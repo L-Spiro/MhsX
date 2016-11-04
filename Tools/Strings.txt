@@ -1,0 +1,7 @@
+"kernel32"
+"IsWow64Process"
+"GetSystemInfo"
+"GetNativeSystemInfo"
+"Ready."
+"Open PE File"
+"Executables (*.exe *.dll *.sys)"

@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CMainClass</class>
+ <widget class="QMainWindow" name="CMainClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>L. Spiro Memory Hacking Software X</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QTreeView" name="treeView">
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::MultiSelection</enum>
+      </property>
+      <property name="rootIsDecorated">
+       <bool>false</bool>
+      </property>
+      <property name="itemsExpandable">
+       <bool>false</bool>
+      </property>
+      <property name="expandsOnDoubleClick">
+       <bool>false</bool>
+      </property>
+      <attribute name="headerStretchLastSection">
+       <bool>true</bool>
+      </attribute>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_File">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="actionOpen_Process"/>
+    <addaction name="actionOpen_Recent"/>
+    <addaction name="actionOpen_for_Debug"/>
+    <addaction name="separator"/>
+    <addaction name="action_Open_Save_File"/>
+    <addaction name="action_Save"/>
+    <addaction name="actionSave_As"/>
+   </widget>
+   <widget class="QMenu" name="menu_Windows">
+    <property name="title">
+     <string>&amp;Window</string>
+    </property>
+    <addaction name="actionShow_All"/>
+    <addaction name="separator"/>
+    <addaction name="action_Expression_Evaluator"/>
+    <addaction name="action_Found_Addresses"/>
+   </widget>
+   <widget class="QMenu" name="menu_Search">
+    <property name="title">
+     <string>&amp;Search</string>
+    </property>
+    <addaction name="action_Data_Type_Search"/>
+    <addaction name="action_Pointer_Search"/>
+    <addaction name="action_String_Search"/>
+    <addaction name="action_Group_Search"/>
+    <addaction name="action_Expression_Search"/>
+    <addaction name="separator"/>
+    <addaction name="actionS_ub_Search"/>
+    <addaction name="separator"/>
+    <addaction name="action_Insert_Address"/>
+    <addaction name="separator"/>
+    <addaction name="actionSearch_Options"/>
+   </widget>
+   <widget class="QMenu" name="menu_Tools">
+    <property name="title">
+     <string>&amp;Tools</string>
+    </property>
+    <addaction name="action_PE_Works"/>
+   </widget>
+   <widget class="QMenu" name="menu_Help">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+   </widget>
+   <addaction name="menu_File"/>
+   <addaction name="menu_Search"/>
+   <addaction name="menu_Tools"/>
+   <addaction name="menu_Windows"/>
+   <addaction name="menu_Help"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <property name="windowTitle">
+    <string>Menu Bar</string>
+   </property>
+   <property name="floatable">
+    <bool>true</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionOpen_Process"/>
+   <addaction name="actionOpen_for_Debug"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionAdd_an_Entry"/>
+   <addaction name="action_Open_Save_File"/>
+   <addaction name="action_Save"/>
+   <addaction name="separator"/>
+   <addaction name="actionRemove_Selected"/>
+   <addaction name="actionRemove_All"/>
+   <addaction name="separator"/>
+   <addaction name="actionLock_Selected"/>
+   <addaction name="actionUnlock_Selected"/>
+  </widget>
+  <action name="actionOpen_Process">
+   <property name="icon">
+    <iconset resource="../MXMhsX.qrc">
+     <normaloff>:/CMain/Resources/73.png</normaloff>:/CMain/Resources/73.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open &amp;Process</string>
+   </property>
+   <property name="toolTip">
+    <string>Open a process.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionOpen_Recent">
+   <property name="text">
+    <string>Open &amp;Recent</string>
+   </property>
+   <property name="toolTip">
+    <string>Open a recent process.</string>
+   </property>
+  </action>
+  <action name="actionOpen_for_Debug">
+   <property name="icon">
+    <iconset resource="../MXMhsX.qrc">
+     <normaloff>:/CMain/Resources/97.png</normaloff>:/CMain/Resources/97.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open for &amp;Debug</string>
+   </property>
+   <property name="toolTip">
+    <string>Open a process for debug.</string>
+   </property>
+  </action>
+  <action name="actionAdd_an_Entry">
+   <property name="icon">
+    <iconset resource="../MXMhsX.qrc">
+     <normaloff>:/CMain/Resources/1.png</normaloff>:/CMain/Resources/1.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add an Entry</string>
+   </property>
+   <property name="toolTip">
+    <string>Add an entry.</string>
+   </property>
+  </action>
+  <action name="action_Open_Save_File">
+   <property name="icon">
+    <iconset resource="../MXMhsX.qrc">
+     <normaloff>:/CMain/Resources/52.png</normaloff>:/CMain/Resources/52.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Open Save File</string>
+   </property>
+   <property name="toolTip">
+    <string>Open a save file.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="action_Save">
+   <property name="icon">
+    <iconset resource="../MXMhsX.qrc">
+     <normaloff>:/CMain/Resources/22.png</normaloff>:/CMain/Resources/22.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Save</string>
+   </property>
+   <property name="toolTip">
+    <string>Save results.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionSave_As">
+   <property name="icon">
+    <iconset resource="../MXMhsX.qrc">
+     <normaloff>:/CMain/Resources/86.png</normaloff>:/CMain/Resources/86.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save &amp;As</string>
+   </property>
+   <property name="toolTip">
+    <string>Save entries as a given file name.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="actionRemove_Selected">
+   <property name="icon">
+    <iconset resource="../MXMhsX.qrc">
+     <normaloff>:/CMain/Resources/33.png</normaloff>:/CMain/Resources/33.png</iconset>
+   </property>
+   <property name="text">
+    <string>Remove Selected</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove the selected entries.</string>
+   </property>
+  </action>
+  <action name="actionRemove_All">
+   <property name="icon">
+    <iconset resource="../MXMhsX.qrc">
+     <normaloff>:/CMain/Resources/31.png</normaloff>:/CMain/Resources/31.png</iconset>
+   </property>
+   <property name="text">
+    <string>Remove All</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove all entries.</string>
+   </property>
+  </action>
+  <action name="actionLock_Selected">
+   <property name="icon">
+    <iconset resource="../MXMhsX.qrc">
+     <normaloff>:/CMain/Resources/27.png</normaloff>:/CMain/Resources/27.png</iconset>
+   </property>
+   <property name="text">
+    <string>Lock Selected</string>
+   </property>
+   <property name="toolTip">
+    <string>Lock the selected entries.</string>
+   </property>
+  </action>
+  <action name="actionUnlock_Selected">
+   <property name="icon">
+    <iconset resource="../MXMhsX.qrc">
+     <normaloff>:/CMain/Resources/28.png</normaloff>:/CMain/Resources/28.png</iconset>
+   </property>
+   <property name="text">
+    <string>Unlock Selected</string>
+   </property>
+   <property name="toolTip">
+    <string>Unlock the selected entries.</string>
+   </property>
+  </action>
+  <action name="action_Expression_Evaluator">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Expression Evaluator</string>
+   </property>
+   <property name="toolTip">
+    <string>Show the Expression Evaluator.</string>
+   </property>
+  </action>
+  <action name="actionShow_All">
+   <property name="text">
+    <string>&amp;Show All</string>
+   </property>
+   <property name="toolTip">
+    <string>Show all windows.</string>
+   </property>
+  </action>
+  <action name="action_Found_Addresses">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Found Addresses</string>
+   </property>
+  </action>
+  <action name="action_Data_Type_Search">
+   <property name="text">
+    <string>&amp;Data-Type Search</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="action_Pointer_Search">
+   <property name="text">
+    <string>&amp;Pointer Search</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="action_String_Search">
+   <property name="text">
+    <string>&amp;String Search</string>
+   </property>
+  </action>
+  <action name="action_Group_Search">
+   <property name="text">
+    <string>&amp;Group Search</string>
+   </property>
+  </action>
+  <action name="action_Expression_Search">
+   <property name="text">
+    <string>&amp;Expression Search</string>
+   </property>
+  </action>
+  <action name="actionS_ub_Search">
+   <property name="text">
+    <string>S&amp;ub Search</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+D</string>
+   </property>
+  </action>
+  <action name="action_Insert_Address">
+   <property name="text">
+    <string>&amp;Insert Address</string>
+   </property>
+   <property name="shortcut">
+    <string>Ins</string>
+   </property>
+  </action>
+  <action name="actionSearch_Options">
+   <property name="text">
+    <string>Search &amp;Options</string>
+   </property>
+  </action>
+  <action name="action_PE_Works">
+   <property name="text">
+    <string>&amp;PE Works</string>
+   </property>
+   <property name="toolTip">
+    <string>PE Works.</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="../MXMhsX.qrc"/>
+ </resources>
+ <connections/>
+</ui>

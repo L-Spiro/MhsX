@@ -33,12 +33,69 @@
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="Source Files\Strings">
+      <UniqueIdentifier>{03b256a9-180e-4b1e-85e5-a2368edb6063}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Strings">
+      <UniqueIdentifier>{be4fbec6-a89c-4e4c-8544-9de947097e7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ExpEval">
+      <UniqueIdentifier>{6ef8646b-0798-4adb-b202-f1acca6da196}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ExpEval">
+      <UniqueIdentifier>{9b627f28-7d4b-4fe1-873b-d0c864e74204}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\FoundAddresses">
+      <UniqueIdentifier>{b3d5b645-9eca-4a9a-8dc5-a4d464d16524}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\FoundAddresses">
+      <UniqueIdentifier>{e8de9f61-494e-4914-9531-d96b818626a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Files">
+      <UniqueIdentifier>{39511840-6f80-4409-ba88-b3e7246561f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Files">
+      <UniqueIdentifier>{1e33c66c-8318-47d6-a5d5-78d93ecc8216}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\System">
+      <UniqueIdentifier>{1ad00288-0c00-41dd-981d-dc4e2b515c1b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\System">
+      <UniqueIdentifier>{fe0c3b81-4036-490f-9994-d73e6ed27a43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\PE">
+      <UniqueIdentifier>{1dc94a43-fd47-47b3-bfca-dc14d499cc72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\PE">
+      <UniqueIdentifier>{1cd8e32f-f155-4fd7-b5ba-a37eff6e4380}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\TreeViews">
+      <UniqueIdentifier>{c47c7b9c-5a04-4393-be0d-c75eea797dde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\TreeViews">
+      <UniqueIdentifier>{f882f9d6-0944-4c74-b357-36bc061c4879}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="GeneratedFiles\qrc_MXMhsX.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ExpEval\MXExpEvalDockWidget.cpp">
+      <Filter>Source Files\ExpEval</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MXExpEvalDockWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_MXExpEvalDockWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Strings\MXStringDecoder.cpp">
+      <Filter>Source Files\Strings</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MXMhsX.cpp">
+    <ClCompile Include="Src\MXMhsX.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_MXMhsX.cpp">
@@ -47,24 +104,129 @@
     <ClCompile Include="GeneratedFiles\Release\moc_MXMhsX.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_MXMhsX.cpp">
-      <Filter>Generated Files</Filter>
+    <ClCompile Include="Src\FoundAddresses\MXFoundAddresses.cpp">
+      <Filter>Source Files\FoundAddresses</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MXFoundAddresses.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_MXFoundAddresses.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Files\MXFile.cpp">
+      <Filter>Source Files\Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Files\MXFileMap.cpp">
+      <Filter>Source Files\Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\System\MXSystem.cpp">
+      <Filter>Source Files\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\PE\MXPeWorks.cpp">
+      <Filter>Source Files\PE</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\PE\MXPeWorksUi.cpp">
+      <Filter>Source Files\PE</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MXPeWorksUi.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_MXPeWorksUi.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\PE\MXPeTab.cpp">
+      <Filter>Source Files\PE</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MXPeTab.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_MXPeTab.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\PE\MXPeObject.cpp">
+      <Filter>Source Files\PE</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\TreeViews\MXTreeViewItem.cpp">
+      <Filter>Source Files\TreeViews</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="MXMhsX.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="MXMhsX.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="MXMhsX.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="UI\MXExp.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UI\MXMhsX.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\ExpEval\MXExpEvalDockWidget.h">
+      <Filter>Header Files\ExpEval</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\MXMhsX.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UI\MXFa.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\FoundAddresses\MXFoundAddresses.h">
+      <Filter>Header Files\FoundAddresses</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UI\MXPew.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\PE\MXPeWorksUi.h">
+      <Filter>Header Files\PE</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UI\MXPet.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\PE\MXPeTab.h">
+      <Filter>Header Files\PE</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GeneratedFiles\ui_MXExp.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_MXMhsX.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Strings\MXStringMacros.h">
+      <Filter>Header Files\Strings</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Strings\MXStringDecoder.h">
+      <Filter>Header Files\Strings</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_MXFa.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Files\MXFile.h">
+      <Filter>Header Files\Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Files\MXFileMap.h">
+      <Filter>Header Files\Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\System\MXSystem.h">
+      <Filter>Header Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PE\MXPeWorks.h">
+      <Filter>Header Files\PE</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PE\MXPeStructs.h">
+      <Filter>Header Files\PE</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_MXPew.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_MXPet.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PE\MXPeObject.h">
+      <Filter>Header Files\PE</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\TreeViews\MXTreeViewItem.h">
+      <Filter>Header Files\TreeViews</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
