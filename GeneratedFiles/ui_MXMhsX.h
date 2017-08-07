@@ -239,7 +239,7 @@ public:
 
     void retranslateUi(QMainWindow *CMainClass)
     {
-        CMainClass->setWindowTitle(QApplication::translate("CMainClass", "L. Spiro Memory Hacking Software X", 0));
+        CMainClass->setWindowTitle(QApplication::translate("CMainClass", "\302\240", 0));
         actionOpen_Process->setText(QApplication::translate("CMainClass", "Open &Process", 0));
 #ifndef QT_NO_TOOLTIP
         actionOpen_Process->setToolTip(QApplication::translate("CMainClass", "Open a process.", 0));

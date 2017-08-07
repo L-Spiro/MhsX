@@ -32,15 +32,36 @@ namespace mx {
 		// Optional header.
 		if ( fFile.Read( &m_woWinOpt, sizeof( m_woWinOpt ) ) != sizeof( m_woWinOpt ) ) { return FALSE; }
 
-		if ( m_woWinOpt.Magic == 0x10B ) {
+		uint32_t uiDatDirSize = 0;
+		if ( m_woWinOpt.Magic == MX_IMAGE_NT_OPTIONAL_HDR32_MAGIC ) {
 			if ( fFile.Read( &m_cwpWin32, sizeof( m_cwpWin32 ) ) != sizeof( m_cwpWin32 ) ) { return FALSE; }
+			uiDatDirSize = m_cwpWin32.NumberOfRvaAndSizes;
+			m_uiImageBase = m_cwpWin32.ImageBase;
 		}
-		else if ( m_woWinOpt.Magic == 0x20B ) {
+		else if ( m_woWinOpt.Magic == MX_IMAGE_NT_OPTIONAL_HDR64_MAGIC ) {
 			if ( fFile.Read( &m_cwpWin64, sizeof( m_cwpWin64 ) ) != sizeof( m_cwpWin64 ) ) { return FALSE; }
+			uiDatDirSize = m_cwpWin64.NumberOfRvaAndSizes;
+			m_uiImageBase = m_cwpWin64.ImageBase;
 		}
 		else {
 			return FALSE;
 		}
+
+		if ( uiDatDirSize > MX_IMAGE_NUMBEROF_DIRECTORY_ENTRIES ) {
+			return FALSE;
+		}
+
+		m_vDataDirectories.resize( uiDatDirSize );
+		for ( uint32_t I = 0; I < uiDatDirSize; ++I ) {
+			if ( fFile.Read( &m_vDataDirectories[I], sizeof( MX_DATA_DIRECTORY ) ) != sizeof( MX_DATA_DIRECTORY ) ) { return FALSE; }
+		}
+		
+		m_vSections.resize( CoffHeader().NumberOfSections );
+		for ( size_t I = 0; I < m_vSections.size(); ++I ) {
+			if ( fFile.Read( &m_vSections[I], sizeof( MX_IMAGE_SECTION_HEADER ) ) != sizeof( MX_IMAGE_SECTION_HEADER ) ) { return FALSE; }
+		}
+
+		//for ( uint32_t I = 0; I < m_cwpWin32.NumberOfRvaAndSizes
 		return TRUE;
 	}
 

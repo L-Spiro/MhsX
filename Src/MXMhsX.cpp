@@ -10,6 +10,7 @@ CMain::CMain( QWidget * _pwParent ) :
 
 
 	// background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:1, y2:0, stop:0 rgba(168, 168, 168, 255), stop:0.25 rgba(192, 192, 192, 255), stop:1 rgba(224, 224, 224, 255));
+	// QTabWidget { background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:1, y2:0, stop:0 rgba(168, 168, 168, 255), stop:0.25 rgba(192, 192, 192, 255), stop:1 rgba(224, 224, 224, 255)); }
 
 	/*QString sStyle = this->styleSheet();
 	const char * pcClasses[] = {
@@ -52,7 +53,7 @@ CMain::CMain( QWidget * _pwParent ) :
 	m_mcUi.statusBar->showMessage( tr( mx::CStringDecoder::Decode( _T_4F39CC88_Ready_, _LEN_4F39CC88, szBuffer ) ) );
 	//m_mcUi.statusBar->showMessage( tr( "Ready." ) );
 
-	//setWindowTitle(QApplication::translate("CMainClass", mx::CStringDecoder::Decode( _T_0B4C2B0E_L__Spiro_Memory_Hacking_Software_X, _LEN_0B4C2B0E, szBuffer ), 0));
+	setWindowTitle(QApplication::translate("CMainClass", mx::CStringDecoder::Decode( _T_0B4C2B0E_L__Spiro_Memory_Hacking_Software_X, _LEN_0B4C2B0E, szBuffer ), 0));
 	//setWindowTitle(QApplication::translate("CMainClass", "Poop Memory Hacking Software X", 0));
 	//setWindowTitle(QApplication::translate("CMainClass", "L. Spiro Memory Hacking Software X", 0));
 
@@ -68,7 +69,7 @@ CMain::~CMain() {
 }
 
 // == Functions.
-void CMain::ShowExpEval() {
+VOID CMain::ShowExpEval() {
 	if ( !m_pdwExpEval ) {
 		m_pdwExpEval = new CExpEvalDockWidget( this );
 		addDockWidget( Qt::LeftDockWidgetArea, m_pdwExpEval );
@@ -79,24 +80,14 @@ void CMain::ShowExpEval() {
 	UpdateWindowChecks();
 }
 
-void CMain::CloseExpEval() {
+VOID CMain::CloseExpEval() {
 	if ( m_pdwExpEval ) {
 		m_pdwExpEval->setHidden( true );
 	}
 	UpdateWindowChecks();
 }
 
-void CMain::UpdateWindowChecks() {
-	m_mcUi.action_Expression_Evaluator->setChecked( m_pdwExpEval ? !m_pdwExpEval->isHidden() : false );
-	m_mcUi.action_Found_Addresses->setChecked( m_pfaFndAddr ? !m_pfaFndAddr->isHidden() : false );
-}
-
-void CMain::closeEvent( QCloseEvent * _pceEvent ) {
-	delete m_ppPeWorksWindow;
-	m_ppPeWorksWindow = nullptr;
-}
-
-void CMain::ShowFoundAddress() {
+VOID CMain::ShowFoundAddress() {
 	if ( !m_pfaFndAddr ) {
 		m_pfaFndAddr = new CFoundAddressesDockWidget( this );
 		addDockWidget( Qt::LeftDockWidgetArea, m_pfaFndAddr );
@@ -107,11 +98,21 @@ void CMain::ShowFoundAddress() {
 	UpdateWindowChecks();
 }
 
-void CMain::CloseFoundAddress() {
+VOID CMain::CloseFoundAddress() {
 	if ( m_pfaFndAddr ) {
 		m_pfaFndAddr->setHidden( true );
 	}
 	UpdateWindowChecks();
+}
+
+VOID CMain::UpdateWindowChecks() {
+	m_mcUi.action_Expression_Evaluator->setChecked( m_pdwExpEval ? !m_pdwExpEval->isHidden() : false );
+	m_mcUi.action_Found_Addresses->setChecked( m_pfaFndAddr ? !m_pfaFndAddr->isHidden() : false );
+}
+
+void CMain::closeEvent( QCloseEvent * _pceEvent ) {
+	delete m_ppPeWorksWindow;
+	m_ppPeWorksWindow = nullptr;
 }
 
 void CMain::showAll() {

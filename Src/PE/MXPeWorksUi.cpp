@@ -25,10 +25,10 @@ void CPe::openPe() {
 	QString strFile;
 	{
 		CHAR szOpenPe[_LEN_2D715017+1];
-		CHAR szExec[_LEN_CDDC05D0+1];
+		CHAR szExec[_LEN_2D90879D+1];
 		strFile = QFileDialog::getOpenFileName( this, tr( mx::_DEC_2D715017_Open_PE_File( szOpenPe ) ),
 			m_sLastFile,
-			tr( mx::_DEC_CDDC05D0_Executables____exe___dll___sys_( szExec ) ) );
+			tr( mx::_DEC_2D90879D_All_Executables____exe___dll___sys___Executables____exe___Dynamic_Link_Libraries____dll___System_Files____sys_( szExec ) ) );
 		::ZeroMemory( szOpenPe, sizeof( szOpenPe ) );
 		::ZeroMemory( szExec, sizeof( szExec ) );
 	}
@@ -74,4 +74,11 @@ void CPe::closeTab( int _iIndex ) {
 	assert( _iIndex < m_vTabs.size() );
 	delete m_mpwUi.tabWidget->widget( _iIndex );
 	m_vTabs.erase( m_vTabs.begin() + _iIndex );
+}
+
+void CPe::closeEvent( QCloseEvent * _pceEvent ) {
+	while ( m_vTabs.size() ) {
+		closeTab( 0 );
+	}
+	m_mpwUi.statusbar->showMessage( "" );
 }

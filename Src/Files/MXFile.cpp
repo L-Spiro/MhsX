@@ -237,7 +237,7 @@ namespace mx {
 		_vRet.resize( sSize );
 
 		CFile fFile;
-		if ( !fFile.OpenFile( _lpcFile, true ) ) { return _vRet; }
+		if ( !fFile.OpenFile( _lpcFile, TRUE ) ) { return _vRet; }
 		size_t sBufferSize = 0;
 		for ( size_t I = 0; I < sSize; I += sBufferSize ) {
 			sBufferSize = sSize - I;
@@ -259,7 +259,7 @@ namespace mx {
 		_vRet.resize( sSize );
 
 		CFile fFile;
-		if ( !fFile.OpenFile( _lpwFile, true ) ) { return _vRet; }
+		if ( !fFile.OpenFile( _lpwFile, TRUE ) ) { return _vRet; }
 		size_t sBufferSize = 0;
 		for ( size_t I = 0; I < sSize; I += sBufferSize ) {
 			sBufferSize = sSize - I;

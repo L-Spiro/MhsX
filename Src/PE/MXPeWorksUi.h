@@ -24,4 +24,5 @@ private slots :
 	// == Functions.
 	void						openPe();
 	void						closeTab( int _iIndex );
+	void						closeEvent( QCloseEvent * _pceEvent );
 };

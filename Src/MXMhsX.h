@@ -1,11 +1,11 @@
 #pragma once
 
-#include <QStandardItemModel.h>
-#include <QtWidgets/QMainWindow>
 #include "FoundAddresses/MXFoundAddresses.h"
 #include "ExpEval/MXExpEvalDockWidget.h"
 #include "PE/MXPeWorksUi.h"
 #include "ui_MXMhsX.h"
+#include <QStandardItemModel.h>
+#include <QtWidgets/QMainWindow>
 
 
 // Would be called CMhsX except that Qt would generate "CMhsX" strings if it were.
@@ -18,11 +18,11 @@ public :
 
 
 	// == Functions.
-	void						ShowExpEval();
-	void						CloseExpEval();
-	void						ShowFoundAddress();
-	void						CloseFoundAddress();
-	void						UpdateWindowChecks();
+	VOID						ShowExpEval();
+	VOID						CloseExpEval();
+	VOID						ShowFoundAddress();
+	VOID						CloseFoundAddress();
+	VOID						UpdateWindowChecks();
 
 	void						closeEvent( QCloseEvent * _pceEvent );
 

@@ -50,7 +50,7 @@ namespace mx {
 		UINT64					MovePointerBy( INT64 _i64Offset );
 
 		// Moves the file pointer to the given file position.
-		UINT64					MovePointerTo( UINT64 _ui64Pos, BOOL _bFromEnd = false );
+		UINT64					MovePointerTo( UINT64 _ui64Pos, BOOL _bFromEnd = FALSE );
 
 
 		// == Statics.

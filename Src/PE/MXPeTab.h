@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../PE/MXPeObject.h"
+#include "MXPeTreeModel.h"
 #include <QStandardItemModel.h>
 #include <QWidget.h>
 #include "ui_MXPet.h"
@@ -15,12 +16,12 @@ public :
 
 	
 	// == Functions.
-	bool						LoadFile( const QString &_sPath );
+	BOOL						LoadFile( const QString &_sPath );
 
 private :
 	// == Members.
 	Ui::PeW						m_mpwUi;
-	QStandardItemModel *		m_psimModel;
+	mx::CPeTreeModel *			m_psimModel;
 	mx::CPeObject				m_poPeObject;
 
 private slots :

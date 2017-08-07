@@ -75,6 +75,12 @@
     <Filter Include="Source Files\TreeViews">
       <UniqueIdentifier>{f882f9d6-0944-4c74-b357-36bc061c4879}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Utilities">
+      <UniqueIdentifier>{7ea8a197-7cd8-4344-91ae-93acc1f44449}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utilities">
+      <UniqueIdentifier>{52d7b450-3a5b-4f4f-9df8-b253c6899524}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeneratedFiles\qrc_MXMhsX.cpp">
@@ -149,6 +155,21 @@
     <ClCompile Include="Src\TreeViews\MXTreeViewItem.cpp">
       <Filter>Source Files\TreeViews</Filter>
     </ClCompile>
+    <ClCompile Include="Src\TreeViews\MXTreeModel.cpp">
+      <Filter>Source Files\TreeViews</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MXTreeModel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_MXTreeModel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\PE\MXPeTreeModel.cpp">
+      <Filter>Source Files\PE</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Utilities\MXUtilities.cpp">
+      <Filter>Source Files\Utilities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MXMhsX.qrc">
@@ -183,6 +204,9 @@
     </CustomBuild>
     <CustomBuild Include="Src\PE\MXPeTab.h">
       <Filter>Header Files\PE</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\TreeViews\MXTreeModel.h">
+      <Filter>Header Files\TreeViews</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -227,6 +251,12 @@
     </ClInclude>
     <ClInclude Include="Src\TreeViews\MXTreeViewItem.h">
       <Filter>Header Files\TreeViews</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PE\MXPeTreeModel.h">
+      <Filter>Header Files\PE</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Utilities\MXUtilities.h">
+      <Filter>Header Files\Utilities</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
