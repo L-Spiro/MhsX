@@ -15,7 +15,7 @@ CPeTab::CPeTab( QWidget * _pwParent ) :
 	};*/
 
 	QList<QVariant> lRootData;
-    lRootData << "Field Name" << "Value" << "Raw Bytes" << "Description";
+    lRootData << "Field Name" << "Value" << "Offset" << "Raw Bytes" << "Description";
 
 	//m_psimModel = new QStandardItemModel();
 	m_psimModel = new mx::CPeTreeModel( lRootData, nullptr );
@@ -23,8 +23,9 @@ CPeTab::CPeTab( QWidget * _pwParent ) :
 	m_mpwUi.treeView->setModel( m_psimModel );
 	//int iWidth = m_mpwUi.treeView->columnWidth( 0 );
 	m_mpwUi.treeView->setColumnWidth( 0, 208 );
-	m_mpwUi.treeView->setColumnWidth( 1, 450 );
-	m_mpwUi.treeView->setColumnWidth( 2, 102 );
+	m_mpwUi.treeView->setColumnWidth( 1, 450 + 5 );
+	m_mpwUi.treeView->setColumnWidth( 2, 122 + 5 );
+	m_mpwUi.treeView->setColumnWidth( 3, 102 + 5 );
 	//m_mpwUi.treeView->resizeColumnToContents( 0 );
 
 	//m_psimModel->setHorizontalHeaderLabels( qslHeaders );

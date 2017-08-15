@@ -1,11 +1,23 @@
 #include "MXUtilities.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../Strings/MXStringMacros.h"
+#include <codecvt>
+#include <ctime>
+#include <locale>
 
 namespace mx {
 
+	// Options.
+	CUtilities::MX_UTIL_OPTIONS CUtilities::Options = {
+		FALSE,							// bUse0xForHex
+		FALSE,							// bShortenEnumNames
+	};
+
+	// Internal buffer for temporary strings.
+	CHAR CUtilities::m_szTemp[128];
+
 	// Convert a single byte to hex.  _pcString must be at least 3 characters long.
-	VOID ByteToHex( BYTE _bIn, CHAR * _pcString, BOOL _bLower ) {
+	VOID CUtilities::ByteToHex( BYTE _bIn, CHAR * _pcString, BOOL _bLower ) {
 		static const CHAR * pszHex = { "0123456789ABCDEF" };
 		static const CHAR * pszHexLower = { "0123456789abcdef" };
 		BYTE bTemp = (_bIn >> 4);
@@ -16,7 +28,7 @@ namespace mx {
 	}
 
 	// Convert a single byte to hex.
-	VOID ByteToHex( BYTE _bIn, std::string &_sString, BOOL _bLower ) {
+	VOID CUtilities::ByteToHex( BYTE _bIn, std::string &_sString, BOOL _bLower ) {
 		static const CHAR * pszHex = { "0123456789ABCDEF" };
 		static const CHAR * pszHexLower = { "0123456789abcdef" };
 		BYTE bTemp = (_bIn >> 4);
@@ -27,7 +39,7 @@ namespace mx {
 	}
 	
 	// Convert a byte array to a hex string.  _pcString must be twice as long as the input, plus 1 character for the NULL.
-	VOID BytesToHex( const VOID * _pvIn, size_t _sLen, CHAR * _pcString, BOOL _bLower ) {
+	VOID CUtilities::BytesToHex( const VOID * _pvIn, size_t _sLen, CHAR * _pcString, BOOL _bLower ) {
 		const BYTE * bIn = static_cast<const BYTE *>(_pvIn);
 		for ( size_t I = 0; I < _sLen; ++I, ++bIn, _pcString += 2 ) {
 			ByteToHex( (*bIn), _pcString, _bLower );
@@ -35,7 +47,7 @@ namespace mx {
 	}
 
 	// Convert a byte array to a hex string.
-	VOID BytesToHex( const VOID * _pvIn, size_t _sLen, std::string &_sString, BOOL _bLower ) {
+	VOID CUtilities::BytesToHex( const VOID * _pvIn, size_t _sLen, std::string &_sString, BOOL _bLower ) {
 		const BYTE * bIn = static_cast<const BYTE *>(_pvIn);
 		for ( size_t I = 0; I < _sLen; ++I, ++bIn ) {
 			ByteToHex( (*bIn), _sString, _bLower );
@@ -43,7 +55,7 @@ namespace mx {
 	}
 
 	// Convert a byte array to a hex string.  _pcString must be 3 times as long as the input.
-	VOID BytesToHexWithSpaces( const VOID * _pvIn, size_t _sLen, CHAR * _pcString, BOOL _bLower ) {
+	VOID CUtilities::BytesToHexWithSpaces( const VOID * _pvIn, size_t _sLen, CHAR * _pcString, BOOL _bLower ) {
 		const BYTE * bIn = static_cast<const BYTE *>(_pvIn);
 		for ( size_t I = 0; I < _sLen; ++I, ++bIn ) {
 			ByteToHex( (*bIn), _pcString, _bLower );
@@ -54,7 +66,7 @@ namespace mx {
 	}
 
 	// Convert a byte array to a hex string.
-	VOID BytesToHexWithSpaces( const VOID * _pvIn, size_t _sLen, std::string &_sString, BOOL _bLower ) {
+	VOID CUtilities::BytesToHexWithSpaces( const VOID * _pvIn, size_t _sLen, std::string &_sString, BOOL _bLower ) {
 		const BYTE * bIn = static_cast<const BYTE *>(_pvIn);
 		size_t sEnd = _sLen - 1;
 		for ( size_t I = 0; I < _sLen; ++I, ++bIn ) {
@@ -66,19 +78,19 @@ namespace mx {
 	}
 
 	// Is the given character printable?  If not, it should be printed as a space or question mark.
-	BOOL ByteIsPrintable( BYTE _bIn, BOOL _bPrintExtended ) {
+	BOOL CUtilities::ByteIsPrintable( BYTE _bIn, BOOL _bPrintExtended ) {
 		if ( _bIn < 32 || _bIn == 127 ) { return FALSE; }
 		return _bIn < 128 || _bPrintExtended;
 	}
 
 	// Convert a single byte to a printable character.  If _bPrintExtended is TRUE, characters above 127 are kept.
-	CHAR ByteToPrintable( BYTE _bIn, BOOL _bPrintExtended, BOOL _bUseQuestionMarks ) {
+	CHAR CUtilities::ByteToPrintable( BYTE _bIn, BOOL _bPrintExtended, BOOL _bUseQuestionMarks ) {
 		CHAR cDefault = _bUseQuestionMarks ? '?' : ' ';
 		return ByteIsPrintable( _bIn, _bPrintExtended ) ? _bIn : cDefault;
 	}
 
 	// Converts a byte to a C-string value.  _pcString must be at least 5 characters long.  Returns the number of characters written.
-	DWORD ByteToCString( BYTE _bIn, CHAR * _pcString, BOOL _bLower ) {
+	DWORD CUtilities::ByteToCString( BYTE _bIn, CHAR * _pcString, BOOL _bLower ) {
 #define MX_PRINTESC( VAL )	_pcString[0] = '\\'; _pcString[1] = VAL; _pcString[2] = '\0';
 #define MX_ESC_CASE( ESC, VAL )				\
 	case ESC : {							\
@@ -114,7 +126,7 @@ namespace mx {
 	}
 
 	// Converts a byte to a C-string value.  Returns the number of characters written.
-	DWORD ByteToCString( BYTE _bIn, std::string &_sString, BOOL _bLower ) {
+	DWORD CUtilities::ByteToCString( BYTE _bIn, std::string &_sString, BOOL _bLower ) {
 #define MX_PRINTESC( VAL )	_sString.push_back( '\\' ); _sString.push_back( VAL );
 #define MX_ESC_CASE( ESC, VAL )				\
 	case ESC : {							\
@@ -148,7 +160,7 @@ namespace mx {
 	}
 
 	// Convert a byte array to a C string.  Returns the number of characters written.
-	DWORD BytesToCString( const VOID * _pvIn, size_t _sLen, CHAR * _pcString, BOOL _bLower ) {
+	DWORD CUtilities::BytesToCString( const VOID * _pvIn, size_t _sLen, CHAR * _pcString, BOOL _bLower ) {
 		const BYTE * bIn = static_cast<const BYTE *>(_pvIn);
 		DWORD dwTotal = 0;
 		for ( size_t I = 0; I < _sLen; ++I, ++bIn ) {
@@ -160,7 +172,7 @@ namespace mx {
 	}
 
 	// Convert a byte array to a C string.  Returns the number of characters written.
-	DWORD BytesToCString( const VOID * _pvIn, size_t _sLen, std::string &_sString, BOOL _bLower ) {
+	DWORD CUtilities::BytesToCString( const VOID * _pvIn, size_t _sLen, std::string &_sString, BOOL _bLower ) {
 		const BYTE * bIn = static_cast<const BYTE *>(_pvIn);
 		DWORD dwTotal = 0;
 		for ( size_t I = 0; I < _sLen; ++I, ++bIn ) {
@@ -171,7 +183,7 @@ namespace mx {
 	}
 
 	// Converts a MX_MACHINE_TYPES enum to its string value.  _pcRet should be at least 32 characters long.
-	VOID MachineTypeToString( uint32_t _uiType, CHAR * _pcRet ) {
+	const CHAR * CUtilities::MachineTypeToString( uint32_t _uiType, CHAR * _pcRet ) {
 		struct {
 			uint32_t ui32Type;
 			const CHAR * pcName;
@@ -214,13 +226,14 @@ namespace mx {
 		for ( size_t I = 0; I < sizeof( aTable ) / sizeof( aTable[0] ); ++I ) {
 			if ( aTable[I].ui32Type == _uiType ) {
 				CStringDecoder::Decode( aTable[I].pcName, aTable[I].ui32StrLen, _pcRet );
-				return;
+				return _pcRet;
 			}
 		}
 		std::strcpy( _pcRet, "Unknown" );
+		return _pcRet;
 	}
 
-	VOID PeCharacteristicsToString( uint32_t _uiVal, std::string &_sString ) {
+	const CHAR * CUtilities::PeCharacteristicsToString( uint32_t _uiVal, std::string &_sString ) {
 		struct {
 			uint32_t ui32Type;
 			const CHAR * pcName;
@@ -230,8 +243,10 @@ namespace mx {
 			{ MX_IMAGE_FILE_RELOCS_STRIPPED, _T_A8CF4CB1_IMAGE_FILE_RELOCS_STRIPPED, _LEN_A8CF4CB1 },
 			{ MX_IMAGE_FILE_EXECUTABLE_IMAGE, _T_8CE929D7_IMAGE_FILE_EXECUTABLE_IMAGE, _LEN_8CE929D7 },
 			{ MX_IMAGE_FILE_LINE_NUMS_STRIPPED, _T_4ACFE92C_IMAGE_FILE_LINE_NUMS_STRIPPED, _LEN_4ACFE92C },
+			{ MX_IMAGE_FILE_LOCAL_SYMS_STRIPPED, _T_36012C69_IMAGE_FILE_LOCAL_SYMS_STRIPPED, _LEN_36012C69 },
 			{ MX_IMAGE_FILE_AGGRESIVE_WS_TRIM, _T_C5765866_IMAGE_FILE_AGGRESIVE_WS_TRIM, _LEN_C5765866 },
 			{ MX_IMAGE_FILE_LARGE_ADDRESS_AWARE, _T_CA4B53ED_IMAGE_FILE_LARGE_ADDRESS_AWARE, _LEN_CA4B53ED },
+			{ 0x40, _T_400C4BC7_40h, _LEN_400C4BC7 },
 			{ MX_IMAGE_FILE_BYTES_REVERSED_LO, _T_9D6947D9_IMAGE_FILE_BYTES_REVERSED_LO, _LEN_9D6947D9 },
 			{ MX_IMAGE_FILE_32BIT_MACHINE, _T_38AEDDBB_IMAGE_FILE_32BIT_MACHINE, _LEN_38AEDDBB },
 			{ MX_IMAGE_FILE_DEBUG_STRIPPED, _T_4DFC5FF2_IMAGE_FILE_DEBUG_STRIPPED, _LEN_4DFC5FF2 },
@@ -258,10 +273,11 @@ namespace mx {
 		if ( !bAdded ) {
 			_sString.append( "No Flags Set" );
 		}
+		return _sString.c_str();
 	}
 
 	// Converts a MX_PE_MAGIC_FLAGS enum to its string value.  _pcRet should be at least 32 characters long.
-	VOID PeMagicTypeToString( uint32_t _uiType, CHAR * _pcRet ) {
+	const CHAR * CUtilities::PeMagicTypeToString( uint32_t _uiType, CHAR * _pcRet ) {
 		struct {
 			uint32_t ui32Type;
 			const CHAR * pcName;
@@ -276,14 +292,15 @@ namespace mx {
 		for ( size_t I = 0; I < sizeof( aTable ) / sizeof( aTable[0] ); ++I ) {
 			if ( aTable[I].ui32Type == _uiType ) {
 				CStringDecoder::Decode( aTable[I].pcName, aTable[I].ui32StrLen, _pcRet );
-				return;
+				return _pcRet;
 			}
 		}
 		std::strcpy( _pcRet, "Unknown" );
+		return _pcRet;
 	}
 
 	// Converts a MX_PE_WINDOWS_SUBSYSTEM enum to its string value.  _pcRet should be at least 32 characters long.
-	VOID PeSubSystemTypeToString( uint32_t _uiType, CHAR * _pcRet ) {
+	const CHAR * CUtilities::PeSubSystemTypeToString( uint32_t _uiType, CHAR * _pcRet ) {
 		struct {
 			uint32_t ui32Type;
 			const CHAR * pcName;
@@ -309,20 +326,26 @@ namespace mx {
 		for ( size_t I = 0; I < sizeof( aTable ) / sizeof( aTable[0] ); ++I ) {
 			if ( aTable[I].ui32Type == _uiType ) {
 				CStringDecoder::Decode( aTable[I].pcName, aTable[I].ui32StrLen, _pcRet );
-				return;
+				return _pcRet;
 			}
 		}
 		std::strcpy( _pcRet, "Unknown" );
+		return _pcRet;
 	}
 
 	// Creates a string with all of the MX_PE_DLL_CHARACTERISTICS bit flags set in a given value.
-	VOID PeDllCharacteristicsToString( uint32_t _uiVal, std::string &_sString ) {
+	const CHAR * CUtilities::PeDllCharacteristicsToString( uint32_t _uiVal, std::string &_sString ) {
 		struct {
 			uint32_t ui32Type;
 			const CHAR * pcName;
 			uint32_t ui32StrLen;
 		}
 		static const aTable[] = {
+			{ 0x01, _T_C4EDFC27_1h, _LEN_C4EDFC27 },
+			{ 0x02, _T_EFC0AFE4_2h, _LEN_EFC0AFE4 },
+			{ 0x04, _T_B99A0862_4h, _LEN_B99A0862 },
+			{ 0x08, _T_152F476E_8h, _LEN_152F476E },
+			{ 0x10, _T_46C7892C_10h, _LEN_46C7892C },
 			{ MX_IMAGE_DLLCHARACTERISTICS_HIGH_ENTROPY_VA, _T_31084C02_IMAGE_DLLCHARACTERISTICS_HIGH_ENTROPY_VA, _LEN_31084C02 },
 			{ MX_IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE, _T_472FF2F7_IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE, _LEN_472FF2F7 },
 			{ MX_IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY, _T_F7B79C9B_IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY, _LEN_F7B79C9B },
@@ -350,10 +373,82 @@ namespace mx {
 		if ( !bAdded ) {
 			_sString.append( "No Flags Set" );
 		}
+		return _sString.c_str();
+	}
+
+	// Creates a string with all of the MX_PE_SECTION_FLAGS bit flags set in a given value.
+	const CHAR * CUtilities::PeSectionFlagsToString( uint32_t _uiVal, std::string &_sString ) {
+		struct {
+			uint32_t ui32Type;
+			uint32_t ui32Mask;
+			const CHAR * pcName;
+			uint32_t ui32StrLen;
+		}
+		static const aTable[] = {
+			{ MX_IMAGE_SCN_TYPE_DSECT, MX_IMAGE_SCN_TYPE_DSECT, _T_12BD7DCA_IMAGE_SCN_TYPE_DSECT, _LEN_12BD7DCA },
+			{ MX_IMAGE_SCN_TYPE_NOLOAD, MX_IMAGE_SCN_TYPE_NOLOAD, _T_9F3CF5C8_IMAGE_SCN_TYPE_NOLOAD, _LEN_9F3CF5C8 },
+			{ MX_IMAGE_SCN_TYPE_GROUP, MX_IMAGE_SCN_TYPE_GROUP, _T_FBC39467_IMAGE_SCN_TYPE_GROUP, _LEN_FBC39467 },
+			{ MX_IMAGE_SCN_TYPE_NO_PAD, MX_IMAGE_SCN_TYPE_NO_PAD, _T_CAEAE9F4_IMAGE_SCN_TYPE_NO_PAD, _LEN_CAEAE9F4 },
+			{ MX_IMAGE_SCN_TYPE_COPY, MX_IMAGE_SCN_TYPE_COPY, _T_47C297E8_IMAGE_SCN_TYPE_COPY, _LEN_47C297E8 },
+			{ MX_IMAGE_SCN_CNT_CODE, MX_IMAGE_SCN_CNT_CODE, _T_87089CB5_IMAGE_SCN_CNT_CODE, _LEN_87089CB5 },
+			{ MX_IMAGE_SCN_CNT_INITIALIZED_DATA, MX_IMAGE_SCN_CNT_INITIALIZED_DATA, _T_CC93B5FD_IMAGE_SCN_CNT_INITIALIZED_DATA, _LEN_CC93B5FD },
+			{ MX_IMAGE_SCN_CNT_UNINITIALIZED_DATA, MX_IMAGE_SCN_CNT_UNINITIALIZED_DATA, _T_F7613740_IMAGE_SCN_CNT_UNINITIALIZED_DATA, _LEN_F7613740 },
+			{ MX_IMAGE_SCN_LNK_OTHER, MX_IMAGE_SCN_LNK_OTHER, _T_E93677C7_IMAGE_SCN_LNK_OTHER, _LEN_E93677C7 },
+			{ MX_IMAGE_SCN_LNK_INFO, MX_IMAGE_SCN_LNK_INFO, _T_10343F98_IMAGE_SCN_LNK_INFO, _LEN_10343F98 },
+			{ MX_IMAGE_SCN_TYPE_OVER, MX_IMAGE_SCN_TYPE_OVER, _T_BE848F33_IMAGE_SCN_TYPE_OVER, _LEN_BE848F33 },
+			{ MX_IMAGE_SCN_LNK_REMOVE, MX_IMAGE_SCN_LNK_REMOVE, _T_6DB02461_IMAGE_SCN_LNK_REMOVE, _LEN_6DB02461 },
+			{ MX_IMAGE_SCN_LNK_COMDAT, MX_IMAGE_SCN_LNK_COMDAT, _T_8CECA67B_IMAGE_SCN_LNK_COMDAT, _LEN_8CECA67B },
+			{ 0x00002000, 0x00002000, _T_55ACDE53_2000h, _LEN_55ACDE53 },
+			{ MX_IMAGE_SCN_MEM_PROTECTED, MX_IMAGE_SCN_MEM_PROTECTED, _T_FB4B6464_IMAGE_SCN_MEM_PROTECTED, _LEN_FB4B6464 },
+			{ MX_IMAGE_SCN_GPREL, MX_IMAGE_SCN_GPREL, _T_EF5A5D03_IMAGE_SCN_GPREL, _LEN_EF5A5D03 },
+			{ MX_IMAGE_SCN_MEM_SYSHEAP, MX_IMAGE_SCN_MEM_SYSHEAP, _T_23AD020D_IMAGE_SCN_MEM_SYSHEAP, _LEN_23AD020D },
+			{ MX_IMAGE_SCN_MEM_PURGEABLE, MX_IMAGE_SCN_MEM_PURGEABLE, _T_66A27CD0_IMAGE_SCN_MEM_PURGEABLE, _LEN_66A27CD0 },
+			{ MX_IMAGE_SCN_MEM_LOCKED, MX_IMAGE_SCN_MEM_LOCKED, _T_441A0DA4_IMAGE_SCN_MEM_LOCKED, _LEN_441A0DA4 },
+			{ MX_IMAGE_SCN_MEM_PRELOAD, MX_IMAGE_SCN_MEM_PRELOAD, _T_0F0D4C8D_IMAGE_SCN_MEM_PRELOAD, _LEN_0F0D4C8D },
+			{ MX_IMAGE_SCN_ALIGN_1BYTES, MX_IMAGE_SCN_ALIGN_MASK, _T_8233C5F3_IMAGE_SCN_ALIGN_1BYTES, _LEN_8233C5F3 },
+			{ MX_IMAGE_SCN_ALIGN_2BYTES, MX_IMAGE_SCN_ALIGN_MASK, _T_04A7B75D_IMAGE_SCN_ALIGN_2BYTES, _LEN_04A7B75D },
+			{ MX_IMAGE_SCN_ALIGN_4BYTES, MX_IMAGE_SCN_ALIGN_MASK, _T_D2FE5440_IMAGE_SCN_ALIGN_4BYTES, _LEN_D2FE5440 },
+			{ MX_IMAGE_SCN_ALIGN_8BYTES, MX_IMAGE_SCN_ALIGN_MASK, _T_A53C943B_IMAGE_SCN_ALIGN_8BYTES, _LEN_A53C943B },
+			{ MX_IMAGE_SCN_ALIGN_16BYTES, MX_IMAGE_SCN_ALIGN_MASK, _T_70C332A9_IMAGE_SCN_ALIGN_16BYTES, _LEN_70C332A9 },
+			{ MX_IMAGE_SCN_ALIGN_32BYTES, MX_IMAGE_SCN_ALIGN_MASK, _T_7CCD6196_IMAGE_SCN_ALIGN_32BYTES, _LEN_7CCD6196 },
+			{ MX_IMAGE_SCN_ALIGN_64BYTES, MX_IMAGE_SCN_ALIGN_MASK, _T_F8ACAD2C_IMAGE_SCN_ALIGN_64BYTES, _LEN_F8ACAD2C },
+			{ MX_IMAGE_SCN_ALIGN_128BYTES, MX_IMAGE_SCN_ALIGN_MASK, _T_35CA3FD7_IMAGE_SCN_ALIGN_128BYTES, _LEN_35CA3FD7 },
+			{ MX_IMAGE_SCN_ALIGN_256BYTES, MX_IMAGE_SCN_ALIGN_MASK, _T_44E867CA_IMAGE_SCN_ALIGN_256BYTES, _LEN_44E867CA },
+			{ MX_IMAGE_SCN_ALIGN_512BYTES, MX_IMAGE_SCN_ALIGN_MASK, _T_21F308D6_IMAGE_SCN_ALIGN_512BYTES, _LEN_21F308D6 },
+			{ MX_IMAGE_SCN_ALIGN_1024BYTES, MX_IMAGE_SCN_ALIGN_MASK, _T_E7EAD6BA_IMAGE_SCN_ALIGN_1024BYTES, _LEN_E7EAD6BA },
+			{ MX_IMAGE_SCN_ALIGN_2048BYTES, MX_IMAGE_SCN_ALIGN_MASK, _T_CA751F3E_IMAGE_SCN_ALIGN_2048BYTES, _LEN_CA751F3E },
+			{ MX_IMAGE_SCN_ALIGN_4096BYTES, MX_IMAGE_SCN_ALIGN_MASK, _T_E2B26604_IMAGE_SCN_ALIGN_4096BYTES, _LEN_E2B26604 },
+			{ MX_IMAGE_SCN_ALIGN_8192BYTES, MX_IMAGE_SCN_ALIGN_MASK, _T_53BDD798_IMAGE_SCN_ALIGN_8192BYTES, _LEN_53BDD798 },
+			{ MX_IMAGE_SCN_LNK_NRELOC_OVFL, MX_IMAGE_SCN_LNK_NRELOC_OVFL, _T_E0B78E5E_IMAGE_SCN_LNK_NRELOC_OVFL, _LEN_E0B78E5E },
+			{ MX_IMAGE_SCN_MEM_DISCARDABLE, MX_IMAGE_SCN_MEM_DISCARDABLE, _T_7ACC9A0B_IMAGE_SCN_MEM_DISCARDABLE, _LEN_7ACC9A0B },
+			{ MX_IMAGE_SCN_MEM_NOT_CACHED, MX_IMAGE_SCN_MEM_NOT_CACHED, _T_DE3D9492_IMAGE_SCN_MEM_NOT_CACHED, _LEN_DE3D9492 },
+			{ MX_IMAGE_SCN_MEM_NOT_PAGED, MX_IMAGE_SCN_MEM_NOT_PAGED, _T_6B802CDA_IMAGE_SCN_MEM_NOT_PAGED, _LEN_6B802CDA },
+			{ MX_IMAGE_SCN_MEM_SHARED, MX_IMAGE_SCN_MEM_SHARED, _T_BD44318E_IMAGE_SCN_MEM_SHARED, _LEN_BD44318E },
+			{ MX_IMAGE_SCN_MEM_EXECUTE, MX_IMAGE_SCN_MEM_EXECUTE, _T_92103CF0_IMAGE_SCN_MEM_EXECUTE, _LEN_92103CF0 },
+			{ MX_IMAGE_SCN_MEM_READ, MX_IMAGE_SCN_MEM_READ, _T_5B1EF8D1_IMAGE_SCN_MEM_READ, _LEN_5B1EF8D1 },
+			{ MX_IMAGE_SCN_MEM_WRITE, MX_IMAGE_SCN_MEM_WRITE, _T_64C40597_IMAGE_SCN_MEM_WRITE, _LEN_64C40597 },
+		};
+
+		BOOL bAdded = FALSE;
+		for ( size_t J = 0; J < sizeof( aTable ) / sizeof( aTable[0] ); ++J ) {
+			if ( (_uiVal & aTable[J].ui32Mask) == aTable[J].ui32Type ) {
+				if ( bAdded ) {
+					_sString.append( " | " );
+				}
+				CHAR szBuffer[_T_MAX_LEN];
+				CStringDecoder::Decode( aTable[J].pcName, aTable[J].ui32StrLen, szBuffer );
+				_sString.append( szBuffer );
+				bAdded = TRUE;
+			}
+		}
+		if ( !bAdded ) {
+			_sString.append( "No Flags Set" );
+		}
+		return _sString.c_str();
 	}
 
 	// Gets a Windows version string based on the given major and minor versions.
-	VOID WindowsVersion( uint32_t _uiMajor, uint32_t _uiMinor, std::string &_sString ) {
+	const CHAR * CUtilities::WindowsVersion( uint32_t _uiMajor, uint32_t _uiMinor, std::string &_sString ) {
 		struct {
 			uint32_t ui32Major;
 			uint32_t ui32Minor;
@@ -389,14 +484,15 @@ namespace mx {
 				CStringDecoder::Decode( aTable[I].pcName, aTable[I].ui32StrLen, szBuffer );
 				_sString.append( szBuffer );
 				ZeroMemory( szBuffer, _T_MAX_LEN );
-				return;
+				return _sString.c_str();
 			}
 		}
 		_sString.append( "Unknown" );
+		return _sString.c_str();
 	}
 
 	// Creates a string that best represents the given size.
-	VOID SizeString( uint64_t _uiSize, std::string &_sString ) {
+	const CHAR * CUtilities::SizeString( uint64_t _uiSize, std::string &_sString ) {
 		CHAR szBuffer[_T_MAX_LEN];
 		struct {
 			uint64_t uiSize;
@@ -428,7 +524,7 @@ namespace mx {
 					_sString.push_back( 's' );
 				}
 				ZeroMemory( szBuffer, _T_MAX_LEN );
-				return;
+				return _sString.c_str();
 			}
 		}
 		CHAR szNumber[64];
@@ -440,6 +536,162 @@ namespace mx {
 			_sString.push_back( 's' );
 		}
 		ZeroMemory( szBuffer, _T_MAX_LEN );
+		return _sString.c_str();
+	}
+
+	// Creates a date string.  _pcRet should be at least 64 characters long.
+	const CHAR * CUtilities::CreateDateString( uint64_t _uiTime, CHAR * _pcRet, size_t _sLen ) {
+		if ( _uiTime ) {
+			time_t tRawTime = _uiTime;
+			tm * ptTimeInfo;
+			ptTimeInfo = std::localtime( &tRawTime );
+			CHAR szTemp[128];
+			std::strftime( szTemp, sizeof( szTemp ),"%d-%m-%Y %I:%M:%S %Z", ptTimeInfo);
+			::sprintf_s( _pcRet, _sLen, "%s (%I64u)", szTemp, _uiTime );
+		}
+		else {
+			::sprintf_s( _pcRet, _sLen, "%I64u", _uiTime );
+		}
+		return _pcRet;
+	}
+
+	// Creates a date string.
+	const CHAR * CUtilities::CreateDateString( uint64_t _uiTime, std::string &_sString ) {
+		if ( _uiTime ) {
+			time_t tRawTime = _uiTime;
+			tm * ptTimeInfo;
+			ptTimeInfo = std::localtime( &tRawTime );
+			CHAR szTemp[128];
+			CHAR szTemp2[128];
+			std::strftime( szTemp, sizeof( szTemp ),"%d-%m-%Y %I:%M:%S %Z", ptTimeInfo);
+			::sprintf_s( szTemp2, sizeof( szTemp2 ), "%s (%I64u)", szTemp, _uiTime );
+			_sString = szTemp2;
+		}
+		else {
+			CHAR szTemp2[128];
+			::sprintf_s( szTemp2, sizeof( szTemp2 ), "%I64u", _uiTime );
+			_sString = szTemp2;
+		}
+		return _sString.c_str();
+	}
+
+	// Creates a hexadecimal string.  Returns the internal buffer, which means the result must be copied as it will be overwritten when the next function that uses the internal buffer is called.
+	const CHAR * CUtilities::ToHex( uint64_t _uiValue, uint32_t _uiNumDigits ) {
+		return ToHex( _uiValue, m_szTemp, MX_ELEMENTS( m_szTemp ), _uiNumDigits );
+	}
+	
+	// Creates a hexadecimal string.
+	const CHAR * CUtilities::ToHex( uint64_t _uiValue, CHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
+		_uiNumDigits = max( _uiNumDigits, 1 );
+		CHAR szFormat[32];
+		if ( Options.bUse0xForHex ) {
+			::sprintf_s( szFormat, sizeof( szFormat ), "0x%%.%uI64X", _uiNumDigits );
+		}
+		else {
+			::sprintf_s( szFormat, sizeof( szFormat ), "%%.%uI64Xh", _uiNumDigits );
+		}
+		::sprintf_s( _pcRet, _sLen, szFormat, _uiValue );
+		return _pcRet;
+	}
+
+	// Creates a hexadecimal string.
+	const CHAR * CUtilities::ToHex( uint64_t _uiValue, std::string &_sString, uint32_t _uiNumDigits ) {
+		CHAR szTemp[32];
+		ToHex( _uiValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits );
+
+		_sString += szTemp;
+		return _sString.c_str();
+	}
+
+	// Creates an unsigned integer string.  Returns the internal buffer, which means the result must be copied as it will be overwritten when the next function that uses the internal buffer is called.
+	const CHAR * CUtilities::ToUnsigned( uint64_t _uiValue, uint32_t _uiNumDigits ) {
+		return ToUnsigned( _uiValue, m_szTemp, MX_ELEMENTS( m_szTemp ), _uiNumDigits );
+	}
+
+	// Creates an unsigned integer string.
+	const CHAR * CUtilities::ToUnsigned( uint64_t _uiValue, CHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
+		_uiNumDigits = max( _uiNumDigits, 1 );
+		CHAR szFormat[32];
+		::sprintf_s( szFormat, sizeof( szFormat ), "%%.%uI64u", _uiNumDigits );
+		::sprintf_s( _pcRet, _sLen, szFormat, _uiValue );
+		return _pcRet;
+	}
+
+	// Creates an unsigned integer string.
+	const CHAR * CUtilities::ToUnsigned( uint64_t _uiValue, std::string &_sString, uint32_t _uiNumDigits ) {
+		CHAR szTemp[32];
+		ToUnsigned( _uiValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits );
+
+		_sString += szTemp;
+		return _sString.c_str();
+	}
+
+	// Clears the internal temporary buffer (as a security measure).
+	VOID CUtilities::ClearInternalBuffer() {
+		std::memset( m_szTemp, 0, sizeof( m_szTemp ) );
+	}
+
+	// Converts a wstring to a UTF-8 string.
+	std::string CUtilities::WStringToString( const std::wstring &_wsIn ) {
+		using convert_typeX = std::codecvt_utf8<wchar_t>;
+		std::wstring_convert<convert_typeX, wchar_t> wscConverter;
+
+		return wscConverter.to_bytes( _wsIn );
+	}
+
+	// Windows resource type to string.
+	BOOL CUtilities::ResourceTypeToString( uint64_t _uiId, CHAR * _pcRet ) {
+		
+		struct {
+			uint32_t ui32Type;
+			const CHAR * pcName;
+			uint32_t ui32StrLen;
+		}
+		static const aTable[] = {
+			{ MX_RT_CURSOR, _T_3587AD08_CURSOR, _LEN_3587AD08 },
+			{ MX_RT_BITMAP, _T_1895992A_BITMAP, _LEN_1895992A },
+			{ MX_RT_ICON, _T_5301C46F_ICON, _LEN_5301C46F },
+			{ MX_RT_MENU, _T_4B90D727_MENU, _LEN_4B90D727 },
+			{ MX_RT_DIALOG, _T_B5991FE4_DIALOG, _LEN_B5991FE4 },
+			{ MX_RT_STRING, _T_6E46752F_STRING, _LEN_6E46752F },
+			{ MX_RT_FONTDIR, _T_3458B8D1_FONTDIR, _LEN_3458B8D1 },
+			{ MX_RT_FONT, _T_E601E566_FONT, _LEN_E601E566 },
+			{ MX_RT_ACCELERATOR, _T_ABDAFA74_ACCELERATOR, _LEN_ABDAFA74 },
+			{ MX_RT_RCDATA, _T_55F5EB0D_RCDATA, _LEN_55F5EB0D },
+			{ MX_RT_MESSAGETABLE, _T_97AB2D94_MESSAGETABLE, _LEN_97AB2D94 },
+			{ MX_RT_GROUP_CURSOR, _T_4C76C2D2_GROUP_CURSOR, _LEN_4C76C2D2 },
+			{ MX_RT_GROUP_ICON, _T_86904090_GROUP_ICON, _LEN_86904090 },
+			{ MX_RT_VERSION, _T_80592DD9_VERSION, _LEN_80592DD9 },
+			{ MX_RT_DLGINCLUDE, _T_BDA1B9A4_DLGINCLUDE, _LEN_BDA1B9A4 },
+			{ MX_RT_PLUGPLAY, _T_4C67C2AD_PLUGPLAY, _LEN_4C67C2AD },
+			{ MX_RT_VXD, _T_94A3D9C5_VXD, _LEN_94A3D9C5 },
+			{ MX_RT_ANICURSOR, _T_4621EF34_ANICURSOR, _LEN_4621EF34 },
+			{ MX_RT_ANIICON, _T_6DE4EBE4_ANIICON, _LEN_6DE4EBE4 },
+			{ MX_RT_HTML, _T_2EEC1551_HTML, _LEN_2EEC1551 },
+			{ MX_RT_MANIFEST, _T_60C9F40C_MANIFEST, _LEN_60C9F40C },
+		};
+
+		for ( size_t I = 0; I < sizeof( aTable ) / sizeof( aTable[0] ); ++I ) {
+			if ( aTable[I].ui32Type == _uiId ) {
+				if ( Options.bShortenEnumNames ) {
+					CStringDecoder::Decode( _T_B57AF7F9_RT_, _LEN_B57AF7F9, _pcRet );
+					_pcRet += _LEN_B57AF7F9;
+				}
+				CStringDecoder::Decode( aTable[I].pcName, aTable[I].ui32StrLen, _pcRet );
+				return TRUE;
+			}
+		}
+		return FALSE;
+	}
+
+	// Windows resource type to string.
+	BOOL CUtilities::ResourceTypeToString( uint64_t _uiId, std::string &_sString ) {
+		CHAR szBuffer[64];
+		if ( ResourceTypeToString( _uiId, szBuffer ) ) {
+			_sString += szBuffer;
+			return TRUE;
+		}
+		return FALSE;
 	}
 
 }	// namespace mx
