@@ -81,6 +81,12 @@
     <Filter Include="Source Files\Utilities">
       <UniqueIdentifier>{52d7b450-3a5b-4f4f-9df8-b253c6899524}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\CodePages">
+      <UniqueIdentifier>{ffc9ddec-c960-49c8-864a-09fcf9317815}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CodePages">
+      <UniqueIdentifier>{d9f1f17b-2b0b-4119-86b6-55809c85a2f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeneratedFiles\qrc_MXMhsX.cpp">
@@ -170,6 +176,9 @@
     <ClCompile Include="Src\Utilities\MXUtilities.cpp">
       <Filter>Source Files\Utilities</Filter>
     </ClCompile>
+    <ClCompile Include="Src\CodePages\MXCodePages.cpp">
+      <Filter>Source Files\CodePages</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MXMhsX.qrc">
@@ -257,6 +266,9 @@
     </ClInclude>
     <ClInclude Include="Src\Utilities\MXUtilities.h">
       <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\CodePages\MXCodePages.h">
+      <Filter>Header Files\CodePages</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

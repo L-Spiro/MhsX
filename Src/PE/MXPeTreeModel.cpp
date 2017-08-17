@@ -1,4 +1,5 @@
 #include "MXPeTreeModel.h"
+#include "../CodePages/MXCodePages.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../Utilities/MXUtilities.h"
 #include <stdlib.h>
@@ -1547,7 +1548,7 @@ namespace mx {
 		if ( !_poPeObject.ResourceDescriptor() ) { return; }
 		uint32_t uiOffset;
 		uint32_t uiIndex = _poPeObject.RelocAddrToRelocIndexAndOffset( _poPeObject.DataDirectory()[MX_IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress, uiOffset );
-		AddResourceTree( _ptviParent, _poPeObject.ResourceDescriptor(), uiIndex, _poPeObject );
+		AddResourceTree( _ptviParent, _poPeObject.ResourceDescriptor(), uiIndex, _poPeObject, 0 );
 		/*
 		uint32_t uiTotal = _poPeObject.ResourceDescriptor()->NumberOfNamedEntries + _poPeObject.ResourceDescriptor()->NumberOfIdEntries;
 		
@@ -1564,7 +1565,7 @@ namespace mx {
 	}
 
 	// Decodes the resource tree.
-	VOID CPeTreeModel::AddResourceTree( CTreeViewItem * _ptviParent, const MX_IMAGE_RESOURCE_DIRECTORY * _pirdDesc, uint32_t _uiSectionIndex, const mx::CPeObject &_poPeObject ) {
+	VOID CPeTreeModel::AddResourceTree( CTreeViewItem * _ptviParent, const MX_IMAGE_RESOURCE_DIRECTORY * _pirdDesc, uint32_t _uiSectionIndex, const mx::CPeObject &_poPeObject, uint32_t _uiLevel ) {
 		uint32_t uiTotal = _pirdDesc->NumberOfNamedEntries + _pirdDesc->NumberOfIdEntries;
 
 		const MX_IMAGE_RESOURCE_DIRECTORY_ENTRY * pirdeEntry = reinterpret_cast<const MX_IMAGE_RESOURCE_DIRECTORY_ENTRY *>(_pirdDesc + 1);
@@ -1575,12 +1576,12 @@ namespace mx {
 				// Trying to read past the section.  No way to continue.
 				break;
 			}
-			AddResourceTree( _ptviParent, pirdeEntry, _uiSectionIndex, _poPeObject );
+			AddResourceTree( _ptviParent, pirdeEntry, _uiSectionIndex, _poPeObject, _uiLevel );
 		}
 	}
 
 	// Decodes the resource tree.
-	VOID CPeTreeModel::AddResourceTree( CTreeViewItem * _ptviParent, const MX_IMAGE_RESOURCE_DIRECTORY_ENTRY * _pirdeEntry, uint32_t _uiSectionIndex, const mx::CPeObject &_poPeObject ) {
+	VOID CPeTreeModel::AddResourceTree( CTreeViewItem * _ptviParent, const MX_IMAGE_RESOURCE_DIRECTORY_ENTRY * _pirdeEntry, uint32_t _uiSectionIndex, const mx::CPeObject &_poPeObject, uint32_t _uiLevel ) {
 		CHAR szBuffer[128];
 		CHAR szBufferRaw[64];
 
@@ -1592,11 +1593,15 @@ namespace mx {
 			std::string sName;
 			if ( _pirdeEntry->NameId & 0x80000000 ) {
 				uiOffset = (_pirdeEntry->NameId & 0x7FFFFFFF) + _poPeObject.SectionData()[_uiSectionIndex].ui64FileOffset;
+				sName += '\"';
 				_poPeObject.GetSizedWideString( (_pirdeEntry->NameId & 0x7FFFFFFF) + _poPeObject.SectionData()[_uiSectionIndex].ui64RelocAddress, sName );
+				sName += "\" (";
+				CUtilities::ToHex( _pirdeEntry->NameId, sName, 8 );
+				sName += ')';
 			}
 			else {
 				uint16_t uiId = _pirdeEntry->NameId & 0xFFFF;
-				if ( !CUtilities::ResourceTypeToString( uiId, sName ) ) {
+				if ( _uiLevel > 0 || !CUtilities::ResourceTypeToString( uiId, sName ) ) {
 					CUtilities::ToUnsigned( uiId, sName );
 				}
 				else {
@@ -1605,12 +1610,18 @@ namespace mx {
 					sName += ')';
 				}
 			}
-			// Decode name or ID.
+			sName += ", ";
+			CUtilities::ToHex( _pirdeEntry->Data, sName, 8 );
+
 			//std::sprintf( szBuffer, "%u", _irdDesc.Characteristics );
-			CUtilities::BytesToHex( _pirdeEntry, sizeof( MX_IMAGE_RESOURCE_DIRECTORY_ENTRY ), szBufferRaw );
+			CUtilities::BytesToHex( &_pirdeEntry->NameId, sizeof( _pirdeEntry->NameId ), szBufferRaw );
+			CHAR * pcTemp = &szBufferRaw[std::strlen( szBufferRaw )];
+			(*pcTemp++) = ',';
+			(*pcTemp++) = ' ';
+			CUtilities::BytesToHex( &_pirdeEntry->Data, sizeof( _pirdeEntry->Data ), pcTemp );
 			MX_PRINT_FILE_OFFSET( uiOffset, MX_IMAGE_RESOURCE_DIRECTORY_ENTRY );
 			QList<QVariant> lValues;
-			lValues << "NameId" << sName.c_str() << szOffset << "" << ((_pirdeEntry->NameId & 0x80000000) ? "Name." : "ID.");
+			lValues << "NameId, Data" << sName.c_str() << szOffset << szBufferRaw << ((_pirdeEntry->NameId & 0x80000000) ? "Name and data." : "ID and data.");
 			ptviTemp = new CTreeViewItem( lValues, _ptviParent );
 			_ptviParent->AppendChild( ptviTemp );
 		}
@@ -1621,7 +1632,7 @@ namespace mx {
 			if ( sOffset + sizeof( MX_IMAGE_RESOURCE_DIRECTORY ) <= _poPeObject.SectionData()[_uiSectionIndex].vData.size() ) {
 				const MX_IMAGE_RESOURCE_DIRECTORY * pirdResDir = reinterpret_cast<const MX_IMAGE_RESOURCE_DIRECTORY *>(&_poPeObject.SectionData()[_uiSectionIndex].vData[sOffset]);
 				//AddResourceDesc( ptviTemp, (*pirdResDir), _poPeObject, sOffset + _poPeObject.SectionData()[_uiSectionIndex].ui64FileOffset );
-				AddResourceTree( ptviTemp, pirdResDir, _uiSectionIndex, _poPeObject );
+				AddResourceTree( ptviTemp, pirdResDir, _uiSectionIndex, _poPeObject, _uiLevel + 1 );
 			}
 		}
 		else {
@@ -1635,37 +1646,47 @@ namespace mx {
 					std::string sTemp;
 					_poPeObject.RelocAddressToStringwithSection( pirdResDir->Data, sTemp );
 					//std::sprintf( szBuffer, "%u", pirdResDir->Data );
-					CUtilities::BytesToHex( _pirdeEntry, sizeof( pirdResDir->Data ), szBufferRaw );
+					CUtilities::BytesToHex( &pirdResDir->Data, sizeof( pirdResDir->Data ), szBufferRaw );
 					MX_PRINT_FILE_OFFSET( uiOffset, pirdResDir->Data );
 					QList<QVariant> lValues;
-					lValues << "Data" << sTemp.c_str() << szOffset << "" << "Data pointer.";
+					lValues << "Data" << sTemp.c_str() << szOffset << szBufferRaw << "Data pointer.";
 					CTreeViewItem * ptviTemp2 = new CTreeViewItem( lValues, ptviTemp );
 					ptviTemp->AppendChild( ptviTemp2 );
 				}
 				{
 					std::sprintf( szBuffer, "%u", pirdResDir->Size );
-					CUtilities::BytesToHex( _pirdeEntry, sizeof( pirdResDir->Size ), szBufferRaw );
+					CUtilities::BytesToHex( &pirdResDir->Size, sizeof( pirdResDir->Size ), szBufferRaw );
 					MX_PRINT_FILE_OFFSET( uiOffset, pirdResDir->Size );
 					QList<QVariant> lValues;
-					lValues << "Size" << szBuffer << szOffset << "" << "Size of the resource.";
+					lValues << "Size" << szBuffer << szOffset << szBufferRaw << "Size of the resource.";
 					CTreeViewItem * ptviTemp2 = new CTreeViewItem( lValues, ptviTemp );
 					ptviTemp->AppendChild( ptviTemp2 );
 				}
 				{
-					std::sprintf( szBuffer, "%u", pirdResDir->CodePage );
-					CUtilities::BytesToHex( _pirdeEntry, sizeof( pirdResDir->CodePage ), szBufferRaw );
+					std::string sValue;
+					std::string sDesc;
+					if ( CCodePages::CodePageToString( pirdResDir->CodePage, sValue, sDesc ) ) {
+						sValue += " (";
+						CUtilities::ToUnsigned( pirdResDir->CodePage, sValue );
+						sValue += ')';
+					}
+					else {
+						CUtilities::ToUnsigned( pirdResDir->CodePage, sValue );
+						sDesc = "Code page.";
+					}
+					CUtilities::BytesToHex( &pirdResDir->CodePage, sizeof( pirdResDir->CodePage ), szBufferRaw );
 					MX_PRINT_FILE_OFFSET( uiOffset, pirdResDir->CodePage );
 					QList<QVariant> lValues;
-					lValues << "CodePage" << szBuffer << szOffset << "" << "Code page.";
+					lValues << "CodePage" << sValue.c_str() << szOffset << szBufferRaw << sDesc.c_str();
 					CTreeViewItem * ptviTemp2 = new CTreeViewItem( lValues, ptviTemp );
 					ptviTemp->AppendChild( ptviTemp2 );
 				}
 				{
 					std::sprintf( szBuffer, "%u", pirdResDir->Reserved );
-					CUtilities::BytesToHex( _pirdeEntry, sizeof( pirdResDir->Reserved ), szBufferRaw );
+					CUtilities::BytesToHex( &pirdResDir->Reserved, sizeof( pirdResDir->Reserved ), szBufferRaw );
 					MX_PRINT_FILE_OFFSET( uiOffset, pirdResDir->Reserved );
 					QList<QVariant> lValues;
-					lValues << "Reserved" << szBuffer << szOffset << "" << "Reserved.";
+					lValues << "Reserved" << szBuffer << szOffset << szBufferRaw << "Reserved.";
 					CTreeViewItem * ptviTemp2 = new CTreeViewItem( lValues, ptviTemp );
 					ptviTemp->AppendChild( ptviTemp2 );
 				}

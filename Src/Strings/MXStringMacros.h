@@ -1161,3 +1161,1393 @@
 #define _LEN_60C9F40C 8
 #define _DEC_60C9F40C_MANIFEST( STR ) CStringDecoder::Decode( _T_60C9F40C_MANIFEST, _LEN_60C9F40C, STR )
 
+// IBM037
+#define _T_BA655461_IBM037 "\xD1\x10\x1D\xCB\xC5\x00"
+#define _LEN_BA655461 6
+#define _DEC_BA655461_IBM037( STR ) CStringDecoder::Decode( _T_BA655461_IBM037, _LEN_BA655461, STR )
+
+// IBM EBCDIC (US-Canada)
+#define _T_3636B8C7_IBM_EBCDIC__US_Canada_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xE7\xEE\xF4\xCB\x2F\x3E\xFC\xF6\x2A\xB7"
+#define _LEN_3636B8C7 22
+#define _DEC_3636B8C7_IBM_EBCDIC__US_Canada_( STR ) CStringDecoder::Decode( _T_3636B8C7_IBM_EBCDIC__US_Canada_, _LEN_3636B8C7, STR )
+
+// IBM437
+#define _T_BD6CFCBD_IBM437 "\xD1\x10\x1D\xCF\xC5\x00"
+#define _LEN_BD6CFCBD 6
+#define _DEC_BD6CFCBD_IBM437( STR ) CStringDecoder::Decode( _T_BD6CFCBD_IBM437, _LEN_BD6CFCBD, STR )
+
+// OEM United States
+#define _T_F624CB1C_OEM_United_States "\xD7\x13\x1D\xBB\xE7\x37\xF7\x3B\x35\x2C\xE9\x21\x06\xFC\x3B\xED\x41"
+#define _LEN_F624CB1C 17
+#define _DEC_F624CB1C_OEM_United_States( STR ) CStringDecoder::Decode( _T_F624CB1C_OEM_United_States, _LEN_F624CB1C, STR )
+
+// IBM500
+#define _T_09E750EA_IBM500 "\xD1\x10\x1D\xD0\xC2\xF9"
+#define _LEN_09E750EA 6
+#define _DEC_09E750EA_IBM500( STR ) CStringDecoder::Decode( _T_09E750EA_IBM500, _LEN_09E750EA, STR )
+
+// IBM EBCDIC (International)
+#define _T_0D6DB3BF_IBM_EBCDIC__International_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xDB\x09\x3B\xED\x40\x3E\xFC\x06\x32\xFD\x35\x31\x34\xF2"
+#define _LEN_0D6DB3BF 26
+#define _DEC_0D6DB3BF_IBM_EBCDIC__International_( STR ) CStringDecoder::Decode( _T_0D6DB3BF_IBM_EBCDIC__International_, _LEN_0D6DB3BF, STR )
+
+// ASMO-708
+#define _T_7F753281_ASMO_708 "\xC9\x21\x1D\xEA\xBF\x00\xBE\xFF"
+#define _LEN_7F753281 8
+#define _DEC_7F753281_ASMO_708( STR ) CStringDecoder::Decode( _T_7F753281_ASMO_708, _LEN_7F753281, STR )
+
+// Arabic (ASMO 708)
+#define _T_C5EADF38_Arabic__ASMO_708_ "\xC9\x40\x31\xFD\xFB\x2C\xAE\xEF\x11\x1B\x16\x1D\xB2\xD2\xF7\xC0\xF7"
+#define _LEN_C5EADF38 17
+#define _DEC_C5EADF38_Arabic__ASMO_708_( STR ) CStringDecoder::Decode( _T_C5EADF38_Arabic__ASMO_708_, _LEN_C5EADF38, STR )
+
+// DOS-720
+#define _T_1440639D_DOS_720 "\xCC\x1D\x23\xC8\xC9\xFB\xBE"
+#define _LEN_1440639D 7
+#define _DEC_1440639D_DOS_720( STR ) CStringDecoder::Decode( _T_1440639D_DOS_720, _LEN_1440639D, STR )
+
+// Arabic (DOS)
+#define _T_059E0FD9_Arabic__DOS_ "\xC9\x40\x31\xFD\xFB\x2C\xAE\xEF\x14\x17\x1C\xF7"
+#define _LEN_059E0FD9 12
+#define _DEC_059E0FD9_Arabic__DOS_( STR ) CStringDecoder::Decode( _T_059E0FD9_Arabic__DOS_, _LEN_059E0FD9, STR )
+
+// ibm737
+#define _T_D975C7E8_ibm737 "\xF1\x30\x3D\xD2\xC5\x00"
+#define _LEN_D975C7E8 6
+#define _DEC_D975C7E8_ibm737( STR ) CStringDecoder::Decode( _T_D975C7E8_ibm737, _LEN_D975C7E8, STR )
+
+// Greek (DOS)
+#define _T_2B8F6891_Greek__DOS_ "\xCF\x40\x35\x00\xFD\xE9\xB6\x0B\x1F\x1B\xF2"
+#define _LEN_2B8F6891 11
+#define _DEC_2B8F6891_Greek__DOS_( STR ) CStringDecoder::Decode( _T_2B8F6891_Greek__DOS_, _LEN_2B8F6891, STR )
+
+// ibm775
+#define _T_531763C0_ibm775 "\xF1\x30\x3D\xD2\xC9\xFE"
+#define _LEN_531763C0 6
+#define _DEC_531763C0_ibm775( STR ) CStringDecoder::Decode( _T_531763C0_ibm775, _LEN_531763C0, STR )
+
+// Baltic (DOS)
+#define _T_6F30CFA8_Baltic__DOS_ "\xCA\x2F\x3C\x0F\xFB\x2C\xAE\xEF\x14\x17\x1C\xF7"
+#define _LEN_6F30CFA8 12
+#define _DEC_6F30CFA8_Baltic__DOS_( STR ) CStringDecoder::Decode( _T_6F30CFA8_Baltic__DOS_, _LEN_6F30CFA8, STR )
+
+// ibm850
+#define _T_1A17B2F0_ibm850 "\xF1\x30\x3D\xD3\xC7\xF9"
+#define _LEN_1A17B2F0 6
+#define _DEC_1A17B2F0_ibm850( STR ) CStringDecoder::Decode( _T_1A17B2F0_ibm850, _LEN_1A17B2F0, STR )
+
+// Western European (DOS)
+#define _T_97510E52_Western_European__DOS_ "\xDF\x33\x43\x0F\xF7\x3B\xFC\xE7\x15\x3D\x3B\x3D\x02\x00\x28\xF6\xEE\xF8\xDF\xE1\x1C\xB7"
+#define _LEN_97510E52 22
+#define _DEC_97510E52_Western_European__DOS_( STR ) CStringDecoder::Decode( _T_97510E52_Western_European__DOS_, _LEN_97510E52, STR )
+
+// ibm852
+#define _T_F419D3DC_ibm852 "\xF1\x30\x3D\xD3\xC7\xFB"
+#define _LEN_F419D3DC 6
+#define _DEC_F419D3DC_ibm852( STR ) CStringDecoder::Decode( _T_F419D3DC_ibm852, _LEN_F419D3DC, STR )
+
+// Central European (DOS)
+#define _T_3876CB7D_Central_European__DOS_ "\xCB\x33\x3E\x0F\x04\x2A\xFA\xE7\x15\x3D\x3B\x3D\x02\x00\x28\xF6\xEE\xF8\xDF\xE1\x1C\xB7"
+#define _LEN_3876CB7D 22
+#define _DEC_3876CB7D_Central_European__DOS_( STR ) CStringDecoder::Decode( _T_3876CB7D_Central_European__DOS_, _LEN_3876CB7D, STR )
+
+// IBM855
+#define _T_0C22C373_IBM855 "\xD1\x10\x1D\xD3\xC7\xFE"
+#define _LEN_0C22C373 6
+#define _DEC_0C22C373_IBM855( STR ) CStringDecoder::Decode( _T_0C22C373_IBM855, _LEN_0C22C373, STR )
+
+// OEM Cyrillic
+#define _T_2B1B2603_OEM_Cyrillic "\xD7\x13\x1D\xBB\xD5\x42\x00\x30\x3C\x34\x32\x31"
+#define _LEN_2B1B2603 12
+#define _DEC_2B1B2603_OEM_Cyrillic( STR ) CStringDecoder::Decode( _T_2B1B2603_OEM_Cyrillic, _LEN_2B1B2603, STR )
+
+// ibm857
+#define _T_84732753_ibm857 "\xF1\x30\x3D\xD3\xC7\x00"
+#define _LEN_84732753 6
+#define _DEC_84732753_ibm857( STR ) CStringDecoder::Decode( _T_84732753_ibm857, _LEN_84732753, STR )
+
+// Turkish (DOS)
+#define _T_D528A8A5_Turkish__DOS_ "\xDC\x43\x42\x06\xFB\x3C\xF6\xE7\xF8\x0C\x18\x21\xBB"
+#define _LEN_D528A8A5 13
+#define _DEC_D528A8A5_Turkish__DOS_( STR ) CStringDecoder::Decode( _T_D528A8A5_Turkish__DOS_, _LEN_D528A8A5, STR )
+
+// IBM00858
+#define _T_C2E3F56A_IBM00858 "\xD1\x10\x1D\xCB\xC2\x01\xC3\xFF"
+#define _LEN_C2E3F56A 8
+#define _DEC_C2E3F56A_IBM00858( STR ) CStringDecoder::Decode( _T_C2E3F56A_IBM00858, _LEN_C2E3F56A, STR )
+
+// OEM Multilingual Latin I
+#define _T_37A4A7AA_OEM_Multilingual_Latin_I "\xD7\x13\x1D\xBB\xDF\x3E\xFA\x3B\x39\x34\x32\x3C\xF9\x10\x28\xF4\xEE\x1C\xFC\x06\x32\xFC\xE7\x19"
+#define _LEN_37A4A7AA 24
+#define _DEC_37A4A7AA_OEM_Multilingual_Latin_I( STR ) CStringDecoder::Decode( _T_37A4A7AA_OEM_Multilingual_Latin_I, _LEN_37A4A7AA, STR )
+
+// IBM860
+#define _T_5765643F_IBM860 "\xD1\x10\x1D\xD3\xC8\xF9"
+#define _LEN_5765643F 6
+#define _DEC_5765643F_IBM860( STR ) CStringDecoder::Decode( _T_5765643F_IBM860, _LEN_5765643F, STR )
+
+// Portuguese (DOS)
+#define _T_31529C73_Portuguese__DOS_ "\xD8\x3D\x42\x0F\x07\x30\x03\x2C\x43\x2D\xE9\xF6\xD6\xEA\x1A\xB1"
+#define _LEN_31529C73 16
+#define _DEC_31529C73_Portuguese__DOS_( STR ) CStringDecoder::Decode( _T_31529C73_Portuguese__DOS_, _LEN_31529C73, STR )
+
+// ibm861
+#define _T_463DD1A5_ibm861 "\xF1\x30\x3D\xD3\xC8\xFA"
+#define _LEN_463DD1A5 6
+#define _DEC_463DD1A5_ibm861( STR ) CStringDecoder::Decode( _T_463DD1A5_ibm861, _LEN_463DD1A5, STR )
+
+// Icelandic (DOS)
+#define _T_C5EA3F27_Icelandic__DOS_ "\xD1\x31\x35\x07\xF3\x37\xF2\x30\x33\xE8\xF1\x12\xE1\xEE\xF0"
+#define _LEN_C5EA3F27 15
+#define _DEC_C5EA3F27_Icelandic__DOS_( STR ) CStringDecoder::Decode( _T_C5EA3F27_Icelandic__DOS_, _LEN_C5EA3F27, STR )
+
+// DOS-862
+#define _T_957E8088_DOS_862 "\xCC\x1D\x23\xC8\xCA\xFF\xC0"
+#define _LEN_957E8088 7
+#define _DEC_957E8088_DOS_862( STR ) CStringDecoder::Decode( _T_957E8088_DOS_862, _LEN_957E8088, STR )
+
+// Hebrew (DOS)
+#define _T_9C33B0E0_Hebrew__DOS_ "\xD0\x33\x32\x0D\xF7\x40\xAE\xEF\x14\x17\x1C\xF7"
+#define _LEN_9C33B0E0 12
+#define _DEC_9C33B0E0_Hebrew__DOS_( STR ) CStringDecoder::Decode( _T_9C33B0E0_Hebrew__DOS_, _LEN_9C33B0E0, STR )
+
+// IBM863
+#define _T_CE6C3585_IBM863 "\xD1\x10\x1D\xD3\xC8\xFC"
+#define _LEN_CE6C3585 6
+#define _DEC_CE6C3585_IBM863( STR ) CStringDecoder::Decode( _T_CE6C3585_IBM863, _LEN_CE6C3585, STR )
+
+// French Canadian (DOS)
+#define _T_14D59C63_French_Canadian__DOS_ "\xCE\x40\x35\x09\xF5\x31\xAE\x0A\x31\x36\x2A\x32\xFB\xFC\x35\xA8\xF6\x14\xEA\xE5\xF2"
+#define _LEN_14D59C63 21
+#define _DEC_14D59C63_French_Canadian__DOS_( STR ) CStringDecoder::Decode( _T_14D59C63_French_Canadian__DOS_, _LEN_14D59C63, STR )
+
+// IBM864
+#define _T_5008A026_IBM864 "\xD1\x10\x1D\xD3\xC8\xFD"
+#define _LEN_5008A026 6
+#define _DEC_5008A026_IBM864( STR ) CStringDecoder::Decode( _T_5008A026_IBM864, _LEN_5008A026, STR )
+
+// Arabic (864)
+#define _T_55EBBE42_Arabic__864_ "\xC9\x40\x31\xFD\xFB\x2C\xAE\xEF\x08\xFE\xFD\xF7"
+#define _LEN_55EBBE42 12
+#define _DEC_55EBBE42_Arabic__864_( STR ) CStringDecoder::Decode( _T_55EBBE42_Arabic__864_, _LEN_55EBBE42, STR )
+
+// IBM865
+#define _T_270F90B0_IBM865 "\xD1\x10\x1D\xD3\xC8\xFE"
+#define _LEN_270F90B0 6
+#define _DEC_270F90B0_IBM865( STR ) CStringDecoder::Decode( _T_270F90B0_IBM865, _LEN_270F90B0, STR )
+
+// Nordic (DOS)
+#define _T_ADEB5A05_Nordic__DOS_ "\xD6\x3D\x42\xFF\xFB\x2C\xAE\xEF\x14\x17\x1C\xF7"
+#define _LEN_ADEB5A05 12
+#define _DEC_ADEB5A05_Nordic__DOS_( STR ) CStringDecoder::Decode( _T_ADEB5A05_Nordic__DOS_, _LEN_ADEB5A05, STR )
+
+// cp866
+#define _T_1F51EAD8_cp866 "\xEB\x3E\x08\xD1\xC8"
+#define _LEN_1F51EAD8 5
+#define _DEC_1F51EAD8_cp866( STR ) CStringDecoder::Decode( _T_1F51EAD8_cp866, _LEN_1F51EAD8, STR )
+
+// Cyrillic (DOS)
+#define _T_7C15E36E_Cyrillic__DOS_ "\xCB\x47\x42\x04\xFE\x35\xF7\x2A\xF0\xF0\x0D\x1D\xE5\xC4"
+#define _LEN_7C15E36E 14
+#define _DEC_7C15E36E_Cyrillic__DOS_( STR ) CStringDecoder::Decode( _T_7C15E36E_Cyrillic__DOS_, _LEN_7C15E36E, STR )
+
+// ibm869
+#define _T_48E65997_ibm869 "\xF1\x30\x3D\xD3\xC8\x02"
+#define _LEN_48E65997 6
+#define _DEC_48E65997_ibm869( STR ) CStringDecoder::Decode( _T_48E65997_ibm869, _LEN_48E65997, STR )
+
+// Greek, Modern (DOS)
+#define _T_C1991C02_Greek__Modern__DOS_ "\xCF\x40\x35\x00\xFD\xF5\xAE\x14\x3F\x2C\x2E\x40\x00\xBB\xEF\xCC\x1D\x23\xC4"
+#define _LEN_C1991C02 19
+#define _DEC_C1991C02_Greek__Modern__DOS_( STR ) CStringDecoder::Decode( _T_C1991C02_Greek__Modern__DOS_, _LEN_C1991C02, STR )
+
+// IBM870
+#define _T_4E7E557E_IBM870 "\xD1\x10\x1D\xD3\xC9\xF9"
+#define _LEN_4E7E557E 6
+#define _DEC_4E7E557E_IBM870( STR ) CStringDecoder::Decode( _T_4E7E557E_IBM870, _LEN_4E7E557E, STR )
+
+// IBM EBCDIC (Multilingual Latin-2)
+#define _T_B6733C9A_IBM_EBCDIC__Multilingual_Latin_2_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xDF\x10\x33\xFC\x37\x3C\x04\x00\x30\x03\x28\x3C\xE8\x15\x2F\x06\x04\x35\xB5\x00\xF9"
+#define _LEN_B6733C9A 33
+#define _DEC_B6733C9A_IBM_EBCDIC__Multilingual_Latin_2_( STR ) CStringDecoder::Decode( _T_B6733C9A_IBM_EBCDIC__Multilingual_Latin_2_, _LEN_B6733C9A, STR )
+
+// windows-874
+#define _T_4D542171_windows_874 "\xFF\x37\x3E\xFF\x01\x40\x01\xF4\x08\xFF\xFD"
+#define _LEN_4D542171 11
+#define _DEC_4D542171_windows_874( STR ) CStringDecoder::Decode( _T_4D542171_windows_874, _LEN_4D542171, STR )
+
+// Thai (Windows)
+#define _T_3E2CF854_Thai__Windows_ "\xDC\x36\x31\x04\xB2\xF1\xE5\x30\x3E\x2C\x38\x45\x05\xC4"
+#define _LEN_3E2CF854 14
+#define _DEC_3E2CF854_Thai__Windows_( STR ) CStringDecoder::Decode( _T_3E2CF854_Thai__Windows_, _LEN_3E2CF854, STR )
+
+// cp875
+#define _T_9F438A23_cp875 "\xEB\x3E\x08\xD2\xC7"
+#define _LEN_9F438A23 5
+#define _DEC_9F438A23_cp875( STR ) CStringDecoder::Decode( _T_9F438A23_cp875, _LEN_9F438A23, STR )
+
+// IBM EBCDIC (Greek Modern)
+#define _T_CD781417_IBM_EBCDIC__Greek_Modern_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xD9\x0D\x2C\xED\x39\xF0\xE8\x01\x2D\xF3\x39\x3E\xF1"
+#define _LEN_CD781417 25
+#define _DEC_CD781417_IBM_EBCDIC__Greek_Modern_( STR ) CStringDecoder::Decode( _T_CD781417_IBM_EBCDIC__Greek_Modern_, _LEN_CD781417, STR )
+
+// shift_jis
+#define _T_4BE552A4_shift_jis "\xFB\x36\x39\x01\x06\x28\xF8\x30\x43"
+#define _LEN_4BE552A4 9
+#define _DEC_4BE552A4_shift_jis( STR ) CStringDecoder::Decode( _T_4BE552A4_shift_jis, _LEN_4BE552A4, STR )
+
+// Japanese (Shift-JIS)
+#define _T_46C5A30E_Japanese__Shift_JIS_ "\xD2\x2F\x40\xFC\x00\x2E\x01\x2C\xF0\xF0\x1C\x36\xFB\x01\x3B\xB5\x18\x19\xEE\xBB"
+#define _LEN_46C5A30E 20
+#define _DEC_46C5A30E_Japanese__Shift_JIS_( STR ) CStringDecoder::Decode( _T_46C5A30E_Japanese__Shift_JIS_, _LEN_46C5A30E, STR )
+
+// gb2312
+#define _T_354487BD_gb2312 "\xEF\x30\x02\xCE\xC3\xFB"
+#define _LEN_354487BD 6
+#define _DEC_354487BD_gb2312( STR ) CStringDecoder::Decode( _T_354487BD_gb2312, _LEN_354487BD, STR )
+
+// Chinese Simplified (GB2312)
+#define _T_D4FB56EF_Chinese_Simplified__GB2312_ "\xCB\x36\x39\x09\xF7\x3C\xF3\xE7\x23\x31\x36\x3E\xFE\x04\x2D\xF1\x33\x34\xBB\xBA\x10\xD0\xF9\x03\xF9\xFB\xF7"
+#define _LEN_D4FB56EF 27
+#define _DEC_D4FB56EF_Chinese_Simplified__GB2312_( STR ) CStringDecoder::Decode( _T_D4FB56EF_Chinese_Simplified__GB2312_, _LEN_D4FB56EF, STR )
+
+// ks_c_5601-1987
+#define _T_6FB9286F_ks_c_5601_1987 "\xF3\x41\x2F\xFE\xF1\xFE\xC4\xF7\x01\xF5\xFA\x07\xCA\xD2"
+#define _LEN_6FB9286F 14
+#define _DEC_6FB9286F_ks_c_5601_1987( STR ) CStringDecoder::Decode( _T_6FB9286F_ks_c_5601_1987, _LEN_6FB9286F, STR )
+
+// Korean
+#define _T_96F9CCF5_Korean "\xD3\x3D\x42\x00\xF3\x37"
+#define _LEN_96F9CCF5 6
+#define _DEC_96F9CCF5_Korean( STR ) CStringDecoder::Decode( _T_96F9CCF5_Korean, _LEN_96F9CCF5, STR )
+
+// big5
+#define _T_8B622978_big5 "\xEA\x37\x37\xD0"
+#define _LEN_8B622978 4
+#define _DEC_8B622978_big5( STR ) CStringDecoder::Decode( _T_8B622978_big5, _LEN_8B622978, STR )
+
+// Chinese Traditional (Big5)
+#define _T_17D4B6A5_Chinese_Traditional__Big5_ "\xCB\x36\x39\x09\xF7\x3C\xF3\xE7\x24\x3A\x2A\x32\xFB\x0F\x30\xF7\x3C\x31\x07\xB2\xF1\xD0\x30\x37\xFD\xF2"
+#define _LEN_17D4B6A5 26
+#define _DEC_17D4B6A5_Chinese_Traditional__Big5_( STR ) CStringDecoder::Decode( _T_17D4B6A5_Chinese_Traditional__Big5_, _LEN_17D4B6A5, STR )
+
+// IBM1026
+#define _T_E03A63F7_IBM1026 "\xD1\x10\x1D\xCC\xC2\xFB\xC4"
+#define _LEN_E03A63F7 7
+#define _DEC_E03A63F7_IBM1026( STR ) CStringDecoder::Decode( _T_E03A63F7_IBM1026, _LEN_E03A63F7, STR )
+
+// IBM EBCDIC (Turkish Latin-5)
+#define _T_F267F1F3_IBM_EBCDIC__Turkish_Latin_5_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xE6\x10\x39\xF3\x37\x43\x03\xB2\x15\xEF\x3B\x39\x36\xF6\x03\xBB"
+#define _LEN_F267F1F3 28
+#define _DEC_F267F1F3_IBM_EBCDIC__Turkish_Latin_5_( STR ) CStringDecoder::Decode( _T_F267F1F3_IBM_EBCDIC__Turkish_Latin_5_, _LEN_F267F1F3, STR )
+
+// IBM01047
+#define _T_FDE8EF67_IBM01047 "\xD1\x10\x1D\xCB\xC3\xF9\xC2\xFE"
+#define _LEN_FDE8EF67 8
+#define _DEC_FDE8EF67_IBM01047( STR ) CStringDecoder::Decode( _T_FDE8EF67_IBM01047, _LEN_FDE8EF67, STR )
+
+// IBM Latin-1
+#define _T_B3A44696_IBM_Latin_1 "\xD1\x10\x1D\xBB\xDE\x2A\x02\x30\x3E\xF5\xFA"
+#define _LEN_B3A44696 11
+#define _DEC_B3A44696_IBM_Latin_1( STR ) CStringDecoder::Decode( _T_B3A44696_IBM_Latin_1, _LEN_B3A44696, STR )
+
+// IBM01140
+#define _T_624E10F3_IBM01140 "\xD1\x10\x1D\xCB\xC3\xFA\xC2\xF7"
+#define _LEN_624E10F3 8
+#define _DEC_624E10F3_IBM01140( STR ) CStringDecoder::Decode( _T_624E10F3_IBM01140, _LEN_624E10F3, STR )
+
+// IBM EBCDIC (US-Canada-Euro)
+#define _T_4CEA3B4F_IBM_EBCDIC__US_Canada_Euro_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xE7\xEE\xF4\xCB\x2F\x3E\xFC\xF6\x2A\xBB\x0C\x45\x3A\x38\xF7"
+#define _LEN_4CEA3B4F 27
+#define _DEC_4CEA3B4F_IBM_EBCDIC__US_Canada_Euro_( STR ) CStringDecoder::Decode( _T_4CEA3B4F_IBM_EBCDIC__US_Canada_Euro_, _LEN_4CEA3B4F, STR )
+
+// IBM01141
+#define _T_15492065_IBM01141 "\xD1\x10\x1D\xCB\xC3\xFA\xC2\xF8"
+#define _LEN_15492065 8
+#define _DEC_15492065_IBM01141( STR ) CStringDecoder::Decode( _T_15492065_IBM01141, _LEN_15492065, STR )
+
+// IBM EBCDIC (Germany-Euro)
+#define _T_23C491D5_IBM_EBCDIC__Germany_Euro_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xD9\x00\x39\xF5\x2F\x3E\x14\xBF\x0E\x03\x39\x3F\xF1"
+#define _LEN_23C491D5 25
+#define _DEC_23C491D5_IBM_EBCDIC__Germany_Euro_( STR ) CStringDecoder::Decode( _T_23C491D5_IBM_EBCDIC__Germany_Euro_, _LEN_23C491D5, STR )
+
+// IBM01142
+#define _T_8C4071DF_IBM01142 "\xD1\x10\x1D\xCB\xC3\xFA\xC2\xF9"
+#define _LEN_8C4071DF 8
+#define _DEC_8C4071DF_IBM01142( STR ) CStringDecoder::Decode( _T_8C4071DF_IBM01142, _LEN_8C4071DF, STR )
+
+// IBM EBCDIC (Denmark-Norway-Euro)
+#define _T_2E3E88CE_IBM_EBCDIC__Denmark_Norway_Euro_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xD6\x00\x35\xF5\x2F\x42\x06\xBF\x17\xFD\x39\x47\x29\x42\xFB\xD7\x10\x39\xF7\xF7"
+#define _LEN_2E3E88CE 32
+#define _DEC_2E3E88CE_IBM_EBCDIC__Denmark_Norway_Euro_( STR ) CStringDecoder::Decode( _T_2E3E88CE_IBM_EBCDIC__Denmark_Norway_Euro_, _LEN_2E3E88CE, STR )
+
+// IBM01143
+#define _T_FB474149_IBM01143 "\xD1\x10\x1D\xCB\xC3\xFA\xC2\xFA"
+#define _LEN_FB474149 8
+#define _DEC_FB474149_IBM01143( STR ) CStringDecoder::Decode( _T_FB474149_IBM01143, _LEN_FB474149, STR )
+
+// IBM EBCDIC (Finland-Sweden-Euro)
+#define _T_24122638_IBM_EBCDIC__Finland_Sweden_Euro_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xD8\x04\x35\xF4\x2F\x3E\xFF\xBF\x1C\x05\x2C\x34\x2D\x37\xFB\xD7\x10\x39\xF7\xF7"
+#define _LEN_24122638 32
+#define _DEC_24122638_IBM_EBCDIC__Finland_Sweden_Euro_( STR ) CStringDecoder::Decode( _T_24122638_IBM_EBCDIC__Finland_Sweden_Euro_, _LEN_24122638, STR )
+
+// IBM01144
+#define _T_6523D4EA_IBM01144 "\xD1\x10\x1D\xCB\xC3\xFA\xC2\xFB"
+#define _LEN_6523D4EA 8
+#define _DEC_6523D4EA_IBM01144( STR ) CStringDecoder::Decode( _T_6523D4EA_IBM01144, _LEN_6523D4EA, STR )
+
+// IBM EBCDIC (Italy-Euro)
+#define _T_3D413EF9_IBM_EBCDIC__Italy_Euro_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xDB\x0F\x28\xF4\x47\xFD\xE0\x07\x3B\xFD\xF0"
+#define _LEN_3D413EF9 23
+#define _DEC_3D413EF9_IBM_EBCDIC__Italy_Euro_( STR ) CStringDecoder::Decode( _T_3D413EF9_IBM_EBCDIC__Italy_Euro_, _LEN_3D413EF9, STR )
+
+// IBM01145
+#define _T_1224E47C_IBM01145 "\xD1\x10\x1D\xCB\xC3\xFA\xC2\xFC"
+#define _LEN_1224E47C 8
+#define _DEC_1224E47C_IBM01145( STR ) CStringDecoder::Decode( _T_1224E47C_IBM01145, _LEN_1224E47C, STR )
+
+// IBM EBCDIC (Spain-Euro)
+#define _T_926AAEE8_IBM_EBCDIC__Spain_Euro_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xE5\x0B\x28\xF1\x3C\xFD\xE0\x07\x3B\xFD\xF0"
+#define _LEN_926AAEE8 23
+#define _DEC_926AAEE8_IBM_EBCDIC__Spain_Euro_( STR ) CStringDecoder::Decode( _T_926AAEE8_IBM_EBCDIC__Spain_Euro_, _LEN_926AAEE8, STR )
+
+// IBM01146
+#define _T_8B2DB5C6_IBM01146 "\xD1\x10\x1D\xCB\xC3\xFA\xC2\xFD"
+#define _LEN_8B2DB5C6 8
+#define _DEC_8B2DB5C6_IBM01146( STR ) CStringDecoder::Decode( _T_8B2DB5C6_IBM01146, _LEN_8B2DB5C6, STR )
+
+// IBM EBCDIC (UK-Euro)
+#define _T_A5A2B650_IBM_EBCDIC__UK_Euro_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xE7\xE6\xF4\xCD\x43\x42\x0A\xBB"
+#define _LEN_A5A2B650 20
+#define _DEC_A5A2B650_IBM_EBCDIC__UK_Euro_( STR ) CStringDecoder::Decode( _T_A5A2B650_IBM_EBCDIC__UK_Euro_, _LEN_A5A2B650, STR )
+
+// IBM01147
+#define _T_FC2A8550_IBM01147 "\xD1\x10\x1D\xCB\xC3\xFA\xC2\xFE"
+#define _LEN_FC2A8550 8
+#define _DEC_FC2A8550_IBM01147( STR ) CStringDecoder::Decode( _T_FC2A8550_IBM01147, _LEN_FC2A8550, STR )
+
+// IBM EBCDIC (France-Euro)
+#define _T_1028C286_IBM_EBCDIC__France_Euro_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xD8\x0D\x28\xF6\x31\x35\xC8\xD7\x3E\x00\x36\xF9"
+#define _LEN_1028C286 24
+#define _DEC_1028C286_IBM_EBCDIC__France_Euro_( STR ) CStringDecoder::Decode( _T_1028C286_IBM_EBCDIC__France_Euro_, _LEN_1028C286, STR )
+
+// IBM01148
+#define _T_6C9598C1_IBM01148 "\xD1\x10\x1D\xCB\xC3\xFA\xC2\xFF"
+#define _LEN_6C9598C1 8
+#define _DEC_6C9598C1_IBM01148( STR ) CStringDecoder::Decode( _T_6C9598C1_IBM01148, _LEN_6C9598C1, STR )
+
+// IBM EBCDIC (International-Euro)
+#define _T_0E123929_IBM_EBCDIC__International_Euro_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xDB\x09\x3B\xED\x40\x3E\xFC\x06\x32\xFD\x35\x31\x34\xF6\x13\x07\x0D\x36\xB1"
+#define _LEN_0E123929 31
+#define _DEC_0E123929_IBM_EBCDIC__International_Euro_( STR ) CStringDecoder::Decode( _T_0E123929_IBM_EBCDIC__International_Euro_, _LEN_0E123929, STR )
+
+// IBM01149
+#define _T_1B92A857_IBM01149 "\xD1\x10\x1D\xCB\xC3\xFA\xC2\x00"
+#define _LEN_1B92A857 8
+#define _DEC_1B92A857_IBM01149( STR ) CStringDecoder::Decode( _T_1B92A857_IBM01149, _LEN_1B92A857, STR )
+
+// IBM EBCDIC (Icelandic-Euro)
+#define _T_2D8D0EA8_IBM_EBCDIC__Icelandic_Euro_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xDB\xFE\x2C\xF4\x2F\x3E\xFF\xFB\x2C\xBB\x0C\x45\x3A\x38\xF7"
+#define _LEN_2D8D0EA8 27
+#define _DEC_2D8D0EA8_IBM_EBCDIC__Icelandic_Euro_( STR ) CStringDecoder::Decode( _T_2D8D0EA8_IBM_EBCDIC__Icelandic_Euro_, _LEN_2D8D0EA8, STR )
+
+// utf-16
+#define _T_C1409499_utf_16 "\xFD\x42\x36\xC8\xC3\xFF"
+#define _LEN_C1409499 6
+#define _DEC_C1409499_utf_16( STR ) CStringDecoder::Decode( _T_C1409499_utf_16, _LEN_C1409499, STR )
+
+// Unicode
+#define _T_1C0C8DFC_Unicode "\xDD\x3C\x39\xFE\x01\x2D\xF3"
+#define _LEN_1C0C8DFC 7
+#define _DEC_1C0C8DFC_Unicode( STR ) CStringDecoder::Decode( _T_1C0C8DFC_Unicode, _LEN_1C0C8DFC, STR )
+
+// utf-16BE
+#define _T_D2C12D29_utf_16BE "\xFD\x42\x36\xC8\xC3\xFF\xD0\x0C"
+#define _LEN_D2C12D29 8
+#define _DEC_D2C12D29_utf_16BE( STR ) CStringDecoder::Decode( _T_D2C12D29_utf_16BE, _LEN_D2C12D29, STR )
+
+// Unicode (Big-Endian)
+#define _T_ECDCEB6A_Unicode__Big_Endian_ "\xDD\x3C\x39\xFE\x01\x2D\xF3\xE7\xF8\x0A\x32\x35\xBF\xE0\x35\xEC\x37\x31\x09\xBB"
+#define _LEN_ECDCEB6A 20
+#define _DEC_ECDCEB6A_Unicode__Big_Endian_( STR ) CStringDecoder::Decode( _T_ECDCEB6A_Unicode__Big_Endian_, _LEN_ECDCEB6A, STR )
+
+// windows-1250
+#define _T_B14C768A_windows_1250 "\xFF\x37\x3E\xFF\x01\x40\x01\xF4\x01\xFA\xFE\xFE"
+#define _LEN_B14C768A 12
+#define _DEC_B14C768A_windows_1250( STR ) CStringDecoder::Decode( _T_B14C768A_windows_1250, _LEN_B14C768A, STR )
+
+// Central European (Windows)
+#define _T_4609212E_Central_European__Windows_ "\xCB\x33\x3E\x0F\x04\x2A\xFA\xE7\x15\x3D\x3B\x3D\x02\x00\x28\xF6\xEE\xF8\xF2\xFB\x37\xF2\x36\x47\x3B\xF2"
+#define _LEN_4609212E 26
+#define _DEC_4609212E_Central_European__Windows_( STR ) CStringDecoder::Decode( _T_4609212E_Central_European__Windows_, _LEN_4609212E, STR )
+
+// windows-1251
+#define _T_C64B461C_windows_1251 "\xFF\x37\x3E\xFF\x01\x40\x01\xF4\x01\xFA\xFE\xFF"
+#define _LEN_C64B461C 12
+#define _DEC_C64B461C_windows_1251( STR ) CStringDecoder::Decode( _T_C64B461C_windows_1251, _LEN_C64B461C, STR )
+
+// Cyrillic (Windows)
+#define _T_0D9A73EA_Cyrillic__Windows_ "\xCB\x47\x42\x04\xFE\x35\xF7\x2A\xF0\xF0\x20\x37\x00\xFF\x36\xFF\x41\xF9"
+#define _LEN_0D9A73EA 18
+#define _DEC_0D9A73EA_Cyrillic__Windows_( STR ) CStringDecoder::Decode( _T_0D9A73EA_Cyrillic__Windows_, _LEN_0D9A73EA, STR )
+
+// Windows-1252
+#define _T_4773CC5E_Windows_1252 "\xDF\x37\x3E\xFF\x01\x40\x01\xF4\x01\xFA\xFE\x00"
+#define _LEN_4773CC5E 12
+#define _DEC_4773CC5E_Windows_1252( STR ) CStringDecoder::Decode( _T_4773CC5E_Windows_1252, _LEN_4773CC5E, STR )
+
+// Western European (Windows)
+#define _T_B590C6F1_Western_European__Windows_ "\xDF\x33\x43\x0F\xF7\x3B\xFC\xE7\x15\x3D\x3B\x3D\x02\x00\x28\xF6\xEE\xF8\xF2\xFB\x37\xF2\x36\x47\x3B\xF2"
+#define _LEN_B590C6F1 26
+#define _DEC_B590C6F1_Western_European__Windows_( STR ) CStringDecoder::Decode( _T_B590C6F1_Western_European__Windows_, _LEN_B590C6F1, STR )
+
+// windows-1253
+#define _T_28452730_windows_1253 "\xFF\x37\x3E\xFF\x01\x40\x01\xF4\x01\xFA\xFE\x01"
+#define _LEN_28452730 12
+#define _DEC_28452730_windows_1253( STR ) CStringDecoder::Decode( _T_28452730_windows_1253, _LEN_28452730, STR )
+
+// Greek (Windows)
+#define _T_405E27BD_Greek__Windows_ "\xCF\x40\x35\x00\xFD\xE9\xB6\x1E\x39\x36\x2D\x3D\x09\x0E\xF0"
+#define _LEN_405E27BD 15
+#define _DEC_405E27BD_Greek__Windows_( STR ) CStringDecoder::Decode( _T_405E27BD_Greek__Windows_, _LEN_405E27BD, STR )
+
+// windows-1254
+#define _T_B621B293_windows_1254 "\xFF\x37\x3E\xFF\x01\x40\x01\xF4\x01\xFA\xFE\x02"
+#define _LEN_B621B293 12
+#define _DEC_B621B293_windows_1254( STR ) CStringDecoder::Decode( _T_B621B293_windows_1254, _LEN_B621B293, STR )
+
+// Turkish (Windows)
+#define _T_15FB2B3E_Turkish__Windows_ "\xDC\x43\x42\x06\xFB\x3C\xF6\xE7\xF8\x1F\x32\x3C\xF6\x0A\x3E\xFB\xF7"
+#define _LEN_15FB2B3E 17
+#define _DEC_15FB2B3E_Turkish__Windows_( STR ) CStringDecoder::Decode( _T_15FB2B3E_Turkish__Windows_, _LEN_15FB2B3E, STR )
+
+// windows-1255
+#define _T_C1268205_windows_1255 "\xFF\x37\x3E\xFF\x01\x40\x01\xF4\x01\xFA\xFE\x03"
+#define _LEN_C1268205 12
+#define _DEC_C1268205_windows_1255( STR ) CStringDecoder::Decode( _T_C1268205_windows_1255, _LEN_C1268205, STR )
+
+// Hebrew (Windows)
+#define _T_0D324357_Hebrew__Windows_ "\xD0\x33\x32\x0D\xF7\x40\xAE\xEF\x27\x31\x37\x32\x01\x12\x3A\xB1"
+#define _LEN_0D324357 16
+#define _DEC_0D324357_Hebrew__Windows_( STR ) CStringDecoder::Decode( _T_0D324357_Hebrew__Windows_, _LEN_0D324357, STR )
+
+// windows-1256
+#define _T_582FD3BF_windows_1256 "\xFF\x37\x3E\xFF\x01\x40\x01\xF4\x01\xFA\xFE\x04"
+#define _LEN_582FD3BF 12
+#define _DEC_582FD3BF_windows_1256( STR ) CStringDecoder::Decode( _T_582FD3BF_windows_1256, _LEN_582FD3BF, STR )
+
+// Arabic (Windows)
+#define _T_DC69A415_Arabic__Windows_ "\xC9\x40\x31\xFD\xFB\x2C\xAE\xEF\x27\x31\x37\x32\x01\x12\x3A\xB1"
+#define _LEN_DC69A415 16
+#define _DEC_DC69A415_Arabic__Windows_( STR ) CStringDecoder::Decode( _T_DC69A415_Arabic__Windows_, _LEN_DC69A415, STR )
+
+// windows-1257
+#define _T_2F28E329_windows_1257 "\xFF\x37\x3E\xFF\x01\x40\x01\xF4\x01\xFA\xFE\x05"
+#define _LEN_2F28E329 12
+#define _DEC_2F28E329_windows_1257( STR ) CStringDecoder::Decode( _T_2F28E329_windows_1257, _LEN_2F28E329, STR )
+
+// Baltic (Windows)
+#define _T_03A6EC8D_Baltic__Windows_ "\xCA\x2F\x3C\x0F\xFB\x2C\xAE\xEF\x27\x31\x37\x32\x01\x12\x3A\xB1"
+#define _LEN_03A6EC8D 16
+#define _DEC_03A6EC8D_Baltic__Windows_( STR ) CStringDecoder::Decode( _T_03A6EC8D_Baltic__Windows_, _LEN_03A6EC8D, STR )
+
+// windows-1258
+#define _T_BF97FEB8_windows_1258 "\xFF\x37\x3E\xFF\x01\x40\x01\xF4\x01\xFA\xFE\x06"
+#define _LEN_BF97FEB8 12
+#define _DEC_BF97FEB8_windows_1258( STR ) CStringDecoder::Decode( _T_BF97FEB8_windows_1258, _LEN_BF97FEB8, STR )
+
+// Vietnamese (Windows)
+#define _T_5A8E141B_Vietnamese__Windows_ "\xDE\x37\x35\x0F\x00\x2A\xFB\x2C\x43\x2D\xE9\xF6\xE9\x04\x35\xEC\x3D\x47\x0E\xBB"
+#define _LEN_5A8E141B 20
+#define _DEC_5A8E141B_Vietnamese__Windows_( STR ) CStringDecoder::Decode( _T_5A8E141B_Vietnamese__Windows_, _LEN_5A8E141B, STR )
+
+// Johab
+#define _T_2EBA90AA_Johab "\xD2\x3D\x38\xFC\xF4"
+#define _LEN_2EBA90AA 5
+#define _DEC_2EBA90AA_Johab( STR ) CStringDecoder::Decode( _T_2EBA90AA_Johab, _LEN_2EBA90AA, STR )
+
+// Korean (Johab)
+#define _T_A7B49950_Korean__Johab_ "\xD3\x3D\x42\x00\xF3\x37\xAE\xEF\x1A\x37\x31\x2F\xF4\xC4"
+#define _LEN_A7B49950 14
+#define _DEC_A7B49950_Korean__Johab_( STR ) CStringDecoder::Decode( _T_A7B49950_Korean__Johab_, _LEN_A7B49950, STR )
+
+// macintosh
+#define _T_046E6B37_macintosh "\xF5\x2F\x33\x04\x00\x3D\xFD\x3A\x38"
+#define _LEN_046E6B37 9
+#define _DEC_046E6B37_macintosh( STR ) CStringDecoder::Decode( _T_046E6B37_macintosh, _LEN_046E6B37, STR )
+
+// Western European (Mac)
+#define _T_07CC1CC1_Western_European__Mac_ "\xDF\x33\x43\x0F\xF7\x3B\xFC\xE7\x15\x3D\x3B\x3D\x02\x00\x28\xF6\xEE\xF8\xE8\xF3\x2C\xB7"
+#define _LEN_07CC1CC1 22
+#define _DEC_07CC1CC1_Western_European__Mac_( STR ) CStringDecoder::Decode( _T_07CC1CC1_Western_European__Mac_, _LEN_07CC1CC1, STR )
+
+// x-mac-japanese
+#define _T_FDA39FA1_x_mac_japanese "\x00\xFB\x3D\xFC\xF5\xF6\xF8\x28\x40\x29\x37\x33\x05\x00"
+#define _LEN_FDA39FA1 14
+#define _DEC_FDA39FA1_x_mac_japanese( STR ) CStringDecoder::Decode( _T_FDA39FA1_x_mac_japanese, _LEN_FDA39FA1, STR )
+
+// Japanese (Mac)
+#define _T_DCDF7A6F_Japanese__Mac_ "\xD2\x2F\x40\xFC\x00\x2E\x01\x2C\xF0\xF0\x16\x2F\xF5\xC4"
+#define _LEN_DCDF7A6F 14
+#define _DEC_DCDF7A6F_Japanese__Mac_( STR ) CStringDecoder::Decode( _T_DCDF7A6F_Japanese__Mac_, _LEN_DCDF7A6F, STR )
+
+// x-mac-chinesetrad
+#define _T_7127DDCB_x_mac_chinesetrad "\x00\xFB\x3D\xFC\xF5\xF6\xF1\x2F\x39\x36\x2E\x41\xF7\x0F\x39\xE9\x32"
+#define _LEN_7127DDCB 17
+#define _DEC_7127DDCB_x_mac_chinesetrad( STR ) CStringDecoder::Decode( _T_7127DDCB_x_mac_chinesetrad, _LEN_7127DDCB, STR )
+
+// Chinese Traditional (Mac)
+#define _T_4A7F4E34_Chinese_Traditional__Mac_ "\xCB\x36\x39\x09\xF7\x3C\xF3\xE7\x24\x3A\x2A\x32\xFB\x0F\x30\xF7\x3C\x31\x07\xB2\xF1\xDB\x28\x33\xF1"
+#define _LEN_4A7F4E34 25
+#define _DEC_4A7F4E34_Chinese_Traditional__Mac_( STR ) CStringDecoder::Decode( _T_4A7F4E34_Chinese_Traditional__Mac_, _LEN_4A7F4E34, STR )
+
+// x-mac-korean
+#define _T_AB037EF6_x_mac_korean "\x00\xFB\x3D\xFC\xF5\xF6\xF9\x36\x42\x2D\x2A\x3C"
+#define _LEN_AB037EF6 12
+#define _DEC_AB037EF6_x_mac_korean( STR ) CStringDecoder::Decode( _T_AB037EF6_x_mac_korean, _LEN_AB037EF6, STR )
+
+// Korean (Mac)
+#define _T_009C51B0_Korean__Mac_ "\xD3\x3D\x42\x00\xF3\x37\xAE\xEF\x1D\x29\x2C\xF7"
+#define _LEN_009C51B0 12
+#define _DEC_009C51B0_Korean__Mac_( STR ) CStringDecoder::Decode( _T_009C51B0_Korean__Mac_, _LEN_009C51B0, STR )
+
+// x-mac-arabic
+#define _T_636316E2_x_mac_arabic "\x00\xFB\x3D\xFC\xF5\xF6\xEF\x39\x31\x2A\x32\x31"
+#define _LEN_636316E2 12
+#define _DEC_636316E2_x_mac_arabic( STR ) CStringDecoder::Decode( _T_636316E2_x_mac_arabic, _LEN_636316E2, STR )
+
+// Arabic (Mac)
+#define _T_95031D4A_Arabic__Mac_ "\xC9\x40\x31\xFD\xFB\x2C\xAE\xEF\x1D\x29\x2C\xF7"
+#define _LEN_95031D4A 12
+#define _DEC_95031D4A_Arabic__Mac_( STR ) CStringDecoder::Decode( _T_95031D4A_Arabic__Mac_, _LEN_95031D4A, STR )
+
+// x-mac-hebrew
+#define _T_2E509B57_x_mac_hebrew "\x00\xFB\x3D\xFC\xF5\xF6\xF6\x2C\x32\x3A\x2E\x45"
+#define _LEN_2E509B57 12
+#define _DEC_2E509B57_x_mac_hebrew( STR ) CStringDecoder::Decode( _T_2E509B57_x_mac_hebrew, _LEN_2E509B57, STR )
+
+// Hebrew (Mac)
+#define _T_0CAEA273_Hebrew__Mac_ "\xD0\x33\x32\x0D\xF7\x40\xAE\xEF\x1D\x29\x2C\xF7"
+#define _LEN_0CAEA273 12
+#define _DEC_0CAEA273_Hebrew__Mac_( STR ) CStringDecoder::Decode( _T_0CAEA273_Hebrew__Mac_, _LEN_0CAEA273, STR )
+
+// x-mac-greek
+#define _T_4316E1CF_x_mac_greek "\x00\xFB\x3D\xFC\xF5\xF6\xF5\x39\x35\x2D\x34"
+#define _LEN_4316E1CF 11
+#define _DEC_4316E1CF_x_mac_greek( STR ) CStringDecoder::Decode( _T_4316E1CF_x_mac_greek, _LEN_4316E1CF, STR )
+
+// Greek (Mac)
+#define _T_BB127A02_Greek__Mac_ "\xCF\x40\x35\x00\xFD\xE9\xB6\x14\x31\x2B\xF2"
+#define _LEN_BB127A02 11
+#define _DEC_BB127A02_Greek__Mac_( STR ) CStringDecoder::Decode( _T_BB127A02_Greek__Mac_, _LEN_BB127A02, STR )
+
+// x-mac-cyrillic
+#define _T_37F31003_x_mac_cyrillic "\x00\xFB\x3D\xFC\xF5\xF6\xF1\x40\x42\x31\x35\x3A\xFB\xFE"
+#define _LEN_37F31003 14
+#define _DEC_37F31003_x_mac_cyrillic( STR ) CStringDecoder::Decode( _T_37F31003_x_mac_cyrillic, _LEN_37F31003, STR )
+
+// Cyrillic (Mac)
+#define _T_EC88F1FD_Cyrillic__Mac_ "\xCB\x47\x42\x04\xFE\x35\xF7\x2A\xF0\xF0\x16\x2F\xF5\xC4"
+#define _LEN_EC88F1FD 14
+#define _DEC_EC88F1FD_Cyrillic__Mac_( STR ) CStringDecoder::Decode( _T_EC88F1FD_Cyrillic__Mac_, _LEN_EC88F1FD, STR )
+
+// x-mac-chinesesimp
+#define _T_4AEC3292_x_mac_chinesesimp "\x00\xFB\x3D\xFC\xF5\xF6\xF1\x2F\x39\x36\x2E\x41\xF7\x0E\x30\xF5\x3E"
+#define _LEN_4AEC3292 17
+#define _DEC_4AEC3292_x_mac_chinesesimp( STR ) CStringDecoder::Decode( _T_4AEC3292_x_mac_chinesesimp, _LEN_4AEC3292, STR )
+
+// Chinese Simplified (Mac)
+#define _T_375D858B_Chinese_Simplified__Mac_ "\xCB\x36\x39\x09\xF7\x3C\xF3\xE7\x23\x31\x36\x3E\xFE\x04\x2D\xF1\x33\x34\xBB\xBA\x16\xEF\x2A\xF9"
+#define _LEN_375D858B 24
+#define _DEC_375D858B_Chinese_Simplified__Mac_( STR ) CStringDecoder::Decode( _T_375D858B_Chinese_Simplified__Mac_, _LEN_375D858B, STR )
+
+// x-mac-romanian
+#define _T_5BB68F18_x_mac_romanian "\x00\xFB\x3D\xFC\xF5\xF6\x00\x36\x3D\x29\x37\x37\xF3\x09"
+#define _LEN_5BB68F18 14
+#define _DEC_5BB68F18_x_mac_romanian( STR ) CStringDecoder::Decode( _T_5BB68F18_x_mac_romanian, _LEN_5BB68F18, STR )
+
+// Romanian (Mac)
+#define _T_3BC8292F_Romanian__Mac_ "\xDA\x3D\x3D\xFC\x00\x32\xEF\x35\xF0\xF0\x16\x2F\xF5\xC4"
+#define _LEN_3BC8292F 14
+#define _DEC_3BC8292F_Romanian__Mac_( STR ) CStringDecoder::Decode( _T_3BC8292F_Romanian__Mac_, _LEN_3BC8292F, STR )
+
+// x-mac-ukrainian
+#define _T_BCFEABC1_x_mac_ukrainian "\x00\xFB\x3D\xFC\xF5\xF6\x03\x32\x42\x29\x32\x3C\xFB\xFC\x35"
+#define _LEN_BCFEABC1 15
+#define _DEC_BCFEABC1_x_mac_ukrainian( STR ) CStringDecoder::Decode( _T_BCFEABC1_x_mac_ukrainian, _LEN_BCFEABC1, STR )
+
+// Ukrainian (Mac)
+#define _T_C9DCD822_Ukrainian__Mac_ "\xDD\x39\x42\xFC\xFB\x37\xF7\x28\x3E\xE8\xF1\x1B\xF3\xFE\xF0"
+#define _LEN_C9DCD822 15
+#define _DEC_C9DCD822_Ukrainian__Mac_( STR ) CStringDecoder::Decode( _T_C9DCD822_Ukrainian__Mac_, _LEN_C9DCD822, STR )
+
+// x-mac-thai
+#define _T_4EA582DD_x_mac_thai "\x00\xFB\x3D\xFC\xF5\xF6\x02\x2F\x31\x31"
+#define _LEN_4EA582DD 10
+#define _DEC_4EA582DD_x_mac_thai( STR ) CStringDecoder::Decode( _T_4EA582DD_x_mac_thai, _LEN_4EA582DD, STR )
+
+// Thai (Mac)
+#define _T_6CB524E7_Thai__Mac_ "\xDC\x36\x31\x04\xB2\xF1\xDB\x28\x33\xF1"
+#define _LEN_6CB524E7 10
+#define _DEC_6CB524E7_Thai__Mac_( STR ) CStringDecoder::Decode( _T_6CB524E7_Thai__Mac_, _LEN_6CB524E7, STR )
+
+// x-mac-ce
+#define _T_CECB6F84_x_mac_ce "\x00\xFB\x3D\xFC\xF5\xF6\xF1\x2C"
+#define _LEN_CECB6F84 8
+#define _DEC_CECB6F84_x_mac_ce( STR ) CStringDecoder::Decode( _T_CECB6F84_x_mac_ce, _LEN_CECB6F84, STR )
+
+// Central European (Mac)
+#define _T_A8EBD9EE_Central_European__Mac_ "\xCB\x33\x3E\x0F\x04\x2A\xFA\xE7\x15\x3D\x3B\x3D\x02\x00\x28\xF6\xEE\xF8\xE8\xF3\x2C\xB7"
+#define _LEN_A8EBD9EE 22
+#define _DEC_A8EBD9EE_Central_European__Mac_( STR ) CStringDecoder::Decode( _T_A8EBD9EE_Central_European__Mac_, _LEN_A8EBD9EE, STR )
+
+// x-mac-icelandic
+#define _T_B5C89EA8_x_mac_icelandic "\x00\xFB\x3D\xFC\xF5\xF6\xF7\x2A\x35\x34\x2A\x3C\xF6\x04\x2A"
+#define _LEN_B5C89EA8 15
+#define _DEC_B5C89EA8_x_mac_icelandic( STR ) CStringDecoder::Decode( _T_B5C89EA8_x_mac_icelandic, _LEN_B5C89EA8, STR )
+
+// Icelandic (Mac)
+#define _T_55772DB4_Icelandic__Mac_ "\xD1\x31\x35\x07\xF3\x37\xF2\x30\x33\xE8\xF1\x1B\xF3\xFE\xF0"
+#define _LEN_55772DB4 15
+#define _DEC_55772DB4_Icelandic__Mac_( STR ) CStringDecoder::Decode( _T_55772DB4_Icelandic__Mac_, _LEN_55772DB4, STR )
+
+// x-mac-turkish
+#define _T_E765D5FD_x_mac_turkish "\x00\xFB\x3D\xFC\xF5\xF6\x02\x3C\x42\x33\x32\x41\xFA"
+#define _LEN_E765D5FD 13
+#define _DEC_E765D5FD_x_mac_turkish( STR ) CStringDecoder::Decode( _T_E765D5FD_x_mac_turkish, _LEN_E765D5FD, STR )
+
+// Turkish (Mac)
+#define _T_45B5BA36_Turkish__Mac_ "\xDC\x43\x42\x06\xFB\x3C\xF6\xE7\xF8\x15\x2A\x31\xBB"
+#define _LEN_45B5BA36 13
+#define _DEC_45B5BA36_Turkish__Mac_( STR ) CStringDecoder::Decode( _T_45B5BA36_Turkish__Mac_, _LEN_45B5BA36, STR )
+
+// x-mac-croatian
+#define _T_9FC25553_x_mac_croatian "\x00\xFB\x3D\xFC\xF5\xF6\xF1\x39\x3F\x29\x3D\x37\xF3\x09"
+#define _LEN_9FC25553 14
+#define _DEC_9FC25553_x_mac_croatian( STR ) CStringDecoder::Decode( _T_9FC25553_x_mac_croatian, _LEN_9FC25553, STR )
+
+// Croatian (Mac)
+#define _T_EFE9BD2F_Croatian__Mac_ "\xCB\x40\x3F\xFC\x06\x32\xEF\x35\xF0\xF0\x16\x2F\xF5\xC4"
+#define _LEN_EFE9BD2F 14
+#define _DEC_EFE9BD2F_Croatian__Mac_( STR ) CStringDecoder::Decode( _T_EFE9BD2F_Croatian__Mac_, _LEN_EFE9BD2F, STR )
+
+// utf-32
+#define _T_F41B3202_utf_32 "\xFD\x42\x36\xC8\xC5\xFB"
+#define _LEN_F41B3202 6
+#define _DEC_F41B3202_utf_32( STR ) CStringDecoder::Decode( _T_F41B3202_utf_32, _LEN_F41B3202, STR )
+
+// Unicode (UTF-32)
+#define _T_AFD526D0_Unicode__UTF_32_ "\xDD\x3C\x39\xFE\x01\x2D\xF3\xE7\xF8\x1D\x1D\x14\xBF\xCE\xF9\xB1"
+#define _LEN_AFD526D0 16
+#define _DEC_AFD526D0_Unicode__UTF_32_( STR ) CStringDecoder::Decode( _T_AFD526D0_Unicode__UTF_32_, _LEN_AFD526D0, STR )
+
+// utf-32BE
+#define _T_7FC14D7E_utf_32BE "\xFD\x42\x36\xC8\xC5\xFB\xD0\x0C"
+#define _LEN_7FC14D7E 8
+#define _DEC_7FC14D7E_utf_32BE( STR ) CStringDecoder::Decode( _T_7FC14D7E_utf_32BE, _LEN_7FC14D7E, STR )
+
+// Unicode (UTF-32 Big-Endian)
+#define _T_91E0D7DB_Unicode__UTF_32_Big_Endian_ "\xDD\x3C\x39\xFE\x01\x2D\xF3\xE7\xF8\x1D\x1D\x14\xBF\xCE\xF9\xA8\x10\x39\x02\xBF\x0E\xFC\x2B\x39\x29\x37\xF7"
+#define _LEN_91E0D7DB 27
+#define _DEC_91E0D7DB_Unicode__UTF_32_Big_Endian_( STR ) CStringDecoder::Decode( _T_91E0D7DB_Unicode__UTF_32_Big_Endian_, _LEN_91E0D7DB, STR )
+
+// x-Chinese-CNS
+#define _T_68D04FCE_x_Chinese_CNS "\x00\xFB\x13\x03\xFB\x37\xF3\x3A\x35\xF5\x0C\x1C\xE5"
+#define _LEN_68D04FCE 13
+#define _DEC_68D04FCE_x_Chinese_CNS( STR ) CStringDecoder::Decode( _T_68D04FCE_x_Chinese_CNS, _LEN_68D04FCE, STR )
+
+// Chinese Traditional (CNS)
+#define _T_46F70E29_Chinese_Traditional__CNS_ "\xCB\x36\x39\x09\xF7\x3C\xF3\xE7\x24\x3A\x2A\x32\xFB\x0F\x30\xF7\x3C\x31\x07\xB2\xF1\xD1\x15\x23\xF1"
+#define _LEN_46F70E29 25
+#define _DEC_46F70E29_Chinese_Traditional__CNS_( STR ) CStringDecoder::Decode( _T_46F70E29_Chinese_Traditional__CNS_, _LEN_46F70E29, STR )
+
+// x-cp20001
+#define _T_FF449943_x_cp20001 "\x00\xFB\x33\x0B\xC4\xF9\xBE\xF7\x01"
+#define _LEN_FF449943 9
+#define _DEC_FF449943_x_cp20001( STR ) CStringDecoder::Decode( _T_FF449943_x_cp20001, _LEN_FF449943, STR )
+
+// TCA Taiwan
+#define _T_6CD14E90_TCA_Taiwan "\xDC\x11\x11\xBB\xE6\x2A\xF7\x3E\x31\x36"
+#define _LEN_6CD14E90 10
+#define _DEC_6CD14E90_TCA_Taiwan( STR ) CStringDecoder::Decode( _T_6CD14E90_TCA_Taiwan, _LEN_6CD14E90, STR )
+
+// x-Chinese-Eten
+#define _T_813732C5_x_Chinese_Eten "\x00\xFB\x13\x03\xFB\x37\xF3\x3A\x35\xF5\x0E\x42\xF7\x09"
+#define _LEN_813732C5 14
+#define _DEC_813732C5_x_Chinese_Eten( STR ) CStringDecoder::Decode( _T_813732C5_x_Chinese_Eten, _LEN_813732C5, STR )
+
+// Chinese Traditional (Eten)
+#define _T_5D4CB506_Chinese_Traditional__Eten_ "\xCB\x36\x39\x09\xF7\x3C\xF3\xE7\x24\x3A\x2A\x32\xFB\x0F\x30\xF7\x3C\x31\x07\xB2\xF1\xD3\x3B\x35\x36\xF2"
+#define _LEN_5D4CB506 26
+#define _DEC_5D4CB506_Chinese_Traditional__Eten_( STR ) CStringDecoder::Decode( _T_5D4CB506_Chinese_Traditional__Eten_, _LEN_5D4CB506, STR )
+
+// x-cp20003
+#define _T_114AF86F_x_cp20003 "\x00\xFB\x33\x0B\xC4\xF9\xBE\xF7\x03"
+#define _LEN_114AF86F 9
+#define _DEC_114AF86F_x_cp20003( STR ) CStringDecoder::Decode( _T_114AF86F_x_cp20003, _LEN_114AF86F, STR )
+
+// IBM5550 Taiwan
+#define _T_4649662F_IBM5550_Taiwan "\xD1\x10\x1D\xD0\xC7\xFE\xBE\xE7\x24\x29\x32\x45\xF3\x09"
+#define _LEN_4649662F 14
+#define _DEC_4649662F_IBM5550_Taiwan( STR ) CStringDecoder::Decode( _T_4649662F_IBM5550_Taiwan, _LEN_4649662F, STR )
+
+// x-cp20004
+#define _T_8F2E6DCC_x_cp20004 "\x00\xFB\x33\x0B\xC4\xF9\xBE\xF7\x04"
+#define _LEN_8F2E6DCC 9
+#define _DEC_8F2E6DCC_x_cp20004( STR ) CStringDecoder::Decode( _T_8F2E6DCC_x_cp20004, _LEN_8F2E6DCC, STR )
+
+// TeleText Taiwan
+#define _T_5EB4791F_TeleText_Taiwan "\xDC\x33\x3C\x00\xE6\x2E\x06\x3B\xF0\x1C\x2A\x37\x09\xFC\x35"
+#define _LEN_5EB4791F 15
+#define _DEC_5EB4791F_TeleText_Taiwan( STR ) CStringDecoder::Decode( _T_5EB4791F_TeleText_Taiwan, _LEN_5EB4791F, STR )
+
+// x-cp20005
+#define _T_F8295D5A_x_cp20005 "\x00\xFB\x33\x0B\xC4\xF9\xBE\xF7\x05"
+#define _LEN_F8295D5A 9
+#define _DEC_F8295D5A_x_cp20005( STR ) CStringDecoder::Decode( _T_F8295D5A_x_cp20005, _LEN_F8295D5A, STR )
+
+// Wang Taiwan
+#define _T_772418F4_Wang_Taiwan "\xDF\x2F\x3E\x02\xB2\x1D\xEF\x30\x47\x29\x37"
+#define _LEN_772418F4 11
+#define _DEC_772418F4_Wang_Taiwan( STR ) CStringDecoder::Decode( _T_772418F4_Wang_Taiwan, _LEN_772418F4, STR )
+
+// x-IA5
+#define _T_9D4227D8_x_IA5 "\x00\xFB\x19\xDC\xC7"
+#define _LEN_9D4227D8 5
+#define _DEC_9D4227D8_x_IA5( STR ) CStringDecoder::Decode( _T_9D4227D8_x_IA5, _LEN_9D4227D8, STR )
+
+// Western European (IA5)
+#define _T_5C0237A4_Western_European__IA5_ "\xDF\x33\x43\x0F\xF7\x3B\xFC\xE7\x15\x3D\x3B\x3D\x02\x00\x28\xF6\xEE\xF8\xE4\xD3\xFE\xB7"
+#define _LEN_5C0237A4 22
+#define _DEC_5C0237A4_Western_European__IA5_( STR ) CStringDecoder::Decode( _T_5C0237A4_Western_European__IA5_, _LEN_5C0237A4, STR )
+
+// x-IA5-German
+#define _T_C8C029EA_x_IA5_German "\x00\xFB\x19\xDC\xC7\xF6\xD5\x2C\x42\x35\x2A\x3C"
+#define _LEN_C8C029EA 12
+#define _DEC_C8C029EA_x_IA5_German( STR ) CStringDecoder::Decode( _T_C8C029EA_x_IA5_German, _LEN_C8C029EA, STR )
+
+// German (IA5)
+#define _T_072FCDC8_German__IA5_ "\xCF\x33\x42\x08\xF3\x37\xAE\xEF\x19\x09\xFE\xF7"
+#define _LEN_072FCDC8 12
+#define _DEC_072FCDC8_German__IA5_( STR ) CStringDecoder::Decode( _T_072FCDC8_German__IA5_, _LEN_072FCDC8, STR )
+
+// x-IA5-Swedish
+#define _T_5244EF59_x_IA5_Swedish "\x00\xFB\x19\xDC\xC7\xF6\xE1\x3E\x35\x2C\x32\x41\xFA"
+#define _LEN_5244EF59 13
+#define _DEC_5244EF59_x_IA5_Swedish( STR ) CStringDecoder::Decode( _T_5244EF59_x_IA5_Swedish, _LEN_5244EF59, STR )
+
+// Swedish (IA5)
+#define _T_F9F58351_Swedish__IA5_ "\xDB\x45\x35\xFF\xFB\x3C\xF6\xE7\xF8\x11\x0A\x03\xBB"
+#define _LEN_F9F58351 13
+#define _DEC_F9F58351_Swedish__IA5_( STR ) CStringDecoder::Decode( _T_F9F58351_Swedish__IA5_, _LEN_F9F58351, STR )
+
+// x-IA5-Norwegian
+#define _T_025A55C5_x_IA5_Norwegian "\x00\xFB\x19\xDC\xC7\xF6\xDC\x36\x42\x3F\x2E\x35\xFB\xFC\x35"
+#define _LEN_025A55C5 15
+#define _DEC_025A55C5_x_IA5_Norwegian( STR ) CStringDecoder::Decode( _T_025A55C5_x_IA5_Norwegian, _LEN_025A55C5, STR )
+
+// Norwegian (IA5)
+#define _T_0402B4FC_Norwegian__IA5_ "\xD6\x3D\x42\x12\xF7\x30\xF7\x28\x3E\xE8\xF1\x17\xD3\xD0\xF0"
+#define _LEN_0402B4FC 15
+#define _DEC_0402B4FC_Norwegian__IA5_( STR ) CStringDecoder::Decode( _T_0402B4FC_Norwegian__IA5_, _LEN_0402B4FC, STR )
+
+// us-ascii
+#define _T_F038B127_us_ascii "\xFD\x41\xFD\xFC\x05\x2C\xF7\x30"
+#define _LEN_F038B127 8
+#define _DEC_F038B127_us_ascii( STR ) CStringDecoder::Decode( _T_F038B127_us_ascii, _LEN_F038B127, STR )
+
+// US-ASCII
+#define _T_31A7285D_US_ASCII "\xDD\x21\xFD\xDC\xE5\x0C\xD7\x10"
+#define _LEN_31A7285D 8
+#define _DEC_31A7285D_US_ASCII( STR ) CStringDecoder::Decode( _T_31A7285D_US_ASCII, _LEN_31A7285D, STR )
+
+// x-cp20261
+#define _T_AA9AEAAB_x_cp20261 "\x00\xFB\x33\x0B\xC4\xF9\xC0\xFD\x01"
+#define _LEN_AA9AEAAB 9
+#define _DEC_AA9AEAAB_x_cp20261( STR ) CStringDecoder::Decode( _T_AA9AEAAB_x_cp20261, _LEN_AA9AEAAB, STR )
+
+// T.61
+#define _T_8F3ABD4C_T_61 "\xDC\xFC\x06\xCC"
+#define _LEN_8F3ABD4C 4
+#define _DEC_8F3ABD4C_T_61( STR ) CStringDecoder::Decode( _T_8F3ABD4C_T_61, _LEN_8F3ABD4C, STR )
+
+// x-cp20269
+#define _T_A4416299_x_cp20269 "\x00\xFB\x33\x0B\xC4\xF9\xC0\xFD\x09"
+#define _LEN_A4416299 9
+#define _DEC_A4416299_x_cp20269( STR ) CStringDecoder::Decode( _T_A4416299_x_cp20269, _LEN_A4416299, STR )
+
+// ISO-6937
+#define _T_34BE1FD4_ISO_6937 "\xD1\x21\x1F\xC8\xC8\x02\xC1\xFE"
+#define _LEN_34BE1FD4 8
+#define _DEC_34BE1FD4_ISO_6937( STR ) CStringDecoder::Decode( _T_34BE1FD4_ISO_6937, _LEN_34BE1FD4, STR )
+
+// IBM273
+#define _T_DAE08112_IBM273 "\xD1\x10\x1D\xCD\xC9\xFC"
+#define _LEN_DAE08112 6
+#define _DEC_DAE08112_IBM273( STR ) CStringDecoder::Decode( _T_DAE08112_IBM273, _LEN_DAE08112, STR )
+
+// IBM EBCDIC (Germany)
+#define _T_DE08332B_IBM_EBCDIC__Germany_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xD9\x00\x39\xF5\x2F\x3E\x14\xBB"
+#define _LEN_DE08332B 20
+#define _DEC_DE08332B_IBM_EBCDIC__Germany_( STR ) CStringDecoder::Decode( _T_DE08332B_IBM_EBCDIC__Germany_, _LEN_DE08332B, STR )
+
+// IBM277
+#define _T_DD8D450B_IBM277 "\xD1\x10\x1D\xCD\xC9\x00"
+#define _LEN_DD8D450B 6
+#define _DEC_DD8D450B_IBM277( STR ) CStringDecoder::Decode( _T_DD8D450B_IBM277, _LEN_DD8D450B, STR )
+
+// IBM EBCDIC (Denmark-Norway)
+#define _T_4DDB51A6_IBM_EBCDIC__Denmark_Norway_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xD6\x00\x35\xF5\x2F\x42\x06\xBF\x17\xFD\x39\x47\x29\x42\xF7"
+#define _LEN_4DDB51A6 27
+#define _DEC_4DDB51A6_IBM_EBCDIC__Denmark_Norway_( STR ) CStringDecoder::Decode( _T_4DDB51A6_IBM_EBCDIC__Denmark_Norway_, _LEN_4DDB51A6, STR )
+
+// IBM278
+#define _T_4D32589A_IBM278 "\xD1\x10\x1D\xCD\xC9\x01"
+#define _LEN_4D32589A 6
+#define _DEC_4D32589A_IBM278( STR ) CStringDecoder::Decode( _T_4D32589A_IBM278, _LEN_4D32589A, STR )
+
+// IBM EBCDIC (Finland-Sweden)
+#define _T_CD4C7193_IBM_EBCDIC__Finland_Sweden_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xD8\x04\x35\xF4\x2F\x3E\xFF\xBF\x1C\x05\x2C\x34\x2D\x37\xF7"
+#define _LEN_CD4C7193 27
+#define _DEC_CD4C7193_IBM_EBCDIC__Finland_Sweden_( STR ) CStringDecoder::Decode( _T_CD4C7193_IBM_EBCDIC__Finland_Sweden_, _LEN_CD4C7193, STR )
+
+// IBM280
+#define _T_C471CC67_IBM280 "\xD1\x10\x1D\xCD\xCA\xF9"
+#define _LEN_C471CC67 6
+#define _DEC_C471CC67_IBM280( STR ) CStringDecoder::Decode( _T_C471CC67_IBM280, _LEN_C471CC67, STR )
+
+// IBM EBCDIC (Italy)
+#define _T_E0308980_IBM_EBCDIC__Italy_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xDB\x0F\x28\xF4\x47\xF9"
+#define _LEN_E0308980 18
+#define _DEC_E0308980_IBM_EBCDIC__Italy_( STR ) CStringDecoder::Decode( _T_E0308980_IBM_EBCDIC__Italy_, _LEN_E0308980, STR )
+
+// IBM284
+#define _T_C31C087E_IBM284 "\xD1\x10\x1D\xCD\xCA\xFD"
+#define _LEN_C31C087E 6
+#define _DEC_C31C087E_IBM284( STR ) CStringDecoder::Decode( _T_C31C087E_IBM284, _LEN_C31C087E, STR )
+
+// IBM EBCDIC (Spain)
+#define _T_B4B548C0_IBM_EBCDIC__Spain_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xE5\x0B\x28\xF1\x3C\xF9"
+#define _LEN_B4B548C0 18
+#define _DEC_B4B548C0_IBM_EBCDIC__Spain_( STR ) CStringDecoder::Decode( _T_B4B548C0_IBM_EBCDIC__Spain_, _LEN_B4B548C0, STR )
+
+// IBM285
+#define _T_B41B38E8_IBM285 "\xD1\x10\x1D\xCD\xCA\xFE"
+#define _LEN_B41B38E8 6
+#define _DEC_B41B38E8_IBM285( STR ) CStringDecoder::Decode( _T_B41B38E8_IBM285, _LEN_B41B38E8, STR )
+
+// IBM EBCDIC (UK)
+#define _T_99D5E525_IBM_EBCDIC__UK_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xE7\xE6\xF0"
+#define _LEN_99D5E525 15
+#define _DEC_99D5E525_IBM_EBCDIC__UK_( STR ) CStringDecoder::Decode( _T_99D5E525_IBM_EBCDIC__UK_, _LEN_99D5E525, STR )
+
+// IBM290
+#define _T_DD6AFD26_IBM290 "\xD1\x10\x1D\xCD\xCB\xF9"
+#define _LEN_DD6AFD26 6
+#define _DEC_DD6AFD26_IBM290( STR ) CStringDecoder::Decode( _T_DD6AFD26_IBM290, _LEN_DD6AFD26, STR )
+
+// IBM EBCDIC (Japanese katakana)
+#define _T_E99C6585_IBM_EBCDIC__Japanese_katakana_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xDC\xFC\x37\xE9\x3C\x35\x0E\xF7\xE9\xF9\x28\x44\x29\x34\x2F\x00\xFC\xF0"
+#define _LEN_E99C6585 30
+#define _DEC_E99C6585_IBM_EBCDIC__Japanese_katakana_( STR ) CStringDecoder::Decode( _T_E99C6585_IBM_EBCDIC__Japanese_katakana_, _LEN_E99C6585, STR )
+
+// IBM297
+#define _T_430E6885_IBM297 "\xD1\x10\x1D\xCD\xCB\x00"
+#define _LEN_430E6885 6
+#define _DEC_430E6885_IBM297( STR ) CStringDecoder::Decode( _T_430E6885_IBM297, _LEN_430E6885, STR )
+
+// IBM EBCDIC (France)
+#define _T_BA8DB998_IBM_EBCDIC__France_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xD8\x0D\x28\xF6\x31\x35\xC4"
+#define _LEN_BA8DB998 19
+#define _DEC_BA8DB998_IBM_EBCDIC__France_( STR ) CStringDecoder::Decode( _T_BA8DB998_IBM_EBCDIC__France_, _LEN_BA8DB998, STR )
+
+// IBM420
+#define _T_3A13585F_IBM420 "\xD1\x10\x1D\xCF\xC4\xF9"
+#define _LEN_3A13585F 6
+#define _DEC_3A13585F_IBM420( STR ) CStringDecoder::Decode( _T_3A13585F_IBM420, _LEN_3A13585F, STR )
+
+// IBM EBCDIC (Arabic)
+#define _T_6E311AFE_IBM_EBCDIC__Arabic_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xD3\x0D\x28\xEA\x37\x33\xC4"
+#define _LEN_6E311AFE 19
+#define _DEC_6E311AFE_IBM_EBCDIC__Arabic_( STR ) CStringDecoder::Decode( _T_6E311AFE_IBM_EBCDIC__Arabic_, _LEN_6E311AFE, STR )
+
+// IBM423
+#define _T_A31A09E5_IBM423 "\xD1\x10\x1D\xCF\xC4\xFC"
+#define _LEN_A31A09E5 6
+#define _DEC_A31A09E5_IBM423( STR ) CStringDecoder::Decode( _T_A31A09E5_IBM423, _LEN_A31A09E5, STR )
+
+// IBM EBCDIC (Greek)
+#define _T_AD3DC15B_IBM_EBCDIC__Greek_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xD9\x0D\x2C\xED\x39\xF9"
+#define _LEN_AD3DC15B 18
+#define _DEC_AD3DC15B_IBM_EBCDIC__Greek_( STR ) CStringDecoder::Decode( _T_AD3DC15B_IBM_EBCDIC__Greek_, _LEN_AD3DC15B, STR )
+
+// IBM424
+#define _T_3D7E9C46_IBM424 "\xD1\x10\x1D\xCF\xC4\xFD"
+#define _LEN_3D7E9C46 6
+#define _DEC_3D7E9C46_IBM424( STR ) CStringDecoder::Decode( _T_3D7E9C46_IBM424, _LEN_3D7E9C46, STR )
+
+// IBM EBCDIC (Hebrew)
+#define _T_D5776E70_IBM_EBCDIC__Hebrew_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xDA\x00\x29\xFA\x33\x47\xC4"
+#define _LEN_D5776E70 19
+#define _DEC_D5776E70_IBM_EBCDIC__Hebrew_( STR ) CStringDecoder::Decode( _T_D5776E70_IBM_EBCDIC__Hebrew_, _LEN_D5776E70, STR )
+
+// x-EBCDIC-KoreanExtended
+#define _T_458E66C1_x_EBCDIC_KoreanExtended "\x00\xFB\x15\xDD\xD5\x0D\xD7\x0A\xFD\x13\x38\x40\xF7\xFC\x35\xCD\x46\x44\x00\x00\x2D\xF3\x2B"
+#define _LEN_458E66C1 23
+#define _DEC_458E66C1_x_EBCDIC_KoreanExtended( STR ) CStringDecoder::Decode( _T_458E66C1_x_EBCDIC_KoreanExtended, _LEN_458E66C1, STR )
+
+// IBM EBCDIC (Korean Extended)
+#define _T_478989FA_IBM_EBCDIC__Korean_Extended_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xDD\x0A\x39\xED\x2F\x3E\xBB\xD7\x41\x02\x2C\x3E\x2C\x2E\x32\xBB"
+#define _LEN_478989FA 28
+#define _DEC_478989FA_IBM_EBCDIC__Korean_Extended_( STR ) CStringDecoder::Decode( _T_478989FA_IBM_EBCDIC__Korean_Extended_, _LEN_478989FA, STR )
+
+// IBM-Thai
+#define _T_40D0118F_IBM_Thai "\xD1\x10\x1D\xC8\xE6\x31\xEF\x30"
+#define _LEN_40D0118F 8
+#define _DEC_40D0118F_IBM_Thai( STR ) CStringDecoder::Decode( _T_40D0118F_IBM_Thai, _LEN_40D0118F, STR )
+
+// IBM EBCDIC (Thai)
+#define _T_7EA9F0A0_IBM_EBCDIC__Thai_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xE6\x03\x28\xF1\xF7"
+#define _LEN_7EA9F0A0 17
+#define _DEC_7EA9F0A0_IBM_EBCDIC__Thai_( STR ) CStringDecoder::Decode( _T_7EA9F0A0_IBM_EBCDIC__Thai_, _LEN_7EA9F0A0, STR )
+
+// koi8-r
+#define _T_3AE4F8F8_koi8_r "\xF3\x3D\x39\xD3\xBF\x3B"
+#define _LEN_3AE4F8F8 6
+#define _DEC_3AE4F8F8_koi8_r( STR ) CStringDecoder::Decode( _T_3AE4F8F8_koi8_r, _LEN_3AE4F8F8, STR )
+
+// Cyrillic (KOI8-R)
+#define _T_6B91C6B9_Cyrillic__KOI8_R_ "\xCB\x47\x42\x04\xFE\x35\xF7\x2A\xF0\xF0\x14\x1D\xDB\xD3\xF4\xDA\xF7"
+#define _LEN_6B91C6B9 17
+#define _DEC_6B91C6B9_Cyrillic__KOI8_R_( STR ) CStringDecoder::Decode( _T_6B91C6B9_Cyrillic__KOI8_R_, _LEN_6B91C6B9, STR )
+
+// IBM871
+#define _T_397965E8_IBM871 "\xD1\x10\x1D\xD3\xC9\xFA"
+#define _LEN_397965E8 6
+#define _DEC_397965E8_IBM871( STR ) CStringDecoder::Decode( _T_397965E8_IBM871, _LEN_397965E8, STR )
+
+// IBM EBCDIC (Icelandic)
+#define _T_EB2888BD_IBM_EBCDIC__Icelandic_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xDB\xFE\x2C\xF4\x2F\x3E\xFF\xFB\x2C\xB7"
+#define _LEN_EB2888BD 22
+#define _DEC_EB2888BD_IBM_EBCDIC__Icelandic_( STR ) CStringDecoder::Decode( _T_EB2888BD_IBM_EBCDIC__Icelandic_, _LEN_EB2888BD, STR )
+
+// IBM880
+#define _T_C9E649B1_IBM880 "\xD1\x10\x1D\xD3\xCA\xF9"
+#define _LEN_C9E649B1 6
+#define _DEC_C9E649B1_IBM880( STR ) CStringDecoder::Decode( _T_C9E649B1_IBM880, _LEN_C9E649B1, STR )
+
+// IBM EBCDIC (Cyrillic Russian)
+#define _T_FF7D2C88_IBM_EBCDIC__Cyrillic_Russian_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xD5\x14\x39\xF1\x3A\x3C\x04\xF5\xE9\xE0\x3C\x43\x3B\x32\x2F\x00\xC4"
+#define _LEN_FF7D2C88 29
+#define _DEC_FF7D2C88_IBM_EBCDIC__Cyrillic_Russian_( STR ) CStringDecoder::Decode( _T_FF7D2C88_IBM_EBCDIC__Cyrillic_Russian_, _LEN_FF7D2C88, STR )
+
+// IBM905
+#define _T_70975D01_IBM905 "\xD1\x10\x1D\xD4\xC2\xFE"
+#define _LEN_70975D01 6
+#define _DEC_70975D01_IBM905( STR ) CStringDecoder::Decode( _T_70975D01_IBM905, _LEN_70975D01, STR )
+
+// IBM EBCDIC (Turkish)
+#define _T_46315751_IBM_EBCDIC__Turkish_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xE6\x10\x39\xF3\x37\x43\x03\xBB"
+#define _LEN_46315751 20
+#define _DEC_46315751_IBM_EBCDIC__Turkish_( STR ) CStringDecoder::Decode( _T_46315751_IBM_EBCDIC__Turkish_, _LEN_46315751, STR )
+
+// IBM00924
+#define _T_85D645B1_IBM00924 "\xD1\x10\x1D\xCB\xC2\x02\xC0\xFB"
+#define _LEN_85D645B1 8
+#define _DEC_85D645B1_IBM00924( STR ) CStringDecoder::Decode( _T_85D645B1_IBM00924, _LEN_85D645B1, STR )
+
+// EUC-JP
+#define _T_C66DAEDC_EUC_JP "\xCD\x23\x13\xC8\xDC\x19"
+#define _LEN_C66DAEDC 6
+#define _DEC_C66DAEDC_EUC_JP( STR ) CStringDecoder::Decode( _T_C66DAEDC_EUC_JP, _LEN_C66DAEDC, STR )
+
+// Japanese (JIS 0208-1990 and 0212-1990)
+#define _T_F6F8025C_Japanese__JIS_0208_1990_and_0212_1990_ "\xD2\x2F\x40\xFC\x00\x2E\x01\x2C\xF0\xF0\x13\x17\xE5\xBB\xF7\xBA\xFE\x08\xC8\xC3\x02\xC7\xF7\xF0\x29\x37\x32\xB2\xCB\xF9\xB9\x00\xFD\xCC\xCB\x02\xBE\xF0"
+#define _LEN_F6F8025C 38
+#define _DEC_F6F8025C_Japanese__JIS_0208_1990_and_0212_1990_( STR ) CStringDecoder::Decode( _T_F6F8025C_Japanese__JIS_0208_1990_and_0212_1990_, _LEN_F6F8025C, STR )
+
+// x-cp20936
+#define _T_45DC64AC_x_cp20936 "\x00\xFB\x33\x0B\xC4\xF9\xC7\xFA\x06"
+#define _LEN_45DC64AC 9
+#define _DEC_45DC64AC_x_cp20936( STR ) CStringDecoder::Decode( _T_45DC64AC_x_cp20936, _LEN_45DC64AC, STR )
+
+// Chinese Simplified (GB2312-80)
+#define _T_A39F12FD_Chinese_Simplified__GB2312_80_ "\xCB\x36\x39\x09\xF7\x3C\xF3\xE7\x23\x31\x36\x3E\xFE\x04\x2D\xF1\x33\x34\xBB\xBA\x10\xD0\xF9\x03\xF9\xFB\xFB\xCA\xCB\xF0"
+#define _LEN_A39F12FD 30
+#define _DEC_A39F12FD_Chinese_Simplified__GB2312_80_( STR ) CStringDecoder::Decode( _T_A39F12FD_Chinese_Simplified__GB2312_80_, _LEN_A39F12FD, STR )
+
+// x-cp20949
+#define _T_9A22EFFA_x_cp20949 "\x00\xFB\x33\x0B\xC4\xF9\xC7\xFB\x09"
+#define _LEN_9A22EFFA 9
+#define _DEC_9A22EFFA_x_cp20949( STR ) CStringDecoder::Decode( _T_9A22EFFA_x_cp20949, _LEN_9A22EFFA, STR )
+
+// Korean Wansung
+#define _T_4C791D7E_Korean_Wansung "\xD3\x3D\x42\x00\xF3\x37\xAE\x1E\x31\x36\x3C\x43\x00\x02"
+#define _LEN_4C791D7E 14
+#define _DEC_4C791D7E_Korean_Wansung( STR ) CStringDecoder::Decode( _T_4C791D7E_Korean_Wansung, _LEN_4C791D7E, STR )
+
+// cp1025
+#define _T_114FD69E_cp1025 "\xEB\x3E\x01\xCB\xC4\xFE"
+#define _LEN_114FD69E 6
+#define _DEC_114FD69E_cp1025( STR ) CStringDecoder::Decode( _T_114FD69E_cp1025, _LEN_114FD69E, STR )
+
+// IBM EBCDIC (Cyrillic Serbian-Bulgarian)
+#define _T_D3B6297E_IBM_EBCDIC__Cyrillic_Serbian_Bulgarian_ "\xD1\x10\x1D\xBB\xD7\x0B\xD1\x0B\x19\x0B\xE9\xF6\xD5\x14\x39\xF1\x3A\x3C\x04\xF5\xE9\xE1\x2C\x42\x2A\x32\x2F\x00\xC8\x09\xFD\x3A\x37\xFC\x04\x32\xEF\x35\xF9"
+#define _LEN_D3B6297E 39
+#define _DEC_D3B6297E_IBM_EBCDIC__Cyrillic_Serbian_Bulgarian_( STR ) CStringDecoder::Decode( _T_D3B6297E_IBM_EBCDIC__Cyrillic_Serbian_Bulgarian_, _LEN_D3B6297E, STR )
+
+// koi8-u
+#define _T_A4806D5B_koi8_u "\xF3\x3D\x39\xD3\xBF\x3E"
+#define _LEN_A4806D5B 6
+#define _DEC_A4806D5B_koi8_u( STR ) CStringDecoder::Decode( _T_A4806D5B_koi8_u, _LEN_A4806D5B, STR )
+
+// Cyrillic (KOI8-U)
+#define _T_24D0507E_Cyrillic__KOI8_U_ "\xCB\x47\x42\x04\xFE\x35\xF7\x2A\xF0\xF0\x14\x1D\xDB\xD3\xF4\xDD\xF7"
+#define _LEN_24D0507E 17
+#define _DEC_24D0507E_Cyrillic__KOI8_U_( STR ) CStringDecoder::Decode( _T_24D0507E_Cyrillic__KOI8_U_, _LEN_24D0507E, STR )
+
+// iso-8859-1
+#define _T_4434A849_iso_8859_1 "\xF1\x41\x3F\xC8\xCA\x01\xC3\x00\xFD\xF9"
+#define _LEN_4434A849 10
+#define _DEC_4434A849_iso_8859_1( STR ) CStringDecoder::Decode( _T_4434A849_iso_8859_1, _LEN_4434A849, STR )
+
+// Western European (ISO)
+#define _T_9670D1C6_Western_European__ISO_ "\xDF\x33\x43\x0F\xF7\x3B\xFC\xE7\x15\x3D\x3B\x3D\x02\x00\x28\xF6\xEE\xF8\xE4\xE5\x18\xB7"
+#define _LEN_9670D1C6 22
+#define _DEC_9670D1C6_Western_European__ISO_( STR ) CStringDecoder::Decode( _T_9670D1C6_Western_European__ISO_, _LEN_9670D1C6, STR )
+
+// iso-8859-2
+#define _T_DD3DF9F3_iso_8859_2 "\xF1\x41\x3F\xC8\xCA\x01\xC3\x00\xFD\xFA"
+#define _LEN_DD3DF9F3 10
+#define _DEC_DD3DF9F3_iso_8859_2( STR ) CStringDecoder::Decode( _T_DD3DF9F3_iso_8859_2, _LEN_DD3DF9F3, STR )
+
+// Central European (ISO)
+#define _T_395714E9_Central_European__ISO_ "\xCB\x33\x3E\x0F\x04\x2A\xFA\xE7\x15\x3D\x3B\x3D\x02\x00\x28\xF6\xEE\xF8\xE4\xE5\x18\xB7"
+#define _LEN_395714E9 22
+#define _DEC_395714E9_Central_European__ISO_( STR ) CStringDecoder::Decode( _T_395714E9_Central_European__ISO_, _LEN_395714E9, STR )
+
+// iso-8859-3
+#define _T_AA3AC965_iso_8859_3 "\xF1\x41\x3F\xC8\xCA\x01\xC3\x00\xFD\xFB"
+#define _LEN_AA3AC965 10
+#define _DEC_AA3AC965_iso_8859_3( STR ) CStringDecoder::Decode( _T_AA3AC965_iso_8859_3, _LEN_AA3AC965, STR )
+
+// Latin 3 (ISO)
+#define _T_4749EADA_Latin_3__ISO_ "\xD4\x2F\x44\x04\x00\xE9\xC1\xE7\xF8\x11\x1C\x1D\xBB"
+#define _LEN_4749EADA 13
+#define _DEC_4749EADA_Latin_3__ISO_( STR ) CStringDecoder::Decode( _T_4749EADA_Latin_3__ISO_, _LEN_4749EADA, STR )
+
+// iso-8859-4
+#define _T_345E5CC6_iso_8859_4 "\xF1\x41\x3F\xC8\xCA\x01\xC3\x00\xFD\xFC"
+#define _LEN_345E5CC6 10
+#define _DEC_345E5CC6_iso_8859_4( STR ) CStringDecoder::Decode( _T_345E5CC6_iso_8859_4, _LEN_345E5CC6, STR )
+
+// Baltic (ISO)
+#define _T_6E11103C_Baltic__ISO_ "\xCA\x2F\x3C\x0F\xFB\x2C\xAE\xEF\x19\x1B\x18\xF7"
+#define _LEN_6E11103C 12
+#define _DEC_6E11103C_Baltic__ISO_( STR ) CStringDecoder::Decode( _T_6E11103C_Baltic__ISO_, _LEN_6E11103C, STR )
+
+// iso-8859-5
+#define _T_43596C50_iso_8859_5 "\xF1\x41\x3F\xC8\xCA\x01\xC3\x00\xFD\xFD"
+#define _LEN_43596C50 10
+#define _DEC_43596C50_iso_8859_5( STR ) CStringDecoder::Decode( _T_43596C50_iso_8859_5, _LEN_43596C50, STR )
+
+// Cyrillic (ISO)
+#define _T_7D343CFA_Cyrillic__ISO_ "\xCB\x47\x42\x04\xFE\x35\xF7\x2A\xF0\xF0\x12\x21\xE1\xC4"
+#define _LEN_7D343CFA 14
+#define _DEC_7D343CFA_Cyrillic__ISO_( STR ) CStringDecoder::Decode( _T_7D343CFA_Cyrillic__ISO_, _LEN_7D343CFA, STR )
+
+// iso-8859-6
+#define _T_DA503DEA_iso_8859_6 "\xF1\x41\x3F\xC8\xCA\x01\xC3\x00\xFD\xFE"
+#define _LEN_DA503DEA 10
+#define _DEC_DA503DEA_iso_8859_6( STR ) CStringDecoder::Decode( _T_DA503DEA_iso_8859_6, _LEN_DA503DEA, STR )
+
+// Arabic (ISO)
+#define _T_04BFD04D_Arabic__ISO_ "\xC9\x40\x31\xFD\xFB\x2C\xAE\xEF\x19\x1B\x18\xF7"
+#define _LEN_04BFD04D 12
+#define _DEC_04BFD04D_Arabic__ISO_( STR ) CStringDecoder::Decode( _T_04BFD04D_Arabic__ISO_, _LEN_04BFD04D, STR )
+
+// iso-8859-7
+#define _T_AD570D7C_iso_8859_7 "\xF1\x41\x3F\xC8\xCA\x01\xC3\x00\xFD\xFF"
+#define _LEN_AD570D7C 10
+#define _DEC_AD570D7C_iso_8859_7( STR ) CStringDecoder::Decode( _T_AD570D7C_iso_8859_7, _LEN_AD570D7C, STR )
+
+// Greek (ISO)
+#define _T_2AAEB705_Greek__ISO_ "\xCF\x40\x35\x00\xFD\xE9\xB6\x10\x23\x17\xF2"
+#define _LEN_2AAEB705 11
+#define _DEC_2AAEB705_Greek__ISO_( STR ) CStringDecoder::Decode( _T_2AAEB705_Greek__ISO_, _LEN_2AAEB705, STR )
+
+// iso-8859-8
+#define _T_3DE810ED_iso_8859_8 "\xF1\x41\x3F\xC8\xCA\x01\xC3\x00\xFD\x00"
+#define _LEN_3DE810ED 10
+#define _DEC_3DE810ED_iso_8859_8( STR ) CStringDecoder::Decode( _T_3DE810ED_iso_8859_8, _LEN_3DE810ED, STR )
+
+// Hebrew (ISO-Visual)
+#define _T_E22B30D6_Hebrew__ISO_Visual_ "\xD0\x33\x32\x0D\xF7\x40\xAE\xEF\x19\x1B\x18\xFB\xE8\x04\x3A\xFD\x2F\x3C\xC4"
+#define _LEN_E22B30D6 19
+#define _DEC_E22B30D6_Hebrew__ISO_Visual_( STR ) CStringDecoder::Decode( _T_E22B30D6_Hebrew__ISO_Visual_, _LEN_E22B30D6, STR )
+
+// iso-8859-9
+#define _T_4AEF207B_iso_8859_9 "\xF1\x41\x3F\xC8\xCA\x01\xC3\x00\xFD\x01"
+#define _LEN_4AEF207B 10
+#define _DEC_4AEF207B_iso_8859_9( STR ) CStringDecoder::Decode( _T_4AEF207B_iso_8859_9, _LEN_4AEF207B, STR )
+
+// Turkish (ISO)
+#define _T_D4097731_Turkish__ISO_ "\xDC\x43\x42\x06\xFB\x3C\xF6\xE7\xF8\x11\x1C\x1D\xBB"
+#define _LEN_D4097731 13
+#define _DEC_D4097731_Turkish__ISO_( STR ) CStringDecoder::Decode( _T_D4097731_Turkish__ISO_, _LEN_D4097731, STR )
+
+// iso-8859-13
+#define _T_62964307_iso_8859_13 "\xF1\x41\x3F\xC8\xCA\x01\xC3\x00\xFD\xF9\xFC"
+#define _LEN_62964307 11
+#define _DEC_62964307_iso_8859_13( STR ) CStringDecoder::Decode( _T_62964307_iso_8859_13, _LEN_62964307, STR )
+
+// Estonian (ISO)
+#define _T_447191CE_Estonian__ISO_ "\xCD\x41\x44\x0A\x00\x32\xEF\x35\xF0\xF0\x12\x21\xE1\xC4"
+#define _LEN_447191CE 14
+#define _DEC_447191CE_Estonian__ISO_( STR ) CStringDecoder::Decode( _T_447191CE_Estonian__ISO_, _LEN_447191CE, STR )
+
+// iso-8859-15
+#define _T_8BF5E632_iso_8859_15 "\xF1\x41\x3F\xC8\xCA\x01\xC3\x00\xFD\xF9\xFE"
+#define _LEN_8BF5E632 11
+#define _DEC_8BF5E632_iso_8859_15( STR ) CStringDecoder::Decode( _T_8BF5E632_iso_8859_15, _LEN_8BF5E632, STR )
+
+// Latin 9 (ISO)
+#define _T_E339B594_Latin_9__ISO_ "\xD4\x2F\x44\x04\x00\xE9\xC7\xE7\xF8\x11\x1C\x1D\xBB"
+#define _LEN_E339B594 13
+#define _DEC_E339B594_Latin_9__ISO_( STR ) CStringDecoder::Decode( _T_E339B594_Latin_9__ISO_, _LEN_E339B594, STR )
+
+// x-Europa
+#define _T_4D6D3542_x_Europa "\x00\xFB\x15\x10\x04\x38\xFE\x28"
+#define _LEN_4D6D3542 8
+#define _DEC_4D6D3542_x_Europa( STR ) CStringDecoder::Decode( _T_4D6D3542_x_Europa, _LEN_4D6D3542, STR )
+
+// Europa
+#define _T_485299F1_Europa "\xCD\x43\x42\x0A\x02\x2A"
+#define _LEN_485299F1 6
+#define _DEC_485299F1_Europa( STR ) CStringDecoder::Decode( _T_485299F1_Europa, _LEN_485299F1, STR )
+
+// iso-8859-8-i
+#define _T_A3FA31C1_iso_8859_8_i "\xF1\x41\x3F\xC8\xCA\x01\xC3\x00\xFD\x00\xF6\x37"
+#define _LEN_A3FA31C1 12
+#define _DEC_A3FA31C1_iso_8859_8_i( STR ) CStringDecoder::Decode( _T_A3FA31C1_iso_8859_8_i, _LEN_A3FA31C1, STR )
+
+// Hebrew (ISO-Logical)
+#define _T_63C1E97F_Hebrew__ISO_Logical_ "\xD0\x33\x32\x0D\xF7\x40\xAE\xEF\x19\x1B\x18\xFB\xDE\x0A\x2E\xF1\x31\x31\x07\xBB"
+#define _LEN_63C1E97F 20
+#define _DEC_63C1E97F_Hebrew__ISO_Logical_( STR ) CStringDecoder::Decode( _T_63C1E97F_Hebrew__ISO_Logical_, _LEN_63C1E97F, STR )
+
+// iso-2022-jp
+#define _T_F90E5180_iso_2022_jp "\xF1\x41\x3F\xC8\xC4\xF9\xC0\xF9\xFD\x32\x39"
+#define _LEN_F90E5180 11
+#define _DEC_F90E5180_iso_2022_jp( STR ) CStringDecoder::Decode( _T_F90E5180_iso_2022_jp, _LEN_F90E5180, STR )
+
+// Japanese (JIS)
+#define _T_A810637D_Japanese__JIS_ "\xD2\x2F\x40\xFC\x00\x2E\x01\x2C\xF0\xF0\x13\x17\xE5\xC4"
+#define _LEN_A810637D 14
+#define _DEC_A810637D_Japanese__JIS_( STR ) CStringDecoder::Decode( _T_A810637D_Japanese__JIS_, _LEN_A810637D, STR )
+
+// csISO2022JP
+#define _T_50B7D228_csISO2022JP "\xEB\x41\x19\xEE\xE1\xFB\xBE\xF9\x02\x12\x19"
+#define _LEN_50B7D228 11
+#define _DEC_50B7D228_csISO2022JP( STR ) CStringDecoder::Decode( _T_50B7D228_csISO2022JP, _LEN_50B7D228, STR )
+
+// Japanese (JIS-Allow 1 byte Kana)
+#define _T_DA96AADA_Japanese__JIS_Allow_1_byte_Kana_ "\xD2\x2F\x40\xFC\x00\x2E\x01\x2C\xF0\xF0\x13\x17\xE5\xC8\x08\xF4\x3A\x3F\x12\xB2\xFA\xAE\x29\x49\x3C\x2E\xEE\xDD\xFC\x35\xE9\xF7"
+#define _LEN_DA96AADA 32
+#define _DEC_DA96AADA_Japanese__JIS_Allow_1_byte_Kana_( STR ) CStringDecoder::Decode( _T_DA96AADA_Japanese__JIS_Allow_1_byte_Kana_, _LEN_DA96AADA, STR )
+
+// Japanese (JIS-Allow 1 byte Kana - SO/SI)
+#define _T_BD28A51B_Japanese__JIS_Allow_1_byte_Kana___SO_SI_ "\xD2\x2F\x40\xFC\x00\x2E\x01\x2C\xF0\xF0\x13\x17\xE5\xC8\x08\xF4\x3A\x3F\x12\xB2\xFA\xAE\x29\x49\x3C\x2E\xEE\xDD\xFC\x35\xE9\xEE\xFD\xBB\xE5\x18\xBD\x1A\x19\xF1"
+#define _LEN_BD28A51B 40
+#define _DEC_BD28A51B_Japanese__JIS_Allow_1_byte_Kana___SO_SI_( STR ) CStringDecoder::Decode( _T_BD28A51B_Japanese__JIS_Allow_1_byte_Kana___SO_SI_, _LEN_BD28A51B, STR )
+
+// iso-2022-kr
+#define _T_0E1B01ED_iso_2022_kr "\xF1\x41\x3F\xC8\xC4\xF9\xC0\xF9\xFD\x33\x3B"
+#define _LEN_0E1B01ED 11
+#define _DEC_0E1B01ED_iso_2022_kr( STR ) CStringDecoder::Decode( _T_0E1B01ED_iso_2022_kr, _LEN_0E1B01ED, STR )
+
+// Korean (ISO)
+#define _T_91209CB7_Korean__ISO_ "\xD3\x3D\x42\x00\xF3\x37\xAE\xEF\x19\x1B\x18\xF7"
+#define _LEN_91209CB7 12
+#define _DEC_91209CB7_Korean__ISO_( STR ) CStringDecoder::Decode( _T_91209CB7_Korean__ISO_, _LEN_91209CB7, STR )
+
+// x-cp50227
+#define _T_95B5568A_x_cp50227 "\x00\xFB\x33\x0B\xC7\xF9\xC0\xF9\x07"
+#define _LEN_95B5568A 9
+#define _DEC_95B5568A_x_cp50227( STR ) CStringDecoder::Decode( _T_95B5568A_x_cp50227, _LEN_95B5568A, STR )
+
+// Chinese Simplified (ISO-2022)
+#define _T_849FD716_Chinese_Simplified__ISO_2022_ "\xCB\x36\x39\x09\xF7\x3C\xF3\xE7\x23\x31\x36\x3E\xFE\x04\x2D\xF1\x33\x34\xBB\xBA\x12\xE1\x16\xFD\xFA\xF9\x00\xC4\xC4"
+#define _LEN_849FD716 29
+#define _DEC_849FD716_Chinese_Simplified__ISO_2022_( STR ) CStringDecoder::Decode( _T_849FD716_Chinese_Simplified__ISO_2022_, _LEN_849FD716, STR )
+
+// euc-jp
+#define _T_0ED82FBA_euc_jp "\xED\x43\x33\xC8\xFC\x39"
+#define _LEN_0ED82FBA 6
+#define _DEC_0ED82FBA_euc_jp( STR ) CStringDecoder::Decode( _T_0ED82FBA_euc_jp, _LEN_0ED82FBA, STR )
+
+// Japanese (EUC)
+#define _T_AF8D3B6E_Japanese__EUC_ "\xD2\x2F\x40\xFC\x00\x2E\x01\x2C\xF0\xF0\x0E\x23\xD5\xC4"
+#define _LEN_AF8D3B6E 14
+#define _DEC_AF8D3B6E_Japanese__EUC_( STR ) CStringDecoder::Decode( _T_AF8D3B6E_Japanese__EUC_, _LEN_AF8D3B6E, STR )
+
+// EUC-CN
+#define _T_EDA028F6_EUC_CN "\xCD\x23\x13\xC8\xD5\x17"
+#define _LEN_EDA028F6 6
+#define _DEC_EDA028F6_EUC_CN( STR ) CStringDecoder::Decode( _T_EDA028F6_EUC_CN, _LEN_EDA028F6, STR )
+
+// Chinese Simplified (EUC)
+#define _T_440FC48A_Chinese_Simplified__EUC_ "\xCB\x36\x39\x09\xF7\x3C\xF3\xE7\x23\x31\x36\x3E\xFE\x04\x2D\xF1\x33\x34\xBB\xBA\x0E\xE3\x0A\xF9"
+#define _LEN_440FC48A 24
+#define _DEC_440FC48A_Chinese_Simplified__EUC_( STR ) CStringDecoder::Decode( _T_440FC48A_Chinese_Simplified__EUC_, _LEN_440FC48A, STR )
+
+// euc-kr
+#define _T_F9CD7FD7_euc_kr "\xED\x43\x33\xC8\xFD\x3B"
+#define _LEN_F9CD7FD7 6
+#define _DEC_F9CD7FD7_euc_kr( STR ) CStringDecoder::Decode( _T_F9CD7FD7_euc_kr, _LEN_F9CD7FD7, STR )
+
+// Korean (EUC)
+#define _T_73CE10B1_Korean__EUC_ "\xD3\x3D\x42\x00\xF3\x37\xAE\xEF\x15\x1D\x0C\xF7"
+#define _LEN_73CE10B1 12
+#define _DEC_73CE10B1_Korean__EUC_( STR ) CStringDecoder::Decode( _T_73CE10B1_Korean__EUC_, _LEN_73CE10B1, STR )
+
+// hz-gb-2312
+#define _T_66BD1860_hz_gb_2312 "\xF0\x48\xFD\x02\xF4\xF6\xC0\xFA\x01\xFA"
+#define _LEN_66BD1860 10
+#define _DEC_66BD1860_hz_gb_2312( STR ) CStringDecoder::Decode( _T_66BD1860_hz_gb_2312, _LEN_66BD1860, STR )
+
+// Chinese Simplified (HZ)
+#define _T_26A48EB9_Chinese_Simplified__HZ_ "\xCB\x36\x39\x09\xF7\x3C\xF3\xE7\x23\x31\x36\x3E\xFE\x04\x2D\xF1\x33\x34\xBB\xBA\x11\xE8\xF0"
+#define _LEN_26A48EB9 23
+#define _DEC_26A48EB9_Chinese_Simplified__HZ_( STR ) CStringDecoder::Decode( _T_26A48EB9_Chinese_Simplified__HZ_, _LEN_26A48EB9, STR )
+
+// GB18030
+#define _T_0157CE9A_GB18030 "\xCF\x10\x01\xD3\xC2\xFC\xBE"
+#define _LEN_0157CE9A 7
+#define _DEC_0157CE9A_GB18030( STR ) CStringDecoder::Decode( _T_0157CE9A_GB18030, _LEN_0157CE9A, STR )
+
+// Chinese Simplified (GB18030)
+#define _T_73EB94AB_Chinese_Simplified__GB18030_ "\xCB\x36\x39\x09\xF7\x3C\xF3\xE7\x23\x31\x36\x3E\xFE\x04\x2D\xF1\x33\x34\xBB\xBA\x10\xD0\xF8\x08\xF8\xFC\xFE\xBB"
+#define _LEN_73EB94AB 28
+#define _DEC_73EB94AB_Chinese_Simplified__GB18030_( STR ) CStringDecoder::Decode( _T_73EB94AB_Chinese_Simplified__GB18030_, _LEN_73EB94AB, STR )
+
+// x-iscii-de
+#define _T_373E874E_x_iscii_de "\x00\xFB\x39\x0E\xF5\x32\xF7\xF4\x34\x2D"
+#define _LEN_373E874E 10
+#define _DEC_373E874E_x_iscii_de( STR ) CStringDecoder::Decode( _T_373E874E_x_iscii_de, _LEN_373E874E, STR )
+
+// ISCII Devanagari
+#define _T_3AB85660_ISCII_Devanagari "\xD1\x21\x13\xE4\xDB\xE9\xD2\x2C\x46\x29\x37\x2F\xF9\xFC\x39\xF1"
+#define _LEN_3AB85660 16
+#define _DEC_3AB85660_ISCII_Devanagari( STR ) CStringDecoder::Decode( _T_3AB85660_ISCII_Devanagari, _LEN_3AB85660, STR )
+
+// x-iscii-be
+#define _T_616420C8_x_iscii_be "\x00\xFB\x39\x0E\xF5\x32\xF7\xF4\x32\x2D"
+#define _LEN_616420C8 10
+#define _DEC_616420C8_x_iscii_be( STR ) CStringDecoder::Decode( _T_616420C8_x_iscii_be, _LEN_616420C8, STR )
+
+// ISCII Bengali
+#define _T_67A671DC_ISCII_Bengali "\xD1\x21\x13\xE4\xDB\xE9\xD0\x2C\x3E\x2F\x2A\x3A\xFB"
+#define _LEN_67A671DC 13
+#define _DEC_67A671DC_ISCII_Bengali( STR ) CStringDecoder::Decode( _T_67A671DC_ISCII_Bengali, _LEN_67A671DC, STR )
+
+// x-iscii-ta
+#define _T_7A915106_x_iscii_ta "\x00\xFB\x39\x0E\xF5\x32\xF7\xF4\x44\x29"
+#define _LEN_7A915106 10
+#define _DEC_7A915106_x_iscii_ta( STR ) CStringDecoder::Decode( _T_7A915106_x_iscii_ta, _LEN_7A915106, STR )
+
+// ISCII Tamil
+#define _T_6D6E24D6_ISCII_Tamil "\xD1\x21\x13\xE4\xDB\xE9\xE2\x28\x3D\x31\x35"
+#define _LEN_6D6E24D6 11
+#define _DEC_6D6E24D6_ISCII_Tamil( STR ) CStringDecoder::Decode( _T_6D6E24D6_ISCII_Tamil, _LEN_6D6E24D6, STR )
+
+// x-iscii-te
+#define _T_7DFC951F_x_iscii_te "\x00\xFB\x39\x0E\xF5\x32\xF7\xF4\x44\x2D"
+#define _LEN_7DFC951F 10
+#define _DEC_7DFC951F_x_iscii_te( STR ) CStringDecoder::Decode( _T_7DFC951F_x_iscii_te, _LEN_7DFC951F, STR )
+
+// ISCII Telugu
+#define _T_26443181_ISCII_Telugu "\xD1\x21\x13\xE4\xDB\xE9\xE2\x2C\x3C\x3D\x30\x43"
+#define _LEN_26443181 12
+#define _DEC_26443181_ISCII_Telugu( STR ) CStringDecoder::Decode( _T_26443181_ISCII_Telugu, _LEN_26443181, STR )
+
+// x-iscii-as
+#define _T_BE9DC65A_x_iscii_as "\x00\xFB\x39\x0E\xF5\x32\xF7\xF4\x31\x3B"
+#define _LEN_BE9DC65A 10
+#define _DEC_BE9DC65A_x_iscii_as( STR ) CStringDecoder::Decode( _T_BE9DC65A_x_iscii_as, _LEN_BE9DC65A, STR )
+
+// ISCII Assamese
+#define _T_2F7B76CA_ISCII_Assamese "\xD1\x21\x13\xE4\xDB\xE9\xCF\x3A\x43\x29\x36\x33\x05\x00"
+#define _LEN_2F7B76CA 14
+#define _DEC_2F7B76CA_ISCII_Assamese( STR ) CStringDecoder::Decode( _T_2F7B76CA_ISCII_Assamese, _LEN_2F7B76CA, STR )
+
+// x-iscii-or
+#define _T_5719DB42_x_iscii_or "\x00\xFB\x39\x0E\xF5\x32\xF7\xF4\x3F\x3A"
+#define _LEN_5719DB42 10
+#define _DEC_5719DB42_x_iscii_or( STR ) CStringDecoder::Decode( _T_5719DB42_x_iscii_or, _LEN_5719DB42, STR )
+
+// ISCII Oriya
+#define _T_0B88BC04_ISCII_Oriya "\xD1\x21\x13\xE4\xDB\xE9\xDD\x39\x39\x41\x2A"
+#define _LEN_0B88BC04 11
+#define _DEC_0B88BC04_ISCII_Oriya( STR ) CStringDecoder::Decode( _T_0B88BC04_ISCII_Oriya, _LEN_0B88BC04, STR )
+
+// x-iscii-ka
+#define _T_B7CB5F98_x_iscii_ka "\x00\xFB\x39\x0E\xF5\x32\xF7\xF4\x3B\x29"
+#define _LEN_B7CB5F98 10
+#define _DEC_B7CB5F98_x_iscii_ka( STR ) CStringDecoder::Decode( _T_B7CB5F98_x_iscii_ka, _LEN_B7CB5F98, STR )
+
+// ISCII Kannada
+#define _T_D2A53BA9_ISCII_Kannada "\xD1\x21\x13\xE4\xDB\xE9\xD9\x28\x3E\x36\x2A\x32\xF3"
+#define _LEN_D2A53BA9 13
+#define _DEC_D2A53BA9_ISCII_Kannada( STR ) CStringDecoder::Decode( _T_D2A53BA9_ISCII_Kannada, _LEN_D2A53BA9, STR )
+
+// x-iscii-ma
+#define _T_E191F81E_x_iscii_ma "\x00\xFB\x39\x0E\xF5\x32\xF7\xF4\x3D\x29"
+#define _LEN_E191F81E 10
+#define _DEC_E191F81E_x_iscii_ma( STR ) CStringDecoder::Decode( _T_E191F81E_x_iscii_ma, _LEN_E191F81E, STR )
+
+// ISCII Malayalam
+#define _T_BAB70C89_ISCII_Malayalam "\xD1\x21\x13\xE4\xDB\xE9\xDB\x28\x3C\x29\x42\x2F\xFE\xFC\x34"
+#define _LEN_BAB70C89 15
+#define _DEC_BAB70C89_ISCII_Malayalam( STR ) CStringDecoder::Decode( _T_BAB70C89_ISCII_Malayalam, _LEN_BAB70C89, STR )
+
+// x-iscii-gu
+#define _T_01A4C4E9_x_iscii_gu "\x00\xFB\x39\x0E\xF5\x32\xF7\xF4\x37\x3D"
+#define _LEN_01A4C4E9 10
+#define _DEC_01A4C4E9_x_iscii_gu( STR ) CStringDecoder::Decode( _T_01A4C4E9_x_iscii_gu, _LEN_01A4C4E9, STR )
+
+// ISCII Gujarati
+#define _T_E7992CDD_ISCII_Gujarati "\xD1\x21\x13\xE4\xDB\xE9\xD5\x3C\x3A\x29\x3B\x2F\x06\x04"
+#define _LEN_E7992CDD 14
+#define _DEC_E7992CDD_ISCII_Gujarati( STR ) CStringDecoder::Decode( _T_E7992CDD_ISCII_Gujarati, _LEN_E7992CDD, STR )
+
+// x-iscii-pa
+#define _T_1EFD9402_x_iscii_pa "\x00\xFB\x39\x0E\xF5\x32\xF7\xF4\x40\x29"
+#define _LEN_1EFD9402 10
+#define _DEC_1EFD9402_x_iscii_pa( STR ) CStringDecoder::Decode( _T_1EFD9402_x_iscii_pa, _LEN_1EFD9402, STR )
+
+// ISCII Punjabi
+#define _T_F8D80BF3_ISCII_Punjabi "\xD1\x21\x13\xE4\xDB\xE9\xDE\x3C\x3E\x32\x2A\x30\xFB"
+#define _LEN_F8D80BF3 13
+#define _DEC_F8D80BF3_ISCII_Punjabi( STR ) CStringDecoder::Decode( _T_F8D80BF3_ISCII_Punjabi, _LEN_F8D80BF3, STR )
+
+// utf-7
+#define _T_C780E71B_utf_7 "\xFD\x42\x36\xC8\xC9"
+#define _LEN_C780E71B 5
+#define _DEC_C780E71B_utf_7( STR ) CStringDecoder::Decode( _T_C780E71B_utf_7, _LEN_C780E71B, STR )
+
+// Unicode (UTF-7)
+#define _T_3E5EE04E_Unicode__UTF_7_ "\xDD\x3C\x39\xFE\x01\x2D\xF3\xE7\xF8\x1D\x1D\x14\xBF\xD2\xF0"
+#define _LEN_3E5EE04E 15
+#define _DEC_3E5EE04E_Unicode__UTF_7_( STR ) CStringDecoder::Decode( _T_3E5EE04E_Unicode__UTF_7_, _LEN_3E5EE04E, STR )
+
+// utf-8
+#define _T_573FFA8A_utf_8 "\xFD\x42\x36\xC8\xCA"
+#define _LEN_573FFA8A 5
+#define _DEC_573FFA8A_utf_8( STR ) CStringDecoder::Decode( _T_573FFA8A_utf_8, _LEN_573FFA8A, STR )
+
+// Unicode (UTF-8)
+#define _T_B9C6FC81_Unicode__UTF_8_ "\xDD\x3C\x39\xFE\x01\x2D\xF3\xE7\xF8\x1D\x1D\x14\xBF\xD3\xF0"
+#define _LEN_B9C6FC81 15
+#define _DEC_B9C6FC81_Unicode__UTF_8_( STR ) CStringDecoder::Decode( _T_B9C6FC81_Unicode__UTF_8_, _LEN_B9C6FC81, STR )
+

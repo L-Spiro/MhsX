@@ -79,10 +79,10 @@ namespace mx {
 		VOID						AddResourceTree( CTreeViewItem * _ptviParent, const mx::CPeObject &_poPeObject );
 
 		// Decodes the resource tree.
-		VOID						AddResourceTree( CTreeViewItem * _ptviParent, const MX_IMAGE_RESOURCE_DIRECTORY * _pirdDesc, uint32_t _uiSectionIndex, const mx::CPeObject &_poPeObject );
+		VOID						AddResourceTree( CTreeViewItem * _ptviParent, const MX_IMAGE_RESOURCE_DIRECTORY * _pirdDesc, uint32_t _uiSectionIndex, const mx::CPeObject &_poPeObject, uint32_t _uiLevel );
 
 		// Decodes the resource tree.
-		VOID						AddResourceTree( CTreeViewItem * _ptviParent, const MX_IMAGE_RESOURCE_DIRECTORY_ENTRY * _pirdeEntry, uint32_t _uiSectionIndex, const mx::CPeObject &_poPeObject );
+		VOID						AddResourceTree( CTreeViewItem * _ptviParent, const MX_IMAGE_RESOURCE_DIRECTORY_ENTRY * _pirdeEntry, uint32_t _uiSectionIndex, const mx::CPeObject &_poPeObject, uint32_t _uiLevel );
 
 	};
 

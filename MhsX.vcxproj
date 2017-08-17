@@ -211,6 +211,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Src\CodePages\MXCodePages.cpp" />
     <ClCompile Include="Src\ExpEval\MXExpEvalDockWidget.cpp" />
     <ClCompile Include="Src\Files\MXFile.cpp" />
     <ClCompile Include="Src\Files\MXFileMap.cpp" />
@@ -274,6 +275,7 @@
     <ClInclude Include="GeneratedFiles\ui_MXMhsX.h" />
     <ClInclude Include="GeneratedFiles\ui_MXPet.h" />
     <ClInclude Include="GeneratedFiles\ui_MXPew.h" />
+    <ClInclude Include="Src\CodePages\MXCodePages.h" />
     <ClInclude Include="Src\PE\MXPeObject.h" />
     <ClInclude Include="Src\PE\MXPeStructs.h" />
     <ClInclude Include="Src\Utilities\MXUtilities.h" />

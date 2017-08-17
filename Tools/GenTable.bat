@@ -1,0 +1,1 @@
+MhsXStrings.exe "MX_" "TableSrc.txt" "TableDest.txt" Table
