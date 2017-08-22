@@ -127,6 +127,7 @@ namespace mx {
 			if ( m_vImportDesc.size() > uiMax ) { return FALSE; }
 		}
 		
+		// Resources.
 		if ( HasResourceDesc() ) {
 			uint32_t uiOffset;
 			uint32_t uiIndex = RelocAddrToRelocIndexAndOffset( m_vDataDirectories[MX_IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress, uiOffset );
@@ -143,10 +144,29 @@ namespace mx {
 			}
 			*/
 			m_uiResourceOffset = static_cast<uint32_t>(m_vSectionData[uiIndex].ui64FileOffset + uiOffset);
-
-			
 		}
-		//
+		
+		// Relocations.
+		// m_uiRelocOffset
+		if ( HasRelocDesc() ) {
+			uint32_t uiOffset;
+			uint32_t uiIndex = RelocAddrToRelocIndexAndOffset( m_vDataDirectories[MX_IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress, uiOffset );
+			if ( uiIndex == MX_ERROR ) { return FALSE; }
+			
+			m_uiRelocOffset = static_cast<uint32_t>(m_vSectionData[uiIndex].ui64FileOffset + uiOffset);
+			while ( uiOffset < m_vDataDirectories[MX_IMAGE_DIRECTORY_ENTRY_BASERELOC].Size ) {
+				MX_BASE_RELOC brReloc;
+				brReloc.ui64FileOffset = m_vSectionData[uiIndex].ui64FileOffset + uiOffset;
+				
+				brReloc.pibrReloc = reinterpret_cast<MX_IMAGE_BASE_RELOCATION *>(&m_vSectionData[uiIndex].vData[uiOffset]);
+				brReloc.uiTotal = (brReloc.pibrReloc->SizeOfBlock - sizeof( MX_IMAGE_BASE_RELOCATION )) / sizeof( uint16_t );
+				brReloc.puiOffsets = reinterpret_cast<uint16_t *>(reinterpret_cast<uint8_t *>(brReloc.pibrReloc) + sizeof( MX_IMAGE_BASE_RELOCATION ));
+	
+				m_vBaseRelocations.push_back( brReloc );
+
+				uiOffset += sizeof( MX_IMAGE_BASE_RELOCATION ) + (sizeof( uint16_t ) * brReloc.uiTotal);
+			}
+		}
 
 		//for ( uint32_t I = 0; I < m_cwpWin32.NumberOfRvaAndSizes
 		return TRUE;

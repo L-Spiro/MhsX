@@ -1,0 +1,1 @@
+MhsXStrings.exe "TableSrc.txt" "TableDest.txt" NTable

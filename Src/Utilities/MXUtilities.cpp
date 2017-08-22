@@ -491,6 +491,42 @@ namespace mx {
 		return _sString.c_str();
 	}
 
+	// Creates a IMAGE_REL_BASED_* string.
+	const CHAR * CUtilities::PeRelocBaseToString( uint32_t _uiVal, std::string &_sString ) {
+		struct {
+			uint32_t ui32Type;
+			const CHAR * pcName;
+			uint32_t ui32StrLen;
+		}
+		static const aTable[] = {
+			{ MX_IMAGE_REL_BASED_ABSOLUTE, _T_60ECEA1A_ABSOLUTE, _LEN_60ECEA1A }, // 0
+			{ MX_IMAGE_REL_BASED_HIGH, _T_C79009E1_HIGH, _LEN_C79009E1 }, // 1
+			{ MX_IMAGE_REL_BASED_LOW, _T_042F3A2B_LOW, _LEN_042F3A2B }, // 2
+			{ MX_IMAGE_REL_BASED_HIGHLOW, _T_8DC2A876_HIGHLOW, _LEN_8DC2A876 }, // 3
+			{ MX_IMAGE_REL_BASED_HIGHADJ, _T_05E88E37_HIGHADJ, _LEN_05E88E37 }, // 4
+			{ MX_IMAGE_REL_BASED_MACHINE_SPECIFIC_5, _T_2940DFA0_MACHINE_SPECIFIC_5, _LEN_2940DFA0 }, // 5
+			{ MX_IMAGE_REL_BASED_RESERVED, _T_8B91778E_RESERVED, _LEN_8B91778E }, // 6
+			{ MX_IMAGE_REL_BASED_MACHINE_SPECIFIC_7, _T_C74EBE8C_MACHINE_SPECIFIC_7, _LEN_C74EBE8C }, // 7
+			{ MX_IMAGE_REL_BASED_MACHINE_SPECIFIC_8, _T_57F1A31D_MACHINE_SPECIFIC_8, _LEN_57F1A31D }, // 8
+			{ MX_IMAGE_REL_BASED_MACHINE_SPECIFIC_9, _T_20F6938B_MACHINE_SPECIFIC_9, _LEN_20F6938B }, // 9
+			{ MX_IMAGE_REL_BASED_DIR64, _T_4ADD813D_DIR64, _LEN_4ADD813D }, // 10
+		};
+		for ( size_t I = 0; I < sizeof( aTable ) / sizeof( aTable[0] ); ++I ) {
+			if ( aTable[I].ui32Type == _uiVal ) {
+				CHAR szBuffer[_T_MAX_LEN];
+				if ( !Options.bShortenEnumNames ) {
+					CStringDecoder::Decode( _T_13E57F2A_IMAGE_REL_BASED_, _LEN_13E57F2A, szBuffer );
+					_sString += szBuffer;
+				}
+				CStringDecoder::Decode( aTable[I].pcName, aTable[I].ui32StrLen, szBuffer );
+				_sString += szBuffer;
+				return _sString.c_str();
+			}
+		}
+		_sString += "Unknown";
+		return _sString.c_str();
+	}
+
 	// Creates a string that best represents the given size.
 	const CHAR * CUtilities::SizeString( uint64_t _uiSize, std::string &_sString ) {
 		CHAR szBuffer[_T_MAX_LEN];
@@ -633,10 +669,12 @@ namespace mx {
 
 	// Converts a wstring to a UTF-8 string.
 	std::string CUtilities::WStringToString( const std::wstring &_wsIn ) {
-		using convert_typeX = std::codecvt_utf8<wchar_t>;
-		std::wstring_convert<convert_typeX, wchar_t> wscConverter;
+		return std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes( _wsIn );
+	}
 
-		return wscConverter.to_bytes( _wsIn );
+	// Converts a UTF-8 string to wstring (UTF-16).
+	std::wstring CUtilities::StringToWString( const std::string &_sIn ) {
+		return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>{}.from_bytes( _sIn.data() );
 	}
 
 	// Windows resource type to string.
@@ -673,7 +711,7 @@ namespace mx {
 
 		for ( size_t I = 0; I < sizeof( aTable ) / sizeof( aTable[0] ); ++I ) {
 			if ( aTable[I].ui32Type == _uiId ) {
-				if ( Options.bShortenEnumNames ) {
+				if ( !Options.bShortenEnumNames ) {
 					CStringDecoder::Decode( _T_B57AF7F9_RT_, _LEN_B57AF7F9, _pcRet );
 					_pcRet += _LEN_B57AF7F9;
 				}
@@ -692,6 +730,22 @@ namespace mx {
 			return TRUE;
 		}
 		return FALSE;
+	}
+
+	// Adds a \ to the end of a string if it does not already have one.
+	std::string & CUtilities::FinishPath( std::string &_sString ) {
+		if ( !_sString.size() || _sString[_sString.size()-1] != '\\' ) {
+			_sString.push_back( '\\' );
+		}
+		return _sString;
+	}
+
+	// Adds a \ to the end of a string if it does not already have one.
+	std::wstring & CUtilities::FinishPath( std::wstring &_sString ) {
+		if ( !_sString.size() || _sString[_sString.size()-1] != L'\\' ) {
+			_sString.push_back( L'\\' );
+		}
+		return _sString;
 	}
 
 }	// namespace mx

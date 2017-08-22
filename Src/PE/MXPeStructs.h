@@ -173,6 +173,20 @@ namespace mx {
 		MX_IMAGE_SCN_MEM_WRITE							= 0x80000000,
 	};
 
+	enum MX_BASE_RELOC {
+		MX_IMAGE_REL_BASED_ABSOLUTE						= 0,
+		MX_IMAGE_REL_BASED_HIGH							= 1,
+		MX_IMAGE_REL_BASED_LOW							= 2,
+		MX_IMAGE_REL_BASED_HIGHLOW						= 3,
+		MX_IMAGE_REL_BASED_HIGHADJ						= 4,
+		MX_IMAGE_REL_BASED_MACHINE_SPECIFIC_5			= 5,
+		MX_IMAGE_REL_BASED_RESERVED						= 6,
+		MX_IMAGE_REL_BASED_MACHINE_SPECIFIC_7			= 7,
+		MX_IMAGE_REL_BASED_MACHINE_SPECIFIC_8			= 8,
+		MX_IMAGE_REL_BASED_MACHINE_SPECIFIC_9			= 9,
+		MX_IMAGE_REL_BASED_DIR64						= 10,
+	};
+
 	struct MX_DOS_HEADER {
 		uint16_t									Signature;
 		uint16_t									BytesInLastBlock;
@@ -329,11 +343,16 @@ namespace mx {
 		uint32_t Data;
 	};
 
-	struct IMAGE_RESOURCE_DATA_ENTRY {
-		uint32_t Data;
+	struct MX_IMAGE_RESOURCE_DATA_ENTRY {
+		uint32_t OffsetToData;
 		uint32_t Size;
 		uint32_t CodePage;
 		uint32_t Reserved;
+	};
+
+	struct MX_IMAGE_BASE_RELOCATION {
+		uint32_t VirtualAddress;
+		uint32_t SizeOfBlock;
 	};
 
 

@@ -122,6 +122,14 @@ namespace mx {
 			m_ptviRootItem->AppendChild( ptviTemp );
 			AddResourceDesc( ptviTemp, (*_poPeObject.ResourceDescriptor()), _poPeObject, _poPeObject.ResourceDescriptorOffset() );
 		}
+		if ( _poPeObject.HasRelocDesc() ) {
+			QList<QVariant> lValues;
+			//MX_PART_TO_STRING( _poPeObject.CoffHeader() );
+			lValues << "Base Relocations" << "" << "" << "" << "Base relocations.";
+			CTreeViewItem * ptviTemp = new CTreeViewItem( lValues, m_ptviRootItem );
+			m_ptviRootItem->AppendChild( ptviTemp );
+			AddReloc( ptviTemp, _poPeObject.BaseRelocs(), _poPeObject );
+		}
 
 		AddExportedFunctions( m_ptviRootItem, _poPeObject );
 		AddImportedFuncs( m_ptviRootItem, _poPeObject );
@@ -1637,19 +1645,19 @@ namespace mx {
 		}
 		else {
 			size_t sOffset = _pirdeEntry->Data;
-			if ( sOffset + sizeof( IMAGE_RESOURCE_DATA_ENTRY ) <= _poPeObject.SectionData()[_uiSectionIndex].vData.size() ) {
-				const IMAGE_RESOURCE_DATA_ENTRY * pirdResDir = reinterpret_cast<const IMAGE_RESOURCE_DATA_ENTRY *>(&_poPeObject.SectionData()[_uiSectionIndex].vData[sOffset]);
+			if ( sOffset + sizeof( MX_IMAGE_RESOURCE_DATA_ENTRY ) <= _poPeObject.SectionData()[_uiSectionIndex].vData.size() ) {
+				const MX_IMAGE_RESOURCE_DATA_ENTRY * pirdResDir = reinterpret_cast<const MX_IMAGE_RESOURCE_DATA_ENTRY *>(&_poPeObject.SectionData()[_uiSectionIndex].vData[sOffset]);
 				//AddResourceDesc( ptviTemp, (*pirdResDir), _poPeObject, sOffset + _poPeObject.SectionData()[_uiSectionIndex].ui64FileOffset );
 				//AddResourceTree( ptviTemp, pirdResDir, _uiSectionIndex, _poPeObject );
 				uiOffset = _poPeObject.SectionData()[_uiSectionIndex].ui64FileOffset + sOffset;
 				{
 					std::string sTemp;
-					_poPeObject.RelocAddressToStringwithSection( pirdResDir->Data, sTemp );
+					_poPeObject.RelocAddressToStringwithSection( pirdResDir->OffsetToData, sTemp );
 					//std::sprintf( szBuffer, "%u", pirdResDir->Data );
-					CUtilities::BytesToHex( &pirdResDir->Data, sizeof( pirdResDir->Data ), szBufferRaw );
-					MX_PRINT_FILE_OFFSET( uiOffset, pirdResDir->Data );
+					CUtilities::BytesToHex( &pirdResDir->OffsetToData, sizeof( pirdResDir->OffsetToData ), szBufferRaw );
+					MX_PRINT_FILE_OFFSET( uiOffset, pirdResDir->OffsetToData );
 					QList<QVariant> lValues;
-					lValues << "Data" << sTemp.c_str() << szOffset << szBufferRaw << "Data pointer.";
+					lValues << "OffsetToData" << sTemp.c_str() << szOffset << szBufferRaw << "Data pointer.";
 					CTreeViewItem * ptviTemp2 = new CTreeViewItem( lValues, ptviTemp );
 					ptviTemp->AppendChild( ptviTemp2 );
 				}
@@ -1691,6 +1699,63 @@ namespace mx {
 					ptviTemp->AppendChild( ptviTemp2 );
 				}
 			}
+		}
+	}
+
+	// Decodes the relocation table.
+	VOID CPeTreeModel::AddReloc( CTreeViewItem * _ptviParent, const std::vector<CPeObject::MX_BASE_RELOC> &_vRelocs, const mx::CPeObject &_poPeObject ) {
+		CHAR szBuffer[128];
+		CHAR szBufferRaw[64];
+
+		uint64_t uiOffset = 0;
+		for ( size_t I = 0; I < _vRelocs.size(); ++I ) {
+			{
+				std::string sDesc;
+				_poPeObject.RelocAddressToStringwithSection( _vRelocs[I].pibrReloc->VirtualAddress, sDesc );
+				/*sDesc += ", ";
+				CUtilities::ToUnsigned( _vRelocs[I].pibrReloc->SizeOfBlock, sDesc );*/
+				//std::sprintf( szBuffer, "%u", _vRelocs[I].pibrReloc->VirtualAddress );
+				CUtilities::BytesToHex( &_vRelocs[I].pibrReloc->VirtualAddress, sizeof( _vRelocs[I].pibrReloc->VirtualAddress ), szBufferRaw );
+				uiOffset = _vRelocs[I].ui64FileOffset;
+				MX_PRINT_FILE_OFFSET( uiOffset, _vRelocs[I].pibrReloc->VirtualAddress );
+				QList<QVariant> lValues;
+				lValues << "VirtualAddress" << sDesc.c_str() << szOffset << szBufferRaw << "Virtual address of the start of the chunk of relocation offsets.";
+				CTreeViewItem * ptviTemp = new CTreeViewItem( lValues, _ptviParent );
+				_ptviParent->AppendChild( ptviTemp );
+			}
+			{
+				std::sprintf( szBuffer, "%u", _vRelocs[I].pibrReloc->SizeOfBlock );
+				CUtilities::BytesToHex( &_vRelocs[I].pibrReloc->SizeOfBlock, sizeof( _vRelocs[I].pibrReloc->SizeOfBlock ), szBufferRaw );
+				MX_PRINT_FILE_OFFSET( uiOffset, _vRelocs[I].pibrReloc->SizeOfBlock );
+				QList<QVariant> lValues;
+				lValues << "SizeOfBlock" << szBuffer << szOffset << szBufferRaw << "Size of the chunk.";
+				CTreeViewItem * ptviTemp = new CTreeViewItem( lValues, _ptviParent );
+				_ptviParent->AppendChild( ptviTemp );
+				AddReloc( ptviTemp, _vRelocs[I], _poPeObject, uiOffset );
+			}
+		}
+	}
+
+	// Decodes the relocation offsets.
+	VOID CPeTreeModel::AddReloc( CTreeViewItem * _ptviParent, const CPeObject::MX_BASE_RELOC &_brRelocs, const mx::CPeObject &_poPeObject, uint64_t _uiStructOffset ) {
+		CHAR szBuffer[128];
+		CHAR szBufferRaw[64];
+
+		for ( uint32_t I = 0; I < _brRelocs.uiTotal; ++I ) {
+			std::string sVal;
+			CUtilities::PeRelocBaseToString( _brRelocs.puiOffsets[I] >> 12, sVal );
+			sVal += " (";
+			CUtilities::ToUnsigned( _brRelocs.puiOffsets[I] >> 12, sVal );
+			sVal += "), ";
+			_poPeObject.RelocAddressToStringwithSection( _brRelocs.pibrReloc->VirtualAddress + (_brRelocs.puiOffsets[I] & 0xFFF), sVal );
+			//CUtilities::ToHex( _brRelocs.puiOffsets[I] & 0xFFF, sVal, 4 );
+			//std::sprintf( szBuffer, "%u", _brRelocs.puiOffsets[I] );
+			CUtilities::BytesToHex( &_brRelocs.puiOffsets[I], sizeof( _brRelocs.puiOffsets[I] ), szBufferRaw );
+			MX_PRINT_FILE_OFFSET( _uiStructOffset, _brRelocs.puiOffsets[I] );
+			QList<QVariant> lValues;
+			lValues << "TypeOffset" << sVal.c_str() << szOffset << szBufferRaw << "Type and offset.";
+			CTreeViewItem * ptviTemp = new CTreeViewItem( lValues, _ptviParent );
+			_ptviParent->AppendChild( ptviTemp );
 		}
 	}
 

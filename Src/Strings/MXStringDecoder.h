@@ -19,7 +19,7 @@ namespace mx {
 			static size_t sLen = std::strlen( pcKey );
 			_tOutType * ptRet = _tOut;
 			for ( size_t I = 0; I < _sInLen; ++I ) {
-				(*_tOut++) = static_cast<char>(_pcIn[I] + pcKey[I%sLen]);
+				(*_tOut++) = static_cast<_tOutType>(_pcIn[I] + pcKey[I%sLen]);
 			}
 			(*_tOut) = static_cast<_tOutType>('\0');
 			return ptRet;

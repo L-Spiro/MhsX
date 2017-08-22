@@ -84,6 +84,12 @@ namespace mx {
 		// Decodes the resource tree.
 		VOID						AddResourceTree( CTreeViewItem * _ptviParent, const MX_IMAGE_RESOURCE_DIRECTORY_ENTRY * _pirdeEntry, uint32_t _uiSectionIndex, const mx::CPeObject &_poPeObject, uint32_t _uiLevel );
 
+		// Decodes the relocation table.
+		VOID						AddReloc( CTreeViewItem * _ptviParent, const std::vector<CPeObject::MX_BASE_RELOC> &_vRelocs, const mx::CPeObject &_poPeObject );
+
+		// Decodes the relocation offsets.
+		VOID						AddReloc( CTreeViewItem * _ptviParent, const CPeObject::MX_BASE_RELOC &_brRelocs, const mx::CPeObject &_poPeObject, uint64_t _uiStructOffset );
+
 	};
 
 }	// namespace mx

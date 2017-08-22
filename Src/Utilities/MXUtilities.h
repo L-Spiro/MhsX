@@ -5,8 +5,10 @@
 #include <Windows.h>
 
 // == Macros.
-#define MX_COUNT_OF( x ) ((sizeof( x ) / sizeof( 0[x] )) / (static_cast<size_t>(!(sizeof( x ) % sizeof(0[x])))))
-#define MX_ELEMENTS( x ) MX_COUNT_OF( x )
+#ifndef MX_COUNT_OF
+#define MX_COUNT_OF( x )				((sizeof( x ) / sizeof( 0[x] )) / (static_cast<size_t>(!(sizeof( x ) % sizeof(0[x])))))
+#define MX_ELEMENTS( x )				MX_COUNT_OF( x )
+#endif	// #ifndef MX_COUNT_OF
 
 namespace mx {
 
@@ -104,6 +106,9 @@ namespace mx {
 		// Gets a Windows version string based on the given major and minor versions.
 		static const CHAR *				WindowsVersion( uint32_t _uiMajor, uint32_t _uiMinor, std::string &_sString );
 
+		// Creates a IMAGE_REL_BASED_* string.
+		static const CHAR *				PeRelocBaseToString( uint32_t _uiVal, std::string &_sString );
+
 		// Creates a string that best represents the given size.
 		static const CHAR *				SizeString( uint64_t _uiSize, std::string &_sString );
 
@@ -137,11 +142,21 @@ namespace mx {
 		// Converts a wstring to a UTF-8 string.
 		static std::string				WStringToString( const std::wstring &_wsIn );
 
+		// Converts a UTF-8 string to wstring (UTF-16).
+		static std::wstring				StringToWString( const std::string &_sIn );
+
 		// Windows resource type to string.
 		static BOOL						ResourceTypeToString( uint64_t _uiId, CHAR * _pcRet );
 
 		// Windows resource type to string.
 		static BOOL						ResourceTypeToString( uint64_t _uiId, std::string &_sString );
+
+		// Adds a \ to the end of a string if it does not already have one.
+		static std::string &			FinishPath( std::string &_sString );
+
+		// Adds a \ to the end of a string if it does not already have one.
+		static std::wstring &			FinishPath( std::wstring &_sString );
+
 
 		// == Members.
 		// Options.

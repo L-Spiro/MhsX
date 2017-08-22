@@ -44,6 +44,14 @@ namespace mx {
 			BOOL							bBound;						// Bound to a static address?
 		};
 
+		// A base relocation.
+		struct MX_BASE_RELOC {
+			MX_IMAGE_BASE_RELOCATION *		pibrReloc;					// Pointer to the start of the set of relocations.
+			uint32_t						uiTotal;					// Total relocations.
+			uint16_t *						puiOffsets;					// Pointer to an array of relocations.
+			uint64_t						ui64FileOffset;				// File offset where this relocation was found.
+		};
+
 
 		// == Functions.
 		BOOL								LoadImageFromFile( const wchar_t * _pwcPath );
@@ -56,6 +64,7 @@ namespace mx {
 		BOOL								HasImportDesc() const { return m_vDataDirectories.size() > MX_IMAGE_DIRECTORY_ENTRY_IMPORT && m_vDataDirectories[MX_IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress && m_vDataDirectories[MX_IMAGE_DIRECTORY_ENTRY_IMPORT].Size; }
 		BOOL								HasExportDesc() const { return m_vDataDirectories.size() > MX_IMAGE_DIRECTORY_ENTRY_EXPORT && m_vDataDirectories[MX_IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress && m_vDataDirectories[MX_IMAGE_DIRECTORY_ENTRY_EXPORT].Size; }
 		BOOL								HasResourceDesc() const { return m_vDataDirectories.size() > MX_IMAGE_DIRECTORY_ENTRY_RESOURCE && m_vDataDirectories[MX_IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress && m_vDataDirectories[MX_IMAGE_DIRECTORY_ENTRY_RESOURCE].Size; }
+		BOOL								HasRelocDesc() const { return m_vDataDirectories.size() > MX_IMAGE_DIRECTORY_ENTRY_BASERELOC && m_vDataDirectories[MX_IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress && m_vDataDirectories[MX_IMAGE_DIRECTORY_ENTRY_BASERELOC].Size; }
 		VOID								ImportDllNameByIndex( uint32_t _ui32Index, std::string &_sReturn ) const;
 		VOID								GetExportDllName( std::string &_sReturn ) const;
 		VOID								GetString( uint64_t _uiRelocAddr, std::string &_sReturn ) const;
@@ -75,6 +84,8 @@ namespace mx {
 		const std::vector<MX_IMAGE_IMPORT_DESCRIPTOR *> &
 											ImportDescriptor() const { return m_vImportDesc; }
 		const MX_IMAGE_RESOURCE_DIRECTORY *	ResourceDescriptor() const { return m_pirdResourceDir; }
+		const std::vector<CPeObject::MX_BASE_RELOC> &
+											BaseRelocs() const { return m_vBaseRelocations; }
 		uint64_t							ReadRelocBytes( uint64_t _uiAddr, VOID * _pvDst, uint64_t _uiTotal ) const; // Expects _uiAddr to be translated from a file offset via FileOffsetToRelocAddress();
 		uint32_t							RelocAddrToRelocIndexAndOffset( uint64_t _uiAddr, uint32_t &_uiOffset ) const; // Expects _uiAddr to be translated from a file offset via FileOffsetToRelocAddress();
 
@@ -114,6 +125,7 @@ namespace mx {
 		std::vector<MX_IMAGE_IMPORT_DESCRIPTOR *>
 											m_vImportDesc;
 		MX_IMAGE_RESOURCE_DIRECTORY *		m_pirdResourceDir;
+		std::vector<MX_BASE_RELOC>			m_vBaseRelocations;
 
 		uint32_t							m_uiImageBase;
 
@@ -127,6 +139,7 @@ namespace mx {
 		uint32_t							m_uiExportOffset;
 		uint32_t							m_uiImportOffset;
 		uint32_t							m_uiResourceOffset;
+		uint32_t							m_uiRelocOffset;
 
 	};
 
