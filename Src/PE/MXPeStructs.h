@@ -4,6 +4,11 @@
 
 namespace mx {
 
+	enum {
+		MX_IMAGE_SEPARATE_DEBUG_SIGNATURE				= 0x4944,
+		MX_NON_PAGED_DEBUG_SIGNATURE					= 0x494E,
+	};
+
 	enum MX_PE_SIZES {
 		MX_PE_DOS_PAD									= 0x20,
 		MX_IMAGE_NUMBEROF_DIRECTORY_ENTRIES				= 16,
@@ -187,6 +192,47 @@ namespace mx {
 		MX_IMAGE_REL_BASED_DIR64						= 10,
 	};
 
+	enum MX_IMAGE_DEBUG_TYPE {
+		MX_IMAGE_DEBUG_TYPE_UNKNOWN						= 0,
+		MX_IMAGE_DEBUG_TYPE_COFF						= 1,
+		MX_IMAGE_DEBUG_TYPE_CODEVIEW					= 2,
+		MX_IMAGE_DEBUG_TYPE_FPO							= 3,
+		MX_IMAGE_DEBUG_TYPE_MISC						= 4,
+		MX_IMAGE_DEBUG_TYPE_EXCEPTION					= 5,
+		MX_IMAGE_DEBUG_TYPE_FIXUP						= 6,
+		MX_IMAGE_DEBUG_TYPE_OMAP_TO_SRC					= 7,
+		MX_IMAGE_DEBUG_TYPE_OMAP_FROM_SRC				= 8,
+		MX_IMAGE_DEBUG_TYPE_BORLAND						= 9,
+		MX_IMAGE_DEBUG_TYPE_RESERVED10					= 10,
+		MX_IMAGE_DEBUG_TYPE_CLSID						= 11,
+	};
+
+	enum MX_IMAGE_LIBRARY {
+		MX_IMAGE_LIBRARY_PROCESS_INIT					= 1,
+		MX_IMAGE_LIBRARY_PROCESS_TERM					= 8,
+		MX_IMAGE_LIBRARY_THREAD_INIT					= 4,
+		MX_IMAGE_LIBRARY_THREAD_TERM					= 2,
+	};
+
+	enum MX_IMAGE_LOADER_FLAGS {
+		MX_IMAGE_LOADER_FLAGS_BREAK_ON_LOAD				= 1,
+		MX_IMAGE_LOADER_FLAGS_DEBUG_ON_LOAD				= 2,
+	};
+
+	enum MX_IMAGE_SYM : int16_t {
+		MX_IMAGE_SYM_UNDEFINED							= 0,
+		MX_IMAGE_SYM_ABSOLUTE							= -1,
+		MX_IMAGE_SYM_DEBUG								= -2,
+	};
+
+	enum MX_IMAGE_SYM_DTYPE {
+		MX_IMAGE_SYM_DTYPE_NULL							= 0,
+		MX_IMAGE_SYM_DTYPE_POINTER						= 1,
+		MX_IMAGE_SYM_DTYPE_FUNCTION						= 2,
+		MX_IMAGE_SYM_DTYPE_ARRAY						= 3,
+	};
+
+
 	struct MX_DOS_HEADER {
 		uint16_t									Signature;
 		uint16_t									BytesInLastBlock;
@@ -353,6 +399,77 @@ namespace mx {
 	struct MX_IMAGE_BASE_RELOCATION {
 		uint32_t VirtualAddress;
 		uint32_t SizeOfBlock;
+	};
+
+	struct MX_IMAGE_IMPORT_MODULE_DIRECTORY {
+		uint32_t RVAFunctionNameList;
+		uint32_t UseLess1;
+		uint32_t UseLess2;
+		uint32_t RVAModuleName;
+		uint32_t RVAFunctionAddressList;
+	};
+
+	struct MX_IMAGE_LOAD_CONFIG_DIRECTORY {
+		uint32_t Characteristics;
+		uint32_t TimeDateStamp;
+		uint16_t MajorVersion;
+		uint16_t MinorVersion;
+		uint32_t GlobalFlagsClear;
+		uint32_t GlobalFlagsSet;
+		uint32_t CriticalSectionDefaultTimeout;
+		uint32_t DeCommitFreeBlockThreshold;
+		uint32_t DeCommitTotalFreeThreshold;
+		uint32_t LockPrefixTable;
+		uint32_t MaximumAllocationSize;
+		uint32_t VirtualMemoryThreshold;
+		uint32_t ProcessHeapFlags;
+		uint32_t Reserved[4];
+	};
+
+	struct MX_IMAGE_TLS_DIRECTORY {
+		uint32_t StartAddressOfRawData;
+		uint32_t EndAddressOfRawData;
+		uint32_t AddressOfIndex;
+		uint32_t AddressOfCallBacks;
+		uint32_t SizeOfZeroFill;
+		uint32_t Characteristics;
+	};
+
+	struct MX_IMAGE_DEBUG_DIRECTORY {
+		uint32_t Characteristics;
+		uint32_t TimeDateStamp;
+		uint16_t MajorVersion;
+		uint16_t MinorVersion;
+		uint32_t Type;
+		uint32_t SizeOfData;
+		uint32_t AddressOfRawData;
+		uint32_t PointerToRawData;
+	};
+
+	struct MX_IMAGE_COFF_SYMBOLS_HEADER {
+		uint32_t NumberOfSymbols;
+		uint32_t LvaToFirstSymbol;
+		uint32_t NumberOfLinenumbers;
+		uint32_t LvaToFirstLinenumber;
+		uint32_t RvaToFirstByteOfCode;
+		uint32_t RvaToLastByteOfCode;
+		uint32_t RvaToFirstByteOfData;
+		uint32_t RvaToLastByteOfData;
+	};
+
+	struct MX_IMAGE_SEPARATE_DEBUG_HEADER {
+		uint16_t Signature;
+		uint16_t Flags;
+		uint16_t Machine;
+		uint16_t Characteristics;
+		uint32_t TimeDateStamp;
+		uint32_t CheckSum;
+		uint32_t ImageBase;
+		uint32_t SizeOfImage;
+		uint32_t NumberOfSections;
+		uint32_t ExportedNamesSize;
+		uint32_t DebugDirectorySize;
+		uint32_t Reserved[3];
 	};
 
 
