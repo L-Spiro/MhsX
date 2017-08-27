@@ -1,6 +1,9 @@
 #include "MXSystem.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../Utilities/MXUtilities.h"
+#ifdef _DEBUG
+#include <cassert>
+#endif	// #ifdef _DEBUG
 
 
 namespace mx {
@@ -12,6 +15,18 @@ namespace mx {
 	// System information.
 	SYSTEM_INFO CSystem::m_siSystemInfo = { 0 };
 
+	// ReadProcessMemory.
+	LPFN_READPROCESSMEMORY CSystem::m_pfReadProcessMemory = nullptr;
+
+	// WriteProcessMemory.
+	LPFN_WRITEPROCESSMEMORY	CSystem::m_pfWriteProcessMemory = nullptr;
+
+	// EnumProcesses().
+	LPFN_ENUMPROCESSES CSystem::m_pfEnumProcesses = nullptr;
+
+	// OpenProcess().
+	LPFN_OPENPROCESS CSystem::m_pfOpenProcess = nullptr;
+
 	// == Types.
 	typedef BOOL (WINAPI * LPFN_ISWOW64PROCESS)( HANDLE, PBOOL );
 	typedef VOID (WINAPI * LPFN_GETSYSTEMINFO)( LPSYSTEM_INFO );
@@ -20,10 +35,10 @@ namespace mx {
 	VOID CSystem::InitSystem() {
 		// Is this WoW64?
 		{
-			CHAR szKernel32[_LEN_204C64E5+1];
+			CHAR szKernel32[_LEN_6AE69F02+1];
 			CHAR szIsWow64Process[_LEN_2E50340B+1];
 			LPFN_ISWOW64PROCESS pfIsWow64Process = reinterpret_cast<LPFN_ISWOW64PROCESS>(::GetProcAddress( ::GetModuleHandleA(
-				_DEC_204C64E5_kernel32(  szKernel32 ) ),
+				_DEC_6AE69F02_kernel32_dll( szKernel32 ) ),
 				_DEC_2E50340B_IsWow64Process( szIsWow64Process ) ));
 			if ( pfIsWow64Process ) {
 				pfIsWow64Process( ::GetCurrentProcess(), &m_bIsWow );
@@ -38,16 +53,16 @@ namespace mx {
 		// System information.
 		{
 			LPFN_GETSYSTEMINFO pfGetSystemInfo = nullptr;
-			CHAR szKernel32[_LEN_204C64E5+1];
+			CHAR szKernel32[_LEN_6AE69F02+1];
 			CHAR szGetSystemInfo[_T_MAX_LEN];
 			if ( IsWow64Process() ) {				
 				pfGetSystemInfo = reinterpret_cast<LPFN_GETSYSTEMINFO>(::GetProcAddress( ::GetModuleHandleA(
-					_DEC_204C64E5_kernel32(  szKernel32 ) ),
+					_DEC_6AE69F02_kernel32_dll( szKernel32 ) ),
 					_DEC_EB64C435_GetNativeSystemInfo( szGetSystemInfo ) ));
 			}
 			else {
 				pfGetSystemInfo = reinterpret_cast<LPFN_GETSYSTEMINFO>(::GetProcAddress( ::GetModuleHandleA(
-					_DEC_204C64E5_kernel32(  szKernel32 ) ),
+					_DEC_6AE69F02_kernel32_dll( szKernel32 ) ),
 					_DEC_763FADF6_GetSystemInfo( szGetSystemInfo ) ));
 			}
 			// Don't leave encrypted strings on the stack.
@@ -58,6 +73,10 @@ namespace mx {
 			}
 			pfGetSystemInfo = nullptr;
 		}
+
+
+		// Kernel32 imports.
+		LoadKernel32();
 	}
 
 	// Gets a function address by DLL name and function name.
@@ -223,6 +242,118 @@ namespace mx {
 			_vResults[I].append( sDllUtf8 );
 		}
 		return _vResults;
+	}
+
+	// Loads a DLL by name.  Uses the normal search paths DLL's use (local directory, working directory, system directory, windows directory, PATH directories).
+	BOOL CSystem::FindDll( const CHAR * _pcDll, CFile &_fReturn ) {
+		return FindDll( CUtilities::StringToWString( _pcDll ).c_str(), _fReturn );
+	}
+
+	// Loads a DLL by name.  Uses the normal search paths DLL's use (local directory, working directory, system directory, windows directory, PATH directories).
+	BOOL CSystem::FindDll( const WCHAR * _pwDll, CFile &_fReturn ) {
+		std::vector<std::wstring> vTemp;
+		DllSearchPaths( _pwDll, vTemp );
+
+		for ( size_t I = 0; I < vTemp.size(); ++I ) {
+			if ( _fReturn.OpenFile( vTemp[I].c_str(), TRUE ) ) { return TRUE; }
+		}
+		return FALSE;
+	}
+
+	// Gets the address of a process.  Slow because it loads the DLL from memory, parses it, then discards it.
+	LPCVOID CSystem::GetProcAddress( LPCSTR _lpcModule, LPCSTR  _lpcProcName ) {
+		CPeObject poObj;
+		CFile fFile;
+		if ( !FindDll( _lpcModule, fFile ) ) { return nullptr; }
+		if ( !poObj.LoadImageFromMemory( fFile ) ) { return nullptr; }
+		return GetProcAddress( _lpcModule, _lpcProcName, poObj );
+	}
+
+	// Faster way to get the address of a function.
+	LPCVOID CSystem::GetProcAddress( LPCSTR _lpcModule, LPCSTR  _lpcProcName, const CPeObject &_poObj ) {
+		HMODULE hMod = ::GetModuleHandleA( _lpcModule );
+		if ( !hMod ) { return nullptr; }
+		
+		uint64_t ui64Temp = _poObj.GetExportAddress( _lpcProcName );
+		if ( !ui64Temp ) { return nullptr; }
+		ui64Temp += reinterpret_cast<uint64_t>(hMod);
+		return reinterpret_cast<LPCVOID>(ui64Temp);
+	}
+
+	// Faster way to get the address of a function, using encrypted strings.
+	LPCVOID CSystem::GetProcAddress( LPCSTR _lpcModule, size_t _sModuleLen, LPCSTR _lpcProcName, size_t _sProcLen, const CPeObject &_poObj ) {
+		std::string sModule, sProc;
+
+		CStringDecoder::Decode( _lpcModule, _sModuleLen, sModule );
+		CStringDecoder::Decode( _lpcProcName, _sProcLen, sProc );
+
+		LPCVOID pvRet = GetProcAddress( sModule.c_str(), sProc.c_str(), _poObj );
+		// Security: Wipe the decoded values from memory.
+		::ZeroMemory( const_cast<std::string::value_type *>(sModule.c_str()), sModule.size() );
+		::ZeroMemory( const_cast<std::string::value_type *>(sProc.c_str()), sProc.size() );
+
+		return pvRet;
+	}
+
+	// ReadProcessMemory().
+	BOOL WINAPI CSystem::ReadProcessMemory( HANDLE _hProcess, LPCVOID _lpBaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) {
+		return m_pfReadProcessMemory ? m_pfReadProcessMemory( _hProcess, _lpBaseAddress, _lpBuffer, _nSize, _lpNumberOfBytesRead ) : FALSE;
+	}
+
+	// WriteProcessMemory().
+	BOOL WINAPI CSystem::WriteProcessMemory( HANDLE _hProcess, LPVOID _lpBaseAddress, LPCVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesWritten ) {
+		return m_pfWriteProcessMemory ? m_pfWriteProcessMemory( _hProcess, _lpBaseAddress, _lpBuffer, _nSize, _lpNumberOfBytesWritten ) : FALSE;
+	}
+
+	// EnumProcesses().
+	BOOL WINAPI CSystem::EnumProcesses( DWORD * _pdwProcessIds, DWORD _dwCb, DWORD * _pdwBytesReturned ) {
+		return m_pfEnumProcesses ? m_pfEnumProcesses( _pdwProcessIds, _dwCb, _pdwBytesReturned ) : FALSE;
+	}
+
+	// OpenProcess().
+	HANDLE WINAPI CSystem::OpenProcess( DWORD _dwDesiredAccess, BOOL _bInheritHandle, DWORD _dwProcessId ) {
+		return m_pfOpenProcess ? m_pfOpenProcess( _dwDesiredAccess, _bInheritHandle, _dwProcessId ) : NULL;
+	}
+
+	// Load kernel32.dll functions.
+	VOID CSystem::LoadKernel32() {
+		CHAR szKernel32[_LEN_6AE69F02+1];
+		_DEC_6AE69F02_kernel32_dll( szKernel32 );
+		CPeObject poObj;
+		CFile fFile;
+		if ( !FindDll( szKernel32, fFile ) ) {
+			::ZeroMemory( szKernel32, MX_ELEMENTS( szKernel32 ) );
+			return;
+		}
+		if ( !poObj.LoadImageFromMemory( fFile ) ) {
+			::ZeroMemory( szKernel32, MX_ELEMENTS( szKernel32 ) );
+			return;
+		}
+
+
+		m_pfReadProcessMemory = reinterpret_cast<LPFN_READPROCESSMEMORY>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_F7C7AE42_ReadProcessMemory, _LEN_F7C7AE42, poObj ));
+		m_pfWriteProcessMemory = reinterpret_cast<LPFN_WRITEPROCESSMEMORY>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_4F58972E_WriteProcessMemory, _LEN_4F58972E, poObj ));
+		m_pfEnumProcesses = reinterpret_cast<LPFN_ENUMPROCESSES>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_0509A21C_EnumProcesses, _LEN_0509A21C, poObj ));
+		if ( !m_pfEnumProcesses ) {
+			m_pfEnumProcesses = reinterpret_cast<LPFN_ENUMPROCESSES>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_0501393D_K32EnumProcesses, _LEN_0501393D, poObj ));
+		}
+		m_pfOpenProcess = reinterpret_cast<LPFN_OPENPROCESS>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_DF27514B_OpenProcess, _LEN_DF27514B, poObj ));
+
+#ifdef _DEBUG
+		LPVOID pfTemp = ::GetProcAddress( ::GetModuleHandleA( szKernel32 ), "ReadProcessMemory" );
+		assert( pfTemp == m_pfReadProcessMemory );
+		pfTemp = ::GetProcAddress( ::GetModuleHandleA( szKernel32 ), "WriteProcessMemory" );
+		assert( pfTemp == m_pfWriteProcessMemory );
+		pfTemp = ::GetProcAddress( ::GetModuleHandleA( szKernel32 ), "EnumProcesses" );
+		if ( !pfTemp ) {
+			pfTemp = ::GetProcAddress( ::GetModuleHandleA( szKernel32 ), "K32EnumProcesses" );
+		}
+		assert( pfTemp == m_pfEnumProcesses );
+		pfTemp = ::GetProcAddress( ::GetModuleHandleA( szKernel32 ), "OpenProcess" );
+		assert( pfTemp == m_pfOpenProcess );
+#endif	// #ifdef _DEBUG
+
+		::ZeroMemory( szKernel32, MX_ELEMENTS( szKernel32 ) );
 	}
 
 }	// namespace mx

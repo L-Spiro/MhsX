@@ -1,5 +1,4 @@
 #include "MXPeObject.h"
-#include "../Files/MXFile.h"
 #include "../Utilities/MXUtilities.h"
 
 namespace mx {
@@ -16,38 +15,43 @@ namespace mx {
 
 	// == Functions.
 	BOOL CPeObject::LoadImageFromFile( const wchar_t * _pwcPath ) {
+		m_wsPath = _pwcPath;
 		CFile fFile;
 		if ( !fFile.OpenFile( _pwcPath, TRUE ) ) { return FALSE; }
-		m_uiDosHeaderOffset = static_cast<uint32_t>(fFile.MovePointerBy( 0 ));
-		if ( fFile.Read( &m_dhDosHeader, sizeof( m_dhDosHeader ) ) != sizeof( m_dhDosHeader ) ) { return FALSE; }
+		return LoadImageFromMemory( fFile );
+	}
+
+	BOOL CPeObject::LoadImageFromMemory( CFile &_fFile ) {
+		m_uiDosHeaderOffset = static_cast<uint32_t>(_fFile.MovePointerBy( 0 ));
+		if ( _fFile.Read( &m_dhDosHeader, sizeof( m_dhDosHeader ) ) != sizeof( m_dhDosHeader ) ) { return FALSE; }
 		if ( m_dhDosHeader.Signature != 0x5A4D ) { return FALSE; }
 		
 
 		// Actual DOS block.
 		m_vDosStub.resize( m_dhDosHeader.PeOffset - sizeof( m_dhDosHeader ) );
 		if ( !m_vDosStub.size() ) { return FALSE; }
-		m_uiDosStubOffset = static_cast<uint32_t>(fFile.MovePointerBy( 0 ));
-		if ( fFile.Read( &m_vDosStub[0], m_vDosStub.size() ) != m_vDosStub.size() ) { return FALSE; }
+		m_uiDosStubOffset = static_cast<uint32_t>(_fFile.MovePointerBy( 0 ));
+		if ( _fFile.Read( &m_vDosStub[0], m_vDosStub.size() ) != m_vDosStub.size() ) { return FALSE; }
 
 		// PE header.
-		m_uiCoffHeaderOffset = static_cast<uint32_t>(fFile.MovePointerBy( 0 ));
-		if ( fFile.Read( &m_chHeader, sizeof( m_chHeader ) ) != sizeof( m_chHeader ) ) { return FALSE; }
+		m_uiCoffHeaderOffset = static_cast<uint32_t>(_fFile.MovePointerBy( 0 ));
+		if ( _fFile.Read( &m_chHeader, sizeof( m_chHeader ) ) != sizeof( m_chHeader ) ) { return FALSE; }
 		if ( (*reinterpret_cast<uint32_t *>(m_chHeader.PeSignature)) != 0x00004550 ) { return FALSE; }
 
 		// Optional header.
-		m_uiWinOptHeaderOffset = static_cast<uint32_t>(fFile.MovePointerBy( 0 ));
-		if ( fFile.Read( &m_woWinOpt, sizeof( m_woWinOpt ) ) != sizeof( m_woWinOpt ) ) { return FALSE; }
+		m_uiWinOptHeaderOffset = static_cast<uint32_t>(_fFile.MovePointerBy( 0 ));
+		if ( _fFile.Read( &m_woWinOpt, sizeof( m_woWinOpt ) ) != sizeof( m_woWinOpt ) ) { return FALSE; }
 
 		uint32_t uiDatDirSize = 0;
 		if ( m_woWinOpt.Magic == MX_IMAGE_NT_OPTIONAL_HDR32_MAGIC ) {
-			m_uiWin6432HeaderOffset = static_cast<uint32_t>(fFile.MovePointerBy( 0 ));
-			if ( fFile.Read( &m_cwpWin32, sizeof( m_cwpWin32 ) ) != sizeof( m_cwpWin32 ) ) { return FALSE; }
+			m_uiWin6432HeaderOffset = static_cast<uint32_t>(_fFile.MovePointerBy( 0 ));
+			if ( _fFile.Read( &m_cwpWin32, sizeof( m_cwpWin32 ) ) != sizeof( m_cwpWin32 ) ) { return FALSE; }
 			uiDatDirSize = m_cwpWin32.NumberOfRvaAndSizes;
 			m_uiImageBase = m_cwpWin32.ImageBase;
 		}
 		else if ( m_woWinOpt.Magic == MX_IMAGE_NT_OPTIONAL_HDR64_MAGIC ) {
-			m_uiWin6432HeaderOffset = static_cast<uint32_t>(fFile.MovePointerBy( 0 ));
-			if ( fFile.Read( &m_cwpWin64, sizeof( m_cwpWin64 ) ) != sizeof( m_cwpWin64 ) ) { return FALSE; }
+			m_uiWin6432HeaderOffset = static_cast<uint32_t>(_fFile.MovePointerBy( 0 ));
+			if ( _fFile.Read( &m_cwpWin64, sizeof( m_cwpWin64 ) ) != sizeof( m_cwpWin64 ) ) { return FALSE; }
 			uiDatDirSize = m_cwpWin64.NumberOfRvaAndSizes;
 			m_uiImageBase = m_cwpWin64.ImageBase;
 		}
@@ -60,26 +64,26 @@ namespace mx {
 		}
 
 		m_vDataDirectories.resize( uiDatDirSize );
-		m_uiDataDirsOffset = static_cast<uint32_t>(fFile.MovePointerBy( 0 ));
+		m_uiDataDirsOffset = static_cast<uint32_t>(_fFile.MovePointerBy( 0 ));
 		for ( uint32_t I = 0; I < uiDatDirSize; ++I ) {
-			if ( fFile.Read( &m_vDataDirectories[I], sizeof( MX_DATA_DIRECTORY ) ) != sizeof( MX_DATA_DIRECTORY ) ) { return FALSE; }
+			if ( _fFile.Read( &m_vDataDirectories[I], sizeof( MX_DATA_DIRECTORY ) ) != sizeof( MX_DATA_DIRECTORY ) ) { return FALSE; }
 		}
 		
 		m_vSections.resize( CoffHeader().NumberOfSections );
-		m_uiSectionsOffset = static_cast<uint32_t>(fFile.MovePointerBy( 0 ));
+		m_uiSectionsOffset = static_cast<uint32_t>(_fFile.MovePointerBy( 0 ));
 		for ( size_t I = 0; I < m_vSections.size(); ++I ) {
-			if ( fFile.Read( &m_vSections[I], sizeof( MX_IMAGE_SECTION_HEADER ) ) != sizeof( MX_IMAGE_SECTION_HEADER ) ) { return FALSE; }
+			if ( _fFile.Read( &m_vSections[I], sizeof( MX_IMAGE_SECTION_HEADER ) ) != sizeof( MX_IMAGE_SECTION_HEADER ) ) { return FALSE; }
 			if ( !m_vSections[I].SizeOfRawData ) { return FALSE; }
 		}
-		uint64_t ui64Pointer = fFile.MovePointerBy( 0 );
+		uint64_t ui64Pointer = _fFile.MovePointerBy( 0 );
 
 		m_vSectionData.resize( CoffHeader().NumberOfSections );
 		for ( size_t I = 0; I < m_vSectionData.size(); ++I ) {
-			if ( !fFile.MovePointerTo( m_vSections[I].PointerToRawData ) ) { return FALSE; }
+			if ( !_fFile.MovePointerTo( m_vSections[I].PointerToRawData ) ) { return FALSE; }
 			m_vSectionData[I].ui64FileOffset = m_vSections[I].PointerToRawData;
 			m_vSectionData[I].ui64RelocAddress = m_vSections[I].VirtualAddress;
 			m_vSectionData[I].vData.resize( m_vSections[I].SizeOfRawData );
-			if ( fFile.Read( &m_vSectionData[I].vData[0], m_vSections[I].SizeOfRawData ) != m_vSections[I].SizeOfRawData ) { return FALSE; }
+			if ( _fFile.Read( &m_vSectionData[I].vData[0], m_vSections[I].SizeOfRawData ) != m_vSections[I].SizeOfRawData ) { return FALSE; }
 		}
 
 		m_piedExportDesc = nullptr;
@@ -365,6 +369,30 @@ namespace mx {
 			}
 		}
 #undef MX_READ
+	}
+
+	// Returns the address without modification or 0.
+	uint64_t CPeObject::GetExportAddress( const char * _pcExport ) const {
+		if ( HasExportDesc() && ExportDescriptor() ) {
+			std::string sExport = _pcExport;
+			uint32_t uiTotal = ExportDescriptor()->NumberOfNames;
+			uint32_t uiNameArray;
+			for ( uint32_t I = 0; I < uiTotal; ++I ) {
+				if ( ReadRelocBytes( ExportDescriptor()->AddressOfNames + I * 4, &uiNameArray, sizeof( uiNameArray ) ) != sizeof( uiNameArray ) ) { return 0; }
+				std::string sName;
+				GetString( uiNameArray, sName );
+				if ( sName == sExport ) {
+					if ( I < ExportDescriptor()->NumberOfFunctions ) {
+						uint32_t uiAddress;
+						if ( ReadRelocBytes( ExportDescriptor()->AddressOfFunctions + I * 4, &uiAddress, sizeof( uiAddress ) ) != sizeof( uiAddress ) ) { return 0; }
+						return uiAddress;
+					}
+					// Address not found associated with it.
+					return 0;
+				}
+			}
+		}
+		return 0;
 	}
 
 	VOID CPeObject::RelocAddressToStringwithSection( uint64_t _uiRelocAddr, std::string &_sReturn ) const {

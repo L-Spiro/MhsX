@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Files/MXFile.h"
 #include "MXPeStructs.h"
 #include <vector>
 #include <Windows.h>
@@ -55,6 +56,8 @@ namespace mx {
 
 		// == Functions.
 		BOOL								LoadImageFromFile( const wchar_t * _pwcPath );
+		BOOL								LoadImageFromMemory( CFile &_fFile );
+
 		BOOL								Is64() const { return m_woWinOpt.Magic == MX_IMAGE_NT_OPTIONAL_HDR64_MAGIC; }
 		uint32_t							NumberOfRvaAndSizes() const { return static_cast<uint32_t>(m_vDataDirectories.size()); }
 		uint32_t							ImageBase() const { return m_uiImageBase; }
@@ -91,6 +94,9 @@ namespace mx {
 
 		VOID								GetExports( std::vector<CPeObject::MX_EXPORT> &_vReturn ) const;
 		VOID								GetImportsFromImportDescByIndex( uint32_t _ui32Index, std::vector<CPeObject::MX_IMPORT> &_vReturn ) const;
+		
+		// Returns the address without modification or 0.
+		uint64_t							GetExportAddress( const char * _pcExport ) const;
 
 		uint32_t							DosHeaderOffset() const { return m_uiDosHeaderOffset; }
 		uint32_t							DosStubOffset() const { return m_uiDosStubOffset; }
@@ -109,6 +115,9 @@ namespace mx {
 		BOOL								AddressIsInLoadedFile( uint64_t _uiAddr ) const;
 		// _uiAddr is a file offset.
 		BOOL								RelocAddressIsInFile( uint64_t _uiAddr ) const;
+
+		const std::wstring &				GetPath() const { return m_wsPath; }
+		VOID								SetPath( const wchar_t * _pwcPath ) { m_wsPath = _pwcPath ? _pwcPath : L""; }	// _pwcPath can be NULL.
 
 	protected :
 		// == Members.
@@ -140,6 +149,8 @@ namespace mx {
 		uint32_t							m_uiImportOffset;
 		uint32_t							m_uiResourceOffset;
 		uint32_t							m_uiRelocOffset;
+
+		std::wstring						m_wsPath;
 
 	};
 

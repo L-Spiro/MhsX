@@ -1442,16 +1442,21 @@ namespace mx {
 	VOID CPeTreeModel::AddImportedFuncs( CTreeViewItem * _ptviParent, uint32_t _uiImportDir, const mx::CPeObject &_poPeObject ) {
 		if ( _uiImportDir == _poPeObject.ImportDescriptor().size() - 1 ) { return; }
 		{
+			std::vector<CPeObject::MX_IMPORT> vImports;
+			_poPeObject.GetImportsFromImportDescByIndex( _uiImportDir, vImports );
+
 			std::string sDllName;
 			_poPeObject.ImportDllNameByIndex( _uiImportDir, sDllName );
+			sDllName += " (";
+			CUtilities::ToUnsigned( vImports.size(), sDllName );
+			sDllName += " functions)";
 			QList<QVariant> lValues;
 			//MX_PART_TO_STRING( _poPeObject.DosHeader() );
 			lValues << sDllName.c_str() << "" << "" << "" << "";
 			CTreeViewItem * ptviTemp = new CTreeViewItem( lValues, _ptviParent );
 			_ptviParent->AppendChild( ptviTemp );
 
-			std::vector<CPeObject::MX_IMPORT> vImports;
-			_poPeObject.GetImportsFromImportDescByIndex( _uiImportDir, vImports );
+			
 			for ( size_t I = 0; I < vImports.size(); ++I ) {
 				AddImport( ptviTemp, vImports[I], _poPeObject );
 			}

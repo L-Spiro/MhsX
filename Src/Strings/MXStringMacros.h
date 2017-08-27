@@ -1,10 +1,10 @@
 #pragma once
 // Key: x20en7r90872ne9
 #define _T_MAX_LEN 111
-// kernel32
-#define _T_204C64E5_kernel32 "\xF3\x33\x42\x09\xF7\x35\xC1\xF9"
-#define _LEN_204C64E5 8
-#define _DEC_204C64E5_kernel32( STR ) CStringDecoder::Decode( _T_204C64E5_kernel32, _LEN_204C64E5, STR )
+// kernel32.dll
+#define _T_6AE69F02_kernel32_dll "\xF3\x33\x42\x09\xF7\x35\xC1\xF9\xFE\x2C\x35\x3A"
+#define _LEN_6AE69F02 12
+#define _DEC_6AE69F02_kernel32_dll( STR ) CStringDecoder::Decode( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, STR )
 
 // IsWow64Process
 #define _T_2E50340B_IsWow64Process "\xD1\x41\x27\x0A\x09\xFF\xC2\x17\x42\x37\x2C\x33\x05\x0E"
@@ -30,6 +30,11 @@
 #define _T_2D715017_Open_PE_File "\xD7\x3E\x35\x09\xB2\x19\xD3\xE7\x16\x31\x35\x33"
 #define _LEN_2D715017 12
 #define _DEC_2D715017_Open_PE_File( STR ) CStringDecoder::Decode( _T_2D715017_Open_PE_File, _LEN_2D715017, STR )
+
+// All Executables (*.exe *.dll *.sys);;Executables (*.exe);;Dynamic-Link Libraries (*.dll);;System Files (*.sys)
+#define _T_2D90879D_All_Executables____exe___dll___sys___Executables____exe___Dynamic_Link_Libraries____dll___System_Files____sys_ "\xC9\x3A\x3C\xBB\xD7\x41\xF3\x2A\x45\x3C\x2A\x30\xFE\x00\x3A\xA8\xF6\xFA\xC9\xF7\x41\xF3\xE7\xFA\xF6\x2D\x3A\xFE\xBB\xF1\xB6\x41\x49\x0E\xBB\x04\xC9\x0C\x48\x2D\x2C\x43\x06\xFC\x29\xF4\x33\x43\xBB\xBA\xF3\xBC\x2C\x48\x2D\xF2\x09\xCD\xDF\x40\xF6\x2F\x3D\x04\xF5\xF6\xDA\x30\x3E\x33\xE9\x1A\xFB\xFD\x39\xE9\x40\x39\x00\x05\xE9\xB6\xF1\xFE\x2C\x35\x3A\xBB\xD6\x02\xDB\x47\x43\x0F\xF7\x36\xAE\x0D\x39\x34\x2E\x41\xB2\xC3\xF1\xB6\x41\x49\x0E\xBB"
+#define _LEN_2D90879D 110
+#define _DEC_2D90879D_All_Executables____exe___dll___sys___Executables____exe___Dynamic_Link_Libraries____dll___System_Files____sys_( STR ) CStringDecoder::Decode( _T_2D90879D_All_Executables____exe___dll___sys___Executables____exe___Dynamic_Link_Libraries____dll___System_Files____sys_, _LEN_2D90879D, STR )
 
 // L. Spiro Memory Hacking Software X
 #define _T_0B4C2B0E_L__Spiro_Memory_Hacking_Software_X "\xD4\xFC\xF0\xEE\x02\x32\x00\x36\xF0\x15\x2E\x3B\x01\x0D\x40\xA8\x16\x31\xFE\xFD\x32\xFC\x2E\xF0\x1B\x38\x34\x06\x12\x28\xFA\x33\xF0\xF3"
@@ -136,10 +141,10 @@
 #define _LEN_2AD621EE 31
 #define _DEC_2AD621EE_Windows_10__Windows_Server_2016( STR ) CStringDecoder::Decode( _T_2AD621EE_Windows_10__Windows_Server_2016, _LEN_2AD621EE, STR )
 
-// All Executables (*.exe *.dll *.sys);;Executables (*.exe);;Dynamic-Link Libraries (*.dll);;System Files (*.sys)
-#define _T_2D90879D_All_Executables____exe___dll___sys___Executables____exe___Dynamic_Link_Libraries____dll___System_Files____sys_ "\xC9\x3A\x3C\xBB\xD7\x41\xF3\x2A\x45\x3C\x2A\x30\xFE\x00\x3A\xA8\xF6\xFA\xC9\xF7\x41\xF3\xE7\xFA\xF6\x2D\x3A\xFE\xBB\xF1\xB6\x41\x49\x0E\xBB\x04\xC9\x0C\x48\x2D\x2C\x43\x06\xFC\x29\xF4\x33\x43\xBB\xBA\xF3\xBC\x2C\x48\x2D\xF2\x09\xCD\xDF\x40\xF6\x2F\x3D\x04\xF5\xF6\xDA\x30\x3E\x33\xE9\x1A\xFB\xFD\x39\xE9\x40\x39\x00\x05\xE9\xB6\xF1\xFE\x2C\x35\x3A\xBB\xD6\x02\xDB\x47\x43\x0F\xF7\x36\xAE\x0D\x39\x34\x2E\x41\xB2\xC3\xF1\xB6\x41\x49\x0E\xBB"
-#define _LEN_2D90879D 110
-#define _DEC_2D90879D_All_Executables____exe___dll___sys___Executables____exe___Dynamic_Link_Libraries____dll___System_Files____sys_( STR ) CStringDecoder::Decode( _T_2D90879D_All_Executables____exe___dll___sys___Executables____exe___Dynamic_Link_Libraries____dll___System_Files____sys_, _LEN_2D90879D, STR )
+// byte
+#define _T_9DC09A6E_byte "\xEA\x47\x44\x00"
+#define _LEN_9DC09A6E 4
+#define _DEC_9DC09A6E_byte( STR ) CStringDecoder::Decode( _T_9DC09A6E_byte, _LEN_9DC09A6E, STR )
 
 // kibibyte
 #define _T_9B1794AD_kibibyte "\xF3\x37\x32\x04\xF4\x42\x02\x2C"
@@ -200,11 +205,6 @@
 #define _T_A5FD666B_EiB "\xCD\x37\x12"
 #define _LEN_A5FD666B 3
 #define _DEC_A5FD666B_EiB( STR ) CStringDecoder::Decode( _T_A5FD666B_EiB, _LEN_A5FD666B, STR )
-
-// byte
-#define _T_9DC09A6E_byte "\xEA\x47\x44\x00"
-#define _LEN_9DC09A6E 4
-#define _DEC_9DC09A6E_byte( STR ) CStringDecoder::Decode( _T_9DC09A6E_byte, _LEN_9DC09A6E, STR )
 
 // IMAGE_FILE_MACHINE_UNKNOWN
 #define _T_3BE1EBA6_IMAGE_FILE_MACHINE_UNKNOWN "\xD1\x1B\x11\xE2\xD7\x28\xD4\x10\x1C\x0D\x28\x1B\xD3\xDE\x0F\xD1\x1C\x15\xFA\xE7\x17\xD9\x15\x1F\x1F\x17"
@@ -375,6 +375,11 @@
 #define _T_4ACFE92C_IMAGE_FILE_LINE_NUMS_STRIPPED "\xD1\x1B\x11\xE2\xD7\x28\xD4\x10\x1C\x0D\x28\x1A\xDB\xE9\x0C\xE7\x1C\x25\xE8\xE5\x28\xE1\x1B\x22\x11\x19\x1E\xD7\xDF"
 #define _LEN_4ACFE92C 29
 #define _DEC_4ACFE92C_IMAGE_FILE_LINE_NUMS_STRIPPED( STR ) CStringDecoder::Decode( _T_4ACFE92C_IMAGE_FILE_LINE_NUMS_STRIPPED, _LEN_4ACFE92C, STR )
+
+// IMAGE_FILE_LOCAL_SYMS_STRIPPED
+#define _T_36012C69_IMAGE_FILE_LOCAL_SYMS_STRIPPED "\xD1\x1B\x11\xE2\xD7\x28\xD4\x10\x1C\x0D\x28\x1A\xE1\xDE\x08\xD4\x2D\x23\xF4\xDF\x1C\xED\x1A\x24\x1A\x12\x1E\xE2\xE0\x0B"
+#define _LEN_36012C69 30
+#define _DEC_36012C69_IMAGE_FILE_LOCAL_SYMS_STRIPPED( STR ) CStringDecoder::Decode( _T_36012C69_IMAGE_FILE_LOCAL_SYMS_STRIPPED, _LEN_36012C69, STR )
 
 // IMAGE_FILE_AGGRESIVE_WS_TRIM
 #define _T_C5765866_IMAGE_FILE_AGGRESIVE_WS_TRIM "\xD1\x1B\x11\xE2\xD7\x28\xD4\x10\x1C\x0D\x28\x0F\xD9\xE2\x19\xCD\x21\x19\xF1\xD7\x28\xE5\x1A\x2F\x1C\x1B\x17\xDF"
@@ -1045,11 +1050,6 @@
 #define _T_64C40597_IMAGE_SCN_MEM_WRITE "\xD1\x1B\x11\xE2\xD7\x28\xE1\x0A\x1E\x27\x16\x13\xDF\xFA\x1E\xDA\x17\x24\xE0"
 #define _LEN_64C40597 19
 #define _DEC_64C40597_IMAGE_SCN_MEM_WRITE( STR ) CStringDecoder::Decode( _T_64C40597_IMAGE_SCN_MEM_WRITE, _LEN_64C40597, STR )
-
-// IMAGE_FILE_LOCAL_SYMS_STRIPPED
-#define _T_36012C69_IMAGE_FILE_LOCAL_SYMS_STRIPPED "\xD1\x1B\x11\xE2\xD7\x28\xD4\x10\x1C\x0D\x28\x1A\xE1\xDE\x08\xD4\x2D\x23\xF4\xDF\x1C\xED\x1A\x24\x1A\x12\x1E\xE2\xE0\x0B"
-#define _LEN_36012C69 30
-#define _DEC_36012C69_IMAGE_FILE_LOCAL_SYMS_STRIPPED( STR ) CStringDecoder::Decode( _T_36012C69_IMAGE_FILE_LOCAL_SYMS_STRIPPED, _LEN_36012C69, STR )
 
 // RT_
 #define _T_B57AF7F9_RT_ "\xDA\x22\x2F"
@@ -2615,4 +2615,29 @@
 #define _T_3DC166BB_PATH "\xD8\x0F\x24\xE3"
 #define _LEN_3DC166BB 4
 #define _DEC_3DC166BB_PATH( STR ) CStringDecoder::Decode( _T_3DC166BB_PATH, _LEN_3DC166BB, STR )
+
+// ReadProcessMemory
+#define _T_F7C7AE42_ReadProcessMemory "\xDA\x33\x31\xFF\xE2\x3B\xFD\x2A\x35\x3B\x3C\x1B\xF7\x08\x36\xFA\x47"
+#define _LEN_F7C7AE42 17
+#define _DEC_F7C7AE42_ReadProcessMemory( STR ) CStringDecoder::Decode( _T_F7C7AE42_ReadProcessMemory, _LEN_F7C7AE42, STR )
+
+// WriteProcessMemory
+#define _T_4F58972E_WriteProcessMemory "\xDF\x40\x39\x0F\xF7\x19\x00\x36\x33\x2D\x3C\x41\xDF\x00\x34\xF7\x40\x49"
+#define _LEN_4F58972E 18
+#define _DEC_4F58972E_WriteProcessMemory( STR ) CStringDecoder::Decode( _T_4F58972E_WriteProcessMemory, _LEN_4F58972E, STR )
+
+// EnumProcesses
+#define _T_0509A21C_EnumProcesses "\xCD\x3C\x45\x08\xE2\x3B\xFD\x2A\x35\x3B\x3C\x33\x05"
+#define _LEN_0509A21C 13
+#define _DEC_0509A21C_EnumProcesses( STR ) CStringDecoder::Decode( _T_0509A21C_EnumProcesses, _LEN_0509A21C, STR )
+
+// K32EnumProcesses
+#define _T_0501393D_K32EnumProcesses "\xD3\x01\x02\xE0\x00\x3E\xFB\x17\x42\x37\x2C\x33\x05\x0E\x2C\xFB"
+#define _LEN_0501393D 16
+#define _DEC_0501393D_K32EnumProcesses( STR ) CStringDecoder::Decode( _T_0501393D_K32EnumProcesses, _LEN_0501393D, STR )
+
+// OpenProcess
+#define _T_DF27514B_OpenProcess "\xD7\x3E\x35\x09\xE2\x3B\xFD\x2A\x35\x3B\x3C"
+#define _LEN_DF27514B 11
+#define _DEC_DF27514B_OpenProcess( STR ) CStringDecoder::Decode( _T_DF27514B_OpenProcess, _LEN_DF27514B, STR )
 
