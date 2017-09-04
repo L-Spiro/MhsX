@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Windows.h>
+#include "../LSWin/LSWWin.h"
 #include "MXFile.h"
 
 namespace mx {

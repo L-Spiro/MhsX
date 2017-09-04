@@ -1,5 +1,6 @@
 #include "MXPeTab.h"
-#include <Windows.h>
+#include "../LSWin/LSWWin.h"
+#include "../Strings/MXStringDecoder.h"
 
 
 CPeTab::CPeTab( QWidget * _pwParent ) :
@@ -15,21 +16,31 @@ CPeTab::CPeTab( QWidget * _pwParent ) :
 	};*/
 
 	QList<QVariant> lRootData;
-    lRootData << "Field Name" << "Value" << "Offset" << "Raw Bytes" << "Description";
+    lRootData << _DEC_S_D902CC4C_Field_Name.c_str() <<
+		_DEC_S_DCB67730_Value.c_str() <<
+		_DEC_S_5EA6CFE6_Offset.c_str() <<
+		_DEC_S_3EF5AD3F_Raw_Bytes.c_str() <<
+		_DEC_S_EB78CFF1_Description.c_str();
 
 	//m_psimModel = new QStandardItemModel();
 	m_psimModel = new mx::CPeTreeModel( lRootData, nullptr );
-	//m_mpwUi.treeView->setStyleSheet( nullptr );
-	m_mpwUi.treeView->setModel( m_psimModel );
-	//int iWidth = m_mpwUi.treeView->columnWidth( 0 );
-	m_mpwUi.treeView->setColumnWidth( 0, 208 );
-	m_mpwUi.treeView->setColumnWidth( 1, 450 + 5 );
-	m_mpwUi.treeView->setColumnWidth( 2, 122 + 5 );
-	m_mpwUi.treeView->setColumnWidth( 3, 102 + 5 );
-	//m_mpwUi.treeView->resizeColumnToContents( 0 );
+	//m_mpwUi.tv->setStyleSheet( nullptr );
+	m_mpwUi.tv->setModel( m_psimModel );
+	
+	QFont fFont = m_mpwUi.tv->font();	// Setting the style resets the font.
+	m_mpwUi.tv->setAlternatingRowColors( true );
+	m_mpwUi.tv->setStyleSheet( "alternate-background-color: rgb(229, 245, 255);" );
+	m_mpwUi.tv->setFont( fFont );
 
+	//int iWidth = m_mpwUi.tv->columnWidth( 0 );
+	m_mpwUi.tv->setColumnWidth( 0, 208 );
+	m_mpwUi.tv->setColumnWidth( 1, 450 + 5 );
+	m_mpwUi.tv->setColumnWidth( 2, 122 + 5 );
+	m_mpwUi.tv->setColumnWidth( 3, 102 + 5 );
+	//m_mpwUi.tv->resizeColumnToContents( 0 );
+	
 	//m_psimModel->setHorizontalHeaderLabels( qslHeaders );
-	QHeaderView * phHeader = m_mpwUi.treeView->header();
+	QHeaderView * phHeader = m_mpwUi.tv->header();
 	phHeader->setTextElideMode( Qt::TextElideMode::ElideRight );
 
 }

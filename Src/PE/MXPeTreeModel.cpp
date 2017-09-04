@@ -1765,3 +1765,5 @@ namespace mx {
 	}
 
 }	// namespace mx
+
+#undef MX_PRINT_FILE_OFFSET

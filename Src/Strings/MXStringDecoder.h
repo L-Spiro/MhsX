@@ -33,6 +33,18 @@ namespace mx {
 			Decode( _pcIn, _sInLen, const_cast<_tOutType::value_type *>(_otRet.c_str()) );
 			return _otRet;
 		}
+
+		// Decodes to std::string, creating a new object.
+		static std::string		DecodeToString( const char * _pcIn, size_t _sInLen ) {
+			std::string sTemp;
+			return Decode( _pcIn, _sInLen, sTemp );
+		}
+
+		// Decodes to std::wstring, creating a new object.
+		static std::wstring		DecodeToWString( const char * _pcIn, size_t _sInLen ) {
+			std::wstring sTemp;
+			return Decode( _pcIn, _sInLen, sTemp );
+		}
 	};
 
 }	// namespace mx

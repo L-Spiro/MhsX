@@ -1,8 +1,23 @@
 #include "MXMhsX.h"
+#include "LSWin/MainWindow/LSWMainWindow.h"
 #include "System/MXSystem.h"
-#include <QtWidgets/QApplication>
+//#include <QtWidgets/QApplication>
 
 
+int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine, int _nCmdShow ) {
+	// Initialize the system.
+	mx::CSystem::InitSystem();
+
+	lsw::CMainWindow mwWindow( L"Agh", L"L. Spiro MHS X" );
+
+	MSG mMsg = {};
+	while ( ::GetMessageW( &mMsg, NULL, 0, 0 ) ) {
+		::TranslateMessage( &mMsg );
+		::DispatchMessageW( &mMsg );
+	}
+}
+
+/*
 int main( int _iArgs, char * _pcArgs[] ) {
 	// Initialize the system.
 	mx::CSystem::InitSystem();
@@ -11,7 +26,7 @@ int main( int _iArgs, char * _pcArgs[] ) {
 	CMain mxWindow;
 	mxWindow.show();
 	return aApp.exec();
-}
+}*/
 
 
 #if 0

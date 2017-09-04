@@ -2,6 +2,7 @@
 
 #include "FoundAddresses/MXFoundAddresses.h"
 #include "ExpEval/MXExpEvalDockWidget.h"
+#include "OpenProcess/MXOpenProcessUi.h"
 #include "PE/MXPeWorksUi.h"
 #include "ui_MXMhsX.h"
 #include <QStandardItemModel.h>
@@ -24,6 +25,7 @@ public :
 	VOID						CloseFoundAddress();
 	VOID						UpdateWindowChecks();
 
+
 	void						closeEvent( QCloseEvent * _pceEvent );
 
 private :
@@ -33,6 +35,7 @@ private :
 	CFoundAddressesDockWidget *	m_pfaFndAddr;
 	QStandardItemModel *		m_psimStoredAddressesModel;
 	CPe *						m_ppPeWorksWindow;
+	COp *						m_popOpenProcessWindow;
 
 
 private slots :
@@ -41,4 +44,5 @@ private slots :
 	void						toggleExpEval();
 	void						toggleFoundAddr();
 	void						showPeWorks();
+	void						showOpenProcess();
 };

@@ -1,7 +1,7 @@
 #pragma once
 
+#include "../LSWin/LSWWin.h"
 #include <vector>
-#include <Windows.h>
 
 namespace mx {
 

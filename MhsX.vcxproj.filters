@@ -87,6 +87,39 @@
     <Filter Include="Source Files\CodePages">
       <UniqueIdentifier>{d9f1f17b-2b0b-4119-86b6-55809c85a2f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\OpenProcess">
+      <UniqueIdentifier>{92c4fa9f-e43e-4ad4-8c34-e14f9abb5296}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\OpenProcess">
+      <UniqueIdentifier>{68aed861-47a5-499e-bcca-bf1d71d1e671}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\LSWin">
+      <UniqueIdentifier>{8725772e-c723-44a7-bd22-56ca6f0472f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\LSWin">
+      <UniqueIdentifier>{7608af41-aefe-4ca3-92ca-56a98252e2da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\LSWin\Widget">
+      <UniqueIdentifier>{7b3b16ba-6244-47fe-a01a-fdacc8d8bc40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\LSWin\Widget">
+      <UniqueIdentifier>{2d030d47-f074-4d5b-829f-166b3f2b1f85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\LSWin\Base">
+      <UniqueIdentifier>{eaac15c5-f247-483e-8d52-bf77a36097c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\LSWin\Base">
+      <UniqueIdentifier>{9c820d4a-8a60-4ab6-99ab-e7caf01f2032}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\LSWin\MainWindow">
+      <UniqueIdentifier>{56db50b8-78f1-4302-a0ca-3bf97722ecd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\LSWin\MainWindow">
+      <UniqueIdentifier>{b80c2f61-fe3c-459b-8f3a-96a11acf1b5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\LSWin\Helpers">
+      <UniqueIdentifier>{96c74dee-f7c9-4e22-8019-7a1f7eb045f6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeneratedFiles\qrc_MXMhsX.cpp">
@@ -179,6 +212,24 @@
     <ClCompile Include="Src\CodePages\MXCodePages.cpp">
       <Filter>Source Files\CodePages</Filter>
     </ClCompile>
+    <ClCompile Include="Src\OpenProcess\MXOpenProcessUi.cpp">
+      <Filter>Source Files\OpenProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MXOpenProcessUi.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_MXOpenProcessUi.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\LSWin\Widget\LSWWidget.cpp">
+      <Filter>Source Files\LSWin\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\LSWin\Base\LSWBase.cpp">
+      <Filter>Source Files\LSWin\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\LSWin\MainWindow\LSWMainWindow.cpp">
+      <Filter>Source Files\LSWin\MainWindow</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MXMhsX.qrc">
@@ -216,6 +267,12 @@
     </CustomBuild>
     <CustomBuild Include="Src\TreeViews\MXTreeModel.h">
       <Filter>Header Files\TreeViews</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\OpenProcess\MXOpenProcessUi.h">
+      <Filter>Header Files\OpenProcess</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UI\MXOp.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -269,6 +326,24 @@
     </ClInclude>
     <ClInclude Include="Src\CodePages\MXCodePages.h">
       <Filter>Header Files\CodePages</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_MXOp.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\LSWin\Widget\LSWWidget.h">
+      <Filter>Header Files\LSWin\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\LSWin\LSWWin.h">
+      <Filter>Header Files\LSWin</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\LSWin\Base\LSWBase.h">
+      <Filter>Header Files\LSWin\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\LSWin\MainWindow\LSWMainWindow.h">
+      <Filter>Header Files\LSWin\MainWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\LSWin\Helpers\LSWHelpers.h">
+      <Filter>Header Files\LSWin\Helpers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

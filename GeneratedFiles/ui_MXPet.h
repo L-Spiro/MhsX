@@ -23,29 +23,29 @@ QT_BEGIN_NAMESPACE
 class Ui_PeW
 {
 public:
-    QHBoxLayout *horizontalLayout_2;
-    QHBoxLayout *horizontalLayout;
-    QTreeView *treeView;
+    QHBoxLayout *hla2;
+    QHBoxLayout *hla;
+    QTreeView *tv;
 
     void setupUi(QWidget *PeW)
     {
         if (PeW->objectName().isEmpty())
             PeW->setObjectName(QStringLiteral("PeW"));
         PeW->resize(400, 300);
-        horizontalLayout_2 = new QHBoxLayout(PeW);
-        horizontalLayout_2->setSpacing(3);
-        horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
-        horizontalLayout_2->setContentsMargins(0, 0, 0, 0);
-        horizontalLayout = new QHBoxLayout();
-        horizontalLayout->setSpacing(3);
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        treeView = new QTreeView(PeW);
-        treeView->setObjectName(QStringLiteral("treeView"));
+        hla2 = new QHBoxLayout(PeW);
+        hla2->setSpacing(3);
+        hla2->setObjectName(QStringLiteral("hla2"));
+        hla2->setContentsMargins(0, 0, 0, 0);
+        hla = new QHBoxLayout();
+        hla->setSpacing(3);
+        hla->setObjectName(QStringLiteral("hla"));
+        tv = new QTreeView(PeW);
+        tv->setObjectName(QStringLiteral("tv"));
 
-        horizontalLayout->addWidget(treeView);
+        hla->addWidget(tv);
 
 
-        horizontalLayout_2->addLayout(horizontalLayout);
+        hla2->addLayout(hla);
 
 
         retranslateUi(PeW);

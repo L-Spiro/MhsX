@@ -27,6 +27,9 @@ namespace mx {
 	// OpenProcess().
 	LPFN_OPENPROCESS CSystem::m_pfOpenProcess = nullptr;
 
+	// OpenThread().
+	LPFN_OPENTHREAD CSystem::m_pfOpenThread = nullptr;
+
 	// == Types.
 	typedef BOOL (WINAPI * LPFN_ISWOW64PROCESS)( HANDLE, PBOOL );
 	typedef VOID (WINAPI * LPFN_GETSYSTEMINFO)( LPSYSTEM_INFO );
@@ -91,9 +94,22 @@ namespace mx {
 
 	// Gets the path to this .EXE in UTF-16.
 	std::wstring CSystem::GetSelfPathW() {
-		DWORD dwLen = GetSelfPathLength();
+		return GetModulePathW( nullptr );
+	}
+
+	// Gets the path to a given loaded DLL given its UTF-8 name.
+	std::string CSystem::GetModulePath( const CHAR * _pcPath ) {
+		return CUtilities::WStringToString( GetModulePathW( CUtilities::StringToWString( _pcPath ).c_str() ) );
+	}
+
+	// Gets the path to a given loaded DLL given its UTF-16 name.
+	std::wstring CSystem::GetModulePathW( const WCHAR * _pwcPath ) {
+		HMODULE hMod = _pwcPath ? ::GetModuleHandleW( _pwcPath ) : NULL;
+
+		DWORD dwLen = GetModulePathLength( _pwcPath );
 		WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[dwLen];
-		::GetModuleFileNameW( NULL, pwcBuffer, dwLen );
+		if ( !pwcBuffer ) { return std::wstring(); }
+		dwLen = ::GetModuleFileNameW( hMod, pwcBuffer, dwLen );
 		while ( dwLen > 1 && pwcBuffer[dwLen-1] != L'\\' ) {
 			pwcBuffer[(dwLen--)-1] = L'\0';
 		}
@@ -105,9 +121,15 @@ namespace mx {
 
 	// Gets the length of the string needed to hold the path to this executable, including the terminating NULL.
 	DWORD CSystem::GetSelfPathLength() {
+		return GetModulePathLength( nullptr );
+	}
+
+	// Gets the length of the path of a loaded DLL, including the terminating NULL.
+	DWORD CSystem::GetModulePathLength( const WCHAR * _pwcPath ) {
+		HMODULE hMod = _pwcPath ? ::GetModuleHandleW( _pwcPath ) : NULL;
 		for ( DWORD I = 1024; TRUE; I += 1024 ) {
 			WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[I];
-			DWORD dwLen = ::GetModuleFileNameW( NULL, pwcBuffer, I );
+			DWORD dwLen = ::GetModuleFileNameW( hMod, pwcBuffer, I );
 			::ZeroMemory( pwcBuffer, dwLen );
 			delete [] pwcBuffer;
 			if ( dwLen < I ) {
@@ -125,6 +147,7 @@ namespace mx {
 	std::wstring CSystem::GetCurDirW() {
 		DWORD dwLen = ::GetCurrentDirectoryW( 0, NULL ) + 1;
 		WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[dwLen];
+		if ( !pwcBuffer ) { return std::wstring(); }
 		dwLen = ::GetCurrentDirectoryW( dwLen, pwcBuffer );
 		std::wstring wTemp = pwcBuffer;
 		::ZeroMemory( pwcBuffer, dwLen );
@@ -141,6 +164,7 @@ namespace mx {
 	std::wstring CSystem::GetSystemDirW() {
 		DWORD dwLen = ::GetSystemDirectoryW( NULL, 0 ) + 1;
 		WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[dwLen];
+		if ( !pwcBuffer ) { return std::wstring(); }
 		dwLen = ::GetSystemDirectoryW( pwcBuffer, dwLen );
 		std::wstring wTemp = pwcBuffer;
 		::ZeroMemory( pwcBuffer, dwLen );
@@ -157,6 +181,7 @@ namespace mx {
 	std::wstring CSystem::GetWindowsDirW() {
 		DWORD dwLen = ::GetWindowsDirectoryW( NULL, 0 ) + 1;
 		WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[dwLen];
+		if ( !pwcBuffer ) { return std::wstring(); }
 		dwLen = ::GetWindowsDirectoryW( pwcBuffer, dwLen );
 		std::wstring wTemp = pwcBuffer;
 		::ZeroMemory( pwcBuffer, dwLen );
@@ -217,8 +242,15 @@ namespace mx {
 	}
 
 	// Gets all of the search paths for a DLL in the order in which they should be searched.
-	std::vector<std::string> CSystem::DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::string> &_vResults ) {
+	std::vector<std::string> CSystem::DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::string> &_vResults, BOOL _bIncludeLoadedModulePath ) {
 		std::string sDllUtf8 = CUtilities::WStringToString( _pwcDll );
+		if ( _bIncludeLoadedModulePath ) {
+			// If the module is already loaded by us, put it in front of the list.
+			std::string sLoadedDir = GetModulePath( sDllUtf8.c_str() );
+			if ( sLoadedDir.size() ) {
+				_vResults.push_back( sLoadedDir );
+			}
+		}
 		_vResults.push_back( GetSelfPath() );
 		_vResults.push_back( GetCurDir() );
 		_vResults.push_back( GetSystemDir() );
@@ -231,8 +263,15 @@ namespace mx {
 	}
 
 	// Gets all of the search paths for a DLL in the order in which they should be searched.
-	std::vector<std::wstring> CSystem::DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::wstring> &_vResults ) {
+	std::vector<std::wstring> CSystem::DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::wstring> &_vResults, BOOL _bIncludeLoadedModulePath ) {
 		std::wstring sDllUtf8 = _pwcDll;
+		if ( _bIncludeLoadedModulePath ) {
+			// If the module is already loaded by us, put it in front of the list.
+			std::wstring sLoadedDir = GetModulePathW( sDllUtf8.c_str() );
+			if ( sLoadedDir.size() ) {
+				_vResults.push_back( sLoadedDir );
+			}
+		}
 		_vResults.push_back( GetSelfPathW() );
 		_vResults.push_back( GetCurDirW() );
 		_vResults.push_back( GetSystemDirW() );
@@ -338,6 +377,7 @@ namespace mx {
 			m_pfEnumProcesses = reinterpret_cast<LPFN_ENUMPROCESSES>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_0501393D_K32EnumProcesses, _LEN_0501393D, poObj ));
 		}
 		m_pfOpenProcess = reinterpret_cast<LPFN_OPENPROCESS>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_DF27514B_OpenProcess, _LEN_DF27514B, poObj ));
+		m_pfOpenThread = reinterpret_cast<LPFN_OPENTHREAD>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_B85486FF_OpenThread, _LEN_B85486FF, poObj ));
 
 #ifdef _DEBUG
 		LPVOID pfTemp = ::GetProcAddress( ::GetModuleHandleA( szKernel32 ), "ReadProcessMemory" );
@@ -351,6 +391,8 @@ namespace mx {
 		assert( pfTemp == m_pfEnumProcesses );
 		pfTemp = ::GetProcAddress( ::GetModuleHandleA( szKernel32 ), "OpenProcess" );
 		assert( pfTemp == m_pfOpenProcess );
+		pfTemp = ::GetProcAddress( ::GetModuleHandleA( szKernel32 ), "OpenThread" );
+		assert( pfTemp == m_pfOpenThread );
 #endif	// #ifdef _DEBUG
 
 		::ZeroMemory( szKernel32, MX_ELEMENTS( szKernel32 ) );

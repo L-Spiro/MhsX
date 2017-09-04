@@ -1,8 +1,8 @@
 #pragma once
 
+#include "../LSWin/LSWWin.h"
 #include "../PE/MXPeStructs.h"
 #include <string>
-#include <Windows.h>
 
 // == Macros.
 #ifndef MX_COUNT_OF

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "../Files/MXFile.h"
+#include "../LSWin/LSWWin.h"
 #include "../PE/MXPeObject.h"
 #include <string>
-#include <Windows.h>
 #include <vector>
 
 // == Macros.
@@ -17,6 +17,8 @@ typedef BOOL (WINAPI * LPFN_READPROCESSMEMORY)( HANDLE, LPCVOID, LPVOID, SIZE_T,
 typedef BOOL (WINAPI * LPFN_WRITEPROCESSMEMORY)( HANDLE, LPVOID, LPCVOID, SIZE_T, SIZE_T * );
 typedef BOOL (WINAPI * LPFN_ENUMPROCESSES)( DWORD *, DWORD, DWORD * );
 typedef HANDLE (WINAPI * LPFN_OPENPROCESS)( DWORD, BOOL, DWORD );
+typedef HANDLE (WINAPI * LPFN_OPENTHREAD)( DWORD, BOOL, DWORD );
+
 
 
 namespace mx {
@@ -42,8 +44,17 @@ namespace mx {
 		// Gets the path to this .EXE in UTF-16.
 		static std::wstring				GetSelfPathW();
 
+		// Gets the path to a given loaded DLL given its UTF-8 name.
+		static std::string				GetModulePath( const CHAR * _pcPath );
+
+		// Gets the path to a given loaded DLL given its UTF-16 name.
+		static std::wstring				GetModulePathW( const WCHAR * _pwcPath );
+
 		// Gets the length of the string needed to hold the path to this executable, including the terminating NULL.
 		static DWORD					GetSelfPathLength();
+
+		// Gets the length of the path of a loaded DLL, including the terminating NULL.
+		static DWORD					GetModulePathLength( const WCHAR * _pwcPath );
 
 		// Gets the current directory in UTF-8.
 		static std::string				GetCurDir();
@@ -71,10 +82,10 @@ namespace mx {
 		static size_t					GetPathEnvW( std::vector<std::wstring> &_vReturn ) { return GetPathEnv( _vReturn ); }
 
 		// Gets all of the search paths for a DLL in the order in which they should be searched.
-		static std::vector<std::string>	DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::string> &_vResults );
+		static std::vector<std::string>	DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::string> &_vResults, BOOL _bIncludeLoadedModulePath = TRUE );
 
 		// Gets all of the search paths for a DLL in the order in which they should be searched.
-		static std::vector<std::wstring>DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::wstring> &_vResults );
+		static std::vector<std::wstring>DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::wstring> &_vResults, BOOL _bIncludeLoadedModulePath = TRUE );
 
 		// Loads a DLL by name.  Uses the normal search paths DLL's use (local directory, working directory, system directory, windows directory, PATH directories).
 		static BOOL						FindDll( const CHAR * _pcDll, CFile &_fReturn );
@@ -122,6 +133,9 @@ namespace mx {
 
 		// OpenProcess().
 		static LPFN_OPENPROCESS			m_pfOpenProcess;
+
+		// OpenThread().
+		static LPFN_OPENTHREAD			m_pfOpenThread;
 
 
 		// == Functions.

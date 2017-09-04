@@ -1,9 +1,9 @@
 #include "MXPeWorksUi.h"
+#include "../LSWin/LSWWin.h"
 #include "../Strings/MXStringDecoder.h"
 #include <cassert>
 #include <QErrorMessage>
 #include <QFileDialog>
-#include <Windows.h>
 
 
 CPe::CPe( QWidget * _pwParent ) :
@@ -26,9 +26,9 @@ void CPe::openPe() {
 	{
 		CHAR szOpenPe[_LEN_2D715017+1];
 		CHAR szExec[_LEN_2D90879D+1];
-		strFile = QFileDialog::getOpenFileName( this, tr( mx::_DEC_2D715017_Open_PE_File( szOpenPe ) ),
+		strFile = QFileDialog::getOpenFileName( this, tr( _DEC_2D715017_Open_PE_File( szOpenPe ) ),
 			m_sLastFile,
-			tr( mx::_DEC_2D90879D_All_Executables____exe___dll___sys___Executables____exe___Dynamic_Link_Libraries____dll___System_Files____sys_( szExec ) ) );
+			tr( _DEC_2D90879D_All_Executables____exe___dll___sys___Executables____exe___Dynamic_Link_Libraries____dll___System_Files____sys_( szExec ) ) );
 		::ZeroMemory( szOpenPe, sizeof( szOpenPe ) );
 		::ZeroMemory( szExec, sizeof( szExec ) );
 	}

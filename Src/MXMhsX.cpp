@@ -5,9 +5,11 @@ CMain::CMain( QWidget * _pwParent ) :
 	QMainWindow( _pwParent ),
 	m_pdwExpEval( nullptr ),
 	m_pfaFndAddr( nullptr ),
-	m_ppPeWorksWindow( nullptr ) {
+	m_ppPeWorksWindow( nullptr ),
+	m_popOpenProcessWindow( nullptr ) {
 	m_mcUi.setupUi( this );
 
+	//this->setStyleSheet("alternate-background-color: yellow;background-color: red;");
 
 	// background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:1, y2:0, stop:0 rgba(168, 168, 168, 255), stop:0.25 rgba(192, 192, 192, 255), stop:1 rgba(224, 224, 224, 255));
 	// QTabWidget { background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:1, y2:0, stop:0 rgba(168, 168, 168, 255), stop:0.25 rgba(192, 192, 192, 255), stop:1 rgba(224, 224, 224, 255)); }
@@ -28,6 +30,7 @@ CMain::CMain( QWidget * _pwParent ) :
 	ShowExpEval();
 	ShowFoundAddress();
 
+	QObject::connect( m_mcUi.actionOpen_Process, SIGNAL( triggered() ), this, SLOT( showOpenProcess() ) );
 	QObject::connect( m_mcUi.actionShow_All, SIGNAL( triggered() ), this, SLOT( showAll() ) );
 	QObject::connect( m_mcUi.action_Expression_Evaluator, SIGNAL( triggered() ), this, SLOT( toggleExpEval() ) );
 	QObject::connect( m_mcUi.action_Found_Addresses, SIGNAL( triggered() ), this, SLOT( toggleFoundAddr() ) );
@@ -144,5 +147,14 @@ void CMain::showPeWorks() {
 	}
 	if ( m_ppPeWorksWindow ) {
 		m_ppPeWorksWindow->show();
+	}
+}
+
+void CMain::showOpenProcess() {
+	if ( !m_popOpenProcessWindow ) {
+		m_popOpenProcessWindow = new COp( this );
+	}
+	if ( m_popOpenProcessWindow ) {
+		m_popOpenProcessWindow->show();
 	}
 }
