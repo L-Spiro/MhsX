@@ -1,5 +1,12 @@
 #pragma once
 
+#include "LSWin/LSWWin.h"
+
+
+
+
+// =====
+
 #include "FoundAddresses/MXFoundAddresses.h"
 #include "ExpEval/MXExpEvalDockWidget.h"
 #include "OpenProcess/MXOpenProcessUi.h"

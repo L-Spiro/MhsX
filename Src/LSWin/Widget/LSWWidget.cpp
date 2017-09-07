@@ -73,8 +73,6 @@ namespace lsw {
 				if ( !::IsIconic( _hWnd ) ) {
 					::GetWindowRect( _hWnd, &pmwThis->m_rRect );
 					::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
-					/*POINT pClientToScreen = pmwThis->m_rClientRect.UpperLeft();
-					::ClientToScreen( _hWnd, &pClientToScreen );*/
 					POINTS pPoint = MAKEPOINTS( _lParam );
 					LSW_HANDLED hHandled = pmwThis->Move( pPoint.x, pPoint.y );
 					if ( hHandled == LSW_H_HANDLED ) { return 0; }

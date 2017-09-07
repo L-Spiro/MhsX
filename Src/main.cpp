@@ -1,12 +1,26 @@
 #include "MXMhsX.h"
 #include "LSWin/MainWindow/LSWMainWindow.h"
 #include "System/MXSystem.h"
+
+#include "EEExpEval.h"
+#include "EEExpEvalContainer.h"
+#include "EEExpEvalLexer.h"
+#include "Gen/EEExpEvalParser.h"
+#include <sstream>
 //#include <QtWidgets/QApplication>
 
 
 int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine, int _nCmdShow ) {
 	// Initialize the system.
 	mx::CSystem::InitSystem();
+
+	{
+		std::istringstream sStream( "02356.8 +2" );
+		ee::CExpEvalLexer eelLexer( &sStream );
+		ee::CExpEvalContainer eecContainer( &eelLexer );
+		ee::CExpEvalParser eepParser( &eelLexer, &eecContainer );
+		int iRet = eepParser.parse();
+	}
 
 	lsw::CMainWindow mwWindow( L"Agh", L"L. Spiro MHS X" );
 

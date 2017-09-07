@@ -1,0 +1,75 @@
+#pragma once
+
+#include "EEExpEval.h"
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// MACROS
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+#ifndef yy
+#define yy																ee
+#endif	// #ifndef yy
+#ifdef YYSTYPE
+#undef YYSTYPE
+#endif	// #ifdef YYSTYPE
+#define YYSTYPE															EE_SYNTAX_NODES
+
+
+namespace ee {
+
+	// == Node types.
+	enum EE_NODES {
+		EE_N_NUMERICCONSTANT,
+		EE_N_IDENTIFIER,
+		EE_N_ADDRESS,
+		EE_N_MEMBERACCESS,
+		EE_N_UNARY,
+		EE_N_OP,
+		EE_N_CONDITIONAL,
+	};
+
+	// Constant types.
+	enum EE_NUM_CONSTANTS {
+		EE_NC_SIGNED,
+		EE_NC_UNSIGNED,
+		EE_NC_FLOATING,
+		EE_NC_INVALID,
+	};
+
+	// Cast types.
+	enum EE_CAST_TYPES {
+		EE_CT_UINT8,
+		EE_CT_UINT16,
+		EE_CT_UINT32,
+		EE_CT_UINT64,
+		EE_CT_FLOAT,
+		EE_CT_DOUBLE,
+	};
+
+	union YYSTYPE {
+		size_t															sStringIndex;						// String index.
+		uint32_t														ui32Unary;							// Unary operator.
+		struct EE_NODE_DATA {
+			EE_NODES													nType;								// Type of the node.
+			size_t														sNodeIndex;							// Index of the node in the stack of nodes.
+			union {
+				uint64_t												ui64Val;							// 64-bit unsigned integer value.
+				int64_t													i64Val;								// 64-bit signed integer value.
+				double													dVal;								// Double value.
+				size_t													sStringIndex;						// Index of the string/identifier.
+				size_t													sNodeIndex;							// When the index of another node is needed.
+			}															u;
+			union {
+				EE_NUM_CONSTANTS										ncConstType;						// Type of numeric constant.
+				EE_CAST_TYPES											ctCast;								// Casting to a type.
+				size_t													sStringIndex;						// Index of the string.
+				size_t													sNodeIndex;							// Index of a node.
+				uint32_t												ui32Op;								// Operator.
+			}															v;
+			union {
+				size_t													sNodeIndex;							// Node index.
+			}															w;
+			
+		}																ndData;
+	};
+}	// namespace ee

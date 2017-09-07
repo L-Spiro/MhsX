@@ -1,0 +1,2 @@
+call EEExpEvalLexBuild.bat
+call EEExpEvalSyntaxBuild.bat
