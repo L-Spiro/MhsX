@@ -138,12 +138,55 @@ namespace yy {
      EE_OB_FLOAT = 278,
      EE_OB_DOUBLE = 279,
      EE_OB_DWORD = 280,
-     EE_OR = 281,
-     EE_AND = 282,
-     EE_LOG_NOT = 283,
-     EE_UNARY_1SCOMPL = 284,
-     EE_UPLUS = 285,
-     EE_UMINUS = 286
+     EE_COS = 281,
+     EE_SIN = 282,
+     EE_TAN = 283,
+     EE_ACOS = 284,
+     EE_ASIN = 285,
+     EE_ATAN = 286,
+     EE_ATAN2 = 287,
+     EE_COSH = 288,
+     EE_SINH = 289,
+     EE_TANH = 290,
+     EE_ACOSH = 291,
+     EE_ASINH = 292,
+     EE_ATANH = 293,
+     EE_EXP = 294,
+     EE_LOG = 295,
+     EE_LOG10 = 296,
+     EE_LOG2 = 297,
+     EE_EXP2 = 298,
+     EE_EXPM1 = 299,
+     EE_ILOGB = 300,
+     EE_LOG1P = 301,
+     EE_LOGB = 302,
+     EE_POW = 303,
+     EE_SQRT = 304,
+     EE_CBRT = 305,
+     EE_HYPOT = 306,
+     EE_TGAMMA = 307,
+     EE_LGAMMA = 308,
+     EE_CEIL = 309,
+     EE_FLOOR = 310,
+     EE_MOD = 311,
+     EE_TRUNC = 312,
+     EE_ROUND = 313,
+     EE_NEARBYINT = 314,
+     EE_REMAINDER = 315,
+     EE_REMQUO = 316,
+     EE_NEXTAFTER = 317,
+     EE_NEXTTOWARD = 318,
+     EE_DIM = 319,
+     EE_MAX = 320,
+     EE_MIN = 321,
+     EE_ABS = 322,
+     EE_MADD = 323,
+     EE_OR = 324,
+     EE_AND = 325,
+     EE_LOG_NOT = 326,
+     EE_UNARY_1SCOMPL = 327,
+     EE_UPLUS = 328,
+     EE_UMINUS = 329
    };
 
     };
@@ -240,7 +283,7 @@ namespace yy {
     static const unsigned char yytable_[];
     static const signed char yytable_ninf_;
 
-    static const signed char yycheck_[];
+    static const unsigned char yycheck_[];
 
     /// For a state, its accessing symbol.
     static const unsigned char yystos_[];

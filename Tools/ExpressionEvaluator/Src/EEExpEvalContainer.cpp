@@ -1,8 +1,58 @@
 #include "EEExpEvalContainer.h"
+#include "Gen/EEExpEvalParser.h"
 
 namespace ee {
 
 	// == Function.
+	// Gets the type to use between 2 given types.
+	EE_NUM_CONSTANTS CExpEvalContainer::GetCastType( EE_NUM_CONSTANTS _ncLeft, EE_NUM_CONSTANTS _ncRight ) {
+		return _ncLeft > _ncRight ? _ncLeft : _ncRight;
+	}
+
+	// Converts a result to a given type.
+	CExpEvalContainer::EE_RESULT CExpEvalContainer::ConvertResult( const EE_RESULT &_rRes, EE_NUM_CONSTANTS _ncType ) {
+		if ( _rRes.ncType == _ncType ) { return _rRes; }
+		EE_RESULT rRes;
+		rRes.ncType = _ncType;
+		if ( _rRes.ncType == EE_NC_FLOATING ) {
+			switch ( _ncType ) {
+				case EE_NC_SIGNED : {
+					rRes.u.i64Val = static_cast<int64_t>(_rRes.u.dVal);
+					break;
+				}
+				case EE_NC_UNSIGNED : {
+					rRes.u.ui64Val = static_cast<uint64_t>(_rRes.u.dVal);
+					break;
+				}
+			}
+		}
+		else if ( _rRes.ncType == EE_NC_SIGNED ) {
+			switch ( _ncType ) {
+				case EE_NC_UNSIGNED : {
+					rRes.u.ui64Val = static_cast<uint64_t>(_rRes.u.i64Val);
+					break;
+				}
+				case EE_NC_FLOATING : {
+					rRes.u.dVal = static_cast<double>(_rRes.u.i64Val);
+					break;
+				}
+			}
+		}
+		else if ( _rRes.ncType == EE_NC_UNSIGNED ) {
+			switch ( _ncType ) {
+				case EE_NC_FLOATING : {
+					rRes.u.dVal = static_cast<double>(_rRes.u.ui64Val);
+					break;
+				}
+				case EE_NC_SIGNED : {
+					rRes.u.i64Val = static_cast<int64_t>(_rRes.u.ui64Val);
+					break;
+				}
+			}
+		}
+		return rRes;
+	}
+
 	// Decodes a string.
 	size_t CExpEvalContainer::CreateString( const char * _pcText ) {
 		std::string sTemp = DecodeEscapes( RemoveQuotes( _pcText, std::strlen( _pcText ) ) );
@@ -127,6 +177,23 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
+	// Create a 1-parm intrinsic.
+	void CExpEvalContainer::CreateIntrinsic1( uint32_t _uiIntrinsic, const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_INTRINSIC_1;
+		_ndNode.u.ui32Intrinsic = _uiIntrinsic;
+		_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Create a 2-parm intrinsic.
+	void CExpEvalContainer::CreateIntrinsic2( uint32_t _uiIntrinsic, const YYSTYPE::EE_NODE_DATA &_ndExp0, const YYSTYPE::EE_NODE_DATA &_ndExp1, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_INTRINSIC_2;
+		_ndNode.u.ui32Intrinsic = _uiIntrinsic;
+		_ndNode.v.sNodeIndex = _ndExp0.sNodeIndex;
+		_ndNode.w.sNodeIndex = _ndExp1.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
 	// Sets the translation-unit node.
 	void CExpEvalContainer::SetTrans( YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		m_sTrans = _ndNode.sNodeIndex;
@@ -146,6 +213,217 @@ namespace ee {
 
 		m_vStrings.push_back( _sText );
 		return m_vStrings.size() - 1;
+	}
+
+	// Resolves a node.
+	bool CExpEvalContainer::ResolveNode( size_t _sNode, EE_RESULT &_rRes ) {
+		if ( _sNode >= m_vNodes.size() ) { return false; }
+		YYSTYPE::EE_NODE_DATA & ndNode = m_vNodes[_sNode];
+
+		switch ( ndNode.nType ) {
+			case EE_N_NUMERICCONSTANT : {
+				_rRes.ncType = ndNode.v.ncConstType;
+				switch ( ndNode.v.ncConstType ) {
+					case EE_NC_UNSIGNED : {
+						_rRes.u.ui64Val = ndNode.u.ui64Val;
+						break;
+					}
+					case EE_NC_SIGNED : {
+						_rRes.u.i64Val = ndNode.u.i64Val;
+						break;
+					}
+					case EE_NC_FLOATING : {
+						_rRes.u.dVal = ndNode.u.dVal;
+						break;
+					}
+				}
+				return true;
+			}
+			case EE_N_IDENTIFIER : {
+				return false; // TODO.
+			}
+			case EE_N_ADDRESS : {
+				return false; // TODO.
+			}
+			case EE_N_MEMBERACCESS : {
+				return false; // TODO.
+			}
+			case EE_N_UNARY : {
+				EE_RESULT rTemp;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTemp ) ) { return false; }
+				switch ( ndNode.v.ui32Op ) {
+					case '+' : {
+						_rRes = rTemp;
+						return true;
+					}
+					case '-' : {
+						switch ( rTemp.ncType ) {
+							case EE_NC_SIGNED : {
+								_rRes.ncType = rTemp.ncType;
+								_rRes.u.i64Val = -rTemp.u.i64Val;
+								return true;
+							}
+							case EE_NC_UNSIGNED : {
+								rTemp = ConvertResult( rTemp, EE_NC_SIGNED );
+								_rRes.ncType = rTemp.ncType;
+								_rRes.u.i64Val = -rTemp.u.i64Val;
+								return true;
+							}
+							case EE_NC_FLOATING : {
+								_rRes.ncType = rTemp.ncType;
+								_rRes.u.dVal = -rTemp.u.dVal;
+								return true;
+							}
+							default : { return false; }
+						}
+						return false;
+					}
+					case '~' : {
+						switch ( rTemp.ncType ) {
+							case EE_NC_SIGNED : {
+								_rRes.ncType = rTemp.ncType;
+								_rRes.u.i64Val = ~rTemp.u.i64Val;
+								return true;
+							}
+							case EE_NC_UNSIGNED : {
+								_rRes.ncType = rTemp.ncType;
+								_rRes.u.ui64Val = ~rTemp.u.ui64Val;
+								return true;
+							}
+							case EE_NC_FLOATING : {
+								return false;
+							}
+							default : { return false; }
+						}
+						return false;
+					}
+					case '!' : {
+						switch ( rTemp.ncType ) {
+							case EE_NC_SIGNED : {
+								_rRes.ncType = rTemp.ncType;
+								_rRes.u.i64Val = !rTemp.u.i64Val;
+								return true;
+							}
+							case EE_NC_UNSIGNED : {
+								_rRes.ncType = rTemp.ncType;
+								_rRes.u.ui64Val = !rTemp.u.ui64Val;
+								return true;
+							}
+							case EE_NC_FLOATING : {
+								_rRes.ncType = EE_NC_UNSIGNED;
+								_rRes.u.ui64Val = !rTemp.u.dVal;
+								return false;
+							}
+							default : { return false; }
+						}
+						return false;
+					}
+					default : { return false; }
+				}
+				return false;
+			}
+			case EE_N_OP : {
+				EE_RESULT rLeft, rRight;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rLeft ) ) { return false; }
+				if ( !ResolveNode( ndNode.w.sNodeIndex, rRight ) ) { return false; }
+				_rRes.ncType = GetCastType( rLeft.ncType, rRight.ncType );
+				rLeft = ConvertResult( rLeft, _rRes.ncType );
+				rRight = ConvertResult( rRight, _rRes.ncType );
+#define EE_OP( MEMBER, CASE, OP )								\
+	case CASE : {												\
+		_rRes.u.MEMBER = rLeft.u.MEMBER OP rRight.u.MEMBER;		\
+		return true;											\
+	}
+#define EE_OP_BOOL( MEMBER, CASE, OP )							\
+	case CASE : {												\
+		_rRes.ncType = EE_NC_UNSIGNED;							\
+		_rRes.u.ui64Val = rLeft.u.MEMBER OP rRight.u.MEMBER;	\
+		return true;											\
+	}
+#define EE_INT_CHECK( CASE, MEMBER )										\
+	case CASE : {															\
+		switch ( ndNode.v.ui32Op ) {										\
+			EE_OP( MEMBER, '*', * )											\
+			EE_OP( MEMBER, '/', / )											\
+			EE_OP( MEMBER, '%', % )											\
+			EE_OP( MEMBER, '+', + )											\
+			EE_OP( MEMBER, '-', - )											\
+			EE_OP( MEMBER, CExpEvalParser::token::EE_RIGHT_OP, >> )			\
+			EE_OP( MEMBER, CExpEvalParser::token::EE_LEFT_OP, << )			\
+			EE_OP( MEMBER, '&', & )											\
+			EE_OP( MEMBER, '^', ^ )											\
+			EE_OP( MEMBER, '|', | )											\
+			EE_OP_BOOL( MEMBER, '<', < )									\
+			EE_OP_BOOL( MEMBER, '>', > )									\
+			EE_OP_BOOL( MEMBER, CExpEvalParser::token::EE_REL_LE, <= )		\
+			EE_OP_BOOL( MEMBER, CExpEvalParser::token::EE_REL_GE, >= )		\
+			EE_OP_BOOL( MEMBER, CExpEvalParser::token::EE_EQU_E, == )		\
+			EE_OP_BOOL( MEMBER, CExpEvalParser::token::EE_EQU_NE, != )		\
+			EE_OP_BOOL( MEMBER, CExpEvalParser::token::EE_AND, && )			\
+			EE_OP_BOOL( MEMBER, CExpEvalParser::token::EE_OR, || )			\
+			default : { return false; }										\
+		}																	\
+		return false;														\
+	}
+
+				switch ( _rRes.ncType ) {
+					EE_INT_CHECK( EE_NC_SIGNED, i64Val )
+					EE_INT_CHECK( EE_NC_UNSIGNED, ui64Val )
+					case EE_NC_FLOATING : {
+						switch ( ndNode.v.ui32Op ) {
+							EE_OP( dVal, '*', * )
+							EE_OP( dVal, '/', / )
+							EE_OP( dVal, '+', + )
+							EE_OP( dVal, '-', - )
+							EE_OP_BOOL( dVal, '<', < )
+							EE_OP_BOOL( dVal, '>', > )
+							EE_OP_BOOL( dVal, CExpEvalParser::token::EE_REL_LE, <= )
+							EE_OP_BOOL( dVal, CExpEvalParser::token::EE_REL_GE, >= )
+							EE_OP_BOOL( dVal, CExpEvalParser::token::EE_EQU_E, == )
+							EE_OP_BOOL( dVal, CExpEvalParser::token::EE_EQU_NE, != )
+							EE_OP_BOOL( dVal, CExpEvalParser::token::EE_AND, && )
+							EE_OP_BOOL( dVal, CExpEvalParser::token::EE_OR, || )
+							case '%' : {
+								_rRes.u.dVal = std::fmod( rLeft.u.dVal, rRight.u.dVal );
+								return true;
+							}
+							case '^' : {
+								_rRes.u.dVal = std::pow( rLeft.u.dVal, rRight.u.dVal );
+								return true;
+							}
+							default : { return false; }
+						}
+						return false;
+					}
+				}
+
+#undef EE_INT_CHECK
+#undef EE_OP_BOOL
+#undef EE_OP
+				return false;
+			}
+			case EE_N_CONDITIONAL : {
+				EE_RESULT rExp;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rExp ) ) { return false; }
+				bool bTrue;
+				if ( rExp.ncType == EE_NC_SIGNED ) {
+					bTrue = rExp.u.i64Val != 0;
+				}
+				else if ( rExp.ncType == EE_NC_UNSIGNED ) {
+					bTrue = rExp.u.ui64Val != 0;
+				}
+				else if ( rExp.ncType == EE_NC_FLOATING ) {
+					bTrue = rExp.u.dVal != 0.0;
+				}
+				else { return false; }	// Can't happen.
+
+				// Slight variation from C/C++.  In compiled code, the left and right nodes have to be the same type, so if one of them
+				//	was double, the other would be cast to double (because the ?: expression must be of a single specific type).
+				// Here, the return type is whatever the left or right node's return type is.  Lazy evaluation to save time.
+				return bTrue ? ResolveNode( ndNode.v.sNodeIndex, _rRes ) : ResolveNode( ndNode.w.sNodeIndex, _rRes );
+			}
+		}
+		return false;
 	}
 
 }	// namespace ee;

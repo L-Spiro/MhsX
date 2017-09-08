@@ -44,6 +44,14 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %token EE_MEMBERACCESS
 %token EE_EQU_E EE_EQU_NE EE_LEFT_OP EE_RIGHT_OP EE_REL_GE EE_REL_LE
 %token EE_OB_BYTE EE_OB_WORD EE_OB_QWORD EE_OB_FLOAT EE_OB_DOUBLE EE_OB_DWORD
+%token EE_COS EE_SIN EE_TAN EE_ACOS EE_ASIN EE_ATAN EE_ATAN2
+%token EE_COSH EE_SINH EE_TANH EE_ACOSH EE_ASINH EE_ATANH
+%token EE_EXP EE_LOG EE_LOG10 EE_LOG2 EE_EXP2 EE_EXPM1 EE_ILOGB EE_LOG1P EE_LOGB
+%token EE_POW EE_SQRT EE_CBRT EE_HYPOT EE_TGAMMA EE_LGAMMA
+%token EE_CEIL EE_FLOOR EE_MOD EE_TRUNC EE_ROUND EE_NEARBYINT EE_REMAINDER EE_REMQUO
+%token EE_NEXTAFTER EE_NEXTTOWARD
+%token EE_DIM EE_MAX EE_MIN
+%token EE_ABS EE_MADD
 
 %type <sStringIndex>										string												
 %type <ndData>												basic_expr
@@ -61,6 +69,7 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %type <ndData>												and_exp
 %type <ndData>												or_exp
 %type <ndData>												conditional_exp
+%type <ndData>												intrinsic
 %type <ndData>												exp
 %type <ndData>												translation_unit
 
@@ -202,9 +211,20 @@ conditional_exp
 	| or_exp '?' exp ':' conditional_exp					{ m_peecContainer->CreateConditional( $1, $3, $5, $$ ); }
 	;
 
+intrinsic
+	: conditional_exp										{ $$ = $1; }
+	| EE_COS '(' intrinsic ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_COS, $3, $$ ); }
+	| EE_SIN '(' intrinsic ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_SIN, $3, $$ ); }
+	| EE_TAN '(' intrinsic ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_TAN, $3, $$ ); }
+	| EE_ACOS '(' intrinsic ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_ACOS, $3, $$ ); }
+	| EE_ASIN '(' intrinsic ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_ASIN, $3, $$ ); }
+	| EE_ATAN '(' intrinsic ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_ATAN, $3, $$ ); }
+	| EE_ATAN2 '(' exp ',' intrinsic ')'					{ m_peecContainer->CreateIntrinsic2( token::EE_ATAN2, $3, $5, $$ ); }
+	| EE_COSH '(' intrinsic ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_COSH, $3, $$ ); }
+	;
 
 exp
-	: conditional_exp										{ $$ = $1; }
+	: intrinsic												{ $$ = $1; }
 	;
 
 

@@ -15,11 +15,16 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 	mx::CSystem::InitSystem();
 
 	{
-		std::istringstream sStream( "02356.8 +2" );
+		uint64_t ui64 = 0x7F3|56 &5642 ^ 53;
+		std::istringstream sStream( "0x7F3|56 &5642 ^ 53" );
 		ee::CExpEvalLexer eelLexer( &sStream );
 		ee::CExpEvalContainer eecContainer( &eelLexer );
 		ee::CExpEvalParser eepParser( &eelLexer, &eecContainer );
 		int iRet = eepParser.parse();
+		ee::CExpEvalContainer::EE_RESULT rRes;
+		eecContainer.Resolve( rRes );
+
+		ee::CExpEvalContainer::EE_RESULT rRes2 = rRes;
 	}
 
 	lsw::CMainWindow mwWindow( L"Agh", L"L. Spiro MHS X" );

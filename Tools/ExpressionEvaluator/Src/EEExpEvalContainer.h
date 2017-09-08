@@ -10,6 +10,7 @@ namespace ee {
 	class CExpEvalLexer;
 
 	class CExpEvalContainer {
+		friend class						CExpEvalParser;
 	public :
 		CExpEvalContainer( CExpEvalLexer * _plLexer ) :
 			m_bTreateAllAsHex( false ),
@@ -17,13 +18,36 @@ namespace ee {
 		}
 
 
+		// == Types.
+		// The result structure.
+		struct EE_RESULT {
+			EE_NUM_CONSTANTS				ncType;
+			union {
+				int64_t						i64Val;
+				uint64_t					ui64Val;
+				double						dVal;
+			}								u;
+		};
+
+
 		// == Functions.
+		// Get the result.
+		bool								Resolve( EE_RESULT &_rRes ) { return ResolveNode( m_sTrans, _rRes ); }
 		// Do we treat everything as hex?
 		bool								TreatAllAsHex() const { return m_bTreateAllAsHex; }
 
 		// Set whether to treat all as hex or not.
 		void								SetTreatAsHex( bool _bVal ) { m_bTreateAllAsHex = _bVal; }
 
+		// Gets the type to use between 2 given types.
+		static EE_NUM_CONSTANTS				GetCastType( EE_NUM_CONSTANTS _ncLeft, EE_NUM_CONSTANTS _ncRight );
+
+		// Converts a result to a given type.
+		static EE_RESULT					ConvertResult( const EE_RESULT &_rRes, EE_NUM_CONSTANTS _ncType );
+
+
+	protected :
+		// == Functions.
 		// Decodes a string.
 		size_t								CreateString( const char * _pcText );
 
@@ -69,6 +93,12 @@ namespace ee {
 		// Create a conditional operator.
 		void								CreateConditional( const YYSTYPE::EE_NODE_DATA &_ndExp, const YYSTYPE::EE_NODE_DATA &_ndLeft, const YYSTYPE::EE_NODE_DATA &_ndRight, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Create a 1-parm intrinsic.
+		void								CreateIntrinsic1( uint32_t _uiIntrinsic, const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Create a 2-parm intrinsic.
+		void								CreateIntrinsic2( uint32_t _uiIntrinsic, const YYSTYPE::EE_NODE_DATA &_ndExp0, const YYSTYPE::EE_NODE_DATA &_ndExp1, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Sets the translation-unit node.
 		void								SetTrans( YYSTYPE::EE_NODE_DATA &_ndNode );
 
@@ -96,6 +126,9 @@ namespace ee {
 
 		// Adds a string and returns its index into the stack.
 		size_t								AddString( const std::string &_sText );
+
+		// Resolves a node.
+		bool								ResolveNode( size_t _sNode, EE_RESULT &_rRes );
 	};
 
 }	// namespace ee

@@ -26,21 +26,27 @@ namespace ee {
 		EE_N_UNARY,
 		EE_N_OP,
 		EE_N_CONDITIONAL,
+		EE_N_INTRINSIC_1,
+		EE_N_INTRINSIC_2,
 	};
 
 	// Constant types.
 	enum EE_NUM_CONSTANTS {
-		EE_NC_SIGNED,
-		EE_NC_UNSIGNED,
-		EE_NC_FLOATING,
-		EE_NC_INVALID,
+		EE_NC_UNSIGNED													= 0,
+		EE_NC_SIGNED													= 1,
+		EE_NC_FLOATING													= 2,
+		EE_NC_INVALID													= 3,
 	};
 
 	// Cast types.
 	enum EE_CAST_TYPES {
+		EE_CT_INT8,
 		EE_CT_UINT8,
+		EE_CT_INT16,
 		EE_CT_UINT16,
+		EE_CT_INT32,
 		EE_CT_UINT32,
+		EE_CT_INT64,
 		EE_CT_UINT64,
 		EE_CT_FLOAT,
 		EE_CT_DOUBLE,
@@ -58,6 +64,7 @@ namespace ee {
 				double													dVal;								// Double value.
 				size_t													sStringIndex;						// Index of the string/identifier.
 				size_t													sNodeIndex;							// When the index of another node is needed.
+				uint32_t												ui32Intrinsic;						// Intrinsic.
 			}															u;
 			union {
 				EE_NUM_CONSTANTS										ncConstType;						// Type of numeric constant.
