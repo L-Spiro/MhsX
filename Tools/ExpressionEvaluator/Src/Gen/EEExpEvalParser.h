@@ -181,12 +181,14 @@ namespace yy {
      EE_MIN = 321,
      EE_ABS = 322,
      EE_MADD = 323,
-     EE_OR = 324,
-     EE_AND = 325,
-     EE_LOG_NOT = 326,
-     EE_UNARY_1SCOMPL = 327,
-     EE_UPLUS = 328,
-     EE_UMINUS = 329
+     EE_PI = 324,
+     EE_E = 325,
+     EE_OR = 326,
+     EE_AND = 327,
+     EE_LOG_NOT = 328,
+     EE_UNARY_1SCOMPL = 329,
+     EE_UPLUS = 330,
+     EE_UMINUS = 331
    };
 
     };
@@ -264,15 +266,15 @@ namespace yy {
     typedef unsigned char token_number_type;
     /* Tables.  */
     /// For a state, the index in \a yytable_ of its portion.
-    static const signed char yypact_[];
-    static const signed char yypact_ninf_;
+    static const short int yypact_[];
+    static const short int yypact_ninf_;
 
     /// For a state, default rule to reduce.
     /// Unless\a  yytable_ specifies something else to do.
     /// Zero means the default is an error.
     static const unsigned char yydefact_[];
 
-    static const signed char yypgoto_[];
+    static const short int yypgoto_[];
     static const signed char yydefgoto_[];
 
     /// What to do in a state.
@@ -280,10 +282,10 @@ namespace yy {
     /// - if positive, shift that token.
     /// - if negative, reduce the rule which number is the opposite.
     /// - if zero, do what YYDEFACT says.
-    static const unsigned char yytable_[];
+    static const unsigned short int yytable_[];
     static const signed char yytable_ninf_;
 
-    static const unsigned char yycheck_[];
+    static const short int yycheck_[];
 
     /// For a state, its accessing symbol.
     static const unsigned char yystos_[];
@@ -309,9 +311,9 @@ namespace yy {
     /// A `-1'-separated list of the rules' RHS.
     static const rhs_number_type yyrhs_[];
     /// For each rule, the index of the first RHS symbol in \a yyrhs_.
-    static const unsigned char yyprhs_[];
+    static const unsigned short int yyprhs_[];
     /// For each rule, its source line number.
-    static const unsigned char yyrline_[];
+    static const unsigned short int yyrline_[];
     /// For each scanner token number, its symbol number.
     static const unsigned short int yytoken_number_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.

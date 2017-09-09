@@ -78,6 +78,9 @@ namespace ee {
 		// Create a double constant.
 		void								CreateDouble( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Create a double constant.
+		void								CreateDouble( double _dVal, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Create an address node.
 		void								CreateAddress( const YYSTYPE::EE_NODE_DATA &_ndExp, EE_CAST_TYPES _ctCast, YYSTYPE::EE_NODE_DATA &_ndNode );
 
@@ -98,6 +101,9 @@ namespace ee {
 
 		// Create a 2-parm intrinsic.
 		void								CreateIntrinsic2( uint32_t _uiIntrinsic, const YYSTYPE::EE_NODE_DATA &_ndExp0, const YYSTYPE::EE_NODE_DATA &_ndExp1, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Create a 3-parm intrinsic.
+		void								CreateIntrinsic3( uint32_t _uiIntrinsic, const YYSTYPE::EE_NODE_DATA &_ndExp0, const YYSTYPE::EE_NODE_DATA &_ndExp1, const YYSTYPE::EE_NODE_DATA &_ndExp2, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Sets the translation-unit node.
 		void								SetTrans( YYSTYPE::EE_NODE_DATA &_ndNode );

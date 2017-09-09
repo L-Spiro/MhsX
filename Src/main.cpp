@@ -16,7 +16,8 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 
 	{
 		uint64_t ui64 = 0x7F3|56 &5642 ^ 53;
-		std::istringstream sStream( "0x7F3|56 &5642 ^ 53" );
+		double dVal = cos( 3.1415926535897932384626433832795 / 2 ) +2.7182818284590452353602874713527;
+		std::istringstream sStream( "cos( PI / 2 ) + e" );
 		ee::CExpEvalLexer eelLexer( &sStream );
 		ee::CExpEvalContainer eecContainer( &eelLexer );
 		ee::CExpEvalParser eepParser( &eelLexer, &eecContainer );

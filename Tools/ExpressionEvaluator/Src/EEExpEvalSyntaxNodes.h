@@ -28,6 +28,7 @@ namespace ee {
 		EE_N_CONDITIONAL,
 		EE_N_INTRINSIC_1,
 		EE_N_INTRINSIC_2,
+		EE_N_INTRINSIC_3,
 	};
 
 	// Constant types.
@@ -76,6 +77,9 @@ namespace ee {
 			union {
 				size_t													sNodeIndex;							// Node index.
 			}															w;
+			union {
+				size_t													sNodeIndex;							// Node index.
+			}															x;
 			
 		}																ndData;
 	};

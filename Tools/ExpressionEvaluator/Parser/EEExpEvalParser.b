@@ -52,6 +52,7 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %token EE_NEXTAFTER EE_NEXTTOWARD
 %token EE_DIM EE_MAX EE_MIN
 %token EE_ABS EE_MADD
+%token EE_PI EE_E
 
 %type <sStringIndex>										string												
 %type <ndData>												basic_expr
@@ -121,6 +122,8 @@ basic_expr
 																	m_peecContainer->CreateDouble( m_peelLexer->YYText(), $$ );
 																}
 															}
+	| EE_PI													{ m_peecContainer->CreateDouble( 3.1415926535897932384626433832795, $$ ); }
+	| EE_E													{ m_peecContainer->CreateDouble( 2.7182818284590452353602874713527, $$ ); }
 	| '(' exp ')'											{ $$ = $2; }
 	| '[' exp ']'											{ m_peecContainer->CreateAddress( $2, EE_CT_UINT32, $$ ); }
 	| EE_OB_DWORD exp ']'									{ m_peecContainer->CreateAddress( $2, EE_CT_UINT32, $$ ); }
@@ -129,6 +132,7 @@ basic_expr
 	| EE_OB_QWORD exp ']'									{ m_peecContainer->CreateAddress( $2, EE_CT_UINT64, $$ ); }
 	| EE_OB_FLOAT exp ']'									{ m_peecContainer->CreateAddress( $2, EE_CT_FLOAT, $$ ); }
 	| EE_OB_DOUBLE exp ']'									{ m_peecContainer->CreateAddress( $2, EE_CT_DOUBLE, $$ ); }
+	| intrinsic												{ $$ = $1; }
 	;
 
 postfix_exp
@@ -212,19 +216,52 @@ conditional_exp
 	;
 
 intrinsic
-	: conditional_exp										{ $$ = $1; }
-	| EE_COS '(' intrinsic ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_COS, $3, $$ ); }
-	| EE_SIN '(' intrinsic ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_SIN, $3, $$ ); }
-	| EE_TAN '(' intrinsic ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_TAN, $3, $$ ); }
-	| EE_ACOS '(' intrinsic ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_ACOS, $3, $$ ); }
-	| EE_ASIN '(' intrinsic ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_ASIN, $3, $$ ); }
-	| EE_ATAN '(' intrinsic ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_ATAN, $3, $$ ); }
-	| EE_ATAN2 '(' exp ',' intrinsic ')'					{ m_peecContainer->CreateIntrinsic2( token::EE_ATAN2, $3, $5, $$ ); }
-	| EE_COSH '(' intrinsic ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_COSH, $3, $$ ); }
+	: EE_COS '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_COS, $3, $$ ); }
+	| EE_SIN '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_SIN, $3, $$ ); }
+	| EE_TAN '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_TAN, $3, $$ ); }
+	| EE_ACOS '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ACOS, $3, $$ ); }
+	| EE_ASIN '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ASIN, $3, $$ ); }
+	| EE_ATAN '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ATAN, $3, $$ ); }
+	| EE_ATAN2 '(' exp ',' exp ')'							{ m_peecContainer->CreateIntrinsic2( token::EE_ATAN2, $3, $5, $$ ); }
+	| EE_COSH '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_COSH, $3, $$ ); }
+	| EE_SINH '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_SINH, $3, $$ ); }
+	| EE_TANH '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_TANH, $3, $$ ); }
+	| EE_ACOSH '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ACOSH, $3, $$ ); }
+	| EE_ASINH '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ASINH, $3, $$ ); }
+	| EE_ATANH '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ATANH, $3, $$ ); }
+	| EE_EXP '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_EXP, $3, $$ ); }
+	| EE_LOG '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_LOG, $3, $$ ); }
+	| EE_LOG10 '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_LOG10, $3, $$ ); }
+	| EE_LOG2 '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_LOG2, $3, $$ ); }
+	| EE_EXP2 '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_EXP2, $3, $$ ); }
+	| EE_EXPM1 '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_EXPM1, $3, $$ ); }
+	| EE_ILOGB '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ILOGB, $3, $$ ); }
+	| EE_LOG1P '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_LOG1P, $3, $$ ); }
+	| EE_LOGB '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_LOGB, $3, $$ ); }
+	| EE_POW '(' exp ',' exp ')'							{ m_peecContainer->CreateIntrinsic2( token::EE_POW, $3, $5, $$ ); }
+	| EE_SQRT '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_SQRT, $3, $$ ); }
+	| EE_CBRT '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_CBRT, $3, $$ ); }
+	| EE_HYPOT '(' exp ',' exp ')'							{ m_peecContainer->CreateIntrinsic2( token::EE_HYPOT, $3, $5, $$ ); }
+	| EE_TGAMMA '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_TGAMMA, $3, $$ ); }
+	| EE_LGAMMA '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_LGAMMA, $3, $$ ); }
+	| EE_CEIL '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_CEIL, $3, $$ ); }
+	| EE_FLOOR '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_FLOOR, $3, $$ ); }
+	| EE_MOD '(' exp ',' exp ')'							{ m_peecContainer->CreateIntrinsic2( token::EE_MOD, $3, $5, $$ ); }
+	| EE_TRUNC '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_TRUNC, $3, $$ ); }
+	| EE_ROUND '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ROUND, $3, $$ ); }
+	| EE_NEARBYINT '(' exp ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_NEARBYINT, $3, $$ ); }
+	| EE_REMAINDER '(' exp ',' exp ')'						{ m_peecContainer->CreateIntrinsic2( token::EE_REMAINDER, $3, $5, $$ ); }
+	| EE_NEXTAFTER '(' exp ',' exp ')'						{ m_peecContainer->CreateIntrinsic2( token::EE_NEXTAFTER, $3, $5, $$ ); }
+	| EE_NEXTTOWARD '(' exp ',' exp ')'						{ m_peecContainer->CreateIntrinsic2( token::EE_NEXTTOWARD, $3, $5, $$ ); }
+	| EE_DIM '(' exp ',' exp ')'							{ m_peecContainer->CreateIntrinsic2( token::EE_DIM, $3, $5, $$ ); }
+	| EE_MAX '(' exp ',' exp ')'							{ m_peecContainer->CreateIntrinsic2( token::EE_MAX, $3, $5, $$ ); }
+	| EE_MIN '(' exp ',' exp ')'							{ m_peecContainer->CreateIntrinsic2( token::EE_MIN, $3, $5, $$ ); }
+	| EE_ABS '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ABS, $3, $$ ); }
+	| EE_MADD '(' exp ',' exp ',' exp ')'					{ m_peecContainer->CreateIntrinsic3( token::EE_MADD, $3, $5, $7, $$ ); }
 	;
 
 exp
-	: intrinsic												{ $$ = $1; }
+	: conditional_exp										{ $$ = $1; }
 	;
 
 
