@@ -1,11 +1,12 @@
 #include "MXMhsX.h"
-#include "LSWin/MainWindow/LSWMainWindow.h"
+#include "MainWindow/LSWMainWindow.h"
 #include "System/MXSystem.h"
 
 #include "EEExpEval.h"
 #include "EEExpEvalContainer.h"
 #include "EEExpEvalLexer.h"
 #include "Gen/EEExpEvalParser.h"
+//#include "Layout/LSWMainWindowLayout.h"
 #include <sstream>
 //#include <QtWidgets/QApplication>
 
@@ -15,9 +16,11 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 	mx::CSystem::InitSystem();
 
 	{
+#define PI 3.1415926535897932384626433832795
+#define e 2.7182818284590452353602874713527
 		uint64_t ui64 = 0x7F3|56 &5642 ^ 53;
-		double dVal = cos( 3.1415926535897932384626433832795 / 2 ) +2.7182818284590452353602874713527;
-		std::istringstream sStream( "cos( PI / 2 ) + e" );
+		double dVal = atan( cos( PI / 2 ) + e / -56 );
+		std::istringstream sStream( "atan( cos( PI / 2 ) + e / -56 )" );
 		ee::CExpEvalLexer eelLexer( &sStream );
 		ee::CExpEvalContainer eecContainer( &eelLexer );
 		ee::CExpEvalParser eepParser( &eelLexer, &eecContainer );
@@ -26,6 +29,8 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 		eecContainer.Resolve( rRes );
 
 		ee::CExpEvalContainer::EE_RESULT rRes2 = rRes;
+#undef PI
+#undef e
 	}
 
 	lsw::CMainWindow mwWindow( L"Agh", L"L. Spiro MHS X" );

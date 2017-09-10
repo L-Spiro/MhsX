@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Files/MXFile.h"
-#include "../LSWin/LSWWin.h"
+#include "LSWWin.h"
 #include "MXPeStructs.h"
 #include <vector>
 

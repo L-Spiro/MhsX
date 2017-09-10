@@ -1,5 +1,5 @@
 #include "MXPeTab.h"
-#include "../LSWin/LSWWin.h"
+#include "LSWWin.h"
 #include "../Strings/MXStringDecoder.h"
 
 

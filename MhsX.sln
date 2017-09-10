@@ -6,11 +6,16 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MhsX", "MhsX.vcxproj", "{B12702AD-ABFB-343A-A199-8E24837244A3}"
 	ProjectSection(ProjectDependencies) = postProject
 		{642C4506-75EB-41EB-8F87-CF92DE64BA4E} = {642C4506-75EB-41EB-8F87-CF92DE64BA4E}
+		{85310519-9B48-46F1-A3E5-FBFFB2BD7FB3} = {85310519-9B48-46F1-A3E5-FBFFB2BD7FB3}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExpressionEvaluator", "Tools\ExpressionEvaluator\ExpressionEvaluator.vcxproj", "{642C4506-75EB-41EB-8F87-CF92DE64BA4E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExpEval", "ExpEval", "{C20DF15B-4D4D-4710-86F7-77C9206F4307}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LSWindow", "LSWindow", "{8FC18B4C-44B3-4AD2-AD3A-BA03F253C56A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LSWindows", "Tools\LSWindows\LSWindows.vcxproj", "{85310519-9B48-46F1-A3E5-FBFFB2BD7FB3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,11 +41,20 @@ Global
 		{642C4506-75EB-41EB-8F87-CF92DE64BA4E}.Release|x64.Build.0 = Release|x64
 		{642C4506-75EB-41EB-8F87-CF92DE64BA4E}.Release|x86.ActiveCfg = Release|Win32
 		{642C4506-75EB-41EB-8F87-CF92DE64BA4E}.Release|x86.Build.0 = Release|Win32
+		{85310519-9B48-46F1-A3E5-FBFFB2BD7FB3}.Debug|x64.ActiveCfg = Debug|x64
+		{85310519-9B48-46F1-A3E5-FBFFB2BD7FB3}.Debug|x64.Build.0 = Debug|x64
+		{85310519-9B48-46F1-A3E5-FBFFB2BD7FB3}.Debug|x86.ActiveCfg = Debug|Win32
+		{85310519-9B48-46F1-A3E5-FBFFB2BD7FB3}.Debug|x86.Build.0 = Debug|Win32
+		{85310519-9B48-46F1-A3E5-FBFFB2BD7FB3}.Release|x64.ActiveCfg = Release|x64
+		{85310519-9B48-46F1-A3E5-FBFFB2BD7FB3}.Release|x64.Build.0 = Release|x64
+		{85310519-9B48-46F1-A3E5-FBFFB2BD7FB3}.Release|x86.ActiveCfg = Release|Win32
+		{85310519-9B48-46F1-A3E5-FBFFB2BD7FB3}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{642C4506-75EB-41EB-8F87-CF92DE64BA4E} = {C20DF15B-4D4D-4710-86F7-77C9206F4307}
+		{85310519-9B48-46F1-A3E5-FBFFB2BD7FB3} = {8FC18B4C-44B3-4AD2-AD3A-BA03F253C56A}
 	EndGlobalSection
 EndGlobal
