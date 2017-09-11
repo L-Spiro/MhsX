@@ -31,3 +31,5 @@ typedef double DOUBLE;
 #ifndef MAXUINT64
 #define MAXUINT64 (static_cast<uint64_t>(~0))
 #endif	// #ifndef MAXUINT64
+
+#include <CommCtrl.h>

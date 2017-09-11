@@ -1,4 +1,6 @@
 #include "MXMhsX.h"
+#include "Base/LSWBase.h"
+#include "Base/LSWWndClassEx.h"
 #include "MainWindow/LSWMainWindow.h"
 #include "System/MXSystem.h"
 
@@ -12,6 +14,7 @@
 
 
 int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine, int _nCmdShow ) {
+	lsw::CBase::Initialize( _hInstance );
 	// Initialize the system.
 	mx::CSystem::InitSystem();
 
@@ -32,14 +35,26 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 #undef PI
 #undef e
 	}
+	
+	// Register the window classes we need.
+	lsw::CWndClassEx wceEx( lsw::CWidget::WindowProc, L"Agh" );
+	wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1) );
+	lsw::CBase::RegisterClassExW( wceEx.Obj() );
 
+	// Create the windows.
 	lsw::CMainWindow mwWindow( L"Agh", L"L. Spiro MHS X" );
 
 	MSG mMsg = {};
 	while ( ::GetMessageW( &mMsg, NULL, 0, 0 ) ) {
+		if ( mMsg.message == WM_QUIT ) {
+			break;
+		}
 		::TranslateMessage( &mMsg );
 		::DispatchMessageW( &mMsg );
 	}
+
+	lsw::CBase::ShutDown();
+	return static_cast<int>(mMsg.wParam);
 }
 
 /*

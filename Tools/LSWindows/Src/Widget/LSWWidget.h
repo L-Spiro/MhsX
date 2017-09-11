@@ -18,6 +18,11 @@ namespace lsw {
 		};
 
 
+		// == Functions.
+		// The default message handler.
+		static LRESULT CALLBACK				WindowProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam );
+
+
 	protected :
 		// == Members.
 		// The window handle.
@@ -28,11 +33,6 @@ namespace lsw {
 
 		// The client rectangle.
 		LSW_RECT							m_rClientRect;
-
-
-		// == Functions.
-		// The default message handler.
-		static LRESULT CALLBACK				WindowProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam );
 
 
 		// == Message Handlers.

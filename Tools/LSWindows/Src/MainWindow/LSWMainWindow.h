@@ -12,6 +12,8 @@ namespace lsw {
 
 	protected :
 		// == Functions.
+		// WM_NCDESTROY.
+		virtual LSW_HANDLED					NcDestroy();
 	};
 		
 }	// namespace lsw

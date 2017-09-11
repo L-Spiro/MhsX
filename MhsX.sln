@@ -16,6 +16,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LSWindow", "LSWindow", "{8FC18B4C-44B3-4AD2-AD3A-BA03F253C56A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LSWindows", "Tools\LSWindows\LSWindows.vcxproj", "{85310519-9B48-46F1-A3E5-FBFFB2BD7FB3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{642C4506-75EB-41EB-8F87-CF92DE64BA4E} = {642C4506-75EB-41EB-8F87-CF92DE64BA4E}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

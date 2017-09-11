@@ -13,6 +13,7 @@ namespace lsw {
 		DWORD						dwWidth;
 		DWORD						dwHeight;
 		LPCWCH						pwcText;
+		LSW_WIDGET_LAYOUT *			pwlParent;
 	};
 
 }	// namespace lsw

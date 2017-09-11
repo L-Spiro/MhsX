@@ -66,6 +66,12 @@
     <ClInclude Include="Src\Layout\LSWWidgetLayout.h">
       <Filter>Header Files\Layout</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Base\LSWWndClassEx.h">
+      <Filter>Header Files\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layout\LSWMenuLayout.h">
+      <Filter>Header Files\Layout</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">

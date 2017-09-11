@@ -1,6 +1,7 @@
 #include "MXSystem.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../Utilities/MXUtilities.h"
+#include "Base/LSWBase.h"
 #ifdef _DEBUG
 #include <cassert>
 #endif	// #ifdef _DEBUG
