@@ -227,6 +227,9 @@
     <ClCompile Include="Src\Files\MXFile.cpp" />
     <ClCompile Include="Src\Files\MXFileMap.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddresses.cpp" />
+    <ClCompile Include="Src\Layouts\MXLayoutManager.cpp" />
+    <ClCompile Include="Src\Layouts\MXMainWindowLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXOpenProcessLayout.cpp" />
     <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\MXMhsX.cpp" />
     <ClCompile Include="Src\OpenProcess\MXOpenProcessUi.cpp" />
@@ -288,6 +291,7 @@
     <ClInclude Include="GeneratedFiles\ui_MXOp.h" />
     <ClInclude Include="GeneratedFiles\ui_MXPet.h" />
     <ClInclude Include="GeneratedFiles\ui_MXPew.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Src\CodePages\MXCodePages.h" />
     <CustomBuild Include="Src\OpenProcess\MXOpenProcessUi.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -307,6 +311,9 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB  "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I.\Tools\ExpressionEvaluator\Src" "-I.\Tools\LSWindows\Src"</Command>
     </CustomBuild>
+    <ClInclude Include="Src\Layouts\MXLayoutManager.h" />
+    <ClInclude Include="Src\Layouts\MXMainWindowLayout.h" />
+    <ClInclude Include="Src\Layouts\MXOpenProcessLayout.h" />
     <ClInclude Include="Src\PE\MXPeObject.h" />
     <ClInclude Include="Src\PE\MXPeStructs.h" />
     <ClInclude Include="Src\Utilities\MXUtilities.h" />
@@ -526,6 +533,9 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MhsX.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

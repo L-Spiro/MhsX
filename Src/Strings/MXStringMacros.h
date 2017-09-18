@@ -3760,3 +3760,10 @@
 #define _DEC_S_EB78CFF1_Description mx::CStringDecoder::DecodeToString( _T_EB78CFF1_Description, _LEN_EB78CFF1 )
 #define _DEC_WS_EB78CFF1_Description mx::CStringDecoder::DecodeToWString( _T_EB78CFF1_Description, _LEN_EB78CFF1 )
 
+// L. Spiro MHS X
+#define _T_F8A1A494_L__Spiro_MHS_X "\xD4\xFC\xF0\xEE\x02\x32\x00\x36\xF0\x15\x11\x21\xB2\xF3"
+#define _LEN_F8A1A494 14
+#define _DEC_F8A1A494_L__Spiro_MHS_X( STR ) mx::CStringDecoder::Decode( _T_F8A1A494_L__Spiro_MHS_X, _LEN_F8A1A494, STR )
+#define _DEC_S_F8A1A494_L__Spiro_MHS_X mx::CStringDecoder::DecodeToString( _T_F8A1A494_L__Spiro_MHS_X, _LEN_F8A1A494 )
+#define _DEC_WS_F8A1A494_L__Spiro_MHS_X mx::CStringDecoder::DecodeToWString( _T_F8A1A494_L__Spiro_MHS_X, _LEN_F8A1A494 )
+

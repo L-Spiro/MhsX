@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Header Files\Base">
       <UniqueIdentifier>{3f770a54-c2b1-48d2-b1ad-9920e35c10f3}</UniqueIdentifier>
     </Filter>
@@ -43,6 +39,18 @@
     <Filter Include="Source Files\Layout">
       <UniqueIdentifier>{25f5d5eb-d185-4bf2-a9f6-072a0b853ef5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ListView">
+      <UniqueIdentifier>{d705f71a-f510-4802-912d-7f8bbedc649d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ListView">
+      <UniqueIdentifier>{cfd673e7-e571-417e-b6d0-cadd35dc521f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GroupBox">
+      <UniqueIdentifier>{f6340dcd-ce48-49ae-936d-6eff1056968c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GroupBox">
+      <UniqueIdentifier>{e006350f-70f8-45f0-94ae-58754f153af6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -72,6 +80,18 @@
     <ClInclude Include="Src\Layout\LSWMenuLayout.h">
       <Filter>Header Files\Layout</Filter>
     </ClInclude>
+    <ClInclude Include="Src\ListView\LSWListView.h">
+      <Filter>Header Files\ListView</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layout\LSWLayoutManager.h">
+      <Filter>Header Files\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Base\LSWGlobalAlloc.h">
+      <Filter>Header Files\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\GroupBox\LSWGroupBox.h">
+      <Filter>Header Files\GroupBox</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -82,6 +102,15 @@
     </ClCompile>
     <ClCompile Include="Src\Widget\LSWWidget.cpp">
       <Filter>Source Files\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ListView\LSWListView.cpp">
+      <Filter>Source Files\ListView</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layout\LSWLayoutManager.cpp">
+      <Filter>Source Files\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\GroupBox\LSWGroupBox.cpp">
+      <Filter>Source Files\GroupBox</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -150,16 +150,23 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp" />
+    <ClCompile Include="Src\GroupBox\LSWGroupBox.cpp" />
+    <ClCompile Include="Src\Layout\LSWLayoutManager.cpp" />
+    <ClCompile Include="Src\ListView\LSWListView.cpp" />
     <ClCompile Include="Src\MainWindow\LSWMainWindow.cpp" />
     <ClCompile Include="Src\Widget\LSWWidget.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Base\LSWBase.h" />
+    <ClInclude Include="Src\Base\LSWGlobalAlloc.h" />
     <ClInclude Include="Src\Base\LSWWndClassEx.h" />
+    <ClInclude Include="Src\GroupBox\LSWGroupBox.h" />
     <ClInclude Include="Src\Helpers\LSWHelpers.h" />
+    <ClInclude Include="Src\Layout\LSWLayoutManager.h" />
     <ClInclude Include="Src\Layout\LSWLayoutTypes.h" />
     <ClInclude Include="Src\Layout\LSWMenuLayout.h" />
     <ClInclude Include="Src\Layout\LSWWidgetLayout.h" />
+    <ClInclude Include="Src\ListView\LSWListView.h" />
     <ClInclude Include="Src\MainWindow\LSWMainWindow.h" />
     <ClInclude Include="Src\Widget\LSWWidget.h" />
   </ItemGroup>

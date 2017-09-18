@@ -1,6 +1,9 @@
 #include "MXMhsX.h"
 #include "Base/LSWBase.h"
 #include "Base/LSWWndClassEx.h"
+#include "Layouts/MXLayoutManager.h"
+#include "Layouts/MXMainWindowLayout.h"
+#include "Layouts/MXOpenProcessLayout.h"
 #include "MainWindow/LSWMainWindow.h"
 #include "System/MXSystem.h"
 
@@ -12,18 +15,23 @@
 #include <sstream>
 //#include <QtWidgets/QApplication>
 
+#pragma comment( lib, "comctl32.lib" )
+#pragma comment( linker,"\"/manifestdependency:type='win32' \
+	name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
+	processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"" )
+
 
 int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine, int _nCmdShow ) {
-	lsw::CBase::Initialize( _hInstance );
+	lsw::CBase::Initialize( _hInstance, new mx::CLayoutManager() );
 	// Initialize the system.
 	mx::CSystem::InitSystem();
-
+	/*
 	{
 #define PI 3.1415926535897932384626433832795
 #define e 2.7182818284590452353602874713527
 		uint64_t ui64 = 0x7F3|56 &5642 ^ 53;
-		double dVal = atan( cos( PI / 2 ) + e / -56 );
-		std::istringstream sStream( "atan( cos( PI / 2 ) + e / -56 )" );
+		double dVal = pow( 15, 41664 );
+		std::istringstream sStream( "512.0 / (512.0 + 3.0)" );
 		ee::CExpEvalLexer eelLexer( &sStream );
 		ee::CExpEvalContainer eecContainer( &eelLexer );
 		ee::CExpEvalParser eepParser( &eelLexer, &eecContainer );
@@ -35,17 +43,18 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 #undef PI
 #undef e
 	}
+	*/
 	
-	// Register the window classes we need.
-	lsw::CWndClassEx wceEx( lsw::CWidget::WindowProc, L"Agh" );
-	wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1) );
-	lsw::CBase::RegisterClassExW( wceEx.Obj() );
+	
 
 	// Create the windows.
-	lsw::CMainWindow mwWindow( L"Agh", L"L. Spiro MHS X" );
+	mx::CMainWindowLayout::CreateMainWindow();
+	mx::COpenProcessLayout::CreateOpenProcessDialog( mx::CMainWindowLayout::MainWindow() );
+
+	//lsw::CMainWindow mwWindow( L"Agh", L"L. Spiro MHS X" );
 
 	MSG mMsg = {};
-	while ( ::GetMessageW( &mMsg, NULL, 0, 0 ) ) {
+	while ( ::GetMessageW( &mMsg, NULL, 0, 0 ) > 0 ) {
 		if ( mMsg.message == WM_QUIT ) {
 			break;
 		}

@@ -93,6 +93,12 @@
     <Filter Include="Source Files\OpenProcess">
       <UniqueIdentifier>{68aed861-47a5-499e-bcca-bf1d71d1e671}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Layouts">
+      <UniqueIdentifier>{68c0c199-0762-49e6-80e8-22e7d003f23a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Layouts">
+      <UniqueIdentifier>{f95ee98c-2a54-4354-b00b-bee5f61bff2e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeneratedFiles\qrc_MXMhsX.cpp">
@@ -194,6 +200,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_MXOpenProcessUi.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Layouts\MXMainWindowLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXLayoutManager.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXOpenProcessLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MXMhsX.qrc">
@@ -294,5 +309,20 @@
     <ClInclude Include="GeneratedFiles\ui_MXOp.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Layouts\MXMainWindowLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXLayoutManager.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXOpenProcessLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MhsX.rc" />
   </ItemGroup>
 </Project>

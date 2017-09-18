@@ -7,13 +7,25 @@ namespace lsw {
 
 	struct LSW_WIDGET_LAYOUT {
 		LSW_LAYOUTTYPES				ltType;
+		DWORD						dwId;						// Unique ID for the control, must not be 0.
+		LPCWSTR						lpwcClass;					// Only needed for custom types.  List views, buttons, etc. already know their classes.
 		BOOL						bEnabled;
 		INT							iLeft;
-		INT							iRight;
+		INT							iTop;
 		DWORD						dwWidth;
 		DWORD						dwHeight;
+		DWORD						dwStyle;
+		DWORD						dwStyleEx;
 		LPCWCH						pwcText;
-		LSW_WIDGET_LAYOUT *			pwlParent;
+		DWORD						dwParentId;					// 0 for no parent.
+
+		// Expressions for dynamic sizing.
+		LPCSTR						pcLeftSizeExp;
+		LPCSTR						pcRightSizeExp;
+		LPCSTR						pcTopSizeExp;
+		LPCSTR						pcBottomSizeExp;
+		LPCSTR						pcWidthSizeExp;
+		LPCSTR						pcHeightSizeExp;
 	};
 
 }	// namespace lsw

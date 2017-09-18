@@ -3,7 +3,12 @@
 
 namespace lsw {
 
-	CMainWindow::CMainWindow( LPCWSTR _pcClass, LPCWSTR _pcTitle, WNDPROC _lpfnWndProc ) {
+	CMainWindow::CMainWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget ) :
+		Parent( _wlLayout, _pwParent, _bCreateWidget ) {
+	}
+
+#if 0
+	CMainWindow::CMainWindow( LPCWSTR _pcClass, LPCWSTR _pcTitle /*, WNDPROC _lpfnWndProc*/ ) {
 		/*CWndClassEx wceEx( _lpfnWndProc, _pcClass );
 		wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1) );*/
 		ATOM aAtom = CBase::GetRegisteredClassAtom( _pcClass );
@@ -17,6 +22,7 @@ namespace lsw {
 			NULL,
 			CBase::GetThisHandle(),
 			static_cast<CWidget *>(this) );
+		//::EnableWindow( m_hWnd, FALSE );
 		/*
 		int idStatus = 90;
 		HWND hwndStatus = ::CreateWindowExW(
@@ -32,6 +38,9 @@ namespace lsw {
         NULL );                   // no window creation data
 		*/
 	}
+#endif
+
+	
 
 	// == Functions.
 	// WM_NCDESTROY.

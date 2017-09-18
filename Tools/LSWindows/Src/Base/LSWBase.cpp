@@ -1,6 +1,13 @@
 #include "LSWBase.h"
+#include "../Layout/LSWLayoutManager.h"
+
+#include <Strsafe.h>
+//#include <Uxtheme.h>
 
 #pragma comment( lib, "comctl32.lib" )
+#pragma comment( linker, "\"/manifestdependency:type='win32' \
+	name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
+	processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"" )
 
 namespace lsw {
 
@@ -11,10 +18,14 @@ namespace lsw {
 	// This HINSTANCE.
 	HINSTANCE CBase::m_hInstance = NULL;
 
+	// The layout manager.
+	CLayoutManager * CBase::m_plmLayoutMan = nullptr;
+
 	// == Functions.
 	// Initialize.
-	VOID CBase::Initialize( HINSTANCE _hInst ) {
+	VOID CBase::Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan ) {
 		m_hInstance = _hInst;
+		m_plmLayoutMan = _plmLayoutMan;
 
 		INITCOMMONCONTROLSEX iccIn = {
 			sizeof( iccIn ),
@@ -30,6 +41,9 @@ namespace lsw {
 		}
 		m_mClasses.clear();
 		m_mClasses = std::map<std::wstring, WNDCLASSEXW_ATOM>();
+
+		delete m_plmLayoutMan;
+		m_plmLayoutMan = nullptr;
 	}
 
 	// Wrapper for ::RegisterClassEx().
@@ -69,6 +83,37 @@ namespace lsw {
 	// Wrapper for ::GetModuleHandleA().
 	HMODULE CBase::GetModuleHandleA( LPCSTR _lpModuleName ) {
 		return _lpModuleName ? ::GetModuleHandleA( _lpModuleName ) : m_hInstance;
+	}
+
+	// Prints the current error (from ::GetLastError()).
+	VOID CBase::PrintError( LPCWSTR _pwcText ) {
+		LPVOID lpMsgBuf;
+		LPVOID lpDisplayBuf;
+		DWORD dwError = ::GetLastError(); 
+
+		::FormatMessageW(
+			FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+			FORMAT_MESSAGE_FROM_SYSTEM |
+			FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL,
+			dwError,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPWSTR) &lpMsgBuf,
+			0, NULL );
+
+		// Display the error message and exit the process
+
+		lpDisplayBuf = static_cast<LPVOID>(::LocalAlloc( LMEM_ZEROINIT, 
+			(lstrlenW( static_cast<LPCWSTR>(lpMsgBuf) ) + lstrlenW( static_cast<LPCWSTR>(_pwcText) ) + 40) * sizeof(WCHAR) ));
+		::StringCchPrintfW( static_cast<LPWSTR>(lpDisplayBuf), 
+			::LocalSize( lpDisplayBuf ) / sizeof( WCHAR ),
+			L"%s failed with error %d: %s",
+			_pwcText, dwError, lpMsgBuf );
+		::MessageBoxW( NULL, static_cast<LPCWSTR>(lpDisplayBuf), L"Error", MB_OK ); 
+
+		::LocalFree( lpMsgBuf );
+		::LocalFree( lpDisplayBuf );
+
 	}
 
 }	// namespace lsw
