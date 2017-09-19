@@ -2,6 +2,7 @@
 
 #include "../LSWWin.h"
 #include "../Widget/LSWWidget.h"
+#include "LSWMenuLayout.h"
 
 #include <vector>
 
@@ -19,6 +20,12 @@ namespace lsw {
 		// Creates a class based on its type.
 		virtual CWidget *				CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget );
 
+		// Creates a menu given a menu layout.
+		HMENU							CreateMenu( const LSW_MENU_LAYOUT &_mlLayout );
+
+		// Creates menus given menu layouts.
+		HMENU							CreateMenu( const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotal );
+
 
 	protected :
 		// == Functions.
@@ -30,6 +37,12 @@ namespace lsw {
 
 		// Writes a string to a given pointer formatted for use with DLGITEMTEMPLATE objects.
 		SIZE_T							ItemTemplateString( const WCHAR * _pwcString, WORD * _pwDest );
+
+		// Creates a MENUITEMINFOW structure based off an LSW_MENU_ITEM structure.
+		MENUITEMINFOW					ItemToMenuItem( const LSW_MENU_ITEM &_miItem );
+
+		// Appends a menu item to a menu.
+		BOOL							AppendMenuItem( HMENU _hMenu, const LSW_MENU_ITEM &_miItem );
 
 	};
 

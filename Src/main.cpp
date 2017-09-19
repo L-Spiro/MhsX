@@ -15,11 +15,6 @@
 #include <sstream>
 //#include <QtWidgets/QApplication>
 
-#pragma comment( lib, "comctl32.lib" )
-#pragma comment( linker,"\"/manifestdependency:type='win32' \
-	name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
-	processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"" )
-
 
 int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine, int _nCmdShow ) {
 	lsw::CBase::Initialize( _hInstance, new mx::CLayoutManager() );
@@ -49,7 +44,7 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 
 	// Create the windows.
 	mx::CMainWindowLayout::CreateMainWindow();
-	mx::COpenProcessLayout::CreateOpenProcessDialog( mx::CMainWindowLayout::MainWindow() );
+	//mx::COpenProcessLayout::CreateOpenProcessDialog( mx::CMainWindowLayout::MainWindow() );
 
 	//lsw::CMainWindow mwWindow( L"Agh", L"L. Spiro MHS X" );
 

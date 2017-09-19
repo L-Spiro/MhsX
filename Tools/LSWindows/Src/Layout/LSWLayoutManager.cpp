@@ -108,6 +108,54 @@ namespace lsw {
 		return nullptr;
 	}
 
+	// Creates a menu given a menu layout.
+	HMENU CLayoutManager::CreateMenu( const LSW_MENU_LAYOUT &_mlLayout ) {
+		HMENU hMenu = ::CreateMenu();
+		for ( SIZE_T I = 0; I < _mlLayout.stTotalMenuItems; ++I ) {
+			if ( !AppendMenuItem( hMenu, _mlLayout.pmiItems[I] ) ) {
+				::DestroyMenu( hMenu );
+				return NULL;
+			}
+		}
+		return hMenu;
+	}
+
+	// Creates menus given menu layouts.
+	HMENU CLayoutManager::CreateMenu( const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotal ) {
+		std::map<DWORD, HMENU> mIdToMenu;
+		HMENU hMenu = NULL;
+		for ( SIZE_T I = 0; I < _sTotal; ++I ) {
+			HMENU hTemp = CreateMenu( _pmlLayouts[I] );
+			if ( !hTemp ) {
+				for ( auto I = mIdToMenu.begin(); I != mIdToMenu.end(); ++I ) {
+					::DestroyMenu( I->second );
+				}
+				return NULL;
+			}
+			if ( !hMenu ) {
+				hMenu = hTemp;
+			}
+
+			// Parent it.
+			HMENU hParent = NULL;
+			if ( _pmlLayouts[I].dwParentMenuId ) {
+				auto aTemp = mIdToMenu.find( _pmlLayouts[I].dwParentMenuId );
+				hParent = aTemp == mIdToMenu.end() ? NULL : aTemp->second;
+			}
+			if ( hParent ) {
+				// Add it as a child to the item.
+				MENUITEMINFOW miSub = { sizeof( MENUITEMINFOW ) };
+				miSub.fMask = MIIM_SUBMENU;
+				miSub.hSubMenu = hTemp;
+				::SetMenuItemInfoW( hParent, _pmlLayouts[I].dwParentMenuItemId, FALSE, &miSub );
+			}
+
+			mIdToMenu.insert_or_assign( _pmlLayouts[I].dwId, hTemp );
+		}
+
+		return hMenu;
+	}
+
 	// Converts an array of LSW_WIDGET_LAYOUT structures to a DLGTEMPLATE structure and an array of following DLGITEMTEMPLATE structures.
 	SIZE_T CLayoutManager::LayoutToDialogTemplate( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, DLGTEMPLATE * _pdtTemplate, const std::vector<CWidget *> &_vWidgets ) {
 		uint8_t * pui8Temp = reinterpret_cast<uint8_t *>(_pdtTemplate);
@@ -222,6 +270,31 @@ namespace lsw {
 		}
 		sRet += sizeof( WORD );
 		return sRet;
+	}
+
+	// Creates a MENUITEMINFOW structure based off an LSW_MENU_ITEM structure.
+	MENUITEMINFOW CLayoutManager::ItemToMenuItem( const LSW_MENU_ITEM &_miItem ) {
+		MENUITEMINFOW miItem = { sizeof( MENUITEMINFOW ) };
+		miItem.fMask = MIIM_ID | MIIM_TYPE | MIIM_STATE;
+		miItem.fType = MFT_STRING;
+		miItem.fState = MFS_GRAYED;
+		miItem.wID = 15;
+		miItem.dwTypeData = L"Coo&l";
+		miItem.cch = lstrlenW( miItem.dwTypeData );
+		return miItem;
+	}
+
+	// Appends a menu item to a menu.
+	BOOL CLayoutManager::AppendMenuItem( HMENU _hMenu, const LSW_MENU_ITEM &_miItem ) {
+		if ( _miItem.bIsSeperator ) {
+			return ::AppendMenuW( _hMenu, MF_SEPARATOR, 0, NULL );
+		}
+		UINT uiFlags = MF_STRING;
+		if ( _miItem.bCheckable ) {
+			uiFlags |= _miItem.bChecked ? MF_CHECKED : MF_UNCHECKED;
+		}
+		uiFlags |= _miItem.bEnabled ? MF_ENABLED : MF_GRAYED;
+		return ::AppendMenuW( _hMenu, uiFlags, _miItem.dwId, _miItem.lpwcText );
 	}
 
 }	// namespace lsw

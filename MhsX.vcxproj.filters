@@ -318,11 +318,10 @@
     <ClInclude Include="Src\Layouts\MXOpenProcessLayout.h">
       <Filter>Header Files\Layouts</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="MhsX.rc" />
+    <Manifest Include="MhsX.exe.intermediate.manifest">
+      <Filter>Resource Files</Filter>
+    </Manifest>
   </ItemGroup>
 </Project>

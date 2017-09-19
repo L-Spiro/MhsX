@@ -92,6 +92,9 @@
     <ClInclude Include="Src\GroupBox\LSWGroupBox.h">
       <Filter>Header Files\GroupBox</Filter>
     </ClInclude>
+    <ClInclude Include="Src\LSWWin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">

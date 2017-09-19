@@ -167,6 +167,7 @@
     <ClInclude Include="Src\Layout\LSWMenuLayout.h" />
     <ClInclude Include="Src\Layout\LSWWidgetLayout.h" />
     <ClInclude Include="Src\ListView\LSWListView.h" />
+    <ClInclude Include="Src\LSWWin.h" />
     <ClInclude Include="Src\MainWindow\LSWMainWindow.h" />
     <ClInclude Include="Src\Widget\LSWWidget.h" />
   </ItemGroup>
