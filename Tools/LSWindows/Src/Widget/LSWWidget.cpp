@@ -6,6 +6,7 @@ namespace lsw {
 	CWidget::CWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget ) :
 		m_hWnd( NULL ),
 		m_dwId( _wlLayout.dwId ),
+		m_bEnabled( _wlLayout.bEnabled ),
 		m_pwParent( _pwParent ) {
 
 		m_rStartingRect.left = _wlLayout.iLeft;
@@ -174,6 +175,8 @@ namespace lsw {
 
 				// Attach all controls to their CWidget counterparts.
 				::EnumChildWindows( _hWnd, EnumChildWindows_AttachWindowToWidget, _lParam );
+				::EnumChildWindows( _hWnd, EnumChildWindows_SetEnabled, _lParam );
+
 				POINT pConvOrg = PixelsToDialogUnits( _hWnd, 574 - 551 - 7, 633 - 302 - 30 );
 				POINT pConv = PixelsToDialogUnits( _hWnd, 567, 206 );
 				POINT pConvClient = PixelsToDialogUnits( _hWnd, 443, 23 );
@@ -336,7 +339,19 @@ namespace lsw {
 		for ( size_t I = 0; I < pvWidgets->size(); ++I ) {
 			if ( (*pvWidgets)[I]->Id() == iId ) {
 				(*pvWidgets)[I]->m_hWnd = _hWnd;
-				::SetWindowLongPtrW( _hWnd, DWLP_USER, reinterpret_cast<LONG_PTR>((*pvWidgets)[I]) );
+				::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>((*pvWidgets)[I]) );
+				return TRUE;
+			}
+		}
+		return TRUE;
+	}
+
+	// Applies enabled/disabled settings.
+	BOOL CALLBACK CWidget::EnumChildWindows_SetEnabled( HWND _hWnd, LPARAM _lParam ) {
+		CWidget * pwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( _hWnd, GWLP_USERDATA ));
+		if ( pwThis ) {
+			if ( !pwThis->Enabled() ) {
+				::EnableWindow( _hWnd, FALSE );
 			}
 		}
 		return TRUE;

@@ -41,6 +41,8 @@ namespace lsw {
 		// Custom ID.
 		DWORD								Id() const { return m_dwId; }
 
+		// Enabled or disabled.
+		BOOL								Enabled() const { return m_bEnabled; }
 		// Window rectangle.
 		const LSW_RECT &					WindowRect() const { return m_rRect; }
 
@@ -67,6 +69,9 @@ namespace lsw {
 
 		// Custom ID.
 		DWORD								m_dwId;
+
+		// Enabled.
+		BOOL								m_bEnabled;
 
 		// The window rectangle.
 		LSW_RECT							m_rRect;
@@ -130,6 +135,9 @@ namespace lsw {
 
 		// Attaches a control/window to its CWidget.
 		static BOOL CALLBACK				EnumChildWindows_AttachWindowToWidget( HWND _hWnd, LPARAM _lParam );
+
+		// Applies enabled/disabled settings.
+		static BOOL CALLBACK				EnumChildWindows_SetEnabled( HWND _hWnd, LPARAM _lParam );
 
 	};
 
