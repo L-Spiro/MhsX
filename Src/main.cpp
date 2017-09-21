@@ -44,7 +44,7 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 
 	// Create the windows.
 	mx::CMainWindowLayout::CreateMainWindow();
-	//mx::COpenProcessLayout::CreateOpenProcessDialog( mx::CMainWindowLayout::MainWindow() );
+	mx::COpenProcessLayout::CreateOpenProcessDialog( mx::CMainWindowLayout::MainWindow() );
 
 	//lsw::CMainWindow mwWindow( L"Agh", L"L. Spiro MHS X" );
 

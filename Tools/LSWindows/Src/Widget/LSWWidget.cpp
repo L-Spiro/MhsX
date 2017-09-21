@@ -174,9 +174,9 @@ namespace lsw {
 
 				// Attach all controls to their CWidget counterparts.
 				::EnumChildWindows( _hWnd, EnumChildWindows_AttachWindowToWidget, _lParam );
-				POINT pConvOrg = PixelsToDialogUnits( _hWnd, 628 - 605, 550 - 496 - 30 );
-				POINT pConv = PixelsToDialogUnits( _hWnd, 443, 206 );
-				POINT pConvClient = PixelsToDialogUnits( _hWnd, 422, 185 );
+				POINT pConvOrg = PixelsToDialogUnits( _hWnd, 574 - 551 - 7, 633 - 302 - 30 );
+				POINT pConv = PixelsToDialogUnits( _hWnd, 567, 206 );
+				POINT pConvClient = PixelsToDialogUnits( _hWnd, 443, 23 );
 				
 				/*NONCLIENTMETRICSW ncmMetrics;
 				ncmMetrics.cbSize = sizeof( ncmMetrics );

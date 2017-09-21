@@ -1,9 +1,12 @@
 #include "LSWLayoutManager.h"
 #include "../Base/LSWBase.h"
 #include "../Base/LSWGlobalAlloc.h"
+#include "../Button/LSWButton.h"
+#include "../CheckButton/LSWCheckButton.h"
 #include "../GroupBox/LSWGroupBox.h"
 #include "../ListView/LSWListView.h"
 #include "../MainWindow/LSWMainWindow.h"
+#include "../RadioButton/LSWRadioButton.h"
 
 #include <map>
 
@@ -101,8 +104,11 @@ namespace lsw {
 	CWidget * CLayoutManager::CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget ) {
 		switch ( _wlLayout.ltType ) {
 			case LSW_LT_WIDGET : { return new CWidget( _wlLayout, _pwParent, _bCreateWidget ); }
+			case LSW_LT_BUTTON : { return new CButton( _wlLayout, _pwParent, _bCreateWidget ); }
 			case LSW_LT_LISTVIEW : { return new CListView( _wlLayout, _pwParent, _bCreateWidget ); }
 			case LSW_LT_GROUPBOX : { return new CGroupBox( _wlLayout, _pwParent, _bCreateWidget ); }
+			case LSW_LT_RADIO : { return new CRadioButton( _wlLayout, _pwParent, _bCreateWidget ); }
+			case LSW_LT_CHECK : { return new CCheckButton( _wlLayout, _pwParent, _bCreateWidget ); }
 			case LSW_LT_MAINWINDOW : { return new CMainWindow( _wlLayout, _pwParent, _bCreateWidget ); }
 		}
 		return nullptr;
@@ -208,6 +214,7 @@ namespace lsw {
 
 		// All other controls.
 		for ( SIZE_T I = 1; I < _sTotal; ++I ) {
+			sRet = reinterpret_cast<SIZE_T>(CHelpers::DwordAlign( reinterpret_cast<LPWORD>(sRet) ));
 			DLGITEMTEMPLATE * pditTemp = reinterpret_cast<DLGITEMTEMPLATE *>(pui8Temp + sRet);
 			sRet += LayoutToItemTemplate( _pwlLayouts[I], _pdtTemplate ? pditTemp : nullptr, _vWidgets[I] );
 		}
@@ -248,7 +255,7 @@ namespace lsw {
 			std::memcpy( pwTemp, _pwCreationData, sizeof( _pwCreationData ) );
 		}
 		sRet += sizeof( _pwCreationData ) + sizeof( WORD );*/
-		return reinterpret_cast<SIZE_T>(CHelpers::DwordAlign( reinterpret_cast<LPWORD>(sRet) ));
+		return sRet;//reinterpret_cast<SIZE_T>(CHelpers::DwordAlign( reinterpret_cast<LPWORD>(sRet) ));
 	}
 
 	// Writes a string to a given pointer formatted for use with DLGITEMTEMPLATE objects.

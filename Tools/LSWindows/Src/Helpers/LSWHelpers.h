@@ -28,9 +28,9 @@ namespace lsw {
 			ULONG_PTR ulVal;
 
 			ulVal = reinterpret_cast<ULONG_PTR>(_lpIn);
-			ulVal++;
-			ulVal >>= 1;
-			ulVal <<= 1;
+			ulVal += 3;
+			ulVal >>= 2;
+			ulVal <<= 2;
 			return reinterpret_cast<LPWORD>(ulVal);
 		}
 

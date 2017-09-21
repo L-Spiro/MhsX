@@ -4,7 +4,6 @@
 namespace mx {
 
 	COpenProcessWindow::~COpenProcessWindow() {
-		int i =0;
 	}
 
 	// == Functions.

@@ -53,6 +53,104 @@ namespace mx {
 			nullptr,								// pwcText
 			MX_OPI_DIALOG,							// dwParentId
 		},
+		{
+			LSW_LT_BUTTON,							// ltType
+			MX_OPI_BUTTON_OK,						// dwId
+			L"Button",								// lpwcClass
+			TRUE,									// bEnabled
+			4,										// iLeft
+			182,									// iTop
+			43,										// dwWidth
+			12,										// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON | BS_TEXT,		// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
+			L"OK",									// pwcText
+			MX_OPI_DIALOG,							// dwParentId
+		},
+		{
+			LSW_LT_BUTTON,							// ltType
+			MX_OPI_BUTTON_CANCEL,					// dwId
+			L"Button",								// lpwcClass
+			TRUE,									// bEnabled
+			224,									// iLeft
+			182,									// iTop
+			43,										// dwWidth
+			12,										// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON | BS_TEXT,		// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
+			L"Cancel",								// pwcText
+			MX_OPI_DIALOG,							// dwParentId
+		},
+		{
+			LSW_LT_GROUPBOX,						// ltType
+			MX_OPI_GROUPSHOW,						// dwId
+			L"Button",								// lpwcClass
+			TRUE,									// bEnabled
+			9,										// iLeft
+			128,									// iTop
+			253,									// dwWidth
+			20,										// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | BS_GROUPBOX,		// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,																// dwStyleEx
+			L"Show",								// pwcText
+			MX_OPI_DIALOG,							// dwParentId
+		},
+		{
+			LSW_LT_RADIO,							// ltType
+			MX_OPI_RADIO_MAIN,						// dwId
+			L"Button",								// lpwcClass
+			TRUE,									// bEnabled
+			14,										// iLeft
+			136,									// iTop
+			29,										// dwWidth
+			9,										// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,		// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,																// dwStyleEx
+			L"Main",								// pwcText
+			MX_OPI_DIALOG,							// dwParentId
+		},
+		{
+			LSW_LT_RADIO,							// ltType
+			MX_OPI_RADIO_ALL,						// dwId
+			L"Button",								// lpwcClass
+			TRUE,									// bEnabled
+			238,										// iLeft
+			136,									// iTop
+			20,										// dwWidth
+			9,										// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,		// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,																// dwStyleEx
+			L"All",								// pwcText
+			MX_OPI_DIALOG,							// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OPI_CHECK_RESTR,						// dwId
+			L"Button",								// lpwcClass
+			FALSE,									// bEnabled
+			9,										// iLeft
+			150,									// iTop
+			253,										// dwWidth
+			9,										// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,		// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,																// dwStyleEx
+			L"Open in Restricted Mode (Improves Undetectability)",								// pwcText
+			MX_OPI_DIALOG,							// dwParentId
+		},
+		{
+			LSW_LT_BUTTON,							// ltType
+			MX_OPI_BUTTON_REFRESH,					// dwId
+			L"Button",								// lpwcClass
+			TRUE,									// bEnabled
+			9,									// iLeft
+			161,									// iTop
+			253,									// dwWidth
+			12,										// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON | BS_TEXT,		// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
+			L"Refresh",								// pwcText
+			MX_OPI_DIALOG,							// dwParentId
+		},
 	};
 
 

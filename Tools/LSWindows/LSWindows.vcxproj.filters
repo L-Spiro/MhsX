@@ -51,6 +51,24 @@
     <Filter Include="Source Files\GroupBox">
       <UniqueIdentifier>{e006350f-70f8-45f0-94ae-58754f153af6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Button">
+      <UniqueIdentifier>{e5e97404-0352-420f-98bf-c1c96caf4514}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Button">
+      <UniqueIdentifier>{84a380c9-967b-4961-af47-faff48452462}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RadioButton">
+      <UniqueIdentifier>{1444effb-cf63-4cb4-85c7-694c40601d58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\RadioButton">
+      <UniqueIdentifier>{32188393-f452-4bd0-a3a1-c05a772d4687}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CheckButton">
+      <UniqueIdentifier>{d255560b-18b4-40ea-b467-6403fe0d6732}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CheckButton">
+      <UniqueIdentifier>{f7a1e2b7-370b-4ba5-a5bc-ccd677a01079}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -95,6 +113,15 @@
     <ClInclude Include="Src\LSWWin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Button\LSWButton.h">
+      <Filter>Header Files\Button</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RadioButton\LSWRadioButton.h">
+      <Filter>Header Files\RadioButton</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\CheckButton\LSWCheckButton.h">
+      <Filter>Header Files\CheckButton</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -114,6 +141,15 @@
     </ClCompile>
     <ClCompile Include="Src\GroupBox\LSWGroupBox.cpp">
       <Filter>Source Files\GroupBox</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Button\LSWButton.cpp">
+      <Filter>Source Files\Button</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RadioButton\LSWRadioButton.cpp">
+      <Filter>Source Files\RadioButton</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\CheckButton\LSWCheckButton.cpp">
+      <Filter>Source Files\CheckButton</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
