@@ -1,4 +1,5 @@
 #include "MXMainWindowLayout.h"
+#include "../Layouts/MXLayoutManager.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../System/MXSystem.h"
 
@@ -12,7 +13,7 @@ namespace mx {
 	// == Members.
 	LSW_WIDGET_LAYOUT CMainWindowLayout::m_wlMainWindow[] = {
 		{
-			LSW_LT_MAINWINDOW,						// ltType
+			MX_MAIN_WINDOW,							// ltType
 			MX_MWI_MAINWINDOW,						// dwId
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
@@ -25,7 +26,7 @@ namespace mx {
 			nullptr,								// pwcText
 			MX_MWI_NONE,							// dwParentId
 		},
-		{
+		/*{
 			LSW_LT_LISTVIEW,						// ltType
 			MX_MWI_STOREDADDRESSES,					// dwId
 			WC_LISTVIEWW,							// lpwcClass
@@ -38,7 +39,7 @@ namespace mx {
 			0,										// dwStyleEx
 			nullptr,								// pwcText
 			MX_MWI_MAINWINDOW,						// dwParentId
-		},
+		},*/
 	};
 
 	// Menu bar items for the main window.
@@ -116,8 +117,8 @@ namespace mx {
 		if ( !m_aMainClass ) {
 			// Register the window classes we need.
 			WCHAR szTemp[5];
-			std::random_device rdRand;   // non-deterministic generator  
-			std::mt19937 mGen( rdRand() );  // to seed mersenne twister.  
+			std::random_device rdRand;
+			std::mt19937 mGen( rdRand() );
 			std::uniform_int_distribution<> uidDist( 'a', 'z' );
 
 			for ( SIZE_T I = 0; I < MX_ELEMENTS( szTemp ); ++I ) {

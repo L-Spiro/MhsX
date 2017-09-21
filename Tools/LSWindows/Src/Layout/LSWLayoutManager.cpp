@@ -38,15 +38,15 @@ namespace lsw {
 		return pwMain;
 	}
 
-	// Creates a dialog with all of its controls.  Returns the dialog widget.
-	CWidget * CLayoutManager::CreateDialogX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, BOOL _bModal, CWidget * _pwParent ) {
-		if ( !_sTotal ) { return nullptr; }
+	// Creates a modal dialog with all of its controls.  Returns the dialog exit value.
+	INT_PTR CLayoutManager::CreateDialogX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent ) {
+		if ( !_sTotal ) { return 0; }
 		std::vector<CWidget *> vWidgets;	// On failure, all widgets must be destroyed.
 #define LSW_DESTROY_WIDGETS		for ( size_t J = 0; J < vWidgets.size(); ++J ) { delete vWidgets[J]; }
 
 
 		CWidget * pwMain = CreateWidget( _pwlLayouts[0], _pwParent, false );
-		if ( !pwMain ) { return nullptr; }
+		if ( !pwMain ) { return 0; }
 		std::map<DWORD, CWidget *> mIdToPointer;
 		mIdToPointer.insert_or_assign( pwMain->Id(), pwMain );
 		vWidgets.push_back( pwMain );
@@ -58,12 +58,12 @@ namespace lsw {
 
 			CWidget * pwThis = CreateWidget( _pwlLayouts[I], pwParent, false );
 			if ( !pwThis ) {
-				// Erase everything from the map and return nullptr.
+				// Erase everything from the map and return 0.
 				for ( auto aIt = mIdToPointer.begin(); aIt != mIdToPointer.end(); aIt++ ) {
 					delete aIt->second;
 				}
 				LSW_DESTROY_WIDGETS;
-				return nullptr;
+				return 0;
 			}
 
 			mIdToPointer.insert_or_assign( pwThis->Id(), pwThis );
@@ -88,12 +88,12 @@ namespace lsw {
 		if ( ipRet == -1 ) {
 			CBase::PrintError( L"CreateDialogX" );
 		}
-
-		if ( ipRet == 0 ) {
+		LSW_DESTROY_WIDGETS;
+		/*if ( ipRet == 0 ) {
 			return pwMain;
-		}
+		}*/
 
-
+		return ipRet;
 #undef LSW_DESTROY_WIDGETS
 	}
 

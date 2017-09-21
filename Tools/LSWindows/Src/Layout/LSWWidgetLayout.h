@@ -6,7 +6,7 @@
 namespace lsw {
 
 	struct LSW_WIDGET_LAYOUT {
-		LSW_LAYOUTTYPES				ltType;
+		DWORD						ltType;
 		DWORD						dwId;						// Unique ID for the control, must not be 0.
 		LPCWSTR						lpwcClass;					// Only needed for custom types.  List views, buttons, etc. already know their classes.
 		BOOL						bEnabled;

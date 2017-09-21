@@ -99,6 +99,12 @@
     <Filter Include="Source Files\Layouts">
       <UniqueIdentifier>{f95ee98c-2a54-4354-b00b-bee5f61bff2e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\MainWindow">
+      <UniqueIdentifier>{9a8cfa9d-095d-4e82-a1ac-4ec5f2bd2485}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MainWindow">
+      <UniqueIdentifier>{94d5a6ef-e256-44fa-9432-fea562d7530c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeneratedFiles\qrc_MXMhsX.cpp">
@@ -209,6 +215,12 @@
     <ClCompile Include="Src\Layouts\MXOpenProcessLayout.cpp">
       <Filter>Source Files\Layouts</Filter>
     </ClCompile>
+    <ClCompile Include="Src\MainWindow\MXMhsMainWindow.cpp">
+      <Filter>Source Files\MainWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\OpenProcess\MXOpenProcessWindow.cpp">
+      <Filter>Source Files\OpenProcess</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MXMhsX.qrc">
@@ -317,6 +329,12 @@
     </ClInclude>
     <ClInclude Include="Src\Layouts\MXOpenProcessLayout.h">
       <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\MainWindow\MXMhsMainWindow.h">
+      <Filter>Header Files\MainWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\OpenProcess\MXOpenProcessWindow.h">
+      <Filter>Header Files\OpenProcess</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

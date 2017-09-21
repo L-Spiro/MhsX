@@ -34,13 +34,16 @@ namespace lsw {
 		}
 	}
 	CWidget::~CWidget() {
-		for ( size_t I = 0; I < m_vChildren.size(); ++I ) {
-			delete m_vChildren[I];
-		}
-		m_vChildren.clear();
 		if ( m_pwParent ) {
 			m_pwParent->RemoveChild( this );
 		}
+		for ( size_t I = 0; I < m_vChildren.size(); ++I ) {
+			CWidget * pwTemp = m_vChildren[I];
+			m_vChildren[I] = nullptr;
+			delete m_vChildren[I];			
+		}
+		m_vChildren.clear();
+		
 		if ( m_hWnd ) {
 			::DestroyWindow( m_hWnd );
 			m_hWnd = NULL;
@@ -118,6 +121,36 @@ namespace lsw {
 				}
 				break;
 			}
+
+			// =======================================
+			// Commands
+			// =======================================
+			case WM_COMMAND : {
+				LSW_HANDLED hHandled;
+				WORD wId = LOWORD( _wParam );
+				if ( _lParam ) {
+					// Sent by a control.
+					hHandled = pmwThis->Command( wId, reinterpret_cast<HWND>(_lParam) );
+				}
+				else {
+					// Sent by a menu or accelerator.
+					switch ( HIWORD( _wParam ) ) {
+						case 0 : {
+							hHandled = pmwThis->MenuCommand( wId );
+							break;
+						}
+						case 1 : {
+							hHandled = pmwThis->AcceleratorCommand( wId );
+							break;
+						}
+						default : {
+							// Error.
+						}
+					}
+				}
+				if ( hHandled == LSW_H_HANDLED ) { return 0; }
+				break;
+			}
 		}
 		return ::DefWindowProcW( _hWnd, _uMsg, _wParam, _lParam );
 	}
@@ -157,6 +190,11 @@ namespace lsw {
 				//EnumChildWindows(_hWnd, (WNDENUMPROC)SetFont, (LPARAM)GetStockObject(SYSTEM_FIXED_FONT));
 				//EnumChildWindows(_hWnd, (WNDENUMPROC)SetFont, (LPARAM)hFont);
 				return TRUE;	// Return TRUE to pass focus on to the control specified by _wParam.
+			}
+			case WM_CLOSE : {
+				LSW_HANDLED hHandled = pmwThis->Close();
+				if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
+				break;
 			}
 			case WM_SETFONT : {
 				/*HFONT hFont = (HFONT)_wParam;
@@ -245,6 +283,21 @@ namespace lsw {
 
 	// WM_MOVE.
 	CWidget::LSW_HANDLED CWidget::Move( LONG _lX, LONG _lY ) {
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_COMMAND from control.
+	CWidget::LSW_HANDLED CWidget::Command( WORD _Id, HWND _hControl ) {
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_COMMAND from menu.
+	CWidget::LSW_HANDLED CWidget::MenuCommand( WORD _Id ) {
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_COMMAND from accelerator.
+	CWidget::LSW_HANDLED CWidget::AcceleratorCommand( WORD _Id ) {
 		return LSW_H_CONTINUE;
 	}
 

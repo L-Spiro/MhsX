@@ -108,6 +108,15 @@ namespace lsw {
 		// WM_MOVE.
 		virtual LSW_HANDLED					Move( LONG _lX, LONG _lY );
 
+		// WM_COMMAND from control.
+		virtual LSW_HANDLED					Command( WORD _Id, HWND _hControl );
+
+		// WM_COMMAND from menu.
+		virtual LSW_HANDLED					MenuCommand( WORD _Id );
+
+		// WM_COMMAND from accelerator.
+		virtual LSW_HANDLED					AcceleratorCommand( WORD _Id );
+
 
 		// == Functions.
 		// Remove a child.

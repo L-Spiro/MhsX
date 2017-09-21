@@ -14,8 +14,8 @@ namespace lsw {
 		// Creates a window with all of its controls.  Returns the main window widget.
 		CWidget *						CreateWindowX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal );
 
-		// Creates a dialog with all of its controls.  Returns the dialog widget.
-		CWidget *						CreateDialogX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, BOOL _bModal, CWidget * _pwParent );
+		// Creates a modal dialog with all of its controls.  Returns the dialog exit value.
+		INT_PTR							CreateDialogX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent );
 
 		// Creates a class based on its type.
 		virtual CWidget *				CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget );

@@ -231,8 +231,10 @@
     <ClCompile Include="Src\Layouts\MXMainWindowLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXOpenProcessLayout.cpp" />
     <ClCompile Include="Src\main.cpp" />
+    <ClCompile Include="Src\MainWindow\MXMhsMainWindow.cpp" />
     <ClCompile Include="Src\MXMhsX.cpp" />
     <ClCompile Include="Src\OpenProcess\MXOpenProcessUi.cpp" />
+    <ClCompile Include="Src\OpenProcess\MXOpenProcessWindow.cpp" />
     <ClCompile Include="Src\PE\MXPeObject.cpp" />
     <ClCompile Include="Src\PE\MXPeTab.cpp" />
     <ClCompile Include="Src\PE\MXPeTreeModel.cpp" />
@@ -313,6 +315,8 @@
     <ClInclude Include="Src\Layouts\MXLayoutManager.h" />
     <ClInclude Include="Src\Layouts\MXMainWindowLayout.h" />
     <ClInclude Include="Src\Layouts\MXOpenProcessLayout.h" />
+    <ClInclude Include="Src\MainWindow\MXMhsMainWindow.h" />
+    <ClInclude Include="Src\OpenProcess\MXOpenProcessWindow.h" />
     <ClInclude Include="Src\PE\MXPeObject.h" />
     <ClInclude Include="Src\PE\MXPeStructs.h" />
     <ClInclude Include="Src\Utilities\MXUtilities.h" />

@@ -13,6 +13,8 @@ namespace lsw {
 		LSW_LT_GROUPBOX,
 		LSW_LT_LABEL,
 		LSW_LT_MAINWINDOW,
+
+		LSW_LT_CUSTOM = 100,
 	};
 
 }	// namespace lsw
