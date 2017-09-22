@@ -103,7 +103,7 @@ namespace lsw {
 		// Display the error message and exit the process
 
 		lpDisplayBuf = static_cast<LPVOID>(::LocalAlloc( LMEM_ZEROINIT, 
-			(lstrlenW( static_cast<LPCWSTR>(lpMsgBuf) ) + lstrlenW( static_cast<LPCWSTR>(_pwcText) ) + 40) * sizeof(WCHAR) ));
+			(::lstrlenW( static_cast<LPCWSTR>(lpMsgBuf) ) + ::lstrlenW( static_cast<LPCWSTR>(_pwcText) ) + 40) * sizeof(WCHAR) ));
 		::StringCchPrintfW( static_cast<LPWSTR>(lpDisplayBuf), 
 			::LocalSize( lpDisplayBuf ) / sizeof( WCHAR ),
 			L"%s failed with error %d: %s",

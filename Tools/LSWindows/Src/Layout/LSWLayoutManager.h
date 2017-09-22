@@ -38,9 +38,6 @@ namespace lsw {
 		// Writes a string to a given pointer formatted for use with DLGITEMTEMPLATE objects.
 		SIZE_T							ItemTemplateString( const WCHAR * _pwcString, WORD * _pwDest );
 
-		// Creates a MENUITEMINFOW structure based off an LSW_MENU_ITEM structure.
-		MENUITEMINFOW					ItemToMenuItem( const LSW_MENU_ITEM &_miItem );
-
 		// Appends a menu item to a menu.
 		BOOL							AppendMenuItem( HMENU _hMenu, const LSW_MENU_ITEM &_miItem );
 

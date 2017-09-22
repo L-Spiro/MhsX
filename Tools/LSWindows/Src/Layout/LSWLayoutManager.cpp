@@ -230,7 +230,7 @@ namespace lsw {
 		if ( _pdittTemplate ) {
 			_pdittTemplate->style = _wlLayout.dwStyle;
 			_pdittTemplate->dwExtendedStyle = _wlLayout.dwStyleEx;
-			_pdittTemplate->id = static_cast<WORD>(_wlLayout.dwId);
+			_pdittTemplate->id = _wlLayout.wId;
 			_pdittTemplate->x = static_cast<short>(_wlLayout.iLeft);
 			_pdittTemplate->y = static_cast<short>(_wlLayout.iTop);
 			_pdittTemplate->cx = static_cast<short>(_wlLayout.dwWidth);
@@ -277,18 +277,6 @@ namespace lsw {
 		}
 		sRet += sizeof( WORD );
 		return sRet;
-	}
-
-	// Creates a MENUITEMINFOW structure based off an LSW_MENU_ITEM structure.
-	MENUITEMINFOW CLayoutManager::ItemToMenuItem( const LSW_MENU_ITEM &_miItem ) {
-		MENUITEMINFOW miItem = { sizeof( MENUITEMINFOW ) };
-		miItem.fMask = MIIM_ID | MIIM_TYPE | MIIM_STATE;
-		miItem.fType = MFT_STRING;
-		miItem.fState = MFS_GRAYED;
-		miItem.wID = 15;
-		miItem.dwTypeData = L"Coo&l";
-		miItem.cch = lstrlenW( miItem.dwTypeData );
-		return miItem;
 	}
 
 	// Appends a menu item to a menu.

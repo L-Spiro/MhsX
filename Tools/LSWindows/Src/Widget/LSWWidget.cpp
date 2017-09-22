@@ -5,7 +5,7 @@ namespace lsw {
 
 	CWidget::CWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget ) :
 		m_hWnd( NULL ),
-		m_dwId( _wlLayout.dwId ),
+		m_dwId( _wlLayout.wId ),
 		m_bEnabled( _wlLayout.bEnabled ),
 		m_pwParent( _pwParent ) {
 
@@ -22,7 +22,7 @@ namespace lsw {
 				_wlLayout.iLeft, _wlLayout.iTop,
 				_wlLayout.dwWidth, _wlLayout.dwHeight,
 				_pwParent ? _pwParent->Wnd() : NULL,
-				(_wlLayout.dwStyle & WS_CHILD) ? reinterpret_cast<HMENU>(_wlLayout.dwId) : NULL,
+				(_wlLayout.dwStyle & WS_CHILD) ? reinterpret_cast<HMENU>(static_cast<UINT_PTR>(_wlLayout.wId)) : NULL,
 				CBase::GetThisHandle(),
 				static_cast<CWidget *>(this) );
 		}

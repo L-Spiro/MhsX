@@ -37,7 +37,7 @@ namespace lsw {
 		// Finds a layout by its ID.
 		static LSW_WIDGET_LAYOUT *			FindLayout( LSW_WIDGET_LAYOUT * _pwlLayouts, size_t _sTotal, DWORD _dwId ) {
 			for ( size_t I = 0; I < _sTotal; ++I ) {
-				if ( _pwlLayouts[I].dwId == _dwId ) { return &_pwlLayouts[I]; }
+				if ( _pwlLayouts[I].wId == _dwId ) { return &_pwlLayouts[I]; }
 			}
 			return nullptr;
 		}

@@ -12,7 +12,7 @@ namespace mx {
 	LSW_WIDGET_LAYOUT COpenProcessLayout::m_wlOpenProcessDialog[] = {
 		{
 			MX_OPEN_PROCESS_WINDOW,					// ltType
-			MX_OPI_DIALOG,							// dwId
+			MX_OPI_DIALOG,							// wId
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
 			64,										// iLeft
@@ -27,7 +27,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_GROUPBOX,						// ltType
-			MX_OPI_GROUP,							// dwId
+			MX_OPI_GROUP,							// wId
 			L"Button",								// lpwcClass
 			TRUE,									// bEnabled
 			4,										// iLeft
@@ -41,7 +41,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_LISTVIEW,						// ltType
-			MX_OPI_LISTVIEW,						// dwId
+			MX_OPI_LISTVIEW,						// wId
 			L"SysListView32",						// lpwcClass
 			TRUE,									// bEnabled
 			8,										// iLeft
@@ -55,7 +55,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_BUTTON,							// ltType
-			MX_OPI_BUTTON_OK,						// dwId
+			MX_OPI_BUTTON_OK,						// wId
 			L"Button",								// lpwcClass
 			TRUE,									// bEnabled
 			4,										// iLeft
@@ -69,7 +69,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_BUTTON,							// ltType
-			MX_OPI_BUTTON_CANCEL,					// dwId
+			MX_OPI_BUTTON_CANCEL,					// wId
 			L"Button",								// lpwcClass
 			TRUE,									// bEnabled
 			224,									// iLeft
@@ -83,7 +83,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_GROUPBOX,						// ltType
-			MX_OPI_GROUPSHOW,						// dwId
+			MX_OPI_GROUPSHOW,						// wId
 			L"Button",								// lpwcClass
 			TRUE,									// bEnabled
 			9,										// iLeft
@@ -97,7 +97,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_RADIO,							// ltType
-			MX_OPI_RADIO_MAIN,						// dwId
+			MX_OPI_RADIO_MAIN,						// wId
 			L"Button",								// lpwcClass
 			TRUE,									// bEnabled
 			14,										// iLeft
@@ -111,7 +111,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_RADIO,							// ltType
-			MX_OPI_RADIO_ALL,						// dwId
+			MX_OPI_RADIO_ALL,						// wId
 			L"Button",								// lpwcClass
 			TRUE,									// bEnabled
 			238,										// iLeft
@@ -125,7 +125,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_CHECK,							// ltType
-			MX_OPI_CHECK_RESTR,						// dwId
+			MX_OPI_CHECK_RESTR,						// wId
 			L"Button",								// lpwcClass
 			FALSE,									// bEnabled
 			9,										// iLeft
@@ -139,7 +139,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_BUTTON,							// ltType
-			MX_OPI_BUTTON_REFRESH,					// dwId
+			MX_OPI_BUTTON_REFRESH,					// wId
 			L"Button",								// lpwcClass
 			TRUE,									// bEnabled
 			9,									// iLeft

@@ -14,7 +14,7 @@ namespace mx {
 	LSW_WIDGET_LAYOUT CMainWindowLayout::m_wlMainWindow[] = {
 		{
 			MX_MAIN_WINDOW,							// ltType
-			MX_MWI_MAINWINDOW,						// dwId
+			MX_MWI_MAINWINDOW,						// wId
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
 			64,										// iLeft
@@ -28,7 +28,7 @@ namespace mx {
 		},
 		/*{
 			LSW_LT_LISTVIEW,						// ltType
-			MX_MWI_STOREDADDRESSES,					// dwId
+			MX_MWI_STOREDADDRESSES,					// wId
 			WC_LISTVIEWW,							// lpwcClass
 			TRUE,									// bEnabled
 			64,										// iLeft
@@ -172,7 +172,7 @@ namespace mx {
 		//SetMenuItemInfo( 
 
 		::SetMenu( m_pwMainWindow->Wnd(), hMenu );*/
-
+		return TRUE;
 	}
 
 }	// namespace mx
