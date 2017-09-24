@@ -336,6 +336,9 @@
     <ClInclude Include="Src\OpenProcess\MXOpenProcessWindow.h">
       <Filter>Header Files\OpenProcess</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Layouts\MXLayoutMacros.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="MhsX.exe.intermediate.manifest">

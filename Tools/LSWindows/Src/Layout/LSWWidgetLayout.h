@@ -17,15 +17,22 @@ namespace lsw {
 		DWORD						dwStyle;
 		DWORD						dwStyleEx;
 		LPCWCH						pwcText;
+		SIZE_T						sTextLen;
 		DWORD						dwParentId;					// 0 for no parent.
 
 		// Expressions for dynamic sizing.
 		LPCSTR						pcLeftSizeExp;
+		SIZE_T						sLeftSizeExpLen;
 		LPCSTR						pcRightSizeExp;
+		SIZE_T						sRightSizeExpLen;
 		LPCSTR						pcTopSizeExp;
+		SIZE_T						sTopSizeExpLen;
 		LPCSTR						pcBottomSizeExp;
+		SIZE_T						sBottomSizeExpLen;
 		LPCSTR						pcWidthSizeExp;
+		SIZE_T						sWidthSizeExpLen;
 		LPCSTR						pcHeightSizeExp;
+		SIZE_T						sHeightSizeExpLen;
 	};
 
 }	// namespace lsw

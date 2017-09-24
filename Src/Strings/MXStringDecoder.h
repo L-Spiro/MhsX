@@ -4,6 +4,9 @@
 #include <cstring>
 #include <string>
 
+#define MX_MAKE_WCHAR2( STRING )			L ## STRING
+#define MX_MAKE_WCHAR( STRING )				MX_MAKE_WCHAR2( STRING )
+
 namespace mx {
 
 	class CStringDecoder {
