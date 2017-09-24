@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../LSWWin.h"
+#include "../Expressions/LSWExpression.h"
 #include "../Helpers/LSWHelpers.h"
 #include "../Layout/LSWWidgetLayout.h"
 
@@ -88,6 +89,24 @@ namespace lsw {
 		// Parent.
 		CWidget *							m_pwParent;
 
+		// Width expression.
+		CExpression							m_eWidth;
+
+		// Height expression.
+		CExpression							m_eHeight;
+
+		// Left expression.
+		CExpression							m_eLeft;
+
+		// Right expression.
+		CExpression							m_eRight;
+
+		// Top expression.
+		CExpression							m_eTop;
+
+		// Bottom expression.
+		CExpression							m_eBottom;
+
 
 		// == Message Handlers.
 		// WM_NCCREATE.
@@ -133,11 +152,26 @@ namespace lsw {
 		// Set the parent.
 		void								SetParent( CWidget * _pwParent );
 
+		// Evaluates expressions to determine a new rectangle for the control.
+		void								EvalNewSize();
+
 		// Attaches a control/window to its CWidget.
 		static BOOL CALLBACK				EnumChildWindows_AttachWindowToWidget( HWND _hWnd, LPARAM _lParam );
 
 		// Applies enabled/disabled settings.
 		static BOOL CALLBACK				EnumChildWindows_SetEnabled( HWND _hWnd, LPARAM _lParam );
+
+		// Sets all the starting rectangles for all widgets.
+		static BOOL CALLBACK				EnumChildWindows_SetStartingRect( HWND _hWnd, LPARAM _lParam );
+
+		// Resizes all controls when the window resizes.
+		static BOOL CALLBACK				EnumChildWindows_ResizeControls( HWND _hWnd, LPARAM _lParam );
+
+		// Evaluates "??" inside expressions.  ?? = this pointer.
+		static bool __stdcall				WidgetUserVarHandler( uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult );
+
+		// Evaluates member access in expressions.
+		static bool __stdcall				WidgetMemberAccessHandler( const ee::CExpEvalContainer::EE_RESULT &_rLeft, const std::string &_sMember, uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult );
 
 	};
 

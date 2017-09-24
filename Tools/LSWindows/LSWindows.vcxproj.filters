@@ -69,6 +69,12 @@
     <Filter Include="Source Files\CheckButton">
       <UniqueIdentifier>{f7a1e2b7-370b-4ba5-a5bc-ccd677a01079}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Expressions">
+      <UniqueIdentifier>{e59ff7cb-0f2f-474d-942c-a9eba98ed24d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Expressions">
+      <UniqueIdentifier>{64c3a51f-18bd-4b3c-ac1c-bf7d8719723d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -122,6 +128,9 @@
     <ClInclude Include="Src\CheckButton\LSWCheckButton.h">
       <Filter>Header Files\CheckButton</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Expressions\LSWExpression.h">
+      <Filter>Header Files\Expressions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -150,6 +159,9 @@
     </ClCompile>
     <ClCompile Include="Src\CheckButton\LSWCheckButton.cpp">
       <Filter>Source Files\CheckButton</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Expressions\LSWExpressions.cpp">
+      <Filter>Source Files\Expressions</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

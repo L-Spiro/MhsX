@@ -6226,7 +6226,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 114:
 YY_RULE_SETUP
-{ /*return yy::CExpEvalParser::token::EE_USER_VAR;*/ }
+{ return yy::CExpEvalParser::token::EE_USER_VAR; }
 	YY_BREAK
 case 115:
 YY_RULE_SETUP

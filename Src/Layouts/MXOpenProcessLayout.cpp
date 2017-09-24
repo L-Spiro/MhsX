@@ -34,10 +34,17 @@ namespace mx {
 			4,										// iTop
 			263,									// dwWidth
 			174,									// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_GROUPBOX,		// dwStyle
+			WS_CHILDWINDOW | WS_VISIBLE | BS_GROUPBOX,																									// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,																// dwStyleEx
 			L"Select Process",						// pwcText
 			MX_OPI_DIALOG,							// dwParentId
+
+			"??::SL+(??::P::L-??::P::SL)",			// pcLeftSizeExp
+			"??::SR+(??::P::R-??::P::SR)",			// pcRightSizeExp
+			"??::ST+(??::P::T-??::P::ST)",			// pcTopSizeExp
+			"??::SB+(??::P::B-??::P::SB)",			// pcBottomSizeExp
+			nullptr,								// pcWidthSizeExp
+			nullptr,								// pcHeightSizeExp
 		},
 		{
 			LSW_LT_LISTVIEW,						// ltType
@@ -47,11 +54,18 @@ namespace mx {
 			8,										// iLeft
 			13,										// iTop
 			255,									// dwWidth
-			110,										// dwHeight
+			110,									// dwHeight
 			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT,		// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY | WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT,						// dwStyleEx
 			nullptr,								// pwcText
 			MX_OPI_DIALOG,							// dwParentId
+
+			"??::SL+(??::P::L-??::P::SL)",			// pcLeftSizeExp
+			"??::SR+(??::P::R-??::P::SR)",			// pcRightSizeExp
+			"??::ST+(??::P::T-??::P::ST)",			// pcTopSizeExp
+			"??::SB+(??::P::B-??::P::SB)",			// pcBottomSizeExp
+			nullptr,								// pcWidthSizeExp
+			nullptr,								// pcHeightSizeExp
 		},
 		{
 			LSW_LT_BUTTON,							// ltType
@@ -62,10 +76,17 @@ namespace mx {
 			182,									// iTop
 			43,										// dwWidth
 			12,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON | BS_TEXT,		// dwStyle
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON | BS_TEXT,									// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			L"OK",									// pwcText
 			MX_OPI_DIALOG,							// dwParentId
+
+			"??::SL+(??::P::L-??::P::SL)",			// pcLeftSizeExp
+			nullptr,								// pcRightSizeExp
+			nullptr,								// pcTopSizeExp
+			"??::SB+(??::P::B-??::P::SB)",			// pcBottomSizeExp
+			"??::W",								// pcWidthSizeExp
+			"??::H",								// pcHeightSizeExp
 		},
 		{
 			LSW_LT_BUTTON,							// ltType
@@ -76,10 +97,17 @@ namespace mx {
 			182,									// iTop
 			43,										// dwWidth
 			12,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON | BS_TEXT,		// dwStyle
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON | BS_TEXT,									// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			L"Cancel",								// pwcText
 			MX_OPI_DIALOG,							// dwParentId
+
+			nullptr,								// pcLeftSizeExp
+			"??::SR+(??::P::R-??::P::SR)",			// pcRightSizeExp
+			nullptr,								// pcTopSizeExp
+			"??::SB+(??::P::B-??::P::SB)",			// pcBottomSizeExp
+			"??::W",								// pcWidthSizeExp
+			"??::H",								// pcHeightSizeExp
 		},
 		{
 			LSW_LT_GROUPBOX,						// ltType
@@ -90,10 +118,17 @@ namespace mx {
 			128,									// iTop
 			253,									// dwWidth
 			20,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_GROUPBOX,		// dwStyle
-			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,																// dwStyleEx
+			WS_CHILDWINDOW | WS_VISIBLE | BS_GROUPBOX,															// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			L"Show",								// pwcText
 			MX_OPI_DIALOG,							// dwParentId
+
+			"??::SL+(??::P::L-??::P::SL)",			// pcLeftSizeExp
+			"??::SR+(??::P::R-??::P::SR)",			// pcRightSizeExp
+			nullptr,								// pcTopSizeExp
+			"??::SB+(??::P::B-??::P::SB)",			// pcBottomSizeExp
+			nullptr,								// pcWidthSizeExp
+			"??::H",								// pcHeightSizeExp
 		},
 		{
 			LSW_LT_RADIO,							// ltType
@@ -104,24 +139,38 @@ namespace mx {
 			136,									// iTop
 			29,										// dwWidth
 			9,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,		// dwStyle
-			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,																// dwStyleEx
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,										// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			L"Main",								// pwcText
 			MX_OPI_DIALOG,							// dwParentId
+
+			"??::SL+(??::P::L-??::P::SL)",			// pcLeftSizeExp
+			nullptr,								// pcRightSizeExp
+			nullptr,								// pcTopSizeExp
+			"??::SB+(??::P::B-??::P::SB)",			// pcBottomSizeExp
+			"??::W",								// pcWidthSizeExp
+			"??::H",								// pcHeightSizeExp
 		},
 		{
 			LSW_LT_RADIO,							// ltType
 			MX_OPI_RADIO_ALL,						// wId
 			L"Button",								// lpwcClass
 			TRUE,									// bEnabled
-			238,										// iLeft
+			238,									// iLeft
 			136,									// iTop
 			20,										// dwWidth
 			9,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,		// dwStyle
-			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,																// dwStyleEx
-			L"All",								// pwcText
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,										// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
+			L"All",									// pwcText
 			MX_OPI_DIALOG,							// dwParentId
+
+			nullptr,								// pcLeftSizeExp
+			"??::SR+(??::P::R-??::P::SR)",			// pcRightSizeExp
+			nullptr,								// pcTopSizeExp
+			"??::SB+(??::P::B-??::P::SB)",			// pcBottomSizeExp
+			"??::W",								// pcWidthSizeExp
+			"??::H",								// pcHeightSizeExp
 		},
 		{
 			LSW_LT_CHECK,							// ltType
@@ -130,26 +179,40 @@ namespace mx {
 			FALSE,									// bEnabled
 			9,										// iLeft
 			150,									// iTop
-			253,										// dwWidth
+			253,									// dwWidth
 			9,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,		// dwStyle
-			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,																// dwStyleEx
-			L"Open in Restricted Mode (Improves Undetectability)",								// pwcText
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,											// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
+			L"Open in Restricted Mode (Improves Undetectability)",												// pwcText
 			MX_OPI_DIALOG,							// dwParentId
+
+			"??::SL+(??::P::L-??::P::SL)",			// pcLeftSizeExp
+			"??::SR+(??::P::R-??::P::SR)",			// pcRightSizeExp
+			nullptr,								// pcTopSizeExp
+			"??::SB+(??::P::B-??::P::SB)",			// pcBottomSizeExp
+			nullptr,								// pcWidthSizeExp
+			"??::H",								// pcHeightSizeExp
 		},
 		{
 			LSW_LT_BUTTON,							// ltType
 			MX_OPI_BUTTON_REFRESH,					// wId
 			L"Button",								// lpwcClass
 			TRUE,									// bEnabled
-			9,									// iLeft
+			9,										// iLeft
 			161,									// iTop
 			253,									// dwWidth
 			12,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON | BS_TEXT,		// dwStyle
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON | BS_TEXT,									// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			L"Refresh",								// pwcText
 			MX_OPI_DIALOG,							// dwParentId
+
+			"??::SL+(??::P::L-??::P::SL)",			// pcLeftSizeExp
+			"??::SR+(??::P::R-??::P::SR)",			// pcRightSizeExp
+			nullptr,								// pcTopSizeExp
+			"??::SB+(??::P::B-??::P::SB)",			// pcBottomSizeExp
+			nullptr,								// pcWidthSizeExp
+			"??::H",								// pcHeightSizeExp
 		},
 	};
 

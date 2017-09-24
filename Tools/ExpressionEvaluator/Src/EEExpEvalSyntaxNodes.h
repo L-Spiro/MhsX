@@ -29,6 +29,7 @@ namespace ee {
 		EE_N_INTRINSIC_1,
 		EE_N_INTRINSIC_2,
 		EE_N_INTRINSIC_3,
+		EE_N_USER_VAR,
 	};
 
 	// Constant types.

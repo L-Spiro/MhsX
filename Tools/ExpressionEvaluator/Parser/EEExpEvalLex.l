@@ -147,7 +147,7 @@ L?'(\\.|[^\\'])+'					{ return yy::CExpEvalParser::token::EE_CHAR_CONSTANT; }
 "^"									{ return ('^'); }
 "?"									{ return ('?'); }
 ":"									{ return (':'); }
-"??"								{ /*return yy::CExpEvalParser::token::EE_USER_VAR;*/ }
+"??"								{ return yy::CExpEvalParser::token::EE_USER_VAR; }
 "&&"								{ return yy::CExpEvalParser::token::EE_AND; }
 "||"								{ return yy::CExpEvalParser::token::EE_OR; }
 "=="								{ return yy::CExpEvalParser::token::EE_EQU_E; }

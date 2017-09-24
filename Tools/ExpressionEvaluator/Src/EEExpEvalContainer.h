@@ -13,8 +13,14 @@ namespace ee {
 		friend class						CExpEvalParser;
 	public :
 		CExpEvalContainer( CExpEvalLexer * _plLexer ) :
-			m_bTreateAllAsHex( false ),
-			m_peelLexer( _plLexer ) {
+			m_bTreatAllAsHex( false ),
+			m_peelLexer( _plLexer ),
+			m_pfUser( nullptr ),
+			m_uiptrUserData( 0 ),
+			m_pfshString( nullptr ),
+			m_uiptrStringData( 0 ),
+			m_pfmahMemberAccess( nullptr ),
+			m_uiptrMemberAccess( 0 ) {
 		}
 
 
@@ -29,15 +35,37 @@ namespace ee {
 			}								u;
 		};
 
+		// User-variable function handler.
+		typedef bool (__stdcall *			PfUserVarHandler)( uintptr_t _uiptrData, CExpEvalContainer * _peecContainer, EE_RESULT &_rResult );
+
+		// String handler.
+		typedef bool (__stdcall *			PfStringHandler)( const std::string &_sString, uintptr_t _uiptrData, CExpEvalContainer * _peecContainer, EE_RESULT &_rResult );
+
+		// Member-access handler.
+		typedef bool (__stdcall *			PfMemberAccessHandler)( const EE_RESULT &_rLeft, const std::string &_sMember, uintptr_t _uiptrData, CExpEvalContainer * _peecContainer, EE_RESULT &_rResult );
+
 
 		// == Functions.
 		// Get the result.
 		bool								Resolve( EE_RESULT &_rRes ) { return ResolveNode( m_sTrans, _rRes ); }
+
 		// Do we treat everything as hex?
-		bool								TreatAllAsHex() const { return m_bTreateAllAsHex; }
+		bool								TreatAllAsHex() const { return m_bTreatAllAsHex; }
 
 		// Set whether to treat all as hex or not.
-		void								SetTreatAsHex( bool _bVal ) { m_bTreateAllAsHex = _bVal; }
+		void								SetTreatAsHex( bool _bVal ) { m_bTreatAllAsHex = _bVal; }
+
+		// Set the user data handler.
+		void								SetUserHandler( PfUserVarHandler _pfHandler, uintptr_t _uiptrData ) { m_pfUser = _pfHandler; m_uiptrUserData = _uiptrData; }
+
+		// Set the string handler.
+		void								SetStringHandler( PfStringHandler _pfHandler, uintptr_t _uiptrData ) { m_pfshString = _pfHandler; m_uiptrStringData = _uiptrData; }
+
+		// Set the identifier handler.
+		void								SetMemberAccessHandler( PfMemberAccessHandler _pfHandler, uintptr_t _uiptrData ) { m_pfmahMemberAccess = _pfHandler; m_uiptrMemberAccess = _uiptrData; }
+
+		// Sets the lexer to NULL.  Call after the expression has been successfully parsed.
+		void								ExpWasParsed() { m_peelLexer = nullptr; }
 
 		// Gets the type to use between 2 given types.
 		static EE_NUM_CONSTANTS				GetCastType( EE_NUM_CONSTANTS _ncLeft, EE_NUM_CONSTANTS _ncRight );
@@ -87,6 +115,9 @@ namespace ee {
 		// Creates member access.
 		void								CreateMemberAccess( const YYSTYPE::EE_NODE_DATA &_ndExp, size_t _sMember, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a user (??) node.
+		void								CreateUser( YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Create a unary node.
 		void								CreateUnary( const YYSTYPE::EE_NODE_DATA &_ndExp, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode );
 
@@ -121,7 +152,25 @@ namespace ee {
 		std::vector<std::string>			m_vStrings;
 
 		// Treate everything as hex?
-		bool								m_bTreateAllAsHex;
+		bool								m_bTreatAllAsHex;
+
+		// User function.
+		PfUserVarHandler					m_pfUser;
+		
+		// Data to pass to the user function.
+		uintptr_t							m_uiptrUserData;
+
+		// String handler.
+		PfStringHandler						m_pfshString;
+
+		// Data to pass to the string handler.
+		uintptr_t							m_uiptrStringData;
+
+		// Member-access handler.
+		PfMemberAccessHandler				m_pfmahMemberAccess;
+
+		// Data to pass to the member-access handler.
+		uintptr_t							m_uiptrMemberAccess;
 
 		// Translation unit.
 		size_t								m_sTrans;

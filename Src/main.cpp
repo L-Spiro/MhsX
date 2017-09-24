@@ -26,7 +26,7 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 #define e 2.7182818284590452353602874713527
 		uint64_t ui64 = 0x7F3|56 &5642 ^ 53;
 		double dVal = pow( 15, 41664 );
-		std::istringstream sStream( "512.0 / (512.0 + 3.0)" );
+		std::istringstream sStream( "??::Width" );
 		ee::CExpEvalLexer eelLexer( &sStream );
 		ee::CExpEvalContainer eecContainer( &eelLexer );
 		ee::CExpEvalParser eepParser( &eelLexer, &eecContainer );
@@ -37,8 +37,8 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 		ee::CExpEvalContainer::EE_RESULT rRes2 = rRes;
 #undef PI
 #undef e
-	}
-	*/
+	}*/
+	
 	
 	
 

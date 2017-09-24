@@ -156,6 +156,12 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
+	// Creates a user (??) node.
+	void CExpEvalContainer::CreateUser( YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_USER_VAR;
+		AddNode( _ndNode );
+	}
+
 	// Create a unary node.
 	void CExpEvalContainer::CreateUnary( const YYSTYPE::EE_NODE_DATA &_ndExp, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_UNARY;
@@ -255,13 +261,21 @@ namespace ee {
 				return true;
 			}
 			case EE_N_IDENTIFIER : {
-				return false; // TODO.
+				if ( !m_pfshString ) { return false; }
+				return m_pfshString( m_vStrings[ndNode.u.sStringIndex], m_uiptrStringData, this, _rRes );
 			}
 			case EE_N_ADDRESS : {
 				return false; // TODO.
 			}
 			case EE_N_MEMBERACCESS : {
-				return false; // TODO.
+				if ( !m_pfmahMemberAccess ) { return false; }
+				EE_RESULT rLeft;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rLeft ) ) { return false; }
+				return m_pfmahMemberAccess( rLeft, m_vStrings[ndNode.v.sStringIndex], m_uiptrMemberAccess, this, _rRes );
+			}
+			case EE_N_USER_VAR : {
+				if ( !m_pfUser ) { return false; }
+				return m_pfUser( m_uiptrUserData, this, _rRes );
 			}
 			case EE_N_UNARY : {
 				EE_RESULT rTemp;

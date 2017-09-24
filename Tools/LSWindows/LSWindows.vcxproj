@@ -84,6 +84,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\ExpressionEvaluator\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -99,6 +100,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\ExpressionEvaluator\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -116,6 +118,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\ExpressionEvaluator\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -135,6 +138,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\ExpressionEvaluator\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -152,6 +156,7 @@
     <ClCompile Include="Src\Base\LSWBase.cpp" />
     <ClCompile Include="Src\Button\LSWButton.cpp" />
     <ClCompile Include="Src\CheckButton\LSWCheckButton.cpp" />
+    <ClCompile Include="Src\Expressions\LSWExpressions.cpp" />
     <ClCompile Include="Src\GroupBox\LSWGroupBox.cpp" />
     <ClCompile Include="Src\Layout\LSWLayoutManager.cpp" />
     <ClCompile Include="Src\ListView\LSWListView.cpp" />
@@ -165,6 +170,7 @@
     <ClInclude Include="Src\Base\LSWWndClassEx.h" />
     <ClInclude Include="Src\Button\LSWButton.h" />
     <ClInclude Include="Src\CheckButton\LSWCheckButton.h" />
+    <ClInclude Include="Src\Expressions\LSWExpression.h" />
     <ClInclude Include="Src\GroupBox\LSWGroupBox.h" />
     <ClInclude Include="Src\Helpers\LSWHelpers.h" />
     <ClInclude Include="Src\Layout\LSWLayoutManager.h" />

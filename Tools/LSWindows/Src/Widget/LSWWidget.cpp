@@ -33,6 +33,39 @@ namespace lsw {
 		else {
 			m_pwParent = nullptr;
 		}
+
+		// Apply expressions.
+#ifdef _DEBUG
+#define LSW_ERROR_PRINT( TEXTEXP, ERROR )	::MessageBoxA( NULL, _wlLayout.TEXTEXP, "Invalid " #ERROR "Expression", MB_OK )
+#else
+#define LSW_ERROR_PRINT( TEXTEXP, ERROR )
+#endif	// #ifdef _DEBUG
+
+#define LSW_SET_EXP( TEXTEXP, EXP, ERROR )																			\
+	if ( _wlLayout.TEXTEXP ) {																						\
+		if ( !EXP.SetExpression( _wlLayout.TEXTEXP ) ) {															\
+			LSW_ERROR_PRINT( TEXTEXP, ERROR );																		\
+			EXP.Reset();																							\
+		}																											\
+		else {																										\
+			EXP.GetContainer()->ExpWasParsed();																		\
+			EXP.GetContainer()->SetUserHandler( WidgetUserVarHandler, reinterpret_cast<uintptr_t>(this) );			\
+			EXP.GetContainer()->SetMemberAccessHandler( WidgetMemberAccessHandler, 0 );								\
+		}																											\
+	}
+
+
+		LSW_SET_EXP( pcWidthSizeExp, m_eWidth, Width )
+		LSW_SET_EXP( pcHeightSizeExp, m_eHeight, Height )
+		LSW_SET_EXP( pcLeftSizeExp, m_eLeft, Left )
+		LSW_SET_EXP( pcRightSizeExp, m_eRight, Right )
+		LSW_SET_EXP( pcTopSizeExp, m_eTop, Top )
+		LSW_SET_EXP( pcBottomSizeExp, m_eBottom, Bottom )
+
+		
+
+#undef LSW_SET_EXP
+#undef LSW_ERROR_PRINT
 	}
 	CWidget::~CWidget() {
 		if ( m_pwParent ) {
@@ -65,6 +98,15 @@ namespace lsw {
 				::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pcsCreate->lpCreateParams) );
 				pmwThis = reinterpret_cast<CWidget *>(pcsCreate->lpCreateParams);
 				pmwThis->m_hWnd = _hWnd;
+				::GetWindowRect( _hWnd, &pmwThis->m_rRect );
+				::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
+				::GetWindowRect( _hWnd, &pmwThis->m_rStartingRect );
+
+				// Attach all controls to their CWidget counterparts.
+				::EnumChildWindows( _hWnd, EnumChildWindows_AttachWindowToWidget, _lParam );
+				::EnumChildWindows( _hWnd, EnumChildWindows_SetEnabled, _lParam );
+				::EnumChildWindows( _hWnd, EnumChildWindows_SetStartingRect, _lParam );
+
 				LSW_HANDLED hHandled = pmwThis->NcCreate( (*pcsCreate) );
 				if ( hHandled == LSW_H_HANDLED ) { return 0; }
 				break;
@@ -169,13 +211,15 @@ namespace lsw {
 				pmwThis = (*pvWidgets)[0];
 				::SetWindowLongPtrW( _hWnd, DWLP_USER, reinterpret_cast<LONG_PTR>(pmwThis) );
 				pmwThis->m_hWnd = _hWnd;
-
-				//SetWindowTheme(hwnd, L" ", L" ");
+				::GetWindowRect( _hWnd, &pmwThis->m_rRect );
+				::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
+				::GetWindowRect( _hWnd, &pmwThis->m_rStartingRect );
 
 
 				// Attach all controls to their CWidget counterparts.
 				::EnumChildWindows( _hWnd, EnumChildWindows_AttachWindowToWidget, _lParam );
 				::EnumChildWindows( _hWnd, EnumChildWindows_SetEnabled, _lParam );
+				::EnumChildWindows( _hWnd, EnumChildWindows_SetStartingRect, _lParam );
 
 				POINT pConvOrg = PixelsToDialogUnits( _hWnd, 574 - 551 - 7, 633 - 302 - 30 );
 				POINT pConv = PixelsToDialogUnits( _hWnd, 567, 206 );
@@ -197,6 +241,38 @@ namespace lsw {
 			case WM_CLOSE : {
 				LSW_HANDLED hHandled = pmwThis->Close();
 				if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
+				break;
+			}
+			// =======================================
+			// Sizing.
+			// =======================================
+			case WM_SIZE : {
+				LSW_HANDLED hHandled;
+				switch ( _wParam ) {
+					case SIZE_MINIMIZED : {
+						// Width and height are the sizes in the task bar.
+						hHandled = pmwThis->Minimized( LOWORD( _lParam ), HIWORD( _lParam ) );
+						break;
+					}
+					default : {
+						::GetWindowRect( _hWnd, &pmwThis->m_rRect );
+						::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
+						hHandled = pmwThis->Size( _wParam, pmwThis->m_rRect.Width(), pmwThis->m_rRect.Height() );
+						::RedrawWindow( _hWnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW );
+					}
+				}
+				
+				if ( hHandled == LSW_H_HANDLED ) { return 0; }
+				break;
+			}
+			case WM_MOVE : {
+				if ( !::IsIconic( _hWnd ) ) {
+					::GetWindowRect( _hWnd, &pmwThis->m_rRect );
+					::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
+					POINTS pPoint = MAKEPOINTS( _lParam );
+					LSW_HANDLED hHandled = pmwThis->Move( pPoint.x, pPoint.y );
+					if ( hHandled == LSW_H_HANDLED ) { return 0; }
+				}
 				break;
 			}
 			case WM_SETFONT : {
@@ -276,6 +352,7 @@ namespace lsw {
 
 	// WM_SIZE.
 	CWidget::LSW_HANDLED CWidget::Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight ) {
+		::EnumChildWindows( Wnd(), EnumChildWindows_ResizeControls, 0 );
 		return LSW_H_CONTINUE;
 	}
 
@@ -332,6 +409,72 @@ namespace lsw {
 		}
 	}
 
+	// Evaluates expressions to determine a new rectangle for the control.
+	void CWidget::EvalNewSize() {
+		LSW_RECT rNewSize = WindowRect();
+		// Each axis has 3 possible expressions.
+		// X axis has left, width, and right.
+		// Y axis has top, height, and bottom.
+		// Only up to 2 on each axis can logically be defined.
+
+
+		// X AXIS.
+		if ( m_eLeft.GetContainer() ) {
+			rNewSize.left = static_cast<LONG>(m_eLeft.Evaluate());
+			if ( m_eWidth.GetContainer() ) {
+				rNewSize.SetWidth( static_cast<LONG>(m_eWidth.Evaluate()) );
+			}
+			else if ( m_eRight.GetContainer() ) {
+				rNewSize.right = static_cast<LONG>(m_eRight.Evaluate());
+			}
+		}
+		else if ( m_eRight.GetContainer() ) {
+			// Left not defined but right is.
+			rNewSize.right = static_cast<LONG>(m_eRight.Evaluate());
+			if ( m_eWidth.GetContainer() ) {
+				rNewSize.left = rNewSize.right - static_cast<LONG>(m_eWidth.Evaluate());
+			}
+		}
+		else if ( m_eWidth.GetContainer() ) {
+			// Only width is defined.
+			rNewSize.SetWidth( static_cast<LONG>(m_eWidth.Evaluate()) );
+		}
+
+
+		// Y AXIS.
+		if ( m_eTop.GetContainer() ) {
+			rNewSize.top = static_cast<LONG>(m_eTop.Evaluate());
+			if ( m_eHeight.GetContainer() ) {
+				rNewSize.SetHeight( static_cast<LONG>(m_eHeight.Evaluate()) );
+			}
+			else if ( m_eBottom.GetContainer() ) {
+				rNewSize.bottom = static_cast<LONG>(m_eBottom.Evaluate());
+			}
+		}
+		else if ( m_eBottom.GetContainer() ) {
+			// Top not defined but bottom is.
+			rNewSize.bottom = static_cast<LONG>(m_eBottom.Evaluate());
+			if ( m_eHeight.GetContainer() ) {
+				rNewSize.top = rNewSize.bottom - static_cast<LONG>(m_eHeight.Evaluate());
+			}
+		}
+		else if ( m_eHeight.GetContainer() ) {
+			// Only width is defined.
+			rNewSize.SetHeight( static_cast<LONG>(m_eHeight.Evaluate()) );
+		}
+
+		if ( Parent() ) {
+			POINT pUpperLeft = rNewSize.UpperLeft(), pBottomRight = rNewSize.BottomRight();
+			::ScreenToClient( Parent()->Wnd(), &pUpperLeft );
+			::ScreenToClient( Parent()->Wnd(), &pBottomRight );
+			rNewSize.left = pUpperLeft.x;
+			rNewSize.top = pUpperLeft.y;
+			rNewSize.right = pBottomRight.x;
+			rNewSize.bottom = pBottomRight.y;
+		}
+		::MoveWindow( Wnd(), rNewSize.left, rNewSize.top, rNewSize.Width(), rNewSize.Height(), FALSE );
+	}
+
 	// Attaches a control/window to its CWidget.
 	BOOL CALLBACK CWidget::EnumChildWindows_AttachWindowToWidget( HWND _hWnd, LPARAM _lParam ) {
 		std::vector<CWidget *> * pvWidgets = reinterpret_cast<std::vector<CWidget *> *>(_lParam);
@@ -355,6 +498,184 @@ namespace lsw {
 			}
 		}
 		return TRUE;
+	}
+
+	// Sets all the starting rectangles for all widgets.
+	BOOL CALLBACK CWidget::EnumChildWindows_SetStartingRect( HWND _hWnd, LPARAM _lParam ) {
+		CWidget * pwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( _hWnd, GWLP_USERDATA ));
+		if ( pwThis ) {
+			::GetWindowRect( _hWnd, &pwThis->m_rRect );
+			::GetClientRect( _hWnd, &pwThis->m_rClientRect );
+			::GetWindowRect( _hWnd, &pwThis->m_rStartingRect );
+		}
+		return TRUE;
+	}
+
+	// Resizes all controls when the window resizes.
+	BOOL CALLBACK CWidget::EnumChildWindows_ResizeControls( HWND _hWnd, LPARAM _lParam ) {
+		CWidget * pwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( _hWnd, GWLP_USERDATA ));
+		if ( pwThis ) {
+			pwThis->EvalNewSize();
+		}
+		return TRUE;
+	}
+
+	// Evaluates "??" inside expressions.  ?? = this pointer.
+	bool __stdcall CWidget::WidgetUserVarHandler( uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult ) {
+		_rResult.ncType = ee::EE_NC_UNSIGNED;
+		_rResult.u.ui64Val = _uiptrData;
+		return true;
+	}
+
+	// Evaluates member access in expressions.
+	bool __stdcall CWidget::WidgetMemberAccessHandler( const ee::CExpEvalContainer::EE_RESULT &_rLeft, const std::string &_sMember, uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult ) {
+		// Expecting that _rLeft evaluates to a CWidget *.
+		if ( _rLeft.ncType != ee::EE_NC_UNSIGNED ) { return false; }
+		CWidget * pwThis = reinterpret_cast<CWidget *>(static_cast<uintptr_t>(_rLeft.u.ui64Val));
+		if ( !pwThis ) { return false; }
+		
+		// Figure out what is being accessed on the widget and return accordingly.
+		// =======================================
+		// PARENT.
+		// =======================================
+		if ( _sMember.size() == 1 ) {
+			if ( ::_stricmp( _sMember.c_str(), "P" ) == 0 ) {
+				// Accessing parent.
+				_rResult.ncType = ee::EE_NC_UNSIGNED;
+				_rResult.u.ui64Val = reinterpret_cast<uint64_t>(pwThis->Parent());
+				return true;
+			}
+			// =======================================
+			// WINDOW RECT.
+			// =======================================
+			if ( ::_stricmp( _sMember.c_str(), "W" ) == 0 ) {
+				// Accessing this width.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect().Width());
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "H" ) == 0 ) {
+				// Accessing this height.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect().Height());
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "L" ) == 0 ) {
+				// Accessing this left.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect().left);
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "R" ) == 0 ) {
+				// Accessing this right.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect().right);
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "T" ) == 0 ) {
+				// Accessing this top.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect().top);
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "B" ) == 0 ) {
+				// Accessing this bottom.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect().bottom);
+				return true;
+			}
+		}
+		// =======================================
+		// CLIENT RECT.
+		// =======================================
+		if ( _sMember.size() == 2 ) {
+			if ( ::_stricmp( _sMember.c_str(), "CW" ) == 0 ) {
+				// Accessing this client width.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().Width());
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "CH" ) == 0 ) {
+				// Accessing this client height.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().Height());
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "CL" ) == 0 ) {
+				// Accessing this client left.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().left);
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "CR" ) == 0 ) {
+				// Accessing this client right.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().right);
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "CT" ) == 0 ) {
+				// Accessing this client top.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().top);
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "CB" ) == 0 ) {
+				// Accessing this client bottom.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().bottom);
+				return true;
+			}
+			// =======================================
+			// START RECT.
+			// =======================================
+			if ( ::_stricmp( _sMember.c_str(), "SW" ) == 0 ) {
+				// Accessing this start width.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartRect().Width());
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "SH" ) == 0 ) {
+				// Accessing this start height.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartRect().Height());
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "SL" ) == 0 ) {
+				// Accessing this start left.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartRect().left);
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "SR" ) == 0 ) {
+				// Accessing this start right.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartRect().right);
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "ST" ) == 0 ) {
+				// Accessing this start top.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartRect().top);
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "SB" ) == 0 ) {
+				// Accessing this start bottom.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartRect().bottom);
+				return true;
+			}
+			// =======================================
+			// PROPERTIES.
+			// =======================================
+			if ( ::_stricmp( _sMember.c_str(), "ID" ) == 0 ) {
+				// Accessing this ID.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->Id());
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }	// namespace lsw
