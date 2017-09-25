@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LSWWin.h"
+#include <LSWWin.h>
 #include "../PE/MXPeStructs.h"
 #include <string>
 
@@ -156,6 +156,12 @@ namespace mx {
 
 		// Adds a \ to the end of a string if it does not already have one.
 		static std::wstring &			FinishPath( std::wstring &_sString );
+
+		// Generates a string of random characters.
+		static CHAR *					RandomString( CHAR * _pcBuffer, SIZE_T _sSize );
+
+		// Generates a string of random characters.
+		static WCHAR *					RandomString( WCHAR * _pwcBuffer, SIZE_T _sSize );
 
 
 		// == Members.

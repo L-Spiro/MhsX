@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LSWWin.h"
+#include <LSWWin.h>
 #include "MXFile.h"
 
 namespace mx {

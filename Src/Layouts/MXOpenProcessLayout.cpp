@@ -34,7 +34,7 @@ namespace mx {
 			L"Button",								// lpwcClass
 			TRUE,									// bEnabled
 			4,										// iLeft
-			4,										// iTop
+			3,										// iTop
 			263,									// dwWidth
 			174,									// dwHeight
 			WS_CHILDWINDOW | WS_VISIBLE | BS_GROUPBOX,																									// dwStyle
@@ -234,52 +234,18 @@ namespace mx {
 	BOOL COpenProcessLayout::CreateOpenProcessDialog( CWidget * _pwParent ) {
 		std::vector<std::string> sStrings;
 		std::vector<std::wstring> sStringsW;
-		sStrings.resize( MX_ELEMENTS( m_wlOpenProcessDialog ) * 6 );	// Each control can have up to 6 normal strings.
-		sStringsW.resize( MX_ELEMENTS( m_wlOpenProcessDialog ) * 1 );
-		size_t sStringIndex = 0;
-		size_t sStringWIndex = 0;
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
-		for ( size_t I = 0; I < MX_ELEMENTS( m_wlOpenProcessDialog ); ++I ) {
-			LSW_WIDGET_LAYOUT wlTemp = m_wlOpenProcessDialog[I];
-			if ( wlTemp.pwcText ) {
-				std::string sTemp;
-				for ( size_t J = 0; J < wlTemp.sTextLen; ++J ) {
-					sTemp.push_back( static_cast<char>(wlTemp.pwcText[J]) );
-				}
-				sStringsW[sStringWIndex] = mx::CStringDecoder::DecodeToWString( sTemp.c_str(), wlTemp.sTextLen );
-				wlTemp.pwcText = sStringsW[sStringWIndex++].c_str();
-			}
-
-			if ( wlTemp.pcLeftSizeExp ) {
-				sStrings[sStringIndex] = mx::CStringDecoder::DecodeToString( wlTemp.pcLeftSizeExp, wlTemp.sLeftSizeExpLen );
-				wlTemp.pcLeftSizeExp = sStrings[sStringIndex++].c_str();
-			}
-			if ( wlTemp.pcRightSizeExp ) {
-				sStrings[sStringIndex] = mx::CStringDecoder::DecodeToString( wlTemp.pcRightSizeExp, wlTemp.sRightSizeExpLen );
-				wlTemp.pcRightSizeExp = sStrings[sStringIndex++].c_str();
-			}
-			if ( wlTemp.pcTopSizeExp ) {
-				sStrings[sStringIndex] = mx::CStringDecoder::DecodeToString( wlTemp.pcTopSizeExp, wlTemp.sTopSizeExpLen );
-				wlTemp.pcTopSizeExp = sStrings[sStringIndex++].c_str();
-			}
-			if ( wlTemp.pcBottomSizeExp ) {
-				sStrings[sStringIndex] = mx::CStringDecoder::DecodeToString( wlTemp.pcBottomSizeExp, wlTemp.sBottomSizeExpLen );
-				wlTemp.pcBottomSizeExp = sStrings[sStringIndex++].c_str();
-			}
-			if ( wlTemp.pcWidthSizeExp ) {
-				sStrings[sStringIndex] = mx::CStringDecoder::DecodeToString( wlTemp.pcWidthSizeExp, wlTemp.sWidthSizeExpLen );
-				wlTemp.pcWidthSizeExp = sStrings[sStringIndex++].c_str();
-			}
-			if ( wlTemp.pcHeightSizeExp ) {
-				sStrings[sStringIndex] = mx::CStringDecoder::DecodeToString( wlTemp.pcHeightSizeExp, wlTemp.sHeightSizeExpLen );
-				wlTemp.pcHeightSizeExp = sStrings[sStringIndex++].c_str();
-			}
-			vLayouts.push_back( wlTemp );
-		}
+		CLayoutManager::UnencryptLayouts( m_wlOpenProcessDialog, MX_ELEMENTS( m_wlOpenProcessDialog ),
+			vLayouts,
+			sStringsW,
+			sStrings );
+		
 		if ( lsw::CBase::LayoutManager()->CreateDialogX( &vLayouts[0], MX_ELEMENTS( m_wlOpenProcessDialog ), _pwParent ) ) {
+			CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
 			// Success.  Do stuff.
 			return TRUE;
 		}
+		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
 
 		return FALSE;
 	}

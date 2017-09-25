@@ -21,6 +21,16 @@ namespace lsw {
 		POINT								BottomRight() const { return { right, bottom }; }
 	};
 
+	struct LSW_HANDLE {
+		LSW_HANDLE() : hHandle( NULL ) {}
+		LSW_HANDLE( HANDLE _hHandle ) : hHandle( _hHandle ) {}
+		~LSW_HANDLE() {
+			if ( hHandle && hHandle != INVALID_HANDLE_VALUE ) { ::CloseHandle( hHandle ); }
+		}
+
+		HANDLE								hHandle;
+	};
+
 	class CHelpers {
 	public :
 		// Aligns a WORD pointer to a 4-byte address.

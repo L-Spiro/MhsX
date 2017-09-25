@@ -4,6 +4,7 @@
 #include <codecvt>
 #include <ctime>
 #include <locale>
+#include <random>
 
 namespace mx {
 
@@ -746,6 +747,32 @@ namespace mx {
 			_sString.push_back( L'\\' );
 		}
 		return _sString;
+	}
+
+	// Generates a string of random characters.
+	CHAR * CUtilities::RandomString( CHAR * _pcBuffer, SIZE_T _sSize ) {
+		if ( !_pcBuffer || !_sSize ) { return _pcBuffer; }
+		std::random_device rdRand;
+		std::mt19937 mGen( rdRand() );
+		std::uniform_int_distribution<> uidDist( 'a', 'z' );
+		for ( SIZE_T I = 0; I < _sSize; ++I ) {
+			_pcBuffer[I] = uidDist( mGen );
+		}
+		_pcBuffer[_sSize-1] = '\0';
+		return _pcBuffer;
+	}
+
+	// Generates a string of random characters.
+	WCHAR * CUtilities::RandomString( WCHAR * _pwcBuffer, SIZE_T _sSize ) {
+		if ( !_pwcBuffer || !_sSize ) { return _pwcBuffer; }
+		std::random_device rdRand;
+		std::mt19937 mGen( rdRand() );
+		std::uniform_int_distribution<> uidDist( L'a', L'z' );
+		for ( SIZE_T I = 0; I < _sSize; ++I ) {
+			_pwcBuffer[I] = uidDist( mGen );
+		}
+		_pwcBuffer[_sSize-1] = L'\0';
+		return _pwcBuffer;
 	}
 
 }	// namespace mx

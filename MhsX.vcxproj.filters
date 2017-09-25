@@ -9,29 +9,10 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h</Extensions>
     </Filter>
-    <Filter Include="Form Files">
-      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
-      <Extensions>ui</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
       <Extensions>qrc;*</Extensions>
       <ParseFiles>false</ParseFiles>
-    </Filter>
-    <Filter Include="Generated Files">
-      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
-      <Extensions>moc;h;cpp</Extensions>
-      <SourceControlFiles>False</SourceControlFiles>
-    </Filter>
-    <Filter Include="Generated Files\Debug">
-      <UniqueIdentifier>{c625712d-3f5b-42cf-a824-0512c01f60b2}</UniqueIdentifier>
-      <Extensions>cpp;moc</Extensions>
-      <SourceControlFiles>False</SourceControlFiles>
-    </Filter>
-    <Filter Include="Generated Files\Release">
-      <UniqueIdentifier>{633137d0-1713-47dd-9019-f78642bcfff2}</UniqueIdentifier>
-      <Extensions>cpp;moc</Extensions>
-      <SourceControlFiles>False</SourceControlFiles>
     </Filter>
     <Filter Include="Source Files\Strings">
       <UniqueIdentifier>{03b256a9-180e-4b1e-85e5-a2368edb6063}</UniqueIdentifier>
@@ -69,12 +50,6 @@
     <Filter Include="Source Files\PE">
       <UniqueIdentifier>{1cd8e32f-f155-4fd7-b5ba-a37eff6e4380}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\TreeViews">
-      <UniqueIdentifier>{c47c7b9c-5a04-4393-be0d-c75eea797dde}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\TreeViews">
-      <UniqueIdentifier>{f882f9d6-0944-4c74-b357-36bc061c4879}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Utilities">
       <UniqueIdentifier>{7ea8a197-7cd8-4344-91ae-93acc1f44449}</UniqueIdentifier>
     </Filter>
@@ -105,20 +80,14 @@
     <Filter Include="Source Files\MainWindow">
       <UniqueIdentifier>{94d5a6ef-e256-44fa-9432-fea562d7530c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\MemHack">
+      <UniqueIdentifier>{24b61b9c-0257-44c3-88ba-543c11edce50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MemHack">
+      <UniqueIdentifier>{b51e5251-aeb2-49a1-9c04-0023971a4cba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GeneratedFiles\qrc_MXMhsX.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\ExpEval\MXExpEvalDockWidget.cpp">
-      <Filter>Source Files\ExpEval</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_MXExpEvalDockWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_MXExpEvalDockWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Strings\MXStringDecoder.cpp">
       <Filter>Source Files\Strings</Filter>
     </ClCompile>
@@ -127,21 +96,6 @@
     </ClCompile>
     <ClCompile Include="Src\MXMhsX.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_MXMhsX.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_MXMhsX.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\FoundAddresses\MXFoundAddresses.cpp">
-      <Filter>Source Files\FoundAddresses</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_MXFoundAddresses.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_MXFoundAddresses.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Src\Files\MXFile.cpp">
       <Filter>Source Files\Files</Filter>
@@ -155,40 +109,7 @@
     <ClCompile Include="Src\PE\MXPeWorks.cpp">
       <Filter>Source Files\PE</Filter>
     </ClCompile>
-    <ClCompile Include="Src\PE\MXPeWorksUi.cpp">
-      <Filter>Source Files\PE</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_MXPeWorksUi.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_MXPeWorksUi.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\PE\MXPeTab.cpp">
-      <Filter>Source Files\PE</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_MXPeTab.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_MXPeTab.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Src\PE\MXPeObject.cpp">
-      <Filter>Source Files\PE</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\TreeViews\MXTreeViewItem.cpp">
-      <Filter>Source Files\TreeViews</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\TreeViews\MXTreeModel.cpp">
-      <Filter>Source Files\TreeViews</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_MXTreeModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_MXTreeModel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\PE\MXPeTreeModel.cpp">
       <Filter>Source Files\PE</Filter>
     </ClCompile>
     <ClCompile Include="Src\Utilities\MXUtilities.cpp">
@@ -196,15 +117,6 @@
     </ClCompile>
     <ClCompile Include="Src\CodePages\MXCodePages.cpp">
       <Filter>Source Files\CodePages</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\OpenProcess\MXOpenProcessUi.cpp">
-      <Filter>Source Files\OpenProcess</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_MXOpenProcessUi.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_MXOpenProcessUi.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Src\Layouts\MXMainWindowLayout.cpp">
       <Filter>Source Files\Layouts</Filter>
@@ -221,66 +133,21 @@
     <ClCompile Include="Src\OpenProcess\MXOpenProcessWindow.cpp">
       <Filter>Source Files\OpenProcess</Filter>
     </ClCompile>
+    <ClCompile Include="Src\MemHack\MXMemHack.cpp">
+      <Filter>Source Files\MemHack</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="MXMhsX.qrc">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UI\MXExp.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UI\MXMhsX.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Src\ExpEval\MXExpEvalDockWidget.h">
-      <Filter>Header Files\ExpEval</Filter>
-    </CustomBuild>
     <CustomBuild Include="Src\MXMhsX.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="UI\MXFa.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Src\FoundAddresses\MXFoundAddresses.h">
-      <Filter>Header Files\FoundAddresses</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UI\MXPew.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Src\PE\MXPeWorksUi.h">
-      <Filter>Header Files\PE</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UI\MXPet.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Src\PE\MXPeTab.h">
-      <Filter>Header Files\PE</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Src\TreeViews\MXTreeModel.h">
-      <Filter>Header Files\TreeViews</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Src\OpenProcess\MXOpenProcessUi.h">
-      <Filter>Header Files\OpenProcess</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UI\MXOp.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GeneratedFiles\ui_MXExp.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_MXMhsX.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Strings\MXStringMacros.h">
       <Filter>Header Files\Strings</Filter>
     </ClInclude>
     <ClInclude Include="Src\Strings\MXStringDecoder.h">
       <Filter>Header Files\Strings</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_MXFa.h">
-      <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\Files\MXFile.h">
       <Filter>Header Files\Files</Filter>
@@ -297,19 +164,7 @@
     <ClInclude Include="Src\PE\MXPeStructs.h">
       <Filter>Header Files\PE</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_MXPew.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_MXPet.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="Src\PE\MXPeObject.h">
-      <Filter>Header Files\PE</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\TreeViews\MXTreeViewItem.h">
-      <Filter>Header Files\TreeViews</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\PE\MXPeTreeModel.h">
       <Filter>Header Files\PE</Filter>
     </ClInclude>
     <ClInclude Include="Src\Utilities\MXUtilities.h">
@@ -317,9 +172,6 @@
     </ClInclude>
     <ClInclude Include="Src\CodePages\MXCodePages.h">
       <Filter>Header Files\CodePages</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_MXOp.h">
-      <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\Layouts\MXMainWindowLayout.h">
       <Filter>Header Files\Layouts</Filter>
@@ -338,6 +190,9 @@
     </ClInclude>
     <ClInclude Include="Src\Layouts\MXLayoutMacros.h">
       <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\MemHack\MXMemHack.h">
+      <Filter>Header Files\MemHack</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

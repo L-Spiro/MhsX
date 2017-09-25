@@ -31,6 +31,30 @@ namespace mx {
 	// OpenThread().
 	LPFN_OPENTHREAD CSystem::m_pfOpenThread = nullptr;
 
+	// Process32FirstW().
+	LPFN_PROCESS32FIRSTW CSystem::m_pfProcess32FirstW = nullptr;
+
+	// Process32NextW().
+	LPFN_PROCESS32NEXTW CSystem::m_pfProcess32NextW = nullptr;
+
+	// Thread32First().
+	LPFN_THREAD32FIRST CSystem::m_pfThread32First = nullptr;
+
+	// Thread32Next().
+	LPFN_THREAD32NEXT CSystem::m_pfThread32Next = nullptr;
+
+	// Module32FirstW().
+	LPFN_MODULE32FIRSTW CSystem::m_pfModule32FirstW = nullptr;
+
+	// Module32NextW().
+	LPFN_MODULE32NEXTW CSystem::m_pfModule32NextW = nullptr;
+
+	// CreateToolhelp32Snapshot().
+	LPFN_CREATETOOLHELP32SNAPSHOT CSystem::m_pfCreateToolhelp32Snapshot = nullptr;
+
+	// QueryFullProcessImageNameW().
+	LPFN_QUERYFULLPROCESSIMAGENAMEW CSystem::m_pfQueryFullProcessImageNameW = nullptr;
+
 	// == Types.
 	typedef BOOL (WINAPI * LPFN_ISWOW64PROCESS)( HANDLE, PBOOL );
 	typedef VOID (WINAPI * LPFN_GETSYSTEMINFO)( LPSYSTEM_INFO );
@@ -355,6 +379,67 @@ namespace mx {
 		return m_pfOpenProcess ? m_pfOpenProcess( _dwDesiredAccess, _bInheritHandle, _dwProcessId ) : NULL;
 	}
 
+	// OpenThread().
+	HANDLE WINAPI CSystem::OpenThread( DWORD _dwDesiredAccess, BOOL _bInheritHandle, DWORD _dwThreadId ) {
+		return m_pfOpenThread ? m_pfOpenThread( _dwDesiredAccess, _bInheritHandle, _dwThreadId ) : NULL;
+	}
+
+	// CreateToolhelp32Snapshot().
+	HANDLE WINAPI CSystem::CreateToolhelp32Snapshot( DWORD _dwFlags, DWORD _th32ProcessID ) {
+		return m_pfCreateToolhelp32Snapshot ? m_pfCreateToolhelp32Snapshot( _dwFlags, _th32ProcessID ) : NULL;
+	}
+
+	// Process32FirstW().
+	BOOL WINAPI CSystem::Process32FirstW( HANDLE _hSnapshot, LPPROCESSENTRY32W _lppe ) {
+		return m_pfProcess32FirstW ? m_pfProcess32FirstW( _hSnapshot, _lppe ) : FALSE;
+	}
+
+	// Process32NextW().
+	BOOL WINAPI CSystem::Process32NextW( HANDLE _hSnapshot, LPPROCESSENTRY32W _lppe ) {
+		return m_pfProcess32NextW ? m_pfProcess32NextW( _hSnapshot, _lppe ) : FALSE;
+	}
+
+	// Thread32First().
+	BOOL WINAPI CSystem::Thread32First( HANDLE _hSnapshot, LPTHREADENTRY32 _lpte ) {
+		return m_pfThread32First ? m_pfThread32First( _hSnapshot, _lpte ) : FALSE;
+	}
+
+	// Thread32Next().
+	BOOL WINAPI CSystem::Thread32Next( HANDLE _hSnapshot, LPTHREADENTRY32 _lpte ) {
+		return m_pfThread32Next ? m_pfThread32Next( _hSnapshot, _lpte ) : FALSE;
+	}
+
+	// Module32FirstW().
+	BOOL WINAPI CSystem::Module32FirstW( HANDLE _hSnapshot, LPMODULEENTRY32W _lpme ) {
+		return m_pfModule32FirstW ? m_pfModule32FirstW( _hSnapshot, _lpme ) : FALSE;
+	}
+
+	// Module32NextW().
+	BOOL WINAPI CSystem::Module32NextW( HANDLE _hSnapshot, LPMODULEENTRY32W _lpme ) {
+		return m_pfModule32NextW ? m_pfModule32NextW( _hSnapshot, _lpme ) : FALSE;
+	}
+
+	// QueryFullProcessImageNameW().
+	BOOL WINAPI CSystem::QueryFullProcessImageNameW( HANDLE _hProcess, DWORD _dwFlags, LPWSTR _lpExeName, PDWORD _lpdwSize ) {
+		return m_pfQueryFullProcessImageNameW ? m_pfQueryFullProcessImageNameW( _hProcess, _dwFlags, _lpExeName, _lpdwSize ) : FALSE;
+	}
+
+	// Determines how large a buffer must be to accept the full path of a process when calling QueryFullProcessImageNameW().
+	DWORD CSystem::FullProcessPathLen( HANDLE _hProcess ) {
+		std::vector<WCHAR> vBuffer;
+		DWORD dwLen = 10;
+		DWORD dwTemp = dwLen;
+		do {
+			dwLen += 2;
+			vBuffer.resize( dwLen );
+			dwTemp = dwLen;
+			if ( QueryFullProcessImageNameW( _hProcess, 0, &vBuffer[0], &dwTemp ) ) {
+				return dwTemp + 1;
+			}
+		} while ( dwTemp == dwLen );
+		return dwTemp + 1;
+	}
+
 	// Load kernel32.dll functions.
 	VOID CSystem::LoadKernel32() {
 		CHAR szKernel32[_LEN_6AE69F02+1];
@@ -379,21 +464,40 @@ namespace mx {
 		}
 		m_pfOpenProcess = reinterpret_cast<LPFN_OPENPROCESS>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_DF27514B_OpenProcess, _LEN_DF27514B, poObj ));
 		m_pfOpenThread = reinterpret_cast<LPFN_OPENTHREAD>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_B85486FF_OpenThread, _LEN_B85486FF, poObj ));
+		m_pfCreateToolhelp32Snapshot = reinterpret_cast<LPFN_CREATETOOLHELP32SNAPSHOT>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_C1F3B876_CreateToolhelp32Snapshot, _LEN_C1F3B876, poObj ));
+		m_pfProcess32FirstW = reinterpret_cast<LPFN_PROCESS32FIRSTW>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_8197004C_Process32FirstW, _LEN_8197004C, poObj ));
+		m_pfProcess32NextW = reinterpret_cast<LPFN_PROCESS32NEXTW>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_BC6B67BF_Process32NextW, _LEN_BC6B67BF, poObj ));
+		m_pfThread32First = reinterpret_cast<LPFN_THREAD32FIRST>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_238B3114_Thread32First, _LEN_238B3114, poObj ));
+		m_pfThread32Next = reinterpret_cast<LPFN_THREAD32NEXT>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_F5197707_Thread32Next, _LEN_F5197707, poObj ));
+		m_pfModule32FirstW = reinterpret_cast<LPFN_MODULE32FIRSTW>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_2735A2C6_Module32FirstW, _LEN_2735A2C6, poObj ));
+		m_pfModule32NextW = reinterpret_cast<LPFN_MODULE32NEXTW>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_A29E8A1A_Module32NextW, _LEN_A29E8A1A, poObj ));
+		m_pfQueryFullProcessImageNameW = reinterpret_cast<LPFN_QUERYFULLPROCESSIMAGENAMEW>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_FC3DC91C_QueryFullProcessImageNameW, _LEN_FC3DC91C, poObj ));
 
 #ifdef _DEBUG
-		LPVOID pfTemp = ::GetProcAddress( ::GetModuleHandleA( szKernel32 ), "ReadProcessMemory" );
-		assert( pfTemp == m_pfReadProcessMemory );
-		pfTemp = ::GetProcAddress( ::GetModuleHandleA( szKernel32 ), "WriteProcessMemory" );
-		assert( pfTemp == m_pfWriteProcessMemory );
+#define MX_CHECK( NAME )																						\
+	pfTemp = ::GetProcAddress( ::GetModuleHandleA( szKernel32 ), #NAME );										\
+	assert( pfTemp == m_pf ## NAME )
+
+		LPVOID pfTemp;
+		MX_CHECK( ReadProcessMemory );
+		MX_CHECK( WriteProcessMemory );
 		pfTemp = ::GetProcAddress( ::GetModuleHandleA( szKernel32 ), "EnumProcesses" );
 		if ( !pfTemp ) {
 			pfTemp = ::GetProcAddress( ::GetModuleHandleA( szKernel32 ), "K32EnumProcesses" );
 		}
 		assert( pfTemp == m_pfEnumProcesses );
-		pfTemp = ::GetProcAddress( ::GetModuleHandleA( szKernel32 ), "OpenProcess" );
-		assert( pfTemp == m_pfOpenProcess );
-		pfTemp = ::GetProcAddress( ::GetModuleHandleA( szKernel32 ), "OpenThread" );
-		assert( pfTemp == m_pfOpenThread );
+		MX_CHECK( OpenProcess );
+		MX_CHECK( OpenThread );
+		MX_CHECK( CreateToolhelp32Snapshot );
+		MX_CHECK( Process32FirstW );
+		MX_CHECK( Process32NextW );
+		MX_CHECK( Thread32First );
+		MX_CHECK( Thread32Next );
+		MX_CHECK( Module32FirstW );
+		MX_CHECK( Module32NextW );
+		MX_CHECK( QueryFullProcessImageNameW );
+
+#undef MX_CHECK
 #endif	// #ifdef _DEBUG
 
 		::ZeroMemory( szKernel32, MX_ELEMENTS( szKernel32 ) );

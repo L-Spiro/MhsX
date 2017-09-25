@@ -5,7 +5,7 @@ namespace lsw {
 
 	CWidget::CWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget ) :
 		m_hWnd( NULL ),
-		m_dwId( _wlLayout.wId ),
+		m_wId( _wlLayout.wId ),
 		m_bEnabled( _wlLayout.bEnabled ),
 		m_pwParent( _pwParent ) {
 
@@ -236,6 +236,8 @@ namespace lsw {
 				//SendMessage( _hWnd, WM_SETFONT,  (WPARAM)GetStockObject(DEFAULT_GUI_FONT), true );
 				//EnumChildWindows(_hWnd, (WNDENUMPROC)SetFont, (LPARAM)GetStockObject(SYSTEM_FIXED_FONT));
 				//EnumChildWindows(_hWnd, (WNDENUMPROC)SetFont, (LPARAM)hFont);
+
+				pmwThis->InitDialog();
 				return TRUE;	// Return TRUE to pass focus on to the control specified by _wParam.
 			}
 			case WM_CLOSE : {
@@ -294,6 +296,16 @@ namespace lsw {
 		return false;
 	}
 
+	// Gets a pointer to a child with the given ID.
+	CWidget * CWidget::FindChild( WORD _wId ) {
+		for ( size_t I = m_vChildren.size(); I--; ) {
+			if ( m_vChildren[I]->Id() == _wId ) {
+				return m_vChildren[I];
+			}
+		}
+		return nullptr;
+	}
+
 	// Sets a given font on all children of a window.
 	BOOL CALLBACK CWidget::EnumChildWindows_SetFont( HWND _hWnd, LPARAM _lParam ) {
 		::SendMessageW( _hWnd, WM_SETFONT, static_cast<WPARAM>(_lParam), TRUE );
@@ -332,6 +344,11 @@ namespace lsw {
 
 	// WM_CREATE.
 	CWidget::LSW_HANDLED CWidget::Create( const CREATESTRUCTW &_csCreateParms ) {
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_INITDIALOG.
+	CWidget::LSW_HANDLED CWidget::InitDialog() {
 		return LSW_H_CONTINUE;
 	}
 

@@ -1,12 +1,13 @@
 #include "MXMainWindowLayout.h"
 #include "../Layouts/MXLayoutManager.h"
+#include "../Utilities/MXUtilities.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../System/MXSystem.h"
 
 #include <Base/LSWBase.h>
 #include <Base/LSWWndClassEx.h>
 #include <Layout/LSWLayoutManager.h>
-#include <random>
+
 
 namespace mx {
 
@@ -117,22 +118,15 @@ namespace mx {
 		if ( !m_aMainClass ) {
 			// Register the window classes we need.
 			WCHAR szTemp[5];
-			std::random_device rdRand;
-			std::mt19937 mGen( rdRand() );
-			std::uniform_int_distribution<> uidDist( 'a', 'z' );
-
-			for ( SIZE_T I = 0; I < MX_ELEMENTS( szTemp ); ++I ) {
-				szTemp[I] = uidDist( mGen );
-			}
-			szTemp[MX_ELEMENTS( szTemp )-1] = L'\0';
+			CUtilities::RandomString( szTemp, MX_ELEMENTS( szTemp ) );
 			lsw::CWndClassEx wceEx( lsw::CWidget::WindowProc, szTemp );
 			wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1) );
 			m_aMainClass = lsw::CBase::RegisterClassExW( wceEx.Obj() );
 
 			
 		}
-		WCHAR szTempTitle[_LEN_F8A1A494+1];
-		_DEC_F8A1A494_L__Spiro_MHS_X( szTempTitle );
+		WCHAR szTempTitle[_LEN_BD5547E7+1];
+		_DEC_BD5547E7_L__Spiro_MHS_X( szTempTitle );
 		LSW_WIDGET_LAYOUT * _pwMain = CHelpers::FindLayout( m_wlMainWindow, MX_ELEMENTS( m_wlMainWindow ), MX_MWI_MAINWINDOW );
 
 		_pwMain->lpwcClass = reinterpret_cast<LPCWSTR>(m_aMainClass);

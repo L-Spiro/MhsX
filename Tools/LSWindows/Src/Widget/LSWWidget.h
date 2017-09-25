@@ -40,7 +40,7 @@ namespace lsw {
 		const CWidget *						Parent() const { return m_pwParent; }
 
 		// Custom ID.
-		DWORD								Id() const { return m_dwId; }
+		WORD								Id() const { return m_wId; }
 
 		// Enabled or disabled.
 		BOOL								Enabled() const { return m_bEnabled; }
@@ -56,6 +56,9 @@ namespace lsw {
 		// Do we have a given child widget?
 		bool								HasChild( const CWidget * _pwChild ) const;
 
+		// Gets a pointer to a child with the given ID.
+		CWidget *							FindChild( WORD _wId );
+
 		// Sets a given font on all children of a window.
 		static BOOL CALLBACK				EnumChildWindows_SetFont( HWND _hWnd, LPARAM _lParam );
 
@@ -69,7 +72,7 @@ namespace lsw {
 		HWND								m_hWnd;
 
 		// Custom ID.
-		DWORD								m_dwId;
+		WORD								m_wId;
 
 		// Enabled.
 		BOOL								m_bEnabled;
@@ -114,6 +117,9 @@ namespace lsw {
 
 		// WM_CREATE.
 		virtual LSW_HANDLED					Create( const CREATESTRUCTW &_csCreateParms );
+
+		// WM_INITDIALOG.
+		virtual LSW_HANDLED					InitDialog();
 
 		// WM_DESTROY.
 		virtual LSW_HANDLED					Destroy();

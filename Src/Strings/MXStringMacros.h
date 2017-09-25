@@ -71,6 +71,55 @@
 #define _DEC_S_B85486FF_OpenThread mx::CStringDecoder::DecodeToString( _T_B85486FF_OpenThread, _LEN_B85486FF )
 #define _DEC_WS_B85486FF_OpenThread mx::CStringDecoder::DecodeToWString( _T_B85486FF_OpenThread, _LEN_B85486FF )
 
+// CreateToolhelp32Snapshot
+#define _T_C1F3B876_CreateToolhelp32Snapshot "\xCB\x40\x35\xFC\x06\x2E\xE2\x36\x3F\x34\x31\x33\xFE\x0B\xFA\xBA\x21\x3E\xFC\x02\x3C\xF6\x36\x44"
+#define _LEN_C1F3B876 24
+#define _DEC_C1F3B876_CreateToolhelp32Snapshot( STR ) mx::CStringDecoder::Decode( _T_C1F3B876_CreateToolhelp32Snapshot, _LEN_C1F3B876, STR )
+#define _DEC_S_C1F3B876_CreateToolhelp32Snapshot mx::CStringDecoder::DecodeToString( _T_C1F3B876_CreateToolhelp32Snapshot, _LEN_C1F3B876 )
+#define _DEC_WS_C1F3B876_CreateToolhelp32Snapshot mx::CStringDecoder::DecodeToWString( _T_C1F3B876_CreateToolhelp32Snapshot, _LEN_C1F3B876 )
+
+// Process32FirstW
+#define _T_8197004C_Process32FirstW "\xD8\x40\x3F\xFE\xF7\x3C\x01\xFA\x02\x0E\x32\x40\x05\x0F\x1E"
+#define _LEN_8197004C 15
+#define _DEC_8197004C_Process32FirstW( STR ) mx::CStringDecoder::Decode( _T_8197004C_Process32FirstW, _LEN_8197004C, STR )
+#define _DEC_S_8197004C_Process32FirstW mx::CStringDecoder::DecodeToString( _T_8197004C_Process32FirstW, _LEN_8197004C )
+#define _DEC_WS_8197004C_Process32FirstW mx::CStringDecoder::DecodeToWString( _T_8197004C_Process32FirstW, _LEN_8197004C )
+
+// Process32NextW
+#define _T_BC6B67BF_Process32NextW "\xD8\x40\x3F\xFE\xF7\x3C\x01\xFA\x02\x16\x2E\x46\x06\xF2"
+#define _LEN_BC6B67BF 14
+#define _DEC_BC6B67BF_Process32NextW( STR ) mx::CStringDecoder::Decode( _T_BC6B67BF_Process32NextW, _LEN_BC6B67BF, STR )
+#define _DEC_S_BC6B67BF_Process32NextW mx::CStringDecoder::DecodeToString( _T_BC6B67BF_Process32NextW, _LEN_BC6B67BF )
+#define _DEC_WS_BC6B67BF_Process32NextW mx::CStringDecoder::DecodeToWString( _T_BC6B67BF_Process32NextW, _LEN_BC6B67BF )
+
+// Module32FirstW
+#define _T_2735A2C6_Module32FirstW "\xD5\x3D\x34\x10\xFE\x2E\xC1\xF9\x16\x31\x3B\x41\x06\xF2"
+#define _LEN_2735A2C6 14
+#define _DEC_2735A2C6_Module32FirstW( STR ) mx::CStringDecoder::Decode( _T_2735A2C6_Module32FirstW, _LEN_2735A2C6, STR )
+#define _DEC_S_2735A2C6_Module32FirstW mx::CStringDecoder::DecodeToString( _T_2735A2C6_Module32FirstW, _LEN_2735A2C6 )
+#define _DEC_WS_2735A2C6_Module32FirstW mx::CStringDecoder::DecodeToWString( _T_2735A2C6_Module32FirstW, _LEN_2735A2C6 )
+
+// Module32NextW
+#define _T_A29E8A1A_Module32NextW "\xD5\x3D\x34\x10\xFE\x2E\xC1\xF9\x1E\x2D\x41\x42\xE9"
+#define _LEN_A29E8A1A 13
+#define _DEC_A29E8A1A_Module32NextW( STR ) mx::CStringDecoder::Decode( _T_A29E8A1A_Module32NextW, _LEN_A29E8A1A, STR )
+#define _DEC_S_A29E8A1A_Module32NextW mx::CStringDecoder::DecodeToString( _T_A29E8A1A_Module32NextW, _LEN_A29E8A1A )
+#define _DEC_WS_A29E8A1A_Module32NextW mx::CStringDecoder::DecodeToWString( _T_A29E8A1A_Module32NextW, _LEN_A29E8A1A )
+
+// Thread32First
+#define _T_238B3114_Thread32First "\xDC\x36\x42\x00\xF3\x2D\xC1\xF9\x16\x31\x3B\x41\x06"
+#define _LEN_238B3114 13
+#define _DEC_238B3114_Thread32First( STR ) mx::CStringDecoder::Decode( _T_238B3114_Thread32First, _LEN_238B3114, STR )
+#define _DEC_S_238B3114_Thread32First mx::CStringDecoder::DecodeToString( _T_238B3114_Thread32First, _LEN_238B3114 )
+#define _DEC_WS_238B3114_Thread32First mx::CStringDecoder::DecodeToWString( _T_238B3114_Thread32First, _LEN_238B3114 )
+
+// Thread32Next
+#define _T_F5197707_Thread32Next "\xDC\x36\x42\x00\xF3\x2D\xC1\xF9\x1E\x2D\x41\x42"
+#define _LEN_F5197707 12
+#define _DEC_F5197707_Thread32Next( STR ) mx::CStringDecoder::Decode( _T_F5197707_Thread32Next, _LEN_F5197707, STR )
+#define _DEC_S_F5197707_Thread32Next mx::CStringDecoder::DecodeToString( _T_F5197707_Thread32Next, _LEN_F5197707 )
+#define _DEC_WS_F5197707_Thread32Next mx::CStringDecoder::DecodeToWString( _T_F5197707_Thread32Next, _LEN_F5197707 )
+
 // Ready.
 #define _T_4F39CC88_Ready_ "\xDA\x33\x31\xFF\x0B\xF7"
 #define _LEN_4F39CC88 6
@@ -3760,12 +3809,12 @@
 #define _DEC_S_EB78CFF1_Description mx::CStringDecoder::DecodeToString( _T_EB78CFF1_Description, _LEN_EB78CFF1 )
 #define _DEC_WS_EB78CFF1_Description mx::CStringDecoder::DecodeToWString( _T_EB78CFF1_Description, _LEN_EB78CFF1 )
 
-// L. Spiro MHS X
-#define _T_F8A1A494_L__Spiro_MHS_X "\xD4\xFC\xF0\xEE\x02\x32\x00\x36\xF0\x15\x11\x21\xB2\xF3"
-#define _LEN_F8A1A494 14
-#define _DEC_F8A1A494_L__Spiro_MHS_X( STR ) mx::CStringDecoder::Decode( _T_F8A1A494_L__Spiro_MHS_X, _LEN_F8A1A494, STR )
-#define _DEC_S_F8A1A494_L__Spiro_MHS_X mx::CStringDecoder::DecodeToString( _T_F8A1A494_L__Spiro_MHS_X, _LEN_F8A1A494 )
-#define _DEC_WS_F8A1A494_L__Spiro_MHS_X mx::CStringDecoder::DecodeToWString( _T_F8A1A494_L__Spiro_MHS_X, _LEN_F8A1A494 )
+// L. Spiro MHS X
+#define _T_BD5547E7_L__Spiro_MHS_X "\xD4\xFC\x70\xEE\x02\x32\x00\x36\x70\x15\x11\x21\x32\xF3"
+#define _LEN_BD5547E7 14
+#define _DEC_BD5547E7_L__Spiro_MHS_X( STR ) mx::CStringDecoder::Decode( _T_BD5547E7_L__Spiro_MHS_X, _LEN_BD5547E7, STR )
+#define _DEC_S_BD5547E7_L__Spiro_MHS_X mx::CStringDecoder::DecodeToString( _T_BD5547E7_L__Spiro_MHS_X, _LEN_BD5547E7 )
+#define _DEC_WS_BD5547E7_L__Spiro_MHS_X mx::CStringDecoder::DecodeToWString( _T_BD5547E7_L__Spiro_MHS_X, _LEN_BD5547E7 )
 
 // Open Process
 #define _T_49D5B53D_Open_Process "\xD7\x3E\x35\x09\xB2\x19\x00\x36\x33\x2D\x3C\x41"
@@ -3871,4 +3920,11 @@
 #define _DEC_39494720_____H( STR ) mx::CStringDecoder::Decode( _T_39494720_____H, _LEN_39494720, STR )
 #define _DEC_S_39494720_____H mx::CStringDecoder::DecodeToString( _T_39494720_____H, _LEN_39494720 )
 #define _DEC_WS_39494720_____H mx::CStringDecoder::DecodeToWString( _T_39494720_____H, _LEN_39494720 )
+
+// QueryFullProcessImageNameW
+#define _T_FC3DC91C_QueryFullProcessImageNameW "\xD9\x43\x35\x0D\x0B\x0F\x03\x33\x3C\x18\x3B\x3D\xF5\x00\x3A\xFB\x17\x3D\xFC\xF9\x2E\xDC\x28\x3D\x2D\x20"
+#define _LEN_FC3DC91C 26
+#define _DEC_FC3DC91C_QueryFullProcessImageNameW( STR ) mx::CStringDecoder::Decode( _T_FC3DC91C_QueryFullProcessImageNameW, _LEN_FC3DC91C, STR )
+#define _DEC_S_FC3DC91C_QueryFullProcessImageNameW mx::CStringDecoder::DecodeToString( _T_FC3DC91C_QueryFullProcessImageNameW, _LEN_FC3DC91C )
+#define _DEC_WS_FC3DC91C_QueryFullProcessImageNameW mx::CStringDecoder::DecodeToWString( _T_FC3DC91C_QueryFullProcessImageNameW, _LEN_FC3DC91C )
 

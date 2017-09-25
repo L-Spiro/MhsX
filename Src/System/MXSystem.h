@@ -1,9 +1,10 @@
 #pragma once
 
 #include "../Files/MXFile.h"
-#include "LSWWin.h"
 #include "../PE/MXPeObject.h"
+#include <LSWWin.h>
 #include <string>
+#include <TlHelp32.h>
 #include <vector>
 
 // == Macros.
@@ -18,8 +19,14 @@ typedef BOOL (WINAPI * LPFN_WRITEPROCESSMEMORY)( HANDLE, LPVOID, LPCVOID, SIZE_T
 typedef BOOL (WINAPI * LPFN_ENUMPROCESSES)( DWORD *, DWORD, DWORD * );
 typedef HANDLE (WINAPI * LPFN_OPENPROCESS)( DWORD, BOOL, DWORD );
 typedef HANDLE (WINAPI * LPFN_OPENTHREAD)( DWORD, BOOL, DWORD );
-
-
+typedef HANDLE (WINAPI * LPFN_CREATETOOLHELP32SNAPSHOT)( DWORD, DWORD );
+typedef BOOL (WINAPI * LPFN_PROCESS32FIRSTW)( HANDLE, LPPROCESSENTRY32W );
+typedef BOOL (WINAPI * LPFN_PROCESS32NEXTW)( HANDLE, LPPROCESSENTRY32W );
+typedef BOOL (WINAPI * LPFN_THREAD32FIRST)( HANDLE, LPTHREADENTRY32 );
+typedef BOOL (WINAPI * LPFN_THREAD32NEXT)( HANDLE, LPTHREADENTRY32 );
+typedef BOOL (WINAPI * LPFN_MODULE32FIRSTW)( HANDLE, LPMODULEENTRY32W );
+typedef BOOL (WINAPI * LPFN_MODULE32NEXTW)( HANDLE, LPMODULEENTRY32W );
+typedef BOOL (WINAPI * LPFN_QUERYFULLPROCESSIMAGENAMEW)( HANDLE, DWORD, LPWSTR, PDWORD );
 
 namespace mx {
 
@@ -114,6 +121,37 @@ namespace mx {
 		// OpenProcess().
 		static HANDLE WINAPI			OpenProcess( DWORD _dwDesiredAccess, BOOL _bInheritHandle, DWORD _dwProcessId );
 
+		// OpenThread().
+		static HANDLE WINAPI			OpenThread( DWORD _dwDesiredAccess, BOOL _bInheritHandle, DWORD _dwThreadId );
+
+		// CreateToolhelp32Snapshot().
+		static HANDLE WINAPI			CreateToolhelp32Snapshot( DWORD _dwFlags, DWORD _th32ProcessID );
+
+		// Process32FirstW().
+		static BOOL WINAPI				Process32FirstW( HANDLE _hSnapshot, LPPROCESSENTRY32W _lppe );
+
+		// Process32NextW().
+		static BOOL WINAPI				Process32NextW( HANDLE _hSnapshot, LPPROCESSENTRY32W _lppe );
+
+		// Thread32First().
+		static BOOL WINAPI				Thread32First( HANDLE _hSnapshot, LPTHREADENTRY32 _lpte );
+
+		// Thread32Next().
+		static BOOL WINAPI				Thread32Next( HANDLE _hSnapshot, LPTHREADENTRY32 _lpte );
+
+		// Module32FirstW().
+		static BOOL WINAPI				Module32FirstW( HANDLE _hSnapshot, LPMODULEENTRY32W _lpme );
+
+		// Module32NextW().
+		static BOOL WINAPI				Module32NextW( HANDLE _hSnapshot, LPMODULEENTRY32W _lpme );
+
+		// QueryFullProcessImageNameW().
+		static BOOL WINAPI				QueryFullProcessImageNameW( HANDLE _hProcess, DWORD _dwFlags, LPWSTR _lpExeName, PDWORD _lpdwSize );
+
+		// Determines how large a buffer must be to accept the full path of a process when calling QueryFullProcessImageNameW().
+		static DWORD					FullProcessPathLen( HANDLE _hProcess );
+
+
 	protected :
 		// == Members.
 		// Is the WoW64?
@@ -136,6 +174,32 @@ namespace mx {
 
 		// OpenThread().
 		static LPFN_OPENTHREAD			m_pfOpenThread;
+
+		// CreateToolhelp32Snapshot().
+		static LPFN_CREATETOOLHELP32SNAPSHOT
+										m_pfCreateToolhelp32Snapshot;
+
+		// Process32FirstW().
+		static LPFN_PROCESS32FIRSTW		m_pfProcess32FirstW;
+
+		// Process32NextW().
+		static LPFN_PROCESS32NEXTW		m_pfProcess32NextW;
+
+		// Thread32First().
+		static LPFN_THREAD32FIRST		m_pfThread32First;
+
+		// Thread32Next().
+		static LPFN_THREAD32NEXT		m_pfThread32Next;
+
+		// Module32FirstW().
+		static LPFN_MODULE32FIRSTW		m_pfModule32FirstW;
+
+		// Module32NextW().
+		static LPFN_MODULE32NEXTW		m_pfModule32NextW;
+
+		// QueryFullProcessImageNameW().
+		static LPFN_QUERYFULLPROCESSIMAGENAMEW
+										m_pfQueryFullProcessImageNameW;
 
 
 		// == Functions.

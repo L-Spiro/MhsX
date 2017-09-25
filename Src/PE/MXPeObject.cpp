@@ -292,24 +292,27 @@ namespace mx {
 				eExport.ui64FileOffsetName = 0;
 				eExport.ui64FileOffsetOrd = RelocAddressToFileOffset( ExportDescriptor()->AddressOfNameOrdinals + I * 2 );
 
-				if ( I < ExportDescriptor()->NumberOfFunctions ) {
-					if ( ReadRelocBytes( ExportDescriptor()->AddressOfFunctions + I * 4, &eExport.uiAddress, sizeof( uint32_t ) ) != sizeof( uint32_t ) ) { return; }
-					eExport.uiAddress += ImageBase();
-				}
-
+				uint16_t ui16AddressIndex = 0;
 				if ( I < ExportDescriptor()->NumberOfNames ) {
 					if ( ReadRelocBytes( ExportDescriptor()->AddressOfNames + I * 4, &uiNameArray, sizeof( uiNameArray ) ) != sizeof( uiNameArray ) ) { return; }
 					GetString( uiNameArray, eExport.sName );
 					eExport.ui64FileOffsetName = RelocAddressToFileOffset( uiNameArray );
 
 					if ( ReadRelocBytes( ExportDescriptor()->AddressOfNameOrdinals + I * 2, &eExport.uiOrdinal, sizeof( eExport.uiOrdinal ) ) != sizeof( eExport.uiOrdinal ) ) { return; }
+					ui16AddressIndex = eExport.uiOrdinal;
 					eExport.uiOrdinal += ExportDescriptor()->Base;
 				}
 				else {
 					GetExportDllName( eExport.sName );
 					eExport.sName.push_back( '.' );
+					ui16AddressIndex = I;
 					eExport.uiOrdinal = I + ExportDescriptor()->Base;
 					CUtilities::ToUnsigned( eExport.uiOrdinal, eExport.sName );
+				}
+
+				if ( ui16AddressIndex < ExportDescriptor()->NumberOfFunctions ) {
+					if ( ReadRelocBytes( ExportDescriptor()->AddressOfFunctions + ui16AddressIndex * 4, &eExport.uiAddress, sizeof( uint32_t ) ) != sizeof( uint32_t ) ) { return; }
+					eExport.uiAddress += ImageBase();
 				}
 				_vReturn.push_back( eExport );
 			}
@@ -382,9 +385,11 @@ namespace mx {
 				std::string sName;
 				GetString( uiNameArray, sName );
 				if ( sName == sExport ) {
-					if ( I < ExportDescriptor()->NumberOfFunctions ) {
+					uint16_t ui16AddressIndex = 0;
+					if ( ReadRelocBytes( ExportDescriptor()->AddressOfNameOrdinals + I * 2, &ui16AddressIndex, sizeof( ui16AddressIndex ) ) != sizeof( ui16AddressIndex ) ) { return 0; }
+					if ( ui16AddressIndex < ExportDescriptor()->NumberOfFunctions ) {
 						uint32_t uiAddress;
-						if ( ReadRelocBytes( ExportDescriptor()->AddressOfFunctions + I * 4, &uiAddress, sizeof( uiAddress ) ) != sizeof( uiAddress ) ) { return 0; }
+						if ( ReadRelocBytes( ExportDescriptor()->AddressOfFunctions + ui16AddressIndex * 4, &uiAddress, sizeof( uiAddress ) ) != sizeof( uiAddress ) ) { return 0; }
 						return uiAddress;
 					}
 					// Address not found associated with it.

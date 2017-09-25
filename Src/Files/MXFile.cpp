@@ -16,7 +16,7 @@ namespace mx {
 		Close();
 		m_hFile = ::CreateFileA( _lpcFile,
 			_bOpenForRead ? GENERIC_READ : GENERIC_WRITE,
-			0,
+			_bOpenForRead ? FILE_SHARE_READ : FILE_SHARE_WRITE,
 			NULL,
 			OPEN_EXISTING,
 			FILE_ATTRIBUTE_NORMAL,
@@ -33,7 +33,7 @@ namespace mx {
 		Close();
 		m_hFile = ::CreateFileW( _lpwFile,
 			_bOpenForRead ? GENERIC_READ : GENERIC_WRITE,
-			0,
+			_bOpenForRead ? FILE_SHARE_READ : FILE_SHARE_WRITE,
 			NULL,
 			OPEN_EXISTING,
 			FILE_ATTRIBUTE_NORMAL,
