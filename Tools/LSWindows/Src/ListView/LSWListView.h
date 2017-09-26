@@ -26,6 +26,24 @@ namespace lsw {
 		// Sets the width of a column.
 		BOOL								SetColumnWidth( INT _iCol, INT _iWidth );
 
+		// Inserts an item.  Returns the index of the item.
+		INT									InsertItem( const LVITEMW &_iItem );
+
+		// Inserts an item.  Returns the index of the item.
+		INT									InsertItem( const LVITEMA &_iItem );
+
+		// Inserts an item that consistes of text and a parameter.
+		INT									InsertItem( const WCHAR * _pwcText, LPARAM _lParam );
+
+		// Inserts an item that consistes of text and a parameter.
+		INT									InsertItem( const CHAR * _pcText, LPARAM _lParam );
+
+		// Sets the text for an item.
+		VOID								SetItemText( INT _iItem, INT _iSubItem, const WCHAR * _pwcText );
+
+		// Sets the text for an item.
+		VOID								SetItemText( INT _iItem, INT _iSubItem, const CHAR * _pcText );
+
 
 	protected :
 		// == Members.

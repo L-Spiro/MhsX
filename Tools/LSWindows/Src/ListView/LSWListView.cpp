@@ -50,4 +50,52 @@ namespace lsw {
 		return ListView_SetColumnWidth( Wnd(), _iCol, _iWidth );
 	}
 
+	// Inserts an item.  Returns the index of the item.
+	INT CListView::InsertItem( const LVITEMW &_iItem ) {
+		return static_cast<INT>(::SendMessageW( Wnd(), LVM_INSERTITEMW, 0, reinterpret_cast<LPARAM>(&_iItem)));
+	}
+
+	// Inserts an item.  Returns the index of the item.
+	INT CListView::InsertItem( const LVITEMA &_iItem ) {
+		return static_cast<INT>(::SendMessageA( Wnd(), LVM_INSERTITEMA, 0, reinterpret_cast<LPARAM>(&_iItem)));
+	}
+
+	// Inserts an item that consistes of text and a parameter.
+	INT CListView::InsertItem( const WCHAR * _pwcText, LPARAM _lParam ) {
+		LVITEMW iItem = { 0 };
+		iItem.mask = LVIF_TEXT | LVIF_PARAM;
+		iItem.iItem = 0x7FFFFFFF;
+		iItem.lParam = _lParam;
+		iItem.pszText = const_cast<LPWSTR>(_pwcText);
+		return InsertItem( iItem );
+	}
+
+	// Inserts an item that consistes of text and a parameter.
+	INT CListView::InsertItem( const CHAR * _pcText, LPARAM _lParam ) {
+		LVITEMA iItem = { 0 };
+		iItem.mask = LVIF_TEXT | LVIF_PARAM;
+		iItem.iItem = 0x7FFFFFFF;
+		iItem.lParam = _lParam;
+		iItem.pszText = const_cast<LPSTR>(_pcText);
+		return InsertItem( iItem );
+	}
+
+	// Sets the text for an item.
+	VOID CListView::SetItemText( INT _iItem, INT _iSubItem, const WCHAR * _pwcText ) {
+		LVITEMW iItem = { 0 };
+		iItem.iItem = _iItem;
+		iItem.iSubItem = _iSubItem;
+		iItem.pszText = const_cast<LPWSTR>(_pwcText);
+		::SendMessageW( Wnd(), LVM_SETITEMTEXTW, static_cast<WPARAM>(_iItem), reinterpret_cast<LPARAM>(&iItem) );
+	}
+
+	// Sets the text for an item.
+	VOID CListView::SetItemText( INT _iItem, INT _iSubItem, const CHAR * _pcText ) {
+		LVITEMA iItem = { 0 };
+		iItem.iItem = _iItem;
+		iItem.iSubItem = _iSubItem;
+		iItem.pszText = const_cast<LPSTR>(_pcText);
+		::SendMessageA( Wnd(), LVM_SETITEMTEXTA, static_cast<WPARAM>(_iItem), reinterpret_cast<LPARAM>(&iItem) );
+	}
+
 }	// namespace lsw

@@ -55,6 +55,9 @@ namespace mx {
 	// QueryFullProcessImageNameW().
 	LPFN_QUERYFULLPROCESSIMAGENAMEW CSystem::m_pfQueryFullProcessImageNameW = nullptr;
 
+	// EnumThreadWindows().
+	LPFN_ENUMTHREADWINDOWS CSystem::m_pfEnumThreadWindows = nullptr;
+
 	// == Types.
 	typedef BOOL (WINAPI * LPFN_ISWOW64PROCESS)( HANDLE, PBOOL );
 	typedef VOID (WINAPI * LPFN_GETSYSTEMINFO)( LPSYSTEM_INFO );
@@ -105,6 +108,9 @@ namespace mx {
 
 		// Kernel32 imports.
 		LoadKernel32();
+
+		// User32 imports.
+		LoadUser32();
 	}
 
 	// Gets a function address by DLL name and function name.
@@ -374,6 +380,22 @@ namespace mx {
 		return m_pfEnumProcesses ? m_pfEnumProcesses( _pdwProcessIds, _dwCb, _pdwBytesReturned ) : FALSE;
 	}
 
+	// Gets the total number of processes EnumProcesses() should want to return.  Might be inaccurate if processes are quickly and constantly
+	//	being opened and closed etc., so this returns a buffer larger than necessary.
+	DWORD CSystem::EnumProcessesBufferSize() {
+		std::vector<DWORD> vIds;
+		DWORD dwSize = 0;
+		while ( TRUE ) {
+			dwSize += 1024;
+			vIds.resize( dwSize );
+			DWORD dwRet;
+			if ( !CSystem::EnumProcesses( &vIds[0], vIds.size() * sizeof( DWORD ), &dwRet ) ) {
+				return vIds.size() + 20;
+			}
+			if ( dwRet < vIds.size() * sizeof( DWORD ) ) { return dwRet / sizeof( DWORD ) + 20; }
+		}
+	}
+
 	// OpenProcess().
 	HANDLE WINAPI CSystem::OpenProcess( DWORD _dwDesiredAccess, BOOL _bInheritHandle, DWORD _dwProcessId ) {
 		return m_pfOpenProcess ? m_pfOpenProcess( _dwDesiredAccess, _bInheritHandle, _dwProcessId ) : NULL;
@@ -440,6 +462,23 @@ namespace mx {
 		return dwTemp + 1;
 	}
 
+	// EnumThreadWindows().
+	BOOL WINAPI CSystem::EnumThreadWindows( DWORD _dwThreadId, WNDENUMPROC _lpfn, LPARAM _lParam ) {
+		return m_pfEnumThreadWindows ? m_pfEnumThreadWindows( _dwThreadId, _lpfn, _lParam ) : FALSE;
+	}
+
+	// Gets window text.
+	BOOL CSystem::GetWindowTextW( HWND _hWnd, std::wstring &_sRes ) {
+		size_t sLen = ::GetWindowTextLengthW( _hWnd ) + 4;
+		WCHAR * pwcBuffer = new WCHAR[sLen];
+		if ( !pwcBuffer ) { return FALSE; }
+		std::memset( pwcBuffer, 0, sLen );
+		::GetWindowTextW( _hWnd, pwcBuffer, sLen );
+		_sRes = pwcBuffer;
+		delete [] pwcBuffer;
+		return TRUE;
+	}
+
 	// Load kernel32.dll functions.
 	VOID CSystem::LoadKernel32() {
 		CHAR szKernel32[_LEN_6AE69F02+1];
@@ -501,6 +540,38 @@ namespace mx {
 #endif	// #ifdef _DEBUG
 
 		::ZeroMemory( szKernel32, MX_ELEMENTS( szKernel32 ) );
+	}
+
+	// Load User32.dll functions.
+	VOID CSystem::LoadUser32() {
+		CHAR szUser32[_LEN_02489AAB+1];
+		_DEC_02489AAB_user32_dll( szUser32 );
+		CPeObject poObj;
+		CFile fFile;
+		if ( !FindDll( szUser32, fFile ) ) {
+			::ZeroMemory( szUser32, MX_ELEMENTS( szUser32 ) );
+			return;
+		}
+		if ( !poObj.LoadImageFromMemory( fFile ) ) {
+			::ZeroMemory( szUser32, MX_ELEMENTS( szUser32 ) );
+			return;
+		}
+
+
+		m_pfEnumThreadWindows = reinterpret_cast<LPFN_ENUMTHREADWINDOWS>(GetProcAddress( _T_02489AAB_user32_dll, _LEN_02489AAB, _T_AF5AA374_EnumThreadWindows, _LEN_AF5AA374, poObj ));
+
+#ifdef _DEBUG
+#define MX_CHECK( NAME )																						\
+	pfTemp = ::GetProcAddress( ::GetModuleHandleA( szUser32 ), #NAME );											\
+	assert( pfTemp == m_pf ## NAME )
+
+		LPVOID pfTemp;
+		MX_CHECK( EnumThreadWindows );
+
+#undef MX_CHECK
+#endif	// #ifdef _DEBUG
+
+		::ZeroMemory( szUser32, MX_ELEMENTS( szUser32 ) );
 	}
 
 }	// namespace mx

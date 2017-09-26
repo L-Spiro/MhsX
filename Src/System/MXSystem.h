@@ -27,6 +27,7 @@ typedef BOOL (WINAPI * LPFN_THREAD32NEXT)( HANDLE, LPTHREADENTRY32 );
 typedef BOOL (WINAPI * LPFN_MODULE32FIRSTW)( HANDLE, LPMODULEENTRY32W );
 typedef BOOL (WINAPI * LPFN_MODULE32NEXTW)( HANDLE, LPMODULEENTRY32W );
 typedef BOOL (WINAPI * LPFN_QUERYFULLPROCESSIMAGENAMEW)( HANDLE, DWORD, LPWSTR, PDWORD );
+typedef BOOL (WINAPI * LPFN_ENUMTHREADWINDOWS)( DWORD, WNDENUMPROC lpfn, LPARAM );
 
 namespace mx {
 
@@ -118,6 +119,10 @@ namespace mx {
 		// EnumProcesses().
 		static BOOL WINAPI				EnumProcesses( DWORD * _pdwProcessIds, DWORD _dwCb, DWORD * _pdwBytesReturned );
 
+		// Gets the total number of processes EnumProcesses() should want to return.  Might be inaccurate if processes are quickly and constantly
+		//	being opened and closed etc., so this returns a buffer larger than necessary.
+		static DWORD					EnumProcessesBufferSize();
+
 		// OpenProcess().
 		static HANDLE WINAPI			OpenProcess( DWORD _dwDesiredAccess, BOOL _bInheritHandle, DWORD _dwProcessId );
 
@@ -150,6 +155,12 @@ namespace mx {
 
 		// Determines how large a buffer must be to accept the full path of a process when calling QueryFullProcessImageNameW().
 		static DWORD					FullProcessPathLen( HANDLE _hProcess );
+
+		// EnumThreadWindows().
+		static BOOL WINAPI				EnumThreadWindows( DWORD _dwThreadId, WNDENUMPROC _lpfn, LPARAM _lParam );
+
+		// Gets window text.
+		static BOOL						GetWindowTextW( HWND _hWnd, std::wstring &_sRes );
 
 
 	protected :
@@ -201,10 +212,16 @@ namespace mx {
 		static LPFN_QUERYFULLPROCESSIMAGENAMEW
 										m_pfQueryFullProcessImageNameW;
 
+		// EnumThreadWindows().
+		static LPFN_ENUMTHREADWINDOWS	m_pfEnumThreadWindows;
+
 
 		// == Functions.
 		// Load kernel32.dll functions.
 		static VOID						LoadKernel32();
+
+		// Load User32.dll functions.
+		static VOID						LoadUser32();
 	};
 
 }	// namespace mx

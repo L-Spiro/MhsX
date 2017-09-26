@@ -3928,3 +3928,24 @@
 #define _DEC_S_FC3DC91C_QueryFullProcessImageNameW mx::CStringDecoder::DecodeToString( _T_FC3DC91C_QueryFullProcessImageNameW, _LEN_FC3DC91C )
 #define _DEC_WS_FC3DC91C_QueryFullProcessImageNameW mx::CStringDecoder::DecodeToWString( _T_FC3DC91C_QueryFullProcessImageNameW, _LEN_FC3DC91C )
 
+// EnumThreadWindows
+#define _T_AF5AA374_EnumThreadWindows "\xCD\x3C\x45\x08\xE6\x31\x00\x2C\x31\x2C\x20\x37\x00\xFF\x36\xFF\x41"
+#define _LEN_AF5AA374 17
+#define _DEC_AF5AA374_EnumThreadWindows( STR ) mx::CStringDecoder::Decode( _T_AF5AA374_EnumThreadWindows, _LEN_AF5AA374, STR )
+#define _DEC_S_AF5AA374_EnumThreadWindows mx::CStringDecoder::DecodeToString( _T_AF5AA374_EnumThreadWindows, _LEN_AF5AA374 )
+#define _DEC_WS_AF5AA374_EnumThreadWindows mx::CStringDecoder::DecodeToWString( _T_AF5AA374_EnumThreadWindows, _LEN_AF5AA374 )
+
+// user32.dll
+#define _T_02489AAB_user32_dll "\xFD\x41\x35\x0D\xC5\xFB\xBC\x2B\x3C\x34"
+#define _LEN_02489AAB 10
+#define _DEC_02489AAB_user32_dll( STR ) mx::CStringDecoder::Decode( _T_02489AAB_user32_dll, _LEN_02489AAB, STR )
+#define _DEC_S_02489AAB_user32_dll mx::CStringDecoder::DecodeToString( _T_02489AAB_user32_dll, _LEN_02489AAB )
+#define _DEC_WS_02489AAB_user32_dll mx::CStringDecoder::DecodeToWString( _T_02489AAB_user32_dll, _LEN_02489AAB )
+
+// EnumChildWindows
+#define _T_EF1AD868_EnumChildWindows "\xCD\x3C\x45\x08\xD5\x31\xF7\x33\x34\x1F\x32\x3C\xF6\x0A\x3E\xFB"
+#define _LEN_EF1AD868 16
+#define _DEC_EF1AD868_EnumChildWindows( STR ) mx::CStringDecoder::Decode( _T_EF1AD868_EnumChildWindows, _LEN_EF1AD868, STR )
+#define _DEC_S_EF1AD868_EnumChildWindows mx::CStringDecoder::DecodeToString( _T_EF1AD868_EnumChildWindows, _LEN_EF1AD868 )
+#define _DEC_WS_EF1AD868_EnumChildWindows mx::CStringDecoder::DecodeToWString( _T_EF1AD868_EnumChildWindows, _LEN_EF1AD868 )
+
