@@ -127,6 +127,12 @@ namespace mx {
 		// Creates a hexadecimal string.
 		static const CHAR *				ToHex( uint64_t _uiValue, std::string &_sString, uint32_t _uiNumDigits );
 
+		// Creates a hexadecimal string.
+		static const WCHAR *			ToHex( uint64_t _uiValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits );
+
+		// Creates a hexadecimal string.
+		static const WCHAR *			ToHex( uint64_t _uiValue, std::wstring &_sString, uint32_t _uiNumDigits );
+
 		// Creates an unsigned integer string.  Returns the internal buffer, which means the result must be copied as it will be overwritten when the next function that uses the internal buffer is called.
 		static const CHAR *				ToUnsigned( uint64_t _uiValue, uint32_t _uiNumDigits = 0 );
 
@@ -135,6 +141,12 @@ namespace mx {
 
 		// Creates an unsigned integer string.
 		static const CHAR *				ToUnsigned( uint64_t _uiValue, std::string &_sString, uint32_t _uiNumDigits = 0 );
+
+		// Creates an unsigned integer string.
+		static const WCHAR *			ToUnsigned( uint64_t _uiValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits = 0 );
+
+		// Creates an unsigned integer string.
+		static const WCHAR *			ToUnsigned( uint64_t _uiValue, std::wstring &_sString, uint32_t _uiNumDigits = 0 );
 
 		// Clears the internal temporary buffer (as a security measure).
 		static VOID						ClearInternalBuffer();

@@ -86,6 +86,9 @@ namespace lsw {
 		// Original rectangle.
 		LSW_RECT							m_rStartingRect;
 
+		// Extended styles.
+		DWORD								m_dwExtendedStyles;
+
 		// Children.
 		std::vector<CWidget *>				m_vChildren;
 
@@ -160,6 +163,9 @@ namespace lsw {
 
 		// Evaluates expressions to determine a new rectangle for the control.
 		void								EvalNewSize();
+
+		// Setting the HWND after the control has been created.
+		virtual void						InitControl( HWND _hWnd );
 
 		// Attaches a control/window to its CWidget.
 		static BOOL CALLBACK				EnumChildWindows_AttachWindowToWidget( HWND _hWnd, LPARAM _lParam );

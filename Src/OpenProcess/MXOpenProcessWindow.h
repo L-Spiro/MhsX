@@ -52,6 +52,12 @@ namespace mx {
 
 		// Enumerate child windows.
 		static BOOL CALLBACK				EnumChildWindows_GatherWindows( HWND _hWnd, LPARAM _lParam );
+
+
+	protected :
+		// == Functions.
+		// Finds an entry in an array of MX_PROCESSES objects with the given process ID.
+		const MX_PROCESSES *				FindProcess( const std::vector<MX_PROCESSES> &_pProcesses, DWORD _dwId );
 	};
 
 }	// namespace mx

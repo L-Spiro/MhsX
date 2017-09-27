@@ -5,23 +5,11 @@ namespace lsw {
 
 	CListView::CListView( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget ) :
 		Parent( _wlLayout, _pwParent, _bCreateWidget ),
-		m_sColumns( 0 ) {
+		m_sColumns( 0 ),
+		m_bSortWithCase( FALSE ) {
 	}
 
 	// == Functions.
-	// Inserts a column at the given index.
-	INT CListView::InsertColumn( INT _iIndex, const CHAR * _pcText, INT _iFormat ) {
-		LV_COLUMNA lvColumn;
-		lvColumn.mask = LVCF_TEXT | LVCF_FMT;
-		lvColumn.pszText = const_cast<LPSTR>(_pcText);
-		lvColumn.fmt = _iFormat;
-		INT iInserted = static_cast<INT>(::SendMessageA( Wnd(), LVM_INSERTCOLUMNA, static_cast<WPARAM>(_iIndex), reinterpret_cast<LPARAM>(&lvColumn)));
-		if ( iInserted != -1 ) {
-			++m_sColumns;
-		}
-		return iInserted;
-	}
-
 	// Inserts a column at the given index.
 	INT CListView::InsertColumn( INT _iIndex, const WCHAR * _pwcText, INT _iFormat ) {
 		LV_COLUMNW lvColumn;
@@ -29,6 +17,19 @@ namespace lsw {
 		lvColumn.pszText = const_cast<LPWSTR>(_pwcText);
 		lvColumn.fmt = _iFormat;
 		INT iInserted = static_cast<INT>(::SendMessageW( Wnd(), LVM_INSERTCOLUMNW, static_cast<WPARAM>(_iIndex), reinterpret_cast<LPARAM>(&lvColumn)));
+		if ( iInserted != -1 ) {
+			++m_sColumns;
+		}
+		return iInserted;
+	}
+
+	// Inserts a column at the given index.
+	INT CListView::InsertColumn( INT _iIndex, const CHAR * _pcText, INT _iFormat ) {
+		LV_COLUMNA lvColumn;
+		lvColumn.mask = LVCF_TEXT | LVCF_FMT;
+		lvColumn.pszText = const_cast<LPSTR>(_pcText);
+		lvColumn.fmt = _iFormat;
+		INT iInserted = static_cast<INT>(::SendMessageA( Wnd(), LVM_INSERTCOLUMNA, static_cast<WPARAM>(_iIndex), reinterpret_cast<LPARAM>(&lvColumn)));
 		if ( iInserted != -1 ) {
 			++m_sColumns;
 		}
@@ -96,6 +97,93 @@ namespace lsw {
 		iItem.iSubItem = _iSubItem;
 		iItem.pszText = const_cast<LPSTR>(_pcText);
 		::SendMessageA( Wnd(), LVM_SETITEMTEXTA, static_cast<WPARAM>(_iItem), reinterpret_cast<LPARAM>(&iItem) );
+	}
+
+	// Gets the length of an item's text in WCHAR units.
+	INT CListView::GetItemTextLenW( INT _iItem, INT _iSubItem ) {
+		INT iSize = 128;
+		INT iRet = 0;
+		LVITEMW liItem = { 0 };
+		liItem.iSubItem = _iSubItem;
+		liItem.pszText = nullptr;
+		do {
+			iSize *= 2;
+			liItem.pszText = new WCHAR[iSize];
+			liItem.cchTextMax = iSize;
+			iRet = static_cast<INT>(::SendMessageW( Wnd(), LVM_GETITEMTEXTW, static_cast<WPARAM>(_iItem), reinterpret_cast<LPARAM>(&liItem) ));
+			delete [] liItem.pszText;
+		} while ( iRet >= iSize -1 );
+		return iRet + 1;
+	}
+
+	// Gets the length of an item's text in CHAR units.
+	INT CListView::GetItemTextLenA( INT _iItem, INT _iSubItem ) {
+		INT iSize = 128;
+		INT iRet = 0;
+		LVITEMA liItem = { 0 };
+		liItem.iSubItem = _iSubItem;
+		liItem.pszText = nullptr;
+		do {
+			iSize *= 2;
+			liItem.pszText = new CHAR[iSize];
+			liItem.cchTextMax = iSize;
+			iRet = static_cast<INT>(::SendMessageA( Wnd(), LVM_GETITEMTEXTA, static_cast<WPARAM>(_iItem), reinterpret_cast<LPARAM>(&liItem) ));
+			delete [] liItem.pszText;
+		} while ( iRet >= iSize - 1 );
+		return iRet + 1;
+	}
+
+	// Gets the text of an item.
+	VOID CListView::GetItemText( INT _iItem, INT _iSubItem, std::wstring &_sRet ) {
+		INT iLen = GetItemTextLenW( _iItem,  _iSubItem );
+		LVITEMW liItem = { 0 };
+		liItem.iSubItem = _iSubItem;
+		liItem.pszText = new WCHAR[iLen];
+		liItem.cchTextMax = iLen;
+		::SendMessageA( Wnd(), LVM_GETITEMTEXTW, static_cast<WPARAM>(_iItem), reinterpret_cast<LPARAM>(&liItem) );
+		_sRet = liItem.pszText;
+		delete [] liItem.pszText;
+	}
+
+	// Gets the text of an item.
+	VOID CListView::GetItemText( INT _iItem, INT _iSubItem, std::string &_sRet ) {
+		INT iLen = GetItemTextLenA( _iItem,  _iSubItem );
+		LVITEMA liItem = { 0 };
+		liItem.iSubItem = _iSubItem;
+		liItem.pszText = new CHAR[iLen];
+		liItem.cchTextMax = iLen;
+		::SendMessageA( Wnd(), LVM_GETITEMTEXTA, static_cast<WPARAM>(_iItem), reinterpret_cast<LPARAM>(&liItem) );
+		_sRet = liItem.pszText;
+		delete [] liItem.pszText;
+	}
+
+	// Sort items.
+	BOOL CListView::SortItems( INT _iSubItem ) {
+		LSW_LISTSORT lsSort = {
+			this,
+			_iSubItem,
+		};
+		return static_cast<BOOL>(::SendMessageA( Wnd(), LVM_SORTITEMSEX, reinterpret_cast<WPARAM>(&lsSort), reinterpret_cast<LPARAM>(CompareFunc) ));
+	}
+
+	// Sort comparison function.  Override to change how items compare against each other.
+	int CListView::SortCompare( INT _iLeft, INT _iRight, INT _iSub ) {
+		std::wstring sLeft, sRight;
+		GetItemText( _iLeft, _iSub, sLeft );
+		GetItemText( _iRight, _iSub, sRight );
+		return m_bSortWithCase ? std::wcscmp( sLeft.c_str(), sRight.c_str() ) : _wcsicmp( sLeft.c_str(), sRight.c_str() );
+	}
+
+	// Setting the HWND after the control has been created.
+	void CListView::InitControl( HWND _hWnd ) {
+		CWidget::InitControl( _hWnd );
+		ListView_SetExtendedListViewStyleEx( Wnd(), m_dwExtendedStyles, 0xFFFFFFFF );
+	}
+
+	// Sort routine.
+	int CALLBACK CListView::CompareFunc( LPARAM _lParam1, LPARAM _lParam2, LPARAM _lParamSort ) {
+		LSW_LISTSORT * plsSort = reinterpret_cast<LSW_LISTSORT *>(_lParamSort);
+		return plsSort->plvListView->SortCompare( static_cast<INT>(_lParam1), static_cast<INT>(_lParam2), plsSort->iSubItem );
 	}
 
 }	// namespace lsw

@@ -622,10 +622,10 @@ namespace mx {
 		_uiNumDigits = max( _uiNumDigits, 1 );
 		CHAR szFormat[32];
 		if ( Options.bUse0xForHex ) {
-			::sprintf_s( szFormat, sizeof( szFormat ), "0x%%.%uI64X", _uiNumDigits );
+			::sprintf_s( szFormat, MX_ELEMENTS( szFormat ), "0x%%.%uI64X", _uiNumDigits );
 		}
 		else {
-			::sprintf_s( szFormat, sizeof( szFormat ), "%%.%uI64Xh", _uiNumDigits );
+			::sprintf_s( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64Xh", _uiNumDigits );
 		}
 		::sprintf_s( _pcRet, _sLen, szFormat, _uiValue );
 		return _pcRet;
@@ -634,6 +634,29 @@ namespace mx {
 	// Creates a hexadecimal string.
 	const CHAR * CUtilities::ToHex( uint64_t _uiValue, std::string &_sString, uint32_t _uiNumDigits ) {
 		CHAR szTemp[32];
+		ToHex( _uiValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits );
+
+		_sString += szTemp;
+		return _sString.c_str();
+	}
+
+	// Creates a hexadecimal string.
+	const WCHAR * CUtilities::ToHex( uint64_t _uiValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
+		_uiNumDigits = max( _uiNumDigits, 1 );
+		WCHAR szFormat[32];
+		if ( Options.bUse0xForHex ) {
+			::swprintf_s( szFormat, MX_ELEMENTS( szFormat ), L"0x%%.%uI64X", _uiNumDigits );
+		}
+		else {
+			::swprintf_s( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64Xh", _uiNumDigits );
+		}
+		::swprintf_s( _pcRet, _sLen, szFormat, _uiValue );
+		return _pcRet;
+	}
+
+	// Creates a hexadecimal string.
+	const WCHAR * CUtilities::ToHex( uint64_t _uiValue, std::wstring &_sString, uint32_t _uiNumDigits ) {
+		WCHAR szTemp[32];
 		ToHex( _uiValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits );
 
 		_sString += szTemp;
@@ -657,6 +680,24 @@ namespace mx {
 	// Creates an unsigned integer string.
 	const CHAR * CUtilities::ToUnsigned( uint64_t _uiValue, std::string &_sString, uint32_t _uiNumDigits ) {
 		CHAR szTemp[32];
+		ToUnsigned( _uiValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits );
+
+		_sString += szTemp;
+		return _sString.c_str();
+	}
+
+	// Creates an unsigned integer string.
+	const WCHAR * CUtilities::ToUnsigned( uint64_t _uiValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
+		_uiNumDigits = max( _uiNumDigits, 1 );
+		WCHAR szFormat[32];
+		::swprintf_s( szFormat, sizeof( szFormat ), L"%%.%uI64u", _uiNumDigits );
+		::swprintf_s( _pcRet, _sLen, szFormat, _uiValue );
+		return _pcRet;
+	}
+
+	// Creates an unsigned integer string.
+	const WCHAR * CUtilities::ToUnsigned( uint64_t _uiValue, std::wstring &_sString, uint32_t _uiNumDigits ) {
+		WCHAR szTemp[32];
 		ToUnsigned( _uiValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits );
 
 		_sString += szTemp;

@@ -26,6 +26,7 @@ namespace mx {
 			"Process ID",
 			"Path",
 			"Windows",
+			"Parent",
 		};
 		CListView * plvLIst = static_cast<CListView *>(FindChild( COpenProcessLayout::MX_OPI_LISTVIEW ));
 		for ( INT I = 0; I < MX_ELEMENTS( ptcHeaders ); I++ ) {
@@ -38,6 +39,7 @@ namespace mx {
 		CreateProcessList( vProcesses );
 
 		FillListView( plvLIst, vProcesses );
+		
 
 
 		return LSW_H_CONTINUE;
@@ -137,6 +139,18 @@ namespace mx {
 			_plvView->SetItemText( iItem, 2, _vProcs[I].sPath.c_str() );
 
 			_plvView->SetItemText( iItem, 3, _vProcs[I].sWindows.c_str() );
+
+			const MX_PROCESSES * ppParent = FindProcess( _vProcs, _vProcs[I].peProcEntry.th32ParentProcessID );
+			if ( ppParent ) {
+				std::wstring sParent = ppParent->peProcEntry.szExeFile;
+				sParent += L' ';
+				sParent += L'(';
+				CUtilities::ToHex( ppParent->dwId, sParent, 4 );
+				sParent += L')';
+
+				_plvView->SetItemText( iItem, 4, sParent.c_str() );
+			}
+			
 		}
 	}
 
@@ -173,6 +187,14 @@ namespace mx {
 		}
 
 		return TRUE;
+	}
+
+	// Finds an entry in an array of MX_PROCESSES objects with the given process ID.
+	const COpenProcessWindow::MX_PROCESSES * COpenProcessWindow::FindProcess( const std::vector<MX_PROCESSES> &_pProcesses, DWORD _dwId ) {
+		for ( size_t I = 0; I < _pProcesses.size(); ++I ) {
+			if ( _pProcesses[I].dwId == _dwId ) { return &_pProcesses[I]; }
+		}
+		return nullptr;
 	}
 
 }	// namespace mx

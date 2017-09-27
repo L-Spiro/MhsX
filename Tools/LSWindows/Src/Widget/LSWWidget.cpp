@@ -1,5 +1,6 @@
 #include "LSWWidget.h"
 #include "../Base/LSWBase.h"
+#include "../ListView/LSWListView.h"
 
 namespace lsw {
 
@@ -14,8 +15,10 @@ namespace lsw {
 		m_rStartingRect.SetWidth( _wlLayout.dwWidth );
 		m_rStartingRect.SetHeight( _wlLayout.dwHeight );
 
+		m_dwExtendedStyles = _wlLayout.dwStyleEx;
+
 		if ( _bCreateWidget ) {
-			m_hWnd = ::CreateWindowExW( 0,
+			m_hWnd = ::CreateWindowExW( _wlLayout.dwStyleEx,
 				_wlLayout.lpwcClass,
 				_wlLayout.pwcText,
 				_wlLayout.dwStyle,
@@ -200,7 +203,7 @@ namespace lsw {
 
 	// The default dialog message handler.
 	INT_PTR CALLBACK CWidget::DialogProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam ) {
-		CWidget * pmwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( _hWnd, DWLP_USER ));
+		CWidget * pmwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( _hWnd, GWLP_USERDATA ));
 
 		switch ( _uMsg ) {
 			// =======================================
@@ -209,7 +212,7 @@ namespace lsw {
 			case WM_INITDIALOG : {
 				std::vector<CWidget *> * pvWidgets = reinterpret_cast<std::vector<CWidget *> *>(_lParam);
 				pmwThis = (*pvWidgets)[0];
-				::SetWindowLongPtrW( _hWnd, DWLP_USER, reinterpret_cast<LONG_PTR>(pmwThis) );
+				::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pmwThis) );
 				pmwThis->m_hWnd = _hWnd;
 				::GetWindowRect( _hWnd, &pmwThis->m_rRect );
 				::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
@@ -276,6 +279,46 @@ namespace lsw {
 					if ( hHandled == LSW_H_HANDLED ) { return 0; }
 				}
 				break;
+			}
+			// =======================================
+			// Notifications.
+			// =======================================
+			case WM_NOTIFY : {
+				LPNMHDR lpHdr = reinterpret_cast<LPNMHDR>(_lParam);
+				switch ( lpHdr->code ) {
+					case LVN_COLUMNCLICK : {
+						LPNMLISTVIEW plvListView = reinterpret_cast<LPNMLISTVIEW>(_lParam);
+						HWND hFrom = plvListView->hdr.hwndFrom;
+						CWidget * pmwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hFrom, GWLP_USERDATA ));
+						if ( pmwThis ) {
+							CListView * plvView = static_cast<CListView *>(pmwThis);
+							plvView->SortItems( plvListView->iSubItem );
+						}
+						return TRUE;
+					}
+					case NM_CUSTOMDRAW : {
+						LPNMLVCUSTOMDRAW pcdCustomDraw = reinterpret_cast<LPNMLVCUSTOMDRAW>(_lParam);
+						HWND hFrom = pcdCustomDraw->nmcd.hdr.hwndFrom;
+						if ( pcdCustomDraw->nmcd.dwDrawStage == CDDS_PREPAINT ) {
+							::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, CDRF_NOTIFYITEMDRAW );
+							return CDRF_NOTIFYITEMDRAW;
+						}
+						if ( pcdCustomDraw->nmcd.dwDrawStage == CDDS_ITEMPREPAINT ) {
+							if ( pcdCustomDraw->nmcd.dwItemSpec % 2 == 0 ) {
+								pcdCustomDraw->clrText = RGB( 0, 0, 0 );
+								pcdCustomDraw->clrTextBk = RGB( 0xE5, 0xF5, 0xFF );
+							}
+							/*else {
+								pcdCustomDraw->clrText = RGB( 0, 0, 0 );
+								pcdCustomDraw->clrTextBk = RGB( 0xFF, 0xFF, 0xFF );
+							}*/
+							::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, CDRF_NEWFONT );
+							return TRUE;
+						}
+						return TRUE;
+					}
+				}
+				return TRUE;
 			}
 			case WM_SETFONT : {
 				/*HFONT hFont = (HFONT)_wParam;
@@ -492,14 +535,20 @@ namespace lsw {
 		::MoveWindow( Wnd(), rNewSize.left, rNewSize.top, rNewSize.Width(), rNewSize.Height(), FALSE );
 	}
 
+	// Setting the HWND after the control has been created.
+	void CWidget::InitControl( HWND _hWnd ) {
+		m_hWnd = _hWnd;
+	}
+
 	// Attaches a control/window to its CWidget.
 	BOOL CALLBACK CWidget::EnumChildWindows_AttachWindowToWidget( HWND _hWnd, LPARAM _lParam ) {
 		std::vector<CWidget *> * pvWidgets = reinterpret_cast<std::vector<CWidget *> *>(_lParam);
 		int iId = ::GetDlgCtrlID( _hWnd );
 		for ( size_t I = 0; I < pvWidgets->size(); ++I ) {
 			if ( (*pvWidgets)[I]->Id() == iId ) {
-				(*pvWidgets)[I]->m_hWnd = _hWnd;
+				//(*pvWidgets)[I]->m_hWnd = _hWnd;
 				::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>((*pvWidgets)[I]) );
+				(*pvWidgets)[I]->InitControl( _hWnd );
 				return TRUE;
 			}
 		}
