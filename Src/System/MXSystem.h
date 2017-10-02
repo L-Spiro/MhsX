@@ -2,6 +2,8 @@
 
 #include "../Files/MXFile.h"
 #include "../PE/MXPeObject.h"
+#include "../Strings/MXStringDecoder.h"
+
 #include <LSWWin.h>
 #include <string>
 #include <TlHelp32.h>
@@ -19,6 +21,7 @@ typedef BOOL (WINAPI * LPFN_WRITEPROCESSMEMORY)( HANDLE, LPVOID, LPCVOID, SIZE_T
 typedef BOOL (WINAPI * LPFN_ENUMPROCESSES)( DWORD *, DWORD, DWORD * );
 typedef HANDLE (WINAPI * LPFN_OPENPROCESS)( DWORD, BOOL, DWORD );
 typedef HANDLE (WINAPI * LPFN_OPENTHREAD)( DWORD, BOOL, DWORD );
+typedef BOOL (WINAPI * LPFN_ISWOW64PROCESS)( HANDLE, PBOOL );
 typedef HANDLE (WINAPI * LPFN_CREATETOOLHELP32SNAPSHOT)( DWORD, DWORD );
 typedef BOOL (WINAPI * LPFN_PROCESS32FIRSTW)( HANDLE, LPPROCESSENTRY32W );
 typedef BOOL (WINAPI * LPFN_PROCESS32NEXTW)( HANDLE, LPPROCESSENTRY32W );
@@ -28,6 +31,9 @@ typedef BOOL (WINAPI * LPFN_MODULE32FIRSTW)( HANDLE, LPMODULEENTRY32W );
 typedef BOOL (WINAPI * LPFN_MODULE32NEXTW)( HANDLE, LPMODULEENTRY32W );
 typedef BOOL (WINAPI * LPFN_QUERYFULLPROCESSIMAGENAMEW)( HANDLE, DWORD, LPWSTR, PDWORD );
 typedef BOOL (WINAPI * LPFN_ENUMTHREADWINDOWS)( DWORD, WNDENUMPROC lpfn, LPARAM );
+typedef BOOL (WINAPI * LPFN_OPENPROCESSTOKEN)( HANDLE, DWORD, PHANDLE );
+typedef BOOL (WINAPI * LPFN_LOOKUPPRIVILEGEVALUEW)( LPCWSTR, LPCWSTR, PLUID );
+typedef BOOL (WINAPI * LPFN_ADJUSTTOKENPRIVILEGES)( HANDLE, BOOL, PTOKEN_PRIVILEGES, DWORD, PTOKEN_PRIVILEGES, PDWORD );
 
 namespace mx {
 
@@ -45,6 +51,12 @@ namespace mx {
 
 		// Gets a function address by DLL name and function name.
 		static LPVOID					GetProcAddress( const WCHAR * _pwcDll, const CHAR * _pcFunc );
+
+		// Gets the file name from a given path.
+		static std::string				GetFileName( const std::string &_sPath );
+
+		// Gets the file name from a given path.
+		static std::wstring				GetFileName( const std::wstring &_wsPath );
 
 		// Gets the path to this .EXE in UTF-8.
 		static std::string				GetSelfPath();
@@ -129,6 +141,9 @@ namespace mx {
 		// OpenThread().
 		static HANDLE WINAPI			OpenThread( DWORD _dwDesiredAccess, BOOL _bInheritHandle, DWORD _dwThreadId );
 
+		// IsWow64Process().
+		static BOOL WINAPI				IsWow64Process( HANDLE _hProcess, PBOOL _Wow64Process );
+
 		// CreateToolhelp32Snapshot().
 		static HANDLE WINAPI			CreateToolhelp32Snapshot( DWORD _dwFlags, DWORD _th32ProcessID );
 
@@ -162,6 +177,18 @@ namespace mx {
 		// Gets window text.
 		static BOOL						GetWindowTextW( HWND _hWnd, std::wstring &_sRes );
 
+		// OpenProcessToken().
+		static BOOL WINAPI				OpenProcessToken( HANDLE _ProcessHandle, DWORD _DesiredAccess, PHANDLE _TokenHandle );
+
+		// LookupPrivilegeValueW().
+		static BOOL WINAPI				LookupPrivilegeValueW( LPCWSTR _lpSystemName, LPCWSTR _lpName, PLUID _lpLuid );
+
+		// AdjustTokenPrivileges().
+		static BOOL WINAPI				AdjustTokenPrivileges( HANDLE _TokenHandle, BOOL _DisableAllPrivileges, PTOKEN_PRIVILEGES _NewState, DWORD _BufferLength, PTOKEN_PRIVILEGES _PreviousState, PDWORD _ReturnLength );
+
+		// Show an encrypted error message box.
+		static VOID						MessageBoxError( HWND _hWnd, const CHAR * _pcMsg, size_t _sMsgLen, const CHAR * _pcTitle = _T_9C1C9375_Error, size_t _sTitleLen = _LEN_9C1C9375 );
+
 
 	protected :
 		// == Members.
@@ -185,6 +212,9 @@ namespace mx {
 
 		// OpenThread().
 		static LPFN_OPENTHREAD			m_pfOpenThread;
+
+		// IsWow64Process().
+		static LPFN_ISWOW64PROCESS		m_pfIsWow64Process;
 
 		// CreateToolhelp32Snapshot().
 		static LPFN_CREATETOOLHELP32SNAPSHOT
@@ -215,6 +245,17 @@ namespace mx {
 		// EnumThreadWindows().
 		static LPFN_ENUMTHREADWINDOWS	m_pfEnumThreadWindows;
 
+		// OpenProcessToken().
+		static LPFN_OPENPROCESSTOKEN	m_pfOpenProcessToken;
+
+		// LookupPrivilegeValue().
+		static LPFN_LOOKUPPRIVILEGEVALUEW
+										m_pfLookupPrivilegeValueW;
+
+		// AdjustTokenPrivileges().
+		static LPFN_ADJUSTTOKENPRIVILEGES
+										m_pfAdjustTokenPrivileges;
+
 
 		// == Functions.
 		// Load kernel32.dll functions.
@@ -222,6 +263,9 @@ namespace mx {
 
 		// Load User32.dll functions.
 		static VOID						LoadUser32();
+
+		// Load Advapi32.dll functions.
+		static VOID						LoadAdvapi32();
 	};
 
 }	// namespace mx

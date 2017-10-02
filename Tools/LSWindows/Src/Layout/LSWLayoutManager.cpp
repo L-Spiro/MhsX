@@ -3,10 +3,13 @@
 #include "../Base/LSWGlobalAlloc.h"
 #include "../Button/LSWButton.h"
 #include "../CheckButton/LSWCheckButton.h"
+#include "../ComboBox/LSWComboBox.h"
 #include "../GroupBox/LSWGroupBox.h"
 #include "../ListView/LSWListView.h"
 #include "../MainWindow/LSWMainWindow.h"
 #include "../RadioButton/LSWRadioButton.h"
+#include "../Rebar/LSWRebar.h"
+#include "../ToolBar/LSWToolBar.h"
 
 #include <map>
 
@@ -88,13 +91,12 @@ namespace lsw {
 			CWidget::DialogProc,
 			reinterpret_cast<LPARAM>(&vWidgets) );
 		
+#if 0
 		if ( ipRet == -1 ) {
 			CBase::PrintError( L"CreateDialogX" );
 		}
+#endif	// #if 0
 		LSW_DESTROY_WIDGETS;
-		/*if ( ipRet == 0 ) {
-			return pwMain;
-		}*/
 
 		return ipRet;
 #undef LSW_DESTROY_WIDGETS
@@ -105,10 +107,13 @@ namespace lsw {
 		switch ( _wlLayout.ltType ) {
 			case LSW_LT_WIDGET : { return new CWidget( _wlLayout, _pwParent, _bCreateWidget ); }
 			case LSW_LT_BUTTON : { return new CButton( _wlLayout, _pwParent, _bCreateWidget ); }
+			case LSW_LT_COMBOBOX : { return new CComboBox( _wlLayout, _pwParent, _bCreateWidget ); }
 			case LSW_LT_LISTVIEW : { return new CListView( _wlLayout, _pwParent, _bCreateWidget ); }
 			case LSW_LT_GROUPBOX : { return new CGroupBox( _wlLayout, _pwParent, _bCreateWidget ); }
 			case LSW_LT_RADIO : { return new CRadioButton( _wlLayout, _pwParent, _bCreateWidget ); }
 			case LSW_LT_CHECK : { return new CCheckButton( _wlLayout, _pwParent, _bCreateWidget ); }
+			case LSW_LT_REBAR : { return new CRebar( _wlLayout, _pwParent, _bCreateWidget ); }
+			case LSW_LT_TOOLBAR : { return new CToolBar( _wlLayout, _pwParent, _bCreateWidget ); }
 			case LSW_LT_MAINWINDOW : { return new CMainWindow( _wlLayout, _pwParent, _bCreateWidget ); }
 		}
 		return nullptr;

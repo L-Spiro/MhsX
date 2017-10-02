@@ -31,6 +31,9 @@ namespace mx {
 	// OpenThread().
 	LPFN_OPENTHREAD CSystem::m_pfOpenThread = nullptr;
 
+	// IsWow64Process().
+	LPFN_ISWOW64PROCESS CSystem::m_pfIsWow64Process = nullptr;
+
 	// Process32FirstW().
 	LPFN_PROCESS32FIRSTW CSystem::m_pfProcess32FirstW = nullptr;
 
@@ -57,6 +60,15 @@ namespace mx {
 
 	// EnumThreadWindows().
 	LPFN_ENUMTHREADWINDOWS CSystem::m_pfEnumThreadWindows = nullptr;
+
+	// OpenProcessToken().
+	LPFN_OPENPROCESSTOKEN CSystem::m_pfOpenProcessToken = nullptr;
+
+	// LookupPrivilegeValue().
+	LPFN_LOOKUPPRIVILEGEVALUEW CSystem::m_pfLookupPrivilegeValueW = nullptr;
+
+	// AdjustTokenPrivileges().
+	LPFN_ADJUSTTOKENPRIVILEGES CSystem::m_pfAdjustTokenPrivileges = nullptr;
 
 	// == Types.
 	typedef BOOL (WINAPI * LPFN_ISWOW64PROCESS)( HANDLE, PBOOL );
@@ -111,11 +123,43 @@ namespace mx {
 
 		// User32 imports.
 		LoadUser32();
+
+		// Advapi32 imports.
+		LoadAdvapi32();
+
+		// Set the current working directory.
+		/*
+		::SetCurrentDirectoryW( GetModulePathW( nullptr ).c_str() );
+		*/
 	}
 
 	// Gets a function address by DLL name and function name.
 	LPVOID CSystem::GetProcAddress( const WCHAR * _pwcDll, const CHAR * _pcFunc ) {
 		return nullptr;
+	}
+
+	// Gets the file name from a given path.
+	std::string CSystem::GetFileName( const std::string &_sPath ) {
+		const char * pcLast = std::strrchr( _sPath.c_str(), '\\' );
+		if ( !pcLast ) {
+			pcLast = std::strrchr( _sPath.c_str(), '/' );
+			if ( !pcLast ) {
+				return _sPath;
+			}
+		}
+		return ++pcLast;
+	}
+
+	// Gets the file name from a given path.
+	std::wstring CSystem::GetFileName( const std::wstring &_wsPath ) {
+		const wchar_t * pwcLast = std::wcsrchr( _wsPath.c_str(), L'\\' );
+		if ( !pwcLast ) {
+			pwcLast = std::wcsrchr( _wsPath.c_str(), L'/' );
+			if ( !pwcLast ) {
+				return _wsPath;
+			}
+		}
+		return ++pwcLast;
 	}
 
 	// Gets the path to this .EXE in UTF-8.
@@ -406,6 +450,11 @@ namespace mx {
 		return m_pfOpenThread ? m_pfOpenThread( _dwDesiredAccess, _bInheritHandle, _dwThreadId ) : NULL;
 	}
 
+	// IsWow64Process().
+	BOOL WINAPI CSystem::IsWow64Process( HANDLE _hProcess, PBOOL _Wow64Process ) {
+		return m_pfIsWow64Process ? m_pfIsWow64Process( _hProcess, _Wow64Process ) : FALSE;
+	}
+
 	// CreateToolhelp32Snapshot().
 	HANDLE WINAPI CSystem::CreateToolhelp32Snapshot( DWORD _dwFlags, DWORD _th32ProcessID ) {
 		return m_pfCreateToolhelp32Snapshot ? m_pfCreateToolhelp32Snapshot( _dwFlags, _th32ProcessID ) : NULL;
@@ -449,16 +498,16 @@ namespace mx {
 	// Determines how large a buffer must be to accept the full path of a process when calling QueryFullProcessImageNameW().
 	DWORD CSystem::FullProcessPathLen( HANDLE _hProcess ) {
 		std::vector<WCHAR> vBuffer;
-		DWORD dwLen = 10;
+		DWORD dwLen = MAX_PATH;
 		DWORD dwTemp = dwLen;
 		do {
-			dwLen += 2;
+			dwLen += MAX_PATH;
 			vBuffer.resize( dwLen );
 			dwTemp = dwLen;
 			if ( QueryFullProcessImageNameW( _hProcess, 0, &vBuffer[0], &dwTemp ) ) {
 				return dwTemp + 1;
 			}
-		} while ( dwTemp == dwLen );
+		} while ( dwTemp == dwLen && dwLen < 0xFFFF );
 		return dwTemp + 1;
 	}
 
@@ -477,6 +526,30 @@ namespace mx {
 		_sRes = pwcBuffer;
 		delete [] pwcBuffer;
 		return TRUE;
+	}
+
+	// OpenProcessToken().
+	BOOL WINAPI CSystem::OpenProcessToken( HANDLE _ProcessHandle, DWORD _DesiredAccess, PHANDLE _TokenHandle ) {
+		return m_pfOpenProcessToken ? m_pfOpenProcessToken( _ProcessHandle, _DesiredAccess, _TokenHandle ) : FALSE;
+	}
+
+	// LookupPrivilegeValueW().
+	BOOL WINAPI CSystem::LookupPrivilegeValueW( LPCWSTR _lpSystemName, LPCWSTR _lpName, PLUID _lpLuid ) {
+		return m_pfLookupPrivilegeValueW ? m_pfLookupPrivilegeValueW( _lpSystemName, _lpName, _lpLuid ) : FALSE;
+	}
+
+	// AdjustTokenPrivileges().
+	BOOL WINAPI CSystem::AdjustTokenPrivileges( HANDLE _TokenHandle, BOOL _DisableAllPrivileges, PTOKEN_PRIVILEGES _NewState, DWORD _BufferLength, PTOKEN_PRIVILEGES _PreviousState, PDWORD _ReturnLength ) {
+		return m_pfAdjustTokenPrivileges ? m_pfAdjustTokenPrivileges( _TokenHandle, _DisableAllPrivileges, _NewState, _BufferLength, _PreviousState, _ReturnLength ) : FALSE;
+	}
+
+	// Show an encrypted error message box.
+	VOID CSystem::MessageBoxError( HWND _hWnd, const CHAR * _pcMsg, size_t _sMsgLen, const CHAR * _pcTitle, size_t _sTitleLen ) {
+		std::string sMsg = mx::CStringDecoder::DecodeToString( _pcMsg, _sMsgLen );
+		std::string sTitle = mx::CStringDecoder::DecodeToString( _pcTitle, _sTitleLen );
+		lsw::CBase::MessageBoxError( _hWnd, sMsg.c_str(), sTitle.c_str() );
+		std::memset( const_cast<char *>(sMsg.c_str()), 0, sMsg.size() );
+		std::memset( const_cast<char *>(sTitle.c_str()), 0, sTitle.size() );
 	}
 
 	// Load kernel32.dll functions.
@@ -503,6 +576,7 @@ namespace mx {
 		}
 		m_pfOpenProcess = reinterpret_cast<LPFN_OPENPROCESS>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_DF27514B_OpenProcess, _LEN_DF27514B, poObj ));
 		m_pfOpenThread = reinterpret_cast<LPFN_OPENTHREAD>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_B85486FF_OpenThread, _LEN_B85486FF, poObj ));
+		m_pfIsWow64Process = reinterpret_cast<LPFN_ISWOW64PROCESS>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_2E50340B_IsWow64Process, _LEN_2E50340B, poObj ));
 		m_pfCreateToolhelp32Snapshot = reinterpret_cast<LPFN_CREATETOOLHELP32SNAPSHOT>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_C1F3B876_CreateToolhelp32Snapshot, _LEN_C1F3B876, poObj ));
 		m_pfProcess32FirstW = reinterpret_cast<LPFN_PROCESS32FIRSTW>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_8197004C_Process32FirstW, _LEN_8197004C, poObj ));
 		m_pfProcess32NextW = reinterpret_cast<LPFN_PROCESS32NEXTW>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_BC6B67BF_Process32NextW, _LEN_BC6B67BF, poObj ));
@@ -527,6 +601,7 @@ namespace mx {
 		assert( pfTemp == m_pfEnumProcesses );
 		MX_CHECK( OpenProcess );
 		MX_CHECK( OpenThread );
+		MX_CHECK( IsWow64Process );
 		MX_CHECK( CreateToolhelp32Snapshot );
 		MX_CHECK( Process32FirstW );
 		MX_CHECK( Process32NextW );
@@ -572,6 +647,42 @@ namespace mx {
 #endif	// #ifdef _DEBUG
 
 		::ZeroMemory( szUser32, MX_ELEMENTS( szUser32 ) );
+	}
+
+	// Load Advapi32.dll functions.
+	VOID CSystem::LoadAdvapi32() {
+		CHAR szAdvapi32[_LEN_F16ED7E0+1];
+		_DEC_F16ED7E0_advapi32_dll( szAdvapi32 );
+		CPeObject poObj;
+		CFile fFile;
+		if ( !FindDll( szAdvapi32, fFile ) ) {
+			::ZeroMemory( szAdvapi32, MX_ELEMENTS( szAdvapi32 ) );
+			return;
+		}
+		if ( !poObj.LoadImageFromMemory( fFile ) ) {
+			::ZeroMemory( szAdvapi32, MX_ELEMENTS( szAdvapi32 ) );
+			return;
+		}
+
+
+		m_pfOpenProcessToken = reinterpret_cast<LPFN_OPENPROCESSTOKEN>(GetProcAddress( _T_F16ED7E0_advapi32_dll, _LEN_F16ED7E0, _T_F9C60615_OpenProcessToken, _LEN_F9C60615, poObj ));
+		m_pfLookupPrivilegeValueW = reinterpret_cast<LPFN_LOOKUPPRIVILEGEVALUEW>(GetProcAddress( _T_F16ED7E0_advapi32_dll, _LEN_F16ED7E0, _T_2E530A33_LookupPrivilegeValueW, _LEN_2E530A33, poObj ));
+		m_pfAdjustTokenPrivileges = reinterpret_cast<LPFN_ADJUSTTOKENPRIVILEGES>(GetProcAddress( _T_F16ED7E0_advapi32_dll, _LEN_F16ED7E0, _T_0DE3E5CF_AdjustTokenPrivileges, _LEN_0DE3E5CF, poObj ));
+
+#ifdef _DEBUG
+#define MX_CHECK( NAME )																						\
+	pfTemp = ::GetProcAddress( ::GetModuleHandleA( szAdvapi32 ), #NAME );										\
+	assert( pfTemp == m_pf ## NAME )
+
+		LPVOID pfTemp;
+		MX_CHECK( OpenProcessToken );
+		MX_CHECK( LookupPrivilegeValueW );
+		MX_CHECK( AdjustTokenPrivileges );
+
+#undef MX_CHECK
+#endif	// #ifdef _DEBUG
+
+		::ZeroMemory( szAdvapi32, MX_ELEMENTS( szAdvapi32 ) );
 	}
 
 }	// namespace mx

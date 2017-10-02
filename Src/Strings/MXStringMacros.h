@@ -3949,3 +3949,52 @@
 #define _DEC_S_EF1AD868_EnumChildWindows mx::CStringDecoder::DecodeToString( _T_EF1AD868_EnumChildWindows, _LEN_EF1AD868 )
 #define _DEC_WS_EF1AD868_EnumChildWindows mx::CStringDecoder::DecodeToWString( _T_EF1AD868_EnumChildWindows, _LEN_EF1AD868 )
 
+// advapi32.dll
+#define _T_F16ED7E0_advapi32_dll "\xE9\x32\x46\xFC\x02\x32\xC1\xF9\xFE\x2C\x35\x3A"
+#define _LEN_F16ED7E0 12
+#define _DEC_F16ED7E0_advapi32_dll( STR ) mx::CStringDecoder::Decode( _T_F16ED7E0_advapi32_dll, _LEN_F16ED7E0, STR )
+#define _DEC_S_F16ED7E0_advapi32_dll mx::CStringDecoder::DecodeToString( _T_F16ED7E0_advapi32_dll, _LEN_F16ED7E0 )
+#define _DEC_WS_F16ED7E0_advapi32_dll mx::CStringDecoder::DecodeToWString( _T_F16ED7E0_advapi32_dll, _LEN_F16ED7E0 )
+
+// OpenProcessToken
+#define _T_F9C60615_OpenProcessToken "\xD7\x3E\x35\x09\xE2\x3B\xFD\x2A\x35\x3B\x3C\x22\x01\x06\x2C\xF6"
+#define _LEN_F9C60615 16
+#define _DEC_F9C60615_OpenProcessToken( STR ) mx::CStringDecoder::Decode( _T_F9C60615_OpenProcessToken, _LEN_F9C60615, STR )
+#define _DEC_S_F9C60615_OpenProcessToken mx::CStringDecoder::DecodeToString( _T_F9C60615_OpenProcessToken, _LEN_F9C60615 )
+#define _DEC_WS_F9C60615_OpenProcessToken mx::CStringDecoder::DecodeToWString( _T_F9C60615_OpenProcessToken, _LEN_F9C60615 )
+
+// LookupPrivilegeValueW
+#define _T_2E530A33_LookupPrivilegeValueW "\xD4\x3D\x3F\x06\x07\x39\xDE\x39\x39\x3E\x32\x3A\xF7\x02\x2C\xDE\x2F\x3C\x10\xF7\x20"
+#define _LEN_2E530A33 21
+#define _DEC_2E530A33_LookupPrivilegeValueW( STR ) mx::CStringDecoder::Decode( _T_2E530A33_LookupPrivilegeValueW, _LEN_2E530A33, STR )
+#define _DEC_S_2E530A33_LookupPrivilegeValueW mx::CStringDecoder::DecodeToString( _T_2E530A33_LookupPrivilegeValueW, _LEN_2E530A33 )
+#define _DEC_WS_2E530A33_LookupPrivilegeValueW mx::CStringDecoder::DecodeToWString( _T_2E530A33_LookupPrivilegeValueW, _LEN_2E530A33 )
+
+// AdjustTokenPrivileges
+#define _T_0DE3E5CF_AdjustTokenPrivileges "\xC9\x32\x3A\x10\x05\x3D\xE2\x36\x3B\x2D\x37\x1E\x04\x04\x3D\xF1\x3A\x35\x02\xF7\x3C"
+#define _LEN_0DE3E5CF 21
+#define _DEC_0DE3E5CF_AdjustTokenPrivileges( STR ) mx::CStringDecoder::Decode( _T_0DE3E5CF_AdjustTokenPrivileges, _LEN_0DE3E5CF, STR )
+#define _DEC_S_0DE3E5CF_AdjustTokenPrivileges mx::CStringDecoder::DecodeToString( _T_0DE3E5CF_AdjustTokenPrivileges, _LEN_0DE3E5CF )
+#define _DEC_WS_0DE3E5CF_AdjustTokenPrivileges mx::CStringDecoder::DecodeToWString( _T_0DE3E5CF_AdjustTokenPrivileges, _LEN_0DE3E5CF )
+
+// No process has been selected.
+#define _T_CD04DF4D_No_process_has_been_selected_ "\xD6\x3D\xF0\x0B\x04\x38\xF1\x2C\x43\x3B\xE9\x36\xF3\x0E\xE7\xEA\x33\x35\x09\xB2\x3C\xF3\x33\x35\x2B\x3D\x33\xF6\xC9"
+#define _LEN_CD04DF4D 29
+#define _DEC_CD04DF4D_No_process_has_been_selected_( STR ) mx::CStringDecoder::Decode( _T_CD04DF4D_No_process_has_been_selected_, _LEN_CD04DF4D, STR )
+#define _DEC_S_CD04DF4D_No_process_has_been_selected_ mx::CStringDecoder::DecodeToString( _T_CD04DF4D_No_process_has_been_selected_, _LEN_CD04DF4D )
+#define _DEC_WS_CD04DF4D_No_process_has_been_selected_ mx::CStringDecoder::DecodeToWString( _T_CD04DF4D_No_process_has_been_selected_, _LEN_CD04DF4D )
+
+// Error
+#define _T_9C1C9375_Error "\xCD\x40\x42\x0A\x04"
+#define _LEN_9C1C9375 5
+#define _DEC_9C1C9375_Error( STR ) mx::CStringDecoder::Decode( _T_9C1C9375_Error, _LEN_9C1C9375, STR )
+#define _DEC_S_9C1C9375_Error mx::CStringDecoder::DecodeToString( _T_9C1C9375_Error, _LEN_9C1C9375 )
+#define _DEC_WS_9C1C9375_Error mx::CStringDecoder::DecodeToWString( _T_9C1C9375_Error, _LEN_9C1C9375 )
+
+// Select a Process
+#define _T_F1AF2E7E_Select_a_Process "\xDB\x33\x3C\x00\xF5\x3D\xAE\x28\xF0\x18\x3B\x3D\xF5\x00\x3A\xFB"
+#define _LEN_F1AF2E7E 16
+#define _DEC_F1AF2E7E_Select_a_Process( STR ) mx::CStringDecoder::Decode( _T_F1AF2E7E_Select_a_Process, _LEN_F1AF2E7E, STR )
+#define _DEC_S_F1AF2E7E_Select_a_Process mx::CStringDecoder::DecodeToString( _T_F1AF2E7E_Select_a_Process, _LEN_F1AF2E7E )
+#define _DEC_WS_F1AF2E7E_Select_a_Process mx::CStringDecoder::DecodeToWString( _T_F1AF2E7E_Select_a_Process, _LEN_F1AF2E7E )
+

@@ -17,6 +17,8 @@ namespace mx {
 			MX_MWI_NONE,
 			MX_MWI_MAINWINDOW,
 			MX_MWI_STOREDADDRESSES,
+			MX_MWI_REBAR0,
+			MX_MWI_TOOLBAR0,
 			
 		};
 

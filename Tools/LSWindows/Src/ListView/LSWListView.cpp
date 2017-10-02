@@ -10,6 +10,14 @@ namespace lsw {
 	}
 
 	// == Functions.
+	// If the list-view control was created without the LVS_OWNERDATA style, this macro causes the control to allocate its internal data structures for
+	//	the specified number of items. This prevents the control from having to allocate the data structures every time an item is added.
+	VOID CListView::SetItemCount( INT _cItems ) {
+		if ( Wnd() ) {
+			::SendMessageW( Wnd(), LVM_SETITEMCOUNT, static_cast<WPARAM>(_cItems), 0 );
+		}
+	}
+
 	// Inserts a column at the given index.
 	INT CListView::InsertColumn( INT _iIndex, const WCHAR * _pwcText, INT _iFormat ) {
 		LV_COLUMNW lvColumn;
@@ -157,6 +165,42 @@ namespace lsw {
 		delete [] liItem.pszText;
 	}
 
+	// Gets the index of the (first) selected item or -1.
+	INT CListView::GetFirstSelectedItem() {
+		if ( !Wnd() ) { return -1; }
+		return static_cast<INT>(::SendMessageW( Wnd(), LVM_GETNEXTITEM, static_cast<WPARAM>(-1), MAKELPARAM( LVNI_SELECTED, 0 ) ));
+	}
+
+	// Gets the data of the selected item or returns -1.
+	LPARAM CListView::GetSelData() {
+		INT iSel = GetFirstSelectedItem();
+		if ( iSel == -1 ) { return -1; }
+
+		LVITEMW lvItem;
+		lvItem.mask = LVIF_PARAM;
+		if ( GetItem( iSel, 0, lvItem ) ) {
+			return lvItem.lParam;
+		}
+
+		return -1;
+	}
+
+	// Gets an item.  _iItm is input and output.
+	BOOL CListView::GetItem( INT _iItem, INT _iSubItem, LVITEMW &_iItm ) {
+		if ( !Wnd() ) { return FALSE; }
+		_iItm.iItem = _iItem;
+		_iItm.iSubItem = _iSubItem;
+		return static_cast<BOOL>(::SendMessageW( Wnd(), LVM_GETITEMW, 0, reinterpret_cast<LPARAM>(&_iItm) ));
+	}
+
+	// Gets an item.  _iItm is input and output.
+	BOOL CListView::GetItem( INT _iItem, INT _iSubItem, LVITEMA &_iItm ) {
+		if ( !Wnd() ) { return FALSE; }
+		_iItm.iItem = _iItem;
+		_iItm.iSubItem = _iSubItem;
+		return static_cast<BOOL>(::SendMessageA( Wnd(), LVM_GETITEMA, 0, reinterpret_cast<LPARAM>(&_iItm) ));
+	}
+
 	// Sort items.
 	BOOL CListView::SortItems( INT _iSubItem ) {
 		LSW_LISTSORT lsSort = {
@@ -172,6 +216,11 @@ namespace lsw {
 		GetItemText( _iLeft, _iSub, sLeft );
 		GetItemText( _iRight, _iSub, sRight );
 		return m_bSortWithCase ? std::wcscmp( sLeft.c_str(), sRight.c_str() ) : _wcsicmp( sLeft.c_str(), sRight.c_str() );
+	}
+
+	// Delete all items.
+	VOID CListView::DeleteAll() {
+		::SendMessageW( Wnd(), LVM_DELETEALLITEMS, 0, 0 );
 	}
 
 	// Setting the HWND after the control has been created.

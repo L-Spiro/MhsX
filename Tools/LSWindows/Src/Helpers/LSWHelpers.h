@@ -25,10 +25,86 @@ namespace lsw {
 		LSW_HANDLE() : hHandle( NULL ) {}
 		LSW_HANDLE( HANDLE _hHandle ) : hHandle( _hHandle ) {}
 		~LSW_HANDLE() {
-			if ( hHandle && hHandle != INVALID_HANDLE_VALUE ) { ::CloseHandle( hHandle ); }
+			Reset();
 		}
 
+		LSW_HANDLE &						operator = ( HANDLE &_hHandle ) {
+			Reset();
+			hHandle = _hHandle;
+			_hHandle = NULL;
+			return (*this);
+		}
+		VOID								Reset() {
+			if ( hHandle && hHandle != INVALID_HANDLE_VALUE ) {
+				::CloseHandle( hHandle );
+				hHandle = NULL;
+			}
+		}
+
+
 		HANDLE								hHandle;
+	};
+
+	struct LSW_REBARBANDINFO : REBARBANDINFOW {
+		LSW_REBARBANDINFO() {
+			std::memset( this, 0, sizeof( (*this) ) );
+			cbSize = sizeof( REBARBANDINFOW );
+		}
+
+		LSW_REBARBANDINFO &					SetStyle( UINT _fStylemember ) {
+			fMask |= RBBIM_STYLE;
+			fStyle = _fStylemember;
+			return (*this);
+		}
+		LSW_REBARBANDINFO &					SetColors( COLORREF _clrFore, COLORREF _clrBack = RGB( 0, 0, 0 ) ) {
+			fMask |= RBBIM_COLORS;
+			clrFore = _clrFore;
+			clrBack = _clrBack;
+			return (*this);
+		}
+		LSW_REBARBANDINFO &					SetText( LPWSTR _lpText ) {
+			fMask |= RBBIM_TEXT;
+			lpText = _lpText;
+			cch = 0;
+			return (*this);
+		}
+		LSW_REBARBANDINFO &					SetText( LPWSTR _lpText, UINT _cch ) {
+			fMask |= RBBIM_TEXT;
+			lpText = _lpText;
+			cch = _cch;
+			return (*this);
+		}
+		LSW_REBARBANDINFO &					SetImage( int _iImage ) {
+			fMask |= RBBIM_IMAGE;
+			iImage = _iImage;
+			return (*this);
+		}
+		LSW_REBARBANDINFO &					SetChild( HWND _hwndChild ) {
+			fMask |= RBBIM_CHILD;
+			hwndChild = _hwndChild;
+			return (*this);
+		}
+		LSW_REBARBANDINFO &					SetChildSize( UINT _cxMinChild, UINT _cyMinChild ) {
+			fMask |= RBBIM_CHILDSIZE;
+			cxMinChild = _cxMinChild;
+			cyMinChild = _cyMinChild;
+			return (*this);
+		}
+		LSW_REBARBANDINFO &					SetSize( UINT _cx ) {
+			fMask |= RBBIM_SIZE;
+			cx = _cx;
+			return (*this);
+		}
+		LSW_REBARBANDINFO &					SetBackground( HBITMAP _hbmBack ) {
+			fMask |= RBBIM_BACKGROUND;
+			hbmBack = _hbmBack;
+			return (*this);
+		}
+		LSW_REBARBANDINFO &					SetId( UINT _wID ) {
+			fMask |= RBBIM_ID;
+			wID = _wID;
+			return (*this);
+		}
 	};
 
 	class CHelpers {

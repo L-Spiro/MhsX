@@ -14,6 +14,10 @@ namespace lsw {
 		// Set sort case sensitivity.
 		VOID								SetSortCaseSensitivity( BOOL _bVal ) { m_bSortWithCase = (_bVal != FALSE); }
 
+		// If the list-view control was created without the LVS_OWNERDATA style, this macro causes the control to allocate its internal data structures for
+		//	the specified number of items. This prevents the control from having to allocate the data structures every time an item is added.
+		VOID								SetItemCount( INT _cItems );
+
 		// Inserts a column at the given index.
 		INT									InsertColumn( INT _iIndex, const WCHAR * _pwcText, INT _iFormat = LVCFMT_LEFT );
 
@@ -59,11 +63,26 @@ namespace lsw {
 		// Gets the text of an item.
 		VOID								GetItemText( INT _iItem, INT _iSubItem, std::string &_sRet );
 
+		// Gets the index of the (first) selected item or -1.
+		INT									GetFirstSelectedItem();
+
+		// Gets the data of the selected item or returns -1.
+		LPARAM								GetSelData();
+
+		// Gets an item.  _iItm is input and output.
+		BOOL								GetItem( INT _iItem, INT _iSubItem, LVITEMW &_iItm );
+
+		// Gets an item.  _iItm is input and output.
+		BOOL								GetItem( INT _iItem, INT _iSubItem, LVITEMA &_iItm );
+
 		// Sort items.
 		virtual BOOL						SortItems( INT _iSubItem );
 
 		// Sort comparison function.  Override to change how items compare against each other.
 		virtual int							SortCompare( INT _iLeft, INT _iRight, INT _iSub );
+
+		// Delete all items.
+		virtual VOID						DeleteAll();
 
 
 	protected :

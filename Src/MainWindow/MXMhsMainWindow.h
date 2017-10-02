@@ -8,9 +8,7 @@ namespace mx {
 	
 	class CMhsMainWindow : public lsw::CMainWindow {
 	public :
-		CMhsMainWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true ) :
-			lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget ) {
-		}
+		CMhsMainWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true );
 
 
 		// == Functions.

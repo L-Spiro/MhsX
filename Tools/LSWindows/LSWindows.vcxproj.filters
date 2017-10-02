@@ -75,6 +75,36 @@
     <Filter Include="Source Files\Expressions">
       <UniqueIdentifier>{64c3a51f-18bd-4b3c-ac1c-bf7d8719723d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Images">
+      <UniqueIdentifier>{2fd43982-16dc-4264-bdf2-252e2261d2bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Images">
+      <UniqueIdentifier>{80afa81a-84cb-4544-b932-e2f4cd583fb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Rebar">
+      <UniqueIdentifier>{58e0adc1-d214-4db0-8e44-9e56c44bb562}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Rebar">
+      <UniqueIdentifier>{e4d2554b-75f9-4036-b756-d6f353d4b064}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ImageList">
+      <UniqueIdentifier>{abbd1f6e-e110-42bb-85f6-71c7fbd00f8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ImageList">
+      <UniqueIdentifier>{8090b50d-1d50-4d96-abc6-27583b987159}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ToolBar">
+      <UniqueIdentifier>{e07a610a-e2c8-47fb-b56f-242f6a8dc55f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ToolBar">
+      <UniqueIdentifier>{d6a26ffd-bb11-41d8-a529-df4042f7e9fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ComboBox">
+      <UniqueIdentifier>{9a547097-81eb-43df-85be-e237724a3665}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ComboBox">
+      <UniqueIdentifier>{612fc0ba-10e5-4d81-98cf-e14eb3bcc57e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -131,6 +161,21 @@
     <ClInclude Include="Src\Expressions\LSWExpression.h">
       <Filter>Header Files\Expressions</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Images\LSWBitmap.h">
+      <Filter>Header Files\Images</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Rebar\LSWRebar.h">
+      <Filter>Header Files\Rebar</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ImageList\LSWImageList.h">
+      <Filter>Header Files\ImageList</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ToolBar\LSWToolBar.h">
+      <Filter>Header Files\ToolBar</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ComboBox\LSWComboBox.h">
+      <Filter>Header Files\ComboBox</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -162,6 +207,21 @@
     </ClCompile>
     <ClCompile Include="Src\Expressions\LSWExpressions.cpp">
       <Filter>Source Files\Expressions</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Images\LSWBitmap.cpp">
+      <Filter>Source Files\Images</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Rebar\LSWRebar.cpp">
+      <Filter>Source Files\Rebar</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ImageList\LSWImageList.cpp">
+      <Filter>Source Files\ImageList</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ToolBar\LSWToolBar.cpp">
+      <Filter>Source Files\ToolBar</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ComboBox\LSWComboBox.cpp">
+      <Filter>Source Files\ComboBox</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

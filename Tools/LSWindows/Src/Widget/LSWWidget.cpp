@@ -8,6 +8,7 @@ namespace lsw {
 		m_hWnd( NULL ),
 		m_wId( _wlLayout.wId ),
 		m_bEnabled( _wlLayout.bEnabled ),
+		m_bActive( _wlLayout.bActive ),
 		m_pwParent( _pwParent ) {
 
 		m_rStartingRect.left = _wlLayout.iLeft;
@@ -189,6 +190,10 @@ namespace lsw {
 							hHandled = pmwThis->AcceleratorCommand( wId );
 							break;
 						}
+						/*case BN_CLICKED : {
+							hHandled = pmwThis->Command( wId, reinterpret_cast<HWND>(_lParam) );
+							break;
+						}*/
 						default : {
 							// Error.
 						}
@@ -281,6 +286,35 @@ namespace lsw {
 				break;
 			}
 			// =======================================
+			// Commands
+			// =======================================
+			case WM_COMMAND : {
+				LSW_HANDLED hHandled;
+				WORD wId = LOWORD( _wParam );
+				if ( _lParam ) {
+					// Sent by a control.
+					hHandled = pmwThis->Command( wId, reinterpret_cast<HWND>(_lParam) );
+				}
+				else {
+					// Sent by a menu or accelerator.
+					switch ( HIWORD( _wParam ) ) {
+						case 0 : {
+							hHandled = pmwThis->MenuCommand( wId );
+							break;
+						}
+						case 1 : {
+							hHandled = pmwThis->AcceleratorCommand( wId );
+							break;
+						}
+						default : {
+							// Error.
+						}
+					}
+				}
+				if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
+				break;
+			}
+			// =======================================
 			// Notifications.
 			// =======================================
 			case WM_NOTIFY : {
@@ -289,9 +323,9 @@ namespace lsw {
 					case LVN_COLUMNCLICK : {
 						LPNMLISTVIEW plvListView = reinterpret_cast<LPNMLISTVIEW>(_lParam);
 						HWND hFrom = plvListView->hdr.hwndFrom;
-						CWidget * pmwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hFrom, GWLP_USERDATA ));
-						if ( pmwThis ) {
-							CListView * plvView = static_cast<CListView *>(pmwThis);
+						CWidget * pmwTemp = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hFrom, GWLP_USERDATA ));
+						if ( pmwTemp ) {
+							CListView * plvView = static_cast<CListView *>(pmwTemp);
 							plvView->SortItems( plvListView->iSubItem );
 						}
 						return TRUE;
@@ -301,20 +335,30 @@ namespace lsw {
 						HWND hFrom = pcdCustomDraw->nmcd.hdr.hwndFrom;
 						if ( pcdCustomDraw->nmcd.dwDrawStage == CDDS_PREPAINT ) {
 							::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, CDRF_NOTIFYITEMDRAW );
-							return CDRF_NOTIFYITEMDRAW;
+							return TRUE;
 						}
 						if ( pcdCustomDraw->nmcd.dwDrawStage == CDDS_ITEMPREPAINT ) {
 							if ( pcdCustomDraw->nmcd.dwItemSpec % 2 == 0 ) {
 								pcdCustomDraw->clrText = RGB( 0, 0, 0 );
 								pcdCustomDraw->clrTextBk = RGB( 0xE5, 0xF5, 0xFF );
+								::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, CDRF_NEWFONT );
+								return TRUE;
 							}
 							/*else {
 								pcdCustomDraw->clrText = RGB( 0, 0, 0 );
 								pcdCustomDraw->clrTextBk = RGB( 0xFF, 0xFF, 0xFF );
 							}*/
-							::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, CDRF_NEWFONT );
-							return TRUE;
 						}
+						return TRUE;
+					}
+					case NM_DBLCLK : {
+						NMHDR * pHdr = reinterpret_cast<NMHDR *>(_lParam);
+						HWND hFrom = pHdr->hwndFrom;
+						CWidget * pmwTemp = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hFrom, GWLP_USERDATA ));
+						if ( pmwTemp ) {
+							if ( pmwTemp->DblClk( pHdr ) == LSW_HANDLED::LSW_H_HANDLED ) { return TRUE; }
+						}
+						pmwThis->DblClk( pHdr, static_cast<WORD>(pHdr->idFrom), pmwTemp );
 						return TRUE;
 					}
 				}
@@ -438,6 +482,16 @@ namespace lsw {
 
 	// WM_COMMAND from accelerator.
 	CWidget::LSW_HANDLED CWidget::AcceleratorCommand( WORD _Id ) {
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_NOTIFY->NM_DBLCLK on this item (if LSW_HANDLED::LSW_H_CONTINUE, message is passed to owning window).
+	CWidget::LSW_HANDLED CWidget::DblClk( const NMHDR * _phHdr ) {
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_NOTIFY->NM_DBLCLK for the owning window if the child either could not be resolved or returned LSW_HANDLED::LSW_H_CONTINUE.
+	CWidget::LSW_HANDLED CWidget::DblClk( const NMHDR * _phHdr, WORD _wControlId, CWidget * _pwWidget ) {
 		return LSW_H_CONTINUE;
 	}
 

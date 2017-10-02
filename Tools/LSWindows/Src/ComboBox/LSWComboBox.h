@@ -5,16 +5,13 @@
 
 namespace lsw {
 
-	class CGroupBox : public CWidget {
+	class CComboBox : public CWidget {
 	public :
-		CGroupBox( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true );
+		CComboBox( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true );
 
 
 		// == Functions.
 
-
-	protected :
-		// == Functions.
 
 	private :
 		typedef CWidget						Parent;

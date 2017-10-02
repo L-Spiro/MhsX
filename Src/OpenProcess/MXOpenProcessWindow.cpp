@@ -8,19 +8,29 @@
 
 namespace mx {
 
+	COpenProcessWindow::COpenProcessWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget ) :
+		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget ) {
+		m_dwMainOrAll = COpenProcessLayout::MX_OPI_RADIO_MAIN;
+	}
+
 	COpenProcessWindow::~COpenProcessWindow() {
 	}
 
 	// == Functions.
+	// Gets the selected process ID and closes the window if valid.
+	DWORD COpenProcessWindow::GetSelectedId() {
+		CListView * plvView = static_cast<CListView *>(FindChild( COpenProcessLayout::MX_OPI_LISTVIEW ));
+		LPARAM lpId = plvView->GetSelData();
+		if ( lpId == -1 ) {
+			CSystem::MessageBoxError( Wnd(), _T_CD04DF4D_No_process_has_been_selected_, _LEN_CD04DF4D, _T_F1AF2E7E_Select_a_Process, _LEN_F1AF2E7E );
+			return static_cast<DWORD>(-1);
+		}
+		::EndDialog( Wnd(), lpId );
+		return static_cast<DWORD>(lpId);
+	}
+
 	// WM_INITDIALOG.
 	CWidget::LSW_HANDLED COpenProcessWindow::InitDialog() {
-
-		
-		/*LV_COLUMNW lvColumn;
-		lvColumn.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
-		lvColumn.fmt = LVCFMT_LEFT;
-		lvColumn.cx = 150;
-		lvColumn.iImage = -1;*/
 		CHAR * ptcHeaders[] = {
 			"Process",
 			"Process ID",
@@ -35,11 +45,7 @@ namespace mx {
 			plvLIst->SetColumnWidth( iCol, 150 );
 		}
 
-		std::vector<MX_PROCESSES> vProcesses;
-		CreateProcessList( vProcesses );
-
-		FillListView( plvLIst, vProcesses );
-		
+		MainList();		
 
 
 		return LSW_H_CONTINUE;
@@ -47,87 +53,167 @@ namespace mx {
 
 	// WM_CLOSE.
 	CWidget::LSW_HANDLED COpenProcessWindow::Close() {
-		::EndDialog( Wnd(), 0 );
+		::EndDialog( Wnd(), -1 );
 		return LSW_H_HANDLED;
 	}
 
 	// WM_COMMAND from control.
 	CWidget::LSW_HANDLED COpenProcessWindow::Command( WORD _Id, HWND _hControl ) {
+		if ( m_dwMainOrAll == _Id ) { return LSW_H_CONTINUE; }
 		switch ( _Id ) {
-			/*case COpenProcessLayout::MX_OP: {
-				COpenProcessLayout::CreateOpenProcessDialog( this );
+			case COpenProcessLayout::MX_OPI_RADIO_MAIN : {
+				MainList();
 				break;
-			}*/
+			}
+			case COpenProcessLayout::MX_OPI_RADIO_ALL : {
+				AllList();
+				break;
+			}
+			case COpenProcessLayout::MX_OPI_BUTTON_REFRESH : {
+				if ( m_dwMainOrAll == COpenProcessLayout::MX_OPI_RADIO_MAIN ) {
+					MainList();
+				}
+				else {
+					AllList();
+				}
+				break;
+			}
+			case COpenProcessLayout::MX_OPI_BUTTON_CANCEL : {
+				return Close();
+			}
+			case COpenProcessLayout::MX_OPI_BUTTON_OK : {
+				GetSelectedId();
+				break;
+			}
 		}
 		return LSW_H_CONTINUE;
+	}
+
+	// Main process list.
+	VOID COpenProcessWindow::MainList() {
+		std::vector<MX_PROCESSES> vProcesses;
+		CreateProcessList( vProcesses );
+				
+		CListView * plvLIst = static_cast<CListView *>(FindChild( COpenProcessLayout::MX_OPI_LISTVIEW ));
+		FillListView( plvLIst, vProcesses );
+		m_dwMainOrAll = COpenProcessLayout::MX_OPI_RADIO_MAIN;
+	}
+
+	// All process list.
+	VOID COpenProcessWindow::AllList() {
+		std::vector<MX_PROCESSES> vProcesses;
+		CreateHiddenProcessList( vProcesses );
+				
+		CListView * plvLIst = static_cast<CListView *>(FindChild( COpenProcessLayout::MX_OPI_LISTVIEW ));
+		FillListView( plvLIst, vProcesses );
+		m_dwMainOrAll = COpenProcessLayout::MX_OPI_RADIO_ALL;
 	}
 
 	// Creates a vector of MX_PROCESSES structures.
 	BOOL COpenProcessWindow::CreateProcessList( std::vector<MX_PROCESSES> &_pProcesses ) {
 		// Create a stapshot.
-		LSW_HANDLE hSnapObj = CSystem::CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS | TH32CS_SNAPTHREAD, 0 );
+		std::vector<PROCESSENTRY32W> vProcs;
+		std::vector<THREADENTRY32> vThreads;
+		LSW_HANDLE hSnapObj = CreateSnap( vProcs, vThreads );
 		if ( hSnapObj.hHandle == INVALID_HANDLE_VALUE ) {
-#ifdef _DEBUG
-			lsw::CBase::PrintError( L"Unable to create process snapshot." );
-#endif	// #ifdef _DEBUG
 			return FALSE;
 		}
 
-		PROCESSENTRY32W pe32Pe = { sizeof( pe32Pe ) };
-		if ( !CSystem::Process32FirstW( hSnapObj.hHandle, &pe32Pe ) ) {
-#ifdef _DEBUG
-			lsw::CBase::PrintError( L"CSystem::Process32FirstW()." );
-#endif	// #ifdef _DEBUG
-			return FALSE;
-		}
-
-		do {
+		for ( size_t I = 0; I < vProcs.size(); ++I ) {
 			MX_PROCESSES pProc;
-			pProc.peProcEntry = pe32Pe;
-			pProc.dwId = pe32Pe.th32ProcessID;
+			pProc.peProcEntry = vProcs[I];
+			pProc.dwId = vProcs[I].th32ProcessID;
 
-			LSW_HANDLE hProc = CSystem::OpenProcess( PROCESS_QUERY_INFORMATION, FALSE, pe32Pe.th32ProcessID );
-			if ( hProc.hHandle ) {
-				DWORD dwRealLen = CSystem::FullProcessPathLen( hProc.hHandle );
-				pProc.sPath.resize( dwRealLen );
-				CSystem::QueryFullProcessImageNameW( hProc.hHandle, 0, &pProc.sPath[0], &dwRealLen );
-				AddWindowTitles( hSnapObj.hHandle, pProc );
-				
-
-				dwRealLen += 10;
+			LSW_HANDLE hProc;
+			if ( FillProcById( pProc.dwId, pProc, hProc ) ) {
+				AddWindowTitles( vThreads, pProc );
 			}
-			/*else {
-				pProc.sPath = L"<?>";
-			}*/
-
 			_pProcesses.push_back( pProc );
-		} while ( CSystem::Process32NextW( hSnapObj.hHandle, &pe32Pe ) );
+		}
 
+		/*
 		DWORD dwTotalProcesses = CSystem::EnumProcessesBufferSize();
 		std::vector<DWORD> vIds;
 		vIds.resize( dwTotalProcesses );
 		CSystem::EnumProcesses( &vIds[0], vIds.size() * sizeof( DWORD ), &dwTotalProcesses );
-		dwTotalProcesses /= sizeof( DWORD );
+		dwTotalProcesses /= sizeof( DWORD );*/
 
 		return TRUE;
 	}
 
-	// Adds window titles to an MX_PROCESSES structure.
-	VOID COpenProcessWindow::AddWindowTitles( HANDLE _hSnap, MX_PROCESSES &_pProc ) {
-		THREADENTRY32 te32Te = { sizeof( THREADENTRY32 ) };
-		if ( !CSystem::Thread32First( _hSnap, &te32Te ) ) { return; }
+	// Creates a vector of MX_PROCESSES structures using a technique to find hidden process ID's.
+	BOOL COpenProcessWindow::CreateHiddenProcessList( std::vector<MX_PROCESSES> &_pProcesses ) {
+		std::vector<PROCESSENTRY32W> vProcs;
+		std::vector<THREADENTRY32> vThreads;
+		LSW_HANDLE hSnapObj = CreateSnap( vProcs, vThreads );
+		// hSnapObj can be INVALID_HANDLE_VALUE.
+#if 0
+		std::set<DWORD> sIds;
+		CreateProcListByThreadRefs( vThreads, sIds );
+#endif	// #if 0
 		
-		do {
-			if ( te32Te.th32OwnerProcessID == _pProc.dwId ) {
-				CSystem::EnumThreadWindows( te32Te.th32ThreadID, EnumThreadWindows_GatherWindows, reinterpret_cast<LPARAM>(&_pProc) );
+		const DWORD dwLast = max( 0xFFFF, HighestProcId( vProcs ) );
+		for ( DWORD I = 0; I <= dwLast; I++ ) {
+			{
+				DWORD dwId = I;
+				MX_PROCESSES pProc;
+				pProc.peProcEntry = { 0 };
+				pProc.peProcEntry.th32ParentProcessID = 0xFFFFFFFF;
+				pProc.bHasWow64 = FALSE;
+				if ( SnapHasProc( vProcs, dwId, pProc ) ) {
+					LSW_HANDLE hProc;
+					if ( FillProcById( dwId, pProc, hProc ) ) {
+						AddWindowTitles( vThreads, pProc );
+					}
+					_pProcesses.push_back( pProc );
+				}
+				else {
+					LSW_HANDLE hProc;
+					if ( FillProcById( dwId, pProc, hProc ) ) {
+						AddWindowTitles( vThreads, pProc );
+						// Get the process name from the path.
+						::wcscpy_s( pProc.peProcEntry.szExeFile, CSystem::GetFileName( pProc.sPath ).c_str() );
+						_pProcesses.push_back( pProc );
+					}
+					else {
+#if 0
+#ifdef _DEBUG
+						if ( ProcessListHasId( sIds, dwId ) ) {
+							lsw::CBase::PrintError( L"ProcessListHasId." );
+						}
+						HANDLE hHnd = CSystem::OpenProcess( PROCESS_VM_READ, FALSE, dwId );
+						if ( hHnd ) {
+							lsw::CBase::PrintError( L"PROCESS_VM_READ." );
+							::CloseHandle( hHnd );
+						}
+#endif	// #ifdef _DEBUG
+#endif	// #if 0
+					}
+				}
 			}
-		} while ( CSystem::Thread32Next( _hSnap, &te32Te ) );
+		}
+		return TRUE;
+	}
+
+	// Adds window titles to an MX_PROCESSES structure.
+	VOID COpenProcessWindow::AddWindowTitles( const std::vector<THREADENTRY32> &_vThreads, MX_PROCESSES &_pProc ) {
+		for ( size_t I = 0; I < _vThreads.size(); ++I ) {
+			if ( _vThreads[I].th32OwnerProcessID == _pProc.dwId ) {
+				CSystem::EnumThreadWindows( _vThreads[I].th32ThreadID, EnumThreadWindows_GatherWindows, reinterpret_cast<LPARAM>(&_pProc) );
+			}
+		}
 	}
 
 	// Fills a list view with the given MX_PROCESSES objects.
 	VOID COpenProcessWindow::FillListView( lsw::CListView * _plvView, const std::vector<MX_PROCESSES> &_vProcs ) {
+		_plvView->DeleteAll();
+		_plvView->SetItemCount( static_cast<INT>(_vProcs.size()) );
 		for ( size_t I = 0; I < _vProcs.size(); ++I ) {
-			INT iItem = _plvView->InsertItem( _vProcs[I].peProcEntry.szExeFile, _vProcs[I].dwId );
+			std::wstring wsFile = _vProcs[I].peProcEntry.szExeFile;
+			if ( _vProcs[I].bHasWow64 ) {
+				wsFile += L" *32";
+			}
+			INT iItem = _plvView->InsertItem( wsFile.c_str(), _vProcs[I].dwId );
 
 			std::string sTemp;
 			CUtilities::ToHex( _vProcs[I].dwId, sTemp, 4 );
@@ -152,6 +238,107 @@ namespace mx {
 			}
 			
 		}
+	}
+
+	// Fills an MX_PROCESSES structure based off a process ID.
+	BOOL COpenProcessWindow::FillProcById( DWORD _dwId, MX_PROCESSES &_pProc, LSW_HANDLE &_hProcHandle ) {
+		_pProc.dwId = _dwId;
+
+		HANDLE hHnd = CSystem::OpenProcess( PROCESS_QUERY_INFORMATION, FALSE, _dwId );
+		if ( !hHnd ) { return FALSE; }
+		DWORD dwRealLen = CSystem::FullProcessPathLen( hHnd );
+		_pProc.sPath.resize( dwRealLen );
+		CSystem::QueryFullProcessImageNameW( hHnd, 0, &_pProc.sPath[0], &dwRealLen );
+		BOOL bSuc = CSystem::IsWow64Process( hHnd, &_pProc.bHasWow64 );
+		if ( !bSuc ) {
+			_pProc.bHasWow64 = FALSE;
+		}
+		_hProcHandle = hHnd;
+		return TRUE;
+	}
+
+	// Determines if a given process has a specified DLL loaded.
+	BOOL COpenProcessWindow::ProcHasDll( HANDLE _hSnap, DWORD _dwId, const WCHAR * _pwcDll ) {
+		MODULEENTRY32W meMod = { sizeof( meMod ) };
+		if ( !CSystem::Module32FirstW( _hSnap, &meMod ) ) { return FALSE; }
+
+		do {
+			if ( meMod.th32ProcessID == _dwId ) {
+				return TRUE;
+			}
+		} while ( CSystem::Module32NextW( _hSnap, &meMod ) );
+		return FALSE;
+	}
+
+	// Determines if a given process ID is in a tool snapshot.
+	BOOL COpenProcessWindow::SnapHasProc( std::vector<PROCESSENTRY32W> &_vProcs, DWORD _dwId, MX_PROCESSES &_pProc ) {
+		for ( size_t I = 0; I < _vProcs.size(); ++I ) {
+			if ( _vProcs[I].th32ProcessID == _dwId ) {
+				_pProc.dwId = _dwId;
+				_pProc.peProcEntry = _vProcs[I];
+				return TRUE;
+			}
+		}
+		return FALSE;
+	}
+
+	// Creates a snapshot and stores all PROCESSENTRY32W entries to a vector (for faster scanning).
+	HANDLE COpenProcessWindow::CreateSnap( std::vector<PROCESSENTRY32W> &_vProcs, std::vector<THREADENTRY32> &_vThreads ) {
+		HANDLE hSnapObj = CSystem::CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS | TH32CS_SNAPTHREAD, 0 );
+		if ( hSnapObj == INVALID_HANDLE_VALUE ) {
+#ifdef _DEBUG
+			lsw::CBase::PrintError( L"Unable to create process snapshot." );
+#endif	// #ifdef _DEBUG
+			return INVALID_HANDLE_VALUE;
+		}
+
+		PROCESSENTRY32W pe32Pe = { sizeof( pe32Pe ) };
+		if ( !CSystem::Process32FirstW( hSnapObj, &pe32Pe ) ) {
+#ifdef _DEBUG
+			lsw::CBase::PrintError( L"CSystem::Process32FirstW()." );
+#endif	// #ifdef _DEBUG
+			::CloseHandle( hSnapObj );
+			return INVALID_HANDLE_VALUE;
+		}
+		do {
+			_vProcs.push_back( pe32Pe );
+		} while ( CSystem::Process32NextW( hSnapObj, &pe32Pe ) );
+
+
+		THREADENTRY32 te32Te = { sizeof( te32Te ) };
+		if ( !CSystem::Thread32First( hSnapObj, &te32Te ) ) {
+#ifdef _DEBUG
+			lsw::CBase::PrintError( L"CSystem::Thread32First()." );
+#endif	// #ifdef _DEBUG
+		}
+		else {
+			do {
+				_vThreads.push_back( te32Te );
+			} while ( CSystem::Thread32Next( hSnapObj, &te32Te ) );
+		}
+
+		return hSnapObj;
+	}
+
+	// Creates a list of process ID's based off the system thread enumeration.
+	VOID COpenProcessWindow::CreateProcListByThreadRefs( const std::vector<THREADENTRY32> &_vThreads, std::set<DWORD> &_sProcs ) {
+		for ( size_t I = 0; I < _vThreads.size(); ++I ) {
+			_sProcs.insert( _vThreads[I].th32OwnerProcessID );
+		}
+	}
+
+	// Gets the highest process ID.
+	DWORD COpenProcessWindow::HighestProcId( const std::vector<PROCESSENTRY32W> &_vProcs ) {
+		DWORD dwRet = 0;
+		for ( size_t I = 0; I < _vProcs.size(); ++I ) {
+			dwRet = max( dwRet, _vProcs[I].th32ParentProcessID );
+		}
+		return dwRet;
+	}
+
+	// Determines if the given process ID is in the given set of process ID's.
+	BOOL COpenProcessWindow::ProcessListHasId( const std::set<DWORD> &_sProcs, DWORD _dwId ) {
+		return _sProcs.find( _dwId ) != _sProcs.end();
 	}
 
 	// Enumerate thread windows.
@@ -195,6 +382,15 @@ namespace mx {
 			if ( _pProcesses[I].dwId == _dwId ) { return &_pProcesses[I]; }
 		}
 		return nullptr;
+	}
+
+	// WM_NOTIFY->NM_DBLCLK for the owning window if the child either could not be resolved or returned LSW_HANDLED::LSW_H_CONTINUE.
+	CWidget::LSW_HANDLED COpenProcessWindow::DblClk( const NMHDR * _phHdr, WORD _wControlId, CWidget * _pwWidget ) {
+		if ( _wControlId == COpenProcessLayout::MX_OPI_LISTVIEW ) {
+			GetSelectedId();
+			return LSW_H_HANDLED;
+		}
+		return LSW_H_HANDLED;
 	}
 
 }	// namespace mx

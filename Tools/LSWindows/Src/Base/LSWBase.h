@@ -51,10 +51,17 @@ namespace lsw {
 		static CLayoutManager *						LayoutManager() { return m_plmLayoutMan; }
 
 		// =======================================
-		// Error-checking.
+		// Error-related.
 		// =======================================
 		// Prints the current error (from ::GetLastError()).
 		static VOID									PrintError( LPCWSTR _pwcText );
+
+		// Displays a message box with the given title and message.
+		static VOID									MessageBoxError( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle = L"Error" );
+
+		// Displays a message box with the given title and message.
+		static VOID									MessageBoxError( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle = "Error" );
+
 
 	protected :
 		// == Types.

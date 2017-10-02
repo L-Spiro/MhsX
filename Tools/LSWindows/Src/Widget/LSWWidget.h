@@ -44,6 +44,7 @@ namespace lsw {
 
 		// Enabled or disabled.
 		BOOL								Enabled() const { return m_bEnabled; }
+
 		// Window rectangle.
 		const LSW_RECT &					WindowRect() const { return m_rRect; }
 
@@ -88,6 +89,9 @@ namespace lsw {
 
 		// Extended styles.
 		DWORD								m_dwExtendedStyles;
+
+		// Default state.  Depends on the type of control.
+		BOOL								m_bActive;
 
 		// Children.
 		std::vector<CWidget *>				m_vChildren;
@@ -149,6 +153,12 @@ namespace lsw {
 
 		// WM_COMMAND from accelerator.
 		virtual LSW_HANDLED					AcceleratorCommand( WORD _Id );
+
+		// WM_NOTIFY->NM_DBLCLK on this item (if LSW_HANDLED::LSW_H_CONTINUE, message is passed to owning window).
+		virtual LSW_HANDLED					DblClk( const NMHDR * _phHdr );
+
+		// WM_NOTIFY->NM_DBLCLK for the owning window if the child either could not be resolved or returned LSW_HANDLED::LSW_H_CONTINUE.
+		virtual LSW_HANDLED					DblClk( const NMHDR * _phHdr, WORD _wControlId, CWidget * _pwWidget );
 
 
 		// == Functions.

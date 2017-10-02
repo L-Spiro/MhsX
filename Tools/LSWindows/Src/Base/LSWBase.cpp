@@ -28,7 +28,7 @@ namespace lsw {
 
 		INITCOMMONCONTROLSEX iccIn = {
 			sizeof( iccIn ),
-			ICC_BAR_CLASSES | ICC_LISTVIEW_CLASSES | ICC_PROGRESS_CLASS | ICC_TAB_CLASSES | ICC_TREEVIEW_CLASSES | ICC_USEREX_CLASSES
+			ICC_BAR_CLASSES | ICC_LISTVIEW_CLASSES | ICC_PROGRESS_CLASS | ICC_TAB_CLASSES | ICC_TREEVIEW_CLASSES | ICC_USEREX_CLASSES | ICC_COOL_CLASSES
 		};
 		::InitCommonControlsEx( &iccIn );
 	}
@@ -112,7 +112,16 @@ namespace lsw {
 
 		::LocalFree( lpMsgBuf );
 		::LocalFree( lpDisplayBuf );
+	}
 
+	// Displays a message box with the given title and message.
+	VOID CBase::MessageBoxError( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle ) {
+		::MessageBoxW( _hWnd, _pwcMsg, _pwcTitle, MB_ICONERROR );
+	}
+
+	// Displays a message box with the given title and message.
+	VOID CBase::MessageBoxError( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle ) {
+		::MessageBoxA( _hWnd, _pcMsg, _pcTitle, MB_ICONERROR );
 	}
 
 }	// namespace lsw

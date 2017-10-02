@@ -10,6 +10,7 @@ namespace lsw {
 		WORD						wId;						// Unique ID for the control, must not be 0.
 		LPCWSTR						lpwcClass;					// Only needed for custom types.  List views, buttons, etc. already know their classes.
 		BOOL						bEnabled;
+		BOOL						bActive;					// For buttons, indicates the default button.  For checks, indicates it is checked by default.
 		INT							iLeft;
 		INT							iTop;
 		DWORD						dwWidth;

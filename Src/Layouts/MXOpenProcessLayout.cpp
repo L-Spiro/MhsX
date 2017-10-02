@@ -17,6 +17,7 @@ namespace mx {
 			MX_OPI_DIALOG,							// wId
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
+			FALSE,									// bActive
 			64,										// iLeft
 			64,										// iTop
 			271,									// dwWidth
@@ -31,8 +32,9 @@ namespace mx {
 		{
 			LSW_LT_GROUPBOX,						// ltType
 			MX_OPI_GROUP,							// wId
-			L"Button",								// lpwcClass
+			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
+			FALSE,									// bActive
 			4,										// iLeft
 			3,										// iTop
 			263,									// dwWidth
@@ -55,6 +57,7 @@ namespace mx {
 			MX_OPI_LISTVIEW,						// wId
 			L"SysListView32",						// lpwcClass
 			TRUE,									// bEnabled
+			FALSE,									// bActive
 			8,										// iLeft
 			13,										// iTop
 			255,									// dwWidth
@@ -75,13 +78,14 @@ namespace mx {
 		{
 			LSW_LT_BUTTON,							// ltType
 			MX_OPI_BUTTON_OK,						// wId
-			L"Button",								// lpwcClass
+			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
+			TRUE,									// bActive
 			4,										// iLeft
 			182,									// iTop
 			43,										// dwWidth
 			12,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON | BS_TEXT,									// dwStyle
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON | BS_TEXT,								// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_D736D92D_OK ),																	// pwcText
 			_LEN_D736D92D,							// sTextLen
@@ -97,8 +101,9 @@ namespace mx {
 		{
 			LSW_LT_BUTTON,							// ltType
 			MX_OPI_BUTTON_CANCEL,					// wId
-			L"Button",								// lpwcClass
+			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
+			FALSE,									// bActive
 			224,									// iLeft
 			182,									// iTop
 			43,										// dwWidth
@@ -119,8 +124,9 @@ namespace mx {
 		{
 			LSW_LT_GROUPBOX,						// ltType
 			MX_OPI_GROUPSHOW,						// wId
-			L"Button",								// lpwcClass
+			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
+			FALSE,									// bActive
 			9,										// iLeft
 			128,									// iTop
 			253,									// dwWidth
@@ -141,8 +147,9 @@ namespace mx {
 		{
 			LSW_LT_RADIO,							// ltType
 			MX_OPI_RADIO_MAIN,						// wId
-			L"Button",								// lpwcClass
+			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
+			TRUE,									// bActive
 			14,										// iLeft
 			136,									// iTop
 			29,										// dwWidth
@@ -163,8 +170,9 @@ namespace mx {
 		{
 			LSW_LT_RADIO,							// ltType
 			MX_OPI_RADIO_ALL,						// wId
-			L"Button",								// lpwcClass
+			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
+			FALSE,									// bActive
 			238,									// iLeft
 			136,									// iTop
 			20,										// dwWidth
@@ -185,8 +193,9 @@ namespace mx {
 		{
 			LSW_LT_CHECK,							// ltType
 			MX_OPI_CHECK_RESTR,						// wId
-			L"Button",								// lpwcClass
+			WC_BUTTONW,								// lpwcClass
 			FALSE,									// bEnabled
+			FALSE,									// bActive
 			9,										// iLeft
 			150,									// iTop
 			253,									// dwWidth
@@ -207,8 +216,9 @@ namespace mx {
 		{
 			LSW_LT_BUTTON,							// ltType
 			MX_OPI_BUTTON_REFRESH,					// wId
-			L"Button",								// lpwcClass
+			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
+			FALSE,									// bActive
 			9,										// iLeft
 			161,									// iTop
 			253,									// dwWidth
@@ -240,12 +250,13 @@ namespace mx {
 			sStringsW,
 			sStrings );
 		
-		if ( lsw::CBase::LayoutManager()->CreateDialogX( &vLayouts[0], MX_ELEMENTS( m_wlOpenProcessDialog ), _pwParent ) ) {
-			CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
+		INT_PTR ipProc = lsw::CBase::LayoutManager()->CreateDialogX( &vLayouts[0], MX_ELEMENTS( m_wlOpenProcessDialog ), _pwParent );
+		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
+		if ( ipProc != -1 ) {
+			
 			// Success.  Do stuff.
 			return TRUE;
 		}
-		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
 
 		return FALSE;
 	}

@@ -1,10 +1,11 @@
 #include "MXMhsX.h"
-#include "Base/LSWBase.h"
-#include "Base/LSWWndClassEx.h"
+#include <Base/LSWBase.h>
+#include <Base/LSWWndClassEx.h>
+#include <Images/LSWBitmap.h>
 #include "Layouts/MXLayoutManager.h"
 #include "Layouts/MXMainWindowLayout.h"
 #include "Layouts/MXOpenProcessLayout.h"
-#include "MainWindow/LSWMainWindow.h"
+#include <MainWindow/LSWMainWindow.h>
 #include "System/MXSystem.h"
 
 #include "EEExpEval.h"
@@ -46,7 +47,14 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 	mx::CMainWindowLayout::CreateMainWindow();
 	//mx::COpenProcessLayout::CreateOpenProcessDialog( mx::CMainWindowLayout::MainWindow() );
 
+	/*WCHAR szBuffer[MAX_PATH];
+	::GetCurrentDirectoryW( MAX_PATH, szBuffer );*/
 	//lsw::CMainWindow mwWindow( L"Agh", L"L. Spiro MHS X" );
+
+	/*
+	lsw::CBitmap bMap;
+	bMap.LoadFromFile( L"Resources/98.bmp", 0, 0, LR_LOADMAP3DCOLORS );
+	*/
 
 	MSG mMsg = {};
 	while ( ::GetMessageW( &mMsg, NULL, 0, 0 ) > 0 ) {
