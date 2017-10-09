@@ -4,7 +4,7 @@
 
 namespace lsw {
 
-	CWidget::CWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget ) :
+	CWidget::CWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
 		m_hWnd( NULL ),
 		m_wId( _wlLayout.wId ),
 		m_bEnabled( _wlLayout.bEnabled ),
@@ -26,7 +26,7 @@ namespace lsw {
 				_wlLayout.iLeft, _wlLayout.iTop,
 				_wlLayout.dwWidth, _wlLayout.dwHeight,
 				_pwParent ? _pwParent->Wnd() : NULL,
-				(_wlLayout.dwStyle & WS_CHILD) ? reinterpret_cast<HMENU>(static_cast<UINT_PTR>(_wlLayout.wId)) : NULL,
+				(_wlLayout.dwStyle & WS_CHILD) ? reinterpret_cast<HMENU>(static_cast<UINT_PTR>(_wlLayout.wId)) : _hMenu,
 				CBase::GetThisHandle(),
 				static_cast<CWidget *>(this) );
 		}
@@ -102,14 +102,8 @@ namespace lsw {
 				::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pcsCreate->lpCreateParams) );
 				pmwThis = reinterpret_cast<CWidget *>(pcsCreate->lpCreateParams);
 				pmwThis->m_hWnd = _hWnd;
-				::GetWindowRect( _hWnd, &pmwThis->m_rRect );
-				::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
-				::GetWindowRect( _hWnd, &pmwThis->m_rStartingRect );
 
-				// Attach all controls to their CWidget counterparts.
-				::EnumChildWindows( _hWnd, EnumChildWindows_AttachWindowToWidget, _lParam );
-				::EnumChildWindows( _hWnd, EnumChildWindows_SetEnabled, _lParam );
-				::EnumChildWindows( _hWnd, EnumChildWindows_SetStartingRect, _lParam );
+				// ControlSetup() called by the layout manager because WM_NCCREATE is inside a constructor.
 
 				LSW_HANDLED hHandled = pmwThis->NcCreate( (*pcsCreate) );
 				if ( hHandled == LSW_H_HANDLED ) { return 0; }
@@ -152,6 +146,7 @@ namespace lsw {
 						::GetWindowRect( _hWnd, &pmwThis->m_rRect );
 						::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
 						hHandled = pmwThis->Size( _wParam, pmwThis->m_rRect.Width(), pmwThis->m_rRect.Height() );
+						::RedrawWindow( _hWnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW );
 					}
 				}
 				
@@ -182,7 +177,7 @@ namespace lsw {
 				else {
 					// Sent by a menu or accelerator.
 					switch ( HIWORD( _wParam ) ) {
-						case 0 : {
+						case BN_CLICKED : {
 							hHandled = pmwThis->MenuCommand( wId );
 							break;
 						}
@@ -219,15 +214,8 @@ namespace lsw {
 				pmwThis = (*pvWidgets)[0];
 				::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pmwThis) );
 				pmwThis->m_hWnd = _hWnd;
-				::GetWindowRect( _hWnd, &pmwThis->m_rRect );
-				::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
-				::GetWindowRect( _hWnd, &pmwThis->m_rStartingRect );
-
-
-				// Attach all controls to their CWidget counterparts.
-				::EnumChildWindows( _hWnd, EnumChildWindows_AttachWindowToWidget, _lParam );
-				::EnumChildWindows( _hWnd, EnumChildWindows_SetEnabled, _lParam );
-				::EnumChildWindows( _hWnd, EnumChildWindows_SetStartingRect, _lParam );
+				
+				ControlSetup( pmwThis, (*pvWidgets) );
 
 				POINT pConvOrg = PixelsToDialogUnits( _hWnd, 574 - 551 - 7, 633 - 302 - 30 );
 				POINT pConv = PixelsToDialogUnits( _hWnd, 567, 206 );
@@ -298,7 +286,7 @@ namespace lsw {
 				else {
 					// Sent by a menu or accelerator.
 					switch ( HIWORD( _wParam ) ) {
-						case 0 : {
+						case BN_CLICKED : {
 							hHandled = pmwThis->MenuCommand( wId );
 							break;
 						}
@@ -373,6 +361,14 @@ namespace lsw {
 		return FALSE;
 	}
 
+	// Updates all rectangles with the current window rectangles.  If a control changes size and you wish to set the new size as its "base" size,
+	//	call this.
+	VOID CWidget::UpdateRects() {
+		::GetWindowRect( Wnd(), &m_rRect );
+		::GetClientRect( Wnd(), &m_rClientRect );
+		::GetWindowRect( Wnd(), &m_rStartingRect );
+	}
+
 	// Do we have a given child widget?
 	bool CWidget::HasChild( const CWidget * _pwChild ) const {
 		for ( size_t I = m_vChildren.size(); I--; ) {
@@ -389,6 +385,8 @@ namespace lsw {
 			if ( m_vChildren[I]->Id() == _wId ) {
 				return m_vChildren[I];
 			}
+			CWidget * pwTemp = m_vChildren[I]->FindChild( _wId );
+			if ( pwTemp ) { return pwTemp; }
 		}
 		return nullptr;
 	}
@@ -530,6 +528,7 @@ namespace lsw {
 		// X axis has left, width, and right.
 		// Y axis has top, height, and bottom.
 		// Only up to 2 on each axis can logically be defined.
+		BOOL bResize = FALSE;
 
 
 		// X AXIS.
@@ -541,6 +540,7 @@ namespace lsw {
 			else if ( m_eRight.GetContainer() ) {
 				rNewSize.right = static_cast<LONG>(m_eRight.Evaluate());
 			}
+			bResize = TRUE;
 		}
 		else if ( m_eRight.GetContainer() ) {
 			// Left not defined but right is.
@@ -548,10 +548,12 @@ namespace lsw {
 			if ( m_eWidth.GetContainer() ) {
 				rNewSize.left = rNewSize.right - static_cast<LONG>(m_eWidth.Evaluate());
 			}
+			bResize = TRUE;
 		}
 		else if ( m_eWidth.GetContainer() ) {
 			// Only width is defined.
 			rNewSize.SetWidth( static_cast<LONG>(m_eWidth.Evaluate()) );
+			bResize = TRUE;
 		}
 
 
@@ -564,6 +566,7 @@ namespace lsw {
 			else if ( m_eBottom.GetContainer() ) {
 				rNewSize.bottom = static_cast<LONG>(m_eBottom.Evaluate());
 			}
+			bResize = TRUE;
 		}
 		else if ( m_eBottom.GetContainer() ) {
 			// Top not defined but bottom is.
@@ -571,22 +574,26 @@ namespace lsw {
 			if ( m_eHeight.GetContainer() ) {
 				rNewSize.top = rNewSize.bottom - static_cast<LONG>(m_eHeight.Evaluate());
 			}
+			bResize = TRUE;
 		}
 		else if ( m_eHeight.GetContainer() ) {
 			// Only width is defined.
 			rNewSize.SetHeight( static_cast<LONG>(m_eHeight.Evaluate()) );
+			bResize = TRUE;
 		}
 
-		if ( Parent() ) {
-			POINT pUpperLeft = rNewSize.UpperLeft(), pBottomRight = rNewSize.BottomRight();
-			::ScreenToClient( Parent()->Wnd(), &pUpperLeft );
-			::ScreenToClient( Parent()->Wnd(), &pBottomRight );
-			rNewSize.left = pUpperLeft.x;
-			rNewSize.top = pUpperLeft.y;
-			rNewSize.right = pBottomRight.x;
-			rNewSize.bottom = pBottomRight.y;
+		if ( bResize ) {
+			if ( Parent() ) {
+				POINT pUpperLeft = rNewSize.UpperLeft(), pBottomRight = rNewSize.BottomRight();
+				::ScreenToClient( Parent()->Wnd(), &pUpperLeft );
+				::ScreenToClient( Parent()->Wnd(), &pBottomRight );
+				rNewSize.left = pUpperLeft.x;
+				rNewSize.top = pUpperLeft.y;
+				rNewSize.right = pBottomRight.x;
+				rNewSize.bottom = pBottomRight.y;
+			}
+			::MoveWindow( Wnd(), rNewSize.left, rNewSize.top, rNewSize.Width(), rNewSize.Height(), FALSE );
 		}
-		::MoveWindow( Wnd(), rNewSize.left, rNewSize.top, rNewSize.Width(), rNewSize.Height(), FALSE );
 	}
 
 	// Setting the HWND after the control has been created.
@@ -613,9 +620,7 @@ namespace lsw {
 	BOOL CALLBACK CWidget::EnumChildWindows_SetEnabled( HWND _hWnd, LPARAM _lParam ) {
 		CWidget * pwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( _hWnd, GWLP_USERDATA ));
 		if ( pwThis ) {
-			if ( !pwThis->Enabled() ) {
-				::EnableWindow( _hWnd, FALSE );
-			}
+			pwThis->Enable( pwThis->Enabled() );
 		}
 		return TRUE;
 	}
@@ -624,9 +629,7 @@ namespace lsw {
 	BOOL CALLBACK CWidget::EnumChildWindows_SetStartingRect( HWND _hWnd, LPARAM _lParam ) {
 		CWidget * pwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( _hWnd, GWLP_USERDATA ));
 		if ( pwThis ) {
-			::GetWindowRect( _hWnd, &pwThis->m_rRect );
-			::GetClientRect( _hWnd, &pwThis->m_rClientRect );
-			::GetWindowRect( _hWnd, &pwThis->m_rStartingRect );
+			pwThis->UpdateRects();
 		}
 		return TRUE;
 	}
@@ -796,6 +799,17 @@ namespace lsw {
 		}
 
 		return false;
+	}
+
+	// Handles control setup.
+	VOID CWidget::ControlSetup( CWidget * _pwParent, const std::vector<CWidget *> &_vWidgetList ) {
+		::GetWindowRect( _pwParent->Wnd(), &_pwParent->m_rRect );
+		::GetClientRect( _pwParent->Wnd(), &_pwParent->m_rClientRect );
+		::GetWindowRect( _pwParent->Wnd(), &_pwParent->m_rStartingRect );
+
+		::EnumChildWindows( _pwParent->Wnd(), EnumChildWindows_AttachWindowToWidget, reinterpret_cast<LPARAM>(&_vWidgetList) );
+		::EnumChildWindows( _pwParent->Wnd(), EnumChildWindows_SetEnabled, reinterpret_cast<LPARAM>(&_vWidgetList) );
+		::EnumChildWindows( _pwParent->Wnd(), EnumChildWindows_SetStartingRect, reinterpret_cast<LPARAM>(&_vWidgetList) );
 	}
 
 }	// namespace lsw

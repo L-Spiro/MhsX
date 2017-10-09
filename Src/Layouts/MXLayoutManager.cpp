@@ -7,16 +7,16 @@ namespace mx {
 
 	// == Functions.
 	// Creates a class based on its type.
-	CWidget * CLayoutManager::CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget ) {
+	CWidget * CLayoutManager::CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) {
 		switch ( _wlLayout.ltType ) {
 			case MX_MAIN_WINDOW : {
-				return new CMhsMainWindow( _wlLayout, _pwParent,  _bCreateWidget );
+				return new CMhsMainWindow( _wlLayout, _pwParent,  _bCreateWidget, _hMenu );
 			}
 			case MX_OPEN_PROCESS_WINDOW : {
-				return new COpenProcessWindow( _wlLayout, _pwParent,  _bCreateWidget );
+				return new COpenProcessWindow( _wlLayout, _pwParent,  _bCreateWidget, _hMenu );
 			}
 		}
-		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget );
+		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu );
 	}
 
 	// Creates a copy of the given array of LSW_WIDGET_LAYOUT objects with LSW_WIDGET_LAYOUT::pwcText and the expressions.

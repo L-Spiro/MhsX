@@ -20,11 +20,29 @@ namespace lsw {
 	// The layout manager.
 	CLayoutManager * CBase::m_plmLayoutMan = nullptr;
 
+	// Non-client metrics.
+	NONCLIENTMETRICSW CBase::m_ncmNonClientMetrics = { sizeof( m_ncmNonClientMetrics ) };
+
+	// Message-box font.
+	HFONT CBase::m_hMessageFont = NULL;
+
+	// Status font.
+	HFONT CBase::m_hStatusFont = NULL;
+
 	// == Functions.
 	// Initialize.
 	VOID CBase::Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan ) {
 		m_hInstance = _hInst;
 		m_plmLayoutMan = _plmLayoutMan;
+
+		// Non-client metrics.
+		::SystemParametersInfoW( SPI_GETNONCLIENTMETRICS,
+			sizeof( m_ncmNonClientMetrics ),
+			&m_ncmNonClientMetrics,
+			0 );
+
+		m_hMessageFont = ::CreateFontIndirectW( &m_ncmNonClientMetrics.lfMessageFont );
+		m_hStatusFont = ::CreateFontIndirectW( &m_ncmNonClientMetrics.lfStatusFont );
 
 		INITCOMMONCONTROLSEX iccIn = {
 			sizeof( iccIn ),
@@ -43,6 +61,9 @@ namespace lsw {
 
 		delete m_plmLayoutMan;
 		m_plmLayoutMan = nullptr;
+
+		::DeleteObject( m_hStatusFont );
+		::DeleteObject( m_hMessageFont );
 	}
 
 	// Wrapper for ::RegisterClassEx().

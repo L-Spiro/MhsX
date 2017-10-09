@@ -157,6 +157,7 @@
     <ClCompile Include="Src\Button\LSWButton.cpp" />
     <ClCompile Include="Src\CheckButton\LSWCheckButton.cpp" />
     <ClCompile Include="Src\ComboBox\LSWComboBox.cpp" />
+    <ClCompile Include="Src\ComboBox\LSWComboBoxEx.cpp" />
     <ClCompile Include="Src\Expressions\LSWExpressions.cpp" />
     <ClCompile Include="Src\GroupBox\LSWGroupBox.cpp" />
     <ClCompile Include="Src\ImageList\LSWImageList.cpp" />
@@ -176,6 +177,7 @@
     <ClInclude Include="Src\Button\LSWButton.h" />
     <ClInclude Include="Src\CheckButton\LSWCheckButton.h" />
     <ClInclude Include="Src\ComboBox\LSWComboBox.h" />
+    <ClInclude Include="Src\ComboBox\LSWComboBoxEx.h" />
     <ClInclude Include="Src\Expressions\LSWExpression.h" />
     <ClInclude Include="Src\GroupBox\LSWGroupBox.h" />
     <ClInclude Include="Src\Helpers\LSWHelpers.h" />

@@ -8,7 +8,7 @@ namespace lsw {
 
 	class CCheckButton : public CWidget {
 	public :
-		CCheckButton( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true );
+		CCheckButton( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
 
 		// == Functions.
 		// Are we checked?

@@ -8,7 +8,7 @@ namespace lsw {
 
 	class CMainWindow : public CWidget {
 	public :
-		CMainWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true );
+		CMainWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
 
 
 	protected :

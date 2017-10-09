@@ -8,8 +8,8 @@
 
 namespace mx {
 
-	COpenProcessWindow::COpenProcessWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget ) :
-		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget ) {
+	COpenProcessWindow::COpenProcessWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
+		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu ) {
 		m_dwMainOrAll = COpenProcessLayout::MX_OPI_RADIO_MAIN;
 	}
 

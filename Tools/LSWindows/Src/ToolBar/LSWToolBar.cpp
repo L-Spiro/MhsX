@@ -2,8 +2,8 @@
 
 namespace lsw {
 
-	CToolBar::CToolBar( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget ) :
-		Parent( _wlLayout, _pwParent, _bCreateWidget ) {
+	CToolBar::CToolBar( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
+		Parent( _wlLayout, _pwParent, _bCreateWidget, _hMenu ) {
 	}
 
 
@@ -80,6 +80,31 @@ namespace lsw {
 	DWORD CToolBar::GetButtonTextA( WORD _wId, CHAR * _pcBuffer ) const {
 		if ( !Wnd() ) { return -1; }
 		return static_cast<DWORD>(::SendMessageA( Wnd(), TB_GETBUTTONTEXTA, static_cast<WPARAM>(_wId), reinterpret_cast<LPARAM>(_pcBuffer) ));
+	}
+
+	// Gets a button's rectangle.
+	LSW_RECT CToolBar::GetButtonRect( DWORD _dwIndex ) const {
+		LSW_RECT rRet;
+		rRet.left = rRet.top = rRet.right = rRet.bottom = 0;
+		if ( !Wnd() ) { return rRet; }
+		::SendMessageW( Wnd(), TB_GETITEMRECT, static_cast<WPARAM>(_dwIndex), reinterpret_cast<LPARAM>(&rRet) );
+		return rRet;
+	}
+
+	// Gets a rectangle large enough to fit any of the buttons inside.
+	LSW_RECT CToolBar::GetMinBoundingRect() const {
+		LONG lW = 0, lH = 0;
+		LSW_RECT rRet;
+		DWORD dwTotal = GetButtonCount();
+		for ( DWORD I = 0; I < dwTotal; ++I ) {
+			rRet = GetButtonRect( I );
+			lW = max( lW, rRet.Width() );
+			lH = max( lH, rRet.Height() );
+		}
+		rRet.left = rRet.top = 0;
+		rRet.SetWidth( lW );
+		rRet.SetHeight( lH );
+		return rRet;
 	}
 
 }	// namespace lsw

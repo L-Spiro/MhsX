@@ -62,6 +62,15 @@ namespace lsw {
 		// Displays a message box with the given title and message.
 		static VOID									MessageBoxError( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle = "Error" );
 
+		// =======================================
+		// Fonts.
+		// =======================================
+		// Gets the default message-box font.
+		static HFONT								MessageBoxFont() { return m_hMessageFont; }
+
+		// Gets the default status-bar font.
+		static HFONT								StatusBarFont() { return m_hStatusFont; }
+
 
 	protected :
 		// == Types.
@@ -79,6 +88,15 @@ namespace lsw {
 
 		// The layout manager.
 		static CLayoutManager *						m_plmLayoutMan;
+
+		// Non-client metrics.
+		static NONCLIENTMETRICSW					m_ncmNonClientMetrics;
+
+		// Message-box font.
+		static HFONT								m_hMessageFont;
+
+		// Status font.
+		static HFONT								m_hStatusFont;
 												
 	};
 

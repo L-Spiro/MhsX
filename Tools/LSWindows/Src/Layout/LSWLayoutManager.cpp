@@ -4,6 +4,7 @@
 #include "../Button/LSWButton.h"
 #include "../CheckButton/LSWCheckButton.h"
 #include "../ComboBox/LSWComboBox.h"
+#include "../ComboBox/LSWComboBoxEx.h"
 #include "../GroupBox/LSWGroupBox.h"
 #include "../ListView/LSWListView.h"
 #include "../MainWindow/LSWMainWindow.h"
@@ -17,19 +18,26 @@ namespace lsw {
 
 	// == Functions.
 	// Creates a window with all of its controls.  Returns the main window widget.
-	CWidget * CLayoutManager::CreateWindowX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal ) {
+	CWidget * CLayoutManager::CreateWindowX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotalMenus ) {
 		if ( !_sTotal ) { return nullptr; }
 
-		CWidget * pwMain = CreateWidget( _pwlLayouts[0], NULL, true );
+		HMENU hMenu = NULL;
+		if ( _pmlLayouts ) {
+			hMenu = CreateMenu( _pmlLayouts, _sTotalMenus );
+		}
+
+		CWidget * pwMain = CreateWidget( _pwlLayouts[0], NULL, true, hMenu );
 		if ( !pwMain ) { return nullptr; }
 
+		std::vector<CWidget *> vWidgets;	// Has to be passed to the ::EnumChildWindows() calls.
 		std::map<DWORD, CWidget *> mIdToPointer;
 		mIdToPointer.insert_or_assign( pwMain->Id(), pwMain );
+		vWidgets.push_back( pwMain );
 		for ( SIZE_T I = 1; I < _sTotal; ++I ) {
 			auto aTemp = mIdToPointer.find( _pwlLayouts[I].dwParentId );
 			CWidget * pwParent = aTemp == mIdToPointer.end() ? nullptr : aTemp->second;
 
-			CWidget * pwThis = CreateWidget( _pwlLayouts[I], pwParent, true );
+			CWidget * pwThis = CreateWidget( _pwlLayouts[I], pwParent, true, NULL );
 			if ( !pwThis ) {
 				// Erase everything from the map and return nullptr.
 				for ( auto aIt = mIdToPointer.begin(); aIt != mIdToPointer.end(); aIt++ ) {
@@ -39,7 +47,15 @@ namespace lsw {
 			}
 
 			mIdToPointer.insert_or_assign( pwThis->Id(), pwThis );
+			vWidgets.push_back( pwThis );
 		}
+
+		::EnumChildWindows( pwMain->Wnd(), CWidget::EnumChildWindows_SetFont, reinterpret_cast<LPARAM>(CBase::MessageBoxFont()) );
+		CWidget::ControlSetup( pwMain, vWidgets );
+
+		// WM_NCCREATE and WM_CREATE occer in constructors so virtual overloads don't work on them.
+		// Now that construction is over and everything is ready, fakea WM_INITDIALOG.
+		pwMain->InitDialog();
 
 		return pwMain;
 	}
@@ -51,7 +67,7 @@ namespace lsw {
 #define LSW_DESTROY_WIDGETS		for ( size_t J = 0; J < vWidgets.size(); ++J ) { delete vWidgets[J]; }
 
 
-		CWidget * pwMain = CreateWidget( _pwlLayouts[0], _pwParent, false );
+		CWidget * pwMain = CreateWidget( _pwlLayouts[0], _pwParent, false, NULL );
 		if ( !pwMain ) { return 0; }
 		std::map<DWORD, CWidget *> mIdToPointer;
 		mIdToPointer.insert_or_assign( pwMain->Id(), pwMain );
@@ -62,7 +78,7 @@ namespace lsw {
 			// Parent here cannot be NULL.
 			if ( !pwParent ) { pwParent = pwMain; }
 
-			CWidget * pwThis = CreateWidget( _pwlLayouts[I], pwParent, false );
+			CWidget * pwThis = CreateWidget( _pwlLayouts[I], pwParent, false, NULL );
 			if ( !pwThis ) {
 				// Erase everything from the map and return 0.
 				for ( auto aIt = mIdToPointer.begin(); aIt != mIdToPointer.end(); aIt++ ) {
@@ -103,18 +119,19 @@ namespace lsw {
 	}
 
 	// Creates a class based on its type.
-	CWidget * CLayoutManager::CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget ) {
+	CWidget * CLayoutManager::CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) {
 		switch ( _wlLayout.ltType ) {
-			case LSW_LT_WIDGET : { return new CWidget( _wlLayout, _pwParent, _bCreateWidget ); }
-			case LSW_LT_BUTTON : { return new CButton( _wlLayout, _pwParent, _bCreateWidget ); }
-			case LSW_LT_COMBOBOX : { return new CComboBox( _wlLayout, _pwParent, _bCreateWidget ); }
-			case LSW_LT_LISTVIEW : { return new CListView( _wlLayout, _pwParent, _bCreateWidget ); }
-			case LSW_LT_GROUPBOX : { return new CGroupBox( _wlLayout, _pwParent, _bCreateWidget ); }
-			case LSW_LT_RADIO : { return new CRadioButton( _wlLayout, _pwParent, _bCreateWidget ); }
-			case LSW_LT_CHECK : { return new CCheckButton( _wlLayout, _pwParent, _bCreateWidget ); }
-			case LSW_LT_REBAR : { return new CRebar( _wlLayout, _pwParent, _bCreateWidget ); }
-			case LSW_LT_TOOLBAR : { return new CToolBar( _wlLayout, _pwParent, _bCreateWidget ); }
-			case LSW_LT_MAINWINDOW : { return new CMainWindow( _wlLayout, _pwParent, _bCreateWidget ); }
+			case LSW_LT_WIDGET : { return new CWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_BUTTON : { return new CButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_COMBOBOX : { return new CComboBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_COMBOBOXEX : { return new CComboBoxEx( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_LISTVIEW : { return new CListView( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_GROUPBOX : { return new CGroupBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_RADIO : { return new CRadioButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_CHECK : { return new CCheckButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_REBAR : { return new CRebar( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_TOOLBAR : { return new CToolBar( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_MAINWINDOW : { return new CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 		}
 		return nullptr;
 	}
@@ -204,8 +221,7 @@ namespace lsw {
 		// Optional font.
 		if ( dwStyle & DS_SETFONT ) {
 			// Get the system default.
-			NONCLIENTMETRICSW ncmMetrics;
-			ncmMetrics.cbSize = sizeof( ncmMetrics );
+			NONCLIENTMETRICSW ncmMetrics = { sizeof( ncmMetrics ) };
 			::SystemParametersInfoW( SPI_GETNONCLIENTMETRICS, ncmMetrics.cbSize, &ncmMetrics, 0 );
 			//HFONT hFont = ::CreateFontIndirectW( &ncmMetrics.lfMessageFont );
 

@@ -8,7 +8,7 @@ namespace lsw {
 
 	class CRebar : public CWidget {
 	public :
-		CRebar( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true );
+		CRebar( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
 
 
 		// == Functions.

@@ -17,6 +17,9 @@ namespace lsw {
 		// Resets the image.
 		VOID							Reset();
 
+		// Gets the handle.
+		HBITMAP							Handle() const { return static_cast<HBITMAP>(m_hHandle); }
+
 
 	protected :
 		// == Members.

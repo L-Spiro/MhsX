@@ -3,8 +3,8 @@
 
 namespace lsw {
 
-	CListView::CListView( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget ) :
-		Parent( _wlLayout, _pwParent, _bCreateWidget ),
+	CListView::CListView( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
+		Parent( _wlLayout, _pwParent, _bCreateWidget, _hMenu ),
 		m_sColumns( 0 ),
 		m_bSortWithCase( FALSE ) {
 	}

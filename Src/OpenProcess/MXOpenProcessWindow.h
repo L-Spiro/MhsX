@@ -11,7 +11,7 @@ namespace mx {
 	
 	class COpenProcessWindow : public lsw::CMainWindow {
 	public :
-		COpenProcessWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true );
+		COpenProcessWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
 		~COpenProcessWindow();
 
 

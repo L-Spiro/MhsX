@@ -7,7 +7,7 @@ namespace lsw {
 
 	class CListView : public CWidget {
 	public :
-		CListView( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true );
+		CListView( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
 
 
 		// == Functions.

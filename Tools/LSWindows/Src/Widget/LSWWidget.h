@@ -10,8 +10,9 @@
 namespace lsw {
 
 	class CWidget {
+		friend class						CLayoutManager;
 	public :
-		CWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true );
+		CWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
 		~CWidget();
 
 
@@ -45,6 +46,29 @@ namespace lsw {
 		// Enabled or disabled.
 		BOOL								Enabled() const { return m_bEnabled; }
 
+		// Enable or disable.
+		BOOL								Enable( BOOL _bEnable ) { m_bEnabled = (_bEnable != 0); return ::EnableWindow( Wnd(), m_bEnabled ); }
+
+		// Copies the text of the specified window's title bar (if it has one) into a buffer. If the specified window is a control, the text of the control is copied.
+		INT									GetTextA( LPSTR _lpString, INT _nMaxCount ) const { return ::GetWindowTextA( Wnd(), _lpString, _nMaxCount ); }
+
+		// Copies the text of the specified window's title bar (if it has one) into a buffer. If the specified window is a control, the text of the control is copied.
+		INT									GetTextW( LPWSTR _lpString, INT _nMaxCount ) const { return ::GetWindowTextW( Wnd(), _lpString, _nMaxCount ); }
+
+		// Retrieves the length, in characters, of the specified window's title bar text (if the window has a title bar).
+		//	If the specified window is a control, the function retrieves the length of the text within the control
+		INT									GetTextLengthA() const { return ::GetWindowTextLengthA( Wnd() ); }
+
+		// Retrieves the length, in characters, of the specified window's title bar text (if the window has a title bar).
+		//	If the specified window is a control, the function retrieves the length of the text within the control
+		INT									GetTextLengthW() const { return ::GetWindowTextLengthW( Wnd() ); }
+
+		// Changes the text of the specified window's title bar (if it has one). If the specified window is a control, the text of the control is changed.
+		BOOL								SetTextA( LPCSTR _lpString ) { return ::SetWindowTextA( Wnd(), _lpString ); }
+
+		// Changes the text of the specified window's title bar (if it has one). If the specified window is a control, the text of the control is changed.
+		BOOL								SetTextW( LPCWSTR _lpwString ) { return ::SetWindowTextW( Wnd(), _lpwString ); }
+
 		// Window rectangle.
 		const LSW_RECT &					WindowRect() const { return m_rRect; }
 
@@ -53,6 +77,10 @@ namespace lsw {
 
 		// Starting window rectangle.
 		const LSW_RECT &					StartRect() const { return m_rStartingRect; }
+
+		// Updates all rectangles with the current window rectangles.  If a control changes size and you wish to set the new size as its "base" size,
+		//	call this.
+		VOID								UpdateRects();
 
 		// Do we have a given child widget?
 		bool								HasChild( const CWidget * _pwChild ) const;
@@ -194,6 +222,9 @@ namespace lsw {
 
 		// Evaluates member access in expressions.
 		static bool __stdcall				WidgetMemberAccessHandler( const ee::CExpEvalContainer::EE_RESULT &_rLeft, const std::string &_sMember, uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult );
+
+		// Handles control setup.
+		static VOID							ControlSetup( CWidget * _pwParent, const std::vector<CWidget *> &_vWidgetList );
 
 	};
 

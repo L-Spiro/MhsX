@@ -8,7 +8,7 @@ namespace lsw {
 
 	class CToolBar : public CWidget {
 	public :
-		CToolBar( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true );
+		CToolBar( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
 
 
 		// == Functions.
@@ -47,6 +47,12 @@ namespace lsw {
 
 		// Gets the button text.  _pcBuffer should be at least GetButtonTextLenA() characters in length.
 		DWORD								GetButtonTextA( WORD _wId, CHAR * _pcBuffer ) const;
+
+		// Gets a button's rectangle.
+		LSW_RECT							GetButtonRect( DWORD _dwIndex ) const;
+
+		// Gets a rectangle large enough to fit any of the buttons inside.
+		LSW_RECT							GetMinBoundingRect() const;
 
 
 	private :

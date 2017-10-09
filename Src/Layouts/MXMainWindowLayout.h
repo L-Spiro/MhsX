@@ -61,6 +61,9 @@ namespace mx {
 		// Creates the main window.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc., and registers the main window class.
 		static BOOL								CreateMainWindow();
 
+		// Creates the main menu and adds it to the window.
+		static BOOL								CreateMenu( CWidget * _pwMainWindow );
+
 		// Gets the main window widget.
 		static CWidget *						MainWindow() { return m_pwMainWindow; }
 

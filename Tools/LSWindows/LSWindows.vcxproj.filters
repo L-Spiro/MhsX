@@ -176,6 +176,9 @@
     <ClInclude Include="Src\ComboBox\LSWComboBox.h">
       <Filter>Header Files\ComboBox</Filter>
     </ClInclude>
+    <ClInclude Include="Src\ComboBox\LSWComboBoxEx.h">
+      <Filter>Header Files\ComboBox</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -221,6 +224,9 @@
       <Filter>Source Files\ToolBar</Filter>
     </ClCompile>
     <ClCompile Include="Src\ComboBox\LSWComboBox.cpp">
+      <Filter>Source Files\ComboBox</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ComboBox\LSWComboBoxEx.cpp">
       <Filter>Source Files\ComboBox</Filter>
     </ClCompile>
   </ItemGroup>

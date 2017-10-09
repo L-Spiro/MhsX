@@ -1,4 +1,5 @@
 #include "MXMainWindowLayout.h"
+#include "../Layouts/MXLayoutMacros.h"
 #include "../Layouts/MXLayoutManager.h"
 #include "../Utilities/MXUtilities.h"
 #include "../Strings/MXStringDecoder.h"
@@ -23,12 +24,13 @@ namespace mx {
 			64,										// iTop
 			772,									// dwWidth
 			605,									// dwHeight
-			WS_OVERLAPPEDWINDOW | WS_VISIBLE,		// dwStyle
+			WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS,		// dwStyle
 			0,										// dwStyleEx
-			nullptr,								// pwcText
-			0,										// sTextLen
+			MX_MAKE_WCHAR( _T_BD5547E7_L__Spiro_MHS_X ),								// pwcText
+			_LEN_BD5547E7,							// sTextLen
 			MX_MWI_NONE,							// dwParentId
 		},
+#if 1
 		{
 			LSW_LT_REBAR,							// ltType
 			MX_MWI_REBAR0,							// wId
@@ -47,6 +49,13 @@ namespace mx {
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_MWI_MAINWINDOW,						// dwParentId
+
+			MX_LOCK_LEFT,							// pcLeftSizeExp
+			MX_LOCK_RIGHT,							// pcRightSizeExp
+			MX_LOCK_TOP,							// pcTopSizeExp
+			nullptr, 0,								// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			MX_FIXED_HEIGHT,						// pcHeightSizeExp
 		},
 		{
 			LSW_LT_TOOLBAR,							// ltType
@@ -63,7 +72,45 @@ namespace mx {
 			0,																		// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
-			MX_MWI_REBAR0,							// dwParentId
+			MX_MWI_MAINWINDOW,							// dwParentId
+		},
+#endif
+
+		/*{
+			LSW_LT_COMBOBOXEX,						// ltType
+			50,										// wId
+			WC_COMBOBOXEXW,						// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			10,										// iLeft
+			30,										// iTop
+			250,										// dwWidth
+			150,										// dwHeight
+			WS_VISIBLE | WS_CHILD | WS_TABSTOP |
+				WS_VSCROLL | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | CCS_NORESIZE |
+				CBS_AUTOHSCROLL | CBS_DROPDOWNLIST,		// dwStyle
+			0,																		// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_MWI_REBAR0,						// dwParentId
+		},*/
+		{
+			LSW_LT_COMBOBOX,						// ltType
+			50,										// wId
+			WC_COMBOBOXW,						// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			10,										// iLeft
+			30,										// iTop
+			250,										// dwWidth
+			150,										// dwHeight
+			WS_VISIBLE | WS_CHILD | WS_TABSTOP |
+				WS_VSCROLL | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | CCS_NORESIZE |
+				CBS_AUTOHSCROLL | CBS_DROPDOWNLIST,		// dwStyle
+			0,																		// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_MWI_MAINWINDOW,						// dwParentId
 		},
 		/*{
 			LSW_LT_LISTVIEW,						// ltType
@@ -159,26 +206,34 @@ namespace mx {
 			WCHAR szTemp[5];
 			CUtilities::RandomString( szTemp, MX_ELEMENTS( szTemp ) );
 			lsw::CWndClassEx wceEx( lsw::CWidget::WindowProc, szTemp );
-			wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1) );
-			m_aMainClass = lsw::CBase::RegisterClassExW( wceEx.Obj() );
-
-			
+			wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(COLOR_WINDOWFRAME + 1) );
+			m_aMainClass = lsw::CBase::RegisterClassExW( wceEx.Obj() );	
 		}
-		WCHAR szTempTitle[_LEN_BD5547E7+1];
-		_DEC_BD5547E7_L__Spiro_MHS_X( szTempTitle );
-		LSW_WIDGET_LAYOUT * _pwMain = CHelpers::FindLayout( m_wlMainWindow, MX_ELEMENTS( m_wlMainWindow ), MX_MWI_MAINWINDOW );
+
+		std::vector<std::string> sStrings;
+		std::vector<std::wstring> sStringsW;
+		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
+		CLayoutManager::UnencryptLayouts( m_wlMainWindow, MX_ELEMENTS( m_wlMainWindow ),
+			vLayouts,
+			sStringsW,
+			sStrings );
+
+		/*WCHAR szTempTitle[_LEN_BD5547E7+1];
+		_DEC_BD5547E7_L__Spiro_MHS_X( szTempTitle );*/
+		LSW_WIDGET_LAYOUT * _pwMain = CHelpers::FindLayout( &vLayouts[0], vLayouts.size(), MX_MWI_MAINWINDOW );
 
 		_pwMain->lpwcClass = reinterpret_cast<LPCWSTR>(m_aMainClass);
-		_pwMain->pwcText = szTempTitle;
-		m_pwMainWindow = lsw::CBase::LayoutManager()->CreateWindowX( m_wlMainWindow, MX_ELEMENTS( m_wlMainWindow ) );
+		m_pwMainWindow = lsw::CBase::LayoutManager()->CreateWindowX( &vLayouts[0], vLayouts.size(), m_miMenus, MX_ELEMENTS( m_miMenus ) );
 		_pwMain->lpwcClass = nullptr;
 		_pwMain->pwcText = nullptr;
-		::ZeroMemory( szTempTitle, MX_ELEMENTS( szTempTitle ) );
+		//::ZeroMemory( szTempTitle, MX_ELEMENTS( szTempTitle ) );
 
 
 		// *** TEMP ***
-		HMENU hMenu = lsw::CBase::LayoutManager()->CreateMenu( m_miMenus, MX_ELEMENTS( m_miMenus ) );
+		/*HMENU hMenu = lsw::CBase::LayoutManager()->CreateMenu( m_miMenus, MX_ELEMENTS( m_miMenus ) );
 		::SetMenu( m_pwMainWindow->Wnd(), hMenu );
+		::RedrawWindow( m_pwMainWindow->Wnd(), NULL, NULL, RDW_INVALIDATE | RDW_INTERNALPAINT | RDW_ERASE );*/
+
 		/*HMENU hMenu = ::CreateMenu();
 		AppendMenuW(
 			hMenu,
@@ -206,6 +261,14 @@ namespace mx {
 
 		::SetMenu( m_pwMainWindow->Wnd(), hMenu );*/
 		return TRUE;
+	}
+
+	// Creates the main menu and adds it to the window.
+	BOOL CMainWindowLayout::CreateMenu( CWidget * _pwMainWindow ) {
+		if ( !_pwMainWindow ) { return FALSE; }
+		HMENU hMenu = lsw::CBase::LayoutManager()->CreateMenu( m_miMenus, MX_ELEMENTS( m_miMenus ) );
+		if ( !hMenu ) { return FALSE; }
+		return ::SetMenu( _pwMainWindow->Wnd(), hMenu );
 	}
 
 }	// namespace mx

@@ -3,8 +3,8 @@
 
 namespace lsw {
 
-	CCheckButton::CCheckButton( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget ) :
-		Parent( _wlLayout, _pwParent, _bCreateWidget ) {
+	CCheckButton::CCheckButton( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
+		Parent( _wlLayout, _pwParent, _bCreateWidget, _hMenu ) {
 		if ( _bCreateWidget ) {
 			::SendMessageW( Wnd(), BM_SETCHECK, m_bActive ? BST_CHECKED : BST_UNCHECKED, 0 );
 		}
