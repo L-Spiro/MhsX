@@ -54,6 +54,9 @@ namespace lsw {
 		// Gets a rectangle large enough to fit any of the buttons inside.
 		LSW_RECT							GetMinBoundingRect() const;
 
+		// Adds buttons.
+		BOOL								AddButtons( const TBBUTTON * _pbButtons, size_t _sTotal );
+
 
 	private :
 		typedef CWidget						Parent;

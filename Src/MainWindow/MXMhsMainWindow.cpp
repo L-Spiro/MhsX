@@ -1,6 +1,7 @@
 #include "MXMhsMainWindow.h"
 #include "../Layouts/MXMainWindowLayout.h"
 #include "../Layouts/MXOpenProcessLayout.h"
+#include "../System/MXSystem.h"
 #include <Base/LSWBase.h>
 #include <ComboBox/LSWComboBox.h>
 #include <ComboBox/LSWComboBoxEx.h>
@@ -81,26 +82,12 @@ namespace mx {
 
 		// == Toolbar.
 		plvToolBar->SetImageList( 0, m_iImages );
-		TBBUTTON tbButtons = { 0 };
-		tbButtons.iBitmap = 0;
-		tbButtons.idCommand = CMainWindowLayout::MX_MWMI_OPENPROCESS;
-		tbButtons.fsState = TBSTATE_ENABLED;
-		tbButtons.fsStyle = BTNS_AUTOSIZE;
-		tbButtons.dwData = 0;
-		tbButtons.iString = (INT_PTR)L"Open Process";
-
-		SendMessage( plvToolBar->Wnd(), TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
-		SendMessage( plvToolBar->Wnd(), TB_ADDBUTTONS,       (WPARAM)1,       (LPARAM)&tbButtons);
-		SendMessage( plvToolBar->Wnd(), TB_AUTOSIZE, 0, 0);
-		RECT rTemp;
-		::GetWindowRect( plvToolBar->Wnd(), &rTemp );
-		POINT pSize = { 0 };
-		SendMessage( plvToolBar->Wnd(), TB_GETIDEALSIZE, FALSE, (LPARAM)&pSize );
-		SendMessage( plvToolBar->Wnd(), TB_GETIDEALSIZE, TRUE, (LPARAM)&pSize );
-		LSW_RECT rToolButHeight;
-		SendMessage( plvToolBar->Wnd(), TB_GETITEMRECT, 0, (LPARAM)&rToolButHeight );
-		
-
+		const TBBUTTON bButtons[] = {
+			// iBitmap							idCommand								fsState				fsStyle			bReserved	dwData	iString
+			{ m_iImageMap[MX_I_OPENPROCESS],	CMainWindowLayout::MX_MWMI_OPENPROCESS, TBSTATE_ENABLED,	BTNS_AUTOSIZE, { 0 },		0,		0/*reinterpret_cast<INT_PTR>(L"Open Process")*/ },
+			{ m_iImageMap[MX_I_OPENFORDEBUG],	CMainWindowLayout::MX_MWMI_OPENFORDEBUG, TBSTATE_ENABLED,	BTNS_AUTOSIZE, { 0 },		0,		0/*reinterpret_cast<INT_PTR>(L"Open for Debug")*/ },
+		};
+		plvToolBar->AddButtons( bButtons, MX_ELEMENTS( bButtons ) );
 
 
 		REBARINFO rbi;
