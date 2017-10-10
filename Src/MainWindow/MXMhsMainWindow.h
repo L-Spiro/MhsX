@@ -23,6 +23,11 @@ namespace mx {
 			MX_I_OPENENTRY,
 			MX_I_SAVEENTRY,
 
+			MX_I_DELETEENTRY,
+			MX_I_DELETEALL,
+			MX_I_LOCK,
+			MX_I_UNLOCK,
+
 			MX_I_TOTAL,
 		};
 
