@@ -94,24 +94,6 @@ namespace mx {
 			0,										// sTextLen
 			MX_MWI_REBAR0,						// dwParentId
 		},*/
-		{
-			LSW_LT_COMBOBOX,						// ltType
-			50,										// wId
-			WC_COMBOBOXW,						// lpwcClass
-			TRUE,									// bEnabled
-			FALSE,									// bActive
-			10,										// iLeft
-			30,										// iTop
-			250,										// dwWidth
-			150,										// dwHeight
-			WS_VISIBLE | WS_CHILD | WS_TABSTOP |
-				WS_VSCROLL | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | CCS_NORESIZE |
-				CBS_AUTOHSCROLL | CBS_DROPDOWNLIST,		// dwStyle
-			0,																		// dwStyleEx
-			nullptr,								// pwcText
-			0,										// sTextLen
-			MX_MWI_MAINWINDOW,						// dwParentId
-		},
 		/*{
 			LSW_LT_LISTVIEW,						// ltType
 			MX_MWI_STOREDADDRESSES,					// wId
