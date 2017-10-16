@@ -105,6 +105,24 @@
     <Filter Include="Source Files\ComboBox">
       <UniqueIdentifier>{612fc0ba-10e5-4d81-98cf-e14eb3bcc57e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\StatusBar">
+      <UniqueIdentifier>{8a352d3d-8a32-4213-9f4f-d7dcdb6c7c40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\StatusBar">
+      <UniqueIdentifier>{94871ddf-040e-4665-a806-818a9d732012}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ListBox">
+      <UniqueIdentifier>{14b3773b-8455-4c7c-b367-af842f54a4ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ListBox">
+      <UniqueIdentifier>{22e6ad0b-3ae8-4a34-98ab-cfcfe798b732}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Static">
+      <UniqueIdentifier>{3d845aa3-9849-43ce-8e3f-1b37f493da13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Static">
+      <UniqueIdentifier>{55dd3fc8-761f-401c-9190-6c7048d42c41}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -179,6 +197,15 @@
     <ClInclude Include="Src\ComboBox\LSWComboBoxEx.h">
       <Filter>Header Files\ComboBox</Filter>
     </ClInclude>
+    <ClInclude Include="Src\StatusBar\LSWStatusBar.h">
+      <Filter>Header Files\StatusBar</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ListBox\LSWListBox.h">
+      <Filter>Header Files\ListBox</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Static\LSWStatic.h">
+      <Filter>Header Files\Static</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -228,6 +255,15 @@
     </ClCompile>
     <ClCompile Include="Src\ComboBox\LSWComboBoxEx.cpp">
       <Filter>Source Files\ComboBox</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\StatusBar\LSWStatusBar.cpp">
+      <Filter>Source Files\StatusBar</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ListBox\LSWListBox.cpp">
+      <Filter>Source Files\ListBox</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Static\LSWStatic.cpp">
+      <Filter>Source Files\Static</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@
 
 #include "../LSWWin.h"
 #include "../Layout/LSWWidgetLayout.h"
+#include <cstring>
 
 namespace lsw {
 
@@ -35,11 +36,13 @@ namespace lsw {
 			return (*this);
 		}
 		VOID								Reset() {
-			if ( hHandle && hHandle != INVALID_HANDLE_VALUE ) {
+			if ( Valid() ) {
 				::CloseHandle( hHandle );
 				hHandle = NULL;
 			}
 		}
+
+		BOOL								Valid() const { return hHandle && hHandle != INVALID_HANDLE_VALUE; }
 
 
 		HANDLE								hHandle;

@@ -197,6 +197,14 @@ namespace lsw {
 				if ( hHandled == LSW_H_HANDLED ) { return 0; }
 				break;
 			}
+			// =======================================
+			// Drawing
+			// =======================================
+			case WM_ERASEBKGND : {
+				LSW_HANDLED hHandled = pmwThis->EraseBkgnd( reinterpret_cast<HDC>(_wParam) );
+				if ( hHandled == LSW_H_HANDLED ) { return 1; }
+				break;
+			}
 		}
 		return ::DefWindowProcW( _hWnd, _uMsg, _wParam, _lParam );
 	}
@@ -217,22 +225,22 @@ namespace lsw {
 				
 				ControlSetup( pmwThis, (*pvWidgets) );
 
-				POINT pConvOrg = PixelsToDialogUnits( _hWnd, 574 - 551 - 7, 633 - 302 - 30 );
-				POINT pConv = PixelsToDialogUnits( _hWnd, 567, 206 );
-				POINT pConvClient = PixelsToDialogUnits( _hWnd, 443, 23 );
+				// Window rect.
+#define MX_X	990
+#define MX_Y	499
+
+#if 0
+				// For window borders.
+#define MX_OFF_X	7
+#define MX_OFF_Y	30
+#else
+#define MX_OFF_X	0
+#define MX_OFF_Y	0
+#endif
+				POINT pConvOrg = PixelsToDialogUnits( _hWnd, 1001 - MX_X - MX_OFF_X, 649 - MX_Y - MX_OFF_Y );
+				//POINT pConv = PixelsToDialogUnits( _hWnd, 559 - 548 - 7, 486 - 453 - 30 );
+				POINT pConvClient = PixelsToDialogUnits( _hWnd, 114, 16 );
 				
-				/*NONCLIENTMETRICSW ncmMetrics;
-				ncmMetrics.cbSize = sizeof( ncmMetrics );
-				::SystemParametersInfoW( SPI_GETNONCLIENTMETRICS, ncmMetrics.cbSize, &ncmMetrics, 0 );
-				HFONT hFont = ::CreateFontIndirectW( &ncmMetrics.lfMessageFont );*/
-
-
-				// ::SetWindowLong( _hWnd, DWL_MSGRESULT, lResult );
-				//FONT 8, "MS Shell Dlg", 400, 0, 0x1
-				//SendMessage( _hWnd, WM_SETFONT,  (WPARAM)GetStockObject(DEFAULT_GUI_FONT), true );
-				//EnumChildWindows(_hWnd, (WNDENUMPROC)SetFont, (LPARAM)GetStockObject(SYSTEM_FIXED_FONT));
-				//EnumChildWindows(_hWnd, (WNDENUMPROC)SetFont, (LPARAM)hFont);
-
 				pmwThis->InitDialog();
 				return TRUE;	// Return TRUE to pass focus on to the control specified by _wParam.
 			}
@@ -352,6 +360,14 @@ namespace lsw {
 				}
 				return TRUE;
 			}
+			// =======================================
+			// Drawing
+			// =======================================
+			case WM_ERASEBKGND : {
+				LSW_HANDLED hHandled = pmwThis->EraseBkgnd( reinterpret_cast<HDC>(_wParam) );
+				if ( hHandled == LSW_H_HANDLED ) { return TRUE; }
+				return FALSE;
+			}
 			case WM_SETFONT : {
 				/*HFONT hFont = (HFONT)_wParam;
 				::EnumChildWindows( _hWnd, EnumChildWindows_SetFont, (LPARAM)hFont );*/
@@ -465,6 +481,7 @@ namespace lsw {
 
 	// WM_MOVE.
 	CWidget::LSW_HANDLED CWidget::Move( LONG _lX, LONG _lY ) {
+		::EnumChildWindows( Wnd(), EnumChildWindows_ResizeControls, 0 );
 		return LSW_H_CONTINUE;
 	}
 
@@ -490,6 +507,11 @@ namespace lsw {
 
 	// WM_NOTIFY->NM_DBLCLK for the owning window if the child either could not be resolved or returned LSW_HANDLED::LSW_H_CONTINUE.
 	CWidget::LSW_HANDLED CWidget::DblClk( const NMHDR * _phHdr, WORD _wControlId, CWidget * _pwWidget ) {
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_ERASEBKGND.
+	CWidget::LSW_HANDLED CWidget::EraseBkgnd( HDC _hDc ) {
 		return LSW_H_CONTINUE;
 	}
 
@@ -594,6 +616,8 @@ namespace lsw {
 			}
 			::MoveWindow( Wnd(), rNewSize.left, rNewSize.top, rNewSize.Width(), rNewSize.Height(), FALSE );
 		}
+		::GetWindowRect( Wnd(), &m_rRect );
+		::GetClientRect( Wnd(), &m_rClientRect );
 	}
 
 	// Setting the HWND after the control has been created.

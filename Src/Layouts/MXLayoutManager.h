@@ -9,6 +9,8 @@ namespace mx {
 	enum MX_LAYOUT_TYPES : DWORD {
 		MX_MAIN_WINDOW				= LSW_LT_CUSTOM,
 		MX_OPEN_PROCESS_WINDOW,
+		MX_OPTIONS_WINDOW,
+		MX_OPTIONS_GENERAL,
 	};
 
 	class CLayoutManager : public lsw::CLayoutManager {

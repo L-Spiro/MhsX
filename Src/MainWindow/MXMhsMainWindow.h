@@ -28,6 +28,10 @@ namespace mx {
 			MX_I_LOCK,
 			MX_I_UNLOCK,
 
+			MX_I_EDIT,
+
+			MX_I_OPTIONS,
+
 			MX_I_TOTAL,
 		};
 
@@ -41,6 +45,9 @@ namespace mx {
 
 		// WM_COMMAND from menu.
 		virtual LSW_HANDLED					MenuCommand( WORD _Id );
+
+		// WM_ERASEBKGND.
+		virtual LSW_HANDLED					EraseBkgnd( HDC _hDc );
 
 
 	protected :

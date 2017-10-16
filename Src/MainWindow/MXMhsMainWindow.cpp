@@ -1,6 +1,7 @@
 #include "MXMhsMainWindow.h"
 #include "../Layouts/MXMainWindowLayout.h"
 #include "../Layouts/MXOpenProcessLayout.h"
+#include "../Layouts/MXOptionsLayout.h"
 #include "../System/MXSystem.h"
 #include <Base/LSWBase.h>
 #include <Rebar/LSWRebar.h>
@@ -15,8 +16,8 @@ namespace mx {
 			LPCWSTR				lpwsImageName;
 			DWORD				dwConst;
 		} sImages[] = {
-			{ L"73", MX_I_OPENPROCESS },
-			{ L"97", MX_I_OPENFORDEBUG },
+			{ L"23", MX_I_OPENPROCESS },
+			{ L"68", MX_I_OPENFORDEBUG },
 
 			{ L"1", MX_I_ADDENTRY },
 			{ L"52", MX_I_OPENENTRY },
@@ -27,6 +28,10 @@ namespace mx {
 
 			{ L"27", MX_I_LOCK },
 			{ L"28", MX_I_UNLOCK },
+
+			{ L"96", MX_I_EDIT },
+
+			{ L"73", MX_I_OPTIONS },
 		};
 		m_iImages.Create( 24, 24, ILC_COLOR32, MX_I_TOTAL, MX_I_TOTAL );
 
@@ -65,6 +70,10 @@ namespace mx {
 			{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
 			{ m_iImageMap[MX_I_LOCK],			CMainWindowLayout::MX_MWMI_LOCK,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Lock Selected" ) },
 			{ m_iImageMap[MX_I_UNLOCK],			CMainWindowLayout::MX_MWMI_UNLOCK,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Unlock Selected" ) },
+			{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
+			{ m_iImageMap[MX_I_EDIT],			CMainWindowLayout::MX_MWMI_EDIT,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Edit Selected" ) },
+			{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
+			{ m_iImageMap[MX_I_OPTIONS],		CMainWindowLayout::MX_MWMI_OPTIONS,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Options" ) },
 		};
 #undef MX_TOOL_STR
 
@@ -86,6 +95,7 @@ namespace mx {
 	   ::MoveWindow( plvRebar->Wnd(), rRebarRect.left, rRebarRect.top, rRebarRect.Width(), plvRebar->WindowRect().Height(), FALSE );
 
 		plvRebar->UpdateRects();
+		//FindChild( CMainWindowLayout::MX_MWI_STATUSBAR )->UpdateRects();
 
 		return LSW_H_CONTINUE;
 	}
@@ -97,19 +107,22 @@ namespace mx {
 				COpenProcessLayout::CreateOpenProcessDialog( this );
 				break;
 			}
+			case CMainWindowLayout::MX_MWMI_OPTIONS : {
+				COptionsLayout::CreateOptionsDialog( this );
+				break;
+			}
 		}
 		return LSW_H_CONTINUE;
 	}
 
 	// WM_COMMAND from menu.
 	CWidget::LSW_HANDLED CMhsMainWindow::MenuCommand( WORD _Id ) {
-		switch ( _Id ) {
-			case CMainWindowLayout::MX_MWMI_OPENPROCESS : {
-				COpenProcessLayout::CreateOpenProcessDialog( this );
-				break;
-			}
-		}
-		return LSW_H_CONTINUE;
+		return Command( _Id, NULL );
+	}
+
+	// WM_ERASEBKGND.
+	CWidget::LSW_HANDLED CMhsMainWindow::EraseBkgnd( HDC _hDc ) {
+		return LSW_H_HANDLED;
 	}
 
 }	// namespace mx

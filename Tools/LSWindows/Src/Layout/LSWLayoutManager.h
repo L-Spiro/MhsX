@@ -1,21 +1,41 @@
 #pragma once
 
 #include "../LSWWin.h"
+#include "../Base/LSWGlobalAlloc.h"
 #include "../Widget/LSWWidget.h"
 #include "LSWMenuLayout.h"
 
+#include <map>
 #include <vector>
 
 namespace lsw {
 
 	class CLayoutManager {
 	public :
+		// == Types.
+		// A DLGTEMPLATE object and helper objects.
+		struct LSW_DLGTEMPLATE {
+			DLGTEMPLATE *				pdtTemplate;			// Created with CGlobalAlloc.
+			std::vector<CWidget *>		vWidgets;
+			std::map<DWORD, CWidget *>	mIdToPointer;
+			CGlobalAlloc				gaAlloc;
+		};
+
 		// == Functions.
 		// Creates a window with all of its controls.  Returns the main window widget.
 		CWidget *						CreateWindowX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, const LSW_MENU_LAYOUT * _pmlLayouts = nullptr, SIZE_T _sTotalMenus = 0 );
 
 		// Creates a modal dialog with all of its controls.  Returns the dialog exit value.
-		INT_PTR							CreateDialogX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent );
+		INT_PTR							DialogBoxX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent );
+
+		// Creates a modeless dialog with all of its controls.  Returns the dialog widget.
+		CWidget *						CreateDialogX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent );
+
+		// Creates a DLGTEMPLATE structure and helper objects given an array of LSW_WIDGET_LAYOUT objects.
+		BOOL							CreateDlgTemplate( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent, LSW_DLGTEMPLATE &_dtTemplate );
+
+		// Destroys an LSW_DLGTEMPLATE object created for use by DialogBoxX().
+		VOID							DestroyDialogBoxTemplate( LSW_DLGTEMPLATE &_dtTemplate );
 
 		// Creates a class based on its type.
 		virtual CWidget *				CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu );

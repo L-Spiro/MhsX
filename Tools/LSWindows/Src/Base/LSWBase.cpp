@@ -117,8 +117,8 @@ namespace lsw {
 			FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL,
 			dwError,
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			(LPWSTR) &lpMsgBuf,
+			MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
+			reinterpret_cast<LPWSTR>(&lpMsgBuf),
 			0, NULL );
 
 		// Display the error message and exit the process

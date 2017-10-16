@@ -188,6 +188,9 @@ namespace lsw {
 		// WM_NOTIFY->NM_DBLCLK for the owning window if the child either could not be resolved or returned LSW_HANDLED::LSW_H_CONTINUE.
 		virtual LSW_HANDLED					DblClk( const NMHDR * _phHdr, WORD _wControlId, CWidget * _pwWidget );
 
+		// WM_ERASEBKGND.
+		virtual LSW_HANDLED					EraseBkgnd( HDC _hDc );
+
 
 		// == Functions.
 		// Remove a child.
@@ -200,7 +203,7 @@ namespace lsw {
 		void								SetParent( CWidget * _pwParent );
 
 		// Evaluates expressions to determine a new rectangle for the control.
-		void								EvalNewSize();
+		virtual void						EvalNewSize();
 
 		// Setting the HWND after the control has been created.
 		virtual void						InitControl( HWND _hWnd );

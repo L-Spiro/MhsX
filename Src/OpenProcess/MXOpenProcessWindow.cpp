@@ -254,6 +254,10 @@ namespace mx {
 			_pProc.bHasWow64 = FALSE;
 		}
 		_hProcHandle = hHnd;
+		_pProc.dwOpenProcessTest = 0;/*CSystem::TestOpenProcess( _dwId );
+		if ( 0x001f3fff != _pProc.dwOpenProcessTest ) {
+			return FALSE;
+		}*/
 		return TRUE;
 	}
 

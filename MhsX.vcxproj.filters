@@ -86,6 +86,12 @@
     <Filter Include="Source Files\MemHack">
       <UniqueIdentifier>{b51e5251-aeb2-49a1-9c04-0023971a4cba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Options">
+      <UniqueIdentifier>{44c8ddf3-7e95-4c7e-b89a-2eafbe4d5771}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Options">
+      <UniqueIdentifier>{fac3538d-daee-4c18-b936-53d7719f8727}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Strings\MXStringDecoder.cpp">
@@ -135,6 +141,18 @@
     </ClCompile>
     <ClCompile Include="Src\MemHack\MXMemHack.cpp">
       <Filter>Source Files\MemHack</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXOptionsLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Options\MXOptionsPage.cpp">
+      <Filter>Source Files\Options</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Options\MXOptionsPageGeneral.cpp">
+      <Filter>Source Files\Options</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Options\MXOptionsWindow.cpp">
+      <Filter>Source Files\Options</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +211,18 @@
     </ClInclude>
     <ClInclude Include="Src\MemHack\MXMemHack.h">
       <Filter>Header Files\MemHack</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXOptionsLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Options\MXOptionsPage.h">
+      <Filter>Header Files\Options</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Options\MXOptionsPageGeneral.h">
+      <Filter>Header Files\Options</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Options\MXOptionsWindow.h">
+      <Filter>Header Files\Options</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

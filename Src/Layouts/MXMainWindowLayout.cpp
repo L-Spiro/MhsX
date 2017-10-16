@@ -1,9 +1,9 @@
 #include "MXMainWindowLayout.h"
-#include "../Layouts/MXLayoutMacros.h"
-#include "../Layouts/MXLayoutManager.h"
 #include "../Utilities/MXUtilities.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../System/MXSystem.h"
+#include "MXLayoutMacros.h"
+#include "MXLayoutManager.h"
 
 #include <Base/LSWBase.h>
 #include <Base/LSWWndClassEx.h>
@@ -29,6 +29,29 @@ namespace mx {
 			MX_MAKE_WCHAR( _T_BD5547E7_L__Spiro_MHS_X ),								// pwcText
 			_LEN_BD5547E7,							// sTextLen
 			MX_MWI_NONE,							// dwParentId
+		},
+		{
+			LSW_LT_STATUSBAR,						// ltType
+			MX_MWI_STATUSBAR,						// wId
+			STATUSCLASSNAMEW,						// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			0,										// iLeft
+			0,										// iTop
+			0,										// dwWidth
+			0,										// dwHeight
+			WS_VISIBLE | WS_CHILD | SBARS_SIZEGRIP,	// dwStyle
+			0,										// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_MWI_MAINWINDOW,						// dwParentId
+
+			nullptr, 0,								// pcLeftSizeExp
+			nullptr, 0,								// pcRightSizeExp
+			nullptr, 0,								// pcTopSizeExp
+			nullptr, 0,								// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			nullptr, 0,								// pcHeightSizeExp
 		},
 #if 1
 		{
@@ -149,6 +172,12 @@ namespace mx {
 		{ FALSE,		MX_MWMI_SEARCHOPTIONS,		FALSE,		FALSE,		TRUE,		L"Search &Options" },
 	};
 
+	// Options menu.
+	LSW_MENU_ITEM CMainWindowLayout::m_miOptionsMenu[] = {
+		//bIsSeperator	dwId						bCheckable	bChecked	bEnabled	
+		{ FALSE,		MX_MWMI_OPTIONS,			FALSE,		FALSE,		TRUE,		L"&Options" },
+	};
+
 	// Menus.
 	LSW_MENU_LAYOUT CMainWindowLayout::m_miMenus[] = {
 		{
@@ -171,6 +200,13 @@ namespace mx {
 			MX_MWMI_SEARCH,
 			MX_ELEMENTS( m_miSearchMenu ),
 			m_miSearchMenu
+		},
+		{
+			MX_MWMI_MENU_TOOLS,
+			MX_MWMI_MENU_BAR,
+			MX_MWMI_TOOLS,
+			MX_ELEMENTS( m_miOptionsMenu ),
+			m_miOptionsMenu
 		},
 	};
 

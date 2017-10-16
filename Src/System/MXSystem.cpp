@@ -1,7 +1,8 @@
 #include "MXSystem.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../Utilities/MXUtilities.h"
-#include "Base/LSWBase.h"
+#include <Base/LSWBase.h>
+#include <Helpers/LSWHelpers.h>
 #ifdef _DEBUG
 #include <cassert>
 #endif	// #ifdef _DEBUG
@@ -550,6 +551,36 @@ namespace mx {
 		lsw::CBase::MessageBoxError( _hWnd, sMsg.c_str(), sTitle.c_str() );
 		std::memset( const_cast<char *>(sMsg.c_str()), 0, sMsg.size() );
 		std::memset( const_cast<char *>(sTitle.c_str()), 0, sTitle.size() );
+	}
+
+	// Tests the flags that can be used to open a given process.
+	DWORD CSystem::TestOpenProcess( DWORD _dwId ) {
+		static const DWORD dwFlags[] = {
+			PROCESS_TERMINATE,
+			PROCESS_CREATE_THREAD,
+			PROCESS_SET_SESSIONID,
+			PROCESS_VM_OPERATION,
+			PROCESS_VM_READ,
+			PROCESS_VM_WRITE,
+			PROCESS_DUP_HANDLE,
+			PROCESS_CREATE_PROCESS,
+			PROCESS_SET_QUOTA,
+			PROCESS_SET_INFORMATION,
+			PROCESS_QUERY_INFORMATION,
+			PROCESS_SUSPEND_RESUME,
+			PROCESS_QUERY_LIMITED_INFORMATION,
+			PROCESS_SET_LIMITED_INFORMATION,
+			STANDARD_RIGHTS_REQUIRED,
+			SYNCHRONIZE,
+		};
+		DWORD dwRet = 0;
+		for ( size_t I = 0; I < MX_ELEMENTS( dwFlags ); ++I ) {
+			lsw::LSW_HANDLE hHandle = CSystem::OpenProcess( dwFlags[I], FALSE, _dwId );
+			if ( hHandle.Valid() ) {
+				dwRet |= dwFlags[I];
+			}
+		}
+		return dwRet;
 	}
 
 	// Load kernel32.dll functions.

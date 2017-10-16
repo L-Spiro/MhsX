@@ -2,6 +2,8 @@
 #include "../Layouts/MXLayoutMacros.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../OpenProcess/MXOpenProcessWindow.h"
+#include "../Options/MXOptionsPageGeneral.h"
+#include "../Options/MXOptionsWindow.h"
 
 namespace mx {
 
@@ -14,6 +16,12 @@ namespace mx {
 			}
 			case MX_OPEN_PROCESS_WINDOW : {
 				return new COpenProcessWindow( _wlLayout, _pwParent,  _bCreateWidget, _hMenu );
+			}
+			case MX_OPTIONS_WINDOW : {
+				return new COptionsWindow( _wlLayout, _pwParent,  _bCreateWidget, _hMenu );
+			}
+			case MX_OPTIONS_GENERAL : {
+				return new COptionsPageGeneral( _wlLayout, _pwParent,  _bCreateWidget, _hMenu );
 			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu );

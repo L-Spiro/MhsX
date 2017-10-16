@@ -189,6 +189,9 @@ namespace mx {
 		// Show an encrypted error message box.
 		static VOID						MessageBoxError( HWND _hWnd, const CHAR * _pcMsg, size_t _sMsgLen, const CHAR * _pcTitle = _T_9C1C9375_Error, size_t _sTitleLen = _LEN_9C1C9375 );
 
+		// Tests the flags that can be used to open a given process.
+		static DWORD					TestOpenProcess( DWORD _dwId );
+
 
 	protected :
 		// == Members.

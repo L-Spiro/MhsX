@@ -1,18 +1,18 @@
 #include "LSWLayoutManager.h"
 #include "../Base/LSWBase.h"
-#include "../Base/LSWGlobalAlloc.h"
 #include "../Button/LSWButton.h"
 #include "../CheckButton/LSWCheckButton.h"
 #include "../ComboBox/LSWComboBox.h"
 #include "../ComboBox/LSWComboBoxEx.h"
 #include "../GroupBox/LSWGroupBox.h"
+#include "../ListBox/LSWListBox.h"
 #include "../ListView/LSWListView.h"
 #include "../MainWindow/LSWMainWindow.h"
 #include "../RadioButton/LSWRadioButton.h"
 #include "../Rebar/LSWRebar.h"
+#include "../Static/LSWStatic.h"
+#include "../StatusBar/LSWStatusBar.h"
 #include "../ToolBar/LSWToolBar.h"
-
-#include <map>
 
 namespace lsw {
 
@@ -61,77 +61,115 @@ namespace lsw {
 	}
 
 	// Creates a modal dialog with all of its controls.  Returns the dialog exit value.
-	INT_PTR CLayoutManager::CreateDialogX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent ) {
-		if ( !_sTotal ) { return 0; }
-		std::vector<CWidget *> vWidgets;	// On failure, all widgets must be destroyed.
-#define LSW_DESTROY_WIDGETS		for ( size_t J = 0; J < vWidgets.size(); ++J ) { delete vWidgets[J]; }
+	INT_PTR CLayoutManager::DialogBoxX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent ) {
+		LSW_DLGTEMPLATE dtTemplate;
+		if ( !CreateDlgTemplate( _pwlLayouts, _sTotal, _pwParent, dtTemplate ) ) {
+			return -1;
+		}
+
+		INT_PTR ipRet = ::DialogBoxIndirectParamW( CBase::GetThisHandle(), 
+			dtTemplate.pdtTemplate, 
+			_pwParent->Wnd(), 
+			CWidget::DialogProc,
+			reinterpret_cast<LPARAM>(&dtTemplate.vWidgets) );
+		
+#if 0
+		if ( ipRet == -1 ) {
+			CBase::PrintError( L"DialogBoxX" );
+		}
+#endif	// #if 0
+
+		DestroyDialogBoxTemplate( dtTemplate );
+
+		return ipRet;
+	}
+
+	// Creates a modeless dialog with all of its controls.  Returns the dialog widget.
+	CWidget * CLayoutManager::CreateDialogX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent ) {
+		LSW_DLGTEMPLATE dtTemplate;
+		if ( !CreateDlgTemplate( _pwlLayouts, _sTotal, _pwParent, dtTemplate ) ) {
+			return NULL;
+		}
+
+		HWND hWnd = ::CreateDialogIndirectParamW( CBase::GetThisHandle(), 
+			dtTemplate.pdtTemplate, 
+			_pwParent->Wnd(), 
+			CWidget::DialogProc,
+			reinterpret_cast<LPARAM>(&dtTemplate.vWidgets) );
+		
+#if 1
+		if ( !hWnd ) {
+			CBase::PrintError( L"CreateDialogX" );
+		}
+#endif	// #if 0
+
+		return dtTemplate.vWidgets[0];
+	}
+
+	// Creates a DLGTEMPLATE structure and helper objects given an array of LSW_WIDGET_LAYOUT objects.
+	BOOL CLayoutManager::CreateDlgTemplate( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent, LSW_DLGTEMPLATE &_dtTemplate ) {
+		_dtTemplate.pdtTemplate = nullptr;
+		if ( !_sTotal ) { return TRUE; }
+
+#define LSW_DESTROY_WIDGETS		for ( size_t J = 0; J < _dtTemplate.vWidgets.size(); ++J ) { delete _dtTemplate.vWidgets[J]; }
 
 
 		CWidget * pwMain = CreateWidget( _pwlLayouts[0], _pwParent, false, NULL );
 		if ( !pwMain ) { return 0; }
-		std::map<DWORD, CWidget *> mIdToPointer;
-		mIdToPointer.insert_or_assign( pwMain->Id(), pwMain );
-		vWidgets.push_back( pwMain );
+		_dtTemplate.mIdToPointer.insert_or_assign( pwMain->Id(), pwMain );
+		_dtTemplate.vWidgets.push_back( pwMain );
 		for ( SIZE_T I = 1; I < _sTotal; ++I ) {
-			auto aTemp = mIdToPointer.find( _pwlLayouts[I].dwParentId );
-			CWidget * pwParent = aTemp == mIdToPointer.end() ? nullptr : aTemp->second;
+			auto aTemp = _dtTemplate.mIdToPointer.find( _pwlLayouts[I].dwParentId );
+			CWidget * pwParent = aTemp == _dtTemplate.mIdToPointer.end() ? nullptr : aTemp->second;
 			// Parent here cannot be NULL.
 			if ( !pwParent ) { pwParent = pwMain; }
 
 			CWidget * pwThis = CreateWidget( _pwlLayouts[I], pwParent, false, NULL );
 			if ( !pwThis ) {
-				// Erase everything from the map and return 0.
-				for ( auto aIt = mIdToPointer.begin(); aIt != mIdToPointer.end(); aIt++ ) {
-					delete aIt->second;
-				}
 				LSW_DESTROY_WIDGETS;
-				return 0;
+				return FALSE;
 			}
 
-			mIdToPointer.insert_or_assign( pwThis->Id(), pwThis );
-			vWidgets.push_back( pwThis );
+			_dtTemplate.mIdToPointer.insert_or_assign( pwThis->Id(), pwThis );
+			_dtTemplate.vWidgets.push_back( pwThis );
 		}
 
 		// The controls are linked to each other, just not attached to any windows.
 		// Figure out how much memory to allocate.
-		SIZE_T sSize = LayoutToDialogTemplate( _pwlLayouts, _sTotal, nullptr, vWidgets );
+		SIZE_T sSize = LayoutToDialogTemplate( _pwlLayouts, _sTotal, nullptr, _dtTemplate.vWidgets );
 		// Allocate.
-		CGlobalAlloc gaAlloc( GMEM_ZEROINIT, sSize );
-		DLGTEMPLATE * pdtTemplate = reinterpret_cast<DLGTEMPLATE *>(gaAlloc.Lock());
-		LayoutToDialogTemplate( _pwlLayouts, _sTotal, pdtTemplate, vWidgets );
-		gaAlloc.Unlock();
+		//CGlobalAlloc gaAlloc( GMEM_ZEROINIT, sSize );
+		_dtTemplate.gaAlloc.Alloc( GMEM_ZEROINIT, sSize );
+		_dtTemplate.pdtTemplate = reinterpret_cast<DLGTEMPLATE *>(_dtTemplate.gaAlloc.Lock());
+		LayoutToDialogTemplate( _pwlLayouts, _sTotal, _dtTemplate.pdtTemplate, _dtTemplate.vWidgets );
+		_dtTemplate.gaAlloc.Unlock();
 
-		INT_PTR ipRet = ::DialogBoxIndirectParamW( CBase::GetThisHandle(), 
-			pdtTemplate, 
-			_pwParent->Wnd(), 
-			CWidget::DialogProc,
-			reinterpret_cast<LPARAM>(&vWidgets) );
-		
-#if 0
-		if ( ipRet == -1 ) {
-			CBase::PrintError( L"CreateDialogX" );
-		}
-#endif	// #if 0
-		LSW_DESTROY_WIDGETS;
-
-		return ipRet;
+		return TRUE;
 #undef LSW_DESTROY_WIDGETS
+	}
+
+	// Destroys an LSW_DLGTEMPLATE object created for use by DialogBoxX().
+	VOID CLayoutManager::DestroyDialogBoxTemplate( LSW_DLGTEMPLATE &_dtTemplate ) {
+		for ( size_t J = 0; J < _dtTemplate.vWidgets.size(); ++J ) { delete _dtTemplate.vWidgets[J]; }
 	}
 
 	// Creates a class based on its type.
 	CWidget * CLayoutManager::CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) {
 		switch ( _wlLayout.ltType ) {
-			case LSW_LT_WIDGET : { return new CWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_BUTTON : { return new CButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_CHECK : { return new CCheckButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_COMBOBOX : { return new CComboBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_COMBOBOXEX : { return new CComboBoxEx( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_LISTVIEW : { return new CListView( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_GROUPBOX : { return new CGroupBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_RADIO : { return new CRadioButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_CHECK : { return new CCheckButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_REBAR : { return new CRebar( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_TOOLBAR : { return new CToolBar( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_LABEL : { return new CStatic( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_LISTBOX : { return new CListBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_LISTVIEW : { return new CListView( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_MAINWINDOW : { return new CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_RADIO : { return new CRadioButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_REBAR : { return new CRebar( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_STATUSBAR : { return new CStatusBar( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_TOOLBAR : { return new CToolBar( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_WIDGET : { return new CWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 		}
 		return nullptr;
 	}

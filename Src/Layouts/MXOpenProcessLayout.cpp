@@ -1,8 +1,8 @@
 #include "MXOpenProcessLayout.h"
-#include "../Layouts/MXLayoutMacros.h"
-#include "../Layouts/MXLayoutManager.h"
 #include "../System/MXSystem.h"
 #include "../Utilities/MXUtilities.h"
+#include "MXLayoutMacros.h"
+#include "MXLayoutManager.h"
 
 #include <Base/LSWBase.h>
 #include <Layout/LSWLayoutManager.h>
@@ -250,7 +250,7 @@ namespace mx {
 			sStringsW,
 			sStrings );
 		
-		INT_PTR ipProc = lsw::CBase::LayoutManager()->CreateDialogX( &vLayouts[0], MX_ELEMENTS( m_wlOpenProcessDialog ), _pwParent );
+		INT_PTR ipProc = lsw::CBase::LayoutManager()->DialogBoxX( &vLayouts[0], MX_ELEMENTS( m_wlOpenProcessDialog ), _pwParent );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
 		if ( ipProc != -1 ) {
 			

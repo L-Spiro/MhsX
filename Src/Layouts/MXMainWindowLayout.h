@@ -19,6 +19,7 @@ namespace mx {
 			MX_MWI_STOREDADDRESSES,
 			MX_MWI_REBAR0,
 			MX_MWI_TOOLBAR0,
+			MX_MWI_STATUSBAR,
 			
 		};
 
@@ -48,6 +49,7 @@ namespace mx {
 			MX_MWMI_DELETEALL,
 			MX_MWMI_LOCK,
 			MX_MWMI_UNLOCK,
+			MX_MWMI_EDIT,
 
 			MX_MWMI_DATATYPE,
 			MX_MWMI_POINTER,
@@ -59,6 +61,8 @@ namespace mx {
 			MX_MWMI_SEARCHOPTIONS,
 
 			MX_MWMI_DATATYPESEARCH,
+
+			MX_MWMI_OPTIONS,
 		};
 
 
@@ -86,6 +90,9 @@ namespace mx {
 
 		// Search menu.
 		static LSW_MENU_ITEM					m_miSearchMenu[];
+
+		// Options menu.
+		static LSW_MENU_ITEM					m_miOptionsMenu[];
 
 		// Menus.
 		static LSW_MENU_LAYOUT					m_miMenus[];
