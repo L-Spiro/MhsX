@@ -9,7 +9,6 @@ namespace mx {
 	// == Functions.
 	// WM_INITDIALOG.
 	/*CWidget::LSW_HANDLED COptionsPage::InitDialog() {
-		CWidget * pwWidget = COptionsLayout::CreateGeneralPage( this );
 		return LSW_H_CONTINUE;
 	}*/
 

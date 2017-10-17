@@ -237,9 +237,9 @@ namespace lsw {
 #define MX_OFF_X	0
 #define MX_OFF_Y	0
 #endif
-				POINT pConvOrg = PixelsToDialogUnits( _hWnd, 1001 - MX_X - MX_OFF_X, 649 - MX_Y - MX_OFF_Y );
+				POINT pConvOrg = PixelsToDialogUnits( _hWnd, 1043 - MX_X - MX_OFF_X, 757 - MX_Y - MX_OFF_Y );
 				//POINT pConv = PixelsToDialogUnits( _hWnd, 559 - 548 - 7, 486 - 453 - 30 );
-				POINT pConvClient = PixelsToDialogUnits( _hWnd, 114, 16 );
+				POINT pConvClient = PixelsToDialogUnits( _hWnd, 297, 23 );
 				
 				pmwThis->InitDialog();
 				return TRUE;	// Return TRUE to pass focus on to the control specified by _wParam.

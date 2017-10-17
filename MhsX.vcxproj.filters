@@ -154,6 +154,9 @@
     <ClCompile Include="Src\Options\MXOptionsWindow.cpp">
       <Filter>Source Files\Options</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Options\MXOptionsPageGenSearch.cpp">
+      <Filter>Source Files\Options</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -222,6 +225,9 @@
       <Filter>Header Files\Options</Filter>
     </ClInclude>
     <ClInclude Include="Src\Options\MXOptionsWindow.h">
+      <Filter>Header Files\Options</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Options\MXOptionsPageGenSearch.h">
       <Filter>Header Files\Options</Filter>
     </ClInclude>
   </ItemGroup>

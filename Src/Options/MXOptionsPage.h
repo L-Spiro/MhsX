@@ -2,6 +2,8 @@
 #include <LSWWin.h>
 #include <Widget/LSWWidget.h>
 
+#include <string>
+
 using namespace lsw;
 
 namespace mx {
@@ -12,6 +14,9 @@ namespace mx {
 
 
 		// == Functions.
+		// Get the name of the page.
+		virtual std::wstring					GetName() const { return std::wstring(); }
+
 		// WM_INITDIALOG.
 		//virtual LSW_HANDLED					InitDialog();
 	};

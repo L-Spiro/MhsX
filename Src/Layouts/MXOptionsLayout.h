@@ -38,6 +38,34 @@ namespace mx {
 			MX_OI_GENERAL_VIEW_CODE_NAMES,
 			MX_OI_GENERAL_VIEW_SIZES,
 			MX_OI_GENERAL_VIEW_RANGES,
+
+			MX_OI_GENERAL_SEARCH,
+			MX_OI_GENERAL_SEARCH_SEARCH_RANGES,
+			MX_OI_GENERAL_SEARCH_MEM_IMAGE,
+			MX_OI_GENERAL_SEARCH_MEM_PRIVATE,
+			MX_OI_GENERAL_SEARCH_MEM_MAPPED,
+			MX_OI_GENERAL_SEARCH_ANYTHING,
+
+			MX_OI_GENERAL_SEARCH_THREAD_PRIORITY,
+			MX_OI_GENERAL_SEARCH_TP_NORMAL,
+			MX_OI_GENERAL_SEARCH_TP_HIGH,
+			MX_OI_GENERAL_SEARCH_TP_CRIT,
+
+			MX_OI_GENERAL_SEARCH_BUFFER,
+			MX_OI_GENERAL_SEARCH_BUFFER_SIZE,
+			MX_OI_GENERAL_SEARCH_BUFFER_SIZE_EDIT,
+			
+			MX_OI_GENERAL_SEARCH_MISC,
+			MX_OI_GENERAL_SEARCH_POSTFLUSH,
+			MX_OI_GENERAL_SEARCH_PREFLUSH,
+			MX_OI_GENERAL_SEARCH_PAUSE,
+
+			MX_OI_GENERAL_SEARCH_DOTS,
+
+			MX_OI_GENERAL_SEARCH_USE_EPSILON,
+			MX_OI_GENERAL_SEARCH_SMART_EPS,
+			MX_OI_GENERAL_SEARCH_EPSILON,
+			MX_OI_GENERAL_SEARCH_EPSILON_EDIT
 		};
 
 
@@ -48,15 +76,20 @@ namespace mx {
 		// Creates the general options page.
 		static CWidget *						CreateGeneralPage( CWidget * _pwParent );
 
+		// Creates the general search options page.
+		static CWidget *						CreateGeneralSearchPage( CWidget * _pwParent );
+
 
 	protected :
 		// == Members.
 		// The layout for the Options dialog.
 		static LSW_WIDGET_LAYOUT				m_wlOptionsDialog[];
 
-
 		// General section.
 		static LSW_WIDGET_LAYOUT				m_wlOptionsGeneral[];
+
+		// General search section.
+		static LSW_WIDGET_LAYOUT				m_wlOptionsGeneralSearch[];
 
 
 		// == Functions.

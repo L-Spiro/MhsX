@@ -11,6 +11,7 @@ namespace mx {
 		MX_OPEN_PROCESS_WINDOW,
 		MX_OPTIONS_WINDOW,
 		MX_OPTIONS_GENERAL,
+		MX_OPTIONS_GENSEARCH,
 	};
 
 	class CLayoutManager : public lsw::CLayoutManager {

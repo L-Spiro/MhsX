@@ -6,9 +6,9 @@ using namespace lsw;
 
 namespace mx {
 
-	class COptionsPageGeneral : public COptionsPage {
+	class COptionsPageGenSearch : public COptionsPage {
 	public :
-		COptionsPageGeneral( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		COptionsPageGenSearch( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
 
 
 		// == Functions.

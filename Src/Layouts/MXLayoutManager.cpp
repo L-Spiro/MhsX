@@ -3,6 +3,7 @@
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../OpenProcess/MXOpenProcessWindow.h"
 #include "../Options/MXOptionsPageGeneral.h"
+#include "../Options/MXOptionsPageGenSearch.h"
 #include "../Options/MXOptionsWindow.h"
 
 namespace mx {
@@ -22,6 +23,9 @@ namespace mx {
 			}
 			case MX_OPTIONS_GENERAL : {
 				return new COptionsPageGeneral( _wlLayout, _pwParent,  _bCreateWidget, _hMenu );
+			}
+			case MX_OPTIONS_GENSEARCH : {
+				return new COptionsPageGenSearch( _wlLayout, _pwParent,  _bCreateWidget, _hMenu );
 			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu );

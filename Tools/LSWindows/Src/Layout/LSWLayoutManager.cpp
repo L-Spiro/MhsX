@@ -4,6 +4,7 @@
 #include "../CheckButton/LSWCheckButton.h"
 #include "../ComboBox/LSWComboBox.h"
 #include "../ComboBox/LSWComboBoxEx.h"
+#include "../Edit/LSWEdit.h"
 #include "../GroupBox/LSWGroupBox.h"
 #include "../ListBox/LSWListBox.h"
 #include "../ListView/LSWListView.h"
@@ -160,6 +161,7 @@ namespace lsw {
 			case LSW_LT_CHECK : { return new CCheckButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_COMBOBOX : { return new CComboBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_COMBOBOXEX : { return new CComboBoxEx( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_EDIT : { return new CEdit( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_GROUPBOX : { return new CGroupBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_LABEL : { return new CStatic( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_LISTBOX : { return new CListBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }

@@ -123,6 +123,12 @@
     <Filter Include="Source Files\Static">
       <UniqueIdentifier>{55dd3fc8-761f-401c-9190-6c7048d42c41}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Edit">
+      <UniqueIdentifier>{113b58f8-5a91-492b-a8da-c8dbc0c16281}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Edit">
+      <UniqueIdentifier>{2deaf9e8-2bca-4496-90ca-844dcee701d8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -206,6 +212,9 @@
     <ClInclude Include="Src\Static\LSWStatic.h">
       <Filter>Header Files\Static</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Edit\LSWEdit.h">
+      <Filter>Header Files\Edit</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -264,6 +273,9 @@
     </ClCompile>
     <ClCompile Include="Src\Static\LSWStatic.cpp">
       <Filter>Source Files\Static</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Edit\LSWEdit.cpp">
+      <Filter>Source Files\Edit</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
