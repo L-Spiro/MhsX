@@ -632,7 +632,7 @@ namespace mx {
 			FALSE,									// bEnabled
 			FALSE,									// bActive
 			4,										// iLeft
-			122,									// iTop
+			121,									// iTop
 			204 - 4 * 2,							// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
 			WS_CHILDWINDOW | WS_VISIBLE | WS_GROUP | SS_LEFT,						// dwStyle

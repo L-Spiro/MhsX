@@ -16,22 +16,27 @@ namespace mx {
 		CWidget * pwGeneral = COptionsLayout::CreateGeneralPage( this );
 		CWidget * pwGenSearch = COptionsLayout::CreateGeneralSearchPage( this );
 
+		m_vPages.push_back( static_cast<COptionsPage *>(pwGeneral) );
+		m_vPages.push_back( static_cast<COptionsPage *>(pwGenSearch) );
+
 		CListBox * plbBox = static_cast<CListBox *>(FindChild( COptionsLayout::MX_OI_LIST ));
 		if ( plbBox ) {
-			// Temp.  These strings should be on the C*Page classes.
-			struct {
-				const CHAR * pcText;
-				size_t sLen;
-			} sList[] = {
-				{ _T_01940FD6_General, _LEN_01940FD6 },
-				{ _T_F530FBCF_General_Search, _LEN_F530FBCF },
-				{ _T_8AB28410_Hotkeys, _LEN_8AB28410 },
-				{ _T_5C475EBC_Env__Variables, _LEN_5C475EBC },
-				{ _T_083F0713_Programs, _LEN_083F0713 },
-				{ _T_85E8BACF_Disassembler, _LEN_85E8BACF },
-			};
-			for ( size_t I = 0; I < MX_ELEMENTS( sList ); ++I ) {
-				plbBox->AddString( mx::CStringDecoder::DecodeToString( sList[I].pcText, sList[I].sLen ).c_str() );
+			for ( size_t I = 0; I < m_vPages.size(); ++I ) {
+				plbBox->AddString( m_vPages[I]->GetName().c_str() );
+			}
+		}
+		plbBox->SetCurSel( 0 );
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_COMMAND from control.
+	CWidget::LSW_HANDLED COptionsWindow::Command( WORD _Id, HWND _hControl ) {
+		switch ( _Id ) {
+			case COptionsLayout::MX_OI_LIST : {
+				//COptionsLayout::CreateOptionsDialog( this );
+				CListBox * plbBox = ListBox();
+				SetPage( plbBox->GetCurSel() );
+				break;
 			}
 		}
 		return LSW_H_CONTINUE;
@@ -41,6 +46,18 @@ namespace mx {
 	CWidget::LSW_HANDLED COptionsWindow::Close() {
 		::EndDialog( Wnd(), 0 );
 		return LSW_H_HANDLED;
+	}
+
+	// Sets the page by index.
+	void COptionsWindow::SetPage( DWORD _dwIndex ) {
+		for ( size_t I = 0; I < m_vPages.size(); ++I ) {
+			m_vPages[I]->SetVisible( I == _dwIndex );
+		}
+	}
+
+	// Gets the list box pointer.
+	CListBox * COptionsWindow::ListBox() {
+		return static_cast<CListBox *>(FindChild( COptionsLayout::MX_OI_LIST ));
 	}
 
 }	// namespace mx

@@ -188,6 +188,7 @@
     <ClInclude Include="Src\MainWindow\MXMhsMainWindow.h" />
     <ClInclude Include="Src\MemHack\MXMemHack.h" />
     <ClInclude Include="Src\OpenProcess\MXOpenProcessWindow.h" />
+    <ClInclude Include="Src\Options\MXOptions.h" />
     <ClInclude Include="Src\Options\MXOptionsPage.h" />
     <ClInclude Include="Src\Options\MXOptionsPageGeneral.h" />
     <ClInclude Include="Src\Options\MXOptionsPageGenSearch.h" />

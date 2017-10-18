@@ -23,4 +23,16 @@ namespace lsw {
 		return static_cast<INT>(static_cast<DWORD>(::SendMessageW( Wnd(), LB_ADDSTRING, 0L, reinterpret_cast<LPARAM>(_lpStr) )));
 	}
 
+	// Gets the index of the currently selected item in a single-selection list box.
+	INT CListBox::GetCurSel() const {
+		if ( !Wnd() ) { return LB_ERR; }
+		return static_cast<INT>(static_cast<DWORD>(::SendMessageW( Wnd(), LB_GETCURSEL, 0L, 0L )));
+	}
+
+	// Sets the currently selected item in a single-selection list box
+	INT CListBox::SetCurSel( INT _iIndex ) {
+		if ( !Wnd() ) { return LB_ERR; }
+		return static_cast<INT>(static_cast<DWORD>(::SendMessageW( Wnd(), LB_SETCURSEL, 0L, static_cast<WPARAM>(static_cast<INT>(_iIndex)) )));
+	}
+
 }	// namespace lsw

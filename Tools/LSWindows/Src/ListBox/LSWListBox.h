@@ -19,7 +19,12 @@ namespace lsw {
 		// Adds a string to the list box.  The return value is the zero-based index of the string in the list box. If an error occurs,
 		//	the return value is LB_ERR. If there is insufficient space to store the new string, the return value is LB_ERRSPACE.
 		INT									AddString( LPCWSTR _lpStr );
+		
+		// Gets the index of the currently selected item in a single-selection list box.
+		INT									GetCurSel() const;
 
+		// Sets the currently selected item in a single-selection list box
+		INT									SetCurSel( INT _iIndex );
 
 
 	protected :

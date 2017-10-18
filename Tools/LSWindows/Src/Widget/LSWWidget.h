@@ -49,6 +49,12 @@ namespace lsw {
 		// Enable or disable.
 		BOOL								Enable( BOOL _bEnable ) { m_bEnabled = (_bEnable != 0); return ::EnableWindow( Wnd(), m_bEnabled ); }
 
+		// Is visible.
+		BOOL								Visible() const { return ::IsWindowVisible( Wnd() ); }
+
+		// Set visible or not.
+		BOOL								SetVisible( BOOL _bVis ) { return ::ShowWindow( Wnd(), _bVis ? SW_SHOW : SW_HIDE ); }
+
 		// Copies the text of the specified window's title bar (if it has one) into a buffer. If the specified window is a control, the text of the control is copied.
 		INT									GetTextA( LPSTR _lpString, INT _nMaxCount ) const { return ::GetWindowTextA( Wnd(), _lpString, _nMaxCount ); }
 
