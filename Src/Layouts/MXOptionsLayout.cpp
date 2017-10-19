@@ -52,7 +52,7 @@ namespace mx {
 			162 + 5,								// iTop
 			43,										// dwWidth
 			12,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON | BS_TEXT,								// dwStyle
+			MX_DEFBUTTONSTYLE,								// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_D736D92D_OK ),																	// pwcText
 			_LEN_D736D92D,							// sTextLen
@@ -68,7 +68,7 @@ namespace mx {
 			162 + 5,								// iTop
 			43,										// dwWidth
 			12,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON | BS_TEXT,									// dwStyle
+			MX_BUTTONSTYLE,									// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_51BAC044_Cancel ),																// pwcText
 			_LEN_51BAC044,							// sTextLen
@@ -89,7 +89,7 @@ namespace mx {
 			2,										// iTop
 			204,									// dwWidth
 			156,									// dwHeight
-			WS_CHILDWINDOW | /*WS_VISIBLE*/ 0| DS_3DLOOK | DS_FIXEDSYS | DS_SETFONT | DS_CONTROL,															// dwStyle
+			WS_CHILDWINDOW | WS_VISIBLE | DS_3DLOOK | DS_FIXEDSYS | DS_SETFONT | DS_CONTROL,															// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_CONTROLPARENT,																	// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
@@ -106,8 +106,8 @@ namespace mx {
 			0,										// iTop
 			204,									// dwWidth
 			67,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_GROUPBOX,																									// dwStyle
-			0,																																			// dwStyleEx
+			MX_GROUPSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_5467F077_Refresh_Rates ),				// pwcText
 			_LEN_5467F077,											// sTextLen
 			MX_OI_GENERAL,							// dwParentId
@@ -123,8 +123,8 @@ namespace mx {
 			11 + MX_ROW_HEIGHT * 0,					// iTop
 			90,										// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_GROUP | SS_LEFT,																							// dwStyle
-			0,																																			// dwStyleEx
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_067EB2AF_Refresh_Found_Addresses ),				// pwcText
 			_LEN_067EB2AF,														// sTextLen
 			MX_OI_GENERAL,							// dwParentId
@@ -155,8 +155,8 @@ namespace mx {
 			11 + MX_ROW_HEIGHT * 0,					// iTop
 			55,										// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_GROUP | SS_LEFT,																							// dwStyle
-			0,																																			// dwStyleEx
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_B7758FF8_Times_Per_Second ),						// pwcText
 			_LEN_B7758FF8,														// sTextLen
 			MX_OI_GENERAL,							// dwParentId
@@ -172,7 +172,7 @@ namespace mx {
 			11 + MX_ROW_HEIGHT * 1,					// iTop
 			90,										// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_GROUP | SS_LEFT,																							// dwStyle
+			MX_STATICSTYLE,																							// dwStyle
 			0,																																			// dwStyleEx
 			MX_MAKE_WCHAR( _T_8168E128_Refresh_Main_List ),						// pwcText
 			_LEN_8168E128,														// sTextLen
@@ -204,7 +204,7 @@ namespace mx {
 			11 + MX_ROW_HEIGHT * 1,					// iTop
 			55,										// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_GROUP | SS_LEFT,																							// dwStyle
+			MX_STATICSTYLE,																							// dwStyle
 			0,																																			// dwStyleEx
 			MX_MAKE_WCHAR( _T_B7758FF8_Times_Per_Second ),						// pwcText
 			_LEN_B7758FF8,														// sTextLen
@@ -221,7 +221,7 @@ namespace mx {
 			11 + MX_ROW_HEIGHT * 2,					// iTop
 			90,										// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_GROUP | SS_LEFT,																							// dwStyle
+			MX_STATICSTYLE,																							// dwStyle
 			0,																																			// dwStyleEx
 			MX_MAKE_WCHAR( _T_BAE47170_Update_Locked_Values ),					// pwcText
 			_LEN_BAE47170,														// sTextLen
@@ -233,7 +233,7 @@ namespace mx {
 			WC_COMBOBOXW,							// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			102,										// iLeft
+			102,									// iLeft
 			9 + MX_ROW_HEIGHT * 2,					// iTop
 			36,										// dwWidth
 			11,										// dwHeight
@@ -253,7 +253,7 @@ namespace mx {
 			11 + MX_ROW_HEIGHT * 2,					// iTop
 			55,										// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_GROUP | SS_LEFT,																							// dwStyle
+			MX_STATICSTYLE,																							// dwStyle
 			0,																																			// dwStyleEx
 			MX_MAKE_WCHAR( _T_B7758FF8_Times_Per_Second ),						// pwcText
 			_LEN_B7758FF8,														// sTextLen
@@ -270,7 +270,7 @@ namespace mx {
 			11 + MX_ROW_HEIGHT * 3,					// iTop
 			90,										// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_GROUP | SS_LEFT,																							// dwStyle
+			MX_STATICSTYLE,																							// dwStyle
 			0,																																			// dwStyleEx
 			MX_MAKE_WCHAR( _T_625BE2FF_Update_Expression_Evaluator ),			// pwcText
 			_LEN_625BE2FF,														// sTextLen
@@ -302,7 +302,7 @@ namespace mx {
 			11 + MX_ROW_HEIGHT * 3,					// iTop
 			55,										// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_GROUP | SS_LEFT,																							// dwStyle
+			MX_STATICSTYLE,																							// dwStyle
 			0,																																			// dwStyleEx
 			MX_MAKE_WCHAR( _T_B7758FF8_Times_Per_Second ),						// pwcText
 			_LEN_B7758FF8,														// sTextLen
@@ -320,7 +320,7 @@ namespace mx {
 			63 + 4,									// iTop
 			204,									// dwWidth
 			29,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_GROUPBOX,																									// dwStyle
+			MX_GROUPSTYLE,																									// dwStyle
 			0,																																			// dwStyleEx
 			MX_MAKE_WCHAR( _T_DD16C375_View_Settings ),				// pwcText
 			_LEN_DD16C375,											// sTextLen
@@ -336,8 +336,8 @@ namespace mx {
 			71 + 4,									// iTop
 			91,										// dwWidth
 			9,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_AUTOCHECKBOX,																								// dwStyle
-			0,																																			// dwStyleEx
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_D546F677_Data_Types_as_Code_Names ),	// pwcText
 			_LEN_D546F677,											// sTextLen
 			MX_OI_GENERAL,							// dwParentId
@@ -352,8 +352,8 @@ namespace mx {
 			71 + 4,									// iTop
 			58,										// dwWidth
 			9,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_AUTOCHECKBOX,																								// dwStyle
-			0,																																			// dwStyleEx
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_2DC47C2B_Data_Type_Sizes ),			// pwcText
 			_LEN_2DC47C2B,											// sTextLen
 			MX_OI_GENERAL,							// dwParentId
@@ -368,8 +368,8 @@ namespace mx {
 			80 + 4,									// iTop
 			91,										// dwWidth
 			9,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_AUTOCHECKBOX,																								// dwStyle
-			0,																																			// dwStyleEx
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_8CD4CB22_Data_Type_Ranges ),	// pwcText
 			_LEN_8CD4CB22,											// sTextLen
 			MX_OI_GENERAL,							// dwParentId
@@ -407,7 +407,7 @@ namespace mx {
 			0,										// iTop
 			204,									// dwWidth
 			48,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_GROUPBOX,				// dwStyle
+			MX_GROUPSTYLE,				// dwStyle
 			0,														// dwStyleEx
 			MX_MAKE_WCHAR( _T_638D307B_Search_Ranges ),				// pwcText
 			_LEN_638D307B,											// sTextLen
@@ -423,8 +423,8 @@ namespace mx {
 			9 + 9 * 0,								// iTop
 			194,									// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_AUTOCHECKBOX,							// dwStyle
-			0,																		// dwStyleEx
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_67CAB38F_MEM_IMAGE__Static_Data_is_Usually_Here_ ),	// pwcText
 			_LEN_67CAB38F,															// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
@@ -439,7 +439,7 @@ namespace mx {
 			9 + 9 * 1,								// iTop
 			194,									// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_AUTOCHECKBOX,											// dwStyle
+			MX_CHECKSTYLE,							// dwStyle
 			0,																						// dwStyleEx
 			MX_MAKE_WCHAR( _T_6B02F769_MEM_PRIVATE__Sections_Exclusive_to_the_Target_Process_ ),	// pwcText
 			_LEN_6B02F769,																			// sTextLen
@@ -455,8 +455,8 @@ namespace mx {
 			9 + 9 * 2,								// iTop
 			194,									// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_AUTOCHECKBOX,										// dwStyle
-			0,																					// dwStyleEx
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_37D0905A_MEM_MAPPED__Data_Loaded_by_the_Target_Process__Slow_ ),	// pwcText
 			_LEN_37D0905A,																		// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
@@ -471,8 +471,8 @@ namespace mx {
 			9 + 9 * 3,								// iTop
 			194,									// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_AUTOCHECKBOX,								// dwStyle
-			0,																			// dwStyleEx
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_39FDDE4C_Anything_Readable__Slower_but_Undetectable_ ),	// pwcText
 			_LEN_39FDDE4C,																// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
@@ -488,7 +488,7 @@ namespace mx {
 			48,										// iTop
 			204,									// dwWidth
 			22,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_GROUPBOX,				// dwStyle
+			MX_GROUPSTYLE,				// dwStyle
 			0,														// dwStyleEx
 			MX_MAKE_WCHAR( _T_33BECF37_Thread_Priority ),			// pwcText
 			_LEN_33BECF37,											// sTextLen
@@ -504,8 +504,8 @@ namespace mx {
 			57,										// iTop
 			60,										// dwWidth
 			MX_DEF_RADIO_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_AUTORADIOBUTTON,		// dwStyle
-			0,														// dwStyleEx
+			MX_RADIOSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_33095CDA_Normal__Default_ ),			// pwcText
 			_LEN_33095CDA,											// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
@@ -520,8 +520,8 @@ namespace mx {
 			57,										// iTop
 			60,										// dwWidth
 			MX_DEF_RADIO_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_AUTORADIOBUTTON,		// dwStyle
-			0,														// dwStyleEx
+			MX_RADIOSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_51374B6B_High ),						// pwcText
 			_LEN_51374B6B,											// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
@@ -536,8 +536,8 @@ namespace mx {
 			57,										// iTop
 			32,										// dwWidth
 			MX_DEF_RADIO_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_AUTORADIOBUTTON,		// dwStyle
-			0,														// dwStyleEx
+			MX_RADIOSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_AE33799D_Critical ),					// pwcText
 			_LEN_AE33799D,											// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
@@ -553,7 +553,7 @@ namespace mx {
 			70,										// iTop
 			204,									// dwWidth
 			25,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_GROUPBOX,				// dwStyle
+			MX_GROUPSTYLE,				// dwStyle
 			0,														// dwStyleEx
 			MX_MAKE_WCHAR( _T_36F6F5C4_Buffer ),					// pwcText
 			_LEN_36F6F5C4,											// sTextLen
@@ -569,7 +569,7 @@ namespace mx {
 			81,										// iTop
 			96,									// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_GROUP | SS_LEFT,																							// dwStyle
+			MX_STATICSTYLE,																							// dwStyle
 			0,																																			// dwStyleEx
 			MX_MAKE_WCHAR( _T_E2091EC1_Buffer_Size__Megabytes__ ),				// pwcText
 			_LEN_E2091EC1,														// sTextLen
@@ -585,7 +585,7 @@ namespace mx {
 			78,										// iTop
 			98,										// dwWidth
 			MX_DEF_EDIT_HEIGHT,						// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_GROUP | ES_LEFT | ES_AUTOHSCROLL,																			// dwStyle
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | WS_GROUP | ES_LEFT | ES_AUTOHSCROLL,																// dwStyle
 			WS_EX_CLIENTEDGE,																															// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
@@ -602,7 +602,7 @@ namespace mx {
 			95,										// iTop
 			204,									// dwWidth
 			60,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_GROUPBOX,				// dwStyle
+			MX_GROUPSTYLE,				// dwStyle
 			0,														// dwStyleEx
 			MX_MAKE_WCHAR( _T_F1050E0B_Miscellaneous ),				// pwcText
 			_LEN_F1050E0B,											// sTextLen
@@ -618,8 +618,8 @@ namespace mx {
 			103,									// iTop
 			90,										// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_AUTOCHECKBOX,							// dwStyle
-			0,																		// dwStyleEx
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_5FAC969F_Postflushing__More_RAM_ ),					// pwcText
 			_LEN_5FAC969F,															// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
@@ -634,7 +634,7 @@ namespace mx {
 			112,									// iTop
 			90,										// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_AUTOCHECKBOX,							// dwStyle
+			MX_CHECKSTYLE,							// dwStyle
 			0,																		// dwStyleEx
 			MX_MAKE_WCHAR( _T_4959D96B_Precaching__More_RAM_ ),						// pwcText
 			_LEN_4959D96B,															// sTextLen
@@ -650,8 +650,8 @@ namespace mx {
 			112,									// iTop
 			90,										// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_AUTOCHECKBOX,							// dwStyle
-			0,																		// dwStyleEx
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_5C839ECF_Pause_Target_Process ),						// pwcText
 			_LEN_5C839ECF,															// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
@@ -666,8 +666,8 @@ namespace mx {
 			121,									// iTop
 			204 - 4 * 2,							// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_GROUP | SS_LEFT,						// dwStyle
-			0,																		// dwStyleEx
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_9D174B2D_________________________________________________________________________________________________________________________________________________________________________________________________________________ ),				// pwcText
 			_LEN_9D174B2D,															// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
@@ -682,8 +682,8 @@ namespace mx {
 			129,									// iTop
 			115,									// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_AUTOCHECKBOX,							// dwStyle
-			0,																		// dwStyleEx
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_A4845F29_Use_Epsilon__Float_Double_Searches_ ),		// pwcText
 			_LEN_A4845F29,															// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
@@ -698,8 +698,8 @@ namespace mx {
 			129,									// iTop
 			50,										// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_AUTOCHECKBOX,							// dwStyle
-			0,																		// dwStyleEx
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_D6F9E0F3_Smart_Epsilon ),								// pwcText
 			_LEN_D6F9E0F3,															// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
@@ -714,8 +714,8 @@ namespace mx {
 			140 + 1,								// iTop
 			30 - 4,									// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_GROUP | SS_LEFT,						// dwStyle
-			0,																		// dwStyleEx
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_FEAAF2A5_Epsilon_ ),									// pwcText
 			_LEN_FEAAF2A5,															// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
@@ -730,8 +730,8 @@ namespace mx {
 			138 + 1,								// iTop
 			170,									// dwWidth
 			MX_DEF_EDIT_HEIGHT,						// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_GROUP | ES_LEFT | ES_AUTOHSCROLL,																			// dwStyle
-			WS_EX_CLIENTEDGE,																															// dwStyleEx
+			MX_EDITSTYLE,							// dwStyle
+			WS_EX_CLIENTEDGE,						// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId

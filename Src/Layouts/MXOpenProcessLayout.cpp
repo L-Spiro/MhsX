@@ -39,7 +39,7 @@ namespace mx {
 			3,										// iTop
 			263,									// dwWidth
 			174,									// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_GROUPBOX,																									// dwStyle
+			MX_GROUPSTYLE,																									// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,																// dwStyleEx
 			MX_MAKE_WCHAR( _T_2FF354B7_Select_Process ),																								// pwcText
 			_LEN_2FF354B7,							// sTextLen
@@ -85,7 +85,7 @@ namespace mx {
 			182,									// iTop
 			43,										// dwWidth
 			12,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON | BS_TEXT,								// dwStyle
+			MX_DEFBUTTONSTYLE,						// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_D736D92D_OK ),																	// pwcText
 			_LEN_D736D92D,							// sTextLen
@@ -108,7 +108,7 @@ namespace mx {
 			182,									// iTop
 			43,										// dwWidth
 			12,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON | BS_TEXT,									// dwStyle
+			MX_BUTTONSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_51BAC044_Cancel ),																// pwcText
 			_LEN_51BAC044,							// sTextLen
@@ -131,7 +131,7 @@ namespace mx {
 			128,									// iTop
 			253,									// dwWidth
 			20,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | BS_GROUPBOX,															// dwStyle
+			MX_GROUPSTYLE,															// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_923C763F_Show ),																	// pwcText
 			_LEN_923C763F,							// sTextLen
@@ -154,7 +154,7 @@ namespace mx {
 			136,									// iTop
 			29,										// dwWidth
 			9,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,										// dwStyle
+			MX_RADIOSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_1F1A625A_Main ),																	// pwcText
 			_LEN_1F1A625A,							// sTextLen
@@ -177,7 +177,7 @@ namespace mx {
 			136,									// iTop
 			20,										// dwWidth
 			9,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON,										// dwStyle
+			MX_RADIOSTYLE,										// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_0355373D_All ),																	// pwcText
 			_LEN_0355373D,							// sTextLen
@@ -200,7 +200,7 @@ namespace mx {
 			150,									// iTop
 			253,									// dwWidth
 			9,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,											// dwStyle
+			MX_CHECKSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_B563255B_Open_in_Restricted_Mode__Improves_Undetectability_ ),					// pwcText
 			_LEN_B563255B,							// sTextLen
@@ -223,7 +223,7 @@ namespace mx {
 			161,									// iTop
 			253,									// dwWidth
 			12,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON | BS_TEXT,									// dwStyle
+			MX_BUTTONSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_AF3C9967_Refresh ),																// pwcText
 			_LEN_AF3C9967,							// sTextLen
