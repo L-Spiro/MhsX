@@ -5,6 +5,26 @@ namespace mx {
 
 	CMemHack::CMemHack() :
 		m_dwProcId( 0 ) {
+		// Default options.
+		m_oOptions.dwFoundAddressRefresh = 10;
+		m_oOptions.dwMainRefresh = 10;
+		m_oOptions.dwLockedRefresh = 1000;
+		m_oOptions.dwExpressionRefresh = 100;
+		m_oOptions.bDataTypesAsCodeNames = TRUE;
+		m_oOptions.bDataTypeSizes = TRUE;
+		m_oOptions.bDataTypeRanges = TRUE;
+		// ====
+		m_oOptions.bMemImage = TRUE;
+		m_oOptions.bMemPrivate = TRUE;
+		m_oOptions.bMemMapped = FALSE;
+		m_oOptions.iThreadPriority = THREAD_PRIORITY_NORMAL;
+		m_oOptions.dwBufferSize = 5 * 1024 * 1024;
+		m_oOptions.bPreCache = TRUE;
+		m_oOptions.bPostFlush = TRUE;
+		m_oOptions.bPauseTarget = FALSE;
+		m_oOptions.bUseEpsilon = TRUE;
+		m_oOptions.bSmartEpsilon = TRUE;
+		m_oOptions.dEpsilon = FLT_EPSILON;// (1.19209290E-07F) (Win32 uses 1.192092896e-07F);
 	}
 	CMemHack::~CMemHack() {
 		Detach();

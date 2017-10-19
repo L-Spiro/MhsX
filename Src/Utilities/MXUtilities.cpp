@@ -704,6 +704,46 @@ namespace mx {
 		return _sString.c_str();
 	}
 
+	// Creates a double string.
+	const CHAR * CUtilities::ToDouble( double _dValue, std::string &_sString ) {
+		const size_t sLen = 2049;
+		CHAR * pcBuffer = new CHAR[sLen];
+		if ( !pcBuffer ) { return nullptr; }
+		int iLen = ::sprintf_s( pcBuffer, sLen, "%.400f", _dValue );
+		_sString.append( pcBuffer, iLen );
+		delete [] pcBuffer;
+		pcBuffer = nullptr;
+#define MX_LAST ((_sString.size() > 0) ? _sString[_sString.size()-1] : '\0')
+		while ( MX_LAST == '0' ) {
+			_sString.pop_back();
+		}
+		while ( MX_LAST == '.' ) {
+			_sString.pop_back();
+		}
+		return _sString.c_str();
+#undef MX_LAST
+	}
+
+	// Creates a double string.
+	const WCHAR * CUtilities::ToDouble( double _dValue, std::wstring &_sString ) {
+		const size_t sLen = 2049;
+		WCHAR * pcBuffer = new WCHAR[sLen];
+		if ( !pcBuffer ) { return nullptr; }
+		int iLen = ::swprintf_s( pcBuffer, sLen, L"%.400f", _dValue );
+		_sString.append( pcBuffer, iLen );
+		delete [] pcBuffer;
+		pcBuffer = nullptr;
+#define MX_LAST _sString.size() > 0 ? _sString[_sString.size()-1] : L'\0'
+		while ( MX_LAST == L'0' ) {
+			_sString.pop_back();
+		}
+		while ( MX_LAST == L'.' ) {
+			_sString.pop_back();
+		}
+		return _sString.c_str();
+#undef MX_LAST
+	}
+
 	// Clears the internal temporary buffer (as a security measure).
 	VOID CUtilities::ClearInternalBuffer() {
 		std::memset( m_szTemp, 0, sizeof( m_szTemp ) );

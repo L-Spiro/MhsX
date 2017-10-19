@@ -148,6 +148,12 @@ namespace mx {
 		// Creates an unsigned integer string.
 		static const WCHAR *			ToUnsigned( uint64_t _uiValue, std::wstring &_sString, uint32_t _uiNumDigits = 0 );
 
+		// Creates a double string.
+		static const CHAR *				ToDouble( double _dValue, std::string &_sString );
+
+		// Creates a double string.
+		static const WCHAR *			ToDouble( double _dValue, std::wstring &_sString );
+
 		// Clears the internal temporary buffer (as a security measure).
 		static VOID						ClearInternalBuffer();
 

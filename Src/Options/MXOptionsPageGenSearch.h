@@ -1,4 +1,6 @@
 #pragma once
+#include "../MXMhsX.h"
+#include "../Options/MXOptions.h"
 #include "MXOptionsPage.h"
 #include <LSWWin.h>
 
@@ -8,7 +10,7 @@ namespace mx {
 
 	class COptionsPageGenSearch : public COptionsPage {
 	public :
-		COptionsPageGenSearch( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		COptionsPageGenSearch( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, MX_OPTIONS * _poOptions, bool _bCreateWidget = true, HMENU _hMenu = NULL );
 
 
 		// == Functions.
@@ -16,7 +18,13 @@ namespace mx {
 		virtual std::wstring					GetName() const;
 
 		// WM_INITDIALOG.
-		//virtual LSW_HANDLED					InitDialog();
+		virtual LSW_HANDLED						InitDialog();
+
+
+		protected :
+		// == Members.
+		// Options.
+		MX_OPTIONS *							m_poOptions;
 	};
 
 }	// namespace mx

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../MemHack/MXMemHack.h"
 #include <MainWindow/LSWMainWindow.h>
 #include <ImageList/LSWImageList.h>
 #include <Images/LSWBitmap.h>
@@ -11,6 +12,7 @@ namespace mx {
 	class CMhsMainWindow : public lsw::CMainWindow {
 	public :
 		CMhsMainWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		~CMhsMainWindow();
 
 
 		// == Enumerations.
@@ -60,6 +62,9 @@ namespace mx {
 
 		// Image mapping.
 		INT									m_iImageMap[MX_I_TOTAL];
+
+		// The MHS object.
+		CMemHack *							m_pmhMemHack;
 
 	};
 

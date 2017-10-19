@@ -1,5 +1,6 @@
 #pragma once
 #include "MXOptionsPage.h"
+#include "MXOptions.h"
 #include <ListBox/LSWListBox.h>
 #include <LSWWin.h>
 #include <MainWindow/LSWMainWindow.h>
@@ -10,7 +11,7 @@ namespace mx {
 
 	class COptionsWindow : public lsw::CMainWindow {
 	public :
-		COptionsWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		COptionsWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, MX_OPTIONS * _poOptions, bool _bCreateWidget = true, HMENU _hMenu = NULL );
 
 
 		// == Functions.
@@ -28,6 +29,9 @@ namespace mx {
 		// == Members.
 		// Options pages.
 		std::vector<COptionsPage *>			m_vPages;
+
+		// Options.
+		MX_OPTIONS *						m_poOptions;
 
 
 		// == Functions.

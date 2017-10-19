@@ -12,6 +12,8 @@ namespace mx {
 	CMhsMainWindow::CMhsMainWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
 		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu ) {
 
+		m_pmhMemHack = new CMemHack();
+
 		static const struct {
 			LPCWSTR				lpwsImageName;
 			DWORD				dwConst;
@@ -44,6 +46,11 @@ namespace mx {
 			m_iImageMap[sImages[I].dwConst] = m_iImages.Add( m_bBitmaps[sImages[I].dwConst].Handle() );
 		}
 
+	}
+
+	CMhsMainWindow::~CMhsMainWindow() {
+		delete m_pmhMemHack;
+		m_pmhMemHack = nullptr;
 	}
 
 	// == Functions.
@@ -108,7 +115,8 @@ namespace mx {
 				break;
 			}
 			case CMainWindowLayout::MX_MWMI_OPTIONS : {
-				COptionsLayout::CreateOptionsDialog( this );
+				MX_OPTIONS oOptions = m_pmhMemHack->Options();
+				COptionsLayout::CreateOptionsDialog( this, &oOptions );
 				break;
 			}
 		}

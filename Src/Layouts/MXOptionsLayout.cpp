@@ -595,7 +595,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_CHECK,							// ltType
-			MX_OI_GENERAL_SEARCH_PREFLUSH,			// wId
+			MX_OI_GENERAL_SEARCH_PRECACHE,			// wId
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
@@ -709,7 +709,7 @@ namespace mx {
 
 	// == Functions.
 	// Creates the Options dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
-	BOOL COptionsLayout::CreateOptionsDialog( CWidget * _pwParent ) {
+	BOOL COptionsLayout::CreateOptionsDialog( CWidget * _pwParent, MX_OPTIONS * _poOptions ) {
 		std::vector<std::string> sStrings;
 		std::vector<std::wstring> sStringsW;
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
@@ -718,9 +718,12 @@ namespace mx {
 			sStringsW,
 			sStrings );
 		
-		INT_PTR ipProc = lsw::CBase::LayoutManager()->DialogBoxX( &vLayouts[0], MX_ELEMENTS( m_wlOptionsDialog ), _pwParent );
+		mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
+		plmLayout->m_poOptions = _poOptions;
+		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], MX_ELEMENTS( m_wlOptionsDialog ), _pwParent );
+		plmLayout->m_poOptions = nullptr;	// Don't keep the pointer around.
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
-		if ( ipProc != -1 ) {
+		if ( ipProc != 0 ) {
 			
 			// Success.  Do stuff.
 			return TRUE;

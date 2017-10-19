@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Options/MXOptions.h"
 #include <Layout/LSWLayoutManager.h>
 
 using namespace lsw;
@@ -29,6 +30,11 @@ namespace mx {
 		// Removes decrypted strings from an array of LSW_WIDGET_LAYOUT objects.
 		static void						CleanEncryptedStrings( std::vector<std::wstring> &_vWStrings,
 			std::vector<std::string> &_vStrings );
+
+		// == Members.
+		// Options.
+		MX_OPTIONS *					m_poOptions;
+
 	};
 
 }	// namespace mx

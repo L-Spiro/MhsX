@@ -6,8 +6,9 @@
 
 namespace mx {
 
-	COptionsWindow::COptionsWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
-		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu ) {
+	COptionsWindow::COptionsWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, MX_OPTIONS * _poOptions, bool _bCreateWidget, HMENU _hMenu ) :
+		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu ),
+		m_poOptions( _poOptions ) {
 	}
 
 	// == Functions.
@@ -16,6 +17,7 @@ namespace mx {
 		CWidget * pwGeneral = COptionsLayout::CreateGeneralPage( this );
 		CWidget * pwGenSearch = COptionsLayout::CreateGeneralSearchPage( this );
 
+		// Order of pushing them here determines the order in the list.
 		m_vPages.push_back( static_cast<COptionsPage *>(pwGeneral) );
 		m_vPages.push_back( static_cast<COptionsPage *>(pwGenSearch) );
 

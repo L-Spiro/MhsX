@@ -1,5 +1,6 @@
 #pragma once
-
+#include "../MXMhsX.h"
+#include "../Options/MXOptions.h"
 #include <Layout/LSWWidgetLayout.h>
 #include <Widget/LSWWidget.h>
 
@@ -57,7 +58,7 @@ namespace mx {
 			
 			MX_OI_GENERAL_SEARCH_MISC,
 			MX_OI_GENERAL_SEARCH_POSTFLUSH,
-			MX_OI_GENERAL_SEARCH_PREFLUSH,
+			MX_OI_GENERAL_SEARCH_PRECACHE,
 			MX_OI_GENERAL_SEARCH_PAUSE,
 
 			MX_OI_GENERAL_SEARCH_DOTS,
@@ -71,7 +72,7 @@ namespace mx {
 
 		// == Functions.
 		// Creates the Options dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
-		static BOOL								CreateOptionsDialog( CWidget * _pwParent );
+		static BOOL								CreateOptionsDialog( CWidget * _pwParent, MX_OPTIONS * _poOptions );
 
 		// Creates the general options page.
 		static CWidget *						CreateGeneralPage( CWidget * _pwParent );

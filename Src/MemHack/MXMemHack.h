@@ -1,4 +1,6 @@
 #pragma once
+#include "../MXMhsX.h"
+#include "../Options/MXOptions.h"
 #include <LSWWin.h>
 #include <Helpers/LSWHelpers.h>
 
@@ -19,6 +21,9 @@ namespace mx {
 		// Detach from the current process.
 		void								Detach();
 
+		// Gets the options.
+		const MX_OPTIONS &					Options() const { return m_oOptions; }
+
 
 	protected :
 		// == Members.
@@ -27,6 +32,9 @@ namespace mx {
 
 		// The process ID.
 		DWORD								m_dwProcId;
+
+		// Options.
+		MX_OPTIONS							m_oOptions;
 	};
 
 }	// namespace mx

@@ -19,13 +19,13 @@ namespace mx {
 				return new COpenProcessWindow( _wlLayout, _pwParent,  _bCreateWidget, _hMenu );
 			}
 			case MX_OPTIONS_WINDOW : {
-				return new COptionsWindow( _wlLayout, _pwParent,  _bCreateWidget, _hMenu );
+				return new COptionsWindow( _wlLayout, _pwParent, m_poOptions, _bCreateWidget, _hMenu );
 			}
 			case MX_OPTIONS_GENERAL : {
-				return new COptionsPageGeneral( _wlLayout, _pwParent,  _bCreateWidget, _hMenu );
+				return new COptionsPageGeneral( _wlLayout, _pwParent, m_poOptions,  _bCreateWidget, _hMenu );
 			}
 			case MX_OPTIONS_GENSEARCH : {
-				return new COptionsPageGenSearch( _wlLayout, _pwParent,  _bCreateWidget, _hMenu );
+				return new COptionsPageGenSearch( _wlLayout, _pwParent, m_poOptions,  _bCreateWidget, _hMenu );
 			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu );
