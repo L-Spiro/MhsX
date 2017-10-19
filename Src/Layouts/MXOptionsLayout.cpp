@@ -34,7 +34,7 @@ namespace mx {
 			FALSE,									// bActive
 			2,										// iLeft
 			2,										// iTop
-			48,									// dwWidth
+			48,										// dwWidth
 			156,									// dwHeight
 			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | LBS_NOTIFY | LBS_NOINTEGRALHEIGHT,																// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY | WS_EX_CLIENTEDGE,												// dwStyleEx
@@ -42,7 +42,38 @@ namespace mx {
 			0,										// sTextLen
 			MX_OI_DIALOG,							// dwParentId
 		},
-		
+		{
+			LSW_LT_BUTTON,							// ltType
+			MX_OI_OK,								// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			TRUE,									// bActive
+			164 + 4,								// iLeft
+			162 + 5,								// iTop
+			43,										// dwWidth
+			12,										// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON | BS_TEXT,								// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
+			MX_MAKE_WCHAR( _T_D736D92D_OK ),																	// pwcText
+			_LEN_D736D92D,							// sTextLen
+			MX_OI_DIALOG,							// dwParentId
+		},
+		{
+			LSW_LT_BUTTON,							// ltType
+			MX_OI_CANCEL,							// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			210 + 4,								// iLeft
+			162 + 5,								// iTop
+			43,										// dwWidth
+			12,										// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON | BS_TEXT,									// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
+			MX_MAKE_WCHAR( _T_51BAC044_Cancel ),																// pwcText
+			_LEN_51BAC044,							// sTextLen
+			MX_OI_DIALOG,							// dwParentId
+		},
 	};
 
 	// General section.

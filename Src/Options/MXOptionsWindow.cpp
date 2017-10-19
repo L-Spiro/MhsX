@@ -26,8 +26,9 @@ namespace mx {
 			for ( size_t I = 0; I < m_vPages.size(); ++I ) {
 				plbBox->AddString( m_vPages[I]->GetName().c_str() );
 			}
+			plbBox->SetCurSel( 0 );
 		}
-		plbBox->SetCurSel( 0 );
+		
 		return LSW_H_CONTINUE;
 	}
 

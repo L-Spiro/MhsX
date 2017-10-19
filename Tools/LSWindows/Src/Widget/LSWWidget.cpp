@@ -226,10 +226,10 @@ namespace lsw {
 				ControlSetup( pmwThis, (*pvWidgets) );
 
 				// Window rect.
-#define MX_X	990
-#define MX_Y	499
+#define MX_X	891
+#define MX_Y	466
 
-#if 0
+#if 1
 				// For window borders.
 #define MX_OFF_X	7
 #define MX_OFF_Y	30
@@ -237,9 +237,9 @@ namespace lsw {
 #define MX_OFF_X	0
 #define MX_OFF_Y	0
 #endif
-				POINT pConvOrg = PixelsToDialogUnits( _hWnd, 1043 - MX_X - MX_OFF_X, 757 - MX_Y - MX_OFF_Y );
+				POINT pConvOrg = PixelsToDialogUnits( _hWnd, 1266 - MX_X - MX_OFF_X, 800 - MX_Y - MX_OFF_Y );
 				//POINT pConv = PixelsToDialogUnits( _hWnd, 559 - 548 - 7, 486 - 453 - 30 );
-				POINT pConvClient = PixelsToDialogUnits( _hWnd, 297, 23 );
+				POINT pConvClient = PixelsToDialogUnits( _hWnd, 75, 23 );
 				
 				pmwThis->InitDialog();
 				return TRUE;	// Return TRUE to pass focus on to the control specified by _wParam.

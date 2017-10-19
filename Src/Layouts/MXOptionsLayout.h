@@ -16,6 +16,8 @@ namespace mx {
 			MX_OI_NONE,
 			MX_OI_DIALOG,
 			MX_OI_LIST,
+			MX_OI_OK,
+			MX_OI_CANCEL,
 
 			MX_OI_GENERAL,
 			MX_OI_GENERAL_REFRESH_RATE,
