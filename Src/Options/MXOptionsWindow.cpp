@@ -2,6 +2,7 @@
 #include "../Layouts/MXOptionsLayout.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../Utilities/MXUtilities.h"
+#include <Base/LSWBase.h>
 #include <ListBox/LSWListBox.h>
 
 namespace mx {
@@ -36,10 +37,23 @@ namespace mx {
 	CWidget::LSW_HANDLED COptionsWindow::Command( WORD _Id, HWND _hControl ) {
 		switch ( _Id ) {
 			case COptionsLayout::MX_OI_LIST : {
-				//COptionsLayout::CreateOptionsDialog( this );
 				CListBox * plbBox = ListBox();
 				SetPage( plbBox->GetCurSel() );
 				break;
+			}
+			case COptionsLayout::MX_OI_OK : {
+				for ( size_t I = 0; I < m_vPages.size(); ++I ) {
+					std::wstring wsTemp;
+					if ( !m_vPages[I]->Verify( wsTemp ) ) {
+						lsw::CBase::MessageBoxError( Wnd(), wsTemp.c_str() );
+						return LSW_H_CONTINUE;
+					}
+
+				}
+				return LSW_H_CONTINUE;
+			}
+			case COptionsLayout::MX_OI_CANCEL : {
+				return Close();
 			}
 		}
 		return LSW_H_CONTINUE;

@@ -7,6 +7,10 @@ namespace mx {
 	}
 
 	// == Functions.
+	// Verifies the options, returning an error string in case of error.
+	BOOL COptionsPage::Verify( std::wstring &_wsError ) {
+		return FALSE;
+	}
 	// WM_INITDIALOG.
 	/*CWidget::LSW_HANDLED COptionsPage::InitDialog() {
 		return LSW_H_CONTINUE;
