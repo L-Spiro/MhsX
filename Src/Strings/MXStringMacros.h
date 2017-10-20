@@ -4257,3 +4257,38 @@
 #define _DEC_S_39FDDE4C_Anything_Readable__Slower_but_Undetectable_ mx::CStringDecoder::DecodeToString( _T_39FDDE4C_Anything_Readable__Slower_but_Undetectable_, _LEN_39FDDE4C )
 #define _DEC_WS_39FDDE4C_Anything_Readable__Slower_but_Undetectable_ mx::CStringDecoder::DecodeToWString( _T_39FDDE4C_Anything_Readable__Slower_but_Undetectable_, _LEN_39FDDE4C )
 
+// Include Child Windows
+#define _T_4CFA0E3F_Include_Child_Windows "\xD1\x3C\x33\x07\x07\x2D\xF3\xE7\x13\x30\x32\x3A\xF6\xBB\x1E\xF1\x3C\x34\x0A\x09\x3C"
+#define _LEN_4CFA0E3F 21
+#define _DEC_4CFA0E3F_Include_Child_Windows( STR ) mx::CStringDecoder::Decode( _T_4CFA0E3F_Include_Child_Windows, _LEN_4CFA0E3F, STR )
+#define _DEC_S_4CFA0E3F_Include_Child_Windows mx::CStringDecoder::DecodeToString( _T_4CFA0E3F_Include_Child_Windows, _LEN_4CFA0E3F )
+#define _DEC_WS_4CFA0E3F_Include_Child_Windows mx::CStringDecoder::DecodeToWString( _T_4CFA0E3F_Include_Child_Windows, _LEN_4CFA0E3F )
+
+// None
+#define _T_DFA2AFF1_None "\xD6\x3D\x3E\x00"
+#define _LEN_DFA2AFF1 4
+#define _DEC_DFA2AFF1_None( STR ) mx::CStringDecoder::Decode( _T_DFA2AFF1_None, _LEN_DFA2AFF1, STR )
+#define _DEC_S_DFA2AFF1_None mx::CStringDecoder::DecodeToString( _T_DFA2AFF1_None, _LEN_DFA2AFF1 )
+#define _DEC_WS_DFA2AFF1_None mx::CStringDecoder::DecodeToWString( _T_DFA2AFF1_None, _LEN_DFA2AFF1 )
+
+// Path
+#define _T_AB662431_Path "\xD8\x2F\x44\x03"
+#define _LEN_AB662431 4
+#define _DEC_AB662431_Path( STR ) mx::CStringDecoder::Decode( _T_AB662431_Path, _LEN_AB662431, STR )
+#define _DEC_S_AB662431_Path mx::CStringDecoder::DecodeToString( _T_AB662431_Path, _LEN_AB662431 )
+#define _DEC_WS_AB662431_Path mx::CStringDecoder::DecodeToWString( _T_AB662431_Path, _LEN_AB662431 )
+
+// Parent
+#define _T_3A226579_Parent "\xD8\x2F\x42\x00\x00\x3D"
+#define _LEN_3A226579 6
+#define _DEC_3A226579_Parent( STR ) mx::CStringDecoder::Decode( _T_3A226579_Parent, _LEN_3A226579, STR )
+#define _DEC_S_3A226579_Parent mx::CStringDecoder::DecodeToString( _T_3A226579_Parent, _LEN_3A226579 )
+#define _DEC_WS_3A226579_Parent mx::CStringDecoder::DecodeToWString( _T_3A226579_Parent, _LEN_3A226579 )
+
+// Gathering more data about a process increases the risk of an anti-cheat being triggered.
+#define _T_CF10E6E7_Gathering_more_data_about_a_process_increases_the_risk_of_an_anti_cheat_being_triggered_ "\xCF\x2F\x44\x03\xF7\x3B\xF7\x35\x37\xE8\x36\x3D\x04\x00\xE7\xEC\x2F\x44\xFC\xB2\x2A\xF0\x36\x45\x3C\xE9\x2F\xB2\x0B\x39\xF7\x31\x35\x0E\x05\xE9\xF7\x35\x33\x3A\x2E\x2F\x05\x00\x3A\xA8\x42\x38\x00\xB2\x3B\xF7\x3A\x3B\xE8\x38\x34\xB2\xFC\x35\xA8\x2F\x3E\x0F\xFB\xF6\xF1\x2F\x35\x29\x3D\xEE\xF4\x00\x30\xF6\x35\xF0\x0F\x04\x32\xF5\x2E\x35\x3A\x2E\x32\xC0"
+#define _LEN_CF10E6E7 88
+#define _DEC_CF10E6E7_Gathering_more_data_about_a_process_increases_the_risk_of_an_anti_cheat_being_triggered_( STR ) mx::CStringDecoder::Decode( _T_CF10E6E7_Gathering_more_data_about_a_process_increases_the_risk_of_an_anti_cheat_being_triggered_, _LEN_CF10E6E7, STR )
+#define _DEC_S_CF10E6E7_Gathering_more_data_about_a_process_increases_the_risk_of_an_anti_cheat_being_triggered_ mx::CStringDecoder::DecodeToString( _T_CF10E6E7_Gathering_more_data_about_a_process_increases_the_risk_of_an_anti_cheat_being_triggered_, _LEN_CF10E6E7 )
+#define _DEC_WS_CF10E6E7_Gathering_more_data_about_a_process_increases_the_risk_of_an_anti_cheat_being_triggered_ mx::CStringDecoder::DecodeToWString( _T_CF10E6E7_Gathering_more_data_about_a_process_increases_the_risk_of_an_anti_cheat_being_triggered_, _LEN_CF10E6E7 )
+

@@ -68,7 +68,19 @@ namespace mx {
 			MX_OI_GENERAL_SEARCH_USE_EPSILON,
 			MX_OI_GENERAL_SEARCH_SMART_EPS,
 			MX_OI_GENERAL_SEARCH_EPSILON,
-			MX_OI_GENERAL_SEARCH_EPSILON_EDIT
+			MX_OI_GENERAL_SEARCH_EPSILON_EDIT,
+
+			MX_OI_OPEN_PROCESS,
+			MX_OI_OPEN_PROCESS_SHOW_GROUP,
+			MX_OI_OPEN_PROCESS_PROCESS,
+			MX_OI_OPEN_PROCESS_PROCESSID,
+			MX_OI_OPEN_PROCESS_PATH,
+			MX_OI_OPEN_PROCESS_WINDOWS,
+			MX_OI_OPEN_PROCESS_CHILDWINDOWS,
+			MX_OI_OPEN_PROCESS_PARENT,
+			MX_OI_OPEN_PROCESS_ALL,
+			MX_OI_OPEN_PROCESS_NONE,
+			MX_OI_OPEN_PROCESS_EXPLAIN,
 		};
 
 
@@ -78,6 +90,9 @@ namespace mx {
 
 		// Creates the general options page.
 		static CWidget *						CreateGeneralPage( CWidget * _pwParent );
+
+		// Creates the open-process options page.
+		static CWidget *						CreateOpenProcPage( CWidget * _pwParent );
 
 		// Creates the general search options page.
 		static CWidget *						CreateGeneralSearchPage( CWidget * _pwParent );
@@ -93,6 +108,9 @@ namespace mx {
 
 		// General search section.
 		static LSW_WIDGET_LAYOUT				m_wlOptionsGeneralSearch[];
+
+		// Open-process section.
+		static LSW_WIDGET_LAYOUT				m_wlOptionsOpenProc[];
 
 
 		// == Functions.

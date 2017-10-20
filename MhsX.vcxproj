@@ -171,6 +171,7 @@
     <ClCompile Include="Src\Options\MXOptionsPage.cpp" />
     <ClCompile Include="Src\Options\MXOptionsPageGeneral.cpp" />
     <ClCompile Include="Src\Options\MXOptionsPageGenSearch.cpp" />
+    <ClCompile Include="Src\Options\MXOptionsPageOpenProc.cpp" />
     <ClCompile Include="Src\Options\MXOptionsWindow.cpp" />
     <ClCompile Include="Src\PE\MXPeObject.cpp" />
     <ClCompile Include="Src\PE\MXPeWorks.cpp" />
@@ -192,6 +193,7 @@
     <ClInclude Include="Src\Options\MXOptionsPage.h" />
     <ClInclude Include="Src\Options\MXOptionsPageGeneral.h" />
     <ClInclude Include="Src\Options\MXOptionsPageGenSearch.h" />
+    <ClInclude Include="Src\Options\MXOptionsPageOpenProc.h" />
     <ClInclude Include="Src\Options\MXOptionsWindow.h" />
     <ClInclude Include="Src\PE\MXPeObject.h" />
     <ClInclude Include="Src\PE\MXPeStructs.h" />

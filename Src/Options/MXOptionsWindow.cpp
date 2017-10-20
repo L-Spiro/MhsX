@@ -16,10 +16,13 @@ namespace mx {
 	// WM_INITDIALOG.
 	CWidget::LSW_HANDLED COptionsWindow::InitDialog() {
 		CWidget * pwGeneral = COptionsLayout::CreateGeneralPage( this );
+		CWidget * pwOpenProc = COptionsLayout::CreateOpenProcPage( this );
 		CWidget * pwGenSearch = COptionsLayout::CreateGeneralSearchPage( this );
+
 
 		// Order of pushing them here determines the order in the list.
 		m_vPages.push_back( static_cast<COptionsPage *>(pwGeneral) );
+		m_vPages.push_back( static_cast<COptionsPage *>(pwOpenProc) );
 		m_vPages.push_back( static_cast<COptionsPage *>(pwGenSearch) );
 
 		CListBox * plbBox = static_cast<CListBox *>(FindChild( COptionsLayout::MX_OI_LIST ));

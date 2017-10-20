@@ -680,7 +680,7 @@ namespace mx {
 			FALSE,									// bActive
 			5,										// iLeft
 			129,									// iTop
-			115,									// dwWidth
+			117,									// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
 			MX_CHECKSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -738,6 +738,187 @@ namespace mx {
 		},
 	};
 
+	// Open-process section.
+	LSW_WIDGET_LAYOUT COptionsLayout::m_wlOptionsOpenProc[] = {
+		{
+			MX_OPTIONS_OPENPROC,					// ltType
+			MX_OI_OPEN_PROCESS,						// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			53,										// iLeft
+			2,										// iTop
+			204,									// dwWidth
+			156,									// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | DS_3DLOOK | DS_FIXEDSYS | DS_SETFONT | DS_CONTROL,															// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_CONTROLPARENT,																	// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_OI_NONE,								// dwParentId
+		},
+		// ==== Show ==== //
+		{
+			LSW_LT_GROUPBOX,						// ltType
+			MX_OI_OPEN_PROCESS_SHOW_GROUP,			// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			0,										// iLeft
+			0,										// iTop
+			204,									// dwWidth
+			(9 + MX_DEF_CHECK_HEIGHT * 6) + MX_DEF_STATIC_HEIGHT * 2 + 3,									// dwHeight
+			MX_GROUPSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_923C763F_Show ),		// pwcText
+			_LEN_923C763F,							// sTextLen
+			MX_OI_OPEN_PROCESS,						// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_OPEN_PROCESS_PROCESS,				// wId
+			WC_BUTTONW,								// lpwcClass
+			FALSE,									// bEnabled
+			FALSE,									// bActive
+			5,										// iLeft
+			9 + MX_DEF_CHECK_HEIGHT * 0,			// iTop
+			87,										// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_49A0210A_Process ),	// pwcText
+			_LEN_49A0210A,							// sTextLen
+			MX_OI_OPEN_PROCESS,						// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_OPEN_PROCESS_PROCESSID,			// wId
+			WC_BUTTONW,								// lpwcClass
+			FALSE,									// bEnabled
+			FALSE,									// bActive
+			5,										// iLeft
+			9 + MX_DEF_CHECK_HEIGHT * 1,			// iTop
+			87,										// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_C0D8DDA3_Process_ID ),// pwcText
+			_LEN_C0D8DDA3,							// sTextLen
+			MX_OI_OPEN_PROCESS,						// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_OPEN_PROCESS_PATH,				// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			5,										// iLeft
+			9 + MX_DEF_CHECK_HEIGHT * 2,			// iTop
+			87,										// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_AB662431_Path ),		// pwcText
+			_LEN_AB662431,							// sTextLen
+			MX_OI_OPEN_PROCESS,						// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_OPEN_PROCESS_WINDOWS,				// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			5,										// iLeft
+			9 + MX_DEF_CHECK_HEIGHT * 3,			// iTop
+			87,										// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_2C5ABC07_Windows ),	// pwcText
+			_LEN_2C5ABC07,							// sTextLen
+			MX_OI_OPEN_PROCESS,						// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_OPEN_PROCESS_CHILDWINDOWS,		// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			5 + 5,									// iLeft
+			9 + MX_DEF_CHECK_HEIGHT * 4,			// iTop
+			87,										// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_4CFA0E3F_Include_Child_Windows ),	// pwcText
+			_LEN_4CFA0E3F,										// sTextLen
+			MX_OI_OPEN_PROCESS,						// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_OPEN_PROCESS_PARENT,				// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			5,										// iLeft
+			9 + MX_DEF_CHECK_HEIGHT * 5,			// iTop
+			87,										// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_3A226579_Parent ),	// pwcText
+			_LEN_3A226579,							// sTextLen
+			MX_OI_OPEN_PROCESS,						// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_OPEN_PROCESS_ALL,					// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			204 / 2,								// iLeft
+			9 + MX_DEF_CHECK_HEIGHT * 0,			// iTop
+			87,										// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_0355373D_All ),		// pwcText
+			_LEN_0355373D,							// sTextLen
+			MX_OI_OPEN_PROCESS,						// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_OPEN_PROCESS_NONE,				// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			204 / 2,								// iLeft
+			9 + MX_DEF_CHECK_HEIGHT * 1,			// iTop
+			87,										// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_DFA2AFF1_None ),		// pwcText
+			_LEN_DFA2AFF1,							// sTextLen
+			MX_OI_OPEN_PROCESS,						// dwParentId
+		},
+		{
+			LSW_LT_LABEL,							// ltType
+			MX_OI_OPEN_PROCESS_EXPLAIN,				// wId
+			WC_STATICW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			5,										// iLeft
+			9 + MX_DEF_CHECK_HEIGHT * 6,			// iTop
+			204 - 10,								// dwWidth
+			MX_DEF_STATIC_HEIGHT * 2,				// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_CF10E6E7_Gathering_more_data_about_a_process_increases_the_risk_of_an_anti_cheat_being_triggered_ ),				// pwcText
+			_LEN_CF10E6E7,																														// sTextLen
+			MX_OI_OPEN_PROCESS,						// dwParentId
+		},
+	};
+
 	// == Functions.
 	// Creates the Options dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
 	BOOL COptionsLayout::CreateOptionsDialog( CWidget * _pwParent, MX_OPTIONS * _poOptions ) {
@@ -766,6 +947,11 @@ namespace mx {
 	// Creates the general options page.
 	CWidget * COptionsLayout::CreateGeneralPage( CWidget * _pwParent ) {
 		return CreatePage( _pwParent, m_wlOptionsGeneral, MX_ELEMENTS( m_wlOptionsGeneral ) );
+	}
+
+	// Creates the open-process options page.
+	CWidget * COptionsLayout::CreateOpenProcPage( CWidget * _pwParent ) {
+		return CreatePage( _pwParent, m_wlOptionsOpenProc, MX_ELEMENTS( m_wlOptionsOpenProc ) );
 	}
 
 	// Creates the general search options page.
