@@ -17,7 +17,7 @@ namespace mx {
 #define MX_OD_COORD			MX_OD_L, MX_OD_T, MX_OD_W, MX_OD_H
 
 	// == Members.
-	// The layout for the Open Process dialog.
+	// The layout for the Options dialog.
 	LSW_WIDGET_LAYOUT COptionsLayout::m_wlOptionsDialog[] = {
 		{
 			MX_OPTIONS_WINDOW,						// ltType
