@@ -387,6 +387,7 @@ namespace mx {
 		},
 
 	};
+#undef MX_TPS_CB_W
 #undef MX_TPS_CB_L
 #undef MX_TPS_L
 #undef MX_TPS_W
@@ -965,6 +966,7 @@ namespace mx {
 #undef MX_OD_W
 #undef MX_OD_T
 #undef MX_OD_L
+#undef MX_OPTIONS_LIST_W
 #undef MX_OPTIONS_H
 #undef MX_OPTIONS_W
 
