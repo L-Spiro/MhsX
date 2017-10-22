@@ -241,7 +241,7 @@ namespace mx {
 
 	// == Functions.
 	// Creates the Open Process dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
-	BOOL COpenProcessLayout::CreateOpenProcessDialog( CWidget * _pwParent ) {
+	BOOL COpenProcessLayout::CreateOpenProcessDialog( CWidget * _pwParent, MX_OPTIONS * _poOptions ) {
 		std::vector<std::string> sStrings;
 		std::vector<std::wstring> sStringsW;
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
@@ -249,8 +249,10 @@ namespace mx {
 			vLayouts,
 			sStringsW,
 			sStrings );
-		
-		INT_PTR ipProc = lsw::CBase::LayoutManager()->DialogBoxX( &vLayouts[0], MX_ELEMENTS( m_wlOpenProcessDialog ), _pwParent );
+		mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
+		plmLayout->m_poOptions = _poOptions;
+		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], MX_ELEMENTS( m_wlOpenProcessDialog ), _pwParent );
+		plmLayout->m_poOptions = nullptr;
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
 		if ( ipProc != -1 ) {
 			

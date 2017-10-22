@@ -7,4 +7,12 @@ namespace lsw {
 		Parent( _wlLayout, _pwParent, _bCreateWidget, _hMenu ) {
 	}
 
+// == Functions.
+	// Selects a range of text.
+	VOID CEdit::SetSel( INT _iStart, INT _iEnd ) const {
+		if ( Wnd() ) {
+			::SendMessageW( Wnd(), EM_SETSEL, static_cast<WPARAM>(_iStart), static_cast<LPARAM>(_iEnd) );
+		}
+	}
+
 }	// namespace lsw

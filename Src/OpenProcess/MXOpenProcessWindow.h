@@ -1,5 +1,6 @@
 #pragma once
-
+#include "../MXMhsX.h"
+#include "../Options/MXOptions.h"
 #include <ListView/LSWListView.h>
 #include <MainWindow/LSWMainWindow.h>
 #include <set>
@@ -11,7 +12,7 @@ namespace mx {
 	
 	class COpenProcessWindow : public lsw::CMainWindow {
 	public :
-		COpenProcessWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		COpenProcessWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, MX_OPTIONS * _poOptions, bool _bCreateWidget = true, HMENU _hMenu = NULL );
 		~COpenProcessWindow();
 
 
@@ -81,8 +82,26 @@ namespace mx {
 		// Determines if the given process ID is in the given set of process ID's.
 		BOOL								ProcessListHasId( const std::set<DWORD> &_sProcs, DWORD _dwId );
 
+		// Show paths?
+		BOOL								ShowPaths() const { return m_poOptions ? (m_poOptions->dwOpenProc & MX_OP_SHOW_PATH) : TRUE; }
+
+		// Show windows?
+		BOOL								ShowWindows() const { return m_poOptions ? (m_poOptions->dwOpenProc & MX_OP_SHOW_WINDOWS) : TRUE; }
+
+		// Show child windows?
+		BOOL								ShowChildWindows() const { return ShowWindows() && (m_poOptions ? (m_poOptions->dwOpenProc & MX_OP_SHOW_CHILDWINDOWS) : TRUE); }
+
+		// Show parents?
+		BOOL								ShowParents() const { return m_poOptions ? (m_poOptions->dwOpenProc & MX_OP_SHOW_PARENT) : TRUE; }
+
+		// Mark x86?
+		BOOL								MarkX86() const { return m_poOptions ? (m_poOptions->dwOpenProc & MX_OP_SHOW_X86) : TRUE; }
+
 		// Enumerate thread windows.
 		static BOOL CALLBACK				EnumThreadWindows_GatherWindows( HWND _hWnd, LPARAM _lParam );
+
+		// Enumerate thread windows (no children).
+		static BOOL CALLBACK				EnumThreadWindows_GatherWindowsNoChildren( HWND _hWnd, LPARAM _lParam );
 
 		// Enumerate child windows.
 		static BOOL CALLBACK				EnumChildWindows_GatherWindows( HWND _hWnd, LPARAM _lParam );
@@ -94,6 +113,9 @@ namespace mx {
 		// == Members.
 		// Main or All.
 		DWORD								m_dwMainOrAll;
+
+		// Options.
+		MX_OPTIONS *						m_poOptions;
 
 		// == Functions.
 		// Finds an entry in an array of MX_PROCESSES objects with the given process ID.

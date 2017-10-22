@@ -47,13 +47,22 @@ namespace mx {
 			case COptionsLayout::MX_OI_OK : {
 				for ( size_t I = 0; I < m_vPages.size(); ++I ) {
 					std::wstring wsTemp;
-					if ( !m_vPages[I]->Verify( wsTemp ) ) {
+					CWidget * pwTemp = nullptr;
+					if ( !m_vPages[I]->Verify( wsTemp, pwTemp ) ) {
+						CListBox * plbBox = ListBox();
+						plbBox->SetCurSel( I );
+						SetPage( I );
+						pwTemp->SetFocus();
+						pwTemp->SetSel( 0, -1 );
 						lsw::CBase::MessageBoxError( Wnd(), wsTemp.c_str() );
 						return LSW_H_CONTINUE;
 					}
-
 				}
-				return LSW_H_CONTINUE;
+				for ( size_t I = 0; I < m_vPages.size(); ++I ) {
+					m_vPages[I]->Finalize();
+				}
+				::EndDialog( Wnd(), 1 );
+				return LSW_H_HANDLED;
 			}
 			case COptionsLayout::MX_OI_CANCEL : {
 				return Close();

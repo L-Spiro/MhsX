@@ -14,6 +14,8 @@ namespace mx {
 		m_oOptions.bDataTypeSizes = TRUE;
 		m_oOptions.bDataTypeRanges = TRUE;
 		// ====
+		m_oOptions.dwOpenProc = MX_OP_SHOW_ALL;
+		// ====
 		m_oOptions.bMemImage = TRUE;
 		m_oOptions.bMemPrivate = TRUE;
 		m_oOptions.bMemMapped = FALSE;

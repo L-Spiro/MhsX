@@ -24,6 +24,9 @@ namespace mx {
 		// Gets the options.
 		const MX_OPTIONS &					Options() const { return m_oOptions; }
 
+		// Sets the options.
+		void								SetOptions( const MX_OPTIONS &_oOptions ) { m_oOptions = _oOptions; }
+
 
 	protected :
 		// == Members.

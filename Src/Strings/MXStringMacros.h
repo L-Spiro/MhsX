@@ -4292,3 +4292,31 @@
 #define _DEC_S_CF10E6E7_Gathering_more_data_about_a_process_increases_the_risk_of_an_anti_cheat_being_triggered_ mx::CStringDecoder::DecodeToString( _T_CF10E6E7_Gathering_more_data_about_a_process_increases_the_risk_of_an_anti_cheat_being_triggered_, _LEN_CF10E6E7 )
 #define _DEC_WS_CF10E6E7_Gathering_more_data_about_a_process_increases_the_risk_of_an_anti_cheat_being_triggered_ mx::CStringDecoder::DecodeToWString( _T_CF10E6E7_Gathering_more_data_about_a_process_increases_the_risk_of_an_anti_cheat_being_triggered_, _LEN_CF10E6E7 )
 
+// Mark x86 Processes
+#define _T_6E9684E9_Mark_x86_Processes "\xD5\x2F\x42\x06\xB2\x41\xC6\xFD\xF0\x18\x3B\x3D\xF5\x00\x3A\xFB\x33\x43"
+#define _LEN_6E9684E9 18
+#define _DEC_6E9684E9_Mark_x86_Processes( STR ) mx::CStringDecoder::Decode( _T_6E9684E9_Mark_x86_Processes, _LEN_6E9684E9, STR )
+#define _DEC_S_6E9684E9_Mark_x86_Processes mx::CStringDecoder::DecodeToString( _T_6E9684E9_Mark_x86_Processes, _LEN_6E9684E9 )
+#define _DEC_WS_6E9684E9_Mark_x86_Processes mx::CStringDecoder::DecodeToWString( _T_6E9684E9_Mark_x86_Processes, _LEN_6E9684E9 )
+
+// Invalid search buffer size.
+#define _T_C6AC1231_Invalid_search_buffer_size_ "\xD1\x3C\x46\xFC\xFE\x32\xF2\xE7\x43\x2D\x2A\x40\xF5\x03\xE7\xEA\x43\x36\x01\xF7\x3B\xAE\x3A\x39\x42\x2E\xFC"
+#define _LEN_C6AC1231 27
+#define _DEC_C6AC1231_Invalid_search_buffer_size_( STR ) mx::CStringDecoder::Decode( _T_C6AC1231_Invalid_search_buffer_size_, _LEN_C6AC1231, STR )
+#define _DEC_S_C6AC1231_Invalid_search_buffer_size_ mx::CStringDecoder::DecodeToString( _T_C6AC1231_Invalid_search_buffer_size_, _LEN_C6AC1231 )
+#define _DEC_WS_C6AC1231_Invalid_search_buffer_size_ mx::CStringDecoder::DecodeToWString( _T_C6AC1231_Invalid_search_buffer_size_, _LEN_C6AC1231 )
+
+// Invalid epsilon.
+#define _T_552321B5_Invalid_epsilon_ "\xD1\x3C\x46\xFC\xFE\x32\xF2\xE7\x35\x38\x3C\x37\xFE\x0A\x35\xB6"
+#define _LEN_552321B5 16
+#define _DEC_552321B5_Invalid_epsilon_( STR ) mx::CStringDecoder::Decode( _T_552321B5_Invalid_epsilon_, _LEN_552321B5, STR )
+#define _DEC_S_552321B5_Invalid_epsilon_ mx::CStringDecoder::DecodeToString( _T_552321B5_Invalid_epsilon_, _LEN_552321B5 )
+#define _DEC_WS_552321B5_Invalid_epsilon_ mx::CStringDecoder::DecodeToWString( _T_552321B5_Invalid_epsilon_, _LEN_552321B5 )
+
+// Invalid timer value.
+#define _T_03589F21_Invalid_timer_value_ "\xD1\x3C\x46\xFC\xFE\x32\xF2\xE7\x44\x31\x36\x33\x04\xBB\x3D\xE9\x3A\x45\x00\xC0"
+#define _LEN_03589F21 20
+#define _DEC_03589F21_Invalid_timer_value_( STR ) mx::CStringDecoder::Decode( _T_03589F21_Invalid_timer_value_, _LEN_03589F21, STR )
+#define _DEC_S_03589F21_Invalid_timer_value_ mx::CStringDecoder::DecodeToString( _T_03589F21_Invalid_timer_value_, _LEN_03589F21 )
+#define _DEC_WS_03589F21_Invalid_timer_value_ mx::CStringDecoder::DecodeToWString( _T_03589F21_Invalid_timer_value_, _LEN_03589F21 )
+

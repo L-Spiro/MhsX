@@ -377,6 +377,69 @@ namespace lsw {
 		return FALSE;
 	}
 
+	// Gets the window text.
+	std::string CWidget::GetTextA() const {
+		INT iLen = GetTextLengthA() + 1;
+		CHAR * pcBuffer = new CHAR[iLen];
+		GetTextA( pcBuffer, iLen );
+		std::string sRet = pcBuffer;
+		delete [] pcBuffer;
+		return sRet;
+	}
+
+	// Gets the window text.
+	std::wstring CWidget::GetTextW() const {
+		INT iLen = GetTextLengthA() + 1;
+		WCHAR * pwcBuffer = new WCHAR[iLen];
+		GetTextW( pwcBuffer, iLen );
+		std::wstring sRet = pwcBuffer;
+		delete [] pwcBuffer;
+		return sRet;
+	}
+
+	// Get the value of the text as an expression.
+	BOOL CWidget::GetTextAsExpression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const {
+		CExpression eExp;
+		std::string sText = GetTextA();
+		if ( sText.size() == 0 ) { return FALSE; }
+		if ( !eExp.SetExpression( sText.c_str() ) ) { return FALSE; }
+		if ( !eExp.GetContainer() ) { return FALSE; }
+		if ( !eExp.GetContainer()->Resolve( _eResult ) ) { return FALSE; }
+		return TRUE;
+	}
+
+	// Get the value of the text as an int64_t expression.
+	BOOL CWidget::GetTextAsInt64Expression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const {
+		if ( !GetTextAsExpression( _eResult ) ) { return FALSE; }
+		_eResult = ee::CExpEvalContainer::ConvertResult( _eResult, ee::EE_NC_SIGNED );
+		return TRUE;
+	}
+
+	// Get the value of the text as a uint64_t expression.
+	BOOL CWidget::GetTextAsUInt64Expression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const {
+		if ( !GetTextAsExpression( _eResult ) ) { return FALSE; }
+		_eResult = ee::CExpEvalContainer::ConvertResult( _eResult, ee::EE_NC_UNSIGNED );
+		return TRUE;
+	}
+
+	// Get the value of the text as a double expression.
+	BOOL CWidget::GetTextAsDoubleExpression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const {
+		if ( !GetTextAsExpression( _eResult ) ) { return FALSE; }
+		_eResult = ee::CExpEvalContainer::ConvertResult( _eResult, ee::EE_NC_FLOATING );
+		return TRUE;
+	}
+
+	// If the function succeeds, the return value is the pointer to the window that previously had the keyboard focus.
+	CWidget * CWidget::SetFocus() const {
+		if ( !Wnd() ) { return nullptr; }
+		HWND hWnd = ::SetFocus( Wnd() );
+		CWidget * pwRet = nullptr;
+		if ( hWnd ) {
+			pwRet = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hWnd, GWLP_USERDATA ));
+		}
+		return pwRet;
+	}
+
 	// Updates all rectangles with the current window rectangles.  If a control changes size and you wish to set the new size as its "base" size,
 	//	call this.
 	VOID CWidget::UpdateRects() {

@@ -18,7 +18,10 @@ namespace mx {
 		virtual std::wstring					GetName() const;
 
 		// WM_INITDIALOG.
-		virtual LSW_HANDLED					InitDialog();
+		virtual LSW_HANDLED						InitDialog();
+
+		// Verifies the options, returning an error string in case of error.
+		virtual BOOL							Verify( std::wstring &_wsError, CWidget * &_pwWidget ) { return TRUE; }
 
 
 	protected :

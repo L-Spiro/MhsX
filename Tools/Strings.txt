@@ -617,3 +617,7 @@
 "Path"
 "Parent"
 "Gathering more data about a process increases the risk of an anti-cheat being triggered."
+"Mark x86 Processes"
+"Invalid search buffer size."
+"Invalid epsilon."
+"Invalid timer value."

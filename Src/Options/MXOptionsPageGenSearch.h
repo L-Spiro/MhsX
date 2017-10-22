@@ -20,6 +20,12 @@ namespace mx {
 		// WM_INITDIALOG.
 		virtual LSW_HANDLED						InitDialog();
 
+		// Verifies the options, returning an error string in case of error.
+		virtual BOOL							Verify( std::wstring &_wsError, CWidget * &_pwWidget );
+
+		// Copies all the settings to the MX_OPTIONS structure.
+		virtual BOOL							Finalize();
+
 
 		protected :
 		// == Members.

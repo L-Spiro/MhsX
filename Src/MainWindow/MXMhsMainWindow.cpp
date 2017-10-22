@@ -111,12 +111,15 @@ namespace mx {
 	CWidget::LSW_HANDLED CMhsMainWindow::Command( WORD _Id, HWND _hControl ) {
 		switch ( _Id ) {
 			case CMainWindowLayout::MX_MWMI_OPENPROCESS : {
-				COpenProcessLayout::CreateOpenProcessDialog( this );
+				MX_OPTIONS oOptions = m_pmhMemHack->Options();
+				COpenProcessLayout::CreateOpenProcessDialog( this, &oOptions );
 				break;
 			}
 			case CMainWindowLayout::MX_MWMI_OPTIONS : {
 				MX_OPTIONS oOptions = m_pmhMemHack->Options();
-				COptionsLayout::CreateOptionsDialog( this, &oOptions );
+				if ( COptionsLayout::CreateOptionsDialog( this, &oOptions ) ) {
+					m_pmhMemHack->SetOptions( oOptions );
+				}
 				break;
 			}
 		}

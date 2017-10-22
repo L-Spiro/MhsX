@@ -61,6 +61,12 @@ namespace lsw {
 		// Copies the text of the specified window's title bar (if it has one) into a buffer. If the specified window is a control, the text of the control is copied.
 		INT									GetTextW( LPWSTR _lpString, INT _nMaxCount ) const { return ::GetWindowTextW( Wnd(), _lpString, _nMaxCount ); }
 
+		// Gets the window text.
+		std::string							GetTextA() const;
+
+		// Gets the window text.
+		std::wstring						GetTextW() const;
+
 		// Retrieves the length, in characters, of the specified window's title bar text (if the window has a title bar).
 		//	If the specified window is a control, the function retrieves the length of the text within the control
 		INT									GetTextLengthA() const { return ::GetWindowTextLengthA( Wnd() ); }
@@ -74,6 +80,24 @@ namespace lsw {
 
 		// Changes the text of the specified window's title bar (if it has one). If the specified window is a control, the text of the control is changed.
 		BOOL								SetTextW( LPCWSTR _lpwString ) { return ::SetWindowTextW( Wnd(), _lpwString ); }
+
+		// Get the value of the text as an expression.
+		BOOL								GetTextAsExpression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const;
+
+		// Get the value of the text as an int64_t expression.
+		BOOL								GetTextAsInt64Expression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const;
+
+		// Get the value of the text as a uint64_t expression.
+		BOOL								GetTextAsUInt64Expression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const;
+
+		// Get the value of the text as a double expression.
+		BOOL								GetTextAsDoubleExpression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const;
+
+		// If the function succeeds, the return value is the pointer to the window that previously had the keyboard focus.
+		CWidget *							SetFocus() const;
+
+		// Selects a range of text.  Implemented by CEdit.
+		virtual VOID						SetSel( INT _iStart, INT _iEnd ) const {}
 
 		// Window rectangle.
 		const LSW_RECT &					WindowRect() const { return m_rRect; }

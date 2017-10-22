@@ -17,7 +17,7 @@ namespace mx {
 				return new CMhsMainWindow( _wlLayout, _pwParent,  _bCreateWidget, _hMenu );
 			}
 			case MX_OPEN_PROCESS_WINDOW : {
-				return new COpenProcessWindow( _wlLayout, _pwParent,  _bCreateWidget, _hMenu );
+				return new COpenProcessWindow( _wlLayout, _pwParent, m_poOptions,  _bCreateWidget, _hMenu );
 			}
 			case MX_OPTIONS_WINDOW : {
 				return new COptionsWindow( _wlLayout, _pwParent, m_poOptions, _bCreateWidget, _hMenu );

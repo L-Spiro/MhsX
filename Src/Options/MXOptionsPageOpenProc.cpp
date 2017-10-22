@@ -21,57 +21,106 @@ namespace mx {
 
 	// WM_INITDIALOG.
 	CWidget::LSW_HANDLED COptionsPageOpenProc::InitDialog() {
-		if ( !m_poOptions ) { return LSW_H_CONTINUE; }
-		/*
 		CCheckButton * pcbCheck = nullptr;
-		CEdit * peEdit = nullptr;
-		CRadioButton * prbRadio = nullptr;
-
-
-#define MX_CHECK( ID, MEMBER )																					\
-	pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::ID ));									\
-	if ( pcbCheck ) {																							\
-		pcbCheck->SetCheck( m_poOptions->MEMBER );																\
-	}*/
-		/*COptionsLayout::MX_OI_GENERAL_SEARCH_MEM_IMAGE;
-		m_poOptions->bMemImage;*/
-		/*
-		MX_CHECK( MX_OI_GENERAL_SEARCH_MEM_IMAGE, bMemImage );
-		MX_CHECK( MX_OI_GENERAL_SEARCH_MEM_PRIVATE, bMemPrivate );
-		MX_CHECK( MX_OI_GENERAL_SEARCH_MEM_MAPPED, bMemMapped );
-
-		MX_CHECK( MX_OI_GENERAL_SEARCH_POSTFLUSH, bPostFlush );
-		MX_CHECK( MX_OI_GENERAL_SEARCH_PRECACHE, bPreCache );
-		MX_CHECK( MX_OI_GENERAL_SEARCH_PAUSE, bPauseTarget );
-
-		MX_CHECK( MX_OI_GENERAL_SEARCH_USE_EPSILON, bUseEpsilon );
-		MX_CHECK( MX_OI_GENERAL_SEARCH_SMART_EPS, bSmartEpsilon );
-#undef MX_CHECK
-
-#define MX_CHECK( ID, MEMBER )																					\
-	prbRadio = static_cast<CRadioButton *>(FindChild( COptionsLayout::ID ));									\
-	if ( prbRadio ) {																							\
-		prbRadio->SetCheck( m_poOptions->MEMBER );																\
-	}
-		MX_CHECK( MX_OI_GENERAL_SEARCH_TP_NORMAL, iThreadPriority == THREAD_PRIORITY_NORMAL );
-		MX_CHECK( MX_OI_GENERAL_SEARCH_TP_HIGH, iThreadPriority == THREAD_PRIORITY_HIGHEST );
-		MX_CHECK( MX_OI_GENERAL_SEARCH_TP_CRIT, iThreadPriority == THREAD_PRIORITY_TIME_CRITICAL );
-#undef MX_CHECK
-
-		peEdit = static_cast<CEdit *>(FindChild( COptionsLayout::MX_OI_GENERAL_SEARCH_BUFFER_SIZE_EDIT ));
-		if ( peEdit ) {
-			peEdit->SetTextA( CUtilities::ToUnsigned( m_poOptions->dwBufferSize / 1024 / 1024 ) );
+		pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_OPEN_PROCESS_PROCESS ));
+		if ( pcbCheck ) {
+			pcbCheck->SetCheck( TRUE );
+		}
+		pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_OPEN_PROCESS_PROCESSID ));
+		if ( pcbCheck ) {
+			pcbCheck->SetCheck( TRUE );
 		}
 
-		peEdit = static_cast<CEdit *>(FindChild( COptionsLayout::MX_OI_GENERAL_SEARCH_EPSILON_EDIT ));
-		if ( peEdit ) {
-			std::string sTemp;
-			peEdit->SetTextA( CUtilities::ToDouble( m_poOptions->dEpsilon, sTemp ) );
-		}
-
-		*/
+		CheckAll();
 		
 		return LSW_H_CONTINUE;
+	}
+
+	// WM_COMMAND from control.
+	CWidget::LSW_HANDLED COptionsPageOpenProc::Command( WORD _Id, HWND _hControl ) {
+		if ( !m_poOptions ) {
+			CheckAll();
+			return LSW_H_CONTINUE;
+		}
+
+		static const struct {
+			WORD					wId;		// Control ID.
+			DWORD					dwFlag;		// Flag to set or unset.
+		} aTemp[] = {
+			{ COptionsLayout::MX_OI_OPEN_PROCESS_PATH, MX_OP_SHOW_PATH },
+			{ COptionsLayout::MX_OI_OPEN_PROCESS_WINDOWS, MX_OP_SHOW_WINDOWS },
+			{ COptionsLayout::MX_OI_OPEN_PROCESS_CHILDWINDOWS, MX_OP_SHOW_CHILDWINDOWS },
+			{ COptionsLayout::MX_OI_OPEN_PROCESS_PARENT, MX_OP_SHOW_PARENT },
+			{ COptionsLayout::MX_OI_OPEN_PROCESS_X86, MX_OP_SHOW_X86 },
+		};
+		for ( size_t I = 0; I < MX_ELEMENTS( aTemp ); ++I ) {
+			if ( aTemp[I].wId == _Id ) {
+				CCheckButton * pcbCheck = static_cast<CCheckButton *>(FindChild( _Id ));
+				if ( pcbCheck ) {
+					if ( pcbCheck->IsChecked() ) {
+						m_poOptions->dwOpenProc |= aTemp[I].dwFlag;
+					}
+					else {
+						m_poOptions->dwOpenProc &= ~aTemp[I].dwFlag;
+					}
+					CheckAll();
+					return LSW_H_CONTINUE;
+				}
+			}
+		}
+		switch ( _Id ) {
+			case COptionsLayout::MX_OI_OPEN_PROCESS_ALL : {
+				CCheckButton * pcbCheck = static_cast<CCheckButton *>(FindChild( _Id ));
+				if ( pcbCheck ) {
+					m_poOptions->dwOpenProc = MX_OP_SHOW_ALL;
+				}
+				CheckAll();
+				break;
+			}
+			case COptionsLayout::MX_OI_OPEN_PROCESS_NONE : {
+				CCheckButton * pcbCheck = static_cast<CCheckButton *>(FindChild( _Id ));
+				if ( pcbCheck ) {
+					m_poOptions->dwOpenProc = 0;
+				}
+				CheckAll();
+				break;
+			}
+		}
+		return LSW_H_CONTINUE;
+	}
+
+	// Check all buttons.
+	VOID COptionsPageOpenProc::CheckAll() {
+		CCheckButton * pcbCheck = nullptr;
+#define MX_FLAG( BIT )		(m_poOptions ? ((m_poOptions->dwOpenProc & (BIT)) == (BIT)) : TRUE)
+#define MX_CHECK( ID, TEST )																						\
+		pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::ID ));									\
+		if ( pcbCheck ) {																							\
+			pcbCheck->SetCheck( TEST );																				\
+		}
+
+
+		MX_CHECK( MX_OI_OPEN_PROCESS_PATH, MX_FLAG( MX_OP_SHOW_PATH ) );
+		MX_CHECK( MX_OI_OPEN_PROCESS_WINDOWS, MX_FLAG( MX_OP_SHOW_WINDOWS ) );
+		MX_CHECK( MX_OI_OPEN_PROCESS_CHILDWINDOWS, MX_FLAG( MX_OP_SHOW_CHILDWINDOWS ) );
+		MX_CHECK( MX_OI_OPEN_PROCESS_PARENT, MX_FLAG( MX_OP_SHOW_PARENT ) );
+		MX_CHECK( MX_OI_OPEN_PROCESS_X86, MX_FLAG( MX_OP_SHOW_X86 ) );
+
+		CCheckButton * pcbChildWindows = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_OPEN_PROCESS_CHILDWINDOWS ));
+		if ( pcbChildWindows ) {
+			pcbChildWindows->Enable( MX_FLAG( MX_OP_SHOW_WINDOWS ) );
+		}
+
+		pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_OPEN_PROCESS_ALL ));
+		if ( pcbCheck ) {
+			pcbCheck->SetCheck( MX_FLAG( MX_OP_SHOW_ALL ) );
+		}
+		pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_OPEN_PROCESS_NONE ));
+		if ( pcbCheck ) {
+			pcbCheck->SetCheck( m_poOptions ? m_poOptions->dwOpenProc == 0 : FALSE );
+		}
+#undef MX_CHECK
+#undef MX_FLAG
 	}
 
 }	// namespace mx

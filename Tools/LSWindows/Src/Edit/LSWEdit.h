@@ -12,6 +12,8 @@ namespace lsw {
 
 
 		// == Functions.
+		// Selects a range of text.
+		virtual VOID						SetSel( INT _iStart, INT _iEnd ) const;
 
 
 	protected :

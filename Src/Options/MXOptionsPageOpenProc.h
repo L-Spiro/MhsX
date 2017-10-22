@@ -15,16 +15,27 @@ namespace mx {
 
 		// == Functions.
 		// Get the name of the page.
-		virtual std::wstring					GetName() const;
+		virtual std::wstring				GetName() const;
 
 		// WM_INITDIALOG.
-		virtual LSW_HANDLED						InitDialog();
+		virtual LSW_HANDLED					InitDialog();
+
+		// WM_COMMAND from control.
+		virtual LSW_HANDLED					Command( WORD _Id, HWND _hControl );
+
+		// Verifies the options, returning an error string in case of error.
+		virtual BOOL						Verify( std::wstring &_wsError, CWidget * &_pwWidget ) { return TRUE; }
 
 
-		protected :
+	protected :
 		// == Members.
 		// Options.
-		MX_OPTIONS *							m_poOptions;
+		MX_OPTIONS *						m_poOptions;
+
+		
+		// == Functions.
+		// Check all buttons.
+		VOID								CheckAll();
 	};
 
 }	// namespace mx

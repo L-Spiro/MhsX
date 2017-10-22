@@ -8,8 +8,9 @@
 
 namespace mx {
 
-	COpenProcessWindow::COpenProcessWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
-		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu ) {
+	COpenProcessWindow::COpenProcessWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, MX_OPTIONS * _poOptions, bool _bCreateWidget, HMENU _hMenu ) :
+		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu ),
+		m_poOptions( _poOptions ) {
 		m_dwMainOrAll = COpenProcessLayout::MX_OPI_RADIO_MAIN;
 	}
 
@@ -31,18 +32,24 @@ namespace mx {
 
 	// WM_INITDIALOG.
 	CWidget::LSW_HANDLED COpenProcessWindow::InitDialog() {
-		CHAR * ptcHeaders[] = {
-			"Process",
-			"Process ID",
-			"Path",
-			"Windows",
-			"Parent",
+		const struct {
+			const char * _pcText;
+			size_t sLen;
+			DWORD dwFlag;
+		} aTitles[] = {
+			{ _T_49A0210A_Process, _LEN_49A0210A, 0 },
+			{ _T_C0D8DDA3_Process_ID, _LEN_C0D8DDA3, 0 },
+			{ _T_AB662431_Path, _LEN_AB662431, MX_OP_SHOW_PATH },
+			{ _T_2C5ABC07_Windows, _LEN_2C5ABC07, MX_OP_SHOW_WINDOWS },
+			{ _T_3A226579_Parent, _LEN_3A226579, MX_OP_SHOW_PARENT },
 		};
+		DWORD dwFlags = m_poOptions ? m_poOptions->dwOpenProc : MX_OP_SHOW_ALL;
 		CListView * plvLIst = static_cast<CListView *>(FindChild( COpenProcessLayout::MX_OPI_LISTVIEW ));
-		for ( INT I = 0; I < MX_ELEMENTS( ptcHeaders ); I++ ) {
-			
-			INT iCol = plvLIst->AddColumn( ptcHeaders[I] );
-			plvLIst->SetColumnWidth( iCol, 150 );
+		for ( INT I = 0; I < MX_ELEMENTS( aTitles ); I++ ) {
+			if ( !aTitles[I].dwFlag || (aTitles[I].dwFlag & dwFlags) ) {
+				INT iCol = plvLIst->AddColumn( mx::CStringDecoder::DecodeToWString( aTitles[I]._pcText, aTitles[I].sLen ).c_str() );
+				plvLIst->SetColumnWidth( iCol, 150 );
+			}
 		}
 
 		MainList();		
@@ -111,6 +118,7 @@ namespace mx {
 
 	// Creates a vector of MX_PROCESSES structures.
 	BOOL COpenProcessWindow::CreateProcessList( std::vector<MX_PROCESSES> &_pProcesses ) {
+		DWORD dwFlags = m_poOptions ? m_poOptions->dwOpenProc : MX_OP_SHOW_ALL;
 		// Create a stapshot.
 		std::vector<PROCESSENTRY32W> vProcs;
 		std::vector<THREADENTRY32> vThreads;
@@ -123,10 +131,13 @@ namespace mx {
 			MX_PROCESSES pProc;
 			pProc.peProcEntry = vProcs[I];
 			pProc.dwId = vProcs[I].th32ProcessID;
+			pProc.bHasWow64 = FALSE;
 
 			LSW_HANDLE hProc;
 			if ( FillProcById( pProc.dwId, pProc, hProc ) ) {
-				AddWindowTitles( vThreads, pProc );
+				if ( dwFlags & MX_OP_SHOW_WINDOWS ) {
+					AddWindowTitles( vThreads, pProc );
+				}
 			}
 			_pProcesses.push_back( pProc );
 		}
@@ -143,6 +154,7 @@ namespace mx {
 
 	// Creates a vector of MX_PROCESSES structures using a technique to find hidden process ID's.
 	BOOL COpenProcessWindow::CreateHiddenProcessList( std::vector<MX_PROCESSES> &_pProcesses ) {
+		DWORD dwFlags = m_poOptions ? m_poOptions->dwOpenProc : MX_OP_SHOW_ALL;
 		std::vector<PROCESSENTRY32W> vProcs;
 		std::vector<THREADENTRY32> vThreads;
 		LSW_HANDLE hSnapObj = CreateSnap( vProcs, vThreads );
@@ -197,9 +209,12 @@ namespace mx {
 
 	// Adds window titles to an MX_PROCESSES structure.
 	VOID COpenProcessWindow::AddWindowTitles( const std::vector<THREADENTRY32> &_vThreads, MX_PROCESSES &_pProc ) {
+		if ( !ShowWindows() ) { return; }
 		for ( size_t I = 0; I < _vThreads.size(); ++I ) {
 			if ( _vThreads[I].th32OwnerProcessID == _pProc.dwId ) {
-				CSystem::EnumThreadWindows( _vThreads[I].th32ThreadID, EnumThreadWindows_GatherWindows, reinterpret_cast<LPARAM>(&_pProc) );
+				CSystem::EnumThreadWindows( _vThreads[I].th32ThreadID,
+					ShowChildWindows() ? EnumThreadWindows_GatherWindows : EnumThreadWindows_GatherWindowsNoChildren,
+					reinterpret_cast<LPARAM>(&_pProc) );
 			}
 		}
 	}
@@ -208,7 +223,9 @@ namespace mx {
 	VOID COpenProcessWindow::FillListView( lsw::CListView * _plvView, const std::vector<MX_PROCESSES> &_vProcs ) {
 		_plvView->DeleteAll();
 		_plvView->SetItemCount( static_cast<INT>(_vProcs.size()) );
+		
 		for ( size_t I = 0; I < _vProcs.size(); ++I ) {
+			INT iIndex = 2;
 			std::wstring wsFile = _vProcs[I].peProcEntry.szExeFile;
 			if ( _vProcs[I].bHasWow64 ) {
 				wsFile += L" *32";
@@ -222,19 +239,25 @@ namespace mx {
 			sTemp += ')';
 			_plvView->SetItemText( iItem, 1, sTemp.c_str() );
 
-			_plvView->SetItemText( iItem, 2, _vProcs[I].sPath.c_str() );
+			if ( ShowPaths() ) {
+				_plvView->SetItemText( iItem, iIndex++, _vProcs[I].sPath.c_str() );
+			}
 
-			_plvView->SetItemText( iItem, 3, _vProcs[I].sWindows.c_str() );
+			if ( ShowWindows() ) {
+				_plvView->SetItemText( iItem, iIndex++, _vProcs[I].sWindows.c_str() );
+			}
 
-			const MX_PROCESSES * ppParent = FindProcess( _vProcs, _vProcs[I].peProcEntry.th32ParentProcessID );
-			if ( ppParent ) {
-				std::wstring sParent = ppParent->peProcEntry.szExeFile;
-				sParent += L' ';
-				sParent += L'(';
-				CUtilities::ToHex( ppParent->dwId, sParent, 4 );
-				sParent += L')';
+			if ( ShowParents() ) {
+				const MX_PROCESSES * ppParent = FindProcess( _vProcs, _vProcs[I].peProcEntry.th32ParentProcessID );
+				if ( ppParent ) {
+					std::wstring sParent = ppParent->peProcEntry.szExeFile;
+					sParent += L' ';
+					sParent += L'(';
+					CUtilities::ToHex( ppParent->dwId, sParent, 4 );
+					sParent += L')';
 
-				_plvView->SetItemText( iItem, 4, sParent.c_str() );
+					_plvView->SetItemText( iItem, iIndex++, sParent.c_str() );
+				}
 			}
 			
 		}
@@ -246,12 +269,17 @@ namespace mx {
 
 		HANDLE hHnd = CSystem::OpenProcess( PROCESS_QUERY_INFORMATION, FALSE, _dwId );
 		if ( !hHnd ) { return FALSE; }
-		DWORD dwRealLen = CSystem::FullProcessPathLen( hHnd );
-		_pProc.sPath.resize( dwRealLen );
-		CSystem::QueryFullProcessImageNameW( hHnd, 0, &_pProc.sPath[0], &dwRealLen );
-		BOOL bSuc = CSystem::IsWow64Process( hHnd, &_pProc.bHasWow64 );
-		if ( !bSuc ) {
-			_pProc.bHasWow64 = FALSE;
+		if ( ShowPaths() ) {
+			DWORD dwRealLen = CSystem::FullProcessPathLen( hHnd );
+			_pProc.sPath.resize( dwRealLen );
+			CSystem::QueryFullProcessImageNameW( hHnd, 0, &_pProc.sPath[0], &dwRealLen );
+		}
+		_pProc.bHasWow64 = FALSE;
+		if ( MarkX86() ) {
+			BOOL bSuc = CSystem::IsWow64Process( hHnd, &_pProc.bHasWow64 );
+			if ( !bSuc ) {
+				_pProc.bHasWow64 = FALSE;
+			}
 		}
 		_hProcHandle = hHnd;
 		_pProc.dwOpenProcessTest = 0;/*CSystem::TestOpenProcess( _dwId );
@@ -359,6 +387,23 @@ namespace mx {
 			//ppProc->vWindows.push_back( wTemp );
 		}
 		::EnumChildWindows( _hWnd, EnumChildWindows_GatherWindows, _lParam );
+
+		return TRUE;
+	}
+
+	// Enumerate thread windows (no children).
+	BOOL CALLBACK COpenProcessWindow::EnumThreadWindows_GatherWindowsNoChildren( HWND _hWnd, LPARAM _lParam ) {
+		MX_PROCESSES * ppProc = reinterpret_cast<MX_PROCESSES *>(_lParam);
+		std::wstring wTemp;
+		CSystem::GetWindowTextW( _hWnd, wTemp );
+		if ( wTemp.size() ) {
+			if ( ppProc->sWindows.size() ) {
+				ppProc->sWindows.push_back( L',' );
+				ppProc->sWindows.push_back( L' ' );
+			}
+			ppProc->sWindows.append( wTemp );
+			//ppProc->vWindows.push_back( wTemp );
+		}
 
 		return TRUE;
 	}
