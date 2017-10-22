@@ -68,8 +68,15 @@ namespace mx {
 			peEdit->SetTextA( CUtilities::ToDouble( m_poOptions->dEpsilon, sTemp ) );
 		}
 
+		ApplySettings();
 		
-		
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_COMMAND from control.
+	CWidget::LSW_HANDLED COptionsPageGenSearch::Command( WORD _Id, HWND _hControl ) {
+		if ( !m_poOptions ) { return LSW_H_CONTINUE; }
+		ApplySettings();
 		return LSW_H_CONTINUE;
 	}
 
@@ -160,6 +167,21 @@ namespace mx {
 		}
 
 		return TRUE;
+	}
+
+	// Apply dialog settings.
+	VOID COptionsPageGenSearch::ApplySettings() {
+		CCheckButton * pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_GENERAL_SEARCH_USE_EPSILON ));
+		if ( pcbCheck ) {
+			CWidget * pwWidget = FindChild( COptionsLayout::MX_OI_GENERAL_SEARCH_EPSILON_EDIT );
+			if ( pwWidget ) {
+				pwWidget->Enable( pcbCheck->IsChecked() );
+			}
+			pwWidget = FindChild( COptionsLayout::MX_OI_GENERAL_SEARCH_SMART_EPS );
+			if ( pwWidget ) {
+				pwWidget->Enable( pcbCheck->IsChecked() );
+			}
+		}
 	}
 
 }	// namespace mx

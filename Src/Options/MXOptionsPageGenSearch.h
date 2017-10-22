@@ -20,6 +20,9 @@ namespace mx {
 		// WM_INITDIALOG.
 		virtual LSW_HANDLED						InitDialog();
 
+		// WM_COMMAND from control.
+		virtual LSW_HANDLED						Command( WORD _Id, HWND _hControl );
+
 		// Verifies the options, returning an error string in case of error.
 		virtual BOOL							Verify( std::wstring &_wsError, CWidget * &_pwWidget );
 
@@ -27,10 +30,15 @@ namespace mx {
 		virtual BOOL							Finalize();
 
 
-		protected :
+	protected :
 		// == Members.
 		// Options.
 		MX_OPTIONS *							m_poOptions;
+
+
+		// == Functions.
+		// Apply dialog settings.
+		VOID									ApplySettings();									
 	};
 
 }	// namespace mx

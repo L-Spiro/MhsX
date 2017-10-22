@@ -12,8 +12,8 @@ namespace mx {
 #define MX_OPTIONS_LIST_W	(52)
 #define MX_OD_L				(MX_OPTIONS_LIST_W + 5)
 #define MX_OD_T				(2)
-#define MX_OD_W				(MX_OPTIONS_W - MX_OD_L - 4)//(204)
-#define MX_OD_H				(MX_OPTIONS_H - 26)//(156)
+#define MX_OD_W				(MX_OPTIONS_W - MX_OD_L - 4)
+#define MX_OD_H				(MX_OPTIONS_H - 26)
 #define MX_OD_COORD			MX_OD_L, MX_OD_T, MX_OD_W, MX_OD_H
 
 	// == Members.
@@ -442,7 +442,7 @@ namespace mx {
 			FALSE,									// bActive
 			MX_GROUP_LEFT,							// iLeft
 			MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT * 0,	// iTop
-			194,									// dwWidth
+			MX_OD_W - MX_GROUP_LEFT - MX_GROUP_RIGHT,												// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
 			MX_CHECKSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -458,7 +458,7 @@ namespace mx {
 			FALSE,									// bActive
 			MX_GROUP_LEFT,							// iLeft
 			MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT * 1,	// iTop
-			194,									// dwWidth
+			MX_OD_W - MX_GROUP_LEFT - MX_GROUP_RIGHT,												// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
 			MX_CHECKSTYLE,							// dwStyle
 			0,																						// dwStyleEx
@@ -474,7 +474,7 @@ namespace mx {
 			FALSE,									// bActive
 			MX_GROUP_LEFT,							// iLeft
 			MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT * 2,	// iTop
-			194,									// dwWidth
+			MX_OD_W - MX_GROUP_LEFT - MX_GROUP_RIGHT,												// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
 			MX_CHECKSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -490,7 +490,7 @@ namespace mx {
 			FALSE,									// bActive
 			MX_GROUP_LEFT,							// iLeft
 			MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT * 3,	// iTop
-			194,									// dwWidth
+			MX_OD_W - MX_GROUP_LEFT - MX_GROUP_RIGHT,												// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
 			MX_CHECKSTYLE,							// dwStyle
 			0,										// dwStyleEx
