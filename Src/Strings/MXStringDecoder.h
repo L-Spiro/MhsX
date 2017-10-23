@@ -32,7 +32,7 @@ namespace mx {
 		// Decodes to an std::string or std::wstring object.
 		template <typename _tOutType>
 		static _tOutType &		Decode( const char * _pcIn, size_t _sInLen, _tOutType &_otRet ) {
-			_otRet.resize( _sInLen + 1 );
+			_otRet.resize( _sInLen );
 			Decode( _pcIn, _sInLen, const_cast<_tOutType::value_type *>(_otRet.c_str()) );
 			return _otRet;
 		}

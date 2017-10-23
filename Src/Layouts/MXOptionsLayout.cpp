@@ -446,8 +446,8 @@ namespace mx {
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
 			MX_CHECKSTYLE,							// dwStyle
 			0,										// dwStyleEx
-			MX_MAKE_WCHAR( _T_67CAB38F_MEM_IMAGE__Static_Data_is_Usually_Here_ ),	// pwcText
-			_LEN_67CAB38F,															// sTextLen
+			MX_MAKE_WCHAR( _T_67CAB38F_MEM_IMAGE__Static_Data_is_Usually_Here_ ),					// pwcText
+			_LEN_67CAB38F,																			// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
 		},
 		{
@@ -478,8 +478,8 @@ namespace mx {
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
 			MX_CHECKSTYLE,							// dwStyle
 			0,										// dwStyleEx
-			MX_MAKE_WCHAR( _T_37D0905A_MEM_MAPPED__Data_Loaded_by_the_Target_Process__Slow_ ),	// pwcText
-			_LEN_37D0905A,																		// sTextLen
+			MX_MAKE_WCHAR( _T_37D0905A_MEM_MAPPED__Data_Loaded_by_the_Target_Process__Slow_ ),		// pwcText
+			_LEN_37D0905A,																			// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
 		},
 		{
@@ -494,8 +494,8 @@ namespace mx {
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
 			MX_CHECKSTYLE,							// dwStyle
 			0,										// dwStyleEx
-			MX_MAKE_WCHAR( _T_39FDDE4C_Anything_Readable__Slower_but_Undetectable_ ),	// pwcText
-			_LEN_39FDDE4C,																// sTextLen
+			MX_MAKE_WCHAR( _T_39FDDE4C_Anything_Readable__Slower_but_Undetectable_ ),				// pwcText
+			_LEN_39FDDE4C,																			// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
 		},
 		// ==== Thread Priority ==== //

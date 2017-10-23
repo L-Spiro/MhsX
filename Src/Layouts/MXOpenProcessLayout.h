@@ -29,7 +29,7 @@ namespace mx {
 
 		// == Functions.
 		// Creates the Open Process dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
-		static BOOL								CreateOpenProcessDialog( CWidget * _pwParent, MX_OPTIONS * _poOptions );
+		static DWORD							CreateOpenProcessDialog( CWidget * _pwParent, MX_OPTIONS * _poOptions );
 
 
 	protected :

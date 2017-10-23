@@ -621,3 +621,4 @@
 "Invalid search buffer size."
 "Invalid epsilon."
 "Invalid timer value."
+"Opened process "

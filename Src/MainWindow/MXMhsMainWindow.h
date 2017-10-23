@@ -7,6 +7,10 @@
 
 using namespace lsw;
 
+namespace lsw {
+	class CStatusBar;
+}
+
 namespace mx {
 	
 	class CMhsMainWindow : public lsw::CMainWindow {
@@ -50,6 +54,9 @@ namespace mx {
 
 		// WM_ERASEBKGND.
 		virtual LSW_HANDLED					EraseBkgnd( HDC _hDc );
+
+		// Gets the status bar.
+		CStatusBar *						StatusBar();
 
 
 	protected :

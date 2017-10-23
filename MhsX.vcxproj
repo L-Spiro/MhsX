@@ -166,6 +166,7 @@
     <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\MainWindow\MXMhsMainWindow.cpp" />
     <ClCompile Include="Src\MemHack\MXMemHack.cpp" />
+    <ClCompile Include="Src\MemHack\MXProcess.cpp" />
     <ClCompile Include="Src\MXMhsX.cpp" />
     <ClCompile Include="Src\OpenProcess\MXOpenProcessWindow.cpp" />
     <ClCompile Include="Src\Options\MXOptionsPage.cpp" />
@@ -188,6 +189,7 @@
     <ClInclude Include="Src\Layouts\MXOptionsLayout.h" />
     <ClInclude Include="Src\MainWindow\MXMhsMainWindow.h" />
     <ClInclude Include="Src\MemHack\MXMemHack.h" />
+    <ClInclude Include="Src\MemHack\MXProcess.h" />
     <ClInclude Include="Src\OpenProcess\MXOpenProcessWindow.h" />
     <ClInclude Include="Src\Options\MXOptions.h" />
     <ClInclude Include="Src\Options\MXOptionsPage.h" />

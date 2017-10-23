@@ -2,6 +2,14 @@
 
 #include "../Strings/MXStringDecoder.h"
 
+#ifndef MX_MAIN_WINDOW_W
+#define MX_MAIN_WINDOW_W		772
+#endif	// MX_MAIN_WINDOW_W
+
+#ifndef MX_MAIN_WINDOW_H
+#define MX_MAIN_WINDOW_H		605
+#endif	// MX_MAIN_WINDOW_H
+
 #ifndef MX_LOCK_LEFT
 #define MX_LOCK_LEFT			_T_BA1A357D_____SL______P__L_____P__SL_, _LEN_BA1A357D
 #endif	// MX_LOCK_LEFT

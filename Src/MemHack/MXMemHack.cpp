@@ -3,8 +3,7 @@
 
 namespace mx {
 
-	CMemHack::CMemHack() :
-		m_dwProcId( 0 ) {
+	CMemHack::CMemHack() {
 		// Default options.
 		m_oOptions.dwFoundAddressRefresh = 10;
 		m_oOptions.dwMainRefresh = 10;
@@ -62,7 +61,7 @@ namespace mx {
 
 	// Detach from the current process.
 	void CMemHack::Detach() {
-		m_hProc.Reset();
+		//m_hProc.Reset();
 	}
 
 }	// namespace mx

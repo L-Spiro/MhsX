@@ -1,6 +1,7 @@
 #pragma once
 #include "../MXMhsX.h"
 #include "../Options/MXOptions.h"
+#include "MXProcess.h"
 #include <LSWWin.h>
 #include <Helpers/LSWHelpers.h>
 
@@ -30,11 +31,8 @@ namespace mx {
 
 	protected :
 		// == Members.
-		// The process handle.
-		lsw::LSW_HANDLE						m_hProc;
-
-		// The process ID.
-		DWORD								m_dwProcId;
+		// The process.
+		CProcess							m_pProcess;
 
 		// Options.
 		MX_OPTIONS							m_oOptions;

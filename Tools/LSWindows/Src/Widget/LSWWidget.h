@@ -56,30 +56,30 @@ namespace lsw {
 		BOOL								SetVisible( BOOL _bVis ) { return ::ShowWindow( Wnd(), _bVis ? SW_SHOW : SW_HIDE ); }
 
 		// Copies the text of the specified window's title bar (if it has one) into a buffer. If the specified window is a control, the text of the control is copied.
-		INT									GetTextA( LPSTR _lpString, INT _nMaxCount ) const { return ::GetWindowTextA( Wnd(), _lpString, _nMaxCount ); }
+		virtual INT							GetTextA( LPSTR _lpString, INT _nMaxCount ) const { return ::GetWindowTextA( Wnd(), _lpString, _nMaxCount ); }
 
 		// Copies the text of the specified window's title bar (if it has one) into a buffer. If the specified window is a control, the text of the control is copied.
-		INT									GetTextW( LPWSTR _lpString, INT _nMaxCount ) const { return ::GetWindowTextW( Wnd(), _lpString, _nMaxCount ); }
+		virtual INT							GetTextW( LPWSTR _lpString, INT _nMaxCount ) const { return ::GetWindowTextW( Wnd(), _lpString, _nMaxCount ); }
 
 		// Gets the window text.
-		std::string							GetTextA() const;
+		virtual std::string					GetTextA() const;
 
 		// Gets the window text.
-		std::wstring						GetTextW() const;
+		virtual std::wstring				GetTextW() const;
 
 		// Retrieves the length, in characters, of the specified window's title bar text (if the window has a title bar).
 		//	If the specified window is a control, the function retrieves the length of the text within the control
-		INT									GetTextLengthA() const { return ::GetWindowTextLengthA( Wnd() ); }
+		virtual INT							GetTextLengthA() const { return ::GetWindowTextLengthA( Wnd() ); }
 
 		// Retrieves the length, in characters, of the specified window's title bar text (if the window has a title bar).
 		//	If the specified window is a control, the function retrieves the length of the text within the control
-		INT									GetTextLengthW() const { return ::GetWindowTextLengthW( Wnd() ); }
+		virtual INT							GetTextLengthW() const { return ::GetWindowTextLengthW( Wnd() ); }
 
 		// Changes the text of the specified window's title bar (if it has one). If the specified window is a control, the text of the control is changed.
-		BOOL								SetTextA( LPCSTR _lpString ) { return ::SetWindowTextA( Wnd(), _lpString ); }
+		virtual BOOL						SetTextA( LPCSTR _lpString ) { return ::SetWindowTextA( Wnd(), _lpString ); }
 
 		// Changes the text of the specified window's title bar (if it has one). If the specified window is a control, the text of the control is changed.
-		BOOL								SetTextW( LPCWSTR _lpwString ) { return ::SetWindowTextW( Wnd(), _lpwString ); }
+		virtual BOOL						SetTextW( LPCWSTR _lpwString ) { return ::SetWindowTextW( Wnd(), _lpwString ); }
 
 		// Get the value of the text as an expression.
 		BOOL								GetTextAsExpression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const;
@@ -98,6 +98,21 @@ namespace lsw {
 
 		// Selects a range of text.  Implemented by CEdit.
 		virtual VOID						SetSel( INT _iStart, INT _iEnd ) const {}
+
+		// Are we checked?  Implemented by CCheckButton and CRadioButton.
+		virtual BOOL						IsChecked() const { return FALSE; }
+
+		// Changes the check state of a button control.  Implemented by CCheckButton and CRadioButton.
+		virtual VOID						CheckButton( UINT _uCheck ) {}
+
+		// Sets the button state to BST_CHECKED.
+		virtual VOID						Check() { CheckButton( BST_CHECKED ); }
+
+		// Sets the button state to BST_UNCHECKED.
+		virtual VOID						UnCheck() { CheckButton( BST_UNCHECKED ); }
+
+		// Sets the button to BST_CHECKED or BST_UNCHECKED.
+		virtual VOID						SetCheck( BOOL _bChecked ) { CheckButton( _bChecked ? BST_CHECKED : BST_UNCHECKED ); }
 
 		// Window rectangle.
 		const LSW_RECT &					WindowRect() const { return m_rRect; }

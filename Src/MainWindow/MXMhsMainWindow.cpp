@@ -3,8 +3,10 @@
 #include "../Layouts/MXOpenProcessLayout.h"
 #include "../Layouts/MXOptionsLayout.h"
 #include "../System/MXSystem.h"
+#include "../Utilities/MXUtilities.h"
 #include <Base/LSWBase.h>
 #include <Rebar/LSWRebar.h>
+#include <StatusBar/LSWStatusBar.h>
 #include <ToolBar/LSWToolBar.h>
 
 namespace mx {
@@ -59,7 +61,7 @@ namespace mx {
 		CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( CMainWindowLayout::MX_MWI_TOOLBAR0 ));
 		CRebar * plvRebar = static_cast<CRebar *>(FindChild( CMainWindowLayout::MX_MWI_REBAR0 ));
 
-		// == Toolbar.
+		// ==== TOOL BAR ==== //
 		plvToolBar->SetImageList( 0, m_iImages );
 //#define MX_TOOL_STR( TXT )					reinterpret_cast<INT_PTR>(TXT)
 #define MX_TOOL_STR( TXT )						0
@@ -102,7 +104,21 @@ namespace mx {
 	   ::MoveWindow( plvRebar->Wnd(), rRebarRect.left, rRebarRect.top, rRebarRect.Width(), plvRebar->WindowRect().Height(), FALSE );
 
 		plvRebar->UpdateRects();
-		//FindChild( CMainWindowLayout::MX_MWI_STATUSBAR )->UpdateRects();
+		
+
+		// ==== STATUS BAR ==== //
+		CStatusBar * psbStatus = StatusBar();
+		if ( psbStatus ) {
+			const CStatusBar::LSW_STATUS_PART spParts[] = {
+				// Last status message.
+				{ 450, FALSE },
+				// Current process ID.
+				{ 450 + 48, FALSE },
+
+				{ rRebarRect.Width() - psbStatus->ClientRect().Height(), TRUE },
+			};
+			psbStatus->SetParts( spParts, MX_ELEMENTS( spParts ) );
+		}
 
 		return LSW_H_CONTINUE;
 	}
@@ -112,7 +128,21 @@ namespace mx {
 		switch ( _Id ) {
 			case CMainWindowLayout::MX_MWMI_OPENPROCESS : {
 				MX_OPTIONS oOptions = m_pmhMemHack->Options();
-				COpenProcessLayout::CreateOpenProcessDialog( this, &oOptions );
+				DWORD dwId = COpenProcessLayout::CreateOpenProcessDialog( this, &oOptions );
+				if ( dwId != static_cast<DWORD>(-1) ) {
+					if ( m_pmhMemHack->OpenProcess( dwId ) ) {
+						CStatusBar * psbStatus = StatusBar();
+						if ( psbStatus ) {
+							std::wstring sTemp = _DEC_WS_9FAAF98F_Opened_process_;
+							CUtilities::ToHex( dwId, sTemp, 4 );
+							sTemp.append( L" (" );
+							CUtilities::ToUnsigned( dwId, sTemp );
+							sTemp.append( L")." );
+							psbStatus->SetTextW( 0, 0, sTemp.c_str() );
+						}
+						
+					}
+				}
 				break;
 			}
 			case CMainWindowLayout::MX_MWMI_OPTIONS : {
@@ -134,6 +164,11 @@ namespace mx {
 	// WM_ERASEBKGND.
 	CWidget::LSW_HANDLED CMhsMainWindow::EraseBkgnd( HDC _hDc ) {
 		return LSW_H_HANDLED;
+	}
+
+	// Gets the status bar.
+	CStatusBar * CMhsMainWindow::StatusBar() {
+		return static_cast<CStatusBar *>(FindChild( CMainWindowLayout::MX_MWI_STATUSBAR ));
 	}
 
 }	// namespace mx

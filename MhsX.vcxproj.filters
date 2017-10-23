@@ -160,6 +160,9 @@
     <ClCompile Include="Src\Options\MXOptionsPageOpenProc.cpp">
       <Filter>Source Files\Options</Filter>
     </ClCompile>
+    <ClCompile Include="Src\MemHack\MXProcess.cpp">
+      <Filter>Source Files\MemHack</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -238,6 +241,9 @@
     </ClInclude>
     <ClInclude Include="Src\Options\MXOptionsPageOpenProc.h">
       <Filter>Header Files\Options</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\MemHack\MXProcess.h">
+      <Filter>Header Files\MemHack</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

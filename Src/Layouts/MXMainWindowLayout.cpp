@@ -22,8 +22,8 @@ namespace mx {
 			FALSE,									// bActive
 			64,										// iLeft
 			64,										// iTop
-			772,									// dwWidth
-			605,									// dwHeight
+			MX_MAIN_WINDOW_W,						// dwWidth
+			MX_MAIN_WINDOW_H,						// dwHeight
 			WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS,		// dwStyle
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_BD5547E7_L__Spiro_MHS_X ),								// pwcText

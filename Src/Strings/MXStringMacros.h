@@ -4320,3 +4320,10 @@
 #define _DEC_S_03589F21_Invalid_timer_value_ mx::CStringDecoder::DecodeToString( _T_03589F21_Invalid_timer_value_, _LEN_03589F21 )
 #define _DEC_WS_03589F21_Invalid_timer_value_ mx::CStringDecoder::DecodeToWString( _T_03589F21_Invalid_timer_value_, _LEN_03589F21 )
 
+// Opened process 
+#define _T_9FAAF98F_Opened_process_ "\xD7\x3E\x35\x09\xF7\x2D\xAE\x37\x42\x37\x2C\x33\x05\x0E\xE7"
+#define _LEN_9FAAF98F 15
+#define _DEC_9FAAF98F_Opened_process_( STR ) mx::CStringDecoder::Decode( _T_9FAAF98F_Opened_process_, _LEN_9FAAF98F, STR )
+#define _DEC_S_9FAAF98F_Opened_process_ mx::CStringDecoder::DecodeToString( _T_9FAAF98F_Opened_process_, _LEN_9FAAF98F )
+#define _DEC_WS_9FAAF98F_Opened_process_ mx::CStringDecoder::DecodeToWString( _T_9FAAF98F_Opened_process_, _LEN_9FAAF98F )
+

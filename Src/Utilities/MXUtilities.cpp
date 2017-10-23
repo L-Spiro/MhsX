@@ -601,12 +601,12 @@ namespace mx {
 			CHAR szTemp[128];
 			CHAR szTemp2[128];
 			std::strftime( szTemp, sizeof( szTemp ),"%d-%m-%Y %I:%M:%S %Z", ptTimeInfo);
-			::sprintf_s( szTemp2, sizeof( szTemp2 ), "%s (%I64u)", szTemp, _uiTime );
+			::sprintf_s( szTemp2, MX_ELEMENTS( szTemp2 ), "%s (%I64u)", szTemp, _uiTime );
 			_sString = szTemp2;
 		}
 		else {
 			CHAR szTemp2[128];
-			::sprintf_s( szTemp2, sizeof( szTemp2 ), "%I64u", _uiTime );
+			::sprintf_s( szTemp2, MX_ELEMENTS( szTemp2 ), "%I64u", _uiTime );
 			_sString = szTemp2;
 		}
 		return _sString.c_str();
@@ -672,7 +672,7 @@ namespace mx {
 	const CHAR * CUtilities::ToUnsigned( uint64_t _uiValue, CHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
 		_uiNumDigits = max( _uiNumDigits, 1 );
 		CHAR szFormat[32];
-		::sprintf_s( szFormat, sizeof( szFormat ), "%%.%uI64u", _uiNumDigits );
+		::sprintf_s( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64u", _uiNumDigits );
 		::sprintf_s( _pcRet, _sLen, szFormat, _uiValue );
 		return _pcRet;
 	}
@@ -690,7 +690,7 @@ namespace mx {
 	const WCHAR * CUtilities::ToUnsigned( uint64_t _uiValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
 		_uiNumDigits = max( _uiNumDigits, 1 );
 		WCHAR szFormat[32];
-		::swprintf_s( szFormat, sizeof( szFormat ), L"%%.%uI64u", _uiNumDigits );
+		::swprintf_s( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64u", _uiNumDigits );
 		::swprintf_s( _pcRet, _sLen, szFormat, _uiValue );
 		return _pcRet;
 	}

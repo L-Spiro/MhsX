@@ -44,6 +44,8 @@ namespace lsw {
 
 		BOOL								Valid() const { return hHandle && hHandle != INVALID_HANDLE_VALUE; }
 
+		static BOOL							Valid( HANDLE _hHandle ) { return _hHandle && _hHandle != INVALID_HANDLE_VALUE; }
+
 
 		HANDLE								hHandle;
 	};
