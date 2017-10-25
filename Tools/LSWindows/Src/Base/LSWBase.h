@@ -4,6 +4,12 @@
 #include <map>
 #include <string>
 
+// == Macros.
+#ifndef LSW_COUNT_OF
+#define LSW_COUNT_OF(x)								((sizeof( x ) / sizeof( 0[x] )) / (static_cast<size_t>(!(sizeof( x ) % sizeof(0[x])))))
+#define LSW_ELEMENTS( x )							LSW_COUNT_OF( x )
+#endif	// #ifndef LSW_COUNT_OF
+
 namespace lsw {
 
 	class											CLayoutManager;
@@ -15,7 +21,7 @@ namespace lsw {
 		// Create/Destroy.
 		// =======================================
 		// Initialize.
-		static VOID									Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan );
+		static VOID									Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan, const WCHAR * _pwcDockableClassName = nullptr );
 
 		// Shut down (frees memory).
 		static VOID									ShutDown();
@@ -31,6 +37,9 @@ namespace lsw {
 
 		// Gets the ATOM associated with a class registered via RegisterClassExW().
 		static ATOM									GetRegisteredClassAtom( const std::wstring &_wsClass );
+
+		// Gets the ATOM for dockable windows.
+		static ATOM									DockableAtom() { return m_aDockable; }
 
 		// =======================================
 		// Process functions.
@@ -97,6 +106,9 @@ namespace lsw {
 
 		// Status font.
 		static HFONT								m_hStatusFont;
+
+		// The dockable class.
+		static ATOM									m_aDockable;
 												
 	};
 

@@ -4,6 +4,7 @@
 #include "../CheckButton/LSWCheckButton.h"
 #include "../ComboBox/LSWComboBox.h"
 #include "../ComboBox/LSWComboBoxEx.h"
+#include "../Docking/LSWDockable.h"
 #include "../Edit/LSWEdit.h"
 #include "../GroupBox/LSWGroupBox.h"
 #include "../ListBox/LSWListBox.h"
@@ -27,7 +28,7 @@ namespace lsw {
 			hMenu = CreateMenu( _pmlLayouts, _sTotalMenus );
 		}
 
-		CWidget * pwMain = CreateWidget( _pwlLayouts[0], NULL, true, hMenu );
+		CWidget * pwMain = CreateWidget( FixLayout( _pwlLayouts[0] ), NULL, true, hMenu );
 		if ( !pwMain ) { return nullptr; }
 
 		std::vector<CWidget *> vWidgets;	// Has to be passed to the ::EnumChildWindows() calls.
@@ -38,7 +39,7 @@ namespace lsw {
 			auto aTemp = mIdToPointer.find( _pwlLayouts[I].dwParentId );
 			CWidget * pwParent = aTemp == mIdToPointer.end() ? nullptr : aTemp->second;
 
-			CWidget * pwThis = CreateWidget( _pwlLayouts[I], pwParent, true, NULL );
+			CWidget * pwThis = CreateWidget( FixLayout( _pwlLayouts[I] ), pwParent, true, NULL );
 			if ( !pwThis ) {
 				// Erase everything from the map and return nullptr.
 				for ( auto aIt = mIdToPointer.begin(); aIt != mIdToPointer.end(); aIt++ ) {
@@ -112,10 +113,8 @@ namespace lsw {
 		_dtTemplate.pdtTemplate = nullptr;
 		if ( !_sTotal ) { return TRUE; }
 
-#define LSW_DESTROY_WIDGETS		for ( size_t J = 0; J < _dtTemplate.vWidgets.size(); ++J ) { delete _dtTemplate.vWidgets[J]; }
 
-
-		CWidget * pwMain = CreateWidget( _pwlLayouts[0], _pwParent, false, NULL );
+		CWidget * pwMain = CreateWidget( FixLayout( _pwlLayouts[0] ), _pwParent, false, NULL );
 		if ( !pwMain ) { return 0; }
 		_dtTemplate.mIdToPointer.insert_or_assign( pwMain->Id(), pwMain );
 		_dtTemplate.vWidgets.push_back( pwMain );
@@ -125,9 +124,9 @@ namespace lsw {
 			// Parent here cannot be NULL.
 			if ( !pwParent ) { pwParent = pwMain; }
 
-			CWidget * pwThis = CreateWidget( _pwlLayouts[I], pwParent, false, NULL );
+			CWidget * pwThis = CreateWidget( FixLayout( _pwlLayouts[I] ), pwParent, false, NULL );
 			if ( !pwThis ) {
-				LSW_DESTROY_WIDGETS;
+				DestroyDialogBoxTemplate( _dtTemplate );
 				return FALSE;
 			}
 
@@ -146,7 +145,6 @@ namespace lsw {
 		_dtTemplate.gaAlloc.Unlock();
 
 		return TRUE;
-#undef LSW_DESTROY_WIDGETS
 	}
 
 	// Destroys an LSW_DLGTEMPLATE object created for use by DialogBoxX().
@@ -175,6 +173,7 @@ namespace lsw {
 			case LSW_LT_STATUSBAR : { return new CStatusBar( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_TOOLBAR : { return new CToolBar( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_WIDGET : { return new CWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_DOCKWINDOW : { return new CDockable( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 		}
 		return nullptr;
 	}
@@ -225,6 +224,46 @@ namespace lsw {
 		}
 
 		return hMenu;
+	}
+
+	// Takes the given layout and produces a copy with certain things changed as necessary.  For example, if
+	//	the control type is LSW_LT_DOCKWINDOW, the class name is changed to lsw::CBase::DockableAtom().
+	// In other cases this fills in missing information, so if you pass a nullptr control class name, the common name will be filled automatically here, etc.
+	LSW_WIDGET_LAYOUT CLayoutManager::FixLayout( const LSW_WIDGET_LAYOUT &_wlLayout ) {
+		LSW_WIDGET_LAYOUT wlCopy = _wlLayout;
+		// This case is always handled.
+		if ( wlCopy.ltType == LSW_LT_DOCKWINDOW ) {
+			wlCopy.lpwcClass = reinterpret_cast<LPCWSTR>(lsw::CBase::DockableAtom());
+		}
+		if ( !wlCopy.lpwcClass ) {
+			const struct {
+				LSW_LAYOUTTYPES					ltType;
+				LPCWSTR							lpwsClass;
+			} aStruct [] = {
+				{ LSW_LT_BUTTON, WC_BUTTONW },
+				{ LSW_LT_RADIO, WC_BUTTONW },
+				{ LSW_LT_CHECK, WC_BUTTONW },
+				{ LSW_LT_COMBOBOX, WC_COMBOBOXW },
+				{ LSW_LT_COMBOBOXEX, WC_COMBOBOXEXW },
+				{ LSW_LT_EDIT, WC_EDITW },
+				{ LSW_LT_LISTVIEW, WC_LISTVIEWW },
+				{ LSW_LT_LISTBOX, WC_LISTBOXW },
+				{ LSW_LT_TREEVIEW, WC_TREEVIEWW },
+				{ LSW_LT_GROUPBOX, WC_BUTTONW },
+				{ LSW_LT_LABEL, WC_STATICW },
+				{ LSW_LT_REBAR, REBARCLASSNAMEW },
+				{ LSW_LT_TOOLBAR, TOOLBARCLASSNAMEW },
+				{ LSW_LT_DOCKWINDOW, reinterpret_cast<LPCWSTR>(lsw::CBase::DockableAtom()) },
+				{ LSW_LT_STATUSBAR, STATUSCLASSNAMEW },
+			};
+			for ( size_t I = 0; I < LSW_ELEMENTS( aStruct ); ++I ) {
+				if ( wlCopy.ltType == aStruct[I].ltType ) {
+					wlCopy.lpwcClass = aStruct[I].lpwsClass;
+					break;
+				}
+			}
+		}
+		return wlCopy;
 	}
 
 	// Converts an array of LSW_WIDGET_LAYOUT structures to a DLGTEMPLATE structure and an array of following DLGITEMTEMPLATE structures.

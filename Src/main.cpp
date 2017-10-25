@@ -7,18 +7,23 @@
 #include "Layouts/MXOpenProcessLayout.h"
 #include <MainWindow/LSWMainWindow.h>
 #include "System/MXSystem.h"
+#include "Utilities/MXUtilities.h"
 
-#include "EEExpEval.h"
+/*#include "EEExpEval.h"
 #include "EEExpEvalContainer.h"
 #include "EEExpEvalLexer.h"
-#include "Gen/EEExpEvalParser.h"
+#include "Gen/EEExpEvalParser.h"*/
 //#include "Layout/LSWMainWindowLayout.h"
 #include <sstream>
 //#include <QtWidgets/QApplication>
 
 
 int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine, int _nCmdShow ) {
-	lsw::CBase::Initialize( _hInstance, new mx::CLayoutManager() );
+	WCHAR szTemp[8];
+	mx::CUtilities::RandomString( szTemp, MX_ELEMENTS( szTemp ) );
+	lsw::CBase::Initialize( _hInstance, new mx::CLayoutManager(), szTemp );
+	::ZeroMemory( szTemp, sizeof( szTemp ) );
+
 	// Initialize the system.
 	mx::CSystem::InitSystem();
 	/*
@@ -46,6 +51,25 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 	// Create the windows.
 	mx::CMainWindowLayout::CreateMainWindow();
 	//mx::COpenProcessLayout::CreateOpenProcessDialog( mx::CMainWindowLayout::MainWindow() );
+
+	LSW_WIDGET_LAYOUT wlDock = {
+		LSW_LT_DOCKWINDOW,						// ltType
+		125,									// wId
+		nullptr,								// lpwcClass
+		TRUE,									// bEnabled
+		TRUE,									// bActive
+		4,										// iLeft
+		3,										// iTop
+		263,									// dwWidth
+		174,									// dwHeight
+		WS_POPUP | WS_SYSMENU | WS_THICKFRAME | WS_CAPTION | WS_VISIBLE,								// dwStyle
+		WS_EX_TOOLWINDOW,																// dwStyleEx
+		L"L. Spiro",							// pwcText
+		0,										// sTextLen
+		0,										// dwParentId
+	};
+	//lsw::CBase::LayoutManager()->CreateWindowX( &wlDock, 1, nullptr, 0 );
+	lsw::CBase::LayoutManager()->CreateWidget( lsw::CLayoutManager::FixLayout( wlDock ), mx::CMainWindowLayout::MainWindow(), true, NULL );
 
 	/*WCHAR szBuffer[MAX_PATH];
 	::GetCurrentDirectoryW( MAX_PATH, szBuffer );*/

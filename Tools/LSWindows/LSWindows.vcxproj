@@ -159,6 +159,7 @@
     <ClCompile Include="Src\ComboBox\LSWComboBox.cpp" />
     <ClCompile Include="Src\ComboBox\LSWComboBoxEx.cpp" />
     <ClCompile Include="Src\CriticalSection\LSWCriticalSection.cpp" />
+    <ClCompile Include="Src\Docking\LSWDockable.cpp" />
     <ClCompile Include="Src\Edit\LSWEdit.cpp" />
     <ClCompile Include="Src\Expressions\LSWExpressions.cpp" />
     <ClCompile Include="Src\GroupBox\LSWGroupBox.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="Src\ComboBox\LSWComboBox.h" />
     <ClInclude Include="Src\ComboBox\LSWComboBoxEx.h" />
     <ClInclude Include="Src\CriticalSection\LSWCriticalSection.h" />
+    <ClInclude Include="Src\Docking\LSWDockable.h" />
     <ClInclude Include="Src\Edit\LSWEdit.h" />
     <ClInclude Include="Src\Expressions\LSWExpression.h" />
     <ClInclude Include="Src\GroupBox\LSWGroupBox.h" />

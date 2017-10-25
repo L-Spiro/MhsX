@@ -135,6 +135,12 @@
     <Filter Include="Source Files\CriticalSection">
       <UniqueIdentifier>{ef26f39a-c2ff-4037-b8f6-5f2459aa6eb5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Docking">
+      <UniqueIdentifier>{96bb8519-aa07-4fdc-8c7d-ddadfcd27b9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Docking">
+      <UniqueIdentifier>{c8571715-d84f-4943-b652-209f8875d113}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -224,6 +230,9 @@
     <ClInclude Include="Src\CriticalSection\LSWCriticalSection.h">
       <Filter>Header Files\CriticalSection</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Docking\LSWDockable.h">
+      <Filter>Header Files\Docking</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -288,6 +297,9 @@
     </ClCompile>
     <ClCompile Include="Src\CriticalSection\LSWCriticalSection.cpp">
       <Filter>Source Files\CriticalSection</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Docking\LSWDockable.cpp">
+      <Filter>Source Files\Docking</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
