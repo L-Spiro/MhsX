@@ -1,5 +1,6 @@
 #include "LSWWidget.h"
 #include "../Base/LSWBase.h"
+#include "../Docking/LSWDockable.h"
 #include "../ListView/LSWListView.h"
 
 namespace lsw {
@@ -122,6 +123,9 @@ namespace lsw {
 			}
 			case WM_NCDESTROY : {
 				LSW_HANDLED hHandled = pmwThis->NcDestroy();
+				::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, 0L );
+				pmwThis->m_hWnd = NULL;	// Destructor calls ::DestroyWindow(), which would send WM_DESTROY and WM_NCDESTROY again.
+				delete pmwThis;
 				if ( hHandled == LSW_H_HANDLED ) { return 0; }
 				break;
 			}
@@ -205,6 +209,35 @@ namespace lsw {
 				if ( hHandled == LSW_H_HANDLED ) { return 1; }
 				break;
 			}
+			// =======================================
+			// Activation
+			// =======================================
+			case WM_ACTIVATE : {
+				BOOL bMinimized = HIWORD( _wParam ) != 0;
+				WORD _wState = LOWORD( _wParam );
+				CWidget * pwPrev =  nullptr;
+				if ( _lParam ) {
+					pwPrev = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( reinterpret_cast<HWND>(_lParam), GWLP_USERDATA ));
+				}
+				LSW_HANDLED hHandled = pmwThis->Activate( bMinimized, _wState, pwPrev );
+				if ( hHandled == LSW_H_HANDLED ) { return 0; }
+				/*if ( pmwThis ) {
+					return pmwThis->DockActivate( pmwThis, _wParam, _lParam, TRUE );
+				}*/
+				break;
+			}
+			case WM_NCACTIVATE : {
+				if ( pmwThis ) {
+					return pmwThis->DockNcActivate( pmwThis, _wParam, _lParam, TRUE );
+				}
+				break;
+			}
+			case WM_ENABLE : {
+				if ( pmwThis ) {
+					return pmwThis->DockEnable( pmwThis, _wParam, _lParam, TRUE );
+				}
+				break;
+			}
 		}
 		return ::DefWindowProcW( _hWnd, _uMsg, _wParam, _lParam );
 	}
@@ -243,6 +276,20 @@ namespace lsw {
 				
 				pmwThis->InitDialog();
 				return TRUE;	// Return TRUE to pass focus on to the control specified by _wParam.
+			}
+			case WM_DESTROY : {
+				LSW_HANDLED hHandled = pmwThis->Destroy();
+				if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
+				break;
+			}
+			case WM_NCDESTROY : {
+				LSW_HANDLED hHandled = pmwThis->NcDestroy();
+				//::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, 0L );
+				//pmwThis->m_hWnd = NULL;	// Destructor calls ::DestroyWindow(), which would send WM_DESTROY and WM_NCDESTROY again.
+				//delete pmwThis;
+				// CLayoutManager::DestroyDialogBoxTemplate() deletes the CWidget object.
+				if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
+				break;
 			}
 			case WM_CLOSE : {
 				LSW_HANDLED hHandled = pmwThis->Close();
@@ -372,6 +419,35 @@ namespace lsw {
 				/*HFONT hFont = (HFONT)_wParam;
 				::EnumChildWindows( _hWnd, EnumChildWindows_SetFont, (LPARAM)hFont );*/
 				return TRUE;
+			}
+			// =======================================
+			// Activation
+			// =======================================
+			case WM_ACTIVATE : {
+				BOOL bMinimized = HIWORD( _wParam ) != 0;
+				WORD _wState = LOWORD( _wParam );
+				CWidget * pwPrev =  nullptr;
+				if ( _lParam ) {
+					pwPrev = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( reinterpret_cast<HWND>(_lParam), GWLP_USERDATA ));
+				}
+				LSW_HANDLED hHandled = pmwThis->Activate( bMinimized, _wState, pwPrev );
+				if ( hHandled == LSW_H_HANDLED ) { return 0; }
+				/*if ( pmwThis ) {
+					return pmwThis->DockActivate( pmwThis, _wParam, _lParam, TRUE );
+				}*/
+				break;
+			}
+			case WM_NCACTIVATE : {
+				if ( pmwThis ) {
+					return pmwThis->DockNcActivate( pmwThis, _wParam, _lParam, FALSE );
+				}
+				break;
+			}
+			case WM_ENABLE : {
+				if ( pmwThis ) {
+					return pmwThis->DockEnable( pmwThis, _wParam, _lParam, FALSE );
+				}
+				break;
 			}
 		}
 		return FALSE;
@@ -578,6 +654,21 @@ namespace lsw {
 		return LSW_H_CONTINUE;
 	}
 
+	// WM_ACTIVATE.
+	CWidget::LSW_HANDLED CWidget::Activate( BOOL _bMinimized, WORD _wActivationMode, CWidget * _pwWidget ) {
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_NCACTIVATE.
+	CWidget::LSW_HANDLED CWidget::NcActivate( BOOL _bTitleBarActive, LPARAM _lParam ) {
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_ENABLE
+	CWidget::LSW_HANDLED CWidget::Enable( BOOL _bEnabled ) {
+		return LSW_H_CONTINUE;
+	}
+
 	// == Functions.
 	// Remove a child.
 	void CWidget::RemoveChild( const CWidget * _pwChild ) {
@@ -688,6 +779,96 @@ namespace lsw {
 		m_hWnd = _hWnd;
 	}
 
+	// Adds a dockable window to the list of dockable windows.
+	void CWidget::AddDockable( CDockable * _pdDock ) {
+		for ( size_t I = 0; I < m_vDockables.size(); ++I ) {
+			if ( m_vDockables[I] == _pdDock ) { return; }
+		}
+		m_vDockables.push_back( _pdDock );
+	}
+
+	// Removes a dockable window from the list of dockable windows.
+	void CWidget::RemDockable( CDockable * _pdDock ) {
+		for ( size_t I = m_vDockables.size(); I--; ) {
+			if ( m_vDockables[I] == _pdDock ) { m_vDockables.erase( m_vDockables.begin() + I ); }
+		}
+	}
+
+	// Gets the array of dockables, optionally including this object.
+	void CWidget::GetDockables( std::vector<CWidget *> &_vReturn, BOOL _bIncludeParent ) {
+		_vReturn.clear();
+		for ( size_t I = 0; I < m_vDockables.size(); ++I ) {
+			_vReturn.push_back( m_vDockables[I] );
+		}
+		if ( _bIncludeParent ) {
+			_vReturn.push_back( this );
+		}
+	}
+
+	// Handle WM_NCACTIVATE for dockables.  Should be called on the owner window.
+	//	_pwWnd = Pointer to window that received WM_NCACTIVATE (can be the owner or one of its tool windows).
+	//	_wParam = WPARAM of the WM_NCACTIVATE message.
+	//	_lParam = LPARAM of the WM_NCACTIVATE message.
+	LRESULT CALLBACK CWidget::DockNcActivate( CWidget * _pwWnd, WPARAM _wParam, LPARAM _lParam, BOOL _bCallDefault ) {
+		LSW_HANDLED hHandled = _pwWnd->NcActivate( static_cast<BOOL>(_wParam), _lParam );
+
+		BOOL bKeepActive = static_cast<BOOL>(_wParam);
+		BOOL bSyncOthers = TRUE;
+
+		HWND hOther = reinterpret_cast<HWND>(_lParam);
+
+		std::vector<CWidget *> vDocks;
+		GetDockables( vDocks, TRUE );
+		if ( _lParam ) {			
+			for ( size_t I = 0; I < vDocks.size(); ++I ) {
+				if ( hOther == vDocks[I]->Wnd() ) {
+					bKeepActive = TRUE;
+					bSyncOthers = FALSE;
+					break;
+				}
+			}
+		}
+
+		if ( _lParam == -1 ) {
+			if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
+			return _bCallDefault ? ::DefWindowProcW( _pwWnd->Wnd(), WM_NCACTIVATE, bKeepActive, 0L ) :
+				TRUE;
+		}
+
+		if ( bSyncOthers ) {
+			for ( size_t I = 0; I < vDocks.size(); ++I ) {
+				// Spoof the message, but not if it is the window that called this.
+				if ( vDocks[I]->Wnd() != _pwWnd->Wnd() && _pwWnd->Wnd() != hOther ) {
+					::SendMessageW( vDocks[I]->Wnd(), WM_NCACTIVATE, bKeepActive, static_cast<LPARAM>(-1L) );
+				}
+			}
+		}
+
+		if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
+
+		return _bCallDefault ? ::DefWindowProcW( _pwWnd->Wnd(), WM_NCACTIVATE, bKeepActive, _lParam ) :
+			TRUE;
+	}
+
+	// Handle WM_ENABLE for Should be called on the owner window.
+	//	_pwWnd = Pointer to window that received WM_ENABLE (can be the owner or one of its tool windows).
+	//	_wParam = WPARAM of the WM_ENABLE message.
+	//	_lParam = LPARAM of the WM_ENABLE message.
+	LRESULT CALLBACK CWidget::DockEnable( CWidget * _pwWnd, WPARAM _wParam, LPARAM _lParam, BOOL _bCallDefault ) {
+		LSW_HANDLED hHandled = _pwWnd->Enable( static_cast<BOOL>(_wParam) );
+		
+
+		for ( size_t I = 0; I < m_vDockables.size(); ++I ) {
+			if ( m_vDockables[I]->Wnd() != _pwWnd->Wnd() ) {
+				::SendMessageW( m_vDockables[I]->Wnd(), WM_ENABLE, _wParam, _lParam );
+			}
+		}
+
+		if ( hHandled == LSW_H_HANDLED ) { return 0; }
+		return _bCallDefault ? ::DefWindowProcW( _pwWnd->Wnd(), WM_ENABLE, _wParam, _lParam ) :
+			0;
+	}
+
 	// Attaches a control/window to its CWidget.
 	BOOL CALLBACK CWidget::EnumChildWindows_AttachWindowToWidget( HWND _hWnd, LPARAM _lParam ) {
 		std::vector<CWidget *> * pvWidgets = reinterpret_cast<std::vector<CWidget *> *>(_lParam);
@@ -707,7 +888,7 @@ namespace lsw {
 	BOOL CALLBACK CWidget::EnumChildWindows_SetEnabled( HWND _hWnd, LPARAM _lParam ) {
 		CWidget * pwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( _hWnd, GWLP_USERDATA ));
 		if ( pwThis ) {
-			pwThis->Enable( pwThis->Enabled() );
+			pwThis->SetEnabled( pwThis->Enabled() );
 		}
 		return TRUE;
 	}

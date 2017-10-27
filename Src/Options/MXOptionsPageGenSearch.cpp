@@ -175,11 +175,11 @@ namespace mx {
 		if ( pcbCheck ) {
 			CWidget * pwWidget = FindChild( COptionsLayout::MX_OI_GENERAL_SEARCH_EPSILON_EDIT );
 			if ( pwWidget ) {
-				pwWidget->Enable( pcbCheck->IsChecked() );
+				pwWidget->SetEnabled( pcbCheck->IsChecked() );
 			}
 			pwWidget = FindChild( COptionsLayout::MX_OI_GENERAL_SEARCH_SMART_EPS );
 			if ( pwWidget ) {
-				pwWidget->Enable( pcbCheck->IsChecked() );
+				pwWidget->SetEnabled( pcbCheck->IsChecked() );
 			}
 		}
 	}

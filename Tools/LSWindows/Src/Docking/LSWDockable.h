@@ -9,6 +9,7 @@ namespace lsw {
 	class CDockable : public CWidget {
 	public :
 		CDockable( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		~CDockable();
 
 
 		// == Functions.
@@ -20,7 +21,7 @@ namespace lsw {
 		// == Functions.
 
 	private :
-		typedef CWidget						Parent;
+		//typedef CWidget						Parent;
 	};
 
 }	// namespace lsw

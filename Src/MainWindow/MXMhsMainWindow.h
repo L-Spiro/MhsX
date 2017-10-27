@@ -55,6 +55,9 @@ namespace mx {
 		// WM_ERASEBKGND.
 		virtual LSW_HANDLED					EraseBkgnd( HDC _hDc );
 
+		// WM_NCDESTROY.
+		virtual LSW_HANDLED					NcDestroy();
+
 		// Gets the status bar.
 		CStatusBar *						StatusBar();
 

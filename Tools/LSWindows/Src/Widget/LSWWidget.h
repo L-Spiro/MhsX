@@ -10,6 +10,7 @@
 namespace lsw {
 
 	class CWidget {
+		friend class						CDockable;
 		friend class						CLayoutManager;
 	public :
 		CWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
@@ -47,7 +48,7 @@ namespace lsw {
 		BOOL								Enabled() const { return m_bEnabled; }
 
 		// Enable or disable.
-		BOOL								Enable( BOOL _bEnable ) { m_bEnabled = (_bEnable != 0); return ::EnableWindow( Wnd(), m_bEnabled ); }
+		BOOL								SetEnabled( BOOL _bEnable ) { m_bEnabled = (_bEnable != 0); return ::EnableWindow( Wnd(), m_bEnabled ); }
 
 		// Is visible.
 		BOOL								Visible() const { return ::IsWindowVisible( Wnd() ); }
@@ -190,6 +191,9 @@ namespace lsw {
 		// Bottom expression.
 		CExpression							m_eBottom;
 
+		// Dock windows as children of this window.
+		std::vector<CDockable *>			m_vDockables;
+
 
 		// == Message Handlers.
 		// WM_NCCREATE.
@@ -236,6 +240,15 @@ namespace lsw {
 		// WM_ERASEBKGND.
 		virtual LSW_HANDLED					EraseBkgnd( HDC _hDc );
 
+		// WM_ACTIVATE.
+		virtual LSW_HANDLED					Activate( BOOL _bMinimized, WORD _wActivationMode, CWidget * _pwWidget );
+
+		// WM_NCACTIVATE.
+		virtual LSW_HANDLED					NcActivate( BOOL _bTitleBarActive, LPARAM _lParam );
+
+		// WM_ENABLE
+		virtual LSW_HANDLED					Enable( BOOL _bEnabled );
+
 
 		// == Functions.
 		// Remove a child.
@@ -252,6 +265,27 @@ namespace lsw {
 
 		// Setting the HWND after the control has been created.
 		virtual void						InitControl( HWND _hWnd );
+
+		// Adds a dockable window to the list of dockable windows.
+		void								AddDockable( CDockable * _pdDock );
+
+		// Removes a dockable window from the list of dockable windows.
+		void								RemDockable( CDockable * _pdDock );
+
+		// Gets the array of dockables, optionally including this object.
+		void								GetDockables( std::vector<CWidget *> &_vReturn, BOOL _bIncludeParent );
+
+		// Handle WM_NCACTIVATE for dockables.  Should be called on the owner window.
+		//	_pwWnd = Pointer to window that received WM_NCACTIVATE (can be the owner or one of its tool windows).
+		//	_wParam = WPARAM of the WM_NCACTIVATE message.
+		//	_lParam = LPARAM of the WM_NCACTIVATE message.
+		LRESULT CALLBACK					DockNcActivate( CWidget * _pwWnd, WPARAM _wParam, LPARAM _lParam, BOOL _bCallDefault );
+
+		// Handle WM_ENABLE for Should be called on the owner window.
+		//	_pwWnd = Pointer to window that received WM_ENABLE (can be the owner or one of its tool windows).
+		//	_wParam = WPARAM of the WM_ENABLE message.
+		//	_lParam = LPARAM of the WM_ENABLE message.
+		LRESULT CALLBACK					DockEnable( CWidget * _pwWnd, WPARAM _wParam, LPARAM _lParam, BOOL _bCallDefault );
 
 		// Attaches a control/window to its CWidget.
 		static BOOL CALLBACK				EnumChildWindows_AttachWindowToWidget( HWND _hWnd, LPARAM _lParam );

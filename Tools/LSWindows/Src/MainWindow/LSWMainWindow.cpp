@@ -43,10 +43,5 @@ namespace lsw {
 	
 
 	// == Functions.
-	// WM_NCDESTROY.
-	CWidget::LSW_HANDLED CMainWindow::NcDestroy() {
-		::PostQuitMessage( 0 );
-		return LSW_H_CONTINUE;
-	}
 	
 }	// namespace lsw

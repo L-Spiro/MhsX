@@ -166,6 +166,12 @@ namespace mx {
 		return LSW_H_HANDLED;
 	}
 
+	// WM_NCDESTROY.
+	CWidget::LSW_HANDLED CMhsMainWindow::NcDestroy() {
+		::PostQuitMessage( 0 );
+		return LSW_H_CONTINUE;
+	}
+
 	// Gets the status bar.
 	CStatusBar * CMhsMainWindow::StatusBar() {
 		return static_cast<CStatusBar *>(FindChild( CMainWindowLayout::MX_MWI_STATUSBAR ));

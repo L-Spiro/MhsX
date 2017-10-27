@@ -13,8 +13,6 @@ namespace lsw {
 
 	protected :
 		// == Functions.
-		// WM_NCDESTROY.
-		virtual LSW_HANDLED					NcDestroy();
 
 	private :
 		typedef CWidget						Parent;

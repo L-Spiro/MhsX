@@ -70,6 +70,10 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 	};
 	//lsw::CBase::LayoutManager()->CreateWindowX( &wlDock, 1, nullptr, 0 );
 	lsw::CBase::LayoutManager()->CreateWidget( lsw::CLayoutManager::FixLayout( wlDock ), mx::CMainWindowLayout::MainWindow(), true, NULL );
+	wlDock.wId++;
+	wlDock.pwcText = L"Found Addresses";
+	wlDock.iLeft = 500;
+	lsw::CBase::LayoutManager()->CreateWidget( lsw::CLayoutManager::FixLayout( wlDock ), mx::CMainWindowLayout::MainWindow(), true, NULL );
 
 	/*WCHAR szBuffer[MAX_PATH];
 	::GetCurrentDirectoryW( MAX_PATH, szBuffer );*/

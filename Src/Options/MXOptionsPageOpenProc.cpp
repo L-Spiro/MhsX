@@ -108,7 +108,7 @@ namespace mx {
 
 		CCheckButton * pcbChildWindows = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_OPEN_PROCESS_CHILDWINDOWS ));
 		if ( pcbChildWindows ) {
-			pcbChildWindows->Enable( MX_FLAG( MX_OP_SHOW_WINDOWS ) );
+			pcbChildWindows->SetEnabled( MX_FLAG( MX_OP_SHOW_WINDOWS ) );
 		}
 
 		pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_OPEN_PROCESS_ALL ));
