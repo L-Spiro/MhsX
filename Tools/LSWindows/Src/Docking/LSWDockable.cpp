@@ -35,17 +35,6 @@ namespace lsw {
 				}
 				break;
 			}
-			/*case WM_ACTIVATE : {
-				if ( pmwThis ) {
-					if ( pmwThis->Parent() ) {
-						return pmwThis->Parent()->DockActivate( pmwThis, _wParam, _lParam, TRUE );
-					}
-				}
-				break;
-			}*/
-			/*case WM_NCACTIVATE : {
-				return CWidget::WindowProc( _hWnd, _uMsg, TRUE, _lParam );
-			}*/
 		}
 		return CWidget::WindowProc( _hWnd, _uMsg, _wParam, _lParam );
 	}

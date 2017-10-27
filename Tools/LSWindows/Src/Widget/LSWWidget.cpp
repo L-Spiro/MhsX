@@ -812,6 +812,12 @@ namespace lsw {
 	LRESULT CALLBACK CWidget::DockNcActivate( CWidget * _pwWnd, WPARAM _wParam, LPARAM _lParam, BOOL _bCallDefault ) {
 		LSW_HANDLED hHandled = _pwWnd->NcActivate( static_cast<BOOL>(_wParam), _lParam );
 
+		if ( _lParam == -1 ) {
+			if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
+			return _bCallDefault ? ::DefWindowProcW( _pwWnd->Wnd(), WM_NCACTIVATE, _wParam, 0L ) :
+				TRUE;
+		}
+
 		BOOL bKeepActive = static_cast<BOOL>(_wParam);
 		BOOL bSyncOthers = TRUE;
 
@@ -827,12 +833,6 @@ namespace lsw {
 					break;
 				}
 			}
-		}
-
-		if ( _lParam == -1 ) {
-			if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
-			return _bCallDefault ? ::DefWindowProcW( _pwWnd->Wnd(), WM_NCACTIVATE, bKeepActive, 0L ) :
-				TRUE;
 		}
 
 		if ( bSyncOthers ) {
