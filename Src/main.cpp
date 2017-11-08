@@ -60,20 +60,20 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 		TRUE,									// bActive
 		4,										// iLeft
 		3,										// iTop
-		263,									// dwWidth
+		563,									// dwWidth
 		174,									// dwHeight
-		WS_POPUP | WS_SYSMENU | WS_THICKFRAME | WS_CAPTION | WS_VISIBLE,								// dwStyle
-		WS_EX_TOOLWINDOW,																// dwStyleEx
+		WS_VISIBLE,								// dwStyle
+		0,										// dwStyleEx
 		L"L. Spiro",							// pwcText
 		0,										// sTextLen
 		0,										// dwParentId
 	};
 	//lsw::CBase::LayoutManager()->CreateWindowX( &wlDock, 1, nullptr, 0 );
-	lsw::CBase::LayoutManager()->CreateWidget( lsw::CLayoutManager::FixLayout( wlDock ), mx::CMainWindowLayout::MainWindow(), true, NULL );
+	//lsw::CBase::LayoutManager()->CreateWidget( lsw::CLayoutManager::FixLayout( wlDock ), mx::CMainWindowLayout::MainWindow(), true, NULL );
 	wlDock.wId++;
 	wlDock.pwcText = L"Found Addresses";
 	wlDock.iLeft = 500;
-	lsw::CBase::LayoutManager()->CreateWidget( lsw::CLayoutManager::FixLayout( wlDock ), mx::CMainWindowLayout::MainWindow(), true, NULL );
+	//lsw::CBase::LayoutManager()->CreateWidget( lsw::CLayoutManager::FixLayout( wlDock ), mx::CMainWindowLayout::MainWindow(), true, NULL );
 
 	/*WCHAR szBuffer[MAX_PATH];
 	::GetCurrentDirectoryW( MAX_PATH, szBuffer );*/

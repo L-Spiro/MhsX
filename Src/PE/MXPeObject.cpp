@@ -1,6 +1,8 @@
 #include "MXPeObject.h"
 #include "../Utilities/MXUtilities.h"
 
+#include <algorithm>
+
 namespace mx {
 
 	CPeObject::CPeObject() {
@@ -262,7 +264,7 @@ namespace mx {
 		if ( uiIndex == MX_ERROR ) { return 0; }
 		uint64_t uiEnd = m_vSectionData[uiIndex].ui64RelocAddress + m_vSectionData[uiIndex].vData.size();
 		uint64_t uiReadEnd = _uiAddr + _uiTotal;
-		uiReadEnd = min( uiReadEnd, uiEnd );
+		uiReadEnd = std::min( uiReadEnd, uiEnd );
 		_uiTotal = uiReadEnd - _uiAddr;
 		std::memcpy( _pvDst, &m_vSectionData[uiIndex].vData[uiOffset], _uiTotal );
 		return _uiTotal;
@@ -281,7 +283,7 @@ namespace mx {
 
 	VOID CPeObject::GetExports( std::vector<CPeObject::MX_EXPORT> &_vReturn ) const {
 		if ( HasExportDesc() && ExportDescriptor() ) {
-			uint32_t uiTotal = max( ExportDescriptor()->NumberOfFunctions, ExportDescriptor()->NumberOfNames );
+			uint32_t uiTotal = std::max( ExportDescriptor()->NumberOfFunctions, ExportDescriptor()->NumberOfNames );
 			_vReturn.reserve( uiTotal );
 			uint32_t uiFuncArray, uiNameArray, uiOrdinArray;
 			for ( uint32_t I = 0; I < uiTotal; ++I ) {
@@ -429,7 +431,7 @@ namespace mx {
 		if ( _uiAddr < ImageBase() ) { return FALSE; }
 		uint64_t uiEndAddress = ImageBase();
 		for ( size_t I = 0; I < SectionData().size(); ++I ) {
-			uiEndAddress = max( uiEndAddress, SectionData()[I].ui64RelocAddress + SectionData()[I].vData.size() + ImageBase() );
+			uiEndAddress = std::max( uiEndAddress, SectionData()[I].ui64RelocAddress + SectionData()[I].vData.size() + ImageBase() );
 		}
 		return _uiAddr < uiEndAddress;
 	}
@@ -438,7 +440,7 @@ namespace mx {
 	BOOL CPeObject::RelocAddressIsInFile( uint64_t _uiAddr ) const {
 		uint64_t uiEndAddress = 0;
 		for ( size_t I = 0; I < SectionData().size(); ++I ) {
-			uiEndAddress = max( uiEndAddress, SectionData()[I].ui64RelocAddress + SectionData()[I].vData.size() + ImageBase() );
+			uiEndAddress = std::max( uiEndAddress, SectionData()[I].ui64RelocAddress + SectionData()[I].vData.size() + ImageBase() );
 		}
 		return _uiAddr < uiEndAddress;
 	}

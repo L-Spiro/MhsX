@@ -2,6 +2,7 @@
 #include "../Base/LSWBase.h"
 #include "../Docking/LSWDockable.h"
 #include "../ListView/LSWListView.h"
+#include <windowsx.h>
 
 namespace lsw {
 
@@ -93,364 +94,18 @@ namespace lsw {
 	// == Functions.
 	// The default message handler.
 	LRESULT CALLBACK CWidget::WindowProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam ) {
-		CWidget * pmwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( _hWnd, GWLP_USERDATA ));
-		switch ( _uMsg ) {
-			// =======================================
-			// Create/Destroy.
-			// =======================================
-			case WM_NCCREATE : {
-				CREATESTRUCTW * pcsCreate = reinterpret_cast<CREATESTRUCTW *>(_lParam);
-				::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pcsCreate->lpCreateParams) );
-				pmwThis = reinterpret_cast<CWidget *>(pcsCreate->lpCreateParams);
-				pmwThis->m_hWnd = _hWnd;
-
-				// ControlSetup() called by the layout manager because WM_NCCREATE is inside a constructor.
-
-				LSW_HANDLED hHandled = pmwThis->NcCreate( (*pcsCreate) );
-				if ( hHandled == LSW_H_HANDLED ) { return 0; }
-				break;
-			}
-			case WM_CREATE : {
-				CREATESTRUCTW * pcsCreate = reinterpret_cast<CREATESTRUCTW *>(_lParam);
-				LSW_HANDLED hHandled = pmwThis->Create( (*pcsCreate) );
-				if ( hHandled == LSW_H_HANDLED ) { return 0; }
-				break;
-			}
-			case WM_DESTROY : {
-				LSW_HANDLED hHandled = pmwThis->Destroy();
-				if ( hHandled == LSW_H_HANDLED ) { return 0; }
-				break;
-			}
-			case WM_NCDESTROY : {
-				LSW_HANDLED hHandled = pmwThis->NcDestroy();
-				::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, 0L );
-				pmwThis->m_hWnd = NULL;	// Destructor calls ::DestroyWindow(), which would send WM_DESTROY and WM_NCDESTROY again.
-				delete pmwThis;
-				if ( hHandled == LSW_H_HANDLED ) { return 0; }
-				break;
-			}
-			case WM_CLOSE : {
-				LSW_HANDLED hHandled = pmwThis->Close();
-				if ( hHandled == LSW_H_HANDLED ) { return 0; }
-				break;
-			}
-
-			// =======================================
-			// Sizing.
-			// =======================================
-			case WM_SIZE : {
-				LSW_HANDLED hHandled;
-				switch ( _wParam ) {
-					case SIZE_MINIMIZED : {
-						// Width and height are the sizes in the task bar.
-						hHandled = pmwThis->Minimized( LOWORD( _lParam ), HIWORD( _lParam ) );
-						break;
-					}
-					default : {
-						::GetWindowRect( _hWnd, &pmwThis->m_rRect );
-						::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
-						hHandled = pmwThis->Size( _wParam, pmwThis->m_rRect.Width(), pmwThis->m_rRect.Height() );
-						::RedrawWindow( _hWnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW );
-					}
-				}
-				
-				if ( hHandled == LSW_H_HANDLED ) { return 0; }
-				break;
-			}
-			case WM_MOVE : {
-				if ( !::IsIconic( _hWnd ) ) {
-					::GetWindowRect( _hWnd, &pmwThis->m_rRect );
-					::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
-					POINTS pPoint = MAKEPOINTS( _lParam );
-					LSW_HANDLED hHandled = pmwThis->Move( pPoint.x, pPoint.y );
-					if ( hHandled == LSW_H_HANDLED ) { return 0; }
-				}
-				break;
-			}
-
-			// =======================================
-			// Commands
-			// =======================================
-			case WM_COMMAND : {
-				LSW_HANDLED hHandled;
-				WORD wId = LOWORD( _wParam );
-				if ( _lParam ) {
-					// Sent by a control.
-					hHandled = pmwThis->Command( wId, reinterpret_cast<HWND>(_lParam) );
-				}
-				else {
-					// Sent by a menu or accelerator.
-					switch ( HIWORD( _wParam ) ) {
-						case BN_CLICKED : {
-							hHandled = pmwThis->MenuCommand( wId );
-							break;
-						}
-						case 1 : {
-							hHandled = pmwThis->AcceleratorCommand( wId );
-							break;
-						}
-						/*case BN_CLICKED : {
-							hHandled = pmwThis->Command( wId, reinterpret_cast<HWND>(_lParam) );
-							break;
-						}*/
-						default : {
-							// Error.
-						}
-					}
-				}
-				if ( hHandled == LSW_H_HANDLED ) { return 0; }
-				break;
-			}
-			// =======================================
-			// Drawing
-			// =======================================
-			case WM_ERASEBKGND : {
-				LSW_HANDLED hHandled = pmwThis->EraseBkgnd( reinterpret_cast<HDC>(_wParam) );
-				if ( hHandled == LSW_H_HANDLED ) { return 1; }
-				break;
-			}
-			// =======================================
-			// Activation
-			// =======================================
-			case WM_ACTIVATE : {
-				BOOL bMinimized = HIWORD( _wParam ) != 0;
-				WORD _wState = LOWORD( _wParam );
-				CWidget * pwPrev =  nullptr;
-				if ( _lParam ) {
-					pwPrev = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( reinterpret_cast<HWND>(_lParam), GWLP_USERDATA ));
-				}
-				LSW_HANDLED hHandled = pmwThis->Activate( bMinimized, _wState, pwPrev );
-				if ( hHandled == LSW_H_HANDLED ) { return 0; }
-				/*if ( pmwThis ) {
-					return pmwThis->DockActivate( pmwThis, _wParam, _lParam, TRUE );
-				}*/
-				break;
-			}
-			case WM_NCACTIVATE : {
-				if ( pmwThis ) {
-					return pmwThis->DockNcActivate( pmwThis, _wParam, _lParam, TRUE );
-				}
-				break;
-			}
-			case WM_ENABLE : {
-				if ( pmwThis ) {
-					return pmwThis->DockEnable( pmwThis, _wParam, _lParam, TRUE );
-				}
-				break;
-			}
-		}
-		return ::DefWindowProcW( _hWnd, _uMsg, _wParam, _lParam );
+		LRESULT lrWndRes = 0;
+		INT_PTR ipDlgRes = 0;
+		WndDlgProc( _hWnd, _uMsg, _wParam, _lParam, FALSE, lrWndRes, ipDlgRes );
+		return lrWndRes;
 	}
 
 	// The default dialog message handler.
 	INT_PTR CALLBACK CWidget::DialogProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam ) {
-		CWidget * pmwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( _hWnd, GWLP_USERDATA ));
-
-		switch ( _uMsg ) {
-			// =======================================
-			// Create/Destroy.
-			// =======================================
-			case WM_INITDIALOG : {
-				std::vector<CWidget *> * pvWidgets = reinterpret_cast<std::vector<CWidget *> *>(_lParam);
-				pmwThis = (*pvWidgets)[0];
-				::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pmwThis) );
-				pmwThis->m_hWnd = _hWnd;
-				
-				ControlSetup( pmwThis, (*pvWidgets) );
-
-				// Window rect.
-#define MX_X	419
-#define MX_Y	153
-
-#if 0
-				// For window borders.
-#define MX_OFF_X	7
-#define MX_OFF_Y	30
-#else
-#define MX_OFF_X	0
-#define MX_OFF_Y	0
-#endif
-				POINT pConvOrg = PixelsToDialogUnits( _hWnd, 440 - MX_X - MX_OFF_X, 169 - MX_Y - MX_OFF_Y );
-				//POINT pConv = PixelsToDialogUnits( _hWnd, 559 - 548 - 7, 486 - 453 - 30 );
-				POINT pConvClient = PixelsToDialogUnits( _hWnd, 152, 16 );
-				
-				pmwThis->InitDialog();
-				return TRUE;	// Return TRUE to pass focus on to the control specified by _wParam.
-			}
-			case WM_DESTROY : {
-				LSW_HANDLED hHandled = pmwThis->Destroy();
-				if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
-				break;
-			}
-			case WM_NCDESTROY : {
-				LSW_HANDLED hHandled = pmwThis->NcDestroy();
-				//::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, 0L );
-				//pmwThis->m_hWnd = NULL;	// Destructor calls ::DestroyWindow(), which would send WM_DESTROY and WM_NCDESTROY again.
-				//delete pmwThis;
-				// CLayoutManager::DestroyDialogBoxTemplate() deletes the CWidget object.
-				if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
-				break;
-			}
-			case WM_CLOSE : {
-				LSW_HANDLED hHandled = pmwThis->Close();
-				if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
-				break;
-			}
-			// =======================================
-			// Sizing.
-			// =======================================
-			case WM_SIZE : {
-				LSW_HANDLED hHandled;
-				switch ( _wParam ) {
-					case SIZE_MINIMIZED : {
-						// Width and height are the sizes in the task bar.
-						hHandled = pmwThis->Minimized( LOWORD( _lParam ), HIWORD( _lParam ) );
-						break;
-					}
-					default : {
-						::GetWindowRect( _hWnd, &pmwThis->m_rRect );
-						::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
-						hHandled = pmwThis->Size( _wParam, pmwThis->m_rRect.Width(), pmwThis->m_rRect.Height() );
-						::RedrawWindow( _hWnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW );
-					}
-				}
-				
-				if ( hHandled == LSW_H_HANDLED ) { return 0; }
-				break;
-			}
-			case WM_MOVE : {
-				if ( !::IsIconic( _hWnd ) ) {
-					::GetWindowRect( _hWnd, &pmwThis->m_rRect );
-					::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
-					POINTS pPoint = MAKEPOINTS( _lParam );
-					LSW_HANDLED hHandled = pmwThis->Move( pPoint.x, pPoint.y );
-					if ( hHandled == LSW_H_HANDLED ) { return 0; }
-				}
-				break;
-			}
-			// =======================================
-			// Commands
-			// =======================================
-			case WM_COMMAND : {
-				LSW_HANDLED hHandled;
-				WORD wId = LOWORD( _wParam );
-				if ( _lParam ) {
-					// Sent by a control.
-					hHandled = pmwThis->Command( wId, reinterpret_cast<HWND>(_lParam) );
-				}
-				else {
-					// Sent by a menu or accelerator.
-					switch ( HIWORD( _wParam ) ) {
-						case BN_CLICKED : {
-							hHandled = pmwThis->MenuCommand( wId );
-							break;
-						}
-						case 1 : {
-							hHandled = pmwThis->AcceleratorCommand( wId );
-							break;
-						}
-						default : {
-							// Error.
-						}
-					}
-				}
-				if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
-				break;
-			}
-			// =======================================
-			// Notifications.
-			// =======================================
-			case WM_NOTIFY : {
-				LPNMHDR lpHdr = reinterpret_cast<LPNMHDR>(_lParam);
-				switch ( lpHdr->code ) {
-					case LVN_COLUMNCLICK : {
-						LPNMLISTVIEW plvListView = reinterpret_cast<LPNMLISTVIEW>(_lParam);
-						HWND hFrom = plvListView->hdr.hwndFrom;
-						CWidget * pmwTemp = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hFrom, GWLP_USERDATA ));
-						if ( pmwTemp ) {
-							CListView * plvView = static_cast<CListView *>(pmwTemp);
-							plvView->SortItems( plvListView->iSubItem );
-						}
-						return TRUE;
-					}
-					case NM_CUSTOMDRAW : {
-						LPNMLVCUSTOMDRAW pcdCustomDraw = reinterpret_cast<LPNMLVCUSTOMDRAW>(_lParam);
-						HWND hFrom = pcdCustomDraw->nmcd.hdr.hwndFrom;
-						if ( pcdCustomDraw->nmcd.dwDrawStage == CDDS_PREPAINT ) {
-							::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, CDRF_NOTIFYITEMDRAW );
-							return TRUE;
-						}
-						if ( pcdCustomDraw->nmcd.dwDrawStage == CDDS_ITEMPREPAINT ) {
-							if ( pcdCustomDraw->nmcd.dwItemSpec % 2 == 0 ) {
-								pcdCustomDraw->clrText = RGB( 0, 0, 0 );
-								pcdCustomDraw->clrTextBk = RGB( 0xE5, 0xF5, 0xFF );
-								::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, CDRF_NEWFONT );
-								return TRUE;
-							}
-							/*else {
-								pcdCustomDraw->clrText = RGB( 0, 0, 0 );
-								pcdCustomDraw->clrTextBk = RGB( 0xFF, 0xFF, 0xFF );
-							}*/
-						}
-						return TRUE;
-					}
-					case NM_DBLCLK : {
-						NMHDR * pHdr = reinterpret_cast<NMHDR *>(_lParam);
-						HWND hFrom = pHdr->hwndFrom;
-						CWidget * pmwTemp = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hFrom, GWLP_USERDATA ));
-						if ( pmwTemp ) {
-							if ( pmwTemp->DblClk( pHdr ) == LSW_HANDLED::LSW_H_HANDLED ) { return TRUE; }
-						}
-						pmwThis->DblClk( pHdr, static_cast<WORD>(pHdr->idFrom), pmwTemp );
-						return TRUE;
-					}
-				}
-				return TRUE;
-			}
-			// =======================================
-			// Drawing
-			// =======================================
-			case WM_ERASEBKGND : {
-				LSW_HANDLED hHandled = pmwThis->EraseBkgnd( reinterpret_cast<HDC>(_wParam) );
-				if ( hHandled == LSW_H_HANDLED ) { return TRUE; }
-				return FALSE;
-			}
-			case WM_SETFONT : {
-				/*HFONT hFont = (HFONT)_wParam;
-				::EnumChildWindows( _hWnd, EnumChildWindows_SetFont, (LPARAM)hFont );*/
-				return TRUE;
-			}
-			// =======================================
-			// Activation
-			// =======================================
-			case WM_ACTIVATE : {
-				BOOL bMinimized = HIWORD( _wParam ) != 0;
-				WORD _wState = LOWORD( _wParam );
-				CWidget * pwPrev =  nullptr;
-				if ( _lParam ) {
-					pwPrev = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( reinterpret_cast<HWND>(_lParam), GWLP_USERDATA ));
-				}
-				LSW_HANDLED hHandled = pmwThis->Activate( bMinimized, _wState, pwPrev );
-				if ( hHandled == LSW_H_HANDLED ) { return 0; }
-				/*if ( pmwThis ) {
-					return pmwThis->DockActivate( pmwThis, _wParam, _lParam, TRUE );
-				}*/
-				break;
-			}
-			case WM_NCACTIVATE : {
-				if ( pmwThis ) {
-					return pmwThis->DockNcActivate( pmwThis, _wParam, _lParam, FALSE );
-				}
-				break;
-			}
-			case WM_ENABLE : {
-				if ( pmwThis ) {
-					return pmwThis->DockEnable( pmwThis, _wParam, _lParam, FALSE );
-				}
-				break;
-			}
-		}
-		return FALSE;
+		LRESULT lrWndRes = 0;
+		INT_PTR ipDlgRes = 0;
+		WndDlgProc( _hWnd, _uMsg, _wParam, _lParam, TRUE, lrWndRes, ipDlgRes );
+		return ipDlgRes;
 	}
 
 	// Gets the window text.
@@ -516,6 +171,13 @@ namespace lsw {
 		return pwRet;
 	}
 
+	// Sets the parent window.
+	CWidget * CWidget::SetParent( CWidget * _pwParent ) {
+		HWND hWnd = _pwParent ? _pwParent->Wnd() : NULL;
+		hWnd = ::SetParent( Wnd(), hWnd );
+		return reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hWnd, GWLP_USERDATA ));
+	}
+
 	// Updates all rectangles with the current window rectangles.  If a control changes size and you wish to set the new size as its "base" size,
 	//	call this.
 	VOID CWidget::UpdateRects() {
@@ -577,95 +239,15 @@ namespace lsw {
 	}
 
 	// == Message Handlers.
-	// WM_NCCREATE.
-	CWidget::LSW_HANDLED CWidget::NcCreate( const CREATESTRUCTW &_csCreateParms ) {
-		return LSW_H_CONTINUE;
-	}
-
-	// WM_CREATE.
-	CWidget::LSW_HANDLED CWidget::Create( const CREATESTRUCTW &_csCreateParms ) {
-		return LSW_H_CONTINUE;
-	}
-
-	// WM_INITDIALOG.
-	CWidget::LSW_HANDLED CWidget::InitDialog() {
-		return LSW_H_CONTINUE;
-	}
-
-	// WM_DESTROY.
-	CWidget::LSW_HANDLED CWidget::Destroy() {
-		return LSW_H_CONTINUE;
-	}
-
-	// WM_NCDESTROY.
-	CWidget::LSW_HANDLED CWidget::NcDestroy() {
-		return LSW_H_CONTINUE;
-	}
-
-	// WM_CLOSE.
-	CWidget::LSW_HANDLED CWidget::Close() {
-		return LSW_H_CONTINUE;
-	}
-
 	// WM_SIZE.
 	CWidget::LSW_HANDLED CWidget::Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight ) {
 		::EnumChildWindows( Wnd(), EnumChildWindows_ResizeControls, 0 );
 		return LSW_H_CONTINUE;
 	}
 
-	// WM_SIZE, SIZE_MINIMIZED.
-	CWidget::LSW_HANDLED CWidget::Minimized( LONG _lWidth, LONG _lHeight ) {
-		return LSW_H_CONTINUE;
-	}
-
 	// WM_MOVE.
 	CWidget::LSW_HANDLED CWidget::Move( LONG _lX, LONG _lY ) {
 		::EnumChildWindows( Wnd(), EnumChildWindows_ResizeControls, 0 );
-		return LSW_H_CONTINUE;
-	}
-
-	// WM_COMMAND from control.
-	CWidget::LSW_HANDLED CWidget::Command( WORD _Id, HWND _hControl ) {
-		return LSW_H_CONTINUE;
-	}
-
-	// WM_COMMAND from menu.
-	CWidget::LSW_HANDLED CWidget::MenuCommand( WORD _Id ) {
-		return LSW_H_CONTINUE;
-	}
-
-	// WM_COMMAND from accelerator.
-	CWidget::LSW_HANDLED CWidget::AcceleratorCommand( WORD _Id ) {
-		return LSW_H_CONTINUE;
-	}
-
-	// WM_NOTIFY->NM_DBLCLK on this item (if LSW_HANDLED::LSW_H_CONTINUE, message is passed to owning window).
-	CWidget::LSW_HANDLED CWidget::DblClk( const NMHDR * _phHdr ) {
-		return LSW_H_CONTINUE;
-	}
-
-	// WM_NOTIFY->NM_DBLCLK for the owning window if the child either could not be resolved or returned LSW_HANDLED::LSW_H_CONTINUE.
-	CWidget::LSW_HANDLED CWidget::DblClk( const NMHDR * _phHdr, WORD _wControlId, CWidget * _pwWidget ) {
-		return LSW_H_CONTINUE;
-	}
-
-	// WM_ERASEBKGND.
-	CWidget::LSW_HANDLED CWidget::EraseBkgnd( HDC _hDc ) {
-		return LSW_H_CONTINUE;
-	}
-
-	// WM_ACTIVATE.
-	CWidget::LSW_HANDLED CWidget::Activate( BOOL _bMinimized, WORD _wActivationMode, CWidget * _pwWidget ) {
-		return LSW_H_CONTINUE;
-	}
-
-	// WM_NCACTIVATE.
-	CWidget::LSW_HANDLED CWidget::NcActivate( BOOL _bTitleBarActive, LPARAM _lParam ) {
-		return LSW_H_CONTINUE;
-	}
-
-	// WM_ENABLE
-	CWidget::LSW_HANDLED CWidget::Enable( BOOL _bEnabled ) {
 		return LSW_H_CONTINUE;
 	}
 
@@ -687,7 +269,7 @@ namespace lsw {
 	}
 
 	// Set the parent.
-	void CWidget::SetParent( CWidget * _pwParent ) {
+	void CWidget::SetWidgetParent( CWidget * _pwParent ) {
 		if ( m_pwParent ) {
 			m_pwParent->RemoveChild( this );
 		}
@@ -782,6 +364,7 @@ namespace lsw {
 	// Adds a dockable window to the list of dockable windows.
 	void CWidget::AddDockable( CDockable * _pdDock ) {
 		for ( size_t I = 0; I < m_vDockables.size(); ++I ) {
+			::SetActiveWindow( m_vDockables[I]->Wnd() );
 			if ( m_vDockables[I] == _pdDock ) { return; }
 		}
 		m_vDockables.push_back( _pdDock );
@@ -815,7 +398,7 @@ namespace lsw {
 		if ( _lParam == -1 ) {
 			if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
 			return _bCallDefault ? ::DefWindowProcW( _pwWnd->Wnd(), WM_NCACTIVATE, _wParam, 0L ) :
-				TRUE;
+				FALSE;
 		}
 
 		BOOL bKeepActive = static_cast<BOOL>(_wParam);
@@ -847,7 +430,7 @@ namespace lsw {
 		if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
 
 		return _bCallDefault ? ::DefWindowProcW( _pwWnd->Wnd(), WM_NCACTIVATE, bKeepActive, _lParam ) :
-			TRUE;
+			FALSE;
 	}
 
 	// Handle WM_ENABLE for Should be called on the owner window.
@@ -856,11 +439,20 @@ namespace lsw {
 	//	_lParam = LPARAM of the WM_ENABLE message.
 	LRESULT CALLBACK CWidget::DockEnable( CWidget * _pwWnd, WPARAM _wParam, LPARAM _lParam, BOOL _bCallDefault ) {
 		LSW_HANDLED hHandled = _pwWnd->Enable( static_cast<BOOL>(_wParam) );
+
+		std::vector<CWidget *> vDocks;
+		GetDockables( vDocks, FALSE );
 		
 
-		for ( size_t I = 0; I < m_vDockables.size(); ++I ) {
-			if ( m_vDockables[I]->Wnd() != _pwWnd->Wnd() ) {
-				::SendMessageW( m_vDockables[I]->Wnd(), WM_ENABLE, _wParam, _lParam );
+		for ( size_t I = 0; I < vDocks.size(); ++I ) {
+			if ( vDocks[I]->Wnd() != _pwWnd->Wnd() ) {
+				LSW_HANDLED hHandledThis = vDocks[I]->Enable( static_cast<BOOL>(_wParam) );
+				if ( hHandled != LSW_H_HANDLED ) {
+					if ( _bCallDefault ) {
+						::DefWindowProcW( vDocks[I]->Wnd(), WM_ENABLE, _wParam, _lParam );
+					}
+				}
+				//::SendMessageW( vDocks[I]->Wnd(), WM_ENABLE, _wParam, _lParam );
 			}
 		}
 
@@ -1078,6 +670,563 @@ namespace lsw {
 		::EnumChildWindows( _pwParent->Wnd(), EnumChildWindows_AttachWindowToWidget, reinterpret_cast<LPARAM>(&_vWidgetList) );
 		::EnumChildWindows( _pwParent->Wnd(), EnumChildWindows_SetEnabled, reinterpret_cast<LPARAM>(&_vWidgetList) );
 		::EnumChildWindows( _pwParent->Wnd(), EnumChildWindows_SetStartingRect, reinterpret_cast<LPARAM>(&_vWidgetList) );
+	}
+
+	// The default message handler.
+	VOID CALLBACK CWidget::WndDlgProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam, BOOL _bIsDlg, LRESULT &_lrWndResult, INT_PTR &_ipDiagResult ) {
+#define LSW_WNDRET( VAL )				if ( !_bIsDlg ) { _lrWndResult = VAL; }
+#define LSW_DLGRET( VAL )				if ( _bIsDlg ) { _ipDiagResult = VAL; }
+#define LSW_RET( WNDVAL, DLGVAL )		LSW_WNDRET( WNDVAL ) LSW_DLGRET( DLGVAL ) return
+
+		CWidget * pmwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( _hWnd, GWLP_USERDATA ));
+		switch ( _uMsg ) {
+			// =======================================
+			// Create/Destroy.
+			// =======================================
+			case WM_NCCREATE : {
+				CREATESTRUCTW * pcsCreate = reinterpret_cast<CREATESTRUCTW *>(_lParam);
+				::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pcsCreate->lpCreateParams) );
+				pmwThis = reinterpret_cast<CWidget *>(pcsCreate->lpCreateParams);
+				pmwThis->m_hWnd = _hWnd;
+
+				// ControlSetup() called by the layout manager because WM_NCCREATE is inside a constructor.
+
+				LSW_HANDLED hHandled = pmwThis->NcCreate( (*pcsCreate) );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_CREATE : {
+				CREATESTRUCTW * pcsCreate = reinterpret_cast<CREATESTRUCTW *>(_lParam);
+				LSW_HANDLED hHandled = pmwThis->Create( (*pcsCreate) );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_INITDIALOG : {
+				std::vector<CWidget *> * pvWidgets = reinterpret_cast<std::vector<CWidget *> *>(_lParam);
+				pmwThis = (*pvWidgets)[0];
+				::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pmwThis) );
+				pmwThis->InitControl( _hWnd );
+				
+				ControlSetup( pmwThis, (*pvWidgets) );
+
+				// Window rect.
+#define MX_X	419
+#define MX_Y	153
+
+#if 0
+				// For window borders.
+#define MX_OFF_X	7
+#define MX_OFF_Y	30
+#else
+#define MX_OFF_X	0
+#define MX_OFF_Y	0
+#endif
+				POINT pConvOrg = PixelsToDialogUnits( _hWnd, 440 - MX_X - MX_OFF_X, 169 - MX_Y - MX_OFF_Y );
+				//POINT pConv = PixelsToDialogUnits( _hWnd, 559 - 548 - 7, 486 - 453 - 30 );
+				POINT pConvClient = PixelsToDialogUnits( _hWnd, 152, 16 );
+				
+				pmwThis->InitDialog();
+				LSW_RET( TRUE, TRUE );	// Return TRUE to pass focus on to the control specified by _wParam.
+			}
+			case WM_DESTROY : {
+				LSW_HANDLED hHandled = pmwThis->Destroy();
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCDESTROY : {
+				LSW_HANDLED hHandled = pmwThis->NcDestroy();
+				if ( !_bIsDlg ) {
+					::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, 0L );
+					pmwThis->m_hWnd = NULL;	// Destructor calls ::DestroyWindow(), which would send WM_DESTROY and WM_NCDESTROY again.
+					delete pmwThis;
+				}
+				// If it is a dialog, CLayoutManager::DestroyDialogBoxTemplate() deletes the CWidget object.
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_CLOSE : {
+				LSW_HANDLED hHandled = pmwThis->Close();
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_CANCELMODE : {
+				LSW_HANDLED hHandled = pmwThis->CancelMode();
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+
+			// =======================================
+			// Sizing.
+			// =======================================
+			case WM_SIZE : {
+				LSW_HANDLED hHandled;
+				switch ( _wParam ) {
+					case SIZE_MINIMIZED : {
+						// Width and height are the sizes in the task bar.
+						hHandled = pmwThis->Minimized( LOWORD( _lParam ), HIWORD( _lParam ) );
+						break;
+					}
+					default : {
+						::GetWindowRect( _hWnd, &pmwThis->m_rRect );
+						::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
+						hHandled = pmwThis->Size( _wParam, pmwThis->m_rRect.Width(), pmwThis->m_rRect.Height() );
+						::RedrawWindow( _hWnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW );
+					}
+				}
+				
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_MOVE : {
+				if ( !::IsIconic( _hWnd ) ) {
+					::GetWindowRect( _hWnd, &pmwThis->m_rRect );
+					::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
+					POINTS pPoint = MAKEPOINTS( _lParam );
+					LSW_HANDLED hHandled = pmwThis->Move( pPoint.x, pPoint.y );
+					if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				}
+				break;
+			}
+			case WM_WINDOWPOSCHANGED : {
+				WINDOWPOS * pwpPos = reinterpret_cast<WINDOWPOS *>(_lParam);
+				LSW_HANDLED hHandled = pmwThis->WindowPosChanged( pwpPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+
+			// =======================================
+			// Commands
+			// =======================================
+			case WM_COMMAND : {
+				LSW_HANDLED hHandled;
+				WORD wId = LOWORD( _wParam );
+				if ( _lParam ) {
+					// Sent by a control.
+					hHandled = pmwThis->Command( wId, reinterpret_cast<HWND>(_lParam) );
+				}
+				else {
+					// Sent by a menu or accelerator.
+					switch ( HIWORD( _wParam ) ) {
+						case BN_CLICKED : {
+							hHandled = pmwThis->MenuCommand( wId );
+							break;
+						}
+						case 1 : {
+							hHandled = pmwThis->AcceleratorCommand( wId );
+							break;
+						}
+						/*case BN_CLICKED : {
+							hHandled = pmwThis->Command( wId, reinterpret_cast<HWND>(_lParam) );
+							break;
+						}*/
+						default : {
+							// Error.
+						}
+					}
+				}
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			// =======================================
+			// Notifications.
+			// =======================================
+			case WM_NOTIFY : {
+				LPNMHDR lpHdr = reinterpret_cast<LPNMHDR>(_lParam);
+				switch ( lpHdr->code ) {
+					case LVN_COLUMNCLICK : {
+						LPNMLISTVIEW plvListView = reinterpret_cast<LPNMLISTVIEW>(_lParam);
+						HWND hFrom = plvListView->hdr.hwndFrom;
+						CWidget * pmwTemp = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hFrom, GWLP_USERDATA ));
+						if ( pmwTemp ) {
+							CListView * plvView = static_cast<CListView *>(pmwTemp);
+							plvView->SortItems( plvListView->iSubItem );
+						}
+						LSW_RET( 1, TRUE );
+					}
+					case NM_CUSTOMDRAW : {
+						LPNMLVCUSTOMDRAW pcdCustomDraw = reinterpret_cast<LPNMLVCUSTOMDRAW>(_lParam);
+						HWND hFrom = pcdCustomDraw->nmcd.hdr.hwndFrom;
+						if ( pcdCustomDraw->nmcd.dwDrawStage == CDDS_PREPAINT ) {
+							::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, CDRF_NOTIFYITEMDRAW );
+							LSW_RET( 1, TRUE );
+						}
+						if ( pcdCustomDraw->nmcd.dwDrawStage == CDDS_ITEMPREPAINT ) {
+							if ( pcdCustomDraw->nmcd.dwItemSpec % 2 == 0 ) {
+								pcdCustomDraw->clrText = RGB( 0, 0, 0 );
+								pcdCustomDraw->clrTextBk = RGB( 0xE5, 0xF5, 0xFF );
+								::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, CDRF_NEWFONT );
+								LSW_RET( 1, TRUE );
+							}
+							/*else {
+								pcdCustomDraw->clrText = RGB( 0, 0, 0 );
+								pcdCustomDraw->clrTextBk = RGB( 0xFF, 0xFF, 0xFF );
+							}*/
+						}
+						LSW_RET( 1, TRUE );
+					}
+					case NM_DBLCLK : {
+						NMHDR * pHdr = reinterpret_cast<NMHDR *>(_lParam);
+						HWND hFrom = pHdr->hwndFrom;
+						CWidget * pmwTemp = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hFrom, GWLP_USERDATA ));
+						if ( pmwTemp ) {
+							if ( pmwTemp->DblClk( pHdr ) == LSW_HANDLED::LSW_H_HANDLED ) { LSW_RET( 1, TRUE ); }
+						}
+						pmwThis->DblClk( pHdr, static_cast<WORD>(pHdr->idFrom), pmwTemp );
+						LSW_RET( 1, TRUE );
+					}
+				}
+				LSW_RET( 1, TRUE );
+			}
+			// =======================================
+			// Drawing
+			// =======================================
+			case WM_ERASEBKGND : {
+				LSW_HANDLED hHandled = pmwThis->EraseBkgnd( reinterpret_cast<HDC>(_wParam) );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 1, 1 ); }
+				break;
+			}
+			// =======================================
+			// Activation
+			// =======================================
+			case WM_ACTIVATE : {
+				BOOL bMinimized = HIWORD( _wParam ) != 0;
+				WORD _wState = LOWORD( _wParam );
+				CWidget * pwPrev =  nullptr;
+				if ( _lParam ) {
+					pwPrev = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( reinterpret_cast<HWND>(_lParam), GWLP_USERDATA ));
+				}
+				LSW_HANDLED hHandled = pmwThis->Activate( bMinimized, _wState, pwPrev );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCACTIVATE : {
+				if ( pmwThis ) {
+					LSW_RET( pmwThis->DockNcActivate( pmwThis, _wParam, _lParam, TRUE ), pmwThis->DockNcActivate( pmwThis, _wParam, _lParam, FALSE ) );
+				}
+				break;
+			}
+			case WM_ENABLE : {
+				if ( pmwThis ) {
+					LSW_RET( pmwThis->DockEnable( pmwThis, _wParam, _lParam, TRUE ), pmwThis->DockEnable( pmwThis, _wParam, _lParam, FALSE ) );
+				}
+				break;
+			}
+			// =======================================
+			// Mouse
+			// =======================================
+			case WM_CAPTURECHANGED : {
+				HWND hWnd = reinterpret_cast<HWND>(_lParam);
+				LSW_HANDLED hHandled = pmwThis->CaptureChanged( reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hWnd, GWLP_USERDATA )) );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_LBUTTONDBLCLK: {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->LButtonDblClk( static_cast<DWORD>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_LBUTTONDOWN : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->LButtonDown( static_cast<DWORD>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_LBUTTONUP : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->LButtonUp( static_cast<DWORD>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_MBUTTONDBLCLK : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->MButtonDblClk( static_cast<DWORD>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_MBUTTONDOWN : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->MButtonDown( static_cast<DWORD>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_MBUTTONUP : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->MButtonUp( static_cast<DWORD>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_MOUSEACTIVATE : {
+				HWND hWnd = reinterpret_cast<HWND>(_wParam);
+				INT iRetCode = MA_ACTIVATE;
+				LSW_HANDLED hHandled = pmwThis->MouseActivate( reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hWnd, GWLP_USERDATA )), static_cast<INT>(_lParam), iRetCode );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( iRetCode, iRetCode ); }
+				break;
+			}
+			case WM_MOUSEHOVER : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->MouseHover( static_cast<DWORD>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+#ifdef WM_MOUSEHWHEEL
+			case WM_MOUSEHWHEEL : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->MouseHWheel( static_cast<DWORD>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+#endif	// #ifdef WM_MOUSEHWHEEL
+			case WM_MOUSELEAVE : {
+				LSW_HANDLED hHandled = pmwThis->MouseLeave();
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_MOUSEMOVE : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->MouseMove( static_cast<DWORD>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_MOUSEWHEEL : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->MouseWheel( static_cast<DWORD>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCHITTEST : {
+				INT iRetCode = HTNOWHERE;
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->NcHitTest( pPos, iRetCode );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( iRetCode, iRetCode ); }
+				break;
+			}
+			case WM_NCLBUTTONDBLCLK : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->NcButtonDblClk( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCLBUTTONDOWN : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->NcLButtonDown( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCLBUTTONUP : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->NcLButtonUp( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCMBUTTONDBLCLK : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->NcMButtonDblClk( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCMBUTTONDOWN : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->NcMButtonDown( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCMBUTTONUP : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->NcMButtonUp( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCMOUSEHOVER : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->NcMouseHover( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCMOUSELEAVE : {
+				LSW_HANDLED hHandled = pmwThis->NcMouseLeave();
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCMOUSEMOVE : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->NcMouseMove( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCRBUTTONDBLCLK : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->NcRButtonDblClk( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCRBUTTONDOWN : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->NcRButtonDown( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCRBUTTONUP : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->NcRButtonUp( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCXBUTTONDBLCLK : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->NcXButtonDblClk( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCXBUTTONDOWN : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->NcXButtonDown( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCXBUTTONUP : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->NcXButtonUp( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_RBUTTONDBLCLK : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->RButtonDblClk( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_RBUTTONDOWN : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->RButtonDown( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_RBUTTONUP : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->RButtonUp( static_cast<INT>(_wParam), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_XBUTTONDBLCLK : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->XButtonDblClk( GET_KEYSTATE_WPARAM( _wParam ), GET_XBUTTON_WPARAM( _wParam ), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_XBUTTONDOWN : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->XButtonDown( GET_KEYSTATE_WPARAM( _wParam ), GET_XBUTTON_WPARAM( _wParam ), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_XBUTTONUP : {
+				POINTS pPos = {
+					GET_X_LPARAM( _lParam ),
+					GET_Y_LPARAM( _lParam ),
+				};
+				LSW_HANDLED hHandled = pmwThis->XButtonUp( GET_KEYSTATE_WPARAM( _wParam ), GET_XBUTTON_WPARAM( _wParam ), pPos );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+		}
+
+		LSW_WNDRET( ::DefWindowProcW( _hWnd, _uMsg, _wParam, _lParam ) );
+		LSW_DLGRET( FALSE );
+
+#undef LSW_RET
+#undef LSW_DLGRET
+#undef LSW_WNDRET
 	}
 
 }	// namespace lsw

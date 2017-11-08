@@ -47,7 +47,51 @@ namespace mx {
 		MX_TEXT( MX_OI_GENERAL_UPDDATE_EXP_EVAL_CB, dwExpressionRefresh );
 #undef MX_TEXT
 
+		UpdateExample();
 		return LSW_H_CONTINUE;
+	}
+
+	// WM_COMMAND from control.
+	CWidget::LSW_HANDLED COptionsPageGeneral::Command( WORD _Id, HWND _hControl ) {
+		UpdateExample();
+		return LSW_H_CONTINUE;
+	}
+
+	// Copies all the settings to the MX_OPTIONS structure.
+	BOOL COptionsPageGeneral::Finalize() {
+		if ( !m_poOptions ) { return TRUE; }
+		CCheckButton * pcbCheck = nullptr;
+		DWORD dwOpts = 0;
+
+		// ==== BOOLEANS ==== //
+#define MX_GETCHECK( ID, MEMBER )																				\
+	pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::ID ));									\
+	if ( pcbCheck ) {																							\
+		m_poOptions->MEMBER = pcbCheck->IsChecked();															\
+	}
+
+		MX_GETCHECK( MX_OI_GENERAL_VIEW_CODE_NAMES, bDataTypesAsCodeNames );
+		MX_GETCHECK( MX_OI_GENERAL_VIEW_SIZES, bDataTypeSizes );
+		MX_GETCHECK( MX_OI_GENERAL_VIEW_RANGES, bDataTypeRanges );
+#undef MX_GETCHECK
+
+		return TRUE;
+	}
+
+	// Updates the text example of data-type settings.
+	void COptionsPageGeneral::UpdateExample() {
+		CWidget * pwExample = FindChild( COptionsLayout::MX_OI_GENERAL_VIEW_EXAMPLE );
+		if ( pwExample ) {
+			std::string sText = _DEC_S_4CEBDC18_Example__;
+			DWORD dwOptions = 0;
+			dwOptions |= FindChild( COptionsLayout::MX_OI_GENERAL_VIEW_CODE_NAMES )->IsChecked() ? CUtilities::MX_DTO_CODENAMES : 0;
+			dwOptions |= FindChild( COptionsLayout::MX_OI_GENERAL_VIEW_SIZES )->IsChecked() ? CUtilities::MX_DTO_SHOWSIZES : 0;
+			dwOptions |= FindChild( COptionsLayout::MX_OI_GENERAL_VIEW_RANGES )->IsChecked() ? CUtilities::MX_DTO_SHOWRANGES : 0;
+
+			sText.push_back( ' ' );
+			CUtilities::PrintDataType( sText, CUtilities::MX_DT_INT32, dwOptions );
+			pwExample->SetTextA( sText.c_str() );
+		}
 	}
 
 }	// namespace mx

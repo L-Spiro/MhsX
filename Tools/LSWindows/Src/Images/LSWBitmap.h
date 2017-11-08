@@ -14,6 +14,9 @@ namespace lsw {
 		// Loads a bitmap from a file.
 		BOOL							LoadFromFile( const WCHAR * _pcPath, int _cxDesired, int _cyDesired, UINT _fuLoad );
 
+		// Creates a bitmap.
+		BOOL							CreateBitmap( int _nWidth, int _nHeight, UINT _cPlanes, UINT _cBitsPerPel, const VOID * _lpvBits );
+
 		// Resets the image.
 		VOID							Reset();
 

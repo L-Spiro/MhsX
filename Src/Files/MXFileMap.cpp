@@ -1,6 +1,8 @@
 #include "MXFileMap.h"
 #include "../System/MXSystem.h"
 
+#include <algorithm>
+
 // == Macros.
 #define MX_MAP_BUF_SIZE			static_cast<UINT64>(mx::CSystem::GetSystemInfo().dwAllocationGranularity * 64)
 
@@ -87,12 +89,12 @@ namespace mx {
 
 	// Reads from the opened file.
 	DWORD CFileMap::Read( LPVOID _lpvBuffer, UINT64 _ui64From, DWORD _dwNumberOfBytesToRead ) const {
-		_dwNumberOfBytesToRead = static_cast<DWORD>(min( _dwNumberOfBytesToRead, Size() - _ui64From ));
+		_dwNumberOfBytesToRead = static_cast<DWORD>(std::min( static_cast<UINT64>(_dwNumberOfBytesToRead), Size() - _ui64From ));
 		// Read in 8-megabyte chunks.
 		PBYTE pbDst = static_cast<PBYTE>(_lpvBuffer);
 		DWORD dwWritten = 0;
 		while ( _dwNumberOfBytesToRead ) {
-			DWORD dwReadAmount = min( 8 * 1024 * 1024, _dwNumberOfBytesToRead );
+			DWORD dwReadAmount = std::min( static_cast<DWORD>(8 * 1024 * 1024), _dwNumberOfBytesToRead );
 			if ( !MapRegion( _ui64From, dwReadAmount ) ) {
 				return dwWritten;
 			}
@@ -108,12 +110,12 @@ namespace mx {
 
 	// Writes to the opened file.
 	DWORD CFileMap::Write( LPCVOID _lpvBuffer, UINT64 _ui64From, DWORD _dwNumberOfBytesToWrite ) {
-		_dwNumberOfBytesToWrite = static_cast<DWORD>(min( _dwNumberOfBytesToWrite, Size() - _ui64From ));
+		_dwNumberOfBytesToWrite = static_cast<DWORD>(std::min( static_cast<UINT64>(_dwNumberOfBytesToWrite), Size() - _ui64From ));
 		// Write in 8-megabyte chunks.
 		const BYTE * pbSrc = static_cast<const BYTE *>(_lpvBuffer);
 		DWORD dwWritten = 0;
 		while ( _dwNumberOfBytesToWrite ) {
-			DWORD dwWriteAmount = min( 8 * 1024 * 1024, _dwNumberOfBytesToWrite );
+			DWORD dwWriteAmount = std::min( static_cast<DWORD>(8 * 1024 * 1024), _dwNumberOfBytesToWrite );
 			if ( !MapRegion( _ui64From, dwWriteAmount ) ) {
 				return dwWritten;
 			}
@@ -155,7 +157,7 @@ namespace mx {
 		if ( m_hMap == INVALID_HANDLE_VALUE ) { return FALSE; }
 		UINT64 ui64Adjusted = AdjustBase( _ui64Offset );
 		DWORD dwNewSize = static_cast<DWORD>((_ui64Offset - ui64Adjusted) + _dwSize);
-		dwNewSize = static_cast<DWORD>(min( dwNewSize, Size() - ui64Adjusted ));
+		dwNewSize = static_cast<DWORD>(std::min( static_cast<UINT64>(dwNewSize), Size() - ui64Adjusted ));
 		if ( m_pbMapBuffer && ui64Adjusted == m_ui64MapStart && dwNewSize == m_dwMapSize ) { return TRUE; }
 
 		if ( m_pbMapBuffer ) {

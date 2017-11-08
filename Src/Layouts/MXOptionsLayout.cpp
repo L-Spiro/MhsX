@@ -330,7 +330,7 @@ namespace mx {
 			0,										// iLeft
 			MX_REFRESH_RATES_GROUP_HEIGHT,			// iTop
 			MX_OD_W,								// dwWidth
-			MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT * 2 + MX_GROUP_BOTTOM/*29*/,										// dwHeight
+			MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT * 2 + MX_GROUP_BOTTOM + MX_DEF_STATIC_HEIGHT/*29*/,										// dwHeight
 			MX_GROUPSTYLE,							// dwStyle
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_DD16C375_View_Settings ),				// pwcText
@@ -383,6 +383,22 @@ namespace mx {
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_8CD4CB22_Data_Type_Ranges ),	// pwcText
 			_LEN_8CD4CB22,											// sTextLen
+			MX_OI_GENERAL,							// dwParentId
+		},
+		{
+			LSW_LT_LABEL,							// ltType
+			MX_OI_GENERAL_VIEW_EXAMPLE,				// wId
+			WC_STATICW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_GROUP_LEFT,							// iLeft
+			MX_REFRESH_RATES_GROUP_HEIGHT + MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT * 2,		// iTop
+			MX_OD_W - MX_GROUP_RIGHT - MX_GROUP_LEFT,									// dwWidth
+			MX_DEF_STATIC_HEIGHT,					// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_4CEBDC18_Example__ ),	// pwcText
+			_LEN_4CEBDC18,							// sTextLen
 			MX_OI_GENERAL,							// dwParentId
 		},
 

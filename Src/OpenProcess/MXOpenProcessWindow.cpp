@@ -164,7 +164,7 @@ namespace mx {
 		CreateProcListByThreadRefs( vThreads, sIds );
 #endif	// #if 0
 		
-		const DWORD dwLast = max( 0xFFFF, HighestProcId( vProcs ) );
+		const DWORD dwLast = std::max( static_cast<DWORD>(0xFFFF), HighestProcId( vProcs ) );
 		for ( DWORD I = 0; I <= dwLast; I++ ) {
 			{
 				DWORD dwId = I;

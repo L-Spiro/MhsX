@@ -20,6 +20,11 @@ namespace lsw {
 		VOID								SetHeight( LONG _lH ) { bottom = top + _lH; }
 		POINT								UpperLeft() const { return { left, top }; }
 		POINT								BottomRight() const { return { right, bottom }; }
+		LSW_RECT							MapToDeskTop( HWND _hWnd ) const {
+			LSW_RECT rTemp = (*this);
+			::MapWindowPoints( _hWnd, HWND_DESKTOP, reinterpret_cast<POINT *>(&rTemp), 2 );
+			return rTemp;
+		}
 	};
 
 	struct LSW_HANDLE {
@@ -112,6 +117,21 @@ namespace lsw {
 		}
 	};
 
+	struct LSW_SELECTOBJECT {
+		LSW_SELECTOBJECT( HDC _hDc, HGDIOBJ _hgdiobj ) :
+			hDc( _hDc ),
+			hCur( _hgdiobj ),
+			hPrev( ::SelectObject( _hDc, _hgdiobj ) ) {
+		}
+		~LSW_SELECTOBJECT() {
+			::SelectObject( hDc, hPrev );
+		}
+
+		HDC									hDc;
+		HGDIOBJ								hCur;
+		HGDIOBJ								hPrev;
+	};
+
 	class CHelpers {
 	public :
 		// Aligns a WORD pointer to a 4-byte address.
@@ -133,6 +153,5 @@ namespace lsw {
 			return nullptr;
 		}
 	};
-
 
 }	// namespace lsw

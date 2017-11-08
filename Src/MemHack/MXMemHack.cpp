@@ -1,4 +1,5 @@
 #include "MXMemHack.h"
+#include "../Utilities/MXUtilities.h"
 #include <Base/LSWBase.h>
 
 namespace mx {
@@ -62,6 +63,26 @@ namespace mx {
 	// Detach from the current process.
 	void CMemHack::Detach() {
 		//m_hProc.Reset();
+	}
+
+	// Gets the options.
+	const MX_OPTIONS & CMemHack::Options() const {
+		// Gather system-wide options into our structure.
+		m_oOptions.bDataTypesAsCodeNames = (CUtilities::Options.dwDataTypeOptions & CUtilities::MX_DTO_CODENAMES) ? TRUE : FALSE;
+		m_oOptions.bDataTypeRanges = (CUtilities::Options.dwDataTypeOptions & CUtilities::MX_DTO_SHOWRANGES) ? TRUE : FALSE;
+		m_oOptions.bDataTypeSizes = (CUtilities::Options.dwDataTypeOptions & CUtilities::MX_DTO_SHOWSIZES) ? TRUE : FALSE;
+		return m_oOptions;
+	}
+
+	// Sets the options.
+	void CMemHack::SetOptions( const MX_OPTIONS &_oOptions ) {
+		m_oOptions = _oOptions;
+		// Disperse options across the system.
+		DWORD dwDataTypeOpts = 0;
+		dwDataTypeOpts |= m_oOptions.bDataTypesAsCodeNames ? CUtilities::MX_DTO_CODENAMES : 0;
+		dwDataTypeOpts |= m_oOptions.bDataTypeRanges ? CUtilities::MX_DTO_SHOWRANGES : 0;
+		dwDataTypeOpts |= m_oOptions.bDataTypeSizes ? CUtilities::MX_DTO_SHOWSIZES : 0;
+		CUtilities::Options.dwDataTypeOptions = dwDataTypeOpts;
 	}
 
 }	// namespace mx

@@ -34,6 +34,18 @@ namespace lsw {
 		SIZE_T						sWidthSizeExpLen;
 		LPCSTR						pcHeightSizeExp;
 		SIZE_T						sHeightSizeExpLen;
+
+
+		LSW_WIDGET_LAYOUT			ChangeStyle( DWORD _dwNewStyle ) const {
+			LSW_WIDGET_LAYOUT wlCopy = (*this);
+			wlCopy.dwStyle = _dwNewStyle;
+			return wlCopy;
+		}
+		LSW_WIDGET_LAYOUT			ChangeStyleEx( DWORD _dwNewStyleEx ) const {
+			LSW_WIDGET_LAYOUT wlCopy = (*this);
+			wlCopy.dwStyleEx = _dwNewStyleEx;
+			return wlCopy;
+		}
 	};
 
 }	// namespace lsw

@@ -56,6 +56,30 @@ namespace lsw {
 		// Set visible or not.
 		BOOL								SetVisible( BOOL _bVis ) { return ::ShowWindow( Wnd(), _bVis ? SW_SHOW : SW_HIDE ); }
 
+		// Get the window style.
+		DWORD								GetStyle() const { return static_cast<DWORD>(::GetWindowLongW( Wnd(), GWL_STYLE )); }
+
+		// Get the window extended style.
+		DWORD								GetStyleEx() const { return static_cast<DWORD>(::GetWindowLongW( Wnd(), GWL_EXSTYLE )); }
+
+		// Set the window style.  Returns the previous style.
+		DWORD								SetStyle( DWORD _dwStyle ) { return static_cast<DWORD>(::SetWindowLongW( Wnd(), GWL_STYLE, static_cast<LONG>(_dwStyle) )); }
+
+		// Set the window extended style.  Returns the previous extended style.
+		DWORD								SetStyleEx( DWORD _dwStyle ) { return static_cast<DWORD>(::SetWindowLongW( Wnd(), GWL_EXSTYLE, static_cast<LONG>(_dwStyle) )); }
+
+		// Adds a flag to the current style of the window.
+		DWORD								AddStyle( DWORD _dwFlags ) { return SetStyle( GetStyle() | _dwFlags ); }
+
+		// Adds a flag to the current extended style of the window.
+		DWORD								AddStyleEx( DWORD _dwFlags ) { return SetStyleEx( GetStyleEx() | _dwFlags ); }
+
+		// Removes a flag from the current style of the window.
+		DWORD								RemoveStyle( DWORD _dwFlags ) { return SetStyle( GetStyle() & ~_dwFlags ); }
+
+		// Removes a flag from the current extended style of the window.
+		DWORD								RemoveStyleEx( DWORD _dwFlags ) { return SetStyleEx( GetStyleEx() & ~_dwFlags ); }
+
 		// Copies the text of the specified window's title bar (if it has one) into a buffer. If the specified window is a control, the text of the control is copied.
 		virtual INT							GetTextA( LPSTR _lpString, INT _nMaxCount ) const { return ::GetWindowTextA( Wnd(), _lpString, _nMaxCount ); }
 
@@ -114,6 +138,9 @@ namespace lsw {
 
 		// Sets the button to BST_CHECKED or BST_UNCHECKED.
 		virtual VOID						SetCheck( BOOL _bChecked ) { CheckButton( _bChecked ? BST_CHECKED : BST_UNCHECKED ); }
+
+		// Sets the parent window.
+		virtual CWidget *					SetParent( CWidget * _pwParent );
 
 		// Window rectangle.
 		const LSW_RECT &					WindowRect() const { return m_rRect; }
@@ -197,57 +224,169 @@ namespace lsw {
 
 		// == Message Handlers.
 		// WM_NCCREATE.
-		virtual LSW_HANDLED					NcCreate( const CREATESTRUCTW &_csCreateParms );
+		virtual LSW_HANDLED					NcCreate( const CREATESTRUCTW &_csCreateParms ) { return LSW_H_CONTINUE; }
 
 		// WM_CREATE.
-		virtual LSW_HANDLED					Create( const CREATESTRUCTW &_csCreateParms );
+		virtual LSW_HANDLED					Create( const CREATESTRUCTW &_csCreateParms ) { return LSW_H_CONTINUE; }
 
 		// WM_INITDIALOG.
-		virtual LSW_HANDLED					InitDialog();
+		virtual LSW_HANDLED					InitDialog() { return LSW_H_CONTINUE; };
 
 		// WM_DESTROY.
-		virtual LSW_HANDLED					Destroy();
+		virtual LSW_HANDLED					Destroy() { return LSW_H_CONTINUE; }
 
 		// WM_NCDESTROY.
-		virtual LSW_HANDLED					NcDestroy();
+		virtual LSW_HANDLED					NcDestroy() { return LSW_H_CONTINUE; }
 
 		// WM_CLOSE.
-		virtual LSW_HANDLED					Close();
+		virtual LSW_HANDLED					Close() { return LSW_H_CONTINUE; }
+
+		// WM_CANCELMODE.
+		virtual LSW_HANDLED					CancelMode() { return LSW_H_CONTINUE; }
 
 		// WM_SIZE.
 		virtual LSW_HANDLED					Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight );
+
 		// WM_SIZE, SIZE_MINIMIZED.
-		virtual LSW_HANDLED					Minimized( LONG _lWidth, LONG _lHeight );
+		virtual LSW_HANDLED					Minimized( LONG _lWidth, LONG _lHeight ) { return LSW_H_CONTINUE; }
 
 		// WM_MOVE.
 		virtual LSW_HANDLED					Move( LONG _lX, LONG _lY );
 
+		// WM_WINDOWPOSCHANGED.
+		virtual LSW_HANDLED					WindowPosChanged( const WINDOWPOS * _pwpPos ) { return LSW_H_CONTINUE; }
+
 		// WM_COMMAND from control.
-		virtual LSW_HANDLED					Command( WORD _Id, HWND _hControl );
+		virtual LSW_HANDLED					Command( WORD _Id, HWND _hControl ) { return LSW_H_CONTINUE; }
 
 		// WM_COMMAND from menu.
-		virtual LSW_HANDLED					MenuCommand( WORD _Id );
+		virtual LSW_HANDLED					MenuCommand( WORD _Id ) { return LSW_H_CONTINUE; }
 
 		// WM_COMMAND from accelerator.
-		virtual LSW_HANDLED					AcceleratorCommand( WORD _Id );
+		virtual LSW_HANDLED					AcceleratorCommand( WORD _Id ) { return LSW_H_CONTINUE; }
 
 		// WM_NOTIFY->NM_DBLCLK on this item (if LSW_HANDLED::LSW_H_CONTINUE, message is passed to owning window).
-		virtual LSW_HANDLED					DblClk( const NMHDR * _phHdr );
+		virtual LSW_HANDLED					DblClk( const NMHDR * _phHdr ) { return LSW_H_CONTINUE; }
 
 		// WM_NOTIFY->NM_DBLCLK for the owning window if the child either could not be resolved or returned LSW_HANDLED::LSW_H_CONTINUE.
-		virtual LSW_HANDLED					DblClk( const NMHDR * _phHdr, WORD _wControlId, CWidget * _pwWidget );
+		virtual LSW_HANDLED					DblClk( const NMHDR * _phHdr, WORD _wControlId, CWidget * _pwWidget ) { return LSW_H_CONTINUE; }
 
 		// WM_ERASEBKGND.
-		virtual LSW_HANDLED					EraseBkgnd( HDC _hDc );
+		virtual LSW_HANDLED					EraseBkgnd( HDC _hDc ) { return LSW_H_CONTINUE; }
 
 		// WM_ACTIVATE.
-		virtual LSW_HANDLED					Activate( BOOL _bMinimized, WORD _wActivationMode, CWidget * _pwWidget );
+		virtual LSW_HANDLED					Activate( BOOL _bMinimized, WORD _wActivationMode, CWidget * _pwWidget ) { return LSW_H_CONTINUE; }
 
 		// WM_NCACTIVATE.
-		virtual LSW_HANDLED					NcActivate( BOOL _bTitleBarActive, LPARAM _lParam );
+		virtual LSW_HANDLED					NcActivate( BOOL _bTitleBarActive, LPARAM _lParam ) { return LSW_H_CONTINUE; }
 
-		// WM_ENABLE
-		virtual LSW_HANDLED					Enable( BOOL _bEnabled );
+		// WM_ENABLE.
+		virtual LSW_HANDLED					Enable( BOOL _bEnabled ) { return LSW_H_CONTINUE; }
+
+		// WM_CAPTURECHANGED.
+		virtual LSW_HANDLED					CaptureChanged( CWidget * _pwNewCaptureOwner ) { return LSW_H_CONTINUE; }
+
+		// WM_LBUTTONDBLCLK.
+		virtual LSW_HANDLED					LButtonDblClk( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_LBUTTONDOWN.
+		virtual LSW_HANDLED					LButtonDown( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_LBUTTONUP.
+		virtual LSW_HANDLED					LButtonUp( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_MBUTTONDBLCLK.
+		virtual LSW_HANDLED					MButtonDblClk( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_MBUTTONDOWN.
+		virtual LSW_HANDLED					MButtonDown( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_MBUTTONUP.
+		virtual LSW_HANDLED					MButtonUp( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_MOUSEACTIVATE.
+		virtual LSW_HANDLED					MouseActivate( CWidget * _pwTopLevelParent, INT _iHitTest, INT &_iReturnCode ) { return LSW_H_CONTINUE; }
+
+		// WM_MOUSEHOVER.
+		virtual LSW_HANDLED					MouseHover( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_MOUSEHWHEEL.
+		virtual LSW_HANDLED					MouseHWheel( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_MOUSELEAVE.
+		virtual LSW_HANDLED					MouseLeave()  { return LSW_H_CONTINUE; }
+		
+		// WM_MOUSEMOVE.
+		virtual LSW_HANDLED					MouseMove( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_MOUSEWHEEL.
+		virtual LSW_HANDLED					MouseWheel( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_NCHITTEST.
+		virtual LSW_HANDLED					NcHitTest( const POINTS &_pCursorPos, INT &_iReturnHitTest ) { return LSW_H_CONTINUE; }
+
+		// WM_NCLBUTTONDBLCLK.
+		virtual LSW_HANDLED					NcButtonDblClk( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_NCLBUTTONDOWN.
+		virtual LSW_HANDLED					NcLButtonDown( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_NCLBUTTONUP.
+		virtual LSW_HANDLED					NcLButtonUp( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_NCMBUTTONDBLCLK.
+		virtual LSW_HANDLED					NcMButtonDblClk( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_NCMBUTTONDOWN.
+		virtual LSW_HANDLED					NcMButtonDown( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_NCMBUTTONUP.
+		virtual LSW_HANDLED					NcMButtonUp( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_NCMOUSEHOVER.
+		virtual LSW_HANDLED					NcMouseHover( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_NCMOUSELEAVE.
+		virtual LSW_HANDLED					NcMouseLeave() { return LSW_H_CONTINUE; }
+
+		// WM_NCMOUSEMOVE.
+		virtual LSW_HANDLED					NcMouseMove( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_NCRBUTTONDBLCLK.
+		virtual LSW_HANDLED					NcRButtonDblClk( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_NCRBUTTONDOWN.
+		virtual LSW_HANDLED					NcRButtonDown( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_NCRBUTTONUP.
+		virtual LSW_HANDLED					NcRButtonUp( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_NCXBUTTONDBLCLK.
+		virtual LSW_HANDLED					NcXButtonDblClk( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_NCXBUTTONDOWN.
+		virtual LSW_HANDLED					NcXButtonDown( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_NCXBUTTONUP.
+		virtual LSW_HANDLED					NcXButtonUp( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_RBUTTONDBLCLK.
+		virtual LSW_HANDLED					RButtonDblClk( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_RBUTTONDOWN.
+		virtual LSW_HANDLED					RButtonDown( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_RBUTTONUP.
+		virtual LSW_HANDLED					RButtonUp( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_XBUTTONDBLCLK.
+		virtual LSW_HANDLED					XButtonDblClk( DWORD _dwVirtKeys, DWORD _dwButton, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_XBUTTONDOWN.
+		virtual LSW_HANDLED					XButtonDown( DWORD _dwVirtKeys, DWORD _dwButton, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+
+		// WM_XBUTTONUP.
+		virtual LSW_HANDLED					XButtonUp( DWORD _dwVirtKeys, DWORD _dwButton, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
 
 
 		// == Functions.
@@ -258,7 +397,7 @@ namespace lsw {
 		void								AddChild( CWidget * _pwChild );
 
 		// Set the parent.
-		void								SetParent( CWidget * _pwParent );
+		void								SetWidgetParent( CWidget * _pwParent );
 
 		// Evaluates expressions to determine a new rectangle for the control.
 		virtual void						EvalNewSize();
@@ -307,6 +446,9 @@ namespace lsw {
 
 		// Handles control setup.
 		static VOID							ControlSetup( CWidget * _pwParent, const std::vector<CWidget *> &_vWidgetList );
+
+		// The default message handler.
+		static VOID CALLBACK				WndDlgProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam, BOOL _bIsDlg, LRESULT &_lrWndResult, INT_PTR &_ipDiagResult );
 
 	};
 

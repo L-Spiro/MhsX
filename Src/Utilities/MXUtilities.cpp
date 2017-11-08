@@ -1,6 +1,8 @@
 #include "MXUtilities.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../Strings/MXStringMacros.h"
+
+#include <algorithm>
 #include <codecvt>
 #include <ctime>
 #include <locale>
@@ -12,6 +14,23 @@ namespace mx {
 	CUtilities::MX_UTIL_OPTIONS CUtilities::Options = {
 		FALSE,							// bUse0xForHex
 		FALSE,							// bShortenEnumNames
+		MX_DTO_DEFAULT,					// dwDataTypeOptions
+	};
+
+	// Data-type information.
+	CUtilities::MX_DATA_TYPE_INFO CUtilities::DataTypeInfo[] = {
+		//dtType			pcCodeName,				sCodeNameLen	pcBasicName							sBasicNameLen	pcRange																	sRangeLen		dwSize					bIsFloat
+		{ MX_DT_INT8,		_T_1C554140_int8_t,		_LEN_1C554140,	_T_2CCCF8A1_Char,					_LEN_2CCCF8A1,	_T_1FC18451__128_to_127,												_LEN_1FC18451,	sizeof( int8_t ),		FALSE },
+		{ MX_DT_UINT8,		_T_8EABC011_uint8_t,	_LEN_8EABC011,	_T_3DF23550_Byte,					_LEN_3DF23550,	_T_D7DC8296_0_to_255,													_LEN_D7DC8296,	sizeof( uint8_t ),		FALSE },
+		{ MX_DT_INT16,		_T_BFD40C35_int16_t,	_LEN_BFD40C35,	_T_4EE9BFA6_Short,					_LEN_4EE9BFA6,	_T_0CDB9DC0__32_768_to_32_767,											_LEN_0CDB9DC0,	sizeof( int16_t ),		FALSE },
+		{ MX_DT_UINT16,		_T_A32A93D6_uint16_t,	_LEN_A32A93D6,	_T_31443FFB_Unsigned_Short,			_LEN_31443FFB,	_T_B6F7A5DA_0_to_65_535,												_LEN_B6F7A5DA,	sizeof( uint16_t ),		FALSE },
+		{ MX_DT_INT32,		_T_12D46C62_int32_t,	_LEN_12D46C62,	_T_2C1C9C51_Int,					_LEN_2C1C9C51,	_T_AAFC6A92__2_147_483_648_to_2_147_483_647,							_LEN_AAFC6A92,	sizeof( int32_t ),		FALSE },
+		{ MX_DT_UINT32,		_T_0E2AF381_uint32_t,	_LEN_0E2AF381,	_T_7652642A_Unsigned_Int,			_LEN_7652642A,	_T_6022BCC9_0_to_4_294_967_295,											_LEN_6022BCC9,	sizeof( uint32_t ),		FALSE },
+		{ MX_DT_INT64,		_T_2187E0E2_int64_t,	_LEN_2187E0E2,	_T_DB26D37C_64_bit_Int,				_LEN_DB26D37C,	_T_A9393404__9_223_372_036_854_775_808_to_9_223_372_036_854_775_807,	_LEN_A9393404,	sizeof( int64_t ),		FALSE },
+		{ MX_DT_UINT64,		_T_3D797F01_uint64_t,	_LEN_3D797F01,	_T_8FFBC537_Unsigned_64_bit_Int,	_LEN_8FFBC537,	_T_5539660F_0_to_18_446_744_073_709_551_615,							_LEN_5539660F,	sizeof( uint64_t ),		FALSE },
+		{ MX_DT_FLOAT,		_T_C9A55E95_float,		_LEN_C9A55E95,	_T_08647191_Float,					_LEN_08647191,	_T_A3BAF20C__3_402823466e_38,											_LEN_A3BAF20C,	sizeof( float ),		TRUE },
+		{ MX_DT_DOUBLE,		_T_DAE7F2EF_double,		_LEN_DAE7F2EF,	_T_DD4BF7D9_Double,					_LEN_DD4BF7D9,	_T_60671844__1_7976931348623158e_308,									_LEN_60671844,	sizeof( double ),		TRUE },
+		{ MX_DT_VOID,		_T_D27BD9EE_void,		_LEN_D27BD9EE,	_T_724976D0_Void,					_LEN_724976D0,	_T_5F837256__undefined_,												_LEN_5F837256,	static_cast<DWORD>(-1),	FALSE },
 	};
 
 	// Internal buffer for temporary strings.
@@ -619,7 +638,7 @@ namespace mx {
 	
 	// Creates a hexadecimal string.
 	const CHAR * CUtilities::ToHex( uint64_t _uiValue, CHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
-		_uiNumDigits = max( _uiNumDigits, 1 );
+		_uiNumDigits = std::max( _uiNumDigits, 1U );
 		CHAR szFormat[32];
 		if ( Options.bUse0xForHex ) {
 			::sprintf_s( szFormat, MX_ELEMENTS( szFormat ), "0x%%.%uI64X", _uiNumDigits );
@@ -642,7 +661,7 @@ namespace mx {
 
 	// Creates a hexadecimal string.
 	const WCHAR * CUtilities::ToHex( uint64_t _uiValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
-		_uiNumDigits = max( _uiNumDigits, 1 );
+		_uiNumDigits = std::max( _uiNumDigits, 1U );
 		WCHAR szFormat[32];
 		if ( Options.bUse0xForHex ) {
 			::swprintf_s( szFormat, MX_ELEMENTS( szFormat ), L"0x%%.%uI64X", _uiNumDigits );
@@ -670,7 +689,7 @@ namespace mx {
 
 	// Creates an unsigned integer string.
 	const CHAR * CUtilities::ToUnsigned( uint64_t _uiValue, CHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
-		_uiNumDigits = max( _uiNumDigits, 1 );
+		_uiNumDigits = std::max( _uiNumDigits, 1U );
 		CHAR szFormat[32];
 		::sprintf_s( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64u", _uiNumDigits );
 		::sprintf_s( _pcRet, _sLen, szFormat, _uiValue );
@@ -688,7 +707,7 @@ namespace mx {
 
 	// Creates an unsigned integer string.
 	const WCHAR * CUtilities::ToUnsigned( uint64_t _uiValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
-		_uiNumDigits = max( _uiNumDigits, 1 );
+		_uiNumDigits = std::max( _uiNumDigits, 1U );
 		WCHAR szFormat[32];
 		::swprintf_s( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64u", _uiNumDigits );
 		::swprintf_s( _pcRet, _sLen, szFormat, _uiValue );
@@ -742,6 +761,81 @@ namespace mx {
 		}
 		return _sString.c_str();
 #undef MX_LAST
+	}
+
+	// Gets the size of a data type.
+	DWORD CUtilities::DataTypeSize( CUtilities::MX_DATA_TYPES _dtType ) {
+		for ( size_t I = 0; I < MX_ELEMENTS( DataTypeInfo ); ++I ) {
+			if ( DataTypeInfo[I].dtType == _dtType ) { return DataTypeInfo[I].dwSize; }
+		}
+		return 0;
+	}
+
+	// Is the data type a float type?
+	BOOL CUtilities::DataTypeIsFloat( CUtilities::MX_DATA_TYPES _dtType ) {
+		for ( size_t I = 0; I < MX_ELEMENTS( DataTypeInfo ); ++I ) {
+			if ( DataTypeInfo[I].dtType == _dtType ) { return DataTypeInfo[I].bIsFloat; }
+		}
+		return FALSE;
+	}
+
+	// Gets the range of a data type as a string.
+	const CHAR * CUtilities::DataTypeRange( CUtilities::MX_DATA_TYPES _dtType, std::string &_sString ) {
+		for ( size_t I = 0; I < MX_ELEMENTS( DataTypeInfo ); ++I ) {
+			if ( DataTypeInfo[I].dtType == _dtType ) {
+				_sString.append( mx::CStringDecoder::DecodeToString( DataTypeInfo[I].pcRange, DataTypeInfo[I].sRangeLen ) );
+				break;
+			}
+		}
+		return _sString.c_str();
+	}
+
+	// Prints the size of the given data type as a string.
+	const CHAR * CUtilities::DataTypeSize( CUtilities::MX_DATA_TYPES _dtType, std::string &_sString ) {
+		DWORD dwSize = DataTypeSize( _dtType );
+		if ( !dwSize ) {
+			_sString.append( _DEC_S_5F837256__undefined_ );
+		}
+		else {
+			ToUnsigned( dwSize, _sString );
+			_sString.append( _DEC_S_C1D51046__bytes );
+		}
+		return _sString.c_str();
+	}
+
+	// Prints a data type given the options.
+	const CHAR * CUtilities::PrintDataType( std::string &_sString, CUtilities::MX_DATA_TYPES _dtType, DWORD _dwOptions ) {
+		if ( _dwOptions == static_cast<DWORD>(-1) ) {
+			_dwOptions = Options.dwDataTypeOptions;
+		}
+
+		for ( size_t I = 0; I < MX_ELEMENTS( DataTypeInfo ); ++I ) {
+			if ( DataTypeInfo[I].dtType == _dtType ) {
+				_sString.append( (_dwOptions & MX_DTO_CODENAMES) ?
+					mx::CStringDecoder::DecodeToString( DataTypeInfo[I].pcCodeName, DataTypeInfo[I].sCodeNameLen ) :
+					mx::CStringDecoder::DecodeToString( DataTypeInfo[I].pcBasicName, DataTypeInfo[I].sBasicNameLen ) );
+
+				if ( _dwOptions & (MX_DTO_SHOWRANGES | MX_DTO_SHOWSIZES) ) {
+					_sString.append( " (" );
+
+					if ( _dwOptions & MX_DTO_SHOWSIZES ) {
+						DataTypeSize( _dtType, _sString );
+
+						if ( _dwOptions & MX_DTO_SHOWRANGES ) {
+							_sString.append( ", " );
+						}
+					}
+
+					if ( _dwOptions & MX_DTO_SHOWRANGES ) {
+						_sString.append( mx::CStringDecoder::DecodeToString( DataTypeInfo[I].pcRange, DataTypeInfo[I].sRangeLen ) );
+					}
+
+					_sString.push_back( ')' );
+				}
+				break;
+			}
+		}
+		return _sString.c_str();
 	}
 
 	// Clears the internal temporary buffer (as a security measure).
@@ -854,6 +948,11 @@ namespace mx {
 		}
 		_pwcBuffer[_sSize-1] = L'\0';
 		return _pwcBuffer;
+	}
+
+	// Gets the number of elements in DataTypeInfo.
+	size_t CUtilities::DataTypeInfoLen() {
+		return MX_ELEMENTS( DataTypeInfo );
 	}
 
 }	// namespace mx

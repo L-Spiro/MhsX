@@ -23,10 +23,10 @@ namespace mx {
 		void								Detach();
 
 		// Gets the options.
-		const MX_OPTIONS &					Options() const { return m_oOptions; }
+		const MX_OPTIONS &					Options() const;
 
 		// Sets the options.
-		void								SetOptions( const MX_OPTIONS &_oOptions ) { m_oOptions = _oOptions; }
+		void								SetOptions( const MX_OPTIONS &_oOptions );
 
 
 	protected :
@@ -35,7 +35,7 @@ namespace mx {
 		CProcess							m_pProcess;
 
 		// Options.
-		MX_OPTIONS							m_oOptions;
+		mutable MX_OPTIONS					m_oOptions;
 	};
 
 }	// namespace mx

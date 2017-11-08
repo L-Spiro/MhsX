@@ -20,8 +20,17 @@ namespace mx {
 		// WM_INITDIALOG.
 		virtual LSW_HANDLED						InitDialog();
 
+		// WM_COMMAND from control.
+		virtual LSW_HANDLED						Command( WORD _Id, HWND _hControl );
+
 		// Verifies the options, returning an error string in case of error.
 		virtual BOOL							Verify( std::wstring &_wsError, CWidget * &_pwWidget ) { return TRUE; }
+
+		// Copies all the settings to the MX_OPTIONS structure.
+		virtual BOOL							Finalize();
+
+		// Updates the text example of data-type settings.
+		virtual void							UpdateExample();
 
 
 	protected :

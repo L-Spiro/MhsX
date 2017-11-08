@@ -141,6 +141,12 @@
     <Filter Include="Source Files\Docking">
       <UniqueIdentifier>{c8571715-d84f-4943-b652-209f8875d113}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Brush">
+      <UniqueIdentifier>{c14235a2-f17a-44b3-a408-e575c3ac28d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Brush">
+      <UniqueIdentifier>{35e63e3b-8c7f-40f8-ad31-a5b42cbf8571}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -233,6 +239,9 @@
     <ClInclude Include="Src\Docking\LSWDockable.h">
       <Filter>Header Files\Docking</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Brush\LSWBrush.h">
+      <Filter>Header Files\Brush</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -300,6 +309,9 @@
     </ClCompile>
     <ClCompile Include="Src\Docking\LSWDockable.cpp">
       <Filter>Source Files\Docking</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Brush\LSWBrush.cpp">
+      <Filter>Source Files\Brush</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

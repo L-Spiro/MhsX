@@ -34,6 +34,8 @@ typedef BOOL (WINAPI * LPFN_ENUMTHREADWINDOWS)( DWORD, WNDENUMPROC lpfn, LPARAM 
 typedef BOOL (WINAPI * LPFN_OPENPROCESSTOKEN)( HANDLE, DWORD, PHANDLE );
 typedef BOOL (WINAPI * LPFN_LOOKUPPRIVILEGEVALUEW)( LPCWSTR, LPCWSTR, PLUID );
 typedef BOOL (WINAPI * LPFN_ADJUSTTOKENPRIVILEGES)( HANDLE, BOOL, PTOKEN_PRIVILEGES, DWORD, PTOKEN_PRIVILEGES, PDWORD );
+typedef BOOL (WINAPI * LPFN_GETEXITCODEPROCESS)( HANDLE, LPDWORD );
+typedef BOOL (WINAPI * LPFN_GETEXITCODETHREAD)( HANDLE, LPDWORD );
 
 namespace mx {
 
@@ -168,6 +170,12 @@ namespace mx {
 		// QueryFullProcessImageNameW().
 		static BOOL WINAPI				QueryFullProcessImageNameW( HANDLE _hProcess, DWORD _dwFlags, LPWSTR _lpExeName, PDWORD _lpdwSize );
 
+		// GetExitCodeProcess().
+		static BOOL WINAPI				GetExitCodeProcess( HANDLE _hProcess, LPDWORD _lpExitCode );
+
+		// GetExitCodeThread().
+		static BOOL WINAPI				GetExitCodeThread( HANDLE _hThread, LPDWORD _lpExitCode );
+
 		// Determines how large a buffer must be to accept the full path of a process when calling QueryFullProcessImageNameW().
 		static DWORD					FullProcessPathLen( HANDLE _hProcess );
 
@@ -258,6 +266,12 @@ namespace mx {
 		// AdjustTokenPrivileges().
 		static LPFN_ADJUSTTOKENPRIVILEGES
 										m_pfAdjustTokenPrivileges;
+
+		// GetExitCodeProcess().
+		static LPFN_GETEXITCODEPROCESS	m_pfGetExitCodeProcess;
+
+		// GetExitCodeThread().
+		static LPFN_GETEXITCODETHREAD	m_pfGetExitCodeThread;
 
 
 		// == Functions.

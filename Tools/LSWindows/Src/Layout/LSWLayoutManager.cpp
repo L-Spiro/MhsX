@@ -149,7 +149,6 @@ namespace lsw {
 
 	// Destroys an LSW_DLGTEMPLATE object created for use by DialogBoxX().
 	VOID CLayoutManager::DestroyDialogBoxTemplate( LSW_DLGTEMPLATE &_dtTemplate ) {
-		//for ( size_t J = 0; J < _dtTemplate.vWidgets.size(); ++J ) {
 		for ( size_t J = _dtTemplate.vWidgets.size(); J--; ) {
 			delete _dtTemplate.vWidgets[J];
 		}

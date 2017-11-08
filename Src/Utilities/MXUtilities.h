@@ -41,11 +41,52 @@ namespace mx {
 			MX_RT_MANIFEST				= 24,
 		};
 
+		// Data types.
+		enum MX_DATA_TYPES {
+			MX_DT_INT8,
+			MX_DT_UINT8,
+			MX_DT_INT16,
+			MX_DT_UINT16,
+			MX_DT_INT32,
+			MX_DT_UINT32,
+			MX_DT_INT64,
+			MX_DT_UINT64,
+			MX_DT_FLOAT,
+			MX_DT_DOUBLE,
+			MX_DT_VOID,
+		};
+
+		// Data-type options.
+		enum MX_DATA_TYPE_OPTIONS : DWORD {
+			MX_DTO_CODENAMES			= (1 << 0),					// Unsigned Short vs. uint16_t
+			MX_DTO_SHOWRANGES			= (1 << 1),					// "uint16_t" vs. "uint16_t (0-65,535)"
+			MX_DTO_SHOWSIZES			= (1 << 2),					// "uint16_t" vs. "uint16_t (2 bytes)"
+			MX_DTO_DEFAULT				= MX_DTO_CODENAMES | MX_DTO_SHOWRANGES | MX_DTO_SHOWSIZES,
+		};
+
 		// == Types.
 		// Various options.
 		struct MX_UTIL_OPTIONS {
 			BOOL						bUse0xForHex;				// 0xOOOO vs. OOOOh
 			BOOL						bShortenEnumNames;			// IMAGE_SCN_MEM_LOCKED vs. LOCKED
+			DWORD						dwDataTypeOptions;			// MX_DATA_TYPE_OPTIONS
+		};
+
+		// Data-type information.
+		struct MX_DATA_TYPE_INFO {
+			MX_DATA_TYPES				dtType;
+
+			const CHAR *				pcCodeName;
+			size_t						sCodeNameLen;
+
+			const CHAR *				pcBasicName;
+			size_t						sBasicNameLen;
+
+			const CHAR *				pcRange;
+			size_t						sRangeLen;
+
+			DWORD						dwSize;
+			BOOL						bIsFloat;
 		};
 
 		// == Functions.
@@ -154,6 +195,21 @@ namespace mx {
 		// Creates a double string.
 		static const WCHAR *			ToDouble( double _dValue, std::wstring &_sString );
 
+		// Gets the size of a data type.
+		static DWORD					DataTypeSize( CUtilities::MX_DATA_TYPES _dtType );
+
+		// Is the data type a float type?
+		static BOOL						DataTypeIsFloat( CUtilities::MX_DATA_TYPES _dtType );
+
+		// Gets the range of a data type as a string.
+		static const CHAR *				DataTypeRange( CUtilities::MX_DATA_TYPES _dtType, std::string &_sString );
+
+		// Prints the size of the given data type as a string.
+		static const CHAR *				DataTypeSize( CUtilities::MX_DATA_TYPES _dtType, std::string &_sString );
+
+		// Prints a data type given the options.
+		static const CHAR *				PrintDataType( std::string &_sString, CUtilities::MX_DATA_TYPES _dtType, DWORD _dwOptions = static_cast<DWORD>(-1) );
+
 		// Clears the internal temporary buffer (as a security measure).
 		static VOID						ClearInternalBuffer();
 
@@ -181,10 +237,16 @@ namespace mx {
 		// Generates a string of random characters.
 		static WCHAR *					RandomString( WCHAR * _pwcBuffer, SIZE_T _sSize );
 
+		// Gets the number of elements in DataTypeInfo.
+		static size_t					DataTypeInfoLen();
+
 
 		// == Members.
 		// Options.
 		static MX_UTIL_OPTIONS			Options;
+
+		// Data-type information.
+		static MX_DATA_TYPE_INFO		DataTypeInfo[];
 
 	protected :
 		// == Members.

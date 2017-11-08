@@ -24,6 +24,7 @@
 #define _WIN32_WINNT						0x0501
 #define WIN32_LEAN_AND_MEAN
 #define OEMRESOURCE							// For OBM_* bitmaps etc.
+#define NOMINMAX
 #include <Windows.h>
 
 #ifdef WIN32_LEAN_AND_MEAN

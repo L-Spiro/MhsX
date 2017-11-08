@@ -21,7 +21,7 @@ namespace mx {
 			DWORD				dwConst;
 		} sImages[] = {
 			{ L"23", MX_I_OPENPROCESS },
-			{ L"68", MX_I_OPENFORDEBUG },
+			{ L"101", MX_I_OPENFORDEBUG },
 
 			{ L"1", MX_I_ADDENTRY },
 			{ L"52", MX_I_OPENENTRY },
