@@ -4,6 +4,7 @@
 #include "../Utilities/MXUtilities.h"
 #include <CheckButton/LSWCheckButton.h>
 #include <ComboBox/LSWComboBox.h>
+#include <limits>
 
 namespace mx {
 
@@ -57,6 +58,52 @@ namespace mx {
 		return LSW_H_CONTINUE;
 	}
 
+	// Verifies the options, returning an error string in case of error.
+	BOOL COptionsPageGeneral::Verify( std::wstring &_wsError, CWidget * &_pwWidget ) {
+		if ( !m_poOptions ) { return TRUE; }
+		ee::CExpEvalContainer::EE_RESULT eRes;
+
+		CWidget * pwTemp = nullptr;
+		pwTemp = FindChild( COptionsLayout::MX_OI_GENERAL_REFRESH_FOUND_ADDRESSES_CB );
+		if ( pwTemp ) {
+			if ( !pwTemp->GetTextAsUInt64Expression( eRes ) ) {
+				_pwWidget = pwTemp;
+				_wsError = _DEC_WS_32DCB4CD_Invalid_update_rate_;
+				return FALSE;
+			}
+		}
+
+		pwTemp = FindChild( COptionsLayout::MX_OI_GENERAL_REFRESH_MAIN_LIST_CB );
+		if ( pwTemp ) {
+			if ( !pwTemp->GetTextAsUInt64Expression( eRes ) ) {
+				_pwWidget = pwTemp;
+				_wsError = _DEC_WS_32DCB4CD_Invalid_update_rate_;
+				return FALSE;
+			}
+		}
+
+		pwTemp = FindChild( COptionsLayout::MX_OI_GENERAL_UPDDATE_LOCKED_VALUE_CB );
+		if ( pwTemp ) {
+			if ( !pwTemp->GetTextAsUInt64Expression( eRes ) ) {
+				_pwWidget = pwTemp;
+				_wsError = _DEC_WS_32DCB4CD_Invalid_update_rate_;
+				return FALSE;
+			}
+		}
+
+		pwTemp = FindChild( COptionsLayout::MX_OI_GENERAL_UPDDATE_EXP_EVAL_CB );
+		if ( pwTemp ) {
+			if ( !pwTemp->GetTextAsUInt64Expression( eRes ) ) {
+				_pwWidget = pwTemp;
+				_wsError = _DEC_WS_32DCB4CD_Invalid_update_rate_;
+				return FALSE;
+			}
+		}
+
+
+		return TRUE;
+	}
+
 	// Copies all the settings to the MX_OPTIONS structure.
 	BOOL COptionsPageGeneral::Finalize() {
 		if ( !m_poOptions ) { return TRUE; }
@@ -74,6 +121,24 @@ namespace mx {
 		MX_GETCHECK( MX_OI_GENERAL_VIEW_SIZES, bDataTypeSizes );
 		MX_GETCHECK( MX_OI_GENERAL_VIEW_RANGES, bDataTypeRanges );
 #undef MX_GETCHECK
+
+		ee::CExpEvalContainer::EE_RESULT eRes;
+		CWidget * pwTemp = nullptr;
+#define MX_GETVAL( ID, MEMBER )																														\
+	pwTemp = FindChild( COptionsLayout::ID );																										\
+	if ( pwTemp ) {																																	\
+		if ( !pwTemp->GetTextAsUInt64Expression( eRes ) ) {																							\
+			return FALSE;																															\
+		}																																			\
+		m_poOptions->MEMBER = static_cast<DWORD>(std::min( eRes.u.ui64Val, static_cast<UINT64>(numeric_limits<DWORD>::max()) ));					\
+	}
+
+		MX_GETVAL( MX_OI_GENERAL_REFRESH_FOUND_ADDRESSES_CB, dwFoundAddressRefresh );
+		MX_GETVAL( MX_OI_GENERAL_REFRESH_MAIN_LIST_CB, dwMainRefresh );
+		MX_GETVAL( MX_OI_GENERAL_UPDDATE_LOCKED_VALUE_CB, dwLockedRefresh );
+		MX_GETVAL( MX_OI_GENERAL_UPDDATE_EXP_EVAL_CB, dwExpressionRefresh );
+
+#undef MX_GETVAL
 
 		return TRUE;
 	}

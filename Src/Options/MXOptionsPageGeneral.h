@@ -24,7 +24,7 @@ namespace mx {
 		virtual LSW_HANDLED						Command( WORD _Id, HWND _hControl );
 
 		// Verifies the options, returning an error string in case of error.
-		virtual BOOL							Verify( std::wstring &_wsError, CWidget * &_pwWidget ) { return TRUE; }
+		virtual BOOL							Verify( std::wstring &_wsError, CWidget * &_pwWidget );
 
 		// Copies all the settings to the MX_OPTIONS structure.
 		virtual BOOL							Finalize();

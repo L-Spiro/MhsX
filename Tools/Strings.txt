@@ -661,3 +661,4 @@
 "Double"
 "Void"
 " bytes"
+"Invalid update rate."

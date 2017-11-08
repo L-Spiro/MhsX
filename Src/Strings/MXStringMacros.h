@@ -4600,3 +4600,10 @@
 #define _DEC_S_C1D51046__bytes mx::CStringDecoder::DecodeToString( _T_C1D51046__bytes, _LEN_C1D51046 )
 #define _DEC_WS_C1D51046__bytes mx::CStringDecoder::DecodeToWString( _T_C1D51046__bytes, _LEN_C1D51046 )
 
+// Invalid update rate.
+#define _T_32DCB4CD_Invalid_update_rate_ "\xD1\x3C\x46\xFC\xFE\x32\xF2\xE7\x45\x38\x2D\x2F\x06\x00\xE7\xFA\x2F\x44\x00\xC0"
+#define _LEN_32DCB4CD 20
+#define _DEC_32DCB4CD_Invalid_update_rate_( STR ) mx::CStringDecoder::Decode( _T_32DCB4CD_Invalid_update_rate_, _LEN_32DCB4CD, STR )
+#define _DEC_S_32DCB4CD_Invalid_update_rate_ mx::CStringDecoder::DecodeToString( _T_32DCB4CD_Invalid_update_rate_, _LEN_32DCB4CD )
+#define _DEC_WS_32DCB4CD_Invalid_update_rate_ mx::CStringDecoder::DecodeToWString( _T_32DCB4CD_Invalid_update_rate_, _LEN_32DCB4CD )
+
