@@ -111,8 +111,8 @@ namespace lsw {
 	// Evaluates expressions to determine a new rectangle for the control.
 	void CStatusBar::EvalNewSize() {
 		::SendMessageW( Wnd(), WM_SIZE, 0L, 0L );
-		::GetWindowRect( Wnd(), &m_rRect );
-		::GetClientRect( Wnd(), &m_rClientRect );
+		/*::GetWindowRect( Wnd(), &m_rRect );
+		::GetClientRect( Wnd(), &m_rClientRect );*/
 
 		if ( m_pwParent ) {
 			LONG lChange = m_pwParent->WindowRect().Width() - m_pwParent->StartRect().Width();

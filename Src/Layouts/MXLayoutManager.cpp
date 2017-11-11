@@ -56,27 +56,27 @@ namespace mx {
 			}
 
 			if ( wlTemp.pcLeftSizeExp ) {
-				_vStrings[sStringIndex] = mx::CStringDecoder::DecodeToString( wlTemp.pcLeftSizeExp, wlTemp.sLeftSizeExpLen );
+				_vStrings[sStringIndex] = wlTemp.sLeftSizeExpLen ? mx::CStringDecoder::DecodeToString( wlTemp.pcLeftSizeExp, wlTemp.sLeftSizeExpLen ) : wlTemp.pcLeftSizeExp;
 				wlTemp.pcLeftSizeExp = _vStrings[sStringIndex++].c_str();
 			}
 			if ( wlTemp.pcRightSizeExp ) {
-				_vStrings[sStringIndex] = mx::CStringDecoder::DecodeToString( wlTemp.pcRightSizeExp, wlTemp.sRightSizeExpLen );
+				_vStrings[sStringIndex] = wlTemp.sRightSizeExpLen ? mx::CStringDecoder::DecodeToString( wlTemp.pcRightSizeExp, wlTemp.sRightSizeExpLen ) : wlTemp.pcRightSizeExp;
 				wlTemp.pcRightSizeExp = _vStrings[sStringIndex++].c_str();
 			}
 			if ( wlTemp.pcTopSizeExp ) {
-				_vStrings[sStringIndex] = mx::CStringDecoder::DecodeToString( wlTemp.pcTopSizeExp, wlTemp.sTopSizeExpLen );
+				_vStrings[sStringIndex] = wlTemp.sTopSizeExpLen ? mx::CStringDecoder::DecodeToString( wlTemp.pcTopSizeExp, wlTemp.sTopSizeExpLen ) : wlTemp.pcTopSizeExp;
 				wlTemp.pcTopSizeExp = _vStrings[sStringIndex++].c_str();
 			}
 			if ( wlTemp.pcBottomSizeExp ) {
-				_vStrings[sStringIndex] = mx::CStringDecoder::DecodeToString( wlTemp.pcBottomSizeExp, wlTemp.sBottomSizeExpLen );
+				_vStrings[sStringIndex] = wlTemp.sBottomSizeExpLen ? mx::CStringDecoder::DecodeToString( wlTemp.pcBottomSizeExp, wlTemp.sBottomSizeExpLen ) : wlTemp.pcBottomSizeExp;
 				wlTemp.pcBottomSizeExp = _vStrings[sStringIndex++].c_str();
 			}
 			if ( wlTemp.pcWidthSizeExp ) {
-				_vStrings[sStringIndex] = mx::CStringDecoder::DecodeToString( wlTemp.pcWidthSizeExp, wlTemp.sWidthSizeExpLen );
+				_vStrings[sStringIndex] = wlTemp.sWidthSizeExpLen ? mx::CStringDecoder::DecodeToString( wlTemp.pcWidthSizeExp, wlTemp.sWidthSizeExpLen ) : wlTemp.pcWidthSizeExp;
 				wlTemp.pcWidthSizeExp = _vStrings[sStringIndex++].c_str();
 			}
 			if ( wlTemp.pcHeightSizeExp ) {
-				_vStrings[sStringIndex] = mx::CStringDecoder::DecodeToString( wlTemp.pcHeightSizeExp, wlTemp.sHeightSizeExpLen );
+				_vStrings[sStringIndex] = wlTemp.sHeightSizeExpLen ? mx::CStringDecoder::DecodeToString( wlTemp.pcHeightSizeExp, wlTemp.sHeightSizeExpLen ) : wlTemp.pcHeightSizeExp;
 				wlTemp.pcHeightSizeExp = _vStrings[sStringIndex++].c_str();
 			}
 			_vArray.push_back( wlTemp );

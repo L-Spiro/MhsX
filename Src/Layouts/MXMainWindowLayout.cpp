@@ -75,7 +75,7 @@ namespace mx {
 
 			MX_LOCK_LEFT,							// pcLeftSizeExp
 			MX_LOCK_RIGHT,							// pcRightSizeExp
-			MX_LOCK_TOP,							// pcTopSizeExp
+			MX_PARENT_CTOP,							// pcTopSizeExp
 			nullptr, 0,								// pcBottomSizeExp
 			nullptr, 0,								// pcWidthSizeExp
 			MX_FIXED_HEIGHT,						// pcHeightSizeExp
@@ -95,9 +95,32 @@ namespace mx {
 			0,																		// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
-			MX_MWI_MAINWINDOW,							// dwParentId
+			MX_MWI_MAINWINDOW,						// dwParentId
 		},
 #endif
+		{
+			LSW_LT_LISTVIEW,						// ltType
+			MX_MWI_STOREDADDRESSES,					// wId
+			WC_LISTVIEWW,							// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			0,										// iLeft
+			0,										// iTop
+			255,									// dwWidth
+			110,									// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT,		// dwStyle
+			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,						// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_MWI_MAINWINDOW,							// dwParentId
+
+			MX_PARENT_VCLEFT,						// pcLeftSizeExp
+			MX_PARENT_VCRIGHT,						// pcRightSizeExp
+			MX_PARENT_VCTOP,						// pcTopSizeExp
+			MX_PARENT_VCBOTTOM,						// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			nullptr, 0,								// pcHeightSizeExp
+		},
 
 		/*{
 			LSW_LT_COMBOBOXEX,						// ltType

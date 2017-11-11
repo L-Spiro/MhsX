@@ -798,7 +798,7 @@ namespace mx {
 		}
 		else {
 			ToUnsigned( dwSize, _sString );
-			_sString.append( _DEC_S_C1D51046__bytes );
+			_sString.append( dwSize == 1 ? _DEC_S_BB679D6B__byte : _DEC_S_C1D51046__bytes );
 		}
 		return _sString.c_str();
 	}

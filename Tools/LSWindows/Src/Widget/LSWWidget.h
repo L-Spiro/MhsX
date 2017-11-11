@@ -143,13 +143,18 @@ namespace lsw {
 		virtual CWidget *					SetParent( CWidget * _pwParent );
 
 		// Window rectangle.
-		const LSW_RECT &					WindowRect() const { return m_rRect; }
+		//virtual const LSW_RECT &			WindowRect() const { return m_rRect; }
+		virtual const LSW_RECT				WindowRect() const { LSW_RECT rTemp; ::GetWindowRect( Wnd(), &rTemp ); return rTemp; }
 
 		// Client rectangle.
-		const LSW_RECT &					ClientRect() const { return m_rClientRect; }
+		//virtual const LSW_RECT &			ClientRect() const { return m_rClientRect; }
+		virtual const LSW_RECT				ClientRect() const { LSW_RECT rTemp; ::GetClientRect( Wnd(), &rTemp ); return rTemp; }
 
 		// Starting window rectangle.
-		const LSW_RECT &					StartRect() const { return m_rStartingRect; }
+		virtual const LSW_RECT &			StartRect() const { return m_rStartingRect; }
+
+		// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
+		virtual const LSW_RECT				VirtualClientRect() const { LSW_RECT rTemp; ::GetClientRect( Wnd(), &rTemp ); return rTemp; }
 
 		// Updates all rectangles with the current window rectangles.  If a control changes size and you wish to set the new size as its "base" size,
 		//	call this.
@@ -160,6 +165,9 @@ namespace lsw {
 
 		// Gets a pointer to a child with the given ID.
 		CWidget *							FindChild( WORD _wId );
+
+		// Gets a pointer to a child with the given ID.
+		const CWidget *						FindChild( WORD _wId ) const;
 
 		// Sets a given font on all children of a window.
 		static BOOL CALLBACK				EnumChildWindows_SetFont( HWND _hWnd, LPARAM _lParam );
@@ -180,10 +188,10 @@ namespace lsw {
 		BOOL								m_bEnabled;
 
 		// The window rectangle.
-		LSW_RECT							m_rRect;
+		//LSW_RECT							m_rRect;
 
 		// The client rectangle.
-		LSW_RECT							m_rClientRect;
+		//LSW_RECT							m_rClientRect;
 
 		// Original rectangle.
 		LSW_RECT							m_rStartingRect;

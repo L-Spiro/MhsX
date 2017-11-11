@@ -29,7 +29,7 @@ namespace lsw {
 	CDockable::CDockable( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
 		CWidget( _wlLayout.ChangeStyle( LSW_POPUP_STYLES | (_wlLayout.dwStyle & WS_VISIBLE) ).ChangeStyleEx( LSW_POPUP_STYLESEX ), _pwParent, _bCreateWidget, _hMenu ),
 		m_dwState( LSW_DS_FLOATING ),
-		m_dwDockStyle( 0 ),
+		m_dwDockStyle( LSW_DS_ALLOW_DOCKALL ),
 		m_iFrameWidth( 0 ),
 		m_iFrameHeight( 0 ),
 		m_dwDockSize( 0 ) {
@@ -140,6 +140,13 @@ namespace lsw {
 							case LSW_DS_DOCKED_TOP : {
 								m_rDragPlacementRect.bottom = rParCient.top + m_dwDockSize;
 								m_rDragPlacementRect.top = rParCient.top;
+								m_rDragPlacementRect.left = rParCient.left;
+								m_rDragPlacementRect.right = rParCient.right;
+								break;
+							}
+							case LSW_DS_DOCKED_BOTTOM : {
+								m_rDragPlacementRect.top = rParCient.bottom - m_dwDockSize;
+								m_rDragPlacementRect.bottom = rParCient.bottom;
 								m_rDragPlacementRect.left = rParCient.left;
 								m_rDragPlacementRect.right = rParCient.right;
 								break;
@@ -316,20 +323,29 @@ namespace lsw {
 		if ( m_rDragPlacementRect.left >= rPrc1.left && m_rDragPlacementRect.right <= rPrc1.right &&
 			m_rDragPlacementRect.top >= rPrc1.top && m_rDragPlacementRect.bottom <= rPrc1.bottom ) {
 			// Check intersection at bottom
-			if ( m_rDragPlacementRect.bottom > rPrc2.bottom && (m_dwDockStyle & LSW_DS_ALLOW_DOCKBOTTOM) ) { dsDockSide = LSW_DS_DOCKED_BOTTOM; }
+			if ( m_rDragPlacementRect.bottom > rPrc2.bottom && (m_dwDockStyle & LSW_DS_ALLOW_DOCKBOTTOM) ) {
+				dsDockSide = LSW_DS_DOCKED_BOTTOM;
+			}
 
 			// Check intersection at top
-			if ( m_rDragPlacementRect.top < rPrc2.top && (m_dwDockStyle & LSW_DS_ALLOW_DOCKTOP) ) { dsDockSide = LSW_DS_DOCKED_TOP; }
+			if ( m_rDragPlacementRect.top < rPrc2.top && (m_dwDockStyle & LSW_DS_ALLOW_DOCKTOP) ) {
+				dsDockSide = LSW_DS_DOCKED_TOP;
+			}
 
 			// Check intersection at left
-			if ( m_rDragPlacementRect.left < rPrc2.left && (m_dwDockStyle & LSW_DS_ALLOW_DOCKLEFT) ) { dsDockSide = LSW_DS_DOCKED_LEFT; }
+			if ( m_rDragPlacementRect.left < rPrc2.left && (m_dwDockStyle & LSW_DS_ALLOW_DOCKLEFT) ) {
+				dsDockSide = LSW_DS_DOCKED_LEFT;
+			}
 
 			// Check intersection at right
-			if ( m_rDragPlacementRect.right > rPrc2.right && (m_dwDockStyle & LSW_DS_ALLOW_DOCKRIGHT) ) { dsDockSide = LSW_DS_DOCKED_RIGHT; }
+			if ( m_rDragPlacementRect.right > rPrc2.right && (m_dwDockStyle & LSW_DS_ALLOW_DOCKRIGHT) ) {
+				dsDockSide = LSW_DS_DOCKED_RIGHT;
+			}
 		}
 
 		BOOL bControlKeyDown = (::GetKeyState( VK_CONTROL ) & 0x8000) ? TRUE : FALSE;
 		m_ddrtDragRectType = ((dsDockSide & LSW_DS_ALL_DOCKS) && !bControlKeyDown) ? LSW_DDRT_SOLID : LSW_DDRT_CHECKERED;
+		return LSW_DS_DOCKED_BOTTOM;
 		return dsDockSide;
 	}
 
@@ -528,7 +544,7 @@ mousedone:		ReleaseCapture();
 		}
 
 		// Send WM_NCCALCSIZE.
-		::SetWindowPos( Wnd(), 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE| SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED );
+		::SetWindowPos( Wnd(), 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED );
 
 		// if (dwp->focusWindow) SetFocus(dwp->focusWindow);
 
@@ -540,6 +556,7 @@ mousedone:		ReleaseCapture();
 			SetFloatingPos( SWP_SHOWWINDOW );
 		}
 		else {
+			// UpdateLayout() will have sent WM_SiZE to the parent to size the docking control.
 			::SetWindowPos( Wnd(), HWND_TOP, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE );
 		}
 	}

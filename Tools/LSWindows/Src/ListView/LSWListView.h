@@ -18,6 +18,9 @@ namespace lsw {
 		//	the specified number of items. This prevents the control from having to allocate the data structures every time an item is added.
 		VOID								SetItemCount( INT _cItems );
 
+		// Gets the number of columns.
+		INT									GetTotalColumns() const;
+
 		// Inserts a column at the given index.
 		INT									InsertColumn( INT _iIndex, const WCHAR * _pwcText, INT _iFormat = LVCFMT_LEFT );
 

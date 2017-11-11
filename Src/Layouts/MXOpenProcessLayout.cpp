@@ -55,7 +55,7 @@ namespace mx {
 		{
 			LSW_LT_LISTVIEW,						// ltType
 			MX_OPI_LISTVIEW,						// wId
-			L"SysListView32",						// lpwcClass
+			WC_LISTVIEWW,							// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			8,										// iLeft

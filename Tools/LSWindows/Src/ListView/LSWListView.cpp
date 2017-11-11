@@ -18,6 +18,17 @@ namespace lsw {
 		}
 	}
 
+	// Gets the number of columns.
+	INT CListView::GetTotalColumns() const {
+		if ( Wnd() ) {
+			HWND hHeader = reinterpret_cast<HWND>(::SendMessageW( Wnd(), LVM_GETHEADER, 0L, 0L ));
+			if ( hHeader ) {
+				return static_cast<INT>(::SendMessageW( hHeader, HDM_GETITEMCOUNT, 0L, 0L ));
+			}
+		}
+		return 0;
+	}
+
 	// Inserts a column at the given index.
 	INT CListView::InsertColumn( INT _iIndex, const WCHAR * _pwcText, INT _iFormat ) {
 		LV_COLUMNW lvColumn;

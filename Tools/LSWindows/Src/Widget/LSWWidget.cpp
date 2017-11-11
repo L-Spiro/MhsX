@@ -181,8 +181,8 @@ namespace lsw {
 	// Updates all rectangles with the current window rectangles.  If a control changes size and you wish to set the new size as its "base" size,
 	//	call this.
 	VOID CWidget::UpdateRects() {
-		::GetWindowRect( Wnd(), &m_rRect );
-		::GetClientRect( Wnd(), &m_rClientRect );
+		/*::GetWindowRect( Wnd(), &m_rRect );
+		::GetClientRect( Wnd(), &m_rClientRect );*/
 		::GetWindowRect( Wnd(), &m_rStartingRect );
 	}
 
@@ -198,6 +198,18 @@ namespace lsw {
 
 	// Gets a pointer to a child with the given ID.
 	CWidget * CWidget::FindChild( WORD _wId ) {
+		for ( size_t I = m_vChildren.size(); I--; ) {
+			if ( m_vChildren[I]->Id() == _wId ) {
+				return m_vChildren[I];
+			}
+			CWidget * pwTemp = m_vChildren[I]->FindChild( _wId );
+			if ( pwTemp ) { return pwTemp; }
+		}
+		return nullptr;
+	}
+
+	// Gets a pointer to a child with the given ID.
+	const CWidget * CWidget::FindChild( WORD _wId ) const {
 		for ( size_t I = m_vChildren.size(); I--; ) {
 			if ( m_vChildren[I]->Id() == _wId ) {
 				return m_vChildren[I];
@@ -352,8 +364,8 @@ namespace lsw {
 			}
 			::MoveWindow( Wnd(), rNewSize.left, rNewSize.top, rNewSize.Width(), rNewSize.Height(), FALSE );
 		}
-		::GetWindowRect( Wnd(), &m_rRect );
-		::GetClientRect( Wnd(), &m_rClientRect );
+		/*::GetWindowRect( Wnd(), &m_rRect );
+		::GetClientRect( Wnd(), &m_rClientRect );*/
 	}
 
 	// Setting the HWND after the control has been created.
@@ -518,6 +530,7 @@ namespace lsw {
 		if ( !pwThis ) { return false; }
 		
 		// Figure out what is being accessed on the widget and return accordingly.
+		// Note that all coordinates are in screen space.
 		// =======================================
 		// PARENT.
 		// =======================================
@@ -587,25 +600,25 @@ namespace lsw {
 			if ( ::_stricmp( _sMember.c_str(), "CL" ) == 0 ) {
 				// Accessing this client left.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().left);
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().UpperLeftClientToScreen( pwThis->Wnd() ).x);
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "CR" ) == 0 ) {
 				// Accessing this client right.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().right);
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().BottomRightClientToScreen( pwThis->Wnd() ).x);
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "CT" ) == 0 ) {
 				// Accessing this client top.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().top);
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().UpperLeftClientToScreen( pwThis->Wnd() ).y);
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "CB" ) == 0 ) {
 				// Accessing this client bottom.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().bottom);
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().BottomRightClientToScreen( pwThis->Wnd() ).y);
 				return true;
 			}
 			// =======================================
@@ -657,14 +670,55 @@ namespace lsw {
 				return true;
 			}
 		}
+		// =======================================
+		// VIRTUAL CLIENT RECT.
+		// =======================================
+		if ( _sMember.size() == 3 ) {
+			if ( ::_stricmp( _sMember.c_str(), "VCW" ) == 0 ) {
+				// Accessing this client width.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect().Width());
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "VCH" ) == 0 ) {
+				// Accessing this client height.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect().Height());
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "VCL" ) == 0 ) {
+				// Accessing this client left.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect().UpperLeftClientToScreen( pwThis->Wnd() ).x);
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "VCR" ) == 0 ) {
+				// Accessing this client right.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect().BottomRightClientToScreen( pwThis->Wnd() ).x);
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "VCT" ) == 0 ) {
+				// Accessing this client top.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect().UpperLeftClientToScreen( pwThis->Wnd() ).y);
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "VCB" ) == 0 ) {
+				// Accessing this client bottom.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect().BottomRightClientToScreen( pwThis->Wnd() ).y);
+				return true;
+			}
+		}
 
 		return false;
 	}
 
 	// Handles control setup.
 	VOID CWidget::ControlSetup( CWidget * _pwParent, const std::vector<CWidget *> &_vWidgetList ) {
-		::GetWindowRect( _pwParent->Wnd(), &_pwParent->m_rRect );
-		::GetClientRect( _pwParent->Wnd(), &_pwParent->m_rClientRect );
+		/*::GetWindowRect( _pwParent->Wnd(), &_pwParent->m_rRect );
+		::GetClientRect( _pwParent->Wnd(), &_pwParent->m_rClientRect );*/
 		::GetWindowRect( _pwParent->Wnd(), &_pwParent->m_rStartingRect );
 
 		::EnumChildWindows( _pwParent->Wnd(), EnumChildWindows_AttachWindowToWidget, reinterpret_cast<LPARAM>(&_vWidgetList) );
@@ -767,9 +821,11 @@ namespace lsw {
 						break;
 					}
 					default : {
-						::GetWindowRect( _hWnd, &pmwThis->m_rRect );
-						::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
-						hHandled = pmwThis->Size( _wParam, pmwThis->m_rRect.Width(), pmwThis->m_rRect.Height() );
+						/*::GetWindowRect( _hWnd, &pmwThis->m_rRect );
+						::GetClientRect( _hWnd, &pmwThis->m_rClientRect );*/
+						LSW_RECT rTemp;
+						::GetWindowRect( _hWnd, &rTemp );
+						hHandled = pmwThis->Size( _wParam, rTemp.Width(), rTemp.Height() );
 						::RedrawWindow( _hWnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW );
 					}
 				}
@@ -779,8 +835,8 @@ namespace lsw {
 			}
 			case WM_MOVE : {
 				if ( !::IsIconic( _hWnd ) ) {
-					::GetWindowRect( _hWnd, &pmwThis->m_rRect );
-					::GetClientRect( _hWnd, &pmwThis->m_rClientRect );
+					/*::GetWindowRect( _hWnd, &pmwThis->m_rRect );
+					::GetClientRect( _hWnd, &pmwThis->m_rClientRect );*/
 					POINTS pPoint = MAKEPOINTS( _lParam );
 					LSW_HANDLED hHandled = pmwThis->Move( pPoint.x, pPoint.y );
 					if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
@@ -875,7 +931,8 @@ namespace lsw {
 						LSW_RET( 1, TRUE );
 					}
 				}
-				LSW_RET( 1, TRUE );
+				//LSW_RET( 1, TRUE );
+				break;
 			}
 			// =======================================
 			// Drawing

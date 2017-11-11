@@ -4,6 +4,7 @@
 #include <MainWindow/LSWMainWindow.h>
 #include <ImageList/LSWImageList.h>
 #include <Images/LSWBitmap.h>
+#include <ListView/LSWListView.h>
 
 using namespace lsw;
 
@@ -60,6 +61,18 @@ namespace mx {
 
 		// Gets the status bar.
 		CStatusBar *						StatusBar();
+
+		// Gets the status bar.
+		const CStatusBar *					StatusBar() const;
+
+		// Gets the list view.
+		CListView *							MainListView();
+
+		// Gets the list view.
+		const CListView *					MainListView() const;
+
+		// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
+		virtual const LSW_RECT				VirtualClientRect() const;
 
 
 	protected :

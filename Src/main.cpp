@@ -58,9 +58,9 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 		nullptr,								// lpwcClass
 		TRUE,									// bEnabled
 		TRUE,									// bActive
-		4,										// iLeft
-		3,										// iTop
-		563,									// dwWidth
+		154,										// iLeft
+		153,										// iTop
+		163,									// dwWidth
 		174,									// dwHeight
 		WS_VISIBLE,								// dwStyle
 		0,										// dwStyleEx

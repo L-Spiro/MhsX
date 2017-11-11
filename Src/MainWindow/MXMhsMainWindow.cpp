@@ -101,7 +101,7 @@ namespace mx {
 		}
 
 	   LSW_RECT rRebarRect = ClientRect();
-	   ::MoveWindow( plvRebar->Wnd(), rRebarRect.left, rRebarRect.top, rRebarRect.Width(), plvRebar->WindowRect().Height(), FALSE );
+	   ::MoveWindow( plvRebar->Wnd(), 0, 0, rRebarRect.Width(), plvRebar->WindowRect().Height(), FALSE );
 
 		plvRebar->UpdateRects();
 		
@@ -118,6 +118,36 @@ namespace mx {
 				{ rRebarRect.Width() - psbStatus->ClientRect().Height(), TRUE },
 			};
 			psbStatus->SetParts( spParts, MX_ELEMENTS( spParts ) );
+		}
+
+
+		// ==== LIST VIEW ==== //
+		CListView * plvAddressList = MainListView();
+		if ( plvAddressList ) {
+			const struct {
+				const char * _pcText;
+				size_t sLen;
+				DWORD dwWidth;
+			} aTitles[] = {
+				{ _T_EB78CFF1_Description, _LEN_EB78CFF1, 150 },
+				{ _T_C2F3561D_Address, _LEN_C2F3561D, 80 },
+				{ _T_31A2F4D5_Current_Value, _LEN_31A2F4D5, 120 },
+				{ _T_022E8A69_Value_When_Locked, _LEN_022E8A69, 120 },
+				{ _T_2CECF817_Type, _LEN_2CECF817, 100 },
+			};
+			for ( INT I = 0; I < MX_ELEMENTS( aTitles ); I++ ) {
+				INT iCol = plvAddressList->AddColumn( mx::CStringDecoder::DecodeToWString( aTitles[I]._pcText, aTitles[I].sLen ).c_str() );
+				BOOL bAdded = plvAddressList->SetColumnWidth( iCol, aTitles[I].dwWidth );
+				if ( !bAdded ) { break; }
+			}
+			//plvAddressList->SetColumnWidth( plvAddressList->GetTotalColumns(), LVSCW_AUTOSIZE_USEHEADER );
+		}
+
+		{
+			LSW_RECT rRect;
+			// Send a fake WM_SIZE message to cause the window to recalculate and redraw its layout.
+			::GetClientRect( Wnd(), &rRect );
+			::SendMessageW( Wnd(), WM_SIZE, SIZE_RESTORED, MAKELPARAM( rRect.Width(), rRect.Height() ) );
 		}
 
 		return LSW_H_CONTINUE;
@@ -175,6 +205,38 @@ namespace mx {
 	// Gets the status bar.
 	CStatusBar * CMhsMainWindow::StatusBar() {
 		return static_cast<CStatusBar *>(FindChild( CMainWindowLayout::MX_MWI_STATUSBAR ));
+	}
+
+	// Gets the status bar.
+	const CStatusBar * CMhsMainWindow::StatusBar() const {
+		return static_cast<const CStatusBar *>(FindChild( CMainWindowLayout::MX_MWI_STATUSBAR ));
+	}
+
+	// Gets the list view.
+	CListView * CMhsMainWindow::MainListView() {
+		return static_cast<CListView *>(FindChild( CMainWindowLayout::MX_MWI_STOREDADDRESSES ));
+	}
+
+	// Gets the list view.
+	const CListView * CMhsMainWindow::MainListView() const {
+		return static_cast<const CListView *>(FindChild( CMainWindowLayout::MX_MWI_STOREDADDRESSES ));
+	}
+
+	// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
+	const LSW_RECT CMhsMainWindow::VirtualClientRect() const {
+		LSW_RECT rTemp = ClientRect();
+		const CRebar * plvRebar = static_cast<const CRebar *>(FindChild( CMainWindowLayout::MX_MWI_REBAR0 ));
+		if ( plvRebar ) {
+			LSW_RECT rRebar = plvRebar->ClientRect();
+			rTemp.top += rRebar.Height();
+		}
+
+		const CStatusBar * psbStatus = StatusBar();
+		if ( psbStatus ) {
+			LSW_RECT rStatus = psbStatus->ClientRect();
+			rTemp.bottom -= rStatus.Height();
+		}
+		return rTemp;
 	}
 
 }	// namespace mx

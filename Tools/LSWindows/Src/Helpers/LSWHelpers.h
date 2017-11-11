@@ -25,6 +25,23 @@ namespace lsw {
 			::MapWindowPoints( _hWnd, HWND_DESKTOP, reinterpret_cast<POINT *>(&rTemp), 2 );
 			return rTemp;
 		}
+		VOID								MoveBy( const POINT _pMove ) { MoveBy( _pMove.x, _pMove.y ); }
+		VOID								MoveBy( INT _iX, INT _iY ) {
+			left += _iX;
+			right += _iX;
+			top += _iY;
+			bottom += _iY;
+		}
+		POINT								UpperLeftClientToScreen( HWND _hWnd ) const {
+			POINT pTemp = UpperLeft();
+			::ClientToScreen( _hWnd, &pTemp );
+			return pTemp;
+		}
+		POINT								BottomRightClientToScreen( HWND _hWnd ) const {
+			POINT pTemp = BottomRight();
+			::ClientToScreen( _hWnd, &pTemp );
+			return pTemp;
+		}
 	};
 
 	struct LSW_HANDLE {
