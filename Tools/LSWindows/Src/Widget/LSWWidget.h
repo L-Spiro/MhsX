@@ -396,6 +396,18 @@ namespace lsw {
 		// WM_XBUTTONUP.
 		virtual LSW_HANDLED					XButtonUp( DWORD _dwVirtKeys, DWORD _dwButton, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
 
+		// TBN_QUERYINSERT.
+		virtual LSW_HANDLED					TbnQueryInsert( const LPNMTOOLBARW _lptbToolBar ) { return LSW_H_CONTINUE; }
+
+		// TBN_QUERYDELETE.
+		virtual LSW_HANDLED					TbnQueryDelete( const LPNMTOOLBARW _lptbToolBar ) { return LSW_H_CONTINUE; }
+
+		// TBN_RESET.
+		virtual LSW_HANDLED					TbnReset() { return LSW_H_CONTINUE; }
+
+		// TBN_GETBUTTONINFO.
+		virtual LSW_HANDLED					TbnGetButtonInfo( LPNMTOOLBARW _lptbToolBar ) { return LSW_H_CONTINUE; }
+
 
 		// == Functions.
 		// Remove a child.

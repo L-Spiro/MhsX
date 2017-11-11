@@ -91,7 +91,7 @@ namespace mx {
 			0,										// dwWidth
 			0,										// dwHeight
 			WS_CHILD | TBSTYLE_FLAT | TBSTYLE_TOOLTIPS | WS_CLIPCHILDREN |
-				WS_CLIPSIBLINGS | CCS_NODIVIDER | CCS_NORESIZE | WS_VISIBLE,		// dwStyle
+				WS_CLIPSIBLINGS | CCS_NODIVIDER | CCS_NORESIZE | WS_VISIBLE | CCS_ADJUSTABLE,		// dwStyle
 			0,																		// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen

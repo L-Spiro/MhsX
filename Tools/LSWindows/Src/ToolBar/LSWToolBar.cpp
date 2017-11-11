@@ -17,7 +17,21 @@ namespace lsw {
 	// Checks a button.
 	BOOL CToolBar::CheckButton( WORD _wId, BOOL _bChecked ) {
 		if ( !Wnd() ) { return FALSE; }
-		return static_cast<BOOL>(::SendMessageW( Wnd(), TB_CHECKBUTTON, static_cast<WPARAM>(_wId), MAKELPARAM( _bChecked, 0 ) ));
+		BOOL bRet = static_cast<BOOL>(::SendMessageW( Wnd(), TB_CHECKBUTTON, static_cast<WPARAM>(_wId), MAKELPARAM( _bChecked, 0 ) ));
+		if ( bRet ) {
+			size_t sIndex = IndexOfButton( _wId );
+			if ( sIndex != static_cast<size_t>(-1) ) {
+				if ( _bChecked ) {
+					// Add TBSTATE_CHECKED.
+					m_vButtons[sIndex].fsState |= TBSTATE_CHECKED;
+				}
+				else {
+					// Remove TBSTATE_CHECKED.
+					m_vButtons[sIndex].fsState &= ~TBSTATE_CHECKED;
+				}
+			}
+		}
+		return bRet;
 	}
 
 	// Auto-sizes.
@@ -41,7 +55,21 @@ namespace lsw {
 	// Enables or disables a button.
 	BOOL CToolBar::EnableButton( WORD _wId, BOOL _bEnabled ) {
 		if ( !Wnd() ) { return FALSE; }
-		return static_cast<BOOL>(::SendMessageW( Wnd(), TB_ENABLEBUTTON, static_cast<WPARAM>(_wId), MAKELPARAM( _bEnabled, 0 ) ));
+		BOOL bRet = static_cast<BOOL>(::SendMessageW( Wnd(), TB_ENABLEBUTTON, static_cast<WPARAM>(_wId), MAKELPARAM( _bEnabled, 0 ) ));
+		if ( bRet ) {
+			size_t sIndex = IndexOfButton( _wId );
+			if ( sIndex != static_cast<size_t>(-1) ) {
+				if ( _bEnabled ) {
+					// Add TBSTATE_ENABLED.
+					m_vButtons[sIndex].fsState |= TBSTATE_ENABLED;
+				}
+				else {
+					// Remove TBSTATE_ENABLED.
+					m_vButtons[sIndex].fsState &= ~TBSTATE_ENABLED;
+				}
+			}
+		}
+		return bRet;
 	}
 
 	// Gets a button's data.
@@ -111,7 +139,53 @@ namespace lsw {
 	BOOL CToolBar::AddButtons( const TBBUTTON * _pbButtons, size_t _sTotal ) {
 		if ( !Wnd() ) { return FALSE; }
 		::SendMessageW( Wnd(), TB_BUTTONSTRUCTSIZE, sizeof( (*_pbButtons) ), 0L );
-		return static_cast<BOOL>(::SendMessageW( Wnd(), TB_ADDBUTTONS, static_cast<WPARAM>(_sTotal), reinterpret_cast<LPARAM>(_pbButtons) ));
+		BOOL bRet = static_cast<BOOL>(::SendMessageW( Wnd(), TB_ADDBUTTONS, static_cast<WPARAM>(_sTotal), reinterpret_cast<LPARAM>(_pbButtons) ));
+		if ( bRet ) {
+			for ( size_t I = 0; I < _sTotal; ++I ) {
+				m_vButtons.push_back( (*_pbButtons++) );
+			}
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+	// TBN_QUERYINSERT.
+	CWidget::LSW_HANDLED CToolBar::TbnQueryInsert( const LPNMTOOLBARW _lptbToolBar ) {
+		return LSW_H_HANDLED;
+	}
+
+	// TBN_QUERYDELETE.
+	CWidget::LSW_HANDLED CToolBar::TbnQueryDelete( const LPNMTOOLBARW _lptbToolBar ) {
+		return LSW_H_HANDLED;
+	}
+
+	// TBN_RESET.
+	CWidget::LSW_HANDLED CToolBar::TbnReset() {
+		if ( !m_vButtons.size() ) { return LSW_H_CONTINUE; }
+		std::vector<TBBUTTON> vCopy = m_vButtons;
+
+		for ( DWORD I = GetButtonCount(); I--; ) {
+			DeleteButton( 0 );
+		}
+		m_vButtons.clear();
+		AddButtons( &vCopy[0], vCopy.size() );
+		return LSW_H_CONTINUE;	// To keep the dialog open.
+		//return LSW_H_HANDLED;	// To close the dialog.
+	}
+
+	// TBN_GETBUTTONINFO.
+	CWidget::LSW_HANDLED CToolBar::TbnGetButtonInfo( LPNMTOOLBARW _lptbToolBar ) {
+		if ( static_cast<size_t>(_lptbToolBar->iItem) >= m_vButtons.size() ) { return LSW_H_CONTINUE; }
+		_lptbToolBar->tbButton = m_vButtons[_lptbToolBar->iItem];
+		return LSW_H_HANDLED;
+	}
+
+	// Gets the index of a button given its command ID.
+	size_t CToolBar::IndexOfButton( WORD _wId ) const {
+		for ( size_t I = m_vButtons.size(); I--; ) {
+			if ( m_vButtons[I].idCommand == _wId ) { return I; }
+		}
+		return static_cast<size_t>(-1);
 	}
 
 }	// namespace lsw

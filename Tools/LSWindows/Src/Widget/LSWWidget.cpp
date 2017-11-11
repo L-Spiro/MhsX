@@ -921,14 +921,45 @@ namespace lsw {
 						LSW_RET( 1, TRUE );
 					}
 					case NM_DBLCLK : {
-						NMHDR * pHdr = reinterpret_cast<NMHDR *>(_lParam);
-						HWND hFrom = pHdr->hwndFrom;
+						HWND hFrom = lpHdr->hwndFrom;
 						CWidget * pmwTemp = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hFrom, GWLP_USERDATA ));
 						if ( pmwTemp ) {
-							if ( pmwTemp->DblClk( pHdr ) == LSW_HANDLED::LSW_H_HANDLED ) { LSW_RET( 1, TRUE ); }
+							if ( pmwTemp->DblClk( lpHdr ) == LSW_HANDLED::LSW_H_HANDLED ) { LSW_RET( 1, TRUE ); }
 						}
-						pmwThis->DblClk( pHdr, static_cast<WORD>(pHdr->idFrom), pmwTemp );
+						pmwThis->DblClk( lpHdr, static_cast<WORD>(lpHdr->idFrom), pmwTemp );
 						LSW_RET( 1, TRUE );
+					}
+					case TBN_QUERYINSERT : {
+						HWND hFrom = lpHdr->hwndFrom;
+						CWidget * pmwTemp = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hFrom, GWLP_USERDATA ));
+						if ( pmwTemp ) {
+							if ( pmwTemp->TbnQueryInsert( reinterpret_cast<LPNMTOOLBARW>(_lParam) ) == LSW_HANDLED::LSW_H_HANDLED ) { LSW_RET( TRUE, TRUE ); }
+						}
+						break;
+					}
+					case TBN_QUERYDELETE : {
+						HWND hFrom = lpHdr->hwndFrom;
+						CWidget * pmwTemp = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hFrom, GWLP_USERDATA ));
+						if ( pmwTemp ) {
+							if ( pmwTemp->TbnQueryDelete( reinterpret_cast<LPNMTOOLBARW>(_lParam) ) == LSW_HANDLED::LSW_H_HANDLED ) { LSW_RET( TRUE, TRUE ); }
+						}
+						break;
+					}
+					case TBN_RESET : {
+						HWND hFrom = lpHdr->hwndFrom;
+						CWidget * pmwTemp = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hFrom, GWLP_USERDATA ));
+						if ( pmwTemp ) {
+							if ( pmwTemp->TbnReset() == LSW_HANDLED::LSW_H_HANDLED ) { LSW_RET( TBNRF_ENDCUSTOMIZE, TBNRF_ENDCUSTOMIZE ); }
+						}
+						break;
+					}
+					case TBN_GETBUTTONINFO : {
+						HWND hFrom = lpHdr->hwndFrom;
+						CWidget * pmwTemp = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hFrom, GWLP_USERDATA ));
+						if ( pmwTemp ) {
+							if ( pmwTemp->TbnGetButtonInfo( reinterpret_cast<LPNMTOOLBARW>(_lParam) ) == LSW_HANDLED::LSW_H_HANDLED ) { LSW_RET( TRUE, TRUE ); }
+						}
+						break;
 					}
 				}
 				//LSW_RET( 1, TRUE );

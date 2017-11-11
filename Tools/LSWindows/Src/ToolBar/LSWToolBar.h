@@ -4,6 +4,8 @@
 #include "../ImageList/LSWImageList.h"
 #include "../Widget/LSWWidget.h"
 
+#include <vector>
+
 namespace lsw {
 
 	class CToolBar : public CWidget {
@@ -56,6 +58,31 @@ namespace lsw {
 
 		// Adds buttons.
 		BOOL								AddButtons( const TBBUTTON * _pbButtons, size_t _sTotal );
+
+		// TBN_QUERYINSERT.
+		virtual LSW_HANDLED					TbnQueryInsert( const LPNMTOOLBARW _lptbToolBar );
+
+		// TBN_QUERYDELETE.
+		virtual LSW_HANDLED					TbnQueryDelete( const LPNMTOOLBARW _lptbToolBar );
+
+		// TBN_RESET.
+		virtual LSW_HANDLED					TbnReset();
+
+		// TBN_GETBUTTONINFO.
+		virtual LSW_HANDLED					TbnGetButtonInfo( LPNMTOOLBARW _lptbToolBar );
+
+
+	protected :
+		// == Members.
+		// Copy of the buttons for TBN_GETBUTTONINFO.
+		// TODO: Button text should be copied into a std::wstring or else pointers here can
+		//	point to invalid addresses.
+		std::vector<TBBUTTON>				m_vButtons;
+
+
+		// == Functions.
+		// Gets the index of a button given its command ID.
+		size_t								IndexOfButton( WORD _wId ) const;
 
 
 	private :
