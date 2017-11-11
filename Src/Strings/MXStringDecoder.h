@@ -4,8 +4,12 @@
 #include <cstring>
 #include <string>
 
+#if 0
 #define MX_MAKE_WCHAR2( STRING )			L ## STRING
 #define MX_MAKE_WCHAR( STRING )				MX_MAKE_WCHAR2( STRING )
+#else
+#define MX_MAKE_WCHAR( STRING )				reinterpret_cast<const WCHAR *>( STRING )
+#endif	// #if 0
 
 namespace mx {
 
@@ -29,25 +33,26 @@ namespace mx {
 			return ptRet;
 		}
 
+		// Decodes to a std::string.
+		static std::string &	Decode( const char * _pcIn, size_t _sInLen, std::string &_otRet ) {
+			_otRet.resize( _sInLen );
+			Decode( _pcIn, _sInLen, const_cast<char *>(_otRet.c_str()) );
+			return _otRet;
+		}
+
 		// Decodes to an std::string or std::wstring object.
-		template <typename _tOutType>
+		/*template <typename _tOutType>
 		static _tOutType &		Decode( const char * _pcIn, size_t _sInLen, _tOutType &_otRet ) {
 			_otRet.resize( _sInLen );
 			Decode( _pcIn, _sInLen, const_cast<_tOutType::value_type *>(_otRet.c_str()) );
 			return _otRet;
-		}
+		}*/
 
 		// Decodes to std::string, creating a new object.
-		static std::string		DecodeToString( const char * _pcIn, size_t _sInLen ) {
-			std::string sTemp;
-			return Decode( _pcIn, _sInLen, sTemp );
-		}
+		static std::string		DecodeToString( const char * _pcIn, size_t _sInLen );
 
 		// Decodes to std::wstring, creating a new object.
-		static std::wstring		DecodeToWString( const char * _pcIn, size_t _sInLen ) {
-			std::wstring sTemp;
-			return Decode( _pcIn, _sInLen, sTemp );
-		}
+		static std::wstring		DecodeToWString( const char * _pcIn, size_t _sInLen );
 	};
 
 }	// namespace mx

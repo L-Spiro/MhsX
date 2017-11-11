@@ -26,8 +26,8 @@ namespace mx {
 			MX_MAIN_WINDOW_H,						// dwHeight
 			WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS,		// dwStyle
 			0,										// dwStyleEx
-			MX_MAKE_WCHAR( _T_BD5547E7_L__Spiro_MHS_X ),								// pwcText
-			_LEN_BD5547E7,							// sTextLen
+			MX_MAKE_WCHAR( _T_BA5DABD6_L___Spiro__MHS__X ),								// pwcText
+			_LEN_BA5DABD6,							// sTextLen
 			MX_MWI_NONE,							// dwParentId
 		},
 		{

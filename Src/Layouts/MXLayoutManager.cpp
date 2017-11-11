@@ -47,11 +47,7 @@ namespace mx {
 		for ( size_t I = 0; I < _sTotal; ++I ) {
 			LSW_WIDGET_LAYOUT wlTemp = _pwlLayouts[I];
 			if ( wlTemp.pwcText ) {
-				std::string sTemp;
-				for ( size_t J = 0; J < wlTemp.sTextLen; ++J ) {
-					sTemp.push_back( static_cast<char>(wlTemp.pwcText[J]) );
-				}
-				_vWStrings[sStringWIndex] = mx::CStringDecoder::DecodeToWString( sTemp.c_str(), wlTemp.sTextLen );
+				_vWStrings[sStringWIndex] = mx::CStringDecoder::DecodeToWString( reinterpret_cast<const char *>(wlTemp.pwcText), wlTemp.sTextLen );
 				wlTemp.pwcText = _vWStrings[sStringWIndex++].c_str();
 			}
 
