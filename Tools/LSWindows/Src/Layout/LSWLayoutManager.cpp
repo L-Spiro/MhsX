@@ -20,7 +20,7 @@ namespace lsw {
 
 	// == Functions.
 	// Creates a window with all of its controls.  Returns the main window widget.
-	CWidget * CLayoutManager::CreateWindowX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotalMenus ) {
+	CWidget * CLayoutManager::CreateWindowX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotalMenus, CWidget * _pwParent ) {
 		if ( !_sTotal ) { return nullptr; }
 
 		HMENU hMenu = NULL;
@@ -28,7 +28,7 @@ namespace lsw {
 			hMenu = CreateMenu( _pmlLayouts, _sTotalMenus );
 		}
 
-		CWidget * pwMain = CreateWidget( FixLayout( _pwlLayouts[0] ), NULL, true, hMenu );
+		CWidget * pwMain = CreateWidget( FixLayout( _pwlLayouts[0] ), _pwParent, true, hMenu );
 		if ( !pwMain ) { return nullptr; }
 
 		std::vector<CWidget *> vWidgets;	// Has to be passed to the ::EnumChildWindows() calls.

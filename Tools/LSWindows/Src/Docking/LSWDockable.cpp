@@ -27,9 +27,9 @@ namespace lsw {
 	CDockable::LSW_DOCK_DRAG_RECT_TYPE CDockable::m_ddrtDragRectType = CDockable::LSW_DDRT_CHECKERED;
 
 	CDockable::CDockable( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
-		CWidget( _wlLayout.ChangeStyle( LSW_POPUP_STYLES | (_wlLayout.dwStyle & WS_VISIBLE) ).ChangeStyleEx( LSW_POPUP_STYLESEX ), _pwParent, _bCreateWidget, _hMenu ),
+		CWidget( _wlLayout.ChangeStyle( LSW_POPUP_STYLES | (_wlLayout.dwStyle & WS_VISIBLE) ).ChangeStyleEx( LSW_POPUP_STYLESEX ).ChangeClass( reinterpret_cast<LPCWSTR>(CBase::DockableAtom()) ), _pwParent, _bCreateWidget, _hMenu ),
 		m_dwState( LSW_DS_FLOATING ),
-		m_dwDockStyle( LSW_DS_ALLOW_DOCKALL ),
+		m_dwDockStyle( 0/*LSW_DS_ALLOW_DOCKALL*/ ),
 		m_iFrameWidth( 0 ),
 		m_iFrameHeight( 0 ),
 		m_dwDockSize( 0 ) {
@@ -162,7 +162,7 @@ namespace lsw {
 
 	// WM_NCLBUTTONDOWN.
 	CWidget::LSW_HANDLED CDockable::NcLButtonDown( INT _iHitTest, const POINTS &_pCursorPos ) {
-		if ( _iHitTest == HTCAPTION ) {
+		if ( _iHitTest == HTCAPTION && (m_dwDockStyle & LSW_DS_ALLOW_DOCKALL) ) {
 			if ( (m_dwDockStyle & LSW_DS_KEEPORIGSTATE) == 0 ) {
 					BOOL bControlKeyDown = (::GetKeyState( VK_CONTROL ) & 0x8000) ? TRUE : FALSE;
 
@@ -345,7 +345,7 @@ namespace lsw {
 
 		BOOL bControlKeyDown = (::GetKeyState( VK_CONTROL ) & 0x8000) ? TRUE : FALSE;
 		m_ddrtDragRectType = ((dsDockSide & LSW_DS_ALL_DOCKS) && !bControlKeyDown) ? LSW_DDRT_SOLID : LSW_DDRT_CHECKERED;
-		return LSW_DS_DOCKED_BOTTOM;
+		//return LSW_DS_DOCKED_BOTTOM;
 		return dsDockSide;
 	}
 

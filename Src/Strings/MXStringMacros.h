@@ -4712,3 +4712,17 @@
 #define _DEC_S_32DCB4CD_Invalid_update_rate_ mx::CStringDecoder::DecodeToString( _T_32DCB4CD_Invalid_update_rate_, _LEN_32DCB4CD )
 #define _DEC_WS_32DCB4CD_Invalid_update_rate_ mx::CStringDecoder::DecodeToWString( _T_32DCB4CD_Invalid_update_rate_, _LEN_32DCB4CD )
 
+// Found Addresses
+#define _T_2741E247_Found_Addresses "\xCE\x3D\x45\x09\xF6\xE9\xCF\x2B\x34\x3A\x2E\x41\x05\x00\x3A"
+#define _LEN_2741E247 15
+#define _DEC_2741E247_Found_Addresses( STR ) mx::CStringDecoder::Decode( _T_2741E247_Found_Addresses, _LEN_2741E247, STR )
+#define _DEC_S_2741E247_Found_Addresses mx::CStringDecoder::DecodeToString( _T_2741E247_Found_Addresses, _LEN_2741E247 )
+#define _DEC_WS_2741E247_Found_Addresses mx::CStringDecoder::DecodeToWString( _T_2741E247_Found_Addresses, _LEN_2741E247 )
+
+// Expression Evaluator
+#define _T_54B37832_Expression_Evaluator "\xCD\x46\x40\x0D\xF7\x3C\x01\x30\x3F\x36\xE9\x13\x08\xFC\x33\xFD\x2F\x44\x0A\x04"
+#define _LEN_54B37832 20
+#define _DEC_54B37832_Expression_Evaluator( STR ) mx::CStringDecoder::Decode( _T_54B37832_Expression_Evaluator, _LEN_54B37832, STR )
+#define _DEC_S_54B37832_Expression_Evaluator mx::CStringDecoder::DecodeToString( _T_54B37832_Expression_Evaluator, _LEN_54B37832 )
+#define _DEC_WS_54B37832_Expression_Evaluator mx::CStringDecoder::DecodeToWString( _T_54B37832_Expression_Evaluator, _LEN_54B37832 )
+

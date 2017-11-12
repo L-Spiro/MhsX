@@ -1,4 +1,5 @@
 #pragma once
+
 #include "../MXMhsX.h"
 #include "../Options/MXOptions.h"
 #include <ListView/LSWListView.h>

@@ -1,4 +1,5 @@
 #include "MXMhsMainWindow.h"
+#include "../Layouts/MXFoundAddressLayout.h"
 #include "../Layouts/MXMainWindowLayout.h"
 #include "../Layouts/MXOpenProcessLayout.h"
 #include "../Layouts/MXOptionsLayout.h"
@@ -12,7 +13,8 @@
 namespace mx {
 
 	CMhsMainWindow::CMhsMainWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
-		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu ) {
+		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu ),
+		m_pfaFoundAddresses( nullptr ) {
 
 		m_pmhMemHack = new CMemHack();
 
@@ -182,6 +184,14 @@ namespace mx {
 				}
 				break;
 			}
+			case CMainWindowLayout::MX_MWMI_SHOWFOUNDADDR : {
+				ShowFoundAddress();
+				break;
+			}
+			case CMainWindowLayout::MX_MWMI_SHOW_ALL : {
+				ShowFoundAddress();
+				break;
+			}
 		}
 		return LSW_H_CONTINUE;
 	}
@@ -237,6 +247,35 @@ namespace mx {
 			rTemp.bottom -= rStatus.Height();
 		}
 		return rTemp;
+	}
+
+	// Shows the Found Address dockable.
+	void CMhsMainWindow::ShowFoundAddress() {
+		if ( !m_pfaFoundAddresses ) {
+			m_pfaFoundAddresses = static_cast<CFoundAddressesWindow *>(CFoundAddressLayout::CreateFoundAddressesWindow( this ));
+		}
+		else {
+			m_pfaFoundAddresses->SetVisible( TRUE );
+		}
+		UpdateWindowChecks();
+	}
+
+	// Remove a child.
+	void CMhsMainWindow::RemoveChild( const CWidget * _pwChild ) {
+		if ( m_pfaFoundAddresses && static_cast<CWidget *>(m_pfaFoundAddresses) == _pwChild ) {
+			m_pfaFoundAddresses = nullptr;
+			UpdateWindowChecks();
+		}
+		CMainWindow::RemoveChild( _pwChild );
+	}
+
+	// Update the "Window" checks.
+	void CMhsMainWindow::UpdateWindowChecks() {
+		HMENU hMenu = ::GetMenu( Wnd() );
+		if ( hMenu ) {
+			//BOOL bCheck = m_pfaFoundAddresses && m_pfaFoundAddresses->
+			::CheckMenuItem( hMenu, CMainWindowLayout::MX_MWMI_SHOWFOUNDADDR, m_pfaFoundAddresses ? MF_CHECKED : MF_UNCHECKED );
+		}
 	}
 
 }	// namespace mx

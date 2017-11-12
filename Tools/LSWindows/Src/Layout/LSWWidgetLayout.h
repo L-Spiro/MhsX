@@ -46,6 +46,11 @@ namespace lsw {
 			wlCopy.dwStyleEx = _dwNewStyleEx;
 			return wlCopy;
 		}
+		LSW_WIDGET_LAYOUT			ChangeClass( LPCWSTR _lpwcClass ) {
+			LSW_WIDGET_LAYOUT wlCopy = (*this);
+			wlCopy.lpwcClass = _lpwcClass;
+			return wlCopy;
+		}
 	};
 
 }	// namespace lsw

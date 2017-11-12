@@ -1,6 +1,8 @@
 #pragma once
 
+#include "../FoundAddresses/MXFoundAddressesWindow.h"
 #include "../MemHack/MXMemHack.h"
+
 #include <MainWindow/LSWMainWindow.h>
 #include <ImageList/LSWImageList.h>
 #include <Images/LSWBitmap.h>
@@ -74,6 +76,9 @@ namespace mx {
 		// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
 		virtual const LSW_RECT				VirtualClientRect() const;
 
+		// Shows the Found Address dockable.
+		void								ShowFoundAddress();
+
 
 	protected :
 		// == Members.
@@ -88,6 +93,17 @@ namespace mx {
 
 		// The MHS object.
 		CMemHack *							m_pmhMemHack;
+
+		// The Found Address dockable.
+		CFoundAddressesWindow *				m_pfaFoundAddresses;
+
+
+		// == Functions.
+		// Remove a child.
+		virtual void						RemoveChild( const CWidget * _pwChild );
+
+		// Update the "Window" checks.
+		void								UpdateWindowChecks();
 
 	};
 

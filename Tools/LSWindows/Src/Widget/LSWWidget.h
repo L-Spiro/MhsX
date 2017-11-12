@@ -412,7 +412,7 @@ namespace lsw {
 
 		// == Functions.
 		// Remove a child.
-		void								RemoveChild( const CWidget * _pwChild );
+		virtual void						RemoveChild( const CWidget * _pwChild );
 
 		// Add a chld.
 		void								AddChild( CWidget * _pwChild );

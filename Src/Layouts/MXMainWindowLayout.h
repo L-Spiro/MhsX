@@ -8,7 +8,7 @@ using namespace lsw;
 
 namespace mx {
 	
-	//
+	// Layout for the main MHS window.
 	class CMainWindowLayout {
 	public :
 		// == Enumerations.
@@ -63,6 +63,10 @@ namespace mx {
 			MX_MWMI_DATATYPESEARCH,
 
 			MX_MWMI_OPTIONS,
+
+			MX_MWMI_SHOWFOUNDADDR,
+			MX_MWMI_SHOW_EXPEVAL,
+			MX_MWMI_SHOW_ALL,
 		};
 
 
@@ -93,6 +97,9 @@ namespace mx {
 
 		// Options menu.
 		static LSW_MENU_ITEM					m_miOptionsMenu[];
+
+		// Windows menu.
+		static LSW_MENU_ITEM					m_miWindowsMenu[];
 
 		// Menus.
 		static LSW_MENU_LAYOUT					m_miMenus[];

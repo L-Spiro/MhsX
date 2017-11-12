@@ -29,6 +29,8 @@
 "Open PE File"
 "All Executables (*.exe *.dll *.sys);;Executables (*.exe);;Dynamic-Link Libraries (*.dll);;System Files (*.sys)"
 "L. Spiro Memory Hacking Software X"
+"Found Addresses"
+"Expression Evaluator"
 "Windows 1.0"
 "Windows 2.0"
 "Windows 2.1x"

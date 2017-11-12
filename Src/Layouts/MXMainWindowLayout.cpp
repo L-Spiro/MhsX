@@ -92,7 +92,7 @@ namespace mx {
 			0,										// dwHeight
 			WS_CHILD | TBSTYLE_FLAT | TBSTYLE_TOOLTIPS | WS_CLIPCHILDREN |
 				WS_CLIPSIBLINGS | CCS_NODIVIDER | CCS_NORESIZE | WS_VISIBLE | CCS_ADJUSTABLE,		// dwStyle
-			0,																		// dwStyleEx
+			0,																						// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_MWI_MAINWINDOW,						// dwParentId
@@ -109,10 +109,10 @@ namespace mx {
 			255,									// dwWidth
 			110,									// dwHeight
 			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT,		// dwStyle
-			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,						// dwStyleEx
+			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,																				// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
-			MX_MWI_MAINWINDOW,							// dwParentId
+			MX_MWI_MAINWINDOW,						// dwParentId
 
 			MX_PARENT_VCLEFT,						// pcLeftSizeExp
 			MX_PARENT_VCRIGHT,						// pcRightSizeExp
@@ -201,6 +201,15 @@ namespace mx {
 		{ FALSE,		MX_MWMI_OPTIONS,			FALSE,		FALSE,		TRUE,		L"&Options" },
 	};
 
+	// Windows menu.
+	LSW_MENU_ITEM CMainWindowLayout::m_miWindowsMenu[]= {
+		//bIsSeperator	dwId						bCheckable	bChecked	bEnabled	
+		{ FALSE,		MX_MWMI_SHOW_EXPEVAL,		TRUE,		FALSE,		TRUE,		L"&Expression Evaluator" },
+		{ FALSE,		MX_MWMI_SHOWFOUNDADDR,		TRUE,		FALSE,		TRUE,		L"&Found Addresses" },
+		{ TRUE,			0,							FALSE,		FALSE,		TRUE,		nullptr },
+		{ FALSE,		MX_MWMI_SHOW_ALL,			TRUE,		FALSE,		TRUE,		L"Show &All" },
+	};
+
 	// Menus.
 	LSW_MENU_LAYOUT CMainWindowLayout::m_miMenus[] = {
 		{
@@ -231,6 +240,13 @@ namespace mx {
 			MX_ELEMENTS( m_miOptionsMenu ),
 			m_miOptionsMenu
 		},
+		{
+			MX_MWMI_MENU_WINDOW,
+			MX_MWMI_MENU_BAR,
+			MX_MWMI_WINDOW,
+			MX_ELEMENTS( m_miWindowsMenu ),
+			m_miWindowsMenu
+		},
 	};
 
 	// The class for the main window.
@@ -259,8 +275,6 @@ namespace mx {
 			sStringsW,
 			sStrings );
 
-		/*WCHAR szTempTitle[_LEN_BD5547E7+1];
-		_DEC_BD5547E7_L__Spiro_MHS_X( szTempTitle );*/
 		LSW_WIDGET_LAYOUT * _pwMain = CHelpers::FindLayout( &vLayouts[0], vLayouts.size(), MX_MWI_MAINWINDOW );
 
 		_pwMain->lpwcClass = reinterpret_cast<LPCWSTR>(m_aMainClass);

@@ -23,7 +23,7 @@ namespace lsw {
 
 		// == Functions.
 		// Creates a window with all of its controls.  Returns the main window widget.
-		CWidget *						CreateWindowX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, const LSW_MENU_LAYOUT * _pmlLayouts = nullptr, SIZE_T _sTotalMenus = 0 );
+		CWidget *						CreateWindowX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, const LSW_MENU_LAYOUT * _pmlLayouts = nullptr, SIZE_T _sTotalMenus = 0, CWidget * _pwParent = nullptr );
 
 		// Creates a modal dialog with all of its controls.  Returns the dialog exit value.
 		INT_PTR							DialogBoxX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent );

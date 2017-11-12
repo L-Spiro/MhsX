@@ -163,6 +163,12 @@
     <ClCompile Include="Src\MemHack\MXProcess.cpp">
       <Filter>Source Files\MemHack</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Layouts\MXFoundAddressLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\FoundAddresses\MXFoundAddressesWindow.cpp">
+      <Filter>Source Files\FoundAddresses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -244,6 +250,12 @@
     </ClInclude>
     <ClInclude Include="Src\MemHack\MXProcess.h">
       <Filter>Header Files\MemHack</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXFoundAddressLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\FoundAddresses\MXFoundAddressesWindow.h">
+      <Filter>Header Files\FoundAddresses</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

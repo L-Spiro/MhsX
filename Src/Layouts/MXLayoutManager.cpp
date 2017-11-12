@@ -1,4 +1,5 @@
 #include "MXLayoutManager.h"
+#include "../FoundAddresses/MXFoundAddressesWindow.h"
 #include "../Layouts/MXLayoutMacros.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../OpenProcess/MXOpenProcessWindow.h"
@@ -23,13 +24,16 @@ namespace mx {
 				return new COptionsWindow( _wlLayout, _pwParent, m_poOptions, _bCreateWidget, _hMenu );
 			}
 			case MX_OPTIONS_GENERAL : {
-				return new COptionsPageGeneral( _wlLayout, _pwParent, m_poOptions,  _bCreateWidget, _hMenu );
+				return new COptionsPageGeneral( _wlLayout, _pwParent, m_poOptions, _bCreateWidget, _hMenu );
 			}
 			case MX_OPTIONS_GENSEARCH : {
-				return new COptionsPageGenSearch( _wlLayout, _pwParent, m_poOptions,  _bCreateWidget, _hMenu );
+				return new COptionsPageGenSearch( _wlLayout, _pwParent, m_poOptions, _bCreateWidget, _hMenu );
 			}
 			case MX_OPTIONS_OPENPROC : {
-				return new COptionsPageOpenProc( _wlLayout, _pwParent, m_poOptions,  _bCreateWidget, _hMenu );
+				return new COptionsPageOpenProc( _wlLayout, _pwParent, m_poOptions, _bCreateWidget, _hMenu );
+			}
+			case MX_FOUND_ADDRESSES : {
+				return new CFoundAddressesWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu );
 			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu );
@@ -46,7 +50,7 @@ namespace mx {
 		size_t sStringWIndex = 0;
 		for ( size_t I = 0; I < _sTotal; ++I ) {
 			LSW_WIDGET_LAYOUT wlTemp = _pwlLayouts[I];
-			if ( wlTemp.pwcText ) {
+			if ( wlTemp.pwcText && wlTemp.sTextLen ) {
 				_vWStrings[sStringWIndex] = mx::CStringDecoder::DecodeToWString( reinterpret_cast<const char *>(wlTemp.pwcText), wlTemp.sTextLen );
 				wlTemp.pwcText = _vWStrings[sStringWIndex++].c_str();
 			}

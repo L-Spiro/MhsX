@@ -2,10 +2,12 @@
 #include <Base/LSWBase.h>
 #include <Base/LSWWndClassEx.h>
 #include <Images/LSWBitmap.h>
+#include "Layouts/MXFoundAddressLayout.h"
 #include "Layouts/MXLayoutManager.h"
 #include "Layouts/MXMainWindowLayout.h"
 #include "Layouts/MXOpenProcessLayout.h"
 #include <MainWindow/LSWMainWindow.h>
+#include "MainWindow/MXMhsMainWindow.h"
 #include "System/MXSystem.h"
 #include "Utilities/MXUtilities.h"
 
@@ -69,11 +71,14 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 		0,										// dwParentId
 	};
 	//lsw::CBase::LayoutManager()->CreateWindowX( &wlDock, 1, nullptr, 0 );
-	lsw::CBase::LayoutManager()->CreateWidget( lsw::CLayoutManager::FixLayout( wlDock ), mx::CMainWindowLayout::MainWindow(), true, NULL );
+	//lsw::CBase::LayoutManager()->CreateWidget( lsw::CLayoutManager::FixLayout( wlDock ), mx::CMainWindowLayout::MainWindow(), true, NULL );
 	wlDock.wId++;
 	wlDock.pwcText = L"Found Addresses";
 	wlDock.iLeft = 500;
 	//lsw::CBase::LayoutManager()->CreateWidget( lsw::CLayoutManager::FixLayout( wlDock ), mx::CMainWindowLayout::MainWindow(), true, NULL );
+
+	//mx::CFoundAddressLayout::CreateFoundAddressesWindow( mx::CMainWindowLayout::MainWindow() );
+	static_cast<mx::CMhsMainWindow *>(mx::CMainWindowLayout::MainWindow())->ShowFoundAddress();
 
 	/*WCHAR szBuffer[MAX_PATH];
 	::GetCurrentDirectoryW( MAX_PATH, szBuffer );*/
