@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../ExpEval/MXExpEvalWindow.h"
 #include "../FoundAddresses/MXFoundAddressesWindow.h"
 #include "../MemHack/MXMemHack.h"
 
@@ -50,7 +51,7 @@ namespace mx {
 		virtual LSW_HANDLED					InitDialog();
 
 		// WM_COMMAND from control.
-		virtual LSW_HANDLED					Command( WORD _Id, HWND _hControl );
+		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc );
 
 		// WM_COMMAND from menu.
 		virtual LSW_HANDLED					MenuCommand( WORD _Id );
@@ -79,6 +80,9 @@ namespace mx {
 		// Shows the Found Address dockable.
 		void								ShowFoundAddress();
 
+		// Shows the Expression Evaluator dockable.
+		void								ShowExpEval();
+
 
 	protected :
 		// == Members.
@@ -96,6 +100,9 @@ namespace mx {
 
 		// The Found Address dockable.
 		CFoundAddressesWindow *				m_pfaFoundAddresses;
+
+		// The Expression Evaluator dockable.
+		CExpEvalWindow *					m_eeExpEval;
 
 
 		// == Functions.

@@ -157,9 +157,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Src\CodePages\MXCodePages.cpp" />
+    <ClCompile Include="Src\ExpEval\MXExpEvalWindow.cpp" />
     <ClCompile Include="Src\Files\MXFile.cpp" />
     <ClCompile Include="Src\Files\MXFileMap.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressesWindow.cpp" />
+    <ClCompile Include="Src\Layouts\MXExpressionEvaluatorLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXFoundAddressLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXLayoutManager.cpp" />
     <ClCompile Include="Src\Layouts\MXMainWindowLayout.cpp" />
@@ -184,7 +186,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\CodePages\MXCodePages.h" />
+    <ClInclude Include="Src\ExpEval\MXExpEvalWindow.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressesWindow.h" />
+    <ClInclude Include="Src\Layouts\MXExpressionEvaluatorLayout.h" />
     <ClInclude Include="Src\Layouts\MXFoundAddressLayout.h" />
     <ClInclude Include="Src\Layouts\MXLayoutMacros.h" />
     <ClInclude Include="Src\Layouts\MXLayoutManager.h" />

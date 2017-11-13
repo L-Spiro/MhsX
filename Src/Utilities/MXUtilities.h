@@ -2,6 +2,8 @@
 
 #include <LSWWin.h>
 #include "../PE/MXPeStructs.h"
+
+#include <EEExpEvalContainer.h>
 #include <string>
 
 // == Macros.
@@ -189,6 +191,18 @@ namespace mx {
 		// Creates an unsigned integer string.
 		static const WCHAR *			ToUnsigned( uint64_t _uiValue, std::wstring &_sString, uint32_t _uiNumDigits = 0 );
 
+		// Creates a signed integer string.
+		static const CHAR *				ToSigned( int64_t _iValue, CHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits = 0 );
+
+		// Creates a signed integer string.
+		static const CHAR *				ToSigned( int64_t _iValue, std::string &_sString, uint32_t _uiNumDigits = 0 );
+
+		// Creates an signed integer string.
+		static const WCHAR *			ToSigned( int64_t _iValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits = 0 );
+
+		// Creates an signed integer string.
+		static const WCHAR *			ToSigned( int64_t _iValue, std::wstring &_sString, uint32_t _uiNumDigits = 0 );
+
 		// Creates a double string.
 		static const CHAR *				ToDouble( double _dValue, std::string &_sString );
 
@@ -239,6 +253,9 @@ namespace mx {
 
 		// Gets the number of elements in DataTypeInfo.
 		static size_t					DataTypeInfoLen();
+
+		// Prints an ee::CExpEvalContainer::EE_RESULT value.
+		static std::string &			PrintExpResult( const ee::CExpEvalContainer::EE_RESULT &_rResult, std::string &_sString );
 
 
 		// == Members.

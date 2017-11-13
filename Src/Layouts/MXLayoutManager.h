@@ -15,6 +15,7 @@ namespace mx {
 		MX_OPTIONS_GENSEARCH,
 		MX_OPTIONS_OPENPROC,
 		MX_FOUND_ADDRESSES,
+		MX_EXP_EVAL,
 	};
 
 	class CLayoutManager : public lsw::CLayoutManager {

@@ -108,7 +108,7 @@ namespace lsw {
 		virtual BOOL						SetTextW( LPCWSTR _lpwString ) { return ::SetWindowTextW( Wnd(), _lpwString ); }
 
 		// Get the value of the text as an expression.
-		BOOL								GetTextAsExpression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const;
+		BOOL								GetTextAsExpression( ee::CExpEvalContainer::EE_RESULT &_eResult, BOOL * _pbExpIsValid = nullptr ) const;
 
 		// Get the value of the text as an int64_t expression.
 		BOOL								GetTextAsInt64Expression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const;
@@ -154,6 +154,9 @@ namespace lsw {
 		// Starting window rectangle.
 		virtual const LSW_RECT &			StartRect() const { return m_rStartingRect; }
 
+		// This control's starting window rectangle relative to its parent's starting client rectangle.
+		virtual const LSW_RECT &			StartClientRect() const { return m_rStartingClientRect; }
+
 		// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
 		virtual const LSW_RECT				VirtualClientRect() const { LSW_RECT rTemp; ::GetClientRect( Wnd(), &rTemp ); return rTemp; }
 
@@ -196,6 +199,9 @@ namespace lsw {
 
 		// Original rectangle.
 		LSW_RECT							m_rStartingRect;
+
+		// This object's starting window rect in relationship with the parent's starting client rect.
+		LSW_RECT							m_rStartingClientRect;
 
 		// Extended styles.
 		DWORD								m_dwExtendedStyles;
@@ -266,7 +272,7 @@ namespace lsw {
 		virtual LSW_HANDLED					WindowPosChanged( const WINDOWPOS * _pwpPos ) { return LSW_H_CONTINUE; }
 
 		// WM_COMMAND from control.
-		virtual LSW_HANDLED					Command( WORD _Id, HWND _hControl ) { return LSW_H_CONTINUE; }
+		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc ) { return LSW_H_CONTINUE; }
 
 		// WM_COMMAND from menu.
 		virtual LSW_HANDLED					MenuCommand( WORD _Id ) { return LSW_H_CONTINUE; }
@@ -282,6 +288,9 @@ namespace lsw {
 
 		// WM_ERASEBKGND.
 		virtual LSW_HANDLED					EraseBkgnd( HDC _hDc ) { return LSW_H_CONTINUE; }
+
+		// WM_CTLCOLORSTATIC.
+		virtual LSW_HANDLED					CtlColorStatic( HDC _hDc, CWidget * _pwControl, HBRUSH &_hBrush ) { return LSW_H_CONTINUE; }
 
 		// WM_ACTIVATE.
 		virtual LSW_HANDLED					Activate( BOOL _bMinimized, WORD _wActivationMode, CWidget * _pwWidget ) { return LSW_H_CONTINUE; }

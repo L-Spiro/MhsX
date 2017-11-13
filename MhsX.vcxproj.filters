@@ -169,6 +169,12 @@
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressesWindow.cpp">
       <Filter>Source Files\FoundAddresses</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Layouts\MXExpressionEvaluatorLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ExpEval\MXExpEvalWindow.cpp">
+      <Filter>Source Files\ExpEval</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -256,6 +262,12 @@
     </ClInclude>
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressesWindow.h">
       <Filter>Header Files\FoundAddresses</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXExpressionEvaluatorLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ExpEval\MXExpEvalWindow.h">
+      <Filter>Header Files\ExpEval</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

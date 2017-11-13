@@ -53,7 +53,7 @@ namespace mx {
 	}
 
 	// WM_COMMAND from control.
-	CWidget::LSW_HANDLED COptionsPageGeneral::Command( WORD _Id, HWND _hControl ) {
+	CWidget::LSW_HANDLED COptionsPageGeneral::Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc ) {
 		UpdateExample();
 		return LSW_H_CONTINUE;
 	}

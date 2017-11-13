@@ -86,7 +86,7 @@ namespace mx {
 	};
 
 	// General section.
-#define MX_ROW_HEIGHT					(MX_DEF_COMBO_HEIGHT + 3)
+#define MX_ROW_HEIGHT					(MX_DEF_COMBO_HEIGHT + 2)
 #define MX_REFRESH_RATES_GROUP_HEIGHT	(MX_GROUP_TOP + (MX_ROW_HEIGHT * 4) + MX_GROUP_BOTTOM - 2)
 #define MX_TPS_W						54
 #define MX_TPS_L						(MX_OD_W - MX_GROUP_RIGHT - MX_TPS_W)
@@ -622,8 +622,8 @@ namespace mx {
 			MX_BUFFER_GROUP_TOP + MX_GROUP_TOP,		// iTop
 			(MX_OD_W - MX_GROUP_RIGHT) - (MX_OD_W / 2),																									// dwWidth
 			MX_DEF_EDIT_HEIGHT,						// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | WS_GROUP | ES_LEFT | ES_AUTOHSCROLL,																// dwStyle
-			WS_EX_CLIENTEDGE,																															// dwStyleEx
+			MX_EDITSTYLE,							// dwStyle
+			WS_EX_CLIENTEDGE,						// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId

@@ -42,7 +42,7 @@ namespace mx {
 		virtual LSW_HANDLED					Close();
 
 		// WM_COMMAND from control.
-		virtual LSW_HANDLED					Command( WORD _Id, HWND _hControl );
+		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc );
 
 		// Main process list.
 		VOID								MainList();

@@ -42,6 +42,30 @@ namespace lsw {
 			::ClientToScreen( _hWnd, &pTemp );
 			return pTemp;
 		}
+		LSW_RECT							ClientToScreen( HWND _hWnd ) const {
+			LSW_RECT rTemp = (*this);
+			POINT pUl = rTemp.UpperLeft();
+			POINT pBr = rTemp.BottomRight();
+			::ClientToScreen( _hWnd, &pUl );
+			::ClientToScreen( _hWnd, &pBr );
+			rTemp.left = pUl.x;
+			rTemp.right = pBr.x;
+			rTemp.top = pUl.y;
+			rTemp.bottom = pBr.y;
+			return rTemp;
+		}
+		LSW_RECT							ScreenToClient( HWND _hWnd ) const {
+			LSW_RECT rTemp = (*this);
+			POINT pUl = rTemp.UpperLeft();
+			POINT pBr = rTemp.BottomRight();
+			::ScreenToClient( _hWnd, &pUl );
+			::ScreenToClient( _hWnd, &pBr );
+			rTemp.left = pUl.x;
+			rTemp.right = pBr.x;
+			rTemp.top = pUl.y;
+			rTemp.bottom = pBr.y;
+			return rTemp;
+		}
 	};
 
 	struct LSW_HANDLE {

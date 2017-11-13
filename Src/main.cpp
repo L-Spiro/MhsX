@@ -79,6 +79,7 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 
 	//mx::CFoundAddressLayout::CreateFoundAddressesWindow( mx::CMainWindowLayout::MainWindow() );
 	static_cast<mx::CMhsMainWindow *>(mx::CMainWindowLayout::MainWindow())->ShowFoundAddress();
+	static_cast<mx::CMhsMainWindow *>(mx::CMainWindowLayout::MainWindow())->ShowExpEval();
 
 	/*WCHAR szBuffer[MAX_PATH];
 	::GetCurrentDirectoryW( MAX_PATH, szBuffer );*/

@@ -37,7 +37,7 @@ namespace mx {
 	}
 
 	// WM_COMMAND from control.
-	CWidget::LSW_HANDLED COptionsWindow::Command( WORD _Id, HWND _hControl ) {
+	CWidget::LSW_HANDLED COptionsWindow::Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc ) {
 		switch ( _Id ) {
 			case COptionsLayout::MX_OI_LIST : {
 				CListBox * plbBox = ListBox();

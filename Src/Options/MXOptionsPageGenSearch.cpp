@@ -74,7 +74,7 @@ namespace mx {
 	}
 
 	// WM_COMMAND from control.
-	CWidget::LSW_HANDLED COptionsPageGenSearch::Command( WORD _Id, HWND _hControl ) {
+	CWidget::LSW_HANDLED COptionsPageGenSearch::Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc ) {
 		if ( !m_poOptions ) { return LSW_H_CONTINUE; }
 		ApplySettings();
 		return LSW_H_CONTINUE;

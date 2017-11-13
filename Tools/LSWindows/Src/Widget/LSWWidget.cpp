@@ -19,6 +19,7 @@ namespace lsw {
 		m_rStartingRect.top = _wlLayout.iTop;
 		m_rStartingRect.SetWidth( _wlLayout.dwWidth );
 		m_rStartingRect.SetHeight( _wlLayout.dwHeight );
+		m_rStartingClientRect = m_rStartingRect;
 
 		m_dwExtendedStyles = _wlLayout.dwStyleEx;
 
@@ -33,6 +34,7 @@ namespace lsw {
 				(_wlLayout.dwStyle & WS_CHILD) ? reinterpret_cast<HMENU>(static_cast<UINT_PTR>(_wlLayout.wId)) : _hMenu,
 				CBase::GetThisHandle(),
 				static_cast<CWidget *>(this) );
+			UpdateRects();
 		}
 
 		if ( _pwParent != nullptr ) {
@@ -137,12 +139,14 @@ namespace lsw {
 	}
 
 	// Get the value of the text as an expression.
-	BOOL CWidget::GetTextAsExpression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const {
+	BOOL CWidget::GetTextAsExpression( ee::CExpEvalContainer::EE_RESULT &_eResult, BOOL * _pbExpIsValid ) const {
+		if ( _pbExpIsValid ) { (*_pbExpIsValid) = FALSE; }
 		CExpression eExp;
 		std::string sText = GetTextA();
 		if ( sText.size() == 0 ) { return FALSE; }
 		if ( !eExp.SetExpression( sText.c_str() ) ) { return FALSE; }
 		if ( !eExp.GetContainer() ) { return FALSE; }
+		if ( _pbExpIsValid ) { (*_pbExpIsValid) = TRUE; }
 		if ( !eExp.GetContainer()->Resolve( _eResult ) ) { return FALSE; }
 		return TRUE;
 	}
@@ -192,6 +196,14 @@ namespace lsw {
 		/*::GetWindowRect( Wnd(), &m_rRect );
 		::GetClientRect( Wnd(), &m_rClientRect );*/
 		::GetWindowRect( Wnd(), &m_rStartingRect );
+		//::GetClientRect( Wnd(), &m_rStartingClientRect );
+		::GetWindowRect( Wnd(), &m_rStartingClientRect );
+		if ( Parent() ) {
+			LSW_RECT rPar = Parent()->ClientRect().ClientToScreen( Parent()->Wnd() );
+			m_rStartingClientRect.MoveBy( { -rPar.left, -rPar.top } );
+		}
+		//m_rStartingClientRect = m_rStartingClientRect.ClientToScreen( Wnd() );
+		//m_rStartingClientRect.MoveBy( { -m_rStartingRect.left, -m_rStartingRect.top } );
 	}
 
 	// Do we have a given child widget?
@@ -718,6 +730,45 @@ namespace lsw {
 				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect().BottomRightClientToScreen( pwThis->Wnd() ).y);
 				return true;
 			}
+			// =======================================
+			// STARTING CLIENT RECT.
+			// =======================================
+			if ( ::_stricmp( _sMember.c_str(), "SCW" ) == 0 ) {
+				// Accessing this client width.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartClientRect().Width());
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "SCH" ) == 0 ) {
+				// Accessing this client height.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartClientRect().Height());
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "SCL" ) == 0 ) {
+				// Accessing this client left.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartClientRect().UpperLeftClientToScreen( pwThis->Wnd() ).x);
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "SCR" ) == 0 ) {
+				// Accessing this client right.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartClientRect().BottomRightClientToScreen( pwThis->Wnd() ).x);
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "SCT" ) == 0 ) {
+				// Accessing this client top.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartClientRect().top);
+				return true;
+			}
+			if ( ::_stricmp( _sMember.c_str(), "SCB" ) == 0 ) {
+				// Accessing this client bottom.
+				_rResult.ncType = ee::EE_NC_SIGNED;
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartClientRect().BottomRightClientToScreen( pwThis->Wnd() ).y);
+				return true;
+			}
 		}
 
 		return false;
@@ -728,6 +779,14 @@ namespace lsw {
 		/*::GetWindowRect( _pwParent->Wnd(), &_pwParent->m_rRect );
 		::GetClientRect( _pwParent->Wnd(), &_pwParent->m_rClientRect );*/
 		::GetWindowRect( _pwParent->Wnd(), &_pwParent->m_rStartingRect );
+		::GetWindowRect( _pwParent->Wnd(), &_pwParent->m_rStartingClientRect );
+		if ( _pwParent->Parent() ) {
+			LSW_RECT rPar = _pwParent->Parent()->ClientRect().ClientToScreen( _pwParent->Parent()->Wnd() );
+			_pwParent->m_rStartingClientRect.MoveBy( { -rPar.left, -rPar.top } );
+		}
+		/*::GetClientRect( _pwParent->Wnd(), &_pwParent->m_rStartingClientRect );
+		_pwParent->m_rStartingClientRect = _pwParent->m_rStartingClientRect.ClientToScreen( _pwParent->Wnd() );
+		_pwParent->m_rStartingClientRect.MoveBy( { -_pwParent->m_rStartingRect.left, -_pwParent->m_rStartingRect.top } );*/
 
 		::EnumChildWindows( _pwParent->Wnd(), EnumChildWindows_AttachWindowToWidget, reinterpret_cast<LPARAM>(&_vWidgetList) );
 		::EnumChildWindows( _pwParent->Wnd(), EnumChildWindows_SetEnabled, reinterpret_cast<LPARAM>(&_vWidgetList) );
@@ -866,7 +925,8 @@ namespace lsw {
 				WORD wId = LOWORD( _wParam );
 				if ( _lParam ) {
 					// Sent by a control.
-					hHandled = pmwThis->Command( wId, reinterpret_cast<HWND>(_lParam) );
+					CWidget * pwSrc = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( reinterpret_cast<HWND>(_lParam), GWLP_USERDATA ));
+					hHandled = pmwThis->Command( HIWORD( _wParam ), wId, pwSrc );
 				}
 				else {
 					// Sent by a menu or accelerator.
@@ -979,6 +1039,13 @@ namespace lsw {
 			case WM_ERASEBKGND : {
 				LSW_HANDLED hHandled = pmwThis->EraseBkgnd( reinterpret_cast<HDC>(_wParam) );
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 1, 1 ); }
+				break;
+			}
+			case WM_CTLCOLORSTATIC : {
+				HBRUSH hBrush = NULL;
+				CWidget * pwControl = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( reinterpret_cast<HWND>(_lParam), GWLP_USERDATA ));
+				LSW_HANDLED hHandled = pmwThis->CtlColorStatic( reinterpret_cast<HDC>(_wParam), pwControl, hBrush );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( reinterpret_cast<LRESULT>(hBrush), reinterpret_cast<INT_PTR>(hBrush) ); }
 				break;
 			}
 			// =======================================

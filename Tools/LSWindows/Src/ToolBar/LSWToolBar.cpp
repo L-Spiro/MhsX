@@ -139,7 +139,7 @@ namespace lsw {
 	BOOL CToolBar::AddButtons( const TBBUTTON * _pbButtons, size_t _sTotal ) {
 		if ( !Wnd() ) { return FALSE; }
 		::SendMessageW( Wnd(), TB_BUTTONSTRUCTSIZE, sizeof( (*_pbButtons) ), 0L );
-		BOOL bRet = static_cast<BOOL>(::SendMessageW( Wnd(), TB_ADDBUTTONS, static_cast<WPARAM>(_sTotal), reinterpret_cast<LPARAM>(_pbButtons) ));
+		BOOL bRet = static_cast<BOOL>(::SendMessageW( Wnd(), TB_ADDBUTTONSW, static_cast<WPARAM>(_sTotal), reinterpret_cast<LPARAM>(_pbButtons) ));
 		if ( bRet ) {
 			for ( size_t I = 0; I < _sTotal; ++I ) {
 				m_vButtons.push_back( (*_pbButtons++) );

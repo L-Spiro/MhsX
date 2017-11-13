@@ -1,4 +1,5 @@
 #include "MXLayoutManager.h"
+#include "../ExpEval/MXExpEvalWindow.h"
 #include "../FoundAddresses/MXFoundAddressesWindow.h"
 #include "../Layouts/MXLayoutMacros.h"
 #include "../MainWindow/MXMhsMainWindow.h"
@@ -34,6 +35,9 @@ namespace mx {
 			}
 			case MX_FOUND_ADDRESSES : {
 				return new CFoundAddressesWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu );
+			}
+			case MX_EXP_EVAL : {
+				return new CExpEvalWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu );
 			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu );

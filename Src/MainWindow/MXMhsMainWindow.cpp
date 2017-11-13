@@ -1,4 +1,5 @@
 #include "MXMhsMainWindow.h"
+#include "../Layouts/MXExpressionEvaluatorLayout.h"
 #include "../Layouts/MXFoundAddressLayout.h"
 #include "../Layouts/MXMainWindowLayout.h"
 #include "../Layouts/MXOpenProcessLayout.h"
@@ -14,7 +15,8 @@ namespace mx {
 
 	CMhsMainWindow::CMhsMainWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
 		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu ),
-		m_pfaFoundAddresses( nullptr ) {
+		m_pfaFoundAddresses( nullptr ),
+		m_eeExpEval( nullptr ) {
 
 		m_pmhMemHack = new CMemHack();
 
@@ -156,7 +158,7 @@ namespace mx {
 	}
 
 	// WM_COMMAND from control.
-	CWidget::LSW_HANDLED CMhsMainWindow::Command( WORD _Id, HWND _hControl ) {
+	CWidget::LSW_HANDLED CMhsMainWindow::Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc ) {
 		switch ( _Id ) {
 			case CMainWindowLayout::MX_MWMI_OPENPROCESS : {
 				MX_OPTIONS oOptions = m_pmhMemHack->Options();
@@ -188,8 +190,13 @@ namespace mx {
 				ShowFoundAddress();
 				break;
 			}
+			case CMainWindowLayout::MX_MWMI_SHOW_EXPEVAL : {
+				ShowExpEval();
+				break;
+			}
 			case CMainWindowLayout::MX_MWMI_SHOW_ALL : {
 				ShowFoundAddress();
+				ShowExpEval();
 				break;
 			}
 		}
@@ -198,7 +205,7 @@ namespace mx {
 
 	// WM_COMMAND from menu.
 	CWidget::LSW_HANDLED CMhsMainWindow::MenuCommand( WORD _Id ) {
-		return Command( _Id, NULL );
+		return Command( 0, _Id, NULL );
 	}
 
 	// WM_ERASEBKGND.
@@ -260,10 +267,25 @@ namespace mx {
 		UpdateWindowChecks();
 	}
 
+	// Shows the Expression Evaluator dockable.
+	void CMhsMainWindow::ShowExpEval() {
+		if ( !m_eeExpEval ) {
+			m_eeExpEval = static_cast<CExpEvalWindow *>(CExpressionEvaluatorLayout::CreateExpEvalWindow( this ));
+		}
+		else {
+			m_eeExpEval->SetVisible( TRUE );
+		}
+		UpdateWindowChecks();
+	}
+
 	// Remove a child.
 	void CMhsMainWindow::RemoveChild( const CWidget * _pwChild ) {
 		if ( m_pfaFoundAddresses && static_cast<CWidget *>(m_pfaFoundAddresses) == _pwChild ) {
 			m_pfaFoundAddresses = nullptr;
+			UpdateWindowChecks();
+		}
+		if ( m_eeExpEval && static_cast<CWidget *>(m_eeExpEval) == _pwChild ) {
+			m_eeExpEval = nullptr;
 			UpdateWindowChecks();
 		}
 		CMainWindow::RemoveChild( _pwChild );
@@ -275,6 +297,7 @@ namespace mx {
 		if ( hMenu ) {
 			//BOOL bCheck = m_pfaFoundAddresses && m_pfaFoundAddresses->
 			::CheckMenuItem( hMenu, CMainWindowLayout::MX_MWMI_SHOWFOUNDADDR, m_pfaFoundAddresses ? MF_CHECKED : MF_UNCHECKED );
+			::CheckMenuItem( hMenu, CMainWindowLayout::MX_MWMI_SHOW_EXPEVAL, m_eeExpEval ? MF_CHECKED : MF_UNCHECKED );
 		}
 	}
 

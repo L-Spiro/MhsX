@@ -723,12 +723,48 @@ namespace mx {
 		return _sString.c_str();
 	}
 
+	// Creates a signed integer string.
+	const CHAR * CUtilities::ToSigned( int64_t _iValue, CHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
+		_uiNumDigits = std::max( _uiNumDigits, 1U );
+		CHAR szFormat[32];
+		::sprintf_s( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64d", _uiNumDigits );
+		::sprintf_s( _pcRet, _sLen, szFormat, _iValue );
+		return _pcRet;
+	}
+
+	// Creates a signed integer string.
+	const CHAR * CUtilities::ToSigned( int64_t _iValue, std::string &_sString, uint32_t _uiNumDigits ) {
+		CHAR szTemp[32];
+		ToSigned( _iValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits );
+
+		_sString += szTemp;
+		return _sString.c_str();
+	}
+
+	// Creates an signed integer string.
+	const WCHAR * CUtilities::ToSigned( int64_t _iValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
+		_uiNumDigits = std::max( _uiNumDigits, 1U );
+		WCHAR szFormat[32];
+		::swprintf_s( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64d", _uiNumDigits );
+		::swprintf_s( _pcRet, _sLen, szFormat, _iValue );
+		return _pcRet;
+	}
+
+	// Creates an signed integer string.
+	const WCHAR * CUtilities::ToSigned( int64_t _iValue, std::wstring &_sString, uint32_t _uiNumDigits ) {
+		WCHAR szTemp[32];
+		ToSigned( _iValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits );
+
+		_sString += szTemp;
+		return _sString.c_str();
+	}
+
 	// Creates a double string.
 	const CHAR * CUtilities::ToDouble( double _dValue, std::string &_sString ) {
 		const size_t sLen = 2049;
 		CHAR * pcBuffer = new CHAR[sLen];
 		if ( !pcBuffer ) { return nullptr; }
-		int iLen = ::sprintf_s( pcBuffer, sLen, "%.400f", _dValue );
+		int iLen = ::sprintf_s( pcBuffer, sLen, "%.2000f", _dValue );
 		_sString.append( pcBuffer, iLen );
 		delete [] pcBuffer;
 		pcBuffer = nullptr;
@@ -953,6 +989,42 @@ namespace mx {
 	// Gets the number of elements in DataTypeInfo.
 	size_t CUtilities::DataTypeInfoLen() {
 		return MX_ELEMENTS( DataTypeInfo );
+	}
+
+	// Prints an ee::CExpEvalContainer::EE_RESULT value.
+	std::string & CUtilities::PrintExpResult( const ee::CExpEvalContainer::EE_RESULT &_rResult, std::string &_sString ) {
+		switch ( _rResult.ncType ) {
+			case ee::EE_NC_SIGNED : {
+				ToSigned( _rResult.u.i64Val, _sString );
+				_sString.push_back( ' ' );
+				_sString.push_back( '(' );
+				ToHex( _rResult.u.i64Val, _sString, 1 );
+				if ( _rResult.u.i64Val < 0 ) {
+					_sString.push_back( ',' );
+					_sString.push_back( ' ' );
+					_sString.push_back( '-' );
+					ToHex( -_rResult.u.i64Val, _sString, 1 );
+				}
+				_sString.push_back( ')' );
+				break;
+			}
+			case ee::EE_NC_UNSIGNED : {
+				ToUnsigned( _rResult.u.ui64Val, _sString );
+				_sString.push_back( ' ' );
+				_sString.push_back( '(' );
+				ToHex( _rResult.u.ui64Val, _sString, 1 );
+				_sString.push_back( ')' );
+				break;
+			}
+			case ee::EE_NC_FLOATING : {
+				ToDouble( _rResult.u.dVal, _sString );
+				break;
+			}
+			default : {
+				_sString.append( _DEC_S_3424431C_Invalid );
+			}
+		}
+		return _sString;
 	}
 
 }	// namespace mx

@@ -37,7 +37,7 @@ namespace mx {
 	}
 
 	// WM_COMMAND from control.
-	CWidget::LSW_HANDLED COptionsPageOpenProc::Command( WORD _Id, HWND _hControl ) {
+	CWidget::LSW_HANDLED COptionsPageOpenProc::Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc ) {
 		if ( !m_poOptions ) {
 			CheckAll();
 			return LSW_H_CONTINUE;
