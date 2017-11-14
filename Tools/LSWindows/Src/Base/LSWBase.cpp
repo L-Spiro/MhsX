@@ -34,9 +34,12 @@ namespace lsw {
 	// The dockable class.
 	ATOM CBase::m_aDockable = 0;
 
+	// The splitter class.
+	ATOM CBase::m_aSplitter = 0;
+
 	// == Functions.
 	// Initialize.
-	VOID CBase::Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan, const WCHAR * _pwcDockableClassName ) {
+	VOID CBase::Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan, const WCHAR * _pwcDockableClassName, const WCHAR * _pwcSplitterClassName ) {
 		m_hInstance = _hInst;
 		m_plmLayoutMan = _plmLayoutMan;
 
@@ -64,6 +67,17 @@ namespace lsw {
 			wceDock.SetBackgroundBrush( reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1) );
 			wceDock.SetWindPro( CDockable::WindowProc );
 			m_aDockable = CBase::RegisterClassExW( wceDock.Obj() );
+		}
+
+		// Register the splitter class.
+		if ( _pwcDockableClassName ) {
+			lsw::CWndClassEx wceSplitter;
+			wceSplitter.SetInstance( GetThisHandle() );
+			wceSplitter.SetClassName( _pwcDockableClassName );
+			wceSplitter.SetStyle( 0 );
+			wceSplitter.SetBackgroundBrush( reinterpret_cast<HBRUSH>(COLOR_3DFACE + 1) );
+			wceSplitter.SetWindPro( CDockable::WindowProc );
+			m_aSplitter = CBase::RegisterClassExW( wceSplitter.Obj() );
 		}
 	}
 

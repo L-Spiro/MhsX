@@ -147,6 +147,12 @@
     <Filter Include="Source Files\Brush">
       <UniqueIdentifier>{35e63e3b-8c7f-40f8-ad31-a5b42cbf8571}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Splitter">
+      <UniqueIdentifier>{e88adbf0-88a9-4be6-b113-c0c848d791a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Splitter">
+      <UniqueIdentifier>{d41af4ab-d9d6-41e3-8b1a-0a736cc8e7b7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -242,6 +248,9 @@
     <ClInclude Include="Src\Brush\LSWBrush.h">
       <Filter>Header Files\Brush</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Splitter\LSWSplitter.h">
+      <Filter>Header Files\Splitter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -312,6 +321,9 @@
     </ClCompile>
     <ClCompile Include="Src\Brush\LSWBrush.cpp">
       <Filter>Source Files\Brush</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Splitter\LSWSplitter.cpp">
+      <Filter>Source Files\Splitter</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

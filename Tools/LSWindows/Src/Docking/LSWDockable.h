@@ -119,6 +119,9 @@ namespace lsw {
 		// The dragging rectangle.
 		static LSW_RECT						m_rDragPlacementRect;
 
+		// The original rectangle of the window at the time drawgging began.
+		static LSW_RECT						m_rDragStartRect;
+
 		// The widget being dragged.
 		static CWidget *					m_pwDraggingDockWnd;
 
@@ -127,6 +130,9 @@ namespace lsw {
 
 		// The mouse position.
 		static POINT						m_pMousePos;
+
+		// The position of starting a drag.
+		static POINT						m_pDragStartPos;
 
 		// Has the mouse moved?
 		static BOOL							m_bMouseMoved;

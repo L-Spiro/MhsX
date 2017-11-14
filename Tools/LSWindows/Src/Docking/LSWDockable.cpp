@@ -11,6 +11,9 @@ namespace lsw {
 	// The dragging rectangle.
 	LSW_RECT CDockable::m_rDragPlacementRect;
 
+	// The original rectangle of the window at the time drawgging began.
+	LSW_RECT CDockable::m_rDragStartRect;
+
 	// The widget being dragged.
 	CWidget * CDockable::m_pwDraggingDockWnd = nullptr;
 
@@ -19,6 +22,9 @@ namespace lsw {
 
 	// The mouse position.
 	POINT CDockable::m_pMousePos = { 0, 0 };
+
+	// The position of starting a drag.
+	POINT CDockable::m_pDragStartPos = { 0, 0 };
 
 	// Has the mouse moved?
 	BOOL CDockable::m_bMouseMoved = FALSE;
@@ -29,7 +35,7 @@ namespace lsw {
 	CDockable::CDockable( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
 		CWidget( _wlLayout.ChangeStyle( LSW_POPUP_STYLES | (_wlLayout.dwStyle & WS_VISIBLE) ).ChangeStyleEx( LSW_POPUP_STYLESEX ).ChangeClass( reinterpret_cast<LPCWSTR>(CBase::DockableAtom()) ), _pwParent, _bCreateWidget, _hMenu ),
 		m_dwState( LSW_DS_FLOATING ),
-		m_dwDockStyle( 0/*LSW_DS_ALLOW_DOCKALL*/ ),
+		m_dwDockStyle( LSW_DS_ALLOW_DOCKALL ),
 		m_iFrameWidth( 0 ),
 		m_iFrameHeight( 0 ),
 		m_dwDockSize( 0 ) {
@@ -120,7 +126,7 @@ namespace lsw {
 					// of the drag rectangle to fill that dockable area
 					if ( m_ddrtDragRectType == LSW_DDRT_SOLID ) {
 
-						LSW_RECT rParCient = Parent()->ClientRect().MapToDeskTop( Parent()->Wnd() );
+						LSW_RECT rParCient = Parent()->VirtualClientRect().MapToDeskTop( Parent()->Wnd() );
 
 						switch ( dsDockSide ) {
 							case LSW_DS_DOCKED_LEFT : {
@@ -167,6 +173,7 @@ namespace lsw {
 					BOOL bControlKeyDown = (::GetKeyState( VK_CONTROL ) & 0x8000) ? TRUE : FALSE;
 
 					::GetCursorPos( &m_pMousePos );
+					m_pDragStartPos = m_pMousePos;
 
 					// Bring to the top.
 					::SetWindowPos( Wnd(), HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE );
@@ -181,6 +188,7 @@ namespace lsw {
 					m_hOrigDockHookProc = ::SetWindowsHookExW( WH_KEYBOARD, KeyboardProc, lsw::CBase::GetThisHandle(), 0 ); 
 
 					::GetWindowRect( Wnd(), &m_rDragPlacementRect );
+					m_rDragStartRect = m_rDragPlacementRect;
 
 					// TODO: Check this logic.
 					m_ddrtDragRectType = (m_dwState > 0) ? LSW_DDRT_SOLID : LSW_DDRT_CHECKERED;
@@ -298,50 +306,42 @@ namespace lsw {
 		// The size of the drag rectangle should now be the size of the Docking
 		// Frame when it is not docked (ie, floating). The drag rectangle should
 		// be centered around the current position of the mouse pointer
-		m_rDragPlacementRect.left = m_pMousePos.x - (m_iFrameWidth >> 1);
-		m_rDragPlacementRect.left = std::max( m_rDragPlacementRect.left, 0L );
-
-		m_rDragPlacementRect.top = m_pMousePos.y - (m_iFrameHeight >> 1);
-		m_rDragPlacementRect.top = std::max( m_rDragPlacementRect.top, 0L );
-
-		m_rDragPlacementRect.right = m_rDragPlacementRect.left + m_iFrameWidth;
-		m_rDragPlacementRect.bottom = m_rDragPlacementRect.top + m_iFrameHeight;
+		m_rDragPlacementRect = m_rDragStartRect;
+		m_rDragPlacementRect.MoveBy( { m_pMousePos.x - m_pDragStartPos.x, m_pMousePos.y - m_pDragStartPos.y } );
 	
 		// ===========================================================
 		// Check if the drag rectangle has moved into a dockable area.
 		// ===========================================================
 		const CWidget * pwContainer = Parent();
 		if ( !pwContainer ) { return static_cast<LSW_DOCK_STATE>(0); }
-		LSW_RECT rPrc1 = pwContainer->WindowRect();
-		LSW_RECT rPrc2 = pwContainer->ClientRect().MapToDeskTop( pwContainer->Wnd() );
-		::InflateRect( &rPrc2, -2 , -2 );
+		LSW_RECT rPrc2 = pwContainer->VirtualClientRect().MapToDeskTop( pwContainer->Wnd() );
 	
 
 		LSW_DOCK_STATE dsDockSide = LSW_DS_FLOATING;
 
-		// If outside of the container frame, then floating.
-		if ( m_rDragPlacementRect.left >= rPrc1.left && m_rDragPlacementRect.right <= rPrc1.right &&
-			m_rDragPlacementRect.top >= rPrc1.top && m_rDragPlacementRect.bottom <= rPrc1.bottom ) {
-			// Check intersection at bottom
-			if ( m_rDragPlacementRect.bottom > rPrc2.bottom && (m_dwDockStyle & LSW_DS_ALLOW_DOCKBOTTOM) ) {
-				dsDockSide = LSW_DS_DOCKED_BOTTOM;
-			}
-
-			// Check intersection at top
-			if ( m_rDragPlacementRect.top < rPrc2.top && (m_dwDockStyle & LSW_DS_ALLOW_DOCKTOP) ) {
-				dsDockSide = LSW_DS_DOCKED_TOP;
-			}
-
-			// Check intersection at left
-			if ( m_rDragPlacementRect.left < rPrc2.left && (m_dwDockStyle & LSW_DS_ALLOW_DOCKLEFT) ) {
-				dsDockSide = LSW_DS_DOCKED_LEFT;
-			}
-
-			// Check intersection at right
-			if ( m_rDragPlacementRect.right > rPrc2.right && (m_dwDockStyle & LSW_DS_ALLOW_DOCKRIGHT) ) {
-				dsDockSide = LSW_DS_DOCKED_RIGHT;
-			}
+#define LSW_CLAMP		7
+		// Check based on the mouse position.
+		// Is it near the top?
+		if ( std::abs( m_pMousePos.y - rPrc2.top ) <= LSW_CLAMP &&
+			m_pMousePos.x >= rPrc2.left && m_pMousePos.x <= rPrc2.right ) {
+			dsDockSide = LSW_DS_DOCKED_TOP;
 		}
+		// Is it near the bottom?
+		if ( std::abs( m_pMousePos.y - rPrc2.bottom ) <= LSW_CLAMP &&
+			m_pMousePos.x >= rPrc2.left && m_pMousePos.x <= rPrc2.right ) {
+			dsDockSide = LSW_DS_DOCKED_BOTTOM;
+		}
+		// Is it near the left?
+		if ( std::abs( m_pMousePos.x - rPrc2.left ) <= LSW_CLAMP &&
+			m_pMousePos.y >= rPrc2.top && m_pMousePos.y <= rPrc2.bottom ) {
+			dsDockSide = LSW_DS_DOCKED_LEFT;
+		}
+		// Is it near the right?
+		if ( std::abs( m_pMousePos.x - rPrc2.right ) <= LSW_CLAMP &&
+			m_pMousePos.y >= rPrc2.top && m_pMousePos.y <= rPrc2.bottom ) {
+			dsDockSide = LSW_DS_DOCKED_RIGHT;
+		}
+#undef LSW_CLAMP
 
 		BOOL bControlKeyDown = (::GetKeyState( VK_CONTROL ) & 0x8000) ? TRUE : FALSE;
 		m_ddrtDragRectType = ((dsDockSide & LSW_DS_ALL_DOCKS) && !bControlKeyDown) ? LSW_DDRT_SOLID : LSW_DDRT_CHECKERED;
@@ -436,83 +436,7 @@ namespace lsw {
 			m_bMouseMoved = 0;
 		}
 #if 0
-				// Did the user actually move the Docking Frame, and not cancel the operation?
-				if (msg != WM_CANCELMODE && MouseMoved)
-				{
-					POINT	pt;
-					char	uDockSide;
-
-					// Get final cursor position
-					GetCursorPos(&pt);
-					MousePos.x = (short)pt.x;
-					MousePos.y = (short)pt.y;
-
-					// Erase the drag rectangle by redrawing it at the same position as before,
-					// and check if it was moved into a dockable area
-					uDockSide = checkDockingPos(dwp);
-
-					// If the window was docked, see if it is now floating
-					if (m_dwState > 0)
-					{
-						// If he held the control key down, or moved it to a non-dockable
-						// area, then it is now floating
-						if (uDockSide < 0)
-						{
-							// Set the XY position where the Docking Frame will float. The
-							// position is where the last mouse position is
-							if (m_rDragPlacementRect.left < 0) m_rDragPlacementRect.left = 0;
-							m_iFrameX = (unsigned short)m_rDragPlacementRect.left;
-							if (m_rDragPlacementRect.top < 0) m_rDragPlacementRect.top = 0;
-							m_iFrameY = (unsigned short)m_rDragPlacementRect.top;
-
-							// Set the docking mode to floating and redraw the window. Also
-							// force the container window to update its layout
-							m_dwState |= (char)0x80;
-							redrawDockingState(dwp);
-						}
-
-						// The window is still docked (but may have changed to different
-						// side of the container window)
-						else
-						{
-							m_dwState = uDockSide;
-
-							// Invalidate any child window so that it redraws itself, just in case
-							// the frame moved
-							if (dwp->focusWindow) InvalidateRect(dwp->focusWindow, 0, 1);
-
-							// Send a WM_SIZE message to the container window so it repositions and
-							// redraws everything docked inside of it
-							updateLayout(dwp->container);
-						}
-					}
-
-					// It was floating, so see if it is now docked
-					else
-					{
-						// If he didn't hold the control key down, and moved it to a dockable
-						// area, then it is now docked
-						if (uDockSide > 0)
-						{
-							m_dwState = uDockSide;
-							redrawDockingState(dwp);
-						}
-
-						// It is still floating. Just change the Docking Frame position to the last
-						// position of the mouse
-						else
-							SetWindowPos(hwnd, 0, m_rDragPlacementRect.left, m_rDragPlacementRect.top, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOZORDER|SWP_DRAWFRAME|SWP_NOSENDCHANGING);
-					}
-				}
-
-				// Erase the drag rectangle if user cancelled
-				else
-					drawDragFrame();
-
-				// No need to trap the mouse any further since we're done
-mousedone:		ReleaseCapture();
-				MouseMoved = 0;
-			}
+				
 
 			// Sizing a docked window?
 			else if (SizingDockWnd)

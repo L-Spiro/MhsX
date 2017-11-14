@@ -154,6 +154,9 @@ namespace mx {
 			::SendMessageW( Wnd(), WM_SIZE, SIZE_RESTORED, MAKELPARAM( rRect.Width(), rRect.Height() ) );
 		}
 
+		ShowFoundAddress();
+		ShowExpEval();
+
 		return LSW_H_CONTINUE;
 	}
 

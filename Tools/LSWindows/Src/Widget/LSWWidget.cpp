@@ -481,6 +481,7 @@ namespace lsw {
 				LSW_HANDLED hHandledThis = vDocks[I]->Enable( static_cast<BOOL>(_wParam) );
 				if ( hHandled != LSW_H_HANDLED ) {
 					if ( _bCallDefault ) {
+						vDocks[I]->SetEnabled( static_cast<BOOL>(_wParam) );
 						::DefWindowProcW( vDocks[I]->Wnd(), WM_ENABLE, _wParam, _lParam );
 					}
 				}
@@ -798,6 +799,7 @@ namespace lsw {
 #define LSW_WNDRET( VAL )				if ( !_bIsDlg ) { _lrWndResult = VAL; }
 #define LSW_DLGRET( VAL )				if ( _bIsDlg ) { _ipDiagResult = VAL; }
 #define LSW_RET( WNDVAL, DLGVAL )		LSW_WNDRET( WNDVAL ) LSW_DLGRET( DLGVAL ) return
+
 
 		CWidget * pmwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( _hWnd, GWLP_USERDATA ));
 		switch ( _uMsg ) {

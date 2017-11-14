@@ -11,6 +11,7 @@
 #include "System/MXSystem.h"
 #include "Utilities/MXUtilities.h"
 
+
 /*#include "EEExpEval.h"
 #include "EEExpEvalContainer.h"
 #include "EEExpEvalLexer.h"
@@ -21,33 +22,16 @@
 
 
 int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine, int _nCmdShow ) {
-	WCHAR szTemp[8];
-	mx::CUtilities::RandomString( szTemp, MX_ELEMENTS( szTemp ) );
-	lsw::CBase::Initialize( _hInstance, new mx::CLayoutManager(), szTemp );
-	::ZeroMemory( szTemp, sizeof( szTemp ) );
+	WCHAR szDockable[8];
+	WCHAR szSplitter[10];
+	mx::CUtilities::RandomString( szDockable, MX_ELEMENTS( szDockable ) );
+	mx::CUtilities::RandomString( szSplitter, MX_ELEMENTS( szSplitter ) );
+	lsw::CBase::Initialize( _hInstance, new mx::CLayoutManager(), szDockable, szSplitter );
+	::ZeroMemory( szSplitter, sizeof( szSplitter ) );
+	::ZeroMemory( szDockable, sizeof( szDockable ) );
 
 	// Initialize the system.
 	mx::CSystem::InitSystem();
-	/*
-	{
-#define PI 3.1415926535897932384626433832795
-#define e 2.7182818284590452353602874713527
-		uint64_t ui64 = 0x7F3|56 &5642 ^ 53;
-		double dVal = pow( 15, 41664 );
-		std::istringstream sStream( "??::Width" );
-		ee::CExpEvalLexer eelLexer( &sStream );
-		ee::CExpEvalContainer eecContainer( &eelLexer );
-		ee::CExpEvalParser eepParser( &eelLexer, &eecContainer );
-		int iRet = eepParser.parse();
-		ee::CExpEvalContainer::EE_RESULT rRes;
-		eecContainer.Resolve( rRes );
-
-		ee::CExpEvalContainer::EE_RESULT rRes2 = rRes;
-#undef PI
-#undef e
-	}*/
-	
-	
 	
 
 	// Create the windows.
@@ -60,8 +44,8 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 		nullptr,								// lpwcClass
 		TRUE,									// bEnabled
 		TRUE,									// bActive
-		154,										// iLeft
-		153,										// iTop
+		154,									// iLeft
+		153,									// iTop
 		163,									// dwWidth
 		174,									// dwHeight
 		WS_VISIBLE,								// dwStyle
@@ -78,13 +62,13 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 	//lsw::CBase::LayoutManager()->CreateWidget( lsw::CLayoutManager::FixLayout( wlDock ), mx::CMainWindowLayout::MainWindow(), true, NULL );
 
 	//mx::CFoundAddressLayout::CreateFoundAddressesWindow( mx::CMainWindowLayout::MainWindow() );
-	static_cast<mx::CMhsMainWindow *>(mx::CMainWindowLayout::MainWindow())->ShowFoundAddress();
-	static_cast<mx::CMhsMainWindow *>(mx::CMainWindowLayout::MainWindow())->ShowExpEval();
+	/*static_cast<mx::CMhsMainWindow *>(mx::CMainWindowLayout::MainWindow())->ShowFoundAddress();
+	static_cast<mx::CMhsMainWindow *>(mx::CMainWindowLayout::MainWindow())->ShowExpEval();*/
 
 	/*WCHAR szBuffer[MAX_PATH];
 	::GetCurrentDirectoryW( MAX_PATH, szBuffer );*/
 	//lsw::CMainWindow mwWindow( L"Agh", L"L. Spiro MHS X" );
-
+	//double dSin = ::sin( 3.1415926535897932384626433832795 );
 	/*
 	lsw::CBitmap bMap;
 	bMap.LoadFromFile( L"Resources/98.bmp", 0, 0, LR_LOADMAP3DCOLORS );

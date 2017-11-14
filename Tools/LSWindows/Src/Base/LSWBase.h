@@ -21,7 +21,8 @@ namespace lsw {
 		// Create/Destroy.
 		// =======================================
 		// Initialize.
-		static VOID									Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan, const WCHAR * _pwcDockableClassName = nullptr );
+		static VOID									Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan, const WCHAR * _pwcDockableClassName = nullptr,
+			const WCHAR * _pwcSplitterClassName = nullptr);
 
 		// Shut down (frees memory).
 		static VOID									ShutDown();
@@ -40,6 +41,9 @@ namespace lsw {
 
 		// Gets the ATOM for dockable windows.
 		static ATOM									DockableAtom() { return m_aDockable; }
+
+		// Gets the ATOM for splitter windows.
+		static ATOM									SplitterAtom() { return m_aSplitter; }
 
 		// =======================================
 		// Process functions.
@@ -109,6 +113,9 @@ namespace lsw {
 
 		// The dockable class.
 		static ATOM									m_aDockable;
+
+		// The splitter class.
+		static ATOM									m_aSplitter;
 												
 	};
 

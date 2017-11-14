@@ -172,6 +172,7 @@
     <ClCompile Include="Src\MainWindow\LSWMainWindow.cpp" />
     <ClCompile Include="Src\RadioButton\LSWRadioButton.cpp" />
     <ClCompile Include="Src\Rebar\LSWRebar.cpp" />
+    <ClCompile Include="Src\Splitter\LSWSplitter.cpp" />
     <ClCompile Include="Src\Static\LSWStatic.cpp" />
     <ClCompile Include="Src\StatusBar\LSWStatusBar.cpp" />
     <ClCompile Include="Src\ToolBar\LSWToolBar.cpp" />
@@ -204,6 +205,7 @@
     <ClInclude Include="Src\MainWindow\LSWMainWindow.h" />
     <ClInclude Include="Src\RadioButton\LSWRadioButton.h" />
     <ClInclude Include="Src\Rebar\LSWRebar.h" />
+    <ClInclude Include="Src\Splitter\LSWSplitter.h" />
     <ClInclude Include="Src\Static\LSWStatic.h" />
     <ClInclude Include="Src\StatusBar\LSWStatusBar.h" />
     <ClInclude Include="Src\ToolBar\LSWToolBar.h" />
