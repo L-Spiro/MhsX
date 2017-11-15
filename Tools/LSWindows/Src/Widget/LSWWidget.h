@@ -289,8 +289,17 @@ namespace lsw {
 		// WM_ERASEBKGND.
 		virtual LSW_HANDLED					EraseBkgnd( HDC _hDc ) { return LSW_H_CONTINUE; }
 
+		// WM_PAINT.
+		virtual LSW_HANDLED					Paint() { return LSW_H_CONTINUE; }
+
+		// WM_NCPAINT.
+		virtual LSW_HANDLED					NcPaint( HRGN _hRgn ) { return LSW_H_CONTINUE; }
+
 		// WM_CTLCOLORSTATIC.
 		virtual LSW_HANDLED					CtlColorStatic( HDC _hDc, CWidget * _pwControl, HBRUSH &_hBrush ) { return LSW_H_CONTINUE; }
+
+		// WM_SETCURSOR.
+		virtual LSW_HANDLED					SetCursor( CWidget * _pwControl, WORD _wHitTest, WORD _wIdent ) { return LSW_H_CONTINUE; }
 
 		// WM_ACTIVATE.
 		virtual LSW_HANDLED					Activate( BOOL _bMinimized, WORD _wActivationMode, CWidget * _pwWidget ) { return LSW_H_CONTINUE; }

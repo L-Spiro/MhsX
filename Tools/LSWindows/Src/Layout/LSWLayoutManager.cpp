@@ -12,6 +12,7 @@
 #include "../MainWindow/LSWMainWindow.h"
 #include "../RadioButton/LSWRadioButton.h"
 #include "../Rebar/LSWRebar.h"
+#include "../Splitter/LSWSplitter.h"
 #include "../Static/LSWStatic.h"
 #include "../StatusBar/LSWStatusBar.h"
 #include "../ToolBar/LSWToolBar.h"
@@ -161,6 +162,7 @@ namespace lsw {
 			case LSW_LT_CHECK : { return new CCheckButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_COMBOBOX : { return new CComboBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_COMBOBOXEX : { return new CComboBoxEx( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_DOCKWINDOW : { return new CDockable( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_EDIT : { return new CEdit( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_GROUPBOX : { return new CGroupBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_LABEL : { return new CStatic( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
@@ -169,10 +171,10 @@ namespace lsw {
 			case LSW_LT_MAINWINDOW : { return new CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_RADIO : { return new CRadioButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_REBAR : { return new CRebar( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_SPLITTER : { return new CSplitter( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_STATUSBAR : { return new CStatusBar( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_TOOLBAR : { return new CToolBar( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_WIDGET : { return new CWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_DOCKWINDOW : { return new CDockable( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 		}
 		return nullptr;
 	}

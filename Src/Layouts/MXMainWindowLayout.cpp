@@ -263,7 +263,7 @@ namespace mx {
 			WCHAR szTemp[5];
 			CUtilities::RandomString( szTemp, MX_ELEMENTS( szTemp ) );
 			lsw::CWndClassEx wceEx( lsw::CWidget::WindowProc, szTemp );
-			wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(COLOR_WINDOWFRAME + 1) );
+			wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1) );
 			m_aMainClass = lsw::CBase::RegisterClassExW( wceEx.Obj() );	
 		}
 

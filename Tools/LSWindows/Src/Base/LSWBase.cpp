@@ -70,13 +70,14 @@ namespace lsw {
 		}
 
 		// Register the splitter class.
-		if ( _pwcDockableClassName ) {
+		if ( _pwcSplitterClassName ) {
 			lsw::CWndClassEx wceSplitter;
 			wceSplitter.SetInstance( GetThisHandle() );
-			wceSplitter.SetClassName( _pwcDockableClassName );
+			wceSplitter.SetClassName( _pwcSplitterClassName );
 			wceSplitter.SetStyle( 0 );
 			wceSplitter.SetBackgroundBrush( reinterpret_cast<HBRUSH>(COLOR_3DFACE + 1) );
-			wceSplitter.SetWindPro( CDockable::WindowProc );
+			wceSplitter.SetWindPro( CWidget::WindowProc );
+			wceSplitter.SetCursor( NULL );
 			m_aSplitter = CBase::RegisterClassExW( wceSplitter.Obj() );
 		}
 	}

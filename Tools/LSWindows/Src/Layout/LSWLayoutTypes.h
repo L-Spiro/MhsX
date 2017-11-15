@@ -20,6 +20,7 @@ namespace lsw {
 		LSW_LT_LABEL,							// WC_STATICW
 		LSW_LT_REBAR,							// REBARCLASSNAMEW
 		LSW_LT_TOOLBAR,							// TOOLBARCLASSNAMEW
+		LSW_LT_SPLITTER,						//lsw::CBase::SplitterAtom()
 		LSW_LT_STATUSBAR,						// STATUSCLASSNAMEW
 		LSW_LT_MAINWINDOW,
 

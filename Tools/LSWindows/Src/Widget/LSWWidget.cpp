@@ -953,6 +953,7 @@ namespace lsw {
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
 				break;
 			}
+			
 			// =======================================
 			// Notifications.
 			// =======================================
@@ -1035,12 +1036,23 @@ namespace lsw {
 				//LSW_RET( 1, TRUE );
 				break;
 			}
+
 			// =======================================
 			// Drawing
 			// =======================================
 			case WM_ERASEBKGND : {
 				LSW_HANDLED hHandled = pmwThis->EraseBkgnd( reinterpret_cast<HDC>(_wParam) );
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 1, 1 ); }
+				break;
+			}
+			case WM_PAINT : {
+				LSW_HANDLED hHandled = pmwThis->Paint();
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_NCPAINT : {
+				LSW_HANDLED hHandled = pmwThis->NcPaint( reinterpret_cast<HRGN>(_wParam) );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
 				break;
 			}
 			case WM_CTLCOLORSTATIC : {
@@ -1050,6 +1062,7 @@ namespace lsw {
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( reinterpret_cast<LRESULT>(hBrush), reinterpret_cast<INT_PTR>(hBrush) ); }
 				break;
 			}
+
 			// =======================================
 			// Activation
 			// =======================================
@@ -1076,6 +1089,7 @@ namespace lsw {
 				}
 				break;
 			}
+
 			// =======================================
 			// Mouse
 			// =======================================
@@ -1382,6 +1396,17 @@ namespace lsw {
 				};
 				LSW_HANDLED hHandled = pmwThis->XButtonUp( GET_KEYSTATE_WPARAM( _wParam ), GET_XBUTTON_WPARAM( _wParam ), pPos );
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+
+			// =======================================
+			// Cursor
+			// =======================================
+			case WM_SETCURSOR : {
+				HWND hWnd = reinterpret_cast<HWND>(_wParam);
+				CWidget * pwWidget = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( hWnd, GWLP_USERDATA ));
+				LSW_HANDLED hHandled = pmwThis->SetCursor( pwWidget, LOWORD( _lParam ), HIWORD( _lParam ) );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( TRUE, TRUE ); }
 				break;
 			}
 		}
