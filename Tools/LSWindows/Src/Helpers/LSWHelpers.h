@@ -66,6 +66,33 @@ namespace lsw {
 			rTemp.bottom = pBr.y;
 			return rTemp;
 		}
+		// Top and left checked inclusively.
+		bool								PointIsIn_ULInclusive( INT _iX, INT _iY ) const {
+			return _iX >= left && _iX < right &&
+				_iY >= top && _iY < bottom;
+		}
+		// Top and left checked inclusively.
+		bool								PointIsIn_ULInclusive( const POINT &_pPoint ) const {
+			return PointIsIn_ULInclusive( _pPoint.x, _pPoint.y );
+		}
+		// Top, left, right, and bottom checked inclusively.
+		bool								PointIsIn_FullInclusive( INT _iX, INT _iY ) const {
+			return _iX >= left && _iX <= right &&
+				_iY >= top && _iY <= bottom;
+		}
+		// Top, left, right, and bottom checked inclusively.
+		bool								PointIsIn_FullInclusive( const POINT &_pPoint ) const {
+			return PointIsIn_FullInclusive( _pPoint.x, _pPoint.y );
+		}
+		// Point must be inside the rectangle, not on any borders.
+		bool								PointIsIn_Exclusive( INT _iX, INT _iY ) const {
+			return _iX > left && _iX < right &&
+				_iY > top && _iY < bottom;
+		}
+		// Point must be inside the rectangle, not on any borders.
+		bool								PointIsIn_Exclusive( const POINT &_pPoint ) const {
+			return PointIsIn_Exclusive( _pPoint.x, _pPoint.y );
+		}
 	};
 
 	struct LSW_HANDLE {

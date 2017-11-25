@@ -99,17 +99,17 @@ namespace mx {
 		},
 #endif
 		{
-			LSW_LT_LISTVIEW,						// ltType
-			MX_MWI_STOREDADDRESSES,					// wId
-			WC_LISTVIEWW,							// lpwcClass
+			LSW_LT_MULTISPLITTER,					// ltType
+			MX_MWI_SPLITTER,						// wId
+			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			0,										// iLeft
 			0,										// iTop
 			255,									// dwWidth
 			110,									// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT,		// dwStyle
-			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,																				// dwStyleEx
+			WS_CHILDWINDOW | WS_VISIBLE,			// dwStyle
+			0,										// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_MWI_MAINWINDOW,						// dwParentId
@@ -121,7 +121,104 @@ namespace mx {
 			nullptr, 0,								// pcWidthSizeExp
 			nullptr, 0,								// pcHeightSizeExp
 		},
+		//{
+		//	LSW_LT_SPLITTER,						// ltType
+		//	MX_MWI_SPLITTER,						// wId
+		//	nullptr,								// lpwcClass
+		//	TRUE,									// bEnabled
+		//	FALSE,									// bActive
+		//	0,										// iLeft
+		//	0,										// iTop
+		//	255,									// dwWidth
+		//	110,									// dwHeight
+		//	WS_CHILDWINDOW | WS_VISIBLE,			// dwStyle
+		//	0,										// dwStyleEx
+		//	nullptr,								// pwcText
+		//	0,										// sTextLen
+		//	MX_MWI_MAINWINDOW,						// dwParentId
 
+		//	MX_PARENT_VCLEFT,						// pcLeftSizeExp
+		//	MX_PARENT_VCRIGHT,						// pcRightSizeExp
+		//	MX_PARENT_VCTOP,						// pcTopSizeExp
+		//	MX_PARENT_VCBOTTOM,						// pcBottomSizeExp
+		//	nullptr, 0,								// pcWidthSizeExp
+		//	nullptr, 0,								// pcHeightSizeExp
+		//},
+		{
+			LSW_LT_LISTVIEW,						// ltType
+			MX_MWI_STOREDADDRESSES,					// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			0,										// iLeft
+			0,										// iTop
+			255,									// dwWidth
+			110,									// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT,		// dwStyle
+			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,																				// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_MWI_SPLITTER,						// dwParentId
+
+			MX_PARENT_VCLEFT,						// pcLeftSizeExp
+			MX_PARENT_VCRIGHT,						// pcRightSizeExp
+			MX_PARENT_VCTOP,						// pcTopSizeExp
+			MX_PARENT_VCBOTTOM,						// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			nullptr, 0,								// pcHeightSizeExp
+		},
+
+
+#if 0
+		{
+			LSW_LT_LISTVIEW,						// ltType
+			MX_MWI_TEST0,							// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			0,										// iLeft
+			0,										// iTop
+			255,									// dwWidth
+			110,									// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT,		// dwStyle
+			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,																				// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_MWI_SPLITTER,						// dwParentId
+
+			MX_PARENT_VCLEFT,						// pcLeftSizeExp
+			MX_PARENT_VCRIGHT,						// pcRightSizeExp
+			MX_PARENT_VCTOP,						// pcTopSizeExp
+			MX_PARENT_VCBOTTOM,						// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			nullptr, 0,								// pcHeightSizeExp
+		},
+
+
+		{
+			LSW_LT_LISTVIEW,						// ltType
+			MX_MWI_TEST1,							// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			0,										// iLeft
+			0,										// iTop
+			255,									// dwWidth
+			110,									// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT,		// dwStyle
+			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,																				// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_MWI_SPLITTER,						// dwParentId
+
+			MX_PARENT_VCLEFT,						// pcLeftSizeExp
+			MX_PARENT_VCRIGHT,						// pcRightSizeExp
+			MX_PARENT_VCTOP,						// pcTopSizeExp
+			MX_PARENT_VCBOTTOM,						// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			nullptr, 0,								// pcHeightSizeExp
+		},
+#endif	// #if 0
 		/*{
 			LSW_LT_COMBOBOXEX,						// ltType
 			50,										// wId

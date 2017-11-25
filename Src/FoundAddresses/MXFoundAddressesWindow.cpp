@@ -82,8 +82,8 @@ namespace mx {
 
 
 		if ( plvRebar ) {
-			LSW_RECT rRebarRect = ClientRect();
-			::MoveWindow( plvRebar->Wnd(), 0, 0, rRebarRect.Width(), plvRebar->WindowRect().Height(), FALSE );
+			LSW_RECT rRebarRect = ClientRect( this );
+			::MoveWindow( plvRebar->Wnd(), 0, 0, rRebarRect.Width(), plvRebar->WindowRect( this ).Height(), FALSE );
 
 			plvRebar->UpdateRects();
 		}
@@ -121,11 +121,11 @@ namespace mx {
 	}
 
 	// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
-	const LSW_RECT CFoundAddressesWindow::VirtualClientRect() const {
-		LSW_RECT rTemp = ClientRect();
+	const LSW_RECT CFoundAddressesWindow::VirtualClientRect( const CWidget * pwChild ) const {
+		LSW_RECT rTemp = ClientRect( this );
 		const CRebar * plvRebar = static_cast<const CRebar *>(FindChild( CFoundAddressLayout::MX_FAW_REBAR0 ));
 		if ( plvRebar ) {
-			LSW_RECT rRebar = plvRebar->ClientRect();
+			LSW_RECT rRebar = plvRebar->ClientRect( this );
 			rTemp.top += rRebar.Height();
 		}
 		return rTemp;

@@ -170,6 +170,7 @@
     <ClCompile Include="Src\ListBox\LSWListBox.cpp" />
     <ClCompile Include="Src\ListView\LSWListView.cpp" />
     <ClCompile Include="Src\MainWindow\LSWMainWindow.cpp" />
+    <ClCompile Include="Src\MultiSplitter\LSWMultiSplitter.cpp" />
     <ClCompile Include="Src\RadioButton\LSWRadioButton.cpp" />
     <ClCompile Include="Src\Rebar\LSWRebar.cpp" />
     <ClCompile Include="Src\Splitter\LSWSplitter.cpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="Src\ListView\LSWListView.h" />
     <ClInclude Include="Src\LSWWin.h" />
     <ClInclude Include="Src\MainWindow\LSWMainWindow.h" />
+    <ClInclude Include="Src\MultiSplitter\LSWMultiSplitter.h" />
     <ClInclude Include="Src\RadioButton\LSWRadioButton.h" />
     <ClInclude Include="Src\Rebar\LSWRebar.h" />
     <ClInclude Include="Src\Splitter\LSWSplitter.h" />

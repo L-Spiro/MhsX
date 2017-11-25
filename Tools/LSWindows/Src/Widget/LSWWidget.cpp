@@ -199,7 +199,7 @@ namespace lsw {
 		//::GetClientRect( Wnd(), &m_rStartingClientRect );
 		::GetWindowRect( Wnd(), &m_rStartingClientRect );
 		if ( Parent() ) {
-			LSW_RECT rPar = Parent()->ClientRect().ClientToScreen( Parent()->Wnd() );
+			LSW_RECT rPar = Parent()->ClientRect( this ).ClientToScreen( Parent()->Wnd() );
 			m_rStartingClientRect.MoveBy( { -rPar.left, -rPar.top } );
 		}
 		//m_rStartingClientRect = m_rStartingClientRect.ClientToScreen( Wnd() );
@@ -293,7 +293,7 @@ namespace lsw {
 		}
 	}
 
-	// Add a chld.
+	// Add a child.
 	void CWidget::AddChild( CWidget * _pwChild ) {
 		if ( !HasChild( _pwChild ) ) {
 			m_vChildren.push_back( _pwChild );
@@ -302,6 +302,7 @@ namespace lsw {
 
 	// Set the parent.
 	void CWidget::SetWidgetParent( CWidget * _pwParent ) {
+		if ( m_pwParent == _pwParent ) { return; }
 		if ( m_pwParent ) {
 			m_pwParent->RemoveChild( this );
 		}
@@ -313,7 +314,7 @@ namespace lsw {
 
 	// Evaluates expressions to determine a new rectangle for the control.
 	void CWidget::EvalNewSize() {
-		LSW_RECT rNewSize = WindowRect();
+		LSW_RECT rNewSize = WindowRect( this );
 		// Each axis has 3 possible expressions.
 		// X axis has left, width, and right.
 		// Y axis has top, height, and bottom.
@@ -549,6 +550,8 @@ namespace lsw {
 		if ( _rLeft.ncType != ee::EE_NC_UNSIGNED ) { return false; }
 		CWidget * pwThis = reinterpret_cast<CWidget *>(static_cast<uintptr_t>(_rLeft.u.ui64Val));
 		if ( !pwThis ) { return false; }
+
+		CWidget * pwCaller = reinterpret_cast<CWidget *>(static_cast<uintptr_t>(_peecContainer->UserData()));
 		
 		// Figure out what is being accessed on the widget and return accordingly.
 		// Note that all coordinates are in screen space.
@@ -568,37 +571,37 @@ namespace lsw {
 			if ( ::_stricmp( _sMember.c_str(), "W" ) == 0 ) {
 				// Accessing this width.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect().Width());
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect( pwCaller ).Width());
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "H" ) == 0 ) {
 				// Accessing this height.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect().Height());
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect( pwCaller ).Height());
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "L" ) == 0 ) {
 				// Accessing this left.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect().left);
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect( pwCaller ).left);
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "R" ) == 0 ) {
 				// Accessing this right.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect().right);
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect( pwCaller ).right);
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "T" ) == 0 ) {
 				// Accessing this top.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect().top);
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect( pwCaller ).top);
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "B" ) == 0 ) {
 				// Accessing this bottom.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect().bottom);
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->WindowRect( pwCaller ).bottom);
 				return true;
 			}
 		}
@@ -609,37 +612,37 @@ namespace lsw {
 			if ( ::_stricmp( _sMember.c_str(), "CW" ) == 0 ) {
 				// Accessing this client width.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().Width());
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect( pwCaller ).Width());
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "CH" ) == 0 ) {
 				// Accessing this client height.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().Height());
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect( pwCaller ).Height());
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "CL" ) == 0 ) {
 				// Accessing this client left.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().UpperLeftClientToScreen( pwThis->Wnd() ).x);
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect( pwCaller ).UpperLeftClientToScreen( pwThis->Wnd() ).x);
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "CR" ) == 0 ) {
 				// Accessing this client right.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().BottomRightClientToScreen( pwThis->Wnd() ).x);
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect( pwCaller ).BottomRightClientToScreen( pwThis->Wnd() ).x);
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "CT" ) == 0 ) {
 				// Accessing this client top.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().UpperLeftClientToScreen( pwThis->Wnd() ).y);
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect( pwCaller ).UpperLeftClientToScreen( pwThis->Wnd() ).y);
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "CB" ) == 0 ) {
 				// Accessing this client bottom.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect().BottomRightClientToScreen( pwThis->Wnd() ).y);
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->ClientRect( pwCaller ).BottomRightClientToScreen( pwThis->Wnd() ).y);
 				return true;
 			}
 			// =======================================
@@ -698,37 +701,37 @@ namespace lsw {
 			if ( ::_stricmp( _sMember.c_str(), "VCW" ) == 0 ) {
 				// Accessing this client width.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect().Width());
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect( pwCaller ).Width());
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "VCH" ) == 0 ) {
 				// Accessing this client height.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect().Height());
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect( pwCaller ).Height());
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "VCL" ) == 0 ) {
 				// Accessing this client left.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect().UpperLeftClientToScreen( pwThis->Wnd() ).x);
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect( pwCaller ).UpperLeftClientToScreen( pwThis->Wnd() ).x);
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "VCR" ) == 0 ) {
 				// Accessing this client right.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect().BottomRightClientToScreen( pwThis->Wnd() ).x);
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect( pwCaller ).BottomRightClientToScreen( pwThis->Wnd() ).x);
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "VCT" ) == 0 ) {
 				// Accessing this client top.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect().UpperLeftClientToScreen( pwThis->Wnd() ).y);
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect( pwCaller ).UpperLeftClientToScreen( pwThis->Wnd() ).y);
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "VCB" ) == 0 ) {
 				// Accessing this client bottom.
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect().BottomRightClientToScreen( pwThis->Wnd() ).y);
+				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->VirtualClientRect( pwCaller ).BottomRightClientToScreen( pwThis->Wnd() ).y);
 				return true;
 			}
 			// =======================================
@@ -782,7 +785,7 @@ namespace lsw {
 		::GetWindowRect( _pwParent->Wnd(), &_pwParent->m_rStartingRect );
 		::GetWindowRect( _pwParent->Wnd(), &_pwParent->m_rStartingClientRect );
 		if ( _pwParent->Parent() ) {
-			LSW_RECT rPar = _pwParent->Parent()->ClientRect().ClientToScreen( _pwParent->Parent()->Wnd() );
+			LSW_RECT rPar = _pwParent->Parent()->ClientRect( nullptr ).ClientToScreen( _pwParent->Parent()->Wnd() );
 			_pwParent->m_rStartingClientRect.MoveBy( { -rPar.left, -rPar.top } );
 		}
 		/*::GetClientRect( _pwParent->Wnd(), &_pwParent->m_rStartingClientRect );

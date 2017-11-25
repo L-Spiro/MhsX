@@ -153,6 +153,12 @@
     <Filter Include="Source Files\Splitter">
       <UniqueIdentifier>{d41af4ab-d9d6-41e3-8b1a-0a736cc8e7b7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\MultiSplitter">
+      <UniqueIdentifier>{ed693924-694f-490d-98ac-ab3c486aa024}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MultiSplitter">
+      <UniqueIdentifier>{70d57c23-ff33-4f75-a1e7-a6afdc11c44d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -251,6 +257,9 @@
     <ClInclude Include="Src\Splitter\LSWSplitter.h">
       <Filter>Header Files\Splitter</Filter>
     </ClInclude>
+    <ClInclude Include="Src\MultiSplitter\LSWMultiSplitter.h">
+      <Filter>Header Files\MultiSplitter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -324,6 +333,9 @@
     </ClCompile>
     <ClCompile Include="Src\Splitter\LSWSplitter.cpp">
       <Filter>Source Files\Splitter</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\MultiSplitter\LSWMultiSplitter.cpp">
+      <Filter>Source Files\MultiSplitter</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

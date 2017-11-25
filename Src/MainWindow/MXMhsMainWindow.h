@@ -5,6 +5,7 @@
 #include "../MemHack/MXMemHack.h"
 
 #include <MainWindow/LSWMainWindow.h>
+#include <MultiSplitter/LSWMultiSplitter.h>
 #include <ImageList/LSWImageList.h>
 #include <Images/LSWBitmap.h>
 #include <ListView/LSWListView.h>
@@ -74,8 +75,14 @@ namespace mx {
 		// Gets the list view.
 		const CListView *					MainListView() const;
 
+		// Gets the multi-splitter.
+		CMultiSplitter *					MultiSplitter();
+
+		// Gets the multi-splitter.
+		const CMultiSplitter *				MultiSplitter() const;
+
 		// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
-		virtual const LSW_RECT				VirtualClientRect() const;
+		virtual const LSW_RECT				VirtualClientRect( const CWidget * pwChild ) const;
 
 		// Shows the Found Address dockable.
 		void								ShowFoundAddress();

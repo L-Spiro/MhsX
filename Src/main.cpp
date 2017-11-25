@@ -24,9 +24,12 @@
 int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine, int _nCmdShow ) {
 	WCHAR szDockable[8];
 	WCHAR szSplitter[10];
+	WCHAR szMSplitter[11];
 	mx::CUtilities::RandomString( szDockable, MX_ELEMENTS( szDockable ) );
 	mx::CUtilities::RandomString( szSplitter, MX_ELEMENTS( szSplitter ) );
-	lsw::CBase::Initialize( _hInstance, new mx::CLayoutManager(), szDockable, szSplitter );
+	mx::CUtilities::RandomString( szMSplitter, MX_ELEMENTS( szMSplitter ) );
+	lsw::CBase::Initialize( _hInstance, new mx::CLayoutManager(), szDockable, szSplitter, szMSplitter );
+	::ZeroMemory( szMSplitter, sizeof( szMSplitter ) );
 	::ZeroMemory( szSplitter, sizeof( szSplitter ) );
 	::ZeroMemory( szDockable, sizeof( szDockable ) );
 

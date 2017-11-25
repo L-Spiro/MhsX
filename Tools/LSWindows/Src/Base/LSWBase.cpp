@@ -37,9 +37,14 @@ namespace lsw {
 	// The splitter class.
 	ATOM CBase::m_aSplitter = 0;
 
+	// The multi-splitter class.
+	ATOM CBase::m_aMultiSplitter = 0;
+
 	// == Functions.
 	// Initialize.
-	VOID CBase::Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan, const WCHAR * _pwcDockableClassName, const WCHAR * _pwcSplitterClassName ) {
+	VOID CBase::Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan, const WCHAR * _pwcDockableClassName,
+		const WCHAR * _pwcSplitterClassName,
+		const WCHAR * _pwcMultiSplitterClassName ) {
 		m_hInstance = _hInst;
 		m_plmLayoutMan = _plmLayoutMan;
 
@@ -79,6 +84,17 @@ namespace lsw {
 			wceSplitter.SetWindPro( CWidget::WindowProc );
 			wceSplitter.SetCursor( NULL );
 			m_aSplitter = CBase::RegisterClassExW( wceSplitter.Obj() );
+		}
+
+		if ( _pwcMultiSplitterClassName ) {
+			lsw::CWndClassEx wceMulSplitter;
+			wceMulSplitter.SetInstance( GetThisHandle() );
+			wceMulSplitter.SetClassName( _pwcMultiSplitterClassName );
+			wceMulSplitter.SetStyle( 0 );
+			wceMulSplitter.SetBackgroundBrush( reinterpret_cast<HBRUSH>(COLOR_3DFACE + 1) );
+			wceMulSplitter.SetWindPro( CWidget::WindowProc );
+			wceMulSplitter.SetCursor( NULL );
+			m_aMultiSplitter = CBase::RegisterClassExW( wceMulSplitter.Obj() );
 		}
 	}
 

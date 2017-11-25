@@ -16,6 +16,7 @@ namespace lsw {
 		LSW_LT_GROUPBOX,						// WC_BUTTONW
 		LSW_LT_LISTVIEW,						// WC_LISTVIEWW
 		LSW_LT_LISTBOX,							// WC_LISTBOXW
+		LSW_LT_MULTISPLITTER,					// lsw::CBase::DockableAtom()
 		LSW_LT_TREEVIEW,						// WC_TREEVIEWW
 		LSW_LT_LABEL,							// WC_STATICW
 		LSW_LT_REBAR,							// REBARCLASSNAMEW

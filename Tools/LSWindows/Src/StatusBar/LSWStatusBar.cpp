@@ -115,7 +115,7 @@ namespace lsw {
 		::GetClientRect( Wnd(), &m_rClientRect );*/
 
 		if ( m_pwParent ) {
-			LONG lChange = m_pwParent->WindowRect().Width() - m_pwParent->StartRect().Width();
+			LONG lChange = m_pwParent->WindowRect( this ).Width() - m_pwParent->StartRect().Width();
 			std::vector<INT> vInts;
 			vInts.reserve( m_vParts.size() );
 			for ( size_t I = 0; I < m_vParts.size(); ++I ) {

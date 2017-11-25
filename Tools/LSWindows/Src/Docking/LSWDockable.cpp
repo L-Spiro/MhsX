@@ -126,7 +126,7 @@ namespace lsw {
 					// of the drag rectangle to fill that dockable area
 					if ( m_ddrtDragRectType == LSW_DDRT_SOLID ) {
 
-						LSW_RECT rParCient = Parent()->VirtualClientRect().MapToDeskTop( Parent()->Wnd() );
+						LSW_RECT rParCient = Parent()->VirtualClientRect( this ).MapToDeskTop( Parent()->Wnd() );
 
 						switch ( dsDockSide ) {
 							case LSW_DS_DOCKED_LEFT : {
@@ -204,8 +204,7 @@ namespace lsw {
 	// WM_WINDOWPOSCHANGED.
 	CWidget::LSW_HANDLED CDockable::WindowPosChanged( const WINDOWPOS * _pwpPos ) {
 		if ( (m_dwDockStyle & LSW_DS_DONTSAVEPOS) == 0 ) {
-			RECT rBorder;
-			::GetClientRect( Wnd(), &rBorder );
+			LSW_RECT rBorder = ClientRect( this );
 			// Floating?
 			if ( Floating() ) {
 				if ( (_pwpPos->flags & SWP_NOMOVE) == 0 ) {
@@ -314,7 +313,7 @@ namespace lsw {
 		// ===========================================================
 		const CWidget * pwContainer = Parent();
 		if ( !pwContainer ) { return static_cast<LSW_DOCK_STATE>(0); }
-		LSW_RECT rPrc2 = pwContainer->VirtualClientRect().MapToDeskTop( pwContainer->Wnd() );
+		LSW_RECT rPrc2 = pwContainer->VirtualClientRect( this ).MapToDeskTop( pwContainer->Wnd() );
 	
 
 		LSW_DOCK_STATE dsDockSide = LSW_DS_FLOATING;
@@ -367,7 +366,7 @@ namespace lsw {
 		LSW_RECT rRect;
 
 		// Send a fake WM_SIZE message to cause the window to recalculate and redraw its layout.
-		::GetClientRect( _pwParent->Wnd(), &rRect );
+		rRect = _pwParent->ClientRect( this );
 		::SendMessageW( _pwParent->Wnd(), WM_SIZE, SIZE_RESTORED, MAKELPARAM( rRect.Width(), rRect.Height() ) );
 	}
 
@@ -423,7 +422,7 @@ namespace lsw {
 					}
 					else {
 						// Still floating.
-						::SetWindowPos( Wnd(), 0, m_rDragPlacementRect.left, m_rDragPlacementRect.top, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER | SWP_DRAWFRAME | SWP_NOSENDCHANGING );
+						::SetWindowPos( Wnd(), NULL, m_rDragPlacementRect.left, m_rDragPlacementRect.top, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER | SWP_DRAWFRAME | SWP_NOSENDCHANGING );
 					}
 				}
 			}

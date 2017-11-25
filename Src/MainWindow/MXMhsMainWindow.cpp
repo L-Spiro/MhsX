@@ -7,7 +7,9 @@
 #include "../System/MXSystem.h"
 #include "../Utilities/MXUtilities.h"
 #include <Base/LSWBase.h>
+#include <MultiSplitter/LSWMultiSplitter.h>
 #include <Rebar/LSWRebar.h>
+#include <Splitter/LSWSplitter.h>
 #include <StatusBar/LSWStatusBar.h>
 #include <ToolBar/LSWToolBar.h>
 
@@ -104,8 +106,8 @@ namespace mx {
 			plvRebar->InsertBand( -1, riRebarInfo );
 		}
 
-	   LSW_RECT rRebarRect = ClientRect();
-	   ::MoveWindow( plvRebar->Wnd(), 0, 0, rRebarRect.Width(), plvRebar->WindowRect().Height(), FALSE );
+	   LSW_RECT rRebarRect = ClientRect( this );
+	   ::MoveWindow( plvRebar->Wnd(), 0, 0, rRebarRect.Width(), plvRebar->WindowRect( this ).Height(), FALSE );
 
 		plvRebar->UpdateRects();
 		
@@ -119,7 +121,7 @@ namespace mx {
 				// Current process ID.
 				{ 450 + 48, FALSE },
 
-				{ rRebarRect.Width() - psbStatus->ClientRect().Height(), TRUE },
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height(), TRUE },
 			};
 			psbStatus->SetParts( spParts, MX_ELEMENTS( spParts ) );
 		}
@@ -146,6 +148,25 @@ namespace mx {
 			}
 			//plvAddressList->SetColumnWidth( plvAddressList->GetTotalColumns(), LVSCW_AUTOSIZE_USEHEADER );
 		}
+
+		// TEMP.
+		/*CSplitter * pwSplitter = static_cast<CSplitter *>(FindChild( CMainWindowLayout::MX_MWI_SPLITTER ));
+		pwSplitter->SetSplitterType( CSplitter::LSW_SS_VERTICAL );
+		pwSplitter->Attach( MainListView(), CSplitter::LSW_A_RIGHT );*/
+
+		CMultiSplitter * pwSplitter = MultiSplitter();
+		CMultiSplitter::LSW_MS_ATTACH aAttach;
+		aAttach.atAttachTo = CMultiSplitter::LSW_AT_RIGHT;
+		aAttach.dwId = pwSplitter->RootId();
+		/*aAttach.pwWidget = FindChild( CMainWindowLayout::MX_MWI_TEST0 );
+		pwSplitter->Attach( aAttach );*/
+		aAttach.pwWidget = MainListView();
+		pwSplitter->Attach( aAttach );
+
+		/*aAttach.atAttachTo = CMultiSplitter::LSW_AT_TOP;
+		aAttach.pwWidget = FindChild( CMainWindowLayout::MX_MWI_TEST1 );
+		pwSplitter->Attach( aAttach );*/
+
 
 		{
 			LSW_RECT rRect;
@@ -242,18 +263,28 @@ namespace mx {
 		return static_cast<const CListView *>(FindChild( CMainWindowLayout::MX_MWI_STOREDADDRESSES ));
 	}
 
+	// Gets the multi-splitter.
+	CMultiSplitter * CMhsMainWindow::MultiSplitter() {
+		return static_cast<CMultiSplitter *>(FindChild( CMainWindowLayout::MX_MWI_SPLITTER ));
+	}
+
+	// Gets the multi-splitter.
+	const CMultiSplitter * CMhsMainWindow::MultiSplitter() const {
+		return static_cast<const CMultiSplitter *>(FindChild( CMainWindowLayout::MX_MWI_SPLITTER ));
+	}
+
 	// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
-	const LSW_RECT CMhsMainWindow::VirtualClientRect() const {
-		LSW_RECT rTemp = ClientRect();
+	const LSW_RECT CMhsMainWindow::VirtualClientRect( const CWidget * pwChild ) const {
+		LSW_RECT rTemp = ClientRect( this );
 		const CRebar * plvRebar = static_cast<const CRebar *>(FindChild( CMainWindowLayout::MX_MWI_REBAR0 ));
 		if ( plvRebar ) {
-			LSW_RECT rRebar = plvRebar->ClientRect();
+			LSW_RECT rRebar = plvRebar->ClientRect( this );
 			rTemp.top += rRebar.Height();
 		}
 
 		const CStatusBar * psbStatus = StatusBar();
 		if ( psbStatus ) {
-			LSW_RECT rStatus = psbStatus->ClientRect();
+			LSW_RECT rStatus = psbStatus->ClientRect( this );
 			rTemp.bottom -= rStatus.Height();
 		}
 		return rTemp;
@@ -262,7 +293,7 @@ namespace mx {
 	// Shows the Found Address dockable.
 	void CMhsMainWindow::ShowFoundAddress() {
 		if ( !m_pfaFoundAddresses ) {
-			m_pfaFoundAddresses = static_cast<CFoundAddressesWindow *>(CFoundAddressLayout::CreateFoundAddressesWindow( this ));
+			m_pfaFoundAddresses = static_cast<CFoundAddressesWindow *>(CFoundAddressLayout::CreateFoundAddressesWindow( MultiSplitter() ));
 		}
 		else {
 			m_pfaFoundAddresses->SetVisible( TRUE );
@@ -273,7 +304,7 @@ namespace mx {
 	// Shows the Expression Evaluator dockable.
 	void CMhsMainWindow::ShowExpEval() {
 		if ( !m_eeExpEval ) {
-			m_eeExpEval = static_cast<CExpEvalWindow *>(CExpressionEvaluatorLayout::CreateExpEvalWindow( this ));
+			m_eeExpEval = static_cast<CExpEvalWindow *>(CExpressionEvaluatorLayout::CreateExpEvalWindow( MultiSplitter() ));
 		}
 		else {
 			m_eeExpEval->SetVisible( TRUE );

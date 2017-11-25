@@ -10,6 +10,7 @@
 #include "../ListBox/LSWListBox.h"
 #include "../ListView/LSWListView.h"
 #include "../MainWindow/LSWMainWindow.h"
+#include "../MultiSplitter/LSWMultiSplitter.h"
 #include "../RadioButton/LSWRadioButton.h"
 #include "../Rebar/LSWRebar.h"
 #include "../Splitter/LSWSplitter.h"
@@ -169,6 +170,7 @@ namespace lsw {
 			case LSW_LT_LISTBOX : { return new CListBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_LISTVIEW : { return new CListView( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_MAINWINDOW : { return new CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_MULTISPLITTER : { return new CMultiSplitter( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_RADIO : { return new CRadioButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_REBAR : { return new CRebar( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
 			case LSW_LT_SPLITTER : { return new CSplitter( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }

@@ -145,11 +145,11 @@ namespace lsw {
 
 		// Window rectangle.
 		//virtual const LSW_RECT &			WindowRect() const { return m_rRect; }
-		virtual const LSW_RECT				WindowRect() const { LSW_RECT rTemp; ::GetWindowRect( Wnd(), &rTemp ); return rTemp; }
+		virtual const LSW_RECT				WindowRect( const CWidget * pwChild ) const { LSW_RECT rTemp; ::GetWindowRect( Wnd(), &rTemp ); return rTemp; }
 
 		// Client rectangle.
 		//virtual const LSW_RECT &			ClientRect() const { return m_rClientRect; }
-		virtual const LSW_RECT				ClientRect() const { LSW_RECT rTemp; ::GetClientRect( Wnd(), &rTemp ); return rTemp; }
+		virtual const LSW_RECT				ClientRect( const CWidget * pwChild ) const { LSW_RECT rTemp; ::GetClientRect( Wnd(), &rTemp ); return rTemp; }
 
 		// Starting window rectangle.
 		virtual const LSW_RECT &			StartRect() const { return m_rStartingRect; }
@@ -158,7 +158,9 @@ namespace lsw {
 		virtual const LSW_RECT &			StartClientRect() const { return m_rStartingClientRect; }
 
 		// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
-		virtual const LSW_RECT				VirtualClientRect() const { LSW_RECT rTemp; ::GetClientRect( Wnd(), &rTemp ); return rTemp; }
+		// pwChild can be nullptr.  If not nullptr, it is assumed to be a child of the widget, and this widget might create a specific rectangle for
+		//	the pwChild, such as for splitter controls.
+		virtual const LSW_RECT				VirtualClientRect( const CWidget * pwChild ) const { return ClientRect( pwChild ); }
 
 		// Updates all rectangles with the current window rectangles.  If a control changes size and you wish to set the new size as its "base" size,
 		//	call this.
@@ -432,7 +434,7 @@ namespace lsw {
 		// Remove a child.
 		virtual void						RemoveChild( const CWidget * _pwChild );
 
-		// Add a chld.
+		// Add a child.
 		void								AddChild( CWidget * _pwChild );
 
 		// Set the parent.

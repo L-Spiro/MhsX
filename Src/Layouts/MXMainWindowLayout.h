@@ -20,6 +20,12 @@ namespace mx {
 			MX_MWI_REBAR0,
 			MX_MWI_TOOLBAR0,
 			MX_MWI_STATUSBAR,
+			MX_MWI_SPLITTER,
+
+			MX_MWI_TEST0,
+			MX_MWI_TEST1,
+			MX_MWI_TEST2,
+			MX_MWI_TEST3,
 			
 		};
 

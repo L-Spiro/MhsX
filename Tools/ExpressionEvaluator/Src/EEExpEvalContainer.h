@@ -67,6 +67,9 @@ namespace ee {
 		// Sets the lexer to NULL.  Call after the expression has been successfully parsed.
 		void								ExpWasParsed() { m_peelLexer = nullptr; }
 
+		// Gets the user data passed in SetUserHandler().
+		uintptr_t							UserData() const { return m_uiptrUserData; }
+
 		// Gets the type to use between 2 given types.
 		static EE_NUM_CONSTANTS				GetCastType( EE_NUM_CONSTANTS _ncLeft, EE_NUM_CONSTANTS _ncRight );
 

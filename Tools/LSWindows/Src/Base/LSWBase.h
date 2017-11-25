@@ -22,7 +22,8 @@ namespace lsw {
 		// =======================================
 		// Initialize.
 		static VOID									Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan, const WCHAR * _pwcDockableClassName = nullptr,
-			const WCHAR * _pwcSplitterClassName = nullptr);
+			const WCHAR * _pwcSplitterClassName = nullptr,
+			const WCHAR * _pwcMultiSplitterClassName = nullptr );
 
 		// Shut down (frees memory).
 		static VOID									ShutDown();
@@ -44,6 +45,9 @@ namespace lsw {
 
 		// Gets the ATOM for splitter windows.
 		static ATOM									SplitterAtom() { return m_aSplitter; }
+
+		// Gets the ATOM for multi-splitter windows.
+		static ATOM									MultiSplitterAtom() { return m_aMultiSplitter; }
 
 		// =======================================
 		// Process functions.
@@ -116,6 +120,9 @@ namespace lsw {
 
 		// The splitter class.
 		static ATOM									m_aSplitter;
+
+		// The multi-splitter class.
+		static ATOM									m_aMultiSplitter;
 												
 	};
 
