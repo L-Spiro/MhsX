@@ -738,37 +738,37 @@ namespace lsw {
 			// STARTING CLIENT RECT.
 			// =======================================
 			if ( ::_stricmp( _sMember.c_str(), "SCW" ) == 0 ) {
-				// Accessing this client width.
+				// Accessing this starting width.
 				_rResult.ncType = ee::EE_NC_SIGNED;
 				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartClientRect().Width());
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "SCH" ) == 0 ) {
-				// Accessing this client height.
+				// Accessing this starting height.
 				_rResult.ncType = ee::EE_NC_SIGNED;
 				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartClientRect().Height());
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "SCL" ) == 0 ) {
-				// Accessing this client left.
+				// Accessing this starting left.
 				_rResult.ncType = ee::EE_NC_SIGNED;
 				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartClientRect().UpperLeftClientToScreen( pwThis->Wnd() ).x);
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "SCR" ) == 0 ) {
-				// Accessing this client right.
+				// Accessing this starting right.
 				_rResult.ncType = ee::EE_NC_SIGNED;
 				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartClientRect().BottomRightClientToScreen( pwThis->Wnd() ).x);
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "SCT" ) == 0 ) {
-				// Accessing this client top.
+				// Accessing this starting top.
 				_rResult.ncType = ee::EE_NC_SIGNED;
 				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartClientRect().top);
 				return true;
 			}
 			if ( ::_stricmp( _sMember.c_str(), "SCB" ) == 0 ) {
-				// Accessing this client bottom.
+				// Accessing this starting bottom.
 				_rResult.ncType = ee::EE_NC_SIGNED;
 				_rResult.u.ui64Val = static_cast<uint64_t>(pwThis->StartClientRect().BottomRightClientToScreen( pwThis->Wnd() ).y);
 				return true;
