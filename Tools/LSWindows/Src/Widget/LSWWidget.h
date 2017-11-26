@@ -437,6 +437,10 @@ namespace lsw {
 		// Add a child.
 		void								AddChild( CWidget * _pwChild );
 
+		// Informs that a child was removed from a child control (IE this control's child had a child control removed from it).
+		// Is also called on the control from which a child was removed for convenience.
+		virtual void						ChildWasRemoved( const CWidget * _pwChild );
+
 		// Set the parent.
 		void								SetWidgetParent( CWidget * _pwParent );
 

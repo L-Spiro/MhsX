@@ -1018,6 +1018,18 @@ namespace mx {
 			}
 			case ee::EE_NC_FLOATING : {
 				ToDouble( _rResult.u.dVal, _sString );
+				_sString.push_back( ' ' );
+				_sString.push_back( '(' );
+				// As float hex.
+				FLOAT fVal = static_cast<FLOAT>(_rResult.u.dVal);
+				uint32_t ui32FloatVal = (*reinterpret_cast<uint32_t *>(&fVal));
+				ToHex( ui32FloatVal, _sString, 8 );
+
+				_sString.push_back( ',' );
+				_sString.push_back( ' ' );
+				ToHex( _rResult.u.i64Val, _sString, 16 );
+
+				_sString.push_back( ')' );
 				break;
 			}
 			default : {

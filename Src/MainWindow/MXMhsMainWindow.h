@@ -113,8 +113,9 @@ namespace mx {
 
 
 		// == Functions.
-		// Remove a child.
-		virtual void						RemoveChild( const CWidget * _pwChild );
+		// Informs that a child was removed from a child control (IE this control's child had a child control removed from it).
+		// Is also called on the control from which a child was removed for convenience.
+		virtual void						ChildWasRemoved( const CWidget * _pwChild );
 
 		// Update the "Window" checks.
 		void								UpdateWindowChecks();

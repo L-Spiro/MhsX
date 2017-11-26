@@ -131,6 +131,7 @@ L?'(\\.|[^\\'])+'					{ return yy::CExpEvalParser::token::EE_CHAR_CONSTANT; }
 
 "<<"								{ return yy::CExpEvalParser::token::EE_LEFT_OP; }
 ">>"								{ return yy::CExpEvalParser::token::EE_RIGHT_OP; }
+","									{ return (','); }
 "!"									{ return ('!'); }
 "~"									{ return ('~'); }
 "-"									{ return ('-'); }

@@ -291,12 +291,21 @@ namespace lsw {
 				m_vChildren.erase( m_vChildren.begin() + I );
 			}
 		}
+		ChildWasRemoved( _pwChild );
 	}
 
 	// Add a child.
 	void CWidget::AddChild( CWidget * _pwChild ) {
 		if ( !HasChild( _pwChild ) ) {
 			m_vChildren.push_back( _pwChild );
+		}
+	}
+
+	// Informs that a child was removed from a child control (IE this control's child had a child control removed from it).
+	// Is also called on the control from which a child was removed for convenience.
+	void CWidget::ChildWasRemoved( const CWidget * _pwChild ) {
+		if ( Parent() ) {
+			Parent()->ChildWasRemoved( _pwChild );
 		}
 	}
 

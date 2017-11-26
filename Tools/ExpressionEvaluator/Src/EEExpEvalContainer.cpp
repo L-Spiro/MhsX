@@ -207,7 +207,7 @@ namespace ee {
 
 	// Create a 3-parm intrinsic.
 	void CExpEvalContainer::CreateIntrinsic3( uint32_t _uiIntrinsic, const YYSTYPE::EE_NODE_DATA &_ndExp0, const YYSTYPE::EE_NODE_DATA &_ndExp1, const YYSTYPE::EE_NODE_DATA &_ndExp2, YYSTYPE::EE_NODE_DATA &_ndNode ) {
-		_ndNode.nType = EE_N_INTRINSIC_2;
+		_ndNode.nType = EE_N_INTRINSIC_3;
 		_ndNode.u.ui32Intrinsic = _uiIntrinsic;
 		_ndNode.v.sNodeIndex = _ndExp0.sNodeIndex;
 		_ndNode.w.sNodeIndex = _ndExp1.sNodeIndex;

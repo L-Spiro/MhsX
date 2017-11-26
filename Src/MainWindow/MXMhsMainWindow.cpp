@@ -158,14 +158,14 @@ namespace mx {
 		CMultiSplitter::LSW_MS_ATTACH aAttach;
 		aAttach.atAttachTo = CMultiSplitter::LSW_AT_RIGHT;
 		aAttach.dwId = pwSplitter->RootId();
-		/*aAttach.pwWidget = FindChild( CMainWindowLayout::MX_MWI_TEST0 );
-		pwSplitter->Attach( aAttach );*/
+		aAttach.pwWidget = FindChild( CMainWindowLayout::MX_MWI_TEST0 );
+		pwSplitter->Attach( aAttach );
 		aAttach.pwWidget = MainListView();
 		pwSplitter->Attach( aAttach );
 
-		/*aAttach.atAttachTo = CMultiSplitter::LSW_AT_TOP;
+		aAttach.atAttachTo = CMultiSplitter::LSW_AT_TOP;
 		aAttach.pwWidget = FindChild( CMainWindowLayout::MX_MWI_TEST1 );
-		pwSplitter->Attach( aAttach );*/
+		pwSplitter->Attach( aAttach );
 
 
 		{
@@ -312,8 +312,9 @@ namespace mx {
 		UpdateWindowChecks();
 	}
 
-	// Remove a child.
-	void CMhsMainWindow::RemoveChild( const CWidget * _pwChild ) {
+	// Informs that a child was removed from a child control (IE this control's child had a child control removed from it).
+	// Is also called on the control from which a child was removed for convenience.
+	void CMhsMainWindow::ChildWasRemoved( const CWidget * _pwChild ) {
 		if ( m_pfaFoundAddresses && static_cast<CWidget *>(m_pfaFoundAddresses) == _pwChild ) {
 			m_pfaFoundAddresses = nullptr;
 			UpdateWindowChecks();
@@ -322,7 +323,7 @@ namespace mx {
 			m_eeExpEval = nullptr;
 			UpdateWindowChecks();
 		}
-		CMainWindow::RemoveChild( _pwChild );
+		CMainWindow::ChildWasRemoved( _pwChild );
 	}
 
 	// Update the "Window" checks.

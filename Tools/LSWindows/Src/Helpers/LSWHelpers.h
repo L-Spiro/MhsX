@@ -20,6 +20,7 @@ namespace lsw {
 		VOID								SetHeight( LONG _lH ) { bottom = top + _lH; }
 		POINT								UpperLeft() const { return { left, top }; }
 		POINT								BottomRight() const { return { right, bottom }; }
+		POINT								Center() const { return { left + (Width() >> 1), top + (Height() >> 1) }; }
 		LSW_RECT							MapToDeskTop( HWND _hWnd ) const {
 			LSW_RECT rTemp = (*this);
 			::MapWindowPoints( _hWnd, HWND_DESKTOP, reinterpret_cast<POINT *>(&rTemp), 2 );

@@ -46,6 +46,18 @@ namespace lsw {
 		// Client rectangle.
 		virtual const LSW_RECT				ClientRect( const CWidget * pwChild ) const;
 
+		// Given a point, an LSW_MS_ATTACH structure is filled that another control could use to
+		//	add a control into this splitter.  Also returned is a rectangle that can be used to
+		//	draw an attach point during a drag operation.
+		// In other words, a user drags a dockable control over this multi-splitter and this tells
+		//	it where it can add the control and gives it a rectangle to draw.
+		// The distance from the given point to the attachment point is returned.  This is always
+		//	the distance to the closest attachment point, and the caller can use this to decide if
+		//	attaching a control is possible.  Whatever control is being dragged should be dragged
+		//	close enough to an attachment point for attachment to be possible.
+		// Returned distance is squared.
+		LONG								GetAttachPoint( const POINT &_pPoint, LSW_MS_ATTACH &_maAttach, INT _iSizeSuggestion,
+			LSW_RECT &_rDrawRect );
 
 	private :
 		// == Types.
@@ -171,6 +183,50 @@ namespace lsw {
 
 		// Size all attachments.
 		void								SizeAttachments() const;
+
+		// Given a layer, index, side, and size (as a suggestion), generate a center point and a possible docking rectangle for the given side.
+		void								GenerateCenterPointAndAttachmentRect( const LSW_MS_LAYER &_mlLayer, size_t _sIndex, LSW_ATTACH_TYPE _atAttachType, INT _iSizeSuggestion,
+			POINT &_pCenterPoint, LSW_RECT &_rAttachRect );
+
+		// Given a layer, index, side, and size (as a suggestion), generate a center point and a possible docking rectangle for the given side.
+		void								GenerateCenterPointAndAttachmentRect( const LSW_RECT &_rLayerRect, const LSW_RECT &_rRect, INT _iDist, LSW_ATTACH_TYPE _atAttachType, INT _iSizeSuggestion,
+			POINT &_pCenterPoint, LSW_RECT &_rAttachRect );
+
+		// Given a point, an LSW_MS_ATTACH structure is filled that another control could use to
+		//	add a control into this splitter.  Also returned is a rectangle that can be used to
+		//	draw an attach point during a drag operation.
+		// In other words, a user drags a dockable control over this multi-splitter and this tells
+		//	it where it can add the control and gives it a rectangle to draw.
+		// The distance from the given point to the attachment point is returned.  This is always
+		//	the distance to the closest attachment point, and the caller can use this to decide if
+		//	attaching a control is possible.  Whatever control is being dragged should be dragged
+		//	close enough to an attachment point for attachment to be possible.
+		LONG								GetAttachPoint( const POINT &_pPoint, LSW_MS_ATTACH &_maAttach, LSW_RECT &_rAttachRect,
+			const LSW_MS_LAYER &_mlLayer, INT _iSizeSuggestion );
+
+		// Given a point, an LSW_MS_ATTACH structure is filled that another control could use to
+		//	add a control into this splitter.  Also returned is a rectangle that can be used to
+		//	draw an attach point during a drag operation.
+		// In other words, a user drags a dockable control over this multi-splitter and this tells
+		//	it where it can add the control and gives it a rectangle to draw.
+		// The distance from the given point to the attachment point is returned.  This is always
+		//	the distance to the closest attachment point, and the caller can use this to decide if
+		//	attaching a control is possible.  Whatever control is being dragged should be dragged
+		//	close enough to an attachment point for attachment to be possible.
+		LONG								GetAttachPoint( const POINT &_pPoint, LSW_MS_ATTACH &_maAttach, LSW_RECT &_rAttachRect,
+			const LSW_MS_LAYER &_mlLayer, size_t _sIndex, LSW_ATTACH_TYPE _atAttachType, INT _iSizeSuggestion );
+
+		// Given a point, an LSW_MS_ATTACH structure is filled that another control could use to
+		//	add a control into this splitter.  Also returned is a rectangle that can be used to
+		//	draw an attach point during a drag operation.
+		// In other words, a user drags a dockable control over this multi-splitter and this tells
+		//	it where it can add the control and gives it a rectangle to draw.
+		// The distance from the given point to the attachment point is returned.  This is always
+		//	the distance to the closest attachment point, and the caller can use this to decide if
+		//	attaching a control is possible.  Whatever control is being dragged should be dragged
+		//	close enough to an attachment point for attachment to be possible.
+		LONG								GetAttachPoint( const POINT &_pPoint, LSW_MS_ATTACH &_maAttach, LSW_RECT &_rAttachRect,
+			const LSW_RECT &_rLayerRect, const LSW_RECT &_rRect, INT _iDist, DWORD _dwId, LSW_ATTACH_TYPE _atAttachType, INT _iSizeSuggestion );
 	};
 
 }	// namespace lsw

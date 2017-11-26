@@ -96,6 +96,72 @@ namespace lsw {
 		return m_meRoot.rRect;
 	}
 
+	// Given a point, an LSW_MS_ATTACH structure is filled that another control could use to
+	//	add a control into this splitter.  Also returned is a rectangle that can be used to
+	//	draw an attach point during a drag operation.
+	// In other words, a user drags a dockable control over this multi-splitter and this tells
+	//	it where it can add the control and gives it a rectangle to draw.
+	// The distance from the given point to the attachment point is returned.  This is always
+	//	the distance to the closest attachment point, and the caller can use this to decide if
+	//	attaching a control is possible.  Whatever control is being dragged should be dragged
+	//	close enough to an attachment point for attachment to be possible.
+	// Returned distance is squared.
+	LONG CMultiSplitter::GetAttachPoint( const POINT &_pPoint, LSW_MS_ATTACH &_maAttach, INT _iSizeSuggestion,
+		LSW_RECT &_rDrawRect ) {
+		_maAttach.pwWidget = nullptr;
+
+
+		// If there is nothing attached.
+		if ( !m_meRoot.u.pmlLayer && !m_meRoot.bContainsWidget ) {
+			// User can drag anywhere.  The whole rectangle is returned.
+			_maAttach.atAttachTo = LSW_AT_LEFT;			// Ignored when you attach the first widget.
+			_maAttach.dwId = RootId();
+			_rDrawRect = ClientRect( this );
+			return 0;
+		}
+
+		// If only one widget is attached.
+		if ( m_meRoot.u.pqWidget && m_meRoot.bContainsWidget ) {
+			LONG lWinDist = LONG_MAX;
+			// Check each side of the widget.
+			static const LSW_ATTACH_TYPE atAttaches[] = {
+				LSW_AT_LEFT,
+				LSW_AT_RIGHT,
+				LSW_AT_TOP,
+				LSW_AT_BOTTOM,
+			};
+			LSW_RECT rRect = ClientRect( this );
+			for ( size_t I = 0; I < LSW_ELEMENTS( atAttaches ); ++I ) {
+				LSW_MS_ATTACH maAttach;
+				INT iDist = 500;
+				if ( atAttaches[I] == LSW_AT_LEFT || atAttaches[I] == LSW_AT_RIGHT ) {
+					iDist = std::min( iDist, static_cast<INT>(rRect.Width()) );
+				}
+				else {
+					iDist = std::min( iDist, static_cast<INT>(rRect.Height()) );
+				}
+				LSW_RECT rAttachrectTemp;
+				LONG lDist = GetAttachPoint( _pPoint, maAttach, rAttachrectTemp,
+					rRect, rRect, iDist, RootId(), atAttaches[I], _iSizeSuggestion );
+				if ( lDist < lWinDist ) {
+					lWinDist = lDist;
+					_maAttach = maAttach;
+					_rDrawRect = rAttachrectTemp;
+				}
+			}
+			return lWinDist;
+		}
+
+		// If more than 1 widget is attached.
+		if ( m_meRoot.u.pmlLayer && !m_meRoot.bContainsWidget ) {
+			return GetAttachPoint( _pPoint, _maAttach, _rDrawRect,
+				(*m_meRoot.u.pmlLayer), _iSizeSuggestion );
+		}
+
+		// Can never get hit.
+		return LONG_MAX;
+	}
+
 	// Draw the XOR bar.
 	void CMultiSplitter::DrawXorBar( HDC _hDc, INT _iX1, INT _iY1, INT _iWidth, INT _iHeight ) {
 		static WORD wDotPattern[8] = {
@@ -401,6 +467,139 @@ namespace lsw {
 				}
 			}
 		}
+	}
+
+	// Given a layer, index, side, and size (as a suggestion), generate a center point and a possible docking rectangle for the given side.
+	void CMultiSplitter::GenerateCenterPointAndAttachmentRect( const LSW_MS_LAYER &_mlLayer, size_t _sIndex, LSW_ATTACH_TYPE _atAttachType, INT _iSizeSuggestion,
+		POINT &_pCenterPoint, LSW_RECT &_rAttachRect ) {
+		return GenerateCenterPointAndAttachmentRect( _mlLayer.rRect, _mlLayer.vRects[_sIndex].rRect, _mlLayer.vRects[_sIndex].iDist, _atAttachType, _iSizeSuggestion,
+		_pCenterPoint, _rAttachRect );
+	}
+
+	// Given a layer, index, side, and size (as a suggestion), generate a center point and a possible docking rectangle for the given side.
+	void CMultiSplitter::GenerateCenterPointAndAttachmentRect( const LSW_RECT &_rLayerRect, const LSW_RECT &_rRect, INT _iDist, LSW_ATTACH_TYPE _atAttachType, INT _iSizeSuggestion,
+		POINT &_pCenterPoint, LSW_RECT &_rAttachRect ) {
+		switch ( _atAttachType ) {
+			case LSW_AT_LEFT : {
+				_rAttachRect.left = _rAttachRect.right = _rRect.left;
+				_rAttachRect.top = _rRect.top;
+				_rAttachRect.bottom = _rRect.bottom;
+				_pCenterPoint = _rAttachRect.Center();
+				LONG lAdjust = std::min( _iSizeSuggestion, _iDist );
+				_rAttachRect.right += lAdjust;
+				break;
+			}
+			case LSW_AT_RIGHT : {
+				_rAttachRect.left = _rAttachRect.right = _rRect.right;
+				_rAttachRect.top = _rRect.top;
+				_rAttachRect.bottom = _rRect.bottom;
+				_pCenterPoint = _rAttachRect.Center();
+				_rAttachRect.right = std::min( _rAttachRect.left + _iSizeSuggestion, _rLayerRect.right );
+				_rAttachRect.left = std::max( 0L, _rAttachRect.left - _iSizeSuggestion );
+				break;
+			}
+			case LSW_AT_TOP : {
+				_rAttachRect.top = _rAttachRect.bottom = _rRect.top;
+				_rAttachRect.left = _rRect.left;
+				_rAttachRect.right = _rRect.right;
+				_pCenterPoint = _rAttachRect.Center();
+				LONG lAdjust = std::min( _iSizeSuggestion, _iDist );
+				_rAttachRect.bottom += lAdjust;
+				break;
+			}
+			case LSW_AT_BOTTOM : {
+				_rAttachRect.top = _rAttachRect.bottom = _rRect.bottom;
+				_rAttachRect.left = _rRect.left;
+				_rAttachRect.right = _rRect.right;
+				_pCenterPoint = _rAttachRect.Center();
+				_rAttachRect.bottom = std::min( _rAttachRect.top + _iSizeSuggestion, _rLayerRect.bottom );
+				_rAttachRect.top = std::max( 0L, _rAttachRect.top - _iSizeSuggestion );
+				break;
+			}
+		}
+	}
+
+	// Given a point, an LSW_MS_ATTACH structure is filled that another control could use to
+	//	add a control into this splitter.  Also returned is a rectangle that can be used to
+	//	draw an attach point during a drag operation.
+	// In other words, a user drags a dockable control over this multi-splitter and this tells
+	//	it where it can add the control and gives it a rectangle to draw.
+	// The distance from the given point to the attachment point is returned.  This is always
+	//	the distance to the closest attachment point, and the caller can use this to decide if
+	//	attaching a control is possible.  Whatever control is being dragged should be dragged
+	//	close enough to an attachment point for attachment to be possible.
+	LONG CMultiSplitter::GetAttachPoint( const POINT &_pPoint, LSW_MS_ATTACH &_maAttach, LSW_RECT &_rAttachRect,
+		const LSW_MS_LAYER &_mlLayer, INT _iSizeSuggestion ) {
+		LONG lWinDist = LONG_MAX;
+		static const LSW_ATTACH_TYPE atAttaches[] = {
+			LSW_AT_LEFT,
+			LSW_AT_RIGHT,
+			LSW_AT_TOP,
+			LSW_AT_BOTTOM,
+		};
+		for ( size_t I = 0; I < _mlLayer.vRects.size(); ++I ) {
+			for ( size_t J = 0; J < LSW_ELEMENTS( atAttaches ); ++J ) {
+				LSW_MS_ATTACH maAttach;
+				LSW_RECT rAttachRectTemp;
+				LONG lDist = GetAttachPoint( _pPoint, maAttach, rAttachRectTemp,
+					_mlLayer, I, atAttaches[J], _iSizeSuggestion );
+				if ( lDist < lWinDist ) {
+					lWinDist = lDist;
+					_maAttach = maAttach;
+					_rAttachRect = rAttachRectTemp;
+				}
+			}
+			if ( !_mlLayer.vRects[I].bContainsWidget && _mlLayer.vRects[I].u.pmlLayer ) {
+				LSW_MS_ATTACH maAttach;
+				LSW_RECT rAttachRectTemp;
+				LONG lDist = GetAttachPoint( _pPoint, maAttach, rAttachRectTemp,
+					(*_mlLayer.vRects[I].u.pmlLayer), _iSizeSuggestion );
+				if ( lDist < lWinDist ) {
+					lWinDist = lDist;
+					_maAttach = maAttach;
+					_rAttachRect = rAttachRectTemp;
+				}
+			}
+		}
+		return lWinDist;
+	}
+
+	// Given a point, an LSW_MS_ATTACH structure is filled that another control could use to
+	//	add a control into this splitter.  Also returned is a rectangle that can be used to
+	//	draw an attach point during a drag operation.
+	// In other words, a user drags a dockable control over this multi-splitter and this tells
+	//	it where it can add the control and gives it a rectangle to draw.
+	// The distance from the given point to the attachment point is returned.  This is always
+	//	the distance to the closest attachment point, and the caller can use this to decide if
+	//	attaching a control is possible.  Whatever control is being dragged should be dragged
+	//	close enough to an attachment point for attachment to be possible.
+	LONG CMultiSplitter::GetAttachPoint( const POINT &_pPoint, LSW_MS_ATTACH &_maAttach, LSW_RECT &_rAttachRect,
+		const LSW_MS_LAYER &_mlLayer, size_t _sIndex, LSW_ATTACH_TYPE _atAttachType, INT _iSizeSuggestion ) {
+		return GetAttachPoint( _pPoint, _maAttach, _rAttachRect,
+			_mlLayer.rRect, _mlLayer.vRects[_sIndex].rRect, _mlLayer.vRects[_sIndex].iDist, _mlLayer.vRects[_sIndex].dwId,
+			_atAttachType, _iSizeSuggestion );
+	}
+
+	// Given a point, an LSW_MS_ATTACH structure is filled that another control could use to
+	//	add a control into this splitter.  Also returned is a rectangle that can be used to
+	//	draw an attach point during a drag operation.
+	// In other words, a user drags a dockable control over this multi-splitter and this tells
+	//	it where it can add the control and gives it a rectangle to draw.
+	// The distance from the given point to the attachment point is returned.  This is always
+	//	the distance to the closest attachment point, and the caller can use this to decide if
+	//	attaching a control is possible.  Whatever control is being dragged should be dragged
+	//	close enough to an attachment point for attachment to be possible.
+	LONG CMultiSplitter::GetAttachPoint( const POINT &_pPoint, LSW_MS_ATTACH &_maAttach, LSW_RECT &_rAttachRect,
+		const LSW_RECT &_rLayerRect, const LSW_RECT &_rRect, INT _iDist, DWORD _dwId, LSW_ATTACH_TYPE _atAttachType, INT _iSizeSuggestion ) {
+		POINT pCenterPoint;
+		GenerateCenterPointAndAttachmentRect( _rLayerRect, _rRect, _iDist, _atAttachType, _iSizeSuggestion,
+			pCenterPoint, _rAttachRect );
+		_maAttach.atAttachTo = _atAttachType;
+		_maAttach.dwId = _dwId;
+		_maAttach.pwWidget = nullptr;
+		LONG lX = _pPoint.x - pCenterPoint.x;
+		LONG lY = _pPoint.y - pCenterPoint.y;
+		return lX * lX + lY * lY;
 	}
 
 }	// namespace lsw

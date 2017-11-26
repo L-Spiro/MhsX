@@ -3,6 +3,7 @@
 #include "../Brush/LSWBrush.h"
 #include "../Helpers/LSWHelpers.h"
 #include "../Images/LSWBitmap.h"
+#include "../MultiSplitter/LSWMultiSplitter.h"
 
 namespace lsw {
 

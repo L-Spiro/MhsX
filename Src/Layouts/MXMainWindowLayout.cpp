@@ -169,7 +169,7 @@ namespace mx {
 		},
 
 
-#if 0
+#if 1
 		{
 			LSW_LT_LISTVIEW,						// ltType
 			MX_MWI_TEST0,							// wId
