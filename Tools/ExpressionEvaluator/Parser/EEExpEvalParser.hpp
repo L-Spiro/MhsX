@@ -182,14 +182,44 @@ namespace yy {
      EE_MIN = 322,
      EE_ABS = 323,
      EE_MADD = 324,
-     EE_PI = 325,
-     EE_E = 326,
-     EE_OR = 327,
-     EE_AND = 328,
-     EE_LOG_NOT = 329,
-     EE_UNARY_1SCOMPL = 330,
-     EE_UPLUS = 331,
-     EE_UMINUS = 332
+     EE_A = 325,
+     EE_ALLADI = 326,
+     EE_B = 327,
+     EE_B4 = 328,
+     EE_BETA = 329,
+     EE_BH = 330,
+     EE_C2 = 331,
+     EE_CAHEN = 332,
+     EE_CATALAN = 333,
+     EE_CONWAY = 334,
+     EE_E = 335,
+     EE_EULER = 336,
+     EE_GR = 337,
+     EE_GWK = 338,
+     EE_HALFPI = 339,
+     EE_HSMC = 340,
+     EE_ICE = 341,
+     EE_K = 342,
+     EE_LAMBDA = 343,
+     EE_LAPLACE = 344,
+     EE_M1 = 345,
+     EE_MU = 346,
+     EE_OMEGA = 347,
+     EE_PI = 348,
+     EE_PLASTIC = 349,
+     EE_PORTER = 350,
+     EE_RAMAN = 351,
+     EE_RAMAMU = 352,
+     EE_THETA = 353,
+     EE_VISW = 354,
+     EE_Z3 = 355,
+     EE_ZETA = 356,
+     EE_OR = 357,
+     EE_AND = 358,
+     EE_LOG_NOT = 359,
+     EE_UNARY_1SCOMPL = 360,
+     EE_UPLUS = 361,
+     EE_UMINUS = 362
    };
 
     };
@@ -268,14 +298,14 @@ namespace yy {
     /* Tables.  */
     /// For a state, the index in \a yytable_ of its portion.
     static const short int yypact_[];
-    static const signed char yypact_ninf_;
+    static const short int yypact_ninf_;
 
     /// For a state, default rule to reduce.
     /// Unless\a  yytable_ specifies something else to do.
     /// Zero means the default is an error.
     static const unsigned char yydefact_[];
 
-    static const signed char yypgoto_[];
+    static const short int yypgoto_[];
     static const signed char yydefgoto_[];
 
     /// What to do in a state.
@@ -308,7 +338,7 @@ namespace yy {
 
 #if YYDEBUG
     /// A type to store symbol numbers and -1.
-    typedef signed char rhs_number_type;
+    typedef short int rhs_number_type;
     /// A `-1'-separated list of the rules' RHS.
     static const rhs_number_type yyrhs_[];
     /// For each rule, the index of the first RHS symbol in \a yyrhs_.

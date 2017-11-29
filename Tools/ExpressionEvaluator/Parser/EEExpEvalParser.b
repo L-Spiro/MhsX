@@ -52,7 +52,8 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %token EE_NEXTAFTER EE_NEXTTOWARD
 %token EE_DIM EE_MAX EE_MIN
 %token EE_ABS EE_MADD
-%token EE_PI EE_E
+%token EE_A EE_ALLADI EE_B EE_B4 EE_BETA EE_BH EE_C2 EE_CAHEN EE_CATALAN EE_CONWAY EE_E EE_EULER EE_GR EE_GWK EE_HALFPI EE_HSMC EE_ICE EE_K
+%token EE_LAMBDA EE_LAPLACE EE_M1 EE_MU EE_OMEGA EE_PI EE_PLASTIC EE_PORTER EE_RAMAN EE_RAMAMU EE_THETA EE_VISW EE_Z3 EE_ZETA 
 
 %type <sStringIndex>										string												
 %type <ndData>												basic_expr
@@ -123,7 +124,37 @@ basic_expr
 																}
 															}
 	| EE_PI													{ m_peecContainer->CreateDouble( 3.1415926535897932384626433832795, $$ ); }
+	| EE_HALFPI												{ m_peecContainer->CreateDouble( 1.5707963267948966192313216916398, $$ ); }
 	| EE_E													{ m_peecContainer->CreateDouble( 2.7182818284590452353602874713527, $$ ); }
+	| EE_ZETA												{ m_peecContainer->CreateDouble( 1.202056903159594285399738161511449990764986292, $$ ); }
+	| EE_GR													{ m_peecContainer->CreateDouble( 1.6180339887498948482045868343656381177203091798057628621, $$ ); }
+	| EE_EULER												{ m_peecContainer->CreateDouble( 0.5772156649015328606065120900824024310421, $$ ); }
+	| EE_K													{ m_peecContainer->CreateDouble( 2.685452001065306445309714835481795693820382293994462953051152345557218, $$ ); }
+	| EE_A													{ m_peecContainer->CreateDouble( 1.2824271291006226368753425688697917277676889273250011920637400217404, $$ ); }
+	| EE_M1													{ m_peecContainer->CreateDouble( 0.26149721284764278375542683860869585, $$ ); }
+	| EE_B													{ m_peecContainer->CreateDouble( 0.28016949902386913303, $$ ); }
+	| EE_GWK												{ m_peecContainer->CreateDouble( 0.30366300289873265859744812190155623, $$ ); }
+	| EE_HSMC												{ m_peecContainer->CreateDouble( 0.35323637185499598454351655043268201, $$ ); }
+	| EE_OMEGA												{ m_peecContainer->CreateDouble( 0.56714329040978387299996866221035554, $$ ); }
+	| EE_MU													{ m_peecContainer->CreateDouble( 0.62432998854355087099293638310083724, $$ ); }
+	| EE_CAHEN												{ m_peecContainer->CreateDouble( 0.6434105462, $$ ); }
+	| EE_C2													{ m_peecContainer->CreateDouble( 0.66016181584686957392781211001455577, $$ ); }
+	| EE_LAPLACE											{ m_peecContainer->CreateDouble( 0.66274341934918158097474209710925290, $$ ); }
+	| EE_BETA												{ m_peecContainer->CreateDouble( 0.70258, $$ ); }
+	| EE_RAMAN												{ m_peecContainer->CreateDouble( 0.76422365358922066299069873125009232, $$ ); }
+	| EE_ALLADI												{ m_peecContainer->CreateDouble( 0.8093940205, $$ ); }
+	| EE_B4													{ m_peecContainer->CreateDouble( 0.87058838, $$ ); }
+	| EE_CATALAN											{ m_peecContainer->CreateDouble( 0.91596559417721901505460351493238411, $$ ); }
+	| EE_LAMBDA												{ m_peecContainer->CreateDouble( 1.0986858055, $$ ); }
+	| EE_VISW												{ m_peecContainer->CreateDouble( 1.13198824, $$ ); }
+	| EE_Z3													{ m_peecContainer->CreateDouble( 1.20205690315959428539973816151144999, $$ ); }
+	| EE_CONWAY												{ m_peecContainer->CreateDouble( 1.30357726903429639125709911215255189, $$ ); }
+	| EE_THETA												{ m_peecContainer->CreateDouble( 1.30637788386308069046861449260260571, $$ ); }
+	| EE_PLASTIC											{ m_peecContainer->CreateDouble( 1.32471795724474602596090885447809734, $$ ); }
+	| EE_RAMAMU												{ m_peecContainer->CreateDouble( 1.45136923488338105028396848589202744, $$ ); }
+	| EE_BH													{ m_peecContainer->CreateDouble( 1.45607494858268967139959535111654356, $$ ); }
+	| EE_PORTER												{ m_peecContainer->CreateDouble( 1.4670780794, $$ ); }
+	| EE_ICE												{ m_peecContainer->CreateDouble( 1.5396007178, $$ ); }
 	| '(' exp ')'											{ $$ = $2; }
 	| '[' exp ']'											{ m_peecContainer->CreateAddress( $2, EE_CT_UINT32, $$ ); }
 	| EE_OB_DWORD exp ']'									{ m_peecContainer->CreateAddress( $2, EE_CT_UINT32, $$ ); }
@@ -143,6 +174,36 @@ postfix_exp
 	| postfix_exp EE_MEMBERACCESS EE_HEX_CONSTANT3			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_E						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_PI						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_HALFPI					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_ZETA					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_GR						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_EULER					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_K						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_A						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_M1						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_B						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_GWK					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_HSMC					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_OMEGA					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_MU						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_CAHEN					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_C2						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LAPLACE				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_BETA					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_RAMAN					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_ALLADI					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_B4						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_CATALAN				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LAMBDA					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_VISW					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_Z3						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_CONWAY					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_THETA					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_PLASTIC				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_RAMAMU					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_BH						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_PORTER					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_ICE					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	;
 
 unary_exp
