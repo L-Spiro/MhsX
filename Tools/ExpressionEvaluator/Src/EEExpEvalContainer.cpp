@@ -74,17 +74,15 @@ namespace ee {
 	// Creates a hex constant (0x----).
 	void CExpEvalContainer::CreateHex1( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
-		_ndNode.u.ui64Val = std::stoul( _pcText, nullptr, 16 );
+		_ndNode.u.ui64Val = StoULL( _pcText, 16 );
 		_ndNode.v.ncConstType = EE_NC_UNSIGNED;
 		AddNode( _ndNode );
 	}
 
 	// Creates a hex constant (----h).
 	void CExpEvalContainer::CreateHex2( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
-		std::string sTemp = _pcText;
-		sTemp.pop_back();
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
-		_ndNode.u.ui64Val = std::stoul( sTemp, nullptr, 16 );
+		_ndNode.u.ui64Val = StoULL( _pcText, 16 );
 		_ndNode.v.ncConstType = EE_NC_UNSIGNED;
 		AddNode( _ndNode );
 	}
@@ -92,7 +90,7 @@ namespace ee {
 	// Creates a hex constant (----).
 	void CExpEvalContainer::CreateHex3( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
-		_ndNode.u.ui64Val = std::stoul( _pcText, nullptr, 16 );
+		_ndNode.u.ui64Val = StoULL( _pcText, 16 );
 		_ndNode.v.ncConstType = EE_NC_UNSIGNED;
 		AddNode( _ndNode );
 	}
@@ -100,7 +98,7 @@ namespace ee {
 	// Creates a decimal constant.
 	void CExpEvalContainer::CreateUInt( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
-		_ndNode.u.ui64Val = std::stoul( _pcText, nullptr, 10 );
+		_ndNode.u.ui64Val = StoULL( _pcText, 10 );
 		_ndNode.v.ncConstType = EE_NC_UNSIGNED;
 		AddNode( _ndNode );
 	}
@@ -108,7 +106,7 @@ namespace ee {
 	// Creates an oct constant.
 	void CExpEvalContainer::CreateOct( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
-		_ndNode.u.ui64Val = std::stoul( _pcText, nullptr, 8 );
+		_ndNode.u.ui64Val = StoULL( _pcText, 8 );
 		_ndNode.v.ncConstType = EE_NC_UNSIGNED;
 		AddNode( _ndNode );
 	}
@@ -546,6 +544,67 @@ namespace ee {
 			}
 		}
 		return false;
+	}
+
+	// String to integer, from any base.  Since std::stoull() raises exceptions etc.
+	uint64_t CExpEvalContainer::StoULL( const char * _pcText, int _iBase ) {
+		// Negate?
+		bool bNegate = false;
+		if ( _pcText[0] == '-' ) {
+			bNegate = true;
+			++_pcText;
+		}
+
+		// Skip whitespace.
+		while ( (*_pcText) == ' ' || (*_pcText) == '\t' || (*_pcText) == '\r' || (*_pcText) == '\n' ) {
+			++_pcText;
+		}
+
+		// Skip any opening "0", "0x", etc.
+		if ( _iBase == 0 || _iBase == 8 || _iBase == 16 ) {
+			if ( (*_pcText) == '0' ) {
+				++_pcText;
+				if ( _iBase == 0 ) {
+					_iBase = 8;
+				}
+			}
+			if ( (*_pcText) == 'x' || (*_pcText) == 'X' ) {
+				++_pcText;
+				if ( _iBase == 0 ) {
+					_iBase = 16;
+				}
+			}
+		}
+		if ( _iBase == 0 ) {
+			_iBase = 10;
+		}
+		uint64_t uiRes = 0;
+		for ( size_t I = 0; _pcText[I]; ++I ) {
+			uint8_t uiNext = static_cast<uint8_t>(_pcText[I]);
+			if ( uiNext >= '0' && uiNext <= '9' ) {
+				uiNext -= '0';
+			}
+			else {
+				if ( uiNext >= 'A' && uiNext <= 'Z' ) {
+					uiNext -= 'A';
+				}
+				else {
+					uiNext -= 'a';
+				}
+				uiNext += 10;
+			}
+			if ( uiNext >= _iBase ) {
+				break;
+			}
+			// Check for overflow.
+			uint64_t uiTemp = uiRes;
+			uiRes *= _iBase;
+			uiRes += uiNext;
+			if ( uiRes < uiTemp ) {
+				return std::numeric_limits<uint64_t>::max();
+			}
+		}
+		return bNegate ? static_cast<uint64_t>(-static_cast<int64_t>(uiRes)) : uiRes;
 	}
 
 }	// namespace ee;

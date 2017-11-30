@@ -52,8 +52,8 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %token EE_NEXTAFTER EE_NEXTTOWARD
 %token EE_DIM EE_MAX EE_MIN
 %token EE_ABS EE_MADD
-%token EE_A EE_ALLADI EE_B EE_B4 EE_BETA EE_BH EE_C2 EE_CAHEN EE_CATALAN EE_CONWAY EE_E EE_EULER EE_GR EE_GWK EE_HALFPI EE_HSMC EE_ICE EE_K
-%token EE_LAMBDA EE_LAPLACE EE_M1 EE_MU EE_OMEGA EE_PI EE_PLASTIC EE_PORTER EE_RAMAN EE_RAMAMU EE_THETA EE_VISW EE_Z3 EE_ZETA 
+%token EE_A EE_ALLADI EE_ALPHA EE_B EE_B2 EE_B4 EE_BETA EE_BH EE_C2 EE_CAHEN EE_CATALAN EE_CONWAY EE_DELTA EE_E EE_ERDOS EE_EULER EE_F EE_GR EE_GWK EE_HALFPI EE_HSMC EE_ICE EE_K
+%token EE_LAMBDA EE_LAPLACE EE_LEVY EE_M1 EE_MU EE_NIVEN EE_OMEGA EE_P2 EE_PI EE_PLASTIC EE_PORTER EE_PSI EE_RAMAN EE_RAMAMU EE_SIERP EE_THETA EE_VISW EE_Z3 EE_ZETA 
 
 %type <sStringIndex>										string												
 %type <ndData>												basic_expr
@@ -155,6 +155,16 @@ basic_expr
 	| EE_BH													{ m_peecContainer->CreateDouble( 1.45607494858268967139959535111654356, $$ ); }
 	| EE_PORTER												{ m_peecContainer->CreateDouble( 1.4670780794, $$ ); }
 	| EE_ICE												{ m_peecContainer->CreateDouble( 1.5396007178, $$ ); }
+	| EE_ERDOS												{ m_peecContainer->CreateDouble( 1.60669515241529176378330152319092458, $$ ); }
+	| EE_NIVEN												{ m_peecContainer->CreateDouble( 1.70521114010536776428855145343450816, $$ ); }
+	| EE_B2													{ m_peecContainer->CreateDouble( 1.902160583104, $$ ); }
+	| EE_P2													{ m_peecContainer->CreateDouble( 2.29558714939263807403429804918949039, $$ ); }
+	| EE_ALPHA												{ m_peecContainer->CreateDouble( 2.50290787509589282228390287321821578, $$ ); }
+	| EE_SIERP												{ m_peecContainer->CreateDouble( 2.58498175957925321706589358738317116, $$ ); }
+	| EE_F													{ m_peecContainer->CreateDouble( 2.80777024202851936522150118655777293, $$ ); }
+	| EE_LEVY												{ m_peecContainer->CreateDouble( 3.27582291872181115978768188245384386, $$ ); }
+	| EE_PSI												{ m_peecContainer->CreateDouble( 3.35988566624317755317201130291892717, $$ ); }
+	| EE_DELTA												{ m_peecContainer->CreateDouble( 4.66920160910299067185320382046620161, $$ ); }
 	| '(' exp ')'											{ $$ = $2; }
 	| '[' exp ']'											{ m_peecContainer->CreateAddress( $2, EE_CT_UINT32, $$ ); }
 	| EE_OB_DWORD exp ']'									{ m_peecContainer->CreateAddress( $2, EE_CT_UINT32, $$ ); }
@@ -204,6 +214,16 @@ postfix_exp
 	| postfix_exp EE_MEMBERACCESS EE_BH						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_PORTER					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_ICE					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_ERDOS					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_NIVEN					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_B2						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_P2						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_ALPHA					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_SIERP					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_F						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LEVY					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_PSI					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_DELTA					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	;
 
 unary_exp

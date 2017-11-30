@@ -187,6 +187,9 @@ namespace ee {
 
 		// Resolves a node.
 		bool								ResolveNode( size_t _sNode, EE_RESULT &_rRes );
+
+		// String to integer, from any base.  Since std::stoull() raises exceptions etc.
+		static uint64_t						StoULL( const char * _pcText, int _iBase = 10 );
 	};
 
 }	// namespace ee
