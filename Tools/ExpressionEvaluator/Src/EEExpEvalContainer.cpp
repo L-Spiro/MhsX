@@ -600,10 +600,14 @@ namespace ee {
 			uint64_t uiTemp = uiRes;
 			uiRes *= _iBase;
 			uiRes += uiNext;
-			if ( uiRes < uiTemp ) {
+			if ( (uiRes - uiNext) / _iBase != uiTemp) {
 				return std::numeric_limits<uint64_t>::max();
 			}
+			/*if ( uiRes < uiTemp ) {
+				return std::numeric_limits<uint64_t>::max();
+			}*/
 		}
+		uint64_t uiCheck = std::strtoull( _pcText, nullptr, _iBase );
 		return bNegate ? static_cast<uint64_t>(-static_cast<int64_t>(uiRes)) : uiRes;
 	}
 
