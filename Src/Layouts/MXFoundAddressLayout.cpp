@@ -29,6 +29,13 @@ namespace mx {
 			MX_MAKE_WCHAR( _T_2741E247_Found_Addresses ),		// pwcText
 			_LEN_2741E247,										// sTextLen
 			0,										// dwParentId
+
+			MX_PARENT_VCLEFT,						// pcLeftSizeExp
+			MX_PARENT_VCRIGHT,						// pcRightSizeExp
+			MX_PARENT_VCTOP,						// pcTopSizeExp
+			MX_PARENT_VCBOTTOM,						// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			nullptr, 0,								// pcHeightSizeExp
 		},
 		{
 			LSW_LT_REBAR,							// ltType

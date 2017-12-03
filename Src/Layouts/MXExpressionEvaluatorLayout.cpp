@@ -34,6 +34,13 @@ namespace mx {
 			MX_MAKE_WCHAR( _T_54B37832_Expression_Evaluator ),		// pwcText
 			_LEN_54B37832,											// sTextLen
 			0,										// dwParentId
+
+			MX_PARENT_VCLEFT,						// pcLeftSizeExp
+			MX_PARENT_VCRIGHT,						// pcRightSizeExp
+			MX_PARENT_VCTOP,						// pcTopSizeExp
+			MX_PARENT_VCBOTTOM,						// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			nullptr, 0,								// pcHeightSizeExp
 		},
 		{
 			LSW_LT_REBAR,							// ltType

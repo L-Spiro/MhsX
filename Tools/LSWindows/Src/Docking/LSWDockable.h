@@ -5,6 +5,7 @@
 #include "../LSWWin.h"
 #include "../Layout/LSWWidgetLayout.h"
 #include "../Widget/LSWWidget.h"
+#include "LSWDockTarget.h"
 
 #ifndef LSW_POPUP_STYLES
 #define LSW_POPUP_STYLES			(WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_SYSMENU | WS_CAPTION | WS_THICKFRAME)
@@ -72,11 +73,20 @@ namespace lsw {
 		// Are we floating?
 		bool								Floating() const { return Floating( m_dwState ); }
 
+		// Adds a dock target to be queried during drags.
+		void								AddDockTarget( CDockTarget * _pdtTarget );
+
+		// Determines if the given target is already in the list of dock targets.
+		bool								HasDockTarget( CDockTarget * _pdtTarget );
+
 		// The dockable message handler.
 		static LRESULT CALLBACK				WindowProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam );
 
 		// Determines of a state is floating.
 		static bool							Floating( DWORD _dwState ) { return (_dwState & LSW_DS_FLOATING) ? true : false; }
+
+		// Converts a CDockTarget::LSW_DT_ATTACH object to a LSW_DOCK_STATE state.
+		static LSW_DOCK_STATE				AttachToDockState( const CDockTarget::LSW_DT_ATTACH &_daAttach );
 
 
 	protected :
@@ -114,6 +124,9 @@ namespace lsw {
 
 		// Docked size.
 		DWORD								m_dwDockSize;
+
+		// The list of controls into which we might be able to dock.
+		std::vector<CDockTarget *>			m_vDockingTargets;
 
 		// To keep track of window movement.  Only one window can move via the mouse at a time.
 		// The dragging rectangle.
@@ -173,7 +186,7 @@ namespace lsw {
 		void								ToggleFloatAndChild();
 
 		// Check if the rectangle have moved to adocking or non-docking area.
-		LSW_DOCK_STATE						CheckDockingPos() const;
+		CDockTarget::LSW_DT_ATTACH			CheckDockingPos( LSW_RECT &_rRect, CDockTarget * &_pdtTarget ) const;
 
 		// Determine the size of the floating frame.
 		void								CalcFloatFrame();
@@ -185,7 +198,7 @@ namespace lsw {
 		void								CancelDrag( BOOL _bBecauseOfCancelMode );
 
 		// Redraws the docking state.
-		virtual void						RedrawDockingState();
+		virtual void						RedrawDockingState( CDockTarget::LSW_DT_ATTACH &_daAttach, CDockTarget * _pdtTarget );
 
 		// Sets the floating window position.
 		virtual void						SetFloatingPos( DWORD _dwSetWindowPosFlags );

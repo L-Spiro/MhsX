@@ -53,6 +53,18 @@ namespace lsw {
 	}
 
 	// == Functions.
+	// Adds a dock target to be queried during drags.
+	void CDockable::AddDockTarget( CDockTarget * _pdtTarget ) {
+		if ( !HasDockTarget( _pdtTarget ) ) {
+			m_vDockingTargets.push_back( _pdtTarget );
+		}
+	}
+
+	// Determines if the given target is already in the list of dock targets.
+	bool CDockable::HasDockTarget( CDockTarget * _pdtTarget ) {
+		return std::find( m_vDockingTargets.begin(), m_vDockingTargets.end(), _pdtTarget ) != m_vDockingTargets.end();
+	}
+
 	// The dockable message handler.
 	LRESULT CALLBACK CDockable::WindowProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam ) {
 		CWidget * pmwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( _hWnd, GWLP_USERDATA ));
@@ -75,6 +87,18 @@ namespace lsw {
 			}
 		}
 		return CWidget::WindowProc( _hWnd, _uMsg, _wParam, _lParam );
+	}
+
+	// Converts a CDockTarget::LSW_DT_ATTACH object to a LSW_DOCK_STATE state.
+	CDockable::LSW_DOCK_STATE CDockable::AttachToDockState( const CDockTarget::LSW_DT_ATTACH &_daAttach ) {
+		if ( !_daAttach.pwWidget ) { return LSW_DS_FLOATING; }
+		switch ( _daAttach.atAttachTo ) {
+			case CDockTarget::LSW_AT_LEFT : { return LSW_DS_DOCKED_LEFT; }
+			case CDockTarget::LSW_AT_RIGHT : { return LSW_DS_DOCKED_RIGHT; }
+			case CDockTarget::LSW_AT_TOP : { return LSW_DS_DOCKED_TOP; }
+			case CDockTarget::LSW_AT_BOTTOM : { return LSW_DS_DOCKED_BOTTOM; }
+		}
+		return LSW_DS_FLOATING;
 	}
 
 	// WM_SIZE.
@@ -100,76 +124,77 @@ namespace lsw {
 	// WM_MOUSEMOVE.
 	CWidget::LSW_HANDLED CDockable::MouseMove( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) {
 		if ( m_pwDraggingDockWnd ) {
-				// Yes. Move the drag rectangle.
-				POINT pMousePos;
-				LSW_DOCK_STATE dsDockSide;
+			// Yes. Move the drag rectangle.
+			POINT pMousePos;
+			LSW_DOCK_STATE dsDockSide;
 
-				// Get mouse pointer position in screen coords
-				::GetCursorPos( &pMousePos );
+			// Get mouse pointer position in screen coords
+			::GetCursorPos( &pMousePos );
 
-				// Did the mouse move?
-				if ( pMousePos.x != m_pMousePos.x || pMousePos.y != m_pMousePos.y ) {
-					// Indicate the drag rectangle (and therefore potentially the Docking Frame) has moved
-					m_bMouseMoved = TRUE;
+			// Did the mouse move?
+			if ( pMousePos.x != m_pMousePos.x || pMousePos.y != m_pMousePos.y ) {
+				// Indicate the drag rectangle (and therefore potentially the Docking Frame) has moved
+				m_bMouseMoved = TRUE;
 
-					// Save new mouse pointer position
-					m_pMousePos = pMousePos;
-				}
-
-				// Did the mouse move or CTRL key state change?
-				if ( m_bMouseMoved ) {
-					// Clear CTRL key status change.
-					m_bMouseMoved &= ~LSW_DS_FLOATING;
-
-					dsDockSide = CheckDockingPos();
-
-					// If we have moved over a dockable area, then temporarily change the size
-					// of the drag rectangle to fill that dockable area
-					if ( m_ddrtDragRectType == LSW_DDRT_SOLID ) {
-
-						LSW_RECT rParCient = Parent()->VirtualClientRect( this ).MapToDeskTop( Parent()->Wnd() );
-
-						switch ( dsDockSide ) {
-							case LSW_DS_DOCKED_LEFT : {
-								m_rDragPlacementRect.right = rParCient.left + m_dwDockSize;
-								m_rDragPlacementRect.left = rParCient.left;
-								m_rDragPlacementRect.top = rParCient.top;
-								m_rDragPlacementRect.bottom = rParCient.bottom;
-								break;
-							}
-							case LSW_DS_DOCKED_RIGHT : {
-								m_rDragPlacementRect.left = rParCient.right - m_dwDockSize;
-								m_rDragPlacementRect.right = rParCient.right;
-								m_rDragPlacementRect.top = rParCient.top;
-								m_rDragPlacementRect.bottom = rParCient.bottom;
-								break;
-							}
-							case LSW_DS_DOCKED_TOP : {
-								m_rDragPlacementRect.bottom = rParCient.top + m_dwDockSize;
-								m_rDragPlacementRect.top = rParCient.top;
-								m_rDragPlacementRect.left = rParCient.left;
-								m_rDragPlacementRect.right = rParCient.right;
-								break;
-							}
-							case LSW_DS_DOCKED_BOTTOM : {
-								m_rDragPlacementRect.top = rParCient.bottom - m_dwDockSize;
-								m_rDragPlacementRect.bottom = rParCient.bottom;
-								m_rDragPlacementRect.left = rParCient.left;
-								m_rDragPlacementRect.right = rParCient.right;
-								break;
-							}
-						}
-					}
-					DrawDragRect();
-				}
+				// Save new mouse pointer position
+				m_pMousePos = pMousePos;
 			}
+
+			// Did the mouse move or CTRL key state change?
+			if ( m_bMouseMoved ) {
+				// Clear CTRL key status change.
+				m_bMouseMoved &= ~LSW_DS_FLOATING;
+				CDockTarget * pdtTarget;
+				CDockTarget::LSW_DT_ATTACH adAttach = CheckDockingPos( m_rDragPlacementRect, pdtTarget );
+				dsDockSide = AttachToDockState( adAttach );
+
+				// If we have moved over a dockable area, then temporarily change the size
+				// of the drag rectangle to fill that dockable area
+				if ( m_ddrtDragRectType == LSW_DDRT_SOLID ) {
+					/*
+					LSW_RECT rParCient = Parent()->VirtualClientRect( this ).MapToDeskTop( Parent()->Wnd() );
+
+					switch ( dsDockSide ) {
+						case LSW_DS_DOCKED_LEFT : {
+							m_rDragPlacementRect.right = rParCient.left + m_dwDockSize;
+							m_rDragPlacementRect.left = rParCient.left;
+							m_rDragPlacementRect.top = rParCient.top;
+							m_rDragPlacementRect.bottom = rParCient.bottom;
+							break;
+						}
+						case LSW_DS_DOCKED_RIGHT : {
+							m_rDragPlacementRect.left = rParCient.right - m_dwDockSize;
+							m_rDragPlacementRect.right = rParCient.right;
+							m_rDragPlacementRect.top = rParCient.top;
+							m_rDragPlacementRect.bottom = rParCient.bottom;
+							break;
+						}
+						case LSW_DS_DOCKED_TOP : {
+							m_rDragPlacementRect.bottom = rParCient.top + m_dwDockSize;
+							m_rDragPlacementRect.top = rParCient.top;
+							m_rDragPlacementRect.left = rParCient.left;
+							m_rDragPlacementRect.right = rParCient.right;
+							break;
+						}
+						case LSW_DS_DOCKED_BOTTOM : {
+							m_rDragPlacementRect.top = rParCient.bottom - m_dwDockSize;
+							m_rDragPlacementRect.bottom = rParCient.bottom;
+							m_rDragPlacementRect.left = rParCient.left;
+							m_rDragPlacementRect.right = rParCient.right;
+							break;
+						}
+					}*/
+				}
+				DrawDragRect();
+			}
+		}
 
 		return LSW_H_CONTINUE;
 	}
 
 	// WM_NCLBUTTONDOWN.
 	CWidget::LSW_HANDLED CDockable::NcLButtonDown( INT _iHitTest, const POINTS &_pCursorPos ) {
-		if ( _iHitTest == HTCAPTION && (m_dwDockStyle & LSW_DS_ALLOW_DOCKALL) ) {
+		if ( _iHitTest == HTCAPTION && (m_dwDockStyle & LSW_DS_ALLOW_DOCKALL) && m_vDockingTargets.size() ) {
 			if ( (m_dwDockStyle & LSW_DS_KEEPORIGSTATE) == 0 ) {
 					BOOL bControlKeyDown = (::GetKeyState( VK_CONTROL ) & 0x8000) ? TRUE : FALSE;
 
@@ -299,21 +324,47 @@ namespace lsw {
 	}
 
 	// Check if the rectangle have moved to adocking or non-docking area.
-	CDockable::LSW_DOCK_STATE CDockable::CheckDockingPos() const {
+	CDockTarget::LSW_DT_ATTACH CDockable::CheckDockingPos( LSW_RECT &_rRect, CDockTarget * &_pdtTarget ) const {
 		// Should have been drawn once already.  Erase it.
 		DrawDragRect();
+
+		_pdtTarget = nullptr;
+		CDockTarget::LSW_DT_ATTACH daAttach;
+		daAttach.atAttachTo = CDockTarget::LSW_AT_LEFT;
+		daAttach.dwId = 0;
+		daAttach.pwWidget = 0;	// If this is nullptr, not attachment could be made.
 
 		// The size of the drag rectangle should now be the size of the Docking
 		// Frame when it is not docked (ie, floating). The drag rectangle should
 		// be centered around the current position of the mouse pointer
-		m_rDragPlacementRect = m_rDragStartRect;
-		m_rDragPlacementRect.MoveBy( { m_pMousePos.x - m_pDragStartPos.x, m_pMousePos.y - m_pDragStartPos.y } );
+		_rRect = m_rDragStartRect;
+		_rRect.MoveBy( { m_pMousePos.x - m_pDragStartPos.x, m_pMousePos.y - m_pDragStartPos.y } );
 	
 		// ===========================================================
 		// Check if the drag rectangle has moved into a dockable area.
 		// ===========================================================
+		BOOL bControlKeyDown = (::GetKeyState( VK_CONTROL ) & 0x8000) ? TRUE : FALSE;
+		m_ddrtDragRectType = LSW_DDRT_SOLID;
+		if ( !bControlKeyDown ) {
+			LONG lDistWin = LONG_MAX;
+			for ( size_t I = 0; I < m_vDockingTargets.size(); ++I ) {
+				CDockTarget::LSW_DT_ATTACH daTemp;
+				LSW_RECT rRectTemp;
+				LONG lDist = m_vDockingTargets[I]->GetAttachPoint( m_pMousePos, daTemp, 300, rRectTemp );
+				if ( lDist < lDistWin && lDist < 250 * 250 ) {
+					lDistWin = lDist;
+					m_rDragPlacementRect = rRectTemp;
+					daAttach = daTemp;
+					daAttach.pwWidget = const_cast<CDockable *>(this);
+					m_ddrtDragRectType = LSW_DDRT_CHECKERED;
+					_pdtTarget = m_vDockingTargets[I];
+				}
+			}
+		}
+		return daAttach;
+#if 0
 		const CWidget * pwContainer = Parent();
-		if ( !pwContainer ) { return static_cast<LSW_DOCK_STATE>(0); }
+		if ( !pwContainer ) { return daAttach; }
 		LSW_RECT rPrc2 = pwContainer->VirtualClientRect( this ).MapToDeskTop( pwContainer->Wnd() );
 	
 
@@ -343,10 +394,12 @@ namespace lsw {
 		}
 #undef LSW_CLAMP
 
+
 		BOOL bControlKeyDown = (::GetKeyState( VK_CONTROL ) & 0x8000) ? TRUE : FALSE;
 		m_ddrtDragRectType = ((dsDockSide & LSW_DS_ALL_DOCKS) && !bControlKeyDown) ? LSW_DDRT_SOLID : LSW_DDRT_CHECKERED;
 		//return LSW_DS_DOCKED_BOTTOM;
 		return dsDockSide;
+#endif	// #if 0
 	}
 
 	// Determine the size of the floating frame.
@@ -386,7 +439,9 @@ namespace lsw {
 			if ( !_bBecauseOfCancelMode && m_bMouseMoved ) {
 				::GetCursorPos( &m_pMousePos );
 
-				LSW_DOCK_STATE dsDockSide = CheckDockingPos();
+				CDockTarget * pdtTarget;
+				CDockTarget::LSW_DT_ATTACH adAttach = CheckDockingPos( m_rDragPlacementRect, pdtTarget );
+				LSW_DOCK_STATE dsDockSide = AttachToDockState( adAttach );
 
 
 				if ( !Floating() ) {
@@ -402,7 +457,7 @@ namespace lsw {
 						// Set the docking mode to floating and redraw the window. Also
 						// force the container window to update its layout
 						m_dwState |= LSW_DS_FLOATING;
-						RedrawDockingState();
+						RedrawDockingState( adAttach, pdtTarget );
 					}
 					// Was docked, still docked.
 					else {
@@ -419,7 +474,7 @@ namespace lsw {
 					if ( !Floating( dsDockSide ) ) {
 						// Became docked.
 						m_dwState = dsDockSide;
-						RedrawDockingState();
+						RedrawDockingState( adAttach, pdtTarget );
 					}
 					else {
 						// Still floating.
@@ -450,7 +505,7 @@ namespace lsw {
 	}
 
 	// Redraws the docking state.
-	void CDockable::RedrawDockingState() {
+	void CDockable::RedrawDockingState( CDockTarget::LSW_DT_ATTACH &_daAttach, CDockTarget * _pdtTarget ) {
 		DWORD dwStyle = m_dwDockStyle;
 
 		// LSW_DS_DONTSAVEPOS used inside WM_WINDOWPOSCHANGED to store the position of the window.
@@ -465,6 +520,9 @@ namespace lsw {
 		}
 		else {
 			BecomeChild();
+			if ( _pdtTarget ) {
+				_pdtTarget->Attach( _daAttach );
+			}
 		}
 
 		// Send WM_NCCALCSIZE.

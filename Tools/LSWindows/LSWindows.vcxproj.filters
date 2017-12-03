@@ -260,6 +260,9 @@
     <ClInclude Include="Src\MultiSplitter\LSWMultiSplitter.h">
       <Filter>Header Files\MultiSplitter</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Docking\LSWDockTarget.h">
+      <Filter>Header Files\Docking</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -336,6 +339,9 @@
     </ClCompile>
     <ClCompile Include="Src\MultiSplitter\LSWMultiSplitter.cpp">
       <Filter>Source Files\MultiSplitter</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Docking\LSWDockTarget.cpp">
+      <Filter>Source Files\Docking</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

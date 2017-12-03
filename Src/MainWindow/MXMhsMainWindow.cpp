@@ -155,17 +155,17 @@ namespace mx {
 		pwSplitter->Attach( MainListView(), CSplitter::LSW_A_RIGHT );*/
 
 		CMultiSplitter * pwSplitter = MultiSplitter();
-		CMultiSplitter::LSW_MS_ATTACH aAttach;
+		CMultiSplitter::LSW_DT_ATTACH aAttach;
 		aAttach.atAttachTo = CMultiSplitter::LSW_AT_RIGHT;
 		aAttach.dwId = pwSplitter->RootId();
 		aAttach.pwWidget = FindChild( CMainWindowLayout::MX_MWI_TEST0 );
-		pwSplitter->Attach( aAttach );
+		//pwSplitter->Attach( aAttach );
 		aAttach.pwWidget = MainListView();
 		pwSplitter->Attach( aAttach );
 
 		aAttach.atAttachTo = CMultiSplitter::LSW_AT_TOP;
 		aAttach.pwWidget = FindChild( CMainWindowLayout::MX_MWI_TEST1 );
-		pwSplitter->Attach( aAttach );
+		//pwSplitter->Attach( aAttach );
 
 
 		{
@@ -294,6 +294,7 @@ namespace mx {
 	void CMhsMainWindow::ShowFoundAddress() {
 		if ( !m_pfaFoundAddresses ) {
 			m_pfaFoundAddresses = static_cast<CFoundAddressesWindow *>(CFoundAddressLayout::CreateFoundAddressesWindow( MultiSplitter() ));
+			m_pfaFoundAddresses->AddDockTarget( MultiSplitter() );
 		}
 		else {
 			m_pfaFoundAddresses->SetVisible( TRUE );
@@ -305,6 +306,7 @@ namespace mx {
 	void CMhsMainWindow::ShowExpEval() {
 		if ( !m_eeExpEval ) {
 			m_eeExpEval = static_cast<CExpEvalWindow *>(CExpressionEvaluatorLayout::CreateExpEvalWindow( MultiSplitter() ));
+			m_eeExpEval->AddDockTarget( MultiSplitter() );
 		}
 		else {
 			m_eeExpEval->SetVisible( TRUE );
