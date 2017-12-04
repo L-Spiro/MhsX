@@ -811,7 +811,7 @@ namespace lsw {
 #define LSW_WNDRET( VAL )				if ( !_bIsDlg ) { _lrWndResult = VAL; }
 #define LSW_DLGRET( VAL )				if ( _bIsDlg ) { _ipDiagResult = VAL; }
 #define LSW_RET( WNDVAL, DLGVAL )		LSW_WNDRET( WNDVAL ) LSW_DLGRET( DLGVAL ) return
-
+		
 
 		CWidget * pmwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( _hWnd, GWLP_USERDATA ));
 		switch ( _uMsg ) {
@@ -1111,7 +1111,7 @@ namespace lsw {
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
 				break;
 			}
-			case WM_LBUTTONDBLCLK: {
+			case WM_LBUTTONDBLCLK : {
 				POINTS pPos = {
 					GET_X_LPARAM( _lParam ),
 					GET_Y_LPARAM( _lParam ),

@@ -216,7 +216,9 @@ WS									[ \t\v\r\n\f]
 "remainder"							{ return yy::CExpEvalParser::token::EE_REMAINDER; }
 "remquo"							{ return yy::CExpEvalParser::token::EE_REMQUO; }
 "nextafter"							{ return yy::CExpEvalParser::token::EE_NEXTAFTER; }
+"nextafterf"						{ return yy::CExpEvalParser::token::EE_NEXTAFTERF; }
 "nexttoward"						{ return yy::CExpEvalParser::token::EE_NEXTTOWARD; }
+"nexttowardf"						{ return yy::CExpEvalParser::token::EE_NEXTTOWARDF; }
 "dim"								{ return yy::CExpEvalParser::token::EE_DIM; }
 "fdim"								{ return yy::CExpEvalParser::token::EE_DIM; }
 "fdimf"								{ return yy::CExpEvalParser::token::EE_DIM; }

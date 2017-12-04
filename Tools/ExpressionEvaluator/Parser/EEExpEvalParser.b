@@ -49,7 +49,7 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %token EE_EXP EE_LOG EE_LOG10 EE_LOG2 EE_EXP2 EE_EXPM1 EE_ILOGB EE_LOG1P EE_LOGB
 %token EE_POW EE_SQRT EE_CBRT EE_HYPOT EE_TGAMMA EE_LGAMMA
 %token EE_CEIL EE_FLOOR EE_MOD EE_TRUNC EE_ROUND EE_NEARBYINT EE_REMAINDER EE_REMQUO
-%token EE_NEXTAFTER EE_NEXTTOWARD
+%token EE_NEXTAFTER EE_NEXTAFTERF EE_NEXTTOWARD EE_NEXTTOWARDF
 %token EE_DIM EE_MAX EE_MIN
 %token EE_ABS EE_MADD
 %token EE_A EE_ALLADI EE_ALPHA EE_B EE_B2 EE_B4 EE_BETA EE_BH EE_C2 EE_CAHEN EE_CATALAN EE_CONWAY EE_DELTA EE_E EE_ERDOS EE_EULER EE_F EE_GR EE_GWK EE_HALFPI EE_HSMC EE_ICE EE_K
@@ -338,7 +338,9 @@ intrinsic
 	| EE_NEARBYINT '(' exp ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_NEARBYINT, $3, $$ ); }
 	| EE_REMAINDER '(' exp ',' exp ')'						{ m_peecContainer->CreateIntrinsic2( token::EE_REMAINDER, $3, $5, $$ ); }
 	| EE_NEXTAFTER '(' exp ',' exp ')'						{ m_peecContainer->CreateIntrinsic2( token::EE_NEXTAFTER, $3, $5, $$ ); }
+	| EE_NEXTAFTERF '(' exp ',' exp ')'						{ m_peecContainer->CreateIntrinsic2( token::EE_NEXTAFTERF, $3, $5, $$ ); }
 	| EE_NEXTTOWARD '(' exp ',' exp ')'						{ m_peecContainer->CreateIntrinsic2( token::EE_NEXTTOWARD, $3, $5, $$ ); }
+	| EE_NEXTTOWARDF '(' exp ',' exp ')'					{ m_peecContainer->CreateIntrinsic2( token::EE_NEXTTOWARDF, $3, $5, $$ ); }
 	| EE_DIM '(' exp ',' exp ')'							{ m_peecContainer->CreateIntrinsic2( token::EE_DIM, $3, $5, $$ ); }
 	| EE_MAX '(' exp ',' exp ')'							{ m_peecContainer->CreateIntrinsic2( token::EE_MAX, $3, $5, $$ ); }
 	| EE_MIN '(' exp ',' exp ')'							{ m_peecContainer->CreateIntrinsic2( token::EE_MIN, $3, $5, $$ ); }
