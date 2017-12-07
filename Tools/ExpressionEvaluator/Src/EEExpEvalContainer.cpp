@@ -511,6 +511,8 @@ namespace ee {
 		_rRes.u.dVal = ::FUNC( rExp0.u.dVal, rExp1.u.dVal );			\
 		return true;													\
 	}
+#pragma warning( push )
+#pragma warning( disable : 4244 )	// warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
 				switch ( ndNode.u.ui32Intrinsic ) {
 					EE_OP( EE_ATAN2, atan2 )
 					EE_OP( EE_POW, pow )
@@ -525,6 +527,7 @@ namespace ee {
 					EE_OP( EE_MAX, max )
 					EE_OP( EE_MIN, min )
 				}
+#pragma warning( pop )
 #undef EE_OP
 			}
 			case EE_N_INTRINSIC_3 : {
