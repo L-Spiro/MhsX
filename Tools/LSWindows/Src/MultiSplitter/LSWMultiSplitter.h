@@ -24,6 +24,9 @@ namespace lsw {
 		// Attach a widget.
 		virtual bool						Attach( const LSW_DT_ATTACH &_maAttach );
 
+		// Detaches a widget given its ID.
+		virtual bool						Detach( WORD _wId );
+
 		// Root ID.
 		DWORD								RootId() const { return m_meRoot.dwId; }
 
@@ -79,6 +82,14 @@ namespace lsw {
 			LSW_MS_RECT *					pmrRect;
 		};
 
+		// Detach data.
+		struct LSW_MS_DETACH {
+			LSW_MS_LAYER *					pmlLayer;				// Layer containing the widget to remove.
+			size_t							sIndex;					// Index of the widget inside the layer to remove.
+			LSW_MS_LAYER *					pmlParentLayer;			// Layer containing the layer holding the widget to remove.
+			size_t							sParentIndex;			// Index into the parent layer where this layer can be found.
+		};
+
 
 		// == Members.
 		// All of the layers, in any order.
@@ -131,6 +142,9 @@ namespace lsw {
 
 		// Adds a layer under a given rectangle.
 		LSW_MS_LAYER *						AddLayer( LSW_MS_RECT &_mrRect, CWidget * _pwWidget );
+
+		// Fills an LSW_MS_DETACH structure with information necessary to remove a widget with the given ID.
+		void								GetDetachmentInfo( WORD _wId, LSW_MS_DETACH &_mdDetach, LSW_MS_LAYER &_mlSearchLayer );
 
 		// Calculates all of the rectangles.
 		void								CalcRects();
@@ -211,6 +225,12 @@ namespace lsw {
 		//	close enough to an attachment point for attachment to be possible.
 		LONG								GetAttachPoint( const POINT &_pPoint, LSW_DT_ATTACH &_maAttach, LSW_RECT &_rAttachRect,
 			const LSW_RECT &_rLayerRect, const LSW_RECT &_rRect, INT _iDist, DWORD _dwId, LSW_ATTACH_TYPE _atAttachType, INT _iSizeSuggestion );
+
+		// Gets the parent layer given a layer pointer.
+		LSW_MS_LAYER *						GetParentLayer( LSW_MS_LAYER * _pmlLayer, size_t &_sindex );
+
+		// Gets the parent layer given a layer pointer.
+		LSW_MS_LAYER *						GetParentLayerRecursive( LSW_MS_LAYER * _pmlCheckLayer, LSW_MS_LAYER * _pmlLayer, size_t &_sindex );
 	};
 
 }	// namespace lsw

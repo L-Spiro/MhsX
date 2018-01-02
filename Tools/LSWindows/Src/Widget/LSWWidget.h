@@ -41,6 +41,12 @@ namespace lsw {
 		// The parent widget.
 		const CWidget *						Parent() const { return m_pwParent; }
 
+		// The ancestor widget.
+		CWidget *							Ancestor();
+
+		// The ancestor widget.
+		const CWidget *						Ancestor() const;
+
 		// Custom ID.
 		WORD								Id() const { return m_wId; }
 
@@ -238,6 +244,12 @@ namespace lsw {
 		// Dock windows as children of this window.
 		std::vector<CDockable *>			m_vDockables;
 
+		// Show as active or not.
+		BOOL								m_bShowAsActive;
+
+		// Last hit returned by NcHitTest().
+		INT									m_iLastHit;
+
 
 		// == Message Handlers.
 		// WM_NCCREATE.
@@ -307,7 +319,7 @@ namespace lsw {
 		virtual LSW_HANDLED					Activate( BOOL _bMinimized, WORD _wActivationMode, CWidget * _pwWidget ) { return LSW_H_CONTINUE; }
 
 		// WM_NCACTIVATE.
-		virtual LSW_HANDLED					NcActivate( BOOL _bTitleBarActive, LPARAM _lParam ) { return LSW_H_CONTINUE; }
+		virtual LSW_HANDLED					NcActivate( BOOL _bTitleBarActive, LPARAM _lParam ) { m_bShowAsActive = _bTitleBarActive; return LSW_H_CONTINUE; }
 
 		// WM_ENABLE.
 		virtual LSW_HANDLED					Enable( BOOL _bEnabled ) { return LSW_H_CONTINUE; }
@@ -361,7 +373,9 @@ namespace lsw {
 		virtual LSW_HANDLED					NcLButtonDown( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
 
 		// WM_NCLBUTTONUP.
-		virtual LSW_HANDLED					NcLButtonUp( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
+		virtual LSW_HANDLED					NcLButtonUp( INT _iHitTest, const POINTS &_pCursorPos ) {
+			return LSW_H_CONTINUE;
+		}
 
 		// WM_NCMBUTTONDBLCLK.
 		virtual LSW_HANDLED					NcMButtonDblClk( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }

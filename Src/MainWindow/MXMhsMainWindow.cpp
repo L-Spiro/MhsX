@@ -294,6 +294,7 @@ namespace mx {
 	void CMhsMainWindow::ShowFoundAddress() {
 		if ( !m_pfaFoundAddresses ) {
 			m_pfaFoundAddresses = static_cast<CFoundAddressesWindow *>(CFoundAddressLayout::CreateFoundAddressesWindow( MultiSplitter() ));
+			//m_pfaFoundAddresses = static_cast<CFoundAddressesWindow *>(CFoundAddressLayout::CreateFoundAddressesWindow( this ));
 			m_pfaFoundAddresses->AddDockTarget( MultiSplitter() );
 		}
 		else {
@@ -306,6 +307,7 @@ namespace mx {
 	void CMhsMainWindow::ShowExpEval() {
 		if ( !m_eeExpEval ) {
 			m_eeExpEval = static_cast<CExpEvalWindow *>(CExpressionEvaluatorLayout::CreateExpEvalWindow( MultiSplitter() ));
+			//m_eeExpEval = static_cast<CExpEvalWindow *>(CExpressionEvaluatorLayout::CreateExpEvalWindow( this ));
 			m_eeExpEval->AddDockTarget( MultiSplitter() );
 		}
 		else {

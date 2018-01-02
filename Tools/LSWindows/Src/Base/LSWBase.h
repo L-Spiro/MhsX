@@ -88,6 +88,10 @@ namespace lsw {
 		// Gets the default status-bar font.
 		static HFONT								StatusBarFont() { return m_hStatusFont; }
 
+		// =======================================
+		// Debug.
+		// =======================================
+		static VOID									MessageToText( WORD _wMessage, std::string &_sName );
 
 	protected :
 		// == Types.

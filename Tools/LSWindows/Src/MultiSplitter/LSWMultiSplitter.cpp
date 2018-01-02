@@ -84,6 +84,38 @@ namespace lsw {
 		return true;
 	}
 
+	// Detaches a widget given its ID.
+	bool CMultiSplitter::Detach( WORD _wId ) {
+		
+		if ( m_meRoot.bContainsWidget && m_meRoot.u.pqWidget ) {
+			if ( m_meRoot.u.pqWidget->Id() == _wId ) {
+				// It is just the root node and nothing else.
+				m_meRoot.bContainsWidget = FALSE;
+				m_meRoot.u.pqWidget = nullptr;
+				CalcRects();
+				return true;
+			}
+		}
+		if ( !m_meRoot.bContainsWidget && m_meRoot.u.pmlLayer ) {
+			LSW_MS_DETACH mdDetachInfo;
+			GetDetachmentInfo( _wId, mdDetachInfo, (*m_meRoot.u.pmlLayer) );
+			if ( mdDetachInfo.pmlLayer ) {
+				// Something was found.
+				mdDetachInfo.pmlLayer->vRects.erase( mdDetachInfo.pmlLayer->vRects.begin() + mdDetachInfo.sIndex );
+				if ( mdDetachInfo.pmlLayer->vRects.size() == 0 ) {
+					// The layer is now empty.  Collapse it down if possible.
+					if ( mdDetachInfo.pmlParentLayer ) {
+						mdDetachInfo.pmlParentLayer->vRects.erase( mdDetachInfo.pmlParentLayer->vRects.begin() + mdDetachInfo.sParentIndex );
+					}
+				}
+				CalcRects();
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	// Client rectangle.
 	const LSW_RECT CMultiSplitter::ClientRect( const CWidget * pwChild ) const {
 		for ( size_t I = 0; I < m_vLayers.size(); ++I ) {
@@ -296,12 +328,38 @@ namespace lsw {
 		return pmlLayer;
 	}
 
+	// Fills an LSW_MS_DETACH structure with information necessary to remove a widget with the given ID.
+	void CMultiSplitter::GetDetachmentInfo( WORD _wId, LSW_MS_DETACH &_mdDetach, LSW_MS_LAYER &_mlSearchLayer ) {
+		_mdDetach.pmlLayer = _mdDetach.pmlParentLayer = nullptr;
+		_mdDetach.sIndex = _mdDetach.sParentIndex = 0;
+		for ( size_t I = 0; I < _mlSearchLayer.vRects.size(); ++I ) {
+			if ( _mlSearchLayer.vRects[I].bContainsWidget && _mlSearchLayer.vRects[I].u.pqWidget ) {
+				if ( _mlSearchLayer.vRects[I].u.pqWidget->Id() == _wId ) {
+					_mdDetach.sIndex = I;
+					_mdDetach.pmlLayer = &_mlSearchLayer;
+					return;
+				}
+			}
+			else if ( !_mlSearchLayer.vRects[I].bContainsWidget && _mlSearchLayer.vRects[I].u.pmlLayer ) {
+				GetDetachmentInfo( _wId, _mdDetach, (*_mlSearchLayer.vRects[I].u.pmlLayer) );
+				if ( _mdDetach.pmlLayer && !_mdDetach.pmlParentLayer ) {
+					_mdDetach.pmlParentLayer = &_mlSearchLayer;
+					_mdDetach.sParentIndex = I;
+					return;
+				}
+			}
+		}
+	}
+
 	// Calculates all of the rectangles.
 	void CMultiSplitter::CalcRects() {
 		::GetClientRect( Wnd(), &m_meRoot.rRect );
 		if ( m_meRoot.u.pmlLayer && !m_meRoot.bContainsWidget ) {
 			CalcRects( (*m_meRoot.u.pmlLayer), m_meRoot.rRect );
 		}
+		/*::RedrawWindow( Wnd(), NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_INTERNALPAINT | RDW_ALLCHILDREN | RDW_UPDATENOW | RDW_FRAME );
+		::InvalidateRect( Wnd(), NULL, FALSE );
+		::UpdateWindow( Wnd() );*/
 	}
 
 	// Calculate rectangles.
@@ -608,6 +666,31 @@ namespace lsw {
 		LONG lX = _pPoint.x - pCenterPoint.x;
 		LONG lY = _pPoint.y - pCenterPoint.y;
 		return lX * lX + lY * lY;
+	}
+
+	// Gets the parent layer given a layer pointer.
+	CMultiSplitter::LSW_MS_LAYER * CMultiSplitter::GetParentLayer( LSW_MS_LAYER * _pmlLayer, size_t &_sindex ) {
+		if ( !m_meRoot.bContainsWidget && m_meRoot.u.pmlLayer ) {
+			return GetParentLayerRecursive( m_meRoot.u.pmlLayer, _pmlLayer, _sindex );
+		}
+		return nullptr;
+	}
+
+	// Gets the parent layer given a layer pointer.
+	CMultiSplitter::LSW_MS_LAYER * CMultiSplitter::GetParentLayerRecursive( LSW_MS_LAYER * _pmlCheckLayer, LSW_MS_LAYER * _pmlLayer, size_t &_sindex ) {
+		for ( size_t I = 0; I < _pmlCheckLayer->vRects.size(); ++I ) {
+			if ( !_pmlCheckLayer->vRects[I].bContainsWidget && _pmlCheckLayer->vRects[I].u.pmlLayer ) {
+				if ( _pmlCheckLayer->vRects[I].u.pmlLayer == _pmlLayer ) {
+					_sindex = I;
+					return _pmlCheckLayer;
+				}
+				LSW_MS_LAYER * pmlTemp = GetParentLayerRecursive( _pmlCheckLayer->vRects[I].u.pmlLayer, _pmlLayer, _sindex );
+				if ( pmlTemp ) {
+					return pmlTemp;
+				}
+			}
+		}
+		return nullptr;
 	}
 
 }	// namespace lsw

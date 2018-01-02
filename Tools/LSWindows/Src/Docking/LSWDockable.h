@@ -68,7 +68,8 @@ namespace lsw {
 		// Gets the last docked rectangle.
 		const LSW_RECT &					LastDockedRect() const { return m_rDockedRect; }
 
-		// Gets the 
+		// Client rectangle.
+		virtual const LSW_RECT				ClientRect( const CWidget * pwChild ) const;
 
 		// Are we floating?
 		bool								Floating() const { return Floating( m_dwState ); }
@@ -78,6 +79,15 @@ namespace lsw {
 
 		// Determines if the given target is already in the list of dock targets.
 		bool								HasDockTarget( CDockTarget * _pdtTarget );
+
+		// The system color of the right side of the caption when docked.
+		INT									GetRightCaptionColorActive() const { return m_bUseGradient ? COLOR_GRADIENTACTIVECAPTION : COLOR_ACTIVECAPTION; }
+
+		// The system color of the right side of the caption when docked and inactive.
+		INT									GetRightCaptionColorInactive() const { return m_bUseGradient ? COLOR_GRADIENTINACTIVECAPTION : COLOR_INACTIVECAPTION; }
+
+		// The system color of the right side of the caption when docked.
+		INT									GetRightCaptionColor() const { return m_bShowAsActive ? GetRightCaptionColorActive() : GetRightCaptionColorInactive(); }
 
 		// The dockable message handler.
 		static LRESULT CALLBACK				WindowProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam );
@@ -128,6 +138,12 @@ namespace lsw {
 		// The list of controls into which we might be able to dock.
 		std::vector<CDockTarget *>			m_vDockingTargets;
 
+		// The control in which we are docked.
+		CDockTarget *						m_pdtDockedControl;
+
+		// Use a gradient for the caption color when docked?
+		BOOL								m_bUseGradient;
+
 		// To keep track of window movement.  Only one window can move via the mouse at a time.
 		// The dragging rectangle.
 		static LSW_RECT						m_rDragPlacementRect;
@@ -169,9 +185,32 @@ namespace lsw {
 
 		// WM_NCLBUTTONDOWN.
 		virtual LSW_HANDLED					NcLButtonDown( INT _iHitTest, const POINTS &_pCursorPos );
+		
+		// WM_NCLBUTTONUP.
+		virtual LSW_HANDLED					NcLButtonUp( INT _iHitTest, const POINTS &_pCursorPos ) {
+			return LSW_H_CONTINUE;
+		}
+
+		// WM_NCMOUSEMOVE.
+		virtual LSW_HANDLED					NcMouseMove( INT _iHitTest, const POINTS &_pCursorPos );
+
+		// WM_NCMOUSELEAVE.
+		virtual LSW_HANDLED					NcMouseLeave();
 
 		// WM_WINDOWPOSCHANGED.
 		virtual LSW_HANDLED					WindowPosChanged( const WINDOWPOS * _pwpPos );
+
+		// WM_NCHITTEST.
+		virtual LSW_HANDLED					NcHitTest( const POINTS &_pCursorPos, INT &_iReturnHitTest );
+
+		// WM_NCACTIVATE.
+		virtual LSW_HANDLED					NcActivate( BOOL _bTitleBarActive, LPARAM _lParam );
+
+		// WM_CLOSE.
+		virtual LSW_HANDLED					Close();
+
+		// WM_PAINT.
+		virtual LSW_HANDLED					Paint();
 
 		// Setting the HWND after the control has been created.
 		virtual void						InitControl( HWND _hWnd );
@@ -181,9 +220,6 @@ namespace lsw {
 
 		// Become a normal child window.
 		void								BecomeChild();
-
-		// Toggle between floating and being a child.
-		void								ToggleFloatAndChild();
 
 		// Check if the rectangle have moved to adocking or non-docking area.
 		CDockTarget::LSW_DT_ATTACH			CheckDockingPos( LSW_RECT &_rRect, CDockTarget * &_pdtTarget ) const;
@@ -202,6 +238,12 @@ namespace lsw {
 
 		// Sets the floating window position.
 		virtual void						SetFloatingPos( DWORD _dwSetWindowPosFlags );
+
+		// Gets the close rectangle.
+		virtual LSW_RECT					GetCloseRect() const;
+
+		// Gets the caption rectangle.
+		virtual LSW_RECT					GetCaptionRect() const;
 
 		// Keyboard hook.
 		static LRESULT CALLBACK				KeyboardProc( int _iCode, WPARAM _wParam, LPARAM _lParam );

@@ -34,8 +34,11 @@ namespace lsw {
 		UINT								GetRowCount() const;
 
 
+	protected :
+
+
 	private :
-		typedef CWidget						Parent;
+		//typedef CWidget						Parent;
 	};
 
 }	// namespace lsw

@@ -39,20 +39,36 @@ namespace lsw {
 		m_dwDockStyle( LSW_DS_ALLOW_DOCKALL ),
 		m_iFrameWidth( 0 ),
 		m_iFrameHeight( 0 ),
-		m_dwDockSize( 0 ) {
-		if ( Parent() ) {
-			Parent()->AddDockable( this );
+		m_dwDockSize( 0 ),
+		m_bUseGradient( TRUE ),
+		m_pdtDockedControl( nullptr ) {
+		if ( Ancestor() ) {
+			Ancestor()->AddDockable( this );
 		}
 		::GetClientRect( Wnd(), (m_dwState & LSW_DS_FLOATING) ? &m_rFloatRect : &m_rDockedRect );
 		CalcFloatFrame();
 	}
 	CDockable::~CDockable() {
-		if ( Parent() ) {
-			Parent()->RemDockable( this );
+		if ( m_pdtDockedControl ) {
+			m_pdtDockedControl->Detach( Id() );
+			m_pdtDockedControl = nullptr;
+		}
+
+		if ( Ancestor() ) {
+			Ancestor()->RemDockable( this );
 		}
 	}
 
 	// == Functions.
+	// Client rectangle.
+	const LSW_RECT CDockable::ClientRect( const CWidget * pwChild ) const {
+		if ( Floating() ) { return CWidget::ClientRect( pwChild ); }
+		LSW_RECT rRect;
+		::GetClientRect( Wnd(), &rRect );
+		rRect.top += ::GetSystemMetrics( SM_CYSMCAPTION );
+		return rRect;
+	}
+
 	// Adds a dock target to be queried during drags.
 	void CDockable::AddDockTarget( CDockTarget * _pdtTarget ) {
 		if ( !HasDockTarget( _pdtTarget ) ) {
@@ -71,16 +87,18 @@ namespace lsw {
 		switch ( _uMsg ) {
 			case WM_NCACTIVATE : {
 				if ( pmwThis ) {
-					if ( pmwThis->Parent() ) {
-						return pmwThis->Parent()->DockNcActivate( pmwThis, _wParam, _lParam, TRUE );
+					CWidget * pwPar = pmwThis->Ancestor();
+					if ( pwPar ) {
+						return pwPar->DockNcActivate( pmwThis, _wParam, _lParam, TRUE );
 					}
 				}
 				break;
 			}
 			case WM_ENABLE : {
 				if ( pmwThis ) {
-					if ( pmwThis->Parent() ) {
-						return pmwThis->Parent()->DockEnable( pmwThis, _wParam, _lParam, TRUE );
+					CWidget * pwPar = pmwThis->Ancestor();
+					if ( pwPar ) {
+						return pwPar->DockEnable( pmwThis, _wParam, _lParam, TRUE );
 					}
 				}
 				break;
@@ -117,7 +135,17 @@ namespace lsw {
 
 	// WM_LBUTTONUP.
 	CWidget::LSW_HANDLED CDockable::LButtonUp( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) {
-		CancelDrag( FALSE );
+		if ( m_pwDraggingDockWnd ) {
+			CancelDrag( FALSE );
+		}
+		{
+			POINT pPnt;
+			::GetCursorPos( &pPnt );
+			LRESULT lrHit = SendMessageW( Wnd(), WM_NCHITTEST, 0, MAKELPARAM( pPnt.x, pPnt.y ) );
+			if ( lrHit == HTCLOSE ) {
+				return Close();
+			}
+		}
 		return LSW_H_CONTINUE;
 	}
 
@@ -224,6 +252,30 @@ namespace lsw {
 					m_bMouseMoved = FALSE;
 			}
 		}
+		if ( _iHitTest == HTCLOSE ) {
+			return Close();
+		}
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_NCMOUSEMOVE.
+	CWidget::LSW_HANDLED CDockable::NcMouseMove( INT _iHitTest, const POINTS &_pCursorPos ) {
+		/*if ( _iHitTest != m_iLastHit ) {
+			::InvalidateRect( Wnd(), NULL, FALSE );
+			::UpdateWindow( Wnd() );
+		}*/
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_NCMOUSELEAVE.
+	CWidget::LSW_HANDLED CDockable::NcMouseLeave() {
+		INT iLast = m_iLastHit;
+		m_iLastHit = HTNOWHERE;
+		if ( iLast == HTCLOSE ) {
+			LSW_RECT rCaption = GetCloseRect();
+			::InvalidateRect( Wnd(), &rCaption, FALSE );
+			::UpdateWindow( Wnd() );
+		}
 		return LSW_H_CONTINUE;
 	}
 
@@ -293,6 +345,119 @@ namespace lsw {
 		return LSW_H_CONTINUE;
 	}
 
+	// WM_NCHITTEST.
+	CWidget::LSW_HANDLED CDockable::NcHitTest( const POINTS &_pCursorPos, INT &_iReturnHitTest ) {
+		if ( Floating() ) { return LSW_H_CONTINUE; }
+
+		LRESULT lRes = ::DefWindowProcW( Wnd(), WM_NCHITTEST, 0, MAKEWPARAM( _pCursorPos.x, _pCursorPos.y ) );
+		if ( lRes == HTCLIENT ) { lRes = HTCAPTION; }
+		if ( lRes == HTCAPTION ) {
+			LSW_RECT rClose = GetCloseRect();
+			POINT pPosBig = { _pCursorPos.x, _pCursorPos.y };
+			::ScreenToClient( Wnd(), &pPosBig );
+			if ( rClose.PointIsIn_ULInclusive( pPosBig ) ) {
+				lRes = HTCLOSE;
+			}
+		}
+		_iReturnHitTest = static_cast<INT>(lRes);
+		if ( _iReturnHitTest != m_iLastHit ) {
+			m_iLastHit = _iReturnHitTest;
+			LSW_RECT rCaption = GetCloseRect();
+			::InvalidateRect( Wnd(), &rCaption, FALSE );
+			::UpdateWindow( Wnd() );
+		}
+		return LSW_H_HANDLED;
+	}
+
+	// WM_NCACTIVATE.
+	CWidget::LSW_HANDLED CDockable::NcActivate( BOOL _bTitleBarActive, LPARAM _lParam ) {
+		LSW_HANDLED hHand = CWidget::NcActivate( _bTitleBarActive, _lParam );
+		if ( !Floating() ) {
+			::RedrawWindow( Wnd(), NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_INTERNALPAINT | RDW_ALLCHILDREN | RDW_UPDATENOW | RDW_FRAME );
+		}
+		return hHand;
+	}
+
+	// WM_CLOSE.
+	CWidget::LSW_HANDLED CDockable::Close() {
+		::DestroyWindow( Wnd() );
+		return LSW_H_HANDLED;
+	}
+
+	// WM_PAINT.
+	CWidget::LSW_HANDLED CDockable::Paint() {
+		if ( Floating() ) { return LSW_H_CONTINUE; }
+
+		LSW_BEGINPAINT bpPaint( Wnd() );
+
+		int iH = ::GetSystemMetrics( SM_CYSMCAPTION );
+		LSW_RECT rRect;
+		::GetClientRect( Wnd(), &rRect );
+		rRect.bottom = rRect.top + iH;
+		LONG rCliRight = rRect.right;
+		BOOL bActive = /*Enabled() && */m_bShowAsActive;
+
+		LSW_RECT rClose = GetCloseRect();
+		rRect.right = rClose.left;
+		::DrawCaption( Wnd(), bpPaint.hDc, &rRect, DC_BUTTONS | DC_TEXT | (bActive ? DC_ACTIVE : 0) | (m_bUseGradient ? DC_GRADIENT : 0) );
+
+
+
+		LOGFONTW lf =  { 0 };
+		lf.lfCharSet = SYMBOL_CHARSET;
+		::wcscpy_s( lf.lfFaceName, LSW_ELEMENTS( lf.lfFaceName ), L"Webdings" );
+		lf.lfHeight = -MulDiv( iH / 2, ::GetDeviceCaps( bpPaint.hDc, LOGPIXELSY ), 72 );
+		lf.lfWeight = FW_NORMAL;
+		lf.lfEscapement = 0;
+		lf.lfOrientation = 0;
+		lf.lfQuality = DRAFT_QUALITY;
+		lf.lfOutPrecision = OUT_STROKE_PRECIS;
+		lf.lfClipPrecision = CLIP_STROKE_PRECIS;
+		lf.lfItalic = FALSE;
+		lf.lfStrikeOut = FALSE;
+		lf.lfUnderline = FALSE;
+		lf.lfPitchAndFamily = VARIABLE_PITCH | FF_ROMAN;
+		HFONT hFont = ::CreateFontIndirectW( &lf );
+
+		{
+			LSW_SELECTOBJECT soBrushOrig( bpPaint.hDc, hFont );	// Destructor sets the original brush back.
+			ABCFLOAT abcfWidth;
+			::GetCharABCWidthsFloatA( bpPaint.hDc, 'r', 'r', &abcfWidth );
+			INT iCharWidth = static_cast<INT>(abcfWidth.abcfA + abcfWidth.abcfB + abcfWidth.abcfC);
+
+			LSW_RECT rChar = rClose;
+			rChar.left = rClose.left + ((rChar.Width() - iCharWidth) >> 1);
+			rChar.bottom = iH;
+
+
+			COLORREF crTextColor = ::GetSysColor( bActive ? COLOR_CAPTIONTEXT : COLOR_INACTIVECAPTIONTEXT );
+			if ( m_iLastHit == HTCLOSE ) {
+				crTextColor = RGB( 0xFF - GetRValue( crTextColor ),
+					0xFF - GetGValue( crTextColor ),
+					0xFF - GetBValue( crTextColor ) );
+			}
+			COLORREF crBackColor = ::GetSysColor( GetRightCaptionColor() );
+			LSW_SETTEXTCOLOR stcText( bpPaint.hDc, crTextColor );
+			LSW_SETBKCOLOR sbcB( bpPaint.hDc, crBackColor );
+			
+			::ExtTextOutA( bpPaint.hDc, rChar.left, rChar.top, ETO_OPAQUE | ETO_CLIPPED, &rChar, "r", 1, NULL );
+			LONG lRight = rChar.right;
+
+
+			rChar.right = rChar.left;
+			rChar.left = rClose.left;
+			::ExtTextOutA( bpPaint.hDc, rChar.left, rChar.top, ETO_OPAQUE | ETO_CLIPPED, &rChar, "", 0, NULL );
+
+
+			rChar.left = lRight;
+			rChar.right = rCliRight;
+			::ExtTextOutA( bpPaint.hDc, rChar.left, rChar.top, ETO_OPAQUE | ETO_CLIPPED, &rChar, "", 0, NULL );
+		}
+		::DeleteObject( hFont );
+
+		return LSW_H_HANDLED;
+	}
+
 	// Setting the HWND after the control has been created.
 	void CDockable::InitControl( HWND _hWnd ) {
 		CWidget::InitControl( _hWnd );
@@ -311,16 +476,7 @@ namespace lsw {
 		SetStyle( (GetStyle() & ~LSW_POPUP_STYLES) | LSW_CHILD_STYLES );
 		SetStyleEx( (GetStyleEx() & ~LSW_POPUP_STYLESEX) | LSW_CHILD_STYLESEX );
 		SetParent( Parent() );
-	}
-
-	// Toggle between floating and being a child.
-	void CDockable::ToggleFloatAndChild() {
-		if ( GetStyle() & WS_CHILD ) {
-			BecomeFloat();
-		}
-		else {
-			BecomeChild();
-		}
+		m_bShowAsActive = TRUE;
 	}
 
 	// Check if the rectangle have moved to adocking or non-docking area.
@@ -517,11 +673,16 @@ namespace lsw {
 
 		if ( Floating() ) {
 			BecomeFloat();
+			if ( m_pdtDockedControl ) {
+				m_pdtDockedControl->Detach( Id() );
+				m_pdtDockedControl = nullptr;
+			}
 		}
 		else {
 			BecomeChild();
 			if ( _pdtTarget ) {
 				_pdtTarget->Attach( _daAttach );
+				m_pdtDockedControl = _pdtTarget;
 			}
 		}
 
@@ -547,6 +708,30 @@ namespace lsw {
 	void CDockable::SetFloatingPos( DWORD _dwSetWindowPosFlags ) {
 		CalcFloatFrame();
 		::SetWindowPos( Wnd(), HWND_TOP, m_iFrameX, m_iFrameY, m_iFrameWidth, m_iFrameHeight, _dwSetWindowPosFlags );
+	}
+
+	// Gets the close rectangle.
+	LSW_RECT CDockable::GetCloseRect() const {
+		LSW_RECT rCaption = GetCaptionRect();
+		int iCxSmSize = ::GetSystemMetrics( SM_CXSMSIZE );
+		int iCySmSize = ::GetSystemMetrics( SM_CYSMSIZE );
+		int iCxFrame = ::GetSystemMetrics( SM_CXFRAME );
+
+		LSW_RECT rRet;
+		rRet.left = std::max( 0L, rCaption.right - iCxSmSize - iCxFrame );
+		rRet.right = rRet.left + iCxSmSize;
+
+		rRet.top = std::max( 0L, ((rCaption.Height()) - iCySmSize) >> 1 );
+		rRet.bottom = rRet.top + iCySmSize;
+		return rRet;
+	}
+
+	// Gets the caption rectangle.
+	LSW_RECT CDockable::GetCaptionRect() const {
+		LSW_RECT rRet;
+		::GetClientRect( Wnd(), &rRet );
+		rRet.bottom = rRet.top + ::GetSystemMetrics( SM_CYSMCAPTION );
+		return rRet;
 	}
 
 	// Keyboard hook.

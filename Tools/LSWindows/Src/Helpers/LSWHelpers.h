@@ -201,6 +201,55 @@ namespace lsw {
 		HGDIOBJ								hPrev;
 	};
 
+	struct LSW_BEGINPAINT {
+		LSW_BEGINPAINT( HWND _hWnd ) :
+			hWnd( _hWnd ) {
+			hDc = ::BeginPaint( _hWnd, &psPaint );
+		}
+		~LSW_BEGINPAINT() {
+			if ( hDc != NULL ) {
+				::EndPaint( hWnd, &psPaint );
+				hDc = NULL;
+			}
+			hWnd = NULL;
+		}
+
+
+		HWND								hWnd;
+		HDC									hDc;
+		PAINTSTRUCT							psPaint;
+	};
+
+	struct LSW_SETTEXTCOLOR {
+		LSW_SETTEXTCOLOR( HDC _hDc, COLORREF _crColor ) :
+			hDc( _hDc ),
+			crCur( _crColor ),
+			crPrev( ::SetTextColor( _hDc, _crColor ) ) {
+		}
+		~LSW_SETTEXTCOLOR() {
+			::SetTextColor( hDc, crPrev );
+		}
+
+		HDC									hDc;
+		COLORREF							crCur;
+		COLORREF							crPrev;
+	};
+
+	struct LSW_SETBKCOLOR {
+		LSW_SETBKCOLOR( HDC _hDc, COLORREF _crColor ) :
+			hDc( _hDc ),
+			crCur( _crColor ),
+			crPrev( ::SetBkColor( _hDc, _crColor ) ) {
+		}
+		~LSW_SETBKCOLOR() {
+			::SetBkColor( hDc, crPrev );
+		}
+
+		HDC									hDc;
+		COLORREF							crCur;
+		COLORREF							crPrev;
+	};
+
 	class CHelpers {
 	public :
 		// Aligns a WORD pointer to a 4-byte address.

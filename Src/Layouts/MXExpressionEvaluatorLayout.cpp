@@ -61,8 +61,8 @@ namespace mx {
 			0,										// sTextLen
 			MX_EE_MAINWINDOW,						// dwParentId
 
-			MX_LOCK_LEFT,							// pcLeftSizeExp
-			MX_LOCK_RIGHT,							// pcRightSizeExp
+			MX_PARENT_CLEFT,						// pcLeftSizeExp
+			MX_PARENT_CRIGHT,						// pcRightSizeExp
 			MX_PARENT_CTOP,							// pcTopSizeExp
 			nullptr, 0,								// pcBottomSizeExp
 			nullptr, 0,								// pcWidthSizeExp

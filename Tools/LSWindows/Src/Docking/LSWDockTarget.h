@@ -36,6 +36,9 @@ namespace lsw {
 		// Attach a widget.
 		virtual bool						Attach( const LSW_DT_ATTACH &_maAttach ) { return false; }
 
+		// Detaches a widget given its ID.
+		virtual bool						Detach( WORD _wId ) { return false; }
+
 		// Given a point, an LSW_DT_ATTACH structure is filled that another control could use to
 		//	add a control into this splitter.  Also returned is a rectangle that can be used to
 		//	draw an attach point during a drag operation.

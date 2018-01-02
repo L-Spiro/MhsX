@@ -13,7 +13,9 @@ namespace lsw {
 		m_wId( _wlLayout.wId ),
 		m_bEnabled( _wlLayout.bEnabled ),
 		m_bActive( _wlLayout.bActive ),
-		m_pwParent( _pwParent ) {
+		m_pwParent( _pwParent ),
+		m_bShowAsActive( FALSE ),
+		m_iLastHit( HTNOWHERE ) {
 
 		m_rStartingRect.left = _wlLayout.iLeft;
 		m_rStartingRect.top = _wlLayout.iTop;
@@ -110,6 +112,24 @@ namespace lsw {
 		INT_PTR ipDlgRes = 0;
 		WndDlgProc( _hWnd, _uMsg, _wParam, _lParam, TRUE, lrWndRes, ipDlgRes );
 		return ipDlgRes;
+	}
+
+	// The ancestor widget.
+	CWidget * CWidget::Ancestor() {
+		CWidget * pwNext = Parent();
+		while ( pwNext && pwNext->Parent() ) {
+			pwNext = pwNext->Parent();
+		}
+		return pwNext;
+	}
+
+	// The ancestor widget.
+	const CWidget * CWidget::Ancestor() const {
+		const CWidget * pwNext = Parent();
+		while ( pwNext && pwNext->Parent() ) {
+			pwNext = pwNext->Parent();
+		}
+		return pwNext;
 	}
 
 	// Gets the window text.
@@ -385,6 +405,7 @@ namespace lsw {
 		if ( bResize ) {
 			if ( Parent() ) {
 				POINT pUpperLeft = rNewSize.UpperLeft(), pBottomRight = rNewSize.BottomRight();
+				LSW_RECT rParRect = Parent()->ClientRect( this );
 				::ScreenToClient( Parent()->Wnd(), &pUpperLeft );
 				::ScreenToClient( Parent()->Wnd(), &pBottomRight );
 				rNewSize.left = pUpperLeft.x;
@@ -437,11 +458,11 @@ namespace lsw {
 	LRESULT CALLBACK CWidget::DockNcActivate( CWidget * _pwWnd, WPARAM _wParam, LPARAM _lParam, BOOL _bCallDefault ) {
 		LSW_HANDLED hHandled = _pwWnd->NcActivate( static_cast<BOOL>(_wParam), _lParam );
 
-		if ( _lParam == -1 ) {
+		/*if ( _lParam == -1 ) {
 			if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
 			return _bCallDefault ? ::DefWindowProcW( _pwWnd->Wnd(), WM_NCACTIVATE, _wParam, 0L ) :
 				FALSE;
-		}
+		}*/
 
 		BOOL bKeepActive = static_cast<BOOL>(_wParam);
 		BOOL bSyncOthers = TRUE;
@@ -450,7 +471,8 @@ namespace lsw {
 
 		std::vector<CWidget *> vDocks;
 		GetDockables( vDocks, TRUE );
-		if ( _lParam ) {			
+
+		//if ( _lParam ) {
 			for ( size_t I = 0; I < vDocks.size(); ++I ) {
 				if ( hOther == vDocks[I]->Wnd() ) {
 					bKeepActive = TRUE;
@@ -458,6 +480,12 @@ namespace lsw {
 					break;
 				}
 			}
+		//}
+
+		if ( _lParam == -1 ) {
+			if ( hHandled == LSW_H_HANDLED ) { return FALSE; }
+			return _bCallDefault ? ::DefWindowProcW( _pwWnd->Wnd(), WM_NCACTIVATE, bKeepActive, 0L ) :
+				FALSE;
 		}
 
 		if ( bSyncOthers ) {
@@ -811,6 +839,11 @@ namespace lsw {
 #define LSW_WNDRET( VAL )				if ( !_bIsDlg ) { _lrWndResult = VAL; }
 #define LSW_DLGRET( VAL )				if ( _bIsDlg ) { _ipDiagResult = VAL; }
 #define LSW_RET( WNDVAL, DLGVAL )		LSW_WNDRET( WNDVAL ) LSW_DLGRET( DLGVAL ) return
+
+		/*std::string sMes;
+		CBase::MessageToText( _uMsg, sMes );
+		::OutputDebugStringA( sMes.c_str() );
+		::OutputDebugStringA( "\r\n" );*/
 		
 
 		CWidget * pmwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( _hWnd, GWLP_USERDATA ));
@@ -1222,7 +1255,10 @@ namespace lsw {
 					GET_Y_LPARAM( _lParam ),
 				};
 				LSW_HANDLED hHandled = pmwThis->NcHitTest( pPos, iRetCode );
-				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( iRetCode, iRetCode ); }
+				if ( hHandled == LSW_H_HANDLED ) {
+					pmwThis->m_iLastHit = iRetCode;
+					LSW_RET( iRetCode, iRetCode );
+				}
 				break;
 			}
 			case WM_NCLBUTTONDBLCLK : {
