@@ -761,7 +761,7 @@ namespace mx {
 
 	// Creates a double string.
 	const CHAR * CUtilities::ToDouble( double _dValue, std::string &_sString ) {
-		const size_t sLen = 2049;
+		const size_t sLen = 2000 + 309 + 3;
 		CHAR * pcBuffer = new CHAR[sLen];
 		if ( !pcBuffer ) { return nullptr; }
 		int iLen = ::sprintf_s( pcBuffer, sLen, "%.2000f", _dValue );
@@ -781,10 +781,10 @@ namespace mx {
 
 	// Creates a double string.
 	const WCHAR * CUtilities::ToDouble( double _dValue, std::wstring &_sString ) {
-		const size_t sLen = 2049;
+		const size_t sLen = 2000 + 309 + 3;
 		WCHAR * pcBuffer = new WCHAR[sLen];
 		if ( !pcBuffer ) { return nullptr; }
-		int iLen = ::swprintf_s( pcBuffer, sLen, L"%.400f", _dValue );
+		int iLen = ::swprintf_s( pcBuffer, sLen, L"%.2000f", _dValue );
 		_sString.append( pcBuffer, iLen );
 		delete [] pcBuffer;
 		pcBuffer = nullptr;

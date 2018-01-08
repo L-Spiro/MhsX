@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Options/MXOptions.h"
+#include "../MemHack/MXMemHack.h"
 #include <Layout/LSWLayoutManager.h>
 
 using namespace lsw;
@@ -37,6 +38,9 @@ namespace mx {
 		// == Members.
 		// Options.
 		MX_OPTIONS *					m_poOptions;
+
+		// Memhack object.
+		CMemHack *						m_pmMemHack;
 
 	};
 

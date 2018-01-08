@@ -100,6 +100,24 @@ namespace ee {
 		// Creates a decimal constant.
 		void								CreateUInt( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a numeric constant.
+		void								CreateNumber( uint64_t _uiVal, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a numeric constant.
+		void								CreateNumber( int64_t _iVal, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a numeric constant.
+		void								CreateNumber( uint32_t _uiVal, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a numeric constant.
+		void								CreateNumber( int32_t _iVal, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a numeric constant.
+		void								CreateNumber( float _fVal, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a numeric constant.
+		void								CreateNumber( double _dVal, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Creates an oct constant.
 		void								CreateOct( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode );
 
@@ -190,6 +208,12 @@ namespace ee {
 
 		// String to integer, from any base.  Since std::stoull() raises exceptions etc.
 		static uint64_t						StoULL( const char * _pcText, int _iBase = 10 );
+
+		// Shifting for floats.
+		static double						LShift( double _dVal, double _dShift );
+
+		// Shifting for floats.
+		static double						RShift( double _dVal, double _dShift );
 	};
 
 }	// namespace ee

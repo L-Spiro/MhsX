@@ -175,6 +175,9 @@
     <ClCompile Include="Src\ExpEval\MXExpEvalWindow.cpp">
       <Filter>Source Files\ExpEval</Filter>
     </ClCompile>
+    <ClCompile Include="Src\MemHack\MXWindowMemHack.cpp">
+      <Filter>Source Files\MemHack</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -268,6 +271,9 @@
     </ClInclude>
     <ClInclude Include="Src\ExpEval\MXExpEvalWindow.h">
       <Filter>Header Files\ExpEval</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\MemHack\MXWindowMemHack.h">
+      <Filter>Header Files\MemHack</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -20,7 +20,7 @@ namespace mx {
 	
 	class CMhsMainWindow : public lsw::CMainWindow {
 	public :
-		CMhsMainWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		CMhsMainWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, CMemHack * _pmhMemHack = nullptr );
 		~CMhsMainWindow();
 
 

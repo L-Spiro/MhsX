@@ -8,6 +8,7 @@
 #include "Layouts/MXOpenProcessLayout.h"
 #include <MainWindow/LSWMainWindow.h>
 #include "MainWindow/MXMhsMainWindow.h"
+#include "MemHack/MXWindowMemHack.h"
 #include "System/MXSystem.h"
 #include "Utilities/MXUtilities.h"
 
@@ -37,8 +38,9 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 	mx::CSystem::InitSystem();
 	
 
+	mx::CWindowMemHack wmhMemHack;
 	// Create the windows.
-	mx::CMainWindowLayout::CreateMainWindow();
+	//mx::CMainWindowLayout::CreateMainWindow();
 	//mx::COpenProcessLayout::CreateOpenProcessDialog( mx::CMainWindowLayout::MainWindow() );
 
 	LSW_WIDGET_LAYOUT wlDock = {

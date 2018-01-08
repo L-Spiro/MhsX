@@ -1,4 +1,5 @@
 #include "MXMainWindowLayout.h"
+#include "../MemHack/MXMemHack.h"
 #include "../Utilities/MXUtilities.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../System/MXSystem.h"
@@ -354,7 +355,7 @@ namespace mx {
 
 	// == Functions.
 	// Creates the main window.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc., and registers the main window class.
-	BOOL CMainWindowLayout::CreateMainWindow() {
+	BOOL CMainWindowLayout::CreateMainWindow( CMemHack * _pmhMemHack ) {
 		if ( !m_aMainClass ) {
 			// Register the window classes we need.
 			WCHAR szTemp[5];
@@ -373,6 +374,8 @@ namespace mx {
 			sStrings );
 
 		LSW_WIDGET_LAYOUT * _pwMain = CHelpers::FindLayout( &vLayouts[0], vLayouts.size(), MX_MWI_MAINWINDOW );
+		mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
+		plmLayout->m_pmMemHack = _pmhMemHack;
 
 		_pwMain->lpwcClass = reinterpret_cast<LPCWSTR>(m_aMainClass);
 		m_pwMainWindow = lsw::CBase::LayoutManager()->CreateWindowX( &vLayouts[0], vLayouts.size(), m_miMenus, MX_ELEMENTS( m_miMenus ) );

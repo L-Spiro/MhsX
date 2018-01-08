@@ -93,6 +93,11 @@ namespace lsw {
 				m_meRoot.bContainsWidget = FALSE;
 				m_meRoot.u.pqWidget = nullptr;
 				CalcRects();
+				for ( size_t I = m_vChildren.size(); I--; ) {
+					::RedrawWindow( m_vChildren[I]->Wnd(), NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_INTERNALPAINT | RDW_ALLCHILDREN | RDW_UPDATENOW | RDW_FRAME );
+					/*::InvalidateRect( Wnd(), NULL, FALSE );
+					::UpdateWindow( Wnd() );*/
+				}
 				return true;
 			}
 		}
@@ -109,6 +114,11 @@ namespace lsw {
 					}
 				}
 				CalcRects();
+				for ( size_t I = m_vChildren.size(); I--; ) {
+					::RedrawWindow( m_vChildren[I]->Wnd(), NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_INTERNALPAINT | RDW_ALLCHILDREN | RDW_UPDATENOW | RDW_FRAME );
+					/*::InvalidateRect( Wnd(), NULL, FALSE );
+					::UpdateWindow( Wnd() );*/
+				}
 				return true;
 			}
 		}
@@ -357,8 +367,8 @@ namespace lsw {
 		if ( m_meRoot.u.pmlLayer && !m_meRoot.bContainsWidget ) {
 			CalcRects( (*m_meRoot.u.pmlLayer), m_meRoot.rRect );
 		}
-		/*::RedrawWindow( Wnd(), NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_INTERNALPAINT | RDW_ALLCHILDREN | RDW_UPDATENOW | RDW_FRAME );
-		::InvalidateRect( Wnd(), NULL, FALSE );
+		//::RedrawWindow( Wnd(), NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_INTERNALPAINT | RDW_ALLCHILDREN | RDW_UPDATENOW | RDW_FRAME );
+		/*::InvalidateRect( Wnd(), NULL, FALSE );
 		::UpdateWindow( Wnd() );*/
 	}
 

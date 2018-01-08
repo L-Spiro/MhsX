@@ -17,10 +17,10 @@ namespace mx {
 
 		// == Functions.
 		// Open a process by its ID.
-		bool								OpenProcess( DWORD _dwId );
+		virtual bool						OpenProcess( DWORD _dwId );
 
 		// Detach from the current process.
-		void								Detach();
+		virtual void						Detach();
 
 		// Gets the options.
 		const MX_OPTIONS &					Options() const;

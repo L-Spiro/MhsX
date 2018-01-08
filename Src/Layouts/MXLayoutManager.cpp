@@ -16,7 +16,7 @@ namespace mx {
 	CWidget * CLayoutManager::CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) {
 		switch ( _wlLayout.ltType ) {
 			case MX_MAIN_WINDOW : {
-				return new CMhsMainWindow( _wlLayout, _pwParent,  _bCreateWidget, _hMenu );
+				return new CMhsMainWindow( _wlLayout, _pwParent,  _bCreateWidget, _hMenu, m_pmMemHack );
 			}
 			case MX_OPEN_PROCESS_WINDOW : {
 				return new COpenProcessWindow( _wlLayout, _pwParent, m_poOptions,  _bCreateWidget, _hMenu );

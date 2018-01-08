@@ -103,6 +103,42 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
+	// Creates a numeric constant.
+	void CExpEvalContainer::CreateNumber( uint64_t _uiVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_NUMERICCONSTANT;
+		_ndNode.u.ui64Val = _uiVal;
+		_ndNode.v.ncConstType = EE_NC_UNSIGNED;
+		AddNode( _ndNode );
+	}
+
+	// Creates a numeric constant.
+	void CExpEvalContainer::CreateNumber( int64_t _iVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_NUMERICCONSTANT;
+		_ndNode.u.i64Val = _iVal;
+		_ndNode.v.ncConstType = EE_NC_SIGNED;
+		AddNode( _ndNode );
+	}
+
+	// Creates a numeric constant.
+	void CExpEvalContainer::CreateNumber( uint32_t _uiVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		CreateNumber( static_cast<uint64_t>(_uiVal), _ndNode );
+	}
+
+	// Creates a numeric constant.
+	void CExpEvalContainer::CreateNumber( int32_t _iVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		CreateNumber( static_cast<int64_t>(_iVal), _ndNode );
+	}
+
+	// Creates a numeric constant.
+	void CExpEvalContainer::CreateNumber( float _fVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		CreateDouble( _fVal, _ndNode );
+	}
+
+	// Creates a numeric constant.
+	void CExpEvalContainer::CreateNumber( double _dVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		CreateDouble( _dVal, _ndNode );
+	}
+
 	// Creates an oct constant.
 	void CExpEvalContainer::CreateOct( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
@@ -410,6 +446,14 @@ namespace ee {
 							EE_OP_BOOL( dVal, CExpEvalParser::token::EE_EQU_NE, != )
 							EE_OP_BOOL( dVal, CExpEvalParser::token::EE_AND, && )
 							EE_OP_BOOL( dVal, CExpEvalParser::token::EE_OR, || )
+							case CExpEvalParser::token::EE_RIGHT_OP : {
+								_rRes.u.dVal = RShift( rLeft.u.dVal, rRight.u.dVal );
+								return true;
+							}
+							case CExpEvalParser::token::EE_LEFT_OP : {
+								_rRes.u.dVal = LShift( rLeft.u.dVal, rRight.u.dVal );
+								return true;
+							}
 							case '%' : {
 								_rRes.u.dVal = std::fmod( rLeft.u.dVal, rRight.u.dVal );
 								return true;
@@ -608,11 +652,18 @@ namespace ee {
 			if ( (uiRes - uiNext) / _iBase != uiTemp) {
 				return std::numeric_limits<uint64_t>::max();
 			}
-			/*if ( uiRes < uiTemp ) {
-				return std::numeric_limits<uint64_t>::max();
-			}*/
 		}
 		return bNegate ? static_cast<uint64_t>(-static_cast<int64_t>(uiRes)) : uiRes;
+	}
+
+	// Shifting for floats.
+	double CExpEvalContainer::LShift( double _dVal, double _dShift ) {
+		return _dVal * ::pow( 2.0, _dShift );
+	}
+
+	// Shifting for floats.
+	double CExpEvalContainer::RShift( double _dVal, double _dShift ) {
+		return _dVal / ::pow( 2.0, _dShift );
 	}
 
 }	// namespace ee;

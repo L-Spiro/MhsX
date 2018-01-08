@@ -15,12 +15,12 @@
 
 namespace mx {
 
-	CMhsMainWindow::CMhsMainWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
+	CMhsMainWindow::CMhsMainWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, CMemHack * _pmhMemHack ) :
 		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu ),
 		m_pfaFoundAddresses( nullptr ),
 		m_eeExpEval( nullptr ) {
 
-		m_pmhMemHack = new CMemHack();
+		m_pmhMemHack = _pmhMemHack;
 
 		static const struct {
 			LPCWSTR				lpwsImageName;
@@ -57,8 +57,8 @@ namespace mx {
 	}
 
 	CMhsMainWindow::~CMhsMainWindow() {
-		delete m_pmhMemHack;
-		m_pmhMemHack = nullptr;
+		delete m_pmhMemHack;/*
+		m_pmhMemHack = nullptr;*/
 	}
 
 	// == Functions.

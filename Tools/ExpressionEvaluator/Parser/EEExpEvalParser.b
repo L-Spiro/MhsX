@@ -21,6 +21,10 @@
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 #define YYINCLUDED_STDLIB_H
 
+#ifndef LDBL_DECIMAL_DIG
+#define LDBL_DECIMAL_DIG DBL_DECIMAL_DIG
+#endif	// #ifndef LDBL_DECIMAL_DIG
+
 
 // Announce to Flex the prototype we want for lexing function.
 extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer );
@@ -54,6 +58,8 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %token EE_ABS EE_MADD
 %token EE_A EE_ALLADI EE_ALPHA EE_B EE_B2 EE_B4 EE_BETA EE_BH EE_C2 EE_CAHEN EE_CATALAN EE_CONWAY EE_DELTA EE_E EE_ERDOS EE_EULER EE_F EE_GR EE_GWK EE_HALFPI EE_HSMC EE_ICE EE_K
 %token EE_LAMBDA EE_LAPLACE EE_LEVY EE_M1 EE_MU EE_NIVEN EE_OMEGA EE_P2 EE_PI EE_PLASTIC EE_PORTER EE_PSI EE_RAMAN EE_RAMAMU EE_SIERP EE_THETA EE_VISW EE_Z3 EE_ZETA 
+
+%token EE_CHAR_BIT EE_MB_LEN_MAX EE_CHAR_MIN EE_CHAR_MAX EE_SCHAR_MIN EE_SHRT_MIN EE_INT_MIN EE_LONG_MIN EE_LLONG_MIN EE_SCHAR_MAX EE_SHRT_MAX EE_INT_MAX EE_LONG_MAX EE_LLONG_MAX EE_UCHAR_MAX EE_USHRT_MAX EE_UINT_MAX EE_ULONG_MAX EE_ULLONG_MAX EE_FLT_RADIX EE_DECIMAL_DIG EE_FLT_DECIMAL_DIG EE_DBL_DECIMAL_DIG EE_LDBL_DECIMAL_DIG EE_FLT_MIN EE_DBL_MIN EE_LDBL_MIN EE_FLT_TRUE_MIN EE_DBL_TRUE_MIN EE_LDBL_TRUE_MIN EE_FLT_MAX EE_DBL_MAX EE_LDBL_MAX EE_FLT_EPSILON EE_DBL_EPSILON EE_LDBL_EPSILON EE_FLT_DIG EE_DBL_DIG EE_LDBL_DIG EE_FLT_MANT_DIG EE_DBL_MANT_DIG EE_LDBL_MANT_DIG EE_FLT_MIN_EXP EE_DBL_MIN_EXP EE_LDBL_MIN_EXP EE_FLT_MIN_10_EXP EE_DBL_MIN_10_EXP EE_LDBL_MIN_10_EXP EE_FLT_MAX_EXP EE_DBL_MAX_EXP EE_LDBL_MAX_EXP EE_FLT_MAX_10_EXP EE_DBL_MAX_10_EXP EE_LDBL_MAX_10_EXP
 
 %type <sStringIndex>										string												
 %type <ndData>												basic_expr
@@ -165,6 +171,60 @@ basic_expr
 	| EE_LEVY												{ m_peecContainer->CreateDouble( 3.27582291872181115978768188245384386, $$ ); }
 	| EE_PSI												{ m_peecContainer->CreateDouble( 3.35988566624317755317201130291892717, $$ ); }
 	| EE_DELTA												{ m_peecContainer->CreateDouble( 4.66920160910299067185320382046620161, $$ ); }
+	| EE_CHAR_BIT											{ m_peecContainer->CreateNumber( CHAR_BIT, $$ ); }
+	| EE_MB_LEN_MAX											{ m_peecContainer->CreateNumber( MB_LEN_MAX, $$ ); }
+	| EE_CHAR_MIN											{ m_peecContainer->CreateNumber( CHAR_MIN, $$ ); }
+	| EE_CHAR_MAX											{ m_peecContainer->CreateNumber( CHAR_MAX, $$ ); }
+	| EE_SCHAR_MIN											{ m_peecContainer->CreateNumber( SCHAR_MIN, $$ ); }
+	| EE_SHRT_MIN											{ m_peecContainer->CreateNumber( SHRT_MIN, $$ ); }
+	| EE_INT_MIN											{ m_peecContainer->CreateNumber( INT_MIN, $$ ); }
+	| EE_LONG_MIN											{ m_peecContainer->CreateNumber( LONG_MIN, $$ ); }
+	| EE_LLONG_MIN											{ m_peecContainer->CreateNumber( LLONG_MIN, $$ ); }
+	| EE_SCHAR_MAX											{ m_peecContainer->CreateNumber( SCHAR_MAX, $$ ); }
+	| EE_SHRT_MAX											{ m_peecContainer->CreateNumber( SHRT_MAX, $$ ); }
+	| EE_INT_MAX											{ m_peecContainer->CreateNumber( INT_MAX, $$ ); }
+	| EE_LONG_MAX											{ m_peecContainer->CreateNumber( LONG_MAX, $$ ); }
+	| EE_LLONG_MAX											{ m_peecContainer->CreateNumber( LLONG_MAX, $$ ); }
+	| EE_UCHAR_MAX											{ m_peecContainer->CreateNumber( UCHAR_MAX, $$ ); }
+	| EE_USHRT_MAX											{ m_peecContainer->CreateNumber( USHRT_MAX, $$ ); }
+	| EE_UINT_MAX											{ m_peecContainer->CreateNumber( UINT_MAX, $$ ); }
+	| EE_ULONG_MAX											{ m_peecContainer->CreateNumber( static_cast<uint64_t>(ULONG_MAX), $$ ); }
+	| EE_ULLONG_MAX											{ m_peecContainer->CreateNumber( ULLONG_MAX, $$ ); }
+	| EE_FLT_RADIX											{ m_peecContainer->CreateNumber( FLT_RADIX, $$ ); }
+	| EE_DECIMAL_DIG										{ m_peecContainer->CreateNumber( DECIMAL_DIG, $$ ); }
+	| EE_FLT_DECIMAL_DIG									{ m_peecContainer->CreateNumber( FLT_DECIMAL_DIG, $$ ); }
+	| EE_DBL_DECIMAL_DIG									{ m_peecContainer->CreateNumber( DBL_DECIMAL_DIG, $$ ); }
+	| EE_LDBL_DECIMAL_DIG									{ m_peecContainer->CreateNumber( LDBL_DECIMAL_DIG, $$ ); }
+	| EE_FLT_MIN											{ m_peecContainer->CreateNumber( FLT_MIN, $$ ); }
+	| EE_DBL_MIN											{ m_peecContainer->CreateNumber( DBL_MIN, $$ ); }
+	| EE_LDBL_MIN											{ m_peecContainer->CreateNumber( LDBL_MIN, $$ ); }
+	| EE_FLT_TRUE_MIN										{ m_peecContainer->CreateNumber( FLT_TRUE_MIN, $$ ); }
+	| EE_DBL_TRUE_MIN										{ m_peecContainer->CreateNumber( DBL_TRUE_MIN, $$ ); }
+	| EE_LDBL_TRUE_MIN										{ m_peecContainer->CreateNumber( LDBL_TRUE_MIN, $$ ); }
+	| EE_FLT_MAX											{ m_peecContainer->CreateNumber( FLT_MAX, $$ ); }
+	| EE_DBL_MAX											{ m_peecContainer->CreateNumber( DBL_MAX, $$ ); }
+	| EE_LDBL_MAX											{ m_peecContainer->CreateNumber( LDBL_MAX, $$ ); }
+	| EE_FLT_EPSILON										{ m_peecContainer->CreateNumber( FLT_EPSILON, $$ ); }
+	| EE_DBL_EPSILON										{ m_peecContainer->CreateNumber( DBL_EPSILON, $$ ); }
+	| EE_LDBL_EPSILON										{ m_peecContainer->CreateNumber( LDBL_EPSILON, $$ ); }
+	| EE_FLT_DIG											{ m_peecContainer->CreateNumber( FLT_DIG, $$ ); }
+	| EE_DBL_DIG											{ m_peecContainer->CreateNumber( DBL_DIG, $$ ); }
+	| EE_LDBL_DIG											{ m_peecContainer->CreateNumber( LDBL_DIG, $$ ); }
+	| EE_FLT_MANT_DIG										{ m_peecContainer->CreateNumber( FLT_MANT_DIG, $$ ); }
+	| EE_DBL_MANT_DIG										{ m_peecContainer->CreateNumber( DBL_MANT_DIG, $$ ); }
+	| EE_LDBL_MANT_DIG										{ m_peecContainer->CreateNumber( LDBL_MANT_DIG, $$ ); }
+	| EE_FLT_MIN_EXP										{ m_peecContainer->CreateNumber( FLT_MIN_EXP, $$ ); }
+	| EE_DBL_MIN_EXP										{ m_peecContainer->CreateNumber( DBL_MIN_EXP, $$ ); }
+	| EE_LDBL_MIN_EXP										{ m_peecContainer->CreateNumber( LDBL_MIN_EXP, $$ ); }
+	| EE_FLT_MIN_10_EXP										{ m_peecContainer->CreateNumber( FLT_MIN_10_EXP, $$ ); }
+	| EE_DBL_MIN_10_EXP										{ m_peecContainer->CreateNumber( DBL_MIN_10_EXP, $$ ); }
+	| EE_LDBL_MIN_10_EXP									{ m_peecContainer->CreateNumber( LDBL_MIN_10_EXP, $$ ); }
+	| EE_FLT_MAX_EXP										{ m_peecContainer->CreateNumber( FLT_MAX_EXP, $$ ); }
+	| EE_DBL_MAX_EXP										{ m_peecContainer->CreateNumber( DBL_MAX_EXP, $$ ); }
+	| EE_LDBL_MAX_EXP										{ m_peecContainer->CreateNumber( LDBL_MAX_EXP, $$ ); }
+	| EE_FLT_MAX_10_EXP										{ m_peecContainer->CreateNumber( FLT_MAX_10_EXP, $$ ); }
+	| EE_DBL_MAX_10_EXP										{ m_peecContainer->CreateNumber( DBL_MAX_10_EXP, $$ ); }
+	| EE_LDBL_MAX_10_EXP									{ m_peecContainer->CreateNumber( LDBL_MAX_10_EXP, $$ ); }
 	| '(' exp ')'											{ $$ = $2; }
 	| '[' exp ']'											{ m_peecContainer->CreateAddress( $2, EE_CT_UINT32, $$ ); }
 	| EE_OB_DWORD exp ']'									{ m_peecContainer->CreateAddress( $2, EE_CT_UINT32, $$ ); }
@@ -224,6 +284,60 @@ postfix_exp
 	| postfix_exp EE_MEMBERACCESS EE_LEVY					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_PSI					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_DELTA					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_CHAR_BIT				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_MB_LEN_MAX				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_CHAR_MIN				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_CHAR_MAX				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_SCHAR_MIN				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_SHRT_MIN				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_INT_MIN				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LONG_MIN				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LLONG_MIN				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_SCHAR_MAX				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_SHRT_MAX				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_INT_MAX				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LONG_MAX				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LLONG_MAX				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_UCHAR_MAX				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_USHRT_MAX				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_UINT_MAX				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_ULONG_MAX				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_ULLONG_MAX				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_FLT_RADIX				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_DECIMAL_DIG			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_FLT_DECIMAL_DIG		{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_DBL_DECIMAL_DIG		{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LDBL_DECIMAL_DIG		{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_FLT_MIN				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_DBL_MIN				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LDBL_MIN				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_FLT_TRUE_MIN			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_DBL_TRUE_MIN			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LDBL_TRUE_MIN			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_FLT_MAX				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_DBL_MAX				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LDBL_MAX				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_FLT_EPSILON			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_DBL_EPSILON			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LDBL_EPSILON			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_FLT_DIG				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_DBL_DIG				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LDBL_DIG				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_FLT_MANT_DIG			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_DBL_MANT_DIG			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LDBL_MANT_DIG			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_FLT_MIN_EXP			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_DBL_MIN_EXP			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LDBL_MIN_EXP			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_FLT_MIN_10_EXP			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_DBL_MIN_10_EXP			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LDBL_MIN_10_EXP		{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_FLT_MAX_EXP			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_DBL_MAX_EXP			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LDBL_MAX_EXP			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_FLT_MAX_10_EXP			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_DBL_MAX_10_EXP			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_LDBL_MAX_10_EXP		{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	;
 
 unary_exp
