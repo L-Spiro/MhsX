@@ -2,6 +2,7 @@
 
 #include "../MXMhsX.h"
 
+#include <ComboBox/LSWComboBox.h>
 #include <Docking/LSWDockable.h>
 #include <Edit/LSWEdit.h>
 #include <ImageList/LSWImageList.h>
@@ -23,6 +24,7 @@ namespace mx {
 		enum MX_IMAGES {
 			MX_I_ADD,
 			MX_I_REMOVE,
+			MX_I_SCIENTIFIC_NOTATION,
 
 			MX_I_TOTAL
 		};
@@ -43,8 +45,14 @@ namespace mx {
 		// Gets a pointer to the list view.
 		CListView *							ListView();
 
+		// Gets a pointer to the input combo box.
+		CComboBox *							Combo();
+
 		// Gets a pointer to the result edit.
 		CEdit *								Edit();
+
+		// Updates the text result.
+		void								UpdateResult();
 
 
 	protected :

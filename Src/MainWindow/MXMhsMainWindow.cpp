@@ -57,8 +57,8 @@ namespace mx {
 	}
 
 	CMhsMainWindow::~CMhsMainWindow() {
-		delete m_pmhMemHack;/*
-		m_pmhMemHack = nullptr;*/
+		//delete m_pmhMemHack;
+		m_pmhMemHack = nullptr;
 	}
 
 	// == Functions.

@@ -760,40 +760,61 @@ namespace mx {
 	}
 
 	// Creates a double string.
-	const CHAR * CUtilities::ToDouble( double _dValue, std::string &_sString ) {
+	const CHAR * CUtilities::ToDouble( double _dValue, std::string &_sString, int32_t _iSigDigits ) {
 		const size_t sLen = 2000 + 309 + 3;
 		CHAR * pcBuffer = new CHAR[sLen];
 		if ( !pcBuffer ) { return nullptr; }
-		int iLen = ::sprintf_s( pcBuffer, sLen, "%.2000f", _dValue );
+		int iLen = 0;
+		if ( _iSigDigits <= 0 ) {
+			iLen = ::sprintf_s( pcBuffer, sLen, "%.2000f", _dValue );
+		}
+		else {
+			CHAR szFormat[32];
+			::sprintf_s( szFormat, MX_ELEMENTS( szFormat ), "%%.%ue", _iSigDigits );
+			iLen = ::sprintf_s( pcBuffer, sLen, szFormat, _dValue );
+		}
 		_sString.append( pcBuffer, iLen );
 		delete [] pcBuffer;
 		pcBuffer = nullptr;
+		if ( _iSigDigits <= 0 ) {
 #define MX_LAST ((_sString.size() > 0) ? _sString[_sString.size()-1] : '\0')
-		while ( MX_LAST == '0' ) {
-			_sString.pop_back();
-		}
-		while ( MX_LAST == '.' ) {
-			_sString.pop_back();
+			while ( MX_LAST == '0' ) {
+				_sString.pop_back();
+			}
+			while ( MX_LAST == '.' ) {
+				_sString.pop_back();
+			}
 		}
 		return _sString.c_str();
 #undef MX_LAST
 	}
 
 	// Creates a double string.
-	const WCHAR * CUtilities::ToDouble( double _dValue, std::wstring &_sString ) {
+	const WCHAR * CUtilities::ToDouble( double _dValue, std::wstring &_sString, int32_t _iSigDigits ) {
 		const size_t sLen = 2000 + 309 + 3;
 		WCHAR * pcBuffer = new WCHAR[sLen];
 		if ( !pcBuffer ) { return nullptr; }
-		int iLen = ::swprintf_s( pcBuffer, sLen, L"%.2000f", _dValue );
+		//int iLen = ::swprintf_s( pcBuffer, sLen, L"%.2000f", _dValue );
+		int iLen = 0;
+		if ( _iSigDigits <= 0 ) {
+			iLen = ::swprintf_s( pcBuffer, sLen, L"%.2000f", _dValue );
+		}
+		else {
+			WCHAR szFormat[32];
+			::swprintf_s( szFormat, MX_ELEMENTS( szFormat ), L"%%.%ue", _iSigDigits );
+			iLen = ::swprintf_s( pcBuffer, sLen, szFormat, _dValue );
+		}
 		_sString.append( pcBuffer, iLen );
 		delete [] pcBuffer;
 		pcBuffer = nullptr;
+		if ( _iSigDigits <= 0 ) {
 #define MX_LAST _sString.size() > 0 ? _sString[_sString.size()-1] : L'\0'
-		while ( MX_LAST == L'0' ) {
-			_sString.pop_back();
-		}
-		while ( MX_LAST == L'.' ) {
-			_sString.pop_back();
+			while ( MX_LAST == L'0' ) {
+				_sString.pop_back();
+			}
+			while ( MX_LAST == L'.' ) {
+				_sString.pop_back();
+			}
 		}
 		return _sString.c_str();
 #undef MX_LAST
@@ -992,7 +1013,7 @@ namespace mx {
 	}
 
 	// Prints an ee::CExpEvalContainer::EE_RESULT value.
-	std::string & CUtilities::PrintExpResult( const ee::CExpEvalContainer::EE_RESULT &_rResult, std::string &_sString ) {
+	std::string & CUtilities::PrintExpResult( const ee::CExpEvalContainer::EE_RESULT &_rResult, std::string &_sString, int32_t _iDblSciPrec ) {
 		switch ( _rResult.ncType ) {
 			case ee::EE_NC_SIGNED : {
 				ToSigned( _rResult.u.i64Val, _sString );
@@ -1017,7 +1038,7 @@ namespace mx {
 				break;
 			}
 			case ee::EE_NC_FLOATING : {
-				ToDouble( _rResult.u.dVal, _sString );
+				ToDouble( _rResult.u.dVal, _sString, _iDblSciPrec );
 				_sString.push_back( ' ' );
 				_sString.push_back( '(' );
 				// As float hex.

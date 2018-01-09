@@ -23,6 +23,9 @@ namespace lsw {
 		// Auto-sizes.
 		VOID								AutoSize();
 
+		// Determines if a button is checked.
+		BOOL								IsChecked( WORD _wId ) const;
+
 		// Gets the button count.
 		DWORD								GetButtonCount() const;
 

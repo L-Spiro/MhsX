@@ -28,6 +28,7 @@ namespace mx {
 		enum MX_BUTTON_COMMANDS {
 			MX_BC_ADD							= 6013,
 			MX_BC_REMOVE,
+			MX_BC_SCINOT,
 		};
 
 

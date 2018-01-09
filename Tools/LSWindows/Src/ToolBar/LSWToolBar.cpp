@@ -40,6 +40,17 @@ namespace lsw {
 		::SendMessageW( Wnd(), TB_AUTOSIZE, 0L, 0L );
 	}
 
+	// Determines if a button is checked.
+	BOOL CToolBar::IsChecked( WORD _wId ) const {
+		TBBUTTONINFOW tbiButton = { 0 };
+		tbiButton.cbSize = sizeof( tbiButton );
+		tbiButton.dwMask = TBIF_STATE;
+		if ( -1 != static_cast<BOOL>(::SendMessageW( Wnd(), TB_GETBUTTONINFOW, static_cast<WPARAM>(_wId), reinterpret_cast<LPARAM>(&tbiButton) )) ) {
+			return (tbiButton.fsState & TBSTATE_CHECKED) ? TRUE : FALSE;
+		}
+		return FALSE;
+	}
+
 	// Gets the button count.
 	DWORD CToolBar::GetButtonCount() const {
 		if ( !Wnd() ) { return 0; }

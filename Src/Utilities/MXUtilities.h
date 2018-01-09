@@ -204,10 +204,10 @@ namespace mx {
 		static const WCHAR *			ToSigned( int64_t _iValue, std::wstring &_sString, uint32_t _uiNumDigits = 0 );
 
 		// Creates a double string.
-		static const CHAR *				ToDouble( double _dValue, std::string &_sString );
+		static const CHAR *				ToDouble( double _dValue, std::string &_sString, int32_t _iSigDigits = -1 );
 
 		// Creates a double string.
-		static const WCHAR *			ToDouble( double _dValue, std::wstring &_sString );
+		static const WCHAR *			ToDouble( double _dValue, std::wstring &_sString, int32_t _iSigDigits = -1 );
 
 		// Gets the size of a data type.
 		static DWORD					DataTypeSize( CUtilities::MX_DATA_TYPES _dtType );
@@ -255,7 +255,7 @@ namespace mx {
 		static size_t					DataTypeInfoLen();
 
 		// Prints an ee::CExpEvalContainer::EE_RESULT value.
-		static std::string &			PrintExpResult( const ee::CExpEvalContainer::EE_RESULT &_rResult, std::string &_sString );
+		static std::string &			PrintExpResult( const ee::CExpEvalContainer::EE_RESULT &_rResult, std::string &_sString, int32_t _iDblSciPrec = -1 );
 
 
 		// == Members.

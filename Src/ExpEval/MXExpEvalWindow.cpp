@@ -23,6 +23,7 @@ namespace mx {
 		} sImages[] = {
 			{ L"60", MX_I_ADD },
 			{ L"59", MX_I_REMOVE },
+			{ L"50", MX_I_SCIENTIFIC_NOTATION },
 		};
 		m_iImages.Create( 24, 24, ILC_COLOR32, MX_I_TOTAL, MX_I_TOTAL );
 #endif	// #if 1
@@ -52,9 +53,11 @@ namespace mx {
 #define MX_TOOL_STR( TXT )					reinterpret_cast<INT_PTR>(TXT)
 //#define MX_TOOL_STR( TXT )						0
 			const TBBUTTON bButtons[] = {
-				// iBitmap							idCommand									fsState				fsStyle			bReserved	dwData	iString
-				{ m_iImageMap[MX_I_ADD],			CExpressionEvaluatorLayout::MX_BC_ADD,		TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Add" ) },
-				{ m_iImageMap[MX_I_REMOVE],			CExpressionEvaluatorLayout::MX_BC_REMOVE,	TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Remove") },
+				// iBitmap									idCommand									fsState				fsStyle			bReserved	dwData	iString
+				{ m_iImageMap[MX_I_ADD],					CExpressionEvaluatorLayout::MX_BC_ADD,		TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Add" ) },
+				{ m_iImageMap[MX_I_REMOVE],					CExpressionEvaluatorLayout::MX_BC_REMOVE,	TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Remove") },
+				{ -1,										0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
+				{ m_iImageMap[MX_I_SCIENTIFIC_NOTATION],	CExpressionEvaluatorLayout::MX_BC_SCINOT,	TBSTATE_ENABLED,	BTNS_CHECK,		{ 0 },		0,		MX_TOOL_STR( L"Scientific") },
 			};
 #undef MX_TOOL_STR
 
@@ -117,23 +120,14 @@ namespace mx {
 	// WM_COMMAND from control.
 	CWidget::LSW_HANDLED CExpEvalWindow::Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc ) {
 		switch ( _Id ) {
+			case CExpressionEvaluatorLayout::MX_BC_SCINOT : {
+				UpdateResult();
+				break;
+			}
 			case CExpressionEvaluatorLayout::MX_EE_EXP_COMBO : {
-				CEdit * peEdit = Edit();
-				if ( !peEdit ) { return LSW_H_CONTINUE; }
 				switch ( _wCtrlCode ) {
 					case CBN_EDITCHANGE : {
-						ee::CExpEvalContainer::EE_RESULT eResult;
-						BOOL bValid;
-						BOOL bSuccess = _pwSrc->GetTextAsExpression( eResult, &bValid );
-						
-						if ( bSuccess ) {
-							std::string sTemp;
-							CUtilities::PrintExpResult( eResult, sTemp );
-							peEdit->SetTextA( sTemp.c_str() );
-						}
-						else {
-							peEdit->SetTextA( bValid ? _DEC_S_533B8966_Unresolvable.c_str() : _DEC_S_3424431C_Invalid.c_str() );
-						}
+						UpdateResult();
 						break;
 					}
 				}
@@ -159,9 +153,40 @@ namespace mx {
 		return static_cast<CListView *>(FindChild( CExpressionEvaluatorLayout::MX_EE_LIST ));
 	}
 
+	// Gets a pointer to the input combo box.
+	CComboBox * CExpEvalWindow::Combo() {
+		return static_cast<CComboBox *>(FindChild( CExpressionEvaluatorLayout::MX_EE_EXP_COMBO ));
+	}
+
 	// Gets a pointer to the result edit.
 	CEdit * CExpEvalWindow::Edit() {
 		return static_cast<CEdit *>(FindChild( CExpressionEvaluatorLayout::MX_EE_EXP_RESULT ));
+	}
+
+	// Updates the text result.
+	void CExpEvalWindow::UpdateResult() {
+		CEdit * peEdit = Edit();
+		if ( !peEdit ) { return; }
+		CComboBox * pcbCombo = Combo();
+		if ( !pcbCombo ) { return; }
+		ee::CExpEvalContainer::EE_RESULT eResult;
+		BOOL bValid;
+
+		BOOL bSuccess = pcbCombo->GetTextAsExpression( eResult, &bValid );
+						
+		if ( bSuccess ) {
+			std::string sTemp;
+			CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( CExpressionEvaluatorLayout::MX_EE_TOOLBAR0 ));
+			int32_t iSciNot = -1;
+			if ( plvToolBar ) {
+				iSciNot = plvToolBar->IsChecked( CExpressionEvaluatorLayout::MX_BC_SCINOT ) ? DBL_DECIMAL_DIG : -1;
+			}
+			CUtilities::PrintExpResult( eResult, sTemp, iSciNot );
+			peEdit->SetTextA( sTemp.c_str() );
+		}
+		else {
+			peEdit->SetTextA( bValid ? _DEC_S_533B8966_Unresolvable.c_str() : _DEC_S_3424431C_Invalid.c_str() );
+		}
 	}
 
 	// == Functions.
