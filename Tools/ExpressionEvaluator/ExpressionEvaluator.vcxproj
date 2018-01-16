@@ -142,6 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\EEExpEvalContainer.cpp" />
+    <ClCompile Include="Src\EEFloatX.cpp" />
     <ClCompile Include="Src\Gen\EEExpEvalLexBase.cpp" />
     <ClCompile Include="Src\Gen\EEExpEvalParser.cpp" />
   </ItemGroup>
@@ -150,6 +151,7 @@
     <ClInclude Include="Src\EEExpEvalContainer.h" />
     <ClInclude Include="Src\EEExpEvalLexer.h" />
     <ClInclude Include="Src\EEExpEvalSyntaxNodes.h" />
+    <ClInclude Include="Src\EEFloatX.h" />
     <ClInclude Include="Src\Gen\EEExpEvalLexBase.h" />
     <ClInclude Include="Src\Gen\EEExpEvalParser.h" />
     <ClInclude Include="Src\Gen\EEExpEvalParserLocation.h" />

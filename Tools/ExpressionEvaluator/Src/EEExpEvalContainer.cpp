@@ -1,4 +1,5 @@
 #include "EEExpEvalContainer.h"
+#include "EEFloatX.h"
 #include "Gen/EEExpEvalParser.h"
 
 namespace ee {
@@ -171,6 +172,59 @@ namespace ee {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
 		_ndNode.u.dVal = _dVal;
 		_ndNode.v.ncConstType = EE_NC_FLOATING;
+		AddNode( _ndNode );
+	}
+
+	// Create a reinterpretation of bits to a float.
+	void CExpEvalContainer::CreateAsFloat( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_ASFLOAT;
+		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Create a reinterpretation of bits to a double.
+	void CExpEvalContainer::CreateAsDouble( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_ASDOUBLE;
+		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Create a reinterpretation of bits to a double with the given bit specifications.
+	void CExpEvalContainer::CreateAsFloatX( const YYSTYPE::EE_NODE_DATA &_ndSignBits,
+		const YYSTYPE::EE_NODE_DATA &_ndExpBits,
+		const YYSTYPE::EE_NODE_DATA &_ndManBits,
+		const YYSTYPE::EE_NODE_DATA &_ndImplicitMan,
+		const YYSTYPE::EE_NODE_DATA &_ndSignValue,	// 0 or 1.
+		const YYSTYPE::EE_NODE_DATA &_ndExpValue,
+		const YYSTYPE::EE_NODE_DATA &_ndManValue,
+		YYSTYPE::EE_NODE_DATA &_ndNode ) {
+
+		_ndNode.nType = EE_N_ASXFLOAT;
+		_ndNode.u.sNodeIndex = _ndSignBits.sNodeIndex;
+		_ndNode.v.sNodeIndex = _ndExpBits.sNodeIndex;
+		_ndNode.w.sNodeIndex = _ndManBits.sNodeIndex;
+		_ndNode.x.sNodeIndex = _ndImplicitMan.sNodeIndex;
+		_ndNode.y.sNodeIndex = _ndSignValue.sNodeIndex;
+		_ndNode.z.sNodeIndex = _ndExpValue.sNodeIndex;
+		_ndNode.a.sNodeIndex = _ndManValue.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Create a reinterpretation of bits to a double with the given bit specifications.
+	void CExpEvalContainer::CreateAsFloatX( const YYSTYPE::EE_NODE_DATA &_ndSignBits,
+		const YYSTYPE::EE_NODE_DATA &_ndExpBits,
+		const YYSTYPE::EE_NODE_DATA &_ndManBits,
+		const YYSTYPE::EE_NODE_DATA &_ndImplicitMan,
+		const YYSTYPE::EE_NODE_DATA &_ndExp,	// The double value to convert.
+			
+		YYSTYPE::EE_NODE_DATA &_ndNode ) {
+
+		_ndNode.nType = EE_N_ASXFLOAT_FROM_DOUBLE;
+		_ndNode.u.sNodeIndex = _ndSignBits.sNodeIndex;
+		_ndNode.v.sNodeIndex = _ndExpBits.sNodeIndex;
+		_ndNode.w.sNodeIndex = _ndManBits.sNodeIndex;
+		_ndNode.x.sNodeIndex = _ndImplicitMan.sNodeIndex;
+		_ndNode.y.sNodeIndex = _ndExp.sNodeIndex;
 		AddNode( _ndNode );
 	}
 
@@ -590,6 +644,125 @@ namespace ee {
 						return true;
 					}
 				}
+			}
+			case EE_N_ASFLOAT : {
+				EE_RESULT rTemp;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTemp ) ) { return false; }
+				// This is for reinterpreting a uint32_t as a float.  The expression in ndNode.u.sNodeIndex
+				//	can either be an integral type (cast up to 64 bits) or a float (cast up to a double).
+				float fVal = 0.0f;
+				switch ( rTemp.ncType ) {
+					case EE_NC_UNSIGNED : {
+						fVal = (*reinterpret_cast<float *>(&rTemp.u.ui64Val));
+						break;
+					}
+					case EE_NC_SIGNED : {
+						fVal = (*reinterpret_cast<float *>(&rTemp.u.i64Val));
+						break;
+					}
+					case EE_NC_FLOATING : {
+						// as_float() is not really intended to reinterpret 64 "double" bit as "float" bits.
+						//	More likely, the user wants to see the float value cast from a double.
+						fVal = static_cast<float>(rTemp.u.dVal);
+						break;
+					}
+					default : { return false; }
+				}
+				_rRes.ncType = EE_NC_FLOATING;
+				_rRes.u.dVal = fVal;
+				return true;
+			}
+			case EE_N_ASDOUBLE : {
+				EE_RESULT rTemp;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTemp ) ) { return false; }
+				// This is for reinterpreting a uint64_t as a float.  The expression in ndNode.u.sNodeIndex
+				//	can either be an integral type (cast up to 64 bits) or a float (cast up to a double).
+				double dVal = 0.0;
+				switch ( rTemp.ncType ) {
+					case EE_NC_UNSIGNED : {
+						dVal = (*reinterpret_cast<double *>(&rTemp.u.ui64Val));
+						break;
+					}
+					case EE_NC_SIGNED : {
+						dVal = (*reinterpret_cast<double *>(&rTemp.u.i64Val));
+						break;
+					}
+					case EE_NC_FLOATING : {
+						// Nothing to do.
+						dVal = rTemp.u.dVal;
+						break;
+					}
+					default : { return false; }
+				}
+				_rRes.ncType = EE_NC_FLOATING;
+				_rRes.u.dVal = dVal;
+				return true;
+			}
+			case EE_N_ASXFLOAT : {
+				EE_RESULT rTempSignBits;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTempSignBits ) ) { return false; }
+				EE_RESULT rTempExpBits;
+				if ( !ResolveNode( ndNode.v.sNodeIndex, rTempExpBits ) ) { return false; }
+				EE_RESULT rTempManBits;
+				if ( !ResolveNode( ndNode.w.sNodeIndex, rTempManBits ) ) { return false; }
+				EE_RESULT rTempImplied;
+				if ( !ResolveNode( ndNode.x.sNodeIndex, rTempImplied ) ) { return false; }
+				EE_RESULT rTempSignVal;
+				if ( !ResolveNode( ndNode.y.sNodeIndex, rTempSignVal ) ) { return false; }
+				EE_RESULT rTempExpVal;
+				if ( !ResolveNode( ndNode.z.sNodeIndex, rTempExpVal ) ) { return false; }
+				EE_RESULT rTempManVal;
+				if ( !ResolveNode( ndNode.a.sNodeIndex, rTempManVal ) ) { return false; }
+
+				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
+				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
+				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
+				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+				rTempSignVal = ConvertResult( rTempSignVal, EE_NC_UNSIGNED );
+				rTempExpVal = ConvertResult( rTempExpVal, EE_NC_UNSIGNED );
+				rTempManVal = ConvertResult( rTempManVal, EE_NC_UNSIGNED );
+				CFloatX fTemp;
+				if ( rTempSignBits.u.ui64Val ) {
+					fTemp.bSign = rTempSignVal.u.ui64Val ? true : false;
+				}
+				fTemp.uiExpBits = static_cast<uint16_t>(rTempExpBits.u.ui64Val);
+				fTemp.uiManBits = static_cast<uint16_t>(rTempManBits.u.ui64Val);
+				fTemp.uiExponent = ((1ULL << fTemp.uiExpBits) - 1ULL) & rTempExpVal.u.ui64Val;
+				fTemp.uiMantissa = ((1ULL << fTemp.uiManBits) - 1ULL) & rTempManVal.u.ui64Val;
+				
+				_rRes.ncType = EE_NC_FLOATING;
+				_rRes.u.dVal = fTemp.AsDouble();
+				return true;
+			}
+			case EE_N_ASXFLOAT_FROM_DOUBLE : {
+				EE_RESULT rTempSignBits;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTempSignBits ) ) { return false; }
+				EE_RESULT rTempExpBits;
+				if ( !ResolveNode( ndNode.v.sNodeIndex, rTempExpBits ) ) { return false; }
+				EE_RESULT rTempManBits;
+				if ( !ResolveNode( ndNode.w.sNodeIndex, rTempManBits ) ) { return false; }
+				EE_RESULT rTempImplied;
+				if ( !ResolveNode( ndNode.x.sNodeIndex, rTempImplied ) ) { return false; }
+				EE_RESULT rTempDoubleVal;
+				if ( !ResolveNode( ndNode.y.sNodeIndex, rTempDoubleVal ) ) { return false; }
+
+				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
+				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
+				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
+				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+				rTempDoubleVal = ConvertResult( rTempDoubleVal, EE_NC_FLOATING );
+
+				CFloatX fTemp;
+				fTemp.CreateFromDouble( rTempDoubleVal.u.dVal, static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val) );
+				_rRes.ncType = EE_NC_FLOATING;
+				_rRes.u.dVal = fTemp.AsDouble();
+				return true;
 			}
 		}
 		return false;

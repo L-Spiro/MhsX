@@ -29,6 +29,9 @@
     <ClCompile Include="Src\EEExpEvalContainer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\EEFloatX.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Gen\EEExpEvalLexBase.h">
@@ -56,6 +59,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\EEExpEval.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\EEFloatX.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

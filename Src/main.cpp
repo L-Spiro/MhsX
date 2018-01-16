@@ -1,4 +1,4 @@
-#include "MXMhsX.h"
+﻿#include "MXMhsX.h"
 #include <Base/LSWBase.h>
 #include <Base/LSWWndClassEx.h>
 #include <Images/LSWBitmap.h>
@@ -12,7 +12,7 @@
 #include "System/MXSystem.h"
 #include "Utilities/MXUtilities.h"
 
-
+#include <EEFloatX.h>
 /*#include "EEExpEval.h"
 #include "EEExpEvalContainer.h"
 #include "EEExpEvalLexer.h"
@@ -36,6 +36,44 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 
 	// Initialize the system.
 	mx::CSystem::InitSystem();
+
+	ee::CFloatX fVal;
+	double dFMax = ee::CFloatX::GetMaxForBits( 8, 24, true );
+	if ( dFMax == FLT_MAX ) {
+		dFMax--;
+	}
+
+	
+	ee::CFloatX fFloat;
+	const uint16_t uiExpBits = 5;
+	const uint16_t uiManBits = 11;
+	fFloat.uiExpBits = uiExpBits;
+	fFloat.uiManBits = uiManBits;
+	fFloat.uiExponent = 0x00000001 >> (uiManBits - 1);
+	fFloat.uiMantissa = (0x00000001 & ((1 << (uiManBits - 1)) - 1));
+	double dTemp = fFloat.AsDouble();
+	double dTemp34 = dTemp;
+	dTemp = ee::CFloatX::GetMaxForBits( uiExpBits, uiManBits, true );
+	dTemp = ee::CFloatX::GetMinForBits( uiExpBits, uiManBits, true );	// 1.401298464e-45F
+	/*fFloat.CreateInfN( fFloat.uiExpBits, fFloat.uiManBits );
+	dTemp = fFloat.AsDouble();
+	fFloat.CreateInfP( fFloat.uiExpBits, fFloat.uiManBits );
+	dTemp = fFloat.AsDouble();
+	fFloat.CreateNaN( fFloat.uiExpBits, fFloat.uiManBits );
+	dTemp = fFloat.AsDouble();*/
+
+	double dTemp2 = 3.141592653589793115997963468544185161590576171875;
+	fVal.CreateFromDouble( -562.0
+		//dTemp2
+		//FLT_TRUE_MIN
+		//2.2250738585072009e-308
+		//DBL_MIN
+		//FLT_MIN
+		//3.14159 * 2000.135464 * 0
+		//65504 + 1
+							//, 8, 24 );
+							, 5, 11 );
+	dTemp = fVal.AsDouble();
 	
 
 	mx::CWindowMemHack wmhMemHack;

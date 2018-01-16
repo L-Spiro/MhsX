@@ -130,6 +130,32 @@ namespace ee {
 		// Create a double constant.
 		void								CreateDouble( double _dVal, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Create a reinterpretation of bits to a float.
+		void								CreateAsFloat( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Create a reinterpretation of bits to a double.
+		void								CreateAsDouble( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Create a reinterpretation of bits to a double with the given bit specifications.
+		void								CreateAsFloatX( const YYSTYPE::EE_NODE_DATA &_ndSignBits,
+			const YYSTYPE::EE_NODE_DATA &_ndExpBits,
+			const YYSTYPE::EE_NODE_DATA &_ndManBits,
+			const YYSTYPE::EE_NODE_DATA &_ndImplicitMan,
+			const YYSTYPE::EE_NODE_DATA &_ndSignValue,	// 0 or 1.
+			const YYSTYPE::EE_NODE_DATA &_ndExpValue,
+			const YYSTYPE::EE_NODE_DATA &_ndManValue,
+			
+			YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Create a reinterpretation of bits to a double with the given bit specifications.
+		void								CreateAsFloatX( const YYSTYPE::EE_NODE_DATA &_ndSignBits,
+			const YYSTYPE::EE_NODE_DATA &_ndExpBits,
+			const YYSTYPE::EE_NODE_DATA &_ndManBits,
+			const YYSTYPE::EE_NODE_DATA &_ndImplicitMan,
+			const YYSTYPE::EE_NODE_DATA &_ndExp,	// The double value to convert.
+			
+			YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Create an address node.
 		void								CreateAddress( const YYSTYPE::EE_NODE_DATA &_ndExp, EE_CAST_TYPES _ctCast, YYSTYPE::EE_NODE_DATA &_ndNode );
 

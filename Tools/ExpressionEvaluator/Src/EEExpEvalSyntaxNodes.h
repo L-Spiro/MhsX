@@ -30,6 +30,10 @@ namespace ee {
 		EE_N_INTRINSIC_2,
 		EE_N_INTRINSIC_3,
 		EE_N_USER_VAR,
+		EE_N_ASFLOAT,
+		EE_N_ASDOUBLE,
+		EE_N_ASXFLOAT,
+		EE_N_ASXFLOAT_FROM_DOUBLE,
 	};
 
 	// Constant types.
@@ -81,6 +85,15 @@ namespace ee {
 			union {
 				size_t													sNodeIndex;							// Node index.
 			}															x;
+			union {
+				size_t													sNodeIndex;							// Node index.
+			}															y;
+			union {
+				size_t													sNodeIndex;							// Node index.
+			}															z;
+			union {
+				size_t													sNodeIndex;							// Node index.
+			}															a;
 			
 		}																ndData;
 	};
