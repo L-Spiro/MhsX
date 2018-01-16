@@ -43,7 +43,7 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %lex-param													{ CExpEvalLexer * m_peelLexer }
 
 %token EE_CHAR_CONSTANT EE_FLOAT_CONSTANT EE_STRING_CONSTANT EE_HEX_CONSTANT1 EE_HEX_CONSTANT2 EE_HEX_CONSTANT3
-%token EE_DEC_CONSTANT EE_OCT_CONSTANT EE_PUREDEC_CONSTANT
+%token EE_BIN_CONSTANT EE_DEC_CONSTANT EE_OCT_CONSTANT EE_PUREDEC_CONSTANT
 %token EE_IDENTIFIER
 %token EE_MEMBERACCESS EE_USER_VAR
 %token EE_EQU_E EE_EQU_NE EE_LEFT_OP EE_RIGHT_OP EE_REL_GE EE_REL_LE
@@ -60,7 +60,7 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %token EE_LAMBDA EE_LAPLACE EE_LEVY EE_M1 EE_MU EE_NIVEN EE_OMEGA EE_P2 EE_PI EE_PLASTIC EE_PORTER EE_PSI EE_RAMAN EE_RAMAMU EE_SIERP EE_THETA EE_VISW EE_Z3 EE_ZETA 
 
 %token EE_CHAR_BIT EE_MB_LEN_MAX EE_CHAR_MIN EE_CHAR_MAX EE_SCHAR_MIN EE_SHRT_MIN EE_INT_MIN EE_LONG_MIN EE_LLONG_MIN EE_SCHAR_MAX EE_SHRT_MAX EE_INT_MAX EE_LONG_MAX EE_LLONG_MAX EE_UCHAR_MAX EE_USHRT_MAX EE_UINT_MAX EE_ULONG_MAX EE_ULLONG_MAX EE_FLT_RADIX EE_DECIMAL_DIG EE_FLT_DECIMAL_DIG EE_DBL_DECIMAL_DIG EE_LDBL_DECIMAL_DIG EE_FLT_MIN EE_DBL_MIN EE_LDBL_MIN EE_FLT_TRUE_MIN EE_DBL_TRUE_MIN EE_LDBL_TRUE_MIN EE_FLT_MAX EE_DBL_MAX EE_LDBL_MAX EE_FLT_EPSILON EE_DBL_EPSILON EE_LDBL_EPSILON EE_FLT_DIG EE_DBL_DIG EE_LDBL_DIG EE_FLT_MANT_DIG EE_DBL_MANT_DIG EE_LDBL_MANT_DIG EE_FLT_MIN_EXP EE_DBL_MIN_EXP EE_LDBL_MIN_EXP EE_FLT_MIN_10_EXP EE_DBL_MIN_10_EXP EE_LDBL_MIN_10_EXP EE_FLT_MAX_EXP EE_DBL_MAX_EXP EE_LDBL_MAX_EXP EE_FLT_MAX_10_EXP EE_DBL_MAX_10_EXP EE_LDBL_MAX_10_EXP
-%token EE_AS_FLOAT EE_AS_DOUBLE
+%token EE_AS_FLOAT EE_AS_DOUBLE EE_AS_FLOAT16 EE_AS_FLOAT14 EE_AS_FLOAT11 EE_AS_FLOAT10
 %token EE_TRUE EE_FALSE
 
 %type <sStringIndex>										string												
@@ -112,6 +112,7 @@ basic_expr
 	| EE_HEX_CONSTANT1										{ m_peecContainer->CreateHex1( m_peelLexer->YYText(), $$ ); }
 	| EE_HEX_CONSTANT2										{ m_peecContainer->CreateHex2( m_peelLexer->YYText(), $$ ); }
 	| EE_HEX_CONSTANT3										{ m_peecContainer->CreateHex3( m_peelLexer->YYText(), $$ ); }
+	| EE_BIN_CONSTANT										{ m_peecContainer->CreateBin( m_peelLexer->YYText(), $$ ); }
 	| EE_DEC_CONSTANT										{
 																if ( m_peecContainer->TreatAllAsHex() ) {
 																	m_peecContainer->CreateHex3( m_peelLexer->YYText(), $$ );
@@ -346,6 +347,12 @@ postfix_exp
 	| postfix_exp EE_MEMBERACCESS EE_FLT_MAX_10_EXP			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_DBL_MAX_10_EXP			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_LDBL_MAX_10_EXP		{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_AS_DOUBLE				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT16				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT14				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT11				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT10				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	;
 
 unary_exp
@@ -474,6 +481,10 @@ intrinsic
 															{ m_peecContainer->CreateAsFloatX( $3, $5, $7, $9, $11, $13, $15, $$ ); }
 	| EE_AS_FLOAT '(' exp ',' exp ',' exp ',' exp ',' exp ')'
 															{ m_peecContainer->CreateAsFloatX( $3, $5, $7, $9, $11, $$ ); }
+	| EE_AS_FLOAT16 '(' exp ')'								{ m_peecContainer->CreateAsFloat( $3, ee::EE_N_ASFLOAT16, $$ ); }
+	| EE_AS_FLOAT14 '(' exp ')'								{ m_peecContainer->CreateAsFloat( $3, ee::EE_N_ASFLOAT14, $$ ); }
+	| EE_AS_FLOAT11 '(' exp ')'								{ m_peecContainer->CreateAsFloat( $3, ee::EE_N_ASFLOAT11, $$ ); }
+	| EE_AS_FLOAT10 '(' exp ')'								{ m_peecContainer->CreateAsFloat( $3, ee::EE_N_ASFLOAT10, $$ ); }
 	;
 
 exp

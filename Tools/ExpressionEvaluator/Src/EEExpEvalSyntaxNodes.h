@@ -34,6 +34,10 @@ namespace ee {
 		EE_N_ASDOUBLE,
 		EE_N_ASXFLOAT,
 		EE_N_ASXFLOAT_FROM_DOUBLE,
+		EE_N_ASFLOAT16,
+		EE_N_ASFLOAT14,
+		EE_N_ASFLOAT11,
+		EE_N_ASFLOAT10,
 	};
 
 	// Constant types.

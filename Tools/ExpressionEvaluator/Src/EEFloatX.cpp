@@ -92,6 +92,18 @@ namespace ee {
 
 	// Create from a double.
 	CFloatX & CFloatX::CreateFromDouble( double _dVal, uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
+		uiManBits = _uiManBits;
+		uiExpBits = _uiExpBits;
+		bHasSign = _bHasSign;
+		bImplicitManBit = _bImplicitMantissaBit;
+
+		// Clamp to 0 if no sign bit.
+		if ( !_bHasSign && _dVal <= 0.0 ) {
+			uiExponent = 0;
+			uiMantissa = 0;
+			bSign = true;
+			return (*this);
+		}
 		// Adaptation from:
 		//	https://stackoverflow.com/questions/1659440/32-bit-to-16-bit-floating-point-conversion
 		// Shared under The Unlicense (choosealicense.com/licenses/unlicense).  Public domain.
@@ -100,8 +112,6 @@ namespace ee {
 			int64_t		iVal;
 			uint64_t	uiVal;
 		};
-		EE_DOUBLE_INT diTest;
-		diTest.dVal = _dVal;
 		const uint64_t uiRealMantissa = RealMantissaBits( _uiManBits, _bImplicitMantissaBit );
 		const int64_t iShiftSign = 64 - TotalBits( _uiExpBits, _uiManBits, _bImplicitMantissaBit, _bHasSign );
 		const int64_t iShift = RealMantissaBits( DBL_MANT_DIG, true ) - uiRealMantissa;
@@ -144,20 +154,17 @@ namespace ee {
 		diV.iVal ^= uiSign;
 		uiSign >>= iShiftSign;
         diS.iVal = uiMulN;
-        diS.iVal = diS.dVal * diV.dVal; // correct subnormals
+        diS.iVal = static_cast<int64_t>(diS.dVal * diV.dVal);									// Correct subnormals.
         diV.iVal ^= (diS.iVal ^ diV.iVal) & -(uiMinN > diV.iVal);
         diV.iVal ^= (uiInfN ^ diV.iVal) & -((uiInfN > diV.iVal) & (diV.iVal > uiMaxN));
         diV.iVal ^= (uiNanN ^ diV.iVal) & -((uiNanN > diV.iVal) & (diV.iVal > uiInfN));
-        diV.uiVal >>= iShift; // logical iShift
-        diV.iVal ^= ((diV.iVal - uiMaxD) ^ diV.iVal) & -(diV.iVal > uiMaxC);
+        diV.uiVal >>= iShift;
+		diV.iVal ^= ((diV.iVal - uiMaxD) ^ diV.iVal) & -(diV.iVal > uiMaxC);
         diV.iVal ^= ((diV.iVal - uiMinD) ^ diV.iVal) & -(diV.iVal > uiSubC);
 		uint64_t uiFinal = diV.uiVal | uiSign;
 		
 
-		uiManBits = _uiManBits;
-		uiExpBits = _uiExpBits;
-		bHasSign = _bHasSign;
-		bImplicitManBit = _bImplicitMantissaBit;
+		
 
 		uiExponent = (uiFinal >> uiRealMantissa) & ((1ULL << uiExpBits) - 1ULL);
 		uiMantissa = uiFinal & ((1ULL << uiRealMantissa) - 1ULL);

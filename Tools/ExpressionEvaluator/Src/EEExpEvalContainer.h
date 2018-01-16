@@ -97,6 +97,9 @@ namespace ee {
 		// Creates a hex constant (----).
 		void								CreateHex3( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a binary constant (0b----).
+		void								CreateBin( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Creates a decimal constant.
 		void								CreateUInt( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode );
 
@@ -132,6 +135,9 @@ namespace ee {
 
 		// Create a reinterpretation of bits to a float.
 		void								CreateAsFloat( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Create a reinterpretation of bits to a float of a common type.
+		void								CreateAsFloat( const YYSTYPE::EE_NODE_DATA &_ndExp, int32_t _eType, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Create a reinterpretation of bits to a double.
 		void								CreateAsDouble( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode );

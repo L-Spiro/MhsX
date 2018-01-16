@@ -96,6 +96,14 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
+	// Creates a binary constant (0b----).
+	void CExpEvalContainer::CreateBin( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_NUMERICCONSTANT;
+		_ndNode.u.ui64Val = StoULL( _pcText + 2, 2 );
+		_ndNode.v.ncConstType = EE_NC_UNSIGNED;
+		AddNode( _ndNode );
+	}
+
 	// Creates a decimal constant.
 	void CExpEvalContainer::CreateUInt( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
@@ -178,6 +186,13 @@ namespace ee {
 	// Create a reinterpretation of bits to a float.
 	void CExpEvalContainer::CreateAsFloat( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ASFLOAT;
+		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Create a reinterpretation of bits to a float of a common type.
+	void CExpEvalContainer::CreateAsFloat( const YYSTYPE::EE_NODE_DATA &_ndExp, int32_t _eType, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = static_cast<ee::EE_NODES>(_eType);
 		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
 		AddNode( _ndNode );
 	}
@@ -760,6 +775,46 @@ namespace ee {
 
 				CFloatX fTemp;
 				fTemp.CreateFromDouble( rTempDoubleVal.u.dVal, static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val) );
+				_rRes.ncType = EE_NC_FLOATING;
+				_rRes.u.dVal = fTemp.AsDouble();
+				return true;
+			}
+			case EE_N_ASFLOAT16 : {
+				EE_RESULT rTemp;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTemp ) ) { return false; }
+				rTemp = ConvertResult( rTemp, EE_NC_FLOATING );
+				CFloatX fTemp;
+				fTemp.CreateFromDouble( rTemp.u.dVal, 5, 11, true, true );
+				_rRes.ncType = EE_NC_FLOATING;
+				_rRes.u.dVal = fTemp.AsDouble();
+				return true;
+			}
+			case EE_N_ASFLOAT14 : {
+				EE_RESULT rTemp;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTemp ) ) { return false; }
+				rTemp = ConvertResult( rTemp, EE_NC_FLOATING );
+				CFloatX fTemp;
+				fTemp.CreateFromDouble( rTemp.u.dVal, 5, 10, true, false );
+				_rRes.ncType = EE_NC_FLOATING;
+				_rRes.u.dVal = fTemp.AsDouble();
+				return true;
+			}
+			case EE_N_ASFLOAT11 : {
+				EE_RESULT rTemp;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTemp ) ) { return false; }
+				rTemp = ConvertResult( rTemp, EE_NC_FLOATING );
+				CFloatX fTemp;
+				fTemp.CreateFromDouble( rTemp.u.dVal, 5, 7, true, false );
+				_rRes.ncType = EE_NC_FLOATING;
+				_rRes.u.dVal = fTemp.AsDouble();
+				return true;
+			}
+			case EE_N_ASFLOAT10 : {
+				EE_RESULT rTemp;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTemp ) ) { return false; }
+				rTemp = ConvertResult( rTemp, EE_NC_FLOATING );
+				CFloatX fTemp;
+				fTemp.CreateFromDouble( rTemp.u.dVal, 5, 6, true, false );
 				_rRes.ncType = EE_NC_FLOATING;
 				_rRes.u.dVal = fTemp.AsDouble();
 				return true;
