@@ -12,6 +12,7 @@
 #include "System/MXSystem.h"
 #include "Utilities/MXUtilities.h"
 
+#include <BigInt/EEBigInt.h>
 #include <EEFloatX.h>
 /*#include "EEExpEval.h"
 #include "EEExpEvalContainer.h"
@@ -20,6 +21,335 @@
 //#include "Layout/LSWMainWindowLayout.h"
 #include <sstream>
 //#include <QtWidgets/QApplication>
+
+
+
+uint32_t NextUtf8Char( const uint8_t * _putf8Char, uint32_t _ui32Len, uint32_t * _pui32Size ) {
+	if ( _ui32Len == 0 ) { return 0; }
+
+	// Get the low bits (which may be all there are).
+	uint32_t ui32Ret = (*_putf8Char);
+
+	// The first byte is a special case.
+	if ( (ui32Ret & 0x80UL) == 0 ) {
+		// We are done.
+		if ( _pui32Size ) {
+			(*_pui32Size) = 1;
+		}
+		return ui32Ret;
+	}
+
+	// We are in a multi-byte sequence.  Get bits from the top, starting
+	//	from the second bit.
+	uint32_t I = 0x20;
+	uint32_t ui32Len = 2;
+	uint32_t ui32Mask = 0xC0UL;
+	while ( ui32Ret & I ) {
+		// Add this bit to the mask to be removed later.
+		ui32Mask |= I;
+		I >>= 1;
+		++ui32Len;
+		if ( I == 0 ) {
+			// Invalid sequence.
+			if ( _pui32Size ) {
+				(*_pui32Size) = 1;
+			}
+			return ~static_cast<uint32_t>(0);
+		}
+	}
+
+	// Bounds checking.
+	if ( ui32Len > _ui32Len ) {
+		if ( _pui32Size ) {
+			(*_pui32Size) = _ui32Len;
+		}
+		return ~static_cast<uint32_t>(0);
+	}
+
+	// We know the size now, so set it.
+	// Even if we return an invalid character we want to return the correct number of
+	//	bytes to skip.
+	if ( _pui32Size ) {
+		(*_pui32Size) = ui32Len;
+	}
+
+	// If the length is greater than 4, it is invalid.
+	if ( ui32Len > 4 ) {
+		// Invalid sequence.
+		return ~static_cast<uint32_t>(0);
+	}
+
+	// Mask out the leading bits.
+	ui32Ret &= ~ui32Mask;
+
+	// For every trailing bit, add it to the final value.
+	for ( I = ui32Len - 1; I--; ) {
+		uint32_t ui32This = (*++_putf8Char);
+		// Validate the byte.
+		if ( (ui32This & 0xC0UL) != 0x80UL ) {
+			// Invalid.
+			return ~static_cast<uint32_t>(0);
+		}
+
+		ui32Ret <<= 6;
+		ui32Ret |= (ui32This & 0x3F);
+	}
+
+	// Finally done.
+	return ui32Ret;
+}
+
+uint32_t NextUtf16Char( const uint16_t * _putf16Char, uint32_t _ui32Len, uint32_t * _pui32Size ) {
+	if ( _ui32Len == 0 ) { return 0; }
+
+	// Get the low bits (which may be all there are).
+	uint32_t ui32Ret = (*_putf16Char);
+
+	uint32_t ui32Top = ui32Ret & 0xFC00UL;
+	// Check to see if this is a surrogate pair.
+	if ( ui32Top == 0xD800UL ) {
+		if ( _ui32Len < 2 ) {
+			// Not enough space to decode correctly.
+			if ( _pui32Size ) {
+				(*_pui32Size) = 1;
+			}
+			return ~static_cast<uint32_t>(0);
+		}
+
+		// Need to add the next character to it.
+		// Remove the 0xD800.
+		ui32Ret &= ~0xD800UL;
+		ui32Ret <<= 10;
+
+		// Get the second set of bits.
+		uint32_t ui32Next = (*++_putf16Char);
+		if ( (ui32Next & 0xFC00UL) != 0xDC00UL ) {
+			// Invalid second character.
+			// Standard defines this as an error.
+			if ( _pui32Size ) {
+				(*_pui32Size) = 1;
+			}
+			return ~static_cast<uint32_t>(0);
+		}
+		if ( _pui32Size ) {
+			(*_pui32Size) = 2;
+		}
+
+		ui32Next &= ~0xDC00UL;
+
+		// Add the second set of bits.
+		ui32Ret |= ui32Next;
+
+		return ui32Ret + 0x10000UL;
+	}
+
+	if ( _pui32Size ) {
+		(*_pui32Size) = 1;
+	}
+	return ui32Ret;
+}
+
+uint32_t Utf8ToUnicodeRaw( uint32_t * _pui32Dst,
+	const uint8_t * _putf8Src, uint32_t _ui32MaxLen ) {
+
+	// Get the number of uint8_t characters in the buffer (including the NULL).
+	const uint8_t * putf8Len = _putf8Src;
+	while ( (*putf8Len++) ) {}
+
+	uint32_t ui32Len = static_cast<uint32_t>(putf8Len - _putf8Src);
+
+	// I represents the length of the destination buffer.
+	uint32_t I = 0;
+	for ( ; I < _ui32MaxLen; ++I ) {
+		uint32_t ui32Size;
+		_pui32Dst[I] = NextUtf8Char( _putf8Src, ui32Len, &ui32Size );
+		if ( !_pui32Dst[I] ) { return I; }
+
+		// Advance the source string.
+		ui32Len -= ui32Size;
+		_putf8Src += ui32Size;
+	}
+
+	if ( _ui32MaxLen ) {
+		_pui32Dst[_ui32MaxLen-1] = 0;
+	}
+	return I;
+}
+
+
+uint32_t Utf16ToUnicodeRaw( uint32_t * _pui32Dst,
+	const uint16_t * _putf16Src, uint32_t _ui32MaxLen ) {
+
+	// Get the number of uint16_t characters in the buffer (including the NULL).
+	const uint16_t * putf16Len = _putf16Src;
+	while ( (*putf16Len++) ) {}
+
+	uint32_t ui32Len = static_cast<uint32_t>(putf16Len - _putf16Src);
+
+	// I represents the length of the destination buffer.
+	uint32_t I = 0;
+	for ( ; I < _ui32MaxLen; ++I ) {
+		uint32_t ui32Size;
+		_pui32Dst[I] = NextUtf16Char( _putf16Src, ui32Len, &ui32Size );
+		if ( !_pui32Dst[I] ) { return I; }
+
+		// Advance the source string.
+		ui32Len -= ui32Size;
+		_putf16Src += ui32Size;
+	}
+
+	if ( _ui32MaxLen ) {
+		_pui32Dst[_ui32MaxLen-1] = 0;
+	}
+	return I;
+}
+
+
+uint32_t RawUnicodeToUtf8Char( uint32_t _ui32Raw, uint32_t &_ui32Len ) {
+	// Handle the single-character case separately since it is a special case.
+	if ( _ui32Raw < 0x80UL ) {
+		_ui32Len = 1;
+		return _ui32Raw;
+	}
+
+	// Upper bounds checking.
+	if ( _ui32Raw > 0x10FFFFUL ) {
+		// Invalid character.  How do we handle it?
+		// Return a default character.
+		_ui32Len = 1;
+		return '?';
+	}
+
+	// Every other case uses bit markers.
+	// Start from the lowest encoding and check upwards.
+	uint32_t ui32High = 0x00000800UL;
+	uint32_t ui32Mask = 0xC0;
+	_ui32Len = 2;
+	while ( _ui32Raw >= ui32High ) {
+		ui32High <<= 5;
+		ui32Mask = (ui32Mask >> 1) | 0x80UL;
+		++_ui32Len;
+	}
+
+	// Encode the first byte.
+	uint32_t ui32BottomMask = ~((ui32Mask >> 1) | 0xFFFFFF80UL);
+	uint32_t ui32Ret = ui32Mask | ((_ui32Raw >> ((_ui32Len - 1) * 6)) & ui32BottomMask);
+	// Now fill in the rest of the bits.
+	uint32_t ui32Shift = 8;
+	for ( uint32_t I = _ui32Len - 1; I--; ) {
+		// Shift down, mask off 6 bits, and add the 10xxxxxx flag.
+		uint32_t ui32This = ((_ui32Raw >> (I * 6)) & 0x3F) | 0x80;
+
+		ui32Ret |= ui32This << ui32Shift;
+		ui32Shift += 8;
+	}
+
+	return ui32Ret;
+}
+
+uint32_t RawUnicodeToUtf8( uint8_t * _putf8Dst,
+	const uint32_t * _pui32Src, uint32_t _ui32MaxLen ) {
+	uint32_t _ui32Len;
+	for ( uint32_t I = 0; I < _ui32MaxLen; ) {
+		uint32_t ui32Value = RawUnicodeToUtf8Char( (*_pui32Src++), _ui32Len );
+		if ( !ui32Value ) {
+			_putf8Dst[I] = 0;
+			return I;
+		}
+
+		// Add the parts.
+		while ( _ui32Len-- && I < _ui32MaxLen ) {
+			_putf8Dst[I++] = static_cast<uint8_t>(ui32Value & 0xFFUL);
+			ui32Value >>= 8;
+		}
+	}
+
+	// Ran out of buffer before reaching the terminating NULL.
+	if ( _ui32MaxLen ) {
+		_putf8Dst[_ui32MaxLen-1] = 0;
+		return _ui32MaxLen - 1;
+	}
+	return 0;
+}
+
+
+uint32_t RawUnicodeToUtf16Char( uint32_t _ui32Raw, uint32_t &_ui32Len ) {
+	if ( (_ui32Raw & 0xFFFF0000) == 0 ) {
+		_ui32Len = 1;
+		return _ui32Raw;
+	}
+
+	_ui32Len = 2;
+
+	// Break into surrogate pairs.
+	_ui32Raw -= 0x10000UL;
+	uint32_t ui32Hi = (_ui32Raw >> 10) & 0x3FF;
+	uint32_t ui32Low = _ui32Raw & 0x3FF;
+
+	return (0xD800 | ui32Hi) |
+		((0xDC00 | ui32Low) << 16);
+}
+
+uint32_t RawUnicodeToUtf16( uint16_t * _putf16Dst,
+	const uint32_t * _pui32Src, uint32_t _ui32MaxLen ) {
+	uint32_t _ui32Len;
+	for ( uint32_t I = 0; I < _ui32MaxLen; ) {
+		uint32_t ui32Value = RawUnicodeToUtf16Char( (*_pui32Src++), _ui32Len );
+		if ( !ui32Value ) {
+			_putf16Dst[I] = 0;
+			return I;
+		}
+
+		// Add the parts.
+		while ( _ui32Len-- && I < _ui32MaxLen ) {
+			_putf16Dst[I++] = static_cast<uint16_t>(ui32Value & 0xFFFFUL);
+			ui32Value >>= 16;
+		}
+	}
+
+	// Ran out of buffer before reaching the terminating NULL.
+	if ( _ui32MaxLen ) {
+		_putf16Dst[_ui32MaxLen-1] = 0;
+		return _ui32MaxLen - 1;
+	}
+	return 0;
+}
+
+uint32_t RawUnicodeToUtf32Char( uint32_t _ui32Raw, uint32_t &_ui32Len ) {
+	_ui32Len = 1;
+	return _ui32Raw;
+}
+
+uint32_t Utf16ToUtf32( uint32_t * _putf32Dst, const uint16_t * _putf16Src,
+	uint32_t _ui32MaxLen ) {
+	for ( uint32_t I = 0; I < _ui32MaxLen; ++I ) {
+		uint32_t ui32ThisLen;
+		uint32_t ui32SrcLen;
+		_putf32Dst[I] = RawUnicodeToUtf32Char( NextUtf16Char( _putf16Src, 2, &ui32SrcLen ), ui32ThisLen );
+		if ( !_putf32Dst[I] ) {
+			_putf32Dst[I] = 0;
+			return I;
+		}
+		_putf16Src += ui32SrcLen;
+	}
+
+	// Ran out of buffer before reaching the terminating NULL.
+	if ( _ui32MaxLen ) {
+		_putf32Dst[_ui32MaxLen-1] = 0;
+		return _ui32MaxLen - 1;
+	}
+	return 0;
+}
+#include <codecvt>
+// Converts a wstring to a UTF-8 string.
+std::string WStringToString2( const std::wstring &_wsIn ) {
+	return std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes( _wsIn );
+}
+std::string NumToUtf8( uint32_t _ui32Val ) {
+	std::wstring wStr;
+	wStr.push_back( (wchar_t)_ui32Val );
+	return std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes( wStr );
+}
 
 
 int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine, int _nCmdShow ) {
@@ -74,8 +404,62 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 							//, 8, 24 );
 							, 5, 11 );
 	dTemp = fVal.AsDouble();
-	
 
+
+	//generate_table();
+	ee::CBigInt biInt = 90;
+	biInt = ee::CBigInt::MakeBigInt( 90 );
+	
+	uint32_t ui320 = '\x9';
+	uint32_t ui321 = '\x90';
+	//uint32_t ui322 = '\x901';
+	//uint32_t ui323 = '\x9089';
+	//uint32_t ui324 = '\x90EF2301';
+
+	size_t sConsued;
+	uint32_t ui32G0 = ee::EscapeX( "x9", 3, sConsued );
+	uint32_t ui32G1 = ee::EscapeX( "xAf", 4, sConsued );
+	uint32_t ui32G3 = ee::EscapeX( "x902", 5, sConsued );
+
+#if 0
+	//uint32_t ui32Blah = '\U0001F436';
+	uint32_t ui32Blah = '\U00002019';
+	uint32_t ui32Blah2 = '\u2019';
+	size_t s0 = sizeof( '\U00002019' );
+	size_t s1 = sizeof( '\u2019' );
+
+	const uint32_t C = 0x0001F436;
+	uint32_t H = std::floor((C - 0x10000) / 0x400) + 0xD800;
+	uint32_t L = (C - 0x10000) % 0x400 + 0xDC00;
+
+	//std::stringw
+	uint32_t ui32Bleh[32];
+	const wchar_t puBlehgh[] = { 0x2019, 0x0 };
+	Utf16ToUnicodeRaw( ui32Bleh, (const uint16_t *)puBlehgh, 32 );
+
+	uint32_t ui32BlehDst[32];
+	Utf16ToUtf32( ui32BlehDst, (const uint16_t *)puBlehgh, 32 );
+
+	std::string strTemp = NumToUtf8( 0x0001F436 );
+	uint32_t uiBlah21212[] = { 0x00000075, 0x00000039, 0x00000045, 0x00000035, 0x00000000 };
+	//{ 0x9E5, 0x0 };
+	char puBlehgh212[32];
+	RawUnicodeToUtf8( (uint8_t *)puBlehgh212, uiBlah21212, 32 );
+
+
+	const wchar_t wPrin[] = {
+		ui32Blah2 && 0xFFUL,
+		(ui32Blah2 >> 8UL) && 0xFFUL,
+		//0x2019,
+		//0x201C,
+		0x0
+	};
+	char wPrin32Dst[32];
+	Utf16ToUnicodeRaw( ui32Bleh, (const uint16_t *)wPrin, 32 );
+	RawUnicodeToUtf8( (uint8_t *)wPrin32Dst, ui32Bleh, 32 );
+	OutputDebugStringW( wPrin );
+	OutputDebugStringA( wPrin32Dst );
+#endif
 	mx::CWindowMemHack wmhMemHack;
 	// Create the windows.
 	//mx::CMainWindowLayout::CreateMainWindow();

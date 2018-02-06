@@ -162,6 +162,25 @@ namespace ee {
 			
 			YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Gets a property of a floating-point type with the given bit configuration.
+		void								CreateAsFloatXProp( const YYSTYPE::EE_NODE_DATA &_ndSignBits,
+			const YYSTYPE::EE_NODE_DATA &_ndExpBits,
+			const YYSTYPE::EE_NODE_DATA &_ndManBits,
+			const YYSTYPE::EE_NODE_DATA &_ndImplicitMan,
+			const EE_NODES _nProp,
+			
+			YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Gets a property of a floating-point type with the given bit configuration.
+		void								CreateAsFloatXProp( const YYSTYPE::EE_NODE_DATA &_ndSignBits,
+			const YYSTYPE::EE_NODE_DATA &_ndExpBits,
+			const YYSTYPE::EE_NODE_DATA &_ndManBits,
+			const YYSTYPE::EE_NODE_DATA &_ndImplicitMan,
+			const YYSTYPE::EE_NODE_DATA &_ndExp,	// The double value to convert.
+			const EE_NODES _nProp,
+			
+			YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Create an address node.
 		void								CreateAddress( const YYSTYPE::EE_NODE_DATA &_ndExp, EE_CAST_TYPES _ctCast, YYSTYPE::EE_NODE_DATA &_ndNode );
 

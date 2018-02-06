@@ -254,7 +254,7 @@ namespace lsw {
 
 		DrawXorBar( hDc, iX, iY, iWidth, iHeight );
 
-		ReleaseDC( Wnd(), hDc );
+		::ReleaseDC( Wnd(), hDc );
 
 		m_pLastPoint = _pPoint;
 	}

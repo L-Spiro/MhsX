@@ -25,6 +25,12 @@ namespace lsw {
 		// Gets the number of items in the list box of a combo box.
 		INT									GetCount() const;
 
+		// Gets the length of an item's text.
+		INT									GetLBTextLen( INT _iIndex ) const;
+
+		// Gets a string from a list in a combo box.
+		INT									GetLBText( INT _iIndex, std::wstring &_wString ) const;
+
 		// Gets the index of the currently selected item in a combo box.
 		INT									GetCurSel() const;
 
@@ -57,6 +63,15 @@ namespace lsw {
 
 		// Shows or hides the list in a combo box.
 		BOOL								ShowDropdown( BOOL _fShow );
+
+		// Gets the rectangle for a string in the combo bod.
+		LSW_RECT							GetItemRect( INT _iIndex ) const;
+
+		// Gets the minimum width for the list box.
+		LONG								GetListMinWidth() const;
+
+		// Auto-sets the minimum width of the list box after adding all the strings.
+		LONG								AutoSetMinListWidth();
 
 
 	private :

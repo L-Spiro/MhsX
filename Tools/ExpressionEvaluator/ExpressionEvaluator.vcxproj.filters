@@ -15,6 +15,12 @@
     <Filter Include="Source Files\Gen">
       <UniqueIdentifier>{358d15c0-8a1f-4dd9-b127-f4af42c16e88}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\BigInt">
+      <UniqueIdentifier>{5b422735-b2ef-49fb-bdab-71113e1fe210}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BigInt">
+      <UniqueIdentifier>{c735382a-ed30-4e04-bab8-ad08015ae4e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -30,6 +36,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\EEFloatX.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\BigInt\EEBigInt.cpp">
+      <Filter>Source Files\BigInt</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\EEExpEval.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -63,6 +75,9 @@
     </ClInclude>
     <ClInclude Include="Src\EEFloatX.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\BigInt\EEBigInt.h">
+      <Filter>Header Files\BigInt</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -141,12 +141,15 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\BigInt\EEBigInt.cpp" />
+    <ClCompile Include="Src\EEExpEval.cpp" />
     <ClCompile Include="Src\EEExpEvalContainer.cpp" />
     <ClCompile Include="Src\EEFloatX.cpp" />
     <ClCompile Include="Src\Gen\EEExpEvalLexBase.cpp" />
     <ClCompile Include="Src\Gen\EEExpEvalParser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\BigInt\EEBigInt.h" />
     <ClInclude Include="Src\EEExpEval.h" />
     <ClInclude Include="Src\EEExpEvalContainer.h" />
     <ClInclude Include="Src\EEExpEvalLexer.h" />

@@ -243,6 +243,42 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
+	// Gets a property of a floating-point type with the given bit configuration.
+	void CExpEvalContainer::CreateAsFloatXProp( const YYSTYPE::EE_NODE_DATA &_ndSignBits,
+		const YYSTYPE::EE_NODE_DATA &_ndExpBits,
+		const YYSTYPE::EE_NODE_DATA &_ndManBits,
+		const YYSTYPE::EE_NODE_DATA &_ndImplicitMan,
+		const EE_NODES _nProp,
+			
+		YYSTYPE::EE_NODE_DATA &_ndNode ) {
+
+		_ndNode.nType = _nProp;
+		_ndNode.u.sNodeIndex = _ndSignBits.sNodeIndex;
+		_ndNode.v.sNodeIndex = _ndExpBits.sNodeIndex;
+		_ndNode.w.sNodeIndex = _ndManBits.sNodeIndex;
+		_ndNode.x.sNodeIndex = _ndImplicitMan.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Gets a property of a floating-point type with the given bit configuration.
+	void CExpEvalContainer::CreateAsFloatXProp( const YYSTYPE::EE_NODE_DATA &_ndSignBits,
+		const YYSTYPE::EE_NODE_DATA &_ndExpBits,
+		const YYSTYPE::EE_NODE_DATA &_ndManBits,
+		const YYSTYPE::EE_NODE_DATA &_ndImplicitMan,
+		const YYSTYPE::EE_NODE_DATA &_ndExp,	// The double value to convert.
+		const EE_NODES _nProp,
+			
+		YYSTYPE::EE_NODE_DATA &_ndNode ) {
+
+		_ndNode.nType = _nProp;
+		_ndNode.u.sNodeIndex = _ndSignBits.sNodeIndex;
+		_ndNode.v.sNodeIndex = _ndExpBits.sNodeIndex;
+		_ndNode.w.sNodeIndex = _ndManBits.sNodeIndex;
+		_ndNode.x.sNodeIndex = _ndImplicitMan.sNodeIndex;
+		_ndNode.y.sNodeIndex = _ndExp.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
 	// Create an address node.
 	void CExpEvalContainer::CreateAddress( const YYSTYPE::EE_NODE_DATA &_ndExp, EE_CAST_TYPES _ctCast, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ADDRESS;
@@ -774,7 +810,8 @@ namespace ee {
 				rTempDoubleVal = ConvertResult( rTempDoubleVal, EE_NC_FLOATING );
 
 				CFloatX fTemp;
-				fTemp.CreateFromDouble( rTempDoubleVal.u.dVal, static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val) );
+				fTemp.CreateFromDouble( rTempDoubleVal.u.dVal, static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
+					rTempImplied.u.ui64Val != 0, rTempSignBits.u.ui64Val != 0 );
 				_rRes.ncType = EE_NC_FLOATING;
 				_rRes.u.dVal = fTemp.AsDouble();
 				return true;
@@ -819,6 +856,261 @@ namespace ee {
 				_rRes.u.dVal = fTemp.AsDouble();
 				return true;
 			}
+			case EE_N_ASXFLOAT_MAX : {
+				EE_RESULT rTempSignBits;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTempSignBits ) ) { return false; }
+				EE_RESULT rTempExpBits;
+				if ( !ResolveNode( ndNode.v.sNodeIndex, rTempExpBits ) ) { return false; }
+				EE_RESULT rTempManBits;
+				if ( !ResolveNode( ndNode.w.sNodeIndex, rTempManBits ) ) { return false; }
+				EE_RESULT rTempImplied;
+				if ( !ResolveNode( ndNode.x.sNodeIndex, rTempImplied ) ) { return false; }
+
+				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
+				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
+				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
+				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+
+				_rRes.ncType = EE_NC_FLOATING;
+				_rRes.u.dVal = CFloatX::GetMaxForBits( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
+					rTempImplied.u.ui64Val != 0 );
+				return true;
+			}
+			case EE_N_ASXFLOAT_MIN : {
+				EE_RESULT rTempSignBits;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTempSignBits ) ) { return false; }
+				EE_RESULT rTempExpBits;
+				if ( !ResolveNode( ndNode.v.sNodeIndex, rTempExpBits ) ) { return false; }
+				EE_RESULT rTempManBits;
+				if ( !ResolveNode( ndNode.w.sNodeIndex, rTempManBits ) ) { return false; }
+				EE_RESULT rTempImplied;
+				if ( !ResolveNode( ndNode.x.sNodeIndex, rTempImplied ) ) { return false; }
+
+				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
+				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
+				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
+				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+
+				_rRes.ncType = EE_NC_FLOATING;
+				_rRes.u.dVal = CFloatX::GetNormalizedMinForBits( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
+					rTempImplied.u.ui64Val != 0 );
+				return true;
+			}
+			case EE_N_ASXFLOAT_TRUE_MIN : {
+				EE_RESULT rTempSignBits;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTempSignBits ) ) { return false; }
+				EE_RESULT rTempExpBits;
+				if ( !ResolveNode( ndNode.v.sNodeIndex, rTempExpBits ) ) { return false; }
+				EE_RESULT rTempManBits;
+				if ( !ResolveNode( ndNode.w.sNodeIndex, rTempManBits ) ) { return false; }
+				EE_RESULT rTempImplied;
+				if ( !ResolveNode( ndNode.x.sNodeIndex, rTempImplied ) ) { return false; }
+
+				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
+				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
+				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
+				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+
+				_rRes.ncType = EE_NC_FLOATING;
+				_rRes.u.dVal = CFloatX::GetMinForBits( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
+					rTempImplied.u.ui64Val != 0 );
+				return true;
+			}
+			case EE_N_ASXFLOAT_NAN : {
+				EE_RESULT rTempSignBits;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTempSignBits ) ) { return false; }
+				EE_RESULT rTempExpBits;
+				if ( !ResolveNode( ndNode.v.sNodeIndex, rTempExpBits ) ) { return false; }
+				EE_RESULT rTempManBits;
+				if ( !ResolveNode( ndNode.w.sNodeIndex, rTempManBits ) ) { return false; }
+				EE_RESULT rTempImplied;
+				if ( !ResolveNode( ndNode.x.sNodeIndex, rTempImplied ) ) { return false; }
+
+				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
+				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
+				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
+				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+
+				CFloatX fTemp;
+				fTemp.CreateNaN( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
+					rTempImplied.u.ui64Val != 0, rTempSignBits.u.ui64Val != 0 );
+				_rRes.ncType = EE_NC_UNSIGNED;
+				_rRes.u.ui64Val = fTemp.AsUint64();
+				return true;
+			}
+			case EE_N_ASXFLOAT_INF : {
+				EE_RESULT rTempSignBits;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTempSignBits ) ) { return false; }
+				EE_RESULT rTempExpBits;
+				if ( !ResolveNode( ndNode.v.sNodeIndex, rTempExpBits ) ) { return false; }
+				EE_RESULT rTempManBits;
+				if ( !ResolveNode( ndNode.w.sNodeIndex, rTempManBits ) ) { return false; }
+				EE_RESULT rTempImplied;
+				if ( !ResolveNode( ndNode.x.sNodeIndex, rTempImplied ) ) { return false; }
+
+				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
+				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
+				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
+				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+
+				CFloatX fTemp;
+				fTemp.CreateInfP( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
+					rTempImplied.u.ui64Val != 0, rTempSignBits.u.ui64Val != 0 );
+				_rRes.ncType = EE_NC_UNSIGNED;
+				_rRes.u.ui64Val = fTemp.AsUint64();
+				return true;
+			}
+			case EE_N_ASXFLOAT_SUBNORM_MAX : {
+				EE_RESULT rTempSignBits;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTempSignBits ) ) { return false; }
+				EE_RESULT rTempExpBits;
+				if ( !ResolveNode( ndNode.v.sNodeIndex, rTempExpBits ) ) { return false; }
+				EE_RESULT rTempManBits;
+				if ( !ResolveNode( ndNode.w.sNodeIndex, rTempManBits ) ) { return false; }
+				EE_RESULT rTempImplied;
+				if ( !ResolveNode( ndNode.x.sNodeIndex, rTempImplied ) ) { return false; }
+
+				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
+				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
+				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
+				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+
+				_rRes.ncType = EE_NC_FLOATING;
+				_rRes.u.dVal = CFloatX::GetDenormalizedMaxForBits( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
+					rTempImplied.u.ui64Val != 0 );
+				return true;
+			}
+			case EE_N_ASXFLOAT_EPS : {
+				EE_RESULT rTempSignBits;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTempSignBits ) ) { return false; }
+				EE_RESULT rTempExpBits;
+				if ( !ResolveNode( ndNode.v.sNodeIndex, rTempExpBits ) ) { return false; }
+				EE_RESULT rTempManBits;
+				if ( !ResolveNode( ndNode.w.sNodeIndex, rTempManBits ) ) { return false; }
+				EE_RESULT rTempImplied;
+				if ( !ResolveNode( ndNode.x.sNodeIndex, rTempImplied ) ) { return false; }
+
+				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
+				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
+				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
+				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+
+				CFloatX fOne, fNextUp;
+				fOne.CreateFromDouble( 1.0, static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
+					rTempImplied.u.ui64Val != 0 );
+				fNextUp.CreateFromParts( fOne.bSign, fOne.uiExponent, fOne.uiMantissa + 1, static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
+					rTempImplied.u.ui64Val != 0 );
+
+				_rRes.ncType = EE_NC_FLOATING;
+				_rRes.u.dVal = fNextUp.AsDouble() - fOne.AsDouble();
+				return true;
+			}
+			case EE_N_ASXFLOAT_SIGNBIT : {
+				EE_RESULT rTempSignBits;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTempSignBits ) ) { return false; }
+				EE_RESULT rTempExpBits;
+				if ( !ResolveNode( ndNode.v.sNodeIndex, rTempExpBits ) ) { return false; }
+				EE_RESULT rTempManBits;
+				if ( !ResolveNode( ndNode.w.sNodeIndex, rTempManBits ) ) { return false; }
+				EE_RESULT rTempImplied;
+				if ( !ResolveNode( ndNode.x.sNodeIndex, rTempImplied ) ) { return false; }
+				EE_RESULT rTempDoubleVal;
+				if ( !ResolveNode( ndNode.y.sNodeIndex, rTempDoubleVal ) ) { return false; }
+
+				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
+				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
+				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
+				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+				rTempDoubleVal = ConvertResult( rTempDoubleVal, EE_NC_FLOATING );
+
+				CFloatX fTemp;
+				fTemp.CreateFromDouble( rTempDoubleVal.u.dVal, static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
+					rTempImplied.u.ui64Val != 0, rTempSignBits.u.ui64Val != 0 );
+				_rRes.ncType = EE_NC_UNSIGNED;
+				_rRes.u.ui64Val = fTemp.SignBit();
+				return true;
+			}
+			case EE_N_ASXFLOAT_EXPBITS : {
+				EE_RESULT rTempSignBits;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTempSignBits ) ) { return false; }
+				EE_RESULT rTempExpBits;
+				if ( !ResolveNode( ndNode.v.sNodeIndex, rTempExpBits ) ) { return false; }
+				EE_RESULT rTempManBits;
+				if ( !ResolveNode( ndNode.w.sNodeIndex, rTempManBits ) ) { return false; }
+				EE_RESULT rTempImplied;
+				if ( !ResolveNode( ndNode.x.sNodeIndex, rTempImplied ) ) { return false; }
+				EE_RESULT rTempDoubleVal;
+				if ( !ResolveNode( ndNode.y.sNodeIndex, rTempDoubleVal ) ) { return false; }
+
+				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
+				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
+				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
+				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+				rTempDoubleVal = ConvertResult( rTempDoubleVal, EE_NC_FLOATING );
+
+				CFloatX fTemp;
+				fTemp.CreateFromDouble( rTempDoubleVal.u.dVal, static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
+					rTempImplied.u.ui64Val != 0, rTempSignBits.u.ui64Val != 0 );
+				_rRes.ncType = EE_NC_UNSIGNED;
+				_rRes.u.ui64Val = fTemp.ExpBits();
+				return true;
+			}
+			case EE_N_ASXFLOAT_MANBITS : {
+				EE_RESULT rTempSignBits;
+				if ( !ResolveNode( ndNode.u.sNodeIndex, rTempSignBits ) ) { return false; }
+				EE_RESULT rTempExpBits;
+				if ( !ResolveNode( ndNode.v.sNodeIndex, rTempExpBits ) ) { return false; }
+				EE_RESULT rTempManBits;
+				if ( !ResolveNode( ndNode.w.sNodeIndex, rTempManBits ) ) { return false; }
+				EE_RESULT rTempImplied;
+				if ( !ResolveNode( ndNode.x.sNodeIndex, rTempImplied ) ) { return false; }
+				EE_RESULT rTempDoubleVal;
+				if ( !ResolveNode( ndNode.y.sNodeIndex, rTempDoubleVal ) ) { return false; }
+
+				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
+				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
+				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
+				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+				rTempDoubleVal = ConvertResult( rTempDoubleVal, EE_NC_FLOATING );
+
+				CFloatX fTemp;
+				fTemp.CreateFromDouble( rTempDoubleVal.u.dVal, static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
+					rTempImplied.u.ui64Val != 0, rTempSignBits.u.ui64Val != 0 );
+				_rRes.ncType = EE_NC_UNSIGNED;
+				_rRes.u.ui64Val = fTemp.ManBits();
+				return true;
+			}
+
 		}
 		return false;
 	}

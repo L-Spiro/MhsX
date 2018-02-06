@@ -53,6 +53,13 @@ namespace ee {
 		// Create from a double.
 		CFloatX &						CreateFromDouble( double _dVal, uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit = true, bool _bHasSign = true );
 
+		// Create from bits in a uint64_t value.
+		CFloatX &						CreateFromBits( uint64_t _uiVal, uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit = true, bool _bHasSign = true );
+
+		// Create from separate values.
+		CFloatX &						CreateFromParts( uint64_t _uiSign, uint64_t _uiExp, uint64_t _uiMan,
+			uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit = true, bool _bHasSign = true );
+
 		// Cast to double.
 		double							AsDouble() const;
 
@@ -74,11 +81,26 @@ namespace ee {
 		// Gets a sign multiplier.
 		double							Sign() const { return ((bHasSign && bSign) ? -1.0 : 1.0); }
 
+		// Gets the sign bit shifted.
+		uint64_t						SignBit() const { return ((bHasSign && bSign) ? 1 : 0); }
+
+		// Gets the exponent bits shifted.
+		uint64_t						ExpBits() const { return uiExponent & ((1ULL << uiExpBits) - 1ULL); }
+
+		// Gets the mantissa bits shifted.
+		uint64_t						ManBits() const { return uiMantissa & ((1ULL << RealMantissaBits( uiManBits, bImplicitManBit )) - 1ULL); }
+
 		// Gets the maximum possible value for a float type with the given bits.
 		static double					GetMaxForBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit );
 
 		// Gets the smallest possible non-0 value for a float type with the given bits.
 		static double					GetMinForBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit );
+
+		// Gets the smallest normalized non-0 value for a float type with the given bits.
+		static double					GetNormalizedMinForBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit );
+
+		// Gets the maximum denormalized value for a float type with the given bits.
+		static double					GetDenormalizedMaxForBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit );
 
 		// Gets an exponent with all bits set.
 		static uint64_t					AllExpBitsSet( uint16_t _uiExpBits ) { return (1 << _uiExpBits) - 1; }

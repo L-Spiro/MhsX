@@ -16,6 +16,7 @@ namespace lsw {
 		}
 		LONG								Width() const { return right - left; }
 		LONG								Height() const { return bottom - top; }
+		LSW_RECT &							Zero() { left = right = top = bottom = 0; return (*this ); }
 		VOID								SetWidth( LONG _lW ) { right = left + _lW; }
 		VOID								SetHeight( LONG _lH ) { bottom = top + _lH; }
 		POINT								UpperLeft() const { return { left, top }; }

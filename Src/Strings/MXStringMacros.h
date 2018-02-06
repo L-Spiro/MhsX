@@ -4845,3 +4845,24 @@
 #define _DEC_S_3424431C_Invalid mx::CStringDecoder::DecodeToString( _T_3424431C_Invalid, _LEN_3424431C )
 #define _DEC_WS_3424431C_Invalid mx::CStringDecoder::DecodeToWString( _T_3424431C_Invalid, _LEN_3424431C )
 
+// Output:
+#define _T_CCC86FF4_Output_ "\xD7\x43\x44\x0B\x07\x3D\xC8"
+#define _LEN_CCC86FF4 7
+#define _DEC_CCC86FF4_Output_( STR ) mx::CStringDecoder::Decode( _T_CCC86FF4_Output_, _LEN_CCC86FF4, STR )
+#define _DEC_S_CCC86FF4_Output_ mx::CStringDecoder::DecodeToString( _T_CCC86FF4_Output_, _LEN_CCC86FF4 )
+#define _DEC_WS_CCC86FF4_Output_ mx::CStringDecoder::DecodeToWString( _T_CCC86FF4_Output_, _LEN_CCC86FF4 )
+
+// Standard
+#define _T_E981B5D1_Standard "\xDB\x42\x31\x09\xF6\x2A\x00\x2B"
+#define _LEN_E981B5D1 8
+#define _DEC_E981B5D1_Standard( STR ) mx::CStringDecoder::Decode( _T_E981B5D1_Standard, _LEN_E981B5D1, STR )
+#define _DEC_S_E981B5D1_Standard mx::CStringDecoder::DecodeToString( _T_E981B5D1_Standard, _LEN_E981B5D1 )
+#define _DEC_WS_E981B5D1_Standard mx::CStringDecoder::DecodeToWString( _T_E981B5D1_Standard, _LEN_E981B5D1 )
+
+// Extended
+#define _T_DCCBE329_Extended "\xCD\x46\x44\x00\x00\x2D\xF3\x2B"
+#define _LEN_DCCBE329 8
+#define _DEC_DCCBE329_Extended( STR ) mx::CStringDecoder::Decode( _T_DCCBE329_Extended, _LEN_DCCBE329, STR )
+#define _DEC_S_DCCBE329_Extended mx::CStringDecoder::DecodeToString( _T_DCCBE329_Extended, _LEN_DCCBE329 )
+#define _DEC_WS_DCCBE329_Extended mx::CStringDecoder::DecodeToWString( _T_DCCBE329_Extended, _LEN_DCCBE329 )
+

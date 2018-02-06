@@ -291,14 +291,24 @@ namespace yy {
      EE_AS_FLOAT14 = 431,
      EE_AS_FLOAT11 = 432,
      EE_AS_FLOAT10 = 433,
-     EE_TRUE = 434,
-     EE_FALSE = 435,
-     EE_OR = 436,
-     EE_AND = 437,
-     EE_LOG_NOT = 438,
-     EE_UNARY_1SCOMPL = 439,
-     EE_UPLUS = 440,
-     EE_UMINUS = 441
+     EE_AS_FLOAT_MAX = 434,
+     EE_AS_FLOAT_MIN = 435,
+     EE_AS_FLOAT_TRUE_MIN = 436,
+     EE_AS_FLOAT_NAN = 437,
+     EE_AS_FLOAT_INF = 438,
+     EE_AS_FLOAT_SUBNORM_MAX = 439,
+     EE_AS_FLOAT_EPS = 440,
+     EE_TRUE = 441,
+     EE_FALSE = 442,
+     EE_AS_FLOAT_SIGNBIT = 443,
+     EE_AS_FLOAT_EXPBITS = 444,
+     EE_AS_FLOAT_MANBITS = 445,
+     EE_OR = 446,
+     EE_AND = 447,
+     EE_LOG_NOT = 448,
+     EE_UNARY_1SCOMPL = 449,
+     EE_UPLUS = 450,
+     EE_UMINUS = 451
    };
 
     };

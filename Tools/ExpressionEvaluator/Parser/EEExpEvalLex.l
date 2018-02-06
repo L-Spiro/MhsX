@@ -300,6 +300,16 @@ WS									[ \t\v\r\n\f]
 "as_float14"						{ return yy::CExpEvalParser::token::EE_AS_FLOAT14; }
 "as_float11"						{ return yy::CExpEvalParser::token::EE_AS_FLOAT11; }
 "as_float10"						{ return yy::CExpEvalParser::token::EE_AS_FLOAT10; }
+"as_float_max"						{ return yy::CExpEvalParser::token::EE_AS_FLOAT_MAX; }
+"as_float_min"						{ return yy::CExpEvalParser::token::EE_AS_FLOAT_MIN; }
+"as_float_true_min"					{ return yy::CExpEvalParser::token::EE_AS_FLOAT_TRUE_MIN; }
+"as_float_nan"						{ return yy::CExpEvalParser::token::EE_AS_FLOAT_NAN; }
+"as_float_inf"						{ return yy::CExpEvalParser::token::EE_AS_FLOAT_INF; }
+"as_float_subnorm_max"				{ return yy::CExpEvalParser::token::EE_AS_FLOAT_SUBNORM_MAX; }
+"as_float_eps"						{ return yy::CExpEvalParser::token::EE_AS_FLOAT_EPS; }
+"as_float_signbit"					{ return yy::CExpEvalParser::token::EE_AS_FLOAT_SIGNBIT; }
+"as_float_expbits"					{ return yy::CExpEvalParser::token::EE_AS_FLOAT_EXPBITS; }
+"as_float_manbits"					{ return yy::CExpEvalParser::token::EE_AS_FLOAT_MANBITS; }
 
 
 "true"								{ return yy::CExpEvalParser::token::EE_TRUE; }

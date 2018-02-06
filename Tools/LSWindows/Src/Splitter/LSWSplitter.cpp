@@ -107,7 +107,7 @@ namespace lsw {
 		if ( iLinesDrawn == 2 ) {
 			DrawXorBar( hDc, _pPoint.x, _pPoint.y, m_dwBarWidth, m_dwBarWidth );
 		}
-		ReleaseDC( Wnd(), hDc );
+		::ReleaseDC( Wnd(), hDc );
 
 		m_pLastPoint = _pPoint;
 	}

@@ -101,7 +101,7 @@ namespace ee {
 		if ( !_bHasSign && _dVal <= 0.0 ) {
 			uiExponent = 0;
 			uiMantissa = 0;
-			bSign = true;
+			bSign = false;
 			return (*this);
 		}
 		// Adaptation from:
@@ -155,20 +155,21 @@ namespace ee {
 		uiSign >>= iShiftSign;
         diS.iVal = uiMulN;
         diS.iVal = static_cast<int64_t>(diS.dVal * diV.dVal);									// Correct subnormals.
-        diV.iVal ^= (diS.iVal ^ diV.iVal) & -(uiMinN > diV.iVal);
-        diV.iVal ^= (uiInfN ^ diV.iVal) & -((uiInfN > diV.iVal) & (diV.iVal > uiMaxN));
-        diV.iVal ^= (uiNanN ^ diV.iVal) & -((uiNanN > diV.iVal) & (diV.iVal > uiInfN));
+        diV.iVal ^= (diS.iVal ^ diV.iVal) & -(static_cast<int64_t>(uiMinN) > diV.iVal);
+        diV.iVal ^= (uiInfN ^ diV.iVal) & -((static_cast<int64_t>(uiInfN) > diV.iVal) & (diV.iVal > static_cast<int64_t>(uiMaxN)));
+        diV.iVal ^= (uiNanN ^ diV.iVal) & -((static_cast<int64_t>(uiNanN) > diV.iVal) & (diV.iVal > static_cast<int64_t>(uiInfN)));
         diV.uiVal >>= iShift;
-		diV.iVal ^= ((diV.iVal - uiMaxD) ^ diV.iVal) & -(diV.iVal > uiMaxC);
-        diV.iVal ^= ((diV.iVal - uiMinD) ^ diV.iVal) & -(diV.iVal > uiSubC);
+		diV.iVal ^= ((diV.iVal - uiMaxD) ^ diV.iVal) & -(diV.iVal > static_cast<int64_t>(uiMaxC));
+        diV.iVal ^= ((diV.iVal - uiMinD) ^ diV.iVal) & -(diV.iVal > static_cast<int64_t>(uiSubC));
 		uint64_t uiFinal = diV.uiVal | uiSign;
 		
 
 		
 
-		uiExponent = (uiFinal >> uiRealMantissa) & ((1ULL << uiExpBits) - 1ULL);
+		/*uiExponent = (uiFinal >> uiRealMantissa) & ((1ULL << uiExpBits) - 1ULL);
 		uiMantissa = uiFinal & ((1ULL << uiRealMantissa) - 1ULL);
-		bSign = uiSign ? true : false;
+		bSign = uiSign ? true : false;*/
+		CreateFromBits( uiFinal, _uiExpBits, _uiManBits, _bImplicitMantissaBit, _bHasSign );
 		
 
 #ifdef _DEBUG
@@ -266,12 +267,43 @@ namespace ee {
 		return (*this);
 	}
 
+	// Create from bits in a uint64_t value.
+	CFloatX & CFloatX::CreateFromBits( uint64_t _uiVal, uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
+		uiManBits = _uiManBits;
+		uiExpBits = _uiExpBits;
+		bHasSign = _bHasSign;
+		bImplicitManBit = _bImplicitMantissaBit;
+
+		uint64_t uiRealMantissa = RealMantissaBits( _uiManBits, _bImplicitMantissaBit );
+		
+		uiExponent = (_uiVal >> uiRealMantissa) & ((1ULL << uiExpBits) - 1ULL);
+		uiMantissa = _uiVal & ((1ULL << uiRealMantissa) - 1ULL);
+		bSign = (_bHasSign && (_uiVal & (1ULL << (TotalBits( _uiExpBits, _uiManBits, _bImplicitMantissaBit, _bHasSign ) - 1ULL)))) ? true : false;
+		return (*this);
+	}
+
+	// Create from separate values.
+	CFloatX & CFloatX::CreateFromParts( uint64_t _uiSign, uint64_t _uiExp, uint64_t _uiMan,
+		uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
+		uiManBits = _uiManBits;
+		uiExpBits = _uiExpBits;
+		bHasSign = _bHasSign;
+		bImplicitManBit = _bImplicitMantissaBit;
+
+		uint64_t uiRealMantissa = RealMantissaBits( _uiManBits, _bImplicitMantissaBit );
+
+		uiExponent = _uiExp & ((1ULL << uiExpBits) - 1ULL);
+		uiMantissa = _uiMan & ((1ULL << uiRealMantissa) - 1ULL);
+		bSign = (_bHasSign && _uiSign) ? true : false;
+		return (*this);
+	}
+
 	// Cast to double.
 	double CFloatX::AsDouble() const {
 		if ( IsNaN() ) { return std::numeric_limits<double>::quiet_NaN(); }
 		if ( IsInfP() ) { return std::numeric_limits<double>::infinity(); }
 		if ( IsInfN() ) { return -std::numeric_limits<double>::infinity(); }
-		uint64_t uiManBitsTemp = uiManBits - 1;
+		uint64_t uiManBitsTemp = RealMantissaBits( uiManBits, bImplicitManBit );
 		double dManPow = ::pow( 2.0, uiManBitsTemp );
 		double dSig = uiMantissa / dManPow;
 
@@ -286,7 +318,7 @@ namespace ee {
 		uint64_t uiVal = ((bHasSign && bSign) ? 1 : 0);
 		uiVal <<= uiExpBits;
 		uiVal |= uiExponent & ((1ULL << uiExpBits) - 1ULL);
-		uint64_t uiRealManBits = bImplicitManBit ? uiManBits - 1 : uiManBits;
+		uint64_t uiRealManBits = RealMantissaBits( uiManBits, bImplicitManBit );
 		uiVal <<= uiRealManBits;
 		uiVal |= uiMantissa & ((1ULL << uiRealManBits) - 1ULL);
 		return uiVal;
@@ -318,6 +350,27 @@ namespace ee {
 		// Mantissa is just the value 1.
 		double dMan = 1.0 / dManPow;
 		// No implicit mantissa "1".
+		return dMaxExp * dMan;
+	}
+
+	// Gets the smallest normalized non-0 value for a float type with the given bits.
+	double CFloatX::GetNormalizedMinForBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit ) {
+		double dExpBias = ExpBias( _uiExpBits );		// Normalized exponent.
+		double dMaxExp = ::pow( 2.0, 1.0 - dExpBias );
+		return dMaxExp;
+	}
+
+	// Gets the maximum denormalized value for a float type with the given bits.
+	double CFloatX::GetDenormalizedMaxForBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit ) {
+		double dExpBias = ExpBias( _uiExpBits ) - 1.0;	// Denormalized exponent.
+		double dMaxExp = ::pow( 2.0, -dExpBias );
+		if ( _bImplicitMantissaBit ) { --_uiManBits; }
+		double dManPow = ::pow( 2.0, _uiManBits );
+		double dMan = (dManPow - 1.0) / dManPow;
+		/*double dMultiplier = 0.5;
+		for ( uint16_t I = _uiManBits; I--; dMultiplier /= 2.0 ) {
+			dMan += dMultiplier;
+		}*/
 		return dMaxExp * dMan;
 	}
 

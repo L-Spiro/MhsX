@@ -15,6 +15,7 @@ namespace mx {
 #define MX_EXP_W				340
 #define MX_EXP_H				490
 #define MX_EXP_TEXT_W			57
+#define MX_OUTPU_TEXT_W			40
 #define MX_T_MARGIN				2
 #define MX_RESULT_TOP			(MX_T_MARGIN + MX_DEF_COMBO_HEIGHT_PXL + 2)
 	// The layout for the Found Addresses dockable window.
@@ -25,7 +26,7 @@ namespace mx {
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
 			TRUE,									// bActive
-			654,									// iLeft
+			654 - 130,								// iLeft
 			153,									// iTop
 			MX_EXP_W,								// dwWidth
 			MX_EXP_H,								// dwHeight
@@ -117,7 +118,7 @@ namespace mx {
 			MX_EXP_TEXT_W + 2,						// iLeft
 			MX_T_MARGIN,							// iTop
 			MX_EXP_W - (MX_EXP_TEXT_W + 2),			// dwWidth
-			MX_DEF_COMBO_HEIGHT,					// dwHeight
+			MX_DEF_COMBO_HEIGHT_PXL,				// dwHeight
 			MX_COMBOSTYLE,							// dwStyle
 			0,										// dwStyleEx
 			nullptr,								// pwcText
@@ -154,6 +155,53 @@ namespace mx {
 			nullptr, 0,								// pcWidthSizeExp
 			MX_FIXED_HEIGHT,						// pcHeightSizeExp
 		},
+
+		{
+			LSW_LT_LABEL,							// ltType
+			MX_EE_EXP_OUTPUTTEXT,					// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			0,										// iLeft
+			MX_RESULT_TOP + MX_DEF_EDIT_HEIGHT_PXL + 2 + 4,	// iTop
+			MX_OUTPU_TEXT_W,						// dwWidth
+			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_CCC86FF4_Output_ ),	// pwcText
+			_LEN_CCC86FF4,							// sTextLen
+			MX_EE_MAINWINDOW,						// dwParentId
+
+			nullptr, 0,								// pcLeftSizeExp
+			nullptr, 0,								// pcRightSizeExp
+			MX_TOP_VCOFFSET,						// pcTopSizeExp
+			nullptr, 0,								// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			MX_FIXED_HEIGHT,						// pcHeightSizeExp
+		},
+		{
+			LSW_LT_COMBOBOX,						// ltType
+			MX_EE_EXP_OUTPUTCOMBO,					// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_OUTPU_TEXT_W + 2,						// iLeft
+			MX_RESULT_TOP + MX_DEF_EDIT_HEIGHT_PXL + 2,	// iTop
+			MX_EXP_W - (MX_OUTPU_TEXT_W + 2),			// dwWidth
+			MX_DEF_COMBO_HEIGHT_PXL,					// dwHeight
+			MX_COMBOSTYLE_LIST,						// dwStyle
+			0,										// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_EE_MAINWINDOW,						// dwParentId
+
+			MX_LOCK_LEFT,							// pcLeftSizeExp
+			MX_PARENT_VCRIGHT,						// pcRightSizeExp
+			MX_TOP_VCOFFSET,						// pcTopSizeExp
+			nullptr, 0,								// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			MX_FIXED_HEIGHT,						// pcHeightSizeExp
+		},
 		{
 			LSW_LT_LISTVIEW,						// ltType
 			MX_EE_LIST,								// wId
@@ -161,7 +209,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			0,										// iLeft
-			MX_RESULT_TOP + MX_DEF_EDIT_HEIGHT_PXL + 2,	// iTop
+			MX_RESULT_TOP + MX_DEF_EDIT_HEIGHT_PXL + 2 + MX_DEF_COMBO_HEIGHT_PXL + 2,	// iTop
 			0,										// dwWidth
 			0,										// dwHeight
 			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOSORTHEADER | WS_TABSTOP,		// dwStyle

@@ -25,6 +25,7 @@ namespace mx {
 			MX_I_ADD,
 			MX_I_REMOVE,
 			MX_I_SCIENTIFIC_NOTATION,
+			MX_I_EXT_OUTPUT,
 
 			MX_I_TOTAL
 		};
@@ -47,6 +48,9 @@ namespace mx {
 
 		// Gets a pointer to the input combo box.
 		CComboBox *							Combo();
+
+		// Gets a pointer to the output combo box.
+		CComboBox *							OutputCombo();
 
 		// Gets a pointer to the result edit.
 		CEdit *								Edit();

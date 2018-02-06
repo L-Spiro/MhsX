@@ -24,11 +24,12 @@ namespace mx {
 			{ L"60", MX_I_ADD },
 			{ L"59", MX_I_REMOVE },
 			{ L"50", MX_I_SCIENTIFIC_NOTATION },
+			//{ L"32", MX_I_EXT_OUTPUT },
 		};
 		m_iImages.Create( 24, 24, ILC_COLOR32, MX_I_TOTAL, MX_I_TOTAL );
 #endif	// #if 1
 
-		for ( size_t I = 0; I < MX_I_TOTAL; ++I ) {
+		for ( size_t I = 0; I < MX_ELEMENTS( sImages ); ++I ) {
 			std::wstring wsTemp = L"Resources/";
 			wsTemp += sImages[I].lpwsImageName;
 			wsTemp += L".bmp";
@@ -58,6 +59,7 @@ namespace mx {
 				{ m_iImageMap[MX_I_REMOVE],					CExpressionEvaluatorLayout::MX_BC_REMOVE,	TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Remove") },
 				{ -1,										0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
 				{ m_iImageMap[MX_I_SCIENTIFIC_NOTATION],	CExpressionEvaluatorLayout::MX_BC_SCINOT,	TBSTATE_ENABLED,	BTNS_CHECK,		{ 0 },		0,		MX_TOOL_STR( L"Scientific") },
+				//{ m_iImageMap[MX_I_EXT_OUTPUT],				CExpressionEvaluatorLayout::MX_BC_EXTOUT,	TBSTATE_ENABLED,	BTNS_CHECK,		{ 0 },		0,		MX_TOOL_STR( L"Ext. Output") },
 			};
 #undef MX_TOOL_STR
 
@@ -86,6 +88,27 @@ namespace mx {
 			plvRebar->UpdateRects();
 		}
 
+
+		// ==== OUTPUT COMBO ==== //
+		CComboBox * pcbOutputFormat = OutputCombo();
+		if ( pcbOutputFormat ) {
+			const struct {
+				const char * _pcText;
+				size_t sLen;
+			} aTitles[] = {
+				{ _T_E981B5D1_Standard, _LEN_E981B5D1 },
+				{ _T_DCCBE329_Extended, _LEN_DCCBE329 },
+				//{ _T_D27BE76B__9_223_372_036_854_775_808_to_9_223_372_036_854_775_807, _LEN_D27BE76B },
+			};
+			for ( INT I = 0; I < MX_ELEMENTS( aTitles ); I++ ) {
+				pcbOutputFormat->AddString( mx::CStringDecoder::DecodeToWString( aTitles[I]._pcText, aTitles[I].sLen ).c_str() );
+			}
+
+			/*LSW_RECT rTemp = pcbOutputFormat->GetItemRect( 0 );
+			rTemp = pcbOutputFormat->GetItemRect( 1 );
+			rTemp = pcbOutputFormat->GetItemRect( 0 );*/
+			pcbOutputFormat->AutoSetMinListWidth();
+		}
 
 		// ==== LIST VIEW ==== //
 		CListView * plvAddressList = ListView();
@@ -156,6 +179,11 @@ namespace mx {
 	// Gets a pointer to the input combo box.
 	CComboBox * CExpEvalWindow::Combo() {
 		return static_cast<CComboBox *>(FindChild( CExpressionEvaluatorLayout::MX_EE_EXP_COMBO ));
+	}
+
+	// Gets a pointer to the output combo box.
+	CComboBox * CExpEvalWindow::OutputCombo() {
+		return static_cast<CComboBox *>(FindChild( CExpressionEvaluatorLayout::MX_EE_EXP_OUTPUTCOMBO ));
 	}
 
 	// Gets a pointer to the result edit.

@@ -21,6 +21,8 @@ namespace mx {
 			MX_EE_LIST,
 			MX_EE_EXP_TEXT,
 			MX_EE_EXP_COMBO,
+			MX_EE_EXP_OUTPUTTEXT,
+			MX_EE_EXP_OUTPUTCOMBO,
 			MX_EE_EXP_RESULT,
 		};
 
@@ -29,6 +31,7 @@ namespace mx {
 			MX_BC_ADD							= 6013,
 			MX_BC_REMOVE,
 			MX_BC_SCINOT,
+			MX_BC_EXTOUT,
 		};
 
 
