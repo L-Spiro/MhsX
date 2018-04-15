@@ -15,7 +15,7 @@ namespace lsw {
 		// == Types.
 		class CEnterCrit {
 		public :
-			CEnterCrit( CCriticalSection &_csCrit ) :
+			CEnterCrit( const CCriticalSection &_csCrit ) :
 				m_pcsCrit( &_csCrit ) {
 				m_pcsCrit->EnterCriticalSection();
 			}
@@ -27,16 +27,16 @@ namespace lsw {
 		protected :
 			// == Members.
 			// The critical section.
-			CCriticalSection *					m_pcsCrit;
+			const CCriticalSection *			m_pcsCrit;
 		};
 
 
 		// == Functions.
 		// Enters the critical section.
-		VOID									EnterCriticalSection();
+		VOID									EnterCriticalSection() const;
 
 		// Leaves the critical section.
-		VOID									LeaveCriticalSection();
+		VOID									LeaveCriticalSection() const;
 
 	protected :
 		// == Members.

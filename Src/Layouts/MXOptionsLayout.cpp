@@ -705,8 +705,8 @@ namespace mx {
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
 			MX_STATICSTYLE,							// dwStyle
 			0,										// dwStyleEx
-			MX_MAKE_WCHAR( _T_9D174B2D_________________________________________________________________________________________________________________________________________________________________________________________________________________ ),				// pwcText
-			_LEN_9D174B2D,															// sTextLen
+			nullptr,								// pwcText
+			0,										// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
 		},
 		{

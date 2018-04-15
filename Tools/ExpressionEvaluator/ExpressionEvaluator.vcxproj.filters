@@ -21,6 +21,12 @@
     <Filter Include="Source Files\BigInt">
       <UniqueIdentifier>{c735382a-ed30-4e04-bab8-ad08015ae4e5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Unicode">
+      <UniqueIdentifier>{19398ae6-6ba4-424f-b562-a55a218f0035}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Unicode">
+      <UniqueIdentifier>{14c960d2-30fd-4385-9888-246153b392f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -43,6 +49,9 @@
     </ClCompile>
     <ClCompile Include="Src\EEExpEval.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Unicode\EEUnicode.cpp">
+      <Filter>Source Files\Unicode</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -78,6 +87,12 @@
     </ClInclude>
     <ClInclude Include="Src\BigInt\EEBigInt.h">
       <Filter>Header Files\BigInt</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Unicode\EEUnicode.h">
+      <Filter>Header Files\Unicode</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Unicode\EEUnicodeTable.h">
+      <Filter>Header Files\Unicode</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,0 +1,3017 @@
+#pragma once
+
+#ifdef _DEBUG
+
+lsw::CHelpers::LSW_MESSAGE CHelpers::m_mMessages[] = {
+#if defined( WM_NULL )
+	{ WM_NULL, "WM_NULL" },
+#endif
+#if defined( WM_CREATE )
+	{ WM_CREATE, "WM_CREATE" },
+#endif
+#if defined( WM_DESTROY )
+	{ WM_DESTROY, "WM_DESTROY" },
+#endif
+#if defined( WM_MOVE )
+	{ WM_MOVE, "WM_MOVE" },
+#endif
+#if defined( WM_SIZE )
+	{ WM_SIZE, "WM_SIZE" },
+#endif
+#if defined( WM_ACTIVATE )
+	{ WM_ACTIVATE, "WM_ACTIVATE" },
+#endif
+#if defined( WM_SETFOCUS )
+	{ WM_SETFOCUS, "WM_SETFOCUS" },
+#endif
+#if defined( WM_KILLFOCUS )
+	{ WM_KILLFOCUS, "WM_KILLFOCUS" },
+#endif
+#if defined( WM_ENABLE )
+	{ WM_ENABLE, "WM_ENABLE" },
+#endif
+#if defined( WM_SETREDRAW )
+	{ WM_SETREDRAW, "WM_SETREDRAW" },
+#endif
+#if defined( WM_SETTEXT )
+	{ WM_SETTEXT, "WM_SETTEXT" },
+#endif
+#if defined( WM_GETTEXT )
+	{ WM_GETTEXT, "WM_GETTEXT" },
+#endif
+#if defined( WM_GETTEXTLENGTH )
+	{ WM_GETTEXTLENGTH, "WM_GETTEXTLENGTH" },
+#endif
+#if defined( WM_PAINT )
+	{ WM_PAINT, "WM_PAINT" },
+#endif
+#if defined( WM_CLOSE )
+	{ WM_CLOSE, "WM_CLOSE" },
+#endif
+#if defined( WM_QUERYENDSESSION )
+	{ WM_QUERYENDSESSION, "WM_QUERYENDSESSION" },
+#endif
+#if defined( WM_QUIT )
+	{ WM_QUIT, "WM_QUIT" },
+#endif
+#if defined( WM_QUERYOPEN )
+	{ WM_QUERYOPEN, "WM_QUERYOPEN" },
+#endif
+#if defined( WM_ERASEBKGND )
+	{ WM_ERASEBKGND, "WM_ERASEBKGND" },
+#endif
+#if defined( WM_SYSCOLORCHANGE )
+	{ WM_SYSCOLORCHANGE, "WM_SYSCOLORCHANGE" },
+#endif
+#if defined( WM_ENDSESSION )
+	{ WM_ENDSESSION, "WM_ENDSESSION" },
+#endif
+#if defined( WM_SHOWWINDOW )
+	{ WM_SHOWWINDOW, "WM_SHOWWINDOW" },
+#endif
+#if defined( WM_CTLCOLOR )
+	{ WM_CTLCOLOR, "WM_CTLCOLOR" },
+#endif
+#if defined( WM_WININICHANGE )
+	{ WM_WININICHANGE, "WM_WININICHANGE" },
+#endif
+#if defined( WM_DEVMODECHANGE )
+	{ WM_DEVMODECHANGE, "WM_DEVMODECHANGE" },
+#endif
+#if defined( WM_ACTIVATEAPP )
+	{ WM_ACTIVATEAPP, "WM_ACTIVATEAPP" },
+#endif
+#if defined( WM_FONTCHANGE )
+	{ WM_FONTCHANGE, "WM_FONTCHANGE" },
+#endif
+#if defined( WM_TIMECHANGE )
+	{ WM_TIMECHANGE, "WM_TIMECHANGE" },
+#endif
+#if defined( WM_CANCELMODE )
+	{ WM_CANCELMODE, "WM_CANCELMODE" },
+#endif
+#if defined( WM_SETCURSOR )
+	{ WM_SETCURSOR, "WM_SETCURSOR" },
+#endif
+#if defined( WM_MOUSEACTIVATE )
+	{ WM_MOUSEACTIVATE, "WM_MOUSEACTIVATE" },
+#endif
+#if defined( WM_CHILDACTIVATE )
+	{ WM_CHILDACTIVATE, "WM_CHILDACTIVATE" },
+#endif
+#if defined( WM_QUEUESYNC )
+	{ WM_QUEUESYNC, "WM_QUEUESYNC" },
+#endif
+#if defined( WM_GETMINMAXINFO )
+	{ WM_GETMINMAXINFO, "WM_GETMINMAXINFO" },
+#endif
+#if defined( WM_PAINTICON )
+	{ WM_PAINTICON, "WM_PAINTICON" },
+#endif
+#if defined( WM_ICONERASEBKGND )
+	{ WM_ICONERASEBKGND, "WM_ICONERASEBKGND" },
+#endif
+#if defined( WM_NEXTDLGCTL )
+	{ WM_NEXTDLGCTL, "WM_NEXTDLGCTL" },
+#endif
+#if defined( WM_SPOOLERSTATUS )
+	{ WM_SPOOLERSTATUS, "WM_SPOOLERSTATUS" },
+#endif
+#if defined( WM_DRAWITEM )
+	{ WM_DRAWITEM, "WM_DRAWITEM" },
+#endif
+#if defined( WM_MEASUREITEM )
+	{ WM_MEASUREITEM, "WM_MEASUREITEM" },
+#endif
+#if defined( WM_DELETEITEM )
+	{ WM_DELETEITEM, "WM_DELETEITEM" },
+#endif
+#if defined( WM_VKEYTOITEM )
+	{ WM_VKEYTOITEM, "WM_VKEYTOITEM" },
+#endif
+#if defined( WM_CHARTOITEM )
+	{ WM_CHARTOITEM, "WM_CHARTOITEM" },
+#endif
+#if defined( WM_SETFONT )
+	{ WM_SETFONT, "WM_SETFONT" },
+#endif
+#if defined( WM_GETFONT )
+	{ WM_GETFONT, "WM_GETFONT" },
+#endif
+#if defined( WM_SETHOTKEY )
+	{ WM_SETHOTKEY, "WM_SETHOTKEY" },
+#endif
+#if defined( WM_GETHOTKEY )
+	{ WM_GETHOTKEY, "WM_GETHOTKEY" },
+#endif
+#if defined( WM_QUERYDRAGICON )
+	{ WM_QUERYDRAGICON, "WM_QUERYDRAGICON" },
+#endif
+#if defined( WM_COMPAREITEM )
+	{ WM_COMPAREITEM, "WM_COMPAREITEM" },
+#endif
+#if defined( WM_GETOBJECT )
+	{ WM_GETOBJECT, "WM_GETOBJECT" },
+#endif
+#if defined( WM_COMPACTING )
+	{ WM_COMPACTING, "WM_COMPACTING" },
+#endif
+#if defined( WM_COMMNOTIFY )
+	{ WM_COMMNOTIFY, "WM_COMMNOTIFY" },
+#endif
+#if defined( WM_WINDOWPOSCHANGING )
+	{ WM_WINDOWPOSCHANGING, "WM_WINDOWPOSCHANGING" },
+#endif
+#if defined( WM_WINDOWPOSCHANGED )
+	{ WM_WINDOWPOSCHANGED, "WM_WINDOWPOSCHANGED" },
+#endif
+#if defined( WM_POWER )
+	{ WM_POWER, "WM_POWER" },
+#endif
+#if defined( WM_COPYGLOBALDATA )
+	{ WM_COPYGLOBALDATA, "WM_COPYGLOBALDATA" },
+#endif
+#if defined( WM_COPYDATA )
+	{ WM_COPYDATA, "WM_COPYDATA" },
+#endif
+#if defined( WM_CANCELJOURNAL )
+	{ WM_CANCELJOURNAL, "WM_CANCELJOURNAL" },
+#endif
+#if defined( WM_NOTIFY )
+	{ WM_NOTIFY, "WM_NOTIFY" },
+#endif
+#if defined( WM_INPUTLANGCHANGEREQUEST )
+	{ WM_INPUTLANGCHANGEREQUEST, "WM_INPUTLANGCHANGEREQUEST" },
+#endif
+#if defined( WM_INPUTLANGCHANGE )
+	{ WM_INPUTLANGCHANGE, "WM_INPUTLANGCHANGE" },
+#endif
+#if defined( WM_TCARD )
+	{ WM_TCARD, "WM_TCARD" },
+#endif
+#if defined( WM_HELP )
+	{ WM_HELP, "WM_HELP" },
+#endif
+#if defined( WM_USERCHANGED )
+	{ WM_USERCHANGED, "WM_USERCHANGED" },
+#endif
+#if defined( WM_NOTIFYFORMAT )
+	{ WM_NOTIFYFORMAT, "WM_NOTIFYFORMAT" },
+#endif
+#if defined( WM_CONTEXTMENU )
+	{ WM_CONTEXTMENU, "WM_CONTEXTMENU" },
+#endif
+#if defined( WM_STYLECHANGING )
+	{ WM_STYLECHANGING, "WM_STYLECHANGING" },
+#endif
+#if defined( WM_STYLECHANGED )
+	{ WM_STYLECHANGED, "WM_STYLECHANGED" },
+#endif
+#if defined( WM_DISPLAYCHANGE )
+	{ WM_DISPLAYCHANGE, "WM_DISPLAYCHANGE" },
+#endif
+#if defined( WM_GETICON )
+	{ WM_GETICON, "WM_GETICON" },
+#endif
+#if defined( WM_SETICON )
+	{ WM_SETICON, "WM_SETICON" },
+#endif
+#if defined( WM_NCCREATE )
+	{ WM_NCCREATE, "WM_NCCREATE" },
+#endif
+#if defined( WM_NCDESTROY )
+	{ WM_NCDESTROY, "WM_NCDESTROY" },
+#endif
+#if defined( WM_NCCALCSIZE )
+	{ WM_NCCALCSIZE, "WM_NCCALCSIZE" },
+#endif
+#if defined( WM_NCHITTEST )
+	{ WM_NCHITTEST, "WM_NCHITTEST" },
+#endif
+#if defined( WM_NCPAINT )
+	{ WM_NCPAINT, "WM_NCPAINT" },
+#endif
+#if defined( WM_NCACTIVATE )
+	{ WM_NCACTIVATE, "WM_NCACTIVATE" },
+#endif
+#if defined( WM_GETDLGCODE )
+	{ WM_GETDLGCODE, "WM_GETDLGCODE" },
+#endif
+#if defined( WM_SYNCPAINT )
+	{ WM_SYNCPAINT, "WM_SYNCPAINT" },
+#endif
+#if defined( WM_NCMOUSEMOVE )
+	{ WM_NCMOUSEMOVE, "WM_NCMOUSEMOVE" },
+#endif
+#if defined( WM_NCLBUTTONDOWN )
+	{ WM_NCLBUTTONDOWN, "WM_NCLBUTTONDOWN" },
+#endif
+#if defined( WM_NCLBUTTONUP )
+	{ WM_NCLBUTTONUP, "WM_NCLBUTTONUP" },
+#endif
+#if defined( WM_NCLBUTTONDBLCLK )
+	{ WM_NCLBUTTONDBLCLK, "WM_NCLBUTTONDBLCLK" },
+#endif
+#if defined( WM_NCRBUTTONDOWN )
+	{ WM_NCRBUTTONDOWN, "WM_NCRBUTTONDOWN" },
+#endif
+#if defined( WM_NCRBUTTONUP )
+	{ WM_NCRBUTTONUP, "WM_NCRBUTTONUP" },
+#endif
+#if defined( WM_NCRBUTTONDBLCLK )
+	{ WM_NCRBUTTONDBLCLK, "WM_NCRBUTTONDBLCLK" },
+#endif
+#if defined( WM_NCMBUTTONDOWN )
+	{ WM_NCMBUTTONDOWN, "WM_NCMBUTTONDOWN" },
+#endif
+#if defined( WM_NCMBUTTONUP )
+	{ WM_NCMBUTTONUP, "WM_NCMBUTTONUP" },
+#endif
+#if defined( WM_NCMBUTTONDBLCLK )
+	{ WM_NCMBUTTONDBLCLK, "WM_NCMBUTTONDBLCLK" },
+#endif
+#if defined( WM_NCXBUTTONDOWN )
+	{ WM_NCXBUTTONDOWN, "WM_NCXBUTTONDOWN" },
+#endif
+#if defined( WM_NCXBUTTONUP )
+	{ WM_NCXBUTTONUP, "WM_NCXBUTTONUP" },
+#endif
+#if defined( WM_NCXBUTTONDBLCLK )
+	{ WM_NCXBUTTONDBLCLK, "WM_NCXBUTTONDBLCLK" },
+#endif
+#if defined( EM_GETSEL )
+	{ EM_GETSEL, "EM_GETSEL" },
+#endif
+#if defined( EM_SETSEL )
+	{ EM_SETSEL, "EM_SETSEL" },
+#endif
+#if defined( EM_GETRECT )
+	{ EM_GETRECT, "EM_GETRECT" },
+#endif
+#if defined( EM_SETRECT )
+	{ EM_SETRECT, "EM_SETRECT" },
+#endif
+#if defined( EM_SETRECTNP )
+	{ EM_SETRECTNP, "EM_SETRECTNP" },
+#endif
+#if defined( EM_SCROLL )
+	{ EM_SCROLL, "EM_SCROLL" },
+#endif
+#if defined( EM_LINESCROLL )
+	{ EM_LINESCROLL, "EM_LINESCROLL" },
+#endif
+#if defined( EM_SCROLLCARET )
+	{ EM_SCROLLCARET, "EM_SCROLLCARET" },
+#endif
+#if defined( EM_GETMODIFY )
+	{ EM_GETMODIFY, "EM_GETMODIFY" },
+#endif
+#if defined( EM_SETMODIFY )
+	{ EM_SETMODIFY, "EM_SETMODIFY" },
+#endif
+#if defined( EM_GETLINECOUNT )
+	{ EM_GETLINECOUNT, "EM_GETLINECOUNT" },
+#endif
+#if defined( EM_LINEINDEX )
+	{ EM_LINEINDEX, "EM_LINEINDEX" },
+#endif
+#if defined( EM_SETHANDLE )
+	{ EM_SETHANDLE, "EM_SETHANDLE" },
+#endif
+#if defined( EM_GETHANDLE )
+	{ EM_GETHANDLE, "EM_GETHANDLE" },
+#endif
+#if defined( EM_GETTHUMB )
+	{ EM_GETTHUMB, "EM_GETTHUMB" },
+#endif
+#if defined( EM_LINELENGTH )
+	{ EM_LINELENGTH, "EM_LINELENGTH" },
+#endif
+#if defined( EM_REPLACESEL )
+	{ EM_REPLACESEL, "EM_REPLACESEL" },
+#endif
+#if defined( EM_SETFONT )
+	{ EM_SETFONT, "EM_SETFONT" },
+#endif
+#if defined( EM_GETLINE )
+	{ EM_GETLINE, "EM_GETLINE" },
+#endif
+#if defined( EM_LIMITTEXT )
+	{ EM_LIMITTEXT, "EM_LIMITTEXT" },
+#endif
+#if defined( EM_SETLIMITTEXT )
+	{ EM_SETLIMITTEXT, "EM_SETLIMITTEXT" },
+#endif
+#if defined( EM_CANUNDO )
+	{ EM_CANUNDO, "EM_CANUNDO" },
+#endif
+#if defined( EM_UNDO )
+	{ EM_UNDO, "EM_UNDO" },
+#endif
+#if defined( EM_FMTLINES )
+	{ EM_FMTLINES, "EM_FMTLINES" },
+#endif
+#if defined( EM_LINEFROMCHAR )
+	{ EM_LINEFROMCHAR, "EM_LINEFROMCHAR" },
+#endif
+#if defined( EM_SETWORDBREAK )
+	{ EM_SETWORDBREAK, "EM_SETWORDBREAK" },
+#endif
+#if defined( EM_SETTABSTOPS )
+	{ EM_SETTABSTOPS, "EM_SETTABSTOPS" },
+#endif
+#if defined( EM_SETPASSWORDCHAR )
+	{ EM_SETPASSWORDCHAR, "EM_SETPASSWORDCHAR" },
+#endif
+#if defined( EM_EMPTYUNDOBUFFER )
+	{ EM_EMPTYUNDOBUFFER, "EM_EMPTYUNDOBUFFER" },
+#endif
+#if defined( EM_GETFIRSTVISIBLELINE )
+	{ EM_GETFIRSTVISIBLELINE, "EM_GETFIRSTVISIBLELINE" },
+#endif
+#if defined( EM_SETREADONLY )
+	{ EM_SETREADONLY, "EM_SETREADONLY" },
+#endif
+#if defined( EM_SETWORDBREAKPROC )
+	{ EM_SETWORDBREAKPROC, "EM_SETWORDBREAKPROC" },
+#endif
+#if defined( EM_GETWORDBREAKPROC )
+	{ EM_GETWORDBREAKPROC, "EM_GETWORDBREAKPROC" },
+#endif
+#if defined( EM_GETPASSWORDCHAR )
+	{ EM_GETPASSWORDCHAR, "EM_GETPASSWORDCHAR" },
+#endif
+#if defined( EM_SETMARGINS )
+	{ EM_SETMARGINS, "EM_SETMARGINS" },
+#endif
+#if defined( EM_GETMARGINS )
+	{ EM_GETMARGINS, "EM_GETMARGINS" },
+#endif
+#if defined( EM_GETLIMITTEXT )
+	{ EM_GETLIMITTEXT, "EM_GETLIMITTEXT" },
+#endif
+#if defined( EM_POSFROMCHAR )
+	{ EM_POSFROMCHAR, "EM_POSFROMCHAR" },
+#endif
+#if defined( EM_CHARFROMPOS )
+	{ EM_CHARFROMPOS, "EM_CHARFROMPOS" },
+#endif
+#if defined( EM_SETIMESTATUS )
+	{ EM_SETIMESTATUS, "EM_SETIMESTATUS" },
+#endif
+#if defined( EM_GETIMESTATUS )
+	{ EM_GETIMESTATUS, "EM_GETIMESTATUS" },
+#endif
+#if defined( SBM_SETPOS )
+	{ SBM_SETPOS, "SBM_SETPOS" },
+#endif
+#if defined( SBM_GETPOS )
+	{ SBM_GETPOS, "SBM_GETPOS" },
+#endif
+#if defined( SBM_SETRANGE )
+	{ SBM_SETRANGE, "SBM_SETRANGE" },
+#endif
+#if defined( SBM_GETRANGE )
+	{ SBM_GETRANGE, "SBM_GETRANGE" },
+#endif
+#if defined( SBM_ENABLE_ARROWS )
+	{ SBM_ENABLE_ARROWS, "SBM_ENABLE_ARROWS" },
+#endif
+#if defined( SBM_SETRANGEREDRAW )
+	{ SBM_SETRANGEREDRAW, "SBM_SETRANGEREDRAW" },
+#endif
+#if defined( SBM_SETSCROLLINFO )
+	{ SBM_SETSCROLLINFO, "SBM_SETSCROLLINFO" },
+#endif
+#if defined( SBM_GETSCROLLINFO )
+	{ SBM_GETSCROLLINFO, "SBM_GETSCROLLINFO" },
+#endif
+#if defined( SBM_GETSCROLLBARINFO )
+	{ SBM_GETSCROLLBARINFO, "SBM_GETSCROLLBARINFO" },
+#endif
+#if defined( BM_GETCHECK )
+	{ BM_GETCHECK, "BM_GETCHECK" },
+#endif
+#if defined( BM_SETCHECK )
+	{ BM_SETCHECK, "BM_SETCHECK" },
+#endif
+#if defined( BM_GETSTATE )
+	{ BM_GETSTATE, "BM_GETSTATE" },
+#endif
+#if defined( BM_SETSTATE )
+	{ BM_SETSTATE, "BM_SETSTATE" },
+#endif
+#if defined( BM_SETSTYLE )
+	{ BM_SETSTYLE, "BM_SETSTYLE" },
+#endif
+#if defined( BM_CLICK )
+	{ BM_CLICK, "BM_CLICK" },
+#endif
+#if defined( BM_GETIMAGE )
+	{ BM_GETIMAGE, "BM_GETIMAGE" },
+#endif
+#if defined( BM_SETIMAGE )
+	{ BM_SETIMAGE, "BM_SETIMAGE" },
+#endif
+#if defined( BM_SETDONTCLICK )
+	{ BM_SETDONTCLICK, "BM_SETDONTCLICK" },
+#endif
+#if defined( WM_INPUT )
+	{ WM_INPUT, "WM_INPUT" },
+#endif
+#if defined( WM_KEYDOWN )
+	{ WM_KEYDOWN, "WM_KEYDOWN" },
+#endif
+#if defined( WM_KEYFIRST )
+	{ WM_KEYFIRST, "WM_KEYFIRST" },
+#endif
+#if defined( WM_KEYUP )
+	{ WM_KEYUP, "WM_KEYUP" },
+#endif
+#if defined( WM_CHAR )
+	{ WM_CHAR, "WM_CHAR" },
+#endif
+#if defined( WM_DEADCHAR )
+	{ WM_DEADCHAR, "WM_DEADCHAR" },
+#endif
+#if defined( WM_SYSKEYDOWN )
+	{ WM_SYSKEYDOWN, "WM_SYSKEYDOWN" },
+#endif
+#if defined( WM_SYSKEYUP )
+	{ WM_SYSKEYUP, "WM_SYSKEYUP" },
+#endif
+#if defined( WM_SYSCHAR )
+	{ WM_SYSCHAR, "WM_SYSCHAR" },
+#endif
+#if defined( WM_SYSDEADCHAR )
+	{ WM_SYSDEADCHAR, "WM_SYSDEADCHAR" },
+#endif
+#if defined( WM_KEYLAST )
+	{ WM_KEYLAST, "WM_KEYLAST" },
+#endif
+#if defined( WM_UNICHAR )
+	{ WM_UNICHAR, "WM_UNICHAR" },
+#endif
+#if defined( WM_WNT_CONVERTREQUESTEX )
+	{ WM_WNT_CONVERTREQUESTEX, "WM_WNT_CONVERTREQUESTEX" },
+#endif
+#if defined( WM_CONVERTREQUEST )
+	{ WM_CONVERTREQUEST, "WM_CONVERTREQUEST" },
+#endif
+#if defined( WM_CONVERTRESULT )
+	{ WM_CONVERTRESULT, "WM_CONVERTRESULT" },
+#endif
+#if defined( WM_INTERIM )
+	{ WM_INTERIM, "WM_INTERIM" },
+#endif
+#if defined( WM_IME_STARTCOMPOSITION )
+	{ WM_IME_STARTCOMPOSITION, "WM_IME_STARTCOMPOSITION" },
+#endif
+#if defined( WM_IME_ENDCOMPOSITION )
+	{ WM_IME_ENDCOMPOSITION, "WM_IME_ENDCOMPOSITION" },
+#endif
+#if defined( WM_IME_COMPOSITION )
+	{ WM_IME_COMPOSITION, "WM_IME_COMPOSITION" },
+#endif
+#if defined( WM_IME_KEYLAST )
+	{ WM_IME_KEYLAST, "WM_IME_KEYLAST" },
+#endif
+#if defined( WM_INITDIALOG )
+	{ WM_INITDIALOG, "WM_INITDIALOG" },
+#endif
+#if defined( WM_COMMAND )
+	{ WM_COMMAND, "WM_COMMAND" },
+#endif
+#if defined( WM_SYSCOMMAND )
+	{ WM_SYSCOMMAND, "WM_SYSCOMMAND" },
+#endif
+#if defined( WM_TIMER )
+	{ WM_TIMER, "WM_TIMER" },
+#endif
+#if defined( WM_HSCROLL )
+	{ WM_HSCROLL, "WM_HSCROLL" },
+#endif
+#if defined( WM_VSCROLL )
+	{ WM_VSCROLL, "WM_VSCROLL" },
+#endif
+#if defined( WM_INITMENU )
+	{ WM_INITMENU, "WM_INITMENU" },
+#endif
+#if defined( WM_INITMENUPOPUP )
+	{ WM_INITMENUPOPUP, "WM_INITMENUPOPUP" },
+#endif
+#if defined( WM_SYSTIMER )
+	{ WM_SYSTIMER, "WM_SYSTIMER" },
+#endif
+#if defined( WM_MENUSELECT )
+	{ WM_MENUSELECT, "WM_MENUSELECT" },
+#endif
+#if defined( WM_MENUCHAR )
+	{ WM_MENUCHAR, "WM_MENUCHAR" },
+#endif
+#if defined( WM_ENTERIDLE )
+	{ WM_ENTERIDLE, "WM_ENTERIDLE" },
+#endif
+#if defined( WM_MENURBUTTONUP )
+	{ WM_MENURBUTTONUP, "WM_MENURBUTTONUP" },
+#endif
+#if defined( WM_MENUDRAG )
+	{ WM_MENUDRAG, "WM_MENUDRAG" },
+#endif
+#if defined( WM_MENUGETOBJECT )
+	{ WM_MENUGETOBJECT, "WM_MENUGETOBJECT" },
+#endif
+#if defined( WM_UNINITMENUPOPUP )
+	{ WM_UNINITMENUPOPUP, "WM_UNINITMENUPOPUP" },
+#endif
+#if defined( WM_MENUCOMMAND )
+	{ WM_MENUCOMMAND, "WM_MENUCOMMAND" },
+#endif
+#if defined( WM_CHANGEUISTATE )
+	{ WM_CHANGEUISTATE, "WM_CHANGEUISTATE" },
+#endif
+#if defined( WM_UPDATEUISTATE )
+	{ WM_UPDATEUISTATE, "WM_UPDATEUISTATE" },
+#endif
+#if defined( WM_QUERYUISTATE )
+	{ WM_QUERYUISTATE, "WM_QUERYUISTATE" },
+#endif
+#if defined( WM_CTLCOLORMSGBOX )
+	{ WM_CTLCOLORMSGBOX, "WM_CTLCOLORMSGBOX" },
+#endif
+#if defined( WM_CTLCOLOREDIT )
+	{ WM_CTLCOLOREDIT, "WM_CTLCOLOREDIT" },
+#endif
+#if defined( WM_CTLCOLORLISTBOX )
+	{ WM_CTLCOLORLISTBOX, "WM_CTLCOLORLISTBOX" },
+#endif
+#if defined( WM_CTLCOLORBTN )
+	{ WM_CTLCOLORBTN, "WM_CTLCOLORBTN" },
+#endif
+#if defined( WM_CTLCOLORDLG )
+	{ WM_CTLCOLORDLG, "WM_CTLCOLORDLG" },
+#endif
+#if defined( WM_CTLCOLORSCROLLBAR )
+	{ WM_CTLCOLORSCROLLBAR, "WM_CTLCOLORSCROLLBAR" },
+#endif
+#if defined( WM_CTLCOLORSTATIC )
+	{ WM_CTLCOLORSTATIC, "WM_CTLCOLORSTATIC" },
+#endif
+#if defined( WM_MOUSEFIRST )
+	{ WM_MOUSEFIRST, "WM_MOUSEFIRST" },
+#endif
+#if defined( WM_MOUSEMOVE )
+	{ WM_MOUSEMOVE, "WM_MOUSEMOVE" },
+#endif
+#if defined( WM_LBUTTONDOWN )
+	{ WM_LBUTTONDOWN, "WM_LBUTTONDOWN" },
+#endif
+#if defined( WM_LBUTTONUP )
+	{ WM_LBUTTONUP, "WM_LBUTTONUP" },
+#endif
+#if defined( WM_LBUTTONDBLCLK )
+	{ WM_LBUTTONDBLCLK, "WM_LBUTTONDBLCLK" },
+#endif
+#if defined( WM_RBUTTONDOWN )
+	{ WM_RBUTTONDOWN, "WM_RBUTTONDOWN" },
+#endif
+#if defined( WM_RBUTTONUP )
+	{ WM_RBUTTONUP, "WM_RBUTTONUP" },
+#endif
+#if defined( WM_RBUTTONDBLCLK )
+	{ WM_RBUTTONDBLCLK, "WM_RBUTTONDBLCLK" },
+#endif
+#if defined( WM_MBUTTONDOWN )
+	{ WM_MBUTTONDOWN, "WM_MBUTTONDOWN" },
+#endif
+#if defined( WM_MBUTTONUP )
+	{ WM_MBUTTONUP, "WM_MBUTTONUP" },
+#endif
+#if defined( WM_MBUTTONDBLCLK )
+	{ WM_MBUTTONDBLCLK, "WM_MBUTTONDBLCLK" },
+#endif
+#if defined( WM_MOUSELAST )
+	{ WM_MOUSELAST, "WM_MOUSELAST" },
+#endif
+#if defined( WM_MOUSEWHEEL )
+	{ WM_MOUSEWHEEL, "WM_MOUSEWHEEL" },
+#endif
+#if defined( WM_XBUTTONDOWN )
+	{ WM_XBUTTONDOWN, "WM_XBUTTONDOWN" },
+#endif
+#if defined( WM_XBUTTONUP )
+	{ WM_XBUTTONUP, "WM_XBUTTONUP" },
+#endif
+#if defined( WM_XBUTTONDBLCLK )
+	{ WM_XBUTTONDBLCLK, "WM_XBUTTONDBLCLK" },
+#endif
+#if defined( WM_PARENTNOTIFY )
+	{ WM_PARENTNOTIFY, "WM_PARENTNOTIFY" },
+#endif
+#if defined( WM_ENTERMENULOOP )
+	{ WM_ENTERMENULOOP, "WM_ENTERMENULOOP" },
+#endif
+#if defined( WM_EXITMENULOOP )
+	{ WM_EXITMENULOOP, "WM_EXITMENULOOP" },
+#endif
+#if defined( WM_NEXTMENU )
+	{ WM_NEXTMENU, "WM_NEXTMENU" },
+#endif
+#if defined( WM_SIZING )
+	{ WM_SIZING, "WM_SIZING" },
+#endif
+#if defined( WM_CAPTURECHANGED )
+	{ WM_CAPTURECHANGED, "WM_CAPTURECHANGED" },
+#endif
+#if defined( WM_MOVING )
+	{ WM_MOVING, "WM_MOVING" },
+#endif
+#if defined( WM_POWERBROADCAST )
+	{ WM_POWERBROADCAST, "WM_POWERBROADCAST" },
+#endif
+#if defined( WM_DEVICECHANGE )
+	{ WM_DEVICECHANGE, "WM_DEVICECHANGE" },
+#endif
+#if defined( WM_MDICREATE )
+	{ WM_MDICREATE, "WM_MDICREATE" },
+#endif
+#if defined( WM_MDIDESTROY )
+	{ WM_MDIDESTROY, "WM_MDIDESTROY" },
+#endif
+#if defined( WM_MDIACTIVATE )
+	{ WM_MDIACTIVATE, "WM_MDIACTIVATE" },
+#endif
+#if defined( WM_MDIRESTORE )
+	{ WM_MDIRESTORE, "WM_MDIRESTORE" },
+#endif
+#if defined( WM_MDINEXT )
+	{ WM_MDINEXT, "WM_MDINEXT" },
+#endif
+#if defined( WM_MDIMAXIMIZE )
+	{ WM_MDIMAXIMIZE, "WM_MDIMAXIMIZE" },
+#endif
+#if defined( WM_MDITILE )
+	{ WM_MDITILE, "WM_MDITILE" },
+#endif
+#if defined( WM_MDICASCADE )
+	{ WM_MDICASCADE, "WM_MDICASCADE" },
+#endif
+#if defined( WM_MDIICONARRANGE )
+	{ WM_MDIICONARRANGE, "WM_MDIICONARRANGE" },
+#endif
+#if defined( WM_MDIGETACTIVE )
+	{ WM_MDIGETACTIVE, "WM_MDIGETACTIVE" },
+#endif
+#if defined( WM_MDISETMENU )
+	{ WM_MDISETMENU, "WM_MDISETMENU" },
+#endif
+#if defined( WM_ENTERSIZEMOVE )
+	{ WM_ENTERSIZEMOVE, "WM_ENTERSIZEMOVE" },
+#endif
+#if defined( WM_EXITSIZEMOVE )
+	{ WM_EXITSIZEMOVE, "WM_EXITSIZEMOVE" },
+#endif
+#if defined( WM_DROPFILES )
+	{ WM_DROPFILES, "WM_DROPFILES" },
+#endif
+#if defined( WM_MDIREFRESHMENU )
+	{ WM_MDIREFRESHMENU, "WM_MDIREFRESHMENU" },
+#endif
+#if defined( WM_IME_REPORT )
+	{ WM_IME_REPORT, "WM_IME_REPORT" },
+#endif
+#if defined( WM_IME_SETCONTEXT )
+	{ WM_IME_SETCONTEXT, "WM_IME_SETCONTEXT" },
+#endif
+#if defined( WM_IME_NOTIFY )
+	{ WM_IME_NOTIFY, "WM_IME_NOTIFY" },
+#endif
+#if defined( WM_IME_CONTROL )
+	{ WM_IME_CONTROL, "WM_IME_CONTROL" },
+#endif
+#if defined( WM_IME_COMPOSITIONFULL )
+	{ WM_IME_COMPOSITIONFULL, "WM_IME_COMPOSITIONFULL" },
+#endif
+#if defined( WM_IME_SELECT )
+	{ WM_IME_SELECT, "WM_IME_SELECT" },
+#endif
+#if defined( WM_IME_CHAR )
+	{ WM_IME_CHAR, "WM_IME_CHAR" },
+#endif
+#if defined( WM_IME_REQUEST )
+	{ WM_IME_REQUEST, "WM_IME_REQUEST" },
+#endif
+#if defined( WM_IMEKEYDOWN )
+	{ WM_IMEKEYDOWN, "WM_IMEKEYDOWN" },
+#endif
+#if defined( WM_IME_KEYDOWN )
+	{ WM_IME_KEYDOWN, "WM_IME_KEYDOWN" },
+#endif
+#if defined( WM_IMEKEYUP )
+	{ WM_IMEKEYUP, "WM_IMEKEYUP" },
+#endif
+#if defined( WM_IME_KEYUP )
+	{ WM_IME_KEYUP, "WM_IME_KEYUP" },
+#endif
+#if defined( WM_NCMOUSEHOVER )
+	{ WM_NCMOUSEHOVER, "WM_NCMOUSEHOVER" },
+#endif
+#if defined( WM_MOUSEHOVER )
+	{ WM_MOUSEHOVER, "WM_MOUSEHOVER" },
+#endif
+#if defined( WM_NCMOUSELEAVE )
+	{ WM_NCMOUSELEAVE, "WM_NCMOUSELEAVE" },
+#endif
+#if defined( WM_MOUSELEAVE )
+	{ WM_MOUSELEAVE, "WM_MOUSELEAVE" },
+#endif
+#if defined( WM_CUT )
+	{ WM_CUT, "WM_CUT" },
+#endif
+#if defined( WM_COPY )
+	{ WM_COPY, "WM_COPY" },
+#endif
+#if defined( WM_PASTE )
+	{ WM_PASTE, "WM_PASTE" },
+#endif
+#if defined( WM_CLEAR )
+	{ WM_CLEAR, "WM_CLEAR" },
+#endif
+#if defined( WM_UNDO )
+	{ WM_UNDO, "WM_UNDO" },
+#endif
+#if defined( WM_RENDERFORMAT )
+	{ WM_RENDERFORMAT, "WM_RENDERFORMAT" },
+#endif
+#if defined( WM_RENDERALLFORMATS )
+	{ WM_RENDERALLFORMATS, "WM_RENDERALLFORMATS" },
+#endif
+#if defined( WM_DESTROYCLIPBOARD )
+	{ WM_DESTROYCLIPBOARD, "WM_DESTROYCLIPBOARD" },
+#endif
+#if defined( WM_DRAWCLIPBOARD )
+	{ WM_DRAWCLIPBOARD, "WM_DRAWCLIPBOARD" },
+#endif
+#if defined( WM_PAINTCLIPBOARD )
+	{ WM_PAINTCLIPBOARD, "WM_PAINTCLIPBOARD" },
+#endif
+#if defined( WM_VSCROLLCLIPBOARD )
+	{ WM_VSCROLLCLIPBOARD, "WM_VSCROLLCLIPBOARD" },
+#endif
+#if defined( WM_SIZECLIPBOARD )
+	{ WM_SIZECLIPBOARD, "WM_SIZECLIPBOARD" },
+#endif
+#if defined( WM_ASKCBFORMATNAME )
+	{ WM_ASKCBFORMATNAME, "WM_ASKCBFORMATNAME" },
+#endif
+#if defined( WM_CHANGECBCHAIN )
+	{ WM_CHANGECBCHAIN, "WM_CHANGECBCHAIN" },
+#endif
+#if defined( WM_HSCROLLCLIPBOARD )
+	{ WM_HSCROLLCLIPBOARD, "WM_HSCROLLCLIPBOARD" },
+#endif
+#if defined( WM_QUERYNEWPALETTE )
+	{ WM_QUERYNEWPALETTE, "WM_QUERYNEWPALETTE" },
+#endif
+#if defined( WM_PALETTEISCHANGING )
+	{ WM_PALETTEISCHANGING, "WM_PALETTEISCHANGING" },
+#endif
+#if defined( WM_PALETTECHANGED )
+	{ WM_PALETTECHANGED, "WM_PALETTECHANGED" },
+#endif
+#if defined( WM_HOTKEY )
+	{ WM_HOTKEY, "WM_HOTKEY" },
+#endif
+#if defined( WM_PRINT )
+	{ WM_PRINT, "WM_PRINT" },
+#endif
+#if defined( WM_PRINTCLIENT )
+	{ WM_PRINTCLIENT, "WM_PRINTCLIENT" },
+#endif
+#if defined( WM_APPCOMMAND )
+	{ WM_APPCOMMAND, "WM_APPCOMMAND" },
+#endif
+#if defined( WM_HANDHELDFIRST )
+	{ WM_HANDHELDFIRST, "WM_HANDHELDFIRST" },
+#endif
+#if defined( WM_HANDHELDLAST )
+	{ WM_HANDHELDLAST, "WM_HANDHELDLAST" },
+#endif
+#if defined( WM_AFXFIRST )
+	{ WM_AFXFIRST, "WM_AFXFIRST" },
+#endif
+#if defined( WM_AFXLAST )
+	{ WM_AFXLAST, "WM_AFXLAST" },
+#endif
+#if defined( WM_PENWINFIRST )
+	{ WM_PENWINFIRST, "WM_PENWINFIRST" },
+#endif
+#if defined( WM_RCRESULT )
+	{ WM_RCRESULT, "WM_RCRESULT" },
+#endif
+#if defined( WM_HOOKRCRESULT )
+	{ WM_HOOKRCRESULT, "WM_HOOKRCRESULT" },
+#endif
+#if defined( WM_GLOBALRCCHANGE )
+	{ WM_GLOBALRCCHANGE, "WM_GLOBALRCCHANGE" },
+#endif
+#if defined( WM_PENMISCINFO )
+	{ WM_PENMISCINFO, "WM_PENMISCINFO" },
+#endif
+#if defined( WM_SKB )
+	{ WM_SKB, "WM_SKB" },
+#endif
+#if defined( WM_HEDITCTL )
+	{ WM_HEDITCTL, "WM_HEDITCTL" },
+#endif
+#if defined( WM_PENCTL )
+	{ WM_PENCTL, "WM_PENCTL" },
+#endif
+#if defined( WM_PENMISC )
+	{ WM_PENMISC, "WM_PENMISC" },
+#endif
+#if defined( WM_CTLINIT )
+	{ WM_CTLINIT, "WM_CTLINIT" },
+#endif
+#if defined( WM_PENEVENT )
+	{ WM_PENEVENT, "WM_PENEVENT" },
+#endif
+#if defined( WM_PENWINLAST )
+	{ WM_PENWINLAST, "WM_PENWINLAST" },
+#endif
+#if defined( DDM_SETFMT )
+	{ DDM_SETFMT, "DDM_SETFMT" },
+#endif
+#if defined( DM_GETDEFID )
+	{ DM_GETDEFID, "DM_GETDEFID" },
+#endif
+#if defined( NIN_SELECT )
+	{ NIN_SELECT, "NIN_SELECT" },
+#endif
+#if defined( TBM_GETPOS )
+	{ TBM_GETPOS, "TBM_GETPOS" },
+#endif
+#if defined( WM_PSD_PAGESETUPDLG )
+	{ WM_PSD_PAGESETUPDLG, "WM_PSD_PAGESETUPDLG" },
+#endif
+#if defined( WM_USER )
+	{ WM_USER, "WM_USER" },
+#endif
+#if defined( CBEM_INSERTITEMA )
+	{ CBEM_INSERTITEMA, "CBEM_INSERTITEMA" },
+#endif
+#if defined( DDM_DRAW )
+	{ DDM_DRAW, "DDM_DRAW" },
+#endif
+#if defined( DM_SETDEFID )
+	{ DM_SETDEFID, "DM_SETDEFID" },
+#endif
+#if defined( HKM_SETHOTKEY )
+	{ HKM_SETHOTKEY, "HKM_SETHOTKEY" },
+#endif
+#if defined( PBM_SETRANGE )
+	{ PBM_SETRANGE, "PBM_SETRANGE" },
+#endif
+#if defined( RB_INSERTBANDA )
+	{ RB_INSERTBANDA, "RB_INSERTBANDA" },
+#endif
+#if defined( SB_SETTEXTA )
+	{ SB_SETTEXTA, "SB_SETTEXTA" },
+#endif
+#if defined( TB_ENABLEBUTTON )
+	{ TB_ENABLEBUTTON, "TB_ENABLEBUTTON" },
+#endif
+#if defined( TBM_GETRANGEMIN )
+	{ TBM_GETRANGEMIN, "TBM_GETRANGEMIN" },
+#endif
+#if defined( TTM_ACTIVATE )
+	{ TTM_ACTIVATE, "TTM_ACTIVATE" },
+#endif
+#if defined( WM_CHOOSEFONT_GETLOGFONT )
+	{ WM_CHOOSEFONT_GETLOGFONT, "WM_CHOOSEFONT_GETLOGFONT" },
+#endif
+#if defined( WM_PSD_FULLPAGERECT )
+	{ WM_PSD_FULLPAGERECT, "WM_PSD_FULLPAGERECT" },
+#endif
+#if defined( CBEM_SETIMAGELIST )
+	{ CBEM_SETIMAGELIST, "CBEM_SETIMAGELIST" },
+#endif
+#if defined( DDM_CLOSE )
+	{ DDM_CLOSE, "DDM_CLOSE" },
+#endif
+#if defined( DM_REPOSITION )
+	{ DM_REPOSITION, "DM_REPOSITION" },
+#endif
+#if defined( HKM_GETHOTKEY )
+	{ HKM_GETHOTKEY, "HKM_GETHOTKEY" },
+#endif
+#if defined( PBM_SETPOS )
+	{ PBM_SETPOS, "PBM_SETPOS" },
+#endif
+#if defined( RB_DELETEBAND )
+	{ RB_DELETEBAND, "RB_DELETEBAND" },
+#endif
+#if defined( SB_GETTEXTA )
+	{ SB_GETTEXTA, "SB_GETTEXTA" },
+#endif
+#if defined( TB_CHECKBUTTON )
+	{ TB_CHECKBUTTON, "TB_CHECKBUTTON" },
+#endif
+#if defined( TBM_GETRANGEMAX )
+	{ TBM_GETRANGEMAX, "TBM_GETRANGEMAX" },
+#endif
+#if defined( WM_PSD_MINMARGINRECT )
+	{ WM_PSD_MINMARGINRECT, "WM_PSD_MINMARGINRECT" },
+#endif
+#if defined( CBEM_GETIMAGELIST )
+	{ CBEM_GETIMAGELIST, "CBEM_GETIMAGELIST" },
+#endif
+#if defined( DDM_BEGIN )
+	{ DDM_BEGIN, "DDM_BEGIN" },
+#endif
+#if defined( HKM_SETRULES )
+	{ HKM_SETRULES, "HKM_SETRULES" },
+#endif
+#if defined( PBM_DELTAPOS )
+	{ PBM_DELTAPOS, "PBM_DELTAPOS" },
+#endif
+#if defined( RB_GETBARINFO )
+	{ RB_GETBARINFO, "RB_GETBARINFO" },
+#endif
+#if defined( SB_GETTEXTLENGTHA )
+	{ SB_GETTEXTLENGTHA, "SB_GETTEXTLENGTHA" },
+#endif
+#if defined( TBM_GETTIC )
+	{ TBM_GETTIC, "TBM_GETTIC" },
+#endif
+#if defined( TB_PRESSBUTTON )
+	{ TB_PRESSBUTTON, "TB_PRESSBUTTON" },
+#endif
+#if defined( TTM_SETDELAYTIME )
+	{ TTM_SETDELAYTIME, "TTM_SETDELAYTIME" },
+#endif
+#if defined( WM_PSD_MARGINRECT )
+	{ WM_PSD_MARGINRECT, "WM_PSD_MARGINRECT" },
+#endif
+#if defined( CBEM_GETITEMA )
+	{ CBEM_GETITEMA, "CBEM_GETITEMA" },
+#endif
+#if defined( DDM_END )
+	{ DDM_END, "DDM_END" },
+#endif
+#if defined( PBM_SETSTEP )
+	{ PBM_SETSTEP, "PBM_SETSTEP" },
+#endif
+#if defined( RB_SETBARINFO )
+	{ RB_SETBARINFO, "RB_SETBARINFO" },
+#endif
+#if defined( SB_SETPARTS )
+	{ SB_SETPARTS, "SB_SETPARTS" },
+#endif
+#if defined( TB_HIDEBUTTON )
+	{ TB_HIDEBUTTON, "TB_HIDEBUTTON" },
+#endif
+#if defined( TBM_SETTIC )
+	{ TBM_SETTIC, "TBM_SETTIC" },
+#endif
+#if defined( TTM_ADDTOOLA )
+	{ TTM_ADDTOOLA, "TTM_ADDTOOLA" },
+#endif
+#if defined( WM_PSD_GREEKTEXTRECT )
+	{ WM_PSD_GREEKTEXTRECT, "WM_PSD_GREEKTEXTRECT" },
+#endif
+#if defined( CBEM_SETITEMA )
+	{ CBEM_SETITEMA, "CBEM_SETITEMA" },
+#endif
+#if defined( PBM_STEPIT )
+	{ PBM_STEPIT, "PBM_STEPIT" },
+#endif
+#if defined( TB_INDETERMINATE )
+	{ TB_INDETERMINATE, "TB_INDETERMINATE" },
+#endif
+#if defined( TBM_SETPOS )
+	{ TBM_SETPOS, "TBM_SETPOS" },
+#endif
+#if defined( TTM_DELTOOLA )
+	{ TTM_DELTOOLA, "TTM_DELTOOLA" },
+#endif
+#if defined( WM_PSD_ENVSTAMPRECT )
+	{ WM_PSD_ENVSTAMPRECT, "WM_PSD_ENVSTAMPRECT" },
+#endif
+#if defined( CBEM_GETCOMBOCONTROL )
+	{ CBEM_GETCOMBOCONTROL, "CBEM_GETCOMBOCONTROL" },
+#endif
+#if defined( PBM_SETRANGE32 )
+	{ PBM_SETRANGE32, "PBM_SETRANGE32" },
+#endif
+#if defined( RB_SETBANDINFOA )
+	{ RB_SETBANDINFOA, "RB_SETBANDINFOA" },
+#endif
+#if defined( SB_GETPARTS )
+	{ SB_GETPARTS, "SB_GETPARTS" },
+#endif
+#if defined( TB_MARKBUTTON )
+	{ TB_MARKBUTTON, "TB_MARKBUTTON" },
+#endif
+#if defined( TBM_SETRANGE )
+	{ TBM_SETRANGE, "TBM_SETRANGE" },
+#endif
+#if defined( TTM_NEWTOOLRECTA )
+	{ TTM_NEWTOOLRECTA, "TTM_NEWTOOLRECTA" },
+#endif
+#if defined( WM_PSD_YAFULLPAGERECT )
+	{ WM_PSD_YAFULLPAGERECT, "WM_PSD_YAFULLPAGERECT" },
+#endif
+#if defined( CBEM_GETEDITCONTROL )
+	{ CBEM_GETEDITCONTROL, "CBEM_GETEDITCONTROL" },
+#endif
+#if defined( PBM_GETRANGE )
+	{ PBM_GETRANGE, "PBM_GETRANGE" },
+#endif
+#if defined( RB_SETPARENT )
+	{ RB_SETPARENT, "RB_SETPARENT" },
+#endif
+#if defined( SB_GETBORDERS )
+	{ SB_GETBORDERS, "SB_GETBORDERS" },
+#endif
+#if defined( TBM_SETRANGEMIN )
+	{ TBM_SETRANGEMIN, "TBM_SETRANGEMIN" },
+#endif
+#if defined( TTM_RELAYEVENT )
+	{ TTM_RELAYEVENT, "TTM_RELAYEVENT" },
+#endif
+#if defined( CBEM_SETEXSTYLE )
+	{ CBEM_SETEXSTYLE, "CBEM_SETEXSTYLE" },
+#endif
+#if defined( PBM_GETPOS )
+	{ PBM_GETPOS, "PBM_GETPOS" },
+#endif
+#if defined( RB_HITTEST )
+	{ RB_HITTEST, "RB_HITTEST" },
+#endif
+#if defined( SB_SETMINHEIGHT )
+	{ SB_SETMINHEIGHT, "SB_SETMINHEIGHT" },
+#endif
+#if defined( TBM_SETRANGEMAX )
+	{ TBM_SETRANGEMAX, "TBM_SETRANGEMAX" },
+#endif
+#if defined( TTM_GETTOOLINFOA )
+	{ TTM_GETTOOLINFOA, "TTM_GETTOOLINFOA" },
+#endif
+#if defined( CBEM_GETEXSTYLE )
+	{ CBEM_GETEXSTYLE, "CBEM_GETEXSTYLE" },
+#endif
+#if defined( CBEM_GETEXTENDEDSTYLE )
+	{ CBEM_GETEXTENDEDSTYLE, "CBEM_GETEXTENDEDSTYLE" },
+#endif
+#if defined( PBM_SETBARCOLOR )
+	{ PBM_SETBARCOLOR, "PBM_SETBARCOLOR" },
+#endif
+#if defined( RB_GETRECT )
+	{ RB_GETRECT, "RB_GETRECT" },
+#endif
+#if defined( SB_SIMPLE )
+	{ SB_SIMPLE, "SB_SIMPLE" },
+#endif
+#if defined( TB_ISBUTTONENABLED )
+	{ TB_ISBUTTONENABLED, "TB_ISBUTTONENABLED" },
+#endif
+#if defined( TBM_CLEARTICS )
+	{ TBM_CLEARTICS, "TBM_CLEARTICS" },
+#endif
+#if defined( TTM_SETTOOLINFOA )
+	{ TTM_SETTOOLINFOA, "TTM_SETTOOLINFOA" },
+#endif
+#if defined( CBEM_HASEDITCHANGED )
+	{ CBEM_HASEDITCHANGED, "CBEM_HASEDITCHANGED" },
+#endif
+#if defined( RB_INSERTBANDW )
+	{ RB_INSERTBANDW, "RB_INSERTBANDW" },
+#endif
+#if defined( SB_GETRECT )
+	{ SB_GETRECT, "SB_GETRECT" },
+#endif
+#if defined( TB_ISBUTTONCHECKED )
+	{ TB_ISBUTTONCHECKED, "TB_ISBUTTONCHECKED" },
+#endif
+#if defined( TBM_SETSEL )
+	{ TBM_SETSEL, "TBM_SETSEL" },
+#endif
+#if defined( TTM_HITTESTA )
+	{ TTM_HITTESTA, "TTM_HITTESTA" },
+#endif
+#if defined( WIZ_QUERYNUMPAGES )
+	{ WIZ_QUERYNUMPAGES, "WIZ_QUERYNUMPAGES" },
+#endif
+#if defined( CBEM_INSERTITEMW )
+	{ CBEM_INSERTITEMW, "CBEM_INSERTITEMW" },
+#endif
+#if defined( RB_SETBANDINFOW )
+	{ RB_SETBANDINFOW, "RB_SETBANDINFOW" },
+#endif
+#if defined( SB_SETTEXTW )
+	{ SB_SETTEXTW, "SB_SETTEXTW" },
+#endif
+#if defined( TB_ISBUTTONPRESSED )
+	{ TB_ISBUTTONPRESSED, "TB_ISBUTTONPRESSED" },
+#endif
+#if defined( TBM_SETSELSTART )
+	{ TBM_SETSELSTART, "TBM_SETSELSTART" },
+#endif
+#if defined( TTM_GETTEXTA )
+	{ TTM_GETTEXTA, "TTM_GETTEXTA" },
+#endif
+#if defined( WIZ_NEXT )
+	{ WIZ_NEXT, "WIZ_NEXT" },
+#endif
+#if defined( CBEM_SETITEMW )
+	{ CBEM_SETITEMW, "CBEM_SETITEMW" },
+#endif
+#if defined( RB_GETBANDCOUNT )
+	{ RB_GETBANDCOUNT, "RB_GETBANDCOUNT" },
+#endif
+#if defined( SB_GETTEXTLENGTHW )
+	{ SB_GETTEXTLENGTHW, "SB_GETTEXTLENGTHW" },
+#endif
+#if defined( TB_ISBUTTONHIDDEN )
+	{ TB_ISBUTTONHIDDEN, "TB_ISBUTTONHIDDEN" },
+#endif
+#if defined( TBM_SETSELEND )
+	{ TBM_SETSELEND, "TBM_SETSELEND" },
+#endif
+#if defined( TTM_UPDATETIPTEXTA )
+	{ TTM_UPDATETIPTEXTA, "TTM_UPDATETIPTEXTA" },
+#endif
+#if defined( WIZ_PREV )
+	{ WIZ_PREV, "WIZ_PREV" },
+#endif
+#if defined( CBEM_GETITEMW )
+	{ CBEM_GETITEMW, "CBEM_GETITEMW" },
+#endif
+#if defined( RB_GETROWCOUNT )
+	{ RB_GETROWCOUNT, "RB_GETROWCOUNT" },
+#endif
+#if defined( SB_GETTEXTW )
+	{ SB_GETTEXTW, "SB_GETTEXTW" },
+#endif
+#if defined( TB_ISBUTTONINDETERMINATE )
+	{ TB_ISBUTTONINDETERMINATE, "TB_ISBUTTONINDETERMINATE" },
+#endif
+#if defined( TTM_GETTOOLCOUNT )
+	{ TTM_GETTOOLCOUNT, "TTM_GETTOOLCOUNT" },
+#endif
+#if defined( CBEM_SETEXTENDEDSTYLE )
+	{ CBEM_SETEXTENDEDSTYLE, "CBEM_SETEXTENDEDSTYLE" },
+#endif
+#if defined( RB_GETROWHEIGHT )
+	{ RB_GETROWHEIGHT, "RB_GETROWHEIGHT" },
+#endif
+#if defined( SB_ISSIMPLE )
+	{ SB_ISSIMPLE, "SB_ISSIMPLE" },
+#endif
+#if defined( TB_ISBUTTONHIGHLIGHTED )
+	{ TB_ISBUTTONHIGHLIGHTED, "TB_ISBUTTONHIGHLIGHTED" },
+#endif
+#if defined( TBM_GETPTICS )
+	{ TBM_GETPTICS, "TBM_GETPTICS" },
+#endif
+#if defined( TTM_ENUMTOOLSA )
+	{ TTM_ENUMTOOLSA, "TTM_ENUMTOOLSA" },
+#endif
+#if defined( SB_SETICON )
+	{ SB_SETICON, "SB_SETICON" },
+#endif
+#if defined( TBM_GETTICPOS )
+	{ TBM_GETTICPOS, "TBM_GETTICPOS" },
+#endif
+#if defined( TTM_GETCURRENTTOOLA )
+	{ TTM_GETCURRENTTOOLA, "TTM_GETCURRENTTOOLA" },
+#endif
+#if defined( RB_IDTOINDEX )
+	{ RB_IDTOINDEX, "RB_IDTOINDEX" },
+#endif
+#if defined( SB_SETTIPTEXTA )
+	{ SB_SETTIPTEXTA, "SB_SETTIPTEXTA" },
+#endif
+#if defined( TBM_GETNUMTICS )
+	{ TBM_GETNUMTICS, "TBM_GETNUMTICS" },
+#endif
+#if defined( TTM_WINDOWFROMPOINT )
+	{ TTM_WINDOWFROMPOINT, "TTM_WINDOWFROMPOINT" },
+#endif
+#if defined( RB_GETTOOLTIPS )
+	{ RB_GETTOOLTIPS, "RB_GETTOOLTIPS" },
+#endif
+#if defined( SB_SETTIPTEXTW )
+	{ SB_SETTIPTEXTW, "SB_SETTIPTEXTW" },
+#endif
+#if defined( TBM_GETSELSTART )
+	{ TBM_GETSELSTART, "TBM_GETSELSTART" },
+#endif
+#if defined( TB_SETSTATE )
+	{ TB_SETSTATE, "TB_SETSTATE" },
+#endif
+#if defined( TTM_TRACKACTIVATE )
+	{ TTM_TRACKACTIVATE, "TTM_TRACKACTIVATE" },
+#endif
+#if defined( RB_SETTOOLTIPS )
+	{ RB_SETTOOLTIPS, "RB_SETTOOLTIPS" },
+#endif
+#if defined( SB_GETTIPTEXTA )
+	{ SB_GETTIPTEXTA, "SB_GETTIPTEXTA" },
+#endif
+#if defined( TB_GETSTATE )
+	{ TB_GETSTATE, "TB_GETSTATE" },
+#endif
+#if defined( TBM_GETSELEND )
+	{ TBM_GETSELEND, "TBM_GETSELEND" },
+#endif
+#if defined( TTM_TRACKPOSITION )
+	{ TTM_TRACKPOSITION, "TTM_TRACKPOSITION" },
+#endif
+#if defined( RB_SETBKCOLOR )
+	{ RB_SETBKCOLOR, "RB_SETBKCOLOR" },
+#endif
+#if defined( SB_GETTIPTEXTW )
+	{ SB_GETTIPTEXTW, "SB_GETTIPTEXTW" },
+#endif
+#if defined( TB_ADDBITMAP )
+	{ TB_ADDBITMAP, "TB_ADDBITMAP" },
+#endif
+#if defined( TBM_CLEARSEL )
+	{ TBM_CLEARSEL, "TBM_CLEARSEL" },
+#endif
+#if defined( TTM_SETTIPBKCOLOR )
+	{ TTM_SETTIPBKCOLOR, "TTM_SETTIPBKCOLOR" },
+#endif
+#if defined( RB_GETBKCOLOR )
+	{ RB_GETBKCOLOR, "RB_GETBKCOLOR" },
+#endif
+#if defined( SB_GETICON )
+	{ SB_GETICON, "SB_GETICON" },
+#endif
+#if defined( TB_ADDBUTTONSA )
+	{ TB_ADDBUTTONSA, "TB_ADDBUTTONSA" },
+#endif
+#if defined( TBM_SETTICFREQ )
+	{ TBM_SETTICFREQ, "TBM_SETTICFREQ" },
+#endif
+#if defined( TTM_SETTIPTEXTCOLOR )
+	{ TTM_SETTIPTEXTCOLOR, "TTM_SETTIPTEXTCOLOR" },
+#endif
+#if defined( RB_SETTEXTCOLOR )
+	{ RB_SETTEXTCOLOR, "RB_SETTEXTCOLOR" },
+#endif
+#if defined( TB_INSERTBUTTONA )
+	{ TB_INSERTBUTTONA, "TB_INSERTBUTTONA" },
+#endif
+#if defined( TBM_SETPAGESIZE )
+	{ TBM_SETPAGESIZE, "TBM_SETPAGESIZE" },
+#endif
+#if defined( TTM_GETDELAYTIME )
+	{ TTM_GETDELAYTIME, "TTM_GETDELAYTIME" },
+#endif
+#if defined( RB_GETTEXTCOLOR )
+	{ RB_GETTEXTCOLOR, "RB_GETTEXTCOLOR" },
+#endif
+#if defined( TB_DELETEBUTTON )
+	{ TB_DELETEBUTTON, "TB_DELETEBUTTON" },
+#endif
+#if defined( TBM_GETPAGESIZE )
+	{ TBM_GETPAGESIZE, "TBM_GETPAGESIZE" },
+#endif
+#if defined( TTM_GETTIPBKCOLOR )
+	{ TTM_GETTIPBKCOLOR, "TTM_GETTIPBKCOLOR" },
+#endif
+#if defined( RB_SIZETORECT )
+	{ RB_SIZETORECT, "RB_SIZETORECT" },
+#endif
+#if defined( TB_GETBUTTON )
+	{ TB_GETBUTTON, "TB_GETBUTTON" },
+#endif
+#if defined( TBM_SETLINESIZE )
+	{ TBM_SETLINESIZE, "TBM_SETLINESIZE" },
+#endif
+#if defined( TTM_GETTIPTEXTCOLOR )
+	{ TTM_GETTIPTEXTCOLOR, "TTM_GETTIPTEXTCOLOR" },
+#endif
+#if defined( RB_BEGINDRAG )
+	{ RB_BEGINDRAG, "RB_BEGINDRAG" },
+#endif
+#if defined( TB_BUTTONCOUNT )
+	{ TB_BUTTONCOUNT, "TB_BUTTONCOUNT" },
+#endif
+#if defined( TBM_GETLINESIZE )
+	{ TBM_GETLINESIZE, "TBM_GETLINESIZE" },
+#endif
+#if defined( TTM_SETMAXTIPWIDTH )
+	{ TTM_SETMAXTIPWIDTH, "TTM_SETMAXTIPWIDTH" },
+#endif
+#if defined( RB_ENDDRAG )
+	{ RB_ENDDRAG, "RB_ENDDRAG" },
+#endif
+#if defined( TB_COMMANDTOINDEX )
+	{ TB_COMMANDTOINDEX, "TB_COMMANDTOINDEX" },
+#endif
+#if defined( TBM_GETTHUMBRECT )
+	{ TBM_GETTHUMBRECT, "TBM_GETTHUMBRECT" },
+#endif
+#if defined( TTM_GETMAXTIPWIDTH )
+	{ TTM_GETMAXTIPWIDTH, "TTM_GETMAXTIPWIDTH" },
+#endif
+#if defined( RB_DRAGMOVE )
+	{ RB_DRAGMOVE, "RB_DRAGMOVE" },
+#endif
+#if defined( TBM_GETCHANNELRECT )
+	{ TBM_GETCHANNELRECT, "TBM_GETCHANNELRECT" },
+#endif
+#if defined( TB_SAVERESTOREA )
+	{ TB_SAVERESTOREA, "TB_SAVERESTOREA" },
+#endif
+#if defined( TTM_SETMARGIN )
+	{ TTM_SETMARGIN, "TTM_SETMARGIN" },
+#endif
+#if defined( RB_GETBARHEIGHT )
+	{ RB_GETBARHEIGHT, "RB_GETBARHEIGHT" },
+#endif
+#if defined( TB_CUSTOMIZE )
+	{ TB_CUSTOMIZE, "TB_CUSTOMIZE" },
+#endif
+#if defined( TBM_SETTHUMBLENGTH )
+	{ TBM_SETTHUMBLENGTH, "TBM_SETTHUMBLENGTH" },
+#endif
+#if defined( TTM_GETMARGIN )
+	{ TTM_GETMARGIN, "TTM_GETMARGIN" },
+#endif
+#if defined( RB_GETBANDINFOW )
+	{ RB_GETBANDINFOW, "RB_GETBANDINFOW" },
+#endif
+#if defined( TB_ADDSTRINGA )
+	{ TB_ADDSTRINGA, "TB_ADDSTRINGA" },
+#endif
+#if defined( TBM_GETTHUMBLENGTH )
+	{ TBM_GETTHUMBLENGTH, "TBM_GETTHUMBLENGTH" },
+#endif
+#if defined( TTM_POP )
+	{ TTM_POP, "TTM_POP" },
+#endif
+#if defined( RB_GETBANDINFOA )
+	{ RB_GETBANDINFOA, "RB_GETBANDINFOA" },
+#endif
+#if defined( TB_GETITEMRECT )
+	{ TB_GETITEMRECT, "TB_GETITEMRECT" },
+#endif
+#if defined( TBM_SETTOOLTIPS )
+	{ TBM_SETTOOLTIPS, "TBM_SETTOOLTIPS" },
+#endif
+#if defined( TTM_UPDATE )
+	{ TTM_UPDATE, "TTM_UPDATE" },
+#endif
+#if defined( RB_MINIMIZEBAND )
+	{ RB_MINIMIZEBAND, "RB_MINIMIZEBAND" },
+#endif
+#if defined( TB_BUTTONSTRUCTSIZE )
+	{ TB_BUTTONSTRUCTSIZE, "TB_BUTTONSTRUCTSIZE" },
+#endif
+#if defined( TBM_GETTOOLTIPS )
+	{ TBM_GETTOOLTIPS, "TBM_GETTOOLTIPS" },
+#endif
+#if defined( TTM_GETBUBBLESIZE )
+	{ TTM_GETBUBBLESIZE, "TTM_GETBUBBLESIZE" },
+#endif
+#if defined( RB_MAXIMIZEBAND )
+	{ RB_MAXIMIZEBAND, "RB_MAXIMIZEBAND" },
+#endif
+#if defined( TBM_SETTIPSIDE )
+	{ TBM_SETTIPSIDE, "TBM_SETTIPSIDE" },
+#endif
+#if defined( TB_SETBUTTONSIZE )
+	{ TB_SETBUTTONSIZE, "TB_SETBUTTONSIZE" },
+#endif
+#if defined( TTM_ADJUSTRECT )
+	{ TTM_ADJUSTRECT, "TTM_ADJUSTRECT" },
+#endif
+#if defined( TBM_SETBUDDY )
+	{ TBM_SETBUDDY, "TBM_SETBUDDY" },
+#endif
+#if defined( TB_SETBITMAPSIZE )
+	{ TB_SETBITMAPSIZE, "TB_SETBITMAPSIZE" },
+#endif
+#if defined( TTM_SETTITLEA )
+	{ TTM_SETTITLEA, "TTM_SETTITLEA" },
+#endif
+#if defined( MSG_FTS_JUMP_VA )
+	{ MSG_FTS_JUMP_VA, "MSG_FTS_JUMP_VA" },
+#endif
+#if defined( TB_AUTOSIZE )
+	{ TB_AUTOSIZE, "TB_AUTOSIZE" },
+#endif
+#if defined( TBM_GETBUDDY )
+	{ TBM_GETBUDDY, "TBM_GETBUDDY" },
+#endif
+#if defined( TTM_SETTITLEW )
+	{ TTM_SETTITLEW, "TTM_SETTITLEW" },
+#endif
+#if defined( RB_GETBANDBORDERS )
+	{ RB_GETBANDBORDERS, "RB_GETBANDBORDERS" },
+#endif
+#if defined( MSG_FTS_JUMP_QWORD )
+	{ MSG_FTS_JUMP_QWORD, "MSG_FTS_JUMP_QWORD" },
+#endif
+#if defined( RB_SHOWBAND )
+	{ RB_SHOWBAND, "RB_SHOWBAND" },
+#endif
+#if defined( TB_GETTOOLTIPS )
+	{ TB_GETTOOLTIPS, "TB_GETTOOLTIPS" },
+#endif
+#if defined( MSG_REINDEX_REQUEST )
+	{ MSG_REINDEX_REQUEST, "MSG_REINDEX_REQUEST" },
+#endif
+#if defined( TB_SETTOOLTIPS )
+	{ TB_SETTOOLTIPS, "TB_SETTOOLTIPS" },
+#endif
+#if defined( MSG_FTS_WHERE_IS_IT )
+	{ MSG_FTS_WHERE_IS_IT, "MSG_FTS_WHERE_IS_IT" },
+#endif
+#if defined( RB_SETPALETTE )
+	{ RB_SETPALETTE, "RB_SETPALETTE" },
+#endif
+#if defined( TB_SETPARENT )
+	{ TB_SETPARENT, "TB_SETPARENT" },
+#endif
+#if defined( RB_GETPALETTE )
+	{ RB_GETPALETTE, "RB_GETPALETTE" },
+#endif
+#if defined( RB_MOVEBAND )
+	{ RB_MOVEBAND, "RB_MOVEBAND" },
+#endif
+#if defined( TB_SETROWS )
+	{ TB_SETROWS, "TB_SETROWS" },
+#endif
+#if defined( TB_GETROWS )
+	{ TB_GETROWS, "TB_GETROWS" },
+#endif
+#if defined( TB_GETBITMAPFLAGS )
+	{ TB_GETBITMAPFLAGS, "TB_GETBITMAPFLAGS" },
+#endif
+#if defined( TB_SETCMDID )
+	{ TB_SETCMDID, "TB_SETCMDID" },
+#endif
+#if defined( RB_PUSHCHEVRON )
+	{ RB_PUSHCHEVRON, "RB_PUSHCHEVRON" },
+#endif
+#if defined( TB_CHANGEBITMAP )
+	{ TB_CHANGEBITMAP, "TB_CHANGEBITMAP" },
+#endif
+#if defined( TB_GETBITMAP )
+	{ TB_GETBITMAP, "TB_GETBITMAP" },
+#endif
+#if defined( MSG_GET_DEFFONT )
+	{ MSG_GET_DEFFONT, "MSG_GET_DEFFONT" },
+#endif
+#if defined( TB_GETBUTTONTEXTA )
+	{ TB_GETBUTTONTEXTA, "TB_GETBUTTONTEXTA" },
+#endif
+#if defined( TB_REPLACEBITMAP )
+	{ TB_REPLACEBITMAP, "TB_REPLACEBITMAP" },
+#endif
+#if defined( TB_SETINDENT )
+	{ TB_SETINDENT, "TB_SETINDENT" },
+#endif
+#if defined( TB_SETIMAGELIST )
+	{ TB_SETIMAGELIST, "TB_SETIMAGELIST" },
+#endif
+#if defined( TB_GETIMAGELIST )
+	{ TB_GETIMAGELIST, "TB_GETIMAGELIST" },
+#endif
+#if defined( TB_LOADIMAGES )
+	{ TB_LOADIMAGES, "TB_LOADIMAGES" },
+#endif
+#if defined( EM_CANPASTE )
+	{ EM_CANPASTE, "EM_CANPASTE" },
+#endif
+#if defined( TTM_ADDTOOLW )
+	{ TTM_ADDTOOLW, "TTM_ADDTOOLW" },
+#endif
+#if defined( EM_DISPLAYBAND )
+	{ EM_DISPLAYBAND, "EM_DISPLAYBAND" },
+#endif
+#if defined( TB_GETRECT )
+	{ TB_GETRECT, "TB_GETRECT" },
+#endif
+#if defined( TTM_DELTOOLW )
+	{ TTM_DELTOOLW, "TTM_DELTOOLW" },
+#endif
+#if defined( EM_EXGETSEL )
+	{ EM_EXGETSEL, "EM_EXGETSEL" },
+#endif
+#if defined( TB_SETHOTIMAGELIST )
+	{ TB_SETHOTIMAGELIST, "TB_SETHOTIMAGELIST" },
+#endif
+#if defined( TTM_NEWTOOLRECTW )
+	{ TTM_NEWTOOLRECTW, "TTM_NEWTOOLRECTW" },
+#endif
+#if defined( EM_EXLIMITTEXT )
+	{ EM_EXLIMITTEXT, "EM_EXLIMITTEXT" },
+#endif
+#if defined( TB_GETHOTIMAGELIST )
+	{ TB_GETHOTIMAGELIST, "TB_GETHOTIMAGELIST" },
+#endif
+#if defined( TTM_GETTOOLINFOW )
+	{ TTM_GETTOOLINFOW, "TTM_GETTOOLINFOW" },
+#endif
+#if defined( EM_EXLINEFROMCHAR )
+	{ EM_EXLINEFROMCHAR, "EM_EXLINEFROMCHAR" },
+#endif
+#if defined( TB_SETDISABLEDIMAGELIST )
+	{ TB_SETDISABLEDIMAGELIST, "TB_SETDISABLEDIMAGELIST" },
+#endif
+#if defined( TTM_SETTOOLINFOW )
+	{ TTM_SETTOOLINFOW, "TTM_SETTOOLINFOW" },
+#endif
+#if defined( EM_EXSETSEL )
+	{ EM_EXSETSEL, "EM_EXSETSEL" },
+#endif
+#if defined( TB_GETDISABLEDIMAGELIST )
+	{ TB_GETDISABLEDIMAGELIST, "TB_GETDISABLEDIMAGELIST" },
+#endif
+#if defined( TTM_HITTESTW )
+	{ TTM_HITTESTW, "TTM_HITTESTW" },
+#endif
+#if defined( EM_FINDTEXT )
+	{ EM_FINDTEXT, "EM_FINDTEXT" },
+#endif
+#if defined( TB_SETSTYLE )
+	{ TB_SETSTYLE, "TB_SETSTYLE" },
+#endif
+#if defined( TTM_GETTEXTW )
+	{ TTM_GETTEXTW, "TTM_GETTEXTW" },
+#endif
+#if defined( EM_FORMATRANGE )
+	{ EM_FORMATRANGE, "EM_FORMATRANGE" },
+#endif
+#if defined( TB_GETSTYLE )
+	{ TB_GETSTYLE, "TB_GETSTYLE" },
+#endif
+#if defined( TTM_UPDATETIPTEXTW )
+	{ TTM_UPDATETIPTEXTW, "TTM_UPDATETIPTEXTW" },
+#endif
+#if defined( EM_GETCHARFORMAT )
+	{ EM_GETCHARFORMAT, "EM_GETCHARFORMAT" },
+#endif
+#if defined( TB_GETBUTTONSIZE )
+	{ TB_GETBUTTONSIZE, "TB_GETBUTTONSIZE" },
+#endif
+#if defined( TTM_ENUMTOOLSW )
+	{ TTM_ENUMTOOLSW, "TTM_ENUMTOOLSW" },
+#endif
+#if defined( EM_GETEVENTMASK )
+	{ EM_GETEVENTMASK, "EM_GETEVENTMASK" },
+#endif
+#if defined( TB_SETBUTTONWIDTH )
+	{ TB_SETBUTTONWIDTH, "TB_SETBUTTONWIDTH" },
+#endif
+#if defined( TTM_GETCURRENTTOOLW )
+	{ TTM_GETCURRENTTOOLW, "TTM_GETCURRENTTOOLW" },
+#endif
+#if defined( EM_GETOLEINTERFACE )
+	{ EM_GETOLEINTERFACE, "EM_GETOLEINTERFACE" },
+#endif
+#if defined( TB_SETMAXTEXTROWS )
+	{ TB_SETMAXTEXTROWS, "TB_SETMAXTEXTROWS" },
+#endif
+#if defined( EM_GETPARAFORMAT )
+	{ EM_GETPARAFORMAT, "EM_GETPARAFORMAT" },
+#endif
+#if defined( TB_GETTEXTROWS )
+	{ TB_GETTEXTROWS, "TB_GETTEXTROWS" },
+#endif
+#if defined( EM_GETSELTEXT )
+	{ EM_GETSELTEXT, "EM_GETSELTEXT" },
+#endif
+#if defined( TB_GETOBJECT )
+	{ TB_GETOBJECT, "TB_GETOBJECT" },
+#endif
+#if defined( EM_HIDESELECTION )
+	{ EM_HIDESELECTION, "EM_HIDESELECTION" },
+#endif
+#if defined( TB_GETBUTTONINFOW )
+	{ TB_GETBUTTONINFOW, "TB_GETBUTTONINFOW" },
+#endif
+#if defined( EM_PASTESPECIAL )
+	{ EM_PASTESPECIAL, "EM_PASTESPECIAL" },
+#endif
+#if defined( TB_SETBUTTONINFOW )
+	{ TB_SETBUTTONINFOW, "TB_SETBUTTONINFOW" },
+#endif
+#if defined( EM_REQUESTRESIZE )
+	{ EM_REQUESTRESIZE, "EM_REQUESTRESIZE" },
+#endif
+#if defined( TB_GETBUTTONINFOA )
+	{ TB_GETBUTTONINFOA, "TB_GETBUTTONINFOA" },
+#endif
+#if defined( EM_SELECTIONTYPE )
+	{ EM_SELECTIONTYPE, "EM_SELECTIONTYPE" },
+#endif
+#if defined( TB_SETBUTTONINFOA )
+	{ TB_SETBUTTONINFOA, "TB_SETBUTTONINFOA" },
+#endif
+#if defined( EM_SETBKGNDCOLOR )
+	{ EM_SETBKGNDCOLOR, "EM_SETBKGNDCOLOR" },
+#endif
+#if defined( TB_INSERTBUTTONW )
+	{ TB_INSERTBUTTONW, "TB_INSERTBUTTONW" },
+#endif
+#if defined( EM_SETCHARFORMAT )
+	{ EM_SETCHARFORMAT, "EM_SETCHARFORMAT" },
+#endif
+#if defined( TB_ADDBUTTONSW )
+	{ TB_ADDBUTTONSW, "TB_ADDBUTTONSW" },
+#endif
+#if defined( EM_SETEVENTMASK )
+	{ EM_SETEVENTMASK, "EM_SETEVENTMASK" },
+#endif
+#if defined( TB_HITTEST )
+	{ TB_HITTEST, "TB_HITTEST" },
+#endif
+#if defined( EM_SETOLECALLBACK )
+	{ EM_SETOLECALLBACK, "EM_SETOLECALLBACK" },
+#endif
+#if defined( TB_SETDRAWTEXTFLAGS )
+	{ TB_SETDRAWTEXTFLAGS, "TB_SETDRAWTEXTFLAGS" },
+#endif
+#if defined( EM_SETPARAFORMAT )
+	{ EM_SETPARAFORMAT, "EM_SETPARAFORMAT" },
+#endif
+#if defined( TB_GETHOTITEM )
+	{ TB_GETHOTITEM, "TB_GETHOTITEM" },
+#endif
+#if defined( EM_SETTARGETDEVICE )
+	{ EM_SETTARGETDEVICE, "EM_SETTARGETDEVICE" },
+#endif
+#if defined( TB_SETHOTITEM )
+	{ TB_SETHOTITEM, "TB_SETHOTITEM" },
+#endif
+#if defined( EM_STREAMIN )
+	{ EM_STREAMIN, "EM_STREAMIN" },
+#endif
+#if defined( TB_SETANCHORHIGHLIGHT )
+	{ TB_SETANCHORHIGHLIGHT, "TB_SETANCHORHIGHLIGHT" },
+#endif
+#if defined( EM_STREAMOUT )
+	{ EM_STREAMOUT, "EM_STREAMOUT" },
+#endif
+#if defined( TB_GETANCHORHIGHLIGHT )
+	{ TB_GETANCHORHIGHLIGHT, "TB_GETANCHORHIGHLIGHT" },
+#endif
+#if defined( EM_GETTEXTRANGE )
+	{ EM_GETTEXTRANGE, "EM_GETTEXTRANGE" },
+#endif
+#if defined( TB_GETBUTTONTEXTW )
+	{ TB_GETBUTTONTEXTW, "TB_GETBUTTONTEXTW" },
+#endif
+#if defined( EM_FINDWORDBREAK )
+	{ EM_FINDWORDBREAK, "EM_FINDWORDBREAK" },
+#endif
+#if defined( TB_SAVERESTOREW )
+	{ TB_SAVERESTOREW, "TB_SAVERESTOREW" },
+#endif
+#if defined( EM_SETOPTIONS )
+	{ EM_SETOPTIONS, "EM_SETOPTIONS" },
+#endif
+#if defined( TB_ADDSTRINGW )
+	{ TB_ADDSTRINGW, "TB_ADDSTRINGW" },
+#endif
+#if defined( EM_GETOPTIONS )
+	{ EM_GETOPTIONS, "EM_GETOPTIONS" },
+#endif
+#if defined( TB_MAPACCELERATORA )
+	{ TB_MAPACCELERATORA, "TB_MAPACCELERATORA" },
+#endif
+#if defined( EM_FINDTEXTEX )
+	{ EM_FINDTEXTEX, "EM_FINDTEXTEX" },
+#endif
+#if defined( TB_GETINSERTMARK )
+	{ TB_GETINSERTMARK, "TB_GETINSERTMARK" },
+#endif
+#if defined( EM_GETWORDBREAKPROCEX )
+	{ EM_GETWORDBREAKPROCEX, "EM_GETWORDBREAKPROCEX" },
+#endif
+#if defined( TB_SETINSERTMARK )
+	{ TB_SETINSERTMARK, "TB_SETINSERTMARK" },
+#endif
+#if defined( EM_SETWORDBREAKPROCEX )
+	{ EM_SETWORDBREAKPROCEX, "EM_SETWORDBREAKPROCEX" },
+#endif
+#if defined( TB_INSERTMARKHITTEST )
+	{ TB_INSERTMARKHITTEST, "TB_INSERTMARKHITTEST" },
+#endif
+#if defined( EM_SETUNDOLIMIT )
+	{ EM_SETUNDOLIMIT, "EM_SETUNDOLIMIT" },
+#endif
+#if defined( TB_MOVEBUTTON )
+	{ TB_MOVEBUTTON, "TB_MOVEBUTTON" },
+#endif
+#if defined( TB_GETMAXSIZE )
+	{ TB_GETMAXSIZE, "TB_GETMAXSIZE" },
+#endif
+#if defined( EM_REDO )
+	{ EM_REDO, "EM_REDO" },
+#endif
+#if defined( TB_SETEXTENDEDSTYLE )
+	{ TB_SETEXTENDEDSTYLE, "TB_SETEXTENDEDSTYLE" },
+#endif
+#if defined( EM_CANREDO )
+	{ EM_CANREDO, "EM_CANREDO" },
+#endif
+#if defined( TB_GETEXTENDEDSTYLE )
+	{ TB_GETEXTENDEDSTYLE, "TB_GETEXTENDEDSTYLE" },
+#endif
+#if defined( EM_GETUNDONAME )
+	{ EM_GETUNDONAME, "EM_GETUNDONAME" },
+#endif
+#if defined( TB_GETPADDING )
+	{ TB_GETPADDING, "TB_GETPADDING" },
+#endif
+#if defined( EM_GETREDONAME )
+	{ EM_GETREDONAME, "EM_GETREDONAME" },
+#endif
+#if defined( TB_SETPADDING )
+	{ TB_SETPADDING, "TB_SETPADDING" },
+#endif
+#if defined( EM_STOPGROUPTYPING )
+	{ EM_STOPGROUPTYPING, "EM_STOPGROUPTYPING" },
+#endif
+#if defined( TB_SETINSERTMARKCOLOR )
+	{ TB_SETINSERTMARKCOLOR, "TB_SETINSERTMARKCOLOR" },
+#endif
+#if defined( EM_SETTEXTMODE )
+	{ EM_SETTEXTMODE, "EM_SETTEXTMODE" },
+#endif
+#if defined( TB_GETINSERTMARKCOLOR )
+	{ TB_GETINSERTMARKCOLOR, "TB_GETINSERTMARKCOLOR" },
+#endif
+#if defined( EM_GETTEXTMODE )
+	{ EM_GETTEXTMODE, "EM_GETTEXTMODE" },
+#endif
+#if defined( TB_MAPACCELERATORW )
+	{ TB_MAPACCELERATORW, "TB_MAPACCELERATORW" },
+#endif
+#if defined( EM_AUTOURLDETECT )
+	{ EM_AUTOURLDETECT, "EM_AUTOURLDETECT" },
+#endif
+#if defined( TB_GETSTRINGW )
+	{ TB_GETSTRINGW, "TB_GETSTRINGW" },
+#endif
+#if defined( EM_GETAUTOURLDETECT )
+	{ EM_GETAUTOURLDETECT, "EM_GETAUTOURLDETECT" },
+#endif
+#if defined( TB_GETSTRINGA )
+	{ TB_GETSTRINGA, "TB_GETSTRINGA" },
+#endif
+#if defined( EM_SETPALETTE )
+	{ EM_SETPALETTE, "EM_SETPALETTE" },
+#endif
+#if defined( EM_GETTEXTEX )
+	{ EM_GETTEXTEX, "EM_GETTEXTEX" },
+#endif
+#if defined( EM_GETTEXTLENGTHEX )
+	{ EM_GETTEXTLENGTHEX, "EM_GETTEXTLENGTHEX" },
+#endif
+#if defined( EM_SHOWSCROLLBAR )
+	{ EM_SHOWSCROLLBAR, "EM_SHOWSCROLLBAR" },
+#endif
+#if defined( EM_SETTEXTEX )
+	{ EM_SETTEXTEX, "EM_SETTEXTEX" },
+#endif
+#if defined( TAPI_REPLY )
+	{ TAPI_REPLY, "TAPI_REPLY" },
+#endif
+#if defined( ACM_OPENA )
+	{ ACM_OPENA, "ACM_OPENA" },
+#endif
+#if defined( BFFM_SETSTATUSTEXTA )
+	{ BFFM_SETSTATUSTEXTA, "BFFM_SETSTATUSTEXTA" },
+#endif
+#if defined( CDM_FIRST )
+	{ CDM_FIRST, "CDM_FIRST" },
+#endif
+#if defined( CDM_GETSPEC )
+	{ CDM_GETSPEC, "CDM_GETSPEC" },
+#endif
+#if defined( EM_SETPUNCTUATION )
+	{ EM_SETPUNCTUATION, "EM_SETPUNCTUATION" },
+#endif
+#if defined( IPM_CLEARADDRESS )
+	{ IPM_CLEARADDRESS, "IPM_CLEARADDRESS" },
+#endif
+#if defined( WM_CAP_UNICODE_START )
+	{ WM_CAP_UNICODE_START, "WM_CAP_UNICODE_START" },
+#endif
+#if defined( ACM_PLAY )
+	{ ACM_PLAY, "ACM_PLAY" },
+#endif
+#if defined( BFFM_ENABLEOK )
+	{ BFFM_ENABLEOK, "BFFM_ENABLEOK" },
+#endif
+#if defined( CDM_GETFILEPATH )
+	{ CDM_GETFILEPATH, "CDM_GETFILEPATH" },
+#endif
+#if defined( EM_GETPUNCTUATION )
+	{ EM_GETPUNCTUATION, "EM_GETPUNCTUATION" },
+#endif
+#if defined( IPM_SETADDRESS )
+	{ IPM_SETADDRESS, "IPM_SETADDRESS" },
+#endif
+#if defined( PSM_SETCURSEL )
+	{ PSM_SETCURSEL, "PSM_SETCURSEL" },
+#endif
+#if defined( UDM_SETRANGE )
+	{ UDM_SETRANGE, "UDM_SETRANGE" },
+#endif
+#if defined( WM_CHOOSEFONT_SETLOGFONT )
+	{ WM_CHOOSEFONT_SETLOGFONT, "WM_CHOOSEFONT_SETLOGFONT" },
+#endif
+#if defined( ACM_STOP )
+	{ ACM_STOP, "ACM_STOP" },
+#endif
+#if defined( BFFM_SETSELECTIONA )
+	{ BFFM_SETSELECTIONA, "BFFM_SETSELECTIONA" },
+#endif
+#if defined( CDM_GETFOLDERPATH )
+	{ CDM_GETFOLDERPATH, "CDM_GETFOLDERPATH" },
+#endif
+#if defined( EM_SETWORDWRAPMODE )
+	{ EM_SETWORDWRAPMODE, "EM_SETWORDWRAPMODE" },
+#endif
+#if defined( IPM_GETADDRESS )
+	{ IPM_GETADDRESS, "IPM_GETADDRESS" },
+#endif
+#if defined( PSM_REMOVEPAGE )
+	{ PSM_REMOVEPAGE, "PSM_REMOVEPAGE" },
+#endif
+#if defined( UDM_GETRANGE )
+	{ UDM_GETRANGE, "UDM_GETRANGE" },
+#endif
+#if defined( WM_CAP_SET_CALLBACK_ERRORW )
+	{ WM_CAP_SET_CALLBACK_ERRORW, "WM_CAP_SET_CALLBACK_ERRORW" },
+#endif
+#if defined( WM_CHOOSEFONT_SETFLAGS )
+	{ WM_CHOOSEFONT_SETFLAGS, "WM_CHOOSEFONT_SETFLAGS" },
+#endif
+#if defined( ACM_OPENW )
+	{ ACM_OPENW, "ACM_OPENW" },
+#endif
+#if defined( BFFM_SETSELECTIONW )
+	{ BFFM_SETSELECTIONW, "BFFM_SETSELECTIONW" },
+#endif
+#if defined( CDM_GETFOLDERIDLIST )
+	{ CDM_GETFOLDERIDLIST, "CDM_GETFOLDERIDLIST" },
+#endif
+#if defined( EM_GETWORDWRAPMODE )
+	{ EM_GETWORDWRAPMODE, "EM_GETWORDWRAPMODE" },
+#endif
+#if defined( IPM_SETRANGE )
+	{ IPM_SETRANGE, "IPM_SETRANGE" },
+#endif
+#if defined( PSM_ADDPAGE )
+	{ PSM_ADDPAGE, "PSM_ADDPAGE" },
+#endif
+#if defined( UDM_SETPOS )
+	{ UDM_SETPOS, "UDM_SETPOS" },
+#endif
+#if defined( WM_CAP_SET_CALLBACK_STATUSW )
+	{ WM_CAP_SET_CALLBACK_STATUSW, "WM_CAP_SET_CALLBACK_STATUSW" },
+#endif
+#if defined( BFFM_SETSTATUSTEXTW )
+	{ BFFM_SETSTATUSTEXTW, "BFFM_SETSTATUSTEXTW" },
+#endif
+#if defined( CDM_SETCONTROLTEXT )
+	{ CDM_SETCONTROLTEXT, "CDM_SETCONTROLTEXT" },
+#endif
+#if defined( EM_SETIMECOLOR )
+	{ EM_SETIMECOLOR, "EM_SETIMECOLOR" },
+#endif
+#if defined( IPM_SETFOCUS )
+	{ IPM_SETFOCUS, "IPM_SETFOCUS" },
+#endif
+#if defined( PSM_CHANGED )
+	{ PSM_CHANGED, "PSM_CHANGED" },
+#endif
+#if defined( UDM_GETPOS )
+	{ UDM_GETPOS, "UDM_GETPOS" },
+#endif
+#if defined( CDM_HIDECONTROL )
+	{ CDM_HIDECONTROL, "CDM_HIDECONTROL" },
+#endif
+#if defined( EM_GETIMECOLOR )
+	{ EM_GETIMECOLOR, "EM_GETIMECOLOR" },
+#endif
+#if defined( IPM_ISBLANK )
+	{ IPM_ISBLANK, "IPM_ISBLANK" },
+#endif
+#if defined( PSM_RESTARTWINDOWS )
+	{ PSM_RESTARTWINDOWS, "PSM_RESTARTWINDOWS" },
+#endif
+#if defined( UDM_SETBUDDY )
+	{ UDM_SETBUDDY, "UDM_SETBUDDY" },
+#endif
+#if defined( CDM_SETDEFEXT )
+	{ CDM_SETDEFEXT, "CDM_SETDEFEXT" },
+#endif
+#if defined( EM_SETIMEOPTIONS )
+	{ EM_SETIMEOPTIONS, "EM_SETIMEOPTIONS" },
+#endif
+#if defined( PSM_REBOOTSYSTEM )
+	{ PSM_REBOOTSYSTEM, "PSM_REBOOTSYSTEM" },
+#endif
+#if defined( UDM_GETBUDDY )
+	{ UDM_GETBUDDY, "UDM_GETBUDDY" },
+#endif
+#if defined( EM_GETIMEOPTIONS )
+	{ EM_GETIMEOPTIONS, "EM_GETIMEOPTIONS" },
+#endif
+#if defined( PSM_CANCELTOCLOSE )
+	{ PSM_CANCELTOCLOSE, "PSM_CANCELTOCLOSE" },
+#endif
+#if defined( UDM_SETACCEL )
+	{ UDM_SETACCEL, "UDM_SETACCEL" },
+#endif
+#if defined( EM_CONVPOSITION )
+	{ EM_CONVPOSITION, "EM_CONVPOSITION" },
+#endif
+#if defined( EM_CONVPOSITION )
+	{ EM_CONVPOSITION, "EM_CONVPOSITION" },
+#endif
+#if defined( PSM_QUERYSIBLINGS )
+	{ PSM_QUERYSIBLINGS, "PSM_QUERYSIBLINGS" },
+#endif
+#if defined( UDM_GETACCEL )
+	{ UDM_GETACCEL, "UDM_GETACCEL" },
+#endif
+#if defined( MCIWNDM_GETZOOM )
+	{ MCIWNDM_GETZOOM, "MCIWNDM_GETZOOM" },
+#endif
+#if defined( PSM_UNCHANGED )
+	{ PSM_UNCHANGED, "PSM_UNCHANGED" },
+#endif
+#if defined( UDM_SETBASE )
+	{ UDM_SETBASE, "UDM_SETBASE" },
+#endif
+#if defined( PSM_APPLY )
+	{ PSM_APPLY, "PSM_APPLY" },
+#endif
+#if defined( UDM_GETBASE )
+	{ UDM_GETBASE, "UDM_GETBASE" },
+#endif
+#if defined( PSM_SETTITLEA )
+	{ PSM_SETTITLEA, "PSM_SETTITLEA" },
+#endif
+#if defined( UDM_SETRANGE32 )
+	{ UDM_SETRANGE32, "UDM_SETRANGE32" },
+#endif
+#if defined( PSM_SETWIZBUTTONS )
+	{ PSM_SETWIZBUTTONS, "PSM_SETWIZBUTTONS" },
+#endif
+#if defined( UDM_GETRANGE32 )
+	{ UDM_GETRANGE32, "UDM_GETRANGE32" },
+#endif
+#if defined( WM_CAP_DRIVER_GET_NAMEW )
+	{ WM_CAP_DRIVER_GET_NAMEW, "WM_CAP_DRIVER_GET_NAMEW" },
+#endif
+#if defined( PSM_PRESSBUTTON )
+	{ PSM_PRESSBUTTON, "PSM_PRESSBUTTON" },
+#endif
+#if defined( UDM_SETPOS32 )
+	{ UDM_SETPOS32, "UDM_SETPOS32" },
+#endif
+#if defined( WM_CAP_DRIVER_GET_VERSIONW )
+	{ WM_CAP_DRIVER_GET_VERSIONW, "WM_CAP_DRIVER_GET_VERSIONW" },
+#endif
+#if defined( PSM_SETCURSELID )
+	{ PSM_SETCURSELID, "PSM_SETCURSELID" },
+#endif
+#if defined( UDM_GETPOS32 )
+	{ UDM_GETPOS32, "UDM_GETPOS32" },
+#endif
+#if defined( PSM_SETFINISHTEXTA )
+	{ PSM_SETFINISHTEXTA, "PSM_SETFINISHTEXTA" },
+#endif
+#if defined( PSM_GETTABCONTROL )
+	{ PSM_GETTABCONTROL, "PSM_GETTABCONTROL" },
+#endif
+#if defined( PSM_ISDIALOGMESSAGE )
+	{ PSM_ISDIALOGMESSAGE, "PSM_ISDIALOGMESSAGE" },
+#endif
+#if defined( MCIWNDM_REALIZE )
+	{ MCIWNDM_REALIZE, "MCIWNDM_REALIZE" },
+#endif
+#if defined( PSM_GETCURRENTPAGEHWND )
+	{ PSM_GETCURRENTPAGEHWND, "PSM_GETCURRENTPAGEHWND" },
+#endif
+#if defined( MCIWNDM_SETTIMEFORMATA )
+	{ MCIWNDM_SETTIMEFORMATA, "MCIWNDM_SETTIMEFORMATA" },
+#endif
+#if defined( PSM_INSERTPAGE )
+	{ PSM_INSERTPAGE, "PSM_INSERTPAGE" },
+#endif
+#if defined( EM_SETLANGOPTIONS )
+	{ EM_SETLANGOPTIONS, "EM_SETLANGOPTIONS" },
+#endif
+#if defined( MCIWNDM_GETTIMEFORMATA )
+	{ MCIWNDM_GETTIMEFORMATA, "MCIWNDM_GETTIMEFORMATA" },
+#endif
+#if defined( PSM_SETTITLEW )
+	{ PSM_SETTITLEW, "PSM_SETTITLEW" },
+#endif
+#if defined( WM_CAP_FILE_SET_CAPTURE_FILEW )
+	{ WM_CAP_FILE_SET_CAPTURE_FILEW, "WM_CAP_FILE_SET_CAPTURE_FILEW" },
+#endif
+#if defined( EM_GETLANGOPTIONS )
+	{ EM_GETLANGOPTIONS, "EM_GETLANGOPTIONS" },
+#endif
+#if defined( MCIWNDM_VALIDATEMEDIA )
+	{ MCIWNDM_VALIDATEMEDIA, "MCIWNDM_VALIDATEMEDIA" },
+#endif
+#if defined( PSM_SETFINISHTEXTW )
+	{ PSM_SETFINISHTEXTW, "PSM_SETFINISHTEXTW" },
+#endif
+#if defined( WM_CAP_FILE_GET_CAPTURE_FILEW )
+	{ WM_CAP_FILE_GET_CAPTURE_FILEW, "WM_CAP_FILE_GET_CAPTURE_FILEW" },
+#endif
+#if defined( EM_GETIMECOMPMODE )
+	{ EM_GETIMECOMPMODE, "EM_GETIMECOMPMODE" },
+#endif
+#if defined( EM_FINDTEXTW )
+	{ EM_FINDTEXTW, "EM_FINDTEXTW" },
+#endif
+#if defined( MCIWNDM_PLAYTO )
+	{ MCIWNDM_PLAYTO, "MCIWNDM_PLAYTO" },
+#endif
+#if defined( WM_CAP_FILE_SAVEASW )
+	{ WM_CAP_FILE_SAVEASW, "WM_CAP_FILE_SAVEASW" },
+#endif
+#if defined( EM_FINDTEXTEXW )
+	{ EM_FINDTEXTEXW, "EM_FINDTEXTEXW" },
+#endif
+#if defined( MCIWNDM_GETFILENAMEA )
+	{ MCIWNDM_GETFILENAMEA, "MCIWNDM_GETFILENAMEA" },
+#endif
+#if defined( EM_RECONVERSION )
+	{ EM_RECONVERSION, "EM_RECONVERSION" },
+#endif
+#if defined( MCIWNDM_GETDEVICEA )
+	{ MCIWNDM_GETDEVICEA, "MCIWNDM_GETDEVICEA" },
+#endif
+#if defined( PSM_SETHEADERTITLEA )
+	{ PSM_SETHEADERTITLEA, "PSM_SETHEADERTITLEA" },
+#endif
+#if defined( WM_CAP_FILE_SAVEDIBW )
+	{ WM_CAP_FILE_SAVEDIBW, "WM_CAP_FILE_SAVEDIBW" },
+#endif
+#if defined( EM_SETIMEMODEBIAS )
+	{ EM_SETIMEMODEBIAS, "EM_SETIMEMODEBIAS" },
+#endif
+#if defined( MCIWNDM_GETPALETTE )
+	{ MCIWNDM_GETPALETTE, "MCIWNDM_GETPALETTE" },
+#endif
+#if defined( PSM_SETHEADERTITLEW )
+	{ PSM_SETHEADERTITLEW, "PSM_SETHEADERTITLEW" },
+#endif
+#if defined( EM_GETIMEMODEBIAS )
+	{ EM_GETIMEMODEBIAS, "EM_GETIMEMODEBIAS" },
+#endif
+#if defined( MCIWNDM_SETPALETTE )
+	{ MCIWNDM_SETPALETTE, "MCIWNDM_SETPALETTE" },
+#endif
+#if defined( PSM_SETHEADERSUBTITLEA )
+	{ PSM_SETHEADERSUBTITLEA, "PSM_SETHEADERSUBTITLEA" },
+#endif
+#if defined( MCIWNDM_GETERRORA )
+	{ MCIWNDM_GETERRORA, "MCIWNDM_GETERRORA" },
+#endif
+#if defined( PSM_SETHEADERSUBTITLEW )
+	{ PSM_SETHEADERSUBTITLEW, "PSM_SETHEADERSUBTITLEW" },
+#endif
+#if defined( PSM_HWNDTOINDEX )
+	{ PSM_HWNDTOINDEX, "PSM_HWNDTOINDEX" },
+#endif
+#if defined( PSM_INDEXTOHWND )
+	{ PSM_INDEXTOHWND, "PSM_INDEXTOHWND" },
+#endif
+#if defined( MCIWNDM_SETINACTIVETIMER )
+	{ MCIWNDM_SETINACTIVETIMER, "MCIWNDM_SETINACTIVETIMER" },
+#endif
+#if defined( PSM_PAGETOINDEX )
+	{ PSM_PAGETOINDEX, "PSM_PAGETOINDEX" },
+#endif
+#if defined( PSM_INDEXTOPAGE )
+	{ PSM_INDEXTOPAGE, "PSM_INDEXTOPAGE" },
+#endif
+#if defined( DL_BEGINDRAG )
+	{ DL_BEGINDRAG, "DL_BEGINDRAG" },
+#endif
+#if defined( MCIWNDM_GETINACTIVETIMER )
+	{ MCIWNDM_GETINACTIVETIMER, "MCIWNDM_GETINACTIVETIMER" },
+#endif
+#if defined( PSM_IDTOINDEX )
+	{ PSM_IDTOINDEX, "PSM_IDTOINDEX" },
+#endif
+#if defined( DL_DRAGGING )
+	{ DL_DRAGGING, "DL_DRAGGING" },
+#endif
+#if defined( PSM_INDEXTOID )
+	{ PSM_INDEXTOID, "PSM_INDEXTOID" },
+#endif
+#if defined( DL_DROPPED )
+	{ DL_DROPPED, "DL_DROPPED" },
+#endif
+#if defined( PSM_GETRESULT )
+	{ PSM_GETRESULT, "PSM_GETRESULT" },
+#endif
+#if defined( DL_CANCELDRAG )
+	{ DL_CANCELDRAG, "DL_CANCELDRAG" },
+#endif
+#if defined( PSM_RECALCPAGESIZES )
+	{ PSM_RECALCPAGESIZES, "PSM_RECALCPAGESIZES" },
+#endif
+#if defined( MCIWNDM_GET_SOURCE )
+	{ MCIWNDM_GET_SOURCE, "MCIWNDM_GET_SOURCE" },
+#endif
+#if defined( MCIWNDM_PUT_SOURCE )
+	{ MCIWNDM_PUT_SOURCE, "MCIWNDM_PUT_SOURCE" },
+#endif
+#if defined( MCIWNDM_GET_DEST )
+	{ MCIWNDM_GET_DEST, "MCIWNDM_GET_DEST" },
+#endif
+#if defined( MCIWNDM_PUT_DEST )
+	{ MCIWNDM_PUT_DEST, "MCIWNDM_PUT_DEST" },
+#endif
+#if defined( MCIWNDM_CAN_PLAY )
+	{ MCIWNDM_CAN_PLAY, "MCIWNDM_CAN_PLAY" },
+#endif
+#if defined( MCIWNDM_CAN_WINDOW )
+	{ MCIWNDM_CAN_WINDOW, "MCIWNDM_CAN_WINDOW" },
+#endif
+#if defined( MCIWNDM_CAN_RECORD )
+	{ MCIWNDM_CAN_RECORD, "MCIWNDM_CAN_RECORD" },
+#endif
+#if defined( MCIWNDM_CAN_SAVE )
+	{ MCIWNDM_CAN_SAVE, "MCIWNDM_CAN_SAVE" },
+#endif
+#if defined( MCIWNDM_CAN_EJECT )
+	{ MCIWNDM_CAN_EJECT, "MCIWNDM_CAN_EJECT" },
+#endif
+#if defined( MCIWNDM_CAN_CONFIG )
+	{ MCIWNDM_CAN_CONFIG, "MCIWNDM_CAN_CONFIG" },
+#endif
+#if defined( IE_GETINK )
+	{ IE_GETINK, "IE_GETINK" },
+#endif
+#if defined( IE_MSGFIRST )
+	{ IE_MSGFIRST, "IE_MSGFIRST" },
+#endif
+#if defined( MCIWNDM_PALETTEKICK )
+	{ MCIWNDM_PALETTEKICK, "MCIWNDM_PALETTEKICK" },
+#endif
+#if defined( IE_SETINK )
+	{ IE_SETINK, "IE_SETINK" },
+#endif
+#if defined( IE_GETPENTIP )
+	{ IE_GETPENTIP, "IE_GETPENTIP" },
+#endif
+#if defined( IE_SETPENTIP )
+	{ IE_SETPENTIP, "IE_SETPENTIP" },
+#endif
+#if defined( IE_GETERASERTIP )
+	{ IE_GETERASERTIP, "IE_GETERASERTIP" },
+#endif
+#if defined( IE_SETERASERTIP )
+	{ IE_SETERASERTIP, "IE_SETERASERTIP" },
+#endif
+#if defined( IE_GETBKGND )
+	{ IE_GETBKGND, "IE_GETBKGND" },
+#endif
+#if defined( IE_SETBKGND )
+	{ IE_SETBKGND, "IE_SETBKGND" },
+#endif
+#if defined( IE_GETGRIDORIGIN )
+	{ IE_GETGRIDORIGIN, "IE_GETGRIDORIGIN" },
+#endif
+#if defined( IE_SETGRIDORIGIN )
+	{ IE_SETGRIDORIGIN, "IE_SETGRIDORIGIN" },
+#endif
+#if defined( IE_GETGRIDPEN )
+	{ IE_GETGRIDPEN, "IE_GETGRIDPEN" },
+#endif
+#if defined( IE_SETGRIDPEN )
+	{ IE_SETGRIDPEN, "IE_SETGRIDPEN" },
+#endif
+#if defined( IE_GETGRIDSIZE )
+	{ IE_GETGRIDSIZE, "IE_GETGRIDSIZE" },
+#endif
+#if defined( IE_SETGRIDSIZE )
+	{ IE_SETGRIDSIZE, "IE_SETGRIDSIZE" },
+#endif
+#if defined( IE_GETMODE )
+	{ IE_GETMODE, "IE_GETMODE" },
+#endif
+#if defined( IE_SETMODE )
+	{ IE_SETMODE, "IE_SETMODE" },
+#endif
+#if defined( IE_GETINKRECT )
+	{ IE_GETINKRECT, "IE_GETINKRECT" },
+#endif
+#if defined( WM_CAP_SET_MCI_DEVICEW )
+	{ WM_CAP_SET_MCI_DEVICEW, "WM_CAP_SET_MCI_DEVICEW" },
+#endif
+#if defined( WM_CAP_GET_MCI_DEVICEW )
+	{ WM_CAP_GET_MCI_DEVICEW, "WM_CAP_GET_MCI_DEVICEW" },
+#endif
+#if defined( WM_CAP_PAL_OPENW )
+	{ WM_CAP_PAL_OPENW, "WM_CAP_PAL_OPENW" },
+#endif
+#if defined( WM_CAP_PAL_SAVEW )
+	{ WM_CAP_PAL_SAVEW, "WM_CAP_PAL_SAVEW" },
+#endif
+#if defined( IE_GETAPPDATA )
+	{ IE_GETAPPDATA, "IE_GETAPPDATA" },
+#endif
+#if defined( IE_SETAPPDATA )
+	{ IE_SETAPPDATA, "IE_SETAPPDATA" },
+#endif
+#if defined( IE_GETDRAWOPTS )
+	{ IE_GETDRAWOPTS, "IE_GETDRAWOPTS" },
+#endif
+#if defined( IE_SETDRAWOPTS )
+	{ IE_SETDRAWOPTS, "IE_SETDRAWOPTS" },
+#endif
+#if defined( IE_GETFORMAT )
+	{ IE_GETFORMAT, "IE_GETFORMAT" },
+#endif
+#if defined( IE_SETFORMAT )
+	{ IE_SETFORMAT, "IE_SETFORMAT" },
+#endif
+#if defined( IE_GETINKINPUT )
+	{ IE_GETINKINPUT, "IE_GETINKINPUT" },
+#endif
+#if defined( IE_SETINKINPUT )
+	{ IE_SETINKINPUT, "IE_SETINKINPUT" },
+#endif
+#if defined( IE_GETNOTIFY )
+	{ IE_GETNOTIFY, "IE_GETNOTIFY" },
+#endif
+#if defined( IE_SETNOTIFY )
+	{ IE_SETNOTIFY, "IE_SETNOTIFY" },
+#endif
+#if defined( IE_GETRECOG )
+	{ IE_GETRECOG, "IE_GETRECOG" },
+#endif
+#if defined( IE_SETRECOG )
+	{ IE_SETRECOG, "IE_SETRECOG" },
+#endif
+#if defined( IE_GETSECURITY )
+	{ IE_GETSECURITY, "IE_GETSECURITY" },
+#endif
+#if defined( IE_SETSECURITY )
+	{ IE_SETSECURITY, "IE_SETSECURITY" },
+#endif
+#if defined( IE_GETSEL )
+	{ IE_GETSEL, "IE_GETSEL" },
+#endif
+#if defined( IE_SETSEL )
+	{ IE_SETSEL, "IE_SETSEL" },
+#endif
+#if defined( CDM_LAST )
+	{ CDM_LAST, "CDM_LAST" },
+#endif
+#if defined( EM_SETBIDIOPTIONS )
+	{ EM_SETBIDIOPTIONS, "EM_SETBIDIOPTIONS" },
+#endif
+#if defined( IE_DOCOMMAND )
+	{ IE_DOCOMMAND, "IE_DOCOMMAND" },
+#endif
+#if defined( MCIWNDM_NOTIFYMODE )
+	{ MCIWNDM_NOTIFYMODE, "MCIWNDM_NOTIFYMODE" },
+#endif
+#if defined( EM_GETBIDIOPTIONS )
+	{ EM_GETBIDIOPTIONS, "EM_GETBIDIOPTIONS" },
+#endif
+#if defined( IE_GETCOMMAND )
+	{ IE_GETCOMMAND, "IE_GETCOMMAND" },
+#endif
+#if defined( EM_SETTYPOGRAPHYOPTIONS )
+	{ EM_SETTYPOGRAPHYOPTIONS, "EM_SETTYPOGRAPHYOPTIONS" },
+#endif
+#if defined( IE_GETCOUNT )
+	{ IE_GETCOUNT, "IE_GETCOUNT" },
+#endif
+#if defined( EM_GETTYPOGRAPHYOPTIONS )
+	{ EM_GETTYPOGRAPHYOPTIONS, "EM_GETTYPOGRAPHYOPTIONS" },
+#endif
+#if defined( IE_GETGESTURE )
+	{ IE_GETGESTURE, "IE_GETGESTURE" },
+#endif
+#if defined( MCIWNDM_NOTIFYMEDIA )
+	{ MCIWNDM_NOTIFYMEDIA, "MCIWNDM_NOTIFYMEDIA" },
+#endif
+#if defined( EM_SETEDITSTYLE )
+	{ EM_SETEDITSTYLE, "EM_SETEDITSTYLE" },
+#endif
+#if defined( IE_GETMENU )
+	{ IE_GETMENU, "IE_GETMENU" },
+#endif
+#if defined( EM_GETEDITSTYLE )
+	{ EM_GETEDITSTYLE, "EM_GETEDITSTYLE" },
+#endif
+#if defined( IE_GETPAINTDC )
+	{ IE_GETPAINTDC, "IE_GETPAINTDC" },
+#endif
+#if defined( MCIWNDM_NOTIFYERROR )
+	{ MCIWNDM_NOTIFYERROR, "MCIWNDM_NOTIFYERROR" },
+#endif
+#if defined( IE_GETPDEVENT )
+	{ IE_GETPDEVENT, "IE_GETPDEVENT" },
+#endif
+#if defined( IE_GETSELCOUNT )
+	{ IE_GETSELCOUNT, "IE_GETSELCOUNT" },
+#endif
+#if defined( IE_GETSELITEMS )
+	{ IE_GETSELITEMS, "IE_GETSELITEMS" },
+#endif
+#if defined( IE_GETSTYLE )
+	{ IE_GETSTYLE, "IE_GETSTYLE" },
+#endif
+#if defined( MCIWNDM_SETTIMEFORMATW )
+	{ MCIWNDM_SETTIMEFORMATW, "MCIWNDM_SETTIMEFORMATW" },
+#endif
+#if defined( EM_OUTLINE )
+	{ EM_OUTLINE, "EM_OUTLINE" },
+#endif
+#if defined( EM_OUTLINE )
+	{ EM_OUTLINE, "EM_OUTLINE" },
+#endif
+#if defined( MCIWNDM_GETTIMEFORMATW )
+	{ MCIWNDM_GETTIMEFORMATW, "MCIWNDM_GETTIMEFORMATW" },
+#endif
+#if defined( EM_GETSCROLLPOS )
+	{ EM_GETSCROLLPOS, "EM_GETSCROLLPOS" },
+#endif
+#if defined( EM_GETSCROLLPOS )
+	{ EM_GETSCROLLPOS, "EM_GETSCROLLPOS" },
+#endif
+#if defined( EM_SETSCROLLPOS )
+	{ EM_SETSCROLLPOS, "EM_SETSCROLLPOS" },
+#endif
+#if defined( EM_SETSCROLLPOS )
+	{ EM_SETSCROLLPOS, "EM_SETSCROLLPOS" },
+#endif
+#if defined( EM_SETFONTSIZE )
+	{ EM_SETFONTSIZE, "EM_SETFONTSIZE" },
+#endif
+#if defined( EM_SETFONTSIZE )
+	{ EM_SETFONTSIZE, "EM_SETFONTSIZE" },
+#endif
+#if defined( EM_GETZOOM )
+	{ EM_GETZOOM, "EM_GETZOOM" },
+#endif
+#if defined( MCIWNDM_GETFILENAMEW )
+	{ MCIWNDM_GETFILENAMEW, "MCIWNDM_GETFILENAMEW" },
+#endif
+#if defined( EM_SETZOOM )
+	{ EM_SETZOOM, "EM_SETZOOM" },
+#endif
+#if defined( MCIWNDM_GETDEVICEW )
+	{ MCIWNDM_GETDEVICEW, "MCIWNDM_GETDEVICEW" },
+#endif
+#if defined( EM_GETVIEWKIND )
+	{ EM_GETVIEWKIND, "EM_GETVIEWKIND" },
+#endif
+#if defined( EM_SETVIEWKIND )
+	{ EM_SETVIEWKIND, "EM_SETVIEWKIND" },
+#endif
+#if defined( EM_GETPAGE )
+	{ EM_GETPAGE, "EM_GETPAGE" },
+#endif
+#if defined( MCIWNDM_GETERRORW )
+	{ MCIWNDM_GETERRORW, "MCIWNDM_GETERRORW" },
+#endif
+#if defined( EM_SETPAGE )
+	{ EM_SETPAGE, "EM_SETPAGE" },
+#endif
+#if defined( EM_GETHYPHENATEINFO )
+	{ EM_GETHYPHENATEINFO, "EM_GETHYPHENATEINFO" },
+#endif
+#if defined( EM_SETHYPHENATEINFO )
+	{ EM_SETHYPHENATEINFO, "EM_SETHYPHENATEINFO" },
+#endif
+#if defined( EM_GETPAGEROTATE )
+	{ EM_GETPAGEROTATE, "EM_GETPAGEROTATE" },
+#endif
+#if defined( EM_SETPAGEROTATE )
+	{ EM_SETPAGEROTATE, "EM_SETPAGEROTATE" },
+#endif
+#if defined( EM_GETCTFMODEBIAS )
+	{ EM_GETCTFMODEBIAS, "EM_GETCTFMODEBIAS" },
+#endif
+#if defined( EM_SETCTFMODEBIAS )
+	{ EM_SETCTFMODEBIAS, "EM_SETCTFMODEBIAS" },
+#endif
+#if defined( EM_GETCTFOPENSTATUS )
+	{ EM_GETCTFOPENSTATUS, "EM_GETCTFOPENSTATUS" },
+#endif
+#if defined( EM_SETCTFOPENSTATUS )
+	{ EM_SETCTFOPENSTATUS, "EM_SETCTFOPENSTATUS" },
+#endif
+#if defined( EM_GETIMECOMPTEXT )
+	{ EM_GETIMECOMPTEXT, "EM_GETIMECOMPTEXT" },
+#endif
+#if defined( EM_ISIME )
+	{ EM_ISIME, "EM_ISIME" },
+#endif
+#if defined( EM_GETIMEPROPERTY )
+	{ EM_GETIMEPROPERTY, "EM_GETIMEPROPERTY" },
+#endif
+#if defined( EM_GETQUERYRTFOBJ )
+	{ EM_GETQUERYRTFOBJ, "EM_GETQUERYRTFOBJ" },
+#endif
+#if defined( EM_SETQUERYRTFOBJ )
+	{ EM_SETQUERYRTFOBJ, "EM_SETQUERYRTFOBJ" },
+#endif
+#if defined( FM_GETFOCUS )
+	{ FM_GETFOCUS, "FM_GETFOCUS" },
+#endif
+#if defined( FM_GETDRIVEINFOA )
+	{ FM_GETDRIVEINFOA, "FM_GETDRIVEINFOA" },
+#endif
+#if defined( FM_GETSELCOUNT )
+	{ FM_GETSELCOUNT, "FM_GETSELCOUNT" },
+#endif
+#if defined( FM_GETSELCOUNTLFN )
+	{ FM_GETSELCOUNTLFN, "FM_GETSELCOUNTLFN" },
+#endif
+#if defined( FM_GETFILESELA )
+	{ FM_GETFILESELA, "FM_GETFILESELA" },
+#endif
+#if defined( FM_GETFILESELLFNA )
+	{ FM_GETFILESELLFNA, "FM_GETFILESELLFNA" },
+#endif
+#if defined( FM_REFRESH_WINDOWS )
+	{ FM_REFRESH_WINDOWS, "FM_REFRESH_WINDOWS" },
+#endif
+#if defined( FM_RELOAD_EXTENSIONS )
+	{ FM_RELOAD_EXTENSIONS, "FM_RELOAD_EXTENSIONS" },
+#endif
+#if defined( FM_GETDRIVEINFOW )
+	{ FM_GETDRIVEINFOW, "FM_GETDRIVEINFOW" },
+#endif
+#if defined( FM_GETFILESELW )
+	{ FM_GETFILESELW, "FM_GETFILESELW" },
+#endif
+#if defined( FM_GETFILESELLFNW )
+	{ FM_GETFILESELLFNW, "FM_GETFILESELLFNW" },
+#endif
+#if defined( WLX_WM_SAS )
+	{ WLX_WM_SAS, "WLX_WM_SAS" },
+#endif
+#if defined( SM_GETSELCOUNT )
+	{ SM_GETSELCOUNT, "SM_GETSELCOUNT" },
+#endif
+#if defined( UM_GETSELCOUNT )
+	{ UM_GETSELCOUNT, "UM_GETSELCOUNT" },
+#endif
+#if defined( WM_CPL_LAUNCH )
+	{ WM_CPL_LAUNCH, "WM_CPL_LAUNCH" },
+#endif
+#if defined( SM_GETSERVERSELA )
+	{ SM_GETSERVERSELA, "SM_GETSERVERSELA" },
+#endif
+#if defined( UM_GETUSERSELA )
+	{ UM_GETUSERSELA, "UM_GETUSERSELA" },
+#endif
+#if defined( WM_CPL_LAUNCHED )
+	{ WM_CPL_LAUNCHED, "WM_CPL_LAUNCHED" },
+#endif
+#if defined( SM_GETSERVERSELW )
+	{ SM_GETSERVERSELW, "SM_GETSERVERSELW" },
+#endif
+#if defined( UM_GETUSERSELW )
+	{ UM_GETUSERSELW, "UM_GETUSERSELW" },
+#endif
+#if defined( SM_GETCURFOCUSA )
+	{ SM_GETCURFOCUSA, "SM_GETCURFOCUSA" },
+#endif
+#if defined( UM_GETGROUPSELA )
+	{ UM_GETGROUPSELA, "UM_GETGROUPSELA" },
+#endif
+#if defined( SM_GETCURFOCUSW )
+	{ SM_GETCURFOCUSW, "SM_GETCURFOCUSW" },
+#endif
+#if defined( UM_GETGROUPSELW )
+	{ UM_GETGROUPSELW, "UM_GETGROUPSELW" },
+#endif
+#if defined( SM_GETOPTIONS )
+	{ SM_GETOPTIONS, "SM_GETOPTIONS" },
+#endif
+#if defined( UM_GETCURFOCUSA )
+	{ UM_GETCURFOCUSA, "UM_GETCURFOCUSA" },
+#endif
+#if defined( UM_GETCURFOCUSW )
+	{ UM_GETCURFOCUSW, "UM_GETCURFOCUSW" },
+#endif
+#if defined( UM_GETOPTIONS )
+	{ UM_GETOPTIONS, "UM_GETOPTIONS" },
+#endif
+#if defined( UM_GETOPTIONS2 )
+	{ UM_GETOPTIONS2, "UM_GETOPTIONS2" },
+#endif
+#if defined( LVM_FIRST )
+	{ LVM_FIRST, "LVM_FIRST" },
+#endif
+#if defined( LVM_GETBKCOLOR )
+	{ LVM_GETBKCOLOR, "LVM_GETBKCOLOR" },
+#endif
+#if defined( LVM_SETBKCOLOR )
+	{ LVM_SETBKCOLOR, "LVM_SETBKCOLOR" },
+#endif
+#if defined( LVM_GETIMAGELIST )
+	{ LVM_GETIMAGELIST, "LVM_GETIMAGELIST" },
+#endif
+#if defined( LVM_SETIMAGELIST )
+	{ LVM_SETIMAGELIST, "LVM_SETIMAGELIST" },
+#endif
+#if defined( LVM_GETITEMCOUNT )
+	{ LVM_GETITEMCOUNT, "LVM_GETITEMCOUNT" },
+#endif
+#if defined( LVM_GETITEMA )
+	{ LVM_GETITEMA, "LVM_GETITEMA" },
+#endif
+#if defined( LVM_SETITEMA )
+	{ LVM_SETITEMA, "LVM_SETITEMA" },
+#endif
+#if defined( LVM_INSERTITEMA )
+	{ LVM_INSERTITEMA, "LVM_INSERTITEMA" },
+#endif
+#if defined( LVM_DELETEITEM )
+	{ LVM_DELETEITEM, "LVM_DELETEITEM" },
+#endif
+#if defined( LVM_DELETEALLITEMS )
+	{ LVM_DELETEALLITEMS, "LVM_DELETEALLITEMS" },
+#endif
+#if defined( LVM_GETCALLBACKMASK )
+	{ LVM_GETCALLBACKMASK, "LVM_GETCALLBACKMASK" },
+#endif
+#if defined( LVM_SETCALLBACKMASK )
+	{ LVM_SETCALLBACKMASK, "LVM_SETCALLBACKMASK" },
+#endif
+#if defined( LVM_GETNEXTITEM )
+	{ LVM_GETNEXTITEM, "LVM_GETNEXTITEM" },
+#endif
+#if defined( LVM_FINDITEMA )
+	{ LVM_FINDITEMA, "LVM_FINDITEMA" },
+#endif
+#if defined( LVM_GETITEMRECT )
+	{ LVM_GETITEMRECT, "LVM_GETITEMRECT" },
+#endif
+#if defined( LVM_SETITEMPOSITION )
+	{ LVM_SETITEMPOSITION, "LVM_SETITEMPOSITION" },
+#endif
+#if defined( LVM_GETITEMPOSITION )
+	{ LVM_GETITEMPOSITION, "LVM_GETITEMPOSITION" },
+#endif
+#if defined( LVM_GETSTRINGWIDTHA )
+	{ LVM_GETSTRINGWIDTHA, "LVM_GETSTRINGWIDTHA" },
+#endif
+#if defined( LVM_HITTEST )
+	{ LVM_HITTEST, "LVM_HITTEST" },
+#endif
+#if defined( LVM_ENSUREVISIBLE )
+	{ LVM_ENSUREVISIBLE, "LVM_ENSUREVISIBLE" },
+#endif
+#if defined( LVM_SCROLL )
+	{ LVM_SCROLL, "LVM_SCROLL" },
+#endif
+#if defined( LVM_REDRAWITEMS )
+	{ LVM_REDRAWITEMS, "LVM_REDRAWITEMS" },
+#endif
+#if defined( LVM_ARRANGE )
+	{ LVM_ARRANGE, "LVM_ARRANGE" },
+#endif
+#if defined( LVM_EDITLABELA )
+	{ LVM_EDITLABELA, "LVM_EDITLABELA" },
+#endif
+#if defined( LVM_GETEDITCONTROL )
+	{ LVM_GETEDITCONTROL, "LVM_GETEDITCONTROL" },
+#endif
+#if defined( LVM_GETCOLUMNA )
+	{ LVM_GETCOLUMNA, "LVM_GETCOLUMNA" },
+#endif
+#if defined( LVM_SETCOLUMNA )
+	{ LVM_SETCOLUMNA, "LVM_SETCOLUMNA" },
+#endif
+#if defined( LVM_INSERTCOLUMNA )
+	{ LVM_INSERTCOLUMNA, "LVM_INSERTCOLUMNA" },
+#endif
+#if defined( LVM_DELETECOLUMN )
+	{ LVM_DELETECOLUMN, "LVM_DELETECOLUMN" },
+#endif
+#if defined( LVM_GETCOLUMNWIDTH )
+	{ LVM_GETCOLUMNWIDTH, "LVM_GETCOLUMNWIDTH" },
+#endif
+#if defined( LVM_SETCOLUMNWIDTH )
+	{ LVM_SETCOLUMNWIDTH, "LVM_SETCOLUMNWIDTH" },
+#endif
+#if defined( LVM_GETHEADER )
+	{ LVM_GETHEADER, "LVM_GETHEADER" },
+#endif
+#if defined( LVM_CREATEDRAGIMAGE )
+	{ LVM_CREATEDRAGIMAGE, "LVM_CREATEDRAGIMAGE" },
+#endif
+#if defined( LVM_GETVIEWRECT )
+	{ LVM_GETVIEWRECT, "LVM_GETVIEWRECT" },
+#endif
+#if defined( LVM_GETTEXTCOLOR )
+	{ LVM_GETTEXTCOLOR, "LVM_GETTEXTCOLOR" },
+#endif
+#if defined( LVM_SETTEXTCOLOR )
+	{ LVM_SETTEXTCOLOR, "LVM_SETTEXTCOLOR" },
+#endif
+#if defined( LVM_GETTEXTBKCOLOR )
+	{ LVM_GETTEXTBKCOLOR, "LVM_GETTEXTBKCOLOR" },
+#endif
+#if defined( LVM_SETTEXTBKCOLOR )
+	{ LVM_SETTEXTBKCOLOR, "LVM_SETTEXTBKCOLOR" },
+#endif
+#if defined( LVM_GETTOPINDEX )
+	{ LVM_GETTOPINDEX, "LVM_GETTOPINDEX" },
+#endif
+#if defined( LVM_GETCOUNTPERPAGE )
+	{ LVM_GETCOUNTPERPAGE, "LVM_GETCOUNTPERPAGE" },
+#endif
+#if defined( LVM_GETORIGIN )
+	{ LVM_GETORIGIN, "LVM_GETORIGIN" },
+#endif
+#if defined( LVM_UPDATE )
+	{ LVM_UPDATE, "LVM_UPDATE" },
+#endif
+#if defined( LVM_SETITEMSTATE )
+	{ LVM_SETITEMSTATE, "LVM_SETITEMSTATE" },
+#endif
+#if defined( LVM_GETITEMSTATE )
+	{ LVM_GETITEMSTATE, "LVM_GETITEMSTATE" },
+#endif
+#if defined( LVM_GETITEMTEXTA )
+	{ LVM_GETITEMTEXTA, "LVM_GETITEMTEXTA" },
+#endif
+#if defined( LVM_SETITEMTEXTA )
+	{ LVM_SETITEMTEXTA, "LVM_SETITEMTEXTA" },
+#endif
+#if defined( LVM_SETITEMCOUNT )
+	{ LVM_SETITEMCOUNT, "LVM_SETITEMCOUNT" },
+#endif
+#if defined( LVM_SORTITEMS )
+	{ LVM_SORTITEMS, "LVM_SORTITEMS" },
+#endif
+#if defined( LVM_SETITEMPOSITION32 )
+	{ LVM_SETITEMPOSITION32, "LVM_SETITEMPOSITION32" },
+#endif
+#if defined( LVM_GETSELECTEDCOUNT )
+	{ LVM_GETSELECTEDCOUNT, "LVM_GETSELECTEDCOUNT" },
+#endif
+#if defined( LVM_GETITEMSPACING )
+	{ LVM_GETITEMSPACING, "LVM_GETITEMSPACING" },
+#endif
+#if defined( LVM_GETISEARCHSTRINGA )
+	{ LVM_GETISEARCHSTRINGA, "LVM_GETISEARCHSTRINGA" },
+#endif
+#if defined( LVM_SETICONSPACING )
+	{ LVM_SETICONSPACING, "LVM_SETICONSPACING" },
+#endif
+#if defined( LVM_SETEXTENDEDLISTVIEWSTYLE )
+	{ LVM_SETEXTENDEDLISTVIEWSTYLE, "LVM_SETEXTENDEDLISTVIEWSTYLE" },
+#endif
+#if defined( LVM_GETEXTENDEDLISTVIEWSTYLE )
+	{ LVM_GETEXTENDEDLISTVIEWSTYLE, "LVM_GETEXTENDEDLISTVIEWSTYLE" },
+#endif
+#if defined( LVM_GETSUBITEMRECT )
+	{ LVM_GETSUBITEMRECT, "LVM_GETSUBITEMRECT" },
+#endif
+#if defined( LVM_SUBITEMHITTEST )
+	{ LVM_SUBITEMHITTEST, "LVM_SUBITEMHITTEST" },
+#endif
+#if defined( LVM_SETCOLUMNORDERARRAY )
+	{ LVM_SETCOLUMNORDERARRAY, "LVM_SETCOLUMNORDERARRAY" },
+#endif
+#if defined( LVM_GETCOLUMNORDERARRAY )
+	{ LVM_GETCOLUMNORDERARRAY, "LVM_GETCOLUMNORDERARRAY" },
+#endif
+#if defined( LVM_SETHOTITEM )
+	{ LVM_SETHOTITEM, "LVM_SETHOTITEM" },
+#endif
+#if defined( LVM_GETHOTITEM )
+	{ LVM_GETHOTITEM, "LVM_GETHOTITEM" },
+#endif
+#if defined( LVM_SETHOTCURSOR )
+	{ LVM_SETHOTCURSOR, "LVM_SETHOTCURSOR" },
+#endif
+#if defined( LVM_GETHOTCURSOR )
+	{ LVM_GETHOTCURSOR, "LVM_GETHOTCURSOR" },
+#endif
+#if defined( LVM_APPROXIMATEVIEWRECT )
+	{ LVM_APPROXIMATEVIEWRECT, "LVM_APPROXIMATEVIEWRECT" },
+#endif
+#if defined( LVM_SETWORKAREAS )
+	{ LVM_SETWORKAREAS, "LVM_SETWORKAREAS" },
+#endif
+#if defined( LVM_GETSELECTIONMARK )
+	{ LVM_GETSELECTIONMARK, "LVM_GETSELECTIONMARK" },
+#endif
+#if defined( LVM_SETSELECTIONMARK )
+	{ LVM_SETSELECTIONMARK, "LVM_SETSELECTIONMARK" },
+#endif
+#if defined( LVM_SETBKIMAGEA )
+	{ LVM_SETBKIMAGEA, "LVM_SETBKIMAGEA" },
+#endif
+#if defined( LVM_GETBKIMAGEA )
+	{ LVM_GETBKIMAGEA, "LVM_GETBKIMAGEA" },
+#endif
+#if defined( LVM_GETWORKAREAS )
+	{ LVM_GETWORKAREAS, "LVM_GETWORKAREAS" },
+#endif
+#if defined( LVM_SETHOVERTIME )
+	{ LVM_SETHOVERTIME, "LVM_SETHOVERTIME" },
+#endif
+#if defined( LVM_GETHOVERTIME )
+	{ LVM_GETHOVERTIME, "LVM_GETHOVERTIME" },
+#endif
+#if defined( LVM_GETNUMBEROFWORKAREAS )
+	{ LVM_GETNUMBEROFWORKAREAS, "LVM_GETNUMBEROFWORKAREAS" },
+#endif
+#if defined( LVM_SETTOOLTIPS )
+	{ LVM_SETTOOLTIPS, "LVM_SETTOOLTIPS" },
+#endif
+#if defined( LVM_GETITEMW )
+	{ LVM_GETITEMW, "LVM_GETITEMW" },
+#endif
+#if defined( LVM_SETITEMW )
+	{ LVM_SETITEMW, "LVM_SETITEMW" },
+#endif
+#if defined( LVM_INSERTITEMW )
+	{ LVM_INSERTITEMW, "LVM_INSERTITEMW" },
+#endif
+#if defined( LVM_GETTOOLTIPS )
+	{ LVM_GETTOOLTIPS, "LVM_GETTOOLTIPS" },
+#endif
+#if defined( LVM_FINDITEMW )
+	{ LVM_FINDITEMW, "LVM_FINDITEMW" },
+#endif
+#if defined( LVM_GETSTRINGWIDTHW )
+	{ LVM_GETSTRINGWIDTHW, "LVM_GETSTRINGWIDTHW" },
+#endif
+#if defined( LVM_GETCOLUMNW )
+	{ LVM_GETCOLUMNW, "LVM_GETCOLUMNW" },
+#endif
+#if defined( LVM_SETCOLUMNW )
+	{ LVM_SETCOLUMNW, "LVM_SETCOLUMNW" },
+#endif
+#if defined( LVM_INSERTCOLUMNW )
+	{ LVM_INSERTCOLUMNW, "LVM_INSERTCOLUMNW" },
+#endif
+#if defined( LVM_GETITEMTEXTW )
+	{ LVM_GETITEMTEXTW, "LVM_GETITEMTEXTW" },
+#endif
+#if defined( LVM_SETITEMTEXTW )
+	{ LVM_SETITEMTEXTW, "LVM_SETITEMTEXTW" },
+#endif
+#if defined( LVM_GETISEARCHSTRINGW )
+	{ LVM_GETISEARCHSTRINGW, "LVM_GETISEARCHSTRINGW" },
+#endif
+#if defined( LVM_EDITLABELW )
+	{ LVM_EDITLABELW, "LVM_EDITLABELW" },
+#endif
+#if defined( LVM_GETBKIMAGEW )
+	{ LVM_GETBKIMAGEW, "LVM_GETBKIMAGEW" },
+#endif
+#if defined( LVM_SETSELECTEDCOLUMN )
+	{ LVM_SETSELECTEDCOLUMN, "LVM_SETSELECTEDCOLUMN" },
+#endif
+#if defined( LVM_SETTILEWIDTH )
+	{ LVM_SETTILEWIDTH, "LVM_SETTILEWIDTH" },
+#endif
+#if defined( LVM_SETVIEW )
+	{ LVM_SETVIEW, "LVM_SETVIEW" },
+#endif
+#if defined( LVM_GETVIEW )
+	{ LVM_GETVIEW, "LVM_GETVIEW" },
+#endif
+#if defined( LVM_INSERTGROUP )
+	{ LVM_INSERTGROUP, "LVM_INSERTGROUP" },
+#endif
+#if defined( LVM_SETGROUPINFO )
+	{ LVM_SETGROUPINFO, "LVM_SETGROUPINFO" },
+#endif
+#if defined( LVM_GETGROUPINFO )
+	{ LVM_GETGROUPINFO, "LVM_GETGROUPINFO" },
+#endif
+#if defined( LVM_REMOVEGROUP )
+	{ LVM_REMOVEGROUP, "LVM_REMOVEGROUP" },
+#endif
+#if defined( LVM_MOVEGROUP )
+	{ LVM_MOVEGROUP, "LVM_MOVEGROUP" },
+#endif
+#if defined( LVM_MOVEITEMTOGROUP )
+	{ LVM_MOVEITEMTOGROUP, "LVM_MOVEITEMTOGROUP" },
+#endif
+#if defined( LVM_SETGROUPMETRICS )
+	{ LVM_SETGROUPMETRICS, "LVM_SETGROUPMETRICS" },
+#endif
+#if defined( LVM_GETGROUPMETRICS )
+	{ LVM_GETGROUPMETRICS, "LVM_GETGROUPMETRICS" },
+#endif
+#if defined( LVM_ENABLEGROUPVIEW )
+	{ LVM_ENABLEGROUPVIEW, "LVM_ENABLEGROUPVIEW" },
+#endif
+#if defined( LVM_SORTGROUPS )
+	{ LVM_SORTGROUPS, "LVM_SORTGROUPS" },
+#endif
+#if defined( LVM_INSERTGROUPSORTED )
+	{ LVM_INSERTGROUPSORTED, "LVM_INSERTGROUPSORTED" },
+#endif
+#if defined( LVM_REMOVEALLGROUPS )
+	{ LVM_REMOVEALLGROUPS, "LVM_REMOVEALLGROUPS" },
+#endif
+#if defined( LVM_HASGROUP )
+	{ LVM_HASGROUP, "LVM_HASGROUP" },
+#endif
+#if defined( LVM_SETTILEVIEWINFO )
+	{ LVM_SETTILEVIEWINFO, "LVM_SETTILEVIEWINFO" },
+#endif
+#if defined( LVM_GETTILEVIEWINFO )
+	{ LVM_GETTILEVIEWINFO, "LVM_GETTILEVIEWINFO" },
+#endif
+#if defined( LVM_SETTILEINFO )
+	{ LVM_SETTILEINFO, "LVM_SETTILEINFO" },
+#endif
+#if defined( LVM_GETTILEINFO )
+	{ LVM_GETTILEINFO, "LVM_GETTILEINFO" },
+#endif
+#if defined( LVM_SETINSERTMARK )
+	{ LVM_SETINSERTMARK, "LVM_SETINSERTMARK" },
+#endif
+#if defined( LVM_GETINSERTMARK )
+	{ LVM_GETINSERTMARK, "LVM_GETINSERTMARK" },
+#endif
+#if defined( LVM_INSERTMARKHITTEST )
+	{ LVM_INSERTMARKHITTEST, "LVM_INSERTMARKHITTEST" },
+#endif
+#if defined( LVM_GETINSERTMARKRECT )
+	{ LVM_GETINSERTMARKRECT, "LVM_GETINSERTMARKRECT" },
+#endif
+#if defined( LVM_SETINSERTMARKCOLOR )
+	{ LVM_SETINSERTMARKCOLOR, "LVM_SETINSERTMARKCOLOR" },
+#endif
+#if defined( LVM_GETINSERTMARKCOLOR )
+	{ LVM_GETINSERTMARKCOLOR, "LVM_GETINSERTMARKCOLOR" },
+#endif
+#if defined( LVM_SETINFOTIP )
+	{ LVM_SETINFOTIP, "LVM_SETINFOTIP" },
+#endif
+#if defined( LVM_GETSELECTEDCOLUMN )
+	{ LVM_GETSELECTEDCOLUMN, "LVM_GETSELECTEDCOLUMN" },
+#endif
+#if defined( LVM_ISGROUPVIEWENABLED )
+	{ LVM_ISGROUPVIEWENABLED, "LVM_ISGROUPVIEWENABLED" },
+#endif
+#if defined( LVM_GETOUTLINECOLOR )
+	{ LVM_GETOUTLINECOLOR, "LVM_GETOUTLINECOLOR" },
+#endif
+#if defined( LVM_SETOUTLINECOLOR )
+	{ LVM_SETOUTLINECOLOR, "LVM_SETOUTLINECOLOR" },
+#endif
+#if defined( LVM_CANCELEDITLABEL )
+	{ LVM_CANCELEDITLABEL, "LVM_CANCELEDITLABEL" },
+#endif
+#if defined( LVM_MAPINDEXTOID )
+	{ LVM_MAPINDEXTOID, "LVM_MAPINDEXTOID" },
+#endif
+#if defined( LVM_MAPIDTOINDEX )
+	{ LVM_MAPIDTOINDEX, "LVM_MAPIDTOINDEX" },
+#endif
+#if defined( LVM_ISITEMVISIBLE )
+	{ LVM_ISITEMVISIBLE, "LVM_ISITEMVISIBLE" },
+#endif
+#if defined( OCM__BASE )
+	{ OCM__BASE, "OCM__BASE" },
+#endif
+#if defined( LVM_SETUNICODEFORMAT )
+	{ LVM_SETUNICODEFORMAT, "LVM_SETUNICODEFORMAT" },
+#endif
+#if defined( LVM_GETUNICODEFORMAT )
+	{ LVM_GETUNICODEFORMAT, "LVM_GETUNICODEFORMAT" },
+#endif
+#if defined( OCM_CTLCOLOR )
+	{ OCM_CTLCOLOR, "OCM_CTLCOLOR" },
+#endif
+#if defined( OCM_DRAWITEM )
+	{ OCM_DRAWITEM, "OCM_DRAWITEM" },
+#endif
+#if defined( OCM_MEASUREITEM )
+	{ OCM_MEASUREITEM, "OCM_MEASUREITEM" },
+#endif
+#if defined( OCM_DELETEITEM )
+	{ OCM_DELETEITEM, "OCM_DELETEITEM" },
+#endif
+#if defined( OCM_VKEYTOITEM )
+	{ OCM_VKEYTOITEM, "OCM_VKEYTOITEM" },
+#endif
+#if defined( OCM_CHARTOITEM )
+	{ OCM_CHARTOITEM, "OCM_CHARTOITEM" },
+#endif
+#if defined( OCM_COMPAREITEM )
+	{ OCM_COMPAREITEM, "OCM_COMPAREITEM" },
+#endif
+#if defined( OCM_NOTIFY )
+	{ OCM_NOTIFY, "OCM_NOTIFY" },
+#endif
+#if defined( OCM_COMMAND )
+	{ OCM_COMMAND, "OCM_COMMAND" },
+#endif
+#if defined( OCM_HSCROLL )
+	{ OCM_HSCROLL, "OCM_HSCROLL" },
+#endif
+#if defined( OCM_VSCROLL )
+	{ OCM_VSCROLL, "OCM_VSCROLL" },
+#endif
+#if defined( OCM_CTLCOLORMSGBOX )
+	{ OCM_CTLCOLORMSGBOX, "OCM_CTLCOLORMSGBOX" },
+#endif
+#if defined( OCM_CTLCOLOREDIT )
+	{ OCM_CTLCOLOREDIT, "OCM_CTLCOLOREDIT" },
+#endif
+#if defined( OCM_CTLCOLORLISTBOX )
+	{ OCM_CTLCOLORLISTBOX, "OCM_CTLCOLORLISTBOX" },
+#endif
+#if defined( OCM_CTLCOLORBTN )
+	{ OCM_CTLCOLORBTN, "OCM_CTLCOLORBTN" },
+#endif
+#if defined( OCM_CTLCOLORDLG )
+	{ OCM_CTLCOLORDLG, "OCM_CTLCOLORDLG" },
+#endif
+#if defined( OCM_CTLCOLORSCROLLBAR )
+	{ OCM_CTLCOLORSCROLLBAR, "OCM_CTLCOLORSCROLLBAR" },
+#endif
+#if defined( OCM_CTLCOLORSTATIC )
+	{ OCM_CTLCOLORSTATIC, "OCM_CTLCOLORSTATIC" },
+#endif
+#if defined( OCM_PARENTNOTIFY )
+	{ OCM_PARENTNOTIFY, "OCM_PARENTNOTIFY" },
+#endif
+#if defined( WM_APP )
+	{ WM_APP, "WM_APP" },
+#endif
+#if defined( WM_RASDIALEVENT )
+	{ WM_RASDIALEVENT, "WM_RASDIALEVENT" },
+#endif
+};
+
+#endif	// #ifdef _DEBUG

@@ -12,6 +12,7 @@
 #define MX_ELEMENTS( x )				MX_COUNT_OF( x )
 #endif	// #ifndef MX_COUNT_OF
 
+
 namespace mx {
 
 	class CUtilities {
@@ -64,6 +65,25 @@ namespace mx {
 			MX_DTO_SHOWRANGES			= (1 << 1),					// "uint16_t" vs. "uint16_t (0-65,535)"
 			MX_DTO_SHOWSIZES			= (1 << 2),					// "uint16_t" vs. "uint16_t (2 bytes)"
 			MX_DTO_DEFAULT				= MX_DTO_CODENAMES | MX_DTO_SHOWRANGES | MX_DTO_SHOWSIZES,
+		};
+
+		// Main search types.
+		enum MX_SEARCH_TYPES {
+			MX_ST_DATATYPE_SEARCH,
+			MX_ST_STRING_SEARCH,
+			MX_ST_EXP_SEARCH,
+			MX_ST_POINTER_SEARCH,
+			MX_ST_GROUP_SEARCH,
+		};
+
+		// Evaluation types.
+		enum MX_EVAL_TYPES {
+			MX_ET_EXACT,
+			MX_ET_NOT_EQUAL_TO,
+			MX_ET_GREATER_THAN,
+			MX_ET_LESS_THAN,
+			MX_ET_RANGE,
+			MX_ET_UNKNOWN,
 		};
 
 		// == Types.
@@ -149,8 +169,11 @@ namespace mx {
 		// Gets a Windows version string based on the given major and minor versions.
 		static const CHAR *				WindowsVersion( uint32_t _uiMajor, uint32_t _uiMinor, std::string &_sString );
 
-		// Creates a IMAGE_REL_BASED_* string.
+		// Creates an IMAGE_REL_BASED_* string.
 		static const CHAR *				PeRelocBaseToString( uint32_t _uiVal, std::string &_sString );
+
+		// Creates a PROCESS_ string.
+		static const CHAR *				OpenProcessFlagToString( uint32_t _uiVal, std::string &_sString, BOOL _bShort = -1 );
 
 		// Creates a string that best represents the given size.
 		static const CHAR *				SizeString( uint64_t _uiSize, std::string &_sString );
@@ -218,11 +241,26 @@ namespace mx {
 		// Gets the range of a data type as a string.
 		static const CHAR *				DataTypeRange( CUtilities::MX_DATA_TYPES _dtType, std::string &_sString );
 
+		// Gets the range of a data type as a string.
+		static const WCHAR *			DataTypeRange( CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString );
+
 		// Prints the size of the given data type as a string.
 		static const CHAR *				DataTypeSize( CUtilities::MX_DATA_TYPES _dtType, std::string &_sString );
 
+		// Prints the size of the given data type as a string.
+		static const WCHAR *			DataTypeSize( CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString );
+
 		// Prints a data type given the options.
 		static const CHAR *				PrintDataType( std::string &_sString, CUtilities::MX_DATA_TYPES _dtType, DWORD _dwOptions = static_cast<DWORD>(-1) );
+
+		// Prints a data type given the options.
+		static const WCHAR *			PrintDataType( std::wstring &_sString, CUtilities::MX_DATA_TYPES _dtType, DWORD _dwOptions = static_cast<DWORD>(-1) );
+
+		// MX_SEARCH_TYPES value to a string.
+		static const WCHAR *			SearchTypeToString( CUtilities::MX_SEARCH_TYPES _stType, std::wstring &_sString );
+
+		// MX_EVAL_TYPES value to a string.
+		static const WCHAR *			EvaluationTypeToString( CUtilities::MX_EVAL_TYPES _etType, std::wstring &_sString );
 
 		// Clears the internal temporary buffer (as a security measure).
 		static VOID						ClearInternalBuffer();

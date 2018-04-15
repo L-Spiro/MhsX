@@ -355,7 +355,7 @@ namespace mx {
 
 	// == Functions.
 	// Creates the main window.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc., and registers the main window class.
-	BOOL CMainWindowLayout::CreateMainWindow( CMemHack * _pmhMemHack ) {
+	CWidget * CMainWindowLayout::CreateMainWindow( CMemHack * _pmhMemHack ) {
 		if ( !m_aMainClass ) {
 			// Register the window classes we need.
 			WCHAR szTemp[5];
@@ -415,7 +415,7 @@ namespace mx {
 		//SetMenuItemInfo( 
 
 		::SetMenu( m_pwMainWindow->Wnd(), hMenu );*/
-		return TRUE;
+		return m_pwMainWindow;
 	}
 
 	// Creates the main menu and adds it to the window.

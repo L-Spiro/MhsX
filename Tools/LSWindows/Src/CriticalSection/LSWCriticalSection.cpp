@@ -11,13 +11,13 @@ namespace lsw {
 
 	// == Functions.
 	// Enters the critical section.
-	VOID CCriticalSection::EnterCriticalSection() {
-		::EnterCriticalSection( &m_csCrit );
+	VOID CCriticalSection::EnterCriticalSection() const {
+		::EnterCriticalSection( const_cast<LPCRITICAL_SECTION>(&m_csCrit) );
 	}
 
 	// Leaves the critical section.
-	VOID CCriticalSection::LeaveCriticalSection() {
-		::LeaveCriticalSection( &m_csCrit );
+	VOID CCriticalSection::LeaveCriticalSection() const {
+		::LeaveCriticalSection( const_cast<LPCRITICAL_SECTION>(&m_csCrit) );
 	}
 
 }	// namespace lsw

@@ -169,6 +169,7 @@
     <ClCompile Include="Src\Edit\LSWEdit.cpp" />
     <ClCompile Include="Src\Expressions\LSWExpressions.cpp" />
     <ClCompile Include="Src\GroupBox\LSWGroupBox.cpp" />
+    <ClCompile Include="Src\Helpers\LSWHelpers.cpp" />
     <ClCompile Include="Src\ImageList\LSWImageList.cpp" />
     <ClCompile Include="Src\Images\LSWBitmap.cpp" />
     <ClCompile Include="Src\Layout\LSWLayoutManager.cpp" />
@@ -200,6 +201,7 @@
     <ClInclude Include="Src\Expressions\LSWExpression.h" />
     <ClInclude Include="Src\GroupBox\LSWGroupBox.h" />
     <ClInclude Include="Src\Helpers\LSWHelpers.h" />
+    <ClInclude Include="Src\Helpers\LSWMessages.h" />
     <ClInclude Include="Src\ImageList\LSWImageList.h" />
     <ClInclude Include="Src\Images\LSWBitmap.h" />
     <ClInclude Include="Src\Layout\LSWLayoutManager.h" />

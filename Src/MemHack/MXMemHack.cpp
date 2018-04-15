@@ -2,6 +2,9 @@
 #include "../Utilities/MXUtilities.h"
 #include <Base/LSWBase.h>
 
+// TEMP.
+#include "../Search/MXSearcher.h"
+
 namespace mx {
 
 	CMemHack::CMemHack() {
@@ -27,6 +30,8 @@ namespace mx {
 		m_oOptions.bUseEpsilon = TRUE;
 		m_oOptions.bSmartEpsilon = TRUE;
 		m_oOptions.dEpsilon = FLT_EPSILON;// (1.19209290E-07F) (Win32 uses 1.192092896e-07F);
+		m_oOptions.bAligned = TRUE;
+		m_oOptions.bSameAsOriginal = TRUE;
 	}
 	CMemHack::~CMemHack() {
 		Detach();
@@ -37,31 +42,67 @@ namespace mx {
 	bool CMemHack::OpenProcess( DWORD _dwId ) {
 		Detach();
 
-		// PROCESS_CREATE_THREAD: CreateThread()
-		// PROCESS_VM_READ: ReadProcessMemory()
-		// PROCESS_VM_WRITE: WriteProcessMemory()
-		// PROCESS_VM_OPERATION: VirtualProtectEx(), WriteProcessMemory()
-		// PROCESS_QUERY_INFORMATION: OpenProcessToken()
-		// PROCESS_SUSPEND_RESUME: NtSuspendProcess(), NtResumeProcess()
+		const CProcess::MX_OPEN_PROC_MODE opmMode = CProcess::MX_OPM_FIXED;
+		switch ( opmMode ) {
+			case CProcess::MX_OPM_FIXED : {
+				// PROCESS_CREATE_THREAD: CreateThread()
+				// PROCESS_VM_READ: ReadProcessMemory()
+				// PROCESS_VM_WRITE: WriteProcessMemory()
+				// PROCESS_VM_OPERATION: VirtualProtectEx(), WriteProcessMemory()
+				// PROCESS_QUERY_INFORMATION: OpenProcessToken()
+				// PROCESS_SUSPEND_RESUME: NtSuspendProcess(), NtResumeProcess()
 
-		DWORD dwAttempts[] = {
-			PROCESS_CREATE_THREAD |											// The full range of what we might want to do.
-				PROCESS_VM_READ | PROCESS_VM_WRITE |
-				PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION |
-				PROCESS_SUSPEND_RESUME,
-			PROCESS_CREATE_THREAD |											// Maybe we can live without suspending the process.
-				PROCESS_VM_READ | PROCESS_VM_WRITE |
-				PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION,
-			/*PROCESS_CREATE_THREAD |											// Maybe we can live without suspending the process.
-				PROCESS_VM_READ | PROCESS_VM_WRITE |
-				PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION,*/
-		};
+				DWORD dwAttempts[] = {
+					PROCESS_CREATE_THREAD |											// The full range of what we might want to do.
+						PROCESS_VM_READ | PROCESS_VM_WRITE |
+						PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION |
+						PROCESS_SUSPEND_RESUME,
+					PROCESS_CREATE_THREAD |											// Maybe we can live without suspending the process.
+						PROCESS_VM_READ | PROCESS_VM_WRITE |
+						PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION,
+
+					PROCESS_QUERY_INFORMATION,										// The bare minimum.
+					/*PROCESS_CREATE_THREAD |											// Maybe we can live without suspending the process.
+						PROCESS_VM_READ | PROCESS_VM_WRITE |
+						PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION,*/
+				};
+				for ( size_t I = 0; I < MX_ELEMENTS( dwAttempts ); ++I ) {
+					if ( m_pProcess.OpenProc( _dwId, opmMode, dwAttempts[I] ) ) {
+						break;
+					}
+				}
+				break;
+			}
+			default : {
+				m_pProcess.OpenProc( _dwId, opmMode, 0 );
+			}
+		}
+
+		if ( !m_pProcess.ProcIsOpened() ) {
+			FailedToOpenProcess( _dwId );
+			return false;
+		}
+		
+		OpenedProcess();
 
 		return true;
 	}
 
+	// Opened a process.
+	void CMemHack::OpenedProcess() {
+		CSearcher sSearcher( &m_pProcess );
+		/*CAddressChunkList adcList;
+		uint64_t ui64ChunkSize = 31ULL * 1024 * 1024 * 1024;
+		sSearcher.GenerateChunks( adcList, ui64ChunkSize, 157 );*/
+	}
+
+	// Failed to open a process.
+	void CMemHack::FailedToOpenProcess( DWORD _dwId ) {
+	}
+
 	// Detach from the current process.
 	void CMemHack::Detach() {
+		m_pProcess.Detatch();
 		//m_hProc.Reset();
 	}
 

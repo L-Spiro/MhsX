@@ -27,7 +27,7 @@ namespace mx {
 			//std::wstring					sCommandLine;
 			PROCESSENTRY32W					peProcEntry;
 			BOOL							bHasWow64;
-			DWORD							dwOpenProcessTest;
+			//DWORD							dwOpenProcessTest;
 		};
 
 

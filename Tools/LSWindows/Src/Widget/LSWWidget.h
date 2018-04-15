@@ -7,6 +7,9 @@
 
 #include <vector>
 
+
+#define LSW_WIN2CLASS( H )					reinterpret_cast<CWidget *>(::GetWindowLongPtrW( H, GWLP_USERDATA ))
+
 namespace lsw {
 
 	class CWidget {
@@ -128,7 +131,7 @@ namespace lsw {
 		// If the function succeeds, the return value is the pointer to the window that previously had the keyboard focus.
 		CWidget *							SetFocus() const;
 
-		// Selects a range of text.  Implemented by CEdit.
+		// Selects a range of text.  Implemented by CEdit and CComboBox.
 		virtual VOID						SetSel( INT _iStart, INT _iEnd ) const {}
 
 		// Are we checked?  Implemented by CCheckButton and CRadioButton.
@@ -180,6 +183,9 @@ namespace lsw {
 
 		// Gets a pointer to a child with the given ID.
 		const CWidget *						FindChild( WORD _wId ) const;
+
+		// Gets the font.
+		HFONT								GetFont() const { return reinterpret_cast<HFONT>(::SendMessageW( Wnd(), WM_GETFONT, 0L, 0L )); }
 
 		// Sets a given font on all children of a window.
 		static BOOL CALLBACK				EnumChildWindows_SetFont( HWND _hWnd, LPARAM _lParam );

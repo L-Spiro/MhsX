@@ -83,7 +83,7 @@ namespace lsw {
 
 	// The dockable message handler.
 	LRESULT CALLBACK CDockable::WindowProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam ) {
-		CWidget * pmwThis = reinterpret_cast<CWidget *>(::GetWindowLongPtrW( _hWnd, GWLP_USERDATA ));
+		CWidget * pmwThis = LSW_WIN2CLASS( _hWnd );
 		switch ( _uMsg ) {
 			case WM_NCACTIVATE : {
 				if ( pmwThis ) {
@@ -399,6 +399,7 @@ namespace lsw {
 
 		LSW_RECT rClose = GetCloseRect();
 		rRect.right = rClose.left;
+
 		::DrawCaption( Wnd(), bpPaint.hDc, &rRect, DC_BUTTONS | DC_TEXT | (bActive ? DC_ACTIVE : 0) | (m_bUseGradient ? DC_GRADIENT : 0) );
 
 

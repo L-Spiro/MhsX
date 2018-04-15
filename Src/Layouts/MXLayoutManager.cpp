@@ -8,6 +8,7 @@
 #include "../Options/MXOptionsPageGenSearch.h"
 #include "../Options/MXOptionsPageOpenProc.h"
 #include "../Options/MXOptionsWindow.h"
+#include "../Search/MXNewDataTypeSearchWindow.h"
 
 namespace mx {
 
@@ -38,6 +39,9 @@ namespace mx {
 			}
 			case MX_EXP_EVAL : {
 				return new CExpEvalWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu );
+			}
+			case MX_NEW_DATA_TYPE_SEARCH : {
+				return new CNewDataTypeSearchWindow( _wlLayout, _pwParent, m_poOptions, _bCreateWidget, _hMenu );
 			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu );

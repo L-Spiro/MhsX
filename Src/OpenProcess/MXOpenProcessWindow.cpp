@@ -282,7 +282,8 @@ namespace mx {
 			}
 		}
 		_hProcHandle = hHnd;
-		_pProc.dwOpenProcessTest = 0;/*CSystem::TestOpenProcess( _dwId );
+		//_pProc.dwOpenProcessTest = 0;
+		/*_pProc.dwOpenProcessTest = CSystem::TestOpenProcess( _dwId );
 		if ( 0x001f3fff != _pProc.dwOpenProcessTest ) {
 			return FALSE;
 		}*/

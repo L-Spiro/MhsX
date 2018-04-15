@@ -32,6 +32,16 @@ namespace mx {
 			}
 			plbBox->SetCurSel( 0 );
 		}
+
+
+		CWidget * pwDots = FindChild( COptionsLayout::MX_OI_GENERAL_SEARCH_DOTS );
+		if ( pwDots ) {
+			std::string sTemp;
+			for ( size_t I = 0; I < 100; ++I ) {
+				sTemp.push_back( I % 2 ? '-' : ' ' );
+			}
+			pwDots->SetTextA( sTemp.c_str() );
+		}
 		
 		return LSW_H_CONTINUE;
 	}

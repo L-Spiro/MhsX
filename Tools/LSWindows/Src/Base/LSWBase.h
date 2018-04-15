@@ -71,13 +71,31 @@ namespace lsw {
 		// Error-related.
 		// =======================================
 		// Prints the current error (from ::GetLastError()).
-		static VOID									PrintError( LPCWSTR _pwcText );
+		static VOID									PrintError( LPCWSTR _pwcText, DWORD _dwError = UINT_MAX );
+
+		// Appends error text to a string.
+		static std::wstring							AppendError( LPCWSTR _pwcText, std::wstring &_wsRet, DWORD _dwError = UINT_MAX );
 
 		// Displays a message box with the given title and message.
 		static VOID									MessageBoxError( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle = L"Error" );
 
 		// Displays a message box with the given title and message.
 		static VOID									MessageBoxError( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle = "Error" );
+
+		// =======================================
+		// Prompting.
+		// =======================================
+		// Prompts with MB_ICONINFORMATION and IDOK.
+		static bool									PromptOk( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle );
+
+		// Prompts with MB_ICONINFORMATION and IDOK.
+		static bool									PromptOk( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle );
+
+		// Prompts with MB_ICONQUESTION and IDYES.
+		static bool									PromptYesNo( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle );
+
+		// Prompts with MB_ICONQUESTION and IDYES.
+		static bool									PromptYesNo( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle );
 
 		// =======================================
 		// Fonts.

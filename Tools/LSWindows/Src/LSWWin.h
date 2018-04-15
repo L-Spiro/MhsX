@@ -19,9 +19,9 @@
 #define _WIN32_WINNT_WIN10                  0x0A00 // Windows 10  
 */
 
-#define _WIN32_IE							0x0501
-#define WINVER								0x0501
-#define _WIN32_WINNT						0x0501
+#define _WIN32_IE							0x0601
+#define WINVER								0x0601
+#define _WIN32_WINNT						0x0601
 #define WIN32_LEAN_AND_MEAN
 #define OEMRESOURCE							// For OBM_* bitmaps etc.
 #define NOMINMAX
@@ -36,3 +36,15 @@ typedef double DOUBLE;
 #endif	// #ifndef MAXUINT64
 
 #include <CommCtrl.h>
+
+#ifndef LVS_EX_DOUBLEBUFFER
+#define LVS_EX_DOUBLEBUFFER 0
+#endif	// #ifndef LVS_EX_DOUBLEBUFFER
+
+#ifndef DC_BUTTONS
+#define DC_BUTTONS 0
+#endif	// #ifndef DC_BUTTONS
+
+#ifndef DC_GRADIENT
+#define DC_GRADIENT 0
+#endif	// #ifndef DC_GRADIENT

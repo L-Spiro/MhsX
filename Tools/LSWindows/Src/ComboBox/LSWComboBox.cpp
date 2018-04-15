@@ -5,15 +5,15 @@
 namespace lsw {
 
 	CComboBox::CComboBox( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
-		Parent( _wlLayout, _pwParent, _bCreateWidget, _hMenu ) {
-		if ( Wnd() ) {
+		CWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu ) {
+		/*if ( Wnd() ) {
 			COMBOBOXINFO cbiInfo = { sizeof( cbiInfo ) };
 			::GetComboBoxInfo( Wnd(), &cbiInfo );
 
 			WCHAR szName[128];
 			::GetClassNameW( cbiInfo.hwndList, szName, 128 );
 			HWND hWnd = cbiInfo.hwndList;
-		}
+		}*/
 	}
 
 
@@ -88,7 +88,11 @@ namespace lsw {
 	// Gets the minimum number of visible items in the drop-down list of a combo box.
 	INT CComboBox::GetMinVisible() const {
 		if ( !Wnd() ) { return 0; }
+#ifndef CB_GETMINVISIBLE
+		return 30;	// I guess?
+#else
 		return static_cast<INT>(::SendMessageW( Wnd(), CB_GETMINVISIBLE, 0L, 0L ));
+#endif	// #ifndef CB_GETMINVISIBLE
 	}
 
 	// Adds a string to a list in a combo box at the specified location.
@@ -123,7 +127,11 @@ namespace lsw {
 	// Sets the minimum number of visible items in the drop-down list of a combo box.
 	BOOL CComboBox::SetMinVisible( INT _iMinVisible ) {
 		if ( !Wnd() ) { return FALSE; }
+#ifndef CB_SETMINVISIBLE
+		return FALSE;
+#else
 		return static_cast<BOOL>(::SendMessageW( Wnd(), CB_SETMINVISIBLE, static_cast<WPARAM>(_iMinVisible), 0L ));
+#endif	// #ifndef CB_SETMINVISIBLE
 	}
 
 	// Shows or hides the list in a combo box.
@@ -140,16 +148,23 @@ namespace lsw {
 			// Originally had rRet.Zero(); here but moved it out to possibly ensure certain behavior inside ::DrawTextW().
 		}
 		else {
+#if ( WINVER >= 0x0500 )
 			COMBOBOXINFO cbiInfo = { sizeof( cbiInfo ) };
 			::GetComboBoxInfo( Wnd(), &cbiInfo );
 			HDC hDc = ::GetDC( cbiInfo.hwndList );
 
-			std::wstring wString;
-			GetLBText( _iIndex, wString );
-			::DrawTextW( hDc, wString.c_str(), wString.size(), &rRet, DT_CALCRECT );
+			HFONT hFont = reinterpret_cast<HFONT>(::SendMessageW( cbiInfo.hwndList, WM_GETFONT, 0L, 0L ));
+			{
+				LSW_SELECTOBJECT soFontOrig( hDc, hFont );	// Destructor sets the original font back.
+
+				std::wstring wString;
+				GetLBText( _iIndex, wString );
+				::DrawTextW( hDc, wString.c_str(), static_cast<int>(wString.size()), &rRet, DT_CALCRECT );
+			}
 
 			::ReleaseDC( cbiInfo.hwndList, hDc );
-			//CHelpers::
+#else
+#endif	// #if ( WINVER >= 0x0500 )
 		}
 		return rRet;
 	}
@@ -162,14 +177,40 @@ namespace lsw {
 			LSW_RECT rTemp = GetItemRect( I );
 			lRet = std::max( lRet, rTemp.Width() );
 		}
+		lRet += ::GetSystemMetrics( SM_CXEDGE ) * 2;
+		if ( GetCount() > GetMinVisible() ) {
+			lRet += ::GetSystemMetrics( SM_CXVSCROLL );
+		}
 		return lRet;
 	}
 
 	// Auto-sets the minimum width of the list box after adding all the strings.
 	LONG CComboBox::AutoSetMinListWidth() {
-		//LONG lRet = GetListMinWidth();
-		//return static_cast<LONG>(::SendMessageW( Wnd(), CB_SETDROPPEDWIDTH, static_cast<WPARAM>(lRet), 0L ));
-		return static_cast<LONG>(::SendMessageW( Wnd(), CB_SETDROPPEDWIDTH, 1L, 0L ));
+		LONG lRet = GetListMinWidth();
+		return static_cast<LONG>(::SendMessageW( Wnd(), CB_SETDROPPEDWIDTH, static_cast<WPARAM>(lRet), 0L ));
+		//return static_cast<LONG>(::SendMessageW( Wnd(), CB_SETDROPPEDWIDTH, 200L, 0L ));
+	}
+
+	// Sets the selection based on index.
+	INT CComboBox::SetCurSel( INT _iIndex ) {
+		if ( !Wnd() || _iIndex >= GetCount() ) { return CB_ERR; }	// Don't handle (_iIndex < 0) here.
+		return static_cast<INT>(::SendMessageW( Wnd(), CB_SETCURSEL, static_cast<WPARAM>(_iIndex), 0L ));
+	}
+
+	// Sets the selection based on item data.
+	INT CComboBox::SetCurSelByItemData( LPARAM _pData ) {
+		INT iTotal = GetCount();
+		for ( INT I = 0; I < iTotal; ++I ) {
+			if ( GetItemData( I ) == _pData ) {
+				return SetCurSel( I );
+			}
+		}
+		return SetCurSel( -1 );
+	}
+
+	// Selects a range of text.  Implemented by CEdit and CComboBox.
+	VOID CComboBox::SetSel( INT _iStart, INT _iEnd ) const {
+		LRESULT lrRet = ::SendMessageW( Wnd(), CB_SETEDITSEL, 0L, MAKELPARAM( _iStart, _iEnd ) );
 	}
 
 }	// namespace lsw

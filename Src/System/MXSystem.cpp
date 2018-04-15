@@ -17,11 +17,23 @@ namespace mx {
 	// System information.
 	SYSTEM_INFO CSystem::m_siSystemInfo = { 0 };
 
-	// ReadProcessMemory.
+	// ReadProcessMemory().
 	LPFN_READPROCESSMEMORY CSystem::m_pfReadProcessMemory = nullptr;
 
-	// WriteProcessMemory.
+	// WriteProcessMemory().
 	LPFN_WRITEPROCESSMEMORY	CSystem::m_pfWriteProcessMemory = nullptr;
+
+	// VirtualProtectEx().
+	LPFN_VIRTUALPROTECTEX CSystem::m_pfVirtualProtectEx = nullptr;
+
+	// VirtualAllocEx().
+	LPFN_VIRTUALALLOCEX CSystem::m_pfVirtualAllocEx = nullptr;
+
+	// VirtualFreeEx().
+	LPFN_VIRTUALFREEEX CSystem::m_pfVirtualFreeEx = nullptr;
+
+	// VirtualQueryEx().
+	LPFN_VIRTUALQUERYEX CSystem::m_pfVirtualQueryEx = nullptr;
 
 	// EnumProcesses().
 	LPFN_ENUMPROCESSES CSystem::m_pfEnumProcesses = nullptr;
@@ -76,6 +88,45 @@ namespace mx {
 
 	// GetExitCodeThread().
 	LPFN_GETEXITCODETHREAD CSystem::m_pfGetExitCodeThread = nullptr;
+
+	// IsDebuggerPresent().
+	LPFN_ISDEBUGGERPRESENT CSystem::m_pfIsDebuggerPresent = nullptr;
+
+	// CheckRemoteDebuggerPresent().
+	LPFN_CHECKREMOTEDEBUGGERPRESENT CSystem::m_pfCheckRemoteDebuggerPresent = nullptr;
+
+	// DebugActiveProcess().
+	LPFN_DEBUGACTIVEPROCESS CSystem::m_pfDebugActiveProcess = nullptr;
+
+	// DebugActiveProcessStop().
+	LPFN_DEBUGACTIVEPROCESSSTOP CSystem::m_pfDebugActiveProcessStop = nullptr;
+
+	// ContinueDebugEvent().
+	LPFN_CONTINUEDEBUGEVENT CSystem::m_pfContinueDebugEvent = nullptr;
+
+	// DebugSetProcessKillOnExit().
+	LPFN_DEBUGSETPROCESSKILLONEXIT CSystem::m_pfDebugSetProcessKillOnExit = nullptr;
+
+	// WaitForDebugEvent().
+	LPFN_WAITFORDEBUGEVENT CSystem::m_pfWaitForDebugEvent = nullptr;
+
+	// WaitForDebugEventEx().
+	LPFN_WAITFORDEBUGEVENTEX CSystem::m_pfWaitForDebugEventEx = nullptr;
+
+	// GetThreadContext().
+	LPFN_GETTHREADCONTEXT CSystem::m_pfGetThreadContext = nullptr;
+
+	// SetThreadContext().
+	LPFN_SETTHREADCONTEXT CSystem::m_pfSetThreadContext = nullptr;
+
+	// Wow64GetThreadContext().
+	LPFN_WOW64GETTHREADCONTEXT CSystem::m_pfWow64GetThreadContext = nullptr;
+
+	// Wow64SetThreadContext().
+	LPFN_WOW64SETTHREADCONTEXT CSystem::m_pfWow64SetThreadContext = nullptr;
+
+	// Wow64GetThreadSelectorEntry().
+	LPFN_WOW64GETTHREADSELECTORENTRY CSystem::m_pfWow64GetThreadSelectorEntry = nullptr;
 
 	// == Types.
 	typedef BOOL (WINAPI * LPFN_ISWOW64PROCESS)( HANDLE, PBOOL );
@@ -426,6 +477,26 @@ namespace mx {
 		return m_pfWriteProcessMemory ? m_pfWriteProcessMemory( _hProcess, _lpBaseAddress, _lpBuffer, _nSize, _lpNumberOfBytesWritten ) : FALSE;
 	}
 
+	// VirtualProtectEx().
+	BOOL WINAPI CSystem::VirtualProtectEx( HANDLE _hProcess, LPVOID _lpAddress, SIZE_T _dwSize, DWORD _flNewProtect, PDWORD _lpflOldProtect ) {
+		return m_pfVirtualProtectEx ? m_pfVirtualProtectEx( _hProcess, _lpAddress, _dwSize, _flNewProtect, _lpflOldProtect ) : FALSE;
+	}
+
+	// VirtualAllocEx();
+	LPVOID WINAPI CSystem::VirtualAllocEx( HANDLE _hProcess, LPVOID _lpAddress, SIZE_T _dwSize, DWORD _flAllocationType, DWORD _flProtect ) {
+		return m_pfVirtualAllocEx ? m_pfVirtualAllocEx( _hProcess, _lpAddress, _dwSize, _flAllocationType, _flProtect ) : NULL;
+	}
+
+	// VirtualFreeEx().
+	BOOL WINAPI CSystem::VirtualFreeEx( HANDLE _hProcess, LPVOID _lpAddress, SIZE_T _dwSize, DWORD _dwFreeType ) {
+		return m_pfVirtualFreeEx ? m_pfVirtualFreeEx( _hProcess, _lpAddress, _dwSize, _dwFreeType ) : FALSE;
+	}
+
+	// VirtualQueryEx();
+	SIZE_T WINAPI CSystem::VirtualQueryEx( HANDLE _hProcess, LPCVOID _lpAddress, PMEMORY_BASIC_INFORMATION _lpBuffer, SIZE_T _dwLength ) {
+		return m_pfVirtualQueryEx ? m_pfVirtualQueryEx( _hProcess, _lpAddress, _lpBuffer, _dwLength ) : 0;
+	}
+
 	// EnumProcesses().
 	BOOL WINAPI CSystem::EnumProcesses( DWORD * _pdwProcessIds, DWORD _dwCb, DWORD * _pdwBytesReturned ) {
 		return m_pfEnumProcesses ? m_pfEnumProcesses( _pdwProcessIds, _dwCb, _pdwBytesReturned ) : FALSE;
@@ -599,6 +670,69 @@ namespace mx {
 		return dwRet;
 	}
 
+	// IsDebuggerPresent().
+	BOOL WINAPI CSystem::IsDebuggerPresent() {
+		return m_pfIsDebuggerPresent ? m_pfIsDebuggerPresent() : FALSE;
+	}
+
+	// CheckRemoteDebuggerPresent().
+	BOOL WINAPI CSystem::CheckRemoteDebuggerPresent( HANDLE _hProcess, PBOOL _pbDebuggerPresent ) {
+		return m_pfCheckRemoteDebuggerPresent ? m_pfCheckRemoteDebuggerPresent( _hProcess, _pbDebuggerPresent ) : FALSE;
+	}
+
+	// DebugActiveProcess().
+	BOOL WINAPI CSystem::DebugActiveProcess( DWORD _dwProcessId ) {
+		return m_pfDebugActiveProcess ? m_pfDebugActiveProcess( _dwProcessId ) : FALSE;
+	}
+
+	// DebugActiveProcessStop().
+	BOOL WINAPI CSystem::DebugActiveProcessStop( DWORD _dwProcessId ) {
+		return m_pfDebugActiveProcessStop ? m_pfDebugActiveProcessStop( _dwProcessId ) : FALSE;
+	}
+
+	// ContinueDebugEvent().
+	BOOL WINAPI CSystem::ContinueDebugEvent( DWORD _dwProcessId, DWORD _dwThreadId, DWORD _dwContinueStatus ) {
+		return m_pfContinueDebugEvent ? m_pfContinueDebugEvent( _dwProcessId, _dwThreadId, _dwContinueStatus ) : FALSE;
+	}
+
+	// DebugSetProcessKillOnExit().
+	BOOL WINAPI CSystem::DebugSetProcessKillOnExit( BOOL _KillOnExit ) {
+		return m_pfDebugSetProcessKillOnExit ? m_pfDebugSetProcessKillOnExit( _KillOnExit ) : FALSE;
+	}
+
+	// WaitForDebugEvent().
+	BOOL WINAPI CSystem::WaitForDebugEvent( LPDEBUG_EVENT _lpDebugEvent, DWORD _dwMilliseconds ) {
+		if ( m_pfWaitForDebugEventEx ) {
+			return m_pfWaitForDebugEventEx( _lpDebugEvent, _dwMilliseconds );
+		}
+		return m_pfWaitForDebugEvent ? m_pfWaitForDebugEvent( _lpDebugEvent, _dwMilliseconds ) : FALSE;
+	}
+
+	// GetThreadContext().
+	BOOL WINAPI CSystem::GetThreadContext( HANDLE _hThread, LPCONTEXT _lpContext ) {
+		return m_pfGetThreadContext ? m_pfGetThreadContext( _hThread, _lpContext ) : FALSE;
+	}
+
+	// SetThreadContext().
+	BOOL WINAPI CSystem::SetThreadContext( HANDLE _hThread, const CONTEXT * _lpContext ) {
+		return m_pfSetThreadContext ? m_pfSetThreadContext( _hThread, _lpContext ) : FALSE;
+	}
+
+	// Wow64GetThreadContext().
+	BOOL WINAPI CSystem::Wow64GetThreadContext( HANDLE _hThread, PWOW64_CONTEXT _lpContext ) {
+		return m_pfWow64GetThreadContext ? m_pfWow64GetThreadContext( _hThread, _lpContext ) : FALSE;
+	}
+
+	// Wow64SetThreadContext().
+	BOOL WINAPI CSystem::Wow64SetThreadContext( HANDLE _hThread, const WOW64_CONTEXT * _lpContext ) {
+		return m_pfWow64SetThreadContext ? m_pfWow64SetThreadContext( _hThread, _lpContext ) : FALSE;
+	}
+
+	// Wow64GetThreadSelectorEntry().
+	BOOL WINAPI CSystem::Wow64GetThreadSelectorEntry( HANDLE _hThread, DWORD _dwSelector, PWOW64_LDT_ENTRY _lpSelectorEntry ) {
+		return m_pfWow64GetThreadSelectorEntry ? m_pfWow64GetThreadSelectorEntry( _hThread, _dwSelector, _lpSelectorEntry ) : FALSE;
+	}
+
 	// Load kernel32.dll functions.
 	VOID CSystem::LoadKernel32() {
 		CHAR szKernel32[_LEN_6AE69F02+1];
@@ -631,6 +765,10 @@ namespace mx {
 
 		MX_PROCADDR( ReadProcessMemory, _T_F7C7AE42_ReadProcessMemory, _LEN_F7C7AE42 );
 		MX_PROCADDR( WriteProcessMemory, _T_4F58972E_WriteProcessMemory, _LEN_4F58972E );
+		MX_PROCADDR( VirtualProtectEx, _T_5D180413_VirtualProtectEx, _LEN_5D180413 );
+		MX_PROCADDR( VirtualAllocEx, _T_E62E824D_VirtualAllocEx, _LEN_E62E824D );
+		MX_PROCADDR( VirtualFreeEx, _T_6B482023_VirtualFreeEx, _LEN_6B482023 );
+		MX_PROCADDR( VirtualQueryEx, _T_1BFB8645_VirtualQueryEx, _LEN_1BFB8645 );
 
 		m_pfEnumProcesses = reinterpret_cast<LPFN_ENUMPROCESSES>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_0509A21C_EnumProcesses, _LEN_0509A21C, poObj ));
 		if ( !m_pfEnumProcesses ) {
@@ -649,6 +787,19 @@ namespace mx {
 		MX_PROCADDR( QueryFullProcessImageNameW, _T_FC3DC91C_QueryFullProcessImageNameW, _LEN_FC3DC91C );
 		MX_PROCADDR( GetExitCodeProcess, _T_1CCA53FD_GetExitCodeProcess, _LEN_1CCA53FD );
 		MX_PROCADDR( GetExitCodeThread, _T_59D89102_GetExitCodeThread, _LEN_59D89102 );
+		MX_PROCADDR( IsDebuggerPresent, _T_8436F795_IsDebuggerPresent, _LEN_8436F795 );
+		MX_PROCADDR( CheckRemoteDebuggerPresent, _T_FC1FDA83_CheckRemoteDebuggerPresent, _LEN_FC1FDA83 );
+		MX_PROCADDR( DebugActiveProcess, _T_A0FF286A_DebugActiveProcess, _LEN_A0FF286A );
+		MX_PROCADDR( DebugActiveProcessStop, _T_3E53E72D_DebugActiveProcessStop, _LEN_3E53E72D );
+		MX_PROCADDR( ContinueDebugEvent, _T_D8E77E49_ContinueDebugEvent, _LEN_D8E77E49 );
+		MX_PROCADDR( DebugSetProcessKillOnExit, _T_7757830E_DebugSetProcessKillOnExit, _LEN_7757830E );
+		MX_PROCADDR( WaitForDebugEvent, _T_96AB83A1_WaitForDebugEvent, _LEN_96AB83A1 );
+		MX_PROCADDR( WaitForDebugEventEx, _T_51A49928_WaitForDebugEventEx, _LEN_51A49928 );
+		MX_PROCADDR( GetThreadContext, _T_649EB9C1_GetThreadContext, _LEN_649EB9C1 );
+		MX_PROCADDR( SetThreadContext, _T_5688CBD8_SetThreadContext, _LEN_5688CBD8 );
+		MX_PROCADDR( Wow64GetThreadContext, _T_49CB90FE_Wow64GetThreadContext, _LEN_49CB90FE );
+		MX_PROCADDR( Wow64SetThreadContext, _T_7BDDE2E7_Wow64SetThreadContext, _LEN_7BDDE2E7 );
+		MX_PROCADDR( Wow64GetThreadSelectorEntry, _T_742F716C_Wow64GetThreadSelectorEntry, _LEN_742F716C );
 
 #ifdef _DEBUG
 		pfTemp = ::GetProcAddress( hDll, "EnumProcesses" );

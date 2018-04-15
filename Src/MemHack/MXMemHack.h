@@ -19,6 +19,12 @@ namespace mx {
 		// Open a process by its ID.
 		virtual bool						OpenProcess( DWORD _dwId );
 
+		// Opened a process.
+		virtual void						OpenedProcess();
+
+		// Failed to open a process.
+		virtual void						FailedToOpenProcess( DWORD _dwId );
+
 		// Detach from the current process.
 		virtual void						Detach();
 
@@ -27,6 +33,11 @@ namespace mx {
 
 		// Sets the options.
 		void								SetOptions( const MX_OPTIONS &_oOptions );
+
+		// Gets the process.
+		const CProcess &					Process() const { return m_pProcess; }
+
+		
 
 
 	protected :

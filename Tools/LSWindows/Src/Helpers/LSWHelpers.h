@@ -3,6 +3,7 @@
 #include "../LSWWin.h"
 #include "../Layout/LSWWidgetLayout.h"
 #include <cstring>
+#include <string>
 
 namespace lsw {
 
@@ -271,6 +272,38 @@ namespace lsw {
 			}
 			return nullptr;
 		}
+
+		// Converts a message to a string.
+		static std::string &				WindowsMessageToString( WORD _wMessage, std::string &_sRet, bool _bOnlyFirst = true );
+
+		// Converts MEMORY_BASIC_INFORMATION32 to MEMORY_BASIC_INFORMATION64.
+		static MEMORY_BASIC_INFORMATION64	MemoryBasicInformation32To64( const MEMORY_BASIC_INFORMATION32 &_mbiInfo ) {
+			MEMORY_BASIC_INFORMATION64 mbiRet;
+			mbiRet.AllocationBase = _mbiInfo.AllocationBase;
+			mbiRet.AllocationProtect = _mbiInfo.AllocationProtect;
+			mbiRet.BaseAddress = _mbiInfo.BaseAddress;
+			mbiRet.Protect = _mbiInfo.Protect;
+			mbiRet.RegionSize = _mbiInfo.RegionSize;
+			mbiRet.State = _mbiInfo.State;
+			mbiRet.Type = _mbiInfo.Type;
+			return mbiRet;
+		}
+
+
+	protected :
+		// == Types.
+#ifdef _DEBUG
+		struct LSW_MESSAGE {
+			uint32_t						uiId;
+			const char *					pcName;
+		};
+#endif	// #ifdef _DEBUG
+
+
+		// == Members.
+#ifdef _DEBUG
+		static LSW_MESSAGE					m_mMessages[];
+#endif	// #ifdef _DEBUG
 	};
 
 }	// namespace lsw

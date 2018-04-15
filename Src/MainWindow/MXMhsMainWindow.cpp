@@ -4,6 +4,8 @@
 #include "../Layouts/MXMainWindowLayout.h"
 #include "../Layouts/MXOpenProcessLayout.h"
 #include "../Layouts/MXOptionsLayout.h"
+#include "../Layouts/MXNewDataTypeSearchLayout.h"
+//#include "../Search/MXNewDataTypeSearchWindow.h"
 #include "../System/MXSystem.h"
 #include "../Utilities/MXUtilities.h"
 #include <Base/LSWBase.h>
@@ -117,9 +119,10 @@ namespace mx {
 		if ( psbStatus ) {
 			const CStatusBar::LSW_STATUS_PART spParts[] = {
 				// Last status message.
-				{ 450, FALSE },
+				//{ 450, TRUE },
 				// Current process ID.
-				{ 450 + 48, FALSE },
+				//{ 450 + 48, TRUE },
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 48, TRUE },
 
 				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height(), TRUE },
 			};
@@ -175,7 +178,7 @@ namespace mx {
 			::SendMessageW( Wnd(), WM_SIZE, SIZE_RESTORED, MAKELPARAM( rRect.Width(), rRect.Height() ) );
 		}
 
-		//ShowFoundAddress();
+		ShowFoundAddress();
 		ShowExpEval();
 
 		return LSW_H_CONTINUE;
@@ -185,22 +188,11 @@ namespace mx {
 	CWidget::LSW_HANDLED CMhsMainWindow::Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc ) {
 		switch ( _Id ) {
 			case CMainWindowLayout::MX_MWMI_OPENPROCESS : {
-				MX_OPTIONS oOptions = m_pmhMemHack->Options();
-				DWORD dwId = COpenProcessLayout::CreateOpenProcessDialog( this, &oOptions );
-				if ( dwId != static_cast<DWORD>(-1) ) {
-					if ( m_pmhMemHack->OpenProcess( dwId ) ) {
-						CStatusBar * psbStatus = StatusBar();
-						if ( psbStatus ) {
-							std::wstring sTemp = _DEC_WS_9FAAF98F_Opened_process_;
-							CUtilities::ToHex( dwId, sTemp, 4 );
-							sTemp.append( L" (" );
-							CUtilities::ToUnsigned( dwId, sTemp );
-							sTemp.append( L")." );
-							psbStatus->SetTextW( 0, 0, sTemp.c_str() );
-						}
-						
-					}
-				}
+				OpenProcess();
+				break;
+			}
+			case CMainWindowLayout::MX_MWMI_DATATYPE : {
+				ShowNewDataTypeSearch();
 				break;
 			}
 			case CMainWindowLayout::MX_MWMI_OPTIONS : {
@@ -314,6 +306,49 @@ namespace mx {
 			m_eeExpEval->SetVisible( TRUE );
 		}
 		UpdateWindowChecks();
+	}
+
+	// Shows a new search.
+	uint32_t CMhsMainWindow::ShowNewDataTypeSearch() {
+		if ( !m_pmhMemHack->Process().ProcIsOpened() ) {
+			if ( !CBase::PromptYesNo( Wnd(), _DEC_WS_77E541C6_You_must_open_a_process_before_you_can_perform_a_search__r_nOpen_a_process_now_.c_str(),
+				_DEC_WS_8C0AA5EB_No_Process_Opened.c_str() ) ) { return 0; }
+			if ( !OpenProcess() ) { return 0; }
+		}
+		// Should not be possible, but just one last check.
+		if ( !m_pmhMemHack->Process().ProcIsOpened() ) { return 0; }
+
+		MX_OPTIONS oOptions = m_pmhMemHack->Options();
+		CNewDataTypeSearchLayout::CreateNewDataTypeSearchDialog( this, &oOptions );
+		// TODO: Come up with a more graceful way to do this.
+		// A few options can be modified directly in the dialog.  This is a simple way to add
+		//	those to a list to check if options need to be updated
+		struct {
+			const BOOL *			pbSrc;
+			BOOL *					pbCopy;
+		} aStruct[] = {
+			{ &m_pmhMemHack->Options().bAligned, &oOptions.bAligned },
+			{ &m_pmhMemHack->Options().bSameAsOriginal, &oOptions.bSameAsOriginal },
+		};
+		for ( size_t I = MX_ELEMENTS( aStruct ); I--; ) {
+			if ( (*aStruct[I].pbSrc) != (*aStruct[I].pbCopy) ) {
+				m_pmhMemHack->SetOptions( oOptions );
+				break;
+			}
+		}
+		return 0;
+	}
+
+	// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
+	bool CMhsMainWindow::OpenProcess() {
+		MX_OPTIONS oOptions = m_pmhMemHack->Options();
+		DWORD dwId = COpenProcessLayout::CreateOpenProcessDialog( this, &oOptions );
+		if ( dwId != static_cast<DWORD>(-1) ) {
+			if ( m_pmhMemHack->OpenProcess( dwId ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// Informs that a child was removed from a child control (IE this control's child had a child control removed from it).

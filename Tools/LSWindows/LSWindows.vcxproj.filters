@@ -263,6 +263,9 @@
     <ClInclude Include="Src\Docking\LSWDockTarget.h">
       <Filter>Header Files\Docking</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Helpers\LSWMessages.h">
+      <Filter>Header Files\Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -342,6 +345,9 @@
     </ClCompile>
     <ClCompile Include="Src\Docking\LSWDockTarget.cpp">
       <Filter>Source Files\Docking</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Helpers\LSWHelpers.cpp">
+      <Filter>Source Files\Helpers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

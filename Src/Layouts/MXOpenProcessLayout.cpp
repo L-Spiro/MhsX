@@ -84,7 +84,7 @@ namespace mx {
 			4,										// iLeft
 			182,									// iTop
 			43,										// dwWidth
-			12,										// dwHeight
+			MX_DEF_BUTTON_HEIGHT,					// dwHeight
 			MX_DEFBUTTONSTYLE,						// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_D736D92D_OK ),																	// pwcText
@@ -107,7 +107,7 @@ namespace mx {
 			224,									// iLeft
 			182,									// iTop
 			43,										// dwWidth
-			12,										// dwHeight
+			MX_DEF_BUTTON_HEIGHT,					// dwHeight
 			MX_BUTTONSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_51BAC044_Cancel ),																// pwcText
@@ -199,7 +199,7 @@ namespace mx {
 			9,										// iLeft
 			150,									// iTop
 			253,									// dwWidth
-			9,										// dwHeight
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
 			MX_CHECKSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_B563255B_Open_in_Restricted_Mode__Improves_Undetectability_ ),					// pwcText
@@ -222,7 +222,7 @@ namespace mx {
 			9,										// iLeft
 			161,									// iTop
 			253,									// dwWidth
-			12,										// dwHeight
+			MX_DEF_BUTTON_HEIGHT,					// dwHeight
 			MX_BUTTONSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_AF3C9967_Refresh ),																// pwcText

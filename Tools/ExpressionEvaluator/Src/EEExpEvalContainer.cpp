@@ -502,6 +502,14 @@ namespace ee {
 		_rRes.u.MEMBER = rLeft.u.MEMBER OP rRight.u.MEMBER;		\
 		return true;											\
 	}
+#define EE_OP_NO_ZERO( MEMBER, CASE, OP )						\
+	case CASE : {												\
+		if ( rRight.u.MEMBER ) {								\
+			_rRes.u.MEMBER = rLeft.u.MEMBER OP rRight.u.MEMBER;	\
+		}														\
+		else { _rRes.u.MEMBER = 0; }							\
+		return true;											\
+	}
 #define EE_OP_BOOL( MEMBER, CASE, OP )							\
 	case CASE : {												\
 		_rRes.ncType = EE_NC_UNSIGNED;							\
@@ -512,8 +520,8 @@ namespace ee {
 	case CASE : {															\
 		switch ( ndNode.v.ui32Op ) {										\
 			EE_OP( MEMBER, '*', * )											\
-			EE_OP( MEMBER, '/', / )											\
-			EE_OP( MEMBER, '%', % )											\
+			EE_OP_NO_ZERO( MEMBER, '/', / )									\
+			EE_OP_NO_ZERO( MEMBER, '%', % )									\
 			EE_OP( MEMBER, '+', + )											\
 			EE_OP( MEMBER, '-', - )											\
 			EE_OP( MEMBER, CExpEvalParser::token::EE_RIGHT_OP, >> )			\
@@ -575,6 +583,7 @@ namespace ee {
 
 #undef EE_INT_CHECK
 #undef EE_OP_BOOL
+#undef EE_OP_NO_ZERO
 #undef EE_OP
 				return false;
 			}

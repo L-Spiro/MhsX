@@ -90,6 +90,12 @@ namespace mx {
 		// Shows the Expression Evaluator dockable.
 		void								ShowExpEval();
 
+		// Shows a new search.
+		uint32_t							ShowNewDataTypeSearch();
+
+		// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
+		bool								OpenProcess();
+
 
 	protected :
 		// == Members.

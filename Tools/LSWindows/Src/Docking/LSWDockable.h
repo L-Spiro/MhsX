@@ -81,10 +81,22 @@ namespace lsw {
 		bool								HasDockTarget( CDockTarget * _pdtTarget );
 
 		// The system color of the right side of the caption when docked.
-		INT									GetRightCaptionColorActive() const { return m_bUseGradient ? COLOR_GRADIENTACTIVECAPTION : COLOR_ACTIVECAPTION; }
+		INT									GetRightCaptionColorActive() const {
+#ifndef COLOR_GRADIENTACTIVECAPTION
+			return COLOR_ACTIVECAPTION;
+#else
+			return m_bUseGradient ? COLOR_GRADIENTACTIVECAPTION : COLOR_ACTIVECAPTION;
+#endif	// #ifndef COLOR_GRADIENTACTIVECAPTION
+		}
 
 		// The system color of the right side of the caption when docked and inactive.
-		INT									GetRightCaptionColorInactive() const { return m_bUseGradient ? COLOR_GRADIENTINACTIVECAPTION : COLOR_INACTIVECAPTION; }
+		INT									GetRightCaptionColorInactive() const {
+#ifndef COLOR_GRADIENTINACTIVECAPTION
+			return COLOR_INACTIVECAPTION;
+#else
+			return m_bUseGradient ? COLOR_GRADIENTINACTIVECAPTION : COLOR_INACTIVECAPTION;
+#endif	// #ifndef COLOR_GRADIENTINACTIVECAPTION
+		}
 
 		// The system color of the right side of the caption when docked.
 		INT									GetRightCaptionColor() const { return m_bShowAsActive ? GetRightCaptionColorActive() : GetRightCaptionColorInactive(); }

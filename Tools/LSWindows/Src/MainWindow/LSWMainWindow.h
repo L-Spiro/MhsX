@@ -15,7 +15,7 @@ namespace lsw {
 		// == Functions.
 
 	private :
-		typedef CWidget						Parent;
+		//typedef CWidget						Parent;
 	};
 		
 }	// namespace lsw

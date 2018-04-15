@@ -169,6 +169,7 @@
     <ClCompile Include="Src\Layouts\MXFoundAddressLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXLayoutManager.cpp" />
     <ClCompile Include="Src\Layouts\MXMainWindowLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXNewDataTypeSearchLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXOpenProcessLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXOptionsLayout.cpp" />
     <ClCompile Include="Src\main.cpp" />
@@ -185,6 +186,9 @@
     <ClCompile Include="Src\Options\MXOptionsWindow.cpp" />
     <ClCompile Include="Src\PE\MXPeObject.cpp" />
     <ClCompile Include="Src\PE\MXPeWorks.cpp" />
+    <ClCompile Include="Src\Search\MXAddressChunkList.cpp" />
+    <ClCompile Include="Src\Search\MXNewDataTypeSearchWindow.cpp" />
+    <ClCompile Include="Src\Search\MXSearcher.cpp" />
     <ClCompile Include="Src\Strings\MXStringDecoder.cpp" />
     <ClCompile Include="Src\System\MXSystem.cpp" />
     <ClCompile Include="Src\Utilities\MXUtilities.cpp" />
@@ -198,6 +202,7 @@
     <ClInclude Include="Src\Layouts\MXLayoutMacros.h" />
     <ClInclude Include="Src\Layouts\MXLayoutManager.h" />
     <ClInclude Include="Src\Layouts\MXMainWindowLayout.h" />
+    <ClInclude Include="Src\Layouts\MXNewDataTypeSearchLayout.h" />
     <ClInclude Include="Src\Layouts\MXOpenProcessLayout.h" />
     <ClInclude Include="Src\Layouts\MXOptionsLayout.h" />
     <ClInclude Include="Src\MainWindow\MXMhsMainWindow.h" />
@@ -213,6 +218,9 @@
     <ClInclude Include="Src\Options\MXOptionsWindow.h" />
     <ClInclude Include="Src\PE\MXPeObject.h" />
     <ClInclude Include="Src\PE\MXPeStructs.h" />
+    <ClInclude Include="Src\Search\MXAddressChunkList.h" />
+    <ClInclude Include="Src\Search\MXNewDataTypeSearchWindow.h" />
+    <ClInclude Include="Src\Search\MXSearcher.h" />
     <ClInclude Include="Src\Utilities\MXUtilities.h" />
     <ClInclude Include="Src\PE\MXPeWorks.h" />
     <ClInclude Include="Src\System\MXSystem.h" />

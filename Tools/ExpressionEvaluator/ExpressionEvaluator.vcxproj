@@ -147,6 +147,7 @@
     <ClCompile Include="Src\EEFloatX.cpp" />
     <ClCompile Include="Src\Gen\EEExpEvalLexBase.cpp" />
     <ClCompile Include="Src\Gen\EEExpEvalParser.cpp" />
+    <ClCompile Include="Src\Unicode\EEUnicode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\BigInt\EEBigInt.h" />
@@ -160,6 +161,8 @@
     <ClInclude Include="Src\Gen\EEExpEvalParserLocation.h" />
     <ClInclude Include="Src\Gen\EEExpEvalParserPosition.h" />
     <ClInclude Include="Src\Gen\EEExpEvalParserStack.h" />
+    <ClInclude Include="Src\Unicode\EEUnicode.h" />
+    <ClInclude Include="Src\Unicode\EEUnicodeTable.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

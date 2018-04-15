@@ -5,6 +5,7 @@
 
 #include <Rebar/LSWRebar.h>
 #include <ToolBar/LSWToolBar.h>
+#include <Unicode/EEUnicode.h>	// TEMP.
 
 namespace mx {
 
@@ -98,11 +99,19 @@ namespace mx {
 			} aTitles[] = {
 				{ _T_E981B5D1_Standard, _LEN_E981B5D1 },
 				{ _T_DCCBE329_Extended, _LEN_DCCBE329 },
-				//{ _T_D27BE76B__9_223_372_036_854_775_808_to_9_223_372_036_854_775_807, _LEN_D27BE76B },
+				{ _T_D27BE76B__9_223_372_036_854_775_808_to_9_223_372_036_854_775_807, _LEN_D27BE76B },
 			};
-			for ( INT I = 0; I < MX_ELEMENTS( aTitles ); I++ ) {
+			for ( size_t I = 0; I < MX_ELEMENTS( aTitles ); I++ ) {
 				pcbOutputFormat->AddString( mx::CStringDecoder::DecodeToWString( aTitles[I]._pcText, aTitles[I].sLen ).c_str() );
 			}
+
+
+			for ( size_t I = 0; I < ee::CUnicode::TotalNames(); I++ ) {
+				std::wstring sTemp;
+				ee::CUnicode::GetName( sTemp, I );
+				pcbOutputFormat->AddString( sTemp.c_str() );
+			}
+
 
 			/*LSW_RECT rTemp = pcbOutputFormat->GetItemRect( 0 );
 			rTemp = pcbOutputFormat->GetItemRect( 1 );
@@ -137,6 +146,10 @@ namespace mx {
 			::SendMessageW( Wnd(), WM_SIZE, SIZE_RESTORED, MAKELPARAM( rRect.Width(), rRect.Height() ) );
 		}
 
+
+		/*if ( pcbOutputFormat ) {
+			pcbOutputFormat->AutoSetMinListWidth();
+		}*/
 		return LSW_H_CONTINUE;
 	}
 

@@ -8,7 +8,7 @@
 #define MX_MAKE_WCHAR2( STRING )			L ## STRING
 #define MX_MAKE_WCHAR( STRING )				MX_MAKE_WCHAR2( STRING )
 #else
-#define MX_MAKE_WCHAR( STRING )				reinterpret_cast<const WCHAR *>( STRING )
+#define MX_MAKE_WCHAR( STRING )				reinterpret_cast<const WCHAR *>(STRING)
 #endif	// #if 0
 
 namespace mx {

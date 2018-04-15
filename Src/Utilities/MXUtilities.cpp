@@ -38,24 +38,22 @@ namespace mx {
 
 	// Convert a single byte to hex.  _pcString must be at least 3 characters long.
 	VOID CUtilities::ByteToHex( BYTE _bIn, CHAR * _pcString, BOOL _bLower ) {
-		static const CHAR * pszHex = { "0123456789ABCDEF" };
-		static const CHAR * pszHexLower = { "0123456789abcdef" };
 		BYTE bTemp = (_bIn >> 4);
-		_pcString[0] = _bLower ? pszHexLower[bTemp] : pszHex[bTemp];
+#define MX_HEX_TO_CHAR( VAL )		((VAL) < 10 ? ('0' + (VAL)) : ((_bLower ? 'a' : 'A') + ((VAL) - 10)))
+		_pcString[0] = MX_HEX_TO_CHAR( bTemp );
 		bTemp = (_bIn & 0xF);
-		_pcString[1] = _bLower ? pszHexLower[bTemp] : pszHex[bTemp];
+		_pcString[1] = MX_HEX_TO_CHAR( bTemp );
 		_pcString[2] = '\0';
 	}
 
 	// Convert a single byte to hex.
 	VOID CUtilities::ByteToHex( BYTE _bIn, std::string &_sString, BOOL _bLower ) {
-		static const CHAR * pszHex = { "0123456789ABCDEF" };
-		static const CHAR * pszHexLower = { "0123456789abcdef" };
 		BYTE bTemp = (_bIn >> 4);
 		
-		_sString.push_back( _bLower ? pszHexLower[bTemp] : pszHex[bTemp] );
+		_sString.push_back( MX_HEX_TO_CHAR( bTemp ) );
 		bTemp = (_bIn & 0xF);
-		_sString.push_back( _bLower ? pszHexLower[bTemp] : pszHex[bTemp] );
+		_sString.push_back( MX_HEX_TO_CHAR( bTemp ) );
+#undef MX_HEX_TO_CHAR
 	}
 	
 	// Convert a byte array to a hex string.  _pcString must be twice as long as the input, plus 1 character for the NULL.
@@ -249,7 +247,7 @@ namespace mx {
 				return _pcRet;
 			}
 		}
-		std::strcpy( _pcRet, "Unknown" );
+		_DEC_629B9E5B_Unknown( _pcRet );
 		return _pcRet;
 	}
 
@@ -315,7 +313,7 @@ namespace mx {
 				return _pcRet;
 			}
 		}
-		std::strcpy( _pcRet, "Unknown" );
+		_DEC_629B9E5B_Unknown( _pcRet );
 		return _pcRet;
 	}
 
@@ -349,7 +347,7 @@ namespace mx {
 				return _pcRet;
 			}
 		}
-		std::strcpy( _pcRet, "Unknown" );
+		_DEC_629B9E5B_Unknown( _pcRet );
 		return _pcRet;
 	}
 
@@ -507,11 +505,11 @@ namespace mx {
 				return _sString.c_str();
 			}
 		}
-		_sString.append( "Unknown" );
+		_sString.append( _DEC_S_629B9E5B_Unknown );
 		return _sString.c_str();
 	}
 
-	// Creates a IMAGE_REL_BASED_* string.
+	// Creates an IMAGE_REL_BASED_* string.
 	const CHAR * CUtilities::PeRelocBaseToString( uint32_t _uiVal, std::string &_sString ) {
 		struct {
 			uint32_t ui32Type;
@@ -543,7 +541,63 @@ namespace mx {
 				return _sString.c_str();
 			}
 		}
-		_sString += "Unknown";
+		_sString += _DEC_S_629B9E5B_Unknown;
+		return _sString.c_str();
+	}
+
+	// Creates a PROCESS_ string.
+	const CHAR * CUtilities::OpenProcessFlagToString( uint32_t _uiVal, std::string &_sString, BOOL _bShort ) {
+		_bShort = (_bShort == -1) ? Options.bShortenEnumNames : _bShort;
+		uint32_t  uiCopy = _uiVal;
+		struct {
+			uint32_t ui32Type;
+			const CHAR * pcName;
+			uint32_t ui32StrLen;
+		}
+		static const aTable[] = {
+			{ PROCESS_TERMINATE, _T_2857F6FF_TERMINATE, _LEN_2857F6FF }, // 0
+			{ PROCESS_CREATE_THREAD, _T_E250C94C_CREATE_THREAD, _LEN_E250C94C }, // 1
+			{ PROCESS_SET_SESSIONID, _T_9D9335AB_SET_SESSIONID, _LEN_9D9335AB }, // 2
+			{ PROCESS_VM_OPERATION, _T_461A1C82_VM_OPERATION, _LEN_461A1C82 }, // 3
+			{ PROCESS_VM_READ, _T_5B6A3194_VM_READ, _LEN_5B6A3194 }, // 4
+			{ PROCESS_VM_WRITE, _T_6272C441_VM_WRITE, _LEN_6272C441 }, // 5
+			{ PROCESS_DUP_HANDLE, _T_1C1FE7F1_DUP_HANDLE, _LEN_1C1FE7F1 }, // 6
+			{ PROCESS_CREATE_PROCESS, _T_B67B97FA_CREATE_PROCESS, _LEN_B67B97FA }, // 7
+			{ PROCESS_SET_QUOTA, _T_BB83E852_SET_QUOTA, _LEN_BB83E852 }, // 8
+			{ PROCESS_SET_INFORMATION, _T_C50CB72D_SET_INFORMATION, _LEN_C50CB72D }, // 9
+			{ PROCESS_QUERY_INFORMATION, _T_864ADAA0_QUERY_INFORMATION, _LEN_864ADAA0 }, // 10
+			{ PROCESS_SUSPEND_RESUME, _T_9A5DB186_SUSPEND_RESUME, _LEN_9A5DB186 }, // 11
+			{ PROCESS_QUERY_LIMITED_INFORMATION, _T_0F01B77A_QUERY_LIMITED_INFORMATION, _LEN_0F01B77A }, // 12
+			{ PROCESS_SET_LIMITED_INFORMATION, _T_EB0CC1BC_SET_LIMITED_INFORMATION, _LEN_EB0CC1BC }, // 13
+		};
+		bool bAdded = false;
+		for ( size_t I = 0; I < sizeof( aTable ) / sizeof( aTable[0] ) && _uiVal; ++I ) {
+			if ( (aTable[I].ui32Type & _uiVal) == aTable[I].ui32Type ) {
+				if ( bAdded ) {
+					_sString.push_back( '|' );
+				}
+				CHAR szBuffer[_T_MAX_LEN];
+				if ( !_bShort ) {
+					CStringDecoder::Decode( _T_CD613405_PROCESS_, _LEN_CD613405, szBuffer );
+					_sString += szBuffer;
+				}
+				CStringDecoder::Decode( aTable[I].pcName, aTable[I].ui32StrLen, szBuffer );
+				_sString += szBuffer;
+				bAdded = true;
+				_uiVal &= ~aTable[I].ui32Type;
+			}
+		}
+		if ( _uiVal ) {
+			if ( bAdded ) {
+				_sString.push_back( '|' );
+			}
+			ToHex( _uiVal, _sString, 8 );
+		}
+		if ( bAdded ) {
+			_sString.push_back( ' ' );
+		}
+		ToHex( uiCopy, _sString, 8 );
+		//_sString += _DEC_S_629B9E5B_Unknown;
 		return _sString.c_str();
 	}
 
@@ -847,6 +901,17 @@ namespace mx {
 		return _sString.c_str();
 	}
 
+	// Gets the range of a data type as a string.
+	const WCHAR * CUtilities::DataTypeRange( CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString ) {
+		for ( size_t I = 0; I < MX_ELEMENTS( DataTypeInfo ); ++I ) {
+			if ( DataTypeInfo[I].dtType == _dtType ) {
+				_sString.append( mx::CStringDecoder::DecodeToWString( DataTypeInfo[I].pcRange, DataTypeInfo[I].sRangeLen ) );
+				break;
+			}
+		}
+		return _sString.c_str();
+	}
+
 	// Prints the size of the given data type as a string.
 	const CHAR * CUtilities::DataTypeSize( CUtilities::MX_DATA_TYPES _dtType, std::string &_sString ) {
 		DWORD dwSize = DataTypeSize( _dtType );
@@ -856,6 +921,19 @@ namespace mx {
 		else {
 			ToUnsigned( dwSize, _sString );
 			_sString.append( dwSize == 1 ? _DEC_S_BB679D6B__byte : _DEC_S_C1D51046__bytes );
+		}
+		return _sString.c_str();
+	}
+
+	// Prints the size of the given data type as a string.
+	const WCHAR * CUtilities::DataTypeSize( CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString ) {
+		DWORD dwSize = DataTypeSize( _dtType );
+		if ( !dwSize ) {
+			_sString.append( _DEC_WS_5F837256__undefined_ );
+		}
+		else {
+			ToUnsigned( dwSize, _sString );
+			_sString.append( dwSize == 1 ? _DEC_WS_BB679D6B__byte : _DEC_WS_C1D51046__bytes );
 		}
 		return _sString.c_str();
 	}
@@ -892,6 +970,92 @@ namespace mx {
 				break;
 			}
 		}
+		return _sString.c_str();
+	}
+
+	// Prints a data type given the options.
+	const WCHAR * CUtilities::PrintDataType( std::wstring &_sString, CUtilities::MX_DATA_TYPES _dtType, DWORD _dwOptions ) {
+		if ( _dwOptions == static_cast<DWORD>(-1) ) {
+			_dwOptions = Options.dwDataTypeOptions;
+		}
+
+		for ( size_t I = 0; I < MX_ELEMENTS( DataTypeInfo ); ++I ) {
+			if ( DataTypeInfo[I].dtType == _dtType ) {
+				_sString.append( (_dwOptions & MX_DTO_CODENAMES) ?
+					mx::CStringDecoder::DecodeToWString( DataTypeInfo[I].pcCodeName, DataTypeInfo[I].sCodeNameLen ) :
+					mx::CStringDecoder::DecodeToWString( DataTypeInfo[I].pcBasicName, DataTypeInfo[I].sBasicNameLen ) );
+
+				if ( _dwOptions & (MX_DTO_SHOWRANGES | MX_DTO_SHOWSIZES) ) {
+					_sString.append( L" (" );
+
+					if ( _dwOptions & MX_DTO_SHOWSIZES ) {
+						DataTypeSize( _dtType, _sString );
+
+						if ( _dwOptions & MX_DTO_SHOWRANGES ) {
+							_sString.append( L", " );
+						}
+					}
+
+					if ( _dwOptions & MX_DTO_SHOWRANGES ) {
+						_sString.append( mx::CStringDecoder::DecodeToWString( DataTypeInfo[I].pcRange, DataTypeInfo[I].sRangeLen ) );
+					}
+
+					_sString.push_back( L')' );
+				}
+				break;
+			}
+		}
+		return _sString.c_str();
+	}
+
+	// MX_SEARCH_TYPES value to a string.
+	const WCHAR * CUtilities::SearchTypeToString( CUtilities::MX_SEARCH_TYPES _stType, std::wstring &_sString ) {
+		static const struct {
+			const char *				pcName;
+			size_t						sLen;
+			uint32_t					ui32Id;
+		} aData[] = {
+			{ _T_LEN_2CB9A1E0_Data_Type_Search,	MX_ST_DATATYPE_SEARCH },
+			{ _T_LEN_A26A67DC_Pointer_Search,	MX_ST_POINTER_SEARCH },
+			{ _T_LEN_9468D604_String_Search,	MX_ST_STRING_SEARCH },
+			{ _T_LEN_408D6284_Expression_Search,MX_ST_EXP_SEARCH },
+			{ _T_LEN_62CB7D7B_Group_Search,		MX_ST_GROUP_SEARCH },
+		};
+
+		for ( size_t I = MX_ELEMENTS( aData ); I--; ) {
+			if ( aData[I].ui32Id == _stType ) {
+				_sString += mx::CStringDecoder::DecodeToWString( aData[I].pcName, aData[I].sLen );
+				return _sString.c_str();
+			}
+		}
+
+		_sString += _DEC_WS_629B9E5B_Unknown;
+		return _sString.c_str();
+	}
+
+	// MX_EVAL_TYPES value to a string.
+	const WCHAR * CUtilities::EvaluationTypeToString( CUtilities::MX_EVAL_TYPES _etType, std::wstring &_sString ) {
+		static const struct {
+			const char *				pcName;
+			size_t						sLen;
+			uint32_t					ui32Id;
+		} aData[] = {
+			{ _T_LEN_396582B1_Exact_Value,	MX_ET_EXACT },
+			{ _T_LEN_82405865_Not_Equal_To,	MX_ET_NOT_EQUAL_TO },
+			{ _T_LEN_474E42C3_Greater_Than,	MX_ET_GREATER_THAN },
+			{ _T_LEN_C8A1ADFC_Lower_Than,	MX_ET_LESS_THAN },
+			{ _T_LEN_5246754D_Range,		MX_ET_RANGE },
+			{ _T_LEN_629B9E5B_Unknown,		MX_ET_UNKNOWN },
+		};
+
+		for ( size_t I = MX_ELEMENTS( aData ); I--; ) {
+			if ( aData[I].ui32Id == _etType ) {
+				_sString += mx::CStringDecoder::DecodeToWString( aData[I].pcName, aData[I].sLen );
+				return _sString.c_str();
+			}
+		}
+
+		_sString += _DEC_WS_629B9E5B_Unknown;
 		return _sString.c_str();
 	}
 

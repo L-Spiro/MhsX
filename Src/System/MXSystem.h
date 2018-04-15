@@ -11,13 +11,21 @@
 
 // == Macros.
 #ifndef MX_COUNT_OF
-#define MX_COUNT_OF(x)					((sizeof( x ) / sizeof( 0[x] )) / (static_cast<size_t>(!(sizeof( x ) % sizeof(0[x])))))
+#define MX_COUNT_OF(x)					((sizeof( x ) / sizeof( 0[x] )) / (static_cast<size_t>(!(sizeof( x ) % sizeof( 0[x] )))))
 #define MX_ELEMENTS( x )				MX_COUNT_OF( x )
 #endif	// #ifndef MX_COUNT_OF
+
+#define MX_CHECK_FLAGS_EQ( L, R )		(((L) & (R)) == (L))
+
+#define MX_PTR2UINT( X )				static_cast<uint64_t>(reinterpret_cast<uintptr_t>(X))
 
 // == Types.
 typedef BOOL (WINAPI * LPFN_READPROCESSMEMORY)( HANDLE, LPCVOID, LPVOID, SIZE_T, SIZE_T * );
 typedef BOOL (WINAPI * LPFN_WRITEPROCESSMEMORY)( HANDLE, LPVOID, LPCVOID, SIZE_T, SIZE_T * );
+typedef BOOL (WINAPI * LPFN_VIRTUALPROTECTEX)( HANDLE, LPVOID, SIZE_T, DWORD, PDWORD );
+typedef LPVOID (WINAPI * LPFN_VIRTUALALLOCEX)( HANDLE, LPVOID, SIZE_T, DWORD, DWORD );
+typedef BOOL (WINAPI * LPFN_VIRTUALFREEEX)( HANDLE, LPVOID, SIZE_T, DWORD );
+typedef SIZE_T (WINAPI * LPFN_VIRTUALQUERYEX)( HANDLE, LPCVOID, PMEMORY_BASIC_INFORMATION, SIZE_T );
 typedef BOOL (WINAPI * LPFN_ENUMPROCESSES)( DWORD *, DWORD, DWORD * );
 typedef HANDLE (WINAPI * LPFN_OPENPROCESS)( DWORD, BOOL, DWORD );
 typedef HANDLE (WINAPI * LPFN_OPENTHREAD)( DWORD, BOOL, DWORD );
@@ -36,6 +44,20 @@ typedef BOOL (WINAPI * LPFN_LOOKUPPRIVILEGEVALUEW)( LPCWSTR, LPCWSTR, PLUID );
 typedef BOOL (WINAPI * LPFN_ADJUSTTOKENPRIVILEGES)( HANDLE, BOOL, PTOKEN_PRIVILEGES, DWORD, PTOKEN_PRIVILEGES, PDWORD );
 typedef BOOL (WINAPI * LPFN_GETEXITCODEPROCESS)( HANDLE, LPDWORD );
 typedef BOOL (WINAPI * LPFN_GETEXITCODETHREAD)( HANDLE, LPDWORD );
+typedef BOOL (WINAPI * LPFN_ISDEBUGGERPRESENT)();
+typedef BOOL (WINAPI * LPFN_CHECKREMOTEDEBUGGERPRESENT)( HANDLE, PBOOL );
+typedef BOOL (WINAPI * LPFN_DEBUGACTIVEPROCESS)( DWORD );
+typedef BOOL (WINAPI * LPFN_DEBUGACTIVEPROCESSSTOP)( DWORD );
+typedef BOOL (WINAPI * LPFN_CONTINUEDEBUGEVENT)( DWORD, DWORD, DWORD );
+typedef BOOL (WINAPI * LPFN_DEBUGSETPROCESSKILLONEXIT)( BOOL );
+typedef BOOL (WINAPI * LPFN_WAITFORDEBUGEVENT)( LPDEBUG_EVENT, DWORD );
+typedef BOOL (WINAPI * LPFN_WAITFORDEBUGEVENTEX)( LPDEBUG_EVENT, DWORD );
+typedef BOOL (WINAPI * LPFN_GETTHREADCONTEXT)( HANDLE, LPCONTEXT );
+typedef BOOL (WINAPI * LPFN_SETTHREADCONTEXT)( HANDLE, const CONTEXT * );
+typedef BOOL (WINAPI * LPFN_WOW64GETTHREADCONTEXT)( HANDLE, PWOW64_CONTEXT );
+typedef BOOL (WINAPI * LPFN_WOW64SETTHREADCONTEXT)( HANDLE, const WOW64_CONTEXT * );
+typedef BOOL (WINAPI * LPFN_WOW64GETTHREADSELECTORENTRY)( HANDLE, DWORD, PWOW64_LDT_ENTRY );
+
 
 namespace mx {
 
@@ -130,6 +152,18 @@ namespace mx {
 		// WriteProcessMemory().
 		static BOOL WINAPI				WriteProcessMemory( HANDLE _hProcess, LPVOID _lpBaseAddress, LPCVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesWritten );
 
+		// VirtualProtectEx().
+		static BOOL WINAPI				VirtualProtectEx( HANDLE _hProcess, LPVOID _lpAddress, SIZE_T _dwSize, DWORD _flNewProtect, PDWORD _lpflOldProtect );
+
+		// VirtualAllocEx();
+		static LPVOID WINAPI			VirtualAllocEx( HANDLE _hProcess, LPVOID _lpAddress, SIZE_T _dwSize, DWORD _flAllocationType, DWORD _flProtect );
+
+		// VirtualFreeEx().
+		static BOOL WINAPI				VirtualFreeEx( HANDLE _hProcess, LPVOID _lpAddress, SIZE_T _dwSize, DWORD _dwFreeType );
+
+		// VirtualQueryEx();
+		static SIZE_T WINAPI			VirtualQueryEx( HANDLE _hProcess, LPCVOID _lpAddress, PMEMORY_BASIC_INFORMATION _lpBuffer, SIZE_T _dwLength );
+
 		// EnumProcesses().
 		static BOOL WINAPI				EnumProcesses( DWORD * _pdwProcessIds, DWORD _dwCb, DWORD * _pdwBytesReturned );
 
@@ -200,6 +234,49 @@ namespace mx {
 		// Tests the flags that can be used to open a given process.
 		static DWORD					TestOpenProcess( DWORD _dwId );
 
+		// IsDebuggerPresent().
+		static BOOL WINAPI				IsDebuggerPresent();
+
+		// CheckRemoteDebuggerPresent().
+		static BOOL WINAPI				CheckRemoteDebuggerPresent( HANDLE _hProcess, PBOOL _pbDebuggerPresent );
+
+		// DebugActiveProcess().
+		static BOOL WINAPI				DebugActiveProcess( DWORD _dwProcessId );
+
+		// DebugActiveProcessStop().
+		static BOOL WINAPI				DebugActiveProcessStop( DWORD _dwProcessId );
+
+		// ContinueDebugEvent().
+		static BOOL WINAPI				ContinueDebugEvent( DWORD _dwProcessId, DWORD _dwThreadId, DWORD _dwContinueStatus );
+
+		// DebugSetProcessKillOnExit().
+		static BOOL WINAPI				DebugSetProcessKillOnExit( BOOL _KillOnExit );
+
+		// WaitForDebugEvent().
+		static BOOL WINAPI				WaitForDebugEvent( LPDEBUG_EVENT _lpDebugEvent, DWORD _dwMilliseconds );
+
+		// GetThreadContext().
+		static BOOL WINAPI				GetThreadContext( HANDLE _hThread, LPCONTEXT _lpContext );
+
+		// SetThreadContext().
+		static BOOL WINAPI				SetThreadContext( HANDLE _hThread, const CONTEXT * _lpContext );
+
+		// Wow64GetThreadContext().
+		static BOOL WINAPI				Wow64GetThreadContext( HANDLE _hThread, PWOW64_CONTEXT _lpContext );
+
+		// Wow64SetThreadContext().
+		static BOOL WINAPI				Wow64SetThreadContext( HANDLE _hThread, const WOW64_CONTEXT * _lpContext );
+
+		// Wow64GetThreadSelectorEntry().
+		static BOOL WINAPI				Wow64GetThreadSelectorEntry( HANDLE _hThread, DWORD _dwSelector, PWOW64_LDT_ENTRY _lpSelectorEntry );
+
+		// Determines if the given address is out of the native range of this process.
+		static bool						AddressIsInNativeMemoryRange( uint64_t _uiAddr ) {
+			uint64_t ui64MissingBits = 0;
+			ui64MissingBits ^= ~static_cast<uint64_t>(static_cast<uintptr_t>(-1));
+			return (ui64MissingBits & _uiAddr) == 0;
+		}
+
 
 	protected :
 		// == Members.
@@ -209,11 +286,23 @@ namespace mx {
 		// System information.
 		static SYSTEM_INFO				m_siSystemInfo;
 
-		// ReadProcessMemory.
+		// ReadProcessMemory().
 		static LPFN_READPROCESSMEMORY	m_pfReadProcessMemory;
 
-		// WriteProcessMemory.
+		// WriteProcessMemory().
 		static LPFN_WRITEPROCESSMEMORY	m_pfWriteProcessMemory;
+
+		// VirtualProtectEx().
+		static LPFN_VIRTUALPROTECTEX	m_pfVirtualProtectEx;
+		
+		// VirtualAllocEx().
+		static LPFN_VIRTUALALLOCEX		m_pfVirtualAllocEx;
+
+		// VirtualFreeEx().
+		static LPFN_VIRTUALFREEEX		m_pfVirtualFreeEx;
+
+		// VirtualQueryEx().
+		static LPFN_VIRTUALQUERYEX		m_pfVirtualQueryEx;
 
 		// EnumProcesses().
 		static LPFN_ENUMPROCESSES		m_pfEnumProcesses;
@@ -272,6 +361,51 @@ namespace mx {
 
 		// GetExitCodeThread().
 		static LPFN_GETEXITCODETHREAD	m_pfGetExitCodeThread;
+
+		// IsDebuggerPresent().
+		static LPFN_ISDEBUGGERPRESENT	m_pfIsDebuggerPresent;
+
+		// CheckRemoteDebuggerPresent().
+		static LPFN_CHECKREMOTEDEBUGGERPRESENT
+										m_pfCheckRemoteDebuggerPresent;
+
+		// DebugActiveProcess().
+		static LPFN_DEBUGACTIVEPROCESS	m_pfDebugActiveProcess;
+
+		// DebugActiveProcessStop().
+		static LPFN_DEBUGACTIVEPROCESSSTOP
+										m_pfDebugActiveProcessStop;
+
+		// ContinueDebugEvent().
+		static LPFN_CONTINUEDEBUGEVENT	m_pfContinueDebugEvent;
+
+		// DebugSetProcessKillOnExit().
+		static LPFN_DEBUGSETPROCESSKILLONEXIT
+										m_pfDebugSetProcessKillOnExit;
+
+		// WaitForDebugEvent().
+		static LPFN_WAITFORDEBUGEVENT	m_pfWaitForDebugEvent;
+
+		// WaitForDebugEventEx().
+		static LPFN_WAITFORDEBUGEVENTEX	m_pfWaitForDebugEventEx;
+
+		// GetThreadContext().
+		static LPFN_GETTHREADCONTEXT	m_pfGetThreadContext;
+
+		// SetThreadContext().
+		static LPFN_SETTHREADCONTEXT	m_pfSetThreadContext;
+
+		// Wow64GetThreadContext().
+		static LPFN_WOW64GETTHREADCONTEXT
+										m_pfWow64GetThreadContext;
+
+		// Wow64SetThreadContext().
+		static LPFN_WOW64SETTHREADCONTEXT
+										m_pfWow64SetThreadContext;
+
+		// Wow64GetThreadSelectorEntry().
+		static LPFN_WOW64GETTHREADSELECTORENTRY
+										m_pfWow64GetThreadSelectorEntry;
 
 
 		// == Functions.

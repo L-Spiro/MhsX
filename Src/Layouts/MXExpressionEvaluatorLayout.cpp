@@ -112,7 +112,7 @@ namespace mx {
 		{
 			LSW_LT_COMBOBOX,						// ltType
 			MX_EE_EXP_COMBO,						// wId
-			nullptr,								// lpwcClass
+			WC_COMBOBOXW,							// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_EXP_TEXT_W + 2,						// iLeft
@@ -182,7 +182,7 @@ namespace mx {
 		{
 			LSW_LT_COMBOBOX,						// ltType
 			MX_EE_EXP_OUTPUTCOMBO,					// wId
-			nullptr,								// lpwcClass
+			WC_COMBOBOXW,							// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_OUTPU_TEXT_W + 2,						// iLeft
@@ -190,7 +190,7 @@ namespace mx {
 			MX_EXP_W - (MX_OUTPU_TEXT_W + 2),			// dwWidth
 			MX_DEF_COMBO_HEIGHT_PXL,					// dwHeight
 			MX_COMBOSTYLE_LIST,						// dwStyle
-			0,										// dwStyleEx
+			MX_COMBOSTYLEEX_LIST,					// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_EE_MAINWINDOW,						// dwParentId

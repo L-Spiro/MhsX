@@ -38,6 +38,8 @@ namespace mx {
 		BOOL							bUseEpsilon;					// TRUE
 		BOOL							bSmartEpsilon;					// TRUE
 		DOUBLE							dEpsilon;						// FLT_EPSILON (1.19209290E-07F)
+		BOOL							bAligned;						// TRUE
+		BOOL							bSameAsOriginal;				// TRUE
 	};
 
 }	// namespace mx

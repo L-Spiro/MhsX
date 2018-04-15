@@ -22,6 +22,8 @@
 #include <sstream>
 //#include <QtWidgets/QApplication>
 
+#include <Unicode/EEUnicode.h>
+
 
 
 uint32_t NextUtf8Char( const uint8_t * _putf8Char, uint32_t _ui32Len, uint32_t * _pui32Size ) {
@@ -373,6 +375,11 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 		dFMax--;
 	}
 
+
+/*	ee::CUnicode::MakeNickNameTable();
+	std::string sUnicode;
+	ee::CUnicode::GetName( sUnicode, 2 );*/
+
 	
 	ee::CFloatX fFloat;
 	const uint16_t uiExpBits = 5;
@@ -407,8 +414,19 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 
 
 	//generate_table();
-	ee::CBigInt biInt = 90;
-	biInt = ee::CBigInt::MakeBigInt( 90 );
+	ee::CBigInt biInt = 16;
+	for ( int H = 0; H < 2; ++H ) {
+		ee::CBigInt::Multiply( biInt, 0xFF90301F );
+	}
+	ee::CBigInt::ShiftRight( biInt, 136 );
+	std::string sTemp = biInt.ToTring( 10 );
+	// 294141651099334622224 (FF209113EDEBA3C10h)
+	// 147070825549667311112 (7F904889F6F5D1E08h)
+	// 73535412774833655556 (3FC82444FB7AE8F04h)
+	// 36767706387416827778 (1FE412227DBD74782h)
+	// 18383853193708413889 (FF209113EDEBA3C1h)
+	// 0x00000000001ff074 {0x78a00000, 0x00000005, 0xcccccccc, 0xcccccccc, 0xcccccccc, 0xcccccccc, 0xcccccccc, ...}
+	// 23498588160 (578A00000h)
 	
 	uint32_t ui320 = '\x9';
 	uint32_t ui321 = '\x90';

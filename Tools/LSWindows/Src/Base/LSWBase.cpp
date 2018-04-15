@@ -153,10 +153,17 @@ namespace lsw {
 	}
 
 	// Prints the current error (from ::GetLastError()).
-	VOID CBase::PrintError( LPCWSTR _pwcText ) {
+	VOID CBase::PrintError( LPCWSTR _pwcText, DWORD _dwError ) {
+		std::wstring swText;
+		AppendError( _pwcText, swText, _dwError );
+		::MessageBoxW( NULL, swText.c_str(), L"Error", MB_OK );
+	}
+
+	// Appends error text to a string.
+	std::wstring CBase::AppendError( LPCWSTR _pwcText, std::wstring &_wsRet, DWORD _dwError ) {
+		DWORD dwError = (_dwError == UINT_MAX) ? ::GetLastError() : _dwError;
 		LPVOID lpMsgBuf;
 		LPVOID lpDisplayBuf;
-		DWORD dwError = ::GetLastError(); 
 
 		::FormatMessageW(
 			FORMAT_MESSAGE_ALLOCATE_BUFFER | 
@@ -168,18 +175,21 @@ namespace lsw {
 			reinterpret_cast<LPWSTR>(&lpMsgBuf),
 			0, NULL );
 
-		// Display the error message and exit the process
+		LPCWSTR lpwsSrc = _pwcText ? _pwcText : L"";
 
 		lpDisplayBuf = static_cast<LPVOID>(::LocalAlloc( LMEM_ZEROINIT,
-			(::lstrlenW( static_cast<LPCWSTR>(lpMsgBuf) ) + ::lstrlenW( static_cast<LPCWSTR>(_pwcText) ) + 40) * sizeof(WCHAR) ));
+			(::lstrlenW( static_cast<LPCWSTR>(lpMsgBuf) ) + ::lstrlenW( static_cast<LPCWSTR>(_pwcText) ) + 40) * sizeof( WCHAR ) ));
 		::StringCchPrintfW( static_cast<LPWSTR>(lpDisplayBuf),
 			::LocalSize( lpDisplayBuf ) / sizeof( WCHAR ),
-			L"%s failed with error %d: %s",
-			_pwcText, dwError, lpMsgBuf );
-		::MessageBoxW( NULL, static_cast<LPCWSTR>(lpDisplayBuf), L"Error", MB_OK );
+			(_pwcText && _pwcText[0] != L'\0') ?
+				L"%s (error %d): %s" :
+				L"%sError %d: %s",
+			lpwsSrc, dwError, lpMsgBuf );
+		_wsRet += static_cast<LPCWSTR>(lpDisplayBuf);
 
-		::LocalFree( lpMsgBuf );
 		::LocalFree( lpDisplayBuf );
+		::LocalFree( lpMsgBuf );
+		return _wsRet;
 	}
 
 	// Displays a message box with the given title and message.
@@ -190,6 +200,26 @@ namespace lsw {
 	// Displays a message box with the given title and message.
 	VOID CBase::MessageBoxError( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle ) {
 		::MessageBoxA( _hWnd, _pcMsg, _pcTitle, MB_ICONERROR );
+	}
+
+	// Prompts with MB_ICONINFORMATION and IDOK.
+	bool CBase::PromptOk( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle ) {
+		return ::MessageBoxA( _hWnd, _pcMsg, _pcTitle, MB_ICONINFORMATION | MB_OKCANCEL ) == IDOK;
+	}
+
+	// Prompts with MB_ICONINFORMATION and IDOK.
+	bool CBase::PromptOk( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle ) {
+		return ::MessageBoxW( _hWnd, _pwcMsg, _pwcTitle, MB_ICONINFORMATION | MB_OKCANCEL ) == IDOK;
+	}
+
+	// Prompts with MB_ICONQUESTION and IDYES.
+	bool CBase::PromptYesNo( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle ) {
+		return ::MessageBoxA( _hWnd, _pcMsg, _pcTitle, MB_ICONQUESTION | MB_YESNO ) == IDYES;
+	}
+
+	// Prompts with MB_ICONQUESTION and IDYES.
+	bool CBase::PromptYesNo( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle ) {
+		return ::MessageBoxW( _hWnd, _pwcMsg, _pwcTitle, MB_ICONQUESTION | MB_YESNO ) == IDYES;
 	}
 
 #ifdef _DEBUG

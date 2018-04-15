@@ -92,6 +92,12 @@
     <Filter Include="Source Files\Options">
       <UniqueIdentifier>{fac3538d-daee-4c18-b936-53d7719f8727}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Search">
+      <UniqueIdentifier>{0bef4e8f-5e4d-442d-b8aa-fa66776aebe8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Search">
+      <UniqueIdentifier>{96f8660b-76c5-4dab-bfdc-455bec0c6788}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Strings\MXStringDecoder.cpp">
@@ -177,6 +183,18 @@
     </ClCompile>
     <ClCompile Include="Src\MemHack\MXWindowMemHack.cpp">
       <Filter>Source Files\MemHack</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Search\MXAddressChunkList.cpp">
+      <Filter>Source Files\Search</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Search\MXSearcher.cpp">
+      <Filter>Source Files\Search</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXNewDataTypeSearchLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Search\MXNewDataTypeSearchWindow.cpp">
+      <Filter>Source Files\Search</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -274,6 +292,18 @@
     </ClInclude>
     <ClInclude Include="Src\MemHack\MXWindowMemHack.h">
       <Filter>Header Files\MemHack</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Search\MXAddressChunkList.h">
+      <Filter>Header Files\Search</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Search\MXSearcher.h">
+      <Filter>Header Files\Search</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXNewDataTypeSearchLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Search\MXNewDataTypeSearchWindow.h">
+      <Filter>Header Files\Search</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

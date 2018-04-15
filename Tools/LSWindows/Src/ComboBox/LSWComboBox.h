@@ -73,9 +73,17 @@ namespace lsw {
 		// Auto-sets the minimum width of the list box after adding all the strings.
 		LONG								AutoSetMinListWidth();
 
+		// Sets the selection based on index.
+		INT									SetCurSel( INT _iIndex );
+
+		// Sets the selection based on item data.
+		INT									SetCurSelByItemData( LPARAM _pData );
+
+		// Selects a range of text.  Implemented by CEdit and CComboBox.
+		virtual VOID						SetSel( INT _iStart, INT _iEnd ) const;
+
 
 	private :
-		typedef CWidget						Parent;
 	};
 
 }	// namespace lsw

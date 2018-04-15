@@ -19,7 +19,7 @@
 #define EE_BI_THROW
 #endif	// EE_BI_THROW
 
-// Basically a rip of corecrt_internal_big_integer.h from Microsoft, modified for my needs ( minimum of 80-bit floats to strings ).
+// Basically a rip of corecrt_internal_big_integer.h from Microsoft, modified for my needs (minimum of 80-bit floats to strings).
 
 #ifndef _DEBUG
 #pragma optimize( "gt", on ) // Optimize for maximum speed
@@ -47,59 +47,136 @@ namespace ee {
 
 	class CBigInt {
 	public :
-		__forceinline CBigInt() EE_BI_THROW
-			: m_ui32Used( 0 ) {
+		__forceinline CBigInt() EE_BI_THROW :
+			m_ui32Used( 0 ) {
 #ifdef _DEBUG
 			std::memset( m_ui32Data, 0xCC, sizeof( m_ui32Data ) );
 #endif
 		}
-		__forceinline CBigInt( CBigInt const &_biOther ) EE_BI_THROW
-			: m_ui32Used( _biOther.m_ui32Used ) {
+		__forceinline CBigInt( CBigInt const &_biOther ) EE_BI_THROW :
+			m_ui32Used( _biOther.m_ui32Used ) {
 			::memcpy_s( m_ui32Data, sizeof( m_ui32Data ), _biOther.m_ui32Data, _biOther.m_ui32Used * sizeof( uint32_t ) );
 		}
 		__forceinline CBigInt( uint64_t _uiSrc ) EE_BI_THROW {
 			(*this) = MakeBigInt( _uiSrc );
 		}
+		__forceinline CBigInt( const uint32_t * _uiSrc, uint32_t _uiLen ) EE_BI_THROW :
+			m_ui32Used( _uiLen ) {
+#ifdef _DEBUG
+			std::memset( m_ui32Data, 0xCC, sizeof( m_ui32Data ) );
+#endif
+			::memcpy_s( m_ui32Data, sizeof( m_ui32Data ), _uiSrc, _uiLen * sizeof( uint32_t ) );
+		}
 
 
 		// == Types.
 		struct EE_UNPACK_INDEX {
-			uint16_t ui64Offset;	// The offset of this power's initial byte in the array.
-			uint8_t ui8Zeroes;		// The number of omitted leading zero elements.
-			uint8_t ui8Size;		// The number of elements present for this power.
+			uint16_t ui64Offset;						// The offset of this power's initial byte in the array.
+			uint8_t ui8Zeroes;							// The number of omitted leading zero elements.
+			uint8_t ui8Size;							// The number of elements present for this power.
 		};
 
-		__forceinline CBigInt & operator = ( CBigInt const &_biOther ) EE_BI_THROW {
+		__forceinline CBigInt &							operator = ( CBigInt const &_biOther ) EE_BI_THROW {
 			m_ui32Used = _biOther.m_ui32Used;
 			::memcpy_s( m_ui32Data, sizeof( m_ui32Data ), _biOther.m_ui32Data, _biOther.m_ui32Used * sizeof( uint32_t ) );
 			return (*this);
 		}
 
-		__forceinline CBigInt & operator = ( uint64_t _uiOther ) EE_BI_THROW {
+		__forceinline CBigInt &							operator = ( uint64_t _uiOther ) EE_BI_THROW {
 			(*this) = MakeBigInt( _uiOther );
 			return (*this);
 		}
 
+		__forceinline bool								LessThan( const CBigInt &_biOther ) const {
+			if ( (*this).m_ui32Used > _biOther.m_ui32Used ) { return false; }
+			if ( (*this).m_ui32Used < _biOther.m_ui32Used ) { return true; }
+
+			uint32_t I = (*this).m_ui32Used - 1;
+			for ( ; I != static_cast<uint32_t>(-1) && (*this).m_ui32Data[I] == _biOther.m_ui32Data[I]; --I ) {
+				// No-op
+			}
+
+			if ( I == static_cast<uint32_t>(-1) ) { return false; }
+			// Original code:
+			/*
+			if (lhs._data[i] <= rhs._data[i])
+				return true;
+
+			return false;
+			*/
+			// #1: Can be simplified to just a return statement.
+			// #2: <= operator here is an inaccuracy (not a bug).  My version fixes this.
+
+			return (*this).m_ui32Data[I] < _biOther.m_ui32Data[I];
+		}
+
+		__forceinline bool								GreaterThan( const CBigInt &_biOther ) const {
+			if ( (*this).m_ui32Used < _biOther.m_ui32Used ) { return false; }
+			if ( (*this).m_ui32Used > _biOther.m_ui32Used ) { return true; }
+			uint32_t I = (*this).m_ui32Used - 1;
+			for ( ; I != static_cast<uint32_t>(-1) && (*this).m_ui32Data[I] == _biOther.m_ui32Data[I]; --I ) {
+				// No-op
+			}
+
+			if ( I == static_cast<uint32_t>(-1) ) { return false; }
+
+			return (*this).m_ui32Data[I] > _biOther.m_ui32Data[I];
+		}
 
 		enum : uint32_t {
 			EE_MAX_BITS  =
-				16445 +			// 16445 bits required to represent 2^16445
-				2552 +			// ceil( log2( 10^768 ) )
-				32,				// shift space
+				16445 +									// 16445 bits required to represent 2^16445
+				2552 +									// ceil( log2( 10^768 ) )
+				32,										// shift space
             
 			EE_ELEM_BITS  = sizeof( uint32_t ) * CHAR_BIT,
 
 			EE_ELEM_COUNT = (EE_MAX_BITS + EE_ELEM_BITS - 1) / EE_ELEM_BITS
 		};
 
-		uint32_t m_ui32Used;                // The number of elements currently in use
-		uint32_t m_ui32Data[EE_ELEM_COUNT]; // The number, stored in little endian form
+		uint32_t										m_ui32Used;                // The number of elements currently in use
+		uint32_t										m_ui32Data[EE_ELEM_COUNT]; // The number, stored in little endian form
 
 
 
+		std::string										ToTring( int _iBase = 10 ) {
+			_iBase = _iBase <= 0 ? 10 : _iBase;
+			std::string sRes;
+
+			// Get the actual number of digits.  There is always at least one.
+			size_t ui64Len = 0;
+			CBigInt ui64ValueCopy = (*this);
+			CBigInt biMul = _iBase;
+
+			while ( true ) {
+				if ( this->LessThan( biMul ) ) { break; }
+				Multiply( biMul, _iBase );
+				++ui64Len;
+			}
+
+			sRes.resize( ui64Len + 1 );
+			biMul = 1;
+			//biMul = _iBase;
+			CBigInt biQuo;
+			for ( size_t I = 0; I < sRes.size(); ++I ) {
+				ui64ValueCopy = (*this);
+				uint64_t uiQuo = Divide( ui64ValueCopy, biMul )/* % _iBase*/;
+				uint64_t uiMod = ui64ValueCopy.m_ui32Data[0] % _iBase;
+				//uint64_t uiQuo = 1;
+				//ui64ValueCopy = (*this);
+				//DivideFull( ui64ValueCopy, biMul, biQuo );
+				char cTemp = static_cast<char>(uiQuo >= 10 ? ((uiQuo - 10) + 'A') : (uiQuo + '0'));
+				sRes[sRes.size()-1-I] = cTemp;
+				//ui64ValueCopy = biQuo;
+				
+				Multiply( biMul, _iBase );
+			}
+
+			return sRes;
+		}
 
 
-		static __forceinline ee::CBigInt __cdecl MakeBigInt( uint64_t const _uiValue ) EE_BI_THROW {
+		static __forceinline ee::CBigInt __cdecl		MakeBigInt( uint64_t const _uiValue ) EE_BI_THROW {
 			ee::CBigInt biX{};
 			biX.m_ui32Data[0] = _uiValue & 0xFFFFFFFF;
 			biX.m_ui32Data[1] = _uiValue >> 32;
@@ -107,7 +184,7 @@ namespace ee {
 			return biX;
 		}
 
-		static __forceinline ee::CBigInt __cdecl MakeBigIntPo2( uint32_t const power ) EE_BI_THROW {
+		static __forceinline ee::CBigInt __cdecl		MakeBigIntPo2( uint32_t const power ) EE_BI_THROW {
 			uint32_t const uiOne = 1;
 
 			ee::CBigInt biX{};
@@ -122,17 +199,17 @@ namespace ee {
 			return biX;
 		}
 
-		static __forceinline bool __cdecl IsZero( ee::CBigInt const &_uiValue ) EE_BI_THROW {
+		static __forceinline bool __cdecl				IsZero( ee::CBigInt const &_uiValue ) EE_BI_THROW {
 			return _uiValue.m_ui32Used == 0;
 		}
 
-		static __forceinline uint32_t __cdecl BitScanRev( uint32_t const _uiValue ) EE_BI_THROW {
+		static __forceinline uint32_t __cdecl			BitScanRev( uint32_t const _uiValue ) EE_BI_THROW {
 			unsigned long ulIndex = 0;
 			if ( _BitScanReverse( &ulIndex, _uiValue ) ) { return ulIndex + 1; }
 			return 0;
 		}
 
-		static __forceinline uint32_t __cdecl BitScanRev( uint64_t const _uiValue ) EE_BI_THROW {
+		static __forceinline uint32_t __cdecl			BitScanRev( uint64_t const _uiValue ) EE_BI_THROW {
 			if ( _uiValue > UINT32_MAX ) {
 				return BitScanRev( reinterpret_cast<uint32_t const*>( &_uiValue )[1] ) + 32;
 			}
@@ -141,7 +218,7 @@ namespace ee {
 			}
 		}
 
-		static __forceinline uint32_t __cdecl BitScanRev( ee::CBigInt const &_biX ) EE_BI_THROW {
+		static __forceinline uint32_t __cdecl			BitScanRev( ee::CBigInt const &_biX ) EE_BI_THROW {
 			if ( _biX.m_ui32Used == 0 ) { return 0; }
 
 			return (_biX.m_ui32Used - 1) * ee::CBigInt::EE_ELEM_BITS + BitScanRev( _biX.m_ui32Data[_biX.m_ui32Used-1] );
@@ -150,7 +227,7 @@ namespace ee {
 		// Shifts the high precision integer _biX by _uiN bits to the left.  Returns true if
 		// the left shift was successful; false if it overflowed.  When overflow occurs,
 		// the high precision integer is reset to zero.
-		static __forceinline bool __cdecl ShiftLeft( ee::CBigInt & _biX, uint32_t const _uiN ) EE_BI_THROW {
+		static __forceinline bool __cdecl				ShiftLeft( ee::CBigInt & _biX, uint32_t const _uiN ) EE_BI_THROW {
 			uint32_t const ui32UnitShift = _uiN / ee::CBigInt::EE_ELEM_BITS;
 			uint32_t const ui32BitShift  = _uiN % ee::CBigInt::EE_ELEM_BITS;
 
@@ -204,10 +281,60 @@ namespace ee {
 			return true;
 		}
 
+		static __forceinline bool __cdecl				ShiftRight( ee::CBigInt & _biX, uint32_t const _uiN ) EE_BI_THROW {
+			uint32_t const ui32UnitShift = _uiN / ee::CBigInt::EE_ELEM_BITS;
+			uint32_t const ui32BitShift  = _uiN % ee::CBigInt::EE_ELEM_BITS;
+
+			uint64_t const ui64One = 1;
+
+			uint32_t const ui32MsbBits = ui32BitShift;
+			uint32_t const ui32LsbBits = ee::CBigInt::EE_ELEM_BITS - ui32MsbBits;
+
+			uint32_t const ui32MsbMask = static_cast<uint32_t>((ui64One << (32 - ui32LsbBits)) - ui64One);
+			uint32_t const ui32LsbMask = ~ui32MsbMask;
+			
+			bool const bBitShiftsIntoNextUnit = ui32BitShift >= (BitScanRev( _biX.m_ui32Data[_biX.m_ui32Used-1] ));
+
+			bool const bUnitShiftWillOverflow = ui32UnitShift >= _biX.m_ui32Used;
+			/*bool const bBitShiftWillOverflow =
+				_biX.m_ui32Used + ui32UnitShift == ee::CBigInt::EE_ELEM_COUNT &&
+				bBitShiftsIntoNextUnit;*/
+
+			if ( bUnitShiftWillOverflow /*|| bBitShiftWillOverflow*/ ) {
+				_biX = ee::CBigInt{};
+				return true;
+			}
+
+			uint32_t const ui32MaxDstIndex = _biX.m_ui32Used - ui32UnitShift;
+
+			for ( uint32_t ui32DstIdx = 1;
+				 ui32DstIdx <= ui32MaxDstIndex;
+				 ++ui32DstIdx ) {
+				uint32_t const ui32UpperSrcIdx = ui32DstIdx + ui32UnitShift;
+				uint32_t const ui32LowerSrcIdx = ui32DstIdx + ui32UnitShift - 1;
+
+				uint32_t const ui32UpperSrc = ui32UpperSrcIdx < _biX.m_ui32Used ? _biX.m_ui32Data[ui32UpperSrcIdx] : 0;
+				uint32_t const ui32LowerSrc = ui32LowerSrcIdx < _biX.m_ui32Used ? _biX.m_ui32Data[ui32LowerSrcIdx] : 0;
+
+				uint32_t const ui32ShiftedUpperSrc = (ui32UpperSrc & ui32MsbMask) << ui32LsbBits;
+				uint32_t const ui32ShiftedLowerSrc = (ui32LowerSrc & ui32LsbMask) >> ui32MsbBits;
+
+				uint32_t const ui32CombinedShiftedSrc = ui32ShiftedUpperSrc | ui32ShiftedLowerSrc;
+
+				_biX.m_ui32Data[ui32DstIdx-1] = ui32CombinedShiftedSrc;
+			}
+
+			_biX.m_ui32Used = bBitShiftsIntoNextUnit
+				? ui32MaxDstIndex - 1
+				: ui32MaxDstIndex;
+
+			return true;
+		}
+
 		// Adds a 32-bit _uiValue to the high-precision integer _biX.  Returns true if the
 		// addition was successful; false if it overflowed.  When overflow occurs, the
 		// high precision integer is reset to zero.
-		static __forceinline bool __cdecl Add( ee::CBigInt& _biX, uint32_t const _uiValue ) EE_BI_THROW {
+		static __forceinline bool __cdecl				Add( ee::CBigInt& _biX, uint32_t _uiValue ) EE_BI_THROW {
 			if ( _uiValue == 0 ) {
 				return true;
 			}
@@ -233,7 +360,17 @@ namespace ee {
 			return true;
 		}
 
-		static __forceinline uint32_t __cdecl AddCarry( 
+		/*
+		// Too easy to create unexpected long loops.
+		static __forceinline bool __cdecl Add64( ee::CBigInt& _biX, uint64_t _uiValue ) {
+			while ( _uiValue ) {
+				uint32_t uiAddMe = static_cast<uint32_t>(_uiValue >= 0xFFFFFFFF ? 0xFFFFFFFF : _uiValue);
+				if ( !Add( _biX, uiAddMe ) ) { return false; }
+				_uiValue -= uiAddMe;
+			}
+			return true;
+		}*/
+		static __forceinline uint32_t __cdecl			AddCarry( 
 			uint32_t &_uiU1,
 			uint32_t const u2,
 			uint32_t const _uiCarry ) EE_BI_THROW {
@@ -242,7 +379,7 @@ namespace ee {
 			return static_cast<uint32_t>(ui64Uu >> 32);
 		}
 
-		static __forceinline uint32_t __cdecl AddMulCarry( 
+		static __forceinline uint32_t __cdecl			AddMulCarry( 
 			uint32_t &_uiUAdd,
 			uint32_t const _uiUMul1,
 			uint32_t const _uiUMul2,
@@ -252,7 +389,7 @@ namespace ee {
 			return  reinterpret_cast<uint32_t const *>(&ui64UuRes)[1];
 		}
 
-		static __forceinline uint32_t __cdecl MultiplyCore( 
+		static __forceinline uint32_t __cdecl			MultiplyCore( 
 			uint32_t * const _uiMultiplicand,
 			uint32_t const _uiMultiplicandCount,
 			uint32_t const _uiMultiplier ) EE_BI_THROW {
@@ -270,7 +407,7 @@ namespace ee {
 		// Multiplies the high precision multiplicand by a 32-bit multiplier.  Returns
 		// true if the multiplication was successful; false if it overflowed.  When
 		// overflow occurs, the multiplicand is reset to zero.
-		static __forceinline bool __cdecl Multiply( ee::CBigInt &_biMultiplicand, uint32_t const _uiMultiplier ) EE_BI_THROW {
+		static __forceinline bool __cdecl				Multiply( ee::CBigInt &_biMultiplicand, uint32_t const _uiMultiplier ) EE_BI_THROW {
 			if ( _uiMultiplier == 0 ) {
 				_biMultiplicand = ee::CBigInt{};
 				return true;
@@ -299,7 +436,7 @@ namespace ee {
 		// sources.  It multiplies the multiplicand by the multiplier and returns true
 		// if the multiplication was successful; false if it overflowed.  When overflow
 		// occurs, the multiplicand is reset to zero.
-		static __forceinline bool __cdecl Multiply( ee::CBigInt & _biMultiplicand, ee::CBigInt const &_biMultiplier ) EE_BI_THROW {
+		static __forceinline bool __cdecl				Multiply( ee::CBigInt & _biMultiplicand, ee::CBigInt const &_biMultiplier ) EE_BI_THROW {
 			if ( _biMultiplier.m_ui32Used <= 1 ) {
 				return Multiply( _biMultiplicand, _biMultiplier.m_ui32Data[0] );
 			}
@@ -365,7 +502,7 @@ namespace ee {
 		// Multiplies the high precision integer biX by 10^power.  Returns true if the
 		// multiplication was successful; false if it overflowed.  When overflow occurs,
 		// the high precision integer is reset to zero.
-		static __forceinline bool __cdecl MulByPo10( ee::CBigInt& biX, uint32_t const _uiPower ) EE_BI_THROW {
+		static __forceinline bool __cdecl				MulByPo10( ee::CBigInt& biX, uint32_t const _uiPower ) EE_BI_THROW {
 			// To improve performance, we use a table of precomputed powers of ten, from
 			// 10^10 through 10^380, in increments of ten.  In its unpacked form, as an
 			// array of ee::CBigInt objects, this table consists mostly of zero elements.
@@ -514,7 +651,7 @@ namespace ee {
 		// ten table found in MulByPo10().  This code is provided for
 		// future use if the table needs to be amended.  Do not remove this code.
 
-		static uint32_t CountLeadingZeroes( ee::CBigInt const &biX ) {
+		static uint32_t									CountLeadingZeroes( ee::CBigInt const &biX ) {
 			for ( uint32_t i = 0; i != biX.m_ui32Used; ++i ) {
 				if ( biX.m_ui32Data[i] != 0 ) { return i; }
 			}
@@ -522,7 +659,7 @@ namespace ee {
 			return 0;
 		}
 
-		static void GenTable() {
+		static void										GenTable() {
 			std::vector<uint32_t> vElements;
 			std::vector<ee::CBigInt::EE_UNPACK_INDEX> vIndices;
 
@@ -564,7 +701,7 @@ namespace ee {
 
 
 		// Computes the number of zeroes higher than the most significant set bit in '_ui32U'
-		static __forceinline uint32_t __cdecl CountSequentialHighZeroes( uint32_t const _ui32U ) EE_BI_THROW {
+		static __forceinline uint32_t __cdecl			CountSequentialHighZeroes( uint32_t const _ui32U ) EE_BI_THROW {
 			unsigned long ulRes;
 			return _BitScanReverse( &ulRes, _ui32U ) ? 31 - ulRes : 32;
 		}
@@ -577,7 +714,7 @@ namespace ee {
 		// for general 64-bit biX 64-bit multiplication, and [2] is inlineable, allowing the
 		// compile to elide the extreme overhead of calling the _allmul function.
 #ifdef _M_IX86
-		static __forceinline uint64_t __cdecl multiply_64_32( 
+		static __forceinline uint64_t __cdecl			multiply_64_32( 
 			uint64_t const _ui64Multiplicand,
 			uint32_t const _ui32Multiplier ) EE_BI_THROW {
 			__asm {
@@ -593,7 +730,7 @@ namespace ee {
 			}
 		}
 #else
-		static __forceinline uint64_t __cdecl multiply_64_32( 
+		static __forceinline uint64_t __cdecl			multiply_64_32( 
 			uint64_t const _ui64Multiplicand,
 			uint32_t const _ui32Multiplier ) EE_BI_THROW {
 			return _ui64Multiplicand * _ui32Multiplier;
@@ -602,10 +739,10 @@ namespace ee {
 
 		// This high precision integer division implementation was translated from the
 		// implementation of System.Numerics.BigIntegerBuilder.ModDivCore in the .NET
-		// Framework sources.  It computes both quotient and remainder:  the remainder
-		// is stored in the numerator argument, and the least significant 32 bits of the
+		// Framework sources.  It computes both quotient and remainder.
+		//	The remainder is stored in the numerator argument and the least significant 32 bits of the
 		// quotient are returned from the function.
-		static inline uint64_t __cdecl Divide( 
+		static inline uint64_t __cdecl					Divide( 
 			ee::CBigInt &_biNumerator,
 			ee::CBigInt const &_biDenominator ) EE_BI_THROW {
 			// If the numerator is zero, then both the quotient and remainder are zero:
@@ -784,11 +921,342 @@ namespace ee {
 
 			return ui64Quotient;
 		}
+
+
+		static inline void __cdecl						DivideFull( 
+			ee::CBigInt &_biNumerator,
+			ee::CBigInt const &_biDenominator,
+			ee::CBigInt &_biQuotient ) EE_BI_THROW {
+			// If the numerator is zero, then both the quotient and remainder are zero:
+			if ( _biNumerator.m_ui32Used == 0 ) {
+				_biQuotient = 0;
+				return;
+			}
+
+			// If the denominator is zero, then uh oh. We can't divide by zero:
+			if ( _biDenominator.m_ui32Used == 0 ) {
+				//_ASSERTE( ( "Division by zero", false ) );
+				_biQuotient = 0;
+				return;
+			}
+
+			uint32_t uiMaxNumerElemIdx = _biNumerator.m_ui32Used - 1;
+			uint32_t uiMaxDenomElemIdx = _biDenominator.m_ui32Used - 1;
+
+			// The numerator and denominator are both nonzero.  If the denominator is
+			// only one element wide, we can take the fast route.
+#if 0
+			if ( uiMaxDenomElemIdx == 0 ) {
+				uint32_t const uiSmallDenom = _biDenominator.m_ui32Data[0];
+
+				if ( uiSmallDenom == 1 ) {
+					_biQuotient = _biNumerator;
+					_biNumerator = ee::CBigInt{};
+					return;
+				}
+
+				if ( uiMaxNumerElemIdx == 0 ) {
+					uint32_t const uiSmallNumer = _biNumerator.m_ui32Data[0];
+
+					_biNumerator = ee::CBigInt{};
+					_biNumerator.m_ui32Data[0] = uiSmallNumer % uiSmallDenom;
+					_biNumerator.m_ui32Used = _biNumerator.m_ui32Data[0] > 0 ? 1 : 0;
+					_biQuotient = uiSmallNumer / uiSmallDenom;
+					return;
+				}
+
+				// We count down in the next loop, so the last assignment to quotient
+				// will be the correct one.
+				//uint64_t uiQuotient = 0;
+				_biQuotient = 0;
+
+				uint64_t ui64Uu = 0;
+				//ee::CBigInt biUu = 0;
+				for ( uint32_t Iv = uiMaxNumerElemIdx; Iv != static_cast<uint32_t>(-1); --Iv ) {
+					ui64Uu = (ui64Uu << 32) | _biNumerator.m_ui32Data[Iv];
+					//uiQuotient = (uiQuotient << 32) + static_cast<uint32_t>(ui64Uu / uiSmallDenom);
+					ShiftLeft( _biQuotient, 32 );
+					Add( _biQuotient, static_cast<uint32_t>(ui64Uu / uiSmallDenom) );
+					ui64Uu %= uiSmallDenom;
+				}
+
+				_biNumerator = ee::CBigInt{};
+				_biNumerator.m_ui32Data[1] = static_cast<uint32_t>(ui64Uu >> 32);
+				_biNumerator.m_ui32Data[0] = static_cast<uint32_t>(ui64Uu);
+				_biNumerator.m_ui32Used = (_biNumerator.m_ui32Data[1] > 0) ? 2 : 1;
+				//_biQuotient = uiQuotient;
+				return;
+			}
+#endif	// #if 0
+
+			if ( uiMaxDenomElemIdx > uiMaxNumerElemIdx ) {
+				_biQuotient = 0;
+				return;
+			}
+
+			uint32_t uiCuDen  = uiMaxDenomElemIdx + 1;
+			int32_t  iCuDiff = uiMaxNumerElemIdx - uiMaxDenomElemIdx;
+
+			// Determine whether the result will have iCuDiff or iCuDiff + 1 digits:
+			int32_t iCuQuo = iCuDiff;
+			for ( int32_t Iu = uiMaxNumerElemIdx; ; --Iu ) {
+				if ( Iu < iCuDiff ) {
+					++iCuQuo;
+					break;
+				}
+
+				if ( _biDenominator.m_ui32Data[Iu-iCuDiff] != _biNumerator.m_ui32Data[Iu] ) {
+					if ( _biDenominator.m_ui32Data[Iu-iCuDiff] < _biNumerator.m_ui32Data[Iu] ) {
+						++iCuQuo;
+					}
+
+					break;
+				}
+			}
+
+			if ( iCuQuo == 0 ) {
+				_biQuotient = 0;
+				return;
+			}
+
+			// Get the uint to use for the trial divisions.  We normalize so the
+			// high bit is set.
+			uint32_t uiUDen = _biDenominator.m_ui32Data[uiCuDen-1];
+			uint32_t uiUDenNext = _biDenominator.m_ui32Data[uiCuDen-2];
+
+			uint32_t uiCBitShiftLeft  = CountSequentialHighZeroes( uiUDen );
+			uint32_t uiCBitShiftRight = 32 - uiCBitShiftLeft;
+			if ( uiCBitShiftLeft > 0 ) {
+				uiUDen = (uiUDen << uiCBitShiftLeft) | (uiUDenNext >> uiCBitShiftRight);
+				uiUDenNext <<= uiCBitShiftLeft;
+
+				if ( uiCuDen > 2 ) {
+					uiUDenNext |= _biDenominator.m_ui32Data[uiCuDen-3] >> uiCBitShiftRight;
+				}
+			}
+
+			//uint64_t ui64Quotient{};
+			_biQuotient = 0;
+			for ( int32_t Iu = iCuQuo; --Iu >= 0; ) {
+				// Get the high (normalized) bits of the numerator.
+				uint32_t uiUNumHi = ( Iu + uiCuDen <= uiMaxNumerElemIdx )
+					? _biNumerator.m_ui32Data[Iu + uiCuDen]
+					: 0;
+
+				uint64_t ui64UuNum = _biNumerator.m_ui32Data[Iu+uiCuDen-1];
+				reinterpret_cast<uint32_t*>(&ui64UuNum)[1] = uiUNumHi;
+
+				uint32_t uiUNumNext = _biNumerator.m_ui32Data[Iu+uiCuDen-2];
+				if ( uiCBitShiftLeft > 0 ) {
+					ui64UuNum = (ui64UuNum << uiCBitShiftLeft) | (uiUNumNext >> uiCBitShiftRight);
+					uiUNumNext <<= uiCBitShiftLeft;
+
+					if ( Iu + uiCuDen >= 3 ) {
+						uiUNumNext |= _biNumerator.m_ui32Data[Iu+uiCuDen-3] >> uiCBitShiftRight;
+					}
+				}
+
+				// Divide to get the quotient digit:
+				uint64_t ui64UuQuo = ui64UuNum / uiUDen;
+				uint64_t ui64UuRem = static_cast<uint32_t>( ui64UuNum % uiUDen );
+
+				if ( ui64UuQuo > UINT32_MAX ) {
+					ui64UuRem += uiUDen * (ui64UuQuo - UINT32_MAX);
+					ui64UuQuo  = UINT32_MAX;
+				}
+
+				while ( ui64UuRem <= UINT32_MAX && ui64UuQuo * uiUDenNext > ((ui64UuRem << 32) | uiUNumNext) ) {
+					--ui64UuQuo;
+					ui64UuRem += uiUDen;
+				}
+
+				// Multiply and subtract.  Note that ui64UuQuo may be one too large.  If
+				// we have a borrow at the end, we'll add the denominator back on and 
+				// decrement ui64UuQuo.
+				if ( ui64UuQuo > 0 ) {
+					uint64_t ui64UuBorrow = 0;
+
+					for ( uint32_t Iu2 = 0; Iu2 < uiCuDen; ++Iu2 ) {
+						ui64UuBorrow += multiply_64_32( ui64UuQuo, _biDenominator.m_ui32Data[Iu2] );
+
+						uint32_t const uiUSub = static_cast<uint32_t>(ui64UuBorrow);
+						ui64UuBorrow >>= 32;
+						if ( _biNumerator.m_ui32Data[Iu+Iu2] < uiUSub ) {
+							++ui64UuBorrow;
+						}
+
+						_biNumerator.m_ui32Data[Iu+Iu2] -= uiUSub;
+					}
+
+					if ( uiUNumHi < ui64UuBorrow ) {
+						// Add, tracking carry:
+						uint32_t uiUCarry = 0;
+						for ( uint32_t Iu2 = 0; Iu2 < uiCuDen; ++Iu2 ) {
+							uint64_t const ui64Sum =
+								static_cast<uint64_t>(_biNumerator.m_ui32Data[Iu+Iu2]) +
+								static_cast<uint64_t>(_biDenominator.m_ui32Data[Iu2])    +
+								uiUCarry;
+
+							_biNumerator.m_ui32Data[Iu+Iu2] = static_cast<uint32_t>(ui64Sum);
+							uiUCarry = ui64Sum >> 32;
+						}
+
+						--ui64UuQuo;
+					}
+
+					uiMaxNumerElemIdx = Iu + uiCuDen - 1;
+				}
+
+				//ui64Quotient = (ui64Quotient << 32) + static_cast<uint32_t>(ui64UuQuo);
+				ShiftLeft( _biQuotient, 32 );
+				Add( _biQuotient, static_cast<uint32_t>(ui64UuQuo) );
+			}
+
+			// Trim the remainder:
+			for ( uint32_t I = uiMaxNumerElemIdx + 1; I < _biNumerator.m_ui32Used; ++I ) {
+				_biNumerator.m_ui32Data[I] = 0;
+			}
+
+			_biNumerator.m_ui32Used = uiMaxNumerElemIdx + 1;
+			while ( _biNumerator.m_ui32Used != 0 && _biNumerator.m_ui32Data[_biNumerator.m_ui32Used-1] == 0 ) {
+				--_biNumerator.m_ui32Used;
+			}
+
+			return;
+		}
+
+
+	protected :
+#if 0
+		static inline void __cdecl						DivideM( const ee::CBigInt &_liLeft,
+			const ee::CBigInt &_liRight,
+			ee::CBigInt &_liQuotient,
+			ee::CBigInt &_liRemainder ) {
+
+			ee::CBigInt liTemp0;
+			ee::CBigInt liTemp1;
+			//CLargeInteger<_uMaxDigits+1> liTemp1;
+			//pliResult = &liTemp0;
+			//pliRemainder = &liTemp1;
+
+			uint32_t ui32Mask = 0x80000000UL;
+			uint32_t ui32Value = _liRight.m_ui32Data[_liRight.m_ui32Used-1];
+			uint32_t ui32Shift = 0, ui32ResPos = 0;
+			while ( ui32Mask && (ui32Value & ui32Mask) == 0 ) {
+				++ui32Shift;
+				ui32Mask >>= 1;
+			}
+
+			for ( uint32_t I = _liLeft.m_ui32Used; I--; ) {
+				liTemp1.m_ui32Data[I] = _liLeft.m_ui32Data[I];
+			}
+			liTemp1.m_ui32Used = _liLeft.m_ui32Used + 1;
+
+			ShiftLeft( liTemp1, ui32Shift );
+			ee::CBigInt liNewRight = _liRight;
+			//ee::CBigInt liNewRight = _liRight << ui32Shift;
+			ShiftLeft( liNewRight, ui32Shift );
+
+			uint32_t ui32J = liTemp1.m_ui32Used - liNewRight.m_ui32Used;
+			uint32_t ui32Pos = liTemp1.m_ui32Used - 1;
+
+			uint32_t ui32FirstDivisorByte = liNewRight.m_ui32Data[liNewRight.m_ui32Used-1];
+			uint32_t ui32SecondDivisorByte = liNewRight.m_ui32Data[liNewRight.m_ui32Used-2];
+
+			uint32_t ui32DivisorLen = liNewRight.m_ui32Used + 1;
+			uint32_t * pui32DividendPart = new uint32_t[ui32DivisorLen];
+
+			for ( ; ui32J > 0; --ui32J ) {
+				uint64_t ui64Dividend = (static_cast<uint64_t>(liTemp1.m_ui32Data[ui32Pos]) << 32ULL) + liTemp1.m_ui32Data[ui32Pos-1];
+
+				uint64_t ui64Q = ui64Dividend / ui32FirstDivisorByte;
+				uint64_t ui64R = ui64Dividend % ui32FirstDivisorByte;
+
+				bool bDone = false;
+				while ( !bDone ) {
+					bDone = true;
+
+					if ( ui64Q == 0x100000000ULL ||
+						(ui64Q * ui32SecondDivisorByte) > ((ui64R << 32ULL) + liTemp1.m_ui32Data[ui32Pos-2]) ) {
+						--ui64Q;
+						ui64R += ui32FirstDivisorByte;
+						if ( ui64R < 0x100000000ULL ) {
+							bDone = false;
+						}
+					}
+				}
+
+				for ( uint32_t I = 0; I < ui32DivisorLen; ++I ) {
+					pui32DividendPart[I] = liTemp1.m_ui32Data[ui32Pos-I];
+				}
+
+				// Again on the heap instead of on the stack.
+				ee::CBigInt liTemp2;
+				//ee::CBigInt * pliK;
+				//if ( _uMaxDigits < 128 ) {
+					liTemp2 = ee::CBigInt( pui32DividendPart, ui32DivisorLen );
+					//pliK = &liTemp2;
+				/*}
+				else {
+					pliK = new ee::CBigInt( pui32DividendPart, ui32DivisorLen );
+				}*/
+			
+				ee::CBigInt liS = liNewRight;// * ee::CBigInt( static_cast<int64_t>(ui64Q) ) );
+				Multiply( liS, ee::CBigInt( static_cast<int64_t>(ui64Q) ) );
+
+				while ( liS > liTemp2 ) {
+					--ui64Q;
+					liS = liS - liNewRight;
+					//Subtr
+				}
+
+				ee::CBigInt liY = liTemp2 - liS;
+				for ( uint32_t I = 0; I < ui32DivisorLen; ++I ) {
+					liTemp1.m_ui32Data[ui32Pos-I] = liY.m_ui32Data[liNewRight.m_ui32Used-I];
+				}
+
+				/*if ( _uMaxDigits < 128 ) {
+				}
+				else {
+					delete pliK;
+				}*/
+
+				pliResult->m_ui32Data[ui32ResPos++] = static_cast<uint32_t>(ui64Q);
+				--ui32Pos;
+			}
+
+			_liQuotient.m_ui32Used = ui32ResPos;
+
+			uint32_t Y = 0;
+			for ( int32_t X = static_cast<int32_t>(_liQuotient.m_ui32Used) - 1; X >= 0; --X, ++Y ) {
+				_liQuotient.m_ui32Data[Y] = pliResult->m_ui32Data[X];
+			}
+
+			for ( ; Y < _uMaxDigits; ++Y ) {
+				_liQuotient.m_ui32Data[Y] = 0;
+			}
+
+			while ( _liQuotient.m_ui32Used > 1 && _liQuotient.m_ui32Data[_liQuotient.m_ui32Used-1] == 0 ) {
+				--_liQuotient.m_ui32Used;
+			}
+
+			_liQuotient.m_ui32Used = EE_MIN( _liQuotient.m_ui32Used, 1 );
+
+			_liRemainder.m_ui32Used = ShiftRight( liTemp1.m_ui32Data, liTemp1.m_ui32Used, ui32Shift );
+			//::memcpy_s( _liRemainder.m_ui32Data, liTemp1.m_ui32Data, sizeof( _liRemainder.m_ui32Data[0] ) * _liRemainder.m_ui32Used );
+			::memcpy_s( _liRemainder.m_ui32Data, sizeof( _liRemainder.m_ui32Data ), _biOther.m_ui32Data, _biOther.m_ui32Used * sizeof( uint32_t ) );
+			for ( Y = _liRemainder.m_ui32Used; Y < _uMaxDigits; ++Y ) {
+				_liRemainder.m_ui32Data[Y] = 0;
+			}
+
+			delete pui32DividendPart;
+		}
+#endif	// #if 0
 	};
 
 }	// namespace ee
 
-__forceinline bool __cdecl operator == ( ee::CBigInt const &_biLhs, ee::CBigInt const &_biRhs ) EE_BI_THROW {
+__forceinline bool __cdecl								operator == ( ee::CBigInt const &_biLhs, ee::CBigInt const &_biRhs ) EE_BI_THROW {
 	if ( _biLhs.m_ui32Used != _biRhs.m_ui32Used ) { return false; }
 
     for ( uint32_t i = 0; i != _biLhs.m_ui32Used; ++i ) {
@@ -798,51 +1266,22 @@ __forceinline bool __cdecl operator == ( ee::CBigInt const &_biLhs, ee::CBigInt 
     return true;
 }
 
-__forceinline bool __cdecl operator != ( ee::CBigInt const &_biLhs, ee::CBigInt const &_biRhs ) EE_BI_THROW {
+__forceinline bool __cdecl								operator != ( ee::CBigInt const &_biLhs, ee::CBigInt const &_biRhs ) EE_BI_THROW {
     return !(_biRhs == _biLhs);
 }
 
-__forceinline bool __cdecl operator < ( ee::CBigInt const &_biLhs, ee::CBigInt const &_biRhs ) EE_BI_THROW {
-	if ( _biLhs.m_ui32Used > _biRhs.m_ui32Used ) { return false; }
-	if ( _biLhs.m_ui32Used < _biRhs.m_ui32Used ) { return true; }
-
-    uint32_t I = _biLhs.m_ui32Used - 1;
-    for ( ; I != static_cast<uint32_t>(-1) && _biLhs.m_ui32Data[I] == _biRhs.m_ui32Data[I]; --I ) {
-        // No-op
-    }
-
-	if ( I == static_cast<uint32_t>(-1) ) { return false; }
-	// Original code:
-	/*
-	if (lhs._data[i] <= rhs._data[i])
-        return true;
-
-    return false;
-	*/
-	// #1: Can be simplified to just a return statement.
-	// #2: <= operator here is a bug.  My version fixes this.
-
-	return _biLhs.m_ui32Data[I] < _biRhs.m_ui32Data[I];
+__forceinline bool __cdecl								operator < ( ee::CBigInt const &_biLhs, ee::CBigInt const &_biRhs ) EE_BI_THROW {
+	return _biLhs.LessThan( _biRhs );
 }
 
-__forceinline bool __cdecl operator > ( ee::CBigInt const &_biLhs, ee::CBigInt const &_biRhs ) EE_BI_THROW {
-	if ( _biLhs.m_ui32Used < _biRhs.m_ui32Used ) { return false; }
-	if ( _biLhs.m_ui32Used > _biRhs.m_ui32Used ) { return true; }
-    uint32_t I = _biLhs.m_ui32Used - 1;
-    for ( ; I != static_cast<uint32_t>(-1) && _biLhs.m_ui32Data[I] == _biRhs.m_ui32Data[I]; --I ) {
-        // No-op
-    }
-
-	if ( I == static_cast<uint32_t>(-1) ) { return false; }
-
-	return _biLhs.m_ui32Data[I] > _biRhs.m_ui32Data[I];
+__forceinline bool __cdecl								operator > ( ee::CBigInt const &_biLhs, ee::CBigInt const &_biRhs ) EE_BI_THROW {
+	return _biLhs.GreaterThan( _biRhs );
 }
 
-__forceinline bool __cdecl operator >= ( ee::CBigInt const &_biLhs, ee::CBigInt const &_biRhs ) EE_BI_THROW {
+__forceinline bool __cdecl								operator >= ( ee::CBigInt const &_biLhs, ee::CBigInt const &_biRhs ) EE_BI_THROW {
     return !(_biLhs < _biRhs);
 }
 
-__forceinline bool __cdecl operator <= ( ee::CBigInt const &_biLhs, ee::CBigInt const &_biRhs ) EE_BI_THROW {
+__forceinline bool __cdecl								operator <= ( ee::CBigInt const &_biLhs, ee::CBigInt const &_biRhs ) EE_BI_THROW {
     return !(_biLhs > _biRhs);
 }
-
