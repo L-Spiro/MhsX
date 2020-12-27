@@ -1,11 +1,12 @@
 #include "LSWComboBox.h"
 #include "../Helpers/LSWHelpers.h"
-#include <windowsx.h>
+#include <codecvt>
+//#include <windowsx.h>
 
 namespace lsw {
 
-	CComboBox::CComboBox( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
-		CWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu ) {
+	CComboBox::CComboBox( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
+		CWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ) {
 		/*if ( Wnd() ) {
 			COMBOBOXINFO cbiInfo = { sizeof( cbiInfo ) };
 			::GetComboBoxInfo( Wnd(), &cbiInfo );
@@ -18,6 +19,12 @@ namespace lsw {
 
 
 	// == Functions.
+	// Prepares the combo box to receive a large number of items on init.
+	INT CComboBox::InitStorage( WPARAM _wpTotalItems, LPARAM _lpStringBytes ) {
+		if ( !Wnd() ) { return CB_ERRSPACE; }
+		return static_cast<INT>(::SendMessageW( Wnd(), CB_INITSTORAGE, _wpTotalItems, _lpStringBytes ));
+	}
+
 	// Adds a string to a list in a combo box. If the combo box does not have the CBS_SORT style, the
 	//	string is added to the end of the list. Otherwise, the string is inserted into the list and the list is sorted.
 	INT CComboBox::AddString( LPCSTR _psString ) {
@@ -58,13 +65,74 @@ namespace lsw {
 		INT iLen = GetLBTextLen( _iIndex );
 		if ( !iLen ) { return CB_ERR; }
 
-		LPWSTR lpszBuffer = new WCHAR[iLen+1];
+		LPWSTR lpszBuffer = new( std::nothrow ) WCHAR[iLen+1];
 		INT iRet = static_cast<INT>(static_cast<DWORD>(::SendMessageW( Wnd(), CB_GETLBTEXT, static_cast<WPARAM>(_iIndex), reinterpret_cast<LPARAM>(lpszBuffer) )));
 		if ( iRet != CB_ERR ) {
 			_wString = lpszBuffer;
 		}
 		delete [] lpszBuffer;
 		return iRet;
+	}
+
+	// Copies the text of the specified window's title bar (if it has one) into a buffer. If the specified window is a control, the text of the control is copied.
+	INT CComboBox::GetTextA( LPSTR _lpString, INT _nMaxCount ) const {
+		INT iSel = GetCurSel();
+		if ( iSel < 0 ) { return CWidget::GetTextA( _lpString, _nMaxCount ); }
+		std::wstring wsTemp;
+		GetLBText( iSel, wsTemp );
+		std::string sTemp = std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes( wsTemp );
+		if ( !_lpString ) { return static_cast<INT>(sTemp.size() + 1); }
+		const CHAR * pcOrig = sTemp.c_str();
+		char * pcNew = std::strncpy( _lpString, sTemp.c_str(), _nMaxCount );
+		INT iRet = static_cast<INT>(pcNew - pcOrig);
+		return iRet;
+	}
+
+	// Copies the text of the specified window's title bar (if it has one) into a buffer. If the specified window is a control, the text of the control is copied.
+	INT CComboBox::GetTextW( LPWSTR _lpString, INT _nMaxCount ) const {
+		INT iSel = GetCurSel();
+		if ( iSel < 0 ) { return CWidget::GetTextW( _lpString, _nMaxCount ); }
+		std::wstring wsTemp;
+		GetLBText( iSel, wsTemp );
+		if ( !_lpString ) { return static_cast<INT>(wsTemp.size() + 1); }
+		const WCHAR * pcOrig = wsTemp.c_str();
+		wchar_t * pcNew = std::wcsncpy( _lpString, wsTemp.c_str(), _nMaxCount );
+		INT iRet = static_cast<INT>(pcNew - pcOrig);
+		return iRet;
+	}
+
+	// Gets the window text.
+	std::string CComboBox::GetTextA() const {
+		INT iSel = GetCurSel();
+		if ( iSel < 0 ) { return CWidget::GetTextA(); }
+		std::wstring wsTemp;
+		GetLBText( iSel, wsTemp );
+		return std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes( wsTemp );
+	}
+
+	// Gets the window text.
+	std::wstring CComboBox::GetTextW() const {
+		INT iSel = GetCurSel();
+		if ( iSel < 0 ) { return CWidget::GetTextW(); }
+		std::wstring wsTemp;
+		GetLBText( iSel, wsTemp );
+		return wsTemp;
+	}
+
+	// Retrieves the length, in characters, of the specified window's title bar text (if the window has a title bar).
+	//	If the specified window is a control, the function retrieves the length of the text within the control
+	INT CComboBox::GetTextLengthA() const {
+		INT iSel = GetCurSel();
+		if ( iSel < 0 ) { return CWidget::GetTextLengthA(); }
+		return GetLBTextLen( iSel );
+	}
+
+	// Retrieves the length, in characters, of the specified window's title bar text (if the window has a title bar).
+	//	If the specified window is a control, the function retrieves the length of the text within the control
+	INT CComboBox::GetTextLengthW() const {
+		INT iSel = GetCurSel();
+		if ( iSel < 0 ) { return CWidget::GetTextLengthW(); }
+		return GetLBTextLen( iSel );
 	}
 
 	// Gets the index of the currently selected item in a combo box.
@@ -75,7 +143,7 @@ namespace lsw {
 
 	// Gets the application-defined value associated with the specified list item in a combo box.
 	LRESULT CComboBox::GetItemData( INT _iIndex ) const {
-		if ( !Wnd() ) { return 0; }
+		if ( !Wnd() || _iIndex < 0 ) { return 0; }
 		return static_cast<LRESULT>(static_cast<ULONG_PTR>(::SendMessageW( Wnd(), CB_GETITEMDATA, static_cast<WPARAM>(_iIndex), 0L )));
 	}
 
@@ -208,9 +276,22 @@ namespace lsw {
 		return SetCurSel( -1 );
 	}
 
+	// Gets the currently selected items data.
+	LPARAM CComboBox::GetCurSelItemData() const {
+		return GetItemData( GetCurSel() );
+	}
+
 	// Selects a range of text.  Implemented by CEdit and CComboBox.
 	VOID CComboBox::SetSel( INT _iStart, INT _iEnd ) const {
 		LRESULT lrRet = ::SendMessageW( Wnd(), CB_SETEDITSEL, 0L, MAKELPARAM( _iStart, _iEnd ) );
+	}
+
+	// Replaces the selected text in an edit control or a rich edit control with the specified text.
+	void CComboBox::ReplaceSel( bool _bCanUndo, const wchar_t * _pwcText ) {
+		COMBOBOXINFO cbiInfo = { sizeof( cbiInfo ) };
+		if ( Wnd() && ::GetComboBoxInfo( Wnd(), &cbiInfo ) ) {
+			::SendMessageW( cbiInfo.hwndItem, EM_REPLACESEL, _bCanUndo, reinterpret_cast<LPARAM>(_pwcText) );
+		}
 	}
 
 }	// namespace lsw

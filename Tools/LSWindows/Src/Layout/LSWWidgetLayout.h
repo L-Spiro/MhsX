@@ -3,6 +3,8 @@
 #include "../LSWWin.h"
 #include "LSWLayoutTypes.h"
 
+#define LSW_NO_SIZE_EXP				nullptr, 0, nullptr, 0, nullptr, 0, nullptr, 0, nullptr, 0, nullptr, 0
+
 namespace lsw {
 
 	struct LSW_WIDGET_LAYOUT {
@@ -34,6 +36,12 @@ namespace lsw {
 		SIZE_T						sWidthSizeExpLen;
 		LPCSTR						pcHeightSizeExp;
 		SIZE_T						sHeightSizeExpLen;
+
+		// Tool tips.
+		LPCH						pcToolTip;
+		SIZE_T						sToolTipLen;
+		DWORD						dwToolTipStyleEx;
+		DWORD						dwToolTipStyle;
 
 
 		LSW_WIDGET_LAYOUT			ChangeStyle( DWORD _dwNewStyle ) const {

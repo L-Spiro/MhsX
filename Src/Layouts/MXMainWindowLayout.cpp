@@ -1,8 +1,8 @@
 #include "MXMainWindowLayout.h"
 #include "../MemHack/MXMemHack.h"
-#include "../Utilities/MXUtilities.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../System/MXSystem.h"
+#include "../Utilities/MXUtilities.h"
 #include "MXLayoutMacros.h"
 #include "MXLayoutManager.h"
 
@@ -25,7 +25,7 @@ namespace mx {
 			64,										// iTop
 			MX_MAIN_WINDOW_W,						// dwWidth
 			MX_MAIN_WINDOW_H,						// dwHeight
-			WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS,		// dwStyle
+			WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS,							// dwStyle
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_BA5DABD6_L___Spiro__MHS__X ),								// pwcText
 			_LEN_BA5DABD6,							// sTextLen
@@ -68,14 +68,14 @@ namespace mx {
 			//WS_CHILDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | TBSTYLE_TRANSPARENT | TBSTYLE_REGISTERDROP | TBSTYLE_LIST | TBSTYLE_FLAT | CCS_NODIVIDER | CCS_NOPARENTALIGN | CCS_NORESIZE | CCS_NOMOVEY,
 			WS_VISIBLE | WS_BORDER | WS_CHILD | WS_CLIPCHILDREN |
 				WS_CLIPSIBLINGS | CCS_NODIVIDER | CCS_NOPARENTALIGN |
-				RBS_VARHEIGHT | RBS_BANDBORDERS,		// dwStyle
-			0,//WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_TOOLWINDOW,										// dwStyleEx
+				RBS_VARHEIGHT | RBS_BANDBORDERS,	// dwStyle
+			0,//WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_TOOLWINDOW,// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_MWI_MAINWINDOW,						// dwParentId
 
-			MX_PARENT_CLEFT,//MX_LOCK_LEFT,							// pcLeftSizeExp
-			MX_PARENT_CRIGHT,							// pcRightSizeExp
+			MX_PARENT_CLEFT,//MX_LOCK_LEFT,			// pcLeftSizeExp
+			MX_PARENT_CRIGHT,						// pcRightSizeExp
 			MX_PARENT_CTOP,							// pcTopSizeExp
 			nullptr, 0,								// pcBottomSizeExp
 			nullptr, 0,								// pcWidthSizeExp
@@ -93,7 +93,7 @@ namespace mx {
 			0,										// dwHeight
 			WS_CHILD | TBSTYLE_FLAT | TBSTYLE_TOOLTIPS | WS_CLIPCHILDREN |
 				WS_CLIPSIBLINGS | CCS_NODIVIDER | CCS_NORESIZE | WS_VISIBLE | CCS_ADJUSTABLE,		// dwStyle
-			0,																						// dwStyleEx
+			0,										// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_MWI_MAINWINDOW,						// dwParentId
@@ -258,54 +258,58 @@ namespace mx {
 	// Menu bar items for the main window.
 	LSW_MENU_ITEM CMainWindowLayout::m_miMenuBar[] = {
 		//bIsSeperator	dwId						bCheckable	bChecked	bEnabled	
-		{ FALSE,		MX_MWMI_FILE,				FALSE,		FALSE,		TRUE,		L"&File" },
-		{ FALSE,		MX_MWMI_SEARCH,				FALSE,		FALSE,		TRUE,		L"&Search" },
-		{ FALSE,		MX_MWMI_TOOLS,				FALSE,		FALSE,		TRUE,		L"&Tools" },
-		{ FALSE,		MX_MWMI_WINDOW,				FALSE,		FALSE,		TRUE,		L"&Window" },
-		{ FALSE,		MX_MWMI_HELP,				FALSE,		FALSE,		TRUE,		L"&Help" },
+		{ FALSE,		MX_MWMI_FILE,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_854A6B8B__File, _LEN_854A6B8B ) },
+		{ FALSE,		MX_MWMI_SEARCH,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_339FACEA__Search, _LEN_339FACEA ) },
+		{ FALSE,		MX_MWMI_TOOLS,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_8D2E41E6__Tools, _LEN_8D2E41E6 ) },
+		{ FALSE,		MX_MWMI_WINDOW,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_0C8B8E90__Window, _LEN_0C8B8E90 ) },
+		{ FALSE,		MX_MWMI_HELP,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_01520137__Help, _LEN_01520137 ) },
 	};
 
 	// File menu.
 	LSW_MENU_ITEM CMainWindowLayout::m_miFileMenu[] {
 		//bIsSeperator	dwId						bCheckable	bChecked	bEnabled	
-		{ FALSE,		MX_MWMI_OPENPROCESS,		FALSE,		FALSE,		TRUE,		L"Open &Process" },
-		{ FALSE,		MX_MWMI_OPENRECENT,			FALSE,		FALSE,		TRUE,		L"Open &Recent" },
-		{ FALSE,		MX_MWMI_OPENFORDEBUG,		FALSE,		FALSE,		TRUE,		L"Open for &Debug" },
+		{ FALSE,		MX_MWMI_OPENPROCESS,		FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_364A9A57_Open__Process, _LEN_364A9A57 ) },
+		{ FALSE,		MX_MWMI_OPENRECENT,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_EA79B404_Open__Recent, _LEN_EA79B404 ) },
+		{ FALSE,		MX_MWMI_OPENFORDEBUG,		FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_33B4BD68_Open_for__Debug, _LEN_33B4BD68 ) },
 		{ TRUE,			0,							FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_MWMI_OPENSAVEFILE,		FALSE,		FALSE,		TRUE,		L"&Open Save File" },
-		{ FALSE,		MX_MWMI_SAVE,				FALSE,		FALSE,		TRUE,		L"&Save" },
-		{ FALSE,		MX_MWMI_SAVEAS,				FALSE,		FALSE,		TRUE,		L"Save &As" },
+		{ FALSE,		MX_MWMI_OPENSAVEFILE,		FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_610CBCA6__Open_Save_File, _LEN_610CBCA6 ) },
+		{ FALSE,		MX_MWMI_SAVE,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_5CB36745__Save, _LEN_5CB36745 ) },
+		{ FALSE,		MX_MWMI_SAVEAS,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_A37FB152_Save__As, _LEN_A37FB152 ) },
 	};
 
 	// Search menu.
 	LSW_MENU_ITEM CMainWindowLayout::m_miSearchMenu[] = {
 		//bIsSeperator	dwId						bCheckable	bChecked	bEnabled	
-		{ FALSE,		MX_MWMI_DATATYPE,			FALSE,		FALSE,		TRUE,		L"&Data-Type Search" },
-		{ FALSE,		MX_MWMI_POINTER,			FALSE,		FALSE,		TRUE,		L"&Pointer Search" },
-		{ FALSE,		MX_MWMI_STRING,				FALSE,		FALSE,		TRUE,		L"&String Search" },
-		{ FALSE,		MX_MWMI_GROUP,				FALSE,		FALSE,		TRUE,		L"&Group Search" },
-		{ FALSE,		MX_MWMI_EXPRESSION,			FALSE,		FALSE,		TRUE,		L"&Expression Search" },
+		{ FALSE,		MX_MWMI_DATATYPE,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_807A9EFA__Data_Type_Search, _LEN_807A9EFA ) },
+		{ FALSE,		MX_MWMI_POINTER,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_0E3DF790__Pointer_Search, _LEN_0E3DF790 ) },
+		{ FALSE,		MX_MWMI_STRING,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_7F01DA2F__String_Search, _LEN_7F01DA2F ) },
+		{ FALSE,		MX_MWMI_GROUP,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_05F169BE__Group_Search, _LEN_05F169BE ) },
+		{ FALSE,		MX_MWMI_EXPRESSION,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_BD4358C1__Expression_Search, _LEN_BD4358C1 ) },
 		{ TRUE,			0,							FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_MWMI_SUB,				FALSE,		FALSE,		TRUE,		L"S&ub Search" },
+		{ FALSE,		MX_MWMI_SUB,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_2D411EAC_S_ub_Search, _LEN_2D411EAC ) },
 		{ TRUE,			0,							FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_MWMI_INSERT,				FALSE,		FALSE,		TRUE,		L"&Insert Address" },
+		{ FALSE,		MX_MWMI_INSERT,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_ED5B72E3__Insert_Address, _LEN_ED5B72E3 ) },
 		{ TRUE,			0,							FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_MWMI_SEARCHOPTIONS,		FALSE,		FALSE,		TRUE,		L"Search &Options" },
+		{ FALSE,		MX_MWMI_SEARCHOPTIONS,		FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_6F5731F2_Search__Options, _LEN_6F5731F2 ) },
 	};
 
 	// Options menu.
 	LSW_MENU_ITEM CMainWindowLayout::m_miOptionsMenu[] = {
 		//bIsSeperator	dwId						bCheckable	bChecked	bEnabled	
-		{ FALSE,		MX_MWMI_OPTIONS,			FALSE,		FALSE,		TRUE,		L"&Options" },
+		{ FALSE,		MX_MWMI_OPTIONS,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_D8DFA8DD__Options, _LEN_D8DFA8DD ) },
+		{ FALSE,		MX_MWMI_PEWORKS,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_1A689CBC_PE__Works, _LEN_1A689CBC ) },
+		{ FALSE,		MX_MWMI_STRINGTHEORY,		FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_38618AB0__String_Theory, _LEN_38618AB0 ) },
+		{ FALSE,		MX_MWMI_FLOATINGPOINTSTUDIO,FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_904CFF9B__Floating_Point_Studio, _LEN_904CFF9B ) },
 	};
 
 	// Windows menu.
 	LSW_MENU_ITEM CMainWindowLayout::m_miWindowsMenu[]= {
 		//bIsSeperator	dwId						bCheckable	bChecked	bEnabled	
-		{ FALSE,		MX_MWMI_SHOW_EXPEVAL,		TRUE,		FALSE,		TRUE,		L"&Expression Evaluator" },
-		{ FALSE,		MX_MWMI_SHOWFOUNDADDR,		TRUE,		FALSE,		TRUE,		L"&Found Addresses" },
+		{ FALSE,		MX_MWMI_SHOW_EXPEVAL,		TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_7B97062A__Expression_Evaluator, _LEN_7B97062A ) },
+		{ FALSE,		MX_MWMI_SHOWFOUNDADDR,		TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_5887B86C__Found_Addresses, _LEN_5887B86C ) },
+		{ FALSE,		MX_MWMI_SHOW_CONVERTER,		TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_2C729004__Converter, _LEN_2C729004 ) },
 		{ TRUE,			0,							FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_MWMI_SHOW_ALL,			TRUE,		FALSE,		TRUE,		L"Show &All" },
+		{ FALSE,		MX_MWMI_SHOW_ALL,			TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_7D8DE2AF_Show__All, _LEN_7D8DE2AF ) },
 	};
 
 	// Menus.
@@ -365,22 +369,31 @@ namespace mx {
 			m_aMainClass = lsw::CBase::RegisterClassExW( wceEx.Obj() );	
 		}
 
-		std::vector<std::string> sStrings;
-		std::vector<std::wstring> sStringsW;
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
+		std::vector<CSecureString> sStrings;
+		std::vector<CSecureWString> sStringsW;
 		CLayoutManager::UnencryptLayouts( m_wlMainWindow, MX_ELEMENTS( m_wlMainWindow ),
 			vLayouts,
 			sStringsW,
 			sStrings );
+		std::vector<LSW_MENU_LAYOUT> vMenus;
+		std::vector<std::vector<LSW_MENU_ITEM> *> vMenuItems;
+		std::vector<std::vector<CSecureWString> *> vMenuStrings;
+		CLayoutManager::UnencryptMenu( m_miMenus, MX_ELEMENTS( m_miMenus ),
+			vMenus,
+			vMenuItems,
+			vMenuStrings );
 
 		LSW_WIDGET_LAYOUT * _pwMain = CHelpers::FindLayout( &vLayouts[0], vLayouts.size(), MX_MWI_MAINWINDOW );
 		mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
-		plmLayout->m_pmMemHack = _pmhMemHack;
 
 		_pwMain->lpwcClass = reinterpret_cast<LPCWSTR>(m_aMainClass);
-		m_pwMainWindow = lsw::CBase::LayoutManager()->CreateWindowX( &vLayouts[0], vLayouts.size(), m_miMenus, MX_ELEMENTS( m_miMenus ) );
+		m_pwMainWindow = lsw::CBase::LayoutManager()->CreateWindowX( &vLayouts[0], vLayouts.size(),
+			vMenus.size() ? &vMenus[0] : nullptr, vMenus.size(),
+			nullptr, reinterpret_cast<uint64_t>(_pmhMemHack) );
 		_pwMain->lpwcClass = nullptr;
 		_pwMain->pwcText = nullptr;
+		CLayoutManager::CleanEncryptedMenu( vMenuItems, vMenuStrings );
 		//::ZeroMemory( szTempTitle, MX_ELEMENTS( szTempTitle ) );
 
 

@@ -1,0 +1,117 @@
+#pragma once
+
+#include <Layout/LSWWidgetLayout.h>
+#include <Widget/LSWWidget.h>
+
+using namespace lsw;
+
+namespace mx {
+
+	class CConverterLayout { 
+	public :
+		// == Enumerations.
+		// Control ID's.
+		enum MX_CONV_WINDOW_IDS {
+			MX_CWI_NONE,
+			MX_CWI_MAIN_WINDOW					= 2400,
+			MX_CWI_REBAR0,
+			MX_CWI_TOOLBAR0,
+			MX_CWI_INT8_LABEL,
+			MX_CWI_UINT8_LABEL,
+			MX_CWI_INT8,
+			MX_CWI_UINT8,
+			MX_CWI_CHAR_LABEL,
+			MX_CWI_UTF8_LABEL,
+			MX_CWI_CHAR,
+			MX_CWI_UTF8,
+			MX_CWI_GROUP_LE,
+			MX_CWI_GROUP_BE,
+			MX_CWI_INT16_LE_LABEL,
+			MX_CWI_INT16_BE_LABEL,
+			MX_CWI_INT16_LE,
+			MX_CWI_INT16_BE,
+			MX_CWI_UINT16_LE_LABEL,
+			MX_CWI_UINT16_BE_LABEL,
+			MX_CWI_UINT16_LE,
+			MX_CWI_UINT16_BE,
+			MX_CWI_INT32_LE_LABEL,
+			MX_CWI_INT32_BE_LABEL,
+			MX_CWI_INT32_LE,
+			MX_CWI_INT32_BE,
+			MX_CWI_UINT32_LE_LABEL,
+			MX_CWI_UINT32_BE_LABEL,
+			MX_CWI_UINT32_LE,
+			MX_CWI_UINT32_BE,
+			MX_CWI_INT64_LE_LABEL,
+			MX_CWI_INT64_BE_LABEL,
+			MX_CWI_INT64_LE,
+			MX_CWI_INT64_BE,
+			MX_CWI_UINT64_LE_LABEL,
+			MX_CWI_UINT64_BE_LABEL,
+			MX_CWI_UINT64_LE,
+			MX_CWI_UINT64_BE,
+			MX_CWI_UTF16_LE_LABEL,
+			MX_CWI_UTF16_BE_LABEL,
+			MX_CWI_UTF16_LE,
+			MX_CWI_UTF16_BE,
+			MX_CWI_UTF32_LE_LABEL,
+			MX_CWI_UTF32_BE_LABEL,
+			MX_CWI_UTF32_LE,
+			MX_CWI_UTF32_BE,
+			MX_CWI_FLOAT10_LE_LABEL,
+			MX_CWI_FLOAT10_BE_LABEL,
+			MX_CWI_FLOAT10_LE,
+			MX_CWI_FLOAT10_BE,
+			MX_CWI_FLOAT11_LE_LABEL,
+			MX_CWI_FLOAT11_BE_LABEL,
+			MX_CWI_FLOAT11_LE,
+			MX_CWI_FLOAT11_BE,
+			MX_CWI_FLOAT14_LE_LABEL,
+			MX_CWI_FLOAT14_BE_LABEL,
+			MX_CWI_FLOAT14_LE,
+			MX_CWI_FLOAT14_BE,
+			MX_CWI_FLOAT16_LE_LABEL,
+			MX_CWI_FLOAT16_BE_LABEL,
+			MX_CWI_FLOAT16_LE,
+			MX_CWI_FLOAT16_BE,
+			MX_CWI_FLOAT24_LE_LABEL,
+			MX_CWI_FLOAT24_BE_LABEL,
+			MX_CWI_FLOAT24_LE,
+			MX_CWI_FLOAT24_BE,
+			MX_CWI_FLOAT32_LE_LABEL,
+			MX_CWI_FLOAT32_BE_LABEL,
+			MX_CWI_FLOAT32_LE,
+			MX_CWI_FLOAT32_BE,
+			MX_CWI_FLOAT64_LE_LABEL,
+			MX_CWI_FLOAT64_BE_LABEL,
+			MX_CWI_FLOAT64_LE,
+			MX_CWI_FLOAT64_BE,
+			MX_CWI_HEX_LE_LABEL,
+			MX_CWI_HEX_BE_LABEL,
+			MX_CWI_HEX_LE,
+			MX_CWI_HEX_BE,
+			MX_CWI_BINARY_LE_LABEL,
+			MX_CWI_BINARY_BE_LABEL,
+			MX_CWI_BINARY_LE,
+			MX_CWI_BINARY_BE,
+		};
+
+		// Buttons.
+		enum MX_BUTTON_COMMANDS {
+			MX_BC_SCINOT						= 6389,
+		};
+
+
+		// == Functions.
+		// Creates the Converter dockable window.
+		static CWidget *						CreateConverterWindow( CWidget * _pwParent );
+
+
+
+	protected :
+		// == Members.
+		// The layout for the Converter dockable window.
+		static LSW_WIDGET_LAYOUT				m_wlMainWindow[];
+	};
+
+} // namespace mx

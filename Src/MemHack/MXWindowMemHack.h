@@ -22,6 +22,9 @@ namespace mx {
 		// Failed to open a process.
 		virtual void						FailedToOpenProcess( DWORD _dwId );
 
+		// Sets the options.
+		virtual void						SetOptions( const MX_OPTIONS &_oOptions );
+
 
 
 	protected :
@@ -29,6 +32,9 @@ namespace mx {
 		// The window.
 		CMhsMainWindow *					m_pmmwWindow;
 
+
+	private :
+		typedef CMemHack					Parent;
 	};
 
 }	// namespace mx

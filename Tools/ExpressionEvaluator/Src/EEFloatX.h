@@ -106,25 +106,25 @@ namespace ee {
 		static uint64_t					AllExpBitsSet( uint16_t _uiExpBits ) { return (1 << _uiExpBits) - 1; }
 
 		// Gets the exponent bias.
-		static double					ExpBias( uint16_t _uiExpBits ) { return (1 << (_uiExpBits - 1)) - 1; }
+		static const double				ExpBias( uint16_t _uiExpBits ) { return (1 << (_uiExpBits - 1)) - 1; }
 
 		// Gets the maximum normalized exponent bias for a given number of bits.
-		static double					MaxExpBias( uint16_t _uiExpBits ) { return (1 << (_uiExpBits - 1)) - 1; }
+		static const double				MaxExpBias( uint16_t _uiExpBits ) { return (1 << (_uiExpBits - 1)) - 1; }
 
 		// Gets the minimum normalized exponent bias for a given number of bits.
-		static double					MinExpBias( uint16_t _uiExpBits ) { return (1 << (_uiExpBits - 1)) - 1; }
+		static const double				MinExpBias( uint16_t _uiExpBits ) { return (1 << (_uiExpBits - 1)) - 1; }
 
 		// Gets the maximum number of bits in a sign.
-		static uint32_t					MaxSignBits() { return 1; }
+		static const uint32_t			MaxSignBits() { return 1; }
 
 		// Gets the maximum number of bits in an exponent.
-		static uint32_t					MaxExpBits() { return 11; }
+		static const uint32_t			MaxExpBits() { return 11; }
 
 		// Gets the maximum number of bits in a mantissa.
-		static uint32_t					MaxManBits() { return DBL_MANT_DIG; }
+		static const uint32_t			MaxManBits() { return DBL_MANT_DIG; }
 
 		// Gets the real number of mantissa bits based on whether or not there is an implicit bit.
-		static uint64_t					RealMantissaBits( uint16_t _uiManBits, bool _bImplicitMantissaBit ) { return _bImplicitMantissaBit ? _uiManBits - 1 : _uiManBits; }
+		static const uint64_t			RealMantissaBits( uint16_t _uiManBits, bool _bImplicitMantissaBit ) { return _bImplicitMantissaBit ? _uiManBits - 1 : _uiManBits; }
 
 		// Gets the sign bit from a double (not shifted).
 		static uint64_t					SignBit( double _dVal ) { return (*reinterpret_cast<uint64_t *>(&_dVal)) & (1ULL << 63ULL); }

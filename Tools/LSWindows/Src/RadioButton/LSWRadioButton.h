@@ -8,7 +8,7 @@ namespace lsw {
 
 	class CRadioButton : public CWidget {
 	public :
-		CRadioButton( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		CRadioButton( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 
 		// == Functions.
 		// Are we checked?
@@ -16,6 +16,12 @@ namespace lsw {
 
 		// Changes the check state of a button control.
 		virtual VOID						CheckButton( UINT _uCheck ) { ::SendMessageW( Wnd(), BM_SETCHECK, static_cast<WPARAM>(_uCheck), 0L ); }
+
+		// Determines the type of control this is.
+		virtual uint32_t					WidgetType() const { return LSW_LT_RADIO; }
+
+		// Returns true if this is a CRadioButton class.
+		virtual bool						IsRadioButton() const { return true; }
 
 	protected :
 		// == Functions.

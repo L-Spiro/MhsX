@@ -98,7 +98,7 @@ namespace mx {
 			if ( !MapRegion( _ui64From, dwReadAmount ) ) {
 				return dwWritten;
 			}
-			::memcpy( pbDst, &m_pbMapBuffer[_ui64From-m_ui64MapStart], dwReadAmount );
+			std::memcpy( pbDst, &m_pbMapBuffer[_ui64From-m_ui64MapStart], dwReadAmount );
 
 
 			_dwNumberOfBytesToRead -= dwReadAmount;
@@ -119,7 +119,7 @@ namespace mx {
 			if ( !MapRegion( _ui64From, dwWriteAmount ) ) {
 				return dwWritten;
 			}
-			::memcpy( &m_pbMapBuffer[_ui64From-m_ui64MapStart], pbSrc, dwWriteAmount );
+			std::memcpy( &m_pbMapBuffer[_ui64From-m_ui64MapStart], pbSrc, dwWriteAmount );
 
 
 			_dwNumberOfBytesToWrite -= dwWriteAmount;
@@ -135,7 +135,7 @@ namespace mx {
 		// Can't open 0-sized files.  Emulate the successful mapping of such a file.
 		m_bIsEmpty = Size() == 0;
 		if ( m_bIsEmpty ) { return TRUE; }
-		m_hMap = ::CreateFileMapping( m_hFile,
+		m_hMap = ::CreateFileMappingW( m_hFile,
 			NULL,
 			m_bWritable ? PAGE_READWRITE : PAGE_READONLY,
 			0,

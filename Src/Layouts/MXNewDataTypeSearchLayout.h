@@ -1,5 +1,6 @@
 #pragma once
 #include "../MXMhsX.h"
+#include "../MemHack/MXMemHack.h"
 #include "../Options/MXOptions.h"
 #include <Layout/LSWWidgetLayout.h>
 #include <Widget/LSWWidget.h>
@@ -10,7 +11,6 @@ namespace mx {
 
 	class CNewDataTypeSearchLayout {
 	public :
-		public :
 		// == Enumerations.
 		// Control ID's.
 		enum MX_NEW_DATA_SEARCH_IDS {
@@ -29,6 +29,7 @@ namespace mx {
 			MX_NDSI_OPTIONS_GROUP,
 			MX_NDSI_SAO_CHECK,
 			MX_NDSI_ALIGNED,
+			MX_NDSI_INVERT,
 
 			MX_NDSI_SEARCH_RANGE_GROUP,
 			MX_NDSI_FROM_LABEL,
@@ -46,8 +47,8 @@ namespace mx {
 
 
 		// == Functions.
-		// Creates the Open Process dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
-		static DWORD							CreateNewDataTypeSearchDialog( CWidget * _pwParent, MX_OPTIONS * _poOptions );
+		// Creates the New Data-Type Search dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
+		static DWORD							CreateNewDataTypeSearchDialog( CWidget * _pwParent, CMemHack * _pmhMemHack );
 
 
 	protected :

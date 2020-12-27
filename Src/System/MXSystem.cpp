@@ -44,8 +44,17 @@ namespace mx {
 	// OpenThread().
 	LPFN_OPENTHREAD CSystem::m_pfOpenThread = nullptr;
 
+	// CreateRemoteThread().
+	LPFN_CREATEREMOTETHREAD	CSystem::m_pfCreateRemoteThread = nullptr;
+
 	// IsWow64Process().
 	LPFN_ISWOW64PROCESS CSystem::m_pfIsWow64Process = nullptr;
+
+	// LoadLibraryW().
+	LPFN_LOADLIBRARYW CSystem::m_pfLoadLibraryW = nullptr;
+
+	// LoadLibraryExW().
+	LPFN_LOADLIBRARYEXW CSystem::m_pfLoadLibraryExW = nullptr;
 
 	// Process32FirstW().
 	LPFN_PROCESS32FIRSTW CSystem::m_pfProcess32FirstW = nullptr;
@@ -128,6 +137,46 @@ namespace mx {
 	// Wow64GetThreadSelectorEntry().
 	LPFN_WOW64GETTHREADSELECTORENTRY CSystem::m_pfWow64GetThreadSelectorEntry = nullptr;
 
+	// SetTimer().
+	LPFN_SETTIMER CSystem::m_pfSetTimer = nullptr;
+
+	// KillTimer().
+	LPFN_KILLTIMER CSystem::m_pfKillTimer = nullptr;
+
+	// NtSuspendProcess().
+	LPFN_NTSUSPENDPROCESS CSystem::m_pfNtSuspendProcess = nullptr;
+
+	// NtResumeProcess().
+	LPFN_NTRESUMEPROCESS CSystem::m_pfNtResumeProcess = nullptr;
+
+	// CompareStringEx().
+	LPFN_COMPARESTRINGEX CSystem::m_pfCompareStringEx = nullptr;
+
+	// SetWindowsHookExW().
+	LPFN_SETWINDOWSHOOKEX CSystem::m_pfSetWindowsHookExW = nullptr;
+
+	// CallNextHookEx().
+	LPFN_CALLNEXTHOOKEX CSystem::m_pfCallNextHookEx = nullptr;
+
+	// UnhookWindowsHookEx().
+	LPFN_UNHOOKWINDOWSHOOKEX CSystem::m_pfUnhookWindowsHookEx = nullptr;
+
+	// RegisterHotKey().
+	LPFN_REGISTERHOTKEY CSystem::m_pfRegisterHotKey = nullptr;
+
+	// UnregisterHotKey().
+	LPFN_UNREGISTERHOTKEY CSystem::m_pfUnregisterHotKey = nullptr;
+
+	// GetKeyboardState()
+	LPFN_GETKEYBOARDSTATE CSystem::m_pfGetKeyboardState = nullptr;
+
+	// GetAsyncKeyState().
+	LPFN_GETASYNCKEYSTATE CSystem::m_pfGetAsyncKeyState = nullptr;
+
+	// Beep().
+	LPFN_BEEP CSystem::m_pfBeep = nullptr;
+
+
 	// == Types.
 	typedef BOOL (WINAPI * LPFN_ISWOW64PROCESS)( HANDLE, PBOOL );
 	typedef VOID (WINAPI * LPFN_GETSYSTEMINFO)( LPSYSTEM_INFO );
@@ -185,10 +234,31 @@ namespace mx {
 		// Advapi32 imports.
 		LoadAdvapi32();
 
+		// Ntdll imports.
+		LoadNtdll();
+
 		// Set the current working directory.
 		/*
 		::SetCurrentDirectoryW( GetModulePathW( nullptr ).c_str() );
 		*/
+	}
+
+	// Is the system 32-bit?
+	bool CSystem::Is32Bit() {
+		return GetSystemInfo().wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL ||
+			GetSystemInfo().wProcessorArchitecture == PROCESSOR_ARCHITECTURE_MIPS ||
+			GetSystemInfo().wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ALPHA ||
+			GetSystemInfo().wProcessorArchitecture == PROCESSOR_ARCHITECTURE_PPC ||
+			GetSystemInfo().wProcessorArchitecture == PROCESSOR_ARCHITECTURE_SHX ||
+			GetSystemInfo().wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM;
+	}
+
+	// Is the system 64-bit?
+	bool CSystem::Is64Bit() {
+		return GetSystemInfo().wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64 ||
+			GetSystemInfo().wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ALPHA64 ||
+			GetSystemInfo().wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 ||
+			GetSystemInfo().wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM64;
 	}
 
 	// Gets a function address by DLL name and function name.
@@ -197,7 +267,7 @@ namespace mx {
 	}
 
 	// Gets the file name from a given path.
-	std::string CSystem::GetFileName( const std::string &_sPath ) {
+	CSecureString CSystem::GetFileName( const std::string &_sPath ) {
 		const char * pcLast = std::strrchr( _sPath.c_str(), '\\' );
 		if ( !pcLast ) {
 			pcLast = std::strrchr( _sPath.c_str(), '/' );
@@ -209,7 +279,7 @@ namespace mx {
 	}
 
 	// Gets the file name from a given path.
-	std::wstring CSystem::GetFileName( const std::wstring &_wsPath ) {
+	CSecureWString CSystem::GetFileName( const std::wstring &_wsPath ) {
 		const wchar_t * pwcLast = std::wcsrchr( _wsPath.c_str(), L'\\' );
 		if ( !pwcLast ) {
 			pwcLast = std::wcsrchr( _wsPath.c_str(), L'/' );
@@ -221,22 +291,35 @@ namespace mx {
 	}
 
 	// Gets the path to this .EXE in UTF-8.
-	std::string CSystem::GetSelfPath() {
+	CSecureString CSystem::GetSelfPath() {
 		return CUtilities::WStringToString( GetSelfPathW() );
 	}
 
 	// Gets the path to this .EXE in UTF-16.
-	std::wstring CSystem::GetSelfPathW() {
+	CSecureWString CSystem::GetSelfPathW() {
 		return GetModulePathW( nullptr );
 	}
 
+	// Gets the Resources/ path.
+	CSecureWString CSystem::GetResourcesPathW() {
+		// ANTICHEAT: Code left basic to make it easy to change.
+		//	If the folder is detected, change its name, change the code here, and you are done.
+		CSecureWString wsTemp = CSystem::GetSelfPathW();
+#if defined( MX_FINAL )
+		wsTemp += _DEC_WS_B4CAD75E_Resources__;
+#else
+		wsTemp += L"..\\..\\Final\\Resources\\";
+#endif	// #if defined( MX_FINAL )
+		return wsTemp;
+	}
+
 	// Gets the path to a given loaded DLL given its UTF-8 name.
-	std::string CSystem::GetModulePath( const CHAR * _pcPath ) {
+	CSecureString CSystem::GetModulePath( const CHAR * _pcPath ) {
 		return CUtilities::WStringToString( GetModulePathW( CUtilities::StringToWString( _pcPath ).c_str() ) );
 	}
 
 	// Gets the path to a given loaded DLL given its UTF-16 name.
-	std::wstring CSystem::GetModulePathW( const WCHAR * _pwcPath ) {
+	CSecureWString CSystem::GetModulePathW( const WCHAR * _pwcPath ) {
 		HMODULE hMod = _pwcPath ? ::GetModuleHandleW( _pwcPath ) : NULL;
 
 		DWORD dwLen = GetModulePathLength( _pwcPath );
@@ -246,7 +329,7 @@ namespace mx {
 		while ( dwLen > 1 && pwcBuffer[dwLen-1] != L'\\' ) {
 			pwcBuffer[(dwLen--)-1] = L'\0';
 		}
-		std::wstring wTemp = pwcBuffer;
+		CSecureWString wTemp = pwcBuffer;
 		::ZeroMemory( pwcBuffer, dwLen );
 		delete [] pwcBuffer;
 		return wTemp;
@@ -272,51 +355,51 @@ namespace mx {
 	}
 
 	// Gets the current directory in UTF-8.
-	std::string CSystem::GetCurDir() {
+	CSecureString CSystem::GetCurDir() {
 		return CUtilities::WStringToString( GetCurDirW() );
 	}
 
 	// Gets the current directory in UTF-16.
-	std::wstring CSystem::GetCurDirW() {
+	CSecureWString CSystem::GetCurDirW() {
 		DWORD dwLen = ::GetCurrentDirectoryW( 0, NULL ) + 1;
 		WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[dwLen];
 		if ( !pwcBuffer ) { return std::wstring(); }
 		dwLen = ::GetCurrentDirectoryW( dwLen, pwcBuffer );
-		std::wstring wTemp = pwcBuffer;
+		CSecureWString wTemp = pwcBuffer;
 		::ZeroMemory( pwcBuffer, dwLen );
 		delete [] pwcBuffer;
 		return CUtilities::FinishPath( wTemp );
 	}
 
 	// Gets the system directory in UTF-8.
-	std::string CSystem::GetSystemDir() {
+	CSecureString CSystem::GetSystemDir() {
 		return CUtilities::WStringToString( GetSystemDirW() );
 	}
 
 	// Gets the system directory in UTF-16.
-	std::wstring CSystem::GetSystemDirW() {
+	CSecureWString CSystem::GetSystemDirW() {
 		DWORD dwLen = ::GetSystemDirectoryW( NULL, 0 ) + 1;
 		WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[dwLen];
 		if ( !pwcBuffer ) { return std::wstring(); }
 		dwLen = ::GetSystemDirectoryW( pwcBuffer, dwLen );
-		std::wstring wTemp = pwcBuffer;
+		CSecureWString wTemp = pwcBuffer;
 		::ZeroMemory( pwcBuffer, dwLen );
 		delete [] pwcBuffer;
 		return CUtilities::FinishPath( wTemp );
 	}
 
 	// Gets the Windows directory in UTF-8.
-	std::string CSystem::GetWindowsDir() {
+	CSecureString CSystem::GetWindowsDir() {
 		return CUtilities::WStringToString( GetWindowsDirW() );
 	}
 
 	// Gets the Windows directory in UTF-16.
-	std::wstring CSystem::GetWindowsDirW() {
+	CSecureWString CSystem::GetWindowsDirW() {
 		DWORD dwLen = ::GetWindowsDirectoryW( NULL, 0 ) + 1;
 		WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[dwLen];
 		if ( !pwcBuffer ) { return std::wstring(); }
 		dwLen = ::GetWindowsDirectoryW( pwcBuffer, dwLen );
-		std::wstring wTemp = pwcBuffer;
+		CSecureWString wTemp = pwcBuffer;
 		::ZeroMemory( pwcBuffer, dwLen );
 		delete [] pwcBuffer;
 		return CUtilities::FinishPath( wTemp );
@@ -326,10 +409,11 @@ namespace mx {
 	size_t CSystem::GetPathEnv( std::vector<std::string> &_vReturn ) {
 		const DWORD dwSize = 32767;
 		WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[dwSize];
+		if ( !pwcBuffer ) { return 0; }
 
 		WCHAR szPath[_LEN_3DC166BB+1];
 		DWORD dwLen = GetEnvironmentVariableW( _DEC_3DC166BB_PATH( szPath ), pwcBuffer, dwSize );
-		std::wstring wTemp;
+		CSecureWString wTemp;
 		size_t sStart = _vReturn.size();
 		for ( size_t I = 0; I < dwLen; ++I ) {
 			if ( pwcBuffer[I] == L';' ) {
@@ -352,10 +436,11 @@ namespace mx {
 	size_t CSystem::GetPathEnv( std::vector<std::wstring> &_vReturn ) {
 		const DWORD dwSize = 32767;
 		WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[dwSize];
+		if ( !pwcBuffer ) { return 0; }
 
 		WCHAR szPath[_LEN_3DC166BB+1];
 		DWORD dwLen = GetEnvironmentVariableW( _DEC_3DC166BB_PATH( szPath ), pwcBuffer, dwSize );
-		std::wstring wTemp;
+		CSecureWString wTemp;
 		size_t sStart = _vReturn.size();
 		for ( size_t I = 0; I < dwLen; ++I ) {
 			if ( pwcBuffer[I] == L';' ) {
@@ -376,10 +461,10 @@ namespace mx {
 
 	// Gets all of the search paths for a DLL in the order in which they should be searched.
 	std::vector<std::string> CSystem::DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::string> &_vResults, BOOL _bIncludeLoadedModulePath ) {
-		std::string sDllUtf8 = CUtilities::WStringToString( _pwcDll );
+		CSecureString sDllUtf8 = CUtilities::WStringToString( _pwcDll );
 		if ( _bIncludeLoadedModulePath ) {
 			// If the module is already loaded by us, put it in front of the list.
-			std::string sLoadedDir = GetModulePath( sDllUtf8.c_str() );
+			CSecureString sLoadedDir = GetModulePath( sDllUtf8.c_str() );
 			if ( sLoadedDir.size() ) {
 				_vResults.push_back( sLoadedDir );
 			}
@@ -397,10 +482,10 @@ namespace mx {
 
 	// Gets all of the search paths for a DLL in the order in which they should be searched.
 	std::vector<std::wstring> CSystem::DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::wstring> &_vResults, BOOL _bIncludeLoadedModulePath ) {
-		std::wstring sDllUtf8 = _pwcDll;
+		CSecureWString sDllUtf8 = _pwcDll;
 		if ( _bIncludeLoadedModulePath ) {
 			// If the module is already loaded by us, put it in front of the list.
-			std::wstring sLoadedDir = GetModulePathW( sDllUtf8.c_str() );
+			CSecureWString sLoadedDir = GetModulePathW( sDllUtf8.c_str() );
 			if ( sLoadedDir.size() ) {
 				_vResults.push_back( sLoadedDir );
 			}
@@ -454,15 +539,12 @@ namespace mx {
 
 	// Faster way to get the address of a function, using encrypted strings.
 	LPCVOID CSystem::GetProcAddress( LPCSTR _lpcModule, size_t _sModuleLen, LPCSTR _lpcProcName, size_t _sProcLen, const CPeObject &_poObj ) {
-		std::string sModule, sProc;
+		CSecureString sModule, sProc;
 
 		CStringDecoder::Decode( _lpcModule, _sModuleLen, sModule );
 		CStringDecoder::Decode( _lpcProcName, _sProcLen, sProc );
 
 		LPCVOID pvRet = GetProcAddress( sModule.c_str(), sProc.c_str(), _poObj );
-		// Security: Wipe the decoded values from memory.
-		::ZeroMemory( const_cast<std::string::value_type *>(sModule.c_str()), sModule.size() );
-		::ZeroMemory( const_cast<std::string::value_type *>(sProc.c_str()), sProc.size() );
 
 		return pvRet;
 	}
@@ -528,9 +610,26 @@ namespace mx {
 		return m_pfOpenThread ? m_pfOpenThread( _dwDesiredAccess, _bInheritHandle, _dwThreadId ) : NULL;
 	}
 
+	// CreateRemoteThread().
+	HANDLE WINAPI CSystem::CreateRemoteThread( HANDLE _hProcess, LPSECURITY_ATTRIBUTES _lpThreadAttributes, SIZE_T _dwStackSize, LPTHREAD_START_ROUTINE _lpStartAddress,
+		LPVOID _lpParameter, DWORD _dwCreationFlags, LPDWORD _lpThreadId ) {
+		return m_pfCreateRemoteThread ? m_pfCreateRemoteThread( _hProcess, _lpThreadAttributes, _dwStackSize, _lpStartAddress,
+			_lpParameter, _dwCreationFlags, _lpThreadId ) : NULL;
+	}
+
 	// IsWow64Process().
 	BOOL WINAPI CSystem::IsWow64Process( HANDLE _hProcess, PBOOL _Wow64Process ) {
 		return m_pfIsWow64Process ? m_pfIsWow64Process( _hProcess, _Wow64Process ) : FALSE;
+	}
+
+	// LoadLibraryW().
+	HMODULE WINAPI CSystem::LoadLibraryW( LPCWSTR _lpLibFileName ) {
+		return m_pfLoadLibraryW ? m_pfLoadLibraryW( _lpLibFileName ) : NULL;
+	}
+
+	// LoadLibraryExW().
+	HMODULE WINAPI CSystem::LoadLibraryExW( LPCWSTR _lpLibFileName, HANDLE _hFile, DWORD _dwFlags ) {
+		return m_pfLoadLibraryExW ? m_pfLoadLibraryExW( _lpLibFileName, _hFile, _dwFlags ) : NULL;
 	}
 
 	// CreateToolhelp32Snapshot().
@@ -607,7 +706,7 @@ namespace mx {
 	// Gets window text.
 	BOOL CSystem::GetWindowTextW( HWND _hWnd, std::wstring &_sRes ) {
 		size_t sLen = ::GetWindowTextLengthW( _hWnd ) + 4;
-		WCHAR * pwcBuffer = new WCHAR[sLen];
+		WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[sLen];
 		if ( !pwcBuffer ) { return FALSE; }
 		std::memset( pwcBuffer, 0, sLen );
 		::GetWindowTextW( _hWnd, pwcBuffer, sLen );
@@ -633,11 +732,16 @@ namespace mx {
 
 	// Show an encrypted error message box.
 	VOID CSystem::MessageBoxError( HWND _hWnd, const CHAR * _pcMsg, size_t _sMsgLen, const CHAR * _pcTitle, size_t _sTitleLen ) {
-		std::string sMsg = mx::CStringDecoder::DecodeToString( _pcMsg, _sMsgLen );
-		std::string sTitle = mx::CStringDecoder::DecodeToString( _pcTitle, _sTitleLen );
+		CSecureWString sMsg = mx::CStringDecoder::DecodeToWString( _pcMsg, _sMsgLen );
+		CSecureWString sTitle = mx::CStringDecoder::DecodeToWString( _pcTitle, _sTitleLen );
 		lsw::CBase::MessageBoxError( _hWnd, sMsg.c_str(), sTitle.c_str() );
-		std::memset( const_cast<char *>(sMsg.c_str()), 0, sMsg.size() );
-		std::memset( const_cast<char *>(sTitle.c_str()), 0, sTitle.size() );
+	}
+
+	// Show an encrypted message box.
+	VOID CSystem::MessageBoxOk( HWND _hWnd, const CHAR * _pcMsg, size_t _sMsgLen, const CHAR * _pcTitle, size_t _sTitleLen ) {
+		CSecureWString sMsg = mx::CStringDecoder::DecodeToWString( _pcMsg, _sMsgLen );
+		CSecureWString sTitle = mx::CStringDecoder::DecodeToWString( _pcTitle, _sTitleLen );
+		lsw::CBase::PromptOk( _hWnd, sMsg.c_str(), sTitle.c_str() );
 	}
 
 	// Tests the flags that can be used to open a given process.
@@ -733,6 +837,67 @@ namespace mx {
 		return m_pfWow64GetThreadSelectorEntry ? m_pfWow64GetThreadSelectorEntry( _hThread, _dwSelector, _lpSelectorEntry ) : FALSE;
 	}
 
+	// SetTimer().
+	UINT_PTR CSystem::SetTimer( HWND _hWnd, UINT_PTR _nIDEvent, UINT _uElapse, TIMERPROC _lpTimerFunc ) {
+		return m_pfSetTimer ? m_pfSetTimer( _hWnd, _nIDEvent, _uElapse, _lpTimerFunc ) : FALSE;
+	}
+
+	// KillTimer().
+	BOOL CSystem::KillTimer( HWND _hWnd, UINT_PTR _uIDEvent ) {
+		return m_pfKillTimer ? m_pfKillTimer( _hWnd, _uIDEvent ) : FALSE;
+	}
+
+	// NtSuspendProcess.
+	LONG NTAPI CSystem::NtSuspendProcess( HANDLE _hProcess ) {
+		return m_pfNtSuspendProcess ? m_pfNtSuspendProcess( _hProcess ) : STATUS_ABANDONED;
+	}
+
+	// NtResumeProcess.
+	LONG NTAPI CSystem::NtResumeProcess( HANDLE _hProcess ) {
+		return m_pfNtResumeProcess ? m_pfNtResumeProcess( _hProcess ) : STATUS_ABANDONED;
+	}
+
+	// CompareStringEx.
+	int WINAPI CSystem::CompareStringEx( LPCWSTR _lpLocaleName, DWORD _dwCmpFlags, LPCWCH _lpString1, int _cchCount1, LPCWCH _lpString2, int _cchCount2, LPNLSVERSIONINFO _lpVersionInformation,
+		LPVOID _lpReserved, LPARAM _lParam ) {
+		return m_pfCompareStringEx ? m_pfCompareStringEx( _lpLocaleName, _dwCmpFlags, _lpString1, _cchCount1, _lpString2, _cchCount2, _lpVersionInformation, _lpReserved, _lParam ) : 0;
+	}
+
+	// SetWindowsHookExW.
+	HHOOK WINAPI CSystem::SetWindowsHookExW( int _idHook, HOOKPROC _lpfn, HINSTANCE _hmod, DWORD _dwThreadId ) {
+		return m_pfSetWindowsHookExW ? m_pfSetWindowsHookExW( _idHook, _lpfn, _hmod, _dwThreadId ) : NULL;
+	}
+
+	// CallNextHookEx.
+	LRESULT WINAPI CSystem::CallNextHookEx( HHOOK _hhk, int _nCode, WPARAM _wParam, LPARAM _lParam ) {
+		return m_pfCallNextHookEx ? m_pfCallNextHookEx( _hhk, _nCode, _wParam, _lParam ) : NULL;
+	}
+
+	// UnhookWindowsHookEx.
+	BOOL WINAPI CSystem::UnhookWindowsHookEx( HHOOK _hhk ) {
+		return m_pfUnhookWindowsHookEx ? m_pfUnhookWindowsHookEx( _hhk ) : FALSE;
+	}
+
+	// RegisterHotKey.
+	BOOL WINAPI CSystem::RegisterHotKey( HWND _hWnd, int _id, UINT _fsModifiers, UINT _vk ) {
+		return m_pfRegisterHotKey ? m_pfRegisterHotKey( _hWnd, _id, _fsModifiers, _vk ) : FALSE;
+	}
+
+	// UnregisterHotKey.
+	BOOL WINAPI CSystem::UnregisterHotKey( HWND _hWnd, int _id ) {
+		return m_pfUnregisterHotKey ? m_pfUnregisterHotKey( _hWnd, _id ) : FALSE;
+	}
+
+	// GetKeyboardState.
+	BOOL WINAPI CSystem::GetKeyboardState( PBYTE _lpKeyState ) {
+		return m_pfGetKeyboardState ? m_pfGetKeyboardState( _lpKeyState ) : 0;
+	}
+
+	// GetAsyncKeyState.
+	SHORT WINAPI CSystem::GetAsyncKeyState( int _vKey ) {
+		return m_pfGetAsyncKeyState ? m_pfGetAsyncKeyState( _vKey ) : 0;
+	}
+
 	// Load kernel32.dll functions.
 	VOID CSystem::LoadKernel32() {
 		CHAR szKernel32[_LEN_6AE69F02+1];
@@ -759,8 +924,8 @@ namespace mx {
 #define MX_CHECK( NAME )
 #endif // #ifdef _DEBUG
 
-#define MX_PROCADDR( NAME, ENCNAME, ENCLEN )			{ LPVOID & pvRef = reinterpret_cast<LPVOID &>(m_pf ## NAME);													\
-														pvRef = const_cast<LPVOID>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, ENCNAME, ENCLEN, poObj ));	\
+#define MX_PROCADDR( NAME, ENCNAME, ENCLEN )			{ LPVOID & pvRef = reinterpret_cast<LPVOID &>(m_pf ## NAME);														\
+														pvRef = const_cast<LPVOID>(mx::CSystem::GetProcAddress( _T_LEN_6AE69F02_kernel32_dll, ENCNAME, ENCLEN, poObj ));	\
 														MX_CHECK( NAME ); }
 
 		MX_PROCADDR( ReadProcessMemory, _T_F7C7AE42_ReadProcessMemory, _LEN_F7C7AE42 );
@@ -776,7 +941,10 @@ namespace mx {
 		}
 		MX_PROCADDR( OpenProcess, _T_DF27514B_OpenProcess, _LEN_DF27514B );
 		MX_PROCADDR( OpenThread, _T_B85486FF_OpenThread, _LEN_B85486FF );
+		MX_PROCADDR( CreateRemoteThread, _T_FF808C10_CreateRemoteThread, _LEN_FF808C10 );
 		MX_PROCADDR( IsWow64Process, _T_2E50340B_IsWow64Process, _LEN_2E50340B );
+		MX_PROCADDR( LoadLibraryW, _T_CB1508DC_LoadLibraryW, _LEN_CB1508DC );
+		MX_PROCADDR( LoadLibraryExW, _T_6FC49B7C_LoadLibraryExW, _LEN_6FC49B7C );
 		MX_PROCADDR( CreateToolhelp32Snapshot, _T_C1F3B876_CreateToolhelp32Snapshot, _LEN_C1F3B876 );
 		MX_PROCADDR( Process32FirstW, _T_8197004C_Process32FirstW, _LEN_8197004C );
 		MX_PROCADDR( Process32NextW, _T_BC6B67BF_Process32NextW, _LEN_BC6B67BF );
@@ -800,6 +968,8 @@ namespace mx {
 		MX_PROCADDR( Wow64GetThreadContext, _T_49CB90FE_Wow64GetThreadContext, _LEN_49CB90FE );
 		MX_PROCADDR( Wow64SetThreadContext, _T_7BDDE2E7_Wow64SetThreadContext, _LEN_7BDDE2E7 );
 		MX_PROCADDR( Wow64GetThreadSelectorEntry, _T_742F716C_Wow64GetThreadSelectorEntry, _LEN_742F716C );
+		MX_PROCADDR( CompareStringEx, _T_9A6C6C6E_CompareStringEx, _LEN_9A6C6C6E );
+		MX_PROCADDR( Beep, _T_16CAA8BF_Beep, _LEN_16CAA8BF );
 
 #ifdef _DEBUG
 		pfTemp = ::GetProcAddress( hDll, "EnumProcesses" );
@@ -841,10 +1011,19 @@ namespace mx {
 
 
 #define MX_PROCADDR( NAME, ENCNAME, ENCLEN )			{ LPVOID & pvRef = reinterpret_cast<LPVOID &>(m_pf ## NAME);													\
-														pvRef = const_cast<LPVOID>(GetProcAddress( _T_02489AAB_user32_dll, _LEN_02489AAB, ENCNAME, ENCLEN, poObj ));	\
+														pvRef = const_cast<LPVOID>(mx::CSystem::GetProcAddress( _T_LEN_02489AAB_user32_dll, ENCNAME, ENCLEN, poObj ));	\
 														MX_CHECK( NAME ); }
 
 		MX_PROCADDR( EnumThreadWindows, _T_AF5AA374_EnumThreadWindows, _LEN_AF5AA374 );
+		MX_PROCADDR( SetTimer, _T_9A8501DA_SetTimer, _LEN_9A8501DA );
+		MX_PROCADDR( KillTimer, _T_2B79DD57_KillTimer, _LEN_2B79DD57 );
+		MX_PROCADDR( SetWindowsHookExW, _T_7EDE5BB6_SetWindowsHookExW, _LEN_7EDE5BB6 );
+		MX_PROCADDR( CallNextHookEx, _T_B5FBE9E2_CallNextHookEx, _LEN_B5FBE9E2 );
+		MX_PROCADDR( UnhookWindowsHookEx, _T_5C3E0230_UnhookWindowsHookEx, _LEN_5C3E0230 );
+		MX_PROCADDR( RegisterHotKey, _T_71349A12_RegisterHotKey, _LEN_71349A12 );
+		MX_PROCADDR( UnregisterHotKey, _T_9C1D98BC_UnregisterHotKey, _LEN_9C1D98BC );
+		MX_PROCADDR( GetKeyboardState, _T_D4F7673B_GetKeyboardState, _LEN_D4F7673B );
+		MX_PROCADDR( GetAsyncKeyState, _T_84029700_GetAsyncKeyState, _LEN_84029700 );
 
 		::ZeroMemory( szUser32, MX_ELEMENTS( szUser32 ) );
 #undef MX_CHECK
@@ -877,8 +1056,8 @@ namespace mx {
 #endif // #ifdef _DEBUG
 
 
-#define MX_PROCADDR( NAME, ENCNAME, ENCLEN )			{ LPVOID & pvRef = reinterpret_cast<LPVOID &>(m_pf ## NAME);													\
-														pvRef = const_cast<LPVOID>(GetProcAddress( _T_F16ED7E0_advapi32_dll, _LEN_F16ED7E0, ENCNAME, ENCLEN, poObj ));	\
+#define MX_PROCADDR( NAME, ENCNAME, ENCLEN )			{ LPVOID & pvRef = reinterpret_cast<LPVOID &>(m_pf ## NAME);														\
+														pvRef = const_cast<LPVOID>(mx::CSystem::GetProcAddress( _T_LEN_F16ED7E0_advapi32_dll, ENCNAME, ENCLEN, poObj ));	\
 														MX_CHECK( NAME ); }
 
 		MX_PROCADDR( OpenProcessToken, _T_F9C60615_OpenProcessToken, _LEN_F9C60615 );
@@ -886,6 +1065,44 @@ namespace mx {
 		MX_PROCADDR( AdjustTokenPrivileges, _T_0DE3E5CF_AdjustTokenPrivileges, _LEN_0DE3E5CF );
 
 		::ZeroMemory( szAdvapi32, MX_ELEMENTS( szAdvapi32 ) );
+#undef MX_CHECK
+#undef MX_PROCADDR
+	}
+
+	// Load ntdll.dll functions.
+	VOID CSystem::LoadNtdll() {
+		CHAR szAtDll[_LEN_84C05E40+1];
+		_DEC_84C05E40_ntdll_dll( szAtDll );
+		CPeObject poObj;
+		CFile fFile;
+		if ( !FindDll( szAtDll, fFile ) ) {
+			::ZeroMemory( szAtDll, MX_ELEMENTS( szAtDll ) );
+			return;
+		}
+		if ( !poObj.LoadImageFromMemory( fFile ) ) {
+			::ZeroMemory( szAtDll, MX_ELEMENTS( szAtDll ) );
+			return;
+		}
+
+#ifdef _DEBUG
+	LPVOID pfTemp;
+	HMODULE hDll = ::GetModuleHandleA( szAtDll );
+#define MX_CHECK( NAME )																						\
+	pfTemp = ::GetProcAddress( hDll, #NAME );																	\
+	assert( pfTemp == m_pf ## NAME )
+#else
+#define MX_CHECK( NAME )
+#endif // #ifdef _DEBUG
+
+
+#define MX_PROCADDR( NAME, ENCNAME, ENCLEN )			{ LPVOID & pvRef = reinterpret_cast<LPVOID &>(m_pf ## NAME);													\
+														pvRef = const_cast<LPVOID>(mx::CSystem::GetProcAddress( _T_LEN_84C05E40_ntdll_dll, ENCNAME, ENCLEN, poObj ));	\
+														MX_CHECK( NAME ); }
+
+		MX_PROCADDR( NtSuspendProcess, _T_1C2211DA_NtSuspendProcess, _LEN_1C2211DA );
+		MX_PROCADDR( NtResumeProcess, _T_4CF489E5_NtResumeProcess, _LEN_4CF489E5 );
+
+		::ZeroMemory( szAtDll, MX_ELEMENTS( szAtDll ) );
 #undef MX_CHECK
 #undef MX_PROCADDR
 	}

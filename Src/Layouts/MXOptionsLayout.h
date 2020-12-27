@@ -12,7 +12,7 @@ namespace mx {
 	public :
 		// == Enumerations.
 		// Control ID's.
-		enum MX_OPTIONS_IDS {
+		enum MX_OPTIONS_IDS : WORD {
 			MX_OI_NONE,
 			MX_OI_DIALOG,
 			MX_OI_LIST,
@@ -43,6 +43,10 @@ namespace mx {
 			MX_OI_GENERAL_VIEW_RANGES,
 			MX_OI_GENERAL_VIEW_EXAMPLE,
 
+			MX_OI_GENERAL_FORMAT_SETTINGS,
+			MX_OI_GENERAL_FORMAT_HEX,
+			MX_OI_GENERAL_FORMAT_SHORT_ENUMS,
+
 			MX_OI_GENERAL_SEARCH,
 			MX_OI_GENERAL_SEARCH_SEARCH_RANGES,
 			MX_OI_GENERAL_SEARCH_MEM_IMAGE,
@@ -71,6 +75,11 @@ namespace mx {
 			MX_OI_GENERAL_SEARCH_EPSILON,
 			MX_OI_GENERAL_SEARCH_EPSILON_EDIT,
 
+			MX_OI_SEARCH_EX,
+			MX_OI_SEARCH_EX_BYTESWAP,
+			MX_OI_SEARCH_EX_BYTESWAP_TYPE_LABEL,
+			MX_OI_SEARCH_EX_BYTESWAP_TYPE_COMBO,
+
 			MX_OI_OPEN_PROCESS,
 			MX_OI_OPEN_PROCESS_SHOW_GROUP,
 			MX_OI_OPEN_PROCESS_PROCESS,
@@ -83,21 +92,55 @@ namespace mx {
 			MX_OI_OPEN_PROCESS_ALL,
 			MX_OI_OPEN_PROCESS_NONE,
 			MX_OI_OPEN_PROCESS_EXPLAIN,
+
+
+			MX_OI_HOTKEYS,
+			MX_OI_HOTKEYS_LIST,
+			MX_OI_HOTKEYS_ADD,
+			MX_OI_HOTKEYS_DELETE,
+			MX_OI_HOTKEYS_UP,
+			MX_OI_HOTKEYS_DOWN,
+			MX_OI_HOTKEYS_OPTIONS_GROUP,
+			MX_OI_HOTKEYS_OPTIONS_KEY_LABEL,
+			MX_OI_HOTKEYS_OPTIONS_KEY_COMBO,
+			MX_OI_HOTKEYS_OPTIONS_KEY_BUTTON,
+			MX_OI_HOTKEYS_OPTIONS_MOD_LABEL,
+			MX_OI_HOTKEYS_OPTIONS_MOD_COMBO,
+			MX_OI_HOTKEYS_OPTIONS_FUNCTION_LABEL,
+			MX_OI_HOTKEYS_OPTIONS_FUNCTION_COMBO,
+			MX_OI_HOTKEYS_OPTIONS_METHOD_LABEL,
+			MX_OI_HOTKEYS_OPTIONS_METHOD_COMBO,
+			MX_OI_HOTKEYS_OPTIONS_PARM1_DESC_LABEL,
+			MX_OI_HOTKEYS_OPTIONS_PARM2_DESC_LABEL,
+			MX_OI_HOTKEYS_OPTIONS_PARM3_DESC_LABEL,
+			MX_OI_HOTKEYS_OPTIONS_PARM1_LABEL,
+			MX_OI_HOTKEYS_OPTIONS_PARM2_LABEL,
+			MX_OI_HOTKEYS_OPTIONS_PARM3_LABEL,
+			MX_OI_HOTKEYS_OPTIONS_PARM1_EDIT,
+			MX_OI_HOTKEYS_OPTIONS_PARM2_EDIT,
+			MX_OI_HOTKEYS_OPTIONS_PARM3_EDIT,
+			MX_OI_HOTKEYS_OPTIONS_WARNING_LABEL,
 		};
 
 
 		// == Functions.
 		// Creates the Options dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
-		static BOOL								CreateOptionsDialog( CWidget * _pwParent, MX_OPTIONS * _poOptions );
+		static BOOL								CreateOptionsDialog( CWidget * _pwParent, MX_OPTIONS * _poOptions, int32_t _i32Page );
 
 		// Creates the general options page.
-		static CWidget *						CreateGeneralPage( CWidget * _pwParent );
+		static CWidget *						CreateGeneralPage( CWidget * _pwParent, MX_OPTIONS * _poOptions );
 
 		// Creates the open-process options page.
-		static CWidget *						CreateOpenProcPage( CWidget * _pwParent );
+		static CWidget *						CreateOpenProcPage( CWidget * _pwParent, MX_OPTIONS * _poOptions );
 
 		// Creates the general search options page.
-		static CWidget *						CreateGeneralSearchPage( CWidget * _pwParent );
+		static CWidget *						CreateGeneralSearchPage( CWidget * _pwParent, MX_OPTIONS * _poOptions );
+
+		// Creates the extended search options page.
+		static CWidget *						CreateSearchExPage( CWidget * _pwParent, MX_OPTIONS * _poOptions );
+
+		// Creates the hotkeys options page.
+		static CWidget *						CreateHotkeysPage( CWidget * _pwParent, MX_OPTIONS * _poOptions );
 
 
 	protected :
@@ -111,13 +154,19 @@ namespace mx {
 		// General search section.
 		static LSW_WIDGET_LAYOUT				m_wlOptionsGeneralSearch[];
 
+		// Extended search section.
+		static LSW_WIDGET_LAYOUT				m_wlOptionsSearchEx[];
+
 		// Open-process section.
 		static LSW_WIDGET_LAYOUT				m_wlOptionsOpenProc[];
+
+		// Hotkeys section.
+		static LSW_WIDGET_LAYOUT				m_wlOptionsHotkeys[];
 
 
 		// == Functions.
 		// Default window-creation.
-		static CWidget *						CreatePage( CWidget * _pwParent, const LSW_WIDGET_LAYOUT * _pwlLayout, size_t _sTotal );
+		static CWidget *						CreatePage( CWidget * _pwParent, const LSW_WIDGET_LAYOUT * _pwlLayout, size_t _sTotal, MX_OPTIONS * _poOptions );
 
 	};
 

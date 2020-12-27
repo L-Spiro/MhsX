@@ -7,7 +7,7 @@ namespace lsw {
 
 	class CListView : public CWidget {
 	public :
-		CListView( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		CListView( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 
 
 		// == Functions.
@@ -17,6 +17,15 @@ namespace lsw {
 		// If the list-view control was created without the LVS_OWNERDATA style, this macro causes the control to allocate its internal data structures for
 		//	the specified number of items. This prevents the control from having to allocate the data structures every time an item is added.
 		VOID								SetItemCount( INT _cItems );
+
+		// Sets the virtual number of items in a virtual list view.
+		VOID								SetItemCountEx( INT _cItems, DWORD _dwFlags );
+
+		// Gets the number of items in a list-view control.
+		int									GetItemCount() const;
+
+		// Removes an item from a list-view control.
+		BOOL								DeleteItem( int _iItem );
 
 		// Gets the number of columns.
 		INT									GetTotalColumns() const;
@@ -35,6 +44,15 @@ namespace lsw {
 
 		// Sets the width of a column.
 		BOOL								SetColumnWidth( INT _iCol, INT _iWidth );
+
+		// Gets the width of a column.
+		INT									GetColumnWidth( INT _iCol ) const;
+
+		// Deletes a column.
+		BOOL								DeleteColumn( INT _iCol );
+
+		// Deletes all columns.
+		VOID								DeleteAllColumns();
 
 		// Inserts an item.  Returns the index of the item.
 		INT									InsertItem( const LVITEMW &_iItem );
@@ -67,16 +85,22 @@ namespace lsw {
 		VOID								GetItemText( INT _iItem, INT _iSubItem, std::string &_sRet );
 
 		// Gets the index of the (first) selected item or -1.
-		INT									GetFirstSelectedItem();
+		INT									GetFirstSelectedItem() const;
 
 		// Gets the data of the selected item or returns -1.
-		LPARAM								GetSelData();
+		LPARAM								GetSelData() const;
 
 		// Gets an item.  _iItm is input and output.
-		BOOL								GetItem( INT _iItem, INT _iSubItem, LVITEMW &_iItm );
+		BOOL								GetItem( INT _iItem, INT _iSubItem, LVITEMW &_iItm ) const;
 
 		// Gets an item.  _iItm is input and output.
-		BOOL								GetItem( INT _iItem, INT _iSubItem, LVITEMA &_iItm );
+		BOOL								GetItem( INT _iItem, INT _iSubItem, LVITEMA &_iItm ) const;
+
+		// Gets the item's state.
+		UINT								GetItemState( INT _iItem, UINT _uiMask ) const;
+
+		// Indicates whether an item in the list-view control is visible.
+		BOOL								IsItemVisible( INT _iItem ) const;
 
 		// Sort items.
 		virtual BOOL						SortItems( INT _iSubItem );
@@ -86,6 +110,18 @@ namespace lsw {
 
 		// Delete all items.
 		virtual VOID						DeleteAll();
+
+		// Delete all items (notification responder).
+		virtual BOOL						DeleteAllNotify() { return 1; }
+
+		// Requesting information (notification responder).
+		virtual BOOL						GetDispInfoNotify( NMLVDISPINFOW * _plvdiInfo ) { return 1; }
+
+		// Determines the type of control this is.
+		virtual uint32_t					WidgetType() const { return LSW_LT_LISTVIEW; }
+
+		// Returns true if this is a CListView class.
+		virtual bool						IsListView() const { return true; }
 
 
 	protected :

@@ -29,11 +29,16 @@ namespace lsw {
 		// Evaluates the expression.
 		int64_t							Evaluate() const;
 
+		// Sets whether or not to treat it as hex.
+		void							SetTreatsAsHex( bool _bVal ) { m_bTreatAsHex = _bVal != false; }
+
 
 	protected :
 		// == Members.
 		// Container.  Holds the parsed data and evaluates the syntax tree to get a result.
 		ee::CExpEvalContainer *			m_peecContainer;
+
+		bool							m_bTreatAsHex;
 	};
 
 }	// namespace lsw

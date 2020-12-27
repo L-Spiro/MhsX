@@ -1,7 +1,8 @@
 #pragma once
 #include "../MXMhsX.h"
+#include "../MemHack/MXMemHack.h"
 #include "../Options/MXOptions.h"
-#include <ListBox/LSWListBox.h>
+#include "../Search/MXSearcher.h"
 #include <LSWWin.h>
 #include <MainWindow/LSWMainWindow.h>
 #include <string>
@@ -12,7 +13,7 @@ namespace mx {
 
 	class CNewDataTypeSearchWindow : public lsw::CMainWindow {
 	public :
-		CNewDataTypeSearchWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, MX_OPTIONS * _poOptions, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		CNewDataTypeSearchWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 
 
 		// == Functions.
@@ -24,6 +25,11 @@ namespace mx {
 
 		// WM_CLOSE.
 		virtual LSW_HANDLED					Close();
+
+		// Translate a child's tooltip text.
+		virtual std::wstring				TranslateTooltip( const std::string &_sText ) { 
+			return CStringDecoder::DecodeToWString( _sText.c_str(), _sText.size() );
+		}
 
 
 	protected :
@@ -40,11 +46,14 @@ namespace mx {
 			std::wstring					wsToText;
 			std::vector<std::wstring>		vFromHistory;
 			std::vector<std::wstring>		vToHistory;
+
+			BOOL							bInvertResults;
 		};
 
 
 		// == Members.
-		MX_OPTIONS *						m_poOptions;
+		//MX_OPTIONS *						m_poOptions;
+		CMemHack *							m_pmhMemHack;
 
 		static MX_SEARCH_WIN_DATA			m_swdData;
 
@@ -52,6 +61,12 @@ namespace mx {
 		// == Functions.
 		// Saves the current dialog values to an MX_SEARCH_WIN_DATA structure.
 		void								SaveDialogData( MX_SEARCH_WIN_DATA &_swdData );
+
+		// Validates the dialog box.
+		bool								DialogContentsAreValid( CSecureWString &_wsError, CSearcher::MX_SEARCH_PARMS &_spParmsIfValid );
+
+		// Updates the dialog.
+		void								UpdateDialog();
 	};
 
 }	// namespace mx

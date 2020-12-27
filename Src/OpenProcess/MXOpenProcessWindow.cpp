@@ -8,9 +8,9 @@
 
 namespace mx {
 
-	COpenProcessWindow::COpenProcessWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, MX_OPTIONS * _poOptions, bool _bCreateWidget, HMENU _hMenu ) :
-		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu ),
-		m_poOptions( _poOptions ) {
+	COpenProcessWindow::COpenProcessWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
+		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
+		m_poOptions( reinterpret_cast<MX_OPTIONS *>(_ui64Data) ) {
 		m_dwMainOrAll = COpenProcessLayout::MX_OPI_RADIO_MAIN;
 	}
 
@@ -24,7 +24,7 @@ namespace mx {
 		LPARAM lpId = plvView->GetSelData();
 		if ( lpId == -1 ) {
 			CSystem::MessageBoxError( Wnd(), _T_CD04DF4D_No_process_has_been_selected_, _LEN_CD04DF4D, _T_F1AF2E7E_Select_a_Process, _LEN_F1AF2E7E );
-			return static_cast<DWORD>(-1);
+			return DWINVALID;
 		}
 		::EndDialog( Wnd(), lpId );
 		return static_cast<DWORD>(lpId);
@@ -226,7 +226,7 @@ namespace mx {
 		
 		for ( size_t I = 0; I < _vProcs.size(); ++I ) {
 			INT iIndex = 2;
-			std::wstring wsFile = _vProcs[I].peProcEntry.szExeFile;
+			CSecureWString wsFile = _vProcs[I].peProcEntry.szExeFile;
 			if ( _vProcs[I].bHasWow64 ) {
 				wsFile += L" *32";
 			}
@@ -250,7 +250,7 @@ namespace mx {
 			if ( ShowParents() ) {
 				const MX_PROCESSES * ppParent = FindProcess( _vProcs, _vProcs[I].peProcEntry.th32ParentProcessID );
 				if ( ppParent ) {
-					std::wstring sParent = ppParent->peProcEntry.szExeFile;
+					CSecureWString sParent = ppParent->peProcEntry.szExeFile;
 					sParent += L' ';
 					sParent += L'(';
 					CUtilities::ToHex( ppParent->dwId, sParent, 4 );
@@ -422,6 +422,8 @@ namespace mx {
 			ppProc->sWindows.append( wTemp );
 			//ppProc->vWindows.push_back( wTemp );
 		}
+
+		::EnumChildWindows( _hWnd, EnumChildWindows_GatherWindows, _lParam );
 
 		return TRUE;
 	}

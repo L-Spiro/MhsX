@@ -21,6 +21,7 @@ namespace lsw {
 			}
 			~CEnterCrit() {
 				m_pcsCrit->LeaveCriticalSection();
+				m_pcsCrit = nullptr;
 			}
 
 

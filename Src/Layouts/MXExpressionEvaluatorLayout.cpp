@@ -12,13 +12,14 @@
 namespace mx {
 
 	// == Members.
-#define MX_EXP_W				340
-#define MX_EXP_H				490
-#define MX_EXP_TEXT_W			57
-#define MX_OUTPU_TEXT_W			40
-#define MX_T_MARGIN				2
-#define MX_RESULT_TOP			(MX_T_MARGIN + MX_DEF_COMBO_HEIGHT_PXL + 2)
-	// The layout for the Found Addresses dockable window.
+#define MX_EXP_W									340
+#define MX_EXP_H									491
+#define MX_EXP_TEXT_W								57
+#define MX_OUTPU_TEXT_W								40
+#define MX_T_MARGIN									2
+#define MX_EXP_EDIT_LINES							4
+#define MX_RESULT_TOP								(MX_T_MARGIN + (MX_DEF_EDIT_HEIGHT_PXL + 15 * MX_EXP_EDIT_LINES) + 2)
+	// The layout for the Expression Evaluator dockable window.
 	LSW_WIDGET_LAYOUT CExpressionEvaluatorLayout::m_wlMainWindow[] = {
 		{
 			MX_EXP_EVAL,							// ltType
@@ -56,8 +57,8 @@ namespace mx {
 			//WS_CHILDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | TBSTYLE_TRANSPARENT | TBSTYLE_REGISTERDROP | TBSTYLE_LIST | TBSTYLE_FLAT | CCS_NODIVIDER | CCS_NOPARENTALIGN | CCS_NORESIZE | CCS_NOMOVEY,
 			WS_VISIBLE | WS_BORDER | WS_CHILD | WS_CLIPCHILDREN |
 				WS_CLIPSIBLINGS | CCS_NODIVIDER | CCS_NOPARENTALIGN |
-				RBS_VARHEIGHT | RBS_BANDBORDERS,		// dwStyle
-			0,//WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_TOOLWINDOW,										// dwStyleEx
+				RBS_VARHEIGHT | RBS_BANDBORDERS,																	// dwStyle
+			0,//WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_TOOLWINDOW,							// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_EE_MAINWINDOW,						// dwParentId
@@ -86,7 +87,7 @@ namespace mx {
 			0,										// sTextLen
 			MX_EE_MAINWINDOW,						// dwParentId
 		},
-		{
+		/*{
 			LSW_LT_LABEL,							// ltType
 			MX_EE_EXP_TEXT,							// wId
 			nullptr,								// lpwcClass
@@ -98,8 +99,8 @@ namespace mx {
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
 			0,										// dwStyleEx
-			MX_MAKE_WCHAR( _T_E54DB928_Expression_ ),																													// pwcText
-			_LEN_E54DB928,																																				// sTextLen
+			MX_MAKE_WCHAR( _T_E54DB928_Expression_ ),																// pwcText
+			_LEN_E54DB928,																							// sTextLen
 			MX_EE_MAINWINDOW,						// dwParentId
 
 			nullptr, 0,								// pcLeftSizeExp
@@ -108,8 +109,31 @@ namespace mx {
 			nullptr, 0,								// pcBottomSizeExp
 			nullptr, 0,								// pcWidthSizeExp
 			MX_FIXED_HEIGHT,						// pcHeightSizeExp
-		},
+		},*/
 		{
+			LSW_LT_EDIT,							// ltType
+			MX_EE_EXP_EDIT,							// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_EXP_TEXT_W + 2,						// iLeft
+			MX_T_MARGIN,							// iTop
+			MX_EXP_W - (MX_EXP_TEXT_W + 2),			// dwWidth
+			MX_DEF_EDIT_HEIGHT_PXL + 15 * MX_EXP_EDIT_LINES,			// dwHeight
+			MX_EDITSTYLE | ES_MULTILINE | ES_AUTOVSCROLL | WS_VSCROLL,	// dwStyle
+			WS_EX_CLIENTEDGE,						// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_EE_MAINWINDOW,						// dwParentId
+
+			MX_PARENT_VCLEFT,						// pcLeftSizeExp
+			MX_PARENT_VCRIGHT,						// pcRightSizeExp
+			MX_TOP_VCOFFSET,						// pcTopSizeExp
+			nullptr, 0,								// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			MX_FIXED_HEIGHT,						// pcHeightSizeExp
+		},
+		/*{
 			LSW_LT_COMBOBOX,						// ltType
 			MX_EE_EXP_COMBO,						// wId
 			WC_COMBOBOXW,							// lpwcClass
@@ -131,7 +155,7 @@ namespace mx {
 			nullptr, 0,								// pcBottomSizeExp
 			nullptr, 0,								// pcWidthSizeExp
 			MX_FIXED_HEIGHT,						// pcHeightSizeExp
-		},
+		},*/
 		{
 			LSW_LT_EDIT,							// ltType
 			MX_EE_EXP_RESULT,						// wId
@@ -212,8 +236,8 @@ namespace mx {
 			MX_RESULT_TOP + MX_DEF_EDIT_HEIGHT_PXL + 2 + MX_DEF_COMBO_HEIGHT_PXL + 2,	// iTop
 			0,										// dwWidth
 			0,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOSORTHEADER | WS_TABSTOP,		// dwStyle
-			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,																								// dwStyleEx
+			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | LVS_REPORT | LVS_ALIGNLEFT | WS_TABSTOP,		// dwStyle
+			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,											// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_EE_MAINWINDOW,						// dwParentId
@@ -235,8 +259,8 @@ namespace mx {
 	// == Functions.
 	// Creates the Expression Evaluator dockable window.
 	CWidget * CExpressionEvaluatorLayout::CreateExpEvalWindow( CWidget * _pwParent ) {
-		std::vector<std::string> sStrings;
-		std::vector<std::wstring> sStringsW;
+		std::vector<CSecureString> sStrings;
+		std::vector<CSecureWString> sStringsW;
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
 		CLayoutManager::UnencryptLayouts( m_wlMainWindow, MX_ELEMENTS( m_wlMainWindow ),
 			vLayouts,

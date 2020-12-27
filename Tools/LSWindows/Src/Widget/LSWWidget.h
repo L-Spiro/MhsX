@@ -16,7 +16,7 @@ namespace lsw {
 		friend class						CDockable;
 		friend class						CLayoutManager;
 	public :
-		CWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		CWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 		virtual ~CWidget();
 
 
@@ -25,6 +25,23 @@ namespace lsw {
 			LSW_H_HANDLED,					// The message was handled and the default procedure should not be called.
 			LSW_H_CONTINUE,					// Continue and let the default procedure handle it.
 		};
+
+		enum LSW_NOTIFICATIONS {
+			// Tab control notifications.
+			LSW_TAB_NM_BASE					= (0U - 3048U),
+			LSW_TAB_NM_CLOSE				= (LSW_TAB_NM_BASE - 0),
+		};
+
+
+		// == Types.
+#pragma pack( push, 1 )
+		// A structure used to send a WM_NOTIFY to the parent as a request for docking information.
+		struct LSW_NMTABCLOSE {
+			NMHDR							hdr;				// Required header.
+			INT								iTab;				// Tab being closed.
+			CWidget *						pwWidget;			// Source widget.
+		};
+#pragma pack( pop )
 
 
 		// == Functions.
@@ -58,6 +75,25 @@ namespace lsw {
 
 		// Enable or disable.
 		BOOL								SetEnabled( BOOL _bEnable ) { m_bEnabled = (_bEnable != 0); return ::EnableWindow( Wnd(), m_bEnabled ); }
+
+		// Set treats all as hex or not.
+		BOOL								SetTreatAsHex( BOOL _bVal ) { BOOL bRet = m_bTreatAsHex; m_bTreatAsHex = _bVal; return bRet; }
+
+		// Does it treat text as hex by default?
+		BOOL								TreatAsHex() const { return m_bTreatAsHex; }
+
+		// Sets the address handler.
+		VOID								SetAddressHandler( ee::CExpEvalContainer::PfAddressHandler _pfahHandler, uintptr_t _uiptrData ) {
+			m_pfahAddressHandler = _pfahHandler;
+			m_uiptrAddressHandlerData = _uiptrData;
+		}
+
+		// Gets the address handler.
+		ee::CExpEvalContainer::PfAddressHandler
+											GetAddressHandler() const { return m_pfahAddressHandler; }
+
+		// Gets the data for the address handler.
+		uintptr_t							GetAddressHandlerData() const { return m_uiptrAddressHandlerData; }
 
 		// Is visible.
 		BOOL								Visible() const { return ::IsWindowVisible( Wnd() ); }
@@ -154,11 +190,11 @@ namespace lsw {
 
 		// Window rectangle.
 		//virtual const LSW_RECT &			WindowRect() const { return m_rRect; }
-		virtual const LSW_RECT				WindowRect( const CWidget * pwChild ) const { LSW_RECT rTemp; ::GetWindowRect( Wnd(), &rTemp ); return rTemp; }
+		virtual const LSW_RECT				WindowRect( const CWidget * pwChild = nullptr ) const { LSW_RECT rTemp; ::GetWindowRect( Wnd(), &rTemp ); return rTemp; }
 
 		// Client rectangle.
 		//virtual const LSW_RECT &			ClientRect() const { return m_rClientRect; }
-		virtual const LSW_RECT				ClientRect( const CWidget * pwChild ) const { LSW_RECT rTemp; ::GetClientRect( Wnd(), &rTemp ); return rTemp; }
+		virtual const LSW_RECT				ClientRect( const CWidget * pwChild = nullptr ) const { LSW_RECT rTemp; ::GetClientRect( Wnd(), &rTemp ); return rTemp; }
 
 		// Starting window rectangle.
 		virtual const LSW_RECT &			StartRect() const { return m_rStartingRect; }
@@ -175,6 +211,14 @@ namespace lsw {
 		//	call this.
 		VOID								UpdateRects();
 
+		// Forces the resizing of this control and all child controls.
+		VOID								ForceSizeUpdate() {
+			LSW_RECT rRect;
+			// Send a fake WM_SIZE message to cause the window to recalculate and redraw its layout.
+			::GetClientRect( Wnd(), &rRect );
+			::SendMessageW( Wnd(), WM_SIZE, SIZE_RESTORED, MAKELPARAM( rRect.Width(), rRect.Height() ) );
+		}
+
 		// Do we have a given child widget?
 		bool								HasChild( const CWidget * _pwChild ) const;
 
@@ -184,8 +228,83 @@ namespace lsw {
 		// Gets a pointer to a child with the given ID.
 		const CWidget *						FindChild( WORD _wId ) const;
 
+		// Gets a pointer to a parent with the given ID.
+		CWidget *							FindParent( WORD _wId );
+
+		// Gets a pointer to a parent with the given ID.
+		const CWidget *						FindParent( WORD _wId ) const;
+
 		// Gets the font.
 		HFONT								GetFont() const { return reinterpret_cast<HFONT>(::SendMessageW( Wnd(), WM_GETFONT, 0L, 0L )); }
+
+		// Determines the type of control this is.
+		virtual uint32_t					WidgetType() const { return LSW_LT_WIDGET; }
+
+		// Returns true if this is a CButton class.
+		virtual bool						IsButton() const { return false; }
+
+		// Returns true if this is a CCheckButton class.
+		virtual bool						IsCheckButton() const { return false; }
+
+		// Returns true if this is a CComboBox class.
+		virtual bool						IsComboBox() const { return false; }
+
+		// Returns true if this is a CComboBoxEx class.
+		virtual bool						IsComboBoxEx() const { return false; }
+
+		// Returns true if this is a CDockable class.
+		virtual bool						IsDockable() const { return false; }
+
+		// Returns true if this is a CEdit class.
+		virtual bool						IsEdit() const { return false; }
+
+		// Returns true if this is a CGroupBox class.
+		virtual bool						IsGroupBox() const { return false; }
+
+		// Returns true if this is a CListBox class.
+		virtual bool						IsListBox() const { return false; }
+
+		// Returns true if this is a CListView class.
+		virtual bool						IsListView() const { return false; }
+
+		// Returns true if this is a CMainWindow class.
+		virtual bool						IsMainWindow() const { return false; }
+
+		// Returns true if this is a CMultiSplitter class.
+		virtual bool						IsMultiSplitter() const { return false; }
+
+		// Returns true if this is a CTreeList class.
+		virtual bool						IsTreeList() const { return false; }
+
+		// Returns true if this is a CProgressBar class.
+		virtual bool						IsProgressBar() const { return false; }
+
+		// Returns true if this is a CRadioButton class.
+		virtual bool						IsRadioButton() const { return false; }
+
+		// Returns true if this is a CRebar class.
+		virtual bool						IsRebar() const { return false; }
+
+		// Returns true if this is a CSplitter class.
+		virtual bool						IsSplitter() const { return false; }
+
+		// Returns true if this is a CStatic class.
+		virtual bool						IsStatic() const { return false; }
+
+		// Returns true if this is a CStatusBar class.
+		virtual bool						IsStatusBar() const { return false; }
+
+		// Returns true if this is a CTab class.
+		virtual bool						IsTab() const { return false; }
+
+		// Returns true if this is a CToolBar class.
+		virtual bool						IsToolBar() const { return false; }
+
+		// Set the parent.
+		void								SetWidgetParent( CWidget * _pwParent );
+
+		// Translate a child's tooltip text.
+		virtual std::wstring				TranslateTooltip( const std::string &_sText );
 
 		// Sets a given font on all children of a window.
 		static BOOL CALLBACK				EnumChildWindows_SetFont( HWND _hWnd, LPARAM _lParam );
@@ -223,6 +342,21 @@ namespace lsw {
 		// Default state.  Depends on the type of control.
 		BOOL								m_bActive;
 
+		// Treat text as hex when possible?
+		BOOL								m_bTreatAsHex;
+
+		// Tooltip styles.
+		DWORD								m_dwTooltipStyle;
+
+		// Tooltip extended styles.
+		DWORD								m_dwTooltipStyleEx;
+
+		// The tooltip text.
+		std::string							m_sTooltipText;
+
+		// The tooltip control.
+		HWND								m_hTooltip;
+
 		// Children.
 		std::vector<CWidget *>				m_vChildren;
 
@@ -255,6 +389,16 @@ namespace lsw {
 
 		// Last hit returned by NcHitTest().
 		INT									m_iLastHit;
+
+		// If in the destructor, the WM_NCDESTROY handler should not call delete.
+		BOOL								m_bInDestructor;
+
+		// The address handler.
+		ee::CExpEvalContainer::PfAddressHandler
+											m_pfahAddressHandler;
+
+		// The data to be sent to the address handler.
+		uintptr_t							m_uiptrAddressHandlerData;
 
 
 		// == Message Handlers.
@@ -315,6 +459,12 @@ namespace lsw {
 		// WM_NCPAINT.
 		virtual LSW_HANDLED					NcPaint( HRGN _hRgn ) { return LSW_H_CONTINUE; }
 
+		// WM_CTLCOLOREDIT.
+		virtual LSW_HANDLED					CtlColorEdit( HDC _hDc, CWidget * _pwControl, HBRUSH &_hBrush ) { return LSW_H_CONTINUE; }
+
+		// WM_CTLCOLORLISTBOX
+		virtual LSW_HANDLED					CtlColorListBox( HDC _hDc, CWidget * _pwControl, HBRUSH &_hBrush ) { return LSW_H_CONTINUE; }
+
 		// WM_CTLCOLORSTATIC.
 		virtual LSW_HANDLED					CtlColorStatic( HDC _hDc, CWidget * _pwControl, HBRUSH &_hBrush ) { return LSW_H_CONTINUE; }
 
@@ -332,6 +482,26 @@ namespace lsw {
 
 		// WM_CAPTURECHANGED.
 		virtual LSW_HANDLED					CaptureChanged( CWidget * _pwNewCaptureOwner ) { return LSW_H_CONTINUE; }
+
+		// WM_HSCROLL
+		virtual LSW_HANDLED					HScroll( USHORT _uScrollPos, USHORT _uScrollType, HWND _hSender ) { return LSW_H_CONTINUE; }
+
+		// WM_VSCROLL
+		virtual LSW_HANDLED					VScroll( USHORT _uScrollPos, USHORT _uScrollType, HWND _hSender ) { return LSW_H_CONTINUE; }
+
+		// WM_KEYDOWN
+		virtual LSW_HANDLED					KeyDown( UINT _uiKeyCode, UINT _uiFlags ) {
+			return LSW_H_CONTINUE;
+		}
+
+		// WM_KEYUP
+		virtual LSW_HANDLED					KeyUp( UINT _uiKeyCode, UINT _uiFlags ) { return LSW_H_CONTINUE; }
+
+		// WM_SYSKEYDOWN
+		virtual LSW_HANDLED					SysKeyDown( UINT _uiKeyCode, UINT _uiFlags ) { return LSW_H_CONTINUE; }
+
+		// WM_SYSKEYUP
+		virtual LSW_HANDLED					SysKeyUp( UINT _uiKeyCode, UINT _uiFlags ) { return LSW_H_CONTINUE; }
 
 		// WM_LBUTTONDBLCLK.
 		virtual LSW_HANDLED					LButtonDblClk( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
@@ -379,9 +549,7 @@ namespace lsw {
 		virtual LSW_HANDLED					NcLButtonDown( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
 
 		// WM_NCLBUTTONUP.
-		virtual LSW_HANDLED					NcLButtonUp( INT _iHitTest, const POINTS &_pCursorPos ) {
-			return LSW_H_CONTINUE;
-		}
+		virtual LSW_HANDLED					NcLButtonUp( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
 
 		// WM_NCMBUTTONDBLCLK.
 		virtual LSW_HANDLED					NcMButtonDblClk( INT _iHitTest, const POINTS &_pCursorPos ) { return LSW_H_CONTINUE; }
@@ -449,6 +617,15 @@ namespace lsw {
 		// TBN_GETBUTTONINFO.
 		virtual LSW_HANDLED					TbnGetButtonInfo( LPNMTOOLBARW _lptbToolBar ) { return LSW_H_CONTINUE; }
 
+		// WM_TIMER.
+		virtual LSW_HANDLED					Timer( UINT_PTR _uiptrId, TIMERPROC _tpProc ) { return LSW_H_CONTINUE; }
+
+		// WM_HOTKEY.
+		virtual LSW_HANDLED					Hotkey( INT _iIdentifier, INT _iVirtualKey, INT _iMod ) { return LSW_H_CONTINUE; }
+
+		// WM_USER/custom messages.
+		virtual LSW_HANDLED					CustomPrivateMsg( UINT _uMsg, WPARAM _wParam, LPARAM _lParam ) { return LSW_H_CONTINUE; }
+
 
 		// == Functions.
 		// Remove a child.
@@ -460,9 +637,6 @@ namespace lsw {
 		// Informs that a child was removed from a child control (IE this control's child had a child control removed from it).
 		// Is also called on the control from which a child was removed for convenience.
 		virtual void						ChildWasRemoved( const CWidget * _pwChild );
-
-		// Set the parent.
-		void								SetWidgetParent( CWidget * _pwParent );
 
 		// Evaluates expressions to determine a new rectangle for the control.
 		virtual void						EvalNewSize();

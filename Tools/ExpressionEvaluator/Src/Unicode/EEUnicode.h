@@ -2,7 +2,7 @@
 
 #include "../EEExpEval.h"
 
-#define EE_GEN_TABLE
+//#define EE_GEN_TABLE
 
 namespace ee {
 

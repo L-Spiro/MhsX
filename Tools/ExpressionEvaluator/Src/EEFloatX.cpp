@@ -128,6 +128,9 @@ namespace ee {
 
 		double dTemp = (*reinterpret_cast<const double *>(&uiMinN));
 		dTempVal = (1ULL << DBL_MANT_DIG) / dTemp;
+		if ( std::isinf( dTempVal ) ) {
+			dTempVal = std::nexttoward( dTempVal, 0.0 );
+		}
 		const uint64_t uiMulN = (*reinterpret_cast<const uint64_t *>(&dTempVal));				// (1 << DBL_MANT_DIG) / uiMinN
 		dTempVal = dTemp / (1ULL << (DBL_MANT_DIG - iShift));
         const uint64_t uiMulC = (*reinterpret_cast<const uint64_t *>(&dTempVal));				// uiMinN / (1 << (DBL_MANT_DIG - iShift))
@@ -171,7 +174,7 @@ namespace ee {
 		bSign = uiSign ? true : false;*/
 		CreateFromBits( uiFinal, _uiExpBits, _uiManBits, _bImplicitMantissaBit, _bHasSign );
 		
-
+		/*
 #ifdef _DEBUG
 		double dVal = AsDouble();
 		if ( uiExpBits == 8 && uiManBits == FLT_MANT_DIG && bImplicitManBit ) {
@@ -182,6 +185,7 @@ namespace ee {
 			assert( fVal == dTemp );
 		}
 #endif	// #ifdef _DEBUG
+		*/
 
             //return diV.uiVal | uiSign;*/
 

@@ -1,14 +1,15 @@
 #pragma once
-
 #include "../MXMhsX.h"
-#include "MXPeStructs.h"
 
 namespace mx {
 
-	class CPeWorks {
+	class CPrimitiveBase {
 	public :
-		CPeWorks();
-		~CPeWorks();
+		// == Functions.
+
+
+	protected :
+		CPrimitiveBase() {}
 	};
 
 }	// namespace mx

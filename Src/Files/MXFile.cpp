@@ -86,18 +86,26 @@ namespace mx {
 	}
 
 	// Reads from the opened file.
-	DWORD CFile::Read( LPVOID _lpvBuffer, DWORD _dwNumberOfBytesToRead ) const {
+	DWORD CFile::Read( LPVOID _lpvBuffer, DWORD _dwNumberOfBytesToRead, DWORD * _pdwBytesRead ) const {
 		if ( m_hFile == INVALID_HANDLE_VALUE ) { return 0; }
 		DWORD dwRead = 0;
-		if ( ::ReadFile( m_hFile, _lpvBuffer, _dwNumberOfBytesToRead, &dwRead, NULL ) ) { return dwRead; }
+		if ( ::ReadFile( m_hFile, _lpvBuffer, _dwNumberOfBytesToRead, &dwRead, NULL ) ) {
+			if ( _pdwBytesRead ) { (*_pdwBytesRead) = dwRead; }
+			return dwRead;
+		}
+		if ( _pdwBytesRead ) { (*_pdwBytesRead) = 0; }
 		return 0;
 	}
 
 	// Writes to the opened file.
-	DWORD CFile::Write( LPCVOID _lpvBuffer, DWORD _dwNumberOfBytesToWrite ) {
+	DWORD CFile::Write( LPCVOID _lpvBuffer, DWORD _dwNumberOfBytesToWrite, DWORD * _pdwBytesWritten ) {
 		if ( m_hFile == INVALID_HANDLE_VALUE ) { return 0; }
 		DWORD dwWritten = 0;
-		if ( ::WriteFile( m_hFile, _lpvBuffer, _dwNumberOfBytesToWrite, &dwWritten, NULL ) ) { return dwWritten; }
+		if ( ::WriteFile( m_hFile, _lpvBuffer, _dwNumberOfBytesToWrite, &dwWritten, NULL ) ) {
+			if ( _pdwBytesWritten ) { (*_pdwBytesWritten) = dwWritten; }
+			return dwWritten;
+		}
+		if ( _pdwBytesWritten ) { (*_pdwBytesWritten) = 0; }
 		return 0;
 	}
 
@@ -107,7 +115,7 @@ namespace mx {
 	}
 
 	// Moves the file pointer from the current position and returns the new position.
-	UINT64 CFile::MovePointerBy( INT64 _i64Offset ) {
+	UINT64 CFile::MovePointerBy( INT64 _i64Offset ) const {
 		if ( m_hFile == INVALID_HANDLE_VALUE ) { return 0; }
 		LARGE_INTEGER liMoveBy;
 		liMoveBy.QuadPart = _i64Offset;
@@ -117,7 +125,7 @@ namespace mx {
 	}
 
 	// Moves the file pointer to the given file position.
-	UINT64 CFile::MovePointerTo( UINT64 _ui64Pos, BOOL _bFromEnd ) {
+	UINT64 CFile::MovePointerTo( UINT64 _ui64Pos, BOOL _bFromEnd ) const {
 		if ( m_hFile == INVALID_HANDLE_VALUE ) { return 0; }
 		LARGE_INTEGER liMoveBy;
 		liMoveBy.QuadPart = _ui64Pos;
@@ -238,13 +246,13 @@ namespace mx {
 
 		CFile fFile;
 		if ( !fFile.OpenFile( _lpcFile, TRUE ) ) { return _vRet; }
-		size_t sBufferSize = 0;
-		for ( size_t I = 0; I < sSize; I += sBufferSize ) {
-			sBufferSize = sSize - I;
-			if ( sBufferSize > UINT32_MAX ) {	// DWORD-sized buffers.
-				sBufferSize = UINT32_MAX;
+		uint64_t ui64BufferSize = 0;
+		for ( size_t I = 0; I < sSize; I += ui64BufferSize ) {
+			ui64BufferSize = sSize - I;
+			if ( ui64BufferSize > UINT32_MAX ) {	// DWORD-sized buffers.
+				ui64BufferSize = UINT32_MAX;
 			}
-			if ( fFile.Read( &_vRet[I], sBufferSize ) != sBufferSize ) { return _vRet; }
+			if ( fFile.Read( &_vRet[I], static_cast<DWORD>(ui64BufferSize) ) != ui64BufferSize ) { return _vRet; }
 		}
 		return _vRet;
 	}
@@ -260,13 +268,13 @@ namespace mx {
 
 		CFile fFile;
 		if ( !fFile.OpenFile( _lpwFile, TRUE ) ) { return _vRet; }
-		size_t sBufferSize = 0;
-		for ( size_t I = 0; I < sSize; I += sBufferSize ) {
-			sBufferSize = sSize - I;
-			if ( sBufferSize > UINT32_MAX ) {	// DWORD-sized buffers.
-				sBufferSize = UINT32_MAX;
+		uint64_t ui64BufferSize = 0;
+		for ( size_t I = 0; I < sSize; I += ui64BufferSize ) {
+			ui64BufferSize = sSize - I;
+			if ( ui64BufferSize > UINT32_MAX ) {	// DWORD-sized buffers.
+				ui64BufferSize = UINT32_MAX;
 			}
-			if ( fFile.Read( &_vRet[I], sBufferSize ) != sBufferSize ) { return _vRet; }
+			if ( fFile.Read( &_vRet[I], ui64BufferSize ) != ui64BufferSize ) { return _vRet; }
 		}
 		return _vRet;
 	}
@@ -274,11 +282,11 @@ namespace mx {
 	// Converts a WIN32_FILE_ATTRIBUTE_DATA structure to an MX_FILE_ATTR structure.
 	CFile::MX_FILE_ATTR CFile::Win32AttrToMxAttr( const WIN32_FILE_ATTRIBUTE_DATA &_wfadData ) {
 		MX_FILE_ATTR faAttr = {
-			_wfadData.dwFileAttributes,																						// dwAttr
-			(static_cast<UINT64>(_wfadData.ftCreationTime.dwHighDateTime) << 32) | _wfadData.ftCreationTime.dwLowDateTime,	// ui64CreationTime
-			(static_cast<UINT64>(_wfadData.ftLastAccessTime.dwHighDateTime) << 32) | _wfadData.ftLastAccessTime.dwLowDateTime,// ui64AccessTime
+			_wfadData.dwFileAttributes,																							// dwAttr
+			(static_cast<UINT64>(_wfadData.ftCreationTime.dwHighDateTime) << 32) | _wfadData.ftCreationTime.dwLowDateTime,		// ui64CreationTime
+			(static_cast<UINT64>(_wfadData.ftLastAccessTime.dwHighDateTime) << 32) | _wfadData.ftLastAccessTime.dwLowDateTime,	// ui64AccessTime
 			(static_cast<UINT64>(_wfadData.ftLastWriteTime.dwHighDateTime) << 32) | _wfadData.ftLastWriteTime.dwLowDateTime,	// ui64WriteTime
-			(static_cast<UINT64>(_wfadData.nFileSizeHigh) << 32) | _wfadData.nFileSizeLow,									// ui64Size
+			(static_cast<UINT64>(_wfadData.nFileSizeHigh) << 32) | _wfadData.nFileSizeLow,										// ui64Size
 		};
 		return faAttr;
 	}

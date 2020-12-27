@@ -3,8 +3,8 @@
 
 namespace lsw {
 
-	CStatusBar::CStatusBar( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
-		Parent( _wlLayout, _pwParent, _bCreateWidget, _hMenu ) {
+	CStatusBar::CStatusBar( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
+		Parent( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ) {
 	}
 
 	// == Functions.
@@ -43,7 +43,7 @@ namespace lsw {
 		if ( static_cast<INT>(dwLen) <= _nMaxCount ) {
 			return static_cast<DWORD>(::SendMessageA( Wnd(), SB_GETTEXTA, static_cast<WPARAM>(_iIdx), reinterpret_cast<LPARAM>(_lpString) ));
 		}
-		CHAR * pcTemp = new CHAR[dwLen];
+		CHAR * pcTemp = new( std::nothrow ) CHAR[dwLen];
 		DWORD dwRet = static_cast<DWORD>(::SendMessageA( Wnd(), SB_GETTEXTA, static_cast<WPARAM>(_iIdx), reinterpret_cast<LPARAM>(pcTemp) ));
 		::StringCbCopyNA( _lpString, _nMaxCount * sizeof( _lpString[0] ), pcTemp, dwLen * sizeof( pcTemp[0] ) );
 		delete [] pcTemp;
@@ -57,7 +57,7 @@ namespace lsw {
 		if ( static_cast<INT>(dwLen) <= _nMaxCount ) {
 			return static_cast<DWORD>(::SendMessageW( Wnd(), SB_GETTEXTW, static_cast<WPARAM>(_iIdx), reinterpret_cast<LPARAM>(_lpString) ));
 		}
-		WCHAR * pwcTemp = new WCHAR[dwLen];
+		WCHAR * pwcTemp = new( std::nothrow ) WCHAR[dwLen];
 		DWORD dwRet = static_cast<DWORD>(::SendMessageW( Wnd(), SB_GETTEXTW, static_cast<WPARAM>(_iIdx), reinterpret_cast<LPARAM>(pwcTemp) ));
 		::StringCbCopyNW( _lpString, _nMaxCount * sizeof( _lpString[0] ), pwcTemp, dwLen * sizeof( pwcTemp[0] ) );
 		delete [] pwcTemp;
@@ -67,7 +67,7 @@ namespace lsw {
 	// Retrieves the text from the specified part of a status window.
 	std::string CStatusBar::GetTextA( INT _iIdx ) const {
 		DWORD dwLen = GetTextLengthA( _iIdx ) + 1;
-		CHAR * pcTemp = new CHAR[dwLen];
+		CHAR * pcTemp = new( std::nothrow ) CHAR[dwLen];
 		::SendMessageA( Wnd(), SB_GETTEXTA, static_cast<WPARAM>(_iIdx), reinterpret_cast<LPARAM>(pcTemp) );
 		std::string sRet = pcTemp;
 		delete [] pcTemp;
@@ -77,7 +77,7 @@ namespace lsw {
 	// Retrieves the text from the specified part of a status window.
 	std::wstring CStatusBar::GetTextW( INT _iIdx ) const {
 		DWORD dwLen = GetTextLengthA( _iIdx ) + 1;
-		WCHAR * pwcTemp = new WCHAR[dwLen];
+		WCHAR * pwcTemp = new( std::nothrow ) WCHAR[dwLen];
 		::SendMessageW( Wnd(), SB_GETTEXTW, static_cast<WPARAM>(_iIdx), reinterpret_cast<LPARAM>(pwcTemp) );
 		std::wstring sRet = pwcTemp;
 		delete [] pwcTemp;
@@ -114,7 +114,7 @@ namespace lsw {
 		/*::GetWindowRect( Wnd(), &m_rRect );
 		::GetClientRect( Wnd(), &m_rClientRect );*/
 
-		if ( m_pwParent ) {
+		if ( m_pwParent && m_vParts.size() ) {
 			LONG lChange = m_pwParent->WindowRect( this ).Width() - m_pwParent->StartRect().Width();
 			std::vector<INT> vInts;
 			vInts.reserve( m_vParts.size() );

@@ -9,7 +9,7 @@ namespace lsw {
 
 	class CMultiSplitter : public CWidget, public CDockTarget {
 	public :
-		CMultiSplitter( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		CMultiSplitter( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 		~CMultiSplitter();
 
 
@@ -45,6 +45,12 @@ namespace lsw {
 		// Returned distance is squared.
 		virtual LONG						GetAttachPoint( const POINT &_pPoint, LSW_DT_ATTACH &_maAttach, INT _iSizeSuggestion,
 			LSW_RECT &_rDrawRect );
+
+		// Determines the type of control this is.
+		virtual uint32_t					WidgetType() const { return LSW_LT_MULTISPLITTER; }
+
+		// Returns true if this is a CMultiSplitter class.
+		virtual bool						IsMultiSplitter() const { return true; }
 
 	private :
 		// == Types.
@@ -95,8 +101,14 @@ namespace lsw {
 		// All of the layers, in any order.
 		std::vector<LSW_MS_LAYER *>			m_vLayers;
 
+		// All of the layers, in any order, except the layer being dragged, if any.
+		std::vector<LSW_MS_LAYER *>			m_vDragLayersCopy;
+
 		// The root rectangle.
 		LSW_MS_RECT							m_meRoot;
+
+		// The copy of the root minus the widget that is being dragged.
+		LSW_MS_RECT							m_meDragRootCopy;
 
 		// Width of the drag bars.
 		INT									m_iBarWidth;
@@ -132,7 +144,7 @@ namespace lsw {
 		INT									GetNewBarY( const POINT &_pCurPoint );
 
 		// Finds a rectangle by its ID.
-		bool								FindRectById( DWORD _dwId, LSW_MS_LAYER_SEARCH &_mlsRet );
+		bool								FindRectById( DWORD _dwId, LSW_MS_LAYER_SEARCH &_mlsRet, LSW_MS_RECT &_mrRoot );
 
 		// Finds a rectangle by its ID.
 		bool								FindRectById( DWORD _dwId, LSW_MS_LAYER * _pmlLayer, LSW_MS_LAYER_SEARCH &_mlsRet );
@@ -231,6 +243,15 @@ namespace lsw {
 
 		// Gets the parent layer given a layer pointer.
 		LSW_MS_LAYER *						GetParentLayerRecursive( LSW_MS_LAYER * _pmlCheckLayer, LSW_MS_LAYER * _pmlLayer, size_t &_sindex );
+
+		// Attach a widget to the given root.
+		bool								Attach( const LSW_DT_ATTACH &_maAttach, LSW_MS_RECT &_mrRoot );
+
+		// Detaches a widget from the given root given its ID.
+		bool								Detach( WORD _wId, LSW_MS_RECT &_mrRoot );
+
+		// Copies the layer tree with a specific layer removed so that it can be dragged elsewhere.
+		bool								CopyLayerTreeForDrag();
 	};
 
 }	// namespace lsw

@@ -8,9 +8,9 @@
 
 namespace mx {
 
-	COptionsPageOpenProc::COptionsPageOpenProc( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, MX_OPTIONS * _poOptions, bool _bCreateWidget, HMENU _hMenu ) :
-		COptionsPage( _wlLayout, _pwParent, _bCreateWidget, _hMenu ),
-		m_poOptions( _poOptions ) {
+	COptionsPageOpenProc::COptionsPageOpenProc( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
+		COptionsPage( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
+		m_poOptions( reinterpret_cast<MX_OPTIONS *>(_ui64Data) ) {
 	}
 
 	// == Functions.

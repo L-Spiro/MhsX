@@ -8,7 +8,7 @@
 #include "LSWDockTarget.h"
 
 #ifndef LSW_POPUP_STYLES
-#define LSW_POPUP_STYLES			(WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_SYSMENU | WS_CAPTION | WS_THICKFRAME)
+#define LSW_POPUP_STYLES			(WS_POPUP | /*WS_CLIPCHILDREN | */WS_CLIPSIBLINGS | WS_SYSMENU | WS_CAPTION | WS_THICKFRAME)
 #endif	// LSW_POPUP_STYLES
 #ifndef LSW_POPUP_STYLESEX
 #define LSW_POPUP_STYLESEX			(WS_EX_TOOLWINDOW | WS_EX_WINDOWEDGE)
@@ -24,7 +24,7 @@ namespace lsw {
 
 	class CDockable : public CWidget {
 	public :
-		CDockable( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		CDockable( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 		~CDockable();
 
 
@@ -100,6 +100,12 @@ namespace lsw {
 
 		// The system color of the right side of the caption when docked.
 		INT									GetRightCaptionColor() const { return m_bShowAsActive ? GetRightCaptionColorActive() : GetRightCaptionColorInactive(); }
+
+		// Determines the type of control this is.
+		virtual uint32_t					WidgetType() const { return LSW_LT_DOCKWINDOW; }
+
+		// Returns true if this is a CDockable class.
+		virtual bool						IsDockable() const { return true; }
 
 		// The dockable message handler.
 		static LRESULT CALLBACK				WindowProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam );

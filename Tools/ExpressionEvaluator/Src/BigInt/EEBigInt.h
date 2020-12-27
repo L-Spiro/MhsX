@@ -251,7 +251,7 @@ namespace ee {
 				return false;
 			}
 
-			uint32_t const ui32MaxDstIndex = EE_MIN( _biX.m_ui32Used + ui32UnitShift, ee::CBigInt::EE_ELEM_COUNT - 1 );
+			uint32_t const ui32MaxDstIndex = EE_MIN_( _biX.m_ui32Used + ui32UnitShift, ee::CBigInt::EE_ELEM_COUNT - 1 );
 
 			for ( uint32_t ui32DstIdx = ui32MaxDstIndex;
 				 ui32DstIdx != static_cast<uint32_t>(-1) && ui32DstIdx >= ui32UnitShift;
@@ -1164,7 +1164,7 @@ namespace ee {
 			uint32_t ui32SecondDivisorByte = liNewRight.m_ui32Data[liNewRight.m_ui32Used-2];
 
 			uint32_t ui32DivisorLen = liNewRight.m_ui32Used + 1;
-			uint32_t * pui32DividendPart = new uint32_t[ui32DivisorLen];
+			uint32_t * pui32DividendPart = new( std::nothrow ) uint32_t[ui32DivisorLen];
 
 			for ( ; ui32J > 0; --ui32J ) {
 				uint64_t ui64Dividend = (static_cast<uint64_t>(liTemp1.m_ui32Data[ui32Pos]) << 32ULL) + liTemp1.m_ui32Data[ui32Pos-1];
@@ -1198,7 +1198,7 @@ namespace ee {
 					//pliK = &liTemp2;
 				/*}
 				else {
-					pliK = new ee::CBigInt( pui32DividendPart, ui32DivisorLen );
+					pliK = new( std::nothrow ) ee::CBigInt( pui32DividendPart, ui32DivisorLen );
 				}*/
 			
 				ee::CBigInt liS = liNewRight;// * ee::CBigInt( static_cast<int64_t>(ui64Q) ) );
@@ -1243,7 +1243,7 @@ namespace ee {
 			_liQuotient.m_ui32Used = EE_MIN( _liQuotient.m_ui32Used, 1 );
 
 			_liRemainder.m_ui32Used = ShiftRight( liTemp1.m_ui32Data, liTemp1.m_ui32Used, ui32Shift );
-			//::memcpy_s( _liRemainder.m_ui32Data, liTemp1.m_ui32Data, sizeof( _liRemainder.m_ui32Data[0] ) * _liRemainder.m_ui32Used );
+			//std::memcpy_s( _liRemainder.m_ui32Data, liTemp1.m_ui32Data, sizeof( _liRemainder.m_ui32Data[0] ) * _liRemainder.m_ui32Used );
 			::memcpy_s( _liRemainder.m_ui32Data, sizeof( _liRemainder.m_ui32Data ), _biOther.m_ui32Data, _biOther.m_ui32Used * sizeof( uint32_t ) );
 			for ( Y = _liRemainder.m_ui32Used; Y < _uMaxDigits; ++Y ) {
 				_liRemainder.m_ui32Data[Y] = 0;

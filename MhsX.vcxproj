@@ -9,6 +9,14 @@
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Final|Win32">
+      <Configuration>Final</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Final|x64">
+      <Configuration>Final</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -20,25 +28,38 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B12702AD-ABFB-343A-A199-8E24837244A3}</ProjectGuid>
-    <Keyword>Qt4VSv1.0</Keyword>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -49,10 +70,16 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Final|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -73,105 +100,180 @@
     <GenerateManifest>true</GenerateManifest>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+    <OutDir>$(SolutionDir)Final\</OutDir>
+    <GenerateManifest>true</GenerateManifest>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <GenerateManifest>true</GenerateManifest>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+    <OutDir>$(SolutionDir)Final\</OutDir>
+    <GenerateManifest>true</GenerateManifest>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>_HAS_EXCEPTIONS=0;UNICODE;WIN32;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ONIG_STATIC;_HAS_EXCEPTIONS=0;UNICODE;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <FloatingPointModel>Precise</FloatingPointModel>
-      <ExceptionHandling>false</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <CallingConvention>Cdecl</CallingConvention>
+      <OmitDefaultLibName>true</OmitDefaultLibName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>_HAS_EXCEPTIONS=0;UNICODE;WIN32;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ONIG_STATIC;_HAS_EXCEPTIONS=0;UNICODE;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <FloatingPointModel>Precise</FloatingPointModel>
-      <ExceptionHandling>false</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <CallingConvention>Cdecl</CallingConvention>
+      <OmitDefaultLibName>true</OmitDefaultLibName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>_HAS_EXCEPTIONS=0;UNICODE;WIN32;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ONIG_STATIC;_HAS_EXCEPTIONS=0;UNICODE;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <FloatingPointModel>Precise</FloatingPointModel>
-      <ExceptionHandling>false</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <CallingConvention>Cdecl</CallingConvention>
+      <OmitDefaultLibName>true</OmitDefaultLibName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>ONIG_STATIC;UNICODE;WIN32;NDEBUG;MX_FINAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <CallingConvention>Cdecl</CallingConvention>
+      <OmitDefaultLibName>true</OmitDefaultLibName>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>_HAS_EXCEPTIONS=0;UNICODE;WIN32;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ONIG_STATIC;_HAS_EXCEPTIONS=0;UNICODE;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <FloatingPointModel>Precise</FloatingPointModel>
-      <ExceptionHandling>false</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <CallingConvention>Cdecl</CallingConvention>
+      <OmitDefaultLibName>true</OmitDefaultLibName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>ONIG_STATIC;UNICODE;WIN32;NDEBUG;MX_FINAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <CallingConvention>Cdecl</CallingConvention>
+      <OmitDefaultLibName>true</OmitDefaultLibName>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Src\CodePages\MXCodePages.cpp" />
+    <ClCompile Include="Src\Converter\MXConverterWindow.cpp" />
     <ClCompile Include="Src\ExpEval\MXExpEvalWindow.cpp" />
     <ClCompile Include="Src\Files\MXFile.cpp" />
     <ClCompile Include="Src\Files\MXFileMap.cpp" />
+    <ClCompile Include="Src\FloatingPointStudio\MXFloatingPointStudioWindow.cpp" />
+    <ClCompile Include="Src\FoundAddresses\MXFoundAddressesListView.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressesWindow.cpp" />
+    <ClCompile Include="Src\Hotkeys\MXHotkeyManager.cpp" />
+    <ClCompile Include="Src\Hotkeys\MXHotkeyManBase.cpp" />
+    <ClCompile Include="Src\Hotkeys\MXHotkeyPollingMethod.cpp" />
+    <ClCompile Include="Src\Hotkeys\MXHotkeyRegisterHotKeyMethod.cpp" />
+    <ClCompile Include="Src\Hotkeys\MXHotkeyWhKeyboardMethod.cpp" />
+    <ClCompile Include="Src\Html\MXHtml.cpp" />
+    <ClCompile Include="Src\Layouts\MXConverterLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXExpressionEvaluatorLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXFloatingPointStudioLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXFoundAddressLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXLayoutManager.cpp" />
     <ClCompile Include="Src\Layouts\MXMainWindowLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXNewDataTypeSearchLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXNewExpressionSearchLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXNewPointerSearchLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXNewStringSearchLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXOpenProcessLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXOptionsLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXPeWorksLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXSearchProgressLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXStringTheoryLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXTemplateLayout.cpp" />
     <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\MainWindow\MXMhsMainWindow.cpp" />
     <ClCompile Include="Src\MemHack\MXMemHack.cpp" />
@@ -182,29 +284,117 @@
     <ClCompile Include="Src\Options\MXOptionsPage.cpp" />
     <ClCompile Include="Src\Options\MXOptionsPageGeneral.cpp" />
     <ClCompile Include="Src\Options\MXOptionsPageGenSearch.cpp" />
+    <ClCompile Include="Src\Options\MXOptionsPageHotkeys.cpp" />
     <ClCompile Include="Src\Options\MXOptionsPageOpenProc.cpp" />
+    <ClCompile Include="Src\Options\MXOptionsPageSearchEx.cpp" />
     <ClCompile Include="Src\Options\MXOptionsWindow.cpp" />
     <ClCompile Include="Src\PE\MXPeObject.cpp" />
-    <ClCompile Include="Src\PE\MXPeWorks.cpp" />
+    <ClCompile Include="Src\PE\MXPeWorksWindow.cpp" />
+    <ClCompile Include="Src\RegEx\MXOnigurumaSystem.cpp" />
+    <ClCompile Include="Src\RegEx\Oniguruma\ascii.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\big5.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\cp1251.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\euc_jp.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\euc_jp_prop.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\euc_kr.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\euc_tw.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\gb18030.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_1.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_10.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_11.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_13.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_14.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_15.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_16.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_2.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_3.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_4.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_5.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_6.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_7.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_8.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_9.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\koi8.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\koi8_r.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\onig_init.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\regcomp.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\regenc.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\regerror.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\regexec.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\regext.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\reggnu.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\regparse.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\regposerr.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\regposix.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\regsyntax.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\regtrav.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\regversion.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\sjis.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\sjis_prop.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\st.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\unicode.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\unicode_fold1_key.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\unicode_fold2_key.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\unicode_fold3_key.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\unicode_unfold_key.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\utf16_be.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\utf16_le.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\utf32_be.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\utf32_le.c" />
+    <ClCompile Include="Src\RegEx\Oniguruma\utf8.c" />
+    <ClCompile Include="Src\RegEx\RexAlgorithm.cpp" />
+    <ClCompile Include="Src\RegEx\RexInterface.cpp" />
     <ClCompile Include="Src\Search\MXAddressChunkList.cpp" />
     <ClCompile Include="Src\Search\MXNewDataTypeSearchWindow.cpp" />
+    <ClCompile Include="Src\Search\MXNewExpressionSearchWindow.cpp" />
+    <ClCompile Include="Src\Search\MXNewPointerSearchWindow.cpp" />
+    <ClCompile Include="Src\Search\MXNewStringSearchWindow.cpp" />
     <ClCompile Include="Src\Search\MXSearcher.cpp" />
+    <ClCompile Include="Src\Search\MXSearchProgressWindow.cpp" />
+    <ClCompile Include="Src\Search\MXSearchResult1.cpp" />
+    <ClCompile Include="Src\Search\MXSearchResult2.cpp" />
+    <ClCompile Include="Src\Search\MXSearchResultBase.cpp" />
+    <ClCompile Include="Src\Search\MXSearchResultRef.cpp" />
     <ClCompile Include="Src\Strings\MXStringDecoder.cpp" />
+    <ClCompile Include="Src\StringTheory\MXStringTheoryWindow.cpp" />
     <ClCompile Include="Src\System\MXSystem.cpp" />
+    <ClCompile Include="Src\Utilities\MXTemplateWindow.cpp" />
     <ClCompile Include="Src\Utilities\MXUtilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\CodePages\MXCodePages.h" />
+    <ClInclude Include="Src\Converter\MXConverterWindow.h" />
     <ClInclude Include="Src\ExpEval\MXExpEvalWindow.h" />
+    <ClInclude Include="Src\Files\MXFileIo.h" />
+    <ClInclude Include="Src\Files\MXFileMapIo.h" />
+    <ClInclude Include="Src\Float16\MXFloat16.h" />
+    <ClInclude Include="Src\FloatingPointStudio\MXFloatingPointStudioWindow.h" />
+    <ClInclude Include="Src\FoundAddresses\MXFoundAddressesListView.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressesWindow.h" />
+    <ClInclude Include="Src\Hotkeys\MXHotkeyManager.h" />
+    <ClInclude Include="Src\Hotkeys\MXHotkeyManBase.h" />
+    <ClInclude Include="Src\Hotkeys\MXHotkeyPollingMethod.h" />
+    <ClInclude Include="Src\Hotkeys\MXHotkeyRegisterHotKeyMethod.h" />
+    <ClInclude Include="Src\Hotkeys\MXHotkeyWhKeyboardMethod.h" />
+    <ClInclude Include="Src\Html\MXHtml.h" />
+    <ClInclude Include="Src\IO\MXInOutInterface.h" />
+    <ClInclude Include="Src\Layouts\MXConverterLayout.h" />
     <ClInclude Include="Src\Layouts\MXExpressionEvaluatorLayout.h" />
+    <ClInclude Include="Src\Layouts\MXFloatingPointStudioLayout.h" />
     <ClInclude Include="Src\Layouts\MXFoundAddressLayout.h" />
     <ClInclude Include="Src\Layouts\MXLayoutMacros.h" />
     <ClInclude Include="Src\Layouts\MXLayoutManager.h" />
     <ClInclude Include="Src\Layouts\MXMainWindowLayout.h" />
     <ClInclude Include="Src\Layouts\MXNewDataTypeSearchLayout.h" />
+    <ClInclude Include="Src\Layouts\MXNewExpressionSearchLayout.h" />
+    <ClInclude Include="Src\Layouts\MXNewPointerSearchLayout.h" />
+    <ClInclude Include="Src\Layouts\MXNewStringSearchLayout.h" />
     <ClInclude Include="Src\Layouts\MXOpenProcessLayout.h" />
     <ClInclude Include="Src\Layouts\MXOptionsLayout.h" />
+    <ClInclude Include="Src\Layouts\MXPeWorksLayout.h" />
+    <ClInclude Include="Src\Layouts\MXSearchProgressLayout.h" />
+    <ClInclude Include="Src\Layouts\MXStringTheoryLayout.h" />
+    <ClInclude Include="Src\Layouts\MXTemplateLayout.h" />
     <ClInclude Include="Src\MainWindow\MXMhsMainWindow.h" />
     <ClInclude Include="Src\MemHack\MXMemHack.h" />
     <ClInclude Include="Src\MemHack\MXProcess.h" />
@@ -214,15 +404,44 @@
     <ClInclude Include="Src\Options\MXOptionsPage.h" />
     <ClInclude Include="Src\Options\MXOptionsPageGeneral.h" />
     <ClInclude Include="Src\Options\MXOptionsPageGenSearch.h" />
+    <ClInclude Include="Src\Options\MXOptionsPageHotkeys.h" />
     <ClInclude Include="Src\Options\MXOptionsPageOpenProc.h" />
+    <ClInclude Include="Src\Options\MXOptionsPageSearchEx.h" />
     <ClInclude Include="Src\Options\MXOptionsWindow.h" />
     <ClInclude Include="Src\PE\MXPeObject.h" />
     <ClInclude Include="Src\PE\MXPeStructs.h" />
+    <ClInclude Include="Src\PE\MXPeWorksWindow.h" />
+    <ClInclude Include="Src\Primitives\MXPrimitiveBase.h" />
+    <ClInclude Include="Src\RegEx\MXOnigurumaRegex.h" />
+    <ClInclude Include="Src\RegEx\MXOnigurumaRegion.h" />
+    <ClInclude Include="Src\RegEx\MXOnigurumaSystem.h" />
+    <ClInclude Include="Src\RegEx\Oniguruma\config.h" />
+    <ClInclude Include="Src\RegEx\Oniguruma\oniggnu.h" />
+    <ClInclude Include="Src\RegEx\Oniguruma\onigposix.h" />
+    <ClInclude Include="Src\RegEx\Oniguruma\oniguruma.h" />
+    <ClInclude Include="Src\RegEx\Oniguruma\regenc.h" />
+    <ClInclude Include="Src\RegEx\Oniguruma\regint.h" />
+    <ClInclude Include="Src\RegEx\Oniguruma\regparse.h" />
+    <ClInclude Include="Src\RegEx\Oniguruma\st.h" />
+    <ClInclude Include="Src\RegEx\RexAlgorithm.h" />
+    <ClInclude Include="Src\RegEx\RexInterface.h" />
     <ClInclude Include="Src\Search\MXAddressChunkList.h" />
     <ClInclude Include="Src\Search\MXNewDataTypeSearchWindow.h" />
+    <ClInclude Include="Src\Search\MXNewExpressionSearchWindow.h" />
+    <ClInclude Include="Src\Search\MXNewPointerSearchWindow.h" />
+    <ClInclude Include="Src\Search\MXNewStringSearchWindow.h" />
     <ClInclude Include="Src\Search\MXSearcher.h" />
+    <ClInclude Include="Src\Search\MXSearchProgressWindow.h" />
+    <ClInclude Include="Src\Search\MXSearchResult1.h" />
+    <ClInclude Include="Src\Search\MXSearchResult2.h" />
+    <ClInclude Include="Src\Search\MXSearchResultBase.h" />
+    <ClInclude Include="Src\Search\MXSearchResultLocker.h" />
+    <ClInclude Include="Src\Search\MXSearchResultRef.h" />
+    <ClInclude Include="Src\Strings\MXSecureString.h" />
+    <ClInclude Include="Src\Strings\MXSecureWString.h" />
+    <ClInclude Include="Src\StringTheory\MXStringTheoryWindow.h" />
+    <ClInclude Include="Src\Utilities\MXTemplateWindow.h" />
     <ClInclude Include="Src\Utilities\MXUtilities.h" />
-    <ClInclude Include="Src\PE\MXPeWorks.h" />
     <ClInclude Include="Src\System\MXSystem.h" />
     <CustomBuild Include="Src\MXMhsX.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -239,15 +458,27 @@
       </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+      </Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
       </Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+      </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
       </Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
+      </Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
       </Command>
     </CustomBuild>
     <ClInclude Include="Src\Files\MXFile.h" />
@@ -261,9 +492,4 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-  <ProjectExtensions>
-    <VisualStudio>
-      <UserProperties MocDir=".\GeneratedFiles\$(ConfigurationName)" UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" lupdateOptions="" lupdateOnBuild="0" lreleaseOptions="" Qt5Version_x0020_Win32="Qt 5.6.0 x86" Qt5Version_x0020_x64="Qt 5.6.0" MocOptions="" />
-    </VisualStudio>
-  </ProjectExtensions>
 </Project>

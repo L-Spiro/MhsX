@@ -25,7 +25,7 @@ namespace mx {
 		if ( m_pmmwWindow ) {
 			CStatusBar * psbStatus = m_pmmwWindow->StatusBar();
 			if ( psbStatus ) {
-				std::wstring sTemp = _DEC_WS_DAC52882_Opened_;
+				CSecureWString sTemp = _DEC_WS_DAC52882_Opened_;
 				CUtilities::ToHex( m_pProcess.ProcId(), sTemp, 4 );
 				sTemp.append( L" (" );
 				CUtilities::ToUnsigned( m_pProcess.ProcId(), sTemp );
@@ -45,13 +45,26 @@ namespace mx {
 		if ( m_pmmwWindow ) {
 			CStatusBar * psbStatus = m_pmmwWindow->StatusBar();
 			if ( psbStatus ) {
-				std::wstring sTemp = _DEC_WS_5D59A6A1_Failed_to_open_;
+				CSecureWString sTemp = _DEC_WS_5D59A6A1_Failed_to_open_;
 				CUtilities::ToHex( _dwId, sTemp, 4 );
 				sTemp.append( L" (" );
 				CUtilities::ToUnsigned( _dwId, sTemp );
 				sTemp.append( L"). " );
 				CBase::AppendError( L"", sTemp );
 				psbStatus->SetTextW( 0, 0, sTemp.c_str() );
+			}
+		}
+	}
+
+	// Sets the options.
+	void CWindowMemHack::SetOptions( const MX_OPTIONS &_oOptions ) {
+		Parent::SetOptions( _oOptions );
+		if ( m_pmmwWindow ) {
+			if ( m_pmmwWindow->ExpressionEvaluator() ) {
+				m_pmmwWindow->ExpressionEvaluator()->SetUpdateSpeed( 1000 / max( Options().dwExpressionRefresh, static_cast<DWORD>(1) ) );
+			}
+			if ( m_pmmwWindow->FoundAddresses() ) {
+				m_pmmwWindow->FoundAddresses()->SetUpdateSpeed( 1000 / max( Options().dwFoundAddressRefresh, static_cast<DWORD>(1) ) );
 			}
 		}
 	}

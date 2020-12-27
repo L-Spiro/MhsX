@@ -9,7 +9,7 @@ namespace lsw {
 	// IDs.
 	DWORD CMultiSplitter::m_dwIds = 0;
 
-	CMultiSplitter::CMultiSplitter( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
+	CMultiSplitter::CMultiSplitter( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
 		CWidget( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(CBase::MultiSplitterAtom()) ), _pwParent, _bCreateWidget, _hMenu ),
 		m_iBarWidth( 4 ),
 		m_pmlDragLayer( nullptr ),
@@ -28,102 +28,27 @@ namespace lsw {
 			delete pmlTemp;
 		}
 		m_vLayers.clear();
+
+
+		for ( size_t I = m_vDragLayersCopy.size(); I--; ) {
+			LSW_MS_LAYER * pmlTemp = m_vDragLayersCopy[I];
+			m_vDragLayersCopy[I] = nullptr;
+			delete pmlTemp;
+		}
+		m_vDragLayersCopy.clear();
+
+		
 	}
 
 	// == Functions.
 	// Attach a widget.
 	bool CMultiSplitter::Attach( const LSW_DT_ATTACH &_maAttach ) {
-		if ( !_maAttach.pwWidget ) { return false; }
-		LSW_MS_LAYER_SEARCH mlsSer;
-		if ( !FindRectById( _maAttach.dwId, mlsSer ) ) { return false; }
-
-
-		// If adding it in the same direction as what is already on the container (or
-		//	if the container has 0 or 1 items and thus has no direction yet), add it to
-		//	the container array.
-		bool bCanAddToExistingContainer = SplitTypeMatchesLayerDirection( _maAttach.atAttachTo, mlsSer.pmlLayer );
-
-		if ( !bCanAddToExistingContainer ) {
-			mlsSer.pmlLayer = AddLayer( (*mlsSer.pmrRect), _maAttach.pwWidget );
-			if ( !mlsSer.pmlLayer ) {
-				// The rectangle pointed to nothing, so the widget was just added to it and nothing
-				//	else needs to be done.  This happens on the root rectangle the first time a
-				//	widget is added.
-				return true;
-			}
-			// Otherwise mlsSer.pmlLayer points to the layer that was just added.
-			mlsSer.sIndex = 0;
-		}
-
-		// If added to the top or left, insert before the current index.
-		size_t sInsertIdx = mlsSer.sIndex;
-
-		// The call to SplitTypeMatchesLayerDirection() ensures that the current type of splitter is either
-		//	"either one" or the same as what we st below.
-		// If it is "either one" then it will be set properly below, and if it is already set to a direction
-		//	then the below code keeps it on the same direction.
-		// It's easier to redundantly set it here than to check for special cases.
-		if ( _maAttach.atAttachTo == LSW_AT_LEFT || _maAttach.atAttachTo == LSW_AT_RIGHT ) {
-			mlsSer.pmlLayer->stSplitType = LSW_ST_VER;
-		}
-		else {
-			mlsSer.pmlLayer->stSplitType = LSW_ST_HOR;
-		}
-		if ( _maAttach.atAttachTo == LSW_AT_BOTTOM || _maAttach.atAttachTo == LSW_AT_RIGHT ) {
-			// If added to the bottom or right, insert after the current index.
-			++sInsertIdx;
-		}
-		LSW_MS_RECT rTemp;
-		rTemp.dwId = ++m_dwIds;
-		rTemp.bContainsWidget = TRUE;
-		rTemp.iDist = 200;
-		rTemp.u.pqWidget = _maAttach.pwWidget;
-		mlsSer.pmlLayer->vRects.insert( mlsSer.pmlLayer->vRects.begin() + sInsertIdx, rTemp );
-
-		CalcRects();
-		return true;
+		return Attach( _maAttach, m_meRoot );
 	}
 
 	// Detaches a widget given its ID.
 	bool CMultiSplitter::Detach( WORD _wId ) {
-		
-		if ( m_meRoot.bContainsWidget && m_meRoot.u.pqWidget ) {
-			if ( m_meRoot.u.pqWidget->Id() == _wId ) {
-				// It is just the root node and nothing else.
-				m_meRoot.bContainsWidget = FALSE;
-				m_meRoot.u.pqWidget = nullptr;
-				CalcRects();
-				for ( size_t I = m_vChildren.size(); I--; ) {
-					::RedrawWindow( m_vChildren[I]->Wnd(), NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_INTERNALPAINT | RDW_ALLCHILDREN | RDW_UPDATENOW | RDW_FRAME );
-					/*::InvalidateRect( Wnd(), NULL, FALSE );
-					::UpdateWindow( Wnd() );*/
-				}
-				return true;
-			}
-		}
-		if ( !m_meRoot.bContainsWidget && m_meRoot.u.pmlLayer ) {
-			LSW_MS_DETACH mdDetachInfo;
-			GetDetachmentInfo( _wId, mdDetachInfo, (*m_meRoot.u.pmlLayer) );
-			if ( mdDetachInfo.pmlLayer ) {
-				// Something was found.
-				mdDetachInfo.pmlLayer->vRects.erase( mdDetachInfo.pmlLayer->vRects.begin() + mdDetachInfo.sIndex );
-				if ( mdDetachInfo.pmlLayer->vRects.size() == 0 ) {
-					// The layer is now empty.  Collapse it down if possible.
-					if ( mdDetachInfo.pmlParentLayer ) {
-						mdDetachInfo.pmlParentLayer->vRects.erase( mdDetachInfo.pmlParentLayer->vRects.begin() + mdDetachInfo.sParentIndex );
-					}
-				}
-				CalcRects();
-				for ( size_t I = m_vChildren.size(); I--; ) {
-					::RedrawWindow( m_vChildren[I]->Wnd(), NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_INTERNALPAINT | RDW_ALLCHILDREN | RDW_UPDATENOW | RDW_FRAME );
-					/*::InvalidateRect( Wnd(), NULL, FALSE );
-					::UpdateWindow( Wnd() );*/
-				}
-				return true;
-			}
-		}
-		
-		return false;
+		return Detach( _wId, m_meRoot );
 	}
 
 	// Client rectangle.
@@ -274,14 +199,14 @@ namespace lsw {
 	}
 
 	// Finds a rectangle by its ID.
-	bool CMultiSplitter::FindRectById( DWORD _dwId, LSW_MS_LAYER_SEARCH &_mlsRet ) {
-		if ( m_meRoot.dwId == _dwId ) {
+	bool CMultiSplitter::FindRectById( DWORD _dwId, LSW_MS_LAYER_SEARCH &_mlsRet, LSW_MS_RECT &_mrRoot ) {
+		if ( _mrRoot.dwId == _dwId ) {
 			_mlsRet.pmlLayer = nullptr;
 			_mlsRet.sIndex = 0;
-			_mlsRet.pmrRect = &m_meRoot;
+			_mlsRet.pmrRect = &_mrRoot;
 			return true;
 		}
-		return FindRectById( _dwId, m_meRoot.u.pmlLayer, _mlsRet );
+		return FindRectById( _dwId, _mrRoot.u.pmlLayer, _mlsRet );
 	}
 
 	// Finds a rectangle by its ID.
@@ -327,7 +252,7 @@ namespace lsw {
 			return nullptr;
 		}
 		// Otherwise, create a new layer and point the rectangle to it.
-		LSW_MS_LAYER * pmlLayer = new LSW_MS_LAYER();
+		LSW_MS_LAYER * pmlLayer = new( std::nothrow ) LSW_MS_LAYER();
 		if ( pmlLayer ) {
 			m_vLayers.push_back( pmlLayer );
 			pmlLayer->vRects.push_back( _mrRect );
@@ -417,7 +342,7 @@ namespace lsw {
 
 	// Does the given attachment type work with the split type of a layer?
 	bool CMultiSplitter::SplitTypeMatchesLayerDirection( LSW_ATTACH_TYPE _atType, LSW_MS_LAYER * _plLayer ) {
-		if ( !_plLayer ) { return false; }						// A layer must be create with the given direction.
+		if ( !_plLayer ) { return false; }						// A layer must be created with the given direction.
 		if ( _plLayer->vRects.size() <= 1 ) { return true; }	// This layer can be made to go in any direction.
 		if ( _plLayer->stSplitType == LSW_ST_HOR ) { return _atType == LSW_AT_TOP || _atType == LSW_AT_BOTTOM; }
 		if ( _plLayer->stSplitType == LSW_ST_VER ) { return _atType == LSW_AT_LEFT || _atType == LSW_AT_RIGHT; }
@@ -701,6 +626,98 @@ namespace lsw {
 			}
 		}
 		return nullptr;
+	}
+
+	// Attach a widget to the given root.
+	bool CMultiSplitter::Attach( const LSW_DT_ATTACH &_maAttach, LSW_MS_RECT &_mrRoot ) {
+		if ( !_maAttach.pwWidget ) { return false; }
+		LSW_MS_LAYER_SEARCH mlsSer;
+		if ( !FindRectById( _maAttach.dwId, mlsSer, _mrRoot ) ) { return false; }
+
+
+		// If adding it in the same direction as what is already on the container (or
+		//	if the container has 0 or 1 items and thus has no direction yet), add it to
+		//	the container array.
+		bool bCanAddToExistingContainer = SplitTypeMatchesLayerDirection( _maAttach.atAttachTo, mlsSer.pmlLayer );
+
+		if ( !bCanAddToExistingContainer ) {
+			mlsSer.pmlLayer = AddLayer( (*mlsSer.pmrRect), _maAttach.pwWidget );
+			if ( !mlsSer.pmlLayer ) {
+				// The rectangle pointed to nothing, so the widget was just added to it and nothing
+				//	else needs to be done.  This happens on the root rectangle the first time a
+				//	widget is added.
+				return true;
+			}
+			// Otherwise mlsSer.pmlLayer points to the layer that was just added.
+			mlsSer.sIndex = 0;
+		}
+
+		// If added to the top or left, insert before the current index.
+		size_t sInsertIdx = mlsSer.sIndex;
+
+		// The call to SplitTypeMatchesLayerDirection() ensures that the current type of splitter is either
+		//	"either one" or the same as what we st below.
+		// If it is "either one" then it will be set properly below, and if it is already set to a direction
+		//	then the below code keeps it on the same direction.
+		// It's easier to redundantly set it here than to check for special cases.
+		if ( _maAttach.atAttachTo == LSW_AT_LEFT || _maAttach.atAttachTo == LSW_AT_RIGHT ) {
+			mlsSer.pmlLayer->stSplitType = LSW_ST_VER;
+		}
+		else {
+			mlsSer.pmlLayer->stSplitType = LSW_ST_HOR;
+		}
+		if ( _maAttach.atAttachTo == LSW_AT_BOTTOM || _maAttach.atAttachTo == LSW_AT_RIGHT ) {
+			// If added to the bottom or right, insert after the current index.
+			++sInsertIdx;
+		}
+		LSW_MS_RECT rTemp;
+		rTemp.dwId = ++m_dwIds;
+		rTemp.bContainsWidget = TRUE;
+		rTemp.iDist = 200;
+		rTemp.u.pqWidget = _maAttach.pwWidget;
+		mlsSer.pmlLayer->vRects.insert( mlsSer.pmlLayer->vRects.begin() + sInsertIdx, rTemp );
+
+		CalcRects();
+		return true;
+	}
+
+	// Detaches a widget from the given root given its ID.
+	bool CMultiSplitter::Detach( WORD _wId, LSW_MS_RECT &_mrRoot ) {
+		if ( _mrRoot.bContainsWidget && _mrRoot.u.pqWidget ) {
+			if ( _mrRoot.u.pqWidget->Id() == _wId ) {
+				// It is just the root node and nothing else.
+				_mrRoot.bContainsWidget = FALSE;
+				_mrRoot.u.pqWidget = nullptr;
+				CalcRects();
+				ForceSizeUpdate();
+				return true;
+			}
+		}
+		if ( !_mrRoot.bContainsWidget && _mrRoot.u.pmlLayer ) {
+			LSW_MS_DETACH mdDetachInfo;
+			GetDetachmentInfo( _wId, mdDetachInfo, (*_mrRoot.u.pmlLayer) );
+			if ( mdDetachInfo.pmlLayer ) {
+				// Something was found.
+				mdDetachInfo.pmlLayer->vRects.erase( mdDetachInfo.pmlLayer->vRects.begin() + mdDetachInfo.sIndex );
+				if ( mdDetachInfo.pmlLayer->vRects.size() == 0 ) {
+					// The layer is now empty.  Collapse it down if possible.
+					if ( mdDetachInfo.pmlParentLayer ) {
+						mdDetachInfo.pmlParentLayer->vRects.erase( mdDetachInfo.pmlParentLayer->vRects.begin() + mdDetachInfo.sParentIndex );
+					}
+				}
+				CalcRects();
+				ForceSizeUpdate();
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	// Copies the layer tree with a specific layer removed so that it can be dragged elsewhere.
+	bool CMultiSplitter::CopyLayerTreeForDrag() {
+
+		return true;
 	}
 
 }	// namespace lsw

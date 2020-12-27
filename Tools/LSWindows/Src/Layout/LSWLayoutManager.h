@@ -23,22 +23,22 @@ namespace lsw {
 
 		// == Functions.
 		// Creates a window with all of its controls.  Returns the main window widget.
-		CWidget *						CreateWindowX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, const LSW_MENU_LAYOUT * _pmlLayouts = nullptr, SIZE_T _sTotalMenus = 0, CWidget * _pwParent = nullptr );
+		CWidget *						CreateWindowX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, const LSW_MENU_LAYOUT * _pmlLayouts = nullptr, SIZE_T _sTotalMenus = 0, CWidget * _pwParent = nullptr, uint64_t _ui64Data = 0 );
 
 		// Creates a modal dialog with all of its controls.  Returns the dialog exit value.
-		INT_PTR							DialogBoxX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent );
+		INT_PTR							DialogBoxX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent, uint64_t _ui64Data );
 
 		// Creates a modeless dialog with all of its controls.  Returns the dialog widget.
-		CWidget *						CreateDialogX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent );
+		CWidget *						CreateDialogX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent, uint64_t _ui64Data );
 
 		// Creates a DLGTEMPLATE structure and helper objects given an array of LSW_WIDGET_LAYOUT objects.
-		BOOL							CreateDlgTemplate( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent, LSW_DLGTEMPLATE &_dtTemplate );
+		BOOL							CreateDlgTemplate( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent, LSW_DLGTEMPLATE &_dtTemplate, uint64_t _ui64Data );
 
 		// Destroys an LSW_DLGTEMPLATE object created for use by DialogBoxX().
 		VOID							DestroyDialogBoxTemplate( LSW_DLGTEMPLATE &_dtTemplate );
 
 		// Creates a class based on its type.
-		virtual CWidget *				CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu );
+		virtual CWidget *				CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data );
 
 		// Creates a menu given a menu layout.
 		HMENU							CreateMenu( const LSW_MENU_LAYOUT &_mlLayout );

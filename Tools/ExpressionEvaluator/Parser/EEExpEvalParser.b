@@ -5,6 +5,7 @@
 #include "../EEExpEvalContainer.h"
 #include "../EEExpEvalLexer.h"
 #include <cstdio>
+#include <ctime>
 
 #pragma warning( push )
 
@@ -42,12 +43,20 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %parse-param												{ class CExpEvalContainer * m_peecContainer }
 %lex-param													{ CExpEvalLexer * m_peelLexer }
 
-%token EE_CHAR_CONSTANT EE_FLOAT_CONSTANT EE_STRING_CONSTANT EE_HEX_CONSTANT1 EE_HEX_CONSTANT2 EE_HEX_CONSTANT3
+%token EE_DO EE_ELSE EE_FOR EE_FOREACH EE_IF EE_IN EE_WHILE
+%token EE_BREAK EE_CONTINUE
+%token EE_NEW EE_COPY
+%token EE_ANY EE_DEFAULT EE_DOUBLE EE_FLOAT EE_FLOAT10 EE_FLOAT11 EE_FLOAT14 EE_FLOAT16 EE_INT8 EE_INT16 EE_INT32 EE_INT64 EE_OBJECT EE_PERSISTENT EE_TEMP EE_UINT8 EE_UINT16 EE_UINT32 EE_UINT64
+
+%token EE_CONST
+%token EE_CHAR_CONSTANT EE_FLOAT_CONSTANT EE_HEX_CONSTANT1 EE_HEX_CONSTANT2 EE_HEX_CONSTANT3 EE_STRING_CONSTANT EE_UNICODE_CONSTANT
 %token EE_BIN_CONSTANT EE_DEC_CONSTANT EE_OCT_CONSTANT EE_PUREDEC_CONSTANT
 %token EE_IDENTIFIER
-%token EE_MEMBERACCESS EE_USER_VAR
+%token EE_ARRAY EE_CUSTOM_VAR EE_MEMBERACCESS EE_USER_VAR
 %token EE_EQU_E EE_EQU_NE EE_LEFT_OP EE_RIGHT_OP EE_REL_GE EE_REL_LE
-%token EE_OB_BYTE EE_OB_SBYTE EE_OB_WORD EE_OB_SWORD EE_OB_QWORD EE_OB_SQWORD EE_OB_FLOAT EE_OB_DOUBLE EE_OB_DWORD EE_OB_SDWORD
+%token EE_PLUSPLUS EE_MINUSMINUS
+%token EE_ASS_PLUSEQUALS EE_ASS_MINUSEQUALS EE_ASS_TIMESEQUALS EE_ASS_MODEQUALS EE_ASS_DIVEQUALS EE_ASS_CARROTEQUALS EE_ASS_SHLEFTEQUALS EE_ASS_SHRIGHTEQUALS EE_ASS_OREQUALS EE_ASS_ANDEQUALS
+%token EE_OB_BYTE EE_OB_SBYTE EE_OB_WORD EE_OB_SWORD EE_OB_QWORD EE_OB_SQWORD EE_OB_FLOAT EE_OB_DOUBLE EE_OB_DWORD EE_OB_SDWORD EE_OB_FLOAT16
 %token EE_COS EE_SIN EE_TAN EE_ACOS EE_ASIN EE_ATAN EE_ATAN2
 %token EE_COSH EE_SINH EE_TANH EE_ACOSH EE_ASINH EE_ATANH
 %token EE_EXP EE_LOG EE_LOG10 EE_LOG2 EE_EXP2 EE_EXPM1 EE_ILOGB EE_LOG1P EE_LOGB
@@ -55,21 +64,33 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %token EE_CEIL EE_FLOOR EE_MOD EE_TRUNC EE_ROUND EE_NEARBYINT EE_REMAINDER EE_REMQUO
 %token EE_NEXTAFTER EE_NEXTAFTERF EE_NEXTTOWARD EE_NEXTTOWARDF
 %token EE_DIM EE_MAX EE_MIN
-%token EE_ABS EE_MADD
+%token EE_DEG EE_RAD
+%token EE_ABS EE_MADD EE_RAND
+%token EE_ISNAN EE_ISINF
+%token EE_BYTESWAPUSHORT EE_BYTESWAPULONG EE_BYTESWAPUINT64
 %token EE_A EE_ALLADI EE_ALPHA EE_B EE_B2 EE_B4 EE_BETA EE_BH EE_C2 EE_CAHEN EE_CATALAN EE_CONWAY EE_DELTA EE_E EE_ERDOS EE_EULER EE_F EE_GR EE_GWK EE_HALFPI EE_HSMC EE_ICE EE_K
 %token EE_LAMBDA EE_LAPLACE EE_LEVY EE_M1 EE_MU EE_NIVEN EE_OMEGA EE_P2 EE_PI EE_PLASTIC EE_PORTER EE_PSI EE_RAMAN EE_RAMAMU EE_SIERP EE_THETA EE_VISW EE_Z3 EE_ZETA 
 
 %token EE_CHAR_BIT EE_MB_LEN_MAX EE_CHAR_MIN EE_CHAR_MAX EE_SCHAR_MIN EE_SHRT_MIN EE_INT_MIN EE_LONG_MIN EE_LLONG_MIN EE_SCHAR_MAX EE_SHRT_MAX EE_INT_MAX EE_LONG_MAX EE_LLONG_MAX EE_UCHAR_MAX EE_USHRT_MAX EE_UINT_MAX EE_ULONG_MAX EE_ULLONG_MAX EE_FLT_RADIX EE_DECIMAL_DIG EE_FLT_DECIMAL_DIG EE_DBL_DECIMAL_DIG EE_LDBL_DECIMAL_DIG EE_FLT_MIN EE_DBL_MIN EE_LDBL_MIN EE_FLT_TRUE_MIN EE_DBL_TRUE_MIN EE_LDBL_TRUE_MIN EE_FLT_MAX EE_DBL_MAX EE_LDBL_MAX EE_FLT_EPSILON EE_DBL_EPSILON EE_LDBL_EPSILON EE_FLT_DIG EE_DBL_DIG EE_LDBL_DIG EE_FLT_MANT_DIG EE_DBL_MANT_DIG EE_LDBL_MANT_DIG EE_FLT_MIN_EXP EE_DBL_MIN_EXP EE_LDBL_MIN_EXP EE_FLT_MIN_10_EXP EE_DBL_MIN_10_EXP EE_LDBL_MIN_10_EXP EE_FLT_MAX_EXP EE_DBL_MAX_EXP EE_LDBL_MAX_EXP EE_FLT_MAX_10_EXP EE_DBL_MAX_10_EXP EE_LDBL_MAX_10_EXP
-%token EE_AS_FLOAT EE_AS_DOUBLE EE_AS_FLOAT16 EE_AS_FLOAT14 EE_AS_FLOAT11 EE_AS_FLOAT10
+%token EE_AS_FLOAT EE_AS_DOUBLE EE_AS_FLOAT24 EE_AS_FLOAT16 EE_AS_FLOAT14 EE_AS_FLOAT11 EE_AS_FLOAT10
 %token EE_AS_FLOAT_MAX EE_AS_FLOAT_MIN EE_AS_FLOAT_TRUE_MIN EE_AS_FLOAT_NAN EE_AS_FLOAT_INF EE_AS_FLOAT_SUBNORM_MAX EE_AS_FLOAT_EPS
 %token EE_TRUE EE_FALSE
 %token EE_AS_FLOAT_SIGNBIT EE_AS_FLOAT_EXPBITS EE_AS_FLOAT_MANBITS
+%token EE_TO_FLOAT32 EE_TO_FLOAT64 EE_TO_INT8 EE_TO_INT16 EE_TO_INT32 EE_TO_INT64 EE_TO_UINT8 EE_TO_UINT16 EE_TO_UINT32 EE_TO_UINT64
+%token EE_CLOCK EE_CLOCKS_PER_SEC EE_SECONDS EE_MILLISECONDS EE_MICROSECONDS EE_SECONDS_SINCE_START EE_MILLISECONDS_SINCE_START EE_MICROSECONDS_SINCE_START
 
-%type <sStringIndex>										string												
+%type <sStringIndex>										identifier
+%type <sStringIndex>										string
+%type <sStringIndex>										custom_var
+%type <sStringIndex>										array_var
 %type <ndData>												basic_expr
 %type <ndData>												postfix_exp
 %type <ndData>												unary_exp
+%type <ndData>												cast_exp
 %type <ui32Unary>											unary_operator
+%type <ui32Backing>											backing_type
+%type <ui32Backing>											backing_persistence
+%type <ui32Backing>											cast_type
 %type <ndData>												multiplicative_exp
 %type <ndData>												additive_exp
 %type <ndData>												shift_exp
@@ -81,8 +102,18 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %type <ndData>												and_exp
 %type <ndData>												or_exp
 %type <ndData>												conditional_exp
+%type <ndData>												assignment_exp
+%type <ndData>												argument_exp_list
 %type <ndData>												intrinsic
 %type <ndData>												exp
+%type <ndData>												exp_statement
+%type <ndData>												statement
+%type <ndData>												compound_statement
+%type <ndData>												statement_list
+%type <ndData>												foreach_decl
+%type <ndData>												iteration_exp
+%type <ndData>												selection_exp
+%type <ndData>												jump_exp
 %type <ndData>												translation_unit
 
 %start translation_unit
@@ -104,13 +135,32 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 
 %%
 
+custom_var
+	: EE_CUSTOM_VAR											{ $$ = m_peecContainer->HasCustomVar( m_peelLexer->YYText() ); }
+	;
+	
+array_var
+	: EE_ARRAY												{ $$ = m_peecContainer->HasArray( m_peelLexer->YYText() ); }
+	;
+	
+identifier
+	: EE_IDENTIFIER											{ $$ = m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ); }
+	;
+	
 string
 	: EE_STRING_CONSTANT									{ $$ = m_peecContainer->CreateString( m_peelLexer->YYText() ); }
-	| EE_IDENTIFIER											{ $$ = m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ); }
+	| identifier											{ $$ = $1; }
 	;
 	
 basic_expr
 	: string												{ m_peecContainer->CreateStringBasicExp( $1, $$ ); }
+	| custom_var											{ m_peecContainer->CreateCustomVar( $1, $$ ); }
+	| EE_USER_VAR											{ m_peecContainer->CreateUser( $$ ); }
+	| array_var '[' exp ']'									{ m_peecContainer->CreateArrayVar( $1, $3, $$ ); }
+	//| basic_expr EE_PLUSPLUS								{ m_peecContainer->CreatePostfixOp( $1, CExpEvalParser::token::EE_PLUSPLUS, $$ ); }
+	//| basic_expr EE_MINUSMINUS								{ m_peecContainer->CreatePostfixOp( $1, CExpEvalParser::token::EE_MINUSMINUS, $$ ); }
+	
+	| EE_UNICODE_CONSTANT									{ m_peecContainer->CreateUnicodeNumericConstant( m_peelLexer->YYText(), $$ ); }
 	| EE_HEX_CONSTANT1										{ m_peecContainer->CreateHex1( m_peelLexer->YYText(), $$ ); }
 	| EE_HEX_CONSTANT2										{ m_peecContainer->CreateHex2( m_peelLexer->YYText(), $$ ); }
 	| EE_HEX_CONSTANT3										{ m_peecContainer->CreateHex3( m_peelLexer->YYText(), $$ ); }
@@ -230,10 +280,11 @@ basic_expr
 	| EE_FLT_MAX_10_EXP										{ m_peecContainer->CreateNumber( FLT_MAX_10_EXP, $$ ); }
 	| EE_DBL_MAX_10_EXP										{ m_peecContainer->CreateNumber( DBL_MAX_10_EXP, $$ ); }
 	| EE_LDBL_MAX_10_EXP									{ m_peecContainer->CreateNumber( LDBL_MAX_10_EXP, $$ ); }
+	| EE_CLOCKS_PER_SEC										{ m_peecContainer->CreateNumber( CLOCKS_PER_SEC, $$ ); }
 	| EE_TRUE												{ m_peecContainer->CreateNumber( 1, $$ ); }
 	| EE_FALSE												{ m_peecContainer->CreateNumber( 0, $$ ); }
 	| '(' exp ')'											{ $$ = $2; }
-	| '[' exp ']'											{ m_peecContainer->CreateAddress( $2, EE_CT_UINT32, $$ ); }
+	//| '[' exp ']'											{ m_peecContainer->CreateAddress( $2, EE_CT_UINT32, $$ ); }
 	| EE_OB_DWORD exp ']'									{ m_peecContainer->CreateAddress( $2, EE_CT_UINT32, $$ ); }
 	| EE_OB_BYTE exp ']'									{ m_peecContainer->CreateAddress( $2, EE_CT_UINT8, $$ ); }
 	| EE_OB_WORD exp ']'									{ m_peecContainer->CreateAddress( $2, EE_CT_UINT16, $$ ); }
@@ -243,13 +294,15 @@ basic_expr
 	| EE_OB_SWORD exp ']'									{ m_peecContainer->CreateAddress( $2, EE_CT_INT16, $$ ); }
 	| EE_OB_SQWORD exp ']'									{ m_peecContainer->CreateAddress( $2, EE_CT_INT64, $$ ); }
 	| EE_OB_FLOAT exp ']'									{ m_peecContainer->CreateAddress( $2, EE_CT_FLOAT, $$ ); }
+	| EE_OB_FLOAT16 exp ']'									{ m_peecContainer->CreateAddress( $2, EE_CT_FLOAT16, $$ ); }
 	| EE_OB_DOUBLE exp ']'									{ m_peecContainer->CreateAddress( $2, EE_CT_DOUBLE, $$ ); }
-	| EE_USER_VAR											{ m_peecContainer->CreateUser( $$ ); }
 	| intrinsic												{ $$ = $1; }
 	;
 
 postfix_exp
 	: basic_expr											{ $$ = $1; }
+	| custom_var EE_PLUSPLUS								{ m_peecContainer->CreatePostfixOp( $1, CExpEvalParser::token::EE_PLUSPLUS, $$ ); }
+	| custom_var EE_MINUSMINUS								{ m_peecContainer->CreatePostfixOp( $1, CExpEvalParser::token::EE_MINUSMINUS, $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_IDENTIFIER				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_STRING_CONSTANT		{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateString( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_HEX_CONSTANT3			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
@@ -349,27 +402,19 @@ postfix_exp
 	| postfix_exp EE_MEMBERACCESS EE_FLT_MAX_10_EXP			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_DBL_MAX_10_EXP			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_LDBL_MAX_10_EXP		{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_AS_DOUBLE				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT16				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT14				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT11				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT10				{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT_MAX			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT_MIN			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT_TRUE_MIN		{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT_NAN			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT_INF			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT_SUBNORM_MAX	{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT_EPS			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT_SIGNBIT		{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT_EXPBITS		{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_AS_FLOAT_MANBITS		{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_CLOCKS_PER_SEC			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	;
 
 unary_exp
 	: postfix_exp											{ $$ = $1; }
+	| EE_PLUSPLUS custom_var								{ m_peecContainer->CreatePrefixOp( $2, CExpEvalParser::token::EE_PLUSPLUS, $$ ); }
+	| EE_MINUSMINUS custom_var								{ m_peecContainer->CreatePrefixOp( $2, CExpEvalParser::token::EE_MINUSMINUS, $$ ); }
 	| unary_operator unary_exp								{ m_peecContainer->CreateUnary( $2, $1, $$ ); }
+	;
+	
+cast_exp
+	: unary_exp												{ $$ = $1; }
+	| '(' cast_type ')' cast_exp							{ m_peecContainer->CreateCast( $4, static_cast<ee::EE_CAST_TYPES>($2), $$ ); }
 	;
 
 unary_operator
@@ -380,10 +425,10 @@ unary_operator
 	;
 
 multiplicative_exp
-	: unary_exp												{ $$ = $1; }
-	| multiplicative_exp '*' unary_exp						{ m_peecContainer->CreateOp( $1, $3, '*', $$ ); }
-	| multiplicative_exp '/' unary_exp						{ m_peecContainer->CreateOp( $1, $3, '/', $$ ); }
-	| multiplicative_exp '%' unary_exp						{ m_peecContainer->CreateOp( $1, $3, '%', $$ ); }
+	: cast_exp												{ $$ = $1; }
+	| multiplicative_exp '*' cast_exp						{ m_peecContainer->CreateOp( $1, $3, '*', $$ ); }
+	| multiplicative_exp '/' cast_exp						{ m_peecContainer->CreateOp( $1, $3, '/', $$ ); }
+	| multiplicative_exp '%' cast_exp						{ m_peecContainer->CreateOp( $1, $3, '%', $$ ); }
 	;
 
 additive_exp
@@ -439,7 +484,97 @@ or_exp
 
 conditional_exp
 	: or_exp												{ $$ = $1; }
-	| or_exp '?' exp ':' conditional_exp					{ m_peecContainer->CreateConditional( $1, $3, $5, $$ ); }
+	| conditional_exp '?' exp ':' or_exp					{ m_peecContainer->CreateConditional( $1, $3, $5, $$ ); }
+	;
+	
+assignment_exp
+	: conditional_exp										{ $$ = $1; }
+	| custom_var '=' assignment_exp							{ m_peecContainer->CreateReAssignment( $1, $3, '=', $$ ); }
+	| identifier '=' EE_NEW backing_type '(' exp ')'
+															{ m_peecContainer->CreateArray( $1, $4, static_cast<uint32_t>(token::EE_TEMP), $6, ~0, ~0, $$ ); }
+	| identifier '=' EE_NEW backing_type '(' exp ',' backing_persistence ')'
+															{ m_peecContainer->CreateArray( $1, $4, $8, $6, ~0, ~0, $$ ); }
+	| identifier '=' EE_NEW backing_type '(' exp ',' backing_persistence ',' exp ')'
+															{ m_peecContainer->CreateArray( $1, $4, $8, $6, $10.sNodeIndex, $10.sNodeIndex, $$ ); }
+	| identifier '=' EE_NEW backing_type '(' exp ',' backing_persistence ',' exp ',' exp ')'
+															{ m_peecContainer->CreateArray( $1, $4, $8, $6, $10.sNodeIndex, $12.sNodeIndex, $$ ); }
+	| identifier '=' EE_NEW '(' exp ')'
+															{ m_peecContainer->CreateArray( $1, static_cast<uint32_t>(CExpEvalParser::token::EE_DEFAULT), static_cast<uint32_t>(token::EE_TEMP), $5, ~0, ~0, $$ ); }
+	| identifier '=' EE_NEW '(' exp ',' backing_persistence ')'
+															{ m_peecContainer->CreateArray( $1, static_cast<uint32_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, ~0, ~0, $$ ); }
+	| identifier '=' EE_NEW '(' exp ',' backing_persistence ',' exp ')'
+															{ m_peecContainer->CreateArray( $1, static_cast<uint32_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $9.sNodeIndex, $$ ); }
+	| identifier '=' EE_NEW '(' exp ',' backing_persistence ',' exp ',' exp ')'
+															{ m_peecContainer->CreateArray( $1, static_cast<uint32_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $11.sNodeIndex, $$ ); }
+	| identifier '=' assignment_exp							{ m_peecContainer->CreateAssignment( $1, $3, '=', false, $$ ); }
+	| EE_CONST identifier '=' assignment_exp				{ m_peecContainer->CreateAssignment( $2, $4, '=', true, $$ ); }
+	| custom_var EE_ASS_PLUSEQUALS assignment_exp			{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_PLUSEQUALS, $$ ); }
+	| custom_var EE_ASS_MINUSEQUALS assignment_exp			{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_MINUSEQUALS, $$ ); }
+	| custom_var EE_ASS_TIMESEQUALS assignment_exp			{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_TIMESEQUALS, $$ ); }
+	| custom_var EE_ASS_MODEQUALS assignment_exp			{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_MODEQUALS, $$ ); }
+	| custom_var EE_ASS_DIVEQUALS assignment_exp			{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_DIVEQUALS, $$ ); }
+	| custom_var EE_ASS_CARROTEQUALS assignment_exp			{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_CARROTEQUALS, $$ ); }
+	| custom_var EE_ASS_SHLEFTEQUALS assignment_exp			{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_SHLEFTEQUALS, $$ ); }
+	| custom_var EE_ASS_SHRIGHTEQUALS assignment_exp		{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_SHRIGHTEQUALS, $$ ); }
+	| custom_var EE_ASS_OREQUALS assignment_exp				{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_OREQUALS, $$ ); }
+	| custom_var EE_ASS_ANDEQUALS assignment_exp			{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_ANDEQUALS, $$ ); }
+	| array_var '[' exp ']' '=' assignment_exp				{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, '=', $$ ); }
+	| array_var '[' exp ']' EE_ASS_PLUSEQUALS assignment_exp{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_PLUSEQUALS, $$ ); }
+	| array_var '[' exp ']' EE_ASS_MINUSEQUALS assignment_exp
+															{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_MINUSEQUALS, $$ ); }
+	| array_var '[' exp ']' EE_ASS_TIMESEQUALS assignment_exp
+															{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_TIMESEQUALS, $$ ); }
+	| array_var '[' exp ']' EE_ASS_MODEQUALS assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_MODEQUALS, $$ ); }
+	| array_var '[' exp ']' EE_ASS_DIVEQUALS assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_DIVEQUALS, $$ ); }
+	| array_var '[' exp ']' EE_ASS_CARROTEQUALS assignment_exp
+															{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_CARROTEQUALS, $$ ); }
+	| array_var '[' exp ']' EE_ASS_SHLEFTEQUALS assignment_exp
+															{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_SHLEFTEQUALS, $$ ); }
+	| array_var '[' exp ']' EE_ASS_SHRIGHTEQUALS assignment_exp
+															{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_SHRIGHTEQUALS, $$ ); }
+	| array_var '[' exp ']' EE_ASS_OREQUALS assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_OREQUALS, $$ ); }
+	| array_var '[' exp ']' EE_ASS_ANDEQUALS assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_ANDEQUALS, $$ ); }
+	;
+
+backing_type
+	: EE_INT8												{ $$ = CExpEvalParser::token::EE_INT8; }
+	| EE_INT16												{ $$ = CExpEvalParser::token::EE_INT16; }
+	| EE_INT32												{ $$ = CExpEvalParser::token::EE_INT32; }
+	| EE_INT64												{ $$ = CExpEvalParser::token::EE_INT64; }
+	| EE_UINT8												{ $$ = CExpEvalParser::token::EE_UINT8; }
+	| EE_UINT16												{ $$ = CExpEvalParser::token::EE_UINT16; }
+	| EE_UINT32												{ $$ = CExpEvalParser::token::EE_UINT32; }
+	| EE_UINT64												{ $$ = CExpEvalParser::token::EE_UINT64; }
+	| EE_FLOAT												{ $$ = CExpEvalParser::token::EE_FLOAT; }
+	| EE_DOUBLE												{ $$ = CExpEvalParser::token::EE_DOUBLE; }
+	| EE_DEFAULT											{ $$ = CExpEvalParser::token::EE_DEFAULT; }
+	;
+	
+cast_type
+	: EE_INT8												{ $$ = ee::EE_CT_INT8; }
+	| EE_INT16												{ $$ = ee::EE_CT_INT16; }
+	| EE_INT32												{ $$ = ee::EE_CT_INT32; }
+	| EE_INT64												{ $$ = ee::EE_CT_INT64; }
+	| EE_UINT8												{ $$ = ee::EE_CT_UINT8; }
+	| EE_UINT16												{ $$ = ee::EE_CT_UINT16; }
+	| EE_UINT32												{ $$ = ee::EE_CT_UINT32; }
+	| EE_UINT64												{ $$ = ee::EE_CT_UINT64; }
+	| EE_FLOAT												{ $$ = ee::EE_CT_FLOAT; }
+	| EE_DOUBLE												{ $$ = ee::EE_CT_DOUBLE; }
+	| EE_FLOAT10											{ $$ = ee::EE_CT_FLOAT10; }
+	| EE_FLOAT11											{ $$ = ee::EE_CT_FLOAT11; }
+	| EE_FLOAT14											{ $$ = ee::EE_CT_FLOAT14; }
+	| EE_FLOAT16											{ $$ = ee::EE_CT_FLOAT16; }
+	;
+	
+backing_persistence
+	: EE_PERSISTENT											{ $$ = token::EE_PERSISTENT; }
+	| EE_TEMP												{ $$ = token::EE_TEMP; }
+	;
+	
+argument_exp_list
+	: conditional_exp										{ $$ = $1; }
+	| argument_exp_list ',' conditional_exp					{}
 	;
 
 intrinsic
@@ -458,6 +593,7 @@ intrinsic
 	| EE_ATANH '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ATANH, $3, $$ ); }
 	| EE_EXP '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_EXP, $3, $$ ); }
 	| EE_LOG '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_LOG, $3, $$ ); }
+	| EE_LOG '(' exp ',' exp ')'							{ m_peecContainer->CreateIntrinsic2( token::EE_LOG, $3, $5, $$ ); }
 	| EE_LOG10 '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_LOG10, $3, $$ ); }
 	| EE_LOG2 '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_LOG2, $3, $$ ); }
 	| EE_EXP2 '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_EXP2, $3, $$ ); }
@@ -485,8 +621,16 @@ intrinsic
 	| EE_DIM '(' exp ',' exp ')'							{ m_peecContainer->CreateIntrinsic2( token::EE_DIM, $3, $5, $$ ); }
 	| EE_MAX '(' exp ',' exp ')'							{ m_peecContainer->CreateIntrinsic2( token::EE_MAX, $3, $5, $$ ); }
 	| EE_MIN '(' exp ',' exp ')'							{ m_peecContainer->CreateIntrinsic2( token::EE_MIN, $3, $5, $$ ); }
+	| EE_DEG '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_DEG, $3, $$ ); }
+	| EE_RAD '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_RAD, $3, $$ ); }
 	| EE_ABS '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ABS, $3, $$ ); }
 	| EE_MADD '(' exp ',' exp ',' exp ')'					{ m_peecContainer->CreateIntrinsic3( token::EE_MADD, $3, $5, $7, $$ ); }
+	| EE_RAND '(' exp ',' exp ')'							{ m_peecContainer->CreateIntrinsic2( token::EE_RAND, $3, $5, $$ ); }
+	| EE_ISNAN '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ISNAN, $3, $$ ); }
+	| EE_ISINF '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ISINF, $3, $$ ); }
+	| EE_BYTESWAPUSHORT '(' exp ')'							{ m_peecContainer->CreateIntrinsic1( token::EE_BYTESWAPUSHORT, $3, $$ ); }
+	| EE_BYTESWAPULONG '(' exp ')'							{ m_peecContainer->CreateIntrinsic1( token::EE_BYTESWAPULONG, $3, $$ ); }
+	| EE_BYTESWAPUINT64 '(' exp ')'							{ m_peecContainer->CreateIntrinsic1( token::EE_BYTESWAPUINT64, $3, $$ ); }
 	| EE_AS_FLOAT '(' exp ')'								{ m_peecContainer->CreateAsFloat( $3, $$ ); }
 	| EE_AS_DOUBLE '(' exp ')'								{ m_peecContainer->CreateAsDouble( $3, $$ ); }
 	| EE_AS_FLOAT '(' exp ',' exp ',' exp ',' exp ',' exp ',' exp ',' exp ')'
@@ -512,15 +656,78 @@ intrinsic
 															{ m_peecContainer->CreateAsFloatXProp( $3, $5, $7, $9, $11, ee::EE_N_ASXFLOAT_EXPBITS, $$ ); }
 	| EE_AS_FLOAT_MANBITS '(' exp ',' exp ',' exp ',' exp ',' exp ')'
 															{ m_peecContainer->CreateAsFloatXProp( $3, $5, $7, $9, $11, ee::EE_N_ASXFLOAT_MANBITS, $$ ); }
+	| EE_TO_FLOAT32 '(' exp ')'								{ m_peecContainer->CreateCast( $3, ee::EE_CT_FLOAT, $$ ); }
+	| EE_TO_FLOAT64 '(' exp ')'								{ m_peecContainer->CreateCast( $3, ee::EE_CT_DOUBLE, $$ ); }
+	| EE_TO_INT8 '(' exp ')'								{ m_peecContainer->CreateCast( $3, ee::EE_CT_INT8, $$ ); }
+	| EE_TO_INT16 '(' exp ')'								{ m_peecContainer->CreateCast( $3, ee::EE_CT_INT16, $$ ); }
+	| EE_TO_INT32 '(' exp ')'								{ m_peecContainer->CreateCast( $3, ee::EE_CT_INT32, $$ ); }
+	| EE_TO_INT64 '(' exp ')'								{ m_peecContainer->CreateCast( $3, ee::EE_CT_INT64, $$ ); }
+	| EE_TO_UINT8 '(' exp ')'								{ m_peecContainer->CreateCast( $3, ee::EE_CT_UINT8, $$ ); }
+	| EE_TO_UINT16 '(' exp ')'								{ m_peecContainer->CreateCast( $3, ee::EE_CT_UINT16, $$ ); }
+	| EE_TO_UINT32 '(' exp ')'								{ m_peecContainer->CreateCast( $3, ee::EE_CT_UINT32, $$ ); }
+	| EE_TO_UINT64 '(' exp ')'								{ m_peecContainer->CreateCast( $3, ee::EE_CT_UINT64, $$ ); }
+	| EE_CLOCK '(' ')'										{ m_peecContainer->CreateIntrinsic0( ee::CExpEvalParser::token::EE_CLOCK, $$ ); }
+	| EE_SECONDS '(' ')'									{ m_peecContainer->CreateIntrinsic0( ee::CExpEvalParser::token::EE_SECONDS, $$ ); }
+	| EE_MILLISECONDS '(' ')'								{ m_peecContainer->CreateIntrinsic0( ee::CExpEvalParser::token::EE_MILLISECONDS, $$ ); }
+	| EE_MICROSECONDS '(' ')'								{ m_peecContainer->CreateIntrinsic0( ee::CExpEvalParser::token::EE_MICROSECONDS, $$ ); }
+	| EE_SECONDS_SINCE_START '(' ')'						{ m_peecContainer->CreateIntrinsic0( ee::CExpEvalParser::token::EE_SECONDS_SINCE_START, $$ ); }
+	| EE_MILLISECONDS_SINCE_START '(' ')'					{ m_peecContainer->CreateIntrinsic0( ee::CExpEvalParser::token::EE_MILLISECONDS_SINCE_START, $$ ); }
+	| EE_MICROSECONDS_SINCE_START '(' ')'					{ m_peecContainer->CreateIntrinsic0( ee::CExpEvalParser::token::EE_MICROSECONDS_SINCE_START, $$ ); }
 	;
 
 exp
-	: conditional_exp										{ $$ = $1; }
+	: assignment_exp										{ $$ = $1; }
+	| iteration_exp											{ $$ = $1; }
+	| selection_exp											{ $$ = $1; }
+	| jump_exp												{ $$ = $1; }
+	;
+	
+exp_statement
+	: exp ';'												{ $$ = $1; }
 	;
 
+statement
+	: exp_statement											{ $$ = $1; }
+	;
+	
+compound_statement
+	: statement												{ $$ = $1; }
+	| compound_statement statement							{ m_peecContainer->CreateCompoundStatement( $1, $2, $$ ); }
+	;
+	
+statement_list
+	: exp													{ $$ = $1; }
+	| compound_statement									{ $$ = $1; }
+	| compound_statement exp								{ m_peecContainer->CreateCompoundStatement( $1, $2, $$ ); }
+	;
+	
+foreach_decl
+	: EE_FOREACH '(' identifier EE_IN array_var ')'			{ m_peecContainer->CreateForEachDecl( $3, $5, $$ ); }
+	;
+	
+iteration_exp
+	: EE_WHILE '(' exp ')' '{' statement_list '}' 			{ m_peecContainer->CreateWhileLoop( $3, $6, $$ ); }
+	| EE_FOR '(' exp_statement exp_statement ')' '{' statement_list '}'
+															{ m_peecContainer->CreateForLoop( $3, $4, $7, $$ ); }
+	| EE_FOR '(' exp_statement exp_statement exp ')' '{' statement_list '}'
+															{ m_peecContainer->CreateForLoop( $3, $4, $5, $8, $$ ); }
+	| EE_DO '{' statement_list '}' EE_WHILE '(' exp ')'		{ m_peecContainer->CreateDoWhileLoop( $7, $3, $$ ); }
+	| foreach_decl '{' statement_list '}'					{ m_peecContainer->CreateForEachLoop( $1, $3, $$ ); }
+	;
+	
+selection_exp
+	: EE_IF '(' exp ')' '{' statement_list '}'				{ m_peecContainer->CreateSelectionStatement( $3, $6, $$ ); }
+	| EE_IF '(' exp ')' '{' statement_list '}' EE_ELSE '{' statement_list '}'
+															{ m_peecContainer->CreateSelectionStatement( $3, $6, $10, $$ ); }
+	;
+	
+jump_exp
+	: EE_CONTINUE											{ m_peecContainer->CreateContinue( $$ ); }
+	| EE_BREAK												{ m_peecContainer->CreateBreak( $$ ); }
+	;
 
 translation_unit
-	: exp													{ m_peecContainer->SetTrans( $1 ); }
+	: statement_list										{ m_peecContainer->SetTrans( $1 ); }
 	;
 
 

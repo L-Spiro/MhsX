@@ -131,9 +131,9 @@ namespace mx {
 			128,									// iTop
 			253,									// dwWidth
 			20,										// dwHeight
-			MX_GROUPSTYLE,															// dwStyle
+			MX_GROUPSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
-			MX_MAKE_WCHAR( _T_923C763F_Show ),																	// pwcText
+			MX_MAKE_WCHAR( _T_923C763F_Show ),		// pwcText
 			_LEN_923C763F,							// sTextLen
 			MX_OPI_DIALOG,							// dwParentId
 
@@ -156,7 +156,7 @@ namespace mx {
 			9,										// dwHeight
 			MX_RADIOSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
-			MX_MAKE_WCHAR( _T_1F1A625A_Main ),																	// pwcText
+			MX_MAKE_WCHAR( _T_1F1A625A_Main ),		// pwcText
 			_LEN_1F1A625A,							// sTextLen
 			MX_OPI_DIALOG,							// dwParentId
 
@@ -177,9 +177,9 @@ namespace mx {
 			136,									// iTop
 			20,										// dwWidth
 			9,										// dwHeight
-			MX_RADIOSTYLE,										// dwStyle
+			MX_RADIOSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
-			MX_MAKE_WCHAR( _T_0355373D_All ),																	// pwcText
+			MX_MAKE_WCHAR( _T_0355373D_All ),		// pwcText
 			_LEN_0355373D,							// sTextLen
 			MX_OPI_DIALOG,							// dwParentId
 
@@ -225,7 +225,7 @@ namespace mx {
 			MX_DEF_BUTTON_HEIGHT,					// dwHeight
 			MX_BUTTONSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
-			MX_MAKE_WCHAR( _T_AF3C9967_Refresh ),																// pwcText
+			MX_MAKE_WCHAR( _T_AF3C9967_Refresh ),	// pwcText
 			_LEN_AF3C9967,							// sTextLen
 			MX_OPI_DIALOG,							// dwParentId
 
@@ -242,17 +242,15 @@ namespace mx {
 	// == Functions.
 	// Creates the Open Process dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
 	DWORD COpenProcessLayout::CreateOpenProcessDialog( CWidget * _pwParent, MX_OPTIONS * _poOptions ) {
-		std::vector<std::string> sStrings;
-		std::vector<std::wstring> sStringsW;
+		std::vector<CSecureString> sStrings;
+		std::vector<CSecureWString> sStringsW;
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
 		CLayoutManager::UnencryptLayouts( m_wlOpenProcessDialog, MX_ELEMENTS( m_wlOpenProcessDialog ),
 			vLayouts,
 			sStringsW,
 			sStrings );
 		mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
-		plmLayout->m_poOptions = _poOptions;
-		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], MX_ELEMENTS( m_wlOpenProcessDialog ), _pwParent );
-		plmLayout->m_poOptions = nullptr;
+		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], MX_ELEMENTS( m_wlOpenProcessDialog ), _pwParent, reinterpret_cast<uint64_t>(_poOptions) );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
 
 		return static_cast<DWORD>(ipProc);

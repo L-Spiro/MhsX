@@ -8,7 +8,7 @@ namespace lsw {
 
 	class CRebar : public CWidget {
 	public :
-		CRebar( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		CRebar( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 
 
 		// == Functions.
@@ -32,6 +32,12 @@ namespace lsw {
 
 		// Gets the row count.
 		UINT								GetRowCount() const;
+
+		// Determines the type of control this is.
+		virtual uint32_t					WidgetType() const { return LSW_LT_REBAR; }
+
+		// Returns true if this is a CRebar class.
+		virtual bool						IsRebar() const { return true; }
 
 
 	protected :

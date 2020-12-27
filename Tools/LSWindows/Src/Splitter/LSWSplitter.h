@@ -8,7 +8,7 @@ namespace lsw {
 
 	class CSplitter : public CWidget {
 	public :
-		CSplitter( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		CSplitter( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 		~CSplitter();
 
 
@@ -53,6 +53,12 @@ namespace lsw {
 
 		// Sets the bar width.
 		void								SetBarWidth( DWORD _dwWidth );
+
+		// Determines the type of control this is.
+		virtual uint32_t					WidgetType() const { return LSW_LT_SPLITTER; }
+
+		// Returns true if this is a CSplitter class.
+		virtual bool						IsSplitter() const { return true; }
 
 
 	protected :

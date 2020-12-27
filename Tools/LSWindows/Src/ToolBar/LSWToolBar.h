@@ -10,7 +10,7 @@ namespace lsw {
 
 	class CToolBar : public CWidget {
 	public :
-		CToolBar( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		CToolBar( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 
 
 		// == Functions.
@@ -73,6 +73,12 @@ namespace lsw {
 
 		// TBN_GETBUTTONINFO.
 		virtual LSW_HANDLED					TbnGetButtonInfo( LPNMTOOLBARW _lptbToolBar );
+
+		// Determines the type of control this is.
+		virtual uint32_t					WidgetType() const { return LSW_LT_TOOLBAR; }
+
+		// Returns true if this is a CToolBar class.
+		virtual bool						IsToolBar() const { return true; }
 
 
 	protected :

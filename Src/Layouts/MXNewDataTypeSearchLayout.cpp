@@ -244,12 +244,28 @@ namespace mx {
 			FALSE,									// bActive
 			MX_LEFT_ALIGN + MX_GROUP_LEFT,			// iLeft
 			MX_OPTIONS_TOP + MX_GROUP_TOP,			// iTop
-			MX_SEARCH_W - ((MX_LEFT_ALIGN + MX_GROUP_LEFT) * 2),		// dwWidth
+			MX_CENTER - (MX_LEFT_ALIGN + MX_GROUP_LEFT),				// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
 			MX_CHECKSTYLE,							// dwStyle
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_22E9689D_Aligned ),	// pwcText
 			_LEN_22E9689D,							// sTextLen
+			MX_NDSI_DIALOG,							// dwParentId
+		},
+		{	// Invert Results.
+			LSW_LT_CHECK,							// ltType
+			MX_NDSI_INVERT,							// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_CENTER,								// iLeft
+			MX_OPTIONS_TOP + MX_GROUP_TOP,			// iTop
+			(MX_SEARCH_W - MX_LEFT_ALIGN - MX_GROUP_RIGHT - MX_CENTER),	// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_EE3A07C4_Invert_Search ),	// pwcText
+			_LEN_EE3A07C4,								// sTextLen
 			MX_NDSI_DIALOG,							// dwParentId
 		},
 		{
@@ -381,7 +397,7 @@ namespace mx {
 			MX_DEF_STATIC_HEIGHT * 3,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
 			0,										// dwStyleEx
-			L"Poop\r\nPee\r\nNoob",							// pwcText
+			L"",									// pwcText
 			0,										// sTextLen
 			MX_NDSI_DIALOG,							// dwParentId
 		},
@@ -399,10 +415,10 @@ namespace mx {
 #undef MX_SEARCH_W
 
 	// == Functions.
-	// Creates the Open Process dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
-	DWORD CNewDataTypeSearchLayout::CreateNewDataTypeSearchDialog( CWidget * _pwParent, MX_OPTIONS * _poOptions ) {
-		std::vector<std::string> sStrings;
-		std::vector<std::wstring> sStringsW;
+	// Creates the New Data-Type Search dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
+	DWORD CNewDataTypeSearchLayout::CreateNewDataTypeSearchDialog( CWidget * _pwParent, CMemHack * _pmhMemHack ) {
+		std::vector<CSecureString> sStrings;
+		std::vector<CSecureWString> sStringsW;
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
 		CLayoutManager::UnencryptLayouts( m_wlNewDataTypeSearchDialog, MX_ELEMENTS( m_wlNewDataTypeSearchDialog ),
 			vLayouts,
@@ -410,9 +426,7 @@ namespace mx {
 			sStrings );
 		
 		mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
-		plmLayout->m_poOptions = _poOptions;
-		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], MX_ELEMENTS( m_wlNewDataTypeSearchDialog ), _pwParent );
-		plmLayout->m_poOptions = nullptr;	// Don't keep the pointer around.
+		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], MX_ELEMENTS( m_wlNewDataTypeSearchDialog ), _pwParent, reinterpret_cast<uint64_t>(_pmhMemHack) );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
 		if ( ipProc != 0 ) {
 			

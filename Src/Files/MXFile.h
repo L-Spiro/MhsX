@@ -38,19 +38,19 @@ namespace mx {
 		VOID					Close();
 
 		// Reads from the opened file.
-		DWORD					Read( LPVOID _lpvBuffer, DWORD _dwNumberOfBytesToRead ) const;
+		DWORD					Read( LPVOID _lpvBuffer, DWORD _dwNumberOfBytesToRead, DWORD * _pdwBytesRead = nullptr ) const;
 
 		// Writes to the opened file.
-		DWORD					Write( LPCVOID _lpvBuffer, DWORD _dwNumberOfBytesToWrite );
+		DWORD					Write( LPCVOID _lpvBuffer, DWORD _dwNumberOfBytesToWrite, DWORD * _pdwBytesWritten = nullptr );
 
 		// Gets the size of the file.
 		UINT64					Size() const;
 
 		// Moves the file pointer from the current position and returns the new position.
-		UINT64					MovePointerBy( INT64 _i64Offset );
+		UINT64					MovePointerBy( INT64 _i64Offset ) const;
 
 		// Moves the file pointer to the given file position.
-		UINT64					MovePointerTo( UINT64 _ui64Pos, BOOL _bFromEnd = FALSE );
+		UINT64					MovePointerTo( UINT64 _ui64Pos, BOOL _bFromEnd = FALSE ) const;
 
 
 		// == Statics.

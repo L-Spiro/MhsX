@@ -1,7 +1,12 @@
 #pragma once
 
 #include <LSWWin.h>
-#include <string>
+#include "../Strings/MXSecureString.h"
+#include "../Strings/MXSecureWString.h"
+#include <CriticalSection/LSWCriticalSection.h>
+
+#include <set>
+#include <vector>
 
 namespace mx {
 
@@ -152,12 +157,52 @@ namespace mx {
 		};
 
 
+		// == Types.
+		// A codepade and its name.
+		struct MX_CODE_PAGE {
+			UINT						uiCodePage;
+			CSecureWString				swsName;
+		};
+
+
 		// == Functions.
 		// Decodes a code page into a text value and description.  _pcValue and _pcDesc should be _T_MAX_LEN characters long.
-		static BOOL					CodePageToString( uint32_t _cpCode, CHAR * _pcValue, CHAR * _pcDesc );
+		static BOOL						CodePageToString( uint32_t _ui32Code, CHAR * _pcValue, CHAR * _pcDesc );
 
 		// Decodes a code page into a text value and description.
-		static BOOL					CodePageToString( uint32_t _cpCode, std::string &_sValue, std::string &_sDesc );
+		static BOOL						CodePageToString( uint32_t _ui32Code, CSecureString &_sValue, CSecureString &_sDesc );
+
+		// Decodes a code page into a text value and description.
+		static BOOL						CodePageToString( uint32_t _ui32Code, CSecureWString &_sValue, CSecureWString &_sDesc );
+
+		// Gets a code page identifier by index.
+		static MX_CODE_PAGES			CodePageByIndex( uint32_t _ui32Idx );
+
+		// Gets the total number of code pages.
+		static size_t					TotalCodePages();
+
+		// Gets all the system code pages, sorted by code page.
+		static std::vector<CCodePages::MX_CODE_PAGE> &
+										GetSystemCodePages( std::vector<CCodePages::MX_CODE_PAGE> &_vRet, bool _bIncludeExtendedUtf );
+
+		// Gets the system default Windows ANSI code page.
+		static UINT						GetSystemDefaultAnsiCodePage();
+
+	protected :
+		// == Members.
+		// The internal list of code pages.
+		static const MX_CODE_PAGES		m_cpPages[];
+
+		// The critical section.
+		static lsw::CCriticalSection	m_csCrit;
+
+		// The set of code pages.
+		static std::set<UINT>			m_sSystemCodePages;
+
+
+		// == Functions.
+		// Gathers code pages.
+		static BOOL CALLBACK			EnumCodePagesProc( LPWSTR _lpCodePageString );
 	};
 
 }	// namespace mx

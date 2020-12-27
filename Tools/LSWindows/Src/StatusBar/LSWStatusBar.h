@@ -7,7 +7,7 @@ namespace lsw {
 
 	class CStatusBar : public CWidget {
 	public :
-		CStatusBar( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		CStatusBar( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 
 
 		// == Types.
@@ -68,6 +68,12 @@ namespace lsw {
 
 		// Sets the text in the first part of a status window.
 		virtual BOOL						SetTextW( LPCWSTR _lpwString ) { return SetTextW( 0, 0, _lpwString ); }
+
+		// Determines the type of control this is.
+		virtual uint32_t					WidgetType() const { return LSW_LT_STATUSBAR; }
+
+		// Returns true if this is a CStatusBar class.
+		virtual bool						IsStatusBar() const { return true; }
 
 
 	protected :

@@ -8,9 +8,9 @@
 
 namespace mx {
 
-	COptionsPageGeneral::COptionsPageGeneral( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, MX_OPTIONS * _poOptions, bool _bCreateWidget, HMENU _hMenu ) :
-		COptionsPage( _wlLayout, _pwParent, _bCreateWidget, _hMenu ),
-		m_poOptions( _poOptions ) {
+	COptionsPageGeneral::COptionsPageGeneral( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
+		COptionsPage( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
+		m_poOptions( reinterpret_cast<MX_OPTIONS *>(_ui64Data) ) {
 	}
 
 	// == Functions.
@@ -35,6 +35,8 @@ namespace mx {
 		MX_CHECK( MX_OI_GENERAL_VIEW_CODE_NAMES, bDataTypesAsCodeNames );
 		MX_CHECK( MX_OI_GENERAL_VIEW_SIZES, bDataTypeSizes );
 		MX_CHECK( MX_OI_GENERAL_VIEW_RANGES, bDataTypeRanges );
+		MX_CHECK( MX_OI_GENERAL_FORMAT_HEX, bUse0x );
+		MX_CHECK( MX_OI_GENERAL_FORMAT_SHORT_ENUMS, bShortEnums );
 #undef MX_CHECK
 
 #define MX_TEXT( ID, MEMBER )																					\
@@ -120,6 +122,8 @@ namespace mx {
 		MX_GETCHECK( MX_OI_GENERAL_VIEW_CODE_NAMES, bDataTypesAsCodeNames );
 		MX_GETCHECK( MX_OI_GENERAL_VIEW_SIZES, bDataTypeSizes );
 		MX_GETCHECK( MX_OI_GENERAL_VIEW_RANGES, bDataTypeRanges );
+		MX_GETCHECK( MX_OI_GENERAL_FORMAT_HEX, bUse0x );
+		MX_GETCHECK( MX_OI_GENERAL_FORMAT_SHORT_ENUMS, bShortEnums );
 #undef MX_GETCHECK
 
 		ee::CExpEvalContainer::EE_RESULT eRes;
@@ -147,7 +151,7 @@ namespace mx {
 	void COptionsPageGeneral::UpdateExample() {
 		CWidget * pwExample = FindChild( COptionsLayout::MX_OI_GENERAL_VIEW_EXAMPLE );
 		if ( pwExample ) {
-			std::string sText = _DEC_S_4CEBDC18_Example__;
+			CSecureString sText = _DEC_S_4CEBDC18_Example__;
 			DWORD dwOptions = 0;
 			dwOptions |= FindChild( COptionsLayout::MX_OI_GENERAL_VIEW_CODE_NAMES )->IsChecked() ? CUtilities::MX_DTO_CODENAMES : 0;
 			dwOptions |= FindChild( COptionsLayout::MX_OI_GENERAL_VIEW_SIZES )->IsChecked() ? CUtilities::MX_DTO_SHOWSIZES : 0;

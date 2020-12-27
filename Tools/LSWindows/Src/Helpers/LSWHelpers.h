@@ -2,6 +2,7 @@
 
 #include "../LSWWin.h"
 #include "../Layout/LSWWidgetLayout.h"
+#include <algorithm>
 #include <cstring>
 #include <string>
 
@@ -96,6 +97,17 @@ namespace lsw {
 		bool								PointIsIn_Exclusive( const POINT &_pPoint ) const {
 			return PointIsIn_Exclusive( _pPoint.x, _pPoint.y );
 		}
+		// Calls ::PtInRect() to determine if a point is in this rectangle.
+		BOOL								PtInRect( const POINT &_pPoint ) const {
+			return ::PtInRect( this, _pPoint );
+		}
+		// Constrains this rectangle by the given rectangle (adjusts this rectangle to fit inside it).
+		void								ConstrainBy( const LSW_RECT &_rRect ) {
+			left = std::max( left, _rRect.left );
+			top = std::max( top, _rRect.top );
+			right = std::min( right, _rRect.right );
+			bottom = std::min( bottom, _rRect.bottom );
+		}
 	};
 
 	struct LSW_HANDLE {
@@ -189,18 +201,25 @@ namespace lsw {
 	};
 
 	struct LSW_SELECTOBJECT {
-		LSW_SELECTOBJECT( HDC _hDc, HGDIOBJ _hgdiobj ) :
+		LSW_SELECTOBJECT( HDC _hDc, HGDIOBJ _hgdiobj, bool _bDeleteNewObjAfter = false ) :
 			hDc( _hDc ),
 			hCur( _hgdiobj ),
-			hPrev( ::SelectObject( _hDc, _hgdiobj ) ) {
+			hPrev( ::SelectObject( _hDc, _hgdiobj ) ),
+			bDeleteAfter( _bDeleteNewObjAfter ) {
 		}
 		~LSW_SELECTOBJECT() {
-			::SelectObject( hDc, hPrev );
+			if ( bDeleteAfter ) {
+				::DeleteObject( ::SelectObject( hDc, hPrev ) );
+			}
+			else {
+				::SelectObject( hDc, hPrev );
+			}
 		}
 
 		HDC									hDc;
 		HGDIOBJ								hCur;
 		HGDIOBJ								hPrev;
+		bool								bDeleteAfter;
 	};
 
 	struct LSW_BEGINPAINT {
@@ -252,6 +271,36 @@ namespace lsw {
 		COLORREF							crPrev;
 	};
 
+	struct LSW_SETBKMODE {
+		LSW_SETBKMODE( HDC _hDc, int _iMode ) :
+			hDc( _hDc ),
+			iCur( _iMode ) {
+			iPrev = ::SetBkMode( _hDc, _iMode );
+		}
+		~LSW_SETBKMODE() {
+			::SetBkMode( hDc, iPrev );
+		}
+
+		HDC									hDc;
+		int									iCur;
+		int									iPrev;
+	};
+
+	struct LSW_THREAD_PRIORITY {
+		LSW_THREAD_PRIORITY( int _iPriority ) :
+			iPrev( ::GetThreadPriority( ::GetCurrentThread() ) ),
+			iCur( _iPriority ) {
+			::SetThreadPriority( ::GetCurrentThread(), _iPriority );
+		}
+		~LSW_THREAD_PRIORITY() {
+			::SetThreadPriority( ::GetCurrentThread(), iPrev );
+		}
+
+		int									iCur;
+		int									iPrev;
+	};
+
+
 	class CHelpers {
 	public :
 		// Aligns a WORD pointer to a 4-byte address.
@@ -287,6 +336,57 @@ namespace lsw {
 			mbiRet.State = _mbiInfo.State;
 			mbiRet.Type = _mbiInfo.Type;
 			return mbiRet;
+		}
+
+		// Sets the window procedure on a window.
+		static WNDPROC						SetWndProc( HWND _hWnd, WNDPROC _wpProc ) {
+			return reinterpret_cast<WNDPROC>(::SetWindowLongPtrW( _hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(_wpProc) ));
+		}
+
+		// Intertpolates between 2 bytes.
+		static BYTE							Mix( BYTE _bA, BYTE _bB, double _dAmnt ) {
+			return static_cast<BYTE>(std::round( (_bB - _bA) * _dAmnt + _bA ));
+		}
+
+		// Mixes between 2 RGB values.
+		static DWORD						MixColorRef( DWORD _dwColorA, DWORD _dwColorB, double _dAmnt ) {
+			BYTE bRa = GetRValue( _dwColorA );
+			BYTE bRb = GetRValue( _dwColorB );
+			BYTE bR = Mix( bRa, bRb, _dAmnt );
+			BYTE bGa = GetGValue( _dwColorA );
+			BYTE bGb = GetGValue( _dwColorB );
+			BYTE bG = Mix( bGa, bGb, _dAmnt );
+			BYTE bBa = GetBValue( _dwColorA );
+			BYTE bBb = GetBValue( _dwColorB );
+			BYTE bB = Mix( bBa, bBb, _dAmnt );
+			return RGB( bR, bG, bB );
+		}
+
+		// Gets the average character width for the font set on the given HDC.
+		static SIZE							GetAveCharSize( HDC _hDc ) {
+			/*
+				How To Calculate Dialog Base Units with Non-System-Based Font
+				http://support.microsoft.com/kb/125681
+				https://www.betaarchive.com/wiki/index.php?title=Microsoft_KB_Archive/125681
+			*/
+			TEXTMETRICW tmTextMetric;
+			::GetTextMetricsW( _hDc, &tmTextMetric );
+
+			std::wstring wBuffer;
+			for ( auto I = 0; I < 26; ++I ) {
+				wBuffer.push_back( L'A' + I );
+				wBuffer.push_back( L'a' + I );
+			}
+
+			SIZE sResult;
+			::GetTextExtentPoint32W( _hDc, wBuffer.c_str(), 52, &sResult );
+
+			sResult.cx = (sResult.cx / 26 + 1) / 2;
+			sResult.cy = tmTextMetric.tmHeight;
+			// For MHS "string security".
+			std::memset( const_cast<wchar_t *>(wBuffer.data()), 0, wBuffer.size() * sizeof( wchar_t ) );
+
+			return sResult;
 		}
 
 

@@ -5,8 +5,8 @@
 
 namespace lsw {
 
-	CListView::CListView( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
-		Parent( _wlLayout, _pwParent, _bCreateWidget, _hMenu ),
+	CListView::CListView( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
+		Parent( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
 		m_sColumns( 0 ),
 		m_bSortWithCase( FALSE ) {
 	}
@@ -18,6 +18,23 @@ namespace lsw {
 		if ( Wnd() ) {
 			::SendMessageW( Wnd(), LVM_SETITEMCOUNT, static_cast<WPARAM>(_cItems), 0 );
 		}
+	}
+
+	// Sets the virtual number of items in a virtual list view.
+	VOID CListView::SetItemCountEx( INT _cItems, DWORD _dwFlags ) {
+		if ( Wnd() ) {
+			::SendMessageW( Wnd(), LVM_SETITEMCOUNT, static_cast<WPARAM>(_cItems), static_cast<LPARAM>(_dwFlags) );
+		}
+	}
+
+	// Gets the number of items in a list-view control.
+	int CListView::GetItemCount() const {
+		return static_cast<int>(::SendMessageW( Wnd(), LVM_GETITEMCOUNT, 0L, 0L ));
+	}
+
+	// Removes an item from a list-view control.
+	BOOL CListView::DeleteItem( int _iItem ) {
+		return static_cast<BOOL>(::SendMessageW( Wnd(), LVM_DELETEITEM, static_cast<WPARAM>(_iItem), 0L ));
 	}
 
 	// Gets the number of columns.
@@ -70,6 +87,27 @@ namespace lsw {
 	// Sets the width of a column.
 	BOOL CListView::SetColumnWidth( INT _iCol, INT _iWidth ) {
 		return ListView_SetColumnWidth( Wnd(), _iCol, _iWidth );
+	}
+
+	// Gets the width of a column.
+	INT CListView::GetColumnWidth( INT _iCol ) const {
+		return static_cast<INT>(::SendMessageW( Wnd(), LVM_GETCOLUMNWIDTH, static_cast<WPARAM>(_iCol), 0 ));
+	}
+
+	// Deletes a column.
+	BOOL CListView::DeleteColumn( INT _iCol ) {
+		if ( static_cast<BOOL>(::SendMessageW( Wnd(), LVM_DELETECOLUMN, static_cast<WPARAM>(_iCol), 0 )) ) {
+			--m_sColumns;
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+	// Deletes all columns.
+	VOID CListView::DeleteAllColumns() {
+		while ( GetTotalColumns() ) {
+			DeleteColumn( 0 );
+		}
 	}
 
 	// Inserts an item.  Returns the index of the item.
@@ -129,7 +167,7 @@ namespace lsw {
 		liItem.pszText = nullptr;
 		do {
 			iSize *= 2;
-			liItem.pszText = new WCHAR[iSize];
+			liItem.pszText = new( std::nothrow ) WCHAR[iSize];
 			liItem.cchTextMax = iSize;
 			iRet = static_cast<INT>(::SendMessageW( Wnd(), LVM_GETITEMTEXTW, static_cast<WPARAM>(_iItem), reinterpret_cast<LPARAM>(&liItem) ));
 			delete [] liItem.pszText;
@@ -146,7 +184,7 @@ namespace lsw {
 		liItem.pszText = nullptr;
 		do {
 			iSize *= 2;
-			liItem.pszText = new CHAR[iSize];
+			liItem.pszText = new( std::nothrow ) CHAR[iSize];
 			liItem.cchTextMax = iSize;
 			iRet = static_cast<INT>(::SendMessageA( Wnd(), LVM_GETITEMTEXTA, static_cast<WPARAM>(_iItem), reinterpret_cast<LPARAM>(&liItem) ));
 			delete [] liItem.pszText;
@@ -159,7 +197,7 @@ namespace lsw {
 		INT iLen = GetItemTextLenW( _iItem,  _iSubItem );
 		LVITEMW liItem = { 0 };
 		liItem.iSubItem = _iSubItem;
-		liItem.pszText = new WCHAR[iLen];
+		liItem.pszText = new( std::nothrow ) WCHAR[iLen];
 		liItem.cchTextMax = iLen;
 		::SendMessageA( Wnd(), LVM_GETITEMTEXTW, static_cast<WPARAM>(_iItem), reinterpret_cast<LPARAM>(&liItem) );
 		_sRet = liItem.pszText;
@@ -171,7 +209,7 @@ namespace lsw {
 		INT iLen = GetItemTextLenA( _iItem,  _iSubItem );
 		LVITEMA liItem = { 0 };
 		liItem.iSubItem = _iSubItem;
-		liItem.pszText = new CHAR[iLen];
+		liItem.pszText = new( std::nothrow ) CHAR[iLen];
 		liItem.cchTextMax = iLen;
 		::SendMessageA( Wnd(), LVM_GETITEMTEXTA, static_cast<WPARAM>(_iItem), reinterpret_cast<LPARAM>(&liItem) );
 		_sRet = liItem.pszText;
@@ -179,13 +217,13 @@ namespace lsw {
 	}
 
 	// Gets the index of the (first) selected item or -1.
-	INT CListView::GetFirstSelectedItem() {
+	INT CListView::GetFirstSelectedItem() const {
 		if ( !Wnd() ) { return -1; }
 		return static_cast<INT>(::SendMessageW( Wnd(), LVM_GETNEXTITEM, static_cast<WPARAM>(-1), MAKELPARAM( LVNI_SELECTED, 0 ) ));
 	}
 
 	// Gets the data of the selected item or returns -1.
-	LPARAM CListView::GetSelData() {
+	LPARAM CListView::GetSelData() const {
 		INT iSel = GetFirstSelectedItem();
 		if ( iSel == -1 ) { return -1; }
 
@@ -199,7 +237,7 @@ namespace lsw {
 	}
 
 	// Gets an item.  _iItm is input and output.
-	BOOL CListView::GetItem( INT _iItem, INT _iSubItem, LVITEMW &_iItm ) {
+	BOOL CListView::GetItem( INT _iItem, INT _iSubItem, LVITEMW &_iItm ) const {
 		if ( !Wnd() ) { return FALSE; }
 		_iItm.iItem = _iItem;
 		_iItm.iSubItem = _iSubItem;
@@ -207,11 +245,23 @@ namespace lsw {
 	}
 
 	// Gets an item.  _iItm is input and output.
-	BOOL CListView::GetItem( INT _iItem, INT _iSubItem, LVITEMA &_iItm ) {
+	BOOL CListView::GetItem( INT _iItem, INT _iSubItem, LVITEMA &_iItm ) const {
 		if ( !Wnd() ) { return FALSE; }
 		_iItm.iItem = _iItem;
 		_iItm.iSubItem = _iSubItem;
 		return static_cast<BOOL>(::SendMessageA( Wnd(), LVM_GETITEMA, 0, reinterpret_cast<LPARAM>(&_iItm) ));
+	}
+
+	// Gets the item's state.
+	UINT CListView::GetItemState( INT _iItem, UINT _uiMask ) const {
+		if ( !Wnd() ) { return 0; }
+		return static_cast<UINT>(::SendMessageW( Wnd(), LVM_GETITEMSTATE, static_cast<WPARAM>(_iItem), static_cast<LPARAM>(_uiMask) ));
+	}
+
+	// Indicates whether an item in the list-view control is visible.
+	BOOL CListView::IsItemVisible( INT _iItem ) const {
+		if ( !Wnd() ) { return FALSE; }
+		return static_cast<BOOL>(::SendMessageA( Wnd(), LVM_ISITEMVISIBLE, static_cast<WPARAM>(_iItem), 0L ));
 	}
 
 	// Sort items.

@@ -2,6 +2,7 @@
 
 #include "../MXMhsX.h"
 #include "../Options/MXOptions.h"
+#include "../Strings/MXStringDecoder.h"
 #include <ListView/LSWListView.h>
 #include <MainWindow/LSWMainWindow.h>
 #include <set>
@@ -13,7 +14,7 @@ namespace mx {
 	
 	class COpenProcessWindow : public lsw::CMainWindow {
 	public :
-		COpenProcessWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, MX_OPTIONS * _poOptions, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		COpenProcessWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 		~COpenProcessWindow();
 
 
@@ -97,6 +98,11 @@ namespace mx {
 
 		// Mark x86?
 		BOOL								MarkX86() const { return m_poOptions ? (m_poOptions->dwOpenProc & MX_OP_SHOW_X86) : TRUE; }
+
+		// Translate a child's tooltip text.
+		virtual std::wstring				TranslateTooltip( const std::string &_sText ) { 
+			return CStringDecoder::DecodeToWString( _sText.c_str(), _sText.size() );
+		}
 
 		// Enumerate thread windows.
 		static BOOL CALLBACK				EnumThreadWindows_GatherWindows( HWND _hWnd, LPARAM _lParam );

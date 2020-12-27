@@ -33,7 +33,7 @@ namespace lsw {
 	// Drag rectangle type.
 	CDockable::LSW_DOCK_DRAG_RECT_TYPE CDockable::m_ddrtDragRectType = CDockable::LSW_DDRT_CHECKERED;
 
-	CDockable::CDockable( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
+	CDockable::CDockable( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
 		CWidget( _wlLayout.ChangeStyle( LSW_POPUP_STYLES | (_wlLayout.dwStyle & WS_VISIBLE) ).ChangeStyleEx( LSW_POPUP_STYLESEX ).ChangeClass( reinterpret_cast<LPCWSTR>(CBase::DockableAtom()) ), _pwParent, _bCreateWidget, _hMenu ),
 		m_dwState( LSW_DS_FLOATING ),
 		m_dwDockStyle( LSW_DS_ALLOW_DOCKALL ),
@@ -141,7 +141,7 @@ namespace lsw {
 		{
 			POINT pPnt;
 			::GetCursorPos( &pPnt );
-			LRESULT lrHit = SendMessageW( Wnd(), WM_NCHITTEST, 0, MAKELPARAM( pPnt.x, pPnt.y ) );
+			LRESULT lrHit = ::SendMessageW( Wnd(), WM_NCHITTEST, 0, MAKELPARAM( pPnt.x, pPnt.y ) );
 			if ( lrHit == HTCLOSE ) {
 				return Close();
 			}
@@ -406,8 +406,17 @@ namespace lsw {
 
 		LOGFONTW lf =  { 0 };
 		lf.lfCharSet = SYMBOL_CHARSET;
-		::wcscpy_s( lf.lfFaceName, LSW_ELEMENTS( lf.lfFaceName ), L"Webdings" );
-		lf.lfHeight = -MulDiv( iH / 2, ::GetDeviceCaps( bpPaint.hDc, LOGPIXELSY ), 72 );
+		// Avoiding searchable strings.
+		//::wcscpy_s( lf.lfFaceName, LSW_COUNT_OF( lf.lfFaceName ), L"Webdings" );
+		lf.lfFaceName[7] = L's';
+		lf.lfFaceName[4] = L'i';
+		lf.lfFaceName[1] = L'e';
+		lf.lfFaceName[6] = L'g';
+		lf.lfFaceName[2] = L'b';
+		lf.lfFaceName[0] = L'W';
+		lf.lfFaceName[3] = L'd';
+		lf.lfFaceName[5] = L'n';
+		lf.lfHeight = -::MulDiv( iH / 2, ::GetDeviceCaps( bpPaint.hDc, LOGPIXELSY ), 72 );
 		lf.lfWeight = FW_NORMAL;
 		lf.lfEscapement = 0;
 		lf.lfOrientation = 0;
@@ -737,7 +746,7 @@ namespace lsw {
 
 	// Keyboard hook.
 	LRESULT CALLBACK CDockable::KeyboardProc( int _iCode, WPARAM _wParam, LPARAM _lParam ) {
-		return CallNextHookEx( m_hOrigDockHookProc, _iCode, _wParam, _lParam );
+		return ::CallNextHookEx( m_hOrigDockHookProc, _iCode, _wParam, _lParam );
 	}
 
 	// Draw the drag rectangle.

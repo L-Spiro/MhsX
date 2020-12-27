@@ -4,7 +4,7 @@
 namespace mx {
 
 	CProcess::CProcess() :
-		m_dwId( static_cast<DWORD>(-1) ),
+		m_dwId( DWINVALID ),
 		m_dwOpenProcFlags( 0 ) {
 	}
 	CProcess::~CProcess() {
@@ -48,18 +48,18 @@ namespace mx {
 	void CProcess::Detatch() {
 		LSW_ENT_CRIT( m_csCrit );
 		m_hProcHandle.Reset();
-		m_dwId = static_cast<DWORD>(-1);
+		m_dwId = DWINVALID;
 	}
 
 	// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
-	bool CProcess::ReadProcessMemory( LPCVOID _lpBaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) {
+	bool CProcess::ReadProcessMemory( LPCVOID _lpBaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) const {
 		LSW_ENT_CRIT( m_csCrit );
 		if ( !ProcIsOpened() ) { return false; }
 		if ( !ReadProcessMemoryInternal( _lpBaseAddress, _lpBuffer, _nSize, _lpNumberOfBytesRead ) ) {
 			if ( m_opmMode == CProcess::MX_OPM_CONSERVATIVE ) {
 				// Add PROCESS_VM_READ and try again.
 				if ( !MX_CHECK_FLAGS_EQ( m_dwOpenProcFlags, PROCESS_VM_READ ) ) {
-					if ( OpenProcInternal( m_dwId, m_dwOpenProcFlags | PROCESS_VM_READ ) ) {
+					if ( const_cast<CProcess *>(this)->OpenProcInternal( m_dwId, m_dwOpenProcFlags | PROCESS_VM_READ ) ) {
 						// Try again.
 						return ReadProcessMemory( _lpBaseAddress, _lpBuffer, _nSize, _lpNumberOfBytesRead );
 					}
@@ -128,12 +128,17 @@ namespace mx {
 	}
 
 	// Determines whether the specified process is running under WOW64.
-	bool CProcess::IsWow64Process() {
+	bool CProcess::IsWow64Process() const {
 		LSW_ENT_CRIT( m_csCrit );
 		if ( !ProcIsOpened() ) { return false; }
 		BOOL bRet;
 		if ( CSystem::IsWow64Process( m_hProcHandle.hHandle, &bRet ) ) { return bRet; }
 		return false;
+	}
+
+	// Determines if the process uses a 32-bit addressing space.
+	bool CProcess::Is32Bit() const {
+		return IsWow64Process() || CSystem::Is32Bit();
 	}
 
 	// Gets the base and size of a region given an address.
@@ -150,17 +155,38 @@ namespace mx {
 		return true;
 	}
 
+	// Resets  all accossiations with the current process.
+	void CProcess::Reset() {
+		m_tProcOpenThread.ExitThread( 0);
+	}
+
+	// Pauses the target process.
+	LONG CProcess::SuspendProcess() const {
+		return CSystem::NtSuspendProcess( m_hProcHandle.hHandle );
+	}
+
+	// Resume the target process.
+	LONG CProcess::ResumeProcess() const {
+		return CSystem::NtResumeProcess( m_hProcHandle.hHandle );
+	}
+
 	// Internal open process.
 	bool CProcess::OpenProcInternal( DWORD _dwId, DWORD _dwFlags ) {
 		LSW_ENT_CRIT( m_csCrit );
 		if ( m_dwId == _dwId && m_dwOpenProcFlags == _dwFlags ) { return true; }
 		// If opening with the new flags fails, keep old handle.
-		HANDLE hTemp = CSystem::OpenProcess( _dwFlags, FALSE, _dwId );
+		HANDLE hTemp = CSystem::OpenProcess( _dwFlags | SYNCHRONIZE, FALSE, _dwId );
 		if ( LSW_HANDLE::Valid( hTemp ) ) {
 			m_hProcHandle.Reset();
 			m_hProcHandle.hHandle = hTemp;
 			m_dwId = _dwId;
 			m_dwOpenProcFlags = _dwFlags;
+
+			DWORD dwVal = m_tProcOpenThread.StopAndWait( 1, INFINITE );
+
+			m_opOpenProcThreadMonitor.hHandle = hTemp;
+			::InterlockedExchange( &m_opOpenProcThreadMonitor.aAtom, 0 );
+			m_tProcOpenThread.CreateThread( ThreadProc, &m_opOpenProcThreadMonitor, &m_opOpenProcThreadMonitor.aAtom );
 			return true;
 		}
 		return m_hProcHandle.Valid();
@@ -176,7 +202,7 @@ namespace mx {
 	}
 
 	// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
-	bool CProcess::ReadProcessMemoryInternal( LPCVOID _lpBaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) {
+	bool CProcess::ReadProcessMemoryInternal( LPCVOID _lpBaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) const {
 		return CSystem::ReadProcessMemory( m_hProcHandle.hHandle, _lpBaseAddress, _lpBuffer, _nSize, _lpNumberOfBytesRead ) != 0;
 	}
 
@@ -219,6 +245,21 @@ namespace mx {
 			(*_lpBuffer) = CHelpers::MemoryBasicInformation32To64( (*reinterpret_cast<PMEMORY_BASIC_INFORMATION32>(_lpBuffer)) );
 		}
 		return sSize;
+	}
+
+	// Open-process thread.  Runs for as long as the target process is open.
+	DWORD WINAPI CProcess::ThreadProc( LPVOID _lpParameter ) {
+		MX_OPEN_PROC * popProc = reinterpret_cast<MX_OPEN_PROC *>(_lpParameter);
+		lsw::LSW_THREAD_PRIORITY tpThreadPri( THREAD_PRIORITY_LOWEST );
+		while ( ::WaitForSingleObject( popProc->hHandle, 0 ) == WAIT_TIMEOUT ) {
+			if ( popProc->aAtom == 1 ) {
+				return 0;
+			}
+			::Sleep( 1 );
+		}
+		DWORD dwVal = ::WaitForSingleObject( popProc->hHandle, 0 );
+		::InterlockedExchange( &popProc->aAtom, 1 );
+		return 0;
 	}
 
 }	// namespace mx

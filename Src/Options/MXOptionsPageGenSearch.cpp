@@ -8,9 +8,9 @@
 
 namespace mx {
 
-	COptionsPageGenSearch::COptionsPageGenSearch( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, MX_OPTIONS * _poOptions, bool _bCreateWidget, HMENU _hMenu ) :
-		COptionsPage( _wlLayout, _pwParent, _bCreateWidget, _hMenu ),
-		m_poOptions( _poOptions ) {
+	COptionsPageGenSearch::COptionsPageGenSearch( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
+		COptionsPage( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
+		m_poOptions( reinterpret_cast<MX_OPTIONS *>(_ui64Data) ) {
 	}
 
 	// == Functions.
@@ -59,7 +59,7 @@ namespace mx {
 
 		peEdit = static_cast<CEdit *>(FindChild( COptionsLayout::MX_OI_GENERAL_SEARCH_BUFFER_SIZE_EDIT ));
 		if ( peEdit ) {
-			peEdit->SetTextA( CUtilities::ToUnsigned( m_poOptions->dwBufferSize / 1024 / 1024 ) );
+			peEdit->SetTextA( CUtilities::ToUnsigned( m_poOptions->ui64BufferSize / 1024 / 1024 ) );
 		}
 
 		peEdit = static_cast<CEdit *>(FindChild( COptionsLayout::MX_OI_GENERAL_SEARCH_EPSILON_EDIT ));
@@ -155,7 +155,7 @@ namespace mx {
 		peEdit = static_cast<CEdit *>(FindChild( COptionsLayout::MX_OI_GENERAL_SEARCH_BUFFER_SIZE_EDIT ));
 		if ( peEdit ) {
 			if ( peEdit->GetTextAsUInt64Expression( eRes ) ) {
-				m_poOptions->dwBufferSize = eRes.u.ui64Val * 1024 * 1024;
+				m_poOptions->ui64BufferSize = eRes.u.ui64Val * 1024ULL * 1024ULL;
 			}
 		}
 

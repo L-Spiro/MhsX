@@ -21,9 +21,11 @@ namespace lsw {
 		// Create/Destroy.
 		// =======================================
 		// Initialize.
-		static VOID									Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan, const WCHAR * _pwcDockableClassName = nullptr,
+		static VOID									Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan,
+			const WCHAR * _pwcDockableClassName = nullptr,
 			const WCHAR * _pwcSplitterClassName = nullptr,
-			const WCHAR * _pwcMultiSplitterClassName = nullptr );
+			const WCHAR * _pwcMultiSplitterClassName = nullptr,
+			const WCHAR * _pwcTeeViewClassName = nullptr );
 
 		// Shut down (frees memory).
 		static VOID									ShutDown();
@@ -48,6 +50,9 @@ namespace lsw {
 
 		// Gets the ATOM for multi-splitter windows.
 		static ATOM									MultiSplitterAtom() { return m_aMultiSplitter; }
+
+		// Gets the ATOM for tree view windows.
+		static ATOM									TreeListAtom() { return m_aTreeView; }
 
 		// =======================================
 		// Process functions.
@@ -86,10 +91,10 @@ namespace lsw {
 		// Prompting.
 		// =======================================
 		// Prompts with MB_ICONINFORMATION and IDOK.
-		static bool									PromptOk( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle );
+		static bool									PromptOk( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle, bool _bIncludeCancel = true );
 
 		// Prompts with MB_ICONINFORMATION and IDOK.
-		static bool									PromptOk( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle );
+		static bool									PromptOk( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle, bool _bIncludeCancel = true );
 
 		// Prompts with MB_ICONQUESTION and IDYES.
 		static bool									PromptYesNo( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle );
@@ -145,6 +150,9 @@ namespace lsw {
 
 		// The multi-splitter class.
 		static ATOM									m_aMultiSplitter;
+
+		// The tree view class.
+		static ATOM									m_aTreeView;
 												
 	};
 

@@ -14,6 +14,7 @@ namespace mx {
 	};
 
 	struct MX_OPTIONS {
+		class CMemHack *				pmhMemHackObj;
 		// General.
 		DWORD							dwFoundAddressRefresh;			// 10
 		DWORD							dwMainRefresh;					// 10
@@ -22,6 +23,8 @@ namespace mx {
 		BOOL							bDataTypesAsCodeNames;			// TRUE
 		BOOL							bDataTypeSizes;					// TRUE
 		BOOL							bDataTypeRanges;				// TRUE
+		BOOL							bUse0x;							// TRUE
+		BOOL							bShortEnums;					// TRUE
 
 		// Open-process settings.
 		DWORD							dwOpenProc;						// MX_OP_SHOW_ALL
@@ -29,17 +32,40 @@ namespace mx {
 		// Search settings.
 		BOOL							bMemImage;						// TRUE
 		BOOL							bMemPrivate;					// TRUE
-		BOOL							bMemMapped;						// FALSE
+		BOOL							bMemMapped;						// TRUE
 		INT								iThreadPriority;				// THREAD_PRIORITY_NORMAL
-		DWORD							dwBufferSize;					// 5 * 1024 * 1024
+		UINT64							ui64BufferSize;					// 4 * 1024 * 1024
 		BOOL							bPreCache;						// TRUE
 		BOOL							bPostFlush;						// TRUE
 		BOOL							bPauseTarget;					// FALSE
 		BOOL							bUseEpsilon;					// TRUE
 		BOOL							bSmartEpsilon;					// TRUE
 		DOUBLE							dEpsilon;						// FLT_EPSILON (1.19209290E-07F)
+		UINT32							ui32Alignment;					// alignof( uint32_t )
 		BOOL							bAligned;						// TRUE
 		BOOL							bSameAsOriginal;				// TRUE
+		BOOL							bInvertResults;					// FALSE
+
+		BOOL							bMatchCase;						// FALSE
+		BOOL							bWholeWord;						// FALSE
+		BOOL							bIsHex;							// FALSE
+		BOOL							bResolveEscapes;				// TRUE
+		BOOL							bWildcard;						// FALSE
+		BOOL							bLingIgnoreCase;				// FALSE
+		BOOL							bLingIgnoreDiacritic;			// FALSE
+		BOOL							bIgnoreKana;					// FALSE
+		BOOL							bIgnoreNoSpace;					// FALSE
+		BOOL							bIgnoreSymbols;					// FALSE
+		BOOL							bIgnoreWidth;					// FALSE
+
+		BOOL							bRegexSingleLine;				// FALSE
+		BOOL							bRegexMultiLine;				// FALSE
+		BOOL							bRegexExtended;					// TRUE
+		BOOL							bRegexFindLongest;				// FALSE
+		BOOL							bRegexNegateSingleLine;			// TRUE
+
+		UINT32							uiRegexFlavor;					// CUtilities::MX_RF_ONIGURUMA
+		UINT32							bsByteswap;						// CUtilities::MX_BS_NONE
 	};
 
 }	// namespace mx

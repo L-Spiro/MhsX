@@ -11,18 +11,24 @@
 #include "../ListView/LSWListView.h"
 #include "../MainWindow/LSWMainWindow.h"
 #include "../MultiSplitter/LSWMultiSplitter.h"
+#include "../ProgressBar/LSWProgressBar.h"
 #include "../RadioButton/LSWRadioButton.h"
 #include "../Rebar/LSWRebar.h"
 #include "../Splitter/LSWSplitter.h"
 #include "../Static/LSWStatic.h"
 #include "../StatusBar/LSWStatusBar.h"
+#include "../Tab/LSWTab.h"
 #include "../ToolBar/LSWToolBar.h"
+#include "../ToolTip/LSWToolTip.h"
+#include "../TreeList/LSWTreeList.h"
+#include "../UpDown/LSWUpDown.h"
+
 
 namespace lsw {
 
 	// == Functions.
 	// Creates a window with all of its controls.  Returns the main window widget.
-	CWidget * CLayoutManager::CreateWindowX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotalMenus, CWidget * _pwParent ) {
+	CWidget * CLayoutManager::CreateWindowX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotalMenus, CWidget * _pwParent, uint64_t _ui64Data ) {
 		if ( !_sTotal ) { return nullptr; }
 
 		HMENU hMenu = NULL;
@@ -30,7 +36,7 @@ namespace lsw {
 			hMenu = CreateMenu( _pmlLayouts, _sTotalMenus );
 		}
 
-		CWidget * pwMain = CreateWidget( FixLayout( _pwlLayouts[0] ), _pwParent, true, hMenu );
+		CWidget * pwMain = CreateWidget( FixLayout( _pwlLayouts[0] ), _pwParent, true, hMenu, _ui64Data );
 		if ( !pwMain ) { return nullptr; }
 
 		std::vector<CWidget *> vWidgets;	// Has to be passed to the ::EnumChildWindows() calls.
@@ -41,7 +47,7 @@ namespace lsw {
 			auto aTemp = mIdToPointer.find( _pwlLayouts[I].dwParentId );
 			CWidget * pwParent = aTemp == mIdToPointer.end() ? nullptr : aTemp->second;
 
-			CWidget * pwThis = CreateWidget( FixLayout( _pwlLayouts[I] ), pwParent, true, NULL );
+			CWidget * pwThis = CreateWidget( FixLayout( _pwlLayouts[I] ), pwParent, true, NULL, _ui64Data );
 			if ( !pwThis ) {
 				// Erase everything from the map and return nullptr.
 				for ( auto aIt = mIdToPointer.begin(); aIt != mIdToPointer.end(); aIt++ ) {
@@ -58,16 +64,16 @@ namespace lsw {
 		CWidget::ControlSetup( pwMain, vWidgets );
 
 		// WM_NCCREATE and WM_CREATE occer in constructors so virtual overloads don't work on them.
-		// Now that construction is over and everything is ready, fakea WM_INITDIALOG.
+		// Now that construction is over and everything is ready, fake a WM_INITDIALOG.
 		pwMain->InitDialog();
 
 		return pwMain;
 	}
 
 	// Creates a modal dialog with all of its controls.  Returns the dialog exit value.
-	INT_PTR CLayoutManager::DialogBoxX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent ) {
+	INT_PTR CLayoutManager::DialogBoxX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent, uint64_t _ui64Data ) {
 		LSW_DLGTEMPLATE dtTemplate;
-		if ( !CreateDlgTemplate( _pwlLayouts, _sTotal, _pwParent, dtTemplate ) ) {
+		if ( !CreateDlgTemplate( _pwlLayouts, _sTotal, _pwParent, dtTemplate, _ui64Data ) ) {
 			return -1;
 		}
 
@@ -89,9 +95,9 @@ namespace lsw {
 	}
 
 	// Creates a modeless dialog with all of its controls.  Returns the dialog widget.
-	CWidget * CLayoutManager::CreateDialogX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent ) {
+	CWidget * CLayoutManager::CreateDialogX( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent, uint64_t _ui64Data ) {
 		LSW_DLGTEMPLATE dtTemplate;
-		if ( !CreateDlgTemplate( _pwlLayouts, _sTotal, _pwParent, dtTemplate ) ) {
+		if ( !CreateDlgTemplate( _pwlLayouts, _sTotal, _pwParent, dtTemplate, _ui64Data ) ) {
 			return NULL;
 		}
 
@@ -101,7 +107,7 @@ namespace lsw {
 			CWidget::DialogProc,
 			reinterpret_cast<LPARAM>(&dtTemplate.vWidgets) );
 		
-#if 1
+#if 0
 		if ( !hWnd ) {
 			CBase::PrintError( L"CreateDialogX" );
 		}
@@ -111,13 +117,13 @@ namespace lsw {
 	}
 
 	// Creates a DLGTEMPLATE structure and helper objects given an array of LSW_WIDGET_LAYOUT objects.
-	BOOL CLayoutManager::CreateDlgTemplate( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent, LSW_DLGTEMPLATE &_dtTemplate ) {
+	BOOL CLayoutManager::CreateDlgTemplate( const LSW_WIDGET_LAYOUT * _pwlLayouts, SIZE_T _sTotal, CWidget * _pwParent, LSW_DLGTEMPLATE &_dtTemplate, uint64_t _ui64Data ) {
 		_dtTemplate.pdtTemplate = nullptr;
 		if ( !_sTotal ) { return TRUE; }
 
 
-		CWidget * pwMain = CreateWidget( FixLayout( _pwlLayouts[0] ), _pwParent, false, NULL );
-		if ( !pwMain ) { return 0; }
+		CWidget * pwMain = CreateWidget( FixLayout( _pwlLayouts[0] ), _pwParent, false, NULL, _ui64Data );
+		if ( !pwMain ) { return FALSE; }
 		_dtTemplate.mIdToPointer.insert_or_assign( pwMain->Id(), pwMain );
 		_dtTemplate.vWidgets.push_back( pwMain );
 		for ( SIZE_T I = 1; I < _sTotal; ++I ) {
@@ -126,7 +132,7 @@ namespace lsw {
 			// Parent here cannot be NULL.
 			if ( !pwParent ) { pwParent = pwMain; }
 
-			CWidget * pwThis = CreateWidget( FixLayout( _pwlLayouts[I] ), pwParent, false, NULL );
+			CWidget * pwThis = CreateWidget( FixLayout( _pwlLayouts[I] ), pwParent, false, NULL, _ui64Data );
 			if ( !pwThis ) {
 				DestroyDialogBoxTemplate( _dtTemplate );
 				return FALSE;
@@ -157,26 +163,31 @@ namespace lsw {
 	}
 
 	// Creates a class based on its type.
-	CWidget * CLayoutManager::CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) {
+	CWidget * CLayoutManager::CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) {
 		switch ( _wlLayout.ltType ) {
-			case LSW_LT_BUTTON : { return new CButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_CHECK : { return new CCheckButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_COMBOBOX : { return new CComboBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_COMBOBOXEX : { return new CComboBoxEx( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_DOCKWINDOW : { return new CDockable( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_EDIT : { return new CEdit( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_GROUPBOX : { return new CGroupBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_LABEL : { return new CStatic( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_LISTBOX : { return new CListBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_LISTVIEW : { return new CListView( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_MAINWINDOW : { return new CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_MULTISPLITTER : { return new CMultiSplitter( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_RADIO : { return new CRadioButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_REBAR : { return new CRebar( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_SPLITTER : { return new CSplitter( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_STATUSBAR : { return new CStatusBar( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_TOOLBAR : { return new CToolBar( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
-			case LSW_LT_WIDGET : { return new CWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu ); }
+			case LSW_LT_BUTTON : { return new CButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_CHECK : { return new CCheckButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_COMBOBOX : { return new CComboBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_COMBOBOXEX : { return new CComboBoxEx( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_DOCKWINDOW : { return new CDockable( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_EDIT : { return new CEdit( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_GROUPBOX : { return new CGroupBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_LABEL : { return new CStatic( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_LISTBOX : { return new CListBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_LISTVIEW : { return new CListView( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_MAINWINDOW : { return new CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_MULTISPLITTER : { return new CMultiSplitter( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_PROGRESSBAR : { return new CProgressBar( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_RADIO : { return new CRadioButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_REBAR : { return new CRebar( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_SPLITTER : { return new CSplitter( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_STATUSBAR : { return new CStatusBar( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_TAB : { return new CTab( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_TOOLBAR : { return new CToolBar( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_TOOLTIP : { return new CToolTip( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_TREELIST : { return new CTreeList( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_UPDOWN : { return new CUpDown( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_WIDGET : { return new CWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 		}
 		return nullptr;
 	}
@@ -244,20 +255,24 @@ namespace lsw {
 				LPCWSTR							lpwsClass;
 			} aStruct [] = {
 				{ LSW_LT_BUTTON, WC_BUTTONW },
-				{ LSW_LT_RADIO, WC_BUTTONW },
 				{ LSW_LT_CHECK, WC_BUTTONW },
 				{ LSW_LT_COMBOBOX, WC_COMBOBOXW },
 				{ LSW_LT_COMBOBOXEX, WC_COMBOBOXEXW },
+				{ LSW_LT_DOCKWINDOW, reinterpret_cast<LPCWSTR>(lsw::CBase::DockableAtom()) },
 				{ LSW_LT_EDIT, WC_EDITW },
+				{ LSW_LT_GROUPBOX, WC_BUTTONW },
 				{ LSW_LT_LISTVIEW, WC_LISTVIEWW },
 				{ LSW_LT_LISTBOX, WC_LISTBOXW },
-				{ LSW_LT_TREEVIEW, WC_TREEVIEWW },
-				{ LSW_LT_GROUPBOX, WC_BUTTONW },
 				{ LSW_LT_LABEL, WC_STATICW },
-				{ LSW_LT_REBAR, REBARCLASSNAMEW },
-				{ LSW_LT_TOOLBAR, TOOLBARCLASSNAMEW },
-				{ LSW_LT_DOCKWINDOW, reinterpret_cast<LPCWSTR>(lsw::CBase::DockableAtom()) },
+				{ LSW_LT_PROGRESSBAR, PROGRESS_CLASSW },
+				{ LSW_LT_RADIO, WC_BUTTONW },
+				{ LSW_LT_REBAR, REBARCLASSNAMEW },				
 				{ LSW_LT_STATUSBAR, STATUSCLASSNAMEW },
+				{ LSW_LT_TAB, WC_TABCONTROLW },
+				{ LSW_LT_TOOLBAR, TOOLBARCLASSNAMEW },
+				{ LSW_LT_TOOLTIP, TOOLTIPS_CLASSW },
+				{ LSW_LT_TREEVIEW, WC_TREEVIEWW },
+				{ LSW_LT_UPDOWN, UPDOWN_CLASSW },
 			};
 			for ( size_t I = 0; I < LSW_ELEMENTS( aStruct ); ++I ) {
 				if ( wlCopy.ltType == aStruct[I].ltType ) {
@@ -320,9 +335,17 @@ namespace lsw {
 
 		// All other controls.
 		for ( SIZE_T I = 1; I < _sTotal; ++I ) {
+			size_t sBackup = sRet;
 			sRet = reinterpret_cast<SIZE_T>(CHelpers::DwordAlign( reinterpret_cast<LPWORD>(sRet) ));
 			DLGITEMTEMPLATE * pditTemp = reinterpret_cast<DLGITEMTEMPLATE *>(pui8Temp + sRet);
-			sRet += LayoutToItemTemplate( _pwlLayouts[I], _pdtTemplate ? pditTemp : nullptr, _vWidgets[I] );
+			size_t sAddMe = LayoutToItemTemplate( FixLayout( _pwlLayouts[I] ), _pdtTemplate ? pditTemp : nullptr, _vWidgets[I] );
+			if ( !sAddMe ) {
+				if ( _pdtTemplate ) { --_pdtTemplate->cdit; }
+				sRet = sBackup;
+			}
+			else {
+				sRet += sAddMe;
+			}
 		}
 
 		return reinterpret_cast<SIZE_T>(CHelpers::DwordAlign( reinterpret_cast<LPWORD>(sRet) ));
@@ -331,6 +354,7 @@ namespace lsw {
 
 	// Converts an LSW_WIDGET_LAYOUT structure to a DLGITEMTEMPLATE structure.  Pass nullptr to get the size to allocate.
 	SIZE_T CLayoutManager::LayoutToItemTemplate( const LSW_WIDGET_LAYOUT &_wlLayout, DLGITEMTEMPLATE * _pdittTemplate, CWidget * _pwCreationData ) {
+		if ( _wlLayout.ltType == LSW_LT_TOOLTIP ) { return 0; }
 		uint8_t * pui8Temp = reinterpret_cast<uint8_t *>(_pdittTemplate);
 		SIZE_T sRet = sizeof( DLGITEMTEMPLATE );
 		if ( _pdittTemplate ) {

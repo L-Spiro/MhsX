@@ -1,6 +1,7 @@
 #include "LSWBase.h"
 #include "../Docking/LSWDockable.h"
 #include "../Layout/LSWLayoutManager.h"
+#include "../TreeList/LSWTreeList.h"
 #include "LSWWndClassEx.h"
 
 #include <Strsafe.h>
@@ -40,11 +41,16 @@ namespace lsw {
 	// The multi-splitter class.
 	ATOM CBase::m_aMultiSplitter = 0;
 
+	// The tree view class.
+	ATOM CBase::m_aTreeView = 0;
+
 	// == Functions.
 	// Initialize.
-	VOID CBase::Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan, const WCHAR * _pwcDockableClassName,
+	VOID CBase::Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan,
+		const WCHAR * _pwcDockableClassName,
 		const WCHAR * _pwcSplitterClassName,
-		const WCHAR * _pwcMultiSplitterClassName ) {
+		const WCHAR * _pwcMultiSplitterClassName,
+		const WCHAR * _pwcTeeViewClassName ) {
 		m_hInstance = _hInst;
 		m_plmLayoutMan = _plmLayoutMan;
 
@@ -95,6 +101,18 @@ namespace lsw {
 			wceMulSplitter.SetWindPro( CWidget::WindowProc );
 			wceMulSplitter.SetCursor( NULL );
 			m_aMultiSplitter = CBase::RegisterClassExW( wceMulSplitter.Obj() );
+		}
+
+		if ( _pwcTeeViewClassName ) {
+			lsw::CWndClassEx wceTreeView;
+			wceTreeView.SetInstance( GetThisHandle() );
+			wceTreeView.SetClassName( _pwcTeeViewClassName );
+			wceTreeView.SetStyle( WS_EX_LEFT | WS_EX_CLIENTEDGE | /*WS_EX_TRANSPARENT | */WS_EX_CONTROLPARENT );
+			wceTreeView.SetBackgroundBrush( 0 );
+			//wceTreeView.SetWindPro( CTreeList::TreeViewProc );
+			wceTreeView.SetWindPro( CWidget::WindowProc );
+			wceTreeView.SetCursor( NULL );
+			m_aTreeView = CBase::RegisterClassExW( wceTreeView.Obj() );
 		}
 	}
 
@@ -203,13 +221,13 @@ namespace lsw {
 	}
 
 	// Prompts with MB_ICONINFORMATION and IDOK.
-	bool CBase::PromptOk( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle ) {
-		return ::MessageBoxA( _hWnd, _pcMsg, _pcTitle, MB_ICONINFORMATION | MB_OKCANCEL ) == IDOK;
+	bool CBase::PromptOk( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle, bool _bIncludeCancel ) {
+		return ::MessageBoxA( _hWnd, _pcMsg, _pcTitle, MB_ICONINFORMATION | (_bIncludeCancel ? MB_OKCANCEL : 0)) == IDOK;
 	}
 
 	// Prompts with MB_ICONINFORMATION and IDOK.
-	bool CBase::PromptOk( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle ) {
-		return ::MessageBoxW( _hWnd, _pwcMsg, _pwcTitle, MB_ICONINFORMATION | MB_OKCANCEL ) == IDOK;
+	bool CBase::PromptOk( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle, bool _bIncludeCancel ) {
+		return ::MessageBoxW( _hWnd, _pwcMsg, _pwcTitle, MB_ICONINFORMATION | (_bIncludeCancel ? MB_OKCANCEL : 0)) == IDOK;
 	}
 
 	// Prompts with MB_ICONQUESTION and IDYES.

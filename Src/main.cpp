@@ -1,7 +1,10 @@
-﻿#include "MXMhsX.h"
+﻿
+#include "MXMhsX.h"
 #include <Base/LSWBase.h>
 #include <Base/LSWWndClassEx.h>
+#include <EEExpEval.h>
 #include <Images/LSWBitmap.h>
+#include "Html/MXHtml.h"
 #include "Layouts/MXFoundAddressLayout.h"
 #include "Layouts/MXLayoutManager.h"
 #include "Layouts/MXMainWindowLayout.h"
@@ -20,7 +23,11 @@
 #include "Gen/EEExpEvalParser.h"*/
 //#include "Layout/LSWMainWindowLayout.h"
 #include <sstream>
-//#include <QtWidgets/QApplication>
+//#define MX_QT
+#ifdef MX_QT
+#include <QtWidgets/QApplication>
+
+#else
 
 #include <Unicode/EEUnicode.h>
 
@@ -355,27 +362,37 @@ std::string NumToUtf8( uint32_t _ui32Val ) {
 
 
 int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine, int _nCmdShow ) {
-	WCHAR szDockable[8];
-	WCHAR szSplitter[10];
-	WCHAR szMSplitter[11];
-	mx::CUtilities::RandomString( szDockable, MX_ELEMENTS( szDockable ) );
-	mx::CUtilities::RandomString( szSplitter, MX_ELEMENTS( szSplitter ) );
-	mx::CUtilities::RandomString( szMSplitter, MX_ELEMENTS( szMSplitter ) );
-	lsw::CBase::Initialize( _hInstance, new mx::CLayoutManager(), szDockable, szSplitter, szMSplitter );
-	::ZeroMemory( szMSplitter, sizeof( szMSplitter ) );
-	::ZeroMemory( szSplitter, sizeof( szSplitter ) );
-	::ZeroMemory( szDockable, sizeof( szDockable ) );
+	// Security measure.  All custom window classes have random names.  Ensure their lengths can change, but not have the same length
+	//	as any other string to ensure no name collisions.  No need for true random here; % is fine enough.
+#define MX_NEW_STRING( NAME, BASELEN )	std::vector<WCHAR> NAME; NAME.resize( (BASELEN) + (rand() % 4) ); mx::CUtilities::RandomString( &NAME[0], NAME.size() )
+	MX_NEW_STRING( szDockable, 2 );
+	MX_NEW_STRING( szSplitter, 6 );
+	MX_NEW_STRING( szMSplitter, 10 );
+	MX_NEW_STRING( szTreeView, 14 );
+#undef MX_NEW_STRING
+	lsw::CBase::Initialize( _hInstance, new mx::CLayoutManager(),
+		&szDockable[0],
+		&szSplitter[0],
+		&szMSplitter[0],
+		&szTreeView[0] );
+#define MX_CLEAN_STRING( STR )	::ZeroMemory( &STR[0], STR.size() * sizeof( STR[0] ) );
+	MX_CLEAN_STRING( szDockable );
+	MX_CLEAN_STRING( szSplitter );
+	MX_CLEAN_STRING( szMSplitter );
+	MX_CLEAN_STRING( szTreeView );
+#undef MX_CLEAN_STRING
 
 	// Initialize the system.
 	mx::CSystem::InitSystem();
-
+	
+#if 0
 	ee::CFloatX fVal;
 	double dFMax = ee::CFloatX::GetMaxForBits( 8, 24, true );
 	if ( dFMax == FLT_MAX ) {
 		dFMax--;
 	}
 
-
+	//mx::CHtml::MakeNickNameTable();
 /*	ee::CUnicode::MakeNickNameTable();
 	std::string sUnicode;
 	ee::CUnicode::GetName( sUnicode, 2 );*/
@@ -439,6 +456,12 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 	uint32_t ui32G1 = ee::EscapeX( "xAf", 4, sConsued );
 	uint32_t ui32G3 = ee::EscapeX( "x902", 5, sConsued );
 
+	const char * pcUtf8Temp = u8"\xEF\xB9\x8C";
+	// C3 AF C2 B9 C2 8C
+	// ï¹
+	// C3 AF C2 B9 C2 8C
+	// Ã¯Â¹ÂŒ
+#endif	// 0
 #if 0
 	//uint32_t ui32Blah = '\U0001F436';
 	uint32_t ui32Blah = '\U00002019';
@@ -478,12 +501,16 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 	OutputDebugStringW( wPrin );
 	OutputDebugStringA( wPrin32Dst );
 #endif
+	const char * pcUtf8Temp = u8"\xEF\xB9\x8C";
+	const wchar_t * pwcUtf16 = L"\u0041\u002B\u00E1\u0103\u01CE\u00C2\u0103";	// A+áăǎÂă
+
+
 	mx::CWindowMemHack wmhMemHack;
 	// Create the windows.
 	//mx::CMainWindowLayout::CreateMainWindow();
 	//mx::COpenProcessLayout::CreateOpenProcessDialog( mx::CMainWindowLayout::MainWindow() );
 
-	LSW_WIDGET_LAYOUT wlDock = {
+	/*LSW_WIDGET_LAYOUT wlDock = {
 		LSW_LT_DOCKWINDOW,						// ltType
 		125,									// wId
 		nullptr,								// lpwcClass
@@ -503,7 +530,7 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 	//lsw::CBase::LayoutManager()->CreateWidget( lsw::CLayoutManager::FixLayout( wlDock ), mx::CMainWindowLayout::MainWindow(), true, NULL );
 	wlDock.wId++;
 	wlDock.pwcText = L"Found Addresses";
-	wlDock.iLeft = 500;
+	wlDock.iLeft = 500;*/
 	//lsw::CBase::LayoutManager()->CreateWidget( lsw::CLayoutManager::FixLayout( wlDock ), mx::CMainWindowLayout::MainWindow(), true, NULL );
 
 	//mx::CFoundAddressLayout::CreateFoundAddressesWindow( mx::CMainWindowLayout::MainWindow() );
@@ -519,6 +546,12 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 	bMap.LoadFromFile( L"Resources/98.bmp", 0, 0, LR_LOADMAP3DCOLORS );
 	*/
 
+	// Controls seconds_since_start(), milliseconds_since_start(), etc., Expression Evaluator.
+	// We move it up as close to the start of the loop as possible so that these values most closely mark the actual time that meaningful execution
+	//	takes place (clock() returns the time since the EXE actually started (before main() is even called), so we don't need more tickers from that
+	//	time.
+	// In a way, this allows (clock() - milliseconds_since_start()) to print the time it takes to initialize.
+	ee::InitializeExpressionEvaluatorLibrary();
 	MSG mMsg = {};
 	while ( ::GetMessageW( &mMsg, NULL, 0, 0 ) > 0 ) {
 		if ( mMsg.message == WM_QUIT ) {
@@ -531,8 +564,9 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 	lsw::CBase::ShutDown();
 	return static_cast<int>(mMsg.wParam);
 }
+#endif	// #ifdef MX_QT
 
-/*
+#ifdef MX_QT
 int main( int _iArgs, char * _pcArgs[] ) {
 	// Initialize the system.
 	mx::CSystem::InitSystem();
@@ -541,10 +575,8 @@ int main( int _iArgs, char * _pcArgs[] ) {
 	CMain mxWindow;
 	mxWindow.show();
 	return aApp.exec();
-}*/
-
-
-#if 0
+}
+#else
 #include <cstdio>
 #include <cmath>
 #include <Windows.h>
@@ -671,9 +703,7 @@ int main()
 
 	return 0;
 }
-#endif
-
-
+#endif	// #ifdef MX_QT
 
 /*int main(int argc, char *argv[])
 {

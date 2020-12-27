@@ -53,6 +53,14 @@ namespace mx {
 			uint64_t						ui64FileOffset;				// File offset where this relocation was found.
 		};
 
+		// An extracted resource with context.
+		struct MX_EXTRACTED_RESOURCE {
+			std::vector<MX_IMAGE_RESOURCE_DIRECTORY_ENTRY>
+											vDirEntries;				// The whole directory tree leading up to this resource.
+			MX_IMAGE_RESOURCE_DATA_ENTRY	irdeDataEntry;				// The data for this resource.
+			std::vector<uint8_t>			vResourceData;				// The actual resource bytes.
+		};
+
 
 		// == Functions.
 		BOOL								LoadImageFromFile( const wchar_t * _pwcPath );
@@ -60,7 +68,7 @@ namespace mx {
 
 		BOOL								Is64() const { return m_woWinOpt.Magic == MX_IMAGE_NT_OPTIONAL_HDR64_MAGIC; }
 		uint32_t							NumberOfRvaAndSizes() const { return static_cast<uint32_t>(m_vDataDirectories.size()); }
-		uint32_t							ImageBase() const { return m_uiImageBase; }
+		uint64_t							ImageBase() const { return m_uiImageBase; }
 		uint64_t							FileOffsetToRelocAddress( uint64_t _uiFileAddr ) const;	// File offset to a file offset that accounts for relocations of sections.  Add ImageBase() to this to get the RAM address.
 		uint64_t							RelocAddressToFileOffset( uint64_t _uiRelocAddr ) const;
 		uint64_t							NameOfSectionByRelocAddress( uint64_t _uiRelocAddr, std::string &_sReturn ) const; // Returns the offset into the section.
@@ -119,6 +127,12 @@ namespace mx {
 		const std::wstring &				GetPath() const { return m_wsPath; }
 		VOID								SetPath( const wchar_t * _pwcPath ) { m_wsPath = _pwcPath ? _pwcPath : L""; }	// _pwcPath can be NULL.
 
+		// Fills a vector with a resource.
+		bool								GetResource( const MX_IMAGE_RESOURCE_DATA_ENTRY * _irdeResource, std::vector<uint8_t> &_vResult ) const;
+
+		// Gathers all resources.
+		bool								GetAllResources( std::vector<MX_EXTRACTED_RESOURCE> &_vResult ) const;
+
 	protected :
 		// == Members.
 		MX_DOS_HEADER						m_dhDosHeader;
@@ -136,7 +150,7 @@ namespace mx {
 		MX_IMAGE_RESOURCE_DIRECTORY *		m_pirdResourceDir;
 		std::vector<MX_BASE_RELOC>			m_vBaseRelocations;
 
-		uint32_t							m_uiImageBase;
+		uint64_t							m_uiImageBase;
 
 		uint32_t							m_uiDosHeaderOffset;
 		uint32_t							m_uiDosStubOffset;
@@ -151,6 +165,18 @@ namespace mx {
 		uint32_t							m_uiRelocOffset;
 
 		std::wstring						m_wsPath;
+
+
+		// == Functions.
+		// Recursively advances down a directory while gathering resources.
+		bool								GetAllResources( std::vector<MX_EXTRACTED_RESOURCE> &_vResult,
+			const MX_IMAGE_RESOURCE_DIRECTORY * _pirdDesc, uint32_t _uiSectionIndex,
+			std::vector<MX_IMAGE_RESOURCE_DIRECTORY_ENTRY> &_vDirStack ) const;
+
+		// Recursively advances down a directory while gathering resources.
+		bool								GetAllResources( std::vector<MX_EXTRACTED_RESOURCE> &_vResult,
+			const MX_IMAGE_RESOURCE_DIRECTORY_ENTRY * _pirdeEntry, uint32_t _uiSectionIndex,
+			std::vector<MX_IMAGE_RESOURCE_DIRECTORY_ENTRY> &_vDirStack ) const;
 
 	};
 

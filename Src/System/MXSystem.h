@@ -1,10 +1,10 @@
 #pragma once
 
 #include "../Files/MXFile.h"
+#include "../MXMhsX.h"
 #include "../PE/MXPeObject.h"
 #include "../Strings/MXStringDecoder.h"
 
-#include <LSWWin.h>
 #include <string>
 #include <TlHelp32.h>
 #include <vector>
@@ -29,7 +29,10 @@ typedef SIZE_T (WINAPI * LPFN_VIRTUALQUERYEX)( HANDLE, LPCVOID, PMEMORY_BASIC_IN
 typedef BOOL (WINAPI * LPFN_ENUMPROCESSES)( DWORD *, DWORD, DWORD * );
 typedef HANDLE (WINAPI * LPFN_OPENPROCESS)( DWORD, BOOL, DWORD );
 typedef HANDLE (WINAPI * LPFN_OPENTHREAD)( DWORD, BOOL, DWORD );
+typedef HANDLE (WINAPI * LPFN_CREATEREMOTETHREAD)( HANDLE, LPSECURITY_ATTRIBUTES, SIZE_T, LPTHREAD_START_ROUTINE, LPVOID, DWORD, LPDWORD );
 typedef BOOL (WINAPI * LPFN_ISWOW64PROCESS)( HANDLE, PBOOL );
+typedef HMODULE (WINAPI * LPFN_LOADLIBRARYW)( LPCWSTR );
+typedef HMODULE (WINAPI * LPFN_LOADLIBRARYEXW)( LPCWSTR, HANDLE, DWORD );
 typedef HANDLE (WINAPI * LPFN_CREATETOOLHELP32SNAPSHOT)( DWORD, DWORD );
 typedef BOOL (WINAPI * LPFN_PROCESS32FIRSTW)( HANDLE, LPPROCESSENTRY32W );
 typedef BOOL (WINAPI * LPFN_PROCESS32NEXTW)( HANDLE, LPPROCESSENTRY32W );
@@ -57,6 +60,22 @@ typedef BOOL (WINAPI * LPFN_SETTHREADCONTEXT)( HANDLE, const CONTEXT * );
 typedef BOOL (WINAPI * LPFN_WOW64GETTHREADCONTEXT)( HANDLE, PWOW64_CONTEXT );
 typedef BOOL (WINAPI * LPFN_WOW64SETTHREADCONTEXT)( HANDLE, const WOW64_CONTEXT * );
 typedef BOOL (WINAPI * LPFN_WOW64GETTHREADSELECTORENTRY)( HANDLE, DWORD, PWOW64_LDT_ENTRY );
+typedef UINT_PTR (WINAPI * LPFN_SETTIMER)( HWND, UINT_PTR, UINT, TIMERPROC );
+typedef BOOL (WINAPI * LPFN_KILLTIMER)( HWND, UINT_PTR );
+typedef LONG (NTAPI * LPFN_NTSUSPENDPROCESS)( HANDLE );
+typedef LONG (NTAPI * LPFN_NTRESUMEPROCESS)( HANDLE );
+typedef int (WINAPI * LPFN_COMPARESTRINGEX)( LPCWSTR, DWORD, LPCWCH, int, LPCWCH, int, LPNLSVERSIONINFO, LPVOID, LPARAM );
+typedef HHOOK (WINAPI * LPFN_SETWINDOWSHOOKEX)( int, HOOKPROC, HINSTANCE, DWORD );
+typedef LRESULT (WINAPI * LPFN_CALLNEXTHOOKEX)( HHOOK, int, WPARAM, LPARAM );
+typedef BOOL (WINAPI * LPFN_UNHOOKWINDOWSHOOKEX)( HHOOK _hhk );
+typedef BOOL (WINAPI * LPFN_REGISTERHOTKEY)( HWND, int, UINT, UINT );
+typedef BOOL (WINAPI * LPFN_UNREGISTERHOTKEY)( HWND,  int );
+typedef BOOL (WINAPI * LPFN_GETKEYBOARDSTATE)( PBYTE );
+typedef SHORT (WINAPI * LPFN_GETASYNCKEYSTATE)( int );
+typedef BOOL (WINAPI * LPFN_BEEP)( DWORD, DWORD );
+
+
+
 
 
 namespace mx {
@@ -73,26 +92,35 @@ namespace mx {
 		// System information.
 		static const SYSTEM_INFO &		GetSystemInfo() { return m_siSystemInfo; }
 
+		// Is the system 32-bit?
+		static bool						Is32Bit();
+
+		// Is the system 64-bit?
+		static bool						Is64Bit();
+
 		// Gets a function address by DLL name and function name.
 		static LPVOID					GetProcAddress( const WCHAR * _pwcDll, const CHAR * _pcFunc );
 
 		// Gets the file name from a given path.
-		static std::string				GetFileName( const std::string &_sPath );
+		static CSecureString			GetFileName( const std::string &_sPath );
 
 		// Gets the file name from a given path.
-		static std::wstring				GetFileName( const std::wstring &_wsPath );
+		static CSecureWString			GetFileName( const std::wstring &_wsPath );
 
 		// Gets the path to this .EXE in UTF-8.
-		static std::string				GetSelfPath();
+		static CSecureString			GetSelfPath();
 
 		// Gets the path to this .EXE in UTF-16.
-		static std::wstring				GetSelfPathW();
+		static CSecureWString			GetSelfPathW();
+
+		// Gets the Resources/ path.
+		static CSecureWString			GetResourcesPathW();
 
 		// Gets the path to a given loaded DLL given its UTF-8 name.
-		static std::string				GetModulePath( const CHAR * _pcPath );
+		static CSecureString			GetModulePath( const CHAR * _pcPath );
 
 		// Gets the path to a given loaded DLL given its UTF-16 name.
-		static std::wstring				GetModulePathW( const WCHAR * _pwcPath );
+		static CSecureWString			GetModulePathW( const WCHAR * _pwcPath );
 
 		// Gets the length of the string needed to hold the path to this executable, including the terminating NULL.
 		static DWORD					GetSelfPathLength();
@@ -101,22 +129,22 @@ namespace mx {
 		static DWORD					GetModulePathLength( const WCHAR * _pwcPath );
 
 		// Gets the current directory in UTF-8.
-		static std::string				GetCurDir();
+		static CSecureString			GetCurDir();
 
 		// Gets the current directory in UTF-16.
-		static std::wstring				GetCurDirW();
+		static CSecureWString			GetCurDirW();
 
 		// Gets the system directory in UTF-8.
-		static std::string				GetSystemDir();
+		static CSecureString			GetSystemDir();
 
 		// Gets the system directory in UTF-16.
-		static std::wstring				GetSystemDirW();
+		static CSecureWString			GetSystemDirW();
 
 		// Gets the Windows directory in UTF-8.
-		static std::string				GetWindowsDir();
+		static CSecureString			GetWindowsDir();
 
 		// Gets the Windows directory in UTF-16.
-		static std::wstring				GetWindowsDirW();
+		static CSecureWString			GetWindowsDirW();
 
 		// Gets all the paths in the PATH environment variable.
 		static size_t					GetPathEnv( std::vector<std::string> &_vReturn );
@@ -177,8 +205,18 @@ namespace mx {
 		// OpenThread().
 		static HANDLE WINAPI			OpenThread( DWORD _dwDesiredAccess, BOOL _bInheritHandle, DWORD _dwThreadId );
 
+		// CreateRemoteThread().
+		static HANDLE WINAPI			CreateRemoteThread( HANDLE _hProcess, LPSECURITY_ATTRIBUTES _lpThreadAttributes, SIZE_T _dwStackSize, LPTHREAD_START_ROUTINE _lpStartAddress,
+			LPVOID _lpParameter, DWORD _dwCreationFlags, LPDWORD _lpThreadId );
+
 		// IsWow64Process().
 		static BOOL WINAPI				IsWow64Process( HANDLE _hProcess, PBOOL _Wow64Process );
+
+		// LoadLibraryW().
+		static HMODULE WINAPI			LoadLibraryW( LPCWSTR _lpLibFileName );
+
+		// LoadLibraryExW().
+		static HMODULE WINAPI			LoadLibraryExW( LPCWSTR _lpLibFileName, HANDLE _hFile, DWORD _dwFlags );
 
 		// CreateToolhelp32Snapshot().
 		static HANDLE WINAPI			CreateToolhelp32Snapshot( DWORD _dwFlags, DWORD _th32ProcessID );
@@ -231,6 +269,9 @@ namespace mx {
 		// Show an encrypted error message box.
 		static VOID						MessageBoxError( HWND _hWnd, const CHAR * _pcMsg, size_t _sMsgLen, const CHAR * _pcTitle = _T_9C1C9375_Error, size_t _sTitleLen = _LEN_9C1C9375 );
 
+		// Show an encrypted message box.
+		static VOID						MessageBoxOk( HWND _hWnd, const CHAR * _pcMsg, size_t _sMsgLen, const CHAR * _pcTitle, size_t _sTitleLen );
+
 		// Tests the flags that can be used to open a given process.
 		static DWORD					TestOpenProcess( DWORD _dwId );
 
@@ -269,6 +310,47 @@ namespace mx {
 
 		// Wow64GetThreadSelectorEntry().
 		static BOOL WINAPI				Wow64GetThreadSelectorEntry( HANDLE _hThread, DWORD _dwSelector, PWOW64_LDT_ENTRY _lpSelectorEntry );
+
+		// SetTimer().
+		static UINT_PTR					SetTimer( HWND _hWnd, UINT_PTR _nIDEvent, UINT _uElapse, TIMERPROC _lpTimerFunc );
+
+		// KillTimer().
+		static BOOL						KillTimer( HWND _hWnd, UINT_PTR _uIDEvent );
+
+		// NtSuspendProcess.
+		static LONG NTAPI				NtSuspendProcess( HANDLE _hProcess );
+
+		// NtResumeProcess.
+		static LONG NTAPI				NtResumeProcess( HANDLE _hProcess );
+
+		// CompareStringEx.
+		static int WINAPI				CompareStringEx( LPCWSTR _lpLocaleName, DWORD _dwCmpFlags, LPCWCH _lpString1, int _cchCount1, LPCWCH _lpString2, int _cchCount2, LPNLSVERSIONINFO _lpVersionInformation,
+			LPVOID _lpReserved, LPARAM _lParam );
+
+		// SetWindowsHookExW.
+		static HHOOK WINAPI				SetWindowsHookExW( int _idHook, HOOKPROC _lpfn, HINSTANCE _hmod, DWORD _dwThreadId );
+
+		// CallNextHookEx.
+		static LRESULT WINAPI			CallNextHookEx( HHOOK _hhk, int _nCode, WPARAM _wParam, LPARAM _lParam );
+
+		// UnhookWindowsHookEx.
+		static BOOL WINAPI				UnhookWindowsHookEx( HHOOK _hhk );
+
+
+		// RegisterHotKey.
+		static BOOL WINAPI				RegisterHotKey( HWND _hWnd, int _id, UINT _fsModifiers, UINT _vk );
+
+		// UnregisterHotKey.
+		static BOOL WINAPI				UnregisterHotKey( HWND _hWnd, int _id );
+
+		
+		// GetKeyboardState.
+		static BOOL WINAPI				GetKeyboardState( PBYTE _lpKeyState );
+
+		// GetAsyncKeyState.
+		static SHORT WINAPI				GetAsyncKeyState( int _vKey );
+
+
 
 		// Determines if the given address is out of the native range of this process.
 		static bool						AddressIsInNativeMemoryRange( uint64_t _uiAddr ) {
@@ -313,8 +395,17 @@ namespace mx {
 		// OpenThread().
 		static LPFN_OPENTHREAD			m_pfOpenThread;
 
+		// CreateRemoteThread().
+		static LPFN_CREATEREMOTETHREAD	m_pfCreateRemoteThread;
+
 		// IsWow64Process().
 		static LPFN_ISWOW64PROCESS		m_pfIsWow64Process;
+
+		// LoadLibraryW().
+		static LPFN_LOADLIBRARYW		m_pfLoadLibraryW;
+
+		// LoadLibraryExW().
+		static LPFN_LOADLIBRARYEXW		m_pfLoadLibraryExW;
 
 		// CreateToolhelp32Snapshot().
 		static LPFN_CREATETOOLHELP32SNAPSHOT
@@ -407,6 +498,45 @@ namespace mx {
 		static LPFN_WOW64GETTHREADSELECTORENTRY
 										m_pfWow64GetThreadSelectorEntry;
 
+		// SetTimer().
+		static LPFN_SETTIMER			m_pfSetTimer;
+
+		// KillTimer().
+		static LPFN_KILLTIMER			m_pfKillTimer;
+
+		// NtSuspendProcess().
+		static LPFN_NTSUSPENDPROCESS	m_pfNtSuspendProcess;
+
+		// NtResumeProcess().
+		static LPFN_NTRESUMEPROCESS		m_pfNtResumeProcess;
+
+		// CompareStringEx().
+		static LPFN_COMPARESTRINGEX		m_pfCompareStringEx;
+
+		// SetWindowsHookExW().
+		static LPFN_SETWINDOWSHOOKEX	m_pfSetWindowsHookExW;
+
+		// CallNextHookEx().
+		static LPFN_CALLNEXTHOOKEX		m_pfCallNextHookEx;
+
+		// UnhookWindowsHookEx().
+		static LPFN_UNHOOKWINDOWSHOOKEX	m_pfUnhookWindowsHookEx;
+
+		// RegisterHotKey().
+		static LPFN_REGISTERHOTKEY		m_pfRegisterHotKey;
+
+		// UnregisterHotKey().
+		static LPFN_UNREGISTERHOTKEY	m_pfUnregisterHotKey;
+
+		// GetKeyboardState().
+		static LPFN_GETKEYBOARDSTATE	m_pfGetKeyboardState;
+
+		// GetAsyncKeyState().
+		static LPFN_GETASYNCKEYSTATE	m_pfGetAsyncKeyState;
+
+		// Beep().
+		static LPFN_BEEP				m_pfBeep;
+
 
 		// == Functions.
 		// Load kernel32.dll functions.
@@ -417,6 +547,9 @@ namespace mx {
 
 		// Load Advapi32.dll functions.
 		static VOID						LoadAdvapi32();
+
+		// Load ntdll.dll functions.
+		static VOID						LoadNtdll();
 	};
 
 }	// namespace mx

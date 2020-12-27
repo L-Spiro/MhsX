@@ -27,6 +27,12 @@
     <Filter Include="Source Files\Unicode">
       <UniqueIdentifier>{14c960d2-30fd-4385-9888-246153b392f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Array">
+      <UniqueIdentifier>{9ecede83-1325-432d-941d-846151427b12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Array">
+      <UniqueIdentifier>{bb67682d-5da5-4ee4-84d3-1e49ebd71cdf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -52,6 +58,9 @@
     </ClCompile>
     <ClCompile Include="Src\Unicode\EEUnicode.cpp">
       <Filter>Source Files\Unicode</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Array\EEArrayBase.cpp">
+      <Filter>Source Files\Array</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -93,6 +102,51 @@
     </ClInclude>
     <ClInclude Include="Src\Unicode\EEUnicodeTable.h">
       <Filter>Header Files\Unicode</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Array\EEArrayBase.h">
+      <Filter>Header Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Array\EEInt8Array.h">
+      <Filter>Header Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Array\EEUInt8Array.h">
+      <Filter>Header Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Array\EEInt16Array.h">
+      <Filter>Header Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Array\EEInt32Array.h">
+      <Filter>Header Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Array\EEInt64Array.h">
+      <Filter>Header Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Array\EEUInt16Array.h">
+      <Filter>Header Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Array\EEUInt32Array.h">
+      <Filter>Header Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Array\EEUInt64Array.h">
+      <Filter>Header Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Array\EEPrimitiveArrayUnsigned.h">
+      <Filter>Header Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Array\EEPrimitiveArrayFloat.h">
+      <Filter>Header Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Array\EEPrimitiveArraySigned.h">
+      <Filter>Header Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Array\EEFloatArray.h">
+      <Filter>Header Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Array\EEDoubleArray.h">
+      <Filter>Header Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Array\EEDefaultArray.h">
+      <Filter>Header Files\Array</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -12,7 +12,7 @@ namespace lsw {
 			UINT _style = CS_DBLCLKS | CS_OWNDC | CS_HREDRAW | CS_VREDRAW,
 			HINSTANCE _hInstance = CBase::GetThisHandle(),
 			HICON _hIcon = nullptr,
-			HCURSOR _hCursor = ::LoadCursorW( NULL, IDC_ARROW ),
+			HCURSOR _hCursor = ::LoadCursor( NULL, IDC_ARROW ),	// Not ::LoadCursorW().
 			HBRUSH _hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1),
 			LPCWSTR _lpszMenuName = nullptr,
 			HICON _hIconSm = nullptr,

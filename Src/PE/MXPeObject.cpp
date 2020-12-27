@@ -75,17 +75,21 @@ namespace mx {
 		m_uiSectionsOffset = static_cast<uint32_t>(_fFile.MovePointerBy( 0 ));
 		for ( size_t I = 0; I < m_vSections.size(); ++I ) {
 			if ( _fFile.Read( &m_vSections[I], sizeof( MX_IMAGE_SECTION_HEADER ) ) != sizeof( MX_IMAGE_SECTION_HEADER ) ) { return FALSE; }
-			if ( !m_vSections[I].SizeOfRawData ) { return FALSE; }
+			if ( !m_vSections[I].SizeOfRawData ) {
+				//return FALSE;	// Necessary?
+			}
 		}
 		uint64_t ui64Pointer = _fFile.MovePointerBy( 0 );
 
 		m_vSectionData.resize( CoffHeader().NumberOfSections );
 		for ( size_t I = 0; I < m_vSectionData.size(); ++I ) {
-			if ( !_fFile.MovePointerTo( m_vSections[I].PointerToRawData ) ) { return FALSE; }
-			m_vSectionData[I].ui64FileOffset = m_vSections[I].PointerToRawData;
-			m_vSectionData[I].ui64RelocAddress = m_vSections[I].VirtualAddress;
-			m_vSectionData[I].vData.resize( m_vSections[I].SizeOfRawData );
-			if ( _fFile.Read( &m_vSectionData[I].vData[0], m_vSections[I].SizeOfRawData ) != m_vSections[I].SizeOfRawData ) { return FALSE; }
+			if ( m_vSections[I].SizeOfRawData ) {
+				if ( !_fFile.MovePointerTo( m_vSections[I].PointerToRawData ) ) { return FALSE; }
+				m_vSectionData[I].ui64FileOffset = m_vSections[I].PointerToRawData;
+				m_vSectionData[I].ui64RelocAddress = m_vSections[I].VirtualAddress;
+				m_vSectionData[I].vData.resize( m_vSections[I].SizeOfRawData );
+				if ( _fFile.Read( &m_vSectionData[I].vData[0], m_vSections[I].SizeOfRawData ) != m_vSections[I].SizeOfRawData ) { return FALSE; }
+			}
 		}
 
 		m_piedExportDesc = nullptr;
@@ -379,12 +383,12 @@ namespace mx {
 	// Returns the address without modification or 0.
 	uint64_t CPeObject::GetExportAddress( const char * _pcExport ) const {
 		if ( HasExportDesc() && ExportDescriptor() ) {
-			std::string sExport = _pcExport;
+			CSecureString sExport = _pcExport;
 			uint32_t uiTotal = ExportDescriptor()->NumberOfNames;
 			uint32_t uiNameArray;
 			for ( uint32_t I = 0; I < uiTotal; ++I ) {
 				if ( ReadRelocBytes( ExportDescriptor()->AddressOfNames + I * 4, &uiNameArray, sizeof( uiNameArray ) ) != sizeof( uiNameArray ) ) { return 0; }
-				std::string sName;
+				CSecureString sName;
 				GetString( uiNameArray, sName );
 				if ( sName == sExport ) {
 					uint16_t ui16AddressIndex = 0;
@@ -443,6 +447,91 @@ namespace mx {
 			uiEndAddress = std::max( uiEndAddress, SectionData()[I].ui64RelocAddress + SectionData()[I].vData.size() + ImageBase() );
 		}
 		return _uiAddr < uiEndAddress;
+	}
+
+	// Fills a vector with a resource.
+	bool CPeObject::GetResource( const MX_IMAGE_RESOURCE_DATA_ENTRY * _irdeResource, std::vector<uint8_t> &_vResult ) const {
+		// Try/catch in case the pointer points outside our loaded memory or is otherwise corrupt.
+		try {
+			_vResult.resize( _irdeResource->Size );
+			if ( _irdeResource->Size ) {
+				return ReadRelocBytes( _irdeResource->OffsetToData, &_vResult[0], _irdeResource->Size ) == _irdeResource->Size;
+			}
+		}
+		catch ( const std::bad_alloc /*& _eE*/ ) {}
+		return false;
+	}
+
+	// Gathers all resources.
+	bool CPeObject::GetAllResources( std::vector<MX_EXTRACTED_RESOURCE> &_vResult ) const {
+		_vResult.clear();
+		if ( HasResourceDesc() && ResourceDescriptor() ) {
+			std::vector<MX_IMAGE_RESOURCE_DIRECTORY_ENTRY> vResourceDirStack;
+			uint32_t uiOffset;
+			uint32_t uiIndex = RelocAddrToRelocIndexAndOffset( DataDirectory()[MX_IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress, uiOffset );
+			try {
+				return GetAllResources( _vResult, ResourceDescriptor(), uiIndex, vResourceDirStack );
+			}
+			catch ( const std::bad_alloc /*& _eE*/ ) { return false; }
+		}
+		return true;
+	}
+
+	// Recursively advances down a directory while gathering resources.
+	bool CPeObject::GetAllResources( std::vector<MX_EXTRACTED_RESOURCE> &_vResult,
+		const MX_IMAGE_RESOURCE_DIRECTORY * _pirdDesc, uint32_t _uiSectionIndex,
+		std::vector<MX_IMAGE_RESOURCE_DIRECTORY_ENTRY> &_vDirStack ) const {
+		uint32_t uiTotal = _pirdDesc->NumberOfNamedEntries + _pirdDesc->NumberOfIdEntries;
+		
+		const MX_IMAGE_RESOURCE_DIRECTORY_ENTRY * pirdeEntry = reinterpret_cast<const MX_IMAGE_RESOURCE_DIRECTORY_ENTRY *>(_pirdDesc + 1);
+		
+		size_t sEndAddr = reinterpret_cast<size_t>(&SectionData()[_uiSectionIndex].vData[0]) + SectionData()[_uiSectionIndex].vData.size();
+		for ( uint32_t I = 0; I < uiTotal; ++I, ++pirdeEntry ) {
+			// Check bounds.
+			if ( reinterpret_cast<size_t>(pirdeEntry + 1) > sEndAddr ) {
+				// Trying to read past the section.  No way to continue.
+				break;
+			}
+			_vDirStack.push_back( (*pirdeEntry) );
+			if ( !GetAllResources( _vResult,
+				pirdeEntry, _uiSectionIndex,
+				_vDirStack ) ) { return false; }
+			_vDirStack.pop_back();
+		}
+		
+		return true;
+	}
+
+	// Recursively advances down a directory while gathering resources.
+	bool CPeObject::GetAllResources( std::vector<MX_EXTRACTED_RESOURCE> &_vResult,
+		const MX_IMAGE_RESOURCE_DIRECTORY_ENTRY * _pirdeEntry, uint32_t _uiSectionIndex,
+		std::vector<MX_IMAGE_RESOURCE_DIRECTORY_ENTRY> &_vDirStack ) const {
+
+		uint64_t uiOffset = reinterpret_cast<size_t>(_pirdeEntry) - reinterpret_cast<size_t>(&SectionData()[_uiSectionIndex].vData[0]);
+		uiOffset += SectionData()[_uiSectionIndex].ui64FileOffset;
+
+		if ( (_pirdeEntry->Data & 0x80000000) ) {
+			// Points to an MX_IMAGE_RESOURCE_DIRECTORY.
+			size_t sOffset = _pirdeEntry->Data & 0x7FFFFFFF;
+			if ( sOffset + sizeof( MX_IMAGE_RESOURCE_DIRECTORY ) <= SectionData()[_uiSectionIndex].vData.size() ) {
+				const MX_IMAGE_RESOURCE_DIRECTORY * pirdResDir = reinterpret_cast<const MX_IMAGE_RESOURCE_DIRECTORY *>(&SectionData()[_uiSectionIndex].vData[sOffset]);
+				//AddResourceDesc( ptviTemp, (*pirdResDir), _poPeObject, sOffset + _poPeObject.SectionData()[_uiSectionIndex].ui64FileOffset );
+				return GetAllResources( _vResult, pirdResDir, _uiSectionIndex, _vDirStack );
+			}
+		}
+		else {
+			size_t sOffset = _pirdeEntry->Data;
+			if ( sOffset + sizeof( MX_IMAGE_RESOURCE_DATA_ENTRY ) <= SectionData()[_uiSectionIndex].vData.size() ) {
+				const MX_IMAGE_RESOURCE_DATA_ENTRY * pirdResDir = reinterpret_cast<const MX_IMAGE_RESOURCE_DATA_ENTRY *>(&SectionData()[_uiSectionIndex].vData[sOffset]);
+				size_t sIdx = _vResult.size();
+				_vResult.push_back( MX_EXTRACTED_RESOURCE() );
+				if ( sIdx >= _vResult.size() ) { return false; }
+				_vResult[sIdx].vDirEntries = _vDirStack;
+				_vResult[sIdx].irdeDataEntry = (*pirdResDir);
+				return GetResource( &_vResult[sIdx].irdeDataEntry, _vResult[sIdx].vResourceData );
+			}
+		}
+		return false;
 	}
 
 }	// namespace mx

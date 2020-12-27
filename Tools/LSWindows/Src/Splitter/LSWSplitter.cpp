@@ -5,7 +5,7 @@
 
 namespace lsw {
 
-	CSplitter::CSplitter( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu ) :
+	CSplitter::CSplitter( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
 		CWidget( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(CBase::SplitterAtom()) ), _pwParent, _bCreateWidget, _hMenu ),
 		m_bDragging( FALSE ),
 		m_dwBarWidth( 4 ),

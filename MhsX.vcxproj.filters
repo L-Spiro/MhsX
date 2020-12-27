@@ -98,6 +98,63 @@
     <Filter Include="Source Files\Search">
       <UniqueIdentifier>{96f8660b-76c5-4dab-bfdc-455bec0c6788}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Primitives">
+      <UniqueIdentifier>{e6535f44-ece6-4d46-b631-de7308667fa1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Primitives">
+      <UniqueIdentifier>{3dea4859-3f5f-4529-8c53-eeaaf00398fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\IO">
+      <UniqueIdentifier>{48442a3d-5876-43f1-9013-18e0af0ca2e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\IO">
+      <UniqueIdentifier>{e099969f-e3d0-4247-8bfd-d20cc5a92a25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RegEx">
+      <UniqueIdentifier>{b54d5c6e-82d8-40c4-b3d2-7e8892254918}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\RegEx">
+      <UniqueIdentifier>{9f064894-2358-48b2-bd71-ff3f660c54fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Converter">
+      <UniqueIdentifier>{be41803d-cadb-46c3-8f97-df84b4d850a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Converter">
+      <UniqueIdentifier>{df9b24b8-c038-4ebc-97ec-c82f627aac03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RegEx\Oniguruma">
+      <UniqueIdentifier>{fd75fdc2-7615-41d7-a081-79d1dcab05c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\RegEx\Oniguruma">
+      <UniqueIdentifier>{9739490b-b068-4569-ad02-779d263dc934}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Float16">
+      <UniqueIdentifier>{2e53a0b4-515f-49e2-9b0d-4c9f0407d524}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\StringTheory">
+      <UniqueIdentifier>{ad567cdd-02ce-417a-b1fb-87198c3a0d87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\StringTheory">
+      <UniqueIdentifier>{fb26edb9-20d0-48c2-891d-fa3d8f3eddd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Html">
+      <UniqueIdentifier>{07c2aaf8-4b48-4462-adae-782876c5a80f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Html">
+      <UniqueIdentifier>{f471cc35-d472-42d6-b7db-5a9e564e0607}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Hotkeys">
+      <UniqueIdentifier>{57426ac6-def4-40c5-a56c-569e02b503bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Hotkeys">
+      <UniqueIdentifier>{857e5c3b-75db-4025-bbd6-9aee8e724cd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\FloatingPointStudio">
+      <UniqueIdentifier>{7101f362-c409-4f7c-b1a4-3ee0ac84fbed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\FloatingPointStudio">
+      <UniqueIdentifier>{f1df9417-b015-453b-8a19-7f65ffe35ae4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Strings\MXStringDecoder.cpp">
@@ -117,9 +174,6 @@
     </ClCompile>
     <ClCompile Include="Src\System\MXSystem.cpp">
       <Filter>Source Files\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\PE\MXPeWorks.cpp">
-      <Filter>Source Files\PE</Filter>
     </ClCompile>
     <ClCompile Include="Src\PE\MXPeObject.cpp">
       <Filter>Source Files\PE</Filter>
@@ -196,6 +250,261 @@
     <ClCompile Include="Src\Search\MXNewDataTypeSearchWindow.cpp">
       <Filter>Source Files\Search</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Layouts\MXSearchProgressLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Search\MXSearchProgressWindow.cpp">
+      <Filter>Source Files\Search</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXPeWorksLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\PE\MXPeWorksWindow.cpp">
+      <Filter>Source Files\PE</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Search\MXSearchResultBase.cpp">
+      <Filter>Source Files\Search</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Search\MXSearchResult1.cpp">
+      <Filter>Source Files\Search</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\FoundAddresses\MXFoundAddressesListView.cpp">
+      <Filter>Source Files\FoundAddresses</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Search\MXSearchResult2.cpp">
+      <Filter>Source Files\Search</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXNewStringSearchLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Search\MXNewStringSearchWindow.cpp">
+      <Filter>Source Files\Search</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\RexAlgorithm.cpp">
+      <Filter>Source Files\RegEx</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\RexInterface.cpp">
+      <Filter>Source Files\RegEx</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXConverterLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Converter\MXConverterWindow.cpp">
+      <Filter>Source Files\Converter</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXNewPointerSearchLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Search\MXNewPointerSearchWindow.cpp">
+      <Filter>Source Files\Search</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Search\MXSearchResultRef.cpp">
+      <Filter>Source Files\Search</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\ascii.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\big5.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\cp1251.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\euc_jp.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\euc_jp_prop.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\euc_kr.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\euc_tw.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\gb18030.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_1.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_2.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_3.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_4.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_5.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_6.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_7.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_8.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_9.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_10.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_11.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_13.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_14.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_15.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\iso8859_16.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\koi8.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\koi8_r.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\onig_init.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\regcomp.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\regenc.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\regerror.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\regexec.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\regext.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\reggnu.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\regparse.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\regposerr.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\regposix.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\regsyntax.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\regtrav.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\regversion.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\sjis.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\sjis_prop.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\st.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\unicode.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\unicode_fold1_key.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\unicode_fold2_key.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\unicode_fold3_key.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\unicode_unfold_key.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\utf8.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\utf16_be.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\utf16_le.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\utf32_be.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\Oniguruma\utf32_le.c">
+      <Filter>Source Files\RegEx\Oniguruma</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx\MXOnigurumaSystem.cpp">
+      <Filter>Source Files\RegEx</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\StringTheory\MXStringTheoryWindow.cpp">
+      <Filter>Source Files\StringTheory</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXStringTheoryLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Html\MXHtml.cpp">
+      <Filter>Source Files\Html</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Options\MXOptionsPageHotkeys.cpp">
+      <Filter>Source Files\Options</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Hotkeys\MXHotkeyManBase.cpp">
+      <Filter>Source Files\Hotkeys</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Hotkeys\MXHotkeyRegisterHotKeyMethod.cpp">
+      <Filter>Source Files\Hotkeys</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Hotkeys\MXHotkeyManager.cpp">
+      <Filter>Source Files\Hotkeys</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Options\MXOptionsPageSearchEx.cpp">
+      <Filter>Source Files\Options</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Search\MXNewExpressionSearchWindow.cpp">
+      <Filter>Source Files\Search</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXNewExpressionSearchLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Hotkeys\MXHotkeyPollingMethod.cpp">
+      <Filter>Source Files\Hotkeys</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Hotkeys\MXHotkeyWhKeyboardMethod.cpp">
+      <Filter>Source Files\Hotkeys</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXFloatingPointStudioLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXTemplateLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\FloatingPointStudio\MXFloatingPointStudioWindow.cpp">
+      <Filter>Source Files\FloatingPointStudio</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Utilities\MXTemplateWindow.cpp">
+      <Filter>Source Files\Utilities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -217,9 +526,6 @@
     </ClInclude>
     <ClInclude Include="Src\System\MXSystem.h">
       <Filter>Header Files\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\PE\MXPeWorks.h">
-      <Filter>Header Files\PE</Filter>
     </ClInclude>
     <ClInclude Include="Src\PE\MXPeStructs.h">
       <Filter>Header Files\PE</Filter>
@@ -304,6 +610,162 @@
     </ClInclude>
     <ClInclude Include="Src\Search\MXNewDataTypeSearchWindow.h">
       <Filter>Header Files\Search</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXSearchProgressLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Search\MXSearchProgressWindow.h">
+      <Filter>Header Files\Search</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXPeWorksLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PE\MXPeWorksWindow.h">
+      <Filter>Header Files\PE</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Strings\MXSecureString.h">
+      <Filter>Header Files\Strings</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Strings\MXSecureWString.h">
+      <Filter>Header Files\Strings</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Search\MXSearchResultBase.h">
+      <Filter>Header Files\Search</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Search\MXSearchResult1.h">
+      <Filter>Header Files\Search</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Primitives\MXPrimitiveBase.h">
+      <Filter>Header Files\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\FoundAddresses\MXFoundAddressesListView.h">
+      <Filter>Header Files\FoundAddresses</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Search\MXSearchResult2.h">
+      <Filter>Header Files\Search</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\IO\MXInOutInterface.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Search\MXSearchResultLocker.h">
+      <Filter>Header Files\Search</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Files\MXFileIo.h">
+      <Filter>Header Files\Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Files\MXFileMapIo.h">
+      <Filter>Header Files\Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXNewStringSearchLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Search\MXNewStringSearchWindow.h">
+      <Filter>Header Files\Search</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RegEx\RexAlgorithm.h">
+      <Filter>Header Files\RegEx</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RegEx\RexInterface.h">
+      <Filter>Header Files\RegEx</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Converter\MXConverterWindow.h">
+      <Filter>Header Files\Converter</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXConverterLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXNewPointerSearchLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Search\MXNewPointerSearchWindow.h">
+      <Filter>Header Files\Search</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Search\MXSearchResultRef.h">
+      <Filter>Header Files\Search</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RegEx\Oniguruma\st.h">
+      <Filter>Header Files\RegEx\Oniguruma</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RegEx\Oniguruma\oniggnu.h">
+      <Filter>Header Files\RegEx\Oniguruma</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RegEx\Oniguruma\onigposix.h">
+      <Filter>Header Files\RegEx\Oniguruma</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RegEx\Oniguruma\oniguruma.h">
+      <Filter>Header Files\RegEx\Oniguruma</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RegEx\Oniguruma\regenc.h">
+      <Filter>Header Files\RegEx\Oniguruma</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RegEx\Oniguruma\regint.h">
+      <Filter>Header Files\RegEx\Oniguruma</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RegEx\Oniguruma\regparse.h">
+      <Filter>Header Files\RegEx\Oniguruma</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RegEx\Oniguruma\config.h">
+      <Filter>Header Files\RegEx\Oniguruma</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RegEx\MXOnigurumaRegion.h">
+      <Filter>Header Files\RegEx</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RegEx\MXOnigurumaSystem.h">
+      <Filter>Header Files\RegEx</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RegEx\MXOnigurumaRegex.h">
+      <Filter>Header Files\RegEx</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Float16\MXFloat16.h">
+      <Filter>Header Files\Float16</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\StringTheory\MXStringTheoryWindow.h">
+      <Filter>Header Files\StringTheory</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXStringTheoryLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Html\MXHtml.h">
+      <Filter>Header Files\Html</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Hotkeys\MXHotkeyManBase.h">
+      <Filter>Header Files\Hotkeys</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Hotkeys\MXHotkeyRegisterHotKeyMethod.h">
+      <Filter>Header Files\Hotkeys</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Hotkeys\MXHotkeyManager.h">
+      <Filter>Header Files\Hotkeys</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Options\MXOptionsPageSearchEx.h">
+      <Filter>Header Files\Options</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Search\MXNewExpressionSearchWindow.h">
+      <Filter>Header Files\Search</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXNewExpressionSearchLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Options\MXOptionsPageHotkeys.h">
+      <Filter>Header Files\Options</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Hotkeys\MXHotkeyPollingMethod.h">
+      <Filter>Header Files\Hotkeys</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Hotkeys\MXHotkeyWhKeyboardMethod.h">
+      <Filter>Header Files\Hotkeys</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXFloatingPointStudioLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXTemplateLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\FloatingPointStudio\MXFloatingPointStudioWindow.h">
+      <Filter>Header Files\FloatingPointStudio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Utilities\MXTemplateWindow.h">
+      <Filter>Header Files\Utilities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

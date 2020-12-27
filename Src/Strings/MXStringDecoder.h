@@ -1,5 +1,7 @@
 #pragma once
 
+#include "MXSecureString.h"
+#include "MXSecureWString.h"
 #include "MXStringMacros.h"
 #include <cstring>
 #include <string>
@@ -21,9 +23,12 @@ namespace mx {
 		//	_sInLen should be one of the _LEN_* macros in MXStringMacros.h.
 		//	_tOut should be at least _T_MAX_LEN characters long.
 		template <typename _tOutType>
-		static _tOutType *		Decode( const char * _pcIn, size_t _sInLen, _tOutType * _tOut ) {
+		static _tOutType *					Decode( const char * _pcIn, size_t _sInLen, _tOutType * _tOut ) {
 			// See MXStringMacros.h for the key.
-			static const char * pcKey = "x20en7r90872ne9";
+			// ANTICHEAT: Change the key in EncodeStrings.bat and run it to re-encode all strings in the project.
+			//	This changes how they are stored in the .EXE and at run-time, making it impossible to detect us via "known string" searches.
+			//	The key can be any length and contain any values but \0 (terminating null).
+			static const char * pcKey = MX_STRING_ENCRYPT_KEY;
 			static size_t sLen = std::strlen( pcKey );
 			_tOutType * ptRet = _tOut;
 			for ( size_t I = 0; I < _sInLen; ++I ) {
@@ -33,26 +38,26 @@ namespace mx {
 			return ptRet;
 		}
 
-		// Decodes to a std::string.
-		static std::string &	Decode( const char * _pcIn, size_t _sInLen, std::string &_otRet ) {
+		// Decodes to a CSecureString.
+		static CSecureString &				Decode( const char * _pcIn, size_t _sInLen, CSecureString &_otRet ) {
 			_otRet.resize( _sInLen );
 			Decode( _pcIn, _sInLen, const_cast<char *>(_otRet.c_str()) );
 			return _otRet;
 		}
 
-		// Decodes to an std::string or std::wstring object.
+		// Decodes to an CSecureString or CSecureWString object.
 		/*template <typename _tOutType>
-		static _tOutType &		Decode( const char * _pcIn, size_t _sInLen, _tOutType &_otRet ) {
+		static _tOutType &					Decode( const char * _pcIn, size_t _sInLen, _tOutType &_otRet ) {
 			_otRet.resize( _sInLen );
 			Decode( _pcIn, _sInLen, const_cast<_tOutType::value_type *>(_otRet.c_str()) );
 			return _otRet;
 		}*/
 
-		// Decodes to std::string, creating a new object.
-		static std::string		DecodeToString( const char * _pcIn, size_t _sInLen );
+		// Decodes to CSecureString, creating a new object.
+		static CSecureString				DecodeToString( const char * _pcIn, size_t _sInLen );
 
-		// Decodes to std::wstring, creating a new object.
-		static std::wstring		DecodeToWString( const char * _pcIn, size_t _sInLen );
+		// Decodes to CSecureWString, creating a new object.
+		static CSecureWString				DecodeToWString( const char * _pcIn, size_t _sInLen );
 	};
 
 }	// namespace mx

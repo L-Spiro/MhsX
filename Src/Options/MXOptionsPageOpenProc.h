@@ -10,7 +10,7 @@ namespace mx {
 
 	class COptionsPageOpenProc : public COptionsPage {
 	public :
-		COptionsPageOpenProc( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, MX_OPTIONS * _poOptions, bool _bCreateWidget = true, HMENU _hMenu = NULL );
+		COptionsPageOpenProc( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 
 
 		// == Functions.

@@ -13,7 +13,7 @@ namespace lsw {
 		// Icon.
 		LPCWSTR						lpwcText;
 		// Shortcut.
-
+		SIZE_T						stTextLen;					// If 0, string ends with 0.
 	};
 
 	struct LSW_MENU_LAYOUT {

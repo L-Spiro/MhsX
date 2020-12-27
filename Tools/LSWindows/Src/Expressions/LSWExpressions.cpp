@@ -4,7 +4,8 @@
 namespace lsw {
 
 	CExpression::CExpression() :
-		m_peecContainer( nullptr ) {
+		m_peecContainer( nullptr ),
+		m_bTreatAsHex( nullptr ) {
 	}
 	CExpression::~CExpression() {
 		Reset();
@@ -17,24 +18,30 @@ namespace lsw {
 
 		std::istringstream sStream( _pcExp );
 
-		ee::CExpEvalLexer * peelLexer = new ee::CExpEvalLexer( &sStream );
+		ee::CExpEvalLexer * peelLexer = new( std::nothrow ) ee::CExpEvalLexer( &sStream );
 		if ( !peelLexer ) { Reset(); return false; }
 
-		m_peecContainer = new ee::CExpEvalContainer( peelLexer );
+		m_peecContainer = new( std::nothrow ) ee::CExpEvalContainer( peelLexer );
 		if ( !m_peecContainer ) {
 			delete peelLexer;
 			Reset();
 			return false;
 		}
 
-		 ee::CExpEvalParser * peepParser = new ee::CExpEvalParser( peelLexer, m_peecContainer );
+		 ee::CExpEvalParser * peepParser = new( std::nothrow ) ee::CExpEvalParser( peelLexer, m_peecContainer );
 		if ( !peepParser ) {
 			delete peelLexer;
 			Reset();
 			return false;
 		}
-
-		int iRet = peepParser->parse();
+		peelLexer->SetContainer( (*m_peecContainer) );
+		m_peecContainer->SetTreatAsHex( m_bTreatAsHex );
+		int iRet = 1;
+		try {
+			iRet = peepParser->parse();
+		}
+		catch ( const std::bad_alloc & /*_eE*/ ) {}
+		catch ( ee::CExpEvalContainer::EE_ERROR_CODES ) {}
 		delete peelLexer;
 		delete peepParser;
 

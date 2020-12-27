@@ -1,9 +1,162 @@
 #include "MXCodePages.h"
 #include "../Strings/MXStringDecoder.h"
+#include "../Utilities/MXUtilities.h"
 #include <cstdint>
 
 namespace mx {
 
+	// == Members.
+	// The internal list of code pages.
+	const CCodePages::MX_CODE_PAGES CCodePages::m_cpPages[] {
+		MX_IBM037,
+		MX_IBM437,
+		MX_IBM500,
+		MX_ASMO_708,
+		MX_DOS_720,
+		MX_ibm737,
+		MX_ibm775,
+		MX_ibm850,
+		MX_ibm852,
+		MX_IBM855,
+		MX_ibm857,
+		MX_IBM00858,
+		MX_IBM860,
+		MX_ibm861,
+		MX_DOS_862,
+		MX_IBM863,
+		MX_IBM864,
+		MX_IBM865,
+		MX_cp866,
+		MX_ibm869,
+		MX_IBM870,
+		MX_windows_874,
+		MX_cp875,
+		MX_shift_jis,
+		MX_gb2312,
+		MX_ks_c_5601_1987,
+		MX_big5,
+		MX_IBM1026,
+		MX_IBM01047,
+		MX_IBM01140,
+		MX_IBM01141,
+		MX_IBM01142,
+		MX_IBM01143,
+		MX_IBM01144,
+		MX_IBM01145,
+		MX_IBM01146,
+		MX_IBM01147,
+		MX_IBM01148,
+		MX_IBM01149,
+		MX_utf_16,
+		MX_utf_16BE,
+		MX_windows_1250,
+		MX_windows_1251,
+		MX_Windows_1252,
+		MX_windows_1253,
+		MX_windows_1254,
+		MX_windows_1255,
+		MX_windows_1256,
+		MX_windows_1257,
+		MX_windows_1258,
+		MX_Johab,
+		MX_macintosh,
+		MX_x_mac_japanese,
+		MX_x_mac_chinesetrad,
+		MX_x_mac_korean,
+		MX_x_mac_arabic,
+		MX_x_mac_hebrew,
+		MX_x_mac_greek,
+		MX_x_mac_cyrillic,
+		MX_x_mac_chinesesimp,
+		MX_x_mac_romanian,
+		MX_x_mac_ukrainian,
+		MX_x_mac_thai,
+		MX_x_mac_ce,
+		MX_x_mac_icelandic,
+		MX_x_mac_turkish,
+		MX_x_mac_croatian,
+		MX_utf_32,
+		MX_utf_32BE,
+		MX_x_Chinese_CNS,
+		MX_x_cp20001,
+		MX_x_Chinese_Eten,
+		MX_x_cp20003,
+		MX_x_cp20004,
+		MX_x_cp20005,
+		MX_x_IA5,
+		MX_x_IA5_German,
+		MX_x_IA5_Swedish,
+		MX_x_IA5_Norwegian,
+		MX_us_ascii,
+		MX_x_cp20261,
+		MX_x_cp20269,
+		MX_IBM273,
+		MX_IBM277,
+		MX_IBM278,
+		MX_IBM280,
+		MX_IBM284,
+		MX_IBM285,
+		MX_IBM290,
+		MX_IBM297,
+		MX_IBM420,
+		MX_IBM423,
+		MX_IBM424,
+		MX_x_EBCDIC_KoreanExtended,
+		MX_IBM_Thai,
+		MX_koi8_r,
+		MX_IBM871,
+		MX_IBM880,
+		MX_IBM905,
+		MX_IBM00924,
+		MX_EUC_JP,
+		MX_x_cp20936,
+		MX_x_cp20949,
+		MX_cp1025,
+		MX_koi8_u,
+		MX_iso_8859_1,
+		MX_iso_8859_2,
+		MX_iso_8859_3,
+		MX_iso_8859_4,
+		MX_iso_8859_5,
+		MX_iso_8859_6,
+		MX_iso_8859_7,
+		MX_iso_8859_8,
+		MX_iso_8859_9,
+		MX_iso_8859_13,
+		MX_iso_8859_15,
+		MX_x_Europa,
+		MX_iso_8859_8_i,
+		MX_iso_2022_jp,
+		MX_csISO2022JP,
+		MX_iso_2022_jp_,
+		MX_iso_2022_kr,
+		MX_x_cp50227,
+		MX_euc_jp,
+		MX_EUC_CN,
+		MX_euc_kr,
+		MX_hz_gb_2312,
+		MX_GB18030,
+		MX_x_iscii_de,
+		MX_x_iscii_be,
+		MX_x_iscii_ta,
+		MX_x_iscii_te,
+		MX_x_iscii_as,
+		MX_x_iscii_or,
+		MX_x_iscii_ka,
+		MX_x_iscii_ma,
+		MX_x_iscii_gu,
+		MX_x_iscii_pa,
+		MX_utf_7,
+		MX_utf_8,
+	};
+
+	// The critical section.
+	lsw::CCriticalSection CCodePages::m_csCrit;
+
+	// The set of code pages.
+	std::set<UINT> CCodePages::m_sSystemCodePages;
+
+	// == Functions.
 	// Decodes a code page into a text value and description.  _pcValue and _pcDesc should be _T_MAX_LEN characters long.
 	BOOL CCodePages::CodePageToString( uint32_t _uiCode, CHAR * _pcValue, CHAR * _pcDesc ) {
 		// 2 tables because that is just easier to do with the tools.  Tables generated with MhsXStrings.exe.
@@ -315,7 +468,7 @@ namespace mx {
 	}
 
 	// Decodes a code page into a text value and description.
-	BOOL CCodePages::CodePageToString( uint32_t _uiCode, std::string &_sValue, std::string &_sDesc ) {
+	BOOL CCodePages::CodePageToString( uint32_t _uiCode, CSecureString &_sValue, CSecureString &_sDesc ) {
 		CHAR szValue[_T_MAX_LEN], szDesc[_T_MAX_LEN];
 		if ( CodePageToString( _uiCode, szValue, szDesc ) ) {
 			_sValue += szValue;
@@ -323,6 +476,91 @@ namespace mx {
 			return TRUE;
 		}
 		return FALSE;
+	}
+
+	// Decodes a code page into a text value and description.
+	BOOL CCodePages::CodePageToString( uint32_t _ui32Code, CSecureWString &_sValue, CSecureWString &_sDesc ) {
+		CHAR szValue[_T_MAX_LEN], szDesc[_T_MAX_LEN];
+		if ( CodePageToString( _ui32Code, szValue, szDesc ) ) {
+			_sValue += CUtilities::StringToWString( szValue );
+			_sDesc += CUtilities::StringToWString( szDesc );
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+	// Gets a code page identifier by index.
+	CCodePages::MX_CODE_PAGES CCodePages::CodePageByIndex( uint32_t _ui32Idx ) {
+		if ( _ui32Idx >= TotalCodePages() ) { return static_cast<CCodePages::MX_CODE_PAGES>(-1); }
+		return m_cpPages[_ui32Idx];
+	}
+
+	// Gets the total number of code pages.
+	size_t CCodePages::TotalCodePages() {
+		return sizeof( m_cpPages ) / sizeof( m_cpPages[0] );
+	}
+
+	// Gets all the system code pages, sorted by code page.
+	std::vector<CCodePages::MX_CODE_PAGE> & CCodePages::GetSystemCodePages( std::vector<CCodePages::MX_CODE_PAGE> &_vRet, bool _bIncludeExtendedUtf ) {
+		LSW_ENT_CRIT( m_csCrit );
+		if ( !m_sSystemCodePages.size() ) {
+			::EnumSystemCodePagesW( CCodePages::EnumCodePagesProc, CP_SUPPORTED );
+		}
+		for ( auto I = m_sSystemCodePages.begin(); I != m_sSystemCodePages.end(); ++I ) {
+			CPINFOEXW cpInfo = { 0 };
+			if ( ::GetCPInfoExW( (*I), 0, &cpInfo ) ) {
+				_vRet.push_back( { cpInfo.CodePage, cpInfo.CodePageName } );
+			}
+		}
+		if ( _bIncludeExtendedUtf ) {
+			if ( !m_sSystemCodePages.count( MX_utf_16 ) ) {
+				_vRet.push_back( { MX_utf_16, _DEC_WS_99793C4E_1200__UTF_16_LE_ } );
+			}
+			if ( !m_sSystemCodePages.count( MX_utf_16BE ) ) {
+				_vRet.push_back( { MX_utf_16BE, _DEC_WS_4E71C8C1_1201__UTF_16_BE_ } );
+			}
+			if ( !m_sSystemCodePages.count( MX_utf_32 ) ) {
+				_vRet.push_back( { MX_utf_32, _DEC_WS_3B7FE4CA_12000__UTF_32_LE_ } );
+			}
+			if ( !m_sSystemCodePages.count( MX_utf_32BE ) ) {
+				_vRet.push_back( { MX_utf_32BE, _DEC_WS_EC771045_12001__UTF_32_BE_ } );
+			}
+		}
+		return _vRet;
+		/*std::map<UINT, CSecureWString> mMap;
+		CPINFOEXW cpInfo = { 0 };
+		for ( uint64_t I = 0; I <= 0xFFFF; ++I ) {
+			if ( ::IsValidCodePage( static_cast<UINT>(I) ) ) {
+				if ( ::GetCPInfoExW( static_cast<UINT>(I), 0, &cpInfo ) ) {
+					mMap[cpInfo.CodePage] = cpInfo.CodePageName;
+				}
+			}
+		}
+		for ( auto I = mMap.begin(); I != mMap.end(); ++I ) {
+			_vRet.push_back( { I->first, I->second } );
+		}
+		return _vRet;*/
+	}
+
+	// Gets the system default Windows ANSI code page.
+	UINT CCodePages::GetSystemDefaultAnsiCodePage() {
+		CPINFOEXW cpInfo = { 0 };
+		if ( ::GetCPInfoExW( CP_ACP, 0, &cpInfo ) ) {
+			return cpInfo.CodePage;
+		}
+		return static_cast<UINT>(-1);
+	}
+
+	// Gathers code pages.
+	BOOL CALLBACK CCodePages::EnumCodePagesProc( LPWSTR _lpCodePageString ) {
+		LSW_ENT_CRIT( m_csCrit );
+		UINT uiPage = ::_wtoi( _lpCodePageString );
+		if ( ::IsValidCodePage( uiPage ) ) {
+			if ( !m_sSystemCodePages.count( uiPage ) ) {
+				m_sSystemCodePages.insert( uiPage );
+			}
+		}
+		return TRUE;
 	}
 
 }	// namespace mx

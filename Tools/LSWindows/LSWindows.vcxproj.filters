@@ -159,6 +159,42 @@
     <Filter Include="Source Files\MultiSplitter">
       <UniqueIdentifier>{70d57c23-ff33-4f75-a1e7-a6afdc11c44d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ProgressBar">
+      <UniqueIdentifier>{96ef8c8a-804f-4830-9dd9-ce2e67c38e4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ProgressBar">
+      <UniqueIdentifier>{a9b45f29-b13d-4c07-ae9b-1e84fcb9dad4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Threads">
+      <UniqueIdentifier>{f0777a9b-1a10-4c50-83a9-f3100d45f5ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Threads">
+      <UniqueIdentifier>{cdf724b9-7b9a-41cc-81b6-362dbf0e14be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tab">
+      <UniqueIdentifier>{e7cc9f8d-af26-4312-9e9d-0f7b413b16dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tab">
+      <UniqueIdentifier>{a9847d5b-418f-49b8-90f9-33a7a17eb778}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\TreeList">
+      <UniqueIdentifier>{ecc85381-dbc9-4c07-ae72-e500db6a3282}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\TreeList">
+      <UniqueIdentifier>{61a48374-aa3f-4877-8b8c-db241d57764a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ToolTip">
+      <UniqueIdentifier>{79a2af9a-1dda-451c-a39b-e71e3df5b8cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ToolTip">
+      <UniqueIdentifier>{308755f4-670b-4903-afd3-64824d7ca5e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\UpDown">
+      <UniqueIdentifier>{01a18199-cb8d-4384-a4d5-7b064e2d887a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UpDown">
+      <UniqueIdentifier>{861ebc9d-fa0c-49d8-89c8-a3b3b389da51}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -266,6 +302,24 @@
     <ClInclude Include="Src\Helpers\LSWMessages.h">
       <Filter>Header Files\Helpers</Filter>
     </ClInclude>
+    <ClInclude Include="Src\ProgressBar\LSWProgressBar.h">
+      <Filter>Header Files\ProgressBar</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Threads\LSWThread.h">
+      <Filter>Header Files\Threads</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Tab\LSWTab.h">
+      <Filter>Header Files\Tab</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\TreeList\LSWTreeList.h">
+      <Filter>Header Files\TreeList</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ToolTip\LSWToolTip.h">
+      <Filter>Header Files\ToolTip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\UpDown\LSWUpDown.h">
+      <Filter>Header Files\UpDown</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -348,6 +402,24 @@
     </ClCompile>
     <ClCompile Include="Src\Helpers\LSWHelpers.cpp">
       <Filter>Source Files\Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ProgressBar\LSWProgressBar.cpp">
+      <Filter>Source Files\ProgressBar</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Threads\LSWThread.cpp">
+      <Filter>Source Files\Threads</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Tab\LSWTab.cpp">
+      <Filter>Source Files\Tab</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\TreeList\LSWTreeList.cpp">
+      <Filter>Source Files\TreeList</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ToolTip\LSWToolTip.cpp">
+      <Filter>Source Files\ToolTip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\UpDown\LSWUpDown.cpp">
+      <Filter>Source Files\UpDown</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

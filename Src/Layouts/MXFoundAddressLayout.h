@@ -18,6 +18,10 @@ namespace mx {
 			MX_FAW_MAINWINDOW					= 2000,
 			MX_FAW_REBAR0,
 			MX_FAW_TOOLBAR0,
+			MX_FAW_PADDING_EDIT_LEFT,
+			MX_FAW_PADDINGLEFT,
+			MX_FAW_PADDING_EDIT_RIGHT,
+			MX_FAW_PADDINGRIGHT,
 			MX_FAW_LIST,
 		};
 
@@ -26,12 +30,14 @@ namespace mx {
 			MX_BC_ADD							= 1010,
 			MX_BC_SEARCH,
 			MX_BC_SUBSEARCH,
+			MX_BC_PREFIX_BYTES,
+			MX_BC_POSTFIX_BYTES,
 		};
 
 
 		// == Functions.
 		// Creates the Found Addresses dockable window.
-		static CWidget *						CreateFoundAddressesWindow( CWidget * _pwParent );
+		static CWidget *						CreateFoundAddressesWindow( CWidget * _pwParent, class CMhsMainWindow * _pmmwMhsWindow );
 
 
 
