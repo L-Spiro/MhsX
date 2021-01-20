@@ -13771,3 +13771,93 @@
 #define _DEC_S_155439B4_Show_Floating_Point_Studio mx::CStringDecoder::DecodeToString( _T_155439B4_Show_Floating_Point_Studio, _LEN_155439B4 )
 #define _DEC_WS_155439B4_Show_Floating_Point_Studio mx::CStringDecoder::DecodeToWString( _T_155439B4_Show_Floating_Point_Studio, _LEN_155439B4 )
 
+// Input
+
+#define _T_19E91DD3_Input "\xD1\x3C\x40\x10\x06"
+#define _LEN_19E91DD3 5
+#define _T_LEN_19E91DD3_Input _T_19E91DD3_Input, _LEN_19E91DD3
+#define _DEC_19E91DD3_Input( STR ) mx::CStringDecoder::Decode( _T_19E91DD3_Input, _LEN_19E91DD3, STR )
+#define _DEC_S_19E91DD3_Input mx::CStringDecoder::DecodeToString( _T_19E91DD3_Input, _LEN_19E91DD3 )
+#define _DEC_WS_19E91DD3_Input mx::CStringDecoder::DecodeToWString( _T_19E91DD3_Input, _LEN_19E91DD3 )
+
+// Value:
+
+#define _T_320BB0E4_Value_ "\xDE\x2F\x3C\x10\xF7\x03"
+#define _LEN_320BB0E4 6
+#define _T_LEN_320BB0E4_Value_ _T_320BB0E4_Value_, _LEN_320BB0E4
+#define _DEC_320BB0E4_Value_( STR ) mx::CStringDecoder::Decode( _T_320BB0E4_Value_, _LEN_320BB0E4, STR )
+#define _DEC_S_320BB0E4_Value_ mx::CStringDecoder::DecodeToString( _T_320BB0E4_Value_, _LEN_320BB0E4 )
+#define _DEC_WS_320BB0E4_Value_ mx::CStringDecoder::DecodeToWString( _T_320BB0E4_Value_, _LEN_320BB0E4 )
+
+// +Infinity:
+
+#define _T_2FDF1AED__Infinity_ "\xB3\x17\x3E\x01\xFB\x37\xF7\x3B\x49\x02"
+#define _LEN_2FDF1AED 10
+#define _T_LEN_2FDF1AED__Infinity_ _T_2FDF1AED__Infinity_, _LEN_2FDF1AED
+#define _DEC_2FDF1AED__Infinity_( STR ) mx::CStringDecoder::Decode( _T_2FDF1AED__Infinity_, _LEN_2FDF1AED, STR )
+#define _DEC_S_2FDF1AED__Infinity_ mx::CStringDecoder::DecodeToString( _T_2FDF1AED__Infinity_, _LEN_2FDF1AED )
+#define _DEC_WS_2FDF1AED__Infinity_ mx::CStringDecoder::DecodeToWString( _T_2FDF1AED__Infinity_, _LEN_2FDF1AED )
+
+// -Infinity:
+
+#define _T_22C16AAA__Infinity_ "\xB5\x17\x3E\x01\xFB\x37\xF7\x3B\x49\x02"
+#define _LEN_22C16AAA 10
+#define _T_LEN_22C16AAA__Infinity_ _T_22C16AAA__Infinity_, _LEN_22C16AAA
+#define _DEC_22C16AAA__Infinity_( STR ) mx::CStringDecoder::Decode( _T_22C16AAA__Infinity_, _LEN_22C16AAA, STR )
+#define _DEC_S_22C16AAA__Infinity_ mx::CStringDecoder::DecodeToString( _T_22C16AAA__Infinity_, _LEN_22C16AAA )
+#define _DEC_WS_22C16AAA__Infinity_ mx::CStringDecoder::DecodeToWString( _T_22C16AAA__Infinity_, _LEN_22C16AAA )
+
+// NaN:
+
+#define _T_BB6CEA3C_NaN_ "\xD6\x2F\x1E\xD5"
+#define _LEN_BB6CEA3C 4
+#define _T_LEN_BB6CEA3C_NaN_ _T_BB6CEA3C_NaN_, _LEN_BB6CEA3C
+#define _DEC_BB6CEA3C_NaN_( STR ) mx::CStringDecoder::Decode( _T_BB6CEA3C_NaN_, _LEN_BB6CEA3C, STR )
+#define _DEC_S_BB6CEA3C_NaN_ mx::CStringDecoder::DecodeToString( _T_BB6CEA3C_NaN_, _LEN_BB6CEA3C )
+#define _DEC_WS_BB6CEA3C_NaN_ mx::CStringDecoder::DecodeToWString( _T_BB6CEA3C_NaN_, _LEN_BB6CEA3C )
+
+// Positive Max:
+
+#define _T_6320EFCC_Positive_Max_ "\xD8\x3D\x43\x04\x06\x32\x04\x2C\xF0\x15\x2A\x46\xCC"
+#define _LEN_6320EFCC 13
+#define _T_LEN_6320EFCC_Positive_Max_ _T_6320EFCC_Positive_Max_, _LEN_6320EFCC
+#define _DEC_6320EFCC_Positive_Max_( STR ) mx::CStringDecoder::Decode( _T_6320EFCC_Positive_Max_, _LEN_6320EFCC, STR )
+#define _DEC_S_6320EFCC_Positive_Max_ mx::CStringDecoder::DecodeToString( _T_6320EFCC_Positive_Max_, _LEN_6320EFCC )
+#define _DEC_WS_6320EFCC_Positive_Max_ mx::CStringDecoder::DecodeToWString( _T_6320EFCC_Positive_Max_, _LEN_6320EFCC )
+
+// Positive Non-0 Min:
+
+#define _T_7A26C825_Positive_Non_0_Min_ "\xD8\x3D\x43\x04\x06\x32\x04\x2C\xF0\x16\x38\x3C\xBF\xCB\xE7\xD5\x37\x3E\xD5"
+#define _LEN_7A26C825 19
+#define _T_LEN_7A26C825_Positive_Non_0_Min_ _T_7A26C825_Positive_Non_0_Min_, _LEN_7A26C825
+#define _DEC_7A26C825_Positive_Non_0_Min_( STR ) mx::CStringDecoder::Decode( _T_7A26C825_Positive_Non_0_Min_, _LEN_7A26C825, STR )
+#define _DEC_S_7A26C825_Positive_Non_0_Min_ mx::CStringDecoder::DecodeToString( _T_7A26C825_Positive_Non_0_Min_, _LEN_7A26C825 )
+#define _DEC_WS_7A26C825_Positive_Non_0_Min_ mx::CStringDecoder::DecodeToWString( _T_7A26C825_Positive_Non_0_Min_, _LEN_7A26C825 )
+
+// Is +Inf
+
+#define _T_575FA38B_Is__Inf "\xD1\x41\xF0\xC6\xDB\x37\xF4"
+#define _LEN_575FA38B 7
+#define _T_LEN_575FA38B_Is__Inf _T_575FA38B_Is__Inf, _LEN_575FA38B
+#define _DEC_575FA38B_Is__Inf( STR ) mx::CStringDecoder::Decode( _T_575FA38B_Is__Inf, _LEN_575FA38B, STR )
+#define _DEC_S_575FA38B_Is__Inf mx::CStringDecoder::DecodeToString( _T_575FA38B_Is__Inf, _LEN_575FA38B )
+#define _DEC_WS_575FA38B_Is__Inf mx::CStringDecoder::DecodeToWString( _T_575FA38B_Is__Inf, _LEN_575FA38B )
+
+// Is -Inf
+
+#define _T_7234FC57_Is__Inf "\xD1\x41\xF0\xC8\xDB\x37\xF4"
+#define _LEN_7234FC57 7
+#define _T_LEN_7234FC57_Is__Inf _T_7234FC57_Is__Inf, _LEN_7234FC57
+#define _DEC_7234FC57_Is__Inf( STR ) mx::CStringDecoder::Decode( _T_7234FC57_Is__Inf, _LEN_7234FC57, STR )
+#define _DEC_S_7234FC57_Is__Inf mx::CStringDecoder::DecodeToString( _T_7234FC57_Is__Inf, _LEN_7234FC57 )
+#define _DEC_WS_7234FC57_Is__Inf mx::CStringDecoder::DecodeToWString( _T_7234FC57_Is__Inf, _LEN_7234FC57 )
+
+// Is NaN
+
+#define _T_1053599D_Is_NaN "\xD1\x41\xF0\xE9\xF3\x17"
+#define _LEN_1053599D 6
+#define _T_LEN_1053599D_Is_NaN _T_1053599D_Is_NaN, _LEN_1053599D
+#define _DEC_1053599D_Is_NaN( STR ) mx::CStringDecoder::Decode( _T_1053599D_Is_NaN, _LEN_1053599D, STR )
+#define _DEC_S_1053599D_Is_NaN mx::CStringDecoder::DecodeToString( _T_1053599D_Is_NaN, _LEN_1053599D )
+#define _DEC_WS_1053599D_Is_NaN mx::CStringDecoder::DecodeToWString( _T_1053599D_Is_NaN, _LEN_1053599D )
+

@@ -30,14 +30,14 @@ namespace mx {
 		int iY = ::GetSystemMetrics( SM_CYMENUCHECK );
 		const int iShave = MX_FPS_CHECKBOX_TRIM;
 
-		LONG lTop = 0;
+		LONG lTop = (MX_GROUP_TOP_PXL + MX_GROUP_BOTTOM_PXL + MX_DEF_EDIT_HEIGHT_PXL);
 		LONG lLeft = 0;
 
 		lLeft = 0;
 		for ( WORD I = 0; I < 65; ++I ) {
 			LSW_WIDGET_LAYOUT wlLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->FixLayout( LSW_WIDGET_LAYOUT{
 				LSW_LT_LABEL,							// ltType
-				static_cast<WORD>(CFloatingPointStudioLayout::MX_C_KEY_LABEL_START + I),	// wId
+				static_cast<WORD>(CFloatingPointStudioLayout::MX_CI_KEY_LABEL_START + I),	// wId
 				nullptr,								// lpwcClass
 				TRUE,									// bEnabled
 				TRUE,									// bActive
@@ -49,7 +49,7 @@ namespace mx {
 				0,										// dwStyleEx
 				L"S",								// pwcText
 				0,										// sTextLen
-				static_cast<DWORD>(CFloatingPointStudioLayout::MX_C_MAINWINDOW),		// dwParentId
+				static_cast<DWORD>(CFloatingPointStudioLayout::MX_CI_MAINWINDOW),		// dwParentId
 
 	//#if 0
 				nullptr, 0,								// pcLeftSizeExp
@@ -82,7 +82,7 @@ namespace mx {
 		for ( WORD I = 0; I < 65; ++I ) {
 			LSW_WIDGET_LAYOUT wlLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->FixLayout( LSW_WIDGET_LAYOUT{
 				LSW_LT_CHECK,							// ltType
-				static_cast<WORD>(CFloatingPointStudioLayout::MX_C_CHECK_START + I),	// wId
+				static_cast<WORD>(CFloatingPointStudioLayout::MX_CI_CHECK_START + I),	// wId
 				nullptr,								// lpwcClass
 				TRUE,									// bEnabled
 				TRUE,									// bActive
@@ -94,7 +94,7 @@ namespace mx {
 				0,										// dwStyleEx
 				nullptr,								// pwcText
 				0,										// sTextLen
-				static_cast<DWORD>(CFloatingPointStudioLayout::MX_C_MAINWINDOW),		// dwParentId
+				static_cast<DWORD>(CFloatingPointStudioLayout::MX_CI_MAINWINDOW),		// dwParentId
 
 	//#if 0
 				nullptr, 0,								// pcLeftSizeExp
@@ -119,7 +119,7 @@ namespace mx {
 		for ( WORD I = 0; I < 65; ++I ) {
 			LSW_WIDGET_LAYOUT wlLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->FixLayout( LSW_WIDGET_LAYOUT{
 				LSW_LT_LABEL,							// ltType
-				static_cast<WORD>(CFloatingPointStudioLayout::MX_C_LABEL_START + I),	// wId
+				static_cast<WORD>(CFloatingPointStudioLayout::MX_CI_LABEL_START + I),	// wId
 				nullptr,								// lpwcClass
 				TRUE,									// bEnabled
 				TRUE,									// bActive
@@ -131,7 +131,7 @@ namespace mx {
 				0,										// dwStyleEx
 				L"6\r\n5",								// pwcText
 				0,										// sTextLen
-				static_cast<DWORD>(CFloatingPointStudioLayout::MX_C_MAINWINDOW),		// dwParentId
+				static_cast<DWORD>(CFloatingPointStudioLayout::MX_CI_MAINWINDOW),		// dwParentId
 
 	//#if 0
 				nullptr, 0,								// pcLeftSizeExp
