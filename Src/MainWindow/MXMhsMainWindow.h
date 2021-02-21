@@ -170,7 +170,7 @@ namespace mx {
 		// Shows the Floating-Point Studio window with a given default value or std::nan() for no default value.
 		void								ShowFloatingPointStudio( double _dDefault,
 			bool _bHasSign = true, bool _bHasExplicitBit = true,
-			uint16_t _uiExpBits = 11, uint16_t _uiManBits = 53 );
+			uint16_t _uiExpBits = EE_FLOATX_DBL_EXP_BITS, uint16_t _uiManBits = EE_FLOATX_DBL_MAN_BITS );
 
 		// Shows a new search.
 		uint32_t							ShowNewDataTypeSearch();

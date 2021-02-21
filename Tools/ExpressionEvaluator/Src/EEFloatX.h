@@ -3,6 +3,11 @@
 #include <cfloat>
 #include <cstdint>
 
+#define EE_FLOATX_DBL_EXP_BITS			11
+#define EE_FLOATX_DBL_MAN_BITS			DBL_MANT_DIG
+#define EE_FLOATX_FLT_EXP_BITS			8
+#define EE_FLOATX_FLT_MAN_BITS			FLT_MANT_DIG
+
 namespace ee {
 
 	// A floating-point value with any number of bits, separated into a sign bit, X exponent bits, and Y mantissa bits.
@@ -41,6 +46,18 @@ namespace ee {
 		// Creates the smallest normalized value.
 		CFloatX &						CreateMinNormalized( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign );
 
+		// Creates the smallest non-0 value.
+		CFloatX &						CreateMin( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign );
+
+		// Creates epsilon, the smallest value such that 1.0+X does not equal 1.
+		CFloatX &						CreateEpsilon( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign );
+
+		// Creates the next-after value going up from the given number.
+		CFloatX &						CreateNextAfterUp( double _dVal, uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign );
+
+		// Creates the next-after value going down from the given number.
+		CFloatX &						CreateNextAfterDown( double _dVal, uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign );
+
 		// Is this a NaN?
 		bool							IsNaN() const;
 
@@ -69,6 +86,9 @@ namespace ee {
 		// Gets the exponent with all bits set.
 		uint64_t						AllExpBitsSet() const { return AllExpBitsSet( uiExpBits ); }
 
+		// Put all the bits together into a uint64_t value except for the sign value.
+		uint64_t						AsUint64SansSign() const;
+
 		// Gets the exponent bias.
 		double							ExpBias() const { return ExpBias( uiExpBits ); }
 
@@ -89,6 +109,15 @@ namespace ee {
 
 		// Gets the mantissa bits shifted.
 		uint64_t						ManBits() const { return uiMantissa & ((1ULL << RealMantissaBits( uiManBits, bImplicitManBit )) - 1ULL); }
+
+		// Sets the sign bit, if applicable.
+		CFloatX &						SetSign( bool _bEnabled );
+
+		// Sets or unsets a bit in the exponent.
+		CFloatX &						SetExpBit( bool _bEnabled, uint16_t _uiBit );
+
+		// Sets or unsets a bit in the mantissa.
+		CFloatX &						SetManBit( bool _bEnabled, uint16_t _uiBit );
 
 		// Gets the maximum possible value for a float type with the given bits.
 		static double					GetMaxForBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit );

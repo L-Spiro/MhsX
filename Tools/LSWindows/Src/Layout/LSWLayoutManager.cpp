@@ -35,8 +35,15 @@ namespace lsw {
 		if ( _pmlLayouts ) {
 			hMenu = CreateMenu( _pmlLayouts, _sTotalMenus );
 		}
+		LSW_WIDGET_LAYOUT wlMainLayout = FixLayout( _pwlLayouts[0] );
+		LSW_RECT rMainRect = { wlMainLayout.iLeft, wlMainLayout.iTop, static_cast<LONG>(wlMainLayout.iLeft + wlMainLayout.dwWidth), static_cast<LONG>(wlMainLayout.iTop + wlMainLayout.dwHeight) };
+		::AdjustWindowRect( &rMainRect, wlMainLayout.dwStyle, _sTotalMenus ? TRUE : FALSE );
+		wlMainLayout.iLeft = rMainRect.left;
+		wlMainLayout.iTop = rMainRect.top;
+		wlMainLayout.dwWidth = rMainRect.Width();
+		wlMainLayout.dwHeight = rMainRect.Height();
 
-		CWidget * pwMain = CreateWidget( FixLayout( _pwlLayouts[0] ), _pwParent, true, hMenu, _ui64Data );
+		CWidget * pwMain = CreateWidget( wlMainLayout, _pwParent, true, hMenu, _ui64Data );
 		if ( !pwMain ) { return nullptr; }
 
 		std::vector<CWidget *> vWidgets;	// Has to be passed to the ::EnumChildWindows() calls.
@@ -121,8 +128,16 @@ namespace lsw {
 		_dtTemplate.pdtTemplate = nullptr;
 		if ( !_sTotal ) { return TRUE; }
 
+		LSW_WIDGET_LAYOUT wlMainLayout = FixLayout( _pwlLayouts[0] );
+		LSW_RECT rMainRect = { wlMainLayout.iLeft, wlMainLayout.iTop, static_cast<LONG>(wlMainLayout.iLeft + wlMainLayout.dwWidth), static_cast<LONG>(wlMainLayout.iTop + wlMainLayout.dwHeight) };
+		::AdjustWindowRect( &rMainRect, wlMainLayout.dwStyle, FALSE );
+		wlMainLayout.iLeft = rMainRect.left;
+		wlMainLayout.iTop = rMainRect.top;
+		wlMainLayout.dwWidth = rMainRect.Width();
+		wlMainLayout.dwHeight = rMainRect.Height();
 
-		CWidget * pwMain = CreateWidget( FixLayout( _pwlLayouts[0] ), _pwParent, false, NULL, _ui64Data );
+
+		CWidget * pwMain = CreateWidget( wlMainLayout, _pwParent, false, NULL, _ui64Data );
 		if ( !pwMain ) { return FALSE; }
 		_dtTemplate.mIdToPointer.insert_or_assign( pwMain->Id(), pwMain );
 		_dtTemplate.vWidgets.push_back( pwMain );

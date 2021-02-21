@@ -16,6 +16,15 @@ namespace lsw {
 			top = _rRect.top;
 			bottom = _rRect.bottom;
 		}
+		LSW_RECT( LONG _lLeft, LONG _lTop, LONG _lRight, LONG _lBottom ) {
+			left = _lLeft;
+			right = _lRight;
+			top = _lTop;
+			bottom = _lBottom;
+		}
+
+		
+		// == Functions.
 		LONG								Width() const { return right - left; }
 		LONG								Height() const { return bottom - top; }
 		LSW_RECT &							Zero() { left = right = top = bottom = 0; return (*this ); }
@@ -130,6 +139,8 @@ namespace lsw {
 			}
 		}
 
+
+		// == Functions.
 		BOOL								Valid() const { return hHandle && hHandle != INVALID_HANDLE_VALUE; }
 
 		static BOOL							Valid( HANDLE _hHandle ) { return _hHandle && _hHandle != INVALID_HANDLE_VALUE; }
@@ -144,6 +155,8 @@ namespace lsw {
 			cbSize = sizeof( REBARBANDINFOW );
 		}
 
+
+		// == Functions.
 		LSW_REBARBANDINFO &					SetStyle( UINT _fStylemember ) {
 			fMask |= RBBIM_STYLE;
 			fStyle = _fStylemember;
@@ -300,6 +313,65 @@ namespace lsw {
 		int									iPrev;
 	};
 
+	struct LSW_CLIPBOARD {
+		LSW_CLIPBOARD( HWND _hWnd, bool _bEmpty ) :
+			bEmptied( FALSE ),
+			bOpen( ::OpenClipboard( _hWnd ) ) {
+			if ( bOpen && _bEmpty ) {
+				bEmptied = ::EmptyClipboard();
+			}
+		}
+		~LSW_CLIPBOARD() {
+			if ( bOpen ) {
+				::CloseClipboard();
+			}
+		}
+
+
+		// == Functions.
+		BOOL								SetText( const char * _pcText, size_t _stLen = -1 ) {
+			if ( !_pcText || !bOpen ) { return FALSE; }
+			if ( _stLen < 0 ) {
+				_stLen = std::strlen( _pcText );
+			}
+			HGLOBAL hglbBinCopy;
+			hglbBinCopy = ::GlobalAlloc( GMEM_MOVEABLE, (_stLen + 1) * sizeof( _pcText[0] ) );
+			if ( !hglbBinCopy ) { return FALSE; }
+			LPVOID lpvAddress = ::GlobalLock( hglbBinCopy );
+			if ( !lpvAddress ) {
+				::GlobalFree( hglbBinCopy );
+				return FALSE;
+			}
+			std::memcpy( lpvAddress, _pcText, (_stLen + 1) * sizeof( _pcText[0] ) );
+			::GlobalUnlock( hglbBinCopy );
+
+			::SetClipboardData( CF_TEXT, hglbBinCopy );
+			return TRUE;
+		}
+
+		BOOL								SetText( const wchar_t * _pwcText, size_t _stLen = -1 ) {
+			if ( !_pwcText || !bOpen ) { return FALSE; }
+			if ( _stLen < 0 ) {
+				_stLen = std::wcslen( _pwcText );
+			}
+			HGLOBAL hglbBinCopy;
+			hglbBinCopy = ::GlobalAlloc( GMEM_MOVEABLE, (_stLen + 1) * sizeof( _pwcText[0] ) );
+			if ( !hglbBinCopy ) { return FALSE; }
+			LPVOID lpvAddress = ::GlobalLock( hglbBinCopy );
+			if ( !lpvAddress ) {
+				::GlobalFree( hglbBinCopy );
+				return FALSE;
+			}
+			std::memcpy( lpvAddress, _pwcText, (_stLen + 1) * sizeof( _pwcText[0] ) );
+			::GlobalUnlock( hglbBinCopy );
+
+			::SetClipboardData( CF_UNICODETEXT, hglbBinCopy );
+			return TRUE;
+		}
+
+		BOOL								bOpen;
+		BOOL								bEmptied;
+	};
 
 	class CHelpers {
 	public :

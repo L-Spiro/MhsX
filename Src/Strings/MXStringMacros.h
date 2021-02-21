@@ -13861,3 +13861,309 @@
 #define _DEC_S_1053599D_Is_NaN mx::CStringDecoder::DecodeToString( _T_1053599D_Is_NaN, _LEN_1053599D )
 #define _DEC_WS_1053599D_Is_NaN mx::CStringDecoder::DecodeToWString( _T_1053599D_Is_NaN, _LEN_1053599D )
 
+// Base-16:
+
+#define _T_C7DE6A79_Base_16_ "\xCA\x2F\x43\x00\xBF\xFA\xC4\x01"
+#define _LEN_C7DE6A79 8
+#define _T_LEN_C7DE6A79_Base_16_ _T_C7DE6A79_Base_16_, _LEN_C7DE6A79
+#define _DEC_C7DE6A79_Base_16_( STR ) mx::CStringDecoder::Decode( _T_C7DE6A79_Base_16_, _LEN_C7DE6A79, STR )
+#define _DEC_S_C7DE6A79_Base_16_ mx::CStringDecoder::DecodeToString( _T_C7DE6A79_Base_16_, _LEN_C7DE6A79 )
+#define _DEC_WS_C7DE6A79_Base_16_ mx::CStringDecoder::DecodeToWString( _T_C7DE6A79_Base_16_, _LEN_C7DE6A79 )
+
+// Base-2:
+
+#define _T_2433A28F_Base_2_ "\xCA\x2F\x43\x00\xBF\xFB\xC8"
+#define _LEN_2433A28F 7
+#define _T_LEN_2433A28F_Base_2_ _T_2433A28F_Base_2_, _LEN_2433A28F
+#define _DEC_2433A28F_Base_2_( STR ) mx::CStringDecoder::Decode( _T_2433A28F_Base_2_, _LEN_2433A28F, STR )
+#define _DEC_S_2433A28F_Base_2_ mx::CStringDecoder::DecodeToString( _T_2433A28F_Base_2_, _LEN_2433A28F )
+#define _DEC_WS_2433A28F_Base_2_ mx::CStringDecoder::DecodeToWString( _T_2433A28F_Base_2_, _LEN_2433A28F )
+
+// Sign Bit
+
+#define _T_A32D47EF_Sign_Bit "\xDB\x37\x37\x09\xB2\x0B\xF7\x3B"
+#define _LEN_A32D47EF 8
+#define _T_LEN_A32D47EF_Sign_Bit _T_A32D47EF_Sign_Bit, _LEN_A32D47EF
+#define _DEC_A32D47EF_Sign_Bit( STR ) mx::CStringDecoder::Decode( _T_A32D47EF_Sign_Bit, _LEN_A32D47EF, STR )
+#define _DEC_S_A32D47EF_Sign_Bit mx::CStringDecoder::DecodeToString( _T_A32D47EF_Sign_Bit, _LEN_A32D47EF )
+#define _DEC_WS_A32D47EF_Sign_Bit mx::CStringDecoder::DecodeToWString( _T_A32D47EF_Sign_Bit, _LEN_A32D47EF )
+
+// Exponent Bits:
+
+#define _T_E5FB9FBC_Exponent_Bits_ "\xCD\x46\x40\x0A\x00\x2E\xFC\x3B\xF0\x0A\x32\x42\x05\xD5"
+#define _LEN_E5FB9FBC 14
+#define _T_LEN_E5FB9FBC_Exponent_Bits_ _T_E5FB9FBC_Exponent_Bits_, _LEN_E5FB9FBC
+#define _DEC_E5FB9FBC_Exponent_Bits_( STR ) mx::CStringDecoder::Decode( _T_E5FB9FBC_Exponent_Bits_, _LEN_E5FB9FBC, STR )
+#define _DEC_S_E5FB9FBC_Exponent_Bits_ mx::CStringDecoder::DecodeToString( _T_E5FB9FBC_Exponent_Bits_, _LEN_E5FB9FBC )
+#define _DEC_WS_E5FB9FBC_Exponent_Bits_ mx::CStringDecoder::DecodeToWString( _T_E5FB9FBC_Exponent_Bits_, _LEN_E5FB9FBC )
+
+// Implicit Mantissa Bit
+
+#define _T_3503B1DC_Implicit_Mantissa_Bit "\xD1\x3B\x40\x07\xFB\x2C\xF7\x3B\xF0\x15\x2A\x3C\x06\x04\x3A\xFB\x2F\xF0\xDD\xFB\x3D"
+#define _LEN_3503B1DC 21
+#define _T_LEN_3503B1DC_Implicit_Mantissa_Bit _T_3503B1DC_Implicit_Mantissa_Bit, _LEN_3503B1DC
+#define _DEC_3503B1DC_Implicit_Mantissa_Bit( STR ) mx::CStringDecoder::Decode( _T_3503B1DC_Implicit_Mantissa_Bit, _LEN_3503B1DC, STR )
+#define _DEC_S_3503B1DC_Implicit_Mantissa_Bit mx::CStringDecoder::DecodeToString( _T_3503B1DC_Implicit_Mantissa_Bit, _LEN_3503B1DC )
+#define _DEC_WS_3503B1DC_Implicit_Mantissa_Bit mx::CStringDecoder::DecodeToWString( _T_3503B1DC_Implicit_Mantissa_Bit, _LEN_3503B1DC )
+
+// Mantissa Bits
+
+#define _T_42906B40_Mantissa_Bits "\xD5\x2F\x3E\x0F\xFB\x3C\x01\x28\xF0\x0A\x32\x42\x05"
+#define _LEN_42906B40 13
+#define _T_LEN_42906B40_Mantissa_Bits _T_42906B40_Mantissa_Bits, _LEN_42906B40
+#define _DEC_42906B40_Mantissa_Bits( STR ) mx::CStringDecoder::Decode( _T_42906B40_Mantissa_Bits, _LEN_42906B40, STR )
+#define _DEC_S_42906B40_Mantissa_Bits mx::CStringDecoder::DecodeToString( _T_42906B40_Mantissa_Bits, _LEN_42906B40 )
+#define _DEC_WS_42906B40_Mantissa_Bits mx::CStringDecoder::DecodeToWString( _T_42906B40_Mantissa_Bits, _LEN_42906B40 )
+
+// Parameters
+
+#define _T_49CE4B2E_Parameters "\xD8\x2F\x42\xFC\xFF\x2E\x02\x2C\x42\x3B"
+#define _LEN_49CE4B2E 10
+#define _T_LEN_49CE4B2E_Parameters _T_49CE4B2E_Parameters, _LEN_49CE4B2E
+#define _DEC_49CE4B2E_Parameters( STR ) mx::CStringDecoder::Decode( _T_49CE4B2E_Parameters, _LEN_49CE4B2E, STR )
+#define _DEC_S_49CE4B2E_Parameters mx::CStringDecoder::DecodeToString( _T_49CE4B2E_Parameters, _LEN_49CE4B2E )
+#define _DEC_WS_49CE4B2E_Parameters mx::CStringDecoder::DecodeToWString( _T_49CE4B2E_Parameters, _LEN_49CE4B2E )
+
+// Mantissa Bits:
+
+#define _T_6290E7C4_Mantissa_Bits_ "\xD5\x2F\x3E\x0F\xFB\x3C\x01\x28\xF0\x0A\x32\x42\x05\xD5"
+#define _LEN_6290E7C4 14
+#define _T_LEN_6290E7C4_Mantissa_Bits_ _T_6290E7C4_Mantissa_Bits_, _LEN_6290E7C4
+#define _DEC_6290E7C4_Mantissa_Bits_( STR ) mx::CStringDecoder::Decode( _T_6290E7C4_Mantissa_Bits_, _LEN_6290E7C4, STR )
+#define _DEC_S_6290E7C4_Mantissa_Bits_ mx::CStringDecoder::DecodeToString( _T_6290E7C4_Mantissa_Bits_, _LEN_6290E7C4 )
+#define _DEC_WS_6290E7C4_Mantissa_Bits_ mx::CStringDecoder::DecodeToWString( _T_6290E7C4_Mantissa_Bits_, _LEN_6290E7C4 )
+
+// Preset:
+
+#define _T_134801C7_Preset_ "\xD8\x40\x35\x0E\xF7\x3D\xC8"
+#define _LEN_134801C7 7
+#define _T_LEN_134801C7_Preset_ _T_134801C7_Preset_, _LEN_134801C7
+#define _DEC_134801C7_Preset_( STR ) mx::CStringDecoder::Decode( _T_134801C7_Preset_, _LEN_134801C7, STR )
+#define _DEC_S_134801C7_Preset_ mx::CStringDecoder::DecodeToString( _T_134801C7_Preset_, _LEN_134801C7 )
+#define _DEC_WS_134801C7_Preset_ mx::CStringDecoder::DecodeToWString( _T_134801C7_Preset_, _LEN_134801C7 )
+
+// Imp. Mantissa Bit
+
+#define _T_2085F958_Imp__Mantissa_Bit "\xD1\x3B\x40\xC9\xB2\x16\xEF\x35\x44\x31\x3C\x41\xF3\xBB\x09\xF1\x42"
+#define _LEN_2085F958 17
+#define _T_LEN_2085F958_Imp__Mantissa_Bit _T_2085F958_Imp__Mantissa_Bit, _LEN_2085F958
+#define _DEC_2085F958_Imp__Mantissa_Bit( STR ) mx::CStringDecoder::Decode( _T_2085F958_Imp__Mantissa_Bit, _LEN_2085F958, STR )
+#define _DEC_S_2085F958_Imp__Mantissa_Bit mx::CStringDecoder::DecodeToString( _T_2085F958_Imp__Mantissa_Bit, _LEN_2085F958 )
+#define _DEC_WS_2085F958_Imp__Mantissa_Bit mx::CStringDecoder::DecodeToWString( _T_2085F958_Imp__Mantissa_Bit, _LEN_2085F958 )
+
+// Next Above:
+
+#define _T_BEE2C309_Next_Above_ "\xD6\x33\x48\x0F\xB2\x0A\xF0\x36\x46\x2D\x03"
+#define _LEN_BEE2C309 11
+#define _T_LEN_BEE2C309_Next_Above_ _T_BEE2C309_Next_Above_, _LEN_BEE2C309
+#define _DEC_BEE2C309_Next_Above_( STR ) mx::CStringDecoder::Decode( _T_BEE2C309_Next_Above_, _LEN_BEE2C309, STR )
+#define _DEC_S_BEE2C309_Next_Above_ mx::CStringDecoder::DecodeToString( _T_BEE2C309_Next_Above_, _LEN_BEE2C309 )
+#define _DEC_WS_BEE2C309_Next_Above_ mx::CStringDecoder::DecodeToWString( _T_BEE2C309_Next_Above_, _LEN_BEE2C309 )
+
+// Next Below:
+
+#define _T_F3E02A75_Next_Below_ "\xD6\x33\x48\x0F\xB2\x0B\xF3\x33\x3F\x3F\x03"
+#define _LEN_F3E02A75 11
+#define _T_LEN_F3E02A75_Next_Below_ _T_F3E02A75_Next_Below_, _LEN_F3E02A75
+#define _DEC_F3E02A75_Next_Below_( STR ) mx::CStringDecoder::Decode( _T_F3E02A75_Next_Below_, _LEN_F3E02A75, STR )
+#define _DEC_S_F3E02A75_Next_Below_ mx::CStringDecoder::DecodeToString( _T_F3E02A75_Next_Below_, _LEN_F3E02A75 )
+#define _DEC_WS_F3E02A75_Next_Below_ mx::CStringDecoder::DecodeToWString( _T_F3E02A75_Next_Below_, _LEN_F3E02A75 )
+
+// float/float32/IEEE 754 single-precision/IEE 754-2008 binary32
+
+#define _T_D1E77BF1_float_float32_IEEE_754_single_precision_IEE_754_2008_binary32 "\xEE\x3A\x3F\xFC\x06\xF8\xF4\x33\x3F\x29\x3D\x01\xC4\xCA\x10\xCD\x13\x15\xBB\xC9\xFE\xC2\xE7\x43\x31\x37\x35\xFE\x00\xF4\xF8\x40\x35\xFE\xFB\x3C\xF7\x36\x3E\xF7\x12\x13\xD7\xBB\xFE\xBD\x02\xFD\xCD\xC2\xF9\xC6\xE7\x32\x31\x37\x2F\x04\x14\xFA\xBA"
+#define _LEN_D1E77BF1 61
+#define _T_LEN_D1E77BF1_float_float32_IEEE_754_single_precision_IEE_754_2008_binary32 _T_D1E77BF1_float_float32_IEEE_754_single_precision_IEE_754_2008_binary32, _LEN_D1E77BF1
+#define _DEC_D1E77BF1_float_float32_IEEE_754_single_precision_IEE_754_2008_binary32( STR ) mx::CStringDecoder::Decode( _T_D1E77BF1_float_float32_IEEE_754_single_precision_IEE_754_2008_binary32, _LEN_D1E77BF1, STR )
+#define _DEC_S_D1E77BF1_float_float32_IEEE_754_single_precision_IEE_754_2008_binary32 mx::CStringDecoder::DecodeToString( _T_D1E77BF1_float_float32_IEEE_754_single_precision_IEE_754_2008_binary32, _LEN_D1E77BF1 )
+#define _DEC_WS_D1E77BF1_float_float32_IEEE_754_single_precision_IEE_754_2008_binary32 mx::CStringDecoder::DecodeToWString( _T_D1E77BF1_float_float32_IEEE_754_single_precision_IEE_754_2008_binary32, _LEN_D1E77BF1 )
+
+// double/float64/IEEE 754 double-precision/IEE 754-2008 binary64
+
+#define _T_E40F369E_double_float64_IEEE_754_double_precision_IEE_754_2008_binary64 "\xEC\x3D\x45\xFD\xFE\x2E\xBD\x2D\x3C\x37\x2A\x42\xC8\xCF\xF6\xD1\x13\x15\xE0\xB2\x00\xC3\xFB\xF0\x2C\x38\x43\xF4\x07\x2C\xB5\x3E\x42\x00\xF5\x32\x01\x30\x3F\x36\xF8\x17\xD7\xE0\xE7\xBF\x03\x04\xC8\xC4\xF9\xBE\xFF\xF0\x2A\x32\x3C\xF3\x0D\x40\xBE\x02"
+#define _LEN_E40F369E 62
+#define _T_LEN_E40F369E_double_float64_IEEE_754_double_precision_IEE_754_2008_binary64 _T_E40F369E_double_float64_IEEE_754_double_precision_IEE_754_2008_binary64, _LEN_E40F369E
+#define _DEC_E40F369E_double_float64_IEEE_754_double_precision_IEE_754_2008_binary64( STR ) mx::CStringDecoder::Decode( _T_E40F369E_double_float64_IEEE_754_double_precision_IEE_754_2008_binary64, _LEN_E40F369E, STR )
+#define _DEC_S_E40F369E_double_float64_IEEE_754_double_precision_IEE_754_2008_binary64 mx::CStringDecoder::DecodeToString( _T_E40F369E_double_float64_IEEE_754_double_precision_IEE_754_2008_binary64, _LEN_E40F369E )
+#define _DEC_WS_E40F369E_double_float64_IEEE_754_double_precision_IEE_754_2008_binary64 mx::CStringDecoder::DecodeToWString( _T_E40F369E_double_float64_IEEE_754_double_precision_IEE_754_2008_binary64, _LEN_E40F369E )
+
+// 6-bit University
+
+#define _T_73516BE4_6_bit_University "\xBE\xFB\x32\x04\x06\xE9\xE3\x35\x39\x3E\x2E\x40\x05\x04\x3B\x01"
+#define _LEN_73516BE4 16
+#define _T_LEN_73516BE4_6_bit_University _T_73516BE4_6_bit_University, _LEN_73516BE4
+#define _DEC_73516BE4_6_bit_University( STR ) mx::CStringDecoder::Decode( _T_73516BE4_6_bit_University, _LEN_73516BE4, STR )
+#define _DEC_S_73516BE4_6_bit_University mx::CStringDecoder::DecodeToString( _T_73516BE4_6_bit_University, _LEN_73516BE4 )
+#define _DEC_WS_73516BE4_6_bit_University mx::CStringDecoder::DecodeToWString( _T_73516BE4_6_bit_University, _LEN_73516BE4 )
+
+// 8-bit University
+
+#define _T_53D39D4F_8_bit_University "\xC0\xFB\x32\x04\x06\xE9\xE3\x35\x39\x3E\x2E\x40\x05\x04\x3B\x01"
+#define _LEN_53D39D4F 16
+#define _T_LEN_53D39D4F_8_bit_University _T_53D39D4F_8_bit_University, _LEN_53D39D4F
+#define _DEC_53D39D4F_8_bit_University( STR ) mx::CStringDecoder::Decode( _T_53D39D4F_8_bit_University, _LEN_53D39D4F, STR )
+#define _DEC_S_53D39D4F_8_bit_University mx::CStringDecoder::DecodeToString( _T_53D39D4F_8_bit_University, _LEN_53D39D4F )
+#define _DEC_WS_53D39D4F_8_bit_University mx::CStringDecoder::DecodeToWString( _T_53D39D4F_8_bit_University, _LEN_53D39D4F )
+
+// float16/half/IEEE 754-2008 binary16/s10e5/fp16
+
+#define _T_013F227A_float16_half_IEEE_754_2008_binary16_s10e5_fp16 "\xEE\x3A\x3F\xFC\x06\xFA\xC4\xF6\x38\x29\x35\x34\xC1\xE4\x0C\xCD\x13\xF0\xD2\xC7\xFD\xBB\xF9\x00\xF8\x01\xEE\xF4\x04\x35\xE9\x40\x49\xCC\xC8\xF8\x01\xF8\x00\x2D\xFE\xFD\xF8\x0B\xF8\xBE"
+#define _LEN_013F227A 46
+#define _T_LEN_013F227A_float16_half_IEEE_754_2008_binary16_s10e5_fp16 _T_013F227A_float16_half_IEEE_754_2008_binary16_s10e5_fp16, _LEN_013F227A
+#define _DEC_013F227A_float16_half_IEEE_754_2008_binary16_s10e5_fp16( STR ) mx::CStringDecoder::Decode( _T_013F227A_float16_half_IEEE_754_2008_binary16_s10e5_fp16, _LEN_013F227A, STR )
+#define _DEC_S_013F227A_float16_half_IEEE_754_2008_binary16_s10e5_fp16 mx::CStringDecoder::DecodeToString( _T_013F227A_float16_half_IEEE_754_2008_binary16_s10e5_fp16, _LEN_013F227A )
+#define _DEC_WS_013F227A_float16_half_IEEE_754_2008_binary16_s10e5_fp16 mx::CStringDecoder::DecodeToWString( _T_013F227A_float16_half_IEEE_754_2008_binary16_s10e5_fp16, _LEN_013F227A )
+
+// 6-bit (Study Material)
+
+#define _T_4228F19E_6_bit__Study_Material_ "\xBE\xFB\x32\x04\x06\xE9\xB6\x1A\x44\x3D\x2D\x47\xB2\xE8\x28\xFC\x33\x42\x04\xF3\x35\xB7"
+#define _LEN_4228F19E 22
+#define _T_LEN_4228F19E_6_bit__Study_Material_ _T_4228F19E_6_bit__Study_Material_, _LEN_4228F19E
+#define _DEC_4228F19E_6_bit__Study_Material_( STR ) mx::CStringDecoder::Decode( _T_4228F19E_6_bit__Study_Material_, _LEN_4228F19E, STR )
+#define _DEC_S_4228F19E_6_bit__Study_Material_ mx::CStringDecoder::DecodeToString( _T_4228F19E_6_bit__Study_Material_, _LEN_4228F19E )
+#define _DEC_WS_4228F19E_6_bit__Study_Material_ mx::CStringDecoder::DecodeToWString( _T_4228F19E_6_bit__Study_Material_, _LEN_4228F19E )
+
+// 8-bit (Study Material)
+
+#define _T_899A8D1E_8_bit__Study_Material_ "\xC0\xFB\x32\x04\x06\xE9\xB6\x1A\x44\x3D\x2D\x47\xB2\xE8\x28\xFC\x33\x42\x04\xF3\x35\xB7"
+#define _LEN_899A8D1E 22
+#define _T_LEN_899A8D1E_8_bit__Study_Material_ _T_899A8D1E_8_bit__Study_Material_, _LEN_899A8D1E
+#define _DEC_899A8D1E_8_bit__Study_Material_( STR ) mx::CStringDecoder::Decode( _T_899A8D1E_8_bit__Study_Material_, _LEN_899A8D1E, STR )
+#define _DEC_S_899A8D1E_8_bit__Study_Material_ mx::CStringDecoder::DecodeToString( _T_899A8D1E_8_bit__Study_Material_, _LEN_899A8D1E )
+#define _DEC_WS_899A8D1E_8_bit__Study_Material_ mx::CStringDecoder::DecodeToWString( _T_899A8D1E_8_bit__Study_Material_, _LEN_899A8D1E )
+
+// half/float16/IEEE 754-2008 binary16/s10e5/fp16
+
+#define _T_7D9829FB_half_float16_IEEE_754_2008_binary16_s10e5_fp16 "\xF0\x2F\x3C\x01\xC1\x2F\xFA\x36\x31\x3C\xFA\x04\xC1\xE4\x0C\xCD\x13\xF0\xD2\xC7\xFD\xBB\xF9\x00\xF8\x01\xEE\xF4\x04\x35\xE9\x40\x49\xCC\xC8\xF8\x01\xF8\x00\x2D\xFE\xFD\xF8\x0B\xF8\xBE"
+#define _LEN_7D9829FB 46
+#define _T_LEN_7D9829FB_half_float16_IEEE_754_2008_binary16_s10e5_fp16 _T_7D9829FB_half_float16_IEEE_754_2008_binary16_s10e5_fp16, _LEN_7D9829FB
+#define _DEC_7D9829FB_half_float16_IEEE_754_2008_binary16_s10e5_fp16( STR ) mx::CStringDecoder::Decode( _T_7D9829FB_half_float16_IEEE_754_2008_binary16_s10e5_fp16, _LEN_7D9829FB, STR )
+#define _DEC_S_7D9829FB_half_float16_IEEE_754_2008_binary16_s10e5_fp16 mx::CStringDecoder::DecodeToString( _T_7D9829FB_half_float16_IEEE_754_2008_binary16_s10e5_fp16, _LEN_7D9829FB )
+#define _DEC_WS_7D9829FB_half_float16_IEEE_754_2008_binary16_s10e5_fp16 mx::CStringDecoder::DecodeToWString( _T_7D9829FB_half_float16_IEEE_754_2008_binary16_s10e5_fp16, _LEN_7D9829FB )
+
+// Limits
+
+#define _T_516F3D8D_Limits "\xD4\x37\x3D\x04\x06\x3C"
+#define _LEN_516F3D8D 6
+#define _T_LEN_516F3D8D_Limits _T_516F3D8D_Limits, _LEN_516F3D8D
+#define _DEC_516F3D8D_Limits( STR ) mx::CStringDecoder::Decode( _T_516F3D8D_Limits, _LEN_516F3D8D, STR )
+#define _DEC_S_516F3D8D_Limits mx::CStringDecoder::DecodeToString( _T_516F3D8D_Limits, _LEN_516F3D8D )
+#define _DEC_WS_516F3D8D_Limits mx::CStringDecoder::DecodeToWString( _T_516F3D8D_Limits, _LEN_516F3D8D )
+
+// +Max:
+
+#define _T_71B2E2B3__Max_ "\xB3\x1B\x31\x13\xCC"
+#define _LEN_71B2E2B3 5
+#define _T_LEN_71B2E2B3__Max_ _T_71B2E2B3__Max_, _LEN_71B2E2B3
+#define _DEC_71B2E2B3__Max_( STR ) mx::CStringDecoder::Decode( _T_71B2E2B3__Max_, _LEN_71B2E2B3, STR )
+#define _DEC_S_71B2E2B3__Max_ mx::CStringDecoder::DecodeToString( _T_71B2E2B3__Max_, _LEN_71B2E2B3 )
+#define _DEC_WS_71B2E2B3__Max_ mx::CStringDecoder::DecodeToWString( _T_71B2E2B3__Max_, _LEN_71B2E2B3 )
+
+// Non-0 +Min:
+
+#define _T_3353A0EC_Non_0__Min_ "\xD6\x3D\x3E\xC8\xC2\xE9\xB9\x14\x39\x36\x03"
+#define _LEN_3353A0EC 11
+#define _T_LEN_3353A0EC_Non_0__Min_ _T_3353A0EC_Non_0__Min_, _LEN_3353A0EC
+#define _DEC_3353A0EC_Non_0__Min_( STR ) mx::CStringDecoder::Decode( _T_3353A0EC_Non_0__Min_, _LEN_3353A0EC, STR )
+#define _DEC_S_3353A0EC_Non_0__Min_ mx::CStringDecoder::DecodeToString( _T_3353A0EC_Non_0__Min_, _LEN_3353A0EC )
+#define _DEC_WS_3353A0EC_Non_0__Min_ mx::CStringDecoder::DecodeToWString( _T_3353A0EC_Non_0__Min_, _LEN_3353A0EC )
+
+// Norm. Min:
+
+#define _T_0B5A0E4E_Norm__Min_ "\xD6\x3D\x42\x08\xC0\xE9\xDB\x30\x3E\x02"
+#define _LEN_0B5A0E4E 10
+#define _T_LEN_0B5A0E4E_Norm__Min_ _T_0B5A0E4E_Norm__Min_, _LEN_0B5A0E4E
+#define _DEC_0B5A0E4E_Norm__Min_( STR ) mx::CStringDecoder::Decode( _T_0B5A0E4E_Norm__Min_, _LEN_0B5A0E4E, STR )
+#define _DEC_S_0B5A0E4E_Norm__Min_ mx::CStringDecoder::DecodeToString( _T_0B5A0E4E_Norm__Min_, _LEN_0B5A0E4E )
+#define _DEC_WS_0B5A0E4E_Norm__Min_ mx::CStringDecoder::DecodeToWString( _T_0B5A0E4E_Norm__Min_, _LEN_0B5A0E4E )
+
+// AMD 9511 (1979)
+
+#define _T_C277C193_AMD_9511__1979_ "\xC9\x1B\x14\xBB\xCB\xFE\xBF\xF8\xF0\xF0\xFA\x07\xC9\xD4\xF0"
+#define _LEN_C277C193 15
+#define _T_LEN_C277C193_AMD_9511__1979_ _T_C277C193_AMD_9511__1979_, _LEN_C277C193
+#define _DEC_C277C193_AMD_9511__1979_( STR ) mx::CStringDecoder::Decode( _T_C277C193_AMD_9511__1979_, _LEN_C277C193, STR )
+#define _DEC_S_C277C193_AMD_9511__1979_ mx::CStringDecoder::DecodeToString( _T_C277C193_AMD_9511__1979_, _LEN_C277C193 )
+#define _DEC_WS_C277C193_AMD_9511__1979_ mx::CStringDecoder::DecodeToWString( _T_C277C193_AMD_9511__1979_, _LEN_C277C193 )
+
+// Custom
+
+#define _T_F22813AD_Custom "\xCB\x43\x43\x0F\x01\x36"
+#define _LEN_F22813AD 6
+#define _T_LEN_F22813AD_Custom _T_F22813AD_Custom, _LEN_F22813AD
+#define _DEC_F22813AD_Custom( STR ) mx::CStringDecoder::Decode( _T_F22813AD_Custom, _LEN_F22813AD, STR )
+#define _DEC_S_F22813AD_Custom mx::CStringDecoder::DecodeToString( _T_F22813AD_Custom, _LEN_F22813AD )
+#define _DEC_WS_F22813AD_Custom mx::CStringDecoder::DecodeToWString( _T_F22813AD_Custom, _LEN_F22813AD )
+
+// Misc
+
+#define _T_DF95B584_Misc "\xD5\x37\x43\xFE"
+#define _LEN_DF95B584 4
+#define _T_LEN_DF95B584_Misc _T_DF95B584_Misc, _LEN_DF95B584
+#define _DEC_DF95B584_Misc( STR ) mx::CStringDecoder::Decode( _T_DF95B584_Misc, _LEN_DF95B584, STR )
+#define _DEC_S_DF95B584_Misc mx::CStringDecoder::DecodeToString( _T_DF95B584_Misc, _LEN_DF95B584 )
+#define _DEC_WS_DF95B584_Misc mx::CStringDecoder::DecodeToWString( _T_DF95B584_Misc, _LEN_DF95B584 )
+
+// Misc.
+
+#define _T_E4DE30CE_Misc_ "\xD5\x37\x43\xFE\xC0"
+#define _LEN_E4DE30CE 5
+#define _T_LEN_E4DE30CE_Misc_ _T_E4DE30CE_Misc_, _LEN_E4DE30CE
+#define _DEC_E4DE30CE_Misc_( STR ) mx::CStringDecoder::Decode( _T_E4DE30CE_Misc_, _LEN_E4DE30CE, STR )
+#define _DEC_S_E4DE30CE_Misc_ mx::CStringDecoder::DecodeToString( _T_E4DE30CE_Misc_, _LEN_E4DE30CE )
+#define _DEC_WS_E4DE30CE_Misc_ mx::CStringDecoder::DecodeToWString( _T_E4DE30CE_Misc_, _LEN_E4DE30CE )
+
+// Total Bits:
+
+#define _T_8C43D147_Total_Bits_ "\xDC\x3D\x44\xFC\xFE\xE9\xD0\x30\x44\x3B\x03"
+#define _LEN_8C43D147 11
+#define _T_LEN_8C43D147_Total_Bits_ _T_8C43D147_Total_Bits_, _LEN_8C43D147
+#define _DEC_8C43D147_Total_Bits_( STR ) mx::CStringDecoder::Decode( _T_8C43D147_Total_Bits_, _LEN_8C43D147, STR )
+#define _DEC_S_8C43D147_Total_Bits_ mx::CStringDecoder::DecodeToString( _T_8C43D147_Total_Bits_, _LEN_8C43D147 )
+#define _DEC_WS_8C43D147_Total_Bits_ mx::CStringDecoder::DecodeToWString( _T_8C43D147_Total_Bits_, _LEN_8C43D147 )
+
+// Mantissa:
+
+#define _T_9F5A67A7_Mantissa_ "\xD5\x2F\x3E\x0F\xFB\x3C\x01\x28\x0A"
+#define _LEN_9F5A67A7 9
+#define _T_LEN_9F5A67A7_Mantissa_ _T_9F5A67A7_Mantissa_, _LEN_9F5A67A7
+#define _DEC_9F5A67A7_Mantissa_( STR ) mx::CStringDecoder::Decode( _T_9F5A67A7_Mantissa_, _LEN_9F5A67A7, STR )
+#define _DEC_S_9F5A67A7_Mantissa_ mx::CStringDecoder::DecodeToString( _T_9F5A67A7_Mantissa_, _LEN_9F5A67A7 )
+#define _DEC_WS_9F5A67A7_Mantissa_ mx::CStringDecoder::DecodeToWString( _T_9F5A67A7_Mantissa_, _LEN_9F5A67A7 )
+
+// Exponent:
+
+#define _T_FD9FF810_Exponent_ "\xCD\x46\x40\x0A\x00\x2E\xFC\x3B\x0A"
+#define _LEN_FD9FF810 9
+#define _T_LEN_FD9FF810_Exponent_ _T_FD9FF810_Exponent_, _LEN_FD9FF810
+#define _DEC_FD9FF810_Exponent_( STR ) mx::CStringDecoder::Decode( _T_FD9FF810_Exponent_, _LEN_FD9FF810, STR )
+#define _DEC_S_FD9FF810_Exponent_ mx::CStringDecoder::DecodeToString( _T_FD9FF810_Exponent_, _LEN_FD9FF810 )
+#define _DEC_WS_FD9FF810_Exponent_ mx::CStringDecoder::DecodeToWString( _T_FD9FF810_Exponent_, _LEN_FD9FF810 )
+
+// %u (Biased: %d)
+
+#define _T_19E2A7FA__u__Biased___d_ "\xAD\x43\xF0\xC3\xD4\x32\xEF\x3A\x35\x2C\x03\xEE\xB7\xFF\xF0"
+#define _LEN_19E2A7FA 15
+#define _T_LEN_19E2A7FA__u__Biased___d_ _T_19E2A7FA__u__Biased___d_, _LEN_19E2A7FA
+#define _DEC_19E2A7FA__u__Biased___d_( STR ) mx::CStringDecoder::Decode( _T_19E2A7FA__u__Biased___d_, _LEN_19E2A7FA, STR )
+#define _DEC_S_19E2A7FA__u__Biased___d_ mx::CStringDecoder::DecodeToString( _T_19E2A7FA__u__Biased___d_, _LEN_19E2A7FA )
+#define _DEC_WS_19E2A7FA__u__Biased___d_ mx::CStringDecoder::DecodeToWString( _T_19E2A7FA__u__Biased___d_, _LEN_19E2A7FA )
+
+// Bias:
+
+#define _T_2934162D_Bias_ "\xCA\x37\x31\x0E\xCC"
+#define _LEN_2934162D 5
+#define _T_LEN_2934162D_Bias_ _T_2934162D_Bias_, _LEN_2934162D
+#define _DEC_2934162D_Bias_( STR ) mx::CStringDecoder::Decode( _T_2934162D_Bias_, _LEN_2934162D, STR )
+#define _DEC_S_2934162D_Bias_ mx::CStringDecoder::DecodeToString( _T_2934162D_Bias_, _LEN_2934162D )
+#define _DEC_WS_2934162D_Bias_ mx::CStringDecoder::DecodeToWString( _T_2934162D_Bias_, _LEN_2934162D )
+
+// Biased Exp.
+
+#define _T_2F7DD938_Biased_Exp_ "\xCA\x37\x31\x0E\xF7\x2D\xAE\x0C\x48\x38\xF7"
+#define _LEN_2F7DD938 11
+#define _T_LEN_2F7DD938_Biased_Exp_ _T_2F7DD938_Biased_Exp_, _LEN_2F7DD938
+#define _DEC_2F7DD938_Biased_Exp_( STR ) mx::CStringDecoder::Decode( _T_2F7DD938_Biased_Exp_, _LEN_2F7DD938, STR )
+#define _DEC_S_2F7DD938_Biased_Exp_ mx::CStringDecoder::DecodeToString( _T_2F7DD938_Biased_Exp_, _LEN_2F7DD938 )
+#define _DEC_WS_2F7DD938_Biased_Exp_ mx::CStringDecoder::DecodeToWString( _T_2F7DD938_Biased_Exp_, _LEN_2F7DD938 )
+

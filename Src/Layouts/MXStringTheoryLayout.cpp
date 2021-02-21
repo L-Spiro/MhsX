@@ -54,8 +54,8 @@ namespace mx {
 			TRUE,									// bActive
 			75,										// iLeft
 			25,										// iTop
-			MX_STW_W + 16,							// dwWidth
-			MX_STW_H + 26,							// dwHeight
+			MX_STW_W,							// dwWidth
+			MX_STW_H + 26 - 38,							// dwHeight
 			WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS | DS_3DLOOK | DS_SETFONT,							// dwStyle
 			WS_EX_WINDOWEDGE | WS_EX_CONTROLPARENT,																	// dwStyleEx
 			MX_MAKE_WCHAR( _T_D308869B_String_Theory ),																// pwcText
