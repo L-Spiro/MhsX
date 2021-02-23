@@ -12,24 +12,27 @@ namespace mx {
 #define MX_FPS_IN_GROUP_TOP		(MX_TOP_JUST + MX_FPS_PARMS_GROUP_HEIGHT)
 #define MX_FPS_INPUT_LABEL_W	75
 #define MX_FPS_PARM_INTERIOR_W	(MX_FPS_W - (MX_LEFT_JUST + MX_GROUP_LEFT_PXL) * 2 - 200)
-#define MX_FPS_1_5TH			((MX_FPS_PARM_INTERIOR_W * 0) / 5 + MX_LEFT_JUST + MX_GROUP_LEFT_PXL)
-#define MX_FPS_2_5TH			((MX_FPS_PARM_INTERIOR_W * 1) / 5 + MX_LEFT_JUST + MX_GROUP_LEFT_PXL)
-#define MX_FPS_3_5TH			((MX_FPS_PARM_INTERIOR_W * 2) / 5 + MX_LEFT_JUST + MX_GROUP_LEFT_PXL)
-#define MX_FPS_4_5TH			((MX_FPS_PARM_INTERIOR_W * 3) / 5 + MX_LEFT_JUST + MX_GROUP_LEFT_PXL)
-#define MX_FPS_5_5TH			((MX_FPS_PARM_INTERIOR_W * 4) / 5 + MX_LEFT_JUST + MX_GROUP_LEFT_PXL)
+#define MX_FPS_EVEN_DIVIDE( FULLW, OFFSET, TOTALDIVS, DIV )																\
+								(((FULLW) * (DIV)) / (TOTALDIVS) + (OFFSET))
+#define MX_FPS_1_5TH			MX_FPS_EVEN_DIVIDE( MX_FPS_PARM_INTERIOR_W, MX_LEFT_JUST + MX_GROUP_LEFT_PXL, 5, 0 ) //((MX_FPS_PARM_INTERIOR_W * 0) / 5 + MX_LEFT_JUST + MX_GROUP_LEFT_PXL)
+#define MX_FPS_2_5TH			MX_FPS_EVEN_DIVIDE( MX_FPS_PARM_INTERIOR_W, MX_LEFT_JUST + MX_GROUP_LEFT_PXL, 5, 1 ) //((MX_FPS_PARM_INTERIOR_W * 1) / 5 + MX_LEFT_JUST + MX_GROUP_LEFT_PXL)
+#define MX_FPS_3_5TH			MX_FPS_EVEN_DIVIDE( MX_FPS_PARM_INTERIOR_W, MX_LEFT_JUST + MX_GROUP_LEFT_PXL, 5, 2 ) //((MX_FPS_PARM_INTERIOR_W * 2) / 5 + MX_LEFT_JUST + MX_GROUP_LEFT_PXL)
+#define MX_FPS_4_5TH			MX_FPS_EVEN_DIVIDE( MX_FPS_PARM_INTERIOR_W, MX_LEFT_JUST + MX_GROUP_LEFT_PXL, 5, 3 ) //((MX_FPS_PARM_INTERIOR_W * 3) / 5 + MX_LEFT_JUST + MX_GROUP_LEFT_PXL)
+#define MX_FPS_5_5TH			MX_FPS_EVEN_DIVIDE( MX_FPS_PARM_INTERIOR_W, MX_LEFT_JUST + MX_GROUP_LEFT_PXL, 5, 4 ) //((MX_FPS_PARM_INTERIOR_W * 4) / 5 + MX_LEFT_JUST + MX_GROUP_LEFT_PXL)
 #define MX_FPS_PARM_SIGN_W		70
 #define MX_FPS_PARM_EXP_W		76
 #define MX_FPS_PARM_IMP_W		110
 #define MX_FPS_PARM_MAN_W		74
 #define MX_FPS_PARM_PRE_W		37
 #define MX_FPS_LIMITS_TOP		(((MX_FPS_IN_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + 3 + MX_FPS_INPUT_LABEL_W) + MX_DEF_STATIC_HEIGHT_PXL + (static_cast<INT>(::GetSystemMetrics( SM_CYMENUCHECK )) - MX_FPS_CHECKBOX_TRIM * 2) + MX_DEF_STATIC_HEIGHT_PXL * 2)
-#define MX_FPS_LIMITS_H			(MX_GROUP_TOP_PXL + MX_GROUP_BOTTOM_PXL + MX_DEF_EDIT_HEIGHT_PXL + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 6)
+#define MX_FPS_LIMITS_H			(MX_GROUP_TOP_PXL + MX_GROUP_BOTTOM_PXL + MX_DEF_EDIT_HEIGHT_PXL + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 7)
 #define MX_FPS_LIMITS_LABEL_W	75
-#define MX_FPS_LIMITS_HEX_W		((((MX_FPS_W - (MX_LEFT_JUST + MX_GROUP_LEFT_PXL) * 2) / 2) - MX_FPS_LIMITS_LABEL_W) / 2 - 2)
+#define MX_FPS_LIMITS_HEX_W		123//((((MX_FPS_W - (MX_LEFT_JUST + MX_GROUP_LEFT_PXL) * 4) / 5) - MX_FPS_LIMITS_LABEL_W) / 2 - 2)
 #define MX_FPS_LIMITS_BIN_L		(MX_LEFT_JUST + MX_GROUP_LEFT_PXL + MX_FPS_LIMITS_LABEL_W + MX_FPS_LIMITS_HEX_W + 2)
 #define MX_FPS_LIMITS_BIN_W		(MX_FPS_W - (MX_LEFT_JUST + MX_GROUP_LEFT_PXL) - MX_FPS_LIMITS_BIN_L)
+#define MX_FPS_BIAS_RIGHT		(MX_LEFT_JUST + MX_GROUP_LEFT_PXL + MX_FPS_LIMITS_LABEL_W + MX_FPS_LIMITS_HEX_W)
 #define MX_FPS_MISC_GROUP_TOP	(MX_FPS_LIMITS_TOP + MX_FPS_LIMITS_H)
-#define MX_FPS_MISC_GROUP_H		(MX_GROUP_TOP_PXL + MX_GROUP_BOTTOM_PXL + MX_DEF_EDIT_HEIGHT_PXL + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 2)
+#define MX_FPS_MISC_GROUP_H		(MX_GROUP_TOP_PXL + MX_GROUP_BOTTOM_PXL + MX_DEF_EDIT_HEIGHT_PXL + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 3)
 #define MX_FPS_MISC_LABEL_W		75
 #define MX_FPS_MISC_INTERIOR_W	(MX_FPS_W - (MX_LEFT_JUST + MX_GROUP_LEFT_PXL) * 1)
 #define MX_FPS_MISC_1_5TH		((MX_FPS_MISC_INTERIOR_W * 0) / 4 + MX_LEFT_JUST + MX_GROUP_LEFT_PXL)
@@ -698,6 +701,110 @@ namespace mx {
 
 
 		{
+			LSW_LT_LABEL,							// ltType
+			MX_CI_OUT_BIAS_LABEL,					// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
+			((MX_FPS_LIMITS_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + 3) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 7,					// iTop
+			MX_FPS_LIMITS_LABEL_W,					// dwWidth
+			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_2934162D_Bias_ ),		// pwcText
+			_LEN_2934162D,							// sTextLen
+			MX_CI_MAINWINDOW,						// dwParentId
+		},
+		{
+			LSW_LT_EDIT,							// ltType
+			MX_CI_OUT_BIAS_EDIT,					// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_LEFT_JUST + MX_GROUP_LEFT_PXL + MX_FPS_LIMITS_LABEL_W,														// iLeft
+			(MX_FPS_LIMITS_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 7,						// iTop
+			MX_FPS_LIMITS_HEX_W,					// dwWidth
+			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
+			MX_EDITSTYLE | ES_READONLY,				// dwStyle
+			WS_EX_CLIENTEDGE,						// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_CI_MAINWINDOW,						// dwParentId
+		},
+
+		{
+			LSW_LT_LABEL,							// ltType
+			MX_CI_OUT_PREC_LABEL,					// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_FPS_EVEN_DIVIDE( MX_FPS_W - (MX_LEFT_JUST + MX_FPS_BIAS_RIGHT), MX_LEFT_JUST + MX_FPS_BIAS_RIGHT, 1, 0 ),	// iLeft
+			((MX_FPS_LIMITS_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + 3) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 7,					// iTop
+			MX_FPS_LIMITS_LABEL_W,					// dwWidth
+			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_0FC09248_Precision_ ),// pwcText
+			_LEN_0FC09248,							// sTextLen
+			MX_CI_MAINWINDOW,						// dwParentId
+		},
+		{
+			LSW_LT_EDIT,							// ltType
+			MX_CI_OUT_PREC_EDIT,					// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_FPS_EVEN_DIVIDE( MX_FPS_W - (MX_LEFT_JUST + MX_FPS_BIAS_RIGHT), MX_LEFT_JUST + MX_FPS_BIAS_RIGHT, 1, 0 ) + MX_FPS_LIMITS_LABEL_W,														// iLeft
+			(MX_FPS_LIMITS_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 7,						// iTop
+			MX_FPS_EVEN_DIVIDE( MX_FPS_W - (MX_LEFT_JUST + MX_FPS_BIAS_RIGHT), MX_LEFT_JUST + MX_FPS_BIAS_RIGHT, 1, 1 ) - 
+				(MX_FPS_EVEN_DIVIDE( MX_FPS_W - (MX_LEFT_JUST + MX_FPS_BIAS_RIGHT), MX_LEFT_JUST + MX_FPS_BIAS_RIGHT, 1, 0 ) + MX_FPS_LIMITS_LABEL_W) -
+				(MX_LEFT_JUST + MX_GROUP_LEFT_PXL),																			// dwWidth
+			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
+			MX_EDITSTYLE | ES_READONLY,				// dwStyle
+			WS_EX_CLIENTEDGE,						// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_CI_MAINWINDOW,						// dwParentId
+		},
+
+		/*{
+			LSW_LT_LABEL,							// ltType
+			MX_CI_OUT_PREC_LOW_LABEL,				// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_FPS_EVEN_DIVIDE( MX_FPS_W - (MX_LEFT_JUST + MX_FPS_BIAS_RIGHT), MX_LEFT_JUST + MX_FPS_BIAS_RIGHT, 2, 1 ),	// iLeft
+			((MX_FPS_LIMITS_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + 3) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 7,					// iTop
+			MX_FPS_LIMITS_LABEL_W,					// dwWidth
+			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_72875955_Precision___1_ ),		// pwcText
+			_LEN_72875955,							// sTextLen
+			MX_CI_MAINWINDOW,						// dwParentId
+		},
+		{
+			LSW_LT_EDIT,							// ltType
+			MX_CI_OUT_PREC_LOW_EDIT,				// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_FPS_EVEN_DIVIDE( MX_FPS_W - (MX_LEFT_JUST + MX_FPS_BIAS_RIGHT), MX_LEFT_JUST + MX_FPS_BIAS_RIGHT, 2, 1 ) + MX_FPS_LIMITS_LABEL_W,														// iLeft
+			(MX_FPS_LIMITS_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 7,						// iTop
+			MX_FPS_EVEN_DIVIDE( MX_FPS_W - (MX_LEFT_JUST + MX_FPS_BIAS_RIGHT), MX_LEFT_JUST + MX_FPS_BIAS_RIGHT, 2, 2 ) - 
+				(MX_FPS_EVEN_DIVIDE( MX_FPS_W - (MX_LEFT_JUST + MX_FPS_BIAS_RIGHT), MX_LEFT_JUST + MX_FPS_BIAS_RIGHT, 2, 1 ) + MX_FPS_LIMITS_LABEL_W) -
+				(MX_LEFT_JUST + MX_GROUP_LEFT_PXL),																			// dwWidth
+			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
+			MX_EDITSTYLE | ES_READONLY,				// dwStyle
+			WS_EX_CLIENTEDGE,						// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_CI_MAINWINDOW,						// dwParentId
+		},*/
+
+
+		{
 			LSW_LT_GROUPBOX,						// ltType
 			MX_CI_MISC_GROUP,						// wId
 			WC_BUTTONW,								// lpwcClass
@@ -748,7 +855,7 @@ namespace mx {
 
 		{
 			LSW_LT_LABEL,							// ltType
-			MX_CI_MISC_NEXT_BELOW_LABEL,			// wId
+			MX_CI_MISC_ACTUAL_LABEL,				// wId
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
@@ -758,13 +865,13 @@ namespace mx {
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
 			0,										// dwStyleEx
-			MX_MAKE_WCHAR( _T_F3E02A75_Next_Below_ ),										// pwcText
-			_LEN_F3E02A75,							// sTextLen
+			MX_MAKE_WCHAR( _T_EE10D731_Actual_Value_ ),										// pwcText
+			_LEN_EE10D731,							// sTextLen
 			MX_CI_MAINWINDOW,						// dwParentId
 		},
 		{
 			LSW_LT_EDIT,							// ltType
-			MX_CI_MISC_NEXT_BELOW_EDIT,				// wId
+			MX_CI_MISC_ACTUAL_EDIT,					// wId
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
@@ -781,12 +888,45 @@ namespace mx {
 
 		{
 			LSW_LT_LABEL,							// ltType
+			MX_CI_MISC_NEXT_BELOW_LABEL,			// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
+			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + 3) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 2,
+			MX_FPS_MISC_LABEL_W,					// dwWidth
+			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_F3E02A75_Next_Below_ ),										// pwcText
+			_LEN_F3E02A75,							// sTextLen
+			MX_CI_MAINWINDOW,						// dwParentId
+		},
+		{
+			LSW_LT_EDIT,							// ltType
+			MX_CI_MISC_NEXT_BELOW_EDIT,				// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_LEFT_JUST + MX_GROUP_LEFT_PXL + MX_FPS_MISC_LABEL_W,							// iLeft
+			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST)) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 2,
+			MX_FPS_W - ((MX_LEFT_JUST + MX_GROUP_LEFT_PXL) * 2) - MX_FPS_MISC_LABEL_W,		// dwWidth
+			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
+			MX_EDITSTYLE | ES_READONLY,				// dwStyle
+			WS_EX_CLIENTEDGE,						// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_CI_MAINWINDOW,						// dwParentId
+		},
+
+		{
+			LSW_LT_LABEL,							// ltType
 			MX_CI_MISC_TOTAL_BITS_LABEL,			// wId
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_FPS_MISC_1_5TH,						// iLeft
-			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + 3) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 2,
+			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + 3) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 3,
 			MX_FPS_MISC_LABEL_W,					// dwWidth
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
@@ -802,7 +942,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_FPS_MISC_1_5TH + MX_FPS_MISC_LABEL_W,// iLeft
-			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST)) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 2,
+			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST)) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 3,
 			(MX_FPS_MISC_2_5TH - MX_FPS_MISC_1_5TH) - MX_FPS_MISC_LABEL_W - (MX_LEFT_JUST + MX_GROUP_LEFT_PXL),// dwWidth
 			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
 			MX_EDITSTYLE | ES_READONLY,				// dwStyle
@@ -819,7 +959,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_FPS_MISC_2_5TH,						// iLeft
-			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + 3) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 2,
+			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + 3) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 3,
 			MX_FPS_MISC_LABEL_W,					// dwWidth
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
@@ -835,7 +975,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_FPS_MISC_2_5TH + MX_FPS_MISC_LABEL_W,// iLeft
-			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST)) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 2,
+			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST)) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 3,
 			(MX_FPS_MISC_3_5TH - MX_FPS_MISC_2_5TH) - MX_FPS_MISC_LABEL_W - (MX_LEFT_JUST + MX_GROUP_LEFT_PXL),// dwWidth
 			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
 			MX_EDITSTYLE | ES_READONLY,				// dwStyle
@@ -852,7 +992,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_FPS_MISC_3_5TH,						// iLeft
-			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + 3) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 2,
+			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + 3) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 3,
 			MX_FPS_MISC_LABEL_W,					// dwWidth
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
@@ -868,7 +1008,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_FPS_MISC_3_5TH + MX_FPS_MISC_LABEL_W,// iLeft
-			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST)) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 2,
+			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST)) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 3,
 			(MX_FPS_MISC_4_5TH - MX_FPS_MISC_3_5TH) - MX_FPS_MISC_LABEL_W - (MX_LEFT_JUST + MX_GROUP_LEFT_PXL),// dwWidth
 			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
 			MX_EDITSTYLE | ES_READONLY,				// dwStyle
@@ -885,7 +1025,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_FPS_MISC_4_5TH,						// iLeft
-			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + 3) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 2,
+			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + 3) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 3,
 			MX_FPS_MISC_LABEL_W,					// dwWidth
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
@@ -901,7 +1041,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_FPS_MISC_4_5TH + MX_FPS_MISC_LABEL_W,// iLeft
-			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST)) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 2,
+			((MX_FPS_MISC_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST)) + (MX_DEF_EDIT_HEIGHT_PXL + 2) * 3,
 			(MX_FPS_MISC_5_5TH - MX_FPS_MISC_4_5TH) - MX_FPS_MISC_LABEL_W - (MX_LEFT_JUST + MX_GROUP_LEFT_PXL),// dwWidth
 			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
 			MX_EDITSTYLE | ES_READONLY,				// dwStyle
@@ -922,6 +1062,7 @@ namespace mx {
 #undef MX_FPS_MISC_INTERIOR_W
 #undef MX_FPS_MISC_GROUP_H
 #undef MX_FPS_MISC_GROUP_TOP
+#undef MX_FPS_BIAS_RIGHT
 #undef MX_FPS_LIMITS_BIN_W
 #undef MX_FPS_LIMITS_BIN_L
 #undef MX_FPS_LIMITS_HEX_W
@@ -938,6 +1079,7 @@ namespace mx {
 #undef MX_FPS_3_5TH
 #undef MX_FPS_2_5TH
 #undef MX_FPS_1_5TH
+#undef MX_FPS_EVEN_DIVIDE
 #undef MX_FPS_PARM_INTERIOR_W
 #undef MX_FPS_INPUT_LABEL_W
 #undef MX_FPS_IN_GROUP_TOP

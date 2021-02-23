@@ -681,6 +681,21 @@ namespace mx {
 			CUtilities::ToDouble( fThis.AsDouble(), sTemp );
 			pwWidget->SetTextA( sTemp.c_str() );
 		}
+
+
+		pwWidget = FindChild( CFloatingPointStudioLayout::MX_CI_OUT_BIAS_EDIT );
+		if ( pwWidget ) {
+			std::string sTemp;
+			CUtilities::ToSigned( static_cast<int64_t>(ee::CFloatX::ExpBias( _csSettings.ui8ExpBits )), sTemp );
+			pwWidget->SetTextA( sTemp.c_str() );
+		}
+
+		pwWidget = FindChild( CFloatingPointStudioLayout::MX_CI_OUT_PREC_EDIT );
+		if ( pwWidget ) {
+			std::string sTemp;
+			CUtilities::ToDouble( ee::CFloatX::Precision( _csSettings.ui8ManBits ), sTemp );
+			pwWidget->SetTextA( sTemp.c_str() );
+		}
 	}
 
 	// Updates the Misc. section.
@@ -693,6 +708,13 @@ namespace mx {
 		if ( pwWidget ) {
 			std::string sTemp;
 			CUtilities::ToDouble( fCopy.AsDouble(), sTemp );
+			pwWidget->SetTextA( sTemp.c_str() );
+		}
+
+		pwWidget = FindChild( CFloatingPointStudioLayout::MX_CI_MISC_ACTUAL_EDIT );
+		if ( pwWidget ) {
+			std::string sTemp;
+			CUtilities::ToDouble( dVal, sTemp );
 			pwWidget->SetTextA( sTemp.c_str() );
 		}
 
@@ -750,7 +772,10 @@ namespace mx {
 			CFloatingPointStudioLayout::MX_CI_OUT_NMIN_EDIT_FLT,
 			CFloatingPointStudioLayout::MX_CI_OUT_EPS_EDIT_HEX,
 			CFloatingPointStudioLayout::MX_CI_OUT_EPS_EDIT_FLT,
+			CFloatingPointStudioLayout::MX_CI_OUT_BIAS_EDIT,
+			CFloatingPointStudioLayout::MX_CI_OUT_PREC_EDIT,
 			CFloatingPointStudioLayout::MX_CI_MISC_NEXT_ABOVE_EDIT,
+			CFloatingPointStudioLayout::MX_CI_MISC_ACTUAL_EDIT,
 			CFloatingPointStudioLayout::MX_CI_MISC_NEXT_BELOW_EDIT,
 			CFloatingPointStudioLayout::MX_CI_MISC_TOTAL_BITS_EDIT,
 			CFloatingPointStudioLayout::MX_CI_MISC_EXPONENT_EDIT,

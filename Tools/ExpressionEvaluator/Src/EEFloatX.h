@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cfloat>
+#include <cmath>
 #include <cstdint>
 
 #define EE_FLOATX_DBL_EXP_BITS			11
@@ -167,6 +168,12 @@ namespace ee {
 		// Gets the number of bits in a given representation.
 		static uint64_t					TotalBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
 			return (_uiExpBits + _uiManBits) + (_bHasSign ? 1 : 0) - (_bImplicitMantissaBit ? 1 : 0);
+		}
+
+		// Gets the precision given the number of mantissa bits for numbers greater than 1.
+		static double					Precision( uint16_t _uiManBits ) {
+			return _uiManBits > 1 ? std::log10( std::pow( 2.0, _uiManBits ) ) :
+				(std::log10( _uiManBits ) + 1.0);
 		}
 	};
 

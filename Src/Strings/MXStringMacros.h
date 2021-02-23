@@ -14167,3 +14167,57 @@
 #define _DEC_S_2F7DD938_Biased_Exp_ mx::CStringDecoder::DecodeToString( _T_2F7DD938_Biased_Exp_, _LEN_2F7DD938 )
 #define _DEC_WS_2F7DD938_Biased_Exp_ mx::CStringDecoder::DecodeToWString( _T_2F7DD938_Biased_Exp_, _LEN_2F7DD938 )
 
+// Precision ≥ 1
+
+#define _T_D43EB0D5_Precision_____1 "\xD8\x40\x35\xFE\xFB\x3C\xF7\x36\x3E\xE8\xAB\x57\x37\xBB\xF8"
+#define _LEN_D43EB0D5 15
+#define _T_LEN_D43EB0D5_Precision_____1 _T_D43EB0D5_Precision_____1, _LEN_D43EB0D5
+#define _DEC_D43EB0D5_Precision_____1( STR ) mx::CStringDecoder::Decode( _T_D43EB0D5_Precision_____1, _LEN_D43EB0D5, STR )
+#define _DEC_S_D43EB0D5_Precision_____1 mx::CStringDecoder::DecodeToString( _T_D43EB0D5_Precision_____1, _LEN_D43EB0D5 )
+#define _DEC_WS_D43EB0D5_Precision_____1 mx::CStringDecoder::DecodeToWString( _T_D43EB0D5_Precision_____1, _LEN_D43EB0D5 )
+
+// Precision < 1
+
+#define _T_8F54A0DA_Precision___1 "\xD8\x40\x35\xFE\xFB\x3C\xF7\x36\x3E\xE8\x05\xEE\xC3"
+#define _LEN_8F54A0DA 13
+#define _T_LEN_8F54A0DA_Precision___1 _T_8F54A0DA_Precision___1, _LEN_8F54A0DA
+#define _DEC_8F54A0DA_Precision___1( STR ) mx::CStringDecoder::Decode( _T_8F54A0DA_Precision___1, _LEN_8F54A0DA, STR )
+#define _DEC_S_8F54A0DA_Precision___1 mx::CStringDecoder::DecodeToString( _T_8F54A0DA_Precision___1, _LEN_8F54A0DA )
+#define _DEC_WS_8F54A0DA_Precision___1 mx::CStringDecoder::DecodeToWString( _T_8F54A0DA_Precision___1, _LEN_8F54A0DA )
+
+// Actual Value:
+
+#define _T_EE10D731_Actual_Value_ "\xC9\x31\x44\x10\xF3\x35\xAE\x1D\x31\x34\x3E\x33\xCC"
+#define _LEN_EE10D731 13
+#define _T_LEN_EE10D731_Actual_Value_ _T_EE10D731_Actual_Value_, _LEN_EE10D731
+#define _DEC_EE10D731_Actual_Value_( STR ) mx::CStringDecoder::Decode( _T_EE10D731_Actual_Value_, _LEN_EE10D731, STR )
+#define _DEC_S_EE10D731_Actual_Value_ mx::CStringDecoder::DecodeToString( _T_EE10D731_Actual_Value_, _LEN_EE10D731 )
+#define _DEC_WS_EE10D731_Actual_Value_ mx::CStringDecoder::DecodeToWString( _T_EE10D731_Actual_Value_, _LEN_EE10D731 )
+
+// Precision ≥ 1:
+
+#define _T_E2632ED4_Precision_____1_ "\xD8\x40\x35\xFE\xFB\x3C\xF7\x36\x3E\xE8\xAB\x57\x37\xBB\xF8\xC2"
+#define _LEN_E2632ED4 16
+#define _T_LEN_E2632ED4_Precision_____1_ _T_E2632ED4_Precision_____1_, _LEN_E2632ED4
+#define _DEC_E2632ED4_Precision_____1_( STR ) mx::CStringDecoder::Decode( _T_E2632ED4_Precision_____1_, _LEN_E2632ED4, STR )
+#define _DEC_S_E2632ED4_Precision_____1_ mx::CStringDecoder::DecodeToString( _T_E2632ED4_Precision_____1_, _LEN_E2632ED4 )
+#define _DEC_WS_E2632ED4_Precision_____1_ mx::CStringDecoder::DecodeToWString( _T_E2632ED4_Precision_____1_, _LEN_E2632ED4 )
+
+// Precision < 1:
+
+#define _T_72875955_Precision___1_ "\xD8\x40\x35\xFE\xFB\x3C\xF7\x36\x3E\xE8\x05\xEE\xC3\xD5"
+#define _LEN_72875955 14
+#define _T_LEN_72875955_Precision___1_ _T_72875955_Precision___1_, _LEN_72875955
+#define _DEC_72875955_Precision___1_( STR ) mx::CStringDecoder::Decode( _T_72875955_Precision___1_, _LEN_72875955, STR )
+#define _DEC_S_72875955_Precision___1_ mx::CStringDecoder::DecodeToString( _T_72875955_Precision___1_, _LEN_72875955 )
+#define _DEC_WS_72875955_Precision___1_ mx::CStringDecoder::DecodeToWString( _T_72875955_Precision___1_, _LEN_72875955 )
+
+// Precision:
+
+#define _T_0FC09248_Precision_ "\xD8\x40\x35\xFE\xFB\x3C\xF7\x36\x3E\x02"
+#define _LEN_0FC09248 10
+#define _T_LEN_0FC09248_Precision_ _T_0FC09248_Precision_, _LEN_0FC09248
+#define _DEC_0FC09248_Precision_( STR ) mx::CStringDecoder::Decode( _T_0FC09248_Precision_, _LEN_0FC09248, STR )
+#define _DEC_S_0FC09248_Precision_ mx::CStringDecoder::DecodeToString( _T_0FC09248_Precision_, _LEN_0FC09248 )
+#define _DEC_WS_0FC09248_Precision_ mx::CStringDecoder::DecodeToWString( _T_0FC09248_Precision_, _LEN_0FC09248 )
+

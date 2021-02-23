@@ -38,7 +38,7 @@ namespace ee {
 		uiManBits = _uiManBits;
 		uiExpBits = _uiExpBits;
 		uiExponent = AllExpBitsSet( _uiExpBits );
-		uiMantissa = 1;
+		uiMantissa = 1ULL << ((_uiManBits - (_bImplicitMantissaBit ? 1 : 0)) - 1ULL);
 		bImplicitManBit = _bImplicitMantissaBit;
 		bHasSign = _bHasSign;
 		bSign = false;

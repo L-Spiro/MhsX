@@ -1570,3 +1570,7 @@
 "%u (Biased: %d)"
 "Bias:"
 "Biased Exp."
+"Precision ≥ 1:"
+"Precision < 1:"
+"Actual Value:"
+"Precision:"
