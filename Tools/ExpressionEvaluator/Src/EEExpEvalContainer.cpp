@@ -681,8 +681,15 @@ namespace ee {
 	// Creates a decimal constant.
 	void CExpEvalContainer::CreateUInt( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
-		_ndNode.u.ui64Val = StoULL( _pcText, 10 );
-		_ndNode.v.ncConstType = EE_NC_UNSIGNED;
+		bool bOverflow;
+		_ndNode.u.ui64Val = StoULL( _pcText, 10, nullptr, ~0ULL, &bOverflow );
+		if ( bOverflow ) {
+			_ndNode.v.ncConstType = EE_NC_FLOATING;
+			_ndNode.u.dVal = std::atof( _pcText );
+		}
+		else {
+			_ndNode.v.ncConstType = EE_NC_UNSIGNED;
+		}
 		AddNode( _ndNode );
 	}
 

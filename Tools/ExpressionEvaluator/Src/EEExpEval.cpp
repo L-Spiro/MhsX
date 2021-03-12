@@ -91,7 +91,8 @@ namespace ee {
 	}
 
 	// String to integer, from any base.  Since std::stoull() raises exceptions etc.
-	uint64_t StoULL( const char * _pcText, int _iBase, size_t * _psEaten, uint64_t _uiMax ) {
+	uint64_t StoULL( const char * _pcText, int _iBase, size_t * _psEaten, uint64_t _uiMax, bool * _pbOverflow ) {
+		if ( _pbOverflow ) { (*_pbOverflow) = false; }
 		const char * _pcOrig = _pcText;
 		// Negate?
 		bool bNegate = false;
@@ -162,8 +163,10 @@ namespace ee {
 			//if ( _psEaten ) { (*_psEaten ) = &_pcText[I] - _pcOrig + 1; }
 
 			// Check for overflow.
-			if ( (uiPreview - uiNext) / _iBase != uiTemp) {
+			if ( uiPreview < uiTemp ) {
+			//if ( (uiPreview - uiNext) / _iBase != uiTemp) {
 				if ( _psEaten ) { (*_psEaten ) = _pcText - _pcOrig + 1; }
+				if ( _pbOverflow ) { (*_pbOverflow) = true; }
 				return std::numeric_limits<uint64_t>::max();
 			}
 			uiRes = uiPreview;

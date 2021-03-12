@@ -348,7 +348,7 @@ namespace ee {
 	uint32_t						EscapeHtml( const char * _pcValue, size_t _sLen, size_t &_sCharsConsumed );
 
 	// String to integer, from any base.  Since std::stoull() raises exceptions etc.
-	uint64_t						StoULL( const char * _pcText, int _iBase = 10, size_t * _psEaten = nullptr, uint64_t _uiMax = 0xFFFFFFFFFFFFFFFFULL );
+	uint64_t						StoULL( const char * _pcText, int _iBase = 10, size_t * _psEaten = nullptr, uint64_t _uiMax = 0xFFFFFFFFFFFFFFFFULL, bool * _pbOverflow = nullptr );
 
 	// String to double.  Unlike std::atof(), this returns the number of characters eaten.
 	double							AtoF( const char * _pcText, size_t * _psEaten = nullptr );

@@ -951,7 +951,8 @@ namespace mx {
 				_sString.pop_back();
 			}
 			if ( MX_LAST == '.' ) {
-				if ( _dValue > static_cast<double>(static_cast<uint64_t>(-1)) ) {
+				double dCheckMe = static_cast<double>(static_cast<uint64_t>(-1));
+				if ( std::abs( _dValue ) > static_cast<double>(static_cast<uint64_t>(-1)) ) {
 					_sString.push_back( '0' );
 				}
 				else {
@@ -996,7 +997,7 @@ namespace mx {
 			}
 			if ( MX_LAST == L'.' ) {
 				double dCheckMe = static_cast<double>(static_cast<uint64_t>(-1));
-				if ( _dValue > static_cast<double>(static_cast<uint64_t>(-1)) ) {
+				if ( std::abs( _dValue ) > static_cast<double>(static_cast<uint64_t>(-1)) ) {
 					_sString.push_back( L'0' );
 				}
 				else {
