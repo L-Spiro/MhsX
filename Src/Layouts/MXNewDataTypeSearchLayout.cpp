@@ -9,12 +9,12 @@
 namespace mx {
 
 #define MX_SEARCH_W									200
-#define MX_SEARCH_H									175
+#define MX_SEARCH_H									(175 + MX_DEF_STATIC_HEIGHT + MX_DEF_COMBO_HEIGHT + 2)
 #define MX_SEARCH_GROUP_TOP							2
 #define MX_LEFT_ALIGN								4
 #define MX_CENTER									(MX_SEARCH_W / 2)
 #define MX_WIDTH_TO_CENTER( L )						((MX_SEARCH_W / 2) - (L))
-#define MX_SEARCH_GROUP_HEIGHT						(MX_DEF_COMBO_HEIGHT * 2 + MX_DEF_STATIC_HEIGHT * 2 + MX_GROUP_TOP + MX_GROUP_BOTTOM + 2)
+#define MX_SEARCH_GROUP_HEIGHT						(MX_DEF_COMBO_HEIGHT * 2 + MX_DEF_STATIC_HEIGHT * 2 + MX_GROUP_TOP + MX_GROUP_BOTTOM + 2 + MX_DEF_STATIC_HEIGHT + MX_DEF_COMBO_HEIGHT + 2)
 #define MX_OPTIONS_TOP								(MX_SEARCH_GROUP_HEIGHT + MX_SEARCH_GROUP_TOP)
 #define MX_OPTIONS_H								(MX_GROUP_TOP + MX_GROUP_BOTTOM + MX_DEF_CHECK_HEIGHT * 2 + MX_DEF_BUTTON_HEIGHT)
 #define MX_SEARCH_RANGE_TOP							(MX_OPTIONS_TOP + MX_OPTIONS_H)
@@ -211,6 +211,39 @@ namespace mx {
 			MX_CENTER,								// iLeft
 			MX_SEARCH_GROUP_TOP + MX_GROUP_TOP + MX_DEF_STATIC_HEIGHT + MX_DEF_COMBO_HEIGHT + 2 + MX_DEF_STATIC_HEIGHT,		// iTop
 			(MX_SEARCH_W - MX_LEFT_ALIGN - MX_GROUP_RIGHT - MX_CENTER),														// dwWidth
+			MX_DEF_COMBO_HEIGHT,					// dwHeight
+			MX_COMBOSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_NDSI_DIALOG,							// dwParentId
+		},
+
+		{
+			LSW_LT_LABEL,							// ltType
+			MX_NDSI_EXP_LABEL,						// wId
+			WC_STATICW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_LEFT_ALIGN + MX_GROUP_LEFT,			// iLeft
+			MX_SEARCH_GROUP_TOP + MX_GROUP_TOP + (MX_DEF_STATIC_HEIGHT + MX_DEF_COMBO_HEIGHT + 2) * 2,	// iTop
+			MX_SEARCH_W - (MX_GROUP_RIGHT + MX_LEFT_ALIGN + MX_LEFT_ALIGN + MX_GROUP_LEFT),				// dwWidth
+			MX_DEF_STATIC_HEIGHT,					// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_68C09196_Value_____ ),// pwcText
+			_LEN_68C09196,							// sTextLen
+			MX_NDSI_DIALOG,							// dwParentId
+		},
+		{
+			LSW_LT_COMBOBOX,						// ltType
+			MX_NDSI_EXP_COMBO,						// wId
+			WC_COMBOBOXW,							// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_LEFT_ALIGN + MX_GROUP_LEFT,			// iLeft
+			MX_SEARCH_GROUP_TOP + MX_GROUP_TOP + (MX_DEF_STATIC_HEIGHT + MX_DEF_COMBO_HEIGHT + 2) * 2 + MX_DEF_STATIC_HEIGHT,	// iTop
+			MX_SEARCH_W - (MX_GROUP_RIGHT + MX_LEFT_ALIGN + MX_LEFT_ALIGN + MX_GROUP_LEFT),										// dwWidth
 			MX_DEF_COMBO_HEIGHT,					// dwHeight
 			MX_COMBOSTYLE,							// dwStyle
 			0,										// dwStyleEx

@@ -54,6 +54,8 @@ namespace mx {
 		// == Members.
 		//MX_OPTIONS *						m_poOptions;
 		CMemHack *							m_pmhMemHack;
+		// Was the lst manually typed expression null?
+		bool								m_bLastTypeExpressionWasEmpty;
 
 		static MX_SEARCH_WIN_DATA			m_swdData;
 
@@ -65,8 +67,27 @@ namespace mx {
 		// Validates the dialog box.
 		bool								DialogContentsAreValid( CSecureWString &_wsError, CSearcher::MX_SEARCH_PARMS &_spParmsIfValid );
 
+		// Verifies that the expression is valid and returns descriptive texts.
+		bool								VerifyExpression( CSecureString &_sExpression, CSecureWString &_wsResult, CSecureWString &_wsHelp, CUtilities::MX_DATA_TYPES _dtDataType );
+
 		// Updates the dialog.
 		void								UpdateDialog();
+
+		// Creates an expression for searching for exact values.
+		void								CreateExactValueExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
+
+		// Creates an expression for searching for greater-than values.
+		void								CreateGreaterThanExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
+
+		// Creates an expression for searching for less-than values.
+		void								CreateLessThanExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
+
+		// Creates an expression for searching for ranged values.
+		void								CreateRangeExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal,
+			const ee::CExpEvalContainer::EE_RESULT &_rRVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
+
+		// User-variable function handler.
+		static bool __stdcall 				UserVarHandler( uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult );
 	};
 
 }	// namespace mx

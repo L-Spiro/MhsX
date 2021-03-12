@@ -140,6 +140,61 @@ namespace mx {
 							bRet = UnknownPrimitiveSearch( spParmsCopy, aclChunks, _hProgressUpdate );
 							break;
 						}
+						case CUtilities::MX_ET_QUICK_EXP : {
+							// ================
+							// == Alignment. ==
+							// ================
+							if ( !PrimitiveAlignment( spParmsCopy, spParmsCopy.dtLVal.dtType, m_ppProcess ) ) { return false; }
+							// ================
+							// ================
+							switch ( _spParms.dtLVal.dtType ) {
+								case CUtilities::MX_DT_INT8 : {
+									bRet = ExpressionSearchPredefinedType<int8_t, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_UINT8 : {
+									bRet = ExpressionSearchPredefinedType<uint8_t, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_INT16 : {
+									bRet = ExpressionSearchPredefinedType<int16_t, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_UINT16 : {
+									bRet = ExpressionSearchPredefinedType<uint16_t, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_INT32 : {
+									bRet = ExpressionSearchPredefinedType<int32_t, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_UINT32 : {
+									bRet = ExpressionSearchPredefinedType<uint32_t, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_INT64 : {
+									bRet = ExpressionSearchPredefinedType<int64_t, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_UINT64 : {
+									bRet = ExpressionSearchPredefinedType<uint64_t, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_FLOAT : {
+									bRet = ExpressionSearchPredefinedType<float, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_DOUBLE : {
+									bRet = ExpressionSearchPredefinedType<double, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_FLOAT16 : {
+									bRet = ExpressionSearchPredefinedType<uint16_t, true>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+							}
+							break;
+						}
 						default : { return false; }
 					}	// switch ( _spParms.i32EvalType )
 					break;
@@ -424,7 +479,19 @@ namespace mx {
 					break;
 				}
 				case 1 : { evcCompFunc = Cmp_ExactVal8; break; }
-				case 2 : { evcCompFunc = Cmp_ExactVal16; break; }
+				case 2 : {
+					if ( CUtilities::DataTypeIsFloat( _spParms.dtLVal.dtType ) && _spParms.bInvertResults ) {
+						evcCompFunc = Cmp_Float16WithNaN;
+					}
+					else {
+						evcCompFunc = Cmp_ExactVal16;
+						if ( _spParms.dtLVal.dtType == CUtilities::MX_DT_FLOAT16 ) {
+							_spParms.dtLVal.u.UInt16 = CFloat16::DoubleToUi16( _spParms.dtLVal.u.Double );
+							//_spParms.dtLVal.dtType = CUtilities::MX_DT_FLOAT16;
+						}
+					}
+					break;
+				}
 				case 4 : {
 					evcCompFunc = (CUtilities::DataTypeIsFloat( _spParms.dtLVal.dtType ) && _spParms.bInvertResults) ? Cmp_Float32WithNaN : Cmp_ExactVal32;
 					break;
@@ -3418,7 +3485,8 @@ namespace mx {
 						ee::CExpEvalContainer::EE_RESULT rThisRes;
 						if ( eExp.GetContainer()->Resolve( rThisRes ) ) {
 							rThisRes = ee::CExpEvalContainer::ConvertResult( rThisRes, ee::EE_NC_UNSIGNED );
-							if ( rThisRes.u.ui64Val ) {
+							if ( (rThisRes.u.ui64Val && !pustParms->pspParms->bInvertResults) ||
+								!rThisRes.u.ui64Val && pustParms->pspParms->bInvertResults) {
 								if ( !pustParms->psrbResults->Add( pustParms->paclChunks->Chunks()[I].ui64Start + J + K,
 									&vBuffer[K], pustParms->ui32Size ) ) {
 									pustParms->i32Result = -1;
@@ -3642,40 +3710,6 @@ namespace mx {
 
 		pustParms->i32Result = 1;
 		return true;
-	}
-
-	// Smart 32-bit epsilon compare.
-	bool __stdcall CSearcher::Cmp_Float32RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
-		if ( _patLeft.u.Float32 == _patRight.u.Float32 ) { return true; }	// Handle infinities.
-
-		float fA = std::fabs( _patLeft.u.Float32 );
-		float fB = std::fabs( _patRight.u.Float32 );
-		float fDiff = std::fabs( _patLeft.u.Float32 - _patRight.u.Float32 );
-
-		if ( _patLeft.u.Float32 == 0 || _patRight.u.Float32 == 0 || (fA + fB < FLT_MIN) ) {
-			// Values very close or equal to 0.
-			return fDiff < (static_cast<float>(_spParms.dEpsilonValue) * FLT_MIN);
-		}
-
-		// Relative error.
-		return fDiff / std::min( (fA + fB), FLT_MAX ) < static_cast<float>(_spParms.dEpsilonValue);
-	}
-
-	// Smart 64-bit epsilon compare.
-	bool __stdcall CSearcher::Cmp_Float64RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
-		if ( _patLeft.u.Float64 == _patRight.u.Float64 ) { return true; }	// Handle infinities.
-
-		double dA = std::fabs( _patLeft.u.Float64 );
-		double dB = std::fabs( _patRight.u.Float64 );
-		double dDiff = std::fabs( _patLeft.u.Float64 - _patRight.u.Float64 );
-
-		if ( _patLeft.u.Float64 == 0 || _patRight.u.Float64 == 0 || (dA + dB < DBL_MIN) ) {
-			// Values very close or equal to 0.
-			return dDiff < (_spParms.dEpsilonValue * DBL_MIN);
-		}
-
-		// Relative error.
-		return dDiff / std::min( (dA + dB), DBL_MAX ) < _spParms.dEpsilonValue;
 	}
 
 	// Compares 2 strings that have been composed, having toupper() and similar conversions already done if necessary, and the final characters to compare are all stored in uint32_t values.

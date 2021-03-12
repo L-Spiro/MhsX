@@ -31,6 +31,49 @@ namespace mx {
 		}
 
 
+		// == Operators.
+		// Cast to int8_t.
+		operator					int8_t() const {
+			return int8_t( Value() );
+		}
+		// Cast to int16_t.
+		operator					int16_t() const {
+			return int16_t( Value() );
+		}
+		// Cast to int32_t.
+		operator					int32_t() const {
+			return int32_t( Value() );
+		}
+		// Cast to int64_t.
+		operator					int64_t() const {
+			return int64_t( Value() );
+		}
+		// Cast to uint8_t.
+		operator					uint8_t() const {
+			return uint8_t( Value() );
+		}
+		// Cast to uint16_t.
+		operator					uint16_t() const {
+			return uint16_t( Value() );
+		}
+		// Cast to uint32_t.
+		operator					uint32_t() const {
+			return uint32_t( Value() );
+		}
+		// Cast to uint64_t.
+		operator					uint64_t() const {
+			return uint64_t( Value() );
+		}
+		// Cast to float.
+		operator					float() const {
+			return float( Value() );
+		}
+		// Cast to double.
+		operator					double() const {
+			return double( Value() );
+		}
+
+
 		// == Functions.
 		// Gets the value as a double.
 		double						Value() const {
@@ -124,5 +167,7 @@ namespace mx {
 		// == Members.
 		uint16_t					m_uiVal;
 	};
+
+	
 
 }	// namespace mx

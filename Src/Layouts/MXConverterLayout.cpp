@@ -9,10 +9,10 @@ namespace mx {
 	// == Members.
 
 #define MX_ROW_HEIGHT								(MX_TOP_JUST + MX_DEF_STATIC_HEIGHT_PXL + MX_DEF_EDIT_HEIGHT_PXL)
-#define MX_GROUP_HEIGHT								(MX_GROUP_TOP_PXL + MX_GROUP_BOTTOM_PXL + (MX_ROW_HEIGHT * 17))
+#define MX_GROUP_HEIGHT								(MX_GROUP_TOP_PXL + MX_GROUP_BOTTOM_PXL + (MX_ROW_HEIGHT * 16))
 #define MX_GROUPS_TOP								(MX_DEF_STATIC_HEIGHT_PXL + MX_TOP_JUST * 2 + MX_DEF_EDIT_HEIGHT_PXL + MX_ROW_HEIGHT)
 #define MX_LAYOUT_W									340
-#define MX_LAYOUT_H									(741 + MX_ROW_HEIGHT * 3)
+#define MX_LAYOUT_H									(MX_GROUP_HEIGHT + MX_GROUPS_TOP + 34 + MX_ROW_HEIGHT)
 
 	// The layout for the Converter dockable window.
 	LSW_WIDGET_LAYOUT CConverterLayout::m_wlMainWindow[] = {
@@ -1449,7 +1449,7 @@ namespace mx {
 			MX_FIXED_HEIGHT,						// pcHeightSizeExp
 		},
 
-
+		/*
 		{
 			LSW_LT_LABEL,							// ltType
 			MX_CWI_FLOAT24_LE_LABEL,				// wId
@@ -1542,7 +1542,7 @@ namespace mx {
 			nullptr, 0,								// pcWidthSizeExp
 			MX_FIXED_HEIGHT,						// pcHeightSizeExp
 		},
-
+		*/
 
 		{
 			LSW_LT_LABEL,							// ltType
@@ -1551,7 +1551,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 13),	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 12),	// iTop
 			0,										// dwWidth
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
@@ -1574,7 +1574,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			0,	// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 13),	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 12),	// iTop
 			0,		// dwWidth
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
@@ -1597,7 +1597,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 13),	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 12),	// iTop
 			0,										// dwWidth
 			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
 			MX_EDITSTYLE,							// dwStyle
@@ -1620,7 +1620,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 13),	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 12),	// iTop
 			0,										// dwWidth
 			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
 			MX_EDITSTYLE,							// dwStyle
@@ -1645,7 +1645,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 14),	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 13),	// iTop
 			0,										// dwWidth
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
@@ -1668,7 +1668,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			0,	// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 14),	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 13),	// iTop
 			0,		// dwWidth
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
@@ -1691,7 +1691,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 14),	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 13),	// iTop
 			0,										// dwWidth
 			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
 			MX_EDITSTYLE,							// dwStyle
@@ -1714,7 +1714,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 14),	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 13),	// iTop
 			0,										// dwWidth
 			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
 			MX_EDITSTYLE,							// dwStyle
@@ -1739,7 +1739,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 15),	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 14),	// iTop
 			0,										// dwWidth
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
@@ -1762,7 +1762,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			0,	// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 15),	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 14),	// iTop
 			0,		// dwWidth
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
@@ -1785,7 +1785,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 15),	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 14),	// iTop
 			0,										// dwWidth
 			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
 			MX_EDITSTYLE,							// dwStyle
@@ -1808,7 +1808,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 15),	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 14),	// iTop
 			0,										// dwWidth
 			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
 			MX_EDITSTYLE,							// dwStyle
@@ -1833,7 +1833,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 16),	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 15),	// iTop
 			0,										// dwWidth
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
@@ -1856,7 +1856,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			0,	// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 16),	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 15),	// iTop
 			0,		// dwWidth
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
@@ -1879,7 +1879,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 16),	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 15),	// iTop
 			0,										// dwWidth
 			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
 			MX_EDITSTYLE,							// dwStyle
@@ -1902,7 +1902,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 16),	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 15),	// iTop
 			0,										// dwWidth
 			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
 			MX_EDITSTYLE,							// dwStyle

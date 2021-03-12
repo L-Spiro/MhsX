@@ -23,7 +23,8 @@ namespace mx {
 
 	CNewDataTypeSearchWindow::CNewDataTypeSearchWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
 		CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
-		m_pmhMemHack( reinterpret_cast<CMemHack *>(_ui64Data) ) {
+		m_pmhMemHack( reinterpret_cast<CMemHack *>(_ui64Data) ),
+		m_bLastTypeExpressionWasEmpty( true ) {
 	}
 
 	// == Functions.
@@ -64,6 +65,7 @@ namespace mx {
 				CUtilities::MX_ET_LESS_THAN,
 				CUtilities::MX_ET_RANGE,
 				CUtilities::MX_ET_UNKNOWN,
+				CUtilities::MX_ET_QUICK_EXP,
 			};
 			for ( size_t I = 0; I < MX_ELEMENTS( stTypes ); ++I ) {
 				CSecureWString sTemp;
@@ -228,6 +230,17 @@ namespace mx {
 				}
 				break;
 			}
+			case CNewDataTypeSearchLayout::MX_NDSI_EXP_COMBO : {
+				CComboBox * pcbExpCombo = static_cast<CComboBox *>(FindChild( _Id ));
+				if ( pcbExpCombo ) {
+					std::string sText = pcbExpCombo->GetTextA();
+					m_bLastTypeExpressionWasEmpty = sText.size() == 0;
+				}
+				if ( _wCtrlCode == CBN_EDITCHANGE || _wCtrlCode == CBN_SELCHANGE ) {
+					UpdateDialog();
+				}
+				break;
+			}
 			case CNewDataTypeSearchLayout::MX_NDSI_FROM_COMBO : {
 				if ( _wCtrlCode == CBN_EDITCHANGE || _wCtrlCode == CBN_SELCHANGE ) {
 					UpdateDialog();
@@ -374,6 +387,18 @@ namespace mx {
 					return false;
 				}
 				_spParmsIfValid.dtLVal = CUtilities::ExpEvalResultToDataType( rRes, dtDataType );
+				break;
+			}
+			case CUtilities::MX_ET_QUICK_EXP : {
+				CSecureString ssExp;
+				CSecureWString wResult;
+				CSecureWString wFinalEvaluation;
+				if ( !VerifyExpression( ssExp, wResult, wFinalEvaluation, dtDataType ) ) {
+					_wsError = wFinalEvaluation;
+					return false;
+				}
+				_spParmsIfValid.ssExpression = ssExp;
+				break;
 			}
 		}
 
@@ -428,6 +453,107 @@ namespace mx {
 		return true;
 	}
 
+	// Verifies that the expression is valid and returns descriptive texts.
+	bool CNewDataTypeSearchWindow::VerifyExpression( CSecureString &_sExpression, CSecureWString &_wsResult, CSecureWString &_wsHelp, CUtilities::MX_DATA_TYPES _dtDataType ) {
+		BOOL bIsValid;
+		{
+			CComboBox * pcbExpCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_EXP_COMBO ));
+			CExpression eExp;
+			std::string sText = pcbExpCombo->GetTextA();
+			if ( sText.size() != 0 ) {
+				if ( !eExp.SetExpression( sText.c_str() ) ) { _wsHelp = _DEC_WS_02BBA31E_Invalid_expression_; }
+				else {
+					if ( !eExp.GetContainer() ) { _wsHelp = _DEC_WS_02BBA31E_Invalid_expression_; }
+					else {
+						if ( !eExp.GetContainer()->HasAccessToUserData() ) { _wsHelp = _DEC_WS_3CF0B31C_Expression_Must_Use___; }
+						else {
+							{	
+								size_t sSize = 0;
+								bool bSizeIsValid = true;
+								if ( bSizeIsValid ) {
+									ee::CExpEvalContainer::EE_RESULT rRes, rDummy;
+									rDummy.ncType = ee::EE_NC_UNSIGNED;
+									rDummy.u.ui64Val = 0;
+									eExp.GetContainer()->SetAddressHandler( CMemHack::ExpAddressHandler, reinterpret_cast<uintptr_t>(m_pmhMemHack) );
+									eExp.GetContainer()->SetUserHandler( UserVarHandler, reinterpret_cast<uintptr_t>(&rDummy) );
+									_sExpression = sText;
+									if ( !eExp.GetContainer()->Resolve( rRes ) ) {
+										return true;
+										// _sExpression
+									}
+									else {
+										return true;
+#if 0
+										CUtilities::PrintExpResult( rRes, _wsResult, 0, CUtilities::MX_D_STANDARD );
+								
+										bool bAccept = false;
+									
+										switch ( rRes.ncType ) {
+											case ee::EE_NC_SIGNED : {
+												{
+													if ( rRes.u.i64Val ) {
+														bAccept = true;
+														sSize = static_cast<size_t>(CUtilities::DataTypeSize( _dtDataType ));
+													}
+												}
+												break;
+											}
+											case ee::EE_NC_UNSIGNED : {
+												{
+													if ( rRes.u.ui64Val ) {
+														bAccept = true;
+														sSize = static_cast<size_t>(CUtilities::DataTypeSize( _dtDataType ));
+													}
+												}
+												break;
+											}
+											case ee::EE_NC_FLOATING : {
+												{
+													if ( rRes.u.dVal ) {
+														bAccept = true;
+														sSize = static_cast<size_t>(CUtilities::DataTypeSize( _dtDataType ));
+													}
+												}
+												break;
+											}
+										}
+										CStatic * plFinalDescLabel = static_cast<CStatic *>(FindChild( CNewDataTypeSearchLayout::MX_NESI_EXPRESSION_RESULT_HELP_LABEL ));
+										if ( plFinalDescLabel ) {
+											if ( !bAccept ) {
+												_wsHelp = _DEC_WS_F55FD24A_Address_is_rejected_;
+												return true;
+											}
+											else if ( sSize > 0 ) {
+												WCHAR szBuffer[_LEN_76C91756+16];
+												::swprintf_s( szBuffer, _DEC_WS_76C91756__u_byte_s_matched_at_current_address_.c_str(), static_cast<uint32_t>(sSize),
+													static_cast<uint32_t>(sSize) != 1 ? L"s" : L"" );
+												_wsHelp = szBuffer;
+												::ZeroMemory( szBuffer, sizeof( szBuffer ) );
+												return true;
+											}
+											else {
+												if ( !_wsHelp.size() ) {
+													_wsHelp = _DEC_WS_75BC43F0_Invalid_Size_;
+												}
+												else { return true; }
+											}
+										}
+										else { _wsHelp = _DEC_WS_1468A1DF_Internal_error_; }
+#endif
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else {
+				_wsHelp = _DEC_WS_02BBA31E_Invalid_expression_;
+			}
+		}
+		return false;
+	}
+
 	// Updates the dialog.
 	void CNewDataTypeSearchWindow::UpdateDialog() {
 		CComboBox * pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_EVALUATION_TYPE_COMBO ));
@@ -452,7 +578,7 @@ namespace mx {
 
 			CComboBox * pcbLValCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_LVAL_COMBO ));
 			if ( pcbLValCombo ) {
-				pcbLValCombo->SetEnabled( lrRes != CUtilities::MX_ET_UNKNOWN );
+				pcbLValCombo->SetEnabled( lrRes != CUtilities::MX_ET_UNKNOWN && lrRes != CUtilities::MX_ET_QUICK_EXP );
 				pcbLabel = static_cast<CWidget *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_LVAL_LABEL ));
 				if ( pcbLabel ) {
 					switch ( lrRes ) {
@@ -480,6 +606,11 @@ namespace mx {
 					pcbLabel ->SetTextW( wsTemp.c_str() );
 				}
 			}
+
+			CComboBox * pcbLExpCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_EXP_COMBO ));
+			if ( pcbLExpCombo ) {
+				pcbLExpCombo->SetEnabled( lrRes == CUtilities::MX_ET_QUICK_EXP );
+			}
 		}
 
 
@@ -499,7 +630,7 @@ namespace mx {
 					CComboBox * pcbLValCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_LVAL_COMBO ));
 					INT iSel = pcbLValCombo->GetCurSel();
 					CComboBox * pcbRValCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_RVAL_COMBO ));
-					ee::CExpEvalContainer::EE_RESULT rRes;
+					ee::CExpEvalContainer::EE_RESULT rRes, rResLow, rResHi;
 					BOOL bIsValid;
 					
 					switch ( lrEvalType ) {
@@ -523,6 +654,15 @@ namespace mx {
 								::swprintf_s( wszBuffer, wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
 
 								wText = wszBuffer;
+
+								if ( m_bLastTypeExpressionWasEmpty ) {
+									CComboBox * pcbExpCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_EXP_COMBO ));
+									if ( pcbExpCombo ) {
+										CSecureString ssExact;
+										CreateExactValueExpression( ssExact, rRes, dtDataType, pcbInvertCheck->IsChecked() );
+										pcbExpCombo->SetTextA( ssExact.c_str() );
+									}
+								}
 							}
 							break;
 						}
@@ -546,6 +686,15 @@ namespace mx {
 								::swprintf_s( wszBuffer, wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
 
 								wText = wszBuffer;
+
+								if ( m_bLastTypeExpressionWasEmpty ) {
+									CComboBox * pcbExpCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_EXP_COMBO ));
+									if ( pcbExpCombo ) {
+										CSecureString ssExact;
+										CreateGreaterThanExpression( ssExact, rRes, dtDataType, pcbInvertCheck->IsChecked() );
+										pcbExpCombo->SetTextA( ssExact.c_str() );
+									}
+								}
 							}
 							break;
 						}
@@ -569,6 +718,15 @@ namespace mx {
 								::swprintf_s( wszBuffer, wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
 
 								wText = wszBuffer;
+
+								if ( m_bLastTypeExpressionWasEmpty ) {
+									CComboBox * pcbExpCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_EXP_COMBO ));
+									if ( pcbExpCombo ) {
+										CSecureString ssExact;
+										CreateLessThanExpression( ssExact, rRes, dtDataType, pcbInvertCheck->IsChecked() );
+										pcbExpCombo->SetTextA( ssExact.c_str() );
+									}
+								}
 							}
 							break;
 						}
@@ -583,6 +741,7 @@ namespace mx {
 							}
 							else {
 								CUtilities::ToDataTypeString( rRes, dtDataType, wsStr1 );
+								rResLow = rRes;
 
 								if ( !pcbRValCombo ) {
 									wText = mx::CStringDecoder::DecodeToWString( _T_LEN_14F91708_The_range_of_values_to_find_is_incomplete_ );
@@ -596,6 +755,7 @@ namespace mx {
 										wText = mx::CStringDecoder::DecodeToWString( _T_LEN_83B9CBC3_Invalid_Data );
 									}
 									else {
+										rResHi = rRes;
 										CSecureWString wsNegation = pcbInvertCheck && pcbInvertCheck->IsChecked() ? mx::CStringDecoder::DecodeToWString( _T_LEN_C90B4F0B_not_ ) : L"";
 										wsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_837BF7A2_Find__s_values__sequal_to_or_between__s_and__s_ );
 										CUtilities::PrintDataType( wsStr0, dtDataType, CUtilities::Options.dwDataTypeOptions & CUtilities::MX_DTO_CODENAMES );
@@ -605,6 +765,15 @@ namespace mx {
 										::swprintf_s( wszBuffer, wsTemp.c_str(), wsStr0.c_str(), wsNegation.c_str(), wsStr1.c_str(), wsStr2.c_str() );
 
 										wText = wszBuffer;
+
+										if ( m_bLastTypeExpressionWasEmpty ) {
+										CComboBox * pcbExpCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_EXP_COMBO ));
+										if ( pcbExpCombo ) {
+											CSecureString ssExact;
+											CreateRangeExpression( ssExact, rResLow, rResHi, dtDataType, pcbInvertCheck->IsChecked() );
+											pcbExpCombo->SetTextA( ssExact.c_str() );
+										}
+									}
 									}
 								}
 							}
@@ -620,6 +789,20 @@ namespace mx {
 							::swprintf_s( wszBuffer, wsTemp.c_str(), wsLeft.c_str() );
 
 							wText = wszBuffer;
+							break;
+						}
+						case CUtilities::MX_ET_QUICK_EXP : {
+							CSecureString ssExp;
+							CSecureWString wResult;
+							CSecureWString wFinalEvaluation;
+							if ( !VerifyExpression( ssExp, wResult, wFinalEvaluation, dtDataType ) ) {
+								wsTemp = wFinalEvaluation;
+							}
+							else {
+								wsTemp = pcbInvertCheck && pcbInvertCheck->IsChecked() ? mx::CStringDecoder::DecodeToWString( _T_LEN_4D9B69FA_Expression_returns_0_to_add_an_address_ ) :
+								mx::CStringDecoder::DecodeToWString( _T_LEN_EB543D9B_Expression_returns_non_0_to_add_an_address_ );
+							}
+							wText = wsTemp;
 							break;
 						}
 					}
@@ -649,6 +832,7 @@ namespace mx {
 				// Address.
 				ee::CExpEvalContainer::EE_RESULT rFrom, rTo;
 				pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_FROM_COMBO ));
+				bool bCapped = false;
 				if ( pcbCombo && pcbCombo->GetTextAsExpression( rFrom ) ) {
 					pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_TO_COMBO ));
 					if ( pcbCombo && pcbCombo->GetTextAsExpression( rTo ) ) {
@@ -657,17 +841,200 @@ namespace mx {
 						CSecureWString wFrom, wTo;
 						CUtilities::ToHex( rFrom.u.ui64Val, wFrom, 1 );
 						CUtilities::ToHex( rTo.u.ui64Val, wTo, 1 );
-						wText.pop_back();
+						//wText.pop_back();
 						wText += L" ";
 						wsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_19729486_from__s_to__s_ );
 						::swprintf_s( wszBuffer, wsTemp.c_str(), wFrom.c_str(), wTo.c_str() );
 						wText += wszBuffer;
+						bCapped = true;
 					}
+				}
+				if ( !bCapped ) {
+					wText.push_back( L'.' );
 				}
 			}
 
 			plLabel->SetTextW( wText.c_str() );
 		}
+	}
+
+	// Creates an expression for searching for exact values.
+	void CNewDataTypeSearchWindow::CreateExactValueExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv ) {
+		int32_t iIsInf = CUtilities::DataTypeIsInf( _rLVal, _dtDataType );
+		bool bIsFloat = CUtilities::DataTypeIsFloat( _dtDataType );
+		bool bUsedNan = false;
+		if ( m_pmhMemHack->Options().bUseEpsilon && bIsFloat ) {
+			if ( _dtDataType == CUtilities::MX_DT_DOUBLE ) {
+				if ( m_pmhMemHack->Options().bSmartEpsilon ) {
+					_sExpression = _DEC_S_6015A3A2_repsilon______;
+				}
+				else {
+					_sExpression = _DEC_S_B5DBEB0F_epsilon______;
+				}
+			}
+			else {
+				if ( m_pmhMemHack->Options().bSmartEpsilon ) {
+					_sExpression = _DEC_S_79D6C61D_repsilonf______;
+				}
+				else {
+					_sExpression = _DEC_S_D164D700_epsilonf______;
+				}
+			}
+			CSecureWString swsLeft;
+			CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft, true );
+			_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+			_sExpression.push_back( ',' );
+			_sExpression.push_back( ' ' );
+
+			swsLeft.SecureClear();
+			CUtilities::ToDouble( m_pmhMemHack->Options().dEpsilon, swsLeft );
+			_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+
+			_sExpression.push_back( ' ' );
+			_sExpression.push_back( ')' );
+		}
+		else {
+			if ( bIsFloat && _bInv ) {
+				if ( iIsInf > 0 ) {
+					_sExpression = _DEC_S_FAD085A8_isinf______;
+				}
+				else if ( iIsInf < 0 ) {
+					_sExpression = _DEC_S_94DF1758_isinf_______;
+				}
+				else if ( CUtilities::DataTypeIsNan( _rLVal, _dtDataType ) ) {
+					_sExpression = _DEC_S_747EB4AA_isnan______;
+					bUsedNan = true;
+				}
+				else {
+					_sExpression = _DEC_S_BA988A07_______;
+					CSecureWString swsLeft;
+					CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft );
+					_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+				}
+			}
+			else {
+				if ( iIsInf > 0 ) {
+					_sExpression = _DEC_S_FAD085A8_isinf______;
+				}
+				else if ( iIsInf < 0 ) {
+					_sExpression = _DEC_S_94DF1758_isinf_______;
+				}
+				else if ( CUtilities::DataTypeIsNan( _rLVal, _dtDataType ) ) {
+					_sExpression = _DEC_S_747EB4AA_isnan______;
+				}
+				else {
+					CSecureWString swsLeft;
+					CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft );
+					_sExpression = _DEC_S_BA988A07_______;
+					_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+				}
+			}
+		}
+
+		if ( bIsFloat && _bInv && !bUsedNan ) {
+			_sExpression.push_back( ' ' );
+			_sExpression.append( _DEC_S_36A7406E____isnan______ );
+		}
+	}
+
+	// Creates an expression for searching for greater-than values.
+	void CNewDataTypeSearchWindow::CreateGreaterThanExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv ) {
+		
+		CSecureWString swsLeft;
+		CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft, true );
+		if ( CUtilities::DataTypeIsFloat( _dtDataType ) && _bInv ) {
+			bool bUsedNan = false;
+			/*if ( CUtilities::DataTypeIsNan( _rLVal, _dtDataType ) ) {
+				bUsedNan = true;
+			}*/
+			_sExpression = _DEC_S_0FFD4DE8______;
+			_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+			if ( !bUsedNan ) {
+				_sExpression.push_back( ' ' );
+				_sExpression.append( _DEC_S_36A7406E____isnan______ );
+			}
+		}
+		else {
+			_sExpression = _DEC_S_0FFD4DE8______;
+			_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+		}
+	}
+
+	// Creates an expression for searching for less-than values.
+	void CNewDataTypeSearchWindow::CreateLessThanExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv ) {
+		CSecureWString swsLeft;
+		CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft, true );
+		if ( CUtilities::DataTypeIsFloat( _dtDataType ) && _bInv ) {
+			bool bUsedNan = false;
+			/*if ( CUtilities::DataTypeIsNan( _rLVal, _dtDataType ) ) {
+				bUsedNan = true;
+			}*/
+			_sExpression = _DEC_S_3DCB2F6A______;
+			_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+			if ( !bUsedNan ) {
+				_sExpression.push_back( ' ' );
+				_sExpression.append( _DEC_S_36A7406E____isnan______ );
+			}
+		}
+		else {
+			_sExpression = _DEC_S_3DCB2F6A______;
+			_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+		}
+	}
+
+	// Creates an expression for searching for ranged values.
+	void CNewDataTypeSearchWindow::CreateRangeExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal,
+		const ee::CExpEvalContainer::EE_RESULT &_rRVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv ) {
+		ee::CExpEvalContainer::EE_RESULT rLow;
+		ee::CExpEvalContainer::EE_RESULT rHi;
+		ee::CExpEvalContainer::EE_RESULT rTempL, rTempH;
+		if ( CUtilities::DataTypeIsFloat( _dtDataType ) ) {
+			rLow = ee::CExpEvalContainer::ConvertResult( _rLVal, ee::EE_NC_FLOATING );
+			rHi = ee::CExpEvalContainer::ConvertResult( _rRVal, ee::EE_NC_FLOATING );
+
+			rTempL.ncType = ee::EE_NC_FLOATING;
+			rTempL.u.dVal = std::min( rLow.u.dVal, rHi.u.dVal );
+			rTempH.ncType = ee::EE_NC_FLOATING;
+			rTempH.u.dVal = std::max( rLow.u.dVal, rHi.u.dVal );
+		}
+		else if ( CUtilities::DataTypeIsSigned( _dtDataType ) ) {
+			rLow = ee::CExpEvalContainer::ConvertResult( _rLVal, ee::EE_NC_SIGNED );
+			rHi = ee::CExpEvalContainer::ConvertResult( _rRVal, ee::EE_NC_SIGNED );
+
+			rTempL.ncType = ee::EE_NC_SIGNED;
+			rTempL.u.i64Val = std::min( rLow.u.i64Val, rHi.u.i64Val );
+			rTempH.ncType = ee::EE_NC_SIGNED;
+			rTempH.u.i64Val = std::max( rLow.u.i64Val, rHi.u.i64Val );
+		}
+		else {
+			rLow = ee::CExpEvalContainer::ConvertResult( _rLVal, ee::EE_NC_UNSIGNED );
+			rHi = ee::CExpEvalContainer::ConvertResult( _rRVal, ee::EE_NC_UNSIGNED );
+
+			rTempL.ncType = ee::EE_NC_UNSIGNED;
+			rTempL.u.ui64Val = std::min( rLow.u.ui64Val, rHi.u.ui64Val );
+			rTempH.ncType = ee::EE_NC_UNSIGNED;
+			rTempH.u.ui64Val = std::max( rLow.u.ui64Val, rHi.u.ui64Val );
+		}
+
+		CSecureWString swsLeft, swsRight;
+		CUtilities::ToDataTypeString( rTempL, _dtDataType, swsLeft, true );
+		CUtilities::ToDataTypeString( rTempH, _dtDataType, swsRight, true );
+		
+		_sExpression = _DEC_S_68223D78________;
+		_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+		_sExpression.append( _DEC_S_C4C57451_____________ );
+		_sExpression.append( CUtilities::WStringToString( swsRight ) );
+		_sExpression.push_back( ')' );
+		if ( CUtilities::DataTypeIsFloat( _dtDataType ) && _bInv ) {
+			_sExpression.push_back( ' ' );
+			_sExpression.append( _DEC_S_36A7406E____isnan______ );
+		}
+	}
+
+	// User-variable function handler.
+	bool __stdcall CNewDataTypeSearchWindow::UserVarHandler( uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult ) {
+		::memcpy( &_rResult, reinterpret_cast<const void *>(_uiptrData), sizeof( _rResult ) );
+		return true;
 	}
 
 }	// namespace mx

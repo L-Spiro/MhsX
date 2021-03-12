@@ -950,8 +950,15 @@ namespace mx {
 			while ( MX_LAST == '0' ) {
 				_sString.pop_back();
 			}
-			while ( MX_LAST == '.' ) {
-				_sString.pop_back();
+			if ( MX_LAST == '.' ) {
+				if ( _dValue > static_cast<double>(static_cast<uint64_t>(-1)) ) {
+					_sString.push_back( '0' );
+				}
+				else {
+					while ( MX_LAST == '.' ) {
+						_sString.pop_back();
+					}
+				}
 			}
 		}
 		return _sString.c_str();
@@ -987,8 +994,16 @@ namespace mx {
 			while ( MX_LAST == L'0' ) {
 				_sString.pop_back();
 			}
-			while ( MX_LAST == L'.' ) {
-				_sString.pop_back();
+			if ( MX_LAST == L'.' ) {
+				double dCheckMe = static_cast<double>(static_cast<uint64_t>(-1));
+				if ( _dValue > static_cast<double>(static_cast<uint64_t>(-1)) ) {
+					_sString.push_back( L'0' );
+				}
+				else {
+					while ( MX_LAST == L'.' ) {
+						_sString.pop_back();
+					}
+				}
 			}
 		}
 		return _sString.c_str();
@@ -1196,35 +1211,61 @@ namespace mx {
 	}
 
 	// Creates a string with the given data interpreted as a given type.
-	const WCHAR * CUtilities::ToDataTypeString( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString ) {
+	const WCHAR * CUtilities::ToDataTypeString( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString,
+		bool _bMustPrintNumber ) {
 		ee::CExpEvalContainer::EE_RESULT eCopy;
+		//ee::CExpEvalContainer::ConvertResult
 		switch ( _dtType ) {
 			case MX_DT_FLOAT16 : {
-				eCopy = ee::CExpEvalContainer::ConvertResult( _rRes, ee::EE_NC_FLOATING );
-				CUtilities::ToDouble( CFloat16( eCopy.u.dVal ).Value(), _sString );
+				eCopy = DetailedConvertResult( _rRes, _dtType );
+				if ( _bMustPrintNumber && std::isinf( CFloat16( eCopy.u.dVal ).Value() ) ) {
+					_sString += CFloat16( eCopy.u.dVal ).Value() > 0.0 ? _DEC_WS_90D8D134_as_float16_0x7C00_ :
+						_DEC_WS_3C64313D__as_float16_0x7C00_;
+				}
+				else if ( _bMustPrintNumber && std::isnan( CFloat16( eCopy.u.dVal ).Value() ) ) {
+					_sString += _DEC_WS_B5B38EE8_as_float16_0x7E00_;
+				}
+				else {
+					CUtilities::ToDouble( CFloat16( eCopy.u.dVal ).Value(), _sString );
+				}
 				break;
 			}
 			case MX_DT_FLOAT : {
-				eCopy = ee::CExpEvalContainer::ConvertResult( _rRes, ee::EE_NC_FLOATING );
-				CUtilities::ToDouble( static_cast<float>(eCopy.u.dVal), _sString );
+				eCopy = DetailedConvertResult( _rRes, _dtType );
+				if ( _bMustPrintNumber && std::isinf( static_cast<float>(eCopy.u.dVal) ) ) {
+					_sString += static_cast<float>(eCopy.u.dVal) > 0.0 ? _DEC_WS_15349BDB_as_float32_0x7F800000_ :
+						_DEC_WS_56CE0A86__as_float32_0x7F800000_;
+				}
+				else if ( _bMustPrintNumber && std::isnan( static_cast<float>(eCopy.u.dVal) ) ) {
+					_sString += _DEC_WS_FB5B1F0A_as_float32_0x7FC00000_;
+				}
+				else {
+					CUtilities::ToDouble( static_cast<float>(eCopy.u.dVal), _sString );
+				}
 				break;
 			}
 			case MX_DT_DOUBLE : {
-				eCopy = ee::CExpEvalContainer::ConvertResult( _rRes, ee::EE_NC_FLOATING );
-				CUtilities::ToDouble( static_cast<double>(eCopy.u.dVal), _sString );
+				eCopy = DetailedConvertResult( _rRes, _dtType );
+				if ( _bMustPrintNumber && std::isinf( static_cast<double>(eCopy.u.dVal) ) ) {
+					_sString += static_cast<double>(eCopy.u.dVal) > 0.0 ? _DEC_WS_73C8F4F3_as_float64_0x7FF0000000000000_ :
+						_DEC_WS_5F0E778A__as_float64_0x7FF0000000000000_;
+				}
+				else if ( _bMustPrintNumber && std::isnan( static_cast<double>(eCopy.u.dVal) ) ) {
+					_sString += _DEC_WS_4091EAC5_as_float64_0x7FF8000000000000_;
+				}
+				else {
+					CUtilities::ToDouble( static_cast<double>(eCopy.u.dVal), _sString );
+				}
 				break;
 			}
-			case MX_DT_INT8 : {
-				eCopy = ee::CExpEvalContainer::ConvertResult( _rRes, ee::EE_NC_SIGNED );
-				CUtilities::ToSigned( static_cast<int8_t>(eCopy.u.i64Val), _sString );
-				break;
-			}
+			
 #define MX_TO_S( TYPE, CAST )																\
 	case TYPE : {																			\
-		eCopy = ee::CExpEvalContainer::ConvertResult( _rRes, ee::EE_NC_SIGNED );			\
+		eCopy = DetailedConvertResult( _rRes, _dtType );									\
 		CUtilities::ToSigned( static_cast<CAST>(eCopy.u.i64Val), _sString );				\
 		break;																				\
 	}
+			MX_TO_S( MX_DT_INT8, int8_t )
 			MX_TO_S( MX_DT_INT16, int16_t )
 			MX_TO_S( MX_DT_INT32, int32_t )
 			MX_TO_S( MX_DT_INT64, int64_t )
@@ -1232,7 +1273,7 @@ namespace mx {
 
 #define MX_TO_US( TYPE, CAST )																\
 	case TYPE : {																			\
-		eCopy = ee::CExpEvalContainer::ConvertResult( _rRes, ee::EE_NC_UNSIGNED );			\
+		eCopy = DetailedConvertResult( _rRes, _dtType );									\
 		CUtilities::ToUnsigned( static_cast<CAST>(eCopy.u.ui64Val), _sString );				\
 		break;																				\
 	}
@@ -1244,6 +1285,55 @@ namespace mx {
 		}
 
 		return _sString.c_str();
+	}
+
+	// Returns -1 if the given result cast to the given type is -inf, 1 if it is +inf, otherwise 0.
+	int32_t CUtilities::DataTypeIsInf( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtType ) {
+		ee::CExpEvalContainer::EE_RESULT eCopy;
+		switch ( _dtType ) {
+			case MX_DT_FLOAT16 : {
+				eCopy = ee::CExpEvalContainer::ConvertResult( _rRes, ee::EE_NC_FLOATING );
+				if ( std::isinf( CFloat16( eCopy.u.dVal ).Value() ) ) {
+					return eCopy.u.dVal > 0.0 ? 1 : -1;
+				}
+				return 0;
+			}
+			case MX_DT_FLOAT : {
+				eCopy = ee::CExpEvalContainer::ConvertResult( _rRes, ee::EE_NC_FLOATING );
+				if ( std::isinf( static_cast<float>(eCopy.u.dVal) ) ) {
+					return eCopy.u.dVal > 0.0 ? 1 : -1;
+				}
+				return 0;
+			}
+			case MX_DT_DOUBLE : {
+				eCopy = ee::CExpEvalContainer::ConvertResult( _rRes, ee::EE_NC_FLOATING );
+				if ( std::isinf( static_cast<double>(eCopy.u.dVal) ) ) {
+					return eCopy.u.dVal > 0.0 ? 1 : -1;
+				}
+				return 0;
+			}
+			default : { return 0; }
+		}
+	}
+
+	// Returns true if the given result cast to the given type is nan.
+	bool CUtilities::DataTypeIsNan( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtType ) {
+		ee::CExpEvalContainer::EE_RESULT eCopy;
+		switch ( _dtType ) {
+			case MX_DT_FLOAT16 : {
+				eCopy = ee::CExpEvalContainer::ConvertResult( _rRes, ee::EE_NC_FLOATING );
+				return std::isnan( CFloat16( eCopy.u.dVal ).Value() );
+			}
+			case MX_DT_FLOAT : {
+				eCopy = ee::CExpEvalContainer::ConvertResult( _rRes, ee::EE_NC_FLOATING );
+				return std::isnan( static_cast<float>(eCopy.u.dVal) );
+			}
+			case MX_DT_DOUBLE : {
+				eCopy = ee::CExpEvalContainer::ConvertResult( _rRes, ee::EE_NC_FLOATING );
+				return std::isnan( static_cast<double>(eCopy.u.dVal) );
+			}
+			default : { return false; }
+		}
 	}
 
 	// Gets the size of a data type.
@@ -1526,6 +1616,61 @@ namespace mx {
 		return _swsRet;
 	}
 
+	// Performs a more detailed conversion of a result to one of our data types.
+	ee::CExpEvalContainer::EE_RESULT CUtilities::DetailedConvertResult( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtType ) {
+		ee::CExpEvalContainer::EE_RESULT rRet;
+		if ( DataTypeIsFloat( _dtType ) ) {
+			rRet.ncType = ee::EE_NC_FLOATING;
+		}
+		else if ( DataTypeIsSigned( _dtType ) ) {
+			rRet.ncType = ee::EE_NC_SIGNED;
+		}
+		else {
+			rRet.ncType = ee::EE_NC_UNSIGNED;
+		}
+		
+		switch ( _rRes.ncType ) {
+#define MX_CASE( TYPE, CASTTYPE, MEMBERTYPE, MEMBER, BACKTYPE, BACKMEMBER )									\
+	case TYPE : {																							\
+		rRet.u.BACKMEMBER = static_cast<BACKTYPE>(CASTTYPE( static_cast<MEMBERTYPE>(_rRes.u.MEMBER) ));		\
+		return rRet;																						\
+	}
+			case ee::EE_NC_FLOATING : {
+
+#define MX_BIG_CASE( MEMBERTYPE, MEMBER )																	\
+	switch ( _dtType ) {																					\
+		MX_CASE( MX_DT_INT8, int8_t, MEMBERTYPE, MEMBER, int64_t, i64Val )									\
+		MX_CASE( MX_DT_INT16, int16_t, MEMBERTYPE, MEMBER, int64_t, i64Val )								\
+		MX_CASE( MX_DT_INT32, int32_t, MEMBERTYPE, MEMBER, int64_t, i64Val )								\
+		MX_CASE( MX_DT_INT64, int64_t, MEMBERTYPE, MEMBER, int64_t, i64Val )								\
+		MX_CASE( MX_DT_UINT8, uint8_t, MEMBERTYPE, MEMBER, uint64_t, ui64Val )								\
+		MX_CASE( MX_DT_UINT16, uint16_t, MEMBERTYPE, MEMBER, uint64_t, ui64Val )							\
+		MX_CASE( MX_DT_UINT32, uint32_t, MEMBERTYPE, MEMBER, uint64_t, ui64Val )							\
+		MX_CASE( MX_DT_UINT64, uint64_t, MEMBERTYPE, MEMBER, uint64_t, ui64Val )							\
+		MX_CASE( MX_DT_FLOAT16, CFloat16, double, MEMBER, double, dVal )									\
+		MX_CASE( MX_DT_FLOAT, float, MEMBERTYPE, MEMBER, double, dVal )										\
+		MX_CASE( MX_DT_DOUBLE, double, MEMBERTYPE, MEMBER, double, dVal )									\
+	}
+
+				MX_BIG_CASE( double, dVal )
+				break;
+			}
+			case ee::EE_NC_SIGNED : {
+				MX_BIG_CASE( int64_t, i64Val )
+				break;
+			}
+			case ee::EE_NC_UNSIGNED : {
+				MX_BIG_CASE( uint64_t, ui64Val )
+				break;
+			}
+
+#undef MX_BIG_CASE
+#undef MX_CASE
+		}
+
+		return ee::CExpEvalContainer::ConvertResult( _rRes, rRet.ncType );
+	}
+
 	// Converts a MX_REGEX_ENCODING value to an actual code page.
 	UINT CUtilities::RegexCodePageToCodePage( MX_REGEX_ENCODING _reEncoding ) {
 		const struct {
@@ -1604,11 +1749,12 @@ namespace mx {
 			size_t						sLen;
 			uint32_t					ui32Id;
 		} aData[] = {
-			{ _T_LEN_396582B1_Exact_Value,	MX_ET_EXACT },
-			{ _T_LEN_474E42C3_Greater_Than,	MX_ET_GREATER_THAN },
-			{ _T_LEN_C8A1ADFC_Lower_Than,	MX_ET_LESS_THAN },
-			{ _T_LEN_5246754D_Range,		MX_ET_RANGE },
-			{ _T_LEN_629B9E5B_Unknown,		MX_ET_UNKNOWN },
+			{ _T_LEN_396582B1_Exact_Value,			MX_ET_EXACT },
+			{ _T_LEN_474E42C3_Greater_Than,			MX_ET_GREATER_THAN },
+			{ _T_LEN_C8A1ADFC_Lower_Than,			MX_ET_LESS_THAN },
+			{ _T_LEN_5246754D_Range,				MX_ET_RANGE },
+			{ _T_LEN_629B9E5B_Unknown,				MX_ET_UNKNOWN },
+			{ _T_LEN_8558CA08_Quick_Expression,		MX_ET_QUICK_EXP },
 		};
 
 		for ( size_t I = MX_ELEMENTS( aData ); I--; ) {

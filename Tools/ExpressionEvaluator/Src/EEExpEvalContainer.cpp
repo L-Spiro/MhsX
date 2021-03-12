@@ -1226,210 +1226,210 @@ namespace ee {
 		switch ( _uiIntrinsic ) {
 			case CExpEvalParser::token::EE_COS : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::cos;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::cos;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_SIN : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::sin;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::sin;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_TAN : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::tan;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::tan;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_ACOS : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::acos;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::acos;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_ASIN : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::asin;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::asin;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_ATAN : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::atan;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::atan;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_COSH : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::cosh;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::cosh;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_SINH : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::sinh;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::sinh;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_TANH : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::tanh;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::tanh;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_ACOSH : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::acosh;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::acosh;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_ASINH : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::asinh;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::asinh;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_ATANH : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::atanh;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::atanh;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_EXP : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::exp;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::exp;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_LOG : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::log;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::log;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_LOG10 : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::log10;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::log10;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_LOG2 : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::log2;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::log2;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_EXP2 : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::exp2;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::exp2;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_EXPM1 : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::expm1;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::expm1;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_LOG1P : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::log1p;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::log1p;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_LOGB : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::logb;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::logb;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_SQRT : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::sqrt;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::sqrt;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_CBRT : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::cbrt;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::cbrt;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_TGAMMA : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::tgamma;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::tgamma;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_LGAMMA : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::lgamma;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::lgamma;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_CEIL : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::ceil;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::ceil;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_FLOOR : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::floor;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::floor;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_TRUNC : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::trunc;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::trunc;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_ROUND : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::round;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::round;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_NEARBYINT : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::nearbyint;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::nearbyint;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_ABS : {
 				_ndNode.nType = EE_N_INTRINSIC_1_FLOAT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Float_Float = ::abs;
+				_ndNode.uFuncPtr.pfIntrins1Float_Float = std::abs;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
@@ -1457,21 +1457,21 @@ namespace ee {
 			}
 			case CExpEvalParser::token::EE_ISINF : {
 				_ndNode.nType = EE_N_INTRINSIC_1_BOOL_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Bool_Float = ::isinf;
+				_ndNode.uFuncPtr.pfIntrins1Bool_Float = std::isinf;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_ISNAN : {
 				_ndNode.nType = EE_N_INTRINSIC_1_BOOL_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Bool_Float = ::isnan;
+				_ndNode.uFuncPtr.pfIntrins1Bool_Float = std::isnan;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_ILOGB : {
 				_ndNode.nType = EE_N_INTRINSIC_1_INT_FLOAT;
-				_ndNode.uFuncPtr.pfIntrins1Signed_Float = ::ilogb;
+				_ndNode.uFuncPtr.pfIntrins1Signed_Float = std::ilogb;
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
@@ -1606,6 +1606,46 @@ namespace ee {
 #endif	// #ifdef EE_OPTIMIZE_FOR_RUNTIME
 
 		switch ( _uiIntrinsic ) {
+			case CExpEvalParser::token::EE_EPSILON: {
+				_ndNode.nType = EE_N_INTRINSIC_3_BOOL_FLOAT_FLOAT_FLOAT;
+				bool (* pfFunc)( double, double, double ) = ee::Epsilon;
+				_ndNode.uFuncPtr.pfIntrins3Bool_Float_Float_Float = pfFunc;
+				_ndNode.v.sNodeIndex = _ndExp0.sNodeIndex;
+				_ndNode.w.sNodeIndex = _ndExp1.sNodeIndex;
+				_ndNode.x.sNodeIndex = _ndExp2.sNodeIndex;
+				AddNode( _ndNode );
+				return;
+			}
+			case CExpEvalParser::token::EE_EPSILONF: {
+				_ndNode.nType = EE_N_INTRINSIC_3_BOOL_FLOAT32_FLOAT32_FLOAT32;
+				bool (* pfFunc)( float, float, float ) = ee::Epsilon;
+				_ndNode.uFuncPtr.pfIntrins3Bool_Float32_Float32_Float32 = pfFunc;
+				_ndNode.v.sNodeIndex = _ndExp0.sNodeIndex;
+				_ndNode.w.sNodeIndex = _ndExp1.sNodeIndex;
+				_ndNode.x.sNodeIndex = _ndExp2.sNodeIndex;
+				AddNode( _ndNode );
+				return;
+			}
+			case CExpEvalParser::token::EE_RELEPSILON: {
+				_ndNode.nType = EE_N_INTRINSIC_3_BOOL_FLOAT_FLOAT_FLOAT;
+				bool (* pfFunc)( double, double, double ) = ee::RelativeEpsilon;
+				_ndNode.uFuncPtr.pfIntrins3Bool_Float_Float_Float = pfFunc;
+				_ndNode.v.sNodeIndex = _ndExp0.sNodeIndex;
+				_ndNode.w.sNodeIndex = _ndExp1.sNodeIndex;
+				_ndNode.x.sNodeIndex = _ndExp2.sNodeIndex;
+				AddNode( _ndNode );
+				return;
+			}
+			case CExpEvalParser::token::EE_RELEPSILONF: {
+				_ndNode.nType = EE_N_INTRINSIC_3_BOOL_FLOAT32_FLOAT32_FLOAT32;
+				bool (* pfFunc)( float, float, float ) = ee::RelativeEpsilon;
+				_ndNode.uFuncPtr.pfIntrins3Bool_Float32_Float32_Float32 = pfFunc;
+				_ndNode.v.sNodeIndex = _ndExp0.sNodeIndex;
+				_ndNode.w.sNodeIndex = _ndExp1.sNodeIndex;
+				_ndNode.x.sNodeIndex = _ndExp2.sNodeIndex;
+				AddNode( _ndNode );
+				return;
+			}
 			case CExpEvalParser::token::EE_MADD : {
 				_ndNode.nType = EE_N_INTRINSIC_3_FLOAT_FLOAT_FLOAT_FLOAT;
 				_ndNode.uFuncPtr.pfIntrins3Float_Float_Float_Float = ::fma;
@@ -3044,22 +3084,26 @@ namespace ee {
 		if ( _sNode >= m_vNodes.size() ) { return false; }
 
 		// The explicit stack.
-		std::vector<EE_STACK_OBJ> vStack;
-
-		// Pre-allocating is absolutely 100% vital.  It WILL crash if this is not done.
-		// Pointers to objects on the stack are used, so if re-allocation ever occurs the pointers will become
-		//	invalid but may still be in use.  Pre-allocation solves this.  Additionally, the allocation size
-		//	must be large enough to ensure that re-allocation never happens.  To ensure this, the stack is
-		//	allocated to the number of nodes + 1.
-		try {
-			vStack.reserve( m_vNodes.size() + 1 );
+		//std::vector<EE_STACK_OBJ> vStack;
+		if ( m_vStack.size() ) {
+			m_vStack.clear();
 		}
-		catch ( const std::bad_alloc & ) {
-			_ecError = EE_EC_OUTOFMEMORY;
-			return false;
+		else {
+			// Pre-allocating is absolutely 100% vital.  It WILL crash if this is not done.
+			// Pointers to objects on the stack are used, so if re-allocation ever occurs the pointers will become
+			//	invalid but may still be in use.  Pre-allocation solves this.  Additionally, the allocation size
+			//	must be large enough to ensure that re-allocation never happens.  To ensure this, the stack is
+			//	allocated to the number of nodes + 1.
+			try {
+				m_vStack.reserve( m_vNodes.size() + 1 );
+			}
+			catch ( const std::bad_alloc & ) {
+				_ecError = EE_EC_OUTOFMEMORY;
+				return false;
+			}
 		}
 
-		if ( !PushNode( vStack, m_vNodes.size() - 1, EE_INVALID_IDX, &_rFinalResult ) ) {
+		if ( !PushNode( m_vStack, m_vNodes.size() - 1, EE_INVALID_IDX, &_rFinalResult ) ) {
 			_ecError = EE_EC_OUTOFMEMORY;
 			return false;
 		}
@@ -3069,31 +3113,31 @@ namespace ee {
 
 
 #define EE_PUSH_EXP( IDX, RES )						if ( sParmIdx == EE_MAX_SUB_EXPRESSIONS ) { _ecError = EE_EC_RESULTSTOOSHORT; m_vLoopStack.clear(); return false; }	\
-	if ( !PushNode( vStack, IDX, sThisIndex, RES ) ) { _ecError = EE_EC_OUTOFMEMORY; m_vLoopStack.clear(); return false; }
+	if ( !PushNode( m_vStack, IDX, sThisIndex, RES ) ) { _ecError = EE_EC_OUTOFMEMORY; m_vLoopStack.clear(); return false; }
 
-#define EE_PUSH( IDX )								EE_PUSH_EXP( IDX, &vStack[sThisIndex].sSubResults[sParmIdx++] )
+#define EE_PUSH( IDX )								EE_PUSH_EXP( IDX, &m_vStack[sThisIndex].sSubResults[sParmIdx++] )
 #define EE_ERROR( IDX )								_ecError = IDX; m_vLoopStack.clear(); return false
-#define EE_SEND_BACK								vStack[sThisIndex].bPassThrough = false; break
+#define EE_SEND_BACK								m_vStack[sThisIndex].bPassThrough = false; break
 #define EE_HAND_OFF( IDX )							{																								\
 		size_t sIdx = IDX;																															\
-		size_t sParentIdx = vStack[sThisIndex].sParentIndex;																						\
-		EE_RESULT * prTemp = vStack[sThisIndex].prResult;																							\
-		vStack.pop_back();																															\
-		if ( !PushNode( vStack, sIdx, sParentIdx, prTemp ) ) { _ecError = EE_EC_OUTOFMEMORY; m_vLoopStack.clear(); return false; }					\
+		size_t sParentIdx = m_vStack[sThisIndex].sParentIndex;																						\
+		EE_RESULT * prTemp = m_vStack[sThisIndex].prResult;																							\
+		m_vStack.pop_back();																														\
+		if ( !PushNode( m_vStack, sIdx, sParentIdx, prTemp ) ) { _ecError = EE_EC_OUTOFMEMORY; m_vLoopStack.clear(); return false; }				\
 	}
 
-#define EE_DONE										vStack.pop_back(); continue
-#define EE_BEGIN_LOOP								vStack[sThisIndex].sLoopStackIdx = m_vLoopStack.size(); vStack[sThisIndex].uiLoopCounter = 0; m_vLoopStack.push_back( EE_LOOP_STACK() )
+#define EE_DONE										m_vStack.pop_back(); continue
+#define EE_BEGIN_LOOP								m_vStack[sThisIndex].sLoopStackIdx = m_vLoopStack.size(); m_vStack[sThisIndex].uiLoopCounter = 0; m_vLoopStack.push_back( EE_LOOP_STACK() )
 #define EE_END_LOOP									m_vLoopStack.pop_back(); EE_DONE
 
 		
-		while ( vStack.size() ) {
+		while ( m_vStack.size() ) {
 			// Process the top of the stack.
-			size_t sThisIndex = vStack.size() - 1;
-			//EE_STACK_OBJ & soProcessMe = vStack[sThisIndex];
+			size_t sThisIndex = m_vStack.size() - 1;
+			//EE_STACK_OBJ & soProcessMe = m_vStack[sThisIndex];
 
-			//EE_STACK_OBJ & soDebugMe = vStack[sThisIndex];
-#define soProcessMe									vStack[sThisIndex]
+			//EE_STACK_OBJ & soDebugMe = m_vStack[sThisIndex];
+#define soProcessMe									m_vStack[sThisIndex]
 			bool bFirstPassOnThisNode = !soProcessMe.bPassThrough;
 			uint64_t uiProcessCount = soProcessMe.uiProcessCount++;
 			// Revisit this node after processing its children, but with the already-processed flag set to true.
@@ -3300,6 +3344,8 @@ namespace ee {
 						EE_PUSH( _ndExp.w.sNodeIndex );
 						continue;
 					}
+					case EE_N_INTRINSIC_3_BOOL_FLOAT32_FLOAT32_FLOAT32 : {}
+					case EE_N_INTRINSIC_3_BOOL_FLOAT_FLOAT_FLOAT : {}
 					case EE_N_INTRINSIC_3_FLOAT_FLOAT_FLOAT_FLOAT : {}
 					case EE_N_INTRINSIC_3 : {
 						EE_PUSH( _ndExp.v.sNodeIndex );
@@ -3697,6 +3743,20 @@ namespace ee {
 					case EE_N_INTRINSIC_3_FLOAT_FLOAT_FLOAT_FLOAT : {
 						(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
 						(*soProcessMe.prResult).u.dVal = _ndExp.uFuncPtr.pfIntrins3Float_Float_Float_Float( ConvertResult( soProcessMe.sSubResults[0], EE_NC_FLOATING ).u.dVal,
+							ConvertResult( soProcessMe.sSubResults[1], EE_NC_FLOATING ).u.dVal,
+							ConvertResult( soProcessMe.sSubResults[2], EE_NC_FLOATING ).u.dVal );
+						EE_DONE;
+					}
+					case EE_N_INTRINSIC_3_BOOL_FLOAT32_FLOAT32_FLOAT32 : {
+						(*soProcessMe.prResult).ncType = EE_NC_SIGNED;
+						(*soProcessMe.prResult).u.i64Val = _ndExp.uFuncPtr.pfIntrins3Bool_Float32_Float32_Float32( static_cast<float>(ConvertResult( soProcessMe.sSubResults[0], EE_NC_FLOATING ).u.dVal),
+							static_cast<float>(ConvertResult( soProcessMe.sSubResults[1], EE_NC_FLOATING ).u.dVal),
+							static_cast<float>(ConvertResult( soProcessMe.sSubResults[2], EE_NC_FLOATING ).u.dVal) );
+						EE_DONE;
+					}
+					case EE_N_INTRINSIC_3_BOOL_FLOAT_FLOAT_FLOAT : {
+						(*soProcessMe.prResult).ncType = EE_NC_SIGNED;
+						(*soProcessMe.prResult).u.i64Val = _ndExp.uFuncPtr.pfIntrins3Bool_Float_Float_Float( ConvertResult( soProcessMe.sSubResults[0], EE_NC_FLOATING ).u.dVal,
 							ConvertResult( soProcessMe.sSubResults[1], EE_NC_FLOATING ).u.dVal,
 							ConvertResult( soProcessMe.sSubResults[2], EE_NC_FLOATING ).u.dVal );
 						EE_DONE;
@@ -4368,7 +4428,7 @@ namespace ee {
 
 
 
-				vStack.pop_back();
+				m_vStack.pop_back();
 			}
 #undef soProcessMe
 		}

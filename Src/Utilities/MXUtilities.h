@@ -119,6 +119,7 @@ namespace mx {
 			MX_ET_LESS_THAN,
 			MX_ET_RANGE,
 			MX_ET_UNKNOWN,
+			MX_ET_QUICK_EXP,
 		};
 
 		// String search types.
@@ -477,7 +478,14 @@ namespace mx {
 		}
 
 		// Creates a string with the given data interpreted as a given type.
-		static const WCHAR *			ToDataTypeString( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString );
+		static const WCHAR *			ToDataTypeString( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString,
+			bool _bMustPrintNumber = false );
+
+		// Returns -1 if the given result cast to the given type is -inf, 1 if it is +inf, otherwise 0.
+		static int32_t					DataTypeIsInf( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtType );
+
+		// Returns true if the given result cast to the given type is nan.
+		static bool						DataTypeIsNan( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtType );
 
 		// Gets the size of a data type.
 		static DWORD					DataTypeSize( CUtilities::MX_DATA_TYPES _dtType );
@@ -520,6 +528,10 @@ namespace mx {
 
 		// Converts a given value to a string given the type.
 		static CSecureWString &			DataTypeToString( const void * _pvData, CUtilities::MX_DATA_TYPES _dtType, CSecureWString &_swsRet, uint32_t _uiNumDigits = 0, int32_t _iSigDigits = 0 );
+
+		// Performs a more detailed conversion of a result to one of our data types.
+		static ee::CExpEvalContainer::EE_RESULT
+										DetailedConvertResult( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtType );
 
 		// Converts a MX_REGEX_ENCODING value to an actual code page.
 		static UINT						RegexCodePageToCodePage( MX_REGEX_ENCODING _reEncoding );

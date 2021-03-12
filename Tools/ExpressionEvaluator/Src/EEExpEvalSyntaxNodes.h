@@ -53,6 +53,8 @@ namespace ee {
 		EE_N_INTRINSIC_2_FLOAT_FLOAT32_FLOAT80,
 		EE_N_INTRINSIC_3,
 		EE_N_INTRINSIC_3_FLOAT_FLOAT_FLOAT_FLOAT,
+		EE_N_INTRINSIC_3_BOOL_FLOAT32_FLOAT32_FLOAT32,
+		EE_N_INTRINSIC_3_BOOL_FLOAT_FLOAT_FLOAT,
 		EE_N_ASFLOAT,
 		EE_N_ASDOUBLE,
 		EE_N_ASXFLOAT,
@@ -116,7 +118,7 @@ namespace ee {
 	typedef uint64_t (* Intrins0Unsigned)( uint64_t );
 	typedef double (__cdecl * Intrins1_Float_Float)( double );
 	typedef uint16_t (__cdecl * Intrins1_Unsigned16_Unsigned16)( uint16_t );
-	typedef unsigned long (__cdecl * Intrins1_Unsigned32_Unsigned32)( unsigned long );						// Because of _byteswap_ulong().
+	typedef unsigned long (__cdecl * Intrins1_Unsigned32_Unsigned32)( unsigned long );							// Because of _byteswap_ulong().
 	typedef uint64_t (__cdecl * Intrins1_Unsigned64_Unsigned64)( uint64_t );
 	typedef bool (__cdecl * Intrins1_Bool_Float)( double );
 	typedef int (__cdecl * Intrins1_Signed_Float)( double );
@@ -125,59 +127,63 @@ namespace ee {
 	typedef long double (__cdecl * Intrins2_Float_Float80_Float80)( long double, long double );
 	typedef float (__cdecl * Intrins2_Float_Float32_Float80)( float, long double );
 	typedef double (__cdecl * Intrins3_Float_Float_Float_Float)( double, double, double );
+	typedef bool (__cdecl * Intrins3_Bool_Float32_Float32_Float32)( float, float, float );
+	typedef bool (__cdecl * Intrins3_Bool_Float_Float_Float)( double, double, double );
 
 	union YYSTYPE {
-		size_t															sStringIndex;						// String index.
-		uint32_t														ui32Unary;							// Unary operator.
-		uint32_t														ui32Backing;						// Backing type (for creating arrays).
+		size_t															sStringIndex;							// String index.
+		uint32_t														ui32Unary;								// Unary operator.
+		uint32_t														ui32Backing;							// Backing type (for creating arrays).
 		struct EE_NODE_DATA {
-			EE_NODES													nType;								// Type of the node.
-			size_t														sNodeIndex;							// Index of the node in the stack of nodes.
+			EE_NODES													nType;									// Type of the node.
+			size_t														sNodeIndex;								// Index of the node in the stack of nodes.
 			union {
-				uint64_t												ui64Val;							// 64-bit unsigned integer value.
-				int64_t													i64Val;								// 64-bit signed integer value.
-				double													dVal;								// Double value.
-				size_t													sStringIndex;						// Index of the string/identifier.
-				size_t													sNodeIndex;							// When the index of another node is needed.
-				uint32_t												ui32Intrinsic;						// Intrinsic.
+				uint64_t												ui64Val;								// 64-bit unsigned integer value.
+				int64_t													i64Val;									// 64-bit signed integer value.
+				double													dVal;									// Double value.
+				size_t													sStringIndex;							// Index of the string/identifier.
+				size_t													sNodeIndex;								// When the index of another node is needed.
+				uint32_t												ui32Intrinsic;							// Intrinsic.
 			}															u;
 			union {
-				EE_NUM_CONSTANTS										ncConstType;						// Type of numeric constant.
-				EE_CAST_TYPES											ctCast;								// Casting to a type.
-				size_t													sStringIndex;						// Index of the string.
-				size_t													sNodeIndex;							// Index of a node.
-				uint32_t												ui32Op;								// Operator.
-				bool													bIsConst;							// Is the user variable const?
+				EE_NUM_CONSTANTS										ncConstType;							// Type of numeric constant.
+				EE_CAST_TYPES											ctCast;									// Casting to a type.
+				size_t													sStringIndex;							// Index of the string.
+				size_t													sNodeIndex;								// Index of a node.
+				uint32_t												ui32Op;									// Operator.
+				bool													bIsConst;								// Is the user variable const?
 			}															v;
 			union {
-				size_t													sNodeIndex;							// Node index.
+				size_t													sNodeIndex;								// Node index.
 			}															w;
 			union {
-				size_t													sNodeIndex;							// Node index.
+				size_t													sNodeIndex;								// Node index.
 			}															x;
 			union {
-				size_t													sNodeIndex;							// Node index.
+				size_t													sNodeIndex;								// Node index.
 			}															y;
 			union {
-				size_t													sNodeIndex;							// Node index.
+				size_t													sNodeIndex;								// Node index.
 			}															z;
 			union {
-				size_t													sNodeIndex;							// Node index.
+				size_t													sNodeIndex;								// Node index.
 			}															a;
 			union {
-				Intrins0Clock											pfClock;							// ::clock().
-				Intrins0Unsigned										pfIntrins0Unsigned;					// Any no-parameter instrinsic that returns a uint64_t.
-				Intrins1_Float_Float									pfIntrins1Float_Float;				// Any single-parameter function that takes a double and gives back a double.
-				Intrins1_Unsigned16_Unsigned16							pfIntrins1Unsigned_Unsigned16;		// Any single-paremeter function that takes a uint16_t and returns a uint16_t.
-				Intrins1_Unsigned32_Unsigned32							pfIntrins1Unsigned_Unsigned32;		// Any single-paremeter function that takes a uint32_t and returns a uint32_t.
-				Intrins1_Unsigned64_Unsigned64							pfIntrins1Unsigned_Unsigned64;		// Any single-paremeter function that takes a uint64_t and returns a uint64_t.
-				Intrins1_Bool_Float										pfIntrins1Bool_Float;				// Any single-paremeter function that takes a double and returns a bool.
-				Intrins1_Signed_Float									pfIntrins1Signed_Float;				// Any single-paremeter function that takes a double and returns an int.
-				Intrins2_Float_Float_Float								pfIntrins2Float_Float_Float;		// Any 2-parameter function that takes all doubles and returns a double.
-				Intrins2_Float_Float32_Float32							pfIntrins2Float32_Float32_Float32;	// Any 2-parameter function that takes all floats and returns a float.
-				Intrins2_Float_Float80_Float80							pfIntrins2Float80_Float80_Float80;	// Any 2-parameter function that takes all long doubles and returns a long double.
-				Intrins2_Float_Float32_Float80							pfIntrins2Float32_Float32_Float80;	// Any 2-parameter function that takes a float and long double and returns a float.
-				Intrins3_Float_Float_Float_Float						pfIntrins3Float_Float_Float_Float;	// Any 3-parameter function that takes 3 doubles and returns a double.
+				Intrins0Clock											pfClock;								// ::clock().
+				Intrins0Unsigned										pfIntrins0Unsigned;						// Any no-parameter instrinsic that returns a uint64_t.
+				Intrins1_Float_Float									pfIntrins1Float_Float;					// Any single-parameter function that takes a double and gives back a double.
+				Intrins1_Unsigned16_Unsigned16							pfIntrins1Unsigned_Unsigned16;			// Any single-paremeter function that takes a uint16_t and returns a uint16_t.
+				Intrins1_Unsigned32_Unsigned32							pfIntrins1Unsigned_Unsigned32;			// Any single-paremeter function that takes a uint32_t and returns a uint32_t.
+				Intrins1_Unsigned64_Unsigned64							pfIntrins1Unsigned_Unsigned64;			// Any single-paremeter function that takes a uint64_t and returns a uint64_t.
+				Intrins1_Bool_Float										pfIntrins1Bool_Float;					// Any single-paremeter function that takes a double and returns a bool.
+				Intrins1_Signed_Float									pfIntrins1Signed_Float;					// Any single-paremeter function that takes a double and returns an int.
+				Intrins2_Float_Float_Float								pfIntrins2Float_Float_Float;			// Any 2-parameter function that takes all doubles and returns a double.
+				Intrins2_Float_Float32_Float32							pfIntrins2Float32_Float32_Float32;		// Any 2-parameter function that takes all floats and returns a float.
+				Intrins2_Float_Float80_Float80							pfIntrins2Float80_Float80_Float80;		// Any 2-parameter function that takes all long doubles and returns a long double.
+				Intrins2_Float_Float32_Float80							pfIntrins2Float32_Float32_Float80;		// Any 2-parameter function that takes a float and long double and returns a float.
+				Intrins3_Float_Float_Float_Float						pfIntrins3Float_Float_Float_Float;		// Any 3-parameter function that takes 3 doubles and returns a double.
+				Intrins3_Bool_Float32_Float32_Float32					pfIntrins3Bool_Float32_Float32_Float32;	// Any 3-parameter function that takes 3 doubles and returns a bool.
+				Intrins3_Bool_Float_Float_Float							pfIntrins3Bool_Float_Float_Float;		// Any 3-parameter function that takes 3 doubles and returns a bool.
 			}															uFuncPtr;
 			
 		}																ndData;

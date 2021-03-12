@@ -236,6 +236,12 @@ WS									[ \t\v\r\n\f]
 "asinhf"							{ return yy::CExpEvalParser::token::EE_ASINH; }
 "atanh"								{ return yy::CExpEvalParser::token::EE_ATANH; }
 "atanhf"							{ return yy::CExpEvalParser::token::EE_ATANH; }
+"epsilon"							{ return yy::CExpEvalParser::token::EE_EPSILON; }
+"repsilon"							{ return yy::CExpEvalParser::token::EE_RELEPSILON; }
+"relepsilon"						{ return yy::CExpEvalParser::token::EE_RELEPSILON; }
+"epsilonf"							{ return yy::CExpEvalParser::token::EE_EPSILONF; }
+"repsilonf"							{ return yy::CExpEvalParser::token::EE_RELEPSILONF; }
+"relepsilonf"						{ return yy::CExpEvalParser::token::EE_RELEPSILONF; }
 "exp"								{ return yy::CExpEvalParser::token::EE_EXP; }
 "expf"								{ return yy::CExpEvalParser::token::EE_EXP; }
 "log"								{ return yy::CExpEvalParser::token::EE_LOG; }

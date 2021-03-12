@@ -367,19 +367,27 @@ namespace mx {
 
 		// Quick 32-bit epsilon compare.
 		static bool __stdcall				Cmp_Float32Epsilon( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
-			return std::fabs( _patLeft.u.Float32 - _patRight.u.Float32 ) <= static_cast<float>(_spParms.dEpsilonValue);
+			return ee::Epsilon( _patLeft.u.Float32, _patRight.u.Float32, static_cast<float>(_spParms.dEpsilonValue) );
 		}
 
 		// Smart 32-bit epsilon compare.
-		static bool __stdcall				Cmp_Float32RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms );
+		static bool __stdcall				Cmp_Float32RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
+			return ee::RelativeEpsilon( static_cast<float>(_patLeft.u.Float32),
+				static_cast<float>(_patRight.u.Float32),
+				static_cast<float>(_spParms.dEpsilonValue) );
+		}
 
 		// Quick 64-bit epsilon compare.
 		static bool __stdcall				Cmp_Float64Epsilon( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
-			return std::fabs( _patLeft.u.Float64 - _patRight.u.Float64 ) <= _spParms.dEpsilonValue;
+			return ee::Epsilon( _patLeft.u.Float64, _patRight.u.Float64, _spParms.dEpsilonValue );
 		}
 
 		// Smart 64-bit epsilon compare.
-		static bool __stdcall				Cmp_Float64RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms );
+		static bool __stdcall				Cmp_Float64RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
+			return ee::RelativeEpsilon( _patLeft.u.Float64,
+				_patRight.u.Float64,
+				_spParms.dEpsilonValue );
+		}
 
 		// Float compare with NaN results returning true.  This allows the negation of the compare to be used in "Not Equal To" searches.
 		static bool __stdcall				Cmp_Float16WithNaN( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {

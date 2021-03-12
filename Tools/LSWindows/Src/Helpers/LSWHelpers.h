@@ -420,17 +420,45 @@ namespace lsw {
 			return static_cast<BYTE>(std::round( (_bB - _bA) * _dAmnt + _bA ));
 		}
 
+		// Intertpolates between 2 values.
+		static double						Mix( double _dA, double _dB, double _dAmnt ) {
+			return (_dB - _dA) * _dAmnt + _dA;
+		}
+
+		// Converts from sRGB to linear.
+		static double						sRGBtoLinear( double _dVal ) {
+			return _dVal <= 0.04045 ?
+				_dVal * (1.0 / 12.92) :
+				std::pow( (_dVal + 0.055) * (1.0 / 1.055), 2.4 );
+		}
+
+		//Converts from linear to sRGB.
+		static double						LinearTosRGB( double _dVal ) {
+			return _dVal <= 0.0031308 ?
+				_dVal * 12.92 :
+				1.055 * std::pow( _dVal, 1.0 / 2.4 ) - 0.055;
+		}
+
 		// Mixes between 2 RGB values.
 		static DWORD						MixColorRef( DWORD _dwColorA, DWORD _dwColorB, double _dAmnt ) {
-			BYTE bRa = GetRValue( _dwColorA );
+			double dA = sRGBtoLinear( GetRValue( _dwColorA ) / 127.0 );
+			double dB = sRGBtoLinear( GetRValue( _dwColorB ) / 127.0 );
+			BYTE bR = static_cast<BYTE>(std::round( LinearTosRGB( Mix( dA, dB, _dAmnt ) ) * 127.0 ));
+			/*BYTE bRa = GetRValue( _dwColorA );
 			BYTE bRb = GetRValue( _dwColorB );
-			BYTE bR = Mix( bRa, bRb, _dAmnt );
-			BYTE bGa = GetGValue( _dwColorA );
+			BYTE bR = Mix( bRa, bRb, _dAmnt );*/
+			dA = sRGBtoLinear( GetGValue( _dwColorA ) / 127.0 );
+			dB = sRGBtoLinear( GetGValue( _dwColorB ) / 127.0 );
+			BYTE bG = static_cast<BYTE>(std::round( LinearTosRGB( Mix( dA, dB, _dAmnt ) ) * 127.0 ));
+			/*BYTE bGa = GetGValue( _dwColorA );
 			BYTE bGb = GetGValue( _dwColorB );
-			BYTE bG = Mix( bGa, bGb, _dAmnt );
-			BYTE bBa = GetBValue( _dwColorA );
+			BYTE bG = Mix( bGa, bGb, _dAmnt );*/
+			dA = sRGBtoLinear( GetBValue( _dwColorA ) / 127.0 );
+			dB = sRGBtoLinear( GetBValue( _dwColorB ) / 127.0 );
+			BYTE bB = static_cast<BYTE>(std::round( LinearTosRGB( Mix( dA, dB, _dAmnt ) ) * 127.0 ));
+			/*BYTE bBa = GetBValue( _dwColorA );
 			BYTE bBb = GetBValue( _dwColorB );
-			BYTE bB = Mix( bBa, bBb, _dAmnt );
+			BYTE bB = Mix( bBa, bBb, _dAmnt );*/
 			return RGB( bR, bG, bB );
 		}
 

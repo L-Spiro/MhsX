@@ -361,6 +361,50 @@ namespace ee {
 	template <typename _tT>
 	static inline _tT				Max( const _tT &_tA, const _tT &_tB ) { return _tA > _tB ? _tA : _tB; }
 
+	// Basic epsilon comparison.
+	static inline bool __cdecl		Epsilon( double _dLeft, double _dRight, double _dEpsilon ) {
+		return std::fabs( _dLeft - _dRight ) <= _dEpsilon;
+	}
+
+	// Basic epsilon comparison.
+	static inline bool __cdecl		Epsilon( float _fLeft, float _fRight, float _fEpsilon ) {
+		return std::fabsf( _fLeft - _fRight ) <= _fEpsilon;
+	}
+
+	// More accurate epsilon comparison.
+	static inline bool __cdecl		RelativeEpsilon( double _dLeft, double _dRight, double _dEpsilon ) {
+		if ( _dLeft == _dRight ) { return true; }	// Handle infinities.
+
+		double dA = std::fabs( _dLeft );
+		double dB = std::fabs( _dRight );
+		double dDiff = std::fabs( _dLeft - _dRight );
+
+		if ( _dLeft == 0.0 || _dRight == 0.0 || (dA + dB < DBL_MIN) ) {
+			// Values very close or equal to 0.
+			return dDiff < (_dEpsilon * DBL_MIN);
+		}
+
+		// Relative error.
+		return dDiff / Min( (dA + dB), DBL_MAX ) < _dEpsilon;
+	}
+
+	// More accurate epsilon comparison.
+	static inline bool __cdecl		RelativeEpsilon( float _fLeft, float _fRight, float _fEpsilon ) {
+		if ( _fLeft == _fRight ) { return true; }	// Handle infinities.
+
+		float fA = std::fabsf( _fLeft );
+		float fB = std::fabsf( _fRight );
+		float fDiff = std::fabsf( _fLeft - _fRight );
+
+		if ( _fLeft == 0.0f || _fRight == 0.0f || (fA + fB < FLT_MIN) ) {
+			// Values very close or equal to 0.
+			return fDiff < (_fEpsilon * FLT_MIN);
+		}
+
+		// Relative error.
+		return fDiff / Min( (fA + fB), FLT_MAX ) < _fEpsilon;
+	}
+
 	// Gets the current time in system units.
 	static inline uint64_t			Time() {
 #ifdef _WIN32

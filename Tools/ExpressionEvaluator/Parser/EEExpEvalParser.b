@@ -59,6 +59,7 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %token EE_OB_BYTE EE_OB_SBYTE EE_OB_WORD EE_OB_SWORD EE_OB_QWORD EE_OB_SQWORD EE_OB_FLOAT EE_OB_DOUBLE EE_OB_DWORD EE_OB_SDWORD EE_OB_FLOAT16
 %token EE_COS EE_SIN EE_TAN EE_ACOS EE_ASIN EE_ATAN EE_ATAN2
 %token EE_COSH EE_SINH EE_TANH EE_ACOSH EE_ASINH EE_ATANH
+%token EE_EPSILON EE_RELEPSILON EE_EPSILONF EE_RELEPSILONF
 %token EE_EXP EE_LOG EE_LOG10 EE_LOG2 EE_EXP2 EE_EXPM1 EE_ILOGB EE_LOG1P EE_LOGB
 %token EE_POW EE_SQRT EE_CBRT EE_HYPOT EE_TGAMMA EE_LGAMMA
 %token EE_CEIL EE_FLOOR EE_MOD EE_TRUNC EE_ROUND EE_NEARBYINT EE_REMAINDER EE_REMQUO
@@ -591,6 +592,10 @@ intrinsic
 	| EE_ACOSH '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ACOSH, $3, $$ ); }
 	| EE_ASINH '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ASINH, $3, $$ ); }
 	| EE_ATANH '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ATANH, $3, $$ ); }
+	| EE_EPSILON '(' exp ',' exp ',' exp ')'				{ m_peecContainer->CreateIntrinsic3( token::EE_EPSILON, $3, $5, $7, $$ ); }
+	| EE_RELEPSILON '(' exp ',' exp ',' exp ')'				{ m_peecContainer->CreateIntrinsic3( token::EE_RELEPSILON, $3, $5, $7, $$ ); }
+	| EE_EPSILONF '(' exp ',' exp ',' exp ')'				{ m_peecContainer->CreateIntrinsic3( token::EE_EPSILONF, $3, $5, $7, $$ ); }
+	| EE_RELEPSILONF '(' exp ',' exp ',' exp ')'			{ m_peecContainer->CreateIntrinsic3( token::EE_RELEPSILONF, $3, $5, $7, $$ ); }
 	| EE_EXP '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_EXP, $3, $$ ); }
 	| EE_LOG '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_LOG, $3, $$ ); }
 	| EE_LOG '(' exp ',' exp ')'							{ m_peecContainer->CreateIntrinsic2( token::EE_LOG, $3, $5, $$ ); }

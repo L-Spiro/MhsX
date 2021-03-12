@@ -284,11 +284,32 @@ namespace ee {
 			_rExp0 = ConvertResult( _rExp0, EE_NC_FLOATING );
 			_rExp1 = ConvertResult( _rExp1, EE_NC_FLOATING );
 			_rExp2 = ConvertResult( _rExp2, EE_NC_FLOATING );
-			_rResult.ncType = EE_NC_FLOATING;
+			
 	
 			switch ( _uiIntrinsic ) {
+				case CExpEvalParser::token::EE_EPSILON : {
+					_rResult.ncType = EE_NC_SIGNED;
+					_rResult.u.i64Val = ee::Epsilon( _rExp0.u.dVal, _rExp1.u.dVal, _rExp2.u.dVal );
+					return EE_EC_SUCCESS;
+				}
+				case CExpEvalParser::token::EE_EPSILONF : {
+					_rResult.ncType = EE_NC_SIGNED;
+					_rResult.u.i64Val = ee::Epsilon( static_cast<float>(_rExp0.u.dVal), static_cast<float>(_rExp1.u.dVal), static_cast<float>(_rExp2.u.dVal) );
+					return EE_EC_SUCCESS;
+				}
+				case CExpEvalParser::token::EE_RELEPSILON : {
+					_rResult.ncType = EE_NC_SIGNED;
+					_rResult.u.i64Val = ee::RelativeEpsilon( _rExp0.u.dVal, _rExp1.u.dVal, _rExp2.u.dVal );
+					return EE_EC_SUCCESS;
+				}
+				case CExpEvalParser::token::EE_RELEPSILONF : {
+					_rResult.ncType = EE_NC_SIGNED;
+					_rResult.u.i64Val = ee::RelativeEpsilon( static_cast<float>(_rExp0.u.dVal), static_cast<float>(_rExp1.u.dVal), static_cast<float>(_rExp2.u.dVal) );
+					return EE_EC_SUCCESS;
+				}
 				case CExpEvalParser::token::EE_MADD : {
-					_rResult.u.dVal = ::fma( _rExp0.u.dVal, _rExp1.u.dVal, _rExp2.u.dVal );
+					_rResult.ncType = EE_NC_FLOATING;
+					_rResult.u.dVal = std::fma( _rExp0.u.dVal, _rExp1.u.dVal, _rExp2.u.dVal );
 					return EE_EC_SUCCESS;
 				}
 				default : {
@@ -364,11 +385,27 @@ namespace ee {
 		// Converts the given value to an X-bit float.
 		static inline EE_ERROR_CODES		PerformToFloatX( EE_RESULT _rTempDoubleVal, uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign,
 			EE_RESULT &_rResult ) {
-			_rTempDoubleVal = ConvertResult( _rTempDoubleVal, EE_NC_FLOATING );
 			CFloatX fTemp;
-			fTemp.CreateFromDouble( _rTempDoubleVal.u.dVal, _uiExpBits,  _uiManBits, _bImplicitMantissaBit, _bHasSign );
+			
+			switch ( _rTempDoubleVal.ncType ) {
+				case EE_NC_FLOATING : {
+					fTemp.CreateFromDouble( _rTempDoubleVal.u.dVal, _uiExpBits,  _uiManBits, _bImplicitMantissaBit, _bHasSign );
+					break;
+				}
+				case EE_NC_SIGNED : {
+					fTemp.CreateFromBits( _rTempDoubleVal.u.i64Val, _uiExpBits,  _uiManBits, _bImplicitMantissaBit, _bHasSign );
+					break;
+				}
+				case EE_NC_UNSIGNED : {
+					fTemp.CreateFromBits( _rTempDoubleVal.u.ui64Val, _uiExpBits,  _uiManBits, _bImplicitMantissaBit, _bHasSign );
+					break;
+				}
+				default : { return EE_EC_PROCESSINGERROR; }
+			}
+
 			_rResult.ncType = EE_NC_FLOATING;
 			_rResult.u.dVal = fTemp.AsDouble();
+			
 			return EE_EC_SUCCESS;
 		}
 
@@ -715,6 +752,9 @@ namespace ee {
 
 		// The stack of loop scopes.
 		std::vector<EE_LOOP_STACK>			m_vLoopStack;
+
+		// The explicit resolve stack.
+		std::vector<EE_STACK_OBJ>			m_vStack;
 
 		// Treate everything as hex?
 		bool								m_bTreatAllAsHex;

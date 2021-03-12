@@ -26,13 +26,14 @@ namespace mx {
 		uint64_t _ui64Address, uint16_t _ui16ItemSize, uint64_t _ui64TotalItems, uint16_t _ui16Align ) {
 		// Lock externally.
 	 	//lsw::CCriticalSection::CEnterCrit ecCrit( m_csCrit );
+		MX_ADDRESS_ARRAY * paaArray = new ( std::nothrow ) MX_ADDRESS_ARRAY();
+		if ( !paaArray ) { return false; }
 		try {
-			m_vAddressLists.push_back( new ( std::nothrow ) MX_ADDRESS_ARRAY() );
+			m_vAddressLists.push_back( paaArray );
 		}
-		catch ( const std::bad_alloc & /*_eE*/ ) { return false; }
-		size_t sIdx = m_vAddressLists.size() - 1;
-		if ( !m_vAddressLists[sIdx]->Set( _pProc, _ui64Address, _ui16ItemSize, _ui64TotalItems, _ui16Align ) ) {
-			delete m_vAddressLists[sIdx];
+		catch ( const std::bad_alloc & /*_eE*/ ) { delete paaArray; return false; }
+		if ( !paaArray->Set( _pProc, _ui64Address, _ui16ItemSize, _ui64TotalItems, _ui16Align ) ) {
+			delete paaArray;
 			m_vAddressLists.pop_back();
 			return false;
 		}
