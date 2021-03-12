@@ -39,13 +39,17 @@ namespace mx {
 			uint32_t						uiEvalType;
 			std::wstring					wsLValText;
 			std::wstring					wsRValText;
+			std::wstring					wsExpText;
 			std::vector<std::wstring>		vLValHistory;
 			std::vector<std::wstring>		vRValHistory;
+
+			std::vector<std::wstring>		vExpHistory;
 
 			std::wstring					wsFromText;
 			std::wstring					wsToText;
 			std::vector<std::wstring>		vFromHistory;
 			std::vector<std::wstring>		vToHistory;
+
 
 			BOOL							bInvertResults;
 		};

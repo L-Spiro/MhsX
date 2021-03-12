@@ -118,6 +118,17 @@ namespace mx {
 			pcbCombo->AutoSetMinListWidth();
 		}
 
+		pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_EXP_COMBO ));
+		if ( pcbCombo ) {
+			for ( size_t I = 0; I < m_swdData.vExpHistory.size(); ++I ) {
+				pcbCombo->AddString( m_swdData.vExpHistory[I].c_str() );
+			}
+			pcbCombo->SetTextW( m_swdData.wsExpText.c_str() );
+			//pcbCombo->SetFocus();
+
+			pcbCombo->AutoSetMinListWidth();
+		}
+
 		pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_FROM_COMBO ));
 		if ( pcbCombo ) {
 			for ( size_t I = 0; I < m_swdData.vFromHistory.size(); ++I ) {
@@ -313,6 +324,17 @@ namespace mx {
 					_swdData.vRValHistory.erase( aFound );
 				}
 				_swdData.vRValHistory.insert( _swdData.vRValHistory.begin(), _swdData.wsRValText );
+			}
+		}
+		pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_EXP_COMBO ));
+		if ( pcbCombo ) {
+			_swdData.wsExpText = pcbCombo->GetTextW();
+			if ( _swdData.wsExpText.size() ) {
+				auto aFound = std::find( _swdData.vExpHistory.begin(), _swdData.vExpHistory.end(), _swdData.wsExpText );
+				if ( aFound != _swdData.vExpHistory.end() ) {
+					_swdData.vExpHistory.erase( aFound );
+				}
+				_swdData.vExpHistory.insert( _swdData.vExpHistory.begin(), _swdData.wsExpText );
 			}
 		}
 		pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_FROM_COMBO ));
