@@ -40,7 +40,7 @@ namespace mx {
 		BOOL							bPauseTarget;					// FALSE
 		BOOL							bUseEpsilon;					// TRUE
 		BOOL							bSmartEpsilon;					// TRUE
-		DOUBLE							dEpsilon;						// FLT_EPSILON (1.19209290E-07F)
+		DOUBLE							dEpsilon;						// EE_FLOAT16_EPSILON (0.0009765625)
 		UINT32							ui32Alignment;					// alignof( uint32_t )
 		BOOL							bAligned;						// TRUE
 		BOOL							bSameAsOriginal;				// TRUE

@@ -259,3 +259,8 @@
 #ifndef MX_LABEL_JUST
 #define MX_LABEL_JUST					2	// Dialog units.
 #endif	// MX_CHECK_JUST
+
+#ifndef MX_EVEN_DIVIDE
+#define MX_EVEN_DIVIDE( FULLW, OFFSET, TOTALDIVS, DIV )																\
+										(((FULLW) * (DIV)) / (TOTALDIVS) + (OFFSET))
+#endif	// MX_EVEN_DIVIDE

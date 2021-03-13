@@ -34,7 +34,7 @@ namespace mx {
 		m_oOptions.bPauseTarget = FALSE;
 		m_oOptions.bUseEpsilon = TRUE;
 		m_oOptions.bSmartEpsilon = TRUE;
-		m_oOptions.dEpsilon = FLT_EPSILON;// (1.19209290E-07F) (Win32 uses 1.192092896e-07F);
+		m_oOptions.dEpsilon = EE_FLOAT16_EPSILON;// 0.0009765625f
 		m_oOptions.ui32Alignment = alignof( uint32_t );
 		m_oOptions.bAligned = TRUE;
 		m_oOptions.bSameAsOriginal = TRUE;

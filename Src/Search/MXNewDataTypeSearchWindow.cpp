@@ -299,7 +299,9 @@ namespace mx {
 			_swdData.uiDataType = pcbCombo->GetItemData( pcbCombo->GetCurSel() );
 		}
 		pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_EVALUATION_TYPE_COMBO ));
+		LPARAM lpEval = 0;
 		if ( pcbCombo ) {
+			lpEval = pcbCombo->GetCurSelItemData();
 			_swdData.uiEvalType = pcbCombo->GetItemData( pcbCombo->GetCurSel() );
 		}
 
@@ -325,16 +327,18 @@ namespace mx {
 				}
 				_swdData.vRValHistory.insert( _swdData.vRValHistory.begin(), _swdData.wsRValText );
 			}
-		}
+		}		
 		pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_EXP_COMBO ));
 		if ( pcbCombo ) {
 			_swdData.wsExpText = pcbCombo->GetTextW();
-			if ( _swdData.wsExpText.size() ) {
-				auto aFound = std::find( _swdData.vExpHistory.begin(), _swdData.vExpHistory.end(), _swdData.wsExpText );
-				if ( aFound != _swdData.vExpHistory.end() ) {
-					_swdData.vExpHistory.erase( aFound );
+			if ( !m_bLastTypeExpressionWasEmpty || lpEval == CUtilities::MX_ET_QUICK_EXP ) {
+				if ( _swdData.wsExpText.size() ) {
+					auto aFound = std::find( _swdData.vExpHistory.begin(), _swdData.vExpHistory.end(), _swdData.wsExpText );
+					if ( aFound != _swdData.vExpHistory.end() ) {
+						_swdData.vExpHistory.erase( aFound );
+					}
+					_swdData.vExpHistory.insert( _swdData.vExpHistory.begin(), _swdData.wsExpText );
 				}
-				_swdData.vExpHistory.insert( _swdData.vExpHistory.begin(), _swdData.wsExpText );
 			}
 		}
 		pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_FROM_COMBO ));

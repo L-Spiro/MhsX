@@ -8,6 +8,7 @@
 #define EE_FLOATX_DBL_MAN_BITS			DBL_MANT_DIG
 #define EE_FLOATX_FLT_EXP_BITS			8
 #define EE_FLOATX_FLT_MAN_BITS			FLT_MANT_DIG
+#define EE_FLOAT16_EPSILON				0.0009765625f
 
 namespace ee {
 
@@ -151,7 +152,7 @@ namespace ee {
 		static const uint32_t			MaxExpBits() { return 11; }
 
 		// Gets the maximum number of bits in a mantissa.
-		static const uint32_t			MaxManBits() { return DBL_MANT_DIG; }
+		static const uint32_t			MaxManBits() { return EE_FLOATX_DBL_MAN_BITS; }
 
 		// Gets the real number of mantissa bits based on whether or not there is an implicit bit.
 		static const uint64_t			RealMantissaBits( uint16_t _uiManBits, bool _bImplicitMantissaBit ) { return _bImplicitMantissaBit ? _uiManBits - 1 : _uiManBits; }
@@ -160,10 +161,10 @@ namespace ee {
 		static uint64_t					SignBit( double _dVal ) { return (*reinterpret_cast<uint64_t *>(&_dVal)) & (1ULL << 63ULL); }
 
 		// Gets the exponent from a double (not shifted).
-		static uint64_t					ExpBits( double _dVal ) { return (*reinterpret_cast<uint64_t *>(&_dVal)) & (((1ULL << 11ULL) - 1ULL) << (DBL_MANT_DIG - 1ULL)); }
+		static uint64_t					ExpBits( double _dVal ) { return (*reinterpret_cast<uint64_t *>(&_dVal)) & (((1ULL << 11ULL) - 1ULL) << (EE_FLOATX_DBL_MAN_BITS - 1ULL)); }
 
 		// Gets the mantissa from a double (not shifted).
-		static uint64_t					ManBits( double _dVal ) { return (*reinterpret_cast<uint64_t *>(&_dVal)) & (((1ULL << (DBL_MANT_DIG - 2ULL)) - 1ULL)); }
+		static uint64_t					ManBits( double _dVal ) { return (*reinterpret_cast<uint64_t *>(&_dVal)) & (((1ULL << (EE_FLOATX_DBL_MAN_BITS - 2ULL)) - 1ULL)); }
 
 		// Gets the number of bits in a given representation.
 		static uint64_t					TotalBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {

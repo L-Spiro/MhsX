@@ -421,7 +421,8 @@ namespace mx {
 		// ==============================================
 		MX_EXACT_VAL_COMP evcCompFunc = nullptr;
 		uint32_t ui32Size = 0;
-		if ( CUtilities::DataTypeIsFloat( _spParms.dtLVal.dtType ) && _spParms.bUseEpsilon ) {
+		bool bLisFloat = CUtilities::DataTypeIsFloat( _spParms.dtLVal.dtType );
+		if ( bLisFloat && _spParms.bUseEpsilon ) {
 			ui32Size = CUtilities::DataTypeSize( _spParms.dtLVal.dtType );
 			switch ( ui32Size ) {
 				case sizeof( uint16_t ) : {
@@ -480,7 +481,7 @@ namespace mx {
 				}
 				case 1 : { evcCompFunc = Cmp_ExactVal8; break; }
 				case 2 : {
-					if ( CUtilities::DataTypeIsFloat( _spParms.dtLVal.dtType ) && _spParms.bInvertResults ) {
+					if ( bLisFloat && _spParms.bInvertResults ) {
 						evcCompFunc = Cmp_Float16WithNaN;
 					}
 					else {
@@ -493,11 +494,11 @@ namespace mx {
 					break;
 				}
 				case 4 : {
-					evcCompFunc = (CUtilities::DataTypeIsFloat( _spParms.dtLVal.dtType ) && _spParms.bInvertResults) ? Cmp_Float32WithNaN : Cmp_ExactVal32;
+					evcCompFunc = (bLisFloat && _spParms.bInvertResults) ? Cmp_Float32WithNaN : Cmp_ExactVal32;
 					break;
 				}
 				case 8 : {
-					evcCompFunc = (CUtilities::DataTypeIsFloat( _spParms.dtLVal.dtType ) && _spParms.bInvertResults) ? Cmp_Float64WithNaN : Cmp_ExactVal64;
+					evcCompFunc = (bLisFloat && _spParms.bInvertResults) ? Cmp_Float64WithNaN : Cmp_ExactVal64;
 					break;
 				}
 				default: { return false; }

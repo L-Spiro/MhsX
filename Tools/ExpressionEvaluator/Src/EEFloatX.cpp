@@ -208,8 +208,8 @@ namespace ee {
 		
 			const uint64_t uiRealMantissa = RealMantissaBits( _uiManBits, _bImplicitMantissaBit );
 			const int64_t iShiftSign = 64 - TotalBits( _uiExpBits, _uiManBits, _bImplicitMantissaBit, _bHasSign );
-			//const int64_t iShift = RealMantissaBits( DBL_MANT_DIG, true ) - uiRealMantissa;
-			const int64_t iShift = (DBL_MANT_DIG - 1) - uiRealMantissa;
+			//const int64_t iShift = RealMantissaBits( EE_FLOATX_DBL_MAN_BITS, true ) - uiRealMantissa;
+			const int64_t iShift = (EE_FLOATX_DBL_MAN_BITS - 1) - uiRealMantissa;
 
 			CFloatX fTemp;
 			const uint64_t uiInfN = 0x7FF0000000000000ULL;											// 64-bit infinity.
@@ -222,13 +222,13 @@ namespace ee {
 			const uint64_t uiSignN = (1ULL << 63);													// 64-bit sign bit.
 
 			double dTemp = (*reinterpret_cast<const double *>(&uiMinN));
-			dTempVal = (1ULL << (DBL_MANT_DIG - 1)) / dTemp;
+			dTempVal = (1ULL << (EE_FLOATX_DBL_MAN_BITS - 1)) / dTemp;
 			if ( std::isinf( dTempVal ) ) {
 				dTempVal = std::nexttoward( dTempVal, 0.0 );
 			}
-			const uint64_t uiMulN = (*reinterpret_cast<const uint64_t *>(&dTempVal));				// (1 << DBL_MANT_DIG) / uiMinN
-			dTempVal = dTemp / (1ULL << ((DBL_MANT_DIG - 1) - iShift));
-			const uint64_t uiMulC = (*reinterpret_cast<const uint64_t *>(&dTempVal));				// uiMinN / (1 << (DBL_MANT_DIG - iShift))
+			const uint64_t uiMulN = (*reinterpret_cast<const uint64_t *>(&dTempVal));				// (1 << EE_FLOATX_DBL_MAN_BITS) / uiMinN
+			dTempVal = dTemp / (1ULL << ((EE_FLOATX_DBL_MAN_BITS - 1) - iShift));
+			const uint64_t uiMulC = (*reinterpret_cast<const uint64_t *>(&dTempVal));				// uiMinN / (1 << (EE_FLOATX_DBL_MAN_BITS - iShift))
 
 			const int64_t uiInfC = uiInfN >> iShift;
 			const int64_t uiNanN = (uiInfC + 1) << iShift;											// Min X-float NaN as a 64-bit float.
@@ -236,7 +236,7 @@ namespace ee {
 			const int64_t uiMinC = uiMinN >> iShift;
 			const int64_t uiSignC = uiSignN >> iShiftSign;											// X-float sign bit.
 
-			/*fTemp.CreateMinNormalized( 11, DBL_MANT_DIG, true, true );
+			/*fTemp.CreateMinNormalized( 11, EE_FLOATX_DBL_MAN_BITS, true, true );
 			dTempVal = fTemp.AsDouble();*/
 			dTempVal = DBL_MIN;
 			const uint64_t uiNorC = (*reinterpret_cast<const uint64_t *>(&dTempVal)) >> iShift;		// Min 64-bit float normal down shifted.
@@ -267,7 +267,7 @@ namespace ee {
 		{
 			const uint64_t uiRealMantissa = RealMantissaBits( _uiManBits, _bImplicitMantissaBit );
 			const int64_t iShiftSign = 64 - TotalBits( _uiExpBits, _uiManBits, _bImplicitMantissaBit, _bHasSign );
-			const int64_t iShiftMan = RealMantissaBits( DBL_MANT_DIG, true ) - uiRealMantissa;
+			const int64_t iShiftMan = RealMantissaBits( EE_FLOATX_DBL_MAN_BITS, true ) - uiRealMantissa;
 			const int64_t iShiftExp = 52 + (11 - _uiExpBits);
 
 			EE_DOUBLE_INT diTmp;
@@ -396,8 +396,8 @@ namespace ee {
 
 		uint64_t uiAsInt = (*reinterpret_cast<uint64_t *>(&_dVal));
 		bSign = static_cast<int8_t>((uiAsInt >> 63ULL) & 0x1ULL);
-		uint64_t uiSExp = (uiAsInt >> (DBL_MANT_DIG - 1ULL)) & ((1ULL << 11ULL) - 1ULL);
-		uint64_t uiSMan = uiAsInt & ((1ULL << (DBL_MANT_DIG - 1ULL)) - 1ULL);
+		uint64_t uiSExp = (uiAsInt >> (EE_FLOATX_DBL_MAN_BITS - 1ULL)) & ((1ULL << 11ULL) - 1ULL);
+		uint64_t uiSMan = uiAsInt & ((1ULL << (EE_FLOATX_DBL_MAN_BITS - 1ULL)) - 1ULL);
 
 
 		double dExp = uiSExp ? (uiSExp - 1023.0) :
@@ -429,10 +429,10 @@ namespace ee {
 			uiNewExp = static_cast<uint64_t>(dExp + ExpBias());
 		}
 		uiExponent = uiNewExp & ((1ULL << uiExpBits) - 1ULL);
-		uiMantissa = (uiSMan >> (DBL_MANT_DIG - uiShift));
+		uiMantissa = (uiSMan >> (EE_FLOATX_DBL_MAN_BITS - uiShift));
 		if ( uiSExp ) {
 			// Rounding.
-			uint64_t uiFirstMissingBit = (uiSMan >> (DBL_MANT_DIG - uiShift - 1ULL)) & 1;
+			uint64_t uiFirstMissingBit = (uiSMan >> (EE_FLOATX_DBL_MAN_BITS - uiShift - 1ULL)) & 1;
 			uiMantissa += uiFirstMissingBit;
 		}
 
