@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../LSWWin.h"
+#include "../Base/LSWBase.h"
 #include "../Layout/LSWWidgetLayout.h"
 #include <algorithm>
 #include <cstring>
@@ -331,7 +332,7 @@ namespace lsw {
 		// == Functions.
 		BOOL								SetText( const char * _pcText, size_t _stLen = -1 ) {
 			if ( !_pcText || !bOpen ) { return FALSE; }
-			if ( _stLen < 0 ) {
+			if ( static_cast<int32_t>(_stLen) < 0 ) {
 				_stLen = std::strlen( _pcText );
 			}
 			HGLOBAL hglbBinCopy;
@@ -343,6 +344,8 @@ namespace lsw {
 				return FALSE;
 			}
 			std::memcpy( lpvAddress, _pcText, (_stLen + 1) * sizeof( _pcText[0] ) );
+			char * pcText = static_cast<char *>(lpvAddress);
+			pcText[_stLen] = L'\0';
 			::GlobalUnlock( hglbBinCopy );
 
 			::SetClipboardData( CF_TEXT, hglbBinCopy );
@@ -350,8 +353,12 @@ namespace lsw {
 		}
 
 		BOOL								SetText( const wchar_t * _pwcText, size_t _stLen = -1 ) {
-			if ( !_pwcText || !bOpen ) { return FALSE; }
-			if ( _stLen < 0 ) {
+			if ( !_pwcText || !bOpen ) {
+				::OutputDebugStringA( "Failed to open.\r\n" );
+				CBase::PrintError( L"Failed to open: " );
+				return FALSE;
+			}
+			if ( static_cast<int32_t>(_stLen) < 0 ) {
 				_stLen = std::wcslen( _pwcText );
 			}
 			HGLOBAL hglbBinCopy;
@@ -360,9 +367,12 @@ namespace lsw {
 			LPVOID lpvAddress = ::GlobalLock( hglbBinCopy );
 			if ( !lpvAddress ) {
 				::GlobalFree( hglbBinCopy );
+				::OutputDebugStringA( "Failed to allocate.\r\n" );
 				return FALSE;
 			}
 			std::memcpy( lpvAddress, _pwcText, (_stLen + 1) * sizeof( _pwcText[0] ) );
+			wchar_t * pwcText = static_cast<wchar_t *>(lpvAddress);
+			pwcText[_stLen] = L'\0';
 			::GlobalUnlock( hglbBinCopy );
 
 			::SetClipboardData( CF_UNICODETEXT, hglbBinCopy );

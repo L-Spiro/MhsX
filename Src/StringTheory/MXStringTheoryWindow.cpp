@@ -335,7 +335,7 @@ namespace mx {
 								ui32Char |= static_cast<uint8_t>(ssEncodedFinal[I]);
 							}
 							vTmp.push_back( uiEncoding == CCodePages::MX_utf_32 ?
-								_byteswap_ulong( ui32Char ) :
+								::_byteswap_ulong( ui32Char ) :
 								ui32Char );
 						}
 

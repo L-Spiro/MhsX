@@ -14581,3 +14581,39 @@
 #define _DEC_S_79D6C61D_repsilonf______ mx::CStringDecoder::DecodeToString( _T_79D6C61D_repsilonf______, _LEN_79D6C61D )
 #define _DEC_WS_79D6C61D_repsilonf______ mx::CStringDecoder::DecodeToWString( _T_79D6C61D_repsilonf______, _LEN_79D6C61D )
 
+// Copy &Address
+
+#define _T_43FCD42E_Copy__Address "\xCB\x3D\x40\x14\xB2\xEF\xCF\x2B\x34\x3A\x2E\x41\x05"
+#define _LEN_43FCD42E 13
+#define _T_LEN_43FCD42E_Copy__Address _T_43FCD42E_Copy__Address, _LEN_43FCD42E
+#define _DEC_43FCD42E_Copy__Address( STR ) mx::CStringDecoder::Decode( _T_43FCD42E_Copy__Address, _LEN_43FCD42E, STR )
+#define _DEC_S_43FCD42E_Copy__Address mx::CStringDecoder::DecodeToString( _T_43FCD42E_Copy__Address, _LEN_43FCD42E )
+#define _DEC_WS_43FCD42E_Copy__Address mx::CStringDecoder::DecodeToWString( _T_43FCD42E_Copy__Address, _LEN_43FCD42E )
+
+// Copy &Value
+
+#define _T_43A1870B_Copy__Value "\xCB\x3D\x40\x14\xB2\xEF\xE4\x28\x3C\x3D\x2E"
+#define _LEN_43A1870B 11
+#define _T_LEN_43A1870B_Copy__Value _T_43A1870B_Copy__Value, _LEN_43A1870B
+#define _DEC_43A1870B_Copy__Value( STR ) mx::CStringDecoder::Decode( _T_43A1870B_Copy__Value, _LEN_43A1870B, STR )
+#define _DEC_S_43A1870B_Copy__Value mx::CStringDecoder::DecodeToString( _T_43A1870B_Copy__Value, _LEN_43A1870B )
+#define _DEC_WS_43A1870B_Copy__Value mx::CStringDecoder::DecodeToWString( _T_43A1870B_Copy__Value, _LEN_43A1870B )
+
+// Copy &Current Value
+
+#define _T_C0FE03C5_Copy__Current_Value "\xCB\x3D\x40\x14\xB2\xEF\xD1\x3C\x42\x3A\x2E\x3C\x06\xBB\x1D\xE9\x3A\x45\x00"
+#define _LEN_C0FE03C5 19
+#define _T_LEN_C0FE03C5_Copy__Current_Value _T_C0FE03C5_Copy__Current_Value, _LEN_C0FE03C5
+#define _DEC_C0FE03C5_Copy__Current_Value( STR ) mx::CStringDecoder::Decode( _T_C0FE03C5_Copy__Current_Value, _LEN_C0FE03C5, STR )
+#define _DEC_S_C0FE03C5_Copy__Current_Value mx::CStringDecoder::DecodeToString( _T_C0FE03C5_Copy__Current_Value, _LEN_C0FE03C5 )
+#define _DEC_WS_C0FE03C5_Copy__Current_Value mx::CStringDecoder::DecodeToWString( _T_C0FE03C5_Copy__Current_Value, _LEN_C0FE03C5 )
+
+// Copy A&ll
+
+#define _T_9B7D368F_Copy_A_ll "\xCB\x3D\x40\x14\xB2\x0A\xB4\x33\x3C"
+#define _LEN_9B7D368F 9
+#define _T_LEN_9B7D368F_Copy_A_ll _T_9B7D368F_Copy_A_ll, _LEN_9B7D368F
+#define _DEC_9B7D368F_Copy_A_ll( STR ) mx::CStringDecoder::Decode( _T_9B7D368F_Copy_A_ll, _LEN_9B7D368F, STR )
+#define _DEC_S_9B7D368F_Copy_A_ll mx::CStringDecoder::DecodeToString( _T_9B7D368F_Copy_A_ll, _LEN_9B7D368F )
+#define _DEC_WS_9B7D368F_Copy_A_ll mx::CStringDecoder::DecodeToWString( _T_9B7D368F_Copy_A_ll, _LEN_9B7D368F )
+

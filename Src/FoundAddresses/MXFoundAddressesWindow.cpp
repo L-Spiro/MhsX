@@ -1,9 +1,13 @@
 #include "MXFoundAddressesWindow.h"
 #include "../Layouts/MXFoundAddressLayout.h"
+#include "../Layouts/MXLayoutMacros.h"
+#include "../Layouts/MXLayoutManager.h"
 #include "../Layouts/MXMainWindowLayout.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../System/MXSystem.h"
+#include "MXFoundAddressesListView.h"
 
+#include <Base/LSWBase.h>
 #include <Rebar/LSWRebar.h>
 #include <ToolBar/LSWToolBar.h>
 #include <UpDown/LSWUpDown.h>
@@ -153,6 +157,29 @@ namespace mx {
 		return LSW_H_CONTINUE;
 	}
 
+	// WM_COMMAND from menu.
+	CWidget::LSW_HANDLED CFoundAddressesWindow::MenuCommand( WORD _Id ) {
+		switch ( _Id ) {
+			case CFoundAddressLayout::MX_BC_COPY_ADDRESS : {
+				CopySelectedAddresses();
+				break;
+			}
+			case CFoundAddressLayout::MX_BC_COPY_VALUE : {
+				CopySelectedValues();
+				break;
+			}
+			case CFoundAddressLayout::MX_BC_COPY_CUR_VALUE : {
+				CopySelectedCurValues();
+				break;
+			}
+			case CFoundAddressLayout::MX_BC_COPY_ALL : {
+				CopySelectedText();
+				break;
+			}
+		}
+		return LSW_H_CONTINUE;
+	}
+
 	// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
 	const LSW_RECT CFoundAddressesWindow::VirtualClientRect( const CWidget * pwChild ) const {
 		LSW_RECT rTemp = ClientRect( this );
@@ -166,6 +193,9 @@ namespace mx {
 
 	// Gets a pointer to the list view.
 	CListView * CFoundAddressesWindow::ListView() { return static_cast<CListView *>(FindChild( CFoundAddressLayout::MX_FAW_LIST )); }
+
+	// Gets a pointer to the list view.
+	const CListView * CFoundAddressesWindow::ListView() const { return static_cast<const CListView *>(FindChild( CFoundAddressLayout::MX_FAW_LIST )); }
 
 	// Updates the header column after a new search.
 	void CFoundAddressesWindow::UpdateHeaders( CUtilities::MX_SEARCH_TYPES _stType ) {
@@ -236,6 +266,120 @@ namespace mx {
 		}
 	}
 
+	// Copies the selected texts' address lines.
+	void CFoundAddressesWindow::CopySelectedAddresses() const {
+		const CFoundAddressesListView * plvAddressList = static_cast<const CFoundAddressesListView *>(ListView());
+		if ( plvAddressList ) {
+			std::vector<int> vSelections;
+			if ( plvAddressList->GetSelectedItems( vSelections ) ) {
+				CSecureWString swsString;
+				for ( size_t I = 0; I < vSelections.size(); I++ ) {
+					if ( swsString.size() ) {
+						swsString.push_back( L'\r' );
+						swsString.push_back( L'\n' );
+					}
+					plvAddressList->GetAddressText( swsString, vSelections[I] );
+				}
+				if ( swsString.size() ) {
+					lsw::LSW_CLIPBOARD cbClipBoard( Wnd(), true );
+					cbClipBoard.SetText( swsString.c_str(), swsString.size() );
+				}
+			}
+		}
+	}
+
+	// Copies the selected texts' value lines.
+	void CFoundAddressesWindow::CopySelectedValues() const {
+		const CFoundAddressesListView * plvAddressList = static_cast<const CFoundAddressesListView *>(ListView());
+		if ( plvAddressList ) {
+			std::vector<int> vSelections;
+			if ( plvAddressList->GetSelectedItems( vSelections ) ) {
+				CSecureWString swsString;
+				for ( size_t I = 0; I < vSelections.size(); I++ ) {
+					if ( swsString.size() ) {
+						swsString.push_back( L'\r' );
+						swsString.push_back( L'\n' );
+					}
+					plvAddressList->GetValueText( swsString, vSelections[I] );
+				}
+				if ( swsString.size() ) {
+					lsw::LSW_CLIPBOARD cbClipBoard( Wnd(), true );
+					cbClipBoard.SetText( swsString.c_str(), swsString.size() );
+				}
+			}
+		}
+	}
+
+	// Copies the selected texts' current value lines if any.
+	void CFoundAddressesWindow::CopySelectedCurValues() const {
+		int iLine = CurValIndex();
+		if ( iLine == -1 ) { return; }
+
+		const CFoundAddressesListView * plvAddressList = static_cast<const CFoundAddressesListView *>(ListView());
+		if ( plvAddressList ) {
+			std::vector<int> vSelections;
+			if ( plvAddressList->GetSelectedItems( vSelections ) ) {
+				CSecureWString swsString;
+				for ( size_t I = 0; I < vSelections.size(); I++ ) {
+					if ( swsString.size() ) {
+						swsString.push_back( L'\r' );
+						swsString.push_back( L'\n' );
+					}
+					plvAddressList->GetOtherText( swsString, vSelections[I], iLine );
+				}
+				if ( swsString.size() ) {
+					lsw::LSW_CLIPBOARD cbClipBoard( Wnd(), true );
+					cbClipBoard.SetText( swsString.c_str(), swsString.size() );
+				}
+			}
+		}
+	}
+
+	// Copies the selected rows' text.
+	void CFoundAddressesWindow::CopySelectedText() const {
+		int iLine = CurValIndex();
+		const CFoundAddressesListView * plvAddressList = static_cast<const CFoundAddressesListView *>(ListView());
+		if ( plvAddressList ) {
+			std::vector<int> vSelections;
+			if ( plvAddressList->GetSelectedItems( vSelections ) ) {
+				CSecureWString swsString;
+				for ( size_t I = 0; I < vSelections.size(); I++ ) {
+					if ( swsString.size() ) {
+						swsString.push_back( L'\r' );
+						swsString.push_back( L'\n' );
+					}
+					plvAddressList->GetAddressText( swsString, vSelections[I] );
+					swsString.push_back( L'\t' );
+					plvAddressList->GetValueText( swsString, vSelections[I] );
+					if ( iLine != -1 ) {
+						swsString.push_back( L'\t' );
+						plvAddressList->GetOtherText( swsString, vSelections[I], iLine );
+					}
+				}
+				if ( swsString.size() ) {
+					lsw::LSW_CLIPBOARD cbClipBoard( Wnd(), true );
+					cbClipBoard.SetText( swsString.c_str(), swsString.size() );
+				}
+			}
+		}
+	}
+
+	// Gets the index of the current-value header or -1.
+	int CFoundAddressesWindow::CurValIndex() const {
+		if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchType() != CUtilities::MX_ST_STRING_SEARCH &&
+			m_pmmwMhsWindow->MemHack()->Searcher().LastSearchType() != CUtilities::MX_ST_GROUP_SEARCH ) {
+
+			// 0 = Address.
+			// 1 = Value.
+			int iRet = 2;
+			if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchType() == CUtilities::MX_ST_POINTER_SEARCH ) {
+				++iRet;
+			}
+			return iRet;
+		}
+		return -1;
+	}
+
 	// WM_TIMER.
 	CWidget::LSW_HANDLED CFoundAddressesWindow::Timer( UINT_PTR _uiptrId, TIMERPROC _tpProc ) {
 		if ( _uiptrId == m_uiptrUpdateListTimer ) {
@@ -246,6 +390,64 @@ namespace mx {
 			}
 		}
 		return LSW_H_CONTINUE;
+	}
+
+	// WM_CONTEXTMENU.
+	CWidget::LSW_HANDLED CFoundAddressesWindow::ContextMenu( CWidget * _pwControl, INT _iX, INT _iY ) {
+		switch ( _pwControl->Id() ) {
+			case CFoundAddressLayout::MX_FAW_LIST : {
+				LSW_MENU_ITEM miMenuBar[] = {
+					//bIsSeperator	dwId													bCheckable	bChecked	bEnabled	lpwcText, stTextLen												bSkip
+					{ FALSE,		CFoundAddressLayout::MX_BC_COPY_ADDRESS,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_43FCD42E_Copy__Address, _LEN_43FCD42E ),		FALSE },
+					{ FALSE,		CFoundAddressLayout::MX_BC_COPY_VALUE,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_43A1870B_Copy__Value, _LEN_43A1870B ),			FALSE },
+					{ FALSE,		CFoundAddressLayout::MX_BC_COPY_CUR_VALUE,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_C0FE03C5_Copy__Current_Value, _LEN_C0FE03C5 ),	CurValIndex() == -1 },
+					{ FALSE,		CFoundAddressLayout::MX_BC_COPY_ALL,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_9B7D368F_Copy_A_ll, _LEN_9B7D368F ),			FALSE },
+				};
+
+				const LSW_MENU_LAYOUT miMenus[] = {
+					{
+						MX_M_CONTEXT_MENU,
+						0,
+						0,
+						MX_ELEMENTS( miMenuBar ),
+						miMenuBar
+					},
+					/*{
+						MX_MWMI_MENU_FILE,
+						MX_MWMI_MENU_BAR,
+						MX_MWMI_FILE,
+						MX_ELEMENTS( m_miFileMenu ),
+						m_miFileMenu
+					},*/
+				};
+
+				std::vector<LSW_MENU_LAYOUT> vMenus;
+				std::vector<std::vector<LSW_MENU_ITEM> *> vMenuItems;
+				std::vector<std::vector<CSecureWString> *> vMenuStrings;
+				CLayoutManager::UnencryptMenu( miMenus, MX_ELEMENTS( miMenus ),
+					vMenus,
+					vMenuItems,
+					vMenuStrings );
+
+				HMENU hMenu = NULL;
+				mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
+				hMenu = plmLayout->CreatePopupMenu( &vMenus[0], vMenus.size() );
+
+				if ( _iX == -1 && _iY == -1 ) {
+					POINT pPos;
+					::GetCursorPos( &pPos );
+					_iX = pPos.x;
+					_iY = pPos.y;
+				}
+				::TrackPopupMenu( hMenu,
+					TPM_LEFTALIGN | TPM_RIGHTBUTTON,
+					_iX, _iY, 0, Wnd(), NULL );
+
+				CLayoutManager::CleanEncryptedMenu( vMenuItems, vMenuStrings );
+				break;
+			}
+		}
+		return lsw::CDockable::ContextMenu( _pwControl, _iX, _iY );
 	}
 
 }	// namespace mx

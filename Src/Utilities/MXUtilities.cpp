@@ -194,7 +194,6 @@ namespace mx {
 			MX_ESC_CASE( '\a', 'a' )
 			MX_ESC_CASE( '\'', '\'' )
 			MX_ESC_CASE( '\"', '\"' )
-			MX_ESC_CASE( '\0', '0' )
 			default : {
 				if ( !ByteIsPrintable( _bIn, _bExtended ) ) {
 					(*_pcString++) = '\\';
@@ -230,7 +229,6 @@ namespace mx {
 			MX_ESC_CASE( '\a', 'a' )
 			MX_ESC_CASE( '\'', '\'' )
 			MX_ESC_CASE( '\"', '\"' )
-			MX_ESC_CASE( '\0', '0' )
 			default : {
 				if ( !ByteIsPrintable( _bIn, _bExtended ) ) {
 					_sString.append( "\\x" );
@@ -2518,13 +2516,25 @@ namespace mx {
 		CSecureWString swsTmp;
 		for ( size_t I = 0; I < _swsInput.size(); ++I ) {
 			swsTmp.push_back( '\\' );
-			swsTmp.push_back( 'u' );
+			
 			char szBuffer[8];
-			::sprintf_s( szBuffer, "%.4X", static_cast<uint16_t>(_swsInput[I]) );
+			if ( _swsInput[I] < 128 ) {
+				// This works because we know that this can't be followed by a number, as it will only be followed
+				//	by the end of the string or \.
+				swsTmp.push_back( 'x' );
+				::sprintf_s( szBuffer, "%.2X", static_cast<uint8_t>(_swsInput[I]) );
+			}
+			else {
+				swsTmp.push_back( 'u' );
+				::sprintf_s( szBuffer, "%.4X", static_cast<uint16_t>(_swsInput[I]) );
+			}
 			swsTmp.push_back( szBuffer[0] );
 			swsTmp.push_back( szBuffer[1] );
-			swsTmp.push_back( szBuffer[2] );
-			swsTmp.push_back( szBuffer[3] );
+			if ( _swsInput[I] >= 128 ) {
+				swsTmp.push_back( szBuffer[2] );
+				swsTmp.push_back( szBuffer[3] );
+			}
+			
 			if ( _bKeepNewline && _swsInput[I] == L'\n' ) {
 				swsTmp.push_back( L'\r' );
 				swsTmp.push_back( L'\n' );
@@ -2538,17 +2548,27 @@ namespace mx {
 		std::vector<uint32_t> swsTmp;
 		for ( size_t I = 0; I < _swsInput.size(); ++I ) {
 			swsTmp.push_back( '\\' );
-			swsTmp.push_back( 'U' );
 			char szBuffer[16];
-			::sprintf_s( szBuffer, "%.8X", static_cast<uint32_t>(_swsInput[I]) );
+			if ( _swsInput[I] < 128 ) {
+				// This works because we know that this can't be followed by a number, as it will only be followed
+				//	by the end of the string or \.
+				swsTmp.push_back( 'x' );
+				::sprintf_s( szBuffer, "%.2X", static_cast<uint8_t>(_swsInput[I]) );
+			}
+			else {
+				swsTmp.push_back( 'U' );
+				::sprintf_s( szBuffer, "%.8X", static_cast<uint32_t>(_swsInput[I]) );
+			}
 			swsTmp.push_back( szBuffer[0] );
 			swsTmp.push_back( szBuffer[1] );
-			swsTmp.push_back( szBuffer[2] );
-			swsTmp.push_back( szBuffer[3] );
-			swsTmp.push_back( szBuffer[4] );
-			swsTmp.push_back( szBuffer[5] );
-			swsTmp.push_back( szBuffer[6] );
-			swsTmp.push_back( szBuffer[7] );
+			if ( _swsInput[I] >= 128 ) {
+				swsTmp.push_back( szBuffer[2] );
+				swsTmp.push_back( szBuffer[3] );
+				swsTmp.push_back( szBuffer[4] );
+				swsTmp.push_back( szBuffer[5] );
+				swsTmp.push_back( szBuffer[6] );
+				swsTmp.push_back( szBuffer[7] );
+			}
 			if ( _bKeepNewline && _swsInput[I] == L'\n' ) {
 				swsTmp.push_back( L'\r' );
 				swsTmp.push_back( L'\n' );
@@ -2594,12 +2614,6 @@ namespace mx {
 					}
 				}
 				if ( bFound ) { ++I; continue; }
-				if ( ui32This == 0 ) {
-					vOutput.push_back( L'\\' );
-					vOutput.push_back( L'0' );
-					 ++I;
-					continue;
-				}
 			}
 			uint32_t ui32ThisLen;
 			uint32_t ui32Conv = Utf32ToUtf16( ui32This, ui32ThisLen );
@@ -2617,10 +2631,7 @@ namespace mx {
 				/*!::iswprint( static_cast<wint_t>(ui32Conv) ) ||*/
 				!(wTypeData[0] & C1_DEFINED) ) {
 				char szBuffer[16];
-				if ( sLen == 1 ) {
-					::sprintf_s( szBuffer, "\\x%.2X", static_cast<uint8_t>(_ssInput[I]) );
-				}
-				else if ( ui32ThisLen == 1 ) {
+				if ( ui32ThisLen == 1 ) {
 					::sprintf_s( szBuffer, "\\u%.4X", static_cast<uint16_t>(ui32Conv) );
 				}
 				else {
@@ -2688,12 +2699,6 @@ namespace mx {
 					}
 				}
 				if ( bFound ) { ++I; continue; }
-				if ( ui32This == 0 ) {
-					swsOut.push_back( L'\\' );
-					swsOut.push_back( L'0' );
-					 ++I;
-					continue;
-				}
 			}
 			uint32_t ui32ThisLen;
 			uint32_t ui32Conv = Utf32ToUtf16( ui32This, ui32ThisLen );
@@ -2712,10 +2717,7 @@ namespace mx {
 				!(wTypeData[0] & C1_DEFINED) /*||
 				(wType3Data[0] & (C3_HIGHSURROGATE | C3_LOWSURROGATE))*/ ) {
 				char szBuffer[16];
-				if ( ui32This <= 0x7F /*&& (wType3Data[0] & (C3_HIGHSURROGATE | C3_LOWSURROGATE)) == 0*/ ) {
-					::sprintf_s( szBuffer, "\\x%.2X", static_cast<uint8_t>(_swsInput[I]) );
-				}
-				else if ( ui32ThisLen == 1 ) {
+				if ( ui32ThisLen == 1 ) {
 					::sprintf_s( szBuffer, "\\u%.4X", static_cast<uint16_t>(_swsInput[I]) );
 				}
 				else {
@@ -2774,13 +2776,6 @@ namespace mx {
 					}
 				}
 				if ( bFound ) { ++I; continue; }
-
-				if ( ui32This == 0 ) {
-					vOutput.push_back( L'\\' );
-					vOutput.push_back( L'0' );
-					 ++I;
-					continue;
-				}
 			}
 				
 			uint32_t ui32ThisLen;

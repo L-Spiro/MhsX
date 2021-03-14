@@ -303,7 +303,7 @@ namespace mx {
 	};
 
 	// Windows menu.
-	LSW_MENU_ITEM CMainWindowLayout::m_miWindowsMenu[]= {
+	LSW_MENU_ITEM CMainWindowLayout::m_miWindowsMenu[] = {
 		//bIsSeperator	dwId						bCheckable	bChecked	bEnabled	
 		{ FALSE,		MX_MWMI_SHOW_EXPEVAL,		TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_7B97062A__Expression_Evaluator, _LEN_7B97062A ) },
 		{ FALSE,		MX_MWMI_SHOWFOUNDADDR,		TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_5887B86C__Found_Addresses, _LEN_5887B86C ) },

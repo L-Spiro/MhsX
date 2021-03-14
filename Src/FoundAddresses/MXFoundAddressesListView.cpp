@@ -191,8 +191,60 @@ namespace mx {
 		return TRUE;
 	}
 
+	// Gets the text for an address line.
+	bool CFoundAddressesListView::GetAddressText( std::wstring &_wsResult, int _iIndex ) const {
+		NMLVDISPINFOW dvInfo = { 0 };
+		dvInfo.item.mask = LVIF_TEXT;
+		dvInfo.item.iItem = _iIndex;
+		dvInfo.item.iSubItem = 0;
+		WCHAR wszBuffer[32];
+		dvInfo.item.pszText = wszBuffer;
+		dvInfo.item.cchTextMax = MX_ELEMENTS( wszBuffer );
+		if ( const_cast<CFoundAddressesListView *>(this)->GetDispInfoNotify( &dvInfo ) ) {
+			_wsResult.append( wszBuffer );
+			return true;
+		}
+		return false;
+	}
+
+	// Gets the value text for a line.
+	bool CFoundAddressesListView::GetValueText( std::wstring &_wsResult, int _iIndex ) const {
+		NMLVDISPINFOW dvInfo = { 0 };
+		dvInfo.item.mask = LVIF_TEXT;
+		dvInfo.item.iItem = _iIndex;
+		dvInfo.item.iSubItem = 1;
+		std::vector<WCHAR> vBuffer;
+		vBuffer.resize( 1024 * 64 );
+		dvInfo.item.pszText = &vBuffer[0];
+		dvInfo.item.cchTextMax = vBuffer.size();
+		if ( const_cast<CFoundAddressesListView *>(this)->GetDispInfoNotify( &dvInfo ) ) {
+			vBuffer[vBuffer.size()-1] = L'\0';
+			_wsResult.append( vBuffer.data() );
+			return true;
+		}
+		return false;
+	}
+
+	// Gets the other text for a line.
+	bool CFoundAddressesListView::GetOtherText( std::wstring &_wsResult, int _iIndex, int _iSub ) const {
+		NMLVDISPINFOW dvInfo = { 0 };
+		dvInfo.item.mask = LVIF_TEXT;
+		dvInfo.item.iItem = _iIndex;
+		dvInfo.item.iSubItem = _iSub;
+		std::vector<WCHAR> vBuffer;
+		vBuffer.resize( 1024 * 64 );
+		dvInfo.item.pszText = &vBuffer[0];
+		dvInfo.item.cchTextMax = vBuffer.size();
+		if ( const_cast<CFoundAddressesListView *>(this)->GetDispInfoNotify( &dvInfo ) ) {
+			vBuffer[vBuffer.size()-1] = L'\0';
+			_wsResult.append( vBuffer.data() );
+			return true;
+		}
+		return false;
+	}
+
 	// Gets the display text for a data-type search result.
-	bool CFoundAddressesListView::GetDataTypeSearchValue( LPWSTR _pwStr, int _iMaxLen, uint32_t _ui32Type, const uint8_t * _pui8Value ) {
+	bool CFoundAddressesListView::GetDataTypeSearchValue( LPWSTR _pwStr, int _iMaxLen, uint32_t _ui32Type, const uint8_t * _pui8Value ) const {
 		switch ( _ui32Type ) {
 			case CUtilities::MX_DT_INT8 : {
 				char szBuffer[32];
@@ -250,7 +302,7 @@ namespace mx {
 	}
 
 	// Gets the display test for a string search result.
-	bool CFoundAddressesListView::GetStringSearchValue( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value ) {
+	bool CFoundAddressesListView::GetStringSearchValue( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value ) const {
 		const CSearchResultRef::MX_ADDRESS_REF & arRef = (*reinterpret_cast<const CSearchResultRef::MX_ADDRESS_REF *>(_pui8Value));
 		if ( !arRef.uiSize ) { return true; }
 
@@ -354,6 +406,7 @@ namespace mx {
 			}
 			case CUtilities::MX_SST_UTF8 : {
 				CSecureWString swsTemp = CUtilities::StringToWString( reinterpret_cast<const char *>(&vData.data()[uiOffsetToData]), arRef.uiSize );
+				swsTemp = CUtilities::EscapeUnprintable( swsTemp, true, false );
 				for ( size_t I = 0; I < swsTemp.size(); ++I ) {
 					if ( !swsTemp[I] ) {
 						MX_PRINT_CHAR( L'\\' );
@@ -368,6 +421,7 @@ namespace mx {
 			}
 			case CUtilities::MX_SST_UTF16 : {
 				CSecureWString swsTemp( reinterpret_cast<const wchar_t *>(&vData.data()[uiOffsetToData]), arRef.uiSize / sizeof( wchar_t ) );
+				swsTemp = CUtilities::EscapeUnprintable( swsTemp, true, false );
 				for ( size_t I = 0; I < swsTemp.size(); ++I ) {
 					if ( !swsTemp[I] ) {
 						MX_PRINT_CHAR( L'\\' );
@@ -382,6 +436,7 @@ namespace mx {
 			}
 			case CUtilities::MX_SST_UTF32 : {
 				CSecureWString swsTemp = CUtilities::Utf32StringToWString( reinterpret_cast<const uint32_t *>(&vData.data()[uiOffsetToData]), arRef.uiSize / sizeof( uint32_t ) );
+				swsTemp = CUtilities::EscapeUnprintable( swsTemp, true, false );
 				for ( size_t I = 0; I < swsTemp.size(); ++I ) {
 					if ( !swsTemp[I] ) {
 						MX_PRINT_CHAR( L'\\' );
@@ -431,7 +486,7 @@ namespace mx {
 	}
 
 	// Gets the display test for a string search result.
-	bool CFoundAddressesListView::GetExpressionSearchValue( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value ) {
+	bool CFoundAddressesListView::GetExpressionSearchValue( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value ) const {
 		const CSearchResultRef::MX_ADDRESS_REF & arRef = (*reinterpret_cast<const CSearchResultRef::MX_ADDRESS_REF *>(_pui8Value));
 		if ( !arRef.uiSize ) { return true; }
 		uint32_t uiSize = std::min( arRef.uiSize, static_cast<uint32_t>(_iMaxLen / 3 + 1) );
@@ -471,7 +526,7 @@ int iIdx = 0;
 	}
 
 	// Gets the display test for a string search result.
-	bool CFoundAddressesListView::GetExpressionSearchValueFixed( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value ) {
+	bool CFoundAddressesListView::GetExpressionSearchValueFixed( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value ) const {
 		// Current Value.
 
 int iIdx = 0;

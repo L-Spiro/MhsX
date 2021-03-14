@@ -1740,6 +1740,17 @@ namespace lsw {
 				}
 				break;
 			}
+
+			// =======================================
+			// Context menus.
+			// =======================================
+			case WM_CONTEXTMENU : {
+				CWidget * pwControl = LSW_WIN2CLASS( reinterpret_cast<HWND>(_wParam) );
+				if ( !pwControl ) { LSW_RET( 0, 0 ); }
+				LSW_HANDLED hHandled = pmwThis->ContextMenu( pwControl, GET_X_LPARAM( _lParam ), GET_Y_LPARAM( _lParam ) );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
 		}
 
 		if ( _uMsg >= WM_USER && _uMsg <= 0x7FFF ) {

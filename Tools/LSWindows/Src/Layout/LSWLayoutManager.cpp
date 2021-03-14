@@ -255,6 +255,54 @@ namespace lsw {
 		return hMenu;
 	}
 
+	// Creates a pop-upmenu given a menu layout.
+	HMENU CLayoutManager::CreatePopupMenu( const LSW_MENU_LAYOUT &_mlLayout ) {
+		HMENU hMenu = ::CreatePopupMenu();
+		for ( SIZE_T I = 0; I < _mlLayout.stTotalMenuItems; ++I ) {
+			if ( !AppendMenuItem( hMenu, _mlLayout.pmiItems[I] ) ) {
+				::DestroyMenu( hMenu );
+				return NULL;
+			}
+		}
+		return hMenu;
+	}
+
+	// Creates a pop-upmenu given menu layouts.
+	HMENU CLayoutManager::CreatePopupMenu( const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotal ) {
+		std::map<DWORD, HMENU> mIdToMenu;
+		HMENU hMenu = NULL;
+		for ( SIZE_T I = 0; I < _sTotal; ++I ) {
+			HMENU hTemp = I == 0 ? CreatePopupMenu( _pmlLayouts[I] ) : CreateMenu( _pmlLayouts[I] );
+			if ( !hTemp ) {
+				for ( auto I = mIdToMenu.begin(); I != mIdToMenu.end(); ++I ) {
+					::DestroyMenu( I->second );
+				}
+				return NULL;
+			}
+			if ( !hMenu ) {
+				hMenu = hTemp;
+			}
+
+			// Parent it.
+			HMENU hParent = NULL;
+			if ( _pmlLayouts[I].dwParentMenuId ) {
+				auto aTemp = mIdToMenu.find( _pmlLayouts[I].dwParentMenuId );
+				hParent = aTemp == mIdToMenu.end() ? NULL : aTemp->second;
+			}
+			if ( hParent ) {
+				// Add it as a child to the item.
+				MENUITEMINFOW miSub = { sizeof( MENUITEMINFOW ) };
+				miSub.fMask = MIIM_SUBMENU;
+				miSub.hSubMenu = hTemp;
+				::SetMenuItemInfoW( hParent, _pmlLayouts[I].dwParentMenuItemId, FALSE, &miSub );
+			}
+
+			mIdToMenu.insert_or_assign( _pmlLayouts[I].dwId, hTemp );
+		}
+
+		return hMenu;
+	}
+
 	// Takes the given layout and produces a copy with certain things changed as necessary.  For example, if
 	//	the control type is LSW_LT_DOCKWINDOW, the class name is changed to lsw::CBase::DockableAtom().
 	// In other cases this fills in missing information, so if you pass a nullptr control class name, the common name will be filled automatically here, etc.
@@ -426,6 +474,7 @@ namespace lsw {
 
 	// Appends a menu item to a menu.
 	BOOL CLayoutManager::AppendMenuItem( HMENU _hMenu, const LSW_MENU_ITEM &_miItem ) {
+		if ( _miItem.bSkip ) { return TRUE; }
 		if ( _miItem.bIsSeperator ) {
 			return ::AppendMenuW( _hMenu, MF_SEPARATOR, 0, NULL );
 		}

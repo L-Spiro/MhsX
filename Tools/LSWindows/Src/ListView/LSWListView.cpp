@@ -32,6 +32,11 @@ namespace lsw {
 		return static_cast<int>(::SendMessageW( Wnd(), LVM_GETITEMCOUNT, 0L, 0L ));
 	}
 
+	// Determines the number of selected items in a list-view control.
+	UINT CListView::GetSelectedCount() const {
+		return static_cast<UINT>(::SendMessageW( Wnd(), LVM_GETSELECTEDCOUNT, 0, 0L ));
+	}
+
 	// Removes an item from a list-view control.
 	BOOL CListView::DeleteItem( int _iItem ) {
 		return static_cast<BOOL>(::SendMessageW( Wnd(), LVM_DELETEITEM, static_cast<WPARAM>(_iItem), 0L ));
@@ -250,6 +255,19 @@ namespace lsw {
 		_iItm.iItem = _iItem;
 		_iItm.iSubItem = _iSubItem;
 		return static_cast<BOOL>(::SendMessageA( Wnd(), LVM_GETITEMA, 0, reinterpret_cast<LPARAM>(&_iItm) ));
+	}
+
+	// Creates an array of indices that correspond to the selected items in the list-view.
+	bool CListView::GetSelectedItems( std::vector<int> &_vArray ) const {
+		if ( !Wnd() ) { return false; }
+		int iIdx = -1;
+		while ( (iIdx = static_cast<int>(::SendMessageW( Wnd(), LVM_GETNEXTITEM, static_cast<WPARAM>(iIdx), MAKELPARAM( LVNI_SELECTED, 0 ) ))) != -1 ) {
+			try {
+				_vArray.push_back( iIdx );
+			}
+			catch ( const std::bad_alloc /*& _eE*/ ) { return false; }
+		}
+		return true;
 	}
 
 	// Gets the item's state.

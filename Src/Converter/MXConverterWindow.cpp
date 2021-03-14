@@ -657,7 +657,7 @@ namespace mx {
 		ee::CExpEvalContainer::EE_RESULT rRes = GetValueUtf16( _pwControl, _ncType, _sSize, _bHex );
 		uint16_t * pui16Array = reinterpret_cast<uint16_t *>(&rRes.u.ui64Val);
 		for ( size_t I = 0; I < 4; ++I ) {
-			pui16Array[I] = _byteswap_ushort( pui16Array[I] );
+			pui16Array[I] = ::_byteswap_ushort( pui16Array[I] );
 		}
 		return rRes;
 	}
@@ -705,7 +705,7 @@ namespace mx {
 		ee::CExpEvalContainer::EE_RESULT rRes = GetValueUtf32( _pwControl, _ncType, _sSize, _bHex );
 		uint32_t * pui32Array = reinterpret_cast<uint32_t *>(&rRes.u.ui64Val);
 		for ( size_t I = 0; I < 2; ++I ) {
-			pui32Array[I] = _byteswap_ulong( pui32Array[I] );
+			pui32Array[I] = ::_byteswap_ulong( pui32Array[I] );
 		}
 		return rRes;
 	}
@@ -853,7 +853,7 @@ namespace mx {
 		CSecureWString ssTmp;
 		const size_t sSize = ((_sSrcSize + (sizeof( wchar_t ) * 8 - 1)) >> 4);	// Round up to the nearest full char size.
 		for ( size_t I = 0; I < sSize; ++I ) {
-			ssTmp.push_back( _byteswap_ushort( pcText[I] ) );
+			ssTmp.push_back( ::_byteswap_ushort( pcText[I] ) );
 		}
 		_pwControl->SetTextW( (_bAltDisp ? CUtilities::EscapeAllW( ssTmp, false ) :
 			CUtilities::EscapeStandard( ssTmp, false )).c_str() );
@@ -884,7 +884,7 @@ namespace mx {
 		std::vector<uint32_t> ssTmp;
 		const size_t sSize = ((_sSrcSize + (sizeof( uint32_t ) * 8 - 1)) >> 5);	// Round up to the nearest full char size.
 		for ( size_t I = 0; I < sSize; ++I ) {
-			ssTmp.push_back( _byteswap_ulong( pcText[I] ) );
+			ssTmp.push_back( ::_byteswap_ulong( pcText[I] ) );
 		}
 		std::vector<uint32_t> vTmp;
 		if ( _bAltDisp ) {

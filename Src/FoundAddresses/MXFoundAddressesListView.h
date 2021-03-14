@@ -18,6 +18,15 @@ namespace mx {
 		// Requesting information (notification responder).
 		virtual BOOL						GetDispInfoNotify( NMLVDISPINFOW * _plvdiInfo );
 
+		// Gets the text for an address line.
+		virtual bool						GetAddressText( std::wstring &_wsResult, int _iIndex ) const;
+
+		// Gets the value text for a line.
+		virtual bool						GetValueText( std::wstring &_wsResult, int _iIndex ) const;
+
+		// Gets the other text for a line.
+		virtual bool						GetOtherText( std::wstring &_wsResult, int _iIndex, int _iSub ) const;
+
 
 	protected :
 		// The main window.
@@ -26,16 +35,16 @@ namespace mx {
 
 		// == Functions.
 		// Gets the display text for a data-type search result.
-		bool								GetDataTypeSearchValue( LPWSTR _pwStr, int _iMaxLen, uint32_t _ui32Type, const uint8_t * _pui8Value );
+		bool								GetDataTypeSearchValue( LPWSTR _pwStr, int _iMaxLen, uint32_t _ui32Type, const uint8_t * _pui8Value ) const;
 
 		// Gets the display test for a string search result.
-		bool								GetStringSearchValue( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value );
+		bool								GetStringSearchValue( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value ) const;
 
 		// Gets the display test for a string search result.
-		bool								GetExpressionSearchValue( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value );
+		bool								GetExpressionSearchValue( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value ) const;
 
 		// Gets the display test for a string search result.
-		bool								GetExpressionSearchValueFixed( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value );
+		bool								GetExpressionSearchValueFixed( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value ) const;
 	};
 
 }	// namespace mx

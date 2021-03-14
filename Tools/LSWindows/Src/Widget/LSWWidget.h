@@ -623,6 +623,9 @@ namespace lsw {
 		// WM_HOTKEY.
 		virtual LSW_HANDLED					Hotkey( INT _iIdentifier, INT _iVirtualKey, INT _iMod ) { return LSW_H_CONTINUE; }
 
+		// WM_CONTEXTMENU.
+		virtual LSW_HANDLED					ContextMenu( CWidget * _pwControl, INT _iX, INT _iY ) { return LSW_H_CONTINUE; }
+
 		// WM_USER/custom messages.
 		virtual LSW_HANDLED					CustomPrivateMsg( UINT _uMsg, WPARAM _wParam, LPARAM _lParam ) { return LSW_H_CONTINUE; }
 

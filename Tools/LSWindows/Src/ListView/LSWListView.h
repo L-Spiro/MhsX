@@ -24,6 +24,9 @@ namespace lsw {
 		// Gets the number of items in a list-view control.
 		int									GetItemCount() const;
 
+		// Determines the number of selected items in a list-view control.
+		UINT								GetSelectedCount() const;
+
 		// Removes an item from a list-view control.
 		BOOL								DeleteItem( int _iItem );
 
@@ -95,6 +98,9 @@ namespace lsw {
 
 		// Gets an item.  _iItm is input and output.
 		BOOL								GetItem( INT _iItem, INT _iSubItem, LVITEMA &_iItm ) const;
+
+		// Creates an array of indices that correspond to the selected items in the list-view.
+		bool								GetSelectedItems( std::vector<int> &_vArray ) const;
 
 		// Gets the item's state.
 		UINT								GetItemState( INT _iItem, UINT _uiMask ) const;

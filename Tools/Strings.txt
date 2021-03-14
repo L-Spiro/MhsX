@@ -1601,3 +1601,7 @@
 "epsilonf( ??, "
 "repsilon( ??, "
 "repsilonf( ??, "
+"Copy &Address"
+"Copy &Value"
+"Copy &Current Value"
+"Copy A&ll"

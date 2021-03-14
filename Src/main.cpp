@@ -385,6 +385,7 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 	// Initialize the system.
 	mx::CSystem::InitSystem();
 	
+
 #if 0
 	ee::CFloatX fVal;
 	double dFMax = ee::CFloatX::GetMaxForBits( 8, 24, true );

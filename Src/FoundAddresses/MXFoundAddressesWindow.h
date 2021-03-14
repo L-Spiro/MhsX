@@ -33,6 +33,11 @@ namespace mx {
 			MX_T_UPDATE_LIST				= 0x3D00
 		};
 
+		// Menu.
+		enum MX_MENU {
+			MX_M_CONTEXT_MENU				= 0x3E00
+		};
+
 		
 
 
@@ -43,11 +48,17 @@ namespace mx {
 		// WM_COMMAND from control.
 		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc );
 
+		// WM_COMMAND from menu.
+		virtual LSW_HANDLED					MenuCommand( WORD _Id );
+
 		// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
 		virtual const LSW_RECT				VirtualClientRect( const CWidget * pwChild ) const;
 
 		// Gets a pointer to the list view.
 		CListView *							ListView();
+
+		// Gets a pointer to the list view.
+		const CListView *					ListView() const;
 
 		// Updates the header column after a new search.
 		void								UpdateHeaders( CUtilities::MX_SEARCH_TYPES _stType );
@@ -57,6 +68,22 @@ namespace mx {
 
 		// Sets the update speed.
 		void								SetUpdateSpeed( uint32_t _ui32Speed );
+
+		// Copies the selected texts' address lines.
+		void								CopySelectedAddresses() const;
+
+		// Copies the selected texts' value lines.
+		void								CopySelectedValues() const;
+
+		// Copies the selected texts' current value lines if any.
+		void								CopySelectedCurValues() const;
+
+		// Copies the selected rows' text.
+		void								CopySelectedText() const;
+
+		// Gets the index of the current-value header or -1.
+		int									CurValIndex() const;
+
 
 
 	protected :
@@ -86,6 +113,9 @@ namespace mx {
 		// == Functions.
 		// WM_TIMER.
 		virtual LSW_HANDLED					Timer( UINT_PTR _uiptrId, TIMERPROC _tpProc );
+
+		// WM_CONTEXTMENU.
+		virtual LSW_HANDLED					ContextMenu( CWidget * _pwControl, INT _iX, INT _iY );
 	};
 
 }	// namespace mx
