@@ -122,6 +122,20 @@ namespace mx {
 			MX_ET_QUICK_EXP,
 		};
 
+		// Subsearch evaluation types.
+		enum MX_SUB_EVAL_TYPES {
+			MX_SET_EXACT,
+			MX_SET_INCREASED,
+			MX_SET_DECREASED,
+			MX_SET_RANGE,
+			MX_SET_SAME_AS_BEFORE,
+			MX_SET_DIFFERENT_FROM_BEFORE,
+			MX_SET_CHANGED_BY,
+			MX_SET_CHANGED_BY_PERCENT,
+			MX_SET_SAME_AS_ORIGINAL,
+			MX_SET_QUICK_EXP,
+		};
+
 		// String search types.
 		enum MX_STRING_SEARCH_TYPES {
 			MX_SST_ASCII,				// Search string not encoded.
@@ -541,6 +555,9 @@ namespace mx {
 
 		// MX_EVAL_TYPES value to a string.
 		static const WCHAR *			EvaluationTypeToString( CUtilities::MX_EVAL_TYPES _etType, std::wstring &_sString );
+
+		// MX_SUB_EVAL_TYPES value to a string.
+		static const WCHAR *			SubEvaluationTypeToString( CUtilities::MX_SUB_EVAL_TYPES _setType, std::wstring &_sString );
 
 		// Converts an ee::CExpEvalContainer::EE_RESULT to a CUtilities::MX_DATA_TYPE with the given data type.
 		static CUtilities::MX_DATA_TYPE	ExpEvalResultToDataType( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtDataType );

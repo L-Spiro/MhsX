@@ -121,6 +121,9 @@ namespace mx {
 		// Gets the total number of results.  Should be called between Lock() and Unlock().
 		uint64_t							TotalResults() const { return SearchResults() ? SearchResults()->TotalResults() : 0; }
 
+		// Gets the number of results between built-in Lock() and Unlock() calls.
+		uint64_t							TotalResultsQuick() { MX_SEARCH_LOCK slLock( this ); return TotalResults(); }
+
 		// Unlocks after done with the buffer returned by GetResultFast().
 		virtual void						Unlock() const { --m_i32LockCount; assert( m_i32LockCount >= 0 ); m_csCrit.LeaveCriticalSection(); }
 

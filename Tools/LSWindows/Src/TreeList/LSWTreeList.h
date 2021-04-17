@@ -6,6 +6,7 @@
 
 
 #define LSW_TREELIST_LEFT_MARGIN			3
+#define LSW_TREELIST_INVALID				static_cast<size_t>(~0ULL)
 
 
 namespace lsw {
@@ -68,7 +69,34 @@ namespace lsw {
 		}
 
 		// Gets the maximum width in pixels of a column.
-		virtual INT							GetColumnTextWidth( INT _iIdx );
+		virtual INT							GetColumnTextWidth( INT _iIdx ) const;
+
+		// Gathers the selected items into a vector.
+		size_t								GatherSelected( std::vector<HTREEITEM> &_vReturn, bool _bIncludeNonVisible = false ) const;
+
+		// Returns true if any of the selected items have children and are not in expanded view.
+		bool								AnySelectedHasUnexpandedChildren() const;
+
+		// Returns true if any of the selected items have children and are in expanded view.
+		bool								AnySelectedHasExpandedChildren() const;
+
+		// Returns true if any of the items have children and are not in expanded view.
+		bool								AnyHasUnexpandedChildren() const;
+
+		// Returns true if any of the items have children and are in expanded view.
+		bool								AnyHasExpandedChildren() const;
+
+		// Expands selected items.
+		void								ExpandSelected() const;
+
+		// Expands all items.
+		void								ExpandAll() const;
+
+		// Collapses selected items.
+		void								CollapseSelected() const;
+
+		// Collapses all items.
+		void								CollapseAll() const;
 
 		// A helper to easily create a tree view item to be inserted with only text.
 		static TVINSERTSTRUCTW				DefaultItem( const WCHAR * _pwcText, HTREEITEM _tiParent = TVI_ROOT, HTREEITEM _tiInsertAfter = TVI_LAST );
@@ -83,14 +111,18 @@ namespace lsw {
 		struct LSW_TREE_ROW {
 			std::vector<std::wstring>		vStrings;		// Length matches GetColumnCount().
 			LPARAM							lpParam;		// The lParam originally associated with the tree item for this row.
+			HTREEITEM						htiItem;		// The tree item associated with this data.
+			UINT							uiStateEx;		// Additional state information.  Manages multi-select.
 		};
 
+		// Parameters for painting.
 		struct LSW_PAINTPARMS {
 			RECT							rClient;
 			INT								iHeaderCount;
 			HTREEITEM						hStart;
 			INT								iIndex;
 		};
+
 
 		// == Members.
 		// The list view.
@@ -115,6 +147,8 @@ namespace lsw {
 		WNDPROC								m_wpHeaderProc;
 		// Book keeping.  One entry per row.
 		std::vector<LSW_TREE_ROW>			m_vRows;
+		// Index of the last selection.
+		size_t								m_stLastSel;
 		// Lock for drawing.
 		bool								m_bLocked;
 		// Window property.
@@ -171,7 +205,23 @@ namespace lsw {
 		void								Redraw( bool _bUpdateNow = false );
 
 		// Gets a tree item's state.
-		UINT								GetTreeItemState( HTREEITEM _tiItem );
+		UINT								GetTreeItemState( HTREEITEM _tiItem, LPARAM * _lpParm = nullptr ) const;
+
+		// Selects a tree item (or NULL to unselect all tree items).
+		BOOL								Select( HTREEITEM _htiItem, UINT _uiCode, LPARAM _lpParm = -1 );
+
+		// Toggles the selection of a given tree item (or NULL to unselect all tree items).
+		BOOL								ToggleSelect( HTREEITEM _htiItem, UINT _uiCode, LPARAM _lpParm = -1 );
+
+		// Selects only the given item, removing selection from all other items (or NULL to unselect all tree items).
+		BOOL								SelectOnly( HTREEITEM _htiItem, UINT _uiCode, LPARAM _lpParm = -1 );
+
+		// Drags a selection from the item to which m_stLastSel points until (and including) _htiItem, unless _htiItem is NULL, in which case
+		//	all items are unselected.
+		BOOL								DragSelect( HTREEITEM _htiItem, UINT _uiCode, bool _bAddToSelection, LPARAM _lpParm = -1 );
+
+		// Gathers the selected items into a vector.
+		void								GatherSelected( HTREEITEM _htiFrom, std::vector<HTREEITEM> &_vReturn, bool _bIncludeNonVisible ) const;
 
 		// Takes an item's rectangle and produces a new rectangle where an expand/contract icon should be displayed.
 		static LSW_RECT						GetExpandIconRectFromItemRect( const LSW_RECT &_rItem );

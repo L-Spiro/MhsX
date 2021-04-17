@@ -75,8 +75,8 @@ namespace mx {
 		{ CConverterLayout::MX_CWI_FLOAT16_LE, ee::EE_NC_FLOATING, 16, false, false, GetValue, SetValueFloating<5, 11, true, true, MX_FLOAT16_SIG_DIG> },
 		{ CConverterLayout::MX_CWI_FLOAT16_BE, ee::EE_NC_FLOATING, 16, true, false, GetValue, SetValueFloating<5, 11, true, true, MX_FLOAT16_SIG_DIG> },
 
-		{ CConverterLayout::MX_CWI_FLOAT24_LE, ee::EE_NC_FLOATING, 24, false, false, GetValue, SetValueFloating<7, 16, false, true, MX_FLOAT24_SIG_DIG> },
-		{ CConverterLayout::MX_CWI_FLOAT24_BE, ee::EE_NC_FLOATING, 24, true, false, GetValue, SetValueFloating<7, 16, false, true, MX_FLOAT24_SIG_DIG> },
+		/*{ CConverterLayout::MX_CWI_FLOAT24_LE, ee::EE_NC_FLOATING, 24, false, false, GetValue, SetValueFloating<7, 16, false, true, MX_FLOAT24_SIG_DIG> },
+		{ CConverterLayout::MX_CWI_FLOAT24_BE, ee::EE_NC_FLOATING, 24, true, false, GetValue, SetValueFloating<7, 16, false, true, MX_FLOAT24_SIG_DIG> },*/
 
 		{ CConverterLayout::MX_CWI_FLOAT32_LE, ee::EE_NC_FLOATING, 32, false, false, GetValue, SetValueFloating<8, 24, true, true, MX_FLOAT32_SIG_DIG> },
 		{ CConverterLayout::MX_CWI_FLOAT32_BE, ee::EE_NC_FLOATING, 32, true, false, GetValue, SetValueFloating<8, 24, true, true, MX_FLOAT32_SIG_DIG> },
@@ -872,8 +872,7 @@ namespace mx {
 			vTmp = CUtilities::EscapeAllW( ssTmp, false );
 		}
 		else {
-			vTmp = CUtilities::EscapeStandard( ssTmp, false );
-			
+			vTmp = CUtilities::EscapeStandard( ssTmp, false );			
 		}
 		_pwControl->SetTextW( CUtilities::Utf32StringToWString( vTmp.data(), vTmp.size() ).c_str() );
 	}
@@ -891,8 +890,7 @@ namespace mx {
 			vTmp = CUtilities::EscapeAllW( ssTmp, false );
 		}
 		else {
-			vTmp = CUtilities::EscapeStandard( ssTmp, false );
-			
+			vTmp = CUtilities::EscapeStandard( ssTmp, false );			
 		}
 		_pwControl->SetTextW( CUtilities::Utf32StringToWString( vTmp.data(), vTmp.size() ).c_str() );
 	}

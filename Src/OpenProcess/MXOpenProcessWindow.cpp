@@ -52,8 +52,10 @@ namespace mx {
 			}
 		}
 
-		MainList();		
-
+		MainList();
+		if ( plvLIst ) {
+			plvLIst->SetFocus();
+		}
 
 		return LSW_H_CONTINUE;
 	}

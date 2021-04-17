@@ -153,6 +153,11 @@ namespace mx {
 				pmmwMain->ShowLastSearch();
 				break;
 			}
+			case CFoundAddressLayout::MX_BC_SUBSEARCH : {
+				CMhsMainWindow * pmmwMain = static_cast<CMhsMainWindow *>(FindParent( mx::CMainWindowLayout::MX_MWI_MAINWINDOW ));
+				pmmwMain->ShowStandardSubsearch();
+				break;
+			}
 		}
 		return LSW_H_CONTINUE;
 	}
@@ -420,30 +425,8 @@ namespace mx {
 						m_miFileMenu
 					},*/
 				};
-
-				std::vector<LSW_MENU_LAYOUT> vMenus;
-				std::vector<std::vector<LSW_MENU_ITEM> *> vMenuItems;
-				std::vector<std::vector<CSecureWString> *> vMenuStrings;
-				CLayoutManager::UnencryptMenu( miMenus, MX_ELEMENTS( miMenus ),
-					vMenus,
-					vMenuItems,
-					vMenuStrings );
-
-				HMENU hMenu = NULL;
 				mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
-				hMenu = plmLayout->CreatePopupMenu( &vMenus[0], vMenus.size() );
-
-				if ( _iX == -1 && _iY == -1 ) {
-					POINT pPos;
-					::GetCursorPos( &pPos );
-					_iX = pPos.x;
-					_iY = pPos.y;
-				}
-				::TrackPopupMenu( hMenu,
-					TPM_LEFTALIGN | TPM_RIGHTBUTTON,
-					_iX, _iY, 0, Wnd(), NULL );
-
-				CLayoutManager::CleanEncryptedMenu( vMenuItems, vMenuStrings );
+				plmLayout->CreatePopupMenuEx( this, miMenus, MX_ELEMENTS( miMenus ), _iX, _iY );
 				break;
 			}
 		}

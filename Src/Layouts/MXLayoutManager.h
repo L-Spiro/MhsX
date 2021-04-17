@@ -27,6 +27,7 @@ namespace mx {
 		MX_NEW_POINTER_SEARCH,
 		MX_NEW_STRING_SEARCH,
 		MX_NEW_EXPRESSION_TYPE_SEARCH,
+		MX_STANDARD_SUBSEARCH,
 		MX_SEARCH_PROGRESS,
 		MX_PE_WORKS,
 		MX_STRING_THEORY,
@@ -38,6 +39,10 @@ namespace mx {
 		// == Functions.
 		// Creates a class based on its type.
 		virtual CWidget *				CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data );
+
+		// Creates a pop-up menu.
+		virtual bool					CreatePopupMenuEx( CWidget * _pwParent, const LSW_MENU_LAYOUT * _pmlLayout, size_t _sTotal,
+			INT _iX, INT _iY );
 
 		// Creates a copy of the given array of LSW_WIDGET_LAYOUT objects with LSW_WIDGET_LAYOUT::pwcText and the expressions.
 		static void						UnencryptLayouts( const LSW_WIDGET_LAYOUT * _pwlLayouts, size_t _sTotal,

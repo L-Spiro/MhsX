@@ -272,6 +272,7 @@
     <ClCompile Include="Src\Layouts\MXOptionsLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXPeWorksLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXSearchProgressLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXStandardSubsearchLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXStringTheoryLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXTemplateLayout.cpp" />
     <ClCompile Include="Src\main.cpp" />
@@ -342,8 +343,6 @@
     <ClCompile Include="Src\RegEx\Oniguruma\utf32_be.c" />
     <ClCompile Include="Src\RegEx\Oniguruma\utf32_le.c" />
     <ClCompile Include="Src\RegEx\Oniguruma\utf8.c" />
-    <ClCompile Include="Src\RegEx\RexAlgorithm.cpp" />
-    <ClCompile Include="Src\RegEx\RexInterface.cpp" />
     <ClCompile Include="Src\Search\MXAddressChunkList.cpp" />
     <ClCompile Include="Src\Search\MXNewDataTypeSearchWindow.cpp" />
     <ClCompile Include="Src\Search\MXNewExpressionSearchWindow.cpp" />
@@ -355,6 +354,7 @@
     <ClCompile Include="Src\Search\MXSearchResult2.cpp" />
     <ClCompile Include="Src\Search\MXSearchResultBase.cpp" />
     <ClCompile Include="Src\Search\MXSearchResultRef.cpp" />
+    <ClCompile Include="Src\Search\MXStandardSubsearchWindow.cpp" />
     <ClCompile Include="Src\Strings\MXStringDecoder.cpp" />
     <ClCompile Include="Src\StringTheory\MXStringTheoryWindow.cpp" />
     <ClCompile Include="Src\System\MXSystem.cpp" />
@@ -393,6 +393,7 @@
     <ClInclude Include="Src\Layouts\MXOptionsLayout.h" />
     <ClInclude Include="Src\Layouts\MXPeWorksLayout.h" />
     <ClInclude Include="Src\Layouts\MXSearchProgressLayout.h" />
+    <ClInclude Include="Src\Layouts\MXStandardSubsearchLayout.h" />
     <ClInclude Include="Src\Layouts\MXStringTheoryLayout.h" />
     <ClInclude Include="Src\Layouts\MXTemplateLayout.h" />
     <ClInclude Include="Src\MainWindow\MXMhsMainWindow.h" />
@@ -423,8 +424,6 @@
     <ClInclude Include="Src\RegEx\Oniguruma\regint.h" />
     <ClInclude Include="Src\RegEx\Oniguruma\regparse.h" />
     <ClInclude Include="Src\RegEx\Oniguruma\st.h" />
-    <ClInclude Include="Src\RegEx\RexAlgorithm.h" />
-    <ClInclude Include="Src\RegEx\RexInterface.h" />
     <ClInclude Include="Src\Search\MXAddressChunkList.h" />
     <ClInclude Include="Src\Search\MXNewDataTypeSearchWindow.h" />
     <ClInclude Include="Src\Search\MXNewExpressionSearchWindow.h" />
@@ -437,6 +436,7 @@
     <ClInclude Include="Src\Search\MXSearchResultBase.h" />
     <ClInclude Include="Src\Search\MXSearchResultLocker.h" />
     <ClInclude Include="Src\Search\MXSearchResultRef.h" />
+    <ClInclude Include="Src\Search\MXStandardSubsearchWindow.h" />
     <ClInclude Include="Src\Strings\MXSecureString.h" />
     <ClInclude Include="Src\Strings\MXSecureWString.h" />
     <ClInclude Include="Src\StringTheory\MXStringTheoryWindow.h" />

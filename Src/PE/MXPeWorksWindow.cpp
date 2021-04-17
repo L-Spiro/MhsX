@@ -97,7 +97,7 @@ namespace mx {
 			0,																		// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
-			static_cast<DWORD>(ptTab->Id()),			// dwParentId
+			static_cast<DWORD>(ptTab->Id()),		// dwParentId
 
 //#if 0
 			sLeftSizeExp.c_str(), 0,				// pcLeftSizeExp
@@ -118,7 +118,7 @@ namespace mx {
 
 		TCITEMW tie = { 0 };
 		tie.mask = TCIF_TEXT;
-		tie.pszText = const_cast<LPWSTR>(::wcsrchr( _pwcFile, L'\\' ));
+		tie.pszText = const_cast<LPWSTR>(std::wcsrchr( _pwcFile, L'\\' ));
 		if ( tie.pszText == NULL ) { tie.pszText = const_cast<LPWSTR>(_pwcFile); }
 		else { tie.pszText++; }
 
@@ -136,7 +136,7 @@ namespace mx {
 			return false;
 		}
 
-		m_vTabs.push_back( tTab );
+		m_vTabs.insert( m_vTabs.begin(), tTab );
 
 
 
@@ -225,6 +225,47 @@ namespace mx {
 					if ( !LoadFile( ofnOpenFile.lpstrFile ) ) {
 					}
 				}
+				break;
+			}
+			case CPeWorksLayout::MX_PEW_COPY_FIELD : {
+				CopyField( false );
+				break;
+			}
+			case CPeWorksLayout::MX_PEW_COPY_VALUE : {
+				CopyValue( false );
+				break;
+			}
+			case CPeWorksLayout::MX_PEW_COPY_OFFSET : {
+				CopyOffset( false );
+				break;
+			}
+			case CPeWorksLayout::MX_PEW_COPY_BYTES : {
+				CopyBytes( false );
+				break;
+			}
+			case CPeWorksLayout::MX_PEW_COPY_DESC : {
+				CopyDesc( false );
+				break;
+			}
+			case CPeWorksLayout::MX_PEW_COPY_ALL : {
+				CopyAll( false );
+				break;
+			}
+
+			case CPeWorksLayout::MX_PEW_COPY_EXPAND_SELECTED : {
+				CurTabExpandSelected();
+				break;
+			}
+			case CPeWorksLayout::MX_PEW_COPY_EXPAND_ALL : {
+				CurTabExpandAll();
+				break;
+			}
+			case CPeWorksLayout::MX_PEW_COPY_COLLAPSE_SELECTED : {
+				CurTabCollapseSelected();
+				break;
+			}
+			case CPeWorksLayout::MX_PEW_COPY_COLLAPSE_ALL : {
+				CurTabCollapseAll();
 				break;
 			}
 		}
@@ -3099,6 +3140,154 @@ namespace mx {
 			ssCString += "\\";
 		}
 		return CUtilities::StringToWString( ssCString );
+	}
+
+	// WM_CONTEXTMENU.
+	CWidget::LSW_HANDLED CPeWorksWindow::ContextMenu( CWidget * _pwControl, INT _iX, INT _iY ) {
+		if ( _pwControl->Id() == CPeWorksLayout::MX_PEW_TABS ) {
+			bool bExpSel = CurTabAnySelectedHasUnexpandedChildren();
+			bool bExpAll = CurTabAnyHasUnexpandedChildren();
+			bool bColSel = CurTabAnySelectedHasExpandedChildren();
+			bool bColAll = CurTabAnyHasExpandedChildren();
+			LSW_MENU_ITEM miMenuBar[] = {
+				//bIsSeperator	dwId													bCheckable	bChecked	bEnabled	lpwcText, stTextLen												bSkip
+				{ FALSE,		CPeWorksLayout::MX_PEW_COPY_FIELD,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_05239A67_Copy__Field, _LEN_05239A67 ),			FALSE },
+				{ FALSE,		CPeWorksLayout::MX_PEW_COPY_VALUE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_43A1870B_Copy__Value, _LEN_43A1870B ),			FALSE },
+				{ FALSE,		CPeWorksLayout::MX_PEW_COPY_OFFSET,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_EF323132_Copy__Offset, _LEN_EF323132 ),			FALSE },
+				{ FALSE,		CPeWorksLayout::MX_PEW_COPY_BYTES,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_C928AB0C_Copy__Raw_Bytes, _LEN_C928AB0C ),		FALSE },
+				{ FALSE,		CPeWorksLayout::MX_PEW_COPY_DESC,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_03939D2C_Copy__Desc, _LEN_03939D2C ),			FALSE },
+				{ FALSE,		CPeWorksLayout::MX_PEW_COPY_ALL,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_9B7D368F_Copy_A_ll, _LEN_9B7D368F ),			FALSE },
+				{ TRUE,			0,														FALSE,		FALSE,		TRUE,		nullptr,														FALSE },
+				{ FALSE,		CPeWorksLayout::MX_PEW_COPY_EXPAND_SELECTED,			FALSE,		FALSE,		bExpSel,	MW_MENU_TXT( _T_BBEDF334_Expand_Selec_ted, _LEN_BBEDF334 ),		FALSE },
+				{ FALSE,		CPeWorksLayout::MX_PEW_COPY_EXPAND_ALL,					FALSE,		FALSE,		bExpAll,	MW_MENU_TXT( _T_465B3E6C_E_xpand_All, _LEN_465B3E6C ),			FALSE },
+				{ FALSE,		CPeWorksLayout::MX_PEW_COPY_COLLAPSE_SELECTED,			FALSE,		FALSE,		bColSel,	MW_MENU_TXT( _T_89E206F0_C_ollapse_Selected, _LEN_89E206F0 ),	FALSE },
+				{ FALSE,		CPeWorksLayout::MX_PEW_COPY_COLLAPSE_ALL,				FALSE,		FALSE,		bColAll,	MW_MENU_TXT( _T_99D9F557__Collapse_All, _LEN_99D9F557 ),		FALSE },
+			};
+
+			const LSW_MENU_LAYOUT miMenus[] = {
+				{
+					MX_M_CONTEXT_MENU,
+					0,
+					0,
+					MX_ELEMENTS( miMenuBar ),
+					miMenuBar
+				},
+				/*{
+					MX_MWMI_MENU_FILE,
+					MX_MWMI_MENU_BAR,
+					MX_MWMI_FILE,
+					MX_ELEMENTS( m_miFileMenu ),
+					m_miFileMenu
+				},*/
+			};
+			mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
+			plmLayout->CreatePopupMenuEx( this, miMenus, MX_ELEMENTS( miMenus ), _iX, _iY );
+		}
+		return lsw::CMainWindow::ContextMenu( _pwControl, _iX, _iY );
+	}
+
+	// Informs tha a child tab closed one of it headers.
+	void CPeWorksWindow::ChildTabClosed( CWidget * _pwChild, INT _iTab ) {
+		//CTab * ptTab = reinterpret_cast<CTab *>(_pwChild);
+		if ( _iTab < m_vTabs.size() ) {
+			delete m_vTabs[_iTab].ppoPeObject;
+			//delete m_vTabs[_iTab].ptWidget;	// Deleted by the tab.
+			m_vTabs.erase( m_vTabs.begin() + _iTab );
+		}
+	}
+
+	// Copies all of the given field in the current tab.
+	bool CPeWorksWindow::CopyAny( INT _iIdx, bool _bCopyHidden ) {
+		CTab * ptTab = GetTab();
+		if ( !ptTab ) { return false; }
+
+		int iSel = ptTab->GetCurSel();
+		if ( iSel >= m_vTabs.size() ) { return false; }
+		if ( !m_vTabs[iSel].ptWidget ) { return false; }
+		std::vector<HTREEITEM> vItems;
+		m_vTabs[iSel].ptWidget->GatherSelected( vItems, _bCopyHidden );
+		CSecureWString swsString, swsTmp;
+		for ( size_t I = 0; I < vItems.size(); ++I ) {
+			if ( !m_vTabs[iSel].ptWidget->GetItemText( vItems[I], _iIdx, swsTmp ) ) { return false; }
+			if ( swsString.size() ) {
+				swsString.push_back( L'\r' );
+				swsString.push_back( L'\n' );
+			}
+			swsString.append( swsTmp );
+		}
+
+		if ( swsString.size() ) {
+			lsw::LSW_CLIPBOARD cbClipBoard( Wnd(), true );
+			cbClipBoard.SetText( swsString.c_str(), swsString.size() );
+		}
+		return true;
+	}
+
+	// Copies all of the Field fields in the current tab.
+	bool CPeWorksWindow::CopyField( bool _bCopyHidden ) {
+		return CopyAny( MW_PE_FIELD, _bCopyHidden );
+	}
+
+	// Copies all of the Value fields in the current tab.
+	bool CPeWorksWindow::CopyValue( bool _bCopyHidden ) {
+		return CopyAny( MW_PE_VALUE, _bCopyHidden );
+	}
+
+	// Copies all of the Offset fields in the current tab.
+	bool CPeWorksWindow::CopyOffset( bool _bCopyHidden ) {
+		return CopyAny( MW_PE_OFFSET, _bCopyHidden );
+	}
+
+	// Copies all of the Raw Bytes fields in the current tab.
+	bool CPeWorksWindow::CopyBytes( bool _bCopyHidden ) {
+		return CopyAny( MW_PE_BYTES, _bCopyHidden );
+	}
+
+	// Copies all of the Description fields in the current tab.
+	bool CPeWorksWindow::CopyDesc( bool _bCopyHidden ) {
+		return CopyAny( MW_PE_DESC, _bCopyHidden );
+	}
+
+	// Copies all of the fields in the current tab.
+	bool CPeWorksWindow::CopyAll( bool _bCopyHidden ) {
+		CTab * ptTab = GetTab();
+		if ( !ptTab ) { return false; }
+
+		if ( ptTab->GetCurSel() >= m_vTabs.size() ) { return false; }
+		if ( !m_vTabs[ptTab->GetCurSel()].ptWidget ) { return false; }
+		std::vector<HTREEITEM> vItems;
+		m_vTabs[ptTab->GetCurSel()].ptWidget->GatherSelected( vItems, _bCopyHidden );
+		CSecureWString swsString, swsTmp;
+		for ( size_t I = 0; I < vItems.size(); ++I ) {
+			if ( swsString.size() ) {
+				swsString.push_back( L'\r' );
+				swsString.push_back( L'\n' );
+			}
+			if ( !m_vTabs[ptTab->GetCurSel()].ptWidget->GetItemText( vItems[I], MW_PE_FIELD, swsTmp ) ) { return false; }
+			swsString.append( swsTmp );
+
+			swsString.push_back( L'\t' );
+			if ( !m_vTabs[ptTab->GetCurSel()].ptWidget->GetItemText( vItems[I], MW_PE_VALUE, swsTmp ) ) { return false; }
+			swsString.append( swsTmp );
+
+			swsString.push_back( L'\t' );
+			if ( !m_vTabs[ptTab->GetCurSel()].ptWidget->GetItemText( vItems[I], MW_PE_OFFSET, swsTmp ) ) { return false; }
+			swsString.append( swsTmp );
+
+			swsString.push_back( L'\t' );
+			if ( !m_vTabs[ptTab->GetCurSel()].ptWidget->GetItemText( vItems[I], MW_PE_BYTES, swsTmp ) ) { return false; }
+			swsString.append( swsTmp );
+
+			swsString.push_back( L'\t' );
+			if ( !m_vTabs[ptTab->GetCurSel()].ptWidget->GetItemText( vItems[I], MW_PE_DESC, swsTmp ) ) { return false; }
+			swsString.append( swsTmp );
+		}
+
+		if ( swsString.size() ) {
+			lsw::LSW_CLIPBOARD cbClipBoard( Wnd(), true );
+			cbClipBoard.SetText( swsString.c_str(), swsString.size() );
+		}
+		return true;
 	}
 
 }	// namespace mx

@@ -30,6 +30,11 @@ namespace mx {
 			MX_I_TOTAL,
 		};
 
+		// Menus.
+		enum MX_MENUS {
+			MX_M_CONTEXT_MENU				= 100,
+		};
+
 
 		// == Functions.
 		// Loads a file.
@@ -183,6 +188,130 @@ namespace mx {
 
 		// Creates a resource name string given a directory stack.
 		CSecureWString						CreateResourceNameString( const CPeObject::MX_EXTRACTED_RESOURCE &_erResource, const mx::CPeObject &_poPeObject );
+
+		// WM_CONTEXTMENU.
+		virtual LSW_HANDLED					ContextMenu( CWidget * _pwControl, INT _iX, INT _iY );
+
+		// Informs tha a child tab closed one of it headers.
+		virtual void						ChildTabClosed( CWidget * _pwChild, INT _iTab );
+
+		// Copies all of the given field in the current tab.
+		bool								CopyAny( INT _iIdx, bool _bCopyHidden = false );
+
+		// Copies all of the Field fields in the current tab.
+		bool								CopyField( bool _bCopyHidden = false );
+
+		// Copies all of the Value fields in the current tab.
+		bool								CopyValue( bool _bCopyHidden = false );
+
+		// Copies all of the Offset fields in the current tab.
+		bool								CopyOffset( bool _bCopyHidden = false );
+
+		// Copies all of the Raw Bytes fields in the current tab.
+		bool								CopyBytes( bool _bCopyHidden = false );
+
+		// Copies all of the Description fields in the current tab.
+		bool								CopyDesc( bool _bCopyHidden = false );
+
+		// Copies all of the fields in the current tab.
+		bool								CopyAll( bool _bCopyHidden = false );
+
+		// Does the current tab has any selected fields with children that are unexpanded?
+		bool								CurTabAnySelectedHasUnexpandedChildren() const {
+			CTab * ptTab = GetTab();
+			if ( !ptTab ) { return false; }
+
+			int iSel = ptTab->GetCurSel();
+			if ( iSel >= m_vTabs.size() ) { return false; }
+			if ( !m_vTabs[iSel].ptWidget ) { return false; }
+			return m_vTabs[iSel].ptWidget->AnySelectedHasUnexpandedChildren();
+		}
+
+		// Does the current tab has any selected fields with children that are expanded?
+		bool								CurTabAnySelectedHasExpandedChildren() const {
+			CTab * ptTab = GetTab();
+			if ( !ptTab ) { return false; }
+
+			int iSel = ptTab->GetCurSel();
+			if ( iSel >= m_vTabs.size() ) { return false; }
+			if ( !m_vTabs[iSel].ptWidget ) { return false; }
+			return m_vTabs[iSel].ptWidget->AnySelectedHasExpandedChildren();
+		}
+
+		// Does the current tab has any fields with children that are unexpanded?
+		bool								CurTabAnyHasUnexpandedChildren() const {
+			CTab * ptTab = GetTab();
+			if ( !ptTab ) { return false; }
+
+			int iSel = ptTab->GetCurSel();
+			if ( iSel >= m_vTabs.size() ) { return false; }
+			if ( !m_vTabs[iSel].ptWidget ) { return false; }
+			return m_vTabs[iSel].ptWidget->AnyHasUnexpandedChildren();
+		}
+
+		// Does the current tab has any fields with children that are expanded?
+		bool								CurTabAnyHasExpandedChildren() const {
+			CTab * ptTab = GetTab();
+			if ( !ptTab ) { return false; }
+
+			int iSel = ptTab->GetCurSel();
+			if ( iSel >= m_vTabs.size() ) { return false; }
+			if ( !m_vTabs[iSel].ptWidget ) { return false; }
+			return m_vTabs[iSel].ptWidget->AnyHasExpandedChildren();
+		}
+
+		// Expands selected items in the current tab.
+		void								CurTabExpandSelected() const {
+			CTab * ptTab = GetTab();
+			if ( ptTab ) {
+				int iSel = ptTab->GetCurSel();
+				if ( iSel < m_vTabs.size() ) {
+					if ( m_vTabs[iSel].ptWidget ) {
+						m_vTabs[iSel].ptWidget->ExpandSelected();
+					}
+				}
+			}
+		}
+
+		// Expands all items in the current tab.
+		void								CurTabExpandAll() const {
+			CTab * ptTab = GetTab();
+			if ( ptTab ) {
+				int iSel = ptTab->GetCurSel();
+				if ( iSel < m_vTabs.size() ) {
+					if ( m_vTabs[iSel].ptWidget ) {
+						m_vTabs[iSel].ptWidget->ExpandAll();
+					}
+				}
+			}
+		}
+
+		// Collapses selected items in the current tab.
+		void								CurTabCollapseSelected() const {
+			CTab * ptTab = GetTab();
+			if ( ptTab ) {
+				int iSel = ptTab->GetCurSel();
+				if ( iSel < m_vTabs.size() ) {
+					if ( m_vTabs[iSel].ptWidget ) {
+						m_vTabs[iSel].ptWidget->CollapseSelected();
+					}
+				}
+			}
+		}
+
+		// Collapses alls items in the current tab.
+		void								CurTabCollapseAll() const {
+			CTab * ptTab = GetTab();
+			if ( ptTab ) {
+				int iSel = ptTab->GetCurSel();
+				if ( iSel < m_vTabs.size() ) {
+					if ( m_vTabs[iSel].ptWidget ) {
+						m_vTabs[iSel].ptWidget->CollapseAll();
+					}
+				}
+			}
+		}
+
 	};
 
 }	// namespace mx

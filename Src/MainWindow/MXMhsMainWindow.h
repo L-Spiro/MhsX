@@ -195,6 +195,9 @@ namespace mx {
 			return 0;
 		}
 
+		// Shows the standard subsearch dialog.
+		uint32_t							ShowStandardSubsearch();
+
 		// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
 		bool								OpenProcess();
 
@@ -212,11 +215,17 @@ namespace mx {
 
 	protected :
 		// == Enumerations.
+		// The last search types.
 		enum MX_SEARCH_TYPES {
 			MX_ST_DATA_TYPE,
 			MX_ST_POINTER,
 			MX_ST_STRING,
 			MX_ST_EXPRESSION,
+		};
+
+		// The last subsearch types.
+		enum MX_SUBSEARCH_TYPES {
+			MX_SST_STANDARD,
 		};
 
 
@@ -253,6 +262,9 @@ namespace mx {
 
 		// The last search that was performed.
 		MX_SEARCH_TYPES						m_stLastSearchType;
+
+		// The last subsearch that was performed.
+		MX_SUBSEARCH_TYPES					m_sstLastSubsearchType;
 
 		// The last options page shown.
 		int32_t								m_i32LastOptionsPage;

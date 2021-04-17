@@ -720,7 +720,7 @@ namespace mx {
 			LSW_LT_CHECK,							// ltType
 			MX_OI_GENERAL_SEARCH_POSTFLUSH,			// wId
 			WC_BUTTONW,								// lpwcClass
-			TRUE,									// bEnabled
+			FALSE,									// bEnabled
 			FALSE,									// bActive
 			MX_GROUP_LEFT,							// iLeft
 			MX_MISC_GROUP_TOP + MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT * 0,				// iTop
@@ -736,7 +736,7 @@ namespace mx {
 			LSW_LT_CHECK,							// ltType
 			MX_OI_GENERAL_SEARCH_PRECACHE,			// wId
 			WC_BUTTONW,								// lpwcClass
-			TRUE,									// bEnabled
+			FALSE,									// bEnabled
 			FALSE,									// bActive
 			MX_GROUP_LEFT,							// iLeft
 			MX_MISC_GROUP_TOP + MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT * 1,				// iTop

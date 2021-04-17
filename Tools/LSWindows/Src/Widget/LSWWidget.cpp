@@ -1207,6 +1207,9 @@ namespace lsw {
 						if ( ptcClose->iTab != -1 && ptcClose->pwWidget ) {
 							static_cast<CTab *>(ptcClose->pwWidget)->DeleteItem( ptcClose->iTab );
 						}
+						if ( ptcClose->pwWidget->Parent() ) {
+							ptcClose->pwWidget->Parent()->ChildTabClosed( ptcClose->pwWidget, ptcClose->iTab );
+						}
 						break;
 					}
 					case TCN_SELCHANGE : {
@@ -1745,8 +1748,14 @@ namespace lsw {
 			// Context menus.
 			// =======================================
 			case WM_CONTEXTMENU : {
+				if ( !_wParam ) { LSW_RET( 0, 0 ); }
 				CWidget * pwControl = LSW_WIN2CLASS( reinterpret_cast<HWND>(_wParam) );
-				if ( !pwControl ) { LSW_RET( 0, 0 ); }
+				HWND hThis = reinterpret_cast<HWND>(_wParam);
+				while ( !pwControl ) {
+					hThis = ::GetParent( hThis );
+					if ( !hThis ) { LSW_RET( 0, 0 ); }
+					pwControl = LSW_WIN2CLASS( hThis );
+				}
 				LSW_HANDLED hHandled = pmwThis->ContextMenu( pwControl, GET_X_LPARAM( _lParam ), GET_Y_LPARAM( _lParam ) );
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
 				break;

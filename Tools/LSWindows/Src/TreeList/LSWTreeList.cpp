@@ -20,6 +20,7 @@ namespace lsw {
 		m_wpTreeViewProc( nullptr ),
 		m_wpTreeListProc( nullptr ),
 		m_wpHeaderProc( nullptr ),
+		m_stLastSel( LSW_TREELIST_INVALID ),
 		m_bLocked( false ) {
 
 		if ( !m_szProp[0] ) {
@@ -107,6 +108,8 @@ namespace lsw {
 			// Add 1 string for each column.
 			int iColumns = GetColumnCount();
 			m_vRows[sIdx].lpParam = _pisStruct->item.lParam;
+			m_vRows[sIdx].uiStateEx = 0;
+			m_vRows[sIdx].htiItem = hItem;
 			try {
 				for ( int I = 0; I < iColumns; ++I ) {
 					m_vRows[sIdx].vStrings.insert( m_vRows[sIdx].vStrings.begin(), std::wstring() );
@@ -232,7 +235,12 @@ namespace lsw {
 				::SendMessageW( m_hHeader, HDM_INSERTITEMW, 0L, reinterpret_cast<LPARAM>(reinterpret_cast<const HD_ITEMW *>(&hdItem)) );
 
 				if ( !m_hTreeView ) {
-					m_hTreeView = ::CreateWindowExW( 0,
+/*#if (NTDDI_VERSION >= NTDDI_VISTA)
+					DWORD dwExStyle = TVS_EX_MULTISELECT;
+#else
+					DWORD dwExStyle = 0;
+#endif*/
+					m_hTreeView = ::CreateWindowExW( 0/*dwExStyle*/,
 					WC_TREEVIEWW,
 					L"",
 					WS_VISIBLE | WS_CHILD | TVS_HASBUTTONS | TVS_SHOWSELALWAYS | TVS_NOHSCROLL | /*TVS_NOSCROLL | *//*TVS_HASLINES | */TVS_LINESATROOT |
@@ -274,7 +282,7 @@ namespace lsw {
 	}
 
 	// Gets the maximum width in pixels of a column.
-	INT CTreeList::GetColumnTextWidth( INT _iIdx ) {
+	INT CTreeList::GetColumnTextWidth( INT _iIdx ) const {
 		if ( _iIdx >= GetColumnCount() ) { return -1; }
 		if ( !m_hTreeView ) { return -1; }
 		HDC hDc = ::GetDC( m_hTreeView );
@@ -311,6 +319,145 @@ namespace lsw {
 		::ReleaseDC( m_hTreeView, hDc );
 		if ( _iIdx > 0 ) { return iRet + LSW_TREELIST_LEFT_MARGIN + 1; }
 		return iRet;
+	}
+
+	// Gathers the selected items into a vector.
+	size_t CTreeList::GatherSelected( std::vector<HTREEITEM> &_vReturn, bool _bIncludeNonVisible ) const {
+		_vReturn.clear();
+		GatherSelected( TreeView_GetRoot( m_hTreeView ), _vReturn, _bIncludeNonVisible );
+		return _vReturn.size();
+	}
+
+	// Returns true if any of the selected items have children and are not in expanded view.
+	bool CTreeList::AnySelectedHasUnexpandedChildren() const {
+		for ( size_t I = 0; I < m_vRows.size(); ++I ) {
+			TVITEM tvItem;
+			tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_CHILDREN;
+			tvItem.hItem = m_vRows[I].htiItem;
+			tvItem.stateMask = ~0;
+			if ( !TreeView_GetItem( m_hTreeView, &tvItem ) ) { return false; }
+			// Is it selected?
+			if ( (tvItem.state | m_vRows[I].uiStateEx) & TVIS_SELECTED ) {
+				// Does it have children and is unexpanded?
+				if ( !(tvItem.state & TVIS_EXPANDED) && tvItem.cChildren != 0 ) { return true; }
+			}
+		}
+		return false;
+	}
+
+	// Returns true if any of the selected items have children and are in expanded view.
+	bool CTreeList::AnySelectedHasExpandedChildren() const {
+		for ( size_t I = 0; I < m_vRows.size(); ++I ) {
+			TVITEM tvItem;
+			tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_CHILDREN;
+			tvItem.hItem = m_vRows[I].htiItem;
+			tvItem.stateMask = ~0;
+			if ( !TreeView_GetItem( m_hTreeView, &tvItem ) ) { return false; }
+			// Is it selected?
+			if ( (tvItem.state | m_vRows[I].uiStateEx) & TVIS_SELECTED ) {
+				// Does it have children and is expanded?
+				if ( (tvItem.state & TVIS_EXPANDED) && tvItem.cChildren != 0 ) { return true; }
+			}
+		}
+		return false;
+	}
+
+	// Returns true if any of the items have children and are not in expanded view.
+	bool CTreeList::AnyHasUnexpandedChildren() const {
+		for ( size_t I = 0; I < m_vRows.size(); ++I ) {
+			TVITEM tvItem;
+			tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_CHILDREN;
+			tvItem.hItem = m_vRows[I].htiItem;
+			tvItem.stateMask = ~0;
+			if ( !TreeView_GetItem( m_hTreeView, &tvItem ) ) { return false; }
+			// Does it have children and is unexpanded?
+			if ( !(tvItem.state & TVIS_EXPANDED) && tvItem.cChildren != 0 ) { return true; }
+		}
+		return false;
+	}
+
+	// Returns true if any of the items have children and are in expanded view.
+	bool CTreeList::AnyHasExpandedChildren() const {
+		for ( size_t I = 0; I < m_vRows.size(); ++I ) {
+			TVITEM tvItem;
+			tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_CHILDREN;
+			tvItem.hItem = m_vRows[I].htiItem;
+			tvItem.stateMask = ~0;
+			if ( !TreeView_GetItem( m_hTreeView, &tvItem ) ) { return false; }
+			// Does it have children and is expanded?
+			if ( (tvItem.state & TVIS_EXPANDED) && tvItem.cChildren != 0 ) { return true; }
+		}
+		return false;
+	}
+
+	// Expands selected items.
+	void CTreeList::ExpandSelected() const {
+		for ( size_t I = 0; I < m_vRows.size(); ++I ) {
+			TVITEM tvItem;
+			tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_CHILDREN;
+			tvItem.hItem = m_vRows[I].htiItem;
+			tvItem.stateMask = ~0;
+			if ( TreeView_GetItem( m_hTreeView, &tvItem ) ) {
+				// Is it selected?
+				if ( (tvItem.state | m_vRows[I].uiStateEx) & TVIS_SELECTED ) {
+					// Does it have children and is unexpanded?
+					if ( !(tvItem.state & TVIS_EXPANDED) && tvItem.cChildren != 0 ) {
+						TreeView_Expand( m_hTreeView, tvItem.hItem, TVE_EXPAND );
+					}
+				}
+			}
+		}
+	}
+
+	// Expands all items.
+	void CTreeList::ExpandAll() const {
+		for ( size_t I = 0; I < m_vRows.size(); ++I ) {
+			TVITEM tvItem;
+			tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_CHILDREN;
+			tvItem.hItem = m_vRows[I].htiItem;
+			tvItem.stateMask = ~0;
+			if ( TreeView_GetItem( m_hTreeView, &tvItem ) ) {
+				// Does it have children and is unexpanded?
+				if ( !(tvItem.state & TVIS_EXPANDED) && tvItem.cChildren != 0 ) {
+					TreeView_Expand( m_hTreeView, tvItem.hItem, TVE_EXPAND );
+				}
+			}
+		}
+	}
+
+	// Collapses selected items.
+	void CTreeList::CollapseSelected() const {
+		for ( size_t I = 0; I < m_vRows.size(); ++I ) {
+			TVITEM tvItem;
+			tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_CHILDREN;
+			tvItem.hItem = m_vRows[I].htiItem;
+			tvItem.stateMask = ~0;
+			if ( TreeView_GetItem( m_hTreeView, &tvItem ) ) {
+				// Is it selected?
+				if ( (tvItem.state | m_vRows[I].uiStateEx) & TVIS_SELECTED ) {
+					// Does it have children and is expanded?
+					if ( (tvItem.state & TVIS_EXPANDED) && tvItem.cChildren != 0 ) {
+						TreeView_Expand( m_hTreeView, tvItem.hItem, TVE_COLLAPSE );
+					}
+				}
+			}
+		}
+	}
+
+	// Collapses all items.
+	void CTreeList::CollapseAll() const {
+		for ( size_t I = 0; I < m_vRows.size(); ++I ) {
+			TVITEM tvItem;
+			tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_CHILDREN;
+			tvItem.hItem = m_vRows[I].htiItem;
+			tvItem.stateMask = ~0;
+			if ( TreeView_GetItem( m_hTreeView, &tvItem ) ) {
+				// Does it have children and is expanded?
+				if ( (tvItem.state & TVIS_EXPANDED) && tvItem.cChildren != 0 ) {
+					TreeView_Expand( m_hTreeView, tvItem.hItem, TVE_COLLAPSE );
+				}
+			}
+		}
 	}
 
 	// A helper to easily create a tree view item to be inserted with only text.
@@ -462,10 +609,30 @@ namespace lsw {
 			}
 		}
 		else {
-			UINT uiState = GetTreeItemState( tiItem );
-			if ( TreeView_Select( m_hTreeView, ((_dwVirtKeys & MK_CONTROL) && uiState & TVIS_SELECTED) ? NULL : tiItem, TVGN_CARET ) ) {
-				Redraw( TRUE );
-				return LSW_H_HANDLED;
+			LPARAM lpParm;
+			UINT uiState = GetTreeItemState( tiItem, &lpParm );
+			if ( lpParm >= 0 ) {
+				uiState |= m_vRows[lpParm].uiStateEx;
+				//if ( TreeView_Select( m_hTreeView, ((_dwVirtKeys & MK_CONTROL) && uiState & TVIS_SELECTED) ? NULL : tiItem, TVGN_CARET ) ) {
+				if ( _dwVirtKeys & MK_CONTROL ) {
+					if ( ToggleSelect( tiItem, TVGN_CARET, lpParm ) ) {
+						Redraw( TRUE );
+						return LSW_H_HANDLED;
+					}
+				}
+				else if ( _dwVirtKeys & MK_SHIFT ) {
+					//if ( Select( tiItem, TVGN_CARET, lpParm ) ) {
+					if ( DragSelect( tiItem, TVGN_CARET, true, lpParm ) ) {
+						Redraw( TRUE );
+						return LSW_H_HANDLED;
+					}
+				}
+				else {
+					if ( SelectOnly( tiItem, TVGN_CARET, lpParm ) ) {
+						Redraw( TRUE );
+						return LSW_H_HANDLED;
+					}
+				}
 			}
 		}
 		return CWidget::LButtonDown( _dwVirtKeys, _pCursorPos );
@@ -788,7 +955,7 @@ namespace lsw {
 			//tvItem.stateMask  = TVIS_STATEIMAGEMASK;
 			if ( !TreeView_GetItem( m_hTreeView, &tvItem ) ) { break; }
 			// Draw it.
-			if ( tvItem.state & TVIS_SELECTED ) {
+			if ( (tvItem.state | m_vRows[tvItem.lParam].uiStateEx) & TVIS_SELECTED ) {
 				::SetBkColor( _hDc, ::GetSysColor( COLOR_HIGHLIGHT ) );
 				::SetTextColor( _hDc, ::GetSysColor( COLOR_HIGHLIGHTTEXT ) );
 			}
@@ -960,14 +1127,178 @@ namespace lsw {
 	}
 
 	// Gets a tree item's state.
-	UINT CTreeList::GetTreeItemState( HTREEITEM _tiItem ) {
+	UINT CTreeList::GetTreeItemState( HTREEITEM _tiItem, LPARAM * _lpParm ) const {
 		TVITEM tvItem;
-		tvItem.mask = TVIF_HANDLE | TVIF_STATE;
+		tvItem.mask = TVIF_HANDLE | TVIF_STATE | (_lpParm ? TVIF_PARAM : 0);
 		tvItem.hItem = _tiItem;
 		tvItem.state = 0;
 		tvItem.stateMask = 0xFF;
+		tvItem.lParam = -1;
 		TreeView_GetItem( m_hTreeView, &tvItem );	// Failure keeps tvItem.state at 0.
+		if ( _lpParm ) {
+			(*_lpParm) = tvItem.lParam;
+		}
 		return tvItem.state;
+	}
+
+	// Selects a tree item (or NULL to unselect all tree items).
+	BOOL CTreeList::Select( HTREEITEM _htiItem, UINT _uiCode, LPARAM _lpParm ) {
+		if ( !_htiItem ) {
+			//if ( TreeView_Select( m_hTreeView, NULL, _uiCode ) ) {
+			{
+				for ( auto I = m_vRows.size(); I--; ) {
+					if ( (GetTreeItemState( m_vRows[I].htiItem ) | m_vRows[I].uiStateEx) & TVIS_SELECTED ) {
+						TreeView_SetItemState( m_hTreeView, m_vRows[I].htiItem, 0, TVIS_SELECTED );
+						m_vRows[I].uiStateEx = m_vRows[I].uiStateEx & ~TVIS_SELECTED;
+					}
+				}
+				m_stLastSel = LSW_TREELIST_INVALID;
+				return TRUE;
+			}
+			return FALSE;
+		}
+		if ( _lpParm == -1 ) {
+			UINT uiState = GetTreeItemState( _htiItem, &_lpParm );
+		}
+		if ( _lpParm >= 0 ) {
+			TreeView_SetItemState( m_hTreeView, _htiItem, TVIS_SELECTED, TVIS_SELECTED );
+			TreeView_EnsureVisible( m_hTreeView, _htiItem );
+			//if ( TreeView_Select( m_hTreeView, _htiItem, _uiCode ) ) {
+				m_vRows[_lpParm].uiStateEx |= TVIS_SELECTED;
+				m_stLastSel = _lpParm;
+				return TRUE;
+			//}
+		}
+		return FALSE;
+	}
+
+	// Toggles the selection of a given tree item (or NULL to unselect all tree items).
+	BOOL CTreeList::ToggleSelect( HTREEITEM _htiItem, UINT _uiCode, LPARAM _lpParm ) {
+		if ( !_htiItem ) { return Select( _htiItem, _uiCode, _lpParm ); }
+
+		if ( _lpParm == -1 ) {
+			UINT uiState = GetTreeItemState( _htiItem, &_lpParm );
+		}
+		if ( _lpParm >= 0 ) {
+			if ( m_vRows[_lpParm].uiStateEx & TVIS_SELECTED ) {
+				// Unselect it.
+				TreeView_SetItemState( m_hTreeView, _htiItem, 0, TVIS_SELECTED );
+				m_vRows[_lpParm].uiStateEx = m_vRows[_lpParm].uiStateEx & ~TVIS_SELECTED;
+			}
+			else {
+				// Select it.
+				TreeView_SetItemState( m_hTreeView, _htiItem, TVIS_SELECTED, TVIS_SELECTED );
+				TreeView_EnsureVisible( m_hTreeView, _htiItem );
+				m_vRows[_lpParm].uiStateEx |= TVIS_SELECTED;
+			}
+			m_stLastSel = _lpParm;
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+	// Selects only the given item, removing selection from all other items (or NULL to unselect all tree items).
+	BOOL CTreeList::SelectOnly( HTREEITEM _htiItem, UINT _uiCode, LPARAM _lpParm ) {
+		if ( !_htiItem ) { return Select( _htiItem, _uiCode, _lpParm ); }
+
+		if ( _lpParm == -1 ) {
+			UINT uiState = GetTreeItemState( _htiItem, &_lpParm );
+		}
+		for ( auto I = m_vRows.size(); I--; ) {
+			if ( I == _lpParm ) {
+				// Select it.
+				TreeView_SetItemState( m_hTreeView, _htiItem, TVIS_SELECTED, TVIS_SELECTED );
+				TreeView_EnsureVisible( m_hTreeView, _htiItem );
+				m_vRows[_lpParm].uiStateEx |= TVIS_SELECTED;
+				m_stLastSel = _lpParm;
+			}
+			else {
+				// Unselect it.
+				if ( (GetTreeItemState( m_vRows[I].htiItem ) | m_vRows[I].uiStateEx) & TVIS_SELECTED ) {
+					// Unselect it.
+					TreeView_SetItemState( m_hTreeView, m_vRows[I].htiItem, 0, TVIS_SELECTED );
+					m_vRows[I].uiStateEx = m_vRows[I].uiStateEx & ~TVIS_SELECTED;
+				}
+			}
+		}
+		return TRUE;
+	}
+
+	// Drags a selection from the item to which m_stLastSel points until (and including) _htiItem, unless _htiItem is NULL, in which case
+	//	all items are unselected.
+	BOOL CTreeList::DragSelect( HTREEITEM _htiItem, UINT _uiCode, bool _bAddToSelection, LPARAM _lpParm ) {
+		if ( !_htiItem || !m_vRows.size() ) { return Select( _htiItem, _uiCode, _lpParm ); }
+
+		if ( _lpParm == -1 ) {
+			_lpParm = GetItemLParam( _htiItem );
+		}
+		size_t stDragFrom = m_stLastSel == LSW_TREELIST_INVALID ? 0 : m_stLastSel;
+		//LPARAM lpDragFromParm = GetItemLParam( _htiItem );
+		HTREEITEM htiThis = TreeView_GetRoot( m_hTreeView );
+		bool bInSelection = false;
+		m_stLastSel = _lpParm;
+		std::vector<HTREEITEM> vStack;
+		vStack.push_back( htiThis );
+		while ( htiThis || vStack.size() ) {
+			if ( !htiThis ) {
+				vStack.pop_back();
+				if ( !vStack.size() ) { break; }
+				htiThis = vStack[vStack.size()-1];
+				htiThis = TreeView_GetNextSibling( m_hTreeView, htiThis );
+				continue;
+			}
+			LPARAM lpThis = LSW_TREELIST_INVALID;
+			UINT uiState = GetTreeItemState( htiThis, &lpThis );
+			if ( htiThis == _htiItem || htiThis == m_vRows[stDragFrom].htiItem ) {
+				// Select it.
+				TreeView_SetItemState( m_hTreeView, htiThis, TVIS_SELECTED, TVIS_SELECTED );
+				//TreeView_EnsureVisible( m_hTreeView, _htiItem );
+				m_vRows[lpThis].uiStateEx |= TVIS_SELECTED;
+
+				if ( bInSelection && _bAddToSelection ) {
+					// We are ending the selection here, and since we don't need to remove the selection
+					//	flag from any furter items we can stop.
+					return TRUE;
+				}
+				bInSelection = !bInSelection;
+			}
+			else if ( bInSelection ) {
+				// Select it.
+				TreeView_SetItemState( m_hTreeView, htiThis, TVIS_SELECTED, TVIS_SELECTED );
+				//TreeView_EnsureVisible( m_hTreeView, htiThis );
+				m_vRows[lpThis].uiStateEx |= TVIS_SELECTED;
+			}
+			else if ( !_bAddToSelection ) {
+				// Unselect it.
+				TreeView_SetItemState( m_hTreeView, htiThis, 0, TVIS_SELECTED );
+				m_vRows[lpThis].uiStateEx = m_vRows[lpThis].uiStateEx & ~TVIS_SELECTED;
+			}
+			if ( uiState & TVIS_EXPANDED ) {
+				vStack[vStack.size()-1] = htiThis;
+				htiThis = TreeView_GetChild( m_hTreeView, htiThis );
+				vStack.push_back( htiThis );
+			}
+			else {
+				htiThis = TreeView_GetNextSibling( m_hTreeView, htiThis );
+			}
+		}
+		return TRUE;
+	}
+
+	// Gathers the selected items into a vector.
+	void CTreeList::GatherSelected( HTREEITEM _htiFrom, std::vector<HTREEITEM> &_vReturn, bool _bIncludeNonVisible ) const {
+		while ( _htiFrom ) {
+			LPARAM lpParm = LSW_TREELIST_INVALID;
+			UINT uiState = GetTreeItemState( _htiFrom, &lpParm );
+			if ( lpParm == LSW_TREELIST_INVALID ) { return; }
+			if ( (uiState | m_vRows[lpParm].uiStateEx) & TVIS_SELECTED ) {
+				_vReturn.push_back( _htiFrom );
+			}
+			if ( _bIncludeNonVisible || (uiState & TVIS_EXPANDED) ) {
+				GatherSelected( TreeView_GetChild( m_hTreeView, _htiFrom ), _vReturn, _bIncludeNonVisible );
+			}
+			_htiFrom = TreeView_GetNextSibling( m_hTreeView, _htiFrom );
+		}
 	}
 
 	// Takes an item's rectangle and produces a new rectangle where an expand/contract icon should be displayed.
@@ -1059,7 +1390,7 @@ namespace lsw {
 			case WM_LBUTTONDBLCLK : {}
 			case WM_MBUTTONDOWN : {}
 			case WM_MBUTTONDBLCLK : {}
-		
+			case WM_RBUTTONDOWN : {}
 			case WM_RBUTTONDBLCLK : { ptlThis->SetFocus(); }
 			case WM_MOUSEHOVER : {}
 			case WM_MOUSEMOVE : {

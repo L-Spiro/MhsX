@@ -57,7 +57,7 @@ namespace mx {
 			MX_OPI_LISTVIEW,						// wId
 			WC_LISTVIEWW,							// lpwcClass
 			TRUE,									// bEnabled
-			FALSE,									// bActive
+			TRUE,									// bActive
 			8,										// iLeft
 			13,										// iTop
 			255,									// dwWidth
@@ -80,7 +80,7 @@ namespace mx {
 			MX_OPI_BUTTON_OK,						// wId
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
-			TRUE,									// bActive
+			FALSE,									// bActive
 			4,										// iLeft
 			182,									// iTop
 			43,										// dwWidth

@@ -19,6 +19,7 @@
 #include "../Search/MXNewPointerSearchWindow.h"
 #include "../Search/MXNewStringSearchWindow.h"
 #include "../Search/MXSearchProgressWindow.h"
+#include "../Search/MXStandardSubsearchWindow.h"
 #include "../StringTheory/MXStringTheoryWindow.h"
 
 
@@ -76,6 +77,9 @@ namespace mx {
 			case MX_NEW_EXPRESSION_TYPE_SEARCH : {
 				return new CNewExpressionSearchWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
+			case MX_STANDARD_SUBSEARCH : {
+				return new CStandardSubsearchWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
 			case MX_SEARCH_PROGRESS : {
 				return new CSearchProgressWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
@@ -90,6 +94,35 @@ namespace mx {
 			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+	}
+
+	// Creates a pop-up menu.
+	bool CLayoutManager::CreatePopupMenuEx( CWidget * _pwParent, const LSW_MENU_LAYOUT * _pmlLayout, size_t _sTotal,
+		INT _iX, INT _iY ) {
+		std::vector<LSW_MENU_LAYOUT> vMenus;
+		std::vector<std::vector<LSW_MENU_ITEM> *> vMenuItems;
+		std::vector<std::vector<CSecureWString> *> vMenuStrings;
+		CLayoutManager::UnencryptMenu( _pmlLayout, _sTotal,
+			vMenus,
+			vMenuItems,
+			vMenuStrings );
+
+		HMENU hMenu = CreatePopupMenu( &vMenus[0], vMenus.size() );
+		if ( !hMenu ) { return false; }
+
+		if ( _iX == -1 && _iY == -1 ) {
+			POINT pPos;
+			::GetCursorPos( &pPos );
+			_iX = pPos.x;
+			_iY = pPos.y;
+		}
+		::TrackPopupMenu( hMenu,
+			TPM_LEFTALIGN | TPM_RIGHTBUTTON,
+			_iX, _iY, 0, _pwParent ? _pwParent->Wnd() : NULL, NULL );
+
+		CLayoutManager::CleanEncryptedMenu( vMenuItems, vMenuStrings );
+
+		return true;
 	}
 
 	// Creates a copy of the given array of LSW_WIDGET_LAYOUT objects with LSW_WIDGET_LAYOUT::pwcText and the expressions.

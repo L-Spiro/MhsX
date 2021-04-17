@@ -1,1 +1,1 @@
-MhsXStrings.exe "MX_" "TableSrc.txt" "TableDest.txt" Table
+MhsXStrings.exe "MX_IMAGE_FILE_MACHINE_" "TableSrc.txt" "TableDest.txt" Table

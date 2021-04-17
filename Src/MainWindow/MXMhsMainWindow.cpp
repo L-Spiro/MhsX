@@ -12,6 +12,7 @@
 #include "../Layouts/MXOptionsLayout.h"
 #include "../Layouts/MXPeWorksLayout.h"
 #include "../Layouts/MXSearchProgressLayout.h"
+#include "../Layouts/MXStandardSubsearchLayout.h"
 #include "../Layouts/MXStringTheoryLayout.h"
 //#include "../Search/MXNewDataTypeSearchWindow.h"
 #include "../System/MXSystem.h"
@@ -90,6 +91,7 @@ namespace mx {
 		m_pfpsFloatingPointStudioWindow( nullptr ),
 		m_cwConverter( nullptr ),
 		m_stLastSearchType( MX_ST_DATA_TYPE ),
+		m_sstLastSubsearchType( MX_SST_STANDARD ),
 		m_i32LastOptionsPage( COptionsWindow::MX_P_GENERAL ) {
 
 		m_pmhMemHack = reinterpret_cast<CMemHack *>(_ui64Data);
@@ -546,6 +548,10 @@ namespace mx {
 				ShowNewExpressionSearch();
 				break;
 			}
+			case CMainWindowLayout::MX_MWMI_SUB : {
+				ShowStandardSubsearch();
+				break;
+			}
 			case CMainWindowLayout::MX_MWMI_SHOWFOUNDADDR : {
 				ShowFoundAddress();
 				break;
@@ -817,7 +823,7 @@ namespace mx {
 		m_stLastSearchType = MX_ST_DATA_TYPE;
 
 		//MX_OPTIONS oOptions = m_pmhMemHack->Options();
-		CNewDataTypeSearchLayout::CreateNewDataTypeSearchDialog( this, m_pmhMemHack );
+		return CNewDataTypeSearchLayout::CreateNewDataTypeSearchDialog( this, m_pmhMemHack );
 		// TODO: Come up with a more graceful way to do this.
 		// A few options can be modified directly in the dialog.  This is a simple way to add
 		//	those to a list to check if options need to be updated
@@ -834,7 +840,7 @@ namespace mx {
 				break;
 			}
 		}*/
-		return 0;
+		//return 0;
 	}
 
 	// Shows a new pointer search.
@@ -849,8 +855,7 @@ namespace mx {
 		m_stLastSearchType = MX_ST_POINTER;
 
 		//MX_OPTIONS oOptions = m_pmhMemHack->Options();
-		CNewPointerSearchLayout::CreateNewPointerSearchDialog( this, m_pmhMemHack );
-		return 0;
+		return CNewPointerSearchLayout::CreateNewPointerSearchDialog( this, m_pmhMemHack );
 	}
 
 	// Shows a new string search.
@@ -865,8 +870,7 @@ namespace mx {
 		m_stLastSearchType = MX_ST_STRING;
 
 		//MX_OPTIONS oOptions = m_pmhMemHack->Options();
-		CNewStringSearchLayout::CreateNewStringSearchDialog( this, m_pmhMemHack );
-		return 0;
+		return CNewStringSearchLayout::CreateNewStringSearchDialog( this, m_pmhMemHack );
 	}
 
 	// Shows a new expression search.
@@ -881,7 +885,34 @@ namespace mx {
 		m_stLastSearchType = MX_ST_EXPRESSION;
 
 		//MX_OPTIONS oOptions = m_pmhMemHack->Options();
-		CNewExpressionSearchLayout::CreateNewExpressionSearchDialog( this, m_pmhMemHack );
+		return CNewExpressionSearchLayout::CreateNewExpressionSearchDialog( this, m_pmhMemHack );
+	}
+
+	// Shows the standard subsearch dialog.
+	uint32_t CMhsMainWindow::ShowStandardSubsearch() {
+		if ( !m_pmhMemHack->Process().ProcIsOpened() ) {
+			if ( !CBase::PromptYesNo( Wnd(), _DEC_WS_77E541C6_You_must_open_a_process_before_you_can_perform_a_search__r_nOpen_a_process_now_.c_str(),
+				_DEC_WS_8C0AA5EB_No_Process_Opened.c_str() ) ) { return 0; }
+			if ( !OpenProcess() ) { return 0; }
+		}
+		// Should not be possible, but just one last check.
+		if ( !m_pmhMemHack->Process().ProcIsOpened() ) { return 0; }
+
+		{
+			if ( !MemHack()->Searcher().TotalResultsQuick() ) {
+				uint32_t uiRet = ShowLastSearch();
+				//if ( !uiRet ) { return 0; }
+				if ( !MemHack()->Searcher().TotalResultsQuick() ) {
+					CBase::PromptOk( Wnd(), _DEC_WS_C616FA6B_There_are_no_results_through_which_to_search_.c_str(),
+						_DEC_WS_D42771B0_No_Results.c_str() );
+					return 0;
+				}
+			}
+		}
+		m_sstLastSubsearchType = MX_SST_STANDARD;
+
+		//MX_OPTIONS oOptions = m_pmhMemHack->Options();
+		CStandardSubsearchLayout::CreateStandardSubsearchDialog( this, m_pmhMemHack );
 		return 0;
 	}
 

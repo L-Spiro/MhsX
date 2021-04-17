@@ -280,12 +280,6 @@
     <ClCompile Include="Src\Search\MXNewStringSearchWindow.cpp">
       <Filter>Source Files\Search</Filter>
     </ClCompile>
-    <ClCompile Include="Src\RegEx\RexAlgorithm.cpp">
-      <Filter>Source Files\RegEx</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\RegEx\RexInterface.cpp">
-      <Filter>Source Files\RegEx</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Layouts\MXConverterLayout.cpp">
       <Filter>Source Files\Layouts</Filter>
     </ClCompile>
@@ -505,6 +499,12 @@
     <ClCompile Include="Src\Utilities\MXTemplateWindow.cpp">
       <Filter>Source Files\Utilities</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Layouts\MXStandardSubsearchLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Search\MXStandardSubsearchWindow.cpp">
+      <Filter>Source Files\Search</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -662,12 +662,6 @@
     <ClInclude Include="Src\Search\MXNewStringSearchWindow.h">
       <Filter>Header Files\Search</Filter>
     </ClInclude>
-    <ClInclude Include="Src\RegEx\RexAlgorithm.h">
-      <Filter>Header Files\RegEx</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\RegEx\RexInterface.h">
-      <Filter>Header Files\RegEx</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Converter\MXConverterWindow.h">
       <Filter>Header Files\Converter</Filter>
     </ClInclude>
@@ -766,6 +760,12 @@
     </ClInclude>
     <ClInclude Include="Src\Utilities\MXTemplateWindow.h">
       <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXStandardSubsearchLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Search\MXStandardSubsearchWindow.h">
+      <Filter>Header Files\Search</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

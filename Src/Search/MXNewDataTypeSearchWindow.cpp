@@ -372,6 +372,7 @@ namespace mx {
 		_spParmsIfValid.iThreadPriority = THREAD_PRIORITY_NORMAL;
 		::ZeroMemory( &_spParmsIfValid.dtLVal, sizeof( _spParmsIfValid.dtLVal ) );
 		::ZeroMemory( &_spParmsIfValid.dtRVal, sizeof( _spParmsIfValid.dtRVal ) );
+		_spParmsIfValid.ssExpression.clear();
 
 
 
