@@ -20,6 +20,8 @@ namespace mx {
 			MX_C_CANCEL,
 
 			MX_C_INFO_GROUP,
+			MX_C_INFO_ORIG_SEARCH_TYPE_LABEL,
+			MX_C_INFO_ORIG_SEARCH_TYPE_VAL_LABEL,
 			MX_C_INFO_SEARCH_TYPE_LABEL,
 			MX_C_INFO_SEARCH_TYPE_VAL_LABEL,
 			MX_C_INFO_RESULTS_LABEL,
@@ -34,6 +36,12 @@ namespace mx {
 			MX_C_SEARCH_RIGHT_VALUE_COMBO,
 			MX_C_SEARCH_EXP_LABEL,
 			MX_C_SEARCH_EXP_COMBO,
+
+			MX_C_OPTIONS_GROUP,
+			MX_C_OPTIONS_INVERT_CHECK,
+			MX_C_OPTIONS_OPTIONS_BUTTON,
+
+			MX_C_DESC_LABEL,
 		};
 
 
@@ -46,6 +54,10 @@ namespace mx {
 		// == Members.
 		// The layout for the window.
 		static LSW_WIDGET_LAYOUT				m_wlMainWindow[];
+
+
+		// == Functions.
+		// Creates the description of the last search
 	};
 
 }	// namespace mx

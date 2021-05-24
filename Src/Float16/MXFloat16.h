@@ -1,7 +1,7 @@
 #pragma once
 
 #include <LSWWin.h>
-#include <EEFloatX.h>
+//#include <EEFloatX.h>
 
 // ********************************************************* //
 // Logic largely ripped from https://github.com/x448/float16 //
@@ -118,8 +118,9 @@ namespace mx {
 
 		// Gets the max value.
 		static double				Max() {
-			static double dMax = ee::CFloatX::GetMaxForBits( 5, 11, true );
-			return dMax;
+			/*static double dMax = ee::CFloatX::GetMaxForBits( 5, 11, true );
+			return dMax;*/
+			return 65504.0;
 		}
 
 		// Converts from a double to a 16-bit integer containing the bits for the 16-bit float.

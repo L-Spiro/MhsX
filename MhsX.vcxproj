@@ -291,6 +291,7 @@
     <ClCompile Include="Src\Options\MXOptionsWindow.cpp" />
     <ClCompile Include="Src\PE\MXPeObject.cpp" />
     <ClCompile Include="Src\PE\MXPeWorksWindow.cpp" />
+    <ClCompile Include="Src\RamBuffer\MXRamBuffer.cpp" />
     <ClCompile Include="Src\RegEx\MXOnigurumaSystem.cpp" />
     <ClCompile Include="Src\RegEx\Oniguruma\ascii.c" />
     <ClCompile Include="Src\RegEx\Oniguruma\big5.c" />
@@ -413,6 +414,7 @@
     <ClInclude Include="Src\PE\MXPeStructs.h" />
     <ClInclude Include="Src\PE\MXPeWorksWindow.h" />
     <ClInclude Include="Src\Primitives\MXPrimitiveBase.h" />
+    <ClInclude Include="Src\RamBuffer\MXRamBuffer.h" />
     <ClInclude Include="Src\RegEx\MXOnigurumaRegex.h" />
     <ClInclude Include="Src\RegEx\MXOnigurumaRegion.h" />
     <ClInclude Include="Src\RegEx\MXOnigurumaSystem.h" />

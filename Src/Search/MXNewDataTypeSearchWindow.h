@@ -58,7 +58,7 @@ namespace mx {
 		// == Members.
 		//MX_OPTIONS *						m_poOptions;
 		CMemHack *							m_pmhMemHack;
-		// Was the lst manually typed expression null?
+		// Was the last manually typed expression null?
 		bool								m_bLastTypeExpressionWasEmpty;
 
 		static MX_SEARCH_WIN_DATA			m_swdData;

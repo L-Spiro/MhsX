@@ -41,6 +41,18 @@ namespace ee {
 		catch ( const std::bad_alloc & ) { return false; }
 	}
 
+	// Sets a numbered parameter.
+	bool CExpEvalContainer::SetNumberedParm( size_t _sIdx, const EE_RESULT &_rValue ) {
+		if ( _sIdx >= m_vNumberedParms.size() ) {
+			try {
+				m_vNumberedParms.resize( _sIdx + 1 );
+			}
+			catch ( const std::bad_alloc & ) { return false; }
+		}
+		m_vNumberedParms[_sIdx] = _rValue;
+		return true;
+	}
+
 	// Gets the type to use between 2 given types.
 	EE_NUM_CONSTANTS CExpEvalContainer::GetCastType( EE_NUM_CONSTANTS _ncLeft, EE_NUM_CONSTANTS _ncRight ) {
 		return _ncLeft > _ncRight ? _ncLeft : _ncRight;
@@ -1007,6 +1019,14 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
+	// Creates a number parameter ($<decimal>) node.
+	void CExpEvalContainer::CreateNumberedParm( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_NUMBERED_PARM;
+		_ndNode.u.ui64Val = ee::StoULL( &_pcText[1] );
+		m_sNumberedParmsAccessed.insert( static_cast<size_t>(_ndNode.u.ui64Val) );
+		AddNode( _ndNode );
+	}
+
 	// Create a unary node.
 	void CExpEvalContainer::CreateUnary( const YYSTYPE::EE_NODE_DATA &_ndExp, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_UNARY;
@@ -1954,6 +1974,10 @@ namespace ee {
 			case EE_N_USER_VAR : {
 				if ( !m_pfUser ) { return false; }
 				return m_pfUser( m_uiptrUserData, this, _rRes );
+			}
+			case EE_N_NUMBERED_PARM : {
+				_rRes = GetNumberedParm( static_cast<size_t>(_ndExp.u.ui64Val) );
+				return true;
 			}
 			case EE_N_UNARY : {
 				EE_RESULT rTemp;
@@ -3207,6 +3231,10 @@ namespace ee {
 						if ( !m_pfUser ) { EE_ERROR( EE_EC_NOUSERHANDLER ); }
 						if ( !m_pfUser( m_uiptrUserData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_USERHANDLERFAILED ); }
 						// Minor optimization.
+						EE_DONE;
+					}
+					case EE_N_NUMBERED_PARM : {
+						(*soProcessMe.prResult) = GetNumberedParm( static_cast<size_t>(_ndExp.u.ui64Val) );
 						EE_DONE;
 					}
 					case EE_N_UNARY : {

@@ -23,14 +23,21 @@ namespace mx {
 
 		
 		// == Types.
+		// Search-dialog parameters.
 		struct MX_SEARCH_DLG_PARMS {
 			class CMhsMainWindow *				pmmwWindow;
-			const CSearcher::MX_SEARCH_PARMS *	pspSearch;
+			union {
+				const CSearcher::MX_SEARCH_PARMS *
+												pspSearch;
+				const CSearcher::MX_SUBSEARCH_PARMS *
+												pspSubsearch;
+			};
+			bool								bSubSearch;
 		};
 
 
 		// == Functions.
-		// Creates the Open Process dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
+		// Creates the search progress dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
 		static BOOL								CreateSearchProgressDialog( CWidget * _pwParent, const MX_SEARCH_DLG_PARMS * _psdpParms );
 
 

@@ -102,7 +102,7 @@ namespace mx {
 
 
 		// == Functions.
-		// Fills a tree-list with the accosiated PE object's information.
+		// Fills a tree-list with the associated PE object's information.
 		bool								FillTree( MX_TAB &_tTab );
 
 		// Decodes a DOS header to a given parent.

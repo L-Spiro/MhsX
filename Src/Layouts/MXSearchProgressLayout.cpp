@@ -61,7 +61,7 @@ namespace mx {
 	};
 
 	// == Functions.
-	// Creates the Open Process dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
+	// Creates the search progress dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
 	BOOL CSearchProgressLayout::CreateSearchProgressDialog( CWidget * _pwParent, const MX_SEARCH_DLG_PARMS * _psdpParms ) {
 		std::vector<CSecureString> sStrings;
 		std::vector<CSecureWString> sStringsW;

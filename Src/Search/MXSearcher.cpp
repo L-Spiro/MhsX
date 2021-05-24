@@ -1,4 +1,5 @@
 #include "MXSearcher.h"
+#include "../RamBuffer/MXRamBuffer.h"
 #include "../RegEx/MXOnigurumaRegex.h"
 #include "../RegEx/MXOnigurumaRegion.h"
 #include "../RegEx/MXOnigurumaSystem.h"
@@ -16,12 +17,12 @@
 //#define MX_GATHER_THREAD_PRIORITY				THREAD_PRIORITY_NORMAL
 
 #define MX_THREADED_GATHER( SEARCHRESULTTYPE )																															\
-	for ( size_t I = 0; I < stThreads; ++I ) {																															\
+	for ( size_t I = 0; I < stMax; ++I ) {																																\
 		{																																								\
 			if ( aThreadStruct[I].tThread.Id() != 0 ) { aThreadStruct[I].tThread.WaitFor( INFINITY ); }																	\
 		}																																								\
 		while ( aThreadStruct[I].pstSearchThreadParms.i32Result == 0 ) { ::Sleep( 1 ); }																				\
-		if ( aThreadStruct[I].pstSearchThreadParms.i32Result == -1 ) { bAllPass = false; }																				\
+		if ( aThreadStruct[I].pstSearchThreadParms.i32Result != 1 ) { bAllPass = false; }																				\
 																																										\
 		if ( bAllPass && !static_cast<SEARCHRESULTTYPE *>(m_psrbCurTmpSearchResults)->AppendResults( aThreadStruct[I].srResults ) ) { bAllPass = false; }				\
 		aThreadStruct[I].srResults.Reset();																																\
@@ -32,7 +33,7 @@ namespace mx {
 
 	// == Functions.
 	// Fill a list of chunks.
-	bool CSearcher::GenerateChunks( CAddressChunkList &_aclList, const MX_SEARCH_PARMS &_spParms,
+	bool CSearcher::GenerateChunks( CAddressChunkList &_aclList, DWORD _dwRegionMask,
 		uint64_t _ui64MaxLen, uint64_t _ui64Start, uint64_t _ui64End ) {
 		if ( !_ui64MaxLen ) { return false; }
 		uint64_t aStart = _ui64Start;
@@ -57,11 +58,12 @@ namespace mx {
 
 			// Move the cursor to the next address.
 			aStart += mbiInfo.RegionSize;
-
-			if ( mbiInfo.State & MEM_FREE ) { continue; }
-			if ( mbiInfo.State & MEM_RESERVE ) { continue; }
-			if ( mbiInfo.Protect & PAGE_NOACCESS ) { continue; }
-			if ( !(_spParms.dwRegions & mbiInfo.Type) ) { continue; }
+			if ( _dwRegionMask != UINT32_MAX ) {
+				if ( mbiInfo.State & MEM_FREE ) { continue; }
+				if ( mbiInfo.State & MEM_RESERVE ) { continue; }
+				if ( mbiInfo.Protect & PAGE_NOACCESS ) { continue; }
+				if ( !(_dwRegionMask & mbiInfo.Type) ) { continue; }
+			}
 
 			// Add the current chunk in separate chunks, each a maximum of _ui64MaxLen bytes.
 			while ( mbiInfo.RegionSize ) {
@@ -86,7 +88,7 @@ namespace mx {
 		spParmsCopy.ui64AddressTo = std::max( _spParms.ui64AddressFrom, _spParms.ui64AddressTo );
 
 		CAddressChunkList aclChunks;
-		if ( !GenerateChunks( aclChunks, _spParms, _spParms.ui64MaxChunkLen, spParmsCopy.ui64AddressFrom, spParmsCopy.ui64AddressTo ) ) {
+		if ( !GenerateChunks( aclChunks, _spParms.dwRegions, _spParms.ui64MaxChunkLen, spParmsCopy.ui64AddressFrom, spParmsCopy.ui64AddressTo ) ) {
 			return false;
 		}
 
@@ -367,15 +369,205 @@ namespace mx {
 				m_psrbCurTmpSearchResults = nullptr;
 				delete srbDeleteMe;
 
+				m_bLastSearchWasSubsearch = false;
+				m_ui64LastSearchTotal = 0;
+
 				m_spLastSearchParms = spParmsCopy;
 				m_ui64LastSearchTime = CUtilities::CurTimeInMicros() - ui64SearchTimeStart;
 			}
+			
 		}
 
 
 		// Delete the temporary results if any are hanging around.
 		delete m_psrbCurTmpSearchResults;
 		m_psrbCurTmpSearchResults = nullptr;
+		return bRet;
+	}
+
+	bool CSearcher::Subsearch( const MX_SUBSEARCH_PARMS &_spParms, HWND _hProgressUpdate, uint64_t * _pui64TotalFound ) {
+		uint64_t ui64SearchTimeStart = CUtilities::CurTimeInMicros();
+
+		MX_SUBSEARCH_PARMS spParmsCopy = _spParms;
+
+		CAddressChunkList aclChunks;
+		uint64_t ui64From, ui64To;
+		if ( !m_psrbSearchResults->GetEncapsulatingAddresses( ui64From, ui64To ) ) { return false; }
+		if ( !GenerateChunks( aclChunks, UINT32_MAX, INT64_MAX, ui64From, ui64To ) ) { return false; }
+
+		bool bRet = false;
+		{
+			lsw::LSW_THREAD_PRIORITY tpThreadPri( spParmsCopy.iThreadPriority );
+			switch ( spParmsCopy.stInitialType ) {
+				case CUtilities::MX_ST_DATATYPE_SEARCH : {
+					switch ( spParmsCopy.i32EvalType ) {
+						case CUtilities::MX_SET_EXACT : {
+							bRet = ExactValuePrimitiveSubsearch( spParmsCopy, aclChunks, _hProgressUpdate );
+							break;
+						}
+						case CUtilities::MX_SET_NOT_EQUAL_TO : {
+							bRet = NotEqualToPrimitiveSubsearch( spParmsCopy, aclChunks, _hProgressUpdate );
+							break;
+						}
+						case CUtilities::MX_SET_INCREASED : {
+							bRet = IncreasedPrimitiveSubsearch( spParmsCopy, aclChunks, _hProgressUpdate );
+							break;
+						}
+						case CUtilities::MX_SET_DECREASED : {
+							bRet = DecreasedPrimitiveSubsearch( spParmsCopy, aclChunks, _hProgressUpdate );
+							break;
+						}
+						case CUtilities::MX_SET_RANGE : {
+							if ( CUtilities::DataTypeIsFloat( spParmsCopy.dtLVal.dtType ) ) {
+								switch ( spParmsCopy.dtLVal.dtType ) {
+									case CUtilities::MX_DT_FLOAT : {
+										spParmsCopy.dtLVal.u.Float32 = std::min( _spParms.dtLVal.u.Float32, _spParms.dtRVal.u.Float32 );
+										spParmsCopy.dtRVal.u.Float32 = std::max( _spParms.dtLVal.u.Float32, _spParms.dtRVal.u.Float32 );
+										break;
+									}
+									case CUtilities::MX_DT_FLOAT16 : {}
+									case CUtilities::MX_DT_DOUBLE : {
+										spParmsCopy.dtLVal.u.Float64 = std::min( _spParms.dtLVal.u.Float64, _spParms.dtRVal.u.Float64 );
+										spParmsCopy.dtRVal.u.Float64 = std::max( _spParms.dtLVal.u.Float64, _spParms.dtRVal.u.Float64 );
+										break;
+									}
+									default : { return false; }
+								}
+							}
+							else if ( CUtilities::DataTypeIsSigned( spParmsCopy.dtLVal.dtType ) ) {
+								spParmsCopy.dtLVal.u.Int64 = std::min( _spParms.dtLVal.u.Int64, _spParms.dtRVal.u.Int64 );
+								spParmsCopy.dtRVal.u.Int64 = std::max( _spParms.dtLVal.u.Int64, _spParms.dtRVal.u.Int64 );
+							}
+							else {
+								spParmsCopy.dtLVal.u.UInt64 = std::min( _spParms.dtLVal.u.UInt64, _spParms.dtRVal.u.UInt64 );
+								spParmsCopy.dtRVal.u.UInt64 = std::max( _spParms.dtLVal.u.UInt64, _spParms.dtRVal.u.UInt64 );
+							}
+							bRet = InRangePrimitiveSubsearch( spParmsCopy, aclChunks, _hProgressUpdate );
+							break;
+						}
+						case CUtilities::MX_SET_SAME_AS_BEFORE : {
+							bRet = SameAsBeforePrimitiveSubsearch( spParmsCopy, aclChunks, _hProgressUpdate );
+							break;
+						}
+						case CUtilities::MX_SET_DIFFERENT_FROM_BEFORE : {
+							bRet = DifferentFromBeforePrimitiveSubsearch( spParmsCopy, aclChunks, _hProgressUpdate );
+							break;
+						}
+						case CUtilities::MX_SET_CHANGED_BY : {
+							bRet = ChangedByPrimitiveSubsearch( spParmsCopy, aclChunks, _hProgressUpdate,
+								&CSearcher::GetChangedByCmpFuncAndSize );
+							break;
+						}
+						case CUtilities::MX_SET_CHANGED_BY_PERCENT : {
+							bRet = ChangedByPrimitiveSubsearch( spParmsCopy, aclChunks, _hProgressUpdate,
+								&CSearcher::GetChangedByPercCmpFuncAndSize );
+							break;
+						}
+						case CUtilities::MX_SET_CHANGED_BY_RANGE : {
+							bRet = ChangedByPrimitiveSubsearch( spParmsCopy, aclChunks, _hProgressUpdate,
+								&CSearcher::GetChangedByRangeCmpFuncAndSize );
+							break;
+						}
+						case CUtilities::MX_SET_CHANGED_BY_RANGE_PERCENT : {
+							bRet = ChangedByPrimitiveSubsearch( spParmsCopy, aclChunks, _hProgressUpdate,
+								&CSearcher::GetChangedByRangePercCmpFuncAndSize );
+							break;
+						}
+						case CUtilities::MX_SET_QUICK_EXP : {
+							switch ( _spParms.dtLVal.dtType ) {
+								case CUtilities::MX_DT_INT8 : {
+									bRet = QuickExpPrimitiveSubsearch<int8_t, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_UINT8 : {
+									bRet = QuickExpPrimitiveSubsearch<uint8_t, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_INT16 : {
+									bRet = QuickExpPrimitiveSubsearch<int16_t, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_UINT16 : {
+									bRet = QuickExpPrimitiveSubsearch<uint16_t, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_INT32 : {
+									bRet = QuickExpPrimitiveSubsearch<int32_t, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_UINT32 : {
+									bRet = QuickExpPrimitiveSubsearch<uint32_t, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_INT64 : {
+									bRet = QuickExpPrimitiveSubsearch<int64_t, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_UINT64 : {
+									bRet = QuickExpPrimitiveSubsearch<uint64_t, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_FLOAT : {
+									bRet = QuickExpPrimitiveSubsearch<float, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_DOUBLE : {
+									bRet = QuickExpPrimitiveSubsearch<double, false>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+								case CUtilities::MX_DT_FLOAT16 : {
+									bRet = QuickExpPrimitiveSubsearch<uint16_t, true>( spParmsCopy, aclChunks, _hProgressUpdate );
+									break;
+								}
+							}
+							//bRet = QuickExpPrimitiveSubsearch( spParmsCopy, aclChunks, _hProgressUpdate );
+							break;
+						}
+						default : { return false; }
+					}
+					break;
+				}
+				case CUtilities::MX_ST_STRING_SEARCH : {
+					break;
+				}
+				case CUtilities::MX_ST_EXP_SEARCH : {
+					break;
+				}
+				default : { return false; }
+			}
+		}
+
+
+
+		if ( bRet ) {
+			// Keep the new search results only if there are more than 0 returns.
+			m_psrbCurTmpSearchResults->Finalize();
+			if ( _pui64TotalFound ) {
+				(*_pui64TotalFound) = m_psrbCurTmpSearchResults->TotalResults();
+			}
+			if ( m_psrbCurTmpSearchResults->TotalResults() ) {
+				LSW_ENT_CRIT( m_csCrit );
+
+
+				CSearchResultBase * psrbDeleteMe = m_psrbSearchResults;
+				m_ui64LastSearchTotal = m_psrbSearchResults->TotalResults();
+				m_psrbSearchResults = m_psrbCurTmpSearchResults;
+				m_psrbCurTmpSearchResults = nullptr;
+				delete psrbDeleteMe;
+
+				m_bLastSearchWasSubsearch = true;
+
+				m_spLastSubSearchParms = spParmsCopy;
+				m_ui64LastSearchTime = CUtilities::CurTimeInMicros() - ui64SearchTimeStart;
+			}
+			
+		}
+
+
+		// Delete the temporary results if any are hanging around.
+		delete m_psrbCurTmpSearchResults;
+		m_psrbCurTmpSearchResults = nullptr;
+
 		return bRet;
 	}
 
@@ -408,6 +600,53 @@ namespace mx {
 		}
 	}
 
+	// Divides the results into treadable parts.
+	bool CSearcher::DivideResultsForSubsearch( CSearchResultBase * _psrbResults, std::vector<MX_SUBSEARCH_DIV> &_vResult,
+		uint64_t _ui64MinResults, const CAddressChunkList &_aclList ) {
+		size_t sChunk = 0;
+		MX_SUBSEARCH_DIV sdDiv = { 0, 0 };
+		while ( true ) {
+			uint64_t ui64Cur = sdDiv.ui64Start + _ui64MinResults;
+			//uint64_t ui64Cur = UINT64_MAX;
+			if ( ui64Cur >= _psrbResults->TotalResults() ) {
+				sdDiv.ui64Total = _psrbResults->TotalResults() - sdDiv.ui64Start;
+				if ( sdDiv.ui64Total ) {
+					_vResult.push_back( sdDiv );
+				}
+				return true;
+			}
+			// Find the chunk in which this final address lies.
+			const uint8_t * pui8Val;
+			if ( !_psrbResults->GetResultFast( ui64Cur, ui64Cur, pui8Val ) ) { return false; }
+			while ( sChunk < _aclList.Chunks().size() ) {
+				CAddressChunkList::MX_CHUNK cThisChunk = _aclList.Chunks()[sChunk];
+				if ( _aclList.Chunks()[sChunk].ui64Start <= ui64Cur && (_aclList.Chunks()[sChunk].ui64Start + _aclList.Chunks()[sChunk].ui64Len) > ui64Cur ) {
+					// Include all the addresses included by this chunk.
+					uint64_t ui64LastInChunk = _psrbResults->GetIndexOfFirstItemWithAddressOrAbove( (_aclList.Chunks()[sChunk].ui64Start + _aclList.Chunks()[sChunk].ui64Len) );
+					if ( ui64LastInChunk == static_cast<uint64_t>(-1) ) { return false; }	// Huh?
+					if ( ui64LastInChunk < sdDiv.ui64Start ) { return false; }				// What?
+					
+					sdDiv.ui64Total = ui64LastInChunk - sdDiv.ui64Start;
+					if ( !sdDiv.ui64Total ) {
+						return false;
+					}
+					_vResult.push_back( sdDiv );
+					sdDiv.ui64Start += sdDiv.ui64Total;
+					break;
+				}
+				
+				++sChunk;
+			}
+			if ( sChunk == _aclList.Chunks().size() ) {
+				// We somehow went past the end of the list of chunks.
+				// Not really possible and this section wouldn't be searchable if it were true, so just add all remaining items.
+				sdDiv.ui64Total = _psrbResults->TotalResults() - sdDiv.ui64Start;
+				_vResult.push_back( sdDiv );
+				return true;
+			}
+		}
+	}
+
 	// Exact-value search on primitives.
 	bool CSearcher::ExactValuePrimitiveSearch( MX_SEARCH_PARMS &_spParms, const CAddressChunkList &_aclChunks, HWND _hProgressUpdate ) {
 		delete m_psrbCurTmpSearchResults;
@@ -421,89 +660,7 @@ namespace mx {
 		// ==============================================
 		MX_EXACT_VAL_COMP evcCompFunc = nullptr;
 		uint32_t ui32Size = 0;
-		bool bLisFloat = CUtilities::DataTypeIsFloat( _spParms.dtLVal.dtType );
-		if ( bLisFloat && _spParms.bUseEpsilon ) {
-			ui32Size = CUtilities::DataTypeSize( _spParms.dtLVal.dtType );
-			switch ( ui32Size ) {
-				case sizeof( uint16_t ) : {
-					if ( _spParms.bInvertResults ) {
-						evcCompFunc = _spParms.bUseSmartEpsilon ? Cmp_Float16RelativeEpsilonWithNaN : Cmp_Float16EpsilonWithNaN;
-					}
-					else {
-						evcCompFunc = _spParms.bUseSmartEpsilon ? Cmp_Float16RelativeEpsilon : Cmp_Float16Epsilon;
-					}
-					break;
-				}
-				case sizeof( float ) : {
-					if ( _spParms.bInvertResults ) {
-						evcCompFunc = _spParms.bUseSmartEpsilon ? Cmp_Float32RelativeEpsilonWithNaN : Cmp_Float32EpsilonWithNaN;
-					}
-					else {
-						evcCompFunc = _spParms.bUseSmartEpsilon ? Cmp_Float32RelativeEpsilon : Cmp_Float32Epsilon;
-					}
-					break;
-				}
-				case sizeof( double ) : {
-					if ( _spParms.bInvertResults ) {
-						evcCompFunc = _spParms.bUseSmartEpsilon ? Cmp_Float64RelativeEpsilonWithNaN : Cmp_Float64EpsilonWithNaN;
-					}
-					else {
-						evcCompFunc = _spParms.bUseSmartEpsilon ? Cmp_Float64RelativeEpsilon : Cmp_Float64Epsilon;
-					}
-					break;
-				}
-				default : { return false; }
-			}
-		}
-		else {
-			ui32Size = CUtilities::DataTypeSize( _spParms.dtLVal.dtType );
-			switch ( ui32Size ) {
-				case DWINVALID : {
-					// CUtilities::MX_DT_VOID == Pointer32 or Pointer64.
-					if ( m_ppProcess->IsWow64Process() ) {
-						// We know it is 32-bit address space.
-						evcCompFunc = Cmp_ExactVal32;
-						ui32Size = 4;
-					}
-					else {
-						// It is the address space of the machine.
-						if ( CSystem::Is32Bit() ) {
-							evcCompFunc = Cmp_ExactVal32;
-							ui32Size = 4;
-						}
-						else if ( CSystem::Is64Bit() ) {
-							evcCompFunc = Cmp_ExactVal64;
-							ui32Size = 8;
-						}
-						else { return false; }
-					}
-					break;
-				}
-				case 1 : { evcCompFunc = Cmp_ExactVal8; break; }
-				case 2 : {
-					if ( bLisFloat && _spParms.bInvertResults ) {
-						evcCompFunc = Cmp_Float16WithNaN;
-					}
-					else {
-						evcCompFunc = Cmp_ExactVal16;
-						if ( _spParms.dtLVal.dtType == CUtilities::MX_DT_FLOAT16 ) {
-							_spParms.dtLVal.u.UInt16 = CFloat16::DoubleToUi16( _spParms.dtLVal.u.Double );
-							//_spParms.dtLVal.dtType = CUtilities::MX_DT_FLOAT16;
-						}
-					}
-					break;
-				}
-				case 4 : {
-					evcCompFunc = (bLisFloat && _spParms.bInvertResults) ? Cmp_Float32WithNaN : Cmp_ExactVal32;
-					break;
-				}
-				case 8 : {
-					evcCompFunc = (bLisFloat && _spParms.bInvertResults) ? Cmp_Float64WithNaN : Cmp_ExactVal64;
-					break;
-				}
-				default: { return false; }
-			}
-		}
+		if ( !GetExactValCmpFuncAndSize( evcCompFunc, ui32Size, _spParms, false ) ) { return false; }
 		// ==============================================
 		// ==============================================
 
@@ -528,16 +685,16 @@ namespace mx {
 			MX_PRIM_SEARCH_THREAD pstSearchThreadParms;
 		} aThreadStruct[stThreads];
 		LONG lProgTotal = 0;
-
-		for ( size_t I = 0; I < stThreads; ++I ) {
+		size_t stMax = std::min( _aclChunks.Chunks().size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
 			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
 			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
 			aThreadStruct[I].pstSearchThreadParms.pspParms = &_spParms;
 			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
 			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
 			aThreadStruct[I].pstSearchThreadParms.evcCompFunc = evcCompFunc;
-			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stThreads);
-			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stThreads);
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stMax);
 			aThreadStruct[I].pstSearchThreadParms.ui32Size = ui32Size;
 			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
 			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
@@ -600,7 +757,7 @@ namespace mx {
 		return bAllPass;
 	}
 
-	// Greater-than serach on primitives.
+	// Greater-than search on primitives.
 	bool CSearcher::GreaterThanPrimitiveSearch( MX_SEARCH_PARMS &_spParms, const CAddressChunkList &_aclChunks, HWND _hProgressUpdate ) {
 		delete m_psrbCurTmpSearchResults;
 		m_psrbCurTmpSearchResults = new ( std::nothrow ) CSearchResult1();
@@ -612,76 +769,8 @@ namespace mx {
 		// == Create the comparison function and size. ==
 		// ==============================================
 		MX_REL_COMP rcCompFunc = nullptr;
-		uint32_t ui32Size = CUtilities::DataTypeSize( _spParms.dtLVal.dtType );
-		if ( ui32Size == DWINVALID ) {
-			// CUtilities::MX_DT_VOID == Pointer32 or Pointer64.
-			if ( m_ppProcess->IsWow64Process() ) {
-				// We know it is 32-bit address space.
-				rcCompFunc = Cmp_GreaterThanUnsigned32;
-				ui32Size = 4;
-			}
-			else {
-				// It is the address space of the machine.
-				if ( CSystem::Is32Bit() ) {
-					rcCompFunc = Cmp_GreaterThanUnsigned32;
-					ui32Size = 4;
-				}
-				else if ( CSystem::Is64Bit() ) {
-					rcCompFunc = Cmp_GreaterThanUnsigned64;
-					ui32Size = 8;
-				}
-				else { return false; }
-			}
-		}
-		else {
-			switch ( _spParms.dtLVal.dtType ) {
-				case CUtilities::MX_DT_INT8 : {
-					rcCompFunc = Cmp_GreaterThanSigned8;
-					break;
-				}
-				case CUtilities::MX_DT_UINT8 : {
-					rcCompFunc = Cmp_GreaterThanUnsigned8;
-					break;
-				}
-				case CUtilities::MX_DT_INT16 : {
-					rcCompFunc = Cmp_GreaterThanSigned16;
-					break;
-				}
-				case CUtilities::MX_DT_UINT16 : {
-					rcCompFunc = Cmp_GreaterThanUnsigned16;
-					break;
-				}
-				case CUtilities::MX_DT_INT32 : {
-					rcCompFunc = Cmp_GreaterThanSigned32;
-					break;
-				}
-				case CUtilities::MX_DT_UINT32 : {
-					rcCompFunc = Cmp_GreaterThanUnsigned32;
-					break;
-				}
-				case CUtilities::MX_DT_INT64 : {
-					rcCompFunc = Cmp_GreaterThanSigned64;
-					break;
-				}
-				case CUtilities::MX_DT_UINT64 : {
-					rcCompFunc = Cmp_GreaterThanUnsigned64;
-					break;
-				}
-				case CUtilities::MX_DT_FLOAT16 : {
-					rcCompFunc = _spParms.bInvertResults ? Cmp_GreaterThanFloat16WithNaN : Cmp_GreaterThanFloat16;
-					break;
-				}
-				case CUtilities::MX_DT_FLOAT : {
-					rcCompFunc = _spParms.bInvertResults ? Cmp_GreaterThanFloat32WithNaN : Cmp_GreaterThanFloat32;
-					break;
-				}
-				case CUtilities::MX_DT_DOUBLE : {
-					rcCompFunc = _spParms.bInvertResults ? Cmp_GreaterThanFloat64WithNaN : Cmp_GreaterThanFloat64;
-					break;
-				}
-				default : { return false; }
-			}
-		}
+		uint32_t ui32Size = 0;
+		if ( !GetGreaterThanCmpFuncAndSize( rcCompFunc, ui32Size, _spParms, false ) ) { return false; }
 		// ==============================================
 		// ==============================================
 
@@ -706,16 +795,16 @@ namespace mx {
 			MX_PRIM_SEARCH_THREAD pstSearchThreadParms;
 		} aThreadStruct[stThreads];
 		LONG lProgTotal = 0;
-
-		for ( size_t I = 0; I < stThreads; ++I ) {
+		size_t stMax = std::min( _aclChunks.Chunks().size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
 			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
 			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
 			aThreadStruct[I].pstSearchThreadParms.pspParms = &_spParms;
 			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
 			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
 			aThreadStruct[I].pstSearchThreadParms.rcRelCompFunc = rcCompFunc;
-			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stThreads);
-			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stThreads);
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stMax);
 			aThreadStruct[I].pstSearchThreadParms.ui32Size = ui32Size;
 			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
 			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
@@ -778,7 +867,7 @@ namespace mx {
 		return bAllPass;
 	}
 
-	// Less-than serach on primitives.
+	// Less-than search on primitives.
 	bool CSearcher::LessThanPrimitiveSearch( MX_SEARCH_PARMS &_spParms, const CAddressChunkList &_aclChunks, HWND _hProgressUpdate ) {
 		delete m_psrbCurTmpSearchResults;
 		m_psrbCurTmpSearchResults = new ( std::nothrow ) CSearchResult1();
@@ -790,76 +879,8 @@ namespace mx {
 		// == Create the comparison function and size. ==
 		// ==============================================
 		MX_REL_COMP rcCompFunc = nullptr;
-		uint32_t ui32Size = CUtilities::DataTypeSize( _spParms.dtLVal.dtType );
-		if ( ui32Size == DWINVALID ) {
-			// CUtilities::MX_DT_VOID == Pointer32 or Pointer64.
-			if ( m_ppProcess->IsWow64Process() ) {
-				// We know it is 32-bit address space.
-				rcCompFunc = Cmp_LessThanUnsigned32;
-				ui32Size = 4;
-			}
-			else {
-				// It is the address space of the machine.
-				if ( CSystem::Is32Bit() ) {
-					rcCompFunc = Cmp_LessThanUnsigned32;
-					ui32Size = 4;
-				}
-				else if ( CSystem::Is64Bit() ) {
-					rcCompFunc = Cmp_LessThanUnsigned64;
-					ui32Size = 8;
-				}
-				else { return false; }
-			}
-		}
-		else {
-			switch ( _spParms.dtLVal.dtType ) {
-				case CUtilities::MX_DT_INT8 : {
-					rcCompFunc = Cmp_LessThanSigned8;
-					break;
-				}
-				case CUtilities::MX_DT_UINT8 : {
-					rcCompFunc = Cmp_LessThanUnsigned8;
-					break;
-				}
-				case CUtilities::MX_DT_INT16 : {
-					rcCompFunc = Cmp_LessThanSigned16;
-					break;
-				}
-				case CUtilities::MX_DT_UINT16 : {
-					rcCompFunc = Cmp_LessThanUnsigned16;
-					break;
-				}
-				case CUtilities::MX_DT_INT32 : {
-					rcCompFunc = Cmp_LessThanSigned32;
-					break;
-				}
-				case CUtilities::MX_DT_UINT32 : {
-					rcCompFunc = Cmp_LessThanUnsigned32;
-					break;
-				}
-				case CUtilities::MX_DT_INT64 : {
-					rcCompFunc = Cmp_LessThanSigned64;
-					break;
-				}
-				case CUtilities::MX_DT_UINT64 : {
-					rcCompFunc = Cmp_LessThanUnsigned64;
-					break;
-				}
-				case CUtilities::MX_DT_FLOAT16 : {
-					rcCompFunc = _spParms.bInvertResults ? Cmp_LessThanFloat16WithNaN : Cmp_LessThanFloat16;
-					break;
-				}
-				case CUtilities::MX_DT_FLOAT : {
-					rcCompFunc = _spParms.bInvertResults ? Cmp_LessThanFloat32WithNaN : Cmp_LessThanFloat32;
-					break;
-				}
-				case CUtilities::MX_DT_DOUBLE : {
-					rcCompFunc = _spParms.bInvertResults ? Cmp_LessThanFloat64WithNaN : Cmp_LessThanFloat64;
-					break;
-				}
-				default : { return false; }
-			}
-		}
+		uint32_t ui32Size = 0;
+		if ( !GetLessThanCmpFuncAndSize( rcCompFunc, ui32Size, _spParms, false ) ) { return false; }
 		// ==============================================
 		// ==============================================
 
@@ -884,16 +905,16 @@ namespace mx {
 			MX_PRIM_SEARCH_THREAD pstSearchThreadParms;
 		} aThreadStruct[stThreads];
 		LONG lProgTotal = 0;
-
-		for ( size_t I = 0; I < stThreads; ++I ) {
+		size_t stMax = std::min( _aclChunks.Chunks().size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
 			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
 			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
 			aThreadStruct[I].pstSearchThreadParms.pspParms = &_spParms;
 			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
 			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
 			aThreadStruct[I].pstSearchThreadParms.rcRelCompFunc = rcCompFunc;
-			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stThreads);
-			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stThreads);
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stMax);
 			aThreadStruct[I].pstSearchThreadParms.ui32Size = ui32Size;
 			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
 			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
@@ -975,76 +996,8 @@ namespace mx {
 		// == Create the comparison function and size. ==
 		// ==============================================
 		MX_RANGE_COMP rcCompFunc = nullptr;
-		uint32_t ui32Size = CUtilities::DataTypeSize( _spParms.dtLVal.dtType );
-		if ( ui32Size == DWINVALID ) {
-			// CUtilities::MX_DT_VOID == Pointer32 or Pointer64.
-			if ( m_ppProcess->IsWow64Process() ) {
-				// We know it is 32-bit address space.
-				rcCompFunc = Cmp_InRangeUInt32;
-				ui32Size = 4;
-			}
-			else {
-				// It is the address space of the machine.
-				if ( CSystem::Is32Bit() ) {
-					rcCompFunc = Cmp_InRangeUInt32;
-					ui32Size = 4;
-				}
-				else if ( CSystem::Is64Bit() ) {
-					rcCompFunc = Cmp_InRangeUInt64;
-					ui32Size = 8;
-				}
-				else { return false; }
-			}
-		}
-		else {
-			switch ( _spParms.dtLVal.dtType ) {
-				case CUtilities::MX_DT_INT8 : {
-					rcCompFunc = Cmp_InRangeInt8;
-					break;
-				}
-				case CUtilities::MX_DT_UINT8 : {
-					rcCompFunc = Cmp_InRangeUInt8;
-					break;
-				}
-				case CUtilities::MX_DT_INT16 : {
-					rcCompFunc = Cmp_InRangeInt16;
-					break;
-				}
-				case CUtilities::MX_DT_UINT16 : {
-					rcCompFunc = Cmp_InRangeUInt16;
-					break;
-				}
-				case CUtilities::MX_DT_INT32 : {
-					rcCompFunc = Cmp_InRangeInt32;
-					break;
-				}
-				case CUtilities::MX_DT_UINT32 : {
-					rcCompFunc = Cmp_InRangeUInt32;
-					break;
-				}
-				case CUtilities::MX_DT_INT64 : {
-					rcCompFunc = Cmp_InRangeInt64;
-					break;
-				}
-				case CUtilities::MX_DT_UINT64 : {
-					rcCompFunc = Cmp_InRangeUInt64;
-					break;
-				}
-				case CUtilities::MX_DT_FLOAT16 : {
-					rcCompFunc = _spParms.bInvertResults ? Cmp_InRangeFloat16WithNaN : Cmp_InRangeFloat16;
-					break;
-				}
-				case CUtilities::MX_DT_FLOAT : {
-					rcCompFunc = _spParms.bInvertResults ? Cmp_InRangeFloat32WithNaN : Cmp_InRangeFloat32;
-					break;
-				}
-				case CUtilities::MX_DT_DOUBLE : {
-					rcCompFunc = _spParms.bInvertResults ? Cmp_InRangeFloat64WithNaN : Cmp_InRangeFloat64;
-					break;
-				}
-				default : { return false; }
-			}
-		}
+		uint32_t ui32Size = 0;
+		if ( !GetRangeCmpFuncAndSize( rcCompFunc, ui32Size, _spParms, false ) ) { return false; }
 		// ==============================================
 		// ==============================================
 
@@ -1069,16 +1022,16 @@ namespace mx {
 			MX_PRIM_SEARCH_THREAD pstSearchThreadParms;
 		} aThreadStruct[stThreads];
 		LONG lProgTotal = 0;
-
-		for ( size_t I = 0; I < stThreads; ++I ) {
+		size_t stMax = std::min( _aclChunks.Chunks().size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
 			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
 			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
 			aThreadStruct[I].pstSearchThreadParms.pspParms = &_spParms;
 			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
 			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
 			aThreadStruct[I].pstSearchThreadParms.rcRangeCompFunc = rcCompFunc;
-			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stThreads);
-			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stThreads);
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stMax);
 			aThreadStruct[I].pstSearchThreadParms.ui32Size = ui32Size;
 			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
 			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
@@ -1147,7 +1100,7 @@ namespace mx {
 		m_psrbCurTmpSearchResults = new ( std::nothrow ) CSearchResult2();
 		if ( !m_psrbCurTmpSearchResults ) { return false; }
 		if ( _spParms.bInvertResults ) {
-			// The opposite of all results is no results.  But that is not a failing condition.
+			// The inverse of all results is no results.  But that is not a failing condition.
 			return true;
 		}
 
@@ -1178,7 +1131,7 @@ namespace mx {
 			reinterpret_cast<CSearchResult2 *>(m_psrbCurTmpSearchResults)->Add( m_ppProcess, _aclChunks.Chunks()[I].ui64Start, static_cast<uint16_t>(ui32Size),
 				ui64TotalItems, static_cast<uint16_t>(_spParms.ui32Alignment) );
 
-			if ( !(I & 0x3) && _hProgressUpdate ) {
+			if ( !(I & 0x1) && _hProgressUpdate ) {
 				::SendNotifyMessageW( _hProgressUpdate, PBM_SETPOS, static_cast<WPARAM>(((I + 1.0) / _aclChunks.Chunks().size()) * 100.0), 0L );
 			}
 			if ( _spParms.pbAbort && (*_spParms.pbAbort) ) { break; }
@@ -1230,15 +1183,15 @@ namespace mx {
 			MX_UTF_SEARCH_THREAD		pstSearchThreadParms;
 		} aThreadStruct[stThreads];
 		LONG lProgTotal = 0;
-
-		for ( size_t I = 0; I < stThreads; ++I ) {
+		size_t stMax = std::min( _aclChunks.Chunks().size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
 			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
 			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
 			aThreadStruct[I].pstSearchThreadParms.pspParms = &_spParms;
 			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
 			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
-			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stThreads);
-			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stThreads);
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stMax);
 			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
 			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
 			aThreadStruct[I].pstSearchThreadParms.pssuUnpackedSrcString = &ssuSearchString;
@@ -1392,15 +1345,15 @@ namespace mx {
 			MX_UTF_SEARCH_THREAD		pstSearchThreadParms;
 		} aThreadStruct[stThreads];
 		LONG lProgTotal = 0;
-
-		for ( size_t I = 0; I < stThreads; ++I ) {
+		size_t stMax = std::min( _aclChunks.Chunks().size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
 			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
 			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
 			aThreadStruct[I].pstSearchThreadParms.pspParms = &_spParms;
 			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
 			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
-			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stThreads);
-			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stThreads);
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stMax);
 			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
 			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
 			aThreadStruct[I].pstSearchThreadParms.pssuUnpackedSrcString = &ssuSearchString;
@@ -1588,15 +1541,15 @@ namespace mx {
 			MX_UTF_SEARCH_THREAD		pstSearchThreadParms;
 		} aThreadStruct[stThreads];
 		LONG lProgTotal = 0;
-
-		for ( size_t I = 0; I < stThreads; ++I ) {
+		size_t stMax = std::min( _aclChunks.Chunks().size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
 			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
 			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
 			aThreadStruct[I].pstSearchThreadParms.pspParms = &_spParms;
 			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
 			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
-			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stThreads);
-			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stThreads);
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stMax);
 			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
 			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
 			aThreadStruct[I].pstSearchThreadParms.pssuUnpackedSrcString = &ssuSearchString;
@@ -1759,15 +1712,15 @@ namespace mx {
 			MX_RAW_ARRAY_SEARCH_THREAD	pstSearchThreadParms;
 		} aThreadStruct[stThreads];
 		LONG lProgTotal = 0;
-
-		for ( size_t I = 0; I < stThreads; ++I ) {
+		size_t stMax = std::min( _aclChunks.Chunks().size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
 			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
 			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
 			aThreadStruct[I].pstSearchThreadParms.pspParms = &_spParms;
 			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
 			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
-			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stThreads);
-			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stThreads);
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stMax);
 			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
 			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
 			
@@ -1879,15 +1832,15 @@ namespace mx {
 			MX_RAW_ARRAY_SEARCH_THREAD	pstSearchThreadParms;
 		} aThreadStruct[stThreads];
 		LONG lProgTotal = 0;
-
-		for ( size_t I = 0; I < stThreads; ++I ) {
+		size_t stMax = std::min( _aclChunks.Chunks().size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
 			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
 			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
 			aThreadStruct[I].pstSearchThreadParms.pspParms = &_spParms;
 			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
 			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
-			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stThreads);
-			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stThreads);
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stMax);
 			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
 			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
 			
@@ -1989,15 +1942,15 @@ namespace mx {
 			MX_RAW_ARRAY_SEARCH_THREAD	pstSearchThreadParms;
 		} aThreadStruct[stThreads];
 		LONG lProgTotal = 0;
-
-		for ( size_t I = 0; I < stThreads; ++I ) {
+		size_t stMax = std::min( _aclChunks.Chunks().size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
 			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
 			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
 			aThreadStruct[I].pstSearchThreadParms.pspParms = &_spParms;
 			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
 			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
-			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stThreads);
-			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stThreads);
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stMax);
 			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
 			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
 			
@@ -2112,15 +2065,15 @@ namespace mx {
 			MX_EXP_SEARCH_THREAD		pstSearchThreadParms;
 		} aThreadStruct[stThreads];
 		LONG lProgTotal = 0;
-
-		for ( size_t I = 0; I < stThreads; ++I ) {
+		size_t stMax = std::min( _aclChunks.Chunks().size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
 			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
 			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
 			aThreadStruct[I].pstSearchThreadParms.pspParms = &_spParms;
 			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
 			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
-			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stThreads);
-			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stThreads);
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stMax);
 			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
 			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
 			aThreadStruct[I].pstSearchThreadParms.ui32Size = ui32Size;
@@ -2248,15 +2201,15 @@ namespace mx {
 			MX_EXP_SEARCH_THREAD		pstSearchThreadParms;
 		} aThreadStruct[stThreads];
 		LONG lProgTotal = 0;
-
-		for ( size_t I = 0; I < stThreads; ++I ) {
+		size_t stMax = std::min( _aclChunks.Chunks().size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
 			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
 			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
 			aThreadStruct[I].pstSearchThreadParms.pspParms = &_spParms;
 			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
 			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
-			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stThreads);
-			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stThreads);
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stMax);
 			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
 			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
 			aThreadStruct[I].pstSearchThreadParms.ui32Size = ui32Size;
@@ -2362,15 +2315,15 @@ namespace mx {
 			MX_EXP_SEARCH_THREAD		pstSearchThreadParms;
 		} aThreadStruct[stThreads];
 		LONG lProgTotal = 0;
-
-		for ( size_t I = 0; I < stThreads; ++I ) {
+		size_t stMax = std::min( _aclChunks.Chunks().size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
 			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
 			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
 			aThreadStruct[I].pstSearchThreadParms.pspParms = &_spParms;
 			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
 			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
-			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stThreads);
-			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stThreads);
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (_aclChunks.Chunks().size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (_aclChunks.Chunks().size() * (I + 1) / stMax);
 			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
 			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
 			aThreadStruct[I].pstSearchThreadParms.ui32Size = ui32Size;
@@ -2458,6 +2411,549 @@ namespace mx {
 		return bAllPass;
 	}
 
+	// Exact-value subsearch on primitives.
+	bool CSearcher::ExactValuePrimitiveSubsearch( MX_SUBSEARCH_PARMS &_spParms, const CAddressChunkList &_aclChunks, HWND _hProgressUpdate ) {
+		delete m_psrbCurTmpSearchResults;
+		m_psrbCurTmpSearchResults = new ( std::nothrow ) CSearchResult1();
+		if ( !m_psrbCurTmpSearchResults ) { return false; }
+		CSearchResultLocker srlSearchLock( m_psrbSearchResults );
+		std::vector<MX_SUBSEARCH_DIV> vDivisions;
+		if ( !DivideResultsForSubsearch( m_psrbSearchResults, vDivisions, _spParms.ui64MaxChunkLen, _aclChunks ) ) {
+			return false;
+		}
+		_spParms.bInvertResults = _spParms.bInvertResults ? true : false;	// Force to 0 or 1.
+
+
+		// ==============================================
+		// == Create the comparison function and size. ==
+		// ==============================================
+		MX_EXACT_VAL_COMP evcCompFunc = nullptr;
+		uint32_t ui32Size = 0;
+		MX_SEARCH_PARMS spSearchParms = SearchObjToSubsearchObj( _spParms );
+		if ( !GetExactValCmpFuncAndSize( evcCompFunc, ui32Size, spSearchParms, false ) ) { return false; }
+		// ==============================================
+		// ==============================================
+
+
+
+		// ====================
+		// == Do the search. ==
+		// ====================
+		bool bAllPass = true;
+#ifndef MX_SINGLE_THREAD_SEARCH
+		const size_t stThreads = 8;
+		struct {
+			CThread tThread;
+			CSearchResult1 srResults;
+			MX_PRIM_SEARCH_THREAD pstSearchThreadParms;
+		} aThreadStruct[stThreads];
+		LONG lProgTotal = 0;
+		size_t stMax = std::min( vDivisions.size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
+			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
+			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
+			aThreadStruct[I].pstSearchThreadParms.pspParms = &spSearchParms;
+			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
+			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
+			aThreadStruct[I].pstSearchThreadParms.evcCompFunc = evcCompFunc;
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (vDivisions.size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (vDivisions.size() * (I + 1) / stMax);
+			aThreadStruct[I].pstSearchThreadParms.ui32Size = ui32Size;
+			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
+			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
+			aThreadStruct[I].pstSearchThreadParms.pvSubsearchDiv = &vDivisions;
+			aThreadStruct[I].pstSearchThreadParms.psrbPrevResults = m_psrbSearchResults;
+			aThreadStruct[I].tThread.CreateThread( PrimitiveExactValueSubsearchThreadProc, &aThreadStruct[I].pstSearchThreadParms );
+		}
+		MX_THREADED_GATHER( CSearchResult1 );
+#endif
+
+		return bAllPass;
+	}
+
+	// Not-equal-to subsearch on primitives.
+	bool CSearcher::NotEqualToPrimitiveSubsearch( MX_SUBSEARCH_PARMS &_spParms, const CAddressChunkList &_aclChunks, HWND _hProgressUpdate ) {
+		delete m_psrbCurTmpSearchResults;
+		m_psrbCurTmpSearchResults = new ( std::nothrow ) CSearchResult1();
+		if ( !m_psrbCurTmpSearchResults ) { return false; }
+		CSearchResultLocker srlSearchLock( m_psrbSearchResults );
+		std::vector<MX_SUBSEARCH_DIV> vDivisions;
+		if ( !DivideResultsForSubsearch( m_psrbSearchResults, vDivisions, _spParms.ui64MaxChunkLen, _aclChunks ) ) {
+			return false;
+		}
+		// Swap the invert test because this is a negative search of equal-to values.
+		_spParms.bInvertResults = _spParms.bInvertResults ? false : true;	// Force to 0 or 1.
+
+
+		// ==============================================
+		// == Create the comparison function and size. ==
+		// ==============================================
+		MX_EXACT_VAL_COMP evcCompFunc = nullptr;
+		uint32_t ui32Size = 0;
+		MX_SEARCH_PARMS spSearchParms = SearchObjToSubsearchObj( _spParms );
+		if ( !GetExactValCmpFuncAndSize( evcCompFunc, ui32Size, spSearchParms, false ) ) { return false; }
+		// ==============================================
+		// ==============================================
+
+
+
+		// ====================
+		// == Do the search. ==
+		// ====================
+		bool bAllPass = true;
+#ifndef MX_SINGLE_THREAD_SEARCH
+		const size_t stThreads = 8;
+		struct {
+			CThread tThread;
+			CSearchResult1 srResults;
+			MX_PRIM_SEARCH_THREAD pstSearchThreadParms;
+		} aThreadStruct[stThreads];
+		LONG lProgTotal = 0;
+		size_t stMax = std::min( vDivisions.size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
+			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
+			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
+			aThreadStruct[I].pstSearchThreadParms.pspParms = &spSearchParms;
+			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
+			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
+			aThreadStruct[I].pstSearchThreadParms.evcCompFunc = evcCompFunc;
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (vDivisions.size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (vDivisions.size() * (I + 1) / stMax);
+			aThreadStruct[I].pstSearchThreadParms.ui32Size = ui32Size;
+			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
+			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
+			aThreadStruct[I].pstSearchThreadParms.pvSubsearchDiv = &vDivisions;
+			aThreadStruct[I].pstSearchThreadParms.psrbPrevResults = m_psrbSearchResults;
+			aThreadStruct[I].tThread.CreateThread( PrimitiveNotEqualToSubsearchThreadProc, &aThreadStruct[I].pstSearchThreadParms );
+		}
+		MX_THREADED_GATHER( CSearchResult1 );
+#endif
+
+		return bAllPass;
+	}
+
+	// Greater-than subsearch on primitives.
+	bool CSearcher::IncreasedPrimitiveSubsearch( MX_SUBSEARCH_PARMS &_spParms, const CAddressChunkList &_aclChunks, HWND _hProgressUpdate ) {
+		delete m_psrbCurTmpSearchResults;
+		m_psrbCurTmpSearchResults = new ( std::nothrow ) CSearchResult1();
+		if ( !m_psrbCurTmpSearchResults ) { return false; }
+		CSearchResultLocker srlSearchLock( m_psrbSearchResults );
+		std::vector<MX_SUBSEARCH_DIV> vDivisions;
+		if ( !DivideResultsForSubsearch( m_psrbSearchResults, vDivisions, _spParms.ui64MaxChunkLen, _aclChunks ) ) {
+			return false;
+		}
+		_spParms.bInvertResults = _spParms.bInvertResults ? true : false;	// Force to 0 or 1.
+
+
+		// ==============================================
+		// == Create the comparison function and size. ==
+		// ==============================================
+		MX_SEARCH_PARMS spSearchParms = SearchObjToSubsearchObj( _spParms );
+		MX_REL_COMP rcCompFunc = nullptr;
+		uint32_t ui32Size = 0;
+		if ( !GetGreaterThanCmpFuncAndSize( rcCompFunc, ui32Size, spSearchParms, true ) ) { return false; }
+		// ==============================================
+		// ==============================================
+
+
+
+		// ====================
+		// == Do the search. ==
+		// ====================
+		bool bAllPass = true;
+#ifndef MX_SINGLE_THREAD_SEARCH
+		const size_t stThreads = 8;
+		struct {
+			CThread tThread;
+			CSearchResult1 srResults;
+			MX_PRIM_SEARCH_THREAD pstSearchThreadParms;
+		} aThreadStruct[stThreads];
+		LONG lProgTotal = 0;
+		size_t stMax = std::min( vDivisions.size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
+			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
+			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
+			aThreadStruct[I].pstSearchThreadParms.pspParms = &spSearchParms;
+			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
+			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
+			aThreadStruct[I].pstSearchThreadParms.rcRelCompFunc = rcCompFunc;
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (vDivisions.size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (vDivisions.size() * (I + 1) / stMax);
+			aThreadStruct[I].pstSearchThreadParms.ui32Size = ui32Size;
+			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
+			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
+			aThreadStruct[I].pstSearchThreadParms.pvSubsearchDiv = &vDivisions;
+			aThreadStruct[I].pstSearchThreadParms.psrbPrevResults = m_psrbSearchResults;
+			aThreadStruct[I].tThread.CreateThread( PrimitiveIncreasedSubsearchThreadProc, &aThreadStruct[I].pstSearchThreadParms );
+		}
+		MX_THREADED_GATHER( CSearchResult1 );
+#endif
+
+		return bAllPass;
+	}
+
+	// Greater-than subsearch on primitives.
+	bool CSearcher::DecreasedPrimitiveSubsearch( MX_SUBSEARCH_PARMS &_spParms, const CAddressChunkList &_aclChunks, HWND _hProgressUpdate ) {
+		delete m_psrbCurTmpSearchResults;
+		m_psrbCurTmpSearchResults = new ( std::nothrow ) CSearchResult1();
+		if ( !m_psrbCurTmpSearchResults ) { return false; }
+		CSearchResultLocker srlSearchLock( m_psrbSearchResults );
+		std::vector<MX_SUBSEARCH_DIV> vDivisions;
+		if ( !DivideResultsForSubsearch( m_psrbSearchResults, vDivisions, _spParms.ui64MaxChunkLen, _aclChunks ) ) {
+			return false;
+		}
+		_spParms.bInvertResults = _spParms.bInvertResults ? true : false;	// Force to 0 or 1.
+
+
+		// ==============================================
+		// == Create the comparison function and size. ==
+		// ==============================================
+		MX_SEARCH_PARMS spSearchParms = SearchObjToSubsearchObj( _spParms );
+		MX_REL_COMP rcCompFunc = nullptr;
+		uint32_t ui32Size = 0;
+		if ( !GetLessThanCmpFuncAndSize( rcCompFunc, ui32Size, spSearchParms, true ) ) { return false; }
+		// ==============================================
+		// ==============================================
+
+
+
+		// ====================
+		// == Do the search. ==
+		// ====================
+		bool bAllPass = true;
+#ifndef MX_SINGLE_THREAD_SEARCH
+		const size_t stThreads = 8;
+		struct {
+			CThread tThread;
+			CSearchResult1 srResults;
+			MX_PRIM_SEARCH_THREAD pstSearchThreadParms;
+		} aThreadStruct[stThreads];
+		LONG lProgTotal = 0;
+		size_t stMax = std::min( vDivisions.size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
+			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
+			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
+			aThreadStruct[I].pstSearchThreadParms.pspParms = &spSearchParms;
+			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
+			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
+			aThreadStruct[I].pstSearchThreadParms.rcRelCompFunc = rcCompFunc;
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (vDivisions.size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (vDivisions.size() * (I + 1) / stMax);
+			aThreadStruct[I].pstSearchThreadParms.ui32Size = ui32Size;
+			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
+			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
+			aThreadStruct[I].pstSearchThreadParms.pvSubsearchDiv = &vDivisions;
+			aThreadStruct[I].pstSearchThreadParms.psrbPrevResults = m_psrbSearchResults;
+			aThreadStruct[I].tThread.CreateThread( PrimitiveDecreasedSubsearchThreadProc, &aThreadStruct[I].pstSearchThreadParms );
+		}
+		MX_THREADED_GATHER( CSearchResult1 );
+#endif
+
+		return bAllPass;
+	}
+
+	// In-range subsearch on primitives.
+	bool CSearcher::InRangePrimitiveSubsearch( MX_SUBSEARCH_PARMS &_spParms, const CAddressChunkList &_aclChunks, HWND _hProgressUpdate ) {
+		delete m_psrbCurTmpSearchResults;
+		m_psrbCurTmpSearchResults = new ( std::nothrow ) CSearchResult1();
+		if ( !m_psrbCurTmpSearchResults ) { return false; }
+		CSearchResultLocker srlSearchLock( m_psrbSearchResults );
+		std::vector<MX_SUBSEARCH_DIV> vDivisions;
+		if ( !DivideResultsForSubsearch( m_psrbSearchResults, vDivisions, _spParms.ui64MaxChunkLen, _aclChunks ) ) {
+			return false;
+		}
+		_spParms.bInvertResults = _spParms.bInvertResults ? true : false;	// Force to 0 or 1.
+
+
+		// ==============================================
+		// == Create the comparison function and size. ==
+		// ==============================================
+		MX_SEARCH_PARMS spSearchParms = SearchObjToSubsearchObj( _spParms );
+		MX_RANGE_COMP rcCompFunc = nullptr;
+		uint32_t ui32Size = 0;
+		if ( !GetRangeCmpFuncAndSize( rcCompFunc, ui32Size, spSearchParms, false ) ) { return false; }
+		// ==============================================
+		// ==============================================
+
+
+
+		// ====================
+		// == Do the search. ==
+		// ====================
+		bool bAllPass = true;
+#ifndef MX_SINGLE_THREAD_SEARCH
+		const size_t stThreads = 8;
+		struct {
+			CThread tThread;
+			CSearchResult1 srResults;
+			MX_PRIM_SEARCH_THREAD pstSearchThreadParms;
+		} aThreadStruct[stThreads];
+		LONG lProgTotal = 0;
+		size_t stMax = std::min( vDivisions.size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
+			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
+			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
+			aThreadStruct[I].pstSearchThreadParms.pspParms = &spSearchParms;
+			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
+			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
+			aThreadStruct[I].pstSearchThreadParms.rcRangeCompFunc = rcCompFunc;
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (vDivisions.size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (vDivisions.size() * (I + 1) / stMax);
+			aThreadStruct[I].pstSearchThreadParms.ui32Size = ui32Size;
+			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
+			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
+			aThreadStruct[I].pstSearchThreadParms.pvSubsearchDiv = &vDivisions;
+			aThreadStruct[I].pstSearchThreadParms.psrbPrevResults = m_psrbSearchResults;
+			aThreadStruct[I].tThread.CreateThread( PrimitiveInRangeSubsearchThreadProc, &aThreadStruct[I].pstSearchThreadParms );
+		}
+		MX_THREADED_GATHER( CSearchResult1 );
+#endif
+
+		return bAllPass;
+	}
+
+	// In-range subsearch on primitives.
+	bool CSearcher::SameAsBeforePrimitiveSubsearch( MX_SUBSEARCH_PARMS &_spParms, const CAddressChunkList &_aclChunks, HWND _hProgressUpdate ) {
+		delete m_psrbCurTmpSearchResults;
+		m_psrbCurTmpSearchResults = new ( std::nothrow ) CSearchResult1();
+		if ( !m_psrbCurTmpSearchResults ) { return false; }
+		CSearchResultLocker srlSearchLock( m_psrbSearchResults );
+		std::vector<MX_SUBSEARCH_DIV> vDivisions;
+		if ( !DivideResultsForSubsearch( m_psrbSearchResults, vDivisions, _spParms.ui64MaxChunkLen, _aclChunks ) ) {
+			return false;
+		}
+		_spParms.bInvertResults = _spParms.bInvertResults ? true : false;	// Force to 0 or 1.
+
+
+		// ==============================================
+		// == Create the comparison function and size. ==
+		// ==============================================
+		MX_EXACT_VAL_COMP evcCompFunc = nullptr;
+		uint32_t ui32Size = 0;
+		MX_SEARCH_PARMS spSearchParms = SearchObjToSubsearchObj( _spParms );
+		if ( !GetExactValCmpFuncAndSize( evcCompFunc, ui32Size, spSearchParms, true ) ) { return false; }
+		// ==============================================
+		// ==============================================
+
+
+
+		// ====================
+		// == Do the search. ==
+		// ====================
+		bool bAllPass = true;
+#ifndef MX_SINGLE_THREAD_SEARCH
+		const size_t stThreads = 8;
+		struct {
+			CThread tThread;
+			CSearchResult1 srResults;
+			MX_PRIM_SEARCH_THREAD pstSearchThreadParms;
+		} aThreadStruct[stThreads];
+		LONG lProgTotal = 0;
+		size_t stMax = std::min( vDivisions.size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
+			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
+			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
+			aThreadStruct[I].pstSearchThreadParms.pspParms = &spSearchParms;
+			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
+			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
+			aThreadStruct[I].pstSearchThreadParms.evcCompFunc = evcCompFunc;
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (vDivisions.size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (vDivisions.size() * (I + 1) / stMax);
+			aThreadStruct[I].pstSearchThreadParms.ui32Size = ui32Size;
+			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
+			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
+			aThreadStruct[I].pstSearchThreadParms.pvSubsearchDiv = &vDivisions;
+			aThreadStruct[I].pstSearchThreadParms.psrbPrevResults = m_psrbSearchResults;
+			aThreadStruct[I].tThread.CreateThread( PrimitiveSameAsBeforeSubsearchThreadProc, &aThreadStruct[I].pstSearchThreadParms );
+		}
+		MX_THREADED_GATHER( CSearchResult1 );
+#endif
+
+		return bAllPass;
+	}
+
+	// In-range subsearch on primitives.
+	bool CSearcher::DifferentFromBeforePrimitiveSubsearch( MX_SUBSEARCH_PARMS &_spParms, const CAddressChunkList &_aclChunks, HWND _hProgressUpdate ) {
+		delete m_psrbCurTmpSearchResults;
+		m_psrbCurTmpSearchResults = new ( std::nothrow ) CSearchResult1();
+		if ( !m_psrbCurTmpSearchResults ) { return false; }
+		CSearchResultLocker srlSearchLock( m_psrbSearchResults );
+		std::vector<MX_SUBSEARCH_DIV> vDivisions;
+		if ( !DivideResultsForSubsearch( m_psrbSearchResults, vDivisions, _spParms.ui64MaxChunkLen, _aclChunks ) ) {
+			return false;
+		}
+		// Swap the invert test because this is a negative search of same-as-before values.
+		_spParms.bInvertResults = _spParms.bInvertResults ? false : true;	// Force to 0 or 1.
+
+
+		// ==============================================
+		// == Create the comparison function and size. ==
+		// ==============================================
+		MX_EXACT_VAL_COMP evcCompFunc = nullptr;
+		uint32_t ui32Size = 0;
+		MX_SEARCH_PARMS spSearchParms = SearchObjToSubsearchObj( _spParms );
+		if ( !GetExactValCmpFuncAndSize( evcCompFunc, ui32Size, spSearchParms, true ) ) { return false; }
+		// ==============================================
+		// ==============================================
+
+
+
+		// ====================
+		// == Do the search. ==
+		// ====================
+		bool bAllPass = true;
+#ifndef MX_SINGLE_THREAD_SEARCH
+		const size_t stThreads = 8;
+		struct {
+			CThread tThread;
+			CSearchResult1 srResults;
+			MX_PRIM_SEARCH_THREAD pstSearchThreadParms;
+		} aThreadStruct[stThreads];
+		LONG lProgTotal = 0;
+		size_t stMax = std::min( vDivisions.size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
+			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
+			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
+			aThreadStruct[I].pstSearchThreadParms.pspParms = &spSearchParms;
+			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
+			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
+			aThreadStruct[I].pstSearchThreadParms.evcCompFunc = evcCompFunc;
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (vDivisions.size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (vDivisions.size() * (I + 1) / stMax);
+			aThreadStruct[I].pstSearchThreadParms.ui32Size = ui32Size;
+			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
+			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
+			aThreadStruct[I].pstSearchThreadParms.pvSubsearchDiv = &vDivisions;
+			aThreadStruct[I].pstSearchThreadParms.psrbPrevResults = m_psrbSearchResults;
+			aThreadStruct[I].tThread.CreateThread( PrimitiveSameAsBeforeSubsearchThreadProc, &aThreadStruct[I].pstSearchThreadParms );
+		}
+		MX_THREADED_GATHER( CSearchResult1 );
+#endif
+
+		return bAllPass;
+	}
+
+	// In-range subsearch on primitives.
+	//template <bool (CSearcher::* T)( CSearcher::MX_CHANGED_BY &, uint32_t &, CSearcher::MX_SEARCH_PARMS &, bool )>
+	bool CSearcher::ChangedByPrimitiveSubsearch( MX_SUBSEARCH_PARMS &_spParms, const CAddressChunkList &_aclChunks, HWND _hProgressUpdate,
+		MX_CHANGED_BY_SELECTOR _cbsFunctor )  {
+		delete m_psrbCurTmpSearchResults;
+		m_psrbCurTmpSearchResults = new ( std::nothrow ) CSearchResult1();
+		if ( !m_psrbCurTmpSearchResults ) { return false; }
+		CSearchResultLocker srlSearchLock( m_psrbSearchResults );
+		std::vector<MX_SUBSEARCH_DIV> vDivisions;
+		if ( !DivideResultsForSubsearch( m_psrbSearchResults, vDivisions, _spParms.ui64MaxChunkLen, _aclChunks ) ) {
+			return false;
+		}
+		_spParms.bInvertResults = _spParms.bInvertResults ? true : false;	// Force to 0 or 1.
+
+
+		// ==============================================
+		// == Create the comparison function and size. ==
+		// ==============================================
+		MX_CHANGED_BY cbCompFunc = nullptr;
+		uint32_t ui32Size = 0;
+		MX_SEARCH_PARMS spSearchParms = SearchObjToSubsearchObj( _spParms );
+		if ( !(this->*_cbsFunctor)( cbCompFunc, ui32Size, spSearchParms, true ) ) { return false; }
+		// ==============================================
+		// ==============================================
+
+
+
+		// ====================
+		// == Do the search. ==
+		// ====================
+		bool bAllPass = true;
+#ifndef MX_SINGLE_THREAD_SEARCH
+		const size_t stThreads = 8;
+		struct {
+			CThread tThread;
+			CSearchResult1 srResults;
+			MX_PRIM_SEARCH_THREAD pstSearchThreadParms;
+		} aThreadStruct[stThreads];
+		LONG lProgTotal = 0;
+		size_t stMax = std::min( vDivisions.size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
+			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
+			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
+			aThreadStruct[I].pstSearchThreadParms.pspParms = &spSearchParms;
+			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
+			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
+			aThreadStruct[I].pstSearchThreadParms.cbChangedByCompFunc = cbCompFunc;
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (vDivisions.size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (vDivisions.size() * (I + 1) / stMax);
+			aThreadStruct[I].pstSearchThreadParms.ui32Size = ui32Size;
+			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
+			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
+			aThreadStruct[I].pstSearchThreadParms.pvSubsearchDiv = &vDivisions;
+			aThreadStruct[I].pstSearchThreadParms.psrbPrevResults = m_psrbSearchResults;
+			aThreadStruct[I].tThread.CreateThread( PrimitiveChangedBySubsearchThreadProc, &aThreadStruct[I].pstSearchThreadParms );
+		}
+		MX_THREADED_GATHER( CSearchResult1 );
+#endif
+
+		return bAllPass;
+	}
+
+	// Quick-Expression subsearch on primitives.
+	template <typename _tType, unsigned _sIsFloat16>
+	bool CSearcher::QuickExpPrimitiveSubsearch( MX_SUBSEARCH_PARMS &_spParms, const CAddressChunkList &_aclChunks, HWND _hProgressUpdate ) {
+
+		delete m_psrbCurTmpSearchResults;
+		m_psrbCurTmpSearchResults = new ( std::nothrow ) CSearchResult1();
+		if ( !m_psrbCurTmpSearchResults ) { return false; }
+		CSearchResultLocker srlSearchLock( m_psrbSearchResults );
+		std::vector<MX_SUBSEARCH_DIV> vDivisions;
+		if ( !DivideResultsForSubsearch( m_psrbSearchResults, vDivisions, _spParms.ui64MaxChunkLen, _aclChunks ) ) {
+			return false;
+		}
+		_spParms.bInvertResults = _spParms.bInvertResults ? true : false;	// Force to 0 or 1.
+
+
+		// ============================================
+		// == Create size and search-parameter copy. ==
+		// ============================================
+		MX_SEARCH_PARMS spSearchParms = SearchObjToSubsearchObj( _spParms );
+		uint32_t ui32Size = CUtilities::DataTypeSize( _spParms.dtLVal.dtType );
+		// ============================================
+		// ============================================
+
+
+
+		// ====================
+		// == Do the search. ==
+		// ====================
+		bool bAllPass = true;
+#ifndef MX_SINGLE_THREAD_SEARCH
+		const size_t stThreads = 16;
+		struct {
+			CThread tThread;
+			CSearchResult1 srResults;
+			MX_PRIM_SEARCH_THREAD pstSearchThreadParms;
+		} aThreadStruct[stThreads];
+		LONG lProgTotal = 0;
+		size_t stMax = std::min( vDivisions.size(), stThreads );
+		for ( size_t I = 0; I < stMax; ++I ) {
+			aThreadStruct[I].pstSearchThreadParms.hProgressUpdate = _hProgressUpdate;
+			aThreadStruct[I].pstSearchThreadParms.paclChunks = &_aclChunks;
+			aThreadStruct[I].pstSearchThreadParms.pspParms = &spSearchParms;
+			aThreadStruct[I].pstSearchThreadParms.psrbResults = &aThreadStruct[I].srResults;
+			aThreadStruct[I].pstSearchThreadParms.ppProcess = m_ppProcess;
+			aThreadStruct[I].pstSearchThreadParms.stStartIdx = (vDivisions.size() * I / stMax);
+			aThreadStruct[I].pstSearchThreadParms.stEndIdx = (vDivisions.size() * (I + 1) / stMax);
+			aThreadStruct[I].pstSearchThreadParms.ui32Size = ui32Size;
+			aThreadStruct[I].pstSearchThreadParms.i32Result = 0;
+			aThreadStruct[I].pstSearchThreadParms.plProgress = &lProgTotal;
+			aThreadStruct[I].pstSearchThreadParms.pvSubsearchDiv = &vDivisions;
+			aThreadStruct[I].pstSearchThreadParms.psrbPrevResults = m_psrbSearchResults;
+			aThreadStruct[I].tThread.CreateThread( PrimitiveQuickExpSubsearchThreadProc<_tType, _sIsFloat16>, &aThreadStruct[I].pstSearchThreadParms );
+		}
+		MX_THREADED_GATHER( CSearchResult1 );
+#endif
+
+		return bAllPass;
+	}
+
 	// Gets the alignment for a primitive type.
 	bool CSearcher::PrimitiveAlignment( MX_SEARCH_PARMS &_spParms, CUtilities::MX_DATA_TYPES _dtType, CProcess * _ppProcess ) {
 		_spParms.ui32Alignment = 1;
@@ -2479,6 +2975,801 @@ namespace mx {
 					}
 					else { return false; }
 				}
+			}
+		}
+		return true;
+	}
+
+	// Creates an MX_SEARCH_PARMS object from a MX_SUBSEARCH_PARMS object.
+	CSearcher::MX_SEARCH_PARMS CSearcher::SearchObjToSubsearchObj( const MX_SUBSEARCH_PARMS &_spParms ) {
+		MX_SEARCH_PARMS spSearchParms;
+		spSearchParms.bInvertResults = _spParms.bInvertResults;
+		spSearchParms.dtLVal = _spParms.dtLVal;
+		spSearchParms.dtRVal = _spParms.dtRVal;
+		spSearchParms.dEpsilonValue = _spParms.dEpsilonValue;
+		spSearchParms.bUseEpsilon = _spParms.bUseEpsilon;
+		spSearchParms.bUseSmartEpsilon = _spParms.bUseSmartEpsilon;
+		spSearchParms.stType = _spParms.stInitialType;
+		spSearchParms.bsByteSwapping = _spParms.bsByteSwapping;
+		spSearchParms.ui64MaxChunkLen = _spParms.ui64MaxChunkLen;
+		spSearchParms.pbAbort = _spParms.pbAbort;
+		spSearchParms.ssExpression = _spParms.ssExpression;
+		return spSearchParms;
+	}
+
+	// Gets the comparison function and size.
+	bool CSearcher::GetExactValCmpFuncAndSize( MX_EXACT_VAL_COMP &_evcCompFunc, uint32_t &_ui32Size, MX_SEARCH_PARMS &_spParms, bool _bConvertBothF16 ) {
+		bool bLisFloat = CUtilities::DataTypeIsFloat( _spParms.dtLVal.dtType );
+		if ( bLisFloat && _spParms.bUseEpsilon ) {
+			_ui32Size = CUtilities::DataTypeSize( _spParms.dtLVal.dtType );
+			switch ( _ui32Size ) {
+				case sizeof( uint16_t ) : {
+					if ( _spParms.bInvertResults ) {
+						if ( _bConvertBothF16 ) {
+							_evcCompFunc = _spParms.bUseSmartEpsilon ? Cmp_Float16RelativeEpsilonWithNaN_ConvertBoth : Cmp_Float16EpsilonWithNaN_ConvertBoth;
+						}
+						else {
+							_evcCompFunc = _spParms.bUseSmartEpsilon ? Cmp_Float16RelativeEpsilonWithNaN : Cmp_Float16EpsilonWithNaN;
+						}
+					}
+					else {
+						if ( _bConvertBothF16 ) {
+							_evcCompFunc = _spParms.bUseSmartEpsilon ? Cmp_Float16RelativeEpsilon_ConvertBoth : Cmp_Float16Epsilon_ConvertBoth;
+						}
+						else {
+							_evcCompFunc = _spParms.bUseSmartEpsilon ? Cmp_Float16RelativeEpsilon : Cmp_Float16Epsilon;
+						}
+					}
+					break;
+				}
+				case sizeof( float ) : {
+					if ( _spParms.bInvertResults ) {
+						_evcCompFunc = _spParms.bUseSmartEpsilon ? Cmp_Float32RelativeEpsilonWithNaN : Cmp_Float32EpsilonWithNaN;
+					}
+					else {
+						_evcCompFunc = _spParms.bUseSmartEpsilon ? Cmp_Float32RelativeEpsilon : Cmp_Float32Epsilon;
+					}
+					break;
+				}
+				case sizeof( double ) : {
+					if ( _spParms.bInvertResults ) {
+						_evcCompFunc = _spParms.bUseSmartEpsilon ? Cmp_Float64RelativeEpsilonWithNaN : Cmp_Float64EpsilonWithNaN;
+					}
+					else {
+						_evcCompFunc = _spParms.bUseSmartEpsilon ? Cmp_Float64RelativeEpsilon : Cmp_Float64Epsilon;
+					}
+					break;
+				}
+				default : { return false; }
+			}
+		}
+		else {
+			_ui32Size = CUtilities::DataTypeSize( _spParms.dtLVal.dtType );
+			switch ( _ui32Size ) {
+				case DWINVALID : {
+					// CUtilities::MX_DT_VOID == Pointer32 or Pointer64.
+					if ( m_ppProcess->IsWow64Process() ) {
+						// We know it is 32-bit address space.
+						_evcCompFunc = Cmp_ExactVal32;
+						_ui32Size = 4;
+					}
+					else {
+						// It is the address space of the machine.
+						if ( CSystem::Is32Bit() ) {
+							_evcCompFunc = Cmp_ExactVal32;
+							_ui32Size = 4;
+						}
+						else if ( CSystem::Is64Bit() ) {
+							_evcCompFunc = Cmp_ExactVal64;
+							_ui32Size = 8;
+						}
+						else { return false; }
+					}
+					break;
+				}
+				case 1 : { _evcCompFunc = Cmp_ExactVal8; break; }
+				case 2 : {
+					if ( bLisFloat && _spParms.bInvertResults ) {
+						if ( _bConvertBothF16 ) {
+							_evcCompFunc = Cmp_Float16WithNaN_ConvertBoth;
+						}
+						else {
+							_evcCompFunc = Cmp_Float16WithNaN;
+						}
+					}
+					else {
+						if ( _bConvertBothF16 ) {
+							_evcCompFunc = Cmp_ExactVal16;
+						}
+						else {
+							_evcCompFunc = Cmp_ExactVal16;
+						}
+						if ( _spParms.dtLVal.dtType == CUtilities::MX_DT_FLOAT16 ) {
+							_spParms.dtLVal.u.UInt16 = CFloat16::DoubleToUi16( _spParms.dtLVal.u.Double );
+							//_spParms.dtLVal.dtType = CUtilities::MX_DT_FLOAT16;
+						}
+					}
+					break;
+				}
+				case 4 : {
+					_evcCompFunc = (bLisFloat && _spParms.bInvertResults) ? Cmp_Float32WithNaN : Cmp_ExactVal32;
+					break;
+				}
+				case 8 : {
+					_evcCompFunc = (bLisFloat && _spParms.bInvertResults) ? Cmp_Float64WithNaN : Cmp_ExactVal64;
+					break;
+				}
+				default: { return false; }
+			}
+		}
+		return true;
+	}
+
+	// Gets the comparison function and size.
+	bool CSearcher::GetGreaterThanCmpFuncAndSize( MX_REL_COMP &_rcCompFunc, uint32_t &_ui32Size, MX_SEARCH_PARMS &_spParms, bool _bConvertBothF16 ) {
+		_ui32Size = CUtilities::DataTypeSize( _spParms.dtLVal.dtType );
+		if ( _ui32Size == DWINVALID ) {
+			// CUtilities::MX_DT_VOID == Pointer32 or Pointer64.
+			if ( m_ppProcess->IsWow64Process() ) {
+				// We know it is 32-bit address space.
+				_rcCompFunc = Cmp_GreaterThanUnsigned32;
+				_ui32Size = 4;
+			}
+			else {
+				// It is the address space of the machine.
+				if ( CSystem::Is32Bit() ) {
+					_rcCompFunc = Cmp_GreaterThanUnsigned32;
+					_ui32Size = 4;
+				}
+				else if ( CSystem::Is64Bit() ) {
+					_rcCompFunc = Cmp_GreaterThanUnsigned64;
+					_ui32Size = 8;
+				}
+				else { return false; }
+			}
+		}
+		else {
+			switch ( _spParms.dtLVal.dtType ) {
+				case CUtilities::MX_DT_INT8 : {
+					_rcCompFunc = Cmp_GreaterThanSigned8;
+					break;
+				}
+				case CUtilities::MX_DT_UINT8 : {
+					_rcCompFunc = Cmp_GreaterThanUnsigned8;
+					break;
+				}
+				case CUtilities::MX_DT_INT16 : {
+					_rcCompFunc = Cmp_GreaterThanSigned16;
+					break;
+				}
+				case CUtilities::MX_DT_UINT16 : {
+					_rcCompFunc = Cmp_GreaterThanUnsigned16;
+					break;
+				}
+				case CUtilities::MX_DT_INT32 : {
+					_rcCompFunc = Cmp_GreaterThanSigned32;
+					break;
+				}
+				case CUtilities::MX_DT_UINT32 : {
+					_rcCompFunc = Cmp_GreaterThanUnsigned32;
+					break;
+				}
+				case CUtilities::MX_DT_INT64 : {
+					_rcCompFunc = Cmp_GreaterThanSigned64;
+					break;
+				}
+				case CUtilities::MX_DT_UINT64 : {
+					_rcCompFunc = Cmp_GreaterThanUnsigned64;
+					break;
+				}
+				case CUtilities::MX_DT_FLOAT16 : {
+					if ( _bConvertBothF16 ) {
+						_rcCompFunc = _spParms.bInvertResults ? Cmp_GreaterThanFloat16WithNaN_ConvertBoth : Cmp_GreaterThanFloat16_ConvertBoth;
+					}
+					else {
+						_rcCompFunc = _spParms.bInvertResults ? Cmp_GreaterThanFloat16WithNaN : Cmp_GreaterThanFloat16;
+					}
+					break;
+				}
+				case CUtilities::MX_DT_FLOAT : {
+					_rcCompFunc = _spParms.bInvertResults ? Cmp_GreaterThanFloat32WithNaN : Cmp_GreaterThanFloat32;
+					break;
+				}
+				case CUtilities::MX_DT_DOUBLE : {
+					_rcCompFunc = _spParms.bInvertResults ? Cmp_GreaterThanFloat64WithNaN : Cmp_GreaterThanFloat64;
+					break;
+				}
+				default : { return false; }
+			}
+		}
+		return true;
+	}
+
+	// Gets the comparison function and size.
+	bool CSearcher::GetLessThanCmpFuncAndSize( MX_REL_COMP &_rcCompFunc, uint32_t &_ui32Size, MX_SEARCH_PARMS &_spParms, bool _bConvertBothF16 ) {
+		_ui32Size = CUtilities::DataTypeSize( _spParms.dtLVal.dtType );
+		if ( _ui32Size == DWINVALID ) {
+			// CUtilities::MX_DT_VOID == Pointer32 or Pointer64.
+			if ( m_ppProcess->IsWow64Process() ) {
+				// We know it is 32-bit address space.
+				_rcCompFunc = Cmp_LessThanUnsigned32;
+				_ui32Size = 4;
+			}
+			else {
+				// It is the address space of the machine.
+				if ( CSystem::Is32Bit() ) {
+					_rcCompFunc = Cmp_LessThanUnsigned32;
+					_ui32Size = 4;
+				}
+				else if ( CSystem::Is64Bit() ) {
+					_rcCompFunc = Cmp_LessThanUnsigned64;
+					_ui32Size = 8;
+				}
+				else { return false; }
+			}
+		}
+		else {
+			switch ( _spParms.dtLVal.dtType ) {
+				case CUtilities::MX_DT_INT8 : {
+					_rcCompFunc = Cmp_LessThanSigned8;
+					break;
+				}
+				case CUtilities::MX_DT_UINT8 : {
+					_rcCompFunc = Cmp_LessThanUnsigned8;
+					break;
+				}
+				case CUtilities::MX_DT_INT16 : {
+					_rcCompFunc = Cmp_LessThanSigned16;
+					break;
+				}
+				case CUtilities::MX_DT_UINT16 : {
+					_rcCompFunc = Cmp_LessThanUnsigned16;
+					break;
+				}
+				case CUtilities::MX_DT_INT32 : {
+					_rcCompFunc = Cmp_LessThanSigned32;
+					break;
+				}
+				case CUtilities::MX_DT_UINT32 : {
+					_rcCompFunc = Cmp_LessThanUnsigned32;
+					break;
+				}
+				case CUtilities::MX_DT_INT64 : {
+					_rcCompFunc = Cmp_LessThanSigned64;
+					break;
+				}
+				case CUtilities::MX_DT_UINT64 : {
+					_rcCompFunc = Cmp_LessThanUnsigned64;
+					break;
+				}
+				case CUtilities::MX_DT_FLOAT16 : {
+					if ( _bConvertBothF16 ) {
+						_rcCompFunc = _spParms.bInvertResults ? Cmp_LessThanFloat16WithNaN_ConvertBoth : Cmp_LessThanFloat16_ConvertBoth;
+					}
+					else {
+						_rcCompFunc = _spParms.bInvertResults ? Cmp_LessThanFloat16WithNaN : Cmp_LessThanFloat16;
+					}
+					break;
+				}
+				case CUtilities::MX_DT_FLOAT : {
+					_rcCompFunc = _spParms.bInvertResults ? Cmp_LessThanFloat32WithNaN : Cmp_LessThanFloat32;
+					break;
+				}
+				case CUtilities::MX_DT_DOUBLE : {
+					_rcCompFunc = _spParms.bInvertResults ? Cmp_LessThanFloat64WithNaN : Cmp_LessThanFloat64;
+					break;
+				}
+				default : { return false; }
+			}
+		}
+		return true;
+	}
+
+	// Gets the comparison function and size.
+	bool CSearcher::GetRangeCmpFuncAndSize( MX_RANGE_COMP &_rcCompFunc, uint32_t &_ui32Size, MX_SEARCH_PARMS &_spParms, bool _bConvertBothF16 ) {
+		_ui32Size = CUtilities::DataTypeSize( _spParms.dtLVal.dtType );
+		if ( _ui32Size == DWINVALID ) {
+			// CUtilities::MX_DT_VOID == Pointer32 or Pointer64.
+			if ( m_ppProcess->IsWow64Process() ) {
+				// We know it is 32-bit address space.
+				_rcCompFunc = Cmp_InRangeUInt32;
+				_ui32Size = 4;
+			}
+			else {
+				// It is the address space of the machine.
+				if ( CSystem::Is32Bit() ) {
+					_rcCompFunc = Cmp_InRangeUInt32;
+					_ui32Size = 4;
+				}
+				else if ( CSystem::Is64Bit() ) {
+					_rcCompFunc = Cmp_InRangeUInt64;
+					_ui32Size = 8;
+				}
+				else { return false; }
+			}
+		}
+		else {
+			switch ( _spParms.dtLVal.dtType ) {
+				case CUtilities::MX_DT_INT8 : {
+					_rcCompFunc = Cmp_InRangeInt8;
+					break;
+				}
+				case CUtilities::MX_DT_UINT8 : {
+					_rcCompFunc = Cmp_InRangeUInt8;
+					break;
+				}
+				case CUtilities::MX_DT_INT16 : {
+					_rcCompFunc = Cmp_InRangeInt16;
+					break;
+				}
+				case CUtilities::MX_DT_UINT16 : {
+					_rcCompFunc = Cmp_InRangeUInt16;
+					break;
+				}
+				case CUtilities::MX_DT_INT32 : {
+					_rcCompFunc = Cmp_InRangeInt32;
+					break;
+				}
+				case CUtilities::MX_DT_UINT32 : {
+					_rcCompFunc = Cmp_InRangeUInt32;
+					break;
+				}
+				case CUtilities::MX_DT_INT64 : {
+					_rcCompFunc = Cmp_InRangeInt64;
+					break;
+				}
+				case CUtilities::MX_DT_UINT64 : {
+					_rcCompFunc = Cmp_InRangeUInt64;
+					break;
+				}
+				case CUtilities::MX_DT_FLOAT16 : {
+					if ( _bConvertBothF16 ) {
+						_rcCompFunc = _spParms.bInvertResults ? Cmp_InRangeFloat16WithNaN : Cmp_InRangeFloat16;
+					}
+					else {
+						_rcCompFunc = _spParms.bInvertResults ? Cmp_InRangeFloat16WithNaN : Cmp_InRangeFloat16;
+					}
+					break;
+				}
+				case CUtilities::MX_DT_FLOAT : {
+					_rcCompFunc = _spParms.bInvertResults ? Cmp_InRangeFloat32WithNaN : Cmp_InRangeFloat32;
+					break;
+				}
+				case CUtilities::MX_DT_DOUBLE : {
+					_rcCompFunc = _spParms.bInvertResults ? Cmp_InRangeFloat64WithNaN : Cmp_InRangeFloat64;
+					break;
+				}
+				default : { return false; }
+			}
+		}
+		return true;
+	}
+
+	// Gets the comparison function and size.
+	bool CSearcher::GetChangedByCmpFuncAndSize( MX_CHANGED_BY &_cbCompFunc, uint32_t &_ui32Size, MX_SEARCH_PARMS &_spParms, bool _bConvertBothF16 ) {
+		bool bLisFloat = CUtilities::DataTypeIsFloat( _spParms.dtLVal.dtType );
+
+		_ui32Size = CUtilities::DataTypeSize( _spParms.dtLVal.dtType );
+		if ( bLisFloat && _spParms.bUseEpsilon ) {
+			switch ( _ui32Size ) {
+				case sizeof( uint16_t ) : {
+					if ( _spParms.bInvertResults ) {
+						_cbCompFunc = _spParms.bUseSmartEpsilon ? Cmp_ChangedByFloat16RelativeEpsilonWithNaN : Cmp_ChangedByFloat16EpsilonWithNaN;
+					}
+					else {
+						_cbCompFunc = _spParms.bUseSmartEpsilon ? Cmp_ChangedByFloat16RelativeEpsilon : Cmp_ChangedByFloat16Epsilon;
+					}
+					break;
+				}
+				case sizeof( float ) : {
+					if ( _spParms.bInvertResults ) {
+						_cbCompFunc = _spParms.bUseSmartEpsilon ? Cmp_ChangedByFloat32RelativeEpsilonWithNaN : Cmp_ChangedByFloat32EpsilonWithNaN;
+					}
+					else {
+						_cbCompFunc = _spParms.bUseSmartEpsilon ? Cmp_ChangedByFloat32RelativeEpsilon : Cmp_ChangedByFloat32Epsilon;
+					}
+					break;
+				}
+				case sizeof( double ) : {
+					if ( _spParms.bInvertResults ) {
+						_cbCompFunc = _spParms.bUseSmartEpsilon ? Cmp_ChangedByFloat64RelativeEpsilonWithNaN : Cmp_ChangedByFloat64EpsilonWithNaN;
+					}
+					else {
+						_cbCompFunc = _spParms.bUseSmartEpsilon ? Cmp_ChangedByFloat64RelativeEpsilon : Cmp_ChangedByFloat64Epsilon;
+					}
+					break;
+				}
+				default : { return false; }
+			}
+		}
+		else {
+
+			if ( _ui32Size == DWINVALID ) {
+				// CUtilities::MX_DT_VOID == Pointer32 or Pointer64.
+				if ( m_ppProcess->IsWow64Process() ) {
+					// We know it is 32-bit address space.
+					_cbCompFunc = Cmp_ChangedByInt32;
+					_ui32Size = 4;
+				}
+				else {
+					// It is the address space of the machine.
+					if ( CSystem::Is32Bit() ) {
+						_cbCompFunc = Cmp_ChangedByInt32;
+						_ui32Size = 4;
+					}
+					else if ( CSystem::Is64Bit() ) {
+						_cbCompFunc = Cmp_ChangedByInt64;
+						_ui32Size = 8;
+					}
+					else { return false; }
+				}
+			}
+			else {
+				switch ( _spParms.dtLVal.dtType ) {
+					case CUtilities::MX_DT_INT8 : {
+						_cbCompFunc = Cmp_ChangedByInt8;
+						break;
+					}
+					case CUtilities::MX_DT_UINT8 : {
+						_cbCompFunc = Cmp_ChangedByUInt8;
+						break;
+					}
+					case CUtilities::MX_DT_INT16 : {
+						_cbCompFunc = Cmp_ChangedByInt16;
+						break;
+					}
+					case CUtilities::MX_DT_UINT16 : {
+						_cbCompFunc = Cmp_ChangedByUInt16;
+						break;
+					}
+					case CUtilities::MX_DT_INT32 : {
+						_cbCompFunc = Cmp_ChangedByInt32;
+						break;
+					}
+					case CUtilities::MX_DT_UINT32 : {
+						_cbCompFunc = Cmp_ChangedByUInt32;
+						break;
+					}
+					case CUtilities::MX_DT_INT64 : {
+						_cbCompFunc = Cmp_ChangedByInt64;
+						break;
+					}
+					case CUtilities::MX_DT_UINT64 : {
+						_cbCompFunc = Cmp_ChangedByUInt64;
+						break;
+					}
+					case CUtilities::MX_DT_FLOAT16 : {
+						if ( _bConvertBothF16 ) {
+							_cbCompFunc = _spParms.bInvertResults ? Cmp_ChangedByFloat16WithNaN : Cmp_ChangedByFloat16;
+						}
+						else {
+							_cbCompFunc = _spParms.bInvertResults ? Cmp_ChangedByFloat16WithNaN : Cmp_ChangedByFloat16;
+						}
+						break;
+					}
+					case CUtilities::MX_DT_FLOAT : {
+						_cbCompFunc = _spParms.bInvertResults ? Cmp_ChangedByFloat32WithNaN : Cmp_ChangedByFloat32;
+						break;
+					}
+					case CUtilities::MX_DT_DOUBLE : {
+						_cbCompFunc = _spParms.bInvertResults ? Cmp_ChangedByFloat64WithNaN : Cmp_ChangedByFloat64;
+						break;
+					}
+					default : { return false; }
+				}
+			}
+		}
+		return true;
+	}
+
+	// Gets the comparison function and size.
+	bool CSearcher::GetChangedByRangeCmpFuncAndSize( MX_CHANGED_BY &_cbCompFunc, uint32_t &_ui32Size, MX_SEARCH_PARMS &_spParms, bool _bConvertBothF16 ) {
+		_ui32Size = CUtilities::DataTypeSize( _spParms.dtLVal.dtType );
+
+		CUtilities::MX_DATA_TYPE dtLCopy = _spParms.dtLVal;
+		CUtilities::MX_DATA_TYPE dtRCopy = _spParms.dtRVal;
+		if ( _ui32Size == DWINVALID ) {
+			// CUtilities::MX_DT_VOID == Pointer32 or Pointer64.
+			if ( m_ppProcess->IsWow64Process() ) {
+				// We know it is 32-bit address space.
+				_cbCompFunc = Cmp_ChangedByRangeInt32;
+				_ui32Size = 4;
+				_spParms.dtLVal.u.Int32 = std::min( dtLCopy.u.Int32, dtRCopy.u.Int32 );
+				_spParms.dtRVal.u.Int32 = std::max( dtRCopy.u.Int32, dtLCopy.u.Int32 );
+			}
+			else {
+				// It is the address space of the machine.
+				if ( CSystem::Is32Bit() ) {
+					_cbCompFunc = Cmp_ChangedByRangeInt32;
+					_ui32Size = 4;
+					_spParms.dtLVal.u.Int32 = std::min( dtLCopy.u.Int32, dtRCopy.u.Int32 );
+					_spParms.dtRVal.u.Int32 = std::max( dtRCopy.u.Int32, dtLCopy.u.Int32 );
+				}
+				else if ( CSystem::Is64Bit() ) {
+					_cbCompFunc = Cmp_ChangedByRangeInt64;
+					_ui32Size = 8;
+					_spParms.dtLVal.u.Int64 = std::min( dtLCopy.u.Int64, dtRCopy.u.Int64 );
+					_spParms.dtRVal.u.Int64 = std::max( dtRCopy.u.Int64, dtLCopy.u.Int64 );
+				}
+				else { return false; }
+			}
+		}
+		else {
+			switch ( _spParms.dtLVal.dtType ) {
+				case CUtilities::MX_DT_INT8 : {
+					_cbCompFunc = Cmp_ChangedByRangeInt8;
+					_spParms.dtLVal.u.Int8 = std::min( dtLCopy.u.Int8, dtRCopy.u.Int8 );
+					_spParms.dtRVal.u.Int8 = std::max( dtRCopy.u.Int8, dtLCopy.u.Int8 );
+					break;
+				}
+				case CUtilities::MX_DT_UINT8 : {
+					_cbCompFunc = Cmp_ChangedByRangeUInt8;
+					_spParms.dtLVal.u.UInt8 = std::min( dtLCopy.u.UInt8, dtRCopy.u.UInt8 );
+					_spParms.dtRVal.u.UInt8 = std::max( dtRCopy.u.UInt8, dtLCopy.u.UInt8 );
+					break;
+				}
+				case CUtilities::MX_DT_INT16 : {
+					_cbCompFunc = Cmp_ChangedByRangeInt16;
+					_spParms.dtLVal.u.Int16 = std::min( dtLCopy.u.Int16, dtRCopy.u.Int16 );
+					_spParms.dtRVal.u.Int16 = std::max( dtRCopy.u.Int16, dtLCopy.u.Int16 );
+					break;
+				}
+				case CUtilities::MX_DT_UINT16 : {
+					_cbCompFunc = Cmp_ChangedByRangeUInt16;
+					_spParms.dtLVal.u.UInt16 = std::min( dtLCopy.u.UInt16, dtRCopy.u.UInt16 );
+					_spParms.dtRVal.u.UInt16 = std::max( dtRCopy.u.UInt16, dtLCopy.u.UInt16 );
+					break;
+				}
+				case CUtilities::MX_DT_INT32 : {
+					_cbCompFunc = Cmp_ChangedByRangeInt32;
+					_spParms.dtLVal.u.Int32 = std::min( dtLCopy.u.Int32, dtRCopy.u.Int32 );
+					_spParms.dtRVal.u.Int32 = std::max( dtRCopy.u.Int32, dtLCopy.u.Int32 );
+					break;
+				}
+				case CUtilities::MX_DT_UINT32 : {
+					_cbCompFunc = Cmp_ChangedByRangeUInt32;
+					_spParms.dtLVal.u.UInt32 = std::min( dtLCopy.u.UInt32, dtRCopy.u.UInt32 );
+					_spParms.dtRVal.u.UInt32 = std::max( dtRCopy.u.UInt32, dtLCopy.u.UInt32 );
+					break;
+				}
+				case CUtilities::MX_DT_INT64 : {
+					_cbCompFunc = Cmp_ChangedByRangeInt64;
+					_spParms.dtLVal.u.Int64 = std::min( dtLCopy.u.Int64, dtRCopy.u.Int64 );
+					_spParms.dtRVal.u.Int64 = std::max( dtRCopy.u.Int64, dtLCopy.u.Int64 );
+					break;
+				}
+				case CUtilities::MX_DT_UINT64 : {
+					_cbCompFunc = Cmp_ChangedByRangeUInt64;
+					_spParms.dtLVal.u.UInt64 = std::min( dtLCopy.u.UInt64, dtRCopy.u.UInt64 );
+					_spParms.dtRVal.u.UInt64 = std::max( dtRCopy.u.UInt64, dtLCopy.u.UInt64 );
+					break;
+				}
+				case CUtilities::MX_DT_FLOAT16 : {
+					if ( _bConvertBothF16 ) {
+						_cbCompFunc = _spParms.bInvertResults ? Cmp_ChangedByRangeFloat16WithNaN : Cmp_ChangedByRangeFloat16;
+					}
+					else {
+						_cbCompFunc = _spParms.bInvertResults ? Cmp_ChangedByRangeFloat16WithNaN : Cmp_ChangedByRangeFloat16;
+					}
+					_spParms.dtLVal.u.Float64 = std::min( dtLCopy.u.Float64, dtRCopy.u.Float64 );
+					_spParms.dtRVal.u.Float64 = std::max( dtRCopy.u.Float64, dtLCopy.u.Float64 );
+					break;
+				}
+				case CUtilities::MX_DT_FLOAT : {
+					_cbCompFunc = _spParms.bInvertResults ? Cmp_ChangedByRangeFloat32WithNaN : Cmp_ChangedByRangeFloat32;
+					_spParms.dtLVal.u.Float32 = std::min( dtLCopy.u.Float32, dtRCopy.u.Float32 );
+					_spParms.dtRVal.u.Float32 = std::max( dtRCopy.u.Float32, dtLCopy.u.Float32 );
+					break;
+				}
+				case CUtilities::MX_DT_DOUBLE : {
+					_cbCompFunc = _spParms.bInvertResults ? Cmp_ChangedByRangeFloat64WithNaN : Cmp_ChangedByRangeFloat64;
+					_spParms.dtLVal.u.Float64 = std::min( dtLCopy.u.Float64, dtRCopy.u.Float64 );
+					_spParms.dtRVal.u.Float64 = std::max( dtRCopy.u.Float64, dtLCopy.u.Float64 );
+					break;
+				}
+				default : { return false; }
+			}
+		}
+		return true;
+	}
+
+	// Gets the comparison function and size.
+	bool CSearcher::GetChangedByPercCmpFuncAndSize( MX_CHANGED_BY &_cbCompFunc, uint32_t &_ui32Size, MX_SEARCH_PARMS &_spParms, bool _bConvertBothF16 ) {
+		bool bLisFloat = CUtilities::DataTypeIsFloat( _spParms.dtLVal.dtType );
+
+		_ui32Size = CUtilities::DataTypeSize( _spParms.dtLVal.dtType );
+		if ( bLisFloat && _spParms.bUseEpsilon ) {
+			switch ( _ui32Size ) {
+				case sizeof( uint16_t ) : {
+					if ( _spParms.bInvertResults ) {
+						_cbCompFunc = _spParms.bUseSmartEpsilon ? Cmp_ChangedByPercFloat16RelativeEpsilonWithNaN : Cmp_ChangedByPercFloat16EpsilonWithNaN;
+					}
+					else {
+						_cbCompFunc = _spParms.bUseSmartEpsilon ? Cmp_ChangedByPercFloat16RelativeEpsilon : Cmp_ChangedByPercFloat16Epsilon;
+					}
+					break;
+				}
+				case sizeof( float ) : {
+					if ( _spParms.bInvertResults ) {
+						_cbCompFunc = _spParms.bUseSmartEpsilon ? Cmp_ChangedByPercFloat32RelativeEpsilonWithNaN : Cmp_ChangedByPercFloat32EpsilonWithNaN;
+					}
+					else {
+						_cbCompFunc = _spParms.bUseSmartEpsilon ? Cmp_ChangedByPercFloat32RelativeEpsilon : Cmp_ChangedByPercFloat32Epsilon;
+					}
+					break;
+				}
+				case sizeof( double ) : {
+					if ( _spParms.bInvertResults ) {
+						_cbCompFunc = _spParms.bUseSmartEpsilon ? Cmp_ChangedByPercFloat64RelativeEpsilonWithNaN : Cmp_ChangedByPercFloat64EpsilonWithNaN;
+					}
+					else {
+						_cbCompFunc = _spParms.bUseSmartEpsilon ? Cmp_ChangedByPercFloat64RelativeEpsilon : Cmp_ChangedByPercFloat64Epsilon;
+					}
+					break;
+				}
+				default : { return false; }
+			}
+		}
+		else {
+
+			if ( _ui32Size == DWINVALID ) {
+				// CUtilities::MX_DT_VOID == Pointer32 or Pointer64.
+				if ( m_ppProcess->IsWow64Process() ) {
+					// We know it is 32-bit address space.
+					_cbCompFunc = Cmp_ChangedByPercInt32;
+					_ui32Size = 4;
+				}
+				else {
+					// It is the address space of the machine.
+					if ( CSystem::Is32Bit() ) {
+						_cbCompFunc = Cmp_ChangedByPercInt32;
+						_ui32Size = 4;
+					}
+					else if ( CSystem::Is64Bit() ) {
+						_cbCompFunc = Cmp_ChangedByPercInt64;
+						_ui32Size = 8;
+					}
+					else { return false; }
+				}
+			}
+			else {
+				switch ( _spParms.dtLVal.dtType ) {
+					case CUtilities::MX_DT_INT8 : {
+						_cbCompFunc = Cmp_ChangedByPercInt8;
+						break;
+					}
+					case CUtilities::MX_DT_UINT8 : {
+						_cbCompFunc = Cmp_ChangedByPercUInt8;
+						break;
+					}
+					case CUtilities::MX_DT_INT16 : {
+						_cbCompFunc = Cmp_ChangedByPercInt16;
+						break;
+					}
+					case CUtilities::MX_DT_UINT16 : {
+						_cbCompFunc = Cmp_ChangedByPercUInt16;
+						break;
+					}
+					case CUtilities::MX_DT_INT32 : {
+						_cbCompFunc = Cmp_ChangedByPercInt32;
+						break;
+					}
+					case CUtilities::MX_DT_UINT32 : {
+						_cbCompFunc = Cmp_ChangedByPercUInt32;
+						break;
+					}
+					case CUtilities::MX_DT_INT64 : {
+						_cbCompFunc = Cmp_ChangedByPercInt64;
+						break;
+					}
+					case CUtilities::MX_DT_UINT64 : {
+						_cbCompFunc = Cmp_ChangedByPercUInt64;
+						break;
+					}
+					case CUtilities::MX_DT_FLOAT16 : {
+						if ( _bConvertBothF16 ) {
+							_cbCompFunc = _spParms.bInvertResults ? Cmp_ChangedByPercFloat16WithNaN : Cmp_ChangedByPercFloat16;
+						}
+						else {
+							_cbCompFunc = _spParms.bInvertResults ? Cmp_ChangedByPercFloat16WithNaN : Cmp_ChangedByPercFloat16;
+						}
+						break;
+					}
+					case CUtilities::MX_DT_FLOAT : {
+						_cbCompFunc = _spParms.bInvertResults ? Cmp_ChangedByPercFloat32WithNaN : Cmp_ChangedByPercFloat32;
+						break;
+					}
+					case CUtilities::MX_DT_DOUBLE : {
+						_cbCompFunc = _spParms.bInvertResults ? Cmp_ChangedByPercFloat64WithNaN : Cmp_ChangedByPercFloat64;
+						break;
+					}
+					default : { return false; }
+				}
+			}
+		}
+		return true;
+	}
+
+	// Gets the comparison function and size.
+	bool CSearcher::GetChangedByRangePercCmpFuncAndSize( MX_CHANGED_BY &_cbCompFunc, uint32_t &_ui32Size, MX_SEARCH_PARMS &_spParms, bool _bConvertBothF16 ) {
+		_ui32Size = CUtilities::DataTypeSize( _spParms.dtLVal.dtType );
+
+		CUtilities::MX_DATA_TYPE dtLCopy = _spParms.dtLVal;
+		CUtilities::MX_DATA_TYPE dtRCopy = _spParms.dtRVal;
+		_spParms.dtLVal.u.Float64 = std::min( dtLCopy.u.Float64, dtRCopy.u.Float64 );
+		_spParms.dtRVal.u.Float64 = std::max( dtRCopy.u.Float64, dtLCopy.u.Float64 );
+		if ( _ui32Size == DWINVALID ) {
+			// CUtilities::MX_DT_VOID == Pointer32 or Pointer64.
+			if ( m_ppProcess->IsWow64Process() ) {
+				// We know it is 32-bit address space.
+				_cbCompFunc = Cmp_ChangedByRangePercInt32;
+				_ui32Size = 4;
+			}
+			else {
+				// It is the address space of the machine.
+				if ( CSystem::Is32Bit() ) {
+					_cbCompFunc = Cmp_ChangedByRangePercInt32;
+					_ui32Size = 4;
+				}
+				else if ( CSystem::Is64Bit() ) {
+					_cbCompFunc = Cmp_ChangedByRangePercInt64;
+					_ui32Size = 8;
+				}
+				else { return false; }
+			}
+		}
+		else {
+			switch ( _spParms.dtLVal.dtType ) {
+				case CUtilities::MX_DT_INT8 : {
+					_cbCompFunc = Cmp_ChangedByRangePercInt8;
+					break;
+				}
+				case CUtilities::MX_DT_UINT8 : {
+					_cbCompFunc = Cmp_ChangedByRangePercUInt8;
+					break;
+				}
+				case CUtilities::MX_DT_INT16 : {
+					_cbCompFunc = Cmp_ChangedByRangePercInt16;
+					break;
+				}
+				case CUtilities::MX_DT_UINT16 : {
+					_cbCompFunc = Cmp_ChangedByRangePercUInt16;
+					break;
+				}
+				case CUtilities::MX_DT_INT32 : {
+					_cbCompFunc = Cmp_ChangedByRangePercInt32;
+					break;
+				}
+				case CUtilities::MX_DT_UINT32 : {
+					_cbCompFunc = Cmp_ChangedByRangePercUInt32;
+					break;
+				}
+				case CUtilities::MX_DT_INT64 : {
+					_cbCompFunc = Cmp_ChangedByRangePercInt64;
+					break;
+				}
+				case CUtilities::MX_DT_UINT64 : {
+					_cbCompFunc = Cmp_ChangedByRangePercUInt64;
+					break;
+				}
+				case CUtilities::MX_DT_FLOAT16 : {
+					if ( _bConvertBothF16 ) {
+						_cbCompFunc = _spParms.bInvertResults ? Cmp_ChangedByRangePercFloat16WithNaN : Cmp_ChangedByRangePercFloat16;
+					}
+					else {
+						_cbCompFunc = _spParms.bInvertResults ? Cmp_ChangedByRangePercFloat16WithNaN : Cmp_ChangedByRangePercFloat16;
+					}
+					break;
+				}
+				case CUtilities::MX_DT_FLOAT : {
+					_cbCompFunc = _spParms.bInvertResults ? Cmp_ChangedByRangePercFloat32WithNaN : Cmp_ChangedByRangePercFloat32;
+					break;
+				}
+				case CUtilities::MX_DT_DOUBLE : {
+					_cbCompFunc = _spParms.bInvertResults ? Cmp_ChangedByRangePercFloat64WithNaN : Cmp_ChangedByRangePercFloat64;
+					break;
+				}
+				default : { return false; }
 			}
 		}
 		return true;
@@ -3710,6 +5001,393 @@ namespace mx {
 		}
 
 		pustParms->i32Result = 1;
+		return true;
+	}
+
+	// Scans multiple parts of the current results at the same time.
+	DWORD WINAPI CSearcher::PrimitiveExactValueSubsearchThreadProc( LPVOID _lpParameter ) {
+		MX_PRIM_SEARCH_THREAD * ppstParms = static_cast<MX_PRIM_SEARCH_THREAD *>(_lpParameter);
+		CSearchResultLocker srlSearchLock( ppstParms->psrbResults );
+		lsw::LSW_THREAD_PRIORITY tpThreadPri( ppstParms->pspParms->iThreadPriority );
+
+		CRamBuffer rbBuffer( ppstParms->ppProcess, ppstParms->paclChunks, ppstParms->pspParms->ui64MaxChunkLen );
+		rbBuffer.SetPreproc( RamProcPreprocessByteSwap, reinterpret_cast<uint64_t>(ppstParms->pspParms) );
+
+		size_t stResultIdx = 0;
+		uint64_t ui64ResultAccumulator = 0;
+		for ( size_t I = ppstParms->stStartIdx; I < ppstParms->stEndIdx; ++I ) {
+			for ( size_t J = 0; J < (*ppstParms->pvSubsearchDiv)[I].ui64Total; ++J ) {
+				uint64_t ui64Addr;
+				if ( !ppstParms->psrbPrevResults->GetResultFast_Locked( static_cast<size_t>(J + (*ppstParms->pvSubsearchDiv)[I].ui64Start), ui64Addr, stResultIdx, ui64ResultAccumulator ) ) {
+					ppstParms->i32Result = -1;
+					return false;
+				}
+				CUtilities::MX_DATA_TYPE dtVal;
+				if ( rbBuffer.Read( ui64Addr, &dtVal, ppstParms->ui32Size ) ) {
+					if ( ppstParms->evcCompFunc( ppstParms->pspParms->dtLVal, dtVal, (*ppstParms->pspParms) ) ^ ppstParms->pspParms->bInvertResults ) {
+						if ( !ppstParms->psrbResults->Add( ui64Addr,
+							reinterpret_cast<uint8_t *>(&dtVal), ppstParms->ui32Size ) ) {
+							ppstParms->i32Result = -1;
+							return false;
+						}
+					}
+				}
+			}
+			if ( !((*ppstParms->plProgress) & 0x1) && ppstParms->hProgressUpdate ) {
+				::SendNotifyMessageW( ppstParms->hProgressUpdate, PBM_SETPOS, static_cast<WPARAM>((((*ppstParms->plProgress) + 1.0) / (ppstParms->pvSubsearchDiv->size())) * 100.0), 0L );
+			}
+			::InterlockedIncrement( ppstParms->plProgress );
+			if ( ppstParms->pspParms->pbAbort && (*ppstParms->pspParms->pbAbort) ) { break; }
+		}
+
+		ppstParms->i32Result = 1;
+		return true;
+	}
+
+	// Scans multiple parts of the current results at the same time.
+	DWORD WINAPI CSearcher::PrimitiveNotEqualToSubsearchThreadProc( LPVOID _lpParameter ) {
+		MX_PRIM_SEARCH_THREAD * ppstParms = static_cast<MX_PRIM_SEARCH_THREAD *>(_lpParameter);
+		CSearchResultLocker srlSearchLock( ppstParms->psrbResults );
+		lsw::LSW_THREAD_PRIORITY tpThreadPri( ppstParms->pspParms->iThreadPriority );
+
+		CRamBuffer rbBuffer( ppstParms->ppProcess, ppstParms->paclChunks, ppstParms->pspParms->ui64MaxChunkLen );
+		rbBuffer.SetPreproc( RamProcPreprocessByteSwap, reinterpret_cast<uint64_t>(ppstParms->pspParms) );
+
+		size_t stResultIdx = 0;
+		uint64_t ui64ResultAccumulator = 0;
+		for ( size_t I = ppstParms->stStartIdx; I < ppstParms->stEndIdx; ++I ) {
+			for ( size_t J = 0; J < (*ppstParms->pvSubsearchDiv)[I].ui64Total; ++J ) {
+				uint64_t ui64Addr;
+				if ( !ppstParms->psrbPrevResults->GetResultFast_Locked( static_cast<size_t>(J + (*ppstParms->pvSubsearchDiv)[I].ui64Start), ui64Addr, stResultIdx, ui64ResultAccumulator ) ) {
+					ppstParms->i32Result = -1;
+					return false;
+				}
+				CUtilities::MX_DATA_TYPE dtVal;
+				if ( rbBuffer.Read( ui64Addr, &dtVal, ppstParms->ui32Size ) ) {
+					// ppstParms->pspParms->bInvertResults was swapped so we don't have to use !ppstParms->evcCompFunc().  Swap our logic here to match.
+					if ( (ppstParms->evcCompFunc( ppstParms->pspParms->dtLVal, dtVal, (*ppstParms->pspParms) )) ^ ppstParms->pspParms->bInvertResults ) {
+						if ( !ppstParms->psrbResults->Add( ui64Addr,
+							reinterpret_cast<uint8_t *>(&dtVal), ppstParms->ui32Size ) ) {
+							ppstParms->i32Result = -1;
+							return false;
+						}
+					}
+				}
+			}
+			if ( !((*ppstParms->plProgress) & 0x1) && ppstParms->hProgressUpdate ) {
+				::SendNotifyMessageW( ppstParms->hProgressUpdate, PBM_SETPOS, static_cast<WPARAM>((((*ppstParms->plProgress) + 1.0) / (ppstParms->pvSubsearchDiv->size())) * 100.0), 0L );
+			}
+			::InterlockedIncrement( ppstParms->plProgress );
+			if ( ppstParms->pspParms->pbAbort && (*ppstParms->pspParms->pbAbort) ) { break; }
+		}
+
+		ppstParms->i32Result = 1;
+		return true;
+	}
+
+	// Scans multiple parts of the current results at the same time.
+	DWORD WINAPI CSearcher::PrimitiveIncreasedSubsearchThreadProc( LPVOID _lpParameter ) {
+		MX_PRIM_SEARCH_THREAD * ppstParms = static_cast<MX_PRIM_SEARCH_THREAD *>(_lpParameter);
+		CSearchResultLocker srlSearchLock( ppstParms->psrbResults );
+		lsw::LSW_THREAD_PRIORITY tpThreadPri( ppstParms->pspParms->iThreadPriority );
+
+		CRamBuffer rbBuffer( ppstParms->ppProcess, ppstParms->paclChunks, ppstParms->pspParms->ui64MaxChunkLen );
+		rbBuffer.SetPreproc( RamProcPreprocessByteSwap, reinterpret_cast<uint64_t>(ppstParms->pspParms) );
+
+		size_t stResultIdx = 0;
+		uint64_t ui64ResultAccumulator = 0;
+		for ( size_t I = ppstParms->stStartIdx; I < ppstParms->stEndIdx; ++I ) {
+			for ( size_t J = 0; J < (*ppstParms->pvSubsearchDiv)[I].ui64Total; ++J ) {
+				uint64_t ui64Addr;
+				const uint8_t * pui8Val;
+				if ( !ppstParms->psrbPrevResults->GetResultFast_Locked( static_cast<size_t>(J + (*ppstParms->pvSubsearchDiv)[I].ui64Start), ui64Addr, pui8Val, stResultIdx, ui64ResultAccumulator ) ) {
+					ppstParms->i32Result = -1;
+					return false;
+				}
+				CUtilities::MX_DATA_TYPE dtVal;
+				if ( rbBuffer.Read( ui64Addr, &dtVal, ppstParms->ui32Size ) ) {
+					if ( (ppstParms->rcRelCompFunc( (*reinterpret_cast<const CUtilities::MX_DATA_TYPE *>(pui8Val)), dtVal )) ^ ppstParms->pspParms->bInvertResults ) {
+						if ( !ppstParms->psrbResults->Add( ui64Addr,
+							reinterpret_cast<uint8_t *>(&dtVal), ppstParms->ui32Size ) ) {
+							ppstParms->i32Result = -1;
+							return false;
+						}
+					}
+				}
+			}
+			if ( !((*ppstParms->plProgress) & 0x1) && ppstParms->hProgressUpdate ) {
+				::SendNotifyMessageW( ppstParms->hProgressUpdate, PBM_SETPOS, static_cast<WPARAM>((((*ppstParms->plProgress) + 1.0) / (ppstParms->pvSubsearchDiv->size())) * 100.0), 0L );
+			}
+			::InterlockedIncrement( ppstParms->plProgress );
+			if ( ppstParms->pspParms->pbAbort && (*ppstParms->pspParms->pbAbort) ) { break; }
+		}
+
+		ppstParms->i32Result = 1;
+		return true;
+	}
+
+	// Scans multiple parts of the current results at the same time.
+	DWORD WINAPI CSearcher::PrimitiveDecreasedSubsearchThreadProc( LPVOID _lpParameter ) {
+		MX_PRIM_SEARCH_THREAD * ppstParms = static_cast<MX_PRIM_SEARCH_THREAD *>(_lpParameter);
+		CSearchResultLocker srlSearchLock( ppstParms->psrbResults );
+		lsw::LSW_THREAD_PRIORITY tpThreadPri( ppstParms->pspParms->iThreadPriority );
+
+		CRamBuffer rbBuffer( ppstParms->ppProcess, ppstParms->paclChunks, ppstParms->pspParms->ui64MaxChunkLen );
+		rbBuffer.SetPreproc( RamProcPreprocessByteSwap, reinterpret_cast<uint64_t>(ppstParms->pspParms) );
+
+		size_t stResultIdx = 0;
+		uint64_t ui64ResultAccumulator = 0;
+		for ( size_t I = ppstParms->stStartIdx; I < ppstParms->stEndIdx; ++I ) {
+			for ( size_t J = 0; J < (*ppstParms->pvSubsearchDiv)[I].ui64Total; ++J ) {
+				uint64_t ui64Addr;
+				const uint8_t * pui8Val;
+				if ( !ppstParms->psrbPrevResults->GetResultFast_Locked( static_cast<size_t>(J + (*ppstParms->pvSubsearchDiv)[I].ui64Start), ui64Addr, pui8Val, stResultIdx, ui64ResultAccumulator ) ) {
+					ppstParms->i32Result = -1;
+					return false;
+				}
+				CUtilities::MX_DATA_TYPE dtVal;
+				if ( rbBuffer.Read( ui64Addr, &dtVal, ppstParms->ui32Size ) ) {
+					if ( (ppstParms->rcRelCompFunc( (*reinterpret_cast<const CUtilities::MX_DATA_TYPE *>(pui8Val)), dtVal )) ^ ppstParms->pspParms->bInvertResults ) {
+						if ( !ppstParms->psrbResults->Add( ui64Addr,
+							reinterpret_cast<uint8_t *>(&dtVal), ppstParms->ui32Size ) ) {
+							ppstParms->i32Result = -1;
+							return false;
+						}
+					}
+				}
+			}
+			if ( !((*ppstParms->plProgress) & 0x1) && ppstParms->hProgressUpdate ) {
+				::SendNotifyMessageW( ppstParms->hProgressUpdate, PBM_SETPOS, static_cast<WPARAM>((((*ppstParms->plProgress) + 1.0) / (ppstParms->pvSubsearchDiv->size())) * 100.0), 0L );
+			}
+			::InterlockedIncrement( ppstParms->plProgress );
+			if ( ppstParms->pspParms->pbAbort && (*ppstParms->pspParms->pbAbort) ) { break; }
+		}
+
+		ppstParms->i32Result = 1;
+		return true;
+	}
+
+	// Scans multiple parts of the current results at the same time.
+	DWORD WINAPI CSearcher::PrimitiveInRangeSubsearchThreadProc( LPVOID _lpParameter ) {
+		MX_PRIM_SEARCH_THREAD * ppstParms = static_cast<MX_PRIM_SEARCH_THREAD *>(_lpParameter);
+		CSearchResultLocker srlSearchLock( ppstParms->psrbResults );
+		lsw::LSW_THREAD_PRIORITY tpThreadPri( ppstParms->pspParms->iThreadPriority );
+
+		CRamBuffer rbBuffer( ppstParms->ppProcess, ppstParms->paclChunks, ppstParms->pspParms->ui64MaxChunkLen );
+		rbBuffer.SetPreproc( RamProcPreprocessByteSwap, reinterpret_cast<uint64_t>(ppstParms->pspParms) );
+
+		size_t stResultIdx = 0;
+		uint64_t ui64ResultAccumulator = 0;
+		for ( size_t I = ppstParms->stStartIdx; I < ppstParms->stEndIdx; ++I ) {
+			for ( size_t J = 0; J < (*ppstParms->pvSubsearchDiv)[I].ui64Total; ++J ) {
+				uint64_t ui64Addr;
+				if ( !ppstParms->psrbPrevResults->GetResultFast_Locked( static_cast<size_t>(J + (*ppstParms->pvSubsearchDiv)[I].ui64Start), ui64Addr, stResultIdx, ui64ResultAccumulator ) ) {
+					ppstParms->i32Result = -1;
+					return false;
+				}
+				CUtilities::MX_DATA_TYPE dtVal;
+				if ( rbBuffer.Read( ui64Addr, &dtVal, ppstParms->ui32Size ) ) {
+					if ( (ppstParms->rcRangeCompFunc( ppstParms->pspParms->dtLVal, ppstParms->pspParms->dtRVal, dtVal )) ^ ppstParms->pspParms->bInvertResults ) {
+						if ( !ppstParms->psrbResults->Add( ui64Addr,
+							reinterpret_cast<uint8_t *>(&dtVal), ppstParms->ui32Size ) ) {
+							ppstParms->i32Result = -1;
+							return false;
+						}
+					}
+				}
+			}
+			if ( !((*ppstParms->plProgress) & 0x1) && ppstParms->hProgressUpdate ) {
+				::SendNotifyMessageW( ppstParms->hProgressUpdate, PBM_SETPOS, static_cast<WPARAM>((((*ppstParms->plProgress) + 1.0) / (ppstParms->pvSubsearchDiv->size())) * 100.0), 0L );
+			}
+			::InterlockedIncrement( ppstParms->plProgress );
+			if ( ppstParms->pspParms->pbAbort && (*ppstParms->pspParms->pbAbort) ) { break; }
+		}
+
+		ppstParms->i32Result = 1;
+		return true;
+	}
+
+	// Scans multiple parts of the current results at the same time.
+	DWORD WINAPI CSearcher::PrimitiveSameAsBeforeSubsearchThreadProc( LPVOID _lpParameter ) {
+		MX_PRIM_SEARCH_THREAD * ppstParms = static_cast<MX_PRIM_SEARCH_THREAD *>(_lpParameter);
+		CSearchResultLocker srlSearchLock( ppstParms->psrbResults );
+		lsw::LSW_THREAD_PRIORITY tpThreadPri( ppstParms->pspParms->iThreadPriority );
+
+		CRamBuffer rbBuffer( ppstParms->ppProcess, ppstParms->paclChunks, ppstParms->pspParms->ui64MaxChunkLen );
+		rbBuffer.SetPreproc( RamProcPreprocessByteSwap, reinterpret_cast<uint64_t>(ppstParms->pspParms) );
+
+		size_t stResultIdx = 0;
+		uint64_t ui64ResultAccumulator = 0;
+		for ( size_t I = ppstParms->stStartIdx; I < ppstParms->stEndIdx; ++I ) {
+			for ( size_t J = 0; J < (*ppstParms->pvSubsearchDiv)[I].ui64Total; ++J ) {
+				uint64_t ui64Addr;
+				const uint8_t * pui8Val;
+				if ( !ppstParms->psrbPrevResults->GetResultFast_Locked( static_cast<size_t>(J + (*ppstParms->pvSubsearchDiv)[I].ui64Start), ui64Addr, pui8Val, stResultIdx, ui64ResultAccumulator ) ) {
+					ppstParms->i32Result = -1;
+					return false;
+				}
+				CUtilities::MX_DATA_TYPE dtVal;
+				if ( rbBuffer.Read( ui64Addr, &dtVal, ppstParms->ui32Size ) ) {
+					if ( ppstParms->evcCompFunc( (*reinterpret_cast<const CUtilities::MX_DATA_TYPE *>(pui8Val)), dtVal, (*ppstParms->pspParms) ) ^ ppstParms->pspParms->bInvertResults ) {
+						if ( !ppstParms->psrbResults->Add( ui64Addr,
+							reinterpret_cast<uint8_t *>(&dtVal), ppstParms->ui32Size ) ) {
+							ppstParms->i32Result = -1;
+							return false;
+						}
+					}
+				}
+			}
+			if ( !((*ppstParms->plProgress) & 0x1) && ppstParms->hProgressUpdate ) {
+				::SendNotifyMessageW( ppstParms->hProgressUpdate, PBM_SETPOS, static_cast<WPARAM>((((*ppstParms->plProgress) + 1.0) / (ppstParms->pvSubsearchDiv->size())) * 100.0), 0L );
+			}
+			::InterlockedIncrement( ppstParms->plProgress );
+			if ( ppstParms->pspParms->pbAbort && (*ppstParms->pspParms->pbAbort) ) { break; }
+		}
+
+		ppstParms->i32Result = 1;
+		return true;
+	}
+
+	// Scans multiple parts of the current results at the same time.
+	DWORD WINAPI CSearcher::PrimitiveChangedBySubsearchThreadProc( LPVOID _lpParameter ) {
+		MX_PRIM_SEARCH_THREAD * ppstParms = static_cast<MX_PRIM_SEARCH_THREAD *>(_lpParameter);
+		CSearchResultLocker srlSearchLock( ppstParms->psrbResults );
+		lsw::LSW_THREAD_PRIORITY tpThreadPri( ppstParms->pspParms->iThreadPriority );
+
+		CRamBuffer rbBuffer( ppstParms->ppProcess, ppstParms->paclChunks, ppstParms->pspParms->ui64MaxChunkLen );
+		rbBuffer.SetPreproc( RamProcPreprocessByteSwap, reinterpret_cast<uint64_t>(ppstParms->pspParms) );
+
+		size_t stResultIdx = 0;
+		uint64_t ui64ResultAccumulator = 0;
+		for ( size_t I = ppstParms->stStartIdx; I < ppstParms->stEndIdx; ++I ) {
+			for ( size_t J = 0; J < (*ppstParms->pvSubsearchDiv)[I].ui64Total; ++J ) {
+				uint64_t ui64Addr;
+				const uint8_t * pui8Val;
+				if ( !ppstParms->psrbPrevResults->GetResultFast_Locked( static_cast<size_t>(J + (*ppstParms->pvSubsearchDiv)[I].ui64Start), ui64Addr, pui8Val, stResultIdx, ui64ResultAccumulator ) ) {
+					ppstParms->i32Result = -1;
+					return false;
+				}
+				CUtilities::MX_DATA_TYPE dtVal;
+				if ( rbBuffer.Read( ui64Addr, &dtVal, ppstParms->ui32Size ) ) {
+					if ( ppstParms->cbChangedByCompFunc( (*reinterpret_cast<const CUtilities::MX_DATA_TYPE *>(pui8Val)), dtVal, ppstParms->pspParms->dtLVal, (*ppstParms->pspParms) ) ^ ppstParms->pspParms->bInvertResults ) {
+						if ( !ppstParms->psrbResults->Add( ui64Addr,
+							reinterpret_cast<uint8_t *>(&dtVal), ppstParms->ui32Size ) ) {
+							ppstParms->i32Result = -1;
+							return false;
+						}
+					}
+				}
+			}
+			if ( !((*ppstParms->plProgress) & 0x1) && ppstParms->hProgressUpdate ) {
+				::SendNotifyMessageW( ppstParms->hProgressUpdate, PBM_SETPOS, static_cast<WPARAM>((((*ppstParms->plProgress) + 1.0) / (ppstParms->pvSubsearchDiv->size())) * 100.0), 0L );
+			}
+			::InterlockedIncrement( ppstParms->plProgress );
+			if ( ppstParms->pspParms->pbAbort && (*ppstParms->pspParms->pbAbort) ) { break; }
+		}
+
+		ppstParms->i32Result = 1;
+		return true;
+	}
+
+	// Scans multiple parts of the current results at the same time.
+	template <typename _tType, unsigned _sIsFloat16>
+	DWORD WINAPI CSearcher::PrimitiveQuickExpSubsearchThreadProc( LPVOID _lpParameter ) {
+		MX_PRIM_SEARCH_THREAD * ppstParms = static_cast<MX_PRIM_SEARCH_THREAD *>(_lpParameter);
+		CSearchResultLocker srlSearchLock( ppstParms->psrbResults );
+		lsw::LSW_THREAD_PRIORITY tpThreadPri( ppstParms->pspParms->iThreadPriority );
+
+		CRamBuffer rbBuffer( ppstParms->ppProcess, ppstParms->paclChunks, ppstParms->pspParms->ui64MaxChunkLen );
+		rbBuffer.SetPreproc( RamProcPreprocessByteSwap, reinterpret_cast<uint64_t>(ppstParms->pspParms) );
+
+
+		// =================
+		// == Expression. ==
+		// =================
+		CExpression eExp;
+		if ( !eExp.SetExpression( ppstParms->pspParms->ssExpression.c_str() ) ) { ppstParms->i32Result = -1; return false; }
+		if ( !eExp.GetContainer() ) { ppstParms->i32Result = -1; return false; }
+		// Since the address is not given to the script, we can't make meaningful predictions about what it will try to access.
+		// Don't try to optimize it; just let it read what it reads.
+		eExp.GetContainer()->SetAddressHandler( ExpAddressHandler, reinterpret_cast<uintptr_t>(ppstParms->ppProcess) );
+
+		// UserVarHandler just copies whatever the uintptr_t points to, so just point it to rRes and then just update rRes during the search.
+		ee::CExpEvalContainer::EE_RESULT rRes;
+		eExp.GetContainer()->SetUserHandler( UserVarHandler, reinterpret_cast<uintptr_t>(&rRes) );
+		bool bIsFloat = false;
+		bool bIsSigned = false;
+		if ( CUtilities::DataTypeIsFloat( ppstParms->pspParms->dtLVal.dtType ) ) { rRes.ncType = ee::EE_NC_FLOATING; bIsFloat = true; }
+		else if ( CUtilities::DataTypeIsSigned( ppstParms->pspParms->dtLVal.dtType ) ) { rRes.ncType = ee::EE_NC_SIGNED; bIsSigned = true; }
+		else { rRes.ncType = ee::EE_NC_UNSIGNED; }
+		// =================
+		// =================
+
+		size_t stResultIdx = 0;
+		uint64_t ui64ResultAccumulator = 0;
+		ee::CExpEvalContainer::EE_RESULT rNumberedParm;
+		if ( bIsFloat ) {
+			rNumberedParm.ncType = ee::EE_NC_FLOATING;
+		}
+		else if ( bIsSigned ) {
+			rNumberedParm.ncType = ee::EE_NC_SIGNED;
+		}
+		else {
+			rNumberedParm.ncType = ee::EE_NC_UNSIGNED;
+		}
+		for ( size_t I = ppstParms->stStartIdx; I < ppstParms->stEndIdx; ++I ) {
+			for ( size_t J = 0; J < (*ppstParms->pvSubsearchDiv)[I].ui64Total; ++J ) {
+				uint64_t ui64Addr;
+				const uint8_t * pui8Val;
+				if ( !ppstParms->psrbPrevResults->GetResultFast_Locked( static_cast<size_t>(J + (*ppstParms->pvSubsearchDiv)[I].ui64Start), ui64Addr, pui8Val, stResultIdx, ui64ResultAccumulator ) ) {
+					ppstParms->i32Result = -1;
+					return false;
+				}
+				CUtilities::MX_DATA_TYPE dtVal;
+				dtVal.u.UInt64 = 0;
+				if ( rbBuffer.Read( ui64Addr, &dtVal, ppstParms->ui32Size ) ) {
+					if ( _sIsFloat16 ) {
+						rRes.u.dVal = CFloat16( dtVal.u.UInt16 ).Value();
+						rNumberedParm.u.dVal = CFloat16( (*reinterpret_cast<const uint16_t *>(pui8Val)) ).Value();
+					}
+					else {
+						if ( bIsFloat ) {
+							rRes.u.dVal = (*reinterpret_cast<_tType *>(&dtVal.u.Float64));
+							rNumberedParm.u.dVal = (*reinterpret_cast<const _tType *>(pui8Val));
+						}
+						else if ( bIsSigned ) {
+							rRes.u.i64Val = (*reinterpret_cast<_tType *>(&dtVal.u.Int64));
+							rNumberedParm.u.i64Val = (*reinterpret_cast<const _tType *>(pui8Val));
+						}
+						else {
+							rRes.u.ui64Val = (*reinterpret_cast<_tType *>(&dtVal.u.UInt64));
+							rNumberedParm.u.ui64Val = (*reinterpret_cast<const _tType *>(pui8Val));
+						}
+					}
+					ee::CExpEvalContainer::EE_RESULT rThisRes;
+					eExp.GetContainer()->SetNumberedParm( 0, rNumberedParm );
+					if ( eExp.GetContainer()->Resolve( rThisRes ) ) {
+						rThisRes = ee::CExpEvalContainer::ConvertResult( rThisRes, ee::EE_NC_UNSIGNED );
+						if ( (rThisRes.u.ui64Val && !ppstParms->pspParms->bInvertResults) ||
+							!rThisRes.u.ui64Val && ppstParms->pspParms->bInvertResults) {
+							/*if ( dtVal.u.UInt64 != 0 ) {
+								volatile int oiuisdu = 0;
+							}*/
+							if ( !ppstParms->psrbResults->Add( ui64Addr,
+								reinterpret_cast<uint8_t *>(&dtVal), ppstParms->ui32Size ) ) {
+								ppstParms->i32Result = -1;
+								return false;
+							}
+						}
+					}
+				}
+			}
+			if ( !((*ppstParms->plProgress) & 0x1) && ppstParms->hProgressUpdate ) {
+				::SendNotifyMessageW( ppstParms->hProgressUpdate, PBM_SETPOS, static_cast<WPARAM>((((*ppstParms->plProgress) + 1.0) / (ppstParms->pvSubsearchDiv->size())) * 100.0), 0L );
+			}
+			::InterlockedIncrement( ppstParms->plProgress );
+			if ( ppstParms->pspParms->pbAbort && (*ppstParms->pspParms->pbAbort) ) { break; }
+		}
+
+		ppstParms->i32Result = 1;
 		return true;
 	}
 

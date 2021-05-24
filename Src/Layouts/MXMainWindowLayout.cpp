@@ -286,7 +286,7 @@ namespace mx {
 		{ FALSE,		MX_MWMI_GROUP,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_05F169BE__Group_Search, _LEN_05F169BE ) },
 		{ FALSE,		MX_MWMI_EXPRESSION,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_BD4358C1__Expression_Search, _LEN_BD4358C1 ) },
 		{ TRUE,			0,							FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_MWMI_SUB,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_2D411EAC_S_ub_Search, _LEN_2D411EAC ) },
+		{ FALSE,		MX_MWMI_SUB,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_BDE91628_S_ubsearch, _LEN_BDE91628 ) },
 		{ TRUE,			0,							FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_MWMI_INSERT,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_ED5B72E3__Insert_Address, _LEN_ED5B72E3 ) },
 		{ TRUE,			0,							FALSE,		FALSE,		TRUE,		nullptr },

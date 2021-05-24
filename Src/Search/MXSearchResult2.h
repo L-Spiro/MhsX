@@ -33,9 +33,26 @@ namespace mx {
 		//	which means the caller must finish using the data before the search results are updated in any way.
 		virtual bool						GetResultFast( size_t _stIdx, uint64_t &_ui64Address, const uint8_t * &_pui8Value ) const;
 
+		// Gets a result under the assumption that the object is locked.
+		virtual bool						GetResultFast_Locked( size_t _stIdx, uint64_t &_ui64Address, const uint8_t * &_pui8Value,
+			size_t &_stSearchIndex, uint64_t &_ui64SearchAccumulator ) const;
+
+		// Gets the address of a result under the assumption that the object is locked.
+		virtual bool						GetResultFast_Locked( size_t _stIdx, uint64_t &_ui64Address,
+			size_t &_stSearchIndex, uint64_t &_ui64SearchAccumulator ) const;
+
 		// Unlocks after done with the buffer returned by GetResultFast().
 		virtual void						Unlock() const { m_csCrit.LeaveCriticalSection(); }
 
+		// Gets the first and last address.  The last address is the first address that is outside the range of the final item in the list, meaning the final item's address plus the size of that item.
+		//	In other words, these addresses represent the entire range of addresses that fully encapsulates all values in the results.
+		virtual bool						GetEncapsulatingAddresses( uint64_t &_ui64Start, uint64_t &_ui64End ) const;
+
+		// Gets the index of the last result whose address is equal to or above the given address.
+		virtual uint64_t					GetIndexOfFirstItemWithAddressOrAbove( uint64_t _ui64Address ) const;
+
+		// Are copies if the data stored within the results?  If not, relative subsearches cannot be made since there is no "previous" value.
+		virtual bool						StoresValues() const { return true; }
 
 
 	protected :
@@ -135,6 +152,23 @@ namespace mx {
 
 		// Critical section.
 		lsw::CCriticalSection				m_csCrit;
+
+
+		// == Functions.
+		// Gets the address and value inside a given array.
+		__inline void						GetAddressAndValue( size_t _sArrayIdx, size_t _stIdx,
+			uint64_t &_ui64Address, const uint8_t * &_pui8Value ) const {
+			size_t stOffset = m_vAddressLists[_sArrayIdx]->ui16Align * _stIdx;
+			_ui64Address = m_vAddressLists[_sArrayIdx]->ui64Address + stOffset;
+			_pui8Value = &m_vAddressLists[_sArrayIdx]->pui8Values[stOffset];
+		}
+
+		// Gets the address inside a given array.
+		__inline void						GetAddress( size_t _sArrayIdx, size_t _stIdx,
+			uint64_t &_ui64Address ) const {
+			size_t stOffset = m_vAddressLists[_sArrayIdx]->ui16Align * _stIdx;
+			_ui64Address = m_vAddressLists[_sArrayIdx]->ui64Address + stOffset;
+		}
 	};
 
 }	// namespace mx

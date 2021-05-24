@@ -48,6 +48,8 @@ namespace mx {
 		// == Members.
 		//MX_OPTIONS *						m_poOptions;
 		CMemHack *							m_pmhMemHack;
+		// Was the last manually typed expression null?
+		bool								m_bLastTypeExpressionWasEmpty;
 
 		static MX_SEARCH_WIN_DATA			m_swdData;
 
@@ -57,13 +59,49 @@ namespace mx {
 		void								SaveDialogData( MX_SEARCH_WIN_DATA &_swdData );
 
 		// Validates the dialog box.
-		bool								DialogContentsAreValid( CSecureWString &_wsError, CSearcher::MX_SEARCH_PARMS &_spParmsIfValid );
+		bool								DialogContentsAreValid( CSecureWString &_wsError, CSearcher::MX_SUBSEARCH_PARMS &_spParmsIfValid );
 
 		// Verifies that the expression is valid and returns descriptive texts.
-		//bool								VerifyExpression( CSecureString &_sExpression, CSecureWString &_wsResult, CSecureWString &_wsHelp, CUtilities::MX_DATA_TYPES _dtDataType );
+		bool								VerifyExpression( CSecureString &_sExpression, CSecureWString &_wsResult, CSecureWString &_wsHelp, CUtilities::MX_DATA_TYPES _dtDataType );
 
 		// Updates the dialog.
 		void								UpdateDialog();
+
+		// Creates an expression for searching for exact values.
+		void								CreateExactValueExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
+
+		// Creates an expression for searching for not-equal-to values.
+		void								CreateNotEqualToExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
+
+		// Creates an expression for searching for increased values.
+		void								CreateIncreasedExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &/*_rLVal*/, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
+
+		// Creates an expression for searching for decreased values.
+		void								CreateDecreasedExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &/*_rLVal*/, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
+
+		// Creates an expression for searching for ranged values.
+		void								CreateRangeExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal,
+			const ee::CExpEvalContainer::EE_RESULT &_rRVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
+
+		// Creates an expression for searching for same-as-before values.
+		void								CreateSameAsBeforeExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &/*_rLVal*/, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
+
+		// Creates an expression for searching for same-as-before values.
+		void								CreateDifferentFromBeforeExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &/*_rLVal*/, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
+
+		// Creates an expression for searching for changed-by values.
+		void								CreateChangedByExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
+
+		// Creates an expression for searching for changed-by-percent values.
+		void								CreateChangedByPercentExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
+
+		// Creates an expression for searching for changed-by-range values.
+		void								CreateChangedByRangeExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal,
+			const ee::CExpEvalContainer::EE_RESULT &_rRVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
+
+		// Creates an expression for searching for changed-by-range-percent values.
+		void								CreateChangedByRangePercentExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal,
+			const ee::CExpEvalContainer::EE_RESULT &_rRVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
 	};
 
 }	// namespace mx

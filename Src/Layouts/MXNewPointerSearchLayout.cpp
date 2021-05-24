@@ -280,8 +280,8 @@ namespace mx {
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
 			MX_CHECKSTYLE,							// dwStyle
 			0,										// dwStyleEx
-			MX_MAKE_WCHAR( _T_7422F11D_Enable____Same_as_Original____Sub_Search ),	// pwcText
-			_LEN_7422F11D,							// sTextLen
+			MX_MAKE_WCHAR( _T_6D3BB054_Enable____Same_as_Original____Subsearch ),	// pwcText
+			_LEN_6D3BB054,							// sTextLen
 			MX_NPSI_DIALOG,							// dwParentId
 		},
 		{

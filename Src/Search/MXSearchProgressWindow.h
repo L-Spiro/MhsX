@@ -38,31 +38,39 @@ namespace mx {
 			CSearchProgressWindow *			pspwProgWindow;		// This object.
 			CWidget *						pwProgressHandle;
 			class CMhsMainWindow *			pmmwMainWindow;
-			const CSearcher::MX_SEARCH_PARMS *
+			union {
+				const CSearcher::MX_SEARCH_PARMS *
 											pspSearch;
+				const CSearcher::MX_SUBSEARCH_PARMS *
+											pspSubsearch;
+			};
 		};
 
 
 		// == Members.
 		// The main window.
 		class CMhsMainWindow *				m_pmmwMainWindow;
-
 		// The search parameters.
 		const CSearcher::MX_SEARCH_PARMS *	m_pspSearch;
-
+		// The search parameters.
+		const CSearcher::MX_SUBSEARCH_PARMS *
+											m_pspSubsearch;
 		// The search thread.
 		CThread								m_tThread;
-
 		// Search-thread parameters.
 		MX_SEARCH_THREAD					m_stParms;
-
 		// The abort trigger.
 		bool								m_bAbort;
+		// Is this a subsearch?
+		bool								m_bIsSubSearch;
 
 
 		// == Functions.
 		// The search thread.
 		static DWORD WINAPI					SearchThreadProc( LPVOID _lpParameter );
+
+		// The subsearch thread.
+		static DWORD WINAPI					SubsearchThreadProc( LPVOID _lpParameter );
 	};
 
 }	// namespace mx

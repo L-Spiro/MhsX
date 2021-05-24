@@ -133,7 +133,7 @@ namespace mx {
 
 	// Detach from the current process.
 	void CMemHack::Detach() {
-		m_pProcess.Detatch();
+		m_pProcess.Detach();
 		//m_hProc.Reset();
 	}
 

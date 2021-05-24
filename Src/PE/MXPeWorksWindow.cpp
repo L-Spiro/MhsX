@@ -334,7 +334,7 @@ namespace mx {
 		m_aAtom = 0;
 	}
 
-	// Fills a tree-list with the accosiated PE object's information.
+	// Fills a tree-list with the associated PE object's information.
 	bool CPeWorksWindow::FillTree( MX_TAB &_tTab ) {
 		lsw::CTreeList * ptlTree = static_cast<lsw::CTreeList *>(_tTab.ptWidget);
 		// Create the header items.

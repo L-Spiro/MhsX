@@ -32,8 +32,8 @@ namespace mx {
 		// Open the given process with the given mode and flags.
 		virtual bool					OpenProc( DWORD _dwId, MX_OPEN_PROC_MODE _opmMode, DWORD _dwFlags );
 
-		// Detatch from the current process, if there is one.
-		virtual void					Detatch();
+		// Detach from the current process, if there is one.
+		virtual void					Detach();
 
 		// Gets the process ID.
 		DWORD							ProcId() const { LSW_ENT_CRIT( m_csCrit ); return m_dwId; }
@@ -48,7 +48,7 @@ namespace mx {
 		DWORD							Flags() const { LSW_ENT_CRIT( m_csCrit ); return m_dwOpenProcFlags; }
 
 		// Is a process open?
-		bool							ProcIsOpened() const { LSW_ENT_CRIT( m_csCrit ); return m_hProcHandle.Valid() && m_dwId != DWINVALID; }
+		bool							ProcIsOpened() const { LSW_ENT_CRIT( m_csCrit ); return m_hProcHandle.Valid() && m_dwId != DWINVALID && m_opOpenProcThreadMonitor.aAtom == 0; }
 
 		// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
 		virtual bool					ReadProcessMemory( LPCVOID _lpBaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) const;
@@ -95,7 +95,7 @@ namespace mx {
 		// Gets the base and size of a region given an address.
 		virtual bool					GetChunk( uint64_t _lpAddress, uint64_t &_uiBaseAddress, uint64_t &_uiRegionSize );
 
-		// Resets  all accossiations with the current process.
+		// Resets all assocations with the current process.
 		virtual void					Reset();
 
 		// Pauses the target process.
@@ -114,7 +114,7 @@ namespace mx {
 			HANDLE						hHandle;						// The handle returned by OpenProcess().
 
 			MX_OPEN_PROC() :
-				aAtom( 0 ) {}
+				aAtom( 1 ) {}
 		};
 
 
@@ -134,7 +134,7 @@ namespace mx {
 		// Critical section.
 		CCriticalSection				m_csCrit;
 		
-		// The thread to signals when the process is no longer open.
+		// The thread to signal when the process is no longer open.
 		CThread							m_tProcOpenThread;
 
 		// Thread parameters.

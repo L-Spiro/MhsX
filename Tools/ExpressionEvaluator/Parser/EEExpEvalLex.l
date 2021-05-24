@@ -496,6 +496,7 @@ L?'(\\.|[^\\'])+'					{ return yy::CExpEvalParser::token::EE_CHAR_CONSTANT; }
 
 
 {L}({L}|{D})*						{ return yy::CExpEvalParser::token::EE_IDENTIFIER; }
+"$"{D}+								{ return yy::CExpEvalParser::token::EE_PARM; }
 
 .									{ }
 {WS}								{ }

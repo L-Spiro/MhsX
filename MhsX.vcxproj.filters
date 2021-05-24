@@ -155,6 +155,12 @@
     <Filter Include="Source Files\FloatingPointStudio">
       <UniqueIdentifier>{f1df9417-b015-453b-8a19-7f65ffe35ae4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\RamBuffer">
+      <UniqueIdentifier>{b3c03f5b-e274-409b-a4fa-f5164d7d20f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\RamBuffer">
+      <UniqueIdentifier>{179688ee-f8af-4dd7-83b3-10cf0afb7ade}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Strings\MXStringDecoder.cpp">
@@ -505,6 +511,9 @@
     <ClCompile Include="Src\Search\MXStandardSubsearchWindow.cpp">
       <Filter>Source Files\Search</Filter>
     </ClCompile>
+    <ClCompile Include="Src\RamBuffer\MXRamBuffer.cpp">
+      <Filter>Source Files\RamBuffer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -766,6 +775,9 @@
     </ClInclude>
     <ClInclude Include="Src\Search\MXStandardSubsearchWindow.h">
       <Filter>Header Files\Search</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RamBuffer\MXRamBuffer.h">
+      <Filter>Header Files\RamBuffer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -204,6 +204,9 @@ namespace mx {
 		// Starts a search on the current thread (when activated via script or plug-in) or on a new thread (normal).
 		bool								Search( CSearcher::MX_SEARCH_PARMS * _pspParms, CWidget * _pwParent, bool _bUseSepThread = true, CWidget * _pwProgress = nullptr );
 
+		// Starts a subsearch on the current thread (when activated via script or plug-in) or on a new thread (normal).
+		bool								Subsearch( CSearcher::MX_SUBSEARCH_PARMS * _pspParms, CWidget * _pwParent, bool _bUseSepThread = true, CWidget * _pwProgress = nullptr );
+
 		// Gets the MemHack object.
 		CMemHack *							MemHack() { return m_pmhMemHack; }
 

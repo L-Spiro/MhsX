@@ -53,6 +53,37 @@ namespace mx {
 			return uiSize;
 		}
 
+		// Gets the chunk containing the given address.
+		bool						FindChunk( uint64_t _ui64Addr, MX_CHUNK &_cChunk ) const {
+			for ( size_t I = 0; I < m_vChunks.size(); ++I ) {
+				if ( m_vChunks[I].ui64Start <= _ui64Addr && (m_vChunks[I].ui64Start + m_vChunks[I].ui64Len) > _ui64Addr ) {
+					_cChunk = m_vChunks[I];
+					return true;
+				}
+			}
+			return false;
+		}
+
+		// Gets the chunk containing the given address.  Begins the search on the given index.
+		bool						FindChunk( uint64_t _ui64Addr, MX_CHUNK &_cChunk, size_t &_stSearchStart ) const {
+			if ( _stSearchStart >= m_vChunks.size() ) { return false; }
+			for ( size_t I = _stSearchStart; I < m_vChunks.size(); ++I ) {
+				if ( m_vChunks[I].ui64Start <= _ui64Addr && (m_vChunks[I].ui64Start + m_vChunks[I].ui64Len) > _ui64Addr ) {
+					_cChunk = m_vChunks[I];
+					_stSearchStart = I;
+					return true;
+				}
+			}
+			for ( size_t I = 0; I < _stSearchStart; ++I ) {
+				if ( m_vChunks[I].ui64Start <= _ui64Addr && (m_vChunks[I].ui64Start + m_vChunks[I].ui64Len) > _ui64Addr ) {
+					_cChunk = m_vChunks[I];
+					_stSearchStart = I;
+					return true;
+				}
+			}
+			return false;
+		}
+
 
 	protected :
 		// == Members.

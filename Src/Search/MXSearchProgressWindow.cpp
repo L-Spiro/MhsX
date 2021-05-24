@@ -10,8 +10,14 @@ namespace mx {
 		m_pspSearch( nullptr ),
 		m_bAbort( false ) {
 		if ( _ui64Data ) {
+			m_bIsSubSearch = reinterpret_cast<CSearchProgressLayout::MX_SEARCH_DLG_PARMS *>(_ui64Data)->bSubSearch;
 			m_pmmwMainWindow = reinterpret_cast<CSearchProgressLayout::MX_SEARCH_DLG_PARMS *>(_ui64Data)->pmmwWindow;
-			m_pspSearch = reinterpret_cast<CSearchProgressLayout::MX_SEARCH_DLG_PARMS *>(_ui64Data)->pspSearch;
+			if ( m_bIsSubSearch ) {
+				m_pspSubsearch = reinterpret_cast<CSearchProgressLayout::MX_SEARCH_DLG_PARMS *>(_ui64Data)->pspSubsearch;
+			}
+			else {
+				m_pspSearch = reinterpret_cast<CSearchProgressLayout::MX_SEARCH_DLG_PARMS *>(_ui64Data)->pspSearch;
+			}
 		}
 	}
 
@@ -20,15 +26,27 @@ namespace mx {
 	CWidget::LSW_HANDLED CSearchProgressWindow::InitDialog() {
 		CWidget::LSW_HANDLED hRet = CMainWindow::InitDialog();
 
-		if ( m_pspSearch && m_pmmwMainWindow ) {
-			const_cast<CSearcher::MX_SEARCH_PARMS *>(m_pspSearch)->pbAbort = &m_bAbort;
+		if ( (m_pspSearch || m_pspSubsearch) && m_pmmwMainWindow ) {
+			if ( m_bIsSubSearch ) {
+				const_cast<CSearcher::MX_SUBSEARCH_PARMS *>(m_pspSubsearch)->pbAbort = &m_bAbort;
 
-			m_stParms.pspwProgWindow = this;
-			m_stParms.pwProgressHandle = FindChild( CSearchProgressLayout::MX_SPW_PROGRESSBAR );
-			m_stParms.pmmwMainWindow = m_pmmwMainWindow;
-			m_stParms.pspSearch = m_pspSearch;
+				m_stParms.pspwProgWindow = this;
+				m_stParms.pwProgressHandle = FindChild( CSearchProgressLayout::MX_SPW_PROGRESSBAR );
+				m_stParms.pmmwMainWindow = m_pmmwMainWindow;
+				m_stParms.pspSubsearch = m_pspSubsearch;
 			
-			m_tThread.CreateThread( SearchThreadProc, &m_stParms );
+				m_tThread.CreateThread( SubsearchThreadProc, &m_stParms );
+			}
+			else {
+				const_cast<CSearcher::MX_SEARCH_PARMS *>(m_pspSearch)->pbAbort = &m_bAbort;
+
+				m_stParms.pspwProgWindow = this;
+				m_stParms.pwProgressHandle = FindChild( CSearchProgressLayout::MX_SPW_PROGRESSBAR );
+				m_stParms.pmmwMainWindow = m_pmmwMainWindow;
+				m_stParms.pspSearch = m_pspSearch;
+			
+				m_tThread.CreateThread( SearchThreadProc, &m_stParms );
+			}
 		}
 
 		return hRet;
@@ -47,7 +65,7 @@ namespace mx {
 
 	// WM_CLOSE.
 	CWidget::LSW_HANDLED CSearchProgressWindow::Close() {
-		// Only allow SearchThreadProc() to close this window.
+		// Only allow SearchThreadProc()/SubsearchThreadProc() to close this window.
 		m_bAbort = true;
 		return LSW_H_HANDLED;
 	}
@@ -56,6 +74,14 @@ namespace mx {
 	DWORD WINAPI CSearchProgressWindow::SearchThreadProc( LPVOID _lpParameter ) {
 		MX_SEARCH_THREAD * pstParms = reinterpret_cast<MX_SEARCH_THREAD *>(_lpParameter);
 		pstParms->pmmwMainWindow->Search( const_cast<mx::CSearcher::MX_SEARCH_PARMS *>(pstParms->pspSearch), pstParms->pspwProgWindow, false, pstParms->pwProgressHandle );
+		::EndDialog( pstParms->pspwProgWindow->Wnd(), 0 );
+		return 0;
+	}
+
+	// The subsearch thread.
+	DWORD WINAPI CSearchProgressWindow::SubsearchThreadProc( LPVOID _lpParameter ) {
+		MX_SEARCH_THREAD * pstParms = reinterpret_cast<MX_SEARCH_THREAD *>(_lpParameter);
+		pstParms->pmmwMainWindow->Subsearch( const_cast<mx::CSearcher::MX_SUBSEARCH_PARMS *>(pstParms->pspSubsearch), pstParms->pspwProgWindow, false, pstParms->pwProgressHandle );
 		::EndDialog( pstParms->pspwProgWindow->Wnd(), 0 );
 		return 0;
 	}

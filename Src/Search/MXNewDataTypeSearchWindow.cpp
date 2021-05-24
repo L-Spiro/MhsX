@@ -473,7 +473,7 @@ namespace mx {
 
 		pcbCheck = static_cast<CCheckButton *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_INVERT ));
 		if ( pcbCheck ) {
-			_spParmsIfValid.bInvertResults = pcbCheck->IsChecked();
+			_spParmsIfValid.bInvertResults = pcbCheck->IsChecked() && lrEvalType != CUtilities::MX_ET_UNKNOWN;
 		}
 		else { _spParmsIfValid.bInvertResults = false; }
 
@@ -638,6 +638,12 @@ namespace mx {
 			if ( pcbLExpCombo ) {
 				pcbLExpCombo->SetEnabled( lrRes == CUtilities::MX_ET_QUICK_EXP );
 			}
+
+			CCheckButton * pcbCheck;
+			pcbCheck = static_cast<CCheckButton *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_INVERT ));
+			if ( pcbCheck ) {
+				pcbCheck->SetEnabled( lrRes != CUtilities::MX_ET_UNKNOWN );
+			}
 		}
 
 
@@ -794,20 +800,20 @@ namespace mx {
 										wText = wszBuffer;
 
 										if ( m_bLastTypeExpressionWasEmpty ) {
-										CComboBox * pcbExpCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_EXP_COMBO ));
-										if ( pcbExpCombo ) {
-											CSecureString ssExact;
-											CreateRangeExpression( ssExact, rResLow, rResHi, dtDataType, pcbInvertCheck->IsChecked() );
-											pcbExpCombo->SetTextA( ssExact.c_str() );
+											CComboBox * pcbExpCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_EXP_COMBO ));
+											if ( pcbExpCombo ) {
+												CSecureString ssExact;
+												CreateRangeExpression( ssExact, rResLow, rResHi, dtDataType, pcbInvertCheck->IsChecked() );
+												pcbExpCombo->SetTextA( ssExact.c_str() );
+											}
 										}
-									}
 									}
 								}
 							}
 							break;
 						}
 						case CUtilities::MX_ET_UNKNOWN : {
-							wsTemp = pcbInvertCheck && pcbInvertCheck->IsChecked() ? mx::CStringDecoder::DecodeToWString( _T_LEN_B6D4D1A0_Find_no__s_values_ ) :
+							wsTemp = ((pcbInvertCheck && pcbInvertCheck->IsChecked()) && false) ? mx::CStringDecoder::DecodeToWString( _T_LEN_B6D4D1A0_Find_no__s_values_ ) :
 								mx::CStringDecoder::DecodeToWString( _T_LEN_2FF885A4_Find_all__s_values_ );
 							CSecureWString wsLeft;
 							CUtilities::PrintDataType( wsLeft, dtDataType, CUtilities::Options.dwDataTypeOptions & CUtilities::MX_DTO_CODENAMES );
@@ -883,6 +889,8 @@ namespace mx {
 
 			plLabel->SetTextW( wText.c_str() );
 		}
+
+		
 	}
 
 	// Creates an expression for searching for exact values.

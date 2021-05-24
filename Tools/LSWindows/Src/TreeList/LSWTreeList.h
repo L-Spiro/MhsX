@@ -6,7 +6,7 @@
 
 
 #define LSW_TREELIST_LEFT_MARGIN			3
-#define LSW_TREELIST_INVALID				static_cast<size_t>(~0ULL)
+#define LSW_TREELIST_INVALID				static_cast<size_t>(~static_cast<size_t>(0))
 
 
 namespace lsw {

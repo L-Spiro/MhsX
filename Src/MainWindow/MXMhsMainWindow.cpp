@@ -354,13 +354,13 @@ namespace mx {
 	// WM_INITDIALOG.
 	CWidget::LSW_HANDLED CMhsMainWindow::InitDialog() {
 		{
-														//	uiFuncParm0							pfFunc				hdName								uiId								sParms	hdParms																			hdFormattings
-			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_OpenOptions,	{ _T_LEN_159BB63C_Show_Options },	MX_WH_SHOW_OPTIONS,					0 };
+														//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
+			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_OpenOptions,				{ _T_LEN_159BB63C_Show_Options },				MX_WH_SHOW_OPTIONS,					0 };
 			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
 		}
 		{
-														//	uiFuncParm0							pfFunc						hdName										uiId								sParms	hdParms																			hdFormattings
-			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowFoundAddresses,	{ _T_LEN_A5501E10_Show_Found_Addresses },	MX_WH_SHOW_FOUND_ADDRESSES,			0 };
+														//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
+			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowFoundAddresses,		{ _T_LEN_A5501E10_Show_Found_Addresses },		MX_WH_SHOW_FOUND_ADDRESSES,			0 };
 			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
 		}
 		{
@@ -947,6 +947,7 @@ namespace mx {
 			CSearchProgressLayout::MX_SEARCH_DLG_PARMS sdpParms;
 			sdpParms.pmmwWindow = this;
 			sdpParms.pspSearch = _pspParms;
+			sdpParms.bSubSearch = false;
 			return CSearchProgressLayout::CreateSearchProgressDialog( _pwParent, &sdpParms );
 		}
 
@@ -986,6 +987,52 @@ namespace mx {
 			MemHack()->Process().ResumeProcess();
 		}
 		
+
+		return true;
+	}
+
+	// Starts a subsearch on the current thread (when activated via script or plug-in) or on a new thread (normal).
+	bool CMhsMainWindow::Subsearch( CSearcher::MX_SUBSEARCH_PARMS * _pspParms, CWidget * _pwParent, bool _bUseSepThread, CWidget * _pwProgress ) {
+		_pspParms->ui64MaxChunkLen = m_pmhMemHack->Options().ui64BufferSize;
+		_pspParms->bUseEpsilon = m_pmhMemHack->Options().bUseEpsilon;
+		_pspParms->bUseSmartEpsilon = m_pmhMemHack->Options().bSmartEpsilon;
+		_pspParms->dEpsilonValue = m_pmhMemHack->Options().dEpsilon;
+		_pspParms->iThreadPriority = m_pmhMemHack->Options().iThreadPriority;
+		_pspParms->bPause = m_pmhMemHack->Options().bPauseTarget;
+		_pspParms->bsByteSwapping = static_cast<CUtilities::MX_BYTESWAP>(m_pmhMemHack->Options().bsByteswap);
+
+		if ( _bUseSepThread ) {
+			CSearchProgressLayout::MX_SEARCH_DLG_PARMS sdpParms;
+			sdpParms.pmmwWindow = this;
+			sdpParms.pspSubsearch = _pspParms;
+			sdpParms.bSubSearch = true;
+			return CSearchProgressLayout::CreateSearchProgressDialog( _pwParent, &sdpParms );
+		}
+
+		LONG lSuspend = STATUS_ABANDONED;
+		if ( _pspParms->bPause ) { lSuspend = MemHack()->Process().SuspendProcess(); }
+		uint64_t ui64TotalFound = 0;
+		bool bRes = m_pmhMemHack->Searcher().Subsearch( (*_pspParms), _pwProgress ? _pwProgress->Wnd() : NULL, &ui64TotalFound );
+
+		if ( !bRes ) {
+			//CSystem::MessageBoxError( Wnd(), _T_5868E6EA_An_error_occurred_during_the_search_, _LEN_5868E6EA );
+		}
+		else if ( ui64TotalFound == 0 ) {
+			CSystem::MessageBoxOk( Wnd(), _T_LEN_D5B44DE0_No_results_found__previous_results_restored_, _T_LEN_8080EB34_Found_Nothing );
+		}
+
+
+		else {
+			// Call UpdateFoundAddressWindowText() on the main thread.
+			::SendNotifyMessageW( Wnd(), MX_CM_UPDATE_FA, 0, 0 );
+			if ( FoundAddresses() ) {
+				FoundAddresses()->UpdateHeaders( MemHack()->Searcher().LastSearchType() );
+				FoundAddresses()->AddFoundAddresses();
+			}
+		}
+		if ( lSuspend == STATUS_SUCCESS ) {
+			MemHack()->Process().ResumeProcess();
+		}
 
 		return true;
 	}
@@ -1033,13 +1080,25 @@ namespace mx {
 		if ( FoundAddresses() ) {
 			CSearcher::MX_SEARCH_LOCK slSearchLock( &MemHack()->Searcher() );
 			if ( m_pmhMemHack->Searcher().TotalResults() ) {
-				CSecureString sMsg = mx::CStringDecoder::DecodeToString( _T_LEN_82CDC580_Found_Addresses___I64u_results_in__f_seconds_ );
-
+				CSearcher & sSearcher = m_pmhMemHack->Searcher();
 				char szBuffer[128];
-				uint64_t ui64SearchTime = std::max( 1ULL, m_pmhMemHack->Searcher().SearchTime() );
+				uint64_t ui64SearchTime = std::max( 1ULL, sSearcher.SearchTime() );
+				CSecureString sMsg;
+				if ( sSearcher.LastSearchTotalResults() > sSearcher.TotalResults() ) {
+					sMsg = mx::CStringDecoder::DecodeToString( _T_LEN_37BD2A11_Found_Addresses___I64u_results_in__f_seconds____I64u_ );
+					::sprintf_s( szBuffer, sMsg.c_str(), sSearcher.TotalResults(),
+						ui64SearchTime / 1000000.0,
+						sSearcher.LastSearchTotalResults() - sSearcher.TotalResults() );
+				}
+				else {
+					sMsg = mx::CStringDecoder::DecodeToString( _T_LEN_82CDC580_Found_Addresses___I64u_results_in__f_seconds_ );
+					::sprintf_s( szBuffer, sMsg.c_str(), sSearcher.TotalResults(),
+						ui64SearchTime / 1000000.0 );
+				}
+
 				
-				::sprintf_s( szBuffer, sMsg.c_str(), m_pmhMemHack->Searcher().TotalResults(),
-					ui64SearchTime / 1000000.0 );
+				
+				
 				FoundAddresses()->SetTextA( szBuffer );
 				//::SendMessageA( FoundAddresses()->Wnd(), WM_SETTEXT, 0, reinterpret_cast<LPARAM>(szBuffer) );
 				//::SendNotifyMessageA( FoundAddresses()->Wnd(), WM_SETTEXT, 0, reinterpret_cast<LPARAM>(szBuffer) );

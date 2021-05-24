@@ -8,14 +8,14 @@ namespace mx {
 		m_dwOpenProcFlags( 0 ) {
 	}
 	CProcess::~CProcess() {
-		Detatch();
+		Detach();
 	}
 
 	// == Functions.
 	// Open the given process with the given mode and flags.
 	bool CProcess::OpenProc( DWORD _dwId, MX_OPEN_PROC_MODE _opmMode, DWORD _dwFlags ) {
 		LSW_ENT_CRIT( m_csCrit );
-		Detatch();
+		Detach();
 
 		m_opmMode = _opmMode;
 		switch ( _opmMode ) {
@@ -44,9 +44,10 @@ namespace mx {
 		return true;
 	}
 
-	// Detatch from the current process, if there is one.
-	void CProcess::Detatch() {
+	// Detach from the current process, if there is one.
+	void CProcess::Detach() {
 		LSW_ENT_CRIT( m_csCrit );
+		Reset();
 		m_hProcHandle.Reset();
 		m_dwId = DWINVALID;
 	}
@@ -155,9 +156,10 @@ namespace mx {
 		return true;
 	}
 
-	// Resets  all accossiations with the current process.
+	// Resets all assocations with the current process.
 	void CProcess::Reset() {
-		m_tProcOpenThread.ExitThread( 0);
+		m_tProcOpenThread.ExitThread( 0 );
+		::InterlockedExchange( &m_opOpenProcThreadMonitor.aAtom, 1 );
 	}
 
 	// Pauses the target process.

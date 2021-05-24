@@ -70,7 +70,7 @@ namespace mx {
 			const TBBUTTON bButtons[] = {
 				// iBitmap							idCommand									fsState				fsStyle			bReserved	dwData	iString
 				{ m_iImageMap[MX_I_SEARCH],			CFoundAddressLayout::MX_BC_SEARCH,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Search" ) },
-				{ m_iImageMap[MX_I_SUBSEARCH],		CFoundAddressLayout::MX_BC_SUBSEARCH,		TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Sub Search") },
+				{ m_iImageMap[MX_I_SUBSEARCH],		CFoundAddressLayout::MX_BC_SUBSEARCH,		TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Subsearch") },
 				{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
 				{ m_iImageMap[MX_I_ADD],			CFoundAddressLayout::MX_BC_ADD,				TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Add" ) },
 				//{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },

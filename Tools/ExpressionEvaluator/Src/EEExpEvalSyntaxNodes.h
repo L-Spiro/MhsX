@@ -32,6 +32,7 @@ namespace ee {
 		EE_N_ADDRESS,
 		EE_N_MEMBERACCESS,
 		EE_N_USER_VAR,
+		EE_N_NUMBERED_PARM,
 		EE_N_UNARY,
 		EE_N_CAST,
 		EE_N_OP,

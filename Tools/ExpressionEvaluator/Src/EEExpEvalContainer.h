@@ -7,6 +7,7 @@
 #include <cstdarg>
 #include <map>
 #include <random>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -157,6 +158,22 @@ namespace ee {
 
 		// Does the compiled script have a dereference?
 		bool								HasAddressRead() const { return m_bHasAddressRead; }
+
+		// Sets a numbered parameter.
+		bool								SetNumberedParm( size_t _sIdx, const EE_RESULT &_rValue );
+
+		// Gets a numbered parameter.
+		EE_RESULT							GetNumberedParm( size_t _sIdx ) {
+			return _sIdx >= m_vNumberedParms.size() ?
+				DefaultResult() :
+				m_vNumberedParms[_sIdx];
+		}
+
+		// Gets the total numbered parameters.
+		__inline size_t						TotalNumberedParms() const { return m_vNumberedParms.size(); }
+
+		// Determines if a numbered parameter is accessed by the script.
+		__inline bool						IsNumberedParmAccessed( size_t _sIdx ) const { return m_sNumberedParmsAccessed.find( _sIdx ) != m_sNumberedParmsAccessed.end(); }
 
 		// Gets the type to use between 2 given types.
 		static EE_NUM_CONSTANTS				GetCastType( EE_NUM_CONSTANTS _ncLeft, EE_NUM_CONSTANTS _ncRight );
@@ -567,6 +584,9 @@ namespace ee {
 		// Creates a user (??) node.
 		void								CreateUser( YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a number parameter ($<decimal>) node.
+		void								CreateNumberedParm( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Create a unary node.
 		void								CreateUnary( const YYSTYPE::EE_NODE_DATA &_ndExp, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode );
 
@@ -755,6 +775,12 @@ namespace ee {
 
 		// The explicit resolve stack.
 		std::vector<EE_STACK_OBJ>			m_vStack;
+
+		// Numbered parameters.
+		std::vector<EE_RESULT>				m_vNumberedParms;
+
+		// Referenced numbered parameters.
+		std::set<size_t>					m_sNumberedParmsAccessed;
 
 		// Treate everything as hex?
 		bool								m_bTreatAllAsHex;

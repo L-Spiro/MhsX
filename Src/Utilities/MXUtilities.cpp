@@ -1826,6 +1826,7 @@ namespace mx {
 			uint32_t					ui32Id;
 		} aData[] = {
 			{ _T_LEN_396582B1_Exact_Value,			MX_SET_EXACT },
+			{ _T_LEN_82405865_Not_Equal_To,			MX_SET_NOT_EQUAL_TO },
 			{ _T_LEN_7B476D38_Increased,			MX_SET_INCREASED },
 			{ _T_LEN_D7629639_Decreased,			MX_SET_DECREASED },
 			{ _T_LEN_1BB1B671_In_Range,				MX_SET_RANGE },
@@ -1833,6 +1834,8 @@ namespace mx {
 			{ _T_LEN_C74C8767_Different_from_Before,MX_SET_DIFFERENT_FROM_BEFORE },
 			{ _T_LEN_95C86580_Changed_By,			MX_SET_CHANGED_BY },
 			{ _T_LEN_3D6AAA8C_Changed_By____,		MX_SET_CHANGED_BY_PERCENT },
+			{ _T_LEN_27A3B5FF_Changed_By__Range_,	MX_SET_CHANGED_BY_RANGE },
+			{ _T_LEN_CC66FC29_Changed_By__Range___,	MX_SET_CHANGED_BY_RANGE_PERCENT },
 			{ _T_LEN_7BD6DC75_Same_as_Original,		MX_SET_SAME_AS_ORIGINAL },
 			{ _T_LEN_8558CA08_Quick_Expression,		MX_SET_QUICK_EXP },
 		};

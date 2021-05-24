@@ -155,7 +155,7 @@ namespace ee {
 
 			
 			uint64_t uiTemp = uiRes;
-			uint64_t uiPreview = uiRes * _iBase + uiNext;
+			uint64_t uiPreview = uiRes * static_cast<uint64_t>(_iBase) + uiNext;
 			// Bounds checking.
 			if ( uiPreview > _uiMax ) { break; }
 
@@ -163,8 +163,8 @@ namespace ee {
 			//if ( _psEaten ) { (*_psEaten ) = &_pcText[I] - _pcOrig + 1; }
 
 			// Check for overflow.
-			if ( uiPreview < uiTemp ) {
-			//if ( (uiPreview - uiNext) / _iBase != uiTemp) {
+			//if ( uiPreview < uiTemp ) {
+			if ( (uiPreview - uiNext) / _iBase != uiTemp) {
 				if ( _psEaten ) { (*_psEaten ) = _pcText - _pcOrig + 1; }
 				if ( _pbOverflow ) { (*_pbOverflow) = true; }
 				return std::numeric_limits<uint64_t>::max();
