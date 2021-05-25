@@ -112,6 +112,7 @@ namespace mx {
 		struct MX_OPEN_PROC {
 			volatile LONG				aAtom;							// The the atom is set on the main thread, unset on the monitoring thread. (ATOM defines to WORD on MINWIN defined, which is a bug).
 			HANDLE						hHandle;						// The handle returned by OpenProcess().
+			//CProcess *					ppProcess;						// Pointer to this object.
 
 			MX_OPEN_PROC() :
 				aAtom( 1 ) {}

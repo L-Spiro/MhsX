@@ -22,6 +22,9 @@ namespace mx {
 		// Failed to open a process.
 		virtual void						FailedToOpenProcess( DWORD _dwId );
 
+		// Detach from the current process.
+		virtual void						Detach();
+
 		// Sets the options.
 		virtual void						SetOptions( const MX_OPTIONS &_oOptions );
 

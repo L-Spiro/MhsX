@@ -820,6 +820,7 @@
 "Invalid timer value."
 "Opened "
 "Failed to open "
+"Detached from "
 "Example: "
 "char"
 "int8_t"

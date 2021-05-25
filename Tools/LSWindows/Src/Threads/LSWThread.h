@@ -42,7 +42,7 @@ namespace lsw {
 		//	stopped after these are reset, so StopAndWait() should be called first.
 		VOID								Reset();
 
-		// Exits and kills the thread.  This hsould only be used when all resources have been cleaned up and no more useful information can be glean from the thread.
+		// Exits and kills the thread.  This should only be used when all resources have been cleaned up and no more useful information can be gleaned from the thread.
 		VOID								ExitThread( DWORD _dxExitCode );
 
 		// Sets the cancellation pointer after the thread has been started.  If the pointer is valid, Stop() can later be called to set the value to which

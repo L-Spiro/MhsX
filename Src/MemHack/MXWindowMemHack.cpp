@@ -56,6 +56,27 @@ namespace mx {
 		}
 	}
 
+	// Detach from the current process.
+	void CWindowMemHack::Detach() {
+		if ( m_pmmwWindow ) {
+			CStatusBar * psbStatus = m_pmmwWindow->StatusBar();
+			if ( psbStatus ) {
+				CSecureWString sTemp = _DEC_WS_6EA39706_Detached_from_;
+				CUtilities::ToHex( m_pProcess.ProcId(), sTemp, 4 );
+				sTemp.append( L" (" );
+				CUtilities::ToUnsigned( m_pProcess.ProcId(), sTemp );
+				sTemp.append( L")." );
+				/*sTemp.push_back( L' ' );
+				std::string sFlagsTemp;
+				CUtilities::OpenProcessFlagToString( m_pProcess.Flags(), sFlagsTemp, TRUE );
+				sTemp += CUtilities::StringToWString( sFlagsTemp );*/
+				psbStatus->SetTextW( 0, 0, sTemp.c_str() );
+			}
+		}
+
+		CMemHack::Detach();
+	}
+
 	// Sets the options.
 	void CWindowMemHack::SetOptions( const MX_OPTIONS &_oOptions ) {
 		Parent::SetOptions( _oOptions );

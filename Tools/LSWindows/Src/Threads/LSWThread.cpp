@@ -53,13 +53,13 @@ namespace lsw {
 	//	stopped after these are reset, so StopAndWait() should be called first.
 	VOID CThread::Reset() {
 		// Doesn't stop the thread.  Just keeps resources allocated correctly.
-		//	But if this the last reference to the previous thread, it will no longer be accessible after this.
+		//	But if this is the last reference to the previous thread, it will no longer be accessible after this.
 		m_hThread.Reset();
 		m_plCancel = nullptr;
 		m_dwId = 0;
 	}
 
-	// Exits and kills the thread.  This hsould only be used when all resources have been cleaned up and no more useful information can be glean from the thread.
+	// Exits and kills the thread.  This should only be used when all resources have been cleaned up and no more useful information can be gleaned from the thread.
 	VOID CThread::ExitThread( DWORD _dxExitCode ) {
 		if ( m_dwId || m_hThread.Valid() ) {
 			::ExitThread( m_dwId );

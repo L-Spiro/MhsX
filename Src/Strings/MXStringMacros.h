@@ -16696,3 +16696,12 @@
 #define _DEC_S_D0582611_Find__s_values_that_have__sbeen_multiplied_by_between__s_and__s_ mx::CStringDecoder::DecodeToString( _T_D0582611_Find__s_values_that_have__sbeen_multiplied_by_between__s_and__s_, _LEN_D0582611 )
 #define _DEC_WS_D0582611_Find__s_values_that_have__sbeen_multiplied_by_between__s_and__s_ mx::CStringDecoder::DecodeToWString( _T_D0582611_Find__s_values_that_have__sbeen_multiplied_by_between__s_and__s_, _LEN_D0582611 )
 
+// Detached from 
+
+#define _T_6EA39706_Detached_from_ "\xCC\x33\x44\xFC\xF5\x31\xF3\x2B\xF0\x2E\x3B\x3D\xFF\xBB"
+#define _LEN_6EA39706 14
+#define _T_LEN_6EA39706_Detached_from_ _T_6EA39706_Detached_from_, _LEN_6EA39706
+#define _DEC_6EA39706_Detached_from_( STR ) mx::CStringDecoder::Decode( _T_6EA39706_Detached_from_, _LEN_6EA39706, STR )
+#define _DEC_S_6EA39706_Detached_from_ mx::CStringDecoder::DecodeToString( _T_6EA39706_Detached_from_, _LEN_6EA39706 )
+#define _DEC_WS_6EA39706_Detached_from_ mx::CStringDecoder::DecodeToWString( _T_6EA39706_Detached_from_, _LEN_6EA39706 )
+

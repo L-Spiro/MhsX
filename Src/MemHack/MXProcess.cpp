@@ -6,6 +6,7 @@ namespace mx {
 	CProcess::CProcess() :
 		m_dwId( DWINVALID ),
 		m_dwOpenProcFlags( 0 ) {
+		//m_opOpenProcThreadMonitor.ppProcess = this;
 	}
 	CProcess::~CProcess() {
 		Detach();
@@ -38,7 +39,7 @@ namespace mx {
 				}
 				break;
 			}
-
+			default : { return false; }
 		}
 
 		return true;
@@ -47,7 +48,7 @@ namespace mx {
 	// Detach from the current process, if there is one.
 	void CProcess::Detach() {
 		LSW_ENT_CRIT( m_csCrit );
-		Reset();
+		//Reset();
 		m_hProcHandle.Reset();
 		m_dwId = DWINVALID;
 	}
@@ -259,6 +260,7 @@ namespace mx {
 			}
 			::Sleep( 1 );
 		}
+		//popProc->ppProcess->Detach();
 		DWORD dwVal = ::WaitForSingleObject( popProc->hHandle, 0 );
 		::InterlockedExchange( &popProc->aAtom, 1 );
 		return 0;
