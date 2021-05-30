@@ -128,12 +128,6 @@ namespace mx {
 
 		if ( m_pmhMemHack ) {
 			CCheckButton * pcbCheck;
-			pcbCheck = static_cast<CCheckButton *>(FindChild( CStandardSubsearchLayout::MX_C_OPTIONS_INVERT_CHECK ));
-			if ( pcbCheck ) {
-				pcbCheck->CheckButton( m_pmhMemHack->Options().bInvertResults ? BST_CHECKED : BST_UNCHECKED );
-			}
-
-
 			CStatic * pcbExpStatic = static_cast<CStatic *>(FindChild( CStandardSubsearchLayout::MX_C_SEARCH_EXP_LABEL ));
 			if ( pcbExpStatic ) {
 				CSearcher::MX_SEARCH_LOCK slSearchLock( &m_pmhMemHack->Searcher() );
@@ -144,6 +138,11 @@ namespace mx {
 					pcbExpStatic->SetTextW( _DEC_WS_289E3DA9_Value_______Previous_Value____0.c_str() );
 				}
 			}
+		}
+
+		CCheckButton * pcbCheck = static_cast<CCheckButton *>(FindChild( CStandardSubsearchLayout::MX_C_OPTIONS_INVERT_CHECK ));
+		if ( pcbCheck ) {
+			pcbCheck->CheckButton( m_swdData.bInvertResults ? BST_CHECKED : BST_UNCHECKED );
 		}
 
 
@@ -275,13 +274,13 @@ namespace mx {
 				}
 			}
 		}
+		CCheckButton * pcbCheck = static_cast<CCheckButton *>(FindChild( CStandardSubsearchLayout::MX_C_OPTIONS_INVERT_CHECK ));
+		_swdData.bInvertResults = pcbCheck && pcbCheck->IsChecked();
+
 		if ( m_pmhMemHack ) {
 			MX_OPTIONS oOpts = m_pmhMemHack->Options();
 			CCheckButton * pcbCheck;
-			pcbCheck = static_cast<CCheckButton *>(FindChild( CStandardSubsearchLayout::MX_C_OPTIONS_INVERT_CHECK ));
-			if ( pcbCheck ) {
-				oOpts.bInvertResults = pcbCheck->IsChecked();
-			}
+			
 			m_pmhMemHack->SetOptions( oOpts );
 		}
 	}

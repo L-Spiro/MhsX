@@ -37,12 +37,20 @@ namespace mx {
 			sAddrSize = 6;
 		}
 		else { sAddrSize = 8; }
+		bool bAdded = false;
 		if ( !m_vAddressLists.size() || m_vAddressLists[sIdx]->ui16SizeOfAddresses != sAddrSize || m_vAddressLists[sIdx]->ui16SizeOfValues != _ui64Size ) {
-			if ( !AddAddressList( sAddrSize, _ui64Size ) ) {
-				return false;
-			}
+			if ( !AddAddressList( sAddrSize, _ui64Size ) ) { return false; }
 			sIdx = m_vAddressLists.size() - 1;
+			bAdded = true;
 		}
+
+		if ( m_vAddressLists[sIdx]->Add( _ui64Address, _pui8Value ) ) {
+			++m_ui64Total;
+			return true;
+		}
+		if ( bAdded ) { return false; }
+		if ( !AddAddressList( sAddrSize, _ui64Size ) ) { return false; }
+		sIdx = m_vAddressLists.size() - 1;
 
 		if ( m_vAddressLists[sIdx]->Add( _ui64Address, _pui8Value ) ) {
 			++m_ui64Total;
@@ -58,12 +66,12 @@ namespace mx {
 		if ( _stIdx >= m_ui64Total ) { return false; }
 		_ui64Address = 0;
 		for ( size_t I = 0; I < m_vAddressLists.size(); ++I ) {
-			if ( static_cast<size_t>(m_vAddressLists[I]->ui32NumberOfEntries) > _stIdx ) {
+			if ( static_cast<size_t>(m_vAddressLists[I]->ui64NumberOfEntries) > _stIdx ) {
 				// Found it.
 				GetAddressAndValue( I, _stIdx, _ui64Address, _pui8Value );
 				return true;
 			}
-			_stIdx -= static_cast<size_t>(m_vAddressLists[I]->ui32NumberOfEntries);
+			_stIdx -= static_cast<size_t>(m_vAddressLists[I]->ui64NumberOfEntries);
 		}
 
 		return false;
@@ -77,14 +85,14 @@ namespace mx {
 
 		_ui64Address = 0;
 		for ( size_t I = _stSearchIndex; I < m_vAddressLists.size(); ++I ) {
-			if ( static_cast<size_t>(m_vAddressLists[I]->ui32NumberOfEntries) > _stIdx ) {
+			if ( static_cast<size_t>(m_vAddressLists[I]->ui64NumberOfEntries) > _stIdx ) {
 				// Found it.
 				GetAddressAndValue( I, _stIdx, _ui64Address, _pui8Value );
 				_stSearchIndex = I;
 				return true;
 			}
-			_stIdx -= static_cast<size_t>(m_vAddressLists[I]->ui32NumberOfEntries);
-			_ui64SearchAccumulator += m_vAddressLists[I]->ui32NumberOfEntries;
+			_stIdx -= static_cast<size_t>(m_vAddressLists[I]->ui64NumberOfEntries);
+			_ui64SearchAccumulator += m_vAddressLists[I]->ui64NumberOfEntries;
 		}
 
 		return false;
@@ -98,14 +106,14 @@ namespace mx {
 
 		_ui64Address = 0;
 		for ( size_t I = _stSearchIndex; I < m_vAddressLists.size(); ++I ) {
-			if ( static_cast<size_t>(m_vAddressLists[I]->ui32NumberOfEntries) > _stIdx ) {
+			if ( static_cast<size_t>(m_vAddressLists[I]->ui64NumberOfEntries) > _stIdx ) {
 				// Found it.
 				GetAddress( I, _stIdx, _ui64Address );
 				_stSearchIndex = I;
 				return true;
 			}
-			_stIdx -= static_cast<size_t>(m_vAddressLists[I]->ui32NumberOfEntries);
-			_ui64SearchAccumulator += m_vAddressLists[I]->ui32NumberOfEntries;
+			_stIdx -= static_cast<size_t>(m_vAddressLists[I]->ui64NumberOfEntries);
+			_ui64SearchAccumulator += m_vAddressLists[I]->ui64NumberOfEntries;
 		}
 
 		return false;
@@ -118,9 +126,10 @@ namespace mx {
 		if ( !m_ui64Total ) { return false; }
 		//if ( !GetResultFast( 0, _ui64Start, pui8Val ) ) { return false; }
 		_ui64Start = 0;
-		std::memcpy( &_ui64Start, &m_vAddressLists[0]->pui8Values[0], m_vAddressLists[0]->ui16SizeOfAddresses );
+		//std::memcpy( &_ui64Start, &m_vAddressLists[0]->pui8Values[0], m_vAddressLists[0]->ui16SizeOfAddresses );
+		MX_SR1_SMALLCOPY_ADDRESS( &_ui64Start, &m_vAddressLists[0]->pui8Values[0], m_vAddressLists[0]->ui16SizeOfAddresses );
 		size_t stIdx = m_vAddressLists.size() - 1;
-		GetAddress( stIdx, m_vAddressLists[stIdx]->ui32NumberOfEntries - 1, _ui64End );
+		GetAddress( stIdx, m_vAddressLists[stIdx]->ui64NumberOfEntries - 1, _ui64End );
 		//if ( !GetResultFast( m_ui64Total - 1, _ui64End, pui8Val ) ) { return false; }
 		_ui64End += m_vAddressLists[m_vAddressLists.size()-1]->ui16SizeOfValues;
 		return true;
@@ -136,14 +145,14 @@ namespace mx {
 		for ( size_t I = 0; I < m_vAddressLists.size(); ++I ) {
 			uint64_t ui64Start = 0, ui64End = 0;
 			GetAddress( I, 0, ui64Start );
-			GetAddress( I, m_vAddressLists[I]->ui32NumberOfEntries - 1, ui64End );
+			GetAddress( I, m_vAddressLists[I]->ui64NumberOfEntries - 1, ui64End );
 			if ( ui64Start >= _ui64Address ) {
 				// Then it is this address in the list.
 				return ui64Count;
 			}
 			if ( _ui64Address == ui64End ) {
 				// Then it is the last address in this list.
-				return ui64Count + m_vAddressLists[I]->ui32NumberOfEntries - 1;
+				return ui64Count + m_vAddressLists[I]->ui64NumberOfEntries - 1;
 			}
 
 			if ( _ui64Address >= ui64Start && _ui64Address <= ui64End ) {
@@ -160,7 +169,7 @@ namespace mx {
 #endif
 
 				// It is in this list.  Do a binary search.
-				size_t stJump = m_vAddressLists[I]->ui32NumberOfEntries / 2;
+				size_t stJump = m_vAddressLists[I]->ui64NumberOfEntries / 2;
 				size_t stIdx = 1 + stJump;	// Because we checked index 0 in the (ui64Start >= _ui64Address) clause.
 				while ( true ) {
 					uint64_t ui64Tmp = 0;
@@ -200,7 +209,7 @@ namespace mx {
 						size_t stPrevIdx = stIdx;
 						stIdx += stJump;
 						// If we go beyond the end of the list, we can reduce jump sizes rapidly.
-						while ( stIdx >= m_vAddressLists[I]->ui32NumberOfEntries ) {
+						while ( stIdx >= m_vAddressLists[I]->ui64NumberOfEntries ) {
 							stJump /= 2;
 							stIdx = stPrevIdx + stJump;
 							if ( !stJump ) {
@@ -219,7 +228,7 @@ namespace mx {
 				}
 			}
 
-			ui64Count += m_vAddressLists[I]->ui32NumberOfEntries;
+			ui64Count += m_vAddressLists[I]->ui64NumberOfEntries;
 		}
 		return ui64Count;
 	}
@@ -247,9 +256,9 @@ namespace mx {
 		if ( !parAddMe ) { return false; }
 		try {
 			m_vAddressLists.push_back( parAddMe );
-			m_vAddressLists[sIdx]->ui16SizeOfAddresses = static_cast<uint64_t>(_sAddrSize);
+			m_vAddressLists[sIdx]->ui16SizeOfAddresses = static_cast<uint16_t>(_sAddrSize);
 			m_vAddressLists[sIdx]->ui16SizeOfValues = _ui64Size;
-			m_vAddressLists[sIdx]->ui32NumberOfEntries = 0;
+			m_vAddressLists[sIdx]->ui64NumberOfEntries = 0;
 		}
 		catch ( const std::bad_alloc /*& _eE*/ ) {
 			delete parAddMe;

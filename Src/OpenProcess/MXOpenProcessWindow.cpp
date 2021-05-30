@@ -48,7 +48,7 @@ namespace mx {
 		for ( INT I = 0; I < MX_ELEMENTS( aTitles ); I++ ) {
 			if ( !aTitles[I].dwFlag || (aTitles[I].dwFlag & dwFlags) ) {
 				INT iCol = plvLIst->AddColumn( mx::CStringDecoder::DecodeToWString( aTitles[I]._pcText, aTitles[I].sLen ).c_str() );
-				plvLIst->SetColumnWidth( iCol, 150 );
+				plvLIst->SetColumnWidth( iCol, 200 );
 			}
 		}
 

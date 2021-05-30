@@ -31,6 +31,15 @@
 #define MX_FLOAT32_SIG_DIG				9
 #define MX_FLOAT64_SIG_DIG				19
 
+// Fast std::memcpy() functions for known-sized small copies.
+#define memcpy_2( DEST, SRC )			(*reinterpret_cast<uint16_t *>(DEST)) = (*reinterpret_cast<uint16_t *>(SRC))
+#define memcpy_3( DEST, SRC )			(*reinterpret_cast<uint16_t *>(DEST)) = (*reinterpret_cast<uint16_t *>(SRC)); reinterpret_cast<uint8_t *>(DEST)[2] = reinterpret_cast<uint8_t *>(SRC)[2]
+#define memcpy_4( DEST, SRC )			(*reinterpret_cast<uint32_t *>(DEST)) = (*reinterpret_cast<uint32_t *>(SRC))
+#define memcpy_5( DEST, SRC )			(*reinterpret_cast<uint32_t *>(DEST)) = (*reinterpret_cast<uint32_t *>(SRC)); reinterpret_cast<uint8_t *>(DEST)[4] = reinterpret_cast<uint8_t *>(SRC)[4]
+#define memcpy_6( DEST, SRC )			(*reinterpret_cast<uint32_t *>(DEST)) = (*reinterpret_cast<uint32_t *>(SRC)); reinterpret_cast<uint16_t *>(DEST)[2] = reinterpret_cast<uint16_t *>(SRC)[2]
+#define memcpy_7( DEST, SRC )			(*reinterpret_cast<uint32_t *>(DEST)) = (*reinterpret_cast<uint32_t *>(SRC)); reinterpret_cast<uint16_t *>(DEST)[2] = reinterpret_cast<uint16_t *>(SRC)[2]; reinterpret_cast<uint8_t *>(DEST)[6] = reinterpret_cast<uint8_t *>(SRC)[6]
+#define memcpy_8( DEST, SRC )			(*reinterpret_cast<uint64_t *>(DEST)) = (*reinterpret_cast<uint64_t *>(SRC))
+
 namespace mx {
 
 	class CUtilities {

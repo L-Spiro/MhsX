@@ -81,17 +81,16 @@ namespace mx {
 				pcbCheck->CheckButton( m_pmhMemHack->Options().bAligned ? BST_CHECKED : BST_UNCHECKED );
 			}
 
-			pcbCheck = static_cast<CCheckButton *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_INVERT ));
-			if ( pcbCheck ) {
-				pcbCheck->CheckButton( m_pmhMemHack->Options().bInvertResults ? BST_CHECKED : BST_UNCHECKED );
-			}
-
 			pcbCheck = static_cast<CCheckButton *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_SAO_CHECK ));
 			if ( pcbCheck ) {
 				pcbCheck->CheckButton( m_pmhMemHack->Options().bSameAsOriginal ? BST_CHECKED : BST_UNCHECKED );
 			}
 		}
 		
+		CCheckButton * pcbCheck = static_cast<CCheckButton *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_INVERT ));
+		if ( pcbCheck ) {
+			pcbCheck->CheckButton( m_swdData.bInvertResults ? BST_CHECKED : BST_UNCHECKED );
+		}
 		
 		pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_LVAL_COMBO ));
 		if ( pcbCombo ) {
@@ -257,10 +256,6 @@ namespace mx {
 			if ( pcbCheck ) {
 				oOpts.bAligned = pcbCheck->IsChecked();
 			}
-			pcbCheck = static_cast<CCheckButton *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_INVERT ));
-			if ( pcbCheck ) {
-				oOpts.bInvertResults = pcbCheck->IsChecked();
-			}
 			pcbCheck = static_cast<CCheckButton *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_SAO_CHECK ));
 			if ( pcbCheck ) {
 				oOpts.bSameAsOriginal = pcbCheck->IsChecked();
@@ -268,6 +263,8 @@ namespace mx {
 			m_pmhMemHack->SetOptions( oOpts );
 		}
 
+		CCheckButton * pcbCheck = static_cast<CCheckButton *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_INVERT ));
+		_swdData.bInvertResults = pcbCheck && pcbCheck->IsChecked();
 
 		CComboBox * pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_DATA_TYPE_COMBO ));
 		if ( pcbCombo ) {

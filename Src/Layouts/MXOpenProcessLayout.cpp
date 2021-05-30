@@ -7,6 +7,18 @@
 #include <Base/LSWBase.h>
 #include <Layout/LSWLayoutManager.h>
 
+#define MX_OPL_W									598
+#define MX_OPL_SELECT_GROUP_TOP						MX_TOP_JUST
+#define MX_OPL_VIEW_HEIGHT							350
+#define MX_OPL_SELECT_GROUP_HEIGHT					(MX_OPL_VIEW_HEIGHT + MX_GROUP_TOP + MX_GROUP_BOTTOM)
+#define MX_OPL_SHOW_GROUP_TOP						(MX_OPL_SELECT_GROUP_TOP + MX_OPL_SELECT_GROUP_HEIGHT + MX_TOP_JUST)
+#define MX_OPL_SHOW_GROUP_HEIGHT					(MX_GROUP_TOP + MX_GROUP_BOTTOM + MX_DEF_RADIO_HEIGHT)
+#define MX_OPL_MAIN_CHECK_W							29
+#define MX_OPL_ALL_CHECK_W							17
+#define MX_OPL_LAST_SECTION_TOP						(MX_OPL_SHOW_GROUP_TOP + MX_OPL_SHOW_GROUP_HEIGHT + MX_TOP_JUST)
+#define MX_OPL_LAST_SECTION_H						(MX_DEF_CHECK_HEIGHT + MX_TOP_JUST + MX_DEF_BUTTON_HEIGHT)
+#define MX_OPL_H									(MX_OPL_LAST_SECTION_TOP + MX_OPL_LAST_SECTION_H + MX_TOP_JUST * 4 + MX_DEF_BUTTON_HEIGHT)
+
 namespace mx {
 
 	// == Members.
@@ -20,8 +32,8 @@ namespace mx {
 			FALSE,									// bActive
 			64,										// iLeft
 			64,										// iTop
-			271,									// dwWidth
-			198,									// dwHeight
+			MX_OPL_W,								// dwWidth
+			MX_OPL_H,								// dwHeight
 			WS_CAPTION | WS_POPUP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_SYSMENU | WS_THICKFRAME | DS_3DLOOK | DS_FIXEDSYS | DS_CENTER,					// dwStyle
 			//WS_POPUP | WS_BORDER | WS_SYSMENU | DS_MODALFRAME | WS_CAPTION,
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_WINDOWEDGE | WS_EX_CONTROLPARENT,												// dwStyleEx
@@ -29,17 +41,20 @@ namespace mx {
 			_LEN_49D5B53D,							// sTextLen
 			MX_OPI_NONE,							// dwParentId
 		},
+
+
+		// Select Process.
 		{
 			LSW_LT_GROUPBOX,						// ltType
 			MX_OPI_GROUP,							// wId
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			4,										// iLeft
-			3,										// iTop
-			263,									// dwWidth
-			174,									// dwHeight
-			MX_GROUPSTYLE,																									// dwStyle
+			MX_LEFT_JUST,							// iLeft
+			MX_OPL_SELECT_GROUP_TOP,				// iTop
+			MX_OPL_W - (MX_LEFT_JUST * 2),			// dwWidth
+			MX_OPL_SELECT_GROUP_HEIGHT,				// dwHeight
+			MX_GROUPSTYLE,																																// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,																// dwStyleEx
 			MX_MAKE_WCHAR( _T_2FF354B7_Select_Process ),																								// pwcText
 			_LEN_2FF354B7,							// sTextLen
@@ -58,12 +73,12 @@ namespace mx {
 			WC_LISTVIEWW,							// lpwcClass
 			TRUE,									// bEnabled
 			TRUE,									// bActive
-			8,										// iLeft
-			13,										// iTop
-			255,									// dwWidth
-			110,									// dwHeight
+			MX_LEFT_JUST + MX_GROUP_LEFT,			// iLeft
+			MX_OPL_SELECT_GROUP_TOP + MX_GROUP_TOP,	// iTop
+			MX_OPL_W - (MX_LEFT_JUST + MX_GROUP_LEFT) * 2,																								// dwWidth
+			MX_OPL_VIEW_HEIGHT,						// dwHeight
 			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT,		// dwStyle
-			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,						// dwStyleEx
+			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,										// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_OPI_DIALOG,							// dwParentId
@@ -81,9 +96,9 @@ namespace mx {
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			4,										// iLeft
-			182,									// iTop
-			43,										// dwWidth
+			MX_LEFT_JUST,							// iLeft
+			MX_OPL_H - MX_DEF_BUTTON_HEIGHT - MX_TOP_JUST,														// iTop
+			MX_DEF_BUTTON_WIDTH,					// dwWidth
 			MX_DEF_BUTTON_HEIGHT,					// dwHeight
 			MX_DEFBUTTONSTYLE,						// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
@@ -104,9 +119,9 @@ namespace mx {
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			224,									// iLeft
-			182,									// iTop
-			43,										// dwWidth
+			MX_OPL_W - MX_DEF_BUTTON_WIDTH - MX_LEFT_JUST,														// iLeft
+			MX_OPL_H - MX_DEF_BUTTON_HEIGHT - MX_TOP_JUST,														// iTop
+			MX_DEF_BUTTON_WIDTH,					// dwWidth
 			MX_DEF_BUTTON_HEIGHT,					// dwHeight
 			MX_BUTTONSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
@@ -121,16 +136,19 @@ namespace mx {
 			MX_FIXED_WIDTH,							// pcWidthSizeExp
 			MX_FIXED_HEIGHT,						// pcHeightSizeExp
 		},
+
+
+		// Show.
 		{
 			LSW_LT_GROUPBOX,						// ltType
 			MX_OPI_GROUPSHOW,						// wId
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			9,										// iLeft
-			128,									// iTop
-			253,									// dwWidth
-			20,										// dwHeight
+			MX_LEFT_JUST,							// iLeft
+			MX_OPL_SHOW_GROUP_TOP,					// iTop
+			MX_OPL_W - (MX_LEFT_JUST * 2),			// dwWidth
+			MX_OPL_SHOW_GROUP_HEIGHT,				// dwHeight
 			MX_GROUPSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_923C763F_Show ),		// pwcText
@@ -150,10 +168,10 @@ namespace mx {
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			TRUE,									// bActive
-			14,										// iLeft
-			136,									// iTop
-			29,										// dwWidth
-			9,										// dwHeight
+			MX_LEFT_JUST + MX_GROUP_LEFT,			// iLeft
+			MX_OPL_SHOW_GROUP_TOP + MX_GROUP_TOP,	// iTop
+			MX_OPL_MAIN_CHECK_W,					// dwWidth
+			MX_DEF_RADIO_HEIGHT,					// dwHeight
 			MX_RADIOSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_1F1A625A_Main ),		// pwcText
@@ -173,10 +191,10 @@ namespace mx {
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			238,									// iLeft
-			136,									// iTop
-			20,										// dwWidth
-			9,										// dwHeight
+			MX_OPL_W - MX_LEFT_JUST - MX_GROUP_RIGHT - MX_OPL_ALL_CHECK_W,										// iLeft
+			MX_OPL_SHOW_GROUP_TOP + MX_GROUP_TOP,	// iTop
+			MX_OPL_ALL_CHECK_W,						// dwWidth
+			MX_DEF_RADIO_HEIGHT,					// dwHeight
 			MX_RADIOSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_0355373D_All ),		// pwcText
@@ -190,15 +208,17 @@ namespace mx {
 			MX_FIXED_WIDTH,							// pcWidthSizeExp
 			MX_FIXED_HEIGHT,						// pcHeightSizeExp
 		},
+
+
 		{
 			LSW_LT_CHECK,							// ltType
 			MX_OPI_CHECK_RESTR,						// wId
 			WC_BUTTONW,								// lpwcClass
 			FALSE,									// bEnabled
 			FALSE,									// bActive
-			9,										// iLeft
-			150,									// iTop
-			253,									// dwWidth
+			MX_LEFT_JUST,							// iLeft
+			MX_OPL_LAST_SECTION_TOP,				// iTop
+			MX_OPL_W - MX_LEFT_JUST * 2,			// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
 			MX_CHECKSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
@@ -219,9 +239,9 @@ namespace mx {
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			9,										// iLeft
-			161,									// iTop
-			253,									// dwWidth
+			MX_LEFT_JUST,							// iLeft
+			MX_OPL_LAST_SECTION_TOP + MX_TOP_JUST + MX_DEF_CHECK_HEIGHT,										// iTop
+			MX_OPL_W - MX_LEFT_JUST * 2,			// dwWidth
 			MX_DEF_BUTTON_HEIGHT,					// dwHeight
 			MX_BUTTONSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
@@ -238,6 +258,17 @@ namespace mx {
 		},
 	};
 
+#undef MX_OPL_H
+#undef MX_OPL_LAST_SECTION_H
+#undef MX_OPL_LAST_SECTION_TOP
+#undef MX_OPL_ALL_CHECK_W
+#undef MX_OPL_MAIN_CHECK_W
+#undef MX_OPL_SHOW_GROUP_HEIGHT
+#undef MX_OPL_SHOW_GROUP_TOP
+#undef MX_OPL_SELECT_GROUP_HEIGHT
+#undef MX_OPL_VIEW_HEIGHT
+#undef MX_OPL_SELECT_GROUP_TOP
+#undef MX_OPL_W
 
 	// == Functions.
 	// Creates the Open Process dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.

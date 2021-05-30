@@ -628,7 +628,8 @@ namespace mx {
 					
 					sdDiv.ui64Total = ui64LastInChunk - sdDiv.ui64Start;
 					if ( !sdDiv.ui64Total ) {
-						return false;
+						++sChunk;
+						continue;
 					}
 					_vResult.push_back( sdDiv );
 					sdDiv.ui64Start += sdDiv.ui64Total;

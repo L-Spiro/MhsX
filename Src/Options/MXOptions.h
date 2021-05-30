@@ -44,7 +44,6 @@ namespace mx {
 		UINT32							ui32Alignment;					// alignof( uint32_t )
 		BOOL							bAligned;						// TRUE
 		BOOL							bSameAsOriginal;				// TRUE
-		BOOL							bInvertResults;					// FALSE
 
 		BOOL							bMatchCase;						// FALSE
 		BOOL							bWholeWord;						// FALSE

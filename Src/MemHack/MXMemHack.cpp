@@ -38,7 +38,6 @@ namespace mx {
 		m_oOptions.ui32Alignment = alignof( uint32_t );
 		m_oOptions.bAligned = TRUE;
 		m_oOptions.bSameAsOriginal = TRUE;
-		m_oOptions.bInvertResults = FALSE;
 
 		m_oOptions.bMatchCase = FALSE;
 		m_oOptions.bWholeWord = FALSE;

@@ -43,6 +43,8 @@ namespace mx {
 			std::vector<std::wstring>		vRValHistory;
 
 			std::vector<std::wstring>		vExpHistory;
+
+			BOOL							bInvertResults;
 		};
 
 		// == Members.

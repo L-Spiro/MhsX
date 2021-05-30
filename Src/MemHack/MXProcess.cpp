@@ -48,6 +48,7 @@ namespace mx {
 	// Detach from the current process, if there is one.
 	void CProcess::Detach() {
 		LSW_ENT_CRIT( m_csCrit );
+		m_tProcOpenThread.StopAndWait( 1, INFINITE );
 		//Reset();
 		m_hProcHandle.Reset();
 		m_dwId = DWINVALID;
@@ -159,8 +160,8 @@ namespace mx {
 
 	// Resets all assocations with the current process.
 	void CProcess::Reset() {
+		m_tProcOpenThread.StopAndWait( 1, INFINITE );
 		m_tProcOpenThread.ExitThread( 0 );
-		::InterlockedExchange( &m_opOpenProcThreadMonitor.aAtom, 1 );
 	}
 
 	// Pauses the target process.

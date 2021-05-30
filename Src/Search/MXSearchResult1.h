@@ -1,10 +1,23 @@
 #pragma once
 #include "../MXMhsX.h"
 #include "../Files/MXFile.h"
+#include "../Utilities/MXUtilities.h"
 #include "MXSearchResultBase.h"
 
 #include <algorithm>
 #include <CriticalSection/LSWCriticalSection.h>
+
+
+// == Macros.
+//#define MX_SR1_SMALLCOPY_ADDRESS( DEST, SRC, SIZE )												std::memcpy( DEST, SRC, SIZE )
+#define MX_SR1_SMALLCOPY_ADDRESS( DEST, SRC, SIZE )												\
+	switch ( SIZE ) {																			\
+		case 3 : { memcpy_3( DEST, SRC ); break; }												\
+		case 4 : { memcpy_4( DEST, SRC ); break; }												\
+		case 6 : { memcpy_6( DEST, SRC ); break; }												\
+		case 8 : { memcpy_8( DEST, SRC ); break; }												\
+	}
+
 
 namespace mx {
 
@@ -62,15 +75,15 @@ namespace mx {
 		// A single array of results (address + value).
 		struct MX_ADDRESS_ARRAY {
 			uint64_t						ui64AllocSize;			// Total bytes to which pui8Values points.
+			uint64_t						ui64NumberOfEntries;	// Number of items.
 			uint8_t *						pui8Values;
-			uint32_t						ui32NumberOfEntries;	// Number of items.
 			uint16_t						ui16SizeOfAddresses;	// Number of bytes in the "address" part of each entry.
 			uint16_t						ui16SizeOfValues;		// Number of bytes in each entry.  Location of any entry is pui8Values[(ui16SizeOfAddresses+ui16SizeOfValues)*IDX].
 
 			MX_ADDRESS_ARRAY() :
 				pui8Values( nullptr ),
 				ui64AllocSize( 0 ),
-				ui32NumberOfEntries( 0 ) {}
+				ui64NumberOfEntries( 0 ) {}
 			MX_ADDRESS_ARRAY( MX_ADDRESS_ARRAY &&_aaOther ) {
 				(*this) = std::move( _aaOther );
 			}
@@ -80,7 +93,7 @@ namespace mx {
 			~MX_ADDRESS_ARRAY() {
 				delete [] pui8Values;
 				pui8Values = nullptr;
-				ui32NumberOfEntries = 0;
+				ui64NumberOfEntries = 0;
 				ui64AllocSize = 0;
 			}
 
@@ -89,7 +102,7 @@ namespace mx {
 #define MX_MOVE( NEM ) NEM = _aaOther.NEM; _aaOther.NEM = 0;
 				MX_MOVE( pui8Values );
 				MX_MOVE( ui64AllocSize );
-				MX_MOVE( ui32NumberOfEntries );
+				MX_MOVE( ui64NumberOfEntries );
 				MX_MOVE( ui16SizeOfAddresses );
 				MX_MOVE( ui16SizeOfValues );
 #undef MX_MOVE
@@ -99,15 +112,21 @@ namespace mx {
 			MX_ADDRESS_ARRAY &				operator = ( MX_ADDRESS_ARRAY &_aaOther ) {
 				delete [] pui8Values;
 				ui64AllocSize = 0;
-				pui8Values = new( std::nothrow ) uint8_t[_aaOther.ui64AllocSize];
+				uint64_t ui64NewSize = (_aaOther.ui16SizeOfAddresses + _aaOther.ui16SizeOfValues) * _aaOther.ui64NumberOfEntries;
+				pui8Values = new( std::nothrow ) uint8_t[ui64NewSize];
 				if ( pui8Values ) {
-					std::memcpy( pui8Values, _aaOther.pui8Values, _aaOther.ui64AllocSize );
+					std::memcpy( pui8Values, _aaOther.pui8Values, ui64NewSize );
 #define MX_MOVE( NEM ) NEM = _aaOther.NEM;
-					MX_MOVE( ui64AllocSize );
-					MX_MOVE( ui32NumberOfEntries );
+					ui64AllocSize = ui64NewSize;
+					MX_MOVE( ui64NumberOfEntries );
 					MX_MOVE( ui16SizeOfAddresses );
 					MX_MOVE( ui16SizeOfValues );
 #undef MX_MOVE
+				}
+				else {
+					ui64NumberOfEntries = 0;
+					ui64AllocSize = 0;
+					ui16SizeOfAddresses = ui16SizeOfValues = 0;
 				}
 				return (*this);
 			}
@@ -116,16 +135,17 @@ namespace mx {
 			// == Function.
 			// Adds an address and value.
 			bool							Add( uint64_t _ui64Addr, uint8_t * _puiData ) {
-				uint64_t ui64NewSize = (ui16SizeOfAddresses + ui16SizeOfValues) * (ui32NumberOfEntries + 1);
+				uint64_t ui64NewSize = (ui16SizeOfAddresses + ui16SizeOfValues) * (ui64NumberOfEntries + 1ULL);
 				if ( ui64AllocSize < ui64NewSize ) {
 					if ( !ReAlloc( std::max( 8ULL * 1024ULL * 1024ULL, ui64AllocSize * 2ULL ) ) ) {
 						return false;
 					}
 				}
-				size_t sIdx = (ui16SizeOfAddresses + ui16SizeOfValues) * ui32NumberOfEntries;
-				std::memcpy( &pui8Values[sIdx], &_ui64Addr, ui16SizeOfAddresses );
+				size_t sIdx = (ui16SizeOfAddresses + ui16SizeOfValues) * ui64NumberOfEntries;
+				//std::memcpy( &pui8Values[sIdx], &_ui64Addr, ui16SizeOfAddresses );
+				MX_SR1_SMALLCOPY_ADDRESS( &pui8Values[sIdx], &_ui64Addr, ui16SizeOfAddresses );
 				std::memcpy( &pui8Values[sIdx] + ui16SizeOfAddresses, _puiData, ui16SizeOfValues );
-				++ui32NumberOfEntries;
+				++ui64NumberOfEntries;
 				return true;
 			}
 
@@ -161,7 +181,8 @@ namespace mx {
 		__inline void						GetAddressAndValue( size_t _sArrayIdx, size_t _stIdx,
 			uint64_t &_ui64Address, const uint8_t * &_pui8Value ) const {
 			size_t stOffset = (m_vAddressLists[_sArrayIdx]->ui16SizeOfAddresses + m_vAddressLists[_sArrayIdx]->ui16SizeOfValues) * _stIdx;
-			std::memcpy( &_ui64Address, &m_vAddressLists[_sArrayIdx]->pui8Values[stOffset], m_vAddressLists[_sArrayIdx]->ui16SizeOfAddresses );
+			//std::memcpy( &_ui64Address, &m_vAddressLists[_sArrayIdx]->pui8Values[stOffset], m_vAddressLists[_sArrayIdx]->ui16SizeOfAddresses );
+			MX_SR1_SMALLCOPY_ADDRESS( &_ui64Address, &m_vAddressLists[_sArrayIdx]->pui8Values[stOffset], m_vAddressLists[_sArrayIdx]->ui16SizeOfAddresses );
 			stOffset += m_vAddressLists[_sArrayIdx]->ui16SizeOfAddresses;
 			_pui8Value = &m_vAddressLists[_sArrayIdx]->pui8Values[stOffset];
 		}
@@ -170,7 +191,8 @@ namespace mx {
 		__inline void						GetAddress( size_t _sArrayIdx, size_t _stIdx,
 			uint64_t &_ui64Address ) const {
 			size_t stOffset = (m_vAddressLists[_sArrayIdx]->ui16SizeOfAddresses + m_vAddressLists[_sArrayIdx]->ui16SizeOfValues) * _stIdx;
-			std::memcpy( &_ui64Address, &m_vAddressLists[_sArrayIdx]->pui8Values[stOffset], m_vAddressLists[_sArrayIdx]->ui16SizeOfAddresses );
+			//std::memcpy( &_ui64Address, &m_vAddressLists[_sArrayIdx]->pui8Values[stOffset], m_vAddressLists[_sArrayIdx]->ui16SizeOfAddresses );
+			MX_SR1_SMALLCOPY_ADDRESS( &_ui64Address, &m_vAddressLists[_sArrayIdx]->pui8Values[stOffset], m_vAddressLists[_sArrayIdx]->ui16SizeOfAddresses );
 		}
 	};
 
