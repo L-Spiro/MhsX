@@ -819,9 +819,9 @@ namespace mx {
 	// Writes the value to the given edit.
 	void CConverterWindow::SetValueChar( CWidget * _pwControl, ee::CExpEvalContainer::EE_RESULT _rRes, ee::EE_NUM_CONSTANTS _ncType, size_t _sSize, bool _bByteSwap, size_t _sSrcSize, bool _bAltDisp ) {
 		CSecureString ssTmp = CSecureString( reinterpret_cast<char *>(&_rRes.u.ui64Val), 1 );
-		CSecureWString swsFinal = _bAltDisp ? CUtilities::ToUtf16( CUtilities::EscapeAllW( ssTmp, false ) ) :
-			CUtilities::ToUtf16( CUtilities::EscapeStandard( ssTmp, false ) );
-		_pwControl->SetTextW( swsFinal.c_str() );
+		CSecureString swsFinal = _bAltDisp ? CUtilities::EscapeAllW( ssTmp, false ) :
+			CUtilities::EscapeStandardAscii( ssTmp, false );
+		_pwControl->SetTextA( swsFinal.c_str() );
 	}
 
 	// Writes the value to the given edit.

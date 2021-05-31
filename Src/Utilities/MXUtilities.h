@@ -658,6 +658,9 @@ namespace mx {
 		// Escapes standard characters.
 		static std::vector<uint32_t>	EscapeStandard( const std::vector<uint32_t> &_swsInput, bool _bKeepNewline );
 
+		// Escapes standard characters in an ASCII string.
+		static CSecureString			EscapeStandardAscii( const CSecureString &_ssInput, bool _bKeepNewline );
+
 		// Creates a string from a string in the form of an array of hex bytes.
 		static CSecureString			FromHexString( const CSecureWString &_swsInput );
 

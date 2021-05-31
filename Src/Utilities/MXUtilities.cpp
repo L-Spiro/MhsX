@@ -2668,19 +2668,19 @@ namespace mx {
 		size_t sLen;
 		
 		static struct {
-			wchar_t wcSrc;
-			wchar_t wcDst;
+			char cSrc;
+			char cDst;
 		} const sTable[] = {
-			{ L'\'', L'\'' },
-			{ L'"', L'"' },
-			{ L'\\', L'\\' },
-			{ L'\a', L'a' },
-			{ L'\b', L'b' },
-			{ L'\f', L'f' },
-			{ L'\n', L'n' },
-			{ L'\r', L'r' },
-			{ L'\t', L't' },
-			{ L'\v', L'v' },
+			{ '\'', '\'' },
+			{ '"', '"' },
+			{ '\\', '\\' },
+			{ '\a', 'a' },
+			{ '\b', 'b' },
+			{ '\f', 'f' },
+			{ '\n', 'n' },
+			{ '\r', 'r' },
+			{ '\t', 't' },
+			{ '\v', 'v' },
 		};
 		CSecureString vOutput;
 		for ( size_t I = 0; I < _ssInput.size();  ) {
@@ -2688,13 +2688,13 @@ namespace mx {
 			if ( sLen == 1 && MX_UTF_INVALID != ui32This ) {
 				bool bFound = false;
 				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
-					if ( _ssInput[I] == sTable[J].wcSrc ) {
-						vOutput.push_back( L'\\' );
-						vOutput.push_back( sTable[J].wcDst );
+					if ( _ssInput[I] == sTable[J].cSrc ) {
+						vOutput.push_back( '\\' );
+						vOutput.push_back( sTable[J].cDst );
 						bFound = true;
-						if ( _bKeepNewline && _ssInput[I] == L'\n' ) {
-							vOutput.push_back( L'\r' );
-							vOutput.push_back( L'\n' );
+						if ( _bKeepNewline && _ssInput[I] == '\n' ) {
+							vOutput.push_back( '\r' );
+							vOutput.push_back( '\n' );
 						}
 						continue;
 					}
@@ -2891,6 +2891,47 @@ namespace mx {
 			}
 			for ( size_t J = 0; J < sLen; ++J ) {
 				vOutput.push_back( static_cast<uint32_t>(_swsInput[I++]) );
+			}
+		}
+		return vOutput;
+	}
+
+	// Escapes standard characters in an ASCII string.
+	CSecureString CUtilities::EscapeStandardAscii( const CSecureString &_ssInput, bool _bKeepNewline ) {
+		size_t sLen;
+		
+		static struct {
+			char cSrc;
+			char cDst;
+		} const sTable[] = {
+			{ '\'', '\'' },
+			{ '"', '"' },
+			{ '\\', '\\' },
+			{ '\a', 'a' },
+			{ '\b', 'b' },
+			{ '\f', 'f' },
+			{ '\n', 'n' },
+			{ '\r', 'r' },
+			{ '\t', 't' },
+			{ '\v', 'v' },
+		};
+		CSecureString vOutput;
+		for ( size_t I = 0; I < _ssInput.size(); ++I ) {
+			bool bFound = false;
+			for ( size_t J = 0; J < MX_ELEMENTS( sTable ); ++J ) {
+				if ( _ssInput[I] == sTable[J].cSrc ) {
+					bFound = true;
+					vOutput.push_back( '\\' );
+					vOutput.push_back( sTable[J].cDst );
+					if ( _bKeepNewline && _ssInput[I] == '\n' ) {
+						vOutput.push_back( '\r' );
+						vOutput.push_back( '\n' );
+					}
+					break;
+				}
+			}
+			if ( !bFound ) {
+				vOutput.push_back( _ssInput[I] );
 			}
 		}
 		return vOutput;

@@ -146,8 +146,7 @@ namespace lsw {
 		virtual INT							GetTextLengthW() const { return ::GetWindowTextLengthW( Wnd() ); }
 
 		// Changes the text of the specified window's title bar (if it has one). If the specified window is a control, the text of the control is changed.
-		// String is assumed to be UTF-8 and is converted to UTF-16 internally.
-		virtual BOOL						SetTextA( LPCSTR _lpString );
+		virtual BOOL						SetTextA( LPCSTR _lpString )  { return ::SetWindowTextA( Wnd(), _lpString ); }
 
 		// Changes the text of the specified window's title bar (if it has one). If the specified window is a control, the text of the control is changed.
 		virtual BOOL						SetTextW( LPCWSTR _lpwString ) { return ::SetWindowTextW( Wnd(), _lpwString ); }

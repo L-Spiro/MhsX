@@ -168,18 +168,12 @@ namespace lsw {
 
 	// Gets the window text.
 	std::wstring CWidget::GetTextW() const {
-		INT iLen = GetTextLengthA() + 1;
+		INT iLen = GetTextLengthW() + 1;
 		WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[iLen];
 		GetTextW( pwcBuffer, iLen );
 		std::wstring sRet = pwcBuffer;
 		delete [] pwcBuffer;
 		return sRet;
-	}
-
-	// Changes the text of the specified window's title bar (if it has one). If the specified window is a control, the text of the control is changed.
-	// String is assumed to be UTF-8 and is converted to UTF-16 internally.
-	BOOL CWidget::SetTextA( LPCSTR _lpString ) {
-		return SetTextW( std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>{}.from_bytes( _lpString ).c_str() );
 	}
 
 	// Get the value of the text as an expression.
