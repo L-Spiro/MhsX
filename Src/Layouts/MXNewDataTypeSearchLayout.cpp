@@ -10,7 +10,7 @@ namespace mx {
 
 #define MX_SEARCH_W									220
 #define MX_SEARCH_H									(175 + MX_DEF_STATIC_HEIGHT + MX_DEF_COMBO_HEIGHT + 2)
-#define MX_SEARCH_GROUP_TOP							2
+#define MX_SEARCH_GROUP_TOP							MX_TOP_JUST
 #define MX_LEFT_ALIGN								MX_LEFT_JUST
 #define MX_L_0										MX_EVEN_DIVIDE( MX_SEARCH_W - (MX_LEFT_ALIGN + MX_GROUP_LEFT * 2), MX_LEFT_ALIGN + MX_GROUP_LEFT, 2, 0 )
 #define MX_L_1										MX_EVEN_DIVIDE( MX_SEARCH_W - (MX_LEFT_ALIGN + MX_GROUP_LEFT * 2), MX_LEFT_ALIGN + MX_GROUP_LEFT, 2, 1 )
@@ -47,7 +47,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			TRUE,									// bActive
 			MX_LEFT_ALIGN,																				// iLeft
-			MX_SEARCH_H - MX_LEFT_ALIGN - MX_DEF_BUTTON_HEIGHT,											// iTop
+			MX_SEARCH_H - MX_TOP_JUST - MX_DEF_BUTTON_HEIGHT,											// iTop
 			MX_DEF_BUTTON_WIDTH,					// dwWidth
 			MX_DEF_BUTTON_HEIGHT,					// dwHeight
 			MX_DEFBUTTONSTYLE,						// dwStyle
@@ -63,7 +63,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_SEARCH_W - MX_DEF_BUTTON_WIDTH - MX_LEFT_ALIGN,											// iLeft
-			MX_SEARCH_H - MX_LEFT_ALIGN - MX_DEF_BUTTON_HEIGHT,											// iTop
+			MX_SEARCH_H - MX_TOP_JUST - MX_DEF_BUTTON_HEIGHT,											// iTop
 			MX_DEF_BUTTON_WIDTH,					// dwWidth
 			MX_DEF_BUTTON_HEIGHT,					// dwHeight
 			MX_BUTTONSTYLE,							// dwStyle

@@ -660,7 +660,7 @@ namespace mx {
 										}
 										else if ( sSize > 0 ) {
 											WCHAR szBuffer[_LEN_76C91756+16];
-											::swprintf_s( szBuffer, _DEC_WS_76C91756__u_byte_s_matched_at_current_address_.c_str(), static_cast<uint32_t>(sSize),
+											std::swprintf( szBuffer, _DEC_WS_76C91756__u_byte_s_matched_at_current_address_.c_str(), static_cast<uint32_t>(sSize),
 												static_cast<uint32_t>(sSize) != 1 ? L"s" : L"" );
 											wFinalEvaluation = szBuffer;
 											::ZeroMemory( szBuffer, sizeof( szBuffer ) );
@@ -888,7 +888,7 @@ case CUtilities::CASE : {															\
 											}
 											else if ( sSize > 0 ) {
 												WCHAR szBuffer[_LEN_76C91756+16];
-												::swprintf_s( szBuffer, _DEC_WS_76C91756__u_byte_s_matched_at_current_address_.c_str(), static_cast<uint32_t>(sSize),
+												std::swprintf( szBuffer, _DEC_WS_76C91756__u_byte_s_matched_at_current_address_.c_str(), static_cast<uint32_t>(sSize),
 													static_cast<uint32_t>(sSize) != 1 ? L"s" : L"" );
 												_wsHelp = szBuffer;
 												::ZeroMemory( szBuffer, sizeof( szBuffer ) );

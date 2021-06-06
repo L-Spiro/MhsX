@@ -226,11 +226,11 @@ namespace mx {
 			if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchType() == CUtilities::MX_ST_POINTER_SEARCH ) {
 				wchar_t szBuffer[128];
 				if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.u.Int64 > UINT32_MAX ) {
-					::swprintf_s( szBuffer, mx::CStringDecoder::DecodeToWString( _T_54965420_Distance_from___16I64X, _LEN_54965420 ).c_str(),
+					std::swprintf( szBuffer, mx::CStringDecoder::DecodeToWString( _T_54965420_Distance_from___16I64X, _LEN_54965420 ).c_str(),
 						m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.u.Int64 );
 				}
 				else {
-					::swprintf_s( szBuffer, mx::CStringDecoder::DecodeToWString( _T_50BACBAF_Distance_from___8I64X, _LEN_50BACBAF ).c_str(),
+					std::swprintf( szBuffer, mx::CStringDecoder::DecodeToWString( _T_50BACBAF_Distance_from___8I64X, _LEN_50BACBAF ).c_str(),
 						m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.u.Int64 );
 				}
 				vHeaders.push_back( szBuffer );

@@ -134,16 +134,16 @@ namespace mx {
 		for ( WORD I = 0; I < 65; ++I ) {
 			WCHAR szBuffer[8];
 			if ( I == 0 ) {
-				::swprintf_s( szBuffer, L"00" );
+				std::swprintf( szBuffer, L"00" );
 			}
 			else if ( I >= 1 && I < ee::CFloatX::MaxExpBits() + 1 ) {
-				::swprintf_s( szBuffer, L"%.2u", I - 1 );
+				std::swprintf( szBuffer, L"%.2u", I - 1 );
 			}
 			else if ( I == ee::CFloatX::MaxExpBits() + 1 ) {
-				::swprintf_s( szBuffer, L"XX" );
+				std::swprintf( szBuffer, L"XX" );
 			}
 			else {
-				::swprintf_s( szBuffer, L"%.2u", I - (ee::CFloatX::MaxExpBits() + 1) - 1 );
+				std::swprintf( szBuffer, L"%.2u", I - (ee::CFloatX::MaxExpBits() + 1) - 1 );
 			}
 			// Insert the line break.
 			szBuffer[3] = szBuffer[1];

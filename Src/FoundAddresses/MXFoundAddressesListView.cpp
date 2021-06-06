@@ -31,10 +31,10 @@ namespace mx {
 						if ( _plvdiInfo->item.iSubItem == 0 ) {
 							// Address.
 							if ( m_pmmwMhsWindow->MemHack()->Process().Is32Bit() ) {
-								::swprintf_s( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%.8I64X", ui64Address );
+								std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%.8I64X", ui64Address );
 							}
 							else {
-								::swprintf_s( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%.11I64X", ui64Address );
+								std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%.11I64X", ui64Address );
 							}
 							if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().stType == CUtilities::MX_ST_STRING_SEARCH &&
 								m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().sstSearchType == CUtilities::MX_SST_UTFALL ) {
@@ -121,7 +121,7 @@ namespace mx {
 
 									if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
 										ui8CurVal, uiAdjustedLen, nullptr ) ) {
-										::swprintf_s( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
+										std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
 									}
 									else {
 										CSearcher::PreprocessByteSwap( ui8CurVal, uiAdjustedLen, m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms() );
@@ -146,7 +146,7 @@ namespace mx {
 
 										if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
 											ui8CurVal, uiAdjustedLen, nullptr ) ) {
-											::swprintf_s( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
+											std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
 										}
 										else {
 											CSearcher::PreprocessByteSwap( ui8CurVal, uiAdjustedLen, m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms() );
@@ -167,7 +167,7 @@ namespace mx {
 										vData.resize( uiAdjustedLen );
 										if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
 											&vData[0], uiAdjustedLen, nullptr ) ) {
-											::swprintf_s( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
+											std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
 										}
 										else {
 											CSearcher::PreprocessByteSwap( &vData[0], uiAdjustedLen, m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms() );
@@ -182,7 +182,7 @@ namespace mx {
 						}
 					}
 					else {
-						::swprintf_s( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
+						std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
 					}
 					psrbResults->Unlock();
 				}
@@ -250,51 +250,51 @@ namespace mx {
 				char szBuffer[32];
 				int32_t i32Temp = (*reinterpret_cast<const int8_t *>(_pui8Value));
 				CUtilities::ByteToCString( (*_pui8Value), szBuffer, FALSE, FALSE );
-				int iOffset = ::swprintf_s( _pwStr, _iMaxLen, L"%d (%S)", i32Temp, szBuffer );
+				int iOffset = std::swprintf( _pwStr, _iMaxLen, L"%d (%S)", i32Temp, szBuffer );
 				break;
 			}
 			case CUtilities::MX_DT_UINT8 : {
-				::swprintf_s( _pwStr, _iMaxLen, L"%u", (*_pui8Value) );
+				std::swprintf( _pwStr, _iMaxLen, L"%u", (*_pui8Value) );
 				break;
 			}
 			case CUtilities::MX_DT_INT16 : {
-				::swprintf_s( _pwStr, _iMaxLen, L"%d", (*reinterpret_cast<const int16_t *>(_pui8Value)) );
+				std::swprintf( _pwStr, _iMaxLen, L"%d", (*reinterpret_cast<const int16_t *>(_pui8Value)) );
 				break;
 			}
 			case CUtilities::MX_DT_UINT16 : {
-				::swprintf_s( _pwStr, _iMaxLen, L"%u", (*reinterpret_cast<const uint16_t *>(_pui8Value)) );
+				std::swprintf( _pwStr, _iMaxLen, L"%u", (*reinterpret_cast<const uint16_t *>(_pui8Value)) );
 				break;
 			}
 			case CUtilities::MX_DT_INT32 : {
-				::swprintf_s( _pwStr, _iMaxLen, L"%d", (*reinterpret_cast<const int32_t *>(_pui8Value)) );
+				std::swprintf( _pwStr, _iMaxLen, L"%d", (*reinterpret_cast<const int32_t *>(_pui8Value)) );
 				break;
 			}
 			case CUtilities::MX_DT_UINT32 : {
-				::swprintf_s( _pwStr, _iMaxLen, L"%u", (*reinterpret_cast<const uint32_t *>(_pui8Value)) );
+				std::swprintf( _pwStr, _iMaxLen, L"%u", (*reinterpret_cast<const uint32_t *>(_pui8Value)) );
 				break;
 			}
 			case CUtilities::MX_DT_INT64 : {
-				::swprintf_s( _pwStr, _iMaxLen, L"%I64d", (*reinterpret_cast<const int64_t *>(_pui8Value)) );
+				std::swprintf( _pwStr, _iMaxLen, L"%I64d", (*reinterpret_cast<const int64_t *>(_pui8Value)) );
 				break;
 			}
 			case CUtilities::MX_DT_UINT64 : {
-				::swprintf_s( _pwStr, _iMaxLen, L"%I64u", (*reinterpret_cast<const uint64_t *>(_pui8Value)) );
+				std::swprintf( _pwStr, _iMaxLen, L"%I64u", (*reinterpret_cast<const uint64_t *>(_pui8Value)) );
 				break;
 			}
 			case CUtilities::MX_DT_FLOAT16 : {
-				::swprintf_s( _pwStr, _iMaxLen, L"%.9g", CFloat16( _pui8Value ).Value() );
+				std::swprintf( _pwStr, _iMaxLen, L"%.9g", CFloat16( _pui8Value ).Value() );
 				break;
 			}
 			case CUtilities::MX_DT_FLOAT : {
-				::swprintf_s( _pwStr, _iMaxLen, L"%.13g", (*reinterpret_cast<const float *>(_pui8Value)) );
+				std::swprintf( _pwStr, _iMaxLen, L"%.13g", (*reinterpret_cast<const float *>(_pui8Value)) );
 				break;
 			}
 			case CUtilities::MX_DT_DOUBLE : {
-				::swprintf_s( _pwStr, _iMaxLen, L"%.27g", (*reinterpret_cast<const double *>(_pui8Value)) );
+				std::swprintf( _pwStr, _iMaxLen, L"%.27g", (*reinterpret_cast<const double *>(_pui8Value)) );
 				break;
 			}
 			default : {
-				::swprintf_s( _pwStr, _iMaxLen, L"N/A" );
+				std::swprintf( _pwStr, _iMaxLen, L"N/A" );
 				return false;
 			}
 		}
@@ -317,7 +317,7 @@ namespace mx {
 		if ( !CUtilities::Resize( vData, uiAdjustedLen ) ) { return false; }
 		if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
 			&vData[0], vData.size(), nullptr ) ) {
-			::swprintf_s( _pwStr, _iMaxLen, L"%s", L"N/A" );
+			std::swprintf( _pwStr, _iMaxLen, L"%s", L"N/A" );
 			return false;
 		}
 		CSearcher::PreprocessByteSwap( vData.data(), vData.size(), m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms() );
@@ -502,7 +502,7 @@ namespace mx {
 		if ( !CUtilities::Resize( vData, uiAdjustedLen ) ) { return false; }
 		if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
 			&vData[0], vData.size(), nullptr ) ) {
-			::swprintf_s( _pwStr, _iMaxLen, L"%s", L"N/A" );
+			std::swprintf( _pwStr, _iMaxLen, L"%s", L"N/A" );
 			return false;
 		}
 		CSearcher::PreprocessByteSwap( vData.data(), vData.size(), m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms() );

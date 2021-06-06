@@ -108,19 +108,19 @@ namespace ee {
 		switch ( _rResult.ncType ) {
 			case ee::EE_NC_SIGNED : {
 				wchar_t szFormat[32];
-				::swprintf_s( szFormat, EE_COUNT_OF( szFormat ), L"%I64d", _rResult.u.i64Val );
+				std::swprintf( szFormat, EE_COUNT_OF( szFormat ), L"%I64d", _rResult.u.i64Val );
 				wsString = szFormat;
 				break;
 			}
 			case ee::EE_NC_UNSIGNED : {
 				wchar_t szFormat[32];
-				::swprintf_s( szFormat, EE_COUNT_OF( szFormat ), L"%I64u", _rResult.u.ui64Val );
+				std::swprintf( szFormat, EE_COUNT_OF( szFormat ), L"%I64u", _rResult.u.ui64Val );
 				wsString = szFormat;
 				break;
 			}
 			case ee::EE_NC_FLOATING : {
 				wchar_t szFormat[32];
-				::swprintf_s( szFormat, EE_COUNT_OF( szFormat ), L"%.17f", _rResult.u.dVal );
+				std::swprintf( szFormat, EE_COUNT_OF( szFormat ), L"%.17f", _rResult.u.dVal );
 				wsString = szFormat;
 				break;
 			}

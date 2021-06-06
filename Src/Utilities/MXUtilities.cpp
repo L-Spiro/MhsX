@@ -837,12 +837,12 @@ namespace mx {
 		_uiNumDigits = std::max( _uiNumDigits, 1U );
 		WCHAR szFormat[32];
 		if ( Options.bUse0xForHex ) {
-			::swprintf_s( szFormat, MX_ELEMENTS( szFormat ), L"0x%%.%uI64X", _uiNumDigits );
+			std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"0x%%.%uI64X", _uiNumDigits );
 		}
 		else {
-			::swprintf_s( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64Xh", _uiNumDigits );
+			std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64Xh", _uiNumDigits );
 		}
-		::swprintf_s( _pcRet, _sLen, szFormat, _uiValue );
+		std::swprintf( _pcRet, _sLen, szFormat, _uiValue );
 		return _pcRet;
 	}
 
@@ -922,8 +922,8 @@ namespace mx {
 	const WCHAR * CUtilities::ToUnsigned( uint64_t _uiValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
 		_uiNumDigits = std::max( _uiNumDigits, 1U );
 		WCHAR szFormat[32];
-		::swprintf_s( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64u", _uiNumDigits );
-		::swprintf_s( _pcRet, _sLen, szFormat, _uiValue );
+		std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64u", _uiNumDigits );
+		std::swprintf( _pcRet, _sLen, szFormat, _uiValue );
 		return _pcRet;
 	}
 
@@ -958,8 +958,8 @@ namespace mx {
 	const WCHAR * CUtilities::ToSigned( int64_t _iValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
 		_uiNumDigits = std::max( _uiNumDigits, 1U );
 		WCHAR szFormat[32];
-		::swprintf_s( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64d", _uiNumDigits );
-		::swprintf_s( _pcRet, _sLen, szFormat, _iValue );
+		std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64d", _uiNumDigits );
+		std::swprintf( _pcRet, _sLen, szFormat, _iValue );
 		return _pcRet;
 	}
 
@@ -1025,17 +1025,17 @@ namespace mx {
 		WCHAR * pcBuffer = m_szFloatPrintBuffer;
 		int iLen = 0;
 		if ( _iSigDigits == 0 ) {
-			iLen = ::swprintf_s( pcBuffer, sLen, L"%.2000f", _dValue );
+			iLen = std::swprintf( pcBuffer, sLen, L"%.2000f", _dValue );
 		}
 		else if ( _iSigDigits < 0 ) {
 			WCHAR szFormat[32];
-			::swprintf_s( szFormat, MX_ELEMENTS( szFormat ), L"%%.%ug", -_iSigDigits );
-			iLen = ::swprintf_s( pcBuffer, sLen, szFormat, _dValue );
+			std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"%%.%ug", -_iSigDigits );
+			iLen = std::swprintf( pcBuffer, sLen, szFormat, _dValue );
 		}
 		else {
 			WCHAR szFormat[32];
-			::swprintf_s( szFormat, MX_ELEMENTS( szFormat ), L"%%.%ue", _iSigDigits );
-			iLen = ::swprintf_s( pcBuffer, sLen, szFormat, _dValue );
+			std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"%%.%ue", _iSigDigits );
+			iLen = std::swprintf( pcBuffer, sLen, szFormat, _dValue );
 		}
 		_sString.append( pcBuffer, iLen );
 		/*delete [] pcBuffer;
@@ -1656,7 +1656,7 @@ namespace mx {
 			}
 			case MX_DT_VOID : {
 				wchar_t szBuffer[32];
-				int iLen = ::swprintf_s( szBuffer, MX_ELEMENTS( szBuffer ), L"%.11I64X", _pdtData->u.Pointer64 );
+				int iLen = std::swprintf( szBuffer, MX_ELEMENTS( szBuffer ), L"%.11I64X", _pdtData->u.Pointer64 );
 				_swsRet.append( szBuffer, iLen );
 				break;
 			}
@@ -4339,7 +4339,7 @@ namespace mx {
 
 		
 		WCHAR szBuffer[256];
-		::swprintf_s( szBuffer, MX_ELEMENTS( szBuffer ), L"%uy:%ud:%.2uh:%.2um:", uiYears, uiDays, uiHours, uiMinutes );
+		std::swprintf( szBuffer, MX_ELEMENTS( szBuffer ), L"%uy:%ud:%.2uh:%.2um:", uiYears, uiDays, uiHours, uiMinutes );
 		wsTemp.append( szBuffer );
 		ToDouble( uiSeconds + dFrac, wsTemp );
 		wsTemp.push_back( L's' );
@@ -4349,7 +4349,7 @@ namespace mx {
 		}
 		else {
 			WCHAR szBuffer[256];
-			//::swprintf_s( szBuffer, MX_ELEMENTS( szBuffer ), L"%.2000f", _dValue );
+			//std::swprintf( szBuffer, MX_ELEMENTS( szBuffer ), L"%.2000f", _dValue );
 		}
 
 		/*if ( _bClosingPar ) {

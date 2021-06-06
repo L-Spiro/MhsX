@@ -99,14 +99,14 @@ namespace mx {
 							uint32_t uiConverted = CUtilities::Utf32ToUtf16( ee::CUnicode::GetUnicodeNum( sIdx ), ui32Len );
 							for ( uint32_t I = 0; I < ui32Len; ++I ) {
 								wchar_t szBuffer[16];
-								::swprintf_s( szBuffer, _DEC_WS_48C2E559___u__4X.c_str(), uiConverted & 0xFFFF );
+								std::swprintf( szBuffer, _DEC_WS_48C2E559___u__4X.c_str(), uiConverted & 0xFFFF );
 								uiConverted >>= 16;
 								sTemp += szBuffer;
 							}
 						}
 						else if ( (pwTmp = FindChild( CStringTheoryLayout::MX_STW_UNICODE_8_ESCAPE )) && pwTmp->IsChecked() ) {
 							wchar_t szBuffer[16];
-							::swprintf_s( szBuffer, _DEC_WS_25B68551___U__8X.c_str(), ee::CUnicode::GetUnicodeNum( sIdx ) );
+							std::swprintf( szBuffer, _DEC_WS_25B68551___U__8X.c_str(), ee::CUnicode::GetUnicodeNum( sIdx ) );
 							sTemp = szBuffer;
 						}
 						else {

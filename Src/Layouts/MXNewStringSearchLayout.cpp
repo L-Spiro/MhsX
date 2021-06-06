@@ -10,8 +10,8 @@ namespace mx {
 
 #define MX_SEARCH_W									280
 //#define MX_SEARCH_H									(200)
-#define MX_SEARCH_GROUP_TOP							2
-#define MX_LEFT_ALIGN								4
+#define MX_SEARCH_GROUP_TOP							MX_TOP_JUST
+#define MX_LEFT_ALIGN								MX_LEFT_JUST
 #define MX_CENTER									(MX_SEARCH_W / 2)
 #define MX_1_3RD_W									((MX_SEARCH_W - (MX_LEFT_ALIGN + MX_GROUP_LEFT) - (MX_LEFT_ALIGN + MX_GROUP_RIGHT)) / 3)
 #define MX_1_3RD_LEFT								(MX_LEFT_ALIGN + MX_GROUP_LEFT)
@@ -24,7 +24,7 @@ namespace mx {
 #define MX_OPTIONS_H								(MX_GROUP_TOP + MX_GROUP_BOTTOM + MX_DEF_CHECK_HEIGHT * 4 + MX_DEF_BUTTON_HEIGHT)
 #define MX_SEARCH_RANGE_TOP							(MX_OPTIONS_TOP + MX_OPTIONS_H)
 #define MX_SEARCH_RANGE_H							(MX_GROUP_TOP + MX_GROUP_BOTTOM + MX_DEF_STATIC_HEIGHT + MX_DEF_COMBO_HEIGHT)
-#define MX_SEARCH_H									(MX_SEARCH_RANGE_TOP + MX_SEARCH_RANGE_H + MX_LEFT_ALIGN + MX_LEFT_ALIGN + MX_DEF_BUTTON_HEIGHT)
+#define MX_SEARCH_H									(MX_SEARCH_RANGE_TOP + MX_SEARCH_RANGE_H + (MX_TOP_JUST * 4 + MX_DEF_BUTTON_HEIGHT))
 
 	// == Members.
 	// The layout for the New Data-Type Search dialog.
@@ -52,7 +52,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			TRUE,									// bActive
 			MX_LEFT_ALIGN,																					// iLeft
-			MX_SEARCH_H - MX_LEFT_ALIGN - MX_DEF_BUTTON_HEIGHT,												// iTop
+			MX_SEARCH_H - MX_TOP_JUST - MX_DEF_BUTTON_HEIGHT,												// iTop
 			MX_DEF_BUTTON_WIDTH,					// dwWidth
 			MX_DEF_BUTTON_HEIGHT,					// dwHeight
 			MX_DEFBUTTONSTYLE,						// dwStyle
@@ -68,7 +68,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_SEARCH_W - MX_DEF_BUTTON_WIDTH - MX_LEFT_ALIGN,												// iLeft
-			MX_SEARCH_H - MX_LEFT_ALIGN - MX_DEF_BUTTON_HEIGHT,												// iTop
+			MX_SEARCH_H - MX_TOP_JUST - MX_DEF_BUTTON_HEIGHT,												// iTop
 			MX_DEF_BUTTON_WIDTH,					// dwWidth
 			MX_DEF_BUTTON_HEIGHT,					// dwHeight
 			MX_BUTTONSTYLE,							// dwStyle
@@ -119,7 +119,7 @@ namespace mx {
 			FALSE,									// bActive
 			MX_COMBOBOXES_LEFT,						// iLeft
 			MX_SEARCH_GROUP_TOP + MX_GROUP_TOP,		// iTop
-			MX_SEARCH_W - MX_GROUP_LEFT - MX_GROUP_RIGHT - MX_COMBOBOXES_LEFT,								// dwWidth
+			MX_SEARCH_W - MX_LEFT_JUST - MX_GROUP_RIGHT - MX_COMBOBOXES_LEFT,								// dwWidth
 			MX_DEF_COMBO_HEIGHT,					// dwHeight
 			MX_COMBOSTYLE_LIST,						// dwStyle
 			MX_COMBOSTYLEEX_LIST,					// dwStyleEx
@@ -169,7 +169,7 @@ namespace mx {
 			FALSE,									// bActive
 			MX_CENTER + 50,							// iLeft
 			MX_SEARCH_GROUP_TOP + MX_GROUP_TOP,		// iTop
-			MX_SEARCH_W - MX_GROUP_LEFT - MX_GROUP_RIGHT - (MX_CENTER + 50),								// dwWidth
+			MX_SEARCH_W - MX_LEFT_JUST - MX_GROUP_RIGHT - (MX_CENTER + 50),									// dwWidth
 			MX_DEF_COMBO_HEIGHT,					// dwHeight
 			MX_COMBOSTYLE_LIST,						// dwStyle
 			MX_COMBOSTYLEEX_LIST,					// dwStyleEx
@@ -185,7 +185,7 @@ namespace mx {
 			FALSE,									// bActive
 			MX_CENTER + 33,							// iLeft
 			MX_SEARCH_GROUP_TOP + MX_GROUP_TOP,		// iTop
-			MX_SEARCH_W - MX_GROUP_LEFT - MX_GROUP_RIGHT - (MX_CENTER + 33),								// dwWidth
+			MX_SEARCH_W - MX_LEFT_JUST - MX_GROUP_RIGHT - (MX_CENTER + 33),								// dwWidth
 			MX_DEF_COMBO_HEIGHT,					// dwHeight
 			MX_COMBOSTYLE_LIST,						// dwStyle
 			MX_COMBOSTYLEEX_LIST,					// dwStyleEx
@@ -219,7 +219,7 @@ namespace mx {
 			FALSE,									// bActive
 			MX_COMBOBOXES_LEFT,						// iLeft
 			(MX_SEARCH_GROUP_TOP + MX_GROUP_TOP) + MX_DEF_COMBO_HEIGHT + 2,									// iTop
-			MX_SEARCH_W - MX_GROUP_LEFT - MX_GROUP_RIGHT - MX_COMBOBOXES_LEFT,								// dwWidth
+			MX_SEARCH_W - MX_LEFT_JUST - MX_GROUP_RIGHT - MX_COMBOBOXES_LEFT,								// dwWidth
 			MX_DEF_COMBO_HEIGHT,					// dwHeight
 			MX_COMBOSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -267,7 +267,7 @@ namespace mx {
 			FALSE,									// bActive
 			MX_COMBOBOXES_LEFT,						// iLeft
 			((MX_SEARCH_GROUP_TOP + MX_GROUP_TOP) + MX_DEF_COMBO_HEIGHT + 2) + MX_DEF_COMBO_HEIGHT + 2,		// iTop
-			MX_SEARCH_W - MX_GROUP_LEFT - MX_GROUP_RIGHT - MX_COMBOBOXES_LEFT,								// dwWidth
+			MX_SEARCH_W - MX_LEFT_JUST - MX_GROUP_RIGHT - MX_COMBOBOXES_LEFT,								// dwWidth
 			MX_DEF_EDIT_HEIGHT,						// dwHeight
 			MX_EDITSTYLE | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY,										// dwStyle
 			WS_EX_CLIENTEDGE,						// dwStyleEx
@@ -283,7 +283,7 @@ namespace mx {
 			FALSE,									// bActive
 			MX_COMBOBOXES_LEFT,						// iLeft
 			((MX_SEARCH_GROUP_TOP + MX_GROUP_TOP) + MX_DEF_COMBO_HEIGHT + 2) + MX_DEF_COMBO_HEIGHT + 2,		// iTop
-			MX_SEARCH_W - MX_GROUP_LEFT - MX_GROUP_RIGHT - MX_COMBOBOXES_LEFT,								// dwWidth
+			MX_SEARCH_W - MX_LEFT_JUST - MX_GROUP_RIGHT - MX_COMBOBOXES_LEFT,								// dwWidth
 			MX_DEF_COMBO_HEIGHT,					// dwHeight
 			MX_COMBOSTYLE_LIST,						// dwStyle
 			MX_COMBOSTYLEEX_LIST,					// dwStyleEx
@@ -299,7 +299,7 @@ namespace mx {
 			FALSE,									// bActive
 			MX_COMBOBOXES_LEFT,						// iLeft
 			(((MX_SEARCH_GROUP_TOP + MX_GROUP_TOP) + MX_DEF_COMBO_HEIGHT + 2) + MX_DEF_COMBO_HEIGHT + 2) + (MX_DEF_EDIT_HEIGHT) + 2,	// iTop
-			MX_SEARCH_W - MX_GROUP_LEFT - MX_GROUP_RIGHT - MX_COMBOBOXES_LEFT,															// dwWidth
+			MX_SEARCH_W - MX_LEFT_JUST - MX_GROUP_RIGHT - MX_COMBOBOXES_LEFT,															// dwWidth
 			MX_DEF_EDIT_HEIGHT,						// dwHeight
 			MX_EDITSTYLE | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY,																	// dwStyle
 			WS_EX_CLIENTEDGE,						// dwStyleEx
@@ -315,7 +315,7 @@ namespace mx {
 			FALSE,									// bActive
 			MX_LEFT_ALIGN + MX_GROUP_LEFT,			// iLeft
 			(MX_SEARCH_GROUP_TOP + MX_GROUP_TOP) + (MX_DEF_COMBO_HEIGHT + 2) * 4,																							// iTop
-			MX_SEARCH_W - MX_GROUP_LEFT - MX_GROUP_RIGHT - (MX_LEFT_ALIGN + MX_GROUP_LEFT),																					// dwWidth
+			MX_SEARCH_W - MX_LEFT_JUST - MX_GROUP_RIGHT - (MX_LEFT_ALIGN + MX_GROUP_LEFT),																					// dwWidth
 			MX_DEF_STATIC_HEIGHT * 2,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -350,7 +350,7 @@ namespace mx {
 			FALSE,									// bActive
 			MX_COMBOBOXES_LEFT,						// iLeft
 			(MX_SEARCH_GROUP_TOP + MX_GROUP_TOP) + (MX_DEF_COMBO_HEIGHT + 2) * 4,														// iTop
-			MX_SEARCH_W - MX_GROUP_LEFT - MX_GROUP_RIGHT - MX_COMBOBOXES_LEFT,															// dwWidth
+			MX_SEARCH_W - MX_LEFT_JUST - MX_GROUP_RIGHT - MX_COMBOBOXES_LEFT,															// dwWidth
 			MX_DEF_COMBO_HEIGHT,					// dwHeight
 			MX_COMBOSTYLE_LIST,						// dwStyle
 			MX_COMBOSTYLEEX_LIST,					// dwStyleEx
@@ -385,7 +385,7 @@ namespace mx {
 			FALSE,									// bActive
 			MX_COMBOBOXES_LEFT,						// iLeft
 			(MX_SEARCH_GROUP_TOP + MX_GROUP_TOP) + (MX_DEF_COMBO_HEIGHT + 2) * 4,														// iTop
-			MX_SEARCH_W - MX_GROUP_LEFT - MX_GROUP_RIGHT - MX_COMBOBOXES_LEFT,															// dwWidth
+			MX_SEARCH_W - MX_LEFT_JUST - MX_GROUP_RIGHT - MX_COMBOBOXES_LEFT,															// dwWidth
 			MX_DEF_COMBO_HEIGHT,					// dwHeight
 			MX_COMBOSTYLE_LIST,						// dwStyle
 			MX_COMBOSTYLEEX_LIST,					// dwStyleEx
@@ -812,9 +812,9 @@ namespace mx {
 			WC_STATICW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_LEFT_ALIGN + MX_GROUP_LEFT,			// iLeft
+			MX_EVEN_DIVIDE_EX( MX_SEARCH_W - ((MX_LEFT_ALIGN + MX_GROUP_LEFT) * 2), MX_LEFT_ALIGN + MX_GROUP_LEFT, 2, 0, MX_LEFT_JUST ),			// iLeft
 			MX_SEARCH_RANGE_TOP + MX_GROUP_TOP,		// iTop
-			MX_WIDTH_TO_CENTER( MX_LEFT_ALIGN + MX_GROUP_LEFT ) - MX_GROUP_RIGHT,						// dwWidth
+			MX_EVEN_DIVIDE_WIDTH_EX( MX_SEARCH_W - ((MX_LEFT_ALIGN + MX_GROUP_LEFT) * 2), MX_LEFT_ALIGN + MX_GROUP_LEFT, 2, 0, MX_LEFT_JUST ),	// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
 			MX_STATICSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -828,9 +828,9 @@ namespace mx {
 			WC_STATICW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_CENTER,								// iLeft
+			MX_EVEN_DIVIDE_EX( MX_SEARCH_W - ((MX_LEFT_ALIGN + MX_GROUP_LEFT) * 2), MX_LEFT_ALIGN + MX_GROUP_LEFT, 2, 1, MX_LEFT_JUST ),			// iLeft
 			MX_SEARCH_RANGE_TOP + MX_GROUP_TOP,		// iTop
-			(MX_SEARCH_W - MX_LEFT_ALIGN - MX_GROUP_RIGHT - MX_CENTER),									// dwWidth
+			MX_EVEN_DIVIDE_WIDTH_EX( MX_SEARCH_W - ((MX_LEFT_ALIGN + MX_GROUP_LEFT) * 2), MX_LEFT_ALIGN + MX_GROUP_LEFT, 2, 1, MX_LEFT_JUST ),	// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
 			MX_STATICSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -844,9 +844,9 @@ namespace mx {
 			WC_COMBOBOXW,							// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_LEFT_ALIGN + MX_GROUP_LEFT,			// iLeft
+			MX_EVEN_DIVIDE_EX( MX_SEARCH_W - ((MX_LEFT_ALIGN + MX_GROUP_LEFT) * 2), MX_LEFT_ALIGN + MX_GROUP_LEFT, 2, 0, MX_LEFT_JUST ),			// iLeft
 			MX_SEARCH_RANGE_TOP + MX_GROUP_TOP + MX_DEF_STATIC_HEIGHT,									// iTop
-			MX_WIDTH_TO_CENTER( MX_LEFT_ALIGN + MX_GROUP_LEFT ) - MX_GROUP_RIGHT,						// dwWidth
+			MX_EVEN_DIVIDE_WIDTH_EX( MX_SEARCH_W - ((MX_LEFT_ALIGN + MX_GROUP_LEFT) * 2), MX_LEFT_ALIGN + MX_GROUP_LEFT, 2, 0, MX_LEFT_JUST ),	// dwWidth
 			MX_DEF_COMBO_HEIGHT,					// dwHeight
 			MX_COMBOSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -860,9 +860,9 @@ namespace mx {
 			WC_COMBOBOXW,							// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_CENTER,								// iLeft
+			MX_EVEN_DIVIDE_EX( MX_SEARCH_W - ((MX_LEFT_ALIGN + MX_GROUP_LEFT) * 2), MX_LEFT_ALIGN + MX_GROUP_LEFT, 2, 1, MX_LEFT_JUST ),			// iLeft
 			MX_SEARCH_RANGE_TOP + MX_GROUP_TOP + MX_DEF_STATIC_HEIGHT,									// iTop
-			(MX_SEARCH_W - MX_LEFT_ALIGN - MX_GROUP_RIGHT - MX_CENTER),									// dwWidth
+			MX_EVEN_DIVIDE_WIDTH_EX( MX_SEARCH_W - ((MX_LEFT_ALIGN + MX_GROUP_LEFT) * 2), MX_LEFT_ALIGN + MX_GROUP_LEFT, 2, 1, MX_LEFT_JUST ),	// dwWidth
 			MX_DEF_COMBO_HEIGHT,					// dwHeight
 			MX_COMBOSTYLE,							// dwStyle
 			0,										// dwStyleEx
