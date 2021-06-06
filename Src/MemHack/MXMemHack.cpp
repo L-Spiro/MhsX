@@ -76,8 +76,9 @@ namespace mx {
 				// PROCESS_VM_READ: ReadProcessMemory()
 				// PROCESS_VM_WRITE: WriteProcessMemory()
 				// PROCESS_VM_OPERATION: VirtualProtectEx(), WriteProcessMemory()
-				// PROCESS_QUERY_INFORMATION: OpenProcessToken()
+				// PROCESS_QUERY_INFORMATION: OpenProcessToken(), GetProcessMemoryInfo()
 				// PROCESS_SUSPEND_RESUME: NtSuspendProcess(), NtResumeProcess()
+				// PROCESS_QUERY_LIMITED_INFORMATION: GetProcessMemoryInfo()
 
 				DWORD dwAttempts[] = {
 					PROCESS_CREATE_THREAD |											// The full range of what we might want to do.

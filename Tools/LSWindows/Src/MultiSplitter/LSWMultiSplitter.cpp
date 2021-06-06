@@ -233,8 +233,7 @@ namespace lsw {
 		for ( size_t I = m_vLayers.size(); I--; ) {
 			for ( size_t J = m_vLayers[I]->vRects.size(); J--; ) {
 				if ( m_vLayers[I]->vRects[J].bContainsWidget && m_vLayers[I]->vRects[J].u.pqWidget == _pwChild ) {
-					// TODO: A real command that correctly removes widgets.
-					m_vLayers[I]->vRects.erase( m_vLayers[I]->vRects.begin() + J );
+					Detach( _pwChild->Id() );
 				}
 			}
 			//if ( m_vLayers[I]->vRects.size() 
@@ -359,9 +358,6 @@ namespace lsw {
 
 	// Gets the layer and index of a bar being clicked.  If no bar was clicked, false is returned.
 	bool CMultiSplitter::GetLayerAndBarBeingClicked( const POINT &_pClick, LSW_MS_LAYER * &_pmlLayer, size_t &_sIndex, LSW_MS_LAYER &_mlCheckLayer ) {
-		// If only 1 rectangle on this layer there is no drag bar (the rectangle covers the full surface).
-		if ( _mlCheckLayer.vRects.size() <= 1 ) { return false; }
-
 		// 2 or more sections on this layer.
 		for ( size_t I = 0; I < _mlCheckLayer.vRects.size(); ++I ) {
 			LSW_RECT rCheckRect = GetBarRect( _mlCheckLayer, I );
@@ -630,7 +626,7 @@ namespace lsw {
 
 	// Attach a widget to the given root.
 	bool CMultiSplitter::Attach( const LSW_DT_ATTACH &_maAttach, LSW_MS_RECT &_mrRoot ) {
-		if ( !_maAttach.pwWidget ) { return false; }
+ 		if ( !_maAttach.pwWidget ) { return false; }
 		LSW_MS_LAYER_SEARCH mlsSer;
 		if ( !FindRectById( _maAttach.dwId, mlsSer, _mrRoot ) ) { return false; }
 
@@ -699,11 +695,36 @@ namespace lsw {
 			if ( mdDetachInfo.pmlLayer ) {
 				// Something was found.
 				mdDetachInfo.pmlLayer->vRects.erase( mdDetachInfo.pmlLayer->vRects.begin() + mdDetachInfo.sIndex );
+				
 				if ( mdDetachInfo.pmlLayer->vRects.size() == 0 ) {
 					// The layer is now empty.  Collapse it down if possible.
+					for ( size_t I = m_vLayers.size(); I--; ) {
+						if ( m_vLayers[I] == mdDetachInfo.pmlLayer ) {
+							LSW_MS_LAYER * pmlTemp = m_vLayers[I];
+							m_vLayers[I] = nullptr;
+							delete pmlTemp;
+							m_vLayers.erase( m_vLayers.begin() + I );
+						}
+					}
+					
 					if ( mdDetachInfo.pmlParentLayer ) {
 						mdDetachInfo.pmlParentLayer->vRects.erase( mdDetachInfo.pmlParentLayer->vRects.begin() + mdDetachInfo.sParentIndex );
 					}
+				}
+				else if ( /*mdDetachInfo.pmlParentLayer && */mdDetachInfo.pmlLayer->vRects.size() == 1 && !mdDetachInfo.pmlLayer->vRects[0].bContainsWidget ) {
+					LSW_MS_LAYER * pmlPrev = mdDetachInfo.pmlLayer->vRects[0].u.pmlLayer;
+					(*mdDetachInfo.pmlLayer) = (*mdDetachInfo.pmlLayer->vRects[0].u.pmlLayer);
+					for ( size_t I = m_vLayers.size(); I--; ) {
+						if ( m_vLayers[I] == pmlPrev ) {
+							LSW_MS_LAYER * pmlTemp = m_vLayers[I];
+							m_vLayers[I] = nullptr;
+							delete pmlTemp;
+							m_vLayers.erase( m_vLayers.begin() + I );
+						}
+					}
+					// This layer is a sub-layer and contains only a reference to another layer.  This layer is not needed.
+					//mdDetachInfo.pmlParentLayer->vRects[mdDetachInfo.sParentIndex].
+
 				}
 				CalcRects();
 				ForceSizeUpdate();
