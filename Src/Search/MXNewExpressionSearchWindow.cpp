@@ -161,7 +161,7 @@ namespace mx {
 			else {
 				pcbCombo->SetTextW( m_eswdData.wsDummyText.c_str() );
 			}
-			pcbCombo->SetTreatAsHex( TRUE );
+			pcbCombo->SetTreatAsHex( m_eswdData.esqmEvalType == CUtilities::MX_ESQM_ADDRESS ? TRUE : FALSE );
 			pcbCombo->SetFocus();
 
 			pcbCombo->AutoSetMinListWidth();
@@ -723,6 +723,8 @@ namespace mx {
 
 		ee::CExpEvalContainer::EE_RESULT rDummy;
 		BOOL bIsValid;
+
+		pcbDummyCombo->SetTreatAsHex( _esqmEvalType == CUtilities::MX_ESQM_ADDRESS ? TRUE : FALSE );
 		pcbDummyCombo->SetAddressHandler( CMemHack::ExpAddressHandler, reinterpret_cast<uintptr_t>(m_pmhMemHack) );
 		BOOL bParsed = pcbDummyCombo->GetTextAsExpression( rDummy, &bIsValid );
 		if ( !bIsValid ) {

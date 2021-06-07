@@ -8,51 +8,66 @@
 
 namespace mx {
 
-#define MX_SEARCH_W									300
+#define MX_SEARCH_W									310
 //#define MX_SEARCH_H									275
-#define MX_LEFT_ALIGN								4
-#define MX_JUSTIFY									2
+#define MX_LEFT_ALIGN								MX_LEFT_JUST
+#define MX_JUSTIFY									MX_TOP_JUST
 #define MX_LEFT_POS									(MX_LEFT_ALIGN + MX_GROUP_LEFT)
 #define MX_CENTER_POS								(MX_SEARCH_W / 2)
 #define MX_ONE_FOURTH_POS							(MX_LEFT_POS + ((MX_CENTER_POS - MX_LEFT_POS) / 2))
-#define MX_SETTINGS_GROUP_TOP						2//(MX_SIZE_GROUP_TOP + MX_SIZE_GROUP_HEIGHT)
+#define MX_SETTINGS_GROUP_TOP						MX_TOP_JUST
 #define MX_SETTINGS_GROUP_HEIGHT					(MX_GROUP_TOP + MX_GROUP_BOTTOM + MX_DEF_COMBO_HEIGHT + (MX_DEF_STATIC_HEIGHT * 2) + MX_JUSTIFY)
 #define MX_SETTINGS_QQ_W							14
 #define MX_SETTINGS_QQ_TYPE_COMBO_W					110
 #define MX_SETTINGS_QQ_TYPE_W						31
+#define MX_BYTES_LABEL_W							16
 #define MX_SIZE_GROUP_TOP							(MX_SETTINGS_GROUP_TOP + MX_SETTINGS_GROUP_HEIGHT)//(2)
 #define MX_SIZE_GROUP_HEIGHT						(MX_GROUP_TOP + MX_GROUP_BOTTOM + MX_DEF_COMBO_HEIGHT + MX_DEF_STATIC_HEIGHT + MX_JUSTIFY)
-#define MX_SIZE_LEFT_JUST							50
-#define MX_SIZE_DYN_W								50
-#define MX_SIZE_FIXED_W								40
-#define MX_SIZE_COMBO_W								110
+#define MX_SIZE_DYN_W								MX_EVEN_DIVIDE_WIDTH_EX( MX_SEARCH_W - (MX_LEFT_POS) * 2, MX_LEFT_POS, 3, 0, MX_LEFT_JUST )
+#define MX_SIZE_DYN_L								MX_EVEN_DIVIDE_EX( MX_SEARCH_W - (MX_LEFT_POS) * 2, MX_LEFT_POS, 3, 0, MX_LEFT_JUST )
+#define MX_SIZE_FIXED_W								MX_EVEN_DIVIDE_WIDTH_EX( MX_SEARCH_W - (MX_LEFT_POS) * 2, MX_LEFT_POS, 3, 1, MX_LEFT_JUST )
+#define MX_SIZE_FIXED_L								MX_EVEN_DIVIDE_EX( MX_SEARCH_W - (MX_LEFT_POS) * 2, MX_LEFT_POS, 3, 1, MX_LEFT_JUST )
+#define MX_SIZE_COMBO_W								(MX_EVEN_DIVIDE_WIDTH_EX( MX_SEARCH_W - (MX_LEFT_POS) * 2, MX_LEFT_POS, 3, 2, MX_LEFT_JUST ) - MX_BYTES_LABEL_W - MX_LEFT_ALIGN)
+#define MX_SIZE_COMBO_L								MX_EVEN_DIVIDE_EX( MX_SEARCH_W - (MX_LEFT_POS) * 2, MX_LEFT_POS, 3, 2, MX_LEFT_JUST )
 
 #define MX_EXP_EDIT_LINES							4
 #define MX_EXPRESSION_GROUP_TOP						(MX_SIZE_GROUP_TOP + MX_SIZE_GROUP_HEIGHT)
 #define MX_EXPRESSION_GROUP_HEIGHT					(MX_GROUP_TOP + MX_GROUP_BOTTOM + (MX_DEF_EDIT_HEIGHT + 8 * MX_EXP_EDIT_LINES) + (MX_DEF_COMBO_HEIGHT + MX_JUSTIFY) + (MX_DEF_EDIT_HEIGHT + MX_JUSTIFY))
 #define MX_EXPRESSION_DUMMY_W						63
-#define MX_EXPRESSION_DUMMY_COMBO_W					110
+#define MX_EXPRESSION_DUMMY_COMBO_L					(MX_EVEN_DIVIDE_EX( MX_SEARCH_W - (MX_LEFT_POS) * 2, MX_LEFT_POS, 2, 0, MX_LEFT_JUST ) + MX_EXPRESSION_DUMMY_W)
+#define MX_EXPRESSION_DUMMY_COMBO_W					(MX_EVEN_DIVIDE_WIDTH_EX( MX_SEARCH_W - (MX_LEFT_POS) * 2, MX_LEFT_POS, 2, 0, MX_LEFT_JUST ) - MX_EXPRESSION_DUMMY_W)
+#define MX_EXPRESSION_TEST_LABEL_L					MX_EVEN_DIVIDE_EX( MX_SEARCH_W - (MX_LEFT_POS) * 2, MX_LEFT_POS, 2, 1, MX_LEFT_JUST )
+#define MX_EXPRESSION_TEST_LABEL_W					MX_EVEN_DIVIDE_WIDTH_EX( MX_SEARCH_W - (MX_LEFT_POS) * 2, MX_LEFT_POS, 2, 1, MX_LEFT_JUST )
 #define MX_EXPRESSION_RESULT_LABEL_W				21
+#define MX_EXPRESSION_RESULT_COMBO_L				(MX_EVEN_DIVIDE_EX( MX_SEARCH_W - (MX_LEFT_POS) * 2, MX_LEFT_POS, 2, 0, MX_LEFT_JUST ) + MX_EXPRESSION_RESULT_LABEL_W)
+#define MX_EXPRESSION_RESULT_COMBO_W				(MX_EVEN_DIVIDE_WIDTH_EX( MX_SEARCH_W - (MX_LEFT_POS) * 2, MX_LEFT_POS, 2, 0, MX_LEFT_JUST ) - MX_EXPRESSION_RESULT_LABEL_W)
 
 #define MX_OPTIONS_GROUP_TOP						(MX_EXPRESSION_GROUP_TOP + MX_EXPRESSION_GROUP_HEIGHT)
 #define MX_OPTIONS_GROUP_HEIGHT						(MX_GROUP_TOP + MX_GROUP_BOTTOM + (MX_DEF_STATIC_HEIGHT + MX_DEF_COMBO_HEIGHT))
-#define MX_OPTIONS_GROUP_W							(MX_CENTER_POS - MX_LEFT_ALIGN - 1)
-#define MX_OPTIONS_GROUP_C							(MX_LEFT_ALIGN + (MX_OPTIONS_GROUP_W / 2))
-#define MX_OPTIONS_GROUP_C_L						((MX_LEFT_ALIGN + (MX_OPTIONS_GROUP_W / 2)) - (MX_LEFT_ALIGN / 2))
-#define MX_OPTIONS_GROUP_C_R						((MX_LEFT_ALIGN + (MX_OPTIONS_GROUP_W / 2)) + (MX_LEFT_ALIGN / 2))
+#define MX_OPTIONS_GROUP_L							MX_EVEN_DIVIDE_EX( MX_SEARCH_W - (MX_LEFT_ALIGN) * 2, MX_LEFT_JUST, 2, 0, MX_LEFT_JUST )
+#define MX_OPTIONS_GROUP_INNER_L					(MX_OPTIONS_GROUP_L + MX_GROUP_LEFT)
+#define MX_OPTIONS_GROUP_W							MX_EVEN_DIVIDE_WIDTH_EX( MX_SEARCH_W - (MX_LEFT_ALIGN) * 2, MX_LEFT_JUST, 2, 0, MX_LEFT_JUST )//(MX_CENTER_POS - MX_LEFT_ALIGN - 1)
+#define MX_OPTIONS_GROUP_INNER_W					(MX_OPTIONS_GROUP_W - (MX_GROUP_LEFT * 2))
+#define MX_OPTIONS_GROUP_L0							MX_EVEN_DIVIDE_EX( MX_OPTIONS_GROUP_INNER_W, MX_OPTIONS_GROUP_INNER_L, 2, 0, MX_LEFT_JUST )
+#define MX_OPTIONS_GROUP_W0							MX_EVEN_DIVIDE_WIDTH_EX( MX_OPTIONS_GROUP_INNER_W, MX_OPTIONS_GROUP_INNER_L, 2, 0, MX_LEFT_JUST )
+#define MX_OPTIONS_GROUP_L1							MX_EVEN_DIVIDE_EX( MX_OPTIONS_GROUP_INNER_W, MX_OPTIONS_GROUP_INNER_L, 2, 1, MX_LEFT_JUST )
+#define MX_OPTIONS_GROUP_W1							MX_EVEN_DIVIDE_WIDTH_EX( MX_OPTIONS_GROUP_INNER_W, MX_OPTIONS_GROUP_INNER_L, 2, 1, MX_LEFT_JUST )
 #define MX_OPTIONS_ALIGN_W							41
 #define MX_OPTIONS_ALIGN_COMBO_W					(MX_CENTER_POS - (MX_LEFT_POS + MX_OPTIONS_ALIGN_W) - MX_LEFT_ALIGN)
 
-#define MX_BYTES_LABEL_W							25
-
 #define MX_SEARCH_RANGE_TOP							(MX_EXPRESSION_GROUP_TOP + MX_EXPRESSION_GROUP_HEIGHT)//(MX_OPTIONS_GROUP_TOP + MX_OPTIONS_GROUP_HEIGHT)
 #define MX_SEARCH_RANGE_H							(MX_GROUP_TOP + MX_GROUP_BOTTOM + MX_DEF_STATIC_HEIGHT + MX_DEF_COMBO_HEIGHT)
-#define MX_SEARCH_RANGE_L							(MX_CENTER_POS + 1/* + (MX_LEFT_ALIGN / 2)*/)
-#define MX_SEARCH_RANGE_R							(MX_SEARCH_W - MX_LEFT_ALIGN)
-#define MX_SEARCH_RANGE_C							(MX_SEARCH_RANGE_L + (MX_SEARCH_RANGE_R - MX_SEARCH_RANGE_L) / 2)
+#define MX_SEARCH_RANGE_L							MX_EVEN_DIVIDE_EX( MX_SEARCH_W - (MX_LEFT_ALIGN) * 2, MX_LEFT_JUST, 2, 1, MX_LEFT_JUST )//(MX_CENTER_POS + 1/* + (MX_LEFT_ALIGN / 2)*/)
+#define MX_SEARCH_RANGE_INNER_L						(MX_SEARCH_RANGE_L + MX_GROUP_LEFT)
+#define MX_SEARCH_RANGE_W							MX_EVEN_DIVIDE_WIDTH_EX( MX_SEARCH_W - (MX_LEFT_ALIGN) * 2, MX_LEFT_JUST, 2, 1, MX_LEFT_JUST )//(MX_CENTER_POS - MX_LEFT_ALIGN - 1)
+#define MX_SEARCH_RANGE_INNER_W						(MX_SEARCH_RANGE_W - (MX_GROUP_LEFT * 2))
+#define MX_SEARCH_RANGE_L0							MX_EVEN_DIVIDE_EX( MX_SEARCH_RANGE_INNER_W, MX_SEARCH_RANGE_INNER_L, 2, 0, MX_LEFT_JUST )
+#define MX_SEARCH_RANGE_W0							MX_EVEN_DIVIDE_WIDTH_EX( MX_SEARCH_RANGE_INNER_W, MX_SEARCH_RANGE_INNER_L, 2, 0, MX_LEFT_JUST )
+#define MX_SEARCH_RANGE_L1							MX_EVEN_DIVIDE_EX( MX_SEARCH_RANGE_INNER_W, MX_SEARCH_RANGE_INNER_L, 2, 1, MX_LEFT_JUST )
+#define MX_SEARCH_RANGE_W1							MX_EVEN_DIVIDE_WIDTH_EX( MX_SEARCH_RANGE_INNER_W, MX_SEARCH_RANGE_INNER_L, 2, 1, MX_LEFT_JUST )
 
 
-#define MX_SEARCH_H									(MX_SEARCH_RANGE_TOP + MX_SEARCH_RANGE_H + (MX_LEFT_ALIGN) + MX_DEF_BUTTON_HEIGHT + MX_LEFT_ALIGN)
+#define MX_SEARCH_H									(MX_SEARCH_RANGE_TOP + MX_SEARCH_RANGE_H + (MX_TOP_JUST * 4 + MX_DEF_BUTTON_HEIGHT))
 
 
 	// == Members.
@@ -81,7 +96,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			TRUE,									// bActive
 			MX_LEFT_ALIGN,							// iLeft
-			MX_SEARCH_H - MX_LEFT_ALIGN - MX_DEF_BUTTON_HEIGHT,											// iTop
+			MX_SEARCH_H - MX_TOP_JUST - MX_DEF_BUTTON_HEIGHT,											// iTop
 			MX_DEF_BUTTON_WIDTH,					// dwWidth
 			MX_DEF_BUTTON_HEIGHT,					// dwHeight
 			MX_DEFBUTTONSTYLE,						// dwStyle
@@ -97,7 +112,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_SEARCH_W - MX_DEF_BUTTON_WIDTH - MX_LEFT_ALIGN,											// iLeft
-			MX_SEARCH_H - MX_LEFT_ALIGN - MX_DEF_BUTTON_HEIGHT,											// iTop
+			MX_SEARCH_H - MX_TOP_JUST - MX_DEF_BUTTON_HEIGHT,											// iTop
 			MX_DEF_BUTTON_WIDTH,					// dwWidth
 			MX_DEF_BUTTON_HEIGHT,					// dwHeight
 			MX_BUTTONSTYLE,							// dwStyle
@@ -183,7 +198,7 @@ namespace mx {
 			FALSE,									// bActive
 			MX_SEARCH_W / 2 + MX_SETTINGS_QQ_TYPE_W,// iLeft
 			MX_SETTINGS_GROUP_TOP + MX_GROUP_TOP,	// iTop
-			MX_SETTINGS_QQ_TYPE_COMBO_W,			// dwWidth
+			MX_SEARCH_W - MX_LEFT_POS - (MX_SEARCH_W / 2 + MX_SETTINGS_QQ_TYPE_W),//MX_SETTINGS_QQ_TYPE_COMBO_W,			// dwWidth
 			MX_DEF_COMBO_HEIGHT,					// dwHeight
 			MX_COMBOSTYLE_LIST,						// dwStyle
 			MX_COMBOSTYLEEX_LIST,					// dwStyleEx
@@ -234,9 +249,10 @@ namespace mx {
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			TRUE,									// bActive
-			MX_LEFT_POS,							// iLeft
+			MX_SIZE_DYN_L,							// iLeft
 			MX_SIZE_GROUP_TOP + MX_GROUP_TOP + MX_CHECK_JUST,												// iTop
-			MX_ONE_FOURTH_POS - MX_LEFT_POS - 1,	// dwWidth
+			//MX_ONE_FOURTH_POS - MX_LEFT_POS - 1,	// dwWidth
+			MX_SIZE_DYN_W,							// dwWidth
 			MX_DEF_RADIO_HEIGHT,					// dwHeight
 			MX_RADIOSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,					// dwStyleEx
@@ -250,9 +266,10 @@ namespace mx {
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_ONE_FOURTH_POS,						// iLeft
+			MX_SIZE_FIXED_L,						// iLeft
 			MX_SIZE_GROUP_TOP + MX_GROUP_TOP + MX_CHECK_JUST,												// iTop
-			MX_CENTER_POS - MX_ONE_FOURTH_POS - 1,	// dwWidth
+			//MX_CENTER_POS - MX_ONE_FOURTH_POS - 1,	// dwWidth
+			MX_SIZE_FIXED_W,						// dwWidth
 			MX_DEF_RADIO_HEIGHT,					// dwHeight
 			MX_RADIOSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,					// dwStyleEx
@@ -266,7 +283,7 @@ namespace mx {
 			WC_COMBOBOXW,							// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_CENTER_POS,							// iLeft
+			MX_SIZE_COMBO_L,						// iLeft
 			MX_SIZE_GROUP_TOP + MX_GROUP_TOP,		// iTop
 			MX_SIZE_COMBO_W,						// dwWidth
 			MX_DEF_COMBO_HEIGHT,					// dwHeight
@@ -282,7 +299,7 @@ namespace mx {
 			WC_STATICW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_CENTER_POS + MX_SIZE_COMBO_W + MX_LEFT_ALIGN,												// iLeft
+			MX_SIZE_COMBO_L + MX_SIZE_COMBO_W + MX_LEFT_ALIGN,												// iLeft
 			MX_SIZE_GROUP_TOP + MX_GROUP_TOP + MX_LABEL_JUST,												// iTop
 			MX_BYTES_LABEL_W,						// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
@@ -366,9 +383,9 @@ namespace mx {
 			WC_COMBOBOXW,							// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_LEFT_POS + MX_EXPRESSION_DUMMY_W,	// iLeft
+			MX_EXPRESSION_DUMMY_COMBO_L,			// iLeft
 			MX_EXPRESSION_GROUP_TOP + MX_GROUP_TOP + (MX_DEF_EDIT_HEIGHT + 8 * MX_EXP_EDIT_LINES) + MX_JUSTIFY,			// iTop
-			MX_CENTER_POS - (MX_LEFT_POS + MX_EXPRESSION_DUMMY_W) - MX_LEFT_ALIGN,							// dwWidth
+			MX_EXPRESSION_DUMMY_COMBO_W,			// dwWidth
 			MX_DEF_COMBO_HEIGHT,					// dwHeight
 			MX_COMBOSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -382,9 +399,9 @@ namespace mx {
 			WC_STATICW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_CENTER_POS,							// iLeft
+			MX_EXPRESSION_TEST_LABEL_L,				// iLeft
 			MX_EXPRESSION_GROUP_TOP + MX_GROUP_TOP + (MX_DEF_EDIT_HEIGHT + 8 * MX_EXP_EDIT_LINES) + MX_LABEL_JUST + MX_JUSTIFY,	// iTop
-			MX_SEARCH_W - (MX_LEFT_POS) - MX_CENTER_POS,													// dwWidth
+			MX_EXPRESSION_TEST_LABEL_W,				// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
 			MX_STATICSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -415,9 +432,9 @@ namespace mx {
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_LEFT_POS + MX_EXPRESSION_RESULT_LABEL_W,														// iLeft
+			MX_EXPRESSION_RESULT_COMBO_L,			// iLeft
 			MX_EXPRESSION_GROUP_TOP + MX_GROUP_TOP + (MX_DEF_EDIT_HEIGHT + 8 * MX_EXP_EDIT_LINES) + MX_JUSTIFY + MX_DEF_COMBO_HEIGHT + MX_JUSTIFY,	// iTop
-			MX_CENTER_POS - (MX_LEFT_POS + MX_EXPRESSION_RESULT_LABEL_W) - MX_LEFT_ALIGN,					// dwWidth
+			MX_EXPRESSION_RESULT_COMBO_W,			// dwWidth
 			MX_DEF_EDIT_HEIGHT,						// dwHeight
 			MX_EDITSTYLE | ES_READONLY,				// dwStyle
 			WS_EX_CLIENTEDGE,						// dwStyleEx
@@ -431,9 +448,9 @@ namespace mx {
 			WC_STATICW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_CENTER_POS,							// iLeft
+			MX_EXPRESSION_TEST_LABEL_L,				// iLeft
 			MX_EXPRESSION_GROUP_TOP + MX_GROUP_TOP + (MX_DEF_EDIT_HEIGHT + 8 * MX_EXP_EDIT_LINES) + MX_JUSTIFY + MX_DEF_COMBO_HEIGHT + MX_LABEL_JUST + MX_JUSTIFY,	// iTop
-			MX_SEARCH_W - (MX_LEFT_POS) - MX_CENTER_POS,													// dwWidth
+			MX_EXPRESSION_TEST_LABEL_W,				// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
 			MX_STATICSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -450,7 +467,7 @@ namespace mx {
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_LEFT_ALIGN,							// iLeft
+			MX_OPTIONS_GROUP_L,						// iLeft
 			MX_OPTIONS_GROUP_TOP,					// iTop
 			MX_OPTIONS_GROUP_W,						// dwWidth
 			MX_OPTIONS_GROUP_HEIGHT,				// dwHeight
@@ -467,9 +484,9 @@ namespace mx {
 			WC_STATICW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_LEFT_POS,							// iLeft
+			MX_OPTIONS_GROUP_L0,					// iLeft
 			MX_OPTIONS_GROUP_TOP + MX_GROUP_TOP,	// iTop
-			MX_OPTIONS_GROUP_C_L - MX_LEFT_POS,		// dwWidth
+			MX_OPTIONS_GROUP_W0,					// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
 			MX_STATICSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -483,9 +500,9 @@ namespace mx {
 			WC_COMBOBOXW,							// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_LEFT_POS,							// iLeft
+			MX_OPTIONS_GROUP_L0,					// iLeft
 			MX_OPTIONS_GROUP_TOP + MX_GROUP_TOP + MX_DEF_STATIC_HEIGHT,						// iTop
-			MX_OPTIONS_GROUP_C_L - MX_LEFT_POS,		// dwWidth
+			MX_OPTIONS_GROUP_W0,					// dwWidth
 			MX_DEF_COMBO_HEIGHT,					// dwHeight
 			MX_COMBOSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -499,9 +516,9 @@ namespace mx {
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_OPTIONS_GROUP_C_R,					// iLeft
+			MX_OPTIONS_GROUP_L1,					// iLeft
 			MX_OPTIONS_GROUP_TOP + MX_GROUP_TOP,	// iTop
-			MX_CENTER_POS - MX_GROUP_LEFT - MX_OPTIONS_GROUP_C_R,							// dwWidth
+			MX_OPTIONS_GROUP_W1,					// dwWidth
 			MX_DEF_STATIC_HEIGHT + MX_DEF_BUTTON_HEIGHT,									// dwHeight
 			MX_BUTTONSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,	// dwStyleEx
@@ -520,7 +537,7 @@ namespace mx {
 			FALSE,									// bActive
 			MX_SEARCH_RANGE_L,						// iLeft
 			MX_SEARCH_RANGE_TOP,					// iTop
-			MX_SEARCH_RANGE_R - MX_SEARCH_RANGE_L,	// dwWidth
+			MX_SEARCH_RANGE_W,						// dwWidth
 			MX_SEARCH_RANGE_H,						// dwHeight
 			MX_GROUPSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -534,9 +551,9 @@ namespace mx {
 			WC_STATICW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_SEARCH_RANGE_L + MX_GROUP_LEFT,		// iLeft
+			MX_SEARCH_RANGE_L0,						// iLeft
 			MX_SEARCH_RANGE_TOP + MX_GROUP_TOP,		// iTop
-			(MX_SEARCH_RANGE_C - (MX_LEFT_ALIGN / 2)) - (MX_SEARCH_RANGE_L + MX_GROUP_LEFT),				// dwWidth
+			MX_SEARCH_RANGE_W0,						// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
 			MX_STATICSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -550,9 +567,9 @@ namespace mx {
 			WC_STATICW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_SEARCH_RANGE_C + (MX_LEFT_ALIGN / 2),// iLeft
+			MX_SEARCH_RANGE_L1,						// iLeft
 			MX_SEARCH_RANGE_TOP + MX_GROUP_TOP,		// iTop
-			(MX_SEARCH_RANGE_R - MX_GROUP_LEFT) - (MX_SEARCH_RANGE_C + (MX_LEFT_ALIGN / 2)),					// dwWidth
+			MX_SEARCH_RANGE_W1,						// dwWidth
 			MX_DEF_STATIC_HEIGHT,					// dwHeight
 			MX_STATICSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -566,9 +583,9 @@ namespace mx {
 			WC_COMBOBOXW,							// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_SEARCH_RANGE_L + MX_GROUP_LEFT,		// iLeft
-			MX_SEARCH_RANGE_TOP + MX_GROUP_TOP + MX_DEF_STATIC_HEIGHT,										// iTop
-			(MX_SEARCH_RANGE_C - (MX_LEFT_ALIGN / 2)) - (MX_SEARCH_RANGE_L + MX_GROUP_LEFT),				// dwWidth
+			MX_SEARCH_RANGE_L0,						// iLeft
+			MX_SEARCH_RANGE_TOP + MX_GROUP_TOP + MX_DEF_STATIC_HEIGHT,						// iTop
+			MX_SEARCH_RANGE_W0,						// dwWidth
 			MX_DEF_COMBO_HEIGHT,					// dwHeight
 			MX_COMBOSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -582,9 +599,9 @@ namespace mx {
 			WC_COMBOBOXW,							// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
-			MX_SEARCH_RANGE_C + (MX_LEFT_ALIGN / 2),// iLeft
-			MX_SEARCH_RANGE_TOP + MX_GROUP_TOP + MX_DEF_STATIC_HEIGHT,										// iTop
-			(MX_SEARCH_RANGE_R - MX_GROUP_LEFT) - (MX_SEARCH_RANGE_C + (MX_LEFT_ALIGN / 2)),					// dwWidth
+			MX_SEARCH_RANGE_L1,						// iLeft
+			MX_SEARCH_RANGE_TOP + MX_GROUP_TOP + MX_DEF_STATIC_HEIGHT,						// iTop
+			MX_SEARCH_RANGE_W1,						// dwWidth
 			MX_DEF_COMBO_HEIGHT,					// dwHeight
 			MX_COMBOSTYLE,							// dwStyle
 			0,										// dwStyleEx
@@ -596,40 +613,63 @@ namespace mx {
 		
 	};
 
-#undef MX_SEARCH_RANGE_C
-#undef MX_SEARCH_RANGE_R
+#undef MX_SEARCH_H
+
+#undef MX_SEARCH_RANGE_W1
+#undef MX_SEARCH_RANGE_L1
+#undef MX_SEARCH_RANGE_W0
+#undef MX_SEARCH_RANGE_L0
+//#undef MX_SEARCH_RANGE_C
+#undef MX_SEARCH_RANGE_INNER_W
+#undef MX_SEARCH_RANGE_W
+//#undef MX_SEARCH_RANGE_R
+#undef MX_SEARCH_RANGE_INNER_L
 #undef MX_SEARCH_RANGE_L
 #undef MX_SEARCH_RANGE_H
 #undef MX_SEARCH_RANGE_TOP
 #undef MX_BYTES_LABEL_W
 #undef MX_OPTIONS_ALIGN_COMBO_W
 #undef MX_OPTIONS_ALIGN_W
-#undef MX_OPTIONS_GROUP_C_R
-#undef MX_OPTIONS_GROUP_C_L
-#undef MX_OPTIONS_GROUP_C
+#undef MX_OPTIONS_GROUP_W1
+#undef MX_OPTIONS_GROUP_L1
+#undef MX_OPTIONS_GROUP_W0
+#undef MX_OPTIONS_GROUP_L0
+//#undef MX_OPTIONS_GROUP_C_R
+//#undef MX_OPTIONS_GROUP_C_L
+//#undef MX_OPTIONS_GROUP_C
 #undef MX_OPTIONS_GROUP_W
 #undef MX_OPTIONS_GROUP_HEIGHT
 #undef MX_OPTIONS_GROUP_TOP
+#undef MX_EXPRESSION_RESULT_COMBO_W
+#undef MX_EXPRESSION_RESULT_COMBO_L
+#undef MX_EXPRESSION_RESULT_LABEL_W
+#undef MX_EXPRESSION_TEST_LABEL_W
+#undef MX_EXPRESSION_TEST_LABEL_L
 #undef MX_EXPRESSION_DUMMY_COMBO_W
+#undef MX_EXPRESSION_DUMMY_COMBO_L
 #undef MX_EXPRESSION_DUMMY_W
 #undef MX_EXPRESSION_GROUP_HEIGHT
 #undef MX_EXPRESSION_GROUP_TOP
 #undef MX_EXP_EDIT_LINES
+#undef MX_SIZE_COMBO_L
+#undef MX_SIZE_COMBO_W
+#undef MX_SIZE_FIXED_L
+#undef MX_SIZE_FIXED_W
+#undef MX_SIZE_DYN_L
+#undef MX_SIZE_DYN_W
+#undef MX_SIZE_GROUP_HEIGHT
 #undef MX_SETTINGS_QQ_TYPE_W
 #undef MX_SETTINGS_QQ_TYPE_COMBO_W
 #undef MX_SETTINGS_QQ_COMBO_W
 #undef MX_SETTINGS_QQ_W
 #undef MX_SETTINGS_GROUP_HEIGHT
 #undef MX_SETTINGS_GROUP_TOP
-#undef MX_SIZE_FIXED_W
-#undef MX_SIZE_DYN_W
 #undef MX_SIZE_GROUP_TOP
 #undef MX_ONE_FOURTH_POS
 #undef MX_CENTER_POS
 #undef MX_LEFT_POS
 #undef MX_JUSTIFY
 #undef MX_LEFT_ALIGN
-#undef MX_SEARCH_H
 #undef MX_SEARCH_W
 
 
