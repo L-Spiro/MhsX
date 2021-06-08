@@ -87,6 +87,26 @@ namespace lsw {
 		// Gets the text of an item.
 		VOID								GetItemText( INT _iItem, INT _iSubItem, std::string &_sRet );
 
+		// Gets the width of a string.
+		int									GetStringWidth( const std::wstring &_wsStr ) const {
+			return static_cast<int>(::SendMessageW( Wnd(), LVM_GETSTRINGWIDTHW, 0, reinterpret_cast<LPARAM>(_wsStr.c_str()) ));
+		}
+
+		// Gets the width of a string.
+		int									GetStringWidth( const std::string &_sStr ) const {
+			return static_cast<int>(::SendMessageA( Wnd(), LVM_GETSTRINGWIDTHA, 0, reinterpret_cast<LPARAM>(_sStr.c_str()) ));
+		}
+
+		// Gets the width of a string.
+		int									GetStringWidth( const WCHAR * _pwcText ) const {
+			return static_cast<int>(::SendMessageW( Wnd(), LVM_GETSTRINGWIDTHW, 0, reinterpret_cast<LPARAM>(_pwcText) ));
+		}
+
+		// Gets the width of a string.
+		int									GetStringWidth( const CHAR * _pcText ) const {
+			return static_cast<int>(::SendMessageA( Wnd(), LVM_GETSTRINGWIDTHA, 0, reinterpret_cast<LPARAM>(_pcText) ));
+		}
+
 		// Gets the index of the (first) selected item or -1.
 		INT									GetFirstSelectedItem() const;
 

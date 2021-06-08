@@ -499,6 +499,20 @@ namespace lsw {
 			return sResult;
 		}
 
+		// Gets the size of a given string printed with the given HDC.
+		static SIZE							GetTextSize( const std::wstring &_wsString, HDC _hHdc ) {
+			SIZE sResult;
+			::GetTextExtentPoint32W( _hHdc, _wsString.c_str(), static_cast<int>(_wsString.size()), &sResult );
+			return sResult;
+		}
+
+		// Gets the size of a given string printed with the given HDC.
+		static SIZE							GetTextSize( const std::string &_sString, HDC _hHdc ) {
+			SIZE sResult;
+			::GetTextExtentPoint32A( _hHdc, _sString.c_str(), static_cast<int>(_sString.size()), &sResult );
+			return sResult;
+		}
+
 
 	protected :
 		// == Types.

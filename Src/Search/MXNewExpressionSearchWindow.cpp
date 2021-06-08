@@ -340,6 +340,7 @@ namespace mx {
 		_spParmsIfValid.stType = CUtilities::MX_ST_EXP_SEARCH;
 		_spParmsIfValid.pbAbort = nullptr;
 		_spParmsIfValid.iThreadPriority = THREAD_PRIORITY_NORMAL;
+		_spParmsIfValid.bInvertResults = false;
 
 		ee::CExpEvalContainer::EE_RESULT rRes;
 		CComboBox * pcbAlignCombo = static_cast<CComboBox *>(FindChild( CNewExpressionSearchLayout::MX_NESI_OPTIONS_ALIGN_COMBO ));

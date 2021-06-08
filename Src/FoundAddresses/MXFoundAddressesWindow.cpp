@@ -117,12 +117,14 @@ namespace mx {
 		// ==== LIST VIEW ==== //
 		CListView * plvAddressList = ListView();
 		if ( plvAddressList ) {
+			
+
 			const struct {
 				const char * _pcText;
 				size_t sLen;
 				DWORD dwWidth;
 			} aTitles[] = {
-				{ _T_LEN_C2F3561D_Address, 80 },
+				{ _T_LEN_C2F3561D_Address, 86 },
 				{ _T_LEN_DCB67730_Value, 120 },
 				{ _T_LEN_31A2F4D5_Current_Value, 120 },
 			};
@@ -248,6 +250,49 @@ namespace mx {
 				INT iWidth = iCol >= m_vHeaderWidths.size() ? 120 : m_vHeaderWidths[iCol];
 				BOOL bAdded = plvList->SetColumnWidth( iCol, iWidth );
 			}
+
+
+			LONG lWid = 0;
+			char cKey[] = {
+				'A', 'B', 'C', 'D', 'E', 'F'
+			};
+			for ( size_t I = 0; I < MX_ELEMENTS( cKey ); ++I ) {
+				// 7XXXXXXXXXX
+				CSecureString sTmp = "7";
+				size_t sTotal = m_pmmwMhsWindow->MemHack()->Process().Is32Bit() ? 7 : 10;
+				for ( size_t J = 0; J < sTotal; ++J ) {
+					sTmp.push_back( cKey[I] );
+				}
+				if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().stType == CUtilities::MX_ST_STRING_SEARCH &&
+					m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().sstSearchType == CUtilities::MX_SST_UTFALL ) {
+					const struct {
+						char * pcText;
+						size_t sLen;
+					} sData[] = {
+						{ _T_LEN_0E813C50_UTF_8 },
+						{ _T_LEN_A71F1195_UTF_16 },
+						{ _T_LEN_9244B70E_UTF_32 },
+						{ _T_LEN_26FC5333_UTF_16_BE },
+						{ _T_LEN_D35E9704_UTF_32_BE },
+					};
+					for ( size_t K = 0; K < MX_ELEMENTS( sData ); ++K ) {
+						CSecureString sNewTmp = sTmp;
+						sNewTmp.push_back( ' ' );
+						sNewTmp += CStringDecoder::DecodeToString( sData[K].pcText, sData[K].sLen );
+						LONG lTmp = plvList->GetStringWidth( sNewTmp );
+						if ( lTmp > lWid ) {
+							lWid = lTmp;
+						}
+					}
+				}
+				else {
+					LONG lTmp = plvList->GetStringWidth( sTmp );
+					if ( lTmp > lWid ) {
+						lWid = lTmp;
+					}
+				}
+			}
+			plvList->SetColumnWidth( 0, lWid + 1 );
 		}
 	}
 
