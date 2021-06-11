@@ -21,7 +21,7 @@ namespace lsw {
 		}
 		if ( !bFound ) {
 			char szBuffer[32];
-			::sprintf_s( szBuffer, "%.4X", _wMessage );
+			std::sprintf( szBuffer, "%.4X", _wMessage );
 			_sRet += szBuffer;
 		}
 #endif	// #ifdef _DEBUG

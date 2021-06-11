@@ -558,7 +558,7 @@ namespace mx {
 					pcFormat = ssTmp.c_str();
 				}
 				char szBuffer[64];
-				::sprintf_s( szBuffer, MX_ELEMENTS( szBuffer ), pcFormat, _hiInst.uiParms[I], _hiInst.uiParms[I], _hiInst.uiParms[I] );
+				std::snprintf( szBuffer, MX_ELEMENTS( szBuffer ), pcFormat, _hiInst.uiParms[I], _hiInst.uiParms[I], _hiInst.uiParms[I] );
 				_sRes += szBuffer;
 			}
 

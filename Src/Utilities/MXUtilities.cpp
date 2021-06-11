@@ -741,10 +741,10 @@ namespace mx {
 			if ( _uiSize >= aTable[I].uiSize ) {
 				CHAR szNumber[64];
 				if ( _uiSize % aTable[I].uiSize == 0 ) {
-					::sprintf( szNumber, "%I64u ", _uiSize / aTable[I].uiSize );
+					std::sprintf( szNumber, "%I64u ", _uiSize / aTable[I].uiSize );
 				}
 				else {
-					::sprintf( szNumber, aTable[I].pcFormat, static_cast<DOUBLE>(_uiSize) / static_cast<DOUBLE>(aTable[I].uiSize) );
+					std::sprintf( szNumber, aTable[I].pcFormat, static_cast<DOUBLE>(_uiSize) / static_cast<DOUBLE>(aTable[I].uiSize) );
 				}
 				_sString.append( szNumber );
 				CStringDecoder::Decode( aTable[I].pcName, aTable[I].ui32StrLen, szBuffer );
@@ -757,7 +757,7 @@ namespace mx {
 			}
 		}
 		CHAR szNumber[64];
-		::sprintf( szNumber, "%I64u ", _uiSize );
+		std::sprintf( szNumber, "%I64u ", _uiSize );
 		_sString.append( szNumber );
 		_DEC_9DC09A6E_byte( szBuffer );
 		_sString.append( szBuffer );
@@ -775,11 +775,14 @@ namespace mx {
 			tm * ptTimeInfo;
 			ptTimeInfo = std::localtime( &tRawTime );
 			CHAR szTemp[128];
-			std::strftime( szTemp, sizeof( szTemp ),"%d-%m-%Y %I:%M:%S %Z", ptTimeInfo);
-			::sprintf_s( _pcRet, _sLen, "%s (%I64u)", szTemp, _uiTime );
+			std::strftime( szTemp, sizeof( szTemp ),"%d-%m-%Y %I:%M:%S %Z", ptTimeInfo );
+			std::snprintf( _pcRet, _sLen, "%s (%I64u)", szTemp, _uiTime );
 		}
 		else {
-			::sprintf_s( _pcRet, _sLen, "%I64u", _uiTime );
+			std::snprintf( _pcRet, _sLen, "%I64u", _uiTime );
+		}
+		if ( _sLen ) {
+			_pcRet[_sLen-1] = '\0';
 		}
 		return _pcRet;
 	}
@@ -792,13 +795,14 @@ namespace mx {
 			ptTimeInfo = std::localtime( &tRawTime );
 			CHAR szTemp[128];
 			CHAR szTemp2[128];
-			std::strftime( szTemp, sizeof( szTemp ),"%d-%m-%Y %I:%M:%S %Z", ptTimeInfo);
-			::sprintf_s( szTemp2, MX_ELEMENTS( szTemp2 ), "%s (%I64u)", szTemp, _uiTime );
+			std::strftime( szTemp, sizeof( szTemp ),"%d-%m-%Y %I:%M:%S %Z", ptTimeInfo );
+			std::snprintf( szTemp2, MX_ELEMENTS( szTemp2 ), "%s (%I64u)", szTemp, _uiTime );
+			szTemp2[MX_ELEMENTS(szTemp2)-1] = '\0';
 			_sString = szTemp2;
 		}
 		else {
 			CHAR szTemp2[128];
-			::sprintf_s( szTemp2, MX_ELEMENTS( szTemp2 ), "%I64u", _uiTime );
+			std::snprintf( szTemp2, MX_ELEMENTS( szTemp2 ), "%I64u", _uiTime );
 			_sString = szTemp2;
 		}
 		return _sString.c_str();
@@ -814,12 +818,12 @@ namespace mx {
 		_uiNumDigits = std::max( _uiNumDigits, 1U );
 		CHAR szFormat[32];
 		if ( Options.bUse0xForHex ) {
-			::sprintf_s( szFormat, MX_ELEMENTS( szFormat ), "0x%%.%uI64X", _uiNumDigits );
+			std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "0x%%.%uI64X", _uiNumDigits );
 		}
 		else {
-			::sprintf_s( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64Xh", _uiNumDigits );
+			std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64Xh", _uiNumDigits );
 		}
-		::sprintf_s( _pcRet, _sLen, szFormat, _uiValue );
+		std::snprintf( _pcRet, _sLen, szFormat, _uiValue );
 		return _pcRet;
 	}
 
@@ -904,8 +908,8 @@ namespace mx {
 	const CHAR * CUtilities::ToUnsigned( uint64_t _uiValue, CHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
 		_uiNumDigits = std::max( _uiNumDigits, 1U );
 		CHAR szFormat[32];
-		::sprintf_s( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64u", _uiNumDigits );
-		::sprintf_s( _pcRet, _sLen, szFormat, _uiValue );
+		std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64u", _uiNumDigits );
+		std::snprintf( _pcRet, _sLen, szFormat, _uiValue );
 		return _pcRet;
 	}
 
@@ -940,8 +944,8 @@ namespace mx {
 	const CHAR * CUtilities::ToSigned( int64_t _iValue, CHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
 		_uiNumDigits = std::max( _uiNumDigits, 1U );
 		CHAR szFormat[32];
-		::sprintf_s( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64d", _uiNumDigits );
-		::sprintf_s( _pcRet, _sLen, szFormat, _iValue );
+		std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64d", _uiNumDigits );
+		std::snprintf( _pcRet, _sLen, szFormat, _iValue );
 		return _pcRet;
 	}
 
@@ -981,17 +985,17 @@ namespace mx {
 		CHAR * pcBuffer = reinterpret_cast<CHAR *>(m_szFloatPrintBuffer);
 		int iLen = 0;
 		if ( _iSigDigits == 0 ) {
-			iLen = ::sprintf_s( pcBuffer, sLen, "%.2000f", _dValue );
+			iLen = std::snprintf( pcBuffer, sLen, "%.2000f", _dValue );
 		}
 		else if ( _iSigDigits < 0 ) {
 			CHAR szFormat[32];
-			::sprintf_s( szFormat, MX_ELEMENTS( szFormat ), "%%.%ug", -_iSigDigits );
-			iLen = ::sprintf_s( pcBuffer, sLen, szFormat, _dValue );
+			std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "%%.%ug", -_iSigDigits );
+			iLen = std::snprintf( pcBuffer, sLen, szFormat, _dValue );
 		}
 		else {
 			CHAR szFormat[32];
-			::sprintf_s( szFormat, MX_ELEMENTS( szFormat ), "%%.%ue", _iSigDigits );
-			iLen = ::sprintf_s( pcBuffer, sLen, szFormat, _dValue );
+			std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "%%.%ue", _iSigDigits );
+			iLen = std::snprintf( pcBuffer, sLen, szFormat, _dValue );
 		}
 		_sString.append( pcBuffer, iLen );
 		/*delete [] pcBuffer;
@@ -1614,7 +1618,7 @@ namespace mx {
 			}
 			case MX_DT_VOID : {
 				char szBuffer[32];
-				int iLen = ::sprintf_s( szBuffer, MX_ELEMENTS( szBuffer ), "%.11I64X", _pdtData->u.Pointer64 );
+				int iLen = std::snprintf( szBuffer, MX_ELEMENTS( szBuffer ), "%.11I64X", _pdtData->u.Pointer64 );
 				_sRet.append( szBuffer, iLen );
 				break;
 			}
@@ -2436,7 +2440,7 @@ namespace mx {
 					!(vTypeData[I] & C1_DEFINED) ||
 					(vType3Data[I] & (C3_HIGHSURROGATE | C3_LOWSURROGATE)) ) {
 					char szBuffer[16];
-					::sprintf_s( szBuffer, "\\u%.4X", static_cast<uint16_t>(_swsInput[I]) );
+					std::sprintf( szBuffer, "\\u%.4X", static_cast<uint16_t>(_swsInput[I]) );
 					char * pcTmp = szBuffer;
 					while ( (*pcTmp) ) {
 						swsOut.push_back( (*pcTmp++) );
@@ -2510,7 +2514,7 @@ namespace mx {
 					!::iswprint( static_cast<wint_t>(ui32Conv) ) ||
 					!(wTypeData[0] & C1_DEFINED) ) {
 					char szBuffer[16];
-					::sprintf_s( szBuffer, "\\U%.8X", static_cast<uint32_t>(_swsInput[I]) );
+					std::sprintf( szBuffer, "\\U%.8X", static_cast<uint32_t>(_swsInput[I]) );
 					char * pcTmp = szBuffer;
 					while ( (*pcTmp) ) {
 						vOutput.push_back( (*pcTmp++) );
@@ -2534,7 +2538,7 @@ namespace mx {
 			ssTmp.push_back( '\\' );
 			ssTmp.push_back( 'x' );
 			char szBuffer[8];
-			::sprintf_s( szBuffer, "%.2X", static_cast<uint8_t>(_ssInput[I]) );
+			std::sprintf( szBuffer, "%.2X", static_cast<uint8_t>(_ssInput[I]) );
 			ssTmp.push_back( szBuffer[0] );
 			ssTmp.push_back( szBuffer[1] );
 			if ( _bKeepNewline && _ssInput[I] == '\n' ) {
@@ -2557,7 +2561,7 @@ namespace mx {
 				ssTmp.push_back( '\\' );
 				ssTmp.push_back( 'x' );
 				char szBuffer[8];
-				::sprintf_s( szBuffer, "%.2X", static_cast<uint8_t>(_ssInput[I]) );
+				std::sprintf( szBuffer, "%.2X", static_cast<uint8_t>(_ssInput[I]) );
 				ssTmp.push_back( szBuffer[0] );
 				ssTmp.push_back( szBuffer[1] );
 				if ( _bKeepNewline && _ssInput[I] == '\n' ) {
@@ -2573,7 +2577,7 @@ namespace mx {
 				ssTmp.push_back( '\\' );
 				ssTmp.push_back( 'u' );
 				char szBuffer[8];
-				::sprintf_s( szBuffer, "%.4X", static_cast<uint16_t>(ui32ThisUtf16) );
+				std::sprintf( szBuffer, "%.4X", static_cast<uint16_t>(ui32ThisUtf16) );
 				ssTmp.push_back( szBuffer[0] );
 				ssTmp.push_back( szBuffer[1] );
 				ssTmp.push_back( szBuffer[2] );
@@ -2584,7 +2588,7 @@ namespace mx {
 			ssTmp.push_back( '\\' );
 			ssTmp.push_back( 'U' );
 			char szBuffer[16];
-			::sprintf_s( szBuffer, "%.8X", ui32This );
+			std::sprintf( szBuffer, "%.8X", ui32This );
 			ssTmp.push_back( szBuffer[0] );
 			ssTmp.push_back( szBuffer[1] );
 			ssTmp.push_back( szBuffer[2] );
@@ -2608,11 +2612,11 @@ namespace mx {
 				// This works because we know that this can't be followed by a number, as it will only be followed
 				//	by the end of the string or \.
 				swsTmp.push_back( 'x' );
-				::sprintf_s( szBuffer, "%.2X", static_cast<uint8_t>(_swsInput[I]) );
+				std::sprintf( szBuffer, "%.2X", static_cast<uint8_t>(_swsInput[I]) );
 			}
 			else {
 				swsTmp.push_back( 'u' );
-				::sprintf_s( szBuffer, "%.4X", static_cast<uint16_t>(_swsInput[I]) );
+				std::sprintf( szBuffer, "%.4X", static_cast<uint16_t>(_swsInput[I]) );
 			}
 			swsTmp.push_back( szBuffer[0] );
 			swsTmp.push_back( szBuffer[1] );
@@ -2639,11 +2643,11 @@ namespace mx {
 				// This works because we know that this can't be followed by a number, as it will only be followed
 				//	by the end of the string or \.
 				swsTmp.push_back( 'x' );
-				::sprintf_s( szBuffer, "%.2X", static_cast<uint8_t>(_swsInput[I]) );
+				std::sprintf( szBuffer, "%.2X", static_cast<uint8_t>(_swsInput[I]) );
 			}
 			else {
 				swsTmp.push_back( 'U' );
-				::sprintf_s( szBuffer, "%.8X", static_cast<uint32_t>(_swsInput[I]) );
+				std::sprintf( szBuffer, "%.8X", static_cast<uint32_t>(_swsInput[I]) );
 			}
 			swsTmp.push_back( szBuffer[0] );
 			swsTmp.push_back( szBuffer[1] );
@@ -2718,10 +2722,10 @@ namespace mx {
 				!(wTypeData[0] & C1_DEFINED) ) {
 				char szBuffer[16];
 				if ( ui32ThisLen == 1 ) {
-					::sprintf_s( szBuffer, "\\u%.4X", static_cast<uint16_t>(ui32Conv) );
+					std::sprintf( szBuffer, "\\u%.4X", static_cast<uint16_t>(ui32Conv) );
 				}
 				else {
-					::sprintf_s( szBuffer, "\\U%.8X", ui32This );
+					std::sprintf( szBuffer, "\\U%.8X", ui32This );
 				}
 				char * pcTmp = szBuffer;
 				while ( (*pcTmp) ) {
@@ -2804,10 +2808,10 @@ namespace mx {
 				(wType3Data[0] & (C3_HIGHSURROGATE | C3_LOWSURROGATE))*/ ) {
 				char szBuffer[16];
 				if ( ui32ThisLen == 1 ) {
-					::sprintf_s( szBuffer, "\\u%.4X", static_cast<uint16_t>(_swsInput[I]) );
+					std::sprintf( szBuffer, "\\u%.4X", static_cast<uint16_t>(_swsInput[I]) );
 				}
 				else {
-					::sprintf_s( szBuffer, "\\U%.8X", ui32This );
+					std::sprintf( szBuffer, "\\U%.8X", ui32This );
 				}
 				char * pcTmp = szBuffer;
 				while ( (*pcTmp) ) {
@@ -2880,7 +2884,7 @@ namespace mx {
 				/*!::iswprint( static_cast<wint_t>(ui32Conv) ) ||*/
 				!(wTypeData[0] & C1_DEFINED) ) {
 				char szBuffer[16];
-				::sprintf_s( szBuffer, "\\U%.8X", static_cast<uint32_t>(_swsInput[I]) );
+				std::sprintf( szBuffer, "\\U%.8X", static_cast<uint32_t>(_swsInput[I]) );
 				char * pcTmp = szBuffer;
 				while ( (*pcTmp) ) {
 					vOutput.push_back( (*pcTmp++) );
@@ -4172,7 +4176,7 @@ namespace mx {
 	// Prints the number of GUI objects.
 	void CUtilities::PrintTotalGuiObjects( DWORD /*_dwFlags*/ ) {
 		/*char szBuffer[64];
-		::sprintf( szBuffer, "PrintTotalGuiObjects: %u.\r\n", ::GetGuiResources( ::GetCurrentProcess(), _dwFlags ) );
+		std::sprintf( szBuffer, "PrintTotalGuiObjects: %u.\r\n", ::GetGuiResources( ::GetCurrentProcess(), _dwFlags ) );
 		::OutputDebugStringA( szBuffer );*/
 	}
 

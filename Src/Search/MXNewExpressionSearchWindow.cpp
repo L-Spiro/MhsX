@@ -127,7 +127,7 @@ namespace mx {
 			else {
 				pcbCombo->SetTextW( m_eswdData.wsAlignmentText.c_str() );
 			}
-			pcbCombo->SetTreatAsHex( TRUE );
+			pcbCombo->SetTreatAsHex( FALSE );
 			pcbCombo->SetFocus();
 
 			pcbCombo->AutoSetMinListWidth();
@@ -144,7 +144,7 @@ namespace mx {
 			else {
 				pcbCombo->SetTextW( m_eswdData.wsFixedSizeText.c_str() );
 			}
-			pcbCombo->SetTreatAsHex( TRUE );
+			pcbCombo->SetTreatAsHex( FALSE );
 			pcbCombo->SetFocus();
 
 			pcbCombo->AutoSetMinListWidth();

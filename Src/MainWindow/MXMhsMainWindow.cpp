@@ -972,7 +972,7 @@ namespace mx {
 			char szBuffer[128];
 			uint64_t ui64SearchTime = std::max( 1ULL, m_pmhMemHack->Searcher().SearchTime() );
 				
-			::sprintf_s( szBuffer, sMsg.c_str(), ui64TotalFound,
+			std::sprintf( szBuffer, sMsg.c_str(), ui64TotalFound,
 				ui64SearchTime / 1000000.0,
 				ui64TotalFound * 1000000.0 / ui64SearchTime );
 			lsw::CBase::PromptOk( Wnd(), szBuffer, sTitle.c_str(), false );
@@ -1086,13 +1086,13 @@ namespace mx {
 				CSecureString sMsg;
 				if ( sSearcher.LastSearchTotalResults() > sSearcher.TotalResults() ) {
 					sMsg = mx::CStringDecoder::DecodeToString( _T_LEN_37BD2A11_Found_Addresses___I64u_results_in__f_seconds____I64u_ );
-					::sprintf_s( szBuffer, sMsg.c_str(), sSearcher.TotalResults(),
+					std::sprintf( szBuffer, sMsg.c_str(), sSearcher.TotalResults(),
 						ui64SearchTime / 1000000.0,
 						sSearcher.LastSearchTotalResults() - sSearcher.TotalResults() );
 				}
 				else {
 					sMsg = mx::CStringDecoder::DecodeToString( _T_LEN_82CDC580_Found_Addresses___I64u_results_in__f_seconds_ );
-					::sprintf_s( szBuffer, sMsg.c_str(), sSearcher.TotalResults(),
+					std::sprintf( szBuffer, sMsg.c_str(), sSearcher.TotalResults(),
 						ui64SearchTime / 1000000.0 );
 				}
 

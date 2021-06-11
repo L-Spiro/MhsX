@@ -2611,7 +2611,7 @@ namespace mx {
 			CHAR szHex1[32], szU1[32];
 			CHAR szHex2[32], szU2[32];
 			CHAR szOffset[128];
-			::sprintf_s( szOffset, MX_ELEMENTS( szOffset ), mx::CStringDecoder::DecodeToString( _T_LEN_7D6FFEED__s___s____s___s____s___s_ ).c_str(),
+			std::snprintf( szOffset, MX_ELEMENTS( szOffset ), mx::CStringDecoder::DecodeToString( _T_LEN_7D6FFEED__s___s____s___s____s___s_ ).c_str(),
 				CUtilities::ToHex( _vList[I].ui64FileOffsetAddr, szHex0, MX_ELEMENTS( szHex0 ), 8 ), CUtilities::ToUnsigned( _vList[I].ui64FileOffsetAddr, szU0, MX_ELEMENTS( szU0 ) ),
 				CUtilities::ToHex( _vList[I].ui64FileOffsetOrd, szHex1, MX_ELEMENTS( szHex1 ), 8 ), CUtilities::ToUnsigned( _vList[I].ui64FileOffsetOrd, szU1, MX_ELEMENTS( szU1 ) ),
 				CUtilities::ToHex( _vList[I].ui64FileOffsetName, szHex2, MX_ELEMENTS( szHex2 ), 8 ), CUtilities::ToUnsigned( _vList[I].ui64FileOffsetName, szU2, MX_ELEMENTS( szU2 ) ) );

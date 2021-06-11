@@ -4338,7 +4338,7 @@ namespace mx {
 				sTemp.push_back( '\\' );
 				sTemp.push_back( 'x' );
 				char szHexBuf[32];
-				::_itoa_s( uiTemp, szHexBuf, 16 );
+				std::_itoa( uiTemp, szHexBuf, 16 );
 				if ( uiTemp < 0x10 ) {	// Only 1 digit.
 					sTemp.push_back( '0' );
 					sTemp.push_back( szHexBuf[0] );
@@ -4367,19 +4367,19 @@ namespace mx {
 				::OutputDebugStringA( "\" /*" );
 				::OutputDebugStringA( sTempString.c_str() );
 				::OutputDebugStringA( "*/, " );
-				::_itoa_s( static_cast<int>(sTempString.size()), szTemp, 10 );
+				std::_itoa( static_cast<int>(sTempString.size()), szTemp, 10 );
 				::OutputDebugStringA( szTemp );
 				::OutputDebugStringA( ", " );
 
-				::_itoa_s( static_cast<int>(vUtf32.size()), szTemp, 10 );
+				std::_itoa( static_cast<int>(vUtf32.size()), szTemp, 10 );
 				::OutputDebugStringA( szTemp );
 				::OutputDebugStringA( ", { " );
 			
 				for ( size_t J = 0; J < vUtf32.size(); ++J ) {
-					::sprintf_s( szTemp, "0x%.X, ", static_cast<uint32_t>(vUtf32[J]) );
+					std::sprintf( szTemp, "0x%.X, ", static_cast<uint32_t>(vUtf32[J]) );
 					::OutputDebugStringA( szTemp );
 				}
-				//::_itoa_s( sStruct[I].pcTrans, szTemp, 16 );
+				//std::_itoa( sStruct[I].pcTrans, szTemp, 16 );
 				//::OutputDebugStringA( szTemp );
 				::OutputDebugStringA( "} },\r\n" );
 			//}
@@ -4389,7 +4389,7 @@ namespace mx {
 		::OutputDebugStringA( "};\r\n" );
 
 		char szTemp[128];
-		::_itoa_s( static_cast<int>(sMax), szTemp, 10 );
+		std::_itoa( static_cast<int>(sMax), szTemp, 10 );
 		::OutputDebugStringA( szTemp );
 		::OutputDebugStringA( "\r\n" );
 	}

@@ -6117,7 +6117,7 @@ namespace ee {
 				sTemp.push_back( '\\' );
 				sTemp.push_back( 'x' );
 				char szHexBuf[32];
-				::_itoa_s( uiTemp, szHexBuf, 16 );
+				std::_itoa( uiTemp, szHexBuf, 16 );
 				if ( uiTemp < 0x10 ) {	// Only 1 digit.
 					sTemp.push_back( '0' );
 					sTemp.push_back( szHexBuf[0] );
@@ -6129,7 +6129,7 @@ namespace ee {
 			}
 			sTemp.push_back( 0 );
 			char szTemp[128];
-			::_itoa_s( sStruct[I].uiId, szTemp, 16 );
+			std::_itoa( sStruct[I].uiId, szTemp, 16 );
 			::OutputDebugStringA( "\t{ \"" );
 			::OutputDebugStringA( reinterpret_cast<LPCSTR>(&sTemp[0]) );
 			::OutputDebugStringA( "\" /*" );
@@ -6137,7 +6137,7 @@ namespace ee {
 			::OutputDebugStringA( "*/, 0x" );
 			::OutputDebugStringA( szTemp );
 			::OutputDebugStringA( ", " );
-			::_itoa_s( static_cast<int>(sTempString.size()), szTemp, 10 );
+			std::_itoa( static_cast<int>(sTempString.size()), szTemp, 10 );
 			::OutputDebugStringA( szTemp );
 			::OutputDebugStringA( " },\r\n" );
 		}

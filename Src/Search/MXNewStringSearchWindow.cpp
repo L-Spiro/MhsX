@@ -803,7 +803,7 @@ namespace mx {
 					char szBuffer[ONIG_MAX_ERROR_MESSAGE_LEN];
 					::onig_error_code_to_str( reinterpret_cast<OnigUChar*>(szBuffer), orRegex.Get(), &orRegex.Error() );
 					char szError[ONIG_MAX_ERROR_MESSAGE_LEN+32];
-					::sprintf_s( szError, _DEC_S_CC6C71BB_Regex_Error___s.c_str(), szBuffer );
+					std::sprintf( szError, _DEC_S_CC6C71BB_Regex_Error___s.c_str(), szBuffer );
 					_wsError = CUtilities::StringToWString( szError );
 					return false;
 				}
