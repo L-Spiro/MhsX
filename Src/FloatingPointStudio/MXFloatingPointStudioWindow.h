@@ -30,6 +30,8 @@ namespace mx {
 			MX_P_FLOAT16,
 			MX_P_6_BIT,
 			MX_P_8_BIT,
+			MX_P_10_BIT,
+			MX_P_11_BIT,
 			MX_P_AMD_9511,
 			MX_P_CUSTOM,
 		};

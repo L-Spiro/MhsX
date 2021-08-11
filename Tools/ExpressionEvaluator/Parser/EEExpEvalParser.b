@@ -52,7 +52,7 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %token EE_CHAR_CONSTANT EE_FLOAT_CONSTANT EE_HEX_CONSTANT1 EE_HEX_CONSTANT2 EE_HEX_CONSTANT3 EE_STRING_CONSTANT EE_UNICODE_CONSTANT
 %token EE_BIN_CONSTANT EE_DEC_CONSTANT EE_OCT_CONSTANT EE_PUREDEC_CONSTANT
 %token EE_IDENTIFIER
-%token EE_ARRAY EE_CUSTOM_VAR EE_MEMBERACCESS EE_PARM EE_USER_VAR
+%token EE_ARRAY EE_CUSTOM_VAR EE_MEMBERACCESS EE_PARM EE_PARM_TOTAL EE_USER_VAR
 %token EE_EQU_E EE_EQU_NE EE_LEFT_OP EE_RIGHT_OP EE_REL_GE EE_REL_LE
 %token EE_PLUSPLUS EE_MINUSMINUS
 %token EE_ASS_PLUSEQUALS EE_ASS_MINUSEQUALS EE_ASS_TIMESEQUALS EE_ASS_MODEQUALS EE_ASS_DIVEQUALS EE_ASS_CARROTEQUALS EE_ASS_SHLEFTEQUALS EE_ASS_SHRIGHTEQUALS EE_ASS_OREQUALS EE_ASS_ANDEQUALS
@@ -158,7 +158,10 @@ basic_expr
 	| custom_var											{ m_peecContainer->CreateCustomVar( $1, $$ ); }
 	| EE_USER_VAR											{ m_peecContainer->CreateUser( $$ ); }
 	| EE_PARM												{ m_peecContainer->CreateNumberedParm( m_peelLexer->YYText(), $$ ); }
+	| '$' '[' custom_var ']'								{ m_peecContainer->CreateDynamicParm( $3, $$ ); }
+	| EE_PARM_TOTAL											{ m_peecContainer->CreateParmTotal( $$ ); }
 	| array_var '[' exp ']'									{ m_peecContainer->CreateArrayVar( $1, $3, $$ ); }
+	| '$' '[' exp ']'										{ m_peecContainer->CreateDynamicParmExp( $3, $$ ); }
 	//| basic_expr EE_PLUSPLUS								{ m_peecContainer->CreatePostfixOp( $1, CExpEvalParser::token::EE_PLUSPLUS, $$ ); }
 	//| basic_expr EE_MINUSMINUS								{ m_peecContainer->CreatePostfixOp( $1, CExpEvalParser::token::EE_MINUSMINUS, $$ ); }
 	

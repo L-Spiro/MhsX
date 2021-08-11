@@ -493,10 +493,12 @@ L?'(\\.|[^\\'])+'					{ return yy::CExpEvalParser::token::EE_CHAR_CONSTANT; }
 "=="								{ return yy::CExpEvalParser::token::EE_EQU_E; }
 "!="								{ return yy::CExpEvalParser::token::EE_EQU_NE; }
 "::"								{ return yy::CExpEvalParser::token::EE_MEMBERACCESS; }
+"$"									{ return ('$'); }
 
 
 {L}({L}|{D})*						{ return yy::CExpEvalParser::token::EE_IDENTIFIER; }
 "$"{D}+								{ return yy::CExpEvalParser::token::EE_PARM; }
+"$$"								{ return yy::CExpEvalParser::token::EE_PARM_TOTAL; }
 
 .									{ }
 {WS}								{ }

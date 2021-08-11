@@ -911,8 +911,18 @@ namespace mx {
 		}
 		m_sstLastSubsearchType = MX_SST_STANDARD;
 
-		//MX_OPTIONS oOptions = m_pmhMemHack->Options();
-		CStandardSubsearchLayout::CreateStandardSubsearchDialog( this, m_pmhMemHack );
+		switch ( m_pmhMemHack->Searcher().LastSearchParms().stType ) {
+			case CUtilities::MX_ST_DATATYPE_SEARCH : {
+				CStandardSubsearchLayout::CreateStandardSubsearchDialog( this, m_pmhMemHack );
+				break;
+			}
+			case CUtilities::MX_ST_EXP_SEARCH : {
+				if ( m_pmhMemHack->Searcher().LastSearchParms().esqmExpSearchType == CUtilities::MX_EXP_SEARCH_QQ_MEANING::MX_ESQM_VALUE ) {
+					CStandardSubsearchLayout::CreateStandardSubsearchDialog( this, m_pmhMemHack );
+				}
+				break;
+			}
+		}
 		return 0;
 	}
 

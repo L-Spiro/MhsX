@@ -16705,3 +16705,39 @@
 #define _DEC_S_6EA39706_Detached_from_ mx::CStringDecoder::DecodeToString( _T_6EA39706_Detached_from_, _LEN_6EA39706 )
 #define _DEC_WS_6EA39706_Detached_from_ mx::CStringDecoder::DecodeToWString( _T_6EA39706_Detached_from_, _LEN_6EA39706 )
 
+// 10-bit (Graphics, EG: GL_R11F_G11F_B10F)
+
+#define _T_1D2DCE46_10_bit__Graphics__EG__GL_R11F_G11F_B10F_ "\xB9\xFE\xFD\xFD\xFB\x3D\xAE\xEF\x17\x3A\x2A\x3E\xFA\x04\x2A\xFB\xFA\xF0\xE0\xD9\x03\xAE\x0E\x1C\x27\x1B\xFF\xC3\xE1\x26\xCF\xFF\x01\xE1\xF1\x0B\xBF\xF7\x16\xF1"
+#define _LEN_1D2DCE46 40
+#define _T_LEN_1D2DCE46_10_bit__Graphics__EG__GL_R11F_G11F_B10F_ _T_1D2DCE46_10_bit__Graphics__EG__GL_R11F_G11F_B10F_, _LEN_1D2DCE46
+#define _DEC_1D2DCE46_10_bit__Graphics__EG__GL_R11F_G11F_B10F_( STR ) mx::CStringDecoder::Decode( _T_1D2DCE46_10_bit__Graphics__EG__GL_R11F_G11F_B10F_, _LEN_1D2DCE46, STR )
+#define _DEC_S_1D2DCE46_10_bit__Graphics__EG__GL_R11F_G11F_B10F_ mx::CStringDecoder::DecodeToString( _T_1D2DCE46_10_bit__Graphics__EG__GL_R11F_G11F_B10F_, _LEN_1D2DCE46 )
+#define _DEC_WS_1D2DCE46_10_bit__Graphics__EG__GL_R11F_G11F_B10F_ mx::CStringDecoder::DecodeToWString( _T_1D2DCE46_10_bit__Graphics__EG__GL_R11F_G11F_B10F_, _LEN_1D2DCE46 )
+
+// 11-bit (Graphics, EG: GL_R11F_G11F_B10F)
+
+#define _T_53A4C5EF_11_bit__Graphics__EG__GL_R11F_G11F_B10F_ "\xB9\xFF\xFD\xFD\xFB\x3D\xAE\xEF\x17\x3A\x2A\x3E\xFA\x04\x2A\xFB\xFA\xF0\xE0\xD9\x03\xAE\x0E\x1C\x27\x1B\xFF\xC3\xE1\x26\xCF\xFF\x01\xE1\xF1\x0B\xBF\xF7\x16\xF1"
+#define _LEN_53A4C5EF 40
+#define _T_LEN_53A4C5EF_11_bit__Graphics__EG__GL_R11F_G11F_B10F_ _T_53A4C5EF_11_bit__Graphics__EG__GL_R11F_G11F_B10F_, _LEN_53A4C5EF
+#define _DEC_53A4C5EF_11_bit__Graphics__EG__GL_R11F_G11F_B10F_( STR ) mx::CStringDecoder::Decode( _T_53A4C5EF_11_bit__Graphics__EG__GL_R11F_G11F_B10F_, _LEN_53A4C5EF, STR )
+#define _DEC_S_53A4C5EF_11_bit__Graphics__EG__GL_R11F_G11F_B10F_ mx::CStringDecoder::DecodeToString( _T_53A4C5EF_11_bit__Graphics__EG__GL_R11F_G11F_B10F_, _LEN_53A4C5EF )
+#define _DEC_WS_53A4C5EF_11_bit__Graphics__EG__GL_R11F_G11F_B10F_ mx::CStringDecoder::DecodeToWString( _T_53A4C5EF_11_bit__Graphics__EG__GL_R11F_G11F_B10F_, _LEN_53A4C5EF )
+
+// float/float32/IEEE 754 single-precision/IEEE 754-2008 binary32
+
+#define _T_D119A670_float_float32_IEEE_754_single_precision_IEEE_754_2008_binary32 "\xEE\x3A\x3F\xFC\x06\xF8\xF4\x33\x3F\x29\x3D\x01\xC4\xCA\x10\xCD\x13\x15\xBB\xC9\xFE\xC2\xE7\x43\x31\x37\x35\xFE\x00\xF4\xF8\x40\x35\xFE\xFB\x3C\xF7\x36\x3E\xF7\x12\x13\xD7\xE0\xE7\xBF\x03\x04\xC8\xC4\xF9\xBE\xFF\xF0\x2A\x32\x3C\xF3\x0D\x40\xBB\x00"
+#define _LEN_D119A670 62
+#define _T_LEN_D119A670_float_float32_IEEE_754_single_precision_IEEE_754_2008_binary32 _T_D119A670_float_float32_IEEE_754_single_precision_IEEE_754_2008_binary32, _LEN_D119A670
+#define _DEC_D119A670_float_float32_IEEE_754_single_precision_IEEE_754_2008_binary32( STR ) mx::CStringDecoder::Decode( _T_D119A670_float_float32_IEEE_754_single_precision_IEEE_754_2008_binary32, _LEN_D119A670, STR )
+#define _DEC_S_D119A670_float_float32_IEEE_754_single_precision_IEEE_754_2008_binary32 mx::CStringDecoder::DecodeToString( _T_D119A670_float_float32_IEEE_754_single_precision_IEEE_754_2008_binary32, _LEN_D119A670 )
+#define _DEC_WS_D119A670_float_float32_IEEE_754_single_precision_IEEE_754_2008_binary32 mx::CStringDecoder::DecodeToWString( _T_D119A670_float_float32_IEEE_754_single_precision_IEEE_754_2008_binary32, _LEN_D119A670 )
+
+// double/float64/IEEE 754 double-precision/IEEE 754-2008 binary64
+
+#define _T_C8A406E9_double_float64_IEEE_754_double_precision_IEEE_754_2008_binary64 "\xEC\x3D\x45\xFD\xFE\x2E\xBD\x2D\x3C\x37\x2A\x42\xC8\xCF\xF6\xD1\x13\x15\xE0\xB2\x00\xC3\xFB\xF0\x2C\x38\x43\xF4\x07\x2C\xB5\x3E\x42\x00\xF5\x32\x01\x30\x3F\x36\xF8\x17\xD7\xE0\x0C\xA8\x05\x05\xCF\xBF\xFB\xBE\xF7\x08\xE8\x2B\x37\x00\xFC\x39\x01\x04\x04"
+#define _LEN_C8A406E9 63
+#define _T_LEN_C8A406E9_double_float64_IEEE_754_double_precision_IEEE_754_2008_binary64 _T_C8A406E9_double_float64_IEEE_754_double_precision_IEEE_754_2008_binary64, _LEN_C8A406E9
+#define _DEC_C8A406E9_double_float64_IEEE_754_double_precision_IEEE_754_2008_binary64( STR ) mx::CStringDecoder::Decode( _T_C8A406E9_double_float64_IEEE_754_double_precision_IEEE_754_2008_binary64, _LEN_C8A406E9, STR )
+#define _DEC_S_C8A406E9_double_float64_IEEE_754_double_precision_IEEE_754_2008_binary64 mx::CStringDecoder::DecodeToString( _T_C8A406E9_double_float64_IEEE_754_double_precision_IEEE_754_2008_binary64, _LEN_C8A406E9 )
+#define _DEC_WS_C8A406E9_double_float64_IEEE_754_double_precision_IEEE_754_2008_binary64 mx::CStringDecoder::DecodeToWString( _T_C8A406E9_double_float64_IEEE_754_double_precision_IEEE_754_2008_binary64, _LEN_C8A406E9 )
+

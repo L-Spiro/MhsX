@@ -139,7 +139,7 @@ namespace mx {
 	UINT64 CFile::Size( LPCSTR _lpcFile ) {
 		WIN32_FILE_ATTRIBUTE_DATA wfadData;
 		if ( ::GetFileAttributesExA( _lpcFile, GetFileExInfoStandard, &wfadData ) ) {
-			return (static_cast<UINT64>(wfadData.nFileSizeHigh) << 32) | wfadData.nFileSizeLow;
+			return (static_cast<UINT64>(wfadData.nFileSizeHigh) << 32ULL) | wfadData.nFileSizeLow;
 		}
 		return 0;
 	}
@@ -148,7 +148,7 @@ namespace mx {
 	UINT64 CFile::Size( LPCWSTR _lpwFile ) {
 		WIN32_FILE_ATTRIBUTE_DATA wfadData;
 		if ( ::GetFileAttributesExW( _lpwFile, GetFileExInfoStandard, &wfadData ) ) {
-			return (static_cast<UINT64>(wfadData.nFileSizeHigh) << 32) | wfadData.nFileSizeLow;
+			return (static_cast<UINT64>(wfadData.nFileSizeHigh) << 32ULL) | wfadData.nFileSizeLow;
 		}
 		return 0;
 	}
@@ -165,7 +165,7 @@ namespace mx {
 	UINT64 CFile::CreationTime( LPCSTR _lpcFile ) {
 		WIN32_FILE_ATTRIBUTE_DATA wfadData;
 		if ( ::GetFileAttributesExA( _lpcFile, GetFileExInfoStandard, &wfadData ) ) {
-			return (static_cast<UINT64>(wfadData.ftCreationTime.dwHighDateTime) << 32) | wfadData.ftCreationTime.dwLowDateTime;
+			return (static_cast<UINT64>(wfadData.ftCreationTime.dwHighDateTime) << 32ULL) | wfadData.ftCreationTime.dwLowDateTime;
 		}
 		return 0;
 	}
@@ -174,7 +174,7 @@ namespace mx {
 	UINT64 CFile::CreationTime( LPCWSTR _lpwFile ) {
 		WIN32_FILE_ATTRIBUTE_DATA wfadData;
 		if ( ::GetFileAttributesExW( _lpwFile, GetFileExInfoStandard, &wfadData ) ) {
-			return (static_cast<UINT64>(wfadData.ftCreationTime.dwHighDateTime) << 32) | wfadData.ftCreationTime.dwLowDateTime;
+			return (static_cast<UINT64>(wfadData.ftCreationTime.dwHighDateTime) << 32ULL) | wfadData.ftCreationTime.dwLowDateTime;
 		}
 		return 0;
 	}
@@ -183,7 +183,7 @@ namespace mx {
 	UINT64 CFile::LastAccessTime( LPCSTR _lpcFile ) {
 		WIN32_FILE_ATTRIBUTE_DATA wfadData;
 		if ( ::GetFileAttributesExA( _lpcFile, GetFileExInfoStandard, &wfadData ) ) {
-			return (static_cast<UINT64>(wfadData.ftLastAccessTime.dwHighDateTime) << 32) | wfadData.ftLastAccessTime.dwLowDateTime;
+			return (static_cast<UINT64>(wfadData.ftLastAccessTime.dwHighDateTime) << 32ULL) | wfadData.ftLastAccessTime.dwLowDateTime;
 		}
 		return 0;
 	}
@@ -192,7 +192,7 @@ namespace mx {
 	UINT64 CFile::LastAccessTime( LPCWSTR _lpwFile ) {
 		WIN32_FILE_ATTRIBUTE_DATA wfadData;
 		if ( ::GetFileAttributesExW( _lpwFile, GetFileExInfoStandard, &wfadData ) ) {
-			return (static_cast<UINT64>(wfadData.ftLastAccessTime.dwHighDateTime) << 32) | wfadData.ftLastAccessTime.dwLowDateTime;
+			return (static_cast<UINT64>(wfadData.ftLastAccessTime.dwHighDateTime) << 32ULL) | wfadData.ftLastAccessTime.dwLowDateTime;
 		}
 		return 0;
 	}
@@ -201,7 +201,7 @@ namespace mx {
 	UINT64 CFile::LastWriteTime( LPCSTR _lpcFile ) {
 		WIN32_FILE_ATTRIBUTE_DATA wfadData;
 		if ( ::GetFileAttributesExA( _lpcFile, GetFileExInfoStandard, &wfadData ) ) {
-			return (static_cast<UINT64>(wfadData.ftLastWriteTime.dwHighDateTime) << 32) | wfadData.ftLastWriteTime.dwLowDateTime;
+			return (static_cast<UINT64>(wfadData.ftLastWriteTime.dwHighDateTime) << 32ULL) | wfadData.ftLastWriteTime.dwLowDateTime;
 		}
 		return 0;
 	}
@@ -210,7 +210,7 @@ namespace mx {
 	UINT64 CFile::LastWriteTime( LPCWSTR _lpwFile ) {
 		WIN32_FILE_ATTRIBUTE_DATA wfadData;
 		if ( ::GetFileAttributesExW( _lpwFile, GetFileExInfoStandard, &wfadData ) ) {
-			return (static_cast<UINT64>(wfadData.ftLastWriteTime.dwHighDateTime) << 32) | wfadData.ftLastWriteTime.dwLowDateTime;
+			return (static_cast<UINT64>(wfadData.ftLastWriteTime.dwHighDateTime) << 32ULL) | wfadData.ftLastWriteTime.dwLowDateTime;
 		}
 		return 0;
 	}
@@ -282,11 +282,11 @@ namespace mx {
 	// Converts a WIN32_FILE_ATTRIBUTE_DATA structure to an MX_FILE_ATTR structure.
 	CFile::MX_FILE_ATTR CFile::Win32AttrToMxAttr( const WIN32_FILE_ATTRIBUTE_DATA &_wfadData ) {
 		MX_FILE_ATTR faAttr = {
-			_wfadData.dwFileAttributes,																							// dwAttr
-			(static_cast<UINT64>(_wfadData.ftCreationTime.dwHighDateTime) << 32) | _wfadData.ftCreationTime.dwLowDateTime,		// ui64CreationTime
-			(static_cast<UINT64>(_wfadData.ftLastAccessTime.dwHighDateTime) << 32) | _wfadData.ftLastAccessTime.dwLowDateTime,	// ui64AccessTime
-			(static_cast<UINT64>(_wfadData.ftLastWriteTime.dwHighDateTime) << 32) | _wfadData.ftLastWriteTime.dwLowDateTime,	// ui64WriteTime
-			(static_cast<UINT64>(_wfadData.nFileSizeHigh) << 32) | _wfadData.nFileSizeLow,										// ui64Size
+			_wfadData.dwFileAttributes,																								// dwAttr
+			(static_cast<UINT64>(_wfadData.ftCreationTime.dwHighDateTime) << 32ULL) | _wfadData.ftCreationTime.dwLowDateTime,		// ui64CreationTime
+			(static_cast<UINT64>(_wfadData.ftLastAccessTime.dwHighDateTime) << 32ULL) | _wfadData.ftLastAccessTime.dwLowDateTime,	// ui64AccessTime
+			(static_cast<UINT64>(_wfadData.ftLastWriteTime.dwHighDateTime) << 32ULL) | _wfadData.ftLastWriteTime.dwLowDateTime,		// ui64WriteTime
+			(static_cast<UINT64>(_wfadData.nFileSizeHigh) << 32ULL) | _wfadData.nFileSizeLow,										// ui64Size
 		};
 		return faAttr;
 	}

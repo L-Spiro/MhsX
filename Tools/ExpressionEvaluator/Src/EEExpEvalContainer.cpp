@@ -1027,6 +1027,62 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
+	// Creates a dynamic numbered parameter node.
+	void CExpEvalContainer::CreateDynamicParm( size_t _sStrIndex, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_DYNAMIC_NUMBERED_PARM;
+		_ndNode.u.sStringIndex = _sStrIndex;
+#ifdef EE_OPTIMIZE_FOR_RUNTIME
+		EE_RESULT rExp;
+		rExp.ncType = EE_NC_INVALID;
+
+		auto aFind = m_mCustomVariables.find( _sStrIndex );
+		if ( aFind != m_mCustomVariables.end() ) {
+			if ( aFind->second.bIsConst ) {
+				rExp = ConvertResult( aFind->second.rRes, EE_NC_UNSIGNED );
+				_ndNode.nType = EE_N_NUMBERED_PARM;
+				_ndNode.u.ui64Val = rExp.u.ui64Val;
+				m_sNumberedParmsAccessed.insert( static_cast<size_t>(_ndNode.u.ui64Val) );
+			}
+		}
+		if ( rExp.ncType == EE_NC_INVALID ) {
+			m_sNumberedParmsAccessed.insert( static_cast<size_t>(-1) );
+		}
+#else
+		m_sNumberedParmsAccessed.insert( static_cast<size_t>(-1) );
+#endif	// #ifdef EE_OPTIMIZE_FOR_RUNTIME
+		AddNode( _ndNode );
+	}
+
+	// Creates a dynamic numbered parameter node.
+	void CExpEvalContainer::CreateDynamicParmExp( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_DYNAMIC_NUMBERED_PARM_EXP;
+		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
+
+#ifdef EE_OPTIMIZE_FOR_RUNTIME
+		EE_RESULT rExp;
+		rExp.ncType = EE_NC_INVALID;
+		if ( IsConst( m_vNodes[_ndExp.sNodeIndex], rExp ) ) {
+			rExp = ConvertResult( rExp, EE_NC_UNSIGNED );
+			_ndNode.nType = EE_N_NUMBERED_PARM;
+			_ndNode.u.ui64Val = rExp.u.ui64Val;
+			m_sNumberedParmsAccessed.insert( static_cast<size_t>(_ndNode.u.ui64Val) );
+		}
+		if ( rExp.ncType == EE_NC_INVALID ) {
+			m_sNumberedParmsAccessed.insert( static_cast<size_t>(-1) );
+		}
+#else
+		m_sNumberedParmsAccessed.insert( static_cast<size_t>(-1) );
+#endif	// #ifdef EE_OPTIMIZE_FOR_RUNTIME
+
+		AddNode( _ndNode );
+	}
+
+	// Creates a node that gets the total numbered parameters.
+	void CExpEvalContainer::CreateParmTotal( YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_NUMBERED_PARM_TOTAL;
+		AddNode( _ndNode );
+	}
+
 	// Create a unary node.
 	void CExpEvalContainer::CreateUnary( const YYSTYPE::EE_NODE_DATA &_ndExp, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_UNARY;
@@ -1977,6 +2033,25 @@ namespace ee {
 			}
 			case EE_N_NUMBERED_PARM : {
 				_rRes = GetNumberedParm( static_cast<size_t>(_ndExp.u.ui64Val) );
+				return true;
+			}
+			case EE_N_DYNAMIC_NUMBERED_PARM : {
+				auto aFind = m_mCustomVariables.find( _ndExp.u.sStringIndex );
+				if ( aFind == m_mCustomVariables.end() ) { return false; }
+				EE_RESULT rTemp = ConvertResult( aFind->second.rRes, EE_NC_UNSIGNED );
+				_rRes = GetNumberedParm( static_cast<size_t>(rTemp.u.ui64Val) );
+				return true;
+			}
+			case EE_N_DYNAMIC_NUMBERED_PARM_EXP : {
+				EE_RESULT rTemp;
+				if ( !ResolveNode( _ndExp.u.sNodeIndex, rTemp ) ) { return false; }
+				rTemp = ConvertResult( rTemp, EE_NC_UNSIGNED );
+				_rRes = GetNumberedParm( static_cast<size_t>(rTemp.u.ui64Val) );
+				return true;
+			}
+			case EE_N_NUMBERED_PARM_TOTAL : {
+				_rRes.ncType = EE_NC_UNSIGNED;
+				_rRes.u.ui64Val = m_vNumberedParms.size();
 				return true;
 			}
 			case EE_N_UNARY : {
@@ -3237,6 +3312,23 @@ namespace ee {
 						(*soProcessMe.prResult) = GetNumberedParm( static_cast<size_t>(_ndExp.u.ui64Val) );
 						EE_DONE;
 					}
+					case EE_N_DYNAMIC_NUMBERED_PARM : {
+						auto aFind = m_mCustomVariables.find( _ndExp.u.sStringIndex );
+						if ( aFind == m_mCustomVariables.end() ) { EE_ERROR( EE_EC_VARNOTFOUND ); }
+						if ( aFind->second.rRes.ncType == EE_NC_INVALID ) { EE_ERROR( EE_EC_VARHASBADTYPE ); }
+						EE_RESULT rTemp = ConvertResult( aFind->second.rRes, EE_NC_UNSIGNED );
+						(*soProcessMe.prResult) = GetNumberedParm( static_cast<size_t>(rTemp.u.ui64Val) );
+						EE_DONE;
+					}
+					case EE_N_DYNAMIC_NUMBERED_PARM_EXP : {
+						EE_PUSH( _ndExp.u.sNodeIndex );
+						continue;
+					}
+					case EE_N_NUMBERED_PARM_TOTAL : {
+						(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
+						(*soProcessMe.prResult).u.ui64Val = m_vNumberedParms.size();
+						EE_DONE;
+					}
 					case EE_N_UNARY : {
 						EE_PUSH( _ndExp.u.sNodeIndex );
 						continue;
@@ -3641,6 +3733,11 @@ namespace ee {
 					case EE_N_MEMBERACCESS : {
 						if ( !m_pfmahMemberAccess( soProcessMe.sSubResults[0], m_vStrings[_ndExp.v.sStringIndex], m_uiptrMemberAccess, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_MEMBERHANDELRFAILED ); }
 						break;
+					}
+					case EE_N_DYNAMIC_NUMBERED_PARM_EXP : {
+						EE_RESULT rTemp = ConvertResult( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						(*soProcessMe.prResult) = GetNumberedParm( static_cast<size_t>(rTemp.u.ui64Val) );
+						EE_DONE;
 					}
 					case EE_N_UNARY : {
 						EE_ERROR_CODES ecError = PerformUnary( soProcessMe.sSubResults[0], _ndExp.v.ui32Op, (*soProcessMe.prResult) );

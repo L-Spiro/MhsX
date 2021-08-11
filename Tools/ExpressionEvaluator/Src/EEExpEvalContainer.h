@@ -175,6 +175,12 @@ namespace ee {
 		// Determines if a numbered parameter is accessed by the script.
 		__inline bool						IsNumberedParmAccessed( size_t _sIdx ) const { return m_sNumberedParmsAccessed.find( _sIdx ) != m_sNumberedParmsAccessed.end(); }
 
+		// Determines if any numbered parameter is accessed by the script.
+		__inline bool						IsNumberedParmAccessed() const { return m_sNumberedParmsAccessed.size() != 0; }
+
+		// Determines if dynamic access to the numbered parameters is used within the script.
+		__inline bool						IsDynamicNumberedParmAccessed() const { return IsNumberedParmAccessed( static_cast<size_t>(-1) ); }
+
 		// Gets the type to use between 2 given types.
 		static EE_NUM_CONSTANTS				GetCastType( EE_NUM_CONSTANTS _ncLeft, EE_NUM_CONSTANTS _ncRight );
 
@@ -586,6 +592,15 @@ namespace ee {
 
 		// Creates a number parameter ($<decimal>) node.
 		void								CreateNumberedParm( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a dynamic numbered parameter node.
+		void								CreateDynamicParm( size_t _sStrIndex, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a dynamic numbered parameter node.
+		void								CreateDynamicParmExp( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a node that gets the total numbered parameters.
+		void								CreateParmTotal( YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Create a unary node.
 		void								CreateUnary( const YYSTYPE::EE_NODE_DATA &_ndExp, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode );

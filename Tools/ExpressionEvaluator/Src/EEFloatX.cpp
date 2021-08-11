@@ -506,13 +506,13 @@ namespace ee {
 		if ( IsInfP() ) { return std::numeric_limits<double>::infinity(); }
 		if ( IsInfN() ) { return -std::numeric_limits<double>::infinity(); }
 		uint64_t uiManBitsTemp = RealMantissaBits( uiManBits, bImplicitManBit );
-		double dManPow = ::pow( 2.0, uiManBitsTemp );
+		double dManPow = std::pow( 2.0, uiManBitsTemp );
 		double dSig = uiMantissa / dManPow;
 
 		if ( IsDenormalized() ) {
-			return Sign() * ::pow( 2.0, -DenormalExpBias() ) * dSig;
+			return Sign() * std::pow( 2.0, -DenormalExpBias() ) * dSig;
 		}
-		return Sign() * ::pow( 2.0, uiExponent - ExpBias() ) * (1.0 + dSig);
+		return Sign() * std::pow( 2.0, uiExponent - ExpBias() ) * (1.0 + dSig);
 	}
 
 	// Put all the bits together into a uint64_t value.
@@ -574,10 +574,10 @@ namespace ee {
 	double CFloatX::GetMaxForBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit ) {
 		uint64_t uiMaxExp = AllExpBitsSet( _uiExpBits ) - 1;
 		double dExpBias = ExpBias( _uiExpBits );
-		double dMaxExp = ::pow( 2.0, uiMaxExp - dExpBias );
+		double dMaxExp = std::pow( 2.0, uiMaxExp - dExpBias );
 		double dMan = _bImplicitMantissaBit ? 1.0 : 0.0;
 		if ( _bImplicitMantissaBit ) { --_uiManBits; }
-		double dManPow = ::pow( 2.0, _uiManBits );
+		double dManPow = std::pow( 2.0, _uiManBits );
 		double dAdd = (dManPow - 1.0) / dManPow;
 		dMan += dAdd;
 		/*double dMultiplier = 0.5;
@@ -590,9 +590,9 @@ namespace ee {
 	// Gets the smallest possible non-0 value for a float type with the given bits.
 	double CFloatX::GetMinForBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit ) {
 		double dExpBias = ExpBias( _uiExpBits ) - 1.0;	// Denormalized exponent.
-		double dMaxExp = ::pow( 2.0, -dExpBias );
+		double dMaxExp = std::pow( 2.0, -dExpBias );
 		if ( _bImplicitMantissaBit ) { --_uiManBits; }
-		double dManPow = ::pow( 2.0, _uiManBits );
+		double dManPow = std::pow( 2.0, _uiManBits );
 		// Mantissa is just the value 1.
 		double dMan = 1.0 / dManPow;
 		// No implicit mantissa "1".
@@ -602,16 +602,16 @@ namespace ee {
 	// Gets the smallest normalized non-0 value for a float type with the given bits.
 	double CFloatX::GetNormalizedMinForBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit ) {
 		double dExpBias = ExpBias( _uiExpBits );		// Normalized exponent.
-		double dMaxExp = ::pow( 2.0, 1.0 - dExpBias );
+		double dMaxExp = std::pow( 2.0, 1.0 - dExpBias );
 		return dMaxExp;
 	}
 
 	// Gets the maximum denormalized value for a float type with the given bits.
 	double CFloatX::GetDenormalizedMaxForBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit ) {
 		double dExpBias = ExpBias( _uiExpBits ) - 1.0;	// Denormalized exponent.
-		double dMaxExp = ::pow( 2.0, -dExpBias );
+		double dMaxExp = std::pow( 2.0, -dExpBias );
 		if ( _bImplicitMantissaBit ) { --_uiManBits; }
-		double dManPow = ::pow( 2.0, _uiManBits );
+		double dManPow = std::pow( 2.0, _uiManBits );
 		double dMan = (dManPow - 1.0) / dManPow;
 		/*double dMultiplier = 0.5;
 		for ( uint16_t I = _uiManBits; I--; dMultiplier /= 2.0 ) {

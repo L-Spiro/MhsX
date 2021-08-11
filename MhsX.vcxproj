@@ -260,6 +260,7 @@
     <ClCompile Include="Src\Html\MXHtml.cpp" />
     <ClCompile Include="Src\Layouts\MXConverterLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXExpressionEvaluatorLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXExpressionSubsearchLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXFloatingPointStudioLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXFoundAddressLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXLayoutManager.cpp" />
@@ -381,6 +382,7 @@
     <ClInclude Include="Src\IO\MXInOutInterface.h" />
     <ClInclude Include="Src\Layouts\MXConverterLayout.h" />
     <ClInclude Include="Src\Layouts\MXExpressionEvaluatorLayout.h" />
+    <ClInclude Include="Src\Layouts\MXExpressionSubsearchLayout.h" />
     <ClInclude Include="Src\Layouts\MXFloatingPointStudioLayout.h" />
     <ClInclude Include="Src\Layouts\MXFoundAddressLayout.h" />
     <ClInclude Include="Src\Layouts\MXLayoutMacros.h" />
