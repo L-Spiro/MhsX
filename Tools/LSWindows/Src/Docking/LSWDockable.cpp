@@ -627,12 +627,27 @@ namespace lsw {
 					}
 					// Was docked, still docked.
 					else {
+						// TODO: Make a routine to adjust the placement based on the boundaries of the screen.
+						m_rDragPlacementRect.left = std::max( m_rDragPlacementRect.left, 0L );
+						m_iFrameX = static_cast<INT>(m_rDragPlacementRect.left);
+						m_rDragPlacementRect.top = std::max( m_rDragPlacementRect.top, 0L );
+						m_iFrameY = static_cast<INT>(m_rDragPlacementRect.top);
+
+						// Set the docking mode to floating and redraw the window. Also
+						// force the container window to update its layout
+						m_dwState |= LSW_DS_FLOATING;
+						RedrawDockingState( adAttach, pdtTarget );
+
+						adAttach = CheckDockingPos( m_rDragPlacementRect, pdtTarget );
+						dsDockSide = AttachToDockState( adAttach );
+
 						m_dwState = dsDockSide;
 
 						//if (dwp->focusWindow) InvalidateRect(dwp->focusWindow, 0, 1);
 
 						// Send WM_SIZE to parent window to reposition and redraws everything.
-						UpdateLayout( Parent() );
+						//UpdateLayout( Parent() );
+						RedrawDockingState( adAttach, pdtTarget );
 					}
 				}
 				else {
@@ -691,8 +706,13 @@ namespace lsw {
 		else {
 			BecomeChild();
 			if ( _pdtTarget ) {
-				_pdtTarget->Attach( _daAttach );
-				m_pdtDockedControl = _pdtTarget;
+				if ( _pdtTarget->Attach( _daAttach ) ) {
+					m_pdtDockedControl = _pdtTarget;
+				}
+				else {
+					m_pdtDockedControl = nullptr;
+					m_dwState |= LSW_DS_FLOATING;
+				}
 			}
 		}
 

@@ -8,6 +8,11 @@ namespace ee {
 	template <typename _tnBaseType>
 	class CPrimitiveArraySigned : public CArrayBase {
 	public :
+		CPrimitiveArraySigned( CExpEvalContainer * _peecContainer ) :
+			CArrayBase( _peecContainer ) {
+		}
+
+
 		// == Functions.
 		// Sets the size of the array.
 		virtual bool								SetSize( size_t _sNewSize ) {
@@ -29,12 +34,15 @@ namespace ee {
 		virtual bool								Initialize( const CExpEvalContainer::EE_RESULT &_rStart, const CExpEvalContainer::EE_RESULT &_rEnd ) {
 			if ( !m_vArray.size() ) { return true; }
 			if ( m_vArray.size() == 1 ) {
-				CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rStart, EE_NC_SIGNED );
+				CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rStart, EE_NC_SIGNED );
+				if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
 				m_vArray[0] = static_cast<_tnBaseType>(rTemp.u.i64Val);
 			}
 			else {
-				CExpEvalContainer::EE_RESULT rTemp0 = CExpEvalContainer::ConvertResult( _rStart, EE_NC_FLOATING );
-				CExpEvalContainer::EE_RESULT rTemp1 = CExpEvalContainer::ConvertResult( _rEnd, EE_NC_FLOATING );
+				CExpEvalContainer::EE_RESULT rTemp0 = m_peecContainer->ConvertResultOrObject( _rStart, EE_NC_FLOATING );
+				if ( rTemp0.ncType == EE_NC_INVALID ) { return false; }
+				CExpEvalContainer::EE_RESULT rTemp1 = m_peecContainer->ConvertResultOrObject( _rEnd, EE_NC_FLOATING );
+				if ( rTemp1.ncType == EE_NC_INVALID ) { return false; }
 				double dDivisor = static_cast<double>(m_vArray.size() - 1);
 				double dRange = rTemp1.u.dVal - rTemp0.u.dVal;
 				for ( size_t I = m_vArray.size(); I--; ) {
@@ -56,7 +64,8 @@ namespace ee {
 		virtual bool								WriteValue( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, EE_NC_SIGNED );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, EE_NC_SIGNED );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
 			m_vArray[_sIdx] = static_cast<_tnBaseType>(rTemp.u.i64Val);
 			_rRet.ncType = EE_NC_SIGNED;
 			_rRet.u.i64Val = m_vArray[_sIdx];
@@ -67,7 +76,8 @@ namespace ee {
 		virtual bool								PlusEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, EE_NC_SIGNED );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, EE_NC_SIGNED );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
 			m_vArray[_sIdx] += static_cast<_tnBaseType>(rTemp.u.i64Val);
 			_rRet.ncType = EE_NC_SIGNED;
 			_rRet.u.i64Val = m_vArray[_sIdx];
@@ -78,7 +88,8 @@ namespace ee {
 		virtual bool								MinusEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, EE_NC_SIGNED );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, EE_NC_SIGNED );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
 			m_vArray[_sIdx] -= static_cast<_tnBaseType>(rTemp.u.i64Val);
 			_rRet.ncType = EE_NC_SIGNED;
 			_rRet.u.i64Val = m_vArray[_sIdx];
@@ -89,7 +100,8 @@ namespace ee {
 		virtual bool								TimesEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, EE_NC_SIGNED );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, EE_NC_SIGNED );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
 			m_vArray[_sIdx] *= static_cast<_tnBaseType>(rTemp.u.i64Val);
 			_rRet.ncType = EE_NC_SIGNED;
 			_rRet.u.i64Val = m_vArray[_sIdx];
@@ -100,7 +112,8 @@ namespace ee {
 		virtual bool								DivideEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, EE_NC_SIGNED );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, EE_NC_SIGNED );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
 			m_vArray[_sIdx] /= static_cast<_tnBaseType>(rTemp.u.i64Val);
 			_rRet.ncType = EE_NC_SIGNED;
 			_rRet.u.i64Val = m_vArray[_sIdx];
@@ -111,7 +124,8 @@ namespace ee {
 		virtual bool								ModEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, EE_NC_SIGNED );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, EE_NC_SIGNED );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
 			m_vArray[_sIdx] %= static_cast<_tnBaseType>(rTemp.u.i64Val);
 			_rRet.ncType = EE_NC_SIGNED;
 			_rRet.u.i64Val = m_vArray[_sIdx];
@@ -122,7 +136,8 @@ namespace ee {
 		virtual bool								ShiftLeftEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, EE_NC_SIGNED );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, EE_NC_SIGNED );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
 			m_vArray[_sIdx] <<= static_cast<_tnBaseType>(rTemp.u.i64Val);
 			_rRet.ncType = EE_NC_SIGNED;
 			_rRet.u.i64Val = m_vArray[_sIdx];
@@ -133,7 +148,8 @@ namespace ee {
 		virtual bool								ShiftRightEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, EE_NC_SIGNED );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, EE_NC_SIGNED );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
 			m_vArray[_sIdx] >>= static_cast<_tnBaseType>(rTemp.u.i64Val);
 			_rRet.ncType = EE_NC_SIGNED;
 			_rRet.u.i64Val = m_vArray[_sIdx];
@@ -144,7 +160,8 @@ namespace ee {
 		virtual bool								CarrotEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, EE_NC_SIGNED );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, EE_NC_SIGNED );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
 			m_vArray[_sIdx] ^= static_cast<_tnBaseType>(rTemp.u.i64Val);
 			_rRet.ncType = EE_NC_SIGNED;
 			_rRet.u.i64Val = m_vArray[_sIdx];
@@ -155,7 +172,8 @@ namespace ee {
 		virtual bool								OrEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, EE_NC_SIGNED );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, EE_NC_SIGNED );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
 			m_vArray[_sIdx] |= static_cast<_tnBaseType>(rTemp.u.i64Val);
 			_rRet.ncType = EE_NC_SIGNED;
 			_rRet.u.i64Val = m_vArray[_sIdx];
@@ -166,7 +184,8 @@ namespace ee {
 		virtual bool								AndEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, EE_NC_SIGNED );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, EE_NC_SIGNED );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
 			m_vArray[_sIdx] &= static_cast<_tnBaseType>(rTemp.u.i64Val);
 			_rRet.ncType = EE_NC_SIGNED;
 			_rRet.u.i64Val = m_vArray[_sIdx];

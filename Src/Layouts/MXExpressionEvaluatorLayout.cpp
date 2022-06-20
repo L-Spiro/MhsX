@@ -17,7 +17,7 @@ namespace mx {
 #define MX_EXP_TEXT_W								57
 #define MX_OUTPU_TEXT_W								40
 #define MX_T_MARGIN									2
-#define MX_EXP_EDIT_LINES							4
+#define MX_EXP_EDIT_LINES							8
 #define MX_RESULT_TOP								(MX_T_MARGIN + (MX_DEF_EDIT_HEIGHT_PXL + 15 * MX_EXP_EDIT_LINES) + 2)
 	// The layout for the Expression Evaluator dockable window.
 	LSW_WIDGET_LAYOUT CExpressionEvaluatorLayout::m_wlMainWindow[] = {

@@ -53,7 +53,7 @@ namespace mx {
 			250,									// iTop
 			MX_FPS_W,								// dwWidth
 			static_cast<DWORD>(MX_FPS_H),			// dwHeight
-			WS_CAPTION | WS_POPUP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_SYSMENU | DS_3DLOOK | DS_FIXEDSYS | DS_MODALFRAME | DS_CENTER,					// dwStyle
+			WS_CAPTION | WS_POPUP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_MINIMIZEBOX | WS_SYSMENU | DS_3DLOOK | DS_FIXEDSYS | DS_MODALFRAME | DS_CENTER,	// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_WINDOWEDGE | WS_EX_CONTROLPARENT,												// dwStyleEx
 			MX_MAKE_WCHAR( _T_830F43B3_Floating_Point_Studio ),																							// pwcText
 			_LEN_830F43B3,							// sTextLen

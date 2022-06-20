@@ -3,6 +3,7 @@
 #include "../MXMhsX.h"
 #include <CriticalSection/LSWCriticalSection.h>
 #include <set>
+#include <string>
 #include <vector>
 
 #define MX_HOTKEY_VERSION				1

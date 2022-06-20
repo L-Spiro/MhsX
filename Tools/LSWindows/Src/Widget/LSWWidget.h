@@ -137,6 +137,9 @@ namespace lsw {
 		// Gets the window text.
 		virtual std::wstring				GetTextW() const;
 
+		// Gets the window text in UTF-8.
+		virtual std::string					GetTextUTF8() const;
+
 		// Retrieves the length, in characters, of the specified window's title bar text (if the window has a title bar).
 		//	If the specified window is a control, the function retrieves the length of the text within the control
 		virtual INT							GetTextLengthA() const { return ::GetWindowTextLengthA( Wnd() ); }
@@ -152,7 +155,8 @@ namespace lsw {
 		virtual BOOL						SetTextW( LPCWSTR _lpwString ) { return ::SetWindowTextW( Wnd(), _lpwString ); }
 
 		// Get the value of the text as an expression.
-		BOOL								GetTextAsExpression( ee::CExpEvalContainer::EE_RESULT &_eResult, BOOL * _pbExpIsValid = nullptr ) const;
+		BOOL								GetTextAsExpression( ee::CExpEvalContainer::EE_RESULT &_eResult, BOOL * _pbExpIsValid = nullptr,
+			std::string * _psObjStringResult = nullptr ) const;
 
 		// Get the value of the text as an int64_t expression.
 		BOOL								GetTextAsInt64Expression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const;

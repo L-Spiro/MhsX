@@ -1,16 +1,31 @@
-%option								yylineno
+%option								yylineno noyywrap
 
 D									[0-9]
 O									[0-7]
-L									[a-zA-Z_]
-H									[a-fA-F0-9]
 B									[0-1]
-E									[Ee][+-]?{D}+
+L									[a-zA-Z_]
+H   								[a-fA-F0-9]
+HP  								(0[xX])
+E									([Ee][+-]?{D}+)
+P									([Pp][+-]?{D}+)
 FS									(f|F|l|L)
-IS									(u|U|l|L)*
+IS  								(((u|U)(l|L|ll|LL)?)|((l|L|ll|LL)(u|U)?))
+ES  								(\\(['"\?\\abfnrtv ]|[0-7]{1,3}|x[a-fA-F0-9]{1,2}|u[a-fA-F0-9]{4}|U[a-fA-F0-9]{8}|N\{[_a-zA-Z0-9, \-]+\}))
+ESX  								(\\(u[a-fA-F0-9]{4}|U[a-fA-F0-9]{8}))
 WS									[ \t\v\r\n\f]
+WS_P								({WS}*\+{WS}*)
+WSC									({WS}*|{WS_P})
+LS0									"\"\"\""
+LS1									"'''"
+CS0									\"
+CS1									\'
+CS0_S								"u8"?{CS0}
+U16_S								[uL]{CS0}
+U32_S								"U"{CS0}
+RS0_S								[rR]{CS0}
+RS1_S								[rR]{CS1}
 
-%x									comment0
+%x									comment0 cstring0 cstring1 longstring0 longstring1 rawstring0 rawstring1 utf16string0 utf32string0
 
 %{
 
@@ -30,13 +45,183 @@ WS									[ \t\v\r\n\f]
 %}
 
 %%
-
 "//".*								{}
 "/*"								BEGIN( comment0 );
 <comment0>[^*\n]*					{ }
 <comment0>"*"+[^*/\n]*				{ }
 <comment0>\n						{ }
 <comment0>"*"+"/"					BEGIN( INITIAL );
+
+<utf16string0>\\x[a-fA-F0-9]{3,4}								{
+																	size_t sConsumed = 0;
+																	uint32_t uiVal = EscapeX( &yytext[1], yyleng - 1, sConsumed, 4 );
+																	if ( !sConsumed ) { yy_tmp_txt.append( yytext, yyleng ); }
+																	else {
+																		uint32_t ui32Len;
+																		uint32_t ui32BackToUtf8 = Utf32ToUtf8( uiVal, ui32Len );
+																		if ( ui32BackToUtf8 == EE_UTF_INVALID ) { yy_tmp_txt.append( yytext, yyleng ); }
+																		else {
+																			for ( uint32_t J = 0; J < ui32Len; ++J ) {
+																				yy_tmp_txt.push_back( static_cast<uint8_t>(ui32BackToUtf8) );
+																				ui32BackToUtf8 >>= 8;
+																			}
+																		}
+																	}
+																}
+																
+<utf16string0>\\[0-7]{4,6}										{
+																	size_t sConsumed = 0;
+																	uint32_t uiVal = EscapeOctal( &yytext[1], yyleng - 1, sConsumed, 6 );
+																	if ( !sConsumed ) { yy_tmp_txt.append( yytext, yyleng ); }
+																	else {
+																		uint32_t ui32Len;
+																		uint32_t ui32BackToUtf8 = Utf32ToUtf8( uiVal, ui32Len );
+																		if ( ui32BackToUtf8 == EE_UTF_INVALID ) { yy_tmp_txt.append( yytext, yyleng ); }
+																		else {
+																			for ( uint32_t J = 0; J < ui32Len; ++J ) {
+																				yy_tmp_txt.push_back( static_cast<uint8_t>(ui32BackToUtf8) );
+																				ui32BackToUtf8 >>= 8;
+																			}
+																		}
+																	}
+																}
+																
+<utf32string0>\\x[a-fA-F0-9]{3,8}								{
+																	size_t sConsumed = 0;
+																	uint32_t uiVal = EscapeX( &yytext[1], yyleng - 1, sConsumed, 8 );
+																	if ( !sConsumed ) { yy_tmp_txt.append( yytext, yyleng ); }
+																	else {
+																		uint32_t ui32Len;
+																		uint32_t ui32BackToUtf8 = Utf32ToUtf8( uiVal, ui32Len );
+																		if ( ui32BackToUtf8 == EE_UTF_INVALID ) { yy_tmp_txt.append( yytext, yyleng ); }
+																		else {
+																			for ( uint32_t J = 0; J < ui32Len; ++J ) {
+																				yy_tmp_txt.push_back( static_cast<uint8_t>(ui32BackToUtf8) );
+																				ui32BackToUtf8 >>= 8;
+																			}
+																		}
+																	}
+																}
+																
+<utf32string0>\\[0-7]{4,11}										{
+																	size_t sConsumed = 0;
+																	uint32_t uiVal = EscapeOctal( &yytext[1], yyleng - 1, sConsumed, 11 );
+																	if ( !sConsumed ) { yy_tmp_txt.append( yytext, yyleng ); }
+																	else {
+																		uint32_t ui32Len;
+																		uint32_t ui32BackToUtf8 = Utf32ToUtf8( uiVal, ui32Len );
+																		if ( ui32BackToUtf8 == EE_UTF_INVALID ) { yy_tmp_txt.append( yytext, yyleng ); }
+																		else {
+																			for ( uint32_t J = 0; J < ui32Len; ++J ) {
+																				yy_tmp_txt.push_back( static_cast<uint8_t>(ui32BackToUtf8) );
+																				ui32BackToUtf8 >>= 8;
+																			}
+																		}
+																	}
+																}
+
+<longstring0,longstring1,cstring0,cstring1,utf16string0,utf32string0>{ES}					{
+																	size_t sConsumed = 0;
+																	bool bEscapeFound = false;
+																	uint32_t uiVal = static_cast<uint32_t>(ResolveEscape( yytext, yyleng, sConsumed, false, &bEscapeFound ));
+																	if ( !bEscapeFound ) { yy_tmp_txt.append( yytext, yyleng ); }
+																	else {
+																		uint32_t ui32Len;
+																		uint32_t ui32BackToUtf8 = Utf32ToUtf8( uiVal, ui32Len );
+																		for ( uint32_t J = 0; J < ui32Len; ++J ) {
+																			yy_tmp_txt.push_back( static_cast<uint8_t>(ui32BackToUtf8) );
+																			ui32BackToUtf8 >>= 8;
+																		}
+																	}
+																}
+
+{LS0}								{ BEGIN( longstring0 ); yy_tmp_txt.clear(); }
+<longstring0>{LS0}					{
+										BEGIN( INITIAL );
+										return yy::CExpEvalParser::token::EE_STRING_CONSTANT;
+									}
+<longstring0>({LS0}{WSC}{LS0})		{	/* Nothing to do. */ }
+<longstring0>({LS0}{WSC}{LS1})		{ BEGIN( longstring1 ); }
+<longstring0>({LS0}{WSC}{CS0_S})	{ BEGIN( cstring0 ); }
+<longstring0>({LS0}{WSC}{CS1})		{ BEGIN( cstring1 ); }
+<longstring0>({LS0}{WSC}{RS0_S})	{ BEGIN( rawstring0 ); }
+<longstring0>({LS0}{WSC}{RS1_S})	{ BEGIN( rawstring1 ); }
+<longstring0>({LS0}{WSC}{U16_S})	{ BEGIN( utf16string0 ); }
+<longstring0>({LS0}{WSC}{U32_S})	{ BEGIN( utf32string0 ); }
+									
+{LS1}								{ BEGIN( longstring1 ); yy_tmp_txt.clear(); }
+<longstring1>{LS1}					{
+										BEGIN( INITIAL );
+										return yy::CExpEvalParser::token::EE_STRING_CONSTANT;
+									}
+<longstring1>({LS1}{WSC}{LS1})		{	/* Nothing to do. */ }
+<longstring1>({LS1}{WSC}{LS0})		{ BEGIN( longstring0 ); }
+<longstring1>({LS1}{WSC}{CS0_S})	{ BEGIN( cstring0 ); }
+<longstring1>({LS1}{WSC}{CS1})		{ BEGIN( cstring1 ); }
+<longstring1>({LS1}{WSC}{RS0_S})	{ BEGIN( rawstring0 ); }
+<longstring1>({LS1}{WSC}{RS1_S})	{ BEGIN( rawstring1 ); }
+<longstring1>({LS1}{WSC}{U16_S})	{ BEGIN( utf16string0 ); }
+<longstring1>({LS1}{WSC}{U32_S})	{ BEGIN( utf32string0 ); }
+
+
+{CS0_S}								{ BEGIN( cstring0 ); yy_tmp_txt.clear(); }
+<cstring0>{CS0}						{
+										BEGIN( INITIAL );
+										return yy::CExpEvalParser::token::EE_STRING_CONSTANT;
+									}
+									
+{CS1}								{ BEGIN( cstring1 ); yy_tmp_txt.clear(); }
+<cstring1>{CS1}						{
+										BEGIN( INITIAL );
+										if ( yy_tmp_txt.size() == 1 ) { return yy::CExpEvalParser::token::EE_CHAR_CONSTANT; }
+										return yy::CExpEvalParser::token::EE_STRING_CONSTANT;
+									}
+
+{RS0_S}								{ BEGIN( rawstring0 ); yy_tmp_txt.clear(); }
+<rawstring0>{CS0}					{
+										BEGIN( INITIAL );
+										return yy::CExpEvalParser::token::EE_STRING_CONSTANT;
+									}
+									
+{RS1_S}								{ BEGIN( rawstring1 ); yy_tmp_txt.clear(); }
+<rawstring1>{CS1}					{
+										BEGIN( INITIAL );
+										if ( yy_tmp_txt.size() == 1 ) { return yy::CExpEvalParser::token::EE_CHAR_CONSTANT; }
+										return yy::CExpEvalParser::token::EE_STRING_CONSTANT;
+									}
+									
+{U16_S}								{ BEGIN( utf16string0 ); yy_tmp_txt.clear(); }
+<utf16string0>{CS0}					{
+										BEGIN( INITIAL );
+										return yy::CExpEvalParser::token::EE_STRING_CONSTANT;
+									}
+									
+{U32_S}								{ BEGIN( utf32string0 ); yy_tmp_txt.clear(); }
+<utf32string0>{CS0}					{
+										BEGIN( INITIAL );
+										return yy::CExpEvalParser::token::EE_STRING_CONSTANT;
+									}
+
+<rawstring0,cstring0,utf16string0,utf32string0>({CS0}{WSC}{LS1})		{ BEGIN( longstring1 ); }
+<rawstring0,cstring0,utf16string0,utf32string0>({CS0}{WSC}{LS0})		{ BEGIN( longstring0 ); }
+<rawstring0,cstring0,utf16string0,utf32string0>({CS0}{WSC}{RS0_S})		{ BEGIN( rawstring0 ); }
+<rawstring0,cstring0,utf16string0,utf32string0>({CS0}{WSC}{RS1_S})		{ BEGIN( rawstring1 ); }
+<rawstring0,cstring0,utf16string0,utf32string0>({CS0}{WSC}{CS0_S})		{ BEGIN( cstring0 ); }
+<rawstring0,cstring0,utf16string0,utf32string0>({CS0}{WSC}{CS1})		{ BEGIN( cstring1 ); }
+<rawstring0,cstring0,utf16string0,utf32string0>({CS0}{WSC}{U16_S})		{ BEGIN( utf16string0 ); }
+<rawstring0,cstring0,utf16string0,utf32string0>({CS0}{WSC}{U32_S})		{ BEGIN( utf32string0 ); }
+
+<rawstring1,cstring1>({CS1}{WSC}{LS1})					{ BEGIN( longstring1 ); }
+<rawstring1,cstring1>({CS1}{WSC}{LS0})					{ BEGIN( longstring0 ); }
+<rawstring1,cstring1>({CS1}{WSC}{RS0_S})				{ BEGIN( rawstring0 ); }
+<rawstring1,cstring1>({CS1}{WSC}{RS1_S})				{ BEGIN( rawstring1 ); }
+<rawstring1,cstring1>({CS1}{WSC}{CS0_S})				{ BEGIN( cstring0 ); }
+<rawstring1,cstring1>({CS1}{WS}*{CS1})					{ BEGIN( cstring1 ); }
+<rawstring1,cstring1>({CS1}{WSC}{U16_S})				{ BEGIN( utf16string0 ); }
+<rawstring1,cstring1>({CS1}{WSC}{U32_S})				{ BEGIN( utf32string0 ); }
+
+<longstring0,longstring1,cstring0,cstring1,rawstring0,rawstring1,utf16string0,utf32string0>.		{ yy_tmp_txt.append( yytext, yyleng ); }
+
 
 "const"								{ return yy::CExpEvalParser::token::EE_CONST; }
 
@@ -82,6 +267,7 @@ WS									[ \t\v\r\n\f]
 
 "#"{D}+{IS}?						{ return yy::CExpEvalParser::token::EE_PUREDEC_CONSTANT; }
 0[bB]{B}+{IS}?						{ return yy::CExpEvalParser::token::EE_BIN_CONSTANT; }
+0[oO]{O}+{IS}?						{ return yy::CExpEvalParser::token::EE_OCT_CONSTANT; }
 0[xX]{H}+{IS}?						{ return yy::CExpEvalParser::token::EE_HEX_CONSTANT1; }
 {H}+{IS}?[hH]						{ return yy::CExpEvalParser::token::EE_HEX_CONSTANT2; }
 0{O}+{IS}?							{ return yy::CExpEvalParser::token::EE_OCT_CONSTANT; }
@@ -304,6 +490,18 @@ WS									[ \t\v\r\n\f]
 "_byteswap_uint32"					{ return yy::CExpEvalParser::token::EE_BYTESWAPULONG; }
 "_byteswap_uint64"					{ return yy::CExpEvalParser::token::EE_BYTESWAPUINT64; }
 
+
+"ascii"								{ return yy::CExpEvalParser::token::EE_ASCII; }
+"bin"								{ return yy::CExpEvalParser::token::EE_BIN; }
+"bool"								{ return yy::CExpEvalParser::token::EE_BOOL; }
+"chr"								{ return yy::CExpEvalParser::token::EE_CHR; }
+"hex"								{ return yy::CExpEvalParser::token::EE_HEX; }
+"int"								{ return yy::CExpEvalParser::token::EE_INT; }
+"len"								{ return yy::CExpEvalParser::token::EE_LEN; }
+"oct"								{ return yy::CExpEvalParser::token::EE_OCT; }
+"ord"								{ return yy::CExpEvalParser::token::EE_ORD; }
+
+
 "CHAR_BIT"							{ return yy::CExpEvalParser::token::EE_CHAR_BIT; }
 "MB_LEN_MAX"						{ return yy::CExpEvalParser::token::EE_MB_LEN_MAX; }
 "CHAR_MIN"							{ return yy::CExpEvalParser::token::EE_CHAR_MIN; }
@@ -358,6 +556,18 @@ WS									[ \t\v\r\n\f]
 "FLT_MAX_10_EXP"					{ return yy::CExpEvalParser::token::EE_FLT_MAX_10_EXP; }
 "DBL_MAX_10_EXP"					{ return yy::CExpEvalParser::token::EE_DBL_MAX_10_EXP; }
 "LDBL_MAX_10_EXP"					{ return yy::CExpEvalParser::token::EE_LDBL_MAX_10_EXP; }
+"INT8_MIN"							{ return yy::CExpEvalParser::token::EE_INT8_MIN; }
+"INT16_MIN"							{ return yy::CExpEvalParser::token::EE_INT16_MIN; }
+"INT32_MIN"							{ return yy::CExpEvalParser::token::EE_INT32_MIN; }
+"INT64_MIN"							{ return yy::CExpEvalParser::token::EE_INT64_MIN; }
+"INT8_MAX"							{ return yy::CExpEvalParser::token::EE_INT8_MAX; }
+"INT16_MAX"							{ return yy::CExpEvalParser::token::EE_INT16_MAX; }
+"INT32_MAX"							{ return yy::CExpEvalParser::token::EE_INT32_MAX; }
+"INT64_MAX"							{ return yy::CExpEvalParser::token::EE_INT64_MAX; }
+"UINT8_MAX"							{ return yy::CExpEvalParser::token::EE_UINT8_MAX; }
+"UINT16_MAX"						{ return yy::CExpEvalParser::token::EE_UINT16_MAX; }
+"UINT32_MAX"						{ return yy::CExpEvalParser::token::EE_UINT32_MAX; }
+"UINT64_MAX"						{ return yy::CExpEvalParser::token::EE_UINT64_MAX; }
 "CLOCKS_PER_SEC"					{ return yy::CExpEvalParser::token::EE_CLOCKS_PER_SEC; }
 
 "as_float64"						{ return yy::CExpEvalParser::token::EE_AS_DOUBLE; }
@@ -421,13 +631,12 @@ WS									[ \t\v\r\n\f]
 "microseconds_since_start"			{ return yy::CExpEvalParser::token::EE_MICROSECONDS_SINCE_START; }
 "micros_since_start"				{ return yy::CExpEvalParser::token::EE_MICROSECONDS_SINCE_START; }
 
-L?'(\\.|[^\\'])+'					{ return yy::CExpEvalParser::token::EE_CHAR_CONSTANT; }
-\"(\\.|[^\\"])*\"					{ return yy::CExpEvalParser::token::EE_STRING_CONSTANT; }
-\\N\{[^}]+\}						{ return yy::CExpEvalParser::token::EE_UNICODE_CONSTANT; }
-
 {D}+{E}{FS}?						{ return yy::CExpEvalParser::token::EE_FLOAT_CONSTANT; }
 {D}*"."{D}+({E})?{FS}?				{ return yy::CExpEvalParser::token::EE_FLOAT_CONSTANT; }
 {D}+"."{D}*({E})?{FS}?				{ return yy::CExpEvalParser::token::EE_FLOAT_CONSTANT; }
+{HP}{H}+{P}{FS}?					{ return yy::CExpEvalParser::token::EE_FLOAT_CONSTANT; }
+{HP}{H}*"."{H}+{P}{FS}?				{ return yy::CExpEvalParser::token::EE_FLOAT_CONSTANT; }
+{HP}{H}+"."{P}{FS}?					{ return yy::CExpEvalParser::token::EE_FLOAT_CONSTANT; }
 
 [bB]("["|"<:")						{ return yy::CExpEvalParser::token::EE_OB_BYTE; }
 [wW]("["|"<:")						{ return yy::CExpEvalParser::token::EE_OB_WORD; }
@@ -438,9 +647,13 @@ L?'(\\.|[^\\'])+'					{ return yy::CExpEvalParser::token::EE_CHAR_CONSTANT; }
 ("f64["|"f64<:")					{ return yy::CExpEvalParser::token::EE_OB_DOUBLE; }
 [dD]("["|"<:")						{ return yy::CExpEvalParser::token::EE_OB_DOUBLE; }
 ("u8["|"u8<:")						{ return yy::CExpEvalParser::token::EE_OB_BYTE; }
+("ui8["|"u8<:")						{ return yy::CExpEvalParser::token::EE_OB_BYTE; }
 ("u16["|"u16<:")					{ return yy::CExpEvalParser::token::EE_OB_WORD; }
+("ui16["|"u16<:")					{ return yy::CExpEvalParser::token::EE_OB_WORD; }
 ("u32["|"u32<:")					{ return yy::CExpEvalParser::token::EE_OB_DWORD; }
+("ui32["|"u32<:")					{ return yy::CExpEvalParser::token::EE_OB_DWORD; }
 ("u64["|"u64<:")					{ return yy::CExpEvalParser::token::EE_OB_QWORD; }
+("ui64["|"u64<:")					{ return yy::CExpEvalParser::token::EE_OB_QWORD; }
 ("i8["|"i8<:")						{ return yy::CExpEvalParser::token::EE_OB_SBYTE; }
 ("i16["|"i16<:")					{ return yy::CExpEvalParser::token::EE_OB_SWORD; }
 ("i32["|"i32<:")					{ return yy::CExpEvalParser::token::EE_OB_SDWORD; }
@@ -507,6 +720,6 @@ L?'(\\.|[^\\'])+'					{ return yy::CExpEvalParser::token::EE_CHAR_CONSTANT; }
 %%
 
 
-int yyFlexLexer::yywrap() {
+/*int yyFlexLexer::yywrap() {
 	return 1;
-}
+}*/

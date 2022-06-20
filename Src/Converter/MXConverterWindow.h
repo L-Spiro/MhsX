@@ -78,6 +78,9 @@ namespace mx {
 		// The edit color for the hex edit.
 		static HBRUSH						m_hHex;
 
+		// The edit color for the oct edit.
+		static HBRUSH						m_hOct;
+
 		// The edit color for the binary edit.
 		static HBRUSH						m_hBinary;
 
@@ -105,6 +108,10 @@ namespace mx {
 		// Gets the value from the given text edit.
 		static ee::CExpEvalContainer::EE_RESULT
 											GetValueHex( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex );
+
+		// Gets the value from the given text edit.
+		static ee::CExpEvalContainer::EE_RESULT
+											GetValueOct( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex );
 
 		// Gets the value from the given text edit.
 		static ee::CExpEvalContainer::EE_RESULT
@@ -207,6 +214,9 @@ namespace mx {
 
 		// Writes the value to the given edit.
 		static void							SetValueHex( CWidget * _pwControl, ee::CExpEvalContainer::EE_RESULT _rRes, ee::EE_NUM_CONSTANTS _ncType, size_t _sSize, bool _bByteSwap, size_t _sSrcSize, bool _bAltDisp );
+
+		// Writes the value to the given edit.
+		static void							SetValueOct( CWidget * _pwControl, ee::CExpEvalContainer::EE_RESULT _rRes, ee::EE_NUM_CONSTANTS _ncType, size_t _sSize, bool _bByteSwap, size_t _sSrcSize, bool _bAltDisp );
 
 		// Writes the value to the given edit.
 		static void							SetValueChar( CWidget * _pwControl, ee::CExpEvalContainer::EE_RESULT _rRes, ee::EE_NUM_CONSTANTS _ncType, size_t _sSize, bool _bByteSwap, size_t _sSrcSize, bool _bAltDisp );

@@ -21,9 +21,13 @@ namespace ee {
 	// == Node types.
 	enum EE_NODES {
 		EE_N_NUMERICCONSTANT,
-		EE_N_IDENTIFIER,
+		EE_N_STRING,
 		EE_N_CUSTOM_VAR,
 		EE_N_ARRAY,
+		EE_N_STRINGARRAY,
+		EE_N_STRINGARRAY_EX,
+		EE_N_ARRAY_ACCESS,
+		EE_N_ARRAY_ACCESS_EX,
 		EE_N_POSTFIX_PLUSPLUS,
 		EE_N_POSTFIX_MINUSMINUS,
 		EE_N_PREFIX_PLUSPLUS,
@@ -81,8 +85,12 @@ namespace ee {
 		EE_N_WHILE_LOOP,
 		EE_N_FOR_LOOP,
 		EE_N_DO_WHILE_LOOP,
-		EE_N_FOREACHDECL,
+		EE_N_FOREACHDECL0,
+		EE_N_FOREACHDECL1,
+		EE_N_FOREACHDECL2,
 		EE_N_FOREACH,
+		EE_N_FOREACHOBJ,
+		EE_N_FOREACHSTR,
 		EE_N_IF,
 		EE_N_CONTINUE,
 		EE_N_BREAK,
@@ -93,10 +101,12 @@ namespace ee {
 
 	// Constant types.  Ordered by cast priority.
 	enum EE_NUM_CONSTANTS {
-		EE_NC_UNSIGNED													= 0,
-		EE_NC_SIGNED													= 1,
-		EE_NC_FLOATING													= 2,
-		EE_NC_INVALID													= 30000,
+		EE_NC_UNSIGNED													= 0x00,
+		EE_NC_SIGNED													= 0x01,
+		EE_NC_FLOATING													= 0x02,
+		EE_NC_OBJECT													= 0x03,
+		EE_NC_INVALID													= 0x80,
+		//EE_NC_MASK														= 0xFF,
 	};
 
 	// Cast types.

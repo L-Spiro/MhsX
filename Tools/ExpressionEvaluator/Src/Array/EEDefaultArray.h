@@ -7,6 +7,11 @@ namespace ee {
 
 	class CDefaultArray : public CArrayBase {
 	public :
+		CDefaultArray( CExpEvalContainer * _peecContainer ) :
+			CArrayBase( _peecContainer ) {
+		}
+
+
 		// == Functions.
 		// Sets the size of the array.
 		virtual bool								SetSize( size_t _sNewSize ) {
@@ -34,8 +39,10 @@ namespace ee {
 				ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( _rStart.ncType, _rEnd.ncType );
 				switch ( ncType ) {
 					case EE_NC_FLOATING : {
-						CExpEvalContainer::EE_RESULT rTemp0 = CExpEvalContainer::ConvertResult( _rStart, EE_NC_FLOATING );
-						CExpEvalContainer::EE_RESULT rTemp1 = CExpEvalContainer::ConvertResult( _rEnd, EE_NC_FLOATING );
+						CExpEvalContainer::EE_RESULT rTemp0 = m_peecContainer->ConvertResultOrObject( _rStart, EE_NC_FLOATING );
+						if ( rTemp0.ncType == EE_NC_INVALID ) { return false; }
+						CExpEvalContainer::EE_RESULT rTemp1 = m_peecContainer->ConvertResultOrObject( _rEnd, EE_NC_FLOATING );
+						if ( rTemp1.ncType == EE_NC_INVALID ) { return false; }
 						double dDivisor = static_cast<double>(m_vArray.size() - 1);
 						double dRange = rTemp1.u.dVal - rTemp0.u.dVal;
 						for ( size_t I = m_vArray.size(); I--; ) {
@@ -48,9 +55,12 @@ namespace ee {
 					}
 					case EE_NC_SIGNED : {
 						// Neither input was a float; we can assume both inputs were in int form.
-						CExpEvalContainer::EE_RESULT ncIntStart = CExpEvalContainer::ConvertResult( _rStart, EE_NC_SIGNED );
-						CExpEvalContainer::EE_RESULT rTemp0 = CExpEvalContainer::ConvertResult( _rStart, EE_NC_FLOATING );
-						CExpEvalContainer::EE_RESULT rTemp1 = CExpEvalContainer::ConvertResult( _rEnd, EE_NC_FLOATING );
+						CExpEvalContainer::EE_RESULT ncIntStart = m_peecContainer->ConvertResultOrObject( _rStart, EE_NC_SIGNED );
+						if ( ncIntStart.ncType == EE_NC_INVALID ) { return false; }
+						CExpEvalContainer::EE_RESULT rTemp0 = m_peecContainer->ConvertResultOrObject( _rStart, EE_NC_FLOATING );
+						if ( rTemp0.ncType == EE_NC_INVALID ) { return false; }
+						CExpEvalContainer::EE_RESULT rTemp1 = m_peecContainer->ConvertResultOrObject( _rEnd, EE_NC_FLOATING );
+						if ( rTemp1.ncType == EE_NC_INVALID ) { return false; }
 						double dDivisor = static_cast<double>(m_vArray.size() - 1);
 						double dRange = static_cast<double>(_rEnd.u.i64Val - _rStart.u.i64Val);
 						for ( size_t I = m_vArray.size(); I--; ) {
@@ -63,9 +73,12 @@ namespace ee {
 					}
 					case EE_NC_UNSIGNED : {
 						// Neither input was a float; we can assume both inputs were in int form.
-						CExpEvalContainer::EE_RESULT ncIntStart = CExpEvalContainer::ConvertResult( _rStart, EE_NC_UNSIGNED );
-						CExpEvalContainer::EE_RESULT rTemp0 = CExpEvalContainer::ConvertResult( _rStart, EE_NC_FLOATING );
-						CExpEvalContainer::EE_RESULT rTemp1 = CExpEvalContainer::ConvertResult( _rEnd, EE_NC_FLOATING );
+						CExpEvalContainer::EE_RESULT ncIntStart = m_peecContainer->ConvertResultOrObject( _rStart, EE_NC_UNSIGNED );
+						if ( ncIntStart.ncType == EE_NC_INVALID ) { return false; }
+						CExpEvalContainer::EE_RESULT rTemp0 = m_peecContainer->ConvertResultOrObject( _rStart, EE_NC_FLOATING );
+						if ( rTemp0.ncType == EE_NC_INVALID ) { return false; }
+						CExpEvalContainer::EE_RESULT rTemp1 = m_peecContainer->ConvertResultOrObject( _rEnd, EE_NC_FLOATING );
+						if ( rTemp1.ncType == EE_NC_INVALID ) { return false; }
 						double dDivisor = static_cast<double>(m_vArray.size() - 1);
 						double dRange = static_cast<double>(_rEnd.u.ui64Val - _rStart.u.ui64Val);
 						for ( size_t I = m_vArray.size(); I--; ) {
@@ -104,12 +117,15 @@ namespace ee {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, ncType );
-			m_vArray[_sIdx] = CExpEvalContainer::ConvertResult( m_vArray[_sIdx], ncType );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, ncType );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
+			m_vArray[_sIdx] = m_peecContainer->ConvertResultOrObject( m_vArray[_sIdx], ncType );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
 			switch ( ncType ) {
 				case EE_NC_FLOATING : { m_vArray[_sIdx].u.dVal += rTemp.u.dVal; break; }
 				case EE_NC_SIGNED : { m_vArray[_sIdx].u.i64Val += rTemp.u.i64Val; break; }
 				case EE_NC_UNSIGNED : { m_vArray[_sIdx].u.ui64Val += rTemp.u.ui64Val; break; }
+				// case EE_NC_OBJECT : {}
 				default : { return false; }
 			}
 			_rRet = m_vArray[_sIdx];
@@ -121,8 +137,10 @@ namespace ee {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, ncType );
-			m_vArray[_sIdx] = CExpEvalContainer::ConvertResult( m_vArray[_sIdx], ncType );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, ncType );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
+			m_vArray[_sIdx] = m_peecContainer->ConvertResultOrObject( m_vArray[_sIdx], ncType );
+			if ( m_vArray[_sIdx].ncType == EE_NC_INVALID ) { return false; }
 			switch ( ncType ) {
 				case EE_NC_FLOATING : { m_vArray[_sIdx].u.dVal -= rTemp.u.dVal; break; }
 				case EE_NC_SIGNED : { m_vArray[_sIdx].u.i64Val -= rTemp.u.i64Val; break; }
@@ -138,8 +156,10 @@ namespace ee {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, ncType );
-			m_vArray[_sIdx] = CExpEvalContainer::ConvertResult( m_vArray[_sIdx], ncType );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, ncType );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
+			m_vArray[_sIdx] = m_peecContainer->ConvertResultOrObject( m_vArray[_sIdx], ncType );
+			if ( m_vArray[_sIdx].ncType == EE_NC_INVALID ) { return false; }
 			switch ( ncType ) {
 				case EE_NC_FLOATING : { m_vArray[_sIdx].u.dVal *= rTemp.u.dVal; break; }
 				case EE_NC_SIGNED : { m_vArray[_sIdx].u.i64Val *= rTemp.u.i64Val; break; }
@@ -155,8 +175,10 @@ namespace ee {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, ncType );
-			m_vArray[_sIdx] = CExpEvalContainer::ConvertResult( m_vArray[_sIdx], ncType );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, ncType );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
+			m_vArray[_sIdx] = m_peecContainer->ConvertResultOrObject( m_vArray[_sIdx], ncType );
+			if ( m_vArray[_sIdx].ncType == EE_NC_INVALID ) { return false; }
 			switch ( ncType ) {
 				case EE_NC_FLOATING : { m_vArray[_sIdx].u.dVal /= rTemp.u.dVal; break; }
 				case EE_NC_SIGNED : { m_vArray[_sIdx].u.i64Val /= rTemp.u.i64Val; break; }
@@ -172,8 +194,10 @@ namespace ee {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, ncType );
-			m_vArray[_sIdx] = CExpEvalContainer::ConvertResult( m_vArray[_sIdx], ncType );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, ncType );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
+			m_vArray[_sIdx] = m_peecContainer->ConvertResultOrObject( m_vArray[_sIdx], ncType );
+			if ( m_vArray[_sIdx].ncType == EE_NC_INVALID ) { return false; }
 			switch ( ncType ) {
 				case EE_NC_FLOATING : { m_vArray[_sIdx].u.dVal = std::fmod( m_vArray[_sIdx].u.dVal, rTemp.u.dVal ); break; }
 				case EE_NC_SIGNED : { m_vArray[_sIdx].u.i64Val %= rTemp.u.i64Val; break; }
@@ -189,8 +213,10 @@ namespace ee {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, ncType );
-			m_vArray[_sIdx] = CExpEvalContainer::ConvertResult( m_vArray[_sIdx], ncType );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, ncType );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
+			m_vArray[_sIdx] = m_peecContainer->ConvertResultOrObject( m_vArray[_sIdx], ncType );
+			if ( m_vArray[_sIdx].ncType == EE_NC_INVALID ) { return false; }
 			switch ( ncType ) {
 				case EE_NC_FLOATING : { m_vArray[_sIdx].u.dVal *= std::pow( 2.0, rTemp.u.dVal ); break; }
 				case EE_NC_SIGNED : { m_vArray[_sIdx].u.i64Val <<= rTemp.u.i64Val; break; }
@@ -206,8 +232,10 @@ namespace ee {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, ncType );
-			m_vArray[_sIdx] = CExpEvalContainer::ConvertResult( m_vArray[_sIdx], ncType );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, ncType );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
+			m_vArray[_sIdx] = m_peecContainer->ConvertResultOrObject( m_vArray[_sIdx], ncType );
+			if ( m_vArray[_sIdx].ncType == EE_NC_INVALID ) { return false; }
 			switch ( ncType ) {
 				case EE_NC_FLOATING : { m_vArray[_sIdx].u.dVal /= std::pow( 2.0, rTemp.u.dVal ); break; }
 				case EE_NC_SIGNED : { m_vArray[_sIdx].u.i64Val <<= rTemp.u.i64Val; break; }
@@ -223,8 +251,10 @@ namespace ee {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, ncType );
-			m_vArray[_sIdx] = CExpEvalContainer::ConvertResult( m_vArray[_sIdx], ncType );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, ncType );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
+			m_vArray[_sIdx] = m_peecContainer->ConvertResultOrObject( m_vArray[_sIdx], ncType );
+			if ( m_vArray[_sIdx].ncType == EE_NC_INVALID ) { return false; }
 			switch ( ncType ) {
 				case EE_NC_FLOATING : { return false; }
 				case EE_NC_SIGNED : { m_vArray[_sIdx].u.i64Val ^= rTemp.u.i64Val; break; }
@@ -240,8 +270,10 @@ namespace ee {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, ncType );
-			m_vArray[_sIdx] = CExpEvalContainer::ConvertResult( m_vArray[_sIdx], ncType );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, ncType );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
+			m_vArray[_sIdx] = m_peecContainer->ConvertResultOrObject( m_vArray[_sIdx], ncType );
+			if ( m_vArray[_sIdx].ncType == EE_NC_INVALID ) { return false; }
 			switch ( ncType ) {
 				case EE_NC_FLOATING : { return false; }
 				case EE_NC_SIGNED : { m_vArray[_sIdx].u.i64Val |= rTemp.u.i64Val; break; }
@@ -257,8 +289,10 @@ namespace ee {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
 
-			CExpEvalContainer::EE_RESULT rTemp = CExpEvalContainer::ConvertResult( _rRet, ncType );
-			m_vArray[_sIdx] = CExpEvalContainer::ConvertResult( m_vArray[_sIdx], ncType );
+			CExpEvalContainer::EE_RESULT rTemp = m_peecContainer->ConvertResultOrObject( _rRet, ncType );
+			if ( rTemp.ncType == EE_NC_INVALID ) { return false; }
+			m_vArray[_sIdx] = m_peecContainer->ConvertResultOrObject( m_vArray[_sIdx], ncType );
+			if ( m_vArray[_sIdx].ncType == EE_NC_INVALID ) { return false; }
 			switch ( ncType ) {
 				case EE_NC_FLOATING : { return false; }
 				case EE_NC_SIGNED : { m_vArray[_sIdx].u.i64Val &= rTemp.u.i64Val; break; }

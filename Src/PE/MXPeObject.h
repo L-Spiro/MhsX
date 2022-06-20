@@ -3,6 +3,7 @@
 #include "../Files/MXFile.h"
 #include <LSWWin.h>
 #include "MXPeStructs.h"
+#include <string>
 #include <vector>
 
 namespace mx {

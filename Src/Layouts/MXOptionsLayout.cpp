@@ -417,7 +417,7 @@ namespace mx {
 			0,										// iLeft
 			MX_VIEW_SETTINGS_GROUP_HEIGHT,			// iTop
 			MX_OD_W,								// dwWidth
-			MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT * 2 + MX_GROUP_BOTTOM,										// dwHeight
+			MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT * 3 + MX_GROUP_BOTTOM,										// dwHeight
 			MX_GROUPSTYLE,							// dwStyle
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_1CD6C0DD_Format_Settings ),													// pwcText
@@ -443,12 +443,28 @@ namespace mx {
 		},
 		{
 			LSW_LT_CHECK,							// ltType
-			MX_OI_GENERAL_FORMAT_SHORT_ENUMS,		// wId
+			MX_OI_GENERAL_FORMAT_OCT,				// wId
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_GROUP_LEFT,							// iLeft
 			MX_VIEW_SETTINGS_GROUP_HEIGHT + MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT * 1,							// iTop
+			MX_OD_W - MX_GROUP_RIGHT - MX_GROUP_LEFT,														// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_612B8F87_Use____0o____Prefix_for_Octadecimal_Numbers__0o_____vs__0_____ ),	// pwcText
+			_LEN_612B8F87,																					// sTextLen
+			MX_OI_GENERAL,							// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_GENERAL_FORMAT_SHORT_ENUMS,		// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_GROUP_LEFT,							// iLeft
+			MX_VIEW_SETTINGS_GROUP_HEIGHT + MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT * 2,							// iTop
 			MX_OD_W - MX_GROUP_RIGHT - MX_GROUP_LEFT,														// dwWidth
 			MX_DEF_CHECK_HEIGHT,					// dwHeight
 			MX_CHECKSTYLE,							// dwStyle

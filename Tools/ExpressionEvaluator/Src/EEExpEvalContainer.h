@@ -18,9 +18,12 @@ namespace ee {
 
 	class CArrayBase;
 	class CExpEvalLexer;
+	class CObject;
+	class CStringRef;
 
 	class CExpEvalContainer {
 		friend class						CExpEvalParser;
+		friend class						CStringRef;			// Hides away the details behind the optimization wherein string literals inside the Expression are read-only references to reduce copying etc.
 	public :
 		CExpEvalContainer( CExpEvalLexer * _plLexer ) :
 			m_bTreatAllAsHex( false ),
@@ -45,21 +48,26 @@ namespace ee {
 		// Error codes.
 		enum EE_ERROR_CODES {
 			EE_EC_SUCCESS,					// No problem.
+
 			EE_EC_INVALIDTREE,				// The syntax tree is invalid.
 			EE_EC_OUTOFMEMORY,				// Out of memory.
 			EE_EC_PROCESSINGERROR,			// General error.
+			
 			EE_EC_RESULTSTOOSHORT,			// The sub-expression results array is too short.
 			EE_EC_NOIDENTIFIERHANDLER,		// No call to SetStringHandler() has been made with a non-nullptr value.
 			EE_EC_IDENTHANDLERFAILED,		// Identifier handler returned false.
+			
 			EE_EC_VARNOTFOUND,				// Custom variable not found by name.
 			EE_EC_VARHASBADTYPE,			// Custom variable has an invalid type.
 			EE_EC_BADARRAYIDX,				// Array index out-of-range.
 			EE_EC_NOADDRESSHANDLER,			// No address handler.
 			EE_EC_ADDRESSHANDLERFAILED,		// Address handler failed.
+			
 			EE_EC_NOMEMBERHANDLER,			// No call to SetMemberAccessHandler() has been made with a non-nullptr value.
 			EE_EC_MEMBERHANDELRFAILED,		// Member handler returned false.
 			EE_EC_NOUSERHANDLER,			// No call to SetUserHandler() has been made with a non-nullptr value.
 			EE_EC_USERHANDLERFAILED,		// User handler returned false.
+			
 			EE_EC_FLOATWITHTILDE,			// The ~ cannot be used with floating-point values.
 			EE_EC_UNRECOGNIZEDUNARYOPERATOR,// Unrecognized unary operator.
 			EE_EC_UNRECOGNIZEDINTRINSIC0,	// Unrecognized no-parameter intrinsic.
@@ -82,11 +90,16 @@ namespace ee {
 
 			EE_EC_INVALIDOPERATOR,			// Invalid operation, such as "~0.3".
 
+			EE_EC_INVALIDAPIOPERATION,		// Invalid operation that is part of the base API implementation and is expected to be working.
+
 			EE_EC_INVALID_WRITE_TO_CONST,							// Invalid attempt to write to a custom variable declared with "const".
 
 			EE_EC_CONST_VAR_REQUIRES_CONST_EPRESSION,				// A const variable was attempted to be created but was not assigned a const expression.
 
 			EE_EC_NONCONSTNOTALLOWED,		// A call to resolve a non-constant expression could have succeeded but failed due to passed-in flags.
+
+			EE_EC_INVALIDCAST,				// An object failed to cast into another object or primitive, or could not be created from one.
+			EE_EC_ARRAY_FROM_NON_OBJECT,	// An array access was attempted on a type that is not an object.
 
 			EE_EC_UNIMPLEMENTED,			// Error for development to indicate that a feature is not implemented yet.
 		};
@@ -100,6 +113,7 @@ namespace ee {
 				int64_t						i64Val;
 				uint64_t					ui64Val;
 				double						dVal;
+				CObject *					poObj;
 			}								u;
 		};
 
@@ -187,6 +201,9 @@ namespace ee {
 		// Converts a result to a given type.
 		static EE_RESULT					ConvertResult( const EE_RESULT &_rRes, EE_NUM_CONSTANTS _ncType );
 
+		// Converts a result or object to a given type.
+		EE_RESULT							ConvertResultOrObject( const EE_RESULT &_rRes, EE_NUM_CONSTANTS _ncType );
+
 		// Gets the default result value.
 		static EE_RESULT					DefaultResult() { EE_RESULT rRes; rRes.ncType = EE_NC_UNSIGNED; rRes.u.ui64Val = 0UL; return rRes; }
 
@@ -224,10 +241,10 @@ namespace ee {
 			const wchar_t * _pwcFormat, const std::vector<EE_RESULT> &_vParms );
 
 		// Performs an operation on 2 given results using the given operator.
-		static EE_ERROR_CODES				PerformOp( EE_RESULT _rLeft, uint32_t _uiOp, EE_RESULT _rRight, EE_RESULT &_rResult );
+		EE_ERROR_CODES						PerformOp( EE_RESULT _rLeft, uint32_t _uiOp, EE_RESULT _rRight, EE_RESULT &_rResult );
 
 		// Applies a unary operation to a result.
-		static inline EE_ERROR_CODES		PerformUnary( EE_RESULT _rExp, uint32_t _uiOp, EE_RESULT &_rResult ) {
+		inline EE_ERROR_CODES				PerformUnary( EE_RESULT _rExp, uint32_t _uiOp, EE_RESULT &_rResult ) {
 			switch ( _uiOp ) {
 				case '+' : {
 					_rResult = _rExp;
@@ -241,7 +258,8 @@ namespace ee {
 							return EE_EC_SUCCESS;
 						}
 						case EE_NC_UNSIGNED : {
-							_rExp = ConvertResult( _rExp, EE_NC_SIGNED );
+							_rExp = ConvertResultOrObject( _rExp, EE_NC_SIGNED );
+							if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 							_rResult.ncType = _rExp.ncType;
 							_rResult.u.i64Val = -_rExp.u.i64Val;
 							return EE_EC_SUCCESS;
@@ -297,16 +315,19 @@ namespace ee {
 		}
 
 		// Applies a 1-parameter intrinsic to a result.
-		static EE_ERROR_CODES				PerformIntrinsic( EE_RESULT _rExp, uint32_t _uiIntrinsic, EE_RESULT &_rResult );
+		EE_ERROR_CODES						PerformIntrinsic( EE_RESULT _rExp, uint32_t _uiIntrinsic, EE_RESULT &_rResult );
 
 		// Applies a 2-parameter intrinsic to a result.
 		EE_ERROR_CODES						PerformIntrinsic( EE_RESULT _rExp0, EE_RESULT _rExp1, uint32_t _uiIntrinsic, EE_RESULT &_rResult, bool _bIncludeNonConst );
 
 		// Applies a 3-parameter intrinsic to a result.
-		static inline EE_ERROR_CODES		PerformIntrinsic( EE_RESULT _rExp0, EE_RESULT _rExp1, EE_RESULT _rExp2, uint32_t _uiIntrinsic, EE_RESULT &_rResult ) {
-			_rExp0 = ConvertResult( _rExp0, EE_NC_FLOATING );
-			_rExp1 = ConvertResult( _rExp1, EE_NC_FLOATING );
-			_rExp2 = ConvertResult( _rExp2, EE_NC_FLOATING );
+		inline EE_ERROR_CODES				PerformIntrinsic( EE_RESULT _rExp0, EE_RESULT _rExp1, EE_RESULT _rExp2, uint32_t _uiIntrinsic, EE_RESULT &_rResult ) {
+			_rExp0 = ConvertResultOrObject( _rExp0, EE_NC_FLOATING );
+			if ( _rExp0.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			_rExp1 = ConvertResultOrObject( _rExp1, EE_NC_FLOATING );
+			if ( _rExp1.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			_rExp2 = ConvertResultOrObject( _rExp2, EE_NC_FLOATING );
+			if ( _rExp2.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 			
 	
 			switch ( _uiIntrinsic ) {
@@ -357,7 +378,7 @@ namespace ee {
 					break;
 				}
 				case EE_NC_FLOATING : {
-					// as_float() is not really intended to reinterpret 64 "double" bit as "float" bits.
+					// as_float() is not really intended to reinterpret 64 "double" bits as "float" bits.
 					//	More likely, the user wants to see the float value cast from a double.
 					fVal = static_cast<float>(_rExp.u.dVal);
 					break;
@@ -396,17 +417,17 @@ namespace ee {
 		}
 
 		// Creates a float using the specific parameters.
-		static EE_ERROR_CODES				PerformFloatX( EE_RESULT _rTempSignBits, EE_RESULT _rTempExpBits,
+		EE_ERROR_CODES						PerformFloatX( EE_RESULT _rTempSignBits, EE_RESULT _rTempExpBits,
 			EE_RESULT _rTempManBits, EE_RESULT _rTempImplied, EE_RESULT _rTempSignVal, EE_RESULT _rTempExpVal, EE_RESULT _rTempManVal,
 			EE_RESULT &_rResult );
 
 		// Creates a float using the specific parameters and a double input.
-		static EE_ERROR_CODES				PerformFloatX( EE_RESULT _rTempSignBits, EE_RESULT _rTempExpBits,
+		EE_ERROR_CODES						PerformFloatX( EE_RESULT _rTempSignBits, EE_RESULT _rTempExpBits,
 			EE_RESULT _rTempManBits, EE_RESULT _rTempImplied, EE_RESULT _rTempDoubleVal,
 			EE_RESULT &_rResult );
 		
 		// Converts the given value to an X-bit float.
-		static inline EE_ERROR_CODES		PerformToFloatX( EE_RESULT _rTempDoubleVal, uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign,
+		inline EE_ERROR_CODES				PerformToFloatX( EE_RESULT _rTempDoubleVal, uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign,
 			EE_RESULT &_rResult ) {
 			CFloatX fTemp;
 			
@@ -433,25 +454,40 @@ namespace ee {
 		}
 
 		// Converts the given value to a 16-bit float.
-		static inline EE_ERROR_CODES		PerformToFloat16( EE_RESULT _rTempDoubleVal, EE_RESULT &_rResult ) {
+		inline EE_ERROR_CODES				PerformToFloat16( EE_RESULT _rTempDoubleVal, EE_RESULT &_rResult ) {
 			return PerformToFloatX( _rTempDoubleVal, 5, 11, true, true, _rResult );
 		}
 
 		// Converts the given value to a 14-bit float.
-		static inline EE_ERROR_CODES		PerformToFloat14( EE_RESULT _rTempDoubleVal, EE_RESULT &_rResult ) {
+		inline EE_ERROR_CODES				PerformToFloat14( EE_RESULT _rTempDoubleVal, EE_RESULT &_rResult ) {
 			return PerformToFloatX( _rTempDoubleVal, 5, 10, true, false, _rResult );
 		}
 
 		// Converts the given value to a 11-bit float.
-		static inline EE_ERROR_CODES		PerformToFloat11( EE_RESULT _rTempDoubleVal, EE_RESULT &_rResult ) {
+		inline EE_ERROR_CODES				PerformToFloat11( EE_RESULT _rTempDoubleVal, EE_RESULT &_rResult ) {
 			return PerformToFloatX( _rTempDoubleVal, 5, 7, true, false, _rResult );
 		}
 
 		// Converts the given value to a 10-bit float.
-		static inline EE_ERROR_CODES		PerformToFloat10( EE_RESULT _rTempDoubleVal, EE_RESULT &_rResult ) {
+		inline EE_ERROR_CODES				PerformToFloat10( EE_RESULT _rTempDoubleVal, EE_RESULT &_rResult ) {
 			return PerformToFloatX( _rTempDoubleVal, 5, 6, true, false, _rResult );
 		}
 
+		// Allocates a new object of the given type.
+		template <typename _tType>
+		_tType *							AllocateObject( uint32_t _ui32Flags = 0 ) {
+			try {
+				auto aIdx = m_vObjects.size();
+				_tType * ptObj = new( std::nothrow ) _tType( this );
+				if ( !ptObj ) { return nullptr; }
+				m_vObjects.push_back( ptObj );
+				return ptObj;
+			}
+			catch ( const std::bad_alloc /*& _eE*/ ) { return nullptr; }
+		}
+
+		// Deallocates an object.
+		bool								DeallocateObject( CObject * _poObj );
 		
 	protected :
 		// == Types.
@@ -462,7 +498,7 @@ namespace ee {
 
 		// == Functions.
 		// Decodes a string.
-		size_t								CreateString( const char * _pcText );
+		size_t								CreateString( const std::string &_sText );
 
 		// Decodes an identifier.
 		size_t								CreateIdentifier( const char * _pcText );
@@ -475,6 +511,24 @@ namespace ee {
 
 		// Creates an array/access expression.
 		void								CreateArrayVar( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates an array/access expression.
+		void								CreateArrayString( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates an array/access expression.
+		void								CreateArrayString( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndExp0, const YYSTYPE::EE_NODE_DATA &_ndExp1, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates an array/access expression.
+		void								CreateArrayToEndString( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndExp0, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates an array/access expression.
+		void								CreateArrayFromStartString( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndExp0, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates an array/access expression.
+		void								CreateArrayAccess( const YYSTYPE::EE_NODE_DATA &_ndObj, const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates an array/access expression.
+		void								CreateArrayAccessEx( const YYSTYPE::EE_NODE_DATA &_ndObj, size_t _sExp0, size_t _sExp1, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Creates a postfix operator.
 		void								CreatePostfixOp( size_t _sStrIndex, int32_t _eType, YYSTYPE::EE_NODE_DATA &_ndNode );
@@ -515,11 +569,11 @@ namespace ee {
 		// Creates a numeric constant.
 		void								CreateNumber( double _dVal, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a numeric constant.
+		void								CreateNumber( long _lVal, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Creates an oct constant.
 		void								CreateOct( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode );
-
-		// Create a character constant.
-		void								CreateChar( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Create a double constant.
 		void								CreateDouble( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode );
@@ -654,8 +708,20 @@ namespace ee {
 		// Creates a foreach declaration.
 		void								CreateForEachDecl( size_t _sStrIndex, size_t _sArrayIdx, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a foreach declaration.
+		void								CreateForEachCustomDecl( size_t _sStrIndex, size_t _sArrayIdx, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a foreach declaration.
+		void								CreateForEachStringDecl( size_t _sStrIndex, size_t _sArrayIdx, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Creates a foreach loop.
 		void								CreateForEachLoop( const YYSTYPE::EE_NODE_DATA &_ndDecl, const YYSTYPE::EE_NODE_DATA &_ndStatements, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a foreach loop that runs over objects.
+		void								CreateForEachObjLoop( const YYSTYPE::EE_NODE_DATA &_ndDecl, const YYSTYPE::EE_NODE_DATA &_ndStatements, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a foreach loop that runs over strings.
+		void								CreateForEachStrLoop( const YYSTYPE::EE_NODE_DATA &_ndDecl, const YYSTYPE::EE_NODE_DATA &_ndStatements, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Creates a selection.
 		void								CreateSelectionStatement( const YYSTYPE::EE_NODE_DATA &_ndExp, const YYSTYPE::EE_NODE_DATA &_ndStatements, YYSTYPE::EE_NODE_DATA &_ndNode );
@@ -761,9 +827,36 @@ namespace ee {
 			// For-each loop custom variable result.
 			EE_RESULT *						prLoopCustomVarResult;
 
+			// For-each loop object.
+			EE_RESULT *						prLoopObject;
+
+			// For-each string.
+			size_t							sForEachString;
+
+			// For-each string current position in the string.
+			size_t							sForEachStringPos;
+
 			// Array of results for already-parsed sub-expressions.
 			EE_RESULT						sSubResults[EE_MAX_SUB_EXPRESSIONS];
 		};
+
+		// Encapsulate an object.
+		/*struct EE_OBJECT {
+			// The actual object pointer.
+			CObject *						poObj;
+
+			// The reference count,
+			int64_t							i64RefCnt;
+
+
+			EE_OBJECT() :
+				poObj( nullptr ),
+				i64RefCnt( 0 ) {
+			}
+			~EE_OBJECT() {
+				//delete poObj;
+			}
+		};*/
 
 
 		// == Members.
@@ -773,8 +866,17 @@ namespace ee {
 		// The stack of nodes.
 		std::vector<YYSTYPE::EE_NODE_DATA>	m_vNodes;
 
-		// The stack of strings.
+		// The stack of UTF-8 strings.
 		std::vector<std::string>			m_vStrings;
+
+		// The array of objects.
+		std::vector<CObject *>				m_vObjects;
+
+		// 1-for-1 array of string references to strings held inside m_vStrings;
+		//std::vector<CStringRef *>			m_vStringObjectsU8;
+
+		// 1-for-1 array of string references to strings held inside m_vStrings;
+		//std::vector<CStringRef *>			m_vStringObjectsU16;
 
 		// The map of custom variables. std::map<name_as_index, EE_CUSTOM_VAR>.
 		std::map<size_t, EE_CUSTOM_VAR>		m_mCustomVariables;
@@ -862,6 +964,9 @@ namespace ee {
 		// Takes an array type and creates an array for the given type.
 		CArrayBase *						CreateArrayFromType( uint32_t _ui32Type );
 
+		// Creates a string reference given a string index.
+		bool								CreateStringRef( size_t _stStrIdx );
+
 		// Pushes a node onto the explicit stack.
 		static bool							PushNode( std::vector<EE_STACK_OBJ> &_vStack, size_t _sNodeIdx, size_t _sParentIdx, EE_RESULT * _prResult ) {
 			EE_STACK_OBJ soDoMeNext;
@@ -888,7 +993,7 @@ namespace ee {
 
 		// Converts a node from identifier to custom variable.
 		static bool							ConvertIdentifierToCustomVar( YYSTYPE::EE_NODE_DATA &_ndNode ) {
-			if ( _ndNode.nType != EE_N_IDENTIFIER ) { return false; }
+			if ( _ndNode.nType != EE_N_STRING ) { return false; }
 			_ndNode.nType = EE_N_CUSTOM_VAR;
 			return true;
 		}

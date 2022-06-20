@@ -1,4 +1,5 @@
 #include "EEExpEvalContainer.h"
+#include "Api/EEBaseApi.h"
 #include "Array/EEDefaultArray.h"
 #include "Array/EEDoubleArray.h"
 #include "Array/EEFloatArray.h"
@@ -10,15 +11,27 @@
 #include "Array/EEUInt16Array.h"
 #include "Array/EEUInt32Array.h"
 #include "Array/EEUInt64Array.h"
+#include "Object/EEString.h"
+//#include "Object/EEStringRef.h"
 #include "Unicode/EEUnicode.h"
 
+#ifdef _DEBUG
+#include <cassert>
+#endif
 #include <ctime>
+#include <iomanip>
+#include <sstream>
 
 #define EE_INVALID_IDX				static_cast<size_t>(-1)
 
 namespace ee {
 
 	CExpEvalContainer::~CExpEvalContainer() {
+		/*for ( auto I = m_vStringObjectsU8.size(); I--; ) {
+			delete m_vStringObjectsU8[I];
+		}
+		m_vStringObjectsU8.clear();*/
+
 		for ( auto I = m_vArrayData.size(); I--; ) {
 			delete m_vArrayData[I].m_pabBase;
 			m_vArrayData[I].m_pabBase = nullptr;
@@ -60,44 +73,107 @@ namespace ee {
 
 	// Converts a result to a given type.
 	CExpEvalContainer::EE_RESULT CExpEvalContainer::ConvertResult( const EE_RESULT &_rRes, EE_NUM_CONSTANTS _ncType ) {
-		if ( _rRes.ncType == _ncType ) { return _rRes; }
+		if ( (_rRes.ncType) == _ncType ) { return _rRes; }
 		EE_RESULT rRes;
+#ifdef _DEBUG
+		assert( (_ncType) != EE_NC_OBJECT && (_rRes.ncType) != EE_NC_OBJECT );
+#endif
 		rRes.ncType = _ncType;
-		if ( _rRes.ncType == EE_NC_FLOATING ) {
+		if ( (_rRes.ncType) == ee::EE_NC_FLOATING ) {
 			switch ( _ncType ) {
-				case EE_NC_SIGNED : {
+				case ee::EE_NC_SIGNED : {
 					rRes.u.i64Val = static_cast<int64_t>(_rRes.u.dVal);
 					break;
 				}
-				case EE_NC_UNSIGNED : {
+				case ee::EE_NC_UNSIGNED : {
 					rRes.u.ui64Val = static_cast<uint64_t>(_rRes.u.dVal);
 					break;
 				}
 			}
 		}
-		else if ( _rRes.ncType == EE_NC_SIGNED ) {
+		else if ( (_rRes.ncType) == ee::EE_NC_SIGNED ) {
 			switch ( _ncType ) {
-				case EE_NC_UNSIGNED : {
+				case ee::EE_NC_UNSIGNED : {
 					rRes.u.ui64Val = static_cast<uint64_t>(_rRes.u.i64Val);
 					break;
 				}
-				case EE_NC_FLOATING : {
+				case ee::EE_NC_FLOATING : {
 					rRes.u.dVal = static_cast<double>(_rRes.u.i64Val);
 					break;
 				}
 			}
 		}
-		else if ( _rRes.ncType == EE_NC_UNSIGNED ) {
+		else if ( (_rRes.ncType) == ee::EE_NC_UNSIGNED ) {
 			switch ( _ncType ) {
-				case EE_NC_FLOATING : {
+				case ee::EE_NC_FLOATING : {
 					rRes.u.dVal = static_cast<double>(_rRes.u.ui64Val);
 					break;
 				}
-				case EE_NC_SIGNED : {
+				case ee::EE_NC_SIGNED : {
 					rRes.u.i64Val = static_cast<int64_t>(_rRes.u.ui64Val);
 					break;
 				}
 			}
+		}
+		return rRes;
+	}
+
+	// Converts a result to a given type.
+	CExpEvalContainer::EE_RESULT CExpEvalContainer::ConvertResultOrObject( const EE_RESULT &_rRes, EE_NUM_CONSTANTS _ncType ) {
+		if ( (_rRes.ncType) == _ncType ) { return _rRes; }
+		EE_RESULT rRes;
+		rRes.ncType = _ncType;
+		if ( (_rRes.ncType) == ee::EE_NC_FLOATING ) {
+			switch ( _ncType ) {
+				case ee::EE_NC_SIGNED : {
+					rRes.u.i64Val = static_cast<int64_t>(_rRes.u.dVal);
+					break;
+				}
+				case ee::EE_NC_UNSIGNED : {
+					rRes.u.ui64Val = static_cast<uint64_t>(_rRes.u.dVal);
+					break;
+				}
+				case EE_NC_OBJECT : {
+					rRes.ncType = ee::EE_NC_INVALID;
+					break;
+				}
+			}
+		}
+		else if ( (_rRes.ncType) == ee::EE_NC_SIGNED ) {
+			switch ( _ncType ) {
+				case ee::EE_NC_UNSIGNED : {
+					rRes.u.ui64Val = static_cast<uint64_t>(_rRes.u.i64Val);
+					break;
+				}
+				case ee::EE_NC_FLOATING : {
+					rRes.u.dVal = static_cast<double>(_rRes.u.i64Val);
+					break;
+				}
+				case EE_NC_OBJECT : {
+					rRes.ncType = ee::EE_NC_INVALID;
+					break;
+				}
+			}
+		}
+		else if ( (_rRes.ncType) == ee::EE_NC_UNSIGNED ) {
+			switch ( _ncType ) {
+				case ee::EE_NC_FLOATING : {
+					rRes.u.dVal = static_cast<double>(_rRes.u.ui64Val);
+					break;
+				}
+				case ee::EE_NC_SIGNED : {
+					rRes.u.i64Val = static_cast<int64_t>(_rRes.u.ui64Val);
+					break;
+				}
+				case EE_NC_OBJECT : {
+					rRes.ncType = ee::EE_NC_INVALID;
+					break;
+				}
+			}
+		}
+		else if ( (_rRes.ncType) == ee::EE_NC_OBJECT ) {
+			if ( !_rRes.u.poObj ) { rRes.ncType = ee::EE_NC_INVALID; }
+			else { return _rRes.u.poObj->ConvertTo( _ncType ); }
 		}
 		return rRes;
 	}
@@ -218,7 +294,7 @@ namespace ee {
 					rTemp = va_arg( _vaArgPtr, const EE_RESULT );
 					--_iArgs;
 				}
-				if ( ncType == EE_NC_FLOATING ) {
+				if ( (ncType) == EE_NC_FLOATING ) {
 					int iTemp = ::swprintf( &_pwcDst[sDst], _sMaxLen - sDst, pcContext.wcFormat, rTemp.u.dVal );
 					if ( iTemp == -1 ) { return -1; }
 					sDst += iTemp;
@@ -263,7 +339,7 @@ namespace ee {
 				if ( sIdx < _vParms.size() ) {
 					rTemp = _vParms[sIdx++];
 				}
-				if ( ncType == EE_NC_FLOATING ) {
+				if ( (ncType) == EE_NC_FLOATING ) {
 					int iTemp = ::swprintf( &_pwcDst[sDst], _sMaxLen - sDst, pcContext.wcFormat, rTemp.u.dVal );
 					if ( iTemp == -1 ) { return -1; }
 					sDst += iTemp;
@@ -286,8 +362,12 @@ namespace ee {
 
 	CExpEvalContainer::EE_ERROR_CODES CExpEvalContainer::PerformOp( EE_RESULT _rLeft, uint32_t _uiOp, EE_RESULT _rRight, EE_RESULT &_rResult ) {
 		_rResult.ncType = GetCastType( _rLeft.ncType, _rRight.ncType );
-		_rLeft = ConvertResult( _rLeft, _rResult.ncType );
-		_rRight = ConvertResult( _rRight, _rResult.ncType );
+		if ( _rResult.ncType != EE_NC_OBJECT ) {
+			_rLeft = ConvertResultOrObject( _rLeft, _rResult.ncType );
+			if ( _rLeft.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			_rRight = ConvertResultOrObject( _rRight, _rResult.ncType );
+			if ( _rRight.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+		}
 #define EE_OP( MEMBER, CASE, OP )													\
 	case CASE : {																	\
 		_rResult.u.MEMBER = _rLeft.u.MEMBER OP _rRight.u.MEMBER;					\
@@ -368,6 +448,40 @@ namespace ee {
 					}
 					default : { return EE_EC_INVALIDTREE; }
 				}
+				break;
+			}
+			case EE_NC_OBJECT : {
+				switch ( _uiOp ) {
+					case '+' : {
+						_rResult = _rLeft.u.poObj->Plus( _rRight );
+						break;
+					}
+					case '-' : {
+						_rResult = _rLeft.u.poObj->Minus( _rRight );
+						break;
+					}
+					case '*' : {
+						_rResult = _rLeft.u.poObj->Multiply( _rRight );
+						break;
+					}
+					case '/' : {
+						_rResult = _rLeft.u.poObj->Divide( _rRight );
+						break;
+					}
+					case CExpEvalParser::token::EE_EQU_E : {
+						_rResult.ncType = EE_NC_UNSIGNED;
+						_rResult.u.ui64Val = _rLeft.u.poObj->Equals( _rRight );
+						break;
+					}
+					case CExpEvalParser::token::EE_EQU_NE : {
+						_rResult.ncType = EE_NC_UNSIGNED;
+						_rResult.u.ui64Val = !_rLeft.u.poObj->Equals( _rRight );
+						break;
+					}
+					default : { return EE_EC_INVALIDTREE; }
+				}
+				//_rLeft.u.poObj->Ord
+				break;
 			}
 		}
 
@@ -381,25 +495,251 @@ namespace ee {
 	// Applies a 1-parameter intrinsic to a result.
 	CExpEvalContainer::EE_ERROR_CODES CExpEvalContainer::PerformIntrinsic( EE_RESULT _rExp, uint32_t _uiIntrinsic, EE_RESULT &_rResult ) {
 		if ( _uiIntrinsic == CExpEvalParser::token::EE_BYTESWAPUSHORT ) {
-			_rExp = ConvertResult( _rExp, EE_NC_UNSIGNED );
+			_rExp = ConvertResultOrObject( _rExp, EE_NC_UNSIGNED );
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 			_rResult.u.ui64Val = ::_byteswap_ushort( static_cast<uint16_t>(_rResult.u.ui64Val) );
 			_rResult.ncType = EE_NC_UNSIGNED;
 			return EE_EC_SUCCESS;
 		}
 		if ( _uiIntrinsic == CExpEvalParser::token::EE_BYTESWAPULONG ) {
-			_rExp = ConvertResult( _rExp, EE_NC_UNSIGNED );
+			_rExp = ConvertResultOrObject( _rExp, EE_NC_UNSIGNED );
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 			_rResult.u.ui64Val = ::_byteswap_ulong( static_cast<uint32_t>(_rResult.u.ui64Val) );
 			_rResult.ncType = EE_NC_UNSIGNED;
 			return EE_EC_SUCCESS;
 		}
 		if ( _uiIntrinsic == CExpEvalParser::token::EE_BYTESWAPUINT64 ) {
-			_rExp = ConvertResult( _rExp, EE_NC_UNSIGNED );
+			_rExp = ConvertResultOrObject( _rExp, EE_NC_UNSIGNED );
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 			_rResult.u.ui64Val = ::_byteswap_uint64( _rResult.u.ui64Val );
 			_rResult.ncType = EE_NC_UNSIGNED;
 			return EE_EC_SUCCESS;
 		}
 
-		_rExp = ConvertResult( _rExp, EE_NC_FLOATING );
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_ASCII ) {
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			if ( _rExp.ncType == EE_NC_OBJECT ) {
+				if ( !_rExp.u.poObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+
+				_rResult = _rExp.u.poObj->Ascii();
+				return _rResult.ncType == EE_NC_INVALID ? EE_EC_OUTOFMEMORY : EE_EC_SUCCESS;
+			}
+			CString * psObj = AllocateObject<CString>();
+			if ( !psObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			
+			_rResult.u.poObj = psObj;
+			_rResult.ncType = EE_NC_OBJECT;
+			return EE_EC_SUCCESS;
+		}
+
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_BIN ) {
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			if ( _rExp.ncType == EE_NC_OBJECT ) {
+				if ( !_rExp.u.poObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+
+				_rResult = _rExp.u.poObj->Bin();
+				return _rResult.ncType == EE_NC_INVALID ? EE_EC_INVALIDAPIOPERATION : EE_EC_SUCCESS;
+			}
+			CString * psObj = AllocateObject<CString>();
+			if ( !psObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			switch ( _rExp.ncType ) {
+				case EE_NC_UNSIGNED : {
+					psObj->SetString( ToBinary( _rExp.u.ui64Val ) );
+					_rResult = psObj->CreateResult();
+					break;
+				}
+				case EE_NC_SIGNED : {
+					psObj->SetString( ToBinary( _rExp.u.i64Val ) );
+					_rResult = psObj->CreateResult();
+					break;
+				}
+				case EE_NC_FLOATING : {
+					psObj->SetString( ToBinary( _rExp.u.dVal ) );
+					_rResult = psObj->CreateResult();
+					break;
+				}
+				default : { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			}
+			
+			return EE_EC_SUCCESS;
+		}
+
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_BOOL ) {
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			if ( _rExp.ncType == EE_NC_OBJECT ) {
+				if ( !_rExp.u.poObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+
+				_rResult = _rExp.u.poObj->Bool();
+				return _rResult.ncType == EE_NC_INVALID ? EE_EC_INVALIDAPIOPERATION : EE_EC_SUCCESS;
+			}
+			CString * psObj = AllocateObject<CString>();
+			if ( !psObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			switch ( _rExp.ncType ) {
+				case EE_NC_UNSIGNED : {
+					psObj->SetString( _rExp.u.ui64Val ? "True" : "False" );
+					_rResult = psObj->CreateResult();
+					break;
+				}
+				case EE_NC_SIGNED : {
+					psObj->SetString( _rExp.u.i64Val ? "True" : "False" );
+					_rResult = psObj->CreateResult();
+					break;
+				}
+				case EE_NC_FLOATING : {
+					psObj->SetString( static_cast<bool>(_rExp.u.ui64Val) ? "True" : "False" );
+					_rResult = psObj->CreateResult();
+					break;
+				}
+				default : { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			}
+			
+			return EE_EC_SUCCESS;
+		}
+
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_CHR ) {
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			if ( _rExp.ncType == EE_NC_OBJECT ) {
+				if ( !_rExp.u.poObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+
+				_rResult = _rExp.u.poObj->Chr();
+				return _rResult.ncType == EE_NC_INVALID ? EE_EC_INVALIDAPIOPERATION : EE_EC_SUCCESS;
+			}
+			CString * psObj = AllocateObject<CString>();
+			if ( !psObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+
+			EE_RESULT rTmp = ConvertResultOrObject( _rExp, EE_NC_UNSIGNED );
+			uint32_t ui32Len;
+			uint32_t ui32Val = Utf32ToUtf8( static_cast<uint32_t>(rTmp.u.ui64Val), ui32Len );
+			std::string sTmp;
+			for ( uint32_t I = 0; I < ui32Len; ++I ) {
+				sTmp.push_back( static_cast<std::string::value_type>(ui32Val >> (I * sizeof( std::string::value_type ) * 8)) );
+			}
+			psObj->SetString( sTmp );
+			_rResult = psObj->CreateResult();
+			return EE_EC_SUCCESS;
+		}
+
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_FLOAT ) {
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			if ( _rExp.ncType == EE_NC_OBJECT ) {
+				if ( !_rExp.u.poObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+
+				_rResult = _rExp.u.poObj->Float();
+				return _rResult.ncType == EE_NC_INVALID ? EE_EC_INVALIDAPIOPERATION : EE_EC_SUCCESS;
+			}
+			_rResult = ConvertResultOrObject( _rExp, EE_NC_FLOATING );
+			
+			return EE_EC_SUCCESS;
+		}
+
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_HEX ) {
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			if ( _rExp.ncType == EE_NC_OBJECT ) {
+				if ( !_rExp.u.poObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+
+				_rResult = _rExp.u.poObj->Hex();
+				return EE_EC_SUCCESS;
+			}
+			CString * psObj = AllocateObject<CString>();
+			if ( !psObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			switch ( _rExp.ncType ) {
+				case EE_NC_UNSIGNED : {
+					psObj->SetString( ToHex( _rExp.u.ui64Val ) );
+					_rResult = psObj->CreateResult();
+					break;
+				}
+				case EE_NC_SIGNED : {
+					psObj->SetString( ToHex( _rExp.u.i64Val ) );
+					_rResult = psObj->CreateResult();
+					break;
+				}
+				case EE_NC_FLOATING : {
+					psObj->SetString( ToHex( _rExp.u.dVal ) );
+					_rResult = psObj->CreateResult();
+					break;
+				}
+				default : { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			}
+			
+			return EE_EC_SUCCESS;
+		}
+
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_INT ) {
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			if ( _rExp.ncType == EE_NC_OBJECT ) {
+				if ( !_rExp.u.poObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+
+				_rResult = _rExp.u.poObj->Int();
+				return _rResult.ncType == EE_NC_INVALID ? EE_EC_INVALIDAPIOPERATION : EE_EC_SUCCESS;
+			}
+			_rResult = ConvertResultOrObject( _rExp, EE_NC_SIGNED );
+			
+			return EE_EC_SUCCESS;
+		}
+
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_LEN ) {
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			if ( _rExp.ncType == EE_NC_OBJECT ) {
+				if ( !_rExp.u.poObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+
+				_rResult = _rExp.u.poObj->Len();
+				return _rResult.ncType == EE_NC_INVALID ? EE_EC_INVALIDAPIOPERATION : EE_EC_SUCCESS;
+			}
+			_rResult = ConvertResultOrObject( _rExp, EE_NC_SIGNED );
+			_rResult.ncType = EE_NC_UNSIGNED;
+			_rResult.u.ui64Val = 0;
+			
+			return EE_EC_SUCCESS;
+		}
+
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_OCT ) {
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			if ( _rExp.ncType == EE_NC_OBJECT ) {
+				if ( !_rExp.u.poObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+
+				_rResult = _rExp.u.poObj->Oct();
+				return EE_EC_SUCCESS;
+			}
+			CString * psObj = AllocateObject<CString>();
+			if ( !psObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			switch ( _rExp.ncType ) {
+				case EE_NC_UNSIGNED : {
+					psObj->SetString( ToOct( _rExp.u.ui64Val ) );
+					_rResult = psObj->CreateResult();
+					break;
+				}
+				case EE_NC_SIGNED : {
+					psObj->SetString( ToOct( _rExp.u.i64Val ) );
+					_rResult = psObj->CreateResult();
+					break;
+				}
+				case EE_NC_FLOATING : {
+					psObj->SetString( ToOct( _rExp.u.dVal ) );
+					_rResult = psObj->CreateResult();
+					break;
+				}
+				default : { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			}
+			
+			return EE_EC_SUCCESS;
+		}
+
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_ORD ) {
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			if ( _rExp.ncType == EE_NC_OBJECT ) {
+				if ( !_rExp.u.poObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+
+				_rResult = _rExp.u.poObj->Ord();
+				return EE_EC_SUCCESS;
+			}
+			_rResult = ConvertResultOrObject( _rExp, EE_NC_SIGNED );
+			
+			return EE_EC_SUCCESS;
+		}
+
+
+		_rExp = ConvertResultOrObject( _rExp, EE_NC_FLOATING );
+		if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 		_rResult.ncType = EE_NC_FLOATING;
 #define EE_OP( CASE, FUNC )												\
 	case CExpEvalParser::token::CASE : {								\
@@ -409,13 +749,15 @@ namespace ee {
 		switch ( _uiIntrinsic ) {
 			case CExpEvalParser::token::EE_DEG : {
 				_rResult.ncType = EE_NC_FLOATING;
-				_rExp = ConvertResult( _rExp, EE_NC_FLOATING );
+				_rExp = ConvertResultOrObject( _rExp, EE_NC_FLOATING );
+				if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 				_rResult.u.dVal = (_rExp.u.dVal * 180.0) / 3.1415926535897932384626433832795;
 				return EE_EC_SUCCESS;
 			}
 			case CExpEvalParser::token::EE_RAD : {
 				_rResult.ncType = EE_NC_FLOATING;
-				_rExp = ConvertResult( _rExp, EE_NC_FLOATING );
+				_rExp = ConvertResultOrObject( _rExp, EE_NC_FLOATING );
+				if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 				_rResult.u.dVal = (_rExp.u.dVal * 3.1415926535897932384626433832795) / 180.0;
 				return EE_EC_SUCCESS;
 			}
@@ -467,18 +809,22 @@ namespace ee {
 			
 #undef EE_OP
 		} 
+
+		
 		return EE_EC_UNRECOGNIZEDINTRINSIC1;
 	}
 
 	// Applies a 2-parameter intrinsic to a result.
 	CExpEvalContainer::EE_ERROR_CODES CExpEvalContainer::PerformIntrinsic( EE_RESULT _rExp0, EE_RESULT _rExp1, uint32_t _uiIntrinsic, EE_RESULT &_rResult, bool _bIncludeNonConst ) {				
-#define EE_OP( CASE, FUNC )												\
-	case CExpEvalParser::token::CASE : {								\
-		_rExp0 = ConvertResult( _rExp0, EE_NC_FLOATING );				\
-		_rExp1 = ConvertResult( _rExp1, EE_NC_FLOATING );				\
-		_rResult.ncType = EE_NC_FLOATING;								\
-		_rResult.u.dVal = ::FUNC( _rExp0.u.dVal, _rExp1.u.dVal );		\
-		return EE_EC_SUCCESS;											\
+#define EE_OP( CASE, FUNC )																						\
+	case CExpEvalParser::token::CASE : {																		\
+		_rExp0 = ConvertResultOrObject( _rExp0, EE_NC_FLOATING );												\
+		if ( _rExp0.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }	\
+		_rExp1 = ConvertResultOrObject( _rExp1, EE_NC_FLOATING );												\
+		if ( _rExp1.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }	\
+		_rResult.ncType = EE_NC_FLOATING;																		\
+		_rResult.u.dVal = ::FUNC( _rExp0.u.dVal, _rExp1.u.dVal );												\
+		return EE_EC_SUCCESS;																					\
 	}
 #pragma warning( push )
 #pragma warning( disable : 4244 )	// warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
@@ -497,8 +843,10 @@ namespace ee {
 			EE_OP( EE_MIN, ee::Min )
 			case CExpEvalParser::token::EE_RAND : {
 				_rResult.ncType = GetCastType( _rExp0.ncType, _rExp1.ncType );
-				_rExp0 = ConvertResult( _rExp0, _rResult.ncType );
-				_rExp1 = ConvertResult( _rExp1, _rResult.ncType );
+				_rExp0 = ConvertResultOrObject( _rExp0, _rResult.ncType );
+				if ( _rExp0.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+				_rExp1 = ConvertResultOrObject( _rExp1, _rResult.ncType );
+				if ( _rExp1.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 #define EE_QM( MEMBER ) std::min( _rExp0.u.MEMBER, _rExp1.u.MEMBER ), std::max( _rExp0.u.MEMBER, _rExp1.u.MEMBER )
 				switch ( _rResult.ncType ) {
 					case EE_NC_UNSIGNED : {
@@ -528,8 +876,10 @@ namespace ee {
 				return EE_EC_PROCESSINGERROR;
 			}
 			case CExpEvalParser::token::EE_LOG : {
-				_rExp0 = ConvertResult( _rExp0, EE_NC_FLOATING );
-				_rExp1 = ConvertResult( _rExp1, EE_NC_FLOATING );
+				_rExp0 = ConvertResultOrObject( _rExp0, EE_NC_FLOATING );
+				if ( _rExp0.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+				_rExp1 = ConvertResultOrObject( _rExp1, EE_NC_FLOATING );
+				if ( _rExp1.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 				_rResult.ncType = EE_NC_FLOATING;
 				_rResult.u.dVal = std::log( _rExp0.u.dVal ) / std::log( _rExp1.u.dVal );
 				return EE_EC_SUCCESS;
@@ -549,16 +899,24 @@ namespace ee {
 		EE_RESULT _rTempManBits, EE_RESULT _rTempImplied, EE_RESULT _rTempSignVal, EE_RESULT _rTempExpVal, EE_RESULT _rTempManVal,
 		EE_RESULT &_rResult ) {
 
-		_rTempSignBits = ConvertResult( _rTempSignBits, EE_NC_UNSIGNED );
+		_rTempSignBits = ConvertResultOrObject( _rTempSignBits, EE_NC_UNSIGNED );
+		if ( _rTempSignBits.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 		if ( _rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return EE_EC_TOOMANYSIGNBITS; }
-		_rTempExpBits = ConvertResult( _rTempExpBits, EE_NC_UNSIGNED );
+		_rTempExpBits = ConvertResultOrObject( _rTempExpBits, EE_NC_UNSIGNED );
+		if ( _rTempExpBits.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 		if ( _rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return EE_EC_TOOMANYEXPBITS; }
-		_rTempManBits = ConvertResult( _rTempManBits, EE_NC_UNSIGNED );
+		_rTempManBits = ConvertResultOrObject( _rTempManBits, EE_NC_UNSIGNED );
+		if ( _rTempManBits.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 		if ( _rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return EE_EC_TOOMANYMANTISSABITS; }
-		_rTempImplied = ConvertResult( _rTempImplied, EE_NC_UNSIGNED );
-		_rTempSignVal = ConvertResult( _rTempSignVal, EE_NC_UNSIGNED );
-		_rTempExpVal = ConvertResult( _rTempExpVal, EE_NC_UNSIGNED );
-		_rTempManVal = ConvertResult( _rTempManVal, EE_NC_UNSIGNED );
+		_rTempImplied = ConvertResultOrObject( _rTempImplied, EE_NC_UNSIGNED );
+		if ( _rTempImplied.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+		_rTempSignVal = ConvertResultOrObject( _rTempSignVal, EE_NC_UNSIGNED );
+		if ( _rTempSignVal.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+		_rTempExpVal = ConvertResultOrObject( _rTempExpVal, EE_NC_UNSIGNED );
+		if ( _rTempExpVal.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+		_rTempManVal = ConvertResultOrObject( _rTempManVal, EE_NC_UNSIGNED );
+		if ( _rTempManVal.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+
 		CFloatX fTemp;
 		if ( _rTempSignBits.u.ui64Val ) {
 			fTemp.bSign = _rTempSignVal.u.ui64Val ? true : false;
@@ -577,14 +935,19 @@ namespace ee {
 	CExpEvalContainer::EE_ERROR_CODES CExpEvalContainer::PerformFloatX( EE_RESULT _rTempSignBits, EE_RESULT _rTempExpBits,
 		EE_RESULT _rTempManBits, EE_RESULT _rTempImplied, EE_RESULT _rTempDoubleVal,
 		EE_RESULT &_rResult ) {
-		_rTempSignBits = ConvertResult( _rTempSignBits, EE_NC_UNSIGNED );
+		_rTempSignBits = ConvertResultOrObject( _rTempSignBits, EE_NC_UNSIGNED );
+		if ( _rTempSignBits.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 		if ( _rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return EE_EC_TOOMANYSIGNBITS; }
-		_rTempExpBits = ConvertResult( _rTempExpBits, EE_NC_UNSIGNED );
+		_rTempExpBits = ConvertResultOrObject( _rTempExpBits, EE_NC_UNSIGNED );
+		if ( _rTempExpBits.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 		if ( _rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return EE_EC_TOOMANYEXPBITS; }
-		_rTempManBits = ConvertResult( _rTempManBits, EE_NC_UNSIGNED );
+		_rTempManBits = ConvertResultOrObject( _rTempManBits, EE_NC_UNSIGNED );
+		if ( _rTempManBits.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 		if ( _rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return EE_EC_TOOMANYMANTISSABITS; }
-		_rTempImplied = ConvertResult( _rTempImplied, EE_NC_UNSIGNED );
-		_rTempDoubleVal = ConvertResult( _rTempDoubleVal, EE_NC_FLOATING );
+		_rTempImplied = ConvertResultOrObject( _rTempImplied, EE_NC_UNSIGNED );
+		if ( _rTempImplied.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+		_rTempDoubleVal = ConvertResultOrObject( _rTempDoubleVal, EE_NC_FLOATING );
+		if ( _rTempDoubleVal.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 
 		CFloatX fTemp;
 		fTemp.CreateFromDouble( _rTempDoubleVal.u.dVal, static_cast<uint16_t>(_rTempExpBits.u.ui64Val), static_cast<uint16_t>(_rTempManBits.u.ui64Val),
@@ -594,10 +957,23 @@ namespace ee {
 		return EE_EC_SUCCESS;
 	}
 
+	// Deallocates an object.
+	bool CExpEvalContainer::DeallocateObject( CObject * _poObj ) {
+		// Reverse search because it is most likely the immediate deletion of a temporary object.
+		for ( auto I = m_vObjects.size(); I--; ) {
+			if ( m_vObjects[I] == _poObj ) {
+				m_vObjects.erase( m_vObjects.begin() + I );
+				delete _poObj;
+				return true;
+			}
+		}
+		return false;
+	}
+
+
 	// Decodes a string.
-	size_t CExpEvalContainer::CreateString( const char * _pcText ) {
-		std::string sTemp = DecodeEscapes( RemoveQuotes( _pcText, std::strlen( _pcText ) ) );
-		return AddString( sTemp );
+	size_t CExpEvalContainer::CreateString( const std::string &_sText ) {
+		return AddString( _sText );
 	}
 
 	// Decodes an identifier.
@@ -607,7 +983,7 @@ namespace ee {
 
 	// Creates a string expression.
 	void CExpEvalContainer::CreateStringBasicExp( size_t _sStrIndex, YYSTYPE::EE_NODE_DATA &_ndNode ) {
-		_ndNode.nType = EE_N_IDENTIFIER;
+		_ndNode.nType = EE_N_STRING;
 		_ndNode.u.sStringIndex = _sStrIndex;
 		AddNode( _ndNode );
 	}
@@ -633,6 +1009,213 @@ namespace ee {
 		_ndNode.nType = EE_N_ARRAY;
 		_ndNode.u.sStringIndex = _sStrIndex;
 		_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Creates an array/access expression.
+	void CExpEvalContainer::CreateArrayString( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_STRINGARRAY;
+		_ndNode.u.sStringIndex = _sStrIndex;
+		_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
+#ifdef EE_OPTIMIZE_FOR_RUNTIME
+		EE_RESULT rExp;
+		if ( IsConst( m_vNodes[_ndExp.sNodeIndex], rExp ) ) {
+			int64_t i64Val = ConvertResultOrObject( rExp, EE_NC_SIGNED ).u.i64Val;
+			uint64_t ui64Len = 0;
+			size_t sIdx = i64Val;
+			if ( i64Val < 0 ) {
+				ui64Len = CountUtfCodePoints( m_vStrings[_sStrIndex] );
+				// The length must convert to size_t losslessly.
+				if ( ui64Len != static_cast<uint64_t>(static_cast<size_t>(ui64Len)) ) {
+					AddNode( _ndNode );
+					return;
+				}
+				sIdx = CBaseApi::ArrayIndexToLinearIndex( i64Val, static_cast<size_t>(ui64Len) );
+			}
+			else {
+				sIdx = static_cast<size_t>(i64Val);
+				// Conversion must be lossless.
+				if ( i64Val != static_cast<int64_t>(sIdx) ) {
+					AddNode( _ndNode );
+					return;
+				}
+			}
+			
+			_ndNode.u.ui64Val = GetUtf8CodePointByIdx( m_vStrings[_sStrIndex], sIdx );
+			_ndNode.nType = EE_N_NUMERICCONSTANT;
+			_ndNode.v.ncConstType = EE_NC_UNSIGNED;
+
+		}
+#endif	// #ifdef EE_OPTIMIZE_FOR_RUNTIME
+		
+		AddNode( _ndNode );
+	}
+
+	// Creates an array/access expression.
+	void CExpEvalContainer::CreateArrayString( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndExp0, const YYSTYPE::EE_NODE_DATA &_ndExp1, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_STRINGARRAY_EX;
+		_ndNode.u.sStringIndex = _sStrIndex;
+		_ndNode.v.sNodeIndex = _ndExp0.sNodeIndex;
+		_ndNode.w.sNodeIndex = _ndExp1.sNodeIndex;
+#ifdef EE_OPTIMIZE_FOR_RUNTIME
+		EE_RESULT rExp0, rExp1;
+		if ( IsConst( m_vNodes[_ndExp0.sNodeIndex], rExp0 ) && IsConst( m_vNodes[_ndExp1.sNodeIndex], rExp1 ) ) {
+			int64_t i64Val0 = ConvertResultOrObject( rExp0, EE_NC_SIGNED ).u.i64Val;
+			int64_t i64Val1 = ConvertResultOrObject( rExp1, EE_NC_SIGNED ).u.i64Val;
+			uint64_t ui64Len = 0;
+			size_t sIdx0 = i64Val0;
+			if ( i64Val0 < 0 ) {
+				ui64Len = CountUtfCodePoints( m_vStrings[_sStrIndex] );
+				// The length must convert to size_t losslessly.
+				if ( ui64Len != static_cast<uint64_t>(static_cast<size_t>(ui64Len)) ) {
+					AddNode( _ndNode );
+					return;
+				}
+				sIdx0 = CBaseApi::ArrayIndexToLinearIndex( i64Val0, static_cast<size_t>(ui64Len) );
+			}
+			else {
+				sIdx0 = static_cast<size_t>(i64Val0);
+				// Conversion must be lossless.
+				if ( i64Val0 != static_cast<int64_t>(sIdx0) ) {
+					AddNode( _ndNode );
+					return;
+				}
+			}
+
+			size_t sIdx1 = i64Val1;
+			if ( i64Val1 < 0 ) {
+				ui64Len = CountUtfCodePoints( m_vStrings[_sStrIndex] );
+				// The length must convert to size_t losslessly.
+				if ( ui64Len != static_cast<uint64_t>(static_cast<size_t>(ui64Len)) ) {
+					AddNode( _ndNode );
+					return;
+				}
+				sIdx1 = CBaseApi::ArrayIndexToLinearIndex( i64Val1, static_cast<size_t>(ui64Len) );
+			}
+			else {
+				sIdx1 = static_cast<size_t>(i64Val1);
+				// Conversion must be lossless.
+				if ( i64Val1 != static_cast<int64_t>(sIdx1) ) {
+					AddNode( _ndNode );
+					return;
+				}
+			}
+			
+			size_t sStartIdx = GetUtf8CharPosByIdx( m_vStrings[_sStrIndex], sIdx0 );
+			size_t sEndIdx = GetUtf8CharPosByIdx( m_vStrings[_sStrIndex], sIdx1 );
+			std::string sTmp;
+			for ( size_t I = sStartIdx; I < sEndIdx; ++I ) {
+				sTmp.push_back( m_vStrings[_sStrIndex][I] );
+			}
+			_ndNode.nType = EE_N_STRING;
+			_ndNode.u.sStringIndex = AddString( sTmp );
+		}
+#endif	// #ifdef EE_OPTIMIZE_FOR_RUNTIME
+		
+		AddNode( _ndNode );
+	}
+
+	// Creates an array/access expression.
+	void CExpEvalContainer::CreateArrayToEndString( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndExp0, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_STRINGARRAY_EX;
+		_ndNode.u.sStringIndex = _sStrIndex;
+		_ndNode.v.sNodeIndex = _ndExp0.sNodeIndex;
+		_ndNode.w.sNodeIndex = size_t( -1 );
+#ifdef EE_OPTIMIZE_FOR_RUNTIME
+		EE_RESULT rExp0;
+		if ( IsConst( m_vNodes[_ndExp0.sNodeIndex], rExp0 ) ) {
+			int64_t i64Val0 = ConvertResultOrObject( rExp0, EE_NC_SIGNED ).u.i64Val;
+			uint64_t ui64Len = 0;
+			size_t sIdx0 = i64Val0;
+			if ( i64Val0 < 0 ) {
+				ui64Len = CountUtfCodePoints( m_vStrings[_sStrIndex] );
+				// The length must convert to size_t losslessly.
+				if ( ui64Len != static_cast<uint64_t>(static_cast<size_t>(ui64Len)) ) {
+					AddNode( _ndNode );
+					return;
+				}
+				sIdx0 = CBaseApi::ArrayIndexToLinearIndex( i64Val0, static_cast<size_t>(ui64Len) );
+			}
+			else {
+				sIdx0 = static_cast<size_t>(i64Val0);
+				// Conversion must be lossless.
+				if ( i64Val0 != static_cast<int64_t>(sIdx0) ) {
+					AddNode( _ndNode );
+					return;
+				}
+			}
+
+			
+			size_t sStartIdx = GetUtf8CharPosByIdx( m_vStrings[_sStrIndex], sIdx0 );
+			std::string sTmp;
+			for ( size_t I = sStartIdx; I < m_vStrings[_sStrIndex].size(); ++I ) {
+				sTmp.push_back( m_vStrings[_sStrIndex][I] );
+			}
+			_ndNode.nType = EE_N_STRING;
+			_ndNode.u.sStringIndex = AddString( sTmp );
+		}
+#endif	// #ifdef EE_OPTIMIZE_FOR_RUNTIME
+		
+		AddNode( _ndNode );
+	}
+
+	// Creates an array/access expression.
+	void CExpEvalContainer::CreateArrayFromStartString( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndExp0, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_STRINGARRAY_EX;
+		_ndNode.u.sStringIndex = _sStrIndex;
+		_ndNode.v.sNodeIndex = size_t( -1 );
+		_ndNode.w.sNodeIndex = _ndExp0.sNodeIndex;
+#ifdef EE_OPTIMIZE_FOR_RUNTIME
+		EE_RESULT rExp0;
+		if ( IsConst( m_vNodes[_ndExp0.sNodeIndex], rExp0 ) ) {
+			int64_t i64Val0 = ConvertResultOrObject( rExp0, EE_NC_SIGNED ).u.i64Val;
+			uint64_t ui64Len = 0;
+			size_t sIdx0 = i64Val0;
+			if ( i64Val0 < 0 ) {
+				ui64Len = CountUtfCodePoints( m_vStrings[_sStrIndex] );
+				// The length must convert to size_t losslessly.
+				if ( ui64Len != static_cast<uint64_t>(static_cast<size_t>(ui64Len)) ) {
+					AddNode( _ndNode );
+					return;
+				}
+				sIdx0 = CBaseApi::ArrayIndexToLinearIndex( i64Val0, static_cast<size_t>(ui64Len) );
+			}
+			else {
+				sIdx0 = static_cast<size_t>(i64Val0);
+				// Conversion must be lossless.
+				if ( i64Val0 != static_cast<int64_t>(sIdx0) ) {
+					AddNode( _ndNode );
+					return;
+				}
+			}
+			
+			size_t sEndIdx = GetUtf8CharPosByIdx( m_vStrings[_sStrIndex], sIdx0 );
+			std::string sTmp;
+			for ( size_t I = 0; I < sEndIdx; ++I ) {
+				sTmp.push_back( m_vStrings[_sStrIndex][I] );
+			}
+			_ndNode.nType = EE_N_STRING;
+			_ndNode.u.sStringIndex = AddString( sTmp );
+		}
+#endif	// #ifdef EE_OPTIMIZE_FOR_RUNTIME
+		
+		AddNode( _ndNode );
+	}
+
+	// Creates an array/access expression.
+	void CExpEvalContainer::CreateArrayAccess( const YYSTYPE::EE_NODE_DATA &_ndObj, const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_ARRAY_ACCESS;
+		_ndNode.u.sNodeIndex = _ndObj.sNodeIndex;
+		_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Creates an array/access expression.
+	void CExpEvalContainer::CreateArrayAccessEx( const YYSTYPE::EE_NODE_DATA &_ndObj, size_t _sExp0, size_t _sExp1, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_ARRAY_ACCESS_EX;
+		_ndNode.u.sNodeIndex = _ndObj.sNodeIndex;
+		_ndNode.v.sNodeIndex = _sExp0;
+		_ndNode.w.sNodeIndex = _sExp1;
 		AddNode( _ndNode );
 	}
 
@@ -741,31 +1324,29 @@ namespace ee {
 		CreateDouble( _dVal, _ndNode );
 	}
 
+	// Creates a numeric constant.
+	void CExpEvalContainer::CreateNumber( long _lVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		CreateNumber( static_cast<int64_t>(_lVal), _ndNode );
+	}
+
 	// Creates an oct constant.
 	void CExpEvalContainer::CreateOct( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
-		_ndNode.u.ui64Val = StoULL( _pcText, 8 );
-		_ndNode.v.ncConstType = EE_NC_UNSIGNED;
-		AddNode( _ndNode );
-	}
-
-	// Create a character constant.
-	void CExpEvalContainer::CreateChar( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
-		std::string sTemp = _pcText;
-		if ( sTemp[0] == 'L' ) {
-			sTemp.erase( sTemp.begin() );
+		auto aLen = std::strlen( _pcText );
+		if ( aLen > 2 &&
+			_pcText[0] == '0' && (_pcText[1] == 'o' || _pcText[1] == 'O') ) {
+			_ndNode.u.ui64Val = StoULL( _pcText + 2, 8 );
 		}
-		sTemp = RemoveQuotes( sTemp.c_str(), sTemp.size() );
-		_ndNode.nType = EE_N_NUMERICCONSTANT;
-		size_t sLen;
-		_ndNode.u.ui64Val = DecodeEscape( sTemp.c_str(), sTemp.size(), sLen );
+		else {
+			_ndNode.u.ui64Val = StoULL( _pcText, 8 );
+		}
 		_ndNode.v.ncConstType = EE_NC_UNSIGNED;
 		AddNode( _ndNode );
 	}
 
 	// Create a double constant.
 	void CExpEvalContainer::CreateDouble( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
-		CreateDouble( std::atof( _pcText ), _ndNode );
+		CreateDouble( AtoF( _pcText ), _ndNode );
 	}
 
 	// Create a double constant.
@@ -1038,13 +1619,14 @@ namespace ee {
 		auto aFind = m_mCustomVariables.find( _sStrIndex );
 		if ( aFind != m_mCustomVariables.end() ) {
 			if ( aFind->second.bIsConst ) {
-				rExp = ConvertResult( aFind->second.rRes, EE_NC_UNSIGNED );
+				rExp = ConvertResultOrObject( aFind->second.rRes, EE_NC_UNSIGNED );
+				if ( rExp.ncType == EE_NC_INVALID ) { throw EE_EC_INVALIDCAST; }
 				_ndNode.nType = EE_N_NUMBERED_PARM;
 				_ndNode.u.ui64Val = rExp.u.ui64Val;
 				m_sNumberedParmsAccessed.insert( static_cast<size_t>(_ndNode.u.ui64Val) );
 			}
 		}
-		if ( rExp.ncType == EE_NC_INVALID ) {
+		if ( (rExp.ncType) == EE_NC_INVALID ) {
 			m_sNumberedParmsAccessed.insert( static_cast<size_t>(-1) );
 		}
 #else
@@ -1062,12 +1644,13 @@ namespace ee {
 		EE_RESULT rExp;
 		rExp.ncType = EE_NC_INVALID;
 		if ( IsConst( m_vNodes[_ndExp.sNodeIndex], rExp ) ) {
-			rExp = ConvertResult( rExp, EE_NC_UNSIGNED );
+			rExp = ConvertResultOrObject( rExp, EE_NC_UNSIGNED );
+			if ( rExp.ncType == EE_NC_INVALID ) { throw EE_EC_INVALIDCAST; }
 			_ndNode.nType = EE_N_NUMBERED_PARM;
 			_ndNode.u.ui64Val = rExp.u.ui64Val;
 			m_sNumberedParmsAccessed.insert( static_cast<size_t>(_ndNode.u.ui64Val) );
 		}
-		if ( rExp.ncType == EE_NC_INVALID ) {
+		if ( (rExp.ncType) == EE_NC_INVALID ) {
 			m_sNumberedParmsAccessed.insert( static_cast<size_t>(-1) );
 		}
 #else
@@ -1793,7 +2376,39 @@ namespace ee {
 
 	// Creates a foreach declaration.
 	void CExpEvalContainer::CreateForEachDecl( size_t _sStrIndex, size_t _sArrayIdx, YYSTYPE::EE_NODE_DATA &_ndNode ) {
-		_ndNode.nType = EE_N_FOREACHDECL;
+		_ndNode.nType = EE_N_FOREACHDECL0;
+		_ndNode.u.sNodeIndex = _sStrIndex;
+		_ndNode.v.sNodeIndex = _sArrayIdx;
+		CExpEvalContainer::EE_CUSTOM_VAR cvVar = {
+			0,
+			CExpEvalContainer::DefaultResult(),
+		};
+		//m_mCustomVariables.insert_or_assign( _sStrIndex, cvVar );
+		if ( m_mCustomVariables.find( _sStrIndex ) == m_mCustomVariables.end() ) {
+			m_mCustomVariables[_sStrIndex] = cvVar;
+		}
+		AddNode( _ndNode );
+	}
+
+	// Creates a foreach declaration.
+	void CExpEvalContainer::CreateForEachCustomDecl( size_t _sStrIndex, size_t _sArrayIdx, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_FOREACHDECL1;
+		_ndNode.u.sNodeIndex = _sStrIndex;
+		_ndNode.v.sNodeIndex = _sArrayIdx;
+		CExpEvalContainer::EE_CUSTOM_VAR cvVar = {
+			0,
+			CExpEvalContainer::DefaultResult(),
+		};
+		//m_mCustomVariables.insert_or_assign( _sStrIndex, cvVar );
+		if ( m_mCustomVariables.find( _sStrIndex ) == m_mCustomVariables.end() ) {
+			m_mCustomVariables[_sStrIndex] = cvVar;
+		}
+		AddNode( _ndNode );
+	}
+
+	// Creates a foreach declaration.
+	void CExpEvalContainer::CreateForEachStringDecl( size_t _sStrIndex, size_t _sArrayIdx, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_FOREACHDECL2;
 		_ndNode.u.sNodeIndex = _sStrIndex;
 		_ndNode.v.sNodeIndex = _sArrayIdx;
 		CExpEvalContainer::EE_CUSTOM_VAR cvVar = {
@@ -1810,6 +2425,24 @@ namespace ee {
 	// Creates a foreach loop.
 	void CExpEvalContainer::CreateForEachLoop( const YYSTYPE::EE_NODE_DATA &_ndDecl, const YYSTYPE::EE_NODE_DATA &_ndStatements, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_FOREACH;
+		_ndNode.u.sNodeIndex = _ndDecl.sNodeIndex;
+		_ndNode.v.sNodeIndex = _ndStatements.sNodeIndex;
+
+		AddNode( _ndNode );
+	}
+
+	// Creates a foreach loop that runs over objects.
+	void CExpEvalContainer::CreateForEachObjLoop( const YYSTYPE::EE_NODE_DATA &_ndDecl, const YYSTYPE::EE_NODE_DATA &_ndStatements, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_FOREACHOBJ;
+		_ndNode.u.sNodeIndex = _ndDecl.sNodeIndex;
+		_ndNode.v.sNodeIndex = _ndStatements.sNodeIndex;
+
+		AddNode( _ndNode );
+	}
+
+	// Creates a foreach loop that runs over strings.
+	void CExpEvalContainer::CreateForEachStrLoop( const YYSTYPE::EE_NODE_DATA &_ndDecl, const YYSTYPE::EE_NODE_DATA &_ndStatements, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_FOREACHSTR;
 		_ndNode.u.sNodeIndex = _ndDecl.sNodeIndex;
 		_ndNode.v.sNodeIndex = _ndStatements.sNodeIndex;
 
@@ -1998,7 +2631,7 @@ namespace ee {
 				}*/
 				return true;
 			}
-			case EE_N_IDENTIFIER : {
+			case EE_N_STRING : {
 				if ( !m_pfshString ) { return false; }
 				return m_pfshString( m_vStrings[_ndExp.u.sStringIndex], m_uiptrStringData, this, _rRes );
 			}
@@ -2012,14 +2645,41 @@ namespace ee {
 				if ( !m_vArrayData[_ndExp.u.sStringIndex].m_pabBase ) { return false; }
 				EE_RESULT rNode;
 				if ( !ResolveNode( _ndExp.v.sNodeIndex, rNode ) ) { return false; }
-				rNode = ConvertResult( rNode, EE_NC_UNSIGNED );
+				rNode = ConvertResultOrObject( rNode, EE_NC_UNSIGNED );
+				if ( rNode.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				return m_vArrayData[_ndExp.u.sStringIndex].m_pabBase->ReadValue( static_cast<size_t>(rNode.u.ui64Val), _rRes );
+			}
+			case EE_N_STRINGARRAY : {
+				EE_RESULT rNode;
+				if ( !ResolveNode( _ndExp.v.sNodeIndex, rNode ) ) { return false; }
+				rNode = ConvertResultOrObject( rNode, EE_NC_UNSIGNED );
+				if ( rNode.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
+				_rRes.ncType = EE_NC_UNSIGNED;
+				_rRes.u.ui64Val = GetUtf8CodePointByIdx( m_vStrings[_ndExp.u.sStringIndex], static_cast<size_t>(rNode.u.ui64Val) );
+				return true;
+			}
+			case EE_N_ARRAY_ACCESS : {
+				EE_RESULT rBase;
+				if ( !ResolveNode( _ndExp.u.sNodeIndex, rBase ) ) { return false; }
+				if ( rBase.ncType != EE_NC_OBJECT || !rBase.u.poObj ) { _rRes.ncType = EE_NC_INVALID; return false; }
+
+				EE_RESULT rIdx;
+				if ( !ResolveNode( _ndExp.v.sNodeIndex, rIdx ) ) { return false; }
+				if ( rIdx.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
+				rIdx = ConvertResultOrObject( rIdx, EE_NC_SIGNED );
+				if ( rIdx.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
+
+				_rRes = rBase.u.poObj->ArrayAccess( rIdx.u.i64Val );
+				if ( _rRes.ncType == EE_NC_INVALID ) { return false; }
+				return true;
 			}
 			case EE_N_ADDRESS : {
 				if ( !m_pfahAddressHandler ) { return false; }
 				EE_RESULT rLeft;
 				if ( !ResolveNode( _ndExp.u.sNodeIndex, rLeft ) ) { return false; }
-				return m_pfahAddressHandler( ConvertResult( rLeft, EE_NC_UNSIGNED ).u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressData, this, _rRes );
+				EE_RESULT rAddr = ConvertResultOrObject( rLeft, EE_NC_UNSIGNED );
+				if ( rAddr.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
+				return m_pfahAddressHandler( rAddr.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressData, this, _rRes );
 			}
 			case EE_N_MEMBERACCESS : {
 				if ( !m_pfmahMemberAccess ) { return false; }
@@ -2038,14 +2698,16 @@ namespace ee {
 			case EE_N_DYNAMIC_NUMBERED_PARM : {
 				auto aFind = m_mCustomVariables.find( _ndExp.u.sStringIndex );
 				if ( aFind == m_mCustomVariables.end() ) { return false; }
-				EE_RESULT rTemp = ConvertResult( aFind->second.rRes, EE_NC_UNSIGNED );
+				EE_RESULT rTemp = ConvertResultOrObject( aFind->second.rRes, EE_NC_UNSIGNED );
+				if ( rTemp.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				_rRes = GetNumberedParm( static_cast<size_t>(rTemp.u.ui64Val) );
 				return true;
 			}
 			case EE_N_DYNAMIC_NUMBERED_PARM_EXP : {
 				EE_RESULT rTemp;
 				if ( !ResolveNode( _ndExp.u.sNodeIndex, rTemp ) ) { return false; }
-				rTemp = ConvertResult( rTemp, EE_NC_UNSIGNED );
+				rTemp = ConvertResultOrObject( rTemp, EE_NC_UNSIGNED );
+				if ( rTemp.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				_rRes = GetNumberedParm( static_cast<size_t>(rTemp.u.ui64Val) );
 				return true;
 			}
@@ -2066,7 +2728,8 @@ namespace ee {
 				switch ( _ndExp.v.ctCast ) {
 #define EE_CAST( TYPE, CASTTYPE, MEMBER )																\
 	_rRes.ncType = TYPE;																				\
-	_rRes.u.MEMBER = static_cast<CASTTYPE>(ConvertResult( rNode, _rRes.ncType ).u.MEMBER);				\
+	_rRes.u.MEMBER = static_cast<CASTTYPE>(ConvertResultOrObject( rNode, _rRes.ncType ).u.MEMBER);		\
+	if ( _rRes.ncType == EE_NC_INVALID ) { return false; }									\
 	return true;
 					case EE_CT_INT8 : { EE_CAST( EE_NC_SIGNED, int8_t, i64Val ) }
 					case EE_CT_INT16 : { EE_CAST( EE_NC_SIGNED, int16_t, i64Val ) }
@@ -2080,7 +2743,8 @@ namespace ee {
 					case EE_CT_DOUBLE : { EE_CAST( EE_NC_FLOATING, double, dVal ) }
 #undef EE_CAST
 					case EE_CT_FLOAT10 : {
-						rNode = ConvertResult( rNode, EE_NC_FLOATING );
+						rNode = ConvertResultOrObject( rNode, EE_NC_FLOATING );
+						if ( rNode.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 						CFloatX fTemp;
 						fTemp.CreateFromDouble( rNode.u.dVal, 5, 6, true, false );
 						_rRes.ncType = EE_NC_FLOATING;
@@ -2088,7 +2752,8 @@ namespace ee {
 						return true;
 					}
 					case EE_CT_FLOAT11 : {
-						rNode = ConvertResult( rNode, EE_NC_FLOATING );
+						rNode = ConvertResultOrObject( rNode, EE_NC_FLOATING );
+						if ( rNode.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 						CFloatX fTemp;
 						fTemp.CreateFromDouble( rNode.u.dVal, 5, 7, true, false );
 						_rRes.ncType = EE_NC_FLOATING;
@@ -2096,7 +2761,8 @@ namespace ee {
 						return true;
 					}
 					case EE_CT_FLOAT14 : {
-						rNode = ConvertResult( rNode, EE_NC_FLOATING );
+						rNode = ConvertResultOrObject( rNode, EE_NC_FLOATING );
+						if ( rNode.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 						CFloatX fTemp;
 						fTemp.CreateFromDouble( rNode.u.dVal, 5, 10, true, false );
 						_rRes.ncType = EE_NC_FLOATING;
@@ -2104,7 +2770,8 @@ namespace ee {
 						return true;
 					}
 					case EE_CT_FLOAT16 : {
-						rNode = ConvertResult( rNode, EE_NC_FLOATING );
+						rNode = ConvertResultOrObject( rNode, EE_NC_FLOATING );
+						if ( rNode.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 						CFloatX fTemp;
 						fTemp.CreateFromDouble( rNode.u.dVal, 5, 11, true, true );
 						_rRes.ncType = EE_NC_FLOATING;
@@ -2119,18 +2786,18 @@ namespace ee {
 				if ( !ResolveNode( _ndExp.u.sNodeIndex, rLeft ) ) { return false; }
 				// Short-circuit evaluation is not only expected by programmers, it will improve performance in loops.
 				if ( _ndExp.v.ui32Op == CExpEvalParser::token::EE_AND ) {
-					if ( (rLeft.ncType == EE_NC_UNSIGNED && !rLeft.u.ui64Val) ||
-						(rLeft.ncType == EE_NC_SIGNED && !rLeft.u.i64Val) ||
-						(rLeft.ncType == EE_NC_FLOATING && !rLeft.u.dVal) ) {
+					if ( ((rLeft.ncType) == EE_NC_UNSIGNED && !rLeft.u.ui64Val) ||
+						((rLeft.ncType) == EE_NC_SIGNED && !rLeft.u.i64Val) ||
+						((rLeft.ncType) == EE_NC_FLOATING && !rLeft.u.dVal) ) {
 						_rRes.ncType = EE_NC_UNSIGNED;
 						_rRes.u.ui64Val = false;
 						return true;
 					}
 				}
 				else if ( _ndExp.v.ui32Op == CExpEvalParser::token::EE_OR ) {
-					if ( (rLeft.ncType == EE_NC_UNSIGNED && rLeft.u.ui64Val) ||
-						(rLeft.ncType == EE_NC_SIGNED && rLeft.u.i64Val) ||
-						(rLeft.ncType == EE_NC_FLOATING && rLeft.u.dVal) ) {
+					if ( ((rLeft.ncType) == EE_NC_UNSIGNED && rLeft.u.ui64Val) ||
+						((rLeft.ncType) == EE_NC_SIGNED && rLeft.u.i64Val) ||
+						((rLeft.ncType) == EE_NC_FLOATING && rLeft.u.dVal) ) {
 						_rRes.ncType = EE_NC_UNSIGNED;
 						_rRes.u.ui64Val = true;
 						return true;
@@ -2138,8 +2805,10 @@ namespace ee {
 				}
 				if ( !ResolveNode( _ndExp.w.sNodeIndex, rRight ) ) { return false; }
 				_rRes.ncType = GetCastType( rLeft.ncType, rRight.ncType );
-				rLeft = ConvertResult( rLeft, _rRes.ncType );
-				rRight = ConvertResult( rRight, _rRes.ncType );
+				rLeft = ConvertResultOrObject( rLeft, _rRes.ncType );
+				if ( rLeft.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
+				rRight = ConvertResultOrObject( rRight, _rRes.ncType );
+				if ( rRight.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 #define EE_OP( MEMBER, CASE, OP )								\
 	case CASE : {												\
 		_rRes.u.MEMBER = rLeft.u.MEMBER OP rRight.u.MEMBER;		\
@@ -2234,13 +2903,13 @@ namespace ee {
 				EE_RESULT rExp;
 				if ( !ResolveNode( _ndExp.u.sNodeIndex, rExp ) ) { return false; }
 				bool bTrue;
-				if ( rExp.ncType == EE_NC_SIGNED ) {
+				if ( (rExp.ncType) == EE_NC_SIGNED ) {
 					bTrue = rExp.u.i64Val != 0;
 				}
-				else if ( rExp.ncType == EE_NC_UNSIGNED ) {
+				else if ( (rExp.ncType) == EE_NC_UNSIGNED ) {
 					bTrue = rExp.u.ui64Val != 0;
 				}
-				else if ( rExp.ncType == EE_NC_FLOATING ) {
+				else if ( (rExp.ncType) == EE_NC_FLOATING ) {
 					bTrue = rExp.u.dVal != 0.0;
 				}
 				else { return false; }	// Can't happen.
@@ -2311,43 +2980,61 @@ namespace ee {
 			case EE_N_INTRINSIC_1_FLOAT_FLOAT : {
 				EE_RESULT rExp;
 				if ( !ResolveNode( _ndExp.v.sNodeIndex, rExp ) ) { return false; }
+				
+				EE_RESULT eTmp = ConvertResultOrObject( rExp, EE_NC_FLOATING );
+				if ( eTmp.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				_rRes.ncType = EE_NC_FLOATING;
-				_rRes.u.dVal = _ndExp.uFuncPtr.pfIntrins1Float_Float( ConvertResult( rExp, EE_NC_FLOATING ).u.dVal );
+				_rRes.u.dVal = _ndExp.uFuncPtr.pfIntrins1Float_Float( eTmp.u.dVal );
 				return true;
 			}
 			case EE_N_INTRINSIC_1_UNSIGNED_UNSIGNED16 : {
 				EE_RESULT rExp;
 				if ( !ResolveNode( _ndExp.v.sNodeIndex, rExp ) ) { return false; }
+				
+				EE_RESULT eTmp = ConvertResultOrObject( rExp, EE_NC_UNSIGNED );
+				if ( eTmp.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				_rRes.ncType = EE_NC_UNSIGNED;
-				_rRes.u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Unsigned_Unsigned16( static_cast<uint16_t>(ConvertResult( rExp, EE_NC_UNSIGNED ).u.ui64Val) );
+				_rRes.u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Unsigned_Unsigned16( static_cast<uint16_t>(eTmp.u.ui64Val) );
 				return true;
 			}
 			case EE_N_INTRINSIC_1_UNSIGNED_UNSIGNED32 : {
 				EE_RESULT rExp;
 				if ( !ResolveNode( _ndExp.v.sNodeIndex, rExp ) ) { return false; }
+				
+				EE_RESULT eTmp = ConvertResultOrObject( rExp, EE_NC_UNSIGNED );
+				if ( eTmp.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				_rRes.ncType = EE_NC_UNSIGNED;
-				_rRes.u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Unsigned_Unsigned32( static_cast<uint32_t>(ConvertResult( rExp, EE_NC_UNSIGNED ).u.ui64Val) );
+				_rRes.u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Unsigned_Unsigned32( static_cast<uint32_t>(eTmp.u.ui64Val) );
 				return true;
 			}
 			case EE_N_INTRINSIC_1_UNSIGNED_UNSIGNED64 : {
 				EE_RESULT rExp;
 				if ( !ResolveNode( _ndExp.v.sNodeIndex, rExp ) ) { return false; }
+				
+				EE_RESULT eTmp = ConvertResultOrObject( rExp, EE_NC_UNSIGNED );
+				if ( eTmp.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				_rRes.ncType = EE_NC_UNSIGNED;
-				_rRes.u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Unsigned_Unsigned64( ConvertResult( rExp, EE_NC_UNSIGNED ).u.ui64Val );
+				_rRes.u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Unsigned_Unsigned64( eTmp.u.ui64Val );
 				return true;
 			}
 			case EE_N_INTRINSIC_1_BOOL_FLOAT : {
 				EE_RESULT rExp;
 				if ( !ResolveNode( _ndExp.v.sNodeIndex, rExp ) ) { return false; }
+				
+				EE_RESULT eTmp = ConvertResultOrObject( rExp, EE_NC_FLOATING );
+				if ( eTmp.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				_rRes.ncType = EE_NC_UNSIGNED;
-				_rRes.u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Bool_Float( ConvertResult( rExp, EE_NC_FLOATING ).u.dVal );
+				_rRes.u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Bool_Float( eTmp.u.dVal );
 				return true;
 			}
 			case EE_N_INTRINSIC_1_INT_FLOAT : {
 				EE_RESULT rExp;
 				if ( !ResolveNode( _ndExp.v.sNodeIndex, rExp ) ) { return false; }
+				
+				EE_RESULT eTmp = ConvertResultOrObject( rExp, EE_NC_FLOATING );
+				if ( eTmp.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				_rRes.ncType = EE_NC_SIGNED;
-				_rRes.u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Signed_Float( ConvertResult( rExp, EE_NC_FLOATING ).u.dVal );
+				_rRes.u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Signed_Float( eTmp.u.dVal );
 				return true;
 			}
 			case EE_N_INTRINSIC_2 : {
@@ -2362,36 +3049,56 @@ namespace ee {
 				EE_RESULT rExp0, rExp1;
 				if ( !ResolveNode( _ndExp.v.sNodeIndex, rExp0 ) ) { return false; }
 				if ( !ResolveNode( _ndExp.w.sNodeIndex, rExp1 ) ) { return false; }
+				
+				EE_RESULT eTmp0 = ConvertResultOrObject( rExp0, EE_NC_FLOATING );
+				if ( eTmp0.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
+				EE_RESULT eTmp1 = ConvertResultOrObject( rExp1, EE_NC_FLOATING );
+				if ( eTmp1.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				_rRes.ncType = EE_NC_FLOATING;
-				_rRes.u.dVal = _ndExp.uFuncPtr.pfIntrins2Float_Float_Float( ConvertResult( rExp0, EE_NC_FLOATING ).u.dVal,
-					ConvertResult( rExp1, EE_NC_FLOATING ).u.dVal );
+				_rRes.u.dVal = _ndExp.uFuncPtr.pfIntrins2Float_Float_Float( eTmp0.u.dVal,
+					eTmp1.u.dVal );
 				return true;
 			}
 			case EE_N_INTRINSIC_2_FLOAT_FLOAT32_FLOAT32 : {
 				EE_RESULT rExp0, rExp1;
 				if ( !ResolveNode( _ndExp.v.sNodeIndex, rExp0 ) ) { return false; }
 				if ( !ResolveNode( _ndExp.w.sNodeIndex, rExp1 ) ) { return false; }
+				
+				EE_RESULT eTmp0 = ConvertResultOrObject( rExp0, EE_NC_FLOATING );
+				if ( eTmp0.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
+				EE_RESULT eTmp1 = ConvertResultOrObject( rExp1, EE_NC_FLOATING );
+				if ( eTmp1.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				_rRes.ncType = EE_NC_FLOATING;
-				_rRes.u.dVal = _ndExp.uFuncPtr.pfIntrins2Float32_Float32_Float32( static_cast<float>(ConvertResult( rExp0, EE_NC_FLOATING ).u.dVal),
-					static_cast<float>(ConvertResult( rExp1, EE_NC_FLOATING ).u.dVal) );
+				_rRes.u.dVal = _ndExp.uFuncPtr.pfIntrins2Float32_Float32_Float32( static_cast<float>(eTmp0.u.dVal),
+					static_cast<float>(eTmp1.u.dVal) );
 				return true;
 			}
 			case EE_N_INTRINSIC_2_FLOAT_FLOAT80_FLOAT80 : {
 				EE_RESULT rExp0, rExp1;
 				if ( !ResolveNode( _ndExp.v.sNodeIndex, rExp0 ) ) { return false; }
 				if ( !ResolveNode( _ndExp.w.sNodeIndex, rExp1 ) ) { return false; }
+
+				EE_RESULT eTmp0 = ConvertResultOrObject( rExp0, EE_NC_FLOATING );
+				if ( eTmp0.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
+				EE_RESULT eTmp1 = ConvertResultOrObject( rExp1, EE_NC_FLOATING );
+				if ( eTmp1.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				_rRes.ncType = EE_NC_FLOATING;
-				_rRes.u.dVal = _ndExp.uFuncPtr.pfIntrins2Float80_Float80_Float80( ConvertResult( rExp0, EE_NC_FLOATING ).u.dVal,
-					ConvertResult( rExp1, EE_NC_FLOATING ).u.dVal );
+				_rRes.u.dVal = _ndExp.uFuncPtr.pfIntrins2Float80_Float80_Float80( eTmp0.u.dVal,
+					eTmp1.u.dVal );
 				return true;
 			}
 			case EE_N_INTRINSIC_2_FLOAT_FLOAT32_FLOAT80 : {
 				EE_RESULT rExp0, rExp1;
 				if ( !ResolveNode( _ndExp.v.sNodeIndex, rExp0 ) ) { return false; }
 				if ( !ResolveNode( _ndExp.w.sNodeIndex, rExp1 ) ) { return false; }
+
+				EE_RESULT eTmp0 = ConvertResultOrObject( rExp0, EE_NC_FLOATING );
+				if ( eTmp0.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
+				EE_RESULT eTmp1 = ConvertResultOrObject( rExp1, EE_NC_FLOATING );
+				if ( eTmp1.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				_rRes.ncType = EE_NC_FLOATING;
-				_rRes.u.dVal = _ndExp.uFuncPtr.pfIntrins2Float32_Float32_Float80( static_cast<float>(ConvertResult( rExp0, EE_NC_FLOATING ).u.dVal),
-					ConvertResult( rExp1, EE_NC_FLOATING ).u.dVal );
+				_rRes.u.dVal = _ndExp.uFuncPtr.pfIntrins2Float32_Float32_Float80( static_cast<float>(eTmp0.u.dVal),
+					eTmp1.u.dVal );
 				return true;
 			}
 			case EE_N_INTRINSIC_3 : {
@@ -2408,10 +3115,17 @@ namespace ee {
 				if ( !ResolveNode( _ndExp.v.sNodeIndex, rExp0 ) ) { return false; }
 				if ( !ResolveNode( _ndExp.w.sNodeIndex, rExp1 ) ) { return false; }
 				if ( !ResolveNode( _ndExp.x.sNodeIndex, rExp2 ) ) { return false; }
+
+				EE_RESULT eTmp0 = ConvertResultOrObject( rExp0, EE_NC_FLOATING );
+				if ( eTmp0.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
+				EE_RESULT eTmp1 = ConvertResultOrObject( rExp1, EE_NC_FLOATING );
+				if ( eTmp1.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
+				EE_RESULT eTmp2 = ConvertResultOrObject( rExp2, EE_NC_FLOATING );
+				if ( eTmp2.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				_rRes.ncType = EE_NC_FLOATING;
-				_rRes.u.dVal = _ndExp.uFuncPtr.pfIntrins3Float_Float_Float_Float( ConvertResult( rExp0, EE_NC_FLOATING ).u.dVal,
-					ConvertResult( rExp1, EE_NC_FLOATING ).u.dVal,
-					ConvertResult( rExp2, EE_NC_FLOATING ).u.dVal );
+				_rRes.u.dVal = _ndExp.uFuncPtr.pfIntrins3Float_Float_Float_Float( rExp0.u.dVal,
+					rExp1.u.dVal,
+					rExp2.u.dVal );
 				return true;
 			}
 			case EE_N_ASFLOAT : {
@@ -2504,13 +3218,17 @@ namespace ee {
 				EE_RESULT rTempImplied;
 				if ( !ResolveNode( _ndExp.x.sNodeIndex, rTempImplied ) ) { return false; }
 
-				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
-				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
-				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
-				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+				rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+				if ( rTempImplied.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 
 				_rRes.ncType = EE_NC_FLOATING;
 				_rRes.u.dVal = CFloatX::GetMaxForBits( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -2527,13 +3245,17 @@ namespace ee {
 				EE_RESULT rTempImplied;
 				if ( !ResolveNode( _ndExp.x.sNodeIndex, rTempImplied ) ) { return false; }
 
-				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
-				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
-				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
-				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+				rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+				if ( rTempImplied.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 
 				_rRes.ncType = EE_NC_FLOATING;
 				_rRes.u.dVal = CFloatX::GetNormalizedMinForBits( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -2550,13 +3272,17 @@ namespace ee {
 				EE_RESULT rTempImplied;
 				if ( !ResolveNode( _ndExp.x.sNodeIndex, rTempImplied ) ) { return false; }
 
-				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
-				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
-				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
-				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+				rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+				if ( rTempImplied.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 
 				_rRes.ncType = EE_NC_FLOATING;
 				_rRes.u.dVal = CFloatX::GetMinForBits( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -2573,13 +3299,17 @@ namespace ee {
 				EE_RESULT rTempImplied;
 				if ( !ResolveNode( _ndExp.x.sNodeIndex, rTempImplied ) ) { return false; }
 
-				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
-				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
-				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
-				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+				rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+				if ( rTempImplied.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 
 				CFloatX fTemp;
 				fTemp.CreateNaN( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -2598,13 +3328,17 @@ namespace ee {
 				EE_RESULT rTempImplied;
 				if ( !ResolveNode( _ndExp.x.sNodeIndex, rTempImplied ) ) { return false; }
 
-				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
-				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
-				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
-				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+				rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+				if ( rTempImplied.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 
 				CFloatX fTemp;
 				fTemp.CreateInfP( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -2623,13 +3357,17 @@ namespace ee {
 				EE_RESULT rTempImplied;
 				if ( !ResolveNode( _ndExp.x.sNodeIndex, rTempImplied ) ) { return false; }
 
-				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
-				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
-				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
-				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+				rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+				if ( rTempImplied.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 
 				_rRes.ncType = EE_NC_FLOATING;
 				_rRes.u.dVal = CFloatX::GetDenormalizedMaxForBits( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -2646,13 +3384,17 @@ namespace ee {
 				EE_RESULT rTempImplied;
 				if ( !ResolveNode( _ndExp.x.sNodeIndex, rTempImplied ) ) { return false; }
 
-				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
-				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
-				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
-				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+				rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+				if ( rTempImplied.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 
 				CFloatX fOne, fNextUp;
 				fOne.CreateFromDouble( 1.0, static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -2676,14 +3418,19 @@ namespace ee {
 				EE_RESULT rTempDoubleVal;
 				if ( !ResolveNode( _ndExp.y.sNodeIndex, rTempDoubleVal ) ) { return false; }
 
-				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
-				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
-				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
-				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
-				rTempDoubleVal = ConvertResult( rTempDoubleVal, EE_NC_FLOATING );
+				rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+				if ( rTempImplied.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
+				rTempDoubleVal = ConvertResultOrObject( rTempDoubleVal, EE_NC_FLOATING );
+				if ( rTempDoubleVal.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 
 				CFloatX fTemp;
 				fTemp.CreateFromDouble( rTempDoubleVal.u.dVal, static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -2704,14 +3451,19 @@ namespace ee {
 				EE_RESULT rTempDoubleVal;
 				if ( !ResolveNode( _ndExp.y.sNodeIndex, rTempDoubleVal ) ) { return false; }
 
-				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
-				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
-				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
-				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
-				rTempDoubleVal = ConvertResult( rTempDoubleVal, EE_NC_FLOATING );
+				rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+				if ( rTempImplied.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
+				rTempDoubleVal = ConvertResultOrObject( rTempDoubleVal, EE_NC_FLOATING );
+				if ( rTempDoubleVal.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 
 				CFloatX fTemp;
 				fTemp.CreateFromDouble( rTempDoubleVal.u.dVal, static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -2732,14 +3484,19 @@ namespace ee {
 				EE_RESULT rTempDoubleVal;
 				if ( !ResolveNode( _ndExp.y.sNodeIndex, rTempDoubleVal ) ) { return false; }
 
-				rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+				rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+				if ( rTempSignBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { return false; }
-				rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+				rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+				if ( rTempExpBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { return false; }
-				rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+				rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+				if ( rTempManBits.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { return false; }
-				rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
-				rTempDoubleVal = ConvertResult( rTempDoubleVal, EE_NC_FLOATING );
+				rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+				if ( rTempImplied.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
+				rTempDoubleVal = ConvertResultOrObject( rTempDoubleVal, EE_NC_FLOATING );
+				if ( rTempDoubleVal.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 
 				CFloatX fTemp;
 				fTemp.CreateFromDouble( rTempDoubleVal.u.dVal, static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -2764,13 +3521,13 @@ namespace ee {
 						// ==== Check the loop condition.
 						EE_RESULT rTemp;
 						if ( !ResolveNode( _ndExp.u.sNodeIndex, rTemp ) ) { return false; }
-						if ( rTemp.ncType == EE_NC_FLOATING ) {
+						if ( (rTemp.ncType) == EE_NC_FLOATING ) {
 							if ( !rTemp.u.dVal ) { break; }
 						}
-						else if ( rTemp.ncType == EE_NC_UNSIGNED ) {
+						else if ( (rTemp.ncType) == EE_NC_UNSIGNED ) {
 							if ( !rTemp.u.ui64Val ) { break; }
 						}
-						else if ( rTemp.ncType == EE_NC_SIGNED ) {
+						else if ( (rTemp.ncType) == EE_NC_SIGNED ) {
 							if ( !rTemp.u.i64Val ) { break; }
 						}
 						else { return false; }
@@ -2808,13 +3565,13 @@ namespace ee {
 						// ==== Check the loop condition.
 						EE_RESULT rTemp;
 						if ( !ResolveNode( _ndExp.v.sNodeIndex, rTemp ) ) { return false; }
-						if ( rTemp.ncType == EE_NC_FLOATING ) {
+						if ( (rTemp.ncType) == EE_NC_FLOATING ) {
 							if ( !rTemp.u.dVal ) { break; }
 						}
-						else if ( rTemp.ncType == EE_NC_UNSIGNED ) {
+						else if ( (rTemp.ncType) == EE_NC_UNSIGNED ) {
 							if ( !rTemp.u.ui64Val ) { break; }
 						}
-						else if ( rTemp.ncType == EE_NC_SIGNED ) {
+						else if ( (rTemp.ncType) == EE_NC_SIGNED ) {
 							if ( !rTemp.u.i64Val ) { break; }
 						}
 						else { return false; }
@@ -2862,13 +3619,13 @@ namespace ee {
 						// ==== Check the loop condition.
 						EE_RESULT rTemp;
 						if ( !ResolveNode( _ndExp.u.sNodeIndex, rTemp ) ) { return false; }
-						if ( rTemp.ncType == EE_NC_FLOATING ) {
+						if ( (rTemp.ncType) == EE_NC_FLOATING ) {
 							if ( !rTemp.u.dVal ) { break; }
 						}
-						else if ( rTemp.ncType == EE_NC_UNSIGNED ) {
+						else if ( (rTemp.ncType) == EE_NC_UNSIGNED ) {
 							if ( !rTemp.u.ui64Val ) { break; }
 						}
-						else if ( rTemp.ncType == EE_NC_SIGNED ) {
+						else if ( (rTemp.ncType) == EE_NC_SIGNED ) {
 							if ( !rTemp.u.i64Val ) { break; }
 						}
 						else { return false; }
@@ -2886,8 +3643,18 @@ namespace ee {
 				}
 				return true;
 			}
-			case EE_N_FOREACHDECL : {
+			case EE_N_FOREACHDECL0 : {
 				// Fall-through.  Loop is handled in EE_N_FOREACH.
+				// This is just so that the parser parses the declaration before it parses the statements that follow.
+				return true;
+			}
+			case EE_N_FOREACHDECL1 : {
+				// Fall-through.  Loop is handled in EE_N_FOREACHOBJ.
+				// This is just so that the parser parses the declaration before it parses the statements that follow.
+				return true;
+			}
+			case EE_N_FOREACHDECL2 : {
+				// Fall-through.  Loop is handled in EE_N_FOREACHSTR.
 				// This is just so that the parser parses the declaration before it parses the statements that follow.
 				return true;
 			}
@@ -2917,19 +3684,83 @@ namespace ee {
 				}
 				return true;
 			}
+			case EE_N_FOREACHOBJ : {
+				YYSTYPE::EE_NODE_DATA & ndDeclNode = m_vNodes[_ndExp.u.sNodeIndex];
+				// The custom_var part.
+				auto aCusVar = m_mCustomVariables.find( ndDeclNode.v.sNodeIndex );
+				if ( aCusVar == m_mCustomVariables.end() ) { return false; }
+				if ( aCusVar->second.rRes.ncType != EE_NC_OBJECT || aCusVar->second.rRes.u.poObj == nullptr ) { return false; }
+
+				// The identifier part.
+				auto aFind = m_mCustomVariables.find( ndDeclNode.u.sNodeIndex );
+				if ( aFind == m_mCustomVariables.end() ) { return false; }
+
+
+				size_t stStackIdx = m_vLoopStack.size();
+				{
+					EE_LOOP_STACK_ADDER lsaLoopStack( m_vLoopStack, EE_LOOP_STACK() );
+					uint64_t ui64Total = ConvertResultOrObject( aCusVar->second.rRes.u.poObj->Len(), EE_NC_UNSIGNED ).u.ui64Val;
+					if ( ui64Total != static_cast<int64_t>(static_cast<size_t>(ui64Total)) ) { return false; }
+					for ( size_t I = 0; I < ui64Total; ++I ) {
+						aFind->second.rRes = aCusVar->second.rRes.u.poObj->ArrayAccess( I );
+						if ( aFind->second.rRes.ncType == EE_NC_INVALID ) { return false; }
+
+						// ==== Execute body.
+						if ( !ResolveNode( _ndExp.v.sNodeIndex, _rRes ) ) { return false; }
+						if ( m_vLoopStack[stStackIdx].bBreak ) { break; }
+						m_vLoopStack[stStackIdx].bContinue = false;
+						// ==================
+
+						// Last.
+						++m_vLoopStack[stStackIdx].sCurIdx;
+					}
+				}
+				return true;
+			}
+			case EE_N_FOREACHSTR : {
+				YYSTYPE::EE_NODE_DATA & ndDeclNode = m_vNodes[_ndExp.u.sNodeIndex];
+				// The string part.
+				if ( ndDeclNode.v.sNodeIndex >= m_vStrings.size() ) { return false; }
+
+				// The identifier part.
+				auto aFind = m_mCustomVariables.find( ndDeclNode.u.sNodeIndex );
+				if ( aFind == m_mCustomVariables.end() ) { return false; }
+
+
+				size_t stStackIdx = m_vLoopStack.size();
+				{
+					EE_LOOP_STACK_ADDER lsaLoopStack( m_vLoopStack, EE_LOOP_STACK() );
+					size_t sSize;
+					aFind->second.rRes.ncType = EE_NC_UNSIGNED;
+					for ( size_t I = 0; I < m_vStrings[ndDeclNode.v.sNodeIndex].size(); I += sSize ) {
+						aFind->second.rRes.u.ui64Val = NextUtf8Char( &m_vStrings[ndDeclNode.v.sNodeIndex][I], m_vStrings[ndDeclNode.v.sNodeIndex].size() - I, &sSize );
+						if ( !sSize ) { break; }
+
+						// ==== Execute body.
+						if ( !ResolveNode( _ndExp.v.sNodeIndex, _rRes ) ) { return false; }
+						if ( m_vLoopStack[stStackIdx].bBreak ) { break; }
+						m_vLoopStack[stStackIdx].bContinue = false;
+						// ==================
+
+						// Last.
+						++m_vLoopStack[stStackIdx].sCurIdx;
+					}
+				}
+				return true;
+			}
 			case EE_N_IF : {
 				EE_RESULT rTemp;
 				if ( !ResolveNode( _ndExp.u.sNodeIndex, rTemp ) ) { return false; }
 
 				// ==== Evaluate the condition.
 				bool bResult = false;
-				if ( rTemp.ncType == EE_NC_FLOATING ) {
+				if ( (rTemp.ncType) == EE_NC_FLOATING ) {
 					bResult = rTemp.u.dVal ? true : false;
 				}
-				else if ( rTemp.ncType == EE_NC_UNSIGNED ) {
+				else if ( (rTemp.ncType) == EE_NC_UNSIGNED ) {
 					bResult = !!rTemp.u.ui64Val;
 				}
-				else if ( rTemp.ncType == EE_NC_SIGNED ) {
+				else if ( (rTemp.ncType) == EE_NC_SIGNED ) {
 					bResult = !!rTemp.u.i64Val;
 				}
 				// ============================
@@ -2990,8 +3821,10 @@ namespace ee {
 
 #define EE_CASE_PREP																						\
 	EE_NUM_CONSTANTS ncTemp = GetCastType( aFind->second.rRes.ncType, _rRes.ncType );						\
-	aFind->second.rRes = ConvertResult( aFind->second.rRes, ncTemp );										\
-	_rRes = ConvertResult( _rRes, ncTemp )
+	aFind->second.rRes = ConvertResultOrObject( aFind->second.rRes, ncTemp );								\
+	if ( aFind->second.rRes.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }		\
+	_rRes = ConvertResultOrObject( _rRes, ncTemp );															\
+	if ( _rRes.ncType == EE_NC_INVALID ) return false 
 
 #define EE_HANDLE_CASE( CASE, VAR, OP )																		\
 	case CASE : {																							\
@@ -3104,7 +3937,7 @@ namespace ee {
 				return true;
 			}
 			case EE_N_CREATE_ARRAY : {
-				if ( _rRes.ncType == EE_NC_INVALID ) {
+				if ( (_rRes.ncType) == EE_NC_INVALID ) {
 					// If this is the first statement in the entire script.
 					_rRes.ncType = EE_NC_UNSIGNED;
 					_rRes.u.ui64Val = 0;
@@ -3119,7 +3952,8 @@ namespace ee {
 					// The array object exists.  Adjust its size and fill it.
 					EE_RESULT rTemp;
 					if ( !ResolveNode( _ndExp.z.sNodeIndex, rTemp ) ) { return false; }
-					rTemp = ConvertResult( rTemp, EE_NC_UNSIGNED );
+					rTemp = ConvertResultOrObject( rTemp, EE_NC_UNSIGNED );
+					if ( rTemp.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 					m_vArrayData[_ndExp.y.sNodeIndex].m_pabBase->SetSize( static_cast<size_t>(rTemp.u.ui64Val) );
 
 
@@ -3142,7 +3976,8 @@ namespace ee {
 			case EE_N_ARRAY_ASSIGNMENT : {
 				EE_RESULT rTemp;
 				if ( !ResolveNode( _ndExp.u.sNodeIndex, rTemp ) ) { return false; }
-				rTemp = ConvertResult( rTemp, EE_NC_UNSIGNED );
+				rTemp = ConvertResultOrObject( rTemp, EE_NC_UNSIGNED );
+				if ( rTemp.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 
 				switch ( _ndExp.v.ui32Op ) {
 					case '=' : {
@@ -3216,6 +4051,13 @@ namespace ee {
 
 		_rFinalResult = DefaultResult();
 		m_vLoopStack.clear();
+		/*if ( m_vStrings.size() > m_vStringObjectsU8.size() ) {
+			m_vStringObjectsU8.resize( m_vStrings.size() );
+		}
+		if ( m_vStringObjectsU8.size() < m_vStrings.size() ) {
+			_ecError = EE_EC_OUTOFMEMORY;
+			return false;
+		}*/
 
 
 #define EE_PUSH_EXP( IDX, RES )						if ( sParmIdx == EE_MAX_SUB_EXPRESSIONS ) { _ecError = EE_EC_RESULTSTOOSHORT; m_vLoopStack.clear(); return false; }	\
@@ -3256,26 +4098,23 @@ namespace ee {
 					case EE_N_NUMERICCONSTANT : {
 						(*soProcessMe.prResult).ncType = _ndExp.v.ncConstType;
 						(*soProcessMe.prResult).u.ui64Val = _ndExp.u.ui64Val;
-						/*switch ( _ndExp.v.ncConstType ) {
-							case EE_NC_UNSIGNED : {
-								(*soProcessMe.prResult).u.ui64Val = _ndExp.u.ui64Val;
-								continue;
-							}
-							case EE_NC_SIGNED : {
-								(*soProcessMe.prResult).u.i64Val = _ndExp.u.i64Val;
-								continue;
-							}
-							case EE_NC_FLOATING : {
-								(*soProcessMe.prResult).u.dVal = _ndExp.u.dVal;
-								continue;
-							}
-						}*/
 						// Minor optimization.
 						EE_DONE;
 					}
-					case EE_N_IDENTIFIER : {
-						if ( !m_pfshString ) { EE_ERROR( EE_EC_NOIDENTIFIERHANDLER ); }
-						if ( !m_pfshString( m_vStrings[_ndExp.u.sStringIndex], m_uiptrStringData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_IDENTHANDLERFAILED ); }
+					case EE_N_STRING : {
+						if ( m_pfshString ) {
+							 if ( !m_pfshString( m_vStrings[_ndExp.u.sStringIndex], m_uiptrStringData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_IDENTHANDLERFAILED ); }
+						}
+						else {
+							// Return a string object reference.
+							//if ( !CreateStringRef( _ndExp.u.sStringIndex ) ) { EE_ERROR( EE_EC_OUTOFMEMORY ); }
+							CString * psString = AllocateObject<CString>();
+							if ( !psString ) { EE_ERROR( EE_EC_OUTOFMEMORY ); }
+							psString->SetString( m_vStrings[_ndExp.u.sStringIndex] );
+							// _ndExp.u.sStringIndex now usable in either m_vStrings or m_vStringObjectsU8;
+							(*soProcessMe.prResult).ncType = EE_NC_OBJECT;
+							(*soProcessMe.prResult).u.poObj = psString;
+						}
 						// Minor optimization.
 						EE_DONE;
 					}
@@ -3283,13 +4122,56 @@ namespace ee {
 						auto aFind = m_mCustomVariables.find( _ndExp.u.sStringIndex );
 						if ( aFind == m_mCustomVariables.end() ) { EE_ERROR( EE_EC_VARNOTFOUND ); }
 						(*soProcessMe.prResult) = aFind->second.rRes;
-						if ( (*soProcessMe.prResult).ncType == EE_NC_INVALID ) { EE_ERROR( EE_EC_VARHASBADTYPE ); }
+						if ( ((*soProcessMe.prResult).ncType) == EE_NC_INVALID ) { EE_ERROR( EE_EC_VARHASBADTYPE ); }
 						// Minor optimization.
 						EE_DONE;
 					}
 					case EE_N_ARRAY : {
 						if ( !m_vArrayData[_ndExp.u.sStringIndex].m_pabBase ) { EE_ERROR( EE_EC_PROCESSINGERROR ); }
 						EE_PUSH( _ndExp.v.sNodeIndex );
+						continue;
+					}
+					case EE_N_STRINGARRAY : {
+						EE_PUSH( _ndExp.v.sNodeIndex );
+						continue;
+					}
+					case EE_N_STRINGARRAY_EX : {
+						if ( _ndExp.v.sNodeIndex != size_t( -1 ) ) {
+							EE_PUSH( _ndExp.v.sNodeIndex );
+						}
+						else {
+							m_vStack[sThisIndex].sSubResults[sParmIdx++].ncType = EE_NC_INVALID;
+						}
+						if ( _ndExp.w.sNodeIndex != size_t( -1 ) ) {
+							EE_PUSH( _ndExp.w.sNodeIndex );
+						}
+						else {
+							m_vStack[sThisIndex].sSubResults[sParmIdx++].ncType = EE_NC_INVALID;
+						}
+
+						continue;
+					}
+					case EE_N_ARRAY_ACCESS : {
+						EE_PUSH( _ndExp.u.sNodeIndex );
+						EE_PUSH( _ndExp.v.sNodeIndex );
+
+						continue;
+					}
+					case EE_N_ARRAY_ACCESS_EX : {
+						EE_PUSH( _ndExp.u.sNodeIndex );
+						if ( _ndExp.v.sNodeIndex != size_t( -1 ) ) {
+							EE_PUSH( _ndExp.v.sNodeIndex );
+						}
+						else {
+							m_vStack[sThisIndex].sSubResults[sParmIdx++].ncType = EE_NC_INVALID;
+						}
+						if ( _ndExp.w.sNodeIndex != size_t( -1 ) ) {
+							EE_PUSH( _ndExp.w.sNodeIndex );
+						}
+						else {
+							m_vStack[sThisIndex].sSubResults[sParmIdx++].ncType = EE_NC_INVALID;
+						}
+
 						continue;
 					}
 					case EE_N_ADDRESS : {
@@ -3315,8 +4197,9 @@ namespace ee {
 					case EE_N_DYNAMIC_NUMBERED_PARM : {
 						auto aFind = m_mCustomVariables.find( _ndExp.u.sStringIndex );
 						if ( aFind == m_mCustomVariables.end() ) { EE_ERROR( EE_EC_VARNOTFOUND ); }
-						if ( aFind->second.rRes.ncType == EE_NC_INVALID ) { EE_ERROR( EE_EC_VARHASBADTYPE ); }
-						EE_RESULT rTemp = ConvertResult( aFind->second.rRes, EE_NC_UNSIGNED );
+						if ( (aFind->second.rRes.ncType) == EE_NC_INVALID ) { EE_ERROR( EE_EC_VARHASBADTYPE ); }
+						EE_RESULT rTemp = ConvertResultOrObject( aFind->second.rRes, EE_NC_UNSIGNED );
+						if ( rTemp.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult) = GetNumberedParm( static_cast<size_t>(rTemp.u.ui64Val) );
 						EE_DONE;
 					}
@@ -3344,7 +4227,7 @@ namespace ee {
 							if ( _ndExp.v.ui32Op == CExpEvalParser::token::EE_AND || _ndExp.v.ui32Op == CExpEvalParser::token::EE_OR ) {
 								EE_SEND_BACK;	// Breaks.
 							}
-							// No short-circuiting, so just push the 2nd parameter and avoid wasting time coing back to this point.
+							// No short-circuiting, so just push the 2nd parameter and avoid wasting time coming back to this point.
 							EE_PUSH( _ndExp.w.sNodeIndex );
 							continue;
 						}
@@ -3354,9 +4237,9 @@ namespace ee {
 							EE_RESULT & rLeft = soProcessMe.sSubResults[0];
 							// Short-circuit evaluation is not only expected by programmers, it will improve performance in loops.
 							if ( _ndExp.v.ui32Op == CExpEvalParser::token::EE_AND ) {
-								if ( (rLeft.ncType == EE_NC_UNSIGNED && !rLeft.u.ui64Val) ||
-									(rLeft.ncType == EE_NC_SIGNED && !rLeft.u.i64Val) ||
-									(rLeft.ncType == EE_NC_FLOATING && !rLeft.u.dVal) ) {
+								if ( ((rLeft.ncType) == EE_NC_UNSIGNED && !rLeft.u.ui64Val) ||
+									((rLeft.ncType) == EE_NC_SIGNED && !rLeft.u.i64Val) ||
+									((rLeft.ncType) == EE_NC_FLOATING && !rLeft.u.dVal) ) {
 									(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
 									(*soProcessMe.prResult).u.ui64Val = false;
 									// Minor optimization.
@@ -3364,9 +4247,9 @@ namespace ee {
 								}
 							}
 							else if ( _ndExp.v.ui32Op == CExpEvalParser::token::EE_OR ) {
-								if ( (rLeft.ncType == EE_NC_UNSIGNED && rLeft.u.ui64Val) ||
-									(rLeft.ncType == EE_NC_SIGNED && rLeft.u.i64Val) ||
-									(rLeft.ncType == EE_NC_FLOATING && rLeft.u.dVal) ) {
+								if ( ((rLeft.ncType) == EE_NC_UNSIGNED && rLeft.u.ui64Val) ||
+									((rLeft.ncType) == EE_NC_SIGNED && rLeft.u.i64Val) ||
+									((rLeft.ncType) == EE_NC_FLOATING && rLeft.u.dVal) ) {
 									(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
 									(*soProcessMe.prResult).u.ui64Val = true;
 									// Minor optimization.
@@ -3384,13 +4267,13 @@ namespace ee {
 						}
 						EE_RESULT & rExp = soProcessMe.sSubResults[0];
 						bool bTrue;
-						if ( rExp.ncType == EE_NC_SIGNED ) {
+						if ( (rExp.ncType) == EE_NC_SIGNED ) {
 							bTrue = rExp.u.i64Val != 0;
 						}
-						else if ( rExp.ncType == EE_NC_UNSIGNED ) {
+						else if ( (rExp.ncType) == EE_NC_UNSIGNED ) {
 							bTrue = rExp.u.ui64Val != 0;
 						}
-						else if ( rExp.ncType == EE_NC_FLOATING ) {
+						else if ( (rExp.ncType) == EE_NC_FLOATING ) {
 							bTrue = rExp.u.dVal != 0.0;
 						}
 						else { EE_ERROR( EE_EC_INVALIDTREE ); }	// Can't happen.
@@ -3558,8 +4441,18 @@ namespace ee {
 						EE_BEGIN_LOOP;
 						continue;
 					}
-					case EE_N_FOREACHDECL : {
+					case EE_N_FOREACHDECL0 : {
 						// Fall-through.  Loop is handled in EE_N_FOREACH.
+						// This is just so that the parser parses the declaration before it parses the statements that follow.
+						EE_DONE;
+					}
+					case EE_N_FOREACHDECL1 : {
+						// Fall-through.  Loop is handled in EE_N_FOREACHOBJ.
+						// This is just so that the parser parses the declaration before it parses the statements that follow.
+						EE_DONE;
+					}
+					case EE_N_FOREACHDECL2 : {
+						// Fall-through.  Loop is handled in EE_N_FOREACHSTR.
 						// This is just so that the parser parses the declaration before it parses the statements that follow.
 						EE_DONE;
 					}
@@ -3573,6 +4466,67 @@ namespace ee {
 						(*soProcessMe.prResult) = DefaultResult();
 						EE_BEGIN_LOOP;
 						continue;
+					}
+					case EE_N_FOREACHOBJ : {
+						YYSTYPE::EE_NODE_DATA & ndDeclNode = m_vNodes[_ndExp.u.sNodeIndex];
+						// The custom_var part.
+						auto aCusVar = m_mCustomVariables.find( ndDeclNode.v.sNodeIndex );
+						if ( aCusVar == m_mCustomVariables.end() ) { EE_ERROR( EE_EC_INVALIDLOOPDECL ); }
+						if ( aCusVar->second.rRes.ncType != EE_NC_OBJECT || aCusVar->second.rRes.u.poObj == nullptr ) { EE_ERROR( EE_EC_INVALIDLOOPDECL ); }
+
+						// The identifier part.
+						auto aFind = m_mCustomVariables.find( ndDeclNode.u.sNodeIndex );
+						if ( aFind == m_mCustomVariables.end() ) { EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						soProcessMe.prLoopCustomVarResult = &aFind->second.rRes;
+						soProcessMe.prLoopObject = &aCusVar->second.rRes;
+						(*soProcessMe.prResult) = DefaultResult();
+						EE_BEGIN_LOOP;
+						continue;
+					}
+					case EE_N_FOREACHSTR : {
+						YYSTYPE::EE_NODE_DATA & ndDeclNode = m_vNodes[_ndExp.u.sNodeIndex];
+						// The string part.
+						if ( ndDeclNode.v.sNodeIndex >= m_vStrings.size() ) { EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						// The identifier part.
+						auto aFind = m_mCustomVariables.find( ndDeclNode.u.sNodeIndex );
+						if ( aFind == m_mCustomVariables.end() ) { EE_ERROR( EE_EC_PROCESSINGERROR ); }
+
+						soProcessMe.prLoopCustomVarResult = &aFind->second.rRes;
+						soProcessMe.sForEachString = ndDeclNode.v.sNodeIndex;
+						soProcessMe.sForEachStringPos = 0;
+						(*soProcessMe.prResult) = DefaultResult();
+						EE_BEGIN_LOOP;
+						continue;
+				
+						/*YYSTYPE::EE_NODE_DATA & ndDeclNode = m_vNodes[_ndExp.u.sNodeIndex];
+						// The string part.
+						if ( ndDeclNode.v.sNodeIndex >= m_vStrings.size() ) { return false; }
+
+						// The identifier part.
+						auto aFind = m_mCustomVariables.find( ndDeclNode.u.sNodeIndex );
+						if ( aFind == m_mCustomVariables.end() ) { return false; }
+
+
+						size_t stStackIdx = m_vLoopStack.size();
+						{
+							EE_LOOP_STACK_ADDER lsaLoopStack( m_vLoopStack, EE_LOOP_STACK() );
+							size_t sSize;
+							aFind->second.rRes.ncType = EE_NC_UNSIGNED;
+							for ( size_t I = 0; I < m_vStrings[ndDeclNode.v.sNodeIndex].size(); I += sSize ) {
+								aFind->second.rRes.u.ui64Val = NextUtf8Char( &m_vStrings[ndDeclNode.v.sNodeIndex][I], m_vStrings[ndDeclNode.v.sNodeIndex].size() - I, &sSize );
+								if ( !sSize ) { break; }
+
+								// ==== Execute body.
+								if ( !ResolveNode( _ndExp.v.sNodeIndex, _rRes ) ) { return false; }
+								if ( m_vLoopStack[stStackIdx].bBreak ) { break; }
+								m_vLoopStack[stStackIdx].bContinue = false;
+								// ==================
+
+								// Last.
+								++m_vLoopStack[stStackIdx].sCurIdx;
+							}
+						}
+						return true;*/
 					}
 					case EE_N_IF : {
 						EE_PUSH( _ndExp.u.sNodeIndex );
@@ -3697,7 +4651,7 @@ namespace ee {
 						EE_DONE;
 					}
 					case EE_N_CREATE_ARRAY : {
-						if ( (*soProcessMe.prResult).ncType == EE_NC_INVALID ) {
+						if ( ((*soProcessMe.prResult).ncType) == EE_NC_INVALID ) {
 							// If this is the first statement in the entire script.
 							(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
 							(*soProcessMe.prResult).u.ui64Val = 0;
@@ -3722,12 +4676,126 @@ namespace ee {
 			else {
 				switch ( _ndExp.nType ) {
 					case EE_N_ARRAY : {
-						EE_RESULT rNode = ConvertResult( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						EE_RESULT rNode = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						if ( rNode.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( !m_vArrayData[_ndExp.u.sStringIndex].m_pabBase->ReadValue( static_cast<size_t>(rNode.u.ui64Val), (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_BADARRAYIDX ); }
 						break;
 					}
+					case EE_N_STRINGARRAY : {
+						EE_RESULT rNode = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						if ( rNode.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+						(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
+						(*soProcessMe.prResult).u.ui64Val = GetUtf8CodePointByIdx( m_vStrings[_ndExp.u.sStringIndex], static_cast<size_t>(rNode.u.ui64Val) );
+						EE_DONE;
+					}
+					case EE_N_STRINGARRAY_EX : {
+						//if ( soProcessMe.sSubResults[0].ncType != EE_NC_OBJECT || !soProcessMe.sSubResults[0].u.poObj ) { EE_ERROR( EE_EC_ARRAY_FROM_NON_OBJECT ); }
+						(*soProcessMe.prResult).ncType = EE_NC_INVALID;
+						int64_t i64CodePoints = -1;
+
+						uint32_t ui32Flags = 0;
+						EE_RESULT rIdx;
+						int64_t i64StartIdx = 0;
+						size_t sStart = 0;
+						if ( soProcessMe.sSubResults[1].ncType != EE_NC_INVALID ) {
+							rIdx = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_SIGNED );
+							if ( rIdx.ncType == EE_NC_INVALID ) { EE_ERROR( EE_EC_INVALIDCAST ); }
+							i64StartIdx = soProcessMe.sSubResults[0].u.i64Val;
+
+							if ( i64StartIdx < 0 ) {
+								if ( i64CodePoints == -1 ) {
+									i64CodePoints = CountUtfCodePoints( m_vStrings[_ndExp.u.sStringIndex] );
+									if ( static_cast<size_t>(i64CodePoints) != i64CodePoints ) { EE_ERROR( EE_EC_BADARRAYIDX ); }
+								}
+								sStart = CBaseApi::ArrayIndexToLinearIndex( i64StartIdx, static_cast<size_t>(i64CodePoints) );
+							}
+							else {
+								sStart = static_cast<size_t>(i64StartIdx);
+								if ( static_cast<int64_t>(sStart) != i64StartIdx ) { EE_ERROR( EE_EC_BADARRAYIDX ); }
+							}
+							
+							//if ( sStart == EE_INVALID_IDX ) { sStart = m_vStrings[_ndExp.u.sStringIndex].size(); }
+						}
+						ui32Flags |= CObject::EE_AEF_START;
+						int64_t i64EndIdx = -1;
+						size_t sEnd;
+						if ( soProcessMe.sSubResults[2].ncType != EE_NC_INVALID ) {
+							rIdx = ConvertResultOrObject( soProcessMe.sSubResults[1], EE_NC_SIGNED );
+							if ( rIdx.ncType == EE_NC_INVALID ) { EE_ERROR( EE_EC_INVALIDCAST ); }
+							i64EndIdx = soProcessMe.sSubResults[1].u.i64Val;
+							if ( i64EndIdx < 0 ) {
+								if ( i64CodePoints == -1 ) {
+									i64CodePoints = CountUtfCodePoints( m_vStrings[_ndExp.u.sStringIndex] );
+									if ( static_cast<size_t>(i64CodePoints) != i64CodePoints ) { EE_ERROR( EE_EC_BADARRAYIDX ); }
+								}
+								sEnd = CBaseApi::ArrayIndexToLinearIndex( i64EndIdx, static_cast<size_t>(i64CodePoints) );
+								//if ( sEnd == EE_INVALID_IDX ) { sEnd = 0; }
+							}
+							else {
+								sEnd = static_cast<size_t>(i64EndIdx);
+								if ( static_cast<int64_t>(sEnd) != i64EndIdx ) { EE_ERROR( EE_EC_BADARRAYIDX ); }
+							}
+							
+
+							sEnd = GetUtf8CharPosByIdx( m_vStrings[_ndExp.u.sStringIndex], sEnd );
+						}
+						else {
+							sEnd = m_vStrings[_ndExp.u.sStringIndex].size();
+						}
+
+						sStart = GetUtf8CharPosByIdx( m_vStrings[_ndExp.u.sStringIndex], sStart );
+						//(*soProcessMe.prResult) = soProcessMe.sSubResults[0].u.poObj->ArrayAccessEx( i64StartIdx, i64EndIdx, ui32Flags );
+						CString * psObj = reinterpret_cast<CString *>(AllocateObject<CString>());
+						if ( psObj ) {
+							std::string sTmp;
+							for ( size_t I = sStart; I < sEnd; ++I ) {
+								sTmp.push_back( m_vStrings[_ndExp.u.sStringIndex][I] );
+							}
+							psObj->SetString( sTmp );
+							(*soProcessMe.prResult) = psObj->CreateResult();
+						}
+						if ( (*soProcessMe.prResult).ncType == EE_NC_INVALID ) { EE_ERROR( EE_EC_INVALIDCAST ); }
+						EE_DONE;
+					}
+					case EE_N_ARRAY_ACCESS : {
+						if ( soProcessMe.sSubResults[0].ncType != EE_NC_OBJECT || !soProcessMe.sSubResults[0].u.poObj ) { EE_ERROR( EE_EC_ARRAY_FROM_NON_OBJECT ); }
+
+						EE_RESULT rIdx;
+						rIdx = ConvertResultOrObject( soProcessMe.sSubResults[1], EE_NC_SIGNED );
+						if ( rIdx.ncType == EE_NC_INVALID ) { EE_ERROR( EE_EC_INVALIDCAST ); }
+
+						(*soProcessMe.prResult) = soProcessMe.sSubResults[0].u.poObj->ArrayAccess( soProcessMe.sSubResults[1].u.i64Val );
+						if ( (*soProcessMe.prResult).ncType == EE_NC_INVALID ) { EE_ERROR( EE_EC_INVALIDCAST ); }
+						EE_DONE;
+					}
+					case EE_N_ARRAY_ACCESS_EX : {
+						if ( soProcessMe.sSubResults[0].ncType != EE_NC_OBJECT || !soProcessMe.sSubResults[0].u.poObj ) { EE_ERROR( EE_EC_ARRAY_FROM_NON_OBJECT ); }
+
+						uint32_t ui32Flags = 0;
+						EE_RESULT rIdx;
+						int64_t i64StartIdx = 0;
+						if ( soProcessMe.sSubResults[1].ncType != EE_NC_INVALID ) {
+							rIdx = ConvertResultOrObject( soProcessMe.sSubResults[1], EE_NC_SIGNED );
+							if ( rIdx.ncType == EE_NC_INVALID ) { EE_ERROR( EE_EC_INVALIDCAST ); }
+							i64StartIdx = soProcessMe.sSubResults[1].u.i64Val;
+						}
+						ui32Flags |= CObject::EE_AEF_START;
+						int64_t i64EndIdx = -1;
+						if ( soProcessMe.sSubResults[2].ncType != EE_NC_INVALID ) {
+							rIdx = ConvertResultOrObject( soProcessMe.sSubResults[2], EE_NC_SIGNED );
+							if ( rIdx.ncType == EE_NC_INVALID ) { EE_ERROR( EE_EC_INVALIDCAST ); }
+							i64EndIdx = soProcessMe.sSubResults[2].u.i64Val;
+							ui32Flags |= CObject::EE_AEF_END;
+						}
+
+						(*soProcessMe.prResult) = soProcessMe.sSubResults[0].u.poObj->ArrayAccessEx( i64StartIdx, i64EndIdx, ui32Flags );
+						if ( (*soProcessMe.prResult).ncType == EE_NC_INVALID ) { EE_ERROR( EE_EC_INVALIDCAST ); }
+						EE_DONE;
+					}
 					case EE_N_ADDRESS : {
-						if ( !m_pfahAddressHandler( ConvertResult( soProcessMe.sSubResults[0], EE_NC_UNSIGNED ).u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+						EE_RESULT rNode = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						if ( rNode.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+						if ( !m_pfahAddressHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
 						break;
 					}
 					case EE_N_MEMBERACCESS : {
@@ -3735,7 +4803,8 @@ namespace ee {
 						break;
 					}
 					case EE_N_DYNAMIC_NUMBERED_PARM_EXP : {
-						EE_RESULT rTemp = ConvertResult( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						EE_RESULT rTemp = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						if ( rTemp.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult) = GetNumberedParm( static_cast<size_t>(rTemp.u.ui64Val) );
 						EE_DONE;
 					}
@@ -3750,7 +4819,8 @@ namespace ee {
 						switch ( _ndExp.v.ctCast ) {
 #define EE_CAST( TYPE, CASTTYPE, MEMBER )																									\
 	(*soProcessMe.prResult).ncType = TYPE;																									\
-	(*soProcessMe.prResult).u.MEMBER = static_cast<CASTTYPE>(ConvertResult( rNode, (*soProcessMe.prResult).ncType ).u.MEMBER);				\
+	(*soProcessMe.prResult).u.MEMBER = static_cast<CASTTYPE>(ConvertResultOrObject( rNode, (*soProcessMe.prResult).ncType ).u.MEMBER);		\
+	if ( (*soProcessMe.prResult).ncType == EE_NC_INVALID ) { EE_ERROR( EE_EC_INVALIDCAST ); }												\
 	EE_DONE;
 							case EE_CT_INT8 : { EE_CAST( EE_NC_SIGNED, int8_t, i64Val ) }
 							case EE_CT_INT16 : { EE_CAST( EE_NC_SIGNED, int16_t, i64Val ) }
@@ -3764,7 +4834,8 @@ namespace ee {
 							case EE_CT_DOUBLE : { EE_CAST( EE_NC_FLOATING, double, dVal ) }
 #undef EE_CAST
 							case EE_CT_FLOAT10 : {
-								rNode = ConvertResult( rNode, EE_NC_FLOATING );
+								rNode = ConvertResultOrObject( rNode, EE_NC_FLOATING );
+								if ( rNode.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 								CFloatX fTemp;
 								fTemp.CreateFromDouble( rNode.u.dVal, 5, 6, true, false );
 								(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
@@ -3772,7 +4843,8 @@ namespace ee {
 								EE_DONE;
 							}
 							case EE_CT_FLOAT11 : {
-								rNode = ConvertResult( rNode, EE_NC_FLOATING );
+								rNode = ConvertResultOrObject( rNode, EE_NC_FLOATING );
+								if ( rNode.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 								CFloatX fTemp;
 								fTemp.CreateFromDouble( rNode.u.dVal, 5, 7, true, false );
 								(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
@@ -3780,7 +4852,8 @@ namespace ee {
 								EE_DONE;
 							}
 							case EE_CT_FLOAT14 : {
-								rNode = ConvertResult( rNode, EE_NC_FLOATING );
+								rNode = ConvertResultOrObject( rNode, EE_NC_FLOATING );
+								if ( rNode.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 								CFloatX fTemp;
 								fTemp.CreateFromDouble( rNode.u.dVal, 5, 10, true, false );
 								(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
@@ -3788,7 +4861,8 @@ namespace ee {
 								EE_DONE;
 							}
 							case EE_CT_FLOAT16 : {
-								rNode = ConvertResult( rNode, EE_NC_FLOATING );
+								rNode = ConvertResultOrObject( rNode, EE_NC_FLOATING );
+								if ( rNode.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 								CFloatX fTemp;
 								fTemp.CreateFromDouble( rNode.u.dVal, 5, 11, true, true );
 								(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
@@ -3809,33 +4883,45 @@ namespace ee {
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_1_FLOAT_FLOAT : {
+						EE_RESULT rNode = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_FLOATING );
+						if ( rNode.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
-						(*soProcessMe.prResult).u.dVal = _ndExp.uFuncPtr.pfIntrins1Float_Float( ConvertResult( soProcessMe.sSubResults[0], EE_NC_FLOATING ).u.dVal );
+						(*soProcessMe.prResult).u.dVal = _ndExp.uFuncPtr.pfIntrins1Float_Float( rNode.u.dVal );
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_1_UNSIGNED_UNSIGNED16 : {
+						EE_RESULT rNode = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						if ( rNode.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
-						(*soProcessMe.prResult).u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Unsigned_Unsigned16( static_cast<uint16_t>(ConvertResult( soProcessMe.sSubResults[0], EE_NC_UNSIGNED ).u.ui64Val) );
+						(*soProcessMe.prResult).u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Unsigned_Unsigned16( static_cast<uint16_t>(rNode.u.ui64Val) );
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_1_UNSIGNED_UNSIGNED32 : {
+						EE_RESULT rNode = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						if ( rNode.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
-						(*soProcessMe.prResult).u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Unsigned_Unsigned32( static_cast<uint32_t>(ConvertResult( soProcessMe.sSubResults[0], EE_NC_UNSIGNED ).u.ui64Val) );
+						(*soProcessMe.prResult).u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Unsigned_Unsigned32( static_cast<uint32_t>(rNode.u.ui64Val) );
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_1_UNSIGNED_UNSIGNED64 : {
+						EE_RESULT rNode = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						if ( rNode.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
-						(*soProcessMe.prResult).u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Unsigned_Unsigned64( static_cast<uint64_t>(ConvertResult( soProcessMe.sSubResults[0], EE_NC_UNSIGNED ).u.ui64Val) );
+						(*soProcessMe.prResult).u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Unsigned_Unsigned64( static_cast<uint64_t>(rNode.u.ui64Val) );
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_1_BOOL_FLOAT : {
+						EE_RESULT rNode = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_FLOATING );
+						if ( rNode.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
-						(*soProcessMe.prResult).u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Bool_Float( ConvertResult( soProcessMe.sSubResults[0], EE_NC_FLOATING ).u.dVal );
+						(*soProcessMe.prResult).u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Bool_Float( rNode.u.dVal );
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_1_INT_FLOAT : {
+						EE_RESULT rNode = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_FLOATING );
+						if ( rNode.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult).ncType = EE_NC_SIGNED;
-						(*soProcessMe.prResult).u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Signed_Float( ConvertResult( soProcessMe.sSubResults[0], EE_NC_FLOATING ).u.dVal );
+						(*soProcessMe.prResult).u.ui64Val = _ndExp.uFuncPtr.pfIntrins1Signed_Float( rNode.u.dVal );
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_2 : {
@@ -3844,27 +4930,43 @@ namespace ee {
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_2_FLOAT_FLOAT_FLOAT : {
+						EE_RESULT rNode0 = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_FLOATING );
+						if ( rNode0.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+						EE_RESULT rNode1 = ConvertResultOrObject( soProcessMe.sSubResults[1], EE_NC_FLOATING );
+						if ( rNode1.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
-						(*soProcessMe.prResult).u.dVal = _ndExp.uFuncPtr.pfIntrins2Float_Float_Float( ConvertResult( soProcessMe.sSubResults[0], EE_NC_FLOATING ).u.dVal,
-							ConvertResult( soProcessMe.sSubResults[1], EE_NC_FLOATING ).u.dVal );
+						(*soProcessMe.prResult).u.dVal = _ndExp.uFuncPtr.pfIntrins2Float_Float_Float( rNode0.u.dVal,
+							rNode1.u.dVal );
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_2_FLOAT_FLOAT32_FLOAT32 : {
+						EE_RESULT rNode0 = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_FLOATING );
+						if ( rNode0.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+						EE_RESULT rNode1 = ConvertResultOrObject( soProcessMe.sSubResults[1], EE_NC_FLOATING );
+						if ( rNode1.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
-						(*soProcessMe.prResult).u.dVal = _ndExp.uFuncPtr.pfIntrins2Float32_Float32_Float32( static_cast<float>(ConvertResult( soProcessMe.sSubResults[0], EE_NC_FLOATING ).u.dVal),
-							static_cast<float>(ConvertResult( soProcessMe.sSubResults[1], EE_NC_FLOATING ).u.dVal) );
+						(*soProcessMe.prResult).u.dVal = _ndExp.uFuncPtr.pfIntrins2Float32_Float32_Float32( static_cast<float>(rNode0.u.dVal),
+							static_cast<float>(rNode1.u.dVal) );
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_2_FLOAT_FLOAT80_FLOAT80 : {
+						EE_RESULT rNode0 = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_FLOATING );
+						if ( rNode0.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+						EE_RESULT rNode1 = ConvertResultOrObject( soProcessMe.sSubResults[1], EE_NC_FLOATING );
+						if ( rNode1.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
-						(*soProcessMe.prResult).u.dVal = _ndExp.uFuncPtr.pfIntrins2Float80_Float80_Float80( ConvertResult( soProcessMe.sSubResults[0], EE_NC_FLOATING ).u.dVal,
-							ConvertResult( soProcessMe.sSubResults[1], EE_NC_FLOATING ).u.dVal );
+						(*soProcessMe.prResult).u.dVal = _ndExp.uFuncPtr.pfIntrins2Float80_Float80_Float80( rNode0.u.dVal,
+							rNode1.u.dVal );
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_2_FLOAT_FLOAT32_FLOAT80 : {
+						EE_RESULT rNode0 = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_FLOATING );
+						if ( rNode0.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+						EE_RESULT rNode1 = ConvertResultOrObject( soProcessMe.sSubResults[1], EE_NC_FLOATING );
+						if ( rNode1.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
-						(*soProcessMe.prResult).u.dVal = _ndExp.uFuncPtr.pfIntrins2Float32_Float32_Float80( static_cast<float>(ConvertResult( soProcessMe.sSubResults[0], EE_NC_FLOATING ).u.dVal),
-							ConvertResult( soProcessMe.sSubResults[1], EE_NC_FLOATING ).u.dVal );
+						(*soProcessMe.prResult).u.dVal = _ndExp.uFuncPtr.pfIntrins2Float32_Float32_Float80( static_cast<float>(rNode0.u.dVal),
+							rNode1.u.dVal );
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_3 : {
@@ -3873,24 +4975,42 @@ namespace ee {
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_3_FLOAT_FLOAT_FLOAT_FLOAT : {
+						EE_RESULT rNode0 = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_FLOATING );
+						if ( rNode0.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+						EE_RESULT rNode1 = ConvertResultOrObject( soProcessMe.sSubResults[1], EE_NC_FLOATING );
+						if ( rNode1.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+						EE_RESULT rNode2 = ConvertResultOrObject( soProcessMe.sSubResults[2], EE_NC_FLOATING );
+						if ( rNode2.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
-						(*soProcessMe.prResult).u.dVal = _ndExp.uFuncPtr.pfIntrins3Float_Float_Float_Float( ConvertResult( soProcessMe.sSubResults[0], EE_NC_FLOATING ).u.dVal,
-							ConvertResult( soProcessMe.sSubResults[1], EE_NC_FLOATING ).u.dVal,
-							ConvertResult( soProcessMe.sSubResults[2], EE_NC_FLOATING ).u.dVal );
+						(*soProcessMe.prResult).u.dVal = _ndExp.uFuncPtr.pfIntrins3Float_Float_Float_Float( rNode0.u.dVal,
+							rNode1.u.dVal,
+							rNode2.u.dVal );
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_3_BOOL_FLOAT32_FLOAT32_FLOAT32 : {
+						EE_RESULT rNode0 = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_FLOATING );
+						if ( rNode0.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+						EE_RESULT rNode1 = ConvertResultOrObject( soProcessMe.sSubResults[1], EE_NC_FLOATING );
+						if ( rNode1.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+						EE_RESULT rNode2 = ConvertResultOrObject( soProcessMe.sSubResults[2], EE_NC_FLOATING );
+						if ( rNode2.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult).ncType = EE_NC_SIGNED;
-						(*soProcessMe.prResult).u.i64Val = _ndExp.uFuncPtr.pfIntrins3Bool_Float32_Float32_Float32( static_cast<float>(ConvertResult( soProcessMe.sSubResults[0], EE_NC_FLOATING ).u.dVal),
-							static_cast<float>(ConvertResult( soProcessMe.sSubResults[1], EE_NC_FLOATING ).u.dVal),
-							static_cast<float>(ConvertResult( soProcessMe.sSubResults[2], EE_NC_FLOATING ).u.dVal) );
+						(*soProcessMe.prResult).u.i64Val = _ndExp.uFuncPtr.pfIntrins3Bool_Float32_Float32_Float32( static_cast<float>(rNode0.u.dVal),
+							static_cast<float>(rNode1.u.dVal),
+							static_cast<float>(rNode2.u.dVal) );
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_3_BOOL_FLOAT_FLOAT_FLOAT : {
+						EE_RESULT rNode0 = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_FLOATING );
+						if ( rNode0.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+						EE_RESULT rNode1 = ConvertResultOrObject( soProcessMe.sSubResults[1], EE_NC_FLOATING );
+						if ( rNode1.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+						EE_RESULT rNode2 = ConvertResultOrObject( soProcessMe.sSubResults[2], EE_NC_FLOATING );
+						if ( rNode2.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult).ncType = EE_NC_SIGNED;
-						(*soProcessMe.prResult).u.i64Val = _ndExp.uFuncPtr.pfIntrins3Bool_Float_Float_Float( ConvertResult( soProcessMe.sSubResults[0], EE_NC_FLOATING ).u.dVal,
-							ConvertResult( soProcessMe.sSubResults[1], EE_NC_FLOATING ).u.dVal,
-							ConvertResult( soProcessMe.sSubResults[2], EE_NC_FLOATING ).u.dVal );
+						(*soProcessMe.prResult).u.i64Val = _ndExp.uFuncPtr.pfIntrins3Bool_Float_Float_Float( rNode0.u.dVal,
+							rNode1.u.dVal,
+							rNode2.u.dVal );
 						EE_DONE;
 					}
 					case EE_N_ASFLOAT : {
@@ -3943,13 +5063,17 @@ namespace ee {
 						EE_RESULT & rTempManBits = soProcessMe.sSubResults[2];
 						EE_RESULT & rTempImplied = soProcessMe.sSubResults[3];
 
-						rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+						rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+						if ( rTempSignBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { EE_ERROR( EE_EC_TOOMANYSIGNBITS ); }
-						rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+						rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+						if ( rTempExpBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { EE_ERROR( EE_EC_TOOMANYEXPBITS ); }
-						rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+						rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+						if ( rTempManBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { EE_ERROR( EE_EC_TOOMANYMANTISSABITS ); }
-						rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+						rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+						if ( rTempImplied.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 
 						(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
 						(*soProcessMe.prResult).u.dVal = CFloatX::GetMaxForBits( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -3962,13 +5086,17 @@ namespace ee {
 						EE_RESULT & rTempManBits = soProcessMe.sSubResults[2];
 						EE_RESULT & rTempImplied = soProcessMe.sSubResults[3];
 
-						rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+						rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+						if ( rTempSignBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { EE_ERROR( EE_EC_TOOMANYSIGNBITS ); }
-						rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+						rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+						if ( rTempExpBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { EE_ERROR( EE_EC_TOOMANYEXPBITS ); }
-						rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+						rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+						if ( rTempManBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { EE_ERROR( EE_EC_TOOMANYMANTISSABITS ); }
-						rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+						rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+						if ( rTempImplied.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 
 						(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
 						(*soProcessMe.prResult).u.dVal = CFloatX::GetNormalizedMinForBits( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -3981,13 +5109,17 @@ namespace ee {
 						EE_RESULT & rTempManBits = soProcessMe.sSubResults[2];
 						EE_RESULT & rTempImplied = soProcessMe.sSubResults[3];
 
-						rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+						rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+						if ( rTempSignBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { EE_ERROR( EE_EC_TOOMANYSIGNBITS ); }
-						rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+						rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+						if ( rTempExpBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { EE_ERROR( EE_EC_TOOMANYEXPBITS ); }
-						rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+						rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+						if ( rTempManBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { EE_ERROR( EE_EC_TOOMANYMANTISSABITS ); }
-						rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+						rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+						if ( rTempImplied.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 
 						(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
 						(*soProcessMe.prResult).u.dVal = CFloatX::GetMinForBits( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -4000,13 +5132,17 @@ namespace ee {
 						EE_RESULT & rTempManBits = soProcessMe.sSubResults[2];
 						EE_RESULT & rTempImplied = soProcessMe.sSubResults[3];
 
-						rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+						rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+						if ( rTempSignBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { EE_ERROR( EE_EC_TOOMANYSIGNBITS ); }
-						rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+						rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+						if ( rTempExpBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { EE_ERROR( EE_EC_TOOMANYEXPBITS ); }
-						rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+						rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+						if ( rTempManBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { EE_ERROR( EE_EC_TOOMANYMANTISSABITS ); }
-						rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+						rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+						if ( rTempImplied.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 
 						CFloatX fTemp;
 						fTemp.CreateNaN( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -4021,13 +5157,17 @@ namespace ee {
 						EE_RESULT & rTempManBits = soProcessMe.sSubResults[2];
 						EE_RESULT & rTempImplied = soProcessMe.sSubResults[3];
 
-						rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+						rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+						if ( rTempSignBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { EE_ERROR( EE_EC_TOOMANYSIGNBITS ); }
-						rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+						rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+						if ( rTempExpBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { EE_ERROR( EE_EC_TOOMANYEXPBITS ); }
-						rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+						rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+						if ( rTempManBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { EE_ERROR( EE_EC_TOOMANYMANTISSABITS ); }
-						rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+						rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+						if ( rTempImplied.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 
 						CFloatX fTemp;
 						fTemp.CreateInfP( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -4042,13 +5182,17 @@ namespace ee {
 						EE_RESULT & rTempManBits = soProcessMe.sSubResults[2];
 						EE_RESULT & rTempImplied = soProcessMe.sSubResults[3];
 
-						rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+						rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+						if ( rTempSignBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { EE_ERROR( EE_EC_TOOMANYSIGNBITS ); }
-						rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+						rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+						if ( rTempExpBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { EE_ERROR( EE_EC_TOOMANYEXPBITS ); }
-						rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+						rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+						if ( rTempManBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { EE_ERROR( EE_EC_TOOMANYMANTISSABITS ); }
-						rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+						rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+						if ( rTempImplied.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 
 						(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
 						(*soProcessMe.prResult).u.dVal = CFloatX::GetDenormalizedMaxForBits( static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -4061,13 +5205,17 @@ namespace ee {
 						EE_RESULT & rTempManBits = soProcessMe.sSubResults[2];
 						EE_RESULT & rTempImplied = soProcessMe.sSubResults[3];
 
-						rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+						rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+						if ( rTempSignBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { EE_ERROR( EE_EC_TOOMANYSIGNBITS ); }
-						rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+						rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+						if ( rTempExpBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { EE_ERROR( EE_EC_TOOMANYEXPBITS ); }
-						rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+						rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+						if ( rTempManBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { EE_ERROR( EE_EC_TOOMANYMANTISSABITS ); }
-						rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
+						rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+						if ( rTempImplied.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 
 						CFloatX fOne, fNextUp;
 						fOne.CreateFromDouble( 1.0, static_cast<uint16_t>(rTempExpBits.u.ui64Val), static_cast<uint16_t>(rTempManBits.u.ui64Val),
@@ -4086,14 +5234,19 @@ namespace ee {
 						EE_RESULT & rTempImplied = soProcessMe.sSubResults[3];
 						EE_RESULT & rTempDoubleVal = soProcessMe.sSubResults[4];
 
-						rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+						rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+						if ( rTempSignBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { EE_ERROR( EE_EC_TOOMANYSIGNBITS ); }
-						rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+						rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+						if ( rTempExpBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { EE_ERROR( EE_EC_TOOMANYEXPBITS ); }
-						rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+						rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+						if ( rTempManBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { EE_ERROR( EE_EC_TOOMANYMANTISSABITS ); }
-						rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
-						rTempDoubleVal = ConvertResult( rTempDoubleVal, EE_NC_FLOATING );
+						rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+						if ( rTempImplied.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+						rTempDoubleVal = ConvertResultOrObject( rTempDoubleVal, EE_NC_FLOATING );
+						if ( rTempDoubleVal.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 
 
 						CFloatX fTemp;
@@ -4110,14 +5263,19 @@ namespace ee {
 						EE_RESULT & rTempImplied = soProcessMe.sSubResults[3];
 						EE_RESULT & rTempDoubleVal = soProcessMe.sSubResults[4];
 
-						rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+						rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+						if ( rTempSignBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { EE_ERROR( EE_EC_TOOMANYSIGNBITS ); }
-						rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+						rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+						if ( rTempExpBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { EE_ERROR( EE_EC_TOOMANYEXPBITS ); }
-						rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+						rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+						if ( rTempManBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { EE_ERROR( EE_EC_TOOMANYMANTISSABITS ); }
-						rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
-						rTempDoubleVal = ConvertResult( rTempDoubleVal, EE_NC_FLOATING );
+						rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+						if ( rTempImplied.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+						rTempDoubleVal = ConvertResultOrObject( rTempDoubleVal, EE_NC_FLOATING );
+						if ( rTempDoubleVal.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 
 
 						CFloatX fTemp;
@@ -4134,14 +5292,19 @@ namespace ee {
 						EE_RESULT & rTempImplied = soProcessMe.sSubResults[3];
 						EE_RESULT & rTempDoubleVal = soProcessMe.sSubResults[4];
 
-						rTempSignBits = ConvertResult( rTempSignBits, EE_NC_UNSIGNED );
+						rTempSignBits = ConvertResultOrObject( rTempSignBits, EE_NC_UNSIGNED );
+						if ( rTempSignBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempSignBits.u.ui64Val > CFloatX::MaxSignBits() ) { EE_ERROR( EE_EC_TOOMANYSIGNBITS ); }
-						rTempExpBits = ConvertResult( rTempExpBits, EE_NC_UNSIGNED );
+						rTempExpBits = ConvertResultOrObject( rTempExpBits, EE_NC_UNSIGNED );
+						if ( rTempExpBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempExpBits.u.ui64Val > CFloatX::MaxExpBits() ) { EE_ERROR( EE_EC_TOOMANYEXPBITS ); }
-						rTempManBits = ConvertResult( rTempManBits, EE_NC_UNSIGNED );
+						rTempManBits = ConvertResultOrObject( rTempManBits, EE_NC_UNSIGNED );
+						if ( rTempManBits.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						if ( rTempManBits.u.ui64Val > DBL_MANT_DIG ) { EE_ERROR( EE_EC_TOOMANYMANTISSABITS ); }
-						rTempImplied = ConvertResult( rTempImplied, EE_NC_UNSIGNED );
-						rTempDoubleVal = ConvertResult( rTempDoubleVal, EE_NC_FLOATING );
+						rTempImplied = ConvertResultOrObject( rTempImplied, EE_NC_UNSIGNED );
+						if ( rTempImplied.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+						rTempDoubleVal = ConvertResultOrObject( rTempDoubleVal, EE_NC_FLOATING );
+						if ( rTempDoubleVal.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 
 
 						CFloatX fTemp;
@@ -4163,13 +5326,13 @@ namespace ee {
 								// Check the condition and optionally evaluate the statement.
 								// ==== Check the loop condition.
 								EE_RESULT & rTemp = soProcessMe.sSubResults[0];
-								if ( rTemp.ncType == EE_NC_FLOATING ) {
+								if ( (rTemp.ncType) == EE_NC_FLOATING ) {
 									if ( !rTemp.u.dVal ) { EE_END_LOOP; }
 								}
-								else if ( rTemp.ncType == EE_NC_UNSIGNED ) {
+								else if ( (rTemp.ncType) == EE_NC_UNSIGNED ) {
 									if ( !rTemp.u.ui64Val ) { EE_END_LOOP; }
 								}
-								else if ( rTemp.ncType == EE_NC_SIGNED ) {
+								else if ( (rTemp.ncType) == EE_NC_SIGNED ) {
 									if ( !rTemp.u.i64Val ) { EE_END_LOOP; }
 								}
 								else { EE_ERROR( EE_EC_INVALILOOPCONDITIONEXP ); }
@@ -4210,13 +5373,13 @@ namespace ee {
 								// Check the condition and optionally evaluate the statement.
 								// ==== Check the loop condition.
 								EE_RESULT & rTemp = soProcessMe.sSubResults[0];
-								if ( rTemp.ncType == EE_NC_FLOATING ) {
+								if ( (rTemp.ncType) == EE_NC_FLOATING ) {
 									if ( !rTemp.u.dVal ) { EE_END_LOOP; }
 								}
-								else if ( rTemp.ncType == EE_NC_UNSIGNED ) {
+								else if ( (rTemp.ncType) == EE_NC_UNSIGNED ) {
 									if ( !rTemp.u.ui64Val ) { EE_END_LOOP; }
 								}
-								else if ( rTemp.ncType == EE_NC_SIGNED ) {
+								else if ( (rTemp.ncType) == EE_NC_SIGNED ) {
 									if ( !rTemp.u.i64Val ) { EE_END_LOOP; }
 								}
 								else { EE_ERROR( EE_EC_INVALILOOPCONDITIONEXP ); }
@@ -4270,13 +5433,13 @@ namespace ee {
 							if ( uiStage == 2 ) {
 								// ==== Check the loop condition.
 								EE_RESULT & rTemp = soProcessMe.sSubResults[0];
-								if ( rTemp.ncType == EE_NC_FLOATING ) {
+								if ( (rTemp.ncType) == EE_NC_FLOATING ) {
 									if ( !rTemp.u.dVal ) { EE_END_LOOP; }
 								}
-								else if ( rTemp.ncType == EE_NC_UNSIGNED ) {
+								else if ( (rTemp.ncType) == EE_NC_UNSIGNED ) {
 									if ( !rTemp.u.ui64Val ) { EE_END_LOOP; }
 								}
-								else if ( rTemp.ncType == EE_NC_SIGNED ) {
+								else if ( (rTemp.ncType) == EE_NC_SIGNED ) {
 									if ( !rTemp.u.i64Val ) { EE_END_LOOP; }
 								}
 								else { EE_ERROR( EE_EC_INVALILOOPCONDITIONEXP ); }
@@ -4318,18 +5481,78 @@ namespace ee {
 
 						EE_END_LOOP;
 					}
+					case EE_N_FOREACHOBJ : {
+						YYSTYPE::EE_NODE_DATA & ndDeclNode = m_vNodes[_ndExp.u.sNodeIndex];
+						if ( soProcessMe.uiLoopCounter < soProcessMe.prLoopObject->u.poObj->Len().u.ui64Val ) {
+							uint32_t uiStage = (uiProcessCount - 1) % 2;
+							if ( uiStage == 0 ) {
+								//if ( !m_vArrayData[ndDeclNode.v.sNodeIndex].m_pabBase->ReadValue( static_cast<size_t>(soProcessMe.uiLoopCounter), (*soProcessMe.prLoopCustomVarResult) ) ) { EE_ERROR( EE_EC_ARRAYACCESSERROR ); }
+								(*soProcessMe.prLoopCustomVarResult) = soProcessMe.prLoopObject->u.poObj->ArrayAccess( soProcessMe.uiLoopCounter );
+								if ( (*soProcessMe.prLoopCustomVarResult).ncType == EE_NC_INVALID ) { EE_ERROR( EE_EC_ARRAYACCESSERROR ); }
+								// ==== Execute body.
+								EE_PUSH_EXP( _ndExp.v.sNodeIndex, soProcessMe.prResult );
+								
+
+								continue;
+							}
+							if ( uiStage == 1 ) {
+								if ( m_vLoopStack[soProcessMe.sLoopStackIdx].bBreak ) { EE_END_LOOP; }
+								m_vLoopStack[soProcessMe.sLoopStackIdx].bContinue = false;
+
+								// Last.
+								++m_vLoopStack[soProcessMe.sLoopStackIdx].sCurIdx;
+								++soProcessMe.uiLoopCounter;
+								continue;
+							}
+						}
+						
+
+						EE_END_LOOP;
+					}
+					case EE_N_FOREACHSTR : {
+						YYSTYPE::EE_NODE_DATA & ndDeclNode = m_vNodes[_ndExp.u.sNodeIndex];
+						if ( soProcessMe.sForEachStringPos < m_vStrings[soProcessMe.sForEachString].size() ) {
+							uint32_t uiStage = (uiProcessCount - 1) % 2;
+							if ( uiStage == 0 ) {
+								size_t sSize;
+								(*soProcessMe.prLoopCustomVarResult).ncType = EE_NC_UNSIGNED;
+								size_t I = soProcessMe.sForEachStringPos;
+								(*soProcessMe.prLoopCustomVarResult).u.ui64Val = NextUtf8Char( &m_vStrings[ndDeclNode.v.sNodeIndex][I],
+									m_vStrings[ndDeclNode.v.sNodeIndex].size() - I, &sSize );
+								if ( !sSize ) {
+									EE_ERROR( EE_EC_ARRAYACCESSERROR );
+								}
+								soProcessMe.sForEachStringPos += sSize;
+								// ==== Execute body.
+								EE_PUSH_EXP( _ndExp.v.sNodeIndex, soProcessMe.prResult );
+								
+
+								continue;
+							}
+							if ( uiStage == 1 ) {
+								if ( m_vLoopStack[soProcessMe.sLoopStackIdx].bBreak ) { EE_END_LOOP; }
+								m_vLoopStack[soProcessMe.sLoopStackIdx].bContinue = false;
+
+								// Last.
+								++m_vLoopStack[soProcessMe.sLoopStackIdx].sCurIdx;
+								++soProcessMe.uiLoopCounter;
+								continue;
+							}
+						}
+						EE_END_LOOP;
+					}
 					case EE_N_IF : {
 						EE_RESULT & rTemp = soProcessMe.sSubResults[0];
 
 						// ==== Evaluate the condition.
 						bool bResult = false;
-						if ( rTemp.ncType == EE_NC_FLOATING ) {
+						if ( (rTemp.ncType) == EE_NC_FLOATING ) {
 							bResult = rTemp.u.dVal ? true : false;
 						}
-						else if ( rTemp.ncType == EE_NC_UNSIGNED ) {
+						else if ( (rTemp.ncType) == EE_NC_UNSIGNED ) {
 							bResult = !!rTemp.u.ui64Val;
 						}
-						else if ( rTemp.ncType == EE_NC_SIGNED ) {
+						else if ( (rTemp.ncType) == EE_NC_SIGNED ) {
 							bResult = !!rTemp.u.i64Val;
 						}
 						// ============================
@@ -4365,13 +5588,26 @@ namespace ee {
 								break;
 							}
 
-#define EE_CASE_PREP																						\
-	EE_NUM_CONSTANTS ncTemp = GetCastType( aFind->second.rRes.ncType, (*soProcessMe.prResult).ncType );		\
-	aFind->second.rRes = ConvertResult( aFind->second.rRes, ncTemp );										\
-	(*soProcessMe.prResult) = ConvertResult( (*soProcessMe.prResult), ncTemp )
+#define EE_CASE_PREP( OBJ_FUNC )																											\
+	if ( aFind->second.rRes.ncType == EE_NC_OBJECT && aFind->second.rRes.u.poObj != nullptr ) {												\
+		if ( !aFind->second.rRes.u.poObj->OBJ_FUNC( (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_INVALIDOPERATOR ); }					 	\
+		break;																																\
+	}																																		\
+	EE_NUM_CONSTANTS ncTemp = GetCastType( aFind->second.rRes.ncType, (*soProcessMe.prResult).ncType );										\
+	aFind->second.rRes = ConvertResultOrObject( aFind->second.rRes, ncTemp );																\
+	if ( aFind->second.rRes.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }	\
+	(*soProcessMe.prResult) = ConvertResultOrObject( (*soProcessMe.prResult), ncTemp );														\
+	if ( (*soProcessMe.prResult).ncType == EE_NC_INVALID ) { EE_ERROR( EE_EC_INVALIDCAST ); }
 
 #define EE_HANDLE_CASE( CASE, VAR, OP )																		\
 	case CASE : {																							\
+		aFind->second.rRes.u.VAR OP (*soProcessMe.prResult).u.VAR;											\
+		(*soProcessMe.prResult) = aFind->second.rRes;														\
+		break;																								\
+	}
+
+#define EE_HANDLE_CASE_OBJ( CASE, VAR, OP )																	\
+	case EE_NC_OBJECT : {																					\
 		aFind->second.rRes.u.VAR OP (*soProcessMe.prResult).u.VAR;											\
 		(*soProcessMe.prResult) = aFind->second.rRes;														\
 		break;																								\
@@ -4385,9 +5621,9 @@ namespace ee {
 		break;																								\
 	}
 
-#define EE_CASE( CASE, OP )																					\
+#define EE_CASE( CASE, OP, OBJ_FUNC )																		\
 	case CASE : {																							\
-		EE_CASE_PREP;																						\
+		EE_CASE_PREP( OBJ_FUNC );																			\
 		switch( (*soProcessMe.prResult).ncType ) {															\
 			EE_HANDLE_CASE( EE_NC_UNSIGNED, ui64Val, OP )													\
 			EE_HANDLE_CASE( EE_NC_SIGNED, i64Val, OP )														\
@@ -4397,9 +5633,9 @@ namespace ee {
 		break;																								\
 	}
 
-#define EE_CASE_BAD_ZERO( CASE, OP )																		\
+#define EE_CASE_BAD_ZERO( CASE, OP, OBJ_FUNC )																\
 	case CASE : {																							\
-		EE_CASE_PREP;																						\
+		EE_CASE_PREP( OBJ_FUNC );																			\
 		switch( (*soProcessMe.prResult).ncType ) {															\
 			EE_HANDLE_CASE_BAD_ZERO( EE_NC_UNSIGNED, ui64Val, OP )											\
 			EE_HANDLE_CASE_BAD_ZERO( EE_NC_SIGNED, i64Val, OP )												\
@@ -4409,9 +5645,9 @@ namespace ee {
 		break;																								\
 	}
 
-#define EE_INT_CASE( CASE, OP )																				\
+#define EE_INT_CASE( CASE, OP, OBJ_FUNC )																	\
 	case CASE : {																							\
-		EE_CASE_PREP;																						\
+		EE_CASE_PREP( OBJ_FUNC );																			\
 		switch( (*soProcessMe.prResult).ncType ) {															\
 			EE_HANDLE_CASE( EE_NC_UNSIGNED, ui64Val, OP )													\
 			EE_HANDLE_CASE( EE_NC_SIGNED, i64Val, OP )														\
@@ -4420,9 +5656,9 @@ namespace ee {
 		break;																								\
 	}
 
-#define EE_INT_CASE_BAD_ZERO( CASE, OP )																	\
+#define EE_INT_CASE_BAD_ZERO( CASE, OP, OBJ_FUNC )															\
 	case CASE : {																							\
-		EE_CASE_PREP;																						\
+		EE_CASE_PREP( OBJ_FUNC );																			\
 		switch( (*soProcessMe.prResult).ncType ) {															\
 			EE_HANDLE_CASE_BAD_ZERO( EE_NC_UNSIGNED, ui64Val, OP )											\
 			EE_HANDLE_CASE_BAD_ZERO( EE_NC_SIGNED, i64Val, OP )												\
@@ -4431,13 +5667,13 @@ namespace ee {
 		break;																								\
 	}
 
-							EE_CASE( CExpEvalParser::token::EE_ASS_PLUSEQUALS, += )
-							EE_CASE( CExpEvalParser::token::EE_ASS_MINUSEQUALS, -= )
-							EE_CASE( CExpEvalParser::token::EE_ASS_TIMESEQUALS, *= )
-							EE_INT_CASE_BAD_ZERO( CExpEvalParser::token::EE_ASS_MODEQUALS, %= )
-							EE_CASE_BAD_ZERO( CExpEvalParser::token::EE_ASS_DIVEQUALS, /= )
+							EE_CASE( CExpEvalParser::token::EE_ASS_PLUSEQUALS, +=, PlusEquals )
+							EE_CASE( CExpEvalParser::token::EE_ASS_MINUSEQUALS, -=, MinusEquals )
+							EE_CASE( CExpEvalParser::token::EE_ASS_TIMESEQUALS, *=, TimesEquals )
+							EE_INT_CASE_BAD_ZERO( CExpEvalParser::token::EE_ASS_MODEQUALS, %=, ModEquals )
+							EE_CASE_BAD_ZERO( CExpEvalParser::token::EE_ASS_DIVEQUALS, /=, DivideEquals )
 							case CExpEvalParser::token::EE_ASS_SHLEFTEQUALS : {
-								EE_CASE_PREP;
+								EE_CASE_PREP( ShiftLeftEquals );
 								switch( (*soProcessMe.prResult).ncType ) {
 									EE_HANDLE_CASE( EE_NC_UNSIGNED, ui64Val, <<= )
 									EE_HANDLE_CASE( EE_NC_SIGNED, i64Val, <<= )
@@ -4451,7 +5687,7 @@ namespace ee {
 								break;
 							}
 							case CExpEvalParser::token::EE_ASS_SHRIGHTEQUALS : {
-								EE_CASE_PREP;
+								EE_CASE_PREP( ShiftRightEquals );
 								switch( (*soProcessMe.prResult).ncType ) {
 									EE_HANDLE_CASE( EE_NC_UNSIGNED, ui64Val, >>= )
 									EE_HANDLE_CASE( EE_NC_SIGNED, i64Val, >>= )
@@ -4464,9 +5700,9 @@ namespace ee {
 								}
 								break;
 							}
-							EE_INT_CASE( CExpEvalParser::token::EE_ASS_OREQUALS, |= )
-							EE_INT_CASE( CExpEvalParser::token::EE_ASS_ANDEQUALS, &= )
-							EE_INT_CASE( CExpEvalParser::token::EE_ASS_CARROTEQUALS, ^= )
+							EE_INT_CASE( CExpEvalParser::token::EE_ASS_OREQUALS, |=, OrEquals )
+							EE_INT_CASE( CExpEvalParser::token::EE_ASS_ANDEQUALS, &=, AndEquals )
+							EE_INT_CASE( CExpEvalParser::token::EE_ASS_CARROTEQUALS, ^=, CarrotEquals )
 						}
 				
 
@@ -4483,7 +5719,8 @@ namespace ee {
 					case EE_N_CREATE_ARRAY : {
 						if ( soProcessMe.uiProcessCount == 1 ) {
 							// The array object exists.  Adjust its size and fill it.
-							EE_RESULT & rTemp = ConvertResult( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+							EE_RESULT rTemp = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+							if ( rTemp.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 							m_vArrayData[_ndExp.y.sNodeIndex].m_pabBase->SetSize( static_cast<size_t>(rTemp.u.ui64Val) );
 
 							if ( _ndExp.w.sNodeIndex != ~0 ) {
@@ -4506,7 +5743,8 @@ namespace ee {
 						break;
 					}
 					case EE_N_ARRAY_ASSIGNMENT : {
-						EE_RESULT & rTemp = ConvertResult( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						EE_RESULT rTemp = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						if ( rTemp.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 
 						switch ( _ndExp.v.ui32Op ) {
 							case '=' : {
@@ -4582,40 +5820,56 @@ namespace ee {
 	CArrayBase * CExpEvalContainer::CreateArrayFromType( uint32_t _ui32Type ) {
 		switch ( _ui32Type ) {
 			case CExpEvalParser::token::EE_INT8 : {
-				return new ( std::nothrow ) CInt8Array();
+				return new ( std::nothrow ) CInt8Array( this );
 			}
 			case CExpEvalParser::token::EE_INT16 : {
-				return new ( std::nothrow ) CInt16Array();
+				return new ( std::nothrow ) CInt16Array( this );
 			}
 			case CExpEvalParser::token::EE_INT32 : {
-				return new ( std::nothrow ) CInt32Array();
+				return new ( std::nothrow ) CInt32Array( this );
 			}
 			case CExpEvalParser::token::EE_INT64 : {
-				return new ( std::nothrow ) CInt64Array();
+				return new ( std::nothrow ) CInt64Array( this );
 			}
 			case CExpEvalParser::token::EE_UINT8 : {
-				return new ( std::nothrow ) CUInt8Array();
+				return new ( std::nothrow ) CUInt8Array( this );
 			}
 			case CExpEvalParser::token::EE_UINT16 : {
-				return new ( std::nothrow ) CUInt16Array();
+				return new ( std::nothrow ) CUInt16Array( this );
 			}
 			case CExpEvalParser::token::EE_UINT32 : {
-				return new ( std::nothrow ) CUInt32Array();
+				return new ( std::nothrow ) CUInt32Array( this );
 			}
 			case CExpEvalParser::token::EE_UINT64 : {
-				return new ( std::nothrow ) CUInt64Array();
+				return new ( std::nothrow ) CUInt64Array( this );
 			}
 			case CExpEvalParser::token::EE_FLOAT : {
-				return new ( std::nothrow ) CFloatArray();
+				return new ( std::nothrow ) CFloatArray( this );
 			}
 			case CExpEvalParser::token::EE_DOUBLE : {
-				return new ( std::nothrow ) CDoubleArray();
+				return new ( std::nothrow ) CDoubleArray( this );
 			}
 			case CExpEvalParser::token::EE_DEFAULT : {
-				return new ( std::nothrow ) CDefaultArray();
+				return new ( std::nothrow ) CDefaultArray( this );
 			}
 		}
 		return nullptr;
+	}
+
+	// Creates a string reference given a string index.
+	bool CExpEvalContainer::CreateStringRef( size_t _stStrIdx ) {
+		return false;
+		/*if ( m_vStringObjectsU8.size() <= _stStrIdx ) {
+			m_vStringObjectsU8.resize( _stStrIdx + 1 );
+		}
+		if ( m_vStringObjectsU8.size() <= _stStrIdx ) { return false; }
+
+		if ( !m_vStringObjectsU8[_stStrIdx] ) {
+			m_vStringObjectsU8[_stStrIdx] = new( std::nothrow ) CStringRef( this, _stStrIdx );
+			if ( !m_vStringObjectsU8[_stStrIdx] ) { return false; }
+		}
+
+		return true;*/
 	}
 	
 	// Shifting for floats.

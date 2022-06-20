@@ -72,13 +72,15 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %token EE_A EE_ALLADI EE_ALPHA EE_B EE_B2 EE_B4 EE_BETA EE_BH EE_C2 EE_CAHEN EE_CATALAN EE_CONWAY EE_DELTA EE_E EE_ERDOS EE_EULER EE_F EE_GR EE_GWK EE_HALFPI EE_HSMC EE_ICE EE_K
 %token EE_LAMBDA EE_LAPLACE EE_LEVY EE_M1 EE_MU EE_NIVEN EE_OMEGA EE_P2 EE_PI EE_PLASTIC EE_PORTER EE_PSI EE_RAMAN EE_RAMAMU EE_SIERP EE_THETA EE_VISW EE_Z3 EE_ZETA 
 
-%token EE_CHAR_BIT EE_MB_LEN_MAX EE_CHAR_MIN EE_CHAR_MAX EE_SCHAR_MIN EE_SHRT_MIN EE_INT_MIN EE_LONG_MIN EE_LLONG_MIN EE_SCHAR_MAX EE_SHRT_MAX EE_INT_MAX EE_LONG_MAX EE_LLONG_MAX EE_UCHAR_MAX EE_USHRT_MAX EE_UINT_MAX EE_ULONG_MAX EE_ULLONG_MAX EE_FLT_RADIX EE_DECIMAL_DIG EE_FLT_DECIMAL_DIG EE_DBL_DECIMAL_DIG EE_LDBL_DECIMAL_DIG EE_FLT_MIN EE_DBL_MIN EE_LDBL_MIN EE_FLT_TRUE_MIN EE_DBL_TRUE_MIN EE_LDBL_TRUE_MIN EE_FLT_MAX EE_DBL_MAX EE_LDBL_MAX EE_FLT_EPSILON EE_DBL_EPSILON EE_LDBL_EPSILON EE_FLT_DIG EE_DBL_DIG EE_LDBL_DIG EE_FLT_MANT_DIG EE_DBL_MANT_DIG EE_LDBL_MANT_DIG EE_FLT_MIN_EXP EE_DBL_MIN_EXP EE_LDBL_MIN_EXP EE_FLT_MIN_10_EXP EE_DBL_MIN_10_EXP EE_LDBL_MIN_10_EXP EE_FLT_MAX_EXP EE_DBL_MAX_EXP EE_LDBL_MAX_EXP EE_FLT_MAX_10_EXP EE_DBL_MAX_10_EXP EE_LDBL_MAX_10_EXP
+%token EE_CHAR_BIT EE_MB_LEN_MAX EE_CHAR_MIN EE_CHAR_MAX EE_SCHAR_MIN EE_SHRT_MIN EE_INT_MIN EE_LONG_MIN EE_LLONG_MIN EE_SCHAR_MAX EE_SHRT_MAX EE_INT_MAX EE_LONG_MAX EE_LLONG_MAX EE_UCHAR_MAX EE_USHRT_MAX EE_UINT_MAX EE_ULONG_MAX EE_ULLONG_MAX EE_FLT_RADIX EE_DECIMAL_DIG EE_FLT_DECIMAL_DIG EE_DBL_DECIMAL_DIG EE_LDBL_DECIMAL_DIG EE_FLT_MIN EE_DBL_MIN EE_LDBL_MIN EE_FLT_TRUE_MIN EE_DBL_TRUE_MIN EE_LDBL_TRUE_MIN EE_FLT_MAX EE_DBL_MAX EE_LDBL_MAX EE_FLT_EPSILON EE_DBL_EPSILON EE_LDBL_EPSILON EE_FLT_DIG EE_DBL_DIG EE_LDBL_DIG EE_FLT_MANT_DIG EE_DBL_MANT_DIG EE_LDBL_MANT_DIG EE_FLT_MIN_EXP EE_DBL_MIN_EXP EE_LDBL_MIN_EXP EE_FLT_MIN_10_EXP EE_DBL_MIN_10_EXP EE_LDBL_MIN_10_EXP EE_FLT_MAX_EXP EE_DBL_MAX_EXP EE_LDBL_MAX_EXP EE_FLT_MAX_10_EXP EE_DBL_MAX_10_EXP EE_LDBL_MAX_10_EXP EE_INT8_MIN EE_INT16_MIN EE_INT32_MIN EE_INT64_MIN EE_INT8_MAX EE_INT16_MAX EE_INT32_MAX EE_INT64_MAX EE_UINT8_MAX EE_UINT16_MAX EE_UINT32_MAX EE_UINT64_MAX  
 %token EE_AS_FLOAT EE_AS_DOUBLE EE_AS_FLOAT24 EE_AS_FLOAT16 EE_AS_FLOAT14 EE_AS_FLOAT11 EE_AS_FLOAT10
 %token EE_AS_FLOAT_MAX EE_AS_FLOAT_MIN EE_AS_FLOAT_TRUE_MIN EE_AS_FLOAT_NAN EE_AS_FLOAT_INF EE_AS_FLOAT_SUBNORM_MAX EE_AS_FLOAT_EPS
 %token EE_TRUE EE_FALSE
 %token EE_AS_FLOAT_SIGNBIT EE_AS_FLOAT_EXPBITS EE_AS_FLOAT_MANBITS
 %token EE_TO_FLOAT32 EE_TO_FLOAT64 EE_TO_INT8 EE_TO_INT16 EE_TO_INT32 EE_TO_INT64 EE_TO_UINT8 EE_TO_UINT16 EE_TO_UINT32 EE_TO_UINT64
 %token EE_CLOCK EE_CLOCKS_PER_SEC EE_SECONDS EE_MILLISECONDS EE_MICROSECONDS EE_SECONDS_SINCE_START EE_MILLISECONDS_SINCE_START EE_MICROSECONDS_SINCE_START
+
+%token EE_ASCII EE_BIN EE_BOOL EE_CHR EE_HEX EE_INT EE_LEN EE_OCT EE_ORD
 
 %type <sStringIndex>										identifier
 %type <sStringIndex>										string
@@ -111,7 +113,9 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %type <ndData>												statement
 %type <ndData>												compound_statement
 %type <ndData>												statement_list
-%type <ndData>												foreach_decl
+%type <ndData>												foreach_decl0
+%type <ndData>												foreach_decl1
+%type <ndData>												foreach_decl2
 %type <ndData>												iteration_exp
 %type <ndData>												selection_exp
 %type <ndData>												jump_exp
@@ -149,8 +153,7 @@ identifier
 	;
 	
 string
-	: EE_STRING_CONSTANT									{ $$ = m_peecContainer->CreateString( m_peelLexer->YYText() ); }
-	| identifier											{ $$ = $1; }
+	: EE_STRING_CONSTANT									{ $$ = m_peecContainer->CreateString( m_peelLexer->get_tmp_txt() ); }
 	;
 	
 basic_expr
@@ -159,9 +162,13 @@ basic_expr
 	| EE_USER_VAR											{ m_peecContainer->CreateUser( $$ ); }
 	| EE_PARM												{ m_peecContainer->CreateNumberedParm( m_peelLexer->YYText(), $$ ); }
 	| '$' '[' custom_var ']'								{ m_peecContainer->CreateDynamicParm( $3, $$ ); }
-	| EE_PARM_TOTAL											{ m_peecContainer->CreateParmTotal( $$ ); }
 	| array_var '[' exp ']'									{ m_peecContainer->CreateArrayVar( $1, $3, $$ ); }
+	| string '[' exp ']'									{ m_peecContainer->CreateArrayString( $1, $3, $$ ); }
+	| string '[' exp ':' exp ']'							{ m_peecContainer->CreateArrayString( $1, $3, $5, $$ ); }
+	| string '[' exp ':' ']'								{ m_peecContainer->CreateArrayToEndString( $1, $3, $$ ); }
+	| string '[' ':' exp ']'								{ m_peecContainer->CreateArrayFromStartString( $1, $4, $$ ); }
 	| '$' '[' exp ']'										{ m_peecContainer->CreateDynamicParmExp( $3, $$ ); }
+	| EE_PARM_TOTAL											{ m_peecContainer->CreateParmTotal( $$ ); }
 	//| basic_expr EE_PLUSPLUS								{ m_peecContainer->CreatePostfixOp( $1, CExpEvalParser::token::EE_PLUSPLUS, $$ ); }
 	//| basic_expr EE_MINUSMINUS								{ m_peecContainer->CreatePostfixOp( $1, CExpEvalParser::token::EE_MINUSMINUS, $$ ); }
 	
@@ -180,7 +187,7 @@ basic_expr
 															}
 	| EE_PUREDEC_CONSTANT									{ m_peecContainer->CreateUInt( m_peelLexer->YYText() + 1, $$ ); }
 	| EE_OCT_CONSTANT										{ m_peecContainer->CreateOct( m_peelLexer->YYText(), $$ ); }
-	| EE_CHAR_CONSTANT										{ m_peecContainer->CreateChar( m_peelLexer->YYText(), $$ ); }
+	| EE_CHAR_CONSTANT										{ m_peecContainer->CreateNumber( m_peelLexer->get_tmp_txt()[0], $$ ); }
 	| EE_FLOAT_CONSTANT										{
 																if ( m_peecContainer->TreatAllAsHex() && ValidHex( m_peelLexer->YYText() ) ) {
 																	m_peecContainer->CreateHex3( m_peelLexer->YYText(), $$ );
@@ -285,6 +292,18 @@ basic_expr
 	| EE_FLT_MAX_10_EXP										{ m_peecContainer->CreateNumber( FLT_MAX_10_EXP, $$ ); }
 	| EE_DBL_MAX_10_EXP										{ m_peecContainer->CreateNumber( DBL_MAX_10_EXP, $$ ); }
 	| EE_LDBL_MAX_10_EXP									{ m_peecContainer->CreateNumber( LDBL_MAX_10_EXP, $$ ); }
+	| EE_INT8_MIN											{ m_peecContainer->CreateNumber( INT8_MIN, $$ ); }
+	| EE_INT16_MIN											{ m_peecContainer->CreateNumber( INT16_MIN, $$ ); }
+	| EE_INT32_MIN											{ m_peecContainer->CreateNumber( INT32_MIN, $$ ); }
+	| EE_INT64_MIN											{ m_peecContainer->CreateNumber( INT64_MIN, $$ ); }
+	| EE_INT8_MAX											{ m_peecContainer->CreateNumber( INT8_MAX, $$ ); }
+	| EE_INT16_MAX											{ m_peecContainer->CreateNumber( INT16_MAX, $$ ); }
+	| EE_INT32_MAX											{ m_peecContainer->CreateNumber( INT32_MAX, $$ ); }
+	| EE_INT64_MAX											{ m_peecContainer->CreateNumber( INT64_MAX, $$ ); }
+	| EE_UINT8_MAX											{ m_peecContainer->CreateNumber( UINT8_MAX, $$ ); }
+	| EE_UINT16_MAX											{ m_peecContainer->CreateNumber( UINT16_MAX, $$ ); }
+	| EE_UINT32_MAX											{ m_peecContainer->CreateNumber( UINT32_MAX, $$ ); }
+	| EE_UINT64_MAX											{ m_peecContainer->CreateNumber( UINT64_MAX, $$ ); }
 	| EE_CLOCKS_PER_SEC										{ m_peecContainer->CreateNumber( CLOCKS_PER_SEC, $$ ); }
 	| EE_TRUE												{ m_peecContainer->CreateNumber( 1, $$ ); }
 	| EE_FALSE												{ m_peecContainer->CreateNumber( 0, $$ ); }
@@ -408,6 +427,10 @@ postfix_exp
 	| postfix_exp EE_MEMBERACCESS EE_DBL_MAX_10_EXP			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_LDBL_MAX_10_EXP		{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_CLOCKS_PER_SEC			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp '[' exp ']'								{ m_peecContainer->CreateArrayAccess( $1, $3, $$ ); }
+	| postfix_exp '[' exp ':' exp ']'						{ m_peecContainer->CreateArrayAccessEx( $1, $3.sNodeIndex, $5.sNodeIndex, $$ ); }
+	| postfix_exp '[' exp ':' ']'							{ m_peecContainer->CreateArrayAccessEx( $1, $3.sNodeIndex, size_t( -1 ), $$ ); }
+	| postfix_exp '[' ':' exp ']'							{ m_peecContainer->CreateArrayAccessEx( $1, size_t( -1 ), $4.sNodeIndex, $$ ); }
 	;
 
 unary_exp
@@ -682,17 +705,28 @@ intrinsic
 	| EE_SECONDS_SINCE_START '(' ')'						{ m_peecContainer->CreateIntrinsic0( ee::CExpEvalParser::token::EE_SECONDS_SINCE_START, $$ ); }
 	| EE_MILLISECONDS_SINCE_START '(' ')'					{ m_peecContainer->CreateIntrinsic0( ee::CExpEvalParser::token::EE_MILLISECONDS_SINCE_START, $$ ); }
 	| EE_MICROSECONDS_SINCE_START '(' ')'					{ m_peecContainer->CreateIntrinsic0( ee::CExpEvalParser::token::EE_MICROSECONDS_SINCE_START, $$ ); }
+	| EE_ASCII '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ASCII, $3, $$ ); }
+	| EE_BIN '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_BIN, $3, $$ ); }
+	| EE_BOOL '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_BOOL, $3, $$ ); }
+	| EE_CHR '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_CHR, $3, $$ ); }
+	| EE_FLOAT '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_FLOAT, $3, $$ ); }
+	| EE_HEX '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_HEX, $3, $$ ); }
+	| EE_INT '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_INT, $3, $$ ); }
+	| EE_LEN '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_LEN, $3, $$ ); }
+	| EE_OCT '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_OCT, $3, $$ ); }
+	| EE_ORD '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ORD, $3, $$ ); }
 	;
 
 exp
 	: assignment_exp										{ $$ = $1; }
-	| iteration_exp											{ $$ = $1; }
+	//| iteration_exp											{ $$ = $1; }
 	| selection_exp											{ $$ = $1; }
 	| jump_exp												{ $$ = $1; }
 	;
 	
 exp_statement
 	: exp ';'												{ $$ = $1; }
+	| iteration_exp											{ $$ = $1; }
 	;
 
 statement
@@ -710,8 +744,16 @@ statement_list
 	| compound_statement exp								{ m_peecContainer->CreateCompoundStatement( $1, $2, $$ ); }
 	;
 	
-foreach_decl
+foreach_decl0
 	: EE_FOREACH '(' identifier EE_IN array_var ')'			{ m_peecContainer->CreateForEachDecl( $3, $5, $$ ); }
+	;
+
+foreach_decl1
+	: EE_FOREACH '(' identifier EE_IN custom_var ')'		{ m_peecContainer->CreateForEachCustomDecl( $3, $5, $$ ); }
+	;
+	
+foreach_decl2
+	: EE_FOREACH '(' identifier EE_IN string ')'			{ m_peecContainer->CreateForEachStringDecl( $3, $5, $$ ); }
 	;
 	
 iteration_exp
@@ -721,7 +763,9 @@ iteration_exp
 	| EE_FOR '(' exp_statement exp_statement exp ')' '{' statement_list '}'
 															{ m_peecContainer->CreateForLoop( $3, $4, $5, $8, $$ ); }
 	| EE_DO '{' statement_list '}' EE_WHILE '(' exp ')'		{ m_peecContainer->CreateDoWhileLoop( $7, $3, $$ ); }
-	| foreach_decl '{' statement_list '}'					{ m_peecContainer->CreateForEachLoop( $1, $3, $$ ); }
+	| foreach_decl0 '{' statement_list '}'					{ m_peecContainer->CreateForEachLoop( $1, $3, $$ ); }
+	| foreach_decl1 '{' statement_list '}'					{ m_peecContainer->CreateForEachObjLoop( $1, $3, $$ ); }
+	| foreach_decl2 '{' statement_list '}'					{ m_peecContainer->CreateForEachStrLoop( $1, $3, $$ ); }
 	;
 	
 selection_exp

@@ -20,6 +20,7 @@ namespace mx {
 	// Options.
 	CUtilities::MX_UTIL_OPTIONS CUtilities::Options = {
 		FALSE,							// bUse0xForHex
+		FALSE,							// bUse0oForOct
 		FALSE,							// bShortenEnumNames
 		MX_DTO_DEFAULT,					// dwDataTypeOptions
 	};
@@ -899,6 +900,50 @@ namespace mx {
 		return _sString.c_str();
 	}
 
+	// Creates an octadecimal (\0[0-7]{1-22}) string from an integer value.
+	const CHAR * CUtilities::ToOct( uint64_t _uiValue, std::string &_sString, uint32_t _uiNumDigits ) {
+		_uiNumDigits = EE_MAX_( _uiNumDigits, 1 );
+		// Determine max number of bits set in the number.
+		uint64_t uiCopy = _uiValue;
+		uint32_t uiTotalDigits = 0;
+		while ( uiCopy ) {
+			++uiTotalDigits;
+			uiCopy >>= 3;
+		}
+
+		_uiNumDigits = EE_MAX_( _uiNumDigits, uiTotalDigits );
+		_sString.push_back( '0' );
+		if ( Options.bUse0oForOct ) {
+			_sString.push_back( 'o' );
+		}
+		for ( uint64_t I = _uiNumDigits; I--; ) {
+			_sString.push_back( ((_uiValue >> (I * 3)) & 0x7) + '0' );
+		}
+		return _sString.c_str();
+	}
+
+	// Creates an octadecimal (\0[0-7]{1-22}) string from an integer value.
+	const WCHAR * CUtilities::ToOct( uint64_t _uiValue, std::wstring &_sString, uint32_t _uiNumDigits ) {
+		_uiNumDigits = EE_MAX_( _uiNumDigits, 1 );
+		// Determine max number of bits set in the number.
+		uint64_t uiCopy = _uiValue;
+		uint32_t uiTotalDigits = 0;
+		while ( uiCopy ) {
+			++uiTotalDigits;
+			uiCopy >>= 3;
+		}
+
+		_uiNumDigits = EE_MAX_( _uiNumDigits, uiTotalDigits );
+		_sString.push_back( L'0' );
+		if ( Options.bUse0oForOct ) {
+			_sString.push_back( 'o' );
+		}
+		for ( uint64_t I = _uiNumDigits; I--; ) {
+			_sString.push_back( ((_uiValue >> (I * 3)) & 0x7) + L'0' );
+		}
+		return _sString.c_str();
+	}
+
 	// Creates an unsigned integer string.  Returns the internal buffer, which means the result must be copied as it will be overwritten when the next function that uses the internal buffer is called.
 	const CHAR * CUtilities::ToUnsigned( uint64_t _uiValue, uint32_t _uiNumDigits ) {
 		return ToUnsigned( _uiValue, m_szTemp, MX_ELEMENTS( m_szTemp ), _uiNumDigits );
@@ -1062,206 +1107,6 @@ namespace mx {
 		}
 		return _sString.c_str();
 #undef MX_LAST
-	}
-
-	// Gets the next UTF-16 character from a stream or error (MX_UTF_INVALID)
-	uint32_t CUtilities::NextUtf16Char( const wchar_t * _pwcString, size_t _sLen, size_t * _psSize ) {
-		if ( _sLen == 0 ) { return 0; }
-
-		// Get the low bits (which may be all there are).
-		uint32_t ui32Ret = (*reinterpret_cast<const uint16_t *>(_pwcString));
-
-		uint32_t ui32Top = ui32Ret & 0xFC00U;
-		// Check to see if this is a surrogate pair.
-		if ( ui32Top == 0xD800U ) {
-			if ( _sLen < 2 ) {
-				// Not enough space to decode correctly.
-				if ( _psSize ) {
-					(*_psSize) = 1;
-				}
-				return MX_UTF_INVALID;
-			}
-
-			// Need to add the next character to it.
-			// Remove the 0xD800.
-			ui32Ret &= ~0xD800U;
-			ui32Ret <<= 10;
-
-			// Get the second set of bits.
-			uint32_t ui32Next = (*reinterpret_cast<const uint16_t *>(++_pwcString));
-			if ( (ui32Next & 0xFC00U) != 0xDC00U ) {
-				// Invalid second character.
-				// Standard defines this as an error.
-				if ( _psSize ) {
-					(*_psSize) = 1;
-				}
-				return MX_UTF_INVALID;
-			}
-			if ( _psSize ) {
-				(*_psSize) = 2;
-			}
-
-			ui32Next &= ~0xDC00U;
-
-			// Add the second set of bits.
-			ui32Ret |= ui32Next;
-
-			return ui32Ret + 0x10000U;
-		}
-
-		if ( _psSize ) {
-			(*_psSize) = 1;
-		}
-		return ui32Ret;
-	}
-
-	// Gets the next UTF-8 character from a stream or error (MX_UTF_INVALID)
-	uint32_t CUtilities::NextUtf8Char( const char * _pcString, size_t _sLen, size_t * _psSize ) {
-		/*mbstate_t sState;
-		std::mbsinit( &sState );
-		char16_t szTemp[2] = { 0 };
-		size_t sLen = std::mbrtoc16( szTemp, _pcString, _sLen, &sState );*/
-
-		if ( _sLen == 0 ) { if ( _psSize ) { (*_psSize) = 0; } return 0; }
-
-		// Get the low bits (which may be all there are).
-		uint32_t ui32Ret = (*reinterpret_cast<const uint8_t *>(_pcString));
-
-		// The first byte is a special case.
-		if ( (ui32Ret & 0x80U) == 0 ) {
-			// We are done.
-			if ( _psSize ) { (*_psSize) = 1; }
-			return ui32Ret;
-		}
-
-		// We are in a multi-byte sequence.  Get bits from the top, starting
-		//	from the second bit.
-		uint32_t I = 0x20;
-		uint32_t ui32Len = 2;
-		uint32_t ui32Mask = 0xC0U;
-		while ( ui32Ret & I ) {
-			// Add this bit to the mask to be removed later.
-			ui32Mask |= I;
-			I >>= 1;
-			++ui32Len;
-			if ( I == 0 ) {
-				// Invalid sequence.
-				if ( _psSize ) {
-					(*_psSize) = 1;
-				}
-				return MX_UTF_INVALID;
-			}
-		}
-
-		// Bounds checking.
-		if ( ui32Len > _sLen ) {
-			if ( _psSize ) { (*_psSize) = _sLen; }
-			return MX_UTF_INVALID;
-		}
-
-		// We know the size now, so set it.
-		// Even if we return an invalid character we want to return the correct number of
-		//	bytes to skip.
-		if ( _psSize ) { (*_psSize) = ui32Len; }
-
-		// If the length is greater than 4, it is invalid.
-		if ( ui32Len > 4 ) {
-			// Invalid sequence.
-			return MX_UTF_INVALID;
-		}
-
-		// Mask out the leading bits.
-		ui32Ret &= ~ui32Mask;
-
-		// For every trailing bit, add it to the final value.
-		for ( I = ui32Len - 1; I--; ) {
-			uint32_t ui32This = (*reinterpret_cast<const uint8_t *>(++_pcString));
-			// Validate the byte.
-			if ( (ui32This & 0xC0U) != 0x80U ) {
-				// Invalid.
-				return MX_UTF_INVALID;
-			}
-
-			ui32Ret <<= 6;
-			ui32Ret |= (ui32This & 0x3F);
-		}
-
-		// Finally done.
-		return ui32Ret;
-	}
-
-	// Converts a UTF-32 character to a UTF-16 character.
-	uint32_t CUtilities::Utf32ToUtf16( uint32_t _ui32Utf32, uint32_t &_ui32Len ) {
-		if ( _ui32Utf32 > 0x10FFFF ) {
-			_ui32Len = 1;
-			return MX_UTF_INVALID;
-		}
-		if ( 0x10000 <= _ui32Utf32 ) {
-			_ui32Len = 2;
-
-			// Break into surrogate pairs.
-			_ui32Utf32 -= 0x10000UL;
-			uint32_t ui32Hi = (_ui32Utf32 >> 10) & 0x3FF;
-			uint32_t ui32Low = _ui32Utf32 & 0x3FF;
-
-			return (0xD800 | ui32Hi) |
-				((0xDC00 | ui32Low) << 16);
-		}
-		_ui32Len = 1;
-		return _ui32Utf32;
-	}
-
-	// Converts a UTF-32 character to a UTF-8 character.
-	uint32_t CUtilities::Utf32ToUtf8( uint32_t _ui32Utf32, uint32_t &_ui32Len ) {
-		// Handle the single-character case separately since it is a special case.
-		if ( _ui32Utf32 < 0x80U ) {
-			_ui32Len = 1;
-			return _ui32Utf32;
-		}
-
-		// Upper bounds checking.
-		if ( _ui32Utf32 > 0x10FFFFU ) {
-			// Invalid character.  How do we handle it?
-			// Return a default character.
-			_ui32Len = 1;
-			return MX_UTF_INVALID;
-		}
-
-		// Every other case uses bit markers.
-		// Start from the lowest encoding and check upwards.
-		uint32_t ui32High = 0x00000800U;
-		uint32_t ui32Mask = 0xC0;
-		_ui32Len = 2;
-		while ( _ui32Utf32 >= ui32High ) {
-			ui32High <<= 5;
-			ui32Mask = (ui32Mask >> 1) | 0x80U;
-			++_ui32Len;
-		}
-
-		// Encode the first byte.
-		uint32_t ui32BottomMask = ~((ui32Mask >> 1) | 0xFFFFFF80U);
-		uint32_t ui32Ret = ui32Mask | ((_ui32Utf32 >> ((_ui32Len - 1) * 6)) & ui32BottomMask);
-		// Now fill in the rest of the bits.
-		uint32_t ui32Shift = 8;
-		for ( uint32_t I = _ui32Len - 1; I--; ) {
-			// Shift down, mask off 6 bits, and add the 10xxxxxx flag.
-			uint32_t ui32This = ((_ui32Utf32 >> (I * 6)) & 0x3F) | 0x80;
-
-			ui32Ret |= ui32This << ui32Shift;
-			ui32Shift += 8;
-		}
-
-		return ui32Ret;
-	}
-
-	// Counts the number of bytes (not bits) set in the given 64-bit value.
-	uint32_t CUtilities::CountSetBytes( uint64_t _ui64Value ) {
-		uint32_t uiRet = 0;
-		while ( _ui64Value ) {
-			++uiRet;
-			_ui64Value >>= 8;
-		}
-		return uiRet;
 	}
 
 	// Creates a string with the given data interpreted as a given type.
@@ -1895,183 +1740,10 @@ namespace mx {
 		std::memset( m_szTemp, 0, sizeof( m_szTemp ) );
 	}
 
-	// Converts a wstring to a UTF-8 string.
-	CSecureString CUtilities::WStringToString( const CSecureWString &_wsIn ) {
-#if 0
-		// Problematic; terminates at the first \0 character, making it impossible to use for strings meant for OPENFILENAMEW etc.
-		//return std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes( _wsIn );
-		// Instead, convert up to the \0 and add the \0 manually and then keep converting.
-		CSecureString ssTemp;
-		std::string::size_type sStart = 0;
-		for ( std::string::size_type I = 0; I < _wsIn.size(); ++I ) {
-			if ( _wsIn[I] == '\0' ) {
-				ssTemp.append( std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes( _wsIn.substr( sStart, I - sStart ).data() ) );
-				ssTemp.push_back( '\0' );
-				sStart = I + 1;
-			}
-		}
-
-		if ( sStart < _wsIn.size() ) {
-			ssTemp.append( std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes( _wsIn.substr( sStart ).data() ) );
-		}
-		return ssTemp;
-#else
-		CSecureString ssTemp;
-		const wchar_t * pwcSrc = _wsIn.c_str();
-		size_t I = 0;
-		size_t sSize;
-		do {
-			uint32_t ui32This = NextUtf16Char( &pwcSrc[I], _wsIn.size() - I, &sSize );
-			uint32_t ui32Len;
-			uint32_t ui32Converted = Utf32ToUtf8( ui32This, ui32Len );
-			for ( uint32_t J = 0; J < ui32Len; ++J ) {
-				ssTemp.push_back( static_cast<char>(ui32Converted & 0xFFU) );
-				ui32Converted >>= 8;
-			}
-			I += sSize;
-		} while ( I < _wsIn.size() );
-		return ssTemp;
-#endif
-	}
-
-	// Converts a UTF-8 string to wstring (UTF-16).
-	CSecureWString CUtilities::StringToWString( const std::string &_sIn ) {
-#if 0
-		// Problematic; terminates at the first \0 character, making it impossible to use for strings meant for OPENFILENAMEW etc.
-		//return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>{}.from_bytes( _sIn.data() );
-		
-		// Instead, convert up to the \0 and add the \0 manually and then keep converting.
-		CSecureWString wTemp;
-		std::string::size_type sStart = 0;
-		for ( std::string::size_type I = 0; I < _sIn.size(); ++I ) {
-			if ( _sIn[I] == '\0' ) {
-				wTemp.append( std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>{}.from_bytes( _sIn.substr( sStart, I - sStart ).data() ) );
-				wTemp.push_back( L'\0' );
-				sStart = I + 1;
-			}
-		}
-
-		if ( sStart < _sIn.size() ) {
-			wTemp.append( std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>{}.from_bytes( _sIn.substr( sStart ).data() ) );
-		}
-		return wTemp;
-#else
-		return StringToWString( static_cast<const char *>(_sIn.c_str()), _sIn.size() );
-#endif
-	}
-
-	// Converts a UTF-8 string to wstring (UTF-16).
-	CSecureWString CUtilities::StringToWString( const char * _pcIn, size_t _sLen ) {
-		CSecureWString swsTemp;
-		size_t I = 0;
-		size_t sSize;
-		do {
-			uint32_t ui32This = NextUtf8Char( &_pcIn[I], _sLen - I, &sSize );
-			uint32_t ui32Len;
-			uint32_t ui32Converted = Utf32ToUtf16( ui32This, ui32Len );
-			for ( uint32_t J = 0; J < ui32Len; ++J ) {
-				swsTemp.push_back( static_cast<wchar_t>(ui32Converted & 0xFFFFU) );
-				ui32Converted >>= 16;
-			}
-			I += sSize;
-		} while ( I < _sLen );
-		return swsTemp;
-	}
-
-	// Converts a UTF-32 string to a UTF-16 string.
-	CSecureWString CUtilities::Utf32StringToWString( const uint32_t * _puiUtf32String, size_t _sLen ) {
-		CSecureWString swsTemp;
-		size_t I = 0;
-		size_t sSize;
-		do {
-			uint32_t ui32This = NextUtf32Char( &_puiUtf32String[I], _sLen - I, &sSize );
-			uint32_t ui32Len;
-			uint32_t ui32Converted = Utf32ToUtf16( ui32This, ui32Len );
-			for ( uint32_t J = 0; J < ui32Len; ++J ) {
-				swsTemp.push_back( static_cast<wchar_t>(ui32Converted & 0xFFFFU) );
-				ui32Converted >>= 16;
-			}
-			I += sSize;
-		} while ( I < _sLen );
-		return swsTemp;
-	}
-
-	// Converts a wstring to a UTF8 string.
-	CSecureString CUtilities::ToUtf8( const std::wstring &_wsString ) {
-		CSecureString sRet;
-		const wchar_t * pwcInput = _wsString.c_str();
-		size_t sSize = _wsString.size();
-
-		for ( size_t I = 0; I < sSize; ) {
-			size_t sThisSize = 0;
-			uint32_t ui32Char = NextUtf16Char( &pwcInput[I], sSize - I, &sThisSize );
-			if ( ui32Char == MX_UTF_INVALID ) {
-				ui32Char = pwcInput[I];
-			}
-			I += sThisSize;
-			uint32_t ui32Len = 0;
-			uint32_t ui32BackToUtf8 = Utf32ToUtf8( ui32Char, ui32Len );
-			for ( uint32_t J = 0; J < ui32Len; ++J ) {
-				sRet.push_back( static_cast<uint8_t>(ui32BackToUtf8) );
-				ui32BackToUtf8 >>= 8;
-			}
-		}
-		return sRet;
-	}
-
-	// Converts from UTF-8 to UTF-16, copying the original characters instead of MX_UTF_INVALID as StringToWString() would.
-	CSecureWString CUtilities::ToUtf16( const std::string &_sIn ) {
-		CSecureWString swsTemp;
-		const char * pcSrc = _sIn.c_str();
-		size_t sSize = _sIn.size();
-
-		for ( size_t I = 0; I < sSize; ) {
-			size_t sThisSize = 0;
-			uint32_t ui32This = NextUtf8Char( &pcSrc[I], _sIn.size() - I, &sThisSize );
-			if ( ui32This == MX_UTF_INVALID ) {
-				for ( size_t J = 0; J < sThisSize; ++J ) {
-					swsTemp.push_back( static_cast<uint8_t>(pcSrc[I+J]) );
-				}
-				I += sThisSize;
-				continue;
-			}
-			I += sThisSize;
-			uint32_t ui32Len;
-			uint32_t ui32Converted = Utf32ToUtf16( ui32This, ui32Len );
-			for ( uint32_t J = 0; J < ui32Len; ++J ) {
-				swsTemp.push_back( static_cast<wchar_t>(ui32Converted & 0xFFFFU) );
-				ui32Converted >>= 16;
-			}
-		}
-		return swsTemp;
-	}
-
-	// Converts from UTF-8 to UTF-32, copying the original characters instead of MX_UTF_INVALID.
-	std::vector<uint32_t> CUtilities::ToUtf32( const std::string &_sIn ) {
-		std::vector<uint32_t> vReturn;
-		const char * pcSrc = _sIn.c_str();
-		size_t sSize = _sIn.size();
-
-		for ( size_t I = 0; I < sSize; ) {
-			size_t sThisSize = 0;
-			uint32_t ui32This = NextUtf8Char( &pcSrc[I], _sIn.size() - I, &sThisSize );
-			if ( ui32This == MX_UTF_INVALID ) {
-				for ( size_t J = 0; J < sThisSize; ++J ) {
-					vReturn.push_back( static_cast<uint8_t>(pcSrc[I+J]) );
-				}
-				I += sThisSize;
-				continue;
-			}
-			I += sThisSize;
-			vReturn.push_back( ui32This );
-		}
-		return vReturn;
-	}
-
 	// Converts from UTF-8 to any single-byte code page.
 	CSecureString CUtilities::ToCodePage( const std::string &_sIn, UINT _uiCodePage, bool * _pbError ) {
 		if ( _pbError ) { (*_pbError) = false; }
-		CSecureWString swsUtf16 = StringToWString( _sIn );
+		CSecureWString swsUtf16 = ee::StringToWString( _sIn );
 		int iLen = ::WideCharToMultiByte( _uiCodePage, 0, swsUtf16.c_str(), swsUtf16.size(),
 			NULL, 0,
 			NULL, NULL );
@@ -2111,7 +1783,7 @@ namespace mx {
 		::MultiByteToWideChar( _uiCodePage, 0, _sIn.c_str(), _sIn.size(),
 			reinterpret_cast<LPWSTR>(vResult.data()), vResult.size() );
 		CSecureWString swsTmp( reinterpret_cast<const CSecureWString::value_type *>(vResult.data()), vResult.size() );
-		return WStringToString( swsTmp );
+		return ee::WStringToString( swsTmp );
 	}
 
 	// Maps a UTF-16 (wide character) string to a new character string. The new character string is not necessarily from a multibyte character set.
@@ -2147,7 +1819,7 @@ namespace mx {
 				CSecureString ssRet;
 				size_t sLen = 1;
 				for ( size_t I = 0; I < _wsString.size(); I += sLen ) {
-					uint32_t ui32This = NextUtf16Char( &_wsString[I], _wsString.size() - I, &sLen );
+					uint32_t ui32This = ee::NextUtf16Char( &_wsString[I], _wsString.size() - I, &sLen );
 					if ( ui32This == MX_UTF_INVALID ) {
 						if ( _lpDefaultChar ) {
 							ui32This = (*_lpDefaultChar);
@@ -2172,7 +1844,7 @@ namespace mx {
 				CSecureString ssRet;
 				size_t sLen = 1;
 				for ( size_t I = 0; I < _wsString.size(); I += sLen ) {
-					uint32_t ui32This = NextUtf16Char( &_wsString[I], _wsString.size() - I, &sLen );
+					uint32_t ui32This = ee::NextUtf16Char( &_wsString[I], _wsString.size() - I, &sLen );
 					if ( ui32This == MX_UTF_INVALID ) {
 						if ( _lpDefaultChar ) {
 							ui32This = (*_lpDefaultChar);
@@ -2245,14 +1917,14 @@ namespace mx {
 				CSecureWString swsRet;
 				for ( size_t I = _sString.size() / sizeof( uint32_t ); I--; ) {
 					uint32_t uiLen;
-					uint32_t ui32This = Utf32ToUtf16( (*_puiSrc++), uiLen );
+					uint32_t ui32This = ee::Utf32ToUtf16( (*_puiSrc++), uiLen );
 
 					if ( ui32This == MX_UTF_INVALID ) {
 						if ( _dwFlags & MB_ERR_INVALID_CHARS ) {
 							if ( _pdwLastError ) { (*_pdwLastError) = ERROR_NO_UNICODE_TRANSLATION; }
 							return CSecureWString();
 						}
-						ui32This = Utf32ToUtf16( 0xFFFD, uiLen );
+						ui32This = ee::Utf32ToUtf16( 0xFFFD, uiLen );
 					}
 					if ( ui32This != MX_UTF_INVALID ) {
 						for ( uint32_t J = 0; J < uiLen; ++J ) {
@@ -2269,14 +1941,14 @@ namespace mx {
 				CSecureWString swsRet;
 				for ( size_t I = _sString.size() / sizeof( uint32_t ); I--; ) {
 					uint32_t uiLen;
-					uint32_t ui32This = Utf32ToUtf16( ::_byteswap_ulong( (*_puiSrc++) ), uiLen );
+					uint32_t ui32This = ee::Utf32ToUtf16( ::_byteswap_ulong( (*_puiSrc++) ), uiLen );
 
 					if ( ui32This == MX_UTF_INVALID ) {
 						if ( _dwFlags & MB_ERR_INVALID_CHARS ) {
 							if ( _pdwLastError ) { (*_pdwLastError) = ERROR_NO_UNICODE_TRANSLATION; }
 							return CSecureWString();
 						}
-						ui32This = Utf32ToUtf16( 0xFFFD, uiLen );
+						ui32This = ee::Utf32ToUtf16( 0xFFFD, uiLen );
 					}
 					if ( ui32This != MX_UTF_INVALID ) {
 						for ( uint32_t J = 0; J < uiLen; ++J ) {
@@ -2414,7 +2086,7 @@ namespace mx {
 			{ L'\v', L'v' },
 		};
 		for ( size_t I = 0; I < _swsInput.size();  ) {
-			uint32_t ui32This = NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t ui32This = ee::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			if ( sLen == 1 ) {
 				bool bFound = false;
 				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
@@ -2459,7 +2131,7 @@ namespace mx {
 
 	// Adds escapes to all unprintable characters.
 	std::vector<uint32_t> CUtilities::EscapeUnprintable( const std::vector<uint32_t> &_swsInput, bool _bIncludeBackSlash, bool _bKeepNewline ) {
-		CSecureWString swsConv = CUtilities::Utf32StringToWString( _swsInput.data(), _swsInput.size() );
+		CSecureWString swsConv = ee::Utf32StringToWString( _swsInput.data(), _swsInput.size() );
 		size_t sLen;
 		
 		static struct {
@@ -2476,7 +2148,7 @@ namespace mx {
 		};
 		std::vector<uint32_t> vOutput;
 		for ( size_t I = 0; I < _swsInput.size();  ) {
-			uint32_t ui32This = NextUtf32Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t ui32This = ee::NextUtf32Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			if ( sLen == 1 && MX_UTF_INVALID != ui32This ) {
 				bool bFound = false;
 				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
@@ -2499,7 +2171,7 @@ namespace mx {
 				if ( bFound ) { ++I; continue; }
 
 				uint32_t ui32ThisLen;
-				uint32_t ui32Conv = Utf32ToUtf16( ui32This, ui32ThisLen );
+				uint32_t ui32Conv = ee::Utf32ToUtf16( ui32This, ui32ThisLen );
 				WORD wTypeData[2], wType3Data[2];
 				::GetStringTypeW( CT_CTYPE1,
 					reinterpret_cast<LPCWCH>(&ui32Conv),
@@ -2555,7 +2227,7 @@ namespace mx {
 		size_t sLen = 1;
 		for ( size_t I = 0; I < _ssInput.size() && sLen; I += sLen ) {
 
-			uint32_t ui32This = NextUtf8Char( &_ssInput[I], _ssInput.size() - I, &sLen );
+			uint32_t ui32This = ee::NextUtf8Char( &_ssInput[I], _ssInput.size() - I, &sLen );
 			if ( sLen == 1 ) {
 				// A single character can be used for all formats.
 				ssTmp.push_back( '\\' );
@@ -2571,7 +2243,7 @@ namespace mx {
 				continue;
 			}
 			uint32_t ui32ThisLen = 0;
-			uint32_t ui32ThisUtf16 = Utf32ToUtf16( ui32This, ui32ThisLen );
+			uint32_t ui32ThisUtf16 = ee::Utf32ToUtf16( ui32This, ui32ThisLen );
 			if ( ui32ThisLen == 1 ) {
 				// To preserve the UTF data, a \uNNNN must be used.
 				ssTmp.push_back( '\\' );
@@ -2688,7 +2360,7 @@ namespace mx {
 		};
 		CSecureString vOutput;
 		for ( size_t I = 0; I < _ssInput.size();  ) {
-			uint32_t ui32This = NextUtf8Char( &_ssInput[I], _ssInput.size() - I, &sLen );
+			uint32_t ui32This = ee::NextUtf8Char( &_ssInput[I], _ssInput.size() - I, &sLen );
 			if ( sLen == 1 && MX_UTF_INVALID != ui32This ) {
 				bool bFound = false;
 				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
@@ -2706,7 +2378,7 @@ namespace mx {
 				if ( bFound ) { ++I; continue; }
 			}
 			uint32_t ui32ThisLen;
-			uint32_t ui32Conv = Utf32ToUtf16( ui32This, ui32ThisLen );
+			uint32_t ui32Conv = ee::Utf32ToUtf16( ui32This, ui32ThisLen );
 			WORD wTypeData[2]/*, wType3Data[2]*/;
 			::GetStringTypeW( CT_CTYPE1,
 				reinterpret_cast<LPCWCH>(&ui32Conv),
@@ -2773,7 +2445,7 @@ namespace mx {
 			{ L'\v', L'v' },
 		};
 		for ( size_t I = 0; I < _swsInput.size();  ) {
-			uint32_t ui32This = NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t ui32This = ee::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			if ( sLen == 1 ) {
 				bool bFound = false;
 				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
@@ -2791,7 +2463,7 @@ namespace mx {
 				if ( bFound ) { ++I; continue; }
 			}
 			uint32_t ui32ThisLen;
-			uint32_t ui32Conv = Utf32ToUtf16( ui32This, ui32ThisLen );
+			uint32_t ui32Conv = ee::Utf32ToUtf16( ui32This, ui32ThisLen );
 			WORD wTypeData[2]/*, wType3Data[2]*/;
 			::GetStringTypeW( CT_CTYPE1,
 				reinterpret_cast<LPCWCH>(&ui32Conv),
@@ -2850,7 +2522,7 @@ namespace mx {
 		};
 		std::vector<uint32_t> vOutput;
 		for ( size_t I = 0; I < _swsInput.size();  ) {
-			uint32_t ui32This = NextUtf32Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t ui32This = ee::NextUtf32Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			if ( sLen == 1 && MX_UTF_INVALID != ui32This ) {
 				bool bFound = false;
 				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
@@ -2869,7 +2541,7 @@ namespace mx {
 			}
 				
 			uint32_t ui32ThisLen;
-			uint32_t ui32Conv = Utf32ToUtf16( ui32This, ui32ThisLen );
+			uint32_t ui32Conv = ee::Utf32ToUtf16( ui32This, ui32ThisLen );
 			WORD wTypeData[2]/*, wType3Data[2]*/;
 			::GetStringTypeW( CT_CTYPE1,
 				reinterpret_cast<LPCWCH>(&ui32Conv),
@@ -2979,9 +2651,9 @@ namespace mx {
 
 			for ( size_t I = 0; I < _sIn.size(); ) {
 				size_t sThisSize = 0;
-				uint32_t ui32This = NextUtf8Char( &pcSrc[I], _sIn.size() - I, &sThisSize );
+				uint32_t ui32This = ee::NextUtf8Char( &pcSrc[I], _sIn.size() - I, &sThisSize );
 				uint32_t uiTempLen;
-				if ( ui32This != MX_UTF_INVALID && std::iswspace( static_cast<wint_t>(Utf32ToUtf16( ui32This, uiTempLen )) ) ) {
+				if ( ui32This != MX_UTF_INVALID && std::iswspace( static_cast<wint_t>(ee::Utf32ToUtf16( ui32This, uiTempLen )) ) ) {
 					if ( !bFoundNonWhitespace ) {
 						for ( size_t J = 0; J < sThisSize; ++J ) { _sIn.erase( _sIn.begin() ); }
 						continue;
@@ -2997,8 +2669,8 @@ namespace mx {
 			while ( _sIn.size() > sTrailIdx ) { _sIn.pop_back(); }
 			return _sIn;
 		}
-		while ( _sIn.size() && ::isspace( _sIn.c_str()[_sIn.size()-1] ) ) { _sIn.pop_back(); }
-		while ( _sIn.size() && ::isspace( _sIn.c_str()[0] ) ) { _sIn.erase( _sIn.begin() ); }
+		while ( _sIn.size() && ee::IsWhiteSpace( _sIn.c_str()[_sIn.size()-1] ) ) { _sIn.pop_back(); }
+		while ( _sIn.size() && ee::IsWhiteSpace( _sIn.c_str()[0] ) ) { _sIn.erase( _sIn.begin() ); }
 
 		return _sIn;
 	}
@@ -3008,11 +2680,11 @@ namespace mx {
 		CSecureWString swsRet;
 		size_t sLen = 0;
 		for ( size_t I = 0; I < _swsInput.size(); I += sLen ) {
-			uint32_t uiConverted = NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t uiConverted = ee::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			uint32_t uiTempLen;
-			uiConverted = Utf32ToUtf16( uiConverted, uiTempLen );
+			uiConverted = ee::Utf32ToUtf16( uiConverted, uiTempLen );
 			if ( uiTempLen == 1 ) {
-				uiConverted = std::towupper( Utf32ToUtf16( uiConverted, uiTempLen ) );
+				uiConverted = std::towupper( ee::Utf32ToUtf16( uiConverted, uiTempLen ) );
 			}
 			for ( size_t J = 0; J < uiTempLen; ++J ) {
 				swsRet.push_back( static_cast<uint16_t>(uiConverted) );
@@ -3027,11 +2699,11 @@ namespace mx {
 		CSecureWString swsRet;
 		size_t sLen = 0;
 		for ( size_t I = 0; I < _swsInput.size(); I += sLen ) {
-			uint32_t uiConverted = NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t uiConverted = ee::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			uint32_t uiTempLen;
-			uiConverted = Utf32ToUtf16( uiConverted, uiTempLen );
+			uiConverted = ee::Utf32ToUtf16( uiConverted, uiTempLen );
 			if ( uiTempLen == 1 ) {
-				uiConverted = std::towlower( Utf32ToUtf16( uiConverted, uiTempLen ) );
+				uiConverted = std::towlower( ee::Utf32ToUtf16( uiConverted, uiTempLen ) );
 			}
 			for ( size_t J = 0; J < uiTempLen; ++J ) {
 				swsRet.push_back( static_cast<uint16_t>(uiConverted) );
@@ -3046,11 +2718,11 @@ namespace mx {
 		CSecureWString swsRet;
 		size_t sLen = 0;
 		for ( size_t I = 0; I < _swsInput.size(); I += sLen ) {
-			uint32_t uiConverted = NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t uiConverted = ee::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			uint32_t uiTempLen;
-			uiConverted = Utf32ToUtf16( uiConverted, uiTempLen );
+			uiConverted = ee::Utf32ToUtf16( uiConverted, uiTempLen );
 			if ( uiTempLen == 1 ) {
-				uiConverted = HiraganaToKatakana( Utf32ToUtf16( uiConverted, uiTempLen ) );
+				uiConverted = HiraganaToKatakana( ee::Utf32ToUtf16( uiConverted, uiTempLen ) );
 			}
 			for ( size_t J = 0; J < uiTempLen; ++J ) {
 				swsRet.push_back( static_cast<uint16_t>(uiConverted) );
@@ -3065,11 +2737,11 @@ namespace mx {
 		CSecureWString swsRet;
 		size_t sLen = 0;
 		for ( size_t I = 0; I < _swsInput.size(); I += sLen ) {
-			uint32_t uiConverted = NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t uiConverted = ee::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			uint32_t uiTempLen;
-			uiConverted = Utf32ToUtf16( uiConverted, uiTempLen );
+			uiConverted = ee::Utf32ToUtf16( uiConverted, uiTempLen );
 			if ( uiTempLen == 1 ) {
-				uiConverted = KatakanaToHiragana( Utf32ToUtf16( uiConverted, uiTempLen ) );
+				uiConverted = KatakanaToHiragana( ee::Utf32ToUtf16( uiConverted, uiTempLen ) );
 			}
 			for ( size_t J = 0; J < uiTempLen; ++J ) {
 				swsRet.push_back( static_cast<uint16_t>(uiConverted) );
@@ -3084,11 +2756,11 @@ namespace mx {
 		CSecureWString swsRet;
 		size_t sLen = 0;
 		for ( size_t I = 0; I < _swsInput.size(); I += sLen ) {
-			uint32_t uiConverted = NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t uiConverted = ee::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			uint32_t uiTempLen;
-			uiConverted = Utf32ToUtf16( uiConverted, uiTempLen );
+			uiConverted = ee::Utf32ToUtf16( uiConverted, uiTempLen );
 			if ( uiTempLen == 1 ) {
-				uiConverted = FullWidthToByte( Utf32ToUtf16( uiConverted, uiTempLen ) );
+				uiConverted = FullWidthToByte( ee::Utf32ToUtf16( uiConverted, uiTempLen ) );
 			}
 			for ( size_t J = 0; J < uiTempLen; ++J ) {
 				swsRet.push_back( static_cast<uint16_t>(uiConverted) );
@@ -3103,11 +2775,11 @@ namespace mx {
 		CSecureWString swsRet;
 		size_t sLen = 0;
 		for ( size_t I = 0; I < _swsInput.size(); I += sLen ) {
-			uint32_t uiConverted = NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t uiConverted = ee::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			uint32_t uiTempLen;
-			uiConverted = Utf32ToUtf16( uiConverted, uiTempLen );
+			uiConverted = ee::Utf32ToUtf16( uiConverted, uiTempLen );
 			if ( uiTempLen == 1 ) {
-				uiConverted = NumericToByte( Utf32ToUtf16( uiConverted, uiTempLen ) );
+				uiConverted = NumericToByte( ee::Utf32ToUtf16( uiConverted, uiTempLen ) );
 			}
 			for ( size_t J = 0; J < uiTempLen; ++J ) {
 				swsRet.push_back( static_cast<uint16_t>(uiConverted) );
@@ -3308,14 +2980,14 @@ namespace mx {
 	void CUtilities::ResolveAllEscapes( const std::string &_sInput, std::string &_sOutput, bool _bIsUtf8 ) {
 		size_t sLen = 1;
 		for ( size_t I = 0; I < _sInput.size() && sLen; I += sLen ) {
-			uint64_t uiNext = _bIsUtf8 ? NextUtf8Char( &_sInput[I], _sInput.size() - I, &sLen ) : (sLen = 1, static_cast<uint8_t>(_sInput[I]));
+			uint64_t uiNext = _bIsUtf8 ? ee::NextUtf8Char( &_sInput[I], _sInput.size() - I, &sLen ) : (sLen = 1, static_cast<uint8_t>(_sInput[I]));
 			if ( sLen == 1 ) {
 				// It was just a regular character.  Could be an escape.
-				uiNext = ResolveEscape( &_sInput[I], _sInput.size() - I, sLen, false );
+				uiNext = ee::ResolveEscape( &_sInput[I], _sInput.size() - I, sLen, false );
 			}
 			do {
 				uint32_t ui32Len;
-				uint32_t ui32BackToUtf8 = _bIsUtf8 ? Utf32ToUtf8( static_cast<uint32_t>(uiNext), ui32Len ) : (ui32Len = CountSetBytes( uiNext ), uiNext);
+				uint32_t ui32BackToUtf8 = _bIsUtf8 ? ee::Utf32ToUtf8( static_cast<uint32_t>(uiNext), ui32Len ) : (ui32Len = ee::CountSetBytes( uiNext ), uiNext);
 				if ( ui32BackToUtf8 == MX_UTF_INVALID ) {
 					ui32Len = 1;
 					ui32BackToUtf8 = uiNext;
@@ -3336,24 +3008,10 @@ namespace mx {
 		// There are at least 2 characters so an escape is possible.
 		if ( _sLen >= 2 && (*_pcInput) == '&' && _bIncludeHtml ) {
 			size_t sLen;
-			uint32_t uiTmp = ee::EscapeHtml( _pcInput + 1, _sLen - 1, sLen );
+			uint64_t uiTmp = ee::EscapeHtml( _pcInput + 1, _sLen - 1, sLen );
 			if ( sLen ) {
 				_sCharLen = sLen + 1;
 				return uiTmp;
-			}
-			// ee::EscapeHtml() only handles &#????; and &#x????; encodings.
-			size_t sCount = ee::CountAlphanumeric( _pcInput + 1, _sLen - 1, 0 );
-			size_t sCodeLen;
-			uint64_t uiCode = CHtml::GetCode( _pcInput + 1, sCount );
-			if ( uiCode != MX_UTF_INVALID ) {
-				_sCharLen = sCount + 1;
-				_pcInput += _sCharLen;
-				_sLen -= _sCharLen;
-				if ( _sLen && (*_pcInput) == ';' ) {
-					// The ';' is nestled against the name as it should be.  Eat it.
-					++_sCharLen;
-				}
-				return uiCode;
 			}
 		}
 		if ( _bIncludeHtml || (*_pcInput) != '\\' ) { _sCharLen = 1; return static_cast<uint8_t>(*_pcInput); }	// Not an escape.
@@ -3400,7 +3058,7 @@ namespace mx {
 				return ui32Temp;
 			}
 			case 'N' : {
-				uint32_t ui32Temp = ee::EspaceNamedUnicode( &_pcInput[1], _sLen - 1, _sCharLen );
+				uint32_t ui32Temp = ee::EscapeNamedUnicode( &_pcInput[1], _sLen - 1, _sCharLen );
 				if ( !_sCharLen ) { _sCharLen = 1; return static_cast<uint8_t>(*_pcInput); }
 				else { ++_sCharLen; }
 				return ui32Temp;
@@ -3431,14 +3089,14 @@ namespace mx {
 	void CUtilities::ResolveAllHtmlXmlEscapes( const std::string &_sInput, std::string &_sOutput, bool _bIsUtf8 ) {
 		size_t sLen = 1;
 		for ( size_t I = 0; I < _sInput.size() && sLen; I += sLen ) {
-			uint64_t uiNext = _bIsUtf8 ? NextUtf8Char( &_sInput[I], _sInput.size() - I, &sLen ) : (sLen = 1, static_cast<uint8_t>(_sInput[I]));
+			uint64_t uiNext = _bIsUtf8 ? ee::NextUtf8Char( &_sInput[I], _sInput.size() - I, &sLen ) : (sLen = 1, static_cast<uint8_t>(_sInput[I]));
 			if ( sLen == 1 && uiNext == '&' ) {
 				// It was just a regular character.  Could be an escape.
-				uiNext = ResolveEscape( &_sInput[I], _sInput.size() - I, sLen, true );
+				uiNext = ee::ResolveEscape( &_sInput[I], _sInput.size() - I, sLen, true );
 			}
 			do {
 				uint32_t ui32Len;
-				uint32_t ui32BackToUtf8 = _bIsUtf8 ? Utf32ToUtf8( static_cast<uint32_t>(uiNext), ui32Len ) : (ui32Len = CountSetBytes( static_cast<uint32_t>(uiNext) ), uiNext);
+				uint32_t ui32BackToUtf8 = _bIsUtf8 ? ee::Utf32ToUtf8( static_cast<uint32_t>(uiNext), ui32Len ) : (ui32Len = ee::CountSetBytes( static_cast<uint32_t>(uiNext) ), uiNext);
 				if ( ui32BackToUtf8 == MX_UTF_INVALID ) {
 					ui32Len = 1;
 					ui32BackToUtf8 = uiNext;
@@ -3461,7 +3119,7 @@ namespace mx {
 		bool bIsFloat = DataTypeIsFloat( _dtTargetType );
 		size_t sSize = DataTypeSize( _dtTargetType );
 		for ( size_t I = 0; I < sLen; ) {
-			while ( I < sLen && ::isspace( _sInput[I] ) ) { ++I; }
+			while ( I < sLen && ee::IsWhiteSpace( _sInput[I] ) ) { ++I; }
 			if ( _pvMeta ) {
 				if ( _sInput[I] == '*' || _sInput[I] == '?' ) {
 					for ( size_t J = 0; J < sSize; ++J ) { ssRet.push_back( 0 ); }
@@ -3510,7 +3168,7 @@ namespace mx {
 		const char * pcInput = _sInput.c_str();
 		size_t sLen = _sInput.size();
 		MX_DATA_TYPES dtDefaultType = _dtTargetType;
-#define MX_SKIP_WS		while ( I < sLen && ::isspace( _sInput[I] ) ) { ++I; }
+#define MX_SKIP_WS		while ( I < sLen && ee::IsWhiteSpace( _sInput[I] ) ) { ++I; }
 		for ( size_t I = 0; I < sLen; ) {
 			MX_SKIP_WS;
 
@@ -3696,11 +3354,11 @@ namespace mx {
 		size_t I = 0;
 		size_t sSize;
 		do {
-			uint32_t ui32This = NextUtf8Char( &_sString[I], _sString.size() - I, &sSize );
+			uint32_t ui32This = ee::NextUtf8Char( &_sString[I], _sString.size() - I, &sSize );
 			uint32_t ui32Len;
-			uint32_t ui32Converted = KatakanaToHiragana( Utf32ToUtf16( ui32This, ui32Len ) );
+			uint32_t ui32Converted = KatakanaToHiragana( ee::Utf32ToUtf16( ui32This, ui32Len ) );
 			size_t sConvertedSize;
-			ui32This = Utf32ToUtf8( NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), sizeof( ui32Converted ) / sizeof( wchar_t ), &sConvertedSize ), ui32Len );
+			ui32This = ee::Utf32ToUtf8( ee::NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), sizeof( ui32Converted ) / sizeof( wchar_t ), &sConvertedSize ), ui32Len );
 
 			for ( uint32_t J = 0; J < ui32Len; ++J ) {
 				ssTemp.push_back( static_cast<wchar_t>(ui32This & 0xFFU) );
@@ -3717,12 +3375,12 @@ namespace mx {
 		size_t I = 0;
 		size_t sSize;
 		do {
-			uint32_t ui32This = NextUtf16Char( &_wsString[I], _wsString.size() - I, &sSize );
+			uint32_t ui32This = ee::NextUtf16Char( &_wsString[I], _wsString.size() - I, &sSize );
 			uint32_t ui32Len;
-			uint32_t ui32Converted = KatakanaToHiragana( Utf32ToUtf16( ui32This, ui32Len ) );
+			uint32_t ui32Converted = KatakanaToHiragana( ee::Utf32ToUtf16( ui32This, ui32Len ) );
 			uint32_t ui32Converted2 = KatakanaToHiragana( ui32This );
 			size_t sConvertedSize;
-			ui32This = Utf32ToUtf16( NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), sizeof( ui32Converted ) / sizeof( wchar_t ), &sConvertedSize ), ui32Len );
+			ui32This = ee::Utf32ToUtf16( ee::NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), sizeof( ui32Converted ) / sizeof( wchar_t ), &sConvertedSize ), ui32Len );
 
 			for ( uint32_t J = 0; J < ui32Len; ++J ) {
 				swsTemp.push_back( static_cast<wchar_t>(ui32This & 0xFFFFU) );
@@ -3739,13 +3397,13 @@ namespace mx {
 		CSecureString ssTemp;
 		size_t sLen = 1;
 		for ( size_t I = 0; I < _sInput.size() && sLen; I += sLen ) {
-			uint32_t uiNext = NextUtf8Char( &_sInput[I], _sInput.size() - I, &sLen );
+			uint32_t uiNext = ee::NextUtf8Char( &_sInput[I], _sInput.size() - I, &sLen );
 			if ( sLen == 1 ) {
 				// It was just a regular character.  Could be an escape.
 				uiNext = ResolveEscape( &_sInput[I], _sInput.size() - I, sLen, false );
 			}
 			uint32_t ui32Len;
-			uint32_t ui32BackToUtf8 = Utf32ToUtf8( uiNext, ui32Len );
+			uint32_t ui32BackToUtf8 = ee::Utf32ToUtf8( uiNext, ui32Len );
 			if ( ui32BackToUtf8 == MX_UTF_INVALID ) {
 				ui32Len = 1;
 				ui32BackToUtf8 = uiNext;
@@ -3831,13 +3489,13 @@ namespace mx {
 				}
 				for ( size_t J = 0; J < _sBytes; ++J ) {
 					size_t sLen = 1;
-					uint32_t ui32This = NextUtf8Char( reinterpret_cast<const char *>(&_puiData[J]), _sBytes - J, &sLen );
+					uint32_t ui32This = ee::NextUtf8Char( reinterpret_cast<const char *>(&_puiData[J]), _sBytes - J, &sLen );
 					/*if ( ui32This == MX_UTF_INVALID ) {
 						ui32This = _puiData[J];
 						sLen = 1;
 					}*/
 					uint32_t ui32Len;
-					uint32_t ui32Converted = Utf32ToUtf16( ui32This, ui32Len );
+					uint32_t ui32Converted = ee::Utf32ToUtf16( ui32This, ui32Len );
 					::GetStringTypeW( bArray[I].dwFlags, reinterpret_cast<LPCWCH>(&ui32Converted),
 						std::min( static_cast<int>(ui32Len), static_cast<int>(_sBytes - J) ),
 						&(*bArray[I].pvBuffer)[J] );
@@ -3870,13 +3528,13 @@ namespace mx {
 				}
 				for ( size_t J = 0; J < _sBytes; ++J ) {
 					size_t sLen = 1;
-					uint32_t ui32This = NextUtf16Char( reinterpret_cast<const wchar_t *>(&_puiData[J]), _sBytes - J, &sLen );
+					uint32_t ui32This = ee::NextUtf16Char( reinterpret_cast<const wchar_t *>(&_puiData[J]), _sBytes - J, &sLen );
 					/*if ( ui32This == MX_UTF_INVALID ) {
 						ui32This = _puiData[J];
 						sLen = 1;
 					}*/
 					uint32_t ui32Len;
-					uint32_t ui32Converted = Utf32ToUtf16( ui32This, ui32Len );
+					uint32_t ui32Converted = ee::Utf32ToUtf16( ui32This, ui32Len );
 					::GetStringTypeW( bArray[I].dwFlags, reinterpret_cast<LPCWCH>(&ui32Converted),
 						std::min( static_cast<int>(ui32Len), static_cast<int>(_sBytes - J) ),
 						&(*bArray[I].pvBuffer)[J] );
@@ -3909,13 +3567,13 @@ namespace mx {
 				}
 				for ( size_t J = 0; J < _sBytes; ++J ) {
 					size_t sLen = 1;
-					uint32_t ui32This = NextUtf32Char( reinterpret_cast<const uint32_t *>(&_puiData[J]), _sBytes - J, &sLen );
+					uint32_t ui32This = ee::NextUtf32Char( reinterpret_cast<const uint32_t *>(&_puiData[J]), _sBytes - J, &sLen );
 					/*if ( ui32This == MX_UTF_INVALID ) {
 						ui32This = _puiData[J];
 						sLen = 1;
 					}*/
 					uint32_t ui32Len;
-					uint32_t ui32Converted = Utf32ToUtf16( ui32This, ui32Len );
+					uint32_t ui32Converted = ee::Utf32ToUtf16( ui32This, ui32Len );
 					::GetStringTypeW( bArray[I].dwFlags, reinterpret_cast<LPCWCH>(&ui32Converted),
 						std::min( static_cast<int>(ui32Len), static_cast<int>(_sBytes - J) ),
 						&(*bArray[I].pvBuffer)[J] );
@@ -3991,11 +3649,11 @@ namespace mx {
 
 		for ( size_t I = 0; I < _sBytes; ++I ) {
 			size_t sLen = 1;
-			uint32_t ui32Temp = NextUtf8Char( reinterpret_cast<const char *>(&_puiData[I]), _sBytes - I, &sLen );
+			uint32_t ui32Temp = ee::NextUtf8Char( reinterpret_cast<const char *>(&_puiData[I]), _sBytes - I, &sLen );
 			_vData[I].ui8UftLen = static_cast<uint8_t>(sLen);
 			if ( ui32Temp != MX_UTF_INVALID ) {
 				uint32_t ui32Len;
-				uint32_t ui32Converted = Utf32ToUtf16( ui32Temp, ui32Len );
+				uint32_t ui32Converted = ee::Utf32ToUtf16( ui32Temp, ui32Len );
 				if ( (_uiFlags & MX_SSF_LINGUISTIC_IGNOREDIACRITIC) && (_wC3Props[I] & C3_DIACRITIC) ) {
 					wchar_t szBuffer[32];
 					int iNorm = ::NormalizeString( NormalizationKD, reinterpret_cast<LPCWCH>(&ui32Converted), ui32Len, szBuffer, MX_ELEMENTS( szBuffer ) );
@@ -4025,7 +3683,7 @@ namespace mx {
 				else if ( _uiFlags & MX_SSF_NORM_IGNORECASE ) {
 					ui32Converted = std::towupper( ui32Converted );
 				}
-				_vData[I].ui32SearchChar = NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), 2 );
+				_vData[I].ui32SearchChar = ee::NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), 2 );
 			}
 			else {
 				_vData[I].ui32SearchChar = ui32Temp;
@@ -4061,15 +3719,15 @@ namespace mx {
 				if ( sLeft >= 2 ) {
 					szByteSwapped[1] = ::_byteswap_ushort( reinterpret_cast<const wchar_t *>(&_puiData[sIdx])[1] );
 				}
-				ui32Temp = NextUtf16Char( szByteSwapped, 2, &sLen );
+				ui32Temp = ee::NextUtf16Char( szByteSwapped, 2, &sLen );
 			}
 			else {
-				ui32Temp = NextUtf16Char( reinterpret_cast<const wchar_t *>(&_puiData[sIdx]), _sBytes - sIdx, &sLen );
+				ui32Temp = ee::NextUtf16Char( reinterpret_cast<const wchar_t *>(&_puiData[sIdx]), _sBytes - sIdx, &sLen );
 			}
 			_vData[sIdx].ui8UftLen = static_cast<uint8_t>(sLen * sizeof( wchar_t ));
 			if ( ui32Temp != MX_UTF_INVALID ) {
 				uint32_t ui32Len;
-				uint32_t ui32Converted = Utf32ToUtf16( ui32Temp, ui32Len );
+				uint32_t ui32Converted = ee::Utf32ToUtf16( ui32Temp, ui32Len );
 				if ( (_uiFlags & MX_SSF_LINGUISTIC_IGNOREDIACRITIC) && (_wC3Props[sIdx] & C3_DIACRITIC) ) {
 					wchar_t szBuffer[32];
 					int iNorm = ::NormalizeString( NormalizationKD, reinterpret_cast<LPCWCH>(&ui32Converted), ui32Len, szBuffer, MX_ELEMENTS( szBuffer ) );
@@ -4099,7 +3757,7 @@ namespace mx {
 				else if ( _uiFlags & MX_SSF_NORM_IGNORECASE ) {
 					ui32Converted = std::towupper( ui32Converted );
 				}
-				_vData[sIdx].ui32SearchChar = NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), 2 );
+				_vData[sIdx].ui32SearchChar = ee::NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), 2 );
 			}
 			else {
 				_vData[sIdx].ui32SearchChar = ui32Temp;
@@ -4130,11 +3788,11 @@ namespace mx {
 			uint32_t ui32Char = _bByteSwapped ?
 				::_byteswap_ulong( (*reinterpret_cast<const uint32_t *>(&_puiData[sIdx])) ) :
 				(*reinterpret_cast<const uint32_t *>(&_puiData[sIdx]));
-			uint32_t ui32Temp = NextUtf32Char( &ui32Char, _sBytes - sIdx, &sLen );
+			uint32_t ui32Temp = ee::NextUtf32Char( &ui32Char, _sBytes - sIdx, &sLen );
 			_vData[sIdx].ui8UftLen = static_cast<uint8_t>(sLen * sizeof( uint32_t ));
 			if ( ui32Temp != MX_UTF_INVALID ) {
 				uint32_t ui32Len;
-				uint32_t ui32Converted = Utf32ToUtf16( ui32Temp, ui32Len );
+				uint32_t ui32Converted = ee::Utf32ToUtf16( ui32Temp, ui32Len );
 				if ( (_uiFlags & MX_SSF_LINGUISTIC_IGNOREDIACRITIC) && (_wC3Props[sIdx] & C3_DIACRITIC) ) {
 					wchar_t szBuffer[32];
 					int iNorm = ::NormalizeString( NormalizationKD, reinterpret_cast<LPCWCH>(&ui32Converted), ui32Len, szBuffer, MX_ELEMENTS( szBuffer ) );
@@ -4164,7 +3822,7 @@ namespace mx {
 				else if ( _uiFlags & MX_SSF_NORM_IGNORECASE ) {
 					ui32Converted = std::towupper( ui32Converted );
 				}
-				_vData[sIdx].ui32SearchChar = NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), 2 );
+				_vData[sIdx].ui32SearchChar = ee::NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), 2 );
 			}
 			else {
 				_vData[sIdx].ui32SearchChar = ui32Temp;
@@ -4242,7 +3900,7 @@ namespace mx {
 		wsTemp.push_back( L' ' );
 
 		// 32-bit float in binary.
-		if ( _rResult.ncType == ee::EE_NC_FLOATING ) {
+		if ( (_rResult.ncType) == ee::EE_NC_FLOATING ) {
 				union {
 					float			fVal;
 					uint32_t		ui32Val;
@@ -4256,8 +3914,8 @@ namespace mx {
 		}
 
 		// Get the number of bits to display.
-		uint32_t ui32Bits = _rResult.ncType == ee::EE_NC_FLOATING ? 64 : 1;
-		if ( _rResult.ncType == ee::EE_NC_SIGNED ) {
+		uint32_t ui32Bits = (_rResult.ncType) == ee::EE_NC_FLOATING ? 64 : 1;
+		if ( (_rResult.ncType) == ee::EE_NC_SIGNED ) {
 			if ( _rResult.u.i64Val >= SCHAR_MIN && _rResult.u.i64Val <= SCHAR_MAX ) {
 				ui32Bits = CHAR_BIT;
 			}
@@ -4271,7 +3929,7 @@ namespace mx {
 				ui32Bits = 64;
 			}
 		}
-		else if ( _rResult.ncType == ee::EE_NC_UNSIGNED ) {
+		else if ( (_rResult.ncType) == ee::EE_NC_UNSIGNED ) {
 			if ( _rResult.u.ui64Val < (1ULL << 8ULL) ) {
 				ui32Bits = 8;
 			}
@@ -4290,7 +3948,7 @@ namespace mx {
 		ToBinary( _rResult.u.ui64Val, wsTemp, ui32Bits );
 
 
-		if ( _rResult.ncType == ee::EE_NC_SIGNED && _rResult.u.i64Val < 0 ) {
+		if ( (_rResult.ncType) == ee::EE_NC_SIGNED && _rResult.u.i64Val < 0 ) {
 			wsTemp.push_back( L',' );
 			wsTemp.push_back( L' ' );
 			wsTemp.push_back( L'-' );
@@ -4308,7 +3966,7 @@ namespace mx {
 		std::wstring wsTemp;
 		// Microseconds can be nabbed from floating-point values.  Get the fractional part if it exists.
 		double dFrac = 0.0;
-		if ( _rResult.ncType == ee::EE_NC_FLOATING ) {
+		if ( (_rResult.ncType) == ee::EE_NC_FLOATING ) {
 			double dInt = 0.0;
 			dFrac = std::modf( _rResult.u.dVal, &dInt );
 		}
@@ -4332,7 +3990,7 @@ namespace mx {
 		const char * pcTemp = std::ctime( reinterpret_cast<const time_t * const>(&rConv.u.ui64Val) );
 
 		if ( pcTemp ) {
-			wsTemp = StringToWString( pcTemp );
+			wsTemp = ee::StringToWString( pcTemp );
 		}
 		else {
 			wsTemp.append( _DEC_WS_3424431C_Invalid );

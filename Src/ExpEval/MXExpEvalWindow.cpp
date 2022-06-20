@@ -2,6 +2,7 @@
 #include "../Layouts/MXExpressionEvaluatorLayout.h"
 #include "../System/MXSystem.h"
 
+#include <Object/EEObject.h>
 #include <Rebar/LSWRebar.h>
 #include <ToolBar/LSWToolBar.h>
 //#include <Unicode/EEUnicode.h>	// TEMP.
@@ -169,8 +170,10 @@ namespace mx {
 			case CExpressionEvaluatorLayout::MX_BC_ADD : {
 				CEdit * pcbCombo = InputEdit();
 				if ( pcbCombo ) {
-					CSecureString sText = pcbCombo->GetTextA();
-					AddExpression( sText.c_str() );
+					//CSecureString sText = pcbCombo->GetTextA();
+					CSecureWString wsText = pcbCombo->GetTextW();
+					CSecureString ssUtf8 = ee::ToUtf8( wsText );
+					AddExpression( ssUtf8.c_str() );
 				}				
 				break;
 			}
@@ -248,18 +251,24 @@ namespace mx {
 		ee::CExpEvalContainer::EE_RESULT eResult;
 		BOOL bValid;
 		pcbCombo->SetAddressHandler( m_pfahAddressHandler, m_uiptrAddressHandlerData );
-		BOOL bSuccess = pcbCombo->GetTextAsExpression( eResult, &bValid );
+		std::string sObj;
+		BOOL bSuccess = pcbCombo->GetTextAsExpression( eResult, &bValid, &sObj );
 
 		if ( bSuccess ) {
-			std::wstring sTemp;
-			CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( CExpressionEvaluatorLayout::MX_EE_TOOLBAR0 ));
-			int32_t iSciNot = 0;
-			if ( plvToolBar ) {
-				iSciNot = plvToolBar->IsChecked( CExpressionEvaluatorLayout::MX_BC_SCINOT ) ? DBL_DECIMAL_DIG : 0;
+			if ( eResult.ncType == ee::EE_NC_OBJECT ) {
+				peEdit->SetTextW( ee::StringToWString( sObj ).c_str() );
 			}
+			else {
+				std::wstring sTemp;
+				CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( CExpressionEvaluatorLayout::MX_EE_TOOLBAR0 ));
+				int32_t iSciNot = 0;
+				if ( plvToolBar ) {
+					iSciNot = plvToolBar->IsChecked( CExpressionEvaluatorLayout::MX_BC_SCINOT ) ? DBL_DECIMAL_DIG : 0;
+				}
 			
-			CUtilities::PrintExpResult( eResult, sTemp, iSciNot, m_dDecoding );
-			peEdit->SetTextW( sTemp.c_str() );
+				CUtilities::PrintExpResult( eResult, sTemp, iSciNot, m_dDecoding );
+				peEdit->SetTextW( sTemp.c_str() );
+			}
 		}
 		else {
 			peEdit->SetTextA( bValid ? _DEC_S_533B8966_Unresolvable.c_str() : _DEC_S_3424431C_Invalid.c_str() );
@@ -272,10 +281,11 @@ namespace mx {
 		if ( _pcExp && (*_pcExp) != '\0' ) {
 			CListView * plvList = ListView();
 			if ( plvList ) {
-				LVITEMA iItem = {
+				LVITEMW iItem = {
 					LVIF_TEXT
 				};
-				iItem.pszText = const_cast<LPSTR>(_pcExp);
+				CSecureWString wsExp = ee::ToUtf16( _pcExp );
+				iItem.pszText = const_cast<LPWSTR>(wsExp.c_str());
 				INT iIdx = plvList->InsertItem( iItem );
 				m_vExpressions.insert( m_vExpressions.begin() + iIdx, new CExpression() );
 				if ( m_vExpressions[iIdx] ) {
@@ -322,6 +332,7 @@ namespace mx {
 	// WM_TIMER.
 	CWidget::LSW_HANDLED CExpEvalWindow::Timer( UINT_PTR _uiptrId, TIMERPROC _tpProc ) {
 		if ( _uiptrId == m_uiptrUpdateListTimer ) {
+			std::string sObj;
 			// Update the list.
 			CListView * plvList = ListView();
 			if ( plvList ) {
@@ -332,6 +343,18 @@ namespace mx {
 							if ( m_vExpressions[I]->GetContainer() ) {
 								ee::CExpEvalContainer::EE_RESULT eResult;
 								if ( m_vExpressions[I]->GetContainer()->Resolve( eResult ) ) {
+									if ( eResult.ncType == ee::EE_NC_OBJECT ) {
+										ee::CObject * poObj = eResult.u.poObj;
+										eResult.u.poObj = nullptr;
+										if ( poObj ) {
+											if ( poObj->ToString( sObj ) ) {
+												plvList->SetItemText( I, 1, ee::StringToWString( sObj ).c_str() );
+												continue;
+											}
+										}
+										plvList->SetTextA( _DEC_S_533B8966_Unresolvable.c_str() );
+										continue;
+									}
 									std::wstring sTemp;
 									CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( CExpressionEvaluatorLayout::MX_EE_TOOLBAR0 ));
 									int32_t iSciNot = -3;

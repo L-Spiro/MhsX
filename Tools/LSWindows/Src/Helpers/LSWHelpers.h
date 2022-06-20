@@ -4,6 +4,7 @@
 #include "../Base/LSWBase.h"
 #include "../Layout/LSWWidgetLayout.h"
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <string>
 

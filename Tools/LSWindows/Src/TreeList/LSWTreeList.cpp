@@ -231,7 +231,7 @@ namespace lsw {
 				hdItem.mask = HDI_TEXT | HDI_WIDTH | HDI_FORMAT;
 				hdItem.cxy = 160;
 				hdItem.fmt = HDF_LEFT;
-				hdItem.pszText = L"";
+				hdItem.pszText = const_cast<LPWSTR>(L"");
 				::SendMessageW( m_hHeader, HDM_INSERTITEMW, 0L, reinterpret_cast<LPARAM>(reinterpret_cast<const HD_ITEMW *>(&hdItem)) );
 
 				if ( !m_hTreeView ) {
@@ -931,8 +931,10 @@ namespace lsw {
 #endif
 			
 			//::InvalidateRect( Wnd(), &rTemp.ScreenToClient( Wnd() ), FALSE );
-			::InvalidateRect( m_hTreeView, &rTemp.ScreenToClient( m_hTreeView ), FALSE );
-			::ValidateRect( Wnd(), &rTemp.ScreenToClient( Wnd() ) );
+			LSW_RECT rTmp = rTemp.ScreenToClient( m_hTreeView );
+			::InvalidateRect( m_hTreeView, &rTmp, FALSE );
+			rTmp = rTemp.ScreenToClient( Wnd() );
+			::ValidateRect( Wnd(), &rTmp );
 		}
 		
 		LSW_RECT rValidateMe;
@@ -941,7 +943,8 @@ namespace lsw {
 		LSW_RECT rHeaderRect;
 		::GetClientRect( m_hHeader, &rHeaderRect );
 		//rHeaderRect.ScreenToClient( Wnd() );
-		::ValidateRect( Wnd(), &rHeaderRect.ClientToScreen( m_hHeader ).ScreenToClient( Wnd() ) );
+		LSW_RECT rTmp = rHeaderRect.ClientToScreen( m_hHeader ).ScreenToClient( Wnd() );
+		::ValidateRect( Wnd(), &rTmp );
 
 		TVITEM tvItem;
 		tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_PARAM;
@@ -1082,7 +1085,8 @@ namespace lsw {
 			::InvalidateRect( m_hTreeView, &rItem, FALSE );
 #endif	// 0
 			LSW_RECT rTemp = sbiInfo.rcScrollBar;
-			::InvalidateRect( m_hTreeView, &rTemp.ScreenToClient( m_hTreeView ), TRUE );
+			LSW_RECT rTmp = rTemp.ScreenToClient( m_hTreeView );
+			::InvalidateRect( m_hTreeView, &rTmp, TRUE );
 			WNDPROC wpOrig = m_wpTreeViewProc;
 			::CallWindowProc( wpOrig, m_hTreeView, WM_NCPAINT, 0, 0 );
 		}

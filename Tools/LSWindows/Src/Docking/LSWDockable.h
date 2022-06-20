@@ -110,7 +110,7 @@ namespace lsw {
 		// The dockable message handler.
 		static LRESULT CALLBACK				WindowProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam );
 
-		// Determines of a state is floating.
+		// Determines if a state is floating.
 		static bool							Floating( DWORD _dwState ) { return (_dwState & LSW_DS_FLOATING) ? true : false; }
 
 		// Converts a CDockTarget::LSW_DT_ATTACH object to a LSW_DOCK_STATE state.

@@ -9,7 +9,7 @@ namespace mx {
 	// == Members.
 
 #define MX_ROW_HEIGHT								(MX_TOP_JUST + MX_DEF_STATIC_HEIGHT_PXL + MX_DEF_EDIT_HEIGHT_PXL)
-#define MX_GROUP_HEIGHT								(MX_GROUP_TOP_PXL + MX_GROUP_BOTTOM_PXL + (MX_ROW_HEIGHT * 16))
+#define MX_GROUP_HEIGHT								(MX_GROUP_TOP_PXL + MX_GROUP_BOTTOM_PXL + (MX_ROW_HEIGHT * 17))
 #define MX_GROUPS_TOP								(MX_DEF_STATIC_HEIGHT_PXL + MX_TOP_JUST * 2 + MX_DEF_EDIT_HEIGHT_PXL + MX_ROW_HEIGHT)
 #define MX_LAYOUT_W									340
 #define MX_LAYOUT_H									(MX_GROUP_HEIGHT + MX_GROUPS_TOP + 34 + MX_ROW_HEIGHT)
@@ -1828,7 +1828,7 @@ namespace mx {
 
 		{
 			LSW_LT_LABEL,							// ltType
-			MX_CWI_BINARY_LE_LABEL,					// wId
+			MX_CWI_OCT_LE_LABEL,					// wId
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
@@ -1838,8 +1838,8 @@ namespace mx {
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
 			0,										// dwStyleEx
-			MX_MAKE_WCHAR( _T_886B59EF_Base_2 ),	// pwcText
-			_LEN_886B59EF,							// sTextLen
+			MX_MAKE_WCHAR( _T_68BEB0F1_Base_8 ),	// pwcText
+			_LEN_68BEB0F1,							// sTextLen
 			MX_CWI_MAIN_WINDOW,						// dwParentId
 
 			_T_LEN_FBFE8371_____P__CL_2_9,			// pcLeftSizeExp
@@ -1851,7 +1851,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_LABEL,							// ltType
-			MX_CWI_BINARY_BE_LABEL,					// wId
+			MX_CWI_OCT_BE_LABEL,					// wId
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
@@ -1861,8 +1861,8 @@ namespace mx {
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
 			0,										// dwStyleEx
-			MX_MAKE_WCHAR( _T_886B59EF_Base_2 ),	// pwcText
-			_LEN_886B59EF,							// sTextLen
+			MX_MAKE_WCHAR( _T_68BEB0F1_Base_8 ),	// pwcText
+			_LEN_68BEB0F1,							// sTextLen
 			MX_CWI_MAIN_WINDOW,						// dwParentId
 
 			_T_LEN_07E1CCEC_____P__CL______P__CW_2__2_2_9__,	// pcLeftSizeExp
@@ -1874,7 +1874,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_EDIT,							// ltType
-			MX_CWI_BINARY_LE,						// wId
+			MX_CWI_OCT_LE,							// wId
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
@@ -1897,12 +1897,106 @@ namespace mx {
 		},
 		{
 			LSW_LT_EDIT,							// ltType
-			MX_CWI_BINARY_BE,						// wId
+			MX_CWI_OCT_BE,							// wId
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
 			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 15),	// iTop
+			0,										// dwWidth
+			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
+			MX_EDITSTYLE,							// dwStyle
+			WS_EX_CLIENTEDGE,						// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_CWI_MAIN_WINDOW,						// dwParentId
+
+			_T_LEN_07E1CCEC_____P__CL______P__CW_2__2_2_9__,	// pcLeftSizeExp
+			_T_LEN_95EC35E9_____P__CL______P__CW_2_9_,			// pcRightSizeExp
+			MX_TOP_VCOFFSET,						// pcTopSizeExp
+			nullptr, 0,								// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			MX_FIXED_HEIGHT,						// pcHeightSizeExp
+		},
+
+
+		{
+			LSW_LT_LABEL,							// ltType
+			MX_CWI_BINARY_LE_LABEL,					// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 16),	// iTop
+			0,										// dwWidth
+			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_886B59EF_Base_2 ),	// pwcText
+			_LEN_886B59EF,							// sTextLen
+			MX_CWI_MAIN_WINDOW,						// dwParentId
+
+			_T_LEN_FBFE8371_____P__CL_2_9,			// pcLeftSizeExp
+			_T_LEN_74FBB566_____P__CL______P__CW_2__2_2_9__,			// pcRightSizeExp
+			MX_TOP_VCOFFSET,						// pcTopSizeExp
+			nullptr, 0,								// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			MX_FIXED_HEIGHT,						// pcHeightSizeExp
+		},
+		{
+			LSW_LT_LABEL,							// ltType
+			MX_CWI_BINARY_BE_LABEL,					// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			0,	// iLeft
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + (MX_ROW_HEIGHT * 16),	// iTop
+			0,		// dwWidth
+			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_886B59EF_Base_2 ),	// pwcText
+			_LEN_886B59EF,							// sTextLen
+			MX_CWI_MAIN_WINDOW,						// dwParentId
+
+			_T_LEN_07E1CCEC_____P__CL______P__CW_2__2_2_9__,	// pcLeftSizeExp
+			_T_LEN_95EC35E9_____P__CL______P__CW_2_9_,			// pcRightSizeExp
+			MX_TOP_VCOFFSET,						// pcTopSizeExp
+			nullptr, 0,								// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			MX_FIXED_HEIGHT,						// pcHeightSizeExp
+		},
+		{
+			LSW_LT_EDIT,							// ltType
+			MX_CWI_BINARY_LE,						// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 16),	// iTop
+			0,										// dwWidth
+			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
+			MX_EDITSTYLE,							// dwStyle
+			WS_EX_CLIENTEDGE,						// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_CWI_MAIN_WINDOW,						// dwParentId
+
+			_T_LEN_FBFE8371_____P__CL_2_9,			// pcLeftSizeExp
+			_T_LEN_74FBB566_____P__CL______P__CW_2__2_2_9__,			// pcRightSizeExp
+			MX_TOP_VCOFFSET,						// pcTopSizeExp
+			nullptr, 0,								// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			MX_FIXED_HEIGHT,						// pcHeightSizeExp
+		},
+		{
+			LSW_LT_EDIT,							// ltType
+			MX_CWI_BINARY_BE,						// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL + MX_DEF_STATIC_HEIGHT_PXL + (MX_ROW_HEIGHT * 16),	// iTop
 			0,										// dwWidth
 			MX_DEF_EDIT_HEIGHT_PXL,					// dwHeight
 			MX_EDITSTYLE,							// dwStyle

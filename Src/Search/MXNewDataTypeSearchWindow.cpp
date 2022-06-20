@@ -916,13 +916,13 @@ namespace mx {
 			}
 			CSecureWString swsLeft;
 			CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft, true );
-			_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+			_sExpression.append( ee::WStringToString( swsLeft ) );
 			_sExpression.push_back( ',' );
 			_sExpression.push_back( ' ' );
 
 			swsLeft.SecureClear();
 			CUtilities::ToDouble( m_pmhMemHack->Options().dEpsilon, swsLeft );
-			_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+			_sExpression.append( ee::WStringToString( swsLeft ) );
 
 			_sExpression.push_back( ' ' );
 			_sExpression.push_back( ')' );
@@ -943,7 +943,7 @@ namespace mx {
 					_sExpression = _DEC_S_BA988A07_______;
 					CSecureWString swsLeft;
 					CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft );
-					_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+					_sExpression.append( ee::WStringToString( swsLeft ) );
 				}
 			}
 			else {
@@ -960,7 +960,7 @@ namespace mx {
 					CSecureWString swsLeft;
 					CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft );
 					_sExpression = _DEC_S_BA988A07_______;
-					_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+					_sExpression.append( ee::WStringToString( swsLeft ) );
 				}
 			}
 		}
@@ -982,7 +982,7 @@ namespace mx {
 				bUsedNan = true;
 			}*/
 			_sExpression = _DEC_S_0FFD4DE8______;
-			_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+			_sExpression.append( ee::WStringToString( swsLeft ) );
 			if ( !bUsedNan ) {
 				_sExpression.push_back( ' ' );
 				_sExpression.append( _DEC_S_36A7406E____isnan______ );
@@ -990,7 +990,7 @@ namespace mx {
 		}
 		else {
 			_sExpression = _DEC_S_0FFD4DE8______;
-			_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+			_sExpression.append( ee::WStringToString( swsLeft ) );
 		}
 	}
 
@@ -1004,7 +1004,7 @@ namespace mx {
 				bUsedNan = true;
 			}*/
 			_sExpression = _DEC_S_3DCB2F6A______;
-			_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+			_sExpression.append( ee::WStringToString( swsLeft ) );
 			if ( !bUsedNan ) {
 				_sExpression.push_back( ' ' );
 				_sExpression.append( _DEC_S_36A7406E____isnan______ );
@@ -1012,7 +1012,7 @@ namespace mx {
 		}
 		else {
 			_sExpression = _DEC_S_3DCB2F6A______;
-			_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+			_sExpression.append( ee::WStringToString( swsLeft ) );
 		}
 	}
 
@@ -1055,9 +1055,9 @@ namespace mx {
 		CUtilities::ToDataTypeString( rTempH, _dtDataType, swsRight, true );
 		
 		_sExpression = _DEC_S_68223D78________;
-		_sExpression.append( CUtilities::WStringToString( swsLeft ) );
+		_sExpression.append( ee::WStringToString( swsLeft ) );
 		_sExpression.append( _DEC_S_C4C57451_____________ );
-		_sExpression.append( CUtilities::WStringToString( swsRight ) );
+		_sExpression.append( ee::WStringToString( swsRight ) );
 		_sExpression.push_back( ')' );
 		if ( CUtilities::DataTypeIsFloat( _dtDataType ) && _bInv ) {
 			_sExpression.push_back( ' ' );

@@ -81,7 +81,7 @@ namespace lsw {
 
 	// Adds a column with the given text.
 	INT CListView::AddColumn( const CHAR * _pcText, INT _iFormat ) {
-		return AddColumn( std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>{}.from_bytes( _pcText ).c_str(), _iFormat );
+		return AddColumn( ee::ToUtf16( _pcText ).c_str(), _iFormat );
 	}
 
 	// Adds a column with the given text.

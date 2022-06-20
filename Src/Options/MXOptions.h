@@ -24,6 +24,7 @@ namespace mx {
 		BOOL							bDataTypeSizes;					// TRUE
 		BOOL							bDataTypeRanges;				// TRUE
 		BOOL							bUse0x;							// TRUE
+		BOOL							bUse0o;							// FALSE
 		BOOL							bShortEnums;					// TRUE
 
 		// Open-process settings.

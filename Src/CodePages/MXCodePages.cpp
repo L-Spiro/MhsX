@@ -482,8 +482,8 @@ namespace mx {
 	BOOL CCodePages::CodePageToString( uint32_t _ui32Code, CSecureWString &_sValue, CSecureWString &_sDesc ) {
 		CHAR szValue[_T_MAX_LEN], szDesc[_T_MAX_LEN];
 		if ( CodePageToString( _ui32Code, szValue, szDesc ) ) {
-			_sValue += CUtilities::StringToWString( szValue );
-			_sDesc += CUtilities::StringToWString( szDesc );
+			_sValue += ee::StringToWString( szValue );
+			_sDesc += ee::StringToWString( szDesc );
 			return TRUE;
 		}
 		return FALSE;

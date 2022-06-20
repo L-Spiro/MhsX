@@ -14,7 +14,7 @@ namespace mx {
 	// Decodes to CSecureWString, creating a new object.
 	CSecureWString CStringDecoder::DecodeToWString( const char * _pcIn, size_t _sInLen ) {
 		CSecureString sTemp = DecodeToString( _pcIn, _sInLen );
-		return CUtilities::StringToWString( sTemp );
+		return ee::StringToWString( sTemp );
 	}
 
 }	// namespace mx

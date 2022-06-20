@@ -183,7 +183,7 @@ namespace lsw {
 
 	// Gets item text.
 	std::string CTab::GetItemTextA( int _iItem ) const {
-		return std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes( GetItemTextW( _iItem ) );
+		return ee::ToUtf8( GetItemTextW( _iItem ) );
 	}
 
 	// Gets item text.
@@ -276,12 +276,12 @@ namespace lsw {
 			}
 			case WM_PAINT : {
 				LONG_PTR hObj = ::GetWindowLongPtrW( _hWnd, 0 );
-				hObj += 0x38;
-				LONG_PTR hObjSet = (*reinterpret_cast<PLONG_PTR>(hObj));
+				/*hObj += 0x38;
+				LONG_PTR hObjSet = (*reinterpret_cast<PLONG_PTR>(hObj));*/
 				LSW_BEGINPAINT bpPaint( _hWnd );
 
 				{
-					LSW_SELECTOBJECT soPrev( bpPaint.hDc, reinterpret_cast<HGDIOBJ>(hObjSet) );
+					//LSW_SELECTOBJECT soPrev( bpPaint.hDc, reinterpret_cast<HGDIOBJ>(hObjSet) );
 
 					INT iTotal = pmwThis->GetItemCount();
 					INT iSel = pmwThis->GetCurSel();

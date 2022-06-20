@@ -16741,3 +16741,21 @@
 #define _DEC_S_C8A406E9_double_float64_IEEE_754_double_precision_IEEE_754_2008_binary64 mx::CStringDecoder::DecodeToString( _T_C8A406E9_double_float64_IEEE_754_double_precision_IEEE_754_2008_binary64, _LEN_C8A406E9 )
 #define _DEC_WS_C8A406E9_double_float64_IEEE_754_double_precision_IEEE_754_2008_binary64 mx::CStringDecoder::DecodeToWString( _T_C8A406E9_double_float64_IEEE_754_double_precision_IEEE_754_2008_binary64, _LEN_C8A406E9 )
 
+// Base-8
+
+#define _T_68BEB0F1_Base_8 "\xCA\x2F\x43\x00\xBF\x01"
+#define _LEN_68BEB0F1 6
+#define _T_LEN_68BEB0F1_Base_8 _T_68BEB0F1_Base_8, _LEN_68BEB0F1
+#define _DEC_68BEB0F1_Base_8( STR ) mx::CStringDecoder::Decode( _T_68BEB0F1_Base_8, _LEN_68BEB0F1, STR )
+#define _DEC_S_68BEB0F1_Base_8 mx::CStringDecoder::DecodeToString( _T_68BEB0F1_Base_8, _LEN_68BEB0F1 )
+#define _DEC_WS_68BEB0F1_Base_8 mx::CStringDecoder::DecodeToWString( _T_68BEB0F1_Base_8, _LEN_68BEB0F1 )
+
+// Use “0o” Prefix for Octadecimal Numbers (0o???? vs. 0????)
+
+#define _T_612B8F87_Use____0o____Prefix_for_Octadecimal_Numbers__0o_____vs__0_____ "\xDD\x41\x35\xBB\x74\x49\x2A\xF7\x3F\xAA\x49\x6B\xB2\xEB\x39\xED\x34\x39\x13\xB2\x2F\xFD\x39\xF0\x17\x2C\x42\xF3\xFF\x2C\xEB\x37\x3D\xFC\xFE\xE9\xDC\x3C\x3D\x2A\x2E\x40\x05\xBB\xEF\xB8\x3D\x0F\xDA\xD1\x08\xAE\x3D\x43\xF6\xE9\xFE\xD1\xDA\x06\xC7\xF7"
+#define _LEN_612B8F87 62
+#define _T_LEN_612B8F87_Use____0o____Prefix_for_Octadecimal_Numbers__0o_____vs__0_____ _T_612B8F87_Use____0o____Prefix_for_Octadecimal_Numbers__0o_____vs__0_____, _LEN_612B8F87
+#define _DEC_612B8F87_Use____0o____Prefix_for_Octadecimal_Numbers__0o_____vs__0_____( STR ) mx::CStringDecoder::Decode( _T_612B8F87_Use____0o____Prefix_for_Octadecimal_Numbers__0o_____vs__0_____, _LEN_612B8F87, STR )
+#define _DEC_S_612B8F87_Use____0o____Prefix_for_Octadecimal_Numbers__0o_____vs__0_____ mx::CStringDecoder::DecodeToString( _T_612B8F87_Use____0o____Prefix_for_Octadecimal_Numbers__0o_____vs__0_____, _LEN_612B8F87 )
+#define _DEC_WS_612B8F87_Use____0o____Prefix_for_Octadecimal_Numbers__0o_____vs__0_____ mx::CStringDecoder::DecodeToWString( _T_612B8F87_Use____0o____Prefix_for_Octadecimal_Numbers__0o_____vs__0_____, _LEN_612B8F87 )
+

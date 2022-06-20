@@ -142,7 +142,7 @@ namespace mx {
 				sTemp.push_back( L':' );
 				sTemp.push_back( L' ' );
 				uint32_t uiLen;
-				uint32_t uiConverted = CUtilities::Utf32ToUtf16( ee::CUnicode::GetUnicodeNum( I ), uiLen );
+				uint32_t uiConverted = ee::Utf32ToUtf16( ee::CUnicode::GetUnicodeNum( I ), uiLen );
 				for ( uint32_t J = 0; J < uiLen; ++J ) {
 					sTemp.push_back( static_cast<uint16_t>(uiConverted) );
 					uiConverted >>= 16;
@@ -804,7 +804,7 @@ namespace mx {
 					::onig_error_code_to_str( reinterpret_cast<OnigUChar*>(szBuffer), orRegex.Get(), &orRegex.Error() );
 					char szError[ONIG_MAX_ERROR_MESSAGE_LEN+32];
 					std::sprintf( szError, _DEC_S_CC6C71BB_Regex_Error___s.c_str(), szBuffer );
-					_wsError = CUtilities::StringToWString( szError );
+					_wsError = ee::StringToWString( szError );
 					return false;
 				}
 			}
@@ -961,13 +961,13 @@ namespace mx {
 								CP_ACP );
 							CUtilities::BytesToCString( &ssTmp[0], ssTmp.size(), ssPreview, false, true );
 						}
-						swsPreview = CUtilities::StringToWString( ssPreview );
+						swsPreview = ee::StringToWString( ssPreview );
 						break;
 					}
 					case MX_ST_UTFANY : {}
 					case MX_ST_UTF8 : {
 						if ( vFinalBytes.size() ) {
-							swsPreview = CUtilities::StringToWString( reinterpret_cast<const char *>(&vFinalBytes[0]), vFinalBytes.size() );
+							swsPreview = ee::StringToWString( reinterpret_cast<const char *>(&vFinalBytes[0]), vFinalBytes.size() );
 						}
 						break;
 					}
@@ -986,7 +986,7 @@ namespace mx {
 					case MX_ST_UTF32 : {
 						if ( vFinalBytes.size() ) {
 							size_t sLen = (vFinalBytes.size() * sizeof( vFinalBytes[0] )) / sizeof( uint32_t );
-							swsPreview = CUtilities::Utf32StringToWString( reinterpret_cast<const uint32_t *>(&vFinalBytes[0]), sLen );
+							swsPreview = ee::Utf32StringToWString( reinterpret_cast<const uint32_t *>(&vFinalBytes[0]), sLen );
 						}
 						break;
 					}
@@ -1192,7 +1192,7 @@ namespace mx {
 						CUtilities::BytesToHexWithSpaces( &vFinalBytes[0], vFinalBytes.size(), ssPreview, false );
 					}
 				}
-				peEdit2->SetTextW( CUtilities::StringToWString( ssPreview ).c_str() );
+				peEdit2->SetTextW( ee::StringToWString( ssPreview ).c_str() );
 			}
 		}
 	}
@@ -1238,7 +1238,7 @@ namespace mx {
 				case MX_ST_UTF32_BE : {}
 				case MX_ST_UTF16 : {}
 				case MX_ST_UTF32 : {
-					sUtf = CUtilities::ToUtf8( pcbStringToFindCombo->GetTextW() );
+					sUtf = ee::ToUtf8( pcbStringToFindCombo->GetTextW() );
 					break;
 				}
 				case MX_ST_BYTE_ARRAY : {
@@ -1353,7 +1353,7 @@ namespace mx {
 				case MX_ST_UTF16_BE : { bByteSwapped = true; }
 				case MX_ST_UTF16 : {
 					// Byte-by-two-byte conversion.
-					CSecureWString swsUtf16 = CUtilities::ToUtf16( sResolved );
+					CSecureWString swsUtf16 = ee::ToUtf16( sResolved );
 					if ( bByteSwapped ) {
 						for ( size_t I = 0; I < swsUtf16.size(); ++I ) {
 							_vResult.push_back( (swsUtf16[I] >> 8) & 0xFF );
@@ -1371,21 +1371,21 @@ namespace mx {
 				case MX_ST_UTF32_BE : { bByteSwapped = true; }
 				case MX_ST_UTF32 : {
 					// Byte-by-four-byte conversion.
-					std::vector<uint32_t> vExpandedResult = CUtilities::ToUtf32( sResolved );
+					std::u32string u32ExpandedResult = ee::ToUtf32( sResolved );
 					if ( bByteSwapped ) {
-						for ( size_t I = 0; I < vExpandedResult.size(); ++I ) {
-							_vResult.push_back( (vExpandedResult[I] >> 24) & 0xFF );
-							_vResult.push_back( (vExpandedResult[I] >> 16) & 0xFF );
-							_vResult.push_back( (vExpandedResult[I] >> 8) & 0xFF );
-							_vResult.push_back( vExpandedResult[I] & 0xFF );							
+						for ( size_t I = 0; I < u32ExpandedResult.size(); ++I ) {
+							_vResult.push_back( (u32ExpandedResult[I] >> 24) & 0xFF );
+							_vResult.push_back( (u32ExpandedResult[I] >> 16) & 0xFF );
+							_vResult.push_back( (u32ExpandedResult[I] >> 8) & 0xFF );
+							_vResult.push_back( u32ExpandedResult[I] & 0xFF );							
 						}
 					}
 					else {
-						for ( size_t I = 0; I < vExpandedResult.size(); ++I ) {
-							_vResult.push_back( vExpandedResult[I] & 0xFF );
-							_vResult.push_back( (vExpandedResult[I] >> 8) & 0xFF );
-							_vResult.push_back( (vExpandedResult[I] >> 16) & 0xFF );
-							_vResult.push_back( (vExpandedResult[I] >> 24) & 0xFF );
+						for ( size_t I = 0; I < u32ExpandedResult.size(); ++I ) {
+							_vResult.push_back( u32ExpandedResult[I] & 0xFF );
+							_vResult.push_back( (u32ExpandedResult[I] >> 8) & 0xFF );
+							_vResult.push_back( (u32ExpandedResult[I] >> 16) & 0xFF );
+							_vResult.push_back( (u32ExpandedResult[I] >> 24) & 0xFF );
 						}
 					}
 					return true;
@@ -1400,7 +1400,7 @@ namespace mx {
 		size_t sWildcardCount = 0;
 		size_t sCharCount = 0, sChars = 0;
 		for ( size_t I = 0; I < _ssString.size(); I += sChars ) {
-			uint32_t ui32Next = CUtilities::NextUtf8Char( &_ssString[I], _ssString.size() - I, &sChars );
+			uint32_t ui32Next = ee::NextUtf8Char( &_ssString[I], _ssString.size() - I, &sChars );
 			if ( ui32Next != MX_UTF_INVALID ) {
 				++sCharCount;
 				if ( ui32Next == '*' || ui32Next == '?' ) { ++sWildcardCount; }

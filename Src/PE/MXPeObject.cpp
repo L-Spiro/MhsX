@@ -259,7 +259,7 @@ namespace mx {
 			wTemp.push_back( wChar );
 			_uiRelocAddr += sizeof( wChar );
 		}
-		_sReturn += CUtilities::WStringToString( wTemp );
+		_sReturn += ee::WStringToString( wTemp );
 	}
 
 	uint64_t CPeObject::ReadRelocBytes( uint64_t _uiAddr, VOID * _pvDst, uint64_t _uiTotal ) const {

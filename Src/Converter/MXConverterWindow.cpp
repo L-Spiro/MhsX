@@ -26,6 +26,9 @@ namespace mx {
 	// The edit color for the hex edit.
 	HBRUSH CConverterWindow::m_hHex = nullptr;
 
+	// The edit color for the oct edit.
+	HBRUSH CConverterWindow::m_hOct = nullptr;
+
 	// The edit color for the binary edit.
 	HBRUSH CConverterWindow::m_hBinary = nullptr;
 
@@ -87,6 +90,9 @@ namespace mx {
 		{ CConverterLayout::MX_CWI_HEX_LE, ee::EE_NC_UNSIGNED, 64, false, true, GetValueHex, SetValueHex },
 		{ CConverterLayout::MX_CWI_HEX_BE, ee::EE_NC_UNSIGNED, 64, true, true, GetValueHex, SetValueHex },
 
+		{ CConverterLayout::MX_CWI_OCT_LE, ee::EE_NC_UNSIGNED, 64, false, false, GetValueOct, SetValueOct },
+		{ CConverterLayout::MX_CWI_OCT_BE, ee::EE_NC_UNSIGNED, 64, true, false, GetValueOct, SetValueOct },
+
 		{ CConverterLayout::MX_CWI_BINARY_LE, ee::EE_NC_UNSIGNED, 64, false, false, GetValueBinary, SetValueBinary },
 		{ CConverterLayout::MX_CWI_BINARY_BE, ee::EE_NC_UNSIGNED, 64, true, false, GetValueBinary, SetValueBinary },
 	};
@@ -116,7 +122,7 @@ namespace mx {
 					BS_SOLID,
 					CHelpers::MixColorRef( ::GetSysColor( COLOR_WINDOW ), ::GetSysColor( COLOR_INACTIVECAPTION ), 0.5 )
 				};
-				lbBrush.lbColor = RGB( GetBValue( lbBrush.lbColor ), GetGValue( lbBrush.lbColor ), GetRValue( lbBrush.lbColor ) );
+				//.lbBrush.lbColor = RGB( GetBValue( lbBrush.lbColor ), GetGValue( lbBrush.lbColor ), GetRValue( lbBrush.lbColor ) );
 				m_hSign = ::CreateBrushIndirect( &lbBrush );
 			}
 			{
@@ -124,7 +130,7 @@ namespace mx {
 					BS_SOLID,
 					CHelpers::MixColorRef( ::GetSysColor( COLOR_WINDOW ), ::GetSysColor( COLOR_INACTIVECAPTION ), 0.5 )
 				};
-				lbBrush.lbColor = RGB( GetRValue( lbBrush.lbColor ), GetBValue( lbBrush.lbColor ), GetGValue( lbBrush.lbColor ) );
+				//lbBrush.lbColor = RGB( GetRValue( lbBrush.lbColor ), GetBValue( lbBrush.lbColor ), GetGValue( lbBrush.lbColor ) );
 				m_hUnsign = ::CreateBrushIndirect( &lbBrush );
 			}
 
@@ -139,6 +145,14 @@ namespace mx {
 			{
 				LOGBRUSH lbBrush = {
 					BS_SOLID,
+					CHelpers::MixColorRef( ::GetSysColor( COLOR_WINDOW ), ::GetSysColor( COLOR_ACTIVECAPTION ), 0.30 )
+				};
+				//lbBrush.lbColor = RGB( GetGValue( lbBrush.lbColor ), GetBValue( lbBrush.lbColor ), GetRValue( lbBrush.lbColor ) );
+				m_hOct = ::CreateBrushIndirect( &lbBrush );
+			}
+			{
+				LOGBRUSH lbBrush = {
+					BS_SOLID,
 					CHelpers::MixColorRef( ::GetSysColor( COLOR_WINDOW ), ::GetSysColor( COLOR_INACTIVECAPTION ), 0.25 )
 				};
 				//lbBrush.lbColor = RGB( GetBValue( lbBrush.lbColor ), GetGValue( lbBrush.lbColor ), GetRValue( lbBrush.lbColor ) );
@@ -149,7 +163,7 @@ namespace mx {
 					BS_SOLID,
 					CHelpers::MixColorRef( ::GetSysColor( COLOR_WINDOW ), ::GetSysColor( COLOR_INACTIVECAPTION ), 0.25 )
 				};
-				lbBrush.lbColor = RGB( GetRValue( lbBrush.lbColor ), GetBValue( lbBrush.lbColor ), GetGValue( lbBrush.lbColor ) );
+				//lbBrush.lbColor = RGB( GetRValue( lbBrush.lbColor ), GetBValue( lbBrush.lbColor ), GetGValue( lbBrush.lbColor ) );
 				m_hStrings = ::CreateBrushIndirect( &lbBrush );
 			}
 			
@@ -190,6 +204,9 @@ namespace mx {
 
 			::DeleteObject( m_hHex );
 			m_hHex = nullptr;
+
+			::DeleteObject( m_hOct );
+			m_hOct = nullptr;
 
 			::DeleteObject( m_hBinary );
 			m_hBinary = nullptr;
@@ -283,6 +300,8 @@ namespace mx {
 			case CConverterLayout::MX_CWI_FLOAT64_BE : {}
 			case CConverterLayout::MX_CWI_HEX_LE : {}
 			case CConverterLayout::MX_CWI_HEX_BE : {}
+			case CConverterLayout::MX_CWI_OCT_LE : {}
+			case CConverterLayout::MX_CWI_OCT_BE : {}
 			case CConverterLayout::MX_CWI_BINARY_LE : {}
 			case CConverterLayout::MX_CWI_BINARY_BE : {
 				switch ( _wCtrlCode ) {
@@ -390,6 +409,17 @@ namespace mx {
 				for ( auto I = MX_ELEMENTS( wId ); I--; ) {
 					if ( _pwControl->Id() == wId[I] ) {
 						_hBrush = m_hHex;
+						return LSW_H_HANDLED;
+					}
+				}
+			}
+			{
+				WORD wId[] = {
+					CConverterLayout::MX_CWI_OCT_LE, CConverterLayout::MX_CWI_OCT_BE,
+				};
+				for ( auto I = MX_ELEMENTS( wId ); I--; ) {
+					if ( _pwControl->Id() == wId[I] ) {
+						_hBrush = m_hOct;
 						return LSW_H_HANDLED;
 					}
 				}
@@ -567,6 +597,22 @@ namespace mx {
 	}
 
 	// Gets the value from the given text edit.
+	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueOct( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex ) {
+		std::string sText = _pwControl->GetTextA();
+		ee::CExpEvalContainer::EE_RESULT rRes;
+		rRes.ncType = ee::EE_NC_UNSIGNED;
+		rRes.u.ui64Val = ee::StoULL( sText.c_str(), 8 );
+		_sSize = 8;
+		for ( size_t I = 8; I--; ) {
+			if ( rRes.u.ui64Val & (0xFFULL << (I * 8ULL)) ) {
+				_sSize = (I + 1) * 8;
+				break;
+			}
+		}
+		return rRes;
+	}
+
+	// Gets the value from the given text edit.
 	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueChar( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool /*_bHex*/ ) {
 		ee::CExpEvalContainer::EE_RESULT rRes;
 		CSecureString ssTmp = _pwControl->GetTextA();
@@ -583,7 +629,7 @@ namespace mx {
 	// Gets the value from the given text edit.
 	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueUtf8( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex ) {
 		ee::CExpEvalContainer::EE_RESULT rRes;
-		CSecureString ssUtf8 = CUtilities::ToUtf8( _pwControl->GetTextW() );
+		CSecureString ssUtf8 = ee::ToUtf8( _pwControl->GetTextW() );
 		if ( !ssUtf8.size() ) {
 			rRes.ncType = ee::EE_NC_INVALID;
 			return rRes;
@@ -596,7 +642,7 @@ namespace mx {
 		size_t sLen = 1;
 		_sSize = 0;
 		for ( size_t I = 0; I < ssResolved.size() && sLen; I += sLen ) {
-			uint64_t uiNext = CUtilities::NextUtf8Char( &ssResolved[I], ssResolved.size() - I, &sLen );
+			uint64_t uiNext = ee::NextUtf8Char( &ssResolved[I], ssResolved.size() - I, &sLen );
 			if ( _sSize + sLen < sizeof( uint64_t ) ) {
 				_sSize += sLen;
 			}
@@ -618,21 +664,21 @@ namespace mx {
 	// Gets the value from the given text edit.
 	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueUtf16( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex ) {
 		ee::CExpEvalContainer::EE_RESULT rRes;
-		CSecureString ssUtf8 = CUtilities::ToUtf8( _pwControl->GetTextW() );
+		CSecureString ssUtf8 = ee::ToUtf8( _pwControl->GetTextW() );
 		if ( !ssUtf8.size() ) {
 			rRes.ncType = ee::EE_NC_INVALID;
 			return rRes;
 		}
 		CSecureString ssResolved;
 		CUtilities::ResolveAllEscapes( ssUtf8, ssResolved, true );
-		CSecureWString wUtf16 = CUtilities::ToUtf16( ssResolved );
+		CSecureWString wUtf16 = ee::ToUtf16( ssResolved );
 		rRes.ncType = _ncType;
 
 
 		size_t sLen = 1;
 		_sSize = 0;
 		for ( size_t I = 0; I < wUtf16.size() && sLen; I += sLen ) {
-			uint64_t uiNext = CUtilities::NextUtf16Char( &wUtf16[I], wUtf16.size() - I, &sLen );
+			uint64_t uiNext = ee::NextUtf16Char( &wUtf16[I], wUtf16.size() - I, &sLen );
 			const size_t sFinalLen = sLen * sizeof( wchar_t );
 			if ( _sSize + sFinalLen < sizeof( uint64_t ) ) {
 				_sSize += sFinalLen;
@@ -666,21 +712,21 @@ namespace mx {
 	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueUtf32( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex ) {
 		ee::CExpEvalContainer::EE_RESULT rRes;
 		CSecureWString swsTmp = _pwControl->GetTextW();
-		CSecureString ssUtf8 = CUtilities::ToUtf8( swsTmp );
+		CSecureString ssUtf8 = ee::ToUtf8( swsTmp );
 		if ( !ssUtf8.size() ) {
 			rRes.ncType = ee::EE_NC_INVALID;
 			return rRes;
 		}
 		CSecureString ssResolved;
 		CUtilities::ResolveAllEscapes( ssUtf8, ssResolved, true );
-		std::vector<uint32_t> vUtf32 = CUtilities::ToUtf32( ssResolved );
+		std::u32string u32Utf32 = ee::ToUtf32( ssResolved );
 		rRes.ncType = _ncType;
 
 
 		size_t sLen = 1;
 		_sSize = 0;
-		for ( size_t I = 0; I < vUtf32.size() && sLen; I += sLen ) {
-			uint64_t uiNext = CUtilities::NextUtf32Char( &vUtf32[I], vUtf32.size() - I, &sLen );
+		for ( size_t I = 0; I < u32Utf32.size() && sLen; I += sLen ) {
+			uint64_t uiNext = ee::NextUtf32Char( reinterpret_cast<const uint32_t *>(&u32Utf32[I]), u32Utf32.size() - I, &sLen );
 			const size_t sFinalLen = sLen * sizeof( uint32_t );
 			if ( _sSize + sFinalLen < sizeof( uint64_t ) ) {
 				_sSize += sFinalLen;
@@ -694,7 +740,7 @@ namespace mx {
 			}
 		}
 		rRes.u.ui64Val = 0;
-		std::memcpy( &rRes.u.ui64Val, vUtf32.data(), _sSize );
+		std::memcpy( &rRes.u.ui64Val, u32Utf32.data(), _sSize );
 
 		_sSize *= 8;
 		return rRes;
@@ -817,6 +863,19 @@ namespace mx {
 	}
 
 	// Writes the value to the given edit.
+	void CConverterWindow::SetValueOct( CWidget * _pwControl, ee::CExpEvalContainer::EE_RESULT _rRes, ee::EE_NUM_CONSTANTS _ncType, size_t _sSize, bool _bByteSwap, size_t _sSrcSize, bool _bAltDisp ) {
+		if ( _bByteSwap ) {
+			_rRes = ByteSwapBySize( _rRes, _sSrcSize );
+		}
+		_rRes.u.ui64Val = (_rRes.u.ui64Val << (64ULL - _sSrcSize)) >> (64ULL - _sSrcSize);
+		CSecureWString swsTmp;
+		CUtilities::ToOct( _rRes.u.ui64Val, swsTmp, 0 );
+
+
+		_pwControl->SetTextW( swsTmp.c_str() );
+	}
+
+	// Writes the value to the given edit.
 	void CConverterWindow::SetValueChar( CWidget * _pwControl, ee::CExpEvalContainer::EE_RESULT _rRes, ee::EE_NUM_CONSTANTS _ncType, size_t _sSize, bool _bByteSwap, size_t _sSrcSize, bool _bAltDisp ) {
 		CSecureString ssTmp = CSecureString( reinterpret_cast<char *>(&_rRes.u.ui64Val), 1 );
 		CSecureString swsFinal = _bAltDisp ? CUtilities::EscapeAllW( ssTmp, false ) :
@@ -831,8 +890,8 @@ namespace mx {
 		for ( size_t I = 0; I < ((_sSrcSize + (sizeof( char ) - 1)) >> 3); ++I ) {
 			ssTmp.push_back( pcText[I] );
 		}
-		_pwControl->SetTextW( (_bAltDisp ? CUtilities::ToUtf16( CUtilities::EscapeAllW( ssTmp, false ) ) :
-			CUtilities::ToUtf16( CUtilities::EscapeStandard( ssTmp, false ) ) ).c_str() );
+		_pwControl->SetTextW( (_bAltDisp ? ee::ToUtf16( CUtilities::EscapeAllW( ssTmp, false ) ) :
+			ee::ToUtf16( CUtilities::EscapeStandard( ssTmp, false ) ) ).c_str() );
 	}
 
 	// Writes the value to the given edit.
@@ -874,7 +933,7 @@ namespace mx {
 		else {
 			vTmp = CUtilities::EscapeStandard( ssTmp, false );			
 		}
-		_pwControl->SetTextW( CUtilities::Utf32StringToWString( vTmp.data(), vTmp.size() ).c_str() );
+		_pwControl->SetTextW( ee::Utf32StringToWString( vTmp.data(), vTmp.size() ).c_str() );
 	}
 
 	// Writes the value to the given edit.
@@ -892,7 +951,7 @@ namespace mx {
 		else {
 			vTmp = CUtilities::EscapeStandard( ssTmp, false );			
 		}
-		_pwControl->SetTextW( CUtilities::Utf32StringToWString( vTmp.data(), vTmp.size() ).c_str() );
+		_pwControl->SetTextW( ee::Utf32StringToWString( vTmp.data(), vTmp.size() ).c_str() );
 	}
 
 	// Writes the value to the given edit.

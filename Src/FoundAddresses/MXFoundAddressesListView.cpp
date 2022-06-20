@@ -405,7 +405,7 @@ namespace mx {
 				// Fall-through.
 			}
 			case CUtilities::MX_SST_UTF8 : {
-				CSecureWString swsTemp = CUtilities::StringToWString( reinterpret_cast<const char *>(&vData.data()[uiOffsetToData]), arRef.uiSize );
+				CSecureWString swsTemp = ee::StringToWString( reinterpret_cast<const char *>(&vData.data()[uiOffsetToData]), arRef.uiSize );
 				swsTemp = CUtilities::EscapeUnprintable( swsTemp, true, false );
 				for ( size_t I = 0; I < swsTemp.size(); ++I ) {
 					if ( !swsTemp[I] ) {
@@ -435,7 +435,7 @@ namespace mx {
 				return true;
 			}
 			case CUtilities::MX_SST_UTF32 : {
-				CSecureWString swsTemp = CUtilities::Utf32StringToWString( reinterpret_cast<const uint32_t *>(&vData.data()[uiOffsetToData]), arRef.uiSize / sizeof( uint32_t ) );
+				CSecureWString swsTemp = ee::Utf32StringToWString( reinterpret_cast<const uint32_t *>(&vData.data()[uiOffsetToData]), arRef.uiSize / sizeof( uint32_t ) );
 				swsTemp = CUtilities::EscapeUnprintable( swsTemp, true, false );
 				for ( size_t I = 0; I < swsTemp.size(); ++I ) {
 					if ( !swsTemp[I] ) {

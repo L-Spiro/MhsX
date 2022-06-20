@@ -21,9 +21,9 @@ namespace mx {
 		//	bSign	bImpBit	ui8ExpBits	ui8ManBits	pId
 		{ _T_LEN_7D9829FB_half_float16_IEEE_754_2008_binary16_s10e5_fp16,
 			true,	false,	5,			10,			MX_P_FLOAT16 },
-		{ _T_LEN_D1E77BF1_float_float32_IEEE_754_single_precision_IEE_754_2008_binary32,
+		{ _T_LEN_D119A670_float_float32_IEEE_754_single_precision_IEEE_754_2008_binary32,
 			true,	true,	8,			24,			MX_P_FLOAT32 },
-		{ _T_LEN_E40F369E_double_float64_IEEE_754_double_precision_IEE_754_2008_binary64,
+		{ _T_LEN_C8A406E9_double_float64_IEEE_754_double_precision_IEEE_754_2008_binary64,
 			true,	true,	11,			53,			MX_P_FLOAT64 },
 		{ _T_LEN_4228F19E_6_bit__Study_Material_,
 			true,	false,	3,			2,			MX_P_6_BIT },

@@ -8,10 +8,13 @@ namespace ee {
 
 	class CArrayBase {
 	public :
+		CArrayBase( CExpEvalContainer * _peecContainer ) :
+			m_peecContainer( _peecContainer ) {
+		}
 		virtual										~CArrayBase() {}
 
 
-		// == Functions.		
+		// == Functions.
 		// Sets the size of the array.
 		virtual bool								SetSize( size_t _sNewSize ) = 0;
 
@@ -56,6 +59,11 @@ namespace ee {
 
 		// Operator &=.
 		virtual bool								AndEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) = 0;
+
+
+	protected :
+		// == Members.
+		CExpEvalContainer *							m_peecContainer;
 	};
 
 }	// namespace ee

@@ -125,7 +125,7 @@ public:
 	void yypush_buffer_state( struct yy_buffer_state* new_buffer );
 	void yypop_buffer_state();
 
-	virtual int yylex();void get_line( FLEX_STD string &_sFileName, int &_iLine );const FLEX_STD string & get_file() const;
+	virtual int yylex();void get_line( FLEX_STD string &_sFileName, int &_iLine );const FLEX_STD string & get_file() const;const std::string & get_tmp_txt() const { return yy_tmp_txt; };const std::u16string & get_tmp_txt16() const { return yy_tmp_txt16; };const std::u32string & get_tmp_txt32() const { return yy_tmp_txt32; }
 	virtual void switch_streams( FLEX_STD istream* new_in, FLEX_STD ostream* new_out = 0 );
 	virtual int yywrap();
 
@@ -197,7 +197,7 @@ protected:
 	int yy_more_flag;
 	int yy_more_len;
 	int yy_more_offset;
-	int yy_prev_more_offset;
+	int yy_prev_more_offset;std::string yy_tmp_txt;std::u16string yy_tmp_txt16;std::u32string yy_tmp_txt32;
 };
 
 }

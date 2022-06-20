@@ -80,7 +80,7 @@ namespace lsw {
 		if ( iSel < 0 ) { return CWidget::GetTextA( _lpString, _nMaxCount ); }
 		std::wstring wsTemp;
 		GetLBText( iSel, wsTemp );
-		std::string sTemp = std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes( wsTemp );
+		std::string sTemp = ee::ToUtf8( wsTemp );
 		if ( !_lpString ) { return static_cast<INT>(sTemp.size() + 1); }
 		const CHAR * pcOrig = sTemp.c_str();
 		char * pcNew = std::strncpy( _lpString, sTemp.c_str(), _nMaxCount );
@@ -107,7 +107,7 @@ namespace lsw {
 		if ( iSel < 0 ) { return CWidget::GetTextA(); }
 		std::wstring wsTemp;
 		GetLBText( iSel, wsTemp );
-		return std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes( wsTemp );
+		return ee::ToUtf8( wsTemp );
 	}
 
 	// Gets the window text.

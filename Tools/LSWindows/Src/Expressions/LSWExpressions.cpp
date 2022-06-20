@@ -60,7 +60,7 @@ namespace lsw {
 		ee::CExpEvalContainer::EE_RESULT rRes;
 		if ( !m_peecContainer->Resolve( rRes ) ) { return 0; }
 
-		return ee::CExpEvalContainer::ConvertResult( rRes, ee::EE_NC_SIGNED ).u.i64Val;
+		return m_peecContainer->ConvertResultOrObject( rRes, ee::EE_NC_SIGNED ).u.i64Val;
 	}
 
 }	// namespace lsw

@@ -5,6 +5,7 @@
 #include "../Tab/LSWTab.h"
 #include "../ToolTip/LSWToolTip.h"
 #include "../TreeList/LSWTreeList.h"
+#include <Object/EEObject.h>
 #include <cassert>
 #include <codecvt>
 #include <locale>
@@ -176,15 +177,21 @@ namespace lsw {
 		return sRet;
 	}
 
+	// Gets the window text in UTF-8.
+	std::string CWidget::GetTextUTF8() const {
+		std::wstring wText = GetTextW();
+		return ee::WStringToString( wText );
+	}
+
 	// Get the value of the text as an expression.
-	BOOL CWidget::GetTextAsExpression( ee::CExpEvalContainer::EE_RESULT &_eResult, BOOL * _pbExpIsValid ) const {
+	BOOL CWidget::GetTextAsExpression( ee::CExpEvalContainer::EE_RESULT &_eResult, BOOL * _pbExpIsValid, std::string * _psObjStringResult ) const {
 		if ( _pbExpIsValid ) { (*_pbExpIsValid) = FALSE; }
 		CExpression eExp;
 		eExp.SetTreatsAsHex( TreatAsHex() != FALSE );
 
 		
 
-		std::string sText = GetTextA();
+		std::string sText = GetTextUTF8();
 		if ( sText.size() == 0 ) { return FALSE; }
 		if ( !eExp.SetExpression( sText.c_str() ) ) { return FALSE; }
 		if ( !eExp.GetContainer() ) { return FALSE; }
@@ -192,6 +199,14 @@ namespace lsw {
 		if ( _pbExpIsValid ) { (*_pbExpIsValid) = TRUE; }
 		
 		if ( !eExp.GetContainer()->Resolve( _eResult ) ) { return FALSE; }
+		if ( (_eResult.ncType) == ee::EE_NC_OBJECT ) {
+			ee::CObject * poObj = _eResult.u.poObj;
+			_eResult.u.poObj = nullptr;
+			if ( _psObjStringResult && poObj ) {
+				return poObj->ToString( (*_psObjStringResult) ) ? TRUE : FALSE;
+			}
+			return FALSE;
+		}
 		return TRUE;
 	}
 
@@ -318,7 +333,7 @@ namespace lsw {
 
 	// Translate a child's tooltip text.
 	std::wstring CWidget::TranslateTooltip( const std::string &_sText ) { 
-		return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>{}.from_bytes( _sText );
+		return ee::ToUtf16( _sText );
 	}
 
 	// Sets a given font on all children of a window.

@@ -4354,14 +4354,14 @@ namespace mx {
 			CSecureString ssOutput;
 			CUtilities::ResolveAllEscapes( ssTmp, ssOutput, true );
 			//CSecureWString swsUnicode = CUtilities::ToUtf16( ssOutput );
-			std::vector<uint32_t> vUtf32 = CUtilities::ToUtf32( ssOutput );
-			if ( vUtf32.size() > 2 ) {
+			std::u32string u32Utf32 = CUtilities::ToUtf32( ssOutput );
+			if ( u32Utf32.size() > 2 ) {
 				::OutputDebugStringA( "\t**** MANY ERROR ****\t\r\n" );
 				::OutputDebugStringA( "\t**** MANY ERROR ****\t\r\n" );
 				::OutputDebugStringA( "\t**** MANY ERROR ****\t\r\n" );
 				::OutputDebugStringA( "\t**** MANY ERROR ****\t\r\n" );
 			}
-			//if ( vUtf32.size() == 2 ) {
+			//if ( u32Utf32.size() == 2 ) {
 				::OutputDebugStringA( "\t{ \"" );
 				::OutputDebugStringA( reinterpret_cast<LPCSTR>(&sTemp[0]) );
 				::OutputDebugStringA( "\" /*" );
@@ -4371,12 +4371,12 @@ namespace mx {
 				::OutputDebugStringA( szTemp );
 				::OutputDebugStringA( ", " );
 
-				std::_itoa( static_cast<int>(vUtf32.size()), szTemp, 10 );
+				std::_itoa( static_cast<int>(u32Utf32.size()), szTemp, 10 );
 				::OutputDebugStringA( szTemp );
 				::OutputDebugStringA( ", { " );
 			
-				for ( size_t J = 0; J < vUtf32.size(); ++J ) {
-					std::sprintf( szTemp, "0x%.X, ", static_cast<uint32_t>(vUtf32[J]) );
+				for ( size_t J = 0; J < u32Utf32.size(); ++J ) {
+					std::sprintf( szTemp, "0x%.X, ", static_cast<uint32_t>(u32Utf32[J]) );
 					::OutputDebugStringA( szTemp );
 				}
 				//std::_itoa( sStruct[I].pcTrans, szTemp, 16 );
@@ -4384,7 +4384,7 @@ namespace mx {
 				::OutputDebugStringA( "} },\r\n" );
 			//}
 
-			sMax = std::max( sMax, vUtf32.size() );
+			sMax = std::max( sMax, u32Utf32.size() );
 		}
 		::OutputDebugStringA( "};\r\n" );
 

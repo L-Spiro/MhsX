@@ -2,6 +2,7 @@
 
 #include <cinttypes>
 #include <string>
+#include <vector>
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
@@ -20,6 +21,14 @@
 #define EE_COUNT_OF( x )			((sizeof( x ) / sizeof( 0[x] )) / (static_cast<size_t>(!(sizeof( x ) % sizeof(0[x])))))
 #endif	// EE_COUNT_OF
 
+#ifndef EE_UTF_INVALID
+#define EE_UTF_INVALID				~static_cast<uint32_t>(0)
+#endif	// EE_UTF_INVALID
+
+#ifndef EE_INVALID_IDX
+#define EE_INVALID_IDX				static_cast<size_t>(-1)
+#endif	// EE_INVALID_IDX
+
 #ifndef EE_MAX_ITERATION_COUNT
 #ifndef NDEBUG
 #define EE_MAX_ITERATION_COUNT		90000
@@ -31,11 +40,35 @@
 
 namespace ee {
 
+	// == Enumerations.
+	// String numeric classifications.
+	enum EE_STRING_NUMBER_CLASS {
+		EE_SNC_UNSIGNED,
+		EE_SNC_SIGNED,
+		EE_SNC_FLOAT,
+		EE_SNC_INVALID
+	};
+
+	// == Functions.
 	// Gets the time of initialization.
 	uint64_t						StartTime();
 
+	// Called at start-up to initialize the Expression Evaluator Library.
 	static inline void				InitializeExpressionEvaluatorLibrary() {
 		StartTime();
+	}
+
+	// Min.
+	template <typename _tT>
+	static inline _tT				Min( const _tT &_tA, const _tT &_tB ) { return _tA < _tB ? _tA : _tB; }
+
+	// Max.
+	template <typename _tT>
+	static inline _tT				Max( const _tT &_tA, const _tT &_tB ) { return _tA > _tB ? _tA : _tB; }
+
+	// Is the given character valid hex character?
+	static inline bool				ValidBin( char _cValue ) {
+		return (_cValue >= '0' && _cValue <= '1');
 	}
 
 	// Is the given character valid hex character?
@@ -72,6 +105,21 @@ namespace ee {
 	static inline uint32_t			OctalToUint32( char _cVal ) {
 		if ( _cVal >= '0' && _cVal <= '7' ) { return _cVal - '0'; }
 		return 0;
+	}
+
+	// Checks for whitespace without throwing exceptions.
+	static inline bool				IsWhiteSpace( char _cVal ) {
+		return _cVal == ' ' ||
+			_cVal == '\r' ||
+			_cVal == '\n' ||
+			_cVal == '\t' ||
+			_cVal == '\f' ||
+			_cVal == '\v';
+	}
+
+	// Checks for digits (0-9) without throwing exceptions.
+	static inline bool				IsDigit( char _cVal ) {
+		return _cVal >= '0' && _cVal <= '9';
 	}
 
 	// Decodes a single escape sequence.
@@ -342,42 +390,270 @@ namespace ee {
 	}
 
 	// Converts a \N{*} named Unicode character to a uint32_t.
-	uint32_t						EspaceNamedUnicode( const char * _pcValue, size_t _sLen, size_t &_sCharsConsumed );
+	uint32_t						EscapeNamedUnicode( const char * _pcValue, size_t _sLen, size_t &_sCharsConsumed );
 
-	// Converts an &#nnnn; or an &#xhhhh; HTML character to a uint32_t.
-	uint32_t						EscapeHtml( const char * _pcValue, size_t _sLen, size_t &_sCharsConsumed );
+	// Converts an &#nnnn; or an &#xhhhh; HTML character to a uint64_t.
+	uint64_t						EscapeHtml( const char * _pcValue, size_t _sLen, size_t &_sCharsConsumed );
+
+	// Gets the next UTF-32 character from a stream or error (EE_UTF_INVALID)
+	inline uint32_t					NextUtf32Char( const uint32_t * _puiString, size_t _sLen, size_t * _psSize = nullptr ) {
+		if ( _sLen == 0 ) {
+			if ( _psSize ) { (*_psSize) = 0; }
+			return 0;
+		}
+		if ( _psSize ) { (*_psSize) = 1; }
+		uint32_t ui32Ret = (*_puiString);
+		if ( ui32Ret & 0xFFE00000 ) { return EE_UTF_INVALID; }
+		return ui32Ret;
+	}
+
+	// Gets the next UTF-16 character from a stream or error (EE_UTF_INVALID)
+	uint32_t						NextUtf16Char( const wchar_t * _pwcString, size_t _sLen, size_t * _psSize = nullptr );
+
+	// Gets the next UTF-8 character from a stream or error (EE_UTF_INVALID)
+	uint32_t						NextUtf8Char( const char * _pcString, size_t _sLen, size_t * _psSize = nullptr );
+
+	// Gets the size of the given UTF-8 character.
+	size_t							Utf8CharSize( const char * _pcString, size_t _sLen );
+
+	// Converts a UTF-32 character to a UTF-16 character.
+	uint32_t						Utf32ToUtf16( uint32_t _ui32Utf32, uint32_t &_ui32Len );
+
+	// Converts a UTF-32 character to a UTF-8 character.
+	uint32_t						Utf32ToUtf8( uint32_t _ui32Utf32, uint32_t &_ui32Len );
+
+	// Converts a wstring to a UTF-8 string.
+	std::string						WStringToString( const std::wstring &_wsIn );
+
+	// Converts a UTF-8 string to wstring (UTF-16).
+	std::wstring					StringToWString( const std::string &_sIn );
+
+	// Converts a UTF-8 string to wstring (UTF-16).
+	std::wstring					StringToWString( const char * _pcIn, size_t _sLen );
+
+	// Converts a UTF-32 string to a UTF-16 string.
+	std::wstring					Utf32StringToWString( const uint32_t * _puiUtf32String, size_t _sLen );
+
+	// Gets the Nth Unicode code point in the given string.
+	uint32_t						GetUtf8CodePointByIdx( const std::string &_sIn, size_t _sIx );
+
+	// Gets the Nth Unicode code point in the given string.
+	size_t							GetUtf8CharPosByIdx( const std::string &_sIn, size_t _sIx );
+
+	// Converts a wstring to a UTF-8 string.  The main difference between this and WStringToString() is that this will copy the raw characters over on error
+	//	compared to WStringToString(), which will output an error character (EE_UTF_INVALID).
+	std::string						ToUtf8( const std::wstring &_wsString );
+
+	// Converts a u16string to a UTF-8 string.  The main difference between this and WStringToString() is that this will copy the raw characters over on error
+	//	compared to WStringToString(), which will output an error character (EE_UTF_INVALID).
+	std::string						ToUtf8( const std::u16string &_u16String );
+
+	// Converts a u32string to a UTF-8 string.
+	std::string						ToUtf8( const std::u32string &_u32String );
+
+	// Converts from UTF-8 to UTF-16, copying the original characters instead of EE_UTF_INVALID as StringToWString() would.
+	template <typename _tOutType = std::wstring>
+	static inline _tOutType			ToUtf16( const std::string &_sIn ) {
+		std::wstring swsTemp;
+		const char * pcSrc = _sIn.c_str();
+		size_t sSize = _sIn.size();
+
+		for ( size_t I = 0; I < sSize; ) {
+			size_t sThisSize = 0;
+			uint32_t ui32This = NextUtf8Char( &pcSrc[I], _sIn.size() - I, &sThisSize );
+			if ( ui32This == EE_UTF_INVALID ) {
+				for ( size_t J = 0; J < sThisSize; ++J ) {
+					swsTemp.push_back( static_cast<uint8_t>(pcSrc[I+J]) );
+				}
+				I += sThisSize;
+				continue;
+			}
+			I += sThisSize;
+			uint32_t ui32Len;
+			uint32_t ui32Converted = Utf32ToUtf16( ui32This, ui32Len );
+			for ( uint32_t J = 0; J < ui32Len; ++J ) {
+				swsTemp.push_back( static_cast<_tOutType::value_type>(ui32Converted & 0xFFFFU) );
+				ui32Converted >>= 16;
+			}
+		}
+		return swsTemp;
+	}
+
+	// Converts from UTF-32 to UTF-16, copying the original characters instead of EE_UTF_INVALID.
+	template <typename _tOutType = std::wstring>
+	static inline _tOutType			ToUtf16( const std::u32string &_u32String ) {
+		_tOutType swsTemp;
+		size_t sSize = _u32String.size();
+
+		for ( size_t I = 0; I < sSize; ) {
+			size_t sThisSize = 0;
+			uint32_t ui32This = NextUtf32Char( reinterpret_cast<const uint32_t *>(&_u32String.data()[I]), _u32String.size() - I, &sThisSize );
+			if ( ui32This == EE_UTF_INVALID ) {
+				for ( size_t J = 0; J < sThisSize * sizeof( std::u32string::value_type ); ++J ) {
+					swsTemp.push_back( reinterpret_cast<const _tOutType::value_type *>(&_u32String.data()[I])[J] );
+				}
+				I += sThisSize;
+				continue;
+			}
+			I += sThisSize;
+			uint32_t ui32Len;
+			uint32_t ui32Converted = Utf32ToUtf16( ui32This, ui32Len );
+			for ( uint32_t J = 0; J < ui32Len; ++J ) {
+				swsTemp.push_back( static_cast<_tOutType::value_type>(ui32Converted & 0xFFFFU) );
+				ui32Converted >>= 16;
+			}
+		}
+		return swsTemp;
+	}
+
+	// Converts from UTF-8 to UTF-32, copying the original characters instead of EE_UTF_INVALID.
+	std::u32string					ToUtf32( const std::string &_sIn );
+
+	// Converts from UTF-8 to ASCII.
+	std::string						ToAscii( const std::string &_sIn );
+
+	// Represents a value in binary notation.
+	std::string						ToBinary( uint64_t _ui64Val );
+
+	// Represents a value in binary notation.
+	std::string						ToBinary( int64_t _i64Val );
+
+	// Represents a value in binary notation.
+	std::string						ToBinary( double _d4Val );
+
+	// Represents a value in hexadecimal notation.
+	std::string						ToHex( uint64_t _ui64Val );
+
+	// Represents a value in hexadecimal notation.
+	std::string						ToHex( int64_t _i64Val );
+
+	// Represents a value in hexadecimal notation.
+	std::string						ToHex( double _d4Val );
+
+	// Represents a value in octadecimal notation.
+	std::string						ToOct( uint64_t _ui64Val );
+
+	// Represents a value in octadecimal notation.
+	std::string						ToOct( int64_t _i64Val );
+
+	// Represents a value in octadecimal notation.
+	std::string						ToOct( double _d4Val );
+
+	// Classifies a string as one of the EE_NUM_CONSTANTS types, IE whether the string is a valid float-point or a signed or unsigned integer.  Or EE_NC_INVALID.
+	EE_STRING_NUMBER_CLASS			ClassifyString( const std::string &_sIn, uint8_t * _pui8SpecialBase = nullptr );
+
+	// Counts the number of bytes (not bits) set in the given 64-bit value.
+	static inline uint32_t			CountSetBytes( uint64_t _ui64Value ) {
+		uint32_t uiRet = 0;
+		while ( _ui64Value ) {
+			++uiRet;
+			_ui64Value >>= 8;
+		}
+		return uiRet;
+	}
+
+	// Finds the idex of the highest-set bit in the given value.
+	static inline uint32_t			CountSetBits( uint64_t _ui64Value ) {
+		uint32_t ui32Cnt = 0;
+		while ( _ui64Value ) {
+			_ui64Value &= (_ui64Value - 1);
+			ui32Cnt++;
+		}
+		return ui32Cnt;
+	}
+
+	// Finds the highest-set bit in a given value.
+	static inline uint32_t			HighestSetBit( uint64_t _ui64Value ) {
+		unsigned long ulPos;
+#if defined( _AMD64_ ) && (defined(_M_AMD64) && !defined(RC_INVOKED) && !defined(MIDL_PASS))
+		if ( _BitScanReverse64( &ulPos, _ui64Value ) ) {
+			return static_cast<uint32_t>(ulPos);
+		}
+
+#else
+		unsigned long ulPosHi;
+		if ( _BitScanReverse( &ulPosHi, static_cast<unsigned long>(_ui64Value >> 32ULL) ) ) {
+			return ulPosHi + 32UL;
+		}
+		if ( _BitScanReverse( &ulPos, static_cast<unsigned long>(_ui64Value) ) ) {
+			return ulPos;
+		}
+#endif	// #if defined( _AMD64_ ) && (defined(_M_AMD64) && !defined(RC_INVOKED) && !defined(MIDL_PASS))
+		return 0;
+	}
+	
+	// Resolves escape sequences.  Returns the full string as a 32-bit character array.
+	// \'	single quote	byte 0x27 in ASCII encoding
+	// \"	double quote	byte 0x22 in ASCII encoding
+	// \?	question mark	byte 0x3f in ASCII encoding
+	// \\	backslash	byte 0x5c in ASCII encoding
+	// \a	audible bell	byte 0x07 in ASCII encoding
+	// \b	backspace	byte 0x08 in ASCII encoding
+	// \f	form feed - new page	byte 0x0c in ASCII encoding
+	// \n	line feed - new line	byte 0x0a in ASCII encoding
+	// \r	carriage return	byte 0x0d in ASCII encoding
+	// \t	horizontal tab	byte 0x09 in ASCII encoding
+	// \v	vertical tab	byte 0x0b in ASCII encoding
+	// \nnn	arbitrary octal value	byte nnn
+	// \xnn	arbitrary hexadecimal value	byte nn
+	// \unnnn universal character name (arbitrary Unicode value); may result in several characters	code point U+nnnn
+	// \Unnnnnnnn universal character name (arbitrary Unicode value); may result in several characters	code point U+nnnnnnnn
+	// \N{name} Character named NAME in the Unicode database
+	void							ResolveAllEscapes( const std::string &_sInput, std::vector<uint32_t> &_vOutput );
+
+	// Resolves escape sequences.
+	// \'	single quote	byte 0x27 in ASCII encoding
+	// \"	double quote	byte 0x22 in ASCII encoding
+	// \?	question mark	byte 0x3f in ASCII encoding
+	// \\	backslash	byte 0x5c in ASCII encoding
+	// \a	audible bell	byte 0x07 in ASCII encoding
+	// \b	backspace	byte 0x08 in ASCII encoding
+	// \f	form feed - new page	byte 0x0c in ASCII encoding
+	// \n	line feed - new line	byte 0x0a in ASCII encoding
+	// \r	carriage return	byte 0x0d in ASCII encoding
+	// \t	horizontal tab	byte 0x09 in ASCII encoding
+	// \v	vertical tab	byte 0x0b in ASCII encoding
+	// \nnn	arbitrary octal value	byte nnn
+	// \xnn	arbitrary hexadecimal value	byte nn
+	// \unnnn universal character name (arbitrary Unicode value); may result in several characters	code point U+nnnn
+	// \Unnnnnnnn universal character name (arbitrary Unicode value); may result in several characters	code point U+nnnnnnnn
+	// \N{name} Character named NAME in the Unicode database
+	void							ResolveAllEscapes( const std::string &_sInput, std::string &_sOutput, bool _bIsUtf8 );
+
+	// Resolves a single escape character, or returns the first input character if not an escape character.
+	uint64_t						ResolveEscape( const char * _pcInput, size_t _sLen, size_t &_sCharLen, bool _bIncludeHtml, bool * _pbEscapeFound = nullptr );
+
+	// Resolves HTML/XML characters.
+	// &#nnnn;
+	// &#xhhhh;
+	void							ResolveAllHtmlXmlEscapes( const std::string &_sInput, std::string &_sOutput, bool _bIsUtf8 );
+
+	// Counts the number of UTF-8 code points in the given string.
+	uint64_t						CountUtfCodePoints( const std::string &_sInput );
 
 	// String to integer, from any base.  Since std::stoull() raises exceptions etc.
 	uint64_t						StoULL( const char * _pcText, int _iBase = 10, size_t * _psEaten = nullptr, uint64_t _uiMax = 0xFFFFFFFFFFFFFFFFULL, bool * _pbOverflow = nullptr );
 
 	// String to double.  Unlike std::atof(), this returns the number of characters eaten.
-	double							AtoF( const char * _pcText, size_t * _psEaten = nullptr );
-
-	// Min.
-	template <typename _tT>
-	static inline _tT				Min( const _tT &_tA, const _tT &_tB ) { return _tA < _tB ? _tA : _tB; }
-
-	// Max.
-	template <typename _tT>
-	static inline _tT				Max( const _tT &_tA, const _tT &_tB ) { return _tA > _tB ? _tA : _tB; }
+	double							AtoF( const char * _pcText, size_t * _psEaten = nullptr, bool * _pbError = nullptr );
 
 	// Basic epsilon comparison.
 	static inline bool __cdecl		Epsilon( double _dLeft, double _dRight, double _dEpsilon ) {
-		return std::fabs( _dLeft - _dRight ) <= _dEpsilon;
+		return std::abs( _dLeft - _dRight ) <= _dEpsilon;
 	}
 
 	// Basic epsilon comparison.
 	static inline bool __cdecl		Epsilon( float _fLeft, float _fRight, float _fEpsilon ) {
-		return std::fabsf( _fLeft - _fRight ) <= _fEpsilon;
+		return std::abs( _fLeft - _fRight ) <= _fEpsilon;
 	}
 
 	// More accurate epsilon comparison.
 	static inline bool __cdecl		RelativeEpsilon( double _dLeft, double _dRight, double _dEpsilon ) {
 		if ( _dLeft == _dRight ) { return true; }	// Handle infinities.
 
-		double dA = std::fabs( _dLeft );
-		double dB = std::fabs( _dRight );
-		double dDiff = std::fabs( _dLeft - _dRight );
+		double dA = std::abs( _dLeft );
+		double dB = std::abs( _dRight );
+		double dDiff = std::abs( _dLeft - _dRight );
 
 		if ( _dLeft == 0.0 || _dRight == 0.0 || (dA + dB < DBL_MIN) ) {
 			// Values very close or equal to 0.
@@ -392,9 +668,9 @@ namespace ee {
 	static inline bool __cdecl		RelativeEpsilon( float _fLeft, float _fRight, float _fEpsilon ) {
 		if ( _fLeft == _fRight ) { return true; }	// Handle infinities.
 
-		float fA = std::fabsf( _fLeft );
-		float fB = std::fabsf( _fRight );
-		float fDiff = std::fabsf( _fLeft - _fRight );
+		float fA = std::abs( _fLeft );
+		float fB = std::abs( _fRight );
+		float fDiff = std::abs( _fLeft - _fRight );
 
 		if ( _fLeft == 0.0f || _fRight == 0.0f || (fA + fB < FLT_MIN) ) {
 			// Values very close or equal to 0.

@@ -33,6 +33,30 @@
     <Filter Include="Source Files\Array">
       <UniqueIdentifier>{bb67682d-5da5-4ee4-84d3-1e49ebd71cdf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Object">
+      <UniqueIdentifier>{52d7a24e-3dd6-4616-89ed-c95946033c9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Object">
+      <UniqueIdentifier>{2f85ad7b-e56b-4e95-883b-5508d69806ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Html">
+      <UniqueIdentifier>{889ebf8b-1813-4920-9071-39e0a781bcc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Html">
+      <UniqueIdentifier>{53d746ff-3ae9-42a7-aa5d-be747974a2ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Context">
+      <UniqueIdentifier>{b34e9924-f18a-45f2-80d6-4ffaff661044}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Context">
+      <UniqueIdentifier>{8fd530c0-b9d5-46f0-a6d5-6102508695ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Api">
+      <UniqueIdentifier>{c68c6eaa-4cc1-48fc-8e10-a531a5945eb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Api">
+      <UniqueIdentifier>{db88c220-9418-4799-a69a-d005633a60fe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -61,6 +85,15 @@
     </ClCompile>
     <ClCompile Include="Src\Array\EEArrayBase.cpp">
       <Filter>Source Files\Array</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Html\EEHtml.cpp">
+      <Filter>Source Files\Html</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\EEString.cpp">
+      <Filter>Source Files\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\EEStringBaseApi.cpp">
+      <Filter>Source Files\Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +180,21 @@
     </ClInclude>
     <ClInclude Include="Src\Array\EEDefaultArray.h">
       <Filter>Header Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\EEObject.h">
+      <Filter>Header Files\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Html\EEHtml.h">
+      <Filter>Header Files\Html</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Api\EEBaseApi.h">
+      <Filter>Header Files\Api</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\EEString.h">
+      <Filter>Header Files\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\EEStringBaseApi.h">
+      <Filter>Header Files\Object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

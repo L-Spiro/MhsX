@@ -265,6 +265,7 @@ namespace mx {
 		// Various options.
 		struct MX_UTIL_OPTIONS {
 			BOOL						bUse0xForHex;				// 0xOOOO vs. OOOOh
+			BOOL						bUse0oForOct;				// 0oOOOO vs. 0OOOO
 			BOOL						bShortenEnumNames;			// IMAGE_SCN_MEM_LOCKED vs. LOCKED
 			DWORD						dwDataTypeOptions;			// MX_DATA_TYPE_OPTIONS
 		};
@@ -434,6 +435,12 @@ namespace mx {
 		// Creates a binary (0bxxxx) string from an integer value.
 		static const WCHAR *			ToBinary( uint64_t _uiValue, std::wstring &_sString, uint32_t _uiNumDigits );
 
+		// Creates an octadecimal (\[0-7]{1-3}) string from an integer value.
+		static const CHAR *				ToOct( uint64_t _uiValue, std::string &_sString, uint32_t _uiNumDigits );
+
+		// Creates an octadecimal (\[0-7]{1-3}) string from an integer value.
+		static const WCHAR *			ToOct( uint64_t _uiValue, std::wstring &_sString, uint32_t _uiNumDigits );
+
 		// Creates an unsigned integer string.  Returns the internal buffer, which means the result must be copied as it will be overwritten when the next function that uses the internal buffer is called.
 		static const CHAR *				ToUnsigned( uint64_t _uiValue, uint32_t _uiNumDigits = 0 );
 
@@ -466,24 +473,6 @@ namespace mx {
 
 		// Creates a double string.
 		static const WCHAR *			ToDouble( double _dValue, std::wstring &_sString, int32_t _iSigDigits = 0 );
-
-		// Gets the next UTF-32 character from a stream or error (MX_UTF_INVALID)
-		static uint32_t					NextUtf32Char( const uint32_t * _puiString, size_t _sLen, size_t * _psSize = nullptr );
-
-		// Gets the next UTF-16 character from a stream or error (MX_UTF_INVALID)
-		static uint32_t					NextUtf16Char( const wchar_t * _pwcString, size_t _sLen, size_t * _psSize = nullptr );
-
-		// Gets the next UTF-8 character from a stream or error (MX_UTF_INVALID)
-		static uint32_t					NextUtf8Char( const char * _pcString, size_t _sLen, size_t * _psSize = nullptr );
-
-		// Converts a UTF-32 character to a UTF-16 character.
-		static uint32_t					Utf32ToUtf16( uint32_t _ui32Utf32, uint32_t &_ui32Len );
-
-		// Converts a UTF-32 character to a UTF-8 character.
-		static uint32_t					Utf32ToUtf8( uint32_t _ui32Utf32, uint32_t &_ui32Len );
-
-		// Counts the number of bytes (not bits) set in the given 64-bit value.
-		static uint32_t					CountSetBytes( uint64_t _ui64Value );
 
 		// Determines if any byte of the 4 in the given value are 0.
 		static inline bool				AnyBytesAre0( uint32_t _uVal ) {
@@ -576,28 +565,6 @@ namespace mx {
 
 		// Clears the internal temporary buffer (as a security measure).
 		static VOID						ClearInternalBuffer();
-
-		// Converts a wstring to a UTF-8 string.
-		static CSecureString			WStringToString( const CSecureWString &_wsIn );
-
-		// Converts a UTF-8 string to wstring (UTF-16).
-		static CSecureWString			StringToWString( const std::string &_sIn );
-
-		// Converts a UTF-8 string to wstring (UTF-16).
-		static CSecureWString			StringToWString( const char * _pcIn, size_t _sLen );
-
-		// Converts a UTF-32 string to a UTF-16 string.
-		static CSecureWString			Utf32StringToWString( const uint32_t * _puiUtf32String, size_t _sLen );
-
-		// Converts a wstring to a UTF8 string.  The main difference between this and WStringToString() is that this will copy the raw characters over on error
-		//	compared to WStringToString(), which will output an error character (MX_UTF_INVALID).
-		static CSecureString			ToUtf8( const std::wstring &_wsString );
-
-		// Converts from UTF-8 to UTF-16, copying the original characters instead of MX_UTF_INVALID as StringToWString() would.
-		static CSecureWString			ToUtf16( const std::string &_sIn );
-
-		// Converts from UTF-8 to UTF-32, copying the original characters instead of MX_UTF_INVALID.
-		static std::vector<uint32_t>	ToUtf32( const std::string &_sIn );
 
 		// Converts from UTF-8 to any single-byte code page.
 		static CSecureString			ToCodePage( const std::string &_sIn, UINT _uiCodePage, bool * _pbError = nullptr );
@@ -1007,17 +974,5 @@ namespace mx {
 		// Prints an ee::CExpEvalContainer::EE_RESULT value as a date/time.
 		static std::wstring				PrintExpResultDataTime( const ee::CExpEvalContainer::EE_RESULT &_rResult, uint64_t _ui64Data, bool _bClosingPar = true );
 	};
-
-	// Gets the next UTF-32 character from a stream or error (MX_UTF_INVALID)
-	inline uint32_t CUtilities::NextUtf32Char( const uint32_t * _puiString, size_t _sLen, size_t * _psSize ) {
-		if ( _sLen == 0 ) {
-			if ( _psSize ) { (*_psSize) = 0; }
-			return 0;
-		}
-		if ( _psSize ) { (*_psSize) = 1; }
-		uint32_t ui32Ret = (*_puiString);
-		if ( ui32Ret & 0xFFE00000 ) { return MX_UTF_INVALID; }
-		return ui32Ret;
-	}
 
 }	// namespace mx

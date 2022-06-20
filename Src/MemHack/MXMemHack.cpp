@@ -20,6 +20,7 @@ namespace mx {
 		m_oOptions.bDataTypeSizes = TRUE;
 		m_oOptions.bDataTypeRanges = TRUE;
 		m_oOptions.bUse0x = TRUE;
+		m_oOptions.bUse0o = FALSE;
 		m_oOptions.bShortEnums = TRUE;
 		// ====
 		m_oOptions.dwOpenProc = MX_OP_SHOW_ALL;
@@ -144,6 +145,7 @@ namespace mx {
 		m_oOptions.bDataTypeRanges = (CUtilities::Options.dwDataTypeOptions & CUtilities::MX_DTO_SHOWRANGES) ? TRUE : FALSE;
 		m_oOptions.bDataTypeSizes = (CUtilities::Options.dwDataTypeOptions & CUtilities::MX_DTO_SHOWSIZES) ? TRUE : FALSE;
 		m_oOptions.bUse0x = CUtilities::Options.bUse0xForHex;
+		m_oOptions.bUse0o = CUtilities::Options.bUse0oForOct;
 		m_oOptions.bShortEnums = CUtilities::Options.bShortenEnumNames;
 		return m_oOptions;
 	}
@@ -158,6 +160,7 @@ namespace mx {
 		dwDataTypeOpts |= m_oOptions.bDataTypeSizes ? CUtilities::MX_DTO_SHOWSIZES : 0;
 		CUtilities::Options.dwDataTypeOptions = dwDataTypeOpts;
 		CUtilities::Options.bUse0xForHex = m_oOptions.bUse0x;
+		CUtilities::Options.bUse0oForOct = m_oOptions.bUse0o;
 		CUtilities::Options.bShortenEnumNames = m_oOptions.bShortEnums;
 	}
 
