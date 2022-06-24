@@ -138,6 +138,12 @@ namespace lsw {
 		// Calculates the new Y coordinate of a bar from dragging.  Uses m_pmlDragLayer, m_sDragBarIndex, and m_pDragStart.
 		INT									GetNewBarY( const POINT &_pCurPoint );
 
+		// Calculates the X delta of a bar from dragging.  Uses m_pDragStart.
+		INT									GetBarXDelta( const POINT &_pCurPoint );
+
+		// Calculates the Y delta of a bar from dragging.  Uses m_pDragStart.
+		INT									GetBarYDelta( const POINT &_pCurPoint );
+
 		// Finds a rectangle by its ID.
 		bool								FindRectById( DWORD _dwId, LSW_MS_LAYER_SEARCH &_mlsRet, LSW_MS_RECT &_mrRoot );
 

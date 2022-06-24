@@ -166,15 +166,15 @@ namespace lsw {
 		INT iX, iY, iWidth, iHeight;
 		if ( m_pmlDragLayer->stSplitType == LSW_ST_HOR ) {
 			iX = static_cast<INT>((*m_pmlDragLayer).vRects[m_sDragBarIndex].rRect.left);
-			iY = GetNewBarY( _pPoint );
-			iY += (*m_pmlDragLayer).vRects[m_sDragBarIndex].rRect.top;
+			iY = GetBarYDelta( _pPoint );//GetNewBarY( _pPoint );
+			iY += (*m_pmlDragLayer).vRects[m_sDragBarIndex].rRect.bottom;
 			iWidth = (*m_pmlDragLayer).vRects[m_sDragBarIndex].rRect.Width();
 			iHeight = m_iBarWidth;
 		}
 		else {
 			iY = static_cast<INT>((*m_pmlDragLayer).vRects[m_sDragBarIndex].rRect.top);
-			iX = GetNewBarX( _pPoint );
-			iX += (*m_pmlDragLayer).vRects[m_sDragBarIndex].rRect.left;
+			iX = GetBarXDelta( _pPoint );//GetNewBarX( _pPoint );
+			iX += (*m_pmlDragLayer).vRects[m_sDragBarIndex].rRect.right;
 			iWidth = m_iBarWidth;
 			iHeight = (*m_pmlDragLayer).vRects[m_sDragBarIndex].rRect.Height();
 		}
@@ -188,17 +188,23 @@ namespace lsw {
 
 	// Calculates the new X coordinate of a bar from dragging.  Uses m_pmlDragLayer, m_sDragBarIndex, and m_pDragStart.
 	INT CMultiSplitter::GetNewBarX( const POINT &_pCurPoint ) {
-		LONG lChange = _pCurPoint.x - m_pDragStart.x;
+		LONG lChange = GetBarXDelta( _pCurPoint );
 		INT iX = static_cast<INT>(std::max( 0L, (*m_pmlDragLayer).vRects[m_sDragBarIndex].iDist + lChange ));
 		return iX;
 	}
 
 	// Calculates the new Y coordinate of a bar from dragging.  Uses m_pmlDragLayer, m_sDragBarIndex, and m_pDragStart.
 	INT CMultiSplitter::GetNewBarY( const POINT &_pCurPoint ) {
-		LONG lChange = _pCurPoint.y - m_pDragStart.y;
+		LONG lChange = GetBarYDelta( _pCurPoint );
 		INT iY = static_cast<INT>(std::max( 0L, (*m_pmlDragLayer).vRects[m_sDragBarIndex].iDist + lChange ));
 		return iY;
 	}
+
+	// Calculates the X delta of a bar from dragging.  Uses m_pDragStart.
+	INT CMultiSplitter::GetBarXDelta( const POINT &_pCurPoint ) { return _pCurPoint.x - m_pDragStart.x; }
+
+	// Calculates the Y delta of a bar from dragging.  Uses m_pDragStart.
+	INT CMultiSplitter::GetBarYDelta( const POINT &_pCurPoint ) { return _pCurPoint.y - m_pDragStart.y; }
 
 	// Finds a rectangle by its ID.
 	bool CMultiSplitter::FindRectById( DWORD _dwId, LSW_MS_LAYER_SEARCH &_mlsRet, LSW_MS_RECT &_mrRoot ) {
@@ -304,18 +310,42 @@ namespace lsw {
 	void CMultiSplitter::CalcRects( LSW_MS_LAYER &_mlLayer, const LSW_RECT &_rRect ) {
 		LSW_RECT rCopy = _rRect;
 		_mlLayer.rRect = rCopy;
-
+		// Sort the rectangles.
+		std::vector<size_t> vRects;
+		vRects.reserve( _mlLayer.vRects.size() );
+		// Push left/top-aligned rectangles, insert(0) the rest.
 		for ( size_t I = 0; I < _mlLayer.vRects.size(); ++I ) {
-			_mlLayer.vRects[I].rRect = CalcRect( _mlLayer.vRects[I], rCopy, _mlLayer.stSplitType, _mlLayer.vRects.size(), I );
-			if ( !_mlLayer.vRects[I].bContainsWidget && _mlLayer.vRects[I].u.pmlLayer ) {
-				CalcRects( (*_mlLayer.vRects[I].u.pmlLayer), _mlLayer.vRects[I].rRect );
-			}
-
-			if ( _mlLayer.stSplitType == LSW_ST_VER ) {
-				rCopy.left = _mlLayer.vRects[I].rRect.right + m_iBarWidth;
+			if ( _mlLayer.vRects[I].bLockToFar ) {
+				vRects.insert( vRects.begin() + 0, I );
 			}
 			else {
-				rCopy.top = _mlLayer.vRects[I].rRect.bottom + m_iBarWidth;
+				vRects.push_back( I );
+			}
+			//vRects.push_back( I );
+		}
+
+		for ( size_t I = 0; I < _mlLayer.vRects.size(); ++I ) {
+			size_t sIdx = vRects[I];
+			_mlLayer.vRects[sIdx].rRect = CalcRect( _mlLayer.vRects[sIdx], rCopy, _mlLayer.stSplitType, _mlLayer.vRects.size(), I );
+			if ( !_mlLayer.vRects[sIdx].bContainsWidget && _mlLayer.vRects[sIdx].u.pmlLayer ) {
+				CalcRects( (*_mlLayer.vRects[sIdx].u.pmlLayer), _mlLayer.vRects[sIdx].rRect );
+			}
+
+			if ( _mlLayer.vRects[sIdx].bLockToFar ) {
+				if ( _mlLayer.stSplitType == LSW_ST_VER ) {
+					rCopy.right = _mlLayer.vRects[sIdx].rRect.left - m_iBarWidth;
+				}
+				else {
+					rCopy.bottom = _mlLayer.vRects[sIdx].rRect.top - m_iBarWidth;
+				}
+			}
+			else {
+				if ( _mlLayer.stSplitType == LSW_ST_VER ) {
+					rCopy.left = _mlLayer.vRects[sIdx].rRect.right + m_iBarWidth;
+				}
+				else {
+					rCopy.top = _mlLayer.vRects[sIdx].rRect.bottom + m_iBarWidth;
+				}
 			}
 		}
 	}
@@ -327,19 +357,35 @@ namespace lsw {
 			return _rRect;
 		}
 		LSW_RECT rCopy = _rRect;
+		
 		// Otherwise the top-left coordinate is already correct.  Ensure there is a drag bar to the right or bottom.
 		if ( _stType == LSW_ST_VER ) {
 			// Based on how many rectangles are in the layer and which rectangle this is we can determine
 			//	the max right value.  The drag bars have to be clamped into the control.
-			LONG lMaxRight = static_cast<LONG>(_rRect.right - m_iBarWidth * ((_stTotalRectsInLayer - 1) - _stRectIndexInLayer));
-			rCopy.right = std::min( lMaxRight, (rCopy.left + _mrRect.iDist) );
-			rCopy.right = std::max( rCopy.left, rCopy.right );
+			
+			if ( _mrRect.bLockToFar ) {
+				LONG lMaxRight = static_cast<LONG>(_rRect.left + m_iBarWidth * ((_stTotalRectsInLayer - 1) - _stRectIndexInLayer));
+				rCopy.left = std::max( lMaxRight, (rCopy.right - _mrRect.iDist) );
+				rCopy.left = std::min( rCopy.left, rCopy.right );
+			}
+			else {
+				LONG lMaxRight = static_cast<LONG>(_rRect.right - m_iBarWidth * ((_stTotalRectsInLayer - 1) - _stRectIndexInLayer));
+				rCopy.right = std::min( lMaxRight, (rCopy.left + _mrRect.iDist) );
+				rCopy.right = std::max( rCopy.left, rCopy.right );
+			}
 		}
 		else {
-			// Same but going down.
-			LONG lMaxBottom = static_cast<LONG>(_rRect.bottom - m_iBarWidth * ((_stTotalRectsInLayer - 1) - _stRectIndexInLayer));
-			rCopy.bottom = std::min( lMaxBottom, (rCopy.top + _mrRect.iDist) );
-			rCopy.bottom = std::max( rCopy.top, rCopy.bottom );
+			// Same but going down.			
+			if ( _mrRect.bLockToFar ) {
+				LONG lMaxBottom = static_cast<LONG>(_rRect.top + m_iBarWidth * ((_stTotalRectsInLayer - 1) - _stRectIndexInLayer));
+				rCopy.top = std::max( lMaxBottom, (rCopy.bottom - _mrRect.iDist) );
+				rCopy.top = std::min( rCopy.top, rCopy.top );
+			}
+			else {
+				LONG lMaxBottom = static_cast<LONG>(_rRect.bottom - m_iBarWidth * ((_stTotalRectsInLayer - 1) - _stRectIndexInLayer));
+				rCopy.bottom = std::min( lMaxBottom, (rCopy.top + _mrRect.iDist) );
+				rCopy.bottom = std::max( rCopy.top, rCopy.bottom );
+			}
 		}
 		return rCopy;
 	}
@@ -442,10 +488,18 @@ namespace lsw {
 			POINT pCurPos = { _pCursorPos.x, _pCursorPos.y };
 
 			if ( m_pmlDragLayer->stSplitType == LSW_ST_HOR ) {
-				m_pmlDragLayer->vRects[m_sDragBarIndex].iDist = GetNewBarY( pCurPos );
+				//m_pmlDragLayer->vRects[m_sDragBarIndex].iDist = GetNewBarY( pCurPos );
+				(*m_pmlDragLayer).vRects[m_sDragBarIndex].iDist = std::max( (*m_pmlDragLayer).vRects[m_sDragBarIndex].iDist + GetBarYDelta( pCurPos ), 0 );
+				if ( ++m_sDragBarIndex < (*m_pmlDragLayer).vRects.size() ) {
+					(*m_pmlDragLayer).vRects[m_sDragBarIndex].iDist = std::max( (*m_pmlDragLayer).vRects[m_sDragBarIndex].iDist - GetBarYDelta( pCurPos ), 0 );
+				}
 			}
 			else {
-				m_pmlDragLayer->vRects[m_sDragBarIndex].iDist = GetNewBarX( pCurPos );
+				//m_pmlDragLayer->vRects[m_sDragBarIndex].iDist = GetNewBarX( pCurPos );
+				(*m_pmlDragLayer).vRects[m_sDragBarIndex].iDist = std::max( (*m_pmlDragLayer).vRects[m_sDragBarIndex].iDist + GetBarXDelta( pCurPos ), 0 );
+				if ( ++m_sDragBarIndex < (*m_pmlDragLayer).vRects.size() ) {
+					(*m_pmlDragLayer).vRects[m_sDragBarIndex].iDist = std::max( (*m_pmlDragLayer).vRects[m_sDragBarIndex].iDist - GetBarXDelta( pCurPos ), 0 );
+				}
 			}
 			CalcRects();
 			SizeAttachments();
