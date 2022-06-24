@@ -1,6 +1,7 @@
 #include "LSWMultiSplitter.h"
 #include "../Base/LSWBase.h"
 #include "../Brush/LSWBrush.h"
+#include "../Docking/LSWDockable.h"
 #include "../Images/LSWBitmap.h"
 
 namespace lsw {
@@ -13,7 +14,8 @@ namespace lsw {
 		CWidget( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(CBase::MultiSplitterAtom()) ), _pwParent, _bCreateWidget, _hMenu ),
 		m_iBarWidth( 4 ),
 		m_pmlDragLayer( nullptr ),
-		m_sDragBarIndex( 0 )/*,
+		m_sDragBarIndex( 0 ),
+		m_bSetCursorToggle( false )/*,
 		m_iHorPos( 10 ),
 		m_iVertPos( 10 )*/ {
 		m_meRoot.u.pmlLayer = nullptr;
@@ -52,7 +54,7 @@ namespace lsw {
 	}
 
 	// Client rectangle.
-	const LSW_RECT CMultiSplitter::ClientRect( const CWidget * pwChild ) const {
+	LSW_RECT CMultiSplitter::ClientRect( const CWidget * pwChild ) const {
 		for ( size_t I = 0; I < m_vLayers.size(); ++I ) {
 			for ( size_t J = 0; J < m_vLayers[I]->vRects.size(); ++J ) {
 				if ( m_vLayers[I]->vRects[J].bContainsWidget && m_vLayers[I]->vRects[J].u.pqWidget == pwChild ) {
@@ -230,14 +232,15 @@ namespace lsw {
 
 	// Remove a child.
 	void CMultiSplitter::RemoveChild( const CWidget * _pwChild ) {
-		for ( size_t I = m_vLayers.size(); I--; ) {
+		/*for ( size_t I = m_vLayers.size(); I--; ) {
 			for ( size_t J = m_vLayers[I]->vRects.size(); J--; ) {
 				if ( m_vLayers[I]->vRects[J].bContainsWidget && m_vLayers[I]->vRects[J].u.pqWidget == _pwChild ) {
 					Detach( _pwChild->Id() );
 				}
 			}
 			//if ( m_vLayers[I]->vRects.size() 
-		}
+		}*/
+		Detach( _pwChild->Id() );
 		CWidget::RemoveChild( _pwChild );
 	}
 
@@ -248,6 +251,7 @@ namespace lsw {
 		if ( !_mrRect.u.pqWidget ) {
 			_mrRect.u.pqWidget = _pwWidget;
 			_mrRect.bContainsWidget = TRUE;
+			_mrRect.bLockToFar = FALSE;
 			return nullptr;
 		}
 		// Otherwise, create a new layer and point the rectangle to it.
@@ -300,6 +304,7 @@ namespace lsw {
 	void CMultiSplitter::CalcRects( LSW_MS_LAYER &_mlLayer, const LSW_RECT &_rRect ) {
 		LSW_RECT rCopy = _rRect;
 		_mlLayer.rRect = rCopy;
+
 		for ( size_t I = 0; I < _mlLayer.vRects.size(); ++I ) {
 			_mlLayer.vRects[I].rRect = CalcRect( _mlLayer.vRects[I], rCopy, _mlLayer.stSplitType, _mlLayer.vRects.size(), I );
 			if ( !_mlLayer.vRects[I].bContainsWidget && _mlLayer.vRects[I].u.pmlLayer ) {
@@ -419,8 +424,10 @@ namespace lsw {
 
 	// WM_MOUSEMOVE.
 	CWidget::LSW_HANDLED CMultiSplitter::MouseMove( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) {
+		m_pLastMouseMove = { _pCursorPos.x, _pCursorPos.y };
+		m_bSetCursorToggle = true;
 		if ( m_pmlDragLayer ) {
-			POINT pCurPos = { _pCursorPos.x, _pCursorPos.y };
+			POINT pCurPos = m_pLastMouseMove;
 			DrawBar( m_pLastPoint );
 			DrawBar( pCurPos );
 		}
@@ -447,6 +454,31 @@ namespace lsw {
 		}
 		
 		::ReleaseCapture();
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_SETCURSOR.
+	CWidget::LSW_HANDLED CMultiSplitter::SetCursor( CWidget * _pwControl, WORD _wHitTest, WORD _wIdent ) {
+		HCURSOR hCursor = NULL;
+		if ( m_bSetCursorToggle ) {
+			LSW_MS_LAYER * pmlDragLayer = nullptr;
+			size_t sDragBarIdx;
+			if ( GetLayerAndBarBeingClicked( m_pLastMouseMove,
+				pmlDragLayer, sDragBarIdx ) ) {
+				switch ( pmlDragLayer->stSplitType ) {
+					case LSW_ST_HOR : {
+						hCursor = ::LoadCursor( NULL, IDC_SIZENS );
+						break;
+					}
+					case LSW_ST_VER : {
+						hCursor = ::LoadCursor( NULL, IDC_SIZEWE );
+						break;
+					}
+				}
+			}
+		}
+		::SetCursor( hCursor );
+		m_bSetCursorToggle = false;
 		return LSW_H_CONTINUE;
 	}
 
@@ -650,6 +682,8 @@ namespace lsw {
 
 		// If added to the top or left, insert before the current index.
 		size_t sInsertIdx = mlsSer.sIndex;
+		LSW_MS_RECT rTemp;
+		rTemp.iDist = 200;
 
 		// The call to SplitTypeMatchesLayerDirection() ensures that the current type of splitter is either
 		//	"either one" or the same as what we st below.
@@ -658,18 +692,30 @@ namespace lsw {
 		// It's easier to redundantly set it here than to check for special cases.
 		if ( _maAttach.atAttachTo == LSW_AT_LEFT || _maAttach.atAttachTo == LSW_AT_RIGHT ) {
 			mlsSer.pmlLayer->stSplitType = LSW_ST_VER;
+			if ( _maAttach.pwWidget->IsDockable() ) {
+				rTemp.iDist = static_cast<CDockable *>(_maAttach.pwWidget)->PreferredDockWidth();
+			}
 		}
 		else {
 			mlsSer.pmlLayer->stSplitType = LSW_ST_HOR;
+			if ( _maAttach.pwWidget->IsDockable() ) {
+				rTemp.iDist = static_cast<CDockable *>(_maAttach.pwWidget)->PreferredDockHeight();
+			}
 		}
+		
 		if ( _maAttach.atAttachTo == LSW_AT_BOTTOM || _maAttach.atAttachTo == LSW_AT_RIGHT ) {
 			// If added to the bottom or right, insert after the current index.
 			++sInsertIdx;
+			rTemp.bLockToFar = TRUE;
 		}
-		LSW_MS_RECT rTemp;
+		else {
+			rTemp.bLockToFar = FALSE;
+		}
+		
 		rTemp.dwId = ++m_dwIds;
 		rTemp.bContainsWidget = TRUE;
-		rTemp.iDist = 200;
+		
+		
 		rTemp.u.pqWidget = _maAttach.pwWidget;
 		mlsSer.pmlLayer->vRects.insert( mlsSer.pmlLayer->vRects.begin() + sInsertIdx, rTemp );
 

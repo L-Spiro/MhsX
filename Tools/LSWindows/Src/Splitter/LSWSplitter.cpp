@@ -19,7 +19,7 @@ namespace lsw {
 
 	// == Functions.
 	// Window rectangle.
-	const LSW_RECT CSplitter::WindowRect( const CWidget * pwChild ) const {
+	LSW_RECT CSplitter::WindowRect( const CWidget * pwChild ) const {
 		LSW_RECT rWindow;
 		::GetWindowRect( Wnd(), &rWindow );
 		LSW_RECT rRet = ClientRect( pwChild );
@@ -28,7 +28,7 @@ namespace lsw {
 	}
 
 	// Client rectangle.
-	const LSW_RECT CSplitter::ClientRect( const CWidget * pwChild ) const {
+	LSW_RECT CSplitter::ClientRect( const CWidget * pwChild ) const {
 		// If we only have 0 or 1 child, use the full rectangle.
 		if ( m_vAttachments.size() > 1 ) {
 			switch ( FindAttachment( pwChild ) ) {

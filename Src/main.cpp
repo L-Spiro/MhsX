@@ -52,17 +52,20 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 	MX_NEW_STRING( szSplitter, 6 );
 	MX_NEW_STRING( szMSplitter, 10 );
 	MX_NEW_STRING( szTreeView, 14 );
+	MX_NEW_STRING( szTreeListView, 12 );
 #undef MX_NEW_STRING
 	lsw::CBase::Initialize( _hInstance, new mx::CLayoutManager(),
 		&szDockable[0],
 		&szSplitter[0],
 		&szMSplitter[0],
-		&szTreeView[0] );
+		&szTreeView[0],
+		&szTreeListView[0] );
 #define MX_CLEAN_STRING( STR )	::ZeroMemory( &STR[0], STR.size() * sizeof( STR[0] ) );
 	MX_CLEAN_STRING( szDockable );
 	MX_CLEAN_STRING( szSplitter );
 	MX_CLEAN_STRING( szMSplitter );
 	MX_CLEAN_STRING( szTreeView );
+	MX_CLEAN_STRING( szTreeListView );
 #undef MX_CLEAN_STRING
 
 	// Initialize the system.

@@ -33,6 +33,12 @@ namespace mx {
 		// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
 		virtual const LSW_RECT				VirtualClientRect( const CWidget * pwChild ) const;
 
+		// Returns the desired width when first docking into a vertical split.
+		virtual INT							PreferredDockWidth() { return 300; }
+
+		// Returns the desired height when first docking into a horizontal split.
+		virtual INT							PreferredDockHeight() { return 200; }
+
 
 	protected :
 		// == Types.

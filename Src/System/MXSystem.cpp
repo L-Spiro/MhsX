@@ -962,7 +962,7 @@ namespace mx {
 		MX_PROCADDR( ContinueDebugEvent, _T_D8E77E49_ContinueDebugEvent, _LEN_D8E77E49 );
 		MX_PROCADDR( DebugSetProcessKillOnExit, _T_7757830E_DebugSetProcessKillOnExit, _LEN_7757830E );
 		MX_PROCADDR( WaitForDebugEvent, _T_96AB83A1_WaitForDebugEvent, _LEN_96AB83A1 );
-		MX_PROCADDR( WaitForDebugEventEx, _T_51A49928_WaitForDebugEventEx, _LEN_51A49928 );
+		//MX_PROCADDR( WaitForDebugEventEx, _T_51A49928_WaitForDebugEventEx, _LEN_51A49928 );
 		MX_PROCADDR( GetThreadContext, _T_649EB9C1_GetThreadContext, _LEN_649EB9C1 );
 		MX_PROCADDR( SetThreadContext, _T_5688CBD8_SetThreadContext, _LEN_5688CBD8 );
 		MX_PROCADDR( Wow64GetThreadContext, _T_49CB90FE_Wow64GetThreadContext, _LEN_49CB90FE );

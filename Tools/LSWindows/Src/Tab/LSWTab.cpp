@@ -4,7 +4,7 @@
 #include <codecvt>
 #include <windowsx.h>
 
-#define LSW_CLOSE_SPACING	15
+#define LSW_CLOSE_SPACING	21
 
 namespace lsw {
 

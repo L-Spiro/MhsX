@@ -1058,9 +1058,9 @@ namespace lsw {
 		if ( rItem.bottom + rItem.Height() < _ppParms.rClient.bottom ) {
 			::SetBkColor( _hDc, ::GetSysColor( COLOR_WINDOW ) );
 			::SetTextColor( _hDc, ::GetSysColor( COLOR_WINDOWTEXT ) );
-			LSW_RECT rThisItem = GetHeaderLandR( 1, false );
+			//LSW_RECT rThisItem = GetHeaderLandR( 1, false );
 			LSW_RECT rBounds = rItem;
-			rBounds.left = rThisItem.left;
+			rBounds.left = _ppParms.rClient.left;//rThisItem.left;
 			rBounds.right = _ppParms.rClient.right - rThisVertScrollRect.Width();
 			if ( rBounds.Width() > 0 ) {
 				rBounds.bottom = _ppParms.rClient.bottom;
@@ -1406,6 +1406,13 @@ namespace lsw {
 				::ScreenToClient( ptlThis->Wnd(), &pPos );
 				return ::SendMessageW( ptlThis->Wnd(), _uMsg, _wParam, MAKELPARAM( pPos.x, pPos.y ) );
 			}
+
+			case TVM_EXPAND : {
+				LRESULT lrRes = ::CallWindowProc( wpOrig, _hWnd, _uMsg, _wParam, _lParam );
+				ptlThis->Redraw( true );
+				ptlThis->SetFocus();
+				return lrRes;
+			}
 		}
 
 		return ::CallWindowProc( wpOrig, _hWnd, _uMsg, _wParam, _lParam );
@@ -1421,6 +1428,21 @@ namespace lsw {
 			// =======================================
 			case WM_PAINT : { return ptlThis->OnPaint( _wParam, _lParam ); }
 			case WM_ERASEBKGND : { return 0; }
+#if 0
+			case WM_NCPAINT : {
+				//LSW_BEGINPAINT bpPaint( ptlThis->Wnd() );
+				HDC hDc = /*bpPaint.hDc;*///::GetDCEx( ptlThis->Wnd(), reinterpret_cast<HRGN>(_wParam), DCX_WINDOW/* | DCX_INTERSECTRGN*/ );
+					::GetWindowDC( ptlThis->Wnd() );
+				LSW_RECT rRect = ptlThis->WindowRect();
+				rRect = rRect.ScreenToClient( ptlThis->Wnd() );
+				rRect.MoveBy( { -rRect.left, -rRect.top } );
+				BOOL bYay = ::DrawEdge( hDc, &rRect, EDGE_ETCHED, BF_RECT );
+				//::FrameRect( hDc
+
+				::ReleaseDC( ptlThis->Wnd(), hDc );
+				return 0;
+			}
+#endif
 			// =======================================
 			// Notifications.
 			// =======================================

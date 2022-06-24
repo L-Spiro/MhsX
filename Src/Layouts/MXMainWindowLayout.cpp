@@ -145,6 +145,31 @@ namespace mx {
 		//	nullptr, 0,								// pcWidthSizeExp
 		//	nullptr, 0,								// pcHeightSizeExp
 		//},
+#if 1
+		{
+			LSW_LT_TREELISTVIEW,					// ltType
+			MX_MWI_STOREDADDRESSES,					// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			0,										// iLeft
+			0,										// iTop
+			255,									// dwWidth
+			110,									// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT,		// dwStyle
+			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,						// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_MWI_SPLITTER,						// dwParentId
+
+			MX_PARENT_VCLEFT,						// pcLeftSizeExp
+			MX_PARENT_VCRIGHT,						// pcRightSizeExp
+			MX_PARENT_VCTOP,						// pcTopSizeExp
+			MX_PARENT_VCBOTTOM,						// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			nullptr, 0,								// pcHeightSizeExp
+		},
+#else
 		{
 			LSW_LT_LISTVIEW,						// ltType
 			MX_MWI_STOREDADDRESSES,					// wId
@@ -168,6 +193,7 @@ namespace mx {
 			nullptr, 0,								// pcWidthSizeExp
 			nullptr, 0,								// pcHeightSizeExp
 		},
+#endif
 
 
 #if 0

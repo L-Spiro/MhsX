@@ -71,6 +71,12 @@ namespace mx {
 		// Sets the update speed.
 		void								SetUpdateSpeed( uint32_t _ui32Speed );
 
+		// Returns the desired width when first docking into a vertical split.
+		virtual INT							PreferredDockWidth() { return 300; }
+
+		// Returns the desired height when first docking into a horizontal split.
+		virtual INT							PreferredDockHeight() { return 320; }
+
 
 	protected :
 		// == Members.

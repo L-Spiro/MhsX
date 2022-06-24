@@ -44,13 +44,17 @@ namespace lsw {
 	// The tree view class.
 	ATOM CBase::m_aTreeView = 0;
 
+	// The tree-list view class.
+	ATOM CBase::m_aTreeListView = 0;
+
 	// == Functions.
 	// Initialize.
 	VOID CBase::Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan,
 		const WCHAR * _pwcDockableClassName,
 		const WCHAR * _pwcSplitterClassName,
 		const WCHAR * _pwcMultiSplitterClassName,
-		const WCHAR * _pwcTeeViewClassName ) {
+		const WCHAR * _pwcTreeViewClassName,
+		const WCHAR * _pwcTreeListViewClassName ) {
 		m_hInstance = _hInst;
 		m_plmLayoutMan = _plmLayoutMan;
 
@@ -103,16 +107,29 @@ namespace lsw {
 			m_aMultiSplitter = CBase::RegisterClassExW( wceMulSplitter.Obj() );
 		}
 
-		if ( _pwcTeeViewClassName ) {
+		if ( _pwcTreeViewClassName ) {
 			lsw::CWndClassEx wceTreeView;
 			wceTreeView.SetInstance( GetThisHandle() );
-			wceTreeView.SetClassName( _pwcTeeViewClassName );
+			wceTreeView.SetClassName( _pwcTreeViewClassName );
 			wceTreeView.SetStyle( WS_EX_LEFT | WS_EX_CLIENTEDGE | /*WS_EX_TRANSPARENT | */WS_EX_CONTROLPARENT );
 			wceTreeView.SetBackgroundBrush( 0 );
 			//wceTreeView.SetWindPro( CTreeList::TreeViewProc );
 			wceTreeView.SetWindPro( CWidget::WindowProc );
 			wceTreeView.SetCursor( NULL );
 			m_aTreeView = CBase::RegisterClassExW( wceTreeView.Obj() );
+		}
+
+		if ( _pwcTreeListViewClassName ) {
+			lsw::CWndClassEx wceTreeListView;
+			wceTreeListView.SetInstance( GetThisHandle() );
+			wceTreeListView.SetClassName( _pwcTreeListViewClassName );
+			//wceTreeListView.SetStyle( 0 );
+			wceTreeListView.SetStyle( WS_EX_LEFT | WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT/* | WS_EX_CONTROLPARENT*/ /*| WS_EX_COMPOSITED*/ );
+			//wceTreeListView.SetBackgroundBrush( 0 );
+			//wceTreeListView.SetWindPro( CTreeList::TreeViewProc );
+			wceTreeListView.SetWindPro( CWidget::WindowProc );
+			//wceTreeListView.SetCursor( NULL );
+			m_aTreeListView = CBase::RegisterClassExW( wceTreeListView.Obj() );
 		}
 	}
 

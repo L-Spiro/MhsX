@@ -195,6 +195,12 @@
     <Filter Include="Source Files\UpDown">
       <UniqueIdentifier>{861ebc9d-fa0c-49d8-89c8-a3b3b389da51}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\TreeListView">
+      <UniqueIdentifier>{d183ec3b-d893-484f-a655-13a046677bba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\TreeListView">
+      <UniqueIdentifier>{a733732d-caeb-4908-ab35-cabff35c0df6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -320,6 +326,9 @@
     <ClInclude Include="Src\UpDown\LSWUpDown.h">
       <Filter>Header Files\UpDown</Filter>
     </ClInclude>
+    <ClInclude Include="Src\TreeListView\LSWTreeListView.h">
+      <Filter>Header Files\TreeListView</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -420,6 +429,9 @@
     </ClCompile>
     <ClCompile Include="Src\UpDown\LSWUpDown.cpp">
       <Filter>Source Files\UpDown</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\TreeListView\LSWTreeListView.cpp">
+      <Filter>Source Files\TreeListView</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

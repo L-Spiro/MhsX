@@ -31,7 +31,7 @@ namespace lsw {
 		DWORD								RootId() const { return m_meRoot.dwId; }
 
 		// Client rectangle.
-		virtual const LSW_RECT				ClientRect( const CWidget * pwChild ) const;
+		virtual LSW_RECT					ClientRect( const CWidget * pwChild ) const;
 
 		// Given a point, an LSW_DT_ATTACH structure is filled that another control could use to
 		//	add a control into this splitter.  Also returned is a rectangle that can be used to
@@ -65,7 +65,7 @@ namespace lsw {
 																	//	as the location of the divider bar.
 			BOOL							bContainsWidget;		// If true, inside this rectangle is a widget.  Otherwise it is an
 																	//	LSW_MS_LAYER object.
-			
+			BOOL							bLockToFar;				// Locks the sizing bar to the far end of the rectangle (right or bottom).
 			DWORD							dwId;					// Unique ID of this box.
 			LSW_RECT						rRect;					// Rectangle of this box in client coordinates.
 		};
@@ -100,31 +100,26 @@ namespace lsw {
 		// == Members.
 		// All of the layers, in any order.
 		std::vector<LSW_MS_LAYER *>			m_vLayers;
-
 		// All of the layers, in any order, except the layer being dragged, if any.
 		std::vector<LSW_MS_LAYER *>			m_vDragLayersCopy;
-
 		// The root rectangle.
 		LSW_MS_RECT							m_meRoot;
-
 		// The copy of the root minus the widget that is being dragged.
 		LSW_MS_RECT							m_meDragRootCopy;
-
 		// Width of the drag bars.
 		INT									m_iBarWidth;
-
 		// Dragged layer.
 		LSW_MS_LAYER *						m_pmlDragLayer;
-
 		// Index into the layer for the bar being dragged.
 		size_t								m_sDragBarIndex;
-
 		// Point of the mouse click for starting the drag of a bar.
 		POINT								m_pDragStart;
-
 		// Last-drawn point.
 		POINT								m_pLastPoint;
-
+		// Last mouse-move point.
+		POINT								m_pLastMouseMove;
+		// Set when the mouse moves, unset when SetCursor() is called.
+		bool								m_bSetCursorToggle;
 		// IDs.
 		static DWORD						m_dwIds;
 
@@ -190,6 +185,9 @@ namespace lsw {
 
 		// WM_LBUTTONUP.
 		virtual LSW_HANDLED					LButtonUp( DWORD _dwVirtKeys, const POINTS &_pCursorPos );
+
+		// WM_SETCURSOR.
+		virtual LSW_HANDLED					SetCursor( CWidget * _pwControl, WORD _wHitTest, WORD _wIdent );
 
 		// Size all attachments.
 		void								SizeAttachments() const;

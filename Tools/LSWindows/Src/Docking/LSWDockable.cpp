@@ -61,7 +61,7 @@ namespace lsw {
 
 	// == Functions.
 	// Client rectangle.
-	const LSW_RECT CDockable::ClientRect( const CWidget * pwChild ) const {
+	LSW_RECT CDockable::ClientRect( const CWidget * pwChild ) const {
 		if ( Floating() ) { return CWidget::ClientRect( pwChild ); }
 		LSW_RECT rRect;
 		::GetClientRect( Wnd(), &rRect );

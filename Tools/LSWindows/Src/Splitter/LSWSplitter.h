@@ -37,10 +37,10 @@ namespace lsw {
 
 		// == Functions.
 		// Window rectangle.
-		virtual const LSW_RECT				WindowRect( const CWidget * pwChild ) const;
+		virtual LSW_RECT					WindowRect( const CWidget * pwChild ) const;
 
 		// Client rectangle.
-		virtual const LSW_RECT				ClientRect( const CWidget * pwChild ) const;
+		virtual LSW_RECT					ClientRect( const CWidget * pwChild ) const;
 
 		// Attach a control to the splitter.
 		virtual void						Attach( CWidget * _pwWidget, LSW_ATTACHMENT _aAttachment );

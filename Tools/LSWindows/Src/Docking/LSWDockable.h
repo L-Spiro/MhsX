@@ -69,7 +69,7 @@ namespace lsw {
 		const LSW_RECT &					LastDockedRect() const { return m_rDockedRect; }
 
 		// Client rectangle.
-		virtual const LSW_RECT				ClientRect( const CWidget * pwChild ) const;
+		virtual LSW_RECT					ClientRect( const CWidget * pwChild ) const;
 
 		// Are we floating?
 		bool								Floating() const { return Floating( m_dwState ); }
@@ -106,6 +106,12 @@ namespace lsw {
 
 		// Returns true if this is a CDockable class.
 		virtual bool						IsDockable() const { return true; }
+
+		// Returns the desired width when first docking into a vertical split.
+		virtual INT							PreferredDockWidth() { return 200; }
+
+		// Returns the desired height when first docking into a horizontal split.
+		virtual INT							PreferredDockHeight() { return 200; }
 
 		// The dockable message handler.
 		static LRESULT CALLBACK				WindowProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam );

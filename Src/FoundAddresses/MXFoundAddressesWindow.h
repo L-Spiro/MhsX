@@ -84,6 +84,11 @@ namespace mx {
 		// Gets the index of the current-value header or -1.
 		int									CurValIndex() const;
 
+		// Returns the desired width when first docking into a vertical split.
+		virtual INT							PreferredDockWidth() { return 300; }
+
+		// Returns the desired height when first docking into a horizontal split.
+		virtual INT							PreferredDockHeight() { return 200; }
 
 
 	protected :

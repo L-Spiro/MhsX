@@ -31,6 +31,8 @@
 
 //#include <MLang.h>
 
+#define MX_USE_LISTVIEW
+
 namespace mx {
 
 	/*BOOL CALLBACK LocaleEnumprocex( LPWSTR Arg1, DWORD Arg2, LPARAM Arg3 ) {
@@ -450,6 +452,7 @@ namespace mx {
 		}
 
 
+#ifdef MX_USE_LISTVIEW
 		// ==== LIST VIEW ==== //
 		CListView * plvAddressList = MainListView();
 		if ( plvAddressList ) {
@@ -471,6 +474,33 @@ namespace mx {
 			}
 			//plvAddressList->SetColumnWidth( plvAddressList->GetTotalColumns(), LVSCW_AUTOSIZE_USEHEADER );
 		}
+#else
+		// ==== TREE LIST ==== //
+		CTreeList * ptlAddressList = MainTreeView();
+		if ( ptlAddressList ) {
+			const struct {
+				const char * _pcText;
+				size_t sLen;
+				DWORD dwWidth;
+			} aTitles[] = {
+				{ _T_EB78CFF1_Description, _LEN_EB78CFF1, 150 },
+				{ _T_C2F3561D_Address, _LEN_C2F3561D, 80 },
+				{ _T_31A2F4D5_Current_Value, _LEN_31A2F4D5, 120 },
+				{ _T_022E8A69_Value_When_Locked, _LEN_022E8A69, 120 },
+				{ _T_2CECF817_Type, _LEN_2CECF817, 100 },
+			};
+			for ( INT I = 0; I < MX_ELEMENTS( aTitles ); I++ ) {
+				if ( I == 0 ) {
+					if ( !ptlAddressList->SetColumnText( mx::CStringDecoder::DecodeToWString( aTitles[I]._pcText, aTitles[I].sLen ).c_str(), 0 ) ) { break; }
+					if ( !ptlAddressList->SetColumnWidth( 0, aTitles[I].dwWidth ) ) { break; }
+				}
+				else {
+					if ( !ptlAddressList->InsertColumn( mx::CStringDecoder::DecodeToWString( aTitles[I]._pcText, aTitles[I].sLen ).c_str(), aTitles[I].dwWidth, -1 ) ) { break; }
+				}
+			}
+			//plvAddressList->SetColumnWidth( plvAddressList->GetTotalColumns(), LVSCW_AUTOSIZE_USEHEADER );
+		}
+#endif	// MX_USE_LISTVIEW
 
 		// TEMP.
 		/*CSplitter * pwSplitter = static_cast<CSplitter *>(FindChild( CMainWindowLayout::MX_MWI_SPLITTER ));
@@ -483,7 +513,11 @@ namespace mx {
 		aAttach.dwId = pwSplitter->RootId();
 		aAttach.pwWidget = FindChild( CMainWindowLayout::MX_MWI_TEST0 );
 		//pwSplitter->Attach( aAttach );
+#ifdef MX_USE_LISTVIEW
 		aAttach.pwWidget = MainListView();
+#else
+		aAttach.pwWidget = MainTreeView();
+#endif	// MX_USE_LISTVIEW
 		pwSplitter->Attach( aAttach );
 
 		aAttach.atAttachTo = CMultiSplitter::LSW_AT_TOP;
@@ -651,6 +685,11 @@ namespace mx {
 	// Gets the list view.
 	CListView * CMhsMainWindow::MainListView() {
 		return static_cast<CListView *>(FindChild( CMainWindowLayout::MX_MWI_STOREDADDRESSES ));
+	}
+
+	// Gets the list view.
+	CTreeList * CMhsMainWindow::MainTreeView() {
+		return static_cast<CTreeList *>(FindChild( CMainWindowLayout::MX_MWI_STOREDADDRESSES ));
 	}
 
 	// Gets the list view.

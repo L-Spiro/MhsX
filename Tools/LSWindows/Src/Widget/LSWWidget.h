@@ -193,11 +193,11 @@ namespace lsw {
 
 		// Window rectangle.
 		//virtual const LSW_RECT &			WindowRect() const { return m_rRect; }
-		virtual const LSW_RECT				WindowRect( const CWidget * pwChild = nullptr ) const { LSW_RECT rTemp; ::GetWindowRect( Wnd(), &rTemp ); return rTemp; }
+		virtual LSW_RECT					WindowRect( const CWidget * pwChild = nullptr ) const { LSW_RECT rTemp; ::GetWindowRect( Wnd(), &rTemp ); return rTemp; }
 
 		// Client rectangle.
 		//virtual const LSW_RECT &			ClientRect() const { return m_rClientRect; }
-		virtual const LSW_RECT				ClientRect( const CWidget * pwChild = nullptr ) const { LSW_RECT rTemp; ::GetClientRect( Wnd(), &rTemp ); return rTemp; }
+		virtual LSW_RECT					ClientRect( const CWidget * pwChild = nullptr ) const { LSW_RECT rTemp; ::GetClientRect( Wnd(), &rTemp ); return rTemp; }
 
 		// Starting window rectangle.
 		virtual const LSW_RECT &			StartRect() const { return m_rStartingRect; }

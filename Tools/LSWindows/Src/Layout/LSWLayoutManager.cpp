@@ -21,6 +21,7 @@
 #include "../ToolBar/LSWToolBar.h"
 #include "../ToolTip/LSWToolTip.h"
 #include "../TreeList/LSWTreeList.h"
+#include "../TreeListView/LSWTreeListView.h"
 #include "../UpDown/LSWUpDown.h"
 
 
@@ -201,6 +202,7 @@ namespace lsw {
 			case LSW_LT_TOOLBAR : { return new CToolBar( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 			case LSW_LT_TOOLTIP : { return new CToolTip( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 			case LSW_LT_TREELIST : { return new CTreeList( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_TREELISTVIEW : { return new CTreeListView( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 			case LSW_LT_UPDOWN : { return new CUpDown( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 			case LSW_LT_WIDGET : { return new CWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 		}
@@ -309,9 +311,9 @@ namespace lsw {
 	LSW_WIDGET_LAYOUT CLayoutManager::FixLayout( const LSW_WIDGET_LAYOUT &_wlLayout ) {
 		LSW_WIDGET_LAYOUT wlCopy = _wlLayout;
 		// This case is always handled.
-		if ( wlCopy.ltType == LSW_LT_DOCKWINDOW ) {
+		/*if ( wlCopy.ltType == LSW_LT_DOCKWINDOW ) {
 			wlCopy.lpwcClass = reinterpret_cast<LPCWSTR>(lsw::CBase::DockableAtom());
-		}
+		}*/
 		if ( !wlCopy.lpwcClass ) {
 			const struct {
 				LSW_LAYOUTTYPES					ltType;
