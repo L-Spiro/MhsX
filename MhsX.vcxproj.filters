@@ -517,6 +517,15 @@
     <ClCompile Include="Src\Layouts\MXExpressionSubsearchLayout.cpp">
       <Filter>Source Files\Layouts</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Layouts\MXStringTheoryQuickReplaceLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXStringTheoryOperationsLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\StringTheory\MXStringTheoryOperationsWindow.cpp">
+      <Filter>Source Files\StringTheory</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -784,6 +793,15 @@
     </ClInclude>
     <ClInclude Include="Src\Layouts\MXExpressionSubsearchLayout.h">
       <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXStringTheoryQuickReplaceLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXStringTheoryOperationsLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\StringTheory\MXStringTheoryOperationsWindow.h">
+      <Filter>Header Files\StringTheory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

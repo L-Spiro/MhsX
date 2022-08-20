@@ -720,13 +720,14 @@ intrinsic
 exp
 	: assignment_exp										{ $$ = $1; }
 	//| iteration_exp											{ $$ = $1; }
-	| selection_exp											{ $$ = $1; }
+	//| selection_exp											{ $$ = $1; }
 	| jump_exp												{ $$ = $1; }
 	;
 	
 exp_statement
 	: exp ';'												{ $$ = $1; }
 	| iteration_exp											{ $$ = $1; }
+	| selection_exp											{ $$ = $1; }
 	;
 
 statement

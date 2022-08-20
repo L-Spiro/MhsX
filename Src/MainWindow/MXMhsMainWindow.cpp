@@ -456,6 +456,7 @@ namespace mx {
 		// ==== LIST VIEW ==== //
 		CListView * plvAddressList = MainListView();
 		if ( plvAddressList ) {
+			plvAddressList->DeleteAllColumns();
 			const struct {
 				const char * _pcText;
 				size_t sLen;
@@ -688,8 +689,8 @@ namespace mx {
 	}
 
 	// Gets the list view.
-	CTreeList * CMhsMainWindow::MainTreeView() {
-		return static_cast<CTreeList *>(FindChild( CMainWindowLayout::MX_MWI_STOREDADDRESSES ));
+	CTreeListView * CMhsMainWindow::MainTreeView() {
+		return static_cast<CTreeListView *>(FindChild( CMainWindowLayout::MX_MWI_STOREDADDRESSES ));
 	}
 
 	// Gets the list view.

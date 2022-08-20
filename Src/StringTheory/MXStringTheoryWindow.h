@@ -20,6 +20,9 @@ namespace mx {
 		// WM_COMMAND from control.
 		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc );
 
+		// WM_GETMINMAXINFO.
+		virtual LSW_HANDLED					GetMinMaxInfo( MINMAXINFO * _pmmiInfo );
+
 		// Sets the text in the main input box.
 		void								SetText( const wchar_t * _pwcTet );
 

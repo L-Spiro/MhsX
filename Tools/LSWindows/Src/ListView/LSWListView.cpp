@@ -79,6 +79,20 @@ namespace lsw {
 		return iInserted;
 	}
 
+	// Inserts a column.
+	BOOL CListView::InsertColumn( const WCHAR * _pwcText, INT _iWidth, INT _iIdx ) {
+		LV_COLUMNW lvColumn;
+		lvColumn.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_FMT;
+		lvColumn.pszText = const_cast<LPWSTR>(_pwcText);
+		lvColumn.fmt = LVCFMT_LEFT;
+		lvColumn.cx = _iWidth;
+		INT iInserted = static_cast<INT>(::SendMessageW( Wnd(), LVM_INSERTCOLUMNW, static_cast<WPARAM>(_iIdx), reinterpret_cast<LPARAM>(&lvColumn)));
+		if ( iInserted != -1 ) {
+			++m_sColumns;
+		}
+		return iInserted;
+	}
+
 	// Adds a column with the given text.
 	INT CListView::AddColumn( const CHAR * _pcText, INT _iFormat ) {
 		return AddColumn( ee::ToUtf16( _pcText ).c_str(), _iFormat );
@@ -97,6 +111,18 @@ namespace lsw {
 	// Gets the width of a column.
 	INT CListView::GetColumnWidth( INT _iCol ) const {
 		return static_cast<INT>(::SendMessageW( Wnd(), LVM_GETCOLUMNWIDTH, static_cast<WPARAM>(_iCol), 0 ));
+	}
+
+	// Sets the text of a column.
+	BOOL CListView::SetColumnText( const WCHAR * _pwcText, INT _iIdx ) {
+		if ( _iIdx >= 0 && _iIdx < GetColumnCount() ) {
+			LV_COLUMNW lvColumn;
+			lvColumn.mask = LVCF_TEXT;
+			lvColumn.pszText = const_cast<LPWSTR>(_pwcText);
+			INT iInserted = static_cast<INT>(::SendMessageW( Wnd(), LVM_SETCOLUMN, static_cast<WPARAM>(_iIdx), reinterpret_cast<LPARAM>(&lvColumn)));
+			return iInserted;
+		}
+		return FALSE;
 	}
 
 	// Deletes a column.

@@ -49,9 +49,29 @@ namespace lsw {
 			wlCopy.dwStyle = _dwNewStyle;
 			return wlCopy;
 		}
+		LSW_WIDGET_LAYOUT			AddStyle( DWORD _dwNewStyle ) const {
+			LSW_WIDGET_LAYOUT wlCopy = (*this);
+			wlCopy.dwStyle |= _dwNewStyle;
+			return wlCopy;
+		}
+		LSW_WIDGET_LAYOUT			RemoveStyle( DWORD _dwNewStyle ) const {
+			LSW_WIDGET_LAYOUT wlCopy = (*this);
+			wlCopy.dwStyle &= ~_dwNewStyle;
+			return wlCopy;
+		}
 		LSW_WIDGET_LAYOUT			ChangeStyleEx( DWORD _dwNewStyleEx ) const {
 			LSW_WIDGET_LAYOUT wlCopy = (*this);
 			wlCopy.dwStyleEx = _dwNewStyleEx;
+			return wlCopy;
+		}
+		LSW_WIDGET_LAYOUT			AddStyleEx( DWORD _dwNewStyleEx ) const {
+			LSW_WIDGET_LAYOUT wlCopy = (*this);
+			wlCopy.dwStyleEx |= _dwNewStyleEx;
+			return wlCopy;
+		}
+		LSW_WIDGET_LAYOUT			RemoveStyleEx( DWORD _dwNewStyleEx ) const {
+			LSW_WIDGET_LAYOUT wlCopy = (*this);
+			wlCopy.dwStyleEx &= ~_dwNewStyleEx;
 			return wlCopy;
 		}
 		LSW_WIDGET_LAYOUT			ChangeClass( LPCWSTR _lpwcClass ) const {

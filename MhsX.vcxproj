@@ -293,6 +293,8 @@
     <ClCompile Include="Src\Layouts\MXSearchProgressLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXStandardSubsearchLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXStringTheoryLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXStringTheoryOperationsLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXStringTheoryQuickReplaceLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXTemplateLayout.cpp" />
     <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\MainWindow\MXMhsMainWindow.cpp" />
@@ -376,6 +378,7 @@
     <ClCompile Include="Src\Search\MXSearchResultRef.cpp" />
     <ClCompile Include="Src\Search\MXStandardSubsearchWindow.cpp" />
     <ClCompile Include="Src\Strings\MXStringDecoder.cpp" />
+    <ClCompile Include="Src\StringTheory\MXStringTheoryOperationsWindow.cpp" />
     <ClCompile Include="Src\StringTheory\MXStringTheoryWindow.cpp" />
     <ClCompile Include="Src\System\MXSystem.cpp" />
     <ClCompile Include="Src\Utilities\MXTemplateWindow.cpp" />
@@ -416,6 +419,8 @@
     <ClInclude Include="Src\Layouts\MXSearchProgressLayout.h" />
     <ClInclude Include="Src\Layouts\MXStandardSubsearchLayout.h" />
     <ClInclude Include="Src\Layouts\MXStringTheoryLayout.h" />
+    <ClInclude Include="Src\Layouts\MXStringTheoryOperationsLayout.h" />
+    <ClInclude Include="Src\Layouts\MXStringTheoryQuickReplaceLayout.h" />
     <ClInclude Include="Src\Layouts\MXTemplateLayout.h" />
     <ClInclude Include="Src\MainWindow\MXMhsMainWindow.h" />
     <ClInclude Include="Src\MemHack\MXMemHack.h" />
@@ -461,6 +466,7 @@
     <ClInclude Include="Src\Search\MXStandardSubsearchWindow.h" />
     <ClInclude Include="Src\Strings\MXSecureString.h" />
     <ClInclude Include="Src\Strings\MXSecureWString.h" />
+    <ClInclude Include="Src\StringTheory\MXStringTheoryOperationsWindow.h" />
     <ClInclude Include="Src\StringTheory\MXStringTheoryWindow.h" />
     <ClInclude Include="Src\Utilities\MXTemplateWindow.h" />
     <ClInclude Include="Src\Utilities\MXUtilities.h" />

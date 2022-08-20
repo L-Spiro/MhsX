@@ -1,11 +1,14 @@
 #include "MXStringTheoryWindow.h"
 #include "../CodePages/MXCodePages.h"
+#include "../Layouts/MXLayoutMacros.h"
 #include "../Layouts/MXStringTheoryLayout.h"
+#include "../Layouts/MXStringTheoryOperationsLayout.h"
 #include "../Utilities/MXUtilities.h"
 #include <Base/LSWBase.h>
 #include <Base/LSWWndClassEx.h>
 #include <ComboBox/LSWComboBox.h>
 #include <Edit/LSWEdit.h>
+
 
 namespace mx {
 
@@ -171,8 +174,30 @@ namespace mx {
 				}
 				break;
 			}
+			case CStringTheoryLayout::MX_STW_ADD_MODIFER : {
+				if ( CStringTheoryOperationsLayout::CreateOperationsDialog( this, nullptr, 0 ) ) {
+				}
+				break;
+			}
 		}
 		return CMainWindow::Command( _wCtrlCode, _Id, _pwSrc );
+	}
+
+	// WM_GETMINMAXINFO.
+	CWidget::LSW_HANDLED CStringTheoryWindow::GetMinMaxInfo( MINMAXINFO * _pmmiInfo ) {
+		const CWidget * pwChild = FindChild( CStringTheoryLayout::MX_STW_PREDEF_GROUP );
+		if ( pwChild ) {
+			LSW_RECT lrRect = pwChild->WindowRect();
+			LSW_RECT lrMyClient = ClientRect();
+			LSW_RECT lrMyWindow = WindowRect();
+			LSW_RECT lrLocalRect = lrRect.ScreenToClient( Wnd() );
+			LONG lWidth = (lrLocalRect.right + lrLocalRect.left) +
+				(lrMyWindow.Width() - lrMyClient.Width());
+			
+			_pmmiInfo->ptMinTrackSize.x = lWidth;
+			return LSW_H_HANDLED;
+		}
+		return LSW_H_CONTINUE;
 	}
 		
 	// Sets the text in the main input box.

@@ -20,6 +20,7 @@
 #include "../Search/MXNewStringSearchWindow.h"
 #include "../Search/MXSearchProgressWindow.h"
 #include "../Search/MXStandardSubsearchWindow.h"
+#include "../StringTheory/MXStringTheoryOperationsWindow.h"
 #include "../StringTheory/MXStringTheoryWindow.h"
 
 
@@ -88,6 +89,9 @@ namespace mx {
 			}
 			case MX_STRING_THEORY : {
 				return new CStringTheoryWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
+			case MX_STRING_THEORY_OPERATIONS : {
+				return new CStringTheoryOperationsWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
 			case MX_FLOATING_POINT_STUDIO : {
 				return new CFloatingPointStudioWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );

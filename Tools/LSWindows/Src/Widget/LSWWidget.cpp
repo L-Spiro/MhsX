@@ -1067,6 +1067,17 @@ namespace lsw {
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
 				break;
 			}
+			case WM_GETMINMAXINFO : {
+				if ( pmwThis ) {
+					MINMAXINFO * pmmiInfo = reinterpret_cast<MINMAXINFO *>(_lParam);
+					if ( pmmiInfo ) {
+						LSW_HANDLED hHandled = pmwThis->GetMinMaxInfo( pmmiInfo );
+						// If an application processes this message, it should return zero.
+						if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+					}
+				}
+				break;
+			}
 
 			// =======================================
 			// Commands.

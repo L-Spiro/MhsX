@@ -39,6 +39,9 @@ namespace lsw {
 		// Inserts a column at the given index.
 		INT									InsertColumn( INT _iIndex, const CHAR * _pcText, INT _iFormat = LVCFMT_LEFT );
 
+		// Inserts a column.
+		BOOL								InsertColumn( const WCHAR * _pwcText, INT _iWidth, INT _iIdx );
+
 		// Adds a column with the given text.
 		INT									AddColumn( const CHAR * _pcText, INT _iFormat = LVCFMT_LEFT );
 
@@ -51,11 +54,17 @@ namespace lsw {
 		// Gets the width of a column.
 		INT									GetColumnWidth( INT _iCol ) const;
 
+		// Sets the text of a column.
+		BOOL								SetColumnText( const WCHAR * _pwcText, INT _iIdx );
+
 		// Deletes a column.
 		BOOL								DeleteColumn( INT _iCol );
 
 		// Deletes all columns.
 		VOID								DeleteAllColumns();
+
+		// Gets the total number of columns in the list view.
+		int									GetColumnCount() const { return Header_GetItemCount( ListView_GetHeader( Wnd() ) ); }
 
 		// Inserts an item.  Returns the index of the item.
 		INT									InsertItem( const LVITEMW &_iItem );

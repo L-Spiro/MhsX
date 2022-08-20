@@ -10,7 +10,7 @@
 #include <Base/LSWWndClassEx.h>
 #include <Rebar/LSWRebar.h>
 #include <ToolBar/LSWToolBar.h>
-#include <TreeList/LSWTreeList.h>
+#include <TreeListView/LSWTreeListView.h>
 #include <commdlg.h>
 #include <strsafe.h>
 
@@ -84,7 +84,7 @@ namespace mx {
 		CSecureString sBottomSizeExp;
 		mx::CStringDecoder::Decode( _T_C0DAD504_____P__VCB, _LEN_C0DAD504, sBottomSizeExp );
 		LSW_WIDGET_LAYOUT wlLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->FixLayout( LSW_WIDGET_LAYOUT{
-			LSW_LT_TREELIST,						// ltType
+			LSW_LT_TREELISTVIEW,//LSW_LT_TREELIST,						// ltType
 			static_cast<WORD>(CPeWorksLayout::MX_PEW_TAB_TREELIST_START + m_vTabs.size()),	// wId
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
@@ -108,7 +108,7 @@ namespace mx {
 			nullptr, 0,								// pcHeightSizeExp
 //#endif
 		} );
-		tTab.ptWidget = static_cast<CTreeList *>(static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->CreateWidget( wlLayout, ptTab, TRUE, NULL, 0 ));
+		tTab.ptWidget = static_cast<CTreeListView *>(static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->CreateWidget( wlLayout, ptTab, TRUE, NULL, 0 ));
 		if ( !tTab.ptWidget ) {
 			delete tTab.ppoPeObject;
 			return false;
@@ -336,7 +336,7 @@ namespace mx {
 
 	// Fills a tree-list with the associated PE object's information.
 	bool CPeWorksWindow::FillTree( MX_TAB &_tTab ) {
-		lsw::CTreeList * ptlTree = static_cast<lsw::CTreeList *>(_tTab.ptWidget);
+		lsw::CTreeListView * ptlTree = static_cast<lsw::CTreeListView *>(_tTab.ptWidget);
 		// Create the header items.
 		if ( !ptlTree->SetColumnText( mx::CStringDecoder::DecodeToWString( _T_LEN_D902CC4C_Field_Name ).c_str(), 0 ) ) { return false; }
 		if ( !ptlTree->SetColumnWidth( 0, 230 ) ) { return false; }
@@ -350,14 +350,14 @@ namespace mx {
 		
 		CSecureWString swsTemp;
 		swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_A94A579A_MS_DOS_Header );
-		TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItem( swsTemp.c_str() );
+		TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItem( swsTemp.c_str() );
 		HTREEITEM hItem = ptlTree->InsertItem( &isInsertMe );
 		if ( !ptlTree->SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_A614D0B8_The_MS_DOS_header_ ).c_str(), MW_PE_DESC ) ) { return false; }
 		if ( !AddDosHeader( (*ptlTree), hItem, _tTab.ppoPeObject->DosHeader(), _tTab.ppoPeObject->DosHeaderOffset() ) ) { return false; }
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_4AD9AEB4_DOS_Stub );
-			isInsertMe = lsw::CTreeList::DefaultItem( swsTemp.c_str() );
+			isInsertMe = lsw::CTreeListView::DefaultItem( swsTemp.c_str() );
 			hItem = ptlTree->InsertItem( &isInsertMe );
 			if ( !ptlTree->SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_639D4FEA_The_DOS_stub_ ).c_str(), MW_PE_DESC ) ) { return false; }
 			if ( !AddDosStub( (*ptlTree), hItem, _tTab.ppoPeObject->DosStub(), _tTab.ppoPeObject->DosStubOffset() ) ) { return false; }
@@ -365,7 +365,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_1E471600_COFF_Header );
-			isInsertMe = lsw::CTreeList::DefaultItem( swsTemp.c_str() );
+			isInsertMe = lsw::CTreeListView::DefaultItem( swsTemp.c_str() );
 			hItem = ptlTree->InsertItem( &isInsertMe );
 			if ( !ptlTree->SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_10A8FDAA_The_Portable_Executable_signature_followed_by_the_COFF_header_ ).c_str(), MW_PE_DESC ) ) { return false; }
 			if ( !AddCoffHeader( (*ptlTree), hItem, _tTab.ppoPeObject->CoffHeader(), _tTab.ppoPeObject->CoffHeaderOffset() ) ) { return false; }
@@ -377,7 +377,7 @@ namespace mx {
 				
 				{
 					swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_E4E1FB09_PE_64_Header );
-					isInsertMe = lsw::CTreeList::DefaultItem( swsTemp.c_str() );
+					isInsertMe = lsw::CTreeListView::DefaultItem( swsTemp.c_str() );
 					hItem = ptlTree->InsertItem( &isInsertMe );
 					if ( !ptlTree->SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_7794FFC7_The_64_bit_PE_header_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -388,7 +388,7 @@ namespace mx {
 			else {
 				{
 					swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_6819B7C1_PE_32_Header );
-					isInsertMe = lsw::CTreeList::DefaultItem( swsTemp.c_str() );
+					isInsertMe = lsw::CTreeListView::DefaultItem( swsTemp.c_str() );
 					hItem = ptlTree->InsertItem( &isInsertMe );
 					if ( !ptlTree->SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_D0AB7AAF_The_32_bit_PE_header_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -402,7 +402,7 @@ namespace mx {
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_174C06B4_Section_Headers );
 			swsTemp += L" (" + std::to_wstring( _tTab.ppoPeObject->Sections().size() ) + L")";
-			isInsertMe = lsw::CTreeList::DefaultItem( swsTemp.c_str() );
+			isInsertMe = lsw::CTreeListView::DefaultItem( swsTemp.c_str() );
 			hItem = ptlTree->InsertItem( &isInsertMe );
 			if ( !ptlTree->SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_3BB9BB87_Section_headers_ ).c_str(), MW_PE_DESC ) ) { return false; }
 			if ( !AddSectionHeaders( (*ptlTree), hItem, _tTab.ppoPeObject->Sections(), _tTab.ppoPeObject->ImageBase(), _tTab.ppoPeObject->SectionsOffset() ) ) { return false; }
@@ -413,7 +413,7 @@ namespace mx {
 		if ( _tTab.ppoPeObject->HasImportDesc() ) {
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_CAD13458_Import_Descriptions );
 			swsTemp += L" (" + std::to_wstring( _tTab.ppoPeObject->ImportDescriptor().size() ) + L")";
-			isInsertMe = lsw::CTreeList::DefaultItem( swsTemp.c_str() );
+			isInsertMe = lsw::CTreeListView::DefaultItem( swsTemp.c_str() );
 			hItem = ptlTree->InsertItem( &isInsertMe );
 			if ( !ptlTree->SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_09C3C10A_Import_descriptors_ ).c_str(), MW_PE_DESC ) ) { return false; }
 			uint32_t ui32Offset = _tTab.ppoPeObject->ImportDescriptorOffset();
@@ -421,7 +421,7 @@ namespace mx {
 				CHAR szTemp[_LEN_8FD2FEFE+16+1];
 				std::sprintf( szTemp, mx::CStringDecoder::DecodeToString( _T_LEN_8FD2FEFE_IMAGE_IMPORT_DESCRIPTOR__u_ ).c_str(), static_cast<uint32_t>(I) );
 				swsTemp = ee::StringToWString( szTemp );
-				isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), ui32Offset, hItem );
+				isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), ui32Offset, hItem );
 				HTREEITEM hThisItem = ptlTree->InsertItem( &isInsertMe );
 				CSecureString sDllName;
 				_tTab.ppoPeObject->ImportDllNameByIndex( I, sDllName );
@@ -432,7 +432,7 @@ namespace mx {
 
 		if ( _tTab.ppoPeObject->HasResourceDesc() && _tTab.ppoPeObject->ResourceDescriptor() ) {
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_A3E1BF2D_Resource_Description );
-			isInsertMe = lsw::CTreeList::DefaultItem( swsTemp.c_str() );
+			isInsertMe = lsw::CTreeListView::DefaultItem( swsTemp.c_str() );
 			hItem = ptlTree->InsertItem( &isInsertMe );
 			if ( !ptlTree->SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_A84061C4_Resource_descriptor_ ).c_str(), MW_PE_DESC ) ) { return false; }
 			if ( !AddResourceDesc( (*ptlTree), hItem, (*_tTab.ppoPeObject->ResourceDescriptor()), (*_tTab.ppoPeObject), _tTab.ppoPeObject->ResourceDescriptorOffset() ) ) { return false; }
@@ -441,7 +441,7 @@ namespace mx {
 		if ( _tTab.ppoPeObject->HasRelocDesc() ) {
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_C5B0D729_Base_Relocations );
 			swsTemp += L" (" + std::to_wstring( _tTab.ppoPeObject->BaseRelocs().size() ) + L")";
-			isInsertMe = lsw::CTreeList::DefaultItem( swsTemp.c_str() );
+			isInsertMe = lsw::CTreeListView::DefaultItem( swsTemp.c_str() );
 			hItem = ptlTree->InsertItem( &isInsertMe );
 			if ( !ptlTree->SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_54921101_Base_relocations_ ).c_str(), MW_PE_DESC ) ) { return false; }
 			if ( !AddReloc( (*ptlTree), hItem, _tTab.ppoPeObject->BaseRelocs(), (*_tTab.ppoPeObject) ) ) { return false; }
@@ -452,7 +452,7 @@ namespace mx {
 
 		if ( _tTab.ppoPeObject->HasResourceDesc() && _tTab.ppoPeObject->ResourceDescriptor() ) {
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_6D97690D_Resources );
-			isInsertMe = lsw::CTreeList::DefaultItem( swsTemp.c_str() );
+			isInsertMe = lsw::CTreeListView::DefaultItem( swsTemp.c_str() );
 			hItem = ptlTree->InsertItem( &isInsertMe );
 			if ( !ptlTree->SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_70080996_Resources_ ).c_str(), MW_PE_DESC ) ) { return false; }
 			if ( !AddResourceTree( (*ptlTree), hItem, (*_tTab.ppoPeObject) ) ) { return false; }
@@ -549,7 +549,7 @@ namespace mx {
 	}
 
 	// Decodes a DOS header to a given parent.
-	bool CPeWorksWindow::AddDosHeader( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const MX_DOS_HEADER &_dhHeader, uint64_t _uiStructOffset ) {
+	bool CPeWorksWindow::AddDosHeader( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const MX_DOS_HEADER &_dhHeader, uint64_t _uiStructOffset ) {
 #define MW_STANDARD_DATA_PRINT( STRUCTMEMBER )																			\
 	MX_PRINT_FILE_OFFSET( wValue, _uiStructOffset, _dhHeader.STRUCTMEMBER, swsTemp );									\
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }										\
@@ -566,7 +566,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_2C7983E2_Signature );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_8758FB73_Signature_MZ__Mark_Zbikowski__ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -581,7 +581,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_0987DADD_BytesInLastBlock );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_C0CA2E6A_The_number_of_bytes_in_the_last_block_of_the_program_that_are_actually_used__If_this_value_is_zero__then_the_entire_last_block_is_used__effectively_512__ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -590,7 +590,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_EBFCAB82_BlocksInFile );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_05C91C32_Number_of_blocks_in_the_file_that_are_part_of_the_EXE_file__If_BytesInLastBlock_is_non_zero__only_that_much_of_the_last_block_is_used_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -599,7 +599,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_5BBBF36F_NumRelocs );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_92C687C0_Number_of_relocation_entries_stored_after_the_header__May_be_zero_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -608,7 +608,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_1D508074_HeaderParagraphs );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_78057912_Number_of_paragraphs_in_the_header_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -617,7 +617,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_3299877C_MinExtraParagraphs );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_49453E11_Number_of_paragraphs_of_additional_memory_that_the_program_will_need__This_is_the_equivalent_of_the_BSS_size_in_a_Unix_program_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -626,7 +626,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_613F9F98_MaxExtraParagraphs );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_B4D1192B_Maximum_number_of_paragraphs_of_additional_memory_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -635,7 +635,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_E2D112A7_StackSegment );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_38D3097D_Relative_value_of_the_stack_segment__This_value_is_added_to_the_segment_at_which_the_program_was_loaded__and_the_result_is_used_to_initialize_the_SS_register_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -644,7 +644,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_BB244D9C_SP );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_767AAF96_Initial_value_of_the_SP_register_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -653,7 +653,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_2719BDCC_Checksum );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_CD12497E_Word_checksum__If_set_properly__the_16_bit_sum_of_all_words_in_the_file_should_be_zero__Usually_this_is_not_set_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -662,7 +662,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_0B09B747_IP );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_9055AA0B_Initial_value_of_the_IP_register_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -671,7 +671,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_68EF0E77_CS );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_5306E6C7_Initial_value_of_the_CS_register__relative_to_the_segment_where_the_program_was_loaded_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -680,7 +680,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_72D9B57B_OverlayNumber );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_1B543F7D_Overlay_number__A_value_of_0_implies_this_is_the_main_program_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -689,7 +689,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_CA491992_Padding );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_101F5933_Padding_ ).c_str(), MW_PE_DESC );
 
@@ -706,7 +706,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_06EE21A8_PeOffset );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_AA2D1287_The_offset_from_the_start_of_the_file_to_the_relocation_pointer_table_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -715,7 +715,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_3A62AF8F_OverlayNum );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_A20CDC05_Overlays_are_sections_of_a_program_that_remain_on_disk_until_the_program_actually_requires_them_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -727,7 +727,7 @@ namespace mx {
 	}
 
 	// Decodes a DOS stub to a given parent.
-	bool CPeWorksWindow::AddDosStub( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const std::vector<uint8_t> &_vStub, uint64_t _uiStructOffset ) {
+	bool CPeWorksWindow::AddDosStub( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const std::vector<uint8_t> &_vStub, uint64_t _uiStructOffset ) {
 		CSecureWString swsTemp;
 		CSecureString ssCString;
 		CSecureString ssRaw;
@@ -735,7 +735,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_5AF0321B_Stub );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_0353637D_DOS_stub_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -752,7 +752,7 @@ namespace mx {
 	}
 
 	// Decodes a COFF header to a given parent.
-	bool CPeWorksWindow::AddCoffHeader( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const MX_COFF_HEADER &_chHeader, uint64_t _uiStructOffset ) {
+	bool CPeWorksWindow::AddCoffHeader( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const MX_COFF_HEADER &_chHeader, uint64_t _uiStructOffset ) {
 #define MW_STANDARD_DATA_PRINT( STRUCTMEMBER )																			\
 	MX_PRINT_FILE_OFFSET( wValue, _uiStructOffset, _chHeader.STRUCTMEMBER, swsTemp );									\
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }										\
@@ -769,7 +769,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_EE8734B0_PeSignature );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_2653BF59_The_PE_header_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -784,7 +784,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_DAB8E618_Machine );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_6894FFB8_Determines_for_what_machine_the_file_was_compiled_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -800,7 +800,7 @@ namespace mx {
 		}
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_63A115CA_NumberOfSections );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_1E47759C_Number_of_sections_that_are_described_at_the_end_of_the_PE_headers_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -809,7 +809,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_52BE8619_TimeDateStamp );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_EE98A75B_32_bit_time_at_which_this_header_was_generated__DD_MM_YYYY_HH_MM_SS__ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -826,7 +826,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_1A0B4ED9_PointerToSymbolTable );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_A5FA5197_The_offset_of_the_symbol_table__in_bytes__or_zero_if_no_COFF_symbol_table_exists_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -835,7 +835,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_5AE35422_NumberOfSymbols );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_7C868567_The_number_of_symbols_in_the_symbol_table_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -844,7 +844,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_C171929F_SizeOfOptionalHeader );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_1E295CF8_The_size_of_the_optional_header__in_bytes_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -853,7 +853,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_F8F28FC8_Characteristics );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_96C80FB7_The_characteristics_of_the_image_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -877,7 +877,7 @@ namespace mx {
 	}
 
 	// Decodes a PE header to a given parent.
-	bool CPeWorksWindow::AddOptHeader( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const MX_COFF_WINDOW_OPT &_cwoHeader, const mx::CPeObject &_poPeObject, uint64_t _uiImageBase, uint64_t _uiStructOffset ) {
+	bool CPeWorksWindow::AddOptHeader( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const MX_COFF_WINDOW_OPT &_cwoHeader, const mx::CPeObject &_poPeObject, uint64_t _uiImageBase, uint64_t _uiStructOffset ) {
 #define MW_STANDARD_DATA_PRINT( STRUCTMEMBER )																			\
 	MX_PRINT_FILE_OFFSET( wValue, _uiStructOffset, _cwoHeader.STRUCTMEMBER, swsTemp );									\
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }										\
@@ -894,7 +894,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_C8C7C62A_Magic );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_D1140659_The_state_of_the_image_file_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -913,7 +913,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_A61E71E1_MajorLinkerVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_D38C901A_The_major_version_number_of_the_linker_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -922,7 +922,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_943F72F8_MinorLinkerVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_F7255C27_The_minor_version_number_of_the_linker_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -931,7 +931,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_BB68F636_SizeOfCode );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_DDC027AE_The_size_of_the_code_section__in_bytes__or_the_sum_of_all_such_sections_if_there_are_multiple_code_sections_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -953,7 +953,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_C0E5353E_SizeOfInitializedData );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_5355503B_The_size_of_the_initialized_data_section__in_bytes__or_the_sum_of_all_such_sections_if_there_are_multiple_initialized_data_sections_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -975,7 +975,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_AC11E99C_SizeOfUninitializedData );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_870326AB_The_size_of_the_uninitialized_data_section__in_bytes__or_the_sum_of_all_such_sections_if_there_are_multiple_uninitialized_data_sections_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -997,7 +997,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_CD01EA3A_AddressOfEntryPoint );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_714C56C8_A_pointer_to_the_entry_point_function__relative_to_the_image_base_address_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1014,7 +1014,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_D793A5D3_BaseOfCode );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_57FB8D7A_A_pointer_to_the_beginning_of_the_code_section__relative_to_the_image_base_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1034,7 +1034,7 @@ namespace mx {
 	}
 
 	// Decodes a PE 32 header to a given parent.
-	bool CPeWorksWindow::AddPe32Header( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const MX_COFF_WINDOWS_PE32 &_cwpHeader, uint64_t _uiStructOffset ) {
+	bool CPeWorksWindow::AddPe32Header( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const MX_COFF_WINDOWS_PE32 &_cwpHeader, uint64_t _uiStructOffset ) {
 #define MW_STANDARD_DATA_PRINT( STRUCTMEMBER )																			\
 	MX_PRINT_FILE_OFFSET( wValue, _uiStructOffset, _cwpHeader.STRUCTMEMBER, swsTemp );									\
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }										\
@@ -1051,7 +1051,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_0D756628_BaseOfData );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_E502C66C_A_pointer_to_the_beginning_of_the_data_section__relative_to_the_image_base_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1068,7 +1068,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_F7F61A55_ImageBase );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_A251F072_The_preferred_address_of_the_first_byte_of_the_image_when_it_is_loaded_in_memory_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1085,7 +1085,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_07ADF8BE_SectionAlignment );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_6EB72FFF_The_alignment_of_sections_loaded_in_memory__in_bytes_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1094,7 +1094,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_82D11DF7_FileAlignment );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_85CFFC4C_The_alignment_of_the_raw_data_of_sections_in_the_image_file__in_bytes_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1103,7 +1103,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_10871E2F_MajorOperatingSystemVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_D481ABDC_The_major_version_number_of_the_required_operating_system_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1127,7 +1127,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_BE137968_MinorOperatingSystemVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_E8E4D323_The_minor_version_number_of_the_required_operating_system_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1136,7 +1136,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_7185AF2B_MajorImageVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_C3E752F1_The_major_version_number_of_the_image_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1145,7 +1145,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_88EA5507_MinorImageVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_DE88C902_The_minor_version_number_of_the_image_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1154,7 +1154,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_CF63D31C_MajorSubsystemVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_4B2D03E8_The_major_version_number_of_the_subsystem_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1163,7 +1163,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_BBD0084C_MinorSubsystemVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_AFDBF601_The_minor_version_number_of_the_subsystem_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1172,7 +1172,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_0BE89003_Win32VersionValue );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_28A62C8F_This_member_is_reserved_and_must_be_0_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1181,7 +1181,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_F49FF776_SizeOfImage );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_68F7F519_The_size_of_the_image__in_bytes__including_all_headers_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1203,7 +1203,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_97F1426A_SizeOfHeaders );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_51FDB88D_The_combined_size_of_the_e_lfanew_member_of_IMAGE_DOS_HEADER__4_byte_signature__size_of_IMAGE_FILE_HEADER__size_of_optional_header__and_the_size_of_all_section_headers_rounded_to_a_multiple_of_the_value_specified_in_the_FileAlignment_member_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1225,7 +1225,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_1F54FB2C_CheckSum );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_577C2717_The_image_file_checksum_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1234,7 +1234,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_2DC01B0D_Subsystem );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_E530F84F_The_subsystem_required_to_run_this_image_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1253,7 +1253,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_81818514_DllCharacteristics );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_569D5C69_The_DLL_characteristics_of_the_image_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1274,7 +1274,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_76D292D2_SizeOfStackReserve );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_976AC976_The_number_of_bytes_to_reserve_for_the_stack_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1296,7 +1296,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_7A6E203E_SizeOfStackCommit );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_11985DB0_The_number_of_bytes_to_commit_for_the_stack_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1318,7 +1318,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_F1DB2148_SizeOfHeapReserve );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_AECDC551_The_number_of_bytes_to_reserve_for_the_local_heap_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1340,7 +1340,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_7B7E68AF_SizeOfHeapCommit );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_212336AA_The_number_of_bytes_to_commit_for_the_local_heap_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1362,7 +1362,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_1B0208B4_LoaderFlags );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_FD06EE87_Obsolete__If_bit_0_is_set__a_breakpoint_is_invoked_before_starting_the_process___If_bit_1_is_set__a_debugger_is_invoked_on_the_process_after_it_is_loaded_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1371,7 +1371,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_5A44785A_NumberOfRvaAndSizes );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_C6FBF31C_The_number_of_directory_entries_in_the_remainder_of_the_optional_header__Each_entry_describes_a_location_and_size_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1384,7 +1384,7 @@ namespace mx {
 	}
 
 	// Decodes a PE 64 header to a given parent.
-	bool CPeWorksWindow::AddPe64Header( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const MX_COFF_WINDOWS_PE64 &_cwpHeader, uint64_t _uiStructOffset ) {
+	bool CPeWorksWindow::AddPe64Header( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const MX_COFF_WINDOWS_PE64 &_cwpHeader, uint64_t _uiStructOffset ) {
 #define MW_STANDARD_DATA_PRINT( STRUCTMEMBER )																			\
 	MX_PRINT_FILE_OFFSET( wValue, _uiStructOffset, _cwpHeader.STRUCTMEMBER, swsTemp );									\
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }										\
@@ -1401,7 +1401,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_F7F61A55_ImageBase );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_A251F072_The_preferred_address_of_the_first_byte_of_the_image_when_it_is_loaded_in_memory_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1418,7 +1418,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_07ADF8BE_SectionAlignment );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_6EB72FFF_The_alignment_of_sections_loaded_in_memory__in_bytes_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1427,7 +1427,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_82D11DF7_FileAlignment );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_85CFFC4C_The_alignment_of_the_raw_data_of_sections_in_the_image_file__in_bytes_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1436,7 +1436,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_10871E2F_MajorOperatingSystemVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_D481ABDC_The_major_version_number_of_the_required_operating_system_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1460,7 +1460,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_BE137968_MinorOperatingSystemVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_E8E4D323_The_minor_version_number_of_the_required_operating_system_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1469,7 +1469,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_7185AF2B_MajorImageVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_C3E752F1_The_major_version_number_of_the_image_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1478,7 +1478,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_88EA5507_MinorImageVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_DE88C902_The_minor_version_number_of_the_image_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1487,7 +1487,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_CF63D31C_MajorSubsystemVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_4B2D03E8_The_major_version_number_of_the_subsystem_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1496,7 +1496,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_BBD0084C_MinorSubsystemVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_AFDBF601_The_minor_version_number_of_the_subsystem_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1505,7 +1505,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_0BE89003_Win32VersionValue );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_28A62C8F_This_member_is_reserved_and_must_be_0_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1514,7 +1514,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_F49FF776_SizeOfImage );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_68F7F519_The_size_of_the_image__in_bytes__including_all_headers_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1536,7 +1536,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_97F1426A_SizeOfHeaders );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_51FDB88D_The_combined_size_of_the_e_lfanew_member_of_IMAGE_DOS_HEADER__4_byte_signature__size_of_IMAGE_FILE_HEADER__size_of_optional_header__and_the_size_of_all_section_headers_rounded_to_a_multiple_of_the_value_specified_in_the_FileAlignment_member_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1558,7 +1558,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_1F54FB2C_CheckSum );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_577C2717_The_image_file_checksum_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1567,7 +1567,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_2DC01B0D_Subsystem );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_E530F84F_The_subsystem_required_to_run_this_image_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1586,7 +1586,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_81818514_DllCharacteristics );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_569D5C69_The_DLL_characteristics_of_the_image_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1607,7 +1607,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_76D292D2_SizeOfStackReserve );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_976AC976_The_number_of_bytes_to_reserve_for_the_stack_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1629,7 +1629,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_7A6E203E_SizeOfStackCommit );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_11985DB0_The_number_of_bytes_to_commit_for_the_stack_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1651,7 +1651,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_F1DB2148_SizeOfHeapReserve );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_AECDC551_The_number_of_bytes_to_reserve_for_the_local_heap_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1673,7 +1673,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_7B7E68AF_SizeOfHeapCommit );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_212336AA_The_number_of_bytes_to_commit_for_the_local_heap_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1695,7 +1695,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_1B0208B4_LoaderFlags );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_FD06EE87_Obsolete__If_bit_0_is_set__a_breakpoint_is_invoked_before_starting_the_process___If_bit_1_is_set__a_debugger_is_invoked_on_the_process_after_it_is_loaded_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1704,7 +1704,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_5A44785A_NumberOfRvaAndSizes );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_C6FBF31C_The_number_of_directory_entries_in_the_remainder_of_the_optional_header__Each_entry_describes_a_location_and_size_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1716,7 +1716,7 @@ namespace mx {
 	}
 
 	// Decodes an array of data directories.
-	bool CPeWorksWindow::AddDataDirectories( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const std::vector<MX_DATA_DIRECTORY> &_vDataDirs, const mx::CPeObject &_poPeObject, uint64_t _uiImageBase, uint64_t _uiStructOffset ) {
+	bool CPeWorksWindow::AddDataDirectories( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const std::vector<MX_DATA_DIRECTORY> &_vDataDirs, const mx::CPeObject &_poPeObject, uint64_t _uiImageBase, uint64_t _uiStructOffset ) {
 		CSecureWString swsTemp;
 		CSecureString ssCString;
 		CSecureString ssRaw;
@@ -1751,7 +1751,7 @@ namespace mx {
 		CHAR szTemp[64];
 		for ( size_t I = 0; I < _vDataDirs.size(); ++I ) {
 			swsTemp = mx::CStringDecoder::DecodeToWString( aTable[I].pcName, aTable[I].ui32StrLen );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( aTable[I].pcDescName, aTable[I].ui32DescStrLen ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1774,7 +1774,7 @@ namespace mx {
 	}
 
 	// Decodes a data directory.
-	bool CPeWorksWindow::AddDataDirectory( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const MX_DATA_DIRECTORY &_ddDir, const mx::CPeObject &_poPeObject, uint64_t _uiImageBase, uint64_t _uiStructOffset ) {
+	bool CPeWorksWindow::AddDataDirectory( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const MX_DATA_DIRECTORY &_ddDir, const mx::CPeObject &_poPeObject, uint64_t _uiImageBase, uint64_t _uiStructOffset ) {
 #define MW_STANDARD_DATA_PRINT( STRUCTMEMBER )																			\
 	MX_PRINT_FILE_OFFSET( wValue, _uiStructOffset, _vDataDirs[I].STRUCTMEMBER, swsTemp );									\
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }										\
@@ -1791,7 +1791,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_823DF0EC_VirtualAddress );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			//if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_212336AA_The_number_of_bytes_to_commit_for_the_local_heap_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1809,7 +1809,7 @@ namespace mx {
 		{
 			CHAR szBuffer[32];
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_57F28B54_Size );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			//if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_212336AA_The_number_of_bytes_to_commit_for_the_local_heap_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1859,7 +1859,7 @@ namespace mx {
 	}
 
 	// Decodes an array of MX_IMAGE_SECTION_HEADER objects.
-	bool CPeWorksWindow::AddSectionHeaders( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const std::vector<MX_IMAGE_SECTION_HEADER> &_vHeaders, uint64_t _uiImageBase, uint64_t _uiStructOffset ) {
+	bool CPeWorksWindow::AddSectionHeaders( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const std::vector<MX_IMAGE_SECTION_HEADER> &_vHeaders, uint64_t _uiImageBase, uint64_t _uiStructOffset ) {
 		CSecureWString swsTemp;
 		CSecureString ssCString;
 		CSecureString ssRaw;
@@ -1871,7 +1871,7 @@ namespace mx {
 			std::memcpy( szTemp, _vHeaders[I].Name, 8 );
 			swsTemp.SecureClear();
 			swsTemp = ee::StringToWString( szTemp );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 
 			AddSectionHeader( _tlTree, hItem, _vHeaders[I], _uiImageBase, _uiStructOffset );
@@ -1892,7 +1892,7 @@ namespace mx {
 	}
 
 	// Decodes an MX_IMAGE_SECTION_HEADER object.
-	bool CPeWorksWindow::AddSectionHeader( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const MX_IMAGE_SECTION_HEADER &_ishHeader, uint64_t _uiImageBase, uint64_t _uiStructOffset ) {
+	bool CPeWorksWindow::AddSectionHeader( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const MX_IMAGE_SECTION_HEADER &_ishHeader, uint64_t _uiImageBase, uint64_t _uiStructOffset ) {
 #define MW_STANDARD_DATA_PRINT( STRUCTMEMBER )																			\
 	MX_PRINT_FILE_OFFSET( wValue, _uiStructOffset, _ishHeader.STRUCTMEMBER, swsTemp );									\
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }										\
@@ -1910,7 +1910,7 @@ namespace mx {
 		{
 
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_FE11D138_Name );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_E9729511_Name_of_the_section_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1930,7 +1930,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_82590091_PhysicalAddress_VirtualSize );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_687D994E_A_physical_address_or_the_total_size_of_the_section_when_loaded_into_memory__in_bytes_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1950,7 +1950,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_823DF0EC_VirtualAddress );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_52747794_The_address_of_the_first_byte_of_the_section_when_loaded_into_memory__relative_to_the_image_base_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1973,7 +1973,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_22B670F2_SizeOfRawData );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_35B4F3B3_The_size_of_the_initialized_data_on_disk__in_bytes_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -1995,7 +1995,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_26594F0E_PointerToRawData );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_BEFD1219_A_file_pointer_to_the_first_page_within_the_COFF_file_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2011,7 +2011,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_DB18CB2C_PointerToRelocations );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_1951565D_A_file_pointer_to_the_beginning_of_the_relocation_entries_for_the_section_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2027,7 +2027,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_2A137B15_PointerToLinenumbers );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_8F6E3689_A_file_pointer_to_the_beginning_of_the_line_number_entries_for_the_section_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2043,7 +2043,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_308C6EB5_NumberOfRelocations );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_A0244534_The_number_of_relocation_entries_for_the_section_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2052,7 +2052,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_C187DE8C_NumberOfLinenumbers );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_BBB99A66_The_number_of_line_number_entries_for_the_section_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2061,7 +2061,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_F8F28FC8_Characteristics );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_96C80FB7_The_characteristics_of_the_image_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2087,11 +2087,11 @@ namespace mx {
 	}
 
 	// Decodes exports.
-	bool CPeWorksWindow::AddExports( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const mx::CPeObject &_poPeObject ) {
+	bool CPeWorksWindow::AddExports( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const mx::CPeObject &_poPeObject ) {
 		if ( _poPeObject.ExportDescriptor() ) {
 			CSecureWString swsTemp;
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_9B9AAE5F_Export_Description );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _poPeObject.ExportDescriptorOffset(), _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _poPeObject.ExportDescriptorOffset(), _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_903B70B6_Export_descriptor_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2102,7 +2102,7 @@ namespace mx {
 	}
 
 	// Decodes an MX_IMAGE_EXPORT_DIRECTORY object.
-	bool CPeWorksWindow::AddExportDesc( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const mx::CPeObject &_poPeObject ) {
+	bool CPeWorksWindow::AddExportDesc( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const mx::CPeObject &_poPeObject ) {
 #define MW_STANDARD_DATA_PRINT( STRUCTMEMBER )																									\
 	MX_PRINT_FILE_OFFSET( wValue, uiOffset, _poPeObject.ExportDescriptor()->STRUCTMEMBER, swsTemp );											\
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }																\
@@ -2120,7 +2120,7 @@ namespace mx {
 		uint64_t uiOffset = _poPeObject.ExportDescriptorOffset();
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_F8F28FC8_Characteristics );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_059CBD2E_Unused_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2129,7 +2129,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_52BE8619_TimeDateStamp );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_EE98A75B_32_bit_time_at_which_this_header_was_generated__DD_MM_YYYY_HH_MM_SS__ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2146,7 +2146,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_02E44089_MajorVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_059CBD2E_Unused_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2155,7 +2155,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_B1CC01B6_MinorVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_059CBD2E_Unused_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2164,7 +2164,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_FE11D138_Name );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_FB9A87C7_Name_of_this_DLL_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2188,7 +2188,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_6086515F_Base );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_8132044F_The_starting_ordinal_number_for_exported_functions_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2197,7 +2197,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_C6812A82_NumberOfFunctions );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_6FDEC421_The_number_of_elements_in_the_AddressOfFunctions_array_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2206,7 +2206,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_DB1B0887_NumberOfNames );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_D53E6B35_The_number_of_elements_in_the_AddressOfNames_array_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2215,7 +2215,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_930A5325_AddressOfFunctions );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_E6E545BC_Points_to_an_array_of_function_addresses_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2232,7 +2232,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_0B5CBD14_AddressOfNames );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_2E242588_Points_to_an_array_of_function_names_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2249,7 +2249,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_BE313889_AddressOfNameOrdinals );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_018C0EF7_Points_to_an_array_of_function_ordinals_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2269,7 +2269,7 @@ namespace mx {
 	}
 
 	// Decodes an MX_IMAGE_IMPORT_DESCRIPTOR object.
-	bool CPeWorksWindow::AddImportDesc( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const MX_IMAGE_IMPORT_DESCRIPTOR &_iidDesc, const mx::CPeObject &_poPeObject, uint64_t _uiStructOffset ) {
+	bool CPeWorksWindow::AddImportDesc( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const MX_IMAGE_IMPORT_DESCRIPTOR &_iidDesc, const mx::CPeObject &_poPeObject, uint64_t _uiStructOffset ) {
 #define MW_STANDARD_DATA_PRINT( STRUCTMEMBER )																									\
 	MX_PRINT_FILE_OFFSET( wValue, uiOffset, _poPeObject.ExportDescriptor()->STRUCTMEMBER, swsTemp );											\
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }																\
@@ -2286,7 +2286,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_F8F28FC8_Characteristics );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_394E2D11_A_pointer_to_a_table_of_imported_functions_from_this_library_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2309,7 +2309,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_52BE8619_TimeDateStamp );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_8A8664AD_32_bit_time_at_which_the_file_was_generated__DD_MM_YYYY_HH_MM_SS__ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2326,7 +2326,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_C37FB7F7_ForwarderChain );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_E6BA1924_Index_into_FirstThunk_of_a_forwarded_function_or_0xFFFFFFFF_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2343,7 +2343,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_FE11D138_Name );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_AD65E47E_Relative_virtual_address_to_the_name_of_this_DLL_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2378,7 +2378,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_638DD947_FirstThunk );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_8499D0FF_Relative_virtual_address_to_an_IMAGE_THUNK_DATA_union_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2405,7 +2405,7 @@ namespace mx {
 	}
 
 	// Decodes an MX_IMAGE_IMPORT_DESCRIPTOR object.
-	bool CPeWorksWindow::AddResourceDesc( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const MX_IMAGE_RESOURCE_DIRECTORY &_irdDesc, const mx::CPeObject &_poPeObject, uint64_t _uiStructOffset ) {
+	bool CPeWorksWindow::AddResourceDesc( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const MX_IMAGE_RESOURCE_DIRECTORY &_irdDesc, const mx::CPeObject &_poPeObject, uint64_t _uiStructOffset ) {
 #define MW_STANDARD_DATA_PRINT( STRUCTMEMBER )																									\
 	MX_PRINT_FILE_OFFSET( wValue, _uiStructOffset, _irdDesc.STRUCTMEMBER, swsTemp );															\
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }																\
@@ -2422,7 +2422,7 @@ namespace mx {
 		
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_F8F28FC8_Characteristics );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_059CBD2E_Unused_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2431,7 +2431,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_52BE8619_TimeDateStamp );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_3FBE666B_32_bit_time_at_which_this_file_was_generated__DD_MM_YYYY_HH_MM_SS__ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2448,7 +2448,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_02E44089_MajorVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_3F42F050_Major_version_of_the_resource_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2457,7 +2457,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_B1CC01B6_MinorVersion );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_9749C186_Minor_version_of_the_resource_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2466,7 +2466,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_D3BC7C71_NumberOfNamedEntries );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_2544B610_Number_of_entries_with_names_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2475,7 +2475,7 @@ namespace mx {
 
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_B86CDFB9_NumberOfIdEntries );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_48C20C6B_Number_of_entries_with_ID_values_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2487,7 +2487,7 @@ namespace mx {
 	}
 
 	// Decodes the relocation table.
-	bool CPeWorksWindow::AddReloc( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const std::vector<CPeObject::MX_BASE_RELOC> &_vRelocs, const mx::CPeObject &_poPeObject ) {
+	bool CPeWorksWindow::AddReloc( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const std::vector<CPeObject::MX_BASE_RELOC> &_vRelocs, const mx::CPeObject &_poPeObject ) {
 #define MW_STANDARD_DATA_PRINT( STRUCTMEMBER )																									\
 	MX_PRINT_FILE_OFFSET( wValue, uiOffset, _vRelocs[I].pibrReloc->STRUCTMEMBER, swsTemp );														\
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }																\
@@ -2507,7 +2507,7 @@ namespace mx {
 			{
 				uiOffset = _vRelocs[I].ui64FileOffset;
 				swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_823DF0EC_VirtualAddress );
-				TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
+				TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
 				HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 				if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_70039ABB_Virtual_address_of_the_start_of_the_chunk_of_relocation_offsets_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2528,7 +2528,7 @@ namespace mx {
 				int iLen = ::wsprintf( swzTemp, _DEC_WS_31984B07_SizeOfBlock___u_relocations_.c_str(), _vRelocs[I].uiTotal );
 				swsTemp = swzTemp;
 				ZeroMemory( swzTemp, sizeof( swzTemp[0] ) * iLen );
-				TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
+				TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
 				HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 				if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_D862F717_Size_of_the_chunk_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2543,14 +2543,14 @@ namespace mx {
 	}
 
 	// Decodes the relocation offsets.
-	bool CPeWorksWindow::AddReloc( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const CPeObject::MX_BASE_RELOC &_brRelocs, const mx::CPeObject &_poPeObject, uint64_t _uiStructOffset ) {
+	bool CPeWorksWindow::AddReloc( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const CPeObject::MX_BASE_RELOC &_brRelocs, const mx::CPeObject &_poPeObject, uint64_t _uiStructOffset ) {
 		WCHAR wValue[64];
 		CSecureWString swsTemp;
 		CSecureString ssCString;
 		CSecureString ssRaw;
 		for ( uint32_t I = 0; I < _brRelocs.uiTotal; ++I ) {
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_95CFA75D_TypeOffset );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_D2C02962_Type_and_offset_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2574,7 +2574,7 @@ namespace mx {
 	}
 
 	// Decodes exported functions.
-	bool CPeWorksWindow::AddExportedFunctions( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const mx::CPeObject &_poPeObject ) {
+	bool CPeWorksWindow::AddExportedFunctions( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const mx::CPeObject &_poPeObject ) {
 		std::vector<CPeObject::MX_EXPORT> vList;
 		_poPeObject.GetExports( vList );
 
@@ -2585,7 +2585,7 @@ namespace mx {
 				swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_23932DDC_Exports );
 				swsTemp += L" (" + std::to_wstring( vList.size() ) + L")";
 
-				TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+				TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 				HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 				if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_70039ABB_Virtual_address_of_the_start_of_the_chunk_of_relocation_offsets_ ).c_str(), MW_PE_DESC ) ) { return false; }
 				if ( !AddExportedFunctions( _tlTree, hItem, _poPeObject, vList ) ) { return false; }
@@ -2596,7 +2596,7 @@ namespace mx {
 	}
 
 	// Decodes exported functions.
-	bool CPeWorksWindow::AddExportedFunctions( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const mx::CPeObject &_poPeObject, const std::vector<CPeObject::MX_EXPORT> &_vList ) {
+	bool CPeWorksWindow::AddExportedFunctions( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const mx::CPeObject &_poPeObject, const std::vector<CPeObject::MX_EXPORT> &_vList ) {
 		WCHAR wValue[64];
 		CSecureWString swsTemp;
 		CSecureString ssCString;
@@ -2604,7 +2604,7 @@ namespace mx {
 
 		for ( size_t I = 0; I < _vList.size(); ++I ) {
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_9E965BE5_Address__Ordinal__Name );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 
 			CHAR szHex0[32], szU0[32];
@@ -2640,11 +2640,11 @@ namespace mx {
 	}
 
 	// Decodes all imports.
-	bool CPeWorksWindow::AddImportedFuncs( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const mx::CPeObject &_poPeObject ) {
+	bool CPeWorksWindow::AddImportedFuncs( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const mx::CPeObject &_poPeObject ) {
 		if ( _poPeObject.ImportDescriptor().size() > 1 ) {
 			CSecureWString swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_B728D480_Imports );
 			swsTemp += L" (" + std::to_wstring( _poPeObject.ImportDescriptor().size() ) + L")";
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_F799DAB6_Function_imports_ ).c_str(), MW_PE_DESC ) ) { return false; }
 			for ( size_t I = 0; I < _poPeObject.ImportDescriptor().size() - 1; ++I ) {
@@ -2656,7 +2656,7 @@ namespace mx {
 	}
 
 	// Decodes imports from a given import directory.
-	bool CPeWorksWindow::AddImportedFuncs( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, uint32_t _uiImportDir, const mx::CPeObject &_poPeObject ) {
+	bool CPeWorksWindow::AddImportedFuncs( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, uint32_t _uiImportDir, const mx::CPeObject &_poPeObject ) {
 		if ( _uiImportDir == _poPeObject.ImportDescriptor().size() - 1 ) { return true; }
 		{
 			std::vector<CPeObject::MX_IMPORT> vImports;
@@ -2668,7 +2668,7 @@ namespace mx {
 			CUtilities::ToUnsigned( vImports.size(), ssTemp );
 			ssTemp += " functions)";
 			CSecureWString swsTemp = ee::StringToWString( ssTemp );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			
 			for ( size_t I = 0; I < vImports.size(); ++I ) {
@@ -2679,11 +2679,11 @@ namespace mx {
 	}
 
 	// Decodes an import.
-	bool CPeWorksWindow::AddImport( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const CPeObject::MX_IMPORT &_iImport, const mx::CPeObject &_poPeObject ) {
+	bool CPeWorksWindow::AddImport( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const CPeObject::MX_IMPORT &_iImport, const mx::CPeObject &_poPeObject ) {
 		uint64_t uiOffset = _iImport.ui64FileOffset;
 		{
 			CSecureWString swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_3A0BEF98_Ordinal__Name );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 
 			WCHAR wValue[64];
@@ -2718,7 +2718,7 @@ namespace mx {
 	}
 
 	// Decodes the resource tree.
-	bool CPeWorksWindow::AddResourceTree( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const mx::CPeObject &_poPeObject ) {
+	bool CPeWorksWindow::AddResourceTree( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const mx::CPeObject &_poPeObject ) {
 		if ( !_poPeObject.ResourceDescriptor() ) { return true; }
 		uint32_t uiOffset;
 		uint32_t uiIndex = _poPeObject.RelocAddrToRelocIndexAndOffset( _poPeObject.DataDirectory()[MX_IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress, uiOffset );
@@ -2726,7 +2726,7 @@ namespace mx {
 	}
 
 	// Decodes the resource tree.
-	bool CPeWorksWindow::AddResourceTree( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const MX_IMAGE_RESOURCE_DIRECTORY * _pirdDesc, uint32_t _uiSectionIndex, const mx::CPeObject &_poPeObject, uint32_t _uiLevel ) {
+	bool CPeWorksWindow::AddResourceTree( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const MX_IMAGE_RESOURCE_DIRECTORY * _pirdDesc, uint32_t _uiSectionIndex, const mx::CPeObject &_poPeObject, uint32_t _uiLevel ) {
 		uint32_t uiTotal = _pirdDesc->NumberOfNamedEntries + _pirdDesc->NumberOfIdEntries;
 
 		const MX_IMAGE_RESOURCE_DIRECTORY_ENTRY * pirdeEntry = reinterpret_cast<const MX_IMAGE_RESOURCE_DIRECTORY_ENTRY *>(_pirdDesc + 1);
@@ -2744,7 +2744,7 @@ namespace mx {
 	}
 
 	// Decodes the resource tree.
-	bool CPeWorksWindow::AddResourceTree( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const MX_IMAGE_RESOURCE_DIRECTORY_ENTRY * _pirdeEntry, uint32_t _uiSectionIndex, const mx::CPeObject &_poPeObject, uint32_t _uiLevel ) {
+	bool CPeWorksWindow::AddResourceTree( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const MX_IMAGE_RESOURCE_DIRECTORY_ENTRY * _pirdeEntry, uint32_t _uiSectionIndex, const mx::CPeObject &_poPeObject, uint32_t _uiLevel ) {
 #define MW_STANDARD_DATA_PRINT( STRUCTMEMBER )																									\
 	MX_PRINT_FILE_OFFSET( wValue, uiOffset, pirdResDir->STRUCTMEMBER, swsTemp );																\
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }																\
@@ -2765,7 +2765,7 @@ namespace mx {
 		CSecureString ssRaw;
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_D531786A_NameId__Data );
-			TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
+			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
 			hItem = _tlTree.InsertItem( &isInsertMe );
 			if ( !_tlTree.SetItemText( hItem, ((_pirdeEntry->NameId & 0x80000000) ?
 				mx::CStringDecoder::DecodeToWString( _T_LEN_BA1310C1_Name_and_data_ ) :
@@ -2828,7 +2828,7 @@ namespace mx {
 
 				{
 					swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_B4404A69_OffsetToData );
-					TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
+					TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), uiOffset, _tiParent );
 					HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 					if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_805143DD_Data_pointer_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2846,7 +2846,7 @@ namespace mx {
 
 				{
 					swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_57F28B54_Size );
-					TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), sOffset, _tiParent );
+					TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), sOffset, _tiParent );
 					HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 					if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_469DC0E0_Size_of_the_resource_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2855,7 +2855,7 @@ namespace mx {
 
 				{
 					swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_6CD26DB4_Code_page_ );
-					TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), sOffset, _tiParent );
+					TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), sOffset, _tiParent );
 					HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 					
 					MX_PRINT_FILE_OFFSET( wValue, uiOffset, pirdResDir->OffsetToData, swsTemp );
@@ -2885,7 +2885,7 @@ namespace mx {
 
 				{
 					swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_B4D48994_Reserved );
-					TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), sOffset, _tiParent );
+					TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), sOffset, _tiParent );
 					HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 					if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_F9026196_Reserved_ ).c_str(), MW_PE_DESC ) ) { return false; }
 
@@ -2900,7 +2900,7 @@ namespace mx {
 	}
 
 	// Decodes an RT_VERSION resource.
-	bool CPeWorksWindow::DecodeVersion( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const CPeObject::MX_EXTRACTED_RESOURCE &_erResource, const mx::CPeObject &_poPeObject ) {
+	bool CPeWorksWindow::DecodeVersion( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const CPeObject::MX_EXTRACTED_RESOURCE &_erResource, const mx::CPeObject &_poPeObject ) {
 		CSecureWString swsTemp;
 		
 		// Print version information.
@@ -2911,7 +2911,7 @@ namespace mx {
 		if ( _erResource.vResourceData.size() ) {
 			{
 				swsTemp = CreateResourceNameString( _erResource, _poPeObject );
-				TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+				TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 				_tiParent = _tlTree.InsertItem( &isInsertMe );
 				//if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_805143DD_Data_pointer_ ).c_str(), MW_PE_DESC ) ) { return false; }
 			}
@@ -2931,7 +2931,7 @@ namespace mx {
 						swsTemp.c_str(),
 						reinterpret_cast<LPVOID *>(&pwcResult),
 						&uiFinalLen ) ) {
-						TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+						TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 						HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 						if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_5E06B2C2_Additional_information_that_should_be_displayed_for_diagnostic_purposes_ ).c_str(), MW_PE_DESC ) ) { return false; }
 						if ( !_tlTree.SetItemText( hItem, pwcResult, MW_PE_VALUE ) ) { return false; }
@@ -2942,7 +2942,7 @@ namespace mx {
 						swsTemp.c_str(),
 						reinterpret_cast<LPVOID *>(&pwcResult),
 						&uiFinalLen ) ) {
-						TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+						TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 						HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 						if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_50BF2458_Company_that_produced_the_file___for_example____Microsoft_Corporation___or___Standard_Microsystems_Corporation__Inc____This_string_is_required_ ).c_str(), MW_PE_DESC ) ) { return false; }
 						if ( !_tlTree.SetItemText( hItem, pwcResult, MW_PE_VALUE ) ) { return false; }
@@ -2953,7 +2953,7 @@ namespace mx {
 						swsTemp.c_str(),
 						reinterpret_cast<LPVOID *>(&pwcResult),
 						&uiFinalLen ) ) {
-						TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+						TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 						HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 						if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_56BE8472_File_description_to_be_presented_to_users__This_string_may_be_displayed_in_a_list_box_when_the_user_is_choosing_files_to_install___for_example____Keyboard_Driver_for_AT_Style_Keyboards____This_string_is_required_ ).c_str(), MW_PE_DESC ) ) { return false; }
 						if ( !_tlTree.SetItemText( hItem, pwcResult, MW_PE_VALUE ) ) { return false; }
@@ -2964,7 +2964,7 @@ namespace mx {
 						swsTemp.c_str(),
 						reinterpret_cast<LPVOID *>(&pwcResult),
 						&uiFinalLen ) ) {
-						TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+						TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 						HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 						if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_C2754D48_Version_number_of_the_file___for_example____3_10___or___5_00_RC2____This_string_is_required_ ).c_str(), MW_PE_DESC ) ) { return false; }
 						if ( !_tlTree.SetItemText( hItem, pwcResult, MW_PE_VALUE ) ) { return false; }
@@ -2975,7 +2975,7 @@ namespace mx {
 						swsTemp.c_str(),
 						reinterpret_cast<LPVOID *>(&pwcResult),
 						&uiFinalLen ) ) {
-						TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+						TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 						HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 						if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_3851A6C7_Internal_name_of_the_file__if_one_exists___for_example__a_module_name_if_the_file_is_a_dynamic_link_library__If_the_file_has_no_internal_name__this_string_should_be_the_original_filename__without_extension__This_string_is_required_ ).c_str(), MW_PE_DESC ) ) { return false; }
 						if ( !_tlTree.SetItemText( hItem, pwcResult, MW_PE_VALUE ) ) { return false; }
@@ -2986,7 +2986,7 @@ namespace mx {
 						swsTemp.c_str(),
 						reinterpret_cast<LPVOID *>(&pwcResult),
 						&uiFinalLen ) ) {
-						TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+						TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 						HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 						if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_0D1FCEC4_Copyright_notices_that_apply_to_the_file__This_should_include_the_full_text_of_all_notices__legal_symbols__copyright_dates__and_so_on__This_string_is_optional_ ).c_str(), MW_PE_DESC ) ) { return false; }
 						if ( !_tlTree.SetItemText( hItem, pwcResult, MW_PE_VALUE ) ) { return false; }
@@ -2997,7 +2997,7 @@ namespace mx {
 						swsTemp.c_str(),
 						reinterpret_cast<LPVOID *>(&pwcResult),
 						&uiFinalLen ) ) {
-						TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+						TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 						HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 						if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_5BD3D97F_Trademarks_and_registered_trademarks_that_apply_to_the_file__This_should_include_the_full_text_of_all_notices__legal_symbols__trademark_numbers__and_so_on__This_string_is_optional_ ).c_str(), MW_PE_DESC ) ) { return false; }
 						if ( !_tlTree.SetItemText( hItem, pwcResult, MW_PE_VALUE ) ) { return false; }
@@ -3008,7 +3008,7 @@ namespace mx {
 						swsTemp.c_str(),
 						reinterpret_cast<LPVOID *>(&pwcResult),
 						&uiFinalLen ) ) {
-						TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+						TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 						HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 						if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_5572F2DA_Original_name_of_the_file__not_including_a_path__This_information_enables_an_application_to_determine_whether_a_file_has_been_renamed_by_a_user__The_format_of_the_name_depends_on_the_file_system_for_which_the_file_was_created__This_string_is_required_ ).c_str(), MW_PE_DESC ) ) { return false; }
 						if ( !_tlTree.SetItemText( hItem, pwcResult, MW_PE_VALUE ) ) { return false; }
@@ -3019,7 +3019,7 @@ namespace mx {
 						swsTemp.c_str(),
 						reinterpret_cast<LPVOID *>(&pwcResult),
 						&uiFinalLen ) ) {
-						TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+						TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 						HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 						if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_4F883DC5_Information_about_a_private_version_of_the_file___for_example____Built_by_TESTER1_on___TESTBED____This_string_should_be_present_only_if_VS_FF_PRIVATEBUILD_is_specified_in_the_fileflags_parameter_of_the_root_block_ ).c_str(), MW_PE_DESC ) ) { return false; }
 						if ( !_tlTree.SetItemText( hItem, pwcResult, MW_PE_VALUE ) ) { return false; }
@@ -3030,7 +3030,7 @@ namespace mx {
 						swsTemp.c_str(),
 						reinterpret_cast<LPVOID *>(&pwcResult),
 						&uiFinalLen ) ) {
-						TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+						TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 						HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 						if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_580B70A2_Name_of_the_product_with_which_the_file_is_distributed__This_string_is_required_ ).c_str(), MW_PE_DESC ) ) { return false; }
 						if ( !_tlTree.SetItemText( hItem, pwcResult, MW_PE_VALUE ) ) { return false; }
@@ -3041,7 +3041,7 @@ namespace mx {
 						swsTemp.c_str(),
 						reinterpret_cast<LPVOID *>(&pwcResult),
 						&uiFinalLen ) ) {
-						TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+						TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 						HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 						if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_8CF8F15D_Version_of_the_product_with_which_the_file_is_distributed___for_example____3_10___or___5_00_RC2____This_string_is_required_ ).c_str(), MW_PE_DESC ) ) { return false; }
 						if ( !_tlTree.SetItemText( hItem, pwcResult, MW_PE_VALUE ) ) { return false; }
@@ -3052,7 +3052,7 @@ namespace mx {
 						swsTemp.c_str(),
 						reinterpret_cast<LPVOID *>(&pwcResult),
 						&uiFinalLen ) ) {
-						TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+						TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 						HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 						if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_1BF0CE20_Text_that_specifies_how_this_version_of_the_file_differs_from_the_standard_version___for_example____Private_build_for_TESTER1_solving_mouse_problems_on_M250_and_M250E_computers____This_string_should_be_present_only_if_VS_FF_SPECIALBUILD_is_specified_in_the_fileflags_parameter_of_the_root_block_ ).c_str(), MW_PE_DESC ) ) { return false; }
 						if ( !_tlTree.SetItemText( hItem, pwcResult, MW_PE_VALUE ) ) { return false; }
@@ -3084,12 +3084,12 @@ namespace mx {
 	}
 
 	// Decodes an RT_MANIFEST resource.
-	bool CPeWorksWindow::DecodeManifest( lsw::CTreeList &_tlTree, HTREEITEM _tiParent, const CPeObject::MX_EXTRACTED_RESOURCE &_erResource, const mx::CPeObject &_poPeObject ) {
+	bool CPeWorksWindow::DecodeManifest( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const CPeObject::MX_EXTRACTED_RESOURCE &_erResource, const mx::CPeObject &_poPeObject ) {
 		if ( _erResource.vResourceData.size() ) {
 			CSecureWString swsTemp;
 			{
 				swsTemp = CreateResourceNameString( _erResource, _poPeObject );
-				TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+				TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 				_tiParent = _tlTree.InsertItem( &isInsertMe );
 				//if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_805143DD_Data_pointer_ ).c_str(), MW_PE_DESC ) ) { return false; }
 			}
@@ -3097,7 +3097,7 @@ namespace mx {
 			std::vector<CSecureString> vLines = CUtilities::StringToLines( std::string( reinterpret_cast<const char *>(&_erResource.vResourceData[0]), _erResource.vResourceData.size() ) );
 			for ( size_t I = 0; I < vLines.size(); ++I ) {
 
-				TVINSERTSTRUCTW isInsertMe = lsw::CTreeList::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+				TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 				HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 				//if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_50BF2458_Company_that_produced_the_file___for_example____Microsoft_Corporation___or___Standard_Microsystems_Corporation__Inc____This_string_is_required_ ).c_str(), MW_PE_DESC ) ) { return false; }
 				if ( !_tlTree.SetItemText( hItem, ee::StringToWString( vLines[I] ).c_str(), MW_PE_VALUE ) ) { return false; }

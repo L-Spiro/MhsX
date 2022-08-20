@@ -40,6 +40,11 @@ namespace lsw {
 			::MapWindowPoints( _hWnd, HWND_DESKTOP, reinterpret_cast<POINT *>(&rTemp), 2 );
 			return rTemp;
 		}
+		LSW_RECT							MapWindowPoints( HWND _hFrom, HWND _hTo ) const {
+			LSW_RECT rTemp = (*this);
+			::MapWindowPoints( _hFrom, _hTo, reinterpret_cast<POINT *>(&rTemp), 2 );
+			return rTemp;
+		}
 		VOID								MoveBy( const POINT _pMove ) { MoveBy( _pMove.x, _pMove.y ); }
 		VOID								MoveBy( INT _iX, INT _iY ) {
 			left += _iX;

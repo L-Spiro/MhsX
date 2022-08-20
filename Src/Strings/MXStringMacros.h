@@ -16759,3 +16759,66 @@
 #define _DEC_S_612B8F87_Use____0o____Prefix_for_Octadecimal_Numbers__0o_____vs__0_____ mx::CStringDecoder::DecodeToString( _T_612B8F87_Use____0o____Prefix_for_Octadecimal_Numbers__0o_____vs__0_____, _LEN_612B8F87 )
 #define _DEC_WS_612B8F87_Use____0o____Prefix_for_Octadecimal_Numbers__0o_____vs__0_____ mx::CStringDecoder::DecodeToWString( _T_612B8F87_Use____0o____Prefix_for_Octadecimal_Numbers__0o_____vs__0_____, _LEN_612B8F87 )
 
+// Quick String Replace
+
+#define _T_BFF9F43A_Quick_String_Replace "\xD9\x43\x39\xFE\xFD\xE9\xE1\x3B\x42\x31\x37\x35\xB2\xED\x2C\xF8\x3A\x31\xFE\xF7"
+#define _LEN_BFF9F43A 20
+#define _T_LEN_BFF9F43A_Quick_String_Replace _T_BFF9F43A_Quick_String_Replace, _LEN_BFF9F43A
+#define _DEC_BFF9F43A_Quick_String_Replace( STR ) mx::CStringDecoder::Decode( _T_BFF9F43A_Quick_String_Replace, _LEN_BFF9F43A, STR )
+#define _DEC_S_BFF9F43A_Quick_String_Replace mx::CStringDecoder::DecodeToString( _T_BFF9F43A_Quick_String_Replace, _LEN_BFF9F43A )
+#define _DEC_WS_BFF9F43A_Quick_String_Replace mx::CStringDecoder::DecodeToWString( _T_BFF9F43A_Quick_String_Replace, _LEN_BFF9F43A )
+
+// String Operations
+
+#define _T_FDE4562A_String_Operations "\xDB\x42\x42\x04\x00\x30\xAE\x16\x40\x2D\x3B\x2F\x06\x04\x36\xF6\x41"
+#define _LEN_FDE4562A 17
+#define _T_LEN_FDE4562A_String_Operations _T_FDE4562A_String_Operations, _LEN_FDE4562A
+#define _DEC_FDE4562A_String_Operations( STR ) mx::CStringDecoder::Decode( _T_FDE4562A_String_Operations, _LEN_FDE4562A, STR )
+#define _DEC_S_FDE4562A_String_Operations mx::CStringDecoder::DecodeToString( _T_FDE4562A_String_Operations, _LEN_FDE4562A )
+#define _DEC_WS_FDE4562A_String_Operations mx::CStringDecoder::DecodeToWString( _T_FDE4562A_String_Operations, _LEN_FDE4562A )
+
+// Add
+
+#define _T_C5573507_Add "\xC9\x32\x34"
+#define _LEN_C5573507 3
+#define _T_LEN_C5573507_Add _T_C5573507_Add, _LEN_C5573507
+#define _DEC_C5573507_Add( STR ) mx::CStringDecoder::Decode( _T_C5573507_Add, _LEN_C5573507, STR )
+#define _DEC_S_C5573507_Add mx::CStringDecoder::DecodeToString( _T_C5573507_Add, _LEN_C5573507 )
+#define _DEC_WS_C5573507_Add mx::CStringDecoder::DecodeToWString( _T_C5573507_Add, _LEN_C5573507 )
+
+// Update
+
+#define _T_9F89304E_Update "\xDD\x3E\x34\xFC\x06\x2E"
+#define _LEN_9F89304E 6
+#define _T_LEN_9F89304E_Update _T_9F89304E_Update, _LEN_9F89304E
+#define _DEC_9F89304E_Update( STR ) mx::CStringDecoder::Decode( _T_9F89304E_Update, _LEN_9F89304E, STR )
+#define _DEC_S_9F89304E_Update mx::CStringDecoder::DecodeToString( _T_9F89304E_Update, _LEN_9F89304E )
+#define _DEC_WS_9F89304E_Update mx::CStringDecoder::DecodeToWString( _T_9F89304E_Update, _LEN_9F89304E )
+
+// ??::P::CL+(((??::P::CW-((4+9)*2)-(395+4))*1/3)+(4+9)+(395+4))
+
+#define _T_F5B4F45C_____P__CL________P__CW___4_9__2___395_4___1_3___4_9___395_4__ "\xC7\x0D\x0A\xD5\xE2\x03\xC8\x0A\x1C\xF3\xF1\xF6\xBA\xDA\x06\xC2\x08\x20\xD5\xCC\x0C\xE5\xF4\xF8\xF0\xFD\xF9\xCB\xC4\xF1\xBA\xF7\xFD\xC3\xC5\x02\xC3\xF2\x04\xF1\xF2\xF8\xC3\xCA\xFA\xB1\xF9\xF8\xCF\xBD\x02\xB7\xF2\xF8\xFB\x02\x03\xBD\xCF\xF0\xB1"
+#define _LEN_F5B4F45C 61
+#define _T_LEN_F5B4F45C_____P__CL________P__CW___4_9__2___395_4___1_3___4_9___395_4__ _T_F5B4F45C_____P__CL________P__CW___4_9__2___395_4___1_3___4_9___395_4__, _LEN_F5B4F45C
+#define _DEC_F5B4F45C_____P__CL________P__CW___4_9__2___395_4___1_3___4_9___395_4__( STR ) mx::CStringDecoder::Decode( _T_F5B4F45C_____P__CL________P__CW___4_9__2___395_4___1_3___4_9___395_4__, _LEN_F5B4F45C, STR )
+#define _DEC_S_F5B4F45C_____P__CL________P__CW___4_9__2___395_4___1_3___4_9___395_4__ mx::CStringDecoder::DecodeToString( _T_F5B4F45C_____P__CL________P__CW___4_9__2___395_4___1_3___4_9___395_4__, _LEN_F5B4F45C )
+#define _DEC_WS_F5B4F45C_____P__CL________P__CW___4_9__2___395_4___1_3___4_9___395_4__ mx::CStringDecoder::DecodeToWString( _T_F5B4F45C_____P__CL________P__CW___4_9__2___395_4___1_3___4_9___395_4__, _LEN_F5B4F45C )
+
+// ??::P::CL+(((??::P::CW-((4+9)*2)-(395+4))*2/3)+(4+9)+(395+4))
+
+#define _T_56E272F5_____P__CL________P__CW___4_9__2___395_4___2_3___4_9___395_4__ "\xC7\x0D\x0A\xD5\xE2\x03\xC8\x0A\x1C\xF3\xF1\xF6\xBA\xDA\x06\xC2\x08\x20\xD5\xCC\x0C\xE5\xF4\xF8\xF0\xFD\xF9\xCB\xC4\xF1\xBA\xF7\xFD\xC3\xC5\x02\xC3\xF2\x04\xF1\xF2\xF8\xC4\xCA\xFA\xB1\xF9\xF8\xCF\xBD\x02\xB7\xF2\xF8\xFB\x02\x03\xBD\xCF\xF0\xB1"
+#define _LEN_56E272F5 61
+#define _T_LEN_56E272F5_____P__CL________P__CW___4_9__2___395_4___2_3___4_9___395_4__ _T_56E272F5_____P__CL________P__CW___4_9__2___395_4___2_3___4_9___395_4__, _LEN_56E272F5
+#define _DEC_56E272F5_____P__CL________P__CW___4_9__2___395_4___2_3___4_9___395_4__( STR ) mx::CStringDecoder::Decode( _T_56E272F5_____P__CL________P__CW___4_9__2___395_4___2_3___4_9___395_4__, _LEN_56E272F5, STR )
+#define _DEC_S_56E272F5_____P__CL________P__CW___4_9__2___395_4___2_3___4_9___395_4__ mx::CStringDecoder::DecodeToString( _T_56E272F5_____P__CL________P__CW___4_9__2___395_4___2_3___4_9___395_4__, _LEN_56E272F5 )
+#define _DEC_WS_56E272F5_____P__CL________P__CW___4_9__2___395_4___2_3___4_9___395_4__ mx::CStringDecoder::DecodeToWString( _T_56E272F5_____P__CL________P__CW___4_9__2___395_4___2_3___4_9___395_4__, _LEN_56E272F5 )
+
+// ??::P::CL+(((??::P::CW-((4+9)*2)-(395+4))*1/2)+(4+9)+(395+4))
+
+#define _T_72123F1F_____P__CL________P__CW___4_9__2___395_4___1_2___4_9___395_4__ "\xC7\x0D\x0A\xD5\xE2\x03\xC8\x0A\x1C\xF3\xF1\xF6\xBA\xDA\x06\xC2\x08\x20\xD5\xCC\x0C\xE5\xF4\xF8\xF0\xFD\xF9\xCB\xC4\xF1\xBA\xF7\xFD\xC3\xC5\x02\xC3\xF2\x04\xF1\xF2\xF8\xC3\xCA\xF9\xB1\xF9\xF8\xCF\xBD\x02\xB7\xF2\xF8\xFB\x02\x03\xBD\xCF\xF0\xB1"
+#define _LEN_72123F1F 61
+#define _T_LEN_72123F1F_____P__CL________P__CW___4_9__2___395_4___1_2___4_9___395_4__ _T_72123F1F_____P__CL________P__CW___4_9__2___395_4___1_2___4_9___395_4__, _LEN_72123F1F
+#define _DEC_72123F1F_____P__CL________P__CW___4_9__2___395_4___1_2___4_9___395_4__( STR ) mx::CStringDecoder::Decode( _T_72123F1F_____P__CL________P__CW___4_9__2___395_4___1_2___4_9___395_4__, _LEN_72123F1F, STR )
+#define _DEC_S_72123F1F_____P__CL________P__CW___4_9__2___395_4___1_2___4_9___395_4__ mx::CStringDecoder::DecodeToString( _T_72123F1F_____P__CL________P__CW___4_9__2___395_4___1_2___4_9___395_4__, _LEN_72123F1F )
+#define _DEC_WS_72123F1F_____P__CL________P__CW___4_9__2___395_4___1_2___4_9___395_4__ mx::CStringDecoder::DecodeToWString( _T_72123F1F_____P__CL________P__CW___4_9__2___395_4___1_2___4_9___395_4__, _LEN_72123F1F )
+

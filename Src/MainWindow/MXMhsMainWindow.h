@@ -111,7 +111,7 @@ namespace mx {
 		CListView *							MainListView();
 
 		// Gets the list view.
-		CTreeList *							MainTreeView();
+		CTreeListView *						MainTreeView();
 
 		// Gets the list view.
 		const CListView *					MainListView() const;

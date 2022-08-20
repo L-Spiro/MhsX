@@ -279,6 +279,9 @@ namespace lsw {
 		// Returns true if this is a CTreeList class.
 		virtual bool						IsTreeList() const { return false; }
 
+		// Returns true if this is a CTreeListView class.
+		virtual bool						IsTreeListView() const { return false; }
+
 		// Returns true if this is a CProgressBar class.
 		virtual bool						IsProgressBar() const { return false; }
 
@@ -437,6 +440,9 @@ namespace lsw {
 
 		// WM_WINDOWPOSCHANGED.
 		virtual LSW_HANDLED					WindowPosChanged( const WINDOWPOS * _pwpPos ) { return LSW_H_CONTINUE; }
+
+		// WM_GETMINMAXINFO.
+		virtual LSW_HANDLED					GetMinMaxInfo( MINMAXINFO * _pmmiInfo ) { return LSW_H_CONTINUE; }
 
 		// WM_COMMAND from control.
 		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc ) { return LSW_H_CONTINUE; }
