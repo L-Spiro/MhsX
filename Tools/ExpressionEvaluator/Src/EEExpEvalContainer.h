@@ -488,6 +488,9 @@ namespace ee {
 
 		// Deallocates an object.
 		bool								DeallocateObject( CObject * _poObj );
+
+		// String formatting.
+		std::string							FormatString( const char * _pcFormat, size_t _stLen, const std::vector<EE_RESULT> &_vArgs );
 		
 	protected :
 		// == Types.

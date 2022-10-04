@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Utilities/MXUtilities.h"
 #include <Docking/LSWDockable.h>
 #include <ImageList/LSWImageList.h>
 #include <Images/LSWBitmap.h>

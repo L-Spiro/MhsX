@@ -1245,7 +1245,8 @@ namespace mx {
 					CUtilities::MX_DATA_TYPES dtCharType = pcbCharTypeCombo ? static_cast<CUtilities::MX_DATA_TYPES>(pcbCharTypeCombo->GetCurSelItemData()) : CUtilities::MX_DT_UINT8;
 					if ( (dtCharType & CUtilities::MX_DT_MASK) == CUtilities::MX_DT_VOID ) {
 						// Base 0 defaults to base 10 but allows the string to override individual numbers with x (base-16), 0 (base-8), and b (base-2).
-						sUtf = CUtilities::NumberStringToString_MultiFormat( CUtilities::Strip( pcbStringToFindCombo->GetTextA(), true ), pcbHexCheck->IsChecked() ? 16 : 0,
+						std::string sTmp = pcbStringToFindCombo->GetTextA();
+						sUtf = CUtilities::NumberStringToString_MultiFormat( CUtilities::Strip( sTmp, true ), pcbHexCheck->IsChecked() ? 16 : 0,
 							CUtilities::MX_DT_UINT32,
 							&_vMeta );
 					}
@@ -1259,7 +1260,8 @@ namespace mx {
 							}
 						}
 						// Base 0 defaults to base 10 but allows the string to override individual numbers with x (base-16), 0 (base-8), and b (base-2).
-						sUtf = CUtilities::NumberStringToString( CUtilities::Strip( pcbStringToFindCombo->GetTextA(), true ), pcbHexCheck->IsChecked() ? 16 : 0,
+						std::string sTmp = pcbStringToFindCombo->GetTextA();
+						sUtf = CUtilities::NumberStringToString( CUtilities::Strip( sTmp, true ), pcbHexCheck->IsChecked() ? 16 : 0,
 							uiMax, dtCharType,
 							&_vMeta );
 					}

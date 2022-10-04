@@ -1,4 +1,4 @@
-#include "EEExpEvalContainer.h"
+﻿#include "EEExpEvalContainer.h"
 #include "Api/EEBaseApi.h"
 #include "Array/EEDefaultArray.h"
 #include "Array/EEDoubleArray.h"
@@ -19,6 +19,7 @@
 #include <cassert>
 #endif
 #include <ctime>
+#include <format>
 #include <iomanip>
 #include <sstream>
 
@@ -970,6 +971,23 @@ namespace ee {
 		return false;
 	}
 
+	// String formatting.
+	std::string CExpEvalContainer::FormatString( const char * _pcFormat, size_t _stLen, const std::vector<EE_RESULT> &_vArgs ) {
+		std::string sTmp;
+		size_t stCharLen = 0;
+		while ( _stLen ) {
+			uint32_t ui32ThisChar = NextUtf8Char( _pcFormat, _stLen, &stCharLen );
+
+			if ( ui32ThisChar == '{' ) {
+			}
+
+			_pcFormat += stCharLen;
+			_stLen -= stCharLen;
+		}
+
+		auto s1 = std::format("{:.^5s}",   "🐱");
+		return sTmp;
+	}
 
 	// Decodes a string.
 	size_t CExpEvalContainer::CreateString( const std::string &_sText ) {

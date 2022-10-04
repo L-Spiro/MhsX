@@ -266,7 +266,7 @@ namespace mx {
 				if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().stType == CUtilities::MX_ST_STRING_SEARCH &&
 					m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().sstSearchType == CUtilities::MX_SST_UTFALL ) {
 					const struct {
-						char * pcText;
+						const char * pcText;
 						size_t sLen;
 					} sData[] = {
 						{ _T_LEN_0E813C50_UTF_8 },

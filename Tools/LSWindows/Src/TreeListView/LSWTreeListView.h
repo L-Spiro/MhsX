@@ -31,7 +31,7 @@ namespace lsw {
 		// Gets the lParam of an item.
 		LPARAM								GetItemLParam( HTREEITEM _tiItem ) const;
 
-		// Returns true if this is a CTreeList class.
+		// Returns true if this is a CTreeListView class.
 		virtual bool						IsTreeListView() const { return true; }
 
 		// Returns true if any of the selected items have children and are not in expanded view.

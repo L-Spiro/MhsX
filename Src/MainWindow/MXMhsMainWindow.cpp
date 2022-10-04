@@ -366,24 +366,24 @@ namespace mx {
 			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
 		}
 		{
-														//	uiFuncParm0							pfFunc							hdName											uiId										sParms	hdParms																			hdFormattings
-			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowExpressionEvaluator,	{ _T_LEN_0661F178_Show_Expression_Evaluator },	MX_WH_SHOW_EXPRESSION_EVALUATOR,			0 };
+														//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
+			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowExpressionEvaluator,	{ _T_LEN_0661F178_Show_Expression_Evaluator },	MX_WH_SHOW_EXPRESSION_EVALUATOR,	0 };
 			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
 		}
 		{
-														//	uiFuncParm0							pfFunc							hdName											uiId										sParms	hdParms																			hdFormattings
-			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowConverter,			{ _T_LEN_9118A28E_Show_Converter },				MX_WH_SHOW_CONVERTER,						0 };
+														//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
+			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowConverter,			{ _T_LEN_9118A28E_Show_Converter },				MX_WH_SHOW_CONVERTER,				0 };
 			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
 		}
 
 		{
-														//	uiFuncParm0							pfFunc							hdName											uiId										sParms	hdParms																			hdFormattings
-			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowPeWorks,				{ _T_LEN_759D0F03_Show_PE_Works },				MX_WH_SHOW_PE_WORKS,						0 };
+														//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
+			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowPeWorks,				{ _T_LEN_759D0F03_Show_PE_Works },				MX_WH_SHOW_PE_WORKS,				0 };
 			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
 		}
 		{
-														//	uiFuncParm0							pfFunc							hdName											uiId										sParms	hdParms																			hdFormattings
-			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowStringTheory,		{ _T_LEN_B7A8A10D_Show_String_Theory },			MX_WH_SHOW_STRING_THEORY,					0 };
+														//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
+			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowStringTheory,		{ _T_LEN_B7A8A10D_Show_String_Theory },			MX_WH_SHOW_STRING_THEORY,			0 };
 			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
 		}
 

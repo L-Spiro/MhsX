@@ -38,7 +38,7 @@ namespace lsw {
 		SIZE_T						sHeightSizeExpLen;
 
 		// Tool tips.
-		LPCH						pcToolTip;
+		LPCCH						pcToolTip;
 		SIZE_T						sToolTipLen;
 		DWORD						dwToolTipStyleEx;
 		DWORD						dwToolTipStyle;
