@@ -975,31 +975,73 @@ namespace ee {
 	std::string CExpEvalContainer::FormatString( const char * _pcFormat, size_t _stLen, const std::vector<EE_RESULT> &_vArgs ) {
 		std::string sTmp;
 		size_t stCharLen = 0;
-		while ( _stLen ) {
-			uint32_t ui32ThisChar = NextUtf8Char( _pcFormat, _stLen, &stCharLen );
+		size_t sArgIdx = 0;
+		try {
+			while ( _stLen ) {
+				uint32_t ui32ThisChar = NextUtf8Char( _pcFormat, _stLen, &stCharLen );
 
-			if ( ui32ThisChar == '{' ) {
-				uint32_t ui32NextChar;
-				if ( _stLen - stCharLen ) {
-					// If there is a next char.
-					size_t stNextCharLen = 0;
-					ui32NextChar = NextUtf8Char( _pcFormat + stCharLen, _stLen - stCharLen, &stNextCharLen );
-					if ( ui32NextChar == '{' ) {
-						stCharLen += stNextCharLen;
-						// {{ gets reduced to {.
-						sTmp.push_back( '{' );
+				if ( ui32ThisChar == '{' && sArgIdx < _vArgs.size() ) {
+					uint32_t ui32NextChar;
+					if ( _stLen - stCharLen ) {
+						// If there is a next char.
+						size_t stNextCharLen = 0;
+						ui32NextChar = NextUtf8Char( _pcFormat + stCharLen, _stLen - stCharLen, &stNextCharLen );
+						if ( ui32NextChar == '{' ) {
+							stCharLen += stNextCharLen;
+							// {{ gets reduced to {.
+							sTmp.push_back( '{' );
+							_pcFormat += stCharLen;
+							_stLen -= stCharLen;
+							continue;
+						}
+
 						_pcFormat += stCharLen;
 						_stLen -= stCharLen;
+						std::string sFormatter = EatStringFormatter( _pcFormat, _stLen );
+						try {
+							switch ( _vArgs[sArgIdx].ncType ) {
+								case EE_NC_UNSIGNED : {
+									sTmp.append( std::format( sFormatter, _vArgs[sArgIdx].u.ui64Val ) );
+									++sArgIdx;
+									break;
+								}
+								case EE_NC_SIGNED : {
+									sTmp.append( std::format( sFormatter, _vArgs[sArgIdx].u.i64Val ) );
+									++sArgIdx;
+									break;
+								}
+								case EE_NC_FLOATING : {
+									sTmp.append( std::format( sFormatter, _vArgs[sArgIdx].u.dVal ) );
+									++sArgIdx;
+									break;
+								}
+								case EE_NC_OBJECT : {
+									sTmp.append( _vArgs[sArgIdx].u.poObj->FormattedString( sFormatter ) );
+									++sArgIdx;
+									break;
+								}
+								default : {
+									sTmp.append( std::format( sFormatter, "<null>" ) );
+									++sArgIdx;
+								}
+							}
+						}
+						catch ( ... ) {
+							sTmp.append( sFormatter );
+						}
+
 						continue;
 					}
 				}
+				while ( stCharLen ) {
+					sTmp.push_back( (*_pcFormat++) );
+					--_stLen;
+				}
 			}
-
-			_pcFormat += stCharLen;
-			_stLen -= stCharLen;
 		}
-
-		auto s1 = std::format("{:.^5s}",   "🐱");
+		catch ( ... ) {
+			sTmp.clear();
+		}
 		return sTmp;
 	}
 
@@ -5962,6 +6004,22 @@ namespace ee {
 		_sPos = sThisPos - 1;
 		return true;
 #undef	EE_APPEND_CHAR
+	}
+
+	// Eats the {..} part out of a string.  Assumes that _pcFormat points to the next character after the opening {.
+	// Also assumes that from { to } is all standard ASCII, since no special characters are allowed inside valid formatters.
+	std::string CExpEvalContainer::EatStringFormatter( const char * &_pcFormat, size_t &_stLen ) {
+		std::string sRet;
+		sRet.push_back( '{' );
+		while ( _stLen ) {
+			if ( (*_pcFormat) == '{' ) { break; }
+			sRet.push_back( (*_pcFormat) );
+			++_pcFormat;
+			--_stLen;
+			if ( sRet[sRet.size()-1] == '}' ) { break; }
+		}
+
+		return sRet;
 	}
 
 }	// namespace ee;

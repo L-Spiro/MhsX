@@ -2,6 +2,8 @@
 
 #include "EEObject.h"
 
+#include <format>
+
 
 namespace ee {
 
@@ -35,6 +37,11 @@ namespace ee {
 		virtual bool								ToString( std::string &_sString ) {
 			_sString = m_sObj;
 			return true;
+		}
+
+		// Creates a formatted string representation of the object.
+		virtual std::string							FormattedString( const std::string &_sFormat ) {
+			return std::format( _sFormat, m_sObj );
 		}
 
 		// Array access.

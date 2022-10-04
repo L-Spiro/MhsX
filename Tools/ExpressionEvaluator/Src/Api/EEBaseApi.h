@@ -51,7 +51,6 @@ namespace ee {
 			if ( _i64SignedIdx != static_cast<int64_t>(static_cast<size_t>(_i64SignedIdx)) || static_cast<size_t>(_i64SignedIdx) >= _stActualLen ) { return EE_INVALID_IDX; }
 			return static_cast<size_t>(_i64SignedIdx);
 		}
-
 		
 	};
 

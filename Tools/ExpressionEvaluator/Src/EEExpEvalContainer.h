@@ -1048,6 +1048,10 @@ namespace ee {
 				_wcFlag == L'g' || _wcFlag == L'G';
 		}
 
+		// Eats the {..} part out of a string.  Assumes that _pcFormat points to the next character after the opening {.
+		// Also assumes that from { to } is all standard ASCII, since no special characters are allowed inside valid formatters.
+		static std::string					EatStringFormatter( const char * &_pcFormat, size_t &_stLen );
+
 	};
 
 }	// namespace ee

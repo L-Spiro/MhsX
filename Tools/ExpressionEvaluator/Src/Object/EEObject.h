@@ -39,6 +39,11 @@ namespace ee {
 			return false;
 		}
 
+		// Creates a formatted string representation of the object.
+		virtual std::string							FormattedString( const std::string &_sFormat ) = 0 {
+			return std::string( "<null>" );
+		}
+
 		// Converts to another object of the given type.
 		virtual CExpEvalContainer::EE_RESULT		ConvertTo( EE_NUM_CONSTANTS _ncType ) = 0 {
 			CExpEvalContainer::EE_RESULT rRet = { EE_NC_INVALID };
