@@ -979,6 +979,20 @@ namespace ee {
 			uint32_t ui32ThisChar = NextUtf8Char( _pcFormat, _stLen, &stCharLen );
 
 			if ( ui32ThisChar == '{' ) {
+				uint32_t ui32NextChar;
+				if ( _stLen - stCharLen ) {
+					// If there is a next char.
+					size_t stNextCharLen = 0;
+					ui32NextChar = NextUtf8Char( _pcFormat + stCharLen, _stLen - stCharLen, &stNextCharLen );
+					if ( ui32NextChar == '{' ) {
+						stCharLen += stNextCharLen;
+						// {{ gets reduced to {.
+						sTmp.push_back( '{' );
+						_pcFormat += stCharLen;
+						_stLen -= stCharLen;
+						continue;
+					}
+				}
 			}
 
 			_pcFormat += stCharLen;
