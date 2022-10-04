@@ -490,6 +490,8 @@ RS1_S								[rR]{CS1}
 "_byteswap_uint32"					{ return yy::CExpEvalParser::token::EE_BYTESWAPULONG; }
 "_byteswap_uint64"					{ return yy::CExpEvalParser::token::EE_BYTESWAPUINT64; }
 
+"format"							{ return yy::CExpEvalParser::token::EE_FORMAT; }
+
 
 "ascii"								{ return yy::CExpEvalParser::token::EE_ASCII; }
 "bin"								{ return yy::CExpEvalParser::token::EE_BIN; }
@@ -660,10 +662,10 @@ RS1_S								[rR]{CS1}
 ("i64["|"i64<:")					{ return yy::CExpEvalParser::token::EE_OB_SQWORD; }
 
 
-("["|"<:")							{ return ('['); }
-("]"|":>")							{ return (']'); }
-"("									{ return ('('); }
-")"									{ return (')'); }
+("["|"<:")							{ return '['; }
+("]"|":>")							{ return ']'; }
+"("									{ return '('; }
+")"									{ return ')'; }
 "{"									{ return '{'; }
 "}"									{ return '}'; }
 
@@ -671,25 +673,26 @@ RS1_S								[rR]{CS1}
 ">>"								{ return yy::CExpEvalParser::token::EE_RIGHT_OP; }
 "++"								{ return yy::CExpEvalParser::token::EE_PLUSPLUS; }
 "--"								{ return yy::CExpEvalParser::token::EE_MINUSMINUS; }
-","									{ return (','); }
-"!"									{ return ('!'); }
-"~"									{ return ('~'); }
-"-"									{ return ('-'); }
-"+"									{ return ('+'); }
-"*"									{ return ('*'); }
-"/"									{ return ('/'); }
-"%"									{ return ('%'); }
+"."									{ return '.'; }
+","									{ return ','; }
+"!"									{ return '!'; }
+"~"									{ return '~'; }
+"-"									{ return '-'; }
+"+"									{ return '+'; }
+"*"									{ return '*'; }
+"/"									{ return '/'; }
+"%"									{ return '%'; }
 "<"									{ return '<'; }
 ">"									{ return '>'; }
 "<="								{ return yy::CExpEvalParser::token::EE_REL_LE; }
 ">="								{ return yy::CExpEvalParser::token::EE_REL_GE; }
-"&"									{ return ('&'); }
-"|"									{ return ('|'); }
-"^"									{ return ('^'); }
-"?"									{ return ('?'); }
-":"									{ return (':'); }
-";"									{ return (';'); }
-"="									{ return ('='); }
+"&"									{ return '&'; }
+"|"									{ return '|'; }
+"^"									{ return '^'; }
+"?"									{ return '?'; }
+":"									{ return ':'; }
+";"									{ return ';'; }
+"="									{ return '='; }
 "+="								{ return yy::CExpEvalParser::token::EE_ASS_PLUSEQUALS; }
 "-="								{ return yy::CExpEvalParser::token::EE_ASS_MINUSEQUALS; }
 "*="								{ return yy::CExpEvalParser::token::EE_ASS_TIMESEQUALS; }
@@ -706,7 +709,7 @@ RS1_S								[rR]{CS1}
 "=="								{ return yy::CExpEvalParser::token::EE_EQU_E; }
 "!="								{ return yy::CExpEvalParser::token::EE_EQU_NE; }
 "::"								{ return yy::CExpEvalParser::token::EE_MEMBERACCESS; }
-"$"									{ return ('$'); }
+"$"									{ return '$'; }
 
 
 {L}({L}|{D})*						{ return yy::CExpEvalParser::token::EE_IDENTIFIER; }

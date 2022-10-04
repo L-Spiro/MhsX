@@ -69,6 +69,7 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %token EE_ABS EE_MADD EE_RAND
 %token EE_ISNAN EE_ISINF
 %token EE_BYTESWAPUSHORT EE_BYTESWAPULONG EE_BYTESWAPUINT64
+%token EE_FORMAT
 %token EE_A EE_ALLADI EE_ALPHA EE_B EE_B2 EE_B4 EE_BETA EE_BH EE_C2 EE_CAHEN EE_CATALAN EE_CONWAY EE_DELTA EE_E EE_ERDOS EE_EULER EE_F EE_GR EE_GWK EE_HALFPI EE_HSMC EE_ICE EE_K
 %token EE_LAMBDA EE_LAPLACE EE_LEVY EE_M1 EE_MU EE_NIVEN EE_OMEGA EE_P2 EE_PI EE_PLASTIC EE_PORTER EE_PSI EE_RAMAN EE_RAMAMU EE_SIERP EE_THETA EE_VISW EE_Z3 EE_ZETA 
 
@@ -106,6 +107,7 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %type <ndData>												or_exp
 %type <ndData>												conditional_exp
 %type <ndData>												assignment_exp
+%type <ndData>												argument_exp_entry
 %type <ndData>												argument_exp_list
 %type <ndData>												intrinsic
 %type <ndData>												exp
@@ -600,9 +602,13 @@ backing_persistence
 	| EE_TEMP												{ $$ = token::EE_TEMP; }
 	;
 	
+argument_exp_entry
+	: conditional_exp										{ m_peecContainer->CreateArgListEntry( $1, $$ ); }
+	| argument_exp_entry ',' conditional_exp				{ m_peecContainer->CreateArgListEntry( $1, $3, $$ ); }
+	;
+	
 argument_exp_list
-	: conditional_exp										{ $$ = $1; }
-	| argument_exp_list ',' conditional_exp					{}
+	: argument_exp_entry									{ m_peecContainer->CreateArgList( $1, $$ ); }
 	;
 
 intrinsic
@@ -715,19 +721,21 @@ intrinsic
 	| EE_LEN '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_LEN, $3, $$ ); }
 	| EE_OCT '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_OCT, $3, $$ ); }
 	| EE_ORD '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ORD, $3, $$ ); }
+	| string '.' EE_FORMAT '(' argument_exp_list ')'		{ m_peecContainer->CreateFormat( $1, $5, $$ ); }
 	;
 
 exp
 	: assignment_exp										{ $$ = $1; }
 	//| iteration_exp											{ $$ = $1; }
 	//| selection_exp											{ $$ = $1; }
-	| jump_exp												{ $$ = $1; }
+	//| jump_exp												{ $$ = $1; }
 	;
 	
 exp_statement
 	: exp ';'												{ $$ = $1; }
 	| iteration_exp											{ $$ = $1; }
 	| selection_exp											{ $$ = $1; }
+	| jump_exp ';'											{ $$ = $1; }
 	;
 
 statement

@@ -980,7 +980,7 @@ namespace ee {
 			while ( _stLen ) {
 				uint32_t ui32ThisChar = NextUtf8Char( _pcFormat, _stLen, &stCharLen );
 
-				if ( ui32ThisChar == '{' && sArgIdx < _vArgs.size() ) {
+				if ( ui32ThisChar == '{' ) {
 					uint32_t ui32NextChar;
 					if ( _stLen - stCharLen ) {
 						// If there is a next char.
@@ -997,45 +997,68 @@ namespace ee {
 
 						_pcFormat += stCharLen;
 						_stLen -= stCharLen;
-						std::string sFormatter = EatStringFormatter( _pcFormat, _stLen );
-						try {
-							switch ( _vArgs[sArgIdx].ncType ) {
-								case EE_NC_UNSIGNED : {
-									sTmp.append( std::format( sFormatter, _vArgs[sArgIdx].u.ui64Val ) );
-									++sArgIdx;
-									break;
-								}
-								case EE_NC_SIGNED : {
-									sTmp.append( std::format( sFormatter, _vArgs[sArgIdx].u.i64Val ) );
-									++sArgIdx;
-									break;
-								}
-								case EE_NC_FLOATING : {
-									sTmp.append( std::format( sFormatter, _vArgs[sArgIdx].u.dVal ) );
-									++sArgIdx;
-									break;
-								}
-								case EE_NC_OBJECT : {
-									sTmp.append( _vArgs[sArgIdx].u.poObj->FormattedString( sFormatter ) );
-									++sArgIdx;
-									break;
-								}
-								default : {
-									sTmp.append( std::format( sFormatter, "<null>" ) );
-									++sArgIdx;
+						size_t stArg = sArgIdx;
+						std::string sFormatter = EatStringFormatter( _pcFormat, _stLen, stArg );
+						if ( stArg < _vArgs.size() ) {
+							try {
+								switch ( _vArgs[stArg].ncType ) {
+									case EE_NC_UNSIGNED : {
+										sTmp.append( std::format( sFormatter, _vArgs[stArg].u.ui64Val ) );
+										sArgIdx = ++stArg;
+										break;
+									}
+									case EE_NC_SIGNED : {
+										sTmp.append( std::format( sFormatter, _vArgs[stArg].u.i64Val ) );
+										sArgIdx = ++stArg;
+										break;
+									}
+									case EE_NC_FLOATING : {
+										sTmp.append( std::format( sFormatter, _vArgs[stArg].u.dVal ) );
+										sArgIdx = ++stArg;
+										break;
+									}
+									case EE_NC_OBJECT : {
+										sTmp.append( _vArgs[stArg].u.poObj->FormattedString( sFormatter ) );
+										sArgIdx = ++stArg;
+										break;
+									}
+									default : {
+										sTmp.append( std::format( sFormatter, "<null>" ) );
+										sArgIdx = ++stArg;
+									}
 								}
 							}
+							catch ( ... ) {
+								sTmp.append( sFormatter );
+							}
 						}
-						catch ( ... ) {
+						else {
 							sTmp.append( sFormatter );
 						}
-
 						continue;
+					}
+				}
+				else if ( ui32ThisChar == '}' ) {
+					// "}" and "}}" both resolve to "}".
+					uint32_t ui32NextChar;
+					if ( _stLen - stCharLen ) {
+						// If there is a next char.
+						size_t stNextCharLen = 0;
+						ui32NextChar = NextUtf8Char( _pcFormat + stCharLen, _stLen - stCharLen, &stNextCharLen );
+						if ( ui32NextChar == '}' ) {
+							stCharLen += stNextCharLen;
+							// {{ gets reduced to {.
+							sTmp.push_back( '}' );
+							_pcFormat += stCharLen;
+							_stLen -= stCharLen;
+							continue;
+						}
 					}
 				}
 				while ( stCharLen ) {
 					sTmp.push_back( (*_pcFormat++) );
 					--_stLen;
+					--stCharLen;
 				}
 			}
 		}
@@ -2609,6 +2632,37 @@ namespace ee {
 	// Creates a break.
 	void CExpEvalContainer::CreateBreak( YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_BREAK;
+		AddNode( _ndNode );
+	}
+
+	// Creates an entry in an argument list.
+	void CExpEvalContainer::CreateArgListEntry( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_ARG_LIST_ENTRY;
+		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
+		_ndNode.v.sNodeIndex = ~0;
+		AddNode( _ndNode );
+	}
+
+	// Creates an entry in an argument list.
+	void CExpEvalContainer::CreateArgListEntry( const YYSTYPE::EE_NODE_DATA &_ndLeft, const YYSTYPE::EE_NODE_DATA &_ndRight, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_ARG_LIST_ENTRY;
+		_ndNode.u.sNodeIndex = _ndLeft.sNodeIndex;
+		_ndNode.v.sNodeIndex = _ndRight.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Creates an arg list.
+	void CExpEvalContainer::CreateArgList( const YYSTYPE::EE_NODE_DATA &_ndList, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_ARG_LIST;
+		_ndNode.u.sNodeIndex = _ndList.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Creates a format string in the format of: "Some string {}.".format( Args0, Arg1 ).
+	void CExpEvalContainer::CreateFormat( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndArgs, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_FORMAT;
+		_ndNode.u.sStringIndex = _sStrIndex;
+		_ndNode.v.sNodeIndex = _ndArgs.sNodeIndex;
 		AddNode( _ndNode );
 	}
 
@@ -4745,6 +4799,22 @@ namespace ee {
 						EE_PUSH( _ndExp.u.sNodeIndex );
 						continue;
 					}
+					case EE_N_ARG_LIST_ENTRY : {
+						if ( _ndExp.v.sNodeIndex != ~0 ) {
+							EE_PUSH( _ndExp.v.sNodeIndex );
+						}
+						EE_PUSH( _ndExp.u.sNodeIndex );
+						continue;
+					}
+					case EE_N_ARG_LIST : {
+						m_vFuncParms.push_back( std::vector<EE_RESULT>() );
+						EE_PUSH( _ndExp.u.sNodeIndex );
+						continue;
+					}
+					case EE_N_FORMAT : {
+						EE_PUSH( _ndExp.v.sNodeIndex );
+						continue;
+					}
 				}
 			}
 			else {
@@ -5868,6 +5938,26 @@ namespace ee {
 						}
 						break;
 					}
+					case EE_N_ARG_LIST_ENTRY : {
+						if ( m_vFuncParms.size() ) {
+							m_vFuncParms[m_vFuncParms.size()-1].push_back( soProcessMe.sSubResults[0] );
+						}
+						break;
+					}
+					case EE_N_FORMAT : {
+						if ( m_vFuncParms.size() ) {
+							std::string sTmp = FormatString( m_vStrings[_ndExp.u.sStringIndex].c_str(), m_vStrings[_ndExp.u.sStringIndex].size(),
+								m_vFuncParms[m_vFuncParms.size()-1] );
+							CString * psObj = reinterpret_cast<CString *>(AllocateObject<CString>());
+							if ( psObj ) {
+								psObj->SetString( sTmp );
+								(*soProcessMe.prResult) = psObj->CreateResult();
+							}
+							// This counts as a function call so pop the argument stack.
+							m_vFuncParms.pop_back();
+						}
+						break;
+					}
 				}
 
 
@@ -6008,9 +6098,16 @@ namespace ee {
 
 	// Eats the {..} part out of a string.  Assumes that _pcFormat points to the next character after the opening {.
 	// Also assumes that from { to } is all standard ASCII, since no special characters are allowed inside valid formatters.
-	std::string CExpEvalContainer::EatStringFormatter( const char * &_pcFormat, size_t &_stLen ) {
+	std::string CExpEvalContainer::EatStringFormatter( const char * &_pcFormat, size_t &_stLen, size_t &_stArgIdx ) {
 		std::string sRet;
 		sRet.push_back( '{' );
+		size_t stNumberEat = 0;
+		uint64_t ui64Idx = ee::StoULL( _pcFormat, 10, &stNumberEat );
+		if ( stNumberEat ) {
+			_stArgIdx = static_cast<size_t>(ui64Idx);
+			_pcFormat += stNumberEat;
+			_stLen -= stNumberEat;
+		}
 		while ( _stLen ) {
 			if ( (*_pcFormat) == '{' ) { break; }
 			sRet.push_back( (*_pcFormat) );

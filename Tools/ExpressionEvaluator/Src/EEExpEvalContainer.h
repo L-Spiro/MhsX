@@ -738,6 +738,18 @@ namespace ee {
 		// Creates a break.
 		void								CreateBreak( YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates an entry in an argument list.
+		void								CreateArgListEntry( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates an entry in an argument list.
+		void								CreateArgListEntry( const YYSTYPE::EE_NODE_DATA &_ndLeft, const YYSTYPE::EE_NODE_DATA &_ndRight, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates an arg list.
+		void								CreateArgList( const YYSTYPE::EE_NODE_DATA &_ndList, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a format string in the format of: "Some string {}.".format( Args0, Arg1 ).
+		void								CreateFormat( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndArgs, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Sets the translation-unit node.
 		void								SetTrans( YYSTYPE::EE_NODE_DATA &_ndNode );
 
@@ -806,26 +818,17 @@ namespace ee {
 
 		// For use with the explicit stack during parsing.
 		struct EE_STACK_OBJ {
-			// Index of the stack item.
-			size_t							sIndex;
-
-			// Index of the parent stack item.
-			size_t							sParentIndex;
-
-			// The result of the expression.
-			EE_RESULT *						prResult;
-
-			// To break processing into 2 parts.
-			bool							bPassThrough;
-
 			// Counts the number of times the node has been processed.
 			uint64_t						uiProcessCount;
 
 			// Loop counter.
 			uint64_t						uiLoopCounter;
 
-			// Loop stack index.
-			size_t							sLoopStackIdx;
+			// Array of results for already-parsed sub-expressions.
+			EE_RESULT						sSubResults[EE_MAX_SUB_EXPRESSIONS];
+
+			// The result of the expression.
+			EE_RESULT *						prResult;
 
 			// For-each loop custom variable result.
 			EE_RESULT *						prLoopCustomVarResult;
@@ -833,14 +836,25 @@ namespace ee {
 			// For-each loop object.
 			EE_RESULT *						prLoopObject;
 
+			// Index of the stack item.
+			size_t							sIndex;
+
+			// Index of the parent stack item.
+			size_t							sParentIndex;
+
+			// Loop stack index.
+			size_t							sLoopStackIdx;
+
 			// For-each string.
 			size_t							sForEachString;
 
 			// For-each string current position in the string.
-			size_t							sForEachStringPos;
+			size_t							sForEachStringPos;			
 
-			// Array of results for already-parsed sub-expressions.
-			EE_RESULT						sSubResults[EE_MAX_SUB_EXPRESSIONS];
+			// Pointer 
+
+			// To break processing into 2 parts.
+			bool							bPassThrough;
 		};
 
 		// Encapsulate an object.
@@ -898,6 +912,9 @@ namespace ee {
 
 		// Numbered parameters.
 		std::vector<EE_RESULT>				m_vNumberedParms;
+
+		// Function parameters.
+		std::vector<std::vector<EE_RESULT>>	m_vFuncParms;
 
 		// Referenced numbered parameters.
 		std::set<size_t>					m_sNumberedParmsAccessed;
@@ -1050,7 +1067,7 @@ namespace ee {
 
 		// Eats the {..} part out of a string.  Assumes that _pcFormat points to the next character after the opening {.
 		// Also assumes that from { to } is all standard ASCII, since no special characters are allowed inside valid formatters.
-		static std::string					EatStringFormatter( const char * &_pcFormat, size_t &_stLen );
+		static std::string					EatStringFormatter( const char * &_pcFormat, size_t &_stLen, size_t &_stArgIdx );
 
 	};
 

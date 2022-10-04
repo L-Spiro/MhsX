@@ -97,6 +97,9 @@ namespace ee {
 		EE_N_ASSIGNMENT,
 		EE_N_CREATE_ARRAY,
 		EE_N_ARRAY_ASSIGNMENT,
+		EE_N_ARG_LIST_ENTRY,
+		EE_N_ARG_LIST,
+		EE_N_FORMAT,
 	};
 
 	// Constant types.  Ordered by cast priority.
