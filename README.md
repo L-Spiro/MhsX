@@ -22,3 +22,4 @@ Easily decode/research any floating-point format, even custom ones.
 
 The Expression Evaluator is a handy ready-to-use simple way to evaluate snippets of code, mathematical expressions, etc.  Supports branching, loops, typed and typeless values, the full C++ \<cmath\> library, strings, and more.  It’s a full programming language that is easy to use; just start typing!
 <br>![Expression Evaluator](https://i.imgur.com/WLF2Xad.png)
+<br>![Expression Evaluator Strings](https://i.imgur.com/yj8thaF.png)
