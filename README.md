@@ -29,6 +29,6 @@ The Expression Evaluator is a handy ready-to-use simple way to evaluate snippets
 <br>![Expression Evaluator](https://i.imgur.com/WLF2Xad.png)
 <br>![Expression Evaluator Strings](https://i.imgur.com/yj8thaF.png)
 
-## Sub-Search
-An exhaustive list of options for sub-searching.
+## Subsearch
+An exhaustive list of options for subsearching.
 <br>![Sub-Search](https://i.imgur.com/3Sg07FJ.png)
