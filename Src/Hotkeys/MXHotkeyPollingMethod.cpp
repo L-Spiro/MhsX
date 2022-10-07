@@ -71,7 +71,7 @@ namespace mx {
 						bSuccess = true;
 					}
 					if ( bSuccess ) {
-						if ( !m_hWnd ) {
+						if ( m_hWnd == NULL ) {
 							ExecuteByindex( I );
 						}
 						else {

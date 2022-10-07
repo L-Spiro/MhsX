@@ -83,7 +83,7 @@ namespace mx {
 	// Registers all of the hotkeys.
 	bool CHotkeyRegisterHotKeyMethod::RegisterAll() {
 		MX_HOTKEY_LOCK hlLock( this );
-		if ( !m_hWnd ) { return false; }
+		if ( m_hWnd == NULL ) { return false; }
 		for ( size_t I = 0; I < m_vHotkeys.size(); ++I ) {
 			CSystem::RegisterHotKey( m_hWnd, m_vHotkeys[I].iIdentifier, VirtualKeyToModifier( m_vHotkeys[I].iMod ), m_vHotkeys[I].iCode );
 		}
@@ -94,7 +94,7 @@ namespace mx {
 	// Unregisters all of the hotkeys.
 	void CHotkeyRegisterHotKeyMethod::UnregisterAll() {
 		MX_HOTKEY_LOCK hlLock( this );
-		if ( m_hWnd ) {
+		if ( m_hWnd != NULL ) {
 			for ( size_t I = 0; I < m_vHotkeys.size(); ++I ) {
 				CSystem::UnregisterHotKey( m_hWnd, m_vHotkeys[I].iIdentifier );
 			}

@@ -998,7 +998,7 @@ namespace ee {
 						_pcFormat += stCharLen;
 						_stLen -= stCharLen;
 						size_t stArg = sArgIdx;
-						std::string sFormatter = EatStringFormatter( _pcFormat, _stLen, stArg );
+						std::string sFormatter = EatStringFormatter( _pcFormat, _stLen, stArg, _vArgs );
 						if ( stArg < _vArgs.size() ) {
 							try {
 								switch ( _vArgs[stArg].ncType ) {
@@ -6098,7 +6098,7 @@ namespace ee {
 
 	// Eats the {..} part out of a string.  Assumes that _pcFormat points to the next character after the opening {.
 	// Also assumes that from { to } is all standard ASCII, since no special characters are allowed inside valid formatters.
-	std::string CExpEvalContainer::EatStringFormatter( const char * &_pcFormat, size_t &_stLen, size_t &_stArgIdx ) {
+	std::string CExpEvalContainer::EatStringFormatter( const char * &_pcFormat, size_t &_stLen, size_t &_stArgIdx, const std::vector<EE_RESULT> &_vArgs ) {
 		std::string sRet;
 		sRet.push_back( '{' );
 		size_t stNumberEat = 0;

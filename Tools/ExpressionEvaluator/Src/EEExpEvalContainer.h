@@ -1067,7 +1067,7 @@ namespace ee {
 
 		// Eats the {..} part out of a string.  Assumes that _pcFormat points to the next character after the opening {.
 		// Also assumes that from { to } is all standard ASCII, since no special characters are allowed inside valid formatters.
-		static std::string					EatStringFormatter( const char * &_pcFormat, size_t &_stLen, size_t &_stArgIdx );
+		static std::string					EatStringFormatter( const char * &_pcFormat, size_t &_stLen, size_t &_stArgIdx, const std::vector<EE_RESULT> &_vArgs );
 
 	};
 
