@@ -85,6 +85,12 @@ namespace mx {
 		void								CreateRangeExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal,
 			const ee::CExpEvalContainer::EE_RESULT &_rRVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
 
+		// Creates an expression for searching for greater-than values.
+		void								CreateGreaterThanExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
+
+		// Creates an expression for searching for less-than values.
+		void								CreateLessThanExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
+
 		// Creates an expression for searching for same-as-before values.
 		void								CreateSameAsBeforeExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &/*_rLVal*/, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv );
 

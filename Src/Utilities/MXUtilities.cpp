@@ -1679,6 +1679,8 @@ namespace mx {
 			{ _T_LEN_7B476D38_Increased,			MX_SET_INCREASED },
 			{ _T_LEN_D7629639_Decreased,			MX_SET_DECREASED },
 			{ _T_LEN_1BB1B671_In_Range,				MX_SET_RANGE },
+			{ _T_LEN_474E42C3_Greater_Than,			MX_SET_GREATER_THAN },
+			{ _T_LEN_C8A1ADFC_Lower_Than,			MX_SET_LESS_THAN },
 			{ _T_LEN_49B80325_Same_as_Before,		MX_SET_SAME_AS_BEFORE },
 			{ _T_LEN_C74C8767_Different_from_Before,MX_SET_DIFFERENT_FROM_BEFORE },
 			{ _T_LEN_95C86580_Changed_By,			MX_SET_CHANGED_BY },

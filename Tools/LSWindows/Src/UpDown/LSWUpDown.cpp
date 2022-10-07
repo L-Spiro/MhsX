@@ -82,4 +82,10 @@ namespace lsw {
 		}
 	}
 
+	// Sets to use Unicode (TRUE) or ASCII (FALSE) and returns the previous Unicode setting.
+	BOOL CUpDown::SetUnicodeFormat( BOOL _bUseUnicode ) {
+		if ( m_hWnd == NULL ) { return FALSE; }
+		return static_cast<BOOL>(::SendMessageW( m_hWnd, UDM_SETUNICODEFORMAT, static_cast<WPARAM>(_bUseUnicode), 0 ));
+	}
+
 }	// namespace lsw

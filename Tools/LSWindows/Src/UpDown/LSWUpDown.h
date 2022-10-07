@@ -43,6 +43,9 @@ namespace lsw {
 		// Sets the range.
 		virtual void						SetRange( int32_t _i32Lower, int32_t _i32Upper );
 
+		// Sets to use Unicode (TRUE) or ASCII (FALSE) and returns the previous Unicode setting.
+		virtual BOOL						GetUnicodeFormat( BOOL _bUseUnicode );
+
 		// Sort routine.
 		//static int CALLBACK					CompareFunc( LPARAM _lParam1, LPARAM _lParam2, LPARAM _lParamSort );
 

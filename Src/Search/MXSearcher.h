@@ -377,6 +377,12 @@ namespace mx {
 		// In-range subsearch on primitives.
 		bool								InRangePrimitiveSubsearch( MX_SUBSEARCH_PARMS &_spParms, const CAddressChunkList &_aclChunks, HWND _hProgressUpdate );
 
+		// Greater-than subsearch on primitives.
+		bool								GreaterThanPrimitiveSubsearch( MX_SUBSEARCH_PARMS &_spParms, const CAddressChunkList &_aclChunks, HWND _hProgressUpdate );
+
+		// Less-than subsearch on primitives.
+		bool								LessThanPrimitiveSubsearch( MX_SUBSEARCH_PARMS &_spParms, const CAddressChunkList &_aclChunks, HWND _hProgressUpdate );
+
 		// Same-as-before subsearch on primitives.
 		bool								SameAsBeforePrimitiveSubsearch( MX_SUBSEARCH_PARMS &_spParms, const CAddressChunkList &_aclChunks, HWND _hProgressUpdate );
 
@@ -490,6 +496,9 @@ namespace mx {
 
 		// Scans multiple parts of the current results at the same time.
 		static DWORD WINAPI					PrimitiveInRangeSubsearchThreadProc( LPVOID _lpParameter );
+
+		// Scans multiple parts of the current results at the same time.
+		static DWORD WINAPI					PrimitiveGreaterThanLessThanSubsearchThreadProc( LPVOID _lpParameter );
 
 		// Scans multiple parts of the current results at the same time.
 		static DWORD WINAPI					PrimitiveSameAsBeforeSubsearchThreadProc( LPVOID _lpParameter );

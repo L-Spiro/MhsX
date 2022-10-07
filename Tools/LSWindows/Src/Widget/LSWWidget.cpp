@@ -98,7 +98,7 @@ namespace lsw {
 	}
 	CWidget::~CWidget() {
 		m_bInDestructor = TRUE;
-		if ( m_hWnd ) {
+		if ( m_hWnd != NULL ) {
 			::DestroyWindow( m_hWnd );
 			m_hWnd = NULL;
 		}

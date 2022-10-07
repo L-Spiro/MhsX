@@ -31,6 +31,8 @@ namespace mx {
 				CUtilities::MX_SET_INCREASED,
 				CUtilities::MX_SET_DECREASED,
 				CUtilities::MX_SET_RANGE,
+				CUtilities::MX_SET_GREATER_THAN,
+				CUtilities::MX_SET_LESS_THAN,
 				CUtilities::MX_SET_SAME_AS_BEFORE,
 				CUtilities::MX_SET_DIFFERENT_FROM_BEFORE,
 				CUtilities::MX_SET_CHANGED_BY,
@@ -310,6 +312,8 @@ namespace mx {
 			case CUtilities::MX_SET_EXACT : {}
 			case CUtilities::MX_SET_NOT_EQUAL_TO : {}
 			case CUtilities::MX_SET_RANGE : {}
+			case CUtilities::MX_SET_GREATER_THAN : {}
+			case CUtilities::MX_SET_LESS_THAN : {}
 			case CUtilities::MX_SET_CHANGED_BY : {}
 			case CUtilities::MX_SET_CHANGED_BY_PERCENT : {}
 			case CUtilities::MX_SET_CHANGED_BY_RANGE : {}
@@ -468,6 +472,22 @@ namespace mx {
 
 				pcbLStatic->SetTextW( _DEC_WS_DF0979ED_Find_Values_Between_.c_str() );
 				pcbRStatic->SetTextW( _DEC_WS_8738717F_And_.c_str() );
+				break;
+			}
+			case CUtilities::MX_SET_GREATER_THAN : {
+				pcbLCombo->SetEnabled( TRUE );
+				pcbRCombo->SetEnabled( FALSE );
+
+				pcbLStatic->SetTextW( _DEC_WS_D7A9ADE0_Find_Values_Greater_Than_.c_str() );
+				pcbRStatic->SetTextW( L"" );
+				break;
+			}
+			case CUtilities::MX_SET_LESS_THAN : {
+				pcbLCombo->SetEnabled( TRUE );
+				pcbRCombo->SetEnabled( FALSE );
+
+				pcbLStatic->SetTextW( _DEC_WS_98033164_Find_Values_Lower_Than_.c_str() );
+				pcbRStatic->SetTextW( L"" );
 				break;
 			}
 			case CUtilities::MX_SET_SAME_AS_BEFORE : {
@@ -682,6 +702,62 @@ namespace mx {
 									pcbExpCombo->SetTextA( ssExact.c_str() );
 								}
 							}
+						}
+					}
+					break;
+				}
+				case CUtilities::MX_SET_GREATER_THAN : {
+					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, &bIsValid );
+					if ( !bIsValid ) {
+						wText = mx::CStringDecoder::DecodeToWString( _T_LEN_83B9CBC3_Invalid_Data );
+					}
+					else if ( !bParsed ) {
+						wText = mx::CStringDecoder::DecodeToWString( _T_LEN_3A9BBB6B_No_search_value_has_been_specified_ );
+					}
+					else {
+						CSecureWString wsNegation = (pcbInvertCheck && pcbInvertCheck->IsChecked()) ? mx::CStringDecoder::DecodeToWString( _T_LEN_C90B4F0B_not_ ) : L"";
+						wsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_9E378ADB_Find__s_values__sgreater_than__s_ );
+						CSecureWString wsLeft, wsRight;
+						CUtilities::PrintDataType( wsLeft, dtDataType, CUtilities::Options.dwDataTypeOptions & CUtilities::MX_DTO_CODENAMES );
+
+						CUtilities::ToDataTypeString( rRes, dtDataType, wsRight );
+						WCHAR wszBuffer[512];
+						std::swprintf( wszBuffer, MX_ELEMENTS( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
+
+						wText = wszBuffer;
+
+						if ( m_bLastTypeExpressionWasEmpty ) {
+							CSecureString ssExact;
+							CreateGreaterThanExpression( ssExact, rRes, dtDataType, pcbInvertCheck->IsChecked() );
+							pcbExpCombo->SetTextA( ssExact.c_str() );
+						}
+					}
+					break;
+				}
+				case CUtilities::MX_SET_LESS_THAN : {
+					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, &bIsValid );
+					if ( !bIsValid ) {
+						wText = mx::CStringDecoder::DecodeToWString( _T_LEN_83B9CBC3_Invalid_Data );
+					}
+					else if ( !bParsed ) {
+						wText = mx::CStringDecoder::DecodeToWString( _T_LEN_3A9BBB6B_No_search_value_has_been_specified_ );
+					}
+					else {
+						CSecureWString wsNegation = (pcbInvertCheck && pcbInvertCheck->IsChecked()) ? mx::CStringDecoder::DecodeToWString( _T_LEN_C90B4F0B_not_ ) : L"";
+						wsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_88096E3E_Find__s_values__slower_than__s_ );
+						CSecureWString wsLeft, wsRight;
+						CUtilities::PrintDataType( wsLeft, dtDataType, CUtilities::Options.dwDataTypeOptions & CUtilities::MX_DTO_CODENAMES );
+
+						CUtilities::ToDataTypeString( rRes, dtDataType, wsRight );
+						WCHAR wszBuffer[512];
+						std::swprintf( wszBuffer, MX_ELEMENTS( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
+
+						wText = wszBuffer;
+
+						if ( m_bLastTypeExpressionWasEmpty ) {
+							CSecureString ssExact;
+							CreateLessThanExpression( ssExact, rRes, dtDataType, pcbInvertCheck->IsChecked() );
+							pcbExpCombo->SetTextA( ssExact.c_str() );
 						}
 					}
 					break;
@@ -1133,6 +1209,50 @@ namespace mx {
 		if ( CUtilities::DataTypeIsFloat( _dtDataType ) && _bInv ) {
 			_sExpression.push_back( ' ' );
 			_sExpression.append( _DEC_S_36A7406E____isnan______ );
+		}
+	}
+
+	// Creates an expression for searching for greater-than values.
+	void CStandardSubsearchWindow::CreateGreaterThanExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv ) {
+		CSecureWString swsLeft;
+		CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft, true );
+		if ( CUtilities::DataTypeIsFloat( _dtDataType ) && _bInv ) {
+			bool bUsedNan = false;
+			/*if ( CUtilities::DataTypeIsNan( _rLVal, _dtDataType ) ) {
+				bUsedNan = true;
+			}*/
+			_sExpression = _DEC_S_0FFD4DE8______;
+			_sExpression.append( ee::WStringToString( swsLeft ) );
+			if ( !bUsedNan ) {
+				_sExpression.push_back( ' ' );
+				_sExpression.append( _DEC_S_36A7406E____isnan______ );
+			}
+		}
+		else {
+			_sExpression = _DEC_S_0FFD4DE8______;
+			_sExpression.append( ee::WStringToString( swsLeft ) );
+		}
+	}
+
+	// Creates an expression for searching for less-than values.
+	void CStandardSubsearchWindow::CreateLessThanExpression( CSecureString &_sExpression, const ee::CExpEvalContainer::EE_RESULT &_rLVal, CUtilities::MX_DATA_TYPES _dtDataType, bool _bInv ) {
+		CSecureWString swsLeft;
+		CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft, true );
+		if ( CUtilities::DataTypeIsFloat( _dtDataType ) && _bInv ) {
+			bool bUsedNan = false;
+			/*if ( CUtilities::DataTypeIsNan( _rLVal, _dtDataType ) ) {
+				bUsedNan = true;
+			}*/
+			_sExpression = _DEC_S_3DCB2F6A______;
+			_sExpression.append( ee::WStringToString( swsLeft ) );
+			if ( !bUsedNan ) {
+				_sExpression.push_back( ' ' );
+				_sExpression.append( _DEC_S_36A7406E____isnan______ );
+			}
+		}
+		else {
+			_sExpression = _DEC_S_3DCB2F6A______;
+			_sExpression.append( ee::WStringToString( swsLeft ) );
 		}
 	}
 
