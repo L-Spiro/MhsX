@@ -88,6 +88,12 @@ namespace lsw {
 			m_uiptrAddressHandlerData = _uiptrData;
 		}
 
+		// Sets the address write handler.
+		VOID								SetAddressWriteHandler( ee::CExpEvalContainer::PfAddressHandler _pfahHandler, uintptr_t _uiptrData ) {
+			m_pfahAddressWriteHandler = _pfahHandler;
+			m_uiptrAddressWriteHandlerData = _uiptrData;
+		}
+
 		// Gets the address handler.
 		ee::CExpEvalContainer::PfAddressHandler
 											GetAddressHandler() const { return m_pfahAddressHandler; }
@@ -405,6 +411,13 @@ namespace lsw {
 
 		// The data to be sent to the address handler.
 		uintptr_t							m_uiptrAddressHandlerData;
+
+		// The address write handler.
+		ee::CExpEvalContainer::PfAddressHandler
+											m_pfahAddressWriteHandler;
+
+		// The data to be sent to the address write handler.
+		uintptr_t							m_uiptrAddressWriteHandlerData;
 
 
 		// == Message Handlers.

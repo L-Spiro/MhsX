@@ -30,6 +30,8 @@ namespace ee {
 			m_peelLexer( _plLexer ),
 			m_pfahAddressHandler( nullptr ),
 			m_uiptrAddressData( 0 ),
+			m_pfahAddressWriteHandler( nullptr ),
+			m_uiptrAddressWriteData( 0 ),
 			m_pfUser( nullptr ),
 			m_uiptrUserData( 0 ),
 			m_pfshString( nullptr ),
@@ -145,6 +147,9 @@ namespace ee {
 
 		// Set the address handler.
 		void								SetAddressHandler( PfAddressHandler _pfHandler, uintptr_t _uiptrData ) { m_pfahAddressHandler = _pfHandler; m_uiptrAddressData = _uiptrData; }
+
+		// Set the address write handler.
+		void								SetAddressWriteHandler( PfAddressHandler _pfHandler, uintptr_t _uiptrData ) { m_pfahAddressWriteHandler = _pfHandler; m_uiptrAddressWriteData = _uiptrData; }
 
 		// Set the user data handler.
 		void								SetUserHandler( PfUserVarHandler _pfHandler, uintptr_t _uiptrData ) { m_pfUser = _pfHandler; m_uiptrUserData = _uiptrData; }
@@ -681,6 +686,9 @@ namespace ee {
 		// Creates an assignment operator to assign a value in an array.
 		void								CreateArrayReAssignment( size_t _sArrayIndex, const YYSTYPE::EE_NODE_DATA &_ndArray, const YYSTYPE::EE_NODE_DATA &_ndValue, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates an assignment operator to write to an external address.
+		void								CreateAddressAssignment( EE_CAST_TYPES _ctCast, const YYSTYPE::EE_NODE_DATA &_ndExp, const YYSTYPE::EE_NODE_DATA &_ndValue, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Create a 0-parm intrinsic.
 		void								CreateIntrinsic0( uint32_t _uiIntrinsic, YYSTYPE::EE_NODE_DATA &_ndNode );
 
@@ -927,6 +935,12 @@ namespace ee {
 
 		// Address data.
 		uintptr_t							m_uiptrAddressData;
+
+		// Address write handler.
+		PfAddressHandler					m_pfahAddressWriteHandler;
+
+		// Address write data.
+		uintptr_t							m_uiptrAddressWriteData;
 
 		// User function.
 		PfUserVarHandler					m_pfUser;

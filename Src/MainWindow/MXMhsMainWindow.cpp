@@ -776,6 +776,7 @@ namespace mx {
 			//m_peeExpEval = static_cast<CExpEvalWindow *>(CExpressionEvaluatorLayout::CreateExpEvalWindow( this ));
 			m_peeExpEval->AddDockTarget( MultiSplitter() );
 			m_peeExpEval->SetAddressHandler( CMemHack::ExpAddressHandler, reinterpret_cast<uintptr_t>(m_pmhMemHack) );
+			m_peeExpEval->SetAddressWriteHandler( CMemHack::ExpAddressWriteHandler, reinterpret_cast<uintptr_t>(m_pmhMemHack) );
 		}
 		else {
 			m_peeExpEval->SetVisible( TRUE );

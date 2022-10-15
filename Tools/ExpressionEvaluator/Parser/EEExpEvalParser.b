@@ -95,6 +95,7 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %type <ui32Backing>											backing_type
 %type <ui32Backing>											backing_persistence
 %type <ui32Backing>											cast_type
+%type <ndData.v.ctCast>										assignment_op
 %type <ndData>												multiplicative_exp
 %type <ndData>												additive_exp
 %type <ndData>												shift_exp
@@ -517,9 +518,23 @@ conditional_exp
 	| conditional_exp '?' exp ':' or_exp					{ m_peecContainer->CreateConditional( $1, $3, $5, $$ ); }
 	;
 	
+assignment_op
+	: '='													{ $$ = static_cast<ee::EE_CAST_TYPES>('='); }
+	| EE_ASS_PLUSEQUALS										{ $$ = static_cast<ee::EE_CAST_TYPES>(CExpEvalParser::token::EE_ASS_PLUSEQUALS); }
+	| EE_ASS_MINUSEQUALS									{ $$ = static_cast<ee::EE_CAST_TYPES>(CExpEvalParser::token::EE_ASS_MINUSEQUALS); }
+	| EE_ASS_TIMESEQUALS									{ $$ = static_cast<ee::EE_CAST_TYPES>(CExpEvalParser::token::EE_ASS_TIMESEQUALS); }
+	| EE_ASS_MODEQUALS										{ $$ = static_cast<ee::EE_CAST_TYPES>(CExpEvalParser::token::EE_ASS_MODEQUALS); }
+	| EE_ASS_DIVEQUALS										{ $$ = static_cast<ee::EE_CAST_TYPES>(CExpEvalParser::token::EE_ASS_DIVEQUALS); }
+	| EE_ASS_CARROTEQUALS									{ $$ = static_cast<ee::EE_CAST_TYPES>(CExpEvalParser::token::EE_ASS_CARROTEQUALS); }
+	| EE_ASS_SHLEFTEQUALS									{ $$ = static_cast<ee::EE_CAST_TYPES>(CExpEvalParser::token::EE_ASS_SHLEFTEQUALS); }
+	| EE_ASS_SHRIGHTEQUALS									{ $$ = static_cast<ee::EE_CAST_TYPES>(CExpEvalParser::token::EE_ASS_SHRIGHTEQUALS); }
+	| EE_ASS_OREQUALS										{ $$ = static_cast<ee::EE_CAST_TYPES>(CExpEvalParser::token::EE_ASS_OREQUALS); }
+	| EE_ASS_ANDEQUALS										{ $$ = static_cast<ee::EE_CAST_TYPES>(CExpEvalParser::token::EE_ASS_ANDEQUALS); }
+	;
+	
 assignment_exp
 	: conditional_exp										{ $$ = $1; }
-	| custom_var '=' assignment_exp							{ m_peecContainer->CreateReAssignment( $1, $3, '=', $$ ); }
+	| custom_var assignment_op assignment_exp				{ m_peecContainer->CreateReAssignment( $1, $3, $2, $$ ); }
 	| identifier '=' EE_NEW backing_type '(' exp ')'
 															{ m_peecContainer->CreateArray( $1, $4, static_cast<uint32_t>(token::EE_TEMP), $6, ~0, ~0, $$ ); }
 	| identifier '=' EE_NEW backing_type '(' exp ',' backing_persistence ')'
@@ -538,32 +553,18 @@ assignment_exp
 															{ m_peecContainer->CreateArray( $1, static_cast<uint32_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $11.sNodeIndex, $$ ); }
 	| identifier '=' assignment_exp							{ m_peecContainer->CreateAssignment( $1, $3, '=', false, $$ ); }
 	| EE_CONST identifier '=' assignment_exp				{ m_peecContainer->CreateAssignment( $2, $4, '=', true, $$ ); }
-	| custom_var EE_ASS_PLUSEQUALS assignment_exp			{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_PLUSEQUALS, $$ ); }
-	| custom_var EE_ASS_MINUSEQUALS assignment_exp			{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_MINUSEQUALS, $$ ); }
-	| custom_var EE_ASS_TIMESEQUALS assignment_exp			{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_TIMESEQUALS, $$ ); }
-	| custom_var EE_ASS_MODEQUALS assignment_exp			{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_MODEQUALS, $$ ); }
-	| custom_var EE_ASS_DIVEQUALS assignment_exp			{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_DIVEQUALS, $$ ); }
-	| custom_var EE_ASS_CARROTEQUALS assignment_exp			{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_CARROTEQUALS, $$ ); }
-	| custom_var EE_ASS_SHLEFTEQUALS assignment_exp			{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_SHLEFTEQUALS, $$ ); }
-	| custom_var EE_ASS_SHRIGHTEQUALS assignment_exp		{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_SHRIGHTEQUALS, $$ ); }
-	| custom_var EE_ASS_OREQUALS assignment_exp				{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_OREQUALS, $$ ); }
-	| custom_var EE_ASS_ANDEQUALS assignment_exp			{ m_peecContainer->CreateReAssignment( $1, $3, token::EE_ASS_ANDEQUALS, $$ ); }
-	| array_var '[' exp ']' '=' assignment_exp				{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, '=', $$ ); }
-	| array_var '[' exp ']' EE_ASS_PLUSEQUALS assignment_exp{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_PLUSEQUALS, $$ ); }
-	| array_var '[' exp ']' EE_ASS_MINUSEQUALS assignment_exp
-															{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_MINUSEQUALS, $$ ); }
-	| array_var '[' exp ']' EE_ASS_TIMESEQUALS assignment_exp
-															{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_TIMESEQUALS, $$ ); }
-	| array_var '[' exp ']' EE_ASS_MODEQUALS assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_MODEQUALS, $$ ); }
-	| array_var '[' exp ']' EE_ASS_DIVEQUALS assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_DIVEQUALS, $$ ); }
-	| array_var '[' exp ']' EE_ASS_CARROTEQUALS assignment_exp
-															{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_CARROTEQUALS, $$ ); }
-	| array_var '[' exp ']' EE_ASS_SHLEFTEQUALS assignment_exp
-															{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_SHLEFTEQUALS, $$ ); }
-	| array_var '[' exp ']' EE_ASS_SHRIGHTEQUALS assignment_exp
-															{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_SHRIGHTEQUALS, $$ ); }
-	| array_var '[' exp ']' EE_ASS_OREQUALS assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_OREQUALS, $$ ); }
-	| array_var '[' exp ']' EE_ASS_ANDEQUALS assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, token::EE_ASS_ANDEQUALS, $$ ); }
+	| array_var '[' exp ']' assignment_op assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, $5, $$ ); }
+	| EE_OB_DWORD exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( EE_CT_UINT32, $2, $5, $4, $$ ); }
+	| EE_OB_BYTE exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( EE_CT_UINT8, $2, $5, $4, $$ ); }
+	| EE_OB_WORD exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( EE_CT_UINT16, $2, $5, $4, $$ ); }
+	| EE_OB_QWORD exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( EE_CT_UINT64, $2, $5, $4, $$ ); }
+	| EE_OB_SDWORD exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( EE_CT_INT32, $2, $5, $4, $$ ); }
+	| EE_OB_SBYTE exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( EE_CT_INT8, $2, $5, $4, $$ ); }
+	| EE_OB_SWORD exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( EE_CT_INT16, $2, $5, $4, $$ ); }
+	| EE_OB_SQWORD exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( EE_CT_INT64, $2, $5, $4, $$ ); }
+	| EE_OB_FLOAT exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( EE_CT_FLOAT, $2, $5, $4, $$ ); }
+	| EE_OB_FLOAT16 exp ']' assignment_op assignment_exp	{ m_peecContainer->CreateAddressAssignment( EE_CT_FLOAT16, $2, $5, $4, $$ ); }
+	| EE_OB_DOUBLE exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( EE_CT_DOUBLE, $2, $5, $4, $$ ); }
 	;
 
 backing_type

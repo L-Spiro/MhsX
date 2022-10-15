@@ -253,4 +253,206 @@ namespace mx {
 		return false;
 	}
 
+	// The address writer for expressions.
+	bool __stdcall CMemHack::ExpAddressWriteHandler( uint64_t _ui64Address, ee::EE_CAST_TYPES _ctType, uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult ) {
+		CMemHack * _mhMemHack = reinterpret_cast<CMemHack *>(_uiptrData);
+		switch ( _rResult.ncType ) {
+			case ee::EE_NC_UNSIGNED : {
+				switch ( _ctType ) {
+#define MX_SIGNED( BITS )																																\
+	case ee::EE_CT_INT ## BITS : {																														\
+		_rResult.ncType = ee::EE_NC_SIGNED;																												\
+		int ## BITS ## _t iVal = static_cast<int ## BITS ## _t>(_rResult.u.ui64Val);																	\
+		if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &iVal, sizeof( iVal ), NULL ) ) {						\
+			_rResult.u.i64Val = iVal;																													\
+			return true;																																\
+		}																																				\
+		break;																																			\
+	}
+					MX_SIGNED( 8 )
+					MX_SIGNED( 16 )
+					MX_SIGNED( 32 )
+					MX_SIGNED( 64 )
+#undef MX_SIGNED
+
+#define MX_UNSIGNED( BITS )																																\
+	case ee::EE_CT_UINT ## BITS : {																														\
+		_rResult.ncType = ee::EE_NC_UNSIGNED;																											\
+		uint ## BITS ## _t iVal = static_cast<uint ## BITS ## _t>(_rResult.u.ui64Val);																	\
+		if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &iVal, sizeof( iVal ), NULL ) ) {						\
+			_rResult.u.ui64Val = iVal;																													\
+			return true;																																\
+		}																																				\
+		break;																																			\
+	}
+					MX_UNSIGNED( 8 )
+					MX_UNSIGNED( 16 )
+					MX_UNSIGNED( 32 )
+					MX_UNSIGNED( 64 )
+#undef MX_UNSIGNED
+
+					case ee::EE_CT_FLOAT : {
+						_rResult.ncType = ee::EE_NC_FLOATING;
+						float fVal = static_cast<float>(_rResult.u.ui64Val);
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &fVal, sizeof( fVal ), NULL ) ) {
+							_rResult.u.dVal = fVal;
+							return true;
+						}
+						break;
+					}
+					case ee::EE_CT_DOUBLE : {
+						_rResult.ncType = ee::EE_NC_FLOATING;
+						double dVal = static_cast<double>(_rResult.u.ui64Val);
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &dVal, sizeof( dVal ), NULL ) ) {
+							_rResult.u.dVal = dVal;
+							return true;
+						}
+						break;
+					}
+					case ee::EE_CT_FLOAT16 : {
+						_rResult.ncType = ee::EE_NC_FLOATING;
+						CFloat16 f16Val = CFloat16( static_cast<double>(_rResult.u.ui64Val) );
+						uint16_t uiVal = f16Val.RawValue();
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &uiVal, sizeof( uiVal ), NULL ) ) {
+							_rResult.u.dVal = f16Val.Value();
+							return true;
+						}
+						break;
+					}
+				}
+			}
+			case ee::EE_NC_SIGNED : {
+				switch ( _ctType ) {
+#define MX_SIGNED( BITS )																																\
+	case ee::EE_CT_INT ## BITS : {																														\
+		_rResult.ncType = ee::EE_NC_SIGNED;																												\
+		int ## BITS ## _t iVal = static_cast<int ## BITS ## _t>(_rResult.u.i64Val);																		\
+		if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &iVal, sizeof( iVal ), NULL ) ) {						\
+			_rResult.u.i64Val = iVal;																													\
+			return true;																																\
+		}																																				\
+		break;																																			\
+	}
+					MX_SIGNED( 8 )
+					MX_SIGNED( 16 )
+					MX_SIGNED( 32 )
+					MX_SIGNED( 64 )
+#undef MX_SIGNED
+
+#define MX_UNSIGNED( BITS )																																\
+	case ee::EE_CT_UINT ## BITS : {																														\
+		_rResult.ncType = ee::EE_NC_UNSIGNED;																											\
+		uint ## BITS ## _t iVal = static_cast<uint ## BITS ## _t>(_rResult.u.i64Val);																	\
+		if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &iVal, sizeof( iVal ), NULL ) ) {						\
+			_rResult.u.i64Val = iVal;																													\
+			return true;																																\
+		}																																				\
+		break;																																			\
+	}
+					MX_UNSIGNED( 8 )
+					MX_UNSIGNED( 16 )
+					MX_UNSIGNED( 32 )
+					MX_UNSIGNED( 64 )
+#undef MX_UNSIGNED
+
+					case ee::EE_CT_FLOAT : {
+						_rResult.ncType = ee::EE_NC_FLOATING;
+						float fVal = static_cast<float>(_rResult.u.i64Val);
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &fVal, sizeof( fVal ), NULL ) ) {
+							_rResult.u.dVal = fVal;
+							return true;
+						}
+						break;
+					}
+					case ee::EE_CT_DOUBLE : {
+						_rResult.ncType = ee::EE_NC_FLOATING;
+						double dVal = static_cast<double>(_rResult.u.i64Val);
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &dVal, sizeof( dVal ), NULL ) ) {
+							_rResult.u.dVal = dVal;
+							return true;
+						}
+						break;
+					}
+					case ee::EE_CT_FLOAT16 : {
+						_rResult.ncType = ee::EE_NC_FLOATING;
+						CFloat16 f16Val = CFloat16( static_cast<double>(_rResult.u.i64Val) );
+						uint16_t uiVal = f16Val.RawValue();
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &uiVal, sizeof( uiVal ), NULL ) ) {
+							_rResult.u.dVal = f16Val.Value();
+							return true;
+						}
+						break;
+					}
+				}
+			}
+			case ee::EE_NC_FLOATING : {
+				switch ( _ctType ) {
+#define MX_SIGNED( BITS )																																\
+	case ee::EE_CT_INT ## BITS : {																														\
+		_rResult.ncType = ee::EE_NC_SIGNED;																												\
+		int ## BITS ## _t iVal = static_cast<int ## BITS ## _t>(_rResult.u.dVal);																		\
+		if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &iVal, sizeof( iVal ), NULL ) ) {						\
+			_rResult.u.i64Val = iVal;																													\
+			return true;																																\
+		}																																				\
+		break;																																			\
+	}
+					MX_SIGNED( 8 )
+					MX_SIGNED( 16 )
+					MX_SIGNED( 32 )
+					MX_SIGNED( 64 )
+#undef MX_SIGNED
+
+#define MX_UNSIGNED( BITS )																																\
+	case ee::EE_CT_UINT ## BITS : {																														\
+		_rResult.ncType = ee::EE_NC_UNSIGNED;																											\
+		uint ## BITS ## _t iVal = static_cast<uint ## BITS ## _t>(_rResult.u.dVal);																		\
+		if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &iVal, sizeof( iVal ), NULL ) ) {						\
+			_rResult.u.dVal = iVal;																														\
+			return true;																																\
+		}																																				\
+		break;																																			\
+	}
+					MX_UNSIGNED( 8 )
+					MX_UNSIGNED( 16 )
+					MX_UNSIGNED( 32 )
+					MX_UNSIGNED( 64 )
+#undef MX_UNSIGNED
+
+					case ee::EE_CT_FLOAT : {
+						_rResult.ncType = ee::EE_NC_FLOATING;
+						float fVal = static_cast<float>(_rResult.u.dVal);
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &fVal, sizeof( fVal ), NULL ) ) {
+							_rResult.u.dVal = fVal;
+							return true;
+						}
+						break;
+					}
+					case ee::EE_CT_DOUBLE : {
+						_rResult.ncType = ee::EE_NC_FLOATING;
+						double dVal = static_cast<double>(_rResult.u.dVal);
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &dVal, sizeof( dVal ), NULL ) ) {
+							_rResult.u.dVal = dVal;
+							return true;
+						}
+						break;
+					}
+					case ee::EE_CT_FLOAT16 : {
+						_rResult.ncType = ee::EE_NC_FLOATING;
+						CFloat16 f16Val = CFloat16( static_cast<double>(_rResult.u.dVal) );
+						uint16_t uiVal = f16Val.RawValue();
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &uiVal, sizeof( uiVal ), NULL ) ) {
+							_rResult.u.dVal = f16Val.Value();
+							return true;
+						}
+						break;
+					}
+				}
+			}
+		}
+
+		_rResult.ncType = ee::EE_NC_INVALID;
+		return false;
+	}
+
 }	// namespace mx

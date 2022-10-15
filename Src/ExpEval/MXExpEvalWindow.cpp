@@ -251,6 +251,7 @@ namespace mx {
 		ee::CExpEvalContainer::EE_RESULT eResult;
 		BOOL bValid;
 		pcbCombo->SetAddressHandler( m_pfahAddressHandler, m_uiptrAddressHandlerData );
+		pcbCombo->SetAddressWriteHandler( m_pfahAddressWriteHandler, m_uiptrAddressWriteHandlerData );
 		std::string sObj;
 		BOOL bSuccess = pcbCombo->GetTextAsExpression( eResult, &bValid, &sObj );
 

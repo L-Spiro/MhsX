@@ -1935,6 +1935,16 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
+	// Creates an assignment operator to write to an external address.
+	void CExpEvalContainer::CreateAddressAssignment( EE_CAST_TYPES _ctCast, const YYSTYPE::EE_NODE_DATA &_ndExp, const YYSTYPE::EE_NODE_DATA &_ndValue, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_ADDRESS_ASSIGNMENT;
+		_ndNode.v.ctCast = _ctCast;
+		_ndNode.u.ui32Intrinsic = _uiOp;
+		_ndNode.w.sNodeIndex = _ndExp.sNodeIndex;
+		_ndNode.x.sNodeIndex = _ndValue.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
 	// Create a 0-parm intrinsic.
 	void CExpEvalContainer::CreateIntrinsic0( uint32_t _uiIntrinsic, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		switch ( _uiIntrinsic ) {
@@ -4799,6 +4809,12 @@ namespace ee {
 						EE_PUSH( _ndExp.u.sNodeIndex );
 						continue;
 					}
+					case EE_N_ADDRESS_ASSIGNMENT : {
+						if ( !m_pfahAddressWriteHandler ) { EE_ERROR( EE_EC_NOADDRESSHANDLER ); }
+						EE_PUSH( _ndExp.w.sNodeIndex );
+						EE_PUSH( _ndExp.x.sNodeIndex );
+						continue;
+					}
 					case EE_N_ARG_LIST_ENTRY : {
 						if ( _ndExp.v.sNodeIndex != ~0 ) {
 							EE_PUSH( _ndExp.v.sNodeIndex );
@@ -5936,6 +5952,115 @@ namespace ee {
 								break;
 							}
 						}
+						break;
+					}
+					case EE_N_ADDRESS_ASSIGNMENT : {
+						EE_RESULT rNode = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						if ( rNode.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+
+						(*soProcessMe.prResult) = ConvertResultOrObject( soProcessMe.sSubResults[1], EE_NC_UNSIGNED );
+						if ( (*soProcessMe.prResult).ncType == EE_NC_INVALID ) { EE_ERROR( EE_EC_INVALIDCAST ); }
+
+						switch ( _ndExp.u.ui32Intrinsic ) {
+							case '=' : {
+								if ( !m_pfahAddressWriteHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressWriteData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								break;
+							}
+							case CExpEvalParser::token::EE_ASS_PLUSEQUALS : {
+								if ( !m_pfahAddressHandler ) { EE_ERROR( EE_EC_NOADDRESSHANDLER ); }
+								EE_RESULT rCurVal;
+								if ( !m_pfahAddressHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressData, this, rCurVal ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								EE_ERROR_CODES ecError = PerformOp( rCurVal, '+', (*soProcessMe.prResult), (*soProcessMe.prResult) );
+								if ( ecError != EE_EC_SUCCESS ) { EE_ERROR( ecError ); }
+								if ( !m_pfahAddressWriteHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressWriteData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								break;
+							}
+							case CExpEvalParser::token::EE_ASS_MINUSEQUALS : {
+								if ( !m_pfahAddressHandler ) { EE_ERROR( EE_EC_NOADDRESSHANDLER ); }
+								EE_RESULT rCurVal;
+								if ( !m_pfahAddressHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressData, this, rCurVal ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								EE_ERROR_CODES ecError = PerformOp( rCurVal, '-', (*soProcessMe.prResult), (*soProcessMe.prResult) );
+								if ( ecError != EE_EC_SUCCESS ) { EE_ERROR( ecError ); }
+								if ( !m_pfahAddressWriteHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressWriteData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								break;
+							}
+							case CExpEvalParser::token::EE_ASS_TIMESEQUALS : {
+								if ( !m_pfahAddressHandler ) { EE_ERROR( EE_EC_NOADDRESSHANDLER ); }
+								EE_RESULT rCurVal;
+								if ( !m_pfahAddressHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressData, this, rCurVal ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								EE_ERROR_CODES ecError = PerformOp( rCurVal, '*', (*soProcessMe.prResult), (*soProcessMe.prResult) );
+								if ( ecError != EE_EC_SUCCESS ) { EE_ERROR( ecError ); }
+								if ( !m_pfahAddressWriteHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressWriteData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								break;
+							}
+							case CExpEvalParser::token::EE_ASS_MODEQUALS : {
+								if ( !m_pfahAddressHandler ) { EE_ERROR( EE_EC_NOADDRESSHANDLER ); }
+								EE_RESULT rCurVal;
+								if ( !m_pfahAddressHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressData, this, rCurVal ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								EE_ERROR_CODES ecError = PerformOp( rCurVal, '%', (*soProcessMe.prResult), (*soProcessMe.prResult) );
+								if ( ecError != EE_EC_SUCCESS ) { EE_ERROR( ecError ); }
+								if ( !m_pfahAddressWriteHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressWriteData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								break;
+							}
+							case CExpEvalParser::token::EE_ASS_DIVEQUALS : {
+								if ( !m_pfahAddressHandler ) { EE_ERROR( EE_EC_NOADDRESSHANDLER ); }
+								EE_RESULT rCurVal;
+								if ( !m_pfahAddressHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressData, this, rCurVal ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								EE_ERROR_CODES ecError = PerformOp( rCurVal, '/', (*soProcessMe.prResult), (*soProcessMe.prResult) );
+								if ( ecError != EE_EC_SUCCESS ) { EE_ERROR( ecError ); }
+								if ( !m_pfahAddressWriteHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressWriteData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								break;
+							}
+							case CExpEvalParser::token::EE_ASS_CARROTEQUALS : {
+								if ( !m_pfahAddressHandler ) { EE_ERROR( EE_EC_NOADDRESSHANDLER ); }
+								EE_RESULT rCurVal;
+								if ( !m_pfahAddressHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressData, this, rCurVal ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								EE_ERROR_CODES ecError = PerformOp( rCurVal, '^', (*soProcessMe.prResult), (*soProcessMe.prResult) );
+								if ( ecError != EE_EC_SUCCESS ) { EE_ERROR( ecError ); }
+								if ( !m_pfahAddressWriteHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressWriteData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								break;
+							}
+							case CExpEvalParser::token::EE_ASS_SHLEFTEQUALS : {
+								if ( !m_pfahAddressHandler ) { EE_ERROR( EE_EC_NOADDRESSHANDLER ); }
+								EE_RESULT rCurVal;
+								if ( !m_pfahAddressHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressData, this, rCurVal ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								EE_ERROR_CODES ecError = PerformOp( rCurVal, CExpEvalParser::token::EE_LEFT_OP, (*soProcessMe.prResult), (*soProcessMe.prResult) );
+								if ( ecError != EE_EC_SUCCESS ) { EE_ERROR( ecError ); }
+								if ( !m_pfahAddressWriteHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressWriteData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								break;
+							}
+							case CExpEvalParser::token::EE_ASS_SHRIGHTEQUALS : {
+								if ( !m_pfahAddressHandler ) { EE_ERROR( EE_EC_NOADDRESSHANDLER ); }
+								EE_RESULT rCurVal;
+								if ( !m_pfahAddressHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressData, this, rCurVal ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								EE_ERROR_CODES ecError = PerformOp( rCurVal, CExpEvalParser::token::EE_RIGHT_OP, (*soProcessMe.prResult), (*soProcessMe.prResult) );
+								if ( ecError != EE_EC_SUCCESS ) { EE_ERROR( ecError ); }
+								if ( !m_pfahAddressWriteHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressWriteData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								break;
+							}
+							case CExpEvalParser::token::EE_ASS_OREQUALS : {
+								if ( !m_pfahAddressHandler ) { EE_ERROR( EE_EC_NOADDRESSHANDLER ); }
+								EE_RESULT rCurVal;
+								if ( !m_pfahAddressHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressData, this, rCurVal ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								EE_ERROR_CODES ecError = PerformOp( rCurVal, '|', (*soProcessMe.prResult), (*soProcessMe.prResult) );
+								if ( ecError != EE_EC_SUCCESS ) { EE_ERROR( ecError ); }
+								if ( !m_pfahAddressWriteHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressWriteData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								break;
+							}
+							case CExpEvalParser::token::EE_ASS_ANDEQUALS : {
+								if ( !m_pfahAddressHandler ) { EE_ERROR( EE_EC_NOADDRESSHANDLER ); }
+								EE_RESULT rCurVal;
+								if ( !m_pfahAddressHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressData, this, rCurVal ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								EE_ERROR_CODES ecError = PerformOp( rCurVal, '+', (*soProcessMe.prResult), (*soProcessMe.prResult) );
+								if ( ecError != EE_EC_SUCCESS ) { EE_ERROR( ecError ); }
+								if ( !m_pfahAddressWriteHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressWriteData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
+								break;
+							}
+							default : {
+								EE_ERROR( EE_EC_ERRORPROCESSINGOP );
+							}
+						}
+
 						break;
 					}
 					case EE_N_ARG_LIST_ENTRY : {

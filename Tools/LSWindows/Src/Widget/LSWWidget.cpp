@@ -27,7 +27,9 @@ namespace lsw {
 		m_dwTooltipStyleEx( _wlLayout.dwToolTipStyleEx ),
 		m_hTooltip( NULL ),
 		m_pfahAddressHandler( nullptr ),
-		m_uiptrAddressHandlerData( 0 ) {
+		m_uiptrAddressHandlerData( 0 ),
+		m_pfahAddressWriteHandler( nullptr ),
+		m_uiptrAddressWriteHandlerData( 0 ) {
 
 		m_rStartingRect.left = _wlLayout.iLeft;
 		m_rStartingRect.top = _wlLayout.iTop;
@@ -196,6 +198,7 @@ namespace lsw {
 		if ( !eExp.SetExpression( sText.c_str() ) ) { return FALSE; }
 		if ( !eExp.GetContainer() ) { return FALSE; }
 		eExp.GetContainer()->SetAddressHandler( m_pfahAddressHandler, m_uiptrAddressHandlerData );
+		eExp.GetContainer()->SetAddressWriteHandler( m_pfahAddressWriteHandler, m_uiptrAddressWriteHandlerData );
 		if ( _pbExpIsValid ) { (*_pbExpIsValid) = TRUE; }
 		
 		if ( !eExp.GetContainer()->Resolve( _eResult ) ) { return FALSE; }
