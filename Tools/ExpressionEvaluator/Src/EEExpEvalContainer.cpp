@@ -6051,7 +6051,7 @@ namespace ee {
 								if ( !m_pfahAddressHandler ) { EE_ERROR( EE_EC_NOADDRESSHANDLER ); }
 								EE_RESULT rCurVal;
 								if ( !m_pfahAddressHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressData, this, rCurVal ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
-								EE_ERROR_CODES ecError = PerformOp( rCurVal, '+', (*soProcessMe.prResult), (*soProcessMe.prResult) );
+								EE_ERROR_CODES ecError = PerformOp( rCurVal, '&', (*soProcessMe.prResult), (*soProcessMe.prResult) );
 								if ( ecError != EE_EC_SUCCESS ) { EE_ERROR( ecError ); }
 								if ( !m_pfahAddressWriteHandler( rNode.u.ui64Val, _ndExp.v.ctCast, m_uiptrAddressWriteData, this, (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_ADDRESSHANDLERFAILED ); }
 								break;
