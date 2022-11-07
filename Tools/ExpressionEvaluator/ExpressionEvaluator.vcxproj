@@ -264,6 +264,11 @@
     <ClCompile Include="Src\Html\EEHtml.cpp" />
     <ClCompile Include="Src\Object\EEString.cpp" />
     <ClCompile Include="Src\Object\EEStringBaseApi.cpp" />
+    <ClCompile Include="Src\PreProcGen\EEPreProcLexBase.cpp" />
+    <ClCompile Include="Src\PreProcGen\EEPreProcParser.cpp" />
+    <ClCompile Include="Src\PreProc\EEPreProc.cpp" />
+    <ClCompile Include="Src\PreProc\EEPreProcContainer.cpp" />
+    <ClCompile Include="Src\PreProc\EEPreProcLexer.cpp" />
     <ClCompile Include="Src\Unicode\EEUnicode.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -298,6 +303,15 @@
     <ClInclude Include="Src\Object\EEObject.h" />
     <ClInclude Include="Src\Object\EEString.h" />
     <ClInclude Include="Src\Object\EEStringBaseApi.h" />
+    <ClInclude Include="Src\PreProcGen\EEPreProcLexBase.h" />
+    <ClInclude Include="Src\PreProcGen\EEPreProcParser.h" />
+    <ClInclude Include="Src\PreProcGen\EEPreProcParserLocation.h" />
+    <ClInclude Include="Src\PreProcGen\EEPreProcParserPosition.h" />
+    <ClInclude Include="Src\PreProcGen\EEPreProcParserStack.h" />
+    <ClInclude Include="Src\PreProc\EEPreProc.h" />
+    <ClInclude Include="Src\PreProc\EEPreProcContainer.h" />
+    <ClInclude Include="Src\PreProc\EEPreProcLexer.h" />
+    <ClInclude Include="Src\PreProc\EEPreProcSyntaxNodes.h" />
     <ClInclude Include="Src\Unicode\EEUnicode.h" />
     <ClInclude Include="Src\Unicode\EEUnicodeTable.h" />
   </ItemGroup>

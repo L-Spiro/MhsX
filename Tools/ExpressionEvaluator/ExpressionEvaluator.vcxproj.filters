@@ -57,6 +57,18 @@
     <Filter Include="Source Files\Api">
       <UniqueIdentifier>{db88c220-9418-4799-a69a-d005633a60fe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\PreProcGen">
+      <UniqueIdentifier>{14e25497-30c6-4543-ad16-f7e358eaf4ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\PreProcGen">
+      <UniqueIdentifier>{253542aa-42a5-474c-90b4-47972538e52a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\PreProc">
+      <UniqueIdentifier>{28f4f3b0-1e25-47a4-a915-32a62851accc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\PreProc">
+      <UniqueIdentifier>{5f47222f-f27d-4184-bdb3-da14945f2b26}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -94,6 +106,21 @@
     </ClCompile>
     <ClCompile Include="Src\Object\EEStringBaseApi.cpp">
       <Filter>Source Files\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\PreProcGen\EEPreProcLexBase.cpp">
+      <Filter>Source Files\PreProcGen</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\PreProcGen\EEPreProcParser.cpp">
+      <Filter>Source Files\PreProcGen</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\PreProc\EEPreProc.cpp">
+      <Filter>Source Files\PreProc</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\PreProc\EEPreProcContainer.cpp">
+      <Filter>Source Files\PreProc</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\PreProc\EEPreProcLexer.cpp">
+      <Filter>Source Files\PreProc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -195,6 +222,33 @@
     </ClInclude>
     <ClInclude Include="Src\Object\EEStringBaseApi.h">
       <Filter>Header Files\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PreProcGen\EEPreProcLexBase.h">
+      <Filter>Header Files\PreProcGen</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PreProcGen\EEPreProcParser.h">
+      <Filter>Header Files\PreProcGen</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PreProcGen\EEPreProcParserLocation.h">
+      <Filter>Header Files\PreProcGen</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PreProcGen\EEPreProcParserPosition.h">
+      <Filter>Header Files\PreProcGen</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PreProcGen\EEPreProcParserStack.h">
+      <Filter>Header Files\PreProcGen</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PreProc\EEPreProc.h">
+      <Filter>Header Files\PreProc</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PreProc\EEPreProcContainer.h">
+      <Filter>Header Files\PreProc</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PreProc\EEPreProcLexer.h">
+      <Filter>Header Files\PreProc</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PreProc\EEPreProcSyntaxNodes.h">
+      <Filter>Header Files\PreProc</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -793,6 +793,12 @@ namespace ee {
 				if ( (_sIn[stIdx+1] == 'x' || _sIn[stIdx+1] == 'X') ) {
 					size_t I = stIdx + 2;
 					for ( ; I < _sIn.size() && ValidHex( _sIn[I] ); ++I ) {}
+
+					if ( stIdx < _sIn.size() ) {
+						if ( (_sIn[stIdx] == 'l' || _sIn[stIdx] == 'L') ) { return EE_SNC_SIGNED; }
+						else if ( (_sIn[stIdx] == 'u' || _sIn[stIdx] == 'U') ) { return EE_SNC_UNSIGNED; }
+					}
+
 					if ( I == _sIn.size() ) {
 						if ( _pui8SpecialBase ) { (*_pui8SpecialBase) = 16; }
 						return bHasNegSign ? EE_SNC_SIGNED : EE_SNC_UNSIGNED;
@@ -810,9 +816,15 @@ namespace ee {
 					return bHasNegSign ? EE_SNC_SIGNED : EE_SNC_UNSIGNED;
 				}
 				if ( (_sIn[stIdx+1] == 'b' || _sIn[stIdx+1] == 'B') &&
-					ValidBin( _sIn[stIdx+2] ) ) {
+					ValidBin( _sIn[stIdx+++2] ) ) {
+					stIdx += 2;
+					while ( stIdx < _sIn.size() && ValidBin( _sIn[stIdx] ) ) { ++stIdx; }
 					// Binary integer literal.
 					if ( _pui8SpecialBase ) { (*_pui8SpecialBase) = 2; }
+					if ( stIdx < _sIn.size() ) {
+						if ( (_sIn[stIdx] == 'l' || _sIn[stIdx] == 'L') ) { return EE_SNC_SIGNED; }
+						else if ( (_sIn[stIdx] == 'u' || _sIn[stIdx] == 'U') ) { return EE_SNC_UNSIGNED; }
+					}
 					return bHasNegSign ? EE_SNC_SIGNED : EE_SNC_UNSIGNED;
 				}
 			}
@@ -851,6 +863,8 @@ namespace ee {
 					_sIn.size() > I + 1 ) { ++I; }
 				if ( IsDigit( _sIn[I] ) ) { return EE_SNC_FLOAT; }
 			}
+			else if ( (_sIn[I] == 'l' || _sIn[I] == 'L') ) { return EE_SNC_SIGNED; }
+			else if ( (_sIn[I] == 'u' || _sIn[I] == 'U') ) { return EE_SNC_UNSIGNED; }
 			return bHasNegSign ? EE_SNC_SIGNED : EE_SNC_UNSIGNED;
 		}
 
