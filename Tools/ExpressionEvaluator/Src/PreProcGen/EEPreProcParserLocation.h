@@ -36,8 +36,8 @@
  ** Define the yy::location class.
  */
 
-#ifndef __EE_SHADERPARSERLOCATION_H__
-# define __EE_SHADERPARSERLOCATION_H__
+#ifndef __EE_EXPEVALPARSERLOCATION_H__
+# define __EE_EXPEVALPARSERLOCATION_H__
 
 # include <iostream>
 # include <string>
@@ -160,4 +160,4 @@ namespace yy {
 } // yy
 
 
-#endif // not __EE_SHADERPARSERLOCATION_H__
+#endif // not __EE_EXPEVALPARSERLOCATION_H__

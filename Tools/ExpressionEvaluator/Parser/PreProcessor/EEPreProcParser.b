@@ -81,21 +81,21 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CPreProcLexer * _ppplLexer
 
 
 identifier
-	: EE_PPT_IDENTIFIER											{ m_pppcContainer->CreateIdentifier( m_ppplLexer->YYText(), $$ ); };
+	: EE_PPT_IDENTIFIER												{ m_pppcContainer->CreateIdentifier( m_ppplLexer->YYText(), $$ ); };
 	;
 
 basic_exp
 	: EE_PPT_DEC_CONSTANT											{ m_pppcContainer->CreateDecimal( m_ppplLexer->YYText(), $$ ); }
 	| EE_PPT_HEX_CONSTANT											{ m_pppcContainer->CreateHexadecimal( m_ppplLexer->YYText(), $$ ); }
 	| identifier													{ $$ = $1; }
-	| EE_PPT_DEFINED '(' identifier ')'							{ m_pppcContainer->CreateDefined( $3, $$ ); }
-	| EE_PPT_DEFINED identifier									{ m_pppcContainer->CreateDefined( $2, $$ ); }
+	| EE_PPT_DEFINED '(' identifier ')'								{ m_pppcContainer->CreateDefined( $3, $$ ); }
+	| EE_PPT_DEFINED identifier										{ m_pppcContainer->CreateDefined( $2, $$ ); }
 	| '(' exp ')'													{ $$ = $2; }
 	;
 
 unary_op
 	: '!' %prec EE_PPT_NOT											{ $$ = '!'; }
-	| '~' %prec EE_PPT_1SCOMPLIMENT								{ $$ = '~'; }
+	| '~' %prec EE_PPT_1SCOMPLIMENT									{ $$ = '~'; }
 	| '-' %prec EE_PPT_UMINUS										{ $$ = '-'; }
 	| '+' %prec EE_PPT_UPLUS										{ $$ = '+'; }
 	;
@@ -121,7 +121,7 @@ additive_exp
 shift_exp
 	: additive_exp													{ $$ = $1; }
 	| shift_exp EE_PPT_SHIFT_LEFT additive_exp						{ m_pppcContainer->CreateMath( $1, $3, token::EE_PPT_SHIFT_LEFT, $$ ); }
-	| shift_exp EE_PPT_SHIFT_RIGHT additive_exp					{ m_pppcContainer->CreateMath( $1, $3, token::EE_PPT_SHIFT_RIGHT, $$ ); }
+	| shift_exp EE_PPT_SHIFT_RIGHT additive_exp						{ m_pppcContainer->CreateMath( $1, $3, token::EE_PPT_SHIFT_RIGHT, $$ ); }
 	;
 
 relational_exp
@@ -134,8 +134,8 @@ relational_exp
 
 equality_exp
 	: relational_exp												{ $$ = $1; }
-	| equality_exp EE_PPT_EQUALS relational_exp					{ m_pppcContainer->CreateMath( $1, $3, token::EE_PPT_EQUALS, $$ ); }
-	| equality_exp EE_PPT_NOT_EQUALS relational_exp				{ m_pppcContainer->CreateMath( $1, $3, token::EE_PPT_NOT_EQUALS, $$ ); }
+	| equality_exp EE_PPT_EQUALS relational_exp						{ m_pppcContainer->CreateMath( $1, $3, token::EE_PPT_EQUALS, $$ ); }
+	| equality_exp EE_PPT_NOT_EQUALS relational_exp					{ m_pppcContainer->CreateMath( $1, $3, token::EE_PPT_NOT_EQUALS, $$ ); }
 	;
 
 logical_and_exp
@@ -155,7 +155,7 @@ logical_or_exp
 
 and_exp
 	: logical_or_exp												{ $$ = $1; }
-	| and_exp EE_PPT_AND logical_or_exp							{ m_pppcContainer->CreateMath( $1, $3, token::EE_PPT_AND, $$ ); }
+	| and_exp EE_PPT_AND logical_or_exp								{ m_pppcContainer->CreateMath( $1, $3, token::EE_PPT_AND, $$ ); }
 	;
 
 or_exp

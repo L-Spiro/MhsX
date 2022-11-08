@@ -32,8 +32,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef __EE_SHADERPARSERSTACK_H__
-# define __EE_SHADERPARSERSTACK_H__
+#ifndef __EE_EXPEVALPARSERSTACK_H__
+# define __EE_EXPEVALPARSERSTACK_H__
 
 #include <deque>
 
@@ -130,5 +130,5 @@ namespace yy {
 } // yy
 
 
-#endif // not __EE_SHADERPARSERSTACK_H__[]dnl
+#endif // not __EE_EXPEVALPARSERSTACK_H__[]dnl
 

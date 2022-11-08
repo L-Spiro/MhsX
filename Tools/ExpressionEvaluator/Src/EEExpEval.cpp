@@ -1268,4 +1268,33 @@ namespace ee {
 		return uiFreq;
 	}
 
+	// Pulls any preprocessing directives out of a single line.
+	/*bool __cdecl PreprocessingDirectives( const std::string &_sInput, std::string &_sDirective, std::string &_sParms ) {
+		_sDirective.clear();
+		_sParms.clear();
+		std::string sTmp = TrimWhitespace( _sInput );
+		if ( !sTmp.size() ) { return false; }
+		if ( sTmp[0] == '#' ) {
+			// Move to the directive.
+			size_t stIdx = 1;
+			while ( stIdx < sTmp.size() && IsWhiteSpace( sTmp[stIdx] ) ) { ++stIdx; }
+
+			// Copy the directive.
+			while ( stIdx < sTmp.size() && !IsWhiteSpace( sTmp[stIdx] ) ) {
+				if ( !IsAlpha( sTmp[stIdx] ) ) { return false; }
+				_sDirective.push_back( sTmp[stIdx++] );
+			}
+
+			// Skip to the parameters.
+			while ( stIdx < sTmp.size() && IsWhiteSpace( sTmp[stIdx] ) ) { ++stIdx; }
+
+			// Copy any parameters.
+			while ( stIdx < sTmp.size() ) {
+				_sParms.push_back( sTmp[stIdx++] );
+			}
+			return true;
+		}
+		return false;
+	}*/
+
 }	// namespace ee

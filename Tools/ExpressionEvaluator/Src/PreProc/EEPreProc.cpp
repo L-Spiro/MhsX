@@ -14,6 +14,7 @@
 
 #include "EEPreProc.h"
 #include "EEPreProcLexer.h"
+#include <algorithm>
 #include <sstream>
 
 
@@ -112,15 +113,145 @@ namespace ee {
 	}
 
 	/**
+	 * Fully preprocesses an in-memory file.
+	 *
+	 * \param _sFile The file to preprocess.
+	 * \param _sResult The preprocessed result.
+	 * \param _mMacros Predefined macros.
+	 * \return Returns an error code indicating success or a type of failure.
+	 */
+	CPreProc::EE_ERRORS CPreProc::PreProcessFile( const std::string &_sFile,
+		std::string &_sResult,
+		const EE_MACROS &_mMacros ) {
+
+		EE_MACROS mMacroCopy = _mMacros;
+
+		bool bErrored = false;
+		std::string sTmp = _sFile;
+		RemoveCPlusPlusComments( sTmp );
+		std::vector<std::string> vLines = Tokenize<std::string>( RemoveChar( sTmp, '\r' ), '\n', true, &bErrored );
+		if ( bErrored ) {
+			// Tokenize() can only fail due to memory issues.
+			return EE_E_OUT_OF_MEMORY;
+		}
+		MergeBackslashedLines( vLines );
+
+		// Remove C-style comments.
+		for ( auto I = vLines.size(); I--; ) {
+			RemoveCComments( vLines[I] );
+		}
+
+		std::string sDirective, sParms;
+		std::vector<EE_CLEAR_STATE> vClearStates;
+		size_t sIfDepth = 0;
+		for ( size_t I = 0; I < vLines.size(); ++I ) {
+			if ( PreprocessingDirectives( vLines[I], sDirective, sParms ) ) {
+				if ( sDirective == "if" ) {
+					vClearStates.push_back( EE_CS_NONE );
+					CPreProc ppPreProc;
+					CPreProc::EE_ERRORS eError = ppPreProc.Parse( sParms );
+					if ( eError == CPreProc::EE_E_ERROR ) { return EE_E_SYNTAX_IF; }
+					bool bRes;
+					if ( !ppPreProc.GetResult( mMacroCopy, bRes ) ) { return EE_E_SYNTAX_IF; }
+
+					if ( !bRes ) {
+						vClearStates[sIfDepth] = EE_CS_CLEAR;
+					}
+					vLines[I].clear();
+					++sIfDepth;
+					continue;
+				}
+				else if ( sDirective == "ifdef" ) {
+					vClearStates.push_back( EE_CS_NONE );
+					CPreProc::EE_PREPROC_DEFINE pdThis;
+					pdThis.sName = sParms;
+
+					vClearStates[sIfDepth] = (mMacroCopy.find( pdThis ) == mMacroCopy.end()) ? EE_CS_CLEAR : EE_CS_NONE;
+					vLines[I].clear();
+					++sIfDepth;
+					continue;
+				}
+				else if ( sDirective == "ifndef" ) {
+					vClearStates.push_back( EE_CS_NONE );
+					CPreProc::EE_PREPROC_DEFINE pdThis;
+					pdThis.sName = sParms;
+
+					vClearStates[sIfDepth] = (mMacroCopy.find( pdThis ) != mMacroCopy.end()) ? EE_CS_CLEAR : EE_CS_NONE;
+					vLines[I].clear();
+					++sIfDepth;
+					continue;
+				}
+				else if ( sDirective == "else" ) {
+					vLines[I].clear();
+					if ( vClearStates[sIfDepth-1] == EE_CS_NONE ) {
+						// Previous #if was true, so scan to the matching #endif.
+						vClearStates[sIfDepth-1] = EE_CS_SEEKING_ENDIF;
+					}
+					else if ( vClearStates[sIfDepth-1] == EE_CS_CLEAR ) {
+						// Previous #if was false, so this area is true.
+						vClearStates[sIfDepth-1] = EE_CS_NONE;
+					}
+					continue;
+				}
+				else if ( sDirective == "elif" ) {
+					vLines[I].clear();
+					if ( vClearStates[sIfDepth-1] == EE_CS_NONE ) {
+						// Previous #if was true, so scan to the matching #endif.
+						vClearStates[sIfDepth-1] = EE_CS_SEEKING_ENDIF;
+					}
+					else if ( vClearStates[sIfDepth-1] == EE_CS_CLEAR ) {
+						CPreProc ppPreProc;
+						CPreProc::EE_ERRORS eError = ppPreProc.Parse( sParms );
+						if ( eError == CPreProc::EE_E_ERROR ) { return EE_E_SYNTAX_ELIF; }
+						bool bRes;
+						if ( !ppPreProc.GetResult( _mMacros, bRes ) ) { return EE_E_SYNTAX_ELIF; }
+
+						if ( !bRes ) {
+							vClearStates[sIfDepth-1] = EE_CS_CLEAR;
+						}
+						else {
+							vClearStates[sIfDepth-1] = EE_CS_NONE;
+						}
+					}
+					continue;
+				}
+				else if ( sDirective == "endif" ) {
+					vLines[I].clear();
+					--sIfDepth;
+					vClearStates.pop_back();
+					continue;
+				}
+
+				if ( (std::find( vClearStates.begin(), vClearStates.end(), EE_CS_CLEAR ) != vClearStates.end()) ||
+					(std::find( vClearStates.begin(), vClearStates.end(), EE_CS_SEEKING_ENDIF ) != vClearStates.end()) ) {
+					vLines[I].clear();
+				}
+			}
+			else if ( (std::find( vClearStates.begin(), vClearStates.end(), EE_CS_CLEAR ) != vClearStates.end()) ||
+				(std::find( vClearStates.begin(), vClearStates.end(), EE_CS_SEEKING_ENDIF ) != vClearStates.end()) ) {
+				vLines[I].clear();
+			}
+		}
+
+
+		_sResult = Reconstitute( vLines, '\n', &bErrored );
+		if ( bErrored ) {
+			// Reconstitute() can only fail due to memory issues.
+			return EE_E_OUT_OF_MEMORY;
+		}
+		return EE_E_SUCCESS;
+	}
+
+	/**
 	 * Process a single node and return the result of that node.
 	 *
-	 * \param _ui32Index The index of the node to process.
+	 * \param _stIndex The index of the node to process.
 	 * \param _i64Return Holds the return value of the node.
 	 * \param _mMacros The macros.
 	 * \return Returns true if the node was evaluated.
 	 */
-	bool CPreProc::EvalNode( uint32_t _ui32Index, int64_t &_i64Return, const EE_MACROS &_mMacros ) const {
-		const EE_PREPROC_SYNTAX_NODES::EE_NODE_DATA & ndData = m_ppcContainer.GetNode( _ui32Index );
+	bool CPreProc::EvalNode( size_t _stIndex, int64_t &_i64Return, const EE_MACROS &_mMacros ) const {
+		const EE_PREPROC_SYNTAX_NODES::EE_NODE_DATA & ndData = m_ppcContainer.GetNode( _stIndex );
 		switch ( ndData.ppnNodeType ) {
 			case EE_PPN_NUMERICCONSTANT : {
 				_i64Return = ndData.nuNodeData.i64Const;
@@ -153,7 +284,7 @@ namespace ee {
 				return true;
 			}
 			case EE_PPN_UNARY : {
-				if ( !EvalNode( ndData.nueNodeDataEx.ui32NodeIndexEx, _i64Return, _mMacros ) ) { return false; }
+				if ( !EvalNode( ndData.nueNodeDataEx.stNodeIndexEx, _i64Return, _mMacros ) ) { return false; }
 				switch ( ndData.nuNodeData.ui32UnaryOp ) {
 					case '!' : {
 						_i64Return = !_i64Return;
@@ -177,8 +308,8 @@ namespace ee {
 			}
 			case EE_PPN_MATH : {
 				int64_t i64Left, i64Right;
-				if ( !EvalNode( ndData.nuNodeData.ui32NodeIndex, i64Left, _mMacros ) ) { return false; }
-				if ( !EvalNode( ndData.nueNodeDataEx.ui32NodeIndexEx, i64Right, _mMacros ) ) { return false; }
+				if ( !EvalNode( ndData.nuNodeData.stNodeIndex, i64Left, _mMacros ) ) { return false; }
+				if ( !EvalNode( ndData.nueNodeDataEx.stNodeIndexEx, i64Right, _mMacros ) ) { return false; }
 #define EE_HELP_ME_HERE( CASE, OP )		case CASE : { _i64Return = i64Left OP i64Right; break; }
 				switch ( ndData.nuoOp.ui32Op ) {
 					EE_HELP_ME_HERE( '*', * )
@@ -205,19 +336,19 @@ namespace ee {
 			}
 			case EE_PPN_TERTIARY : {
 				// Condition.
-				if ( !EvalNode( ndData.nuNodeData.ui32NodeIndex, _i64Return, _mMacros ) ) { return false; }
+				if ( !EvalNode( ndData.nuNodeData.stNodeIndex, _i64Return, _mMacros ) ) { return false; }
 				if ( _i64Return ) {
 					// Left.
-					return EvalNode( ndData.nueNodeDataEx.ui32NodeIndexEx, _i64Return, _mMacros );
+					return EvalNode( ndData.nueNodeDataEx.stNodeIndexEx, _i64Return, _mMacros );
 				}
 				else {
-					return EvalNode( ndData.nueNodeDataEx.ui32NodeIndexEx, _i64Return, _mMacros );
+					return EvalNode( ndData.nueNodeDataEx.stNodeIndexEx, _i64Return, _mMacros );
 				}
 			}
 			case EE_PPN_DEFINED : {
 				// Should be in the macro dictionary.
 				EE_PREPROC_DEFINE pdThis;
-				const EE_PREPROC_SYNTAX_NODES::EE_NODE_DATA & ndString = m_ppcContainer.GetNode( ndData.nuNodeData.ui32NodeIndex );
+				const EE_PREPROC_SYNTAX_NODES::EE_NODE_DATA & ndString = m_ppcContainer.GetNode( ndData.nuNodeData.stNodeIndex );
 				pdThis.sName = m_ppcContainer.GetString( ndString.nuNodeData.ui32IdentifierIndex );
 				//uint32_t ui32Index;
 				auto aItem = _mMacros.find( pdThis );

@@ -42,9 +42,13 @@ namespace ee {
 		 * Error codes.
 		 */
 		enum EE_ERRORS {
-			EE_E_FAILURE,
-			EE_E_SUCCESS,
-			EE_E_ERROR,
+			EE_E_FAILURE,							/**< A nor-error parsing error occurred. */
+			EE_E_SUCCESS,							/**< Parsing succeeded. */
+			EE_E_ERROR,								/**< Parsing failed. */
+			EE_E_OUT_OF_MEMORY,						/**< Memory error. */
+			EE_E_PROCESSING_ERROR,					/**< General processing error. */
+			EE_E_SYNTAX_IF,							/**< Syntax error on an #if directive. */
+			EE_E_SYNTAX_ELIF,						/**< Syntax error on an #elif directive. */
 		};
 
 
@@ -124,12 +128,33 @@ namespace ee {
 		 */
 		bool										GetResult( const EE_MACROS &_mMacros, bool &_bRet ) const;
 
+		/**
+		 * Fully preprocesses an in-memory file.
+		 *
+		 * \param _sFile The file to preprocess.
+		 * \param _sResult The preprocessed result.
+		 * \param _mMacros Predefined macros.
+		 * \return Returns an error code indicating success or a type of failure.
+		 */
+		static EE_ERRORS							PreProcessFile( const std::string &_sFile,
+			std::string &_sResult,
+			const EE_MACROS &_mMacros );
+
 
 	protected :
-		// == Members.
+		// == Types.
 		/**
-		 * The container for holding the parsed data.
+		 * Clear states for internal use.
 		 */
+		enum EE_CLEAR_STATE {
+			EE_CS_NONE,
+			EE_CS_CLEAR,
+			EE_CS_SEEKING_ENDIF,
+		};
+
+
+		// == Members.
+		/** The container for holding the parsed data. */
 		CPreProcContainer							m_ppcContainer;
 
 
@@ -137,12 +162,12 @@ namespace ee {
 		/**
 		 * Process a single node and return the result of that node.
 		 *
-		 * \param _ui32Index The index of the node to process.
+		 * \param _stIndex The index of the node to process.
 		 * \param _i64Return Holds the return value of the node.
 		 * \param _mMacros The macros.
 		 * \return Returns true if the node was evaluated.
 		 */
-		bool										EvalNode( uint32_t _ui32Index, int64_t &_i64Return, const EE_MACROS &_mMacros ) const;
+		bool										EvalNode( size_t _stIndex, int64_t &_i64Return, const EE_MACROS &_mMacros ) const;
 	};
 
 }	// namespace ee

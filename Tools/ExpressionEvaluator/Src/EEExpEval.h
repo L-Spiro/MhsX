@@ -122,6 +122,21 @@ namespace ee {
 		return _cVal >= '0' && _cVal <= '9';
 	}
 
+	// Checks for alpha characters (a-z, A-Z) without throwing exceptions.
+	static inline bool				IsAlpha( char _cVal ) {
+		return (_cVal >= 'A' && _cVal <= 'Z') ||
+			(_cVal >= 'a' && _cVal <= 'z');
+	}
+
+	// Determines if a character is an identifier character.  Sets _bIsFirst to false internally.
+	static inline bool				IsIdentifier( char _cVal, bool &_bIsFirst ) {
+		if ( _bIsFirst ) {
+			_bIsFirst = false;
+			return IsAlpha( _cVal ) || _cVal == '_';
+		}
+		return IsAlpha( _cVal ) || IsDigit( _cVal ) || _cVal == '_';
+	}
+
 	// Decodes a single escape sequence.
 	static inline wchar_t			DecodeEscape( const char * _pcValue, size_t _sLen, size_t &_sSize ) {
 		struct {
@@ -243,6 +258,35 @@ namespace ee {
 		std::string sRet = ++_pcValue;
 		sRet.pop_back();
 		return sRet;
+	}
+
+	// Remove a character from a string.
+	template <typename _tStringType = std::string>
+	static inline _tStringType &	RemoveChar( _tStringType &_sInput, uint32_t _ui32RemoveMe ) {
+		for ( auto I = _sInput.size(); I--; ) {
+			if ( _sInput[I] == static_cast<_tStringType::value_type>(_ui32RemoveMe) ) {
+				_sInput.erase( I, 1 );
+			}
+		}
+		return _sInput;
+	}
+
+	// Trims whitespace from the start and end of a given string.
+	template <typename _tType = std::string>
+	static _tType					TrimWhitespace( const _tType &_sString ) {
+		_tType sCopy = _sString;
+		while ( sCopy.size() && IsWhiteSpace( sCopy[sCopy.size()-1] ) ) {
+			sCopy.pop_back();
+		}
+		// Count the opening whitespace.
+		size_t stOpening = 0;
+		while ( sCopy.size() && IsWhiteSpace( sCopy[stOpening] ) ) {
+			++stOpening;
+		}
+		if ( stOpening ) {
+			sCopy.erase( 0, stOpening );
+		}
+		return sCopy;
 	}
 
 	// Counts the number of sequential hex characters in a string starting at the given character.
@@ -698,6 +742,242 @@ namespace ee {
 	// Converts ticks to microseconds.
 	static inline uint64_t			TicksToMicroseconds( uint64_t _ui64Ticks ) {
 		return (_ui64Ticks * 1000000ULL) / TimerFrequency();
+	}
+
+	// Parse a string into an array of strings given a delimiter.
+	template <typename _tType = std::string>
+	static std::vector<_tType>		Tokenize( const _tType &_sInput, uint32_t _ui32Token, bool _bIncludeEmptyTokens = true, bool * pbErrored = nullptr ) {
+		std::vector<_tType> vRet;
+		try {
+			_tType tCurLine;
+			for ( size_t I = 0; I < _sInput.size(); ++I ) {
+				if ( _sInput[I] == _tType::value_type( _ui32Token ) ) {
+					if ( tCurLine.size() || _bIncludeEmptyTokens ) {
+						vRet.push_back( tCurLine );
+					}
+					tCurLine.clear();
+				}
+				else {
+					tCurLine.push_back( _sInput[I] );
+				}
+			}
+			if ( tCurLine.size() || _bIncludeEmptyTokens ) {
+				vRet.push_back( tCurLine );
+			}
+			if ( pbErrored ) { (*pbErrored) = false; }
+		}
+		catch ( ... ) {
+			if ( pbErrored ) { (*pbErrored) = true; }
+		}
+		return vRet;
+	}
+
+	// Recombines an array of strings back into a single string.
+	template <typename _tType = std::string>
+	static _tType					Reconstitute( const std::vector<_tType> &_vArray, uint32_t _ui32Token, bool * pbErrored = nullptr ) {
+		_tType sRet;
+		try {
+			for ( size_t I = 0; I < _vArray.size(); ++I ) {
+				sRet.append( _vArray[I] );
+				sRet.push_back( _tType::value_type( _ui32Token ) );
+			}
+			if ( pbErrored ) { (*pbErrored) = false; }
+		}
+		catch ( ... ) {
+			if ( pbErrored ) { (*pbErrored) = true; }
+		}
+		return sRet;
+	}
+
+	// Merges lines that end with \ with the next line below.
+	template <typename _tType = std::string>
+	static std::vector<_tType> &	MergeBackslashedLines( std::vector<_tType> &_vArray ) {
+		for ( size_t I = 0; I < _vArray.size(); ++I ) {
+			if ( _vArray[I].size() && _vArray[I][_vArray[I].size()-1] == '\\' ) {
+				// If the whole line is just \ by itself, clear the line and move on.
+				_tType sCopy = TrimWhitespace<_tType>( _vArray[I] );
+				if ( sCopy.size() == 1 && sCopy[0] == '\\' ) {
+					_vArray[I].clear();
+				}
+				else {
+					// Begin combining lines.
+					size_t sIdx = I;
+					_vArray[sIdx].pop_back();	// Remove the \.
+					for ( ++I; I < _vArray.size(); ++I ) {
+						_vArray[sIdx].append( _vArray[I] );
+						_vArray[I].clear();
+						if ( _vArray[sIdx][_vArray[sIdx].size()-1] != '\\' ) {
+							break;
+						}
+						else {
+							_vArray[sIdx].pop_back();	// Remove the \.
+						}
+					}
+				}
+			}
+		}
+		return _vArray;
+	}
+
+	// Detrmines the length of a C/C++/Python string inside the given text starting at the given position.  A non-0 return indicates the substring at the given
+	//	text position is the start of a code-format string.
+	template <typename _tType = std::string>
+	static size_t					CodeStringLength( const _tType &_sInput, size_t _sPos ) {
+#define EE_PREVIEW( OFF )			(((_sPos + (OFF)) < _sInput.size()) ? _sInput[_sPos+(OFF)] : _tType::value_type( '\0' ))
+		size_t sStart = _sPos;
+		if ( _sInput[_sPos] == _tType::value_type( '\'' ) && EE_PREVIEW( 1 ) == _tType::value_type( '\'' ) && EE_PREVIEW( 2 ) == _tType::value_type( '\'' ) ) {
+			_sPos += 2;	// Eat the 2nd and 3rd '.
+			// Eat string quotes.
+			while ( ++_sPos < _sInput.size() ) {
+				if ( _sInput[_sPos] == _tType::value_type( '\\' ) && EE_PREVIEW( 1 ) == _tType::value_type( '\\' ) ) {
+					// \\ sequence.  Skip.
+					++_sPos;
+				}
+				else if ( _sInput[_sPos] == _tType::value_type( '\\' ) && EE_PREVIEW( 1 ) == _tType::value_type( '\'' ) ) {
+					// \' sequence.  Skip.
+					++_sPos;
+				}
+				else if ( _sInput[_sPos] == _tType::value_type( '\'' ) && EE_PREVIEW( 1 ) == _tType::value_type( '\'' ) && EE_PREVIEW( 2 ) == _tType::value_type( '\'' ) ) {
+					return _sPos - sStart + 3;
+				}
+			}
+		}
+		else if ( _sInput[_sPos] == _tType::value_type( '\"' ) && EE_PREVIEW( 1 ) == _tType::value_type( '\"' ) && EE_PREVIEW( 2 ) == _tType::value_type( '\"' ) ) {
+			_sPos += 2;	// Eat the 2nd and 3rd ".
+			// Eat string quotes.
+			while ( ++_sPos < _sInput.size() ) {
+				if ( _sInput[_sPos] == _tType::value_type( '\\' ) && EE_PREVIEW( 1 ) == _tType::value_type( '\\' ) ) {
+					// \\ sequence.  Skip.
+					++_sPos;
+				}
+				else if ( _sInput[_sPos] == _tType::value_type( '\\' ) && EE_PREVIEW( 1 ) == _tType::value_type( '\"' ) ) {
+					// \" sequence.  Skip.
+					++_sPos;
+				}
+				else if ( _sInput[_sPos] == _tType::value_type( '\"' ) && EE_PREVIEW( 1 ) == _tType::value_type( '\"' ) && EE_PREVIEW( 2 ) == _tType::value_type( '\"' ) ) {
+					return _sPos - sStart + 3;
+				}
+			}
+		}
+		else if ( (_sInput[_sPos] == _tType::value_type( 'r' ) || _sInput[_sPos] == _tType::value_type( 'R' )) &&
+			EE_PREVIEW( 1 ) == _tType::value_type( '\"' ) ) {
+			++_sPos;	// Eat the R.
+			// Eat raw string quotes.
+			while ( ++_sPos < _sInput.size() ) {
+				if ( _sInput[_sPos] == _tType::value_type( '\"' ) ) {
+					return _sPos - sStart + 1;
+				}
+			}
+		}
+		else if ( _sInput[_sPos] == _tType::value_type( '\"' ) ) {
+			// Eat string quotes.
+			while ( ++_sPos < _sInput.size() ) {
+				if ( _sInput[_sPos] == _tType::value_type( '\\' ) && EE_PREVIEW( 1 ) == _tType::value_type( '\\' ) ) {
+					// \\ sequence.  Skip.
+					++_sPos;
+				}
+				else if ( _sInput[_sPos] == _tType::value_type( '\\' ) && EE_PREVIEW( 1 ) == _tType::value_type( '\"' ) ) {
+					// \" sequence.  Skip.
+					++_sPos;
+				}
+				else if ( _sInput[_sPos] == _tType::value_type( '\"' ) ) {
+					return _sPos - sStart + 1;
+				}
+			}
+		}
+		else if ( _sInput[_sPos] == _tType::value_type( '\'' ) ) {
+			// Eat character quotes.
+			while ( ++_sPos < _sInput.size() ) {
+				if ( _sInput[_sPos] == _tType::value_type( '\\' ) && EE_PREVIEW( 1 ) == _tType::value_type( '\\' ) ) {
+					// \\ sequence.  Skip.
+					++_sPos;
+				}
+				else if ( _sInput[_sPos] == _tType::value_type( '\\' ) && EE_PREVIEW( 1 ) == _tType::value_type( '\'' ) ) {
+					// \" sequence.  Skip.
+					++_sPos;
+				}
+				else if ( _sInput[_sPos] == _tType::value_type( '\'' ) ) {
+					return _sPos - sStart + 1;
+				}
+			}
+		}
+#undef EE_PREVIEW
+		return 0;
+	}
+
+	// Removes C-style comments from a string.
+	template <typename _tType = std::string>
+	static _tType &					RemoveCComments( _tType &_sInput ) {
+		size_t sIdx = 0;
+#define EE_PREVIEW( OFF )			(((sIdx + (OFF)) < _sInput.size()) ? _sInput[sIdx+(OFF)] : _tType::value_type( '\0' ))
+
+		while ( sIdx < _sInput.size() ) {
+			sIdx += CodeStringLength( _sInput, sIdx );
+
+			if ( _sInput[sIdx] == _tType::value_type( '/' ) && EE_PREVIEW( 1 ) == _tType::value_type( '/' ) ) {
+				_sInput.erase( sIdx );
+				break;
+			}
+
+			++sIdx;
+		}
+
+#undef EE_PREVIEW
+		return _sInput;
+	}
+
+	// Removes C++-style comments from a string.
+	template <typename _tType = std::string>
+	static _tType &					RemoveCPlusPlusComments( _tType &_sInput ) {
+		size_t sIdx = 0;
+#define EE_PREVIEW( OFF )			(((sIdx + (OFF)) < _sInput.size()) ? _sInput[sIdx+(OFF)] : _tType::value_type( '\0' ))
+		_tType sNewLines;
+		while ( sIdx < _sInput.size() ) {
+			sIdx += CodeStringLength( _sInput, sIdx );
+
+			if ( _sInput[sIdx] == _tType::value_type( '/' ) && EE_PREVIEW( 1 ) == _tType::value_type( '*' ) ) {
+				size_t I = sIdx++;
+				while ( ++sIdx < _sInput.size() ) {
+					if ( _sInput[sIdx] == _tType::value_type( '*' ) && EE_PREVIEW( 1 ) == _tType::value_type( '/' ) ) { sIdx += 2; break; }
+					if ( _sInput[sIdx] == _tType::value_type( '\n' ) ) { sNewLines.push_back( '\n' ); }
+				}
+				_sInput.erase( I, sIdx - I );
+				_sInput.insert( I, sNewLines );
+				break;
+			}
+
+			++sIdx;
+		}
+
+#undef EE_PREVIEW
+		return _sInput;
+	}
+
+	// Pulls any preprocessing directives out of a single line.
+	static bool						PreprocessingDirectives( const std::string &_sInput, std::string &_sDirective, std::string &_sParms ) {
+		_sDirective.clear();
+		_sParms.clear();
+		std::string sTmp = TrimWhitespace( _sInput );
+		if ( !sTmp.size() ) { return false; }
+		if ( sTmp[0] == '#' ) {
+			// Move to the directive.
+			size_t stIdx = 1;
+			while ( stIdx < sTmp.size() && IsWhiteSpace( sTmp[stIdx] ) ) { ++stIdx; }
+
+			// Copy the directive.
+			while ( stIdx < sTmp.size() && !IsWhiteSpace( sTmp[stIdx] ) ) {
+				if ( !IsAlpha( sTmp[stIdx] ) ) { return false; }
+				_sDirective.push_back( sTmp[stIdx++] );
+			}
+
+			// Skip to the parameters.
+			while ( stIdx < sTmp.size() && IsWhiteSpace( sTmp[stIdx] ) ) { ++stIdx; }
+
+			// Copy any parameters.
+			_sParms = sTmp.substr( stIdx );
+			return true;
+		}
+		return false;
 	}
 
 }	// namespace ee

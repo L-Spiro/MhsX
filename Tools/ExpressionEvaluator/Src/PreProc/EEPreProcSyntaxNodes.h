@@ -63,22 +63,22 @@ namespace ee {
 
 		struct EE_NODE_DATA {
 			EE_PREPROC_NODE												ppnNodeType;		// One of the EE_PPN_* constants.
-			uint32_t													ui32NodeIndex;		// Index of the node within the stack of nodes.
+			size_t														stNodeIndex;		// Index of the node within the stack of nodes.
 			union EE_NODE_UNION {
 				uint32_t												ui32IdentifierIndex;// Index of an identifier in the master list of identifiers.
 				uint64_t												ui64Const;			// Value of unsigned constant numeric.
 				int64_t													i64Const;			// Value of signed constant numeric.
 				double													dConst;				// Value of floating-point numeric.
 				uint32_t												ui32UnaryOp;		// Unary operator.
-				uint32_t												ui32NodeIndex;		// Index of a node.  Multi-purpose.
+				size_t													stNodeIndex;		// Index of a node.  Multi-purpose.
 			}															nuNodeData;			// Node data.
 			union EE_NODE_UNION_EX {
 				EE_PREPROC_NUM_CONSTANTS								ncConstantType;		// Whether the given numeric constant is signed, unsigned, or floating.
-				uint32_t												ui32NodeIndexEx;	// Index of a node.  Multi-purpose.
+				size_t													stNodeIndexEx;	// Index of a node.  Multi-purpose.
 			}															nueNodeDataEx;
 			union EE_NODE_UNION_OP {
 				uint32_t												ui32Op;				// Operator.
-				uint32_t												ui32NodeIndex3;		// Tertiary expression and initializer index in single declarations.
+				size_t													stNodeIndex3;		// Tertiary expression and initializer index in single declarations.
 			}															nuoOp;
 		}																ndData;
 	};

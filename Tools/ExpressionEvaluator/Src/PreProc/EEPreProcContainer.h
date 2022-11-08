@@ -137,18 +137,18 @@ namespace ee {
 		/**
 		 * Gets a node for read-only.
 		 *
-		 * \param _ui32Index Index of the node to get.
+		 * \param _stIndex Index of the node to get.
 		 * \return Returns a constant reference to the requested node.
 		 */
 		const EE_PREPROC_SYNTAX_NODES::EE_NODE_DATA &
-													GetNode( uint32_t _ui32Index ) const;
+													GetNode( size_t _stIndex ) const;
 
 		/**
 		 * Gets the total number of nodes.
 		 *
 		 * \return Returns the total number of nodes in the syntax tree.
 		 */
-		uint32_t 									TotalNodes() const;
+		size_t	 									TotalNodes() const;
 
 		/**
 		 * Gets a string from the string pool.

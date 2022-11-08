@@ -154,7 +154,7 @@ namespace ee {
 		_ndNode.ppnNodeType = EE_PPN_UNARY;
 
 		_ndNode.nuNodeData.ui32UnaryOp = _ui32Op;
-		_ndNode.nueNodeDataEx.ui32NodeIndexEx = _ndBase.ui32NodeIndex;
+		_ndNode.nueNodeDataEx.stNodeIndexEx = _ndBase.stNodeIndex;
 
 		return AddNode( _ndNode );
 	}
@@ -173,8 +173,8 @@ namespace ee {
 		const YYSTYPE::EE_NODE_DATA &_ndRight,
 		uint32_t _ui32Op, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.ppnNodeType = EE_PPN_MATH;
-		_ndNode.nuNodeData.ui32NodeIndex = _ndLeft.ui32NodeIndex;
-		_ndNode.nueNodeDataEx.ui32NodeIndexEx = _ndRight.ui32NodeIndex;
+		_ndNode.nuNodeData.stNodeIndex = _ndLeft.stNodeIndex;
+		_ndNode.nueNodeDataEx.stNodeIndexEx = _ndRight.stNodeIndex;
 		_ndNode.nuoOp.ui32Op = _ui32Op;
 
 		return AddNode( _ndNode );
@@ -194,9 +194,9 @@ namespace ee {
 		const YYSTYPE::EE_NODE_DATA &_ndRight,
 		YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.ppnNodeType = EE_PPN_TERTIARY;
-		_ndNode.nuNodeData.ui32NodeIndex = _ndCond.ui32NodeIndex;
-		_ndNode.nueNodeDataEx.ui32NodeIndexEx = _ndLeft.ui32NodeIndex;
-		_ndNode.nuoOp.ui32NodeIndex3 = _ndRight.ui32NodeIndex;
+		_ndNode.nuNodeData.stNodeIndex = _ndCond.stNodeIndex;
+		_ndNode.nueNodeDataEx.stNodeIndexEx = _ndLeft.stNodeIndex;
+		_ndNode.nuoOp.stNodeIndex3 = _ndRight.stNodeIndex;
 
 		return AddNode( _ndNode );
 	}
@@ -211,7 +211,7 @@ namespace ee {
 	bool CPreProcContainer::CreateDefined( const YYSTYPE::EE_NODE_DATA &_ndIdent,
 		YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.ppnNodeType = EE_PPN_DEFINED;
-		_ndNode.nuNodeData.ui32NodeIndex = _ndIdent.ui32NodeIndex;
+		_ndNode.nuNodeData.stNodeIndex = _ndIdent.stNodeIndex;
 
 		return AddNode( _ndNode );
 	}
@@ -228,8 +228,8 @@ namespace ee {
 		const YYSTYPE::EE_NODE_DATA &_ndRight,
 		YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.ppnNodeType = EE_PPN_TU;
-		_ndNode.nuNodeData.ui32NodeIndex = _ndLeft.ui32NodeIndex;
-		_ndNode.nueNodeDataEx.ui32NodeIndexEx = _ndRight.ui32NodeIndex;
+		_ndNode.nuNodeData.stNodeIndex = _ndLeft.stNodeIndex;
+		_ndNode.nueNodeDataEx.stNodeIndexEx = _ndRight.stNodeIndex;
 
 		return AddNode( _ndNode );
 	}
@@ -240,8 +240,8 @@ namespace ee {
 	 * \param _ui32Index Index of the node to get.
 	 * \return Returns a constant reference to the requested node.
 	 */
-	const EE_PREPROC_SYNTAX_NODES::EE_NODE_DATA & CPreProcContainer::GetNode( uint32_t _ui32Index ) const {
-		return m_vNodes[_ui32Index];
+	const EE_PREPROC_SYNTAX_NODES::EE_NODE_DATA & CPreProcContainer::GetNode( size_t _stIndex ) const {
+		return m_vNodes[_stIndex];
 	}
 
 	/**
@@ -249,7 +249,7 @@ namespace ee {
 	 *
 	 * \return Returns the total number of nodes in the syntax tree.
 	 */
-	uint32_t CPreProcContainer::TotalNodes() const {
+	size_t CPreProcContainer::TotalNodes() const {
 		return m_vNodes.size();
 	}
 
@@ -270,7 +270,7 @@ namespace ee {
 	 * \return Returns true if the node was added.
 	 */
 	bool CPreProcContainer::AddNode( EE_PREPROC_SYNTAX_NODES::EE_NODE_DATA &_ndNode ) {
-		_ndNode.ui32NodeIndex = m_vNodes.size();
+		_ndNode.stNodeIndex = m_vNodes.size();
 		try {
 			m_vNodes.push_back( _ndNode );
 			return true;
@@ -291,6 +291,7 @@ namespace ee {
 		if ( ui32Ret == uint32_t( static_cast<size_t>(-1) ) ) {
 			// Not there so add it.
 			try {
+				ui32Ret = uint32_t( m_vStringPool.size() );
 				m_vStringPool.push_back( _pcText );
 			}
 			catch ( ... ) {
