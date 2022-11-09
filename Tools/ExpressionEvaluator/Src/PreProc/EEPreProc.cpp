@@ -580,16 +580,24 @@ namespace ee {
 		if ( _iMacro->first.sParms.size() != _vParms.size() ) {
 			return false;
 		}
+/*#define BLAH( PARM, PARM1 ) "_90" #####PARM     # PARM1
+		const char * pcTmp = BLAH( BABY, "BIBBY" );*/
 		// The primary replacement.
-		std::string sIdentifier;
-		_sRet.reserve( _iMacro->second.size() );
+		std::string sFinal, sIdentifier;
+		sFinal.reserve( _iMacro->second.size() );
 		const char * pcStr = _iMacro->second.c_str();
 		
+		EE_TOKEN tToken = EE_T_NONE;
+		char cLastChar = '\0';
 		for ( size_t I = 0; I < _iMacro->second.size(); ++I ) {
 			size_t sStrLen = CodeStringLength( _iMacro->second, I );
-			_sRet.append( _iMacro->second, I, sStrLen );
-			I += sStrLen;
-			if ( I == _iMacro->second.size() ) { break; }
+			if ( sStrLen ) {
+				sFinal.append( _iMacro->second, I, sStrLen );
+				I += sStrLen;
+				if ( I == _iMacro->second.size() ) { break; }
+				cLastChar = '\0';
+				tToken = EE_T_NONE;
+			}
 
 			bool bIdentStart = true;
 			sIdentifier.clear();
@@ -598,31 +606,76 @@ namespace ee {
 			}
 			if ( sIdentifier.size() ) {
 				--I;
+				
 				// An identifier was eaten.
 				size_t stIdx = 0;
 				for ( ; stIdx < _iMacro->first.sParms.size(); ++stIdx ) {
 					if ( _iMacro->first.sParms[stIdx] == sIdentifier ) {
-						_sRet.append( _vParms[stIdx] );
+						if ( tToken == EE_T_STRINGIZE ) {
+							while ( sFinal.size() && sFinal[sFinal.size()-1] != '#' ) {
+								sFinal.pop_back();
+							}
+							sFinal.pop_back();
+							sFinal.push_back( '\"' );
+							sFinal.append( ee::EscapeQuotes<std::string>( _vParms[stIdx] ) );
+							sFinal.push_back( '\"' );
+						}
+						else {
+							sFinal.append( _vParms[stIdx] );
+						}
 						break;
 					}
 				}
 				if ( stIdx == _iMacro->first.sParms.size() ) {
-					_sRet.append( sIdentifier );
+					sFinal.append( sIdentifier );
 				}
+				tToken = EE_T_NONE;
+				cLastChar = '\0';
 			}
 			else {
-				_sRet.push_back( pcStr[I] );
+				sFinal.push_back( pcStr[I] );
+				if ( pcStr[I] == '#' ) {
+					tToken = (cLastChar == '#' && tToken != EE_T_CONCAT) ? EE_T_CONCAT : EE_T_STRINGIZE;
+				}
+				else if ( !ee::IsWhiteSpace( pcStr[I] ) ) {
+					tToken = EE_T_NONE;
+				}
+				cLastChar = pcStr[I];
 			}
 		}
-	
-		/*if ( _vParms.size() ) {
-			//std::string sTmp = std::move( _sRet );
+		// Handle concatenation.
+		size_t stLastPos = 0;
+		cLastChar = '\0';
+		pcStr = sFinal.c_str();
+		for ( size_t I = 0; I < sFinal.size(); ++I ) {
+			size_t sStrLen = CodeStringLength( sFinal, I );
+			if ( sStrLen ) {
+				_sRet.append( sFinal, I, sStrLen );
+				I += sStrLen;
+				if ( I == sFinal.size() ) { break; }
+				cLastChar = '\0';
+				tToken = EE_T_NONE;
+				stLastPos = _sRet.size();
+			}
 
-			_sRet = _iMacro->second;
+			
+			_sRet.push_back( pcStr[I] );
+			if ( pcStr[I] == '#' ) {
+				tToken = (cLastChar == '#' && tToken != EE_T_CONCAT) ? EE_T_CONCAT : EE_T_STRINGIZE;
+				if ( tToken == EE_T_CONCAT ) {
+					_sRet.erase( stLastPos );
+					while ( ++I < sFinal.size() && ee::IsWhiteSpace( pcStr[I] ) ) {}
+					--I;
+					continue;
+				}
+			}
+			else if ( !ee::IsWhiteSpace( pcStr[I] ) ) {
+				tToken = EE_T_NONE;
+				stLastPos = _sRet.size();
+			}			
+			cLastChar = pcStr[I];
 		}
-		else {
-			_sRet = _iMacro->second;
-		}*/
+
 
 		std::set<std::string> sReplaced = _sUsedValues;
 		sReplaced.insert( _iMacro->first.sName );

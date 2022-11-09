@@ -450,6 +450,19 @@ namespace ee {
 	// Converts an &#nnnn; or an &#xhhhh; HTML character to a uint64_t.
 	uint64_t						EscapeHtml( const char * _pcValue, size_t _sLen, size_t &_sCharsConsumed );
 
+	// Escapes double quotes in a string (" -> \").
+	template <typename _tType = std::string>
+	static _tType					EscapeQuotes( const _tType &_sInput ) {
+		_tType sRet;
+		for ( size_t I = 0; I < _sInput.size(); ++I ) {
+			if ( _sInput[I] == _tType::value_type( '\"' ) ) {
+				sRet.push_back( _tType::value_type( '\\' ) );
+			}
+			sRet.push_back( _sInput[I] );
+		}
+		return sRet;
+	}
+
 	// Gets the next UTF-32 character from a stream or error (EE_UTF_INVALID)
 	inline uint32_t					NextUtf32Char( const uint32_t * _puiString, size_t _sLen, size_t * _psSize = nullptr ) {
 		if ( _sLen == 0 ) {

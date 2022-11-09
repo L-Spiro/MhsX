@@ -157,6 +157,15 @@ namespace ee {
 			EE_CS_SEEKING_ENDIF,
 		};
 
+		/**
+		 * # and ## directives.
+		 */
+		enum EE_TOKEN {
+			EE_T_NONE,
+			EE_T_CONCAT,
+			EE_T_STRINGIZE
+		};
+
 
 		// == Members.
 		/** The container for holding the parsed data. */
@@ -226,6 +235,14 @@ namespace ee {
 		static bool									GetMacroReplacementString( CPreProc::EE_MACROS::const_iterator &_iMacro, std::vector<std::string> &_vParms,
 			const CPreProc::EE_MACROS &_mMacros, const std::set<std::string> &_sUsedValues,
 			std::string &_sRet );
+
+		/**
+		 * Eats a macro-expansion token from the end of a line and 
+		 *
+		 * \param PARM DESC
+		 * \param PARM DESC
+		 * \return RETURN
+		 */
 	};
 
 }	// namespace ee
