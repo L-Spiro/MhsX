@@ -584,8 +584,7 @@ namespace ee {
 		if ( _iMacro->first.sParms.size() != _vParms.size() ) {
 			return false;
 		}
-/*#define BLAH( PARM, PARM1 ) "_90" #####PARM     # PARM1
-		const char * pcTmp = BLAH( BABY, "BIBBY" );*/
+
 		// The primary replacement.
 		std::string sFinal, sIdentifier;
 		sFinal.reserve( _iMacro->second.size() );
