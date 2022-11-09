@@ -22,6 +22,7 @@
 #include "EEPreProcContainer.h"
 
 #include <map>
+#include <set>
 
 namespace ee {
 
@@ -49,6 +50,10 @@ namespace ee {
 			EE_E_PROCESSING_ERROR,					/**< General processing error. */
 			EE_E_SYNTAX_IF,							/**< Syntax error on an #if directive. */
 			EE_E_SYNTAX_ELIF,						/**< Syntax error on an #elif directive. */
+			EE_E_SYNTAX_DEFINE,						/**< Syntax error on a #define directive. */
+			EE_E_SYNTAX_UNDEF,						/**< Syntax error on an #undef directive. */
+			EE_E_MACRO_EXPANSION,					/**< Error expanding a macro. */
+			EE_E_UNMATCHED_ENDIF,					/**< An unmatched #endif. */
 		};
 
 
@@ -168,6 +173,59 @@ namespace ee {
 		 * \return Returns true if the node was evaluated.
 		 */
 		bool										EvalNode( size_t _stIndex, int64_t &_i64Return, const EE_MACROS &_mMacros ) const;
+
+		/**
+		 * Handles a #define.
+		 *
+		 * \param _sLine The text after "#define".  Parsed to determin the name, parameters, and definition of a macro.
+		 * \param _mMacros Set of macros to which to add the new macro.
+		 * \return Returns true if the text is valid and the macro was added.
+		 */
+		static EE_ERRORS							ParseDefine( const std::string &_sLine, CPreProc::EE_MACROS &_mMacros );
+
+		/**
+		 * Replace all macros in a given string.
+		 *
+		 * \param _sString The string in which to expand macros.
+		 * \param _mMacros The macro dictionary.
+		 * \return Returns true if the expansion succeeds.  Otherwise fills _sError with the error string and returns false.
+		 */
+		static bool									ExpandMacros( std::string &_sString, const CPreProc::EE_MACROS &_mMacros );
+
+		/**
+		 * Replace all macros in a given string.
+		 *
+		 * \param _sString The string in which to expand macros.
+		 * \param _mMacros The macro dictionary.
+		 * \param _sUsedValues Values that have already been expanded.
+		 * \return Returns true if the expansion succeeds.  Otherwise fills _sError with the error string and returns false.
+		 */
+		static bool									ExpandMacros( std::string &_sString, const CPreProc::EE_MACROS &_mMacros, const std::set<std::string> &_sUsedValues );
+
+		/**
+		 * Gets the parameters for a function-style macro.  If no parameters are given, returns false.
+		 *
+		 * \param _psString The string from which to extract function-style macro parameters.
+		 * \param _stPos The position at which to begin the extraction.
+		 * \param _stNewPos The position after successful extraction.
+		 * \param _vRet The returned parameters, as strings.
+		 * \return Returns true if the parameters were extracted.  False indicates no parameters present or an invalid parameter string.
+		 */
+		static bool									GetMacroParms( const std::string &_sString, size_t _stPos, size_t &_stNewPos, std::vector<std::string> &_vRet );
+
+		/**
+		 * Gets the replacement string for a given macro and optional parameters.  Returns false if there is an error expanding the macro.
+		 *
+		 * \param _iMacro Iterator of the macro to expand.
+		 * \param _vParms Optional macro parameters.  If this does not match the number of parameters the macro receives, false is returned.
+		 * \param _mMacros The macro dictionary.
+		 * \param _sUsedValues Values that have already been expanded.  Allows recursion to be avoided.
+		 * \param _sRet The returned fully expanded string.
+		 * \return Returns true if there were no errors during macro expansion.
+		 */
+		static bool									GetMacroReplacementString( CPreProc::EE_MACROS::const_iterator &_iMacro, std::vector<std::string> &_vParms,
+			const CPreProc::EE_MACROS &_mMacros, const std::set<std::string> &_sUsedValues,
+			std::string &_sRet );
 	};
 
 }	// namespace ee

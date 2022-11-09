@@ -137,6 +137,17 @@ namespace ee {
 		return IsAlpha( _cVal ) || IsDigit( _cVal ) || _cVal == '_';
 	}
 
+	// Determines if the given string is an identifier.
+	template <typename _tStringType = std::string>
+	static bool						IsIdentifier( const _tStringType &_sIdent ) {
+		if ( !_sIdent.size() ) { return false; }
+		bool bStart = true;
+		for ( size_t I = 0; I < _sIdent.size(); ++I ) {
+			if ( !IsIdentifier( static_cast<char>(_sIdent[I]), bStart ) ) { return false; }
+		}
+		return true;
+	}
+
 	// Decodes a single escape sequence.
 	static inline wchar_t			DecodeEscape( const char * _pcValue, size_t _sLen, size_t &_sSize ) {
 		struct {

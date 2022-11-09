@@ -204,19 +204,15 @@ namespace ee {
 						CPreProc::EE_ERRORS eError = ppPreProc.Parse( sParms );
 						if ( eError == CPreProc::EE_E_ERROR ) { return EE_E_SYNTAX_ELIF; }
 						bool bRes;
-						if ( !ppPreProc.GetResult( _mMacros, bRes ) ) { return EE_E_SYNTAX_ELIF; }
+						if ( !ppPreProc.GetResult( mMacroCopy, bRes ) ) { return EE_E_SYNTAX_ELIF; }
 
-						if ( !bRes ) {
-							vClearStates[sIfDepth-1] = EE_CS_CLEAR;
-						}
-						else {
-							vClearStates[sIfDepth-1] = EE_CS_NONE;
-						}
+						vClearStates[sIfDepth-1] = !bRes ? EE_CS_CLEAR : EE_CS_NONE;
 					}
 					continue;
 				}
 				else if ( sDirective == "endif" ) {
 					vLines[I].clear();
+					if ( !vClearStates.size() ) { return EE_E_UNMATCHED_ENDIF; }
 					--sIfDepth;
 					vClearStates.pop_back();
 					continue;
@@ -226,10 +222,26 @@ namespace ee {
 					(std::find( vClearStates.begin(), vClearStates.end(), EE_CS_SEEKING_ENDIF ) != vClearStates.end()) ) {
 					vLines[I].clear();
 				}
+				else if ( sDirective == "define" ) {
+					EE_ERRORS eDefine = ParseDefine( sParms, mMacroCopy );
+					if ( eDefine != EE_E_SUCCESS ) { return eDefine; }
+					vLines[I].clear();
+				}
+				else if ( sDirective == "undef" ) {
+					CPreProc::EE_PREPROC_DEFINE pdThis;
+					if ( !ee::IsIdentifier( sParms ) ) { return EE_E_SYNTAX_UNDEF; }
+					pdThis.sName = sParms;
+					auto aFound = mMacroCopy.find( pdThis );
+					if ( aFound != mMacroCopy.end() ) { mMacroCopy.erase( aFound ); }
+					vLines[I].clear();
+				}
 			}
 			else if ( (std::find( vClearStates.begin(), vClearStates.end(), EE_CS_CLEAR ) != vClearStates.end()) ||
 				(std::find( vClearStates.begin(), vClearStates.end(), EE_CS_SEEKING_ENDIF ) != vClearStates.end()) ) {
 				vLines[I].clear();
+			}
+			else if ( !ExpandMacros( vLines[I], mMacroCopy ) ) {
+				return EE_E_MACRO_EXPANSION;
 			}
 		}
 
@@ -277,7 +289,7 @@ namespace ee {
 						return false;
 					}
 					else {
-						//_i64Return = CStd::AtoI64( _mMacros.GetByIndex( ui32Index ).CStr() );
+						//_i64Return = CStd::AtoI64( _mMacros.GetByIndex( ui32Index ).c_str() );
 						_i64Return = StoULL( aItem->second.c_str() );
 					}
 				}
@@ -364,6 +376,225 @@ namespace ee {
 			case EE_PPN_TU : { return false; }
 		}
 		return false;
+	}
+
+	/**
+	 * Handles a #define.
+	 *
+	 * \param _sLine The text after "#define".  Parsed to determin the name, parameters, and definition of a macro.
+	 * \param _mMacros Set of macros to which to add the new macro.
+	 * \return Returns true if the text is valid and the macro was added.
+	 */
+	CPreProc::EE_ERRORS CPreProc::ParseDefine( const std::string &_sLine, CPreProc::EE_MACROS &_mMacros ) {
+		try {
+			CPreProc::EE_PREPROC_DEFINE pdDefine;
+			size_t stPos = 0;
+			bool bIsStart = true;
+			for ( ; stPos < _sLine.size(); ++stPos ) {
+				if ( ee::IsWhiteSpace( _sLine[stPos] ) || _sLine[stPos] == '(' ) { break; }
+				if ( !ee::IsIdentifier( _sLine[stPos], bIsStart ) ) { return EE_E_SYNTAX_DEFINE; }
+			}
+			if ( !stPos ) { return EE_E_SYNTAX_DEFINE; }
+			pdDefine.sName = _sLine.substr( 0, stPos );
+
+
+			// Optionally add parameters.
+			if ( _sLine[stPos] == '(' ) {
+				// Get parameters.
+				std::string sParm;
+				bIsStart = true;
+				bool bFoundWs = false;
+				for ( ++stPos; stPos < _sLine.size(); ++stPos ) {
+					if ( ee::IsWhiteSpace( _sLine[stPos] ) ) {
+						if ( !bIsStart ) { bFoundWs = true; }
+						continue;
+					}
+					if ( _sLine[stPos] == ',' || _sLine[stPos] == ')' ) {
+					
+						pdDefine.sParms.push_back( sParm );
+						sParm.clear();
+						bIsStart = true;
+						bFoundWs = false;
+					}
+					else {
+						if ( !ee::IsIdentifier( _sLine[stPos], bIsStart ) ) { return EE_E_SYNTAX_DEFINE; }
+						if ( bFoundWs ) { return EE_E_SYNTAX_DEFINE; }
+						sParm.push_back( _sLine[stPos] );
+					}
+					if ( _sLine[stPos] == ')' ) { ++stPos; break; }
+				}
+			}
+
+			// Skip to the definition.
+			while ( ee::IsWhiteSpace( _sLine[stPos] ) ) { ++stPos; }
+
+			_mMacros[pdDefine] = _sLine.substr( stPos );
+			return EE_E_SUCCESS;
+		}
+		catch ( ... ) {
+			return EE_E_OUT_OF_MEMORY;
+		}
+	}
+
+	/**
+	 * Replace all macros in a given string.
+	 *
+	 * \param _sString The string in which to expand macros.
+	 * \param _mMacros The macro dictionary.
+	 * \return Returns true if the expansion succeeds.  Otherwise fills _sError with the error string and returns false.
+	 */
+	bool CPreProc::ExpandMacros( std::string &_sString, const CPreProc::EE_MACROS &_mMacros ) {
+		std::set<std::string> sReplaced;
+		return ExpandMacros( _sString, _mMacros, sReplaced );
+	}
+
+	/**
+	 * Replace all macros in a given string.
+	 *
+	 * \param _sString The string in which to expand macros.
+	 * \param _mMacros The macro dictionary.
+	 * \param _sUsedValues Values that have already been expanded.
+	 * \return Returns true if the expansion succeeds.  Otherwise fills _sError with the error string and returns false.
+	 */
+	bool CPreProc::ExpandMacros( std::string &_sString, const CPreProc::EE_MACROS &_mMacros, const std::set<std::string> &_sUsedValues ) {
+		std::string sFinal, sIdentifier;
+		sFinal.reserve( _sString.size() );
+		const char * pcStr = _sString.c_str();
+#define EE_TMP( BB )		BB
+		EE_TMP ( 90 );
+		
+		for ( size_t I = 0; I < _sString.size(); ++I ) {
+			size_t sStrLen = CodeStringLength( _sString, I );
+			sFinal.append( _sString, I, sStrLen );
+			I += sStrLen;
+			if ( I == _sString.size() ) { break; }
+
+			bool bIdentStart = true;
+			sIdentifier.clear();
+			while ( ee::IsIdentifier( pcStr[I], bIdentStart ) && I < _sString.size() ) {
+				sIdentifier.push_back( pcStr[I++] );
+			}
+			if ( sIdentifier.size() ) {
+				// An identifier was eaten.
+				if ( _sUsedValues.find( sIdentifier ) == _sUsedValues.end() ) {
+					// It hasn't been replaced.
+					CPreProc::EE_PREPROC_DEFINE pdTestMe;
+					pdTestMe.sName = std::move( sIdentifier );	// pdTestMe.sName is now the official home of the identifier.
+					auto aFound = _mMacros.find( pdTestMe );
+					if ( aFound != _mMacros.end() ) {
+						if ( aFound->first.sParms.size() ) {
+							size_t stNewPos;
+							std::vector<std::string> vParms;
+							if ( GetMacroParms( _sString, I, stNewPos, vParms ) ) {
+								std::string sReplacement;
+								if ( GetMacroReplacementString( aFound, vParms, _mMacros, _sUsedValues, sReplacement ) ) {
+									sFinal.append( sReplacement );
+									I = stNewPos;
+									continue;
+								}
+							}
+						}
+						else {
+							std::string sReplacement;
+							std::vector<std::string> vParms;
+							if ( GetMacroReplacementString( aFound, vParms, _mMacros, _sUsedValues, sReplacement ) ) {
+								sFinal.append( sReplacement );
+								--I;
+								continue;
+							}
+						}
+					}
+					// Not a macro or failed macro expansion.
+					sFinal.append( pdTestMe.sName );
+					--I;
+				}
+				else {
+					// It was replaced so just copy it to the output.
+					sFinal.append( sIdentifier );
+				}
+			}
+			else {
+				sFinal.push_back( pcStr[I] );
+			}
+		}
+
+		_sString = sFinal;
+		return true;
+	}
+
+	/**
+	 * Gets the parameters for a function-style macro.  If no parameters are given, returns false.
+	 *
+	 * \param _psString The string from which to extract function-style macro parameters.
+	 * \param _stPos The position at which to begin the extraction.
+	 * \param _stNewPos The position after successful extraction.
+	 * \param _vRet The returned parameters, as strings.
+	 * \return Returns true if the parameters were extracted.  False indicates no parameters present or an invalid parameter string.
+	 */
+	bool CPreProc::GetMacroParms( const std::string &_sString, size_t _stPos, size_t &_stNewPos, std::vector<std::string> &_vRet ) {
+		_stNewPos = _stPos;
+		// Skip any whitespace.
+		while ( _stNewPos < _sString.size() && ee::IsWhiteSpace( _sString[_stNewPos] ) ) { ++_stNewPos; }
+		if ( _stNewPos == _sString.size() ) { return false; }
+		// The next character must be '('.
+		if ( _sString[_stNewPos] != '(' ) { return false; }
+
+
+		uint32_t ui32ParDepth = 1;
+		std::string sCur;
+		for ( ++_stNewPos; _stNewPos < _sString.size(); ++_stNewPos ) {
+			char cThis = _sString[_stNewPos];
+			if ( cThis == ',' && ui32ParDepth == 1 ) {
+				if ( !sCur.size() ) { return false; }
+				_vRet.push_back( TrimWhitespace( sCur ) );
+				sCur.clear();
+			}
+			else {
+				
+				sCur.push_back( cThis );
+				if ( cThis == '(' ) {
+					++ui32ParDepth;
+				}
+				else if ( cThis == ')' ) {
+					--ui32ParDepth;
+					if ( ui32ParDepth == 0 ) {
+						sCur.pop_back();
+						_vRet.push_back( TrimWhitespace( sCur ) );
+						++_stNewPos;
+						return true;
+					}
+				}
+			}
+		}
+		// No closing ) found.
+		return false;
+
+	}
+
+	/**
+	 * Gets the replacement string for a given macro and optional parameters.  Returns false if there is an error expanding the macro.
+	 *
+	 * \param _iMacro Iterator of the macro to expand.
+	 * \param _vParms Optional macro parameters.  If this does not match the number of parameters the macro receives, false is returned.
+	 * \param _mMacros The macro dictionary.
+	 * \param _sUsedValues Values that have already been expanded.  Allows recursion to be avoided.
+	 * \param _sRet The returned fully expanded string.
+	 * \return Returns true if there were no errors during macro expansion.
+	 */
+	bool CPreProc::GetMacroReplacementString( CPreProc::EE_MACROS::const_iterator &_iMacro, std::vector<std::string> &_vParms,
+		const CPreProc::EE_MACROS &_mMacros, const std::set<std::string> &_sUsedValues,
+		std::string &_sRet ) {
+		if ( _iMacro->first.sParms.size() != _vParms.size() ) {
+			return false;
+		}
+		// The primary replacement.
+		_sRet = _iMacro->second;
+
+
+		std::set<std::string> sReplaced = _sUsedValues;
+		sReplaced.insert( _iMacro->first.sName );
+		if ( !ExpandMacros( _sRet, _mMacros, sReplaced ) ) { return false; }
+		return true;
 	}
 
 }	// namespace ee
