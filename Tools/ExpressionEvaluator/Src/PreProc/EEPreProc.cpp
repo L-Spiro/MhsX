@@ -128,18 +128,13 @@ namespace ee {
 
 		bool bErrored = false;
 		std::string sTmp = _sFile;
-		RemoveCPlusPlusComments( sTmp );
-		std::vector<std::string> vLines = Tokenize<std::string>( RemoveChar( sTmp, '\r' ), '\n', true, &bErrored );
+		RemoveComments<std::string>( RemoveChar( sTmp, '\r' ) );
+		std::vector<std::string> vLines = Tokenize<std::string>( sTmp, '\n', true, &bErrored );
 		if ( bErrored ) {
 			// Tokenize() can only fail due to memory issues.
 			return EE_E_OUT_OF_MEMORY;
 		}
 		MergeBackslashedLines( vLines );
-
-		// Remove C-style comments.
-		for ( auto I = vLines.size(); I--; ) {
-			RemoveCComments( vLines[I] );
-		}
 
 		std::string sDirective, sParms;
 		std::vector<EE_CLEAR_STATE> vClearStates;
@@ -460,8 +455,6 @@ namespace ee {
 		std::string sFinal, sIdentifier;
 		sFinal.reserve( _sString.size() );
 		const char * pcStr = _sString.c_str();
-#define EE_TMP( BB )		BB
-		EE_TMP ( 90 );
 		
 		for ( size_t I = 0; I < _sString.size(); ++I ) {
 			size_t sStrLen = CodeStringLength( _sString, I );
@@ -489,7 +482,7 @@ namespace ee {
 								std::string sReplacement;
 								if ( GetMacroReplacementString( aFound, vParms, _mMacros, _sUsedValues, sReplacement ) ) {
 									sFinal.append( sReplacement );
-									I = stNewPos;
+									I = stNewPos - 1;
 									continue;
 								}
 							}
@@ -588,8 +581,48 @@ namespace ee {
 			return false;
 		}
 		// The primary replacement.
-		_sRet = _iMacro->second;
+		std::string sIdentifier;
+		_sRet.reserve( _iMacro->second.size() );
+		const char * pcStr = _iMacro->second.c_str();
+		
+		for ( size_t I = 0; I < _iMacro->second.size(); ++I ) {
+			size_t sStrLen = CodeStringLength( _iMacro->second, I );
+			_sRet.append( _iMacro->second, I, sStrLen );
+			I += sStrLen;
+			if ( I == _iMacro->second.size() ) { break; }
 
+			bool bIdentStart = true;
+			sIdentifier.clear();
+			while ( ee::IsIdentifier( pcStr[I], bIdentStart ) && I < _iMacro->second.size() ) {
+				sIdentifier.push_back( pcStr[I++] );
+			}
+			if ( sIdentifier.size() ) {
+				--I;
+				// An identifier was eaten.
+				size_t stIdx = 0;
+				for ( ; stIdx < _iMacro->first.sParms.size(); ++stIdx ) {
+					if ( _iMacro->first.sParms[stIdx] == sIdentifier ) {
+						_sRet.append( _vParms[stIdx] );
+						break;
+					}
+				}
+				if ( stIdx == _iMacro->first.sParms.size() ) {
+					_sRet.append( sIdentifier );
+				}
+			}
+			else {
+				_sRet.push_back( pcStr[I] );
+			}
+		}
+	
+		/*if ( _vParms.size() ) {
+			//std::string sTmp = std::move( _sRet );
+
+			_sRet = _iMacro->second;
+		}
+		else {
+			_sRet = _iMacro->second;
+		}*/
 
 		std::set<std::string> sReplaced = _sUsedValues;
 		sReplaced.insert( _iMacro->first.sName );

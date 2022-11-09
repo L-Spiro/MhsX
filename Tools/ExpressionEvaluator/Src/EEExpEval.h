@@ -926,8 +926,31 @@ namespace ee {
 			sIdx += CodeStringLength( _sInput, sIdx );
 
 			if ( _sInput[sIdx] == _tType::value_type( '/' ) && EE_PREVIEW( 1 ) == _tType::value_type( '/' ) ) {
-				_sInput.erase( sIdx );
-				break;
+				size_t stStart = sIdx;
+				sIdx += 2;
+				uint32_t ui32LastChar = '\0';
+				size_t stNewLines = 0;
+				while ( sIdx < _sInput.size() ) {
+					if ( _sInput[sIdx] == _tType::value_type( '\n' ) ) {
+						if ( ui32LastChar == '\\' ) {
+							++stNewLines;
+						}
+						else {
+							// Add back the new lines we skipped.
+							for ( auto J = stNewLines; J--; ) {
+								_sInput[stStart++] = _tType::value_type( '\n' );
+							}
+							_sInput.erase( stStart, sIdx - stStart );
+							sIdx = stStart;
+							break;
+						}
+					}
+					ui32LastChar = _sInput[sIdx++];
+				}
+				if ( sIdx == _sInput.size() ) {
+					_sInput.erase( stStart );
+				}
+				continue;
 			}
 
 			++sIdx;
@@ -945,6 +968,61 @@ namespace ee {
 		_tType sNewLines;
 		while ( sIdx < _sInput.size() ) {
 			sIdx += CodeStringLength( _sInput, sIdx );
+
+			if ( _sInput[sIdx] == _tType::value_type( '/' ) && EE_PREVIEW( 1 ) == _tType::value_type( '*' ) ) {
+				size_t I = sIdx++;
+				while ( ++sIdx < _sInput.size() ) {
+					if ( _sInput[sIdx] == _tType::value_type( '*' ) && EE_PREVIEW( 1 ) == _tType::value_type( '/' ) ) { sIdx += 2; break; }
+					if ( _sInput[sIdx] == _tType::value_type( '\n' ) ) { sNewLines.push_back( '\n' ); }
+				}
+				_sInput.erase( I, sIdx - I );
+				_sInput.insert( I, sNewLines );
+				break;
+			}
+
+			++sIdx;
+		}
+
+#undef EE_PREVIEW
+		return _sInput;
+	}
+
+	// Removes C/C++ comments from a string.
+	template <typename _tType = std::string>
+	static _tType &					RemoveComments( _tType &_sInput ) {
+		size_t sIdx = 0;
+#define EE_PREVIEW( OFF )			(((sIdx + (OFF)) < _sInput.size()) ? _sInput[sIdx+(OFF)] : _tType::value_type( '\0' ))
+		_tType sNewLines;
+		while ( sIdx < _sInput.size() ) {
+			sIdx += CodeStringLength( _sInput, sIdx );
+
+			if ( _sInput[sIdx] == _tType::value_type( '/' ) && EE_PREVIEW( 1 ) == _tType::value_type( '/' ) ) {
+				size_t stStart = sIdx;
+				sIdx += 2;
+				uint32_t ui32LastChar = '\0';
+				size_t stNewLines = 0;
+				while ( sIdx < _sInput.size() ) {
+					if ( _sInput[sIdx] == _tType::value_type( '\n' ) ) {
+						if ( ui32LastChar == '\\' ) {
+							++stNewLines;
+						}
+						else {
+							// Add back the new lines we skipped.
+							for ( auto J = stNewLines; J--; ) {
+								_sInput[stStart++] = _tType::value_type( '\n' );
+							}
+							_sInput.erase( stStart, sIdx - stStart );
+							sIdx = stStart;
+							break;
+						}
+					}
+					ui32LastChar = _sInput[sIdx++];
+				}
+				if ( sIdx == _sInput.size() ) {
+					_sInput.erase( stStart );
+				}
+				continue;
+			}
 
 			if ( _sInput[sIdx] == _tType::value_type( '/' ) && EE_PREVIEW( 1 ) == _tType::value_type( '*' ) ) {
 				size_t I = sIdx++;

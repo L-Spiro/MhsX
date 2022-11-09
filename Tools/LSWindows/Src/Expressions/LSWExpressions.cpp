@@ -1,4 +1,5 @@
 #include "LSWExpression.h"
+#include <PreProc/EEPreProc.h>
 #include <sstream>
 
 namespace lsw {
@@ -16,7 +17,13 @@ namespace lsw {
 	bool CExpression::SetExpression( const char * _pcExp ) {
 		Reset();
 
-		std::istringstream sStream( _pcExp );
+		std::string sPreProc;
+		ee::CPreProc::EE_MACROS mMacros;
+		ee::CPreProc::EE_ERRORS ePreProcError = ee::CPreProc::PreProcessFile( _pcExp,
+			sPreProc,
+			mMacros );
+
+		std::istringstream sStream( sPreProc );
 
 		ee::CExpEvalLexer * peelLexer = new( std::nothrow ) ee::CExpEvalLexer( &sStream );
 		if ( !peelLexer ) { Reset(); return false; }
