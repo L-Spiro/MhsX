@@ -936,7 +936,11 @@ namespace ee {
 #define EE_PREVIEW( OFF )			(((sIdx + (OFF)) < _sInput.size()) ? _sInput[sIdx+(OFF)] : _tType::value_type( '\0' ))
 
 		while ( sIdx < _sInput.size() ) {
-			sIdx += CodeStringLength( _sInput, sIdx );
+			size_t stStrLen = CodeStringLength( _sInput, sIdx );
+			if ( stStrLen ) {
+				sIdx += stStrLen;
+				continue;
+			}
 
 			if ( _sInput[sIdx] == _tType::value_type( '/' ) && EE_PREVIEW( 1 ) == _tType::value_type( '/' ) ) {
 				size_t stStart = sIdx;
@@ -980,7 +984,11 @@ namespace ee {
 #define EE_PREVIEW( OFF )			(((sIdx + (OFF)) < _sInput.size()) ? _sInput[sIdx+(OFF)] : _tType::value_type( '\0' ))
 		_tType sNewLines;
 		while ( sIdx < _sInput.size() ) {
-			sIdx += CodeStringLength( _sInput, sIdx );
+			size_t stStrLen = CodeStringLength( _sInput, sIdx );
+			if ( stStrLen ) {
+				sIdx += stStrLen;
+				continue;
+			}
 
 			if ( _sInput[sIdx] == _tType::value_type( '/' ) && EE_PREVIEW( 1 ) == _tType::value_type( '*' ) ) {
 				size_t I = sIdx++;
@@ -1007,7 +1015,11 @@ namespace ee {
 #define EE_PREVIEW( OFF )			(((sIdx + (OFF)) < _sInput.size()) ? _sInput[sIdx+(OFF)] : _tType::value_type( '\0' ))
 		_tType sNewLines;
 		while ( sIdx < _sInput.size() ) {
-			sIdx += CodeStringLength( _sInput, sIdx );
+			size_t stStrLen = CodeStringLength( _sInput, sIdx );
+			if ( stStrLen ) {
+				sIdx += stStrLen;
+				continue;
+			}
 
 			if ( _sInput[sIdx] == _tType::value_type( '/' ) && EE_PREVIEW( 1 ) == _tType::value_type( '/' ) ) {
 				size_t stStart = sIdx;

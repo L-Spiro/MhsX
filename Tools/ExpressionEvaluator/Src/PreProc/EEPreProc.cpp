@@ -458,9 +458,13 @@ namespace ee {
 		
 		for ( size_t I = 0; I < _sString.size(); ++I ) {
 			size_t sStrLen = CodeStringLength( _sString, I );
-			sFinal.append( _sString, I, sStrLen );
-			I += sStrLen;
-			if ( I == _sString.size() ) { break; }
+			if ( sStrLen ) {
+				sFinal.append( _sString, I, sStrLen );
+				I += sStrLen;
+				if ( I == _sString.size() ) { break; }
+				--I;
+				continue;
+			}
 
 			bool bIdentStart = true;
 			sIdentifier.clear();
@@ -597,6 +601,8 @@ namespace ee {
 				if ( I == _iMacro->second.size() ) { break; }
 				cLastChar = '\0';
 				tToken = EE_T_NONE;
+				--I;
+				continue;
 			}
 
 			bool bIdentStart = true;
@@ -656,6 +662,8 @@ namespace ee {
 				cLastChar = '\0';
 				tToken = EE_T_NONE;
 				stLastPos = _sRet.size();
+				--I;
+				continue;
 			}
 
 			
@@ -672,7 +680,12 @@ namespace ee {
 			else if ( !ee::IsWhiteSpace( pcStr[I] ) ) {
 				tToken = EE_T_NONE;
 				stLastPos = _sRet.size();
-			}			
+			}
+			else if ( tToken == EE_T_STRINGIZE ) {
+				// Is whitespace.
+				tToken = EE_T_NONE;
+				stLastPos = _sRet.size();
+			}
 			cLastChar = pcStr[I];
 		}
 
