@@ -176,6 +176,9 @@ namespace mx {
 	// Beep().
 	LPFN_BEEP CSystem::m_pfBeep = nullptr;
 
+	// GetProcessTimes().
+	LPFN_GETPROCESSTIMES CSystem::m_pfGetProcessTimes = nullptr;
+
 
 	// == Types.
 	typedef BOOL (WINAPI * LPFN_ISWOW64PROCESS)( HANDLE, PBOOL );
@@ -898,6 +901,11 @@ namespace mx {
 		return m_pfGetAsyncKeyState ? m_pfGetAsyncKeyState( _vKey ) : 0;
 	}
 
+	// GetProcessTimes.
+	BOOL WINAPI CSystem::GetProcessTimes( HANDLE _hProcess, LPFILETIME _lpCreationTime, LPFILETIME _lpExitTime, LPFILETIME _lpKernelTime, LPFILETIME _lpUserTime ) {
+		return m_pfGetProcessTimes ? m_pfGetProcessTimes( _hProcess, _lpCreationTime, _lpExitTime, _lpKernelTime, _lpUserTime ) : 0;
+	}
+
 	// Load kernel32.dll functions.
 	VOID CSystem::LoadKernel32() {
 		CHAR szKernel32[_LEN_6AE69F02+1];
@@ -970,6 +978,7 @@ namespace mx {
 		MX_PROCADDR( Wow64GetThreadSelectorEntry, _T_742F716C_Wow64GetThreadSelectorEntry, _LEN_742F716C );
 		MX_PROCADDR( CompareStringEx, _T_9A6C6C6E_CompareStringEx, _LEN_9A6C6C6E );
 		MX_PROCADDR( Beep, _T_16CAA8BF_Beep, _LEN_16CAA8BF );
+		MX_PROCADDR( GetProcessTimes, _T_F924FEE7_GetProcessTimes, _LEN_F924FEE7 );
 
 #ifdef _DEBUG
 		pfTemp = ::GetProcAddress( hDll, "EnumProcesses" );

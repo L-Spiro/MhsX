@@ -73,7 +73,7 @@ typedef BOOL (WINAPI * LPFN_UNREGISTERHOTKEY)( HWND,  int );
 typedef BOOL (WINAPI * LPFN_GETKEYBOARDSTATE)( PBYTE );
 typedef SHORT (WINAPI * LPFN_GETASYNCKEYSTATE)( int );
 typedef BOOL (WINAPI * LPFN_BEEP)( DWORD, DWORD );
-
+typedef BOOL (WINAPI * LPFN_GETPROCESSTIMES)( HANDLE, LPFILETIME, LPFILETIME, LPFILETIME, LPFILETIME );
 
 
 
@@ -350,6 +350,9 @@ namespace mx {
 		// GetAsyncKeyState.
 		static SHORT WINAPI				GetAsyncKeyState( int _vKey );
 
+		// GetProcessTimes.
+		static BOOL WINAPI				GetProcessTimes( HANDLE _hProcess, LPFILETIME _lpCreationTime, LPFILETIME _lpExitTime, LPFILETIME _lpKernelTime, LPFILETIME _lpUserTime );
+
 
 
 		// Determines if the given address is out of the native range of this process.
@@ -536,6 +539,9 @@ namespace mx {
 
 		// Beep().
 		static LPFN_BEEP				m_pfBeep;
+
+		// GetProcessTimes().
+		static LPFN_GETPROCESSTIMES		m_pfGetProcessTimes;
 
 
 		// == Functions.

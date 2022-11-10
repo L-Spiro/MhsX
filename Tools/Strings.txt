@@ -58,6 +58,7 @@
 "UnregisterHotKey"
 "GetKeyboardState"
 "GetAsyncKeyState"
+"GetProcessTimes"
 "Ready."
 "Open PE File"
 "L. Spiro Memory Hacking Software X"

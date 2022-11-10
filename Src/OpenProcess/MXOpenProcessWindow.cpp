@@ -36,19 +36,20 @@ namespace mx {
 			const char * _pcText;
 			size_t sLen;
 			DWORD dwFlag;
+			DWORD dwWidth;
 		} aTitles[] = {
-			{ _T_49A0210A_Process, _LEN_49A0210A, 0 },
-			{ _T_C0D8DDA3_Process_ID, _LEN_C0D8DDA3, 0 },
-			{ _T_AB662431_Path, _LEN_AB662431, MX_OP_SHOW_PATH },
-			{ _T_2C5ABC07_Windows, _LEN_2C5ABC07, MX_OP_SHOW_WINDOWS },
-			{ _T_3A226579_Parent, _LEN_3A226579, MX_OP_SHOW_PARENT },
+			{ _T_49A0210A_Process, _LEN_49A0210A,		0,					200 },
+			{ _T_C0D8DDA3_Process_ID, _LEN_C0D8DDA3,	0,					90 },
+			{ _T_AB662431_Path, _LEN_AB662431,			MX_OP_SHOW_PATH,	200 },
+			{ _T_2C5ABC07_Windows, _LEN_2C5ABC07,		MX_OP_SHOW_WINDOWS,	200 },
+			{ _T_3A226579_Parent, _LEN_3A226579,		MX_OP_SHOW_PARENT,	200 },
 		};
 		DWORD dwFlags = m_poOptions ? m_poOptions->dwOpenProc : MX_OP_SHOW_ALL;
 		CListView * plvLIst = static_cast<CListView *>(FindChild( COpenProcessLayout::MX_OPI_LISTVIEW ));
 		for ( INT I = 0; I < MX_ELEMENTS( aTitles ); I++ ) {
 			if ( !aTitles[I].dwFlag || (aTitles[I].dwFlag & dwFlags) ) {
 				INT iCol = plvLIst->AddColumn( mx::CStringDecoder::DecodeToWString( aTitles[I]._pcText, aTitles[I].sLen ).c_str() );
-				plvLIst->SetColumnWidth( iCol, 200 );
+				plvLIst->SetColumnWidth( iCol, aTitles[I].dwWidth );
 			}
 		}
 
@@ -129,11 +130,13 @@ namespace mx {
 			return FALSE;
 		}
 
+		MX_PROCESSES pProc;
 		for ( size_t I = 0; I < vProcs.size(); ++I ) {
-			MX_PROCESSES pProc;
+			
 			pProc.peProcEntry = vProcs[I];
 			pProc.dwId = vProcs[I].th32ProcessID;
 			pProc.bHasWow64 = FALSE;
+			pProc.ftStartTime.dwLowDateTime = pProc.ftStartTime.dwHighDateTime = 0;
 
 			LSW_HANDLE hProc;
 			if ( FillProcById( pProc.dwId, pProc, hProc ) ) {
@@ -143,6 +146,7 @@ namespace mx {
 			}
 			_pProcesses.push_back( pProc );
 		}
+		std::sort( _pProcesses.begin(), _pProcesses.end(), pProc );
 
 		/*
 		DWORD dwTotalProcesses = CSystem::EnumProcessesBufferSize();
@@ -283,6 +287,9 @@ namespace mx {
 				_pProc.bHasWow64 = FALSE;
 			}
 		}
+		FILETIME ftTmp1, ftTmp2, ftTmp3;
+		CSystem::GetProcessTimes( hHnd, &_pProc.ftStartTime, &ftTmp1, &ftTmp2, &ftTmp3 );
+
 		_hProcHandle = hHnd;
 		//_pProc.dwOpenProcessTest = 0;
 		/*_pProc.dwOpenProcessTest = CSystem::TestOpenProcess( _dwId );

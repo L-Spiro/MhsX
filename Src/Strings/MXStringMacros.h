@@ -16822,3 +16822,12 @@
 #define _DEC_S_72123F1F_____P__CL________P__CW___4_9__2___395_4___1_2___4_9___395_4__ mx::CStringDecoder::DecodeToString( _T_72123F1F_____P__CL________P__CW___4_9__2___395_4___1_2___4_9___395_4__, _LEN_72123F1F )
 #define _DEC_WS_72123F1F_____P__CL________P__CW___4_9__2___395_4___1_2___4_9___395_4__ mx::CStringDecoder::DecodeToWString( _T_72123F1F_____P__CL________P__CW___4_9__2___395_4___1_2___4_9___395_4__, _LEN_72123F1F )
 
+// GetProcessTimes
+
+#define _T_F924FEE7_GetProcessTimes "\xCF\x33\x44\xEB\x04\x38\xF1\x2C\x43\x3B\x1D\x37\xFF\x00\x3A"
+#define _LEN_F924FEE7 15
+#define _T_LEN_F924FEE7_GetProcessTimes _T_F924FEE7_GetProcessTimes, _LEN_F924FEE7
+#define _DEC_F924FEE7_GetProcessTimes( STR ) mx::CStringDecoder::Decode( _T_F924FEE7_GetProcessTimes, _LEN_F924FEE7, STR )
+#define _DEC_S_F924FEE7_GetProcessTimes mx::CStringDecoder::DecodeToString( _T_F924FEE7_GetProcessTimes, _LEN_F924FEE7 )
+#define _DEC_WS_F924FEE7_GetProcessTimes mx::CStringDecoder::DecodeToWString( _T_F924FEE7_GetProcessTimes, _LEN_F924FEE7 )
+
