@@ -903,7 +903,7 @@ namespace mx {
 
 	// GetProcessTimes.
 	BOOL WINAPI CSystem::GetProcessTimes( HANDLE _hProcess, LPFILETIME _lpCreationTime, LPFILETIME _lpExitTime, LPFILETIME _lpKernelTime, LPFILETIME _lpUserTime ) {
-		return m_pfGetProcessTimes ? m_pfGetProcessTimes( _hProcess, _lpCreationTime, _lpExitTime, _lpKernelTime, _lpUserTime ) : 0;
+		return m_pfGetProcessTimes ? m_pfGetProcessTimes( _hProcess, _lpCreationTime, _lpExitTime, _lpKernelTime, _lpUserTime ) : FALSE;
 	}
 
 	// Load kernel32.dll functions.
