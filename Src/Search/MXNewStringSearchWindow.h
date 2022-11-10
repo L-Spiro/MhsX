@@ -58,10 +58,6 @@ namespace mx {
 			std::wstring					wsSearchText;
 			std::vector<std::wstring>		vSearchTextHistory;
 
-			std::wstring					wsFromText;
-			std::wstring					wsToText;
-			std::vector<std::wstring>		vFromHistory;
-			std::vector<std::wstring>		vToHistory;
 		};
 
 

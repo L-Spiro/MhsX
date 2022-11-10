@@ -49,11 +49,6 @@ namespace mx {
 
 			CSecureWString					wsDummyText;
 			std::vector<CSecureWString>		vDummyHistory;
-
-			CSecureWString					wsFromText;
-			CSecureWString					wsToText;
-			std::vector<CSecureWString>		vFromHistory;
-			std::vector<CSecureWString>		vToHistory;
 		};
 
 

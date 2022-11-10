@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../MXMhsX.h"
+#include "../Strings/MXSecureWString.h"
+#include <vector>
 
 namespace mx {
 
@@ -66,6 +68,11 @@ namespace mx {
 
 		UINT32							uiRegexFlavor;					// CUtilities::MX_RF_ONIGURUMA
 		UINT32							bsByteswap;						// CUtilities::MX_BS_NONE
+
+		CSecureWString					wsFromText;
+		CSecureWString					wsToText;
+		std::vector<CSecureWString>		vFromHistory;
+		std::vector<CSecureWString>		vToHistory;
 	};
 
 }	// namespace mx

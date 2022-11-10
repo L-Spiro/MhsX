@@ -143,7 +143,7 @@ namespace ee {
 		 */
 		static EE_ERRORS							PreProcessFile( const std::string &_sFile,
 			std::string &_sResult,
-			const EE_MACROS &_mMacros );
+			EE_MACROS &_mMacros );
 
 
 	protected :

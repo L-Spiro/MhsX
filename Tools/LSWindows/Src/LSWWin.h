@@ -32,7 +32,7 @@ typedef double DOUBLE;
 #endif	// #ifdef WIN32_LEAN_AND_MEAN
 
 #ifndef MAXUINT64
-#define MAXUINT64 (static_cast<uint64_t>(~0))
+#define MAXUINT64 static_cast<uint64_t>(~static_cast<uint64_t>(0))
 #endif	// #ifndef MAXUINT64
 
 #include <CommCtrl.h>

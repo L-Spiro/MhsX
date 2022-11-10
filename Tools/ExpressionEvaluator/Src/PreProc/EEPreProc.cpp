@@ -122,9 +122,7 @@ namespace ee {
 	 */
 	CPreProc::EE_ERRORS CPreProc::PreProcessFile( const std::string &_sFile,
 		std::string &_sResult,
-		const EE_MACROS &_mMacros ) {
-
-		EE_MACROS mMacroCopy = _mMacros;
+		EE_MACROS &_mMacros ) {
 
 		bool bErrored = false;
 		std::string sTmp = _sFile;
@@ -147,7 +145,7 @@ namespace ee {
 					CPreProc::EE_ERRORS eError = ppPreProc.Parse( sParms );
 					if ( eError == CPreProc::EE_E_ERROR ) { return EE_E_SYNTAX_IF; }
 					bool bRes;
-					if ( !ppPreProc.GetResult( mMacroCopy, bRes ) ) { return EE_E_SYNTAX_IF; }
+					if ( !ppPreProc.GetResult( _mMacros, bRes ) ) { return EE_E_SYNTAX_IF; }
 
 					if ( !bRes ) {
 						vClearStates[sIfDepth] = EE_CS_CLEAR;
@@ -161,7 +159,7 @@ namespace ee {
 					CPreProc::EE_PREPROC_DEFINE pdThis;
 					pdThis.sName = sParms;
 
-					vClearStates[sIfDepth] = (mMacroCopy.find( pdThis ) == mMacroCopy.end()) ? EE_CS_CLEAR : EE_CS_NONE;
+					vClearStates[sIfDepth] = (_mMacros.find( pdThis ) == _mMacros.end()) ? EE_CS_CLEAR : EE_CS_NONE;
 					vLines[I].clear();
 					++sIfDepth;
 					continue;
@@ -171,7 +169,7 @@ namespace ee {
 					CPreProc::EE_PREPROC_DEFINE pdThis;
 					pdThis.sName = sParms;
 
-					vClearStates[sIfDepth] = (mMacroCopy.find( pdThis ) != mMacroCopy.end()) ? EE_CS_CLEAR : EE_CS_NONE;
+					vClearStates[sIfDepth] = (_mMacros.find( pdThis ) != _mMacros.end()) ? EE_CS_CLEAR : EE_CS_NONE;
 					vLines[I].clear();
 					++sIfDepth;
 					continue;
@@ -199,7 +197,7 @@ namespace ee {
 						CPreProc::EE_ERRORS eError = ppPreProc.Parse( sParms );
 						if ( eError == CPreProc::EE_E_ERROR ) { return EE_E_SYNTAX_ELIF; }
 						bool bRes;
-						if ( !ppPreProc.GetResult( mMacroCopy, bRes ) ) { return EE_E_SYNTAX_ELIF; }
+						if ( !ppPreProc.GetResult( _mMacros, bRes ) ) { return EE_E_SYNTAX_ELIF; }
 
 						vClearStates[sIfDepth-1] = !bRes ? EE_CS_CLEAR : EE_CS_NONE;
 					}
@@ -218,7 +216,7 @@ namespace ee {
 					vLines[I].clear();
 				}
 				else if ( sDirective == "define" ) {
-					EE_ERRORS eDefine = ParseDefine( sParms, mMacroCopy );
+					EE_ERRORS eDefine = ParseDefine( sParms, _mMacros );
 					if ( eDefine != EE_E_SUCCESS ) { return eDefine; }
 					vLines[I].clear();
 				}
@@ -226,8 +224,8 @@ namespace ee {
 					CPreProc::EE_PREPROC_DEFINE pdThis;
 					if ( !ee::IsIdentifier( sParms ) ) { return EE_E_SYNTAX_UNDEF; }
 					pdThis.sName = sParms;
-					auto aFound = mMacroCopy.find( pdThis );
-					if ( aFound != mMacroCopy.end() ) { mMacroCopy.erase( aFound ); }
+					auto aFound = _mMacros.find( pdThis );
+					if ( aFound != _mMacros.end() ) { _mMacros.erase( aFound ); }
 					vLines[I].clear();
 				}
 			}
@@ -235,7 +233,7 @@ namespace ee {
 				(std::find( vClearStates.begin(), vClearStates.end(), EE_CS_SEEKING_ENDIF ) != vClearStates.end()) ) {
 				vLines[I].clear();
 			}
-			else if ( !ExpandMacros( vLines[I], mMacroCopy ) ) {
+			else if ( !ExpandMacros( vLines[I], _mMacros ) ) {
 				return EE_E_MACRO_EXPANSION;
 			}
 		}

@@ -251,7 +251,7 @@ namespace mx {
 				BOOL bAdded = plvList->SetColumnWidth( iCol, iWidth );
 			}
 
-
+#if 0
 			LONG lWid = 0;
 			char cKey[] = {
 				'A', 'B', 'C', 'D', 'E', 'F'
@@ -293,6 +293,7 @@ namespace mx {
 				}
 			}
 			plvList->SetColumnWidth( 0, lWid + 1 );
+#endif
 		}
 	}
 

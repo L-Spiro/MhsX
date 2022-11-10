@@ -42,11 +42,6 @@ namespace mx {
 			std::vector<std::wstring>		vLValHistory;
 			std::vector<std::wstring>		vRValHistory;
 
-			std::wstring					wsFromText;
-			std::wstring					wsToText;
-			std::vector<std::wstring>		vFromHistory;
-			std::vector<std::wstring>		vToHistory;
-
 			BOOL							bInvertResults;
 		};
 

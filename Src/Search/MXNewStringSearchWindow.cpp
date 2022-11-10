@@ -363,6 +363,44 @@ namespace mx {
 			MX_CHECK( MX_SSI_REGEX_FIND_LONGEST, bRegexFindLongest );
 			MX_CHECK( MX_SSI_REGEX_NEGATE_SINGLELINE, bRegexNegateSingleLine );
 #undef MX_CHECK
+
+			pcbCombo = static_cast<CComboBox *>(FindChild( CNewStringSearchLayout::MX_SSI_FROM_COMBO ));
+			if ( pcbCombo ) {
+				for ( size_t I = 0; I < m_pmhMemHack->Options().vFromHistory.size(); ++I ) {
+					pcbCombo->AddString( m_pmhMemHack->Options().vFromHistory[I].c_str() );
+				}
+				if ( m_pmhMemHack->Options().wsFromText.size() == 0 ) {
+					uintptr_t uiptrTemp = reinterpret_cast<uintptr_t>(mx::CSystem::GetSystemInfo().lpMinimumApplicationAddress);
+					std::string sTemp = CUtilities::ToHex( uiptrTemp, 4 );
+					pcbCombo->SetTextA( sTemp.c_str() );
+				}
+				else {
+					pcbCombo->SetTextW( m_pmhMemHack->Options().wsFromText.c_str() );
+				}
+				pcbCombo->SetTreatAsHex( TRUE );
+				pcbCombo->SetFocus();
+
+				pcbCombo->AutoSetMinListWidth();
+			}
+
+			pcbCombo = static_cast<CComboBox *>(FindChild( CNewStringSearchLayout::MX_SSI_TO_COMBO ));
+			if ( pcbCombo ) {
+				for ( size_t I = 0; I < m_pmhMemHack->Options().vToHistory.size(); ++I ) {
+					pcbCombo->AddString( m_pmhMemHack->Options().vToHistory[I].c_str() );
+				}
+				if ( m_pmhMemHack->Options().wsToText.size() == 0 ) {
+					uintptr_t uiptrTemp = reinterpret_cast<uintptr_t>(mx::CSystem::GetSystemInfo().lpMaximumApplicationAddress);
+					std::string sTemp = CUtilities::ToHex( uiptrTemp + 1ULL, 4 );
+					pcbCombo->SetTextA( sTemp.c_str() );
+				}
+				else {
+					pcbCombo->SetTextW( m_pmhMemHack->Options().wsToText.c_str() );
+				}
+				pcbCombo->SetTreatAsHex( TRUE );
+				pcbCombo->SetFocus();
+
+				pcbCombo->AutoSetMinListWidth();
+			}
 		}
 
 		CButton * pbButton = static_cast<CButton *>(FindChild( CNewStringSearchLayout::MX_SSI_GENERAL_SEARCH_OPTIONS_BUTTON ));
@@ -370,43 +408,7 @@ namespace mx {
 			pbButton->SetEnabled( m_pmhMemHack != nullptr );
 		}
 
-		pcbCombo = static_cast<CComboBox *>(FindChild( CNewStringSearchLayout::MX_SSI_FROM_COMBO ));
-		if ( pcbCombo ) {
-			for ( size_t I = 0; I < m_swdData.vFromHistory.size(); ++I ) {
-				pcbCombo->AddString( m_swdData.vFromHistory[I].c_str() );
-			}
-			if ( m_swdData.wsFromText.size() == 0 ) {
-				uintptr_t uiptrTemp = reinterpret_cast<uintptr_t>(mx::CSystem::GetSystemInfo().lpMinimumApplicationAddress);
-				std::string sTemp = CUtilities::ToHex( uiptrTemp, 4 );
-				pcbCombo->SetTextA( sTemp.c_str() );
-			}
-			else {
-				pcbCombo->SetTextW( m_swdData.wsFromText.c_str() );
-			}
-			pcbCombo->SetTreatAsHex( TRUE );
-			pcbCombo->SetFocus();
-
-			pcbCombo->AutoSetMinListWidth();
-		}
-
-		pcbCombo = static_cast<CComboBox *>(FindChild( CNewStringSearchLayout::MX_SSI_TO_COMBO ));
-		if ( pcbCombo ) {
-			for ( size_t I = 0; I < m_swdData.vToHistory.size(); ++I ) {
-				pcbCombo->AddString( m_swdData.vToHistory[I].c_str() );
-			}
-			if ( m_swdData.wsToText.size() == 0 ) {
-				uintptr_t uiptrTemp = reinterpret_cast<uintptr_t>(mx::CSystem::GetSystemInfo().lpMaximumApplicationAddress);
-				std::string sTemp = CUtilities::ToHex( uiptrTemp + 1ULL, 4 );
-				pcbCombo->SetTextA( sTemp.c_str() );
-			}
-			else {
-				pcbCombo->SetTextW( m_swdData.wsToText.c_str() );
-			}
-			pcbCombo->SetTreatAsHex( TRUE );
-			pcbCombo->SetFocus();
-
-			pcbCombo->AutoSetMinListWidth();
-		}
+		
 
 		UpdateDialog();
 		return CMainWindow::InitDialog();
@@ -506,6 +508,7 @@ namespace mx {
 
 	// Saves the current dialog values to an MX_SEARCH_WIN_DATA structure.
 	void CNewStringSearchWindow::SaveDialogData( MX_SEARCH_WIN_DATA &_swdData ) {
+		CComboBox * pcbCombo;
 		if ( m_pmhMemHack ) {
 			MX_OPTIONS oOpts = m_pmhMemHack->Options();
 			CCheckButton * pcbCheck;
@@ -530,10 +533,34 @@ namespace mx {
 			MX_SAVE_CHECK( MX_SSI_REGEX_FIND_LONGEST, bRegexFindLongest );
 			MX_SAVE_CHECK( MX_SSI_REGEX_NEGATE_SINGLELINE, bRegexNegateSingleLine );
 #undef MX_SAVE_CHECK
+
+			pcbCombo = static_cast<CComboBox *>(FindChild( CNewStringSearchLayout::MX_SSI_FROM_COMBO ));
+			if ( pcbCombo ) {
+				oOpts.wsFromText = pcbCombo->GetTextW();
+				if ( oOpts.wsFromText.size() ) {
+					auto aFound = std::find( oOpts.vFromHistory.begin(), oOpts.vFromHistory.end(), oOpts.wsFromText );
+					if ( aFound != oOpts.vFromHistory.end() ) {
+						oOpts.vFromHistory.erase( aFound );
+					}
+					oOpts.vFromHistory.insert( oOpts.vFromHistory.begin(), oOpts.wsFromText );
+				}
+			}
+			pcbCombo = static_cast<CComboBox *>(FindChild( CNewStringSearchLayout::MX_SSI_TO_COMBO ));
+			if ( pcbCombo ) {
+				oOpts.wsToText = pcbCombo->GetTextW();
+				if ( oOpts.wsToText.size() ) {
+					auto aFound = std::find( oOpts.vToHistory.begin(), oOpts.vToHistory.end(), oOpts.wsToText );
+					if ( aFound != oOpts.vToHistory.end() ) {
+						oOpts.vToHistory.erase( aFound );
+					}
+					oOpts.vToHistory.insert( oOpts.vToHistory.begin(), oOpts.wsToText );
+				}
+			}
+
 			m_pmhMemHack->SetOptions( oOpts );
 		}
 
-		CComboBox * pcbCombo = static_cast<CComboBox *>(FindChild( CNewStringSearchLayout::MX_SSI_STRING_TYPE_COMBO ));
+		pcbCombo = static_cast<CComboBox *>(FindChild( CNewStringSearchLayout::MX_SSI_STRING_TYPE_COMBO ));
 		if ( pcbCombo ) {
 			_swdData.stSearchFormat = static_cast<MX_STRING_TYPE>(pcbCombo->GetCurSelItemData());
 		}
@@ -558,28 +585,7 @@ namespace mx {
 			_swdData.uiRegexHelperIdx = static_cast<uint32_t>(pcbCombo->GetCurSelItemData());
 		}
 
-		pcbCombo = static_cast<CComboBox *>(FindChild( CNewStringSearchLayout::MX_SSI_FROM_COMBO ));
-		if ( pcbCombo ) {
-			_swdData.wsFromText = pcbCombo->GetTextW();
-			if ( _swdData.wsFromText.size() ) {
-				auto aFound = std::find( _swdData.vFromHistory.begin(), _swdData.vFromHistory.end(), _swdData.wsFromText );
-				if ( aFound != _swdData.vFromHistory.end() ) {
-					_swdData.vFromHistory.erase( aFound );
-				}
-				_swdData.vFromHistory.insert( _swdData.vFromHistory.begin(), _swdData.wsFromText );
-			}
-		}
-		pcbCombo = static_cast<CComboBox *>(FindChild( CNewStringSearchLayout::MX_SSI_TO_COMBO ));
-		if ( pcbCombo ) {
-			_swdData.wsToText = pcbCombo->GetTextW();
-			if ( _swdData.wsToText.size() ) {
-				auto aFound = std::find( _swdData.vToHistory.begin(), _swdData.vToHistory.end(), _swdData.wsToText );
-				if ( aFound != _swdData.vToHistory.end() ) {
-					_swdData.vToHistory.erase( aFound );
-				}
-				_swdData.vToHistory.insert( _swdData.vToHistory.begin(), _swdData.wsToText );
-			}
-		}
+		
 
 
 		pcbCombo = static_cast<CComboBox *>(FindChild( CNewStringSearchLayout::MX_SSI_STRING_TO_FIND_COMBO ));
