@@ -31,7 +31,7 @@ namespace mx {
 			FILETIME						ftStartTime;
 			//DWORD							dwOpenProcessTest;
 
-			bool							operator() ( const MX_PROCESSES &_pLeft, const MX_PROCESSES &_pRight ) {
+			bool							operator () ( const MX_PROCESSES &_pLeft, const MX_PROCESSES &_pRight ) {
 				return (*reinterpret_cast<const uint64_t *>(&_pLeft.ftStartTime)) > (*reinterpret_cast<const uint64_t *>(&_pRight.ftStartTime));
 			}
 		};

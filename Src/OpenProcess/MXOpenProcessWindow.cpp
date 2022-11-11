@@ -132,7 +132,8 @@ namespace mx {
 
 		MX_PROCESSES pProc;
 		for ( size_t I = 0; I < vProcs.size(); ++I ) {
-			
+			pProc.sPath.clear();
+			pProc.sWindows.clear();
 			pProc.peProcEntry = vProcs[I];
 			pProc.dwId = vProcs[I].th32ProcessID;
 			pProc.bHasWow64 = FALSE;
