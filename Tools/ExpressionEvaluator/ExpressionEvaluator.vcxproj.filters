@@ -69,6 +69,9 @@
     <Filter Include="Header Files\PreProc">
       <UniqueIdentifier>{5f47222f-f27d-4184-bdb3-da14945f2b26}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Tree">
+      <UniqueIdentifier>{c25b6c65-ad7c-4cc7-9e90-854a4f9826a9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -249,6 +252,9 @@
     </ClInclude>
     <ClInclude Include="Src\PreProc\EEPreProcSyntaxNodes.h">
       <Filter>Header Files\PreProc</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Tree\EETree.h">
+      <Filter>Header Files\Tree</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

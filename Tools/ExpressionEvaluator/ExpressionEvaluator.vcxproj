@@ -312,6 +312,7 @@
     <ClInclude Include="Src\PreProc\EEPreProcContainer.h" />
     <ClInclude Include="Src\PreProc\EEPreProcLexer.h" />
     <ClInclude Include="Src\PreProc\EEPreProcSyntaxNodes.h" />
+    <ClInclude Include="Src\Tree\EETree.h" />
     <ClInclude Include="Src\Unicode\EEUnicode.h" />
     <ClInclude Include="Src\Unicode\EEUnicodeTable.h" />
   </ItemGroup>

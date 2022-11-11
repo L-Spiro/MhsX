@@ -74,10 +74,14 @@ namespace lsw {
 		struct LSW_TREE_ROW {
 			std::vector<std::wstring>		vStrings;		// Length matches GetColumnCount().
 			LPARAM							lpParam;		// The lParam originally associated with the tree item for this row.
-			HTREEITEM						htiItem;		// The tree item associated with this data.
+			//HTREEITEM						htiItem;		// The tree item associated with this data.
+			UINT							uiState;		// State information.
 			UINT							uiStateEx;		// Additional state information.  Manages multi-select.
-			std::vector<LSW_TREE_ROW>		vChildren;		// Its children.
-			LSW_TREE_ROW *					ptiParent;		// Its parent.
+			int								iImage;			// Index in the tree-view control's image list of the icon image to use when the item is in the nonselected state.
+			int								iSelectedImage;	// Index in the tree-view control's image list of the icon image to use when the item is in the selected state.
+			int								iExpandedImage;	// Index of the image in the control's image list to display when the item is in the expanded state.
+			//std::vector<LSW_TREE_ROW>		vChildren;		// Its children.
+			//LSW_TREE_ROW *					ptiParent;		// Its parent.
 		};
 
 
