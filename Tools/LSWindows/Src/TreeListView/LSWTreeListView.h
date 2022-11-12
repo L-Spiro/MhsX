@@ -129,6 +129,19 @@ namespace lsw {
 		// Converts an object pointer to an HTREEITEM.
 		HTREEITEM							PointerToTreeItem( ee::CTree<LSW_TREE_ROW> * _ptObj );
 
+		// Gets an item by index accounting for children being expanded or not.
+		ee::CTree<LSW_TREE_ROW> *			ItemByIndex( size_t _stIdx );
+
+		// Gets an item by index accounting for children being expanded or not.
+		ee::CTree<LSW_TREE_ROW> *			ItemByIndex( ee::CTree<LSW_TREE_ROW> * _ptStart, size_t _stIdx, size_t _stStartIdx );
+
+		// Counts the total number of expanded items.
+		size_t								CountExpanded() const;
+
+		// Gets the next item based on expansion.
+		ee::CTree<CTreeListView::LSW_TREE_ROW> *
+											NextByExpansion( ee::CTree<CTreeListView::LSW_TREE_ROW> * _ptThis ) const;
+
 		// WM_SIZE.
 		virtual LSW_HANDLED					Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight );
 

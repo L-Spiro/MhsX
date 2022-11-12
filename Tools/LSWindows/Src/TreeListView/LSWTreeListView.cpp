@@ -290,6 +290,52 @@ namespace lsw {
 		return reinterpret_cast<HTREEITEM>(_ptObj);
 	}
 
+	// Gets an item by index accounting for children being expanded or not.
+	ee::CTree<CTreeListView::LSW_TREE_ROW> * CTreeListView::ItemByIndex( size_t _stIdx ) {
+		return ItemByIndex( nullptr, _stIdx, 0 );
+	}
+
+	// Gets an item by index accounting for children being expanded or not.
+	ee::CTree<CTreeListView::LSW_TREE_ROW> * CTreeListView::ItemByIndex( ee::CTree<LSW_TREE_ROW> * _ptStart, size_t _stIdx, size_t _stStartIdx ) {
+		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptThis = _ptStart;
+		for ( ptThis = NextByExpansion( ptThis ); ++_stStartIdx < _stIdx; ) {
+			if ( !ptThis ) { break; }
+		}
+		return ptThis;
+	}
+
+	// Counts the total number of expanded items.
+	size_t CTreeListView::CountExpanded() const {
+		size_t stCnt = 0;
+		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptTmp = nullptr;
+		while ( (ptTmp = NextByExpansion( ptTmp )) ) {
+			++stCnt;
+		}
+		return stCnt;
+	}
+
+	// Gets the next item based on expansion.
+	ee::CTree<CTreeListView::LSW_TREE_ROW> * CTreeListView::NextByExpansion( ee::CTree<CTreeListView::LSW_TREE_ROW> * _ptThis ) const {
+		if ( !_ptThis ) {
+			if ( !m_tRoot.Size() ) { return nullptr; }
+			return const_cast<ee::CTree<CTreeListView::LSW_TREE_ROW> *>(m_tRoot.GetChild( 0 ));
+		}
+		if ( (_ptThis->Value().uiState & TVIS_EXPANDED) && _ptThis->Size() ) {
+			// Go to its children.
+			return _ptThis->GetChild( 0 );
+		}
+		// Item not expanded.  Go to the next in line.
+		if ( _ptThis->Next() ) { return _ptThis->Next(); }
+
+		// Nothing after this.  Go to the parent.
+		while ( _ptThis->Parent() ) {
+			_ptThis = _ptThis->Parent();
+			if ( _ptThis->Next() ) { return _ptThis->Next(); }
+		}
+		// That's the end.
+		return nullptr;
+	}
+
 	// WM_SIZE.
 	CWidget::LSW_HANDLED CTreeListView::Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight ) {
 		CWidget::Size( _wParam, _lWidth, _lHeight );
