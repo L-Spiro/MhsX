@@ -113,8 +113,8 @@ namespace mx {
 			delete tTab.ppoPeObject;
 			return false;
 		}
-		std::vector<CWidget *> vNewTab;
-		CWidget::ControlSetup( tTab.ptWidget, vNewTab );
+		//std::vector<CWidget *> vNewTab;
+		//CWidget::ControlSetup( tTab.ptWidget, vNewTab );
 		tTab.ptWidget->InitControl( tTab.ptWidget->Wnd() );
 
 
