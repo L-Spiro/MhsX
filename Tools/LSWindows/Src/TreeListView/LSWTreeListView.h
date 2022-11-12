@@ -2,6 +2,7 @@
 #include "../LSWWin.h"
 #include "../Layout/LSWWidgetLayout.h"
 #include "../ListView/LSWListView.h"
+#include <Tree/EETree.h>
 #include "../Widget/LSWWidget.h"
 
 namespace lsw {
@@ -72,26 +73,37 @@ namespace lsw {
 		// == Types.
 		// Internal book-keeping for each row.
 		struct LSW_TREE_ROW {
-			std::vector<std::wstring>		vStrings;		// Length matches GetColumnCount().
-			LPARAM							lpParam;		// The lParam originally associated with the tree item for this row.
-			//HTREEITEM						htiItem;		// The tree item associated with this data.
-			UINT							uiState;		// State information.
-			UINT							uiStateEx;		// Additional state information.  Manages multi-select.
-			int								iImage;			// Index in the tree-view control's image list of the icon image to use when the item is in the nonselected state.
-			int								iSelectedImage;	// Index in the tree-view control's image list of the icon image to use when the item is in the selected state.
-			int								iExpandedImage;	// Index of the image in the control's image list to display when the item is in the expanded state.
-			//std::vector<LSW_TREE_ROW>		vChildren;		// Its children.
-			//LSW_TREE_ROW *					ptiParent;		// Its parent.
+			std::vector<std::wstring>		vStrings;					// Length matches GetColumnCount().
+			LPARAM							lpParam			= 0;		// The lParam originally associated with the tree item for this row.
+			UINT							uiState			= 0;		// State information.
+			UINT							uiStateEx		= 0;		// Additional state information.  Manages multi-select.
+			int								iImage			= 0;		// Index in the tree-view control's image list of the icon image to use when the item is in the nonselected state.
+			int								iSelectedImage	= 0;		// Index in the tree-view control's image list of the icon image to use when the item is in the selected state.
+			int								iExpandedImage	= 0;		// Index of the image in the control's image list to display when the item is in the expanded state.
+
+			// == Operators.
+			// Less-than against another object.
+			bool							operator < ( const LSW_TREE_ROW &_trOther ) const {
+				if ( vStrings.size() == 0 || _trOther.vStrings.size() == 0 ) { return false; }
+				return vStrings[0].compare( _trOther.vStrings[0] ) < 0;
+			}
+
+			// Less-than against a string.
+			bool							operator < ( const wchar_t * _pwcOther ) const {
+				if ( vStrings.size() == 0 ) { return false; }
+				return std::wcscmp( vStrings[0].c_str(), _pwcOther ) < 0;
+			}
 		};
 
 
 		// == Members.
 		// The list view.
-		HWND								m_hListView;
+		//HWND								m_hListView;
 		// Original list-view message handler.
 		WNDPROC								m_wpListViewProc;
 		// Book keeping.  One entry per row.
-		std::vector<LSW_TREE_ROW>			m_vRows;
+		//std::vector<LSW_TREE_ROW>			m_vRows;
+		ee::CTree<LSW_TREE_ROW>				m_tRoot;
 		// Window property.
 		static WCHAR						m_szProp[2];
 
@@ -105,8 +117,32 @@ namespace lsw {
 		virtual LSW_HANDLED					Move( LONG _lX, LONG _lY );
 #endif
 
+		// Converts an HTREEITEM to an object pointer.
+		ee::CTree<LSW_TREE_ROW> *			TreeItemToPointer( HTREEITEM _htiItem );
+
+		// Converts an HTREEITEM to an object pointer.
+		const ee::CTree<LSW_TREE_ROW> *		TreeItemToPointer( HTREEITEM _htiItem ) const;
+
+		// Converts an HTREEITEM to an index.
+		size_t								TreeItemToIndex( ee::CTree<LSW_TREE_ROW> * _ptParent, HTREEITEM _htiItem, const wchar_t * _pwcSortText );
+
+		// Converts an object pointer to an HTREEITEM.
+		HTREEITEM							PointerToTreeItem( ee::CTree<LSW_TREE_ROW> * _ptObj );
+
+		// WM_SIZE.
+		virtual LSW_HANDLED					Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight );
+
+		// WM_MOVE.
+		virtual LSW_HANDLED					Move( LONG _lX, LONG _lY );
+
+		// Evaluates expressions to determine a new rectangle for the control.
+		virtual void						EvalNewSize();
+
 		// List-view window procedure.  The list-view is hidden.
 		static LRESULT CALLBACK				ListViewOverride( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam );
+
+		// Converts a TVITEMEXW to a LSW_TREE_ROW.
+		static LSW_TREE_ROW					ItemExToTreeRow( const TVITEMEXW &_ieItemEx );
 	};
 
 }	// namespace lsw

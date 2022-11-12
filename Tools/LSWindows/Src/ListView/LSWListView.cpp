@@ -72,6 +72,9 @@ namespace lsw {
 		lvColumn.mask = LVCF_TEXT | LVCF_FMT;
 		lvColumn.pszText = const_cast<LPSTR>(_pcText);
 		lvColumn.fmt = _iFormat;
+		if ( _iIndex < 0 ) {
+			_iIndex = static_cast<INT>(m_sColumns);
+		}
 		INT iInserted = static_cast<INT>(::SendMessageA( Wnd(), LVM_INSERTCOLUMNA, static_cast<WPARAM>(_iIndex), reinterpret_cast<LPARAM>(&lvColumn)));
 		if ( iInserted != -1 ) {
 			++m_sColumns;
@@ -86,6 +89,9 @@ namespace lsw {
 		lvColumn.pszText = const_cast<LPWSTR>(_pwcText);
 		lvColumn.fmt = LVCFMT_LEFT;
 		lvColumn.cx = _iWidth;
+		if ( _iIdx < 0 ) {
+			_iIdx = static_cast<INT>(m_sColumns);
+		}
 		INT iInserted = static_cast<INT>(::SendMessageW( Wnd(), LVM_INSERTCOLUMNW, static_cast<WPARAM>(_iIdx), reinterpret_cast<LPARAM>(&lvColumn)));
 		if ( iInserted != -1 ) {
 			++m_sColumns;

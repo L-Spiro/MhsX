@@ -87,6 +87,12 @@ namespace lsw {
 
 
 		// == Functions.
+		// // WM_SIZE.
+		virtual LSW_HANDLED					Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight );
+
+		// WM_MOVE.
+		virtual LSW_HANDLED					Move( LONG _lX, LONG _lY );
+
 		// Determines the close rectangle.
 		static LSW_RECT						GetCloseRect( const LSW_RECT &_rTabRect, bool _bHasFocus );
 

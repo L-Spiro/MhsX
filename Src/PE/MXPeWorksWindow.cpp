@@ -90,9 +90,9 @@ namespace mx {
 			TRUE,									// bEnabled
 			TRUE,									// bActive
 			0,										// iLeft
-			0,										// iTop
-			255,									// dwWidth
-			110,									// dwHeight
+			50,										// iTop
+			1055,									// dwWidth
+			310,									// dwHeight
 			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP,								// dwStyle
 			0,																		// dwStyleEx
 			nullptr,								// pwcText
@@ -113,6 +113,8 @@ namespace mx {
 			delete tTab.ppoPeObject;
 			return false;
 		}
+		std::vector<CWidget *> vNewTab;
+		CWidget::ControlSetup( tTab.ptWidget, vNewTab );
 		tTab.ptWidget->InitControl( tTab.ptWidget->Wnd() );
 
 
@@ -135,10 +137,10 @@ namespace mx {
 			delete tTab.ptWidget;
 			return false;
 		}
-
+		
 		m_vTabs.insert( m_vTabs.begin(), tTab );
 
-
+		
 
 		ForceSizeUpdate();
 

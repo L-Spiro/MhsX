@@ -6,7 +6,6 @@
 namespace lsw {
 
 	class CToolTip : public CWidget {
-		friend class						CWidget;
 	public :
 		CToolTip( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 

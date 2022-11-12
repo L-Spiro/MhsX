@@ -12,15 +12,15 @@ namespace lsw {
 	CTreeListView::CTreeListView( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
 		CListView( _wlLayout.ChangeClass( WC_LISTVIEWW ).AddStyleEx( LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER ).AddStyle( LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT ),
 			_pwParent, _bCreateWidget, _hMenu ),
-		m_hListView( NULL ),
+		/*m_hListView( NULL ),*/
 		m_wpListViewProc( nullptr ) {
-
+		
 		if ( !m_szProp[0] ) {
 			m_szProp[0] = L'A' + ((reinterpret_cast<UINT_PTR>(_pwParent) >> 2) & 0x0F);
 		}
 	}
 	CTreeListView::~CTreeListView() {
-		::DestroyWindow( m_hListView );
+		//::DestroyWindow( m_hListView );
 	}
 
 	// == Functions.
@@ -111,27 +111,55 @@ namespace lsw {
 
 	// Inserts an item.
 	HTREEITEM CTreeListView::InsertItem( const TVINSERTSTRUCTW * _pisStruct ) {
+		ee::CTree<LSW_TREE_ROW> * pntParent = TreeItemToPointer( _pisStruct->hParent );
+		if ( !pntParent ) { return nullptr; }
+		size_t stIdx = TreeItemToIndex( pntParent, _pisStruct->hInsertAfter, _pisStruct->itemex.pszText );
+
+		if ( pntParent->InsertChild( ItemExToTreeRow( _pisStruct->itemex ), stIdx ) ) {
+			return PointerToTreeItem( pntParent->GetChild( stIdx ) );
+		}
 		return nullptr;
 	}
 
 	// Sets the text for an item.
 	BOOL CTreeListView::SetItemText( HTREEITEM _tiItem, const WCHAR * _pwcText, INT _iColumn ) {
-		return FALSE;
+		if ( _iColumn >= GetColumnCount() ) { return FALSE; }
+		ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( _tiItem );
+		if ( !pntItem ) { return FALSE; }
+		while ( pntItem->Value().vStrings.size() <= _iColumn ) {
+			pntItem->Value().vStrings.push_back( L"" );
+		}
+		pntItem->Value().vStrings[_iColumn] = _pwcText;
+		return TRUE;
 	}
 
 	// Gets the text of an item.
 	BOOL CTreeListView::GetItemText( HTREEITEM _tiItem, INT _iColumn, std::wstring &_sRet ) const {
-		return FALSE;
+		if ( _iColumn >= GetColumnCount() ) { return FALSE; }
+		const ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( _tiItem );
+		if ( !pntItem ) { return FALSE; }
+		if ( _iColumn < pntItem->Value().vStrings.size() ) {
+			_sRet = pntItem->Value().vStrings[_iColumn];
+		}
+		else {
+			_sRet = L"";
+		}
+		return TRUE;
 	}
 
 	// Sets the lParam of an item.
 	BOOL CTreeListView::SetItemLParam( HTREEITEM _tiItem, LPARAM _lpParam ) {
-		return FALSE;
+		ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( _tiItem );
+		if ( !pntItem ) { return FALSE; }
+		pntItem->Value().lpParam = _lpParam;
+		return TRUE;
 	}
 
 	// Gets the lParam of an item.
 	LPARAM CTreeListView::GetItemLParam( HTREEITEM _tiItem ) const {
-		return 0;
+		const ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( _tiItem );
+		if ( !pntItem ) { return 0; }
+		return pntItem->Value().lpParam;
 	}
 
 	// Returns true if any of the selected items have children and are not in expanded view.
@@ -198,6 +226,90 @@ namespace lsw {
 		return isItem;
 	}
 
+	// Converts a TVITEMEXW to a LSW_TREE_ROW.
+	CTreeListView::LSW_TREE_ROW CTreeListView::ItemExToTreeRow( const TVITEMEXW &_ieItemEx ) {
+		LSW_TREE_ROW trRow;
+		if ( _ieItemEx.mask & TVIF_IMAGE ) {
+			trRow.iImage = _ieItemEx.iImage;
+		}
+		if ( _ieItemEx.mask & TVIF_PARAM ) {
+			trRow.lpParam = _ieItemEx.lParam;
+		}
+		if ( _ieItemEx.mask & TVIF_SELECTEDIMAGE ) {
+			trRow.iSelectedImage = _ieItemEx.iSelectedImage;
+		}
+		if ( _ieItemEx.mask & TVIF_STATE ) {
+			trRow.uiState = (_ieItemEx.state & _ieItemEx.stateMask) | (trRow.uiState & ~_ieItemEx.stateMask);
+		}
+		if ( _ieItemEx.mask & TVIF_STATEEX ) {
+			trRow.uiStateEx = _ieItemEx.uStateEx;
+		}
+		if ( _ieItemEx.mask & TVIF_TEXT ) {
+			trRow.vStrings.push_back( std::wstring( _ieItemEx.pszText, _ieItemEx.cchTextMax ) );
+		}
+		return trRow;
+	}
+
+	// Converts an HTREEITEM to an object pointer.
+	ee::CTree<CTreeListView::LSW_TREE_ROW> * CTreeListView::TreeItemToPointer( HTREEITEM _htiItem ) {
+		if ( _htiItem == TVI_ROOT ) { return &m_tRoot; }
+		return reinterpret_cast<ee::CTree<LSW_TREE_ROW> *>(_htiItem);
+	}
+
+	// Converts an HTREEITEM to an object pointer.
+	const ee::CTree<CTreeListView::LSW_TREE_ROW> * CTreeListView::TreeItemToPointer( HTREEITEM _htiItem ) const {
+		if ( _htiItem == TVI_ROOT ) { return &m_tRoot; }
+		return reinterpret_cast<ee::CTree<LSW_TREE_ROW> *>(_htiItem);
+	}
+
+	// Converts an HTREEITEM to an index.
+	size_t CTreeListView::TreeItemToIndex( ee::CTree<LSW_TREE_ROW> * _ptParent, HTREEITEM _htiItem, const wchar_t * _pwcSortText ) {
+		if ( _htiItem == TVI_FIRST ) { return 0; }
+		if ( _htiItem == TVI_LAST ) { return _ptParent->Size(); }
+		if ( _htiItem == TVI_SORT ) {
+			if ( nullptr == _pwcSortText ) { return 0; }
+			for ( size_t I = 0; I < _ptParent->Size(); ++I ) {
+				if ( _ptParent->GetChild( I )->Value() < _pwcSortText ) { continue; }
+				return I;
+			}
+			return _ptParent->Size();
+		}
+		// _htiItem must be an item parented by _ptParent.
+		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptItem = TreeItemToPointer( _htiItem );
+		for ( auto I = _ptParent->Size(); I--; ) {
+			if ( _ptParent->GetChild( I ) == ptItem ) { return I; }
+		}
+		// Hmm.
+		return _ptParent->Size();
+	}
+
+	// Converts an object pointer to an HTREEITEM.
+	HTREEITEM CTreeListView::PointerToTreeItem( ee::CTree<LSW_TREE_ROW> * _ptObj ) {
+		if ( _ptObj == &m_tRoot ) { return TVI_ROOT; }
+		return reinterpret_cast<HTREEITEM>(_ptObj);
+	}
+
+	// WM_SIZE.
+	CWidget::LSW_HANDLED CTreeListView::Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight ) {
+		CWidget::Size( _wParam, _lWidth, _lHeight );
+		//::ShowScrollBar( Wnd(), SB_VERT, FALSE );
+		//ResizeControls( VirtualClientRect( nullptr ) );
+
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_MOVE.
+	CWidget::LSW_HANDLED CTreeListView::Move( LONG _lX, LONG _lY ) {
+		CWidget::Move( _lX, _lY );
+		//ResizeControls( VirtualClientRect( nullptr ) );
+
+		return LSW_H_CONTINUE;
+	}
+
+	// Evaluates expressions to determine a new rectangle for the control.
+	void CTreeListView::EvalNewSize() {
+		CWidget::EvalNewSize();
+	}
 
 	// List-view window procedure.  The list-view is hidden.
 	LRESULT CALLBACK CTreeListView::ListViewOverride( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam ) {

@@ -215,6 +215,30 @@ namespace lsw {
 	}
 
 	// == Functions.
+	// WM_SIZE.
+	CWidget::LSW_HANDLED CTab::Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight ) {
+		CWidget::Size( _wParam, _lWidth, _lHeight );
+		//::ShowScrollBar( Wnd(), SB_VERT, FALSE );
+		//ResizeControls( VirtualClientRect( nullptr ) );
+
+		/*for ( auto I = m_vTabs.size(); I--; ) {
+			m_vTabs[I].pwWidget->EvalNewSize();
+		}*/
+
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_MOVE.
+	CWidget::LSW_HANDLED CTab::Move( LONG _lX, LONG _lY ) {
+		CWidget::Move( _lX, _lY );
+		//ResizeControls( VirtualClientRect( nullptr ) );
+		/*for ( auto I = m_vTabs.size(); I--; ) {
+			m_vTabs[I].pwWidget->Move( _lX, _lY );
+		}*/
+
+		return LSW_H_CONTINUE;
+	}
+
 	// Determines the close rectangle.
 	LSW_RECT CTab::GetCloseRect( const LSW_RECT &_rTabRect, bool _bHasFocus ) {
 		LSW_RECT rReturn;

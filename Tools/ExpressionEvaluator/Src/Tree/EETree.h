@@ -6,7 +6,7 @@
 namespace ee {
 
 	template <typename _tType>
-class CTree {
+	class CTree {
 	public :
 		CTree() :
 			m_tObj(),
@@ -26,6 +26,14 @@ class CTree {
 		}
 
 
+		// == Types.
+		/** The node type. */
+		typedef CTree<_tType>							EE_NODE_TYPE;
+
+		/** The pointer to each node. */
+		typedef std::unique_ptr<EE_NODE_TYPE>			EE_PTR_TYPE;
+
+
 		// == Functions.
 		/**
 		 * Adds a child.
@@ -36,35 +44,38 @@ class CTree {
 		 */
 		bool											InsertChild( const _tType &_tChild, size_t _stIdx ) {
 			try {
-				m_vChildren.insert( m_vChildren.begin() + _stIdx, std::make_unique<CTree<_tType>>( _tChild ) );
-				// Insertion successful.
-				// Fix pointers.
-				m_vChildren[_stIdx]->m_ptParent = this;
-				// Fix prev pointer.
-				if ( _stIdx == 0 ) {
-					m_vChildren[_stIdx]->m_ptPrev = nullptr;
-				}
-				else {
-					m_vChildren[_stIdx]->m_ptPrev = m_vChildren[_stIdx-1].get();
-				}
-				// Fix next pointer.
-				if ( _stIdx == m_vChildren.size() - 1 ) {
-					m_vChildren[_stIdx]->m_ptNext = nullptr;
-				}
-				else {
-					m_vChildren[_stIdx]->m_ptNext = m_vChildren[_stIdx+1].get();
-				}
-
-				// Fix neighbors.
-				if ( m_vChildren[_stIdx]->m_ptPrev ) {
-					(*m_vChildren[_stIdx]->m_ptPrev).m_ptNext = m_vChildren[_stIdx].get();
-				}
-				if ( m_vChildren[_stIdx]->m_ptNext ) {
-					(*m_vChildren[_stIdx]->m_ptNext).m_ptPrev = m_vChildren[_stIdx].get();
-				}
+				auto aIt = InsertChild_It( _tChild, m_vChildren.begin() + _stIdx );
 				return true;
 			}
 			catch ( ... ) { return false; }
+		}
+
+		std::vector<EE_PTR_TYPE>::iterator				InsertChild_It( const _tType &_tChild, std::vector<EE_PTR_TYPE>::iterator _iIt ) {
+			auto aIt = m_vChildren.insert( _iIt, std::make_unique<CTree<_tType>>( _tChild ) );
+			(*aIt)->m_ptParent = this;
+			// Fix prev pointer.
+			if ( aIt == m_vChildren.begin() ) {
+				(*aIt)->m_ptPrev = nullptr;
+			}
+			else {
+				(*aIt)->m_ptPrev = (*(aIt-1)).get();
+			}
+			// Fix next pointer.
+			if ( aIt == m_vChildren.end() - 1 ) {
+				(*aIt)->m_ptNext = nullptr;
+			}
+			else {
+				(*aIt)->m_ptNext = (*(aIt+1)).get();
+			}
+
+			// Fix neighbors.
+			if ( (*aIt)->m_ptPrev ) {
+				(*(*aIt)->m_ptPrev).m_ptNext = (*aIt).get();
+			}
+			if ( (*aIt)->m_ptNext ) {
+				(*(*aIt)->m_ptNext).m_ptPrev = (*aIt).get();
+			}
+			return aIt;
 		}
 
 		/**
@@ -164,6 +175,12 @@ class CTree {
 		 */
 		const CTree<_tType> *							Prev() const { return m_ptPrev; }
 
+		/**
+		 * Gets the total numbr of children on this node.
+		 *
+		 * \return Returns the total numbr of children on this node.
+		 */
+		size_t											Size() const { return m_vChildren.size(); }
 
 
 	protected :
@@ -175,7 +192,7 @@ class CTree {
 		/** The previous sibling. */
 		CTree<_tType> *									m_ptPrev;
 		/** Children. */
-		std::vector<std::unique_ptr<CTree<_tType>>>		m_vChildren;
+		std::vector<EE_PTR_TYPE>						m_vChildren;
 		/** The object of the tree. */
 		_tType											m_tObj;
 	};
