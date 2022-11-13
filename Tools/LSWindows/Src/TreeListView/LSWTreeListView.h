@@ -62,6 +62,9 @@ namespace lsw {
 		// Gathers the selected items into a vector.
 		size_t								GatherSelected( std::vector<HTREEITEM> &_vReturn, bool _bIncludeNonVisible = false ) const;
 
+		// Requesting information (notification responder).
+		virtual BOOL						GetDispInfoNotify( NMLVDISPINFOW * _plvdiInfo );
+
 		// A helper to easily create a tree view item to be inserted with only text.
 		static TVINSERTSTRUCTW				DefaultItem( const WCHAR * _pwcText, HTREEITEM _tiParent = TVI_ROOT, HTREEITEM _tiInsertAfter = TVI_LAST );
 
@@ -75,7 +78,7 @@ namespace lsw {
 		struct LSW_TREE_ROW {
 			std::vector<std::wstring>		vStrings;					// Length matches GetColumnCount().
 			LPARAM							lpParam			= 0;		// The lParam originally associated with the tree item for this row.
-			UINT							uiState			= 0;		// State information.
+			UINT							uiState			= TVIS_EXPANDED;		// State information.
 			UINT							uiStateEx		= 0;		// Additional state information.  Manages multi-select.
 			int								iImage			= 0;		// Index in the tree-view control's image list of the icon image to use when the item is in the nonselected state.
 			int								iSelectedImage	= 0;		// Index in the tree-view control's image list of the icon image to use when the item is in the selected state.
@@ -104,6 +107,10 @@ namespace lsw {
 		// Book keeping.  One entry per row.
 		//std::vector<LSW_TREE_ROW>			m_vRows;
 		ee::CTree<LSW_TREE_ROW>				m_tRoot;
+		// Optimiation: Cache the last ee::CTree<CTreeListView::LSW_TREE_ROW> * returned by ItemByIndex().
+		mutable ee::CTree<LSW_TREE_ROW> *	m_ptIndexCache;
+		// Optimiation: Cache the last index returned by ItemByIndex().
+		mutable size_t						m_stIndexCache;
 		// Window property.
 		static WCHAR						m_szProp[2];
 
@@ -137,6 +144,9 @@ namespace lsw {
 
 		// Counts the total number of expanded items.
 		size_t								CountExpanded() const;
+
+		// Gets the indentation level for an item.
+		INT									GetIndent( ee::CTree<CTreeListView::LSW_TREE_ROW> * _ptThis ) const;
 
 		// Gets the next item based on expansion.
 		ee::CTree<CTreeListView::LSW_TREE_ROW> *
