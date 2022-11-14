@@ -71,7 +71,10 @@ namespace lsw {
 			sizeof( iccIn ),
 			ICC_BAR_CLASSES | ICC_LISTVIEW_CLASSES | ICC_PROGRESS_CLASS | ICC_TAB_CLASSES | ICC_TREEVIEW_CLASSES | ICC_USEREX_CLASSES | ICC_COOL_CLASSES | ICC_UPDOWN_CLASS
 		};
-		::InitCommonControlsEx( &iccIn );
+		BOOL bCommons = ::InitCommonControlsEx( &iccIn );
+		if ( !bCommons ) {
+			MessageBoxError( NULL, L"Common controls failed to initialize." );
+		}
 
 		// Register the dockable class.
 		if ( _pwcDockableClassName ) {

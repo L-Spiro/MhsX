@@ -38,7 +38,7 @@ namespace lsw {
 		}
 		LSW_WIDGET_LAYOUT wlMainLayout = FixLayout( _pwlLayouts[0] );
 		LSW_RECT rMainRect = { wlMainLayout.iLeft, wlMainLayout.iTop, static_cast<LONG>(wlMainLayout.iLeft + wlMainLayout.dwWidth), static_cast<LONG>(wlMainLayout.iTop + wlMainLayout.dwHeight) };
-		::AdjustWindowRect( &rMainRect, wlMainLayout.dwStyle, _sTotalMenus ? TRUE : FALSE );
+		::AdjustWindowRectEx( &rMainRect, wlMainLayout.dwStyle, _sTotalMenus ? TRUE : FALSE, wlMainLayout.dwStyleEx );
 		wlMainLayout.iLeft = rMainRect.left;
 		wlMainLayout.iTop = rMainRect.top;
 		wlMainLayout.dwWidth = rMainRect.Width();
