@@ -487,11 +487,11 @@ namespace lsw {
 			*/
 			TEXTMETRICW tmTextMetric;
 			::GetTextMetricsW( _hDc, &tmTextMetric );
-
-			std::wstring wBuffer;
+			typedef std::wstring			strtype;
+			strtype wBuffer;
 			for ( auto I = 0; I < 26; ++I ) {
-				wBuffer.push_back( L'A' + I );
-				wBuffer.push_back( L'a' + I );
+				wBuffer.push_back( strtype::value_type( L'A' + I ) );
+				wBuffer.push_back( strtype::value_type( L'a' + I ) );
 			}
 
 			SIZE sResult;
@@ -500,7 +500,7 @@ namespace lsw {
 			sResult.cx = (sResult.cx / 26 + 1) / 2;
 			sResult.cy = tmTextMetric.tmHeight;
 			// For MHS "string security".
-			std::memset( const_cast<wchar_t *>(wBuffer.data()), 0, wBuffer.size() * sizeof( wchar_t ) );
+			std::memset( const_cast<strtype::value_type *>(wBuffer.data()), 0, wBuffer.size() * sizeof( strtype::value_type ) );
 
 			return sResult;
 		}

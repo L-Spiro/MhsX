@@ -1180,6 +1180,9 @@ namespace lsw {
 										pcdListViewDraw->clrTextBk = RGB( 0xFF, 0xFF, 0xFF );
 									}*/
 								}
+								if ( (CDDS_ITEMPREPAINT | CDDS_SUBITEM) == pcdListViewDraw->nmcd.dwDrawStage ) {
+									LSW_RET( CDRF_NEWFONT, CDRF_NEWFONT );
+								}
 							}
 						}
 						LSW_RET( 1, TRUE );

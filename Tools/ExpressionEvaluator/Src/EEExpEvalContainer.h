@@ -1010,8 +1010,8 @@ namespace ee {
 			soDoMeNext.prResult = _prResult;
 			soDoMeNext.uiProcessCount = 0;
 
-			uint32_t ui32ParentData = 0;
-			/*if ( soDoMeNext.sParentIndex != EE_INVALID_IDX ) {
+			/*uint32_t ui32ParentData = 0;
+			if ( soDoMeNext.sParentIndex != EE_INVALID_IDX ) {
 				ui32ParentData = _vStack[soDoMeNext.sParentIndex].u.ui32Data;
 			}*/
 

@@ -401,7 +401,6 @@ namespace ee {
 		uint32_t uiLeft = EscapeUnicodeWide4( _pcValue, _sLen, _sCharsConsumed );
 		if ( !_sCharsConsumed ) { return uiLeft; }
 
-		uint32_t ui32Top = uiLeft & 0xFC00UL;
 		if ( (uiLeft & 0xFC00) == 0xD800 ) {					// In order to be a surrogate pair.
 			_pcValue += _sCharsConsumed;
 			_sLen -= _sCharsConsumed;

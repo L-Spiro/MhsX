@@ -139,7 +139,7 @@ namespace ee {
 
 
 
-		std::string										ToTring( int _iBase = 10 ) {
+		std::string										ToString( int _iBase = 10 ) {
 			_iBase = _iBase <= 0 ? 10 : _iBase;
 			std::string sRes;
 
