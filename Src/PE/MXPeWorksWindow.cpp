@@ -124,12 +124,13 @@ namespace mx {
 		if ( tie.pszText == NULL ) { tie.pszText = const_cast<LPWSTR>(_pwcFile); }
 		else { tie.pszText++; }
 
-
+		tTab.ptWidget->BeginLargeUpdate();
 		if ( !FillTree( tTab ) ) {
 			delete tTab.ppoPeObject;
 			delete tTab.ptWidget;
 			return false;
 		}
+		tTab.ptWidget->FinishUpdate();
 
 
 		if ( ptTab->InsertItem( 0, &tie, tTab.ptWidget ) == -1 ) {
@@ -219,7 +220,7 @@ namespace mx {
 				ofnOpenFile.hwndOwner = Wnd();
 				ofnOpenFile.lpstrFilter = wsFilter.c_str();
 				ofnOpenFile.lpstrFile = &szFileName[0];
-				ofnOpenFile.nMaxFile = szFileName.size();
+				ofnOpenFile.nMaxFile = DWORD( szFileName.size() );
 				ofnOpenFile.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST;
 				//ofnOpenFile.lpstrDefExt = L"";
 

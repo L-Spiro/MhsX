@@ -16,7 +16,8 @@ namespace lsw {
 		/*m_hListView( NULL ),*/
 		m_wpListViewProc( nullptr ),
 		m_ptIndexCache( nullptr ),
-		m_stIndexCache( 0 ) {
+		m_stIndexCache( 0 ),
+		m_bDontUpdate( false ) {
 		
 		if ( !m_szProp[0] ) {
 			m_szProp[0] = L'A' + ((reinterpret_cast<UINT_PTR>(_pwParent) >> 2) & 0x0F);
@@ -52,7 +53,9 @@ namespace lsw {
 		size_t stIdx = TreeItemToIndex( pntParent, _pisStruct->hInsertAfter, _pisStruct->itemex.pszText );
 
 		if ( pntParent->InsertChild( ItemExToTreeRow( _pisStruct->itemex ), stIdx ) ) {
-			SetItemCount( static_cast<INT>(CountExpanded()) );
+			if ( !m_bDontUpdate ) {
+				SetItemCount( static_cast<INT>(CountExpanded()) );
+			}
 			m_ptIndexCache = nullptr;
 			m_stIndexCache = 0;
 			return PointerToTreeItem( pntParent->GetChild( stIdx ) );

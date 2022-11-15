@@ -62,6 +62,18 @@ namespace lsw {
 		// Gathers the selected items into a vector.
 		size_t								GatherSelected( std::vector<HTREEITEM> &_vReturn, bool _bIncludeNonVisible = false ) const;
 
+		// Allows quickly updating the tree without causing visual updates to the controls.  Must be paired with a call to FinishUpdate().
+		void								BeginLargeUpdate() {
+			m_bDontUpdate = true;
+		}
+
+		void								FinishUpdate() {
+			m_bDontUpdate = false;
+			SetItemCount( static_cast<INT>(CountExpanded()) );
+			m_ptIndexCache = nullptr;
+			m_stIndexCache = 0;
+		}
+
 		// Requesting information (notification responder).
 		virtual BOOL						GetDispInfoNotify( NMLVDISPINFOW * _plvdiInfo );
 
@@ -111,6 +123,8 @@ namespace lsw {
 		mutable ee::CTree<LSW_TREE_ROW> *	m_ptIndexCache;
 		// Optimiation: Cache the last index returned by ItemByIndex().
 		mutable size_t						m_stIndexCache;
+		// If set, the listview is not updated when inserting/removing an item.  FinishUpdate() must be called to update the listview after the tree is modified.
+		bool								m_bDontUpdate;
 		// Window property.
 		static WCHAR						m_szProp[2];
 
