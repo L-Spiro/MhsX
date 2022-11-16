@@ -327,7 +327,7 @@ namespace mx {
 			TRUE,									// bEnabled
 			FALSE,									// bActive
 			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
-			MX_GROUPS_TOP + MX_GROUP_TOP_PXL,	// iTop
+			MX_GROUPS_TOP + MX_GROUP_TOP_PXL,		// iTop
 			0,										// dwWidth
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle

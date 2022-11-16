@@ -45,17 +45,17 @@ namespace mx {
 			{ _T_3A226579_Parent, _LEN_3A226579,		MX_OP_SHOW_PARENT,	200 },
 		};
 		DWORD dwFlags = m_poOptions ? m_poOptions->dwOpenProc : MX_OP_SHOW_ALL;
-		CListView * plvLIst = static_cast<CListView *>(FindChild( COpenProcessLayout::MX_OPI_LISTVIEW ));
+		CListView * plvList = static_cast<CListView *>(FindChild( COpenProcessLayout::MX_OPI_LISTVIEW ));
 		for ( INT I = 0; I < MX_ELEMENTS( aTitles ); I++ ) {
 			if ( !aTitles[I].dwFlag || (aTitles[I].dwFlag & dwFlags) ) {
-				INT iCol = plvLIst->AddColumn( mx::CStringDecoder::DecodeToWString( aTitles[I]._pcText, aTitles[I].sLen ).c_str() );
-				plvLIst->SetColumnWidth( iCol, aTitles[I].dwWidth );
+				INT iCol = plvList->AddColumn( mx::CStringDecoder::DecodeToWString( aTitles[I]._pcText, aTitles[I].sLen ).c_str() );
+				plvList->SetColumnWidth( iCol, aTitles[I].dwWidth );
 			}
 		}
 
 		MainList();
-		if ( plvLIst ) {
-			plvLIst->SetFocus();
+		if ( plvList ) {
+			plvList->SetFocus();
 		}
 
 		return LSW_H_CONTINUE;
@@ -104,8 +104,8 @@ namespace mx {
 		std::vector<MX_PROCESSES> vProcesses;
 		CreateProcessList( vProcesses );
 				
-		CListView * plvLIst = static_cast<CListView *>(FindChild( COpenProcessLayout::MX_OPI_LISTVIEW ));
-		FillListView( plvLIst, vProcesses );
+		CListView * plvList = static_cast<CListView *>(FindChild( COpenProcessLayout::MX_OPI_LISTVIEW ));
+		FillListView( plvList, vProcesses );
 		m_dwMainOrAll = COpenProcessLayout::MX_OPI_RADIO_MAIN;
 	}
 
@@ -114,8 +114,8 @@ namespace mx {
 		std::vector<MX_PROCESSES> vProcesses;
 		CreateHiddenProcessList( vProcesses );
 				
-		CListView * plvLIst = static_cast<CListView *>(FindChild( COpenProcessLayout::MX_OPI_LISTVIEW ));
-		FillListView( plvLIst, vProcesses );
+		CListView * plvList = static_cast<CListView *>(FindChild( COpenProcessLayout::MX_OPI_LISTVIEW ));
+		FillListView( plvList, vProcesses );
 		m_dwMainOrAll = COpenProcessLayout::MX_OPI_RADIO_ALL;
 	}
 
