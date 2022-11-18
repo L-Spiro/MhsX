@@ -234,7 +234,7 @@ namespace mx {
 			CSecureString ssTmp;
 			LPARAM lpParm;
 			if ( !GetKeyDescByIndex( I, ssTmp, lpParm ) ) { return false; }
-			INT iRes = _plbBox->AddString( ee::StringToWString( ssTmp ).c_str() );
+			INT iRes = _plbBox->AddString( ee::CExpEval::StringToWString( ssTmp ).c_str() );
 			if ( iRes == LB_ERRSPACE ) { return false; }
 			_plbBox->SetItemData( iRes, lpParm );
 			_plbBox->SetSel( _sSelections.count( lpParm ) != 0, iRes );
@@ -538,7 +538,7 @@ namespace mx {
 				wswTmp += L"+";
 			}
 			wswTmp += ScanCodeToString( _hiInst.uiScanCode );
-			_sRes += ee::WStringToString( wswTmp );
+			_sRes += ee::CExpEval::WStringToString( wswTmp );
 			_sRes += ":";
 			_sRes += mx::CStringDecoder::DecodeToString( _hiInst.phhHandler->hdName.pcDesc, _hiInst.phhHandler->hdName.sLen );
 			_sRes += "(";

@@ -338,22 +338,22 @@ namespace ee {
 			switch ( _uiIntrinsic ) {
 				case CExpEvalParser::token::EE_EPSILON : {
 					_rResult.ncType = EE_NC_SIGNED;
-					_rResult.u.i64Val = ee::Epsilon( _rExp0.u.dVal, _rExp1.u.dVal, _rExp2.u.dVal );
+					_rResult.u.i64Val = ee::CExpEval::Epsilon( _rExp0.u.dVal, _rExp1.u.dVal, _rExp2.u.dVal );
 					return EE_EC_SUCCESS;
 				}
 				case CExpEvalParser::token::EE_EPSILONF : {
 					_rResult.ncType = EE_NC_SIGNED;
-					_rResult.u.i64Val = ee::Epsilon( static_cast<float>(_rExp0.u.dVal), static_cast<float>(_rExp1.u.dVal), static_cast<float>(_rExp2.u.dVal) );
+					_rResult.u.i64Val = ee::CExpEval::Epsilon( static_cast<float>(_rExp0.u.dVal), static_cast<float>(_rExp1.u.dVal), static_cast<float>(_rExp2.u.dVal) );
 					return EE_EC_SUCCESS;
 				}
 				case CExpEvalParser::token::EE_RELEPSILON : {
 					_rResult.ncType = EE_NC_SIGNED;
-					_rResult.u.i64Val = ee::RelativeEpsilon( _rExp0.u.dVal, _rExp1.u.dVal, _rExp2.u.dVal );
+					_rResult.u.i64Val = ee::CExpEval::RelativeEpsilon( _rExp0.u.dVal, _rExp1.u.dVal, _rExp2.u.dVal );
 					return EE_EC_SUCCESS;
 				}
 				case CExpEvalParser::token::EE_RELEPSILONF : {
 					_rResult.ncType = EE_NC_SIGNED;
-					_rResult.u.i64Val = ee::RelativeEpsilon( static_cast<float>(_rExp0.u.dVal), static_cast<float>(_rExp1.u.dVal), static_cast<float>(_rExp2.u.dVal) );
+					_rResult.u.i64Val = ee::CExpEval::RelativeEpsilon( static_cast<float>(_rExp0.u.dVal), static_cast<float>(_rExp1.u.dVal), static_cast<float>(_rExp2.u.dVal) );
 					return EE_EC_SUCCESS;
 				}
 				case CExpEvalParser::token::EE_MADD : {

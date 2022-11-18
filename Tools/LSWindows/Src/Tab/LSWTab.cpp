@@ -183,7 +183,7 @@ namespace lsw {
 
 	// Gets item text.
 	std::string CTab::GetItemTextA( int _iItem ) const {
-		return ee::ToUtf8( GetItemTextW( _iItem ) );
+		return ee::CExpEval::ToUtf8( GetItemTextW( _iItem ) );
 	}
 
 	// Gets item text.

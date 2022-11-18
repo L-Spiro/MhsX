@@ -54,11 +54,11 @@ RS1_S								[rR]{CS1}
 
 <utf16string0>\\x[a-fA-F0-9]{3,4}								{
 																	size_t sConsumed = 0;
-																	uint32_t uiVal = EscapeX( &yytext[1], yyleng - 1, sConsumed, 4 );
+																	uint32_t uiVal = ee::CExpEval::EscapeX( &yytext[1], yyleng - 1, sConsumed, 4 );
 																	if ( !sConsumed ) { yy_tmp_txt.append( yytext, yyleng ); }
 																	else {
 																		uint32_t ui32Len;
-																		uint32_t ui32BackToUtf8 = Utf32ToUtf8( uiVal, ui32Len );
+																		uint32_t ui32BackToUtf8 = ee::CExpEval::Utf32ToUtf8( uiVal, ui32Len );
 																		if ( ui32BackToUtf8 == EE_UTF_INVALID ) { yy_tmp_txt.append( yytext, yyleng ); }
 																		else {
 																			for ( uint32_t J = 0; J < ui32Len; ++J ) {
@@ -71,11 +71,11 @@ RS1_S								[rR]{CS1}
 																
 <utf16string0>\\[0-7]{4,6}										{
 																	size_t sConsumed = 0;
-																	uint32_t uiVal = EscapeOctal( &yytext[1], yyleng - 1, sConsumed, 6 );
+																	uint32_t uiVal = ee::CExpEval::EscapeOctal( &yytext[1], yyleng - 1, sConsumed, 6 );
 																	if ( !sConsumed ) { yy_tmp_txt.append( yytext, yyleng ); }
 																	else {
 																		uint32_t ui32Len;
-																		uint32_t ui32BackToUtf8 = Utf32ToUtf8( uiVal, ui32Len );
+																		uint32_t ui32BackToUtf8 = ee::CExpEval::Utf32ToUtf8( uiVal, ui32Len );
 																		if ( ui32BackToUtf8 == EE_UTF_INVALID ) { yy_tmp_txt.append( yytext, yyleng ); }
 																		else {
 																			for ( uint32_t J = 0; J < ui32Len; ++J ) {
@@ -88,11 +88,11 @@ RS1_S								[rR]{CS1}
 																
 <utf32string0>\\x[a-fA-F0-9]{3,8}								{
 																	size_t sConsumed = 0;
-																	uint32_t uiVal = EscapeX( &yytext[1], yyleng - 1, sConsumed, 8 );
+																	uint32_t uiVal = ee::CExpEval::EscapeX( &yytext[1], yyleng - 1, sConsumed, 8 );
 																	if ( !sConsumed ) { yy_tmp_txt.append( yytext, yyleng ); }
 																	else {
 																		uint32_t ui32Len;
-																		uint32_t ui32BackToUtf8 = Utf32ToUtf8( uiVal, ui32Len );
+																		uint32_t ui32BackToUtf8 = ee::CExpEval::Utf32ToUtf8( uiVal, ui32Len );
 																		if ( ui32BackToUtf8 == EE_UTF_INVALID ) { yy_tmp_txt.append( yytext, yyleng ); }
 																		else {
 																			for ( uint32_t J = 0; J < ui32Len; ++J ) {
@@ -105,11 +105,11 @@ RS1_S								[rR]{CS1}
 																
 <utf32string0>\\[0-7]{4,11}										{
 																	size_t sConsumed = 0;
-																	uint32_t uiVal = EscapeOctal( &yytext[1], yyleng - 1, sConsumed, 11 );
+																	uint32_t uiVal = ee::CExpEval::EscapeOctal( &yytext[1], yyleng - 1, sConsumed, 11 );
 																	if ( !sConsumed ) { yy_tmp_txt.append( yytext, yyleng ); }
 																	else {
 																		uint32_t ui32Len;
-																		uint32_t ui32BackToUtf8 = Utf32ToUtf8( uiVal, ui32Len );
+																		uint32_t ui32BackToUtf8 = ee::CExpEval::Utf32ToUtf8( uiVal, ui32Len );
 																		if ( ui32BackToUtf8 == EE_UTF_INVALID ) { yy_tmp_txt.append( yytext, yyleng ); }
 																		else {
 																			for ( uint32_t J = 0; J < ui32Len; ++J ) {
@@ -123,11 +123,11 @@ RS1_S								[rR]{CS1}
 <longstring0,longstring1,cstring0,cstring1,utf16string0,utf32string0>{ES}					{
 																	size_t sConsumed = 0;
 																	bool bEscapeFound = false;
-																	uint32_t uiVal = static_cast<uint32_t>(ResolveEscape( yytext, yyleng, sConsumed, false, &bEscapeFound ));
+																	uint32_t uiVal = static_cast<uint32_t>(ee::CExpEval::ResolveEscape( yytext, yyleng, sConsumed, false, &bEscapeFound ));
 																	if ( !bEscapeFound ) { yy_tmp_txt.append( yytext, yyleng ); }
 																	else {
 																		uint32_t ui32Len;
-																		uint32_t ui32BackToUtf8 = Utf32ToUtf8( uiVal, ui32Len );
+																		uint32_t ui32BackToUtf8 = ee::CExpEval::Utf32ToUtf8( uiVal, ui32Len );
 																		for ( uint32_t J = 0; J < ui32Len; ++J ) {
 																			yy_tmp_txt.push_back( static_cast<uint8_t>(ui32BackToUtf8) );
 																			ui32BackToUtf8 >>= 8;

@@ -295,7 +295,7 @@ namespace mx {
 
 	// Gets the path to this .EXE in UTF-8.
 	CSecureString CSystem::GetSelfPath() {
-		return ee::WStringToString( GetSelfPathW() );
+		return ee::CExpEval::WStringToString( GetSelfPathW() );
 	}
 
 	// Gets the path to this .EXE in UTF-16.
@@ -318,7 +318,7 @@ namespace mx {
 
 	// Gets the path to a given loaded DLL given its UTF-8 name.
 	CSecureString CSystem::GetModulePath( const CHAR * _pcPath ) {
-		return ee::WStringToString( GetModulePathW( ee::StringToWString( _pcPath ).c_str() ) );
+		return ee::CExpEval::WStringToString( GetModulePathW( ee::CExpEval::StringToWString( _pcPath ).c_str() ) );
 	}
 
 	// Gets the path to a given loaded DLL given its UTF-16 name.
@@ -359,7 +359,7 @@ namespace mx {
 
 	// Gets the current directory in UTF-8.
 	CSecureString CSystem::GetCurDir() {
-		return ee::WStringToString( GetCurDirW() );
+		return ee::CExpEval::WStringToString( GetCurDirW() );
 	}
 
 	// Gets the current directory in UTF-16.
@@ -376,7 +376,7 @@ namespace mx {
 
 	// Gets the system directory in UTF-8.
 	CSecureString CSystem::GetSystemDir() {
-		return ee::WStringToString( GetSystemDirW() );
+		return ee::CExpEval::WStringToString( GetSystemDirW() );
 	}
 
 	// Gets the system directory in UTF-16.
@@ -393,7 +393,7 @@ namespace mx {
 
 	// Gets the Windows directory in UTF-8.
 	CSecureString CSystem::GetWindowsDir() {
-		return ee::WStringToString( GetWindowsDirW() );
+		return ee::CExpEval::WStringToString( GetWindowsDirW() );
 	}
 
 	// Gets the Windows directory in UTF-16.
@@ -421,7 +421,7 @@ namespace mx {
 		for ( size_t I = 0; I < dwLen; ++I ) {
 			if ( pwcBuffer[I] == L';' ) {
 				if ( wTemp.size() ) {
-					_vReturn.push_back( ee::WStringToString( CUtilities::FinishPath( wTemp ) ) );
+					_vReturn.push_back( ee::CExpEval::WStringToString( CUtilities::FinishPath( wTemp ) ) );
 					wTemp.clear();
 				}
 			}
@@ -464,7 +464,7 @@ namespace mx {
 
 	// Gets all of the search paths for a DLL in the order in which they should be searched.
 	std::vector<std::string> CSystem::DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::string> &_vResults, BOOL _bIncludeLoadedModulePath ) {
-		CSecureString sDllUtf8 = ee::WStringToString( _pwcDll );
+		CSecureString sDllUtf8 = ee::CExpEval::WStringToString( _pwcDll );
 		if ( _bIncludeLoadedModulePath ) {
 			// If the module is already loaded by us, put it in front of the list.
 			CSecureString sLoadedDir = GetModulePath( sDllUtf8.c_str() );
@@ -506,7 +506,7 @@ namespace mx {
 
 	// Loads a DLL by name.  Uses the normal search paths DLL's use (local directory, working directory, system directory, windows directory, PATH directories).
 	BOOL CSystem::FindDll( const CHAR * _pcDll, CFile &_fReturn ) {
-		return FindDll( ee::StringToWString( _pcDll ).c_str(), _fReturn );
+		return FindDll( ee::CExpEval::StringToWString( _pcDll ).c_str(), _fReturn );
 	}
 
 	// Loads a DLL by name.  Uses the normal search paths DLL's use (local directory, working directory, system directory, windows directory, PATH directories).

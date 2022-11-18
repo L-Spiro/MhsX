@@ -126,19 +126,19 @@ namespace ee {
 
 		bool bErrored = false;
 		std::string sTmp = _sFile;
-		RemoveComments<std::string>( RemoveChar( sTmp, '\r' ) );
-		std::vector<std::string> vLines = Tokenize<std::string>( sTmp, '\n', true, &bErrored );
+		ee::CExpEval::RemoveComments<std::string>( ee::CExpEval::RemoveChar( sTmp, '\r' ) );
+		std::vector<std::string> vLines = ee::CExpEval::Tokenize<std::string>( sTmp, '\n', true, &bErrored );
 		if ( bErrored ) {
 			// Tokenize() can only fail due to memory issues.
 			return EE_E_OUT_OF_MEMORY;
 		}
-		MergeBackslashedLines( vLines );
+		ee::CExpEval::MergeBackslashedLines( vLines );
 
 		std::string sDirective, sParms;
 		std::vector<EE_CLEAR_STATE> vClearStates;
 		size_t sIfDepth = 0;
 		for ( size_t I = 0; I < vLines.size(); ++I ) {
-			if ( PreprocessingDirectives( vLines[I], sDirective, sParms ) ) {
+			if ( ee::CExpEval::PreprocessingDirectives( vLines[I], sDirective, sParms ) ) {
 				if ( sDirective == "if" ) {
 					vClearStates.push_back( EE_CS_NONE );
 					CPreProc ppPreProc;
@@ -222,7 +222,7 @@ namespace ee {
 				}
 				else if ( sDirective == "undef" ) {
 					CPreProc::EE_PREPROC_DEFINE pdThis;
-					if ( !ee::IsIdentifier( sParms ) ) { return EE_E_SYNTAX_UNDEF; }
+					if ( !ee::CExpEval::IsIdentifier( sParms ) ) { return EE_E_SYNTAX_UNDEF; }
 					pdThis.sName = sParms;
 					auto aFound = _mMacros.find( pdThis );
 					if ( aFound != _mMacros.end() ) { _mMacros.erase( aFound ); }
@@ -239,7 +239,7 @@ namespace ee {
 		}
 
 
-		_sResult = Reconstitute( vLines, '\n', &bErrored );
+		_sResult = ee::CExpEval::Reconstitute( vLines, '\n', &bErrored );
 		if ( bErrored ) {
 			// Reconstitute() can only fail due to memory issues.
 			return EE_E_OUT_OF_MEMORY;
@@ -283,7 +283,7 @@ namespace ee {
 					}
 					else {
 						//_i64Return = CStd::AtoI64( _mMacros.GetByIndex( ui32Index ).c_str() );
-						_i64Return = StoULL( aItem->second.c_str() );
+						_i64Return = ee::CExpEval::StoULL( aItem->second.c_str() );
 					}
 				}
 				return true;
@@ -384,8 +384,8 @@ namespace ee {
 			size_t stPos = 0;
 			bool bIsStart = true;
 			for ( ; stPos < _sLine.size(); ++stPos ) {
-				if ( ee::IsWhiteSpace( _sLine[stPos] ) || _sLine[stPos] == '(' ) { break; }
-				if ( !ee::IsIdentifier( _sLine[stPos], bIsStart ) ) { return EE_E_SYNTAX_DEFINE; }
+				if ( ee::CExpEval::IsWhiteSpace( _sLine[stPos] ) || _sLine[stPos] == '(' ) { break; }
+				if ( !ee::CExpEval::IsIdentifier( _sLine[stPos], bIsStart ) ) { return EE_E_SYNTAX_DEFINE; }
 			}
 			if ( !stPos ) { return EE_E_SYNTAX_DEFINE; }
 			pdDefine.sName = _sLine.substr( 0, stPos );
@@ -398,7 +398,7 @@ namespace ee {
 				bIsStart = true;
 				bool bFoundWs = false;
 				for ( ++stPos; stPos < _sLine.size(); ++stPos ) {
-					if ( ee::IsWhiteSpace( _sLine[stPos] ) ) {
+					if ( ee::CExpEval::IsWhiteSpace( _sLine[stPos] ) ) {
 						if ( !bIsStart ) { bFoundWs = true; }
 						continue;
 					}
@@ -410,7 +410,7 @@ namespace ee {
 						bFoundWs = false;
 					}
 					else {
-						if ( !ee::IsIdentifier( _sLine[stPos], bIsStart ) ) { return EE_E_SYNTAX_DEFINE; }
+						if ( !ee::CExpEval::IsIdentifier( _sLine[stPos], bIsStart ) ) { return EE_E_SYNTAX_DEFINE; }
 						if ( bFoundWs ) { return EE_E_SYNTAX_DEFINE; }
 						sParm.push_back( _sLine[stPos] );
 					}
@@ -419,7 +419,7 @@ namespace ee {
 			}
 
 			// Skip to the definition.
-			while ( ee::IsWhiteSpace( _sLine[stPos] ) ) { ++stPos; }
+			while ( ee::CExpEval::IsWhiteSpace( _sLine[stPos] ) ) { ++stPos; }
 
 			_mMacros[pdDefine] = _sLine.substr( stPos );
 			return EE_E_SUCCESS;
@@ -455,7 +455,7 @@ namespace ee {
 		const char * pcStr = _sString.c_str();
 		
 		for ( size_t I = 0; I < _sString.size(); ++I ) {
-			size_t sStrLen = CodeStringLength( _sString, I );
+			size_t sStrLen = ee::CExpEval::CodeStringLength( _sString, I );
 			if ( sStrLen ) {
 				sFinal.append( _sString, I, sStrLen );
 				I += sStrLen;
@@ -466,7 +466,7 @@ namespace ee {
 
 			bool bIdentStart = true;
 			sIdentifier.clear();
-			while ( ee::IsIdentifier( pcStr[I], bIdentStart ) && I < _sString.size() ) {
+			while ( ee::CExpEval::IsIdentifier( pcStr[I], bIdentStart ) && I < _sString.size() ) {
 				sIdentifier.push_back( pcStr[I++] );
 			}
 			if ( sIdentifier.size() ) {
@@ -529,7 +529,7 @@ namespace ee {
 	bool CPreProc::GetMacroParms( const std::string &_sString, size_t _stPos, size_t &_stNewPos, std::vector<std::string> &_vRet ) {
 		_stNewPos = _stPos;
 		// Skip any whitespace.
-		while ( _stNewPos < _sString.size() && ee::IsWhiteSpace( _sString[_stNewPos] ) ) { ++_stNewPos; }
+		while ( _stNewPos < _sString.size() && ee::CExpEval::IsWhiteSpace( _sString[_stNewPos] ) ) { ++_stNewPos; }
 		if ( _stNewPos == _sString.size() ) { return false; }
 		// The next character must be '('.
 		if ( _sString[_stNewPos] != '(' ) { return false; }
@@ -541,7 +541,7 @@ namespace ee {
 			char cThis = _sString[_stNewPos];
 			if ( cThis == ',' && ui32ParDepth == 1 ) {
 				if ( !sCur.size() ) { return false; }
-				_vRet.push_back( TrimWhitespace( sCur ) );
+				_vRet.push_back( ee::CExpEval::TrimWhitespace( sCur ) );
 				sCur.clear();
 			}
 			else {
@@ -554,7 +554,7 @@ namespace ee {
 					--ui32ParDepth;
 					if ( ui32ParDepth == 0 ) {
 						sCur.pop_back();
-						_vRet.push_back( TrimWhitespace( sCur ) );
+						_vRet.push_back( ee::CExpEval::TrimWhitespace( sCur ) );
 						++_stNewPos;
 						return true;
 					}
@@ -591,7 +591,7 @@ namespace ee {
 		EE_TOKEN tToken = EE_T_NONE;
 		char cLastChar = '\0';
 		for ( size_t I = 0; I < _iMacro->second.size(); ++I ) {
-			size_t sStrLen = CodeStringLength( _iMacro->second, I );
+			size_t sStrLen = ee::CExpEval::CodeStringLength( _iMacro->second, I );
 			if ( sStrLen ) {
 				sFinal.append( _iMacro->second, I, sStrLen );
 				I += sStrLen;
@@ -604,7 +604,7 @@ namespace ee {
 
 			bool bIdentStart = true;
 			sIdentifier.clear();
-			while ( ee::IsIdentifier( pcStr[I], bIdentStart ) && I < _iMacro->second.size() ) {
+			while ( ee::CExpEval::IsIdentifier( pcStr[I], bIdentStart ) && I < _iMacro->second.size() ) {
 				sIdentifier.push_back( pcStr[I++] );
 			}
 			if ( sIdentifier.size() ) {
@@ -620,7 +620,7 @@ namespace ee {
 							}
 							sFinal.pop_back();
 							sFinal.push_back( '\"' );
-							sFinal.append( ee::EscapeQuotes<std::string>( _vParms[stIdx] ) );
+							sFinal.append( ee::CExpEval::EscapeQuotes<std::string>( _vParms[stIdx] ) );
 							sFinal.push_back( '\"' );
 						}
 						else {
@@ -640,7 +640,7 @@ namespace ee {
 				if ( pcStr[I] == '#' ) {
 					tToken = (cLastChar == '#' && tToken != EE_T_CONCAT) ? EE_T_CONCAT : EE_T_STRINGIZE;
 				}
-				else if ( !ee::IsWhiteSpace( pcStr[I] ) ) {
+				else if ( !ee::CExpEval::IsWhiteSpace( pcStr[I] ) ) {
 					tToken = EE_T_NONE;
 				}
 				cLastChar = pcStr[I];
@@ -651,7 +651,7 @@ namespace ee {
 		cLastChar = '\0';
 		pcStr = sFinal.c_str();
 		for ( size_t I = 0; I < sFinal.size(); ++I ) {
-			size_t sStrLen = CodeStringLength( sFinal, I );
+			size_t sStrLen = ee::CExpEval::CodeStringLength( sFinal, I );
 			if ( sStrLen ) {
 				_sRet.append( sFinal, I, sStrLen );
 				I += sStrLen;
@@ -669,12 +669,12 @@ namespace ee {
 				tToken = (cLastChar == '#' && tToken != EE_T_CONCAT) ? EE_T_CONCAT : EE_T_STRINGIZE;
 				if ( tToken == EE_T_CONCAT ) {
 					_sRet.erase( stLastPos );
-					while ( ++I < sFinal.size() && ee::IsWhiteSpace( pcStr[I] ) ) {}
+					while ( ++I < sFinal.size() && ee::CExpEval::IsWhiteSpace( pcStr[I] ) ) {}
 					--I;
 					continue;
 				}
 			}
-			else if ( !ee::IsWhiteSpace( pcStr[I] ) ) {
+			else if ( !ee::CExpEval::IsWhiteSpace( pcStr[I] ) ) {
 				tToken = EE_T_NONE;
 				stLastPos = _sRet.size();
 			}

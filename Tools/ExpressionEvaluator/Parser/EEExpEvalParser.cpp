@@ -568,7 +568,7 @@ namespace yy {
   case 27:
 
     {
-																if ( m_peecContainer->TreatAllAsHex() && ValidHex( m_peelLexer->YYText() ) ) {
+																if ( m_peecContainer->TreatAllAsHex() && ee::CExpEval::ValidHex( m_peelLexer->YYText() ) ) {
 																	m_peecContainer->CreateHex3( m_peelLexer->YYText(), (yyval.ndData) );
 																}
 																else {

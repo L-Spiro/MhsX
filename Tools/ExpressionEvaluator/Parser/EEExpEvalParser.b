@@ -192,7 +192,7 @@ basic_expr
 	| EE_OCT_CONSTANT										{ m_peecContainer->CreateOct( m_peelLexer->YYText(), $$ ); }
 	| EE_CHAR_CONSTANT										{ m_peecContainer->CreateNumber( m_peelLexer->get_tmp_txt()[0], $$ ); }
 	| EE_FLOAT_CONSTANT										{
-																if ( m_peecContainer->TreatAllAsHex() && ValidHex( m_peelLexer->YYText() ) ) {
+																if ( m_peecContainer->TreatAllAsHex() && ee::CExpEval::ValidHex( m_peelLexer->YYText() ) ) {
 																	m_peecContainer->CreateHex3( m_peelLexer->YYText(), $$ );
 																}
 																else {

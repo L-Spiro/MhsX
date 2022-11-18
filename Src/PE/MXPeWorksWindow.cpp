@@ -423,12 +423,12 @@ namespace mx {
 			for ( size_t I = 0; I < _tTab.ppoPeObject->ImportDescriptor().size(); ++I ) {
 				CHAR szTemp[_LEN_8FD2FEFE+16+1];
 				std::sprintf( szTemp, mx::CStringDecoder::DecodeToString( _T_LEN_8FD2FEFE_IMAGE_IMPORT_DESCRIPTOR__u_ ).c_str(), static_cast<uint32_t>(I) );
-				swsTemp = ee::StringToWString( szTemp );
+				swsTemp = ee::CExpEval::StringToWString( szTemp );
 				isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), ui32Offset, hItem );
 				HTREEITEM hThisItem = ptlTree->InsertItem( &isInsertMe );
 				CSecureString sDllName;
 				_tTab.ppoPeObject->ImportDllNameByIndex( I, sDllName );
-				if ( !ptlTree->SetItemText( hThisItem, ee::StringToWString( sDllName ).c_str(), MW_PE_VALUE ) ) { return false; }
+				if ( !ptlTree->SetItemText( hThisItem, ee::CExpEval::StringToWString( sDllName ).c_str(), MW_PE_VALUE ) ) { return false; }
 				if ( !AddImportDesc( (*ptlTree), hThisItem, (*_tTab.ppoPeObject->ImportDescriptor()[I]), (*_tTab.ppoPeObject), ui32Offset + sizeof( MX_IMAGE_IMPORT_DESCRIPTOR ) * I ) ) { return false; }
 			}
 		}
@@ -560,7 +560,7 @@ namespace mx {
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_VALUE ) ) { return false; }											\
 	ssRaw.SecureClear();																								\
 	CUtilities::MW_HEX_PRINT( &_dhHeader.STRUCTMEMBER, sizeof( _dhHeader.STRUCTMEMBER ), ssRaw );						\
-	if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+	if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 		CSecureWString swsTemp;
 		CSecureString ssCString;
@@ -577,9 +577,9 @@ namespace mx {
 			if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }
 
 			CUtilities::BytesToCString( &_dhHeader.Signature, sizeof( _dhHeader.Signature ), ssCString );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			CUtilities::BytesToHexWithSpaces( &_dhHeader.Signature, sizeof( _dhHeader.Signature ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -701,10 +701,10 @@ namespace mx {
 
 			ssCString.SecureClear();
 			CUtilities::BytesToCString( &_dhHeader.Padding, sizeof( _dhHeader.Padding ), ssCString );
-			_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE );
+			_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE );
 			ssRaw.SecureClear();
 			CUtilities::BytesToHexWithSpaces( &_dhHeader.Padding, sizeof( _dhHeader.Padding ), ssRaw );
-			_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES );
+			_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES );
 		}
 
 		{
@@ -746,9 +746,9 @@ namespace mx {
 			if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }
 
 			CUtilities::BytesToCString( &_vStub[0], _vStub.size(), ssCString );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			CUtilities::BytesToHexWithSpaces( &_vStub[0], _vStub.size(), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		return true;
@@ -762,8 +762,8 @@ namespace mx {
 	::wsprintf( wValue, L"%u", _chHeader.STRUCTMEMBER );																\
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_VALUE ) ) { return false; }											\
 	ssRaw.SecureClear();																								\
-	CUtilities::MW_HEX_PRINT( &_chHeader.STRUCTMEMBER, sizeof( _chHeader.STRUCTMEMBER ), ssRaw );				\
-	if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+	CUtilities::MW_HEX_PRINT( &_chHeader.STRUCTMEMBER, sizeof( _chHeader.STRUCTMEMBER ), ssRaw );						\
+	if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 		CSecureWString swsTemp;
 		CSecureString ssCString;
@@ -780,9 +780,9 @@ namespace mx {
 			if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }
 
 			CUtilities::BytesToCString( &_chHeader.PeSignature, sizeof( _chHeader.PeSignature ), ssCString );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			CUtilities::BytesToHexWithSpaces( &_chHeader.PeSignature, sizeof( _chHeader.PeSignature ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -796,10 +796,10 @@ namespace mx {
 
 			CHAR szTemp[64];
 			CUtilities::MachineTypeToString( _chHeader.Machine, szTemp );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( szTemp ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( szTemp ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_chHeader.Machine, sizeof( _chHeader.Machine ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 		{
 			swsTemp = mx::CStringDecoder::DecodeToWString( _T_LEN_63A115CA_NumberOfSections );
@@ -821,10 +821,10 @@ namespace mx {
 
 			ssCString.SecureClear();
 			CUtilities::CreateDateString( _chHeader.TimeDateStamp, ssCString );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_chHeader.TimeDateStamp, sizeof( _chHeader.TimeDateStamp ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -869,10 +869,10 @@ namespace mx {
 			ssCString.SecureClear();
 			CUtilities::PeCharacteristicsToString( _chHeader.Characteristics, ssCString );
 			ssCString.append( szTemp );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_chHeader.Characteristics, sizeof( _chHeader.Characteristics ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		return true;
@@ -888,7 +888,7 @@ namespace mx {
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_VALUE ) ) { return false; }											\
 	ssRaw.SecureClear();																								\
 	CUtilities::MW_HEX_PRINT( &_cwoHeader.STRUCTMEMBER, sizeof( _cwoHeader.STRUCTMEMBER ), ssRaw );				\
-	if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+	if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 		CSecureWString swsTemp;
 		CSecureString ssCString;
@@ -908,10 +908,10 @@ namespace mx {
 			CHAR szMagic[64];
 			CUtilities::PeMagicTypeToString( _cwoHeader.Magic, szMagic );
 			std::sprintf( szBuffer, "%s (%u, %s)", szMagic, _cwoHeader.Magic, CUtilities::ToHex( _cwoHeader.Magic, 4 ) );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( szBuffer ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( szBuffer ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwoHeader.Magic, sizeof( _cwoHeader.Magic ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -948,10 +948,10 @@ namespace mx {
 			CUtilities::SizeString( _cwoHeader.SizeOfCode, ssCString );
 			ssCString.push_back( ')' );
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwoHeader.SizeOfCode, sizeof( _cwoHeader.SizeOfCode ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -970,10 +970,10 @@ namespace mx {
 			CUtilities::SizeString( _cwoHeader.SizeOfInitializedData, ssCString );
 			ssCString.push_back( ')' );
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwoHeader.SizeOfInitializedData, sizeof( _cwoHeader.SizeOfInitializedData ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -992,10 +992,10 @@ namespace mx {
 			CUtilities::SizeString( _cwoHeader.SizeOfUninitializedData, ssCString );
 			ssCString.push_back( ')' );
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwoHeader.SizeOfUninitializedData, sizeof( _cwoHeader.SizeOfUninitializedData ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1009,10 +1009,10 @@ namespace mx {
 
 			ssCString.SecureClear();
 			_poPeObject.RelocAddressToStringwithSection( _cwoHeader.AddressOfEntryPoint, ssCString );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwoHeader.AddressOfEntryPoint, sizeof( _cwoHeader.AddressOfEntryPoint ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1026,10 +1026,10 @@ namespace mx {
 
 			ssCString.SecureClear();
 			CUtilities::ToHex( _cwoHeader.BaseOfCode, ssCString, 8 );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwoHeader.BaseOfCode, sizeof( _cwoHeader.BaseOfCode ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		return true;
@@ -1045,7 +1045,7 @@ namespace mx {
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_VALUE ) ) { return false; }											\
 	ssRaw.SecureClear();																								\
 	CUtilities::MW_HEX_PRINT( &_cwpHeader.STRUCTMEMBER, sizeof( _cwpHeader.STRUCTMEMBER ), ssRaw );				\
-	if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+	if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 		CSecureWString swsTemp;
 		CSecureString ssCString;
@@ -1063,10 +1063,10 @@ namespace mx {
 
 			ssCString.SecureClear();
 			CUtilities::ToHex( _cwpHeader.BaseOfData, ssCString, 8 );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.BaseOfData, sizeof( _cwpHeader.BaseOfData ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1080,10 +1080,10 @@ namespace mx {
 
 			ssCString.SecureClear();
 			CUtilities::ToHex( _cwpHeader.ImageBase, ssCString, 8 );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.ImageBase, sizeof( _cwpHeader.ImageBase ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1122,10 +1122,10 @@ namespace mx {
 			CUtilities::WindowsVersion( _cwpHeader.MajorOperatingSystemVersion, _cwpHeader.MinorOperatingSystemVersion, ssCString );
 			ssCString.push_back( ')' );
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.MajorOperatingSystemVersion, sizeof( _cwpHeader.MajorOperatingSystemVersion ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1198,10 +1198,10 @@ namespace mx {
 			ssCString.append( szTemp );
 			CUtilities::SizeString( _cwpHeader.SizeOfImage, ssCString );
 			ssCString.push_back( ')' );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.SizeOfImage, sizeof( _cwpHeader.SizeOfImage ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1220,10 +1220,10 @@ namespace mx {
 			ssCString.append( szTemp );
 			CUtilities::SizeString( _cwpHeader.SizeOfHeaders, ssCString );
 			ssCString.push_back( ')' );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.SizeOfHeaders, sizeof( _cwpHeader.SizeOfHeaders ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1248,10 +1248,10 @@ namespace mx {
 			CHAR szBuffer[96];
 			CUtilities::PeSubSystemTypeToString( _cwpHeader.Subsystem, szTemp );
 			std::sprintf( szBuffer, "%s (%u)", szTemp, _cwpHeader.Subsystem );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( szBuffer ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( szBuffer ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.Subsystem, sizeof( _cwpHeader.Subsystem ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1269,10 +1269,10 @@ namespace mx {
 			ssCString.SecureClear();
 			CUtilities::PeDllCharacteristicsToString( _cwpHeader.DllCharacteristics, ssCString );
 			ssCString.append( szTemp );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.DllCharacteristics, sizeof( _cwpHeader.DllCharacteristics ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1291,10 +1291,10 @@ namespace mx {
 			CUtilities::SizeString( _cwpHeader.SizeOfStackReserve, ssCString );
 			ssCString.push_back( ')' );
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.SizeOfStackReserve, sizeof( _cwpHeader.SizeOfStackReserve ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1313,10 +1313,10 @@ namespace mx {
 			CUtilities::SizeString( _cwpHeader.SizeOfStackCommit, ssCString );
 			ssCString.push_back( ')' );
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.SizeOfStackCommit, sizeof( _cwpHeader.SizeOfStackCommit ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1335,10 +1335,10 @@ namespace mx {
 			CUtilities::SizeString( _cwpHeader.SizeOfHeapReserve, ssCString );
 			ssCString.push_back( ')' );
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.SizeOfHeapReserve, sizeof( _cwpHeader.SizeOfHeapReserve ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1357,10 +1357,10 @@ namespace mx {
 			CUtilities::SizeString( _cwpHeader.SizeOfHeapCommit, ssCString );
 			ssCString.push_back( ')' );
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.SizeOfHeapCommit, sizeof( _cwpHeader.SizeOfHeapCommit ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1395,7 +1395,7 @@ namespace mx {
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_VALUE ) ) { return false; }											\
 	ssRaw.SecureClear();																								\
 	CUtilities::MW_HEX_PRINT( &_cwpHeader.STRUCTMEMBER, sizeof( _cwpHeader.STRUCTMEMBER ), ssRaw );				\
-	if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+	if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 		CSecureWString swsTemp;
 		CSecureString ssCString;
@@ -1413,10 +1413,10 @@ namespace mx {
 
 			ssCString.SecureClear();
 			CUtilities::ToHex( _cwpHeader.ImageBase, ssCString, 8 );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.ImageBase, sizeof( _cwpHeader.ImageBase ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1455,10 +1455,10 @@ namespace mx {
 			CUtilities::WindowsVersion( _cwpHeader.MajorOperatingSystemVersion, _cwpHeader.MinorOperatingSystemVersion, ssCString );
 			ssCString.push_back( ')' );
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.MajorOperatingSystemVersion, sizeof( _cwpHeader.MajorOperatingSystemVersion ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1531,10 +1531,10 @@ namespace mx {
 			ssCString.append( szTemp );
 			CUtilities::SizeString( _cwpHeader.SizeOfImage, ssCString );
 			ssCString.push_back( ')' );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.SizeOfImage, sizeof( _cwpHeader.SizeOfImage ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1553,10 +1553,10 @@ namespace mx {
 			ssCString.append( szTemp );
 			CUtilities::SizeString( _cwpHeader.SizeOfHeaders, ssCString );
 			ssCString.push_back( ')' );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.SizeOfHeaders, sizeof( _cwpHeader.SizeOfHeaders ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1581,10 +1581,10 @@ namespace mx {
 			CHAR szBuffer[96];
 			CUtilities::PeSubSystemTypeToString( _cwpHeader.Subsystem, szTemp );
 			std::sprintf( szBuffer, "%s (%u)", szTemp, _cwpHeader.Subsystem );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( szBuffer ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( szBuffer ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.Subsystem, sizeof( _cwpHeader.Subsystem ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1602,10 +1602,10 @@ namespace mx {
 			ssCString.SecureClear();
 			CUtilities::PeDllCharacteristicsToString( _cwpHeader.DllCharacteristics, ssCString );
 			ssCString.append( szTemp );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.DllCharacteristics, sizeof( _cwpHeader.DllCharacteristics ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1624,10 +1624,10 @@ namespace mx {
 			CUtilities::SizeString( _cwpHeader.SizeOfStackReserve, ssCString );
 			ssCString.push_back( ')' );
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.SizeOfStackReserve, sizeof( _cwpHeader.SizeOfStackReserve ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1646,10 +1646,10 @@ namespace mx {
 			CUtilities::SizeString( _cwpHeader.SizeOfStackCommit, ssCString );
 			ssCString.push_back( ')' );
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.SizeOfStackCommit, sizeof( _cwpHeader.SizeOfStackCommit ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1668,10 +1668,10 @@ namespace mx {
 			CUtilities::SizeString( _cwpHeader.SizeOfHeapReserve, ssCString );
 			ssCString.push_back( ')' );
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.SizeOfHeapReserve, sizeof( _cwpHeader.SizeOfHeapReserve ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1690,10 +1690,10 @@ namespace mx {
 			CUtilities::SizeString( _cwpHeader.SizeOfHeapCommit, ssCString );
 			ssCString.push_back( ')' );
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_cwpHeader.SizeOfHeapCommit, sizeof( _cwpHeader.SizeOfHeapCommit ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1759,10 +1759,10 @@ namespace mx {
 			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( aTable[I].pcDescName, aTable[I].ui32DescStrLen ).c_str(), MW_PE_DESC ) ) { return false; }
 
 			std::sprintf( szTemp, mx::CStringDecoder::DecodeToString( _T_LEN_F1D4865E_VirtualAddress__s__Size__u ).c_str(), CUtilities::ToHex( _vDataDirs[I].VirtualAddress, 8 ), _vDataDirs[I].Size );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( szTemp ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( szTemp ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_vDataDirs[I], sizeof( _vDataDirs[I] ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 			if ( _vDataDirs[I].VirtualAddress ) {
 				AddDataDirectory( _tlTree, hItem, _vDataDirs[I], _poPeObject, _uiImageBase, _uiStructOffset );
@@ -1785,7 +1785,7 @@ namespace mx {
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_VALUE ) ) { return false; }											\
 	ssRaw.SecureClear();																								\
 	CUtilities::MW_HEX_PRINT( &_vDataDirs[I].STRUCTMEMBER, sizeof( _vDataDirs[I].STRUCTMEMBER ), ssRaw );				\
-	if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+	if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 		CSecureWString swsTemp;
 		CSecureString ssCString;
@@ -1803,10 +1803,10 @@ namespace mx {
 
 			ssCString.SecureClear();
 			_poPeObject.RelocAddressToStringwithSection( _ddDir.VirtualAddress, ssCString );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_ddDir.VirtualAddress, sizeof( _ddDir.VirtualAddress ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -1831,10 +1831,10 @@ namespace mx {
 				CUtilities::SizeString( _ddDir.Size, ssCString );
 				ssCString.push_back( ')' );
 			}
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_ddDir.Size, sizeof( _ddDir.Size ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 			/*
 			std::string sTemp;
@@ -1873,7 +1873,7 @@ namespace mx {
 			::ZeroMemory( szTemp, sizeof( szTemp ) );
 			std::memcpy( szTemp, _vHeaders[I].Name, 8 );
 			swsTemp.SecureClear();
-			swsTemp = ee::StringToWString( szTemp );
+			swsTemp = ee::CExpEval::StringToWString( szTemp );
 			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 
@@ -1903,7 +1903,7 @@ namespace mx {
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_VALUE ) ) { return false; }											\
 	ssRaw.SecureClear();																								\
 	CUtilities::MW_HEX_PRINT( &_ishHeader.STRUCTMEMBER, sizeof( _ishHeader.STRUCTMEMBER ), ssRaw );						\
-	if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+	if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 		CSecureWString swsTemp;
 		CSecureString ssCString;
@@ -1923,10 +1923,10 @@ namespace mx {
 			CHAR szTemp[16];
 			::ZeroMemory( szTemp, sizeof( szTemp ) );
 			std::memcpy( szTemp, _ishHeader.Name, 8 );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( szTemp ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( szTemp ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::BytesToHexWithSpaces( &_ishHeader.Name, sizeof( _ishHeader.Name ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 			::ZeroMemory( szTemp, sizeof( szTemp ) );
 		}
@@ -1942,10 +1942,10 @@ namespace mx {
 
 			CHAR szTemp[32];
 			std::sprintf( szTemp, "%s (%u)", CUtilities::ToHex( _ishHeader.Misc.PhysicalAddress, 8 ), _ishHeader.Misc.PhysicalAddress );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( szTemp ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( szTemp ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::BytesToHexWithSpaces( &_ishHeader.Misc.PhysicalAddress, sizeof( _ishHeader.Misc.PhysicalAddress ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 
 			::ZeroMemory( szTemp, sizeof( szTemp ) );
@@ -1965,10 +1965,10 @@ namespace mx {
 			CHAR szBuffer[48];
 			std::sprintf( szBuffer, mx::CStringDecoder::DecodeToString( _T_LEN_03FE75A1__s___s_after_loading_ ).c_str(), CUtilities::ToHex( _ishHeader.VirtualAddress, 8 ),
 				CUtilities::ToHex( _ishHeader.VirtualAddress + _uiImageBase, szTemp, MX_ELEMENTS( szTemp ), 0 ) );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( szBuffer ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( szBuffer ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::BytesToHexWithSpaces( &_ishHeader.VirtualAddress, sizeof( _ishHeader.VirtualAddress ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 
 			::ZeroMemory( szTemp, sizeof( szTemp ) );
@@ -1990,10 +1990,10 @@ namespace mx {
 			CUtilities::SizeString( _ishHeader.SizeOfRawData, ssCString );
 			ssCString.push_back( ')' );
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_ishHeader.SizeOfRawData, sizeof( _ishHeader.SizeOfRawData ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -2006,10 +2006,10 @@ namespace mx {
 			if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }
 
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( CUtilities::ToHex( _ishHeader.PointerToRawData, 8 ) ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( CUtilities::ToHex( _ishHeader.PointerToRawData, 8 ) ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::BytesToHexWithSpaces( &_ishHeader.PointerToRawData, sizeof( _ishHeader.PointerToRawData ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -2022,10 +2022,10 @@ namespace mx {
 			if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }
 
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( CUtilities::ToHex( _ishHeader.PointerToRelocations, 8 ) ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( CUtilities::ToHex( _ishHeader.PointerToRelocations, 8 ) ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::BytesToHexWithSpaces( &_ishHeader.PointerToRelocations, sizeof( _ishHeader.PointerToRelocations ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -2038,10 +2038,10 @@ namespace mx {
 			if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }
 
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( CUtilities::ToHex( _ishHeader.PointerToLinenumbers, 8 ) ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( CUtilities::ToHex( _ishHeader.PointerToLinenumbers, 8 ) ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::BytesToHexWithSpaces( &_ishHeader.PointerToLinenumbers, sizeof( _ishHeader.PointerToLinenumbers ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -2077,10 +2077,10 @@ namespace mx {
 			ssCString.SecureClear();
 			CUtilities::PeSectionFlagsToString( _ishHeader.Characteristics, ssCString );
 			ssCString.append( szTemp );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_ishHeader.Characteristics, sizeof( _ishHeader.Characteristics ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 			::ZeroMemory( szTemp, sizeof( szTemp ) );
 		}
@@ -2113,7 +2113,7 @@ namespace mx {
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_VALUE ) ) { return false; }																	\
 	ssRaw.SecureClear();																														\
 	CUtilities::MW_HEX_PRINT( &_poPeObject.ExportDescriptor()->STRUCTMEMBER, sizeof( _poPeObject.ExportDescriptor()->STRUCTMEMBER ), ssRaw );	\
-	if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+	if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 		CSecureWString swsTemp;
 		CSecureString ssCString;
@@ -2141,10 +2141,10 @@ namespace mx {
 
 			ssCString.SecureClear();
 			CUtilities::CreateDateString( _poPeObject.ExportDescriptor()->TimeDateStamp, ssCString );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_poPeObject.ExportDescriptor()->TimeDateStamp, sizeof( _poPeObject.ExportDescriptor()->TimeDateStamp ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -2181,10 +2181,10 @@ namespace mx {
 			ssCString = szBuffer;
 			_poPeObject.GetExportDllName( ssCString );
 			ssCString.push_back( ')' );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_poPeObject.ExportDescriptor()->Name, sizeof( _poPeObject.ExportDescriptor()->Name ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 			ZeroMemory( szBuffer, sizeof( szBuffer ) );
 		}
@@ -2227,10 +2227,10 @@ namespace mx {
 
 			ssCString.SecureClear();
 			_poPeObject.RelocAddressToStringwithSection( _poPeObject.ExportDescriptor()->AddressOfFunctions, ssCString );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_poPeObject.ExportDescriptor()->AddressOfFunctions, sizeof( _poPeObject.ExportDescriptor()->AddressOfFunctions ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -2244,10 +2244,10 @@ namespace mx {
 
 			ssCString.SecureClear();
 			_poPeObject.RelocAddressToStringwithSection( _poPeObject.ExportDescriptor()->AddressOfNames, ssCString );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_poPeObject.ExportDescriptor()->AddressOfNames, sizeof( _poPeObject.ExportDescriptor()->AddressOfNames ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -2261,10 +2261,10 @@ namespace mx {
 
 			ssCString.SecureClear();
 			_poPeObject.RelocAddressToStringwithSection( _poPeObject.ExportDescriptor()->AddressOfNameOrdinals, ssCString );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_poPeObject.ExportDescriptor()->AddressOfNameOrdinals, sizeof( _poPeObject.ExportDescriptor()->AddressOfNameOrdinals ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		return true;
@@ -2280,7 +2280,7 @@ namespace mx {
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_VALUE ) ) { return false; }																	\
 	ssRaw.SecureClear();																														\
 	CUtilities::MW_HEX_PRINT( &_poPeObject.ExportDescriptor()->STRUCTMEMBER, sizeof( _poPeObject.ExportDescriptor()->STRUCTMEMBER ), ssRaw );	\
-	if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+	if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 		CSecureWString swsTemp;
 		CSecureString ssCString;
@@ -2302,10 +2302,10 @@ namespace mx {
 			std::sprintf( szBuffer, mx::CStringDecoder::DecodeToString( _T_LEN_03E23EE2__s__file_offset__s_ ).c_str(),
 				CUtilities::ToHex( _iidDesc.Characteristics, szTempOff1, MX_ELEMENTS( szTempOff1 ), 8 ),
 				CUtilities::ToHex( _poPeObject.RelocAddressToFileOffset( _iidDesc.Characteristics ), szTempOff2, MX_ELEMENTS( szTempOff2 ), 8 ) );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( szBuffer ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( szBuffer ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_iidDesc.Characteristics, sizeof( _iidDesc.Characteristics ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 			::ZeroMemory( szBuffer, sizeof( szBuffer ) );
 		}
@@ -2321,10 +2321,10 @@ namespace mx {
 
 			ssCString.SecureClear();
 			CUtilities::CreateDateString( _iidDesc.TimeDateStamp, ssCString );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_iidDesc.TimeDateStamp, sizeof( _iidDesc.TimeDateStamp ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -2338,10 +2338,10 @@ namespace mx {
 
 			ssCString.SecureClear();
 			CUtilities::ToHex( _iidDesc.ForwarderChain, ssCString, 8 );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_iidDesc.ForwarderChain, sizeof( _iidDesc.ForwarderChain ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -2373,10 +2373,10 @@ namespace mx {
 			else {
 				CUtilities::ToHex( _iidDesc.Name, ssCString, 8 );
 			}
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_iidDesc.Name, sizeof( _iidDesc.Name ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -2395,10 +2395,10 @@ namespace mx {
 				CUtilities::ToHex( _iidDesc.FirstThunk, 8 ),
 				CUtilities::ToHex( _poPeObject.RelocAddressToFileOffset( _iidDesc.FirstThunk ), szTempOff, MX_ELEMENTS( szTempOff ), 8 ) );
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( szBuffer ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( szBuffer ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_iidDesc.FirstThunk, sizeof( _iidDesc.FirstThunk ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 			ZeroMemory( szBuffer, sizeof( szBuffer ) );
 		}
@@ -2416,7 +2416,7 @@ namespace mx {
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_VALUE ) ) { return false; }																	\
 	ssRaw.SecureClear();																														\
 	CUtilities::MW_HEX_PRINT( &_irdDesc.STRUCTMEMBER, sizeof( _irdDesc.STRUCTMEMBER ), ssRaw );	\
-	if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+	if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 		CSecureWString swsTemp;
 		CSecureString ssCString;
@@ -2443,10 +2443,10 @@ namespace mx {
 
 			ssCString.SecureClear();
 			CUtilities::CreateDateString( _irdDesc.TimeDateStamp, ssCString );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_irdDesc.TimeDateStamp, sizeof( _irdDesc.TimeDateStamp ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		{
@@ -2498,7 +2498,7 @@ namespace mx {
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_VALUE ) ) { return false; }																	\
 	ssRaw.SecureClear();																														\
 	CUtilities::MW_HEX_PRINT( &_vRelocs[I].pibrReloc->STRUCTMEMBER, sizeof( _vRelocs[I].pibrReloc->STRUCTMEMBER ), ssRaw );						\
-	if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+	if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 		CSecureWString swsTemp;
 		CSecureString ssCString;
@@ -2520,10 +2520,10 @@ namespace mx {
 
 				ssCString.SecureClear();
 				_poPeObject.RelocAddressToStringwithSection( _vRelocs[I].pibrReloc->VirtualAddress, ssCString );
-				if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+				if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 				ssRaw.SecureClear();
 				CUtilities::MW_HEX_PRINT( &_vRelocs[I].pibrReloc->VirtualAddress, sizeof( _vRelocs[I].pibrReloc->VirtualAddress ), ssRaw );
-				if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+				if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 			}
 
 			{
@@ -2567,10 +2567,10 @@ namespace mx {
 			CUtilities::ToUnsigned( _brRelocs.puiOffsets[I] >> 12, ssCString );
 			ssCString += "), ";
 			_poPeObject.RelocAddressToStringwithSection( _brRelocs.pibrReloc->VirtualAddress + (_brRelocs.puiOffsets[I] & 0xFFF), ssCString );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_brRelocs.puiOffsets[I], sizeof( _brRelocs.puiOffsets[I] ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		return true;
@@ -2618,7 +2618,7 @@ namespace mx {
 				CUtilities::ToHex( _vList[I].ui64FileOffsetAddr, szHex0, MX_ELEMENTS( szHex0 ), 8 ), CUtilities::ToUnsigned( _vList[I].ui64FileOffsetAddr, szU0, MX_ELEMENTS( szU0 ) ),
 				CUtilities::ToHex( _vList[I].ui64FileOffsetOrd, szHex1, MX_ELEMENTS( szHex1 ), 8 ), CUtilities::ToUnsigned( _vList[I].ui64FileOffsetOrd, szU1, MX_ELEMENTS( szU1 ) ),
 				CUtilities::ToHex( _vList[I].ui64FileOffsetName, szHex2, MX_ELEMENTS( szHex2 ), 8 ), CUtilities::ToUnsigned( _vList[I].ui64FileOffsetName, szU2, MX_ELEMENTS( szU2 ) ) );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( szOffset ).c_str(), MW_PE_OFFSET ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( szOffset ).c_str(), MW_PE_OFFSET ) ) { return false; }
 
 
 
@@ -2628,7 +2628,7 @@ namespace mx {
 			CUtilities::ToUnsigned( _vList[I].uiOrdinal, ssCString );
 			ssCString.append( ", " );
 			ssCString += _vList[I].sName;
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 
 			ssRaw.SecureClear();
 			CUtilities::BytesToHex( &_vList[I].uiAddress, sizeof( _vList[I].uiAddress ), ssRaw );
@@ -2636,7 +2636,7 @@ namespace mx {
 			CUtilities::BytesToHex( &_vList[I].uiOrdinal, sizeof( _vList[I].uiOrdinal ), ssRaw );
 			ssRaw.push_back( ' ' );
 			CUtilities::BytesToHexWithSpaces( _vList[I].sName.c_str(), _vList[I].sName.size(), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		return true;
@@ -2670,7 +2670,7 @@ namespace mx {
 			ssTemp += " (";
 			CUtilities::ToUnsigned( vImports.size(), ssTemp );
 			ssTemp += " functions)";
-			CSecureWString swsTemp = ee::StringToWString( ssTemp );
+			CSecureWString swsTemp = ee::CExpEval::StringToWString( ssTemp );
 			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 			
@@ -2698,7 +2698,7 @@ namespace mx {
 			CSecureString ssCString;
 			CUtilities::ToHex( _iImport.uiOrdinal, ssCString, 4 );
 			ssCString += std::string( ", " ) + _iImport.sName;
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 
 
 			CSecureString ssRaw;
@@ -2714,7 +2714,7 @@ namespace mx {
 				CUtilities::BytesToHexWithSpaces( _iImport.sName.c_str(), _iImport.sName.size(), ssRaw );
 			}
 			
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 		}
 
 		return true;
@@ -2755,7 +2755,7 @@ namespace mx {
 	if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_VALUE ) ) { return false; }																	\
 	ssRaw.SecureClear();																														\
 	CUtilities::MW_HEX_PRINT( &pirdResDir->STRUCTMEMBER, sizeof( pirdResDir->STRUCTMEMBER ), ssRaw );											\
-	if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+	if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 
 		uint64_t uiOffset = reinterpret_cast<size_t>(_pirdeEntry) - reinterpret_cast<size_t>(&_poPeObject.SectionData()[_uiSectionIndex].vData[0]);
@@ -2798,7 +2798,7 @@ namespace mx {
 			ssCString += ", ";
 			CUtilities::ToHex( _pirdeEntry->Data, ssCString, 8 );
 
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 
 
 			ssRaw.SecureClear();
@@ -2806,7 +2806,7 @@ namespace mx {
 			ssRaw += ',';
 			ssRaw += ' ';
 			CUtilities::MW_HEX_PRINT( &_pirdeEntry->Data, sizeof( _pirdeEntry->Data ), ssRaw );
-			if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 
 
 			MX_PRINT_FILE_OFFSET( wValue, uiOffset, MX_IMAGE_RESOURCE_DIRECTORY_ENTRY, swsTemp );
@@ -2841,10 +2841,10 @@ namespace mx {
 
 					ssCString.SecureClear();
 					_poPeObject.RelocAddressToStringwithSection( pirdResDir->OffsetToData, ssCString );
-					if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+					if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 					ssRaw.SecureClear();
 					CUtilities::MW_HEX_PRINT( &pirdResDir->OffsetToData, sizeof( pirdResDir->OffsetToData ), ssRaw );
-					if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+					if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 				}
 
 				{
@@ -2876,14 +2876,14 @@ namespace mx {
 						CUtilities::ToUnsigned( pirdResDir->CodePage, ssCString );
 						sDesc = mx::CStringDecoder::DecodeToString( _T_LEN_6CD26DB4_Code_page_ );
 					}
-					if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
-					if ( !_tlTree.SetItemText( hItem, ee::StringToWString( sDesc ).c_str(), MW_PE_DESC ) ) { return false; }
+					if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
+					if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( sDesc ).c_str(), MW_PE_DESC ) ) { return false; }
 
 					
 
 					ssRaw.SecureClear();
 					CUtilities::MW_HEX_PRINT( &pirdResDir->CodePage, sizeof( pirdResDir->CodePage ), ssRaw );
-					if ( !_tlTree.SetItemText( hItem, ee::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
+					if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
 				}
 
 				{
@@ -3103,7 +3103,7 @@ namespace mx {
 				TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
 				HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
 				//if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( _T_LEN_50BF2458_Company_that_produced_the_file___for_example____Microsoft_Corporation___or___Standard_Microsystems_Corporation__Inc____This_string_is_required_ ).c_str(), MW_PE_DESC ) ) { return false; }
-				if ( !_tlTree.SetItemText( hItem, ee::StringToWString( vLines[I] ).c_str(), MW_PE_VALUE ) ) { return false; }
+				if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( vLines[I] ).c_str(), MW_PE_VALUE ) ) { return false; }
 			}
 		}
 		return true;
@@ -3142,7 +3142,7 @@ namespace mx {
 
 			ssCString += "\\";
 		}
-		return ee::StringToWString( ssCString );
+		return ee::CExpEval::StringToWString( ssCString );
 	}
 
 	// WM_CONTEXTMENU.

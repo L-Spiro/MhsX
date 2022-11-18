@@ -172,7 +172,7 @@ namespace mx {
 				if ( pcbCombo ) {
 					//CSecureString sText = pcbCombo->GetTextA();
 					CSecureWString wsText = pcbCombo->GetTextW();
-					CSecureString ssUtf8 = ee::ToUtf8( wsText );
+					CSecureString ssUtf8 = ee::CExpEval::ToUtf8( wsText );
 					AddExpression( ssUtf8.c_str() );
 				}				
 				break;
@@ -257,7 +257,7 @@ namespace mx {
 
 		if ( bSuccess ) {
 			if ( eResult.ncType == ee::EE_NC_OBJECT ) {
-				peEdit->SetTextW( ee::StringToWString( sObj ).c_str() );
+				peEdit->SetTextW( ee::CExpEval::StringToWString( sObj ).c_str() );
 			}
 			else {
 				std::wstring sTemp;
@@ -285,7 +285,7 @@ namespace mx {
 				LVITEMW iItem = {
 					LVIF_TEXT
 				};
-				CSecureWString wsExp = ee::ToUtf16( _pcExp );
+				CSecureWString wsExp = ee::CExpEval::ToUtf16( _pcExp );
 				iItem.pszText = const_cast<LPWSTR>(wsExp.c_str());
 				INT iIdx = plvList->InsertItem( iItem );
 				m_vExpressions.insert( m_vExpressions.begin() + iIdx, new CExpression() );
@@ -349,7 +349,7 @@ namespace mx {
 										eResult.u.poObj = nullptr;
 										if ( poObj ) {
 											if ( poObj->ToString( sObj ) ) {
-												plvList->SetItemText( I, 1, ee::StringToWString( sObj ).c_str() );
+												plvList->SetItemText( I, 1, ee::CExpEval::StringToWString( sObj ).c_str() );
 												continue;
 											}
 										}

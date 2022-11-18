@@ -998,13 +998,13 @@ namespace mx {
 			}
 			CSecureWString swsLeft;
 			CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft, true );
-			_sExpression.append( ee::WStringToString( swsLeft ) );
+			_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 			_sExpression.push_back( ',' );
 			_sExpression.push_back( ' ' );
 
 			swsLeft.SecureClear();
 			CUtilities::ToDouble( m_pmhMemHack->Options().dEpsilon, swsLeft );
-			_sExpression.append( ee::WStringToString( swsLeft ) );
+			_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 
 			_sExpression.push_back( ' ' );
 			_sExpression.push_back( ')' );
@@ -1025,7 +1025,7 @@ namespace mx {
 					_sExpression = _DEC_S_BA988A07_______;
 					CSecureWString swsLeft;
 					CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft, true );
-					_sExpression.append( ee::WStringToString( swsLeft ) );
+					_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 				}
 			}
 			else {
@@ -1042,7 +1042,7 @@ namespace mx {
 					CSecureWString swsLeft;
 					CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft, true );
 					_sExpression = _DEC_S_BA988A07_______;
-					_sExpression.append( ee::WStringToString( swsLeft ) );
+					_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 				}
 			}
 		}
@@ -1078,13 +1078,13 @@ namespace mx {
 			}
 			CSecureWString swsLeft;
 			CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft, true );
-			_sExpression.append( ee::WStringToString( swsLeft ) );
+			_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 			_sExpression.push_back( ',' );
 			_sExpression.push_back( ' ' );
 
 			swsLeft.SecureClear();
 			CUtilities::ToDouble( m_pmhMemHack->Options().dEpsilon, swsLeft );
-			_sExpression.append( ee::WStringToString( swsLeft ) );
+			_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 
 			_sExpression.push_back( ' ' );
 			_sExpression.push_back( ')' );
@@ -1108,7 +1108,7 @@ namespace mx {
 					_sExpression = _DEC_S_AFA4D013_______;
 					CSecureWString swsLeft;
 					CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft, true );
-					_sExpression.append( ee::WStringToString( swsLeft ) );
+					_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 				}
 			}
 			else {
@@ -1128,7 +1128,7 @@ namespace mx {
 					CSecureWString swsLeft;
 					CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft, true );
 					_sExpression = _DEC_S_AFA4D013_______;
-					_sExpression.append( ee::WStringToString( swsLeft ) );
+					_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 				}
 			}
 		}
@@ -1202,9 +1202,9 @@ namespace mx {
 		CUtilities::ToDataTypeString( rTempH, _dtDataType, swsRight, true );
 		
 		_sExpression = _DEC_S_68223D78________;
-		_sExpression.append( ee::WStringToString( swsLeft ) );
+		_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 		_sExpression.append( _DEC_S_C4C57451_____________ );
-		_sExpression.append( ee::WStringToString( swsRight ) );
+		_sExpression.append( ee::CExpEval::WStringToString( swsRight ) );
 		_sExpression.push_back( ')' );
 		if ( CUtilities::DataTypeIsFloat( _dtDataType ) && _bInv ) {
 			_sExpression.push_back( ' ' );
@@ -1222,7 +1222,7 @@ namespace mx {
 				bUsedNan = true;
 			}*/
 			_sExpression = _DEC_S_0FFD4DE8______;
-			_sExpression.append( ee::WStringToString( swsLeft ) );
+			_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 			if ( !bUsedNan ) {
 				_sExpression.push_back( ' ' );
 				_sExpression.append( _DEC_S_36A7406E____isnan______ );
@@ -1230,7 +1230,7 @@ namespace mx {
 		}
 		else {
 			_sExpression = _DEC_S_0FFD4DE8______;
-			_sExpression.append( ee::WStringToString( swsLeft ) );
+			_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 		}
 	}
 
@@ -1244,7 +1244,7 @@ namespace mx {
 				bUsedNan = true;
 			}*/
 			_sExpression = _DEC_S_3DCB2F6A______;
-			_sExpression.append( ee::WStringToString( swsLeft ) );
+			_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 			if ( !bUsedNan ) {
 				_sExpression.push_back( ' ' );
 				_sExpression.append( _DEC_S_36A7406E____isnan______ );
@@ -1252,7 +1252,7 @@ namespace mx {
 		}
 		else {
 			_sExpression = _DEC_S_3DCB2F6A______;
-			_sExpression.append( ee::WStringToString( swsLeft ) );
+			_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 		}
 	}
 
@@ -1304,13 +1304,13 @@ namespace mx {
 			}
 			CSecureWString swsLeft;
 			CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft, true );
-			_sExpression.append( ee::WStringToString( swsLeft ) );
+			_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 			_sExpression.push_back( ',' );
 			_sExpression.push_back( ' ' );
 
 			swsLeft.SecureClear();
 			CUtilities::ToDouble( m_pmhMemHack->Options().dEpsilon, swsLeft );
-			_sExpression.append( ee::WStringToString( swsLeft ) );
+			_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 
 			_sExpression.push_back( ' ' );
 			_sExpression.push_back( ')' );
@@ -1319,7 +1319,7 @@ namespace mx {
 			_sExpression = _DEC_S_D0ED2A1B________0_____;
 			CSecureWString swsLeft;
 			CUtilities::ToDataTypeString( _rLVal, _dtDataType, swsLeft, true );
-			_sExpression.append( ee::WStringToString( swsLeft ) );
+			_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 		}
 
 		if ( bIsFloat && _bInv && !bUsedNan ) {
@@ -1352,13 +1352,13 @@ namespace mx {
 			}
 			CSecureWString swsLeft;
 			CUtilities::ToDataTypeString( _rLVal, CUtilities::MX_DT_DOUBLE, swsLeft, true );
-			_sExpression.append( ee::WStringToString( swsLeft ) );
+			_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 			_sExpression.push_back( ',' );
 			_sExpression.push_back( ' ' );
 
 			swsLeft.SecureClear();
 			CUtilities::ToDouble( m_pmhMemHack->Options().dEpsilon, swsLeft );
-			_sExpression.append( ee::WStringToString( swsLeft ) );
+			_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 
 			_sExpression.push_back( ' ' );
 			_sExpression.push_back( ')' );
@@ -1369,7 +1369,7 @@ namespace mx {
 			_sExpression = _DEC_S_D0DAC171__0______double_______0_____;
 			CSecureWString swsLeft;
 			CUtilities::ToDataTypeString( _rLVal, CUtilities::MX_DT_DOUBLE, swsLeft, true );
-			_sExpression.append( ee::WStringToString( swsLeft ) );
+			_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 		}
 
 		if ( bIsFloat && _bInv && !bUsedNan ) {
@@ -1417,9 +1417,9 @@ namespace mx {
 		CUtilities::ToDataTypeString( rTempH, _dtDataType, swsRight, true );
 		
 		_sExpression = _DEC_S_EFDD3592_Tmp__________0____Tmp____;
-		_sExpression.append( ee::WStringToString( swsLeft ) );
+		_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 		_sExpression.append( _DEC_S_E1223E80_____Tmp____ );
-		_sExpression.append( ee::WStringToString( swsRight ) );
+		_sExpression.append( ee::CExpEval::WStringToString( swsRight ) );
 		_sExpression.push_back( ')' );
 		if ( CUtilities::DataTypeIsFloat( _dtDataType ) && _bInv ) {
 			_sExpression.push_back( ' ' );
@@ -1454,9 +1454,9 @@ namespace mx {
 			// 2 casts will have the same result but add 1 extra node of processing, so ever-so-slightly slower.
 			_sExpression = _DEC_S_B7B76940_if____0_____Tmp____double_______0___Tmp____;
 		}
-		_sExpression.append( ee::WStringToString( swsLeft ) );
+		_sExpression.append( ee::CExpEval::WStringToString( swsLeft ) );
 		_sExpression.append( _DEC_S_E1223E80_____Tmp____ );
-		_sExpression.append( ee::WStringToString( swsRight ) );
+		_sExpression.append( ee::CExpEval::WStringToString( swsRight ) );
 		_sExpression.push_back( ')' );
 		if ( CUtilities::DataTypeIsFloat( _dtDataType ) && _bInv ) {
 			_sExpression.push_back( ' ' );

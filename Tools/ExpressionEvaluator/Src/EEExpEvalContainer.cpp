@@ -545,17 +545,17 @@ namespace ee {
 			if ( !psObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 			switch ( _rExp.ncType ) {
 				case EE_NC_UNSIGNED : {
-					psObj->SetString( ToBinary( _rExp.u.ui64Val ) );
+					psObj->SetString( ee::CExpEval::ToBinary( _rExp.u.ui64Val ) );
 					_rResult = psObj->CreateResult();
 					break;
 				}
 				case EE_NC_SIGNED : {
-					psObj->SetString( ToBinary( _rExp.u.i64Val ) );
+					psObj->SetString( ee::CExpEval::ToBinary( _rExp.u.i64Val ) );
 					_rResult = psObj->CreateResult();
 					break;
 				}
 				case EE_NC_FLOATING : {
-					psObj->SetString( ToBinary( _rExp.u.dVal ) );
+					psObj->SetString( ee::CExpEval::ToBinary( _rExp.u.dVal ) );
 					_rResult = psObj->CreateResult();
 					break;
 				}
@@ -610,7 +610,7 @@ namespace ee {
 
 			EE_RESULT rTmp = ConvertResultOrObject( _rExp, EE_NC_UNSIGNED );
 			uint32_t ui32Len;
-			uint32_t ui32Val = Utf32ToUtf8( static_cast<uint32_t>(rTmp.u.ui64Val), ui32Len );
+			uint32_t ui32Val = ee::CExpEval::Utf32ToUtf8( static_cast<uint32_t>(rTmp.u.ui64Val), ui32Len );
 			std::string sTmp;
 			for ( uint32_t I = 0; I < ui32Len; ++I ) {
 				sTmp.push_back( static_cast<std::string::value_type>(ui32Val >> (I * sizeof( std::string::value_type ) * 8)) );
@@ -645,17 +645,17 @@ namespace ee {
 			if ( !psObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 			switch ( _rExp.ncType ) {
 				case EE_NC_UNSIGNED : {
-					psObj->SetString( ToHex( _rExp.u.ui64Val ) );
+					psObj->SetString( ee::CExpEval::ToHex( _rExp.u.ui64Val ) );
 					_rResult = psObj->CreateResult();
 					break;
 				}
 				case EE_NC_SIGNED : {
-					psObj->SetString( ToHex( _rExp.u.i64Val ) );
+					psObj->SetString( ee::CExpEval::ToHex( _rExp.u.i64Val ) );
 					_rResult = psObj->CreateResult();
 					break;
 				}
 				case EE_NC_FLOATING : {
-					psObj->SetString( ToHex( _rExp.u.dVal ) );
+					psObj->SetString( ee::CExpEval::ToHex( _rExp.u.dVal ) );
 					_rResult = psObj->CreateResult();
 					break;
 				}
@@ -705,17 +705,17 @@ namespace ee {
 			if ( !psObj ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 			switch ( _rExp.ncType ) {
 				case EE_NC_UNSIGNED : {
-					psObj->SetString( ToOct( _rExp.u.ui64Val ) );
+					psObj->SetString( ee::CExpEval::ToOct( _rExp.u.ui64Val ) );
 					_rResult = psObj->CreateResult();
 					break;
 				}
 				case EE_NC_SIGNED : {
-					psObj->SetString( ToOct( _rExp.u.i64Val ) );
+					psObj->SetString( ee::CExpEval::ToOct( _rExp.u.i64Val ) );
 					_rResult = psObj->CreateResult();
 					break;
 				}
 				case EE_NC_FLOATING : {
-					psObj->SetString( ToOct( _rExp.u.dVal ) );
+					psObj->SetString( ee::CExpEval::ToOct( _rExp.u.dVal ) );
 					_rResult = psObj->CreateResult();
 					break;
 				}
@@ -840,8 +840,8 @@ namespace ee {
 			EE_OP( EE_NEXTTOWARD, nexttoward )
 			EE_OP( EE_NEXTTOWARDF, nexttowardf )
 			EE_OP( EE_DIM, fdim )
-			EE_OP( EE_MAX, ee::Max )
-			EE_OP( EE_MIN, ee::Min )
+			EE_OP( EE_MAX, ee::CExpEval::Max )
+			EE_OP( EE_MIN, ee::CExpEval::Min )
 			case CExpEvalParser::token::EE_RAND : {
 				_rResult.ncType = GetCastType( _rExp0.ncType, _rExp1.ncType );
 				_rExp0 = ConvertResultOrObject( _rExp0, _rResult.ncType );
@@ -978,14 +978,14 @@ namespace ee {
 		size_t sArgIdx = 0;
 		try {
 			while ( _stLen ) {
-				uint32_t ui32ThisChar = NextUtf8Char( _pcFormat, _stLen, &stCharLen );
+				uint32_t ui32ThisChar = ee::CExpEval::NextUtf8Char( _pcFormat, _stLen, &stCharLen );
 
 				if ( ui32ThisChar == '{' ) {
 					uint32_t ui32NextChar;
 					if ( _stLen - stCharLen ) {
 						// If there is a next char.
 						size_t stNextCharLen = 0;
-						ui32NextChar = NextUtf8Char( _pcFormat + stCharLen, _stLen - stCharLen, &stNextCharLen );
+						ui32NextChar = ee::CExpEval::NextUtf8Char( _pcFormat + stCharLen, _stLen - stCharLen, &stNextCharLen );
 						if ( ui32NextChar == '{' ) {
 							stCharLen += stNextCharLen;
 							// {{ gets reduced to {.
@@ -1044,7 +1044,7 @@ namespace ee {
 					if ( _stLen - stCharLen ) {
 						// If there is a next char.
 						size_t stNextCharLen = 0;
-						ui32NextChar = NextUtf8Char( _pcFormat + stCharLen, _stLen - stCharLen, &stNextCharLen );
+						ui32NextChar = ee::CExpEval::NextUtf8Char( _pcFormat + stCharLen, _stLen - stCharLen, &stNextCharLen );
 						if ( ui32NextChar == '}' ) {
 							stCharLen += stNextCharLen;
 							// {{ gets reduced to {.
@@ -1121,7 +1121,7 @@ namespace ee {
 			uint64_t ui64Len = 0;
 			size_t sIdx = i64Val;
 			if ( i64Val < 0 ) {
-				ui64Len = CountUtfCodePoints( m_vStrings[_sStrIndex] );
+				ui64Len = ee::CExpEval::CountUtfCodePoints( m_vStrings[_sStrIndex] );
 				// The length must convert to size_t losslessly.
 				if ( ui64Len != static_cast<uint64_t>(static_cast<size_t>(ui64Len)) ) {
 					AddNode( _ndNode );
@@ -1138,7 +1138,7 @@ namespace ee {
 				}
 			}
 			
-			_ndNode.u.ui64Val = GetUtf8CodePointByIdx( m_vStrings[_sStrIndex], sIdx );
+			_ndNode.u.ui64Val = ee::CExpEval::GetUtf8CodePointByIdx( m_vStrings[_sStrIndex], sIdx );
 			_ndNode.nType = EE_N_NUMERICCONSTANT;
 			_ndNode.v.ncConstType = EE_NC_UNSIGNED;
 
@@ -1162,7 +1162,7 @@ namespace ee {
 			uint64_t ui64Len = 0;
 			size_t sIdx0 = i64Val0;
 			if ( i64Val0 < 0 ) {
-				ui64Len = CountUtfCodePoints( m_vStrings[_sStrIndex] );
+				ui64Len = ee::CExpEval::CountUtfCodePoints( m_vStrings[_sStrIndex] );
 				// The length must convert to size_t losslessly.
 				if ( ui64Len != static_cast<uint64_t>(static_cast<size_t>(ui64Len)) ) {
 					AddNode( _ndNode );
@@ -1181,7 +1181,7 @@ namespace ee {
 
 			size_t sIdx1 = i64Val1;
 			if ( i64Val1 < 0 ) {
-				ui64Len = CountUtfCodePoints( m_vStrings[_sStrIndex] );
+				ui64Len = ee::CExpEval::CountUtfCodePoints( m_vStrings[_sStrIndex] );
 				// The length must convert to size_t losslessly.
 				if ( ui64Len != static_cast<uint64_t>(static_cast<size_t>(ui64Len)) ) {
 					AddNode( _ndNode );
@@ -1198,8 +1198,8 @@ namespace ee {
 				}
 			}
 			
-			size_t sStartIdx = GetUtf8CharPosByIdx( m_vStrings[_sStrIndex], sIdx0 );
-			size_t sEndIdx = GetUtf8CharPosByIdx( m_vStrings[_sStrIndex], sIdx1 );
+			size_t sStartIdx = ee::CExpEval::GetUtf8CharPosByIdx( m_vStrings[_sStrIndex], sIdx0 );
+			size_t sEndIdx = ee::CExpEval::GetUtf8CharPosByIdx( m_vStrings[_sStrIndex], sIdx1 );
 			std::string sTmp;
 			for ( size_t I = sStartIdx; I < sEndIdx; ++I ) {
 				sTmp.push_back( m_vStrings[_sStrIndex][I] );
@@ -1225,7 +1225,7 @@ namespace ee {
 			uint64_t ui64Len = 0;
 			size_t sIdx0 = i64Val0;
 			if ( i64Val0 < 0 ) {
-				ui64Len = CountUtfCodePoints( m_vStrings[_sStrIndex] );
+				ui64Len = ee::CExpEval::CountUtfCodePoints( m_vStrings[_sStrIndex] );
 				// The length must convert to size_t losslessly.
 				if ( ui64Len != static_cast<uint64_t>(static_cast<size_t>(ui64Len)) ) {
 					AddNode( _ndNode );
@@ -1243,7 +1243,7 @@ namespace ee {
 			}
 
 			
-			size_t sStartIdx = GetUtf8CharPosByIdx( m_vStrings[_sStrIndex], sIdx0 );
+			size_t sStartIdx = ee::CExpEval::GetUtf8CharPosByIdx( m_vStrings[_sStrIndex], sIdx0 );
 			std::string sTmp;
 			for ( size_t I = sStartIdx; I < m_vStrings[_sStrIndex].size(); ++I ) {
 				sTmp.push_back( m_vStrings[_sStrIndex][I] );
@@ -1269,7 +1269,7 @@ namespace ee {
 			uint64_t ui64Len = 0;
 			size_t sIdx0 = i64Val0;
 			if ( i64Val0 < 0 ) {
-				ui64Len = CountUtfCodePoints( m_vStrings[_sStrIndex] );
+				ui64Len = ee::CExpEval::CountUtfCodePoints( m_vStrings[_sStrIndex] );
 				// The length must convert to size_t losslessly.
 				if ( ui64Len != static_cast<uint64_t>(static_cast<size_t>(ui64Len)) ) {
 					AddNode( _ndNode );
@@ -1286,7 +1286,7 @@ namespace ee {
 				}
 			}
 			
-			size_t sEndIdx = GetUtf8CharPosByIdx( m_vStrings[_sStrIndex], sIdx0 );
+			size_t sEndIdx = ee::CExpEval::GetUtf8CharPosByIdx( m_vStrings[_sStrIndex], sIdx0 );
 			std::string sTmp;
 			for ( size_t I = 0; I < sEndIdx; ++I ) {
 				sTmp.push_back( m_vStrings[_sStrIndex][I] );
@@ -1341,7 +1341,7 @@ namespace ee {
 	// Creates a hex constant (0x----).
 	void CExpEvalContainer::CreateHex1( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
-		_ndNode.u.ui64Val = StoULL( _pcText, 16 );
+		_ndNode.u.ui64Val = ee::CExpEval::StoULL( _pcText, 16 );
 		_ndNode.v.ncConstType = EE_NC_UNSIGNED;
 		AddNode( _ndNode );
 	}
@@ -1349,7 +1349,7 @@ namespace ee {
 	// Creates a hex constant (----h).
 	void CExpEvalContainer::CreateHex2( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
-		_ndNode.u.ui64Val = StoULL( _pcText, 16 );
+		_ndNode.u.ui64Val = ee::CExpEval::StoULL( _pcText, 16 );
 		_ndNode.v.ncConstType = EE_NC_UNSIGNED;
 		AddNode( _ndNode );
 	}
@@ -1357,7 +1357,7 @@ namespace ee {
 	// Creates a hex constant (----).
 	void CExpEvalContainer::CreateHex3( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
-		_ndNode.u.ui64Val = StoULL( _pcText, 16 );
+		_ndNode.u.ui64Val = ee::CExpEval::StoULL( _pcText, 16 );
 		_ndNode.v.ncConstType = EE_NC_UNSIGNED;
 		AddNode( _ndNode );
 	}
@@ -1365,7 +1365,7 @@ namespace ee {
 	// Creates a binary constant (0b----).
 	void CExpEvalContainer::CreateBin( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
-		_ndNode.u.ui64Val = StoULL( _pcText + 2, 2 );
+		_ndNode.u.ui64Val = ee::CExpEval::StoULL( _pcText + 2, 2 );
 		_ndNode.v.ncConstType = EE_NC_UNSIGNED;
 		AddNode( _ndNode );
 	}
@@ -1374,7 +1374,7 @@ namespace ee {
 	void CExpEvalContainer::CreateUInt( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
 		bool bOverflow;
-		_ndNode.u.ui64Val = StoULL( _pcText, 10, nullptr, ~0ULL, &bOverflow );
+		_ndNode.u.ui64Val = ee::CExpEval::StoULL( _pcText, 10, nullptr, ~0ULL, &bOverflow );
 		if ( bOverflow ) {
 			_ndNode.v.ncConstType = EE_NC_FLOATING;
 			_ndNode.u.dVal = std::atof( _pcText );
@@ -1432,10 +1432,10 @@ namespace ee {
 		auto aLen = std::strlen( _pcText );
 		if ( aLen > 2 &&
 			_pcText[0] == '0' && (_pcText[1] == 'o' || _pcText[1] == 'O') ) {
-			_ndNode.u.ui64Val = StoULL( _pcText + 2, 8 );
+			_ndNode.u.ui64Val = ee::CExpEval::StoULL( _pcText + 2, 8 );
 		}
 		else {
-			_ndNode.u.ui64Val = StoULL( _pcText, 8 );
+			_ndNode.u.ui64Val = ee::CExpEval::StoULL( _pcText, 8 );
 		}
 		_ndNode.v.ncConstType = EE_NC_UNSIGNED;
 		AddNode( _ndNode );
@@ -1443,7 +1443,7 @@ namespace ee {
 
 	// Create a double constant.
 	void CExpEvalContainer::CreateDouble( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
-		CreateDouble( AtoF( _pcText ), _ndNode );
+		CreateDouble( ee::CExpEval::AtoF( _pcText ), _ndNode );
 	}
 
 	// Create a double constant.
@@ -1700,7 +1700,7 @@ namespace ee {
 	// Creates a number parameter ($<decimal>) node.
 	void CExpEvalContainer::CreateNumberedParm( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMBERED_PARM;
-		_ndNode.u.ui64Val = ee::StoULL( &_pcText[1] );
+		_ndNode.u.ui64Val = ee::CExpEval::StoULL( &_pcText[1] );
 		m_sNumberedParmsAccessed.insert( static_cast<size_t>(_ndNode.u.ui64Val) );
 		AddNode( _ndNode );
 	}
@@ -1956,21 +1956,21 @@ namespace ee {
 			}
 			case CExpEvalParser::token::EE_SECONDS : {
 				_ndNode.nType = EE_N_INTRINSIC_0_UNSIGNED_DIVISOR;
-				_ndNode.uFuncPtr.pfIntrins0Unsigned = ee::TicksToMicroseconds;
+				_ndNode.uFuncPtr.pfIntrins0Unsigned = ee::CExpEval::TicksToMicroseconds;
 				_ndNode.u.ui64Val = 1000000ULL;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_MILLISECONDS : {
 				_ndNode.nType = EE_N_INTRINSIC_0_UNSIGNED_DIVISOR;
-				_ndNode.uFuncPtr.pfIntrins0Unsigned = ee::TicksToMicroseconds;
+				_ndNode.uFuncPtr.pfIntrins0Unsigned = ee::CExpEval::TicksToMicroseconds;
 				_ndNode.u.ui64Val = 1000ULL;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_MICROSECONDS : {
 				_ndNode.nType = EE_N_INTRINSIC_0_UNSIGNED_DIVISOR;
-				_ndNode.uFuncPtr.pfIntrins0Unsigned = ee::TicksToMicroseconds;
+				_ndNode.uFuncPtr.pfIntrins0Unsigned = ee::CExpEval::TicksToMicroseconds;
 				_ndNode.u.ui64Val = 1ULL;
 				AddNode( _ndNode );
 				return;
@@ -2381,7 +2381,7 @@ namespace ee {
 		switch ( _uiIntrinsic ) {
 			case CExpEvalParser::token::EE_EPSILON: {
 				_ndNode.nType = EE_N_INTRINSIC_3_BOOL_FLOAT_FLOAT_FLOAT;
-				bool (* pfFunc)( double, double, double ) = ee::Epsilon;
+				bool (* pfFunc)( double, double, double ) = ee::CExpEval::Epsilon;
 				_ndNode.uFuncPtr.pfIntrins3Bool_Float_Float_Float = pfFunc;
 				_ndNode.v.sNodeIndex = _ndExp0.sNodeIndex;
 				_ndNode.w.sNodeIndex = _ndExp1.sNodeIndex;
@@ -2391,7 +2391,7 @@ namespace ee {
 			}
 			case CExpEvalParser::token::EE_EPSILONF: {
 				_ndNode.nType = EE_N_INTRINSIC_3_BOOL_FLOAT32_FLOAT32_FLOAT32;
-				bool (* pfFunc)( float, float, float ) = ee::Epsilon;
+				bool (* pfFunc)( float, float, float ) = ee::CExpEval::Epsilon;
 				_ndNode.uFuncPtr.pfIntrins3Bool_Float32_Float32_Float32 = pfFunc;
 				_ndNode.v.sNodeIndex = _ndExp0.sNodeIndex;
 				_ndNode.w.sNodeIndex = _ndExp1.sNodeIndex;
@@ -2401,7 +2401,7 @@ namespace ee {
 			}
 			case CExpEvalParser::token::EE_RELEPSILON: {
 				_ndNode.nType = EE_N_INTRINSIC_3_BOOL_FLOAT_FLOAT_FLOAT;
-				bool (* pfFunc)( double, double, double ) = ee::RelativeEpsilon;
+				bool (* pfFunc)( double, double, double ) = ee::CExpEval::RelativeEpsilon;
 				_ndNode.uFuncPtr.pfIntrins3Bool_Float_Float_Float = pfFunc;
 				_ndNode.v.sNodeIndex = _ndExp0.sNodeIndex;
 				_ndNode.w.sNodeIndex = _ndExp1.sNodeIndex;
@@ -2411,7 +2411,7 @@ namespace ee {
 			}
 			case CExpEvalParser::token::EE_RELEPSILONF: {
 				_ndNode.nType = EE_N_INTRINSIC_3_BOOL_FLOAT32_FLOAT32_FLOAT32;
-				bool (* pfFunc)( float, float, float ) = ee::RelativeEpsilon;
+				bool (* pfFunc)( float, float, float ) = ee::CExpEval::RelativeEpsilon;
 				_ndNode.uFuncPtr.pfIntrins3Bool_Float32_Float32_Float32 = pfFunc;
 				_ndNode.v.sNodeIndex = _ndExp0.sNodeIndex;
 				_ndNode.w.sNodeIndex = _ndExp1.sNodeIndex;
@@ -2793,7 +2793,7 @@ namespace ee {
 				rNode = ConvertResultOrObject( rNode, EE_NC_UNSIGNED );
 				if ( rNode.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				_rRes.ncType = EE_NC_UNSIGNED;
-				_rRes.u.ui64Val = GetUtf8CodePointByIdx( m_vStrings[_ndExp.u.sStringIndex], static_cast<size_t>(rNode.u.ui64Val) );
+				_rRes.u.ui64Val = ee::CExpEval::GetUtf8CodePointByIdx( m_vStrings[_ndExp.u.sStringIndex], static_cast<size_t>(rNode.u.ui64Val) );
 				return true;
 			}
 			case EE_N_ARRAY_ACCESS : {
@@ -3066,32 +3066,32 @@ namespace ee {
 					}
 					case CExpEvalParser::token::EE_SECONDS : {
 						_rRes.ncType = EE_NC_UNSIGNED;
-						_rRes.u.ui64Val = ee::TicksToMicroseconds( ee::Time() ) / 1000000ULL;
+						_rRes.u.ui64Val = ee::CExpEval::TicksToMicroseconds( ee::CExpEval::Time() ) / 1000000ULL;
 						return true;
 					}
 					case CExpEvalParser::token::EE_MILLISECONDS : {
 						_rRes.ncType = EE_NC_UNSIGNED;
-						_rRes.u.ui64Val = ee::TicksToMicroseconds( ee::Time() ) / 1000ULL;
+						_rRes.u.ui64Val = ee::CExpEval::TicksToMicroseconds( ee::CExpEval::Time() ) / 1000ULL;
 						return true;
 					}
 					case CExpEvalParser::token::EE_MICROSECONDS : {
 						_rRes.ncType = EE_NC_UNSIGNED;
-						_rRes.u.ui64Val = ee::TicksToMicroseconds( ee::Time() );
+						_rRes.u.ui64Val = ee::CExpEval::TicksToMicroseconds( ee::CExpEval::Time() );
 						return true;
 					}
 					case CExpEvalParser::token::EE_SECONDS_SINCE_START : {
 						_rRes.ncType = EE_NC_UNSIGNED;
-						_rRes.u.ui64Val = ee::TicksToMicroseconds( ee::Time() - ee::StartTime() ) / 1000000ULL;
+						_rRes.u.ui64Val = ee::CExpEval::TicksToMicroseconds( ee::CExpEval::Time() - ee::CExpEval::StartTime() ) / 1000000ULL;
 						return true;
 					}
 					case CExpEvalParser::token::EE_MILLISECONDS_SINCE_START : {
 						_rRes.ncType = EE_NC_UNSIGNED;
-						_rRes.u.ui64Val = ee::TicksToMicroseconds( ee::Time() - ee::StartTime() ) / 1000ULL;
+						_rRes.u.ui64Val = ee::CExpEval::TicksToMicroseconds( ee::CExpEval::Time() - ee::CExpEval::StartTime() ) / 1000ULL;
 						return true;
 					}
 					case CExpEvalParser::token::EE_MICROSECONDS_SINCE_START : {
 						_rRes.ncType = EE_NC_UNSIGNED;
-						_rRes.u.ui64Val = ee::TicksToMicroseconds( ee::Time() - ee::StartTime() );
+						_rRes.u.ui64Val = ee::CExpEval::TicksToMicroseconds( ee::CExpEval::Time() - ee::CExpEval::StartTime() );
 						return true;
 					}
 				}
@@ -3105,7 +3105,7 @@ namespace ee {
 			}
 			case EE_N_INTRINSIC_0_UNSIGNED_DIVISOR : {
 				_rRes.ncType = EE_NC_UNSIGNED;
-				_rRes.u.i64Val = _ndExp.uFuncPtr.pfIntrins0Unsigned( ee::Time() ) / _ndExp.u.ui64Val;
+				_rRes.u.i64Val = _ndExp.uFuncPtr.pfIntrins0Unsigned( ee::CExpEval::Time() ) / _ndExp.u.ui64Val;
 				return true;
 			}
 			case EE_N_INTRINSIC_1 : {
@@ -3871,7 +3871,7 @@ namespace ee {
 					size_t sSize;
 					aFind->second.rRes.ncType = EE_NC_UNSIGNED;
 					for ( size_t I = 0; I < m_vStrings[ndDeclNode.v.sNodeIndex].size(); I += sSize ) {
-						aFind->second.rRes.u.ui64Val = NextUtf8Char( &m_vStrings[ndDeclNode.v.sNodeIndex][I], m_vStrings[ndDeclNode.v.sNodeIndex].size() - I, &sSize );
+						aFind->second.rRes.u.ui64Val = ee::CExpEval::NextUtf8Char( &m_vStrings[ndDeclNode.v.sNodeIndex][I], m_vStrings[ndDeclNode.v.sNodeIndex].size() - I, &sSize );
 						if ( !sSize ) { break; }
 
 						// ==== Execute body.
@@ -4431,32 +4431,32 @@ namespace ee {
 							}
 							case CExpEvalParser::token::EE_SECONDS : {
 								(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
-								(*soProcessMe.prResult).u.ui64Val = ee::TicksToMicroseconds( ee::Time() ) / 1000000ULL;
+								(*soProcessMe.prResult).u.ui64Val = ee::CExpEval::TicksToMicroseconds( ee::CExpEval::Time() ) / 1000000ULL;
 								EE_DONE;
 							}
 							case CExpEvalParser::token::EE_MILLISECONDS : {
 								(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
-								(*soProcessMe.prResult).u.ui64Val = ee::TicksToMicroseconds( ee::Time() ) / 1000ULL;
+								(*soProcessMe.prResult).u.ui64Val = ee::CExpEval::TicksToMicroseconds( ee::CExpEval::Time() ) / 1000ULL;
 								EE_DONE;
 							}
 							case CExpEvalParser::token::EE_MICROSECONDS : {
 								(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
-								(*soProcessMe.prResult).u.ui64Val = ee::TicksToMicroseconds( ee::Time() );
+								(*soProcessMe.prResult).u.ui64Val = ee::CExpEval::TicksToMicroseconds( ee::CExpEval::Time() );
 								EE_DONE;
 							}
 							case CExpEvalParser::token::EE_SECONDS_SINCE_START : {
 								(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
-								(*soProcessMe.prResult).u.ui64Val = ee::TicksToMicroseconds( ee::Time() - ee::StartTime() ) / 1000000ULL;
+								(*soProcessMe.prResult).u.ui64Val = ee::CExpEval::TicksToMicroseconds( ee::CExpEval::Time() - ee::CExpEval::StartTime() ) / 1000000ULL;
 								EE_DONE;
 							}
 							case CExpEvalParser::token::EE_MILLISECONDS_SINCE_START : {
 								(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
-								(*soProcessMe.prResult).u.ui64Val = ee::TicksToMicroseconds( ee::Time() - ee::StartTime() ) / 1000ULL;
+								(*soProcessMe.prResult).u.ui64Val = ee::CExpEval::TicksToMicroseconds( ee::CExpEval::Time() - ee::CExpEval::StartTime() ) / 1000ULL;
 								EE_DONE;
 							}
 							case CExpEvalParser::token::EE_MICROSECONDS_SINCE_START : {
 								(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
-								(*soProcessMe.prResult).u.ui64Val = ee::TicksToMicroseconds( ee::Time() - ee::StartTime() );
+								(*soProcessMe.prResult).u.ui64Val = ee::CExpEval::TicksToMicroseconds( ee::CExpEval::Time() - ee::CExpEval::StartTime() );
 								EE_DONE;
 							}
 						}
@@ -4470,7 +4470,7 @@ namespace ee {
 					}
 					case EE_N_INTRINSIC_0_UNSIGNED_DIVISOR : {
 						(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
-						(*soProcessMe.prResult).u.i64Val = _ndExp.uFuncPtr.pfIntrins0Unsigned( ee::Time() ) / _ndExp.u.ui64Val;
+						(*soProcessMe.prResult).u.i64Val = _ndExp.uFuncPtr.pfIntrins0Unsigned( ee::CExpEval::Time() ) / _ndExp.u.ui64Val;
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_1_FLOAT_FLOAT : {}
@@ -4845,7 +4845,7 @@ namespace ee {
 						EE_RESULT rNode = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
 						if ( rNode.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult).ncType = EE_NC_UNSIGNED;
-						(*soProcessMe.prResult).u.ui64Val = GetUtf8CodePointByIdx( m_vStrings[_ndExp.u.sStringIndex], static_cast<size_t>(rNode.u.ui64Val) );
+						(*soProcessMe.prResult).u.ui64Val = ee::CExpEval::GetUtf8CodePointByIdx( m_vStrings[_ndExp.u.sStringIndex], static_cast<size_t>(rNode.u.ui64Val) );
 						EE_DONE;
 					}
 					case EE_N_STRINGARRAY_EX : {
@@ -4864,7 +4864,7 @@ namespace ee {
 
 							if ( i64StartIdx < 0 ) {
 								if ( i64CodePoints == -1 ) {
-									i64CodePoints = CountUtfCodePoints( m_vStrings[_ndExp.u.sStringIndex] );
+									i64CodePoints = ee::CExpEval::CountUtfCodePoints( m_vStrings[_ndExp.u.sStringIndex] );
 									if ( static_cast<size_t>(i64CodePoints) != i64CodePoints ) { EE_ERROR( EE_EC_BADARRAYIDX ); }
 								}
 								sStart = CBaseApi::ArrayIndexToLinearIndex( i64StartIdx, static_cast<size_t>(i64CodePoints) );
@@ -4885,7 +4885,7 @@ namespace ee {
 							i64EndIdx = soProcessMe.sSubResults[1].u.i64Val;
 							if ( i64EndIdx < 0 ) {
 								if ( i64CodePoints == -1 ) {
-									i64CodePoints = CountUtfCodePoints( m_vStrings[_ndExp.u.sStringIndex] );
+									i64CodePoints = ee::CExpEval::CountUtfCodePoints( m_vStrings[_ndExp.u.sStringIndex] );
 									if ( static_cast<size_t>(i64CodePoints) != i64CodePoints ) { EE_ERROR( EE_EC_BADARRAYIDX ); }
 								}
 								sEnd = CBaseApi::ArrayIndexToLinearIndex( i64EndIdx, static_cast<size_t>(i64CodePoints) );
@@ -4897,13 +4897,13 @@ namespace ee {
 							}
 							
 
-							sEnd = GetUtf8CharPosByIdx( m_vStrings[_ndExp.u.sStringIndex], sEnd );
+							sEnd = ee::CExpEval::GetUtf8CharPosByIdx( m_vStrings[_ndExp.u.sStringIndex], sEnd );
 						}
 						else {
 							sEnd = m_vStrings[_ndExp.u.sStringIndex].size();
 						}
 
-						sStart = GetUtf8CharPosByIdx( m_vStrings[_ndExp.u.sStringIndex], sStart );
+						sStart = ee::CExpEval::GetUtf8CharPosByIdx( m_vStrings[_ndExp.u.sStringIndex], sStart );
 						//(*soProcessMe.prResult) = soProcessMe.sSubResults[0].u.poObj->ArrayAccessEx( i64StartIdx, i64EndIdx, ui32Flags );
 						CString * psObj = reinterpret_cast<CString *>(AllocateObject<CString>());
 						if ( psObj ) {
@@ -5677,7 +5677,7 @@ namespace ee {
 								size_t sSize;
 								(*soProcessMe.prLoopCustomVarResult).ncType = EE_NC_UNSIGNED;
 								size_t I = soProcessMe.sForEachStringPos;
-								(*soProcessMe.prLoopCustomVarResult).u.ui64Val = NextUtf8Char( &m_vStrings[ndDeclNode.v.sNodeIndex][I],
+								(*soProcessMe.prLoopCustomVarResult).u.ui64Val = ee::CExpEval::NextUtf8Char( &m_vStrings[ndDeclNode.v.sNodeIndex][I],
 									m_vStrings[ndDeclNode.v.sNodeIndex].size() - I, &sSize );
 								if ( !sSize ) {
 									EE_ERROR( EE_EC_ARRAYACCESSERROR );
@@ -6158,7 +6158,7 @@ namespace ee {
 		std::string sRet;
 		sRet.push_back( '{' );
 		size_t stNumberEat = 0;
-		uint64_t ui64Idx = ee::StoULL( _pcFormat, 10, &stNumberEat );
+		uint64_t ui64Idx = ee::CExpEval::StoULL( _pcFormat, 10, &stNumberEat );
 		if ( stNumberEat ) {
 			_stArgIdx = static_cast<size_t>(ui64Idx);
 			_pcFormat += stNumberEat;

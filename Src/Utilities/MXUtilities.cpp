@@ -1745,7 +1745,7 @@ namespace mx {
 	// Converts from UTF-8 to any single-byte code page.
 	CSecureString CUtilities::ToCodePage( const std::string &_sIn, UINT _uiCodePage, bool * _pbError ) {
 		if ( _pbError ) { (*_pbError) = false; }
-		CSecureWString swsUtf16 = ee::StringToWString( _sIn );
+		CSecureWString swsUtf16 = ee::CExpEval::StringToWString( _sIn );
 		int iLen = ::WideCharToMultiByte( _uiCodePage, 0, swsUtf16.c_str(), swsUtf16.size(),
 			NULL, 0,
 			NULL, NULL );
@@ -1785,7 +1785,7 @@ namespace mx {
 		::MultiByteToWideChar( _uiCodePage, 0, _sIn.c_str(), _sIn.size(),
 			reinterpret_cast<LPWSTR>(vResult.data()), vResult.size() );
 		CSecureWString swsTmp( reinterpret_cast<const CSecureWString::value_type *>(vResult.data()), vResult.size() );
-		return ee::WStringToString( swsTmp );
+		return ee::CExpEval::WStringToString( swsTmp );
 	}
 
 	// Maps a UTF-16 (wide character) string to a new character string. The new character string is not necessarily from a multibyte character set.
@@ -1821,7 +1821,7 @@ namespace mx {
 				CSecureString ssRet;
 				size_t sLen = 1;
 				for ( size_t I = 0; I < _wsString.size(); I += sLen ) {
-					uint32_t ui32This = ee::NextUtf16Char( &_wsString[I], _wsString.size() - I, &sLen );
+					uint32_t ui32This = ee::CExpEval::NextUtf16Char( &_wsString[I], _wsString.size() - I, &sLen );
 					if ( ui32This == MX_UTF_INVALID ) {
 						if ( _lpDefaultChar ) {
 							ui32This = (*_lpDefaultChar);
@@ -1846,7 +1846,7 @@ namespace mx {
 				CSecureString ssRet;
 				size_t sLen = 1;
 				for ( size_t I = 0; I < _wsString.size(); I += sLen ) {
-					uint32_t ui32This = ee::NextUtf16Char( &_wsString[I], _wsString.size() - I, &sLen );
+					uint32_t ui32This = ee::CExpEval::NextUtf16Char( &_wsString[I], _wsString.size() - I, &sLen );
 					if ( ui32This == MX_UTF_INVALID ) {
 						if ( _lpDefaultChar ) {
 							ui32This = (*_lpDefaultChar);
@@ -1919,14 +1919,14 @@ namespace mx {
 				CSecureWString swsRet;
 				for ( size_t I = _sString.size() / sizeof( uint32_t ); I--; ) {
 					uint32_t uiLen;
-					uint32_t ui32This = ee::Utf32ToUtf16( (*_puiSrc++), uiLen );
+					uint32_t ui32This = ee::CExpEval::Utf32ToUtf16( (*_puiSrc++), uiLen );
 
 					if ( ui32This == MX_UTF_INVALID ) {
 						if ( _dwFlags & MB_ERR_INVALID_CHARS ) {
 							if ( _pdwLastError ) { (*_pdwLastError) = ERROR_NO_UNICODE_TRANSLATION; }
 							return CSecureWString();
 						}
-						ui32This = ee::Utf32ToUtf16( 0xFFFD, uiLen );
+						ui32This = ee::CExpEval::Utf32ToUtf16( 0xFFFD, uiLen );
 					}
 					if ( ui32This != MX_UTF_INVALID ) {
 						for ( uint32_t J = 0; J < uiLen; ++J ) {
@@ -1943,14 +1943,14 @@ namespace mx {
 				CSecureWString swsRet;
 				for ( size_t I = _sString.size() / sizeof( uint32_t ); I--; ) {
 					uint32_t uiLen;
-					uint32_t ui32This = ee::Utf32ToUtf16( ::_byteswap_ulong( (*_puiSrc++) ), uiLen );
+					uint32_t ui32This = ee::CExpEval::Utf32ToUtf16( ::_byteswap_ulong( (*_puiSrc++) ), uiLen );
 
 					if ( ui32This == MX_UTF_INVALID ) {
 						if ( _dwFlags & MB_ERR_INVALID_CHARS ) {
 							if ( _pdwLastError ) { (*_pdwLastError) = ERROR_NO_UNICODE_TRANSLATION; }
 							return CSecureWString();
 						}
-						ui32This = ee::Utf32ToUtf16( 0xFFFD, uiLen );
+						ui32This = ee::CExpEval::Utf32ToUtf16( 0xFFFD, uiLen );
 					}
 					if ( ui32This != MX_UTF_INVALID ) {
 						for ( uint32_t J = 0; J < uiLen; ++J ) {
@@ -2088,7 +2088,7 @@ namespace mx {
 			{ L'\v', L'v' },
 		};
 		for ( size_t I = 0; I < _swsInput.size();  ) {
-			uint32_t ui32This = ee::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t ui32This = ee::CExpEval::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			if ( sLen == 1 ) {
 				bool bFound = false;
 				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
@@ -2133,7 +2133,7 @@ namespace mx {
 
 	// Adds escapes to all unprintable characters.
 	std::vector<uint32_t> CUtilities::EscapeUnprintable( const std::vector<uint32_t> &_swsInput, bool _bIncludeBackSlash, bool _bKeepNewline ) {
-		CSecureWString swsConv = ee::Utf32StringToWString( _swsInput.data(), _swsInput.size() );
+		CSecureWString swsConv = ee::CExpEval::Utf32StringToWString( _swsInput.data(), _swsInput.size() );
 		size_t sLen;
 		
 		static struct {
@@ -2150,7 +2150,7 @@ namespace mx {
 		};
 		std::vector<uint32_t> vOutput;
 		for ( size_t I = 0; I < _swsInput.size();  ) {
-			uint32_t ui32This = ee::NextUtf32Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t ui32This = ee::CExpEval::NextUtf32Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			if ( sLen == 1 && MX_UTF_INVALID != ui32This ) {
 				bool bFound = false;
 				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
@@ -2173,7 +2173,7 @@ namespace mx {
 				if ( bFound ) { ++I; continue; }
 
 				uint32_t ui32ThisLen;
-				uint32_t ui32Conv = ee::Utf32ToUtf16( ui32This, ui32ThisLen );
+				uint32_t ui32Conv = ee::CExpEval::Utf32ToUtf16( ui32This, ui32ThisLen );
 				WORD wTypeData[2], wType3Data[2];
 				::GetStringTypeW( CT_CTYPE1,
 					reinterpret_cast<LPCWCH>(&ui32Conv),
@@ -2229,7 +2229,7 @@ namespace mx {
 		size_t sLen = 1;
 		for ( size_t I = 0; I < _ssInput.size() && sLen; I += sLen ) {
 
-			uint32_t ui32This = ee::NextUtf8Char( &_ssInput[I], _ssInput.size() - I, &sLen );
+			uint32_t ui32This = ee::CExpEval::NextUtf8Char( &_ssInput[I], _ssInput.size() - I, &sLen );
 			if ( sLen == 1 ) {
 				// A single character can be used for all formats.
 				ssTmp.push_back( '\\' );
@@ -2245,7 +2245,7 @@ namespace mx {
 				continue;
 			}
 			uint32_t ui32ThisLen = 0;
-			uint32_t ui32ThisUtf16 = ee::Utf32ToUtf16( ui32This, ui32ThisLen );
+			uint32_t ui32ThisUtf16 = ee::CExpEval::Utf32ToUtf16( ui32This, ui32ThisLen );
 			if ( ui32ThisLen == 1 ) {
 				// To preserve the UTF data, a \uNNNN must be used.
 				ssTmp.push_back( '\\' );
@@ -2362,7 +2362,7 @@ namespace mx {
 		};
 		CSecureString vOutput;
 		for ( size_t I = 0; I < _ssInput.size();  ) {
-			uint32_t ui32This = ee::NextUtf8Char( &_ssInput[I], _ssInput.size() - I, &sLen );
+			uint32_t ui32This = ee::CExpEval::NextUtf8Char( &_ssInput[I], _ssInput.size() - I, &sLen );
 			if ( sLen == 1 && MX_UTF_INVALID != ui32This ) {
 				bool bFound = false;
 				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
@@ -2380,7 +2380,7 @@ namespace mx {
 				if ( bFound ) { ++I; continue; }
 			}
 			uint32_t ui32ThisLen;
-			uint32_t ui32Conv = ee::Utf32ToUtf16( ui32This, ui32ThisLen );
+			uint32_t ui32Conv = ee::CExpEval::Utf32ToUtf16( ui32This, ui32ThisLen );
 			WORD wTypeData[2]/*, wType3Data[2]*/;
 			::GetStringTypeW( CT_CTYPE1,
 				reinterpret_cast<LPCWCH>(&ui32Conv),
@@ -2447,7 +2447,7 @@ namespace mx {
 			{ L'\v', L'v' },
 		};
 		for ( size_t I = 0; I < _swsInput.size();  ) {
-			uint32_t ui32This = ee::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t ui32This = ee::CExpEval::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			if ( sLen == 1 ) {
 				bool bFound = false;
 				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
@@ -2465,7 +2465,7 @@ namespace mx {
 				if ( bFound ) { ++I; continue; }
 			}
 			uint32_t ui32ThisLen;
-			uint32_t ui32Conv = ee::Utf32ToUtf16( ui32This, ui32ThisLen );
+			uint32_t ui32Conv = ee::CExpEval::Utf32ToUtf16( ui32This, ui32ThisLen );
 			WORD wTypeData[2]/*, wType3Data[2]*/;
 			::GetStringTypeW( CT_CTYPE1,
 				reinterpret_cast<LPCWCH>(&ui32Conv),
@@ -2524,7 +2524,7 @@ namespace mx {
 		};
 		std::vector<uint32_t> vOutput;
 		for ( size_t I = 0; I < _swsInput.size();  ) {
-			uint32_t ui32This = ee::NextUtf32Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t ui32This = ee::CExpEval::NextUtf32Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			if ( sLen == 1 && MX_UTF_INVALID != ui32This ) {
 				bool bFound = false;
 				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
@@ -2543,7 +2543,7 @@ namespace mx {
 			}
 				
 			uint32_t ui32ThisLen;
-			uint32_t ui32Conv = ee::Utf32ToUtf16( ui32This, ui32ThisLen );
+			uint32_t ui32Conv = ee::CExpEval::Utf32ToUtf16( ui32This, ui32ThisLen );
 			WORD wTypeData[2]/*, wType3Data[2]*/;
 			::GetStringTypeW( CT_CTYPE1,
 				reinterpret_cast<LPCWCH>(&ui32Conv),
@@ -2620,14 +2620,14 @@ namespace mx {
 		CSecureString ssTmp;
 		CSecureString ssBuffer;
 		for ( size_t I = 0; I < _swsInput.size(); ++I ) {
-			if ( ee::ValidHex( _swsInput[I] ) ) {
+			if ( ee::CExpEval::ValidHex( _swsInput[I] ) ) {
 				ssBuffer.push_back( _swsInput[I] );
 			}
 			else {
 				if ( ssBuffer.size() ) {
 					size_t sEaten = 0;
 					for ( size_t J = 0; J < ssBuffer.size(); J += sEaten ) {
-						uint64_t uiVal = ee::StoULL( &ssBuffer[J], 16, &sEaten, 0xFF );
+						uint64_t uiVal = ee::CExpEval::StoULL( &ssBuffer[J], 16, &sEaten, 0xFF );
 						ssTmp.push_back( static_cast<uint8_t>(uiVal) );
 					}
 					ssBuffer.clear();
@@ -2637,7 +2637,7 @@ namespace mx {
 		if ( ssBuffer.size() ) {
 			size_t sEaten = 0;
 			for ( size_t J = 0; J < ssBuffer.size(); J += sEaten ) {
-				uint64_t uiVal = ee::StoULL( &ssBuffer[J], 16, &sEaten, 0xFF );
+				uint64_t uiVal = ee::CExpEval::StoULL( &ssBuffer[J], 16, &sEaten, 0xFF );
 				ssTmp.push_back( static_cast<uint8_t>(uiVal) );
 			}
 		}
@@ -2653,9 +2653,9 @@ namespace mx {
 
 			for ( size_t I = 0; I < _sIn.size(); ) {
 				size_t sThisSize = 0;
-				uint32_t ui32This = ee::NextUtf8Char( &pcSrc[I], _sIn.size() - I, &sThisSize );
+				uint32_t ui32This = ee::CExpEval::NextUtf8Char( &pcSrc[I], _sIn.size() - I, &sThisSize );
 				uint32_t uiTempLen;
-				if ( ui32This != MX_UTF_INVALID && std::iswspace( static_cast<wint_t>(ee::Utf32ToUtf16( ui32This, uiTempLen )) ) ) {
+				if ( ui32This != MX_UTF_INVALID && std::iswspace( static_cast<wint_t>(ee::CExpEval::Utf32ToUtf16( ui32This, uiTempLen )) ) ) {
 					if ( !bFoundNonWhitespace ) {
 						for ( size_t J = 0; J < sThisSize; ++J ) { _sIn.erase( _sIn.begin() ); }
 						continue;
@@ -2671,8 +2671,8 @@ namespace mx {
 			while ( _sIn.size() > sTrailIdx ) { _sIn.pop_back(); }
 			return _sIn;
 		}
-		while ( _sIn.size() && ee::IsWhiteSpace( _sIn.c_str()[_sIn.size()-1] ) ) { _sIn.pop_back(); }
-		while ( _sIn.size() && ee::IsWhiteSpace( _sIn.c_str()[0] ) ) { _sIn.erase( _sIn.begin() ); }
+		while ( _sIn.size() && ee::CExpEval::IsWhiteSpace( _sIn.c_str()[_sIn.size()-1] ) ) { _sIn.pop_back(); }
+		while ( _sIn.size() && ee::CExpEval::IsWhiteSpace( _sIn.c_str()[0] ) ) { _sIn.erase( _sIn.begin() ); }
 
 		return _sIn;
 	}
@@ -2682,11 +2682,11 @@ namespace mx {
 		CSecureWString swsRet;
 		size_t sLen = 0;
 		for ( size_t I = 0; I < _swsInput.size(); I += sLen ) {
-			uint32_t uiConverted = ee::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t uiConverted = ee::CExpEval::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			uint32_t uiTempLen;
-			uiConverted = ee::Utf32ToUtf16( uiConverted, uiTempLen );
+			uiConverted = ee::CExpEval::Utf32ToUtf16( uiConverted, uiTempLen );
 			if ( uiTempLen == 1 ) {
-				uiConverted = std::towupper( ee::Utf32ToUtf16( uiConverted, uiTempLen ) );
+				uiConverted = std::towupper( ee::CExpEval::Utf32ToUtf16( uiConverted, uiTempLen ) );
 			}
 			for ( size_t J = 0; J < uiTempLen; ++J ) {
 				swsRet.push_back( static_cast<uint16_t>(uiConverted) );
@@ -2701,11 +2701,11 @@ namespace mx {
 		CSecureWString swsRet;
 		size_t sLen = 0;
 		for ( size_t I = 0; I < _swsInput.size(); I += sLen ) {
-			uint32_t uiConverted = ee::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t uiConverted = ee::CExpEval::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			uint32_t uiTempLen;
-			uiConverted = ee::Utf32ToUtf16( uiConverted, uiTempLen );
+			uiConverted = ee::CExpEval::Utf32ToUtf16( uiConverted, uiTempLen );
 			if ( uiTempLen == 1 ) {
-				uiConverted = std::towlower( ee::Utf32ToUtf16( uiConverted, uiTempLen ) );
+				uiConverted = std::towlower( ee::CExpEval::Utf32ToUtf16( uiConverted, uiTempLen ) );
 			}
 			for ( size_t J = 0; J < uiTempLen; ++J ) {
 				swsRet.push_back( static_cast<uint16_t>(uiConverted) );
@@ -2720,11 +2720,11 @@ namespace mx {
 		CSecureWString swsRet;
 		size_t sLen = 0;
 		for ( size_t I = 0; I < _swsInput.size(); I += sLen ) {
-			uint32_t uiConverted = ee::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t uiConverted = ee::CExpEval::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			uint32_t uiTempLen;
-			uiConverted = ee::Utf32ToUtf16( uiConverted, uiTempLen );
+			uiConverted = ee::CExpEval::Utf32ToUtf16( uiConverted, uiTempLen );
 			if ( uiTempLen == 1 ) {
-				uiConverted = HiraganaToKatakana( ee::Utf32ToUtf16( uiConverted, uiTempLen ) );
+				uiConverted = HiraganaToKatakana( ee::CExpEval::Utf32ToUtf16( uiConverted, uiTempLen ) );
 			}
 			for ( size_t J = 0; J < uiTempLen; ++J ) {
 				swsRet.push_back( static_cast<uint16_t>(uiConverted) );
@@ -2739,11 +2739,11 @@ namespace mx {
 		CSecureWString swsRet;
 		size_t sLen = 0;
 		for ( size_t I = 0; I < _swsInput.size(); I += sLen ) {
-			uint32_t uiConverted = ee::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t uiConverted = ee::CExpEval::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			uint32_t uiTempLen;
-			uiConverted = ee::Utf32ToUtf16( uiConverted, uiTempLen );
+			uiConverted = ee::CExpEval::Utf32ToUtf16( uiConverted, uiTempLen );
 			if ( uiTempLen == 1 ) {
-				uiConverted = KatakanaToHiragana( ee::Utf32ToUtf16( uiConverted, uiTempLen ) );
+				uiConverted = KatakanaToHiragana( ee::CExpEval::Utf32ToUtf16( uiConverted, uiTempLen ) );
 			}
 			for ( size_t J = 0; J < uiTempLen; ++J ) {
 				swsRet.push_back( static_cast<uint16_t>(uiConverted) );
@@ -2758,11 +2758,11 @@ namespace mx {
 		CSecureWString swsRet;
 		size_t sLen = 0;
 		for ( size_t I = 0; I < _swsInput.size(); I += sLen ) {
-			uint32_t uiConverted = ee::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t uiConverted = ee::CExpEval::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			uint32_t uiTempLen;
-			uiConverted = ee::Utf32ToUtf16( uiConverted, uiTempLen );
+			uiConverted = ee::CExpEval::Utf32ToUtf16( uiConverted, uiTempLen );
 			if ( uiTempLen == 1 ) {
-				uiConverted = FullWidthToByte( ee::Utf32ToUtf16( uiConverted, uiTempLen ) );
+				uiConverted = FullWidthToByte( ee::CExpEval::Utf32ToUtf16( uiConverted, uiTempLen ) );
 			}
 			for ( size_t J = 0; J < uiTempLen; ++J ) {
 				swsRet.push_back( static_cast<uint16_t>(uiConverted) );
@@ -2777,11 +2777,11 @@ namespace mx {
 		CSecureWString swsRet;
 		size_t sLen = 0;
 		for ( size_t I = 0; I < _swsInput.size(); I += sLen ) {
-			uint32_t uiConverted = ee::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			uint32_t uiConverted = ee::CExpEval::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			uint32_t uiTempLen;
-			uiConverted = ee::Utf32ToUtf16( uiConverted, uiTempLen );
+			uiConverted = ee::CExpEval::Utf32ToUtf16( uiConverted, uiTempLen );
 			if ( uiTempLen == 1 ) {
-				uiConverted = NumericToByte( ee::Utf32ToUtf16( uiConverted, uiTempLen ) );
+				uiConverted = NumericToByte( ee::CExpEval::Utf32ToUtf16( uiConverted, uiTempLen ) );
 			}
 			for ( size_t J = 0; J < uiTempLen; ++J ) {
 				swsRet.push_back( static_cast<uint16_t>(uiConverted) );
@@ -2982,14 +2982,14 @@ namespace mx {
 	void CUtilities::ResolveAllEscapes( const std::string &_sInput, std::string &_sOutput, bool _bIsUtf8 ) {
 		size_t sLen = 1;
 		for ( size_t I = 0; I < _sInput.size() && sLen; I += sLen ) {
-			uint64_t uiNext = _bIsUtf8 ? ee::NextUtf8Char( &_sInput[I], _sInput.size() - I, &sLen ) : (sLen = 1, static_cast<uint8_t>(_sInput[I]));
+			uint64_t uiNext = _bIsUtf8 ? ee::CExpEval::NextUtf8Char( &_sInput[I], _sInput.size() - I, &sLen ) : (sLen = 1, static_cast<uint8_t>(_sInput[I]));
 			if ( sLen == 1 ) {
 				// It was just a regular character.  Could be an escape.
-				uiNext = ee::ResolveEscape( &_sInput[I], _sInput.size() - I, sLen, false );
+				uiNext = ee::CExpEval::ResolveEscape( &_sInput[I], _sInput.size() - I, sLen, false );
 			}
 			do {
 				uint32_t ui32Len;
-				uint32_t ui32BackToUtf8 = _bIsUtf8 ? ee::Utf32ToUtf8( static_cast<uint32_t>(uiNext), ui32Len ) : (ui32Len = ee::CountSetBytes( uiNext ), uiNext);
+				uint32_t ui32BackToUtf8 = _bIsUtf8 ? ee::CExpEval::Utf32ToUtf8( static_cast<uint32_t>(uiNext), ui32Len ) : (ui32Len = ee::CExpEval::CountSetBytes( uiNext ), uiNext);
 				if ( ui32BackToUtf8 == MX_UTF_INVALID ) {
 					ui32Len = 1;
 					ui32BackToUtf8 = uiNext;
@@ -3010,7 +3010,7 @@ namespace mx {
 		// There are at least 2 characters so an escape is possible.
 		if ( _sLen >= 2 && (*_pcInput) == '&' && _bIncludeHtml ) {
 			size_t sLen;
-			uint64_t uiTmp = ee::EscapeHtml( _pcInput + 1, _sLen - 1, sLen );
+			uint64_t uiTmp = ee::CExpEval::EscapeHtml( _pcInput + 1, _sLen - 1, sLen );
 			if ( sLen ) {
 				_sCharLen = sLen + 1;
 				return uiTmp;
@@ -3041,33 +3041,33 @@ namespace mx {
 		_sCharLen = 1;
 		switch ( cNext ) {
 			case 'x' : {
-				uint32_t ui32Temp = ee::EscapeX( &_pcInput[1], _sLen - 1, _sCharLen );
+				uint32_t ui32Temp = ee::CExpEval::EscapeX( &_pcInput[1], _sLen - 1, _sCharLen );
 				if ( !_sCharLen ) { _sCharLen = 1; return static_cast<uint8_t>(*_pcInput); }
 				else { ++_sCharLen; }
 				return ui32Temp;
 			}
 			case 'u' : {
 				// Takes \uNNNN and \uNNNN\uNNNN.
-				uint32_t ui32Temp = ee::EscapeUnicodeWide4WithSurrogatePairs( &_pcInput[1], _sLen - 1, _sCharLen );
+				uint32_t ui32Temp = ee::CExpEval::EscapeUnicodeWide4WithSurrogatePairs( &_pcInput[1], _sLen - 1, _sCharLen );
 				if ( !_sCharLen ) { _sCharLen = 1; return static_cast<uint8_t>(*_pcInput); }
 				else { ++_sCharLen; }
 				return ui32Temp;
 			}
 			case 'U' : {
-				uint32_t ui32Temp = ee::EscapeUnicode8( &_pcInput[1], _sLen - 1, _sCharLen );
+				uint32_t ui32Temp = ee::CExpEval::EscapeUnicode8( &_pcInput[1], _sLen - 1, _sCharLen );
 				if ( !_sCharLen ) { _sCharLen = 1; return static_cast<uint8_t>(*_pcInput); }
 				else { ++_sCharLen; }
 				return ui32Temp;
 			}
 			case 'N' : {
-				uint32_t ui32Temp = ee::EscapeNamedUnicode( &_pcInput[1], _sLen - 1, _sCharLen );
+				uint32_t ui32Temp = ee::CExpEval::EscapeNamedUnicode( &_pcInput[1], _sLen - 1, _sCharLen );
 				if ( !_sCharLen ) { _sCharLen = 1; return static_cast<uint8_t>(*_pcInput); }
 				else { ++_sCharLen; }
 				return ui32Temp;
 			}
 			default : {
 				if ( _pcInput[1] >= '0' && _pcInput[1] <= '7' ) {
-					uint32_t ui32Temp = ee::EscapeOctal( &_pcInput[1], _sLen, _sCharLen );
+					uint32_t ui32Temp = ee::CExpEval::EscapeOctal( &_pcInput[1], _sLen, _sCharLen );
 					++_sCharLen;	// Eat the \.
 					return ui32Temp;
 				}
@@ -3091,14 +3091,14 @@ namespace mx {
 	void CUtilities::ResolveAllHtmlXmlEscapes( const std::string &_sInput, std::string &_sOutput, bool _bIsUtf8 ) {
 		size_t sLen = 1;
 		for ( size_t I = 0; I < _sInput.size() && sLen; I += sLen ) {
-			uint64_t uiNext = _bIsUtf8 ? ee::NextUtf8Char( &_sInput[I], _sInput.size() - I, &sLen ) : (sLen = 1, static_cast<uint8_t>(_sInput[I]));
+			uint64_t uiNext = _bIsUtf8 ? ee::CExpEval::NextUtf8Char( &_sInput[I], _sInput.size() - I, &sLen ) : (sLen = 1, static_cast<uint8_t>(_sInput[I]));
 			if ( sLen == 1 && uiNext == '&' ) {
 				// It was just a regular character.  Could be an escape.
-				uiNext = ee::ResolveEscape( &_sInput[I], _sInput.size() - I, sLen, true );
+				uiNext = ee::CExpEval::ResolveEscape( &_sInput[I], _sInput.size() - I, sLen, true );
 			}
 			do {
 				uint32_t ui32Len;
-				uint32_t ui32BackToUtf8 = _bIsUtf8 ? ee::Utf32ToUtf8( static_cast<uint32_t>(uiNext), ui32Len ) : (ui32Len = ee::CountSetBytes( static_cast<uint32_t>(uiNext) ), uiNext);
+				uint32_t ui32BackToUtf8 = _bIsUtf8 ? ee::CExpEval::Utf32ToUtf8( static_cast<uint32_t>(uiNext), ui32Len ) : (ui32Len = ee::CExpEval::CountSetBytes( static_cast<uint32_t>(uiNext) ), uiNext);
 				if ( ui32BackToUtf8 == MX_UTF_INVALID ) {
 					ui32Len = 1;
 					ui32BackToUtf8 = uiNext;
@@ -3121,7 +3121,7 @@ namespace mx {
 		bool bIsFloat = DataTypeIsFloat( _dtTargetType );
 		size_t sSize = DataTypeSize( _dtTargetType );
 		for ( size_t I = 0; I < sLen; ) {
-			while ( I < sLen && ee::IsWhiteSpace( _sInput[I] ) ) { ++I; }
+			while ( I < sLen && ee::CExpEval::IsWhiteSpace( _sInput[I] ) ) { ++I; }
 			if ( _pvMeta ) {
 				if ( _sInput[I] == '*' || _sInput[I] == '?' ) {
 					for ( size_t J = 0; J < sSize; ++J ) { ssRet.push_back( 0 ); }
@@ -3135,22 +3135,22 @@ namespace mx {
 			if ( bIsFloat ) {				
 				switch ( _dtTargetType ) {
 					case MX_DT_FLOAT16 : {
-						dtVal.u.UInt16 = CFloat16( ee::AtoF( &_sInput[I], &sEaten ) ).RawValue();
+						dtVal.u.UInt16 = CFloat16( ee::CExpEval::AtoF( &_sInput[I], &sEaten ) ).RawValue();
 						break;
 					}
 					case MX_DT_FLOAT : {
-						dtVal.u.Float32 = ee::AtoF( &_sInput[I], &sEaten );
+						dtVal.u.Float32 = ee::CExpEval::AtoF( &_sInput[I], &sEaten );
 						break;
 					}
 					case MX_DT_DOUBLE : {
-						dtVal.u.Float64 = ee::AtoF( &_sInput[I], &sEaten );
+						dtVal.u.Float64 = ee::CExpEval::AtoF( &_sInput[I], &sEaten );
 						break;
 					}
 				}
 				if ( !sEaten ) { break; }
 			}
 			else {
-				dtVal.u.UInt64 = ee::StoULL( &_sInput[I], _iBase, &sEaten, _ui64MaxSingleValue );
+				dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], _iBase, &sEaten, _ui64MaxSingleValue );
 				if ( !sEaten ) { break; }
 			}
 			if ( _pvMeta ) { _pvMeta->push_back( 0 ); }
@@ -3170,7 +3170,7 @@ namespace mx {
 		const char * pcInput = _sInput.c_str();
 		size_t sLen = _sInput.size();
 		MX_DATA_TYPES dtDefaultType = _dtTargetType;
-#define MX_SKIP_WS		while ( I < sLen && ee::IsWhiteSpace( _sInput[I] ) ) { ++I; }
+#define MX_SKIP_WS		while ( I < sLen && ee::CExpEval::IsWhiteSpace( _sInput[I] ) ) { ++I; }
 		for ( size_t I = 0; I < sLen; ) {
 			MX_SKIP_WS;
 
@@ -3293,22 +3293,22 @@ namespace mx {
 			if ( bIsFloat ) {				
 				switch ( dtDefaultType ) {
 					case MX_DT_FLOAT16 : {
-						dtVal.u.UInt16 = CFloat16( ee::AtoF( &_sInput[I], &sEaten ) ).RawValue();
+						dtVal.u.UInt16 = CFloat16( ee::CExpEval::AtoF( &_sInput[I], &sEaten ) ).RawValue();
 						break;
 					}
 					case MX_DT_FLOAT : {
-						dtVal.u.Float32 = ee::AtoF( &_sInput[I], &sEaten );
+						dtVal.u.Float32 = ee::CExpEval::AtoF( &_sInput[I], &sEaten );
 						break;
 					}
 					case MX_DT_DOUBLE : {
-						dtVal.u.Float64 = ee::AtoF( &_sInput[I], &sEaten );
+						dtVal.u.Float64 = ee::CExpEval::AtoF( &_sInput[I], &sEaten );
 						break;
 					}
 				}
 				if ( !sEaten ) { break; }
 			}
 			else {
-				dtVal.u.UInt64 = ee::StoULL( &_sInput[I], _iBase, &sEaten, uiMax );
+				dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], _iBase, &sEaten, uiMax );
 				if ( !sEaten ) { break; }
 			}
 			if ( _pvMeta ) { _pvMeta->push_back( dtDefaultType ); }
@@ -3356,11 +3356,11 @@ namespace mx {
 		size_t I = 0;
 		size_t sSize;
 		do {
-			uint32_t ui32This = ee::NextUtf8Char( &_sString[I], _sString.size() - I, &sSize );
+			uint32_t ui32This = ee::CExpEval::NextUtf8Char( &_sString[I], _sString.size() - I, &sSize );
 			uint32_t ui32Len;
-			uint32_t ui32Converted = KatakanaToHiragana( ee::Utf32ToUtf16( ui32This, ui32Len ) );
+			uint32_t ui32Converted = KatakanaToHiragana( ee::CExpEval::Utf32ToUtf16( ui32This, ui32Len ) );
 			size_t sConvertedSize;
-			ui32This = ee::Utf32ToUtf8( ee::NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), sizeof( ui32Converted ) / sizeof( wchar_t ), &sConvertedSize ), ui32Len );
+			ui32This = ee::CExpEval::Utf32ToUtf8( ee::CExpEval::NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), sizeof( ui32Converted ) / sizeof( wchar_t ), &sConvertedSize ), ui32Len );
 
 			for ( uint32_t J = 0; J < ui32Len; ++J ) {
 				ssTemp.push_back( static_cast<wchar_t>(ui32This & 0xFFU) );
@@ -3377,12 +3377,12 @@ namespace mx {
 		size_t I = 0;
 		size_t sSize;
 		do {
-			uint32_t ui32This = ee::NextUtf16Char( &_wsString[I], _wsString.size() - I, &sSize );
+			uint32_t ui32This = ee::CExpEval::NextUtf16Char( &_wsString[I], _wsString.size() - I, &sSize );
 			uint32_t ui32Len;
-			uint32_t ui32Converted = KatakanaToHiragana( ee::Utf32ToUtf16( ui32This, ui32Len ) );
+			uint32_t ui32Converted = KatakanaToHiragana( ee::CExpEval::Utf32ToUtf16( ui32This, ui32Len ) );
 			uint32_t ui32Converted2 = KatakanaToHiragana( ui32This );
 			size_t sConvertedSize;
-			ui32This = ee::Utf32ToUtf16( ee::NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), sizeof( ui32Converted ) / sizeof( wchar_t ), &sConvertedSize ), ui32Len );
+			ui32This = ee::CExpEval::Utf32ToUtf16( ee::CExpEval::NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), sizeof( ui32Converted ) / sizeof( wchar_t ), &sConvertedSize ), ui32Len );
 
 			for ( uint32_t J = 0; J < ui32Len; ++J ) {
 				swsTemp.push_back( static_cast<wchar_t>(ui32This & 0xFFFFU) );
@@ -3399,13 +3399,13 @@ namespace mx {
 		CSecureString ssTemp;
 		size_t sLen = 1;
 		for ( size_t I = 0; I < _sInput.size() && sLen; I += sLen ) {
-			uint32_t uiNext = ee::NextUtf8Char( &_sInput[I], _sInput.size() - I, &sLen );
+			uint32_t uiNext = ee::CExpEval::NextUtf8Char( &_sInput[I], _sInput.size() - I, &sLen );
 			if ( sLen == 1 ) {
 				// It was just a regular character.  Could be an escape.
 				uiNext = ResolveEscape( &_sInput[I], _sInput.size() - I, sLen, false );
 			}
 			uint32_t ui32Len;
-			uint32_t ui32BackToUtf8 = ee::Utf32ToUtf8( uiNext, ui32Len );
+			uint32_t ui32BackToUtf8 = ee::CExpEval::Utf32ToUtf8( uiNext, ui32Len );
 			if ( ui32BackToUtf8 == MX_UTF_INVALID ) {
 				ui32Len = 1;
 				ui32BackToUtf8 = uiNext;
@@ -3491,13 +3491,13 @@ namespace mx {
 				}
 				for ( size_t J = 0; J < _sBytes; ++J ) {
 					size_t sLen = 1;
-					uint32_t ui32This = ee::NextUtf8Char( reinterpret_cast<const char *>(&_puiData[J]), _sBytes - J, &sLen );
+					uint32_t ui32This = ee::CExpEval::NextUtf8Char( reinterpret_cast<const char *>(&_puiData[J]), _sBytes - J, &sLen );
 					/*if ( ui32This == MX_UTF_INVALID ) {
 						ui32This = _puiData[J];
 						sLen = 1;
 					}*/
 					uint32_t ui32Len;
-					uint32_t ui32Converted = ee::Utf32ToUtf16( ui32This, ui32Len );
+					uint32_t ui32Converted = ee::CExpEval::Utf32ToUtf16( ui32This, ui32Len );
 					::GetStringTypeW( bArray[I].dwFlags, reinterpret_cast<LPCWCH>(&ui32Converted),
 						std::min( static_cast<int>(ui32Len), static_cast<int>(_sBytes - J) ),
 						&(*bArray[I].pvBuffer)[J] );
@@ -3530,13 +3530,13 @@ namespace mx {
 				}
 				for ( size_t J = 0; J < _sBytes; ++J ) {
 					size_t sLen = 1;
-					uint32_t ui32This = ee::NextUtf16Char( reinterpret_cast<const wchar_t *>(&_puiData[J]), _sBytes - J, &sLen );
+					uint32_t ui32This = ee::CExpEval::NextUtf16Char( reinterpret_cast<const wchar_t *>(&_puiData[J]), _sBytes - J, &sLen );
 					/*if ( ui32This == MX_UTF_INVALID ) {
 						ui32This = _puiData[J];
 						sLen = 1;
 					}*/
 					uint32_t ui32Len;
-					uint32_t ui32Converted = ee::Utf32ToUtf16( ui32This, ui32Len );
+					uint32_t ui32Converted = ee::CExpEval::Utf32ToUtf16( ui32This, ui32Len );
 					::GetStringTypeW( bArray[I].dwFlags, reinterpret_cast<LPCWCH>(&ui32Converted),
 						std::min( static_cast<int>(ui32Len), static_cast<int>(_sBytes - J) ),
 						&(*bArray[I].pvBuffer)[J] );
@@ -3569,13 +3569,13 @@ namespace mx {
 				}
 				for ( size_t J = 0; J < _sBytes; ++J ) {
 					size_t sLen = 1;
-					uint32_t ui32This = ee::NextUtf32Char( reinterpret_cast<const uint32_t *>(&_puiData[J]), _sBytes - J, &sLen );
+					uint32_t ui32This = ee::CExpEval::NextUtf32Char( reinterpret_cast<const uint32_t *>(&_puiData[J]), _sBytes - J, &sLen );
 					/*if ( ui32This == MX_UTF_INVALID ) {
 						ui32This = _puiData[J];
 						sLen = 1;
 					}*/
 					uint32_t ui32Len;
-					uint32_t ui32Converted = ee::Utf32ToUtf16( ui32This, ui32Len );
+					uint32_t ui32Converted = ee::CExpEval::Utf32ToUtf16( ui32This, ui32Len );
 					::GetStringTypeW( bArray[I].dwFlags, reinterpret_cast<LPCWCH>(&ui32Converted),
 						std::min( static_cast<int>(ui32Len), static_cast<int>(_sBytes - J) ),
 						&(*bArray[I].pvBuffer)[J] );
@@ -3651,11 +3651,11 @@ namespace mx {
 
 		for ( size_t I = 0; I < _sBytes; ++I ) {
 			size_t sLen = 1;
-			uint32_t ui32Temp = ee::NextUtf8Char( reinterpret_cast<const char *>(&_puiData[I]), _sBytes - I, &sLen );
+			uint32_t ui32Temp = ee::CExpEval::NextUtf8Char( reinterpret_cast<const char *>(&_puiData[I]), _sBytes - I, &sLen );
 			_vData[I].ui8UftLen = static_cast<uint8_t>(sLen);
 			if ( ui32Temp != MX_UTF_INVALID ) {
 				uint32_t ui32Len;
-				uint32_t ui32Converted = ee::Utf32ToUtf16( ui32Temp, ui32Len );
+				uint32_t ui32Converted = ee::CExpEval::Utf32ToUtf16( ui32Temp, ui32Len );
 				if ( (_uiFlags & MX_SSF_LINGUISTIC_IGNOREDIACRITIC) && (_wC3Props[I] & C3_DIACRITIC) ) {
 					wchar_t szBuffer[32];
 					int iNorm = ::NormalizeString( NormalizationKD, reinterpret_cast<LPCWCH>(&ui32Converted), ui32Len, szBuffer, MX_ELEMENTS( szBuffer ) );
@@ -3685,7 +3685,7 @@ namespace mx {
 				else if ( _uiFlags & MX_SSF_NORM_IGNORECASE ) {
 					ui32Converted = std::towupper( ui32Converted );
 				}
-				_vData[I].ui32SearchChar = ee::NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), 2 );
+				_vData[I].ui32SearchChar = ee::CExpEval::NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), 2 );
 			}
 			else {
 				_vData[I].ui32SearchChar = ui32Temp;
@@ -3721,15 +3721,15 @@ namespace mx {
 				if ( sLeft >= 2 ) {
 					szByteSwapped[1] = ::_byteswap_ushort( reinterpret_cast<const wchar_t *>(&_puiData[sIdx])[1] );
 				}
-				ui32Temp = ee::NextUtf16Char( szByteSwapped, 2, &sLen );
+				ui32Temp = ee::CExpEval::NextUtf16Char( szByteSwapped, 2, &sLen );
 			}
 			else {
-				ui32Temp = ee::NextUtf16Char( reinterpret_cast<const wchar_t *>(&_puiData[sIdx]), _sBytes - sIdx, &sLen );
+				ui32Temp = ee::CExpEval::NextUtf16Char( reinterpret_cast<const wchar_t *>(&_puiData[sIdx]), _sBytes - sIdx, &sLen );
 			}
 			_vData[sIdx].ui8UftLen = static_cast<uint8_t>(sLen * sizeof( wchar_t ));
 			if ( ui32Temp != MX_UTF_INVALID ) {
 				uint32_t ui32Len;
-				uint32_t ui32Converted = ee::Utf32ToUtf16( ui32Temp, ui32Len );
+				uint32_t ui32Converted = ee::CExpEval::Utf32ToUtf16( ui32Temp, ui32Len );
 				if ( (_uiFlags & MX_SSF_LINGUISTIC_IGNOREDIACRITIC) && (_wC3Props[sIdx] & C3_DIACRITIC) ) {
 					wchar_t szBuffer[32];
 					int iNorm = ::NormalizeString( NormalizationKD, reinterpret_cast<LPCWCH>(&ui32Converted), ui32Len, szBuffer, MX_ELEMENTS( szBuffer ) );
@@ -3759,7 +3759,7 @@ namespace mx {
 				else if ( _uiFlags & MX_SSF_NORM_IGNORECASE ) {
 					ui32Converted = std::towupper( ui32Converted );
 				}
-				_vData[sIdx].ui32SearchChar = ee::NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), 2 );
+				_vData[sIdx].ui32SearchChar = ee::CExpEval::NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), 2 );
 			}
 			else {
 				_vData[sIdx].ui32SearchChar = ui32Temp;
@@ -3790,11 +3790,11 @@ namespace mx {
 			uint32_t ui32Char = _bByteSwapped ?
 				::_byteswap_ulong( (*reinterpret_cast<const uint32_t *>(&_puiData[sIdx])) ) :
 				(*reinterpret_cast<const uint32_t *>(&_puiData[sIdx]));
-			uint32_t ui32Temp = ee::NextUtf32Char( &ui32Char, _sBytes - sIdx, &sLen );
+			uint32_t ui32Temp = ee::CExpEval::NextUtf32Char( &ui32Char, _sBytes - sIdx, &sLen );
 			_vData[sIdx].ui8UftLen = static_cast<uint8_t>(sLen * sizeof( uint32_t ));
 			if ( ui32Temp != MX_UTF_INVALID ) {
 				uint32_t ui32Len;
-				uint32_t ui32Converted = ee::Utf32ToUtf16( ui32Temp, ui32Len );
+				uint32_t ui32Converted = ee::CExpEval::Utf32ToUtf16( ui32Temp, ui32Len );
 				if ( (_uiFlags & MX_SSF_LINGUISTIC_IGNOREDIACRITIC) && (_wC3Props[sIdx] & C3_DIACRITIC) ) {
 					wchar_t szBuffer[32];
 					int iNorm = ::NormalizeString( NormalizationKD, reinterpret_cast<LPCWCH>(&ui32Converted), ui32Len, szBuffer, MX_ELEMENTS( szBuffer ) );
@@ -3824,7 +3824,7 @@ namespace mx {
 				else if ( _uiFlags & MX_SSF_NORM_IGNORECASE ) {
 					ui32Converted = std::towupper( ui32Converted );
 				}
-				_vData[sIdx].ui32SearchChar = ee::NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), 2 );
+				_vData[sIdx].ui32SearchChar = ee::CExpEval::NextUtf16Char( reinterpret_cast<const wchar_t *>(&ui32Converted), 2 );
 			}
 			else {
 				_vData[sIdx].ui32SearchChar = ui32Temp;
@@ -3992,7 +3992,7 @@ namespace mx {
 		const char * pcTemp = std::ctime( reinterpret_cast<const time_t * const>(&rConv.u.ui64Val) );
 
 		if ( pcTemp ) {
-			wsTemp = ee::StringToWString( pcTemp );
+			wsTemp = ee::CExpEval::StringToWString( pcTemp );
 		}
 		else {
 			wsTemp.append( _DEC_WS_3424431C_Invalid );

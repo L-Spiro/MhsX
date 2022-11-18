@@ -451,7 +451,7 @@ namespace mx {
 
 	// Updates the inputs based on the binary input.
 	void CFloatingPointStudioWindow::UpdateBinary( CWidget * _pwWidget ) {
-		uint64_t ui64Val = ee::StoULL( _pwWidget->GetTextA().c_str(), 2 );
+		uint64_t ui64Val = ee::CExpEval::StoULL( _pwWidget->GetTextA().c_str(), 2 );
 		MX_CUR_SETTINGS csSettings;
 		if ( !GatherSettings( csSettings ) ) { return; }
 		ee::CFloatX fFloat;

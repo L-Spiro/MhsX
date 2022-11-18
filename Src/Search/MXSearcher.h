@@ -553,24 +553,24 @@ namespace mx {
 
 		// Quick 32-bit epsilon compare.
 		static bool __stdcall				Cmp_Float32Epsilon( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
-			return ee::Epsilon( _patLeft.u.Float32, _patRight.u.Float32, static_cast<float>(_spParms.dEpsilonValue) );
+			return ee::CExpEval::Epsilon( _patLeft.u.Float32, _patRight.u.Float32, static_cast<float>(_spParms.dEpsilonValue) );
 		}
 
 		// Smart 32-bit epsilon compare.
 		static bool __stdcall				Cmp_Float32RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
-			return ee::RelativeEpsilon( static_cast<float>(_patLeft.u.Float32),
+			return ee::CExpEval::RelativeEpsilon( static_cast<float>(_patLeft.u.Float32),
 				static_cast<float>(_patRight.u.Float32),
 				static_cast<float>(_spParms.dEpsilonValue) );
 		}
 
 		// Quick 64-bit epsilon compare.
 		static bool __stdcall				Cmp_Float64Epsilon( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
-			return ee::Epsilon( _patLeft.u.Float64, _patRight.u.Float64, _spParms.dEpsilonValue );
+			return ee::CExpEval::Epsilon( _patLeft.u.Float64, _patRight.u.Float64, _spParms.dEpsilonValue );
 		}
 
 		// Smart 64-bit epsilon compare.
 		static bool __stdcall				Cmp_Float64RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
-			return ee::RelativeEpsilon( _patLeft.u.Float64,
+			return ee::CExpEval::RelativeEpsilon( _patLeft.u.Float64,
 				_patRight.u.Float64,
 				_spParms.dEpsilonValue );
 		}
@@ -898,7 +898,7 @@ namespace mx {
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat16RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			double dVal = CFloat16( _patCur.u.UInt16 ).Value() - CFloat16( _patPrev.u.UInt16 ).Value();
-			return ee::RelativeEpsilon( dVal,
+			return ee::CExpEval::RelativeEpsilon( dVal,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue );
 		}
@@ -906,13 +906,13 @@ namespace mx {
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat16Epsilon( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			double dVal = CFloat16( _patCur.u.UInt16 ).Value() - CFloat16( _patPrev.u.UInt16 ).Value();
-			return ee::Epsilon( dVal, _patTest.u.Float64, _spParms.dEpsilonValue );
+			return ee::CExpEval::Epsilon( dVal, _patTest.u.Float64, _spParms.dEpsilonValue );
 		}
 
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat16RelativeEpsilonWithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			double dVal = CFloat16( _patCur.u.UInt16 ).Value() - CFloat16( _patPrev.u.UInt16 ).Value();
-			return ee::RelativeEpsilon( dVal,
+			return ee::CExpEval::RelativeEpsilon( dVal,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue ) || std::isnan( dVal );
 		}
@@ -920,13 +920,13 @@ namespace mx {
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat16EpsilonWithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			double dVal = CFloat16( _patCur.u.UInt16 ).Value() - CFloat16( _patPrev.u.UInt16 ).Value();
-			return ee::Epsilon( dVal, _patTest.u.Float64, _spParms.dEpsilonValue ) || std::isnan( dVal );
+			return ee::CExpEval::Epsilon( dVal, _patTest.u.Float64, _spParms.dEpsilonValue ) || std::isnan( dVal );
 		}
 
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat32RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			double dVal = _patCur.u.Float32 - _patPrev.u.Float32;
-			return ee::RelativeEpsilon( dVal,
+			return ee::CExpEval::RelativeEpsilon( dVal,
 				static_cast<double>(_patTest.u.Float32),
 				_spParms.dEpsilonValue );
 		}
@@ -934,13 +934,13 @@ namespace mx {
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat32Epsilon( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			double dVal = _patCur.u.Float32 - _patPrev.u.Float32;
-			return ee::Epsilon( dVal, static_cast<double>(_patTest.u.Float32), _spParms.dEpsilonValue );
+			return ee::CExpEval::Epsilon( dVal, static_cast<double>(_patTest.u.Float32), _spParms.dEpsilonValue );
 		}
 
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat32RelativeEpsilonWithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			double dVal = _patCur.u.Float32 - _patPrev.u.Float32;
-			return ee::RelativeEpsilon( dVal,
+			return ee::CExpEval::RelativeEpsilon( dVal,
 				static_cast<double>(_patTest.u.Float32),
 				_spParms.dEpsilonValue ) || std::isnan( dVal );
 		}
@@ -948,13 +948,13 @@ namespace mx {
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat32EpsilonWithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			double dVal = _patCur.u.Float32 - _patPrev.u.Float32;
-			return ee::Epsilon( dVal, static_cast<double>(_patTest.u.Float32), _spParms.dEpsilonValue ) || std::isnan( dVal );
+			return ee::CExpEval::Epsilon( dVal, static_cast<double>(_patTest.u.Float32), _spParms.dEpsilonValue ) || std::isnan( dVal );
 		}
 
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat64RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			double dVal = _patCur.u.Float64 - _patPrev.u.Float64;
-			return ee::RelativeEpsilon( dVal,
+			return ee::CExpEval::RelativeEpsilon( dVal,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue );
 		}
@@ -962,13 +962,13 @@ namespace mx {
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat64Epsilon( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			double dVal = _patCur.u.Float64 - _patPrev.u.Float64;
-			return ee::Epsilon( dVal, _patTest.u.Float64, _spParms.dEpsilonValue );
+			return ee::CExpEval::Epsilon( dVal, _patTest.u.Float64, _spParms.dEpsilonValue );
 		}
 
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat64RelativeEpsilonWithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			double dVal = _patCur.u.Float64 - _patPrev.u.Float64;
-			return ee::RelativeEpsilon( dVal,
+			return ee::CExpEval::RelativeEpsilon( dVal,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue ) || std::isnan( dVal );
 		}
@@ -976,7 +976,7 @@ namespace mx {
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat64EpsilonWithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			double dVal = _patCur.u.Float64 - _patPrev.u.Float64;
-			return ee::Epsilon( dVal, _patTest.u.Float64, _spParms.dEpsilonValue ) || std::isnan( dVal );
+			return ee::CExpEval::Epsilon( dVal, _patTest.u.Float64, _spParms.dEpsilonValue ) || std::isnan( dVal );
 		}
 
 
@@ -1164,7 +1164,7 @@ namespace mx {
 		static bool __stdcall				Cmp_ChangedByPercFloat16RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			double dTmp = CFloat16( _patPrev.u.UInt16 ).Value();
 			if ( !dTmp ) { return false; }
-			return ee::RelativeEpsilon( CFloat16( _patCur.u.UInt16 ).Value() / dTmp,
+			return ee::CExpEval::RelativeEpsilon( CFloat16( _patCur.u.UInt16 ).Value() / dTmp,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue );
 		}
@@ -1174,7 +1174,7 @@ namespace mx {
 			double dTmp = CFloat16( _patPrev.u.UInt16 ).Value();
 			if ( !dTmp ) { return false; }
 			double dVal = CFloat16( _patCur.u.UInt16 ).Value() / dTmp;
-			return ee::RelativeEpsilon( dVal,
+			return ee::CExpEval::RelativeEpsilon( dVal,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue ) || std::isnan( dVal );
 		}
@@ -1183,7 +1183,7 @@ namespace mx {
 		static bool __stdcall				Cmp_ChangedByPercFloat16Epsilon( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			double dTmp = CFloat16( _patPrev.u.UInt16 ).Value();
 			if ( !dTmp ) { return false; }
-			return ee::Epsilon( CFloat16( _patCur.u.UInt16 ).Value() / dTmp,
+			return ee::CExpEval::Epsilon( CFloat16( _patCur.u.UInt16 ).Value() / dTmp,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue );
 		}
@@ -1193,7 +1193,7 @@ namespace mx {
 			double dTmp = CFloat16( _patPrev.u.UInt16 ).Value();
 			if ( !dTmp ) { return false; }
 			double dVal = CFloat16( _patCur.u.UInt16 ).Value() / dTmp;
-			return ee::Epsilon( dVal,
+			return ee::CExpEval::Epsilon( dVal,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue ) || std::isnan( dVal );
 		}
@@ -1201,7 +1201,7 @@ namespace mx {
 		// Changed-by-percent primitive compare.
 		static bool __stdcall				Cmp_ChangedByPercFloat32RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			if ( !_patPrev.u.Float32 ) { return false; }
-			return ee::RelativeEpsilon( static_cast<double>(_patCur.u.Float32 / _patPrev.u.Float32),
+			return ee::CExpEval::RelativeEpsilon( static_cast<double>(_patCur.u.Float32 / _patPrev.u.Float32),
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue );
 		}
@@ -1210,7 +1210,7 @@ namespace mx {
 		static bool __stdcall				Cmp_ChangedByPercFloat32RelativeEpsilonWithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			if ( !_patPrev.u.Float32 ) { return false; }
 			double dVal = _patCur.u.Float32 / _patPrev.u.Float32;
-			return ee::RelativeEpsilon( dVal,
+			return ee::CExpEval::RelativeEpsilon( dVal,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue ) || std::isnan( dVal );
 		}
@@ -1218,7 +1218,7 @@ namespace mx {
 		// Changed-by-percent primitive compare.
 		static bool __stdcall				Cmp_ChangedByPercFloat32Epsilon( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			if ( !_patPrev.u.Float32 ) { return false; }
-			return ee::Epsilon( static_cast<double>(_patCur.u.Float32 / _patPrev.u.Float32),
+			return ee::CExpEval::Epsilon( static_cast<double>(_patCur.u.Float32 / _patPrev.u.Float32),
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue );
 		}
@@ -1227,7 +1227,7 @@ namespace mx {
 		static bool __stdcall				Cmp_ChangedByPercFloat32EpsilonWithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			if ( !_patPrev.u.Float32 ) { return false; }
 			double dVal = _patCur.u.Float32 / _patPrev.u.Float32;
-			return ee::Epsilon( dVal,
+			return ee::CExpEval::Epsilon( dVal,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue ) || std::isnan( dVal );
 		}
@@ -1235,7 +1235,7 @@ namespace mx {
 		// Changed-by-percent primitive compare.
 		static bool __stdcall				Cmp_ChangedByPercFloat64RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			if ( !_patPrev.u.Float64 ) { return false; }
-			return ee::RelativeEpsilon( _patCur.u.Float64 / _patPrev.u.Float64,
+			return ee::CExpEval::RelativeEpsilon( _patCur.u.Float64 / _patPrev.u.Float64,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue );
 		}
@@ -1244,7 +1244,7 @@ namespace mx {
 		static bool __stdcall				Cmp_ChangedByPercFloat64RelativeEpsilonWithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			if ( !_patPrev.u.Float64 ) { return false; }
 			double dVal = _patCur.u.Float64 / _patPrev.u.Float64;
-			return ee::RelativeEpsilon( dVal,
+			return ee::CExpEval::RelativeEpsilon( dVal,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue ) || std::isnan( dVal );
 		}
@@ -1252,7 +1252,7 @@ namespace mx {
 		// Changed-by-percent primitive compare.
 		static bool __stdcall				Cmp_ChangedByPercFloat64Epsilon( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			if ( !_patPrev.u.Float64 ) { return false; }
-			return ee::Epsilon( _patCur.u.Float64 / _patPrev.u.Float64,
+			return ee::CExpEval::Epsilon( _patCur.u.Float64 / _patPrev.u.Float64,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue );
 		}
@@ -1261,7 +1261,7 @@ namespace mx {
 		static bool __stdcall				Cmp_ChangedByPercFloat64EpsilonWithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
 			if ( !_patPrev.u.Float64 ) { return false; }
 			double dVal = _patCur.u.Float64 / _patPrev.u.Float64;
-			return ee::Epsilon( dVal,
+			return ee::CExpEval::Epsilon( dVal,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue ) || std::isnan( dVal );
 		}

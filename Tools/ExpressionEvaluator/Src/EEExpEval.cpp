@@ -7,8 +7,9 @@
 
 namespace ee {
 
+	// == Functions.
 	// Gets the time of initialization.
-	uint64_t StartTime() {
+	uint64_t CExpEval::StartTime() {
 		static uint64_t uiStart = 0;
 		if ( !uiStart ) {
 #ifdef _WIN32
@@ -21,7 +22,7 @@ namespace ee {
 	}
 
 	// Converts a \N{*} named Unicode character to a uint32_t.
-	uint32_t EscapeNamedUnicode( const char * _pcValue, size_t _sLen, size_t &_sCharsConsumed ) {
+	uint32_t CExpEval::EscapeNamedUnicode( const char * _pcValue, size_t _sLen, size_t &_sCharsConsumed ) {
 		const char * pcOrig = _pcValue;
 		_sCharsConsumed = 0;
 		const char * pcStart = nullptr;
@@ -45,7 +46,7 @@ namespace ee {
 	}
 
 	// Converts an &#nnnn; or an &#xhhhh; HTML character to a uint64_t.
-	uint64_t EscapeHtml( const char * _pcValue, size_t _sLen, size_t &_sCharsConsumed ) {
+	uint64_t CExpEval::EscapeHtml( const char * _pcValue, size_t _sLen, size_t &_sCharsConsumed ) {
 		// The & is assumed to have been eaten already.
 		const char * pcOrig = _pcValue;
 		_sCharsConsumed = 0;
@@ -111,7 +112,7 @@ namespace ee {
 	}
 
 	// Gets the next UTF-16 character from a stream or error (EE_UTF_INVALID)
-	uint32_t NextUtf16Char( const wchar_t * _pwcString, size_t _sLen, size_t * _psSize ) {
+	uint32_t CExpEval::NextUtf16Char( const wchar_t * _pwcString, size_t _sLen, size_t * _psSize ) {
 		if ( _sLen == 0 ) { return 0; }
 
 		// Get the low bits (which may be all there are).
@@ -162,7 +163,7 @@ namespace ee {
 	}
 
 	// Gets the next UTF-8 character from a stream or error (EE_UTF_INVALID)
-	uint32_t NextUtf8Char( const char * _pcString, size_t _sLen, size_t * _psSize ) {
+	uint32_t CExpEval::NextUtf8Char( const char * _pcString, size_t _sLen, size_t * _psSize ) {
 		if ( _sLen == 0 ) { if ( _psSize ) { (*_psSize) = 0; } return 0; }
 
 		// Get the low bits (which may be all there are).
@@ -232,7 +233,7 @@ namespace ee {
 	}
 
 	// Gets the size of the given UTF-8 character.
-	size_t Utf8CharSize( const char * _pcString, size_t _sLen ) {
+	size_t CExpEval::Utf8CharSize( const char * _pcString, size_t _sLen ) {
 		if ( _sLen == 0 ) { return 0; }
 
 		// Get the low bits (which may be all there are).
@@ -263,7 +264,7 @@ namespace ee {
 	}
 
 	// Converts a UTF-32 character to a UTF-16 character.
-	uint32_t Utf32ToUtf16( uint32_t _ui32Utf32, uint32_t &_ui32Len ) {
+	uint32_t CExpEval::Utf32ToUtf16( uint32_t _ui32Utf32, uint32_t &_ui32Len ) {
 		if ( _ui32Utf32 > 0x10FFFF ) {
 			_ui32Len = 1;
 			return EE_UTF_INVALID;
@@ -284,7 +285,7 @@ namespace ee {
 	}
 
 	// Converts a UTF-32 character to a UTF-8 character.
-	uint32_t Utf32ToUtf8( uint32_t _ui32Utf32, uint32_t &_ui32Len ) {
+	uint32_t CExpEval::Utf32ToUtf8( uint32_t _ui32Utf32, uint32_t &_ui32Len ) {
 		// Handle the single-character case separately since it is a special case.
 		if ( _ui32Utf32 < 0x80U ) {
 			_ui32Len = 1;
@@ -327,7 +328,7 @@ namespace ee {
 	}
 
 	// Converts a wstring to a UTF-8 string.
-	std::string WStringToString( const std::wstring &_wsIn ) {
+	std::string CExpEval::WStringToString( const std::wstring &_wsIn ) {
 #if 0
 		// Problematic; terminates at the first \0 character, making it impossible to use for strings meant for OPENFILENAMEW etc.
 		//return std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes( _wsIn );
@@ -366,7 +367,7 @@ namespace ee {
 	}
 
 	// Converts a UTF-8 string to wstring (UTF-16).
-	std::wstring StringToWString( const std::string &_sIn ) {
+	std::wstring CExpEval::StringToWString( const std::string &_sIn ) {
 #if 0
 		// Problematic; terminates at the first \0 character, making it impossible to use for strings meant for OPENFILENAMEW etc.
 		//return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>{}.from_bytes( _sIn.data() );
@@ -392,7 +393,7 @@ namespace ee {
 	}
 
 	// Converts a UTF-8 string to wstring (UTF-16).
-	std::wstring StringToWString( const char * _pcIn, size_t _sLen ) {
+	std::wstring CExpEval::StringToWString( const char * _pcIn, size_t _sLen ) {
 		std::wstring swsTemp;
 		size_t I = 0;
 		size_t sSize;
@@ -410,7 +411,7 @@ namespace ee {
 	}
 
 	// Converts a UTF-32 string to a UTF-16 string.
-	std::wstring Utf32StringToWString( const uint32_t * _puiUtf32String, size_t _sLen ) {
+	std::wstring CExpEval::Utf32StringToWString( const uint32_t * _puiUtf32String, size_t _sLen ) {
 		std::wstring swsTemp;
 		size_t I = 0;
 		size_t sSize;
@@ -428,7 +429,7 @@ namespace ee {
 	}
 
 	// Gets the Nth Unicode code point in the given string.
-	uint32_t GetUtf8CodePointByIdx( const std::string &_sIn, size_t _sIx ) {
+	uint32_t CExpEval::GetUtf8CodePointByIdx( const std::string &_sIn, size_t _sIx ) {
 		uint32_t ui32Char = 0;
 		++_sIx;
 		size_t sThisSize = 0;
@@ -442,7 +443,7 @@ namespace ee {
 	}
 
 	// Gets the Nth Unicode code point in the given string.
-	size_t GetUtf8CharPosByIdx( const std::string &_sIn, size_t _sIx ) {
+	size_t CExpEval::GetUtf8CharPosByIdx( const std::string &_sIn, size_t _sIx ) {
 		size_t I = 0;
 		size_t sThisSize = 0;
 		uint32_t ui32Char = 0;
@@ -455,7 +456,7 @@ namespace ee {
 
 	// Converts a wstring to a UTF-8 string.  The main difference between this and WStringToString() is that this will copy the raw characters over on error
 	//	compared to WStringToString(), which will output an error character (EE_UTF_INVALID).
-	std::string ToUtf8( const std::wstring &_wsString ) {
+	std::string CExpEval::ToUtf8( const std::wstring &_wsString ) {
 		std::string sRet;
 		const wchar_t * pwcInput = _wsString.c_str();
 		size_t sSize = _wsString.size();
@@ -479,7 +480,7 @@ namespace ee {
 
 	// Converts a u16string to a UTF-8 string.  The main difference between this and WStringToString() is that this will copy the raw characters over on error
 	//	compared to WStringToString(), which will output an error character (EE_UTF_INVALID).
-	std::string ToUtf8( const std::u16string &_u16String ) {
+	std::string CExpEval::ToUtf8( const std::u16string &_u16String ) {
 		std::string sRet;
 		const char16_t * pc16Input = _u16String.c_str();
 		size_t sSize = _u16String.size();
@@ -502,7 +503,7 @@ namespace ee {
 	}
 
 	// Converts a u32string to a UTF-8 string.
-	std::string ToUtf8( const std::u32string &_u32String ) {
+	std::string CExpEval::ToUtf8( const std::u32string &_u32String ) {
 		std::string sRet;
 		const char32_t * pc32Input = _u32String.c_str();
 		size_t sSize = _u32String.size();
@@ -530,7 +531,7 @@ namespace ee {
 	}
 
 	// Converts from UTF-8 to UTF-32, copying the original characters instead of EE_UTF_INVALID.
-	std::u32string ToUtf32( const std::string &_sIn ) {
+	std::u32string CExpEval::ToUtf32( const std::string &_sIn ) {
 		std::u32string u32Return;
 		const char * pcSrc = _sIn.c_str();
 		size_t sSize = _sIn.size();
@@ -552,7 +553,7 @@ namespace ee {
 	}
 
 	// Converts from UTF-8 to ASCII.
-	std::string ToAscii( const std::string &_sIn ) {
+	std::string CExpEval::ToAscii( const std::string &_sIn ) {
 		size_t sSize = _sIn.size();
 		std::string sRet;
 		
@@ -649,7 +650,7 @@ namespace ee {
 	}
 
 	// Represents a value in binary notation.
-	std::string ToBinary( uint64_t _ui64Val ) {
+	std::string CExpEval::ToBinary( uint64_t _ui64Val ) {
 		std::string sTmp;
 		sTmp.push_back( '0' );
 		sTmp.push_back( 'b' );
@@ -661,7 +662,7 @@ namespace ee {
 	}
 
 	// Represents a value in binary notation.
-	std::string ToBinary( int64_t _i64Val ) {
+	std::string CExpEval::ToBinary( int64_t _i64Val ) {
 		std::string sTmp;
 		bool bNeg = _i64Val < 0;
 		if ( bNeg ) {
@@ -678,7 +679,7 @@ namespace ee {
 	}
 
 	// Represents a value in binary notation.
-	std::string ToBinary( double _d4Val ) {
+	std::string CExpEval::ToBinary( double _d4Val ) {
 		std::string sTmp;
 		int64_t i64Val = (*reinterpret_cast<int64_t *>(&_d4Val));
 		bool bNeg = i64Val < 0;
@@ -696,7 +697,7 @@ namespace ee {
 	}
 
 	// Represents a value in hexadecimal notation.
-	std::string ToHex( uint64_t _ui64Val ) {
+	std::string CExpEval::ToHex( uint64_t _ui64Val ) {
 		std::string sTmp;
 		std::stringstream ssStream;
 		ssStream << "0x" <<
@@ -707,7 +708,7 @@ namespace ee {
 	}
 
 	// Represents a value in hexadecimal notation.
-	std::string ToHex( int64_t _i64Val ) {
+	std::string CExpEval::ToHex( int64_t _i64Val ) {
 		std::string sTmp;
 		std::stringstream ssStream;
 		_i64Val < 0 ? 
@@ -722,7 +723,7 @@ namespace ee {
 	}
 
 	// Represents a value in hexadecimal notation.
-	std::string ToHex( double _d4Val ) {
+	std::string CExpEval::ToHex( double _d4Val ) {
 		std::string sTmp;
 		std::stringstream ssStream;
 		ssStream << std::hexfloat <<
@@ -732,7 +733,7 @@ namespace ee {
 	}
 
 	// Represents a value in octadecimal notation.
-	std::string ToOct( uint64_t _ui64Val ) {
+	std::string CExpEval::ToOct( uint64_t _ui64Val ) {
 		std::string sTmp;
 		std::stringstream ssStream;
 		ssStream << "0o" <<
@@ -743,7 +744,7 @@ namespace ee {
 	}
 
 	// Represents a value in octadecimal notation.
-	std::string ToOct( int64_t _i64Val ) {
+	std::string CExpEval::ToOct( int64_t _i64Val ) {
 		std::string sTmp;
 		std::stringstream ssStream;
 		_i64Val < 0 ? 
@@ -758,7 +759,7 @@ namespace ee {
 	}
 
 	// Represents a value in octadecimal notation.
-	std::string ToOct( double _d4Val ) {
+	std::string CExpEval::ToOct( double _d4Val ) {
 		int64_t i64Tmp = (*reinterpret_cast<int64_t *>(&_d4Val));
 		std::string sTmp;
 		std::stringstream ssStream;
@@ -774,7 +775,7 @@ namespace ee {
 	}
 
 	// Classifies a string as one of the EE_NUM_CONSTANTS types, IE whether the string is a valid float-point or a signed or unsigned integer.  Or EE_NC_INVALID.
-	EE_STRING_NUMBER_CLASS ClassifyString( const std::string &_sIn, uint8_t * _pui8SpecialBase ) {
+	EE_STRING_NUMBER_CLASS CExpEval::ClassifyString( const std::string &_sIn, uint8_t * _pui8SpecialBase ) {
 		if ( _pui8SpecialBase ) { (*_pui8SpecialBase) = 0; }
 		size_t stIdx = 0;
 		while ( IsWhiteSpace( _sIn[stIdx] ) ) { ++stIdx; }
@@ -889,7 +890,7 @@ namespace ee {
 	// \unnnn universal character name (arbitrary Unicode value); may result in several characters	code point U+nnnn
 	// \Unnnnnnnn universal character name (arbitrary Unicode value); may result in several characters	code point U+nnnnnnnn
 	// \N{name} Character named NAME in the Unicode database
-	void ResolveAllEscapes( const std::string &_sInput, std::vector<uint32_t> &_vOutput ) {
+	void CExpEval::ResolveAllEscapes( const std::string &_sInput, std::vector<uint32_t> &_vOutput ) {
 		size_t sLen = 1;
 		for ( size_t I = 0; I < _sInput.size() && sLen; ) {
 			uint64_t uiVal = ResolveEscape( &_sInput.c_str()[I], _sInput.size() - I, sLen, false );
@@ -918,7 +919,7 @@ namespace ee {
 	// \unnnn universal character name (arbitrary Unicode value); may result in several characters	code point U+nnnn
 	// \Unnnnnnnn universal character name (arbitrary Unicode value); may result in several characters	code point U+nnnnnnnn
 	// \N{name} Character named NAME in the Unicode database
-	void ResolveAllEscapes( const std::string &_sInput, std::string &_sOutput, bool _bIsUtf8 ) {
+	void CExpEval::ResolveAllEscapes( const std::string &_sInput, std::string &_sOutput, bool _bIsUtf8 ) {
 		size_t sLen = 1;
 		for ( size_t I = 0; I < _sInput.size() && sLen; I += sLen ) {
 			uint64_t uiNext = _bIsUtf8 ? NextUtf8Char( &_sInput[I], _sInput.size() - I, &sLen ) : (sLen = 1, static_cast<uint8_t>(_sInput[I]));
@@ -943,7 +944,7 @@ namespace ee {
 	}
 
 	// Resolves a single escape character, or returns the first input character if not an escape character.
-	uint64_t ResolveEscape( const char * _pcInput, size_t _sLen, size_t &_sCharLen, bool _bIncludeHtml, bool * _pbEscapeFound ) {
+	uint64_t CExpEval::ResolveEscape( const char * _pcInput, size_t _sLen, size_t &_sCharLen, bool _bIncludeHtml, bool * _pbEscapeFound ) {
 		if ( _pbEscapeFound ) { (*_pbEscapeFound) = false; }
 		if ( !_sLen ) { _sCharLen = 0; return 0; }
 		if ( _sLen == 1 ) { _sCharLen = 1; return static_cast<uint8_t>(*_pcInput); }
@@ -1031,7 +1032,7 @@ namespace ee {
 	// Resolves HTML/XML characters.
 	// &#nnnn;
 	// &#xhhhh;
-	void ResolveAllHtmlXmlEscapes( const std::string &_sInput, std::string &_sOutput, bool _bIsUtf8 ) {
+	void CExpEval::ResolveAllHtmlXmlEscapes( const std::string &_sInput, std::string &_sOutput, bool _bIsUtf8 ) {
 		size_t sLen = 1;
 		for ( size_t I = 0; I < _sInput.size() && sLen; I += sLen ) {
 			uint64_t uiNext = _bIsUtf8 ? NextUtf8Char( &_sInput[I], _sInput.size() - I, &sLen ) : (sLen = 1, static_cast<uint8_t>(_sInput[I]));
@@ -1056,7 +1057,7 @@ namespace ee {
 	}
 
 	// Counts the number of UTF-8 code points in the given string.
-	uint64_t CountUtfCodePoints( const std::string &_sInput ) {
+	uint64_t CExpEval::CountUtfCodePoints( const std::string &_sInput ) {
 		uint64_t ui64Tally = 0;
 		size_t sPos = 0;
 		while ( sPos < _sInput.size() ) {
@@ -1070,7 +1071,7 @@ namespace ee {
 	}
 
 	// String to integer, from any base.  Since std::stoull() raises exceptions etc.
-	uint64_t StoULL( const char * _pcText, int _iBase, size_t * _psEaten, uint64_t _uiMax, bool * _pbOverflow ) {
+	uint64_t CExpEval::StoULL( const char * _pcText, int _iBase, size_t * _psEaten, uint64_t _uiMax, bool * _pbOverflow ) {
 		if ( _pbOverflow ) { (*_pbOverflow) = false; }
 		const char * _pcOrig = _pcText;
 		// Negate?
@@ -1161,7 +1162,7 @@ namespace ee {
 	}
 
 	// String to double.  Unlike std::atof(), this returns the number of characters eaten.
-	double AtoF( const char * _pcText, size_t * _psEaten, bool * _pbError ) {
+	double CExpEval::AtoF( const char * _pcText, size_t * _psEaten, bool * _pbError ) {
 		const char * _pcOrig = _pcText;
 		if ( _pbError ) { (*_pbError) = true; }
 		// The number is in the following format:
@@ -1256,7 +1257,7 @@ namespace ee {
 	}
 
 	// Gets the timer frequency.
-	uint64_t TimerFrequency() {
+	uint64_t CExpEval::TimerFrequency() {
 		static uint64_t uiFreq = 0;
 		if ( !uiFreq ) {
 #ifdef _WIN32
@@ -1269,7 +1270,7 @@ namespace ee {
 	}
 
 	// Pulls any preprocessing directives out of a single line.
-	/*bool __cdecl PreprocessingDirectives( const std::string &_sInput, std::string &_sDirective, std::string &_sParms ) {
+	bool CExpEval::PreprocessingDirectives( const std::string &_sInput, std::string &_sDirective, std::string &_sParms ) {
 		_sDirective.clear();
 		_sParms.clear();
 		std::string sTmp = TrimWhitespace( _sInput );
@@ -1289,12 +1290,10 @@ namespace ee {
 			while ( stIdx < sTmp.size() && IsWhiteSpace( sTmp[stIdx] ) ) { ++stIdx; }
 
 			// Copy any parameters.
-			while ( stIdx < sTmp.size() ) {
-				_sParms.push_back( sTmp[stIdx++] );
-			}
+			_sParms = sTmp.substr( stIdx );
 			return true;
 		}
 		return false;
-	}*/
+	}
 
 }	// namespace ee

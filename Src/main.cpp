@@ -77,7 +77,7 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 	//	takes place (clock() returns the time since the EXE actually started (before main() is even called), so we don't need more tickers from that
 	//	time.
 	// In a way, this allows (clock() - milliseconds_since_start()) to print the time it takes to initialize.
-	ee::InitializeExpressionEvaluatorLibrary();
+	ee::CExpEval::InitializeExpressionEvaluatorLibrary();
 	MSG mMsg = {};
 	while ( ::GetMessageW( &mMsg, NULL, 0, 0 ) > 0 ) {
 		if ( mMsg.message == WM_QUIT ) {

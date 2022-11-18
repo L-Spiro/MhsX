@@ -57,7 +57,7 @@ namespace ee {
 			return false;
 		}
 
-		switch ( ClassifyString( sString ) ) {
+		switch ( ee::CExpEval::ClassifyString( sString ) ) {
 			case EE_SNC_SIGNED : {
 				_ndNode.nueNodeDataEx.ncConstantType = EE_PPNC_SIGNED;
 				break;
@@ -72,7 +72,7 @@ namespace ee {
 				return false;
 			}
 		}
-		_ndNode.nuNodeData.i64Const = StoULL( _pcText );
+		_ndNode.nuNodeData.i64Const = ee::CExpEval::StoULL( _pcText );
 
 		return AddNode( _ndNode );
 	}
@@ -96,7 +96,7 @@ namespace ee {
 			return false;
 		}
 
-		switch ( ClassifyString( sString ) ) {
+		switch ( ee::CExpEval::ClassifyString( sString ) ) {
 			case EE_SNC_SIGNED : {
 				_ndNode.nueNodeDataEx.ncConstantType = EE_PPNC_SIGNED;
 				break;
@@ -111,7 +111,7 @@ namespace ee {
 				return false;
 			}
 		}
-		_ndNode.nuNodeData.i64Const = StoULL( _pcText, 16 );
+		_ndNode.nuNodeData.i64Const = ee::CExpEval::StoULL( _pcText, 16 );
 
 		return AddNode( _ndNode );
 	}
@@ -135,7 +135,7 @@ namespace ee {
 			return false;
 		}
 
-		_ndNode.nuNodeData.dConst = AtoF( _pcText );
+		_ndNode.nuNodeData.dConst = ee::CExpEval::AtoF( _pcText );
 		_ndNode.nueNodeDataEx.ncConstantType = EE_PPNC_FLOATING;
 
 		return AddNode( _ndNode );

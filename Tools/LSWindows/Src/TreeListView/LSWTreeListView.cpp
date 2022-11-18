@@ -545,7 +545,7 @@ namespace lsw {
 			}
 			case WM_NCLBUTTONDBLCLK : {
 				volatile int ghjg = 0;
-				//::MoveWindow( _hWnd, ee::Time() % 10, ee::Time() % 20, ee::Time() % 10 + 350, ee::Time() % 10 + 250, TRUE );
+				//::MoveWindow( _hWnd, ee::CExpEval::Time() % 10, ee::CExpEval::Time() % 20, ee::CExpEval::Time() % 10 + 350, ee::CExpEval::Time() % 10 + 250, TRUE );
 				break;
 			}
 			/*case WM_PAINT : {

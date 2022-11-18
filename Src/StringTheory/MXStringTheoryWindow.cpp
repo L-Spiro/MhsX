@@ -34,7 +34,7 @@ namespace mx {
 				sTemp.push_back( L':' );
 				sTemp.push_back( L' ' );
 				uint32_t uiLen;
-				uint32_t uiConverted = ee::Utf32ToUtf16( ee::CUnicode::GetUnicodeNum( I ), uiLen );
+				uint32_t uiConverted = ee::CExpEval::Utf32ToUtf16( ee::CUnicode::GetUnicodeNum( I ), uiLen );
 				for ( uint32_t J = 0; J < uiLen; ++J ) {
 					sTemp.push_back( static_cast<uint16_t>(uiConverted) );
 					uiConverted >>= 16;
@@ -99,7 +99,7 @@ namespace mx {
 						CWidget * pwTmp;
 						if ( (pwTmp = FindChild( CStringTheoryLayout::MX_STW_UNICODE_4_ESCAPE )) && pwTmp->IsChecked() ) {
 							uint32_t ui32Len;
-							uint32_t uiConverted = ee::Utf32ToUtf16( ee::CUnicode::GetUnicodeNum( sIdx ), ui32Len );
+							uint32_t uiConverted = ee::CExpEval::Utf32ToUtf16( ee::CUnicode::GetUnicodeNum( sIdx ), ui32Len );
 							for ( uint32_t I = 0; I < ui32Len; ++I ) {
 								wchar_t szBuffer[16];
 								std::swprintf( szBuffer, _DEC_WS_48C2E559___u__4X.c_str(), uiConverted & 0xFFFF );
@@ -230,7 +230,7 @@ namespace mx {
 				ssUtf8 = CUtilities::FromHexString( peEdit->GetTextW() );
 			}
 			else {
-				ssUtf8 = ee::ToUtf8( peEdit->GetTextW() );
+				ssUtf8 = ee::CExpEval::ToUtf8( peEdit->GetTextW() );
 			}
 			
 
@@ -261,7 +261,7 @@ namespace mx {
 					ssResolved );
 			}
 			else {
-				swsUtf16 = ee::ToUtf16( ssResolved );
+				swsUtf16 = ee::CExpEval::ToUtf16( ssResolved );
 			}
 
 			if ( MX_IS_CHECKED( MX_STW_TO_HIRAGANA ) ) {
@@ -365,7 +365,7 @@ namespace mx {
 						}
 
 						std::vector<uint32_t> vTmp2 = CUtilities::EscapeAllW( vTmp, true );
-						swsPrintFinal = ee::Utf32StringToWString( vTmp2.data(), vTmp2.size() );
+						swsPrintFinal = ee::CExpEval::Utf32StringToWString( vTmp2.data(), vTmp2.size() );
 						break;
 					}
 					case CCodePages::MX_utf_16 : {}
@@ -375,11 +375,11 @@ namespace mx {
 						break;
 					}
 					case CCodePages::MX_utf_8 : {
-						swsPrintFinal = ee::ToUtf16( CUtilities::EscapeAllW( ssEncodedFinal, true ) );
+						swsPrintFinal = ee::CExpEval::ToUtf16( CUtilities::EscapeAllW( ssEncodedFinal, true ) );
 						break;
 					}
 					default : {
-						swsPrintFinal = ee::ToUtf16( CUtilities::EscapeAllNonUtf( ssEncodedFinal, true ) );
+						swsPrintFinal = ee::CExpEval::ToUtf16( CUtilities::EscapeAllNonUtf( ssEncodedFinal, true ) );
 					}
 				}
 			}

@@ -11,17 +11,17 @@ namespace ee {
 	CExpEvalContainer::EE_RESULT CStringBaseApi::BestFitResult( const std::string &_sIn ) {
 		CExpEvalContainer::EE_RESULT rTmp;
 		uint8_t ui8Base;
-		EE_STRING_NUMBER_CLASS sncClass = ClassifyString( _sIn, &ui8Base );
+		EE_STRING_NUMBER_CLASS sncClass = ee::CExpEval::ClassifyString( _sIn, &ui8Base );
 		switch ( sncClass ) {
 			case EE_SNC_UNSIGNED : {
 				bool bOverflow = false;
-				rTmp.u.ui64Val = StoULL( _sIn.c_str(),
+				rTmp.u.ui64Val = ee::CExpEval::StoULL( _sIn.c_str(),
 					ui8Base,
 					nullptr,
 					UINT64_MAX,
 					&bOverflow );
 				if ( bOverflow && ui8Base == 0 ) {
-					rTmp.u.dVal = AtoF( _sIn.c_str(), nullptr, &bOverflow );
+					rTmp.u.dVal = ee::CExpEval::AtoF( _sIn.c_str(), nullptr, &bOverflow );
 					if ( !bOverflow ) {
 						rTmp.ncType = EE_NC_FLOATING;
 						break;
@@ -33,14 +33,14 @@ namespace ee {
 			}
 			case EE_SNC_SIGNED : {
 				bool bOverflow = false;
-				rTmp.u.ui64Val = StoULL( _sIn.c_str(),
+				rTmp.u.ui64Val = ee::CExpEval::StoULL( _sIn.c_str(),
 					ui8Base,
 					nullptr,
 					UINT64_MAX / 2 + 1,
 					&bOverflow );
 				rTmp.ncType = EE_NC_SIGNED;
 				if ( bOverflow && ui8Base == 0 ) {
-					rTmp.u.dVal = AtoF( _sIn.c_str(), nullptr, &bOverflow );
+					rTmp.u.dVal = ee::CExpEval::AtoF( _sIn.c_str(), nullptr, &bOverflow );
 					if ( !bOverflow ) {
 						rTmp.ncType = EE_NC_FLOATING;
 						break;
@@ -54,7 +54,7 @@ namespace ee {
 				rTmp.ncType = EE_NC_FLOATING;
 				bool bErrored = false;
 				size_t sEaten = 0;
-				rTmp.u.dVal = AtoF( _sIn.c_str(), &sEaten, &bErrored );
+				rTmp.u.dVal = ee::CExpEval::AtoF( _sIn.c_str(), &sEaten, &bErrored );
 				if ( bErrored || !sEaten ) {
 					rTmp.u.dVal = ::nan( "" );
 				}
@@ -73,7 +73,7 @@ namespace ee {
 		CExpEvalContainer::EE_RESULT rRet = { EE_NC_INVALID };
 		CString * psObj = reinterpret_cast<CString *>(_peecCont->AllocateObject<CString>());
 		if ( psObj ) {
-			psObj->m_sObj = ToAscii( _sIn );
+			psObj->m_sObj = ee::CExpEval::ToAscii( _sIn );
 			rRet = psObj->CreateResult();
 		}
 
@@ -89,15 +89,15 @@ namespace ee {
 		if ( psObj ) {
 			switch ( rTmp.ncType ) {
 				case EE_NC_UNSIGNED : {
-					psObj->SetString( ToBinary( rTmp.u.ui64Val ) );
+					psObj->SetString( ee::CExpEval::ToBinary( rTmp.u.ui64Val ) );
 					break;
 				}
 				case EE_NC_SIGNED : {
-					psObj->SetString( ToBinary( rTmp.u.i64Val ) );
+					psObj->SetString( ee::CExpEval::ToBinary( rTmp.u.i64Val ) );
 					break;
 				}
 				case EE_NC_FLOATING : {
-					psObj->SetString( ToBinary( rTmp.u.dVal ) );
+					psObj->SetString( ee::CExpEval::ToBinary( rTmp.u.dVal ) );
 					break;
 				}
 				default : {}
@@ -131,7 +131,7 @@ namespace ee {
 		if ( psObj ) {
 			rTmp = _peecCont->ConvertResultOrObject( rTmp, EE_NC_UNSIGNED );
 			uint32_t ui32Len;
-			uint32_t ui32Val = Utf32ToUtf8( static_cast<uint32_t>(rTmp.u.ui64Val), ui32Len );
+			uint32_t ui32Val = ee::CExpEval::Utf32ToUtf8( static_cast<uint32_t>(rTmp.u.ui64Val), ui32Len );
 			std::string sTmp;
 			for ( uint32_t I = 0; I < ui32Len; ++I ) {
 				sTmp.push_back( static_cast<std::string::value_type>(ui32Val >> (I * sizeof( std::string::value_type ) * 8)) );
@@ -164,15 +164,15 @@ namespace ee {
 		if ( psObj ) {
 			switch ( rTmp.ncType ) {
 				case EE_NC_UNSIGNED : {
-					psObj->SetString( ToHex( rTmp.u.ui64Val ) );
+					psObj->SetString( ee::CExpEval::ToHex( rTmp.u.ui64Val ) );
 					break;
 				}
 				case EE_NC_SIGNED : {
-					psObj->SetString( ToHex( rTmp.u.i64Val ) );
+					psObj->SetString( ee::CExpEval::ToHex( rTmp.u.i64Val ) );
 					break;
 				}
 				case EE_NC_FLOATING : {
-					psObj->SetString( ToHex( rTmp.u.dVal ) );
+					psObj->SetString( ee::CExpEval::ToHex( rTmp.u.dVal ) );
 					break;
 				}
 				default : {}
@@ -192,15 +192,15 @@ namespace ee {
 		if ( psObj ) {
 			switch ( rTmp.ncType ) {
 				case EE_NC_UNSIGNED : {
-					psObj->SetString( ToOct( rTmp.u.ui64Val ) );
+					psObj->SetString( ee::CExpEval::ToOct( rTmp.u.ui64Val ) );
 					break;
 				}
 				case EE_NC_SIGNED : {
-					psObj->SetString( ToOct( rTmp.u.i64Val ) );
+					psObj->SetString( ee::CExpEval::ToOct( rTmp.u.i64Val ) );
 					break;
 				}
 				case EE_NC_FLOATING : {
-					psObj->SetString( ToOct( rTmp.u.dVal ) );
+					psObj->SetString( ee::CExpEval::ToOct( rTmp.u.dVal ) );
 					break;
 				}
 				default : {}
@@ -218,7 +218,7 @@ namespace ee {
 			rTmp.u.ui64Val = 0;
 			return rTmp;
 		}
-		rTmp.u.ui64Val = NextUtf8Char( &_sIn[0], _sIn.size() );
+		rTmp.u.ui64Val = ee::CExpEval::NextUtf8Char( &_sIn[0], _sIn.size() );
 		return rTmp;
 	}
 
@@ -242,7 +242,7 @@ namespace ee {
 		uint32_t ui32This = EE_UTF_INVALID;
 		for ( ; I <= _stIdx; ++I ) {
 			size_t sCheckIdx = _vArray[I];
-			ui32This = NextUtf8Char( &_sIn[sCheckIdx], _sIn.size() - sCheckIdx, &sSize );
+			ui32This = ee::CExpEval::NextUtf8Char( &_sIn[sCheckIdx], _sIn.size() - sCheckIdx, &sSize );
 			if ( !sSize ) { return; }
 
 			if ( I + 1 < _vArray.size() ) {

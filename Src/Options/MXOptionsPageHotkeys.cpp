@@ -331,7 +331,7 @@ namespace mx {
 					(phhHandler->hdParms[I].sLen == 0 ? phhHandler->hdParms[I].pcDesc :
 						(ssTmp = mx::CStringDecoder::DecodeToString( phhHandler->hdParms[I].pcDesc, phhHandler->hdParms[I].sLen )).c_str()) :
 						(ssTmp = _DEC_S_12A629FB_Parameter_Not_Used).c_str();
-				psLabels[I]->SetTextW( ee::StringToWString( pcTxt ).c_str() );
+				psLabels[I]->SetTextW( ee::CExpEval::StringToWString( pcTxt ).c_str() );
 			}
 		}
 
@@ -432,7 +432,7 @@ namespace mx {
 			case CHotkeyManager::MX_M_HOTKEY : {
 				CSecureString ssError;
 				if ( !m_hmManager.AddHotkey( 0, iKey, iMod, m_dwScanCode, iMethod, iFunc, rRes[0].u.ui64Val, rRes[1].u.ui64Val, rRes[2].u.ui64Val, ssError ) ) {
-					lsw::CBase::MessageBoxError( Wnd(), (_DEC_WS_9C1C9375_Error + L": " + ee::StringToWString( ssError )).c_str(), _DEC_WS_9C1C9375_Error.c_str() );
+					lsw::CBase::MessageBoxError( Wnd(), (_DEC_WS_9C1C9375_Error + L": " + ee::CExpEval::StringToWString( ssError )).c_str(), _DEC_WS_9C1C9375_Error.c_str() );
 					return false;
 				}
 				break;

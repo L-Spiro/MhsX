@@ -11,7 +11,7 @@ namespace ee {
 			case EE_NC_UNSIGNED : {
 				bool bOverflowed = false;
 				size_t sEaten = 0;
-				rRet.u.ui64Val = StoULL( m_sObj.c_str(), 10, &sEaten, UINT64_MAX, &bOverflowed );
+				rRet.u.ui64Val = ee::CExpEval::StoULL( m_sObj.c_str(), 10, &sEaten, UINT64_MAX, &bOverflowed );
 				if ( !bOverflowed && sEaten ) {
 					rRet.ncType = _ncType;
 					return rRet;
@@ -21,7 +21,7 @@ namespace ee {
 			case EE_NC_SIGNED : {
 				bool bOverflowed = false;
 				size_t sEaten = 0;
-				rRet.u.ui64Val = StoULL( m_sObj.c_str(), 10, &sEaten, UINT64_MAX / 2 + 1, &bOverflowed );
+				rRet.u.ui64Val = ee::CExpEval::StoULL( m_sObj.c_str(), 10, &sEaten, UINT64_MAX / 2 + 1, &bOverflowed );
 				if ( !bOverflowed && sEaten ) {
 					rRet.ncType = _ncType;
 					return rRet;
@@ -31,7 +31,7 @@ namespace ee {
 			case EE_NC_FLOATING : {
 				bool bErrored = false;
 				size_t sEaten = 0;
-				rRet.u.dVal = AtoF( m_sObj.c_str(), &sEaten, &bErrored );
+				rRet.u.dVal = ee::CExpEval::AtoF( m_sObj.c_str(), &sEaten, &bErrored );
 				if ( !bErrored && sEaten ) {
 					rRet.ncType = _ncType;
 					return rRet;
@@ -88,7 +88,7 @@ namespace ee {
 		
 		size_t sIdx;
 		if ( _i64Idx < 0 ) {
-			if ( !m_ui64Len ) { m_ui64Len = CountUtfCodePoints( m_sObj ); }
+			if ( !m_ui64Len ) { m_ui64Len = ee::CExpEval::CountUtfCodePoints( m_sObj ); }
 			if ( m_ui64Len != static_cast<size_t>(m_ui64Len) ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
 
 			sIdx = ArrayIndexToLinearIndex( _i64Idx, static_cast<size_t>(m_ui64Len) );
@@ -110,7 +110,7 @@ namespace ee {
 		size_t sIdx0 = 0;
 		if ( _ui32Mask & EE_AEF_START ) {
 			if ( _i64Idx0 < 0 ) {
-				if ( !m_ui64Len ) { m_ui64Len = CountUtfCodePoints( m_sObj ); }
+				if ( !m_ui64Len ) { m_ui64Len = ee::CExpEval::CountUtfCodePoints( m_sObj ); }
 				if ( m_ui64Len != static_cast<size_t>(m_ui64Len) ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
 
 				sIdx0 = ArrayIndexToLinearIndex( _i64Idx0, static_cast<size_t>(m_ui64Len) );
@@ -119,13 +119,13 @@ namespace ee {
 				sIdx0 = static_cast<size_t>(_i64Idx0);
 				if ( sIdx0 != _i64Idx0 ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
 			}
-			sIdx0 = GetUtf8CharPosByIdx( m_sObj, sIdx0 );
+			sIdx0 = ee::CExpEval::GetUtf8CharPosByIdx( m_sObj, sIdx0 );
 		}
 
 		size_t sIdx1;
 		if ( _ui32Mask & EE_AEF_END ) {
 			if ( _i64Idx1 < 0 ) {
-				if ( !m_ui64Len ) { m_ui64Len = CountUtfCodePoints( m_sObj ); }
+				if ( !m_ui64Len ) { m_ui64Len = ee::CExpEval::CountUtfCodePoints( m_sObj ); }
 				if ( m_ui64Len != static_cast<size_t>(m_ui64Len) ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
 
 				sIdx1 = ArrayIndexToLinearIndex( _i64Idx1, static_cast<size_t>(m_ui64Len) );
@@ -134,7 +134,7 @@ namespace ee {
 				sIdx1 = static_cast<size_t>(_i64Idx1);
 				if ( sIdx1 != _i64Idx1 ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
 			}
-			sIdx1 = GetUtf8CharPosByIdx( m_sObj, sIdx1 );
+			sIdx1 = ee::CExpEval::GetUtf8CharPosByIdx( m_sObj, sIdx1 );
 		}
 		else {
 			sIdx1 = m_sObj.size();
@@ -153,7 +153,7 @@ namespace ee {
 
 	// Gets the array length.
 	size_t CString::ArrayLength() {
-		if ( !m_ui64Len ) { m_ui64Len = CountUtfCodePoints( m_sObj ); }
+		if ( !m_ui64Len ) { m_ui64Len = ee::CExpEval::CountUtfCodePoints( m_sObj ); }
 		if ( m_ui64Len != size_t( m_ui64Len ) ) { return size_t( ~0 ); }
 		return size_t( m_ui64Len );
 	}
@@ -220,7 +220,7 @@ namespace ee {
 				uint64_t ui64Val = _rRet.u.ui64Val;
 				for ( auto I = 0; I < sizeof( _rRet.u.ui64Val ) / sizeof( char32_t ); ++I ) {
 					uint32_t ui32Len;
-					uint32_t ui32BackToUtf8 = Utf32ToUtf8( static_cast<uint32_t>(ui64Val), ui32Len );
+					uint32_t ui32BackToUtf8 = ee::CExpEval::Utf32ToUtf8( static_cast<uint32_t>(ui64Val), ui32Len );
 					if ( !ui32Len ) {
 						m_sObj += std::to_string( ui64Val );
 						break;
