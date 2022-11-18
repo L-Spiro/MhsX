@@ -289,6 +289,14 @@ namespace lsw {
 		ee::CTree<LSW_TREE_ROW> *			ItemByIndex( ee::CTree<LSW_TREE_ROW> * _ptStart, size_t _stIdx, size_t _stStartIdx );
 
 		/**
+		 * Gets an item by index accounting for children being expanded or not, using cached internal values to speed up the process.
+		 *
+		 * \param _stIdx The index of the item to get with collapsed items being taken into account.
+		 * \return Returns the _stIdx'th item in the tree, accounting for expandedness.
+		 */
+		ee::CTree<LSW_TREE_ROW> *			ItemByIndex_Cached( size_t _stIdx );
+
+		/**
 		 * Counts the total number of expanded items.
 		 *
 		 * \return Returns the total number of items, accounting for expandedness.

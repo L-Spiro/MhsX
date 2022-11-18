@@ -36,18 +36,11 @@ namespace lsw {
 	void CTreeListView::InitControl( HWND _hWnd ) {
 		::SetWindowLongPtrW( Wnd(), GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this) );
 		CListView::InitControl( _hWnd );
-		//m_wpListViewProc = CHelpers::SetWndProc( Wnd(), ListViewOverride );
+		m_wpListViewProc = CHelpers::SetWndProc( Wnd(), ListViewOverride );
 		::SetPropW( Wnd(), m_szProp, reinterpret_cast<HANDLE>(this) );
 
 		// By default there is already a header.
 		InsertColumn( L"", 150, 0 );
-		/*LV_COLUMNW lvColumn;
-		lvColumn.mask = LVCF_TEXT | LVCF_FMT | LVCF_WIDTH;
-		lvColumn.pszText = const_cast<LPWSTR>(L"");
-		lvColumn.fmt = LVCFMT_LEFT;
-		lvColumn.cx = 150;
-		INT iInserted = static_cast<INT>(::SendMessageW( Wnd(), LVM_INSERTCOLUMNW, static_cast<WPARAM>(0), reinterpret_cast<LPARAM>(&lvColumn)));*/
-		//::SendMessageW( Wnd(), LVM_SETCOLUMNWIDTH, static_cast<WPARAM>(0), MAKELPARAM( (150), 0 ) );
 	}
 
 	/**
@@ -222,23 +215,7 @@ namespace lsw {
 	 * \return Returns TRUE if the requested information could be obtained.  FALSE indicates an internal error.
 	 */
 	BOOL CTreeListView::GetDispInfoNotify( NMLVDISPINFOW * _plvdiInfo ) {
-		//m_ptIndexCache = ItemByIndex( _plvdiInfo->item.iItem );
-		if ( m_ptIndexCache == nullptr ) {
-			m_ptIndexCache = ItemByIndex( _plvdiInfo->item.iItem );
-			m_stIndexCache = _plvdiInfo->item.iItem;
-		}
-		else if ( _plvdiInfo->item.iItem == m_stIndexCache ) {
-			
-		}
-		else if ( _plvdiInfo->item.iItem < m_stIndexCache ) {
-			m_ptIndexCache = ItemByIndex( _plvdiInfo->item.iItem );
-			m_stIndexCache = _plvdiInfo->item.iItem;
-		}
-		else {
-			m_ptIndexCache = ItemByIndex( m_ptIndexCache, _plvdiInfo->item.iItem, m_stIndexCache );
-			m_stIndexCache = _plvdiInfo->item.iItem;
-		}
-
+		m_ptIndexCache = ItemByIndex_Cached( _plvdiInfo->item.iItem );
 		if ( !m_ptIndexCache ) { return FALSE; }
 
 		INT iMask = _plvdiInfo->item.mask;
@@ -263,6 +240,9 @@ namespace lsw {
 		}
 		if ( iMask & LVIF_INDENT ) {
 			_plvdiInfo->item.iIndent = GetIndent( m_ptIndexCache ) + 1;
+		}
+		if ( iMask & LVIF_PARAM ) {
+			_plvdiInfo->item.lParam = reinterpret_cast<LPARAM>(m_ptIndexCache);
 		}
 		return TRUE;
 	}
@@ -403,6 +383,31 @@ namespace lsw {
 			ptThis = NextByExpansion( ptThis );
 		}
 		return ptThis;
+	}
+
+	/**
+	 * Gets an item by index accounting for children being expanded or not, using cached internal values to speed up the process.
+	 *
+	 * \param _stIdx The index of the item to get with collapsed items being taken into account.
+	 * \return Returns the _stIdx'th item in the tree, accounting for expandedness.
+	 */
+	ee::CTree<CTreeListView::LSW_TREE_ROW> * CTreeListView::ItemByIndex_Cached( size_t _stIdx ) {
+		if ( m_ptIndexCache == nullptr ) {
+			m_ptIndexCache = ItemByIndex( _stIdx );
+			m_stIndexCache = _stIdx;
+		}
+		else if ( _stIdx == m_stIndexCache ) {
+			
+		}
+		else if ( _stIdx < m_stIndexCache ) {
+			m_ptIndexCache = ItemByIndex( _stIdx );
+			m_stIndexCache = _stIdx;
+		}
+		else {
+			m_ptIndexCache = ItemByIndex( m_ptIndexCache, _stIdx, m_stIndexCache );
+			m_stIndexCache = _stIdx;
+		}
+		return m_ptIndexCache;
 	}
 
 	/**
@@ -555,6 +560,14 @@ namespace lsw {
 				}
 				break;
 			}*/
+
+			// =======================================
+			// List-View Messages.
+			// =======================================
+			case LVM_SETITEMSTATE : {
+				volatile int ioi = 0;
+				break;
+			}
 		}
 		if ( wpOrig ) {
 			return ::CallWindowProc( wpOrig, _hWnd, _uMsg, _wParam, _lParam );

@@ -1153,7 +1153,17 @@ namespace lsw {
 						}
 						LSW_RET( 1, TRUE );
 					}
+					case LVN_ITEMCHANGED : {
+						LPNMLISTVIEW lplvStateChange = reinterpret_cast<LPNMLISTVIEW>(_lParam);
+						break;
+					}
 					case LVN_ODSTATECHANGED : {
+						LPNMLVODSTATECHANGE lpscStateChange = reinterpret_cast<LPNMLVODSTATECHANGE>(_lParam);
+						CWidget * pmwSrc = LSW_WIN2CLASS( lpscStateChange->hdr.hwndFrom );
+						if ( pmwSrc ) {
+							LSW_RET( 1, TRUE );
+						}
+
 						break;
 					}
 					case NM_CUSTOMDRAW : {
@@ -1167,7 +1177,7 @@ namespace lsw {
 									if ( _bIsDlg ) {
 										::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, CDRF_NOTIFYITEMDRAW );
 									}
-									LSW_RET( CDRF_NOTIFYITEMDRAW, CDRF_NOTIFYITEMDRAW );
+									LSW_RET( CDRF_NOTIFYITEMDRAW, TRUE );
 								}
 								if ( pcdListViewDraw->nmcd.dwDrawStage == CDDS_ITEMPREPAINT ) {
 									if ( pcdListViewDraw->nmcd.dwItemSpec % 2 == 0 ) {
@@ -1176,7 +1186,7 @@ namespace lsw {
 										if ( _bIsDlg ) {
 											::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, CDRF_NEWFONT );
 										}
-										LSW_RET( CDRF_NEWFONT, CDRF_NEWFONT );
+										LSW_RET( CDRF_NEWFONT, TRUE );
 									}
 									/*else {
 										pcdListViewDraw->clrText = RGB( 0, 0, 0 );
@@ -1184,11 +1194,14 @@ namespace lsw {
 									}*/
 								}
 								if ( (CDDS_ITEMPREPAINT | CDDS_SUBITEM) == pcdListViewDraw->nmcd.dwDrawStage ) {
-									LSW_RET( CDRF_NEWFONT, CDRF_NEWFONT );
+									LSW_RET( CDRF_NEWFONT, TRUE );
 								}
 							}
 						}
-						LSW_RET( CDRF_DODEFAULT, CDRF_DODEFAULT );
+						if ( _bIsDlg ) {
+							::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, CDRF_DODEFAULT );
+						}
+						LSW_RET( 1, TRUE );
 					}
 					case NM_DBLCLK : {
 						HWND hFrom = lpHdr->hwndFrom;

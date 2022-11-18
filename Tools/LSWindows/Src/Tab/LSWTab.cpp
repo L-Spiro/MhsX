@@ -300,8 +300,6 @@ namespace lsw {
 			}
 			case WM_PAINT : {
 				LONG_PTR hObj = ::GetWindowLongPtrW( _hWnd, 0 );
-				/*hObj += 0x38;
-				LONG_PTR hObjSet = (*reinterpret_cast<PLONG_PTR>(hObj));*/
 				LSW_BEGINPAINT bpPaint( _hWnd );
 
 				{
@@ -310,116 +308,14 @@ namespace lsw {
 					INT iTotal = pmwThis->GetItemCount();
 					INT iSel = pmwThis->GetCurSel();
 
-#if 0
-					for ( INT I = 0; I < iTotal; I++ ) {
-						TCITEM tcItem;
-						_TCHAR szBuffer[MAX_PATH];
-						tcItem.mask = TCIF_STATE | TCIF_TEXT;
-						tcItem.pszText = szBuffer;
-						tcItem.cchTextMax = MAX_PATH;
-						TabCtrl_GetItem( _hWnd, I, &tcItem );
-						RECT rItem;
-						TabCtrl_GetItemRect( _hWnd, I, &rItem );
-						BOOL bFollowing = (I != iTotal - 1) ? TRUE : FALSE;
-						BOOL bSel = (I == iSel) ? TRUE : FALSE;
-						if ( !bSel && bFollowing ) {
-							bFollowing |= (I + 1 == iSel) ? 0x80000000 : 0;
-						}
-						//if ( !bSel ) {
-							TabProcDrawTab( bpPaint.hDc, &rItem, tcItem.dwState, bSel, szBuffer, bFollowing );
-						//}
-					}
-
-					// Draw the line under the tab control.
-					// Exclude the selected tab from the drawing.
-					RECT rItem;
-					SelectClipRgn( bpPaint.hDc, NULL );
-					if ( iSel != -1 ) {
-						TabCtrl_GetItemRect( _hWnd, iSel, &rItem );
-
-						ExcludeClipRect( bpPaint.hDc, rItem.left, rItem.top, rItem.right, rItem.bottom );
-					}
-					HPEN hpBackPen = CreatePen( PS_SOLID, 0, RGB( 0x00, 0x61, 0x8E ) );
-					HANDLE hPrevPen = SelectObject( bpPaint.hDc, hpBackPen );
-
-					RECT rClient;
-					GetClientRect( _hWnd, &rClient );
-					INT iY = TabProcGetTabBottoms( _hWnd ) - 1;
-					MoveToEx( bpPaint.hDc, 0, iY, NULL );
-					LineTo( bpPaint.hDc, rClient.right, iY );
-
-					SelectObject( bpPaint.hDc, hPrevPen );
-					DeleteObject( hpBackPen );
-
-
-					ColorArray caColor;
-					caColor.Add( GetSysColor( COLOR_BTNFACE ) );
-					caColor.Add( RGB( 0xE4, 0xF4, 0xFB ) );
-
-					hpBackPen = CreatePen( PS_SOLID, 0, caColor.GetAverage() );
-					SelectObject( bpPaint.hDc, hpBackPen );
-
-					MoveToEx( bpPaint.hDc, 0, iY + 1, NULL );
-					LineTo( bpPaint.hDc, rClient.right, iY + 1 );
-
-					SelectObject( bpPaint.hDc, hPrevPen );
-					DeleteObject( hpBackPen );
-
-					//ColorArray
-
-					SelectClipRgn( bpPaint.hDc, NULL );
-					SelectObject( bpPaint.hDc, (HGDIOBJ)hPrev );
-
-#else
-
 					::CallWindowProcW( pOld, _hWnd, _uMsg, reinterpret_cast<WPARAM>(bpPaint.hDc), 0L );
 
 					for ( INT I = 0; I < iTotal; I++ ) {
 						LSW_RECT rItem, rClose;
 						rItem = pmwThis->GetItemRect( I );
 						rClose = GetCloseRect( rItem, I == iSel );
-#if 0
-
-						// Prepare to draw the closing X.  Set the font.
-						LOGFONTW lf = { 0 };
-						lf.lfCharSet = SYMBOL_CHARSET;
-
-						// Avoiding searchable strings.
-						//::wcscpy_s( lf.lfFaceName, LSW_COUNT_OF( lf.lfFaceName ), L"Webdings" );
-						lf.lfFaceName[7] = L's';
-						lf.lfFaceName[4] = L'i';
-						lf.lfFaceName[1] = L'e';
-						lf.lfFaceName[6] = L'g';
-						lf.lfFaceName[2] = L'b';
-						lf.lfFaceName[0] = L'W';
-						lf.lfFaceName[3] = L'd';
-						lf.lfFaceName[5] = L'n';
-					
-						lf.lfHeight = -::MulDiv( rClose.Height() * 1, ::GetDeviceCaps( bpPaint.hDc, LOGPIXELSY ), 72 * 2 );
-						lf.lfWeight = FW_NORMAL;
-						lf.lfEscapement = 0;
-						lf.lfOrientation = 0;
-						lf.lfQuality = DEFAULT_QUALITY;
-						lf.lfOutPrecision = OUT_STROKE_PRECIS;
-						lf.lfClipPrecision = CLIP_STROKE_PRECIS;
-						lf.lfItalic = FALSE;
-						lf.lfStrikeOut = FALSE;
-						lf.lfUnderline = FALSE;
-						lf.lfPitchAndFamily = VARIABLE_PITCH | FF_ROMAN;
-						HFONT hFont = ::CreateFontIndirectW( &lf );
-				
-						{
-							LSW_SELECTOBJECT soOld( bpPaint.hDc, hFont );	// Destructor sets the original brush back.
-							LSW_SETBKMODE sbmB( bpPaint.hDc, TRANSPARENT );
-							//::DrawTextW( bpPaint.hDc, L"r", 1, &rClose, DT_CENTER );
-							::DrawFrameControl( bpPaint.hDc, &rClose, DFC_CAPTION, DFCS_CAPTIONCLOSE | DFCS_FLAT );
-						}
-
-						::DeleteObject( hFont );
-#endif // 0
 						::DrawFrameControl( bpPaint.hDc, &rClose, DFC_CAPTION, DFCS_CAPTIONCLOSE | DFCS_FLAT );
 					}
-#endif
 				}
 
 				// ::EndPaint() called by the destructor of bpPaint.
@@ -445,6 +341,16 @@ namespace lsw {
 				}
 				break;
 			}*/
+			case WM_NOTIFY : {
+				LPNMHDR lpHdr = reinterpret_cast<LPNMHDR>(_lParam);
+				switch ( lpHdr->code ) {
+					case NM_CUSTOMDRAW : {
+						return CWidget::WindowProc( _hWnd, _uMsg, _wParam, _lParam );
+					}
+				}
+				//LVN_ODSTATECHANGED
+				break;
+			}
 		}
 
 		return ::CallWindowProcW( reinterpret_cast<WNDPROC>(pOld), _hWnd, _uMsg, _wParam, _lParam );

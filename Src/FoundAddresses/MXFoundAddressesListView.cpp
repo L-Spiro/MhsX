@@ -31,41 +31,48 @@ namespace mx {
 						if ( _plvdiInfo->item.iSubItem == 0 ) {
 							// Address.
 							if ( m_pmmwMhsWindow->MemHack()->Process().Is32Bit() ) {
-								std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%.8I64X", ui64Address );
+								int iPrinted = std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%.8I64X", ui64Address );
+								_plvdiInfo->item.cchTextMax -= iPrinted;
 							}
 							else {
-								std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%.11I64X", ui64Address );
+								int iPrinted = std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%.11I64X", ui64Address );
+								_plvdiInfo->item.cchTextMax -= iPrinted;
 							}
 							if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().stType == CUtilities::MX_ST_STRING_SEARCH &&
 								m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().sstSearchType == CUtilities::MX_SST_UTFALL ) {
 
 								const CSearchResultRef::MX_ADDRESS_REF & arRef = (*reinterpret_cast<const CSearchResultRef::MX_ADDRESS_REF *>(pui8Data));
-								::wcsncat_s( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L" ", 1 );
-								CSecureWString swsTmp;
+								if ( _plvdiInfo->item.cchTextMax ) {
+									::wcsncat_s( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L" ", _plvdiInfo->item.cchTextMax - 1 );
+									--_plvdiInfo->item.cchTextMax;
+									if ( _plvdiInfo->item.cchTextMax ) {
+										CSecureWString swsTmp;
 
-								switch ( arRef.uiData ) {
-									case CUtilities::MX_SST_UTF8 : {
-										swsTmp = _DEC_WS_0E813C50_UTF_8;
-										break;
-									}
-									case CUtilities::MX_SST_UTF16 : {
-										swsTmp = _DEC_WS_A71F1195_UTF_16.c_str();
-										break;
-									}
-									case CUtilities::MX_SST_UTF32 : {
-										swsTmp = _DEC_WS_9244B70E_UTF_32.c_str();
-										break;
-									}
-									case CUtilities::MX_SST_UTF16_BE : {
-										swsTmp = _DEC_WS_26FC5333_UTF_16_BE.c_str();
-										break;
-									}
-									case CUtilities::MX_SST_UTF32_BE : {
-										swsTmp = _DEC_WS_D35E9704_UTF_32_BE.c_str();
-										break;
+										switch ( arRef.uiData ) {
+											case CUtilities::MX_SST_UTF8 : {
+												swsTmp = _DEC_WS_0E813C50_UTF_8;
+												break;
+											}
+											case CUtilities::MX_SST_UTF16 : {
+												swsTmp = _DEC_WS_A71F1195_UTF_16.c_str();
+												break;
+											}
+											case CUtilities::MX_SST_UTF32 : {
+												swsTmp = _DEC_WS_9244B70E_UTF_32.c_str();
+												break;
+											}
+											case CUtilities::MX_SST_UTF16_BE : {
+												swsTmp = _DEC_WS_26FC5333_UTF_16_BE.c_str();
+												break;
+											}
+											case CUtilities::MX_SST_UTF32_BE : {
+												swsTmp = _DEC_WS_D35E9704_UTF_32_BE.c_str();
+												break;
+											}
+										}
+										::wcsncat( _plvdiInfo->item.pszText, swsTmp.c_str(), _plvdiInfo->item.cchTextMax - 1 );
 									}
 								}
-								::wcsncat_s( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, swsTmp.c_str(), swsTmp.size() );
 							}
 						}
 						else if ( _plvdiInfo->item.iSubItem == 1 ) {
