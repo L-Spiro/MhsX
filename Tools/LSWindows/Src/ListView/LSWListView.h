@@ -122,6 +122,15 @@ namespace lsw {
 		// Gets the data of the selected item or returns -1.
 		LPARAM								GetSelData() const;
 
+		/**
+		 * Sets selection on an item by index.
+		 *
+		 * \param _iItem The item to update.
+		 * \param _bSelected Whether the item is selcted or not.
+		 */
+		void								SetItemSelection( INT _iItem, BOOL _bSelected );
+
+
 		// Gets an item.  _iItm is input and output.
 		BOOL								GetItem( INT _iItem, INT _iSubItem, LVITEMW &_iItm ) const;
 

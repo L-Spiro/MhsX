@@ -254,6 +254,10 @@ namespace mx {
 				CopyAll( false );
 				break;
 			}
+			case CPeWorksLayout::MX_PEW_COPY_FIELD_VALUE : {
+				CopyFieldValue( false );
+				break;
+			}
 
 			case CPeWorksLayout::MX_PEW_COPY_EXPAND_SELECTED : {
 				CurTabExpandSelected();
@@ -3160,6 +3164,7 @@ namespace mx {
 				{ FALSE,		CPeWorksLayout::MX_PEW_COPY_BYTES,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_C928AB0C_Copy__Raw_Bytes, _LEN_C928AB0C ),		FALSE },
 				{ FALSE,		CPeWorksLayout::MX_PEW_COPY_DESC,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_03939D2C_Copy__Desc, _LEN_03939D2C ),			FALSE },
 				{ FALSE,		CPeWorksLayout::MX_PEW_COPY_ALL,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_9B7D368F_Copy_A_ll, _LEN_9B7D368F ),			FALSE },
+				{ FALSE,		CPeWorksLayout::MX_PEW_COPY_FIELD_VALUE,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_E9B5F487_Copy_F_ield__Value, _LEN_E9B5F487 ),	FALSE },
 				{ TRUE,			0,														FALSE,		FALSE,		TRUE,		nullptr,														FALSE },
 				{ FALSE,		CPeWorksLayout::MX_PEW_COPY_EXPAND_SELECTED,			FALSE,		FALSE,		bExpSel,	MW_MENU_TXT( _T_BBEDF334_Expand_Selec_ted, _LEN_BBEDF334 ),		FALSE },
 				{ FALSE,		CPeWorksLayout::MX_PEW_COPY_EXPAND_ALL,					FALSE,		FALSE,		bExpAll,	MW_MENU_TXT( _T_465B3E6C_E_xpand_All, _LEN_465B3E6C ),			FALSE },
@@ -3283,6 +3288,37 @@ namespace mx {
 
 			swsString.push_back( L'\t' );
 			if ( !m_vTabs[ptTab->GetCurSel()].ptWidget->GetItemText( vItems[I], MW_PE_DESC, swsTmp ) ) { return false; }
+			swsString.append( swsTmp );
+		}
+
+		if ( swsString.size() ) {
+			lsw::LSW_CLIPBOARD cbClipBoard( Wnd(), true );
+			cbClipBoard.SetText( swsString.c_str(), swsString.size() );
+		}
+		return true;
+	}
+
+	// Copies all of the Field and Value fields in the format "Field: Format".
+	bool CPeWorksWindow::CopyFieldValue( bool _bCopyHidden ) {
+		CTab * ptTab = GetTab();
+		if ( !ptTab ) { return false; }
+
+		if ( ptTab->GetCurSel() >= m_vTabs.size() ) { return false; }
+		if ( !m_vTabs[ptTab->GetCurSel()].ptWidget ) { return false; }
+		std::vector<HTREEITEM> vItems;
+		m_vTabs[ptTab->GetCurSel()].ptWidget->GatherSelected( vItems, _bCopyHidden );
+		CSecureWString swsString, swsTmp;
+		for ( size_t I = 0; I < vItems.size(); ++I ) {
+			if ( swsString.size() ) {
+				swsString.push_back( L'\r' );
+				swsString.push_back( L'\n' );
+			}
+			if ( !m_vTabs[ptTab->GetCurSel()].ptWidget->GetItemText( vItems[I], MW_PE_FIELD, swsTmp ) ) { return false; }
+			swsString.append( swsTmp );
+
+			swsString.push_back( L':' );
+			swsString.push_back( L'\t' );
+			if ( !m_vTabs[ptTab->GetCurSel()].ptWidget->GetItemText( vItems[I], MW_PE_VALUE, swsTmp ) ) { return false; }
 			swsString.append( swsTmp );
 		}
 

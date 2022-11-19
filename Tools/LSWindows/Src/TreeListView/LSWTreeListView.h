@@ -139,6 +139,15 @@ namespace lsw {
 		size_t								GatherSelected( std::vector<HTREEITEM> &_vReturn, bool _bIncludeNonVisible = false ) const;
 
 		/**
+		 * Gathers the selected item indices into a vector.
+		 *
+		 * \param _vReturn The array into which to gather the selected items.
+		 * \param _bIncludeNonVisible If true, selected items from collapsed nodes are gathered as well.
+		 * \return Returns the number of items gathered.
+		 */
+		size_t								GatherSelected( std::vector<size_t> &_vReturn, bool _bIncludeNonVisible = false ) const;
+
+		/**
 		 * Unselects all.
 		 */
 		void								UnselectAll();
@@ -155,8 +164,7 @@ namespace lsw {
 		 */
 		void								FinishUpdate() {
 			m_bDontUpdate = false;
-			ClearCache();
-			SetItemCount( static_cast<INT>(CountExpanded()) );
+			UpdateListView();
 		}
 
 		/**
@@ -408,6 +416,21 @@ namespace lsw {
 		 * \param _bIncludeNonVisible If true, selected items from collapsed nodes are gathered as well.
 		 */
 		void								GatherSelected( HTREEITEM _htiFrom, std::vector<HTREEITEM> &_vReturn, bool _bIncludeNonVisible ) const;
+
+		/**
+		 * Gathers the selected item indices into a vector.
+		 *
+		 * \param _htiFrom The item from which to start gathering.
+		 * \param _vReturn The array into which to gather the selected items.
+		 * \param _bIncludeNonVisible If true, selected items from collapsed nodes are gathered as well.
+		 * \param _stIndex Tracks the current item's index.
+		 */
+		void								GatherSelected( HTREEITEM _htiFrom, std::vector<size_t> &_vReturn, bool _bIncludeNonVisible, size_t &_stIndex ) const;
+
+		/**
+		 * Updates the list view (clears the cache, sets the size, and updates selections/hot).
+		 */
+		void								UpdateListView() const;
 
 		/**
 		 * List-view window procedure.  The list-view is hidden.

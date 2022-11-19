@@ -216,6 +216,9 @@ namespace mx {
 		// Copies all of the fields in the current tab.
 		bool								CopyAll( bool _bCopyHidden = false );
 
+		// Copies all of the Field and Value fields in the format "Field: Format".
+		bool								CopyFieldValue( bool _bCopyHidden = false );
+
 		// Does the current tab has any selected fields with children that are unexpanded?
 		bool								CurTabAnySelectedHasUnexpandedChildren() const {
 			CTab * ptTab = GetTab();

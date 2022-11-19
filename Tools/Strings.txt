@@ -1792,6 +1792,7 @@
 "Copy &Offset"
 "Copy &Raw Bytes"
 "Copy &Desc"
+"Copy F&ield: Value"
 "Expand Selec&ted"
 "E&xpand All"
 "C&ollapse Selected"

@@ -57,7 +57,7 @@ namespace lsw {
 
 		if ( pntParent->InsertChild( ItemExToTreeRow( _pisStruct->itemex ), stIdx ) ) {
 			if ( !m_bDontUpdate ) {
-				SetItemCount( static_cast<INT>(CountExpanded()) );
+				UpdateListView();
 			}
 			ClearCache();
 			return PointerToTreeItem( pntParent->GetChild( stIdx ) );
@@ -202,7 +202,6 @@ namespace lsw {
 				if ( !(ptNode->Value().uiState & TVIS_EXPANDED) ) {
 					if ( ptNode->Size() ) {
 						bFound = true;
-						ClearCache();
 					}
 					ptNode->Value().uiState |= TVIS_EXPANDED;
 				}
@@ -210,8 +209,7 @@ namespace lsw {
 			ptNode = Next( ptNode );
 		}
 		if ( bFound ) {
-			ClearCache();
-			const_cast<CTreeListView *>(this)->SetItemCount( static_cast<INT>(CountExpanded()) );
+			UpdateListView();
 		}
 	}
 
@@ -225,15 +223,13 @@ namespace lsw {
 			if ( !(ptNode->Value().uiState & TVIS_EXPANDED) ) {
 				if ( ptNode->Size() ) {
 					bFound = true;
-					ClearCache();
 				}
 				ptNode->Value().uiState |= TVIS_EXPANDED;
 			}
 			ptNode = Next( ptNode );
 		}
 		if ( bFound ) {
-			ClearCache();
-			const_cast<CTreeListView *>(this)->SetItemCount( static_cast<INT>(CountExpanded()) );
+			UpdateListView();
 		}
 	}
 
@@ -250,7 +246,6 @@ namespace lsw {
 				if ( (ptNode->Value().uiState & TVIS_EXPANDED) ) {
 					if ( ptNode->Size() ) {
 						bFound = true;
-						ClearCache();
 					}
 					ptNode->Value().uiState &= ~TVIS_EXPANDED;
 				}
@@ -258,8 +253,7 @@ namespace lsw {
 			ptNode = Next( ptNode );
 		}
 		if ( bFound ) {
-			ClearCache();
-			const_cast<CTreeListView *>(this)->SetItemCount( static_cast<INT>(CountExpanded()) );
+			UpdateListView();
 		}
 	}
 
@@ -275,15 +269,13 @@ namespace lsw {
 			if ( (ptNode->Value().uiState & TVIS_EXPANDED) ) {
 				if ( ptNode->Size() ) {
 					bFound = true;
-					ClearCache();
 				}
 				ptNode->Value().uiState &= ~TVIS_EXPANDED;
 			}
 			ptNode = Next( ptNode );
 		}
 		if ( bFound ) {
-			ClearCache();
-			const_cast<CTreeListView *>(this)->SetItemCount( static_cast<INT>(CountExpanded()) );
+			UpdateListView();
 		}
 	}
 
@@ -297,6 +289,20 @@ namespace lsw {
 	size_t CTreeListView::GatherSelected( std::vector<HTREEITEM> &_vReturn, bool _bIncludeNonVisible ) const {
 		_vReturn.clear();
 		GatherSelected( TVI_ROOT, _vReturn, _bIncludeNonVisible );
+		return _vReturn.size();
+	}
+
+	/**
+	 * Gathers the selected item indices into a vector.
+	 *
+	 * \param _vReturn The array into which to gather the selected items.
+	 * \param _bIncludeNonVisible If true, selected items from collapsed nodes are gathered as well.
+	 * \return Returns the number of items gathered.
+	 */
+	size_t CTreeListView::GatherSelected( std::vector<size_t> &_vReturn, bool _bIncludeNonVisible ) const {
+		_vReturn.clear();
+		size_t stIdx = size_t( -1 );
+		GatherSelected( TVI_ROOT, _vReturn, _bIncludeNonVisible, stIdx );
 		return _vReturn.size();
 	}
 
@@ -347,6 +353,9 @@ namespace lsw {
 		if ( iMask & LVIF_PARAM ) {
 			_plvdiInfo->item.lParam = reinterpret_cast<LPARAM>(m_ptIndexCache);
 		}
+		/*if ( iMask & LVIF_STATE ) {
+			_plvdiInfo->item.state = 2;
+		}*/
 		return TRUE;
 	}
 
@@ -753,6 +762,73 @@ namespace lsw {
 				GatherSelected( PointerToTreeItem( ptFrom->GetChild( 0 ) ), _vReturn, _bIncludeNonVisible );
 			}
 			ptFrom = ptFrom->Next();
+		}
+	}
+
+	/**
+	 * Gathers the selected item indices into a vector.
+	 *
+	 * \param _htiFrom The item from which to start gathering.
+	 * \param _vReturn The array into which to gather the selected items.
+	 * \param _bIncludeNonVisible If true, selected items from collapsed nodes are gathered as well.
+	 * \param _stIndex Tracks the current item's index.
+	 */
+	void CTreeListView::GatherSelected( HTREEITEM _htiFrom, std::vector<size_t> &_vReturn, bool _bIncludeNonVisible, size_t &_stIndex ) const {
+		const ee::CTree<LSW_TREE_ROW> * ptFrom = TreeItemToPointer( _htiFrom );
+		while ( ptFrom ) {
+			UINT uiState = ptFrom->Value().uiState;
+			if ( uiState & TVIS_SELECTED ) {
+				_vReturn.push_back( _stIndex );
+			}
+			++_stIndex;
+			if ( _bIncludeNonVisible || (uiState & TVIS_EXPANDED) && ptFrom->Size() ) {
+				GatherSelected( PointerToTreeItem( ptFrom->GetChild( 0 ) ), _vReturn, _bIncludeNonVisible, _stIndex );
+			}
+			ptFrom = ptFrom->Next();
+		}
+	}
+
+	/**
+	 * Updates the list view (clears the cache, sets the size, and updates selections/hot).
+	 */
+	void CTreeListView::UpdateListView() const {
+		ClearCache();
+		size_t stTotal = CountExpanded();
+		const_cast<CTreeListView *>(this)->SetItemCount( static_cast<INT>(stTotal) );		
+		// Get the selected indices based on the tree.
+		std::vector<size_t> vSelection;
+		GatherSelected( vSelection );
+
+		// Get the selected indices in the listview.
+		std::vector<int> vListSelection;
+		GetSelectedItems( vListSelection );
+
+		// Unselect from the listview.
+		auto aTreeSelctIdx = vSelection.begin();
+		for ( size_t I = 0; I < vListSelection.size(); ++I ) {
+			auto aTmp = std::find( aTreeSelctIdx, vSelection.end(), vListSelection[I] );
+			if ( aTmp != vSelection.end() ) {
+				// It is still selected.
+				aTreeSelctIdx = aTmp;
+			}
+			else {
+				// It is unselected.
+				const_cast<CTreeListView *>(this)->SetItemSelection( static_cast<INT>(vListSelection[I]), FALSE );
+			}
+		}
+
+		// Select from the tree-listview.
+		auto aSelctIdx = vListSelection.begin();
+		for ( size_t I = 0; I < vSelection.size(); ++I ) {
+			auto aTmp = std::find( aSelctIdx, vListSelection.end(), static_cast<int>(vSelection[I]) );
+			if ( aTmp != vListSelection.end() ) {
+				// It is still selected.
+				aSelctIdx = aTmp;
+			}
+			else {
+				// It is selected.
+				const_cast<CTreeListView *>(this)->SetItemSelection( static_cast<INT>(vSelection[I]), TRUE );
+			}
 		}
 	}
 
