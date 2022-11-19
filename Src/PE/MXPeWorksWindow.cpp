@@ -1729,7 +1729,7 @@ namespace mx {
 		CSecureString ssRaw;
 		WCHAR wValue[64];
 
-		struct {
+		struct MX_DIRS {
 			const CHAR * pcName;
 			uint32_t ui32StrLen;
 
@@ -1737,30 +1737,50 @@ namespace mx {
 			uint32_t ui32DescStrLen;
 		}
 		static const aTable[MX_IMAGE_NUMBEROF_DIRECTORY_ENTRIES] = {
-			{ _T_B4C7FDE2_DataDirectory_IMAGE_DIRECTORY_ENTRY_EXPORT_, _LEN_B4C7FDE2, _T_E00180C9_Export_directory_, _LEN_E00180C9 },
-			{ _T_207C04BE_DataDirectory_IMAGE_DIRECTORY_ENTRY_IMPORT_, _LEN_207C04BE, _T_E9670B10_Import_directory_, _LEN_E9670B10 },
-			{ _T_E94D3397_DataDirectory_IMAGE_DIRECTORY_ENTRY_RESOURCE_, _LEN_E94D3397, _T_43D2366B_Resource_directory_, _LEN_43D2366B },
-			{ _T_352498F1_DataDirectory_IMAGE_DIRECTORY_ENTRY_EXCEPTION_, _LEN_352498F1, _T_7E617328_Exception_directory_, _LEN_7E617328 },
-			{ _T_F1837EC1_DataDirectory_IMAGE_DIRECTORY_ENTRY_SECURITY_, _LEN_F1837EC1, _T_E318A398_Security_directory_, _LEN_E318A398 },
-			{ _T_3918D7CF_DataDirectory_IMAGE_DIRECTORY_ENTRY_BASERELOC_, _LEN_3918D7CF, _T_3C63033E_Base_relocation_table_, _LEN_3C63033E },
-			{ _T_35CDC213_DataDirectory_IMAGE_DIRECTORY_ENTRY_DEBUG_, _LEN_35CDC213, _T_FC6D4DB9_Debug_directory_, _LEN_FC6D4DB9 },
-			{ _T_B9A5B87A_DataDirectory_IMAGE_DIRECTORY_ENTRY_ARCHITECTURE_, _LEN_B9A5B87A, _T_51010B52_Architecture_specific_data_, _LEN_51010B52 },
-			{ _T_11FA74D4_DataDirectory_IMAGE_DIRECTORY_ENTRY_GLOBALPTR_, _LEN_11FA74D4, _T_2F9F4C35_Global_pointer_register_relative_virtual_address_, _LEN_2F9F4C35 },
-			{ _T_0A097252_DataDirectory_IMAGE_DIRECTORY_ENTRY_TLS_, _LEN_0A097252, _T_D218D979_Thread_local_storage_directory_, _LEN_D218D979 },
-			{ _T_5F596E7F_DataDirectory_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG_, _LEN_5F596E7F, _T_5FC3427C_Load_configuration_directory_, _LEN_5FC3427C },
-			{ _T_15F78447_DataDirectory_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT_, _LEN_15F78447, _T_462CE6FA_Bound_import_directory_, _LEN_462CE6FA },
-			{ _T_EFE3F884_DataDirectory_IMAGE_DIRECTORY_ENTRY_IAT_, _LEN_EFE3F884, _T_ADA7D54A_Import_address_table_, _LEN_ADA7D54A },
-			{ _T_261AB71E_DataDirectory_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT_, _LEN_261AB71E, _T_493F6470_Delay_import_table_, _LEN_493F6470 },
-			{ _T_716D9916_DataDirectory_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR_, _LEN_716D9916, _T_E80FA376_COM_descriptor_table_, _LEN_E80FA376 },
-			{ _T_B8592F2A_DataDirectory_15_, _LEN_B8592F2A, _T_F9026196_Reserved_, _LEN_F9026196 },
+			{ _T_LEN_B4C7FDE2_DataDirectory_IMAGE_DIRECTORY_ENTRY_EXPORT_, _T_LEN_E00180C9_Export_directory_ },
+			{ _T_LEN_207C04BE_DataDirectory_IMAGE_DIRECTORY_ENTRY_IMPORT_, _T_LEN_E9670B10_Import_directory_ },
+			{ _T_LEN_E94D3397_DataDirectory_IMAGE_DIRECTORY_ENTRY_RESOURCE_, _T_LEN_43D2366B_Resource_directory_ },
+			{ _T_LEN_352498F1_DataDirectory_IMAGE_DIRECTORY_ENTRY_EXCEPTION_, _T_LEN_7E617328_Exception_directory_ },
+			{ _T_LEN_F1837EC1_DataDirectory_IMAGE_DIRECTORY_ENTRY_SECURITY_, _T_LEN_E318A398_Security_directory_ },
+			{ _T_LEN_3918D7CF_DataDirectory_IMAGE_DIRECTORY_ENTRY_BASERELOC_, _T_LEN_3C63033E_Base_relocation_table_ },
+			{ _T_LEN_35CDC213_DataDirectory_IMAGE_DIRECTORY_ENTRY_DEBUG_, _T_LEN_FC6D4DB9_Debug_directory_ },
+			{ _T_LEN_B9A5B87A_DataDirectory_IMAGE_DIRECTORY_ENTRY_ARCHITECTURE_, _T_LEN_51010B52_Architecture_specific_data_ },
+			{ _T_LEN_11FA74D4_DataDirectory_IMAGE_DIRECTORY_ENTRY_GLOBALPTR_, _T_LEN_2F9F4C35_Global_pointer_register_relative_virtual_address_ },
+			{ _T_LEN_0A097252_DataDirectory_IMAGE_DIRECTORY_ENTRY_TLS_, _T_LEN_D218D979_Thread_local_storage_directory_ },
+			{ _T_LEN_5F596E7F_DataDirectory_IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG_, _T_LEN_5FC3427C_Load_configuration_directory_ },
+			{ _T_LEN_15F78447_DataDirectory_IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT_, _T_LEN_462CE6FA_Bound_import_directory_ },
+			{ _T_LEN_EFE3F884_DataDirectory_IMAGE_DIRECTORY_ENTRY_IAT_, _T_LEN_ADA7D54A_Import_address_table_ },
+			{ _T_LEN_261AB71E_DataDirectory_IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT_, _T_LEN_493F6470_Delay_import_table_ },
+			{ _T_LEN_716D9916_DataDirectory_IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR_, _T_LEN_E80FA376_COM_descriptor_table_ },
+			{ _T_LEN_B8592F2A_DataDirectory_15_, _T_LEN_F9026196_Reserved_ },
 		};
+		static const MX_DIRS aTableShort[MX_IMAGE_NUMBEROF_DIRECTORY_ENTRIES] = {
+			{ _T_LEN_40866799_DataDirectory_EXPORT_, _T_LEN_E00180C9_Export_directory_ },
+			{ _T_LEN_D43D9EC5_DataDirectory_IMPORT_, _T_LEN_E9670B10_Import_directory_ },
+			{ _T_LEN_355C1DB1_DataDirectory_RESOURCE_, _T_LEN_43D2366B_Resource_directory_ },
+			{ _T_LEN_E7F50C22_DataDirectory_EXCEPTION_, _T_LEN_7E617328_Exception_directory_ },
+			{ _T_LEN_2D9250E7_DataDirectory_SECURITY_, _T_LEN_E318A398_Security_directory_ },
+			{ _T_LEN_EBC9431C_DataDirectory_BASERELOC_, _T_LEN_3C63033E_Base_relocation_table_ },
+			{ _T_LEN_A0E2E805_DataDirectory_DEBUG_, _T_LEN_FC6D4DB9_Debug_directory_ },
+			{ _T_LEN_D2939E9D_DataDirectory_ARCHITECTURE_, _T_LEN_51010B52_Architecture_specific_data_ },
+			{ _T_LEN_C32BE007_DataDirectory_GLOBALPTR_, _T_LEN_2F9F4C35_Global_pointer_register_relative_virtual_address_ },
+			{ _T_LEN_D5802B5D_DataDirectory_TLS_, _T_LEN_D218D979_Thread_local_storage_directory_ },
+			{ _T_LEN_022E7D2F_DataDirectory_LOAD_CONFIG_, _T_LEN_5FC3427C_Load_configuration_directory_ },
+			{ _T_LEN_7EC1A2A0_DataDirectory_BOUND_IMPORT_, _T_LEN_462CE6FA_Bound_import_directory_ },
+			{ _T_LEN_306AA18B_DataDirectory_IAT_, _T_LEN_ADA7D54A_Import_address_table_ },
+			{ _T_LEN_4D2C91F9_DataDirectory_DELAY_IMPORT_, _T_LEN_493F6470_Delay_import_table_ },
+			{ _T_LEN_B25F12F6_DataDirectory_COM_DESCRIPTOR_, _T_LEN_E80FA376_COM_descriptor_table_ },
+			{ _T_LEN_B8592F2A_DataDirectory_15_, _T_LEN_F9026196_Reserved_ },
+		};
+
+		const MX_DIRS * pdUseMe = CUtilities::Options.bShortenEnumNames ? aTableShort : aTable;
 
 		CHAR szTemp[64];
 		for ( size_t I = 0; I < _vDataDirs.size(); ++I ) {
-			swsTemp = mx::CStringDecoder::DecodeToWString( aTable[I].pcName, aTable[I].ui32StrLen );
+			swsTemp = mx::CStringDecoder::DecodeToWString( pdUseMe[I].pcName, pdUseMe[I].ui32StrLen );
 			TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), _uiStructOffset, _tiParent );
 			HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
-			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( aTable[I].pcDescName, aTable[I].ui32DescStrLen ).c_str(), MW_PE_DESC ) ) { return false; }
+			if ( !_tlTree.SetItemText( hItem, mx::CStringDecoder::DecodeToWString( pdUseMe[I].pcDescName, pdUseMe[I].ui32DescStrLen ).c_str(), MW_PE_DESC ) ) { return false; }
 
 			std::sprintf( szTemp, mx::CStringDecoder::DecodeToString( _T_LEN_F1D4865E_VirtualAddress__s__Size__u ).c_str(), CUtilities::ToHex( _vDataDirs[I].VirtualAddress, 8 ), _vDataDirs[I].Size );
 			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( szTemp ).c_str(), MW_PE_VALUE ) ) { return false; }

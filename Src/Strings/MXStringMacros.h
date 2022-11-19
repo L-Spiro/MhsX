@@ -16129,3 +16129,138 @@
 #define _DEC_S_9F89304E_Update mx::CStringDecoder::DecodeToString( _T_9F89304E_Update, _LEN_9F89304E )
 #define _DEC_WS_9F89304E_Update mx::CStringDecoder::DecodeToWString( _T_9F89304E_Update, _LEN_9F89304E )
 
+// DataDirectory[EXPORT]
+
+#define _T_40866799_DataDirectory_EXPORT_ "\xCC\x2F\x44\xFC\xD6\x32\x00\x2C\x33\x3C\x38\x40\x0B\xF6\x0C\xE0\x1E\x1F\xED\xE6\x26"
+#define _LEN_40866799 21
+#define _T_LEN_40866799_DataDirectory_EXPORT_ _T_40866799_DataDirectory_EXPORT_, _LEN_40866799
+#define _DEC_40866799_DataDirectory_EXPORT_( STR ) mx::CStringDecoder::Decode( _T_40866799_DataDirectory_EXPORT_, _LEN_40866799, STR )
+#define _DEC_S_40866799_DataDirectory_EXPORT_ mx::CStringDecoder::DecodeToString( _T_40866799_DataDirectory_EXPORT_, _LEN_40866799 )
+#define _DEC_WS_40866799_DataDirectory_EXPORT_ mx::CStringDecoder::DecodeToWString( _T_40866799_DataDirectory_EXPORT_, _LEN_40866799 )
+
+// DataDirectory[IMPORT]
+
+#define _T_D43D9EC5_DataDirectory_IMPORT_ "\xCC\x2F\x44\xFC\xD6\x32\x00\x2C\x33\x3C\x38\x40\x0B\xF6\x10\xD5\x1E\x1F\xED\xE6\x26"
+#define _LEN_D43D9EC5 21
+#define _T_LEN_D43D9EC5_DataDirectory_IMPORT_ _T_D43D9EC5_DataDirectory_IMPORT_, _LEN_D43D9EC5
+#define _DEC_D43D9EC5_DataDirectory_IMPORT_( STR ) mx::CStringDecoder::Decode( _T_D43D9EC5_DataDirectory_IMPORT_, _LEN_D43D9EC5, STR )
+#define _DEC_S_D43D9EC5_DataDirectory_IMPORT_ mx::CStringDecoder::DecodeToString( _T_D43D9EC5_DataDirectory_IMPORT_, _LEN_D43D9EC5 )
+#define _DEC_WS_D43D9EC5_DataDirectory_IMPORT_ mx::CStringDecoder::DecodeToWString( _T_D43D9EC5_DataDirectory_IMPORT_, _LEN_D43D9EC5 )
+
+// DataDirectory[RESOURCE]
+
+#define _T_355C1DB1_DataDirectory_RESOURCE_ "\xCC\x2F\x44\xFC\xD6\x32\x00\x2C\x33\x3C\x38\x40\x0B\xF6\x19\xCD\x21\x1F\xF0\xE4\x0C\xD3\x24"
+#define _LEN_355C1DB1 23
+#define _T_LEN_355C1DB1_DataDirectory_RESOURCE_ _T_355C1DB1_DataDirectory_RESOURCE_, _LEN_355C1DB1
+#define _DEC_355C1DB1_DataDirectory_RESOURCE_( STR ) mx::CStringDecoder::Decode( _T_355C1DB1_DataDirectory_RESOURCE_, _LEN_355C1DB1, STR )
+#define _DEC_S_355C1DB1_DataDirectory_RESOURCE_ mx::CStringDecoder::DecodeToString( _T_355C1DB1_DataDirectory_RESOURCE_, _LEN_355C1DB1 )
+#define _DEC_WS_355C1DB1_DataDirectory_RESOURCE_ mx::CStringDecoder::DecodeToWString( _T_355C1DB1_DataDirectory_RESOURCE_, _LEN_355C1DB1 )
+
+// DataDirectory[EXCEPTION]
+
+#define _T_E7F50C22_DataDirectory_EXCEPTION_ "\xCC\x2F\x44\xFC\xD6\x32\x00\x2C\x33\x3C\x38\x40\x0B\xF6\x0C\xE0\x11\x15\xEB\xE6\x12\xDD\x15\x2D"
+#define _LEN_E7F50C22 24
+#define _T_LEN_E7F50C22_DataDirectory_EXCEPTION_ _T_E7F50C22_DataDirectory_EXCEPTION_, _LEN_E7F50C22
+#define _DEC_E7F50C22_DataDirectory_EXCEPTION_( STR ) mx::CStringDecoder::Decode( _T_E7F50C22_DataDirectory_EXCEPTION_, _LEN_E7F50C22, STR )
+#define _DEC_S_E7F50C22_DataDirectory_EXCEPTION_ mx::CStringDecoder::DecodeToString( _T_E7F50C22_DataDirectory_EXCEPTION_, _LEN_E7F50C22 )
+#define _DEC_WS_E7F50C22_DataDirectory_EXCEPTION_ mx::CStringDecoder::DecodeToWString( _T_E7F50C22_DataDirectory_EXCEPTION_, _LEN_E7F50C22 )
+
+// DataDirectory[SECURITY]
+
+#define _T_2D9250E7_DataDirectory_SECURITY_ "\xCC\x2F\x44\xFC\xD6\x32\x00\x2C\x33\x3C\x38\x40\x0B\xF6\x1A\xCD\x11\x25\xED\xDB\x1D\xE7\x24"
+#define _LEN_2D9250E7 23
+#define _T_LEN_2D9250E7_DataDirectory_SECURITY_ _T_2D9250E7_DataDirectory_SECURITY_, _LEN_2D9250E7
+#define _DEC_2D9250E7_DataDirectory_SECURITY_( STR ) mx::CStringDecoder::Decode( _T_2D9250E7_DataDirectory_SECURITY_, _LEN_2D9250E7, STR )
+#define _DEC_S_2D9250E7_DataDirectory_SECURITY_ mx::CStringDecoder::DecodeToString( _T_2D9250E7_DataDirectory_SECURITY_, _LEN_2D9250E7 )
+#define _DEC_WS_2D9250E7_DataDirectory_SECURITY_ mx::CStringDecoder::DecodeToWString( _T_2D9250E7_DataDirectory_SECURITY_, _LEN_2D9250E7 )
+
+// DataDirectory[BASERELOC]
+
+#define _T_EBC9431C_DataDirectory_BASERELOC_ "\xCC\x2F\x44\xFC\xD6\x32\x00\x2C\x33\x3C\x38\x40\x0B\xF6\x09\xC9\x21\x15\xED\xD7\x15\xDD\x0A\x2D"
+#define _LEN_EBC9431C 24
+#define _T_LEN_EBC9431C_DataDirectory_BASERELOC_ _T_EBC9431C_DataDirectory_BASERELOC_, _LEN_EBC9431C
+#define _DEC_EBC9431C_DataDirectory_BASERELOC_( STR ) mx::CStringDecoder::Decode( _T_EBC9431C_DataDirectory_BASERELOC_, _LEN_EBC9431C, STR )
+#define _DEC_S_EBC9431C_DataDirectory_BASERELOC_ mx::CStringDecoder::DecodeToString( _T_EBC9431C_DataDirectory_BASERELOC_, _LEN_EBC9431C )
+#define _DEC_WS_EBC9431C_DataDirectory_BASERELOC_ mx::CStringDecoder::DecodeToWString( _T_EBC9431C_DataDirectory_BASERELOC_, _LEN_EBC9431C )
+
+// DataDirectory[DEBUG]
+
+#define _T_A0E2E805_DataDirectory_DEBUG_ "\xCC\x2F\x44\xFC\xD6\x32\x00\x2C\x33\x3C\x38\x40\x0B\xF6\x0B\xCD\x10\x25\xE2\xEF"
+#define _LEN_A0E2E805 20
+#define _T_LEN_A0E2E805_DataDirectory_DEBUG_ _T_A0E2E805_DataDirectory_DEBUG_, _LEN_A0E2E805
+#define _DEC_A0E2E805_DataDirectory_DEBUG_( STR ) mx::CStringDecoder::Decode( _T_A0E2E805_DataDirectory_DEBUG_, _LEN_A0E2E805, STR )
+#define _DEC_S_A0E2E805_DataDirectory_DEBUG_ mx::CStringDecoder::DecodeToString( _T_A0E2E805_DataDirectory_DEBUG_, _LEN_A0E2E805 )
+#define _DEC_WS_A0E2E805_DataDirectory_DEBUG_ mx::CStringDecoder::DecodeToWString( _T_A0E2E805_DataDirectory_DEBUG_, _LEN_A0E2E805 )
+
+// DataDirectory[ARCHITECTURE]
+
+#define _T_D2939E9D_DataDirectory_ARCHITECTURE_ "\xCC\x2F\x44\xFC\xD6\x32\x00\x2C\x33\x3C\x38\x40\x0B\xF6\x08\xDA\x11\x18\xE4\xE6\x0E\xD1\x1B\x25\x1A\x0E\x2B"
+#define _LEN_D2939E9D 27
+#define _T_LEN_D2939E9D_DataDirectory_ARCHITECTURE_ _T_D2939E9D_DataDirectory_ARCHITECTURE_, _LEN_D2939E9D
+#define _DEC_D2939E9D_DataDirectory_ARCHITECTURE_( STR ) mx::CStringDecoder::Decode( _T_D2939E9D_DataDirectory_ARCHITECTURE_, _LEN_D2939E9D, STR )
+#define _DEC_S_D2939E9D_DataDirectory_ARCHITECTURE_ mx::CStringDecoder::DecodeToString( _T_D2939E9D_DataDirectory_ARCHITECTURE_, _LEN_D2939E9D )
+#define _DEC_WS_D2939E9D_DataDirectory_ARCHITECTURE_ mx::CStringDecoder::DecodeToWString( _T_D2939E9D_DataDirectory_ARCHITECTURE_, _LEN_D2939E9D )
+
+// DataDirectory[GLOBALPTR]
+
+#define _T_C32BE007_DataDirectory_GLOBALPTR_ "\xCC\x2F\x44\xFC\xD6\x32\x00\x2C\x33\x3C\x38\x40\x0B\xF6\x0E\xD4\x1D\x12\xDC\xDE\x19\xE2\x19\x2D"
+#define _LEN_C32BE007 24
+#define _T_LEN_C32BE007_DataDirectory_GLOBALPTR_ _T_C32BE007_DataDirectory_GLOBALPTR_, _LEN_C32BE007
+#define _DEC_C32BE007_DataDirectory_GLOBALPTR_( STR ) mx::CStringDecoder::Decode( _T_C32BE007_DataDirectory_GLOBALPTR_, _LEN_C32BE007, STR )
+#define _DEC_S_C32BE007_DataDirectory_GLOBALPTR_ mx::CStringDecoder::DecodeToString( _T_C32BE007_DataDirectory_GLOBALPTR_, _LEN_C32BE007 )
+#define _DEC_WS_C32BE007_DataDirectory_GLOBALPTR_ mx::CStringDecoder::DecodeToWString( _T_C32BE007_DataDirectory_GLOBALPTR_, _LEN_C32BE007 )
+
+// DataDirectory[TLS]
+
+#define _T_D5802B5D_DataDirectory_TLS_ "\xCC\x2F\x44\xFC\xD6\x32\x00\x2C\x33\x3C\x38\x40\x0B\xF6\x1B\xD4\x21\x2D"
+#define _LEN_D5802B5D 18
+#define _T_LEN_D5802B5D_DataDirectory_TLS_ _T_D5802B5D_DataDirectory_TLS_, _LEN_D5802B5D
+#define _DEC_D5802B5D_DataDirectory_TLS_( STR ) mx::CStringDecoder::Decode( _T_D5802B5D_DataDirectory_TLS_, _LEN_D5802B5D, STR )
+#define _DEC_S_D5802B5D_DataDirectory_TLS_ mx::CStringDecoder::DecodeToString( _T_D5802B5D_DataDirectory_TLS_, _LEN_D5802B5D )
+#define _DEC_WS_D5802B5D_DataDirectory_TLS_ mx::CStringDecoder::DecodeToWString( _T_D5802B5D_DataDirectory_TLS_, _LEN_D5802B5D )
+
+// DataDirectory[LOAD_CONFIG]
+
+#define _T_022E7D2F_DataDirectory_LOAD_CONFIG_ "\xCC\x2F\x44\xFC\xD6\x32\x00\x2C\x33\x3C\x38\x40\x0B\xF6\x13\xD7\x0F\x14\xFA\xD5\x18\xDC\x0D\x19\x0F\x26"
+#define _LEN_022E7D2F 26
+#define _T_LEN_022E7D2F_DataDirectory_LOAD_CONFIG_ _T_022E7D2F_DataDirectory_LOAD_CONFIG_, _LEN_022E7D2F
+#define _DEC_022E7D2F_DataDirectory_LOAD_CONFIG_( STR ) mx::CStringDecoder::Decode( _T_022E7D2F_DataDirectory_LOAD_CONFIG_, _LEN_022E7D2F, STR )
+#define _DEC_S_022E7D2F_DataDirectory_LOAD_CONFIG_ mx::CStringDecoder::DecodeToString( _T_022E7D2F_DataDirectory_LOAD_CONFIG_, _LEN_022E7D2F )
+#define _DEC_WS_022E7D2F_DataDirectory_LOAD_CONFIG_ mx::CStringDecoder::DecodeToWString( _T_022E7D2F_DataDirectory_LOAD_CONFIG_, _LEN_022E7D2F )
+
+// DataDirectory[BOUND_IMPORT]
+
+#define _T_7EC1A2A0_DataDirectory_BOUND_IMPORT_ "\xCC\x2F\x44\xFC\xD6\x32\x00\x2C\x33\x3C\x38\x40\x0B\xF6\x09\xD7\x23\x1E\xDF\xF1\x12\xDB\x17\x1F\x1A\x1D\x2B"
+#define _LEN_7EC1A2A0 27
+#define _T_LEN_7EC1A2A0_DataDirectory_BOUND_IMPORT_ _T_7EC1A2A0_DataDirectory_BOUND_IMPORT_, _LEN_7EC1A2A0
+#define _DEC_7EC1A2A0_DataDirectory_BOUND_IMPORT_( STR ) mx::CStringDecoder::Decode( _T_7EC1A2A0_DataDirectory_BOUND_IMPORT_, _LEN_7EC1A2A0, STR )
+#define _DEC_S_7EC1A2A0_DataDirectory_BOUND_IMPORT_ mx::CStringDecoder::DecodeToString( _T_7EC1A2A0_DataDirectory_BOUND_IMPORT_, _LEN_7EC1A2A0 )
+#define _DEC_WS_7EC1A2A0_DataDirectory_BOUND_IMPORT_ mx::CStringDecoder::DecodeToWString( _T_7EC1A2A0_DataDirectory_BOUND_IMPORT_, _LEN_7EC1A2A0 )
+
+// DataDirectory[IAT]
+
+#define _T_306AA18B_DataDirectory_IAT_ "\xCC\x2F\x44\xFC\xD6\x32\x00\x2C\x33\x3C\x38\x40\x0B\xF6\x10\xC9\x22\x2D"
+#define _LEN_306AA18B 18
+#define _T_LEN_306AA18B_DataDirectory_IAT_ _T_306AA18B_DataDirectory_IAT_, _LEN_306AA18B
+#define _DEC_306AA18B_DataDirectory_IAT_( STR ) mx::CStringDecoder::Decode( _T_306AA18B_DataDirectory_IAT_, _LEN_306AA18B, STR )
+#define _DEC_S_306AA18B_DataDirectory_IAT_ mx::CStringDecoder::DecodeToString( _T_306AA18B_DataDirectory_IAT_, _LEN_306AA18B )
+#define _DEC_WS_306AA18B_DataDirectory_IAT_ mx::CStringDecoder::DecodeToWString( _T_306AA18B_DataDirectory_IAT_, _LEN_306AA18B )
+
+// DataDirectory[DELAY_IMPORT]
+
+#define _T_4D2C91F9_DataDirectory_DELAY_IMPORT_ "\xCC\x2F\x44\xFC\xD6\x32\x00\x2C\x33\x3C\x38\x40\x0B\xF6\x0B\xCD\x1A\x11\xF4\xF1\x12\xDB\x17\x1F\x1A\x1D\x2B"
+#define _LEN_4D2C91F9 27
+#define _T_LEN_4D2C91F9_DataDirectory_DELAY_IMPORT_ _T_4D2C91F9_DataDirectory_DELAY_IMPORT_, _LEN_4D2C91F9
+#define _DEC_4D2C91F9_DataDirectory_DELAY_IMPORT_( STR ) mx::CStringDecoder::Decode( _T_4D2C91F9_DataDirectory_DELAY_IMPORT_, _LEN_4D2C91F9, STR )
+#define _DEC_S_4D2C91F9_DataDirectory_DELAY_IMPORT_ mx::CStringDecoder::DecodeToString( _T_4D2C91F9_DataDirectory_DELAY_IMPORT_, _LEN_4D2C91F9 )
+#define _DEC_WS_4D2C91F9_DataDirectory_DELAY_IMPORT_ mx::CStringDecoder::DecodeToWString( _T_4D2C91F9_DataDirectory_DELAY_IMPORT_, _LEN_4D2C91F9 )
+
+// DataDirectory[COM_DESCRIPTOR]
+
+#define _T_B25F12F6_DataDirectory_COM_DESCRIPTOR_ "\xCC\x2F\x44\xFC\xD6\x32\x00\x2C\x33\x3C\x38\x40\x0B\xF6\x0A\xD7\x1B\x2F\xDF\xD7\x1C\xD1\x19\x19\x18\x1D\x1D\xE4\xF8"
+#define _LEN_B25F12F6 29
+#define _T_LEN_B25F12F6_DataDirectory_COM_DESCRIPTOR_ _T_B25F12F6_DataDirectory_COM_DESCRIPTOR_, _LEN_B25F12F6
+#define _DEC_B25F12F6_DataDirectory_COM_DESCRIPTOR_( STR ) mx::CStringDecoder::Decode( _T_B25F12F6_DataDirectory_COM_DESCRIPTOR_, _LEN_B25F12F6, STR )
+#define _DEC_S_B25F12F6_DataDirectory_COM_DESCRIPTOR_ mx::CStringDecoder::DecodeToString( _T_B25F12F6_DataDirectory_COM_DESCRIPTOR_, _LEN_B25F12F6 )
+#define _DEC_WS_B25F12F6_DataDirectory_COM_DESCRIPTOR_ mx::CStringDecoder::DecodeToWString( _T_B25F12F6_DataDirectory_COM_DESCRIPTOR_, _LEN_B25F12F6 )
+
