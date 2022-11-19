@@ -143,7 +143,9 @@ namespace lsw {
 		// Sort comparison function.  Override to change how items compare against each other.
 		virtual int							SortCompare( INT _iLeft, INT _iRight, INT _iSub );
 
-		// Delete all items.
+		/**
+		 * Deletes all items.
+		 */
 		virtual VOID						DeleteAll();
 
 		// Delete all items (notification responder).
@@ -152,10 +154,34 @@ namespace lsw {
 		// Requesting information (notification responder).
 		virtual BOOL						GetDispInfoNotify( NMLVDISPINFOW * _plvdiInfo ) { return 1; }
 
-		// Determines the type of control this is.
+		/**
+		 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_PREPAINT handler.
+		 *
+		 * \param _lpcdParm The notifacation structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual DWORD						Notify_CustomDraw_PrePaint( LPNMLVCUSTOMDRAW /*_lpcdParm*/ ) { return CDRF_NOTIFYITEMDRAW; }
+
+		/**
+		 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_ITEMPREPAINT handler.
+		 *
+		 * \param _lpcdParm The notifacation structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual DWORD						Notify_CustomDraw_ItemPrePaint( LPNMLVCUSTOMDRAW /*_lpcdParm*/ );
+
+		/**
+		 * Determines the type of control this is.
+		 *
+		 * \return Returns LSW_LT_LISTVIEW.
+		 */
 		virtual uint32_t					WidgetType() const { return LSW_LT_LISTVIEW; }
 
-		// Returns true if this is a CListView class.
+		/**
+		 * Returns true if this is a CListView class.
+		 *
+		 * \return Returns true.
+		 */
 		virtual bool						IsListView() const { return true; }
 
 

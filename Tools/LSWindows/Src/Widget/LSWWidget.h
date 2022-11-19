@@ -637,6 +637,46 @@ namespace lsw {
 		// TBN_GETBUTTONINFO.
 		virtual LSW_HANDLED					TbnGetButtonInfo( LPNMTOOLBARW /*_lptbToolBar*/ ) { return LSW_H_CONTINUE; }
 
+		/**
+		 * The WM_NOTIFY -> LVN_ITEMCHANGED handler.
+		 *
+		 * \param _lplvParm The notifacation structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					Notify_ItemChanged( LPNMLISTVIEW /*_lplvParm*/ ) { return LSW_H_CONTINUE; }
+
+		/**
+		 * The WM_NOTIFY -> LVN_ODSTATECHANGED handler.
+		 *
+		 * \param _lposcParm The notifacation structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					Notify_OdStateChange( LPNMLVODSTATECHANGE /*_lposcParm*/ ) { return LSW_H_CONTINUE; }
+
+		/**
+		 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_PREPAINT handler.
+		 *
+		 * \param _lpcdParm The notifacation structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual DWORD						Notify_CustomDraw_PrePaint( LPNMLVCUSTOMDRAW /*_lpcdParm*/ ) { return CDRF_DODEFAULT; }
+
+		/**
+		 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_ITEMPREPAINT handler.
+		 *
+		 * \param _lpcdParm The notifacation structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual DWORD						Notify_CustomDraw_ItemPrePaint( LPNMLVCUSTOMDRAW /*_lpcdParm*/ ) { return CDRF_DODEFAULT; }
+
+		/**
+		 * The WM_NOTIFY -> NM_CUSTOMDRAW -> (CDDS_ITEMPREPAINT | CDDS_SUBITEM) handler.
+		 *
+		 * \param _lpcdParm The notifacation structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual DWORD						Notify_CustomDraw_ItemPrePaintSubItem( LPNMLVCUSTOMDRAW /*_lpcdParm*/ ) { return CDRF_DODEFAULT; }
+
 		// WM_TIMER.
 		virtual LSW_HANDLED					Timer( UINT_PTR /*_uiptrId*/, TIMERPROC /*_tpProc*/ ) { return LSW_H_CONTINUE; }
 

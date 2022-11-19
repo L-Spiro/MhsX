@@ -1155,16 +1155,19 @@ namespace lsw {
 					}
 					case LVN_ITEMCHANGED : {
 						LPNMLISTVIEW lplvStateChange = reinterpret_cast<LPNMLISTVIEW>(_lParam);
-						break;
+						CWidget * pmwSrc = LSW_WIN2CLASS( lplvStateChange->hdr.hwndFrom );
+						if ( pmwSrc ) {
+							if ( pmwSrc->Notify_ItemChanged( lplvStateChange ) == LSW_HANDLED::LSW_H_HANDLED ) { LSW_RET( 1, TRUE ); }
+						}
+						LSW_RET( 1, TRUE );
 					}
 					case LVN_ODSTATECHANGED : {
 						LPNMLVODSTATECHANGE lpscStateChange = reinterpret_cast<LPNMLVODSTATECHANGE>(_lParam);
 						CWidget * pmwSrc = LSW_WIN2CLASS( lpscStateChange->hdr.hwndFrom );
 						if ( pmwSrc ) {
-							LSW_RET( 1, TRUE );
+							if ( pmwSrc->Notify_OdStateChange( lpscStateChange ) == LSW_HANDLED::LSW_H_HANDLED ) { LSW_RET( 1, TRUE ); }
 						}
-
-						break;
+						LSW_RET( 1, TRUE );
 					}
 					case NM_CUSTOMDRAW : {
 						LPNMCUSTOMDRAW pcdCustomDraw = reinterpret_cast<LPNMCUSTOMDRAW>(_lParam);
@@ -1174,27 +1177,25 @@ namespace lsw {
 								LPNMLVCUSTOMDRAW pcdListViewDraw = reinterpret_cast<LPNMLVCUSTOMDRAW>(_lParam);
 								HWND hFrom = pcdCustomDraw->hdr.hwndFrom;
 								if ( pcdListViewDraw->nmcd.dwDrawStage == CDDS_PREPAINT ) {
+									DWORD dwRet = pmwSrc->Notify_CustomDraw_PrePaint( pcdListViewDraw );
 									if ( _bIsDlg ) {
-										::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, CDRF_NOTIFYITEMDRAW );
+										::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, dwRet );
 									}
-									LSW_RET( CDRF_NOTIFYITEMDRAW, TRUE );
+									LSW_RET( dwRet, dwRet != CDRF_DODEFAULT );
 								}
 								if ( pcdListViewDraw->nmcd.dwDrawStage == CDDS_ITEMPREPAINT ) {
-									if ( pcdListViewDraw->nmcd.dwItemSpec % 2 == 0 ) {
-										pcdListViewDraw->clrText = ::GetSysColor( COLOR_WINDOWTEXT );//RGB( 0, 0, 0 );
-										pcdListViewDraw->clrTextBk = RGB( 0xE5, 0xF5, 0xFF );
-										if ( _bIsDlg ) {
-											::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, CDRF_NEWFONT );
-										}
-										LSW_RET( CDRF_NEWFONT, TRUE );
+									DWORD dwRet = pmwSrc->Notify_CustomDraw_ItemPrePaint( pcdListViewDraw );
+									if ( _bIsDlg ) {
+										::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, dwRet );
 									}
-									/*else {
-										pcdListViewDraw->clrText = RGB( 0, 0, 0 );
-										pcdListViewDraw->clrTextBk = RGB( 0xFF, 0xFF, 0xFF );
-									}*/
+									LSW_RET( dwRet, dwRet != CDRF_DODEFAULT );
 								}
 								if ( (CDDS_ITEMPREPAINT | CDDS_SUBITEM) == pcdListViewDraw->nmcd.dwDrawStage ) {
-									LSW_RET( CDRF_NEWFONT, TRUE );
+									DWORD dwRet = pmwSrc->Notify_CustomDraw_ItemPrePaintSubItem( pcdListViewDraw );
+									if ( _bIsDlg ) {
+										::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, dwRet );
+									}
+									LSW_RET( dwRet, dwRet != CDRF_DODEFAULT );
 								}
 							}
 						}

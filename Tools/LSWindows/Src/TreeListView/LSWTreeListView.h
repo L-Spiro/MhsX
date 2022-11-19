@@ -139,6 +139,11 @@ namespace lsw {
 		size_t								GatherSelected( std::vector<HTREEITEM> &_vReturn, bool _bIncludeNonVisible = false ) const;
 
 		/**
+		 * Unselects all.
+		 */
+		void								UnselectAll();
+
+		/**
 		 * Allows quickly updating the tree without causing visual updates to the controls.  Must be paired with a call to FinishUpdate().
 		 */
 		void								BeginLargeUpdate() {
@@ -150,9 +155,8 @@ namespace lsw {
 		 */
 		void								FinishUpdate() {
 			m_bDontUpdate = false;
+			ClearCache();
 			SetItemCount( static_cast<INT>(CountExpanded()) );
-			m_ptIndexCache = nullptr;
-			m_stIndexCache = 0;
 		}
 
 		/**
@@ -223,6 +227,8 @@ namespace lsw {
 		mutable ee::CTree<LSW_TREE_ROW> *	m_ptIndexCache;
 		/** Optimiation: Cache the last index returned by ItemByIndex(). */
 		mutable size_t						m_stIndexCache;
+		/** The hot item index. */
+		size_t								m_stHotItem;
 		/** If set, the listview is not updated when inserting/removing an item.  FinishUpdate() must be called to update the listview after the tree is modified. */
 		bool								m_bDontUpdate;
 		/** Window property. */
@@ -297,6 +303,15 @@ namespace lsw {
 		ee::CTree<LSW_TREE_ROW> *			ItemByIndex_Cached( size_t _stIdx );
 
 		/**
+		 * Clears the cached tree item and index.
+		 */
+		void								ClearCache() const {
+			m_ptIndexCache = nullptr;
+			m_stIndexCache = 0;
+		}
+
+
+		/**
 		 * Counts the total number of expanded items.
 		 *
 		 * \return Returns the total number of items, accounting for expandedness.
@@ -321,6 +336,15 @@ namespace lsw {
 											NextByExpansion( ee::CTree<CTreeListView::LSW_TREE_ROW> * _ptThis ) const;
 
 		/**
+		 * Gets the next item.
+		 *
+		 * \param _ptThis The items whose next item is to be obtained.
+		 * \return Returns the next item.
+		 */
+		ee::CTree<CTreeListView::LSW_TREE_ROW> *
+											Next( ee::CTree<CTreeListView::LSW_TREE_ROW> * _ptThis ) const;
+
+		/**
 		 * WM_SIZE.
 		 *
 		 * \param _wParam The type of resizing requested.
@@ -338,6 +362,38 @@ namespace lsw {
 		 * \return Returns a HANDLED code.
 		 */
 		virtual LSW_HANDLED					Move( LONG _lX, LONG _lY );
+
+		/**
+		 * The WM_NOTIFY -> LVN_ITEMCHANGED handler.
+		 *
+		 * \param _lplvParm The notifacation structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					Notify_ItemChanged( LPNMLISTVIEW /*_lplvParm*/ );
+
+		/**
+		 * The WM_NOTIFY -> LVN_ODSTATECHANGED handler.
+		 *
+		 * \param _lposcParm The notifacation structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					Notify_OdStateChange( LPNMLVODSTATECHANGE /*_lposcParm*/ );
+
+		/**
+		 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_PREPAINT handler.
+		 *
+		 * \param _lpcdParm The notifacation structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual DWORD						Notify_CustomDraw_PrePaint( LPNMLVCUSTOMDRAW /*_lpcdParm*/ ) { return CDRF_NOTIFYITEMDRAW; }
+
+		/**
+		 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_ITEMPREPAINT handler.
+		 *
+		 * \param _lpcdParm The notifacation structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual DWORD						Notify_CustomDraw_ItemPrePaint( LPNMLVCUSTOMDRAW /*_lpcdParm*/ );
 
 		/**
 		 * Evaluates expressions to determine a new rectangle for the control.

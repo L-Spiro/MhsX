@@ -17,6 +17,7 @@ namespace lsw {
 		m_wpListViewProc( nullptr ),
 		m_ptIndexCache( nullptr ),
 		m_stIndexCache( 0 ),
+		m_stHotItem( size_t( -1 ) ),
 		m_bDontUpdate( false ) {
 		
 		if ( !m_szProp[0] ) {
@@ -58,8 +59,7 @@ namespace lsw {
 			if ( !m_bDontUpdate ) {
 				SetItemCount( static_cast<INT>(CountExpanded()) );
 			}
-			m_ptIndexCache = nullptr;
-			m_stIndexCache = 0;
+			ClearCache();
 			return PointerToTreeItem( pntParent->GetChild( stIdx ) );
 		}
 		return nullptr;
@@ -137,6 +137,13 @@ namespace lsw {
 	 * \return Returns true if any of the selected items have children and are not in expanded view.
 	 */
 	bool CTreeListView::AnySelectedHasUnexpandedChildren() const {
+		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptNode = Next( nullptr );
+		while ( ptNode ) {
+			if ( ptNode->Value().uiState & TVIS_SELECTED ) {
+				if ( !(ptNode->Value().uiState & TVIS_EXPANDED) && ptNode->Size() ) { return true; }
+			}
+			ptNode = Next( ptNode );
+		}
 		return false;
 	}
 
@@ -146,6 +153,13 @@ namespace lsw {
 	 * \return Returns true if any of the selected items have children and are in expanded view.
 	 */
 	bool CTreeListView::AnySelectedHasExpandedChildren() const {
+		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptNode = Next( nullptr );
+		while ( ptNode ) {
+			if ( ptNode->Value().uiState & TVIS_SELECTED ) {
+				if ( (ptNode->Value().uiState & TVIS_EXPANDED) && ptNode->Size() ) { return true; }
+			}
+			ptNode = Next( ptNode );
+		}
 		return false;
 	}
 
@@ -155,6 +169,11 @@ namespace lsw {
 	 * \return Returns true if any of the items have children and are not in expanded view.
 	 */
 	bool CTreeListView::AnyHasUnexpandedChildren() const {
+		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptNode = Next( nullptr );
+		while ( ptNode ) {
+			if ( !(ptNode->Value().uiState & TVIS_EXPANDED) && ptNode->Size() ) { return true; }
+			ptNode = Next( ptNode );
+		}
 		return false;
 	}
 
@@ -164,6 +183,11 @@ namespace lsw {
 	 * \return Returns true if any of the items have children and are in expanded view.
 	 */
 	bool CTreeListView::AnyHasExpandedChildren() const {
+		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptNode = Next( nullptr );
+		while ( ptNode ) {
+			if ( (ptNode->Value().uiState & TVIS_EXPANDED) && ptNode->Size() ) { return true; }
+			ptNode = Next( ptNode );
+		}
 		return false;
 	}
 
@@ -171,12 +195,46 @@ namespace lsw {
 	 * Expands selected items.
 	 */
 	void CTreeListView::ExpandSelected() const {
+		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptNode = Next( nullptr );
+		bool bFound = false;
+		while ( ptNode ) {
+			if ( ptNode->Value().uiState & TVIS_SELECTED ) {
+				if ( !(ptNode->Value().uiState & TVIS_EXPANDED) ) {
+					if ( ptNode->Size() ) {
+						bFound = true;
+						ClearCache();
+					}
+					ptNode->Value().uiState |= TVIS_EXPANDED;
+				}
+			}
+			ptNode = Next( ptNode );
+		}
+		if ( bFound ) {
+			ClearCache();
+			const_cast<CTreeListView *>(this)->SetItemCount( static_cast<INT>(CountExpanded()) );
+		}
 	}
 
 	/**
 	 * Expands all items.
 	 */
 	void CTreeListView::ExpandAll() const {
+		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptNode = Next( nullptr );
+		bool bFound = false;
+		while ( ptNode ) {
+			if ( !(ptNode->Value().uiState & TVIS_EXPANDED) ) {
+				if ( ptNode->Size() ) {
+					bFound = true;
+					ClearCache();
+				}
+				ptNode->Value().uiState |= TVIS_EXPANDED;
+			}
+			ptNode = Next( ptNode );
+		}
+		if ( bFound ) {
+			ClearCache();
+			const_cast<CTreeListView *>(this)->SetItemCount( static_cast<INT>(CountExpanded()) );
+		}
 	}
 
 	/**
@@ -185,6 +243,24 @@ namespace lsw {
 	 * \return Collapses selected items.
 	 */
 	void CTreeListView::CollapseSelected() const {
+		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptNode = Next( nullptr );
+		bool bFound = false;
+		while ( ptNode ) {
+			if ( ptNode->Value().uiState & TVIS_SELECTED ) {
+				if ( (ptNode->Value().uiState & TVIS_EXPANDED) ) {
+					if ( ptNode->Size() ) {
+						bFound = true;
+						ClearCache();
+					}
+					ptNode->Value().uiState &= ~TVIS_EXPANDED;
+				}
+			}
+			ptNode = Next( ptNode );
+		}
+		if ( bFound ) {
+			ClearCache();
+			const_cast<CTreeListView *>(this)->SetItemCount( static_cast<INT>(CountExpanded()) );
+		}
 	}
 
 	/**
@@ -193,6 +269,22 @@ namespace lsw {
 	 * \return Collapses all items.
 	 */
 	void CTreeListView::CollapseAll() const {
+		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptNode = Next( nullptr );
+		bool bFound = false;
+		while ( ptNode ) {
+			if ( (ptNode->Value().uiState & TVIS_EXPANDED) ) {
+				if ( ptNode->Size() ) {
+					bFound = true;
+					ClearCache();
+				}
+				ptNode->Value().uiState &= ~TVIS_EXPANDED;
+			}
+			ptNode = Next( ptNode );
+		}
+		if ( bFound ) {
+			ClearCache();
+			const_cast<CTreeListView *>(this)->SetItemCount( static_cast<INT>(CountExpanded()) );
+		}
 	}
 
 	/**
@@ -206,6 +298,17 @@ namespace lsw {
 		_vReturn.clear();
 		GatherSelected( TVI_ROOT, _vReturn, _bIncludeNonVisible );
 		return _vReturn.size();
+	}
+
+	/**
+	 * Unselects all.
+	 */
+	void CTreeListView::UnselectAll() {
+		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptNode = Next( nullptr );
+		while ( ptNode ) {
+			ptNode->Value().uiState &= ~TVIS_SELECTED;
+			ptNode = Next( ptNode );
+		}
 	}
 
 	/**
@@ -467,6 +570,33 @@ namespace lsw {
 	}
 
 	/**
+	 * Gets the next item.
+	 *
+	 * \param _ptThis The items whose next item is to be obtained.
+	 * \return Returns the next item.
+	 */
+	ee::CTree<CTreeListView::LSW_TREE_ROW> * CTreeListView::Next( ee::CTree<CTreeListView::LSW_TREE_ROW> * _ptThis ) const {
+		if ( !_ptThis ) {
+			if ( !m_tRoot.Size() ) { return nullptr; }
+			return const_cast<ee::CTree<CTreeListView::LSW_TREE_ROW> *>(m_tRoot.GetChild( 0 ));
+		}
+		if ( _ptThis->Size() ) {
+			// Go to its children.
+			return _ptThis->GetChild( 0 );
+		}
+		// No chilren.  Go to the next in line.
+		if ( _ptThis->Next() ) { return _ptThis->Next(); }
+
+		// Nothing after this.  Go to the parent.
+		while ( _ptThis->Parent() ) {
+			_ptThis = _ptThis->Parent();
+			if ( _ptThis->Next() ) { return _ptThis->Next(); }
+		}
+		// That's the end.
+		return nullptr;
+	}
+
+	/**
 	 * WM_SIZE.
 	 *
 	 * \param _wParam The type of resizing requested.
@@ -497,6 +627,108 @@ namespace lsw {
 	}
 
 	/**
+	 * The WM_NOTIFY -> LVN_ITEMCHANGED handler.
+	 *
+	 * \param _lplvParm The notifacation structure.
+	 * \return Returns an LSW_HANDLED code.
+	 */
+	CWidget::LSW_HANDLED CTreeListView::Notify_ItemChanged( LPNMLISTVIEW _lplvParm ) {
+		if ( _lplvParm->uChanged & LVIF_STATE ) {
+			if ( _lplvParm->iItem == -1 ) {
+				// All items.
+				if ( (_lplvParm->uOldState & LVIS_SELECTED) && !(_lplvParm->uNewState & LVIS_SELECTED) ) {
+					// All items were deselected.
+					UnselectAll();
+				}
+			}
+			else {
+				if ( (_lplvParm->uOldState & LVIS_SELECTED) && !(_lplvParm->uNewState & LVIS_SELECTED) ) {
+					// Single node unselected.
+					ee::CTree<LSW_TREE_ROW> * ptNode = ItemByIndex_Cached( _lplvParm->iItem );
+					if ( ptNode ) {
+						ptNode->Value().uiState &= ~TVIS_SELECTED;
+					}
+				}
+				else if ( (_lplvParm->uOldState & LVIS_SELECTED) && (_lplvParm->uNewState & LVIS_SELECTED) ) {
+					// Single node selected.
+					ee::CTree<LSW_TREE_ROW> * ptNode = ItemByIndex_Cached( _lplvParm->iItem );
+					if ( ptNode ) {
+						ptNode->Value().uiState |= TVIS_SELECTED;
+					}
+				}
+				else if ( !(_lplvParm->uOldState & LVIS_SELECTED) && (_lplvParm->uNewState & LVIS_SELECTED) ) {
+					// Single node selected.
+					ee::CTree<LSW_TREE_ROW> * ptNode = ItemByIndex_Cached( _lplvParm->iItem );
+					if ( ptNode ) {
+						ptNode->Value().uiState |= TVIS_SELECTED;
+					}
+				}
+
+				if ( (_lplvParm->uOldState & LVIS_FOCUSED) && !(_lplvParm->uNewState & LVIS_FOCUSED) ) {
+					m_stHotItem = size_t( -1 );
+				}
+				else if ( (_lplvParm->uOldState & LVIS_FOCUSED) && (_lplvParm->uNewState & LVIS_FOCUSED) ) {
+					m_stHotItem = size_t( _lplvParm->iItem );
+				}
+				else if ( !(_lplvParm->uOldState & LVIS_FOCUSED) && (_lplvParm->uNewState & LVIS_FOCUSED) ) {
+					m_stHotItem = size_t( _lplvParm->iItem );
+				}
+			}
+		}
+
+		return LSW_H_CONTINUE;
+	}
+
+	/**
+	 * The WM_NOTIFY -> LVN_ODSTATECHANGED handler.
+	 *
+	 * \param _lposcParm The notifacation structure.
+	 * \return Returns an LSW_HANDLED code.
+	 */
+	CWidget::LSW_HANDLED CTreeListView::Notify_OdStateChange( LPNMLVODSTATECHANGE _lposcParm ) {
+		for ( int I = _lposcParm->iFrom; I <= _lposcParm->iTo; ++I ) {
+			if ( (_lposcParm->uOldState & LVIS_SELECTED) && !(_lposcParm->uNewState & LVIS_SELECTED) ) {
+				// Single node unselected.
+				ee::CTree<LSW_TREE_ROW> * ptNode = ItemByIndex_Cached( I );
+				if ( ptNode ) {
+					ptNode->Value().uiState &= ~TVIS_SELECTED;
+				}
+			}
+			else if ( (_lposcParm->uOldState & LVIS_SELECTED) && (_lposcParm->uNewState & LVIS_SELECTED) ) {
+				// Single node selected.
+				ee::CTree<LSW_TREE_ROW> * ptNode = ItemByIndex_Cached( I );
+				if ( ptNode ) {
+					ptNode->Value().uiState |= TVIS_SELECTED;
+				}
+			}
+			else if ( !(_lposcParm->uOldState & LVIS_SELECTED) && (_lposcParm->uNewState & LVIS_SELECTED) ) {
+				// Single node selected.
+				ee::CTree<LSW_TREE_ROW> * ptNode = ItemByIndex_Cached( I );
+				if ( ptNode ) {
+					ptNode->Value().uiState |= TVIS_SELECTED;
+				}
+			}
+		}
+		
+		return LSW_H_CONTINUE;
+	}
+
+	/**
+	 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_ITEMPREPAINT handler.
+	 *
+	 * \param _lpcdParm The notifacation structure.
+	 * \return Returns an LSW_HANDLED code.
+	 */
+	DWORD CTreeListView::Notify_CustomDraw_ItemPrePaint( LPNMLVCUSTOMDRAW _lpcdParm ) {
+		if ( _lpcdParm->nmcd.dwItemSpec % 2 == 0 ) {
+			_lpcdParm->clrText = ::GetSysColor( COLOR_WINDOWTEXT );//RGB( 0, 0, 0 );
+			_lpcdParm->clrTextBk = RGB( 0xF2, 0xFA, 0xFF );
+			return CDRF_NEWFONT;
+		}
+		return CDRF_DODEFAULT;
+	}
+
+	/**
 	 * Evaluates expressions to determine a new rectangle for the control.
 	 */
 	void CTreeListView::EvalNewSize() {
@@ -515,7 +747,7 @@ namespace lsw {
 		while ( ptFrom ) {
 			UINT uiState = ptFrom->Value().uiState;
 			if ( uiState & TVIS_SELECTED ) {
-				_vReturn.push_back( _htiFrom );
+				_vReturn.push_back( PointerToTreeItem( ptFrom ) );
 			}
 			if ( _bIncludeNonVisible || (uiState & TVIS_EXPANDED) && ptFrom->Size() ) {
 				GatherSelected( PointerToTreeItem( ptFrom->GetChild( 0 ) ), _vReturn, _bIncludeNonVisible );

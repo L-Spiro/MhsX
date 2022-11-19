@@ -331,9 +331,26 @@ namespace lsw {
 		return m_bSortWithCase ? std::wcscmp( sLeft.c_str(), sRight.c_str() ) : _wcsicmp( sLeft.c_str(), sRight.c_str() );
 	}
 
-	// Delete all items.
+	/**
+	 * Deletes all items.
+	 */
 	VOID CListView::DeleteAll() {
 		::SendMessageW( Wnd(), LVM_DELETEALLITEMS, 0, 0 );
+	}
+
+	/**
+	 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_ITEMPREPAINT handler.
+	 *
+	 * \param _lpcdParm The notifacation structure.
+	 * \return Returns an LSW_HANDLED code.
+	 */
+	DWORD CListView::Notify_CustomDraw_ItemPrePaint( LPNMLVCUSTOMDRAW _lpcdParm ) {
+		if ( _lpcdParm->nmcd.dwItemSpec % 2 == 0 ) {
+			_lpcdParm->clrText = ::GetSysColor( COLOR_WINDOWTEXT );//RGB( 0, 0, 0 );
+			_lpcdParm->clrTextBk = RGB( 0xE5, 0xF5, 0xFF );
+			return CDRF_NEWFONT;
+		}
+		return CDRF_DODEFAULT;
 	}
 
 	// Setting the HWND after the control has been created.
