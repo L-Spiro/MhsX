@@ -90,9 +90,9 @@ namespace mx {
 			TRUE,									// bEnabled
 			TRUE,									// bActive
 			0,										// iLeft
-			50,										// iTop
-			1055,									// dwWidth
-			310,									// dwHeight
+			20,										// iTop
+			0,										// dwWidth
+			0,										// dwHeight
 			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP,								// dwStyle
 			0,																		// dwStyleEx
 			nullptr,								// pwcText

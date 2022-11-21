@@ -277,12 +277,25 @@ namespace lsw {
 	 * Sets selection on an item by index.
 	 *
 	 * \param _iItem The item to update.
-	 * \param _bSelected Whether the item is selcted or not.
+	 * \param _bSelected Whether the item is selected or not.
 	 */
 	void CListView::SetItemSelection( INT _iItem, BOOL _bSelected ) {
 		LVITEMW iItem = {};
 		iItem.stateMask = LVIS_SELECTED;
 		iItem.state = _bSelected ? LVIS_SELECTED : 0;
+		::SendMessageW( Wnd(), LVM_SETITEMSTATE, static_cast<WPARAM>(_iItem), reinterpret_cast<LPARAM>(reinterpret_cast<const LV_ITEM *>(&iItem) ));
+	}
+
+	/**
+	 * Sets highlight on an item by index.
+	 *
+	 * \param _iItem The item to update.
+	 * \param _bSelected Whether the item is highlighted or not.
+	 */
+	void CListView::SetItemHighlight( INT _iItem, BOOL _bHighlighted ) {
+		LVITEMW iItem = {};
+		iItem.stateMask = LVIS_FOCUSED;
+		iItem.state = _bHighlighted ? LVIS_FOCUSED : 0;
 		::SendMessageW( Wnd(), LVM_SETITEMSTATE, static_cast<WPARAM>(_iItem), reinterpret_cast<LPARAM>(reinterpret_cast<const LV_ITEM *>(&iItem) ));
 	}
 

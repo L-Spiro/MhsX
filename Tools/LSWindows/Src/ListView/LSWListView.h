@@ -126,9 +126,17 @@ namespace lsw {
 		 * Sets selection on an item by index.
 		 *
 		 * \param _iItem The item to update.
-		 * \param _bSelected Whether the item is selcted or not.
+		 * \param _bSelected Whether the item is selected or not.
 		 */
 		void								SetItemSelection( INT _iItem, BOOL _bSelected );
+
+		/**
+		 * Sets highlight on an item by index.
+		 *
+		 * \param _iItem The item to update.
+		 * \param _bSelected Whether the item is highlighted or not.
+		 */
+		void								SetItemHighlight( INT _iItem, BOOL _bHighlighted );
 
 
 		// Gets an item.  _iItm is input and output.

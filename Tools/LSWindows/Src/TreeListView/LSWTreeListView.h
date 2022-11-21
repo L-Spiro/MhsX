@@ -9,6 +9,10 @@
 #define LSW_TREELIST_INVALID				static_cast<size_t>(~static_cast<size_t>(0))
 #endif	// #ifndef LSW_TREELIST_INVALID
 
+#ifndef LSW_TREELIST_HIGHLIGHTED
+#define LSW_TREELIST_HIGHLIGHTED			0x08000000
+#endif	// #ifndef LSW_TREELIST_HIGHLIGHTED
+
 namespace lsw {
 
 	class CTreeListView : public CListView {
@@ -108,26 +112,26 @@ namespace lsw {
 		/**
 		 * Expands selected items.
 		 */
-		void								ExpandSelected() const;
+		void								ExpandSelected();
 
 		/**
 		 * Expands all items.
 		 */
-		void								ExpandAll() const;
+		void								ExpandAll();
 
 		/**
 		 * Collapses selected items.
 		 *
 		 * \return Collapses selected items.
 		 */
-		void								CollapseSelected() const;
+		void								CollapseSelected();
 
 		/**
 		 * Collapses all items.
 		 *
 		 * \return Collapses all items.
 		 */
-		void								CollapseAll() const;
+		void								CollapseAll();
 
 		/**
 		 * Gathers the selected items into a vector.
@@ -148,6 +152,13 @@ namespace lsw {
 		size_t								GatherSelected( std::vector<size_t> &_vReturn, bool _bIncludeNonVisible = false ) const;
 
 		/**
+		 * Gets the index of the highlighted item or returns size_t( -1 ).
+		 *
+		 * \return Returs the index of the highlighted item or size_t( -1 ) if there is none.
+		 */
+		size_t								FindHighlighted() const;
+
+		/**
 		 * Unselects all.
 		 */
 		void								UnselectAll();
@@ -166,6 +177,14 @@ namespace lsw {
 			m_bDontUpdate = false;
 			UpdateListView();
 		}
+
+		/**
+		 * Determines if the given tree item is hidden.
+		 *
+		 * \param _hiItem The item to check for being hidden
+		 * \return Returns true if any parent of the item is collapsed.
+		 */
+		bool								IsHidden( HTREEITEM _hiItem ) const;
 
 		/**
 		 * Requesting information (notification responder).
@@ -372,6 +391,15 @@ namespace lsw {
 		virtual LSW_HANDLED					Move( LONG _lX, LONG _lY );
 
 		/**
+		 * WM_KEYDOWN.
+		 *
+		 * \param _uiKeyCode The virtual-key code of the nonsystem key.
+		 * \param _uiFlags The repeat count, scan code, extended-key flag, context code, previous key-state flag, and transition-state flag.
+		 * \return Returns a HANDLED code.
+		 */
+		virtual LSW_HANDLED					KeyDown( UINT _uiKeyCode, UINT _uiFlags );
+
+		/**
 		 * The WM_NOTIFY -> LVN_ITEMCHANGED handler.
 		 *
 		 * \param _lplvParm The notifacation structure.
@@ -430,7 +458,17 @@ namespace lsw {
 		/**
 		 * Updates the list view (clears the cache, sets the size, and updates selections/hot).
 		 */
-		void								UpdateListView() const;
+		void								UpdateListView();
+
+		/**
+		 * Removes focus from any hidden items.
+		 */
+		void								UnfocusCollapsed();
+
+		/**
+		 * Removes focus from all items.
+		 */
+		void								UnfocusAll();
 
 		/**
 		 * List-view window procedure.  The list-view is hidden.
