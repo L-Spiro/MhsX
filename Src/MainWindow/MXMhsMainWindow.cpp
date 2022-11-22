@@ -386,6 +386,11 @@ namespace mx {
 			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowStringTheory,		{ _T_LEN_B7A8A10D_Show_String_Theory },			MX_WH_SHOW_STRING_THEORY,			0 };
 			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
 		}
+		{
+														//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
+			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowStringTheory,		{ _T_LEN_155439B4_Show_Floating_Point_Studio },	MX_WH_SHOW_STRING_THEORY,			0 };
+			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
+		}
 
 
 		CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( CMainWindowLayout::MX_MWI_TOOLBAR0 ));
@@ -1171,40 +1176,95 @@ namespace mx {
 		m_pmhMemHack->HotkeyManager().HandleHookHotkey( _iId );
 	}
 
-	// Hotkey handler for opening the options window.
+	/**
+	 * Hotkey handler for opening the options window.
+	 *
+	 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+	 * \param _uiParm1 Unused.
+	 * \param _uiParm2 Unused.
+	 * \param _uiParm3 Unused.
+	 */
 	void __stdcall CMhsMainWindow::Hotkey_OpenOptions( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
 		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
 		pmhThis->ShowOptions( pmhThis->LastOptionsShown() );
 	}
 
-	// Hotkey handler for showing the Found Addresses window.
+	/**
+	 * Hotkey handler for showing the Found Addresses window.
+	 *
+	 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+	 * \param _uiParm1 Unused.
+	 * \param _uiParm2 Unused.
+	 * \param _uiParm3 Unused.
+	 */
 	void __stdcall CMhsMainWindow::Hotkey_ShowFoundAddresses( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
 		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
 		pmhThis->ShowFoundAddress();
 	}
 
-	// Hotkey handler for showing the Expression Evaluator window.
+	/**
+	 * Hotkey handler for showing the Expression Evaluator window.
+	 *
+	 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+	 * \param _uiParm1 Unused.
+	 * \param _uiParm2 Unused.
+	 * \param _uiParm3 Unused.
+	 */
 	void __stdcall CMhsMainWindow::Hotkey_ShowExpressionEvaluator( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
 		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
 		pmhThis->ShowExpEval();
 	}
 
-	// Hotkey handler for showing the Converter window.
+	/**
+	 * Hotkey handler for showing the Converter window.
+	 *
+	 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+	 * \param _uiParm1 Unused.
+	 * \param _uiParm2 Unused.
+	 * \param _uiParm3 Unused.
+	 */
 	void __stdcall CMhsMainWindow::Hotkey_ShowConverter( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
 		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
 		pmhThis->ShowConverter();
 	}
 
-	// Hotkey handler for showing the PE Works window.
+	/**
+	 * Hotkey handler for showing the PE Works window.
+	 *
+	 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+	 * \param _uiParm1 Unused.
+	 * \param _uiParm2 Unused.
+	 * \param _uiParm3 Unused.
+	 */
 	void __stdcall CMhsMainWindow::Hotkey_ShowPeWorks( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
 		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
 		pmhThis->ShowPeWorks();
 	}
 
-	// Hotkey handler for showing the String Theory window.
+	/**
+	 * Hotkey handler for showing the String Theory window.
+	 *
+	 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+	 * \param _uiParm1 Unused.
+	 * \param _uiParm2 Unused.
+	 * \param _uiParm3 Unused.
+	 */
 	void __stdcall CMhsMainWindow::Hotkey_ShowStringTheory( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
 		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
 		pmhThis->ShowStringTheory();
+	}
+
+	/**
+	 * Hotkey handler for showing the Floating-Point Studio window.
+	 *
+	 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+	 * \param _uiParm1 Unused.
+	 * \param _uiParm2 Unused.
+	 * \param _uiParm3 Unused.
+	 */
+	void __stdcall CMhsMainWindow::Hotkey_ShowFloatingPointStudio( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
+		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
+		pmhThis->ShowFloatingPointStudio();
 	}
 
 }	// namespace mx

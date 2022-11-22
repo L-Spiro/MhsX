@@ -706,7 +706,6 @@ namespace lsw {
 							else {
 								// Holy shift!
 								if ( ptNode->Parent() && ptNode->Parent() != &m_tRoot ) {
-									UnselectAll();
 									UnfocusAll();
 									ptNode->Value().uiState |= (TVIS_SELECTED | LSW_TREELIST_HIGHLIGHTED);
 									ee::CTree<LSW_TREE_ROW> * ptPrev = ptNode->Prev();
