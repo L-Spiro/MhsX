@@ -161,6 +161,12 @@
     <Filter Include="Source Files\RamBuffer">
       <UniqueIdentifier>{179688ee-f8af-4dd7-83b3-10cf0afb7ade}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Speedhack">
+      <UniqueIdentifier>{8e5af683-1842-417a-8ed1-09f413e87007}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Speedhack">
+      <UniqueIdentifier>{265e3114-ede9-4bfb-bbc0-c0c8d27ff60e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Strings\MXStringDecoder.cpp">

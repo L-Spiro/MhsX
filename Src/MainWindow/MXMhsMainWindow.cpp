@@ -388,7 +388,7 @@ namespace mx {
 		}
 		{
 														//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
-			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowStringTheory,		{ _T_LEN_155439B4_Show_Floating_Point_Studio },	MX_WH_SHOW_STRING_THEORY,			0 };
+			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowFloatingPointStudio,	{ _T_LEN_155439B4_Show_Floating_Point_Studio },	MX_WH_SHOW_FLOATING_POINT_STUDIO,	0 };
 			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
 		}
 
@@ -1264,7 +1264,7 @@ namespace mx {
 	 */
 	void __stdcall CMhsMainWindow::Hotkey_ShowFloatingPointStudio( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
 		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
-		pmhThis->ShowFloatingPointStudio();
+		pmhThis->ShowFloatingPointStudio( std::nan( "0" ) );
 	}
 
 }	// namespace mx
