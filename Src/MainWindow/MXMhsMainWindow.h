@@ -293,23 +293,75 @@ namespace mx {
 		// Do hook-based hotkeys.
 		void								PollHookKeys( INT _iId );
 
-		// Hotkey handler for opening the options window.
+		/**
+		 * Hotkey handler for opening the options window.
+		 *
+		 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+		 * \param _uiParm1 Unused.
+		 * \param _uiParm2 Unused.
+		 * \param _uiParm3 Unused.
+		 */
 		static void __stdcall				Hotkey_OpenOptions( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
 		
-		// Hotkey handler for showing the Found Addresses window.
+		/**
+		 * Hotkey handler for showing the Found Addresses window.
+		 *
+		 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+		 * \param _uiParm1 Unused.
+		 * \param _uiParm2 Unused.
+		 * \param _uiParm3 Unused.
+		 */
 		static void __stdcall				Hotkey_ShowFoundAddresses( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
 
-		// Hotkey handler for showing the Expression Evaluator window.
+		/**
+		 * Hotkey handler for showing the Expression Evaluator window.
+		 *
+		 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+		 * \param _uiParm1 Unused.
+		 * \param _uiParm2 Unused.
+		 * \param _uiParm3 Unused.
+		 */
 		static void __stdcall				Hotkey_ShowExpressionEvaluator( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
 
-		// Hotkey handler for showing the Converter window.
+		/**
+		 * Hotkey handler for showing the Converter window.
+		 *
+		 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+		 * \param _uiParm1 Unused.
+		 * \param _uiParm2 Unused.
+		 * \param _uiParm3 Unused.
+		 */
 		static void __stdcall				Hotkey_ShowConverter( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
 
-		// Hotkey handler for showing the PE Works window.
+		/**
+		 * Hotkey handler for showing the PE Works window.
+		 *
+		 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+		 * \param _uiParm1 Unused.
+		 * \param _uiParm2 Unused.
+		 * \param _uiParm3 Unused.
+		 */
 		static void __stdcall				Hotkey_ShowPeWorks( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
 
-		// Hotkey handler for showing the String Theory window.
+		/**
+		 * Hotkey handler for showing the String Theory window.
+		 *
+		 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+		 * \param _uiParm1 Unused.
+		 * \param _uiParm2 Unused.
+		 * \param _uiParm3 Unused.
+		 */
 		static void __stdcall				Hotkey_ShowStringTheory( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
+
+		/**
+		 * Hotkey handler for showing the Floating-Point Studio window.
+		 *
+		 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+		 * \param _uiParm1 Unused.
+		 * \param _uiParm2 Unused.
+		 * \param _uiParm3 Unused.
+		 */
+		static void __stdcall				Hotkey_ShowFloatingPointStudio( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
 
 	};
 
