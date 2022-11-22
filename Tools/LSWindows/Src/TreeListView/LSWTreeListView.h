@@ -359,8 +359,7 @@ namespace lsw {
 		 * \param _ptThis The items whose next item is to be obtained, accounting for expandedness.
 		 * \return Returns the next item, accounting for expandedness.
 		 */
-		ee::CTree<CTreeListView::LSW_TREE_ROW> *
-											NextByExpansion( ee::CTree<CTreeListView::LSW_TREE_ROW> * _ptThis ) const;
+		ee::CTree<LSW_TREE_ROW> *			NextByExpansion( ee::CTree<LSW_TREE_ROW> * _ptThis ) const;
 
 		/**
 		 * Gets the next item.
@@ -368,8 +367,7 @@ namespace lsw {
 		 * \param _ptThis The items whose next item is to be obtained.
 		 * \return Returns the next item.
 		 */
-		ee::CTree<CTreeListView::LSW_TREE_ROW> *
-											Next( ee::CTree<CTreeListView::LSW_TREE_ROW> * _ptThis ) const;
+		ee::CTree<LSW_TREE_ROW> *			Next( ee::CTree<LSW_TREE_ROW> * _ptThis ) const;
 
 		/**
 		 * WM_SIZE.
@@ -454,6 +452,13 @@ namespace lsw {
 		 * \param _stIndex Tracks the current item's index.
 		 */
 		void								GatherSelected( HTREEITEM _htiFrom, std::vector<size_t> &_vReturn, bool _bIncludeNonVisible, size_t &_stIndex ) const;
+
+		/**
+		 * Gets the highlighted item or returns nullptr.
+		 *
+		 * \return Returs the highlighted item or nullptr if there is none.
+		 */
+		ee::CTree<LSW_TREE_ROW> *			GetHighlighted();
 
 		/**
 		 * Updates the list view (clears the cache, sets the size, and updates selections/hot).

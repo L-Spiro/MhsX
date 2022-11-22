@@ -389,6 +389,21 @@ namespace lsw {
 		BOOL								bEmptied;
 	};
 
+	struct LSW_KEY_FLAGS {
+		union {
+			DWORD							dwFlags;
+			struct {
+				DWORD						dwRepeatCnt : 16;
+				DWORD						dwScanCode : 8;
+				DWORD						dwIsExtended : 1;
+				DWORD						dwReserved : 4;
+				DWORD						dwContextCode : 1;
+				DWORD						dwPrevState : 1;
+				DWORD						dwTransitionState : 1;
+			}								s;
+		};
+	};
+
 	class CHelpers {
 	public :
 		// Aligns a WORD pointer to a 4-byte address.
