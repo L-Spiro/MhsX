@@ -167,6 +167,12 @@
     <Filter Include="Source Files\Speedhack">
       <UniqueIdentifier>{265e3114-ede9-4bfb-bbc0-c0c8d27ff60e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Programs">
+      <UniqueIdentifier>{81a5f3e9-8d22-4e5c-a9e2-2d2ecf79a5fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Programs">
+      <UniqueIdentifier>{879f87be-0f98-424a-aadd-8ce677838eb7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Strings\MXStringDecoder.cpp">
@@ -532,6 +538,9 @@
     <ClCompile Include="Src\StringTheory\MXStringTheoryOperationsWindow.cpp">
       <Filter>Source Files\StringTheory</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Options\MXOptionsPagePrograms.cpp">
+      <Filter>Source Files\Options</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -808,6 +817,12 @@
     </ClInclude>
     <ClInclude Include="Src\StringTheory\MXStringTheoryOperationsWindow.h">
       <Filter>Header Files\StringTheory</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Options\MXOptionsPagePrograms.h">
+      <Filter>Header Files\Options</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Programs\MXPrograms.h">
+      <Filter>Header Files\Programs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1283,7 +1283,7 @@ namespace mx {
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_CE3DF015_Hotkey_Options ),														// pwcText
 			_LEN_CE3DF015,							// sTextLen
-			MX_OI_OPEN_PROCESS,						// dwParentId
+			MX_OI_HOTKEYS,						// dwParentId
 		},
 		
 		{
@@ -1300,7 +1300,7 @@ namespace mx {
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_1BBC12E6_Key_ ),		// pwcText
 			_LEN_1BBC12E6,							// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},
 		{
 			LSW_LT_BUTTON,							// ltType
@@ -1316,7 +1316,7 @@ namespace mx {
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_971A9E73_Press_to_set_hotkey_ ),													// pwcText
 			_LEN_971A9E73,																						// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},
 
 		{
@@ -1333,7 +1333,7 @@ namespace mx {
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_965F37C1_Method_ ),	// pwcText
 			_LEN_965F37C1,							// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},
 		{
 			LSW_LT_COMBOBOX,						// ltType
@@ -1349,7 +1349,7 @@ namespace mx {
 			0,										// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},
 
 		/*{
@@ -1366,7 +1366,7 @@ namespace mx {
 			0,										// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},*/
 		
 		/*{
@@ -1383,7 +1383,7 @@ namespace mx {
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_CC2CA4F0_Mod_ ),		// pwcText
 			_LEN_CC2CA4F0,							// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},
 		{
 			LSW_LT_COMBOBOX,						// ltType
@@ -1399,7 +1399,7 @@ namespace mx {
 			0,										// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},*/
 
 		{
@@ -1416,7 +1416,7 @@ namespace mx {
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_CE5D569B_Function_ ),	// pwcText
 			_LEN_CE5D569B,							// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},
 		{
 			LSW_LT_COMBOBOX,						// ltType
@@ -1432,7 +1432,7 @@ namespace mx {
 			0,										// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},
 
 
@@ -1453,7 +1453,7 @@ namespace mx {
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_12A629FB_Parameter_Not_Used ),													// pwcText
 			_LEN_12A629FB,							// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},
 		{
 			LSW_LT_LABEL,							// ltType
@@ -1469,7 +1469,7 @@ namespace mx {
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_0F53EEA7_Parm_1_ ),	// pwcText
 			_LEN_0F53EEA7,							// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},
 		{
 			LSW_LT_COMBOBOX,						// ltType
@@ -1481,11 +1481,11 @@ namespace mx {
 			MX_HOTKEY_OPTIONS_PARMS_TOP + MX_DEF_STATIC_HEIGHT + (MX_OPTIONS_PARM_PART_HEIGHT * 0),						// iTop
 			(MX_HOTKEY_TOP_WIDTH - MX_HOTKEY_OPTIONS_COMBO_LEFT),
 			MX_DEF_EDIT_HEIGHT,						// dwHeight
-			MX_EDITSTYLE,							// dwStyle
+			MX_COMBOSTYLE,							// dwStyle
 			WS_EX_CLIENTEDGE,						// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},
 
 		{
@@ -1502,7 +1502,7 @@ namespace mx {
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_12A629FB_Parameter_Not_Used ),													// pwcText
 			_LEN_12A629FB,							// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},
 		{
 			LSW_LT_LABEL,							// ltType
@@ -1518,7 +1518,7 @@ namespace mx {
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_247EBD64_Parm_2_ ),	// pwcText
 			_LEN_247EBD64,							// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},
 		{
 			LSW_LT_COMBOBOX,						// ltType
@@ -1530,11 +1530,11 @@ namespace mx {
 			MX_HOTKEY_OPTIONS_PARMS_TOP + MX_DEF_STATIC_HEIGHT + (MX_OPTIONS_PARM_PART_HEIGHT * 1),
 			(MX_HOTKEY_TOP_WIDTH - MX_HOTKEY_OPTIONS_COMBO_LEFT),
 			MX_DEF_EDIT_HEIGHT,						// dwHeight
-			MX_EDITSTYLE,							// dwStyle
+			MX_COMBOSTYLE,							// dwStyle
 			WS_EX_CLIENTEDGE,						// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},
 
 		{
@@ -1551,7 +1551,7 @@ namespace mx {
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_12A629FB_Parameter_Not_Used ),													// pwcText
 			_LEN_12A629FB,							// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},
 		{
 			LSW_LT_LABEL,							// ltType
@@ -1567,10 +1567,10 @@ namespace mx {
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_3D658C25_Parm_3_ ),	// pwcText
 			_LEN_3D658C25,							// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},
 		{
-			LSW_LT_EDIT,							// ltType
+			LSW_LT_COMBOBOX,						// ltType
 			MX_OI_HOTKEYS_OPTIONS_PARM3_EDIT,		// wId
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
@@ -1579,11 +1579,11 @@ namespace mx {
 			MX_HOTKEY_OPTIONS_PARMS_TOP + MX_DEF_STATIC_HEIGHT + (MX_OPTIONS_PARM_PART_HEIGHT * 2),
 			(MX_HOTKEY_TOP_WIDTH - MX_HOTKEY_OPTIONS_COMBO_LEFT),
 			MX_DEF_EDIT_HEIGHT,						// dwHeight
-			MX_EDITSTYLE,							// dwStyle
+			MX_COMBOSTYLE,							// dwStyle
 			WS_EX_CLIENTEDGE,						// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 		},
 
 
@@ -1601,7 +1601,7 @@ namespace mx {
 			0,										// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
-			MX_OI_GENERAL,							// dwParentId
+			MX_OI_HOTKEYS,							// dwParentId
 
 			LSW_NO_SIZE_EXP,
 			_T_LEN_EF7346DB_The____Hotkey____method_does_not_allow_duplicate_hotkeys_,							// pcToolTip, sToolTipLen
@@ -1611,16 +1611,318 @@ namespace mx {
 
 	};
 
+#undef MX_HOTKEY_OPTIONS_LEFT_WIDTH
 #undef MX_HOTKEY_OPTIONS_COMBO_LEFT
 #undef MX_HOTKEY_OPTIONS_MOD_WIDTH
-#undef MX_HOTKEY_OPTIONS_LEFT_WIDTH
-#undef MX_HOTKEY_OPTIONS_LEFT
 #undef MX_HOTKEY_OPTIONS_GROUP_HIEGHT
 #undef MX_HOTKEY_OPTIONS_PARMS_TOP
 #undef MX_OPTIONS_PARM_PART_HEIGHT
+
+#define MX_HOTKEY_OPTIONS_LEFT_WIDTH				(40)
+#define MX_HOTKEY_OPTIONS_COMBO_LEFT				(MX_HOTKEY_OPTIONS_LEFT + MX_HOTKEY_OPTIONS_LEFT_WIDTH)
+#define MX_OPTIONS_PARM_PART_HEIGHT					(MX_THIN_PADDING + MX_DEF_EDIT_HEIGHT)
+#define MX_PROGRAMS_OPTIONS_GROUP_HIEGHT			(MX_GROUP_TOP + MX_GROUP_BOTTOM + MX_THIN_PADDING * 0 + (MX_OPTIONS_PARM_PART_HEIGHT * 4))
+
+	// Programs section.
+	LSW_WIDGET_LAYOUT COptionsLayout::m_wlOptionsPrograms[] = {
+		{
+			MX_OPTIONS_PROGRAMS,					// ltType
+			MX_OI_PROGRAMS,							// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_OD_COORD,
+			WS_CHILDWINDOW | WS_VISIBLE | DS_3DLOOK | DS_FIXEDSYS | DS_SETFONT | DS_CONTROL,										// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_CONTROLPARENT,												// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_OI_NONE,								// dwParentId
+		},
+
+		{
+			LSW_LT_LISTBOX,							// ltType
+			MX_OI_PROGRAMS_LIST,					// wId
+			WC_LISTBOXW,							// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			0,										// iLeft
+			0,										// iTop
+			MX_HOTKEY_TOP_WIDTH,					// dwWidth
+			MX_HOTKEY_TOP_HEIGHT,					// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL | LBS_NOTIFY | LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL,			// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY | WS_EX_CLIENTEDGE,							// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+
+			LSW_NO_SIZE_EXP,
+			_T_LEN_8E05DFDB_Hold_Ctrl_while_selecting_to_copy_program_settings_,													// pcToolTip, sToolTipLen
+			WS_EX_TOPMOST,							// dwToolTipStyleEx
+			MX_TOOLTIP_STYLE,						// dwToolTipStyle
+		},
+		{
+			LSW_LT_BUTTON,							// ltType
+			MX_OI_PROGRAMS_ADD,						// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_HOTKEY_TOP_WIDTH + MX_THIN_PADDING,	// iLeft
+			0,										// iTop
+			MX_OD_W - (MX_HOTKEY_TOP_WIDTH + MX_THIN_PADDING),																		// dwWidth
+			MX_DEF_BUTTON_HEIGHT,					// dwHeight
+			MX_BUTTONSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_53AE02A5_New ),		// pwcText
+			_LEN_53AE02A5,							// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+
+			LSW_NO_SIZE_EXP,
+			_T_LEN_A5A04C84_Adds_a_new_program_using_the_current_settings_,															// pcToolTip, sToolTipLen
+			WS_EX_TOPMOST,							// dwToolTipStyleEx
+			MX_TOOLTIP_STYLE,						// dwToolTipStyle
+		},
+		{
+			LSW_LT_BUTTON,							// ltType
+			MX_OI_PROGRAMS_DELETE,					// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_HOTKEY_TOP_WIDTH + MX_THIN_PADDING,	// iLeft
+			MX_DEF_BUTTON_HEIGHT + MX_PADDING,		// iTop
+			MX_OD_W - (MX_HOTKEY_TOP_WIDTH + MX_THIN_PADDING),																		// dwWidth
+			MX_DEF_BUTTON_HEIGHT,					// dwHeight
+			MX_BUTTONSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_3DBE79B1_Delete ),	// pwcText
+			_LEN_3DBE79B1,							// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+
+			LSW_NO_SIZE_EXP,
+			_T_LEN_B4FF749D_Deletes_all_selected_programs_,																			// pcToolTip, sToolTipLen
+			WS_EX_TOPMOST,							// dwToolTipStyleEx
+			MX_TOOLTIP_STYLE,						// dwToolTipStyle
+		},
+
+		{
+			LSW_LT_BUTTON,							// ltType
+			MX_OI_PROGRAMS_UP,						// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_HOTKEY_TOP_WIDTH + MX_THIN_PADDING,	// iLeft
+			MX_HOTKEY_TOP_HEIGHT - MX_DEF_BUTTON_HEIGHT,																			// iTop
+			MX_UPDOWN_BUTTON_WIDTHS,				// dwWidth
+			MX_DEF_BUTTON_HEIGHT,					// dwHeight
+			MX_BUTTONSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_D610CAD2_Up ),		// pwcText
+			_LEN_D610CAD2,							// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+
+			LSW_NO_SIZE_EXP,
+			_T_LEN_74F2386F_Moves_all_selected_programs_up_,																		// pcToolTip, sToolTipLen
+			WS_EX_TOPMOST,							// dwToolTipStyleEx
+			MX_TOOLTIP_STYLE,						// dwToolTipStyle
+		},
+		{
+			LSW_LT_BUTTON,							// ltType
+			MX_OI_PROGRAMS_DOWN,						// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_HOTKEY_TOP_WIDTH + MX_THIN_PADDING * 2 + MX_UPDOWN_BUTTON_WIDTHS,													// iLeft
+			MX_HOTKEY_TOP_HEIGHT - MX_DEF_BUTTON_HEIGHT,																			// iTop
+			MX_UPDOWN_BUTTON_WIDTHS,				// dwWidth
+			MX_DEF_BUTTON_HEIGHT,					// dwHeight
+			MX_BUTTONSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_BCCD3F05_Down ),		// pwcText
+			_LEN_BCCD3F05,							// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+
+			LSW_NO_SIZE_EXP,
+			_T_LEN_9A810ED9_Moves_all_selected_programs_down_,																		// pcToolTip, sToolTipLen
+			WS_EX_TOPMOST,							// dwToolTipStyleEx
+			MX_TOOLTIP_STYLE,						// dwToolTipStyle
+		},
+
+
+		// ==== Program Options ==== //
+		{
+			LSW_LT_GROUPBOX,						// ltType
+			MX_OI_PROGRAMS_OPTIONS_GROUP,			// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			0,										// iLeft
+			MX_HOTKEY_TOP_HEIGHT,					// iTop
+			MX_OD_W,								// dwWidth
+			MX_PROGRAMS_OPTIONS_GROUP_HIEGHT,		// dwHeight
+			MX_GROUPSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_69D7866D_Program_Options ),																			// pwcText
+			_LEN_69D7866D,							// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+		},
+		{
+			LSW_LT_LABEL,							// ltType
+			MX_OI_PROGRAMS_OPTIONS_NAME_LABEL,		// wId
+			WC_STATICW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_HOTKEY_OPTIONS_LEFT,					// iLeft
+			MX_HOTKEY_TOP_HEIGHT + MX_GROUP_TOP + (MX_DEF_EDIT_HEIGHT-MX_DEF_STATIC_HEIGHT) / 2 + (MX_OPTIONS_PARM_PART_HEIGHT * 0),// iTop
+			MX_HOTKEY_OPTIONS_LEFT_WIDTH,			// dwWidth
+			MX_DEF_STATIC_HEIGHT,					// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_3CF29F70_Name_ ),		// pwcText
+			_LEN_3CF29F70,							// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+		},
+		{
+			LSW_LT_EDIT,							// ltType
+			MX_OI_PROGRAMS_OPTIONS_NAME_EDIT,		// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_HOTKEY_OPTIONS_COMBO_LEFT,			// iLeft
+			MX_HOTKEY_TOP_HEIGHT + MX_GROUP_TOP + (MX_OPTIONS_PARM_PART_HEIGHT * 0),												// iTop
+			(MX_HOTKEY_TOP_WIDTH - MX_HOTKEY_OPTIONS_COMBO_LEFT),
+			MX_DEF_EDIT_HEIGHT,						// dwHeight
+			MX_EDITSTYLE,							// dwStyle
+			WS_EX_CLIENTEDGE,						// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+		},
+
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_PROGRAMS_OPTIONS_HIDDEN_CHECK,	// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_HOTKEY_TOP_WIDTH + MX_THIN_PADDING,	// iLeft
+			MX_HOTKEY_TOP_HEIGHT + MX_GROUP_TOP + (MX_DEF_EDIT_HEIGHT-MX_DEF_CHECK_HEIGHT) / 2,										// iTop
+			MX_OD_W - (MX_HOTKEY_TOP_WIDTH + MX_THIN_PADDING) - MX_GROUP_LEFT,														// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_8FF1EC8B_Hidden ),	// pwcText
+			_LEN_8FF1EC8B,							// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+		},
+
+		{
+			LSW_LT_LABEL,							// ltType
+			MX_OI_PROGRAMS_OPTIONS_PROGRAM_LABEL,	// wId
+			WC_STATICW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_HOTKEY_OPTIONS_LEFT,					// iLeft
+			MX_HOTKEY_TOP_HEIGHT + MX_GROUP_TOP + (MX_DEF_EDIT_HEIGHT-MX_DEF_STATIC_HEIGHT) / 2 + (MX_OPTIONS_PARM_PART_HEIGHT * 1),// iTop
+			MX_HOTKEY_OPTIONS_LEFT_WIDTH,			// dwWidth
+			MX_DEF_STATIC_HEIGHT,					// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_073FFE27_Program_ ),	// pwcText
+			_LEN_073FFE27,							// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+		},
+		{
+			LSW_LT_EDIT,							// ltType
+			MX_OI_PROGRAMS_OPTIONS_PROGRAM_EDIT,	// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_HOTKEY_OPTIONS_COMBO_LEFT,			// iLeft
+			MX_HOTKEY_TOP_HEIGHT + MX_GROUP_TOP + (MX_OPTIONS_PARM_PART_HEIGHT * 1),												// iTop
+			(MX_HOTKEY_TOP_WIDTH - MX_HOTKEY_OPTIONS_COMBO_LEFT),
+			MX_DEF_EDIT_HEIGHT,						// dwHeight
+			MX_EDITSTYLE,							// dwStyle
+			WS_EX_CLIENTEDGE,						// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+		},
+
+		{
+			LSW_LT_LABEL,							// ltType
+			MX_OI_PROGRAMS_OPTIONS_ARGUMENTS_LABEL,	// wId
+			WC_STATICW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_HOTKEY_OPTIONS_LEFT,					// iLeft
+			MX_HOTKEY_TOP_HEIGHT + MX_GROUP_TOP + (MX_DEF_EDIT_HEIGHT-MX_DEF_STATIC_HEIGHT) / 2 + (MX_OPTIONS_PARM_PART_HEIGHT * 2),// iTop
+			MX_HOTKEY_OPTIONS_LEFT_WIDTH,			// dwWidth
+			MX_DEF_STATIC_HEIGHT,					// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_877EEE17_Arguments_ ),// pwcText
+			_LEN_877EEE17,							// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+		},
+		{
+			LSW_LT_EDIT,							// ltType
+			MX_OI_PROGRAMS_OPTIONS_ARGUMENTS_EDIT,	// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_HOTKEY_OPTIONS_COMBO_LEFT,			// iLeft
+			MX_HOTKEY_TOP_HEIGHT + MX_GROUP_TOP + (MX_OPTIONS_PARM_PART_HEIGHT * 2),												// iTop
+			(MX_HOTKEY_TOP_WIDTH - MX_HOTKEY_OPTIONS_COMBO_LEFT),
+			MX_DEF_EDIT_HEIGHT,						// dwHeight
+			MX_EDITSTYLE,							// dwStyle
+			WS_EX_CLIENTEDGE,						// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+		},
+
+		{
+			LSW_LT_LABEL,							// ltType
+			MX_OI_PROGRAMS_OPTIONS_WORKINGDIR_LABEL,// wId
+			WC_STATICW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_HOTKEY_OPTIONS_LEFT,					// iLeft
+			MX_HOTKEY_TOP_HEIGHT + MX_GROUP_TOP + (MX_DEF_EDIT_HEIGHT-MX_DEF_STATIC_HEIGHT) / 2 + (MX_OPTIONS_PARM_PART_HEIGHT * 3),// iTop
+			MX_HOTKEY_OPTIONS_LEFT_WIDTH,			// dwWidth
+			MX_DEF_STATIC_HEIGHT,					// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_94F83C03_Working_Dir_ ),																				// pwcText
+			_LEN_94F83C03,							// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+		},
+		{
+			LSW_LT_EDIT,							// ltType
+			MX_OI_PROGRAMS_OPTIONS_WORKINGDIR_EDIT,	// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_HOTKEY_OPTIONS_COMBO_LEFT,			// iLeft
+			MX_HOTKEY_TOP_HEIGHT + MX_GROUP_TOP + (MX_OPTIONS_PARM_PART_HEIGHT * 3),												// iTop
+			(MX_HOTKEY_TOP_WIDTH - MX_HOTKEY_OPTIONS_COMBO_LEFT),
+			MX_DEF_EDIT_HEIGHT,						// dwHeight
+			MX_EDITSTYLE,							// dwStyle
+			WS_EX_CLIENTEDGE,						// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+		},
+	};
+
+#undef MX_HOTKEY_OPTIONS_COMBO_LEFT
+#undef MX_HOTKEY_OPTIONS_LEFT_WIDTH
+#undef MX_HOTKEY_OPTIONS_LEFT
 #undef MX_UPDOWN_BUTTON_WIDTHS
 #undef MX_HOTKEY_TOP_WIDTH
 #undef MX_HOTKEY_TOP_HEIGHT
+#undef MX_OPTIONS_PARM_PART_HEIGHT
+#undef MX_PROGRAMS_OPTIONS_GROUP_HIEGHT
+
 
 #undef MX_OD_COORD
 #undef MX_OD_H
@@ -1632,7 +1934,6 @@ namespace mx {
 #undef MX_OPTIONS_LIST_W
 #undef MX_OPTIONS_H
 #undef MX_OPTIONS_W
-
 	
 
 	// == Functions.
@@ -1686,6 +1987,11 @@ namespace mx {
 	// Creates the hotkeys options page.
 	CWidget * COptionsLayout::CreateHotkeysPage( CWidget * _pwParent, MX_OPTIONS * _poOptions ) {
 		return CreatePage( _pwParent, m_wlOptionsHotkeys, MX_ELEMENTS( m_wlOptionsHotkeys ), _poOptions );
+	}
+
+		// Creates the programs options page.
+	CWidget * COptionsLayout::CreateProgramsPage( CWidget * _pwParent, MX_OPTIONS * _poOptions ) {
+		return CreatePage( _pwParent, m_wlOptionsPrograms, MX_ELEMENTS( m_wlOptionsPrograms ), _poOptions );
 	}
 
 	// Default window-creation.

@@ -27,6 +27,7 @@ namespace mx {
 		CWidget * pwGenSearch = COptionsLayout::CreateGeneralSearchPage( this, m_poOptions );
 		CWidget * pwSearchEx = COptionsLayout::CreateSearchExPage( this, m_poOptions );
 		CWidget * pwHotkeys = COptionsLayout::CreateHotkeysPage( this, m_poOptions );
+		CWidget * pwPrograms = COptionsLayout::CreateProgramsPage( this, m_poOptions );
 
 
 		// Order of pushing them here determines the order in the window/list.
@@ -35,6 +36,7 @@ namespace mx {
 		m_vPages.push_back( static_cast<COptionsPage *>(pwGenSearch) );
 		m_vPages.push_back( static_cast<COptionsPage *>(pwSearchEx) );
 		m_vPages.push_back( static_cast<COptionsPage *>(pwHotkeys) );
+		m_vPages.push_back( static_cast<COptionsPage *>(pwPrograms) );
 
 		CListBox * plbBox = static_cast<CListBox *>(FindChild( COptionsLayout::MX_OI_LIST ));
 		if ( plbBox ) {

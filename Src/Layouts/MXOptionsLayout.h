@@ -19,6 +19,7 @@ namespace mx {
 			MX_OI_OK,
 			MX_OI_CANCEL,
 
+
 			MX_OI_GENERAL,
 			MX_OI_GENERAL_REFRESH_RATE,
 			MX_OI_GENERAL_REFRESH_FOUND_ADDRESSES,
@@ -76,10 +77,12 @@ namespace mx {
 			MX_OI_GENERAL_SEARCH_EPSILON,
 			MX_OI_GENERAL_SEARCH_EPSILON_EDIT,
 
+
 			MX_OI_SEARCH_EX,
 			MX_OI_SEARCH_EX_BYTESWAP,
 			MX_OI_SEARCH_EX_BYTESWAP_TYPE_LABEL,
 			MX_OI_SEARCH_EX_BYTESWAP_TYPE_COMBO,
+
 
 			MX_OI_OPEN_PROCESS,
 			MX_OI_OPEN_PROCESS_SHOW_GROUP,
@@ -121,6 +124,24 @@ namespace mx {
 			MX_OI_HOTKEYS_OPTIONS_PARM2_EDIT,
 			MX_OI_HOTKEYS_OPTIONS_PARM3_EDIT,
 			MX_OI_HOTKEYS_OPTIONS_WARNING_LABEL,
+
+
+			MX_OI_PROGRAMS,
+			MX_OI_PROGRAMS_LIST,
+			MX_OI_PROGRAMS_ADD,
+			MX_OI_PROGRAMS_DELETE,
+			MX_OI_PROGRAMS_UP,
+			MX_OI_PROGRAMS_DOWN,
+			MX_OI_PROGRAMS_OPTIONS_GROUP,
+			MX_OI_PROGRAMS_OPTIONS_NAME_LABEL,
+			MX_OI_PROGRAMS_OPTIONS_NAME_EDIT,
+			MX_OI_PROGRAMS_OPTIONS_HIDDEN_CHECK,
+			MX_OI_PROGRAMS_OPTIONS_PROGRAM_LABEL,
+			MX_OI_PROGRAMS_OPTIONS_PROGRAM_EDIT,
+			MX_OI_PROGRAMS_OPTIONS_ARGUMENTS_LABEL,
+			MX_OI_PROGRAMS_OPTIONS_ARGUMENTS_EDIT,
+			MX_OI_PROGRAMS_OPTIONS_WORKINGDIR_LABEL,
+			MX_OI_PROGRAMS_OPTIONS_WORKINGDIR_EDIT,
 		};
 
 
@@ -143,6 +164,9 @@ namespace mx {
 		// Creates the hotkeys options page.
 		static CWidget *						CreateHotkeysPage( CWidget * _pwParent, MX_OPTIONS * _poOptions );
 
+		// Creates the programs options page.
+		static CWidget *						CreateProgramsPage( CWidget * _pwParent, MX_OPTIONS * _poOptions );
+
 
 	protected :
 		// == Members.
@@ -163,6 +187,9 @@ namespace mx {
 
 		// Hotkeys section.
 		static LSW_WIDGET_LAYOUT				m_wlOptionsHotkeys[];
+
+		// Programs section.
+		static LSW_WIDGET_LAYOUT				m_wlOptionsPrograms[];
 
 
 		// == Functions.

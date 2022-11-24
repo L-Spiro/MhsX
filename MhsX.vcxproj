@@ -308,6 +308,7 @@
     <ClCompile Include="Src\Options\MXOptionsPageGenSearch.cpp" />
     <ClCompile Include="Src\Options\MXOptionsPageHotkeys.cpp" />
     <ClCompile Include="Src\Options\MXOptionsPageOpenProc.cpp" />
+    <ClCompile Include="Src\Options\MXOptionsPagePrograms.cpp" />
     <ClCompile Include="Src\Options\MXOptionsPageSearchEx.cpp" />
     <ClCompile Include="Src\Options\MXOptionsWindow.cpp" />
     <ClCompile Include="Src\PE\MXPeObject.cpp" />
@@ -433,12 +434,14 @@
     <ClInclude Include="Src\Options\MXOptionsPageGenSearch.h" />
     <ClInclude Include="Src\Options\MXOptionsPageHotkeys.h" />
     <ClInclude Include="Src\Options\MXOptionsPageOpenProc.h" />
+    <ClInclude Include="Src\Options\MXOptionsPagePrograms.h" />
     <ClInclude Include="Src\Options\MXOptionsPageSearchEx.h" />
     <ClInclude Include="Src\Options\MXOptionsWindow.h" />
     <ClInclude Include="Src\PE\MXPeObject.h" />
     <ClInclude Include="Src\PE\MXPeStructs.h" />
     <ClInclude Include="Src\PE\MXPeWorksWindow.h" />
     <ClInclude Include="Src\Primitives\MXPrimitiveBase.h" />
+    <ClInclude Include="Src\Programs\MXPrograms.h" />
     <ClInclude Include="Src\RamBuffer\MXRamBuffer.h" />
     <ClInclude Include="Src\RegEx\MXOnigurumaRegex.h" />
     <ClInclude Include="Src\RegEx\MXOnigurumaRegion.h" />

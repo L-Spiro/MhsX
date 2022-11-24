@@ -2,8 +2,10 @@
 #include "../MXMhsX.h"
 #include "../Hotkeys/MXHotkeyManager.h"
 #include "../Options/MXOptions.h"
+#include "../Programs/MXPrograms.h"
 #include "../RegEx/MXOnigurumaSystem.h"
 #include "../Search/MXSearcher.h"
+#include <CriticalSection/LSWCriticalSection.h>
 #include "MXProcess.h"
 #include <LSWWin.h>
 #include <Helpers/LSWHelpers.h>
@@ -49,6 +51,18 @@ namespace mx {
 		// Gets the hotkey manager.
 		const CHotkeyManager &				HotkeyManager() const { return m_hmHotkeys; }
 
+		// Locks programs for modification.
+		void								LockPrograms() const { m_csProgramCrit.EnterCriticalSection(); }
+
+		// Unlocks programs for modification.
+		void								UnlockPrograms() const { m_csProgramCrit.LeaveCriticalSection(); }
+
+		// Gets a reference to the programs.
+		std::vector<MX_PROGRAM> &			Programs() { return m_vPrograms; }
+
+		// Gets a const reference to the programs.
+		const std::vector<MX_PROGRAM> &		Programs() const { return m_vPrograms; }
+
 		// The address reader for expressions.
 		static bool __stdcall				ExpAddressHandler( uint64_t _ui64Address, ee::EE_CAST_TYPES _ctType, uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult );
 
@@ -70,6 +84,10 @@ namespace mx {
 		COnigurumaSystem					m_osRegexSystem;
 		// Hotkeys.
 		CHotkeyManager						m_hmHotkeys;
+		// Programs.
+		std::vector<MX_PROGRAM>				m_vPrograms;
+		// Program critical section.
+		mutable CCriticalSection			m_csProgramCrit;
 	};
 
 }	// namespace mx

@@ -11,6 +11,7 @@
 #include "../Options/MXOptionsPageGeneral.h"
 #include "../Options/MXOptionsPageGenSearch.h"
 #include "../Options/MXOptionsPageOpenProc.h"
+#include "../Options/MXOptionsPagePrograms.h"
 #include "../Options/MXOptionsPageSearchEx.h"
 #include "../Options/MXOptionsWindow.h"
 #include "../PE/MXPeWorksWindow.h"
@@ -53,6 +54,9 @@ namespace mx {
 			}
 			case MX_OPTIONS_HOTKEYS : {
 				return new COptionsPageHotkeys( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
+			case MX_OPTIONS_PROGRAMS : {
+				return new COptionsPagePrograms( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
 			case MX_FOUND_ADDRESSES : {
 				return new CFoundAddressesWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );

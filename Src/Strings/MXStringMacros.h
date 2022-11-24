@@ -16264,3 +16264,120 @@
 #define _DEC_S_B25F12F6_DataDirectory_COM_DESCRIPTOR_ mx::CStringDecoder::DecodeToString( _T_B25F12F6_DataDirectory_COM_DESCRIPTOR_, _LEN_B25F12F6 )
 #define _DEC_WS_B25F12F6_DataDirectory_COM_DESCRIPTOR_ mx::CStringDecoder::DecodeToWString( _T_B25F12F6_DataDirectory_COM_DESCRIPTOR_, _LEN_B25F12F6 )
 
+// Adds a new program using the current settings.
+
+#define _T_A5A04C84_Adds_a_new_program_using_the_current_settings_ "\xC9\x32\x34\x0E\xB2\x2A\xAE\x35\x35\x3F\xE9\x3E\x04\x0A\x2E\xFA\x2F\x3D\xBB\x07\x3C\xF7\x35\x37\xE8\x3D\x36\xF7\xBB\x2A\xFD\x40\x42\x00\x00\x3D\xAE\x3A\x35\x3C\x3D\x37\x00\x02\x3A\xB6"
+#define _LEN_A5A04C84 46
+#define _T_LEN_A5A04C84_Adds_a_new_program_using_the_current_settings_ _T_A5A04C84_Adds_a_new_program_using_the_current_settings_, _LEN_A5A04C84
+#define _DEC_A5A04C84_Adds_a_new_program_using_the_current_settings_( STR ) mx::CStringDecoder::Decode( _T_A5A04C84_Adds_a_new_program_using_the_current_settings_, _LEN_A5A04C84, STR )
+#define _DEC_S_A5A04C84_Adds_a_new_program_using_the_current_settings_ mx::CStringDecoder::DecodeToString( _T_A5A04C84_Adds_a_new_program_using_the_current_settings_, _LEN_A5A04C84 )
+#define _DEC_WS_A5A04C84_Adds_a_new_program_using_the_current_settings_ mx::CStringDecoder::DecodeToWString( _T_A5A04C84_Adds_a_new_program_using_the_current_settings_, _LEN_A5A04C84 )
+
+// Deletes all selected programs.
+
+#define _T_B4FF749D_Deletes_all_selected_programs_ "\xCC\x33\x3C\x00\x06\x2E\x01\xE7\x31\x34\x35\xEE\x05\x00\x33\xED\x31\x44\x00\xF6\xE9\xFE\x39\x3F\x2F\x3B\x2F\xFF\x0E\xF5"
+#define _LEN_B4FF749D 30
+#define _T_LEN_B4FF749D_Deletes_all_selected_programs_ _T_B4FF749D_Deletes_all_selected_programs_, _LEN_B4FF749D
+#define _DEC_B4FF749D_Deletes_all_selected_programs_( STR ) mx::CStringDecoder::Decode( _T_B4FF749D_Deletes_all_selected_programs_, _LEN_B4FF749D, STR )
+#define _DEC_S_B4FF749D_Deletes_all_selected_programs_ mx::CStringDecoder::DecodeToString( _T_B4FF749D_Deletes_all_selected_programs_, _LEN_B4FF749D )
+#define _DEC_WS_B4FF749D_Deletes_all_selected_programs_ mx::CStringDecoder::DecodeToWString( _T_B4FF749D_Deletes_all_selected_programs_, _LEN_B4FF749D )
+
+// Moves all selected programs up.
+
+#define _T_74F2386F_Moves_all_selected_programs_up_ "\xD5\x3D\x46\x00\x05\xE9\xEF\x33\x3C\xE8\x3C\x33\xFE\x00\x2A\xFC\x33\x34\xBB\x02\x3B\xFD\x2E\x42\x29\x36\x41\xB2\x10\x37\xB6"
+#define _LEN_74F2386F 31
+#define _T_LEN_74F2386F_Moves_all_selected_programs_up_ _T_74F2386F_Moves_all_selected_programs_up_, _LEN_74F2386F
+#define _DEC_74F2386F_Moves_all_selected_programs_up_( STR ) mx::CStringDecoder::Decode( _T_74F2386F_Moves_all_selected_programs_up_, _LEN_74F2386F, STR )
+#define _DEC_S_74F2386F_Moves_all_selected_programs_up_ mx::CStringDecoder::DecodeToString( _T_74F2386F_Moves_all_selected_programs_up_, _LEN_74F2386F )
+#define _DEC_WS_74F2386F_Moves_all_selected_programs_up_ mx::CStringDecoder::DecodeToWString( _T_74F2386F_Moves_all_selected_programs_up_, _LEN_74F2386F )
+
+// Moves all selected programs down.
+
+#define _T_9A810ED9_Moves_all_selected_programs_down_ "\xD5\x3D\x46\x00\x05\xE9\xEF\x33\x3C\xE8\x3C\x33\xFE\x00\x2A\xFC\x33\x34\xBB\x02\x3B\xFD\x2E\x42\x29\x36\x41\xB2\xFF\x36\xFF\x3C\xFE"
+#define _LEN_9A810ED9 33
+#define _T_LEN_9A810ED9_Moves_all_selected_programs_down_ _T_9A810ED9_Moves_all_selected_programs_down_, _LEN_9A810ED9
+#define _DEC_9A810ED9_Moves_all_selected_programs_down_( STR ) mx::CStringDecoder::Decode( _T_9A810ED9_Moves_all_selected_programs_down_, _LEN_9A810ED9, STR )
+#define _DEC_S_9A810ED9_Moves_all_selected_programs_down_ mx::CStringDecoder::DecodeToString( _T_9A810ED9_Moves_all_selected_programs_down_, _LEN_9A810ED9 )
+#define _DEC_WS_9A810ED9_Moves_all_selected_programs_down_ mx::CStringDecoder::DecodeToWString( _T_9A810ED9_Moves_all_selected_programs_down_, _LEN_9A810ED9 )
+
+// Hold Ctrl while selecting to copy program settings.
+
+#define _T_8E05DFDB_Hold_Ctrl_while_selecting_to_copy_program_settings_ "\xD0\x3D\x3C\xFF\xB2\x0C\x02\x39\x3C\xE8\x40\x36\xFB\x07\x2C\xA8\x41\x35\x07\xF7\x2C\x02\x30\x3E\x2F\xE9\x42\x01\xBB\x2A\xF7\x3E\x49\xBB\x02\x3B\xFD\x2E\x42\x29\x36\xEE\x05\x00\x3B\xFC\x37\x3E\x02\x05\xF7"
+#define _LEN_8E05DFDB 51
+#define _T_LEN_8E05DFDB_Hold_Ctrl_while_selecting_to_copy_program_settings_ _T_8E05DFDB_Hold_Ctrl_while_selecting_to_copy_program_settings_, _LEN_8E05DFDB
+#define _DEC_8E05DFDB_Hold_Ctrl_while_selecting_to_copy_program_settings_( STR ) mx::CStringDecoder::Decode( _T_8E05DFDB_Hold_Ctrl_while_selecting_to_copy_program_settings_, _LEN_8E05DFDB, STR )
+#define _DEC_S_8E05DFDB_Hold_Ctrl_while_selecting_to_copy_program_settings_ mx::CStringDecoder::DecodeToString( _T_8E05DFDB_Hold_Ctrl_while_selecting_to_copy_program_settings_, _LEN_8E05DFDB )
+#define _DEC_WS_8E05DFDB_Hold_Ctrl_while_selecting_to_copy_program_settings_ mx::CStringDecoder::DecodeToWString( _T_8E05DFDB_Hold_Ctrl_while_selecting_to_copy_program_settings_, _LEN_8E05DFDB )
+
+// Program Options
+
+#define _T_69D7866D_Program_Options "\xD8\x40\x3F\x02\x04\x2A\xFB\xE7\x1F\x38\x3D\x37\x01\x09\x3A"
+#define _LEN_69D7866D 15
+#define _T_LEN_69D7866D_Program_Options _T_69D7866D_Program_Options, _LEN_69D7866D
+#define _DEC_69D7866D_Program_Options( STR ) mx::CStringDecoder::Decode( _T_69D7866D_Program_Options, _LEN_69D7866D, STR )
+#define _DEC_S_69D7866D_Program_Options mx::CStringDecoder::DecodeToString( _T_69D7866D_Program_Options, _LEN_69D7866D )
+#define _DEC_WS_69D7866D_Program_Options mx::CStringDecoder::DecodeToWString( _T_69D7866D_Program_Options, _LEN_69D7866D )
+
+// New Program
+
+#define _T_75FF111D_New_Program "\xD6\x33\x47\xBB\xE2\x3B\xFD\x2E\x42\x29\x36"
+#define _LEN_75FF111D 11
+#define _T_LEN_75FF111D_New_Program _T_75FF111D_New_Program, _LEN_75FF111D
+#define _DEC_75FF111D_New_Program( STR ) mx::CStringDecoder::Decode( _T_75FF111D_New_Program, _LEN_75FF111D, STR )
+#define _DEC_S_75FF111D_New_Program mx::CStringDecoder::DecodeToString( _T_75FF111D_New_Program, _LEN_75FF111D )
+#define _DEC_WS_75FF111D_New_Program mx::CStringDecoder::DecodeToWString( _T_75FF111D_New_Program, _LEN_75FF111D )
+
+// Name:
+
+#define _T_3CF29F70_Name_ "\xD6\x2F\x3D\x00\xCC"
+#define _LEN_3CF29F70 5
+#define _T_LEN_3CF29F70_Name_ _T_3CF29F70_Name_, _LEN_3CF29F70
+#define _DEC_3CF29F70_Name_( STR ) mx::CStringDecoder::Decode( _T_3CF29F70_Name_, _LEN_3CF29F70, STR )
+#define _DEC_S_3CF29F70_Name_ mx::CStringDecoder::DecodeToString( _T_3CF29F70_Name_, _LEN_3CF29F70 )
+#define _DEC_WS_3CF29F70_Name_ mx::CStringDecoder::DecodeToWString( _T_3CF29F70_Name_, _LEN_3CF29F70 )
+
+// Program:
+
+#define _T_073FFE27_Program_ "\xD8\x40\x3F\x02\x04\x2A\xFB\x01"
+#define _LEN_073FFE27 8
+#define _T_LEN_073FFE27_Program_ _T_073FFE27_Program_, _LEN_073FFE27
+#define _DEC_073FFE27_Program_( STR ) mx::CStringDecoder::Decode( _T_073FFE27_Program_, _LEN_073FFE27, STR )
+#define _DEC_S_073FFE27_Program_ mx::CStringDecoder::DecodeToString( _T_073FFE27_Program_, _LEN_073FFE27 )
+#define _DEC_WS_073FFE27_Program_ mx::CStringDecoder::DecodeToWString( _T_073FFE27_Program_, _LEN_073FFE27 )
+
+// Arguments:
+
+#define _T_877EEE17_Arguments_ "\xC9\x40\x37\x10\xFF\x2E\xFC\x3B\x43\x02"
+#define _LEN_877EEE17 10
+#define _T_LEN_877EEE17_Arguments_ _T_877EEE17_Arguments_, _LEN_877EEE17
+#define _DEC_877EEE17_Arguments_( STR ) mx::CStringDecoder::Decode( _T_877EEE17_Arguments_, _LEN_877EEE17, STR )
+#define _DEC_S_877EEE17_Arguments_ mx::CStringDecoder::DecodeToString( _T_877EEE17_Arguments_, _LEN_877EEE17 )
+#define _DEC_WS_877EEE17_Arguments_ mx::CStringDecoder::DecodeToWString( _T_877EEE17_Arguments_, _LEN_877EEE17 )
+
+// Working Directory:
+
+#define _T_B1214A2D_Working_Directory_ "\xDF\x3D\x42\x06\xFB\x37\xF5\xE7\x14\x31\x3B\x33\xF5\x0F\x36\xFA\x47\x0A"
+#define _LEN_B1214A2D 18
+#define _T_LEN_B1214A2D_Working_Directory_ _T_B1214A2D_Working_Directory_, _LEN_B1214A2D
+#define _DEC_B1214A2D_Working_Directory_( STR ) mx::CStringDecoder::Decode( _T_B1214A2D_Working_Directory_, _LEN_B1214A2D, STR )
+#define _DEC_S_B1214A2D_Working_Directory_ mx::CStringDecoder::DecodeToString( _T_B1214A2D_Working_Directory_, _LEN_B1214A2D )
+#define _DEC_WS_B1214A2D_Working_Directory_ mx::CStringDecoder::DecodeToWString( _T_B1214A2D_Working_Directory_, _LEN_B1214A2D )
+
+// Working Dir:
+
+#define _T_94F83C03_Working_Dir_ "\xDF\x3D\x42\x06\xFB\x37\xF5\xE7\x14\x31\x3B\x08"
+#define _LEN_94F83C03 12
+#define _T_LEN_94F83C03_Working_Dir_ _T_94F83C03_Working_Dir_, _LEN_94F83C03
+#define _DEC_94F83C03_Working_Dir_( STR ) mx::CStringDecoder::Decode( _T_94F83C03_Working_Dir_, _LEN_94F83C03, STR )
+#define _DEC_S_94F83C03_Working_Dir_ mx::CStringDecoder::DecodeToString( _T_94F83C03_Working_Dir_, _LEN_94F83C03 )
+#define _DEC_WS_94F83C03_Working_Dir_ mx::CStringDecoder::DecodeToWString( _T_94F83C03_Working_Dir_, _LEN_94F83C03 )
+
+// Hidden
+
+#define _T_8FF1EC8B_Hidden "\xD0\x37\x34\xFF\xF7\x37"
+#define _LEN_8FF1EC8B 6
+#define _T_LEN_8FF1EC8B_Hidden _T_8FF1EC8B_Hidden, _LEN_8FF1EC8B
+#define _DEC_8FF1EC8B_Hidden( STR ) mx::CStringDecoder::Decode( _T_8FF1EC8B_Hidden, _LEN_8FF1EC8B, STR )
+#define _DEC_S_8FF1EC8B_Hidden mx::CStringDecoder::DecodeToString( _T_8FF1EC8B_Hidden, _LEN_8FF1EC8B )
+#define _DEC_WS_8FF1EC8B_Hidden mx::CStringDecoder::DecodeToWString( _T_8FF1EC8B_Hidden, _LEN_8FF1EC8B )
+
