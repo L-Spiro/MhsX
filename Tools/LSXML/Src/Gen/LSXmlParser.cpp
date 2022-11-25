@@ -427,72 +427,72 @@ namespace yy {
       {
 	  case 4:
 
-    {printf("<?XML-VERSION 1.0?>\n");}
+    { }
     break;
 
   case 6:
 
-    {printf("<?XML-ENCODING %s?>\n",(yysemantic_stack_[(1) - (1)].s)); free((yysemantic_stack_[(1) - (1)].s));}
+    { }
     break;
 
   case 10:
 
-    {printf("%s", (yysemantic_stack_[(1) - (1)].s));}
+    { }
     break;
 
   case 12:
 
-    {printf("\n<?XML-ATT %s", (yysemantic_stack_[(2) - (2)].s));}
+    { }
     break;
 
   case 13:
 
-    {printf("?>\n");}
+    { }
     break;
 
   case 14:
 
-    {printf("\n<%s", (yysemantic_stack_[(1) - (1)].s)); free((yysemantic_stack_[(1) - (1)].s));}
+    { }
     break;
 
   case 16:
 
-    {printf("/>\n");}
+    { }
     break;
 
   case 17:
 
-    {printf(">\n");}
+    { }
     break;
 
   case 18:
 
-    {printf("\n</%s>\n", (yysemantic_stack_[(6) - (5)].s)); free((yysemantic_stack_[(6) - (5)].s));}
+    { }
     break;
 
   case 19:
 
-    {printf("%s", (yysemantic_stack_[(2) - (2)].s)); free((yysemantic_stack_[(2) - (2)].s));}
+    { }
     break;
 
   case 23:
 
-    {(yyval.s) = (yysemantic_stack_[(1) - (1)].s);}
+    { }
     break;
 
   case 24:
 
-    {(yyval.s) = strdup("");}
+    { }
     break;
 
   case 27:
 
-    {printf(" %s", (yysemantic_stack_[(1) - (1)].s)); free((yysemantic_stack_[(1) - (1)].s));}
+    { }
     break;
 
   case 28:
 
-    {printf(" %s=%s", (yysemantic_stack_[(3) - (1)].s), (yysemantic_stack_[(3) - (3)].s)); free((yysemantic_stack_[(3) - (1)].s)); free((yysemantic_stack_[(3) - (3)].s));}
+    { }
     break;
 
 

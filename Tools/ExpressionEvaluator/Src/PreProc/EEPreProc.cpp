@@ -620,11 +620,21 @@ namespace ee {
 							}
 							sFinal.pop_back();
 							sFinal.push_back( '\"' );
-							sFinal.append( ee::CExpEval::EscapeQuotes<std::string>( _vParms[stIdx] ) );
+							if ( _vParms[stIdx].find( '"', 0 ) == std::string::npos ) {
+								sFinal.append( _vParms[stIdx] );
+							}
+							else {
+								sFinal.append( ee::CExpEval::EscapeQuotes<std::string>( _vParms[stIdx], true ) );
+							}
 							sFinal.push_back( '\"' );
 						}
 						else {
-							sFinal.append( _vParms[stIdx] );
+							std::set<std::string> sReplaced = _sUsedValues;
+							sReplaced.insert( _iMacro->first.sName );
+							std::string sTmp = _vParms[stIdx];
+							if ( !ExpandMacros( sTmp, _mMacros, sReplaced ) ) { return false; }
+
+							sFinal.append( sTmp );
 						}
 						break;
 					}

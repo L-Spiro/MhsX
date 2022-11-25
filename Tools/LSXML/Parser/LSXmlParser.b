@@ -50,11 +50,11 @@ prolog
    misc_seq_opt
  ;
 version_opt
- : VERSION			{printf("<?XML-VERSION 1.0?>\n");}
+ : VERSION													{ }
  | /*empty*/
  ;
 encoding_opt
- : ENCODING			{printf("<?XML-ENCODING %s?>\n",$1); free($1);}
+ : ENCODING													{ }
  | /*empty*/
  ;
 misc_seq_opt
@@ -62,40 +62,40 @@ misc_seq_opt
  | /*empty*/
  ;
 misc
- : COMMENT			{printf("%s", $1);}
+ : COMMENT													{ }
  | attribute_decl
  ;
 attribute_decl
- : ATTDEF NAME			{printf("\n<?XML-ATT %s", $2);}
-   attribute_seq_opt ENDDEF	{printf("?>\n");}
+ : ATTDEF NAME												{ }
+   attribute_seq_opt ENDDEF									{ }
  ;	
 element
- : START			{printf("\n<%s", $1); free($1);}
+ : START													{ }
    attribute_seq_opt
    empty_or_content
  ;
 empty_or_content
- : SLASH CLOSE			{printf("/>\n");}
- | CLOSE			{printf(">\n");}
-   content END name_opt CLOSE	{printf("\n</%s>\n", $5); free($5);}
+ : SLASH CLOSE												{ }
+ | CLOSE													{ }
+   content END name_opt CLOSE								{ }
  ;
 content
- : content DATA			{printf("%s", $2); free($2);}
+ : content DATA												{ }
  | content misc
  | content element
  | /*empty*/
  ;
 name_opt
- : NAME				{$$ = $1;}
- | /*empty*/			{$$ = strdup("");}
+ : NAME														{ }
+ | /*empty*/												{ }
  ;
 attribute_seq_opt
  : attribute_seq_opt attribute
  | /*empty*/
  ;
 attribute
- : NAME				{printf(" %s", $1); free($1);}
- | NAME EQ VALUE		{printf(" %s=%s", $1, $3); free($1); free($3);}
+ : NAME														{ }
+ | NAME EQ VALUE											{ }
  ;
 
 

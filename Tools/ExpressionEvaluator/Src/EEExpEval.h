@@ -452,10 +452,13 @@ namespace ee {
 
 		// Escapes double quotes in a string (" -> \").
 		template <typename _tType = std::string>
-		static _tType					EscapeQuotes( const _tType &_sInput ) {
+		static _tType					EscapeQuotes( const _tType &_sInput, bool _bEscapeSlashes ) {
 			_tType sRet;
 			for ( size_t I = 0; I < _sInput.size(); ++I ) {
 				if ( _sInput[I] == _tType::value_type( '\"' ) ) {
+					sRet.push_back( _tType::value_type( '\\' ) );
+				}
+				else if ( _bEscapeSlashes && _sInput[I] == _tType::value_type( '\\' ) ) {
 					sRet.push_back( _tType::value_type( '\\' ) );
 				}
 				sRet.push_back( _sInput[I] );
