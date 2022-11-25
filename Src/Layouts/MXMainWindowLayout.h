@@ -79,6 +79,9 @@ namespace mx {
 			MX_MWMI_SHOW_EXPEVAL,
 			MX_MWMI_SHOW_CONVERTER,
 			MX_MWMI_SHOW_ALL,
+
+
+			MX_MWMI_USER_PROGRAMS_BASE			= 1000,
 		};
 
 

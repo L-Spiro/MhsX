@@ -322,10 +322,11 @@ namespace mx {
 	// Options menu.
 	LSW_MENU_ITEM CMainWindowLayout::m_miOptionsMenu[] = {
 		//bIsSeperator	dwId						bCheckable	bChecked	bEnabled	
-		{ FALSE,		MX_MWMI_OPTIONS,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_D8DFA8DD__Options, _LEN_D8DFA8DD ) },
 		{ FALSE,		MX_MWMI_PEWORKS,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_1A689CBC_PE__Works, _LEN_1A689CBC ) },
 		{ FALSE,		MX_MWMI_STRINGTHEORY,		FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_38618AB0__String_Theory, _LEN_38618AB0 ) },
 		{ FALSE,		MX_MWMI_FLOATINGPOINTSTUDIO,FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_904CFF9B__Floating_Point_Studio, _LEN_904CFF9B ) },
+		{ TRUE,			0,							FALSE,		FALSE,		TRUE,		nullptr },
+		{ FALSE,		MX_MWMI_OPTIONS,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_D8DFA8DD__Options, _LEN_D8DFA8DD ) },
 	};
 
 	// Windows menu.

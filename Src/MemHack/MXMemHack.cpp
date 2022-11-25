@@ -1,6 +1,7 @@
 #include "MXMemHack.h"
 #include "../Utilities/MXUtilities.h"
 #include <Base/LSWBase.h>
+#include <shellapi.h>
 
 // TEMP.
 /*#include "../Search/MXSearcher.h"
@@ -162,6 +163,18 @@ namespace mx {
 		CUtilities::Options.bUse0xForHex = m_oOptions.bUse0x;
 		CUtilities::Options.bUse0oForOct = m_oOptions.bUse0o;
 		CUtilities::Options.bShortenEnumNames = m_oOptions.bShortEnums;
+	}
+
+	// Executes a program by index.
+	bool CMemHack::ExecuteProgramByIdx( size_t _stIdx ) {
+		if ( _stIdx >= m_vPrograms.size() ) { return false; }
+		HINSTANCE hReturn = ::ShellExecuteW( NULL,
+			L"open",
+			m_vPrograms[_stIdx].wsPath.c_str(),
+			m_vPrograms[_stIdx].wsArgs.c_str(),
+			m_vPrograms[_stIdx].wsWorkingDir.c_str(),
+			m_vPrograms[_stIdx].iShowCmd );
+		return reinterpret_cast<int>(hReturn) > 32;
 	}
 
 	// The address reader for expressions.

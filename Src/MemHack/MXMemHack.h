@@ -63,6 +63,9 @@ namespace mx {
 		// Gets a const reference to the programs.
 		const std::vector<MX_PROGRAM> &		Programs() const { return m_vPrograms; }
 
+		// Executes a program by index.
+		bool								ExecuteProgramByIdx( size_t _stIdx );
+
 		// The address reader for expressions.
 		static bool __stdcall				ExpAddressHandler( uint64_t _ui64Address, ee::EE_CAST_TYPES _ctType, uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult );
 

@@ -13,6 +13,8 @@ namespace mx {
 	CWindowMemHack::CWindowMemHack() :
 		m_pmmwWindow( nullptr ) {
 		m_pmmwWindow = reinterpret_cast<CMhsMainWindow *>(mx::CMainWindowLayout::CreateMainWindow( this ));
+
+		AddUserProgramsToMenu();
 	}
 	CWindowMemHack::~CWindowMemHack() {
 		m_pmmwWindow = nullptr;
@@ -87,7 +89,64 @@ namespace mx {
 			if ( m_pmmwWindow->FoundAddresses() ) {
 				m_pmmwWindow->FoundAddresses()->SetUpdateSpeed( 1000 / max( Options().dwFoundAddressRefresh, static_cast<DWORD>(1) ) );
 			}
+
+			AddUserProgramsToMenu();
 		}
+	}
+
+	// Adds user programs to the menu.
+	void CWindowMemHack::AddUserProgramsToMenu() {
+		if ( !m_pmmwWindow ) { return; }
+		HMENU hMenu = ::GetSubMenu( ::GetMenu( m_pmmwWindow->Wnd() ), 2 );
+		std::vector<int> vIds = CHelpers::GetMenuItemIDs( hMenu );
+		// Delete all menu items with a command greater than or equal to CMainWindowLayout::MX_MWMI_USER_PROGRAMS_BASE.
+		for ( auto I = vIds.size(); I--; ) {
+			if ( vIds[I] >= CMainWindowLayout::MX_MWMI_USER_PROGRAMS_BASE ) {
+				::DeleteMenu( hMenu, vIds[I], MF_BYCOMMAND );
+			}
+		}
+
+		CHelpers::SanitizeMenuSeparators( hMenu );
+
+		if ( m_vPrograms.size() ) {
+			bool bVisible = false;
+			for ( auto I = m_vPrograms.size(); I--; ) {
+				if ( m_vPrograms[I].bVisible ) {
+					bVisible = true;
+					break;
+				}
+			}
+			if ( bVisible ) {
+				int iInsertBefore = CMainWindowLayout::MX_MWMI_FLOATINGPOINTSTUDIO;
+				vIds = CHelpers::GetMenuItemIDs( hMenu );
+				for ( auto I = vIds.size(); I--; ) {
+					if ( vIds[I] == iInsertBefore ) {
+						iInsertBefore = static_cast<int>(I + 1);
+						break;
+					}
+				}
+
+				::InsertMenuW( hMenu, iInsertBefore++,
+					MF_BYPOSITION | MF_SEPARATOR, 0, NULL );
+
+				for ( size_t I = 0; I < m_vPrograms.size(); ++I ) {
+					if ( m_vPrograms[I].bVisible ) {
+						::InsertMenuW( hMenu, iInsertBefore,
+							MF_BYPOSITION | MF_STRING, CMainWindowLayout::MX_MWMI_USER_PROGRAMS_BASE + I, m_vPrograms[I].wsMenuName.c_str() );
+						++iInsertBefore;
+					}
+				}
+				::InsertMenuW( hMenu, iInsertBefore++,
+					MF_BYPOSITION | MF_SEPARATOR, 0, NULL );
+			}
+
+		}
+		CHelpers::SanitizeMenuSeparators( hMenu );
+		return;
+		/*HMENU hMenu = ::GetSubMenu( ::GetMenu( m_pmmwWindow->Wnd() ), CMainWindowLayout::MX_MWMI_MENU_TOOLS );
+		if ( hMenu ) {
+			// Gather menu ID
+		}*/
 	}
 
 }	// namespace mx

@@ -28,6 +28,9 @@ namespace mx {
 		// Sets the options.
 		virtual void						SetOptions( const MX_OPTIONS &_oOptions );
 
+		// Adds user programs to the menu.
+		void								AddUserProgramsToMenu();
+
 
 
 	protected :

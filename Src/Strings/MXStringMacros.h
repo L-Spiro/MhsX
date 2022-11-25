@@ -16381,3 +16381,57 @@
 #define _DEC_S_8FF1EC8B_Hidden mx::CStringDecoder::DecodeToString( _T_8FF1EC8B_Hidden, _LEN_8FF1EC8B )
 #define _DEC_WS_8FF1EC8B_Hidden mx::CStringDecoder::DecodeToWString( _T_8FF1EC8B_Hidden, _LEN_8FF1EC8B )
 
+// Find the program to launch.
+
+#define _T_F5BE626B_Find_the_program_to_launch_ "\xCE\x37\x3E\xFF\xB2\x3D\xF6\x2C\xF0\x38\x3B\x3D\xF9\x0D\x28\xF5\xEE\x44\x0A\xB2\x35\xEF\x3C\x3E\x2B\x31\xFC"
+#define _LEN_F5BE626B 27
+#define _T_LEN_F5BE626B_Find_the_program_to_launch_ _T_F5BE626B_Find_the_program_to_launch_, _LEN_F5BE626B
+#define _DEC_F5BE626B_Find_the_program_to_launch_( STR ) mx::CStringDecoder::Decode( _T_F5BE626B_Find_the_program_to_launch_, _LEN_F5BE626B, STR )
+#define _DEC_S_F5BE626B_Find_the_program_to_launch_ mx::CStringDecoder::DecodeToString( _T_F5BE626B_Find_the_program_to_launch_, _LEN_F5BE626B )
+#define _DEC_WS_F5BE626B_Find_the_program_to_launch_ mx::CStringDecoder::DecodeToWString( _T_F5BE626B_Find_the_program_to_launch_, _LEN_F5BE626B )
+
+// Browse to the desire working directory.
+
+#define _T_B9D74D16_Browse_to_the_desire_working_directory_ "\xCA\x40\x3F\x12\x05\x2E\xAE\x3B\x3F\xE8\x3D\x36\xF7\xBB\x2B\xED\x41\x39\x0D\xF7\xE9\x05\x36\x42\x33\x32\x3C\xF9\xBB\x2B\xF1\x40\x35\xFE\x06\x38\x00\x40\xFE"
+#define _LEN_B9D74D16 39
+#define _T_LEN_B9D74D16_Browse_to_the_desire_working_directory_ _T_B9D74D16_Browse_to_the_desire_working_directory_, _LEN_B9D74D16
+#define _DEC_B9D74D16_Browse_to_the_desire_working_directory_( STR ) mx::CStringDecoder::Decode( _T_B9D74D16_Browse_to_the_desire_working_directory_, _LEN_B9D74D16, STR )
+#define _DEC_S_B9D74D16_Browse_to_the_desire_working_directory_ mx::CStringDecoder::DecodeToString( _T_B9D74D16_Browse_to_the_desire_working_directory_, _LEN_B9D74D16 )
+#define _DEC_WS_B9D74D16_Browse_to_the_desire_working_directory_ mx::CStringDecoder::DecodeToWString( _T_B9D74D16_Browse_to_the_desire_working_directory_, _LEN_B9D74D16 )
+
+// Browse to the desired working directory.
+
+#define _T_66D72F7C_Browse_to_the_desired_working_directory_ "\xCA\x40\x3F\x12\x05\x2E\xAE\x3B\x3F\xE8\x3D\x36\xF7\xBB\x2B\xED\x41\x39\x0D\xF7\x2D\xAE\x3E\x3F\x3A\x34\x37\x00\x02\xE7\xEC\x37\x42\x00\xF5\x3D\xFD\x39\x49\xF6"
+#define _LEN_66D72F7C 40
+#define _T_LEN_66D72F7C_Browse_to_the_desired_working_directory_ _T_66D72F7C_Browse_to_the_desired_working_directory_, _LEN_66D72F7C
+#define _DEC_66D72F7C_Browse_to_the_desired_working_directory_( STR ) mx::CStringDecoder::Decode( _T_66D72F7C_Browse_to_the_desired_working_directory_, _LEN_66D72F7C, STR )
+#define _DEC_S_66D72F7C_Browse_to_the_desired_working_directory_ mx::CStringDecoder::DecodeToString( _T_66D72F7C_Browse_to_the_desired_working_directory_, _LEN_66D72F7C )
+#define _DEC_WS_66D72F7C_Browse_to_the_desired_working_directory_ mx::CStringDecoder::DecodeToWString( _T_66D72F7C_Browse_to_the_desired_working_directory_, _LEN_66D72F7C )
+
+// Adds a new program using default settings.
+
+#define _T_C2E8ADD2_Adds_a_new_program_using_default_settings_ "\xC9\x32\x34\x0E\xB2\x2A\xAE\x35\x35\x3F\xE9\x3E\x04\x0A\x2E\xFA\x2F\x3D\xBB\x07\x3C\xF7\x35\x37\xE8\x2D\x33\xF8\xFC\x3C\xF4\x42\xF0\x0E\xF7\x3D\x02\x30\x3E\x2F\x3C\xFC"
+#define _LEN_C2E8ADD2 42
+#define _T_LEN_C2E8ADD2_Adds_a_new_program_using_default_settings_ _T_C2E8ADD2_Adds_a_new_program_using_default_settings_, _LEN_C2E8ADD2
+#define _DEC_C2E8ADD2_Adds_a_new_program_using_default_settings_( STR ) mx::CStringDecoder::Decode( _T_C2E8ADD2_Adds_a_new_program_using_default_settings_, _LEN_C2E8ADD2, STR )
+#define _DEC_S_C2E8ADD2_Adds_a_new_program_using_default_settings_ mx::CStringDecoder::DecodeToString( _T_C2E8ADD2_Adds_a_new_program_using_default_settings_, _LEN_C2E8ADD2 )
+#define _DEC_WS_C2E8ADD2_Adds_a_new_program_using_default_settings_ mx::CStringDecoder::DecodeToWString( _T_C2E8ADD2_Adds_a_new_program_using_default_settings_, _LEN_C2E8ADD2 )
+
+// Executable Files (*.exe)\0*.exe;\0All Files (*.*)\0*.*\0\0
+
+#define _T_412B1AEA_Executable_Files____exe__0__exe__0All_Files_______0____0_0 "\xCD\x46\x35\xFE\x07\x3D\xEF\x29\x3C\x2D\xE9\x14\xFB\x07\x2C\xFB\xEE\xF8\xC5\xC0\x2E\x06\x2C\xF9\xC8\xF3\xFC\xF7\x13\x2C\xC3\xCE\x11\x07\xFE\xE9\xD4\x30\x3C\x2D\x3C\xEE\xBA\xC5\xF5\xB2\xF7\xD0\xC5\xC0\xF3\x8E\xC7"
+#define _LEN_412B1AEA 53
+#define _T_LEN_412B1AEA_Executable_Files____exe__0__exe__0All_Files_______0____0_0 _T_412B1AEA_Executable_Files____exe__0__exe__0All_Files_______0____0_0, _LEN_412B1AEA
+#define _DEC_412B1AEA_Executable_Files____exe__0__exe__0All_Files_______0____0_0( STR ) mx::CStringDecoder::Decode( _T_412B1AEA_Executable_Files____exe__0__exe__0All_Files_______0____0_0, _LEN_412B1AEA, STR )
+#define _DEC_S_412B1AEA_Executable_Files____exe__0__exe__0All_Files_______0____0_0 mx::CStringDecoder::DecodeToString( _T_412B1AEA_Executable_Files____exe__0__exe__0All_Files_______0____0_0, _LEN_412B1AEA )
+#define _DEC_WS_412B1AEA_Executable_Files____exe__0__exe__0All_Files_______0____0_0 mx::CStringDecoder::DecodeToWString( _T_412B1AEA_Executable_Files____exe__0__exe__0All_Files_______0____0_0, _LEN_412B1AEA )
+
+// Select a Folder
+
+#define _T_59A477CC_Select_a_Folder "\xDB\x33\x3C\x00\xF5\x3D\xAE\x28\xF0\x0E\x38\x3A\xF6\x00\x39"
+#define _LEN_59A477CC 15
+#define _T_LEN_59A477CC_Select_a_Folder _T_59A477CC_Select_a_Folder, _LEN_59A477CC
+#define _DEC_59A477CC_Select_a_Folder( STR ) mx::CStringDecoder::Decode( _T_59A477CC_Select_a_Folder, _LEN_59A477CC, STR )
+#define _DEC_S_59A477CC_Select_a_Folder mx::CStringDecoder::DecodeToString( _T_59A477CC_Select_a_Folder, _LEN_59A477CC )
+#define _DEC_WS_59A477CC_Select_a_Folder mx::CStringDecoder::DecodeToWString( _T_59A477CC_Select_a_Folder, _LEN_59A477CC )
+

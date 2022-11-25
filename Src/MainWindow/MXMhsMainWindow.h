@@ -76,10 +76,10 @@ namespace mx {
 		virtual LSW_HANDLED					InitDialog();
 
 		// WM_COMMAND from control.
-		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc );
+		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _wId, CWidget * _pwSrc );
 
 		// WM_COMMAND from menu.
-		virtual LSW_HANDLED					MenuCommand( WORD _Id );
+		virtual LSW_HANDLED					MenuCommand( WORD _wId );
 
 		// WM_ERASEBKGND.
 		virtual LSW_HANDLED					EraseBkgnd( HDC _hDc );

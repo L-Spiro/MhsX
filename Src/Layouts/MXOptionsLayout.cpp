@@ -1656,7 +1656,7 @@ namespace mx {
 			MX_OI_PROGRAMS,							// dwParentId
 
 			LSW_NO_SIZE_EXP,
-			_T_LEN_8E05DFDB_Hold_Ctrl_while_selecting_to_copy_program_settings_,													// pcToolTip, sToolTipLen
+			nullptr, 0,								// pcToolTip, sToolTipLen
 			WS_EX_TOPMOST,							// dwToolTipStyleEx
 			MX_TOOLTIP_STYLE,						// dwToolTipStyle
 		},
@@ -1677,7 +1677,7 @@ namespace mx {
 			MX_OI_PROGRAMS,							// dwParentId
 
 			LSW_NO_SIZE_EXP,
-			_T_LEN_A5A04C84_Adds_a_new_program_using_the_current_settings_,															// pcToolTip, sToolTipLen
+			_T_LEN_C2E8ADD2_Adds_a_new_program_using_default_settings_,																// pcToolTip, sToolTipLen
 			WS_EX_TOPMOST,							// dwToolTipStyleEx
 			MX_TOOLTIP_STYLE,						// dwToolTipStyle
 		},
@@ -1796,7 +1796,6 @@ namespace mx {
 			0,										// sTextLen
 			MX_OI_PROGRAMS,							// dwParentId
 		},
-
 		{
 			LSW_LT_CHECK,							// ltType
 			MX_OI_PROGRAMS_OPTIONS_HIDDEN_CHECK,	// wId
@@ -1845,6 +1844,27 @@ namespace mx {
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_OI_PROGRAMS,							// dwParentId
+		},
+		{
+			LSW_LT_BUTTON,							// ltType
+			MX_OI_PROGRAMS_OPTIONS_PROGRAM_BUTTON,	// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_HOTKEY_TOP_WIDTH + MX_THIN_PADDING,	// iLeft
+			MX_HOTKEY_TOP_HEIGHT + MX_GROUP_TOP + (MX_OPTIONS_PARM_PART_HEIGHT * 1),												// iTop
+			MX_UPDOWN_BUTTON_WIDTHS,				// dwWidth
+			MX_DEF_BUTTON_HEIGHT,					// dwHeight
+			MX_BUTTONSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			L"…",									// pwcText
+			0,										// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+
+			LSW_NO_SIZE_EXP,
+			_T_LEN_F5BE626B_Find_the_program_to_launch_,																			// pcToolTip, sToolTipLen
+			WS_EX_TOPMOST,							// dwToolTipStyleEx
+			MX_TOOLTIP_STYLE,						// dwToolTipStyle
 		},
 
 		{
@@ -1911,6 +1931,27 @@ namespace mx {
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_OI_PROGRAMS,							// dwParentId
+		},
+		{
+			LSW_LT_BUTTON,							// ltType
+			MX_OI_PROGRAMS_OPTIONS_WORKINGDIR_BUTTON,																				// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_HOTKEY_TOP_WIDTH + MX_THIN_PADDING,	// iLeft
+			MX_HOTKEY_TOP_HEIGHT + MX_GROUP_TOP + (MX_OPTIONS_PARM_PART_HEIGHT * 3),												// iTop
+			MX_UPDOWN_BUTTON_WIDTHS,				// dwWidth
+			MX_DEF_BUTTON_HEIGHT,					// dwHeight
+			MX_BUTTONSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			L"…",									// pwcText
+			0,										// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+
+			LSW_NO_SIZE_EXP,
+			_T_LEN_66D72F7C_Browse_to_the_desired_working_directory_,																// pcToolTip, sToolTipLen
+			WS_EX_TOPMOST,							// dwToolTipStyleEx
+			MX_TOOLTIP_STYLE,						// dwToolTipStyle
 		},
 	};
 

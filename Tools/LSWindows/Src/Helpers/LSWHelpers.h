@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstring>
 #include <string>
+#include <vector>
 
 namespace lsw {
 
@@ -532,6 +533,44 @@ namespace lsw {
 			SIZE sResult;
 			::GetTextExtentPoint32A( _hHdc, _sString.c_str(), static_cast<int>(_sString.size()), &sResult );
 			return sResult;
+		}
+
+		/**
+		 * Gathers the menu ID's into an array.
+		 *
+		 * \param _hMenu The menu whose ID's are to be gathered.
+		 * \return Returns a vector containing all of the menu ID's, or -1 for sub menus.
+		 */
+		static std::vector<int>				GetMenuItemIDs( HMENU _hMenu ) {
+			int iCnt = ::GetMenuItemCount( _hMenu );
+			std::vector<int> vRet;
+			for ( int I = 0; I < iCnt; ++I ) {
+				vRet.push_back( ::GetMenuItemID( _hMenu, I ) );
+			}
+			return vRet;
+		}
+
+		/**
+		 * Removes double separators and separators at the ends of menus.
+		 *
+		 * \param _hMenu The menu to sanitize.
+		 */
+		static void							SanitizeMenuSeparators( HMENU _hMenu ) {
+			std::vector<int> vIds = GetMenuItemIDs( _hMenu );
+			while ( vIds.size() && vIds[vIds.size()-1] == 0 ) {
+				// Separator at the end of the menu.
+				::DeleteMenu( _hMenu, static_cast<UINT>(vIds.size() - 1), MF_BYPOSITION );
+				vIds.pop_back();
+			}
+			// Remove double separators.
+			if ( vIds.size() > 1 ) {
+				for ( auto I = vIds.size(); --I >= 1; ) {
+					if ( vIds[I] == 0 && vIds[I-1] == 0 ) {
+						::DeleteMenu( _hMenu, static_cast<UINT>(I), MF_BYPOSITION );
+						vIds.erase( vIds.begin() + I++ );
+					}
+				}
+			}
 		}
 
 

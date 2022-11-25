@@ -546,8 +546,15 @@ namespace mx {
 	}
 
 	// WM_COMMAND from control.
-	CWidget::LSW_HANDLED CMhsMainWindow::Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc ) {
-		switch ( _Id ) {
+	CWidget::LSW_HANDLED CMhsMainWindow::Command( WORD _wCtrlCode, WORD _wId, CWidget * _pwSrc ) {
+		if ( _wId >= CMainWindowLayout::MX_MWMI_USER_PROGRAMS_BASE ) {
+			if ( !m_pmhMemHack ) { return LSW_H_CONTINUE; }
+			size_t stIdx = _wId - CMainWindowLayout::MX_MWMI_USER_PROGRAMS_BASE;
+
+			m_pmhMemHack->ExecuteProgramByIdx( stIdx );
+			return LSW_H_CONTINUE;
+		}
+		switch ( _wId ) {
 			case CMainWindowLayout::MX_MWMI_OPENPROCESS : {
 				OpenProcess();
 				break;
@@ -615,8 +622,8 @@ namespace mx {
 	}
 
 	// WM_COMMAND from menu.
-	CWidget::LSW_HANDLED CMhsMainWindow::MenuCommand( WORD _Id ) {
-		return Command( 0, _Id, NULL );
+	CWidget::LSW_HANDLED CMhsMainWindow::MenuCommand( WORD _wId ) {
+		return Command( 0, _wId, NULL );
 	}
 
 	// WM_ERASEBKGND.

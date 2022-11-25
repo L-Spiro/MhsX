@@ -75,6 +75,15 @@ namespace mx {
 		// Handles the Down button.
 		bool									DownButton();
 
+		// Handles the Hidden check.
+		bool									HiddenCheck();
+
+		// Browse for a program.
+		bool									BrowseProgram();
+
+		// Browse for a working directory.
+		bool									BrowseWorkingDirectory();
+
 		// Fills a set of LPARAM's, one for each selected item in the list box.
 		void									GatherSelected( std::vector<LPARAM> &_sResult );
 

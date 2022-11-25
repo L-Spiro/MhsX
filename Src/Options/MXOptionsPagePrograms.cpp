@@ -1,3 +1,7 @@
+// Included first to avoid an error with std::byte.
+#include "../MXMhsX.h"
+#include <ShlObj_core.h>
+
 #include "MXOptionsPagePrograms.h"
 #include "../Layouts/MXOptionsLayout.h"
 #include "../MemHack/MXMemHack.h"
@@ -6,9 +10,11 @@
 #include <Base/LSWBase.h>
 #include <Button/LSWButton.h>
 #include <CheckButton/LSWCheckButton.h>
+#include <commdlg.h>
 #include <Edit/LSWEdit.h>
 #include <EEExpEvalContainer.h>
 #include <RadioButton/LSWRadioButton.h>
+
 #include <Static/LSWStatic.h>
 
 namespace mx {
@@ -84,16 +90,114 @@ namespace mx {
 				}
 				break;
 			}
+			case COptionsLayout::MX_OI_PROGRAMS_OPTIONS_PROGRAM_BUTTON : {
+				if ( BrowseProgram() ) {
+				}
+				break;
+			}
+			case COptionsLayout::MX_OI_PROGRAMS_OPTIONS_WORKINGDIR_BUTTON : {
+				if ( BrowseWorkingDirectory() ) {
+				}
+				break;
+			}
 			case COptionsLayout::MX_OI_PROGRAMS_LIST : {
 				switch ( _wCtrlCode ) {
 					case LBN_SELCHANGE : {
-						SHORT sKey = CSystem::GetAsyncKeyState( VK_CONTROL );
-						if ( sKey & 0x8000 ) {
-							FillInfoBySelection();
+						FillInfoBySelection();
+						break;
+					}
+				}
+				break;
+			}
+			case COptionsLayout::MX_OI_PROGRAMS_OPTIONS_HIDDEN_CHECK : {
+				if ( HiddenCheck() ) {
+				}
+				break;
+			}
+			case COptionsLayout::MX_OI_PROGRAMS_OPTIONS_NAME_EDIT : {
+				switch ( _wCtrlCode ) {
+					case EN_CHANGE : {
+						CListBox * plbList = static_cast<CListBox *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_LIST ));
+						if ( plbList ) {
+							INT iSel = plbList->GetCurSel();
+							LPARAM lpSel = plbList->GetCurSel() != LB_ERR ? plbList->GetCurSelItemData() : -1;
+							if ( lpSel != -1 && size_t( lpSel ) < m_vPrograms.size() ) {
+								CEdit * peEdit;
+
+								peEdit = static_cast<CEdit *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_OPTIONS_NAME_EDIT ));
+								if ( peEdit ) {
+									m_vPrograms[lpSel].wsMenuName = peEdit->GetTextW();
+									ApplySettings();
+								}
+							}
 						}
 						break;
 					}
 				}
+				break;
+			}
+			case COptionsLayout::MX_OI_PROGRAMS_OPTIONS_PROGRAM_EDIT : {
+				switch ( _wCtrlCode ) {
+					case EN_CHANGE : {
+						CListBox * plbList = static_cast<CListBox *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_LIST ));
+						if ( plbList ) {
+							INT iSel = plbList->GetCurSel();
+							LPARAM lpSel = plbList->GetCurSel() != LB_ERR ? plbList->GetCurSelItemData() : -1;
+							if ( lpSel != -1 && size_t( lpSel ) < m_vPrograms.size() ) {
+								CEdit * peEdit;
+
+								peEdit = static_cast<CEdit *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_OPTIONS_PROGRAM_EDIT ));
+								if ( peEdit ) {
+									m_vPrograms[lpSel].wsPath = peEdit->GetTextW();
+								}
+							}
+						}
+						break;
+					}
+				}
+				break;
+			}
+			case COptionsLayout::MX_OI_PROGRAMS_OPTIONS_ARGUMENTS_EDIT : {
+				switch ( _wCtrlCode ) {
+					case EN_CHANGE : {
+						CListBox * plbList = static_cast<CListBox *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_LIST ));
+						if ( plbList ) {
+							INT iSel = plbList->GetCurSel();
+							LPARAM lpSel = plbList->GetCurSel() != LB_ERR ? plbList->GetCurSelItemData() : -1;
+							if ( lpSel != -1 && size_t( lpSel ) < m_vPrograms.size() ) {
+								CEdit * peEdit;
+
+								peEdit = static_cast<CEdit *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_OPTIONS_ARGUMENTS_EDIT ));
+								if ( peEdit ) {
+									m_vPrograms[lpSel].wsArgs = peEdit->GetTextW();
+								}
+							}
+						}
+						break;
+					}
+				}
+				break;
+			}
+			case COptionsLayout::MX_OI_PROGRAMS_OPTIONS_WORKINGDIR_EDIT : {
+				switch ( _wCtrlCode ) {
+					case EN_CHANGE : {
+						CListBox * plbList = static_cast<CListBox *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_LIST ));
+						if ( plbList ) {
+							INT iSel = plbList->GetCurSel();
+							LPARAM lpSel = plbList->GetCurSel() != LB_ERR ? plbList->GetCurSelItemData() : -1;
+							if ( lpSel != -1 && size_t( lpSel ) < m_vPrograms.size() ) {
+								CEdit * peEdit;
+
+								peEdit = static_cast<CEdit *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_OPTIONS_WORKINGDIR_EDIT ));
+								if ( peEdit ) {
+									m_vPrograms[lpSel].wsWorkingDir = peEdit->GetTextW();
+								}
+							}
+						}
+						break;
+					}
+				}
+				break;
 			}
 		}
 		return LSW_H_CONTINUE;
@@ -157,6 +261,7 @@ namespace mx {
 			m_vPrograms.push_back( MX_PROGRAM() );
 			m_vPrograms[aIdx].wsMenuName = _DEC_WS_75FF111D_New_Program;
 			ApplySettings();
+			FillInfoBySelection();
 			return true;
 		}
 		catch ( ... ) { return false; }
@@ -170,6 +275,7 @@ namespace mx {
 			m_vPrograms.erase( m_vPrograms.begin() + sResult[I] );
 		}
 		ApplySettings();
+		FillInfoBySelection();
 		return true;
 	}
 
@@ -183,6 +289,87 @@ namespace mx {
 	bool COptionsPagePrograms::DownButton() {
 		
 		return true;
+	}
+
+	// Handles the Hidden check.
+	bool COptionsPagePrograms::HiddenCheck() {
+		CListBox * plbList = static_cast<CListBox *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_LIST ));
+		if ( plbList ) {
+			INT iSel = plbList->GetCurSel();
+			LPARAM lpSel = plbList->GetCurSel() != LB_ERR ? plbList->GetCurSelItemData() : -1;
+			if ( lpSel != -1 && size_t( lpSel ) < m_vPrograms.size() ) {
+				CCheckButton * pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_OPTIONS_HIDDEN_CHECK ));
+				if ( pcbCheck ) {
+					m_vPrograms[lpSel].bVisible = !pcbCheck->IsChecked();
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	// Browse for a program.
+	bool COptionsPagePrograms::BrowseProgram() {
+		CListBox * plbList = static_cast<CListBox *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_LIST ));
+		if ( plbList ) {
+			INT iSel = plbList->GetCurSel();
+			LPARAM lpSel = plbList->GetCurSel() != LB_ERR ? plbList->GetCurSelItemData() : -1;
+			if ( lpSel != -1 && size_t( lpSel ) < m_vPrograms.size() ) {
+		
+				OPENFILENAMEW ofnOpenFile = { sizeof( ofnOpenFile ) };
+				std::wstring szFileName;
+				szFileName.resize( 0xFFFF + 2 );
+
+				CSecureWString wsFilter = _DEC_WS_412B1AEA_Executable_Files____exe__0__exe__0All_Files_______0____0_0;
+				ofnOpenFile.hwndOwner = Wnd();
+				ofnOpenFile.lpstrFilter = wsFilter.c_str();
+				ofnOpenFile.lpstrFile = szFileName.data();
+				ofnOpenFile.nMaxFile = DWORD( szFileName.size() );
+				ofnOpenFile.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST;
+
+				if ( ::GetOpenFileNameW( &ofnOpenFile ) ) {
+					m_vPrograms[lpSel].wsPath = ofnOpenFile.lpstrFile;
+					CEdit * peEdit = static_cast<CEdit *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_OPTIONS_PROGRAM_EDIT ));
+					if ( peEdit ) {
+						peEdit->SetTextW( m_vPrograms[lpSel].wsPath.c_str() );
+					}
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	// Browse for a working directory.
+	bool COptionsPagePrograms::BrowseWorkingDirectory() {
+		CListBox * plbList = static_cast<CListBox *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_LIST ));
+		if ( plbList ) {
+			INT iSel = plbList->GetCurSel();
+			LPARAM lpSel = plbList->GetCurSel() != LB_ERR ? plbList->GetCurSelItemData() : -1;
+			if ( lpSel != -1 && size_t( lpSel ) < m_vPrograms.size() ) {
+				std::wstring szFileName;
+				szFileName.resize( 0xFFFF + 2 );
+				CSecureWString wsSelectFolder = _DEC_WS_59A477CC_Select_a_Folder;
+
+				BROWSEINFOW biInfo = {};
+				biInfo.hwndOwner = Wnd();
+				biInfo.pszDisplayName = szFileName.data();
+				biInfo.lpszTitle = wsSelectFolder.c_str();
+				LPITEMIDLIST lpilList = ::SHBrowseForFolderW( &biInfo );
+				if ( lpilList != NULL ) {
+					if ( ::SHGetPathFromIDListW( lpilList, szFileName.data() ) ) {
+						m_vPrograms[lpSel].wsWorkingDir = szFileName;
+						CEdit * peEdit = static_cast<CEdit *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_OPTIONS_WORKINGDIR_EDIT ));
+						if ( peEdit ) {
+							peEdit->SetTextW( m_vPrograms[lpSel].wsWorkingDir.c_str() );
+						}
+						return true;
+					}
+				}
+		
+			}
+		}
+		return false;
 	}
 
 	// Fills a set of LPARAM's, one for each selected item in the list box.
@@ -205,7 +392,40 @@ namespace mx {
 
 	// Sets the current information based on the current selection.
 	void COptionsPagePrograms::FillInfoBySelection() {
-		
+		CListBox * plbList = static_cast<CListBox *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_LIST ));
+		if ( plbList ) {
+			INT iSel = plbList->GetCurSel();
+			LPARAM lpSel = plbList->GetCurSel() != LB_ERR ? plbList->GetCurSelItemData() : -1;
+			if ( lpSel != -1 && size_t( lpSel ) < m_vPrograms.size() ) {
+				CEdit * peEdit = nullptr;
+				CCheckButton * pcbCheck = nullptr;
+
+				peEdit = static_cast<CEdit *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_OPTIONS_NAME_EDIT ));
+				if ( peEdit ) {
+					peEdit->SetTextW( m_vPrograms[lpSel].wsMenuName.c_str() );
+				}
+
+				peEdit = static_cast<CEdit *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_OPTIONS_PROGRAM_EDIT ));
+				if ( peEdit ) {
+					peEdit->SetTextW( m_vPrograms[lpSel].wsPath.c_str() );
+				}
+
+				peEdit = static_cast<CEdit *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_OPTIONS_ARGUMENTS_EDIT ));
+				if ( peEdit ) {
+					peEdit->SetTextW( m_vPrograms[lpSel].wsArgs.c_str() );
+				}
+
+				peEdit = static_cast<CEdit *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_OPTIONS_WORKINGDIR_EDIT ));
+				if ( peEdit ) {
+					peEdit->SetTextW( m_vPrograms[lpSel].wsWorkingDir.c_str() );
+				}
+
+				pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_OPTIONS_HIDDEN_CHECK ));
+				if ( pcbCheck ) {
+					pcbCheck->SetCheck( !m_vPrograms[lpSel].bVisible );
+				}
+			}
+		}
 	}
 
 }	// namespace mx
