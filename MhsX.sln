@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExpressionEvaluator", "Tools\ExpressionEvaluator\ExpressionEvaluator.vcxproj", "{642C4506-75EB-41EB-8F87-CF92DE64BA4E}"
 EndProject
@@ -19,6 +19,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MhsX", "MhsX.vcxproj", "{B1
 		{642C4506-75EB-41EB-8F87-CF92DE64BA4E} = {642C4506-75EB-41EB-8F87-CF92DE64BA4E}
 		{85310519-9B48-46F1-A3E5-FBFFB2BD7FB3} = {85310519-9B48-46F1-A3E5-FBFFB2BD7FB3}
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LSXML", "LSXML", "{E7777402-1BED-4557-9356-BC732E315ED3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LSXML", "Tools\LSXML\LSXML.vcxproj", "{CFDCA692-E321-43F4-BC61-8323666E28FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -66,6 +70,18 @@ Global
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.Build.0 = Release|x64
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x86.ActiveCfg = Release|Win32
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x86.Build.0 = Release|Win32
+		{CFDCA692-E321-43F4-BC61-8323666E28FF}.Debug|x64.ActiveCfg = Debug|x64
+		{CFDCA692-E321-43F4-BC61-8323666E28FF}.Debug|x64.Build.0 = Debug|x64
+		{CFDCA692-E321-43F4-BC61-8323666E28FF}.Debug|x86.ActiveCfg = Debug|Win32
+		{CFDCA692-E321-43F4-BC61-8323666E28FF}.Debug|x86.Build.0 = Debug|Win32
+		{CFDCA692-E321-43F4-BC61-8323666E28FF}.Final|x64.ActiveCfg = Final|x64
+		{CFDCA692-E321-43F4-BC61-8323666E28FF}.Final|x64.Build.0 = Final|x64
+		{CFDCA692-E321-43F4-BC61-8323666E28FF}.Final|x86.ActiveCfg = Final|Win32
+		{CFDCA692-E321-43F4-BC61-8323666E28FF}.Final|x86.Build.0 = Final|Win32
+		{CFDCA692-E321-43F4-BC61-8323666E28FF}.Release|x64.ActiveCfg = Release|x64
+		{CFDCA692-E321-43F4-BC61-8323666E28FF}.Release|x64.Build.0 = Release|x64
+		{CFDCA692-E321-43F4-BC61-8323666E28FF}.Release|x86.ActiveCfg = Release|Win32
+		{CFDCA692-E321-43F4-BC61-8323666E28FF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -73,8 +89,10 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{642C4506-75EB-41EB-8F87-CF92DE64BA4E} = {C20DF15B-4D4D-4710-86F7-77C9206F4307}
 		{85310519-9B48-46F1-A3E5-FBFFB2BD7FB3} = {8FC18B4C-44B3-4AD2-AD3A-BA03F253C56A}
+		{CFDCA692-E321-43F4-BC61-8323666E28FF} = {E7777402-1BED-4557-9356-BC732E315ED3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0D33D63B-91D6-46AD-B030-B98837201DA7}
 		Qt5Version = $(DefaultQtVersion)
 	EndGlobalSection
 EndGlobal

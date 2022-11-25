@@ -1649,7 +1649,7 @@ namespace mx {
 			0,										// iTop
 			MX_HOTKEY_TOP_WIDTH,					// dwWidth
 			MX_HOTKEY_TOP_HEIGHT,					// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL | LBS_NOTIFY | LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL,			// dwStyle
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL | LBS_NOTIFY | LBS_NOINTEGRALHEIGHT,								// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY | WS_EX_CLIENTEDGE,							// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen

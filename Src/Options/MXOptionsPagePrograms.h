@@ -76,7 +76,7 @@ namespace mx {
 		bool									DownButton();
 
 		// Fills a set of LPARAM's, one for each selected item in the list box.
-		void									GatherSelected( std::set<LPARAM> &_sResult );
+		void									GatherSelected( std::vector<LPARAM> &_sResult );
 
 		// Sets the current information based on the current selection.
 		void									FillInfoBySelection();

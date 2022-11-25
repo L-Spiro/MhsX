@@ -135,14 +135,15 @@ namespace mx {
 		CListBox * plbList = nullptr;
 		plbList = static_cast<CListBox *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_LIST ));
 		if ( plbList ) {
-			LPARAM lpSel = plbList->GetCurSelItemData();
+			INT iSel = plbList->GetCurSel();
+			LPARAM lpSel = plbList->GetCurSel() != LB_ERR ? plbList->GetCurSelItemData() : -1;
 			plbList->ResetContent();
 			for ( size_t I = 0; I < m_vPrograms.size(); ++I ) {
 				INT iRes = plbList->AddString( m_vPrograms[I].wsMenuName.c_str() );
 				if ( iRes != LB_ERRSPACE ) {
 					plbList->SetItemData( iRes, I );
 					if ( I == lpSel ) {
-						plbList->SetSel( TRUE, I );
+						plbList->SetCurSel( I );
 					}
 				}
 			}
@@ -163,7 +164,11 @@ namespace mx {
 
 	// Handles the Delete button.
 	bool COptionsPagePrograms::DeleteButton() {
-		
+		std::vector<LPARAM> sResult;
+		GatherSelected( sResult );
+		for ( auto I = sResult.size(); I--; ) {
+			m_vPrograms.erase( m_vPrograms.begin() + sResult[I] );
+		}
 		ApplySettings();
 		return true;
 	}
@@ -181,16 +186,20 @@ namespace mx {
 	}
 
 	// Fills a set of LPARAM's, one for each selected item in the list box.
-	void COptionsPagePrograms::GatherSelected( std::set<LPARAM> &_sResult ) {
+	void COptionsPagePrograms::GatherSelected( std::vector<LPARAM> &_sResult ) {
 		CListBox * plbList = nullptr;
 		plbList = static_cast<CListBox *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_LIST ));
 		if ( plbList ) {
 			std::vector<INT> vSelections;
-			if ( plbList->GetSelItems( vSelections ) ) {
-				for ( size_t I = 0; I < vSelections.size(); ++I ) {
-					_sResult.insert( plbList->GetItemData( vSelections[I] ) );
-				}
+			INT iSel = plbList->GetCurSel();
+			if ( iSel != LB_ERR ) {
+				_sResult.push_back( plbList->GetItemData( iSel ) );
 			}
+			/*if ( plbList->GetSelItems( vSelections ) ) {
+				for ( size_t I = 0; I < vSelections.size(); ++I ) {
+					_sResult.push_back( plbList->GetItemData( vSelections[I] ) );
+				}
+			}*/
 		}
 	}
 
