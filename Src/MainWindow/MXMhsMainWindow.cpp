@@ -131,6 +131,9 @@ namespace mx {
 			m_iImageMap[sImages[I].dwConst] = m_iImages.Add( m_bBitmaps[sImages[I].dwConst].Handle() );
 		}
 
+		/*std::vector<std::string> vStr = CHelpers::ExpandPATH<std::string>();
+		std::vector<std::wstring> vwStr = CHelpers::ExpandPATH<std::wstring>();*/
+
 		/*::EnumSystemLocalesEx( LocaleEnumprocex, LOCALE_ALL, 0, NULL );*/
 		//::EnumSystemCodePagesW( EnumCodePagesProc, CP_SUPPORTED );
 		

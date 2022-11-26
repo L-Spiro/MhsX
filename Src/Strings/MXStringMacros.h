@@ -16561,3 +16561,39 @@
 #define _DEC_S_9F95CE0D_SW_ mx::CStringDecoder::DecodeToString( _T_9F95CE0D_SW_, _LEN_9F95CE0D )
 #define _DEC_WS_9F95CE0D_SW_ mx::CStringDecoder::DecodeToWString( _T_9F95CE0D_SW_, _LEN_9F95CE0D )
 
+// Windows C&alculator…
+
+#define _T_E1053BE4_Windows_C_alculator___ "\xDF\x37\x3E\xFF\x01\x40\x01\xE7\x13\xEE\x2A\x3A\xF5\x10\x33\xE9\x42\x3F\x0D\x74\x49\x34"
+#define _LEN_E1053BE4 22
+#define _T_LEN_E1053BE4_Windows_C_alculator___ _T_E1053BE4_Windows_C_alculator___, _LEN_E1053BE4
+#define _DEC_E1053BE4_Windows_C_alculator___( STR ) mx::CStringDecoder::Decode( _T_E1053BE4_Windows_C_alculator___, _LEN_E1053BE4, STR )
+#define _DEC_S_E1053BE4_Windows_C_alculator___ mx::CStringDecoder::DecodeToString( _T_E1053BE4_Windows_C_alculator___, _LEN_E1053BE4 )
+#define _DEC_WS_E1053BE4_Windows_C_alculator___ mx::CStringDecoder::DecodeToWString( _T_E1053BE4_Windows_C_alculator___, _LEN_E1053BE4 )
+
+// Calc.exe
+
+#define _T_9A9A2865_Calc_exe "\xCB\x2F\x3C\xFE\xC0\x2E\x06\x2C"
+#define _LEN_9A9A2865 8
+#define _T_LEN_9A9A2865_Calc_exe _T_9A9A2865_Calc_exe, _LEN_9A9A2865
+#define _DEC_9A9A2865_Calc_exe( STR ) mx::CStringDecoder::Decode( _T_9A9A2865_Calc_exe, _LEN_9A9A2865, STR )
+#define _DEC_S_9A9A2865_Calc_exe mx::CStringDecoder::DecodeToString( _T_9A9A2865_Calc_exe, _LEN_9A9A2865 )
+#define _DEC_WS_9A9A2865_Calc_exe mx::CStringDecoder::DecodeToWString( _T_9A9A2865_Calc_exe, _LEN_9A9A2865 )
+
+// Windows &Notepad…
+
+#define _T_A16E1680_Windows__Notepad___ "\xDF\x37\x3E\xFF\x01\x40\x01\xE7\xF6\x16\x38\x42\xF7\x0B\x28\xEC\xB0\x50\x41"
+#define _LEN_A16E1680 19
+#define _T_LEN_A16E1680_Windows__Notepad___ _T_A16E1680_Windows__Notepad___, _LEN_A16E1680
+#define _DEC_A16E1680_Windows__Notepad___( STR ) mx::CStringDecoder::Decode( _T_A16E1680_Windows__Notepad___, _LEN_A16E1680, STR )
+#define _DEC_S_A16E1680_Windows__Notepad___ mx::CStringDecoder::DecodeToString( _T_A16E1680_Windows__Notepad___, _LEN_A16E1680 )
+#define _DEC_WS_A16E1680_Windows__Notepad___ mx::CStringDecoder::DecodeToWString( _T_A16E1680_Windows__Notepad___, _LEN_A16E1680 )
+
+// Notepad.exe
+
+#define _T_6DAC8A48_Notepad_exe "\xD6\x3D\x44\x00\x02\x2A\xF2\xF5\x35\x40\x2E"
+#define _LEN_6DAC8A48 11
+#define _T_LEN_6DAC8A48_Notepad_exe _T_6DAC8A48_Notepad_exe, _LEN_6DAC8A48
+#define _DEC_6DAC8A48_Notepad_exe( STR ) mx::CStringDecoder::Decode( _T_6DAC8A48_Notepad_exe, _LEN_6DAC8A48, STR )
+#define _DEC_S_6DAC8A48_Notepad_exe mx::CStringDecoder::DecodeToString( _T_6DAC8A48_Notepad_exe, _LEN_6DAC8A48 )
+#define _DEC_WS_6DAC8A48_Notepad_exe mx::CStringDecoder::DecodeToWString( _T_6DAC8A48_Notepad_exe, _LEN_6DAC8A48 )
+

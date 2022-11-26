@@ -1854,3 +1854,7 @@
 "SHOWDEFAULT"
 "FORCEMINIMIZE"
 "SW_"
+"Windows C&alculator…"
+"Calc.exe"
+"Windows &Notepad…"
+"Notepad.exe"

@@ -6,7 +6,9 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <EEExpEval.h>
 #include <string>
+#include <Uxtheme.h>
 #include <vector>
 
 namespace lsw {
@@ -386,6 +388,8 @@ namespace lsw {
 			return TRUE;
 		}
 
+
+		// == Members.
 		BOOL								bOpen;
 		BOOL								bEmptied;
 	};
@@ -403,6 +407,53 @@ namespace lsw {
 				DWORD						dwTransitionState : 1;
 			}								s;
 		};
+	};
+
+	struct LSW_THEME_DATA {
+		LSW_THEME_DATA( HWND _hWnd, LPCWSTR _pszClassList ) :
+			hWnd( _hWnd ),
+			wsClass( _pszClassList ) {
+			htTheme = ::OpenThemeData( _hWnd, _pszClassList );
+		}
+		~LSW_THEME_DATA() {
+			if ( NULL != htTheme ) {
+				HRESULT hRes = ::CloseThemeData( htTheme );
+			}
+		}
+
+
+		// == Functions.
+		/**
+		 * Gets the theme handle, creating it if necessary.
+		 *
+		 * \return Returns the theme handle.
+		 */
+		HTHEME								Handle() {
+			if ( !htTheme ) {
+				htTheme = ::OpenThemeData( hWnd, wsClass.c_str() );
+			}
+			return htTheme;
+		}
+
+		/**
+		 * Handles WM_THEMECHANGED.
+		 */
+		void								ThemeChanged() {
+			if ( NULL != htTheme ) {
+				HRESULT hRes = ::CloseThemeData( htTheme );
+				htTheme = NULL;
+			}
+		}
+
+
+	protected :
+		// == Members.
+		/** The theme class. */
+		std::wstring						wsClass;
+		/** The Theme handle. */
+		HTHEME								htTheme;
+		/** The window handle. */
+		HWND								hWnd;
 	};
 
 	class CHelpers {
@@ -473,24 +524,15 @@ namespace lsw {
 
 		// Mixes between 2 RGB values.
 		static DWORD						MixColorRef( DWORD _dwColorA, DWORD _dwColorB, double _dAmnt ) {
-			double dA = sRGBtoLinear( GetRValue( _dwColorA ) / 127.0 );
-			double dB = sRGBtoLinear( GetRValue( _dwColorB ) / 127.0 );
-			BYTE bR = static_cast<BYTE>(std::round( LinearTosRGB( Mix( dA, dB, _dAmnt ) ) * 127.0 ));
-			/*BYTE bRa = GetRValue( _dwColorA );
-			BYTE bRb = GetRValue( _dwColorB );
-			BYTE bR = Mix( bRa, bRb, _dAmnt );*/
-			dA = sRGBtoLinear( GetGValue( _dwColorA ) / 127.0 );
-			dB = sRGBtoLinear( GetGValue( _dwColorB ) / 127.0 );
-			BYTE bG = static_cast<BYTE>(std::round( LinearTosRGB( Mix( dA, dB, _dAmnt ) ) * 127.0 ));
-			/*BYTE bGa = GetGValue( _dwColorA );
-			BYTE bGb = GetGValue( _dwColorB );
-			BYTE bG = Mix( bGa, bGb, _dAmnt );*/
-			dA = sRGBtoLinear( GetBValue( _dwColorA ) / 127.0 );
-			dB = sRGBtoLinear( GetBValue( _dwColorB ) / 127.0 );
-			BYTE bB = static_cast<BYTE>(std::round( LinearTosRGB( Mix( dA, dB, _dAmnt ) ) * 127.0 ));
-			/*BYTE bBa = GetBValue( _dwColorA );
-			BYTE bBb = GetBValue( _dwColorB );
-			BYTE bB = Mix( bBa, bBb, _dAmnt );*/
+			double dA = sRGBtoLinear( GetRValue( _dwColorA ) / 255.0 );
+			double dB = sRGBtoLinear( GetRValue( _dwColorB ) / 255.0 );
+			BYTE bR = static_cast<BYTE>(std::round( LinearTosRGB( Mix( dA, dB, _dAmnt ) ) * 255.0 ));
+			dA = sRGBtoLinear( GetGValue( _dwColorA ) / 255.0 );
+			dB = sRGBtoLinear( GetGValue( _dwColorB ) / 255.0 );
+			BYTE bG = static_cast<BYTE>(std::round( LinearTosRGB( Mix( dA, dB, _dAmnt ) ) * 255.0 ));
+			dA = sRGBtoLinear( GetBValue( _dwColorA ) / 255.0 );
+			dB = sRGBtoLinear( GetBValue( _dwColorB ) / 255.0 );
+			BYTE bB = static_cast<BYTE>(std::round( LinearTosRGB( Mix( dA, dB, _dAmnt ) ) * 255.0 ));
 			return RGB( bR, bG, bB );
 		}
 
@@ -571,6 +613,79 @@ namespace lsw {
 					}
 				}
 			}
+		}
+
+		/**
+		 * Fully expands the PATH enviroment variable into an array of paths.
+		 *
+		 * \return Returns a vector of paths.
+		 */
+		template <typename _tType>
+		static std::vector<_tType>			ExpandPATH() {
+			_tType tTmp, tReplacement;
+			tTmp.push_back( _tType::value_type( '%' ) );
+			tTmp.push_back( _tType::value_type( 'P' ) );
+			tTmp.push_back( _tType::value_type( 'A' ) );
+			tTmp.push_back( _tType::value_type( 'T' ) );
+			tTmp.push_back( _tType::value_type( 'H' ) );
+			tTmp.push_back( _tType::value_type( '%' ) );
+			size_t stStart, stEnd;
+			while ( FindEnvVariableInString<_tType>( tTmp, stStart, stEnd, tReplacement ) ) {
+				tTmp.replace( stStart, stEnd - stStart + 1, tReplacement );
+			}
+			// Remove quotes.
+			for ( auto I = tTmp.size(); I--; ) {
+				if ( tTmp[I] == _tType::value_type( '"' ) ) {
+					tTmp.erase( tTmp.begin() + I );
+				}
+			}
+			return ee::CExpEval::Tokenize<_tType>( tTmp, _tType::value_type( ';' ), false );
+		}
+
+		/**
+		 * Helps expand %VAR% environment variables inside a string.  Gets the range of the first %...% encountered and returns the string that should be there.
+		 *
+		 * \param PARM The string in which to seek %...%.
+		 * \param PARM Holds the returned start position of the %...% section.
+		 * \param PARM Holds the returned end position of the %...% section.
+		 * \param PARM Holds the replacement string, if true is returned.
+		 * \return Returns true if a %...% value was found and expanded.
+		 */
+		template <typename _tType>
+		static bool							FindEnvVariableInString( const _tType &_sString, size_t &_stStart, size_t &_stEnd, _tType &_sReplacement ) {
+			_tType sTmp;
+			_tType tExpanded;
+			tExpanded.resize( 0xFFFF + 2 );
+			for ( size_t I = 0; I < _sString.size(); ++I ) {
+				if ( _sString[I] == _tType::value_type( '%' ) ) {
+					sTmp.clear();
+					for ( size_t J = I + 1; J < _sString.size(); ++J ) {
+						if ( _sString[J] == _tType::value_type( '%' ) ) {
+							DWORD dwSize = 0;
+							if constexpr ( sizeof( _tType::value_type ) == sizeof( char ) ) {
+								dwSize = ::GetEnvironmentVariableA( reinterpret_cast<LPCSTR>(sTmp.data()), reinterpret_cast<LPSTR>(tExpanded.data()), static_cast<DWORD>(tExpanded.size()) );
+							}
+							else if constexpr ( sizeof( _tType::value_type ) == sizeof( wchar_t ) ) {
+								dwSize = ::GetEnvironmentVariableW( reinterpret_cast<LPCWSTR>(sTmp.data()), reinterpret_cast<LPWSTR>(tExpanded.data()), static_cast<DWORD>(tExpanded.size()) );
+							}
+							if ( dwSize ) {
+								_stStart = I;
+								_stEnd = J;
+								_sReplacement.assign( tExpanded, 0, dwSize );
+								return true;
+							}
+							else {
+								I = J - 1;
+								break;
+							}
+						}
+						else {
+							sTmp.push_back( _sString[J] );
+						}
+					}
+				}
+			}
+			return false;
 		}
 
 

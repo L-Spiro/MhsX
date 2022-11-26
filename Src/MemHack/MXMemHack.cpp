@@ -61,6 +61,13 @@ namespace mx {
 		m_oOptions.bRegexNegateSingleLine = TRUE;
 		m_oOptions.uiRegexFlavor = CUtilities::MX_RF_ONIGURUMA;
 		m_oOptions.bsByteswap = CUtilities::MX_BS_NONE;
+
+		m_vPrograms.push_back( MX_PROGRAM() );
+		m_vPrograms.push_back( MX_PROGRAM() );
+		m_vPrograms[0].wsMenuName = _DEC_WS_E1053BE4_Windows_C_alculator___;
+		m_vPrograms[0].wsPath = _DEC_WS_9A9A2865_Calc_exe;
+		m_vPrograms[1].wsMenuName = _DEC_WS_A16E1680_Windows__Notepad___;
+		m_vPrograms[1].wsPath = _DEC_WS_6DAC8A48_Notepad_exe;
 	}
 	CMemHack::~CMemHack() {
 		Detach();
