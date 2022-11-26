@@ -1621,7 +1621,7 @@ namespace mx {
 #define MX_HOTKEY_OPTIONS_LEFT_WIDTH				(40)
 #define MX_HOTKEY_OPTIONS_COMBO_LEFT				(MX_HOTKEY_OPTIONS_LEFT + MX_HOTKEY_OPTIONS_LEFT_WIDTH)
 #define MX_OPTIONS_PARM_PART_HEIGHT					(MX_THIN_PADDING + MX_DEF_EDIT_HEIGHT)
-#define MX_PROGRAMS_OPTIONS_GROUP_HIEGHT			(MX_GROUP_TOP + MX_GROUP_BOTTOM + MX_THIN_PADDING * 0 + (MX_OPTIONS_PARM_PART_HEIGHT * 4))
+#define MX_PROGRAMS_OPTIONS_GROUP_HIEGHT			(MX_GROUP_TOP + MX_GROUP_BOTTOM + MX_THIN_PADDING * 0 + (MX_OPTIONS_PARM_PART_HEIGHT * 4) + MX_DEF_COMBO_HEIGHT)
 
 	// Programs section.
 	LSW_WIDGET_LAYOUT COptionsLayout::m_wlOptionsPrograms[] = {
@@ -1950,6 +1950,28 @@ namespace mx {
 
 			LSW_NO_SIZE_EXP,
 			_T_LEN_66D72F7C_Browse_to_the_desired_working_directory_,																// pcToolTip, sToolTipLen
+			WS_EX_TOPMOST,							// dwToolTipStyleEx
+			MX_TOOLTIP_STYLE,						// dwToolTipStyle
+		},
+
+		{
+			LSW_LT_COMBOBOX,						// ltType
+			MX_OI_PROGRAMS_OPTIONS_SHOW_CMD_COMBO,	// wId
+			WC_COMBOBOXW,							// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_HOTKEY_OPTIONS_COMBO_LEFT,			// iLeft
+			MX_HOTKEY_TOP_HEIGHT + MX_GROUP_TOP + (MX_OPTIONS_PARM_PART_HEIGHT * 4),												// iTop
+			(MX_HOTKEY_TOP_WIDTH - MX_HOTKEY_OPTIONS_COMBO_LEFT),
+			MX_DEF_COMBO_HEIGHT,					// dwHeight
+			MX_COMBOSTYLE_LIST,						// dwStyle
+			0,										// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_OI_PROGRAMS,							// dwParentId
+
+			LSW_NO_SIZE_EXP,
+			_T_LEN_497C0C91_The_flags_that_specify_how_an_application_is_to_be_displayed_when_it_is_opened_,						// pcToolTip, sToolTipLen
 			WS_EX_TOPMOST,							// dwToolTipStyleEx
 			MX_TOOLTIP_STYLE,						// dwToolTipStyle
 		},

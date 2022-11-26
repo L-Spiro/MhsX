@@ -174,7 +174,7 @@ namespace mx {
 			m_vPrograms[_stIdx].wsArgs.c_str(),
 			m_vPrograms[_stIdx].wsWorkingDir.c_str(),
 			m_vPrograms[_stIdx].iShowCmd );
-		return reinterpret_cast<int>(hReturn) > 32;
+		return reinterpret_cast<INT_PTR>(hReturn) > 32;
 	}
 
 	// The address reader for expressions.

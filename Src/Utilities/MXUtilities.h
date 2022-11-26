@@ -407,6 +407,9 @@ namespace mx {
 		// Creates a PROCESS_ string.
 		static const CHAR *				OpenProcessFlagToString( uint32_t _uiVal, std::string &_sString, BOOL _bShort = -1 );
 
+		// Creates an SW_ string.
+		static const CHAR *				ShowWindowToString( int _iVal, std::string &_sString, BOOL _bShort = -1 );
+
 		// Creates a string that best represents the given size.
 		static const CHAR *				SizeString( uint64_t _uiSize, std::string &_sString );
 
@@ -945,6 +948,40 @@ namespace mx {
 
 		// Prints the number of GUI objects.
 		static void						PrintTotalGuiObjects( DWORD _dwFlags );
+
+		// Moves the selected items in a vector up (closer to 0) by 1.
+		template <typename _tType>
+		static void						MoveElementsUp( std::vector<_tType> &_vElements, const std::vector<size_t> &_vSelection ) {
+			size_t sLowestIdx = -1;
+			for ( size_t I = 0; I < _vSelection.size(); ++I ) {
+				if ( _vSelection[I] < _vElements.size() ) {
+					if ( static_cast<intptr_t>(_vSelection[I]) > static_cast<intptr_t>(sLowestIdx) && _vSelection[I] > 0 ) {
+						std::swap( _vElements[_vSelection[I]-1], _vElements[_vSelection[I]] );
+						sLowestIdx = _vSelection[I];
+					}
+					else {
+						sLowestIdx = _vSelection[I] + 1;
+					}
+				}
+			}
+		}
+
+		// Moves the selected items in a vector down (away from 0) by 1.
+		template <typename _tType>
+		static void						MoveElementsDown( std::vector<_tType> &_vElements, const std::vector<size_t> &_vSelection ) {
+			size_t sHighestIdx = _vSelection.size();
+			for ( size_t I = _vSelection.size(); I--; ) {
+				if ( _vSelection[I] < _vElements.size() ) {
+					if ( _vSelection[I] < sHighestIdx && _vSelection[I] < _vElements.size() - 1 ) {
+						std::swap( _vElements[_vSelection[I]], _vElements[_vSelection[I]+1] );
+						sHighestIdx = _vSelection[I];
+					}
+					else {
+						sHighestIdx = _vSelection[I] - 1;
+					}
+				}
+			}
+		}
 		
 
 		// == Members.

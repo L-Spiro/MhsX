@@ -84,8 +84,14 @@ namespace mx {
 		// Browse for a working directory.
 		bool									BrowseWorkingDirectory();
 
+		// Update the show type.
+		bool									UpdateShowType();
+
+		// Gets the selected index or -1.
+		int										SelectedIdx() const;
+
 		// Fills a set of LPARAM's, one for each selected item in the list box.
-		void									GatherSelected( std::vector<LPARAM> &_sResult );
+		void									GatherSelected( std::vector<size_t> &_sResult );
 
 		// Sets the current information based on the current selection.
 		void									FillInfoBySelection();

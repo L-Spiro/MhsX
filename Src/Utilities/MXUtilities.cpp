@@ -721,6 +721,43 @@ namespace mx {
 		return _sString.c_str();
 	}
 
+	// Creates an SW_ string.
+	const CHAR * CUtilities::ShowWindowToString( int _iVal, std::string &_sString, BOOL _bShort ) {
+		_bShort = (_bShort == -1) ? Options.bShortenEnumNames : _bShort;
+		struct {
+			int iType;
+			const CHAR * pcName;
+			uint32_t ui32StrLen;
+		}
+		static const aTable[] = {
+			{ SW_HIDE, _T_LEN_920C269F_HIDE },
+			{ SW_NORMAL, _T_LEN_D17DAF62_NORMAL },
+			{ SW_SHOWMINIMIZED, _T_LEN_6DA4DADD_SHOWMINIMIZED },
+			{ SW_SHOWMAXIMIZED, _T_LEN_BA4F689C_SHOWMAXIMIZED },
+			{ SW_SHOWNOACTIVATE, _T_LEN_EA02892C_SHOWNOACTIVATE },
+			{ SW_SHOW, _T_LEN_049B34B5_SHOW },
+			{ SW_MINIMIZE, _T_LEN_364F5FB5_MINIMIZE },
+			{ SW_SHOWMINNOACTIVE, _T_LEN_059A7C09_SHOWMINNOACTIVE },
+			{ SW_SHOWNA, _T_LEN_96FEABA1_SHOWNA },
+			{ SW_RESTORE, _T_LEN_B892D1E5_RESTORE },
+			{ SW_SHOWDEFAULT, _T_LEN_18095A2F_SHOWDEFAULT },
+			{ SW_FORCEMINIMIZE, _T_LEN_C2DC3EA7_FORCEMINIMIZE },
+		};
+		for ( size_t I = 0; I < MX_ELEMENTS( aTable ); ++I ) {
+			if ( _iVal == aTable[I].iType ) {
+				CHAR szBuffer[_T_MAX_LEN];
+				if ( !_bShort ) {
+					CStringDecoder::Decode( _T_LEN_9F95CE0D_SW_, szBuffer );
+					_sString += szBuffer;
+				}
+				CStringDecoder::Decode( aTable[I].pcName, aTable[I].ui32StrLen, szBuffer );
+				_sString += szBuffer;
+				break;
+			}
+		}
+		return _sString.c_str();
+	}
+
 	// Creates a string that best represents the given size.
 	const CHAR * CUtilities::SizeString( uint64_t _uiSize, std::string &_sString ) {
 		CHAR szBuffer[_T_MAX_LEN];
