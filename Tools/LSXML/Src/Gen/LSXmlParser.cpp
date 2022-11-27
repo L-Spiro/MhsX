@@ -944,6 +944,7 @@ namespace yy {
 
 
 int yylex( /*YYSTYPE*/void * /*_pvNodeUnion*/, lsx::CXmlLexer * _pxlLexer ) {
+    const char * pcText = _pxlLexer->YYText();
 	return _pxlLexer->yylex();
 }
 

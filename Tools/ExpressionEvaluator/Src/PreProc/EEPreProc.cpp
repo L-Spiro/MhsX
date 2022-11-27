@@ -79,12 +79,10 @@ namespace ee {
 		std::istringstream isStream( _sExp );
 
 		// Streams created.  Create the parsers.
-		//CPreProcLexer * ppplLexer = LSENEW CPreProcLexer( &isStream, NULL );
 		std::unique_ptr<CPreProcLexer> ppplLexer = std::make_unique<CPreProcLexer>( &isStream, nullptr );
 		if ( !ppplLexer ) {
 			return EE_E_ERROR;
 		}
-		//CPreProcParser * ppppParser = LSENEW CPreProcParser( ppplLexer, &m_ppcContainer );
 		std::unique_ptr<CPreProcParser> ppppParser = std::make_unique<CPreProcParser>( ppplLexer.get(), &m_ppcContainer );
 		if ( !ppppParser ) {
 			return EE_E_ERROR;

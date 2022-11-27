@@ -4357,12 +4357,16 @@ YY_RULE_SETUP
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-{ return yy::CXmlParser::token::VERSION; }
+{
+    return yy::CXmlParser::token::VERSION;
+}
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-{ return yy::CXmlParser::token::ENCODING; }
+{
+    return yy::CXmlParser::token::ENCODING;
+}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP

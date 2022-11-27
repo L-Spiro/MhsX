@@ -6,7 +6,17 @@
 #include "Utilities/MXUtilities.h"
 
 
+#include <LSXml.h>
+
+
 int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine, int _nCmdShow ) {
+	std::vector<uint8_t> vBytes;
+	mx::CFile::LoadToMemory( L"J:\\My Projects\\MHS X\\Research\\Test.xml", vBytes );
+	vBytes.push_back( 0 );
+	lsx::CXml xXml;
+	xXml.SetXml( (const char *)(vBytes.data()) );
+
+
 	// Security measure.  All custom window classes have random names.  Ensure their lengths can change, but not have the same length
 	//	as any other string to ensure no name collisions.  No need for true random here; % is fine enough.
 #define MX_NEW_STRING( NAME, BASELEN )	std::vector<WCHAR> NAME; NAME.resize( (BASELEN) + (rand() % 4) ); mx::CUtilities::RandomString( &NAME[0], NAME.size() )

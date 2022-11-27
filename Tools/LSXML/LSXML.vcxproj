@@ -169,6 +169,7 @@
       </PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -225,6 +226,7 @@
       </PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -246,9 +248,9 @@
     <ClInclude Include="Src\LSXmlSyntaxNodes.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="LSXML.cpp" />
     <ClCompile Include="Src\Gen\LSXmlLexBase.cpp" />
     <ClCompile Include="Src\Gen\LSXmlParser.cpp" />
+    <ClCompile Include="Src\LSXml.cpp" />
     <ClCompile Include="Src\LSXmlContainer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

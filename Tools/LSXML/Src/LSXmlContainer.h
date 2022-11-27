@@ -9,6 +9,12 @@ namespace lsx {
 
 	class CXmlLexer;
 
+	/**
+	 * Class CXmlContainer
+	 * \brief Processes the results of the parsing and stores the result.
+	 *
+	 * Description: Processes the results of the parsing and stores the result.
+	 */
 	class CXmlContainer {
 	public :
 		CXmlContainer( CXmlLexer * _pxlLexer );

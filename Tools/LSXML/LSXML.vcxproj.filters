@@ -50,9 +50,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="LSXML.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Gen\LSXmlLexBase.cpp">
       <Filter>Source Files\Gen</Filter>
     </ClCompile>
@@ -60,6 +57,9 @@
       <Filter>Source Files\Gen</Filter>
     </ClCompile>
     <ClCompile Include="Src\LSXmlContainer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\LSXml.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
