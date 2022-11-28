@@ -95,6 +95,18 @@ namespace mx {
 		static std::vector<uint8_t> &
 								LoadToMemory( LPCWSTR _lpwFile, std::vector<uint8_t> &_vRet );
 
+		// Determines if the given path represents an existing file (not folder).
+		static bool				IsFile( LPCSTR _lpcFile );
+
+		// Determines if the given path represents an existing file (not folder).
+		static bool				IsFile( LPCWSTR _lpwFile );
+
+		// Determines if the given path represents an existing folder (not file).
+		static bool				IsFolder( LPCSTR _lpcFolder );
+
+		// Determines if the given path represents an existing folder (not file).
+		static bool				IsFolder( LPCWSTR _lpwFolder );
+
 
 	protected :
 		// == Members.

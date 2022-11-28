@@ -154,10 +154,20 @@ namespace mx {
 		static size_t					GetPathEnvW( std::vector<std::wstring> &_vReturn ) { return GetPathEnv( _vReturn ); }
 
 		// Gets all of the search paths for a DLL in the order in which they should be searched.
-		static std::vector<std::string>	DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::string> &_vResults, BOOL _bIncludeLoadedModulePath = TRUE );
+		static std::vector<std::string> &
+										DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::string> &_vResults, BOOL _bIncludeLoadedModulePath = TRUE );
 
 		// Gets all of the search paths for a DLL in the order in which they should be searched.
-		static std::vector<std::wstring>DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::wstring> &_vResults, BOOL _bIncludeLoadedModulePath = TRUE );
+		static std::vector<std::wstring> &
+										DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::wstring> &_vResults, BOOL _bIncludeLoadedModulePath = TRUE );
+
+		// Gets all of the search paths for an EXE in the order in which they should be searched.
+		static std::vector<std::string> &
+										ExeSearchPaths( const WCHAR * _pwcExe, std::vector<std::string> &_vResults );
+
+		// Gets all of the search paths for an EXE in the order in which they should be searched.
+		static std::vector<std::wstring> &
+										ExeSearchPaths( const WCHAR * _pwcExe, std::vector<std::wstring> &_vResults );
 
 		// Loads a DLL by name.  Uses the normal search paths DLL's use (local directory, working directory, system directory, windows directory, PATH directories).
 		static BOOL						FindDll( const CHAR * _pcDll, CFile &_fReturn );

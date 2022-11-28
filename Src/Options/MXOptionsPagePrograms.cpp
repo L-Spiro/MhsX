@@ -237,8 +237,43 @@ namespace mx {
 
 	// Verifies the options, returning an error string in case of error.
 	BOOL COptionsPagePrograms::Verify( std::wstring &_wsError, CWidget * &_pwWidget ) {
-		ee::CExpEvalContainer::EE_RESULT eRes;
-		CWidget * pwTemp = nullptr;
+		/*ee::CExpEvalContainer::EE_RESULT eRes;
+		CWidget * pwTemp = nullptr;*/
+		CListBox * plbList = nullptr;
+		plbList = static_cast<CListBox *>(FindChild( COptionsLayout::MX_OI_PROGRAMS_LIST ));
+		for ( auto I = m_vPrograms.size(); I--; ) {
+			if ( m_vPrograms[I].wsWorkingDir.size() ) {
+				if ( !CFile::IsFolder( m_vPrograms[I].wsWorkingDir.c_str() ) ) {
+					plbList->SetCurSelByItemData( static_cast<LPARAM>(I) );
+					_pwWidget = FindChild( COptionsLayout::MX_OI_PROGRAMS_OPTIONS_WORKINGDIR_EDIT );
+					_wsError = _DEC_WS_D284E408_The_supplied_working_directory_is_invalid_;
+					return FALSE;
+				}
+			}
+			if ( !m_vPrograms[I].wsPath.size() ) {
+				plbList->SetCurSelByItemData( static_cast<LPARAM>(I) );
+				_pwWidget = FindChild( COptionsLayout::MX_OI_PROGRAMS_OPTIONS_PROGRAM_EDIT );
+				_wsError = _DEC_WS_50E7AAE8_The_supplied_executable_path_is_invalid_;
+				return FALSE;
+			}
+			if ( !CFile::IsFile( m_vPrograms[I].wsPath.c_str() ) ) {
+				bool bFound = false;
+				std::vector<std::wstring> vPaths;
+				CSystem::ExeSearchPaths( m_vPrograms[I].wsPath.c_str(), vPaths );
+				for ( auto J = vPaths.size(); J--; ) {
+					if ( CFile::IsFile( vPaths[J].c_str() ) ) {
+						bFound = true;
+						break;
+					}
+				}
+				if ( !bFound ) {
+					plbList->SetCurSelByItemData( static_cast<LPARAM>(I) );
+					_pwWidget = FindChild( COptionsLayout::MX_OI_PROGRAMS_OPTIONS_PROGRAM_EDIT );
+					_wsError = _DEC_WS_50E7AAE8_The_supplied_executable_path_is_invalid_;
+					return FALSE;
+				}
+			}
+		}
 		return TRUE;
 	}
 

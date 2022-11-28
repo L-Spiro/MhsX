@@ -16597,3 +16597,21 @@
 #define _DEC_S_6DAC8A48_Notepad_exe mx::CStringDecoder::DecodeToString( _T_6DAC8A48_Notepad_exe, _LEN_6DAC8A48 )
 #define _DEC_WS_6DAC8A48_Notepad_exe mx::CStringDecoder::DecodeToWString( _T_6DAC8A48_Notepad_exe, _LEN_6DAC8A48 )
 
+// The supplied working directory is invalid.
+
+#define _T_D284E408_The_supplied_working_directory_is_invalid_ "\xDC\x36\x35\xBB\x05\x3E\xFE\x37\x3C\x31\x2E\x32\xB2\x12\x36\xFA\x39\x39\x09\xF9\xE9\xF2\x30\x42\x2D\x2C\x42\x01\x0D\x40\xA8\x37\x43\xBB\xFB\x37\x04\x28\x3C\x31\x2D\xFC"
+#define _LEN_D284E408 42
+#define _T_LEN_D284E408_The_supplied_working_directory_is_invalid_ _T_D284E408_The_supplied_working_directory_is_invalid_, _LEN_D284E408
+#define _DEC_D284E408_The_supplied_working_directory_is_invalid_( STR ) mx::CStringDecoder::Decode( _T_D284E408_The_supplied_working_directory_is_invalid_, _LEN_D284E408, STR )
+#define _DEC_S_D284E408_The_supplied_working_directory_is_invalid_ mx::CStringDecoder::DecodeToString( _T_D284E408_The_supplied_working_directory_is_invalid_, _LEN_D284E408 )
+#define _DEC_WS_D284E408_The_supplied_working_directory_is_invalid_ mx::CStringDecoder::DecodeToWString( _T_D284E408_The_supplied_working_directory_is_invalid_, _LEN_D284E408 )
+
+// The supplied executable path is invalid.
+
+#define _T_50E7AAE8_The_supplied_executable_path_is_invalid_ "\xDC\x36\x35\xBB\x05\x3E\xFE\x37\x3C\x31\x2E\x32\xB2\x00\x3F\xED\x31\x45\x0F\xF3\x2B\xFA\x2C\xF0\x38\x2A\x42\xFA\xBB\x30\xFB\xEE\x39\x09\x08\x2A\xFA\x30\x34\xF6"
+#define _LEN_50E7AAE8 40
+#define _T_LEN_50E7AAE8_The_supplied_executable_path_is_invalid_ _T_50E7AAE8_The_supplied_executable_path_is_invalid_, _LEN_50E7AAE8
+#define _DEC_50E7AAE8_The_supplied_executable_path_is_invalid_( STR ) mx::CStringDecoder::Decode( _T_50E7AAE8_The_supplied_executable_path_is_invalid_, _LEN_50E7AAE8, STR )
+#define _DEC_S_50E7AAE8_The_supplied_executable_path_is_invalid_ mx::CStringDecoder::DecodeToString( _T_50E7AAE8_The_supplied_executable_path_is_invalid_, _LEN_50E7AAE8 )
+#define _DEC_WS_50E7AAE8_The_supplied_executable_path_is_invalid_ mx::CStringDecoder::DecodeToWString( _T_50E7AAE8_The_supplied_executable_path_is_invalid_, _LEN_50E7AAE8 )
+

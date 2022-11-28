@@ -410,60 +410,30 @@ namespace mx {
 
 	// Gets all the paths in the PATH environment variable.
 	size_t CSystem::GetPathEnv( std::vector<std::string> &_vReturn ) {
-		const DWORD dwSize = 32767;
-		WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[dwSize];
-		if ( !pwcBuffer ) { return 0; }
-
-		WCHAR szPath[_LEN_3DC166BB+1];
-		DWORD dwLen = GetEnvironmentVariableW( _DEC_3DC166BB_PATH( szPath ), pwcBuffer, dwSize );
-		CSecureWString wTemp;
 		size_t sStart = _vReturn.size();
-		for ( size_t I = 0; I < dwLen; ++I ) {
-			if ( pwcBuffer[I] == L';' ) {
-				if ( wTemp.size() ) {
-					_vReturn.push_back( ee::CExpEval::WStringToString( CUtilities::FinishPath( wTemp ) ) );
-					wTemp.clear();
-				}
-			}
-			else {
-				wTemp.push_back( pwcBuffer[I] );
-			}
+		std::vector<std::string> vTmp = lsw::CHelpers::ExpandPATH<std::string>();
+		for ( size_t I = 0; I < vTmp.size(); ++I ) {
+			_vReturn.push_back( CUtilities::FinishPath( vTmp[I] ) );
+			::ZeroMemory( vTmp[I].data(), vTmp[I].size() );
 		}
-		::ZeroMemory( pwcBuffer, dwLen );
-		delete [] pwcBuffer;
 
 		return _vReturn.size() - sStart;
 	}
 
 	// Gets all the paths in the PATH environment variable.
 	size_t CSystem::GetPathEnv( std::vector<std::wstring> &_vReturn ) {
-		const DWORD dwSize = 32767;
-		WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[dwSize];
-		if ( !pwcBuffer ) { return 0; }
-
-		WCHAR szPath[_LEN_3DC166BB+1];
-		DWORD dwLen = GetEnvironmentVariableW( _DEC_3DC166BB_PATH( szPath ), pwcBuffer, dwSize );
-		CSecureWString wTemp;
 		size_t sStart = _vReturn.size();
-		for ( size_t I = 0; I < dwLen; ++I ) {
-			if ( pwcBuffer[I] == L';' ) {
-				if ( wTemp.size() ) {
-					_vReturn.push_back( CUtilities::FinishPath( wTemp ) );
-					wTemp.clear();
-				}
-			}
-			else {
-				wTemp.push_back( pwcBuffer[I] );
-			}
+		std::vector<std::wstring> vTmp = lsw::CHelpers::ExpandPATH<std::wstring>();
+		for ( size_t I = 0; I < vTmp.size(); ++I ) {
+			_vReturn.push_back( CUtilities::FinishPath( vTmp[I] ) );
+			::ZeroMemory( vTmp[I].data(), vTmp[I].size() );
 		}
-		::ZeroMemory( pwcBuffer, dwLen );
-		delete [] pwcBuffer;
 
 		return _vReturn.size() - sStart;
 	}
 
 	// Gets all of the search paths for a DLL in the order in which they should be searched.
-	std::vector<std::string> CSystem::DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::string> &_vResults, BOOL _bIncludeLoadedModulePath ) {
+	std::vector<std::string> & CSystem::DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::string> &_vResults, BOOL _bIncludeLoadedModulePath ) {
 		CSecureString sDllUtf8 = ee::CExpEval::WStringToString( _pwcDll );
 		if ( _bIncludeLoadedModulePath ) {
 			// If the module is already loaded by us, put it in front of the list.
@@ -484,7 +454,7 @@ namespace mx {
 	}
 
 	// Gets all of the search paths for a DLL in the order in which they should be searched.
-	std::vector<std::wstring> CSystem::DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::wstring> &_vResults, BOOL _bIncludeLoadedModulePath ) {
+	std::vector<std::wstring> & CSystem::DllSearchPaths( const WCHAR * _pwcDll, std::vector<std::wstring> &_vResults, BOOL _bIncludeLoadedModulePath ) {
 		CSecureWString sDllUtf8 = _pwcDll;
 		if ( _bIncludeLoadedModulePath ) {
 			// If the module is already loaded by us, put it in front of the list.
@@ -497,6 +467,32 @@ namespace mx {
 		_vResults.push_back( GetCurDirW() );
 		_vResults.push_back( GetSystemDirW() );
 		_vResults.push_back( GetWindowsDirW() );
+		GetPathEnv( _vResults );
+		for ( size_t I = 0; I < _vResults.size(); ++I ) {
+			_vResults[I].append( sDllUtf8 );
+		}
+		return _vResults;
+	}
+
+	// Gets all of the search paths for an EXE in the order in which they should be searched.
+	std::vector<std::string> & CSystem::ExeSearchPaths( const WCHAR * _pwcExe, std::vector<std::string> &_vResults ) {
+		CSecureString sDllUtf8 = ee::CExpEval::WStringToString( _pwcExe );
+		_vResults.push_back( GetCurDir() );
+		_vResults.push_back( GetWindowsDir() );
+		_vResults.push_back( GetSystemDir() );
+		GetPathEnv( _vResults );
+		for ( size_t I = 0; I < _vResults.size(); ++I ) {
+			_vResults[I].append( sDllUtf8 );
+		}
+		return _vResults;
+	}
+
+	// Gets all of the search paths for an EXE in the order in which they should be searched.
+	std::vector<std::wstring> & CSystem::ExeSearchPaths( const WCHAR * _pwcExe, std::vector<std::wstring> &_vResults ) {
+		CSecureWString sDllUtf8 = _pwcExe;
+		_vResults.push_back( GetCurDirW() );
+		_vResults.push_back( GetWindowsDirW() );
+		_vResults.push_back( GetSystemDirW() );
 		GetPathEnv( _vResults );
 		for ( size_t I = 0; I < _vResults.size(); ++I ) {
 			_vResults[I].append( sDllUtf8 );

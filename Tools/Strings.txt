@@ -1858,3 +1858,5 @@
 "Calc.exe"
 "Windows &Notepad…"
 "Notepad.exe"
+"The supplied working directory is invalid."
+"The supplied executable path is invalid."

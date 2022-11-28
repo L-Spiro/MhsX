@@ -1,4 +1,5 @@
 #include "MXFile.h"
+#include <string>
 
 
 namespace mx {
@@ -277,6 +278,40 @@ namespace mx {
 			if ( fFile.Read( &_vRet[I], ui64BufferSize ) != ui64BufferSize ) { return _vRet; }
 		}
 		return _vRet;
+	}
+
+	// Determines if the given path represents an existing file (not folder).
+	bool CFile::IsFile( LPCSTR _lpcFile ) {
+		DWORD dwAttr = ::GetFileAttributesA( _lpcFile );
+		return (dwAttr != INVALID_FILE_ATTRIBUTES) &&
+			!(dwAttr & FILE_ATTRIBUTE_DIRECTORY);
+	}
+
+	// Determines if the given path represents an existing file (not folder).
+	bool CFile::IsFile( LPCWSTR _lpwFile ) {
+		std::wstring wsTmp;
+		wsTmp = L"\\\\?\\";
+		wsTmp += _lpwFile;
+		DWORD dwAttr = ::GetFileAttributesW( wsTmp.c_str() );
+		return (dwAttr != INVALID_FILE_ATTRIBUTES) &&
+			!(dwAttr & FILE_ATTRIBUTE_DIRECTORY);
+	}
+
+	// Determines if the given path represents an existing folder (not file).
+	bool CFile::IsFolder( LPCSTR _lpcFolder ) {
+		DWORD dwAttr = ::GetFileAttributesA( _lpcFolder );
+		return (dwAttr != INVALID_FILE_ATTRIBUTES) &&
+			(dwAttr & FILE_ATTRIBUTE_DIRECTORY);
+	}
+
+	// Determines if the given path represents an existing folder (not file).
+	bool CFile::IsFolder( LPCWSTR _lpwFolder ) {
+		std::wstring wsTmp;
+		wsTmp = L"\\\\?\\";
+		wsTmp += _lpwFolder;
+		DWORD dwAttr = ::GetFileAttributesW( wsTmp.c_str() );
+		return (dwAttr != INVALID_FILE_ATTRIBUTES) &&
+			(dwAttr & FILE_ATTRIBUTE_DIRECTORY);
 	}
 
 	// Converts a WIN32_FILE_ATTRIBUTE_DATA structure to an MX_FILE_ATTR structure.
