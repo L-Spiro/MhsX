@@ -51,12 +51,12 @@ namespace lsx {
 
 
 		if ( ppppParser->parse() == 0 ) {
+			m_pxcContainer->PrintNode( m_pxcContainer->Root(), 0 );
 			// Parsed.
 			return true;
 		}
 		Reset();
 		return false;
-
 	}
 
 }	// namespace lsx

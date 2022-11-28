@@ -34,68 +34,102 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, lsx::CXmlLexer * _pxlLexer );
 %parse-param												{ class CXmlContainer * m_peecContainer }
 %lex-param													{ CXmlLexer * m_peelLexer }
 
-%union {char *s;}
 
-%token VERSION ATTDEF ENDDEF EQ SLASH CLOSE END
-%token <s> ENCODING NAME VALUE DATA COMMENT START
-%type <s> name_opt
+%token LSX_VERSION LSX_ATTDEF LSX_ENDDEF LSX_EQ LSX_SLASH LSX_CLOSE LSX_END
+%token LSX_ENCODING LSX_NAME LSX_VALUE LSX_DATA LSX_COMMENT LSX_START
+
+%type <sStringIndex>										data
+%type <sStringIndex>										name
+%type <sStringIndex>										name_opt
+%type <sStringIndex>										start
+%type <sStringIndex>										value
+%type <nNode>												attribute
+%type <nNode>												attribute_seq_opt
+%type <nNode>												attribute_decl
+%type <nNode>												content
+%type <nNode>												document
+%type <nNode>												element
+%type <nNode>												empty_or_content
+%type <nNode>												encoding_opt
+%type <nNode>												misc
+%type <nNode>												misc_seq_opt
+%type <nNode>												prolog
+%type <nNode>												version_opt
+
+%start document
 
 %%
 
+name
+ : LSX_NAME													{ $$ = m_peecContainer->AddString( m_peelLexer->YYText() ); }
+ ;
+ 
+value
+ : LSX_VALUE												{ $$ = m_peecContainer->AddValue( m_peelLexer->YYText() ); }
+ ;
+ 
+data
+ : LSX_DATA													{ $$ = m_peecContainer->AddString( m_peelLexer->YYText() ); }
+ ;
+ 
+start
+ : LSX_START												{ $$ = m_peecContainer->AddAttributeStart( m_peelLexer->YYText() ); }
+ ;
+
 document
- : prolog element misc_seq_opt
+ : prolog element misc_seq_opt								{ m_peecContainer->AddDocument( $$, $1, $2, $3 ); }
  ;
 prolog
  : version_opt encoding_opt
-   misc_seq_opt
+   misc_seq_opt												{ m_peecContainer->AddProlog( $$, $1, $2, $3 ); }
  ;
 version_opt
- : VERSION													{ }
- | /*empty*/
+ : LSX_VERSION												{ m_peecContainer->AddVersion( $$, m_peelLexer->YYText() ); }
+ |															{ m_peecContainer->AddEmpty( $$ ); }
  ;
 encoding_opt
- : ENCODING													{ }
- | /*empty*/
+ : LSX_ENCODING												{ m_peecContainer->AddEncoding( $$, m_peelLexer->YYText() ); }
+ | 															{ m_peecContainer->AddEmpty( $$ ); }
  ;
 misc_seq_opt
- : misc_seq_opt misc
- | /*empty*/
+ : misc_seq_opt misc										{ m_peecContainer->AddMiscSeq( $$, $1, $2 ); }
+ | 															{ m_peecContainer->AddEmpty( $$ ); }
  ;
 misc
- : COMMENT													{ }
- | attribute_decl
+ : LSX_COMMENT												{ m_peecContainer->AddEmpty( $$ ); }
+ | attribute_decl											{ $$ = $1; }
  ;
 attribute_decl
- : ATTDEF NAME												{ }
-   attribute_seq_opt ENDDEF									{ }
+ : LSX_ATTDEF name
+   attribute_seq_opt LSX_ENDDEF								{ m_peecContainer->AddAttributeDecl( $$, $2, $3 ); }
  ;	
 element
- : START													{ }
+ : start
    attribute_seq_opt
-   empty_or_content
+   empty_or_content											{ m_peecContainer->AddElement( $$, $1, $2, $3 ); }
  ;
 empty_or_content
- : SLASH CLOSE												{ }
- | CLOSE													{ }
-   content END name_opt CLOSE								{ }
+ : LSX_SLASH LSX_CLOSE										{ m_peecContainer->AddEmpty( $$ ); }
+ | LSX_CLOSE
+   content LSX_END name_opt LSX_CLOSE						{ m_peecContainer->AddContent( $$, $2, $4 ); }
  ;
 content
- : content DATA												{ }
- | content misc
- | content element
- | /*empty*/
+ : content data												{ m_peecContainer->AddContentData( $$, $1, $2 ); }
+ | content misc												{ m_peecContainer->AddContentMisc( $$, $1, $2 ); }
+ | content element											{ m_peecContainer->AddContentElement( $$, $1, $2 ); }
+ | 															{ m_peecContainer->AddEmpty( $$ ); }
  ;
 name_opt
- : NAME														{ }
- | /*empty*/												{ }
+ : name														{ $$ = $1; }
+ | /*empty*/												{ $$ = size_t( -1 ); }
  ;
 attribute_seq_opt
- : attribute_seq_opt attribute
- | /*empty*/
+ : attribute_seq_opt attribute								{ m_peecContainer->AddAttributeList( $$, $1, $2 ); }
+ | 															{ m_peecContainer->AddEmpty( $$ ); }
  ;
 attribute
- : NAME														{ }
- | NAME EQ VALUE											{ }
+ : name														{ m_peecContainer->AddAttribute( $$, $1 ); }
+ | name LSX_EQ value										{ m_peecContainer->AddAttribute( $$, $1, $3 ); }
  ;
 
 

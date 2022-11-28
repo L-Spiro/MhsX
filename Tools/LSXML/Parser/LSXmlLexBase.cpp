@@ -4145,11 +4145,6 @@ static yyconst yy_state_type yy_NUL_trans[118] =
 #include "../LSXmlContainer.h"
 #include "../LSXmlLexer.h"
 #include "LSXmlParser.h"
-/*#include <stdio.h>
-#include <ctype.h>
-#include <string.h>
-#include <stdlib.h>*/
-//#include "y.tab.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // MACROS
@@ -4348,64 +4343,64 @@ YY_RULE_SETUP
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-{ return yy::CXmlParser::token::VERSION; }
+{ return yy::CXmlParser::token::LSX_VERSION; }
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-{ return yy::CXmlParser::token::ENCODING; }
+{ return yy::CXmlParser::token::LSX_ENCODING; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-{ return yy::CXmlParser::token::SLASH; }
+{ return yy::CXmlParser::token::LSX_SLASH; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-{ return yy::CXmlParser::token::EQ; }
+{ return yy::CXmlParser::token::LSX_EQ; }
 	YY_BREAK
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-{ BEGIN(CONTENT); return yy::CXmlParser::token::CLOSE; }
+{ BEGIN(CONTENT); return yy::CXmlParser::token::LSX_CLOSE; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-{ return yy::CXmlParser::token::NAME; }
+{ return yy::CXmlParser::token::LSX_NAME; }
 	YY_BREAK
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-{ return yy::CXmlParser::token::VALUE; }
+{ return yy::CXmlParser::token::LSX_VALUE; }
 	YY_BREAK
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-{ BEGIN(keep); return yy::CXmlParser::token::ENDDEF; }
+{ BEGIN(keep); return yy::CXmlParser::token::LSX_ENDDEF; }
 	YY_BREAK
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-{ keep = YY_START; BEGIN(INITIAL); return yy::CXmlParser::token::ATTDEF; }
+{ keep = YY_START; BEGIN(INITIAL); return yy::CXmlParser::token::LSX_ATTDEF; }
 	YY_BREAK
 case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
-{ BEGIN(INITIAL); return yy::CXmlParser::token::START; }
+{ BEGIN(INITIAL); return yy::CXmlParser::token::LSX_START; }
 	YY_BREAK
 case 12:
 /* rule 12 can match eol */
 YY_RULE_SETUP
-{ BEGIN(INITIAL); return yy::CXmlParser::token::END; }
+{ BEGIN(INITIAL); return yy::CXmlParser::token::LSX_END; }
 	YY_BREAK
 case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
-{ return yy::CXmlParser::token::COMMENT; }
+{ return yy::CXmlParser::token::LSX_COMMENT; }
 	YY_BREAK
 case 14:
 /* rule 14 can match eol */
 YY_RULE_SETUP
-{ return yy::CXmlParser::token::DATA; }
+{ return yy::CXmlParser::token::LSX_DATA; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP

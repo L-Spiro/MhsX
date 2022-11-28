@@ -104,13 +104,7 @@ namespace yy {
   public:
     /// Symbol semantic values.
 #ifndef YYSTYPE
-    union semantic_type
-    {
-
-char *s;
-
-
-    };
+    typedef YYSTYPE semantic_type;
 #else
     typedef YYSTYPE semantic_type;
 #endif
@@ -121,19 +115,19 @@ char *s;
     {
       /* Tokens.  */
    enum yytokentype {
-     VERSION = 258,
-     ATTDEF = 259,
-     ENDDEF = 260,
-     EQ = 261,
-     SLASH = 262,
-     CLOSE = 263,
-     END = 264,
-     ENCODING = 265,
-     NAME = 266,
-     VALUE = 267,
-     DATA = 268,
-     COMMENT = 269,
-     START = 270
+     LSX_VERSION = 258,
+     LSX_ATTDEF = 259,
+     LSX_ENDDEF = 260,
+     LSX_EQ = 261,
+     LSX_SLASH = 262,
+     LSX_CLOSE = 263,
+     LSX_END = 264,
+     LSX_ENCODING = 265,
+     LSX_NAME = 266,
+     LSX_VALUE = 267,
+     LSX_DATA = 268,
+     LSX_COMMENT = 269,
+     LSX_START = 270
    };
 
     };

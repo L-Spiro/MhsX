@@ -19,8 +19,6 @@
 #include <cassert>
 #endif
 #include <ctime>
-#include <format>
-#include <iomanip>
 #include <sstream>
 
 #define EE_INVALID_IDX				static_cast<size_t>(-1)

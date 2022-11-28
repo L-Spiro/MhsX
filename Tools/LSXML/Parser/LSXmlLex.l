@@ -17,11 +17,6 @@
 #include "../LSXmlContainer.h"
 #include "../LSXmlLexer.h"
 #include "LSXmlParser.h"
-/*#include <stdio.h>
-#include <ctype.h>
-#include <string.h>
-#include <stdlib.h>*/
-//#include "y.tab.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // MACROS
@@ -61,21 +56,21 @@ attdef								{open}"?XML-ATT"
 %%
 
 <INITIAL>{ws}						{ /* skip */ }
-<INITIAL>{version}					{ return yy::CXmlParser::token::VERSION; }
-<INITIAL>{encoding}					{ return yy::CXmlParser::token::ENCODING; }
-<INITIAL>"/"						{ return yy::CXmlParser::token::SLASH; }
-<INITIAL>"="						{ return yy::CXmlParser::token::EQ; }
-<INITIAL>{close}					{ BEGIN(CONTENT); return yy::CXmlParser::token::CLOSE; }
-<INITIAL>{name}						{ return yy::CXmlParser::token::NAME; }
-<INITIAL>{string}					{ return yy::CXmlParser::token::VALUE; }
-<INITIAL>"?"{close}					{ BEGIN(keep); return yy::CXmlParser::token::ENDDEF; }
+<INITIAL>{version}					{ return yy::CXmlParser::token::LSX_VERSION; }
+<INITIAL>{encoding}					{ return yy::CXmlParser::token::LSX_ENCODING; }
+<INITIAL>"/"						{ return yy::CXmlParser::token::LSX_SLASH; }
+<INITIAL>"="						{ return yy::CXmlParser::token::LSX_EQ; }
+<INITIAL>{close}					{ BEGIN(CONTENT); return yy::CXmlParser::token::LSX_CLOSE; }
+<INITIAL>{name}						{ return yy::CXmlParser::token::LSX_NAME; }
+<INITIAL>{string}					{ return yy::CXmlParser::token::LSX_VALUE; }
+<INITIAL>"?"{close}					{ BEGIN(keep); return yy::CXmlParser::token::LSX_ENDDEF; }
 
-{attdef}							{ keep = YY_START; BEGIN(INITIAL); return yy::CXmlParser::token::ATTDEF; }
-{open}{ws}?{name}					{ BEGIN(INITIAL); return yy::CXmlParser::token::START; }
-{open}{ws}?"/"						{ BEGIN(INITIAL); return yy::CXmlParser::token::END; }
-{comment}							{ return yy::CXmlParser::token::COMMENT; }
+{attdef}							{ keep = YY_START; BEGIN(INITIAL); return yy::CXmlParser::token::LSX_ATTDEF; }
+{open}{ws}?{name}					{ BEGIN(INITIAL); return yy::CXmlParser::token::LSX_START; }
+{open}{ws}?"/"						{ BEGIN(INITIAL); return yy::CXmlParser::token::LSX_END; }
+{comment}							{ return yy::CXmlParser::token::LSX_COMMENT; }
 
-<CONTENT>{data}						{ return yy::CXmlParser::token::DATA; }
+<CONTENT>{data}						{ return yy::CXmlParser::token::LSX_DATA; }
 
 .									{ fprintf(stderr, "!ERROR(%c)\n", *yytext); }
 {nl}								{ /* skip, must be an extra one at EOF */; }
