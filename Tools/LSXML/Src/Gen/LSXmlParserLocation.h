@@ -36,8 +36,8 @@
  ** Define the yy::location class.
  */
 
-#ifndef __EE_EXPEVALPARSERLOCATION_H__
-#define __EE_EXPEVALPARSERLOCATION_H__
+#ifndef __LSX_LSXMLPARSERLOCATION_H__
+#define __LSX_LSXMLPARSERLOCATION_H__
 
 #include <iostream>
 #include <string>
@@ -160,4 +160,4 @@ namespace yy {
 } // yy
 
 
-#endif // not __EE_EXPEVALPARSERLOCATION_H__
+#endif // not __LSX_LSXMLPARSERLOCATION_H__

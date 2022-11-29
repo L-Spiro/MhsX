@@ -36,6 +36,10 @@
 #define __EE_EXPEVALPARSERSTACK_H__
 
 #include <deque>
+#ifdef yy
+#undef yy
+#endif  // yy
+#define yy                  ee
 
 
 

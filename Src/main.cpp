@@ -5,17 +5,26 @@
 #include "MemHack/MXWindowMemHack.h"
 #include "Utilities/MXUtilities.h"
 
-
+#ifdef MX_XML_TEST
 #include <LSXml.h>
-
+#include <LSXmlContainer.h>
+#endif	// #ifdef MX_XML_TEST
 
 int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine, int _nCmdShow ) {
+#ifdef MX_XML_TEST
 	std::vector<uint8_t> vBytes;
-	mx::CFile::LoadToMemory( L"J:\\My Projects\\MHS X\\Research\\x86reference.xml", vBytes );
-	//mx::CFile::LoadToMemory( L"J:\\My Projects\\MHS X\\Research\\Test2.xml", vBytes );
+	//mx::CFile::LoadToMemory( L"J:\\My Projects\\MHS X\\Research\\x86reference.xml", vBytes );
+	mx::CFile::LoadToMemory( L"J:\\My Projects\\MHS X\\Research\\Test.xml", vBytes );
 	vBytes.push_back( 0 );
 	lsx::CXml xXml;
 	xXml.SetXml( (const char *)(vBytes.data()) );
+	if ( xXml.GetContainer() ) {
+		std::map<std::string, std::set<std::string>> mmMap;
+		xXml.GetContainer()->GatherElements( mmMap );
+		if ( mmMap.size() == 0 ) {
+		}
+	}
+#endif	// #ifdef MX_XML_TEST
 
 
 	// Security measure.  All custom window classes have random names.  Ensure their lengths can change, but not have the same length

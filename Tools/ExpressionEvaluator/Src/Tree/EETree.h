@@ -182,6 +182,48 @@ namespace ee {
 		 */
 		size_t											Size() const { return m_vChildren.size(); }
 
+		/**
+		 * Gets the next child linearly down the tree.
+		 *
+		 * \param _ptItem The item after this item is returned or nullptr is returned if this is the last item in the tree.
+		 * \return Returns the item after the given item or nullptr.
+		 */
+		static CTree<_tType> *							Next( CTree<_tType> * _ptItem ) {
+			if ( nullptr == _ptItem ) { return nullptr; }
+			if ( _ptItem->Size() ) { return _ptItem->GetChild( 0 ); }
+			if ( _ptItem->Next() ) { return _ptItem->Next(); }
+			// Nothing after this.  Go to the parent.
+			while ( _ptItem->Parent() ) {
+				_ptItem = _ptItem->Parent();
+				if ( _ptItem->Next() ) { return _ptItem->Next(); }
+			}
+			// That's the end.
+			return nullptr;
+		}
+
+		/**
+		 * Gets the previous child linearly up the tree.
+		 *
+		 * \param _ptItem The item before this item is returned or nullptr is returned if this is the first item in the tree.
+		 * \return Returns the item after the given item or nullptr.
+		 */
+		static CTree<_tType> *							Prev( CTree<_tType> * _ptItem ) {
+			if ( nullptr == _ptItem ) { return nullptr; }
+			if ( _ptItem->Prev() ) {
+				_ptItem = _ptItem->Prev();
+				while ( _ptItem ) {
+					if ( _ptItem->Size() ) {
+						_ptItem = _ptItem->GetChild( _ptItem->Size() - 1 );
+						continue;
+					}
+					break;
+				}
+				return _ptItem;
+			}
+			// If there is no previous, go to the parent.
+			return _ptItem->Parent();
+		}
+
 
 	protected :
 		// == Members.

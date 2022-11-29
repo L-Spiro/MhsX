@@ -622,7 +622,131 @@ namespace lsx {
 	 * Prints the tree recursively.
 	 */
 	void CXmlContainer::PrintTree() {
-		PrintTree( GetTreePointer( nullptr ), 0 );
+		PrintTree( Next( nullptr ), 0 );
+	}
+
+	/**
+	 * Gets the next item.
+	 *
+	 * \param _ptThis The items whose next item is to be obtained.
+	 * \return Returns the next item.
+	 */
+	CTree<CXmlContainer::LSX_XML_ELEMENT> * CXmlContainer::Next( CTree<LSX_XML_ELEMENT> * _ptThis ) {
+		if ( !_ptThis ) {
+			if ( !m_tRoot.Size() ) { return nullptr; }		// We skip the very rootest node.
+			return const_cast<CTree<LSX_XML_ELEMENT> *>(m_tRoot.GetChild( 0 ));
+		}
+		return CTree<LSX_XML_ELEMENT>::Next( _ptThis );
+	}
+
+	/**
+	 * Gets the previous item.
+	 *
+	 * \param _ptThis The items whose previous item is to be obtained.
+	 * \return Returns the previous item.
+	 */
+	CTree<CXmlContainer::LSX_XML_ELEMENT> * CXmlContainer::Prev( CTree<LSX_XML_ELEMENT> * _ptThis ) {
+		if ( !_ptThis ) {
+			if ( !m_tRoot.Size() ) { return nullptr; }
+			_ptThis = &m_tRoot;
+			while ( _ptThis ) {
+				if ( _ptThis->Size() ) {
+					_ptThis = _ptThis->GetChild( _ptThis->Size() - 1 );
+				}
+				else { break; }
+			}
+			return _ptThis;
+		}
+		_ptThis = CTree<LSX_XML_ELEMENT>::Prev( _ptThis );
+		if ( _ptThis == &m_tRoot ) { _ptThis = nullptr; }	// We skip the very rootest node.
+		return _ptThis;
+	}
+
+	/**
+	 * Gathers every attribute and their values into a multi-map.
+	 *
+	 * \param _mmDst The destination multi-map.
+	 * \return Returns true if there were no memory errors.
+	 */
+	bool CXmlContainer::GatherAttributes( std::multimap<std::string, std::string> &_mmDst ) {
+		try {
+			CTree<CXmlContainer::LSX_XML_ELEMENT> * ptItem = Next( nullptr );
+			while ( ptItem ) {
+				for ( size_t I = ptItem->Value().vAttributes.size(); I--; ) {
+					/*auto aThis = _mmDst.find( GetString( ptItem->Value().vAttributes[I].stNameString ) );
+					if ( aThis == _mmDst.end() ) {
+						aThis = _mmDst.insert( std::pair( GetString( ptItem->Value().vAttributes[I].stNameString ) );
+					}*/
+					if ( ptItem->Value().vAttributes[I].stValueString == size_t( -1 ) ) {
+						_mmDst.insert( std::pair( GetString( ptItem->Value().vAttributes[I].stNameString ), std::string() ) );
+					}
+					else {
+						_mmDst.insert( std::pair( GetString( ptItem->Value().vAttributes[I].stNameString ), GetString( ptItem->Value().vAttributes[I].stValueString ) ) );
+					}
+				}
+
+				ptItem = Next( ptItem );
+			}
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * Gathers every attribute and their values into a map.
+	 *
+	 * \param _mDst The destination map.
+	 * \return Returns true if there were no memory errors.
+	 */
+	bool CXmlContainer::GatherAttributes( std::map<std::string, std::set<std::string>> &_mDst ) {
+		try {
+			CTree<CXmlContainer::LSX_XML_ELEMENT> * ptItem = Next( nullptr );
+			while ( ptItem ) {
+				for ( size_t I = ptItem->Value().vAttributes.size(); I--; ) {
+					auto aThis = _mDst.find( GetString( ptItem->Value().vAttributes[I].stNameString ) );
+					if ( aThis == _mDst.end() ) {
+						std::string sTmp = GetString( ptItem->Value().vAttributes[I].stNameString );
+						_mDst.insert( std::pair( sTmp, std::set<std::string>() ) );
+						aThis = _mDst.find( GetString( ptItem->Value().vAttributes[I].stNameString ) );
+					}
+					if ( ptItem->Value().vAttributes[I].stValueString != size_t( -1 ) ) {
+						std::string sTmp = GetString( ptItem->Value().vAttributes[I].stValueString );
+						aThis->second.insert( sTmp );
+					}
+				}
+
+				ptItem = Next( ptItem );
+			}
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * Gathers every element and their data values into a map.
+	 *
+	 * \param _mDst The destination map.
+	 * \return Returns true if there were no memory errors.
+	 */
+	bool CXmlContainer::GatherElements( std::map<std::string, std::set<std::string>> &_mDst ) {
+		try {
+			CTree<CXmlContainer::LSX_XML_ELEMENT> * ptItem = Next( nullptr );
+			while ( ptItem ) {
+				auto aThis = _mDst.find( GetString( ptItem->Value().stNameString ) );
+				if ( aThis == _mDst.end() ) {
+					std::string sTmp = GetString( ptItem->Value().stNameString );
+					_mDst.insert( std::pair( sTmp, std::set<std::string>() ) );
+					aThis = _mDst.find( GetString( ptItem->Value().stNameString ) );
+				}
+				if ( ptItem->Value().sData.size() ) {
+					aThis->second.insert( ptItem->Value().sData );
+				}
+
+				ptItem = Next( ptItem );
+			}
+			return true;
+		}
+		catch ( ... ) { return false; }
 	}
 
 	/**
@@ -661,8 +785,10 @@ namespace lsx {
 	 */
 	void CXmlContainer::PrintTree( const CTree<LSX_XML_ELEMENT> * _ptNode, int32_t _i32Depth ) {
 		std::string sPrintMe;
-		sPrintMe = std::format( "{0: >{1}}Node: {2}\r\n", "", _i32Depth * 5, GetString( _ptNode->Value().stNameString ) );
-		::OutputDebugStringA( sPrintMe.c_str() );
+		if ( _ptNode->Value().stNameString != size_t( -1 ) ) {
+			sPrintMe = std::format( "{0: >{1}}Node: {2}\r\n", "", _i32Depth * 5, GetString( _ptNode->Value().stNameString ) );
+			::OutputDebugStringA( sPrintMe.c_str() );
+		}
 		for ( size_t I = 0; I < _ptNode->Value().vAttributes.size(); ++I ) {
 			if ( _ptNode->Value().vAttributes[I].stValueString == size_t( -1 ) ) {
 				sPrintMe = std::format( "{0: >{1}}{2}\r\n", "", (_i32Depth + 1) * 5, GetString( _ptNode->Value().vAttributes[I].stNameString ) );

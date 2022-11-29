@@ -30,6 +30,7 @@ static int keep;					/* To store start condition */
 
 nl									(\r\n|\r|\n)
 ws									[ \t\r\n]+
+ws_opt								[ \t\r\n]*
 open								{nl}?"<"
 close								">"{nl}?
 namestart							[A-Za-z\200-\377_]
@@ -39,7 +40,9 @@ name								{namestart}{namechar}*
 data								([^<\n&]|\n[^<&]|\n{esc}|{esc})+
 comment								{open}"!--"([^-]|"-"[^-])*"--"{close}
 string								\"([^"&]|{esc})*\"|\'([^'&]|{esc})*\'
-version								{open}"?XML-VERSION 1.0?"{close}
+attribute_value						"="{ws_opt}{string}
+attribute							{name}{ws_opt}{attribute_value}
+version								{open}"?"{ws_opt}{name}{ws_opt}({attribute}{ws_opt})*"?"{close}
 encoding							{open}"?XML-ENCODING"{ws}{name}{ws}?"?"{close}
 attdef								{open}"?XML-ATT"
 
@@ -55,7 +58,7 @@ attdef								{open}"?XML-ATT"
 
 %%
 
-<INITIAL>{ws}						{ /* skip */ }
+<INITIAL>{ws}						{ }
 <INITIAL>{version}					{ return yy::CXmlParser::token::LSX_VERSION; }
 <INITIAL>{encoding}					{ return yy::CXmlParser::token::LSX_ENCODING; }
 <INITIAL>"/"						{ return yy::CXmlParser::token::LSX_SLASH; }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "LSXmlContainer.h"
+#include "LSXmlSyntaxNodes.h"
 #include <string>
 #include <vector>
 
@@ -34,7 +36,12 @@ namespace lsx {
 		 */
 		bool										SetXml( const char * _pcXml );
 
-
+		/**
+		 * Gets the container pointer.
+		 *
+		 * \return Returns the container pointer.
+		 */
+		CXmlContainer *								GetContainer() { return m_pxcContainer; }
 
 
 	protected :

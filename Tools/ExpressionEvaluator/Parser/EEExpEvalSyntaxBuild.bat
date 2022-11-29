@@ -20,6 +20,7 @@ LSUtility.exe "../Src/Gen/EEExpEvalParser.h" -r iff if -r PARSER_HEADER_H __EE_E
 LSUtility.exe "../Src/Gen/EEExpEvalParserLocation.h" -r \r "" -r \n \r\n -r position.hh EEExpEvalParserPosition.h -r BISON_LOCATION_HH __EE_EXPEVALPARSERLOCATION_H__
 LSUtility.exe "../Src/Gen/EEExpEvalParserPosition.h" -r \r "" -r \n \r\n -r std::max max -r BISON_POSITION_HH __EE_EXPEVALPARSERPOSITION_H__ -r "\r\nnamespace yy" "using namespace std;\r\n\r\nnamespace yy"
 LSUtility.exe "../Src/Gen/EEExpEvalParserStack.h" -r \r "" -r \n \r\n -r "unsigned int*    height" "size_t height" -r BISON_STACK_HH __EE_EXPEVALPARSERSTACK_H__
+LSUtility.exe "../Src/Gen/EEExpEvalParserStack.h" -r "#include <deque>" "#include <deque>\r\n#ifdef yy\r\n#undef yy\r\n#endif  // yy\r\n#define yy                  ee"
 
 :: set s1=deque^<T^>^>
 :: set s2=deque^<T^> ^>

@@ -1,9 +1,12 @@
 #pragma once
 
-#include "LSXml.h"
+//#include "LSXml.h"
 #include "LSXmlSyntaxNodes.h"
 #include "Gen/LSXmlParser.h"
 #include "Tree/LSXTree.h"
+
+#include <map>
+#include <set>
 
 
 namespace lsx {
@@ -24,13 +27,13 @@ namespace lsx {
 		// == Types.
 		/** The public attibute structure. */
 		struct LSX_XML_ATTRIBUTE {
-			size_t										stNameString;							/**< Use GetString() to get the name of the attribute. */
-			size_t										stValueString;							/**< Use GetString() to get the name of the attribute value (unles sit is size_t( -1 )). */
+			size_t										stNameString = size_t( -1 );			/**< Use GetString() to get the name of the attribute. */
+			size_t										stValueString = size_t( -1 );			/**< Use GetString() to get the name of the attribute value (unles sit is size_t( -1 )). */
 		};
 
 		/** The public node structure. */
 		struct LSX_XML_ELEMENT {
-			size_t										stNameString;							/**< Use GetString() to get the name of the element. */
+			size_t										stNameString = size_t( -1 );			/**< Use GetString() to get the name of the element. */
 			std::vector<LSX_XML_ATTRIBUTE>				vAttributes;							/**< The attributes associated with this element. */
 			std::string									sData;									/**< Combined data values minus any data values that are nothing but whitespace. */
 		};
@@ -250,6 +253,46 @@ namespace lsx {
 		 * Prints the tree recursively.
 		 */
 		void											PrintTree();
+
+		/**
+		 * Gets the next item.
+		 *
+		 * \param _ptThis The items whose next item is to be obtained.
+		 * \return Returns the next item.
+		 */
+		CTree<LSX_XML_ELEMENT> *						Next( CTree<LSX_XML_ELEMENT> * _ptThis );
+
+		/**
+		 * Gets the previous item.
+		 *
+		 * \param _ptThis The items whose previous item is to be obtained.
+		 * \return Returns the previous item.
+		 */
+		CTree<LSX_XML_ELEMENT> *						Prev( CTree<LSX_XML_ELEMENT> * _ptThis );
+
+		/**
+		 * Gathers every attribute and their values into a multi-map.
+		 *
+		 * \param _mmDst The destination multi-map.
+		 * \return Returns true if there were no memory errors.
+		 */
+		bool											GatherAttributes( std::multimap<std::string, std::string> &_mmDst );
+
+		/**
+		 * Gathers every attribute and their values into a map.
+		 *
+		 * \param _mDst The destination map.
+		 * \return Returns true if there were no memory errors.
+		 */
+		bool											GatherAttributes( std::map<std::string, std::set<std::string>> &_mDst );
+
+		/**
+		 * Gathers every element and their data values into a map.
+		 *
+		 * \param _mDst The destination map.
+		 * \return Returns true if there were no memory errors.
+		 */
+		bool											GatherElements( std::map<std::string, std::set<std::string>> &_mDst );
 
 
 	protected :

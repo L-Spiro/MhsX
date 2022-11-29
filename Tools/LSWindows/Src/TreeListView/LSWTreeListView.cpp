@@ -626,20 +626,7 @@ namespace lsw {
 			if ( !m_tRoot.Size() ) { return nullptr; }
 			return const_cast<ee::CTree<CTreeListView::LSW_TREE_ROW> *>(m_tRoot.GetChild( 0 ));
 		}
-		if ( _ptThis->Size() ) {
-			// Go to its children.
-			return _ptThis->GetChild( 0 );
-		}
-		// No chilren.  Go to the next in line.
-		if ( _ptThis->Next() ) { return _ptThis->Next(); }
-
-		// Nothing after this.  Go to the parent.
-		while ( _ptThis->Parent() ) {
-			_ptThis = _ptThis->Parent();
-			if ( _ptThis->Next() ) { return _ptThis->Next(); }
-		}
-		// That's the end.
-		return nullptr;
+		return ee::CTree<CTreeListView::LSW_TREE_ROW>::Next( _ptThis );
 	}
 
 	/**

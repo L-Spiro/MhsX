@@ -36,8 +36,8 @@
  ** Define the yy::position class.
  */
 
-#ifndef __EE_EXPEVALPARSERPOSITION_H__
-#define __EE_EXPEVALPARSERPOSITION_H__
+#ifndef __LSX_LSXMLPARSERPOSITION_H__
+#define __LSX_LSXMLPARSERPOSITION_H__
 
 #include <iostream>
 #include <string>
@@ -157,4 +157,4 @@ namespace yy {
 
 } // yy
 
-#endif // not __EE_EXPEVALPARSERPOSITION_H__
+#endif // not __LSX_LSXMLPARSERPOSITION_H__

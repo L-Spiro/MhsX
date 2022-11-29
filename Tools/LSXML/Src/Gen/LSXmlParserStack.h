@@ -32,10 +32,14 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef __EE_EXPEVALPARSERSTACK_H__
-#define __EE_EXPEVALPARSERSTACK_H__
+#ifndef __LSX_LSXMLPARSERSTACK_H__
+#define __LSX_LSXMLPARSERSTACK_H__
 
 #include <deque>
+#ifdef yy
+#undef yy
+#endif  // yy
+#define yy                  lsx
 
 
 
@@ -130,5 +134,5 @@ namespace yy {
 } // yy
 
 
-#endif // not __EE_EXPEVALPARSERSTACK_H__[]dnl
+#endif // not __LSX_LSXMLPARSERSTACK_H__[]dnl
 

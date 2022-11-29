@@ -17,9 +17,10 @@ LSUtility.exe "../Src/Gen/LSXmlParser.h" -r "#include <string>" "" -r "#include 
 LSUtility.exe "../Src/Gen/LSXmlParser.h" -r m_pslLexer_yyarg _pslLexer -r m_pslpLexer_yyarg _pslpLexer
 LSUtility.exe "../Src/Gen/LSXmlParser.h" -r location.hh LSXmlParserLocation.h -r position.hh LSXmlParserPosition.h -r stack.hh LSXmlParserStack.h
 LSUtility.exe "../Src/Gen/LSXmlParser.h" -r iff if -r PARSER_HEADER_H __LSX_XML_PARSER_H__
-LSUtility.exe "../Src/Gen/LSXmlParserLocation.h" -r \r "" -r \n \r\n -r position.hh LSXmlParserPosition.h -r BISON_LOCATION_HH __EE_EXPEVALPARSERLOCATION_H__
-LSUtility.exe "../Src/Gen/LSXmlParserPosition.h" -r \r "" -r \n \r\n -r std::max max -r BISON_POSITION_HH __EE_EXPEVALPARSERPOSITION_H__ -r "\r\nnamespace yy" "using namespace std;\r\n\r\nnamespace yy"
-LSUtility.exe "../Src/Gen/LSXmlParserStack.h" -r \r "" -r \n \r\n -r "unsigned int*    height" "size_t height" -r BISON_STACK_HH __EE_EXPEVALPARSERSTACK_H__
+LSUtility.exe "../Src/Gen/LSXmlParserLocation.h" -r \r "" -r \n \r\n -r position.hh LSXmlParserPosition.h -r BISON_LOCATION_HH __LSX_LSXMLPARSERLOCATION_H__
+LSUtility.exe "../Src/Gen/LSXmlParserPosition.h" -r \r "" -r \n \r\n -r std::max max -r BISON_POSITION_HH __LSX_LSXMLPARSERPOSITION_H__ -r "\r\nnamespace yy" "using namespace std;\r\n\r\nnamespace yy"
+LSUtility.exe "../Src/Gen/LSXmlParserStack.h" -r \r "" -r \n \r\n -r "unsigned int*    height" "size_t height" -r BISON_STACK_HH __LSX_LSXMLPARSERSTACK_H__
+LSUtility.exe "../Src/Gen/LSXmlParserStack.h" -r "#include <deque>" "#include <deque>\r\n#ifdef yy\r\n#undef yy\r\n#endif  // yy\r\n#define yy                  lsx"
 
 :: set s1=deque^<T^>^>
 :: set s2=deque^<T^> ^>
