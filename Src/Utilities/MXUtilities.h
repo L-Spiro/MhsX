@@ -665,10 +665,13 @@ namespace mx {
 		static BOOL						ResourceTypeToString( uint64_t _uiId, std::string &_sString );
 
 		// Adds a \ to the end of a string if it does not already have one.
-		static std::string &			FinishPath( std::string &_sString );
-
-		// Adds a \ to the end of a string if it does not already have one.
-		static std::wstring &			FinishPath( std::wstring &_sString );
+		template <typename _tType>
+		static _tType &					FinishPath( _tType &_sString ) {
+			if ( !_sString.size() || _sString[_sString.size()-1] != _tType::value_type( '\\' ) ) {
+				_sString.push_back( _tType::value_type( '\\' ) );
+			}
+			return _sString;
+		}
 
 		// Generates a string of random characters.
 		template <typename _tType>
@@ -679,7 +682,7 @@ namespace mx {
 			std::uniform_int_distribution<> uidDistLower( _tType( 'a' ), _tType( 'z' ) );
 			std::uniform_int_distribution<> uidDistUpper( _tType( 'A' ), _tType( 'Z' ) );
 			std::uniform_int_distribution<> uidBool( 0, 3 );
-			for ( SIZE_T I = 0; I < _sSize; ++I ) {
+			for ( SIZE_T I = 0; I < _sSize - 1; ++I ) {
 				if ( uidBool( mGen ) == 0 ) {
 					_pcBuffer[I] = uidDistUpper( mGen );
 				}

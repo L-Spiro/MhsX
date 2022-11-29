@@ -2882,22 +2882,6 @@ namespace mx {
 		return FALSE;
 	}
 
-	// Adds a \ to the end of a string if it does not already have one.
-	std::string & CUtilities::FinishPath( std::string &_sString ) {
-		if ( !_sString.size() || _sString[_sString.size()-1] != '\\' ) {
-			_sString.push_back( '\\' );
-		}
-		return _sString;
-	}
-
-	// Adds a \ to the end of a string if it does not already have one.
-	std::wstring & CUtilities::FinishPath( std::wstring &_sString ) {
-		if ( !_sString.size() || _sString[_sString.size()-1] != L'\\' ) {
-			_sString.push_back( L'\\' );
-		}
-		return _sString;
-	}
-
 	// Gets the number of elements in DataTypeInfo.
 	size_t CUtilities::DataTypeInfoLen() {
 		return MX_ELEMENTS( DataTypeInfo );
