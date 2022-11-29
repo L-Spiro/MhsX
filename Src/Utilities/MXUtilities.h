@@ -11,6 +11,7 @@
 #include <clocale>
 #include <cwctype>
 #include <mbstring.h>
+#include <random>
 #include <string>
 
 
@@ -670,10 +671,25 @@ namespace mx {
 		static std::wstring &			FinishPath( std::wstring &_sString );
 
 		// Generates a string of random characters.
-		static CHAR *					RandomString( CHAR * _pcBuffer, SIZE_T _sSize );
-
-		// Generates a string of random characters.
-		static WCHAR *					RandomString( WCHAR * _pwcBuffer, SIZE_T _sSize );
+		template <typename _tType>
+		static _tType *					RandomString( _tType * _pcBuffer, SIZE_T _sSize ) {
+			if ( !_pcBuffer || !_sSize ) { return _pcBuffer; }
+			std::random_device rdRand;
+			std::mt19937 mGen( rdRand() );
+			std::uniform_int_distribution<> uidDistLower( _tType( 'a' ), _tType( 'z' ) );
+			std::uniform_int_distribution<> uidDistUpper( _tType( 'A' ), _tType( 'Z' ) );
+			std::uniform_int_distribution<> uidBool( 0, 3 );
+			for ( SIZE_T I = 0; I < _sSize; ++I ) {
+				if ( uidBool( mGen ) == 0 ) {
+					_pcBuffer[I] = uidDistUpper( mGen );
+				}
+				else {
+					_pcBuffer[I] = uidDistLower( mGen );
+				}
+			}
+			_pcBuffer[_sSize-1] = _tType( '\0' );
+			return _pcBuffer;
+		}
 
 		// Gets the number of elements in DataTypeInfo.
 		static size_t					DataTypeInfoLen();

@@ -11,8 +11,8 @@
 
 int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine, int _nCmdShow ) {
 	std::vector<uint8_t> vBytes;
-	//mx::CFile::LoadToMemory( L"J:\\My Projects\\MHS X\\Research\\x86reference.xml", vBytes );
-	mx::CFile::LoadToMemory( L"J:\\My Projects\\MHS X\\Research\\Test.xml", vBytes );
+	mx::CFile::LoadToMemory( L"J:\\My Projects\\MHS X\\Research\\x86reference.xml", vBytes );
+	//mx::CFile::LoadToMemory( L"J:\\My Projects\\MHS X\\Research\\Test2.xml", vBytes );
 	vBytes.push_back( 0 );
 	lsx::CXml xXml;
 	xXml.SetXml( (const char *)(vBytes.data()) );

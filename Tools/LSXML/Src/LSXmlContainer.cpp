@@ -407,8 +407,8 @@ namespace lsx {
 					PrintNode( nThisNode.u.cContentObj.sLeft, _i32Depth + 0 );
 				}
 				if ( nThisNode.u.cContentObj.sRight != size_t( -1 ) ) {
-					//sPrintMe = std::format( "{0: >{1}}CONTENT RIGHT: {2}\r\n", "", _i32Depth * 5, m_vStrings[nThisNode.u.cContentObj.sRight] );
-					//::OutputDebugStringA( sPrintMe.c_str() );
+					sPrintMe = std::format( "{0: >{1}}CONTENT RIGHT: {2}\r\n", "", _i32Depth * 5, m_vStrings[nThisNode.u.cContentObj.sRight] );
+					::OutputDebugStringA( sPrintMe.c_str() );
 				}
 				break;
 			}
@@ -484,6 +484,148 @@ namespace lsx {
 	}
 
 	/**
+	 * Builds the XML tree non-recursively.
+	 *
+	 * \return Returns true if there were no memory errors during tree creation.
+	 */
+	bool CXmlContainer::BuidTree() {
+		if ( m_stRoot == size_t( -1 ) ) { return false; }
+		while ( m_tRoot.Size() ) {
+			m_tRoot.RemoveChild( 0 );
+		}
+		struct LSX_STACK_OBJ {
+			size_t					stNodeIdx;
+			bool					bPassThrough = false;
+
+			LSX_STACK_OBJ( size_t _stIdx ) :
+				stNodeIdx( _stIdx ) {
+			}
+		};
+		std::vector<LSX_STACK_OBJ> vStack;
+		std::vector<CTree<LSX_XML_ELEMENT> *> vCurElement;
+		try {
+#define LXM_PUSH( IDX )			vStack.push_back( LSX_STACK_OBJ( m_vNodes[stNodeIdx].u.IDX ) )
+			vStack.reserve( m_vNodes.size() + 1 );
+			vStack.push_back( LSX_STACK_OBJ( m_stRoot ) );
+			while ( vStack.size() ) {
+				size_t stThis = vStack.size() - 1;
+				bool bFirstPass = !vStack[stThis].bPassThrough;
+				vStack[stThis].bPassThrough = true;
+				size_t stNodeIdx = vStack[stThis].stNodeIdx;
+				if ( stNodeIdx == size_t( -1 ) ) {
+					vStack.pop_back();
+					continue;
+				}
+				if ( bFirstPass ) {
+					// Push in revese order (top gets processed sooner).
+					switch ( m_vNodes[stNodeIdx].nType ) {
+						case LSX_N_DOCUMENT : {
+							LXM_PUSH( dDocumentObj.sMiscSeq );
+							LXM_PUSH( dDocumentObj.sElement );
+							LXM_PUSH( dDocumentObj.sProlog );
+							break;
+						}
+						case LSX_N_PROLOG : {
+							LXM_PUSH( pPrologObj.sMiscSeq );
+							LXM_PUSH( pPrologObj.sEncoding );
+							LXM_PUSH( pPrologObj.sVersion );
+							break;
+						}
+						case LSX_N_VERSION : {
+							// Store the version somewhere.
+							break;
+						}
+						case LSX_N_ENCODING : {
+							// Store the encoding somewhere.
+							break;
+						}
+						case LSX_N_MISC_SEQ : {
+							LXM_PUSH( msMiscSeqObj.sRight );
+							LXM_PUSH( msMiscSeqObj.sLeft );
+							break;
+						}
+						case LSX_N_ELEMENT : {
+							CTree<LSX_XML_ELEMENT> * ptParent = CurStackPointer( vCurElement );
+							LSX_XML_ELEMENT eElement;
+							eElement.stNameString = m_vNodes[stNodeIdx].u.eElementObj.sName;
+							ptParent->InsertChild( eElement, ptParent->Size() );
+							vCurElement.push_back( ptParent->GetChild( ptParent->Size() - 1 ) );
+
+							LXM_PUSH( eElementObj.sContent );
+							LXM_PUSH( eElementObj.sAttribute );
+							break;
+						}
+						case LSX_N_CONTENT : {
+							LXM_PUSH( cContentObj.sLeft );
+							break;
+						}
+						case LSX_N_CONTENT_ELEMENT : {
+							LXM_PUSH( cContentObj.sRight );
+							LXM_PUSH( cContentObj.sLeft );
+							break;
+						}
+						case LSX_N_CONTENT_MISC : {
+							LXM_PUSH( cContentObj.sRight );
+							LXM_PUSH( cContentObj.sLeft );
+							break;
+						}
+						case LSX_N_CONTENT_DATA : {
+							if ( m_vNodes[stNodeIdx].u.cContentObj.sRight != size_t( -1 ) ) {
+								if ( !IsWhitespace( m_vStrings[m_vNodes[stNodeIdx].u.cContentObj.sRight] ) ) {
+									CTree<LSX_XML_ELEMENT> * ptParent = CurStackPointer( vCurElement );
+									ptParent->Value().sData.append( m_vStrings[m_vNodes[stNodeIdx].u.cContentObj.sRight] );
+								}
+							}
+							LXM_PUSH( cContentObj.sLeft );
+							break;
+						}
+						case LSX_N_ATTRIBUTE_DECL : {
+							/*CTree<LSX_XML_ELEMENT> * ptParent = CurStackPointer( vCurElement );
+							ptParent->Value().*/
+							// TODO: Haven’t encountered this case yet.
+							LXM_PUSH( aAttributeDeclObj.sList );
+							break;
+						}
+						case LSX_N_ATTRIBUTE_LIST : {
+							LXM_PUSH( aAttributeListObj.sRight );
+							LXM_PUSH( aAttributeListObj.sLeft );
+							break;
+						}
+						case LSX_N_ATTRIBUTE : {
+							CTree<LSX_XML_ELEMENT> * ptParent = CurStackPointer( vCurElement );
+							LSX_XML_ATTRIBUTE xaAttr = { m_vNodes[stNodeIdx].u.aAttributeObj.sAttribute, m_vNodes[stNodeIdx].u.aAttributeObj.sValue };
+							ptParent->Value().vAttributes.push_back( xaAttr );
+							break;
+						}
+					}
+				}
+				else {
+					switch ( m_vNodes[stNodeIdx].nType ) {
+						case LSX_N_ELEMENT : {
+							vCurElement.pop_back();
+							break;
+						}
+					}
+					vStack.pop_back();
+				}
+			}
+#undef LXM_PUSH
+			return true;
+		}
+		catch ( ... ) {
+
+		}
+		return false;
+	}
+
+	/**
+	 * Prints the tree recursively.
+	 */
+	void CXmlContainer::PrintTree() {
+		PrintTree( GetTreePointer( nullptr ), 0 );
+	}
+
+	/**
 	 * Adds a node and returns its index into the array of nodes.
 	 *
 	 * \param _nNode The node to add.
@@ -493,6 +635,51 @@ namespace lsx {
 		_nNode.stNodeIdx = m_vNodes.size();
 		m_vNodes.push_back( _nNode );
 		return _nNode.stNodeIdx;
+	}
+
+	/**
+	 * Determines if a string is entirely whitespace.
+	 *
+	 * \param _sString The string to check.
+	 * \return Returns true if the given string is entirely whitespace ([ \t\r\n]+).
+	 */
+	bool CXmlContainer::IsWhitespace( const std::string & _sString ) {
+		for ( auto I = _sString.size(); I--; ) {
+			if ( _sString[I] != ' ' &&
+				_sString[I] != '\t' &&
+				_sString[I] != '\r' &&
+				_sString[I] != '\n' ) { return false; }
+		}
+		return true;
+	}
+
+	/**
+	 * Prints the tree recursively.
+	 * 
+	 * \param _ptNode The node to print.
+	 * \param _i32Depth The node depth.
+	 */
+	void CXmlContainer::PrintTree( const CTree<LSX_XML_ELEMENT> * _ptNode, int32_t _i32Depth ) {
+		std::string sPrintMe;
+		sPrintMe = std::format( "{0: >{1}}Node: {2}\r\n", "", _i32Depth * 5, GetString( _ptNode->Value().stNameString ) );
+		::OutputDebugStringA( sPrintMe.c_str() );
+		for ( size_t I = 0; I < _ptNode->Value().vAttributes.size(); ++I ) {
+			if ( _ptNode->Value().vAttributes[I].stValueString == size_t( -1 ) ) {
+				sPrintMe = std::format( "{0: >{1}}{2}\r\n", "", (_i32Depth + 1) * 5, GetString( _ptNode->Value().vAttributes[I].stNameString ) );
+			}
+			else {
+				sPrintMe = std::format( "{0: >{1}}{2} = {3}\r\n", "", (_i32Depth + 1) * 5, GetString( _ptNode->Value().vAttributes[I].stNameString ), GetString( _ptNode->Value().vAttributes[I].stValueString ) );
+			}
+			::OutputDebugStringA( sPrintMe.c_str() );
+		}
+		if ( _ptNode->Value().sData.size() ) {
+			sPrintMe = std::format( "{0: >{1}}{2}\r\n", "", (_i32Depth + 1) * 5, _ptNode->Value().sData );
+			::OutputDebugStringA( sPrintMe.c_str() );
+		}
+
+		for ( size_t I = 0; I < _ptNode->Size(); ++I ) {
+			PrintTree( _ptNode->GetChild( I ), _i32Depth + 1 );
+		}
 	}
 
 }	// namespace lsx

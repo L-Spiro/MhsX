@@ -19,6 +19,9 @@
     <Filter Include="Source Files\Gen">
       <UniqueIdentifier>{1c54d416-fe80-42ba-9aef-2afd133563c5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Tree">
+      <UniqueIdentifier>{9ce2e9f7-2fec-4e1b-b91b-08c01c0a188f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Gen\LSXmlLexBase.h">
@@ -47,6 +50,9 @@
     </ClInclude>
     <ClInclude Include="Src\LSXmlContainer.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Tree\LSXTree.h">
+      <Filter>Header Files\Tree</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

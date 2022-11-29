@@ -51,7 +51,9 @@ namespace lsx {
 
 
 		if ( ppppParser->parse() == 0 ) {
-			m_pxcContainer->PrintNode( m_pxcContainer->Root(), 0 );
+			//m_pxcContainer->PrintNode( m_pxcContainer->Root(), 0 );
+			m_pxcContainer->BuidTree();
+			m_pxcContainer->PrintTree();
 			// Parsed.
 			return true;
 		}

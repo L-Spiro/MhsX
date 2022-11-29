@@ -3,6 +3,7 @@
 #include "LSXml.h"
 #include "LSXmlSyntaxNodes.h"
 #include "Gen/LSXmlParser.h"
+#include "Tree/LSXTree.h"
 
 
 namespace lsx {
@@ -18,6 +19,21 @@ namespace lsx {
 	class CXmlContainer {
 	public :
 		CXmlContainer( CXmlLexer * _pxlLexer );
+
+
+		// == Types.
+		/** The public attibute structure. */
+		struct LSX_XML_ATTRIBUTE {
+			size_t										stNameString;							/**< Use GetString() to get the name of the attribute. */
+			size_t										stValueString;							/**< Use GetString() to get the name of the attribute value (unles sit is size_t( -1 )). */
+		};
+
+		/** The public node structure. */
+		struct LSX_XML_ELEMENT {
+			size_t										stNameString;							/**< Use GetString() to get the name of the element. */
+			std::vector<LSX_XML_ATTRIBUTE>				vAttributes;							/**< The attributes associated with this element. */
+			std::string									sData;									/**< Combined data values minus any data values that are nothing but whitespace. */
+		};
 
 		
 		// == Functions.
@@ -44,6 +60,14 @@ namespace lsx {
 		 * \return Returns the index of the string if it exists or size_t( -1 ).
 		 */
 		size_t											FindString( const std::string &_sText ) const;
+
+		/**
+		 * Gets a reference to a string by index.
+		 *
+		 * \param _stIdx String index.
+		 * \return Returns a constant reference to the string given its index.
+		 */
+		const std::string								GetString( size_t _stIdx ) const { return m_vStrings[_stIdx]; }
 
 		/**
 		 * Creates an attribute start string.
@@ -215,6 +239,18 @@ namespace lsx {
 		 */
 		size_t											Root() const { return m_stRoot; }
 
+		/**
+		 * Builds the XML tree non-recursively.
+		 *
+		 * \return Returns true if there were no memory errors during tree creation.
+		 */
+		bool											BuidTree();
+
+		/**
+		 * Prints the tree recursively.
+		 */
+		void											PrintTree();
+
 
 	protected :
 		// == Members.
@@ -224,6 +260,8 @@ namespace lsx {
 		std::vector<YYSTYPE::LSX_NODE>					m_vNodes;
 		/** The stack of UTF-8 strings. */
 		std::vector<std::string>						m_vStrings;
+		/** The resulting tree. */
+		CTree<LSX_XML_ELEMENT>							m_tRoot;
 		/** The base node. */
 		size_t											m_stRoot;
 
@@ -237,6 +275,41 @@ namespace lsx {
 		 */
 		size_t											AddNode( YYSTYPE::LSX_NODE &_nNode );
 
+		/**
+		 * Converts a pointer to a tree pointer (nullptr = &m_tRoot, everything else is pass-through).
+		 *
+		 * \param _ptPtr The pointer to sanitize.
+		 * \return Returns the input pointer or &m_tRoot if the input is nullptr.
+		 */
+		CTree<LSX_XML_ELEMENT> *						GetTreePointer( CTree<LSX_XML_ELEMENT> * _ptPtr ) {
+			return _ptPtr ? _ptPtr : &m_tRoot;
+		}
+
+		/**
+		 * Gets the current tree pointer from a stack of tree pointers.
+		 *
+		 * \param _vStack The input stack of pointers.
+		 * \return Returns &m_tRoot if the stack is empty, otherwise the top of the stack is returned.
+		 */
+		CTree<LSX_XML_ELEMENT> *						CurStackPointer( const std::vector<CTree<LSX_XML_ELEMENT> *> &_vStack ) {
+			return GetTreePointer( (_vStack.size() == 0) ? nullptr : _vStack[_vStack.size()-1] );
+		}
+
+		/**
+		 * Determines if a string is entirely whitespace.
+		 *
+		 * \param _sString The string to check.
+		 * \return Returns true if the given string is entirely whitespace ([ \t\r\n]+).
+		 */
+		bool											IsWhitespace( const std::string & _sString );
+
+		/**
+		 * Prints the tree recursively.
+		 * 
+		 * \param _ptNode The node to print.
+		 * \param _i32Depth The node depth.
+		 */
+		void											PrintTree( const CTree<LSX_XML_ELEMENT> * _ptNode, int32_t _i32Depth );
 		
 	};
 

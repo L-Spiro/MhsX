@@ -33,7 +33,7 @@ ws									[ \t\r\n]+
 open								{nl}?"<"
 close								">"{nl}?
 namestart							[A-Za-z\200-\377_]
-namechar							[A-Za-z\200-\377_0-9.-]
+namechar							[A-Za-z\200-\377_0-9.:-]
 esc									"&#"[0-9]+";"|"&#x"[0-9a-fA-F]+";"
 name								{namestart}{namechar}*
 data								([^<\n&]|\n[^<&]|\n{esc}|{esc})+

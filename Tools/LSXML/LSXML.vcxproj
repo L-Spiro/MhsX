@@ -252,6 +252,7 @@
     <ClInclude Include="Src\LSXmlContainer.h" />
     <ClInclude Include="Src\LSXmlLexer.h" />
     <ClInclude Include="Src\LSXmlSyntaxNodes.h" />
+    <ClInclude Include="Src\Tree\LSXTree.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Gen\LSXmlLexBase.cpp" />
