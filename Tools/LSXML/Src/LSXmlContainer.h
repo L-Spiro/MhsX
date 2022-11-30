@@ -271,6 +271,61 @@ namespace lsx {
 		CTree<LSX_XML_ELEMENT> *						Prev( CTree<LSX_XML_ELEMENT> * _ptThis );
 
 		/**
+		 * Gets the first child element by name.
+		 *
+		 * \param _ptParent The node whose children are to be scanned for elements matching the given name.
+		 * \param _sName The name of the child element to find.
+		 * \return Returns a pointer to the child element of te given name or nullptr if there is none.
+		 */
+		const CTree<LSX_XML_ELEMENT> *					GetChildElement( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName ) const;
+
+		/**
+		 * Gets the first child element by name.
+		 *
+		 * \param _ptParent The node whose children are to be scanned for elements matching the given name.
+		 * \param _sName The name of the child element to find.
+		 * \return Returns a pointer to the child element of te given name or nullptr if there is none.
+		 */
+		CTree<LSX_XML_ELEMENT> *						GetChildElement( CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName );
+
+		/**
+		 * Gathers the indices of children nodes (non-recursively) whose element names match the given name.
+		 *
+		 * \param _ptParent The node whose children are to be scanned for elements matching the given name.
+		 * \param _sName The name of the children elements to gather.
+		 * \return Returns an array of indices indicating the children of _ptParent whose element names match _sName.
+		 */
+		std::vector<size_t>								GatherChildElementIndices( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName ) const;
+
+		/**
+		 * Gets the value of an attribute on a given element.
+		 *
+		 * \param _ptElement The element whose attributes are to be searched.
+		 * \param _sName The name of the attribute whose value is to be found.
+		 * \param _sRet Holds the returned value of the attribute.
+		 * \return Returns true if the given attribute was found on the given item.
+		 */
+		bool											GetAttributeValue( const CTree<LSX_XML_ELEMENT> * _ptElement, const std::string &_sName, std::string &_sRet ) const;
+
+		/**
+		 * Gets the data of an child element given its name.
+		 *
+		 * \param _ptParent The element whose child elements are to be searched.
+		 * \param _sName The name of the child element whose value is to be found.
+		 * \param _sRet Holds the returned data value of the element.
+		 * \return Returns true if the given child element was found on the given item.
+		 */
+		bool											GetChildElementData( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName, std::string &_sRet ) const;
+
+		/**
+		 * Gets the data associated with a given element.
+		 *
+		 * \param _ptElement The element whose data is to be returned.
+		 * \param PARM Holds the return value of the element’s data if true is returned.
+		 * \return Returns true 
+		 */
+
+		/**
 		 * Gathers every attribute and their values into a multi-map.
 		 *
 		 * \param _mmDst The destination multi-map.

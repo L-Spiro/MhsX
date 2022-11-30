@@ -173,6 +173,12 @@
     <Filter Include="Source Files\Programs">
       <UniqueIdentifier>{879f87be-0f98-424a-aadd-8ce677838eb7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Disassembler x86_x64">
+      <UniqueIdentifier>{b45960bb-e130-42e5-94c2-b5aa8456f0d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Disassembler x86_x64">
+      <UniqueIdentifier>{0bf85e4e-9e48-4d1e-abe3-3ec8704a36a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Strings\MXStringDecoder.cpp">
@@ -541,6 +547,9 @@
     <ClCompile Include="Src\Options\MXOptionsPagePrograms.cpp">
       <Filter>Source Files\Options</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Disassembler x86_x64\MXDisassemGen.cpp">
+      <Filter>Source Files\Disassembler x86_x64</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -823,6 +832,12 @@
     </ClInclude>
     <ClInclude Include="Src\Programs\MXPrograms.h">
       <Filter>Header Files\Programs</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Disassembler x86_x64\MXDisassemGen.h">
+      <Filter>Header Files\Disassembler x86_x64</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Disassembler x86_x64\MXDisassem.h">
+      <Filter>Header Files\Disassembler x86_x64</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

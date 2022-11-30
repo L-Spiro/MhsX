@@ -2713,6 +2713,24 @@ namespace mx {
 		return _sIn;
 	}
 
+	// Upper-cases an ASCII string.
+	std::string CUtilities::ToUpper( const std::string &_sInput ) {
+		std::string sRet;
+		for ( size_t I = 0; I < _sInput.size(); ++I ) {
+			sRet.push_back( std::toupper( _sInput[I] ) );
+		}
+		return sRet;
+	}
+
+	// Lower-cases an ASCII string.
+	std::string CUtilities::ToLower( const std::string &_sInput ) {
+		std::string sRet;
+		for ( size_t I = 0; I < _sInput.size(); ++I ) {
+			sRet.push_back( std::tolower( _sInput[I] ) );
+		}
+		return sRet;
+	}
+
 	// Upper-cases a string.
 	CSecureWString CUtilities::ToUpper( const CSecureWString &_swsInput ) {
 		CSecureWString swsRet;

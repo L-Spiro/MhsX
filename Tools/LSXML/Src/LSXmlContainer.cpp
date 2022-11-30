@@ -663,6 +663,102 @@ namespace lsx {
 	}
 
 	/**
+	 * Gets the first child element by name.
+	 *
+	 * \param _ptParent The node whose children are to be scanned for elements matching the given name.
+	 * \param _sName The name of the child element to find.
+	 * \return Returns a pointer to the child element of te given name or nullptr if there is none.
+	 */
+	const CTree<CXmlContainer::LSX_XML_ELEMENT> * CXmlContainer::GetChildElement( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName ) const {
+		if ( _ptParent ) {
+			for ( size_t I = 0; I < _ptParent->Size(); ++I ) {
+				if ( GetString( _ptParent->GetChild( I )->Value().stNameString ) == _sName ) {
+					return _ptParent->GetChild( I );
+				}
+			}
+		}
+		return nullptr;
+	}
+
+	/**
+	 * Gets the first child element by name.
+	 *
+	 * \param _ptParent The node whose children are to be scanned for elements matching the given name.
+	 * \param _sName The name of the child element to find.
+	 * \return Returns a pointer to the child element of te given name or nullptr if there is none.
+	 */
+	CTree<CXmlContainer::LSX_XML_ELEMENT> * CXmlContainer::GetChildElement( CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName ) {
+		if ( _ptParent ) {
+			for ( size_t I = 0; I < _ptParent->Size(); ++I ) {
+				if ( GetString( _ptParent->GetChild( I )->Value().stNameString ) == _sName ) {
+					return _ptParent->GetChild( I );
+				}
+			}
+		}
+		return nullptr;
+	}
+
+	/**
+	 * Gathers the indices of children nodes (non-recursively) whose element names match the given name.
+	 *
+	 * \param _ptParent The node whose children are to be scanned for elements matching the given name.
+	 * \param _sName The name of the children elements to gather.
+	 * \return Returns an array of indices indicating the children of _ptParent whose element names match _sName.
+	 */
+	std::vector<size_t> CXmlContainer::GatherChildElementIndices( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName ) const {
+		std::vector<size_t> vRet;
+		if ( !_ptParent ) { return vRet; }
+		for ( size_t I = 0; I < _ptParent->Size(); ++I ) {
+			if ( GetString( _ptParent->GetChild( I )->Value().stNameString ) == _sName ) {
+				vRet.push_back( I );
+			}
+		}
+		return vRet;
+	}
+
+	/**
+	 * Gets the value of an attribute on a given element.
+	 *
+	 * \param _ptElement The element whose attributes are to be searched.
+	 * \param _sName The name of the attribute whose value is to be found.
+	 * \param _sRet Holds the returned value of the attribute.
+	 * \return Returns true if the given attribute was found on the given item.
+	 */
+	bool CXmlContainer::GetAttributeValue( const CTree<LSX_XML_ELEMENT> * _ptElement, const std::string &_sName, std::string &_sRet ) const {
+		_sRet.clear();
+		if ( !_ptElement ) { return false; }
+		for ( auto I = _ptElement->Value().vAttributes.size(); I--; ) {
+			if ( GetString( _ptElement->Value().vAttributes[I].stNameString ) == _sName ) {
+				if ( _ptElement->Value().vAttributes[I].stValueString != size_t( -1 ) ) {
+					_sRet = GetString( _ptElement->Value().vAttributes[I].stValueString );
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Gets the data of an child element given its name.
+	 *
+	 * \param _ptParent The element whose child elements are to be searched.
+	 * \param _sName The name of the child element whose value is to be found.
+	 * \param _sRet Holds the returned data value of the element.
+	 * \return Returns true if the given child element was found on the given item.
+	 */
+	bool CXmlContainer::GetChildElementData( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName, std::string &_sRet ) const {
+		_sRet.clear();
+		if ( !_ptParent ) { return false; }
+		for ( size_t I = 0; I < _ptParent->Size(); ++I ) {
+			if ( GetString( _ptParent->GetChild( I )->Value().stNameString ) == _sName ) {
+				_sRet = _ptParent->GetChild( I )->Value().sData;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Gathers every attribute and their values into a multi-map.
 	 *
 	 * \param _mmDst The destination multi-map.
