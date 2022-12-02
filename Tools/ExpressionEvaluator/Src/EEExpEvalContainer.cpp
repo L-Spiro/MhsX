@@ -177,6 +177,101 @@ namespace ee {
 		return rRes;
 	}
 
+	/**
+	 * Performs ToString() on a given result or object.
+	 *
+	 * \param _rRes The result to convert to a string.
+	 * \param _sReturn The resulting string form of the given result.
+	 * \return Returns true of a to-string conversion was made.
+	 */
+	bool CExpEvalContainer::ToStringResultOrObject( const EE_RESULT &_rRes, std::string &_sReturn ) {
+		switch ( _rRes.ncType ) {
+			case ee::EE_NC_SIGNED : {
+				char szFormat[32];
+				std::snprintf( szFormat, EE_COUNT_OF( szFormat ), "%I64d", _rRes.u.i64Val );
+				_sReturn = szFormat;
+				break;
+			}
+			case ee::EE_NC_UNSIGNED : {
+				char szFormat[32];
+				std::snprintf( szFormat, EE_COUNT_OF( szFormat ), "%I64u", _rRes.u.ui64Val );
+				_sReturn = szFormat;
+				break;
+			}
+			case ee::EE_NC_FLOATING : {
+				char szFormat[32];
+				std::snprintf( szFormat, EE_COUNT_OF( szFormat ), "%.17g", _rRes.u.dVal );
+				_sReturn = szFormat;
+				break;
+			}
+			case ee::EE_NC_OBJECT : {
+				if ( !_rRes.u.poObj ) {
+					_sReturn = "<null>";
+				}
+				else {
+					return _rRes.u.poObj->ToString( _sReturn );
+				}
+				break;
+			}
+			default : {
+				_sReturn = "";
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Performs ToString() on a given result or object.
+	 *
+	 * \param _rRes The result to convert to a string.
+	 * \param _sFormat The format string.
+	 * \param _sReturn The resulting string form of the given result.
+	 * \return Returns true of a to-string conversion was made.
+	 */
+	bool CExpEvalContainer::ToFormatStringResultOrObject( const EE_RESULT &_rRes, const std::string &_sFormat, std::string &_sReturn ) {
+		switch ( _rRes.ncType ) {
+			case EE_NC_UNSIGNED : {
+				_sReturn = std::format( _sFormat, _rRes.u.ui64Val );
+				break;
+			}
+			case EE_NC_SIGNED : {
+				_sReturn = std::format( _sFormat, _rRes.u.i64Val );
+				break;
+			}
+			case EE_NC_FLOATING : {
+				_sReturn = std::format( _sFormat, _rRes.u.dVal );
+				break;
+			}
+			case EE_NC_OBJECT : {
+				if ( !_rRes.u.poObj ) {
+					_sReturn = "<null>";
+				}
+				else {
+					_sReturn = _rRes.u.poObj->FormattedString( _sFormat );
+				}
+				break;
+			}
+			default : {
+				_sReturn = "";
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Prforms an equality comparison on a pair of given results or objects.
+	 *
+	 * \param _rLeft The left operand.
+	 * \param _rRight The right operand.
+	 * \return If either result is an object, Obj->Equals() is called on te pair, otherwise a comparison between
+	 */
+	bool CExpEvalContainer::EqualResultOrObject( const EE_RESULT &_rLeft, const EE_RESULT &_rRight ) {
+		EE_RESULT rRes;
+		EE_ERROR_CODES ecCode = PerformOp( _rLeft, CExpEvalParser::token::EE_EQU_E, _rRight, rRes );
+		if ( ecCode != EE_EC_SUCCESS || rRes.ncType == ee::EE_NC_INVALID ) { return false; }
+		return !!rRes.u.ui64Val;
+	}
+
 	// Default ToString() function.
 	std::wstring CExpEvalContainer::DefaultToString( EE_RESULT &_rResult, uint64_t _ui64Options ) {
 		std::wstring wsString;
@@ -195,7 +290,7 @@ namespace ee {
 			}
 			case ee::EE_NC_FLOATING : {
 				wchar_t szFormat[32];
-				std::swprintf( szFormat, EE_COUNT_OF( szFormat ), L"%.17f", _rResult.u.dVal );
+				std::swprintf( szFormat, EE_COUNT_OF( szFormat ), L"%.17g", _rResult.u.dVal );
 				wsString = szFormat;
 				break;
 			}

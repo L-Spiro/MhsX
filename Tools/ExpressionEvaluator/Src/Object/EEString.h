@@ -90,7 +90,7 @@ namespace ee {
 		// Gets the string interpreted to its best fit and then converted to int64_t. 
 		virtual CExpEvalContainer::EE_RESULT		Int() const;
 
-// Gets the number of elements in the object.  For arrays, maps, sets, lists, etc., this is the number of items.  For Unicode strings, this is the number of UTF code points.
+		// Gets the number of elements in the object.  For arrays, maps, sets, lists, etc., this is the number of items.  For Unicode strings, this is the number of UTF code points.
 		virtual CExpEvalContainer::EE_RESULT		Len() const {
 			CExpEvalContainer::EE_RESULT rRes = { EE_NC_UNSIGNED };
 			if ( !m_ui64Len ) { m_ui64Len = ee::CExpEval::CountUtfCodePoints( m_sObj ); }

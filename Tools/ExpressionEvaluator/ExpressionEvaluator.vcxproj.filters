@@ -125,6 +125,9 @@
     <ClCompile Include="Src\PreProc\EEPreProcLexer.cpp">
       <Filter>Source Files\PreProc</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Object\EEVector.cpp">
+      <Filter>Source Files\Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Gen\EEExpEvalLexBase.h">
@@ -255,6 +258,9 @@
     </ClInclude>
     <ClInclude Include="Src\Tree\EETree.h">
       <Filter>Header Files\Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\EEVector.h">
+      <Filter>Header Files\Object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

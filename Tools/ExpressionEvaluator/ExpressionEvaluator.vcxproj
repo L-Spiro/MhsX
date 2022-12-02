@@ -264,6 +264,7 @@
     <ClCompile Include="Src\Html\EEHtml.cpp" />
     <ClCompile Include="Src\Object\EEString.cpp" />
     <ClCompile Include="Src\Object\EEStringBaseApi.cpp" />
+    <ClCompile Include="Src\Object\EEVector.cpp" />
     <ClCompile Include="Src\PreProcGen\EEPreProcLexBase.cpp" />
     <ClCompile Include="Src\PreProcGen\EEPreProcParser.cpp" />
     <ClCompile Include="Src\PreProc\EEPreProc.cpp" />
@@ -303,6 +304,7 @@
     <ClInclude Include="Src\Object\EEObject.h" />
     <ClInclude Include="Src\Object\EEString.h" />
     <ClInclude Include="Src\Object\EEStringBaseApi.h" />
+    <ClInclude Include="Src\Object\EEVector.h" />
     <ClInclude Include="Src\PreProcGen\EEPreProcLexBase.h" />
     <ClInclude Include="Src\PreProcGen\EEPreProcParser.h" />
     <ClInclude Include="Src\PreProcGen\EEPreProcParserLocation.h" />

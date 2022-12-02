@@ -5,7 +5,9 @@
 #include "MemHack/MXWindowMemHack.h"
 #include "Utilities/MXUtilities.h"
 
-//#define MX_XML_TEST
+#ifdef _DEBUG
+#define MX_XML_TEST
+#endif	// #ifdef _DEBUG
 #ifdef MX_XML_TEST
 #include "Disassembler x86_x64/MXDisassemGen.h"
 #endif	// #ifdef MX_XML_TEST
@@ -23,6 +25,7 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 		}
 		//dgGen.GenerateGroupMasks();
 		//dgGen.GenerateInstExt();
+		dgGen.GenerateOperandAddressFlags();
 		dgGen.GenerateInstructionTable();
 	}
 #endif	// #ifdef MX_XML_TEST

@@ -20,6 +20,7 @@ namespace ee {
 		enum EE_BUILT_IN_TYPES : uint32_t {
 			EE_BIT_STRING_REF						= (1 << 0),						// CStringRef
 			EE_BIT_STRING							= (1 << 1),						// CString
+			EE_BIT_VECTOR							= (1 << 2),						// CVector
 		};
 
 		// Extended array access flags.

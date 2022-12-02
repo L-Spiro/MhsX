@@ -45,6 +45,7 @@ namespace mx {
 		MX_OG_TRANS			= (1ULL << 36ULL),
 		MX_OG_UNPACK		= (1ULL << 37ULL),
 		MX_OG_X87FPU		= (1ULL << 38ULL),
+		
 	};
 
 	// Instruction extensions.
@@ -59,6 +60,43 @@ namespace mx {
 		MX_IE_SSE42,
 		MX_IE_SSSE3,
 		MX_IE_VMX,
+	};
+
+	// Addressing modes.
+	enum MX_ADDRESS_MODES {
+		MX_AM_NONE,
+		MX_AM_JMF,
+		MX_AM_BAX,
+		MX_AM_BBX,
+		MX_AM_BDX,
+		MX_AM_CRX,
+		MX_AM_DRX,
+		MX_AM_MRG,
+		MX_AM_MF4,
+		MX_AM_RST,
+		MX_AM_FLG,
+		MX_AM_REG,
+		MX_AM_RR4,
+		MX_AM_IMM,
+		MX_AM_JOW,
+		MX_AM_MRM,
+		MX_AM_MR8,
+		MX_AM_IMA,
+		MX_AM_RMX,
+		MX_AM_MRQ,
+		MX_AM_MRGE,
+		MX_AM_SGM,
+		MX_AM_SGM2,
+		MX_AM_SGM30,
+		MX_AM_SGM33,
+		MX_AM_STK,
+		MX_AM_TRX,
+		MX_AM_RMXE,
+		MX_AM_RRXE,
+		MX_AM_MXMM,
+		MX_AM_MSI,
+		MX_AM_MDI,
+		MX_AM_RCM,
 	};
 
 }	// namespace mx

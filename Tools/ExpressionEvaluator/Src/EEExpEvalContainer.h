@@ -209,6 +209,34 @@ namespace ee {
 		// Converts a result or object to a given type.
 		EE_RESULT							ConvertResultOrObject( const EE_RESULT &_rRes, EE_NUM_CONSTANTS _ncType );
 
+		/**
+		 * Performs ToString() on a given result or object.
+		 *
+		 * \param _rRes The result to convert to a string.
+		 * \param _sReturn The resulting string form of the given result.
+		 * \return Returns true of a to-string conversion was made.
+		 */
+		bool								ToStringResultOrObject( const EE_RESULT &_rRes, std::string &_sReturn );
+
+		/**
+		 * Performs ToString() on a given result or object.
+		 *
+		 * \param _rRes The result to convert to a string.
+		 * \param _sFormat The format string.
+		 * \param _sReturn The resulting string form of the given result.
+		 * \return Returns true of a to-string conversion was made.
+		 */
+		bool								ToFormatStringResultOrObject( const EE_RESULT &_rRes, const std::string &_sFormat, std::string &_sReturn );
+
+		/**
+		 * Prforms an equality comparison on a pair of given results or objects.
+		 *
+		 * \param _rLeft The left operand.
+		 * \param _rRight The right operand.
+		 * \return If either result is an object, Obj->Equals() is called on te pair, otherwise a comparison between
+		 */
+		bool								EqualResultOrObject( const EE_RESULT &_rLeft, const EE_RESULT &_rRight );
+
 		// Gets the default result value.
 		static EE_RESULT					DefaultResult() { EE_RESULT rRes; rRes.ncType = EE_NC_UNSIGNED; rRes.u.ui64Val = 0UL; return rRes; }
 

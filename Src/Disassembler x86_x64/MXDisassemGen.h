@@ -27,6 +27,9 @@ namespace mx {
 		// Generate instruction extensions.
 		void									GenerateInstExt();
 
+		// Generates operand addressing flags.
+		void									GenerateOperandAddressFlags();
+
 		// Generates the instruction table.
 		void									GenerateInstructionTable();
 
@@ -103,10 +106,10 @@ namespace mx {
 			if ( _sVal == "trans" ) { return MX_OG_TRANS; }
 			if ( _sVal == "unpack" ) { return MX_OG_UNPACK; }
 			if ( _sVal == "x87fpu" ) { return MX_OG_X87FPU; }
+			return MX_OPCODE_GROUPS( 0 );
 		}
 
-		static MX_INSTR_EXT						InstExtEnum( const std::string &_sVal ) {
-			if ( _sVal == "" ) { return MX_IE_NONE; }
+		static MX_INSTR_EXT						InstExtToEnum( const std::string &_sVal ) {
 			if ( _sVal == "mmx" ) { return MX_IE_MMX; }
 			if ( _sVal == "smx" ) { return MX_IE_SMX; }
 			if ( _sVal == "sse1" ) { return MX_IE_SSE1; }
@@ -116,6 +119,43 @@ namespace mx {
 			if ( _sVal == "sse42" ) { return MX_IE_SSE42; }
 			if ( _sVal == "ssse3" ) { return MX_IE_SSSE3; }
 			if ( _sVal == "vmx" ) { return MX_IE_VMX; }
+			return MX_IE_NONE;
+		}
+
+		static MX_ADDRESS_MODES					AddressModeToEnum( const std::string &_sVal ) {
+			if ( _sVal == "A" ) { return MX_AM_JMF; }
+			if ( _sVal == "BA" ) { return MX_AM_BAX; }
+			if ( _sVal == "BB" ) { return MX_AM_BBX; }
+			if ( _sVal == "BD" ) { return MX_AM_BDX; }
+			if ( _sVal == "C" ) { return MX_AM_CRX; }
+			if ( _sVal == "D" ) { return MX_AM_DRX; }
+			if ( _sVal == "E" ) { return MX_AM_MRG; }
+			if ( _sVal == "ES" ) { return MX_AM_MF4; }
+			if ( _sVal == "EST" ) { return MX_AM_RST; }
+			if ( _sVal == "F" ) { return MX_AM_FLG; }
+			if ( _sVal == "G" ) { return MX_AM_REG; }
+			if ( _sVal == "H" ) { return MX_AM_RR4; }
+			if ( _sVal == "I" ) { return MX_AM_IMM; }
+			if ( _sVal == "J" ) { return MX_AM_JOW; }
+			if ( _sVal == "M" ) { return MX_AM_MRM; }
+			if ( _sVal == "N" ) { return MX_AM_MR8; }
+			if ( _sVal == "O" ) { return MX_AM_IMA; }
+			if ( _sVal == "P" ) { return MX_AM_RMX; }
+			if ( _sVal == "Q" ) { return MX_AM_MRQ; }
+			if ( _sVal == "R" ) { return MX_AM_MRGE; }
+			if ( _sVal == "S" ) { return MX_AM_SGM; }
+			if ( _sVal == "S2" ) { return MX_AM_SGM2; }
+			if ( _sVal == "S30" ) { return MX_AM_SGM30; }
+			if ( _sVal == "S33" ) { return MX_AM_SGM33; }
+			if ( _sVal == "SC" ) { return MX_AM_STK; }
+			if ( _sVal == "T" ) { return MX_AM_TRX; }
+			if ( _sVal == "U" ) { return MX_AM_RMXE; }
+			if ( _sVal == "V" ) { return MX_AM_RRXE; }
+			if ( _sVal == "W" ) { return MX_AM_MXMM; }
+			if ( _sVal == "X" ) { return MX_AM_MSI; }
+			if ( _sVal == "Y" ) { return MX_AM_MDI; }
+			if ( _sVal == "Z" ) { return MX_AM_RCM; }
+			return MX_AM_NONE;
 		}
 #endif	// #ifdef _DEBUG
 	};

@@ -4,6 +4,7 @@
 
 namespace ee {
 
+	// == Functions.
 	// Converts to another object of the given type.
 	CExpEvalContainer::EE_RESULT CString::ConvertTo( EE_NUM_CONSTANTS _ncType ) {
 		CExpEvalContainer::EE_RESULT rRet;
@@ -21,7 +22,7 @@ namespace ee {
 			case EE_NC_SIGNED : {
 				bool bOverflowed = false;
 				size_t sEaten = 0;
-				rRet.u.ui64Val = ee::CExpEval::StoULL( m_sObj.c_str(), 10, &sEaten, UINT64_MAX / 2 + 1, &bOverflowed );
+				rRet.u.ui64Val = ee::CExpEval::StoULL( m_sObj.c_str(), 10, &sEaten, UINT64_MAX / 2ULL + 1ULL, &bOverflowed );
 				if ( !bOverflowed && sEaten ) {
 					rRet.ncType = _ncType;
 					return rRet;
@@ -40,6 +41,7 @@ namespace ee {
 			}
 		}
 		rRet.ncType = EE_NC_INVALID;
+		rRet.u.poObj = nullptr;
 		return rRet;
 	}
 
@@ -141,12 +143,16 @@ namespace ee {
 		}
 		CString * psObj = reinterpret_cast<CString *>(m_peecContainer->AllocateObject<CString>());
 		if ( psObj ) {
-			std::string sTmp;
-			for ( size_t I = sIdx0; I < sIdx1; ++I ) {
-				sTmp.push_back( m_sObj[I] );
+			try {
+				for ( size_t I = sIdx0; I < sIdx1; ++I ) {
+					psObj->m_sObj.push_back( m_sObj[I] );
+				}
+				psObj->Dirty();
+				rRet = psObj->CreateResult();
 			}
-			psObj->SetString( sTmp );
-			rRet = psObj->CreateResult();
+			catch ( ... ) {
+				m_peecContainer->DeallocateObject( psObj );
+			}
 		}
 		return rRet;
 	}
@@ -182,9 +188,14 @@ namespace ee {
 				
 				CString * psObj = reinterpret_cast<CString *>(m_peecContainer->AllocateObject<CString>());
 				if ( psObj ) {
-					std::string sTmp = m_sObj + static_cast<CString *>(_rRet.u.poObj)->m_sObj;
-					psObj->SetString( sTmp );
-					rRet = psObj->CreateResult();
+					try {
+						psObj->m_sObj = m_sObj + static_cast<CString *>(_rRet.u.poObj)->m_sObj;
+						psObj->Dirty();
+						rRet = psObj->CreateResult();
+					}
+					catch ( ... ) {
+						m_peecContainer->DeallocateObject( psObj );
+					}
 				}
 
 				return rRet;
@@ -199,13 +210,17 @@ namespace ee {
 			CExpEvalContainer::EE_RESULT rRet = { EE_NC_INVALID };
 			CString * psObj = reinterpret_cast<CString *>(m_peecContainer->AllocateObject<CString>());
 			if ( psObj ) {
-				std::string sTmp;
-				sTmp.reserve( m_sObj.size() * _rRet.u.ui64Val );
-				for ( uint64_t I = 0; I < _rRet.u.ui64Val; ++I ) {
-					sTmp += m_sObj;
+				try {
+					psObj->m_sObj.reserve( m_sObj.size() * _rRet.u.ui64Val );
+					for ( uint64_t I = 0; I < _rRet.u.ui64Val; ++I ) {
+						psObj->m_sObj += m_sObj;
+					}
+					psObj->Dirty();
+					rRet = psObj->CreateResult();
 				}
-				psObj->SetString( sTmp );
-				rRet = psObj->CreateResult();
+				catch ( ... ) {
+					m_peecContainer->DeallocateObject( psObj );
+				}
 			}			
 			return rRet;
 		}
