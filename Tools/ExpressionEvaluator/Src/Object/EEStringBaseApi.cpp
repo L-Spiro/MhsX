@@ -74,6 +74,7 @@ namespace ee {
 		CString * psObj = reinterpret_cast<CString *>(_peecCont->AllocateObject<CString>());
 		if ( psObj ) {
 			psObj->m_sObj = ee::CExpEval::ToAscii( _sIn );
+			psObj->Dirty();
 			rRet = psObj->CreateResult();
 		}
 
