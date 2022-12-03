@@ -294,6 +294,21 @@ namespace ee {
 				wsString = szFormat;
 				break;
 			}
+			case ee::EE_NC_OBJECT : {
+				if ( !_rResult.u.poObj ) {
+					wsString = L"<null>";
+				}
+				else {
+					std::string sTmp;
+					if ( _rResult.u.poObj->ToString( sTmp ) ) {
+						wsString = ee::CExpEval::StringToWString( sTmp );
+					}
+					else {
+						wsString = L"<err>";
+					}
+				}
+				break;
+			}
 			default : {
 				wsString = L"";
 			}
