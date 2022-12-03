@@ -417,7 +417,7 @@ namespace lsw {
 		}
 		~LSW_THEME_DATA() {
 			if ( NULL != htTheme ) {
-				HRESULT hRes = ::CloseThemeData( htTheme );
+				::CloseThemeData( htTheme );
 			}
 		}
 
@@ -440,7 +440,7 @@ namespace lsw {
 		 */
 		void								ThemeChanged() {
 			if ( NULL != htTheme ) {
-				HRESULT hRes = ::CloseThemeData( htTheme );
+				::CloseThemeData( htTheme );
 				htTheme = NULL;
 			}
 		}

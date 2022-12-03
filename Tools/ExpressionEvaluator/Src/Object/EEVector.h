@@ -103,6 +103,28 @@ namespace ee {
 		 */
 		virtual bool								PlusEquals( CExpEvalContainer::EE_RESULT &_rRet );
 
+		// == Base API functions.
+		// Gets the object as an ASCII string.
+		virtual CExpEvalContainer::EE_RESULT		Ascii() const { return { EE_NC_INVALID }; }
+
+		// Gets the binary form of the object as a string (0b****).
+		virtual CExpEvalContainer::EE_RESULT		Bin() const { return { EE_NC_INVALID }; }
+
+		// Gets the boolean form of the object as a string (0b****).
+		virtual CExpEvalContainer::EE_RESULT		Bool() const { return { EE_NC_INVALID }; }
+
+		// Returns the character that represents the specified Unicode. 
+		virtual CExpEvalContainer::EE_RESULT		Chr() const { return { EE_NC_INVALID }; }
+
+		// Gets the string interpreted to its best fit and then converted to float. 
+		virtual CExpEvalContainer::EE_RESULT		Float() const { return { EE_NC_INVALID }; }
+
+		// Gets the hexadecimal form of the object as a string (0x****).
+		virtual CExpEvalContainer::EE_RESULT		Hex() const { return { EE_NC_INVALID }; }
+
+		// Gets the string interpreted to its best fit and then converted to int64_t. 
+		virtual CExpEvalContainer::EE_RESULT		Int() const { return { EE_NC_INVALID }; }
+
 		/**
 		 * Gets the number of elements in the object.  For arrays, maps, sets, lists, etc., this is the number of items.  For Unicode strings, this is the number of UTF code points.
 		 *
@@ -113,6 +135,13 @@ namespace ee {
 			rRes.u.ui64Val = m_vBacking.size();
 			return rRes;
 		}
+
+		// Gets the octadecimal form of the object as a string (0o****).
+		virtual CExpEvalContainer::EE_RESULT		Oct() const { return { EE_NC_INVALID }; }
+
+		// Returns the ordinal value of the object as a Unicode character (always EE_NC_UNSIGNED).
+		virtual CExpEvalContainer::EE_RESULT		Ord() const { return { EE_NC_INVALID }; }
+
 
 	protected :
 		// == Members.
