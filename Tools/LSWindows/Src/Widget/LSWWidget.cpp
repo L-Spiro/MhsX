@@ -29,7 +29,8 @@ namespace lsw {
 		m_pfahAddressHandler( nullptr ),
 		m_uiptrAddressHandlerData( 0 ),
 		m_pfahAddressWriteHandler( nullptr ),
-		m_uiptrAddressWriteHandlerData( 0 ) {
+		m_uiptrAddressWriteHandlerData( 0 ),
+		m_bHasFocus( false ) {
 
 		m_rStartingRect.left = _wlLayout.iLeft;
 		m_rStartingRect.top = _wlLayout.iTop;
@@ -245,6 +246,11 @@ namespace lsw {
 		return pwRet;
 	}
 
+	// Gets the value of the boolean that tracks the window's focus.
+	bool CWidget::GetFocus() const {
+		return m_bHasFocus;
+	}
+
 	// Sets the parent window.
 	CWidget * CWidget::SetParent( CWidget * _pwParent ) {
 		HWND hWnd = _pwParent ? _pwParent->Wnd() : NULL;
@@ -370,7 +376,14 @@ namespace lsw {
 	}
 
 	// == Message Handlers.
-	// WM_SIZE.
+	/**
+	 * The WM_SIZE handler.
+	 *
+	 * \param _wParam The type of resizing requested.
+	 * \param _lWidth The new width of the client area.
+	 * \param _lHeight The new height of the client area.
+	 * \return Returns a LSW_HANDLED enumeration.
+	 */
 	CWidget::LSW_HANDLED CWidget::Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight ) {
 		::EnumChildWindows( Wnd(), EnumChildWindows_ResizeControls, 0 );
 		return LSW_H_CONTINUE;
@@ -1035,6 +1048,13 @@ namespace lsw {
 			// =======================================
 			// Sizing.
 			// =======================================
+			case WM_SIZING : {
+				LSW_HANDLED hHandled = pmwThis->Sizing( static_cast<INT>(_wParam), reinterpret_cast<LSW_RECT *>(_lParam) );
+
+				// An application should return TRUE if it processes this message.
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( TRUE, TRUE ); }
+				break;
+			}
 			case WM_SIZE : {
 				LSW_HANDLED hHandled;
 				switch ( _wParam ) {
@@ -1050,7 +1070,7 @@ namespace lsw {
 						::RedrawWindow( _hWnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW );
 					}
 				}
-				
+				// If an application processes this message, it should return zero.
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
 				break;
 			}
@@ -1361,6 +1381,24 @@ namespace lsw {
 			case WM_ENABLE : {
 				if ( pmwThis ) {
 					LSW_RET( pmwThis->DockEnable( pmwThis, _wParam, _lParam, TRUE ), pmwThis->DockEnable( pmwThis, _wParam, _lParam, FALSE ) );
+				}
+				break;
+			}
+			case WM_SETFOCUS : {
+				if ( pmwThis ) {
+					pmwThis->m_bHasFocus = true;
+					LSW_HANDLED hHandled = pmwThis->SetFocus( reinterpret_cast<HWND>(_wParam) );
+					// An application should return zero if it processes this message.
+					if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				}
+				break;
+			}
+			case WM_KILLFOCUS : {
+				if ( pmwThis ) {
+					pmwThis->m_bHasFocus = false;
+					LSW_HANDLED hHandled = pmwThis->KillFocus( reinterpret_cast<HWND>(_wParam) );
+					// An application should return zero if it processes this message.
+					if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
 				}
 				break;
 			}

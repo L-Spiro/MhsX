@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstring>
 #include <EEExpEval.h>
+#include <hidsdi.h>
 #include <string>
 #include <Uxtheme.h>
 #include <vector>
@@ -456,9 +457,20 @@ namespace lsw {
 		HWND								hWnd;
 	};
 
+	struct LSW_RAW_INPUT_DEVICE_LIST {
+		std::wstring						wsName;									/**< The device's name. */
+		std::wstring						wsIdent;								/**< The device's identifier. */
+		RID_DEVICE_INFO						diInfo;									/**< The device's information. */
+	};
+
 	class CHelpers {
 	public :
-		// Aligns a WORD pointer to a 4-byte address.
+		/**
+		 * Aligns a WORD pointer to a 4-byte address.
+		 *
+		 * \param _lpIn The data to align.
+		 * \return Returns the aligned value.
+		 */
 		static LPWORD						DwordAlign( LPWORD _lpIn ) {
 			ULONG_PTR ulVal;
 
@@ -469,7 +481,14 @@ namespace lsw {
 			return reinterpret_cast<LPWORD>(ulVal);
 		}
 
-		// Finds a layout by its ID.
+		/**
+		 * Finds a layout by its ID.
+		 *
+		 * \param _pwlLayouts The layouts through which to search.
+		 * \param _sTotal The total number of widgets to which _pwlLayouts points.
+		 * \param _dwId The ID of the widget to locate.
+		 * \return Returns the found widget or nullptr.
+		 */
 		static LSW_WIDGET_LAYOUT *			FindLayout( LSW_WIDGET_LAYOUT * _pwlLayouts, size_t _sTotal, DWORD _dwId ) {
 			for ( size_t I = 0; I < _sTotal; ++I ) {
 				if ( _pwlLayouts[I].wId == _dwId ) { return &_pwlLayouts[I]; }
@@ -477,10 +496,22 @@ namespace lsw {
 			return nullptr;
 		}
 
-		// Converts a message to a string.
+		/**
+		 * Converts a message to a string.
+		 *
+		 * \param _wMessage The Windows message to turn into a string.
+		 * \param _sRet Returned by the function after being filled with a text string containing the given Windows message.
+		 * \param _bOnlyFirst Returns only the first identifier when multiple exist.
+		 * \return The returned string.
+		 */
 		static std::string &				WindowsMessageToString( WORD _wMessage, std::string &_sRet, bool _bOnlyFirst = true );
 
-		// Converts MEMORY_BASIC_INFORMATION32 to MEMORY_BASIC_INFORMATION64.
+		/**
+		 * Converts MEMORY_BASIC_INFORMATION32 to MEMORY_BASIC_INFORMATION64.
+		 *
+		 * \param _mbiInfo The MEMORY_BASIC_INFORMATION32 object to convert.
+		 * \return Returns the converted object
+		 */
 		static MEMORY_BASIC_INFORMATION64	MemoryBasicInformation32To64( const MEMORY_BASIC_INFORMATION32 &_mbiInfo ) {
 			MEMORY_BASIC_INFORMATION64 mbiRet;
 			mbiRet.AllocationBase = _mbiInfo.AllocationBase;
@@ -493,36 +524,73 @@ namespace lsw {
 			return mbiRet;
 		}
 
-		// Sets the window procedure on a window.
+		/**
+		 * Sets the window procedure on a window.
+		 *
+		 * \param _hWnd The window whose procedure is to be updated.
+		 * \param _wpProc The new procedure to apply to the window.
+		 * \return Returns the old procedure.
+		 */
 		static WNDPROC						SetWndProc( HWND _hWnd, WNDPROC _wpProc ) {
 			return reinterpret_cast<WNDPROC>(::SetWindowLongPtrW( _hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(_wpProc) ));
 		}
 
-		// Intertpolates between 2 bytes.
+		/**
+		 * Interpolates between 2 bytes.
+		 *
+		 * \param _bA Operand 1.
+		 * \param _bB Operand 2.
+		 * \param _dAmnt The amount to interpolate between the operands.
+		 * \return RETURN
+		 */
 		static BYTE							Mix( BYTE _bA, BYTE _bB, double _dAmnt ) {
 			return static_cast<BYTE>(std::round( (_bB - _bA) * _dAmnt + _bA ));
 		}
 
-		// Intertpolates between 2 values.
+		/**
+		 * Interpolates between 2 bytes.
+		 *
+		 * \param _dA Operand 1.
+		 * \param _dB Operand 2.
+		 * \param _dAmnt The amount to interpolate between the operands.
+		 * \return RETURN
+		 */
 		static double						Mix( double _dA, double _dB, double _dAmnt ) {
 			return (_dB - _dA) * _dAmnt + _dA;
 		}
 
-		// Converts from sRGB to linear.
+		/**
+		 * Converts from sRGB to linear.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 */
 		static double						sRGBtoLinear( double _dVal ) {
 			return _dVal <= 0.04045 ?
 				_dVal * (1.0 / 12.92) :
 				std::pow( (_dVal + 0.055) * (1.0 / 1.055), 2.4 );
 		}
 
-		//Converts from linear to sRGB.
+		/**
+		 * Converts from linear to sRGB.
+		 *
+		 * \param _dVal The value to convert.
+		 * \return Returns the value converted to sRGB space.
+		 */
 		static double						LinearTosRGB( double _dVal ) {
 			return _dVal <= 0.0031308 ?
 				_dVal * 12.92 :
 				1.055 * std::pow( _dVal, 1.0 / 2.4 ) - 0.055;
 		}
 
-		// Mixes between 2 RGB values.
+		/**
+		 * Mixes between 2 24-bit RGB values.
+		 *
+		 * \param _dwColorA Operand 1.
+		 * \param _dwColorB Operand 2.
+		 * \param _dAmnt The amount to interpolate between the operands.
+		 * \return Returns the interpolated 24-bit RGB value.
+		 */
 		static DWORD						MixColorRef( DWORD _dwColorA, DWORD _dwColorB, double _dAmnt ) {
 			double dA = sRGBtoLinear( GetRValue( _dwColorA ) / 255.0 );
 			double dB = sRGBtoLinear( GetRValue( _dwColorB ) / 255.0 );
@@ -536,7 +604,12 @@ namespace lsw {
 			return RGB( bR, bG, bB );
 		}
 
-		// Gets the average character width for the font set on the given HDC.
+		/**
+		 * Gets the average character width for the font set on the given HDC.
+		 *
+		 * \param _hDc The device context.
+		 * \return Returns the average size of upper-case and lower-case characters given the context's font.
+		 */
 		static SIZE							GetAveCharSize( HDC _hDc ) {
 			/*
 				How To Calculate Dialog Base Units with Non-System-Based Font
@@ -563,17 +636,29 @@ namespace lsw {
 			return sResult;
 		}
 
-		// Gets the size of a given string printed with the given HDC.
-		static SIZE							GetTextSize( const std::wstring &_wsString, HDC _hHdc ) {
+		/**
+		 * Gets the size of a given string printed with the given HDC.
+		 *
+		 * \param _wsString The string whose length in pixels is to be found.
+		 * \param _hDc The device context.
+		 * \return Returns the size of te given text in the given device context's font.
+		 */
+		static SIZE							GetTextSize( const std::wstring &_wsString, HDC _hDc ) {
 			SIZE sResult;
-			::GetTextExtentPoint32W( _hHdc, _wsString.c_str(), static_cast<int>(_wsString.size()), &sResult );
+			::GetTextExtentPoint32W( _hDc, _wsString.c_str(), static_cast<int>(_wsString.size()), &sResult );
 			return sResult;
 		}
 
-		// Gets the size of a given string printed with the given HDC.
-		static SIZE							GetTextSize( const std::string &_sString, HDC _hHdc ) {
+		/**
+		 * Gets the size of a given string printed with the given HDC.
+		 *
+		 * \param _sString The string whose length in pixels is to be found.
+		 * \param _hDc The device context.
+		 * \return Returns the size of te given text in the given device context's font.
+		 */
+		static SIZE							GetTextSize( const std::string &_sString, HDC _hDc ) {
 			SIZE sResult;
-			::GetTextExtentPoint32A( _hHdc, _sString.c_str(), static_cast<int>(_sString.size()), &sResult );
+			::GetTextExtentPoint32A( _hDc, _sString.c_str(), static_cast<int>(_sString.size()), &sResult );
 			return sResult;
 		}
 
@@ -686,6 +771,57 @@ namespace lsw {
 				}
 			}
 			return false;
+		}
+
+		/**
+		 * Gets a list of input devices.
+		 *
+		 * \return Returns a vector of input devices.
+		 */
+		static std::vector<RAWINPUTDEVICELIST>
+											GetRawInputDeviceList();
+
+		/**
+		 * Gets an input device's name.
+		 *
+		 * \param _hHandle The handle to the device.
+		 * \param _wsIdentString Contains the identifier string for the device.
+		 * \return Returns a wstring containing the name of the device.
+		 */
+		static std::wstring					GetRawInputDeviceName( HANDLE _hHandle, std::wstring &_wsIdentString );
+
+		/**
+		 * Gets an input device's information.
+		 *
+		 * \param _hHandle The handle to the device.
+		 * \return Returns the device's information.
+		 */
+		static RID_DEVICE_INFO				GetRawInputDeviceInformation( HANDLE _hHandle );
+
+		/**
+		 * Gathers all of the raw nput devices of a given type into an array.
+		 *
+		 * \param _dwType The type of device to gather.
+		 * \return Returns a vector containing the raw input devices of the given type.
+		 */
+		static std::vector<LSW_RAW_INPUT_DEVICE_LIST>
+											GatherRawInputDevices( DWORD _dwType );
+
+		/**
+		 * Gets the desktop space minus the taskbar.
+		 *
+		 * \return RETURN
+		 */
+		static LSW_RECT						UsableDesktopRect() {
+			LSW_RECT rDesktop;
+			rDesktop.Zero();
+			if ( ::SystemParametersInfoW( SPI_GETWORKAREA, 0, &rDesktop, 0 ) ) {
+				/*LSW_RECT rTmp;
+				if ( ::GetWindowRect( ::GetDesktopWindow(), &rTmp ) ) {
+					return rDesktop;
+				}*/
+			}
+			return rDesktop;
 		}
 
 

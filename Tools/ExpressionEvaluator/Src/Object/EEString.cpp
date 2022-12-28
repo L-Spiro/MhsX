@@ -211,7 +211,7 @@ namespace ee {
 			CString * psObj = reinterpret_cast<CString *>(m_peecContainer->AllocateObject<CString>());
 			if ( psObj ) {
 				try {
-					psObj->m_sObj.reserve( m_sObj.size() * _rRet.u.ui64Val );
+					psObj->m_sObj.reserve( size_t( m_sObj.size() * _rRet.u.ui64Val ) );
 					for ( uint64_t I = 0; I < _rRet.u.ui64Val; ++I ) {
 						psObj->m_sObj += m_sObj;
 					}

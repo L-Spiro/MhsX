@@ -1227,7 +1227,7 @@ namespace ee {
 		if ( IsConst( m_vNodes[_ndExp.sNodeIndex], rExp ) ) {
 			int64_t i64Val = ConvertResultOrObject( rExp, EE_NC_SIGNED ).u.i64Val;
 			uint64_t ui64Len = 0;
-			size_t sIdx = i64Val;
+			size_t sIdx = size_t( i64Val );
 			if ( i64Val < 0 ) {
 				ui64Len = ee::CExpEval::CountUtfCodePoints( m_vStrings[_sStrIndex] );
 				// The length must convert to size_t losslessly.
@@ -1268,7 +1268,7 @@ namespace ee {
 			int64_t i64Val0 = ConvertResultOrObject( rExp0, EE_NC_SIGNED ).u.i64Val;
 			int64_t i64Val1 = ConvertResultOrObject( rExp1, EE_NC_SIGNED ).u.i64Val;
 			uint64_t ui64Len = 0;
-			size_t sIdx0 = i64Val0;
+			size_t sIdx0 = size_t( i64Val0 );
 			if ( i64Val0 < 0 ) {
 				ui64Len = ee::CExpEval::CountUtfCodePoints( m_vStrings[_sStrIndex] );
 				// The length must convert to size_t losslessly.
@@ -1287,7 +1287,7 @@ namespace ee {
 				}
 			}
 
-			size_t sIdx1 = i64Val1;
+			size_t sIdx1 = size_t( i64Val1 );
 			if ( i64Val1 < 0 ) {
 				ui64Len = ee::CExpEval::CountUtfCodePoints( m_vStrings[_sStrIndex] );
 				// The length must convert to size_t losslessly.
@@ -1331,7 +1331,7 @@ namespace ee {
 		if ( IsConst( m_vNodes[_ndExp0.sNodeIndex], rExp0 ) ) {
 			int64_t i64Val0 = ConvertResultOrObject( rExp0, EE_NC_SIGNED ).u.i64Val;
 			uint64_t ui64Len = 0;
-			size_t sIdx0 = i64Val0;
+			size_t sIdx0 = size_t( i64Val0 );
 			if ( i64Val0 < 0 ) {
 				ui64Len = ee::CExpEval::CountUtfCodePoints( m_vStrings[_sStrIndex] );
 				// The length must convert to size_t losslessly.
@@ -1375,7 +1375,7 @@ namespace ee {
 		if ( IsConst( m_vNodes[_ndExp0.sNodeIndex], rExp0 ) ) {
 			int64_t i64Val0 = ConvertResultOrObject( rExp0, EE_NC_SIGNED ).u.i64Val;
 			uint64_t ui64Len = 0;
-			size_t sIdx0 = i64Val0;
+			size_t sIdx0 = size_t( i64Val0 );
 			if ( i64Val0 < 0 ) {
 				ui64Len = ee::CExpEval::CountUtfCodePoints( m_vStrings[_sStrIndex] );
 				// The length must convert to size_t losslessly.

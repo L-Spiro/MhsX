@@ -176,6 +176,9 @@ namespace lsw {
 		// If the function succeeds, the return value is the pointer to the window that previously had the keyboard focus.
 		CWidget *							SetFocus() const;
 
+		// Gets the value of the boolean that tracks the window's focus.
+		bool								GetFocus() const;
+
 		// Selects a range of text.  Implemented by CEdit and CComboBox.
 		virtual VOID						SetSel( INT /*_iStart*/, INT /*_iEnd*/ ) const {}
 
@@ -327,13 +330,57 @@ namespace lsw {
 
 	protected :
 		// == Members.
-		// The window handle.
+		/** The window handle. */
 		HWND								m_hWnd;
 
-		// Custom ID.
-		WORD								m_wId;
+		/** The tooltip control. */
+		HWND								m_hTooltip;
 
-		// Enabled.
+		/** The address handler. */
+		ee::CExpEvalContainer::PfAddressHandler
+											m_pfahAddressHandler;
+
+		/** The data to be sent to the address handler. */
+		uintptr_t							m_uiptrAddressHandlerData;
+
+		/** The address write handler. */
+		ee::CExpEvalContainer::PfAddressHandler
+											m_pfahAddressWriteHandler;
+
+		/** The data to be sent to the address write handler. */
+		uintptr_t							m_uiptrAddressWriteHandlerData;
+
+		/** The tooltip text. */
+		std::string							m_sTooltipText;
+
+		/** Children. */
+		std::vector<CWidget *>				m_vChildren;
+
+		/** Dock windows as children of this window. */
+		std::vector<CDockable *>			m_vDockables;
+
+		/** Parent. */
+		CWidget *							m_pwParent;
+
+		/** Original rectangle. */
+		LSW_RECT							m_rStartingRect;
+
+		/** This object's starting window rect in relationship with the parent's starting client rect. */
+		LSW_RECT							m_rStartingClientRect;
+
+		/** Extended styles. */
+		DWORD								m_dwExtendedStyles;
+
+		/** Tooltip styles. */
+		DWORD								m_dwTooltipStyle;
+
+		/** Tooltip extended styles. */
+		DWORD								m_dwTooltipStyleEx;
+
+		/** Last hit returned by NcHitTest(). */
+		INT									m_iLastHit;
+
+		/** Enabled. */
 		BOOL								m_bEnabled;
 
 		// The window rectangle.
@@ -342,82 +389,42 @@ namespace lsw {
 		// The client rectangle.
 		//LSW_RECT							m_rClientRect;
 
-		// Original rectangle.
-		LSW_RECT							m_rStartingRect;
-
-		// This object's starting window rect in relationship with the parent's starting client rect.
-		LSW_RECT							m_rStartingClientRect;
-
-		// Extended styles.
-		DWORD								m_dwExtendedStyles;
-
-		// Default state.  Depends on the type of control.
+		/** Default state.  Depends on the type of control. */
 		BOOL								m_bActive;
 
-		// Treat text as hex when possible?
+		/** Treat text as hex when possible? */
 		BOOL								m_bTreatAsHex;
-
-		// Tooltip styles.
-		DWORD								m_dwTooltipStyle;
-
-		// Tooltip extended styles.
-		DWORD								m_dwTooltipStyleEx;
-
-		// The tooltip text.
-		std::string							m_sTooltipText;
-
-		// The tooltip control.
-		HWND								m_hTooltip;
-
-		// Children.
-		std::vector<CWidget *>				m_vChildren;
-
-		// Parent.
-		CWidget *							m_pwParent;
-
-		// Width expression.
+		
+		/** Width expression. */
 		CExpression							m_eWidth;
 
-		// Height expression.
+		/** Height expression. */
 		CExpression							m_eHeight;
 
-		// Left expression.
+		/** Left expression. */
 		CExpression							m_eLeft;
 
-		// Right expression.
+		/** Right expression. */
 		CExpression							m_eRight;
 
-		// Top expression.
+		/** Top expression. */
 		CExpression							m_eTop;
 
-		// Bottom expression.
+		/** Bottom expression. */
 		CExpression							m_eBottom;
 
-		// Dock windows as children of this window.
-		std::vector<CDockable *>			m_vDockables;
-
-		// Show as active or not.
+		/** Show as active or not. */
 		BOOL								m_bShowAsActive;
 
-		// Last hit returned by NcHitTest().
-		INT									m_iLastHit;
-
-		// If in the destructor, the WM_NCDESTROY handler should not call delete.
+		/** If in the destructor, the WM_NCDESTROY handler should not call delete. */
 		BOOL								m_bInDestructor;
 
-		// The address handler.
-		ee::CExpEvalContainer::PfAddressHandler
-											m_pfahAddressHandler;
+		/** Custom ID. */
+		WORD								m_wId;
 
-		// The data to be sent to the address handler.
-		uintptr_t							m_uiptrAddressHandlerData;
-
-		// The address write handler.
-		ee::CExpEvalContainer::PfAddressHandler
-											m_pfahAddressWriteHandler;
-
-		// The data to be sent to the address write handler.
-		uintptr_t							m_uiptrAddressWriteHandlerData;
+		/** Tracks whether the control has focus or not. */
+		bool								m_bHasFocus;
+				
 
 
 		// == Message Handlers.
@@ -442,8 +449,24 @@ namespace lsw {
 		// WM_CANCELMODE.
 		virtual LSW_HANDLED					CancelMode() { return LSW_H_CONTINUE; }
 
-		// WM_SIZE.
+		/**
+		 * The WM_SIZE handler.
+		 *
+		 * \param _wParam The type of resizing requested.
+		 * \param _lWidth The new width of the client area.
+		 * \param _lHeight The new height of the client area.
+		 * \return Returns a LSW_HANDLED enumeration.
+		 */
 		virtual LSW_HANDLED					Size( WPARAM /*_wParam*/, LONG /*_lWidth*/, LONG /*_lHeight*/ );
+
+		/**
+		 * The WM_SIZING handler.
+		 *
+		 * \param _iEdge The edge of the window that is being sized.
+		 * \param _prRect A pointer to a RECT structure with the screen coordinates of the drag rectangle. To change the size or position of the drag rectangle, an application must change the members of this structure.
+		 * \return Returns a LSW_HANDLED enumeration.
+		 */
+		virtual LSW_HANDLED					Sizing( INT /*_iEdge*/, LSW_RECT * /*_prRect*/ ) { return LSW_H_CONTINUE; }
 
 		// WM_SIZE, SIZE_MINIMIZED.
 		virtual LSW_HANDLED					Minimized( LONG /*_lWidth*/, LONG /*_lHeight*/ ) { return LSW_H_CONTINUE; }
@@ -471,6 +494,22 @@ namespace lsw {
 
 		// WM_NOTIFY->NM_DBLCLK for the owning window if the child either could not be resolved or returned LSW_HANDLED::LSW_H_CONTINUE.
 		virtual LSW_HANDLED					DblClk( const NMHDR * /*_phHdr*/, WORD /*_wControlId*/, CWidget * /*_pwWidget*/ ) { return LSW_H_CONTINUE; }
+
+		/**
+		 * The WM_SETFOCUS handler.
+		 *
+		 * \param _hPrevFocus A handle to the window that previously had focus.
+		 * \return Returns a LSW_HANDLED enumeration.
+		 */
+		virtual LSW_HANDLED					SetFocus( HWND /*_hPrevFocus*/ ) { return LSW_H_CONTINUE; }
+
+		/**
+		 * The WM_KILLFOCUS handler.
+		 *
+		 * \param _hNewFocus A handle to the window that receives the keyboard focus. This parameter can be NULL.
+		 * \return Returns a LSW_HANDLED enumeration.
+		 */
+		virtual LSW_HANDLED					KillFocus( HWND /*_hNewFocus*/ ) { return LSW_H_CONTINUE; }
 
 		// WM_ERASEBKGND.
 		virtual LSW_HANDLED					EraseBkgnd( HDC /*_hDc*/ ) { return LSW_H_CONTINUE; }
