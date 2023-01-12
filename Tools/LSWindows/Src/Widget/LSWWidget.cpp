@@ -1406,6 +1406,22 @@ namespace lsw {
 			// =======================================
 			// Keyboard.
 			// =======================================
+			case WM_INPUT : {
+				LSW_HANDLED hHandled = pmwThis->Input( static_cast<INT>(_wParam), reinterpret_cast<HRAWINPUT>(_lParam) );
+
+				// Return value
+				//	If an application processes this message, it should return zero.
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_INPUT_DEVICE_CHANGE : {
+				LSW_HANDLED hHandled = pmwThis->InputDeviceChanged( static_cast<INT>(_wParam), reinterpret_cast<HANDLE>(_lParam) );
+
+				// Return value
+				//	If an application processes this message, it should return zero.
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
 			case WM_KEYDOWN : {
 				LSW_HANDLED hHandled = pmwThis->KeyDown( static_cast<UINT>(_wParam), static_cast<UINT>(_lParam) );
 
@@ -1633,8 +1649,10 @@ namespace lsw {
 #endif	// #ifdef WM_NCMOUSEHOVER
 #ifdef WM_NCMOUSELEAVE
 				case WM_NCMOUSELEAVE : {
-					LSW_HANDLED hHandled = pmwThis->NcMouseLeave();
-					if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+					if ( pmwThis ) {
+						LSW_HANDLED hHandled = pmwThis->NcMouseLeave();
+						if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+					}
 					break;
 				}
 #endif	// #ifdef WM_NCMOUSELEAVE
@@ -1826,7 +1844,7 @@ namespace lsw {
 			}
 
 			// =======================================
-			// Context menus.
+			// Menus.
 			// =======================================
 			case WM_CONTEXTMENU : {
 				if ( !_wParam ) { LSW_RET( 0, 0 ); }
@@ -1838,6 +1856,12 @@ namespace lsw {
 					pwControl = LSW_WIN2CLASS( hThis );
 				}
 				LSW_HANDLED hHandled = pmwThis->ContextMenu( pwControl, GET_X_LPARAM( _lParam ), GET_Y_LPARAM( _lParam ) );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+			case WM_INITMENUPOPUP : {
+				LSW_HANDLED hHandled = pmwThis->InitMenuPopup( reinterpret_cast<HMENU>(_wParam), LOWORD( _lParam ), static_cast<BOOL>(HIWORD( _lParam )) );
+				// If an application processes this message, it should return zero.
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
 				break;
 			}

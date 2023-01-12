@@ -460,7 +460,30 @@ namespace lsw {
 	struct LSW_RAW_INPUT_DEVICE_LIST {
 		std::wstring						wsName;									/**< The device's name. */
 		std::wstring						wsIdent;								/**< The device's identifier. */
+		HANDLE								hDevice;								/**< A handle to the device. */
 		RID_DEVICE_INFO						diInfo;									/**< The device's information. */
+		std::vector<uint8_t>				vPreparsedData;							/**< The device's preparsed data.  Cast .data() to PHIDP_PREPARSED_DATA. */
+		PHIDP_PREPARSED_DATA				pdPreparsedData;						/**< The device's preparsed data. */
+	};
+
+	struct LSW_HID_HANLE {
+		LSW_HID_HANLE( const wchar_t * _pwcDeviceId ) {
+			hHandle = ::CreateFileW( _pwcDeviceId,
+				GENERIC_READ | GENERIC_WRITE,
+				FILE_SHARE_READ | FILE_SHARE_WRITE,
+				NULL,
+				OPEN_EXISTING, 0,
+				NULL );
+			m_bOpened = hHandle != NULL;
+		}
+		~LSW_HID_HANLE() {
+			if ( hHandle ) {
+				::CloseHandle( hHandle );
+			}
+		}
+
+		HANDLE								hHandle;
+		BOOL								m_bOpened;
 	};
 
 	class CHelpers {
@@ -799,6 +822,14 @@ namespace lsw {
 		static RID_DEVICE_INFO				GetRawInputDeviceInformation( HANDLE _hHandle );
 
 		/**
+		 * Gets an input device's preparsed data.
+		 *
+		 * \param _hHandle The handle to the device.
+		 * \return Returns the device's preparsed data.
+		 */
+		static std::vector<uint8_t>			GetRawInputDevicePreparsedData( HANDLE _hHandle );
+
+		/**
 		 * Gathers all of the raw nput devices of a given type into an array.
 		 *
 		 * \param _dwType The type of device to gather.
@@ -806,6 +837,23 @@ namespace lsw {
 		 */
 		static std::vector<LSW_RAW_INPUT_DEVICE_LIST>
 											GatherRawInputDevices( DWORD _dwType );
+
+		/**
+		 * Registers raw input devices.
+		 *
+		 * \param _pridDevices An array of devices to register.
+		 * \param _uiNumDevices The number of devices to which _uiNumDevices points.
+		 * \return Returns TRUE if registration succeeded.
+		 */
+		static bool							RegisterRawInputDevices( const RAWINPUTDEVICE * _pridDevices, UINT _uiNumDevices );
+
+		/**
+		 * Gets the raw input data from a WM_INPUT message.
+		 *
+		 * \param _hRawInput The handle provided by WM_INPUT.
+		 * \return Returns an array of the gathered input data.
+		 */
+		static std::vector<uint8_t>			GetRawInputData_Input( HRAWINPUT _hRawInput );
 
 		/**
 		 * Gets the desktop space minus the taskbar.
@@ -824,6 +872,114 @@ namespace lsw {
 			return rDesktop;
 		}
 
+		/**
+		 * Gets the desktop task-bar top.
+		 * 
+		 * \return Returns the top of the taskbar.
+		 */
+		static LONG							TaskBarTop() {
+			LSW_RECT rDesktop;
+			rDesktop.Zero();
+			if ( ::SystemParametersInfoW( SPI_GETWORKAREA, 0, &rDesktop, 0 ) ) {
+				LSW_RECT rTmp;
+				if ( ::GetWindowRect( ::GetDesktopWindow(), &rTmp ) ) {
+					// If docked to the top.
+					if ( rTmp.top != rDesktop.top ) {
+						return std::max( rTmp.top, rDesktop.top );
+					}
+					if ( rTmp.bottom != rDesktop.bottom ) {
+						// Docked to the bottom.
+						return std::min( rTmp.bottom, rDesktop.bottom );
+					}
+					return rTmp.top;
+				}
+			}
+			return 0;
+		}
+
+		/**
+		 * Gets the desktop task-bar bottom.
+		 * 
+		 * \return Returns the bottom of the taskbar.
+		 */
+		static LONG							TaskBarBottom() {
+			LSW_RECT rDesktop;
+			rDesktop.Zero();
+			if ( ::SystemParametersInfoW( SPI_GETWORKAREA, 0, &rDesktop, 0 ) ) {
+				LSW_RECT rTmp;
+				if ( ::GetWindowRect( ::GetDesktopWindow(), &rTmp ) ) {
+					// If docked to the bottom.
+					if ( rTmp.bottom != rDesktop.bottom ) {
+						return std::max( rTmp.bottom, rDesktop.bottom );
+					}
+					if ( rTmp.top != rDesktop.top ) {
+						// Docked to the top.
+						return std::min( rTmp.top, rDesktop.top );
+					}
+					return rTmp.bottom;
+				}
+			}
+			return 0;
+		}
+
+		/**
+		 * Gets the desktop task-bar left.
+		 * 
+		 * \return Returns the left of the taskbar.
+		 */
+		static LONG							TaskBarLeft() {
+			LSW_RECT rDesktop;
+			rDesktop.Zero();
+			if ( ::SystemParametersInfoW( SPI_GETWORKAREA, 0, &rDesktop, 0 ) ) {
+				LSW_RECT rTmp;
+				if ( ::GetWindowRect( ::GetDesktopWindow(), &rTmp ) ) {
+					// If docked to the left.
+					if ( rTmp.left != rDesktop.left ) {
+						return std::max( rTmp.left, rDesktop.left );
+					}
+					if ( rTmp.right != rDesktop.right ) {
+						// Docked to the right.
+						return std::min( rTmp.right, rDesktop.right );
+					}
+					return rTmp.left;
+				}
+			}
+			return 0;
+		}
+
+		/**
+		 * Gets the desktop task-bar right.
+		 * 
+		 * \return Returns the right of the taskbar.
+		 */
+		static LONG							TaskBarRight() {
+			LSW_RECT rDesktop;
+			rDesktop.Zero();
+			if ( ::SystemParametersInfoW( SPI_GETWORKAREA, 0, &rDesktop, 0 ) ) {
+				LSW_RECT rTmp;
+				if ( ::GetWindowRect( ::GetDesktopWindow(), &rTmp ) ) {
+					// If docked to the right.
+					if ( rTmp.right != rDesktop.right ) {
+						return std::max( rTmp.right, rDesktop.right );
+					}
+					if ( rTmp.left != rDesktop.left ) {
+						// Docked to the left.
+						return std::min( rTmp.left, rDesktop.left );
+					}
+					return rTmp.right;
+				}
+			}
+			return 0;
+		}
+
+		/**
+		 * Gets the taskbar rectange.
+		 *
+		 * \return Returns the taskbar rectangle.
+		 */
+		static LSW_RECT						TaskBarRect() {
+			return LSW_RECT( TaskBarLeft(), TaskBarTop(), TaskBarRight(), TaskBarBottom() );
+		}
 
 	protected :
 		// == Types.

@@ -77,7 +77,7 @@ namespace lsw {
 		if ( _iColumn >= GetColumnCount() ) { return FALSE; }
 		ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( _tiItem );
 		if ( !pntItem ) { return FALSE; }
-		while ( pntItem->Value().vStrings.size() <= _iColumn ) {
+		while ( pntItem->Value().vStrings.size() <= size_t( _iColumn ) && _iColumn >= 0 ) {
 			pntItem->Value().vStrings.push_back( L"" );
 		}
 		pntItem->Value().vStrings[_iColumn] = _pwcText;
@@ -96,7 +96,7 @@ namespace lsw {
 		if ( _iColumn >= GetColumnCount() ) { return FALSE; }
 		const ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( _tiItem );
 		if ( !pntItem ) { return FALSE; }
-		if ( _iColumn < pntItem->Value().vStrings.size() ) {
+		if ( size_t( _iColumn ) < pntItem->Value().vStrings.size() ) {
 			_sRet = pntItem->Value().vStrings[_iColumn];
 		}
 		else {
@@ -366,7 +366,7 @@ namespace lsw {
 
 		INT iMask = _plvdiInfo->item.mask;
 		if ( (iMask & LVIF_TEXT) && _plvdiInfo->item.cchTextMax >= 1 ) {
-			if ( _plvdiInfo->item.iSubItem >= m_ptIndexCache->Value().vStrings.size() ) {
+			if ( size_t( _plvdiInfo->item.iSubItem ) >= m_ptIndexCache->Value().vStrings.size() ) {
 				std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"" );
 			}
 			else {

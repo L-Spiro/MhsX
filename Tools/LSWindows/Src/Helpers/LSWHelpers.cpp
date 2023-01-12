@@ -80,11 +80,10 @@ namespace lsw {
 			::GetRawInputDeviceInfoW( _hHandle,
 				RIDI_DEVICENAME, _wsIdentString.data(), &uiSize );
 
-			HANDLE hThis = ::CreateFileW( _wsIdentString.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, NULL );
-			if ( hThis ) {
+			LSW_HID_HANLE hHandle( _wsIdentString.c_str() );
+			if ( hHandle.m_bOpened ) {
 				wchar_t wcName[128] = { 0 };
-				BOOLEAN bResult = ::HidD_GetProductString( hThis, wcName, sizeof( wchar_t ) * 126 );
-				CloseHandle( hThis );
+				BOOLEAN bResult = ::HidD_GetProductString( hHandle.hHandle, wcName, sizeof( wchar_t ) * 126 );
 				if ( bResult ) {
 					wsRet = wcName;
 				}
@@ -112,6 +111,29 @@ namespace lsw {
 	}
 
 	/**
+	 * Gets an input device's preparsed data.
+	 *
+	 * \param _hHandle The handle to the device.
+	 * \return Returns the device's preparsed data.
+	 */
+	std::vector<uint8_t> CHelpers::GetRawInputDevicePreparsedData( HANDLE _hHandle ) {
+		std::vector<uint8_t> vRet;
+		UINT uiSize;
+		PHIDP_PREPARSED_DATA pdData = nullptr;
+		UINT uiThis = ::GetRawInputDeviceInfoW( _hHandle,
+			RIDI_PREPARSEDDATA, NULL, &uiSize );
+		if ( UINT( -1 ) == uiThis ) {
+			CBase::PrintError( L"Error Gathering Input Device Preparsed Data." );
+			return vRet;
+		}
+		vRet.resize( uiSize );
+		::GetRawInputDeviceInfoW( _hHandle,
+			RIDI_PREPARSEDDATA, vRet.data(), &uiSize );
+		
+		return vRet;
+	}
+
+	/**
 	 * Gathers all of the raw nput devices of a given type into an array.
 	 *
 	 * \param _dwType The type of device to gather.
@@ -123,6 +145,7 @@ namespace lsw {
 		for ( size_t I = 0; I < vList.size(); ++I ) {
 			if ( RIM_TYPEHID == vList[I].dwType ) {
 				LSW_RAW_INPUT_DEVICE_LIST ridlList;
+				ridlList.hDevice = vList[I].hDevice;
 				ridlList.wsName = CHelpers::GetRawInputDeviceName( vList[I].hDevice, ridlList.wsIdent );
 				if ( ridlList.wsName.size() == 0 ) {
 					CBase::PrintError( L"Error Gathering Input Device Name." );
@@ -130,11 +153,45 @@ namespace lsw {
 				}
 
 				ridlList.diInfo = CHelpers::GetRawInputDeviceInformation( vList[I].hDevice );
+				ridlList.vPreparsedData = CHelpers::GetRawInputDevicePreparsedData( vList[I].hDevice );
 				
 				vRet.push_back( ridlList );
 			}
 		}
 		return vRet;
+	}
+
+	/**
+	 * Registers raw input devices.
+	 *
+	 * \param _pridDevices An array of devices to register.
+	 * \param _uiNumDevices The number of devices to which _uiNumDevices points.
+	 * \return Returns TRUE if registration succeeded.
+	 */
+	bool CHelpers::RegisterRawInputDevices( const RAWINPUTDEVICE * _pridDevices, UINT _uiNumDevices ) {
+		if ( ::RegisterRawInputDevices( _pridDevices, _uiNumDevices, sizeof( RAWINPUTDEVICE ) ) == FALSE ) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Gets the raw input data from a WM_INPUT message.
+	 *
+	 * \param _hRawInput The handle provided by WM_INPUT.
+	 * \return Returns an array of the gathered input data.
+	 */
+	std::vector<uint8_t> CHelpers::GetRawInputData_Input( HRAWINPUT _hRawInput ) {
+		std::vector<uint8_t> vRaw;
+		UINT uiSize;
+		if ( ::GetRawInputData( _hRawInput, RID_INPUT, NULL, &uiSize, sizeof( RAWINPUTHEADER ) ) ) {
+			return vRaw;
+		}
+		vRaw.resize( uiSize );
+		if ( UINT( -1 ) == ::GetRawInputData( _hRawInput, RID_INPUT, vRaw.data(), &uiSize, sizeof( RAWINPUTHEADER ) ) ) {
+			return std::vector<uint8_t>();
+		}
+		return vRaw;
 	}
 
 }	// namespace lsw

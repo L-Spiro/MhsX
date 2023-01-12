@@ -550,6 +550,24 @@ namespace lsw {
 		// WM_VSCROLL
 		virtual LSW_HANDLED					VScroll( USHORT /*_uScrollPos*/, USHORT /*_uScrollType*/, HWND /*_hSender*/ ) { return LSW_H_CONTINUE; }
 
+		/**
+		 * The WM_INPUT handler.
+		 *
+		 * \param _iCode The input code. Use GET_RAWINPUT_CODE_WPARAM macro to get the value. Can be one of the following values: RIM_INPUT, RIM_INPUTSINK.
+		 * \param _hRawInput A HRAWINPUT handle to the RAWINPUT structure that contains the raw input from the device. To get the raw data, use this handle in the call to GetRawInputData.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					Input( INT /*_iCode*/, HRAWINPUT /*_hRawInput*/ ) { return LSW_H_CONTINUE; }
+
+		/**
+		 * The WM_INPUT_DEVICE_CHANGE handler.
+		 *
+		 * \param _iNotifCode This parameter can be one of the following values: GIDC_ARRIVAL, GIDC_REMOVAL.
+		 * \param _hDevice The HANDLE to the raw input device.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					InputDeviceChanged( INT /*_iNotifCode*/, HANDLE /*_hDevice*/ ) { return LSW_H_CONTINUE; }
+
 		// WM_KEYDOWN
 		virtual LSW_HANDLED					KeyDown( UINT /*_uiKeyCode*/, UINT /*_uiFlags*/ ) { return LSW_H_CONTINUE; }
 
@@ -724,6 +742,16 @@ namespace lsw {
 
 		// WM_CONTEXTMENU.
 		virtual LSW_HANDLED					ContextMenu( CWidget * /*_pwControl*/, INT /*_iX*/, INT /*_iY*/ ) { return LSW_H_CONTINUE; }
+
+		/**
+		 * The WM_INITMENUPOPUP handler.
+		 *
+		 * \param _hMenu A handle to the drop-down menu or submenu.
+		 * \param _wPos The zero-based relative position of the menu item that opens the drop-down menu or submenu.
+		 * \param _bIsWindowMenu Indicates whether the drop-down menu is the window menu. If the menu is the window menu, this parameter is TRUE; otherwise, it is FALSE.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					InitMenuPopup( HMENU /*_hMenu*/, WORD /*_wPos*/, BOOL /*_bIsWindowMenu*/ ) { return LSW_H_CONTINUE; }
 
 		// WM_USER/custom messages.
 		virtual LSW_HANDLED					CustomPrivateMsg( UINT /*_uMsg*/, WPARAM /*_wParam*/, LPARAM /*_lParam*/ ) { return LSW_H_CONTINUE; }
