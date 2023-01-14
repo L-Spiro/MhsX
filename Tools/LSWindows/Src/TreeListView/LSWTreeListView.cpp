@@ -35,7 +35,6 @@ namespace lsw {
 	 * \param _hWnd The handle to the window/control being initialized.
 	 */
 	void CTreeListView::InitControl( HWND _hWnd ) {
-		::SetWindowLongPtrW( Wnd(), GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this) );
 		CListView::InitControl( _hWnd );
 		m_wpListViewProc = CHelpers::SetWndProc( Wnd(), ListViewOverride );
 		::SetPropW( Wnd(), m_szProp, reinterpret_cast<HANDLE>(this) );

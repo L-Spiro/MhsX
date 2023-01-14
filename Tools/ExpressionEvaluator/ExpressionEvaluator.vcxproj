@@ -75,6 +75,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
@@ -314,11 +315,21 @@
     <ClInclude Include="Src\PreProc\EEPreProcContainer.h" />
     <ClInclude Include="Src\PreProc\EEPreProcLexer.h" />
     <ClInclude Include="Src\PreProc\EEPreProcSyntaxNodes.h" />
+    <ClInclude Include="Src\SinCos\EESinCos.h" />
     <ClInclude Include="Src\Tree\EETree.h" />
     <ClInclude Include="Src\Unicode\EEUnicode.h" />
     <ClInclude Include="Src\Unicode\EEUnicodeTable.h" />
   </ItemGroup>
+  <ItemGroup>
+    <MASM Include="Src\SinCos\EESinCos.asm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </MASM>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
   </ImportGroup>
 </Project>

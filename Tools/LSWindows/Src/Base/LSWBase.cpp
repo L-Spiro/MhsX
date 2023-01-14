@@ -47,6 +47,9 @@ namespace lsw {
 	// The tree-list view class.
 	ATOM CBase::m_aTreeListView = 0;
 
+	/** The child-window class. */
+	ATOM CBase::m_aChildWindow = 0;
+
 	// == Functions.
 	// Initialize.
 	VOID CBase::Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan,
@@ -54,7 +57,8 @@ namespace lsw {
 		const WCHAR * _pwcSplitterClassName,
 		const WCHAR * _pwcMultiSplitterClassName,
 		const WCHAR * _pwcTreeViewClassName,
-		const WCHAR * _pwcTreeListViewClassName ) {
+		const WCHAR * _pwcTreeListViewClassName,
+		const WCHAR * _pwcChildWindowClassName ) {
 		m_hInstance = _hInst;
 		m_plmLayoutMan = _plmLayoutMan;
 
@@ -99,6 +103,7 @@ namespace lsw {
 			m_aSplitter = CBase::RegisterClassExW( wceSplitter.Obj() );
 		}
 
+		// Register the multi-splitter class.
 		if ( _pwcMultiSplitterClassName ) {
 			lsw::CWndClassEx wceMulSplitter;
 			wceMulSplitter.SetInstance( GetThisHandle() );
@@ -110,6 +115,7 @@ namespace lsw {
 			m_aMultiSplitter = CBase::RegisterClassExW( wceMulSplitter.Obj() );
 		}
 
+		// Register the unused tree-view class.
 		if ( _pwcTreeViewClassName ) {
 			lsw::CWndClassEx wceTreeView;
 			wceTreeView.SetInstance( GetThisHandle() );
@@ -122,17 +128,28 @@ namespace lsw {
 			m_aTreeView = CBase::RegisterClassExW( wceTreeView.Obj() );
 		}
 
+		// Register the tree-list-view class.
 		if ( _pwcTreeListViewClassName ) {
 			lsw::CWndClassEx wceTreeListView;
 			wceTreeListView.SetInstance( GetThisHandle() );
 			wceTreeListView.SetClassName( _pwcTreeListViewClassName );
-			//wceTreeListView.SetStyle( 0 );
 			wceTreeListView.SetStyle( WS_EX_LEFT | WS_EX_CLIENTEDGE | WS_EX_TRANSPARENT/* | WS_EX_CONTROLPARENT*/ /*| WS_EX_COMPOSITED*/ );
 			//wceTreeListView.SetBackgroundBrush( 0 );
-			//wceTreeListView.SetWindPro( CTreeList::TreeViewProc );
 			wceTreeListView.SetWindPro( CWidget::WindowProc );
 			//wceTreeListView.SetCursor( NULL );
 			m_aTreeListView = CBase::RegisterClassExW( wceTreeListView.Obj() );
+		}
+
+		// Register the child-window class.
+		if ( _pwcChildWindowClassName ) {
+			lsw::CWndClassEx wceTreeListView;
+			wceTreeListView.SetInstance( GetThisHandle() );
+			wceTreeListView.SetClassName( _pwcChildWindowClassName );
+			wceTreeListView.SetStyle( WS_CHILDWINDOW | WS_VISIBLE /*| DS_3DLOOK | DS_FIXEDSYS | DS_SETFONT | DS_CONTROL*/ );
+			wceTreeListView.SetBackgroundBrush( 0 );
+			wceTreeListView.SetWindPro( CWidget::WindowProc );
+			//wceTreeListView.SetCursor( NULL );
+			m_aChildWindow = CBase::RegisterClassExW( wceTreeListView.Obj() );
 		}
 	}
 

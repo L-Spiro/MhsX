@@ -302,6 +302,7 @@
     <ClInclude Include="Src\Brush\LSWBrush.h" />
     <ClInclude Include="Src\Button\LSWButton.h" />
     <ClInclude Include="Src\CheckButton\LSWCheckButton.h" />
+    <ClInclude Include="Src\ChildWindow\LSWChildWindow.h" />
     <ClInclude Include="Src\ComboBox\LSWComboBox.h" />
     <ClInclude Include="Src\ComboBox\LSWComboBoxEx.h" />
     <ClInclude Include="Src\CriticalSection\LSWCriticalSection.h" />

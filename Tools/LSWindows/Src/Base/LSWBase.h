@@ -26,7 +26,8 @@ namespace lsw {
 			const WCHAR * _pwcSplitterClassName = nullptr,
 			const WCHAR * _pwcMultiSplitterClassName = nullptr,
 			const WCHAR * _pwcTreeViewClassName = nullptr,
-			const WCHAR * _pwcTreeListViewClassName = nullptr );
+			const WCHAR * _pwcTreeListViewClassName = nullptr,
+			const WCHAR * _pwcChildWindowClassName = nullptr );
 
 		// Shut down (frees memory).
 		static VOID									ShutDown();
@@ -57,6 +58,13 @@ namespace lsw {
 
 		// Gets the ATOM for tree-list view windows.
 		static ATOM									TreeListViewAtom() { return m_aTreeListView; }
+
+		/**
+		 * Gets the ATOM for child windows.
+		 *
+		 * \return Returns the ATOM for child windows.
+		 */
+		static ATOM									ChildWindowAtom() { return m_aChildWindow; }
 
 		// =======================================
 		// Process functions.
@@ -160,6 +168,9 @@ namespace lsw {
 
 		// The tree-list view class.
 		static ATOM									m_aTreeListView;
+
+		/** The child-window class. */
+		static ATOM									m_aChildWindow;
 												
 	};
 

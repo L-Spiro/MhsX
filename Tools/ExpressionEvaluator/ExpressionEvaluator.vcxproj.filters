@@ -72,6 +72,9 @@
     <Filter Include="Header Files\Tree">
       <UniqueIdentifier>{c25b6c65-ad7c-4cc7-9e90-854a4f9826a9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\SinCos">
+      <UniqueIdentifier>{a1b7f9e4-8261-4cd4-a641-81da6d060bf4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -262,5 +265,13 @@
     <ClInclude Include="Src\Object\EEVector.h">
       <Filter>Header Files\Object</Filter>
     </ClInclude>
+    <ClInclude Include="Src\SinCos\EESinCos.h">
+      <Filter>Header Files\SinCos</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="Src\SinCos\EESinCos.asm">
+      <Filter>Header Files\SinCos</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

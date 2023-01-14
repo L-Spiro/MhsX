@@ -8,6 +8,7 @@ namespace lsw {
 		LSW_LT_WIDGET,
 		LSW_LT_BUTTON,							// WC_BUTTONW
 		LSW_LT_CHECK,							// WC_BUTTONW
+		LSW_LT_CHILDWINDOW,						// lsw::CBase::ChildWindowAtom()
 		LSW_LT_COMBOBOX,						// WC_COMBOBOXW
 		LSW_LT_COMBOBOXEX,						// WC_COMBOBOXEXW
 		LSW_LT_DOCKWINDOW,						// lsw::CBase::DockableAtom()
@@ -16,7 +17,7 @@ namespace lsw {
 		LSW_LT_LABEL,							// WC_STATICW
 		LSW_LT_LISTBOX,							// WC_LISTBOXW
 		LSW_LT_LISTVIEW,						// WC_LISTVIEWW
-		LSW_LT_MULTISPLITTER,					// lsw::CBase::DockableAtom()
+		LSW_LT_MULTISPLITTER,					// lsw::CBase::MultiSplitterAtom()
 		LSW_LT_PROGRESSBAR,						// PROGRESS_CLASS
 		LSW_LT_RADIO,							// WC_BUTTONW
 		LSW_LT_REBAR,							// REBARCLASSNAMEW

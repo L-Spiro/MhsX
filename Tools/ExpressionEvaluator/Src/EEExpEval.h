@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SinCos/EESinCos.h"
 #include <cinttypes>
 #include <string>
 #include <vector>

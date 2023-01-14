@@ -201,6 +201,12 @@
     <Filter Include="Source Files\TreeListView">
       <UniqueIdentifier>{a733732d-caeb-4908-ab35-cabff35c0df6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ChildWindow">
+      <UniqueIdentifier>{760715c3-e80b-4088-9c8b-27c23c5e5a1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ChildWindow">
+      <UniqueIdentifier>{32c0d8e1-196a-41de-b682-014f46900ae1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -328,6 +334,9 @@
     </ClInclude>
     <ClInclude Include="Src\TreeListView\LSWTreeListView.h">
       <Filter>Header Files\TreeListView</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ChildWindow\LSWChildWindow.h">
+      <Filter>Header Files\ChildWindow</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

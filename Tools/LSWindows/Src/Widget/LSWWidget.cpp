@@ -56,6 +56,7 @@ namespace lsw {
 				CBase::GetThisHandle(),
 				static_cast<CWidget *>(this) );
 			assert( m_hWnd );
+			::SetWindowLongPtrW( Wnd(), GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this) );
 			UpdateRects();
 		}
 

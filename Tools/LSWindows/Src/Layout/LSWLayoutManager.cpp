@@ -2,6 +2,7 @@
 #include "../Base/LSWBase.h"
 #include "../Button/LSWButton.h"
 #include "../CheckButton/LSWCheckButton.h"
+#include "../ChildWindow/LSWChildWindow.h"
 #include "../ComboBox/LSWComboBox.h"
 #include "../ComboBox/LSWComboBoxEx.h"
 #include "../Docking/LSWDockable.h"
@@ -183,6 +184,7 @@ namespace lsw {
 		switch ( _wlLayout.ltType ) {
 			case LSW_LT_BUTTON : { return new CButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 			case LSW_LT_CHECK : { return new CCheckButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_CHILDWINDOW : { return new CChildWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 			case LSW_LT_COMBOBOX : { return new CComboBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 			case LSW_LT_COMBOBOXEX : { return new CComboBoxEx( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 			case LSW_LT_DOCKWINDOW : { return new CDockable( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
@@ -321,6 +323,7 @@ namespace lsw {
 			} aStruct [] = {
 				{ LSW_LT_BUTTON, WC_BUTTONW },
 				{ LSW_LT_CHECK, WC_BUTTONW },
+				{ LSW_LT_CHILDWINDOW, reinterpret_cast<LPCWSTR>(lsw::CBase::ChildWindowAtom()) },
 				{ LSW_LT_COMBOBOX, WC_COMBOBOXW },
 				{ LSW_LT_COMBOBOXEX, WC_COMBOBOXEXW },
 				{ LSW_LT_DOCKWINDOW, reinterpret_cast<LPCWSTR>(lsw::CBase::DockableAtom()) },
@@ -329,6 +332,7 @@ namespace lsw {
 				{ LSW_LT_LISTVIEW, WC_LISTVIEWW },
 				{ LSW_LT_LISTBOX, WC_LISTBOXW },
 				{ LSW_LT_LABEL, WC_STATICW },
+				{ LSW_LT_MULTISPLITTER, reinterpret_cast<LPCWSTR>(lsw::CBase::MultiSplitterAtom()) },
 				{ LSW_LT_PROGRESSBAR, PROGRESS_CLASSW },
 				{ LSW_LT_RADIO, WC_BUTTONW },
 				{ LSW_LT_REBAR, REBARCLASSNAMEW },				
