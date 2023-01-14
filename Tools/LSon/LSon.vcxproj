@@ -242,6 +242,22 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="LSon.cpp" />
+    <ClCompile Include="Src\Gen\LSONJsonLexBase.cpp" />
+    <ClCompile Include="Src\Gen\LSONJsonParser.cpp" />
+    <ClCompile Include="Src\LSONJson.cpp" />
+    <ClCompile Include="Src\LSONJsonContainer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Src\Gen\LSONJsonLexBase.h" />
+    <ClInclude Include="Src\Gen\LSONJsonParser.h" />
+    <ClInclude Include="Src\Gen\LSONJsonParserLocation.h" />
+    <ClInclude Include="Src\Gen\LSONJsonParserPosition.h" />
+    <ClInclude Include="Src\Gen\LSONJsonParserStack.h" />
+    <ClInclude Include="Src\LSONJson.h" />
+    <ClInclude Include="Src\LSONJsonContainer.h" />
+    <ClInclude Include="Src\LSONJsonLexer.h" />
+    <ClInclude Include="Src\LSONJsonSyntaxNodes.h" />
+    <ClInclude Include="Src\Tree\LSXTree.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

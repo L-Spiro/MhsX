@@ -1,0 +1,2 @@
+call LSONJsonLexBuild.bat
+call LSONJsonSyntaxBuild.bat
