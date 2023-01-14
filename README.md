@@ -8,7 +8,7 @@ The successor of the original MHS, a memory-searching tool similar to Cheat Engi
 <br>![Data-Type Search Types](https://i.imgur.com/ySOzXu0.png)
 
 ## String Search
-Includes the ability to find all UTF versions of a string at once, along with every existing flavor of Reg-Ex searches that exists.
+Includes the ability to find all UTF versions of a string at once, along with every flavor of Reg-Ex searches that exists.
 <br>![String Search Search Types](https://i.imgur.com/aQyJsHr.png)
 ![String Search Reg-Ex Search](https://i.imgur.com/vRCunWi.png)
 <br>Byte strings can also be searched, with full wildcard support:
