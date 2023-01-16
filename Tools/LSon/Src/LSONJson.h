@@ -12,9 +12,9 @@ namespace lson {
 
 	/**
 	 * Class CJson
-	 * \brief Parses an XML file.
+	 * \brief Parses an JSON file.
 	 *
-	 * Description: Parses an XML file.
+	 * Description: Parses an JSON file.
 	 */
 	class CJson {
 	public :
@@ -29,25 +29,25 @@ namespace lson {
 		void											Reset();
 
 		/**
-		 * Sets the loaded XML data.
+		 * Sets the loaded JSON data.
 		 *
-		 * \param _pcXml The NULL-terminated XML data.
-		 * \return Returns true if the XML data was successfully parsed.
+		 * \param _pcJson The NULL-terminated JSON data.
+		 * \return Returns true if the JSON data was successfully parsed.
 		 */
-		bool											SetXml( const char * _pcXml );
+		bool											SetJson( const char * _pcJson );
 
 		/**
 		 * Gets the container pointer.
 		 *
 		 * \return Returns the container pointer.
 		 */
-		CJsonContainer *								GetContainer() { return m_pxcContainer; }
+		CJsonContainer *								GetContainer() { return m_pjcContainer; }
 
 
 	protected :
 		// == Members.
 		/** The container of the parsed results. */
-		CJsonContainer *								m_pxcContainer;
+		CJsonContainer *								m_pjcContainer;
 	};
 
 }	// namespace lson

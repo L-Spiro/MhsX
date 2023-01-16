@@ -6,11 +6,18 @@
 #include "Utilities/MXUtilities.h"
 
 #ifdef _DEBUG
-#define MX_XML_TEST
+//#define MX_XML_TEST
 #endif	// #ifdef _DEBUG
 #ifdef MX_XML_TEST
 #include "Disassembler x86_x64/MXDisassemGen.h"
 #endif	// #ifdef MX_XML_TEST
+
+#ifdef _DEBUG
+#define MX_JSON_TEST
+#endif	// #ifdef _DEBUG
+#ifdef MX_JSON_TEST
+#include "LSONJson.h"
+#endif	// #ifdef MX_JSON_TEST
 
 int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine, int _nCmdShow ) {
 #ifdef MX_XML_TEST
@@ -29,6 +36,21 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 		dgGen.GenerateInstructionTable();
 	}
 #endif	// #ifdef MX_XML_TEST
+
+
+#ifdef MX_JSON_TEST
+	{
+		lson::CJson jSon;
+		std::vector<uint8_t> vBytes;
+		mx::CFile::LoadToMemory( L"J:\\My Projects\\MHS X\\Research\\02.json", vBytes );
+		vBytes.push_back( 0 );
+
+		if ( !jSon.SetJson( reinterpret_cast<const char *>(vBytes.data()) ) ) {
+			::OutputDebugStringA( "JSON FAIL\r\n" );
+		}
+	}
+
+#endif	// #ifdef MX_JSON_TEST
 
 
 	// Security measure.  All custom window classes have random names.  Ensure their lengths can change, but not have the same length

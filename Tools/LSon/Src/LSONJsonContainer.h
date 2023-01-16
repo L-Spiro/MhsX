@@ -3,7 +3,7 @@
 //#include "LSONJson.h"
 #include "LSONJsonSyntaxNodes.h"
 #include "Gen/LSONJsonParser.h"
-#include "Tree/LSXTree.h"
+#include "Tree/LSONTree.h"
 
 #include <map>
 #include <set>
@@ -26,15 +26,15 @@ namespace lson {
 
 		// == Types.
 		/** The public attibute structure. */
-		struct LSX_XML_ATTRIBUTE {
+		struct LSON_JSON_ATTRIBUTE {
 			size_t										stNameString = size_t( -1 );			/**< Use GetString() to get the name of the attribute. */
 			size_t										stValueString = size_t( -1 );			/**< Use GetString() to get the name of the attribute value (unles sit is size_t( -1 )). */
 		};
 
 		/** The public node structure. */
-		struct LSX_XML_ELEMENT {
+		struct LSON_JSON_ELEMENT {
 			size_t										stNameString = size_t( -1 );			/**< Use GetString() to get the name of the element. */
-			std::vector<LSX_XML_ATTRIBUTE>				vAttributes;							/**< The attributes associated with this element. */
+			std::vector<LSON_JSON_ATTRIBUTE>			vAttributes;							/**< The attributes associated with this element. */
 			std::string									sData;									/**< Combined data values minus any data values that are nothing but whitespace. */
 		};
 
@@ -73,6 +73,69 @@ namespace lson {
 		const std::string								GetString( size_t _stIdx ) const { return m_vStrings[_stIdx]; }
 
 		/**
+		 * Creates a string value node.
+		 *
+		 * \param _nNode The resulting node.
+		 * \param _stValue The string.
+		 * \return Returns the index of the value node created.
+		 */
+		size_t											AddStringValue( YYSTYPE::LSON_NODE &_nNode, size_t _stValue );
+
+		/**
+		 * Creates a decimal value node.
+		 *
+		 * \param _nNode The resulting node.
+		 * \param _dValue The value.
+		 * \return Returns the index of the value node created.
+		 */
+		size_t											AddDecimalValue( YYSTYPE::LSON_NODE &_nNode, double _dValue );
+
+		/**
+		 * Creates a TRUE value node.
+		 *
+		 * \param _nNode The resulting node.
+		 * \return Returns the index of the value node created.
+		 */
+		size_t											AddTrueValue( YYSTYPE::LSON_NODE &_nNode );
+
+		/**
+		 * Creates a FALSE value node.
+		 *
+		 * \param _nNode The resulting node.
+		 * \return Returns the index of the value node created.
+		 */
+		size_t											AddFalseValue( YYSTYPE::LSON_NODE &_nNode );
+
+		/**
+		 * Creates a NULL value node.
+		 *
+		 * \param _nNode The resulting node.
+		 * \return Returns the index of the value node created.
+		 */
+		size_t											AddNullValue( YYSTYPE::LSON_NODE &_nNode );
+
+		/**
+		 * Creates a member node.
+		 *
+		 * \param _nNode The resulting node.
+		 * \param _stName The name of the member.
+		 * \param _nValue The value.
+		 * \return Returns the index of the value node created.
+		 */
+		size_t											AddMember( YYSTYPE::LSON_NODE &_nNode, size_t _stName, const YYSTYPE::LSON_NODE &_nValue );
+
+		/**
+		 * Creates a member-list node.
+		 *
+		 * \param _nNode The resulting node.
+		 * \param _nLeft The left node.
+		 * \param _nRight The right node.
+		 * \return Returns the index of the value node created.
+		 */
+		size_t											AddMemberList( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight );
+
+#if 0
+		/**
 		 * Creates an attribute start string.
 		 *
 		 * \param _sText The name of the attribute.
@@ -88,7 +151,7 @@ namespace lson {
 		 * \param _stValue The optional value of the attribute.
 		 * \return Returns the index of the attribute node created.
 		 */
-		size_t											AddAttribute( YYSTYPE::LSX_NODE &_nNode, size_t _stName, size_t _stValue = size_t( -1 ) );
+		size_t											AddAttribute( YYSTYPE::LSON_NODE &_nNode, size_t _stName, size_t _stValue = size_t( -1 ) );
 
 		/**
 		 * Creates an attribute list.
@@ -98,7 +161,7 @@ namespace lson {
 		 * \param _nRight The right attribute node.
 		 * \return Returns the index of the node created.
 		 */
-		size_t											AddAttributeList( YYSTYPE::LSX_NODE &_nNode, const YYSTYPE::LSX_NODE &_nLeft, const YYSTYPE::LSX_NODE &_nRight );
+		size_t											AddAttributeList( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight );
 
 		/**
 		 * Creates a blank attribute list.
@@ -106,7 +169,7 @@ namespace lson {
 		 * \param _nNode The resulting node.
 		 * \return Returns the index of the node created.
 		 */
-		size_t											AddAttributeList( YYSTYPE::LSX_NODE &_nNode );
+		size_t											AddAttributeList( YYSTYPE::LSON_NODE &_nNode );
 
 		/**
 		 * Creates an attribute declaration.
@@ -116,7 +179,7 @@ namespace lson {
 		 * \param _nAttributes Optional attributes associated with it.
 		 * \return Returns the index of the node created.
 		 */
-		size_t											AddAttributeDecl( YYSTYPE::LSX_NODE &_nNode, size_t _stName, const YYSTYPE::LSX_NODE &_nAttributes );
+		size_t											AddAttributeDecl( YYSTYPE::LSON_NODE &_nNode, size_t _stName, const YYSTYPE::LSON_NODE &_nAttributes );
 
 		/**
 		 * Creates a data content node.
@@ -126,7 +189,7 @@ namespace lson {
 		 * \param _stData The data.
 		 * \return Returns the index of the node created.
 		 */
-		size_t											AddContentData( YYSTYPE::LSX_NODE &_nNode, const YYSTYPE::LSX_NODE &_nLeft, size_t _stData );
+		size_t											AddContentData( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, size_t _stData );
 
 		/**
 		 * Creates a miscellaneous content node.
@@ -136,7 +199,7 @@ namespace lson {
 		 * \param _nRight The right content node.
 		 * \return Returns the index of the node created.
 		 */
-		size_t											AddContentMisc( YYSTYPE::LSX_NODE &_nNode, const YYSTYPE::LSX_NODE &_nLeft, const YYSTYPE::LSX_NODE &_nRight );
+		size_t											AddContentMisc( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight );
 
 		/**
 		 * Creates an element content node.
@@ -146,7 +209,7 @@ namespace lson {
 		 * \param _nRight The right content node.
 		 * \return Returns the index of the node created.
 		 */
-		size_t											AddContentElement( YYSTYPE::LSX_NODE &_nNode, const YYSTYPE::LSX_NODE &_nLeft, const YYSTYPE::LSX_NODE &_nRight );
+		size_t											AddContentElement( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight );
 
 		/**
 		 * Creates a content node.
@@ -156,7 +219,7 @@ namespace lson {
 		 * \param _stName The name.
 		 * \return Returns the index of the node created.
 		 */
-		size_t											AddContent( YYSTYPE::LSX_NODE &_nNode, const YYSTYPE::LSX_NODE &_nContent, size_t _stName );
+		size_t											AddContent( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nContent, size_t _stName );
 
 		/**
 		 * Creates an element node.
@@ -167,7 +230,7 @@ namespace lson {
 		 * \param _nContent The content node.
 		 * \return Returns the index of the node created.
 		 */
-		size_t											AddElement( YYSTYPE::LSX_NODE &_nNode, size_t _stName, const YYSTYPE::LSX_NODE &_nAttributes, const YYSTYPE::LSX_NODE &_nContent );
+		size_t											AddElement( YYSTYPE::LSON_NODE &_nNode, size_t _stName, const YYSTYPE::LSON_NODE &_nAttributes, const YYSTYPE::LSON_NODE &_nContent );
 
 		/**
 		 * Creates an element node.
@@ -177,7 +240,7 @@ namespace lson {
 		 * \param _nRight The right node.
 		 * \return Returns the index of the node created.
 		 */
-		size_t											AddMiscSeq( YYSTYPE::LSX_NODE &_nNode, const YYSTYPE::LSX_NODE &_nLeft, const YYSTYPE::LSX_NODE &_nRight );
+		size_t											AddMiscSeq( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight );
 
 		/**
 		 * Creates an encoding node.
@@ -186,7 +249,7 @@ namespace lson {
 		 * \param _pcEncoding The encoding string.
 		 * \return Returns the index of the node created.
 		 */
-		size_t											AddEncoding( YYSTYPE::LSX_NODE &_nNode, const char * _pcEncoding );
+		size_t											AddEncoding( YYSTYPE::LSON_NODE &_nNode, const char * _pcEncoding );
 
 		/**
 		 * Creates a version node.
@@ -195,7 +258,7 @@ namespace lson {
 		 * \param _pcVersion The version string.
 		 * \return Returns the index of the node created.
 		 */
-		size_t											AddVersion( YYSTYPE::LSX_NODE &_nNode, const char * _pcVersion );
+		size_t											AddVersion( YYSTYPE::LSON_NODE &_nNode, const char * _pcVersion );
 
 		/**
 		 * Creates a prolog node.
@@ -206,7 +269,7 @@ namespace lson {
 		 * \param _nMisc The optional misc. sequence node.
 		 * \return Returns the index of the node created.
 		 */
-		size_t											AddProlog( YYSTYPE::LSX_NODE &_nNode, const YYSTYPE::LSX_NODE &_nVersion, const YYSTYPE::LSX_NODE &_nEncoding, const YYSTYPE::LSX_NODE &_nMisc );
+		size_t											AddProlog( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nVersion, const YYSTYPE::LSON_NODE &_nEncoding, const YYSTYPE::LSON_NODE &_nMisc );
 
 		/**
 		 * Creates a document node.
@@ -217,7 +280,7 @@ namespace lson {
 		 * \param _nMisc The optional misc. sequence node.
 		 * \return Returns the index of the node created.
 		 */
-		size_t											AddDocument( YYSTYPE::LSX_NODE &_nNode, const YYSTYPE::LSX_NODE &_nProlog, const YYSTYPE::LSX_NODE &_nElement, const YYSTYPE::LSX_NODE &_nMisc );
+		size_t											AddDocument( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nProlog, const YYSTYPE::LSON_NODE &_nElement, const YYSTYPE::LSON_NODE &_nMisc );
 
 		/**
 		 * Creates an empty node.
@@ -225,7 +288,7 @@ namespace lson {
 		 * \param _nNode The resulting node.
 		 * \return Returns the index of the node created.
 		 */
-		size_t											AddEmpty( YYSTYPE::LSX_NODE &_nNode );
+		size_t											AddEmpty( YYSTYPE::LSON_NODE &_nNode );
 
 		/**
 		 * Prints a node recursively.
@@ -243,7 +306,7 @@ namespace lson {
 		size_t											Root() const { return m_stRoot; }
 
 		/**
-		 * Builds the XML tree non-recursively.
+		 * Builds the JSON tree non-recursively.
 		 *
 		 * \return Returns true if there were no memory errors during tree creation.
 		 */
@@ -260,7 +323,7 @@ namespace lson {
 		 * \param _ptThis The items whose next item is to be obtained.
 		 * \return Returns the next item.
 		 */
-		CTree<LSX_XML_ELEMENT> *						Next( CTree<LSX_XML_ELEMENT> * _ptThis );
+		CTree<LSON_JSON_ELEMENT> *						Next( CTree<LSON_JSON_ELEMENT> * _ptThis );
 
 		/**
 		 * Gets the previous item.
@@ -268,7 +331,7 @@ namespace lson {
 		 * \param _ptThis The items whose previous item is to be obtained.
 		 * \return Returns the previous item.
 		 */
-		CTree<LSX_XML_ELEMENT> *						Prev( CTree<LSX_XML_ELEMENT> * _ptThis );
+		CTree<LSON_JSON_ELEMENT> *						Prev( CTree<LSON_JSON_ELEMENT> * _ptThis );
 
 		/**
 		 * Gets the first child element by name.
@@ -277,7 +340,7 @@ namespace lson {
 		 * \param _sName The name of the child element to find.
 		 * \return Returns a pointer to the child element of te given name or nullptr if there is none.
 		 */
-		const CTree<LSX_XML_ELEMENT> *					GetChildElement( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName ) const;
+		const CTree<LSON_JSON_ELEMENT> *				GetChildElement( const CTree<LSON_JSON_ELEMENT> * _ptParent, const std::string &_sName ) const;
 
 		/**
 		 * Gets the first child element by name.
@@ -286,7 +349,7 @@ namespace lson {
 		 * \param _sName The name of the child element to find.
 		 * \return Returns a pointer to the child element of te given name or nullptr if there is none.
 		 */
-		CTree<LSX_XML_ELEMENT> *						GetChildElement( CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName );
+		CTree<LSON_JSON_ELEMENT> *						GetChildElement( CTree<LSON_JSON_ELEMENT> * _ptParent, const std::string &_sName );
 
 		/**
 		 * Gathers the indices of children nodes (non-recursively) whose element names match the given name.
@@ -295,7 +358,7 @@ namespace lson {
 		 * \param _sName The name of the children elements to gather.
 		 * \return Returns an array of indices indicating the children of _ptParent whose element names match _sName.
 		 */
-		std::vector<size_t>								GatherChildElementIndices( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName ) const;
+		std::vector<size_t>								GatherChildElementIndices( const CTree<LSON_JSON_ELEMENT> * _ptParent, const std::string &_sName ) const;
 
 		/**
 		 * Gets the value of an attribute on a given element.
@@ -305,7 +368,7 @@ namespace lson {
 		 * \param _sRet Holds the returned value of the attribute.
 		 * \return Returns true if the given attribute was found on the given item.
 		 */
-		bool											GetAttributeValue( const CTree<LSX_XML_ELEMENT> * _ptElement, const std::string &_sName, std::string &_sRet ) const;
+		bool											GetAttributeValue( const CTree<LSON_JSON_ELEMENT> * _ptElement, const std::string &_sName, std::string &_sRet ) const;
 
 		/**
 		 * Gets the data of an child element given its name.
@@ -315,7 +378,7 @@ namespace lson {
 		 * \param _sRet Holds the returned data value of the element.
 		 * \return Returns true if the given child element was found on the given item.
 		 */
-		bool											GetChildElementData( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName, std::string &_sRet ) const;
+		bool											GetChildElementData( const CTree<LSON_JSON_ELEMENT> * _ptParent, const std::string &_sName, std::string &_sRet ) const;
 
 		/**
 		 * Gets the data associated with a given element.
@@ -349,17 +412,17 @@ namespace lson {
 		 */
 		bool											GatherElements( std::map<std::string, std::set<std::string>> &_mDst );
 
-
+#endif
 	protected :
 		// == Members.
 		/** The lexer object. */
 		CJsonLexer *									m_pxlLexer;
 		/** The stack of nodes. */
-		std::vector<YYSTYPE::LSX_NODE>					m_vNodes;
+		std::vector<YYSTYPE::LSON_NODE>					m_vNodes;
 		/** The stack of UTF-8 strings. */
 		std::vector<std::string>						m_vStrings;
 		/** The resulting tree. */
-		CTree<LSX_XML_ELEMENT>							m_tRoot;
+		CTree<LSON_JSON_ELEMENT>						m_tRoot;
 		/** The base node. */
 		size_t											m_stRoot;
 
@@ -371,7 +434,7 @@ namespace lson {
 		 * \param _nNode The node to add.
 		 * \return Returns the index of the added node inside m_vNodes.
 		 */
-		size_t											AddNode( YYSTYPE::LSX_NODE &_nNode );
+		size_t											AddNode( YYSTYPE::LSON_NODE &_nNode );
 
 		/**
 		 * Converts a pointer to a tree pointer (nullptr = &m_tRoot, everything else is pass-through).
@@ -379,7 +442,7 @@ namespace lson {
 		 * \param _ptPtr The pointer to sanitize.
 		 * \return Returns the input pointer or &m_tRoot if the input is nullptr.
 		 */
-		CTree<LSX_XML_ELEMENT> *						GetTreePointer( CTree<LSX_XML_ELEMENT> * _ptPtr ) {
+		CTree<LSON_JSON_ELEMENT> *						GetTreePointer( CTree<LSON_JSON_ELEMENT> * _ptPtr ) {
 			return _ptPtr ? _ptPtr : &m_tRoot;
 		}
 
@@ -389,7 +452,7 @@ namespace lson {
 		 * \param _vStack The input stack of pointers.
 		 * \return Returns &m_tRoot if the stack is empty, otherwise the top of the stack is returned.
 		 */
-		CTree<LSX_XML_ELEMENT> *						CurStackPointer( const std::vector<CTree<LSX_XML_ELEMENT> *> &_vStack ) {
+		CTree<LSON_JSON_ELEMENT> *						CurStackPointer( const std::vector<CTree<LSON_JSON_ELEMENT> *> &_vStack ) {
 			return GetTreePointer( (_vStack.size() == 0) ? nullptr : _vStack[_vStack.size()-1] );
 		}
 
@@ -407,7 +470,7 @@ namespace lson {
 		 * \param _ptNode The node to print.
 		 * \param _i32Depth The node depth.
 		 */
-		void											PrintTree( const CTree<LSX_XML_ELEMENT> * _ptNode, int32_t _i32Depth );
+		void											PrintTree( const CTree<LSON_JSON_ELEMENT> * _ptNode, int32_t _i32Depth );
 		
 	};
 

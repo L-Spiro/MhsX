@@ -23,14 +23,24 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, lson::CJsonLexer * _pxlLexer )
 
 %pure-parser
 
-%parse-param												{ class CJsonLexer * m_peelLexer }
-%parse-param												{ class CJsonContainer * m_peecContainer }
-%lex-param													{ CJsonLexer * m_peelLexer }
+%parse-param												{ class CJsonLexer * m_pjlLexer }
+%parse-param												{ class CJsonContainer * m_pjcContainer }
+%lex-param													{ CJsonLexer * m_pjlLexer }
 
 
 %token LSON_LCURLY LSON_RCURLY LSON_LBRAC LSON_RBRAC LSON_COMMA LSON_COLON
 %token LSON_VTRUE LSON_VFALSE LSON_VNULL
 %token LSON_STRING LSON_DECIMAL
+
+%type <sStringIndex>										string
+%type <dDecimal>											decimal
+%type <nNode>												json
+%type <nNode>												value
+%type <nNode>												object
+%type <nNode>												members
+%type <nNode>												member
+%type <nNode>												array
+%type <nNode>												values
 
 %start json
 
@@ -43,12 +53,12 @@ json
 
 value
 	: object
-	| LSON_STRING
-	| LSON_DECIMAL
+	| string												{ m_pjcContainer->AddStringValue( $$, $1 ); }
+	| decimal												{ m_pjcContainer->AddDecimalValue( $$, $1 ); }
 	| array
-	| LSON_VTRUE
-	| LSON_VFALSE
-	| LSON_VNULL
+	| LSON_VTRUE											{ m_pjcContainer->AddTrueValue( $$ ); }
+	| LSON_VFALSE											{ m_pjcContainer->AddFalseValue( $$ ); }
+	| LSON_VNULL											{ m_pjcContainer->AddNullValue( $$ ); }
 	;
 
 object
@@ -57,12 +67,12 @@ object
 	;
 
 members
-	: member
-	| members LSON_COMMA member
+	: member												{ $$ = $1; }
+	| members LSON_COMMA member								{ m_pjcContainer->AddMemberList( $$, $1, $3 ); }
 	;
 
 member
-	: LSON_STRING LSON_COLON value
+	: string LSON_COLON value								{ m_pjcContainer->AddMember( $$, $1, $3 ); }
     ;
 
 array
@@ -74,6 +84,12 @@ values
 	: value
 	| values LSON_COMMA value
 	;
+	
+string
+	: LSON_STRING											{ $$ = m_pjcContainer->AddValue( m_pjlLexer->YYText() ); }
+	
+decimal
+	: LSON_DECIMAL											{ $$ = ::atof( m_pjlLexer->YYText() ); }
 
 %%
 

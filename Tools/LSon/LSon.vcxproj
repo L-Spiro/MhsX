@@ -257,7 +257,7 @@
     <ClInclude Include="Src\LSONJsonContainer.h" />
     <ClInclude Include="Src\LSONJsonLexer.h" />
     <ClInclude Include="Src\LSONJsonSyntaxNodes.h" />
-    <ClInclude Include="Src\Tree\LSXTree.h" />
+    <ClInclude Include="Src\Tree\LSONTree.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

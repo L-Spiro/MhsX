@@ -8,7 +8,7 @@
 namespace lson {
 
 	CJson::CJson() :
-		m_pxcContainer( nullptr ) {
+		m_pjcContainer( nullptr ) {
 	}
 	CJson::~CJson() {
 		Reset();
@@ -19,31 +19,31 @@ namespace lson {
 	 * Resets the object back to its defult useable state.
 	 */
 	void CJson::Reset() {
-		delete m_pxcContainer;
-		m_pxcContainer = nullptr;
+		delete m_pjcContainer;
+		m_pjcContainer = nullptr;
 	}
 
 	/**
-	 * Sets the loaded XML data.
+	 * Sets the loaded JSON data.
 	 *
-	 * \param _pcXml The NULL-terminated XML data.
-	 * \return Returns true if the XML data was successfully parsed.
+	 * \param _pcJson The NULL-terminated JSON data.
+	 * \return Returns true if the JSON data was successfully parsed.
 	 */
-	bool CJson::SetXml( const char * _pcXml ) {
+	bool CJson::SetJson( const char * _pcJson ) {
 		Reset();
-		if ( !_pcXml ) { return false; }
+		if ( !_pcJson ) { return false; }
 
-		std::istringstream isStream( _pcXml );
+		std::istringstream isStream( _pcJson );
 
 		// Streams created.  Create the parsers.
-		std::unique_ptr<CJsonLexer> ppplLexer = std::make_unique<CJsonLexer>( &isStream, nullptr );
-		if ( !ppplLexer ) {
+		std::unique_ptr<CJsonLexer> pjlLexer = std::make_unique<CJsonLexer>( &isStream, nullptr );
+		if ( !pjlLexer ) {
 			return false;
 		}
 
-		m_pxcContainer = new( std::nothrow ) CJsonContainer( ppplLexer.get() );
+		m_pjcContainer = new( std::nothrow ) CJsonContainer( pjlLexer.get() );
 
-		std::unique_ptr<CJsonParser> ppppParser = std::make_unique<CJsonParser>( ppplLexer.get(), m_pxcContainer );
+		std::unique_ptr<CJsonParser> ppppParser = std::make_unique<CJsonParser>( pjlLexer.get(), m_pjcContainer );
 		if ( !ppppParser ) {
 			Reset();
 			return false;
@@ -51,9 +51,9 @@ namespace lson {
 
 
 		if ( ppppParser->parse() == 0 ) {
-			//m_pxcContainer->PrintNode( m_pxcContainer->Root(), 0 );
-			m_pxcContainer->BuidTree();
-			//m_pxcContainer->PrintTree();
+			//m_pjcContainer->PrintNode( m_pjcContainer->Root(), 0 );
+			//m_pjcContainer->BuidTree();
+			//m_pjcContainer->PrintTree();
 			// Parsed.
 			return true;
 		}

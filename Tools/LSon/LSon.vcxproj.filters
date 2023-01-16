@@ -68,7 +68,7 @@
     <ClInclude Include="Src\LSONJsonSyntaxNodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Tree\LSXTree.h">
+    <ClInclude Include="Src\Tree\LSONTree.h">
       <Filter>Header Files\Tree</Filter>
     </ClInclude>
   </ItemGroup>

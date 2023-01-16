@@ -104,7 +104,7 @@ namespace yy {
   public:
     /// Symbol semantic values.
 #ifndef YYSTYPE
-    typedef int semantic_type;
+    typedef YYSTYPE semantic_type;
 #else
     typedef YYSTYPE semantic_type;
 #endif
@@ -133,7 +133,7 @@ namespace yy {
     typedef token::yytokentype token_type;
 
     /// Build a parser object.
-    parser (class CJsonLexer * m_peelLexer_yyarg, class CJsonContainer * m_peecContainer_yyarg);
+    parser (class CJsonLexer * m_pjlLexer_yyarg, class CJsonContainer * m_pjcContainer_yyarg);
     virtual ~parser ();
 
     /// Parse.
@@ -222,7 +222,7 @@ namespace yy {
     static const unsigned char yytable_[];
     static const signed char yytable_ninf_;
 
-    static const signed char yycheck_[];
+    static const unsigned char yycheck_[];
 
     /// For a state, its accessing symbol.
     static const unsigned char yystos_[];
@@ -293,8 +293,8 @@ namespace yy {
     static const token_number_type yyundef_token_;
 
     /* User arguments.  */
-    class CJsonLexer * m_peelLexer;
-    class CJsonContainer * m_peecContainer;
+    class CJsonLexer * m_pjlLexer;
+    class CJsonContainer * m_pjcContainer;
   };
 
 

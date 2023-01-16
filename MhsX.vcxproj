@@ -116,7 +116,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>ONIG_STATIC;_HAS_EXCEPTIONS=0;UNICODE;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;.\Tools\LSXML\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;.\Tools\LSXML\Src;.\Tools\LSon\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -133,7 +133,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSXML.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSXML.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSon.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
@@ -141,7 +141,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>ONIG_STATIC;_HAS_EXCEPTIONS=0;UNICODE;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;.\Tools\LSXML\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;.\Tools\LSXML\Src;.\Tools\LSon\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -158,7 +158,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSXML.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSXML.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSon.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
@@ -166,7 +166,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>ONIG_STATIC;_HAS_EXCEPTIONS=0;UNICODE;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;.\Tools\LSXML\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;.\Tools\LSXML\Src;.\Tools\LSon\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -182,7 +182,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSXML.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSXML.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSon.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
@@ -190,7 +190,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>ONIG_STATIC;UNICODE;WIN32;NDEBUG;MX_FINAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;.\Tools\LSXML\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;.\Tools\LSXML\Src;.\Tools\LSon\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -207,7 +207,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSXML.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSXML.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSon.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
@@ -215,7 +215,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PreprocessorDefinitions>ONIG_STATIC;_HAS_EXCEPTIONS=0;UNICODE;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;.\Tools\LSXML\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;.\Tools\LSXML\Src;.\Tools\LSon\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -231,7 +231,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSXML.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSXML.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSon.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
@@ -239,7 +239,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|x64'">
     <ClCompile>
       <PreprocessorDefinitions>ONIG_STATIC;UNICODE;WIN32;NDEBUG;MX_FINAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;.\Tools\LSXML\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Tools\ExpressionEvaluator\Src;.\Tools\LSWindows\Src;.\Tools\LSXML\Src;.\Tools\LSon\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -256,7 +256,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSXML.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\ExpressionEvaluator.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSWindows.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSXML.lib;$(SolutionDir)$(Platform)\$(Configuration)\LSon.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>

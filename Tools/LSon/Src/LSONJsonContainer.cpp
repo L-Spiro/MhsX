@@ -55,6 +55,111 @@ namespace lson {
 	}
 
 	/**
+	 * Creates a string value node.
+	 *
+	 * \param _nNode The resulting node.
+	 * \param _stValue The string.
+	 * \return Returns the index of the value node created.
+	 */
+	size_t CJsonContainer::AddStringValue( YYSTYPE::LSON_NODE &_nNode, size_t _stValue ) {
+		_nNode.nType = LSON_N_VALUE;
+		_nNode.u.vValue.vType = LSON_V_STRING;
+		_nNode.u.vValue.v.stValue = _stValue;
+
+		return AddNode( _nNode );
+	}
+
+	/**
+	 * Creates a decimal value node.
+	 *
+	 * \param _nNode The resulting node.
+	 * \param _dValue The value.
+	 * \return Returns the index of the value node created.
+	 */
+	size_t CJsonContainer::AddDecimalValue( YYSTYPE::LSON_NODE &_nNode, double _dValue ) {
+		_nNode.nType = LSON_N_VALUE;
+		_nNode.u.vValue.vType = LSON_V_DECIMAL;
+		_nNode.u.vValue.v.dDecimal = _dValue;
+
+		return AddNode( _nNode );
+	}
+
+	/**
+	 * Creates a TRUE value node.
+	 *
+	 * \param _nNode The resulting node.
+	 * \return Returns the index of the value node created.
+	 */
+	size_t CJsonContainer::AddTrueValue( YYSTYPE::LSON_NODE &_nNode ) {
+		_nNode.nType = LSON_N_VALUE;
+		_nNode.u.vValue.vType = LSON_V_TRUE;
+		_nNode.u.vValue.v.dDecimal = 0.0;
+
+		return AddNode( _nNode );
+	}
+
+	/**
+	 * Creates a FALSE value node.
+	 *
+	 * \param _nNode The resulting node.
+	 * \return Returns the index of the value node created.
+	 */
+	size_t CJsonContainer::AddFalseValue( YYSTYPE::LSON_NODE &_nNode ) {
+		_nNode.nType = LSON_N_VALUE;
+		_nNode.u.vValue.vType = LSON_V_FALSE;
+		_nNode.u.vValue.v.dDecimal = 0.0;
+
+		return AddNode( _nNode );
+	}
+
+	/**
+	 * Creates a NULL value node.
+	 *
+	 * \param _nNode The resulting node.
+	 * \return Returns the index of the value node created.
+	 */
+	size_t CJsonContainer::AddNullValue( YYSTYPE::LSON_NODE &_nNode ) {
+		_nNode.nType = LSON_N_VALUE;
+		_nNode.u.vValue.vType = LSON_V_NULL;
+		_nNode.u.vValue.v.dDecimal = 0.0;
+
+		return AddNode( _nNode );
+	}
+
+	/**
+	 * Creates a member node.
+	 *
+	 * \param _nNode The resulting node.
+	 * \param _stName The name of the member.
+	 * \param _nValue The value.
+	 * \return Returns the index of the value node created.
+	 */
+	size_t CJsonContainer::AddMember( YYSTYPE::LSON_NODE &_nNode, size_t _stName, const YYSTYPE::LSON_NODE &_nValue ) {
+		_nNode.nType = LSON_N_MEMBER;
+		_nNode.u.mMember.stName = _stName;
+		_nNode.u.mMember.stValue = _nValue.stNodeIdx;
+
+		return AddNode( _nNode );
+	}
+
+	/**
+	 * Creates a member-list node.
+	 *
+	 * \param _nNode The resulting node.
+	 * \param _nLeft The left node.
+	 * \param _nRight The right node.
+	 * \return Returns the index of the value node created.
+	 */
+	size_t CJsonContainer::AddMemberList( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight ) {
+		_nNode.nType = LSON_N_MEMBER_LIST;
+		_nNode.u.mlMembers.stLeft = _nLeft.stNodeIdx;
+		_nNode.u.mlMembers.stRight = _nRight.stNodeIdx;
+
+		return AddNode( _nNode );
+	}
+
+#if 0
+	/**
 	 * Creates an attribute start string.
 	 *
 	 * \param _sText The name of the attribute.
@@ -88,8 +193,8 @@ namespace lson {
 	 * \param _stValue The optional value of the attribute.
 	 * \return Returns the index of the attribute node created.
 	 */
-	size_t CJsonContainer::AddAttribute( YYSTYPE::LSX_NODE &_nNode, size_t _stName, size_t _stValue ) {
-		_nNode.nType = LSX_N_ATTRIBUTE;
+	size_t CJsonContainer::AddAttribute( YYSTYPE::LSON_NODE &_nNode, size_t _stName, size_t _stValue ) {
+		_nNode.nType = LSON_N_ATTRIBUTE;
 		_nNode.u.aAttributeObj.sAttribute = _stName;
 		_nNode.u.aAttributeObj.sValue = _stValue;
 
@@ -104,8 +209,8 @@ namespace lson {
 	 * \param _nRight The right attribute node.
 	 * \return Returns the index of the node created.
 	 */
-	size_t CJsonContainer::AddAttributeList( YYSTYPE::LSX_NODE &_nNode, const YYSTYPE::LSX_NODE &_nLeft, const YYSTYPE::LSX_NODE &_nRight ) {
-		_nNode.nType = LSX_N_ATTRIBUTE_LIST;
+	size_t CJsonContainer::AddAttributeList( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight ) {
+		_nNode.nType = LSON_N_ATTRIBUTE_LIST;
 		_nNode.u.aAttributeListObj.sLeft = _nLeft.stNodeIdx;
 		_nNode.u.aAttributeListObj.sRight = _nRight.stNodeIdx;
 
@@ -118,8 +223,8 @@ namespace lson {
 	 * \param _nNode The resulting node.
 	 * \return Returns the index of the node created.
 	 */
-	size_t CJsonContainer::AddAttributeList( YYSTYPE::LSX_NODE &_nNode ) {
-		_nNode.nType = LSX_N_ATTRIBUTE_LIST;
+	size_t CJsonContainer::AddAttributeList( YYSTYPE::LSON_NODE &_nNode ) {
+		_nNode.nType = LSON_N_ATTRIBUTE_LIST;
 		_nNode.u.aAttributeListObj.sLeft = size_t( -1 );
 		_nNode.u.aAttributeListObj.sRight = size_t( -1 );
 
@@ -134,8 +239,8 @@ namespace lson {
 	 * \param _nAttributes Optional attributes associated with it.
 	 * \return Returns the index of the node created.
 	 */
-	size_t CJsonContainer::AddAttributeDecl( YYSTYPE::LSX_NODE &_nNode, size_t _stName, const YYSTYPE::LSX_NODE &_nAttributes ) {
-		_nNode.nType = LSX_N_ATTRIBUTE_DECL;
+	size_t CJsonContainer::AddAttributeDecl( YYSTYPE::LSON_NODE &_nNode, size_t _stName, const YYSTYPE::LSON_NODE &_nAttributes ) {
+		_nNode.nType = LSON_N_ATTRIBUTE_DECL;
 		_nNode.u.aAttributeDeclObj.sName = _stName;
 		_nNode.u.aAttributeDeclObj.sList = _nAttributes.stNodeIdx;
 
@@ -150,8 +255,8 @@ namespace lson {
 	 * \param _stData The data.
 	 * \return Returns the index of the node created.
 	 */
-	size_t CJsonContainer::AddContentData( YYSTYPE::LSX_NODE &_nNode, const YYSTYPE::LSX_NODE &_nLeft, size_t _stData ) {
-		_nNode.nType = LSX_N_CONTENT_DATA;
+	size_t CJsonContainer::AddContentData( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, size_t _stData ) {
+		_nNode.nType = LSON_N_CONTENT_DATA;
 		_nNode.u.cContentObj.sLeft = _nLeft.stNodeIdx;
 		_nNode.u.cContentObj.sRight = _stData;
 
@@ -166,8 +271,8 @@ namespace lson {
 	 * \param _nRight The right content node.
 	 * \return Returns the index of the node created.
 	 */
-	size_t CJsonContainer::AddContentMisc( YYSTYPE::LSX_NODE &_nNode, const YYSTYPE::LSX_NODE &_nLeft, const YYSTYPE::LSX_NODE &_nRight ) {
-		_nNode.nType = LSX_N_CONTENT_MISC;
+	size_t CJsonContainer::AddContentMisc( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight ) {
+		_nNode.nType = LSON_N_CONTENT_MISC;
 		_nNode.u.cContentObj.sLeft = _nLeft.stNodeIdx;
 		_nNode.u.cContentObj.sRight = _nRight.stNodeIdx;
 
@@ -182,8 +287,8 @@ namespace lson {
 	 * \param _nRight The right content node.
 	 * \return Returns the index of the node created.
 	 */
-	size_t CJsonContainer::AddContentElement( YYSTYPE::LSX_NODE &_nNode, const YYSTYPE::LSX_NODE &_nLeft, const YYSTYPE::LSX_NODE &_nRight ) {
-		_nNode.nType = LSX_N_CONTENT_ELEMENT;
+	size_t CJsonContainer::AddContentElement( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight ) {
+		_nNode.nType = LSON_N_CONTENT_ELEMENT;
 		_nNode.u.cContentObj.sLeft = _nLeft.stNodeIdx;
 		_nNode.u.cContentObj.sRight = _nRight.stNodeIdx;
 
@@ -198,8 +303,8 @@ namespace lson {
 	 * \param _stName The name.
 	 * \return Returns the index of the node created.
 	 */
-	size_t CJsonContainer::AddContent( YYSTYPE::LSX_NODE &_nNode, const YYSTYPE::LSX_NODE &_nContent, size_t _stName ) {
-		_nNode.nType = LSX_N_CONTENT;
+	size_t CJsonContainer::AddContent( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nContent, size_t _stName ) {
+		_nNode.nType = LSON_N_CONTENT;
 		_nNode.u.cContentObj.sLeft = _nContent.stNodeIdx;
 		_nNode.u.cContentObj.sRight = _stName;
 
@@ -215,8 +320,8 @@ namespace lson {
 	 * \param _nContent The content node.
 	 * \return Returns the index of the node created.
 	 */
-	size_t CJsonContainer::AddElement( YYSTYPE::LSX_NODE &_nNode, size_t _stName, const YYSTYPE::LSX_NODE &_nAttributes, const YYSTYPE::LSX_NODE &_nContent ) {
-		_nNode.nType = LSX_N_ELEMENT;
+	size_t CJsonContainer::AddElement( YYSTYPE::LSON_NODE &_nNode, size_t _stName, const YYSTYPE::LSON_NODE &_nAttributes, const YYSTYPE::LSON_NODE &_nContent ) {
+		_nNode.nType = LSON_N_ELEMENT;
 		_nNode.u.eElementObj.sName = _stName;
 		_nNode.u.eElementObj.sAttribute = _nAttributes.stNodeIdx;
 		_nNode.u.eElementObj.sContent = _nContent.stNodeIdx;
@@ -232,8 +337,8 @@ namespace lson {
 	 * \param _nRight The right node.
 	 * \return Returns the index of the node created.
 	 */
-	size_t CJsonContainer::AddMiscSeq( YYSTYPE::LSX_NODE &_nNode, const YYSTYPE::LSX_NODE &_nLeft, const YYSTYPE::LSX_NODE &_nRight ) {
-		_nNode.nType = LSX_N_MISC_SEQ;
+	size_t CJsonContainer::AddMiscSeq( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight ) {
+		_nNode.nType = LSON_N_MISC_SEQ;
 		_nNode.u.msMiscSeqObj.sLeft = _nLeft.stNodeIdx;
 		_nNode.u.msMiscSeqObj.sRight = _nRight.stNodeIdx;
 
@@ -247,8 +352,8 @@ namespace lson {
 	 * \param _pcEncoding The encoding string.
 	 * \return Returns the index of the node created.
 	 */
-	size_t CJsonContainer::AddEncoding( YYSTYPE::LSX_NODE &_nNode, const char * _pcEncoding ) {
-		_nNode.nType = LSX_N_ENCODING;
+	size_t CJsonContainer::AddEncoding( YYSTYPE::LSON_NODE &_nNode, const char * _pcEncoding ) {
+		_nNode.nType = LSON_N_ENCODING;
 		_nNode.u.eEncodingObj.sEncodingStr = AddString( _pcEncoding );
 
 		return AddNode( _nNode );
@@ -261,8 +366,8 @@ namespace lson {
 	 * \param _pcVersion The version string.
 	 * \return Returns the index of the node created.
 	 */
-	size_t CJsonContainer::AddVersion( YYSTYPE::LSX_NODE &_nNode, const char * _pcVersion ) {
-		_nNode.nType = LSX_N_VERSION;
+	size_t CJsonContainer::AddVersion( YYSTYPE::LSON_NODE &_nNode, const char * _pcVersion ) {
+		_nNode.nType = LSON_N_VERSION;
 		_nNode.u.vVersionObj.sVersionStr = AddString( _pcVersion );
 
 		return AddNode( _nNode );
@@ -277,8 +382,8 @@ namespace lson {
 	 * \param _nMisc The optional misc. sequence node.
 	 * \return Returns the index of the node created.
 	 */
-	size_t CJsonContainer::AddProlog( YYSTYPE::LSX_NODE &_nNode, const YYSTYPE::LSX_NODE &_nVersion, const YYSTYPE::LSX_NODE &_nEncoding, const YYSTYPE::LSX_NODE &_nMisc ) {
-		_nNode.nType = LSX_N_PROLOG;
+	size_t CJsonContainer::AddProlog( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nVersion, const YYSTYPE::LSON_NODE &_nEncoding, const YYSTYPE::LSON_NODE &_nMisc ) {
+		_nNode.nType = LSON_N_PROLOG;
 		_nNode.u.pPrologObj.sVersion = _nVersion.stNodeIdx;
 		_nNode.u.pPrologObj.sEncoding = _nEncoding.stNodeIdx;
 		_nNode.u.pPrologObj.sMiscSeq = _nMisc.stNodeIdx;
@@ -295,8 +400,8 @@ namespace lson {
 	 * \param _nMisc The optional misc. sequence node.
 	 * \return Returns the index of the node created.
 	 */
-	size_t CJsonContainer::AddDocument( YYSTYPE::LSX_NODE &_nNode, const YYSTYPE::LSX_NODE &_nProlog, const YYSTYPE::LSX_NODE &_nElement, const YYSTYPE::LSX_NODE &_nMisc ) {
-		_nNode.nType = LSX_N_DOCUMENT;
+	size_t CJsonContainer::AddDocument( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nProlog, const YYSTYPE::LSON_NODE &_nElement, const YYSTYPE::LSON_NODE &_nMisc ) {
+		_nNode.nType = LSON_N_DOCUMENT;
 		_nNode.u.dDocumentObj.sProlog = _nProlog.stNodeIdx;
 		_nNode.u.dDocumentObj.sElement = _nElement.stNodeIdx;
 		_nNode.u.dDocumentObj.sMiscSeq = _nMisc.stNodeIdx;
@@ -310,8 +415,8 @@ namespace lson {
 	 * \param _nNode The resulting node.
 	 * \return Returns the index of the node created.
 	 */
-	size_t CJsonContainer::AddEmpty( YYSTYPE::LSX_NODE &_nNode ) {
-		_nNode.nType = LSX_N_EMPTY;
+	size_t CJsonContainer::AddEmpty( YYSTYPE::LSON_NODE &_nNode ) {
+		_nNode.nType = LSON_N_EMPTY;
 		_nNode.stNodeIdx = size_t( -1 );
 		_nNode.u.cContentObj.sLeft = size_t( -1 );
 		_nNode.u.cContentObj.sRight = size_t( -1 );
@@ -327,10 +432,10 @@ namespace lson {
 	 */
 	void CJsonContainer::PrintNode( size_t _stIdx, int32_t _i32Depth ) const {
 		if ( _stIdx == size_t( -1 ) ) { return; }
-		const YYSTYPE::LSX_NODE &nThisNode = m_vNodes[_stIdx];
+		const YYSTYPE::LSON_NODE &nThisNode = m_vNodes[_stIdx];
 		std::string sPrintMe;
 		switch ( nThisNode.nType ) {
-			case LSX_N_DOCUMENT : {
+			case LSON_N_DOCUMENT : {
 				if ( nThisNode.u.dDocumentObj.sProlog != size_t( -1 ) ) {
 					sPrintMe = std::format( "{0: >{1}}DOCUMENT PROLOG:\r\n", "", _i32Depth * 5 );
 					::OutputDebugStringA( sPrintMe.c_str() );
@@ -348,7 +453,7 @@ namespace lson {
 				}
 				break;
 			}
-			case LSX_N_PROLOG : {
+			case LSON_N_PROLOG : {
 				if ( nThisNode.u.pPrologObj.sVersion != size_t( -1 ) ) {
 					sPrintMe = std::format( "{0: >{1}}PROLOG VERSION:\r\n", "", _i32Depth * 5 );
 					::OutputDebugStringA( sPrintMe.c_str() );
@@ -366,17 +471,17 @@ namespace lson {
 				}
 				break;
 			}
-			case LSX_N_VERSION : {
+			case LSON_N_VERSION : {
 				sPrintMe = std::format( "{0: >{1}}VERSION: {2}\r\n", "", _i32Depth * 5, m_vStrings[nThisNode.u.vVersionObj.sVersionStr] );
 				::OutputDebugStringA( sPrintMe.c_str() );
 				break;
 			}
-			case LSX_N_ENCODING : {
+			case LSON_N_ENCODING : {
 				sPrintMe = std::format( "{0: >{1}}ENCODING: {2}\r\n", "", _i32Depth * 5, m_vStrings[nThisNode.u.eEncodingObj.sEncodingStr] );
 				::OutputDebugStringA( sPrintMe.c_str() );
 				break;
 			}
-			case LSX_N_MISC_SEQ : {
+			case LSON_N_MISC_SEQ : {
 				if ( nThisNode.u.msMiscSeqObj.sLeft != size_t( -1 ) ) {
 					//sPrintMe = std::format( "{0: >{1}}MISC SEQ LEFT:\r\n", "", _i32Depth * 5 );
 					//::OutputDebugStringA( sPrintMe.c_str() );
@@ -389,7 +494,7 @@ namespace lson {
 				}
 				break;
 			}
-			case LSX_N_ELEMENT : {
+			case LSON_N_ELEMENT : {
 				sPrintMe = std::format( "{0: >{1}}ELEMENT ATTRIBUTE: {2}\r\n", "", _i32Depth * 5, m_vStrings[nThisNode.u.eElementObj.sName] );
 				::OutputDebugStringA( sPrintMe.c_str() );
 				PrintNode( nThisNode.u.eElementObj.sAttribute, _i32Depth + 1 );
@@ -400,7 +505,7 @@ namespace lson {
 				}
 				break;
 			}
-			case LSX_N_CONTENT : {
+			case LSON_N_CONTENT : {
 				if ( nThisNode.u.cContentObj.sLeft != size_t( -1 ) ) {
 					//sPrintMe = std::format( "{0: >{1}}CONTENT LEFT:\r\n", "", _i32Depth * 5 );
 					//::OutputDebugStringA( sPrintMe.c_str() );
@@ -412,7 +517,7 @@ namespace lson {
 				}
 				break;
 			}
-			case LSX_N_CONTENT_ELEMENT : {
+			case LSON_N_CONTENT_ELEMENT : {
 				if ( nThisNode.u.cContentObj.sLeft != size_t( -1 ) ) {
 					//sPrintMe = std::format( "{0: >{1}}CONTENT ELEMENT LEFT:\r\n", "", _i32Depth * 5 );
 					//::OutputDebugStringA( sPrintMe.c_str() );
@@ -425,7 +530,7 @@ namespace lson {
 				}
 				break;
 			}
-			case LSX_N_CONTENT_MISC : {
+			case LSON_N_CONTENT_MISC : {
 				if ( nThisNode.u.cContentObj.sLeft != size_t( -1 ) ) {
 					//sPrintMe = std::format( "{0: >{1}}CONTENT MISC LEFT:\r\n", "", _i32Depth * 5 );
 					//::OutputDebugStringA( sPrintMe.c_str() );
@@ -438,7 +543,7 @@ namespace lson {
 				}
 				break;
 			}
-			case LSX_N_CONTENT_DATA : {
+			case LSON_N_CONTENT_DATA : {
 				if ( nThisNode.u.cContentObj.sLeft != size_t( -1 ) ) {
 					//sPrintMe = std::format( "{0: >{1}}CONTENT DATA LEFT:\r\n", "", _i32Depth * 5 );
 					//::OutputDebugStringA( sPrintMe.c_str() );
@@ -450,13 +555,13 @@ namespace lson {
 				}
 				break;
 			}
-			case LSX_N_ATTRIBUTE_DECL : {
+			case LSON_N_ATTRIBUTE_DECL : {
 				sPrintMe = std::format( "{0: >{1}}ATTR DECL: {2}\r\n", "", _i32Depth * 5, m_vStrings[nThisNode.u.aAttributeDeclObj.sName] );
 				::OutputDebugStringA( sPrintMe.c_str() );
 				PrintNode( nThisNode.u.aAttributeDeclObj.sList, _i32Depth + 1 );
 				break;
 			}
-			case LSX_N_ATTRIBUTE_LIST : {
+			case LSON_N_ATTRIBUTE_LIST : {
 				if ( nThisNode.u.aAttributeListObj.sLeft != size_t( -1 ) ) {
 					//sPrintMe = std::format( "{0: >{1}}ATTR LIST LEFT:\r\n", "", _i32Depth * 5 );
 					//::OutputDebugStringA( sPrintMe.c_str() );
@@ -469,7 +574,7 @@ namespace lson {
 				}
 				break;
 			}
-			case LSX_N_ATTRIBUTE : {
+			case LSON_N_ATTRIBUTE : {
 				if ( nThisNode.u.aAttributeObj.sValue != size_t( -1 ) ) {
 					sPrintMe = std::format( "{0: >{1}}ATTR: {2} = {3}\r\n", "", _i32Depth * 5, m_vStrings[nThisNode.u.aAttributeObj.sAttribute], m_vStrings[nThisNode.u.aAttributeObj.sValue] );
 					::OutputDebugStringA( sPrintMe.c_str() );
@@ -484,7 +589,7 @@ namespace lson {
 	}
 
 	/**
-	 * Builds the XML tree non-recursively.
+	 * Builds the JSON tree non-recursively.
 	 *
 	 * \return Returns true if there were no memory errors during tree creation.
 	 */
@@ -493,20 +598,20 @@ namespace lson {
 		while ( m_tRoot.Size() ) {
 			m_tRoot.RemoveChild( 0 );
 		}
-		struct LSX_STACK_OBJ {
+		struct LSON_STACK_OBJ {
 			size_t					stNodeIdx;
 			bool					bPassThrough = false;
 
-			LSX_STACK_OBJ( size_t _stIdx ) :
+			LSON_STACK_OBJ( size_t _stIdx ) :
 				stNodeIdx( _stIdx ) {
 			}
 		};
-		std::vector<LSX_STACK_OBJ> vStack;
-		std::vector<CTree<LSX_XML_ELEMENT> *> vCurElement;
+		std::vector<LSON_STACK_OBJ> vStack;
+		std::vector<CTree<LSON_JSON_ELEMENT> *> vCurElement;
 		try {
-#define LXM_PUSH( IDX )			vStack.push_back( LSX_STACK_OBJ( m_vNodes[stNodeIdx].u.IDX ) )
+#define LXM_PUSH( IDX )			vStack.push_back( LSON_STACK_OBJ( m_vNodes[stNodeIdx].u.IDX ) )
 			vStack.reserve( m_vNodes.size() + 1 );
-			vStack.push_back( LSX_STACK_OBJ( m_stRoot ) );
+			vStack.push_back( LSON_STACK_OBJ( m_stRoot ) );
 			while ( vStack.size() ) {
 				size_t stThis = vStack.size() - 1;
 				bool bFirstPass = !vStack[stThis].bPassThrough;
@@ -519,34 +624,34 @@ namespace lson {
 				if ( bFirstPass ) {
 					// Push in revese order (top gets processed sooner).
 					switch ( m_vNodes[stNodeIdx].nType ) {
-						case LSX_N_DOCUMENT : {
+						case LSON_N_DOCUMENT : {
 							LXM_PUSH( dDocumentObj.sMiscSeq );
 							LXM_PUSH( dDocumentObj.sElement );
 							LXM_PUSH( dDocumentObj.sProlog );
 							break;
 						}
-						case LSX_N_PROLOG : {
+						case LSON_N_PROLOG : {
 							LXM_PUSH( pPrologObj.sMiscSeq );
 							LXM_PUSH( pPrologObj.sEncoding );
 							LXM_PUSH( pPrologObj.sVersion );
 							break;
 						}
-						case LSX_N_VERSION : {
+						case LSON_N_VERSION : {
 							// Store the version somewhere.
 							break;
 						}
-						case LSX_N_ENCODING : {
+						case LSON_N_ENCODING : {
 							// Store the encoding somewhere.
 							break;
 						}
-						case LSX_N_MISC_SEQ : {
+						case LSON_N_MISC_SEQ : {
 							LXM_PUSH( msMiscSeqObj.sRight );
 							LXM_PUSH( msMiscSeqObj.sLeft );
 							break;
 						}
-						case LSX_N_ELEMENT : {
-							CTree<LSX_XML_ELEMENT> * ptParent = CurStackPointer( vCurElement );
-							LSX_XML_ELEMENT eElement;
+						case LSON_N_ELEMENT : {
+							CTree<LSON_JSON_ELEMENT> * ptParent = CurStackPointer( vCurElement );
+							LSON_JSON_ELEMENT eElement;
 							eElement.stNameString = m_vNodes[stNodeIdx].u.eElementObj.sName;
 							ptParent->InsertChild( eElement, ptParent->Size() );
 							vCurElement.push_back( ptParent->GetChild( ptParent->Size() - 1 ) );
@@ -555,45 +660,45 @@ namespace lson {
 							LXM_PUSH( eElementObj.sAttribute );
 							break;
 						}
-						case LSX_N_CONTENT : {
+						case LSON_N_CONTENT : {
 							LXM_PUSH( cContentObj.sLeft );
 							break;
 						}
-						case LSX_N_CONTENT_ELEMENT : {
+						case LSON_N_CONTENT_ELEMENT : {
 							LXM_PUSH( cContentObj.sRight );
 							LXM_PUSH( cContentObj.sLeft );
 							break;
 						}
-						case LSX_N_CONTENT_MISC : {
+						case LSON_N_CONTENT_MISC : {
 							LXM_PUSH( cContentObj.sRight );
 							LXM_PUSH( cContentObj.sLeft );
 							break;
 						}
-						case LSX_N_CONTENT_DATA : {
+						case LSON_N_CONTENT_DATA : {
 							if ( m_vNodes[stNodeIdx].u.cContentObj.sRight != size_t( -1 ) ) {
 								if ( !IsWhitespace( m_vStrings[m_vNodes[stNodeIdx].u.cContentObj.sRight] ) ) {
-									CTree<LSX_XML_ELEMENT> * ptParent = CurStackPointer( vCurElement );
+									CTree<LSON_JSON_ELEMENT> * ptParent = CurStackPointer( vCurElement );
 									ptParent->Value().sData.append( m_vStrings[m_vNodes[stNodeIdx].u.cContentObj.sRight] );
 								}
 							}
 							LXM_PUSH( cContentObj.sLeft );
 							break;
 						}
-						case LSX_N_ATTRIBUTE_DECL : {
-							/*CTree<LSX_XML_ELEMENT> * ptParent = CurStackPointer( vCurElement );
+						case LSON_N_ATTRIBUTE_DECL : {
+							/*CTree<LSON_JSON_ELEMENT> * ptParent = CurStackPointer( vCurElement );
 							ptParent->Value().*/
 							// TODO: Haven’t encountered this case yet.
 							LXM_PUSH( aAttributeDeclObj.sList );
 							break;
 						}
-						case LSX_N_ATTRIBUTE_LIST : {
+						case LSON_N_ATTRIBUTE_LIST : {
 							LXM_PUSH( aAttributeListObj.sRight );
 							LXM_PUSH( aAttributeListObj.sLeft );
 							break;
 						}
-						case LSX_N_ATTRIBUTE : {
-							CTree<LSX_XML_ELEMENT> * ptParent = CurStackPointer( vCurElement );
-							LSX_XML_ATTRIBUTE xaAttr = { m_vNodes[stNodeIdx].u.aAttributeObj.sAttribute, m_vNodes[stNodeIdx].u.aAttributeObj.sValue };
+						case LSON_N_ATTRIBUTE : {
+							CTree<LSON_JSON_ELEMENT> * ptParent = CurStackPointer( vCurElement );
+							LSON_JSON_ATTRIBUTE xaAttr = { m_vNodes[stNodeIdx].u.aAttributeObj.sAttribute, m_vNodes[stNodeIdx].u.aAttributeObj.sValue };
 							ptParent->Value().vAttributes.push_back( xaAttr );
 							break;
 						}
@@ -601,7 +706,7 @@ namespace lson {
 				}
 				else {
 					switch ( m_vNodes[stNodeIdx].nType ) {
-						case LSX_N_ELEMENT : {
+						case LSON_N_ELEMENT : {
 							vCurElement.pop_back();
 							break;
 						}
@@ -631,12 +736,12 @@ namespace lson {
 	 * \param _ptThis The items whose next item is to be obtained.
 	 * \return Returns the next item.
 	 */
-	CTree<CJsonContainer::LSX_XML_ELEMENT> * CJsonContainer::Next( CTree<LSX_XML_ELEMENT> * _ptThis ) {
+	CTree<CJsonContainer::LSON_JSON_ELEMENT> * CJsonContainer::Next( CTree<LSON_JSON_ELEMENT> * _ptThis ) {
 		if ( !_ptThis ) {
 			if ( !m_tRoot.Size() ) { return nullptr; }		// We skip the very rootest node.
-			return const_cast<CTree<LSX_XML_ELEMENT> *>(m_tRoot.GetChild( 0 ));
+			return const_cast<CTree<LSON_JSON_ELEMENT> *>(m_tRoot.GetChild( 0 ));
 		}
-		return CTree<LSX_XML_ELEMENT>::Next( _ptThis );
+		return CTree<LSON_JSON_ELEMENT>::Next( _ptThis );
 	}
 
 	/**
@@ -645,7 +750,7 @@ namespace lson {
 	 * \param _ptThis The items whose previous item is to be obtained.
 	 * \return Returns the previous item.
 	 */
-	CTree<CJsonContainer::LSX_XML_ELEMENT> * CJsonContainer::Prev( CTree<LSX_XML_ELEMENT> * _ptThis ) {
+	CTree<CJsonContainer::LSON_JSON_ELEMENT> * CJsonContainer::Prev( CTree<LSON_JSON_ELEMENT> * _ptThis ) {
 		if ( !_ptThis ) {
 			if ( !m_tRoot.Size() ) { return nullptr; }
 			_ptThis = &m_tRoot;
@@ -657,7 +762,7 @@ namespace lson {
 			}
 			return _ptThis;
 		}
-		_ptThis = CTree<LSX_XML_ELEMENT>::Prev( _ptThis );
+		_ptThis = CTree<LSON_JSON_ELEMENT>::Prev( _ptThis );
 		if ( _ptThis == &m_tRoot ) { _ptThis = nullptr; }	// We skip the very rootest node.
 		return _ptThis;
 	}
@@ -669,7 +774,7 @@ namespace lson {
 	 * \param _sName The name of the child element to find.
 	 * \return Returns a pointer to the child element of te given name or nullptr if there is none.
 	 */
-	const CTree<CJsonContainer::LSX_XML_ELEMENT> * CJsonContainer::GetChildElement( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName ) const {
+	const CTree<CJsonContainer::LSON_JSON_ELEMENT> * CJsonContainer::GetChildElement( const CTree<LSON_JSON_ELEMENT> * _ptParent, const std::string &_sName ) const {
 		if ( _ptParent ) {
 			for ( size_t I = 0; I < _ptParent->Size(); ++I ) {
 				if ( GetString( _ptParent->GetChild( I )->Value().stNameString ) == _sName ) {
@@ -687,7 +792,7 @@ namespace lson {
 	 * \param _sName The name of the child element to find.
 	 * \return Returns a pointer to the child element of te given name or nullptr if there is none.
 	 */
-	CTree<CJsonContainer::LSX_XML_ELEMENT> * CJsonContainer::GetChildElement( CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName ) {
+	CTree<CJsonContainer::LSON_JSON_ELEMENT> * CJsonContainer::GetChildElement( CTree<LSON_JSON_ELEMENT> * _ptParent, const std::string &_sName ) {
 		if ( _ptParent ) {
 			for ( size_t I = 0; I < _ptParent->Size(); ++I ) {
 				if ( GetString( _ptParent->GetChild( I )->Value().stNameString ) == _sName ) {
@@ -705,7 +810,7 @@ namespace lson {
 	 * \param _sName The name of the children elements to gather.
 	 * \return Returns an array of indices indicating the children of _ptParent whose element names match _sName.
 	 */
-	std::vector<size_t> CJsonContainer::GatherChildElementIndices( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName ) const {
+	std::vector<size_t> CJsonContainer::GatherChildElementIndices( const CTree<LSON_JSON_ELEMENT> * _ptParent, const std::string &_sName ) const {
 		std::vector<size_t> vRet;
 		if ( !_ptParent ) { return vRet; }
 		for ( size_t I = 0; I < _ptParent->Size(); ++I ) {
@@ -724,7 +829,7 @@ namespace lson {
 	 * \param _sRet Holds the returned value of the attribute.
 	 * \return Returns true if the given attribute was found on the given item.
 	 */
-	bool CJsonContainer::GetAttributeValue( const CTree<LSX_XML_ELEMENT> * _ptElement, const std::string &_sName, std::string &_sRet ) const {
+	bool CJsonContainer::GetAttributeValue( const CTree<LSON_JSON_ELEMENT> * _ptElement, const std::string &_sName, std::string &_sRet ) const {
 		_sRet.clear();
 		if ( !_ptElement ) { return false; }
 		for ( auto I = _ptElement->Value().vAttributes.size(); I--; ) {
@@ -746,7 +851,7 @@ namespace lson {
 	 * \param _sRet Holds the returned data value of the element.
 	 * \return Returns true if the given child element was found on the given item.
 	 */
-	bool CJsonContainer::GetChildElementData( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName, std::string &_sRet ) const {
+	bool CJsonContainer::GetChildElementData( const CTree<LSON_JSON_ELEMENT> * _ptParent, const std::string &_sName, std::string &_sRet ) const {
 		_sRet.clear();
 		if ( !_ptParent ) { return false; }
 		for ( size_t I = 0; I < _ptParent->Size(); ++I ) {
@@ -766,7 +871,7 @@ namespace lson {
 	 */
 	bool CJsonContainer::GatherAttributes( std::multimap<std::string, std::string> &_mmDst ) {
 		try {
-			CTree<CJsonContainer::LSX_XML_ELEMENT> * ptItem = Next( nullptr );
+			CTree<CJsonContainer::LSON_JSON_ELEMENT> * ptItem = Next( nullptr );
 			while ( ptItem ) {
 				for ( size_t I = ptItem->Value().vAttributes.size(); I--; ) {
 					/*auto aThis = _mmDst.find( GetString( ptItem->Value().vAttributes[I].stNameString ) );
@@ -796,7 +901,7 @@ namespace lson {
 	 */
 	bool CJsonContainer::GatherAttributes( std::map<std::string, std::set<std::string>> &_mDst ) {
 		try {
-			CTree<CJsonContainer::LSX_XML_ELEMENT> * ptItem = Next( nullptr );
+			CTree<CJsonContainer::LSON_JSON_ELEMENT> * ptItem = Next( nullptr );
 			while ( ptItem ) {
 				for ( size_t I = ptItem->Value().vAttributes.size(); I--; ) {
 					auto aThis = _mDst.find( GetString( ptItem->Value().vAttributes[I].stNameString ) );
@@ -826,7 +931,7 @@ namespace lson {
 	 */
 	bool CJsonContainer::GatherElements( std::map<std::string, std::set<std::string>> &_mDst ) {
 		try {
-			CTree<CJsonContainer::LSX_XML_ELEMENT> * ptItem = Next( nullptr );
+			CTree<CJsonContainer::LSON_JSON_ELEMENT> * ptItem = Next( nullptr );
 			while ( ptItem ) {
 				auto aThis = _mDst.find( GetString( ptItem->Value().stNameString ) );
 				if ( aThis == _mDst.end() ) {
@@ -844,6 +949,7 @@ namespace lson {
 		}
 		catch ( ... ) { return false; }
 	}
+#endif	// 0
 
 	/**
 	 * Adds a node and returns its index into the array of nodes.
@@ -851,7 +957,7 @@ namespace lson {
 	 * \param _nNode The node to add.
 	 * \return Returns the index of the added node inside m_vNodes.
 	 */
-	size_t CJsonContainer::AddNode( YYSTYPE::LSX_NODE &_nNode ) {
+	size_t CJsonContainer::AddNode( YYSTYPE::LSON_NODE &_nNode ) {
 		_nNode.stNodeIdx = m_vNodes.size();
 		m_vNodes.push_back( _nNode );
 		return _nNode.stNodeIdx;
@@ -879,7 +985,7 @@ namespace lson {
 	 * \param _ptNode The node to print.
 	 * \param _i32Depth The node depth.
 	 */
-	void CJsonContainer::PrintTree( const CTree<LSX_XML_ELEMENT> * _ptNode, int32_t _i32Depth ) {
+	void CJsonContainer::PrintTree( const CTree<LSON_JSON_ELEMENT> * _ptNode, int32_t _i32Depth ) {
 		std::string sPrintMe;
 		if ( _ptNode->Value().stNameString != size_t( -1 ) ) {
 			sPrintMe = std::format( "{0: >{1}}Node: {2}\r\n", "", _i32Depth * 5, GetString( _ptNode->Value().stNameString ) );
