@@ -32,12 +32,12 @@ namespace lson {
 	}
 
 	/**
-	 * A value is a string with quotes around it.  After the quotes are removed, this behaves as AddString().
+	 * Removes quotes from the front and end before adding the string.
 	 *
 	 * \param _sText The string to add or whose existing index is to be found.
 	 * \return Returns the index of the added string after stripping the enclosing quotes from it.
 	 */
-	size_t CJsonContainer::AddValue( const std::string &_sText ) {
+	size_t CJsonContainer::AddQuoteString( const std::string &_sText ) {
 		return AddString( _sText.substr( 1, _sText.size() - 2 ) );
 	}
 
@@ -52,6 +52,21 @@ namespace lson {
 			if ( m_vStrings[I] == _sText ) { return I; }
 		}
 		return size_t( -1 );
+	}
+
+	/**
+	 * Creates an object value node.
+	 *
+	 * \param _nNode The resulting node.
+	 * \param _nValue The value.
+	 * \return Returns the index of the value node created.
+	 */
+	size_t CJsonContainer::AddObjectValue( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nValue ) {
+		_nNode.nType = LSON_N_VALUE;
+		_nNode.u.vValue.vType = LSON_V_OBJECT;
+		_nNode.u.vValue.v.stValue = _nValue.stNodeIdx;
+
+		return AddNode( _nNode );
 	}
 
 	/**
@@ -80,6 +95,21 @@ namespace lson {
 		_nNode.nType = LSON_N_VALUE;
 		_nNode.u.vValue.vType = LSON_V_DECIMAL;
 		_nNode.u.vValue.v.dDecimal = _dValue;
+
+		return AddNode( _nNode );
+	}
+
+	/**
+	 * Creates an array value node.
+	 *
+	 * \param _nNode The resulting node.
+	 * \param _nValue The value.
+	 * \return Returns the index of the value node created.
+	 */
+	size_t CJsonContainer::AddArrayValue( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nValue ) {
+		_nNode.nType = LSON_N_VALUE;
+		_nNode.u.vValue.vType = LSON_V_ARRAY;
+		_nNode.u.vValue.v.stValue = _nValue.stNodeIdx;
 
 		return AddNode( _nNode );
 	}
@@ -156,6 +186,114 @@ namespace lson {
 		_nNode.u.mlMembers.stRight = _nRight.stNodeIdx;
 
 		return AddNode( _nNode );
+	}
+
+	/**
+	 * Creates an empty member-list node.
+	 *
+	 * \param _nNode The resulting node.
+	 * \return Returns the index of the value node created.
+	 */
+	size_t CJsonContainer::AddMemberList( YYSTYPE::LSON_NODE &_nNode ) {
+		_nNode.nType = LSON_N_MEMBER_LIST;
+		_nNode.u.mlMembers.stLeft = size_t( -1 );
+		_nNode.u.mlMembers.stRight = size_t( -1 );
+
+		return AddNode( _nNode );
+	}
+
+	/**
+	 * Creates an object node.
+	 *
+	 * \param _nNode The resulting node.
+	 * \param _nMembers The members node.
+	 * \return Returns the index of the value node created.
+	 */
+	size_t CJsonContainer::AddObject( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nMembers ) {
+		_nNode.nType = LSON_N_OBJECT;
+		_nNode.u.oObject.stMembers = _nMembers.stNodeIdx;
+
+		return AddNode( _nNode );
+	}
+
+	/**
+	 * Creates an object node with no members.
+	 *
+	 * \param _nNode The resulting node.
+	 * \return Returns the index of the value node created.
+	 */
+	size_t CJsonContainer::AddObject( YYSTYPE::LSON_NODE &_nNode ) {
+		_nNode.nType = LSON_N_OBJECT;
+		_nNode.u.oObject.stMembers = size_t( -1 );
+
+		return AddNode( _nNode );
+	}
+
+	/**
+	 * Creates a value-list node.
+	 *
+	 * \param _nNode The resulting node.
+	 * \param _nLeft The left node.
+	 * \param _nRight The right node.
+	 * \return Returns the index of the value node created.
+	 */
+	size_t CJsonContainer::AddValueList( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight ) {
+		_nNode.nType = LSON_N_VALUE_LIST;
+		_nNode.u.vlValues.stLeft = _nLeft.stNodeIdx;
+		_nNode.u.vlValues.stRight = _nRight.stNodeIdx;
+
+		return AddNode( _nNode );
+	}
+
+	/**
+	 * Creates an empty value-list node.
+	 *
+	 * \param _nNode The resulting node.
+	 * \param _nLeft The left node.
+	 * \return Returns the index of the value node created.
+	 */
+	size_t CJsonContainer::AddValueList( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft ) {
+		_nNode.nType = LSON_N_VALUE_LIST;
+		_nNode.u.vlValues.stLeft = _nLeft.stNodeIdx;
+		_nNode.u.vlValues.stRight = size_t( -1 );
+
+		return AddNode( _nNode );
+	}
+
+	/**
+	 * Creates an array node.
+	 *
+	 * \param _nNode The resulting node.
+	 * \param _nValues The values node.
+	 * \return Returns the index of the value node created.
+	 */
+	size_t CJsonContainer::AddArray( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nValues ) {
+		_nNode.nType = LSON_N_ARRAY;
+		_nNode.u.aArray.stValues = _nValues.stNodeIdx;
+
+		return AddNode( _nNode );
+	}
+
+	/**
+	 * Creates an empty array node.
+	 *
+	 * \param _nNode The resulting node.
+	 * \return Returns the index of the value node created.
+	 */
+	size_t CJsonContainer::AddArray( YYSTYPE::LSON_NODE &_nNode ) {
+		_nNode.nType = LSON_N_ARRAY;
+		_nNode.u.aArray.stValues = size_t( -1 );
+
+		return AddNode( _nNode );
+	}
+
+	/**
+	 * Creates the JSON node.
+	 *
+	 * \param _nNode The resulting node.
+	 */
+	void CJsonContainer::AddJson( YYSTYPE::LSON_NODE &_nNode ) {
+		m_stRoot = _nNode.stNodeIdx;
 	}
 
 #if 0

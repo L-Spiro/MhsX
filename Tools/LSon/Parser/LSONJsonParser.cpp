@@ -418,7 +418,17 @@ namespace yy {
     YY_REDUCE_PRINT (yyn);
     switch (yyn)
       {
-	  case 5:
+	  case 3:
+
+    { m_pjcContainer->AddJson( (yyval.nNode) ); }
+    break;
+
+  case 4:
+
+    { m_pjcContainer->AddObjectValue( (yyval.nNode), (yysemantic_stack_[(1) - (1)].nNode) ); }
+    break;
+
+  case 5:
 
     { m_pjcContainer->AddStringValue( (yyval.nNode), (yysemantic_stack_[(1) - (1)].sStringIndex) ); }
     break;
@@ -426,6 +436,11 @@ namespace yy {
   case 6:
 
     { m_pjcContainer->AddDecimalValue( (yyval.nNode), (yysemantic_stack_[(1) - (1)].dDecimal) ); }
+    break;
+
+  case 7:
+
+    { m_pjcContainer->AddArrayValue( (yyval.nNode), (yysemantic_stack_[(1) - (1)].nNode) ); }
     break;
 
   case 8:
@@ -443,9 +458,19 @@ namespace yy {
     { m_pjcContainer->AddNullValue( (yyval.nNode) ); }
     break;
 
+  case 11:
+
+    { m_pjcContainer->AddObject( (yyval.nNode) ); }
+    break;
+
+  case 12:
+
+    { m_pjcContainer->AddObject( (yyval.nNode), (yysemantic_stack_[(3) - (2)].nNode) ); }
+    break;
+
   case 13:
 
-    { (yyval.nNode) = (yysemantic_stack_[(1) - (1)].nNode); }
+    { m_pjcContainer->AddMemberList( (yyval.nNode) ); }
     break;
 
   case 14:
@@ -458,9 +483,29 @@ namespace yy {
     { m_pjcContainer->AddMember( (yyval.nNode), (yysemantic_stack_[(3) - (1)].sStringIndex), (yysemantic_stack_[(3) - (3)].nNode) ); }
     break;
 
+  case 16:
+
+    { m_pjcContainer->AddArray( (yyval.nNode) ); }
+    break;
+
+  case 17:
+
+    { m_pjcContainer->AddArray( (yyval.nNode), (yysemantic_stack_[(3) - (2)].nNode) ); }
+    break;
+
+  case 18:
+
+    { m_pjcContainer->AddValueList( (yyval.nNode), (yysemantic_stack_[(1) - (1)].nNode) ); }
+    break;
+
+  case 19:
+
+    { m_pjcContainer->AddValueList( (yyval.nNode), (yysemantic_stack_[(3) - (1)].nNode), (yysemantic_stack_[(3) - (3)].nNode) ); }
+    break;
+
   case 20:
 
-    { (yyval.sStringIndex) = m_pjcContainer->AddValue( m_pjlLexer->YYText() ); }
+    { (yyval.sStringIndex) = m_pjcContainer->AddQuoteString( m_pjlLexer->YYText() ); }
     break;
 
   case 21:

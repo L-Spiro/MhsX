@@ -48,26 +48,26 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, lson::CJsonLexer * _pxlLexer )
 
 json
 	:
-    | value
+    | value													{ m_pjcContainer->AddJson( $$ ); }
     ;
 
 value
-	: object
+	: object												{ m_pjcContainer->AddObjectValue( $$, $1 ); }
 	| string												{ m_pjcContainer->AddStringValue( $$, $1 ); }
 	| decimal												{ m_pjcContainer->AddDecimalValue( $$, $1 ); }
-	| array
+	| array													{ m_pjcContainer->AddArrayValue( $$, $1 ); }
 	| LSON_VTRUE											{ m_pjcContainer->AddTrueValue( $$ ); }
 	| LSON_VFALSE											{ m_pjcContainer->AddFalseValue( $$ ); }
 	| LSON_VNULL											{ m_pjcContainer->AddNullValue( $$ ); }
 	;
 
 object
-	: LSON_LCURLY LSON_RCURLY
-	| LSON_LCURLY members LSON_RCURLY
+	: LSON_LCURLY LSON_RCURLY								{ m_pjcContainer->AddObject( $$ ); }
+	| LSON_LCURLY members LSON_RCURLY						{ m_pjcContainer->AddObject( $$, $2 ); }
 	;
 
 members
-	: member												{ $$ = $1; }
+	: member												{ m_pjcContainer->AddMemberList( $$ ); }
 	| members LSON_COMMA member								{ m_pjcContainer->AddMemberList( $$, $1, $3 ); }
 	;
 
@@ -76,17 +76,17 @@ member
     ;
 
 array
-	: LSON_LBRAC LSON_RBRAC
-	| LSON_LBRAC values LSON_RBRAC
+	: LSON_LBRAC LSON_RBRAC									{ m_pjcContainer->AddArray( $$ ); }
+	| LSON_LBRAC values LSON_RBRAC							{ m_pjcContainer->AddArray( $$, $2 ); }
 	;
 
 values
-	: value
-	| values LSON_COMMA value
+	: value													{ m_pjcContainer->AddValueList( $$, $1 ); }
+	| values LSON_COMMA value								{ m_pjcContainer->AddValueList( $$, $1, $3 ); }
 	;
 	
 string
-	: LSON_STRING											{ $$ = m_pjcContainer->AddValue( m_pjlLexer->YYText() ); }
+	: LSON_STRING											{ $$ = m_pjcContainer->AddQuoteString( m_pjlLexer->YYText() ); }
 	
 decimal
 	: LSON_DECIMAL											{ $$ = ::atof( m_pjlLexer->YYText() ); }

@@ -20,6 +20,9 @@ namespace lson {
 		LSON_N_MEMBER,
 		LSON_N_MEMBER_LIST,
 		LSON_N_VALUE,
+		LSON_N_VALUE_LIST,
+		LSON_N_OBJECT,
+		LSON_N_ARRAY,
 	};
 
 	enum LSON_VALUES {
@@ -47,6 +50,10 @@ namespace lson {
 						double											dDecimal;								/**< The value, if vType is LSON_V_DECIMAL. */
 					}													v;
 				}														vValue;
+				struct LSON_VALUE_LIST {
+					size_t												stLeft;									/**< The left node. */
+					size_t												stRight;								/**< The right node. */
+				}														vlValues;
 				struct LSON_MEMBER {
 					size_t												stName;									/**< The name of the member. */
 					size_t												stValue;								/**< The value of the member. */
@@ -55,6 +62,12 @@ namespace lson {
 					size_t												stLeft;									/**< The left node. */
 					size_t												stRight;								/**< The right node. */
 				}														mlMembers;
+				struct LSON_OBJECT {
+					size_t												stMembers;								/**< The members list or size_t( -1 ). */
+				}														oObject;
+				struct LSON_ARRAY {
+					size_t												stValues;								/**< The values list or size_t( -1 ). */
+				}														aArray;
 			}															u;
 		}																nNode;
 	};

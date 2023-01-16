@@ -49,12 +49,12 @@ namespace lson {
 		size_t											AddString( const std::string &_sText );
 
 		/**
-		 * A value is a string with quotes around it.  After the quotes are removed, this behaves as AddString().
+		 * Removes quotes from the front and end before adding the string.
 		 *
 		 * \param _sText The string to add or whose existing index is to be found.
 		 * \return Returns the index of the added string after stripping the enclosing quotes from it.
 		 */
-		size_t											AddValue( const std::string &_sText );
+		size_t											AddQuoteString( const std::string &_sText );
 
 		/**
 		 * Returns the index of a string or -1 if it does not exist.
@@ -73,6 +73,15 @@ namespace lson {
 		const std::string								GetString( size_t _stIdx ) const { return m_vStrings[_stIdx]; }
 
 		/**
+		 * Creates an object value node.
+		 *
+		 * \param _nNode The resulting node.
+		 * \param _nValue The value.
+		 * \return Returns the index of the value node created.
+		 */
+		size_t											AddObjectValue( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nValue );
+
+		/**
 		 * Creates a string value node.
 		 *
 		 * \param _nNode The resulting node.
@@ -89,6 +98,15 @@ namespace lson {
 		 * \return Returns the index of the value node created.
 		 */
 		size_t											AddDecimalValue( YYSTYPE::LSON_NODE &_nNode, double _dValue );
+
+		/**
+		 * Creates an array value node.
+		 *
+		 * \param _nNode The resulting node.
+		 * \param _nValue The value.
+		 * \return Returns the index of the value node created.
+		 */
+		size_t											AddArrayValue( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nValue );
 
 		/**
 		 * Creates a TRUE value node.
@@ -133,6 +151,74 @@ namespace lson {
 		 * \return Returns the index of the value node created.
 		 */
 		size_t											AddMemberList( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight );
+
+		/**
+		 * Creates an empty member-list node.
+		 *
+		 * \param _nNode The resulting node.
+		 * \return Returns the index of the value node created.
+		 */
+		size_t											AddMemberList( YYSTYPE::LSON_NODE &_nNode );
+
+		/**
+		 * Creates an object node.
+		 *
+		 * \param _nNode The resulting node.
+		 * \param _nMembers The members node.
+		 * \return Returns the index of the value node created.
+		 */
+		size_t											AddObject( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nMembers );
+
+		/**
+		 * Creates an object node with no members.
+		 *
+		 * \param _nNode The resulting node.
+		 * \return Returns the index of the value node created.
+		 */
+		size_t											AddObject( YYSTYPE::LSON_NODE &_nNode );
+
+		/**
+		 * Creates a value-list node.
+		 *
+		 * \param _nNode The resulting node.
+		 * \param _nLeft The left node.
+		 * \param _nRight The right node.
+		 * \return Returns the index of the value node created.
+		 */
+		size_t											AddValueList( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight );
+
+		/**
+		 * Creates an empty value-list node.
+		 *
+		 * \param _nNode The resulting node.
+		 * \param _nLeft The left node.
+		 * \return Returns the index of the value node created.
+		 */
+		size_t											AddValueList( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft );
+
+		/**
+		 * Creates an array node.
+		 *
+		 * \param _nNode The resulting node.
+		 * \param _nValues The values node.
+		 * \return Returns the index of the value node created.
+		 */
+		size_t											AddArray( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nValues );
+
+		/**
+		 * Creates an empty array node.
+		 *
+		 * \param _nNode The resulting node.
+		 * \return Returns the index of the value node created.
+		 */
+		size_t											AddArray( YYSTYPE::LSON_NODE &_nNode );
+
+		/**
+		 * Creates the JSON node.
+		 *
+		 * \param _nNode The resulting node.
+		 */
+		void											AddJson( YYSTYPE::LSON_NODE &_nNode );
 
 #if 0
 		/**
