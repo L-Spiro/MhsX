@@ -247,7 +247,7 @@ namespace lsx {
 		 *
 		 * \return Returns true if there were no memory errors during tree creation.
 		 */
-		bool											BuidTree();
+		bool											BuildTree();
 
 		/**
 		 * Prints the tree recursively.

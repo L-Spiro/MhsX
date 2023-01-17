@@ -488,7 +488,7 @@ namespace lsx {
 	 *
 	 * \return Returns true if there were no memory errors during tree creation.
 	 */
-	bool CXmlContainer::BuidTree() {
+	bool CXmlContainer::BuildTree() {
 		if ( m_stRoot == size_t( -1 ) ) { return false; }
 		while ( m_tRoot.Size() ) {
 			m_tRoot.RemoveChild( 0 );

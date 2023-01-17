@@ -52,7 +52,7 @@ namespace lson {
 
 		if ( ppppParser->parse() == 0 ) {
 			//m_pjcContainer->PrintNode( m_pjcContainer->Root(), 0 );
-			//m_pjcContainer->BuidTree();
+			m_pjcContainer->BuildTree();
 			//m_pjcContainer->PrintTree();
 			// Parsed.
 			return true;

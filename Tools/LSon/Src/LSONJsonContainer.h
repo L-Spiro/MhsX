@@ -24,19 +24,49 @@ namespace lson {
 		CJsonContainer( CJsonLexer * _pxlLexer );
 
 
-		// == Types.
-		/** The public attibute structure. */
-		struct LSON_JSON_ATTRIBUTE {
-			size_t										stNameString = size_t( -1 );			/**< Use GetString() to get the name of the attribute. */
-			size_t										stValueString = size_t( -1 );			/**< Use GetString() to get the name of the attribute value (unles sit is size_t( -1 )). */
+		// == Enumerations
+		/** Object types. */
+		enum LSON_VALUE_TYPE {
+			LSON_VT_OBJECT,																		/**< An object. */
+			LSON_VT_STRING,																		/**< A string. */
+			LSON_VT_DECIMAL,																	/**< A number. */
+			LSON_VT_ARRAY,																		/**< An array of values. */
+			LSON_VT_TRUE,																		/**< A TRUE value. */
+			LSON_VT_FALSE,																		/**< A FALSE value. */
+			LSON_VT_NULL,																		/**< A NULL value. */
 		};
 
-		/** The public node structure. */
-		struct LSON_JSON_ELEMENT {
-			size_t										stNameString = size_t( -1 );			/**< Use GetString() to get the name of the element. */
-			std::vector<LSON_JSON_ATTRIBUTE>			vAttributes;							/**< The attributes associated with this element. */
-			std::string									sData;									/**< Combined data values minus any data values that are nothing but whitespace. */
+
+		// == Types.
+		/** A member. */
+		struct LSON_JSON_MEMBER {
+			size_t										stName;									/**< Name of the member. */
+			size_t										stValue;								/**< Index of the member value. */
+#ifdef _DEBUG
+			std::string									sName;
+#endif	// #ifdef _DEBUG
 		};
+
+		/** An object. */
+		struct LSON_OBJECT {
+			std::vector<LSON_JSON_MEMBER>				vMembers;								/**< The object's members. */
+		};
+
+		/** A JSON value. */
+		struct LSON_JSON_VALUE {
+			LSON_VALUE_TYPE								vtType;									/**< The type of the value. */
+			union {
+				size_t									stString;								/**< The string index if vtType is LSON_VT_STRING. */
+				double									dDecimal;								/**< The number if vtType is LSON_VT_DECIMAL. */
+			}											u;
+			std::vector<size_t>							vArray;									/**< The array, if vtType is LSON_VT_ARRAY. */
+			LSON_OBJECT									oObject;								/**< The object, if vtType is LSON_VT_OBJECT. */
+#ifdef _DEBUG
+			std::string									sString;
+#endif	// #ifdef _DEBUG
+		};
+
+		
 
 		
 		// == Functions.
@@ -220,285 +250,19 @@ namespace lson {
 		 */
 		void											AddJson( YYSTYPE::LSON_NODE &_nNode );
 
-#if 0
 		/**
-		 * Creates an attribute start string.
+		 * Builds the tree that can be used to access data in the JSON.
+		 */
+		bool											BuildTree();
+
+		/**
+		 * Gets the root value index.
 		 *
-		 * \param _sText The name of the attribute.
-		 * \return Returns the index of the string created.
+		 * \return Returns the root value's index.
 		 */
-		size_t											AddAttributeStart( const std::string &_sText );
+		inline size_t									GetRoot() const { return 0; }
 
-		/**
-		 * Creates an attribute node.
-		 *
-		 * \param _nNode The resulting node.
-		 * \param _stName The name of the attribute.
-		 * \param _stValue The optional value of the attribute.
-		 * \return Returns the index of the attribute node created.
-		 */
-		size_t											AddAttribute( YYSTYPE::LSON_NODE &_nNode, size_t _stName, size_t _stValue = size_t( -1 ) );
 
-		/**
-		 * Creates an attribute list.
-		 *
-		 * \param _nNode The resulting node.
-		 * \param _nLeft The left attribute node.
-		 * \param _nRight The right attribute node.
-		 * \return Returns the index of the node created.
-		 */
-		size_t											AddAttributeList( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight );
-
-		/**
-		 * Creates a blank attribute list.
-		 *
-		 * \param _nNode The resulting node.
-		 * \return Returns the index of the node created.
-		 */
-		size_t											AddAttributeList( YYSTYPE::LSON_NODE &_nNode );
-
-		/**
-		 * Creates an attribute declaration.
-		 *
-		 * \param _nNode The resulting node.
-		 * \param _stName The attribute name.
-		 * \param _nAttributes Optional attributes associated with it.
-		 * \return Returns the index of the node created.
-		 */
-		size_t											AddAttributeDecl( YYSTYPE::LSON_NODE &_nNode, size_t _stName, const YYSTYPE::LSON_NODE &_nAttributes );
-
-		/**
-		 * Creates a data content node.
-		 *
-		 * \param _nNode The resulting node.
-		 * \param _nLeft The left content node.
-		 * \param _stData The data.
-		 * \return Returns the index of the node created.
-		 */
-		size_t											AddContentData( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, size_t _stData );
-
-		/**
-		 * Creates a miscellaneous content node.
-		 *
-		 * \param _nNode The resulting node.
-		 * \param _nLeft The left content node.
-		 * \param _nRight The right content node.
-		 * \return Returns the index of the node created.
-		 */
-		size_t											AddContentMisc( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight );
-
-		/**
-		 * Creates an element content node.
-		 *
-		 * \param _nNode The resulting node.
-		 * \param _nLeft The left content node.
-		 * \param _nRight The right content node.
-		 * \return Returns the index of the node created.
-		 */
-		size_t											AddContentElement( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight );
-
-		/**
-		 * Creates a content node.
-		 *
-		 * \param _nNode The resulting node.
-		 * \param _nContent The content node.
-		 * \param _stName The name.
-		 * \return Returns the index of the node created.
-		 */
-		size_t											AddContent( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nContent, size_t _stName );
-
-		/**
-		 * Creates an element node.
-		 *
-		 * \param _nNode The resulting node.
-		 * \param _stName The name of the element.
-		 * \param _nAttributes The attribute node.
-		 * \param _nContent The content node.
-		 * \return Returns the index of the node created.
-		 */
-		size_t											AddElement( YYSTYPE::LSON_NODE &_nNode, size_t _stName, const YYSTYPE::LSON_NODE &_nAttributes, const YYSTYPE::LSON_NODE &_nContent );
-
-		/**
-		 * Creates an element node.
-		 *
-		 * \param _nNode The resulting node.
-		 * \param _nLeft The left node.
-		 * \param _nRight The right node.
-		 * \return Returns the index of the node created.
-		 */
-		size_t											AddMiscSeq( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight );
-
-		/**
-		 * Creates an encoding node.
-		 *
-		 * \param _nNode The resulting node.
-		 * \param _pcEncoding The encoding string.
-		 * \return Returns the index of the node created.
-		 */
-		size_t											AddEncoding( YYSTYPE::LSON_NODE &_nNode, const char * _pcEncoding );
-
-		/**
-		 * Creates a version node.
-		 *
-		 * \param _nNode The resulting node.
-		 * \param _pcVersion The version string.
-		 * \return Returns the index of the node created.
-		 */
-		size_t											AddVersion( YYSTYPE::LSON_NODE &_nNode, const char * _pcVersion );
-
-		/**
-		 * Creates a prolog node.
-		 *
-		 * \param _nNode The resulting node.
-		 * \param _nVersion The optional version node.
-		 * \param _nEncoding The optional encoding node.
-		 * \param _nMisc The optional misc. sequence node.
-		 * \return Returns the index of the node created.
-		 */
-		size_t											AddProlog( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nVersion, const YYSTYPE::LSON_NODE &_nEncoding, const YYSTYPE::LSON_NODE &_nMisc );
-
-		/**
-		 * Creates a document node.
-		 *
-		 * \param _nNode The resulting node.
-		 * \param _nProlog The prolog node.
-		 * \param _nElement The element node.
-		 * \param _nMisc The optional misc. sequence node.
-		 * \return Returns the index of the node created.
-		 */
-		size_t											AddDocument( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nProlog, const YYSTYPE::LSON_NODE &_nElement, const YYSTYPE::LSON_NODE &_nMisc );
-
-		/**
-		 * Creates an empty node.
-		 *
-		 * \param _nNode The resulting node.
-		 * \return Returns the index of the node created.
-		 */
-		size_t											AddEmpty( YYSTYPE::LSON_NODE &_nNode );
-
-		/**
-		 * Prints a node recursively.
-		 *
-		 * \param _stIdx The node index to print.
-		 * \param _i32Depth The node depth.
-		 */
-		void											PrintNode( size_t _stIdx, int32_t _i32Depth ) const;
-
-		/**
-		 * Gets the root node.
-		 *
-		 * \return Returns the index of the root node.
-		 */
-		size_t											Root() const { return m_stRoot; }
-
-		/**
-		 * Builds the JSON tree non-recursively.
-		 *
-		 * \return Returns true if there were no memory errors during tree creation.
-		 */
-		bool											BuidTree();
-
-		/**
-		 * Prints the tree recursively.
-		 */
-		void											PrintTree();
-
-		/**
-		 * Gets the next item.
-		 *
-		 * \param _ptThis The items whose next item is to be obtained.
-		 * \return Returns the next item.
-		 */
-		CTree<LSON_JSON_ELEMENT> *						Next( CTree<LSON_JSON_ELEMENT> * _ptThis );
-
-		/**
-		 * Gets the previous item.
-		 *
-		 * \param _ptThis The items whose previous item is to be obtained.
-		 * \return Returns the previous item.
-		 */
-		CTree<LSON_JSON_ELEMENT> *						Prev( CTree<LSON_JSON_ELEMENT> * _ptThis );
-
-		/**
-		 * Gets the first child element by name.
-		 *
-		 * \param _ptParent The node whose children are to be scanned for elements matching the given name.
-		 * \param _sName The name of the child element to find.
-		 * \return Returns a pointer to the child element of te given name or nullptr if there is none.
-		 */
-		const CTree<LSON_JSON_ELEMENT> *				GetChildElement( const CTree<LSON_JSON_ELEMENT> * _ptParent, const std::string &_sName ) const;
-
-		/**
-		 * Gets the first child element by name.
-		 *
-		 * \param _ptParent The node whose children are to be scanned for elements matching the given name.
-		 * \param _sName The name of the child element to find.
-		 * \return Returns a pointer to the child element of te given name or nullptr if there is none.
-		 */
-		CTree<LSON_JSON_ELEMENT> *						GetChildElement( CTree<LSON_JSON_ELEMENT> * _ptParent, const std::string &_sName );
-
-		/**
-		 * Gathers the indices of children nodes (non-recursively) whose element names match the given name.
-		 *
-		 * \param _ptParent The node whose children are to be scanned for elements matching the given name.
-		 * \param _sName The name of the children elements to gather.
-		 * \return Returns an array of indices indicating the children of _ptParent whose element names match _sName.
-		 */
-		std::vector<size_t>								GatherChildElementIndices( const CTree<LSON_JSON_ELEMENT> * _ptParent, const std::string &_sName ) const;
-
-		/**
-		 * Gets the value of an attribute on a given element.
-		 *
-		 * \param _ptElement The element whose attributes are to be searched.
-		 * \param _sName The name of the attribute whose value is to be found.
-		 * \param _sRet Holds the returned value of the attribute.
-		 * \return Returns true if the given attribute was found on the given item.
-		 */
-		bool											GetAttributeValue( const CTree<LSON_JSON_ELEMENT> * _ptElement, const std::string &_sName, std::string &_sRet ) const;
-
-		/**
-		 * Gets the data of an child element given its name.
-		 *
-		 * \param _ptParent The element whose child elements are to be searched.
-		 * \param _sName The name of the child element whose value is to be found.
-		 * \param _sRet Holds the returned data value of the element.
-		 * \return Returns true if the given child element was found on the given item.
-		 */
-		bool											GetChildElementData( const CTree<LSON_JSON_ELEMENT> * _ptParent, const std::string &_sName, std::string &_sRet ) const;
-
-		/**
-		 * Gets the data associated with a given element.
-		 *
-		 * \param _ptElement The element whose data is to be returned.
-		 * \param PARM Holds the return value of the element’s data if true is returned.
-		 * \return Returns true 
-		 */
-
-		/**
-		 * Gathers every attribute and their values into a multi-map.
-		 *
-		 * \param _mmDst The destination multi-map.
-		 * \return Returns true if there were no memory errors.
-		 */
-		bool											GatherAttributes( std::multimap<std::string, std::string> &_mmDst );
-
-		/**
-		 * Gathers every attribute and their values into a map.
-		 *
-		 * \param _mDst The destination map.
-		 * \return Returns true if there were no memory errors.
-		 */
-		bool											GatherAttributes( std::map<std::string, std::set<std::string>> &_mDst );
-
-		/**
-		 * Gathers every element and their data values into a map.
-		 *
-		 * \param _mDst The destination map.
-		 * \return Returns true if there were no memory errors.
-		 */
-		bool											GatherElements( std::map<std::string, std::set<std::string>> &_mDst );
-
-#endif
 	protected :
 		// == Members.
 		/** The lexer object. */
@@ -507,8 +271,10 @@ namespace lson {
 		std::vector<YYSTYPE::LSON_NODE>					m_vNodes;
 		/** The stack of UTF-8 strings. */
 		std::vector<std::string>						m_vStrings;
+		/** Tree values, referenced by index. */
+		std::vector<LSON_JSON_VALUE>					m_vValues;
 		/** The resulting tree. */
-		CTree<LSON_JSON_ELEMENT>						m_tRoot;
+		//CTree<size_t>									m_tRoot;
 		/** The base node. */
 		size_t											m_stRoot;
 
@@ -523,14 +289,26 @@ namespace lson {
 		size_t											AddNode( YYSTYPE::LSON_NODE &_nNode );
 
 		/**
+		 * Adds a value to be indexed by the tree.
+		 *
+		 * \param _jvValue The value structure to added to the internal database of values.
+		 * \return Returns the index of the stored value.
+		 */
+		inline size_t									AddValue( LSON_JSON_VALUE &_jvValue ) {
+			size_t stIdx = m_vValues.size();
+			m_vValues.push_back( std::move( _jvValue ) );
+			return stIdx;
+		}
+
+		/**
 		 * Converts a pointer to a tree pointer (nullptr = &m_tRoot, everything else is pass-through).
 		 *
 		 * \param _ptPtr The pointer to sanitize.
 		 * \return Returns the input pointer or &m_tRoot if the input is nullptr.
 		 */
-		CTree<LSON_JSON_ELEMENT> *						GetTreePointer( CTree<LSON_JSON_ELEMENT> * _ptPtr ) {
+		/*CTree<LSON_JSON_ELEMENT> *						GetTreePointer( CTree<LSON_JSON_ELEMENT> * _ptPtr ) {
 			return _ptPtr ? _ptPtr : &m_tRoot;
-		}
+		}*/
 
 		/**
 		 * Gets the current tree pointer from a stack of tree pointers.
@@ -538,17 +316,9 @@ namespace lson {
 		 * \param _vStack The input stack of pointers.
 		 * \return Returns &m_tRoot if the stack is empty, otherwise the top of the stack is returned.
 		 */
-		CTree<LSON_JSON_ELEMENT> *						CurStackPointer( const std::vector<CTree<LSON_JSON_ELEMENT> *> &_vStack ) {
-			return GetTreePointer( (_vStack.size() == 0) ? nullptr : _vStack[_vStack.size()-1] );
+		LSON_JSON_VALUE *								CurStackPointer( const std::vector<size_t> &_vStack ) {
+			return (m_vValues.size() == 0 || _vStack.size() == 0) ? nullptr : &m_vValues[_vStack[_vStack.size()-1]];
 		}
-
-		/**
-		 * Determines if a string is entirely whitespace.
-		 *
-		 * \param _sString The string to check.
-		 * \return Returns true if the given string is entirely whitespace ([ \t\r\n]+).
-		 */
-		bool											IsWhitespace( const std::string & _sString );
 
 		/**
 		 * Prints the tree recursively.
@@ -556,7 +326,7 @@ namespace lson {
 		 * \param _ptNode The node to print.
 		 * \param _i32Depth The node depth.
 		 */
-		void											PrintTree( const CTree<LSON_JSON_ELEMENT> * _ptNode, int32_t _i32Depth );
+		//void											PrintTree( const CTree<LSON_JSON_ELEMENT> * _ptNode, int32_t _i32Depth );
 		
 	};
 

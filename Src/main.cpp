@@ -48,6 +48,9 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 		if ( !jSon.SetJson( reinterpret_cast<const char *>(vBytes.data()) ) ) {
 			::OutputDebugStringA( "JSON FAIL\r\n" );
 		}
+		else {
+			::OutputDebugStringA( "JSON NOT FAIL\r\n" );
+		}
 	}
 
 #endif	// #ifdef MX_JSON_TEST

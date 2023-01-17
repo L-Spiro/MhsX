@@ -296,6 +296,191 @@ namespace lson {
 		m_stRoot = _nNode.stNodeIdx;
 	}
 
+	/**
+	 * Builds the tree that can be used to access data in the JSON.
+	 * 
+	 * \return Returns true if the tree was successfully built.
+	 */
+	bool CJsonContainer::BuildTree() {
+		if ( m_stRoot == size_t( -1 ) ) { return false; }
+		/*while ( m_tRoot.Size() ) {
+			m_tRoot.RemoveChild( 0 );
+		}*/
+		struct LSON_STACK_OBJ {
+			size_t *				pstReturn = nullptr;
+			size_t					stNodeIdx;
+			size_t					stParmResult[2];
+			size_t					stResults = 0;
+			//size_t					
+
+			bool					bPassThrough = false;
+			LSON_STACK_OBJ( size_t _stIdx ) :
+				stNodeIdx( _stIdx ) {
+			}
+		};
+		std::vector<LSON_STACK_OBJ> vStack;
+		std::vector<size_t> vCurElement;
+		try {
+#define LSON_PUSH( IDX )			vStack.push_back( LSON_STACK_OBJ( m_vNodes[stNodeIdx].u.IDX ) )
+#define LSON_PUSH_RESULT( IDX )		LSON_PUSH( IDX ); vStack[vStack.size()-1].pstReturn = &vStack[stThis].stParmResult[vStack[stThis].stResults++]
+
+			vStack.reserve( m_vNodes.size() + 1 );
+			vStack.push_back( LSON_STACK_OBJ( m_stRoot ) );
+			while ( vStack.size() ) {
+				size_t stThis = vStack.size() - 1;
+				bool bFirstPass = !vStack[stThis].bPassThrough;
+				vStack[stThis].bPassThrough = true;
+				size_t stNodeIdx = vStack[stThis].stNodeIdx;
+				if ( stNodeIdx == size_t( -1 ) ) {
+					vStack.pop_back();
+					continue;
+				}
+				if ( bFirstPass ) {
+					// Push in revese order (top gets processed sooner).
+					switch ( m_vNodes[stNodeIdx].nType ) {
+						case LSON_N_MEMBER : {
+							LSON_PUSH_RESULT( mMember.stValue );
+							break;
+						}
+						case LSON_N_MEMBER_LIST : {
+							if ( m_vNodes[stNodeIdx].u.mlMembers.stRight != size_t( -1 ) ) {
+								LSON_PUSH_RESULT( mlMembers.stRight );
+							}
+							LSON_PUSH_RESULT( mlMembers.stLeft );
+							break;
+						}
+						case LSON_N_VALUE : {
+							LSON_JSON_VALUE jvVal;
+							switch ( m_vNodes[stNodeIdx].u.vValue.vType ) {
+								case LSON_V_OBJECT : {
+									jvVal.vtType = LSON_VT_OBJECT;
+									LSON_PUSH( vValue.v.stValue );
+									break;
+								}
+								case LSON_V_STRING : {
+									jvVal.vtType = LSON_VT_STRING;
+									jvVal.u.stString = m_vNodes[stNodeIdx].u.vValue.v.stValue;
+#ifdef _DEBUG
+									jvVal.sString = GetString( jvVal.u.stString );
+#endif	// #ifdef _DEBUG
+									break;
+								}
+								case LSON_V_DECIMAL : {
+									jvVal.vtType = LSON_VT_DECIMAL;
+									jvVal.u.dDecimal = m_vNodes[stNodeIdx].u.vValue.v.dDecimal;
+									break;
+								}
+								case LSON_V_ARRAY : {
+									jvVal.vtType = LSON_VT_ARRAY;
+									LSON_PUSH( vValue.v.stValue );
+									break;
+								}
+								case LSON_V_TRUE : {
+									jvVal.vtType = LSON_VT_TRUE;
+									break;
+								}
+								case LSON_V_FALSE : {
+									jvVal.vtType = LSON_VT_FALSE;
+									break;
+								}
+								case LSON_V_NULL : {
+									jvVal.vtType = LSON_VT_NULL;
+									break;
+								}
+							}
+							vCurElement.push_back( AddValue( jvVal ) );
+							LSON_JSON_VALUE * pjvCurVal = CurStackPointer( vCurElement );
+							if ( pjvCurVal ) {
+							}
+							break;
+						}
+						case LSON_N_VALUE_LIST : {
+							if ( m_vNodes[stNodeIdx].u.vlValues.stRight != size_t( -1 ) ) {
+								LSON_PUSH_RESULT( vlValues.stRight );
+							}
+							LSON_PUSH_RESULT( vlValues.stLeft );
+							break;
+						}
+						case LSON_N_OBJECT : {
+							LSON_PUSH( oObject.stMembers );
+							break;
+						}
+						case LSON_N_ARRAY : {
+							if ( m_vNodes[stNodeIdx].u.aArray.stValues != size_t( -1 ) ) {
+								LSON_PUSH( aArray.stValues );
+							}
+							break;
+						}
+					}
+				}
+				else {
+					switch ( m_vNodes[stNodeIdx].nType ) {
+						case LSON_N_MEMBER : {
+							if ( vStack[stThis].pstReturn ) {
+								(*vStack[stThis].pstReturn) = vCurElement[vCurElement.size()-1];
+							}
+							LSON_JSON_VALUE * pjvCurVal = CurStackPointer( vCurElement );
+							if ( pjvCurVal ) {
+								LSON_JSON_MEMBER jmMember;
+								jmMember.stName = m_vNodes[stNodeIdx].u.mMember.stName;
+								jmMember.stValue = vStack[stThis].stParmResult[0];
+#ifdef _DEBUG
+								jmMember.sName = GetString( jmMember.stName );
+#endif	// #ifdef _DEBUG
+								pjvCurVal->oObject.vMembers.push_back( jmMember );
+							}
+							break;
+						}
+						case LSON_N_MEMBER_LIST : {
+							if ( vStack[stThis].pstReturn ) {
+								(*vStack[stThis].pstReturn) = vCurElement[vCurElement.size()-1];
+							}
+							break;
+						}
+						case LSON_N_VALUE : {
+							size_t stThisIdx = vCurElement[vCurElement.size()-1];
+							if ( vStack[stThis].pstReturn ) {
+								(*vStack[stThis].pstReturn) = stThisIdx;
+							}
+							LSON_JSON_VALUE * pjvCurVal2 = CurStackPointer( vCurElement );
+							vCurElement.pop_back();
+
+							LSON_JSON_VALUE * pjvCurVal = CurStackPointer( vCurElement );
+							if ( pjvCurVal ) {
+								if ( pjvCurVal->vtType == LSON_V_ARRAY ) {
+									pjvCurVal->vArray.push_back( stThisIdx );
+								}
+							}
+
+							break;
+						}
+						case LSON_N_VALUE_LIST : {
+							if ( vStack[stThis].pstReturn ) {
+								(*vStack[stThis].pstReturn) = vCurElement[vCurElement.size()-1];
+							}
+							break;
+						}
+						case LSON_N_OBJECT : {
+							if ( vStack[stThis].pstReturn ) {
+								(*vStack[stThis].pstReturn) = vCurElement[vCurElement.size()-1];
+							}
+							break;
+						}
+					}
+					vStack.pop_back();
+				}
+			}
+
+#undef LSON_PUSH_RESULT
+#undef LSON_PUSH
+			return true;
+		}
+		catch ( ... ) {
+
+		}
+		return false;
+	}
+
 #if 0
 	/**
 	 * Creates an attribute start string.
@@ -731,7 +916,7 @@ namespace lson {
 	 *
 	 * \return Returns true if there were no memory errors during tree creation.
 	 */
-	bool CJsonContainer::BuidTree() {
+	bool CJsonContainer::BuildTree() {
 		if ( m_stRoot == size_t( -1 ) ) { return false; }
 		while ( m_tRoot.Size() ) {
 			m_tRoot.RemoveChild( 0 );
@@ -747,7 +932,7 @@ namespace lson {
 		std::vector<LSON_STACK_OBJ> vStack;
 		std::vector<CTree<LSON_JSON_ELEMENT> *> vCurElement;
 		try {
-#define LXM_PUSH( IDX )			vStack.push_back( LSON_STACK_OBJ( m_vNodes[stNodeIdx].u.IDX ) )
+#define LSON_PUSH( IDX )			vStack.push_back( LSON_STACK_OBJ( m_vNodes[stNodeIdx].u.IDX ) )
 			vStack.reserve( m_vNodes.size() + 1 );
 			vStack.push_back( LSON_STACK_OBJ( m_stRoot ) );
 			while ( vStack.size() ) {
@@ -763,15 +948,15 @@ namespace lson {
 					// Push in revese order (top gets processed sooner).
 					switch ( m_vNodes[stNodeIdx].nType ) {
 						case LSON_N_DOCUMENT : {
-							LXM_PUSH( dDocumentObj.sMiscSeq );
-							LXM_PUSH( dDocumentObj.sElement );
-							LXM_PUSH( dDocumentObj.sProlog );
+							LSON_PUSH( dDocumentObj.sMiscSeq );
+							LSON_PUSH( dDocumentObj.sElement );
+							LSON_PUSH( dDocumentObj.sProlog );
 							break;
 						}
 						case LSON_N_PROLOG : {
-							LXM_PUSH( pPrologObj.sMiscSeq );
-							LXM_PUSH( pPrologObj.sEncoding );
-							LXM_PUSH( pPrologObj.sVersion );
+							LSON_PUSH( pPrologObj.sMiscSeq );
+							LSON_PUSH( pPrologObj.sEncoding );
+							LSON_PUSH( pPrologObj.sVersion );
 							break;
 						}
 						case LSON_N_VERSION : {
@@ -783,8 +968,8 @@ namespace lson {
 							break;
 						}
 						case LSON_N_MISC_SEQ : {
-							LXM_PUSH( msMiscSeqObj.sRight );
-							LXM_PUSH( msMiscSeqObj.sLeft );
+							LSON_PUSH( msMiscSeqObj.sRight );
+							LSON_PUSH( msMiscSeqObj.sLeft );
 							break;
 						}
 						case LSON_N_ELEMENT : {
@@ -794,22 +979,22 @@ namespace lson {
 							ptParent->InsertChild( eElement, ptParent->Size() );
 							vCurElement.push_back( ptParent->GetChild( ptParent->Size() - 1 ) );
 
-							LXM_PUSH( eElementObj.sContent );
-							LXM_PUSH( eElementObj.sAttribute );
+							LSON_PUSH( eElementObj.sContent );
+							LSON_PUSH( eElementObj.sAttribute );
 							break;
 						}
 						case LSON_N_CONTENT : {
-							LXM_PUSH( cContentObj.sLeft );
+							LSON_PUSH( cContentObj.sLeft );
 							break;
 						}
 						case LSON_N_CONTENT_ELEMENT : {
-							LXM_PUSH( cContentObj.sRight );
-							LXM_PUSH( cContentObj.sLeft );
+							LSON_PUSH( cContentObj.sRight );
+							LSON_PUSH( cContentObj.sLeft );
 							break;
 						}
 						case LSON_N_CONTENT_MISC : {
-							LXM_PUSH( cContentObj.sRight );
-							LXM_PUSH( cContentObj.sLeft );
+							LSON_PUSH( cContentObj.sRight );
+							LSON_PUSH( cContentObj.sLeft );
 							break;
 						}
 						case LSON_N_CONTENT_DATA : {
@@ -819,19 +1004,19 @@ namespace lson {
 									ptParent->Value().sData.append( m_vStrings[m_vNodes[stNodeIdx].u.cContentObj.sRight] );
 								}
 							}
-							LXM_PUSH( cContentObj.sLeft );
+							LSON_PUSH( cContentObj.sLeft );
 							break;
 						}
 						case LSON_N_ATTRIBUTE_DECL : {
 							/*CTree<LSON_JSON_ELEMENT> * ptParent = CurStackPointer( vCurElement );
 							ptParent->Value().*/
 							// TODO: Haven’t encountered this case yet.
-							LXM_PUSH( aAttributeDeclObj.sList );
+							LSON_PUSH( aAttributeDeclObj.sList );
 							break;
 						}
 						case LSON_N_ATTRIBUTE_LIST : {
-							LXM_PUSH( aAttributeListObj.sRight );
-							LXM_PUSH( aAttributeListObj.sLeft );
+							LSON_PUSH( aAttributeListObj.sRight );
+							LSON_PUSH( aAttributeListObj.sLeft );
 							break;
 						}
 						case LSON_N_ATTRIBUTE : {
@@ -852,7 +1037,7 @@ namespace lson {
 					vStack.pop_back();
 				}
 			}
-#undef LXM_PUSH
+#undef LSON_PUSH
 			return true;
 		}
 		catch ( ... ) {
@@ -1102,28 +1287,12 @@ namespace lson {
 	}
 
 	/**
-	 * Determines if a string is entirely whitespace.
-	 *
-	 * \param _sString The string to check.
-	 * \return Returns true if the given string is entirely whitespace ([ \t\r\n]+).
-	 */
-	bool CJsonContainer::IsWhitespace( const std::string & _sString ) {
-		for ( auto I = _sString.size(); I--; ) {
-			if ( _sString[I] != ' ' &&
-				_sString[I] != '\t' &&
-				_sString[I] != '\r' &&
-				_sString[I] != '\n' ) { return false; }
-		}
-		return true;
-	}
-
-	/**
 	 * Prints the tree recursively.
 	 * 
 	 * \param _ptNode The node to print.
 	 * \param _i32Depth The node depth.
 	 */
-	void CJsonContainer::PrintTree( const CTree<LSON_JSON_ELEMENT> * _ptNode, int32_t _i32Depth ) {
+	/*void CJsonContainer::PrintTree( const CTree<LSON_JSON_ELEMENT> * _ptNode, int32_t _i32Depth ) {
 		std::string sPrintMe;
 		if ( _ptNode->Value().stNameString != size_t( -1 ) ) {
 			sPrintMe = std::format( "{0: >{1}}Node: {2}\r\n", "", _i32Depth * 5, GetString( _ptNode->Value().stNameString ) );
@@ -1146,6 +1315,6 @@ namespace lson {
 		for ( size_t I = 0; I < _ptNode->Size(); ++I ) {
 			PrintTree( _ptNode->GetChild( I ), _i32Depth + 1 );
 		}
-	}
+	}*/
 
 }	// namespace lson
