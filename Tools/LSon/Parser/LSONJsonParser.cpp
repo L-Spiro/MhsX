@@ -470,7 +470,7 @@ namespace yy {
 
   case 13:
 
-    { m_pjcContainer->AddMemberList( (yyval.nNode) ); }
+    { m_pjcContainer->AddMemberList( (yyval.nNode), (yysemantic_stack_[(1) - (1)].nNode) ); }
     break;
 
   case 14:

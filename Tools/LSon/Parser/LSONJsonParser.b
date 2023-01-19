@@ -67,7 +67,7 @@ object
 	;
 
 members
-	: member												{ m_pjcContainer->AddMemberList( $$ ); }
+	: member												{ m_pjcContainer->AddMemberList( $$, $1 ); }
 	| members LSON_COMMA member								{ m_pjcContainer->AddMemberList( $$, $1, $3 ); }
 	;
 

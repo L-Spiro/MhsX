@@ -1,12 +1,9 @@
 #pragma once
 
-//#include "LSONJson.h"
 #include "LSONJsonSyntaxNodes.h"
 #include "Gen/LSONJsonParser.h"
-#include "Tree/LSONTree.h"
 
-#include <map>
-#include <set>
+#include <vector>
 
 
 namespace lson {
@@ -186,9 +183,10 @@ namespace lson {
 		 * Creates an empty member-list node.
 		 *
 		 * \param _nNode The resulting node.
+		 * \param _nLeft The left node.
 		 * \return Returns the index of the value node created.
 		 */
-		size_t											AddMemberList( YYSTYPE::LSON_NODE &_nNode );
+		size_t											AddMemberList( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft );
 
 		/**
 		 * Creates an object node.
@@ -260,7 +258,24 @@ namespace lson {
 		 *
 		 * \return Returns the root value's index.
 		 */
-		inline size_t									GetRoot() const { return 0; }
+		inline constexpr size_t							GetRoot() const { return 0; }
+
+		/**
+		 * Gets a value by index.
+		 *
+		 * \param _stIdx Index of te value to get.
+		 * \return Returns a constant reference to a value loaded from the JSON file by index.
+		 */
+		inline const LSON_JSON_VALUE &					GetValue( size_t _stIdx ) const { return m_vValues[_stIdx]; }
+
+		/**
+		 * Finds a member by name and returns a pointer to the given value or nullptr.  _jvValue must be an object.
+		 *
+		 * \param _jvValue The object owning the member to find.
+		 * \param _sName The name of the member to locate.
+		 * \return Returns a pointer to the member value with the given name or nullptr if it can't be found.
+		 */
+		const LSON_JSON_VALUE *							GetMemberByName( const LSON_JSON_VALUE &_jvValue, const std::string &_sName );
 
 
 	protected :

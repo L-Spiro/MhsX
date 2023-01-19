@@ -19,14 +19,8 @@
     <Filter Include="Source Files\Gen">
       <UniqueIdentifier>{e331e150-3dac-4a4f-a500-02d04b094dd6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Tree">
-      <UniqueIdentifier>{7450c4f0-d3c1-46a9-a2a0-6ebc8c89dba8}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="LSon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Gen\LSONJsonLexBase.cpp">
       <Filter>Source Files\Gen</Filter>
     </ClCompile>
@@ -67,9 +61,6 @@
     </ClInclude>
     <ClInclude Include="Src\LSONJsonSyntaxNodes.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Tree\LSONTree.h">
-      <Filter>Header Files\Tree</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
