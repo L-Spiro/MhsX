@@ -21,7 +21,8 @@ namespace ee {
 			uiManBits( 0 ),
 			uiExpBits( 0 ),
 			bSign( false ),
-			bImplicitManBit( true ) {
+			bImplicitManBit( true ),
+			bHasSign( false ) {
 		}
 		uint64_t						uiExponent;
 		uint64_t						uiMantissa;

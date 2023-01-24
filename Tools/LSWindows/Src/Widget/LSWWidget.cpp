@@ -13,7 +13,7 @@
 
 namespace lsw {
 
-	CWidget::CWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
+	CWidget::CWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t /*_ui64Data*/ ) :
 		m_hWnd( NULL ),
 		m_wId( _wlLayout.wId ),
 		m_bEnabled( _wlLayout.bEnabled ),
@@ -354,7 +354,7 @@ namespace lsw {
 
 	// Converts a point from pixels to dialog units.
 	POINT CWidget::PixelsToDialogUnits( HWND _hWnd, LONG _lX, LONG _lY ) {
-		POINT pRet;
+		POINT pRet = {};
 		for ( LONG I = 0; I < 5000; ++I ) {
 			RECT rX;
 			rX.left = I;
@@ -385,13 +385,13 @@ namespace lsw {
 	 * \param _lHeight The new height of the client area.
 	 * \return Returns a LSW_HANDLED enumeration.
 	 */
-	CWidget::LSW_HANDLED CWidget::Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight ) {
+	CWidget::LSW_HANDLED CWidget::Size( WPARAM /*_wParam*/, LONG /*_lWidth*/, LONG /*_lHeight*/ ) {
 		::EnumChildWindows( Wnd(), EnumChildWindows_ResizeControls, 0 );
 		return LSW_H_CONTINUE;
 	}
 
 	// WM_MOVE.
-	CWidget::LSW_HANDLED CWidget::Move( LONG _lX, LONG _lY ) {
+	CWidget::LSW_HANDLED CWidget::Move( LONG /*_lX*/, LONG /*_lY*/ ) {
 		::EnumChildWindows( Wnd(), EnumChildWindows_ResizeControls, 0 );
 		return LSW_H_CONTINUE;
 	}
@@ -623,7 +623,7 @@ namespace lsw {
 		for ( size_t I = 0; I < vDocks.size(); ++I ) {
 			if ( vDocks[I]->Wnd() != _pwWnd->Wnd() ) {
 				LSW_HANDLED hHandledThis = vDocks[I]->Enable( static_cast<BOOL>(_wParam) );
-				if ( hHandled != LSW_H_HANDLED ) {
+				if ( hHandledThis != LSW_H_HANDLED ) {
 					if ( _bCallDefault ) {
 						vDocks[I]->SetEnabled( static_cast<BOOL>(_wParam) );
 						::DefWindowProcW( vDocks[I]->Wnd(), WM_ENABLE, _wParam, _lParam );
@@ -654,7 +654,7 @@ namespace lsw {
 	}
 
 	// Applies enabled/disabled settings.
-	BOOL CALLBACK CWidget::EnumChildWindows_SetEnabled( HWND _hWnd, LPARAM _lParam ) {
+	BOOL CALLBACK CWidget::EnumChildWindows_SetEnabled( HWND _hWnd, LPARAM /*_lParam*/ ) {
 		CWidget * pwThis = LSW_WIN2CLASS( _hWnd );
 		if ( pwThis ) {
 			pwThis->SetEnabled( pwThis->Enabled() );
@@ -663,7 +663,7 @@ namespace lsw {
 	}
 
 	// Sets all the starting rectangles for all widgets.
-	BOOL CALLBACK CWidget::EnumChildWindows_SetStartingRect( HWND _hWnd, LPARAM _lParam ) {
+	BOOL CALLBACK CWidget::EnumChildWindows_SetStartingRect( HWND _hWnd, LPARAM /*_lParam*/ ) {
 		CWidget * pwThis = LSW_WIN2CLASS( _hWnd );
 		if ( pwThis ) {
 			pwThis->UpdateRects();
@@ -672,7 +672,7 @@ namespace lsw {
 	}
 
 	// Resizes all controls when the window resizes.
-	BOOL CALLBACK CWidget::EnumChildWindows_ResizeControls( HWND _hWnd, LPARAM _lParam ) {
+	BOOL CALLBACK CWidget::EnumChildWindows_ResizeControls( HWND _hWnd, LPARAM /*_lParam*/ ) {
 		CWidget * pwThis = LSW_WIN2CLASS( _hWnd );
 		if ( pwThis ) {
 			pwThis->EvalNewSize();
@@ -681,14 +681,14 @@ namespace lsw {
 	}
 
 	// Evaluates "??" inside expressions.  ?? = this pointer.
-	bool __stdcall CWidget::WidgetUserVarHandler( uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult ) {
+	bool __stdcall CWidget::WidgetUserVarHandler( uintptr_t _uiptrData, ee::CExpEvalContainer * /*_peecContainer*/, ee::CExpEvalContainer::EE_RESULT &_rResult ) {
 		_rResult.ncType = ee::EE_NC_UNSIGNED;
 		_rResult.u.ui64Val = _uiptrData;
 		return true;
 	}
 
 	// Evaluates member access in expressions.
-	bool __stdcall CWidget::WidgetMemberAccessHandler( const ee::CExpEvalContainer::EE_RESULT &_rLeft, const std::string &_sMember, uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult ) {
+	bool __stdcall CWidget::WidgetMemberAccessHandler( const ee::CExpEvalContainer::EE_RESULT &_rLeft, const std::string &_sMember, uintptr_t /*_uiptrData*/, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult ) {
 		// Expecting that _rLeft evaluates to a CWidget *.
 		if ( _rLeft.ncType != ee::EE_NC_UNSIGNED ) {
 			return false;
@@ -1107,7 +1107,7 @@ namespace lsw {
 			// Commands.
 			// =======================================
 			case WM_COMMAND : {
-				LSW_HANDLED hHandled;
+				LSW_HANDLED hHandled = LSW_H_CONTINUE;
 				WORD wId = LOWORD( _wParam );
 
 
@@ -1196,7 +1196,7 @@ namespace lsw {
 						if ( pmwSrc ) {
 							if ( pmwSrc->IsListView() ) {
 								LPNMLVCUSTOMDRAW pcdListViewDraw = reinterpret_cast<LPNMLVCUSTOMDRAW>(_lParam);
-								HWND hFrom = pcdCustomDraw->hdr.hwndFrom;
+								//HWND hFrom = pcdCustomDraw->hdr.hwndFrom;
 								if ( pcdListViewDraw->nmcd.dwDrawStage == CDDS_PREPAINT ) {
 									DWORD dwRet = pmwSrc->Notify_CustomDraw_PrePaint( pcdListViewDraw );
 									if ( _bIsDlg ) {

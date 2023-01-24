@@ -10,7 +10,8 @@ namespace lsw {
 
 	CTab::CTab( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
 		CWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
-		m_lpOriginProc( 0 ) {
+		m_lpOriginProc( 0 ),
+		m_bShowClose( true ) {
 	}
 	CTab::~CTab() {
 		/*for ( auto I = m_vTabs.size(); I--; ) {
@@ -23,7 +24,7 @@ namespace lsw {
 
 	// == Functions.
 	// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
-	const LSW_RECT CTab::VirtualClientRect( const CWidget * pwChild ) const {
+	const LSW_RECT CTab::VirtualClientRect( const CWidget * /*pwChild*/ ) const {
 		LSW_RECT rRect = ClientRect();
 		AdjustRect( FALSE, &rRect );
 
@@ -65,9 +66,8 @@ namespace lsw {
 				tNewTab.sTextLen = std::strlen( _piItem->pszText );
 			}
 			m_vTabs.insert( m_vTabs.begin() + iRet, tNewTab );
-
 			int iLen = GetLongestTextWidth();
-			SetItemSize( iLen + LSW_CLOSE_SPACING, 0 );
+			SetItemSize( iLen + (m_bShowClose ? LSW_CLOSE_SPACING : 0), 0 );
 			SetCurSel( iRet );
 		}
 
@@ -86,7 +86,7 @@ namespace lsw {
 			}
 			m_vTabs.erase( m_vTabs.begin() + _iItem );
 			int iLen = GetLongestTextWidth();
-			SetItemSize( iLen + LSW_CLOSE_SPACING, 0 );
+			SetItemSize( iLen + (m_bShowClose ? LSW_CLOSE_SPACING : 0), 0 );
 
 			int iCount = GetItemCount();
 			if ( iCount && iCur == _iItem ) {
@@ -131,7 +131,7 @@ namespace lsw {
 	LSW_RECT CTab::GetItemRect( INT _iTab ) const {
 		LSW_RECT rTemp = LSW_RECT().Zero();
 		if ( !Wnd() ) { return rTemp; }
-		BOOL bRet = static_cast<BOOL>(::SendMessageW( Wnd(), TCM_GETITEMRECT, static_cast<WPARAM>(_iTab), reinterpret_cast<LPARAM>(&rTemp) ));
+		/*BOOL bRet = */static_cast<BOOL>(::SendMessageW( Wnd(), TCM_GETITEMRECT, static_cast<WPARAM>(_iTab), reinterpret_cast<LPARAM>(&rTemp) ));
 		return rTemp;
 	}
 
@@ -144,7 +144,7 @@ namespace lsw {
 		DWORD dwStyle = static_cast<DWORD>(::GetWindowLongPtrW( Wnd(), GWL_STYLE ));
 		// Go back to normal style that allows tabs to have different widths.
 		::SetWindowLongPtrW( Wnd(), GWL_STYLE, dwStyle & ~(TCS_FIXEDWIDTH | TCS_FORCELABELLEFT | TCS_SINGLELINE) );
-		// Widt this style, the system will do the math for us.
+		// With this style, the system will do the math for us.
 		LSW_RECT rItem = GetItemRect( _iTab );
 		// Put the styles back.
 		::SetWindowLongPtrW( Wnd(), GWL_STYLE, dwStyle );
@@ -259,24 +259,27 @@ namespace lsw {
 		WNDPROC pOld = pmwThis->OriginalProc();
 		switch ( _uMsg ) {
 			case WM_NCHITTEST : {
-				POINTS pPos = MAKEPOINTS( _lParam );
-				LRESULT lrHit = ::CallWindowProcW( reinterpret_cast<WNDPROC>(pOld), _hWnd, _uMsg, _wParam, _lParam );
-				TCHITTESTINFO tTest;
-				tTest.pt.x = pPos.x;
-				tTest.pt.y = pPos.y;
-				::ScreenToClient( _hWnd, &tTest.pt );
-				INT iHit = pmwThis->HitTest( &tTest );
-				if ( iHit == -1 ) {
+				if ( pmwThis->m_bShowClose ) {
+					POINTS pPos = MAKEPOINTS( _lParam );
+					LRESULT lrHit = ::CallWindowProcW( reinterpret_cast<WNDPROC>(pOld), _hWnd, _uMsg, _wParam, _lParam );
+					TCHITTESTINFO tTest;
+					tTest.pt.x = pPos.x;
+					tTest.pt.y = pPos.y;
+					::ScreenToClient( _hWnd, &tTest.pt );
+					INT iHit = pmwThis->HitTest( &tTest );
+					if ( iHit == -1 ) {
+						return lrHit;
+					}
+					LSW_RECT rItem = pmwThis->GetItemRect( iHit );
+					LSW_RECT rClose;
+					rClose = GetCloseRect( rItem, iHit == pmwThis->GetCurSel() );
+			
+					if ( rClose.PtInRect( tTest.pt ) ) {
+						lrHit = HTCLOSE;
+					}
 					return lrHit;
 				}
-				LSW_RECT rItem = pmwThis->GetItemRect( iHit );
-				LSW_RECT rClose;
-				rClose = GetCloseRect( rItem, iHit == pmwThis->GetCurSel() );
-			
-				if ( rClose.PtInRect( tTest.pt ) ) {
-					lrHit = HTCLOSE;
-				}
-				return lrHit;
+				break;
 			}
 			case WM_NCLBUTTONUP : {
 				if ( _wParam == HTCLOSE ) {
@@ -287,7 +290,7 @@ namespace lsw {
 					tTest.pt.x = pPos.x;
 					tTest.pt.y = pPos.y;
 					::ScreenToClient( pmwThis->Wnd(), &tTest.pt );
-					hCloser.hdr.code		= LSW_TAB_NM_CLOSE;
+					hCloser.hdr.code		= static_cast<UINT>(LSW_TAB_NM_CLOSE);
 					hCloser.hdr.hwndFrom	= pmwThis->Wnd();
 					hCloser.hdr.idFrom		= iID;
 					hCloser.iTab			= pmwThis->HitTest( &tTest );
@@ -299,34 +302,36 @@ namespace lsw {
 				break;
 			}
 			case WM_PAINT : {
-				LONG_PTR hObj = ::GetWindowLongPtrW( _hWnd, 0 );
-				LSW_BEGINPAINT bpPaint( _hWnd );
+				if ( pmwThis->m_bShowClose ) {
+					/*LONG_PTR hObj = */::GetWindowLongPtrW( _hWnd, 0 );
+					LSW_BEGINPAINT bpPaint( _hWnd );
 
-				{
-					//LSW_SELECTOBJECT soPrev( bpPaint.hDc, reinterpret_cast<HGDIOBJ>(hObjSet) );
+					{
+						//LSW_SELECTOBJECT soPrev( bpPaint.hDc, reinterpret_cast<HGDIOBJ>(hObjSet) );
 
-					INT iTotal = pmwThis->GetItemCount();
-					INT iSel = pmwThis->GetCurSel();
+						INT iTotal = pmwThis->GetItemCount();
+						INT iSel = pmwThis->GetCurSel();
 
-					::CallWindowProcW( pOld, _hWnd, _uMsg, reinterpret_cast<WPARAM>(bpPaint.hDc), 0L );
+						::CallWindowProcW( pOld, _hWnd, _uMsg, reinterpret_cast<WPARAM>(bpPaint.hDc), 0L );
 
-					for ( INT I = 0; I < iTotal; I++ ) {
-						LSW_RECT rItem, rClose;
-						rItem = pmwThis->GetItemRect( I );
-						rClose = GetCloseRect( rItem, I == iSel );
-						::DrawFrameControl( bpPaint.hDc, &rClose, DFC_CAPTION, DFCS_CAPTIONCLOSE | DFCS_FLAT );
+						for ( INT I = 0; I < iTotal; I++ ) {
+							LSW_RECT rItem, rClose;
+							rItem = pmwThis->GetItemRect( I );
+							rClose = GetCloseRect( rItem, I == iSel );
+							::DrawFrameControl( bpPaint.hDc, &rClose, DFC_CAPTION, DFCS_CAPTIONCLOSE | DFCS_FLAT );
+						}
 					}
-				}
 
-				// ::EndPaint() called by the destructor of bpPaint.
-				return 0;
+					// ::EndPaint() called by the destructor of bpPaint.
+					return 0;
+				}
+				break;
 			}
 			case WM_MOUSEACTIVATE : {
 				if ( LOWORD( _lParam ) == HTCLOSE && HIWORD( _lParam ) == WM_LBUTTONDOWN ) { return MA_ACTIVATEANDEAT; }
 				break;
 			}
 			case WM_ACTIVATE : {
-				volatile int gjhg = 0;
 				break;
 			}
 			/*case WM_MOUSEWHEEL : {

@@ -34,10 +34,10 @@ namespace lsw {
 
 		// == Functions.
 		// Attach a widget.
-		virtual bool						Attach( const LSW_DT_ATTACH &_maAttach ) { return false; }
+		virtual bool						Attach( const LSW_DT_ATTACH &/*_maAttach*/ ) { return false; }
 
 		// Detaches a widget given its ID.
-		virtual bool						Detach( WORD _wId ) { return false; }
+		virtual bool						Detach( WORD /*_wId*/ ) { return false; }
 
 		// Given a point, an LSW_DT_ATTACH structure is filled that another control could use to
 		//	add a control into this splitter.  Also returned is a rectangle that can be used to
@@ -49,8 +49,8 @@ namespace lsw {
 		//	attaching a control is possible.  Whatever control is being dragged should be dragged
 		//	close enough to an attachment point for attachment to be possible.
 		// Returned distance is squared.
-		virtual LONG						GetAttachPoint( const POINT &_pPoint, LSW_DT_ATTACH &_maAttach, INT _iSizeSuggestion,
-			LSW_RECT &_rDrawRect ) { return LONG_MAX; }
+		virtual LONG						GetAttachPoint( const POINT &/*_pPoint*/, LSW_DT_ATTACH &/*_maAttach*/, INT /*_iSizeSuggestion*/,
+			LSW_RECT &/*_rDrawRect*/ ) { return LONG_MAX; }
 
 	};
 

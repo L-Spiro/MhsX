@@ -288,7 +288,7 @@ namespace ee {
 	uint32_t CPreProcContainer::AddIdentifier( const char * _pcText ) {
 		// Find the name in the existing stack of strings if it is there.
 		uint32_t ui32Ret = uint32_t( HasString( std::string( _pcText ) ) );
-		if ( ui32Ret == uint32_t( static_cast<size_t>(-1) ) ) {
+		if ( ui32Ret == static_cast<uint32_t>(static_cast<size_t>(-1)) ) {
 			// Not there so add it.
 			try {
 				ui32Ret = uint32_t( m_vStringPool.size() );

@@ -211,7 +211,7 @@ namespace lsw {
 		virtual LSW_HANDLED					NcLButtonDown( INT _iHitTest, const POINTS &_pCursorPos );
 		
 		// WM_NCLBUTTONUP.
-		virtual LSW_HANDLED					NcLButtonUp( INT _iHitTest, const POINTS &_pCursorPos ) {
+		virtual LSW_HANDLED					NcLButtonUp( INT /*_iHitTest*/, const POINTS &/*_pCursorPos*/ ) {
 			return LSW_H_CONTINUE;
 		}
 

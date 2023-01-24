@@ -509,8 +509,9 @@ namespace ee {
 		// Allocates a new object of the given type.
 		template <typename _tType>
 		_tType *							AllocateObject( uint32_t _ui32Flags = 0 ) {
+			static_cast<void>(_ui32Flags);
 			try {
-				auto aIdx = m_vObjects.size();
+				//auto aIdx = m_vObjects.size();
 				_tType * ptObj = new( std::nothrow ) _tType( this );
 				if ( !ptObj ) { return nullptr; }
 				m_vObjects.push_back( ptObj );

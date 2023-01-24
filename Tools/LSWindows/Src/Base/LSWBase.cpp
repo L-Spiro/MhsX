@@ -1298,7 +1298,7 @@ namespace lsw {
 		}
 	}
 #else
-	VOID CBase::MessageToText( WORD _wMessage, std::string &_sName ) { return; }
+	VOID CBase::MessageToText( WORD /*_wMessage*/, std::string &/*_sName*/ ) { return; }
 #endif	// #ifdef _DEBUG
 
 }	// namespace lsw

@@ -140,7 +140,7 @@ namespace ee {
 			}
 			else {
 				sIdx0 = static_cast<size_t>(_i64Idx0);
-				if ( sIdx0 != _i64Idx0 || sIdx0 >= m_vBacking.size() ) { rRet.u.poObj = nullptr; return rRet; }
+				if ( static_cast<int64_t>(sIdx0) != _i64Idx0 || sIdx0 >= m_vBacking.size() ) { rRet.u.poObj = nullptr; return rRet; }
 			}
 		}
 
@@ -151,7 +151,7 @@ namespace ee {
 			}
 			else {
 				sIdx1 = static_cast<size_t>(_i64Idx1);
-				if ( sIdx1 != _i64Idx1 || sIdx1 >= m_vBacking.size() ) { rRet.u.poObj = nullptr; return rRet; }
+				if ( static_cast<int64_t>(sIdx1) != _i64Idx1 || sIdx1 >= m_vBacking.size() ) { rRet.u.poObj = nullptr; return rRet; }
 			}
 		}
 		else {

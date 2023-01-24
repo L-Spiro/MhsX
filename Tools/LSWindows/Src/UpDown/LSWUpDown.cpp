@@ -9,7 +9,7 @@ namespace lsw {
 
 	// == Functions.
 	// Setting the HWND after the control has been created.
-	void CUpDown::InitControl( HWND _hWnd ) {
+	void CUpDown::InitControl( HWND /*_hWnd*/ ) {
 	}
 
 	// Gets the radix base (10 or 16).

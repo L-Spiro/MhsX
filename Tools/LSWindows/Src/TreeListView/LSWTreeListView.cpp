@@ -12,7 +12,7 @@ namespace lsw {
 
 	CTreeListView::CTreeListView( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
 		CListView( _wlLayout.ChangeClass( WC_LISTVIEWW ).AddStyleEx( LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER ).AddStyle( LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA ),
-			_pwParent, _bCreateWidget, _hMenu ),
+			_pwParent, _bCreateWidget, _hMenu, _ui64Data ),
 		/*m_hListView( NULL ),*/
 		m_wpListViewProc( nullptr ),
 		m_ptIndexCache( nullptr ),
@@ -1011,13 +1011,11 @@ namespace lsw {
 				break;
 			}
 			case WM_LBUTTONDBLCLK : {
-				volatile int ghjg = 0;
 				//LSW_RECT rRect = ptlThis->VirtualClientRect( nullptr );
 				//::MoveWindow( _hWnd, rRect.left, rRect.top, rRect.Width(), rRect.Height(), TRUE );
 				break;
 			}
 			case WM_NCLBUTTONDBLCLK : {
-				volatile int ghjg = 0;
 				//::MoveWindow( _hWnd, ee::CExpEval::Time() % 10, ee::CExpEval::Time() % 20, ee::CExpEval::Time() % 10 + 350, ee::CExpEval::Time() % 10 + 250, TRUE );
 				break;
 			}
@@ -1043,7 +1041,6 @@ namespace lsw {
 			// List-View Messages.
 			// =======================================
 			case LVM_SETITEMSTATE : {
-				volatile int ioi = 0;
 				break;
 			}
 		}

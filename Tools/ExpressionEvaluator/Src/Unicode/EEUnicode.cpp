@@ -6148,7 +6148,7 @@ namespace ee {
 #endif	// #if EE_GEN_TABLE
 
 	// Encrypts a string.
-	void CUnicode::Encrypt( const char * _pcString, size_t _sLen, std::string &_sResult ) {
+	void CUnicode::Encrypt( const char * _pcString, size_t /*_sLen*/, std::string &_sResult ) {
 		const char * pcKey = EE_UNICODE_DECRYPT;
 		static const size_t sKeyLen = std::strlen( pcKey );
 		for ( size_t J = 0; _pcString[J]; ++J ) {

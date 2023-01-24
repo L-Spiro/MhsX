@@ -13,7 +13,7 @@
 #endif	// #ifdef MX_XML_TEST
 
 #ifdef _DEBUG
-#define MX_JSON_TEST
+//#define MX_JSON_TEST
 #endif	// #ifdef _DEBUG
 #ifdef MX_JSON_TEST
 #include "LSONJson.h"

@@ -11,7 +11,7 @@ namespace lsw {
 	DWORD CMultiSplitter::m_dwIds = 0;
 
 	CMultiSplitter::CMultiSplitter( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
-		CWidget( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(CBase::MultiSplitterAtom()) ), _pwParent, _bCreateWidget, _hMenu ),
+		CWidget( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(CBase::MultiSplitterAtom()) ), _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
 		m_iBarWidth( 4 ),
 		m_pmlDragLayer( nullptr ),
 		m_sDragBarIndex( 0 ),
@@ -454,7 +454,7 @@ namespace lsw {
 	}
 
 	// WM_LBUTTONDOWN.
-	CWidget::LSW_HANDLED CMultiSplitter::LButtonDown( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) {
+	CWidget::LSW_HANDLED CMultiSplitter::LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
 		// If we only have 0 or 1 child, do nothing.
 		m_pmlDragLayer = nullptr;
 		POINT pCurPos = { _pCursorPos.x, _pCursorPos.y };
@@ -469,7 +469,7 @@ namespace lsw {
 	}
 
 	// WM_MOUSEMOVE.
-	CWidget::LSW_HANDLED CMultiSplitter::MouseMove( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) {
+	CWidget::LSW_HANDLED CMultiSplitter::MouseMove( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
 		m_pLastMouseMove = { _pCursorPos.x, _pCursorPos.y };
 		m_bSetCursorToggle = true;
 		if ( m_pmlDragLayer ) {
@@ -482,7 +482,7 @@ namespace lsw {
 	}
 
 	// WM_LBUTTONUP.
-	CWidget::LSW_HANDLED CMultiSplitter::LButtonUp( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) {
+	CWidget::LSW_HANDLED CMultiSplitter::LButtonUp( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
 		if ( m_pmlDragLayer ) {
 			DrawBar( m_pLastPoint );
 			POINT pCurPos = { _pCursorPos.x, _pCursorPos.y };
@@ -512,7 +512,7 @@ namespace lsw {
 	}
 
 	// WM_SETCURSOR.
-	CWidget::LSW_HANDLED CMultiSplitter::SetCursor( CWidget * _pwControl, WORD _wHitTest, WORD _wIdent ) {
+	CWidget::LSW_HANDLED CMultiSplitter::SetCursor( CWidget * /*_pwControl*/, WORD /*_wHitTest*/, WORD /*_wIdent*/ ) {
 		HCURSOR hCursor = NULL;
 		if ( m_bSetCursorToggle ) {
 			LSW_MS_LAYER * pmlDragLayer = nullptr;

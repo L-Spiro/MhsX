@@ -118,11 +118,11 @@ namespace mx {
 		tTab.ptWidget->InitControl( tTab.ptWidget->Wnd() );
 
 
-		TCITEMW tie = { 0 };
-		tie.mask = TCIF_TEXT;
-		tie.pszText = const_cast<LPWSTR>(std::wcsrchr( _pwcFile, L'\\' ));
-		if ( tie.pszText == NULL ) { tie.pszText = const_cast<LPWSTR>(_pwcFile); }
-		else { tie.pszText++; }
+		TCITEMW tciItem = { 0 };
+		tciItem.mask = TCIF_TEXT;
+		tciItem.pszText = const_cast<LPWSTR>(std::wcsrchr( _pwcFile, L'\\' ));
+		if ( tciItem.pszText == NULL ) { tciItem.pszText = const_cast<LPWSTR>(_pwcFile); }
+		else { tciItem.pszText++; }
 
 		tTab.ptWidget->BeginLargeUpdate();
 		if ( !FillTree( tTab ) ) {
@@ -133,7 +133,7 @@ namespace mx {
 		tTab.ptWidget->FinishUpdate();
 
 
-		if ( ptTab->InsertItem( 0, &tie, tTab.ptWidget ) == -1 ) {
+		if ( ptTab->InsertItem( 0, &tciItem, tTab.ptWidget ) == -1 ) {
 			delete tTab.ppoPeObject;
 			delete tTab.ptWidget;
 			return false;

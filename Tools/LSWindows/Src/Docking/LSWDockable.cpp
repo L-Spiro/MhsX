@@ -34,7 +34,7 @@ namespace lsw {
 	CDockable::LSW_DOCK_DRAG_RECT_TYPE CDockable::m_ddrtDragRectType = CDockable::LSW_DDRT_CHECKERED;
 
 	CDockable::CDockable( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
-		CWidget( _wlLayout.ChangeStyle( LSW_POPUP_STYLES | (_wlLayout.dwStyle & WS_VISIBLE) ).ChangeStyleEx( LSW_POPUP_STYLESEX ).ChangeClass( reinterpret_cast<LPCWSTR>(CBase::DockableAtom()) ), _pwParent, _bCreateWidget, _hMenu ),
+		CWidget( _wlLayout.ChangeStyle( LSW_POPUP_STYLES | (_wlLayout.dwStyle & WS_VISIBLE) ).ChangeStyleEx( LSW_POPUP_STYLESEX ).ChangeClass( reinterpret_cast<LPCWSTR>(CBase::DockableAtom()) ), _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
 		m_dwState( LSW_DS_FLOATING ),
 		m_dwDockStyle( LSW_DS_ALLOW_DOCKALL ),
 		m_iFrameWidth( 0 ),
@@ -134,7 +134,7 @@ namespace lsw {
 	}
 
 	// WM_LBUTTONUP.
-	CWidget::LSW_HANDLED CDockable::LButtonUp( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) {
+	CWidget::LSW_HANDLED CDockable::LButtonUp( DWORD /*_dwVirtKeys*/, const POINTS &/*_pCursorPos*/ ) {
 		if ( m_pwDraggingDockWnd ) {
 			CancelDrag( FALSE );
 		}
@@ -150,7 +150,7 @@ namespace lsw {
 	}
 
 	// WM_MOUSEMOVE.
-	CWidget::LSW_HANDLED CDockable::MouseMove( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) {
+	CWidget::LSW_HANDLED CDockable::MouseMove( DWORD /*_dwVirtKeys*/, const POINTS &/*_pCursorPos*/ ) {
 		if ( m_pwDraggingDockWnd ) {
 			// Yes. Move the drag rectangle.
 			POINT pMousePos;
@@ -221,10 +221,10 @@ namespace lsw {
 	}
 
 	// WM_NCLBUTTONDOWN.
-	CWidget::LSW_HANDLED CDockable::NcLButtonDown( INT _iHitTest, const POINTS &_pCursorPos ) {
+	CWidget::LSW_HANDLED CDockable::NcLButtonDown( INT _iHitTest, const POINTS &/*_pCursorPos*/ ) {
 		if ( _iHitTest == HTCAPTION && (m_dwDockStyle & LSW_DS_ALLOW_DOCKALL) && m_vDockingTargets.size() ) {
 			if ( (m_dwDockStyle & LSW_DS_KEEPORIGSTATE) == 0 ) {
-					BOOL bControlKeyDown = (::GetKeyState( VK_CONTROL ) & 0x8000) ? TRUE : FALSE;
+					//BOOL bControlKeyDown = (::GetKeyState( VK_CONTROL ) & 0x8000) ? TRUE : FALSE;
 
 					::GetCursorPos( &m_pMousePos );
 					m_pDragStartPos = m_pMousePos;
@@ -259,7 +259,7 @@ namespace lsw {
 	}
 
 	// WM_NCMOUSEMOVE.
-	CWidget::LSW_HANDLED CDockable::NcMouseMove( INT _iHitTest, const POINTS &_pCursorPos ) {
+	CWidget::LSW_HANDLED CDockable::NcMouseMove( INT /*_iHitTest*/, const POINTS &/*_pCursorPos*/ ) {
 		/*if ( _iHitTest != m_iLastHit ) {
 			::InvalidateRect( Wnd(), NULL, FALSE );
 			::UpdateWindow( Wnd() );
@@ -307,7 +307,7 @@ namespace lsw {
 				else {
 					rBorder.left = _pwpPos->cy;
 				}
-				if ( m_dwDockSize != rBorder.left ) {
+				if ( m_dwDockSize != DWORD( rBorder.left ) ) {
 					m_dwDockSize = static_cast<DWORD>(rBorder.left);
 					UpdateLayout( Parent() );
 				}
@@ -780,8 +780,8 @@ namespace lsw {
 			0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF
 		};
 		HDC hDc = ::GetDC( NULL );
-		const WORD * pwBitmap = (m_ddrtDragRectType = CDockable::LSW_DDRT_CHECKERED) ? wDotPatternBmp2 : wDotPatternBmp1;
-		INT iBorder = (m_ddrtDragRectType = CDockable::LSW_DDRT_CHECKERED) ? 1 : 3;
+		const WORD * pwBitmap = (m_ddrtDragRectType == CDockable::LSW_DDRT_CHECKERED) ? wDotPatternBmp2 : wDotPatternBmp1;
+		INT iBorder = (m_ddrtDragRectType == CDockable::LSW_DDRT_CHECKERED) ? 1 : 3;
 
 		CBitmap bBitmap;
 		bBitmap.CreateBitmap( 8, 8, 1, 1, pwBitmap );

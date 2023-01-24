@@ -4397,7 +4397,7 @@ namespace ee {
 #endif	// #if EE_GEN_HTML_TABLE
 
 	// Encrypts a string.
-	void CHtml::Encrypt( const char * _pcString, size_t _sLen, std::string &_sResult ) {
+	void CHtml::Encrypt( const char * _pcString, size_t /*_sLen*/, std::string &_sResult ) {
 		const char * pcKey = EE_UNICODE_DECRYPT;
 		static const size_t sKeyLen = std::strlen( pcKey );
 		for ( size_t J = 0; _pcString[J]; ++J ) {

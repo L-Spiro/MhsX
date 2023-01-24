@@ -63,7 +63,7 @@ namespace lsw {
 		virtual bool						IsTreeList() const { return true; }
 
 		// Tree-view notification for an expanded item.
-		virtual BOOL						ItemExpandedNotify( NMTREEVIEWW * _ptvNotif ) {
+		virtual BOOL						ItemExpandedNotify( NMTREEVIEWW * /*_ptvNotif*/ ) {
 			Redraw( true );
 			return 0; /* Return value is ignored. */
 		}

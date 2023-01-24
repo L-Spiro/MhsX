@@ -6,7 +6,7 @@
 namespace lsw {
 
 	CSplitter::CSplitter( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
-		CWidget( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(CBase::SplitterAtom()) ), _pwParent, _bCreateWidget, _hMenu ),
+		CWidget( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(CBase::SplitterAtom()) ), _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
 		m_bDragging( FALSE ),
 		m_dwBarWidth( 4 ),
 		m_dwSplitterType( LSW_SS_HORIZONTAL ),
@@ -241,7 +241,7 @@ namespace lsw {
 	}
 
 	// WM_LBUTTONDOWN.
-	CWidget::LSW_HANDLED CSplitter::LButtonDown( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) {
+	CWidget::LSW_HANDLED CSplitter::LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
 		// If we only have 0 or 1 child, do nothing.
 		if ( m_vAttachments.size() <= 1 ) { return LSW_H_CONTINUE; }
 		m_bDragging = TRUE;
@@ -255,7 +255,7 @@ namespace lsw {
 	}
 
 	// WM_MOUSEMOVE.
-	CWidget::LSW_HANDLED CSplitter::MouseMove( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) {
+	CWidget::LSW_HANDLED CSplitter::MouseMove( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
 		if ( !m_bDragging ) { return LSW_H_CONTINUE; }
 
 		POINT pCurPos = { _pCursorPos.x, _pCursorPos.y };
@@ -268,7 +268,7 @@ namespace lsw {
 	}
 
 	// WM_LBUTTONUP.
-	CWidget::LSW_HANDLED CSplitter::LButtonUp( DWORD _dwVirtKeys, const POINTS &_pCursorPos ) {
+	CWidget::LSW_HANDLED CSplitter::LButtonUp( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
 		if ( !m_bDragging ) { return LSW_H_CONTINUE; }
 
 		m_bDragging = FALSE;

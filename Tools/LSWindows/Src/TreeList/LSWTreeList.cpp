@@ -10,7 +10,7 @@ namespace lsw {
 	WCHAR CTreeList::m_szProp[2] = { 0 };
 
 	CTreeList::CTreeList( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
-		CWidget( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(CBase::TreeListAtom()) ), _pwParent, _bCreateWidget, _hMenu ),
+		CWidget( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(CBase::TreeListAtom()) ), _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
 		m_hListView( NULL ),
 		m_hTreeView( NULL ),
 		m_hHeader( NULL ),
@@ -220,7 +220,7 @@ namespace lsw {
 					CBase::GetThisHandle(),
 					NULL );
 				::SendMessageW( m_hHeader, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), FALSE );
-				HGDIOBJ hNewFont = reinterpret_cast<HGDIOBJ>(::SendMessageW( m_hHeader, WM_GETFONT, 0L, 0L ));
+				/*HGDIOBJ hNewFont = */reinterpret_cast<HGDIOBJ>(::SendMessageW( m_hHeader, WM_GETFONT, 0L, 0L ));
 				LSW_RECT rHeaderRect;
 				::GetClientRect( m_hHeader, &rHeaderRect );
 				m_uiHeaderHeight = rHeaderRect.Height();
@@ -334,7 +334,7 @@ namespace lsw {
 			TVITEM tvItem;
 			tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_CHILDREN;
 			tvItem.hItem = m_vRows[I].htiItem;
-			tvItem.stateMask = ~0;
+			tvItem.stateMask = static_cast<UINT>(~0);
 			if ( !TreeView_GetItem( m_hTreeView, &tvItem ) ) { return false; }
 			// Is it selected?
 			if ( (tvItem.state | m_vRows[I].uiStateEx) & TVIS_SELECTED ) {
@@ -351,7 +351,7 @@ namespace lsw {
 			TVITEM tvItem;
 			tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_CHILDREN;
 			tvItem.hItem = m_vRows[I].htiItem;
-			tvItem.stateMask = ~0;
+			tvItem.stateMask = static_cast<UINT>(~0);
 			if ( !TreeView_GetItem( m_hTreeView, &tvItem ) ) { return false; }
 			// Is it selected?
 			if ( (tvItem.state | m_vRows[I].uiStateEx) & TVIS_SELECTED ) {
@@ -368,7 +368,7 @@ namespace lsw {
 			TVITEM tvItem;
 			tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_CHILDREN;
 			tvItem.hItem = m_vRows[I].htiItem;
-			tvItem.stateMask = ~0;
+			tvItem.stateMask = static_cast<UINT>(~0);
 			if ( !TreeView_GetItem( m_hTreeView, &tvItem ) ) { return false; }
 			// Does it have children and is unexpanded?
 			if ( !(tvItem.state & TVIS_EXPANDED) && tvItem.cChildren != 0 ) { return true; }
@@ -382,7 +382,7 @@ namespace lsw {
 			TVITEM tvItem;
 			tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_CHILDREN;
 			tvItem.hItem = m_vRows[I].htiItem;
-			tvItem.stateMask = ~0;
+			tvItem.stateMask = static_cast<UINT>(~0);
 			if ( !TreeView_GetItem( m_hTreeView, &tvItem ) ) { return false; }
 			// Does it have children and is expanded?
 			if ( (tvItem.state & TVIS_EXPANDED) && tvItem.cChildren != 0 ) { return true; }
@@ -396,7 +396,7 @@ namespace lsw {
 			TVITEM tvItem;
 			tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_CHILDREN;
 			tvItem.hItem = m_vRows[I].htiItem;
-			tvItem.stateMask = ~0;
+			tvItem.stateMask = static_cast<UINT>(~0);
 			if ( TreeView_GetItem( m_hTreeView, &tvItem ) ) {
 				// Is it selected?
 				if ( (tvItem.state | m_vRows[I].uiStateEx) & TVIS_SELECTED ) {
@@ -415,7 +415,7 @@ namespace lsw {
 			TVITEM tvItem;
 			tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_CHILDREN;
 			tvItem.hItem = m_vRows[I].htiItem;
-			tvItem.stateMask = ~0;
+			tvItem.stateMask = static_cast<UINT>(~0);
 			if ( TreeView_GetItem( m_hTreeView, &tvItem ) ) {
 				// Does it have children and is unexpanded?
 				if ( !(tvItem.state & TVIS_EXPANDED) && tvItem.cChildren != 0 ) {
@@ -431,7 +431,7 @@ namespace lsw {
 			TVITEM tvItem;
 			tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_CHILDREN;
 			tvItem.hItem = m_vRows[I].htiItem;
-			tvItem.stateMask = ~0;
+			tvItem.stateMask = static_cast<UINT>(~0);
 			if ( TreeView_GetItem( m_hTreeView, &tvItem ) ) {
 				// Is it selected?
 				if ( (tvItem.state | m_vRows[I].uiStateEx) & TVIS_SELECTED ) {
@@ -450,7 +450,7 @@ namespace lsw {
 			TVITEM tvItem;
 			tvItem.mask = TVIF_HANDLE | TVIF_STATE | TVIF_CHILDREN;
 			tvItem.hItem = m_vRows[I].htiItem;
-			tvItem.stateMask = ~0;
+			tvItem.stateMask = static_cast<UINT>(~0);
 			if ( TreeView_GetItem( m_hTreeView, &tvItem ) ) {
 				// Does it have children and is expanded?
 				if ( (tvItem.state & TVIS_EXPANDED) && tvItem.cChildren != 0 ) {
@@ -501,7 +501,7 @@ namespace lsw {
 	}
 
 	// WM_HSCROLL
-	CWidget::LSW_HANDLED CTreeList::HScroll( USHORT _uScrollPos, USHORT _uScrollType, HWND _hSender ) {
+	CWidget::LSW_HANDLED CTreeList::HScroll( USHORT _uScrollPos, USHORT _uScrollType, HWND /*_hSender*/ ) {
 		//return LSW_H_CONTINUE;
 		int xDelta;     // xDelta = new_pos - current_pos
 		int xNewPos;    // new position
@@ -639,7 +639,7 @@ namespace lsw {
 	}
 
 	// Notification that a header is being dragged.
-	BOOL CTreeList::NotifyHeaderDrag( LPNMHEADERW _lphHeader ) {
+	BOOL CTreeList::NotifyHeaderDrag( LPNMHEADERW /*_lphHeader*/ ) {
 		UpdateHorScroll();
 		Redraw( true );
 		return FALSE;
@@ -849,7 +849,7 @@ namespace lsw {
 	}
 
 	// Gets the tree item under the given mouse position.
-	HTREEITEM CTreeList::TreeItemAt( SHORT _sX, SHORT _sY ) const {
+	HTREEITEM CTreeList::TreeItemAt( SHORT /*_sX*/, SHORT _sY ) const {
 		TVITEM tvItem;
 		tvItem.mask = TVIF_HANDLE;
 		LSW_RECT rRect, rTree;
@@ -867,7 +867,7 @@ namespace lsw {
 	}
 
 	// Handle painting.
-	BOOL CTreeList::OnPaint( WPARAM _wParam, LPARAM _lParam ) {
+	BOOL CTreeList::OnPaint( WPARAM /*_wParam*/, LPARAM /*_lParam*/ ) {
 		LSW_BEGINPAINT bpPaint( Wnd() );
 		if ( m_bLocked ) { return 0; }
 
@@ -890,7 +890,7 @@ namespace lsw {
 	}
 
 	// Draw the tree items.
-	void CTreeList::DrawTreeItems( HDC _hDc, LSW_PAINTPARMS &_ppParms, PAINTSTRUCT &_psPaintStruct ) {
+	void CTreeList::DrawTreeItems( HDC _hDc, LSW_PAINTPARMS &_ppParms, PAINTSTRUCT &/*_psPaintStruct*/ ) {
 		/*{
 			WNDPROC wpOrig = m_wpTreeViewProc;
 			::CallWindowProc( wpOrig, m_hTreeView, WM_PAINT, 0, 0 );
@@ -921,7 +921,7 @@ namespace lsw {
 			::InvalidateRect( Wnd(), &rScrollInWnd, FALSE );
 			//::InvalidateRect( m_hTreeView, &rThisVertScrollRect.ClientToScreen( Wnd() ).ScreenToClient( m_hTreeView ), FALSE );
 			*/
-			int iWidth = ::GetSystemMetrics( SM_CXVSCROLL );
+			/*int iWidth = */::GetSystemMetrics( SM_CXVSCROLL );
 			rThisVertScrollRect.left = rThisVertScrollRect.right - ::GetSystemMetrics( SM_CXVSCROLL );
 			LSW_RECT rTemp = sbiInfo.rcScrollBar;
 #if 0
@@ -1070,7 +1070,7 @@ namespace lsw {
 		}
 
 		//::SetWindowOrgEx( _hDc, origin.x, origin.y, 0 );
-		WNDPROC wpOrig = m_wpTreeViewProc;
+		//WNDPROC wpOrig = m_wpTreeViewProc;
 		::InvalidateRect( m_hHeader, NULL, FALSE );
 		::CallWindowProc( m_wpHeaderProc, m_hHeader, WM_PAINT, 0, 0 );
 
@@ -1085,10 +1085,10 @@ namespace lsw {
 			::InvalidateRect( m_hTreeView, &rItem, FALSE );
 #endif	// 0
 			LSW_RECT rTemp = sbiInfo.rcScrollBar;
-			LSW_RECT rTmp = rTemp.ScreenToClient( m_hTreeView );
-			::InvalidateRect( m_hTreeView, &rTmp, TRUE );
-			WNDPROC wpOrig = m_wpTreeViewProc;
-			::CallWindowProc( wpOrig, m_hTreeView, WM_NCPAINT, 0, 0 );
+			LSW_RECT rTmp2 = rTemp.ScreenToClient( m_hTreeView );
+			::InvalidateRect( m_hTreeView, &rTmp2, TRUE );
+			WNDPROC wpOrig2 = m_wpTreeViewProc;
+			::CallWindowProc( wpOrig2, m_hTreeView, WM_NCPAINT, 0, 0 );
 		}
 #endif
 	}
@@ -1146,7 +1146,7 @@ namespace lsw {
 	}
 
 	// Selects a tree item (or NULL to unselect all tree items).
-	BOOL CTreeList::Select( HTREEITEM _htiItem, UINT _uiCode, LPARAM _lpParm ) {
+	BOOL CTreeList::Select( HTREEITEM _htiItem, UINT /*_uiCode*/, LPARAM _lpParm ) {
 		if ( !_htiItem ) {
 			//if ( TreeView_Select( m_hTreeView, NULL, _uiCode ) ) {
 			{
@@ -1162,7 +1162,7 @@ namespace lsw {
 			return FALSE;
 		}
 		if ( _lpParm == -1 ) {
-			UINT uiState = GetTreeItemState( _htiItem, &_lpParm );
+			/*UINT uiState = */GetTreeItemState( _htiItem, &_lpParm );
 		}
 		if ( _lpParm >= 0 ) {
 			TreeView_SetItemState( m_hTreeView, _htiItem, TVIS_SELECTED, TVIS_SELECTED );
@@ -1181,7 +1181,7 @@ namespace lsw {
 		if ( !_htiItem ) { return Select( _htiItem, _uiCode, _lpParm ); }
 
 		if ( _lpParm == -1 ) {
-			UINT uiState = GetTreeItemState( _htiItem, &_lpParm );
+			/*UINT uiState = */GetTreeItemState( _htiItem, &_lpParm );
 		}
 		if ( _lpParm >= 0 ) {
 			if ( m_vRows[_lpParm].uiStateEx & TVIS_SELECTED ) {
@@ -1206,10 +1206,10 @@ namespace lsw {
 		if ( !_htiItem ) { return Select( _htiItem, _uiCode, _lpParm ); }
 
 		if ( _lpParm == -1 ) {
-			UINT uiState = GetTreeItemState( _htiItem, &_lpParm );
+			/*UINT uiState = */GetTreeItemState( _htiItem, &_lpParm );
 		}
 		for ( auto I = m_vRows.size(); I--; ) {
-			if ( I == _lpParm ) {
+			if ( static_cast<LPARAM>(I) == _lpParm ) {
 				// Select it.
 				TreeView_SetItemState( m_hTreeView, _htiItem, TVIS_SELECTED, TVIS_SELECTED );
 				TreeView_EnsureVisible( m_hTreeView, _htiItem );
@@ -1336,11 +1336,9 @@ namespace lsw {
 				break;
 			}
 			case WM_LBUTTONDBLCLK : {
-				volatile int ghjg = 0;
 				break;
 			}
 			case WM_NCLBUTTONDBLCLK : {
-				volatile int ghjg = 0;
 				break;
 			}
 		}

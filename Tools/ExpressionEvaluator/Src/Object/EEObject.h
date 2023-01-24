@@ -41,18 +41,18 @@ namespace ee {
 		}
 
 		// Creates a formatted string representation of the object.
-		virtual std::string							FormattedString( const std::string &_sFormat ) = 0 {
+		virtual std::string							FormattedString( const std::string &/*_sFormat*/ ) = 0 {
 			return std::string( "<null>" );
 		}
 
 		// Converts to another object of the given type.
-		virtual CExpEvalContainer::EE_RESULT		ConvertTo( EE_NUM_CONSTANTS _ncType ) = 0 {
+		virtual CExpEvalContainer::EE_RESULT		ConvertTo( EE_NUM_CONSTANTS /*_ncType*/ ) = 0 {
 			CExpEvalContainer::EE_RESULT rRet = { EE_NC_INVALID };
 			return rRet;
 		}
 
 		// Initializes this object given another object.
-		virtual bool								InitializeFrom( const CExpEvalContainer::EE_RESULT &_rObj ) = 0 {
+		virtual bool								InitializeFrom( const CExpEvalContainer::EE_RESULT &/*_rObj*/ ) = 0 {
 			return false;
 		}
 
@@ -71,12 +71,12 @@ namespace ee {
 		}
 
 		// Array access.
-		virtual CExpEvalContainer::EE_RESULT		ArrayAccess( int64_t _i64Idx ) = 0 {
+		virtual CExpEvalContainer::EE_RESULT		ArrayAccess( int64_t /*_i64Idx*/ ) = 0 {
 			return { EE_NC_OBJECT };
 		}
 
 		// Extended array access.
-		virtual CExpEvalContainer::EE_RESULT		ArrayAccessEx( int64_t _i64Idx0, int64_t _i64Idx1, uint32_t _ui32Mask ) = 0 {
+		virtual CExpEvalContainer::EE_RESULT		ArrayAccessEx( int64_t /*_i64Idx0*/, int64_t /*_i64Idx1*/, uint32_t /*_ui32Mask*/ ) = 0 {
 			return { EE_NC_OBJECT };
 		}
 
@@ -84,49 +84,49 @@ namespace ee {
 		virtual size_t								ArrayLength() { return 1; }
 
 		// Operator ==.
-		virtual bool								Equals( CExpEvalContainer::EE_RESULT &_rRet ) { return false; }
+		virtual bool								Equals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
 
 		// Operator +.
-		virtual CExpEvalContainer::EE_RESULT		Plus( CExpEvalContainer::EE_RESULT &_rRet ) { return { EE_NC_INVALID }; }
+		virtual CExpEvalContainer::EE_RESULT		Plus( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return { EE_NC_INVALID }; }
 
 		// Operator -.
-		virtual CExpEvalContainer::EE_RESULT		Minus( CExpEvalContainer::EE_RESULT &_rRet ) { return { EE_NC_INVALID }; }
+		virtual CExpEvalContainer::EE_RESULT		Minus( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return { EE_NC_INVALID }; }
 
 		// Operator *.
-		virtual CExpEvalContainer::EE_RESULT		Multiply( CExpEvalContainer::EE_RESULT &_rRet ) { return { EE_NC_INVALID }; }
+		virtual CExpEvalContainer::EE_RESULT		Multiply( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return { EE_NC_INVALID }; }
 
 		// Operator /.
-		virtual CExpEvalContainer::EE_RESULT		Divide( CExpEvalContainer::EE_RESULT &_rRet ) { return { EE_NC_INVALID }; }
+		virtual CExpEvalContainer::EE_RESULT		Divide( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return { EE_NC_INVALID }; }
 
 		// Operator +=.
-		virtual bool								PlusEquals( CExpEvalContainer::EE_RESULT &_rRet ) { return false; }
+		virtual bool								PlusEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
 
 		// Operator -=.
-		virtual bool								MinusEquals( CExpEvalContainer::EE_RESULT &_rRet ) { return false; }
+		virtual bool								MinusEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
 
 		// Operator *=.
-		virtual bool								TimesEquals( CExpEvalContainer::EE_RESULT &_rRet ) { return false; }
+		virtual bool								TimesEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
 
 		// Operator /=.
-		virtual bool								DivideEquals( CExpEvalContainer::EE_RESULT &_rRet ) { return false; }
+		virtual bool								DivideEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
 
 		// Operator %=.
-		virtual bool								ModEquals( CExpEvalContainer::EE_RESULT &_rRet ) { return false; }
+		virtual bool								ModEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
 
 		// Operator <<=.
-		virtual bool								ShiftLeftEquals( CExpEvalContainer::EE_RESULT &_rRet ) { return false; }
+		virtual bool								ShiftLeftEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
 
 		// Operator >>=.
-		virtual bool								ShiftRightEquals( CExpEvalContainer::EE_RESULT &_rRet ) { return false; }
+		virtual bool								ShiftRightEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
 
 		// Operator ^=.
-		virtual bool								CarrotEquals( CExpEvalContainer::EE_RESULT &_rRet ) { return false; }
+		virtual bool								CarrotEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
 
 		// Operator |=.
-		virtual bool								OrEquals( CExpEvalContainer::EE_RESULT &_rRet ) { return false; }
+		virtual bool								OrEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
 
 		// Operator &=.
-		virtual bool								AndEquals( CExpEvalContainer::EE_RESULT &_rRet ) { return false; }
+		virtual bool								AndEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
 
 
 	protected :

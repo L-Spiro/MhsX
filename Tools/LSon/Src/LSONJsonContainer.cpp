@@ -447,12 +447,11 @@ namespace lson {
 							if ( vStack[stThis].pstReturn ) {
 								(*vStack[stThis].pstReturn) = stThisIdx;
 							}
-							LSON_JSON_VALUE * pjvCurVal2 = CurStackPointer( vCurElement );
 							vCurElement.pop_back();
 
 							LSON_JSON_VALUE * pjvCurVal = CurStackPointer( vCurElement );
 							if ( pjvCurVal ) {
-								if ( pjvCurVal->vtType == LSON_V_ARRAY ) {
+								if ( pjvCurVal->vtType == LSON_VT_ARRAY ) {
 									pjvCurVal->vArray.push_back( stThisIdx );
 								}
 							}

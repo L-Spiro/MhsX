@@ -213,7 +213,7 @@ namespace ee {
 	}
 
 	// Returns the ordinal value of the object as a Unicode character (always EE_NC_UNSIGNED).
-	CExpEvalContainer::EE_RESULT CStringBaseApi::Ord( const std::string &_sIn, CExpEvalContainer * _peecCont ) {
+	CExpEvalContainer::EE_RESULT CStringBaseApi::Ord( const std::string &_sIn, CExpEvalContainer * /*_peecCont*/ ) {
 		CExpEvalContainer::EE_RESULT rTmp = { EE_NC_UNSIGNED };
 		if ( !_sIn.size() ) {
 			rTmp.u.ui64Val = 0;

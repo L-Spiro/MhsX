@@ -161,7 +161,7 @@ namespace ee {
 			for ( size_t I = 0; I < sRes.size(); ++I ) {
 				ui64ValueCopy = (*this);
 				uint64_t uiQuo = Divide( ui64ValueCopy, biMul )/* % _iBase*/;
-				uint64_t uiMod = ui64ValueCopy.m_ui32Data[0] % _iBase;
+				//uint64_t uiMod = ui64ValueCopy.m_ui32Data[0] % _iBase;
 				//uint64_t uiQuo = 1;
 				//ui64ValueCopy = (*this);
 				//DivideFull( ui64ValueCopy, biMul, biQuo );
@@ -671,8 +671,8 @@ namespace ee {
 
 				ee::CBigInt::EE_UNPACK_INDEX index{};
 				index.ui64Offset = static_cast<uint16_t>( vElements.size() );
-				index.ui8Zeroes = CountLeadingZeroes( biX );
-				index.ui8Size = biX.m_ui32Used - index.ui8Zeroes;
+				index.ui8Zeroes = uint8_t( CountLeadingZeroes( biX ) );
+				index.ui8Size = uint8_t( biX.m_ui32Used - index.ui8Zeroes );
 
 				for ( uint32_t j = index.ui8Zeroes; j != biX.m_ui32Used; ++j ) {
 					vElements.push_back( biX.m_ui32Data[j] );

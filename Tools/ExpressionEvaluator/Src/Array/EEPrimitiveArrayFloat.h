@@ -157,17 +157,17 @@ namespace ee {
 		}
 
 		// Operator ^=.
-		virtual bool								CarrotEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
+		virtual bool								CarrotEquals( size_t /*_sIdx*/, CExpEvalContainer::EE_RESULT &/*_rRet*/ ) {
 			return false;
 		}
 
 		// Operator |=.
-		virtual bool								OrEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
+		virtual bool								OrEquals( size_t /*_sIdx*/, CExpEvalContainer::EE_RESULT &/*_rRet*/ ) {
 			return false;
 		}
 
 		// Operator &=.
-		virtual bool								AndEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
+		virtual bool								AndEquals( size_t /*_sIdx*/, CExpEvalContainer::EE_RESULT &/*_rRet*/ ) {
 			return false;
 		}
 

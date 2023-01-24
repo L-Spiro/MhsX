@@ -69,6 +69,12 @@ namespace lsw {
 		// Returns true if this is a CTab class.
 		virtual bool						IsTab() const { return true; }
 
+		/**
+		 * Sets whether to show the close boxes or not.
+		 *
+		 * \param _bShowClose If true, close boxes are shown in the tabs.
+		 */
+		void								SetShowCloseBoxes( bool _bShowClose ) { m_bShowClose = _bShowClose; }
 
 	protected :
 		// == Types.
@@ -80,10 +86,12 @@ namespace lsw {
 
 		
 		// == Members.
-		// Data for each tab.
+		/** Data for each tab. */
 		std::vector<LSW_TAB>				m_vTabs;
-		// Original tab function.
+		/** Original tab function. */
 		LONG_PTR							m_lpOriginProc;
+		/** If true, close boxes appear in the tabs. */
+		bool								m_bShowClose;
 
 
 		// == Functions.

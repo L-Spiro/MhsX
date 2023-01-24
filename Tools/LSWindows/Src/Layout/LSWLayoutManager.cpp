@@ -110,7 +110,7 @@ namespace lsw {
 			return NULL;
 		}
 
-		HWND hWnd = ::CreateDialogIndirectParamW( CBase::GetThisHandle(), 
+		/*HWND hWnd = */::CreateDialogIndirectParamW( CBase::GetThisHandle(), 
 			dtTemplate.pdtTemplate, 
 			_pwParent->Wnd(), 
 			CWidget::DialogProc,
@@ -230,8 +230,8 @@ namespace lsw {
 		for ( SIZE_T I = 0; I < _sTotal; ++I ) {
 			HMENU hTemp = CreateMenu( _pmlLayouts[I] );
 			if ( !hTemp ) {
-				for ( auto I = mIdToMenu.begin(); I != mIdToMenu.end(); ++I ) {
-					::DestroyMenu( I->second );
+				for ( auto J = mIdToMenu.begin(); J != mIdToMenu.end(); ++J ) {
+					::DestroyMenu( J->second );
 				}
 				return NULL;
 			}
@@ -278,8 +278,8 @@ namespace lsw {
 		for ( SIZE_T I = 0; I < _sTotal; ++I ) {
 			HMENU hTemp = I == 0 ? CreatePopupMenu( _pmlLayouts[I] ) : CreateMenu( _pmlLayouts[I] );
 			if ( !hTemp ) {
-				for ( auto I = mIdToMenu.begin(); I != mIdToMenu.end(); ++I ) {
-					::DestroyMenu( I->second );
+				for ( auto J = mIdToMenu.begin(); J != mIdToMenu.end(); ++J ) {
+					::DestroyMenu( J->second );
 				}
 				return NULL;
 			}
@@ -422,7 +422,7 @@ namespace lsw {
 	}
 
 	// Converts an LSW_WIDGET_LAYOUT structure to a DLGITEMTEMPLATE structure.  Pass nullptr to get the size to allocate.
-	SIZE_T CLayoutManager::LayoutToItemTemplate( const LSW_WIDGET_LAYOUT &_wlLayout, DLGITEMTEMPLATE * _pdittTemplate, CWidget * _pwCreationData ) {
+	SIZE_T CLayoutManager::LayoutToItemTemplate( const LSW_WIDGET_LAYOUT &_wlLayout, DLGITEMTEMPLATE * _pdittTemplate, CWidget * /*_pwCreationData*/ ) {
 		if ( _wlLayout.ltType == LSW_LT_TOOLTIP ) { return 0; }
 		uint8_t * pui8Temp = reinterpret_cast<uint8_t *>(_pdittTemplate);
 		SIZE_T sRet = sizeof( DLGITEMTEMPLATE );

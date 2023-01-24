@@ -273,7 +273,7 @@ namespace ee {
 	}
 
 	// Default ToString() function.
-	std::wstring CExpEvalContainer::DefaultToString( EE_RESULT &_rResult, uint64_t _ui64Options ) {
+	std::wstring CExpEvalContainer::DefaultToString( EE_RESULT &_rResult, uint64_t /*_ui64Options*/ ) {
 		std::wstring wsString;
 		switch ( _rResult.ncType ) {
 			case ee::EE_NC_SIGNED : {
@@ -2576,7 +2576,7 @@ namespace ee {
 		_ndNode.nType = EE_N_FOR_LOOP;
 		_ndNode.u.sNodeIndex = _ndExp0.sNodeIndex;
 		_ndNode.v.sNodeIndex = _ndExp1.sNodeIndex;
-		_ndNode.w.sNodeIndex = ~0;
+		_ndNode.w.sNodeIndex = size_t( ~0 );
 		_ndNode.x.sNodeIndex = _ndStatements.sNodeIndex;
 		AddNode( _ndNode );
 	}
@@ -2669,7 +2669,7 @@ namespace ee {
 		_ndNode.nType = EE_N_IF;
 		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
 		_ndNode.v.sNodeIndex = _ndStatements.sNodeIndex;
-		_ndNode.w.sNodeIndex = ~0;
+		_ndNode.w.sNodeIndex = size_t( ~0 );
 #ifdef EE_OPTIMIZE_FOR_RUNTIME
 		EE_RESULT rExp;
 		if ( IsConst( m_vNodes[_ndExp.sNodeIndex], rExp ) ) {
@@ -2757,7 +2757,7 @@ namespace ee {
 	void CExpEvalContainer::CreateArgListEntry( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARG_LIST_ENTRY;
 		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
-		_ndNode.v.sNodeIndex = ~0;
+		_ndNode.v.sNodeIndex = size_t( ~0 );
 		AddNode( _ndNode );
 	}
 
@@ -3329,8 +3329,8 @@ namespace ee {
 				EE_RESULT eTmp1 = ConvertResultOrObject( rExp1, EE_NC_FLOATING );
 				if ( eTmp1.ncType == EE_NC_INVALID ) { _rRes.ncType = EE_NC_INVALID; return false; }
 				_rRes.ncType = EE_NC_FLOATING;
-				_rRes.u.dVal = _ndExp.uFuncPtr.pfIntrins2Float80_Float80_Float80( eTmp0.u.dVal,
-					eTmp1.u.dVal );
+				_rRes.u.dVal = double( _ndExp.uFuncPtr.pfIntrins2Float80_Float80_Float80( eTmp0.u.dVal,
+					eTmp1.u.dVal ) );
 				return true;
 			}
 			case EE_N_INTRINSIC_2_FLOAT_FLOAT32_FLOAT80 : {
@@ -3946,7 +3946,7 @@ namespace ee {
 				{
 					EE_LOOP_STACK_ADDER lsaLoopStack( m_vLoopStack, EE_LOOP_STACK() );
 					uint64_t ui64Total = ConvertResultOrObject( aCusVar->second.rRes.u.poObj->Len(), EE_NC_UNSIGNED ).u.ui64Val;
-					if ( ui64Total != static_cast<int64_t>(static_cast<size_t>(ui64Total)) ) { return false; }
+					if ( ui64Total != static_cast<uint64_t>(static_cast<size_t>(ui64Total)) ) { return false; }
 					for ( size_t I = 0; I < ui64Total; ++I ) {
 						aFind->second.rRes = aCusVar->second.rRes.u.poObj->ArrayAccess( I );
 						if ( aFind->second.rRes.ncType == EE_NC_INVALID ) { return false; }
@@ -4973,7 +4973,7 @@ namespace ee {
 							if ( i64StartIdx < 0 ) {
 								if ( i64CodePoints == -1 ) {
 									i64CodePoints = ee::CExpEval::CountUtfCodePoints( m_vStrings[_ndExp.u.sStringIndex] );
-									if ( static_cast<size_t>(i64CodePoints) != i64CodePoints ) { EE_ERROR( EE_EC_BADARRAYIDX ); }
+									if ( int64_t( static_cast<size_t>(i64CodePoints) ) != i64CodePoints ) { EE_ERROR( EE_EC_BADARRAYIDX ); }
 								}
 								sStart = CBaseApi::ArrayIndexToLinearIndex( i64StartIdx, static_cast<size_t>(i64CodePoints) );
 							}
@@ -4994,7 +4994,7 @@ namespace ee {
 							if ( i64EndIdx < 0 ) {
 								if ( i64CodePoints == -1 ) {
 									i64CodePoints = ee::CExpEval::CountUtfCodePoints( m_vStrings[_ndExp.u.sStringIndex] );
-									if ( static_cast<size_t>(i64CodePoints) != i64CodePoints ) { EE_ERROR( EE_EC_BADARRAYIDX ); }
+									if ( int64_t( static_cast<size_t>(i64CodePoints) ) != i64CodePoints ) { EE_ERROR( EE_EC_BADARRAYIDX ); }
 								}
 								sEnd = CBaseApi::ArrayIndexToLinearIndex( i64EndIdx, static_cast<size_t>(i64CodePoints) );
 								//if ( sEnd == EE_INVALID_IDX ) { sEnd = 0; }
@@ -5223,8 +5223,8 @@ namespace ee {
 						EE_RESULT rNode1 = ConvertResultOrObject( soProcessMe.sSubResults[1], EE_NC_FLOATING );
 						if ( rNode1.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 						(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
-						(*soProcessMe.prResult).u.dVal = _ndExp.uFuncPtr.pfIntrins2Float80_Float80_Float80( rNode0.u.dVal,
-							rNode1.u.dVal );
+						(*soProcessMe.prResult).u.dVal = double( _ndExp.uFuncPtr.pfIntrins2Float80_Float80_Float80( rNode0.u.dVal,
+							rNode1.u.dVal ) );
 						EE_DONE;
 					}
 					case EE_N_INTRINSIC_2_FLOAT_FLOAT32_FLOAT80 : {
@@ -5750,7 +5750,7 @@ namespace ee {
 						EE_END_LOOP;
 					}
 					case EE_N_FOREACHOBJ : {
-						YYSTYPE::EE_NODE_DATA & ndDeclNode = m_vNodes[_ndExp.u.sNodeIndex];
+						//YYSTYPE::EE_NODE_DATA & ndDeclNode = m_vNodes[_ndExp.u.sNodeIndex];
 						if ( soProcessMe.uiLoopCounter < soProcessMe.prLoopObject->u.poObj->Len().u.ui64Val ) {
 							uint32_t uiStage = (uiProcessCount - 1) % 2;
 							if ( uiStage == 0 ) {
@@ -6185,7 +6185,7 @@ namespace ee {
 	}
 
 	// Creates a string reference given a string index.
-	bool CExpEvalContainer::CreateStringRef( size_t _stStrIdx ) {
+	bool CExpEvalContainer::CreateStringRef( size_t /*_stStrIdx*/ ) {
 		return false;
 		/*if ( m_vStringObjectsU8.size() <= _stStrIdx ) {
 			m_vStringObjectsU8.resize( _stStrIdx + 1 );
@@ -6262,7 +6262,7 @@ namespace ee {
 
 	// Eats the {..} part out of a string.  Assumes that _pcFormat points to the next character after the opening {.
 	// Also assumes that from { to } is all standard ASCII, since no special characters are allowed inside valid formatters.
-	std::string CExpEvalContainer::EatStringFormatter( const char * &_pcFormat, size_t &_stLen, size_t &_stArgIdx, const std::vector<EE_RESULT> &_vArgs ) {
+	std::string CExpEvalContainer::EatStringFormatter( const char * &_pcFormat, size_t &_stLen, size_t &_stArgIdx, const std::vector<EE_RESULT> &/*_vArgs*/ ) {
 		std::string sRet;
 		sRet.push_back( '{' );
 		size_t stNumberEat = 0;

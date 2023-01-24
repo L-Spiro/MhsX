@@ -111,13 +111,13 @@ namespace lsw {
 
 	// Gets the button text.  _pwcBuffer should be at least GetButtonTextLenW() characters in length.
 	DWORD CToolBar::GetButtonTextW( WORD _wId, WCHAR * _pwcBuffer ) const {
-		if ( !Wnd() ) { return -1; }
+		if ( !Wnd() ) { return static_cast<DWORD>(-1); }
 		return static_cast<DWORD>(::SendMessageW( Wnd(), TB_GETBUTTONTEXTW, static_cast<WPARAM>(_wId), reinterpret_cast<LPARAM>(_pwcBuffer) ));
 	}
 
 	// Gets the button text.  _pcBuffer should be at least GetButtonTextLenA() characters in length.
 	DWORD CToolBar::GetButtonTextA( WORD _wId, CHAR * _pcBuffer ) const {
-		if ( !Wnd() ) { return -1; }
+		if ( !Wnd() ) { return static_cast<DWORD>(-1); }
 		return static_cast<DWORD>(::SendMessageA( Wnd(), TB_GETBUTTONTEXTA, static_cast<WPARAM>(_wId), reinterpret_cast<LPARAM>(_pcBuffer) ));
 	}
 
@@ -161,12 +161,12 @@ namespace lsw {
 	}
 
 	// TBN_QUERYINSERT.
-	CWidget::LSW_HANDLED CToolBar::TbnQueryInsert( const LPNMTOOLBARW _lptbToolBar ) {
+	CWidget::LSW_HANDLED CToolBar::TbnQueryInsert( const LPNMTOOLBARW /*_lptbToolBar*/ ) {
 		return LSW_H_HANDLED;
 	}
 
 	// TBN_QUERYDELETE.
-	CWidget::LSW_HANDLED CToolBar::TbnQueryDelete( const LPNMTOOLBARW _lptbToolBar ) {
+	CWidget::LSW_HANDLED CToolBar::TbnQueryDelete( const LPNMTOOLBARW /*_lptbToolBar*/ ) {
 		return LSW_H_HANDLED;
 	}
 

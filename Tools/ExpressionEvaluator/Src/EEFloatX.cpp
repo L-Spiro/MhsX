@@ -219,7 +219,7 @@ namespace ee {
 			fTemp.CreateMinNormalized( _uiExpBits, _uiManBits, _bImplicitMantissaBit, _bHasSign );
 			dTempVal = fTemp.AsDouble();
 			const uint64_t uiMinN = (*reinterpret_cast<const uint64_t *>(&dTempVal));				// Min X-float normal as 64-bit float.
-			const uint64_t uiSignN = (1ULL << 63);													// 64-bit sign bit.
+			//const uint64_t uiSignN = (1ULL << 63);													// 64-bit sign bit.
 
 			double dTemp = (*reinterpret_cast<const double *>(&uiMinN));
 			dTempVal = (1ULL << (EE_FLOATX_DBL_MAN_BITS - 1)) / dTemp;
@@ -228,13 +228,13 @@ namespace ee {
 			}
 			const uint64_t uiMulN = (*reinterpret_cast<const uint64_t *>(&dTempVal));				// (1 << EE_FLOATX_DBL_MAN_BITS) / uiMinN
 			dTempVal = dTemp / (1ULL << ((EE_FLOATX_DBL_MAN_BITS - 1) - iShift));
-			const uint64_t uiMulC = (*reinterpret_cast<const uint64_t *>(&dTempVal));				// uiMinN / (1 << (EE_FLOATX_DBL_MAN_BITS - iShift))
+			//const uint64_t uiMulC = (*reinterpret_cast<const uint64_t *>(&dTempVal));				// uiMinN / (1 << (EE_FLOATX_DBL_MAN_BITS - iShift))
 
 			const int64_t uiInfC = uiInfN >> iShift;
 			const int64_t uiNanN = (uiInfC + 1) << iShift;											// Min X-float NaN as a 64-bit float.
 			const int64_t uiMaxC = uiMaxN >> iShift;
 			const int64_t uiMinC = uiMinN >> iShift;
-			const int64_t uiSignC = uiSignN >> iShiftSign;											// X-float sign bit.
+			//const int64_t uiSignC = uiSignN >> iShiftSign;											// X-float sign bit.
 
 			/*fTemp.CreateMinNormalized( 11, EE_FLOATX_DBL_MAN_BITS, true, true );
 			dTempVal = fTemp.AsDouble();*/
@@ -600,7 +600,7 @@ namespace ee {
 	}
 
 	// Gets the smallest normalized non-0 value for a float type with the given bits.
-	double CFloatX::GetNormalizedMinForBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit ) {
+	double CFloatX::GetNormalizedMinForBits( uint16_t _uiExpBits, uint16_t /*_uiManBits*/, bool /*_bImplicitMantissaBit*/ ) {
 		double dExpBias = ExpBias( _uiExpBits );		// Normalized exponent.
 		double dMaxExp = std::pow( 2.0, 1.0 - dExpBias );
 		return dMaxExp;

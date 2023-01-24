@@ -536,21 +536,21 @@ assignment_exp
 	: conditional_exp										{ $$ = $1; }
 	| custom_var assignment_op assignment_exp				{ m_peecContainer->CreateReAssignment( $1, $3, $2, $$ ); }
 	| identifier '=' EE_NEW backing_type '(' exp ')'
-															{ m_peecContainer->CreateArray( $1, $4, static_cast<uint32_t>(token::EE_TEMP), $6, ~0, ~0, $$ ); }
+															{ m_peecContainer->CreateArray( $1, size_t( $4 ), static_cast<size_t>(token::EE_TEMP), $6, size_t( ~0 ), size_t( ~0 ), $$ ); }
 	| identifier '=' EE_NEW backing_type '(' exp ',' backing_persistence ')'
-															{ m_peecContainer->CreateArray( $1, $4, $8, $6, ~0, ~0, $$ ); }
+															{ m_peecContainer->CreateArray( $1, size_t( $4 ), $8, $6, size_t( ~0 ), size_t( ~0 ), $$ ); }
 	| identifier '=' EE_NEW backing_type '(' exp ',' backing_persistence ',' exp ')'
 															{ m_peecContainer->CreateArray( $1, $4, $8, $6, $10.sNodeIndex, $10.sNodeIndex, $$ ); }
 	| identifier '=' EE_NEW backing_type '(' exp ',' backing_persistence ',' exp ',' exp ')'
 															{ m_peecContainer->CreateArray( $1, $4, $8, $6, $10.sNodeIndex, $12.sNodeIndex, $$ ); }
 	| identifier '=' EE_NEW '(' exp ')'
-															{ m_peecContainer->CreateArray( $1, static_cast<uint32_t>(CExpEvalParser::token::EE_DEFAULT), static_cast<uint32_t>(token::EE_TEMP), $5, ~0, ~0, $$ ); }
+															{ m_peecContainer->CreateArray( $1, static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), static_cast<size_t>(token::EE_TEMP), $5, size_t( ~0 ), size_t( ~0 ), $$ ); }
 	| identifier '=' EE_NEW '(' exp ',' backing_persistence ')'
-															{ m_peecContainer->CreateArray( $1, static_cast<uint32_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, ~0, ~0, $$ ); }
+															{ m_peecContainer->CreateArray( $1, static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, size_t( ~0 ), size_t( ~0 ), $$ ); }
 	| identifier '=' EE_NEW '(' exp ',' backing_persistence ',' exp ')'
-															{ m_peecContainer->CreateArray( $1, static_cast<uint32_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $9.sNodeIndex, $$ ); }
+															{ m_peecContainer->CreateArray( $1, static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $9.sNodeIndex, $$ ); }
 	| identifier '=' EE_NEW '(' exp ',' backing_persistence ',' exp ',' exp ')'
-															{ m_peecContainer->CreateArray( $1, static_cast<uint32_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $11.sNodeIndex, $$ ); }
+															{ m_peecContainer->CreateArray( $1, static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $11.sNodeIndex, $$ ); }
 	| identifier '=' assignment_exp							{ m_peecContainer->CreateAssignment( $1, $3, '=', false, $$ ); }
 	| EE_CONST identifier '=' assignment_exp				{ m_peecContainer->CreateAssignment( $2, $4, '=', true, $$ ); }
 	| array_var '[' exp ']' assignment_op assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, $5, $$ ); }

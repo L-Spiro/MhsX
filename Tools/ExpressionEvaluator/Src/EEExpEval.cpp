@@ -446,7 +446,7 @@ namespace ee {
 	size_t CExpEval::GetUtf8CharPosByIdx( const std::string &_sIn, size_t _sIx ) {
 		size_t I = 0;
 		size_t sThisSize = 0;
-		uint32_t ui32Char = 0;
+		//uint32_t ui32Char = 0;
 		for ( I = 0; I < _sIn.size() && _sIx; --_sIx, I += sThisSize ) {
 			sThisSize = Utf8CharSize( &_sIn[I], _sIn.size() - I );
 			if ( !sThisSize ) { return I; }
@@ -575,10 +575,10 @@ namespace ee {
 						{ 't', '\t' },
 					};
 					bool bFound = false;
-					for ( auto I = EE_COUNT_OF( sEscapes ); I--; ) {
-						if ( ui32BackToUtf8 == sEscapes[I].cValue ) {
+					for ( auto J = EE_COUNT_OF( sEscapes ); J--; ) {
+						if ( ui32BackToUtf8 == static_cast<uint8_t>(sEscapes[J].cValue) ) {
 							sRet.push_back( '\\' );
-							sRet.push_back( sEscapes[I].cEscape );
+							sRet.push_back( sEscapes[J].cEscape );
 							bFound = true;
 							break;
 						}
@@ -1169,7 +1169,7 @@ namespace ee {
 		// [whitespace] [sign] [digits] [.digits] [ {e | E }[sign]digits]
 		// Skip whitespace.
 		while ( IsWhiteSpace( (*_pcText) ) ) { ++_pcText; }
-		bool bLastWasQuote = false;
+		//bool bLastWasQuote = false;
 		const char * _pcNumberBegins = _pcText;
 		// Optional sign.
 		if ( (*_pcText) == '-' || (*_pcText) == '+' ) {

@@ -97,7 +97,7 @@ namespace ee {
 		}
 		else {
 			sIdx = static_cast<size_t>(_i64Idx);
-			if ( sIdx != _i64Idx ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
+			if ( static_cast<int64_t>(sIdx) != _i64Idx ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
 		}
 		uint32_t ui32Val;
 		CStringBaseApi::UpdateArrayAccessOptimizer( m_sObj, m_vArrayOpt, sIdx, ui32Val );
@@ -119,7 +119,7 @@ namespace ee {
 			}
 			else {
 				sIdx0 = static_cast<size_t>(_i64Idx0);
-				if ( sIdx0 != _i64Idx0 ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
+				if ( static_cast<int64_t>(sIdx0) != _i64Idx0 ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
 			}
 			sIdx0 = ee::CExpEval::GetUtf8CharPosByIdx( m_sObj, sIdx0 );
 		}
@@ -134,7 +134,7 @@ namespace ee {
 			}
 			else {
 				sIdx1 = static_cast<size_t>(_i64Idx1);
-				if ( sIdx1 != _i64Idx1 ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
+				if ( static_cast<int64_t>(sIdx1) != _i64Idx1 ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
 			}
 			sIdx1 = ee::CExpEval::GetUtf8CharPosByIdx( m_sObj, sIdx1 );
 		}

@@ -169,7 +169,7 @@ namespace lsw {
 		virtual BOOL						DeleteAllNotify() { return 1; }
 
 		// Requesting information (notification responder).
-		virtual BOOL						GetDispInfoNotify( NMLVDISPINFOW * _plvdiInfo ) { return 1; }
+		virtual BOOL						GetDispInfoNotify( NMLVDISPINFOW * /*_plvdiInfo*/ ) { return 1; }
 
 		/**
 		 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_PREPAINT handler.
