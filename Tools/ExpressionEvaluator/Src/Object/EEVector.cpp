@@ -109,7 +109,7 @@ namespace ee {
 	 * \return Returns the item at the given index or an invalid item.
 	 */
 	CExpEvalContainer::EE_RESULT CVector::ArrayAccess( int64_t _i64Idx ) {
-		size_t sIdx;
+		size_t sIdx = size_t( _i64Idx );
 		if ( _i64Idx < 0 ) {
 			sIdx = ArrayIndexToLinearIndex( _i64Idx, m_vBacking.size() );
 		}

@@ -1358,6 +1358,13 @@ namespace lsw {
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( reinterpret_cast<LRESULT>(hBrush), reinterpret_cast<INT_PTR>(hBrush) ); }
 				break;
 			}
+			case WM_CTLCOLORDLG : {
+				HBRUSH hBrush = NULL;
+				CWidget * pwControl = LSW_WIN2CLASS( reinterpret_cast<HWND>(_lParam) );
+				LSW_HANDLED hHandled = pmwThis->CtlColorDlg( reinterpret_cast<HDC>(_wParam), pwControl, hBrush );
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( reinterpret_cast<LRESULT>(hBrush), reinterpret_cast<INT_PTR>(hBrush) ); }
+				break;
+			}
 
 			// =======================================
 			// Activation.

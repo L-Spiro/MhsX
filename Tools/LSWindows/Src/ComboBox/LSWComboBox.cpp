@@ -283,7 +283,7 @@ namespace lsw {
 
 	// Selects a range of text.  Implemented by CEdit and CComboBox.
 	VOID CComboBox::SetSel( INT _iStart, INT _iEnd ) const {
-		LRESULT lrRet = ::SendMessageW( Wnd(), CB_SETEDITSEL, 0L, MAKELPARAM( _iStart, _iEnd ) );
+		/*LRESULT lrRet = */::SendMessageW( Wnd(), CB_SETEDITSEL, 0L, MAKELPARAM( _iStart, _iEnd ) );
 	}
 
 	// Replaces the selected text in an edit control or a rich edit control with the specified text.

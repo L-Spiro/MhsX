@@ -526,8 +526,25 @@ namespace lsw {
 		// WM_CTLCOLORLISTBOX
 		virtual LSW_HANDLED					CtlColorListBox( HDC /*_hDc*/, CWidget * /*_pwControl*/, HBRUSH &/*_hBrush*/ ) { return LSW_H_CONTINUE; }
 
-		// WM_CTLCOLORSTATIC.
+		/**
+		 * The WM_CTLCOLORSTATIC handler.
+		 *
+		 * \param _hDc Handle to the device context for the static control window
+		 * \param _pwControl Handle to the static control.
+		 * \param _hBrush If an application processes this message, the return value is a handle to a brush that the system uses to paint the background of the static control.
+		 * \return Returns a LSW_HANDLED enumeration.
+		 */
 		virtual LSW_HANDLED					CtlColorStatic( HDC /*_hDc*/, CWidget * /*_pwControl*/, HBRUSH &/*_hBrush*/ ) { return LSW_H_CONTINUE; }
+
+		/**
+		 * The WM_CTLCOLORDLG handler.
+		 *
+		 * \param _hDc Handle to the device context for the dialog box
+		 * \param _pwControl Handle to the dialog box.
+		 * \param _hBrush If an application processes this message, the return value is a handle to a brush that the system uses to paint the background of the dialog box.
+		 * \return Returns a LSW_HANDLED enumeration.
+		 */
+		virtual LSW_HANDLED					CtlColorDlg( HDC /*_hDc*/, CWidget * /*_pwControl*/, HBRUSH &/*_hBrush*/ ) { return LSW_H_CONTINUE; }
 
 		// WM_SETCURSOR.
 		virtual LSW_HANDLED					SetCursor( CWidget * /*_pwControl*/, WORD /*_wHitTest*/, WORD /*_wIdent*/ ) { return LSW_H_CONTINUE; }

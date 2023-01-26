@@ -69,7 +69,7 @@ namespace lsw {
 			// =======================================
 			case WM_KEYDOWN : {
 				UINT uiCode = static_cast<UINT>(_wParam);
-				DWORD dwFlags = static_cast<DWORD>(_lParam);
+				//DWORD dwFlags = static_cast<DWORD>(_lParam);
 				if ( uiCode == 'A' ) {
 					SHORT sState = ::GetAsyncKeyState( VK_CONTROL );
 					if ( sState & 0x8000 ) {

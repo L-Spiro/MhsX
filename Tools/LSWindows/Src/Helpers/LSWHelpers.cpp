@@ -16,6 +16,8 @@ namespace lsw {
 	 * \return The returned string.
 	 */
 	std::string & CHelpers::WindowsMessageToString( WORD _wMessage, std::string &_sRet, bool _bOnlyFirst ) {
+		static_cast<void>(_wMessage);
+		static_cast<void>(_bOnlyFirst);
 #ifdef _DEBUG
 		bool bFound = false;
 		for ( size_t I = 0; I < sizeof( m_mMessages ) / sizeof( m_mMessages[0] ); ++I ) {
@@ -119,7 +121,7 @@ namespace lsw {
 	std::vector<uint8_t> CHelpers::GetRawInputDevicePreparsedData( HANDLE _hHandle ) {
 		std::vector<uint8_t> vRet;
 		UINT uiSize;
-		PHIDP_PREPARSED_DATA pdData = nullptr;
+		//PHIDP_PREPARSED_DATA pdData = nullptr;
 		UINT uiThis = ::GetRawInputDeviceInfoW( _hHandle,
 			RIDI_PREPARSEDDATA, NULL, &uiSize );
 		if ( UINT( -1 ) == uiThis ) {
@@ -139,7 +141,7 @@ namespace lsw {
 	 * \param _dwType The type of device to gather.
 	 * \return Returns a vector containing the raw input devices of the given type.
 	 */
-	std::vector<LSW_RAW_INPUT_DEVICE_LIST> CHelpers::GatherRawInputDevices( DWORD _dwType ) {
+	std::vector<LSW_RAW_INPUT_DEVICE_LIST> CHelpers::GatherRawInputDevices( DWORD /*_dwType*/ ) {
 		std::vector<RAWINPUTDEVICELIST> vList = CHelpers::GetRawInputDeviceList();
 		std::vector<LSW_RAW_INPUT_DEVICE_LIST> vRet;
 		for ( size_t I = 0; I < vList.size(); ++I ) {
