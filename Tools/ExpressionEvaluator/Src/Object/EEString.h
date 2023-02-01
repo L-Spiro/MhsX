@@ -41,7 +41,8 @@ namespace ee {
 
 		// Creates a formatted string representation of the object.
 		virtual std::string							FormattedString( const std::string &_sFormat ) {
-			return std::format( _sFormat, m_sObj );
+			//return std::format( _sFormat, m_sObj );
+			return std::vformat( _sFormat, std::make_format_args( m_sObj ) );
 		}
 
 		// Array access.

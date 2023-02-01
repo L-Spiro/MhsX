@@ -231,15 +231,15 @@ namespace ee {
 	bool CExpEvalContainer::ToFormatStringResultOrObject( const EE_RESULT &_rRes, const std::string &_sFormat, std::string &_sReturn ) {
 		switch ( _rRes.ncType ) {
 			case EE_NC_UNSIGNED : {
-				_sReturn = std::format( _sFormat, _rRes.u.ui64Val );
+				_sReturn = std::vformat( _sFormat, std::make_format_args( _rRes.u.ui64Val ) );
 				break;
 			}
 			case EE_NC_SIGNED : {
-				_sReturn = std::format( _sFormat, _rRes.u.i64Val );
+				_sReturn = std::vformat( _sFormat, std::make_format_args( _rRes.u.i64Val ) );
 				break;
 			}
 			case EE_NC_FLOATING : {
-				_sReturn = std::format( _sFormat, _rRes.u.dVal );
+				_sReturn = std::vformat( _sFormat, std::make_format_args( _rRes.u.dVal ) );
 				break;
 			}
 			case EE_NC_OBJECT : {
@@ -1111,17 +1111,17 @@ namespace ee {
 							try {
 								switch ( _vArgs[stArg].ncType ) {
 									case EE_NC_UNSIGNED : {
-										sTmp.append( std::format( sFormatter, _vArgs[stArg].u.ui64Val ) );
+										sTmp.append( std::vformat( sFormatter, std::make_format_args( _vArgs[stArg].u.ui64Val ) ) );
 										sArgIdx = ++stArg;
 										break;
 									}
 									case EE_NC_SIGNED : {
-										sTmp.append( std::format( sFormatter, _vArgs[stArg].u.i64Val ) );
+										sTmp.append( std::vformat( sFormatter, std::make_format_args( _vArgs[stArg].u.i64Val ) ) );
 										sArgIdx = ++stArg;
 										break;
 									}
 									case EE_NC_FLOATING : {
-										sTmp.append( std::format( sFormatter, _vArgs[stArg].u.dVal ) );
+										sTmp.append( std::vformat( sFormatter, std::make_format_args( _vArgs[stArg].u.dVal ) ) );
 										sArgIdx = ++stArg;
 										break;
 									}
@@ -1131,7 +1131,7 @@ namespace ee {
 										break;
 									}
 									default : {
-										sTmp.append( std::format( sFormatter, "<null>" ) );
+										sTmp.append( std::vformat( sFormatter, std::make_format_args( "<null>" ) ) );
 										sArgIdx = ++stArg;
 									}
 								}
