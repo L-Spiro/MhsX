@@ -12,14 +12,6 @@ namespace lsw {
 	BOOL CStatusBar::SetParts( const std::vector<LSW_STATUS_PART> &_vParts ) {
 		if ( !_vParts.size() ) { return TRUE; }
 		return SetParts( &_vParts[0], _vParts.size() );
-		m_vParts = _vParts;
-		std::vector<INT> vInts;
-		vInts.reserve( _vParts.size() );
-		for ( size_t I = 0; I < _vParts.size(); ++I ) {
-			vInts.push_back( _vParts[I].iRightCoord );
-		}
-		if ( !vInts.size() ) { return TRUE; }
-		return static_cast<BOOL>(::SendMessageW( Wnd(), SB_SETPARTS, static_cast<WPARAM>(vInts.size()), reinterpret_cast<LPARAM>(&vInts[0]) ));
 	}
 
 	// Add parts.

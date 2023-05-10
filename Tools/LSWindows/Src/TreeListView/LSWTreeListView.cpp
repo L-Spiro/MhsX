@@ -939,7 +939,7 @@ namespace lsw {
 		// Unselect from the listview.
 		auto aTreeSelctIdx = vSelection.begin();
 		for ( size_t I = 0; I < vListSelection.size(); ++I ) {
-			auto aTmp = std::find( aTreeSelctIdx, vSelection.end(), vListSelection[I] );
+			auto aTmp = std::find( aTreeSelctIdx, vSelection.end(), size_t( vListSelection[I] ) );
 			if ( aTmp != vSelection.end() ) {
 				// It is still selected.
 				aTreeSelctIdx = aTmp;

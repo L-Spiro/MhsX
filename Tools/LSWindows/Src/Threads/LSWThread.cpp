@@ -62,8 +62,9 @@ namespace lsw {
 	// Exits and kills the thread.  This should only be used when all resources have been cleaned up and no more useful information can be gleaned from the thread.
 	VOID CThread::ExitThread( DWORD /*_dxExitCode*/ ) {
 		if ( m_dwId || m_hThread.Valid() ) {
-			::ExitThread( m_dwId );
+			DWORD dwId = m_dwId;
 			Reset();
+			::ExitThread( dwId );
 		}
 	}
 

@@ -218,3 +218,4 @@ Src/Fmt/*
 MhsX.VC.db
 Tools/ExpressionEvaluator/Src/Fmt/*
 Tools/LSXML/Win32/*
+Tools/LSon/Win32/*

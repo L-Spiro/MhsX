@@ -109,7 +109,7 @@ namespace lsw {
 		// Do not check iRet for -1.
 		for ( size_t I = 0; I < m_vTabs.size(); ++I ) {
 			if ( m_vTabs[I].pwWidget ) {
-				m_vTabs[I].pwWidget->SetVisible( I == _iItem );
+				m_vTabs[I].pwWidget->SetVisible( I == static_cast<size_t>(_iItem) );
 			}
 		}
 		return iRet;

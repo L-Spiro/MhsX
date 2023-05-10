@@ -686,6 +686,45 @@ namespace lsw {
 		}
 
 		/**
+		 * Maps a given scan code to a into a virtual-key code as text.
+		 *
+		 * \param _uiKey The scan code to return as a string.
+		 * \return Returns the text string representing the given scan code.
+		 */
+		static std::wstring					ScanCodeToString( UINT _uiKey ) {
+			std::wstring wsRet;
+			WCHAR szBufText[64];
+			if ( ::GetKeyNameTextW( _uiKey, szBufText, LSW_ELEMENTS( szBufText ) ) ) {
+				wsRet += szBufText;
+			}
+			return wsRet;
+		}
+
+		/**
+		 * Converts a modifier to text.
+		 *
+		 * \param _iMod The VK_ modifier to convert to a string.
+		 * \param _swsResult Holds the result of the conversion.
+		 * \param _bIgnoreLeftRight If true, left and right Shift, Control, and Alt are considered indistinguishable.
+		 * \return Returns true if the conversion to text was successful.
+		 */
+		static bool							ModifierToString( INT _iMod, std::wstring &_swsResult, bool _bIgnoreLeftRight ) {
+			if ( _bIgnoreLeftRight ) {
+				if ( _iMod == VK_LSHIFT || _iMod == VK_RSHIFT ) {
+					_iMod = VK_SHIFT;
+				}
+			}
+			UINT uiKey = ::MapVirtualKeyW( _iMod, MAPVK_VK_TO_VSC_EX );
+			UINT uiExt = (_iMod == VK_LWIN || _iMod == VK_RWIN) ? KF_EXTENDED : 0;
+			if ( !_bIgnoreLeftRight ) {
+				uiExt |= (_iMod == VK_RCONTROL) ? KF_EXTENDED : 0;
+				uiExt |= (_iMod == VK_RMENU) ? KF_EXTENDED : 0;
+			}
+			_swsResult += ScanCodeToString( (uiKey | uiExt) << 16 );
+			return true;
+		}
+
+		/**
 		 * Gathers the menu ID's into an array.
 		 *
 		 * \param _hMenu The menu whose ID's are to be gathered.
