@@ -61,4 +61,87 @@ namespace lson {
 		return false;
 	}
 
+	/**
+	 * Creates an object JSON element.
+	 * 
+	 * \param _sName The name of the element.
+	 * \param _eElement The return structure.
+	 **/
+	void CJson::CreateObjectElement( const std::string &_sName, LSON_ELEMENT &_eElement ) {
+		_eElement.ntType = LSON_OBJECT;
+		_eElement.sName = _sName;
+		_eElement.vObjectMembers.clear();
+	}
+
+	/**
+	 * Creates an array JSON element.
+	 * 
+	 * \param _sName The name of the element.
+	 * \param _eElement The return structure.
+	 **/
+	void CJson::CreateArrayElement( const std::string &_sName, LSON_ELEMENT &_eElement ) {
+		_eElement.ntType = LSON_ARRAY;
+		_eElement.sName = _sName;
+		_eElement.vArray.clear();
+	}
+
+	/**
+	 * Creates a string JSON element.
+	 * 
+	 * \param _sName The name of the element.
+	 * \param _sString The string.
+	 * \param _eElement The return structure.
+	 **/
+	void CJson::CreateStringElement( const std::string &_sName, const std::string &_sString, LSON_ELEMENT &_eElement ) {
+		_eElement.ntType = LSON_STRING;
+		_eElement.sName = _sName;
+		_eElement.sString = _sString;
+	}
+
+	/**
+	 * Creates a number JSON element.
+	 * 
+	 * \param _sName The name of the element.
+	 * \param _dNumber The number.
+	 * \param _eElement The return structure.
+	 **/
+	void CJson::CreateNumberElement( const std::string &_sName, double _dNumber, LSON_ELEMENT &_eElement ) {
+		_eElement.ntType = LSON_STRING;
+		_eElement.sName = _sName;
+		_eElement.dNumber = _dNumber;
+	}
+
+	/**
+	 * Creates a true JSON element.
+	 * 
+	 * \param _sName The name of the element.
+	 * \param _eElement The return structure.
+	 **/
+	void CJson::CreateTrueElement( const std::string &_sName, LSON_ELEMENT &_eElement ) {
+		_eElement.ntType = LSON_TRUE;
+		_eElement.sName = _sName;
+	}
+
+	/**
+	 * Creates a false JSON element.
+	 * 
+	 * \param _sName The name of the element.
+	 * \param _eElement The return structure.
+	 **/
+	void CJson::CreateFalseElement( const std::string &_sName, LSON_ELEMENT &_eElement ) {
+		_eElement.ntType = LSON_FALSE;
+		_eElement.sName = _sName;
+	}
+
+	/**
+	 * Creates a null JSON element.
+	 * 
+	 * \param _sName The name of the element.
+	 * \param _eElement The return structure.
+	 **/
+	void CJson::CreateNullElement( const std::string &_sName, LSON_ELEMENT &_eElement ) {
+		_eElement.ntType = LSON_NULL;
+		_eElement.sName = _sName;
+	}
+
 }	// namespace lson
