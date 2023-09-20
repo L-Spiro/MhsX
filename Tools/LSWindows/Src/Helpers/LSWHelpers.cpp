@@ -1,6 +1,6 @@
 #include "LSWHelpers.h"
 
-#pragma comment(lib, "Hid.lib")
+#pragma comment( lib, "Hid.lib" )
 
 namespace lsw {
 
