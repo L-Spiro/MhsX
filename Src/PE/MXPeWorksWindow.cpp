@@ -72,6 +72,7 @@ namespace mx {
 		tTab.ppoPeObject = new( std::nothrow ) CPeObject();
 		if ( !tTab.ppoPeObject ) { return false; }
 		if ( !tTab.ppoPeObject->LoadImageFromFile( _pwcFile ) ) {
+			delete tTab.ppoPeObject;
 			return false;
 		}
 		// 
