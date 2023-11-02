@@ -474,7 +474,7 @@ namespace lsw {
 				NULL,
 				OPEN_EXISTING, 0,
 				NULL );
-			m_bOpened = hHandle != NULL;
+			bOpened = hHandle != NULL;
 		}
 		~LSW_HID_HANLE() {
 			if ( hHandle ) {
@@ -483,7 +483,148 @@ namespace lsw {
 		}
 
 		HANDLE								hHandle;
-		BOOL								m_bOpened;
+		BOOL								bOpened;
+	};
+
+	struct LSW_HDEVNOTIFY {
+		LSW_HDEVNOTIFY() :
+			hNotify( NULL ) {
+		};
+		~LSW_HDEVNOTIFY() {
+			Reset();
+		}
+
+
+		// == Functions.
+		/**
+		 * DESC
+		 * 
+		 * \param _hRecipient A handle to the window or service that will receive device events for the devices specified in the NotificationFilter parameter. The same window handle can be used in multiple calls to RegisterDeviceNotification.  Services can specify either a window handle or service status handle.
+		 * \param _lpvNotificationFilter A pointer to a block of data that specifies the type of device for which notifications should be sent. This block always begins with the DEV_BROADCAST_HDR structure. The data following this header is dependent on the value of the dbch_devicetype member, which can be DBT_DEVTYP_DEVICEINTERFACE or DBT_DEVTYP_HANDLE.
+		 * \param _dwFlags This parameter can be DEVICE_NOTIFY_WINDOW_HANDLE or DEVICE_NOTIFY_SERVICE_HANDLE, and DEVICE_NOTIFY_ALL_INTERFACE_CLASSES.
+		 * \return Returns TRUE if the call to ::RegisterDeviceNotificationW() does not return NULL.
+		 **/
+		BOOL								RegisterDeviceNot( HANDLE _hRecipient, LPVOID _lpvNotificationFilter, DWORD _dwFlags = DEVICE_NOTIFY_WINDOW_HANDLE ) {
+			Reset();
+			hNotify = ::RegisterDeviceNotificationW( _hRecipient, _lpvNotificationFilter, _dwFlags );
+			return hNotify == NULL ? FALSE : TRUE;
+		}
+
+		/**
+		 * Resets the handle.
+		 **/
+		void								Reset() {
+			if ( NULL != hNotify ) {
+				if ( ::UnregisterDeviceNotification( hNotify ) ) {
+					hNotify = NULL;
+				}
+			}
+		}
+
+
+		// == Members.
+		/** GUID for all USB serial host PnP drivers. */
+		static const GUID					s_gUsbPnPDevices;
+
+
+	protected :
+		// == Members.
+		HDEVNOTIFY							hNotify;
+	};
+
+	struct LSW_WINDOW_PLACEMENT {
+		~LSW_WINDOW_PLACEMENT() {
+			if ( NULL != hMenu ) {
+				// Window was destroyed before the menu was restored, leaving the menu without an owner to destroy it.
+				::DestroyMenu( hMenu );
+				hMenu = NULL;
+			}
+		}
+
+
+		// == Members.
+		/** The menu, if menu-hiding is used. */
+		HMENU								hMenu = NULL;
+		/** The window style before going into full-screen mode. */
+		LONG								lWindowStyle = 0;
+		/** The window placement. */
+		WINDOWPLACEMENT						wpPlacement;
+		/** If true, we are in borderless mode. */
+		bool								bInBorderless = false;
+		/** If true, this object is performing a size operation on the given window. */
+		bool								bIsSizing = false;
+
+
+		// == Functions.
+		/**
+		 * Enters borderless mode.  The restoration information is saved to the structure.
+		 * 
+		 * \param _hWnd The window to affect.
+		 * \return Returns true if full-screening the given window succeeds.
+		 **/
+		bool								EnterBorderless( HWND _hWnd, bool _bHideMenu ) {
+			if ( bInBorderless ) { return true; }
+			LONG lStyle = ::GetWindowLongW( _hWnd, GWL_STYLE );
+			if ( !lStyle ) { return false; }
+
+			HMONITOR hMon = ::MonitorFromWindow( _hWnd, MONITOR_DEFAULTTOPRIMARY );
+			if ( NULL == hMon ) { return false; }
+			MONITORINFO miMonInfo = { sizeof( miMonInfo ) };
+			if ( ::GetMonitorInfoW( hMon, &miMonInfo ) && ::GetWindowPlacement( _hWnd, &wpPlacement ) ) {
+				bIsSizing = true;
+				if ( _bHideMenu && hMenu == NULL ) {
+					hMenu = ::GetMenu( _hWnd );
+					::SetMenu( _hWnd, NULL );
+				}
+				::SetWindowLongW( _hWnd, GWL_STYLE,
+					(lStyle & ~WS_OVERLAPPEDWINDOW) | WS_POPUP );
+				::SetWindowPos( _hWnd, HWND_TOP,
+					miMonInfo.rcMonitor.left, miMonInfo.rcMonitor.top,
+					miMonInfo.rcMonitor.right - miMonInfo.rcMonitor.left,
+					miMonInfo.rcMonitor.bottom - miMonInfo.rcMonitor.top,
+					SWP_NOOWNERZORDER | SWP_FRAMECHANGED );
+				bIsSizing = false;
+				lWindowStyle = lStyle;
+				bInBorderless = true;
+				return true;
+			}
+			return false;
+		}
+
+		/**
+		 * Leaves borderless and returns to normal.
+		 * 
+		 * \param _hWnd The window to affect.
+		 * \return Returns true if the window was returned to normal.
+		 **/
+		bool								LeaveBorderless( HWND _hWnd ) {
+			if ( !bInBorderless ) { return true; }
+			bInBorderless = false;
+			if ( hMenu != NULL ) {
+				::SetMenu( _hWnd, hMenu );
+				hMenu = NULL;
+			}
+			if ( !::SetWindowLongW( _hWnd, GWL_STYLE,
+                  lWindowStyle | WS_OVERLAPPEDWINDOW ) ) {
+				bInBorderless = true;
+				return false;
+			}
+			if ( !::SetWindowPlacement( _hWnd, &wpPlacement ) ) { bInBorderless = true; return false; }
+			bIsSizing = true;
+			if ( !::SetWindowPos( _hWnd, NULL,
+				wpPlacement.rcNormalPosition.left, wpPlacement.rcNormalPosition.top,
+				wpPlacement.rcNormalPosition.right - wpPlacement.rcNormalPosition.left,
+				wpPlacement.rcNormalPosition.bottom - wpPlacement.rcNormalPosition.top,
+				SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+				SWP_NOOWNERZORDER | SWP_FRAMECHANGED ) ) {
+				bIsSizing = false;
+				bInBorderless = true;
+				return false; }
+			::ShowWindow( _hWnd, SW_NORMAL );
+			bIsSizing = false;
+			bInBorderless = false;
+			return true;
+		}
 	};
 
 	class CHelpers {

@@ -92,7 +92,7 @@ namespace lsw {
 					else {
 						pophThis->m_krResult.bKeyModifier = BYTE( ::MapVirtualKeyW( (_lParam >> 16) & 0xFF, MAPVK_VSC_TO_VK_EX ) );
 						CHelpers::ModifierToString( pophThis->m_krResult.bKeyModifier, wTmp, bIgnoreLeftRight );
-						wTmp += L"…";
+						wTmp += L"\u2026";	// "...".
 						::SetWindowTextW( _hWnd, wTmp.c_str() );
 						return 0;
 					}
@@ -104,7 +104,7 @@ namespace lsw {
 						UINT uiTemp = ::MapVirtualKeyW( VK_CONTROL, MAPVK_VK_TO_VSC );
 						std::wstring wTmp = CHelpers::ScanCodeToString( bIgnoreLeftRight ? (uiTemp << 16) : UINT( _lParam ) );
 						pophThis->m_krResult.bKeyModifier = bExtended ? VK_RCONTROL : VK_LCONTROL;
-						wTmp += L"…";
+						wTmp += L"\u2026";	// "...".
 						::SetWindowTextW( _hWnd, wTmp.c_str() );
 						return 0;
 					}
@@ -116,7 +116,7 @@ namespace lsw {
 						UINT uiTemp = ::MapVirtualKeyW( VK_MENU, MAPVK_VK_TO_VSC );
 						std::wstring wTmp = CHelpers::ScanCodeToString( bIgnoreLeftRight ? (uiTemp << 16) : UINT( _lParam ) );
 						pophThis->m_krResult.bKeyModifier = bExtended ? VK_RMENU : VK_LMENU;
-						wTmp += L"…";
+						wTmp += L"\u2026";	// "...".
 						::SetWindowTextW( _hWnd, wTmp.c_str() );
 						return 0;
 					}
@@ -148,7 +148,7 @@ namespace lsw {
 					else {
 						pophThis->m_krResult.bKeyModifier = bExtended ? VK_RMENU : VK_LMENU;
 						CHelpers::ModifierToString( pophThis->m_krResult.bKeyModifier, wTmp, bIgnoreLeftRight );
-						wTmp += L"…";
+						wTmp += L"\u2026";	// "...".
 						::SetWindowTextW( _hWnd, wTmp.c_str() );
 						return 0;
 					}

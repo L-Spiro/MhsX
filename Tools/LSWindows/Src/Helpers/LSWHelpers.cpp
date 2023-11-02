@@ -5,6 +5,10 @@
 namespace lsw {
 
 	// == Members.
+	/** GUID for all USB serial host PnP drivers. */
+	const GUID LSW_HDEVNOTIFY::s_gUsbPnPDevices = { 0x25DBCE51, 0x6C8F, 0x4A72,
+		0x8A,0x6D,0xB5,0x4C,0x2B,0x4F,0xC8,0x35 };
+
 	#include "LSWMessages.h"		// m_mMessages[].
 
 	/**
@@ -83,7 +87,7 @@ namespace lsw {
 				RIDI_DEVICENAME, _wsIdentString.data(), &uiSize );
 
 			LSW_HID_HANLE hHandle( _wsIdentString.c_str() );
-			if ( hHandle.m_bOpened ) {
+			if ( hHandle.bOpened ) {
 				wchar_t wcName[128] = { 0 };
 				BOOLEAN bResult = ::HidD_GetProductString( hHandle.hHandle, wcName, sizeof( wchar_t ) * 126 );
 				if ( bResult ) {

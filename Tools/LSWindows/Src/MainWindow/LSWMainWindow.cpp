@@ -1,5 +1,6 @@
 #include "LSWMainWindow.h"
 #include "../Base/LSWBase.h"
+#include <dbt.h>
 
 namespace lsw {
 
@@ -40,8 +41,17 @@ namespace lsw {
 	}
 #endif
 
-	
-
 	// == Functions.
+	/**
+	 * Registers this window for notifications sensitive to changes in plug-and-play USB devices.
+	 * 
+	 * \return Returns true if the registry for notification of the changing of PnP devices.
+	 **/
+	bool CMainWindow::RegisterDeviceInterfaceToHwnd() {
+		DEV_BROADCAST_DEVICEINTERFACE_W dbNotifFilter = { .dbcc_size = sizeof( DEV_BROADCAST_DEVICEINTERFACE_W ) };
+		dbNotifFilter.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
+		dbNotifFilter.dbcc_classguid = LSW_HDEVNOTIFY::s_gUsbPnPDevices;
+		return m_hDevNotify.RegisterDeviceNot( Wnd(), &dbNotifFilter, DEVICE_NOTIFY_WINDOW_HANDLE ) == TRUE;
+	}
 	
 }	// namespace lsw
