@@ -12,7 +12,7 @@ WS															[ \t\v\r\n\f]
 %{
 #include "../PreProc/EEPreProcSyntaxNodes.h"				// Must be included before EEPreProcParser.h.
 #include "EEPreProcParser.h"
-
+using namespace ee;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

@@ -555,7 +555,7 @@ assignment_exp
 	| identifier '=' assignment_exp							{ m_peecContainer->CreateAssignment( $1, $3, '=', false, $$ ); }
 	| EE_CONST identifier '=' assignment_exp				{ m_peecContainer->CreateAssignment( $2, $4, '=', true, $$ ); }
 	| array_var '[' exp ']' assignment_op assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, $5, $$ ); }
-	| address_type exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( $1, $2, $5, $4, $$ ); }
+	| address_type exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( static_cast<ee::EE_CAST_TYPES>($1), $2, $5, $4, $$ ); }
 	;
 	
 address_type

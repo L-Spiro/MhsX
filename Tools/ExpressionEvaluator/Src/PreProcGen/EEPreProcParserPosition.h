@@ -3,12 +3,12 @@
 
 /* Positions for Bison parsers in C++
    
-      Copyright (C) 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+      Copyright( C ) 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
    
-   This program is free software: you can redistribute it and/or modify
+   This program is free software : you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+  ( at your option ) any later version.
    
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,14 +16,14 @@
    GNU General Public License for more details.
    
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <http ://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
    under terms of your choice, so long as that work isn't itself a
    parser generator using the skeleton or a modified version thereof
    as a parser skeleton.  Alternatively, if you modify or redistribute
-   the parser skeleton itself, you may (at your option) remove this
+   the parser skeleton itself, you may( at your option ) remove this
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
@@ -37,11 +37,11 @@
  */
 
 #ifndef __EE_EXPEVALPARSERPOSITION_H__
-# define __EE_EXPEVALPARSERPOSITION_H__
+#define __EE_EXPEVALPARSERPOSITION_H__
 
-# include <iostream>
-# include <string>
-# include <algorithm>
+#include <iostream>
+#include <string>
+#include <algorithm>
 
 
 using namespace std;
@@ -51,17 +51,17 @@ namespace yy {
   /// Abstract a position.
   class position
   {
-  public:
+  public :
 
     /// Construct a position.
-    position ()
-      : filename (0), line (1), column (1)
+    position()
+       : filename( 0 ), line( 1 ), column( 1 )
     {
     }
 
 
     /// Initialization.
-    inline void initialize (std::string* fn)
+    inline void initialize( std::string * fn )
     {
       filename = fn;
       line = 1;
@@ -70,24 +70,24 @@ namespace yy {
 
     /** \name Line and Column related manipulators
      ** \{ */
-  public:
-    /// (line related) Advance to the COUNT next lines.
-    inline void lines (int count = 1)
+  public :
+    ///( line related ) Advance to the COUNT next lines.
+    inline void lines( int count = 1 )
     {
       column = 1;
       line += count;
     }
 
-    /// (column related) Advance to the COUNT next columns.
-    inline void columns (int count = 1)
+    ///( column related ) Advance to the COUNT next columns.
+    inline void columns( int count = 1 )
     {
-      column = max (1u, column + count);
+      column = max( 1u, column + count );
     }
     /** \} */
 
-  public:
+  public :
     /// File name to which this position refers.
-    std::string* filename;
+    std::string * filename;
     /// Current line number.
     unsigned int line;
     /// Current column number.
@@ -96,15 +96,15 @@ namespace yy {
 
   /// Add and assign a position.
   inline const position&
-  operator+= (position& res, const int width)
+  operator += ( position &res, const int width )
   {
-    res.columns (width);
+    res.columns( width );
     return res;
   }
 
   /// Add two position objects.
   inline const position
-  operator+ (const position& begin, const int width)
+  operator + ( const position &begin, const int width )
   {
     position res = begin;
     return res += width;
@@ -112,33 +112,33 @@ namespace yy {
 
   /// Add and assign a position.
   inline const position&
-  operator-= (position& res, const int width)
+  operator -= ( position &res, const int width )
   {
     return res += -width;
   }
 
   /// Add two position objects.
   inline const position
-  operator- (const position& begin, const int width)
+  operator - ( const position &begin, const int width )
   {
     return begin + -width;
   }
 
   /// Compare two position objects.
   inline bool
-  operator== (const position& pos1, const position& pos2)
+  operator == ( const position &pos1, const position &pos2 )
   {
     return
-      (pos1.filename == pos2.filename
-       || pos1.filename && pos2.filename && *pos1.filename == *pos2.filename)
-      && pos1.line == pos2.line && pos1.column == pos2.column;
+     ( pos1.filename == pos2.filename
+       || pos1.filename &&pos2.filename &&*pos1.filename == *pos2.filename )
+      &&pos1.line == pos2.line &&pos1.column == pos2.column;
   }
 
   /// Compare two position objects.
   inline bool
-  operator!= (const position& pos1, const position& pos2)
+  operator != ( const position &pos1, const position &pos2 )
   {
-    return !(pos1 == pos2);
+    return !( pos1 == pos2 );
   }
 
   /** \brief Intercept output stream redirection.
@@ -146,9 +146,9 @@ namespace yy {
    ** \param pos a reference to the position to redirect
    */
   inline std::ostream&
-  operator<< (std::ostream& ostr, const position& pos)
+  operator << ( std::ostream &ostr, const position &pos )
   {
-    if (pos.filename)
+    if ( pos.filename )
       ostr << *pos.filename << ':';
     return ostr << pos.line << '.' << pos.column;
   }
