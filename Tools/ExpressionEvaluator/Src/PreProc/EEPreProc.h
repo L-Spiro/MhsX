@@ -50,6 +50,7 @@ namespace ee {
 			EE_E_PROCESSING_ERROR,					/**< General processing error. */
 			EE_E_SYNTAX_IF,							/**< Syntax error on an #if directive. */
 			EE_E_SYNTAX_ELIF,						/**< Syntax error on an #elif directive. */
+			EE_E_SYNTAX_ELSE,						/**< Syntax error on an #else directive. */
 			EE_E_SYNTAX_DEFINE,						/**< Syntax error on a #define directive. */
 			EE_E_SYNTAX_UNDEF,						/**< Syntax error on an #undef directive. */
 			EE_E_MACRO_EXPANSION,					/**< Error expanding a macro. */

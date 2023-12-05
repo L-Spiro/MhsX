@@ -141,9 +141,9 @@ namespace ee {
 					vClearStates.push_back( EE_CS_NONE );
 					CPreProc ppPreProc;
 					CPreProc::EE_ERRORS eError = ppPreProc.Parse( sParms );
-					if ( eError == CPreProc::EE_E_ERROR ) { return EE_E_SYNTAX_IF; }
+					if ( eError == CPreProc::EE_E_ERROR ) { return CPreProc::EE_E_SYNTAX_IF; }
 					bool bRes;
-					if ( !ppPreProc.GetResult( _mMacros, bRes ) ) { return EE_E_SYNTAX_IF; }
+					if ( !ppPreProc.GetResult( _mMacros, bRes ) ) { return CPreProc::EE_E_SYNTAX_IF; }
 
 					if ( !bRes ) {
 						vClearStates[sIfDepth] = EE_CS_CLEAR;
@@ -173,6 +173,7 @@ namespace ee {
 					continue;
 				}
 				else if ( sDirective == "else" ) {
+					if ( sIfDepth == 0 ) { return CPreProc::EE_E_SYNTAX_ELSE; }
 					vLines[I].clear();
 					if ( vClearStates[sIfDepth-1] == EE_CS_NONE ) {
 						// Previous #if was true, so scan to the matching #endif.
@@ -185,6 +186,7 @@ namespace ee {
 					continue;
 				}
 				else if ( sDirective == "elif" ) {
+					if ( sIfDepth == 0 ) { return CPreProc::EE_E_SYNTAX_ELIF; }
 					vLines[I].clear();
 					if ( vClearStates[sIfDepth-1] == EE_CS_NONE ) {
 						// Previous #if was true, so scan to the matching #endif.
@@ -193,9 +195,9 @@ namespace ee {
 					else if ( vClearStates[sIfDepth-1] == EE_CS_CLEAR ) {
 						CPreProc ppPreProc;
 						CPreProc::EE_ERRORS eError = ppPreProc.Parse( sParms );
-						if ( eError == CPreProc::EE_E_ERROR ) { return EE_E_SYNTAX_ELIF; }
+						if ( eError == CPreProc::EE_E_ERROR ) { return CPreProc::EE_E_SYNTAX_ELIF; }
 						bool bRes;
-						if ( !ppPreProc.GetResult( _mMacros, bRes ) ) { return EE_E_SYNTAX_ELIF; }
+						if ( !ppPreProc.GetResult( _mMacros, bRes ) ) { return CPreProc::EE_E_SYNTAX_ELIF; }
 
 						vClearStates[sIfDepth-1] = !bRes ? EE_CS_CLEAR : EE_CS_NONE;
 					}
@@ -203,7 +205,7 @@ namespace ee {
 				}
 				else if ( sDirective == "endif" ) {
 					vLines[I].clear();
-					if ( !vClearStates.size() ) { return EE_E_UNMATCHED_ENDIF; }
+					if ( !vClearStates.size() ) { return CPreProc::EE_E_UNMATCHED_ENDIF; }
 					--sIfDepth;
 					vClearStates.pop_back();
 					continue;
@@ -214,7 +216,7 @@ namespace ee {
 					vLines[I].clear();
 				}
 				else if ( sDirective == "define" ) {
-					EE_ERRORS eDefine = ParseDefine( sParms, _mMacros );
+					CPreProc::EE_ERRORS eDefine = ParseDefine( sParms, _mMacros );
 					if ( eDefine != EE_E_SUCCESS ) { return eDefine; }
 					vLines[I].clear();
 				}
