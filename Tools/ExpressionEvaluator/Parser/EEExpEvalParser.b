@@ -109,6 +109,8 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %type <ndData>												or_exp
 %type <ndData>												conditional_exp
 %type <ndData>												assignment_exp
+%type <ndData>												initializer
+%type <ndData>												initializer_list
 %type <ndData>												argument_exp_entry
 %type <ndData>												argument_exp_list
 %type <ndData>												intrinsic
@@ -546,6 +548,18 @@ assignment_exp
 	| EE_CONST identifier '=' assignment_exp				{ m_peecContainer->CreateAssignment( $2, $4, '=', true, $$ ); }
 	| array_var '[' exp ']' assignment_op assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, $5, $$ ); }
 	| address_type exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( static_cast<ee::EE_CAST_TYPES>($1), $2, $5, $4, $$ ); }
+	| identifier '=' '{' initializer_list '}'				{}
+	;
+	
+initializer
+	: exp													{ $$ = $1; }
+	| '{' exp '}'											{ m_peecContainer->CreateArrayInitializer( $2, $$ ); }
+	| '{' exp ',' '}'										{ m_peecContainer->CreateArrayInitializer( $2, $$ ); }
+	;
+	
+initializer_list
+	: initializer											{ m_peecContainer->CreateArrayInitializerList( $1.sNodeIndex, size_t( ~0 ), $$ ); }
+	| initializer_list ',' initializer						{ m_peecContainer->CreateArrayInitializerList( $1.sNodeIndex, $3.sNodeIndex, $$ ); }
 	;
 	
 address_type

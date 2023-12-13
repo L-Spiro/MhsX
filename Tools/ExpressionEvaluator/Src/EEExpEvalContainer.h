@@ -718,6 +718,12 @@ namespace ee {
 		// Creates an assignment operator to write to an external address.
 		void								CreateAddressAssignment( EE_CAST_TYPES _ctCast, const YYSTYPE::EE_NODE_DATA &_ndExp, const YYSTYPE::EE_NODE_DATA &_ndValue, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates an array initializer.
+		void								CreateArrayInitializer( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates an array initializer list.
+		void								CreateArrayInitializerList( size_t _stLeftIdx, size_t _stRightIdx, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Create a 0-parm intrinsic.
 		void								CreateIntrinsic0( uint32_t _uiIntrinsic, YYSTYPE::EE_NODE_DATA &_ndNode );
 

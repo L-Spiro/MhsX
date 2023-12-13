@@ -2053,6 +2053,21 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
+	// Creates an array initializer.
+	void CExpEvalContainer::CreateArrayInitializer( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_ARRAY_INITIALIZER;
+		_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Creates an array initializer list.
+	void CExpEvalContainer::CreateArrayInitializerList( size_t _stLeftIdx, size_t _stRightIdx, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_ARRAY_INITIALIZER_LIST;
+		_ndNode.v.sNodeIndex = _stLeftIdx;
+		_ndNode.u.sNodeIndex = _stRightIdx;
+		AddNode( _ndNode );
+	}
+
 	// Create a 0-parm intrinsic.
 	void CExpEvalContainer::CreateIntrinsic0( uint32_t _uiIntrinsic, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		switch ( _uiIntrinsic ) {
