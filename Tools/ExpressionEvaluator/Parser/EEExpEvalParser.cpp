@@ -1949,42 +1949,42 @@ namespace yy {
 
   case 302:
 
-    { m_peecContainer->CreateArray( (yysemantic_stack_[(7) - (1)].sStringIndex), size_t( (yysemantic_stack_[(7) - (4)].ui32Backing) ), static_cast<size_t>(token::EE_TEMP), (yysemantic_stack_[(7) - (6)].ndData), size_t( ~0 ), size_t( ~0 ), (yyval.ndData) ); }
+    { m_peecContainer->CreateRawArray( (yysemantic_stack_[(7) - (1)].sStringIndex), size_t( (yysemantic_stack_[(7) - (4)].ui32Backing) ), static_cast<size_t>(token::EE_TEMP), (yysemantic_stack_[(7) - (6)].ndData), size_t( ~0 ), size_t( ~0 ), (yyval.ndData) ); }
     break;
 
   case 303:
 
-    { m_peecContainer->CreateArray( (yysemantic_stack_[(9) - (1)].sStringIndex), size_t( (yysemantic_stack_[(9) - (4)].ui32Backing) ), (yysemantic_stack_[(9) - (8)].ui32Backing), (yysemantic_stack_[(9) - (6)].ndData), size_t( ~0 ), size_t( ~0 ), (yyval.ndData) ); }
+    { m_peecContainer->CreateRawArray( (yysemantic_stack_[(9) - (1)].sStringIndex), size_t( (yysemantic_stack_[(9) - (4)].ui32Backing) ), (yysemantic_stack_[(9) - (8)].ui32Backing), (yysemantic_stack_[(9) - (6)].ndData), size_t( ~0 ), size_t( ~0 ), (yyval.ndData) ); }
     break;
 
   case 304:
 
-    { m_peecContainer->CreateArray( (yysemantic_stack_[(11) - (1)].sStringIndex), (yysemantic_stack_[(11) - (4)].ui32Backing), (yysemantic_stack_[(11) - (8)].ui32Backing), (yysemantic_stack_[(11) - (6)].ndData), (yysemantic_stack_[(11) - (10)].ndData).sNodeIndex, (yysemantic_stack_[(11) - (10)].ndData).sNodeIndex, (yyval.ndData) ); }
+    { m_peecContainer->CreateRawArray( (yysemantic_stack_[(11) - (1)].sStringIndex), (yysemantic_stack_[(11) - (4)].ui32Backing), (yysemantic_stack_[(11) - (8)].ui32Backing), (yysemantic_stack_[(11) - (6)].ndData), (yysemantic_stack_[(11) - (10)].ndData).sNodeIndex, (yysemantic_stack_[(11) - (10)].ndData).sNodeIndex, (yyval.ndData) ); }
     break;
 
   case 305:
 
-    { m_peecContainer->CreateArray( (yysemantic_stack_[(13) - (1)].sStringIndex), (yysemantic_stack_[(13) - (4)].ui32Backing), (yysemantic_stack_[(13) - (8)].ui32Backing), (yysemantic_stack_[(13) - (6)].ndData), (yysemantic_stack_[(13) - (10)].ndData).sNodeIndex, (yysemantic_stack_[(13) - (12)].ndData).sNodeIndex, (yyval.ndData) ); }
+    { m_peecContainer->CreateRawArray( (yysemantic_stack_[(13) - (1)].sStringIndex), (yysemantic_stack_[(13) - (4)].ui32Backing), (yysemantic_stack_[(13) - (8)].ui32Backing), (yysemantic_stack_[(13) - (6)].ndData), (yysemantic_stack_[(13) - (10)].ndData).sNodeIndex, (yysemantic_stack_[(13) - (12)].ndData).sNodeIndex, (yyval.ndData) ); }
     break;
 
   case 306:
 
-    { m_peecContainer->CreateArray( (yysemantic_stack_[(6) - (1)].sStringIndex), static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), static_cast<size_t>(token::EE_TEMP), (yysemantic_stack_[(6) - (5)].ndData), size_t( ~0 ), size_t( ~0 ), (yyval.ndData) ); }
+    { m_peecContainer->CreateRawArray( (yysemantic_stack_[(6) - (1)].sStringIndex), static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), static_cast<size_t>(token::EE_TEMP), (yysemantic_stack_[(6) - (5)].ndData), size_t( ~0 ), size_t( ~0 ), (yyval.ndData) ); }
     break;
 
   case 307:
 
-    { m_peecContainer->CreateArray( (yysemantic_stack_[(8) - (1)].sStringIndex), static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), (yysemantic_stack_[(8) - (7)].ui32Backing), (yysemantic_stack_[(8) - (5)].ndData), size_t( ~0 ), size_t( ~0 ), (yyval.ndData) ); }
+    { m_peecContainer->CreateRawArray( (yysemantic_stack_[(8) - (1)].sStringIndex), static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), (yysemantic_stack_[(8) - (7)].ui32Backing), (yysemantic_stack_[(8) - (5)].ndData), size_t( ~0 ), size_t( ~0 ), (yyval.ndData) ); }
     break;
 
   case 308:
 
-    { m_peecContainer->CreateArray( (yysemantic_stack_[(10) - (1)].sStringIndex), static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), (yysemantic_stack_[(10) - (7)].ui32Backing), (yysemantic_stack_[(10) - (5)].ndData), (yysemantic_stack_[(10) - (9)].ndData).sNodeIndex, (yysemantic_stack_[(10) - (9)].ndData).sNodeIndex, (yyval.ndData) ); }
+    { m_peecContainer->CreateRawArray( (yysemantic_stack_[(10) - (1)].sStringIndex), static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), (yysemantic_stack_[(10) - (7)].ui32Backing), (yysemantic_stack_[(10) - (5)].ndData), (yysemantic_stack_[(10) - (9)].ndData).sNodeIndex, (yysemantic_stack_[(10) - (9)].ndData).sNodeIndex, (yyval.ndData) ); }
     break;
 
   case 309:
 
-    { m_peecContainer->CreateArray( (yysemantic_stack_[(12) - (1)].sStringIndex), static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), (yysemantic_stack_[(12) - (7)].ui32Backing), (yysemantic_stack_[(12) - (5)].ndData), (yysemantic_stack_[(12) - (9)].ndData).sNodeIndex, (yysemantic_stack_[(12) - (11)].ndData).sNodeIndex, (yyval.ndData) ); }
+    { m_peecContainer->CreateRawArray( (yysemantic_stack_[(12) - (1)].sStringIndex), static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), (yysemantic_stack_[(12) - (7)].ui32Backing), (yysemantic_stack_[(12) - (5)].ndData), (yysemantic_stack_[(12) - (9)].ndData).sNodeIndex, (yysemantic_stack_[(12) - (11)].ndData).sNodeIndex, (yyval.ndData) ); }
     break;
 
   case 310:

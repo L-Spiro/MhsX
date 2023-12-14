@@ -49,66 +49,66 @@ namespace ee {
 		// == Enumerations.
 		// Error codes.
 		enum EE_ERROR_CODES {
-			EE_EC_SUCCESS,					// No problem.
+			EE_EC_SUCCESS,					/**< No problem. */
 
-			EE_EC_INVALIDTREE,				// The syntax tree is invalid.
-			EE_EC_OUTOFMEMORY,				// Out of memory.
-			EE_EC_PROCESSINGERROR,			// General error.
+			EE_EC_INVALIDTREE,				/**< The syntax tree is invalid. */
+			EE_EC_OUTOFMEMORY,				/**< Out of memory. */
+			EE_EC_PROCESSINGERROR,			/**< General error. */
 			
-			EE_EC_RESULTSTOOSHORT,			// The sub-expression results array is too short.
-			EE_EC_NOIDENTIFIERHANDLER,		// No call to SetStringHandler() has been made with a non-nullptr value.
-			EE_EC_IDENTHANDLERFAILED,		// Identifier handler returned false.
+			EE_EC_RESULTSTOOSHORT,			/**< The sub-expression results array is too short. */
+			EE_EC_NOIDENTIFIERHANDLER,		/**< No call to SetStringHandler() has been made with a non-nullptr value. */
+			EE_EC_IDENTHANDLERFAILED,		/**< Identifier handler returned false. */
 			
-			EE_EC_VARNOTFOUND,				// Custom variable not found by name.
-			EE_EC_VARHASBADTYPE,			// Custom variable has an invalid type.
-			EE_EC_BADARRAYIDX,				// Array index out-of-range.
-			EE_EC_NOADDRESSHANDLER,			// No address handler.
-			EE_EC_ADDRESSHANDLERFAILED,		// Address handler failed.
+			EE_EC_VARNOTFOUND,				/**< Custom variable not found by name. */
+			EE_EC_VARHASBADTYPE,			/**< Custom variable has an invalid type. */
+			EE_EC_BADARRAYIDX,				/**< Array index out-of-range. */
+			EE_EC_NOADDRESSHANDLER,			/**< No address handler. */
+			EE_EC_ADDRESSHANDLERFAILED,		/**< Address handler failed. */
 			
-			EE_EC_NOMEMBERHANDLER,			// No call to SetMemberAccessHandler() has been made with a non-nullptr value.
-			EE_EC_MEMBERHANDELRFAILED,		// Member handler returned false.
-			EE_EC_NOUSERHANDLER,			// No call to SetUserHandler() has been made with a non-nullptr value.
-			EE_EC_USERHANDLERFAILED,		// User handler returned false.
+			EE_EC_NOMEMBERHANDLER,			/**< No call to SetMemberAccessHandler() has been made with a non-nullptr value. */
+			EE_EC_MEMBERHANDELRFAILED,		/**< Member handler returned false. */
+			EE_EC_NOUSERHANDLER,			/**< No call to SetUserHandler() has been made with a non-nullptr value. */
+			EE_EC_USERHANDLERFAILED,		/**< User handler returned false. */
 			
-			EE_EC_FLOATWITHTILDE,			// The ~ cannot be used with floating-point values.
-			EE_EC_UNRECOGNIZEDUNARYOPERATOR,// Unrecognized unary operator.
-			EE_EC_UNRECOGNIZEDINTRINSIC0,	// Unrecognized no-parameter intrinsic.
-			EE_EC_UNRECOGNIZEDINTRINSIC1,	// Unrecognized 1-parameter intrinsic.
-			EE_EC_UNRECOGNIZEDINTRINSIC2,	// Unrecognized 2-parameter intrinsic.
-			EE_EC_UNRECOGNIZEDINTRINSIC3,	// Unrecognized 3-parameter intrinsic.
+			EE_EC_FLOATWITHTILDE,			/**< The ~ cannot be used with floating-point values. */
+			EE_EC_UNRECOGNIZEDUNARYOPERATOR,/**< Unrecognized unary operator. */
+			EE_EC_UNRECOGNIZEDINTRINSIC0,	/**< Unrecognized no-parameter intrinsic. */
+			EE_EC_UNRECOGNIZEDINTRINSIC1,	/**< Unrecognized 1-parameter intrinsic. */
+			EE_EC_UNRECOGNIZEDINTRINSIC2,	/**< Unrecognized 2-parameter intrinsic. */
+			EE_EC_UNRECOGNIZEDINTRINSIC3,	/**< Unrecognized 3-parameter intrinsic. */
 
-			EE_EC_TOOMANYSIGNBITS,			// Too many sign bits in a custom float.
-			EE_EC_TOOMANYEXPBITS,			// Too many exponent bits in a custom float.
-			EE_EC_TOOMANYMANTISSABITS,		// Too many mantissa bits in a custom float.
+			EE_EC_TOOMANYSIGNBITS,			/**< Too many sign bits in a custom float. */
+			EE_EC_TOOMANYEXPBITS,			/**< Too many exponent bits in a custom float. */
+			EE_EC_TOOMANYMANTISSABITS,		/**< Too many mantissa bits in a custom float. */
 
-			EE_EC_INVALILOOPCONDITIONEXP,	// Invalid expression inside a loop condition.
-			EE_EC_INVALIDLOOPDECL,			// Invalid declaration inside a loop.
+			EE_EC_INVALILOOPCONDITIONEXP,	/**< Invalid expression inside a loop condition. */
+			EE_EC_INVALIDLOOPDECL,			/**< Invalid declaration inside a loop. */
 
-			EE_EC_ARRAYACCESSERROR,			// Error accessing the contents of an array for a for-each loop.
+			EE_EC_ARRAYACCESSERROR,			/**< Error accessing the contents of an array for a for-each loop. */
 
-			EE_EC_ERRORPROCESSINGOP,		// An invalid operator was submitted.
+			EE_EC_ERRORPROCESSINGOP,		/**< An invalid operator was submitted. */
 
-			EE_EC_OPMUSTNOTBEZERO,			// 0 not allow on the right-hand side of an op (X / 0, X % 0, etc.)
+			EE_EC_OPMUSTNOTBEZERO,			/**< 0 not allow on the right-hand side of an op (X / 0, X % 0, etc.) */
 
-			EE_EC_INVALIDOPERATOR,			// Invalid operation, such as "~0.3".
+			EE_EC_INVALIDOPERATOR,			/**< Invalid operation, such as "~0.3". */
 
-			EE_EC_INVALIDAPIOPERATION,		// Invalid operation that is part of the base API implementation and is expected to be working.
+			EE_EC_INVALIDAPIOPERATION,		/**< Invalid operation that is part of the base API implementation and is expected to be working. */
 
-			EE_EC_INVALID_WRITE_TO_CONST,							// Invalid attempt to write to a custom variable declared with "const".
+			EE_EC_INVALID_WRITE_TO_CONST,							/**< Invalid attempt to write to a custom variable declared with "const". */
 
-			EE_EC_CONST_VAR_REQUIRES_CONST_EPRESSION,				// A const variable was attempted to be created but was not assigned a const expression.
+			EE_EC_CONST_VAR_REQUIRES_CONST_EPRESSION,				/**< A const variable was attempted to be created but was not assigned a const expression. */
 
-			EE_EC_NONCONSTNOTALLOWED,		// A call to resolve a non-constant expression could have succeeded but failed due to passed-in flags.
+			EE_EC_NONCONSTNOTALLOWED,		/**< A call to resolve a non-constant expression could have succeeded but failed due to passed-in flags. */
 
-			EE_EC_INVALIDCAST,				// An object failed to cast into another object or primitive, or could not be created from one.
-			EE_EC_ARRAY_FROM_NON_OBJECT,	// An array access was attempted on a type that is not an object.
+			EE_EC_INVALIDCAST,				/**< An object failed to cast into another object or primitive, or could not be created from one. */
+			EE_EC_ARRAY_FROM_NON_OBJECT,	/**< An array access was attempted on a type that is not an object. */
 
-			EE_EC_UNIMPLEMENTED,			// Error for development to indicate that a feature is not implemented yet.
+			EE_EC_UNIMPLEMENTED,			/**< Error for development to indicate that a feature is not implemented yet. */
 		};
 
 		
 		// == Types.
-		// The result structure.
+		/** The result structure. */
 		struct EE_RESULT {
 			EE_NUM_CONSTANTS				ncType;
 			union {
@@ -119,94 +119,200 @@ namespace ee {
 			}								u;
 		};
 
-		// Address ([<address>]) handler.
+		/** Address ([<address>]) handler. */
 		typedef bool (__stdcall *			PfAddressHandler)( uint64_t _ui64Address, EE_CAST_TYPES _tType, uintptr_t _uiptrData, CExpEvalContainer * _peecContainer, EE_RESULT &_rResult );
 
-		// User-variable function handler.
+		/** User-variable function handler. */
 		typedef bool (__stdcall *			PfUserVarHandler)( uintptr_t _uiptrData, CExpEvalContainer * _peecContainer, EE_RESULT &_rResult );
 
-		// String handler.
+		/** String handler. */
 		typedef bool (__stdcall *			PfStringHandler)( const std::string &_sString, uintptr_t _uiptrData, CExpEvalContainer * _peecContainer, EE_RESULT &_rResult );
 
-		// Member-access handler.
+		/** Member-access handler. */
 		typedef bool (__stdcall *			PfMemberAccessHandler)( const EE_RESULT &_rLeft, const std::string &_sMember, uintptr_t _uiptrData, CExpEvalContainer * _peecContainer, EE_RESULT &_rResult );
 
-		// ToString() function.
+		/** ToString() function. */
 		typedef std::wstring (__stdcall *	PfToStringHandler)( EE_RESULT &_rResult, uint64_t _ui64Options );
 
 
 		// == Functions.
-		// Get the result.
+		/**
+		 * Gets the result.  If the function returns false then the expression is invalid.  If it returns true but the return type is EE_NC_INVALID, the expression is valid but was unable to be resolved for some reason.
+		 * 
+		 * \param _rRes Holds the returned result after evaluating the already-parsed expression.
+		 * \return Returns true if the expression has been parsed.
+		 **/
 		bool								Resolve( EE_RESULT &_rRes );
 
-		// Do we treat everything as hex?
+		/**
+		 * Do we treat everything as hex?
+		 * 
+		 * \return Returns true if decimal and octal numbers are treated as hexadecimal by default.
+		 **/
 		bool								TreatAllAsHex() const { return m_bTreatAllAsHex; }
 
-		// Set whether to treat all as hex or not.
+		/**
+		 * Set whether to treat all as hex or not.
+		 * 
+		 * \param _bVal If true, decimal and octal numbers are treated as hexadecimal by default.
+		 **/
 		void								SetTreatAsHex( bool _bVal ) { m_bTreatAllAsHex = _bVal; }
 
-		// Set the address handler.
+		/**
+		 * Sets the address handler.
+		 * 
+		 * \param _pfHandler The handler call-back function.
+		 * \param _uiptrData Data to be passed to the call-back function.  It is always pointer-width.
+		 **/
 		void								SetAddressHandler( PfAddressHandler _pfHandler, uintptr_t _uiptrData ) { m_pfahAddressHandler = _pfHandler; m_uiptrAddressData = _uiptrData; }
 
-		// Set the address write handler.
+		/**
+		 * Sets the address write handler.
+		 * 
+		 * \param _pfHandler The handler call-back function.
+		 * \param _uiptrData Data to be passed to the call-back function.  It is always pointer-width.
+		 **/
 		void								SetAddressWriteHandler( PfAddressHandler _pfHandler, uintptr_t _uiptrData ) { m_pfahAddressWriteHandler = _pfHandler; m_uiptrAddressWriteData = _uiptrData; }
 
-		// Set the user data handler.
+		/**
+		 * Sets the user data handler.
+		 * 
+		 * \param _pfHandler The handler call-back function.
+		 * \param _uiptrData Data to be passed to the call-back function.  It is always pointer-width.
+		 **/
 		void								SetUserHandler( PfUserVarHandler _pfHandler, uintptr_t _uiptrData ) { m_pfUser = _pfHandler; m_uiptrUserData = _uiptrData; }
 
-		// Set the string handler.
+		/**
+		 * Sets the string handler.
+		 * 
+		 * \param _pfHandler The handler call-back function.
+		 * \param _uiptrData Data to be passed to the call-back function.  It is always pointer-width.
+		 **/
 		void								SetStringHandler( PfStringHandler _pfHandler, uintptr_t _uiptrData ) { m_pfshString = _pfHandler; m_uiptrStringData = _uiptrData; }
 
-		// Set the identifier handler.
+		/**
+		 * Sets the identifier handler.
+		 * 
+		 * \param _pfHandler The handler call-back function.
+		 * \param _uiptrData Data to be passed to the call-back function.  It is always pointer-width.
+		 **/
 		void								SetMemberAccessHandler( PfMemberAccessHandler _pfHandler, uintptr_t _uiptrData ) { m_pfmahMemberAccess = _pfHandler; m_uiptrMemberAccess = _uiptrData; }
 
-		// Sets the ToString() handler.
+		/**
+		 * Sets the ToString() handler.
+		 * 
+		 * \param _pfHandler The handler call-back function.
+		 **/
 		void								SetToStringHandler( PfToStringHandler _pfHandler ) { m_pfToString = _pfHandler; }
 
-		// Sets the lexer to NULL.  Call after the expression has been successfully parsed.
+		/**
+		 * Sets the lexer to NULL.  Call after the expression has been successfully parsed.
+		 **/
 		void								ExpWasParsed() { m_peelLexer = nullptr; }
 
-		// Gets the user data passed in SetUserHandler().
+		/**
+		 * Gets the user data passed in SetUserHandler()/SetUserData().
+		 * 
+		 * \return Returns the user data passed in SetUserHandler()/SetUserData().
+		 **/
 		uintptr_t							UserData() const { return m_uiptrUserData; }
 
-		// Sets the user data to be used by the handler passed in SetUserHandler().
+		/**
+		 * Sets the user data to be used by the handler passed in SetUserHandler()/SetUserData().
+		 * 
+		 * \param _uiptrData Data to be passed to the call-back function.  It is always pointer-width.
+		 **/
 		void								SetUserData( uintptr_t _uiptrData ) { m_uiptrUserData = _uiptrData; }
 
-		// Does the compilsed script have a call to "??"?
+		/**
+		 * Does the compilsed script have a call to "??"?
+		 * 
+		 * \return Returns true if the script uses ??.
+		 **/
 		bool								HasAccessToUserData() const { return m_bHasUserVar; }
 
-		// Does the compiled script have a dereference?
+		/**
+		 * Does the compiled script have a dereference?
+		 * 
+		 * \return Returns true if the script uses a dereference, such as ui8[<address>].
+		 **/
 		bool								HasAddressRead() const { return m_bHasAddressRead; }
 
-		// Sets a numbered parameter.
+		/**
+		 * Sets a numbered ($x) parameter.
+		 * 
+		 * \param _sIdx The index of the parameter to set.
+		 * \param _rValue The value to assign to the parameter.
+		 * \return Returns true if there was enough memory available to create the parameter index.
+		 **/
 		bool								SetNumberedParm( size_t _sIdx, const EE_RESULT &_rValue );
 
-		// Gets a numbered parameter.
+		/**
+		 * Gets a numbered parameter.
+		 * 
+		 * \param _sIdx The index of the parameter to get.
+		 * \return Returns EE_NC_UNSIGNED with a value of 0 if the index is invalid, otherwise it returns the parameter at the given index.
+		 **/
 		EE_RESULT							GetNumberedParm( size_t _sIdx ) {
 			return _sIdx >= m_vNumberedParms.size() ?
 				DefaultResult() :
 				m_vNumberedParms[_sIdx];
 		}
 
-		// Gets the total numbered parameters.
+		/**
+		 * Gets the total numbered parameters ($$).
+		 * 
+		 * \return Returns the total numbered parameters ($$).
+		 **/
 		__inline size_t						TotalNumberedParms() const { return m_vNumberedParms.size(); }
 
-		// Determines if a numbered parameter is accessed by the script.
+		/**
+		 * Determines if a numbered parameter ($x) is accessed by the script.
+		 * 
+		 * \param _sIdx The parameter index to check for access.
+		 * \return Returns true if the given parameter index is accessed by the script.
+		 **/
 		__inline bool						IsNumberedParmAccessed( size_t _sIdx ) const { return m_sNumberedParmsAccessed.find( _sIdx ) != m_sNumberedParmsAccessed.end(); }
 
-		// Determines if any numbered parameter is accessed by the script.
+		/**
+		 * Determines if any numbered parameter ($x) is accessed by the script.
+		 * 
+		 * \return Returns true if any numbered parameter is accessed by the script.
+		 **/
 		__inline bool						IsNumberedParmAccessed() const { return m_sNumberedParmsAccessed.size() != 0; }
 
-		// Determines if dynamic access to the numbered parameters is used within the script.
+		/**
+		 * Determines if dynamic access to the numbered parameters is used within the script.
+		 * 
+		 * \return Returns true if a numbered parameter is accessed via a dynamix run-time index.
+		 **/
 		__inline bool						IsDynamicNumberedParmAccessed() const { return IsNumberedParmAccessed( static_cast<size_t>(-1) ); }
 
-		// Gets the type to use between 2 given types.
+		/**
+		 * Gets the type to use between 2 given types.
+		 * 
+		 * \param _ncLeft The left operand.
+		 * \param _ncRight The right operand.
+		 * \return Using C++ promotion rules, a common cast type for the given values is determined.
+		 **/
 		static EE_NUM_CONSTANTS				GetCastType( EE_NUM_CONSTANTS _ncLeft, EE_NUM_CONSTANTS _ncRight );
 
-		// Converts a result to a given type.
+		/**
+		 * Converts a result to a given type.  Only basic types (no objects) can be converted)
+		 * 
+		 * \param _rRes The result to convert.
+		 * \param _ncType The new type of the result.
+		 * \return Returns a new result that represents the conversion from the _rRes type to _ncType, or an EE_NC_INVALID return if the types are incompatible completely.
+		 **/
 		static EE_RESULT					ConvertResult( const EE_RESULT &_rRes, EE_NUM_CONSTANTS _ncType );
 
-		// Converts a result or object to a given type.
+		/**
+		 * Converts a result or object to a given type.  Same as ConvertResult() but it can convert objects as well.
+		 * 
+		 * \param _rRes The result to convert.
+		 * \param _ncType The new type of the result.
+		 * \return Returns a new result that represents the conversion from the _rRes type to _ncType, or an EE_NC_INVALID return if the types are incompatible completely.
+		 **/
 		EE_RESULT							ConvertResultOrObject( const EE_RESULT &_rRes, EE_NUM_CONSTANTS _ncType );
 
 		/**
@@ -708,8 +814,8 @@ namespace ee {
 		// Creates an assignment operator (to change a variable that has already been created.
 		void								CreateReAssignment( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndRight, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode );
 
-		// Creates an array.
-		void								CreateArray( size_t _sStrIndex, uint32_t _ui32Backing, uint32_t _ui32BackingPersistence, const YYSTYPE::EE_NODE_DATA &_ndSize,
+		// Creates a raw data array.
+		void								CreateRawArray( size_t _sStrIndex, uint32_t _ui32Backing, uint32_t _ui32BackingPersistence, const YYSTYPE::EE_NODE_DATA &_ndSize,
 			size_t _sStartValueNodeIdx, size_t _sEndValueNodeIdx, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Creates an assignment operator to assign a value in an array.

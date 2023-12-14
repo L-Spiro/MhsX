@@ -39,7 +39,12 @@ namespace ee {
 	}
 
 	// == Function.
-	// Get the result. 
+	/**
+	 * Gets the result.  If the function returns false then the expression is invalid.  If it returns true but the return type is EE_NC_INVALID, the expression is valid but was unable to be resolved for some reason.
+	 * 
+	 * \param _rRes Holds the returned result after evaluating the already-parsed expression.
+	 * \return Returns true if the expression has been parsed.
+	 **/
 	bool CExpEvalContainer::Resolve( EE_RESULT &_rRes ) {
 		_rRes.ncType = EE_NC_INVALID;
 		try {
@@ -53,7 +58,13 @@ namespace ee {
 		catch ( const std::bad_alloc & ) { return false; }
 	}
 
-	// Sets a numbered parameter.
+	/**
+	 * Sets a numbered ($x) parameter.
+	 * 
+	 * \param _sIdx The index of the parameter to set.
+	 * \param _rValue The value to assign to the parameter.
+	 * \return Returns true if there was enough memory available to create the parameter index.
+	 **/
 	bool CExpEvalContainer::SetNumberedParm( size_t _sIdx, const EE_RESULT &_rValue ) {
 		if ( _sIdx >= m_vNumberedParms.size() ) {
 			try {
@@ -65,12 +76,24 @@ namespace ee {
 		return true;
 	}
 
-	// Gets the type to use between 2 given types.
+	/**
+	 * Gets the type to use between 2 given types.
+	 * 
+	 * \param _ncLeft The left operand.
+	 * \param _ncRight The right operand.
+	 * \return Using C++ promotion rules, a common cast type for the given values is determined.
+	 **/
 	EE_NUM_CONSTANTS CExpEvalContainer::GetCastType( EE_NUM_CONSTANTS _ncLeft, EE_NUM_CONSTANTS _ncRight ) {
 		return _ncLeft > _ncRight ? _ncLeft : _ncRight;
 	}
 
-	// Converts a result to a given type.
+	/**
+	 * Converts a result to a given type.  Only basic types (no objects) can be converted)
+	 * 
+	 * \param _rRes The result to convert.
+	 * \param _ncType The new type of the result.
+	 * \return Returns a new result that represents the conversion from the _rRes type to _ncType, or an EE_NC_INVALID return if the types are incompatible completely.
+	 **/
 	CExpEvalContainer::EE_RESULT CExpEvalContainer::ConvertResult( const EE_RESULT &_rRes, EE_NUM_CONSTANTS _ncType ) {
 		if ( (_rRes.ncType) == _ncType ) { return _rRes; }
 		EE_RESULT rRes;
@@ -117,7 +140,13 @@ namespace ee {
 		return rRes;
 	}
 
-	// Converts a result to a given type.
+	/**
+	 * Converts a result or object to a given type.  Same as ConvertResult() but it can convert objects as well.
+	 * 
+	 * \param _rRes The result to convert.
+	 * \param _ncType The new type of the result.
+	 * \return Returns a new result that represents the conversion from the _rRes type to _ncType, or an EE_NC_INVALID return if the types are incompatible completely.
+	 **/
 	CExpEvalContainer::EE_RESULT CExpEvalContainer::ConvertResultOrObject( const EE_RESULT &_rRes, EE_NUM_CONSTANTS _ncType ) {
 		if ( (_rRes.ncType) == _ncType ) { return _rRes; }
 		EE_RESULT rRes;
@@ -2012,8 +2041,8 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an array.
-	void CExpEvalContainer::CreateArray( size_t _sStrIndex, uint32_t _ui32Backing, uint32_t _ui32BackingPersistence, const YYSTYPE::EE_NODE_DATA &_ndSize,
+	// Creates a raw data array.
+	void CExpEvalContainer::CreateRawArray( size_t _sStrIndex, uint32_t _ui32Backing, uint32_t _ui32BackingPersistence, const YYSTYPE::EE_NODE_DATA &_ndSize,
 		size_t _sStartValueNodeIdx, size_t _sEndValueNodeIdx, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_CREATE_ARRAY;
 		_ndNode.u.sStringIndex = _sStrIndex;
