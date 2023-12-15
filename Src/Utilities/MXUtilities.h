@@ -339,16 +339,42 @@ namespace mx {
 
 
 		// == Functions.
-		// Convert a single byte to hex.  _pcString must be at least 3 characters long.
+		/**
+		 * Convert a single byte to hex.  _pcString must be at least 3 characters long.
+		 * 
+		 * \param _bIn The 8-bit value to convert to a 2-character (plus NULL) string.
+		 * \param _pcString The retun string, which must be long enough to contain the 2 characters and final NULL.
+		 * \param _bLower If FALSE, capital letters are used for characters A-F.
+		 **/
 		static VOID						ByteToHex( BYTE _bIn, CHAR * _pcString, BOOL _bLower = FALSE );
 
-		// Convert a single byte to hex.
+		/**
+		 * Convert a single byte to hex.
+		 * 
+		 * \param _bIn The 8-bit value to convert to a 2-character string.
+		 * \param _sString The retun string.
+		 * \param _bLower If FALSE, capital letters are used for characters A-F.
+		 **/
 		static VOID						ByteToHex( BYTE _bIn, std::string &_sString, BOOL _bLower = FALSE );
 
-		// Convert a byte array to a hex string.  _pcString must be twice as long as the input, plus 1 character for the NULL.
+		/**
+		 * Convert a byte array to a hex string.  _pcString must be twice as long as the input, plus 1 character for the NULL.
+		 * 
+		 * \param _pvIn The input array of bytes.
+		 * \param _sLen The number of bytes to which _pvIn points.
+		 * \param _pcString The retun string, which must be long enough to contain the 2 characters and final NULL.
+		 * \param _bLower If FALSE, capital letters are used for characters A-F.
+		 **/
 		static VOID						BytesToHex( const VOID * _pvIn, size_t _sLen, CHAR * _pcString, BOOL _bLower = FALSE );
 
-		// Convert a byte array to a hex string.
+		/**
+		 * Convert a byte array to a hex string.
+		 * 
+		 * \param _pvIn The input array of bytes.
+		 * \param _sLen The number of bytes to which _pvIn points.
+		 * \param _sString The retun string.
+		 * \param _bLower If FALSE, capital letters are used for characters A-F.
+		 **/
 		static VOID						BytesToHex( const VOID * _pvIn, size_t _sLen, std::string &_sString, BOOL _bLower = FALSE );
 
 		// Convert a byte array to a hex string.  _pcString must be 3 times as long as the input.
@@ -488,6 +514,50 @@ namespace mx {
 		// Determines if any byte of the 8 in the given value are 0.
 		static inline bool				AnyBytesAre0( uint64_t _uVal ) {
 			return (((_uVal) - 0x0101010101010101ULL) & ~(_uVal) & 0x8080808080808080ULL) != 0;
+		}
+
+		/**
+		 * Reverses the bits in an 8-bit value.
+		 * 
+		 * \param _ui8Val The value to bit-reverse.
+		 * \return Returns the bit-reversed result.
+		 **/
+		static inline uint8_t			ReverseBits8( uint8_t _ui8Val ) {
+			_ui8Val = (_ui8Val & 0xF0) >> 4 | (_ui8Val & 0x0F) << 4;
+			_ui8Val = (_ui8Val & 0xCC) >> 2 | (_ui8Val & 0x33) << 2;
+			_ui8Val = (_ui8Val & 0xAA) >> 1 | (_ui8Val & 0x55) << 1;
+			return _ui8Val;
+		}
+
+		/**
+		 * Reverses the bits in an 32-bit value.
+		 * 
+		 * \param _ui32Val The value to bit-reverse.
+		 * \return Returns the bit-reversed result.
+		 **/
+		static inline uint32_t			ReverseBits32( uint32_t _ui32Val ) {
+			_ui32Val = ((_ui32Val >> 1) & 0x55555555U) | ((_ui32Val & 0x55555555U) << 1);
+			_ui32Val = ((_ui32Val >> 2) & 0x33333333U) | ((_ui32Val & 0x33333333U) << 2);
+			_ui32Val = ((_ui32Val >> 4) & 0x0F0F0F0FU) | ((_ui32Val & 0x0F0F0F0FU) << 4);
+			_ui32Val = ((_ui32Val >> 8) & 0x00FF00FFU) | ((_ui32Val & 0x00FF00FFU) << 8);
+			_ui32Val = ((_ui32Val >> 16) & 0xFFFFU) | ((_ui32Val & 0xFFFFU) << 16);
+			return _ui32Val;
+		}
+
+		/**
+		 * Reverses the bits in an 64-bit value.
+		 * 
+		 * \param _ui64Val The value to bit-reverse.
+		 * \return Returns the bit-reversed result.
+		 **/
+		static inline uint64_t			ReverseBits64( uint64_t _ui64Val ) {
+			_ui64Val = ((_ui64Val >> 1) & 0x5555555555555555ULL) | ((_ui64Val & 0x5555555555555555ULL) << 1);
+			_ui64Val = ((_ui64Val >> 2) & 0x3333333333333333ULL) | ((_ui64Val & 0x3333333333333333ULL) << 2);
+			_ui64Val = ((_ui64Val >> 4) & 0x0F0F0F0F0F0F0F0FULL) | ((_ui64Val & 0x0F0F0F0F0F0F0F0FULL) << 4);
+			_ui64Val = ((_ui64Val >> 8) & 0x00FF00FF00FF00FFULL) | ((_ui64Val & 0x00FF00FF00FF00FFULL) << 8);
+			_ui64Val = ((_ui64Val >> 16) & 0x0000FFFF0000FFFFULL) | ((_ui64Val & 0x0000FFFF0000FFFFULL) << 16);
+			_ui64Val = ((_ui64Val >> 32) & 0x00000000FFFFFFFFULL) | ((_ui64Val & 0x00000000FFFFFFFFULL) << 32);
+			return _ui64Val;
 		}
 
 		// Resizes a vector with the ability to return a bool to indicate success.

@@ -58,7 +58,13 @@ namespace mx {
 		lResult = ppProc->ResumeProcess();
 	}
 
-	// Convert a single byte to hex.  _pcString must be at least 3 characters long.
+	/**
+	 * Convert a single byte to hex.  _pcString must be at least 3 characters long.
+	 * 
+	 * \param _bIn The 8-bit value to convert to a 2-character (plus NULL) string.
+	 * \param _pcString The retun string, which must be long enough to contain the 2 characters and final NULL.
+	 * \param _bLower If FALSE, capital letters are used for characters A-F.
+	 **/
 	VOID CUtilities::ByteToHex( BYTE _bIn, CHAR * _pcString, BOOL _bLower ) {
 		BYTE bTemp = (_bIn >> 4);
 #define MX_HEX_TO_CHAR( VAL )		((VAL) < 10 ? ('0' + (VAL)) : ((_bLower ? 'a' : 'A') + ((VAL) - 10)))
@@ -68,7 +74,13 @@ namespace mx {
 		_pcString[2] = '\0';
 	}
 
-	// Convert a single byte to hex.
+	/**
+	 * Convert a single byte to hex.
+	 * 
+	 * \param _bIn The 8-bit value to convert to a 2-character string.
+	 * \param _sString The retun string.
+	 * \param _bLower If FALSE, capital letters are used for characters A-F.
+	 **/
 	VOID CUtilities::ByteToHex( BYTE _bIn, std::string &_sString, BOOL _bLower ) {
 		BYTE bTemp = (_bIn >> 4);
 		
@@ -78,7 +90,14 @@ namespace mx {
 #undef MX_HEX_TO_CHAR
 	}
 	
-	// Convert a byte array to a hex string.  _pcString must be twice as long as the input, plus 1 character for the NULL.
+	/**
+	 * Convert a byte array to a hex string.  _pcString must be twice as long as the input, plus 1 character for the NULL.
+	 * 
+	 * \param _pvIn The input array of bytes.
+	 * \param _sLen The number of bytes to which _pvIn points.
+	 * \param _pcString The retun string, which must be long enough to contain the 2 characters and final NULL.
+	 * \param _bLower If FALSE, capital letters are used for characters A-F.
+	 **/
 	VOID CUtilities::BytesToHex( const VOID * _pvIn, size_t _sLen, CHAR * _pcString, BOOL _bLower ) {
 		const BYTE * bIn = static_cast<const BYTE *>(_pvIn);
 		for ( size_t I = 0; I < _sLen; ++I, ++bIn, _pcString += 2 ) {
@@ -86,7 +105,14 @@ namespace mx {
 		}
 	}
 
-	// Convert a byte array to a hex string.
+	/**
+	 * Convert a byte array to a hex string.
+	 * 
+	 * \param _pvIn The input array of bytes.
+	 * \param _sLen The number of bytes to which _pvIn points.
+	 * \param _sString The retun string.
+	 * \param _bLower If FALSE, capital letters are used for characters A-F.
+	 **/
 	VOID CUtilities::BytesToHex( const VOID * _pvIn, size_t _sLen, std::string &_sString, BOOL _bLower ) {
 		const BYTE * bIn = static_cast<const BYTE *>(_pvIn);
 		for ( size_t I = 0; I < _sLen; ++I, ++bIn ) {
