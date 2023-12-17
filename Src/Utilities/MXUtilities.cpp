@@ -3132,6 +3132,54 @@ namespace mx {
 		return std::wstring();
 	}
 
+	/**
+	 * Inserts a number of random characters into a string.  Returns _wsString.
+	 * 
+	 * \param _wsString The string to update.
+	 * \param _stTotal Number of insertions to make.
+	 * \param _pwcTable The table of characters that can be inserted.
+	 * \param _stTableSize The number of characters in _pwcTable.
+	 * \return Returns the updated input, _wsString.
+	 **/
+	std::wstring CUtilities::InsertRandomChars( std::wstring &_wsString, size_t _stTotal, const wchar_t * _pwcTable, size_t _stTableSize ) {
+		if ( !_wsString.size() ) { return _wsString; }
+		std::random_device rdRand;
+		std::mt19937 mGen( rdRand() );
+		
+		std::uniform_int_distribution<> uidDistTable( 0, static_cast<int>(_stTableSize) - 1 );
+		for ( auto I = _stTotal; I--; ) {
+			std::uniform_int_distribution<> uidDistSrc( 0, static_cast<int>(_wsString.size()) - 1 );
+			_wsString.insert( _wsString.begin() + uidDistSrc( mGen ), _pwcTable[uidDistTable(mGen)] );
+		}
+
+
+		return _wsString;
+	}
+
+	/**
+	 * Replaces a number of random characters in a string with characters randomly chosen from _pwcTable.  Returns _wsString.
+	 * 
+	 * \param _wsString The string to update.
+	 * \param _stTotal Number of replacements to make.
+	 * \param _pwcTable The table of characters that can be inserted.
+	 * \param _stTableSize The number of characters in _pwcTable.
+	 * \return Returns the updated input, _wsString.
+	 **/
+	std::wstring CUtilities::ReplaceRandomChars( std::wstring &_wsString, size_t _stTotal, const wchar_t * _pwcTable, size_t _stTableSize ) {
+		if ( !_wsString.size() ) { return _wsString; }
+		std::random_device rdRand;
+		std::mt19937 mGen( rdRand() );
+		
+		std::uniform_int_distribution<> uidDistTable( 0, static_cast<int>(_stTableSize) - 1 );
+		std::uniform_int_distribution<> uidDistSrc( 0, static_cast<int>(_wsString.size()) - 1 );
+		for ( auto I = _stTotal; I--; ) {
+			_wsString.data()[uidDistSrc(mGen)] = _pwcTable[uidDistTable(mGen)];
+		}
+
+
+		return _wsString;
+	}
+
 	// Resolves escape sequences.  Returns the full string as a 32-bit character array.
 	// \'	single quote	byte 0x27 in ASCII encoding
 	// \"	double quote	byte 0x22 in ASCII encoding

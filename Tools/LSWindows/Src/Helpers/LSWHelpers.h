@@ -7,10 +7,16 @@
 #include <cmath>
 #include <cstring>
 #include <EEExpEval.h>
-#include <hidsdi.h>
+
 #include <string>
 #include <Uxtheme.h>
 #include <vector>
+
+#define LSW_USB_INPUTS
+
+#ifdef LSW_USB_INPUTS
+#include <hidsdi.h>
+#endif	// #ifdef LSW_USB_INPUTS
 
 namespace lsw {
 
@@ -463,7 +469,11 @@ namespace lsw {
 		HANDLE								hDevice;								/**< A handle to the device. */
 		RID_DEVICE_INFO						diInfo;									/**< The device's information. */
 		std::vector<uint8_t>				vPreparsedData;							/**< The device's preparsed data.  Cast .data() to PHIDP_PREPARSED_DATA. */
+#ifdef LSW_USB_INPUTS
 		PHIDP_PREPARSED_DATA				pdPreparsedData;						/**< The device's preparsed data. */
+#else
+		void *								pdPreparsedData;
+#endif	// #ifdef LSW_USB_INPUTS
 	};
 
 	struct LSW_HID_HANLE {

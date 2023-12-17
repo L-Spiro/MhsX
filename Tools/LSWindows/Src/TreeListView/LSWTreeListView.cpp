@@ -1036,14 +1036,14 @@ namespace lsw {
 				// Call the original window procedure to draw into memory DC
 				LRESULT lrRes = ::CallWindowProcW( wpOrig, _hWnd, _uMsg, _wParam, _lParam );
 
-				PAINTSTRUCT ps;
+				/*PAINTSTRUCT ps;
 				HDC hdc = ::BeginPaint( _hWnd, &ps );
 
 				RECT rcButton = { 5, 50, 30, 70 };
 				::InvalidateRect( _hWnd, &rcButton, TRUE );
 				::DrawFrameControl( hdc, &rcButton, DFC_BUTTON, DFCS_BUTTONCHECK );
 
-				::EndPaint( _hWnd, &ps );
+				::EndPaint( _hWnd, &ps );*/
 
 				/*
 				PAINTSTRUCT ps;

@@ -85,6 +85,26 @@ namespace mx {
 					CUtilities::ToUnsigned( m_pProcess.ProcId(), swsString );
 					swsString.append( L")" );
 				}
+
+				if ( m_oOptions.dwOpenProc & MX_OP_TITLE_BAR_RANDOM ) {
+					const wchar_t wcTable[] = {
+						L'a',
+						L'b',
+						L'e',
+						L'i',
+						L'd',
+						L'o',
+						L'u',
+						L'C',
+						L'2',
+						L'0',
+						L'-',
+						L'_',
+						L'\u00A0',
+					};
+					CUtilities::InsertRandomChars( swsString, swsString.size() / 3, wcTable, LSW_ELEMENTS( wcTable ) );
+					CUtilities::ReplaceRandomChars( swsString, swsString.size() / 5, wcTable, LSW_ELEMENTS( wcTable ) );
+				}
 			}
 			
 			if ( !swsString.size() ) {

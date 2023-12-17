@@ -48,10 +48,14 @@ namespace lsw {
 	 * \return Returns true if the registry for notification of the changing of PnP devices.
 	 **/
 	bool CMainWindow::RegisterDeviceInterfaceToHwnd() {
+#ifdef LSW_USB_INPUTS
 		DEV_BROADCAST_DEVICEINTERFACE_W dbNotifFilter = { .dbcc_size = sizeof( DEV_BROADCAST_DEVICEINTERFACE_W ) };
 		dbNotifFilter.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
 		dbNotifFilter.dbcc_classguid = LSW_HDEVNOTIFY::s_gUsbPnPDevices;
 		return m_hDevNotify.RegisterDeviceNot( Wnd(), &dbNotifFilter, DEVICE_NOTIFY_WINDOW_HANDLE ) == TRUE;
+#else
+		return FALSE;
+#endif	// #ifdef LSW_USB_INPUTS
 	}
 	
 }	// namespace lsw

@@ -826,6 +826,28 @@ namespace mx {
 		 */
 		static std::wstring				GetFilePath( const std::wstring &_wsPath );
 
+		/**
+		 * Inserts a number of random characters into a string.  Returns _wsString.
+		 * 
+		 * \param _wsString The string to update.
+		 * \param _stTotal Number of insertions to make.
+		 * \param _pwcTable The table of characters that can be inserted.
+		 * \param _stTableSize The number of characters in _pwcTable.
+		 * \return Returns the updated input, _wsString.
+		 **/
+		static std::wstring				InsertRandomChars( std::wstring &_wsString, size_t _stTotal, const wchar_t * _pwcTable, size_t _stTableSize );
+
+		/**
+		 * Replaces a number of random characters in a string with characters randomly chosen from _pwcTable.  Returns _wsString.
+		 * 
+		 * \param _wsString The string to update.
+		 * \param _stTotal Number of replacements to make.
+		 * \param _pwcTable The table of characters that can be inserted.
+		 * \param _stTableSize The number of characters in _pwcTable.
+		 * \return Returns the updated input, _wsString.
+		 **/
+		static std::wstring				ReplaceRandomChars( std::wstring &_wsString, size_t _stTotal, const wchar_t * _pwcTable, size_t _stTableSize );
+
 		// Resolves escape sequences.  Returns the full string as a 32-bit character array.
 		// \'	single quote	byte 0x27 in ASCII encoding
 		// \"	double quote	byte 0x22 in ASCII encoding
