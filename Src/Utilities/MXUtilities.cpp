@@ -1,11 +1,11 @@
 #include "MXUtilities.h"
 #include "../CodePages/MXCodePages.h"
-#include "../Float16/MXFloat16.h"
 #include "../Html/MXHtml.h"
 #include "../MemHack/MXProcess.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../Strings/MXStringMacros.h"
 #include <EEExpEval.h>
+#include <Float16/EEFloat16.h>
 
 #include <algorithm>
 #include <cmath>
@@ -1179,15 +1179,15 @@ namespace mx {
 		switch ( _dtType ) {
 			case MX_DT_FLOAT16 : {
 				eCopy = DetailedConvertResult( _rRes, _dtType );
-				if ( _bMustPrintNumber && std::isinf( CFloat16( eCopy.u.dVal ).Value() ) ) {
-					_sString += CFloat16( eCopy.u.dVal ).Value() > 0.0 ? _DEC_WS_90D8D134_as_float16_0x7C00_ :
+				if ( _bMustPrintNumber && std::isinf( ee::CFloat16( eCopy.u.dVal ).Value() ) ) {
+					_sString += ee::CFloat16( eCopy.u.dVal ).Value() > 0.0 ? _DEC_WS_90D8D134_as_float16_0x7C00_ :
 						_DEC_WS_3C64313D__as_float16_0x7C00_;
 				}
-				else if ( _bMustPrintNumber && std::isnan( CFloat16( eCopy.u.dVal ).Value() ) ) {
+				else if ( _bMustPrintNumber && std::isnan( ee::CFloat16( eCopy.u.dVal ).Value() ) ) {
 					_sString += _DEC_WS_B5B38EE8_as_float16_0x7E00_;
 				}
 				else {
-					CUtilities::ToDouble( CFloat16( eCopy.u.dVal ).Value(), _sString );
+					CUtilities::ToDouble( ee::CFloat16( eCopy.u.dVal ).Value(), _sString );
 				}
 				break;
 			}
@@ -1254,7 +1254,7 @@ namespace mx {
 		switch ( _dtType ) {
 			case MX_DT_FLOAT16 : {
 				eCopy = ee::CExpEvalContainer::ConvertResult( _rRes, ee::EE_NC_FLOATING );
-				if ( std::isinf( CFloat16( eCopy.u.dVal ).Value() ) ) {
+				if ( std::isinf( ee::CFloat16( eCopy.u.dVal ).Value() ) ) {
 					return eCopy.u.dVal > 0.0 ? 1 : -1;
 				}
 				return 0;
@@ -1283,7 +1283,7 @@ namespace mx {
 		switch ( _dtType ) {
 			case MX_DT_FLOAT16 : {
 				eCopy = ee::CExpEvalContainer::ConvertResult( _rRes, ee::EE_NC_FLOATING );
-				return std::isnan( CFloat16( eCopy.u.dVal ).Value() );
+				return std::isnan( ee::CFloat16( eCopy.u.dVal ).Value() );
 			}
 			case MX_DT_FLOAT : {
 				eCopy = ee::CExpEvalContainer::ConvertResult( _rRes, ee::EE_NC_FLOATING );
@@ -1334,7 +1334,7 @@ namespace mx {
 		if ( DataTypeIsFloat( _dtType.dtType ) ) {
 			switch ( _dtType.dtType ) {
 				case CUtilities::MX_DT_FLOAT16 : {
-					return _dtType.u.Float64 == CFloat16::Max();
+					return _dtType.u.Float64 == ee::CFloat16::Max();
 				}
 				case CUtilities::MX_DT_FLOAT : {
 					return _dtType.u.Float32 == FLT_MAX;
@@ -1512,7 +1512,7 @@ namespace mx {
 			MX_CASE_PAIR( 32 )
 			MX_CASE_PAIR( 64 )
 			case MX_DT_FLOAT16 : {
-				ToDouble( CFloat16( _pdtData->u.UInt16 ).Value(), _sRet, _iSigDigits );
+				ToDouble( ee::CFloat16( _pdtData->u.UInt16 ).Value(), _sRet, _iSigDigits );
 				break;
 			}
 			case MX_DT_FLOAT : {
@@ -1554,7 +1554,7 @@ namespace mx {
 			MX_CASE_PAIR( 32 )
 			MX_CASE_PAIR( 64 )
 			case MX_DT_FLOAT16 : {
-				ToDouble( CFloat16( _pdtData->u.UInt16 ).Value(), _swsRet, _iSigDigits );
+				ToDouble( ee::CFloat16( _pdtData->u.UInt16 ).Value(), _swsRet, _iSigDigits );
 				break;
 			}
 			case MX_DT_FLOAT : {
@@ -1608,7 +1608,7 @@ namespace mx {
 		MX_CASE( MX_DT_UINT16, uint16_t, MEMBERTYPE, MEMBER, uint64_t, ui64Val )							\
 		MX_CASE( MX_DT_UINT32, uint32_t, MEMBERTYPE, MEMBER, uint64_t, ui64Val )							\
 		MX_CASE( MX_DT_UINT64, uint64_t, MEMBERTYPE, MEMBER, uint64_t, ui64Val )							\
-		MX_CASE( MX_DT_FLOAT16, CFloat16, double, MEMBER, double, dVal )									\
+		MX_CASE( MX_DT_FLOAT16, ee::CFloat16, double, MEMBER, double, dVal )								\
 		MX_CASE( MX_DT_FLOAT, float, MEMBERTYPE, MEMBER, double, dVal )										\
 		MX_CASE( MX_DT_DOUBLE, double, MEMBERTYPE, MEMBER, double, dVal )									\
 	}
@@ -1789,7 +1789,7 @@ namespace mx {
 			MX_CASE( MX_DT_DOUBLE, double, EE_NC_FLOATING, Float64, dVal )
 			case MX_DT_FLOAT16 : {
 				ee::CExpEvalContainer::EE_RESULT eCopy = ee::CExpEvalContainer::ConvertResult( _rRes, ee::EE_NC_FLOATING );
-				dtRet.u.Float64 = CFloat16( eCopy.u.dVal ).Value();
+				dtRet.u.Float64 = ee::CFloat16( eCopy.u.dVal ).Value();
 				return dtRet;
 			}
 
@@ -2953,7 +2953,47 @@ namespace mx {
 		}
 	}
 
-	// Gets the current time in microseconds.
+	/**
+	 * Creates a string with _cReplaceMe replaced with _cWithMe inside _s16String.
+	 *
+	 * \param _s16String The string in which replacements are to be made.
+	 * \param _cReplaceMe The character to replace.
+	 * \param _cWithMe The character with which to replace _cReplaceMe.
+	 * \return Returns the new string with the given replacements made.
+	 */
+	std::u16string CUtilities::Replace( const std::u16string &_s16String, char16_t _cReplaceMe, char16_t _cWithMe ) {
+		std::u16string s16Copy = _s16String;
+		auto aFound = s16Copy.find( _cReplaceMe );
+		while ( aFound != std::string::npos ) {
+			s16Copy[aFound] = _cWithMe;
+			aFound = s16Copy.find( _cReplaceMe, aFound + 1 );
+		}
+		return s16Copy;
+	}
+
+	/**
+	 * Creates a string with _wcReplaceMe replaced with _wcWithMe inside _wsString.
+	 *
+	 * \param _wsString The string in which replacements are to be made.
+	 * \param _wcReplaceMe The character to replace.
+	 * \param _wcWithMe The character with which to replace _cReplaceMe.
+	 * \return Returns the new string with the given replacements made.
+	 */
+	std::wstring CUtilities::Replace( const std::wstring &_wsString, wchar_t _wcReplaceMe, wchar_t _wcWithMe ) {
+		std::wstring wsCopy = _wsString;
+		auto aFound = wsCopy.find( _wcReplaceMe );
+		while ( aFound != std::string::npos ) {
+			wsCopy[aFound] = _wcWithMe;
+			aFound = wsCopy.find( _wcReplaceMe, aFound + 1 );
+		}
+		return wsCopy;
+	}
+
+	/**
+	 * Gets the current time in microseconds.
+	 * 
+	 * \return Returns the current time in microseconds.
+	 **/
 	uint64_t CUtilities::CurTimeInMicros() {
 		static LARGE_INTEGER liFreq = { 0 };
 		if ( !liFreq.QuadPart ) {
@@ -2962,6 +3002,134 @@ namespace mx {
 		LARGE_INTEGER liInt;
 		::QueryPerformanceCounter( &liInt );
 		return (liInt.QuadPart * 1000000ULL) / liFreq.QuadPart;
+	}
+
+	/**
+	 * Gets the extension from a file path.
+	 *
+	 * \param _s16Path The file path whose extension is to be obtained.
+	 * \return Returns a string containing the file extension.
+	 */
+	std::u16string CUtilities::GetFileExtension( const std::u16string &_s16Path ) {
+		std::u16string s16File = GetFileName( _s16Path );
+		std::string::size_type stFound = s16File.rfind( u'.' );
+		if ( stFound == std::string::npos ) { return std::u16string(); }
+		return s16File.substr( stFound + 1 );
+	}
+
+	/**
+	 * Gets the extension from a file path.
+	 *
+	 * \param _wsPath The file path whose extension is to be obtained.
+	 * \return Returns a string containing the file extension.
+	 */
+	std::wstring CUtilities::GetFileExtension( const std::wstring &_wsPath ) {
+		std::wstring wsFile = GetFileName( _wsPath );
+		std::string::size_type stFound = wsFile.rfind( L'.' );
+		if ( stFound == std::string::npos ) { return std::wstring(); }
+		return wsFile.substr( stFound + 1 );
+	}
+
+	/**
+	 * Removes the extension from a file path.
+	 *
+	 * \param _s16Path The file path whose extension is to be removed.
+	 * \return Returns a string containing the file mname without the extension.
+	 */
+	std::u16string CUtilities::NoExtension( const std::u16string &_s16Path ) {
+		std::u16string s16File = GetFileName( _s16Path );
+		std::string::size_type stFound = s16File.rfind( u'.' );
+		if ( stFound == std::string::npos ) { return std::u16string(); }
+		return s16File.substr( 0, stFound );
+	}
+
+	/**
+	 * Removes the extension from a file path.
+	 *
+	 * \param _wsPath The file path whose extension is to be removed.
+	 * \return Returns a string containing the file mname without the extension.
+	 */
+	std::wstring CUtilities::NoExtension( const std::wstring &_wsPath ) {
+		std::wstring wsFile = GetFileName( _wsPath );
+		std::string::size_type stFound = wsFile.rfind( L'.' );
+		if ( stFound == std::string::npos ) { return std::wstring(); }
+		return wsFile.substr( 0, stFound );
+	}
+
+	/**
+	 * Gets the file name from a file path.
+	 *
+	 * \param _s16Path The file path whose name is to be obtained.
+	 * \return Returns a string containing the file name.
+	 */
+	std::u16string CUtilities::GetFileName( const std::u16string &_s16Path ) {
+		// If the last character is } then it is a file inside a ZIP.
+		if ( _s16Path.size() && _s16Path[_s16Path.size()-1] == u'}' ) {
+			std::string::size_type stFound = _s16Path.rfind( u'{' );
+			std::u16string s16File = _s16Path.substr( stFound + 1 );
+			s16File.pop_back();
+			return s16File;
+		}
+		std::u16string s16Normalized = Replace( _s16Path, u'/', u'\\' );
+		std::string::size_type stFound = s16Normalized.rfind( u'\\' );
+		std::u16string s16File = s16Normalized.substr( stFound + 1 );
+
+		return s16File;
+	}
+
+	/**
+	 * Gets the file name from a file path.
+	 *
+	 * \param _wsPath The file path whose name is to be obtained.
+	 * \return Returns a string containing the file name.
+	 */
+	std::wstring CUtilities::GetFileName( const std::wstring &_wsPath ) {
+		// If the last character is } then it is a file inside a ZIP.
+		if ( _wsPath.size() && _wsPath[_wsPath.size()-1] == L'}' ) {
+			std::string::size_type stFound = _wsPath.rfind( L'{' );
+			std::wstring wsFile = _wsPath.substr( stFound + 1 );
+			wsFile.pop_back();
+			return wsFile;
+		}
+		std::wstring wsNormalized = Replace( _wsPath, L'/', L'\\' );
+		std::string::size_type stFound = wsNormalized.rfind( L'\\' );
+		std::wstring wsFile = wsNormalized.substr( stFound + 1 );
+
+		return wsFile;
+	}
+
+	/**
+	 * Gets the file path without the file name
+	 *
+	 * \param _s16Path The file path whose path is to be obtained.
+	 * \return Returns a string containing the file path.
+	 */
+	std::u16string CUtilities::GetFilePath( const std::u16string &_s16Path ) {
+		if ( _s16Path.size() ) {
+			std::u16string s16Normalized = Replace( _s16Path, u'/', u'\\' );
+			std::string::size_type stFound = s16Normalized.rfind( u'\\' );
+			if ( stFound >= s16Normalized.size() ) { return std::u16string(); }
+			std::u16string s16File = s16Normalized.substr( 0, stFound + 1 );
+			return s16File;
+		}
+		return std::u16string();
+	}
+
+	/**
+	 * Gets the file path without the file name
+	 *
+	 * \param _wsPath The file path whose path is to be obtained.
+	 * \return Returns a string containing the file path.
+	 */
+	std::wstring CUtilities::GetFilePath( const std::wstring &_wsPath ) {
+		if ( _wsPath.size() ) {
+			std::wstring wsNormalized = Replace( _wsPath, L'/', L'\\' );
+			std::string::size_type stFound = wsNormalized.rfind( L'\\' );
+			if ( stFound >= wsNormalized.size() ) { return std::wstring(); }
+			std::wstring wsFile = wsNormalized.substr( 0, stFound + 1 );
+			return wsFile;
+		}
+		return std::wstring();
 	}
 
 	// Resolves escape sequences.  Returns the full string as a 32-bit character array.
@@ -3166,7 +3334,7 @@ namespace mx {
 			if ( bIsFloat ) {				
 				switch ( _dtTargetType ) {
 					case MX_DT_FLOAT16 : {
-						dtVal.u.UInt16 = CFloat16( ee::CExpEval::AtoF( &_sInput[I], &sEaten ) ).RawValue();
+						dtVal.u.UInt16 = ee::CFloat16( ee::CExpEval::AtoF( &_sInput[I], &sEaten ) ).RawValue();
 						break;
 					}
 					case MX_DT_FLOAT : {
@@ -3324,7 +3492,7 @@ namespace mx {
 			if ( bIsFloat ) {				
 				switch ( dtDefaultType ) {
 					case MX_DT_FLOAT16 : {
-						dtVal.u.UInt16 = CFloat16( ee::CExpEval::AtoF( &_sInput[I], &sEaten ) ).RawValue();
+						dtVal.u.UInt16 = ee::CFloat16( ee::CExpEval::AtoF( &_sInput[I], &sEaten ) ).RawValue();
 						break;
 					}
 					case MX_DT_FLOAT : {

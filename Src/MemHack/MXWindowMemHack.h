@@ -19,6 +19,11 @@ namespace mx {
 		// Opened a process.
 		virtual void						OpenedProcess();
 
+		/**
+		 * Updates the window title.
+		 **/
+		virtual void						UpdateWindowTitle();
+
 		// Failed to open a process.
 		virtual void						FailedToOpenProcess( DWORD _dwId );
 

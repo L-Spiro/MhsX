@@ -274,7 +274,7 @@ RS1_S								[rR]{CS1}
 {D}+{IS}?							{ return yy::CExpEvalParser::token::EE_DEC_CONSTANT; }
 {H}+{IS}?							{ return yy::CExpEvalParser::token::EE_HEX_CONSTANT3; }
 
-(?i:_Pi)							{ return yy::CExpEvalParser::token::EE_PI; }
+(?i:_Pi)							{ return yy::CExpEvalParser::token::EE_PI_; }
 (?i:_HalfPi)						{ return yy::CExpEvalParser::token::EE_HALFPI; }
 (?i:_E)								{ return yy::CExpEvalParser::token::EE_E; }
 (?i:_Zeta)							{ return yy::CExpEvalParser::token::EE_ZETA; }
@@ -484,11 +484,38 @@ RS1_S								[rR]{CS1}
 "rand"								{ return yy::CExpEvalParser::token::EE_RAND; }
 "isnan"								{ return yy::CExpEvalParser::token::EE_ISNAN; }
 "isinf"								{ return yy::CExpEvalParser::token::EE_ISINF; }
-"_byteswap_ushort"					{ return yy::CExpEvalParser::token::EE_BYTESWAPUSHORT; }
+"_byteswap16"						{ return yy::CExpEvalParser::token::EE_BYTESWAPUSHORT; }
+"_byteswap_16"						{ return yy::CExpEvalParser::token::EE_BYTESWAPUSHORT; }
 "_byteswap_uint16"					{ return yy::CExpEvalParser::token::EE_BYTESWAPUSHORT; }
-"_byteswap_ulong"					{ return yy::CExpEvalParser::token::EE_BYTESWAPULONG; }
+"_byteswap_32"						{ return yy::CExpEvalParser::token::EE_BYTESWAPULONG; }
+"_byteswap32"						{ return yy::CExpEvalParser::token::EE_BYTESWAPULONG; }
 "_byteswap_uint32"					{ return yy::CExpEvalParser::token::EE_BYTESWAPULONG; }
+"_byteswap_64"						{ return yy::CExpEvalParser::token::EE_BYTESWAPUINT64; }
+"_byteswap64"						{ return yy::CExpEvalParser::token::EE_BYTESWAPUINT64; }
 "_byteswap_uint64"					{ return yy::CExpEvalParser::token::EE_BYTESWAPUINT64; }
+"_byteswap_ushort"					{ return yy::CExpEvalParser::token::EE_BYTESWAPUSHORT; }
+"_byteswap_ulong"					{ return yy::CExpEvalParser::token::EE_BYTESWAPULONG; }
+"__rbit8"							{ return yy::CExpEvalParser::token::EE_BITSWAP8; }
+"__rbit_8"							{ return yy::CExpEvalParser::token::EE_BITSWAP8; }
+"__rbit_uint8"						{ return yy::CExpEvalParser::token::EE_BITSWAP8; }
+"__rbit16"							{ return yy::CExpEvalParser::token::EE_BITSWAP16; }
+"__rbit_16"							{ return yy::CExpEvalParser::token::EE_BITSWAP16; }
+"__rbit_uint16"						{ return yy::CExpEvalParser::token::EE_BITSWAP16; }
+"__rbit32"							{ return yy::CExpEvalParser::token::EE_BITSWAP32; }
+"__rbit_32"							{ return yy::CExpEvalParser::token::EE_BITSWAP32; }
+"__rbit_uint32"						{ return yy::CExpEvalParser::token::EE_BITSWAP32; }
+"__rbit64"							{ return yy::CExpEvalParser::token::EE_BITSWAP64; }
+"__rbit_64"							{ return yy::CExpEvalParser::token::EE_BITSWAP64; }
+"__rbit_uint64"						{ return yy::CExpEvalParser::token::EE_BITSWAP64; }
+"__rbit_ushort"						{ return yy::CExpEvalParser::token::EE_BITSWAP16; }
+"__rbit_ulong"						{ return yy::CExpEvalParser::token::EE_BITSWAP32; }
+"__rbit_f16"						{ return yy::CExpEvalParser::token::EE_BITSWAPF16; }
+"__rbit_f32"						{ return yy::CExpEvalParser::token::EE_BITSWAPF32; }
+"__rbit_f64"						{ return yy::CExpEvalParser::token::EE_BITSWAPF64; }
+"__rbitf16"							{ return yy::CExpEvalParser::token::EE_BITSWAPF16; }
+"__rbitf32"							{ return yy::CExpEvalParser::token::EE_BITSWAPF32; }
+"__rbitf64"							{ return yy::CExpEvalParser::token::EE_BITSWAPF64; }
+"__rbit"							{ return yy::CExpEvalParser::token::EE_BITSWAP32; }
 
 "format"							{ return yy::CExpEvalParser::token::EE_FORMAT; }
 

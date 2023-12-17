@@ -69,9 +69,10 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %token EE_ABS EE_MADD EE_RAND
 %token EE_ISNAN EE_ISINF
 %token EE_BYTESWAPUSHORT EE_BYTESWAPULONG EE_BYTESWAPUINT64
+%token EE_BITSWAP8 EE_BITSWAP16 EE_BITSWAP32 EE_BITSWAP64 EE_BITSWAPF16 EE_BITSWAPF32 EE_BITSWAPF64
 %token EE_FORMAT
 %token EE_A EE_ALLADI EE_ALPHA EE_B EE_B2 EE_B4 EE_BETA EE_BH EE_C2 EE_CAHEN EE_CATALAN EE_CONWAY EE_DELTA EE_E EE_ERDOS EE_EULER EE_F EE_GR EE_GWK EE_HALFPI EE_HSMC EE_ICE EE_K
-%token EE_LAMBDA EE_LAPLACE EE_LEVY EE_M1 EE_MU EE_NIVEN EE_OMEGA EE_P2 EE_PI EE_PLASTIC EE_PORTER EE_PSI EE_RAMAN EE_RAMAMU EE_SIERP EE_THETA EE_VISW EE_Z3 EE_ZETA 
+%token EE_LAMBDA EE_LAPLACE EE_LEVY EE_M1 EE_MU EE_NIVEN EE_OMEGA EE_P2 EE_PI_ EE_PLASTIC EE_PORTER EE_PSI EE_RAMAN EE_RAMAMU EE_SIERP EE_THETA EE_VISW EE_Z3 EE_ZETA 
 
 %token EE_CHAR_BIT EE_MB_LEN_MAX EE_CHAR_MIN EE_CHAR_MAX EE_SCHAR_MIN EE_SHRT_MIN EE_INT_MIN EE_LONG_MIN EE_LLONG_MIN EE_SCHAR_MAX EE_SHRT_MAX EE_INT_MAX EE_LONG_MAX EE_LLONG_MAX EE_UCHAR_MAX EE_USHRT_MAX EE_UINT_MAX EE_ULONG_MAX EE_ULLONG_MAX EE_FLT_RADIX EE_DECIMAL_DIG EE_FLT_DECIMAL_DIG EE_DBL_DECIMAL_DIG EE_LDBL_DECIMAL_DIG EE_FLT_MIN EE_DBL_MIN EE_LDBL_MIN EE_FLT_TRUE_MIN EE_DBL_TRUE_MIN EE_LDBL_TRUE_MIN EE_FLT_MAX EE_DBL_MAX EE_LDBL_MAX EE_FLT_EPSILON EE_DBL_EPSILON EE_LDBL_EPSILON EE_FLT_DIG EE_DBL_DIG EE_LDBL_DIG EE_FLT_MANT_DIG EE_DBL_MANT_DIG EE_LDBL_MANT_DIG EE_FLT_MIN_EXP EE_DBL_MIN_EXP EE_LDBL_MIN_EXP EE_FLT_MIN_10_EXP EE_DBL_MIN_10_EXP EE_LDBL_MIN_10_EXP EE_FLT_MAX_EXP EE_DBL_MAX_EXP EE_LDBL_MAX_EXP EE_FLT_MAX_10_EXP EE_DBL_MAX_10_EXP EE_LDBL_MAX_10_EXP EE_INT8_MIN EE_INT16_MIN EE_INT32_MIN EE_INT64_MIN EE_INT8_MAX EE_INT16_MAX EE_INT32_MAX EE_INT64_MAX EE_UINT8_MAX EE_UINT16_MAX EE_UINT32_MAX EE_UINT64_MAX  
 %token EE_AS_FLOAT EE_AS_DOUBLE EE_AS_FLOAT24 EE_AS_FLOAT16 EE_AS_FLOAT14 EE_AS_FLOAT11 EE_AS_FLOAT10
@@ -202,7 +203,7 @@ basic_expr
 																	m_peecContainer->CreateDouble( m_peelLexer->YYText(), $$ );
 																}
 															}
-	| EE_PI													{ m_peecContainer->CreateDouble( 3.1415926535897932384626433832795, $$ ); }
+	| EE_PI_													{ m_peecContainer->CreateDouble( 3.1415926535897932384626433832795, $$ ); }
 	| EE_HALFPI												{ m_peecContainer->CreateDouble( 1.5707963267948966192313216916398, $$ ); }
 	| EE_E													{ m_peecContainer->CreateDouble( 2.7182818284590452353602874713527, $$ ); }
 	| EE_ZETA												{ m_peecContainer->CreateDouble( 1.202056903159594285399738161511449990764986292, $$ ); }
@@ -327,7 +328,7 @@ postfix_exp
 	| postfix_exp EE_MEMBERACCESS EE_STRING_CONSTANT		{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateString( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_HEX_CONSTANT3			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_E						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_PI						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_PI_						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_HALFPI					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_ZETA					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_GR						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
@@ -679,6 +680,13 @@ intrinsic
 	| EE_BYTESWAPUSHORT '(' exp ')'							{ m_peecContainer->CreateIntrinsic1( token::EE_BYTESWAPUSHORT, $3, $$ ); }
 	| EE_BYTESWAPULONG '(' exp ')'							{ m_peecContainer->CreateIntrinsic1( token::EE_BYTESWAPULONG, $3, $$ ); }
 	| EE_BYTESWAPUINT64 '(' exp ')'							{ m_peecContainer->CreateIntrinsic1( token::EE_BYTESWAPUINT64, $3, $$ ); }
+	| EE_BITSWAP8 '(' exp ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_BITSWAP8, $3, $$ ); }
+	| EE_BITSWAP16 '(' exp ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_BITSWAP16, $3, $$ ); }
+	| EE_BITSWAP32 '(' exp ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_BITSWAP32, $3, $$ ); }
+	| EE_BITSWAP64 '(' exp ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_BITSWAP64, $3, $$ ); }
+	| EE_BITSWAPF16 '(' exp ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_BITSWAPF16, $3, $$ ); }
+	| EE_BITSWAPF32 '(' exp ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_BITSWAPF32, $3, $$ ); }
+	| EE_BITSWAPF64 '(' exp ')'								{ m_peecContainer->CreateIntrinsic1( token::EE_BITSWAPF64, $3, $$ ); }
 	| EE_AS_FLOAT '(' exp ')'								{ m_peecContainer->CreateAsFloat( $3, $$ ); }
 	| EE_AS_DOUBLE '(' exp ')'								{ m_peecContainer->CreateAsDouble( $3, $$ ); }
 	| EE_AS_FLOAT '(' exp ',' exp ',' exp ',' exp ',' exp ',' exp ',' exp ')'

@@ -1,11 +1,11 @@
 #pragma once
 #include "../MXMhsX.h"
-#include "../Float16/MXFloat16.h"
 #include "../MemHack/MXProcess.h"
 #include "../Utilities/MXUtilities.h"
 #include "MXAddressChunkList.h"
 #include "MXSearchResultBase.h"
 #include <cassert>
+#include <Float16/EEFloat16.h>
 
 
 namespace mx {
@@ -528,26 +528,26 @@ namespace mx {
 
 		// Quick 16-bit epsilon compare.
 		static bool __stdcall				Cmp_Float16Epsilon( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
-			return std::fabs( _patLeft.u.Float64 - CFloat16( _patRight.u.UInt16 ).Value() ) <= _spParms.dEpsilonValue;
+			return std::fabs( _patLeft.u.Float64 - ee::CFloat16( _patRight.u.UInt16 ).Value() ) <= _spParms.dEpsilonValue;
 		}
 
 		// Quick 16-bit epsilon compare.
 		static bool __stdcall				Cmp_Float16Epsilon_ConvertBoth( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
-			return std::fabs( CFloat16( _patLeft.u.UInt16 ).Value() - CFloat16( _patRight.u.UInt16 ).Value() ) <= _spParms.dEpsilonValue;
+			return std::fabs( ee::CFloat16( _patLeft.u.UInt16 ).Value() - ee::CFloat16( _patRight.u.UInt16 ).Value() ) <= _spParms.dEpsilonValue;
 		}
 
 		// Smart 16-bit epsilon compare.
 		static bool __stdcall				Cmp_Float16RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
 			CUtilities::MX_DATA_TYPE dtRight;
-			dtRight.u.Float64 = CFloat16( _patRight.u.UInt16 ).Value();
+			dtRight.u.Float64 = ee::CFloat16( _patRight.u.UInt16 ).Value();
 			return Cmp_Float64RelativeEpsilon( _patLeft, dtRight, _spParms );
 		}
 
 		// Smart 16-bit epsilon compare.
 		static bool __stdcall				Cmp_Float16RelativeEpsilon_ConvertBoth( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
 			CUtilities::MX_DATA_TYPE dtRight, dtLeft;
-			dtRight.u.Float64 = CFloat16( _patRight.u.UInt16 ).Value();
-			dtLeft.u.Float64 = CFloat16( _patLeft.u.UInt16 ).Value();
+			dtRight.u.Float64 = ee::CFloat16( _patRight.u.UInt16 ).Value();
+			dtLeft.u.Float64 = ee::CFloat16( _patLeft.u.UInt16 ).Value();
 			return Cmp_Float64RelativeEpsilon( dtLeft, dtRight, _spParms );
 		}
 
@@ -577,14 +577,14 @@ namespace mx {
 
 		// Float compare with NaN results returning true.  This allows the negation of the compare to be used in "Not Equal To" searches.
 		static bool __stdcall				Cmp_Float16WithNaN( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
-			double dRight = CFloat16( _patRight.u.UInt16 ).Value();
+			double dRight = ee::CFloat16( _patRight.u.UInt16 ).Value();
 			return _patLeft.u.Float64 == dRight || std::isnan( dRight );
 		}
 
 		// Float compare with NaN results returning true.  This allows the negation of the compare to be used in "Not Equal To" searches.
 		static bool __stdcall				Cmp_Float16WithNaN_ConvertBoth( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
-			double dRight = CFloat16( _patRight.u.UInt16 ).Value();
-			return CFloat16( _patLeft.u.UInt16 ).Value() == dRight || std::isnan( dRight );
+			double dRight = ee::CFloat16( _patRight.u.UInt16 ).Value();
+			return ee::CFloat16( _patLeft.u.UInt16 ).Value() == dRight || std::isnan( dRight );
 		}
 
 		// Float compare with NaN results returning true.  This allows the negation of the compare to be used in "Not Equal To" searches.
@@ -596,15 +596,15 @@ namespace mx {
 		// Quick 16-bit epsilon compare with NaN results returning true.  This allows the negation of the compare to be used in "Not Equal To" searches.
 		static bool __stdcall				Cmp_Float16EpsilonWithNaN( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
 			CUtilities::MX_DATA_TYPE dtRight;
-			dtRight.u.Float64 = CFloat16( _patRight.u.UInt16 ).Value();
+			dtRight.u.Float64 = ee::CFloat16( _patRight.u.UInt16 ).Value();
 			return Cmp_Float64Epsilon( _patLeft, dtRight, _spParms ) || std::isnan( dtRight.u.Float64 );
 		}
 
 		// Quick 16-bit epsilon compare with NaN results returning true.  This allows the negation of the compare to be used in "Not Equal To" searches.
 		static bool __stdcall				Cmp_Float16EpsilonWithNaN_ConvertBoth( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
 			CUtilities::MX_DATA_TYPE dtRight, dtLeft;
-			dtRight.u.Float64 = CFloat16( _patRight.u.UInt16 ).Value();
-			dtLeft.u.Float64 = CFloat16( _patLeft.u.UInt16 ).Value();
+			dtRight.u.Float64 = ee::CFloat16( _patRight.u.UInt16 ).Value();
+			dtLeft.u.Float64 = ee::CFloat16( _patLeft.u.UInt16 ).Value();
 			return Cmp_Float64Epsilon( dtLeft, dtRight, _spParms ) || std::isnan( dtRight.u.Float64 );
 		}
 
@@ -621,15 +621,15 @@ namespace mx {
 		// Smart 16-bit epsilon compare with NaN results returning true.  This allows the negation of the compare to be used in "Not Equal To" searches.
 		static bool __stdcall				Cmp_Float16RelativeEpsilonWithNaN( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
 			CUtilities::MX_DATA_TYPE dtRight;
-			dtRight.u.Float64 = CFloat16( _patRight.u.UInt16 ).Value();
+			dtRight.u.Float64 = ee::CFloat16( _patRight.u.UInt16 ).Value();
 			return Cmp_Float64RelativeEpsilon( _patLeft, dtRight, _spParms ) || std::isnan( dtRight.u.Float64 );
 		}
 
 		// Smart 16-bit epsilon compare with NaN results returning true.  This allows the negation of the compare to be used in "Not Equal To" searches.
 		static bool __stdcall				Cmp_Float16RelativeEpsilonWithNaN_ConvertBoth( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight, const MX_SEARCH_PARMS &_spParms ) {
 			CUtilities::MX_DATA_TYPE dtRight, dtLeft;
-			dtRight.u.Float64 = CFloat16( _patRight.u.UInt16 ).Value();
-			dtLeft.u.Float64 = CFloat16( _patLeft.u.UInt16 ).Value();
+			dtRight.u.Float64 = ee::CFloat16( _patRight.u.UInt16 ).Value();
+			dtLeft.u.Float64 = ee::CFloat16( _patLeft.u.UInt16 ).Value();
 			return Cmp_Float64RelativeEpsilon( dtLeft, dtRight, _spParms ) || std::isnan( dtRight.u.Float64 );
 		}
 
@@ -673,23 +673,23 @@ namespace mx {
 
 		// Greater-than primitive compare.
 		static bool __stdcall				Cmp_GreaterThanFloat16( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight ) {
-			return CFloat16( _patRight.u.UInt16 ).Value() > _patLeft.u.Float64;
+			return ee::CFloat16( _patRight.u.UInt16 ).Value() > _patLeft.u.Float64;
 		}
 
 		// Greater-than primitive compare.
 		static bool __stdcall				Cmp_GreaterThanFloat16_ConvertBoth( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight ) {
-			return CFloat16( _patRight.u.UInt16 ).Value() > CFloat16(  _patLeft.u.UInt16 ).Value();
+			return ee::CFloat16( _patRight.u.UInt16 ).Value() > ee::CFloat16(  _patLeft.u.UInt16 ).Value();
 		}
 
 		// Greater-than primitive compare.
 		static bool __stdcall				Cmp_GreaterThanFloat16WithNaN( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight ) {
-			double dVal = CFloat16( _patRight.u.UInt16 ).Value();
+			double dVal = ee::CFloat16( _patRight.u.UInt16 ).Value();
 			return (dVal > _patLeft.u.Float64) || std::isnan( dVal );
 		}
 		// Greater-than primitive compare.
 		static bool __stdcall				Cmp_GreaterThanFloat16WithNaN_ConvertBoth( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight ) {
-			double dVal = CFloat16( _patRight.u.UInt16 ).Value();
-			return (dVal > CFloat16( _patLeft.u.UInt16 ).Value()) || std::isnan( dVal );
+			double dVal = ee::CFloat16( _patRight.u.UInt16 ).Value();
+			return (dVal > ee::CFloat16( _patLeft.u.UInt16 ).Value()) || std::isnan( dVal );
 		}
 
 		// Greater-than primitive compare.
@@ -734,24 +734,24 @@ namespace mx {
 
 		// Less-than primitive compare.
 		static bool __stdcall				Cmp_LessThanFloat16( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight ) {
-			return CFloat16( _patRight.u.UInt16 ).Value() < _patLeft.u.Float64;
+			return ee::CFloat16( _patRight.u.UInt16 ).Value() < _patLeft.u.Float64;
 		}
 
 		// Less-than primitive compare.
 		static bool __stdcall				Cmp_LessThanFloat16_ConvertBoth( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight ) {
-			return CFloat16( _patRight.u.UInt16 ).Value() < CFloat16( _patLeft.u.UInt16 ).Value();
+			return ee::CFloat16( _patRight.u.UInt16 ).Value() < ee::CFloat16( _patLeft.u.UInt16 ).Value();
 		}
 
 		// Less-than primitive compare.
 		static bool __stdcall				Cmp_LessThanFloat16WithNaN( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight ) {
-			double dVal = CFloat16( _patRight.u.UInt16 ).Value();
+			double dVal = ee::CFloat16( _patRight.u.UInt16 ).Value();
 			return (dVal < _patLeft.u.Float64) || std::isnan( dVal );
 		}
 
 		// Less-than primitive compare.
 		static bool __stdcall				Cmp_LessThanFloat16WithNaN_ConvertBoth( const CUtilities::MX_DATA_TYPE &_patLeft, const CUtilities::MX_DATA_TYPE &_patRight ) {
-			double dVal = CFloat16( _patRight.u.UInt16 ).Value();
-			return (dVal < CFloat16( _patLeft.u.UInt16 ).Value()) || std::isnan( dVal );
+			double dVal = ee::CFloat16( _patRight.u.UInt16 ).Value();
+			return (dVal < ee::CFloat16( _patLeft.u.UInt16 ).Value()) || std::isnan( dVal );
 		}
 
 		// Less-than primitive compare.
@@ -796,13 +796,13 @@ namespace mx {
 
 		// In-range primitive compare.
 		static bool __stdcall				Cmp_InRangeFloat16( const CUtilities::MX_DATA_TYPE &_patLow, const CUtilities::MX_DATA_TYPE &_patHigh, const CUtilities::MX_DATA_TYPE &_patVal ) {
-			double dVal = CFloat16( _patVal.u.UInt16 ).Value();
+			double dVal = ee::CFloat16( _patVal.u.UInt16 ).Value();
 			return dVal >= _patLow.u.Float64 && dVal <= _patHigh.u.Float64;
 		}
 
 		// In-range primitive compare.
 		static bool __stdcall				Cmp_InRangeFloat16WithNaN( const CUtilities::MX_DATA_TYPE &_patLow, const CUtilities::MX_DATA_TYPE &_patHigh, const CUtilities::MX_DATA_TYPE &_patVal ) {
-			double dVal = CFloat16( _patVal.u.UInt16 ).Value();
+			double dVal = ee::CFloat16( _patVal.u.UInt16 ).Value();
 			return (dVal >= _patLow.u.Float64 && dVal <= _patHigh.u.Float64) || std::isnan( dVal );
 		}
 
@@ -864,12 +864,12 @@ namespace mx {
 
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat16( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &/*_spParms*/ ) {
-			return CFloat16( _patCur.u.UInt16 ).Value() - CFloat16( _patPrev.u.UInt16 ).Value() == _patTest.u.Float64;
+			return ee::CFloat16( _patCur.u.UInt16 ).Value() - ee::CFloat16( _patPrev.u.UInt16 ).Value() == _patTest.u.Float64;
 		}
 
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat16WithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &/*_spParms*/ ) {
-			double dVal = CFloat16( _patCur.u.UInt16 ).Value() - CFloat16( _patPrev.u.UInt16 ).Value();
+			double dVal = ee::CFloat16( _patCur.u.UInt16 ).Value() - ee::CFloat16( _patPrev.u.UInt16 ).Value();
 			return (dVal == _patTest.u.Float64) || std::isnan( dVal );
 		}
 
@@ -897,7 +897,7 @@ namespace mx {
 
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat16RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
-			double dVal = CFloat16( _patCur.u.UInt16 ).Value() - CFloat16( _patPrev.u.UInt16 ).Value();
+			double dVal = ee::CFloat16( _patCur.u.UInt16 ).Value() - ee::CFloat16( _patPrev.u.UInt16 ).Value();
 			return ee::CExpEval::RelativeEpsilon( dVal,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue );
@@ -905,13 +905,13 @@ namespace mx {
 
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat16Epsilon( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
-			double dVal = CFloat16( _patCur.u.UInt16 ).Value() - CFloat16( _patPrev.u.UInt16 ).Value();
+			double dVal = ee::CFloat16( _patCur.u.UInt16 ).Value() - ee::CFloat16( _patPrev.u.UInt16 ).Value();
 			return ee::CExpEval::Epsilon( dVal, _patTest.u.Float64, _spParms.dEpsilonValue );
 		}
 
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat16RelativeEpsilonWithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
-			double dVal = CFloat16( _patCur.u.UInt16 ).Value() - CFloat16( _patPrev.u.UInt16 ).Value();
+			double dVal = ee::CFloat16( _patCur.u.UInt16 ).Value() - ee::CFloat16( _patPrev.u.UInt16 ).Value();
 			return ee::CExpEval::RelativeEpsilon( dVal,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue ) || std::isnan( dVal );
@@ -919,7 +919,7 @@ namespace mx {
 
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByFloat16EpsilonWithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
-			double dVal = CFloat16( _patCur.u.UInt16 ).Value() - CFloat16( _patPrev.u.UInt16 ).Value();
+			double dVal = ee::CFloat16( _patCur.u.UInt16 ).Value() - ee::CFloat16( _patPrev.u.UInt16 ).Value();
 			return ee::CExpEval::Epsilon( dVal, _patTest.u.Float64, _spParms.dEpsilonValue ) || std::isnan( dVal );
 		}
 
@@ -1033,7 +1033,7 @@ namespace mx {
 
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByRangeFloat16( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &/*_patTest*/, const MX_SEARCH_PARMS &_spParms ) {
-			double dVal = CFloat16( _patCur.u.UInt16 ).Value() - CFloat16( _patPrev.u.UInt16 ).Value();
+			double dVal = ee::CFloat16( _patCur.u.UInt16 ).Value() - ee::CFloat16( _patPrev.u.UInt16 ).Value();
 			return dVal >= _spParms.dtLVal.u.Float64 && dVal <= _spParms.dtRVal.u.Float64;
 		}
 
@@ -1051,7 +1051,7 @@ namespace mx {
 
 		// Changed-by primitive compare.
 		static bool __stdcall				Cmp_ChangedByRangeFloat16WithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &/*_patTest*/, const MX_SEARCH_PARMS &_spParms ) {
-			double dVal = CFloat16( _patCur.u.UInt16 ).Value() - CFloat16( _patPrev.u.UInt16 ).Value();
+			double dVal = ee::CFloat16( _patCur.u.UInt16 ).Value() - ee::CFloat16( _patPrev.u.UInt16 ).Value();
 			return (dVal >= _spParms.dtLVal.u.Float64 && dVal <= _spParms.dtRVal.u.Float64) || std::isnan( dVal );
 		}
 
@@ -1121,16 +1121,16 @@ namespace mx {
 
 		// Changed-by-percent primitive compare.
 		static bool __stdcall				Cmp_ChangedByPercFloat16( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &/*_spParms*/ ) {
-			double dTmp = CFloat16( _patPrev.u.UInt16 ).Value();
+			double dTmp = ee::CFloat16( _patPrev.u.UInt16 ).Value();
 			if ( !dTmp ) { return false; }
-			return CFloat16( _patCur.u.UInt16 ).Value() / dTmp == _patTest.u.Float64;
+			return ee::CFloat16( _patCur.u.UInt16 ).Value() / dTmp == _patTest.u.Float64;
 		}
 
 		// Changed-by-percent primitive compare.
 		static bool __stdcall				Cmp_ChangedByPercFloat16WithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &/*_spParms*/ ) {
-			double dTmp = CFloat16( _patPrev.u.UInt16 ).Value();
+			double dTmp = ee::CFloat16( _patPrev.u.UInt16 ).Value();
 			if ( !dTmp ) { return false; }
-			double dVal = CFloat16( _patCur.u.UInt16 ).Value() / dTmp;
+			double dVal = ee::CFloat16( _patCur.u.UInt16 ).Value() / dTmp;
 			return (dVal == _patTest.u.Float64) || std::isnan( dVal );
 		}
 
@@ -1162,18 +1162,18 @@ namespace mx {
 
 		// Changed-by-percent primitive compare.
 		static bool __stdcall				Cmp_ChangedByPercFloat16RelativeEpsilon( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
-			double dTmp = CFloat16( _patPrev.u.UInt16 ).Value();
+			double dTmp = ee::CFloat16( _patPrev.u.UInt16 ).Value();
 			if ( !dTmp ) { return false; }
-			return ee::CExpEval::RelativeEpsilon( CFloat16( _patCur.u.UInt16 ).Value() / dTmp,
+			return ee::CExpEval::RelativeEpsilon( ee::CFloat16( _patCur.u.UInt16 ).Value() / dTmp,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue );
 		}
 
 		// Changed-by-percent primitive compare.
 		static bool __stdcall				Cmp_ChangedByPercFloat16RelativeEpsilonWithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
-			double dTmp = CFloat16( _patPrev.u.UInt16 ).Value();
+			double dTmp = ee::CFloat16( _patPrev.u.UInt16 ).Value();
 			if ( !dTmp ) { return false; }
-			double dVal = CFloat16( _patCur.u.UInt16 ).Value() / dTmp;
+			double dVal = ee::CFloat16( _patCur.u.UInt16 ).Value() / dTmp;
 			return ee::CExpEval::RelativeEpsilon( dVal,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue ) || std::isnan( dVal );
@@ -1181,18 +1181,18 @@ namespace mx {
 
 		// Changed-by-percent primitive compare.
 		static bool __stdcall				Cmp_ChangedByPercFloat16Epsilon( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
-			double dTmp = CFloat16( _patPrev.u.UInt16 ).Value();
+			double dTmp = ee::CFloat16( _patPrev.u.UInt16 ).Value();
 			if ( !dTmp ) { return false; }
-			return ee::CExpEval::Epsilon( CFloat16( _patCur.u.UInt16 ).Value() / dTmp,
+			return ee::CExpEval::Epsilon( ee::CFloat16( _patCur.u.UInt16 ).Value() / dTmp,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue );
 		}
 
 		// Changed-by-percent primitive compare.
 		static bool __stdcall				Cmp_ChangedByPercFloat16EpsilonWithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &_patTest, const MX_SEARCH_PARMS &_spParms ) {
-			double dTmp = CFloat16( _patPrev.u.UInt16 ).Value();
+			double dTmp = ee::CFloat16( _patPrev.u.UInt16 ).Value();
 			if ( !dTmp ) { return false; }
-			double dVal = CFloat16( _patCur.u.UInt16 ).Value() / dTmp;
+			double dVal = ee::CFloat16( _patCur.u.UInt16 ).Value() / dTmp;
 			return ee::CExpEval::Epsilon( dVal,
 				_patTest.u.Float64,
 				_spParms.dEpsilonValue ) || std::isnan( dVal );
@@ -1328,17 +1328,17 @@ namespace mx {
 
 		// Changed-by-range (percent) primitive compare.
 		static bool __stdcall				Cmp_ChangedByRangePercFloat16( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &/*_patTest*/, const MX_SEARCH_PARMS &_spParms ) {
-			double dTmp = CFloat16( _patPrev.u.UInt16 ).Value();
+			double dTmp = ee::CFloat16( _patPrev.u.UInt16 ).Value();
 			if ( !dTmp ) { return false; }
-			double dPerc = CFloat16( _patCur.u.UInt16 ).Value() / dTmp;
+			double dPerc = ee::CFloat16( _patCur.u.UInt16 ).Value() / dTmp;
 			return dPerc >= _spParms.dtLVal.u.Float64 && dPerc <= _spParms.dtRVal.u.Float64;
 		}
 
 		// Changed-by-range (percent) primitive compare.
 		static bool __stdcall				Cmp_ChangedByRangePercFloat16WithNaN( const CUtilities::MX_DATA_TYPE &_patPrev, const CUtilities::MX_DATA_TYPE &_patCur, const CUtilities::MX_DATA_TYPE &/*_patTest*/, const MX_SEARCH_PARMS &_spParms ) {
-			double dTmp = CFloat16( _patPrev.u.UInt16 ).Value();
-			if ( !dTmp ) { return std::isnan( CFloat16( _patCur.u.UInt16 ).Value() ); }
-			double dPerc = CFloat16( _patCur.u.UInt16 ).Value() / dTmp;
+			double dTmp = ee::CFloat16( _patPrev.u.UInt16 ).Value();
+			if ( !dTmp ) { return std::isnan( ee::CFloat16( _patCur.u.UInt16 ).Value() ); }
+			double dPerc = ee::CFloat16( _patCur.u.UInt16 ).Value() / dTmp;
 			return (dPerc >= _spParms.dtLVal.u.Float64 && dPerc <= _spParms.dtRVal.u.Float64) || std::isnan( dPerc );
 		}
 

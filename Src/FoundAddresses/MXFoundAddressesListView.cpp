@@ -1,7 +1,7 @@
 #include "MXFoundAddressesListView.h"
-#include "../Float16/MXFloat16.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../Search/MXSearchResultRef.h"
+#include <Float16/EEFloat16.h>
 
 #include <strsafe.h>
 
@@ -289,7 +289,7 @@ namespace mx {
 				break;
 			}
 			case CUtilities::MX_DT_FLOAT16 : {
-				std::swprintf( _pwStr, _iMaxLen, L"%.9g", CFloat16( _pui8Value ).Value() );
+				std::swprintf( _pwStr, _iMaxLen, L"%.9g", ee::CFloat16( _pui8Value ).Value() );
 				break;
 			}
 			case CUtilities::MX_DT_FLOAT : {

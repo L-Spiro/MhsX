@@ -1,13 +1,13 @@
 #pragma once
 
-#include <LSWWin.h>
+#include "../EEExpEval.h"
 //#include <EEFloatX.h>
 
 // ********************************************************* //
 // Logic largely ripped from https://github.com/x448/float16 //
 // ********************************************************* //
 
-namespace mx {
+namespace ee {
 
 	class CFloat16 {
 	public :
@@ -171,4 +171,4 @@ namespace mx {
 
 	
 
-}	// namespace mx
+}	// namespace ee

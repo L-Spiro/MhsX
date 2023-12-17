@@ -16615,3 +16615,84 @@
 #define _DEC_S_50E7AAE8_The_supplied_executable_path_is_invalid_ mx::CStringDecoder::DecodeToString( _T_50E7AAE8_The_supplied_executable_path_is_invalid_, _LEN_50E7AAE8 )
 #define _DEC_WS_50E7AAE8_The_supplied_executable_path_is_invalid_ mx::CStringDecoder::DecodeToWString( _T_50E7AAE8_The_supplied_executable_path_is_invalid_, _LEN_50E7AAE8 )
 
+// Title Bar
+
+#define _T_2111C006_Title_Bar "\xDC\x37\x44\x07\xF7\xE9\xD0\x28\x42"
+#define _LEN_2111C006 9
+#define _T_LEN_2111C006_Title_Bar _T_2111C006_Title_Bar, _LEN_2111C006
+#define _DEC_2111C006_Title_Bar( STR ) mx::CStringDecoder::Decode( _T_2111C006_Title_Bar, _LEN_2111C006, STR )
+#define _DEC_S_2111C006_Title_Bar mx::CStringDecoder::DecodeToString( _T_2111C006_Title_Bar, _LEN_2111C006 )
+#define _DEC_WS_2111C006_Title_Bar mx::CStringDecoder::DecodeToWString( _T_2111C006_Title_Bar, _LEN_2111C006 )
+
+// Status Bar
+
+#define _T_ECDC29F2_Status_Bar "\xDB\x42\x31\x0F\x07\x3C\xAE\x09\x31\x3A"
+#define _LEN_ECDC29F2 10
+#define _T_LEN_ECDC29F2_Status_Bar _T_ECDC29F2_Status_Bar, _LEN_ECDC29F2
+#define _DEC_ECDC29F2_Status_Bar( STR ) mx::CStringDecoder::Decode( _T_ECDC29F2_Status_Bar, _LEN_ECDC29F2, STR )
+#define _DEC_S_ECDC29F2_Status_Bar mx::CStringDecoder::DecodeToString( _T_ECDC29F2_Status_Bar, _LEN_ECDC29F2 )
+#define _DEC_WS_ECDC29F2_Status_Bar mx::CStringDecoder::DecodeToWString( _T_ECDC29F2_Status_Bar, _LEN_ECDC29F2 )
+
+// Custom: 
+
+#define _T_C0099D1C_Custom__ "\xCB\x43\x43\x0F\x01\x36\xC8\xE7"
+#define _LEN_C0099D1C 8
+#define _T_LEN_C0099D1C_Custom__ _T_C0099D1C_Custom__, _LEN_C0099D1C
+#define _DEC_C0099D1C_Custom__( STR ) mx::CStringDecoder::Decode( _T_C0099D1C_Custom__, _LEN_C0099D1C, STR )
+#define _DEC_S_C0099D1C_Custom__ mx::CStringDecoder::DecodeToString( _T_C0099D1C_Custom__, _LEN_C0099D1C )
+#define _DEC_WS_C0099D1C_Custom__ mx::CStringDecoder::DecodeToWString( _T_C0099D1C_Custom__, _LEN_C0099D1C )
+
+// Process Name
+
+#define _T_724BAFEB_Process_Name "\xD8\x40\x3F\xFE\xF7\x3C\x01\xE7\x1E\x29\x36\x33"
+#define _LEN_724BAFEB 12
+#define _T_LEN_724BAFEB_Process_Name _T_724BAFEB_Process_Name, _LEN_724BAFEB
+#define _DEC_724BAFEB_Process_Name( STR ) mx::CStringDecoder::Decode( _T_724BAFEB_Process_Name, _LEN_724BAFEB, STR )
+#define _DEC_S_724BAFEB_Process_Name mx::CStringDecoder::DecodeToString( _T_724BAFEB_Process_Name, _LEN_724BAFEB )
+#define _DEC_WS_724BAFEB_Process_Name mx::CStringDecoder::DecodeToWString( _T_724BAFEB_Process_Name, _LEN_724BAFEB )
+
+// 32-bit Flag
+
+#define _T_48A7FE9B_32_bit_Flag "\xBB\x00\xFD\xFD\xFB\x3D\xAE\x0D\x3C\x29\x30"
+#define _LEN_48A7FE9B 11
+#define _T_LEN_48A7FE9B_32_bit_Flag _T_48A7FE9B_32_bit_Flag, _LEN_48A7FE9B
+#define _DEC_48A7FE9B_32_bit_Flag( STR ) mx::CStringDecoder::Decode( _T_48A7FE9B_32_bit_Flag, _LEN_48A7FE9B, STR )
+#define _DEC_S_48A7FE9B_32_bit_Flag mx::CStringDecoder::DecodeToString( _T_48A7FE9B_32_bit_Flag, _LEN_48A7FE9B )
+#define _DEC_WS_48A7FE9B_32_bit_Flag mx::CStringDecoder::DecodeToWString( _T_48A7FE9B_32_bit_Flag, _LEN_48A7FE9B )
+
+// x86 Flag
+
+#define _T_C27BEE75_x86_Flag "\x00\x06\x06\xBB\xD8\x35\xEF\x2E"
+#define _LEN_C27BEE75 8
+#define _T_LEN_C27BEE75_x86_Flag _T_C27BEE75_x86_Flag, _LEN_C27BEE75
+#define _DEC_C27BEE75_x86_Flag( STR ) mx::CStringDecoder::Decode( _T_C27BEE75_x86_Flag, _LEN_C27BEE75, STR )
+#define _DEC_S_C27BEE75_x86_Flag mx::CStringDecoder::DecodeToString( _T_C27BEE75_x86_Flag, _LEN_C27BEE75 )
+#define _DEC_WS_C27BEE75_x86_Flag mx::CStringDecoder::DecodeToWString( _T_C27BEE75_x86_Flag, _LEN_C27BEE75 )
+
+// Insert Random Characters
+
+#define _T_75F327AF_Insert_Random_Characters "\xD1\x3C\x43\x00\x04\x3D\xAE\x19\x31\x36\x2D\x3D\xFF\xBB\x0A\xF0\x2F\x42\xFC\xF5\x3D\xF3\x39\x43"
+#define _LEN_75F327AF 24
+#define _T_LEN_75F327AF_Insert_Random_Characters _T_75F327AF_Insert_Random_Characters, _LEN_75F327AF
+#define _DEC_75F327AF_Insert_Random_Characters( STR ) mx::CStringDecoder::Decode( _T_75F327AF_Insert_Random_Characters, _LEN_75F327AF, STR )
+#define _DEC_S_75F327AF_Insert_Random_Characters mx::CStringDecoder::DecodeToString( _T_75F327AF_Insert_Random_Characters, _LEN_75F327AF )
+#define _DEC_WS_75F327AF_Insert_Random_Characters mx::CStringDecoder::DecodeToWString( _T_75F327AF_Insert_Random_Characters, _LEN_75F327AF )
+
+// Insert Random
+
+#define _T_3DA6AAF4_Insert_Random "\xD1\x3C\x43\x00\x04\x3D\xAE\x19\x31\x36\x2D\x3D\xFF"
+#define _LEN_3DA6AAF4 13
+#define _T_LEN_3DA6AAF4_Insert_Random _T_3DA6AAF4_Insert_Random, _LEN_3DA6AAF4
+#define _DEC_3DA6AAF4_Insert_Random( STR ) mx::CStringDecoder::Decode( _T_3DA6AAF4_Insert_Random, _LEN_3DA6AAF4, STR )
+#define _DEC_S_3DA6AAF4_Insert_Random mx::CStringDecoder::DecodeToString( _T_3DA6AAF4_Insert_Random, _LEN_3DA6AAF4 )
+#define _DEC_WS_3DA6AAF4_Insert_Random mx::CStringDecoder::DecodeToWString( _T_3DA6AAF4_Insert_Random, _LEN_3DA6AAF4 )
+
+// [x86]
+
+#define _T_91D489A0__x86_ "\xE3\x46\x08\xD1\xEF"
+#define _LEN_91D489A0 5
+#define _T_LEN_91D489A0__x86_ _T_91D489A0__x86_, _LEN_91D489A0
+#define _DEC_91D489A0__x86_( STR ) mx::CStringDecoder::Decode( _T_91D489A0__x86_, _LEN_91D489A0, STR )
+#define _DEC_S_91D489A0__x86_ mx::CStringDecoder::DecodeToString( _T_91D489A0__x86_, _LEN_91D489A0 )
+#define _DEC_WS_91D489A0__x86_ mx::CStringDecoder::DecodeToWString( _T_91D489A0__x86_, _LEN_91D489A0 )
+

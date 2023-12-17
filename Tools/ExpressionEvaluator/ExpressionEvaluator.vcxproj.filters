@@ -75,6 +75,9 @@
     <Filter Include="Header Files\SinCos">
       <UniqueIdentifier>{a1b7f9e4-8261-4cd4-a641-81da6d060bf4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Float16">
+      <UniqueIdentifier>{d8035391-d2b8-44e3-9d1a-78370f0316be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -267,6 +270,9 @@
     </ClInclude>
     <ClInclude Include="Src\SinCos\EESinCos.h">
       <Filter>Header Files\SinCos</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Float16\EEFloat16.h">
+      <Filter>Header Files\Float16</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

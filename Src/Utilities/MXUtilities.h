@@ -516,50 +516,6 @@ namespace mx {
 			return (((_uVal) - 0x0101010101010101ULL) & ~(_uVal) & 0x8080808080808080ULL) != 0;
 		}
 
-		/**
-		 * Reverses the bits in an 8-bit value.
-		 * 
-		 * \param _ui8Val The value to bit-reverse.
-		 * \return Returns the bit-reversed result.
-		 **/
-		static inline uint8_t			ReverseBits8( uint8_t _ui8Val ) {
-			_ui8Val = (_ui8Val & 0xF0) >> 4 | (_ui8Val & 0x0F) << 4;
-			_ui8Val = (_ui8Val & 0xCC) >> 2 | (_ui8Val & 0x33) << 2;
-			_ui8Val = (_ui8Val & 0xAA) >> 1 | (_ui8Val & 0x55) << 1;
-			return _ui8Val;
-		}
-
-		/**
-		 * Reverses the bits in an 32-bit value.
-		 * 
-		 * \param _ui32Val The value to bit-reverse.
-		 * \return Returns the bit-reversed result.
-		 **/
-		static inline uint32_t			ReverseBits32( uint32_t _ui32Val ) {
-			_ui32Val = ((_ui32Val >> 1) & 0x55555555U) | ((_ui32Val & 0x55555555U) << 1);
-			_ui32Val = ((_ui32Val >> 2) & 0x33333333U) | ((_ui32Val & 0x33333333U) << 2);
-			_ui32Val = ((_ui32Val >> 4) & 0x0F0F0F0FU) | ((_ui32Val & 0x0F0F0F0FU) << 4);
-			_ui32Val = ((_ui32Val >> 8) & 0x00FF00FFU) | ((_ui32Val & 0x00FF00FFU) << 8);
-			_ui32Val = ((_ui32Val >> 16) & 0xFFFFU) | ((_ui32Val & 0xFFFFU) << 16);
-			return _ui32Val;
-		}
-
-		/**
-		 * Reverses the bits in an 64-bit value.
-		 * 
-		 * \param _ui64Val The value to bit-reverse.
-		 * \return Returns the bit-reversed result.
-		 **/
-		static inline uint64_t			ReverseBits64( uint64_t _ui64Val ) {
-			_ui64Val = ((_ui64Val >> 1) & 0x5555555555555555ULL) | ((_ui64Val & 0x5555555555555555ULL) << 1);
-			_ui64Val = ((_ui64Val >> 2) & 0x3333333333333333ULL) | ((_ui64Val & 0x3333333333333333ULL) << 2);
-			_ui64Val = ((_ui64Val >> 4) & 0x0F0F0F0F0F0F0F0FULL) | ((_ui64Val & 0x0F0F0F0F0F0F0F0FULL) << 4);
-			_ui64Val = ((_ui64Val >> 8) & 0x00FF00FF00FF00FFULL) | ((_ui64Val & 0x00FF00FF00FF00FFULL) << 8);
-			_ui64Val = ((_ui64Val >> 16) & 0x0000FFFF0000FFFFULL) | ((_ui64Val & 0x0000FFFF0000FFFFULL) << 16);
-			_ui64Val = ((_ui64Val >> 32) & 0x00000000FFFFFFFFULL) | ((_ui64Val & 0x00000000FFFFFFFFULL) << 32);
-			return _ui64Val;
-		}
-
 		// Resizes a vector with the ability to return a bool to indicate success.
 		template <typename  _tType>
 		static inline bool				Resize( std::vector<_tType> &_vVector, size_t _sSize ) {
@@ -779,8 +735,96 @@ namespace mx {
 		// Prints an ee::CExpEvalContainer::EE_RESULT value.
 		static std::wstring				PrintExpResult( const ee::CExpEvalContainer::EE_RESULT &_rResult, uint64_t _ui64Data, MX_DECODING _dDecoder = MX_D_STANDARD );
 
-		// Gets the current time in microseconds.
+		/**
+		 * Creates a string with _cReplaceMe replaced with _cWithMe inside _s16String.
+		 *
+		 * \param _s16String The string in which replacements are to be made.
+		 * \param _cReplaceMe The character to replace.
+		 * \param _cWithMe The character with which to replace _cReplaceMe.
+		 * \return Returns the new string with the given replacements made.
+		 */
+		static std::u16string			Replace( const std::u16string &_s16String, char16_t _cReplaceMe, char16_t _cWithMe );
+
+		/**
+		 * Creates a string with _wcReplaceMe replaced with _wcWithMe inside _wsString.
+		 *
+		 * \param _wsString The string in which replacements are to be made.
+		 * \param _wcReplaceMe The character to replace.
+		 * \param _wcWithMe The character with which to replace _cReplaceMe.
+		 * \return Returns the new string with the given replacements made.
+		 */
+		static std::wstring				Replace( const std::wstring &_wsString, wchar_t _wcReplaceMe, wchar_t _wcWithMe );
+
+		/**
+		 * Gets the current time in microseconds.
+		 * 
+		 * \return Returns the current time in microseconds.
+		 **/
 		static uint64_t					CurTimeInMicros();
+
+		/**
+		 * Gets the extension from a file path.
+		 *
+		 * \param _s16Path The file path whose extension is to be obtained.
+		 * \return Returns a string containing the file extension.
+		 */
+		static std::u16string			GetFileExtension( const std::u16string &_s16Path );
+
+		/**
+		 * Gets the extension from a file path.
+		 *
+		 * \param _wsPath The file path whose extension is to be obtained.
+		 * \return Returns a string containing the file extension.
+		 */
+		static std::wstring				GetFileExtension( const std::wstring &_wsPath );
+
+		/**
+		 * Removes the extension from a file path.
+		 *
+		 * \param _s16Path The file path whose extension is to be removed.
+		 * \return Returns a string containing the file mname without the extension.
+		 */
+		static std::u16string			NoExtension( const std::u16string &_s16Path );
+
+		/**
+		 * Removes the extension from a file path.
+		 *
+		 * \param _wsPath The file path whose extension is to be removed.
+		 * \return Returns a string containing the file mname without the extension.
+		 */
+		static std::wstring				NoExtension( const std::wstring &_wsPath );
+
+		/**
+		 * Gets the file name from a file path.
+		 *
+		 * \param _s16Path The file path whose name is to be obtained.
+		 * \return Returns a string containing the file name.
+		 */
+		static std::u16string			GetFileName( const std::u16string &_s16Path );
+
+		/**
+		 * Gets the file name from a file path.
+		 *
+		 * \param _wsPath The file path whose name is to be obtained.
+		 * \return Returns a string containing the file name.
+		 */
+		static std::wstring				GetFileName( const std::wstring &_wsPath );
+
+		/**
+		 * Gets the file path without the file name
+		 *
+		 * \param _s16Path The file path whose path is to be obtained.
+		 * \return Returns a string containing the file path.
+		 */
+		static std::u16string			GetFilePath( const std::u16string &_s16Path );
+
+		/**
+		 * Gets the file path without the file name
+		 *
+		 * \param _wsPath The file path whose path is to be obtained.
+		 * \return Returns a string containing the file path.
+		 */
+		static std::wstring				GetFilePath( const std::wstring &_wsPath );
 
 		// Resolves escape sequences.  Returns the full string as a 32-bit character array.
 		// \'	single quote	byte 0x27 in ASCII encoding

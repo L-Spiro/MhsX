@@ -2143,7 +2143,7 @@ namespace mx {
 					size_t sEnd = sSize - ui32Size;
 					for ( uint64_t K = 0; K <= sEnd; ) {
 						if constexpr ( _sIsFloat16 ) {
-							rRes.u.dVal = CFloat16( (*reinterpret_cast<uint16_t *>(&vBuffer[K])) ).Value();
+							rRes.u.dVal = ee::CFloat16( (*reinterpret_cast<uint16_t *>(&vBuffer[K])) ).Value();
 						}
 						else {
 							if ( bIsFloat ) {
@@ -3217,7 +3217,7 @@ namespace mx {
 							_evcCompFunc = Cmp_ExactVal16;
 						}
 						if ( _spParms.dtLVal.dtType == CUtilities::MX_DT_FLOAT16 ) {
-							_spParms.dtLVal.u.UInt16 = CFloat16::DoubleToUi16( _spParms.dtLVal.u.Double );
+							_spParms.dtLVal.u.UInt16 = ee::CFloat16::DoubleToUi16( _spParms.dtLVal.u.Double );
 							//_spParms.dtLVal.dtType = CUtilities::MX_DT_FLOAT16;
 						}
 					}
@@ -3978,7 +3978,7 @@ namespace mx {
 				_rResult.ncType = ee::EE_NC_FLOATING;
 				uint16_t ui16Val = 0;
 				if ( ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &ui16Val, sizeof( ui16Val ), NULL ) ) {
-					_rResult.u.dVal = CFloat16( ui16Val ).Value();
+					_rResult.u.dVal = ee::CFloat16( ui16Val ).Value();
 					return true;
 				}
 				break;
@@ -4033,11 +4033,11 @@ namespace mx {
 #undef MX_CASE
 
 			case ee::EE_CT_FLOAT16 : {
-				if ( _ui64Address >= pescCache->ui64Address && _ui64Address <= (pescCache->ui64Address + pescCache->sBaseSize - sizeof( CFloat16 )) ) {
+				if ( _ui64Address >= pescCache->ui64Address && _ui64Address <= (pescCache->ui64Address + pescCache->sBaseSize - sizeof( ee::CFloat16 )) ) {
 					_rResult.ncType = ee::EE_NC_FLOATING;
 					uint16_t ui16Val;
 					std::memcpy( &ui16Val, &pescCache->pui8Base[_ui64Address-pescCache->ui64Address], sizeof( ui16Val ) );
-					_rResult.u.dVal = CFloat16( ui16Val ).Value();
+					_rResult.u.dVal = ee::CFloat16( ui16Val ).Value();
 					return true;
 				}
 				break;
@@ -4893,7 +4893,7 @@ namespace mx {
 					size_t sEnd = sSize - pustParms->ui32Size;
 					for ( uint64_t K = 0; K <= sEnd; ) {
 						if constexpr ( _sIsFloat16 ) {
-							rRes.u.dVal = CFloat16( (*reinterpret_cast<uint16_t *>(&vBuffer[K])) ).Value();
+							rRes.u.dVal = ee::CFloat16( (*reinterpret_cast<uint16_t *>(&vBuffer[K])) ).Value();
 						}
 						else {
 							if ( bIsFloat ) {
@@ -5518,8 +5518,8 @@ namespace mx {
 				dtVal.u.UInt64 = 0;
 				if ( rbBuffer.Read( ui64Addr, &dtVal, ppstParms->ui32Size ) ) {
 					if constexpr ( _sIsFloat16 ) {
-						rRes.u.dVal = CFloat16( dtVal.u.UInt16 ).Value();
-						rNumberedParm.u.dVal = CFloat16( (*reinterpret_cast<const uint16_t *>(pui8Val)) ).Value();
+						rRes.u.dVal = ee::CFloat16( dtVal.u.UInt16 ).Value();
+						rNumberedParm.u.dVal = ee::CFloat16( (*reinterpret_cast<const uint16_t *>(pui8Val)) ).Value();
 					}
 					else {
 						if ( bIsFloat ) {

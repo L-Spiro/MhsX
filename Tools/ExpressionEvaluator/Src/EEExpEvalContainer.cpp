@@ -11,6 +11,7 @@
 #include "Array/EEUInt16Array.h"
 #include "Array/EEUInt32Array.h"
 #include "Array/EEUInt64Array.h"
+#include "Float16/EEFloat16.h"
 #include "Object/EEString.h"
 //#include "Object/EEStringRef.h"
 #include "Unicode/EEUnicode.h"
@@ -635,22 +636,76 @@ namespace ee {
 		if ( _uiIntrinsic == CExpEvalParser::token::EE_BYTESWAPUSHORT ) {
 			_rExp = ConvertResultOrObject( _rExp, EE_NC_UNSIGNED );
 			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
-			_rResult.u.ui64Val = ::_byteswap_ushort( static_cast<uint16_t>(_rResult.u.ui64Val) );
+			_rResult.u.ui64Val = ::_byteswap_ushort( static_cast<uint16_t>(_rExp.u.ui64Val) );
 			_rResult.ncType = EE_NC_UNSIGNED;
 			return EE_EC_SUCCESS;
 		}
 		if ( _uiIntrinsic == CExpEvalParser::token::EE_BYTESWAPULONG ) {
 			_rExp = ConvertResultOrObject( _rExp, EE_NC_UNSIGNED );
 			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
-			_rResult.u.ui64Val = ::_byteswap_ulong( static_cast<uint32_t>(_rResult.u.ui64Val) );
+			_rResult.u.ui64Val = ::_byteswap_ulong( static_cast<uint32_t>(_rExp.u.ui64Val) );
 			_rResult.ncType = EE_NC_UNSIGNED;
 			return EE_EC_SUCCESS;
 		}
 		if ( _uiIntrinsic == CExpEvalParser::token::EE_BYTESWAPUINT64 ) {
 			_rExp = ConvertResultOrObject( _rExp, EE_NC_UNSIGNED );
 			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
-			_rResult.u.ui64Val = ::_byteswap_uint64( _rResult.u.ui64Val );
+			_rResult.u.ui64Val = ::_byteswap_uint64( _rExp.u.ui64Val );
 			_rResult.ncType = EE_NC_UNSIGNED;
+			return EE_EC_SUCCESS;
+		}
+
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_BITSWAP8 ) {
+			_rExp = ConvertResultOrObject( _rExp, EE_NC_UNSIGNED );
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			_rResult.u.ui64Val = CExpEval::ReverseBits8( static_cast<uint8_t>(_rExp.u.ui64Val) );
+			_rResult.ncType = EE_NC_UNSIGNED;
+			return EE_EC_SUCCESS;
+		}
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_BITSWAP16 ) {
+			_rExp = ConvertResultOrObject( _rExp, EE_NC_UNSIGNED );
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			_rResult.u.ui64Val = CExpEval::ReverseBits16( static_cast<uint16_t>(_rExp.u.ui64Val) );
+			_rResult.ncType = EE_NC_UNSIGNED;
+			return EE_EC_SUCCESS;
+		}
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_BITSWAP32 ) {
+			_rExp = ConvertResultOrObject( _rExp, EE_NC_UNSIGNED );
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			_rResult.u.ui64Val = CExpEval::ReverseBits32( static_cast<uint32_t>(_rExp.u.ui64Val) );
+			_rResult.ncType = EE_NC_UNSIGNED;
+			return EE_EC_SUCCESS;
+		}
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_BITSWAP64 ) {
+			_rExp = ConvertResultOrObject( _rExp, EE_NC_UNSIGNED );
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			_rResult.u.ui64Val = CExpEval::ReverseBits64( _rResult.u.ui64Val );
+			_rResult.ncType = EE_NC_UNSIGNED;
+			return EE_EC_SUCCESS;
+		}
+
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_BITSWAPF16 ) {
+			_rExp = ConvertResultOrObject( _rExp, EE_NC_FLOATING );
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			_rResult.u.dVal = CFloat16( CExpEval::ReverseBits16( CFloat16::DoubleToUi16( _rExp.u.dVal ) ) ).Value();
+			_rResult.ncType = EE_NC_FLOATING;
+			return EE_EC_SUCCESS;
+		}
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_BITSWAPF32 ) {
+			_rExp = ConvertResultOrObject( _rExp, EE_NC_FLOATING );
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			float fVal = static_cast<float>(_rExp.u.dVal);
+			uint32_t * pui32Val = reinterpret_cast<uint32_t *>(&fVal);
+			uint32_t ui32Tmp = CExpEval::ReverseBits32( (*pui32Val) );
+			_rResult.u.dVal = (*reinterpret_cast<float *>(&ui32Tmp));
+			_rResult.ncType = EE_NC_FLOATING;
+			return EE_EC_SUCCESS;
+		}
+		if ( _uiIntrinsic == CExpEvalParser::token::EE_BITSWAPF64 ) {
+			_rExp = ConvertResultOrObject( _rExp, EE_NC_FLOATING );
+			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			_rResult.u.ui64Val = CExpEval::ReverseBits64( _rExp.u.ui64Val );
+			_rResult.ncType = EE_NC_FLOATING;
 			return EE_EC_SUCCESS;
 		}
 
@@ -889,14 +944,14 @@ namespace ee {
 				_rResult.ncType = EE_NC_FLOATING;
 				_rExp = ConvertResultOrObject( _rExp, EE_NC_FLOATING );
 				if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
-				_rResult.u.dVal = (_rExp.u.dVal * 180.0) / 3.1415926535897932384626433832795;
+				_rResult.u.dVal = (_rExp.u.dVal * 180.0) / EE_PI;
 				return EE_EC_SUCCESS;
 			}
 			case CExpEvalParser::token::EE_RAD : {
 				_rResult.ncType = EE_NC_FLOATING;
 				_rExp = ConvertResultOrObject( _rExp, EE_NC_FLOATING );
 				if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
-				_rResult.u.dVal = (_rExp.u.dVal * 3.1415926535897932384626433832795) / 180.0;
+				_rResult.u.dVal = (_rExp.u.dVal * EE_PI) / 180.0;
 				return EE_EC_SUCCESS;
 			}
 			EE_OP( EE_COS, cos )

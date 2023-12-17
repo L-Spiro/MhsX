@@ -394,7 +394,6 @@
     <ClInclude Include="Src\ExpEval\MXExpEvalWindow.h" />
     <ClInclude Include="Src\Files\MXFileIo.h" />
     <ClInclude Include="Src\Files\MXFileMapIo.h" />
-    <ClInclude Include="Src\Float16\MXFloat16.h" />
     <ClInclude Include="Src\FloatingPointStudio\MXFloatingPointStudioWindow.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressesListView.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressesWindow.h" />

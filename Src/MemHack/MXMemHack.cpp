@@ -11,57 +11,6 @@ namespace mx {
 
 	CMemHack::CMemHack() :
 		m_sSearcher( &m_pProcess ) {
-		// Default options.
-		m_oOptions.pmhMemHackObj = this;
-		m_oOptions.dwFoundAddressRefresh = 10;
-		m_oOptions.dwMainRefresh = 10;
-		m_oOptions.dwLockedRefresh = 1000;
-		m_oOptions.dwExpressionRefresh = 100;
-		m_oOptions.bDataTypesAsCodeNames = TRUE;
-		m_oOptions.bDataTypeSizes = TRUE;
-		m_oOptions.bDataTypeRanges = TRUE;
-		m_oOptions.bUse0x = TRUE;
-		m_oOptions.bUse0o = FALSE;
-		m_oOptions.bShortEnums = TRUE;
-		// ====
-		m_oOptions.dwOpenProc = MX_OP_SHOW_ALL;
-		// ====
-		m_oOptions.bMemImage = TRUE;
-		m_oOptions.bMemPrivate = TRUE;
-		m_oOptions.bMemMapped = TRUE;
-		m_oOptions.iThreadPriority = THREAD_PRIORITY_NORMAL;
-		m_oOptions.ui64BufferSize = 4 * 1024 * 1024;
-		m_oOptions.bPreCache = TRUE;
-		m_oOptions.bPostFlush = TRUE;
-		m_oOptions.bPauseTarget = FALSE;
-		m_oOptions.bUseEpsilon = TRUE;
-		m_oOptions.bSmartEpsilon = TRUE;
-		m_oOptions.dEpsilon = EE_FLOAT16_EPSILON;// 0.0009765625f
-		m_oOptions.ui32Alignment = alignof( uint32_t );
-		m_oOptions.bAligned = TRUE;
-		m_oOptions.bSameAsOriginal = TRUE;
-
-		m_oOptions.bMatchCase = FALSE;
-		m_oOptions.bWholeWord = FALSE;
-		m_oOptions.bIsHex = FALSE;
-		m_oOptions.bResolveEscapes = TRUE;
-		m_oOptions.bWildcard = FALSE;
-
-		m_oOptions.bLingIgnoreCase = FALSE;
-		m_oOptions.bLingIgnoreDiacritic = FALSE;
-		m_oOptions.bIgnoreKana = FALSE;
-		m_oOptions.bIgnoreNoSpace = FALSE;
-		m_oOptions.bIgnoreSymbols = FALSE;
-		m_oOptions.bIgnoreWidth = FALSE;
-
-		m_oOptions.bRegexSingleLine = FALSE;
-		m_oOptions.bRegexMultiLine = FALSE;
-		m_oOptions.bRegexExtended = TRUE;
-		m_oOptions.bRegexFindLongest = FALSE;
-		m_oOptions.bRegexNegateSingleLine = TRUE;
-		m_oOptions.uiRegexFlavor = CUtilities::MX_RF_ONIGURUMA;
-		m_oOptions.bsByteswap = CUtilities::MX_BS_NONE;
-
 		m_vPrograms.push_back( MX_PROGRAM() );
 		m_vPrograms.push_back( MX_PROGRAM() );
 		m_vPrograms[0].wsMenuName = _DEC_WS_E1053BE4_Windows_C_alculator___;
@@ -249,7 +198,7 @@ namespace mx {
 				_rResult.ncType = ee::EE_NC_FLOATING;
 				uint16_t ui16Val = 0;
 				if ( _mhMemHack->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &ui16Val, sizeof( ui16Val ), NULL ) ) {
-					_rResult.u.dVal = CFloat16( ui16Val ).Value();
+					_rResult.u.dVal = ee::CFloat16( ui16Val ).Value();
 					return true;
 				}
 				break;
@@ -331,7 +280,7 @@ namespace mx {
 					}
 					case ee::EE_CT_FLOAT16 : {
 						_rResult.ncType = ee::EE_NC_FLOATING;
-						CFloat16 f16Val = CFloat16( static_cast<double>(_rResult.u.ui64Val) );
+						ee::CFloat16 f16Val = ee::CFloat16( static_cast<double>(_rResult.u.ui64Val) );
 						uint16_t uiVal = f16Val.RawValue();
 						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &uiVal, sizeof( uiVal ), NULL ) ) {
 							_rResult.u.dVal = f16Val.Value();
@@ -395,7 +344,7 @@ namespace mx {
 					}
 					case ee::EE_CT_FLOAT16 : {
 						_rResult.ncType = ee::EE_NC_FLOATING;
-						CFloat16 f16Val = CFloat16( static_cast<double>(_rResult.u.i64Val) );
+						ee::CFloat16 f16Val = ee::CFloat16( static_cast<double>(_rResult.u.i64Val) );
 						uint16_t uiVal = f16Val.RawValue();
 						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &uiVal, sizeof( uiVal ), NULL ) ) {
 							_rResult.u.dVal = f16Val.Value();
@@ -459,7 +408,7 @@ namespace mx {
 					}
 					case ee::EE_CT_FLOAT16 : {
 						_rResult.ncType = ee::EE_NC_FLOATING;
-						CFloat16 f16Val = CFloat16( static_cast<double>(_rResult.u.dVal) );
+						ee::CFloat16 f16Val = ee::CFloat16( static_cast<double>(_rResult.u.dVal) );
 						uint16_t uiVal = f16Val.RawValue();
 						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &uiVal, sizeof( uiVal ), NULL ) ) {
 							_rResult.u.dVal = f16Val.Value();

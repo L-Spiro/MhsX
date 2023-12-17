@@ -38,6 +38,10 @@
 #endif	// NDEBUG
 #endif	// EE_MAX_ITERATION_COUNT
 
+#ifndef EE_PI
+#define EE_PI							3.1415926535897932384626433832795
+#endif // #ifndef EE_PI
+
 
 namespace ee {
 
@@ -652,6 +656,64 @@ namespace ee {
 			}
 #endif	// #if defined( _AMD64_ ) && (defined(_M_AMD64) && !defined(RC_INVOKED) && !defined(MIDL_PASS))
 			return 0;
+		}
+
+		/**
+		 * Reverses the bits in an 8-bit value.
+		 * 
+		 * \param _ui8Val The value to bit-reverse.
+		 * \return Returns the bit-reversed result.
+		 **/
+		static inline uint8_t			ReverseBits8( uint8_t _ui8Val ) {
+			_ui8Val = (_ui8Val & 0xF0) >> 4 | (_ui8Val & 0x0F) << 4;
+			_ui8Val = (_ui8Val & 0xCC) >> 2 | (_ui8Val & 0x33) << 2;
+			_ui8Val = (_ui8Val & 0xAA) >> 1 | (_ui8Val & 0x55) << 1;
+			return _ui8Val;
+		}
+
+		/**
+		 * Reverses the bits in an 16-bit value.
+		 * 
+		 * \param _ui16Val The value to bit-reverse.
+		 * \return Returns the bit-reversed result.
+		 **/
+		static inline uint16_t			ReverseBits16( uint16_t _ui16Val ) {
+			_ui16Val = ((_ui16Val >> 1) & 0x5555) | ((_ui16Val & 0x5555) << 1);
+			_ui16Val = ((_ui16Val >> 2) & 0x3333) | ((_ui16Val & 0x3333) << 2);
+			_ui16Val = ((_ui16Val >> 4) & 0x0F0F) | ((_ui16Val & 0x0F0F) << 4);
+			_ui16Val = ((_ui16Val >> 8) & 0x00FF) | ((_ui16Val & 0x00FF) << 8);
+			return _ui16Val;
+		}
+
+		/**
+		 * Reverses the bits in an 32-bit value.
+		 * 
+		 * \param _ui32Val The value to bit-reverse.
+		 * \return Returns the bit-reversed result.
+		 **/
+		static inline uint32_t			ReverseBits32( uint32_t _ui32Val ) {
+			_ui32Val = ((_ui32Val >> 1) & 0x55555555U) | ((_ui32Val & 0x55555555U) << 1);
+			_ui32Val = ((_ui32Val >> 2) & 0x33333333U) | ((_ui32Val & 0x33333333U) << 2);
+			_ui32Val = ((_ui32Val >> 4) & 0x0F0F0F0FU) | ((_ui32Val & 0x0F0F0F0FU) << 4);
+			_ui32Val = ((_ui32Val >> 8) & 0x00FF00FFU) | ((_ui32Val & 0x00FF00FFU) << 8);
+			_ui32Val = ((_ui32Val >> 16) & 0xFFFFU) | ((_ui32Val & 0xFFFFU) << 16);
+			return _ui32Val;
+		}
+
+		/**
+		 * Reverses the bits in an 64-bit value.
+		 * 
+		 * \param _ui64Val The value to bit-reverse.
+		 * \return Returns the bit-reversed result.
+		 **/
+		static inline uint64_t			ReverseBits64( uint64_t _ui64Val ) {
+			_ui64Val = ((_ui64Val >> 1) & 0x5555555555555555ULL) | ((_ui64Val & 0x5555555555555555ULL) << 1);
+			_ui64Val = ((_ui64Val >> 2) & 0x3333333333333333ULL) | ((_ui64Val & 0x3333333333333333ULL) << 2);
+			_ui64Val = ((_ui64Val >> 4) & 0x0F0F0F0F0F0F0F0FULL) | ((_ui64Val & 0x0F0F0F0F0F0F0F0FULL) << 4);
+			_ui64Val = ((_ui64Val >> 8) & 0x00FF00FF00FF00FFULL) | ((_ui64Val & 0x00FF00FF00FF00FFULL) << 8);
+			_ui64Val = ((_ui64Val >> 16) & 0x0000FFFF0000FFFFULL) | ((_ui64Val & 0x0000FFFF0000FFFFULL) << 16);
+			_ui64Val = ((_ui64Val >> 32) & 0x00000000FFFFFFFFULL) | ((_ui64Val & 0x00000000FFFFFFFFULL) << 32);
+			return _ui64Val;
 		}
 	
 		// Resolves escape sequences.  Returns the full string as a 32-bit character array.

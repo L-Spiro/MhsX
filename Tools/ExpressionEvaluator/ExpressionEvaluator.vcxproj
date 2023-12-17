@@ -296,6 +296,7 @@
     <ClInclude Include="Src\EEExpEvalLexer.h" />
     <ClInclude Include="Src\EEExpEvalSyntaxNodes.h" />
     <ClInclude Include="Src\EEFloatX.h" />
+    <ClInclude Include="Src\Float16\EEFloat16.h" />
     <ClInclude Include="Src\Gen\EEExpEvalLexBase.h" />
     <ClInclude Include="Src\Gen\EEExpEvalParser.h" />
     <ClInclude Include="Src\Gen\EEExpEvalParserLocation.h" />

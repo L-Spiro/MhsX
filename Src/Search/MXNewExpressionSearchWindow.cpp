@@ -521,7 +521,7 @@ namespace mx {
 						MX_CHECK( MX_DT_DOUBLE, EE_NC_FLOATING, dVal, double )
 						case CUtilities::MX_DT_FLOAT16 : {
 							rDummy = ee::CExpEvalContainer::ConvertResult( rDummy, ee::EE_NC_FLOATING );
-							rDummy.u.dVal = CFloat16( rDummy.u.dVal ).Value();
+							rDummy.u.dVal = ee::CFloat16( rDummy.u.dVal ).Value();
 							break;
 						}
 						default : {
@@ -762,7 +762,7 @@ case CUtilities::CASE : {															\
 					MX_CHECK( MX_DT_DOUBLE, EE_NC_FLOATING, dVal, double )
 					case CUtilities::MX_DT_FLOAT16 : {
 						rDummy = ee::CExpEvalContainer::ConvertResult( rDummy, ee::EE_NC_FLOATING );
-						rDummy.u.dVal = CFloat16( rDummy.u.dVal ).Value();
+						rDummy.u.dVal = ee::CFloat16( rDummy.u.dVal ).Value();
 						break;
 					}
 					default : {

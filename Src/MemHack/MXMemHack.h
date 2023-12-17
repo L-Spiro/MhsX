@@ -66,6 +66,11 @@ namespace mx {
 		// Executes a program by index.
 		bool								ExecuteProgramByIdx( size_t _stIdx );
 
+		/**
+		 * Updates the window title.
+		 **/
+		virtual void						UpdateWindowTitle() {}
+
 		// The address reader for expressions.
 		static bool __stdcall				ExpAddressHandler( uint64_t _ui64Address, ee::EE_CAST_TYPES _ctType, uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult );
 

@@ -1,5 +1,4 @@
 #include "MXNewStringSearchWindow.h"
-#include "../Float16/MXFloat16.h"
 #include "../Layouts/MXMainWindowLayout.h"
 #include "../Layouts/MXNewStringSearchLayout.h"
 #include "../MainWindow/MXMhsMainWindow.h"
@@ -12,6 +11,7 @@
 #include <Button/LSWButton.h>
 #include <CheckButton/LSWCheckButton.h>
 #include <ComboBox/LSWComboBox.h>
+#include <Float16/EEFloat16.h>
 #include <Static/LSWStatic.h>
 
 #include <set>
@@ -1030,7 +1030,7 @@ namespace mx {
 								case CUtilities::MX_DT_FLOAT16 : {
 									const uint16_t * pui16Array = reinterpret_cast<const uint16_t *>(&vFinalBytes[0]);
 
-									size_t sLen = (vFinalBytes.size() * sizeof( vFinalBytes[0] )) / sizeof( CFloat16 );
+									size_t sLen = (vFinalBytes.size() * sizeof( vFinalBytes[0] )) / sizeof( ee::CFloat16 );
 									for ( size_t I = 0; I < sLen; ++I ) {
 										if ( swsPreview.size() ) { swsPreview.push_back( L' ' ); }
 										switch ( vFinalMeta[I] ) {
@@ -1043,7 +1043,7 @@ namespace mx {
 												break;
 											}
 											default : {
-												CUtilities::ToDouble( CFloat16( pui16Array[I] ).Value(), swsPreview, -MX_FLOAT16_SIG_DIG );
+												CUtilities::ToDouble( ee::CFloat16( pui16Array[I] ).Value(), swsPreview, -MX_FLOAT16_SIG_DIG );
 											}
 										}
 									}
@@ -1124,8 +1124,8 @@ namespace mx {
 													MX_CASE_INT( 32 )
 													MX_CASE_INT( 64 )
 													case CUtilities::MX_DT_FLOAT16 : {
-														CUtilities::ToDouble( CFloat16( pfIn ).Value(), swsPreview, -MX_FLOAT16_SIG_DIG );
-														pfIn += sizeof( CFloat16 );
+														CUtilities::ToDouble( ee::CFloat16( pfIn ).Value(), swsPreview, -MX_FLOAT16_SIG_DIG );
+														pfIn += sizeof( ee::CFloat16 );
 														break;
 													}
 													case CUtilities::MX_DT_FLOAT : {

@@ -861,8 +861,7 @@ namespace mx {
 			MX_OPTIONS_GENSEARCH,					// dwParentId
 		},
 	};
-#undef MX_TP_L
-#undef MX_CRIT_W
+
 #undef MX_MISC_GROUP_HEIGHT
 #undef MX_MISC_GROUP_TOP
 #undef MX_BUFFER_GROUP_HEIGHT
@@ -939,7 +938,10 @@ namespace mx {
 	};
 
 #undef MX_SEARCH_EX_BYTESWAP_GROUP_HEIGHT
-
+#define MX_SHOW_HEIGHT								(MX_GROUP_TOP + (MX_DEF_CHECK_HEIGHT * 7) + MX_DEF_STATIC_HEIGHT * 2 + MX_GROUP_BOTTOM)
+#define MX_TITLE_BAR_HEIGHT							(MX_GROUP_TOP + (MX_DEF_CHECK_HEIGHT * 2) + MX_GROUP_BOTTOM)
+#undef MX_CRIT_W
+#define MX_CRIT_W									33
 	// Open-process section.
 	LSW_WIDGET_LAYOUT COptionsLayout::m_wlOptionsOpenProc[] = {
 		{
@@ -965,7 +967,7 @@ namespace mx {
 			0,										// iLeft
 			0,										// iTop
 			MX_OD_W,								// dwWidth
-			MX_GROUP_TOP + (MX_DEF_CHECK_HEIGHT * 7) + MX_DEF_STATIC_HEIGHT * 2 + MX_GROUP_BOTTOM,	// dwHeight
+			MX_SHOW_HEIGHT,							// dwHeight
 			MX_GROUPSTYLE,							// dwStyle
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_923C763F_Show ),		// pwcText
@@ -1132,8 +1134,126 @@ namespace mx {
 			_LEN_CF10E6E7,																														// sTextLen
 			MX_OI_OPEN_PROCESS,						// dwParentId
 		},
+
+		// ==== Title Bar ==== //
+		{
+			LSW_LT_GROUPBOX,						// ltType
+			MX_OI_OPEN_PROCESS_TITLE_BAR,			// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			0,										// iLeft
+			MX_SHOW_HEIGHT,							// iTop
+			MX_OD_W,								// dwWidth
+			MX_TITLE_BAR_HEIGHT,					// dwHeight
+			MX_GROUPSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_2111C006_Title_Bar ),	// pwcText
+			_LEN_2111C006,							// sTextLen
+			MX_OI_OPEN_PROCESS,						// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_OPEN_PROCESS_PROCESS_NAME,		// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_TP_L( 0 ),							// iLeft
+			MX_SHOW_HEIGHT + MX_GROUP_TOP,			// iTop
+			60,										// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_724BAFEB_Process_Name ),			// pwcText
+			_LEN_724BAFEB,										// sTextLen
+			MX_OPTIONS_GENSEARCH,					// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_OPEN_PROCESS_PROCESS_ID,			// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_TP_L( 1 ),							// iLeft
+			MX_SHOW_HEIGHT + MX_GROUP_TOP,			// iTop
+			60,										// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_C0D8DDA3_Process_ID ),// pwcText
+			_LEN_C0D8DDA3,							// sTextLen
+			MX_OPTIONS_GENSEARCH,					// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_OPEN_PROCESS_TITLE_BAR_ALL,		// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_TP_L( 2 ),							// iLeft
+			MX_SHOW_HEIGHT + MX_GROUP_TOP,			// iTop
+			MX_CRIT_W,								// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_0355373D_All ),		// pwcText
+			_LEN_0355373D,							// sTextLen
+			MX_OPTIONS_GENSEARCH,					// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_OPEN_PROCESS_32_BIT_FLAG,			// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_TP_L( 0 ),							// iLeft
+			MX_SHOW_HEIGHT + MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT,			// iTop
+			60,										// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_C27BEE75_x86_Flag ),	// pwcText
+			_LEN_C27BEE75,							// sTextLen
+			MX_OPTIONS_GENSEARCH,					// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_OPEN_PROCESS_INSERT_RANDOM,		// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_TP_L( 1 ),							// iLeft
+			MX_SHOW_HEIGHT + MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT,			// iTop
+			60,										// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_3DA6AAF4_Insert_Random ),						// pwcText
+			_LEN_3DA6AAF4,							// sTextLen
+			MX_OPTIONS_GENSEARCH,					// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_OPEN_PROCESS_TITLE_BAR_NONE,		// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_TP_L( 2 ),							// iLeft
+			MX_SHOW_HEIGHT + MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT,			// iTop
+			MX_CRIT_W,								// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_DFA2AFF1_None ),		// pwcText
+			_LEN_DFA2AFF1,							// sTextLen
+			MX_OPTIONS_GENSEARCH,					// dwParentId
+		},
 	};
 
+#undef MX_TP_L
+#undef MX_CRIT_W
+#undef MX_TITLE_BAR_HEIGHT
+#undef MX_SHOW_HEIGHT
 
 #define MX_HOTKEY_TOP_HEIGHT						48
 #define MX_HOTKEY_TOP_WIDTH							151

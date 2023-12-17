@@ -7,6 +7,8 @@
 #include <Base/LSWBase.h>
 #include <StatusBar/LSWStatusBar.h>
 
+#include <psapi.h>
+
 
 namespace mx {
 
@@ -25,6 +27,8 @@ namespace mx {
 	void CWindowMemHack::OpenedProcess() {
 		CMemHack::OpenedProcess();
 		if ( m_pmmwWindow ) {
+			UpdateWindowTitle();
+
 			CStatusBar * psbStatus = m_pmmwWindow->StatusBar();
 			if ( psbStatus ) {
 				CSecureWString sTemp = _DEC_WS_DAC52882_Opened_;
@@ -41,10 +45,61 @@ namespace mx {
 		}
 	}
 
+	/**
+	 * Updates the window title.
+	 **/
+	void CWindowMemHack::UpdateWindowTitle() {
+		if ( m_pmmwWindow ) {
+			CSecureWString swsString;
+			if ( m_pProcess.ProcIsOpened() ) {
+				if ( m_oOptions.dwOpenProc & MX_OP_TITLE_BAR_PROC_NAME ) {
+					if ( swsString.size() ) {
+						swsString += L'\u00A0';
+					}
+					wchar_t wcPath[MAX_PATH];
+					::GetModuleFileNameExW( static_cast<HMODULE>(m_pProcess.ProcHandle()), NULL, wcPath, MAX_PATH );
+					swsString += CUtilities::NoExtension( CUtilities::GetFileName( wcPath ) );
+
+					if ( m_oOptions.dwOpenProc & MX_OP_TITLE_BAR_X86_FLAG ) {
+						if ( m_pProcess.IsWow64Process() ) {
+							swsString += L'*';
+							swsString += L'\u00B3';	// 3
+							swsString += L'\u00B2';	// 2
+						}
+					}
+				}
+				else if ( m_oOptions.dwOpenProc & MX_OP_TITLE_BAR_X86_FLAG ) {
+					if ( swsString.size() ) {
+						swsString += L'\u00A0';
+					}
+					if ( m_pProcess.IsWow64Process() ) {
+						swsString += _DEC_WS_91D489A0__x86_; 
+					}
+				}
+				if ( m_oOptions.dwOpenProc & MX_OP_TITLE_BAR_PROC_ID ) {
+					if ( swsString.size() ) {
+						swsString += L'\u00A0';
+					}
+					CUtilities::ToHex( m_pProcess.ProcId(), swsString, 4 );
+					swsString.append( L"\u00A0(" );
+					CUtilities::ToUnsigned( m_pProcess.ProcId(), swsString );
+					swsString.append( L")" );
+				}
+			}
+			
+			if ( !swsString.size() ) {
+				swsString = _DEC_WS_BA5DABD6_L___Spiro__MHS__X;
+			}
+			m_pmmwWindow->SetTextW( swsString.c_str() );
+		}
+	}
+
 	// Failed to open a process.
 	void CWindowMemHack::FailedToOpenProcess( DWORD _dwId ) {
 		CMemHack::FailedToOpenProcess( _dwId );
 		if ( m_pmmwWindow ) {
+			UpdateWindowTitle();
+
 			CStatusBar * psbStatus = m_pmmwWindow->StatusBar();
 			if ( psbStatus ) {
 				CSecureWString sTemp = _DEC_WS_5D59A6A1_Failed_to_open_;
@@ -61,6 +116,8 @@ namespace mx {
 	// Detach from the current process.
 	void CWindowMemHack::Detach() {
 		if ( m_pmmwWindow ) {
+			UpdateWindowTitle();
+
 			CStatusBar * psbStatus = m_pmmwWindow->StatusBar();
 			if ( psbStatus ) {
 				CSecureWString sTemp = _DEC_WS_6EA39706_Detached_from_;
@@ -91,6 +148,8 @@ namespace mx {
 			}
 
 			AddUserProgramsToMenu();
+
+			UpdateWindowTitle();
 		}
 	}
 

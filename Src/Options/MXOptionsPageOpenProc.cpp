@@ -31,6 +31,19 @@ namespace mx {
 			pcbCheck->SetCheck( TRUE );
 		}
 
+		pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_OPEN_PROCESS_PROCESS_NAME ));
+		if ( pcbCheck ) {
+			pcbCheck->SetCheck( TRUE );
+		}
+		pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_OPEN_PROCESS_PROCESS_ID ));
+		if ( pcbCheck ) {
+			pcbCheck->SetCheck( TRUE );
+		}
+		pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_OPEN_PROCESS_32_BIT_FLAG ));
+		if ( pcbCheck ) {
+			pcbCheck->SetCheck( TRUE );
+		}
+
 		CheckAll();
 		
 		return LSW_H_CONTINUE;
@@ -52,6 +65,11 @@ namespace mx {
 			{ COptionsLayout::MX_OI_OPEN_PROCESS_CHILDWINDOWS, MX_OP_SHOW_CHILDWINDOWS },
 			{ COptionsLayout::MX_OI_OPEN_PROCESS_PARENT, MX_OP_SHOW_PARENT },
 			{ COptionsLayout::MX_OI_OPEN_PROCESS_X86, MX_OP_SHOW_X86 },
+
+			{ COptionsLayout::MX_OI_OPEN_PROCESS_PROCESS_NAME, MX_OP_TITLE_BAR_PROC_NAME },
+			{ COptionsLayout::MX_OI_OPEN_PROCESS_PROCESS_ID, MX_OP_TITLE_BAR_PROC_ID },
+			{ COptionsLayout::MX_OI_OPEN_PROCESS_32_BIT_FLAG, MX_OP_TITLE_BAR_X86_FLAG },
+			{ COptionsLayout::MX_OI_OPEN_PROCESS_INSERT_RANDOM, MX_OP_TITLE_BAR_RANDOM },
 		};
 		for ( size_t I = 0; I < MX_ELEMENTS( aTemp ); ++I ) {
 			if ( aTemp[I].wId == _Id ) {
@@ -72,7 +90,7 @@ namespace mx {
 			case COptionsLayout::MX_OI_OPEN_PROCESS_ALL : {
 				CCheckButton * pcbCheck = static_cast<CCheckButton *>(FindChild( _Id ));
 				if ( pcbCheck ) {
-					m_poOptions->dwOpenProc = MX_OP_SHOW_ALL;
+					m_poOptions->dwOpenProc |= MX_OP_SHOW_ALL;
 				}
 				CheckAll();
 				break;
@@ -80,7 +98,23 @@ namespace mx {
 			case COptionsLayout::MX_OI_OPEN_PROCESS_NONE : {
 				CCheckButton * pcbCheck = static_cast<CCheckButton *>(FindChild( _Id ));
 				if ( pcbCheck ) {
-					m_poOptions->dwOpenProc = 0;
+					m_poOptions->dwOpenProc &= ~MX_OP_SHOW_ALL;
+				}
+				CheckAll();
+				break;
+			}
+			case COptionsLayout::MX_OI_OPEN_PROCESS_TITLE_BAR_ALL : {
+				CCheckButton * pcbCheck = static_cast<CCheckButton *>(FindChild( _Id ));
+				if ( pcbCheck ) {
+					m_poOptions->dwOpenProc |= MX_OP_TITLE_BAR_ALL;
+				}
+				CheckAll();
+				break;
+			}
+			case COptionsLayout::MX_OI_OPEN_PROCESS_TITLE_BAR_NONE : {
+				CCheckButton * pcbCheck = static_cast<CCheckButton *>(FindChild( _Id ));
+				if ( pcbCheck ) {
+					m_poOptions->dwOpenProc &= ~MX_OP_TITLE_BAR_ALL;
 				}
 				CheckAll();
 				break;
@@ -106,6 +140,11 @@ namespace mx {
 		MX_CHECK( MX_OI_OPEN_PROCESS_PARENT, MX_FLAG( MX_OP_SHOW_PARENT ) );
 		MX_CHECK( MX_OI_OPEN_PROCESS_X86, MX_FLAG( MX_OP_SHOW_X86 ) );
 
+		MX_CHECK( MX_OI_OPEN_PROCESS_PROCESS_NAME, MX_FLAG( MX_OP_TITLE_BAR_PROC_NAME ) );
+		MX_CHECK( MX_OI_OPEN_PROCESS_PROCESS_ID, MX_FLAG( MX_OP_TITLE_BAR_PROC_ID ) );
+		MX_CHECK( MX_OI_OPEN_PROCESS_32_BIT_FLAG, MX_FLAG( MX_OP_TITLE_BAR_X86_FLAG ) );
+		MX_CHECK( MX_OI_OPEN_PROCESS_INSERT_RANDOM, MX_FLAG( MX_OP_TITLE_BAR_RANDOM ) );
+
 		CCheckButton * pcbChildWindows = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_OPEN_PROCESS_CHILDWINDOWS ));
 		if ( pcbChildWindows ) {
 			pcbChildWindows->SetEnabled( MX_FLAG( MX_OP_SHOW_WINDOWS ) );
@@ -117,7 +156,16 @@ namespace mx {
 		}
 		pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_OPEN_PROCESS_NONE ));
 		if ( pcbCheck ) {
-			pcbCheck->SetCheck( m_poOptions ? m_poOptions->dwOpenProc == 0 : FALSE );
+			pcbCheck->SetCheck( m_poOptions ? (m_poOptions->dwOpenProc & MX_OP_SHOW_ALL) == 0 : FALSE );
+		}
+
+		pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_OPEN_PROCESS_TITLE_BAR_ALL ));
+		if ( pcbCheck ) {
+			pcbCheck->SetCheck( MX_FLAG( MX_OP_TITLE_BAR_ALL ) );
+		}
+		pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_OPEN_PROCESS_TITLE_BAR_NONE ));
+		if ( pcbCheck ) {
+			pcbCheck->SetCheck( m_poOptions ? (m_poOptions->dwOpenProc & MX_OP_TITLE_BAR_ALL) == 0 : FALSE );
 		}
 #undef MX_CHECK
 #undef MX_FLAG

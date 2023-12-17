@@ -128,9 +128,6 @@
     <Filter Include="Source Files\RegEx\Oniguruma">
       <UniqueIdentifier>{9739490b-b068-4569-ad02-779d263dc934}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Float16">
-      <UniqueIdentifier>{2e53a0b4-515f-49e2-9b0d-4c9f0407d524}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\StringTheory">
       <UniqueIdentifier>{ad567cdd-02ce-417a-b1fb-87198c3a0d87}</UniqueIdentifier>
     </Filter>
@@ -754,9 +751,6 @@
     </ClInclude>
     <ClInclude Include="Src\RegEx\MXOnigurumaRegex.h">
       <Filter>Header Files\RegEx</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Float16\MXFloat16.h">
-      <Filter>Header Files\Float16</Filter>
     </ClInclude>
     <ClInclude Include="Src\StringTheory\MXStringTheoryWindow.h">
       <Filter>Header Files\StringTheory</Filter>
