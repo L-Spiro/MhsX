@@ -346,6 +346,13 @@ namespace lsw {
 
 
 		// == Functions.
+		/**
+		 * Sets the clipboard text in 8-bit characters.  Can be data rather than a NULL-terminated text string, but a NULL character is appended to the end.
+		 * 
+		 * \param _pcText The data/string to copy to the clipboard.
+		 * \param _stLen The number of bytes to which _pcText points.
+		 * \return Returns TRUE if the clipboard is opened and memory could be allocated and locked.
+		 **/
 		BOOL								SetText( const char * _pcText, size_t _stLen = -1 ) {
 			if ( !_pcText || !bOpen ) { return FALSE; }
 			if ( static_cast<int32_t>(_stLen) < 0 ) {
@@ -368,6 +375,13 @@ namespace lsw {
 			return TRUE;
 		}
 
+		/**
+		 * Sets the clipboard text in 16-bit characters.  Can be data rather than a NULL-terminated text string, but a NULL character is appended to the end.
+		 * 
+		 * \param _pwcText The data/string to copy to the clipboard.
+		 * \param _stLen The number of wchar_t characters to which _pwcText points.
+		 * \return Returns TRUE if the clipboard is opened and memory could be allocated and locked.
+		 **/
 		BOOL								SetText( const wchar_t * _pwcText, size_t _stLen = -1 ) {
 			if ( !_pwcText || !bOpen ) {
 				::OutputDebugStringA( "Failed to open.\r\n" );
@@ -397,6 +411,7 @@ namespace lsw {
 
 
 		// == Members.
+	protected :
 		BOOL								bOpen;
 		BOOL								bEmptied;
 	};

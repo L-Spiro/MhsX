@@ -1,6 +1,7 @@
 #pragma once
 #include "../MXMhsX.h"
 #include "../IO/MXInOutInterface.h"
+#include "../Strings/MXSecureWString.h"
 #include <CriticalSection/LSWCriticalSection.h>
 #include <Helpers/LSWHelpers.h>
 #include <Threads/LSWThread.h.>
@@ -26,6 +27,11 @@ namespace mx {
 										//	PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION | PROCESS_SUSPEND_RESUME
 			MX_OPM_FIXED,				// Opens the process using flags specified by the user.
 		};
+
+
+		// == Types.
+		// The callback function type for detatch events.
+		typedef void					(* PfDetatchCallback)( void *, uintptr_t );
 
 
 		// == Functions.
@@ -92,6 +98,9 @@ namespace mx {
 		// Determines if the process uses a 32-bit addressing space.
 		virtual bool					Is32Bit() const;
 
+		// Gets the full path of the process.  Returns an empty string if there is no process opened.
+		virtual CSecureWString			QueryProcessImageName( DWORD _dwFlags = 0 ) const;
+
 		// Gets the base and size of a region given an address.
 		virtual bool					GetChunk( uint64_t _lpAddress, uint64_t &_uiBaseAddress, uint64_t &_uiRegionSize );
 
@@ -103,6 +112,9 @@ namespace mx {
 
 		// Resume the target process.
 		virtual LONG					ResumeProcess() const;
+
+		// Sets the detatch callback.
+		void							SetDetatchCallback( PfDetatchCallback _pfFunc, void * _pvParm1,  uintptr_t _uiptrParm2 );
 
 
 
@@ -141,6 +153,14 @@ namespace mx {
 		// Thread parameters.
 		MX_OPEN_PROC					m_opOpenProcThreadMonitor;
 
+		// The detatch event callback.
+		PfDetatchCallback				m_pfDetatchCallback;
+		// Detatch parameter 1.
+		void *							m_pvDetatchParm1;
+		// Detatch parameter 2.
+		uintptr_t						m_uiptrDetatchParm2;
+
+
 
 		// == Functions.
 		// Internal open process.
@@ -166,7 +186,6 @@ namespace mx {
 
 		// Open-process thread.  Runs for as long as the target process is open.
 		static DWORD WINAPI				ThreadProc( LPVOID _lpParameter );
-
 
 	};
 

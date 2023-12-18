@@ -19,16 +19,14 @@ namespace mx {
 		// Opened a process.
 		virtual void						OpenedProcess();
 
-		/**
-		 * Updates the window title.
-		 **/
+		// Updates the window title.
 		virtual void						UpdateWindowTitle();
 
 		// Failed to open a process.
 		virtual void						FailedToOpenProcess( DWORD _dwId );
 
 		// Detach from the current process.
-		virtual void						Detach();
+		virtual void						Detach( BOOL _bCallProcessDetach );
 
 		// Sets the options.
 		virtual void						SetOptions( const MX_OPTIONS &_oOptions );
@@ -42,6 +40,11 @@ namespace mx {
 		// == Members.
 		// The window.
 		CMhsMainWindow *					m_pmmwWindow;
+
+
+		// == Functions.
+		// The process detatch callback.
+		static void							DetatchCallback( void * _pvParm1,  uintptr_t _uiptrParm2 );
 
 
 	private :

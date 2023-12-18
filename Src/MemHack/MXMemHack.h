@@ -31,7 +31,7 @@ namespace mx {
 		virtual void						FailedToOpenProcess( DWORD _dwId );
 
 		// Detach from the current process.
-		virtual void						Detach();
+		virtual void						Detach( BOOL _bCallProcessDetach );
 
 		// Gets the options.
 		const MX_OPTIONS &					Options() const;

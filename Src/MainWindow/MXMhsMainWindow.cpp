@@ -755,6 +755,10 @@ namespace mx {
 				PollHookKeys( static_cast<INT>(_wParam) );
 				break;
 			}
+			case MX_CM_DETATCHED : {
+				m_pmhMemHack->Detach( FALSE );
+				break;
+			}
 		}
 		return LSW_H_CONTINUE;
 	}

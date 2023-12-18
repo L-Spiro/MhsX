@@ -19,13 +19,13 @@ namespace mx {
 		m_vPrograms[1].wsPath = _DEC_WS_6DAC8A48_Notepad_exe;
 	}
 	CMemHack::~CMemHack() {
-		Detach();
+		Detach( TRUE );
 	}
 
 	// == Functions.
 	// Open a process by its ID.
 	bool CMemHack::OpenProcess( DWORD _dwId ) {
-		Detach();
+		Detach( TRUE );
 
 		const CProcess::MX_OPEN_PROC_MODE opmMode = CProcess::MX_OPM_FIXED;
 		switch ( opmMode ) {
@@ -90,8 +90,10 @@ namespace mx {
 	}
 
 	// Detach from the current process.
-	void CMemHack::Detach() {
-		m_pProcess.Detach();
+	void CMemHack::Detach( BOOL _bCallProcessDetach ) {
+		if ( _bCallProcessDetach ) {
+			m_pProcess.Detach();
+		}
 		//m_hProc.Reset();
 	}
 

@@ -5,7 +5,8 @@ namespace mx {
 
 	CProcess::CProcess() :
 		m_dwId( DWINVALID ),
-		m_dwOpenProcFlags( 0 ) {
+		m_dwOpenProcFlags( 0 ),
+		m_pfDetatchCallback( nullptr ) {
 		//m_opOpenProcThreadMonitor.ppProcess = this;
 	}
 	CProcess::~CProcess() {
@@ -52,6 +53,9 @@ namespace mx {
 		//Reset();
 		m_hProcHandle.Reset();
 		m_dwId = DWINVALID;
+		if ( m_pfDetatchCallback ) {
+			m_pfDetatchCallback( m_pvDetatchParm1, m_uiptrDetatchParm2 );
+		}
 	}
 
 	// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
@@ -144,6 +148,31 @@ namespace mx {
 		return IsWow64Process() || CSystem::Is32Bit();
 	}
 
+	// Gets the full path of the process.  Returns an empty string if there is no process opened.
+	CSecureWString CProcess::QueryProcessImageName( DWORD _dwFlags ) const {
+		LSW_ENT_CRIT( m_csCrit );
+		if ( !ProcIsOpened() ) { return CSecureWString(); }
+		CSecureWString swsTmp;
+		swsTmp.resize( MAX_PATH );
+		size_t stSize = swsTmp.size();
+		while ( stSize == swsTmp.size() ) {
+			DWORD dwSize = static_cast<DWORD>(swsTmp.size());
+			if ( (!::QueryFullProcessImageNameW( ProcHandle(), _dwFlags, swsTmp.data(), &dwSize ) && dwSize == 0) || swsTmp.size() >= 1024 * 1024 ) {
+				return CSecureWString();
+			}
+			if ( dwSize == static_cast<DWORD>(swsTmp.size()) ) {
+				swsTmp.resize( swsTmp.size() + MAX_PATH );
+				stSize = swsTmp.size();
+			}
+			else {
+				swsTmp.resize( dwSize );
+				break;
+			}
+		}
+
+		return swsTmp;
+	}
+
 	// Gets the base and size of a region given an address.
 	bool CProcess::GetChunk( uint64_t _lpAddress, uint64_t &_uiBaseAddress, uint64_t &_uiRegionSize ) {
 		// Have to handle cases where the address is out of native range differently.
@@ -172,6 +201,13 @@ namespace mx {
 	// Resume the target process.
 	LONG CProcess::ResumeProcess() const {
 		return CSystem::NtResumeProcess( m_hProcHandle.hHandle );
+	}
+
+	// Sets the detatch callback.
+	void CProcess::SetDetatchCallback( PfDetatchCallback _pfFunc, void * _pvParm1,  uintptr_t _uiptrParm2 ) {
+		m_pfDetatchCallback = _pfFunc;
+		m_pvDetatchParm1 = _pvParm1;
+		m_uiptrDetatchParm2 = _uiptrParm2;
 	}
 
 	// Internal open process.

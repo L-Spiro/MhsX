@@ -17,6 +17,8 @@ namespace mx {
 		m_pmmwWindow = reinterpret_cast<CMhsMainWindow *>(mx::CMainWindowLayout::CreateMainWindow( this ));
 
 		AddUserProgramsToMenu();
+
+		m_pProcess.SetDetatchCallback( DetatchCallback, this, 0 );
 	}
 	CWindowMemHack::~CWindowMemHack() {
 		m_pmmwWindow = nullptr;
@@ -56,9 +58,7 @@ namespace mx {
 					if ( swsString.size() ) {
 						swsString += L'\u00A0';
 					}
-					wchar_t wcPath[MAX_PATH];
-					::GetModuleFileNameExW( static_cast<HMODULE>(m_pProcess.ProcHandle()), NULL, wcPath, MAX_PATH );
-					swsString += CUtilities::NoExtension( CUtilities::GetFileName( wcPath ) );
+					swsString += CUtilities::NoExtension( CUtilities::GetFileName( m_pProcess.QueryProcessImageName() ) );
 
 					if ( m_oOptions.dwOpenProc & MX_OP_TITLE_BAR_X86_FLAG ) {
 						if ( m_pProcess.IsWow64Process() ) {
@@ -134,7 +134,7 @@ namespace mx {
 	}
 
 	// Detach from the current process.
-	void CWindowMemHack::Detach() {
+	void CWindowMemHack::Detach( BOOL _bCallProcessDetach ) {
 		if ( m_pmmwWindow ) {
 			UpdateWindowTitle();
 
@@ -152,8 +152,7 @@ namespace mx {
 				psbStatus->SetTextW( 0, 0, sTemp.c_str() );
 			}
 		}
-
-		CMemHack::Detach();
+		CMemHack::Detach( _bCallProcessDetach );
 	}
 
 	// Sets the options.
@@ -226,6 +225,15 @@ namespace mx {
 		if ( hMenu ) {
 			// Gather menu ID
 		}*/
+	}
+
+	// The process detatch callback.
+	void CWindowMemHack::DetatchCallback( void * _pvParm1,  uintptr_t /*_uiptrParm2*/ ) {
+		//static_cast<CWindowMemHack *>(_pvParm1)->Detach( FALSE );
+		CWindowMemHack * pwmhMemHack = static_cast<CWindowMemHack *>(_pvParm1);
+		if ( pwmhMemHack->m_pmmwWindow ) {
+			::PostMessageW( pwmhMemHack->m_pmmwWindow->Wnd(), CMhsMainWindow::MX_CUSTOM_MESSAGE::MX_CM_DETATCHED, 0, 0 );
+		}
 	}
 
 }	// namespace mx

@@ -57,6 +57,7 @@ namespace mx {
 			MX_CM_UPDATE_FA					= WM_USER + 0x0000,
 			MX_CM_HOTKEY,
 			MX_CM_HOOKKEY,
+			MX_CM_DETATCHED,
 		};
 
 		// Our hotkeys.  Ranging from 100-200.
