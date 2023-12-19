@@ -11,7 +11,6 @@ namespace mx {
 #define MX_SEARCH_W									280
 //#define MX_SEARCH_H									(200)
 #define MX_SEARCH_GROUP_TOP							MX_TOP_JUST
-#define MX_LEFT_ALIGN								MX_LEFT_JUST
 #define MX_CENTER									(MX_SEARCH_W / 2)
 #define MX_1_3RD_W									((MX_SEARCH_W - (MX_LEFT_ALIGN + MX_GROUP_LEFT) - (MX_LEFT_ALIGN + MX_GROUP_RIGHT)) / 3)
 #define MX_1_3RD_LEFT								(MX_LEFT_ALIGN + MX_GROUP_LEFT)

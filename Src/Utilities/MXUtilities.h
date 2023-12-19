@@ -6,6 +6,7 @@
 #include "../Strings/MXSecureWString.h"
 #include "../System/MXSystem.h"
 
+#include <ComboBox/LSWComboBox.h>
 #include <CriticalSection/LSWCriticalSection.h>
 #include <EEExpEvalContainer.h>
 #include <clocale>
@@ -1143,6 +1144,9 @@ namespace mx {
 				}
 			}
 		}
+
+		// The From and To address ranges.
+		static void						FillAddressRangeComboBoxes( lsw::CComboBox * _pcbFrom, lsw::CComboBox * _pcbTo, const void * _poOptions );
 		
 
 		// == Members.

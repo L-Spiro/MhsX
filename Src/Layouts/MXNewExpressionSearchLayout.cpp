@@ -10,7 +10,6 @@ namespace mx {
 
 #define MX_SEARCH_W									410
 //#define MX_SEARCH_H									275
-#define MX_LEFT_ALIGN								MX_LEFT_JUST
 #define MX_JUSTIFY									MX_TOP_JUST
 #define MX_LEFT_POS									(MX_LEFT_ALIGN + MX_GROUP_LEFT)
 #define MX_CENTER_POS								(MX_SEARCH_W / 2)

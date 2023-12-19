@@ -765,12 +765,6 @@ namespace mx {
 
 	// Shows the Found Address dockable.
 	void CMhsMainWindow::ShowFoundAddress() {
-		/*ee::CExpEvalContainer::EE_RESULT rRes;
-		rRes.ncType = ee::EE_NC_UNSIGNED;
-		rRes.u.dVal = -903;
-		wchar_t szBuffer[128];
-		ee::CExpEvalContainer::PrintF( szBuffer, MX_ELEMENTS( szBuffer ), L"Blah %+20f %X KEYS\r\n", 1, rRes );*/
-
 		if ( !m_pfaFoundAddresses ) {
 			m_pfaFoundAddresses = static_cast<CFoundAddressesWindow *>(CFoundAddressLayout::CreateFoundAddressesWindow( MultiSplitter(), this ));
 			if ( !m_pfaFoundAddresses ) { return; }

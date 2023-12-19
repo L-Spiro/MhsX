@@ -47,6 +47,9 @@ namespace mx {
 			pcbCombo->AutoSetMinListWidth();
 		}
 
+		CUtilities::FillAddressRangeComboBoxes( static_cast<CComboBox *>(FindChild( COptionsLayout::MX_OI_SEARCH_EX_SEARCH_RANGE_LOW_COMBO )),
+			static_cast<CComboBox *>(FindChild( COptionsLayout::MX_OI_SEARCH_EX_SEARCH_RANGE_HIGH_COMBO )),
+			m_poOptions );
 		ApplySettings();
 		
 		return LSW_H_CONTINUE;

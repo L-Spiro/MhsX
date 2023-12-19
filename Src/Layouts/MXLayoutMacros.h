@@ -12,6 +12,10 @@
 #define MX_MAIN_WINDOW_H				750
 #endif	// MX_MAIN_WINDOW_H
 
+#ifndef MX_LEFT_ALIGN
+#define MX_LEFT_ALIGN					2
+#endif	// MX_LEFT_ALIGN
+
 #ifndef MX_LOCK_LEFT
 #define MX_LOCK_LEFT					_T_LEN_BA1A357D_____SL______P__L_____P__SL_
 #endif	// MX_LOCK_LEFT

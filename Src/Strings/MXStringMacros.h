@@ -16696,3 +16696,12 @@
 #define _DEC_S_91D489A0__x86_ mx::CStringDecoder::DecodeToString( _T_91D489A0__x86_, _LEN_91D489A0 )
 #define _DEC_WS_91D489A0__x86_ mx::CStringDecoder::DecodeToWString( _T_91D489A0__x86_, _LEN_91D489A0 )
 
+// Snap to Full Range
+
+#define _T_A07EA06F_Snap_to_Full_Range "\xDB\x3C\x31\x0B\xB2\x3D\xFD\xE7\x16\x3D\x35\x3A\xB2\xED\x28\xF6\x35\x35"
+#define _LEN_A07EA06F 18
+#define _T_LEN_A07EA06F_Snap_to_Full_Range _T_A07EA06F_Snap_to_Full_Range, _LEN_A07EA06F
+#define _DEC_A07EA06F_Snap_to_Full_Range( STR ) mx::CStringDecoder::Decode( _T_A07EA06F_Snap_to_Full_Range, _LEN_A07EA06F, STR )
+#define _DEC_S_A07EA06F_Snap_to_Full_Range mx::CStringDecoder::DecodeToString( _T_A07EA06F_Snap_to_Full_Range, _LEN_A07EA06F )
+#define _DEC_WS_A07EA06F_Snap_to_Full_Range mx::CStringDecoder::DecodeToWString( _T_A07EA06F_Snap_to_Full_Range, _LEN_A07EA06F )
+

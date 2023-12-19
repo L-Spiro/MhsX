@@ -2,6 +2,7 @@
 #include "../CodePages/MXCodePages.h"
 #include "../Html/MXHtml.h"
 #include "../MemHack/MXProcess.h"
+#include "../Options/MXOptions.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../Strings/MXStringMacros.h"
 #include <EEExpEval.h>
@@ -4085,6 +4086,48 @@ namespace mx {
 		/*char szBuffer[64];
 		std::sprintf( szBuffer, "PrintTotalGuiObjects: %u.\r\n", ::GetGuiResources( ::GetCurrentProcess(), _dwFlags ) );
 		::OutputDebugStringA( szBuffer );*/
+	}
+
+	// The From and To address ranges.
+	void CUtilities::FillAddressRangeComboBoxes( lsw::CComboBox * _pcbFrom, lsw::CComboBox * _pcbTo, const void * _poOptions ) {
+		const MX_OPTIONS & oOptions = (*reinterpret_cast<const MX_OPTIONS *>(_poOptions));
+		lsw::CComboBox * pcbCombo = _pcbFrom;
+		if ( pcbCombo ) {
+			for ( size_t I = 0; I < oOptions.vFromHistory.size(); ++I ) {
+				pcbCombo->AddString( oOptions.vFromHistory[I].c_str() );
+			}
+			if ( oOptions.wsFromText.size() == 0 ) {
+				uintptr_t uiptrTemp = reinterpret_cast<uintptr_t>(mx::CSystem::GetSystemInfo().lpMinimumApplicationAddress);
+				std::string sTemp = CUtilities::ToHex( uiptrTemp, 4 );
+				pcbCombo->SetTextA( sTemp.c_str() );
+			}
+			else {
+				pcbCombo->SetTextW( oOptions.wsFromText.c_str() );
+			}
+			pcbCombo->SetTreatAsHex( TRUE );
+			pcbCombo->SetFocus();
+
+			pcbCombo->AutoSetMinListWidth();
+		}
+
+		pcbCombo = _pcbTo;
+		if ( pcbCombo ) {
+			for ( size_t I = 0; I < oOptions.vToHistory.size(); ++I ) {
+				pcbCombo->AddString( oOptions.vToHistory[I].c_str() );
+			}
+			if ( oOptions.wsToText.size() == 0 ) {
+				uintptr_t uiptrTemp = reinterpret_cast<uintptr_t>(mx::CSystem::GetSystemInfo().lpMaximumApplicationAddress);
+				std::string sTemp = CUtilities::ToHex( uiptrTemp + 1ULL, 4 );
+				pcbCombo->SetTextA( sTemp.c_str() );
+			}
+			else {
+				pcbCombo->SetTextW( oOptions.wsToText.c_str() );
+			}
+			pcbCombo->SetTreatAsHex( TRUE );
+			pcbCombo->SetFocus();
+
+			pcbCombo->AutoSetMinListWidth();
+		}
 	}
 
 	// Prints an ee::CExpEvalContainer::EE_RESULT value.

@@ -11,7 +11,7 @@ namespace mx {
 #define MX_SEARCH_W									200
 #define MX_SEARCH_H									175
 #define MX_SEARCH_GROUP_TOP							2
-#define MX_LEFT_ALIGN								4
+//#define MX_LEFT_ALIGN								4
 #define MX_CENTER									(MX_SEARCH_W / 2)
 #define MX_WIDTH_TO_CENTER( L )						((MX_SEARCH_W / 2) - (L))
 #define MX_SEARCH_GROUP_HEIGHT						(MX_DEF_COMBO_HEIGHT * 2 + MX_DEF_STATIC_HEIGHT * 2 + MX_GROUP_TOP + MX_GROUP_BOTTOM + 2)

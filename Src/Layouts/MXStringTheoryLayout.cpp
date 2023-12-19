@@ -18,6 +18,7 @@ namespace mx {
 #define MX_HEX_EDIT_LINES							3
 #define MX_STW_W									760
 #define MX_STW_H									800
+#undef MX_LEFT_ALIGN
 #define MX_LEFT_ALIGN								4
 #define MX_PADDING									2
 #define MX_INPUT_ENCODING_GROUP_HEIGHT				(MX_GROUP_TOP_PXL + MX_GROUP_BOTTOM_PXL + MX_DEF_COMBO_HEIGHT_PXL)

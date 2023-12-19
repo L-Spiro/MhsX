@@ -871,6 +871,7 @@ namespace mx {
 
 
 #define MX_SEARCH_EX_BYTESWAP_GROUP_HEIGHT			(MX_GROUP_TOP + MX_DEF_COMBO_HEIGHT + MX_GROUP_BOTTOM)
+#define MX_SEARCH_EX_RANGE_GROUP_HEIGHT				(MX_GROUP_TOP + MX_DEF_STATIC_HEIGHT + MX_DEF_COMBO_HEIGHT + MX_DEF_BUTTON_HEIGHT + MX_LEFT_ALIGN + MX_GROUP_BOTTOM)
 	// Extended search section.
 	LSW_WIDGET_LAYOUT COptionsLayout::m_wlOptionsSearchEx[] = {
 		{
@@ -935,8 +936,107 @@ namespace mx {
 			0,										// sTextLen
 			MX_OI_SEARCH_EX,						// dwParentId
 		},
+
+		// ==== Range ==== //
+		{
+			LSW_LT_GROUPBOX,						// ltType
+			MX_OI_SEARCH_EX_SEARCH_RANGE,			// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			0,										// iLeft
+			MX_SEARCH_EX_BYTESWAP_GROUP_HEIGHT,		// iTop
+			MX_OD_W,								// dwWidth
+			MX_SEARCH_EX_RANGE_GROUP_HEIGHT,		// dwHeight
+			MX_GROUPSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_638D307B_Search_Ranges ),																									// pwcText
+			_LEN_638D307B,																																// sTextLen
+			MX_OI_SEARCH_EX,						// dwParentId
+		},
+		{
+			LSW_LT_LABEL,							// ltType
+			MX_OI_SEARCH_EX_SEARCH_RANGE_LOW_LABEL,	// wId
+			WC_STATICW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_GROUP_LEFT,							// iLeft
+			MX_SEARCH_EX_BYTESWAP_GROUP_HEIGHT + MX_GROUP_TOP,															// iTop
+			(MX_OD_W - MX_GROUP_LEFT * 2) / 2 - (MX_LEFT_ALIGN),														// dwWidth
+			MX_DEF_STATIC_HEIGHT,					// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_857372A6_From_ ),		// pwcText
+			_LEN_857372A6,							// sTextLen
+			MX_OI_SEARCH_EX,						// dwParentId
+		},
+		{
+			LSW_LT_LABEL,							// ltType
+			MX_OI_SEARCH_EX_SEARCH_RANGE_HIGH_LABEL,// wId
+			WC_STATICW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_OD_W - MX_GROUP_LEFT - ((MX_OD_W - MX_GROUP_LEFT * 2) / 2) + MX_LEFT_ALIGN,								// iLeft
+			MX_SEARCH_EX_BYTESWAP_GROUP_HEIGHT + MX_GROUP_TOP,															// iTop
+			(MX_OD_W - MX_GROUP_LEFT * 2) / 2 - (MX_LEFT_ALIGN),														// dwWidth
+			MX_DEF_STATIC_HEIGHT,					// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_B09DF1A4_To_ ),		// pwcText
+			_LEN_B09DF1A4,							// sTextLen
+			MX_OI_SEARCH_EX,						// dwParentId
+		},
+		{
+			LSW_LT_COMBOBOX,						// ltType
+			MX_OI_SEARCH_EX_SEARCH_RANGE_LOW_COMBO,	// wId
+			WC_COMBOBOXW,							// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_GROUP_LEFT,							// iLeft
+			MX_SEARCH_EX_BYTESWAP_GROUP_HEIGHT + MX_GROUP_TOP + MX_DEF_STATIC_HEIGHT,									// iTop
+			(MX_OD_W - MX_GROUP_LEFT * 2) / 2 - (MX_LEFT_ALIGN),														// dwWidth
+			MX_DEF_COMBO_HEIGHT,					// dwHeight
+			MX_COMBOSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_OI_SEARCH_EX,						// dwParentId
+		},
+		{
+			LSW_LT_COMBOBOX,						// ltType
+			MX_OI_SEARCH_EX_SEARCH_RANGE_HIGH_COMBO,// wId
+			WC_COMBOBOXW,							// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_OD_W - MX_GROUP_LEFT - ((MX_OD_W - MX_GROUP_LEFT * 2) / 2) + MX_LEFT_ALIGN,								// iLeft
+			MX_SEARCH_EX_BYTESWAP_GROUP_HEIGHT + MX_GROUP_TOP + MX_DEF_STATIC_HEIGHT,									// iTop
+			(MX_OD_W - MX_GROUP_LEFT * 2) / 2 - (MX_LEFT_ALIGN),// dwWidth
+			MX_DEF_COMBO_HEIGHT,					// dwHeight
+			MX_COMBOSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_OI_SEARCH_EX,						// dwParentId
+		},
+		{
+			LSW_LT_BUTTON,							// ltType
+			MX_OI_SEARCH_EX_SEARCH_RANGE_SET_BUTTON,// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_GROUP_LEFT,							// iLeft
+			MX_SEARCH_EX_BYTESWAP_GROUP_HEIGHT + MX_GROUP_TOP + MX_DEF_STATIC_HEIGHT + MX_DEF_COMBO_HEIGHT + MX_LEFT_ALIGN,				// iTop
+			MX_OD_W - MX_GROUP_LEFT * 2,			// dwWidth
+			MX_DEF_BUTTON_HEIGHT,					// dwHeight
+			MX_BUTTONSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_A07EA06F_Snap_to_Full_Range ),		// pwcText
+			_LEN_A07EA06F,							// sTextLen
+			MX_OI_SEARCH_EX,						// dwParentId
+		},
 	};
 
+#undef MX_SEARCH_EX_RANGE_GROUP_HEIGHT
 #undef MX_SEARCH_EX_BYTESWAP_GROUP_HEIGHT
 #define MX_SHOW_HEIGHT								(MX_GROUP_TOP + (MX_DEF_CHECK_HEIGHT * 7) + MX_DEF_STATIC_HEIGHT * 2 + MX_GROUP_BOTTOM)
 #define MX_TITLE_BAR_HEIGHT							(MX_GROUP_TOP + (MX_DEF_CHECK_HEIGHT * 2) + MX_GROUP_BOTTOM)
