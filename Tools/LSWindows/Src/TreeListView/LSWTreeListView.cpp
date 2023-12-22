@@ -1,6 +1,7 @@
 #include "LSWTreeListView.h"
 #include "../Base/LSWBase.h"
 #include <strsafe.h>
+#include <vsstyle.h>
 #include <uxtheme.h>
 #include <windowsx.h>
 
@@ -1083,6 +1084,53 @@ namespace lsw {
 				return lrRes;
 
 			}
+
+			case WM_NOTIFY : {
+				LPNMHDR lpnmhdr = (LPNMHDR)_lParam;
+				if (lpnmhdr->code == NM_CUSTOMDRAW) {
+					LPNMLVCUSTOMDRAW lpLVCD = (LPNMLVCUSTOMDRAW)_lParam;
+
+					switch (lpLVCD->nmcd.dwDrawStage) {
+						case CDDS_PREPAINT:
+							return CDRF_NOTIFYITEMDRAW;
+
+						case CDDS_ITEMPREPAINT: {
+							/*static bool _bInPrePaint = false;
+
+							if ( !_bInPrePaint ) {
+								_bInPrePaint = true;
+								::InvalidateRect( _hWnd, &lpLVCD->nmcd.rc, FALSE );
+								::SendMessageW( lpLVCD->nmcd.hdr.hwndFrom, WM_PAINT, 0, 0 );
+								::ValidateRect( _hWnd, &lpLVCD->nmcd.rc );
+								_bInPrePaint = false;
+							}
+							else {
+								return CDRF_DODEFAULT;
+							}*/
+							HTHEME hTheme = ::OpenThemeData(_hWnd, L"TREEVIEW");
+							if (hTheme) {
+								
+								RECT rc = lpLVCD->nmcd.rc;
+								rc.right = rc.left + 20;
+								int partId = TVP_GLYPH;
+								int stateId = GLPS_OPENED; // or GLPS_CLOSED for "+"
+
+								//::InvalidateRect( _hWnd, &rc, FALSE );
+								//::DrawThemeBackground(hTheme, lpLVCD->nmcd.hdc, partId, stateId, &rc, NULL);
+								//::ValidateRect( _hWnd, &rc );
+
+
+
+								::CloseThemeData(hTheme);
+							}
+							return CDRF_DODEFAULT;
+							//return CDRF_SKIPDEFAULT;
+						}
+					}
+				}
+				break;
+			}
+
 						  
 			/*case WM_PAINT : {
 				HTHEME hTheme = ::OpenThemeData( _hWnd, L"TREEVIEW" );

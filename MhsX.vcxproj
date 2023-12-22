@@ -473,6 +473,7 @@
     <ClInclude Include="Src\Strings\MXSecureWString.h" />
     <ClInclude Include="Src\StringTheory\MXStringTheoryOperationsWindow.h" />
     <ClInclude Include="Src\StringTheory\MXStringTheoryWindow.h" />
+    <ClInclude Include="Src\Utilities\MXStream.h" />
     <ClInclude Include="Src\Utilities\MXTemplateWindow.h" />
     <ClInclude Include="Src\Utilities\MXUtilities.h" />
     <ClInclude Include="Src\System\MXSystem.h" />

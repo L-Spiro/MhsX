@@ -5,10 +5,30 @@
 #include "../Programs/MXPrograms.h"
 #include "../RegEx/MXOnigurumaSystem.h"
 #include "../Search/MXSearcher.h"
+#include "../Utilities/MXStream.h"
 #include <CriticalSection/LSWCriticalSection.h>
 #include "MXProcess.h"
+#include <LSONJson.h>
 #include <LSWWin.h>
 #include <Helpers/LSWHelpers.h>
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// MACROS
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// Creates a number JSON element.
+#define MX_JSON_NUMBER( NAME, NUMBER, JSON )																																							\
+	(JSON)->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );																													\
+	lson::CJson::CreateNumberElement( (NAME), static_cast<double>(NUMBER), (*(JSON)->vObjectMembers[(JSON)->vObjectMembers.size()-1]) )
+
+#define MX_JSON_BOOL( NAME, VAL, JSON )																																									\
+	(JSON)->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );																													\
+	if ( VAL ) {																																														\
+		lson::CJson::CreateTrueElement( (NAME), (*(JSON)->vObjectMembers[(JSON)->vObjectMembers.size()-1]) );																							\
+	}																																																	\
+	else {																																																\
+		lson::CJson::CreateFalseElement( (NAME), (*(JSON)->vObjectMembers[(JSON)->vObjectMembers.size()-1]) );																							\
+	}
 
 
 namespace mx {
@@ -66,10 +86,20 @@ namespace mx {
 		// Executes a program by index.
 		bool								ExecuteProgramByIdx( size_t _stIdx );
 
-		/**
-		 * Updates the window title.
-		 **/
+		// Updates the window title.
 		virtual void						UpdateWindowTitle() {}
+
+		// Saves all program settings.
+		virtual bool						SaveSettings( const std::wstring &_wsPath, bool _bAsJson ) const;
+
+		// Loads all program settings.
+		virtual bool						LoadSettings( const std::wstring &_wsPath, bool _bAsJson );
+
+		// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
+		virtual bool						SaveSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary, const MX_OPTIONS &_oOptions ) const;
+
+		// Loads settings from either a JSON object or a byte buffer.
+		virtual bool						LoadSettings( lson::CJson * _pjJson, CStream * _psBinary, MX_OPTIONS &_oOptions );
 
 		// The address reader for expressions.
 		static bool __stdcall				ExpAddressHandler( uint64_t _ui64Address, ee::EE_CAST_TYPES _ctType, uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult );
@@ -96,6 +126,17 @@ namespace mx {
 		std::vector<MX_PROGRAM>				m_vPrograms;
 		// Program critical section.
 		mutable CCriticalSection			m_csProgramCrit;
+
+
+		// == Functions.
+		// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
+		virtual bool						SaveGeneralSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary, const MX_OPTIONS &_oOptions ) const;
+
+		// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
+		virtual bool						SaveOpenProcSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary, const MX_OPTIONS &_oOptions ) const;
+
+		// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
+		virtual bool						SaveSearchSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary, const MX_OPTIONS &_oOptions ) const;
 	};
 
 }	// namespace mx

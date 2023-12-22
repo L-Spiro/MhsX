@@ -40,8 +40,7 @@ namespace lson {
 		struct LSON_ELEMENT {
 			LSON_NODE_TYPE								ntType;								/**< The element type. */
 			std::string									sName;								/**< The name of the element. */
-			std::vector<LSON_ELEMENT>					vObjectMembers;						/**< If ntType is LSON_OBJECT. */
-			std::vector<LSON_ELEMENT>					vArray;								/**< If ntType is LSON_ARRAY. */
+			std::vector<std::unique_ptr<LSON_ELEMENT>>	vObjectMembers;						/**< If ntType is LSON_OBJECT or LSON_ARRAY. */
 			std::string									sString;							/**< If ntType is LSON_STRING. */
 			double										dNumber;							/**< If ntType is LSON_NUMBER. */
 		};
@@ -126,11 +125,111 @@ namespace lson {
 		 **/
 		static void										CreateNullElement( const std::string &_sName, LSON_ELEMENT &_eElement );
 
+		/**
+		 * Writes an element JSON element to a byte buffer.
+		 * 
+		 * \param _eElement The element to write.
+		 * \param _vBuffer The buffer to which to append the element.
+		 * \param _iIndent The indent level.
+		 * \return Returns true if the element was appended to the end of the given data buffer.
+		 **/
+		static bool										WriteElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+
+		/**
+		 * Writes an object JSON element to a byte buffer.
+		 * 
+		 * \param _eElement The element to write.
+		 * \param _vBuffer The buffer to which to append the element.
+		 * \param _iIndent The indent level.
+		 * \return Returns true if the element was appended to the end of the given data buffer.
+		 **/
+		static bool										WriteObjectElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+
+		/**
+		 * Writes an array JSON element to a byte buffer.
+		 * 
+		 * \param _eElement The element to write.
+		 * \param _vBuffer The buffer to which to append the element.
+		 * \param _iIndent The indent level.
+		 * \return Returns true if the element was appended to the end of the given data buffer.
+		 **/
+		static bool										WriteArrayElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+
+		/**
+		 * Writes a string JSON element to a byte buffer.
+		 * 
+		 * \param _eElement The element to write.
+		 * \param _vBuffer The buffer to which to append the element.
+		 * \param _iIndent The indent level.
+		 * \return Returns true if the element was appended to the end of the given data buffer.
+		 **/
+		static bool										WriteStringElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+
+		/**
+		 * Writes a number JSON element to a byte buffer.
+		 * 
+		 * \param _eElement The element to write.
+		 * \param _vBuffer The buffer to which to append the element.
+		 * \param _iIndent The indent level.
+		 * \return Returns true if the element was appended to the end of the given data buffer.
+		 **/
+		static bool										WriteNumberElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+
+		/**
+		 * Writes a true JSON element to a byte buffer.
+		 * 
+		 * \param _eElement The element to write.
+		 * \param _vBuffer The buffer to which to append the element.
+		 * \param _iIndent The indent level.
+		 * \return Returns true if the element was appended to the end of the given data buffer.
+		 **/
+		static bool										WriteTrueElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+
+		/**
+		 * Writes a false JSON element to a byte buffer.
+		 * 
+		 * \param _eElement The element to write.
+		 * \param _vBuffer The buffer to which to append the element.
+		 * \param _iIndent The indent level.
+		 * \return Returns true if the element was appended to the end of the given data buffer.
+		 **/
+		static bool										WriteFalseElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+
+		/**
+		 * Writes a null JSON element to a byte buffer.
+		 * 
+		 * \param _eElement The element to write.
+		 * \param _vBuffer The buffer to which to append the element.
+		 * \param _iIndent The indent level.
+		 * \return Returns true if the element was appended to the end of the given data buffer.
+		 **/
+		static bool										WriteNullElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+
 
 	protected :
 		// == Members.
 		/** The container of the parsed results. */
 		CJsonContainer *								m_pjcContainer;
+
+
+		// == Functions.
+		/**
+		 * Writes an indentation level to a buffer.
+		 * 
+		 * \param _vBuffer The buffer to which to append the indentation.
+		 * \param _iIndent The indent level.
+		 * \return Returns true if the indentation was appended to the end of the given data buffer.
+		 **/
+		static bool										WriteIndent( std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+
+		/**
+		 * Writes a string to the buffer, enclosed in quotations.
+		 * 
+		 * \param _sString The string to write.
+		 * \param _vBuffer The buffer to which to append the string.
+		 * \return Returns true if the string was appended to the end of the given data buffer.
+		 **/
+		static bool										WriteString( const std::string &_sString, std::vector<uint8_t> &_vBuffer );
 	};
 
 }	// namespace lson

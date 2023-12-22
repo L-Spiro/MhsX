@@ -1,0 +1,59 @@
+{
+    "Version" : 1,
+    "General" : {
+        "FoundAddressRate" : 10,
+        "MainRefreshRate" : 10,
+        "LockedRefreshRate" : 1000,
+        "ExpressionRefreshRate" : 100,
+        "DataAsCodeName" : true,
+        "DataSizes" : true,
+        "DataRanges" : true,
+        "UseXx" : false,
+        "UseOo" : false,
+        "ShortEnums" : false
+    },
+    "OpenProc" : {
+        "OpenProcFlags" : 255
+    },
+    "SearchSettings" : {
+        "MemImage" : true,
+        "MemPrivate" : true,
+        "MemMapped" : true,
+        "ThreadPriority" : false,
+        "BufferSize" : 12582912,
+        "PauseTarget" : false,
+        "UseEpsilon" : true,
+        "SmartEpsilon" : true,
+        "Epsilon" : 0.0009765625,
+        "Alignment" : 4,
+        "Aligned" : true,
+        "SameAsOriginal" : true,
+        "MatchCase" : false,
+        "WholeWord" : false,
+        "IsHex" : false,
+        "ResolveEscapes" : true,
+        "Wildcards" : false,
+        "LingIgnoreCase" : false,
+        "LinkIgnoreDiacritic" : false,
+        "IgnoreKana" : false,
+        "IgnoreNoSpace" : false,
+        "IgnoreSymbols" : false,
+        "IgnoreWidth" : false,
+        "RegexSingleLine" : false,
+        "RegexMultiLine" : false,
+        "RegexExtended" : true,
+        "RegexFindLongest" : false,
+        "RegexNegateSingleLine" : true,
+        "RegexFlavor" : 10,
+        "ByteSwap" : 0,
+        "From" : "10000h+2",
+        "To" : "7FFFFFFF0000h",
+        "FromHistory" : [
+            "0" : "10000h+2",
+            "1" : "10000h"
+        ],
+        "ToHistory" : [
+            "0" : "7FFFFFFF0000h"
+        ]
+    }
+}

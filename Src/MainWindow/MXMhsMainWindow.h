@@ -85,6 +85,9 @@ namespace mx {
 		// WM_ERASEBKGND.
 		virtual LSW_HANDLED					EraseBkgnd( HDC _hDc );
 
+		// WM_DESTROY.
+		virtual LSW_HANDLED					Destroy();
+
 		// WM_NCDESTROY.
 		virtual LSW_HANDLED					NcDestroy();
 

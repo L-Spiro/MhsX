@@ -58,12 +58,40 @@ namespace mx {
 	// WM_COMMAND from control.
 	CWidget::LSW_HANDLED COptionsPageSearchEx::Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc ) {
 		if ( !m_poOptions ) { return LSW_H_CONTINUE; }
+		switch ( _Id ) {
+			case COptionsLayout::MX_OI_SEARCH_EX_SEARCH_RANGE_SET_BUTTON : {
+				lsw::CComboBox * pcbCombo = static_cast<CComboBox *>(FindChild( COptionsLayout::MX_OI_SEARCH_EX_SEARCH_RANGE_LOW_COMBO ));
+				uintptr_t uiptrTemp = reinterpret_cast<uintptr_t>(mx::CSystem::GetSystemInfo().lpMinimumApplicationAddress);
+				std::string sTemp = CUtilities::ToHex( uiptrTemp, 4 );
+				pcbCombo->SetTextA( sTemp.c_str() );
+
+				pcbCombo = static_cast<CComboBox *>(FindChild( COptionsLayout::MX_OI_SEARCH_EX_SEARCH_RANGE_HIGH_COMBO ));
+				uiptrTemp = reinterpret_cast<uintptr_t>(mx::CSystem::GetSystemInfo().lpMaximumApplicationAddress);
+				sTemp = CUtilities::ToHex( uiptrTemp + 1ULL, 4 );
+				pcbCombo->SetTextA( sTemp.c_str() );
+				break;
+			}
+		}
 		ApplySettings();
 		return LSW_H_CONTINUE;
 	}
 
 	// Verifies the options, returning an error string in case of error.
 	BOOL COptionsPageSearchEx::Verify( std::wstring &_wsError, CWidget * &_pwWidget ) {
+		switch ( CUtilities::VerifyAddressRangeComboBoxes( static_cast<CComboBox *>(FindChild( COptionsLayout::MX_OI_SEARCH_EX_SEARCH_RANGE_LOW_COMBO )),
+			static_cast<CComboBox *>(FindChild( COptionsLayout::MX_OI_SEARCH_EX_SEARCH_RANGE_HIGH_COMBO )) ) ) {
+			case 1 : {
+				_pwWidget = static_cast<CComboBox *>(FindChild( COptionsLayout::MX_OI_SEARCH_EX_SEARCH_RANGE_LOW_COMBO ));
+				_wsError = _DEC_WS_F94C43F0_The_specified_search_range_is_invalid_;
+				return FALSE;
+			}
+			case 2 : {
+				_pwWidget = static_cast<CComboBox *>(FindChild( COptionsLayout::MX_OI_SEARCH_EX_SEARCH_RANGE_HIGH_COMBO ));
+				_wsError = _DEC_WS_F94C43F0_The_specified_search_range_is_invalid_;
+				return FALSE;
+			}
+		}
+
 		return TRUE;
 	}
 
@@ -73,6 +101,10 @@ namespace mx {
 		CComboBox * pcbCombo = static_cast<CComboBox *>(FindChild( COptionsLayout::MX_OI_SEARCH_EX_BYTESWAP_TYPE_COMBO ));
 		if ( !pcbCombo ) { return TRUE; }
 		m_poOptions->bsByteswap = static_cast<CUtilities::MX_BYTESWAP>(pcbCombo->GetCurSelItemData());
+
+		CUtilities::UpdateAddressRangeComboBoxes( static_cast<CComboBox *>(FindChild( COptionsLayout::MX_OI_SEARCH_EX_SEARCH_RANGE_LOW_COMBO )),
+			static_cast<CComboBox *>(FindChild( COptionsLayout::MX_OI_SEARCH_EX_SEARCH_RANGE_HIGH_COMBO )),
+			m_poOptions );
 		return TRUE;
 	}
 

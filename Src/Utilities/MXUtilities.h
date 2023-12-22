@@ -661,6 +661,9 @@ namespace mx {
 		// Escapes standard characters in an ASCII string.
 		static CSecureString			EscapeStandardAscii( const CSecureString &_ssInput, bool _bKeepNewline );
 
+		// Escapes all non-JSON string characters.
+		static CSecureWString			EscapeNonJson( const CSecureWString &_swsInput, bool _bKeepNewline );
+
 		// Creates a string from a string in the form of an array of hex bytes.
 		static CSecureString			FromHexString( const CSecureWString &_swsInput );
 
@@ -1147,6 +1150,12 @@ namespace mx {
 
 		// The From and To address ranges.
 		static void						FillAddressRangeComboBoxes( lsw::CComboBox * _pcbFrom, lsw::CComboBox * _pcbTo, const void * _poOptions );
+
+		// Verifies the address-range combo boxes.  A return of 0 indicates success, a return of 1 indicates the From box had errors, and 2 indicates the To box had errors.
+		static uint8_t					VerifyAddressRangeComboBoxes( lsw::CComboBox * _pcbFrom, lsw::CComboBox * _pcbTo );
+
+		// Updates the options with the given range-address combo boxes.
+		static void						UpdateAddressRangeComboBoxes( lsw::CComboBox * _pcbFrom, lsw::CComboBox * _pcbTo, void * _poOptions );
 		
 
 		// == Members.

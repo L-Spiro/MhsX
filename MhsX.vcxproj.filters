@@ -833,6 +833,9 @@
     <ClInclude Include="Src\Disassembler x86_x64\MXDisassem.h">
       <Filter>Header Files\Disassembler x86_x64</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Utilities\MXStream.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="MhsX.exe.intermediate.manifest">

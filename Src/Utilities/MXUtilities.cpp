@@ -2678,6 +2678,64 @@ namespace mx {
 		return vOutput;
 	}
 
+	// Escapes all non-JSON string characters.
+	CSecureWString CUtilities::EscapeNonJson( const CSecureWString &_swsInput, bool _bKeepNewline ) {
+		size_t sLen;
+		
+		static struct {
+			wchar_t wcSrc;
+			wchar_t wcDst;
+		} const sTable[] = {
+			{ L'"', L'"' },
+			{ L'\\', L'\\' },
+			{ L'\b', L'b' },
+			{ L'\f', L'f' },
+			{ L'\n', L'n' },
+			{ L'\r', L'r' },
+			{ L'\t', L't' },
+			{ L'/', L'/' },
+		};
+		CSecureWString swsOut;
+
+		for ( size_t I = 0; I < _swsInput.size();  ) {
+			uint32_t ui32This = ee::CExpEval::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
+			if ( sLen == 1 ) {
+				bool bFound = false;
+				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
+					if ( _swsInput[I] == sTable[J].wcSrc ) {
+						swsOut.push_back( L'\\' );
+						swsOut.push_back( sTable[J].wcDst );
+						bFound = true;
+						if ( _bKeepNewline && _swsInput[I] == L'\n' ) {
+							swsOut.push_back( L'\r' );
+							swsOut.push_back( L'\n' );
+						}
+						continue;
+					}
+				}
+				if ( bFound ) { ++I; continue; }
+			}
+
+			uint32_t ui32ThisLen;
+			uint32_t ui32Conv = ee::CExpEval::Utf32ToUtf16( ui32This, ui32ThisLen );
+			if ( ui32ThisLen == 1 && ui32Conv >= L' ' && ui32Conv <= L'z' ) {
+				swsOut.push_back( wchar_t( ui32Conv ) );
+				++I;
+				continue;
+			}
+
+			char szBuffer[16];
+			std::sprintf( szBuffer, "\\U%.8X", ui32This );
+			char * pcTmp = szBuffer;
+			while ( (*pcTmp) ) {
+				swsOut.push_back( (*pcTmp++) );
+			}
+
+			++I;
+		}
+		return swsOut;
+	}
+
 	// Creates a string from a string in the form of an array of hex bytes.
 	CSecureString CUtilities::FromHexString( const CSecureWString &_swsInput ) {
 		CSecureString ssTmp;
@@ -4127,6 +4185,52 @@ namespace mx {
 			pcbCombo->SetFocus();
 
 			pcbCombo->AutoSetMinListWidth();
+		}
+	}
+
+	// Verifies the address-range combo boxes.  A return of 0 indicates success, a return of 1 indicates the From box had errors, and 2 indicates the To box had errors.
+	uint8_t CUtilities::VerifyAddressRangeComboBoxes( lsw::CComboBox * _pcbFrom, lsw::CComboBox * _pcbTo ) {
+		BOOL bIsValid;
+		ee::CExpEvalContainer::EE_RESULT rRes;
+		// Starting address.
+		lsw::CComboBox * pcbCombo = _pcbFrom;
+		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, &bIsValid ) ) {
+			return 1;
+		}
+		//_spParmsIfValid.ui64AddressFrom = CUtilities::ExpEvalResultToDataType( rRes, CUtilities::MX_DT_UINT64 ).u.UInt64;
+		// Ending search address.
+		pcbCombo = _pcbTo;
+		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, &bIsValid ) ) {
+			return 2;
+		}
+		//_spParmsIfValid.ui64AddressTo = CUtilities::ExpEvalResultToDataType( rRes, CUtilities::MX_DT_UINT64 ).u.UInt64;
+
+		return 0;
+	}
+
+	// Updates the options with the given range-address combo boxes.
+	void CUtilities::UpdateAddressRangeComboBoxes( lsw::CComboBox * _pcbFrom, lsw::CComboBox * _pcbTo, void * _poOptions ) {
+		MX_OPTIONS & oOptions = (*reinterpret_cast<MX_OPTIONS *>(_poOptions));
+
+		lsw::CComboBox * pcbCombo = _pcbFrom;
+		oOptions.wsFromText = pcbCombo->GetTextW();
+		if ( oOptions.wsFromText.size() ) {
+			auto aFound = std::find( oOptions.vFromHistory.begin(), oOptions.vFromHistory.end(), oOptions.wsFromText );
+			if ( aFound != oOptions.vFromHistory.end() ) {
+				oOptions.vFromHistory.erase( aFound );
+			}
+			oOptions.vFromHistory.insert( oOptions.vFromHistory.begin(), oOptions.wsFromText );
+		}
+		pcbCombo = _pcbTo;
+		if ( pcbCombo ) {
+			oOptions.wsToText = pcbCombo->GetTextW();
+			if ( oOptions.wsToText.size() ) {
+				auto aFound = std::find( oOptions.vToHistory.begin(), oOptions.vToHistory.end(), oOptions.wsToText );
+				if ( aFound != oOptions.vToHistory.end() ) {
+					oOptions.vToHistory.erase( aFound );
+				}
+				oOptions.vToHistory.insert( oOptions.vToHistory.begin(), oOptions.wsToText );
+			}
 		}
 	}
 

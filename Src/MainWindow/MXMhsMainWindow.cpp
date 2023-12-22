@@ -536,6 +536,8 @@ namespace mx {
 
 		ForceSizeUpdate();
 
+		m_pmhMemHack->LoadSettings( CSecureWString(), true );
+
 		ShowFoundAddress();
 		ShowExpEval();
 		ShowConverter();
@@ -632,6 +634,14 @@ namespace mx {
 	// WM_ERASEBKGND.
 	CWidget::LSW_HANDLED CMhsMainWindow::EraseBkgnd( HDC _hDc ) {
 		return LSW_H_HANDLED;
+	}
+
+	// WM_DESTROY.
+	CWidget::LSW_HANDLED CMhsMainWindow::Destroy() {
+		if ( m_pmhMemHack ) {
+			m_pmhMemHack->SaveSettings( CSecureWString(), true );
+		}
+		return LSW_H_CONTINUE;
 	}
 
 	// WM_NCDESTROY.
