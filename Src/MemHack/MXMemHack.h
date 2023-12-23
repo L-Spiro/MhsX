@@ -21,6 +21,7 @@
 	(JSON)->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );																													\
 	lson::CJson::CreateNumberElement( (NAME), static_cast<double>(NUMBER), (*(JSON)->vObjectMembers[(JSON)->vObjectMembers.size()-1]) )
 
+// Creates a true or false element.
 #define MX_JSON_BOOL( NAME, VAL, JSON )																																									\
 	(JSON)->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );																													\
 	if ( VAL ) {																																														\
@@ -30,6 +31,16 @@
 		lson::CJson::CreateFalseElement( (NAME), (*(JSON)->vObjectMembers[(JSON)->vObjectMembers.size()-1]) );																							\
 	}
 
+// Gets a numbered JSON element.
+#define MX_JSON_GET_NUMBER( NAME, STORETO, TYPE, LOCAL, PARENT )																																		\
+	LOCAL = _pjcContainer->GetMemberByName( (*PARENT), (NAME) );																																		\
+	if ( !LOCAL || LOCAL->vtType != lson::CJsonContainer::LSON_VT_DECIMAL ) { return false; }																											\
+	STORETO = static_cast<TYPE>(LOCAL->u.dDecimal)
+// Gets a boolean JSON element.
+#define MX_JSON_GET_BOOL( NAME, STORETO, LOCAL, PARENT )																																				\
+	LOCAL = _pjcContainer->GetMemberByName( (*PARENT), (NAME) );																																		\
+	if ( !LOCAL || (LOCAL->vtType != lson::CJsonContainer::LSON_VT_TRUE && LOCAL->vtType != lson::CJsonContainer::LSON_VT_FALSE) ) { return false; }													\
+	STORETO = LOCAL->vtType == lson::CJsonContainer::LSON_VT_TRUE ? TRUE : FALSE
 
 namespace mx {
 
@@ -132,11 +143,20 @@ namespace mx {
 		// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
 		virtual bool						SaveGeneralSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary, const MX_OPTIONS &_oOptions ) const;
 
+		// Loads general settings from either a JSON object or a byte buffer.
+		virtual bool						LoadGeneralSettings( const lson::CJsonContainer::LSON_JSON_VALUE * _pjJson, lson::CJsonContainer * _pjcContainer, CStream * _psBinary, MX_OPTIONS &_oOptions, uint32_t _ui32Version );
+
 		// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
 		virtual bool						SaveOpenProcSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary, const MX_OPTIONS &_oOptions ) const;
 
+		// Loads open-process settings from either a JSON object or a byte buffer.
+		virtual bool						LoadOpenProcSettings( const lson::CJsonContainer::LSON_JSON_VALUE * _pjJson, lson::CJsonContainer * _pjcContainer, CStream * _psBinary, MX_OPTIONS &_oOptions, uint32_t _ui32Version );
+
 		// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
 		virtual bool						SaveSearchSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary, const MX_OPTIONS &_oOptions ) const;
+
+		// Loads search settings from either a JSON object or a byte buffer.
+		virtual bool						LoadSearchSettings( const lson::CJsonContainer::LSON_JSON_VALUE * _pjJson, lson::CJsonContainer * _pjcContainer, CStream * _psBinary, MX_OPTIONS &_oOptions, uint32_t _ui32Version );
 	};
 
 }	// namespace mx

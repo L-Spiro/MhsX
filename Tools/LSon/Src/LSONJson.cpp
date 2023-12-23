@@ -151,30 +151,31 @@ namespace lson {
 	 * \param _eElement The element to write.
 	 * \param _vBuffer The buffer to which to append the element.
 	 * \param _iIndent The indent level.
+	 * \param _bValueOnly Set to true inside arrays.
 	 * \return Returns true if the element was appended to the end of the given data buffer.
 	 **/
-	bool CJson::WriteElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent ) {
+	bool CJson::WriteElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent, bool _bValueOnly ) {
 		switch ( _eElement.ntType ) {
 			case LSON_OBJECT : {
-				return WriteObjectElement( _eElement, _vBuffer, _iIndent );
+				return WriteObjectElement( _eElement, _vBuffer, _iIndent, _bValueOnly );
 			}
 			case LSON_ARRAY : {
-				return WriteArrayElement( _eElement, _vBuffer, _iIndent );
+				return WriteArrayElement( _eElement, _vBuffer, _iIndent, _bValueOnly );
 			}
 			case LSON_STRING : {
-				return WriteStringElement( _eElement, _vBuffer, _iIndent );
+				return WriteStringElement( _eElement, _vBuffer, _iIndent, _bValueOnly );
 			}
 			case LSON_NUMBER : {
-				return WriteNumberElement( _eElement, _vBuffer, _iIndent );
+				return WriteNumberElement( _eElement, _vBuffer, _iIndent, _bValueOnly );
 			}
 			case LSON_TRUE : {
-				return WriteTrueElement( _eElement, _vBuffer, _iIndent );
+				return WriteTrueElement( _eElement, _vBuffer, _iIndent, _bValueOnly );
 			}
 			case LSON_FALSE : {
-				return WriteFalseElement( _eElement, _vBuffer, _iIndent );
+				return WriteFalseElement( _eElement, _vBuffer, _iIndent, _bValueOnly );
 			}
 			case LSON_NULL : {
-				return WriteNullElement( _eElement, _vBuffer, _iIndent );
+				return WriteNullElement( _eElement, _vBuffer, _iIndent, _bValueOnly );
 			}
 			default : { return false; }
 		}
@@ -186,16 +187,19 @@ namespace lson {
 	 * \param _eElement The element to write.
 	 * \param _vBuffer The buffer to which to append the element.
 	 * \param _iIndent The indent level.
+	 * \param _bValueOnly Set to true inside arrays.
 	 * \return Returns true if the element was appended to the end of the given data buffer.
 	 **/
-	bool CJson::WriteObjectElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent ) {
+	bool CJson::WriteObjectElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent, bool _bValueOnly ) {
 		try {
 			if ( !WriteIndent( _vBuffer, _iIndent ) ) { return false; }
-			if ( _eElement.sName.size() ) {
-				if ( !WriteString( _eElement.sName, _vBuffer ) ) { return false; }
-				_vBuffer.push_back( 0x20 );
-				_vBuffer.push_back( ':' );
-				_vBuffer.push_back( 0x20 );
+			if ( !_bValueOnly ) {
+				if ( _eElement.sName.size() ) {
+					if ( !WriteString( _eElement.sName, _vBuffer ) ) { return false; }
+					_vBuffer.push_back( 0x20 );
+					_vBuffer.push_back( ':' );
+					_vBuffer.push_back( 0x20 );
+				}
 			}
 
 			_vBuffer.push_back( '{' );
@@ -229,15 +233,18 @@ namespace lson {
 	 * \param _eElement The element to write.
 	 * \param _vBuffer The buffer to which to append the element.
 	 * \param _iIndent The indent level.
+	 * \param _bValueOnly Set to true inside arrays.
 	 * \return Returns true if the element was appended to the end of the given data buffer.
 	 **/
-	bool CJson::WriteArrayElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent ) {
+	bool CJson::WriteArrayElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent, bool _bValueOnly ) {
 		try {
 			if ( !WriteIndent( _vBuffer, _iIndent ) ) { return false; }
-			if ( !WriteString( _eElement.sName, _vBuffer ) ) { return false; }
-			_vBuffer.push_back( 0x20 );
-			_vBuffer.push_back( ':' );
-			_vBuffer.push_back( 0x20 );
+			if ( !_bValueOnly ) {
+				if ( !WriteString( _eElement.sName, _vBuffer ) ) { return false; }
+				_vBuffer.push_back( 0x20 );
+				_vBuffer.push_back( ':' );
+				_vBuffer.push_back( 0x20 );
+			}
 
 			_vBuffer.push_back( '[' );
 			_vBuffer.push_back( '\r' );
@@ -249,7 +256,7 @@ namespace lson {
 					_vBuffer.push_back( '\r' );
 					_vBuffer.push_back( '\n' );
 				}
-				if ( !WriteElement( (*_eElement.vObjectMembers[I]), _vBuffer, _iIndent + 1 ) ) { return false; }
+				if ( !WriteElement( (*_eElement.vObjectMembers[I]), _vBuffer, _iIndent + 1, true ) ) { return false; }
 			}
 			/*if ( _eElement.vObjectMembers.size() == 0 ) {
 				if ( !WriteIndent( _vBuffer, _iIndent ) ) { return false; }
@@ -270,15 +277,18 @@ namespace lson {
 	 * \param _eElement The element to write.
 	 * \param _vBuffer The buffer to which to append the element.
 	 * \param _iIndent The indent level.
+	 * \param _bValueOnly Set to true inside arrays.
 	 * \return Returns true if the element was appended to the end of the given data buffer.
 	 **/
-	bool CJson::WriteStringElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent ) {
+	bool CJson::WriteStringElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent, bool _bValueOnly ) {
 		try {
 			if ( !WriteIndent( _vBuffer, _iIndent ) ) { return false; }
-			if ( !WriteString( _eElement.sName, _vBuffer ) ) { return false; }
-			_vBuffer.push_back( 0x20 );
-			_vBuffer.push_back( ':' );
-			_vBuffer.push_back( 0x20 );
+			if ( !_bValueOnly ) {
+				if ( !WriteString( _eElement.sName, _vBuffer ) ) { return false; }
+				_vBuffer.push_back( 0x20 );
+				_vBuffer.push_back( ':' );
+				_vBuffer.push_back( 0x20 );
+			}
 
 			if ( !WriteString( _eElement.sString, _vBuffer ) ) { return false; }
 
@@ -293,15 +303,18 @@ namespace lson {
 	 * \param _eElement The element to write.
 	 * \param _vBuffer The buffer to which to append the element.
 	 * \param _iIndent The indent level.
+	 * \param _bValueOnly Set to true inside arrays.
 	 * \return Returns true if the element was appended to the end of the given data buffer.
 	 **/
-	bool CJson::WriteNumberElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent ) {
+	bool CJson::WriteNumberElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent, bool _bValueOnly ) {
 		try {
 			if ( !WriteIndent( _vBuffer, _iIndent ) ) { return false; }
-			if ( !WriteString( _eElement.sName, _vBuffer ) ) { return false; }
-			_vBuffer.push_back( 0x20 );
-			_vBuffer.push_back( ':' );
-			_vBuffer.push_back( 0x20 );
+			if ( !_bValueOnly ) {
+				if ( !WriteString( _eElement.sName, _vBuffer ) ) { return false; }
+				_vBuffer.push_back( 0x20 );
+				_vBuffer.push_back( ':' );
+				_vBuffer.push_back( 0x20 );
+			}
 
 			std::string sTmp = std::format( "{:.2000}", _eElement.dNumber );
 			for ( size_t I = 0; I < sTmp.size(); ++I ) {
@@ -319,15 +332,18 @@ namespace lson {
 	 * \param _eElement The element to write.
 	 * \param _vBuffer The buffer to which to append the element.
 	 * \param _iIndent The indent level.
+	 * \param _bValueOnly Set to true inside arrays.
 	 * \return Returns true if the element was appended to the end of the given data buffer.
 	 **/
-	bool CJson::WriteTrueElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent ) {
+	bool CJson::WriteTrueElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent, bool _bValueOnly ) {
 		try {
 			if ( !WriteIndent( _vBuffer, _iIndent ) ) { return false; }
-			if ( !WriteString( _eElement.sName, _vBuffer ) ) { return false; }
-			_vBuffer.push_back( 0x20 );
-			_vBuffer.push_back( ':' );
-			_vBuffer.push_back( 0x20 );
+			if ( !_bValueOnly ) {
+				if ( !WriteString( _eElement.sName, _vBuffer ) ) { return false; }
+				_vBuffer.push_back( 0x20 );
+				_vBuffer.push_back( ':' );
+				_vBuffer.push_back( 0x20 );
+			}
 
 			_vBuffer.push_back( 't' );
 			_vBuffer.push_back( 'r' );
@@ -345,15 +361,18 @@ namespace lson {
 	 * \param _eElement The element to write.
 	 * \param _vBuffer The buffer to which to append the element.
 	 * \param _iIndent The indent level.
+	 * \param _bValueOnly Set to true inside arrays.
 	 * \return Returns true if the element was appended to the end of the given data buffer.
 	 **/
-	bool CJson::WriteFalseElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent ) {
+	bool CJson::WriteFalseElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent, bool _bValueOnly ) {
 		try {
 			if ( !WriteIndent( _vBuffer, _iIndent ) ) { return false; }
-			if ( !WriteString( _eElement.sName, _vBuffer ) ) { return false; }
-			_vBuffer.push_back( 0x20 );
-			_vBuffer.push_back( ':' );
-			_vBuffer.push_back( 0x20 );
+			if ( !_bValueOnly ) {
+				if ( !WriteString( _eElement.sName, _vBuffer ) ) { return false; }
+				_vBuffer.push_back( 0x20 );
+				_vBuffer.push_back( ':' );
+				_vBuffer.push_back( 0x20 );
+			}
 
 			_vBuffer.push_back( 'f' );
 			_vBuffer.push_back( 'a' );
@@ -372,15 +391,18 @@ namespace lson {
 	 * \param _eElement The element to write.
 	 * \param _vBuffer The buffer to which to append the element.
 	 * \param _iIndent The indent level.
+	 * \param _bValueOnly Set to true inside arrays.
 	 * \return Returns true if the element was appended to the end of the given data buffer.
 	 **/
-	bool CJson::WriteNullElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent ) {
+	bool CJson::WriteNullElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent, bool _bValueOnly ) {
 		try {
 			if ( !WriteIndent( _vBuffer, _iIndent ) ) { return false; }
-			if ( !WriteString( _eElement.sName, _vBuffer ) ) { return false; }
-			_vBuffer.push_back( 0x20 );
-			_vBuffer.push_back( ':' );
-			_vBuffer.push_back( 0x20 );
+			if ( !_bValueOnly ) {
+				if ( !WriteString( _eElement.sName, _vBuffer ) ) { return false; }
+				_vBuffer.push_back( 0x20 );
+				_vBuffer.push_back( ':' );
+				_vBuffer.push_back( 0x20 );
+			}
 
 			_vBuffer.push_back( 'n' );
 			_vBuffer.push_back( 'u' );

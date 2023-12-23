@@ -131,9 +131,10 @@ namespace lson {
 		 * \param _eElement The element to write.
 		 * \param _vBuffer The buffer to which to append the element.
 		 * \param _iIndent The indent level.
+		 * \param _bValueOnly Set to true inside arrays.
 		 * \return Returns true if the element was appended to the end of the given data buffer.
 		 **/
-		static bool										WriteElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+		static bool										WriteElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent, bool _bValueOnly = false );
 
 		/**
 		 * Writes an object JSON element to a byte buffer.
@@ -141,9 +142,10 @@ namespace lson {
 		 * \param _eElement The element to write.
 		 * \param _vBuffer The buffer to which to append the element.
 		 * \param _iIndent The indent level.
+		 * \param _bValueOnly Set to true inside arrays.
 		 * \return Returns true if the element was appended to the end of the given data buffer.
 		 **/
-		static bool										WriteObjectElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+		static bool										WriteObjectElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent, bool _bValueOnly );
 
 		/**
 		 * Writes an array JSON element to a byte buffer.
@@ -151,9 +153,10 @@ namespace lson {
 		 * \param _eElement The element to write.
 		 * \param _vBuffer The buffer to which to append the element.
 		 * \param _iIndent The indent level.
+		 * \param _bValueOnly Set to true inside arrays.
 		 * \return Returns true if the element was appended to the end of the given data buffer.
 		 **/
-		static bool										WriteArrayElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+		static bool										WriteArrayElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent, bool _bValueOnly );
 
 		/**
 		 * Writes a string JSON element to a byte buffer.
@@ -161,9 +164,10 @@ namespace lson {
 		 * \param _eElement The element to write.
 		 * \param _vBuffer The buffer to which to append the element.
 		 * \param _iIndent The indent level.
+		 * \param _bValueOnly Set to true inside arrays.
 		 * \return Returns true if the element was appended to the end of the given data buffer.
 		 **/
-		static bool										WriteStringElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+		static bool										WriteStringElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent, bool _bValueOnly );
 
 		/**
 		 * Writes a number JSON element to a byte buffer.
@@ -171,9 +175,10 @@ namespace lson {
 		 * \param _eElement The element to write.
 		 * \param _vBuffer The buffer to which to append the element.
 		 * \param _iIndent The indent level.
+		 * \param _bValueOnly Set to true inside arrays.
 		 * \return Returns true if the element was appended to the end of the given data buffer.
 		 **/
-		static bool										WriteNumberElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+		static bool										WriteNumberElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent, bool _bValueOnly );
 
 		/**
 		 * Writes a true JSON element to a byte buffer.
@@ -181,9 +186,10 @@ namespace lson {
 		 * \param _eElement The element to write.
 		 * \param _vBuffer The buffer to which to append the element.
 		 * \param _iIndent The indent level.
+		 * \param _bValueOnly Set to true inside arrays.
 		 * \return Returns true if the element was appended to the end of the given data buffer.
 		 **/
-		static bool										WriteTrueElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+		static bool										WriteTrueElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent, bool _bValueOnly );
 
 		/**
 		 * Writes a false JSON element to a byte buffer.
@@ -191,9 +197,10 @@ namespace lson {
 		 * \param _eElement The element to write.
 		 * \param _vBuffer The buffer to which to append the element.
 		 * \param _iIndent The indent level.
+		 * \param _bValueOnly Set to true inside arrays.
 		 * \return Returns true if the element was appended to the end of the given data buffer.
 		 **/
-		static bool										WriteFalseElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+		static bool										WriteFalseElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent, bool _bValueOnly );
 
 		/**
 		 * Writes a null JSON element to a byte buffer.
@@ -201,9 +208,10 @@ namespace lson {
 		 * \param _eElement The element to write.
 		 * \param _vBuffer The buffer to which to append the element.
 		 * \param _iIndent The indent level.
+		 * \param _bValueOnly Set to true inside arrays.
 		 * \return Returns true if the element was appended to the end of the given data buffer.
 		 **/
-		static bool										WriteNullElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent );
+		static bool										WriteNullElement( const LSON_ELEMENT &_eElement, std::vector<uint8_t> &_vBuffer, int32_t _iIndent, bool _bValueOnly );
 
 
 	protected :

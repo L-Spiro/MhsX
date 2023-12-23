@@ -6,11 +6,11 @@
         "LockedRefreshRate" : 1000,
         "ExpressionRefreshRate" : 100,
         "DataAsCodeName" : true,
-        "DataSizes" : true,
-        "DataRanges" : true,
+        "DataSizes" : false,
+        "DataRanges" : false,
         "UseXx" : false,
         "UseOo" : false,
-        "ShortEnums" : false
+        "ShortEnums" : true
     },
     "OpenProc" : {
         "OpenProcFlags" : 255
@@ -19,9 +19,9 @@
         "MemImage" : true,
         "MemPrivate" : true,
         "MemMapped" : true,
-        "ThreadPriority" : false,
-        "BufferSize" : 12582912,
-        "PauseTarget" : false,
+        "ThreadPriority" : true,
+        "BufferSize" : 4194304,
+        "PauseTarget" : true,
         "UseEpsilon" : true,
         "SmartEpsilon" : true,
         "Epsilon" : 0.0009765625,
@@ -46,14 +46,15 @@
         "RegexNegateSingleLine" : true,
         "RegexFlavor" : 10,
         "ByteSwap" : 0,
-        "From" : "10000h+2",
-        "To" : "7FFFFFFF0000h",
+        "From" : "10000h",
+        "To" : "0x7FFFFFFF0000",
         "FromHistory" : [
-            "0" : "10000h+2",
-            "1" : "10000h"
+            "10000h",
+            "0x10000"
         ],
         "ToHistory" : [
-            "0" : "7FFFFFFF0000h"
+            "0x7FFFFFFF0000",
+            "7FFFFFFF0000h"
         ]
     }
 }

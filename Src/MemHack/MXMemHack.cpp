@@ -188,13 +188,13 @@ namespace mx {
 			vBuffer.push_back( 0 );
 
 			if ( !jSon.SetJson( reinterpret_cast<const char *>(vBuffer.data()) ) ) { return false; }
-			return LoadSettings( &jSon, nullptr, m_oOptions );
+			if ( !LoadSettings( &jSon, nullptr, m_oOptions ) ) { return false; }
 		}
 		else {
 			CStream sStream( vBuffer );
-			return LoadSettings( nullptr, &sStream, m_oOptions );
+			if ( !LoadSettings( nullptr, &sStream, m_oOptions ) ) { return false; }
 		}
-
+		SetOptions( m_oOptions );
 
 		return true;
 	}
@@ -244,10 +244,23 @@ namespace mx {
 			if ( !pjvVal ) { return false; }
 			if ( pjvVal->vtType != lson::CJsonContainer::LSON_VT_DECIMAL ) { return false; }
 			uint32_t ui32Version = static_cast<uint32_t>(pjvVal->u.dDecimal);
+
+			pjvVal = _pjJson->GetContainer()->GetMemberByName( jvRoot, _DEC_S_01940FD6_General );
+			if ( !pjvVal || !LoadGeneralSettings( pjvVal, _pjJson->GetContainer(), nullptr, _oOptions, ui32Version ) ) { return false; }
+
+			pjvVal = _pjJson->GetContainer()->GetMemberByName( jvRoot, _DEC_S_AD6A7CD0_OpenProc );
+			if ( !pjvVal || !LoadOpenProcSettings( pjvVal, _pjJson->GetContainer(), nullptr, _oOptions, ui32Version ) ) { return false; }
+
+			pjvVal = _pjJson->GetContainer()->GetMemberByName( jvRoot, _DEC_S_28CEB4AC_SearchSettings );
+			if ( !pjvVal || !LoadSearchSettings( pjvVal, _pjJson->GetContainer(), nullptr, _oOptions, ui32Version ) ) { return false; }
 		}
 		else {
 			uint32_t ui32Version;
 			if ( !_psBinary->ReadUi32( ui32Version ) ) { return false; }
+
+			if ( !LoadGeneralSettings( nullptr, nullptr, _psBinary, _oOptions, ui32Version ) ) { return false; }
+			if ( !LoadOpenProcSettings( nullptr, nullptr, _psBinary, _oOptions, ui32Version ) ) { return false; }
+			if ( !LoadSearchSettings( nullptr, nullptr, _psBinary, _oOptions, ui32Version ) ) { return false; }
 		}
 		return true;
 	}
@@ -559,17 +572,57 @@ namespace mx {
 			MX_JSON_BOOL( _DEC_S_B412829D_ShortEnums, _oOptions.bShortEnums, _peJson );
 		}
 		else {
-			_psBinary->WriteUi32( _oOptions.dwFoundAddressRefresh );
-			_psBinary->WriteUi32( _oOptions.dwMainRefresh );
-			_psBinary->WriteUi32( _oOptions.dwLockedRefresh );
-			_psBinary->WriteUi32( _oOptions.dwExpressionRefresh );
+			if ( !_psBinary->Write( _oOptions.dwFoundAddressRefresh ) ) { return false; }
+			if ( !_psBinary->Write( _oOptions.dwMainRefresh ) ) { return false; }
+			if ( !_psBinary->Write( _oOptions.dwLockedRefresh ) ) { return false; }
+			if ( !_psBinary->Write( _oOptions.dwExpressionRefresh ) ) { return false; }
 
-			_psBinary->WriteUi8( _oOptions.bDataTypesAsCodeNames ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bDataTypeSizes ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bDataTypeRanges ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bUse0x ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bUse0o ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bShortEnums ? TRUE : FALSE );
+			if ( !_psBinary->WriteUi8( _oOptions.bDataTypesAsCodeNames ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bDataTypeSizes ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bDataTypeRanges ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bUse0x ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bUse0o ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bShortEnums ? TRUE : FALSE ) ) { return false; }
+		}
+		return true;
+	}
+
+	// Loads general settings from either a JSON object or a byte buffer.
+	bool CMemHack::LoadGeneralSettings( const lson::CJsonContainer::LSON_JSON_VALUE * _pjJson, lson::CJsonContainer * _pjcContainer, CStream * _psBinary, MX_OPTIONS &_oOptions, uint32_t /*_ui32Version*/ ) {
+		if ( nullptr == _pjJson && _psBinary == nullptr ) { return false; }
+		if ( _pjJson ) {
+			const lson::CJsonContainer::LSON_JSON_VALUE * pjvVal;
+			MX_JSON_GET_NUMBER( _DEC_S_A28FE3CD_FoundAddressRate, _oOptions.dwFoundAddressRefresh, DWORD, pjvVal, _pjJson );
+			MX_JSON_GET_NUMBER( _DEC_S_CD01A1C1_MainRefreshRate, _oOptions.dwMainRefresh, DWORD, pjvVal, _pjJson );
+			MX_JSON_GET_NUMBER( _DEC_S_6BC41969_LockedRefreshRate, _oOptions.dwLockedRefresh, DWORD, pjvVal, _pjJson );
+			MX_JSON_GET_NUMBER( _DEC_S_07F2BA28_ExpressionRefreshRate, _oOptions.dwExpressionRefresh, DWORD, pjvVal, _pjJson );
+
+			MX_JSON_GET_BOOL( _DEC_S_9385205C_DataAsCodeName, _oOptions.bDataTypesAsCodeNames, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_13C49137_DataSizes, _oOptions.bDataTypeSizes, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_98EB9780_DataRanges, _oOptions.bDataTypeRanges, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_2DFB9F4D_UseXx, _oOptions.bUse0x, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_ABAB9E1C_UseOo, _oOptions.bUse0o, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_B412829D_ShortEnums, _oOptions.bShortEnums, pjvVal, _pjJson );
+		}
+		else {
+			if ( !_psBinary->Read( _oOptions.dwFoundAddressRefresh ) ) { return false; }
+			if ( !_psBinary->Read( _oOptions.dwMainRefresh ) ) { return false; }
+			if ( !_psBinary->Read( _oOptions.dwLockedRefresh ) ) { return false; }
+			if ( !_psBinary->Read( _oOptions.dwExpressionRefresh ) ) { return false; }
+			uint8_t ui8Tmp;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bDataTypesAsCodeNames = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bDataTypeSizes = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bDataTypeRanges = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bUse0x = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bUse0o = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bShortEnums = ui8Tmp ? TRUE : FALSE;
+
 		}
 		return true;
 	}
@@ -580,7 +633,20 @@ namespace mx {
 			MX_JSON_NUMBER( _DEC_S_3C318291_OpenProcFlags, _oOptions.dwOpenProc, _peJson );
 		}
 		else {
-			_psBinary->WriteUi32( _oOptions.dwOpenProc );
+			if ( !_psBinary->Write( _oOptions.dwOpenProc ) ) { return false; }
+		}
+		return true;
+	}
+
+	// Loads open-process settings from either a JSON object or a byte buffer.
+	bool CMemHack::LoadOpenProcSettings( const lson::CJsonContainer::LSON_JSON_VALUE * _pjJson, lson::CJsonContainer * _pjcContainer, CStream * _psBinary, MX_OPTIONS &_oOptions, uint32_t _ui32Version ) {
+		if ( nullptr == _pjJson && _psBinary == nullptr ) { return false; }
+		if ( _pjJson ) {
+			const lson::CJsonContainer::LSON_JSON_VALUE * pjvVal;
+			MX_JSON_GET_NUMBER( _DEC_S_3C318291_OpenProcFlags, _oOptions.dwOpenProc, DWORD, pjvVal, _pjJson );
+		}
+		else {
+			if ( !_psBinary->Read( _oOptions.dwOpenProc ) ) { return false; }
 		}
 		return true;
 	}
@@ -661,53 +727,213 @@ namespace mx {
 
 		}
 		else {
-			_psBinary->WriteUi8( _oOptions.bMemImage ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bMemPrivate ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bMemMapped ? TRUE : FALSE );
+			if ( !_psBinary->WriteUi8( _oOptions.bMemImage ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bMemPrivate ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bMemMapped ? TRUE : FALSE ) ) { return false; }
 
-			_psBinary->WriteI32( _oOptions.iThreadPriority );
-			_psBinary->WriteUi64( _oOptions.ui64BufferSize );
+			if ( !_psBinary->WriteI32( _oOptions.iThreadPriority ) ) { return false; }
+			if ( !_psBinary->WriteUi64( _oOptions.ui64BufferSize ) ) { return false; }
 
-			_psBinary->WriteUi8( _oOptions.bPauseTarget ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bUseEpsilon ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bSmartEpsilon ? TRUE : FALSE );
-			_psBinary->WriteF64( _oOptions.dEpsilon );
-			_psBinary->WriteUi32( _oOptions.ui32Alignment );
-			_psBinary->WriteUi8( _oOptions.bAligned ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bSameAsOriginal ? TRUE : FALSE );
+			if ( !_psBinary->WriteUi8( _oOptions.bPauseTarget ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bUseEpsilon ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bSmartEpsilon ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteF64( _oOptions.dEpsilon ) ) { return false; }
+			if ( !_psBinary->WriteUi32( _oOptions.ui32Alignment ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bAligned ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bSameAsOriginal ? TRUE : FALSE ) ) { return false; }
 
-			_psBinary->WriteUi8( _oOptions.bMatchCase ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bWholeWord ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bIsHex ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bResolveEscapes ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bWildcard ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bLingIgnoreCase ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bLingIgnoreDiacritic ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bIgnoreKana ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bIgnoreNoSpace ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bIgnoreSymbols ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bIgnoreWidth ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bRegexSingleLine ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bRegexMultiLine ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bRegexExtended ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bRegexFindLongest ? TRUE : FALSE );
-			_psBinary->WriteUi8( _oOptions.bRegexNegateSingleLine ? TRUE : FALSE );
+			if ( !_psBinary->WriteUi8( _oOptions.bMatchCase ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bWholeWord ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bIsHex ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bResolveEscapes ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bWildcard ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bLingIgnoreCase ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bLingIgnoreDiacritic ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bIgnoreKana ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bIgnoreNoSpace ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bIgnoreSymbols ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bIgnoreWidth ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bRegexSingleLine ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bRegexMultiLine ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bRegexExtended ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bRegexFindLongest ? TRUE : FALSE ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bRegexNegateSingleLine ? TRUE : FALSE ) ) { return false; }
 
-			_psBinary->WriteUi32( _oOptions.uiRegexFlavor );
-			_psBinary->WriteUi32( _oOptions.bsByteswap );
+			if ( !_psBinary->WriteUi32( _oOptions.uiRegexFlavor ) ) { return false; }
+			if ( !_psBinary->WriteUi32( _oOptions.bsByteswap ) ) { return false; }
 
-			_psBinary->WriteStringU16( _oOptions.wsFromText );
-			_psBinary->WriteStringU16( _oOptions.wsToText );
+			if ( !_psBinary->WriteStringU16( _oOptions.wsFromText ) ) { return false; }
+			if ( !_psBinary->WriteStringU16( _oOptions.wsToText ) ) { return false; }
 
-			_psBinary->WriteUi32( _oOptions.vFromHistory.size() );
+			if ( !_psBinary->WriteUi32( _oOptions.vFromHistory.size() ) ) { return false; }
 			for ( size_t I = 0; I < _oOptions.vFromHistory.size(); ++I ) {
-				_psBinary->WriteStringU16( _oOptions.vFromHistory[I] );
+				if ( !_psBinary->WriteStringU16( _oOptions.vFromHistory[I] ) ) { return false; }
 			}
-			_psBinary->WriteUi32( _oOptions.vToHistory.size() );
+			if ( !_psBinary->WriteUi32( _oOptions.vToHistory.size() ) ) { return false; }
 			for ( size_t I = 0; I < _oOptions.vToHistory.size(); ++I ) {
-				_psBinary->WriteStringU16( _oOptions.vToHistory[I] );
+				if ( !_psBinary->WriteStringU16( _oOptions.vToHistory[I] ) ) { return false; }
 			}
 
+		}
+		return true;
+	}
+
+	// Loads search settings from either a JSON object or a byte buffer.
+	bool CMemHack::LoadSearchSettings( const lson::CJsonContainer::LSON_JSON_VALUE * _pjJson, lson::CJsonContainer * _pjcContainer, CStream * _psBinary, MX_OPTIONS &_oOptions, uint32_t _ui32Version ) {
+		if ( nullptr == _pjJson && _psBinary == nullptr ) { return false; }
+		if ( _pjJson ) {
+			const lson::CJsonContainer::LSON_JSON_VALUE * pjvVal;
+			MX_JSON_GET_BOOL( _DEC_S_7880ABD5_MemImage, _oOptions.bMemImage, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_5503B2D4_MemPrivate, _oOptions.bMemPrivate, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_C1B1C624_MemMapped, _oOptions.bMemMapped, pjvVal, _pjJson );
+
+			MX_JSON_GET_BOOL( _DEC_S_9346CF9D_ThreadPriority, _oOptions.iThreadPriority, pjvVal, _pjJson );
+			MX_JSON_GET_NUMBER( _DEC_S_908E909C_BufferSize, _oOptions.ui64BufferSize, UINT64, pjvVal, _pjJson );
+
+			MX_JSON_GET_BOOL( _DEC_S_9C78FB44_PauseTarget, _oOptions.bPauseTarget, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_017D084F_UseEpsilon, _oOptions.bUseEpsilon, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_8FF5F221_SmartEpsilon, _oOptions.bSmartEpsilon, pjvVal, _pjJson );
+			MX_JSON_GET_NUMBER( _DEC_S_7183A384_Epsilon, _oOptions.dEpsilon, DOUBLE, pjvVal, _pjJson );
+			MX_JSON_GET_NUMBER( _DEC_S_AE3F9CFF_Alignment, _oOptions.ui32Alignment, UINT32, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_22E9689D_Aligned, _oOptions.bAligned, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_C5BA9DF2_SameAsOriginal, _oOptions.bSameAsOriginal, pjvVal, _pjJson );
+
+			MX_JSON_GET_BOOL( _DEC_S_13EE0CBD_MatchCase, _oOptions.bMatchCase, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_E2A98D3C_WholeWord, _oOptions.bWholeWord, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_D29678C3_IsHex, _oOptions.bIsHex, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_0769B140_ResolveEscapes, _oOptions.bResolveEscapes, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_220D47BC_Wildcards, _oOptions.bWildcard, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_87690053_LingIgnoreCase, _oOptions.bLingIgnoreCase, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_4AAB5CCD_LinkIgnoreDiacritic, _oOptions.bLingIgnoreDiacritic, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_D24B1BCF_IgnoreKana, _oOptions.bIgnoreKana, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_CEB15581_IgnoreNoSpace, _oOptions.bIgnoreNoSpace, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_80E4546E_IgnoreSymbols, _oOptions.bIgnoreSymbols, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_C0E4A373_IgnoreWidth, _oOptions.bIgnoreWidth, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_2937FA36_RegexSingleLine, _oOptions.bRegexSingleLine, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_4F5DA621_RegexMultiLine, _oOptions.bRegexMultiLine, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_6AE0CEA2_RegexExtended, _oOptions.bRegexExtended, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_3EE2DC3A_RegexFindLongest, _oOptions.bRegexFindLongest, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_AA86E6A0_RegexNegateSingleLine, _oOptions.bRegexNegateSingleLine, pjvVal, _pjJson );
+			
+			MX_JSON_GET_NUMBER( _DEC_S_095E5602_RegexFlavor, _oOptions.uiRegexFlavor, UINT32, pjvVal, _pjJson );
+			MX_JSON_GET_NUMBER( _DEC_S_12EECDA8_ByteSwap, _oOptions.bsByteswap, UINT32, pjvVal, _pjJson );
+
+			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_19280E4E_From );
+			if ( !pjvVal || pjvVal->vtType != lson::CJsonContainer::LSON_VT_STRING ) { return false; }
+			{
+				CSecureString ssTmp;
+				CUtilities::ResolveAllEscapes( _pjcContainer->GetString( pjvVal->u.stString ), ssTmp, true );
+				_oOptions.wsFromText = ee::CExpEval::ToUtf16( ssTmp );
+			}
+
+			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_4203F666_To );
+			if ( !pjvVal || pjvVal->vtType != lson::CJsonContainer::LSON_VT_STRING ) { return false; }
+			{
+				CSecureString ssTmp;
+				CUtilities::ResolveAllEscapes( _pjcContainer->GetString( pjvVal->u.stString ), ssTmp, true );
+				_oOptions.wsToText = ee::CExpEval::ToUtf16( ssTmp );
+			}
+
+			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_1A995A53_FromHistory );
+			if ( !pjvVal || pjvVal->vtType != lson::CJsonContainer::LSON_VT_ARRAY ) { return false; }
+			
+			for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+				const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+				if ( jvArrayVal.vtType != lson::CJsonContainer::LSON_VT_STRING ) { return false; }
+				CSecureString ssTmp;
+				CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+				_oOptions.vFromHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+			}
+
+			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_B517206A_ToHistory );
+			if ( !pjvVal || pjvVal->vtType != lson::CJsonContainer::LSON_VT_ARRAY ) { return false; }
+			
+			for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+				const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+				if ( jvArrayVal.vtType != lson::CJsonContainer::LSON_VT_STRING ) { return false; }
+				CSecureString ssTmp;
+				CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+				_oOptions.vToHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+			}
+
+		}
+		else {
+			uint8_t ui8Tmp;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bMemImage = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bMemPrivate = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bMemMapped = ui8Tmp ? TRUE : FALSE;
+
+			if ( !_psBinary->ReadI32( _oOptions.iThreadPriority ) ) { return false; }
+			if ( !_psBinary->ReadUi64( _oOptions.ui64BufferSize ) ) { return false; }
+
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bPauseTarget = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bUseEpsilon = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bSmartEpsilon = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadF64( _oOptions.dEpsilon ) ) { return false; }
+			if ( !_psBinary->ReadUi32( _oOptions.ui32Alignment ) ) { return false; }
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bAligned = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bSameAsOriginal = ui8Tmp ? TRUE : FALSE;
+
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bMatchCase = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bWholeWord = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bIsHex = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bResolveEscapes = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bWildcard = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bLingIgnoreCase = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bLingIgnoreDiacritic = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bIgnoreKana = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bIgnoreNoSpace = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bIgnoreSymbols = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bIgnoreWidth = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bRegexSingleLine = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bRegexMultiLine = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bRegexExtended = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bRegexFindLongest = ui8Tmp ? TRUE : FALSE;
+			if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+			_oOptions.bRegexNegateSingleLine = ui8Tmp ? TRUE : FALSE;
+
+			if ( !_psBinary->ReadUi32( _oOptions.uiRegexFlavor ) ) { return false; }
+			if ( !_psBinary->ReadUi32( _oOptions.bsByteswap ) ) { return false; }
+
+			if ( !_psBinary->ReadStringU16( _oOptions.wsFromText ) ) { return false; }
+			if ( !_psBinary->ReadStringU16( _oOptions.wsToText ) ) { return false; }
+
+			uint32_t ui32Tmp;
+			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+			for ( size_t I = 0; I < ui32Tmp; ++I ) {
+				CSecureWString wsTmp;
+				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+				_oOptions.vFromHistory.push_back( wsTmp );
+			}
+			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+			for ( size_t I = 0; I < ui32Tmp; ++I ) {
+				CSecureWString wsTmp;
+				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+				_oOptions.vToHistory.push_back( wsTmp );
+			}
 		}
 		return true;
 	}

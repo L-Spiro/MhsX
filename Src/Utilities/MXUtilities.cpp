@@ -2718,14 +2718,19 @@ namespace mx {
 
 			uint32_t ui32ThisLen;
 			uint32_t ui32Conv = ee::CExpEval::Utf32ToUtf16( ui32This, ui32ThisLen );
-			if ( ui32ThisLen == 1 && ui32Conv >= L' ' && ui32Conv <= L'z' ) {
+			if ( ui32Conv >= L' ' && ui32Conv <= L'z' ) {
 				swsOut.push_back( wchar_t( ui32Conv ) );
 				++I;
 				continue;
 			}
 
 			char szBuffer[16];
-			std::sprintf( szBuffer, "\\U%.8X", ui32This );
+			if ( ui32ThisLen == 1 ) {
+				std::sprintf( szBuffer, "\\u%.4X", static_cast<uint16_t>(_swsInput[I]) );
+			}
+			else {
+				std::sprintf( szBuffer, "\\U%.8X", ui32This );
+			}
 			char * pcTmp = szBuffer;
 			while ( (*pcTmp) ) {
 				swsOut.push_back( (*pcTmp++) );
