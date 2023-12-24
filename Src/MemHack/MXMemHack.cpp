@@ -658,7 +658,7 @@ namespace mx {
 			MX_JSON_BOOL( _DEC_S_5503B2D4_MemPrivate, _oOptions.bMemPrivate, _peJson );
 			MX_JSON_BOOL( _DEC_S_C1B1C624_MemMapped, _oOptions.bMemMapped, _peJson );
 
-			MX_JSON_BOOL( _DEC_S_9346CF9D_ThreadPriority, _oOptions.iThreadPriority, _peJson );
+			MX_JSON_NUMBER( _DEC_S_9346CF9D_ThreadPriority, _oOptions.iThreadPriority, _peJson );
 			MX_JSON_NUMBER( _DEC_S_908E909C_BufferSize, _oOptions.ui64BufferSize, _peJson );
 
 			MX_JSON_BOOL( _DEC_S_9C78FB44_PauseTarget, _oOptions.bPauseTarget, _peJson );
@@ -787,7 +787,7 @@ namespace mx {
 			MX_JSON_GET_BOOL( _DEC_S_5503B2D4_MemPrivate, _oOptions.bMemPrivate, pjvVal, _pjJson );
 			MX_JSON_GET_BOOL( _DEC_S_C1B1C624_MemMapped, _oOptions.bMemMapped, pjvVal, _pjJson );
 
-			MX_JSON_GET_BOOL( _DEC_S_9346CF9D_ThreadPriority, _oOptions.iThreadPriority, pjvVal, _pjJson );
+			MX_JSON_GET_NUMBER( _DEC_S_9346CF9D_ThreadPriority, _oOptions.iThreadPriority, INT, pjvVal, _pjJson );
 			MX_JSON_GET_NUMBER( _DEC_S_908E909C_BufferSize, _oOptions.ui64BufferSize, UINT64, pjvVal, _pjJson );
 
 			MX_JSON_GET_BOOL( _DEC_S_9C78FB44_PauseTarget, _oOptions.bPauseTarget, pjvVal, _pjJson );
@@ -818,42 +818,32 @@ namespace mx {
 			MX_JSON_GET_NUMBER( _DEC_S_095E5602_RegexFlavor, _oOptions.uiRegexFlavor, UINT32, pjvVal, _pjJson );
 			MX_JSON_GET_NUMBER( _DEC_S_12EECDA8_ByteSwap, _oOptions.bsByteswap, UINT32, pjvVal, _pjJson );
 
-			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_19280E4E_From );
-			if ( !pjvVal || pjvVal->vtType != lson::CJsonContainer::LSON_VT_STRING ) { return false; }
-			{
-				CSecureString ssTmp;
-				CUtilities::ResolveAllEscapes( _pjcContainer->GetString( pjvVal->u.stString ), ssTmp, true );
-				_oOptions.wsFromText = ee::CExpEval::ToUtf16( ssTmp );
-			}
+			MX_JSON_GET_STRING( _DEC_S_19280E4E_From, _oOptions.wsFromText, pjvVal, _pjJson );
+			MX_JSON_GET_STRING( _DEC_S_4203F666_To, _oOptions.wsToText, pjvVal, _pjJson )
 
-			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_4203F666_To );
-			if ( !pjvVal || pjvVal->vtType != lson::CJsonContainer::LSON_VT_STRING ) { return false; }
-			{
-				CSecureString ssTmp;
-				CUtilities::ResolveAllEscapes( _pjcContainer->GetString( pjvVal->u.stString ), ssTmp, true );
-				_oOptions.wsToText = ee::CExpEval::ToUtf16( ssTmp );
-			}
 
 			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_1A995A53_FromHistory );
-			if ( !pjvVal || pjvVal->vtType != lson::CJsonContainer::LSON_VT_ARRAY ) { return false; }
-			
-			for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
-				const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
-				if ( jvArrayVal.vtType != lson::CJsonContainer::LSON_VT_STRING ) { return false; }
-				CSecureString ssTmp;
-				CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
-				_oOptions.vFromHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+						CSecureString ssTmp;
+						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+						_oOptions.vFromHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+					}
+				}
 			}
 
 			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_B517206A_ToHistory );
-			if ( !pjvVal || pjvVal->vtType != lson::CJsonContainer::LSON_VT_ARRAY ) { return false; }
-			
-			for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
-				const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
-				if ( jvArrayVal.vtType != lson::CJsonContainer::LSON_VT_STRING ) { return false; }
-				CSecureString ssTmp;
-				CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
-				_oOptions.vToHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+						CSecureString ssTmp;
+						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+						_oOptions.vToHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+					}
+				}
 			}
 
 		}

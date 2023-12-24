@@ -34,13 +34,24 @@
 // Gets a numbered JSON element.
 #define MX_JSON_GET_NUMBER( NAME, STORETO, TYPE, LOCAL, PARENT )																																		\
 	LOCAL = _pjcContainer->GetMemberByName( (*PARENT), (NAME) );																																		\
-	if ( !LOCAL || LOCAL->vtType != lson::CJsonContainer::LSON_VT_DECIMAL ) { return false; }																											\
-	STORETO = static_cast<TYPE>(LOCAL->u.dDecimal)
+	if ( LOCAL && LOCAL->vtType == lson::CJsonContainer::LSON_VT_DECIMAL ) {																															\
+		STORETO = static_cast<TYPE>(LOCAL->u.dDecimal);																																					\
+	}
+
 // Gets a boolean JSON element.
 #define MX_JSON_GET_BOOL( NAME, STORETO, LOCAL, PARENT )																																				\
 	LOCAL = _pjcContainer->GetMemberByName( (*PARENT), (NAME) );																																		\
-	if ( !LOCAL || (LOCAL->vtType != lson::CJsonContainer::LSON_VT_TRUE && LOCAL->vtType != lson::CJsonContainer::LSON_VT_FALSE) ) { return false; }													\
-	STORETO = LOCAL->vtType == lson::CJsonContainer::LSON_VT_TRUE ? TRUE : FALSE
+	if ( LOCAL && (LOCAL->vtType == lson::CJsonContainer::LSON_VT_TRUE || LOCAL->vtType == lson::CJsonContainer::LSON_VT_FALSE) ) {																		\
+		STORETO = LOCAL->vtType == lson::CJsonContainer::LSON_VT_TRUE ? TRUE : FALSE;																													\
+	}
+
+#define MX_JSON_GET_STRING( NAME, STORETO, LOCAL, PARENT )																																				\
+	LOCAL = _pjcContainer->GetMemberByName( (*PARENT), (NAME) );																																		\
+	if ( LOCAL && LOCAL->vtType == lson::CJsonContainer::LSON_VT_STRING ) {																																\
+		CSecureString ssTmp;																																											\
+		CUtilities::ResolveAllEscapes( _pjcContainer->GetString( LOCAL->u.stString ), ssTmp, true );																									\
+		STORETO = ee::CExpEval::ToUtf16( ssTmp );																																						\
+	}
 
 namespace mx {
 

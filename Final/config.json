@@ -6,8 +6,8 @@
         "LockedRefreshRate" : 1000,
         "ExpressionRefreshRate" : 100,
         "DataAsCodeName" : true,
-        "DataSizes" : false,
-        "DataRanges" : false,
+        "DataSizes" : true,
+        "DataRanges" : true,
         "UseXx" : false,
         "UseOo" : false,
         "ShortEnums" : true
@@ -19,7 +19,7 @@
         "MemImage" : true,
         "MemPrivate" : true,
         "MemMapped" : true,
-        "ThreadPriority" : true,
+        "ThreadPriority" : 15,
         "BufferSize" : 4194304,
         "PauseTarget" : true,
         "UseEpsilon" : true,
@@ -46,14 +46,15 @@
         "RegexNegateSingleLine" : true,
         "RegexFlavor" : 10,
         "ByteSwap" : 0,
-        "From" : "10000h",
-        "To" : "0x7FFFFFFF0000",
+        "From" : "DFE40000",
+        "To" : "DFE40000 + 08000000h",
         "FromHistory" : [
-            "10000h",
-            "0x10000"
+            "DFE40000",
+            "10000h+0",
+            "10000h"
         ],
         "ToHistory" : [
-            "0x7FFFFFFF0000",
+            "DFE40000 + 08000000h",
             "7FFFFFFF0000h"
         ]
     }
