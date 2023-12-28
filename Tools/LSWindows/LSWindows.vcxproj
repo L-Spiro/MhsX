@@ -445,6 +445,7 @@
     <ClCompile Include="Src\Threads\LSWThread.cpp" />
     <ClCompile Include="Src\ToolBar\LSWToolBar.cpp" />
     <ClCompile Include="Src\ToolTip\LSWToolTip.cpp" />
+    <ClCompile Include="Src\TrackBar\LSWTrackBar.cpp" />
     <ClCompile Include="Src\TreeListView\LSWTreeListView.cpp" />
     <ClCompile Include="Src\TreeList\LSWTreeList.cpp" />
     <ClCompile Include="Src\UpDown\LSWUpDown.cpp" />
@@ -490,6 +491,7 @@
     <ClInclude Include="Src\Threads\LSWThread.h" />
     <ClInclude Include="Src\ToolBar\LSWToolBar.h" />
     <ClInclude Include="Src\ToolTip\LSWToolTip.h" />
+    <ClInclude Include="Src\TrackBar\LSWTrackBar.h" />
     <ClInclude Include="Src\TreeListView\LSWTreeListView.h" />
     <ClInclude Include="Src\TreeList\LSWTreeList.h" />
     <ClInclude Include="Src\UpDown\LSWUpDown.h" />

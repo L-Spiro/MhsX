@@ -26,6 +26,7 @@ namespace lsw {
 		LSW_LT_TAB,								// WC_TABCONTROLW
 		LSW_LT_TOOLBAR,							// TOOLBARCLASSNAMEW
 		LSW_LT_TOOLTIP,							// TOOLTIPS_CLASS
+		LSW_LT_TRACKBAR,						// TRACKBAR_CLASS
 		LSW_LT_TREELIST,						// lsw::CBase::TreeListAtom()
 		LSW_LT_TREELISTVIEW,					// lsw::CBase::TreeListViewAtom()
 		LSW_LT_TREEVIEW,						// WC_TREEVIEWW

@@ -21,6 +21,7 @@
 #include "../Tab/LSWTab.h"
 #include "../ToolBar/LSWToolBar.h"
 #include "../ToolTip/LSWToolTip.h"
+#include "../TrackBar/LSWTrackBar.h"
 #include "../TreeList/LSWTreeList.h"
 #include "../TreeListView/LSWTreeListView.h"
 #include "../UpDown/LSWUpDown.h"
@@ -203,6 +204,9 @@ namespace lsw {
 			case LSW_LT_TAB : { return new CTab( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 			case LSW_LT_TOOLBAR : { return new CToolBar( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 			case LSW_LT_TOOLTIP : { return new CToolTip( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			
+			case LSW_LT_TRACKBAR : { return new CTrackBar( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+
 			case LSW_LT_TREELIST : { return new CTreeList( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 			case LSW_LT_TREELISTVIEW : { return new CTreeListView( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 			case LSW_LT_UPDOWN : { return new CUpDown( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
@@ -338,6 +342,7 @@ namespace lsw {
 				{ LSW_LT_REBAR, REBARCLASSNAMEW },				
 				{ LSW_LT_STATUSBAR, STATUSCLASSNAMEW },
 				{ LSW_LT_TAB, WC_TABCONTROLW },
+				{ LSW_LT_TRACKBAR, TRACKBAR_CLASS },
 				{ LSW_LT_TOOLBAR, TOOLBARCLASSNAMEW },
 				{ LSW_LT_TOOLTIP, TOOLTIPS_CLASSW },
 				{ LSW_LT_TREEVIEW, WC_TREEVIEWW },

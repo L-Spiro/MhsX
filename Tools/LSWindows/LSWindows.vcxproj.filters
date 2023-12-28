@@ -207,6 +207,12 @@
     <Filter Include="Source Files\ChildWindow">
       <UniqueIdentifier>{32c0d8e1-196a-41de-b682-014f46900ae1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\TrackBar">
+      <UniqueIdentifier>{26c37274-541e-4de8-9c33-94373b974124}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\TrackBar">
+      <UniqueIdentifier>{41d97d56-826d-44e3-8fd6-71913660be64}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -341,6 +347,9 @@
     <ClInclude Include="Src\Helpers\LSWInputListenerBase.h">
       <Filter>Header Files\Helpers</Filter>
     </ClInclude>
+    <ClInclude Include="Src\TrackBar\LSWTrackBar.h">
+      <Filter>Header Files\TrackBar</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -447,6 +456,9 @@
     </ClCompile>
     <ClCompile Include="Src\Helpers\LSWInputListenerBase.cpp">
       <Filter>Source Files\Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\TrackBar\LSWTrackBar.cpp">
+      <Filter>Source Files\TrackBar</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
