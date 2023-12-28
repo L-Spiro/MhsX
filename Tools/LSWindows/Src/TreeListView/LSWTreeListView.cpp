@@ -1030,12 +1030,13 @@ namespace lsw {
 				}
 				break;
 			}
+#if 0
 			case WM_PAINT : {
 				RECT clientRect;
 				::GetClientRect( _hWnd, &clientRect );
 
 				// Call the original window procedure to draw into memory DC
-				LRESULT lrRes = ::CallWindowProcW( wpOrig, _hWnd, _uMsg, _wParam, _lParam );
+				//LRESULT lrRes = ::CallWindowProcW( wpOrig, _hWnd, _uMsg, _wParam, _lParam );
 
 				/*PAINTSTRUCT ps;
 				HDC hdc = ::BeginPaint( _hWnd, &ps );
@@ -1046,7 +1047,7 @@ namespace lsw {
 
 				::EndPaint( _hWnd, &ps );*/
 
-				/*
+				
 				PAINTSTRUCT ps;
 				HDC hdc = BeginPaint(_hWnd, &ps);
 
@@ -1058,14 +1059,15 @@ namespace lsw {
     // Fill the bitmap with a background color (e.g., white)
     //FillRect(memDC, &clientRect, (HBRUSH)(COLOR_WINDOW+1));
 
-				
+				LRESULT lrRes = CallWindowProcW( wpOrig, _hWnd, _uMsg, (WPARAM)memDC, _lParam );
+				//LRESULT lrRes = CallWindowProcW( wpOrig, _hWnd, _uMsg, _wParam, (LPARAM)memDC );
 
 				// Now do your custom drawing on memory DC
 				RECT rcButton = {10, 50, 30, 70};
 				::InvalidateRect( _hWnd, &rcButton, FALSE );
 				DrawFrameControl(memDC, &rcButton, DFC_BUTTON, DFCS_BUTTONCHECK);
 				// Call the original window procedure to draw into memory DC
-				//LRESULT lrRes = CallWindowProcW(wpOrig, _hWnd, _uMsg, _wParam, (LPARAM)memDC);
+				
 
 				// Blit the memory DC to screen
 				BitBlt(hdc, ps.rcPaint.left, ps.rcPaint.top, (ps.rcPaint.right - ps.rcPaint.left) / 2,
@@ -1080,11 +1082,12 @@ namespace lsw {
 				DeleteDC(memDC);
 
 				EndPaint(_hWnd, &ps);
-				*/
+				
 				return lrRes;
 
 			}
-
+#endif
+#if 0
 			case WM_NOTIFY : {
 				LPNMHDR lpnmhdr = (LPNMHDR)_lParam;
 				if (lpnmhdr->code == NM_CUSTOMDRAW) {
@@ -1130,7 +1133,7 @@ namespace lsw {
 				}
 				break;
 			}
-
+#endif
 						  
 			/*case WM_PAINT : {
 				HTHEME hTheme = ::OpenThemeData( _hWnd, L"TREEVIEW" );
