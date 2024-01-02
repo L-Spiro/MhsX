@@ -14,6 +14,7 @@
 namespace lsw {
 
 	CWidget::CWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t /*_ui64Data*/ ) :
+		m_ui64UserData( 0 ),
 		m_hWnd( NULL ),
 		m_wId( _wlLayout.wId ),
 		m_bEnabled( _wlLayout.bEnabled ),

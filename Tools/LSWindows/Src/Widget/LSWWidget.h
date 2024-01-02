@@ -318,6 +318,20 @@ namespace lsw {
 		// Set the parent.
 		void								SetWidgetParent( CWidget * _pwParent );
 
+		/**
+		 * Sets user custom data.
+		 * 
+		 * \param _ui64Data The custom user value to associate with this object.
+		 **/
+		void								SetUserData( uint64_t _ui64Data ) { m_ui64UserData = _ui64Data; }
+
+		/**
+		 * Gets the user custom data.
+		 * 
+		 * \return Returns the user custom data.
+		 **/
+		uint64_t							GetUserData() const { return m_ui64UserData; }
+
 		// Translate a child's tooltip text.
 		virtual std::wstring				TranslateTooltip( const std::string &_sText );
 
@@ -330,101 +344,72 @@ namespace lsw {
 
 	protected :
 		// == Members.
+		/** User data. */
+		uint64_t							m_ui64UserData;
 		/** The window handle. */
 		HWND								m_hWnd;
-
 		/** The tooltip control. */
 		HWND								m_hTooltip;
-
 		/** The address handler. */
 		ee::CExpEvalContainer::PfAddressHandler
 											m_pfahAddressHandler;
-
 		/** The data to be sent to the address handler. */
 		uintptr_t							m_uiptrAddressHandlerData;
-
 		/** The address write handler. */
 		ee::CExpEvalContainer::PfAddressHandler
 											m_pfahAddressWriteHandler;
-
 		/** The data to be sent to the address write handler. */
 		uintptr_t							m_uiptrAddressWriteHandlerData;
-
 		/** The tooltip text. */
 		std::string							m_sTooltipText;
-
 		/** Children. */
 		std::vector<CWidget *>				m_vChildren;
-
 		/** Dock windows as children of this window. */
 		std::vector<CDockable *>			m_vDockables;
-
 		/** Parent. */
 		CWidget *							m_pwParent;
-
 		/** Original rectangle. */
 		LSW_RECT							m_rStartingRect;
-
 		/** This object's starting window rect in relationship with the parent's starting client rect. */
 		LSW_RECT							m_rStartingClientRect;
-
 		/** Extended styles. */
 		DWORD								m_dwExtendedStyles;
-
 		/** Tooltip styles. */
 		DWORD								m_dwTooltipStyle;
-
 		/** Tooltip extended styles. */
 		DWORD								m_dwTooltipStyleEx;
-
 		/** Last hit returned by NcHitTest(). */
 		INT									m_iLastHit;
-
 		/** Enabled. */
 		BOOL								m_bEnabled;
-
 		// The window rectangle.
 		//LSW_RECT							m_rRect;
-
 		// The client rectangle.
 		//LSW_RECT							m_rClientRect;
-
 		/** Default state.  Depends on the type of control. */
 		BOOL								m_bActive;
-
 		/** Treat text as hex when possible? */
-		BOOL								m_bTreatAsHex;
-		
+		BOOL								m_bTreatAsHex;		
 		/** Width expression. */
 		CExpression							m_eWidth;
-
 		/** Height expression. */
 		CExpression							m_eHeight;
-
 		/** Left expression. */
 		CExpression							m_eLeft;
-
 		/** Right expression. */
 		CExpression							m_eRight;
-
 		/** Top expression. */
 		CExpression							m_eTop;
-
 		/** Bottom expression. */
 		CExpression							m_eBottom;
-
 		/** Show as active or not. */
 		BOOL								m_bShowAsActive;
-
 		/** If in the destructor, the WM_NCDESTROY handler should not call delete. */
 		BOOL								m_bInDestructor;
-
 		/** Custom ID. */
 		WORD								m_wId;
-
 		/** Tracks whether the control has focus or not. */
-		bool								m_bHasFocus;
-				
+		bool								m_bHasFocus;				
 
 
 		// == Message Handlers.
@@ -480,8 +465,15 @@ namespace lsw {
 		// WM_GETMINMAXINFO.
 		virtual LSW_HANDLED					GetMinMaxInfo( MINMAXINFO * /*_pmmiInfo*/ ) { return LSW_H_CONTINUE; }
 
-		// WM_COMMAND from control.
-		virtual LSW_HANDLED					Command( WORD /*_wCtrlCode*/, WORD /*_Id*/, CWidget * /*_pwSrc*/ ) { return LSW_H_CONTINUE; }
+		/**
+		 * Handles the WM_COMMAND message.
+		 *
+		 * \param _wCtrlCode 0 = from menu, 1 = from accelerator, otherwise it is a Control-defined notification code.
+		 * \param _wId The ID of the control if _wCtrlCode is not 0 or 1.
+		 * \param _pwSrc The source control if _wCtrlCode is not 0 or 1.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					Command( WORD /*_wCtrlCode*/, WORD /*_wId*/, CWidget * /*_pwSrc*/ ) { return LSW_H_CONTINUE; }
 
 		// WM_COMMAND from menu.
 		virtual LSW_HANDLED					MenuCommand( WORD /*_Id*/ ) { return LSW_H_CONTINUE; }
