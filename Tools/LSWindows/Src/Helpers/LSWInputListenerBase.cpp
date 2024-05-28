@@ -13,6 +13,9 @@ namespace lsw {
 		if ( !m_szProp[0] ) {
 			m_szProp[0] = L'H' + ((reinterpret_cast<UINT_PTR>(this) >> 2) & 0x0F);
 		}
+
+		m_kResult.bKeyCode = m_kResult.bKeyModifier = 0;
+		m_kResult.dwScanCode = 0;
 	}
 
 	// == Functions.
@@ -23,8 +26,8 @@ namespace lsw {
 	 * \return Returns true if beginning the keyboard isten was successful.
 	 */
 	bool CInputListenerBase::BeginListening_Keyboard( CWidget * _pwControl ) {
-		m_krResult.bKeyCode = m_krResult.bKeyModifier = 0;
-		m_krResult.dwScanCode = 0;
+		m_kResult.bKeyCode = m_kResult.bKeyModifier = 0;
+		m_kResult.dwScanCode = 0;
 
 		if ( !_pwControl ) { return false; }
 		if ( m_lsListenState != LSW_LS_LISTENING ) {
@@ -48,8 +51,8 @@ namespace lsw {
 		if ( m_lsListenState != LSW_LS_LISTENING ) { return false; }
 		m_lsListenState = _bSuccess ? LSW_LS_SUCCESS : LSW_LS_FAILURE;
 		if ( !_bSuccess ) {
-			m_krResult.bKeyCode = m_krResult.bKeyModifier = 0;
-			m_krResult.dwScanCode = 0;
+			m_kResult.bKeyCode = m_kResult.bKeyModifier = 0;
+			m_kResult.dwScanCode = 0;
 		}
 
 		if ( !_pwControl ) { return false; }
@@ -90,8 +93,8 @@ namespace lsw {
 					if ( !pophThis->AllowKeyCombos() ) {
 					}
 					else {
-						pophThis->m_krResult.bKeyModifier = BYTE( ::MapVirtualKeyW( (_lParam >> 16) & 0xFF, MAPVK_VSC_TO_VK_EX ) );
-						CHelpers::ModifierToString( pophThis->m_krResult.bKeyModifier, wTmp, bIgnoreLeftRight );
+						pophThis->m_kResult.bKeyModifier = BYTE( ::MapVirtualKeyW( (_lParam >> 16) & 0xFF, MAPVK_VSC_TO_VK_EX ) );
+						CHelpers::ModifierToString( pophThis->m_kResult.bKeyModifier, wTmp, bIgnoreLeftRight );
 						wTmp += L"\u2026";	// "...".
 						::SetWindowTextW( _hWnd, wTmp.c_str() );
 						return 0;
@@ -103,7 +106,7 @@ namespace lsw {
 					else {
 						UINT uiTemp = ::MapVirtualKeyW( VK_CONTROL, MAPVK_VK_TO_VSC );
 						std::wstring wTmp = CHelpers::ScanCodeToString( bIgnoreLeftRight ? (uiTemp << 16) : UINT( _lParam ) );
-						pophThis->m_krResult.bKeyModifier = bExtended ? VK_RCONTROL : VK_LCONTROL;
+						pophThis->m_kResult.bKeyModifier = bExtended ? VK_RCONTROL : VK_LCONTROL;
 						wTmp += L"\u2026";	// "...".
 						::SetWindowTextW( _hWnd, wTmp.c_str() );
 						return 0;
@@ -115,22 +118,22 @@ namespace lsw {
 					else {
 						UINT uiTemp = ::MapVirtualKeyW( VK_MENU, MAPVK_VK_TO_VSC );
 						std::wstring wTmp = CHelpers::ScanCodeToString( bIgnoreLeftRight ? (uiTemp << 16) : UINT( _lParam ) );
-						pophThis->m_krResult.bKeyModifier = bExtended ? VK_RMENU : VK_LMENU;
+						pophThis->m_kResult.bKeyModifier = bExtended ? VK_RMENU : VK_LMENU;
 						wTmp += L"\u2026";	// "...".
 						::SetWindowTextW( _hWnd, wTmp.c_str() );
 						return 0;
 					}
 				}
 				std::wstring wTmp;
-				if ( pophThis->m_krResult.bKeyModifier ) {
-					CHelpers::ModifierToString( pophThis->m_krResult.bKeyModifier, wTmp, bIgnoreLeftRight );
+				if ( pophThis->m_kResult.bKeyModifier ) {
+					CHelpers::ModifierToString( pophThis->m_kResult.bKeyModifier, wTmp, bIgnoreLeftRight );
 					wTmp += L"+";
 				}
 				wTmp += CHelpers::ScanCodeToString( UINT( _lParam ) );
 				
 				::SetWindowTextW( _hWnd, wTmp.c_str() );
-				pophThis->m_krResult.bKeyCode = static_cast<BYTE>(_wParam);
-				pophThis->m_krResult.dwScanCode = static_cast<DWORD>(_lParam);
+				pophThis->m_kResult.bKeyCode = static_cast<BYTE>(_wParam);
+				pophThis->m_kResult.dwScanCode = static_cast<DWORD>(_lParam);
 
 				pophThis->StopListening_Keyboard( pwThis, true );
 				return 0;
@@ -146,23 +149,23 @@ namespace lsw {
 					if ( !pophThis->AllowKeyCombos() ) {
 					}
 					else {
-						pophThis->m_krResult.bKeyModifier = bExtended ? VK_RMENU : VK_LMENU;
-						CHelpers::ModifierToString( pophThis->m_krResult.bKeyModifier, wTmp, bIgnoreLeftRight );
+						pophThis->m_kResult.bKeyModifier = bExtended ? VK_RMENU : VK_LMENU;
+						CHelpers::ModifierToString( pophThis->m_kResult.bKeyModifier, wTmp, bIgnoreLeftRight );
 						wTmp += L"\u2026";	// "...".
 						::SetWindowTextW( _hWnd, wTmp.c_str() );
 						return 0;
 					}
 				}
 				
-				if ( pophThis->m_krResult.bKeyModifier ) {
-					CHelpers::ModifierToString( pophThis->m_krResult.bKeyModifier, wTmp, bIgnoreLeftRight );
+				if ( pophThis->m_kResult.bKeyModifier ) {
+					CHelpers::ModifierToString( pophThis->m_kResult.bKeyModifier, wTmp, bIgnoreLeftRight );
 					wTmp += L"+";
 				}
 				wTmp += CHelpers::ScanCodeToString( UINT( _lParam ) );
 				
 				::SetWindowTextW( _hWnd, wTmp.c_str() );
-				pophThis->m_krResult.bKeyCode = static_cast<BYTE>(_wParam);
-				pophThis->m_krResult.dwScanCode = static_cast<DWORD>(_lParam);
+				pophThis->m_kResult.bKeyCode = static_cast<BYTE>(_wParam);
+				pophThis->m_kResult.dwScanCode = static_cast<DWORD>(_lParam);
 
 				pophThis->StopListening_Keyboard( pwThis, true );
 				return 0;

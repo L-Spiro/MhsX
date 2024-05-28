@@ -149,6 +149,9 @@ namespace lsw {
 			_hHandle = NULL;
 			return (*this);
 		}
+
+
+		// == Functions.
 		VOID								Reset() {
 			if ( Valid() ) {
 				::CloseHandle( hHandle );
@@ -156,14 +159,62 @@ namespace lsw {
 			}
 		}
 
+		inline BOOL							Valid() const { return hHandle && hHandle != INVALID_HANDLE_VALUE; }
+
+		static inline  BOOL					Valid( HANDLE _hHandle ) { return _hHandle && _hHandle != INVALID_HANDLE_VALUE; }
+
+
+		// == Members.
+		HANDLE								hHandle;
+	};
+
+	struct LSW_HMODULE {
+		LSW_HMODULE() : hHandle( NULL ) {}
+		LSW_HMODULE( LPCSTR _sPath ) :
+			hHandle( ::LoadLibraryW( ee::CExpEval::StringToWString( _sPath ).c_str() ) ) {
+		}
+		LSW_HMODULE( LPCWSTR _wsPath ) :
+			hHandle( ::LoadLibraryW( _wsPath ) ) {
+		}
+		LSW_HMODULE( const char16_t * _pu16Path ) :
+			hHandle( ::LoadLibraryW( reinterpret_cast<LPCWSTR>(_pu16Path) ) ) {
+		}
+		~LSW_HMODULE() {
+			Reset();
+		}
+
 
 		// == Functions.
-		BOOL								Valid() const { return hHandle && hHandle != INVALID_HANDLE_VALUE; }
+		BOOL								LoadLibrary( LPCSTR _sPath ) {
+			Reset();
+			hHandle = ::LoadLibraryW( ee::CExpEval::StringToWString( _sPath ).c_str() );
+			return hHandle != NULL;
+		}
 
-		static BOOL							Valid( HANDLE _hHandle ) { return _hHandle && _hHandle != INVALID_HANDLE_VALUE; }
+		BOOL								LoadLibrary( LPCWSTR _wsPath ) {
+			Reset();
+			hHandle = ::LoadLibraryW( _wsPath );
+			return hHandle != NULL;
+		}
+
+		BOOL								LoadLibrary( const char16_t * _pu16Path ) {
+			Reset();
+			hHandle = ::LoadLibraryW( reinterpret_cast<LPCWSTR>(_pu16Path) );
+			return hHandle != NULL;
+		}
+
+		inline VOID							Reset() {
+			if ( Valid() ) {
+				::FreeLibrary( hHandle );
+				hHandle = NULL;
+			}
+		}
+
+		inline BOOL							Valid() const { return hHandle != NULL; }
 
 
-		HANDLE								hHandle;
+		// == Members.
+		HMODULE								hHandle;
 	};
 
 	struct LSW_REBARBANDINFO : REBARBANDINFOW {
@@ -431,6 +482,41 @@ namespace lsw {
 		};
 	};
 
+	struct LSW_KEY {
+		DWORD								dwScanCode;								/**< The key scancode. */
+		BYTE								bKeyCode;								/**< The key virtual key code. */
+		BYTE								bKeyModifier;							/**< The key modifier code. */
+
+
+		// == Functions.
+		/**
+		 * Fills out the structure based on the WPARAM and LPARAM passed to WM_KEYDOWN.
+		 * 
+		 * \param _wpParm The virtual-key code of the nonsystem key.
+		 * \param _lpParm The repeat count, scan code, extended-key flag, context code, previous key-state flag, and transition-state flag, as seen in LSW_KEY_FLAGS.
+		 * \param _bAllowKeyCombos If true, VK_SHIFT, VK_CONTROL, and VK_MENU keys update only bKeyModifier, and subsequent calls are required to set the other values.
+		 **/
+		VOID								MakeFromKeyDown( WPARAM _wpParm, LPARAM _lpParm, bool _bAllowKeyCombos ) {
+			bool bExtended = (_lpParm & (KF_EXTENDED << 16));
+			if ( _bAllowKeyCombos ) {
+				if ( static_cast<BYTE>(_wpParm) == VK_SHIFT ) {
+					bKeyModifier = BYTE( ::MapVirtualKeyW( (_lpParm >> 16) & 0xFF, MAPVK_VSC_TO_VK_EX ) );
+					return;
+				}
+				if ( static_cast<BYTE>(_wpParm) == VK_CONTROL ) {
+					bKeyModifier = bExtended ? VK_RCONTROL : VK_LCONTROL;
+					return;
+				}
+				if ( static_cast<BYTE>(_wpParm) == VK_MENU ) {
+					bKeyModifier = bExtended ? VK_RMENU : VK_LMENU;
+					return;
+				}
+			}
+			bKeyCode = static_cast<BYTE>(_wpParm);
+			dwScanCode = static_cast<DWORD>(_lpParm);
+		}
+	};
+
 	struct LSW_THEME_DATA {
 		LSW_THEME_DATA( HWND _hWnd, LPCWSTR _pszClassList ) :
 			hWnd( _hWnd ),
@@ -522,7 +608,7 @@ namespace lsw {
 
 		// == Functions.
 		/**
-		 * DESC
+		 * Registers the device or type of device for which a window will receive notifications.
 		 * 
 		 * \param _hRecipient A handle to the window or service that will receive device events for the devices specified in the NotificationFilter parameter. The same window handle can be used in multiple calls to RegisterDeviceNotification.  Services can specify either a window handle or service status handle.
 		 * \param _lpvNotificationFilter A pointer to a block of data that specifies the type of device for which notifications should be sent. This block always begins with the DEV_BROADCAST_HDR structure. The data following this header is dependent on the value of the dbch_devicetype member, which can be DBT_DEVTYP_DEVICEINTERFACE or DBT_DEVTYP_HANDLE.
@@ -650,6 +736,22 @@ namespace lsw {
 			bInBorderless = false;
 			return true;
 		}
+	};
+
+	struct LSW_FILE_MAP_VIEW {
+		LSW_FILE_MAP_VIEW( HANDLE _hFileMappingObject, uint64_t _ui64FileOffset, size_t _dwNumberOfBytesToMap, DWORD _dwDesiredAccess ) :
+			pvBuffer( ::MapViewOfFile( _hFileMappingObject, _dwDesiredAccess, DWORD( _ui64FileOffset >> 32 ), DWORD( _ui64FileOffset ), _dwNumberOfBytesToMap ) ) {
+		}
+		~LSW_FILE_MAP_VIEW() {
+			if ( pvBuffer != NULL ) {
+				::UnmapViewOfFile( pvBuffer );
+			}
+		}
+
+
+		// == Members.
+		/** The mapped address for access to the mapped region. */
+		LPVOID								pvBuffer;
 	};
 
 	class CHelpers {
@@ -870,11 +972,11 @@ namespace lsw {
 		 * Converts a modifier to text.
 		 *
 		 * \param _iMod The VK_ modifier to convert to a string.
-		 * \param _swsResult Holds the result of the conversion.
+		 * \param _wsResult Holds the result of the conversion.
 		 * \param _bIgnoreLeftRight If true, left and right Shift, Control, and Alt are considered indistinguishable.
 		 * \return Returns true if the conversion to text was successful.
 		 */
-		static bool							ModifierToString( INT _iMod, std::wstring &_swsResult, bool _bIgnoreLeftRight ) {
+		static bool							ModifierToString( INT _iMod, std::wstring &_wsResult, bool _bIgnoreLeftRight ) {
 			if ( _bIgnoreLeftRight ) {
 				if ( _iMod == VK_LSHIFT || _iMod == VK_RSHIFT ) {
 					_iMod = VK_SHIFT;
@@ -886,8 +988,25 @@ namespace lsw {
 				uiExt |= (_iMod == VK_RCONTROL) ? KF_EXTENDED : 0;
 				uiExt |= (_iMod == VK_RMENU) ? KF_EXTENDED : 0;
 			}
-			_swsResult += ScanCodeToString( (uiKey | uiExt) << 16 );
+			_wsResult += ScanCodeToString( (uiKey | uiExt) << 16 );
 			return true;
+		}
+
+		/**
+		 * Creates a string from the current key configuration.
+		 * 
+		 * \param _kKey The key to print.
+		 * \param _bIgnoreLeftRight If true, left/right variations of VK_MENU and VK_CONTROL are ignored.
+		 * \return Returns a wide-character string containing the key in text.
+		 **/
+		static std::wstring					ToString( const LSW_KEY &_kKey, bool _bIgnoreLeftRight ) {
+			std::wstring wTmp;
+			if ( _kKey.bKeyModifier ) {
+				CHelpers::ModifierToString( _kKey.bKeyModifier, wTmp, _bIgnoreLeftRight );
+				wTmp += L"+";
+			}
+			wTmp += CHelpers::ScanCodeToString( UINT( _kKey.dwScanCode ) );
+			return wTmp;
 		}
 
 		/**

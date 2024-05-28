@@ -19,6 +19,7 @@ namespace lsw {
 		m_ptIndexCache( nullptr ),
 		m_stIndexCache( 0 ),
 		m_stHotItem( size_t( -1 ) ),
+		m_lSpaceWidth( 0 ),
 		m_bDontUpdate( false ) {
 		
 		if ( !m_szProp[0] ) {
@@ -567,7 +568,7 @@ namespace lsw {
 	size_t CTreeListView::CountExpanded() const {
 		size_t stCnt = 0;
 		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptTmp = nullptr;
-		while ( (ptTmp = NextByExpansion( ptTmp )) ) {
+		while ( (ptTmp = NextByExpansion( ptTmp )) != nullptr ) {
 			++stCnt;
 		}
 		return stCnt;
@@ -730,6 +731,44 @@ namespace lsw {
 	}
 
 	/**
+	 * WM_LBUTTONDOWN.
+	 * 
+	 * \param _dwVirtKeys Indicates whether various virtual keys are down.
+	 * \param _pCursorPos The coordinate of the cursor. The coordinate is relative to the upper-left corner of the client area.
+	 * \return Returns a HANDLED code.
+	 **/
+	CWidget::LSW_HANDLED CTreeListView::LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
+		LVHITTESTINFO hitTestInfo;
+		hitTestInfo.pt.x = _pCursorPos.x;
+		hitTestInfo.pt.y = _pCursorPos.y;
+		ListView_HitTest( Wnd(), &hitTestInfo );
+		if ( hitTestInfo.iItem >= 0 ) {
+			HDC hHdc = ::GetDC( Wnd() );
+			if ( hHdc ) {
+				LSW_RECT rItem = GetItemRect( hitTestInfo.iItem, LVIR_BOUNDS );
+				auto aItem = ItemByIndex( hitTestInfo.iItem );
+				LSW_RECT rRect = ExpansionBox( rItem, aItem, hHdc );
+				::ReleaseDC( Wnd(), hHdc );
+
+				if ( rRect.PtInRect( hitTestInfo.pt ) ) {
+					if ( aItem->Value().uiState & TVIS_EXPANDED ) {
+						aItem->Value().uiState &= ~TVIS_EXPANDED;
+					}
+					else {
+						aItem->Value().uiState |= TVIS_EXPANDED;
+					}
+
+					UpdateListView();
+					return LSW_H_HANDLED;
+				}
+			}
+		}
+
+
+		return LSW_H_CONTINUE;
+	}
+
+	/**
 	 * The WM_NOTIFY -> LVN_ITEMCHANGED handler.
 	 *
 	 * \param _lplvParm The notifacation structure.
@@ -840,9 +879,42 @@ namespace lsw {
 		if ( _lpcdParm->nmcd.dwItemSpec % 2 == 0 ) {
 			_lpcdParm->clrText = ::GetSysColor( COLOR_WINDOWTEXT );//RGB( 0, 0, 0 );
 			_lpcdParm->clrTextBk = RGB( 0xF2, 0xFA, 0xFF );
-			return CDRF_NEWFONT;
+			//return CDRF_NEWFONT;
 		}
-		return CDRF_DODEFAULT;
+		return (CDRF_DODEFAULT | CDRF_NOTIFYPOSTPAINT);
+	}
+
+	/**
+	 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_ITEMPOSTPAINT handler.
+	 * 
+	 * \param _lpcdParm The notifacation structure.
+	 * \return Returns an LSW_HANDLED code.
+	 */
+	DWORD CTreeListView::Notify_CustomDraw_ItemPostPaint( LPNMLVCUSTOMDRAW _lpcdParm ) {
+		m_ptIndexCache = ItemByIndex_Cached( _lpcdParm->nmcd.dwItemSpec );
+		if ( m_ptIndexCache ) {
+			if ( m_ptIndexCache->Size() ) {
+				HTHEME hTheme = ::OpenThemeData( _lpcdParm->nmcd.hdr.hwndFrom, L"TREEVIEW" );
+				if ( hTheme ) {
+					int iState = GLPS_OPENED;
+					if ( m_ptIndexCache->Value().uiState & TVIS_EXPANDED ) {
+						iState = GLPS_OPENED;
+					}
+					else {
+						iState = GLPS_CLOSED;
+					}
+
+					m_lSpaceWidth = 0;
+					LSW_RECT rRect = ExpansionBox( _lpcdParm->nmcd.rc, ItemByIndex( _lpcdParm->nmcd.dwItemSpec ), _lpcdParm->nmcd.hdc );
+
+
+					::DrawThemeBackground( hTheme, _lpcdParm->nmcd.hdc, TVP_GLYPH, iState, &rRect, NULL );
+
+					::CloseThemeData( hTheme );
+				}
+			}
+		}
+		return CDRF_SKIPDEFAULT;
 	}
 
 	/**
@@ -994,6 +1066,37 @@ namespace lsw {
 	}
 
 	/**
+	 * Takes an item RECT and returns the expanding/collapsing box rectangle that goes with it.
+	 * 
+	 * \param _rItemRect The item's RECT.
+	 * \param _ptItem The item.
+	 * \param _hHdc The listview's HDC.
+	 * \return Returns the item's expanding/collapsing box rectangle.
+	 **/
+	LSW_RECT CTreeListView::ExpansionBox( const RECT &_rItemRect, const ee::CTree<LSW_TREE_ROW> * _ptItem, HDC _hHdc ) {
+		LSW_RECT rRet;
+		rRet.Zero();
+		if ( _ptItem ) {
+			if ( _ptItem->Size() ) {
+				if ( !m_lSpaceWidth ) {
+					SIZE sSpaceSize;
+					::GetTextExtentPoint32A( _hHdc, " ", 1, &sSpaceSize );
+					m_lSpaceWidth = sSpaceSize.cx;
+				}
+
+				const LSW_RECT & rTmp = _rItemRect;
+				LONG lLeft = rTmp.left + 2;
+				lLeft += m_lSpaceWidth * 4 * GetIndent( const_cast<ee::CTree<LSW_TREE_ROW> *>(_ptItem) );
+				return { lLeft,
+					rTmp.top + 1,
+					lLeft + rTmp.Height() - 2,
+					rTmp.top + 1 + rTmp.Height() - 2 };
+			}
+		}
+		return rRet;
+	}
+
+	/**
 	 * List-view window procedure.  The list-view is hidden.
 	 *
 	 * \param _hWnd A handle to the window.
@@ -1018,6 +1121,20 @@ namespace lsw {
 			}
 			case WM_NCLBUTTONDBLCLK : {
 				//::MoveWindow( _hWnd, ee::CExpEval::Time() % 10, ee::CExpEval::Time() % 20, ee::CExpEval::Time() % 10 + 350, ee::CExpEval::Time() % 10 + 250, TRUE );
+				break;
+			}
+			case WM_LBUTTONDOWN : {
+				if ( ptlThis ) {
+					POINTS pPos = {
+						GET_X_LPARAM( _lParam ),
+						GET_Y_LPARAM( _lParam ),
+					};
+					LSW_HANDLED hHandled = ptlThis->LButtonDown( static_cast<DWORD>(_wParam), pPos );
+
+					// Return value
+					//	An application should return zero if it processes this message.
+					if ( hHandled == LSW_H_HANDLED ) { return 0; }
+				}
 				break;
 			}
 			case WM_KEYDOWN : {

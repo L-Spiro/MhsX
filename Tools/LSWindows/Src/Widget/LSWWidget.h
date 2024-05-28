@@ -631,7 +631,13 @@ namespace lsw {
 		// WM_MOUSEWHEEL.
 		virtual LSW_HANDLED					MouseWheel( DWORD /*_dwVirtKeys*/, const POINTS &/*_pCursorPos*/ ) { return LSW_H_CONTINUE; }
 
-		// WM_NCHITTEST.
+		/**
+		 * WM_NCHITTEST.
+		 * 
+		 * \param _pCursorPos The coordinate of the cursor. The coordinate is relative to the upper-left corner of the screen.
+		 * \param _iReturnHitTest Holds the returned position of the cursor hot spot.
+		 * \return Returns a HANDLED code.
+		 **/
 		virtual LSW_HANDLED					NcHitTest( const POINTS &/*_pCursorPos*/, INT &/*_iReturnHitTest*/ ) { return LSW_H_CONTINUE; }
 
 		// WM_NCLBUTTONDBLCLK.
@@ -767,6 +773,14 @@ namespace lsw {
 		 * \return Returns an LSW_HANDLED code.
 		 */
 		virtual DWORD						Notify_CustomDraw_ItemPrePaintSubItem( LPNMLVCUSTOMDRAW /*_lpcdParm*/ ) { return CDRF_DODEFAULT; }
+
+		/**
+		 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_ITEMPOSTPAINT handler.
+		 * 
+		 * \param _lpcdParm The notifacation structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual DWORD						Notify_CustomDraw_ItemPostPaint( LPNMLVCUSTOMDRAW /*_lpcdParm*/ ) { return CDRF_DODEFAULT; }
 
 		// WM_TIMER.
 		virtual LSW_HANDLED					Timer( UINT_PTR /*_uiptrId*/, TIMERPROC /*_tpProc*/ ) { return LSW_H_CONTINUE; }

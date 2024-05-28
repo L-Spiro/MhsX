@@ -256,6 +256,8 @@ namespace lsw {
 		mutable size_t						m_stIndexCache;
 		/** The hot item index. */
 		size_t								m_stHotItem;
+		/** The width of the space character inside items of the ListView. */
+		LONG								m_lSpaceWidth;
 		/** If set, the listview is not updated when inserting/removing an item.  FinishUpdate() must be called to update the listview after the tree is modified. */
 		bool								m_bDontUpdate;
 		/** Window property. */
@@ -398,6 +400,15 @@ namespace lsw {
 		virtual LSW_HANDLED					KeyDown( UINT _uiKeyCode, UINT _uiFlags );
 
 		/**
+		 * WM_LBUTTONDOWN.
+		 * 
+		 * \param _dwVirtKeys Indicates whether various virtual keys are down.
+		 * \param _pCursorPos The coordinate of the cursor. The coordinate is relative to the upper-left corner of the client area.
+		 * \return Returns a HANDLED code.
+		 **/
+		virtual LSW_HANDLED					LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos );
+
+		/**
 		 * The WM_NOTIFY -> LVN_ITEMCHANGED handler.
 		 *
 		 * \param _lplvParm The notifacation structure.
@@ -428,6 +439,14 @@ namespace lsw {
 		 * \return Returns an LSW_HANDLED code.
 		 */
 		virtual DWORD						Notify_CustomDraw_ItemPrePaint( LPNMLVCUSTOMDRAW /*_lpcdParm*/ );
+
+		/**
+		 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_ITEMPOSTPAINT handler.
+		 * 
+		 * \param _lpcdParm The notifacation structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual DWORD						Notify_CustomDraw_ItemPostPaint( LPNMLVCUSTOMDRAW /*_lpcdParm*/ );
 
 		/**
 		 * Evaluates expressions to determine a new rectangle for the control.
@@ -474,6 +493,16 @@ namespace lsw {
 		 * Removes focus from all items.
 		 */
 		void								UnfocusAll();
+
+		/**
+		 * Takes an item RECT and returns the expanding/collapsing box rectangle that goes with it.
+		 * 
+		 * \param _rItemRect The item's RECT.
+		 * \param _ptItem The item.
+		 * \param _hHdc The listview's HDC.
+		 * \return Returns the item's expanding/collapsing box rectangle.
+		 **/
+		LSW_RECT							ExpansionBox( const RECT &_rItemRect, const ee::CTree<LSW_TREE_ROW> * _ptItem, HDC _hHdc );
 
 		/**
 		 * List-view window procedure.  The list-view is hidden.

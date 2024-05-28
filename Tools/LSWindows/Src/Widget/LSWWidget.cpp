@@ -1219,6 +1219,13 @@ namespace lsw {
 									}
 									LSW_RET( dwRet, dwRet != CDRF_DODEFAULT );
 								}
+								if ( pcdListViewDraw->nmcd.dwDrawStage == CDDS_ITEMPOSTPAINT ) {
+									DWORD dwRet = pmwSrc->Notify_CustomDraw_ItemPostPaint( pcdListViewDraw );
+									if ( _bIsDlg ) {
+										::SetWindowLongPtrW( _hWnd, DWLP_MSGRESULT, dwRet );
+									}
+									LSW_RET( dwRet, dwRet != CDRF_DODEFAULT );
+								}
 							}
 						}
 						if ( _bIsDlg ) {

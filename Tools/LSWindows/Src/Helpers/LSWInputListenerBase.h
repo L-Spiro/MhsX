@@ -21,15 +21,6 @@ namespace lsw {
 		};
 
 
-		// == Types.
-		/** Holds the discovered key data. */
-		struct LSW_KEYBOARD_RESULT {
-			DWORD									dwScanCode = 0;						/**< The key scancode. */
-			BYTE									bKeyCode = 0;						/**< The key virtual key code. */
-			BYTE									bKeyModifier = 0;					/**< The key modifier code. */
-		};
-
-
 		// == Functions.
 		/**
 		 * Starts listening for keyboard input.
@@ -86,7 +77,7 @@ namespace lsw {
 		/** The listening state. */
 		LSW_LISTENING_STATE							m_lsListenState;
 		/** The result after listening success. */
-		LSW_KEYBOARD_RESULT							m_krResult;
+		LSW_KEY										m_kResult;
 		/** Window property. */
 		static WCHAR								m_szProp[2];
 

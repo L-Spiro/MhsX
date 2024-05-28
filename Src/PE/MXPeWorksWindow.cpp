@@ -581,7 +581,7 @@ namespace mx {
 			MX_PRINT_FILE_OFFSET( wValue, _uiStructOffset, _dhHeader.Signature, swsTemp );
 			if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }
 
-			CUtilities::BytesToCString( &_dhHeader.Signature, sizeof( _dhHeader.Signature ), ssCString );
+			CUtilities::BytesToCString( &_dhHeader.Signature, sizeof( _dhHeader.Signature ), ssCString, FALSE, FALSE );
 			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			CUtilities::BytesToHexWithSpaces( &_dhHeader.Signature, sizeof( _dhHeader.Signature ), ssRaw );
 			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
@@ -705,7 +705,7 @@ namespace mx {
 			if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }
 
 			ssCString.SecureClear();
-			CUtilities::BytesToCString( &_dhHeader.Padding, sizeof( _dhHeader.Padding ), ssCString );
+			CUtilities::BytesToCString( &_dhHeader.Padding, sizeof( _dhHeader.Padding ), ssCString, FALSE, FALSE );
 			_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE );
 			ssRaw.SecureClear();
 			CUtilities::BytesToHexWithSpaces( &_dhHeader.Padding, sizeof( _dhHeader.Padding ), ssRaw );
@@ -750,7 +750,7 @@ namespace mx {
 			MX_PRINT_FILE_OFFSET( wValue, _uiStructOffset, _vStub, swsTemp );
 			if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }
 
-			CUtilities::BytesToCString( &_vStub[0], _vStub.size(), ssCString );
+			CUtilities::BytesToCString( &_vStub[0], _vStub.size(), ssCString, FALSE, FALSE );
 			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			CUtilities::BytesToHexWithSpaces( &_vStub[0], _vStub.size(), ssRaw );
 			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
@@ -784,7 +784,7 @@ namespace mx {
 			MX_PRINT_FILE_OFFSET( wValue, _uiStructOffset, _chHeader.PeSignature, swsTemp );
 			if ( !_tlTree.SetItemText( hItem, wValue, MW_PE_OFFSET ) ) { return false; }
 
-			CUtilities::BytesToCString( &_chHeader.PeSignature, sizeof( _chHeader.PeSignature ), ssCString );
+			CUtilities::BytesToCString( &_chHeader.PeSignature, sizeof( _chHeader.PeSignature ), ssCString, FALSE, FALSE );
 			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssCString ).c_str(), MW_PE_VALUE ) ) { return false; }
 			CUtilities::BytesToHexWithSpaces( &_chHeader.PeSignature, sizeof( _chHeader.PeSignature ), ssRaw );
 			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( ssRaw ).c_str(), MW_PE_BYTES ) ) { return false; }
