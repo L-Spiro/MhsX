@@ -15,7 +15,7 @@ namespace mx {
 		// Control ID's.
 		enum MX_QUICK_REPLACE_IDS {
 			MX_QRI_NONE,
-			MX_QRI_DIALOG,
+			MX_QRI_DIALOG					= 4400,
 			MX_QRI_SEARCH_GROUP,
 			/*MX_QRI_DATA_TYPE_LABEL,
 			MX_QRI_DATA_TYPE_COMBO,

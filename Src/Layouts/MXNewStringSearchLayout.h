@@ -15,7 +15,7 @@ namespace mx {
 		// Control ID's.
 		enum MX_STRING_SEARCH_IDS {
 			MX_SSI_NONE,
-			MX_SSI_DIALOG,
+			MX_SSI_DIALOG					= 4100,
 			
 			MX_SSI_SEARCH_GROUP,
 			MX_SSI_TYPE_LABEL,

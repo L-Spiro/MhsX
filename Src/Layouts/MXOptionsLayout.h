@@ -14,7 +14,7 @@ namespace mx {
 		// Control ID's.
 		enum MX_OPTIONS_IDS : WORD {
 			MX_OI_NONE,
-			MX_OI_DIALOG,
+			MX_OI_DIALOG					= 4200,
 			MX_OI_LIST,
 			MX_OI_OK,
 			MX_OI_CANCEL,

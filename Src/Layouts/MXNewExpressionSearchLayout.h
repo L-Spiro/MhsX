@@ -15,7 +15,7 @@ namespace mx {
 		// Control ID's.
 		enum MX_NEW_EXPRESSION_SEARCH_IDS {
 			MX_NESI_NONE,
-			MX_NESI_DIALOG,
+			MX_NESI_DIALOG					= 3800,
 
 			MX_NESI_SETTINGS_GROUP,
 			MX_NESI_SETTINGS_QQ_LABEL,

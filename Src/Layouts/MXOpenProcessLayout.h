@@ -14,7 +14,7 @@ namespace mx {
 		// Control ID's.
 		enum MX_OPEN_PROCESS_IDS {
 			MX_OPI_NONE,
-			MX_OPI_DIALOG,
+			MX_OPI_DIALOG					= 4200,
 			MX_OPI_GROUP,
 			MX_OPI_GROUPSHOW,
 			MX_OPI_LISTVIEW,
