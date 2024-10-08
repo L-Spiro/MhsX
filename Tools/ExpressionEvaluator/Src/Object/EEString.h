@@ -35,7 +35,15 @@ namespace ee {
 
 		// Creates a string representation of the object, with the string usually assumed to be in UTF-8 format.
 		virtual bool								ToString( std::string &_sString ) {
-			_sString = m_sObj;
+			_sString.reserve( m_sObj.size() + 2 );
+			_sString = "\"";
+			for ( std::string::size_type I = 0; I < m_sObj.size(); ++I ) {
+				if ( m_sObj[I] == '"' || m_sObj[I] == '\\' ) {
+					_sString.push_back( '\\' );
+				}
+				_sString.push_back( m_sObj[I] );
+			}
+			_sString += "\"";
 			return true;
 		}
 

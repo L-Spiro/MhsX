@@ -549,17 +549,17 @@ assignment_exp
 	| EE_CONST identifier '=' assignment_exp				{ m_peecContainer->CreateAssignment( $2, $4, '=', true, $$ ); }
 	| array_var '[' exp ']' assignment_op assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, $5, $$ ); }
 	| address_type exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( static_cast<ee::EE_CAST_TYPES>($1), $2, $5, $4, $$ ); }
-	| identifier '=' '{' initializer_list '}'				{ m_peecContainer->StartArray(); m_peecContainer->CreateArrayInitializer( $4, $$ ); m_peecContainer->EndArray(); }
+	| identifier '=' '{' initializer_list '}'				{ m_peecContainer->CreateVector( $4, $$ ); }
 	;
 
 initializer
-	: exp													{ $$ = $1; }
-	| '{' exp '}'											{ m_peecContainer->StartArray(); m_peecContainer->CreateArrayInitializer( $2, $$ ); m_peecContainer->EndArray(); }
-	| '{' exp ',' '}'										{ m_peecContainer->StartArray(); m_peecContainer->CreateArrayInitializer( $2, $$ ); m_peecContainer->EndArray(); }
+	: exp													{ m_peecContainer->CreateArrayInitializer( $1, $$ ); }
+	| '{' initializer_list '}'								{ m_peecContainer->CreateVector( $2, $$ ); m_peecContainer->CreateArrayInitializer( $$, $$ ); }
+	| '{' initializer_list ',' '}'							{ m_peecContainer->CreateVector( $2, $$ ); m_peecContainer->CreateArrayInitializer( $$, $$ ); }
 	;
 	
 initializer_list
-	: initializer											{ m_peecContainer->CreateArrayInitializerList( $1.sNodeIndex, size_t( ~0 ), $$ ); }
+	: initializer											{ $$ = $1; }
 	| initializer_list ',' initializer						{ m_peecContainer->CreateArrayInitializerList( $1.sNodeIndex, $3.sNodeIndex, $$ ); }
 	;
 	

@@ -69,8 +69,8 @@ namespace ee {
 
 			_sString += "}";
 		}
-		catch ( ... ) {}
-		return false;
+		catch ( ... ) { return false;}
+		return true;
 	}
 
 	/**

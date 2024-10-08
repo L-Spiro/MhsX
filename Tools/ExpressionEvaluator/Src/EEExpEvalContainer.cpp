@@ -2148,7 +2148,7 @@ namespace ee {
 	void CExpEvalContainer::CreateArrayInitializer( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARRAY_INITIALIZER;
 		_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
-		_ndNode.u.sStringIndex = m_vVectorStack[m_vVectorStack.size()-1];
+		//_ndNode.u.sStringIndex = m_vVectorStack[m_vVectorStack.size()-1];
 		AddNode( _ndNode );
 	}
 
@@ -2157,6 +2157,25 @@ namespace ee {
 		_ndNode.nType = EE_N_ARRAY_INITIALIZER_LIST;
 		_ndNode.v.sNodeIndex = _stLeftIdx;
 		_ndNode.u.sNodeIndex = _stRightIdx;
+		AddNode( _ndNode );
+	}
+
+	// Creates a vector.
+	void CExpEvalContainer::CreateVector( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_ARRAY_CREATE_VECTOR;
+		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
+
+		_ndNode.v.sStringIndex = m_vObjects.size();
+		ee::CObject * psObj = reinterpret_cast<ee::CVector *>(AllocateObject<ee::CVector>());
+		if ( !psObj ) { return; }
+		/*try {
+			m_vVectorStack.push_back( _ndNode.v.sStringIndex );
+		}
+		catch ( ... ) {
+			DeallocateObject( psObj );
+			return;
+		}*/
+
 		AddNode( _ndNode );
 	}
 
@@ -5068,6 +5087,11 @@ namespace ee {
 						EE_PUSH( _ndExp.v.sNodeIndex );
 						continue;
 					}
+					case EE_N_ARRAY_CREATE_VECTOR : {
+						m_vVectorStack.push_back( _ndExp.v.sStringIndex );
+						EE_PUSH( _ndExp.u.sNodeIndex );
+						continue;
+					}
 					case EE_N_ARG_LIST_ENTRY : {
 						if ( _ndExp.v.sNodeIndex != ~0 ) {
 							EE_PUSH( _ndExp.v.sNodeIndex );
@@ -6249,7 +6273,7 @@ namespace ee {
 						break;
 					}
 					case EE_N_ARRAY_INITIALIZER : {
-						size_t sIdx = _ndExp.u.sStringIndex;
+						size_t sIdx = m_vVectorStack[m_vVectorStack.size()-1];
 						if ( sIdx >= m_vObjects.size() ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
 						CObject * poVector = m_vObjects[sIdx];
 						if ( (poVector->Type() & CObject::EE_BIT_VECTOR) == 0 ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
@@ -6259,8 +6283,16 @@ namespace ee {
 						break;
 					}
 					case EE_N_ARRAY_INITIALIZER_LIST : {
+						volatile int gjhg  =0;
 						/*EE_PUSH( _ndExp.u.sNodeIndex );
 						EE_PUSH( _ndExp.v.sNodeIndex );*/
+						break;
+					}
+					case EE_N_ARRAY_CREATE_VECTOR : {
+						//EE_PUSH( _ndExp.u.sNodeIndex );
+						CObject * poVector = m_vObjects[_ndExp.v.sStringIndex];
+						(*soProcessMe.prResult) = poVector->CreateResult();
+						m_vVectorStack.pop_back();
 						break;
 					}
 					case EE_N_ARG_LIST_ENTRY : {
