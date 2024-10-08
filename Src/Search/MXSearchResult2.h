@@ -69,10 +69,11 @@ namespace mx {
 			MX_ADDRESS_ARRAY() :
 				pui8Values( nullptr ),
 				ui64AllocSize( 0 ),
+				ui64Address( 0 ),
 				ui64NumberOfEntries( 0 ),
 				ui16SizeOfValues( 0 ),
 				ui16Align( 0 ) {}
-			MX_ADDRESS_ARRAY( MX_ADDRESS_ARRAY &&_aaOther ) {
+			MX_ADDRESS_ARRAY( MX_ADDRESS_ARRAY &&_aaOther ) noexcept {
 				(*this) = std::move( _aaOther );
 			}
 			MX_ADDRESS_ARRAY( MX_ADDRESS_ARRAY &_aaOther ) {
@@ -87,32 +88,36 @@ namespace mx {
 				ui16Align = 0;
 			}
 
-			MX_ADDRESS_ARRAY &				operator = ( MX_ADDRESS_ARRAY &&_aaOther ) {
-				delete [] pui8Values;
+			MX_ADDRESS_ARRAY &				operator = ( MX_ADDRESS_ARRAY &&_aaOther ) noexcept {
+				if ( this != &_aaOther ) {
+					delete [] pui8Values;
 #define MX_MOVE( NEM ) NEM = _aaOther.NEM; _aaOther.NEM = 0;
-				MX_MOVE( pui8Values );
-				MX_MOVE( ui64AllocSize );
-				MX_MOVE( ui64NumberOfEntries );
-				MX_MOVE( ui16SizeOfValues );
-				MX_MOVE( ui64Address );
-				MX_MOVE( ui16Align );
-#undef MX_MOVE
-				return (*this);
-			}
-
-			MX_ADDRESS_ARRAY &				operator = ( MX_ADDRESS_ARRAY &_aaOther ) {
-				delete [] pui8Values;
-				ui64AllocSize = 0;
-				pui8Values = new( std::nothrow ) uint8_t[_aaOther.ui64AllocSize];
-				if ( pui8Values ) {
-					std::memcpy( pui8Values, _aaOther.pui8Values, _aaOther.ui64AllocSize );
-#define MX_MOVE( NEM ) NEM = _aaOther.NEM;
+					MX_MOVE( pui8Values );
 					MX_MOVE( ui64AllocSize );
 					MX_MOVE( ui64NumberOfEntries );
 					MX_MOVE( ui16SizeOfValues );
 					MX_MOVE( ui64Address );
 					MX_MOVE( ui16Align );
 #undef MX_MOVE
+				}
+				return (*this);
+			}
+
+			MX_ADDRESS_ARRAY &				operator = ( MX_ADDRESS_ARRAY &_aaOther ) {
+				if ( this != &_aaOther ) {
+					delete [] pui8Values;
+					ui64AllocSize = 0;
+					pui8Values = new( std::nothrow ) uint8_t[_aaOther.ui64AllocSize];
+					if ( pui8Values ) {
+						std::memcpy( pui8Values, _aaOther.pui8Values, _aaOther.ui64AllocSize );
+#define MX_MOVE( NEM ) NEM = _aaOther.NEM;
+						MX_MOVE( ui64AllocSize );
+						MX_MOVE( ui64NumberOfEntries );
+						MX_MOVE( ui16SizeOfValues );
+						MX_MOVE( ui64Address );
+						MX_MOVE( ui16Align );
+#undef MX_MOVE
+					}
 				}
 				return (*this);
 			}

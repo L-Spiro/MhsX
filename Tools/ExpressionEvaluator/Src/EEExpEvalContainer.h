@@ -23,7 +23,7 @@ namespace ee {
 
 	class CExpEvalContainer {
 		friend class						CExpEvalParser;
-		friend class						CStringRef;			// Hides away the details behind the optimization wherein string literals inside the Expression are read-only references to reduce copying etc.
+		friend class						CStringRef;				// Hides away the details behind the optimization wherein string literals inside the Expression are read-only references to reduce copying etc.
 	public :
 		CExpEvalContainer( CExpEvalLexer * _plLexer ) :
 			m_bTreatAllAsHex( false ),
@@ -49,61 +49,61 @@ namespace ee {
 		// == Enumerations.
 		// Error codes.
 		enum EE_ERROR_CODES {
-			EE_EC_SUCCESS,					/**< No problem. */
+			EE_EC_SUCCESS,											/**< No problem. */
 
-			EE_EC_INVALIDTREE,				/**< The syntax tree is invalid. */
-			EE_EC_OUTOFMEMORY,				/**< Out of memory. */
-			EE_EC_PROCESSINGERROR,			/**< General error. */
+			EE_EC_INVALIDTREE,										/**< The syntax tree is invalid. */
+			EE_EC_OUTOFMEMORY,										/**< Out of memory. */
+			EE_EC_PROCESSINGERROR,									/**< General error. */
 			
-			EE_EC_RESULTSTOOSHORT,			/**< The sub-expression results array is too short. */
-			EE_EC_NOIDENTIFIERHANDLER,		/**< No call to SetStringHandler() has been made with a non-nullptr value. */
-			EE_EC_IDENTHANDLERFAILED,		/**< Identifier handler returned false. */
+			EE_EC_RESULTSTOOSHORT,									/**< The sub-expression results array is too short. */
+			EE_EC_NOIDENTIFIERHANDLER,								/**< No call to SetStringHandler() has been made with a non-nullptr value. */
+			EE_EC_IDENTHANDLERFAILED,								/**< Identifier handler returned false. */
 			
-			EE_EC_VARNOTFOUND,				/**< Custom variable not found by name. */
-			EE_EC_VARHASBADTYPE,			/**< Custom variable has an invalid type. */
-			EE_EC_BADARRAYIDX,				/**< Array index out-of-range. */
-			EE_EC_NOADDRESSHANDLER,			/**< No address handler. */
-			EE_EC_ADDRESSHANDLERFAILED,		/**< Address handler failed. */
+			EE_EC_VARNOTFOUND,										/**< Custom variable not found by name. */
+			EE_EC_VARHASBADTYPE,									/**< Custom variable has an invalid type. */
+			EE_EC_BADARRAYIDX,										/**< Array index out-of-range. */
+			EE_EC_NOADDRESSHANDLER,									/**< No address handler. */
+			EE_EC_ADDRESSHANDLERFAILED,								/**< Address handler failed. */
 			
-			EE_EC_NOMEMBERHANDLER,			/**< No call to SetMemberAccessHandler() has been made with a non-nullptr value. */
-			EE_EC_MEMBERHANDELRFAILED,		/**< Member handler returned false. */
-			EE_EC_NOUSERHANDLER,			/**< No call to SetUserHandler() has been made with a non-nullptr value. */
-			EE_EC_USERHANDLERFAILED,		/**< User handler returned false. */
+			EE_EC_NOMEMBERHANDLER,									/**< No call to SetMemberAccessHandler() has been made with a non-nullptr value. */
+			EE_EC_MEMBERHANDELRFAILED,								/**< Member handler returned false. */
+			EE_EC_NOUSERHANDLER,									/**< No call to SetUserHandler() has been made with a non-nullptr value. */
+			EE_EC_USERHANDLERFAILED,								/**< User handler returned false. */
 			
-			EE_EC_FLOATWITHTILDE,			/**< The ~ cannot be used with floating-point values. */
-			EE_EC_UNRECOGNIZEDUNARYOPERATOR,/**< Unrecognized unary operator. */
-			EE_EC_UNRECOGNIZEDINTRINSIC0,	/**< Unrecognized no-parameter intrinsic. */
-			EE_EC_UNRECOGNIZEDINTRINSIC1,	/**< Unrecognized 1-parameter intrinsic. */
-			EE_EC_UNRECOGNIZEDINTRINSIC2,	/**< Unrecognized 2-parameter intrinsic. */
-			EE_EC_UNRECOGNIZEDINTRINSIC3,	/**< Unrecognized 3-parameter intrinsic. */
+			EE_EC_FLOATWITHTILDE,									/**< The ~ cannot be used with floating-point values. */
+			EE_EC_UNRECOGNIZEDUNARYOPERATOR,						/**< Unrecognized unary operator. */
+			EE_EC_UNRECOGNIZEDINTRINSIC0,							/**< Unrecognized no-parameter intrinsic. */
+			EE_EC_UNRECOGNIZEDINTRINSIC1,							/**< Unrecognized 1-parameter intrinsic. */
+			EE_EC_UNRECOGNIZEDINTRINSIC2,							/**< Unrecognized 2-parameter intrinsic. */
+			EE_EC_UNRECOGNIZEDINTRINSIC3,							/**< Unrecognized 3-parameter intrinsic. */
 
-			EE_EC_TOOMANYSIGNBITS,			/**< Too many sign bits in a custom float. */
-			EE_EC_TOOMANYEXPBITS,			/**< Too many exponent bits in a custom float. */
-			EE_EC_TOOMANYMANTISSABITS,		/**< Too many mantissa bits in a custom float. */
+			EE_EC_TOOMANYSIGNBITS,									/**< Too many sign bits in a custom float. */
+			EE_EC_TOOMANYEXPBITS,									/**< Too many exponent bits in a custom float. */
+			EE_EC_TOOMANYMANTISSABITS,								/**< Too many mantissa bits in a custom float. */
 
-			EE_EC_INVALILOOPCONDITIONEXP,	/**< Invalid expression inside a loop condition. */
-			EE_EC_INVALIDLOOPDECL,			/**< Invalid declaration inside a loop. */
+			EE_EC_INVALILOOPCONDITIONEXP,							/**< Invalid expression inside a loop condition. */
+			EE_EC_INVALIDLOOPDECL,									/**< Invalid declaration inside a loop. */
 
-			EE_EC_ARRAYACCESSERROR,			/**< Error accessing the contents of an array for a for-each loop. */
+			EE_EC_ARRAYACCESSERROR,									/**< Error accessing the contents of an array for a for-each loop. */
 
-			EE_EC_ERRORPROCESSINGOP,		/**< An invalid operator was submitted. */
+			EE_EC_ERRORPROCESSINGOP,								/**< An invalid operator was submitted. */
 
-			EE_EC_OPMUSTNOTBEZERO,			/**< 0 not allow on the right-hand side of an op (X / 0, X % 0, etc.) */
+			EE_EC_OPMUSTNOTBEZERO,									/**< 0 not allow on the right-hand side of an op (X / 0, X % 0, etc.) */
 
-			EE_EC_INVALIDOPERATOR,			/**< Invalid operation, such as "~0.3". */
+			EE_EC_INVALIDOPERATOR,									/**< Invalid operation, such as "~0.3". */
 
-			EE_EC_INVALIDAPIOPERATION,		/**< Invalid operation that is part of the base API implementation and is expected to be working. */
+			EE_EC_INVALIDAPIOPERATION,								/**< Invalid operation that is part of the base API implementation and is expected to be working. */
 
 			EE_EC_INVALID_WRITE_TO_CONST,							/**< Invalid attempt to write to a custom variable declared with "const". */
 
 			EE_EC_CONST_VAR_REQUIRES_CONST_EPRESSION,				/**< A const variable was attempted to be created but was not assigned a const expression. */
 
-			EE_EC_NONCONSTNOTALLOWED,		/**< A call to resolve a non-constant expression could have succeeded but failed due to passed-in flags. */
+			EE_EC_NONCONSTNOTALLOWED,								/**< A call to resolve a non-constant expression could have succeeded but failed due to passed-in flags. */
 
-			EE_EC_INVALIDCAST,				/**< An object failed to cast into another object or primitive, or could not be created from one. */
-			EE_EC_ARRAY_FROM_NON_OBJECT,	/**< An array access was attempted on a type that is not an object. */
+			EE_EC_INVALIDCAST,										/**< An object failed to cast into another object or primitive, or could not be created from one. */
+			EE_EC_ARRAY_FROM_NON_OBJECT,							/**< An array access was attempted on a type that is not an object. */
 
-			EE_EC_UNIMPLEMENTED,			/**< Error for development to indicate that a feature is not implemented yet. */
+			EE_EC_UNIMPLEMENTED,									/**< Error for development to indicate that a feature is not implemented yet. */
 		};
 
 		
@@ -896,6 +896,12 @@ namespace ee {
 		// Creates an arg list.
 		void								CreateArgList( const YYSTYPE::EE_NODE_DATA &_ndList, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Starts an array.
+		bool								StartArray( /*YYSTYPE::EE_NODE_DATA &_ndNode*/ );
+
+		// Ends an array.
+		void								EndArray( /*YYSTYPE::EE_NODE_DATA &_ndNode*/ );
+
 		// Creates a format string in the format of: "Some string {}.".format( Args0, Arg1 ).
 		void								CreateFormat( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndArgs, YYSTYPE::EE_NODE_DATA &_ndNode );
 
@@ -1067,6 +1073,9 @@ namespace ee {
 
 		// Referenced numbered parameters.
 		std::set<size_t>					m_sNumberedParmsAccessed;
+
+		// Stack of arrays being constructed.
+		std::vector<size_t>					m_vVectorStack;
 
 		// Treate everything as hex?
 		bool								m_bTreatAllAsHex;

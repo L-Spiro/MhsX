@@ -83,7 +83,9 @@ namespace mx {
 			MX_ADDRESS_ARRAY() :
 				pui8Values( nullptr ),
 				ui64AllocSize( 0 ),
-				ui64NumberOfEntries( 0 ) {}
+				ui64NumberOfEntries( 0 ),
+				ui16SizeOfAddresses( 0 ),
+				ui16SizeOfValues( 0 ) {}
 			MX_ADDRESS_ARRAY( MX_ADDRESS_ARRAY &&_aaOther ) {
 				(*this) = std::move( _aaOther );
 			}
@@ -98,35 +100,39 @@ namespace mx {
 			}
 
 			MX_ADDRESS_ARRAY &				operator = ( MX_ADDRESS_ARRAY &&_aaOther ) {
-				delete [] pui8Values;
+				if ( this != &_aaOther ) {
+					delete [] pui8Values;
 #define MX_MOVE( NEM ) NEM = _aaOther.NEM; _aaOther.NEM = 0;
-				MX_MOVE( pui8Values );
-				MX_MOVE( ui64AllocSize );
-				MX_MOVE( ui64NumberOfEntries );
-				MX_MOVE( ui16SizeOfAddresses );
-				MX_MOVE( ui16SizeOfValues );
-#undef MX_MOVE
-				return (*this);
-			}
-
-			MX_ADDRESS_ARRAY &				operator = ( MX_ADDRESS_ARRAY &_aaOther ) {
-				delete [] pui8Values;
-				ui64AllocSize = 0;
-				uint64_t ui64NewSize = (_aaOther.ui16SizeOfAddresses + _aaOther.ui16SizeOfValues) * _aaOther.ui64NumberOfEntries;
-				pui8Values = new( std::nothrow ) uint8_t[ui64NewSize];
-				if ( pui8Values ) {
-					std::memcpy( pui8Values, _aaOther.pui8Values, ui64NewSize );
-#define MX_MOVE( NEM ) NEM = _aaOther.NEM;
-					ui64AllocSize = ui64NewSize;
+					MX_MOVE( pui8Values );
+					MX_MOVE( ui64AllocSize );
 					MX_MOVE( ui64NumberOfEntries );
 					MX_MOVE( ui16SizeOfAddresses );
 					MX_MOVE( ui16SizeOfValues );
 #undef MX_MOVE
 				}
-				else {
-					ui64NumberOfEntries = 0;
+				return (*this);
+			}
+
+			MX_ADDRESS_ARRAY &				operator = ( MX_ADDRESS_ARRAY &_aaOther ) {
+				if ( this != &_aaOther ) {
+					delete [] pui8Values;
 					ui64AllocSize = 0;
-					ui16SizeOfAddresses = ui16SizeOfValues = 0;
+					uint64_t ui64NewSize = (_aaOther.ui16SizeOfAddresses + _aaOther.ui16SizeOfValues) * _aaOther.ui64NumberOfEntries;
+					pui8Values = new( std::nothrow ) uint8_t[ui64NewSize];
+					if ( pui8Values ) {
+						std::memcpy( pui8Values, _aaOther.pui8Values, ui64NewSize );
+#define MX_MOVE( NEM ) NEM = _aaOther.NEM;
+						ui64AllocSize = ui64NewSize;
+						MX_MOVE( ui64NumberOfEntries );
+						MX_MOVE( ui16SizeOfAddresses );
+						MX_MOVE( ui16SizeOfValues );
+#undef MX_MOVE
+					}
+					else {
+						ui64NumberOfEntries = 0;
+						ui64AllocSize = 0;
+						ui16SizeOfAddresses = ui16SizeOfValues = 0;
+					}
 				}
 				return (*this);
 			}
@@ -135,13 +141,13 @@ namespace mx {
 			// == Function.
 			// Adds an address and value.
 			bool							Add( uint64_t _ui64Addr, uint8_t * _puiData ) {
-				uint64_t ui64NewSize = (ui16SizeOfAddresses + ui16SizeOfValues) * (ui64NumberOfEntries + 1ULL);
+				uint64_t ui64NewSize = (uint64_t( ui16SizeOfAddresses ) + ui16SizeOfValues) * (ui64NumberOfEntries + 1ULL);
 				if ( ui64AllocSize < ui64NewSize ) {
 					if ( !ReAlloc( std::max( 8ULL * 1024ULL * 1024ULL, ui64AllocSize * 2ULL ) ) ) {
 						return false;
 					}
 				}
-				size_t sIdx = (ui16SizeOfAddresses + ui16SizeOfValues) * ui64NumberOfEntries;
+				size_t sIdx = (uint64_t( ui16SizeOfAddresses ) + ui16SizeOfValues) * ui64NumberOfEntries;
 				//std::memcpy( &pui8Values[sIdx], &_ui64Addr, ui16SizeOfAddresses );
 				MX_SR1_SMALLCOPY_ADDRESS( &pui8Values[sIdx], &_ui64Addr, ui16SizeOfAddresses );
 				std::memcpy( &pui8Values[sIdx] + ui16SizeOfAddresses, _puiData, ui16SizeOfValues );

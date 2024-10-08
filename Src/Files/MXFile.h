@@ -1,6 +1,8 @@
 #pragma once
 
 #include <LSWWin.h>
+
+#include <filesystem>
 #include <vector>
 
 namespace mx {
@@ -106,6 +108,28 @@ namespace mx {
 
 		// Determines if the given path represents an existing folder (not file).
 		static bool				IsFolder( LPCWSTR _lpwFolder );
+
+		/**
+		 * Finds files/folders in a given directory.
+		 * 
+		 * \param _pcFolderPath The path to the directory to search.
+		 * \param _pcSearchString A wildcard search string to find only certain files/folders.
+		 * \param _bIncludeFolders If true, folders are included in the return.
+		 * \param _vResult The return array.  Found files and folders are appended to the array.
+		 * \return Returns _vResult.
+		 **/
+		static std::vector<std::wstring> &
+								FindFiles( const wchar_t * _pcFolderPath, const wchar_t * _pcSearchString, bool _bIncludeFolders, std::vector<std::wstring> &_vResult );
+
+		/**
+		 * Delets all files of a given type in a given folder.
+		 * 
+		 * \param _pcFolderPath The directory in which to delete files.
+		 * \param _pcType The file type to delete.
+		 * \param _bIncludeFolders Whether to include subfolders or not.
+		 * \return Returns the number of files deleted.
+		 **/
+		static size_t			DeleteFiles( const wchar_t * _pcFolderPath, const wchar_t * _pcType, bool _bIncludeFolders );
 
 
 	protected :

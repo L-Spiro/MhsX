@@ -13,6 +13,7 @@
 #include "Array/EEUInt64Array.h"
 #include "Float16/EEFloat16.h"
 #include "Object/EEString.h"
+#include "Object/EEVector.h"
 //#include "Object/EEStringRef.h"
 #include "Unicode/EEUnicode.h"
 
@@ -37,6 +38,12 @@ namespace ee {
 			m_vArrayData[I].m_pabBase = nullptr;
 		}
 		m_vArrayData.clear();
+
+
+		for ( auto I = m_vObjects.size(); I--; ) {
+			delete m_vObjects[I];
+		}
+		m_vObjects.clear();
 	}
 
 	// == Function.
@@ -2141,6 +2148,7 @@ namespace ee {
 	void CExpEvalContainer::CreateArrayInitializer( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARRAY_INITIALIZER;
 		_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
+		_ndNode.u.sStringIndex = m_vVectorStack[m_vVectorStack.size()-1];
 		AddNode( _ndNode );
 	}
 
@@ -2873,6 +2881,33 @@ namespace ee {
 		_ndNode.nType = EE_N_ARG_LIST;
 		_ndNode.u.sNodeIndex = _ndList.sNodeIndex;
 		AddNode( _ndNode );
+	}
+
+	// Starts an array.
+	bool CExpEvalContainer::StartArray( /*YYSTYPE::EE_NODE_DATA &_ndNode*/ ) {
+		size_t sIdx = m_vObjects.size();
+		ee::CObject * psObj = reinterpret_cast<ee::CVector *>(AllocateObject<ee::CVector>());
+		if ( !psObj ) { return false; }
+		try {
+			m_vVectorStack.push_back( sIdx );
+		}
+		catch ( ... ) {
+			DeallocateObject( psObj );
+			return false;
+		}
+		/*_ndNode.nType = EE_N_START_VECTOR;
+		_ndNode.u.sNodeIndex = sIdx;
+		AddNode( _ndNode );*/
+		return true;
+	}
+
+	// Ends an array.
+	void CExpEvalContainer::EndArray( /*YYSTYPE::EE_NODE_DATA &_ndNode*/ ) {
+		size_t sIdx = m_vVectorStack[m_vVectorStack.size()-1];
+		m_vVectorStack.pop_back();
+		/*_ndNode.nType = EE_N_END_VECTOR;
+		_ndNode.u.sNodeIndex = sIdx;
+		AddNode( _ndNode );*/
 	}
 
 	// Creates a format string in the format of: "Some string {}.".format( Args0, Arg1 ).
@@ -5022,6 +5057,17 @@ namespace ee {
 						EE_PUSH( _ndExp.x.sNodeIndex );
 						continue;
 					}
+					case EE_N_ARRAY_INITIALIZER : {
+						EE_PUSH( _ndExp.v.sNodeIndex );
+						continue;
+					}
+					case EE_N_ARRAY_INITIALIZER_LIST : {
+						if ( _ndExp.u.sNodeIndex != size_t( ~0 ) ) {
+							EE_PUSH( _ndExp.u.sNodeIndex );
+						}
+						EE_PUSH( _ndExp.v.sNodeIndex );
+						continue;
+					}
 					case EE_N_ARG_LIST_ENTRY : {
 						if ( _ndExp.v.sNodeIndex != ~0 ) {
 							EE_PUSH( _ndExp.v.sNodeIndex );
@@ -5038,6 +5084,7 @@ namespace ee {
 						EE_PUSH( _ndExp.v.sNodeIndex );
 						continue;
 					}
+					
 				}
 			}
 			else {
@@ -6201,6 +6248,21 @@ namespace ee {
 
 						break;
 					}
+					case EE_N_ARRAY_INITIALIZER : {
+						size_t sIdx = _ndExp.u.sStringIndex;
+						if ( sIdx >= m_vObjects.size() ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						CObject * poVector = m_vObjects[sIdx];
+						if ( (poVector->Type() & CObject::EE_BIT_VECTOR) == 0 ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						ee::CVector * pvThis = static_cast<ee::CVector *>(poVector);
+						(*soProcessMe.prResult) = pvThis->PushBack( soProcessMe.sSubResults[0] );
+						
+						break;
+					}
+					case EE_N_ARRAY_INITIALIZER_LIST : {
+						/*EE_PUSH( _ndExp.u.sNodeIndex );
+						EE_PUSH( _ndExp.v.sNodeIndex );*/
+						break;
+					}
 					case EE_N_ARG_LIST_ENTRY : {
 						if ( m_vFuncParms.size() ) {
 							m_vFuncParms[m_vFuncParms.size()-1].push_back( soProcessMe.sSubResults[0] );
@@ -6219,6 +6281,9 @@ namespace ee {
 							// This counts as a function call so pop the argument stack.
 							m_vFuncParms.pop_back();
 						}
+						break;
+					}
+					case EE_N_START_VECTOR : {
 						break;
 					}
 				}

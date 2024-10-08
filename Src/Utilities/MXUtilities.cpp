@@ -3481,7 +3481,7 @@ namespace mx {
 		const char * pcInput = _sInput.c_str();
 		size_t sLen = _sInput.size();
 		MX_DATA_TYPES dtDefaultType = _dtTargetType;
-#define MX_SKIP_WS		while ( I < sLen && ee::CExpEval::IsWhiteSpace( _sInput[I] ) ) { ++I; }
+#define MX_SKIP_WS		while ( I < sLen && (ee::CExpEval::IsWhiteSpace( _sInput[I] ) || _sInput[I] == ',') ) { ++I; }
 		for ( size_t I = 0; I < sLen; ) {
 			MX_SKIP_WS;
 
@@ -4302,16 +4302,16 @@ namespace mx {
 
 		// 32-bit float in binary.
 		if ( (_rResult.ncType) == ee::EE_NC_FLOATING ) {
-				union {
-					float			fVal;
-					uint32_t		ui32Val;
-				} uTemp;
-				uTemp.fVal = static_cast<float>(_rResult.u.dVal);
+			union {
+				float			fVal;
+				uint32_t		ui32Val;
+			} uTemp;
+			uTemp.fVal = static_cast<float>(_rResult.u.dVal);
 
-				ToBinary( uTemp.ui32Val, wsTemp, 32 );
+			ToBinary( uTemp.ui32Val, wsTemp, 32 );
 
-				wsTemp.push_back( L',' );
-				wsTemp.push_back( L' ' );
+			wsTemp.push_back( L',' );
+			wsTemp.push_back( L' ' );
 		}
 
 		// Get the number of bits to display.
@@ -4356,6 +4356,36 @@ namespace mx {
 			// Inverted-sign version.
 			ToBinary( -_rResult.u.ui64Val, wsTemp, ui32Bits );
 		}
+
+
+
+		// 32-bit float in octal.
+		wsTemp.push_back( L',' );
+		wsTemp.push_back( L' ' );
+		if ( (_rResult.ncType) == ee::EE_NC_FLOATING ) {
+			union {
+				float			fVal;
+				uint32_t		ui32Val;
+			} uTemp;
+			uTemp.fVal = static_cast<float>(_rResult.u.dVal);
+
+			ToOct( uTemp.ui32Val, wsTemp, 11 );
+
+			wsTemp.push_back( L',' );
+			wsTemp.push_back( L' ' );
+		}
+
+		ui32Bits = (_rResult.ncType) == ee::EE_NC_FLOATING ? 23 : 1;
+		ToOct( _rResult.u.ui64Val, wsTemp, ui32Bits );
+		if ( (_rResult.ncType) == ee::EE_NC_SIGNED && _rResult.u.i64Val < 0 ) {
+			wsTemp.push_back( L',' );
+			wsTemp.push_back( L' ' );
+			wsTemp.push_back( L'-' );
+			// Inverted-sign version.
+			ToOct( -_rResult.u.ui64Val, wsTemp, ui32Bits );
+		}
+
+
 		if ( _bClosingPar ) {
 			wsTemp.push_back( L')' );
 		}

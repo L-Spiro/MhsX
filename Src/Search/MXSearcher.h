@@ -2,10 +2,12 @@
 #include "../MXMhsX.h"
 #include "../MemHack/MXProcess.h"
 #include "../Utilities/MXUtilities.h"
+#include <Float16/EEFloat16.h>
 #include "MXAddressChunkList.h"
 #include "MXSearchResultBase.h"
+
 #include <cassert>
-#include <Float16/EEFloat16.h>
+#include <filesystem>
 
 
 namespace mx {
@@ -184,6 +186,31 @@ namespace mx {
 			PreprocessByteSwap( _pvData, _stLen, (*pspParms) );
 		}
 
+		/**
+		 * Gets the search save directory for a given search index.
+		 * 
+		 * \param _ui32Idx The search index.
+		 * \return Returns the path to the given search index.
+		 **/
+		static std::filesystem::path		SearchDir( uint32_t _ui32Idx ) {
+			auto aPath = std::filesystem::path( CSystem::GetCurDirW() );
+			aPath.append( std::to_wstring( _ui32Idx ) );
+			return aPath;
+		}
+
+		/**
+		 * Gets the path to a search file given the search index and sub-search index.
+		 * 
+		 * \param _ui32Idx The search index.
+		 * \param _ui32SubIdx The sub-search index.
+		 * \return Returns the path to the given search index.
+		 **/
+		static std::filesystem::path		SearchDir( uint32_t _ui32Idx, uint32_t _ui32SubIdx ) {
+			auto aPath = SearchDir( _ui32Idx );
+			aPath.append( std::to_wstring( _ui32Idx ) + L".mhss" );
+			return aPath;
+		}
+
 
 	protected :
 		// == Types.
@@ -300,6 +327,10 @@ namespace mx {
 		MX_SEARCH_PARMS						m_spLastSearchParms;
 		// Last subsearch parameters.
 		MX_SUBSEARCH_PARMS					m_spLastSubSearchParms;
+		// Number of new searches made.
+		uint32_t							m_ui32SearchCnt = 0;
+		// Number of searches to retain on disk.
+		uint32_t							m_ui32SearchRetain = 5;
 		// Was the last search a subsearch?
 		bool								m_bLastSearchWasSubsearch;
 

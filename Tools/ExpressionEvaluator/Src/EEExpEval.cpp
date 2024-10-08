@@ -1099,6 +1099,9 @@ namespace ee {
 			bNegate = true;
 			++_pcText;
 		}
+		else if ( _pcText[0] == '+' ) {
+			++_pcText;
+		}
 
 		// Skip whitespace.
 		while ( IsWhiteSpace( (*_pcText) ) ) {

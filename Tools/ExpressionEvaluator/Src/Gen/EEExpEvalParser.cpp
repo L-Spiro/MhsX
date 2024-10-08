@@ -2009,7 +2009,7 @@ namespace yy {
 
   case 314:
 
-    {}
+    { m_peecContainer->StartArray(); m_peecContainer->CreateArrayInitializer( (yysemantic_stack_[(5) - (4)].ndData), (yyval.ndData) ); m_peecContainer->EndArray(); }
     break;
 
   case 315:
@@ -2019,12 +2019,12 @@ namespace yy {
 
   case 316:
 
-    { m_peecContainer->CreateArrayInitializer( (yysemantic_stack_[(3) - (2)].ndData), (yyval.ndData) ); }
+    { m_peecContainer->StartArray(); m_peecContainer->CreateArrayInitializer( (yysemantic_stack_[(3) - (2)].ndData), (yyval.ndData) ); m_peecContainer->EndArray(); }
     break;
 
   case 317:
 
-    { m_peecContainer->CreateArrayInitializer( (yysemantic_stack_[(4) - (2)].ndData), (yyval.ndData) ); }
+    { m_peecContainer->StartArray(); m_peecContainer->CreateArrayInitializer( (yysemantic_stack_[(4) - (2)].ndData), (yyval.ndData) ); m_peecContainer->EndArray(); }
     break;
 
   case 318:

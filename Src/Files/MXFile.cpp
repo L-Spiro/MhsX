@@ -314,6 +314,81 @@ namespace mx {
 			(dwAttr & FILE_ATTRIBUTE_DIRECTORY);
 	}
 
+	/**
+	 * Finds files/folders in a given directory.
+	 * 
+	 * \param _pcFolderPath The path to the directory to search.
+	 * \param _pcSearchString A wildcard search string to find only certain files/folders.
+	 * \param _bIncludeFolders If true, folders are included in the return.
+	 * \param _vResult The return array.  Found files and folders are appended to the array.
+	 * \return Returns _vResult.
+	 **/
+	std::vector<std::wstring> & CFile::FindFiles( const wchar_t * _pcFolderPath, const wchar_t * _pcSearchString, bool _bIncludeFolders, std::vector<std::wstring> &_vResult ) {
+		std::filesystem::path sPath = std::filesystem::path( _pcFolderPath ).make_preferred();
+
+		std::filesystem::path sSearch;
+		if ( _pcSearchString ) { sSearch = std::filesystem::path( _pcSearchString ).make_preferred(); }
+		else { sSearch = L"*"; }
+
+
+		std::filesystem::path sSearchPath = (sPath / sSearch).make_preferred();
+		// Add the "\\?\" prefix to the path to support long paths
+		std::wstring wsSearchPath = sSearchPath.native();
+		if ( wsSearchPath.compare( 0, 4, L"\\\\?\\" ) != 0 ) {
+			wsSearchPath = L"\\\\?\\" + wsSearchPath;
+		}
+
+		WIN32_FIND_DATAW wfdData;
+		HANDLE hDir = ::FindFirstFileW( wsSearchPath.c_str(), &wfdData );
+		if ( INVALID_HANDLE_VALUE == hDir ) { return _vResult; }
+		
+		do {
+			if ( wfdData.cFileName[0] == L'.' ) { continue; }
+			bool bIsFolder = ((wfdData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0);
+			if ( !_bIncludeFolders && bIsFolder ) { continue; }
+			try {
+				// Construct the full path to the file
+				std::filesystem::path pFilePath = sPath / wfdData.cFileName;
+				pFilePath = pFilePath.make_preferred();
+
+				// Add the "\\?\" prefix if it's not already present
+				std::wstring wsFilePath = pFilePath.native();
+				if ( wsFilePath.compare( 0, 4, L"\\\\?\\" ) != 0 ) {
+					wsFilePath = L"\\\\?\\" + wsFilePath;
+				}
+
+				_vResult.push_back( wsFilePath );
+			}
+			catch ( ... ) {
+				::FindClose( hDir );
+				return _vResult;
+			}
+		} while ( ::FindNextFileW( hDir, &wfdData ) );
+
+		::FindClose( hDir );
+		return _vResult;
+	}
+
+	/**
+	 * Delets all files of a given type in a given folder.
+	 * 
+	 * \param _pcFolderPath The directory in which to delete files.
+	 * \param _pcType The file type to delete.
+	 * \param _bIncludeFolders Whether to include subfolders or not.
+	 * \return Returns the number of files deleted.
+	 **/
+	size_t CFile::DeleteFiles( const wchar_t * _pcFolderPath, const wchar_t * _pcType, bool _bIncludeFolders ) {
+		std::vector<std::wstring> vList;
+		FindFiles( _pcFolderPath, (std::wstring( L"*." ) + _pcType).c_str(), _bIncludeFolders, vList );
+		size_t sCnt = 0;
+		for ( auto I = vList.size(); I--; ) {
+			if ( IsFile( vList[I].c_str() ) ) {
+				sCnt += ::DeleteFileW( vList[I].c_str() );
+			}
+		}
+		return sCnt;
+	}
+
 	// Converts a WIN32_FILE_ATTRIBUTE_DATA structure to an MX_FILE_ATTR structure.
 	CFile::MX_FILE_ATTR CFile::Win32AttrToMxAttr( const WIN32_FILE_ATTRIBUTE_DATA &_wfadData ) {
 		MX_FILE_ATTR faAttr = {

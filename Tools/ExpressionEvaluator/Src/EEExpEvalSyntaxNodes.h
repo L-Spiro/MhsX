@@ -103,6 +103,8 @@ namespace ee {
 		EE_N_ARG_LIST_ENTRY,
 		EE_N_ARG_LIST,
 		EE_N_FORMAT,
+		EE_N_START_VECTOR,
+		EE_N_END_VECTOR,
 	};
 
 	// Constant types.  Ordered by cast priority.

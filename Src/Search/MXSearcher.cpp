@@ -81,6 +81,7 @@ namespace mx {
 
 	// Searches the target process.
 	bool CSearcher::Search( const MX_SEARCH_PARMS &_spParms, HWND _hProgressUpdate, uint64_t * _pui64TotalFound ) {
+		//CSystem::GetCurDirW()
 		uint64_t ui64SearchTimeStart = CUtilities::CurTimeInMicros();
 
 		MX_SEARCH_PARMS spParmsCopy = _spParms;
@@ -374,6 +375,15 @@ namespace mx {
 
 				m_spLastSearchParms = spParmsCopy;
 				m_ui64LastSearchTime = CUtilities::CurTimeInMicros() - ui64SearchTimeStart;
+
+				++m_ui32SearchCnt;
+				if ( m_ui32SearchCnt >= m_ui32SearchRetain ) {
+					//CFile::DeleteFiles( SearchDir( m_ui32SearchCnt - m_ui32SearchRetain ).c_str(), L"mhss", true );
+					try {
+						std::filesystem::remove_all( SearchDir( m_ui32SearchCnt - m_ui32SearchRetain ) );
+					}
+					catch ( ... ) {}
+				}
 			}
 			
 		}

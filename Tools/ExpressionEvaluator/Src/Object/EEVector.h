@@ -142,6 +142,9 @@ namespace ee {
 		// Returns the ordinal value of the object as a Unicode character (always EE_NC_UNSIGNED).
 		virtual CExpEvalContainer::EE_RESULT		Ord() const { return { EE_NC_INVALID }; }
 
+		// Append an item to the end of the vector.
+		virtual CExpEvalContainer::EE_RESULT		PushBack( CExpEvalContainer::EE_RESULT &_rRet ) { m_vBacking.push_back( _rRet ); return _rRet; }
+
 
 	protected :
 		// == Members.

@@ -549,13 +549,13 @@ assignment_exp
 	| EE_CONST identifier '=' assignment_exp				{ m_peecContainer->CreateAssignment( $2, $4, '=', true, $$ ); }
 	| array_var '[' exp ']' assignment_op assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, $5, $$ ); }
 	| address_type exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( static_cast<ee::EE_CAST_TYPES>($1), $2, $5, $4, $$ ); }
-	| identifier '=' '{' initializer_list '}'				{}
+	| identifier '=' '{' initializer_list '}'				{ m_peecContainer->StartArray(); m_peecContainer->CreateArrayInitializer( $4, $$ ); m_peecContainer->EndArray(); }
 	;
-	
+
 initializer
 	: exp													{ $$ = $1; }
-	| '{' exp '}'											{ m_peecContainer->CreateArrayInitializer( $2, $$ ); }
-	| '{' exp ',' '}'										{ m_peecContainer->CreateArrayInitializer( $2, $$ ); }
+	| '{' exp '}'											{ m_peecContainer->StartArray(); m_peecContainer->CreateArrayInitializer( $2, $$ ); m_peecContainer->EndArray(); }
+	| '{' exp ',' '}'										{ m_peecContainer->StartArray(); m_peecContainer->CreateArrayInitializer( $2, $$ ); m_peecContainer->EndArray(); }
 	;
 	
 initializer_list

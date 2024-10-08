@@ -11,6 +11,7 @@
 #include <EEExpEvalContainer.h>
 #include <clocale>
 #include <cwctype>
+#include <filesystem>
 #include <mbstring.h>
 #include <random>
 #include <string>

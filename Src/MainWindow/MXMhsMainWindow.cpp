@@ -1029,6 +1029,7 @@ namespace mx {
 		LONG lSuspend = STATUS_ABANDONED;
 		if ( _pspParms->bPause ) { lSuspend = MemHack()->Process().SuspendProcess(); }
 		uint64_t ui64TotalFound = 0;
+		
 		bool bRes = m_pmhMemHack->Searcher().Search( (*_pspParms), _pwProgress ? _pwProgress->Wnd() : NULL, &ui64TotalFound );
 		
 		if ( !bRes ) {
