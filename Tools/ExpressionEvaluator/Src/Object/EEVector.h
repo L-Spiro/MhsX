@@ -145,6 +145,122 @@ namespace ee {
 		// Append an item to the end of the vector.
 		virtual CExpEvalContainer::EE_RESULT		PushBack( CExpEvalContainer::EE_RESULT &_rRet ) { m_vBacking.push_back( _rRet ); return _rRet; }
 
+		// Gets the capacity.
+		virtual CExpEvalContainer::EE_RESULT		Capacity() const {
+			CExpEvalContainer::EE_RESULT rRet = { .ncType = EE_NC_UNSIGNED };
+			rRet.u.ui64Val = m_vBacking.capacity();
+			return rRet;
+		}
+
+		// Gets whether the vector is empty or not.
+		virtual CExpEvalContainer::EE_RESULT		Empty() const {
+			CExpEvalContainer::EE_RESULT rRet = { .ncType = EE_NC_UNSIGNED };
+			rRet.u.ui64Val = m_vBacking.empty();
+			return rRet;
+		}
+
+		// Clears the array.
+		virtual CExpEvalContainer::EE_RESULT		Clear() { m_vBacking.clear(); return CreateResult(); }
+
+		// Appends to the array.
+		virtual CExpEvalContainer::EE_RESULT		Append( CExpEvalContainer::EE_RESULT &_rRet ) { return PushBack( _rRet ); }
+
+		// Pops the back item and returns it.
+		virtual CExpEvalContainer::EE_RESULT		PopBack() {
+			if ( !m_vBacking.size() ) { return { .ncType = EE_NC_INVALID }; }
+			auto aTmp = m_vBacking[m_vBacking.size()-1];
+			m_vBacking.pop_back();
+			return aTmp;
+		}
+
+		// Gets a value at an index in the array.
+		virtual CExpEvalContainer::EE_RESULT		At( size_t _sIdx ) {
+			_sIdx = ArrayIndexToLinearIndex( _sIdx, m_vBacking.size() );
+			CExpEvalContainer::EE_RESULT rRet = { .ncType = EE_NC_UNSIGNED };
+			if ( _sIdx == EE_INVALID_IDX ) { rRet.ncType = EE_NC_INVALID; return rRet; }
+			return m_vBacking.at( _sIdx );
+		}
+
+		// Assigns a value at a given index in the array.
+		virtual CExpEvalContainer::EE_RESULT		Assign( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) { m_vBacking.assign( _sIdx, _rRet ); return CreateResult(); }
+
+		// Inserts a value at a given index in the array.
+		virtual CExpEvalContainer::EE_RESULT		Insert( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
+			_sIdx = ArrayIndexToLinearIndex( _sIdx, m_vBacking.size() );
+			CExpEvalContainer::EE_RESULT rRet = { .ncType = EE_NC_UNSIGNED };
+			if ( _sIdx == EE_INVALID_IDX ) { rRet.ncType = EE_NC_INVALID; return rRet; }
+
+			m_vBacking.insert( m_vBacking.begin() + _sIdx, _rRet );
+			return CreateResult();
+		}
+
+		// Erases a value at an index in the array.
+		virtual CExpEvalContainer::EE_RESULT		Erase( size_t _sIdx ) {
+			_sIdx = ArrayIndexToLinearIndex( _sIdx, m_vBacking.size() );
+			CExpEvalContainer::EE_RESULT rRet = { .ncType = EE_NC_UNSIGNED };
+			if ( _sIdx == EE_INVALID_IDX ) { rRet.ncType = EE_NC_INVALID; return rRet; }
+
+			rRet = m_vBacking.at( _sIdx );
+			m_vBacking.erase( m_vBacking.begin() + _sIdx );
+			return rRet;
+		}
+
+		// Gets the max size.
+		virtual CExpEvalContainer::EE_RESULT		MaxSize() const {
+			CExpEvalContainer::EE_RESULT rRet = { .ncType = EE_NC_UNSIGNED };
+			rRet.u.ui64Val = m_vBacking.max_size();
+			return rRet;
+		}
+
+		// Gets the size.
+		virtual CExpEvalContainer::EE_RESULT		Size() const {
+			return Len();
+		}
+
+		// Reserves memory for X number of elements.
+		virtual CExpEvalContainer::EE_RESULT		Reserve( size_t _sTotal ) {
+			m_vBacking.reserve( _sTotal );
+			return CreateResult();
+		}
+
+		// Resize to X elements.
+		virtual CExpEvalContainer::EE_RESULT		Resize( size_t _sTotal ) {
+			m_vBacking.resize( _sTotal );
+			return CreateResult();
+		}
+
+		// Shrinks to fit.
+		virtual CExpEvalContainer::EE_RESULT		ShrinkToFit() {
+			m_vBacking.shrink_to_fit();
+			return CreateResult();
+		}
+
+		// Swaps the vector with another.
+		virtual CExpEvalContainer::EE_RESULT		Swap( CExpEvalContainer::EE_RESULT &_rRet ) {
+			if ( _rRet.ncType != EE_NC_OBJECT ) { return { .ncType = EE_NC_INVALID }; }
+			if ( !_rRet.u.poObj ) { return { .ncType = EE_NC_INVALID }; }
+			if ( !(_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { return { .ncType = EE_NC_INVALID }; }
+			m_vBacking.swap( static_cast<ee::CVector *>(_rRet.u.poObj)->m_vBacking );
+			return CreateResult();
+		}
+
+		// Sums all elements.
+		virtual CExpEvalContainer::EE_RESULT		Sum();
+
+		// Element-wise addition.
+		virtual CExpEvalContainer::EE_RESULT		Add( const ee::CVector * _pvOther, ee::CVector * _pvReturn );
+
+		// Element-wise subtraction.
+		virtual CExpEvalContainer::EE_RESULT		Sub( const ee::CVector * _pvOther, ee::CVector * _pvReturn );
+
+		// Element-wise multiplication.
+		virtual CExpEvalContainer::EE_RESULT		Mul( const ee::CVector * _pvOther, ee::CVector * _pvReturn );
+
+		// Scalar multiplication.
+		virtual CExpEvalContainer::EE_RESULT		Mul( const CExpEvalContainer::EE_RESULT &_rScalar, ee::CVector * _pvReturn );
+
+		// Dot product.
+		virtual CExpEvalContainer::EE_RESULT		Dot( const ee::CVector * _pvOther );
 
 	protected :
 		// == Members.

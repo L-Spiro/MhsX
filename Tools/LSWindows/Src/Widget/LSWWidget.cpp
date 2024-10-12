@@ -70,7 +70,7 @@ namespace lsw {
 
 		// Apply expressions.
 #ifdef _DEBUG
-#define LSW_ERROR_PRINT( TEXTEXP, ERROR )	::MessageBoxA( NULL, _wlLayout.TEXTEXP, "Invalid " #ERROR "Expression", MB_OK )
+#define LSW_ERROR_PRINT( TEXTEXP, ERROR )	::MessageBoxA( NULL, _wlLayout.TEXTEXP, "Invalid " #ERROR " Expression", MB_OK )
 #else
 #define LSW_ERROR_PRINT( TEXTEXP, ERROR )
 #endif	// #ifdef _DEBUG

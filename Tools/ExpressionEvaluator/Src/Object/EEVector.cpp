@@ -186,9 +186,9 @@ namespace ee {
 			case EE_NC_OBJECT : {
 				if ( _rRet.u.poObj ) {
 					if ( _rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR ) {
-						if ( reinterpret_cast<const CVector &>(_rRet.u.poObj).m_vBacking.size() != m_vBacking.size() ) { return false; }
+						if ( reinterpret_cast<const CVector *>(_rRet.u.poObj)->m_vBacking.size() != m_vBacking.size() ) { return false; }
 						for ( auto I = m_vBacking.size(); I--; ) {
-							if ( !m_peecContainer->EqualResultOrObject( m_vBacking[I], reinterpret_cast<const CVector &>(_rRet.u.poObj).m_vBacking[I] ) ) { return false; }
+							if ( !m_peecContainer->EqualResultOrObject( m_vBacking[I], reinterpret_cast<const CVector *>(_rRet.u.poObj)->m_vBacking[I] ) ) { return false; }
 						}
 						return true;
 					}
@@ -214,9 +214,9 @@ namespace ee {
 				if ( psObj ) {
 					try {
 						psObj->m_vBacking = m_vBacking;
-						const size_t stSize = reinterpret_cast<const CVector &>(_rRet.u.poObj).m_vBacking.size();
+						const size_t stSize = reinterpret_cast<const CVector *>(_rRet.u.poObj)->m_vBacking.size();
 						for ( size_t I = 0; I < stSize; ++I ) {
-							psObj->m_vBacking.push_back( reinterpret_cast<const CVector &>(_rRet.u.poObj).m_vBacking[I] );
+							psObj->m_vBacking.push_back( reinterpret_cast<const CVector *>(_rRet.u.poObj)->m_vBacking[I] );
 						}
 					}
 					catch ( ... ) {
@@ -255,9 +255,9 @@ namespace ee {
 			if ( !_rRet.u.poObj ) { return false; }
 			if ( (_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) {
 				try {
-					const size_t stSize = reinterpret_cast<const CVector &>(_rRet.u.poObj).m_vBacking.size();
+					const size_t stSize = reinterpret_cast<const CVector *>(_rRet.u.poObj)->m_vBacking.size();
 					for ( size_t I = 0; I < stSize; ++I ) {
-						m_vBacking.push_back( reinterpret_cast<const CVector &>(_rRet.u.poObj).m_vBacking[I] );
+						m_vBacking.push_back( reinterpret_cast<const CVector *>(_rRet.u.poObj)->m_vBacking[I] );
 					}
 				}
 				catch ( ... ) {
@@ -274,6 +274,115 @@ namespace ee {
 		catch ( ... ) {
 			return false;
 		}
+	}
+
+	// Sums all elements.
+	CExpEvalContainer::EE_RESULT CVector::Sum() {
+		if ( !m_vBacking.size() ) { return { .ncType = EE_NC_INVALID }; }
+		CExpEvalContainer::EE_RESULT rRet = { .ncType = EE_NC_UNSIGNED };
+		rRet.u.ui64Val = 0;
+		for ( std::vector<CExpEvalContainer::EE_RESULT>::size_type I = 0; I < m_vBacking.size(); ++I ) {
+			CExpEvalContainer::EE_RESULT rTmp;
+			auto aCode = m_peecContainer->PerformOp( rRet, '+', m_vBacking[I], rTmp );
+			if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+			rRet = rTmp;
+		}
+		return rRet;
+	}
+
+	// Element-wise addition.
+	CExpEvalContainer::EE_RESULT CVector::Add( const ee::CVector * _pvOther, ee::CVector * _pvReturn ) {
+		_pvReturn->Clear();
+		
+		if ( _pvReturn->Resize( std::max( m_vBacking.size(), _pvOther->m_vBacking.size() ) ).ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
+		for ( auto I = _pvReturn->m_vBacking.size(); I--; ) {
+			if ( I >= m_vBacking.size() ) {
+				_pvReturn->m_vBacking[I] = _pvOther->m_vBacking[I];
+			}
+			else if ( I >= _pvOther->m_vBacking.size() ) {
+				_pvReturn->m_vBacking[I] = m_vBacking[I];
+			}
+			else {
+				auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '+', _pvOther->m_vBacking[I], _pvReturn->m_vBacking[I] );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+			}
+		}
+
+		return _pvReturn->CreateResult();
+	}
+
+	// Element-wise subtraction.
+	CExpEvalContainer::EE_RESULT CVector::Sub( const ee::CVector * _pvOther, ee::CVector * _pvReturn ) {
+		_pvReturn->Clear();
+		
+		if ( _pvReturn->Resize( std::max( m_vBacking.size(), _pvOther->m_vBacking.size() ) ).ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
+		for ( auto I = _pvReturn->m_vBacking.size(); I--; ) {
+			if ( I >= m_vBacking.size() ) {
+				_pvReturn->m_vBacking[I] = _pvOther->m_vBacking[I];
+			}
+			else if ( I >= _pvOther->m_vBacking.size() ) {
+				_pvReturn->m_vBacking[I] = m_vBacking[I];
+			}
+			else {
+				auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '-', _pvOther->m_vBacking[I], _pvReturn->m_vBacking[I] );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+			}
+		}
+
+		return _pvReturn->CreateResult();
+	}
+
+	// Element-wise multiplication.
+	CExpEvalContainer::EE_RESULT CVector::Mul( const ee::CVector * _pvOther, ee::CVector * _pvReturn ) {
+		_pvReturn->Clear();
+		
+		if ( _pvReturn->Resize( std::max( m_vBacking.size(), _pvOther->m_vBacking.size() ) ).ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
+		for ( auto I = _pvReturn->m_vBacking.size(); I--; ) {
+			if ( I >= m_vBacking.size() ) {
+				_pvReturn->m_vBacking[I] = _pvOther->m_vBacking[I];
+			}
+			else if ( I >= _pvOther->m_vBacking.size() ) {
+				_pvReturn->m_vBacking[I] = m_vBacking[I];
+			}
+			else {
+				auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '*', _pvOther->m_vBacking[I], _pvReturn->m_vBacking[I] );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+			}
+		}
+
+		return _pvReturn->CreateResult();
+	}
+
+	// Scalar multiplication.
+	CExpEvalContainer::EE_RESULT CVector::Mul( const CExpEvalContainer::EE_RESULT &_rScalar, ee::CVector * _pvReturn ) {
+		_pvReturn->Clear();
+
+		if ( _pvReturn->Resize( m_vBacking.size() ).ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
+		for ( auto I = _pvReturn->m_vBacking.size(); I--; ) {
+			auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '*', _rScalar, _pvReturn->m_vBacking[I] );
+			if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+		}
+
+		return _pvReturn->CreateResult();
+	}
+
+	// Dot product.
+	CExpEvalContainer::EE_RESULT CVector::Dot( const ee::CVector * _pvOther ) {
+		if ( m_vBacking.size() != _pvOther->m_vBacking.size() ) { return { .ncType = EE_NC_INVALID }; }
+
+		CExpEvalContainer::EE_RESULT rRet = { .ncType = EE_NC_UNSIGNED };
+		rRet.u.ui64Val = 0;
+		for ( auto I = m_vBacking.size(); I--; ) {
+			CExpEvalContainer::EE_RESULT rTmp;
+			auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '*', _pvOther->m_vBacking[I], rTmp );
+			if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+			CExpEvalContainer::EE_RESULT rTmp2;
+			aCode = m_peecContainer->PerformOp( rRet, '+', rTmp, rTmp2 );
+			if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+			rRet = rTmp2;
+		}
+
+		return rRet;
 	}
 
 }	// namespace ee

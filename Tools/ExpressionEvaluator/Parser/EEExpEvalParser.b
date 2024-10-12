@@ -84,6 +84,8 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 
 %token EE_ASCII EE_BIN EE_BOOL EE_CHR EE_HEX EE_INT EE_LEN EE_OCT EE_ORD
 
+%token EE_ADD EE_APPEND EE_ASSIGN EE_AT EE_CAPACITY EE_CLEAR EE_DOT EE_EMPTY EE_ERASE EE_INSERT EE_MAX_SIZE EE_MUL EE_RESERVE EE_RESIZE EE_POP_BACK EE_PUSH_BACK EE_SHRINK_TO_FIT EE_SIZE EE_SUB EE_SUM EE_SWAP
+
 %type <sStringIndex>										identifier
 %type <sStringIndex>										string
 %type <sStringIndex>										custom_var
@@ -203,7 +205,7 @@ basic_expr
 																	m_peecContainer->CreateDouble( m_peelLexer->YYText(), $$ );
 																}
 															}
-	| EE_PI_													{ m_peecContainer->CreateDouble( 3.1415926535897932384626433832795, $$ ); }
+	| EE_PI_												{ m_peecContainer->CreateDouble( 3.1415926535897932384626433832795, $$ ); }
 	| EE_HALFPI												{ m_peecContainer->CreateDouble( 1.5707963267948966192313216916398, $$ ); }
 	| EE_E													{ m_peecContainer->CreateDouble( 2.7182818284590452353602874713527, $$ ); }
 	| EE_ZETA												{ m_peecContainer->CreateDouble( 1.202056903159594285399738161511449990764986292, $$ ); }
@@ -440,6 +442,7 @@ unary_exp
 cast_exp
 	: unary_exp												{ $$ = $1; }
 	| '(' cast_type ')' cast_exp							{ m_peecContainer->CreateCast( $4, static_cast<ee::EE_CAST_TYPES>($2), $$ ); }
+	| cast_type '(' cast_exp ')'							{ m_peecContainer->CreateCast( $3, static_cast<ee::EE_CAST_TYPES>($1), $$ ); }
 	;
 
 unary_operator
@@ -549,7 +552,7 @@ assignment_exp
 	| EE_CONST identifier '=' assignment_exp				{ m_peecContainer->CreateAssignment( $2, $4, '=', true, $$ ); }
 	| array_var '[' exp ']' assignment_op assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, $5, $$ ); }
 	| address_type exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( static_cast<ee::EE_CAST_TYPES>($1), $2, $5, $4, $$ ); }
-	| identifier '=' '{' initializer_list '}'				{ m_peecContainer->CreateVector( $4, $$ ); }
+	| identifier '=' '{' initializer_list '}'				{ m_peecContainer->CreateVector( $4, $$ ); m_peecContainer->CreateAssignment( $1, $$, '=', false, $$ ); }
 	;
 
 initializer
@@ -740,6 +743,27 @@ intrinsic
 	| EE_OCT '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_OCT, $3, $$ ); }
 	| EE_ORD '(' exp ')'									{ m_peecContainer->CreateIntrinsic1( token::EE_ORD, $3, $$ ); }
 	| string '.' EE_FORMAT '(' argument_exp_list ')'		{ m_peecContainer->CreateFormat( $1, $5, $$ ); }
+	| EE_ADD '(' exp ',' exp ')'							{ m_peecContainer->CreateVectorAdd( $3, $5, $$ ); }
+	| EE_APPEND '(' exp ',' exp ')'							{ m_peecContainer->CreateVectorAppend( $3, $5, $$ ); }
+	| EE_ASSIGN '(' exp ',' exp ',' exp ')'					{ m_peecContainer->CreateVectorAssign( $3, $5, $7, $$ ); }
+	| EE_AT '(' exp ',' exp ')'								{ m_peecContainer->CreateVectorAt( $3, $5, $$ ); }
+	| EE_CAPACITY '(' exp ')'								{ m_peecContainer->CreateVectorCapacity( $3, $$ ); }
+	| EE_CLEAR '(' exp ')'									{ m_peecContainer->CreateVectorClear( $3, $$ ); }
+	| EE_DOT '(' exp ',' exp ')'							{ m_peecContainer->CreateVectorDot( $3, $5, $$ ); }
+	| EE_EMPTY '(' exp ')'									{ m_peecContainer->CreateVectorEmpty( $3, $$ ); }
+	| EE_ERASE '(' exp ',' exp ')'							{ m_peecContainer->CreateVectorErase( $3, $5, $$ ); }
+	| EE_INSERT '(' exp ',' exp ',' exp ')'					{ m_peecContainer->CreateVectorInsert( $3, $5, $7, $$ ); }
+	| EE_MAX_SIZE '(' exp ')'								{ m_peecContainer->CreateVectorMaxSize( $3, $$ ); }
+	| EE_MUL '(' exp ',' exp ')'							{ m_peecContainer->CreateVectorMul( $3, $5, $$ ); }
+	| EE_RESERVE '(' exp ',' exp ')'						{ m_peecContainer->CreateVectorReserve( $3, $5, $$ ); }
+	| EE_RESIZE '(' exp ',' exp ')'							{ m_peecContainer->CreateVectorResize( $3, $5, $$ ); }
+	| EE_POP_BACK '(' exp ')'								{ m_peecContainer->CreateVectorPopBack( $3, $$ ); }
+	| EE_PUSH_BACK '(' exp ',' exp ')'						{ m_peecContainer->CreateVectorPushBack( $3, $5, $$ ); }
+	| EE_SHRINK_TO_FIT '(' exp ')'							{ m_peecContainer->CreateVectorShrinkToFit( $3, $$ ); }
+	| EE_SIZE '(' exp ')'									{ m_peecContainer->CreateVectorSize( $3, $$ ); }
+	| EE_SUB '(' exp ',' exp ')'							{ m_peecContainer->CreateVectorSub( $3, $5, $$ ); }
+	| EE_SUM '(' exp ')'									{ m_peecContainer->CreateVectorSum( $3, $$ ); }
+	| EE_SWAP '(' exp ',' exp ')'							{ m_peecContainer->CreateVectorSwap( $3, $5, $$ ); }
 	;
 
 exp

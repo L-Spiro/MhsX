@@ -103,6 +103,8 @@ namespace ee {
 			EE_EC_INVALIDCAST,										/**< An object failed to cast into another object or primitive, or could not be created from one. */
 			EE_EC_ARRAY_FROM_NON_OBJECT,							/**< An array access was attempted on a type that is not an object. */
 
+			EE_EC_INVALID_OBJECT,									/**< Operation performed on an object of an invalid type. */
+
 			EE_EC_UNIMPLEMENTED,									/**< Error for development to indicate that a feature is not implemented yet. */
 		};
 
@@ -907,6 +909,69 @@ namespace ee {
 
 		// Creates a format string in the format of: "Some string {}.".format( Args0, Arg1 ).
 		void								CreateFormat( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndArgs, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.add().
+		void								CreateVectorAdd( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndOperand, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.sub().
+		void								CreateVectorSub( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndOperand, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.mul().
+		void								CreateVectorMul( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndOperand, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.dot().
+		void								CreateVectorDot( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndOperand, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.append().
+		void								CreateVectorAppend( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.assign().
+		void								CreateVectorAssign( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndIdx, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.at().
+		void								CreateVectorAt( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndIdx, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.capacity().
+		void								CreateVectorCapacity( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.clear().
+		void								CreateVectorClear( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.empty().
+		void								CreateVectorEmpty( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.erase().
+		void								CreateVectorErase( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndIdx, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.insert().
+		void								CreateVectorInsert( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndIdx, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.max_size().
+		void								CreateVectorMaxSize( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.reserve().
+		void								CreateVectorReserve( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.resize().
+		void								CreateVectorResize( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.pop_back().
+		void								CreateVectorPopBack( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.push_back().
+		void								CreateVectorPushBack( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.shrink_to_fit().
+		void								CreateVectorShrinkToFit( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.size().
+		void								CreateVectorSize( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.sum().
+		void								CreateVectorSum( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.swap().
+		void								CreateVectorSwap( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndLeft, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Sets the translation-unit node.
 		void								SetTrans( YYSTYPE::EE_NODE_DATA &_ndNode );

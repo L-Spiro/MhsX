@@ -340,6 +340,50 @@ namespace ee {
 		return CStringBaseApi::Ord( m_sObj, m_peecContainer );
 	}
 
+	// Gets a value in the string.
+	CExpEvalContainer::EE_RESULT CString::At( size_t _sIdx ) {
+		CExpEvalContainer::EE_RESULT rRet = { .ncType = EE_NC_UNSIGNED, };
+		_sIdx = ArrayIndexToLinearIndex( _sIdx, static_cast<size_t>(Len().u.ui64Val) );
+		if ( _sIdx == EE_INVALID_IDX ) { rRet.ncType = EE_NC_INVALID; return rRet; }
+		
+		uint32_t ui32Val;
+		CStringBaseApi::UpdateArrayAccessOptimizer( m_sObj, m_vArrayOpt, _sIdx, ui32Val );
+		rRet.u.ui64Val = ui32Val;
+		return rRet;
+	}
+
+	// Inserts a value at a given index in the string.
+	CExpEvalContainer::EE_RESULT CString::Insert( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
+		CExpEvalContainer::EE_RESULT rRet = { .ncType = EE_NC_UNSIGNED };
+		if ( _sIdx != static_cast<size_t>(Len().u.ui64Val) ) {
+			_sIdx = ArrayIndexToLinearIndex( _sIdx, static_cast<size_t>(Len().u.ui64Val) );
+			if ( _sIdx == EE_INVALID_IDX ) { rRet.ncType = EE_NC_INVALID; return rRet; }
+		}
+
+		if ( _rRet.ncType == EE_NC_OBJECT && _rRet.u.poObj && _rRet.u.poObj->Type() & CObject::EE_BIT_STRING ) {
+			ee::CString * psThis = static_cast<CString *>(_rRet.u.poObj);
+			uint32_t ui32Val;
+			CStringBaseApi::UpdateArrayAccessOptimizer( m_sObj, m_vArrayOpt, _sIdx, ui32Val );
+			m_sObj.insert( m_sObj.begin() + m_vArrayOpt[_sIdx], psThis->m_sObj.begin(), psThis->m_sObj.end() );
+		}
+		else {
+			CExpEvalContainer::EE_RESULT rVal = m_peecContainer->ConvertResultOrObject( _rRet, EE_NC_UNSIGNED );
+			if ( rVal.ncType == EE_NC_INVALID ) { rRet.ncType = EE_NC_INVALID; return rRet; }
+
+			uint32_t ui32Char, ui32Len;
+			ui32Char = ee::CExpEval::Utf32ToUtf8( uint32_t( rVal.u.ui64Val ), ui32Len );
+			//if ( EE_UTF_INVALID == ui32Char ) { rRet.ncType = EE_NC_INVALID; return rRet; }
+
+			uint32_t ui32Val;
+			CStringBaseApi::UpdateArrayAccessOptimizer( m_sObj, m_vArrayOpt, _sIdx, ui32Val );
+			while ( ui32Len-- ) {
+				m_sObj.insert( m_sObj.begin() + m_vArrayOpt[_sIdx], std::string::value_type( ui32Char >> (ui32Len * 8)) );
+			}
+		}
+		Dirty();
+		return CreateResult();
+	}
+
 	// Resets the object.
 	void CString::Reset() {
 		m_sObj.clear();
