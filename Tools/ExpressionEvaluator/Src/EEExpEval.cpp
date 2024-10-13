@@ -659,6 +659,107 @@ namespace ee {
 		return sRet;
 	}
 
+	// Converts from UTF-8 to a C string.
+	std::string CExpEval::ToCString( const std::string &_sIn ) {
+		size_t sSize = _sIn.size();
+		std::string sRet;
+		
+		for ( size_t I = 0; I < sSize; ) {
+			size_t sThisSize = 0;
+			uint32_t ui32This = NextUtf8Char( &_sIn[I], sSize - I, &sThisSize );
+			if ( ui32This != EE_UTF_INVALID ) {
+				uint32_t ui32Len = 0;
+				uint32_t ui32BackToUtf8 = Utf32ToUtf8( ui32This, ui32Len );
+				if ( ui32Len == 1 ) {
+					struct {
+						// The character to write to return.
+						char				cEscape;
+						// The actual character to find.
+						char				cValue;
+					} sEscapes[] = {
+						{ 'a', '\a' },
+						{ 'b', '\b' },
+						{ 'f', '\f' },
+						{ 'n', '\n' },
+						{ 'r', '\r' },
+						{ 't', '\t' },
+						{ 'v', '\v' },
+						{ '"', '"' },
+						{ '\\', '\\' },
+					};
+					bool bFound = false;
+					for ( auto J = EE_COUNT_OF( sEscapes ); J--; ) {
+						if ( ui32BackToUtf8 == static_cast<uint8_t>(sEscapes[J].cValue) ) {
+							sRet.push_back( '\\' );
+							sRet.push_back( sEscapes[J].cEscape );
+							bFound = true;
+							break;
+						}
+					}
+					if ( bFound ) {
+						I += sThisSize;
+						continue;
+					}
+					// Check if printable.
+					if ( (static_cast<int8_t>(ui32This) >= -1 || ui32This < 256) && ::isprint( ui32This ) ) {
+						sRet.push_back( static_cast<std::string::value_type>(ui32This) );
+						I += sThisSize;
+						continue;
+					}
+					// Not printable.
+					std::stringstream ssStream;
+					ssStream << "\\x" <<
+						std::setfill( '0' ) << std::setw( 2 ) <<
+						std::hex << ui32This;
+					sRet.append( ssStream.str() );
+					
+					I += sThisSize;
+					continue;
+				}
+				// ui32Len is greater than 1, so at the very least a \u is needed.
+				ui32BackToUtf8 = Utf32ToUtf16( ui32This, ui32Len );
+				if ( ui32Len == 1 ) {
+					// If only the bottom bits are set, \x can be used instead.
+					if ( ui32BackToUtf8 & ~0xFF ) {
+						// Have to use the longer \u form.
+						std::stringstream ssStream;
+						ssStream << "\\u" <<
+							std::setfill( '0' ) << std::setw( 4 ) <<
+							std::hex << ui32This;
+						sRet.append( ssStream.str() );
+					}
+					else {
+						std::stringstream ssStream;
+						ssStream << "\\x" <<
+							std::setfill( '0' ) << std::setw( 2 ) <<
+							std::hex << ui32This;
+						sRet.append( ssStream.str() );
+					}
+				}
+				else {
+					// There was a validity check above for (ui32This != EE_UTF_INVALID) so we know that
+					//	ui32This did decode into a valid value.  \U should work with no further checking.
+					std::stringstream ssStream;
+					ssStream << "\\U" <<
+						std::setfill( '0' ) << std::setw( 8 ) <<
+						std::hex << ui32This;
+					sRet.append( ssStream.str() );
+				}
+				I += sThisSize;
+				continue;
+			}
+			// It was invalid.
+			for ( size_t J = 0; J < sThisSize; ++J ) {
+				std::stringstream ssStream;
+				ssStream << "\\x" <<
+					std::setfill( '0' ) << std::setw( 2 ) <<
+					std::hex << _sIn[I++];
+				sRet.append( ssStream.str() );
+			}
+		}
+		return sRet;
+	}
+
 	// Represents a value in binary notation.
 	std::string CExpEval::ToBinary( uint64_t _ui64Val ) {
 		std::string sTmp;

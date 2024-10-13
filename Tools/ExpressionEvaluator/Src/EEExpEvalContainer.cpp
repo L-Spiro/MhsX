@@ -221,7 +221,7 @@ namespace ee {
 	 * \param _sReturn The resulting string form of the given result.
 	 * \return Returns true of a to-string conversion was made.
 	 */
-	bool CExpEvalContainer::ToStringResultOrObject( const EE_RESULT &_rRes, std::string &_sReturn ) {
+	bool CExpEvalContainer::ToStringResultOrObject( const EE_RESULT &_rRes, std::string &_sReturn, uint32_t _ui32Flags ) {
 		switch ( _rRes.ncType ) {
 			case ee::EE_NC_SIGNED : {
 				char szFormat[32];
@@ -246,7 +246,7 @@ namespace ee {
 					_sReturn = "<null>";
 				}
 				else {
-					return _rRes.u.poObj->ToString( _sReturn );
+					return _rRes.u.poObj->ToString( _sReturn, _ui32Flags );
 				}
 				break;
 			}
@@ -265,7 +265,7 @@ namespace ee {
 	 * \param _sReturn The resulting string form of the given result.
 	 * \return Returns true of a to-string conversion was made.
 	 */
-	bool CExpEvalContainer::ToFormatStringResultOrObject( const EE_RESULT &_rRes, const std::string &_sFormat, std::string &_sReturn ) {
+	bool CExpEvalContainer::ToFormatStringResultOrObject( const EE_RESULT &_rRes, const std::string &_sFormat, std::string &_sReturn, uint32_t _ui32Flags ) {
 		switch ( _rRes.ncType ) {
 			case EE_NC_UNSIGNED : {
 				_sReturn = std::vformat( _sFormat, std::make_format_args( _rRes.u.ui64Val ) );
@@ -284,7 +284,7 @@ namespace ee {
 					_sReturn = "<null>";
 				}
 				else {
-					_sReturn = _rRes.u.poObj->FormattedString( _sFormat );
+					_sReturn = _rRes.u.poObj->FormattedString( _sFormat, _ui32Flags );
 				}
 				break;
 			}
@@ -2990,6 +2990,16 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
+	// Creates a vector.append().
+	void CExpEvalContainer::CreateVectorAppend( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_VECTOR_APPEND_IDENT;
+		_ndNode.u.sNodeIndex = _sVarId;
+		_ndNode.v.sNodeIndex = _ndVal.sNodeIndex;
+		auto aTmp = m_mCustomVariables.find( _sVarId );
+		if ( aTmp == m_mCustomVariables.end() ) { throw EE_EC_INVALID_OBJECT; }
+		AddNode( _ndNode );
+	}
+
 	// Creates a vector.assign().
 	void CExpEvalContainer::CreateVectorAssign( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndIdx, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_ASSIGN;
@@ -3007,10 +3017,29 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
+	// Creates a vector.at().
+	void CExpEvalContainer::CreateVectorAt( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndIdx, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_VECTOR_AT_IDENT;
+		_ndNode.u.sNodeIndex = _sVarId;
+		_ndNode.v.sNodeIndex = _ndIdx.sNodeIndex;
+		auto aTmp = m_mCustomVariables.find( _sVarId );
+		if ( aTmp == m_mCustomVariables.end() ) { throw EE_EC_INVALID_OBJECT; }
+		AddNode( _ndNode );
+	}
+
 	// Creates a vector.capacity().
 	void CExpEvalContainer::CreateVectorCapacity( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_CAPACITY;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Creates a vector.capacity().
+	void CExpEvalContainer::CreateVectorCapacity( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_VECTOR_CAPACITY_IDENT;
+		_ndNode.u.sNodeIndex = _sVarId;
+		auto aTmp = m_mCustomVariables.find( _sVarId );
+		if ( aTmp == m_mCustomVariables.end() ) { throw EE_EC_INVALID_OBJECT; }
 		AddNode( _ndNode );
 	}
 
@@ -3021,10 +3050,28 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
+	// Creates a vector.clear().
+	void CExpEvalContainer::CreateVectorClear( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_VECTOR_CLEAR_IDENT;
+		_ndNode.u.sNodeIndex = _sVarId;
+		auto aTmp = m_mCustomVariables.find( _sVarId );
+		if ( aTmp == m_mCustomVariables.end() ) { throw EE_EC_INVALID_OBJECT; }
+		AddNode( _ndNode );
+	}
+
 	// Creates a vector.empty().
 	void CExpEvalContainer::CreateVectorEmpty( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_EMPTY;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Creates a vector.empty().
+	void CExpEvalContainer::CreateVectorEmpty( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_VECTOR_EMPTY_IDENT;
+		_ndNode.u.sNodeIndex = _sVarId;
+		auto aTmp = m_mCustomVariables.find( _sVarId );
+		if ( aTmp == m_mCustomVariables.end() ) { throw EE_EC_INVALID_OBJECT; }
 		AddNode( _ndNode );
 	}
 
@@ -3033,6 +3080,16 @@ namespace ee {
 		_ndNode.nType = EE_N_VECTOR_ERASE;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
 		_ndNode.w.sNodeIndex = _ndIdx.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Creates a vector.erase().
+	void CExpEvalContainer::CreateVectorErase( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndIdx, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_VECTOR_ERASE_IDENT;
+		_ndNode.u.sNodeIndex = _sVarId;
+		_ndNode.v.sNodeIndex = _ndIdx.sNodeIndex;
+		auto aTmp = m_mCustomVariables.find( _sVarId );
+		if ( aTmp == m_mCustomVariables.end() ) { throw EE_EC_INVALID_OBJECT; }
 		AddNode( _ndNode );
 	}
 
@@ -3052,11 +3109,30 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
+	// Creates a vector.max_size().
+	void CExpEvalContainer::CreateVectorMaxSize( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_VECTOR_MAX_SIZE_IDENT;
+		_ndNode.u.sNodeIndex = _sVarId;
+		auto aTmp = m_mCustomVariables.find( _sVarId );
+		if ( aTmp == m_mCustomVariables.end() ) { throw EE_EC_INVALID_OBJECT; }
+		AddNode( _ndNode );
+	}
+
 	// Creates a vector.reserve().
 	void CExpEvalContainer::CreateVectorReserve( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_RESERVE;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
 		_ndNode.w.sNodeIndex = _ndSize.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Creates a vector.reserve().
+	void CExpEvalContainer::CreateVectorReserve( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_VECTOR_RESERVE_IDENT;
+		_ndNode.u.sNodeIndex = _sVarId;
+		_ndNode.v.sNodeIndex = _ndSize.sNodeIndex;
+		auto aTmp = m_mCustomVariables.find( _sVarId );
+		if ( aTmp == m_mCustomVariables.end() ) { throw EE_EC_INVALID_OBJECT; }
 		AddNode( _ndNode );
 	}
 
@@ -3068,10 +3144,29 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
+	// Creates a vector.resize().
+	void CExpEvalContainer::CreateVectorResize( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_VECTOR_RESIZE_IDENT;
+		_ndNode.u.sNodeIndex = _sVarId;
+		_ndNode.v.sNodeIndex = _ndSize.sNodeIndex;
+		auto aTmp = m_mCustomVariables.find( _sVarId );
+		if ( aTmp == m_mCustomVariables.end() ) { throw EE_EC_INVALID_OBJECT; }
+		AddNode( _ndNode );
+	}
+
 	// Creates a vector.pop_back().
 	void CExpEvalContainer::CreateVectorPopBack( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_POP_BACK;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Creates a vector.pop_back().
+	void CExpEvalContainer::CreateVectorPopBack( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_VECTOR_POP_BACK_IDENT;
+		_ndNode.u.sNodeIndex = _sVarId;
+		auto aTmp = m_mCustomVariables.find( _sVarId );
+		if ( aTmp == m_mCustomVariables.end() ) { throw EE_EC_INVALID_OBJECT; }
 		AddNode( _ndNode );
 	}
 
@@ -3083,6 +3178,16 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
+	// Creates a vector.push_back().
+	void CExpEvalContainer::CreateVectorPushBack( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_VECTOR_APPEND_IDENT;
+		_ndNode.u.sNodeIndex = _sVarId;
+		_ndNode.v.sNodeIndex = _ndVal.sNodeIndex;
+		auto aTmp = m_mCustomVariables.find( _sVarId );
+		if ( aTmp == m_mCustomVariables.end() ) { throw EE_EC_INVALID_OBJECT; }
+		AddNode( _ndNode );
+	}
+
 	// Creates a vector.shrink_to_fit().
 	void CExpEvalContainer::CreateVectorShrinkToFit( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_SHRINK_TO_FIT;
@@ -3090,10 +3195,28 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
+	// Creates a vector.shrink_to_fit().
+	void CExpEvalContainer::CreateVectorShrinkToFit( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_VECTOR_SHRINK_TO_FIT_IDENT;
+		_ndNode.u.sNodeIndex = _sVarId;
+		auto aTmp = m_mCustomVariables.find( _sVarId );
+		if ( aTmp == m_mCustomVariables.end() ) { throw EE_EC_INVALID_OBJECT; }
+		AddNode( _ndNode );
+	}
+
 	// Creates a vector.size().
 	void CExpEvalContainer::CreateVectorSize( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_SIZE;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Creates a vector.size().
+	void CExpEvalContainer::CreateVectorSize( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_VECTOR_SIZE_IDENT;
+		_ndNode.u.sNodeIndex = _sVarId;
+		auto aTmp = m_mCustomVariables.find( _sVarId );
+		if ( aTmp == m_mCustomVariables.end() ) { throw EE_EC_INVALID_OBJECT; }
 		AddNode( _ndNode );
 	}
 
@@ -3105,10 +3228,20 @@ namespace ee {
 	}
 
 	// Creates a vector.swap().
-	void CExpEvalContainer::CreateVectorSwap( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndLeft, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+	void CExpEvalContainer::CreateVectorSwap( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndRight, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_SWAP;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
-		_ndNode.v.sNodeIndex = _ndLeft.sNodeIndex;
+		_ndNode.v.sNodeIndex = _ndRight.sNodeIndex;
+		AddNode( _ndNode );
+	}
+
+	// Creates a vector.swap().
+	void CExpEvalContainer::CreateVectorSwap( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndRight, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_VECTOR_SWAP_IDENT;
+		_ndNode.u.sNodeIndex = _sVarId;
+		_ndNode.v.sNodeIndex = _ndRight.sNodeIndex;
+		auto aTmp = m_mCustomVariables.find( _sVarId );
+		if ( aTmp == m_mCustomVariables.end() ) { throw EE_EC_INVALID_OBJECT; }
 		AddNode( _ndNode );
 	}
 
@@ -5308,6 +5441,12 @@ namespace ee {
 						EE_PUSH( _ndExp.v.sNodeIndex );		// soProcessMe.sSubResults[1] = OBJ2.
 						continue;
 					}
+					case EE_N_VECTOR_APPEND_IDENT : {
+						//EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[0] = OBJ.
+						++sParmIdx;							// Fake push so we can fill in soProcessMe.sSubResults[0] manually later.
+						EE_PUSH( _ndExp.v.sNodeIndex );		// soProcessMe.sSubResults[1] = VAL.
+						continue;
+					}
 					case EE_N_VECTOR_APPEND : {
 						EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[0] = OBJ.
 						EE_PUSH( _ndExp.v.sNodeIndex );		// soProcessMe.sSubResults[1] = VAL.
@@ -6646,6 +6785,12 @@ namespace ee {
 						else { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
 						break;
 					}
+					case EE_N_VECTOR_APPEND_IDENT : {
+						auto aFind = m_mCustomVariables.find( _ndExp.u.sNodeIndex );
+						if ( aFind == m_mCustomVariables.end() ) { EE_ERROR( EE_EC_INVALIDTREE ); }
+						soProcessMe.sSubResults[0] = (*aFind).second.rRes;
+						// Fall through.
+					}
 					case EE_N_VECTOR_APPEND : {
 						if ( soProcessMe.sSubResults[0].ncType != EE_NC_OBJECT ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
 						CObject * poObj = soProcessMe.sSubResults[0].u.poObj;
@@ -6691,6 +6836,12 @@ namespace ee {
 						else { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
 						break;
 					}
+					case EE_N_VECTOR_CAPACITY_IDENT : {
+						auto aFind = m_mCustomVariables.find( _ndExp.u.sNodeIndex );
+						if ( aFind == m_mCustomVariables.end() ) { EE_ERROR( EE_EC_INVALIDTREE ); }
+						soProcessMe.sSubResults[0] = (*aFind).second.rRes;
+						// Fall through.
+					}
 					case EE_N_VECTOR_CAPACITY : {
 						if ( soProcessMe.sSubResults[0].ncType != EE_NC_OBJECT ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
 						CObject * poObj = soProcessMe.sSubResults[0].u.poObj;
@@ -6705,6 +6856,12 @@ namespace ee {
 						else { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
 						break;
 					}
+					case EE_N_VECTOR_CLEAR_IDENT : {
+						auto aFind = m_mCustomVariables.find( _ndExp.u.sNodeIndex );
+						if ( aFind == m_mCustomVariables.end() ) { EE_ERROR( EE_EC_INVALIDTREE ); }
+						soProcessMe.sSubResults[0] = (*aFind).second.rRes;
+						// Fall through.
+					}
 					case EE_N_VECTOR_CLEAR : {
 						if ( soProcessMe.sSubResults[0].ncType != EE_NC_OBJECT ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
 						CObject * poObj = soProcessMe.sSubResults[0].u.poObj;
@@ -6718,6 +6875,12 @@ namespace ee {
 						}
 						else { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
 						break;
+					}
+					case EE_N_VECTOR_EMPTY_IDENT : {
+						auto aFind = m_mCustomVariables.find( _ndExp.u.sNodeIndex );
+						if ( aFind == m_mCustomVariables.end() ) { EE_ERROR( EE_EC_INVALIDTREE ); }
+						soProcessMe.sSubResults[0] = (*aFind).second.rRes;
+						// Fall through.
 					}
 					case EE_N_VECTOR_EMPTY : {
 						if ( soProcessMe.sSubResults[0].ncType != EE_NC_OBJECT ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
@@ -6767,6 +6930,12 @@ namespace ee {
 						else { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
 						break;
 					}
+					case EE_N_VECTOR_MAX_SIZE_IDENT : {
+						auto aFind = m_mCustomVariables.find( _ndExp.u.sNodeIndex );
+						if ( aFind == m_mCustomVariables.end() ) { EE_ERROR( EE_EC_INVALIDTREE ); }
+						soProcessMe.sSubResults[0] = (*aFind).second.rRes;
+						// Fall through.
+					}
 					case EE_N_VECTOR_MAX_SIZE : {
 						if ( soProcessMe.sSubResults[0].ncType != EE_NC_OBJECT ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
 						CObject * poObj = soProcessMe.sSubResults[0].u.poObj;
@@ -6815,6 +6984,12 @@ namespace ee {
 						else { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
 						break;
 					}
+					case EE_N_VECTOR_POP_BACK_IDENT : {
+						auto aFind = m_mCustomVariables.find( _ndExp.u.sNodeIndex );
+						if ( aFind == m_mCustomVariables.end() ) { EE_ERROR( EE_EC_INVALIDTREE ); }
+						soProcessMe.sSubResults[0] = (*aFind).second.rRes;
+						// Fall through.
+					}
 					case EE_N_VECTOR_POP_BACK : {
 						if ( soProcessMe.sSubResults[0].ncType != EE_NC_OBJECT ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
 						CObject * poObj = soProcessMe.sSubResults[0].u.poObj;
@@ -6842,6 +7017,12 @@ namespace ee {
 						}
 						else { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
 						break;
+					}
+					case EE_N_VECTOR_SIZE_IDENT : {
+						auto aFind = m_mCustomVariables.find( _ndExp.u.sNodeIndex );
+						if ( aFind == m_mCustomVariables.end() ) { EE_ERROR( EE_EC_INVALIDTREE ); }
+						soProcessMe.sSubResults[0] = (*aFind).second.rRes;
+						// Fall through.
 					}
 					case EE_N_VECTOR_SIZE : {
 						if ( soProcessMe.sSubResults[0].ncType != EE_NC_OBJECT ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }

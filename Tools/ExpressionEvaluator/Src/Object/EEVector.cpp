@@ -50,13 +50,13 @@ namespace ee {
 	 * \param _sString Holds the returned string.
 	 * \return Returns true if the object can be converted to a string and no memory errors were encountered when doing so.
 	 */
-	bool CVector::ToString( std::string &_sString ) {
+	bool CVector::ToString( std::string &_sString, uint32_t _ui32Flags ) {
 		std::string sTmp;
 		try {
 			_sString = "{";
 
 			for ( size_t I = 0; I < m_vBacking.size(); ++I ) {
-				if ( !m_peecContainer->ToStringResultOrObject( m_vBacking[I], sTmp ) ) {
+				if ( !m_peecContainer->ToStringResultOrObject( m_vBacking[I], sTmp, _ui32Flags | CObject::EE_TF_C_STRING ) ) {
 					_sString += "<error>";
 				}
 				else {
@@ -79,13 +79,13 @@ namespace ee {
 	 * \param _sFormat The format string.
 	 * \return Returns a string containing each element in the vector formatted according to the format string provied in _sFormat.
 	 */
-	std::string CVector::FormattedString( const std::string &_sFormat ) {
+	std::string CVector::FormattedString( const std::string &_sFormat, uint32_t _ui32Flags ) {
 		std::string sTmp, sRet;
 		try {
 			sRet = "{";
 
 			for ( size_t I = 0; I < m_vBacking.size(); ++I ) {
-				if ( !m_peecContainer->ToFormatStringResultOrObject( m_vBacking[I], _sFormat, sTmp ) ) {
+				if ( !m_peecContainer->ToFormatStringResultOrObject( m_vBacking[I], _sFormat, sTmp, _ui32Flags ) ) {
 					sRet += "<error>";
 				}
 				else {

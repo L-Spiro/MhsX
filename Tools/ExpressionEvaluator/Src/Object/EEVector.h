@@ -42,7 +42,7 @@ namespace ee {
 		 * \param _sString Holds the returned string.
 		 * \return Returns true if the object can be converted to a string and no memory errors were encountered when doing so.
 		 */
-		virtual bool								ToString( std::string &_sString );
+		virtual bool								ToString( std::string &_sString, uint32_t _ui32Flags = EE_TF_NONE );
 
 		/**
 		 * Creates a formatted string representation of the vector by passing the format string to each element of the vector.
@@ -50,7 +50,7 @@ namespace ee {
 		 * \param _sFormat The format string.
 		 * \return Returns a string containing each element in the vector formatted according to the format string provied in _sFormat.
 		 */
-		virtual std::string							FormattedString( const std::string &_sFormat );
+		virtual std::string							FormattedString( const std::string &_sFormat, uint32_t _ui32Flags = EE_TF_NONE );
 
 		/**
 		 * Array access.
@@ -143,7 +143,11 @@ namespace ee {
 		virtual CExpEvalContainer::EE_RESULT		Ord() const { return { EE_NC_INVALID }; }
 
 		// Append an item to the end of the vector.
-		virtual CExpEvalContainer::EE_RESULT		PushBack( CExpEvalContainer::EE_RESULT &_rRet ) { m_vBacking.push_back( _rRet ); return _rRet; }
+		virtual CExpEvalContainer::EE_RESULT		PushBack( CExpEvalContainer::EE_RESULT &_rRet ) {
+			if ( _rRet.ncType == EE_NC_OBJECT && _rRet.u.poObj && (_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) &&
+				static_cast<ee::CVector *>(_rRet.u.poObj) == this ) { return { .ncType = EE_NC_INVALID }; }
+			m_vBacking.push_back( _rRet ); return _rRet;
+		}
 
 		// Gets the capacity.
 		virtual CExpEvalContainer::EE_RESULT		Capacity() const {

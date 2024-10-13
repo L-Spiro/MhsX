@@ -37,21 +37,30 @@ namespace ee {
 		virtual bool								InitializeFrom( const CExpEvalContainer::EE_RESULT &_rObj );
 
 		// Creates a string representation of the object, with the string usually assumed to be in UTF-8 format.
-		virtual bool								ToString( std::string &_sString ) {
-			_sString.reserve( m_sObj.size() + 2 );
-			_sString = "\"";
-			for ( std::string::size_type I = 0; I < m_sObj.size(); ++I ) {
-				if ( m_sObj[I] == '"' || m_sObj[I] == '\\' ) {
-					_sString.push_back( '\\' );
-				}
-				_sString.push_back( m_sObj[I] );
+		virtual bool								ToString( std::string &_sString, uint32_t _ui32Flags = EE_TF_NONE ) {
+			if ( _ui32Flags & CObject::EE_TF_C_STRING ) {
+				_sString.reserve( m_sObj.size() + 2 );
+				_sString = "\"";
+				/*for ( std::string::size_type I = 0; I < m_sObj.size(); ++I ) {
+					if ( m_sObj[I] == '"' || m_sObj[I] == '\\' ) {
+						_sString.push_back( '\\' );
+					}
+					_sString.push_back( m_sObj[I] );
+				}*/
+				_sString += CExpEval::ToCString( m_sObj );
+				_sString += "\"";
 			}
-			_sString += "\"";
+			else {
+				_sString = m_sObj;
+			}
 			return true;
 		}
 
 		// Creates a formatted string representation of the object.
-		virtual std::string							FormattedString( const std::string &_sFormat ) {
+		virtual std::string							FormattedString( const std::string &_sFormat, uint32_t _ui32Flags = EE_TF_NONE ) {
+			if ( _ui32Flags & CObject::EE_TF_C_STRING ) {
+				return std::vformat( _sFormat, std::make_format_args( CExpEval::ToCString( m_sObj ) ) );
+			}
 			//return std::format( _sFormat, m_sObj );
 			return std::vformat( _sFormat, std::make_format_args( m_sObj ) );
 		}
@@ -120,12 +129,7 @@ namespace ee {
 		virtual CExpEvalContainer::EE_RESULT		PushBack( CExpEvalContainer::EE_RESULT &_rRet ) { m_sObj.push_back( static_cast<std::string::value_type>(_rRet.u.ui64Val) ); Dirty(); return CreateResult(); }
 
 		// Pops the back item.
-		virtual CExpEvalContainer::EE_RESULT		PopBack() {
-			if ( !m_sObj.size() ) { return CreateResult(); }
-			m_sObj.pop_back();
-			Dirty();
-			return CreateResult();
-		}
+		virtual CExpEvalContainer::EE_RESULT		PopBack();
 
 		// Gets the capacity.
 		virtual CExpEvalContainer::EE_RESULT		Capacity() const {

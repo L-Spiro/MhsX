@@ -330,7 +330,7 @@ postfix_exp
 	| postfix_exp EE_MEMBERACCESS EE_STRING_CONSTANT		{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateString( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_HEX_CONSTANT3			{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_E						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
-	| postfix_exp EE_MEMBERACCESS EE_PI_						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
+	| postfix_exp EE_MEMBERACCESS EE_PI_					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_HALFPI					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_ZETA					{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
 	| postfix_exp EE_MEMBERACCESS EE_GR						{ m_peecContainer->CreateMemberAccess( $1, m_peecContainer->CreateIdentifier( m_peelLexer->YYText() ), $$ ); }
@@ -531,6 +531,8 @@ assignment_op
 	
 assignment_exp
 	: conditional_exp										{ $$ = $1; }
+	//| '{' initializer_list '}'								{ m_peecContainer->CreateVector( $2, $$ ); }
+	| identifier '=' assignment_exp							{ m_peecContainer->CreateAssignment( $1, $3, '=', false, $$ ); }
 	| custom_var assignment_op assignment_exp				{ m_peecContainer->CreateReAssignment( $1, $3, $2, $$ ); }
 	| identifier '=' EE_NEW backing_type '(' exp ')'
 															{ m_peecContainer->CreateRawArray( $1, size_t( $4 ), static_cast<size_t>(token::EE_TEMP), $6, size_t( ~0 ), size_t( ~0 ), $$ ); }
@@ -548,11 +550,11 @@ assignment_exp
 															{ m_peecContainer->CreateRawArray( $1, static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $9.sNodeIndex, $$ ); }
 	| identifier '=' EE_NEW '(' exp ',' backing_persistence ',' exp ',' exp ')'
 															{ m_peecContainer->CreateRawArray( $1, static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $11.sNodeIndex, $$ ); }
-	| identifier '=' assignment_exp							{ m_peecContainer->CreateAssignment( $1, $3, '=', false, $$ ); }
 	| EE_CONST identifier '=' assignment_exp				{ m_peecContainer->CreateAssignment( $2, $4, '=', true, $$ ); }
 	| array_var '[' exp ']' assignment_op assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, $5, $$ ); }
 	| address_type exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( static_cast<ee::EE_CAST_TYPES>($1), $2, $5, $4, $$ ); }
 	| identifier '=' '{' initializer_list '}'				{ m_peecContainer->CreateVector( $4, $$ ); m_peecContainer->CreateAssignment( $1, $$, '=', false, $$ ); }
+	| custom_var '=' '{' initializer_list '}'				{ m_peecContainer->CreateVector( $4, $$ ); m_peecContainer->CreateReAssignment( $1, $$, '=', $$ ); }
 	;
 
 initializer
@@ -745,25 +747,39 @@ intrinsic
 	| string '.' EE_FORMAT '(' argument_exp_list ')'		{ m_peecContainer->CreateFormat( $1, $5, $$ ); }
 	| EE_ADD '(' exp ',' exp ')'							{ m_peecContainer->CreateVectorAdd( $3, $5, $$ ); }
 	| EE_APPEND '(' exp ',' exp ')'							{ m_peecContainer->CreateVectorAppend( $3, $5, $$ ); }
+	| custom_var '.' EE_APPEND '(' exp ')'					{ m_peecContainer->CreateVectorAppend( $1, $5, $$ ); }
 	| EE_ASSIGN '(' exp ',' exp ',' exp ')'					{ m_peecContainer->CreateVectorAssign( $3, $5, $7, $$ ); }
 	| EE_AT '(' exp ',' exp ')'								{ m_peecContainer->CreateVectorAt( $3, $5, $$ ); }
+	| custom_var '.' EE_AT '(' exp ')'						{ m_peecContainer->CreateVectorAt( $1, $5, $$ ); }
 	| EE_CAPACITY '(' exp ')'								{ m_peecContainer->CreateVectorCapacity( $3, $$ ); }
+	| custom_var '.' EE_CAPACITY '(' ')'					{ m_peecContainer->CreateVectorCapacity( $1, $$ ); }
 	| EE_CLEAR '(' exp ')'									{ m_peecContainer->CreateVectorClear( $3, $$ ); }
+	| custom_var '.' EE_CLEAR '(' ')'						{ m_peecContainer->CreateVectorClear( $1, $$ ); }
 	| EE_DOT '(' exp ',' exp ')'							{ m_peecContainer->CreateVectorDot( $3, $5, $$ ); }
 	| EE_EMPTY '(' exp ')'									{ m_peecContainer->CreateVectorEmpty( $3, $$ ); }
+	| custom_var '.' EE_EMPTY '(' ')'						{ m_peecContainer->CreateVectorEmpty( $1, $$ ); }
 	| EE_ERASE '(' exp ',' exp ')'							{ m_peecContainer->CreateVectorErase( $3, $5, $$ ); }
+	| custom_var '.' EE_ERASE '(' exp ')'					{ m_peecContainer->CreateVectorErase( $1, $5, $$ ); }
 	| EE_INSERT '(' exp ',' exp ',' exp ')'					{ m_peecContainer->CreateVectorInsert( $3, $5, $7, $$ ); }
 	| EE_MAX_SIZE '(' exp ')'								{ m_peecContainer->CreateVectorMaxSize( $3, $$ ); }
+	| custom_var '.' EE_MAX_SIZE '(' ')'					{ m_peecContainer->CreateVectorMaxSize( $1, $$ ); }
 	| EE_MUL '(' exp ',' exp ')'							{ m_peecContainer->CreateVectorMul( $3, $5, $$ ); }
 	| EE_RESERVE '(' exp ',' exp ')'						{ m_peecContainer->CreateVectorReserve( $3, $5, $$ ); }
+	| custom_var '.' EE_RESERVE '(' exp ')'					{ m_peecContainer->CreateVectorReserve( $1, $5, $$ ); }
 	| EE_RESIZE '(' exp ',' exp ')'							{ m_peecContainer->CreateVectorResize( $3, $5, $$ ); }
+	| custom_var '.' EE_RESIZE '(' exp ')'					{ m_peecContainer->CreateVectorResize( $1, $5, $$ ); }
 	| EE_POP_BACK '(' exp ')'								{ m_peecContainer->CreateVectorPopBack( $3, $$ ); }
+	| custom_var '.' EE_POP_BACK '(' ')'					{ m_peecContainer->CreateVectorPopBack( $1, $$ ); }
 	| EE_PUSH_BACK '(' exp ',' exp ')'						{ m_peecContainer->CreateVectorPushBack( $3, $5, $$ ); }
+	| custom_var '.' EE_PUSH_BACK '(' exp ')'				{ m_peecContainer->CreateVectorPushBack( $1, $5, $$ ); }
 	| EE_SHRINK_TO_FIT '(' exp ')'							{ m_peecContainer->CreateVectorShrinkToFit( $3, $$ ); }
+	| custom_var '.' EE_SHRINK_TO_FIT '(' ')'				{ m_peecContainer->CreateVectorShrinkToFit( $1, $$ ); }
 	| EE_SIZE '(' exp ')'									{ m_peecContainer->CreateVectorSize( $3, $$ ); }
+	| custom_var '.' EE_SIZE '(' ')'						{ m_peecContainer->CreateVectorSize( $1, $$ ); }
 	| EE_SUB '(' exp ',' exp ')'							{ m_peecContainer->CreateVectorSub( $3, $5, $$ ); }
 	| EE_SUM '(' exp ')'									{ m_peecContainer->CreateVectorSum( $3, $$ ); }
 	| EE_SWAP '(' exp ',' exp ')'							{ m_peecContainer->CreateVectorSwap( $3, $5, $$ ); }
+	| custom_var '.' EE_SWAP '(' exp ')'					{ m_peecContainer->CreateVectorSwap( $1, $5, $$ ); }
 	;
 
 exp

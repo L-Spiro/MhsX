@@ -18,7 +18,7 @@ namespace ee {
 		// == Enumerations.
 		// The built-in types.
 		enum EE_BUILT_IN_TYPES : uint32_t {
-			EE_BIT_STRING_REF						= (1 << 0),						// CStringRef
+			//EE_BIT_STRING_REF						= (1 << 0),						// CStringRef
 			EE_BIT_STRING							= (1 << 1),						// CString
 			EE_BIT_VECTOR							= (1 << 2),						// CVector
 		};
@@ -29,19 +29,27 @@ namespace ee {
 			EE_AEF_END								= (1 << 1),						// _i64Idx1 is valid.
 		};
 
+		// ToString() flags.
+		enum EE_TOSTRING_FLAGS : uint32_t {
+			EE_TF_NONE								= 0,
+			EE_TF_C_STRING							= (1 << 0),						// Hey "Bob" -> "Hey \"Bob\""
+		};
+
 
 		// == Functions.
 		// Gets the object type.
 		virtual uint32_t							Type() const = 0 { return 0; }
 
 		// Creates a string representation of the object, with the string usually assumed to be in UTF-8 format.
-		virtual bool								ToString( std::string &_sString ) = 0 {
+		virtual bool								ToString( std::string &_sString, uint32_t _ui32Flags = EE_TF_NONE ) = 0 {
+			static_cast<void>(_ui32Flags);
 			_sString = "<null>";
 			return false;
 		}
 
 		// Creates a formatted string representation of the object.
-		virtual std::string							FormattedString( const std::string &/*_sFormat*/ ) = 0 {
+		virtual std::string							FormattedString( const std::string &/*_sFormat*/, uint32_t _ui32Flags = EE_TF_NONE ) = 0 {
+			static_cast<void>(_ui32Flags);
 			return std::string( "<null>" );
 		}
 

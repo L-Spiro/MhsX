@@ -588,6 +588,9 @@ namespace ee {
 		// Converts from UTF-8 to ASCII.
 		static std::string				ToAscii( const std::string &_sIn );
 
+		// Converts from UTF-8 to a C string.
+		static std::string				ToCString( const std::string &_sIn );
+
 		// Represents a value in binary notation.
 		static std::string				ToBinary( uint64_t _ui64Val );
 

@@ -324,7 +324,7 @@ namespace ee {
 		 * \param _sReturn The resulting string form of the given result.
 		 * \return Returns true of a to-string conversion was made.
 		 */
-		bool								ToStringResultOrObject( const EE_RESULT &_rRes, std::string &_sReturn );
+		bool								ToStringResultOrObject( const EE_RESULT &_rRes, std::string &_sReturn, uint32_t _ui32Flags = 0 );
 
 		/**
 		 * Performs ToString() on a given result or object.
@@ -334,7 +334,7 @@ namespace ee {
 		 * \param _sReturn The resulting string form of the given result.
 		 * \return Returns true of a to-string conversion was made.
 		 */
-		bool								ToFormatStringResultOrObject( const EE_RESULT &_rRes, const std::string &_sFormat, std::string &_sReturn );
+		bool								ToFormatStringResultOrObject( const EE_RESULT &_rRes, const std::string &_sFormat, std::string &_sReturn, uint32_t _ui32Flags = 0 );
 
 		/**
 		 * Prforms an equality comparison on a pair of given results or objects.
@@ -925,23 +925,41 @@ namespace ee {
 		// Creates a vector.append().
 		void								CreateVectorAppend( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a vector.append().
+		void								CreateVectorAppend( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Creates a vector.assign().
 		void								CreateVectorAssign( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndIdx, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Creates a vector.at().
 		void								CreateVectorAt( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndIdx, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a vector.at().
+		void								CreateVectorAt( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndIdx, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Creates a vector.capacity().
 		void								CreateVectorCapacity( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.capacity().
+		void								CreateVectorCapacity( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Creates a vector.clear().
 		void								CreateVectorClear( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a vector.clear().
+		void								CreateVectorClear( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Creates a vector.empty().
 		void								CreateVectorEmpty( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a vector.empty().
+		void								CreateVectorEmpty( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Creates a vector.erase().
 		void								CreateVectorErase( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndIdx, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.erase().
+		void								CreateVectorErase( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndIdx, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Creates a vector.insert().
 		void								CreateVectorInsert( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndIdx, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode );
@@ -949,29 +967,53 @@ namespace ee {
 		// Creates a vector.max_size().
 		void								CreateVectorMaxSize( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a vector.max_size().
+		void								CreateVectorMaxSize( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Creates a vector.reserve().
 		void								CreateVectorReserve( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.reserve().
+		void								CreateVectorReserve( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Creates a vector.resize().
 		void								CreateVectorResize( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a vector.resize().
+		void								CreateVectorResize( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Creates a vector.pop_back().
 		void								CreateVectorPopBack( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.pop_back().
+		void								CreateVectorPopBack( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Creates a vector.push_back().
 		void								CreateVectorPushBack( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a vector.push_back().
+		void								CreateVectorPushBack( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Creates a vector.shrink_to_fit().
 		void								CreateVectorShrinkToFit( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a vector.shrink_to_fit().
+		void								CreateVectorShrinkToFit( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Creates a vector.size().
 		void								CreateVectorSize( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.size().
+		void								CreateVectorSize( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Creates a vector.sum().
 		void								CreateVectorSum( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Creates a vector.swap().
-		void								CreateVectorSwap( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndLeft, YYSTYPE::EE_NODE_DATA &_ndNode );
+		void								CreateVectorSwap( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndRight, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.swap().
+		void								CreateVectorSwap( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndRight, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Sets the translation-unit node.
 		void								SetTrans( YYSTYPE::EE_NODE_DATA &_ndNode );

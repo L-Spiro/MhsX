@@ -281,7 +281,7 @@ namespace ee {
 				return true;
 			}
 			case EE_NC_OBJECT : {
-				if ( _rRet.u.poObj && (_rRet.u.poObj->Type() & (EE_BIT_STRING_REF | EE_BIT_STRING)) ) {
+				if ( _rRet.u.poObj && (_rRet.u.poObj->Type() & EE_BIT_STRING) ) {
 					std::string sTmp;
 					if ( !_rRet.u.poObj->ToString( sTmp ) ) { return false; }
 					m_sObj += sTmp;
@@ -338,6 +338,25 @@ namespace ee {
 	// Returns the ordinal value of the object as a Unicode character (always EE_NC_UNSIGNED).
 	CExpEvalContainer::EE_RESULT CString::Ord() const {
 		return CStringBaseApi::Ord( m_sObj, m_peecContainer );
+	}
+
+	// Pops the back item.
+	CExpEvalContainer::EE_RESULT CString::PopBack() {
+		auto aLen = Len();
+		if ( !aLen.u.ui64Val ) { return CreateResult(); }
+		--aLen.u.ui64Val;
+		
+		if ( m_vArrayOpt.size() <= aLen.u.ui64Val ) {
+			uint32_t ui32Val;
+			CStringBaseApi::UpdateArrayAccessOptimizer( m_sObj, m_vArrayOpt, size_t( aLen.u.ui64Val ), ui32Val );
+		}
+		while ( m_sObj.size() > m_vArrayOpt[aLen.u.ui64Val] ) {
+			m_sObj.pop_back();
+		}
+		//Dirty();
+		m_ui64Len = aLen.u.ui64Val;
+		m_vArrayOpt.pop_back();
+		return CreateResult();
 	}
 
 	// Gets a value in the string.
