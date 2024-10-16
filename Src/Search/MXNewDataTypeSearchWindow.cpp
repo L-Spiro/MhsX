@@ -5,11 +5,13 @@
 #include "../Strings/MXStringDecoder.h"
 #include "../System/MXSystem.h"
 #include "../Utilities/MXUtilities.h"
+
 #include <algorithm>
 #include <Base/LSWBase.h>
 #include <Button/LSWButton.h>
 #include <CheckButton/LSWCheckButton.h>
 #include <ComboBox/LSWComboBox.h>
+#include <Object/EEObject.h>
 #include <Static/LSWStatic.h>
 
 
@@ -413,7 +415,7 @@ namespace mx {
 					return false;
 				}
 				
-				BOOL bParsed = pcbCombo->GetTextAsExpression( rRes, &bIsValid );
+				BOOL bParsed = pcbCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 				if ( !bParsed ) {
 					_wsError = bIsValid ? mx::CStringDecoder::DecodeToWString( _T_LEN_BDC62AA7_The_specified_value_is_invalid_ ) :
 						mx::CStringDecoder::DecodeToWString( _T_LEN_3A9BBB6B_No_search_value_has_been_specified_ );
@@ -444,7 +446,7 @@ namespace mx {
 					_wsError = mx::CStringDecoder::DecodeToWString( _T_LEN_83B9CBC3_Invalid_Data );
 					return false;
 				}
-				BOOL bParsed = pcbCombo->GetTextAsExpression( rRes, &bIsValid );
+				BOOL bParsed = pcbCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 				if ( !bParsed ) {
 					_wsError = bIsValid ? mx::CStringDecoder::DecodeToWString( _T_LEN_BDC62AA7_The_specified_value_is_invalid_ ) :
 						mx::CStringDecoder::DecodeToWString( _T_LEN_14F91708_The_range_of_values_to_find_is_incomplete_ );
@@ -457,14 +459,14 @@ namespace mx {
 
 		// Starting address.
 		pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_FROM_COMBO ));
-		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, &bIsValid ) ) {
+		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid ) ) {
 			_wsError = mx::CStringDecoder::DecodeToWString( _T_LEN_F94C43F0_The_specified_search_range_is_invalid_ );
 			return false;
 		}
 		_spParmsIfValid.ui64AddressFrom = CUtilities::ExpEvalResultToDataType( rRes, CUtilities::MX_DT_UINT64 ).u.UInt64;
 		// Ending search address.
 		pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_TO_COMBO ));
-		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, &bIsValid ) ) {
+		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid ) ) {
 			_wsError = mx::CStringDecoder::DecodeToWString( _T_LEN_F94C43F0_The_specified_search_range_is_invalid_ );
 			return false;
 		}
@@ -675,7 +677,7 @@ namespace mx {
 					switch ( lrEvalType ) {
 						case CUtilities::MX_ET_EXACT : {
 							CSecureWString wsStr0, wsStr1;
-							BOOL bParsed = pcbLValCombo->GetTextAsExpression( rRes, &bIsValid );
+							BOOL bParsed = pcbLValCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 							if ( !bIsValid ) {
 								wText = mx::CStringDecoder::DecodeToWString( _T_LEN_83B9CBC3_Invalid_Data );
 							}
@@ -707,7 +709,7 @@ namespace mx {
 						}
 						case CUtilities::MX_ET_GREATER_THAN : {
 							CSecureWString wsStr0, wsStr1;
-							BOOL bParsed = pcbLValCombo->GetTextAsExpression( rRes, &bIsValid );
+							BOOL bParsed = pcbLValCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 							if ( !bIsValid ) {
 								wText = mx::CStringDecoder::DecodeToWString( _T_LEN_83B9CBC3_Invalid_Data );
 							}
@@ -739,7 +741,7 @@ namespace mx {
 						}
 						case CUtilities::MX_ET_LESS_THAN : {
 							CSecureWString wsStr0, wsStr1;
-							BOOL bParsed = pcbLValCombo->GetTextAsExpression( rRes, &bIsValid );
+							BOOL bParsed = pcbLValCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 							if ( !bIsValid ) {
 								wText = mx::CStringDecoder::DecodeToWString( _T_LEN_83B9CBC3_Invalid_Data );
 							}
@@ -771,7 +773,7 @@ namespace mx {
 						}
 						case CUtilities::MX_ET_RANGE : {
 							CSecureWString wsStr0, wsStr1, wsStr2;
-							BOOL bParsed = pcbLValCombo->GetTextAsExpression( rRes, &bIsValid );
+							BOOL bParsed = pcbLValCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 							if ( !bIsValid ) {
 								wText = mx::CStringDecoder::DecodeToWString( _T_LEN_3A9BBB6B_No_search_value_has_been_specified_ );
 							}
@@ -786,7 +788,7 @@ namespace mx {
 									wText = mx::CStringDecoder::DecodeToWString( _T_LEN_14F91708_The_range_of_values_to_find_is_incomplete_ );
 								}
 								else {
-									bParsed = pcbRValCombo->GetTextAsExpression( rRes, &bIsValid );
+									bParsed = pcbRValCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 									if ( !bIsValid ) {
 										wText = mx::CStringDecoder::DecodeToWString( _T_LEN_14F91708_The_range_of_values_to_find_is_incomplete_ );
 									}
@@ -872,9 +874,9 @@ namespace mx {
 				ee::CExpEvalContainer::EE_RESULT rFrom, rTo;
 				pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_FROM_COMBO ));
 				bool bCapped = false;
-				if ( pcbCombo && pcbCombo->GetTextAsExpression( rFrom ) ) {
+				if ( pcbCombo && pcbCombo->GetTextAsExpression( rFrom, ee::CObject::EE_TF_NONE ) ) {
 					pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_TO_COMBO ));
-					if ( pcbCombo && pcbCombo->GetTextAsExpression( rTo ) ) {
+					if ( pcbCombo && pcbCombo->GetTextAsExpression( rTo, ee::CObject::EE_TF_NONE ) ) {
 						rFrom = ee::CExpEvalContainer::ConvertResult( rFrom, ee::EE_NC_UNSIGNED );
 						rTo = ee::CExpEvalContainer::ConvertResult( rTo, ee::EE_NC_UNSIGNED );
 						CSecureWString wFrom, wTo;

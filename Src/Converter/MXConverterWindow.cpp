@@ -3,6 +3,7 @@
 #include "../System/MXSystem.h"
 #include "../Utilities/MXUtilities.h"
 
+#include <Object/EEObject.h>
 #include <Rebar/LSWRebar.h>
 #include <ToolBar/LSWToolBar.h>
 
@@ -468,7 +469,7 @@ namespace mx {
 		ee::CExpEvalContainer::EE_RESULT rRes;
 		_pwControl->SetTreatAsHex( _bHex );
 		_pwControl->SetAddressHandler( _pwControl->Parent()->GetAddressHandler(), _pwControl->Parent()->GetAddressHandlerData() );
-		if ( !_pwControl->GetTextAsExpression( rRes, &bValid ) || !bValid ) {
+		if ( !_pwControl->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bValid ) || !bValid ) {
 			rRes.ncType = ee::EE_NC_INVALID;
 			return rRes;
 		}
@@ -530,7 +531,7 @@ namespace mx {
 		ee::CExpEvalContainer::EE_RESULT rRes;
 		_pwControl->SetTreatAsHex( _bHex );
 		_pwControl->SetAddressHandler( _pwControl->Parent()->GetAddressHandler(), _pwControl->Parent()->GetAddressHandlerData() );
-		if ( !_pwControl->GetTextAsExpression( rRes, &bValid ) || !bValid ) {
+		if ( !_pwControl->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bValid ) || !bValid ) {
 			rRes.ncType = ee::EE_NC_INVALID;
 			return rRes;
 		}

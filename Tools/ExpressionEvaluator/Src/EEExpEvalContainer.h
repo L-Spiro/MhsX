@@ -324,7 +324,7 @@ namespace ee {
 		 * \param _sReturn The resulting string form of the given result.
 		 * \return Returns true of a to-string conversion was made.
 		 */
-		bool								ToStringResultOrObject( const EE_RESULT &_rRes, std::string &_sReturn, uint32_t _ui32Flags = 0 );
+		bool								ToStringResultOrObject( const EE_RESULT &_rRes, std::string &_sReturn, uint32_t _ui32Depth, uint32_t _ui32Flags = 0 );
 
 		/**
 		 * Performs ToString() on a given result or object.
@@ -349,7 +349,7 @@ namespace ee {
 		static EE_RESULT					DefaultResult() { EE_RESULT rRes; rRes.ncType = EE_NC_UNSIGNED; rRes.u.ui64Val = 0UL; return rRes; }
 
 		// Default ToString() function.
-		static std::wstring					DefaultToString( EE_RESULT &_rResult, uint64_t _ui64Options );
+		static std::wstring					DefaultToString( EE_RESULT &_rResult, uint32_t _ui32Depth, uint64_t _ui64Options );
 
 		// Returns the index of a string if it exists or static_cast<size_t>(-1) otherwise.
 		size_t								HasString( const std::string &_sText ) const;
@@ -367,7 +367,7 @@ namespace ee {
 		bool								IsArray( const std::string &_sText ) const;
 
 		// Gets the string version of the given value.
-		std::wstring						ToString( EE_RESULT &_rResult, uint64_t _ui64Options );
+		std::wstring						ToString( EE_RESULT &_rResult, uint32_t _ui32Depth, uint64_t _ui64Options );
 
 		// Prints a formatted string.  All ... parameters must be of type "const EE_RESULT".
 		static int __cdecl					PrintF( wchar_t * _pwcDst, size_t _sMaxLen,
@@ -456,7 +456,7 @@ namespace ee {
 		}
 
 		// Applies a 1-parameter intrinsic to a result.
-		EE_ERROR_CODES						PerformIntrinsic( EE_RESULT _rExp, uint32_t _uiIntrinsic, EE_RESULT &_rResult );
+		EE_ERROR_CODES						PerformIntrinsic( EE_RESULT _rExp, uint32_t _uiIntrinsic, EE_RESULT &_rResult, uint32_t _ui32Depth = 0 );
 
 		// Applies a 2-parameter intrinsic to a result.
 		EE_ERROR_CODES						PerformIntrinsic( EE_RESULT _rExp0, EE_RESULT _rExp1, uint32_t _uiIntrinsic, EE_RESULT &_rResult, bool _bIncludeNonConst );
@@ -835,6 +835,9 @@ namespace ee {
 		// Creates a vector.
 		void								CreateVector( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a vector.
+		void								CreateVector( YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Create a 0-parm intrinsic.
 		void								CreateIntrinsic0( uint32_t _uiIntrinsic, YYSTYPE::EE_NODE_DATA &_ndNode );
 
@@ -949,6 +952,9 @@ namespace ee {
 		// Creates a vector.clear().
 		void								CreateVectorClear( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a vector.cross().
+		void								CreateVectorCross( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndOperand, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Creates a vector.empty().
 		void								CreateVectorEmpty( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
 
@@ -969,6 +975,24 @@ namespace ee {
 
 		// Creates a vector.max_size().
 		void								CreateVectorMaxSize( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.mag().
+		void								CreateVectorMag( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.mag().
+		void								CreateVectorMag( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.mag_sq().
+		void								CreateVectorMagSq( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.mag_sq().
+		void								CreateVectorMagSq( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.normalize().
+		void								CreateVectorNormalize( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a vector.normalize().
+		void								CreateVectorNormalize( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Creates a vector.reserve().
 		void								CreateVectorReserve( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
@@ -1014,6 +1038,27 @@ namespace ee {
 
 		// Creates a vector.swap().
 		void								CreateVectorSwap( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndRight, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a string tokenization.
+		void								CreateStringTokenize( const YYSTYPE::EE_NODE_DATA &_ndString, const YYSTYPE::EE_NODE_DATA &_ndTokenizer, const YYSTYPE::EE_NODE_DATA &_ndIncludeEmpty, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a string tokenization.
+		void								CreateStringTokenize( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndTokenizer, const YYSTYPE::EE_NODE_DATA &_ndIncludeEmpty, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a Bartlett window.
+		void								CreateWindowBartlett( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a Blackman window.
+		void								CreateWindowBlackman( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a Hamming window.
+		void								CreateWindowHamming( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a Hann window.
+		void								CreateWindowHann( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a Kaiser window.
+		void								CreateWindowKaiser( const YYSTYPE::EE_NODE_DATA &_ndSize, const YYSTYPE::EE_NODE_DATA &_ndBeta, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Sets the translation-unit node.
 		void								SetTrans( YYSTYPE::EE_NODE_DATA &_ndNode );

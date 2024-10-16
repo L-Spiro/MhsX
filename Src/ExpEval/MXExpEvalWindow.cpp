@@ -253,7 +253,14 @@ namespace mx {
 		pcbCombo->SetAddressHandler( m_pfahAddressHandler, m_uiptrAddressHandlerData );
 		pcbCombo->SetAddressWriteHandler( m_pfahAddressWriteHandler, m_uiptrAddressWriteHandlerData );
 		std::string sObj;
-		BOOL bSuccess = pcbCombo->GetTextAsExpression( eResult, &bValid, &sObj );
+		CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( CExpressionEvaluatorLayout::MX_EE_TOOLBAR0 ));
+		int32_t iSciNot = 0;
+		if ( plvToolBar ) {
+			iSciNot = plvToolBar->IsChecked( CExpressionEvaluatorLayout::MX_BC_SCINOT ) ? DBL_DECIMAL_DIG : 0;
+		}
+		BOOL bSuccess = pcbCombo->GetTextAsExpression( eResult, iSciNot == DBL_DECIMAL_DIG ? ee::CObject::EE_TF_C_STRING : ee::CObject::EE_TF_NONE, &bValid, &sObj );
+
+		//ee::CObject::EE_TF_NONE
 
 		if ( bSuccess ) {
 			if ( eResult.ncType == ee::EE_NC_OBJECT ) {
@@ -261,11 +268,6 @@ namespace mx {
 			}
 			else {
 				std::wstring sTemp;
-				CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( CExpressionEvaluatorLayout::MX_EE_TOOLBAR0 ));
-				int32_t iSciNot = 0;
-				if ( plvToolBar ) {
-					iSciNot = plvToolBar->IsChecked( CExpressionEvaluatorLayout::MX_BC_SCINOT ) ? DBL_DECIMAL_DIG : 0;
-				}
 			
 				CUtilities::PrintExpResult( eResult, sTemp, iSciNot, m_dDecoding );
 				peEdit->SetTextW( sTemp.c_str() );
@@ -344,11 +346,17 @@ namespace mx {
 							if ( m_vExpressions[I]->GetContainer() ) {
 								ee::CExpEvalContainer::EE_RESULT eResult;
 								if ( m_vExpressions[I]->GetContainer()->Resolve( eResult ) ) {
+									CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( CExpressionEvaluatorLayout::MX_EE_TOOLBAR0 ));
+									int32_t iSciNot = -3;
+									if ( plvToolBar ) {
+										iSciNot = plvToolBar->IsChecked( CExpressionEvaluatorLayout::MX_BC_SCINOT ) ? DBL_DECIMAL_DIG : -(DBL_DECIMAL_DIG >> 0);
+									}
+
 									if ( eResult.ncType == ee::EE_NC_OBJECT ) {
 										ee::CObject * poObj = eResult.u.poObj;
 										eResult.u.poObj = nullptr;
 										if ( poObj ) {
-											if ( poObj->ToString( sObj ) ) {
+											if ( poObj->ToString( sObj, 0, iSciNot == DBL_DECIMAL_DIG ? ee::CObject::EE_TF_C_STRING : 0 ) ) {
 												plvList->SetItemText( I, 1, ee::CExpEval::StringToWString( sObj ).c_str() );
 												continue;
 											}
@@ -357,11 +365,7 @@ namespace mx {
 										continue;
 									}
 									std::wstring sTemp;
-									CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( CExpressionEvaluatorLayout::MX_EE_TOOLBAR0 ));
-									int32_t iSciNot = -3;
-									if ( plvToolBar ) {
-										iSciNot = plvToolBar->IsChecked( CExpressionEvaluatorLayout::MX_BC_SCINOT ) ? DBL_DECIMAL_DIG : -(DBL_DECIMAL_DIG >> 0);
-									}
+									
 									CComboBox * pcbOutputFormat = OutputCombo();
 									LPARAM lpDecoder = pcbOutputFormat ?
 										pcbOutputFormat->GetItemData( pcbOutputFormat->GetCurSel() ) :

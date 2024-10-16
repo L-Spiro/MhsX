@@ -189,7 +189,7 @@ namespace lsw {
 	}
 
 	// Get the value of the text as an expression.
-	BOOL CWidget::GetTextAsExpression( ee::CExpEvalContainer::EE_RESULT &_eResult, BOOL * _pbExpIsValid, std::string * _psObjStringResult ) const {
+	BOOL CWidget::GetTextAsExpression( ee::CExpEvalContainer::EE_RESULT &_eResult, uint32_t _ui32Flags, BOOL * _pbExpIsValid, std::string * _psObjStringResult ) const {
 		if ( _pbExpIsValid ) { (*_pbExpIsValid) = FALSE; }
 		CExpression eExp;
 		eExp.SetTreatsAsHex( TreatAsHex() != FALSE );
@@ -209,7 +209,7 @@ namespace lsw {
 			ee::CObject * poObj = _eResult.u.poObj;
 			_eResult.u.poObj = nullptr;
 			if ( _psObjStringResult && poObj ) {
-				return poObj->ToString( (*_psObjStringResult) ) ? TRUE : FALSE;
+				return poObj->ToString( (*_psObjStringResult), 0, _ui32Flags ) ? TRUE : FALSE;
 			}
 			return FALSE;
 		}
@@ -218,21 +218,21 @@ namespace lsw {
 
 	// Get the value of the text as an int64_t expression.
 	BOOL CWidget::GetTextAsInt64Expression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const {
-		if ( !GetTextAsExpression( _eResult ) ) { return FALSE; }
+		if ( !GetTextAsExpression( _eResult, ee::CObject::EE_TF_NONE ) ) { return FALSE; }
 		_eResult = ee::CExpEvalContainer::ConvertResult( _eResult, ee::EE_NC_SIGNED );
 		return TRUE;
 	}
 
 	// Get the value of the text as a uint64_t expression.
 	BOOL CWidget::GetTextAsUInt64Expression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const {
-		if ( !GetTextAsExpression( _eResult ) ) { return FALSE; }
+		if ( !GetTextAsExpression( _eResult, ee::CObject::EE_TF_NONE ) ) { return FALSE; }
 		_eResult = ee::CExpEvalContainer::ConvertResult( _eResult, ee::EE_NC_UNSIGNED );
 		return TRUE;
 	}
 
 	// Get the value of the text as a double expression.
 	BOOL CWidget::GetTextAsDoubleExpression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const {
-		if ( !GetTextAsExpression( _eResult ) ) { return FALSE; }
+		if ( !GetTextAsExpression( _eResult, ee::CObject::EE_TF_NONE ) ) { return FALSE; }
 		_eResult = ee::CExpEvalContainer::ConvertResult( _eResult, ee::EE_NC_FLOATING );
 		return TRUE;
 	}

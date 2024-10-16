@@ -42,7 +42,7 @@ namespace ee {
 		 * \param _sString Holds the returned string.
 		 * \return Returns true if the object can be converted to a string and no memory errors were encountered when doing so.
 		 */
-		virtual bool								ToString( std::string &_sString, uint32_t _ui32Flags = EE_TF_NONE );
+		virtual bool								ToString( std::string &_sString, uint32_t _ui32Depth, uint32_t _ui32Flags = EE_TF_NONE );
 
 		/**
 		 * Creates a formatted string representation of the vector by passing the format string to each element of the vector.
@@ -96,12 +96,60 @@ namespace ee {
 		virtual CExpEvalContainer::EE_RESULT		Plus( CExpEvalContainer::EE_RESULT &_rRet );
 
 		/**
+		 * Operator -.  If _rRet is an object, element, otherwise a new vector is returned with element-wise subtraction of the given value.
+		 *
+		 * \param _rRet The concatenation object.
+		 * \return If _rRet is another vector, a new vector is returned with both this and _rRet’s contents, otherwise an invalid object is returned.
+		 */
+		virtual CExpEvalContainer::EE_RESULT		Minus( CExpEvalContainer::EE_RESULT &_rRet );
+
+		/**
+		 * Operator *.  If _rRet is a vector, element-wise multiplication is performed, otherwise a new vector is returned with scalar multiplication of the given value.
+		 *
+		 * \param _rRet The concatenation object.
+		 * \return If _rRet is another vector, a new vector is returned with both this and _rRet’s contents, otherwise an invalid object is returned.
+		 */
+		virtual CExpEvalContainer::EE_RESULT		Multiply( CExpEvalContainer::EE_RESULT &_rRet );
+
+		/**
+		 * Operator /.  If _rRet is a vector, element-wise division is performed, otherwise a new vector is returned with scalar division by the given value.
+		 *
+		 * \param _rRet The concatenation object.
+		 * \return If _rRet is another vector, a new vector is returned with both this and _rRet’s contents, otherwise an invalid object is returned.
+		 */
+		virtual CExpEvalContainer::EE_RESULT		Divide( CExpEvalContainer::EE_RESULT &_rRet );
+
+		/**
 		 * Operator +=.  Appends the item or all of the items in the vector if the item is a vector.
 		 *
 		 * \param _rRet The concatenation object.
 		 * \return Returns true unless there were memory failures during the concatenation process.
 		 */
 		virtual bool								PlusEquals( CExpEvalContainer::EE_RESULT &_rRet );
+
+		/**
+		 * Operator -=.  Subtracts the given scalar from all elements in this vector.
+		 *
+		 * \param _rRet The concatenation object.
+		 * \return Returns true unless there were memory failures during the concatenation process.
+		 */
+		virtual bool								MinusEquals( CExpEvalContainer::EE_RESULT &_rRet );
+
+		/**
+		 * Operator *=.  Performs scalar or element-wise * with self and given operand.
+		 *
+		 * \param _rRet The concatenation object.
+		 * \return Returns true unless there were memory failures during the concatenation process.
+		 */
+		virtual bool								TimesEquals( CExpEvalContainer::EE_RESULT &_rRet );
+
+		/**
+		 * Operator /=.  Performs scalar or element-wise / with self and given operand.
+		 *
+		 * \param _rRet The concatenation object.
+		 * \return Returns true unless there were memory failures during the concatenation process.
+		 */
+		virtual bool								DivideEquals( CExpEvalContainer::EE_RESULT &_rRet );
 
 		// == Base API functions.
 		// Gets the object as an ASCII string.
@@ -126,6 +174,13 @@ namespace ee {
 		virtual CExpEvalContainer::EE_RESULT		Int() const { return { EE_NC_INVALID }; }
 
 		/**
+		 * Gets the backing vector directly.
+		 * 
+		 * \return Returns a reference to the backing string.
+		 **/
+		std::vector<CExpEvalContainer::EE_RESULT> &	GetBacking() { return m_vBacking; }
+
+		/**
 		 * Gets the number of elements in the object.  For arrays, maps, sets, lists, etc., this is the number of items.  For Unicode strings, this is the number of UTF code points.
 		 *
 		 * \return Returns the number of items in the vector.
@@ -144,9 +199,10 @@ namespace ee {
 
 		// Append an item to the end of the vector.
 		virtual CExpEvalContainer::EE_RESULT		PushBack( CExpEvalContainer::EE_RESULT &_rRet ) {
-			if ( _rRet.ncType == EE_NC_OBJECT && _rRet.u.poObj && (_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) &&
-				static_cast<ee::CVector *>(_rRet.u.poObj) == this ) { return { .ncType = EE_NC_INVALID }; }
-			m_vBacking.push_back( _rRet ); return _rRet;
+			/*if ( _rRet.ncType == EE_NC_OBJECT && _rRet.u.poObj && (_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) &&
+				static_cast<ee::CVector *>(_rRet.u.poObj) == this ) { return { .ncType = EE_NC_INVALID }; }*/
+			m_vBacking.push_back( _rRet );
+			return _rRet;
 		}
 
 		// Gets the capacity.
@@ -186,7 +242,12 @@ namespace ee {
 		}
 
 		// Assigns a value at a given index in the array.
-		virtual CExpEvalContainer::EE_RESULT		Assign( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) { m_vBacking.assign( _sIdx, _rRet ); return CreateResult(); }
+		virtual CExpEvalContainer::EE_RESULT		Assign( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
+			/*if ( _rRet.ncType == EE_NC_OBJECT && _rRet.u.poObj && (_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) &&
+				static_cast<ee::CVector *>(_rRet.u.poObj) == this ) { return { .ncType = EE_NC_INVALID }; }*/
+			m_vBacking.assign( _sIdx, _rRet );
+			return CreateResult();
+		}
 
 		// Inserts a value at a given index in the array.
 		virtual CExpEvalContainer::EE_RESULT		Insert( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
@@ -263,8 +324,26 @@ namespace ee {
 		// Scalar multiplication.
 		virtual CExpEvalContainer::EE_RESULT		Mul( const CExpEvalContainer::EE_RESULT &_rScalar, ee::CVector * _pvReturn );
 
+		// Element-wise division.
+		virtual CExpEvalContainer::EE_RESULT		Div( const ee::CVector * _pvOther, ee::CVector * _pvReturn );
+
+		// Scalar division.
+		virtual CExpEvalContainer::EE_RESULT		Div( const CExpEvalContainer::EE_RESULT &_rScalar, ee::CVector * _pvReturn );
+
 		// Dot product.
 		virtual CExpEvalContainer::EE_RESULT		Dot( const ee::CVector * _pvOther );
+
+		// Cross product.
+		virtual CExpEvalContainer::EE_RESULT		Cross( const ee::CVector * _pvOther, ee::CVector * _pvReturn );
+
+		// Gets the magnitude of the vector.
+		virtual CExpEvalContainer::EE_RESULT		Mag();
+
+		// Gets the squared magnitude of the vector.
+		virtual CExpEvalContainer::EE_RESULT		MagSq();
+
+		// Return a normalized copy of this vector.
+		virtual CExpEvalContainer::EE_RESULT		Normalize( ee::CVector * _pvReturn );
 
 	protected :
 		// == Members.

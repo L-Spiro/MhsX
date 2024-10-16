@@ -551,13 +551,17 @@ RS1_S								[rR]{CS1}
 "at"								{ return yy::CExpEvalParser::token::EE_AT; }
 "capacity"							{ return yy::CExpEvalParser::token::EE_CAPACITY; }
 "clear"								{ return yy::CExpEvalParser::token::EE_CLEAR; }
+"cross"								{ return yy::CExpEvalParser::token::EE_CROSS; }
 "dot"								{ return yy::CExpEvalParser::token::EE_DOT; }
 "empty"								{ return yy::CExpEvalParser::token::EE_EMPTY; }
 "erase"								{ return yy::CExpEvalParser::token::EE_ERASE; }
 "insert"							{ return yy::CExpEvalParser::token::EE_INSERT; }
 "length"							{ return yy::CExpEvalParser::token::EE_SIZE; }
 "max_size"							{ return yy::CExpEvalParser::token::EE_MAX_SIZE; }
+"mag"								{ return yy::CExpEvalParser::token::EE_MAG; }
+"mag_sq"							{ return yy::CExpEvalParser::token::EE_MAGSQ; }
 "mul"								{ return yy::CExpEvalParser::token::EE_MUL; }
+"normalize"							{ return yy::CExpEvalParser::token::EE_NORMALIZE; }
 "reserve"							{ return yy::CExpEvalParser::token::EE_RESERVE; }
 "resize"							{ return yy::CExpEvalParser::token::EE_RESIZE; }
 "pop_back"							{ return yy::CExpEvalParser::token::EE_POP_BACK; }
@@ -567,6 +571,15 @@ RS1_S								[rR]{CS1}
 "sub"								{ return yy::CExpEvalParser::token::EE_SUB; }
 "sum"								{ return yy::CExpEvalParser::token::EE_SUM; }
 "swap"								{ return yy::CExpEvalParser::token::EE_SWAP; }
+"tokenize"							{ return yy::CExpEvalParser::token::EE_TOKENIZE; }
+
+"bartlett"							{ return yy::CExpEvalParser::token::EE_BARTLETT; }
+"blackman"							{ return yy::CExpEvalParser::token::EE_BLACKMAN; }
+"hamming"							{ return yy::CExpEvalParser::token::EE_HAMMING; }
+"hann"								{ return yy::CExpEvalParser::token::EE_HANN; }
+"hanning"							{ return yy::CExpEvalParser::token::EE_HANN; }
+"kaiser"							{ return yy::CExpEvalParser::token::EE_KAISER; }
+"sinc"								{ return yy::CExpEvalParser::token::EE_SINC; }
 
 
 "CHAR_BIT"							{ return yy::CExpEvalParser::token::EE_CHAR_BIT; }

@@ -50,13 +50,17 @@ namespace ee {
 	 * \param _sString Holds the returned string.
 	 * \return Returns true if the object can be converted to a string and no memory errors were encountered when doing so.
 	 */
-	bool CVector::ToString( std::string &_sString, uint32_t _ui32Flags ) {
+	bool CVector::ToString( std::string &_sString, uint32_t _ui32Depth, uint32_t _ui32Flags ) {
+		if ( _ui32Depth >= 32 ) {
+			_sString = "<...>";
+			return true;
+		}
 		std::string sTmp;
 		try {
 			_sString = "{";
 
 			for ( size_t I = 0; I < m_vBacking.size(); ++I ) {
-				if ( !m_peecContainer->ToStringResultOrObject( m_vBacking[I], sTmp, _ui32Flags | CObject::EE_TF_C_STRING ) ) {
+				if ( !m_peecContainer->ToStringResultOrObject( m_vBacking[I], sTmp, _ui32Depth + 1, _ui32Flags | CObject::EE_TF_C_STRING ) ) {
 					_sString += "<error>";
 				}
 				else {
@@ -206,43 +210,118 @@ namespace ee {
 	 * \return If _rRet is another vector, a new vector is returned with both this and _rRet’s contents, otherwise an invalid object is returned.
 	 */
 	CExpEvalContainer::EE_RESULT CVector::Plus( CExpEvalContainer::EE_RESULT &_rRet ) {
-		CExpEvalContainer::EE_RESULT rRet = { EE_NC_INVALID };
-		if ( _rRet.ncType == EE_NC_OBJECT ) {
-			if ( !_rRet.u.poObj ) { return rRet; }
-			if ( (_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) {
-				CVector * psObj = reinterpret_cast<CVector *>(m_peecContainer->AllocateObject<CVector>());
-				if ( psObj ) {
-					try {
-						psObj->m_vBacking = m_vBacking;
-						const size_t stSize = reinterpret_cast<const CVector *>(_rRet.u.poObj)->m_vBacking.size();
-						for ( size_t I = 0; I < stSize; ++I ) {
-							psObj->m_vBacking.push_back( reinterpret_cast<const CVector *>(_rRet.u.poObj)->m_vBacking[I] );
-						}
-					}
-					catch ( ... ) {
-						m_peecContainer->DeallocateObject( psObj );
-						return rRet;
-					}
-					rRet = psObj->CreateResult();
-				}
-				return rRet;
-			}
-		}
+		if ( _rRet.ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
 		CVector * psObj = reinterpret_cast<CVector *>(m_peecContainer->AllocateObject<CVector>());
-		if ( psObj ) {
+		if ( !psObj ) { return { .ncType = EE_NC_INVALID }; }
+
+		if ( _rRet.ncType == EE_NC_OBJECT && _rRet.u.poObj ) {
+
+			if ( (_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) {
+				try {
+					const size_t stSize = static_cast<const CVector *>(_rRet.u.poObj)->m_vBacking.size();
+					for ( size_t I = 0; I < stSize; ++I ) {
+						m_vBacking.push_back( static_cast<const CVector *>(_rRet.u.poObj)->m_vBacking[I] );
+					}
+				}
+				catch ( ... ) { return { .ncType = EE_NC_INVALID }; }
+				_rRet = static_cast<const CVector *>(_rRet.u.poObj)->CreateResult();
+				return psObj->CreateResult();
+			}
+
 			try {
 				psObj->m_vBacking = m_vBacking;
-				psObj->m_vBacking.push_back( _rRet );
+				if ( psObj->Append( _rRet ).ncType == EE_NC_INVALID ) {
+					m_peecContainer->DeallocateObject( psObj );
+					return { .ncType = EE_NC_INVALID };
+				}
+				return psObj->CreateResult();
 			}
 			catch ( ... ) {
 				m_peecContainer->DeallocateObject( psObj );
-				return rRet;
+				return { .ncType = EE_NC_INVALID };
 			}
-			rRet = psObj->CreateResult();
+		}
+		
+		if ( psObj->Resize( m_vBacking.size() ).ncType == EE_NC_INVALID ) { m_peecContainer->DeallocateObject( psObj ); return { .ncType = EE_NC_INVALID }; }
+		for ( auto I = m_vBacking.size(); I--; ) {
+			auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '+', _rRet, psObj->m_vBacking[I] );
+			if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { m_peecContainer->DeallocateObject( psObj ); return { .ncType = EE_NC_INVALID }; }
 		}
 
-		return rRet;
+		return psObj->CreateResult();
 	}
+
+	/**
+	 * Operator -.  If _rRet is an object, errors, otherwise a new vector is returned with element-wise subtraction of the given value.
+	 *
+	 * \param _rRet The concatenation object.
+	 * \return If _rRet is another vector, a new vector is returned with both this and _rRet’s contents, otherwise an invalid object is returned.
+	 */
+	CExpEvalContainer::EE_RESULT CVector::Minus( CExpEvalContainer::EE_RESULT &_rRet ) {
+		if ( _rRet.ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
+		CVector * psObj = reinterpret_cast<CVector *>(m_peecContainer->AllocateObject<CVector>());
+		if ( !psObj ) { return { .ncType = EE_NC_INVALID }; }
+
+		if ( psObj->Resize( m_vBacking.size() ).ncType == EE_NC_INVALID ) { m_peecContainer->DeallocateObject( psObj ); return { .ncType = EE_NC_INVALID }; }
+
+		if ( _rRet.ncType == EE_NC_OBJECT ) {
+			if ( !_rRet.u.poObj || !(_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { m_peecContainer->DeallocateObject( psObj ); return { .ncType = EE_NC_INVALID }; }
+			if ( m_vBacking.size() != static_cast<ee::CVector *>(_rRet.u.poObj)->m_vBacking.size() ) { m_peecContainer->DeallocateObject( psObj ); return { .ncType = EE_NC_INVALID }; }
+			for ( auto I = m_vBacking.size(); I--; ) {
+				auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '-', static_cast<ee::CVector *>(_rRet.u.poObj)->m_vBacking[I], psObj->m_vBacking[I] );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { m_peecContainer->DeallocateObject( psObj ); return { .ncType = EE_NC_INVALID }; }
+			}
+			return psObj->CreateResult();
+		}
+		
+		for ( auto I = m_vBacking.size(); I--; ) {
+			auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '-', _rRet, psObj->m_vBacking[I] );
+			if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { m_peecContainer->DeallocateObject( psObj ); return { .ncType = EE_NC_INVALID }; }
+		}
+
+		return psObj->CreateResult();
+	}
+
+	/**
+	 * Operator *.  If _rRet is a vector, element-wise multiplication is performed, otherwise a new vector is returned with scalar multiplication of the given value.
+	 *
+	 * \param _rRet The concatenation object.
+	 * \return If _rRet is another vector, a new vector is returned with both this and _rRet’s contents, otherwise an invalid object is returned.
+	 */
+	CExpEvalContainer::EE_RESULT CVector::Multiply( CExpEvalContainer::EE_RESULT &_rRet ) {
+		if ( _rRet.ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
+		CVector * psObj = reinterpret_cast<CVector *>(m_peecContainer->AllocateObject<CVector>());
+		if ( !psObj ) { return { .ncType = EE_NC_INVALID }; }
+
+		if ( _rRet.ncType == EE_NC_OBJECT ) {
+			if ( !_rRet.u.poObj || !(_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { m_peecContainer->DeallocateObject( psObj ); return { .ncType = EE_NC_INVALID }; }
+			if ( Mul( static_cast<ee::CVector *>(_rRet.u.poObj), psObj ).ncType == EE_NC_INVALID ) { m_peecContainer->DeallocateObject( psObj ); return { .ncType = EE_NC_INVALID }; }
+			return psObj->CreateResult();
+		}
+		if ( Mul( _rRet, psObj ).ncType == EE_NC_INVALID ) { m_peecContainer->DeallocateObject( psObj ); return { .ncType = EE_NC_INVALID }; }
+		return psObj->CreateResult();
+	}
+
+	/**
+	 * Operator /.  If _rRet is a vector, element-wise division is performed, otherwise a new vector is returned with scalar division by the given value.
+	 *
+	 * \param _rRet The concatenation object.
+	 * \return If _rRet is another vector, a new vector is returned with both this and _rRet’s contents, otherwise an invalid object is returned.
+	 */
+	CExpEvalContainer::EE_RESULT CVector::Divide( CExpEvalContainer::EE_RESULT &_rRet ) {
+		if ( _rRet.ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
+		CVector * psObj = reinterpret_cast<CVector *>(m_peecContainer->AllocateObject<CVector>());
+		if ( !psObj ) { return { .ncType = EE_NC_INVALID }; }
+
+		if ( _rRet.ncType == EE_NC_OBJECT ) {
+			if ( !_rRet.u.poObj || !(_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { return { .ncType = EE_NC_INVALID }; }
+			if ( Div( static_cast<ee::CVector *>(_rRet.u.poObj), psObj ).ncType == EE_NC_INVALID ) { m_peecContainer->DeallocateObject( psObj ); return { .ncType = EE_NC_INVALID }; }
+			return psObj->CreateResult();
+		}
+		if ( Div( _rRet, psObj ).ncType == EE_NC_INVALID ) { m_peecContainer->DeallocateObject( psObj ); return { .ncType = EE_NC_INVALID }; }
+		return psObj->CreateResult();
+	}
+
 
 	/**
 	 * Operator +=.  Appends the item or all of the items in the vector if the item is a vector.
@@ -251,29 +330,119 @@ namespace ee {
 	 * \return Returns true unless there were memory failures during the concatenation process.
 	 */
 	bool CVector::PlusEquals( CExpEvalContainer::EE_RESULT &_rRet ) {
+		if ( _rRet.ncType == EE_NC_INVALID ) { return false; }
+
 		if ( _rRet.ncType == EE_NC_OBJECT ) {
 			if ( !_rRet.u.poObj ) { return false; }
 			if ( (_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) {
 				try {
-					const size_t stSize = reinterpret_cast<const CVector *>(_rRet.u.poObj)->m_vBacking.size();
+					const size_t stSize = static_cast<const CVector *>(_rRet.u.poObj)->m_vBacking.size();
 					for ( size_t I = 0; I < stSize; ++I ) {
-						m_vBacking.push_back( reinterpret_cast<const CVector *>(_rRet.u.poObj)->m_vBacking[I] );
+						m_vBacking.push_back( static_cast<const CVector *>(_rRet.u.poObj)->m_vBacking[I] );
 					}
 				}
 				catch ( ... ) {
 					return false;
 				}
+				_rRet = CreateResult();
 				return true;
 			}
 		}
 		
-		try {
-			m_vBacking.push_back( _rRet );
+		for ( auto I = m_vBacking.size(); I--; ) {
+			auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '+', _rRet, m_vBacking[I] );
+			if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return false; }
+		}
+
+		_rRet = CreateResult();
+		return true;
+	}
+
+	/**
+	 * Operator -=.  Subtracts the given scalar from all elements in this vector.
+	 *
+	 * \param _rRet The concatenation object.
+	 * \return Returns true unless there were memory failures during the concatenation process.
+	 */
+	bool CVector::MinusEquals( CExpEvalContainer::EE_RESULT &_rRet ) {
+		if ( _rRet.ncType == EE_NC_INVALID ) { return false; }
+
+		if ( _rRet.ncType == EE_NC_OBJECT ) {
+			if ( !_rRet.u.poObj || !(_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { return false; }
+			if ( m_vBacking.size() != static_cast<ee::CVector *>(_rRet.u.poObj)->m_vBacking.size() ) { return false; }
+			for ( auto I = m_vBacking.size(); I--; ) {
+				auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '-', static_cast<ee::CVector *>(_rRet.u.poObj)->m_vBacking[I], m_vBacking[I] );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return false; }
+			}
+			_rRet = CreateResult();
 			return true;
 		}
-		catch ( ... ) {
-			return false;
+		
+		for ( auto I = m_vBacking.size(); I--; ) {
+			auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '-', _rRet, m_vBacking[I] );
+			if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return false; }
 		}
+
+		_rRet = CreateResult();
+		return true;
+	}
+
+	/**
+	 * Operator *=.  Performs scalar or element-wise * with self and given operand.
+	 *
+	 * \param _rRet The concatenation object.
+	 * \return Returns true unless there were memory failures during the concatenation process.
+	 */
+	bool CVector::TimesEquals( CExpEvalContainer::EE_RESULT &_rRet ) {
+		if ( _rRet.ncType == EE_NC_INVALID ) { return false; }
+
+		if ( _rRet.ncType == EE_NC_OBJECT ) {
+			if ( !_rRet.u.poObj || !(_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { return false; }
+			if ( m_vBacking.size() != static_cast<ee::CVector *>(_rRet.u.poObj)->m_vBacking.size() ) { return false; }
+			for ( auto I = m_vBacking.size(); I--; ) {
+				auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '*', static_cast<ee::CVector *>(_rRet.u.poObj)->m_vBacking[I], m_vBacking[I] );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return false; }
+			}
+			_rRet = CreateResult();
+			return true;
+		}
+		
+		for ( auto I = m_vBacking.size(); I--; ) {
+			auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '*', _rRet, m_vBacking[I] );
+			if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return false; }
+		}
+
+		_rRet = CreateResult();
+		return true;
+	}
+
+	/**
+	 * Operator /=.  Performs scalar or element-wise / with self and given operand.
+	 *
+	 * \param _rRet The concatenation object.
+	 * \return Returns true unless there were memory failures during the concatenation process.
+	 */
+	bool CVector::DivideEquals( CExpEvalContainer::EE_RESULT &_rRet ) {
+		if ( _rRet.ncType == EE_NC_INVALID ) { return false; }
+
+		if ( _rRet.ncType == EE_NC_OBJECT ) {
+			if ( !_rRet.u.poObj || !(_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { return false; }
+			if ( m_vBacking.size() != static_cast<ee::CVector *>(_rRet.u.poObj)->m_vBacking.size() ) { return false; }
+			for ( auto I = m_vBacking.size(); I--; ) {
+				auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '/', static_cast<ee::CVector *>(_rRet.u.poObj)->m_vBacking[I], m_vBacking[I] );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return false; }
+			}
+			_rRet = CreateResult();
+			return true;
+		}
+		
+		for ( auto I = m_vBacking.size(); I--; ) {
+			auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '/', _rRet, m_vBacking[I] );
+			if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return false; }
+		}
+
+		_rRet = CreateResult();
+		return true;
 	}
 
 	// Sums all elements.
@@ -355,6 +524,7 @@ namespace ee {
 
 	// Scalar multiplication.
 	CExpEvalContainer::EE_RESULT CVector::Mul( const CExpEvalContainer::EE_RESULT &_rScalar, ee::CVector * _pvReturn ) {
+		if ( _rScalar.ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
 		_pvReturn->Clear();
 
 		if ( _pvReturn->Resize( m_vBacking.size() ).ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
@@ -364,6 +534,47 @@ namespace ee {
 		}
 
 		return _pvReturn->CreateResult();
+	}
+
+	// Element-wise division.
+	CExpEvalContainer::EE_RESULT CVector::Div( const ee::CVector * _pvOther, ee::CVector * _pvReturn ) {
+		try {
+			_pvReturn->Clear();
+		
+			if ( _pvReturn->Resize( std::max( m_vBacking.size(), _pvOther->m_vBacking.size() ) ).ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
+			for ( auto I = _pvReturn->m_vBacking.size(); I--; ) {
+				if ( I >= m_vBacking.size() ) {
+					_pvReturn->m_vBacking[I] = _pvOther->m_vBacking[I];
+				}
+				else if ( I >= _pvOther->m_vBacking.size() ) {
+					_pvReturn->m_vBacking[I] = m_vBacking[I];
+				}
+				else {
+					auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '/', _pvOther->m_vBacking[I], _pvReturn->m_vBacking[I] );
+					if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+				}
+			}
+
+			return _pvReturn->CreateResult();
+		}
+		catch ( ... ) { return { .ncType = EE_NC_INVALID }; }
+	}
+
+	// Scalar division.
+	CExpEvalContainer::EE_RESULT CVector::Div( const CExpEvalContainer::EE_RESULT &_rScalar, ee::CVector * _pvReturn ) {
+		if ( _rScalar.ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
+		try {
+			_pvReturn->Clear();
+
+			if ( _pvReturn->Resize( m_vBacking.size() ).ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
+			for ( auto I = _pvReturn->m_vBacking.size(); I--; ) {
+				auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '/', _rScalar, _pvReturn->m_vBacking[I] );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+			}
+
+			return _pvReturn->CreateResult();
+		}
+		catch ( ... ) { return { .ncType = EE_NC_INVALID }; }
 	}
 
 	// Dot product.
@@ -383,6 +594,115 @@ namespace ee {
 		}
 
 		return rRet;
+	}
+
+	// Cross product.
+	CExpEvalContainer::EE_RESULT CVector::Cross( const ee::CVector * _pvOther, ee::CVector * _pvReturn ) {
+		if ( m_vBacking.size() != _pvOther->m_vBacking.size() ) { return { .ncType = EE_NC_INVALID }; }
+		//if ( m_vBacking.size() != 2 && m_vBacking.size() != 3 ) { return { .ncType = EE_NC_INVALID }; }
+
+		CExpEvalContainer::EE_RESULT rRet;
+		switch ( m_vBacking.size() ) {
+			case 2 : {
+				// 2D Cross Product, result is a scalar representing the z component.
+				//	T tResult = vA[0] * vB[1] - vA[1] * vB[0];
+				CExpEvalContainer::EE_RESULT rTmp, rTmp2;
+				// vA[0] * vB[1]
+				auto aCode = m_peecContainer->PerformOp( m_vBacking[0], '*', _pvOther->m_vBacking[1], rTmp );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+				// vA[1] * vB[0]
+				aCode = m_peecContainer->PerformOp( m_vBacking[1], '*', _pvOther->m_vBacking[0], rTmp2 );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+				// (vA[0] * vB[1]) - (vA[1] * vB[0])
+				aCode = m_peecContainer->PerformOp( rTmp, '-', rTmp2, rRet );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+				return rRet;
+			}
+			case 3 : {
+				// 3D Cross Product.
+				//	std::vector<T> vResult( 3 );
+				//	vResult[0] = vA[1] * vB[2] - vA[2] * vB[1];
+				//	vResult[1] = vA[2] * vB[0] - vA[0] * vB[2];
+				//	vResult[2] = vA[0] * vB[1] - vA[1] * vB[0];
+				try {
+					_pvReturn->m_vBacking.resize( 3 );
+				}
+				catch ( ... ) { return { .ncType = EE_NC_INVALID }; }
+				CExpEvalContainer::EE_RESULT rTmp, rTmp2;
+				// vA[1] * vB[2]
+				auto aCode = m_peecContainer->PerformOp( m_vBacking[1], '*', _pvOther->m_vBacking[2], rTmp );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+				// vA[2] * vB[1]
+				aCode = m_peecContainer->PerformOp( m_vBacking[2], '*', _pvOther->m_vBacking[1], rTmp2 );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+				// vResult[0] = vA[1] * vB[2] - vA[2] * vB[1];
+				aCode = m_peecContainer->PerformOp( rTmp, '-', rTmp2, _pvReturn->m_vBacking[0] );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+
+				// vA[2] * vB[0]
+				aCode = m_peecContainer->PerformOp( m_vBacking[2], '*', _pvOther->m_vBacking[0], rTmp );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+				// vA[0] * vB[2]
+				aCode = m_peecContainer->PerformOp( m_vBacking[0], '*', _pvOther->m_vBacking[2], rTmp2 );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+				// vResult[1] = vA[2] * vB[0] - vA[0] * vB[2];
+				aCode = m_peecContainer->PerformOp( rTmp, '-', rTmp2, _pvReturn->m_vBacking[1] );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+
+				// vA[0] * vB[1]
+				aCode = m_peecContainer->PerformOp( m_vBacking[0], '*', _pvOther->m_vBacking[1], rTmp );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+				// vA[1] * vB[0]
+				aCode = m_peecContainer->PerformOp( m_vBacking[1], '*', _pvOther->m_vBacking[0], rTmp2 );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+				// vResult[2] = vA[0] * vB[1] - vA[1] * vB[0];
+				aCode = m_peecContainer->PerformOp( rTmp, '-', rTmp2, _pvReturn->m_vBacking[2] );
+				if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+
+				return _pvReturn->CreateResult();
+			}
+			default : { return { .ncType = EE_NC_INVALID }; }
+		}
+	}
+
+	// Gets the magnitude of the vector.
+	CExpEvalContainer::EE_RESULT CVector::Mag() {
+		CExpEvalContainer::EE_RESULT rRet = CExpEvalContainer::DefaultResult();
+
+		for ( auto I = m_vBacking.size(); I--; ) {
+			CExpEvalContainer::EE_RESULT rTmp;
+			auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '*', m_vBacking[I], rTmp );
+			if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+			CExpEvalContainer::EE_RESULT rTmp2;
+			aCode = m_peecContainer->PerformOp( rRet, '+', rTmp, rTmp2 );
+			if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+			rRet = rTmp2;
+		}
+		rRet = m_peecContainer->ConvertResultOrObject( rRet, EE_NC_FLOATING );
+		rRet.u.dVal = std::sqrt( rRet.u.dVal );
+		return rRet;
+	}
+
+	// Gets the squared magnitude of the vector.
+	CExpEvalContainer::EE_RESULT CVector::MagSq() {
+		CExpEvalContainer::EE_RESULT rRet = CExpEvalContainer::DefaultResult();
+
+		for ( auto I = m_vBacking.size(); I--; ) {
+			CExpEvalContainer::EE_RESULT rTmp;
+			auto aCode = m_peecContainer->PerformOp( m_vBacking[I], '*', m_vBacking[I], rTmp );
+			if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+			CExpEvalContainer::EE_RESULT rTmp2;
+			aCode = m_peecContainer->PerformOp( rRet, '+', rTmp, rTmp2 );
+			if ( aCode != CExpEvalContainer::EE_EC_SUCCESS ) { return { .ncType = EE_NC_INVALID }; }
+			rRet = rTmp2;
+		}
+		//rRet = m_peecContainer->ConvertResultOrObject( rRet, EE_NC_FLOATING );
+		return rRet;
+	}
+
+	// Return a normalized copy of this vector.
+	CExpEvalContainer::EE_RESULT CVector::Normalize( ee::CVector * _pvReturn ) {
+		return Div( Mag(), _pvReturn );
 	}
 
 }	// namespace ee

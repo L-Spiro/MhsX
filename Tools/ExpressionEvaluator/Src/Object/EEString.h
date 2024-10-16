@@ -37,7 +37,7 @@ namespace ee {
 		virtual bool								InitializeFrom( const CExpEvalContainer::EE_RESULT &_rObj );
 
 		// Creates a string representation of the object, with the string usually assumed to be in UTF-8 format.
-		virtual bool								ToString( std::string &_sString, uint32_t _ui32Flags = EE_TF_NONE ) {
+		virtual bool								ToString( std::string &_sString, uint32_t _ui32Depth, uint32_t _ui32Flags = EE_TF_NONE ) {
 			if ( _ui32Flags & CObject::EE_TF_C_STRING ) {
 				_sString.reserve( m_sObj.size() + 2 );
 				_sString = "\"";
@@ -125,8 +125,24 @@ namespace ee {
 		// Returns the ordinal value of the object as a Unicode character (always EE_NC_UNSIGNED).
 		virtual CExpEvalContainer::EE_RESULT		Ord() const;
 
+		// Gets the backing string directly.
+		const std::string &							GetBacking() const { return m_sObj; }
+
 		// Append an item to the end of the string.
-		virtual CExpEvalContainer::EE_RESULT		PushBack( CExpEvalContainer::EE_RESULT &_rRet ) { m_sObj.push_back( static_cast<std::string::value_type>(_rRet.u.ui64Val) ); Dirty(); return CreateResult(); }
+		virtual CExpEvalContainer::EE_RESULT		PushBack( CExpEvalContainer::EE_RESULT &_rRet ) {
+			if ( _rRet.ncType == EE_NC_OBJECT ) {
+				if ( !_rRet.u.poObj ) { return { .ncType = EE_NC_INVALID }; };
+				if ( !(_rRet.u.poObj->Type() & CObject::EE_BIT_STRING ) ) { return { .ncType = EE_NC_INVALID }; };
+				m_sObj.append( static_cast<ee::CString *>(_rRet.u.poObj)->m_sObj );
+			}
+			else {
+				CExpEvalContainer::EE_RESULT rIdx = m_peecContainer->ConvertResultOrObject( _rRet, EE_NC_UNSIGNED );
+				if ( rIdx.ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
+				m_sObj.push_back( static_cast<std::string::value_type>(rIdx.u.ui64Val) );
+			}
+			Dirty();
+			return CreateResult();
+		}
 
 		// Pops the back item.
 		virtual CExpEvalContainer::EE_RESULT		PopBack();

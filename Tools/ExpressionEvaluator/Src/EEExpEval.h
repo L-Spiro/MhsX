@@ -1,7 +1,9 @@
 #pragma once
 
 #include "SinCos/EESinCos.h"
+#include <cmath>
 #include <cinttypes>
+#include <numbers>
 #include <string>
 #include <vector>
 #ifdef _WIN32
@@ -34,13 +36,19 @@
 #ifndef NDEBUG
 #define EE_MAX_ITERATION_COUNT			90000
 #else
-#define EE_MAX_ITERATION_COUNT			9000000
+#define EE_MAX_ITERATION_COUNT			0x10000000
 #endif	// NDEBUG
 #endif	// EE_MAX_ITERATION_COUNT
 
 #ifndef EE_PI
 #define EE_PI							3.1415926535897932384626433832795
 #endif // #ifndef EE_PI
+
+#if defined( _MSC_VER )
+#define EE_FALLTHROUGH					[[fallthrough]];
+#else
+#define EE_FALLTHROUGH					
+#endif	// #if defined( _MSC_VER )
 
 
 namespace ee {
@@ -865,6 +873,47 @@ namespace ee {
 			return vRet;
 		}
 
+		// Parse a string into an array of strings given a UTF-32 delimiter.
+		template <typename _tType = std::string>
+		static std::vector<_tType>		TokenizeUtf( const _tType &_sInput, uint32_t _ui32Token, bool _bIncludeEmptyTokens = true, bool * pbErrored = nullptr ) {
+			std::vector<_tType> vRet;
+			try {
+				_tType tCurLine;
+				size_t sSize = 1;
+				for ( size_t I = 0; I < _sInput.size(); I += sSize ) {
+					uint32_t ui32Char;
+					if constexpr ( sizeof( _tType::value_type ) == sizeof( char8_t ) ) {
+						ui32Char = NextUtf8Char( &_sInput[I], _sInput.size() - I, &sSize );
+					}
+					else if constexpr ( sizeof( _tType::value_type ) == sizeof( char16_t ) ) {
+						ui32Char = NextUtf16Char( &_sInput[I], _sInput.size() - I, &sSize );
+					}
+					else {
+						sSize = 1;
+						ui32Char = _sInput[I];
+					}
+
+					if ( ui32Char == _ui32Token ) {
+						if ( tCurLine.size() || _bIncludeEmptyTokens ) {
+							vRet.push_back( tCurLine );
+						}
+						tCurLine.clear();
+					}
+					else {
+						tCurLine.append( &_sInput[I], sSize );
+					}
+				}
+				if ( tCurLine.size() || _bIncludeEmptyTokens ) {
+					vRet.push_back( tCurLine );
+				}
+				if ( pbErrored ) { (*pbErrored) = false; }
+			}
+			catch ( ... ) {
+				if ( pbErrored ) { (*pbErrored) = true; }
+			}
+			return vRet;
+		}
+
 		// Recombines an array of strings back into a single string.
 		template <typename _tType = std::string>
 		static _tType					Reconstitute( const std::vector<_tType> &_vArray, uint32_t _ui32Token, bool * pbErrored = nullptr ) {
@@ -1138,6 +1187,308 @@ namespace ee {
 
 		// Pulls any preprocessing directives out of a single line.
 		static bool						PreprocessingDirectives( const std::string &_sInput, std::string &_sDirective, std::string &_sParms );
+
+		/**
+		 * Creates a Hann window.
+		 * 
+		 * \param _sN Number of samples.  Generally an odd number.
+		 * \param _vRet The returned vector.
+		 * \return Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						HannWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			try {
+				_vRet.resize( _sN );
+
+				const double dTau = 2.0 * std::numbers::pi;
+				size_t stMax = _vRet.size() - 1;
+				double dInvMax = 1.0 / stMax;
+				double dTauInvMax = dTau * dInvMax;
+				for ( auto I = _vRet.size(); I--; ) {
+					_vRet[I] = _tType( 0.5 - 0.5 * std::cos( dTauInvMax * I ) );
+				}
+
+				return true;
+			}
+			catch ( ... ) { return false; }
+		}
+
+		/**
+		 * Creates a Hamming window.
+		 * 
+		 * \param _sN Number of samples.  Generally an odd number.
+		 * \param _vRet The returned vector.
+		 * \return Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						HammingWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			try {
+				_vRet.resize( _sN );
+
+				const double dTau = 2.0 * std::numbers::pi;
+				size_t stMax = _vRet.size() - 1;
+				double dInvMax = 1.0 / stMax;
+				double dTauInvMax = dTau * dInvMax;
+				for ( auto I = _vRet.size(); I--; ) {
+					_vRet[I] = _tType( 0.53836 - 0.46164 * std::cos( dTauInvMax * I ) );
+				}
+
+				return true;
+			}
+			catch ( ... ) { return false; }
+		}
+
+		/**
+		 * Creates a Blackman window.
+		 * 
+		 * \param _sN Number of samples.  Generally an odd number.
+		 * \param _vRet The returned vector.
+		 * \return Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						BlackmanWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			// These exact values place zeros at the third and fourth sidelobes, but result in a discontinuity at the edges and a 6 dB/oct fall-off.
+			//constexpr double dA0 = 7938.0 / 18608.0;	// 0.42659071367153911236158592146239243447780609130859375
+			//constexpr double dA1 = 9240.0 / 18608.0;	// 0.4965606190885640813803547644056379795074462890625
+			//constexpr double dA2 = 1430.0 / 18608.0;	// 0.07684866723989682013584712194642634131014347076416015625
+			
+			// The truncated coefficients do not null the sidelobes as well, but have an improved 18 dB/oct fall-off.
+			constexpr double dA = 0.16;					// 0.1600000000000000033306690738754696212708950042724609375
+			constexpr double dA0 = (1.0 - dA) / 2.0;	// 0.419999999999999984456877655247808434069156646728515625
+			constexpr double dA1 = 1.0 / 2.0;			// 0.5
+			constexpr double dA2 = dA / 2.0;			// 0.08000000000000000166533453693773481063544750213623046875
+			try {
+				_vRet.resize( _sN );
+
+				const double dTau = 2.0 * std::numbers::pi;
+				size_t stMax = _vRet.size() - 1;
+				double dInvMax = 1.0 / stMax;
+				double dTauInvMax = dTau * dInvMax;
+				double dTauInvMax2 = 2.0 * dTauInvMax;
+				for ( auto I = _vRet.size(); I--; ) {
+					_vRet[I] = _tType( dA0 - dA1 * std::cos( dTauInvMax * I ) + dA2 * std::cos( dTauInvMax2 * I ) );
+				}
+
+				return true;
+			}
+			catch ( ... ) { return false; }
+		}
+
+		/**
+		 * Creates a Bartlett window.
+		 * 
+		 * \param _sN Number of samples.  Generally an odd number.
+		 * \param _vRet The returned vector.
+		 * \return Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						BartlettWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			try {
+				_vRet.resize( _sN );
+
+				size_t stMax = _vRet.size() - 1;
+				double d2InvMax = 2.0 / stMax;
+				double dHalfMax = stMax / 2.0;
+				for ( auto I = _vRet.size(); I--; ) {
+					_vRet[I] = _tType( d2InvMax * (dHalfMax - std::abs( I - dHalfMax )) );
+				}
+
+				return true;
+			}
+			catch ( ... ) { return false; }
+		}
+
+		/**
+		 * A 0th-order Bessel function needed for the Kaiser window.
+		 * 
+		 * \param _dX The Bessel term.
+		 * \return Returns the Bessel function for the given term.
+		 **/
+		static inline double			Bessel0( double _dX ) {
+			constexpr double dEspiRatio = 1.0e-16;
+			double dSum = 1.0, dPow = 1.0, dDs = 1.0, dXh = _dX * 0.5;
+			uint32_t ui32K = 0;
+
+			while ( dDs > dSum * dEspiRatio ) {
+				++ui32K;
+				dPow *= (dXh / ui32K);
+				dDs = dPow * dPow;
+				dSum += dDs;
+			}
+
+			return dSum;
+		}
+
+		/**
+		 * Creates a Kaiser window.
+		 * 
+		 * \param _sN Number of samples.  Generally an odd number.
+		 * \param _tBeta The beta parameter.
+		 * \param _vRet The returned vector.
+		 * \return Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						KaiserWindow( size_t _sN, _tType _tBeta, std::vector<_tType> &_vRet ) {
+			try {
+				_vRet.resize( _sN );
+
+				double dDenominator = Bessel0( double( _tBeta ) );
+
+				for ( size_t I = 0; I < _sN; ++I ) {
+					double dRatio = 0.0;
+					if ( _sN > 1 ) {
+						dRatio = (2.0 * I) / (_sN - 1) - 1.0;
+					}
+					double dArg = _tBeta * std::sqrt( 1.0 - dRatio * dRatio );
+					_vRet[I] = _tType( Bessel0( dArg ) / dDenominator );
+				}
+
+
+				return true;
+			}
+			catch ( ... ) { return false; }
+		}
+
+		/**
+		 * Creates a Nuttal window.
+		 * 
+		 * \param _sN Number of samples.  Generally an odd number.
+		 * \param _vRet The returned vector.
+		 * \return Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						NuttalWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			constexpr double dA0 = 0.355768;			// 0.35576799999999997314859001562581397593021392822265625
+			constexpr double dA1 = 0.487396;			// 0.487395999999999995910826555700623430311679840087890625
+			constexpr double dA2 = 0.144232;			// 0.1442319999999999990958343687452725134789943695068359375
+			constexpr double dA3 = 0.012604;			// 0.0126040000000000006197264923457623808644711971282958984375
+			try {
+				_vRet.resize( _sN );
+
+				const double dTau = 2.0 * std::numbers::pi;
+				size_t stMax = _vRet.size() - 1;
+				double dInvMax = 1.0 / stMax;
+				double dTauInvMax = dTau * dInvMax;
+				double dTauInvMax2 = 2.0 * dTauInvMax;
+				double dTauInvMax3 = 3.0 * dTauInvMax;
+				for ( auto I = _vRet.size(); I--; ) {
+					_vRet[I] = _tType( dA0 - dA1 * std::cos( dTauInvMax * I ) + dA2 * std::cos( dTauInvMax2 * I ) - dA3 * std::cos( dTauInvMax3 * I ) );
+				}
+
+				return true;
+			}
+			catch ( ... ) { return false; }
+		}
+
+		/**
+		 * Creates a Blackman-Nuttal window.
+		 * 
+		 * \param _sN Number of samples.  Generally an odd number.
+		 * \param _vRet The returned vector.
+		 * \return Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						BlackmanNuttalWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			constexpr double dA0 = 0.3635819;			// 0.3635819000000000134065203383215703070163726806640625
+			constexpr double dA1 = 0.4891775;			// 0.489177499999999987334575735076214186847209930419921875
+			constexpr double dA2 = 0.1365995;			// 0.1365995000000000125783827797931735403835773468017578125
+			constexpr double dA3 = 0.0106411;			// 0.01064110000000000055830895462349872104823589324951171875
+			try {
+				_vRet.resize( _sN );
+
+				const double dTau = 2.0 * std::numbers::pi;
+				size_t stMax = _vRet.size() - 1;
+				double dInvMax = 1.0 / stMax;
+				double dTauInvMax = dTau * dInvMax;
+				double dTauInvMax2 = 2.0 * dTauInvMax;
+				double dTauInvMax3 = 3.0 * dTauInvMax;
+				for ( auto I = _vRet.size(); I--; ) {
+					_vRet[I] = _tType( dA0 - dA1 * std::cos( dTauInvMax * I ) + dA2 * std::cos( dTauInvMax2 * I ) - dA3 * std::cos( dTauInvMax3 * I ) );
+				}
+
+				return true;
+			}
+			catch ( ... ) { return false; }
+		}
+
+		/**
+		 * Creates a Blackman-Harris window.
+		 * 
+		 * \param _sN Number of samples.  Generally an odd number.
+		 * \param _vRet The returned vector.
+		 * \return Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						BlackmanHarrisWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			constexpr double dA0 = 0.35875;				// 0.35875000000000001332267629550187848508358001708984375
+			constexpr double dA1 = 0.48829;				// 0.48829000000000000181188397618825547397136688232421875
+			constexpr double dA2 = 0.14128;				// 0.1412799999999999889244151063394383527338504791259765625
+			constexpr double dA3 = 0.01168;				// 0.0116799999999999994104715739240418770350515842437744140625
+			try {
+				_vRet.resize( _sN );
+
+				const double dTau = 2.0 * std::numbers::pi;
+				size_t stMax = _vRet.size() - 1;
+				double dInvMax = 1.0 / stMax;
+				double dTauInvMax = dTau * dInvMax;
+				double dTauInvMax2 = 2.0 * dTauInvMax;
+				double dTauInvMax3 = 3.0 * dTauInvMax;
+				for ( auto I = _vRet.size(); I--; ) {
+					_vRet[I] = _tType( dA0 - dA1 * std::cos( dTauInvMax * I ) + dA2 * std::cos( dTauInvMax2 * I ) - dA3 * std::cos( dTauInvMax3 * I ) );
+				}
+
+				return true;
+			}
+			catch ( ... ) { return false; }
+		}
+
+		/**
+		 * Creates a FLat-Top window.
+		 * 
+		 * \param _sN Number of samples.  Generally an odd number.
+		 * \param _vRet The returned vector.
+		 * \return Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						FlatTopWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			constexpr double dA0 = 0.21557895;			// 0.215578949999999991415933209282229654490947723388671875
+			constexpr double dA1 = 0.41663158;			// 0.4166315800000000013625367500935681164264678955078125
+			constexpr double dA2 = 0.277263158;			// 0.2772631580000000095509449238306842744350433349609375
+			constexpr double dA3 = 0.083578947;			// 0.08357894700000000065553962258491083048284053802490234375
+			constexpr double dA4 = 0.006947368;			// 0.006947367999999999772786640761523813125677406787872314453125
+			try {
+				_vRet.resize( _sN );
+
+				const double dTau = 2.0 * std::numbers::pi;
+				size_t stMax = _vRet.size() - 1;
+				double dInvMax = 1.0 / stMax;
+				double dTauInvMax = dTau * dInvMax;
+				double dTauInvMax2 = 2.0 * dTauInvMax;
+				double dTauInvMax3 = 3.0 * dTauInvMax;
+				double dTauInvMax4 = 4.0 * dTauInvMax;
+				for ( auto I = _vRet.size(); I--; ) {
+					_vRet[I] = _tType( dA0 - dA1 * std::cos( dTauInvMax * I ) + dA2 * std::cos( dTauInvMax2 * I ) - dA3 * std::cos( dTauInvMax3 * I ) + dA4 * std::cos( dTauInvMax4 * I ) );
+				}
+
+				return true;
+			}
+			catch ( ... ) { return false; }
+		}
+
+		/**
+		 * Standard sinc() function.
+		 * 
+		 * \param _dX The operand.
+		 * \return Returns sin(x*PI) / x*PI.
+		 **/
+		static inline double			Sinc( double _dX ) {
+			_dX *= std::numbers::pi;
+			if ( _dX < 0.01 && _dX > -0.01 ) {
+				return 1.0 + _dX * _dX * (-1.0 / 6.0 + _dX * _dX * 1.0 / 120.0);
+			}
+
+			return std::sin( _dX ) / _dX;
+		}
 	};
 
 }	// namespace ee

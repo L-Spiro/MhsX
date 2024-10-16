@@ -41,7 +41,7 @@ namespace ee {
 		virtual uint32_t							Type() const = 0 { return 0; }
 
 		// Creates a string representation of the object, with the string usually assumed to be in UTF-8 format.
-		virtual bool								ToString( std::string &_sString, uint32_t _ui32Flags = EE_TF_NONE ) = 0 {
+		virtual bool								ToString( std::string &_sString, uint32_t /*_ui32Depth*/, uint32_t _ui32Flags = EE_TF_NONE ) = 0 {
 			static_cast<void>(_ui32Flags);
 			_sString = "<null>";
 			return false;

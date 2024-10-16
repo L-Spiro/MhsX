@@ -6,12 +6,14 @@
 #include "../Strings/MXStringDecoder.h"
 #include "../System/MXSystem.h"
 #include "../Utilities/MXUtilities.h"
+
 #include <algorithm>
 #include <Base/LSWBase.h>
 #include <Button/LSWButton.h>
 #include <CheckButton/LSWCheckButton.h>
 #include <ComboBox/LSWComboBox.h>
 #include <Float16/EEFloat16.h>
+#include <Object/EEObject.h>
 #include <Static/LSWStatic.h>
 
 #include <set>
@@ -701,14 +703,14 @@ namespace mx {
 		BOOL bIsValid;
 		ee::CExpEvalContainer::EE_RESULT rRes;
 		pcbCombo = static_cast<CComboBox *>(FindChild( CNewStringSearchLayout::MX_SSI_FROM_COMBO ));
-		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, &bIsValid ) ) {
+		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid ) ) {
 			_wsError = _DEC_WS_F94C43F0_The_specified_search_range_is_invalid_;
 			return false;
 		}
 		_spParmsIfValid.ui64AddressFrom = CUtilities::ExpEvalResultToDataType( rRes, CUtilities::MX_DT_UINT64 ).u.UInt64;
 		// Ending search address.
 		pcbCombo = static_cast<CComboBox *>(FindChild( CNewStringSearchLayout::MX_SSI_TO_COMBO ));
-		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, &bIsValid ) ) {
+		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid ) ) {
 			_wsError = _DEC_WS_F94C43F0_The_specified_search_range_is_invalid_;
 			return false;
 		}

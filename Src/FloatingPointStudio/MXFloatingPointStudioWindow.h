@@ -32,7 +32,11 @@ namespace mx {
 			MX_P_8_BIT,
 			MX_P_10_BIT,
 			MX_P_11_BIT,
+			MX_P_BFLOAT16,
+			MX_P_TENSORFLOAT32,
+			MX_P_AMD_F24,
 			MX_P_AMD_9511,
+			MX_P_PXR24,
 			MX_P_CUSTOM,
 		};
 

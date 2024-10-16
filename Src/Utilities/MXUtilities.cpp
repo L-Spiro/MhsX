@@ -5,8 +5,10 @@
 #include "../Options/MXOptions.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../Strings/MXStringMacros.h"
+
 #include <EEExpEval.h>
 #include <Float16/EEFloat16.h>
+#include <Object/EEObject.h>
 
 #include <algorithm>
 #include <cmath>
@@ -4199,13 +4201,13 @@ namespace mx {
 		ee::CExpEvalContainer::EE_RESULT rRes;
 		// Starting address.
 		lsw::CComboBox * pcbCombo = _pcbFrom;
-		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, &bIsValid ) ) {
+		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid ) ) {
 			return 1;
 		}
 		//_spParmsIfValid.ui64AddressFrom = CUtilities::ExpEvalResultToDataType( rRes, CUtilities::MX_DT_UINT64 ).u.UInt64;
 		// Ending search address.
 		pcbCombo = _pcbTo;
-		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, &bIsValid ) ) {
+		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid ) ) {
 			return 2;
 		}
 		//_spParmsIfValid.ui64AddressTo = CUtilities::ExpEvalResultToDataType( rRes, CUtilities::MX_DT_UINT64 ).u.UInt64;

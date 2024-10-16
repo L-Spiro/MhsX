@@ -77,7 +77,7 @@ namespace ee {
 			}
 			case EE_NC_OBJECT : {
 				if ( _rObj.u.poObj ) {
-					 return _rObj.u.poObj->ToString( m_sObj );
+					 return _rObj.u.poObj->ToString( m_sObj, 0 );
 				}
 			}
 		}
@@ -99,6 +99,7 @@ namespace ee {
 			sIdx = static_cast<size_t>(_i64Idx);
 			if ( static_cast<int64_t>(sIdx) != _i64Idx ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
 		}
+		if ( sIdx == size_t( -1 ) ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
 		uint32_t ui32Val;
 		CStringBaseApi::UpdateArrayAccessOptimizer( m_sObj, m_vArrayOpt, sIdx, ui32Val );
 		rRet.u.ui64Val = ui32Val;
@@ -121,6 +122,7 @@ namespace ee {
 				sIdx0 = static_cast<size_t>(_i64Idx0);
 				if ( static_cast<int64_t>(sIdx0) != _i64Idx0 ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
 			}
+			if ( sIdx0 == size_t( -1 ) ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
 			sIdx0 = ee::CExpEval::GetUtf8CharPosByIdx( m_sObj, sIdx0 );
 		}
 
@@ -136,6 +138,7 @@ namespace ee {
 				sIdx1 = static_cast<size_t>(_i64Idx1);
 				if ( static_cast<int64_t>(sIdx1) != _i64Idx1 ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
 			}
+			if ( sIdx1 == size_t( -1 ) ) { rRet.u.ui64Val = EE_UTF_INVALID; return rRet; }
 			sIdx1 = ee::CExpEval::GetUtf8CharPosByIdx( m_sObj, sIdx1 );
 		}
 		else {
@@ -283,7 +286,7 @@ namespace ee {
 			case EE_NC_OBJECT : {
 				if ( _rRet.u.poObj && (_rRet.u.poObj->Type() & EE_BIT_STRING) ) {
 					std::string sTmp;
-					if ( !_rRet.u.poObj->ToString( sTmp ) ) { return false; }
+					if ( !_rRet.u.poObj->ToString( sTmp, 0 ) ) { return false; }
 					m_sObj += sTmp;
 					Dirty();
 					_rRet = CreateResult();

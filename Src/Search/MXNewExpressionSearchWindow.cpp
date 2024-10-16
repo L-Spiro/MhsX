@@ -2,11 +2,13 @@
 #include "../Layouts/MXMainWindowLayout.h"
 #include "../Layouts/MXNewExpressionSearchLayout.h"
 #include "../MainWindow/MXMhsMainWindow.h"
+
 #include <Base/LSWBase.h>
 #include <Button/LSWButton.h>
 #include <CheckButton/LSWCheckButton.h>
 #include <ComboBox/LSWComboBox.h>
 #include <Edit/LSWEdit.h>
+#include <Object/EEObject.h>
 #include <RadioButton/LSWRadioButton.h>
 #include <Static/LSWStatic.h>
 
@@ -362,14 +364,14 @@ namespace mx {
 		// Starting address.
 		BOOL bIsValid;
 		CComboBox * pcbCombo = static_cast<CComboBox *>(FindChild( CNewExpressionSearchLayout::MX_NESI_FROM_COMBO ));
-		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, &bIsValid ) ) {
+		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid ) ) {
 			_wsError = mx::CStringDecoder::DecodeToWString( _T_LEN_F94C43F0_The_specified_search_range_is_invalid_ );
 			return false;
 		}
 		_spParmsIfValid.ui64AddressFrom = CUtilities::ExpEvalResultToDataType( rRes, CUtilities::MX_DT_UINT64 ).u.UInt64;
 		// Ending search address.
 		pcbCombo = static_cast<CComboBox *>(FindChild( CNewExpressionSearchLayout::MX_NESI_TO_COMBO ));
-		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, &bIsValid ) ) {
+		if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid ) ) {
 			_wsError = mx::CStringDecoder::DecodeToWString( _T_LEN_F94C43F0_The_specified_search_range_is_invalid_ );
 			return false;
 		}
@@ -385,7 +387,7 @@ namespace mx {
 			bool bDynamic = prbDynRadio && prbDynRadio->IsChecked();
 			if ( !bDynamic ) {
 				pcbCombo = static_cast<CComboBox *>(FindChild( CNewExpressionSearchLayout::MX_NESI_SIZE_FIXED_SIZE_COMBO ));
-				if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, &bIsValid ) ) {
+				if ( !pcbCombo || !pcbCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid ) ) {
 					_wsError = _DEC_WS_7B4DE404_The_specified_fixed_size_is_invalid_;
 					return false;
 				}
@@ -730,7 +732,7 @@ namespace mx {
 
 		pcbDummyCombo->SetTreatAsHex( _esqmEvalType == CUtilities::MX_ESQM_ADDRESS ? TRUE : FALSE );
 		pcbDummyCombo->SetAddressHandler( CMemHack::ExpAddressHandler, reinterpret_cast<uintptr_t>(m_pmhMemHack) );
-		BOOL bParsed = pcbDummyCombo->GetTextAsExpression( rDummy, &bIsValid );
+		BOOL bParsed = pcbDummyCombo->GetTextAsExpression( rDummy, ee::CObject::EE_TF_NONE, &bIsValid );
 		if ( !bIsValid ) {
 			_wsHelp = _DEC_WS_32F9AB23_Invalid____Value;
 		}
@@ -792,7 +794,7 @@ case CUtilities::CASE : {															\
 										ee::CExpEvalContainer::EE_RESULT rSize;
 										CComboBox * pcbSizeCombo = static_cast<CComboBox *>(FindChild( CNewExpressionSearchLayout::MX_NESI_SIZE_FIXED_SIZE_COMBO ));
 										pcbSizeCombo->SetAddressHandler( CMemHack::ExpAddressHandler, reinterpret_cast<uintptr_t>(m_pmhMemHack) );
-										bParsed = pcbSizeCombo->GetTextAsExpression( rSize, &bIsValid );
+										bParsed = pcbSizeCombo->GetTextAsExpression( rSize, ee::CObject::EE_TF_NONE, &bIsValid );
 										if ( !bIsValid ) {
 											_wsHelp = _DEC_WS_32F9AB23_Invalid____Value;
 											bSizeIsValid = false;

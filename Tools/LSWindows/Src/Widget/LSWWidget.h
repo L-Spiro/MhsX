@@ -161,7 +161,7 @@ namespace lsw {
 		virtual BOOL						SetTextW( LPCWSTR _lpwString ) { return ::SetWindowTextW( Wnd(), _lpwString ); }
 
 		// Get the value of the text as an expression.
-		BOOL								GetTextAsExpression( ee::CExpEvalContainer::EE_RESULT &_eResult, BOOL * _pbExpIsValid = nullptr,
+		BOOL								GetTextAsExpression( ee::CExpEvalContainer::EE_RESULT &_eResult, uint32_t _ui32Flags, BOOL * _pbExpIsValid = nullptr,
 			std::string * _psObjStringResult = nullptr ) const;
 
 		// Get the value of the text as an int64_t expression.

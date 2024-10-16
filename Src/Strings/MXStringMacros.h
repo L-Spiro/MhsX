@@ -17146,3 +17146,48 @@
 #define _DEC_S_7183A384_Epsilon mx::CStringDecoder::DecodeToString( _T_7183A384_Epsilon, _LEN_7183A384 )
 #define _DEC_WS_7183A384_Epsilon mx::CStringDecoder::DecodeToWString( _T_7183A384_Epsilon, _LEN_7183A384 )
 
+// bfloat16
+
+#define _T_A25BEC0C_bfloat16 "\xEA\x34\x3C\x0A\xF3\x3D\xBF\xFD"
+#define _LEN_A25BEC0C 8
+#define _T_LEN_A25BEC0C_bfloat16 _T_A25BEC0C_bfloat16, _LEN_A25BEC0C
+#define _DEC_A25BEC0C_bfloat16( STR ) mx::CStringDecoder::Decode( _T_A25BEC0C_bfloat16, _LEN_A25BEC0C, STR )
+#define _DEC_S_A25BEC0C_bfloat16 mx::CStringDecoder::DecodeToString( _T_A25BEC0C_bfloat16, _LEN_A25BEC0C )
+#define _DEC_WS_A25BEC0C_bfloat16 mx::CStringDecoder::DecodeToWString( _T_A25BEC0C_bfloat16, _LEN_A25BEC0C )
+
+// Nvidia TensorFloat-32
+
+#define _T_1AD9610B_Nvidia_TensorFloat_32 "\xD6\x44\x39\xFF\xFB\x2A\xAE\x1B\x35\x36\x3C\x3D\x04\xE1\x33\xF7\x2F\x44\xC8\xC5\xFB"
+#define _LEN_1AD9610B 21
+#define _T_LEN_1AD9610B_Nvidia_TensorFloat_32 _T_1AD9610B_Nvidia_TensorFloat_32, _LEN_1AD9610B
+#define _DEC_1AD9610B_Nvidia_TensorFloat_32( STR ) mx::CStringDecoder::Decode( _T_1AD9610B_Nvidia_TensorFloat_32, _LEN_1AD9610B, STR )
+#define _DEC_S_1AD9610B_Nvidia_TensorFloat_32 mx::CStringDecoder::DecodeToString( _T_1AD9610B_Nvidia_TensorFloat_32, _LEN_1AD9610B )
+#define _DEC_WS_1AD9610B_Nvidia_TensorFloat_32 mx::CStringDecoder::DecodeToWString( _T_1AD9610B_Nvidia_TensorFloat_32, _LEN_1AD9610B )
+
+// AMD 9511 (1979) fp24
+
+#define _T_71BEA7E8_AMD_9511__1979__fp24 "\xC9\x1B\x14\xBB\xCB\xFE\xBF\xF8\xF0\xF0\xFA\x07\xC9\xD4\xF0\xA8\x34\x40\xCD\xC6"
+#define _LEN_71BEA7E8 20
+#define _T_LEN_71BEA7E8_AMD_9511__1979__fp24 _T_71BEA7E8_AMD_9511__1979__fp24, _LEN_71BEA7E8
+#define _DEC_71BEA7E8_AMD_9511__1979__fp24( STR ) mx::CStringDecoder::Decode( _T_71BEA7E8_AMD_9511__1979__fp24, _LEN_71BEA7E8, STR )
+#define _DEC_S_71BEA7E8_AMD_9511__1979__fp24 mx::CStringDecoder::DecodeToString( _T_71BEA7E8_AMD_9511__1979__fp24, _LEN_71BEA7E8 )
+#define _DEC_WS_71BEA7E8_AMD_9511__1979__fp24 mx::CStringDecoder::DecodeToWString( _T_71BEA7E8_AMD_9511__1979__fp24, _LEN_71BEA7E8 )
+
+// Pixar PXR24
+
+#define _T_80FCF432_Pixar_PXR24 "\xD8\x37\x48\xFC\x04\xE9\xDE\x1F\x22\xFA\xFD"
+#define _LEN_80FCF432 11
+#define _T_LEN_80FCF432_Pixar_PXR24 _T_80FCF432_Pixar_PXR24, _LEN_80FCF432
+#define _DEC_80FCF432_Pixar_PXR24( STR ) mx::CStringDecoder::Decode( _T_80FCF432_Pixar_PXR24, _LEN_80FCF432, STR )
+#define _DEC_S_80FCF432_Pixar_PXR24 mx::CStringDecoder::DecodeToString( _T_80FCF432_Pixar_PXR24, _LEN_80FCF432 )
+#define _DEC_WS_80FCF432_Pixar_PXR24 mx::CStringDecoder::DecodeToWString( _T_80FCF432_Pixar_PXR24, _LEN_80FCF432 )
+
+// AMD f24
+
+#define _T_4109FEE0_AMD_f24 "\xC9\x1B\x14\xBB\xF8\xFB\xC2"
+#define _LEN_4109FEE0 7
+#define _T_LEN_4109FEE0_AMD_f24 _T_4109FEE0_AMD_f24, _LEN_4109FEE0
+#define _DEC_4109FEE0_AMD_f24( STR ) mx::CStringDecoder::Decode( _T_4109FEE0_AMD_f24, _LEN_4109FEE0, STR )
+#define _DEC_S_4109FEE0_AMD_f24 mx::CStringDecoder::DecodeToString( _T_4109FEE0_AMD_f24, _LEN_4109FEE0 )
+#define _DEC_WS_4109FEE0_AMD_f24 mx::CStringDecoder::DecodeToWString( _T_4109FEE0_AMD_f24, _LEN_4109FEE0 )
+

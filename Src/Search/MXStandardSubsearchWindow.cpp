@@ -2,7 +2,9 @@
 #include "../Layouts/MXMainWindowLayout.h"
 #include "../Layouts/MXStandardSubsearchLayout.h"
 #include "../MainWindow/MXMhsMainWindow.h"
+
 #include <CheckButton/LSWCheckButton.h>
+#include <Object/EEObject.h>
 #include <Static/LSWStatic.h>
 
 
@@ -324,7 +326,7 @@ namespace mx {
 					return false;
 				}
 				
-				BOOL bParsed = pcbCombo->GetTextAsExpression( rRes, &bIsValid );
+				BOOL bParsed = pcbCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 				if ( !bParsed ) {
 					_wsError = bIsValid ? mx::CStringDecoder::DecodeToWString( _T_LEN_BDC62AA7_The_specified_value_is_invalid_ ) :
 						mx::CStringDecoder::DecodeToWString( _T_LEN_3A9BBB6B_No_search_value_has_been_specified_ );
@@ -361,7 +363,7 @@ namespace mx {
 					_wsError = mx::CStringDecoder::DecodeToWString( _T_LEN_83B9CBC3_Invalid_Data );
 					return false;
 				}
-				BOOL bParsed = pcbCombo->GetTextAsExpression( rRes, &bIsValid );
+				BOOL bParsed = pcbCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 				if ( !bParsed ) {
 					_wsError = bIsValid ? mx::CStringDecoder::DecodeToWString( _T_LEN_BDC62AA7_The_specified_value_is_invalid_ ) :
 						mx::CStringDecoder::DecodeToWString( _T_LEN_14F91708_The_range_of_values_to_find_is_incomplete_ );
@@ -568,7 +570,7 @@ namespace mx {
 			CSecureWString wsTemp;
 			switch ( lpSearchType ) {
 				case CUtilities::MX_SET_EXACT : {
-					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, &bIsValid );
+					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 					if ( !bIsValid ) {
 						wText = mx::CStringDecoder::DecodeToWString( _T_LEN_83B9CBC3_Invalid_Data );
 					}
@@ -596,7 +598,7 @@ namespace mx {
 					break;
 				}
 				case CUtilities::MX_SET_NOT_EQUAL_TO : {
-					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, &bIsValid );
+					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 					if ( !bIsValid ) {
 						wText = mx::CStringDecoder::DecodeToWString( _T_LEN_83B9CBC3_Invalid_Data );
 					}
@@ -661,7 +663,7 @@ namespace mx {
 				}
 				case CUtilities::MX_SET_RANGE : {
 					CSecureWString wsStr0, wsStr1, wsStr2;
-					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, &bIsValid );
+					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 					if ( !bIsValid ) {
 						wText = mx::CStringDecoder::DecodeToWString( _T_LEN_3A9BBB6B_No_search_value_has_been_specified_ );
 					}
@@ -676,7 +678,7 @@ namespace mx {
 							wText = mx::CStringDecoder::DecodeToWString( _T_LEN_14F91708_The_range_of_values_to_find_is_incomplete_ );
 						}
 						else {
-							bParsed = pcbRCombo->GetTextAsExpression( rRes, &bIsValid );
+							bParsed = pcbRCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 							if ( !bIsValid ) {
 								wText = mx::CStringDecoder::DecodeToWString( _T_LEN_14F91708_The_range_of_values_to_find_is_incomplete_ );
 							}
@@ -707,7 +709,7 @@ namespace mx {
 					break;
 				}
 				case CUtilities::MX_SET_GREATER_THAN : {
-					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, &bIsValid );
+					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 					if ( !bIsValid ) {
 						wText = mx::CStringDecoder::DecodeToWString( _T_LEN_83B9CBC3_Invalid_Data );
 					}
@@ -735,7 +737,7 @@ namespace mx {
 					break;
 				}
 				case CUtilities::MX_SET_LESS_THAN : {
-					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, &bIsValid );
+					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 					if ( !bIsValid ) {
 						wText = mx::CStringDecoder::DecodeToWString( _T_LEN_83B9CBC3_Invalid_Data );
 					}
@@ -799,7 +801,7 @@ namespace mx {
 					break;
 				}
 				case CUtilities::MX_SET_CHANGED_BY : {
-					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, &bIsValid );
+					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 					if ( !bIsValid ) {
 						wText = mx::CStringDecoder::DecodeToWString( _T_LEN_83B9CBC3_Invalid_Data );
 					}
@@ -827,7 +829,7 @@ namespace mx {
 					break;
 				}
 				case CUtilities::MX_SET_CHANGED_BY_PERCENT : {
-					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, &bIsValid );
+					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 					if ( !bIsValid ) {
 						wText = mx::CStringDecoder::DecodeToWString( _T_LEN_83B9CBC3_Invalid_Data );
 					}
@@ -857,7 +859,7 @@ namespace mx {
 				}
 				case CUtilities::MX_SET_CHANGED_BY_RANGE : {
 					CSecureWString wsStr0, wsStr1, wsStr2;
-					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, &bIsValid );
+					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 					if ( !bIsValid ) {
 						wText = mx::CStringDecoder::DecodeToWString( _T_LEN_78D93AF7_No_changed_by_value_has_been_specified_ );
 					}
@@ -872,7 +874,7 @@ namespace mx {
 							wText = mx::CStringDecoder::DecodeToWString( _T_LEN_14F91708_The_range_of_values_to_find_is_incomplete_ );
 						}
 						else {
-							bParsed = pcbRCombo->GetTextAsExpression( rRes, &bIsValid );
+							bParsed = pcbRCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 							if ( !bIsValid ) {
 								wText = mx::CStringDecoder::DecodeToWString( _T_LEN_14F91708_The_range_of_values_to_find_is_incomplete_ );
 							}
@@ -904,7 +906,7 @@ namespace mx {
 				}
 				case CUtilities::MX_SET_CHANGED_BY_RANGE_PERCENT : {
 					CSecureWString wsStr0, wsStr1, wsStr2;
-					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, &bIsValid );
+					BOOL bParsed = pcbLCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 					if ( !bIsValid ) {
 						wText = mx::CStringDecoder::DecodeToWString( _T_LEN_78D93AF7_No_changed_by_value_has_been_specified_ );
 					}
@@ -919,7 +921,7 @@ namespace mx {
 							wText = mx::CStringDecoder::DecodeToWString( _T_LEN_14F91708_The_range_of_values_to_find_is_incomplete_ );
 						}
 						else {
-							bParsed = pcbRCombo->GetTextAsExpression( rRes, &bIsValid );
+							bParsed = pcbRCombo->GetTextAsExpression( rRes, ee::CObject::EE_TF_NONE, &bIsValid );
 							if ( !bIsValid ) {
 								wText = mx::CStringDecoder::DecodeToWString( _T_LEN_14F91708_The_range_of_values_to_find_is_incomplete_ );
 							}
