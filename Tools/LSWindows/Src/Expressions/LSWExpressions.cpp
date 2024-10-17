@@ -46,6 +46,7 @@ namespace lsw {
 		int iRet = 1;
 		try {
 			iRet = peepParser->parse();
+			m_peecContainer->Parsed();
 		}
 		catch ( const std::bad_alloc & /*_eE*/ ) {}
 		catch ( ee::CExpEvalContainer::EE_ERROR_CODES ) {}

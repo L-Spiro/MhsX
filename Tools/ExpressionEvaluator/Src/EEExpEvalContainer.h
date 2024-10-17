@@ -147,6 +147,13 @@ namespace ee {
 		bool								Resolve( EE_RESULT &_rRes );
 
 		/**
+		 * Callsd when parsing is finished.
+		 **/
+		void								Parsed() {
+			m_vsCompileTimeObjects = m_vObjects.size();
+		}
+
+		/**
 		 * Do we treat everything as hex?
 		 * 
 		 * \return Returns true if decimal and octal numbers are treated as hexadecimal by default.
@@ -1199,11 +1206,8 @@ namespace ee {
 		// The array of objects.
 		std::vector<CObject *>				m_vObjects;
 
-		// 1-for-1 array of string references to strings held inside m_vStrings;
-		//std::vector<CStringRef *>			m_vStringObjectsU8;
-
-		// 1-for-1 array of string references to strings held inside m_vStrings;
-		//std::vector<CStringRef *>			m_vStringObjectsU16;
+		// The number of objects allocated during compilation.
+		size_t								m_vsCompileTimeObjects = 0;
 
 		// The map of custom variables. std::map<name_as_index, EE_CUSTOM_VAR>.
 		std::map<size_t, EE_CUSTOM_VAR>		m_mCustomVariables;

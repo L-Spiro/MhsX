@@ -155,14 +155,14 @@ namespace ee {
 			}
 			else {
 				sIdx1 = static_cast<size_t>(_i64Idx1);
-				if ( static_cast<int64_t>(sIdx1) != _i64Idx1 || sIdx1 >= m_vBacking.size() ) { rRet.u.poObj = nullptr; return rRet; }
+				if ( static_cast<int64_t>(sIdx1) != _i64Idx1 || sIdx1 > m_vBacking.size() ) { rRet.u.poObj = nullptr; return rRet; }
 			}
 		}
 		else {
 			sIdx1 = m_vBacking.size();
 		}
 
-		CVector * psObj = reinterpret_cast<CVector *>(m_peecContainer->AllocateObject<CVector>());
+		ee::CVector * psObj = reinterpret_cast<ee::CVector *>(m_peecContainer->AllocateObject<ee::CVector>());
 		if ( psObj ) {
 			try {
 				for ( size_t I = sIdx0; I < sIdx1; ++I ) {
@@ -190,9 +190,9 @@ namespace ee {
 			case EE_NC_OBJECT : {
 				if ( _rRet.u.poObj ) {
 					if ( _rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR ) {
-						if ( reinterpret_cast<const CVector *>(_rRet.u.poObj)->m_vBacking.size() != m_vBacking.size() ) { return false; }
+						if ( reinterpret_cast<const ee::CVector *>(_rRet.u.poObj)->m_vBacking.size() != m_vBacking.size() ) { return false; }
 						for ( auto I = m_vBacking.size(); I--; ) {
-							if ( !m_peecContainer->EqualResultOrObject( m_vBacking[I], reinterpret_cast<const CVector *>(_rRet.u.poObj)->m_vBacking[I] ) ) { return false; }
+							if ( !m_peecContainer->EqualResultOrObject( m_vBacking[I], reinterpret_cast<const ee::CVector *>(_rRet.u.poObj)->m_vBacking[I] ) ) { return false; }
 						}
 						return true;
 					}
@@ -211,20 +211,23 @@ namespace ee {
 	 */
 	CExpEvalContainer::EE_RESULT CVector::Plus( CExpEvalContainer::EE_RESULT &_rRet ) {
 		if ( _rRet.ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
-		CVector * psObj = reinterpret_cast<CVector *>(m_peecContainer->AllocateObject<CVector>());
+		ee::CVector * psObj = reinterpret_cast<ee::CVector *>(m_peecContainer->AllocateObject<ee::CVector>());
 		if ( !psObj ) { return { .ncType = EE_NC_INVALID }; }
 
 		if ( _rRet.ncType == EE_NC_OBJECT && _rRet.u.poObj ) {
 
 			if ( (_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) {
 				try {
-					const size_t stSize = static_cast<const CVector *>(_rRet.u.poObj)->m_vBacking.size();
-					for ( size_t I = 0; I < stSize; ++I ) {
-						m_vBacking.push_back( static_cast<const CVector *>(_rRet.u.poObj)->m_vBacking[I] );
+					psObj->m_vBacking.reserve( m_vBacking.size() + static_cast<const ee::CVector *>(_rRet.u.poObj)->m_vBacking.size() );
+					for ( size_t I = 0; I < m_vBacking.size(); ++I ) {
+						psObj->m_vBacking.push_back( m_vBacking[I] );
+					}
+					for ( size_t I = 0; I < static_cast<const ee::CVector *>(_rRet.u.poObj)->m_vBacking.size(); ++I ) {
+						psObj->m_vBacking.push_back( static_cast<const ee::CVector *>(_rRet.u.poObj)->m_vBacking[I] );
 					}
 				}
 				catch ( ... ) { return { .ncType = EE_NC_INVALID }; }
-				_rRet = static_cast<const CVector *>(_rRet.u.poObj)->CreateResult();
+				_rRet = static_cast<const ee::CVector *>(_rRet.u.poObj)->CreateResult();
 				return psObj->CreateResult();
 			}
 
@@ -259,7 +262,7 @@ namespace ee {
 	 */
 	CExpEvalContainer::EE_RESULT CVector::Minus( CExpEvalContainer::EE_RESULT &_rRet ) {
 		if ( _rRet.ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
-		CVector * psObj = reinterpret_cast<CVector *>(m_peecContainer->AllocateObject<CVector>());
+		ee::CVector * psObj = reinterpret_cast<ee::CVector *>(m_peecContainer->AllocateObject<ee::CVector>());
 		if ( !psObj ) { return { .ncType = EE_NC_INVALID }; }
 
 		if ( psObj->Resize( m_vBacking.size() ).ncType == EE_NC_INVALID ) { m_peecContainer->DeallocateObject( psObj ); return { .ncType = EE_NC_INVALID }; }
@@ -290,7 +293,7 @@ namespace ee {
 	 */
 	CExpEvalContainer::EE_RESULT CVector::Multiply( CExpEvalContainer::EE_RESULT &_rRet ) {
 		if ( _rRet.ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
-		CVector * psObj = reinterpret_cast<CVector *>(m_peecContainer->AllocateObject<CVector>());
+		ee::CVector * psObj = reinterpret_cast<ee::CVector *>(m_peecContainer->AllocateObject<ee::CVector>());
 		if ( !psObj ) { return { .ncType = EE_NC_INVALID }; }
 
 		if ( _rRet.ncType == EE_NC_OBJECT ) {
@@ -310,7 +313,7 @@ namespace ee {
 	 */
 	CExpEvalContainer::EE_RESULT CVector::Divide( CExpEvalContainer::EE_RESULT &_rRet ) {
 		if ( _rRet.ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
-		CVector * psObj = reinterpret_cast<CVector *>(m_peecContainer->AllocateObject<CVector>());
+		ee::CVector * psObj = reinterpret_cast<ee::CVector *>(m_peecContainer->AllocateObject<ee::CVector>());
 		if ( !psObj ) { return { .ncType = EE_NC_INVALID }; }
 
 		if ( _rRet.ncType == EE_NC_OBJECT ) {
@@ -336,9 +339,9 @@ namespace ee {
 			if ( !_rRet.u.poObj ) { return false; }
 			if ( (_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) {
 				try {
-					const size_t stSize = static_cast<const CVector *>(_rRet.u.poObj)->m_vBacking.size();
+					const size_t stSize = static_cast<const ee::CVector *>(_rRet.u.poObj)->m_vBacking.size();
 					for ( size_t I = 0; I < stSize; ++I ) {
-						m_vBacking.push_back( static_cast<const CVector *>(_rRet.u.poObj)->m_vBacking[I] );
+						m_vBacking.push_back( static_cast<const ee::CVector *>(_rRet.u.poObj)->m_vBacking[I] );
 					}
 				}
 				catch ( ... ) {
@@ -346,6 +349,14 @@ namespace ee {
 				}
 				_rRet = CreateResult();
 				return true;
+			}
+			try {
+				m_vBacking.push_back( _rRet );
+				_rRet = CreateResult();
+				return true;
+			}
+			catch ( ... ) {
+				return false;
 			}
 		}
 		

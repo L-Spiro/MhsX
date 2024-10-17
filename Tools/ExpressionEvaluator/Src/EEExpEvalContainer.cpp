@@ -4894,6 +4894,12 @@ namespace ee {
 			}
 		}
 
+		// Remove run-time-allocated objects.
+		while ( m_vsCompileTimeObjects != m_vObjects.size() ) {
+			delete m_vObjects[m_vObjects.size()-1];
+			m_vObjects.pop_back();
+		}
+
 		if ( !PushNode( m_vStack, m_vNodes.size() - 1, EE_INVALID_IDX, &_rFinalResult ) ) {
 			_ecError = EE_EC_OUTOFMEMORY;
 			return false;

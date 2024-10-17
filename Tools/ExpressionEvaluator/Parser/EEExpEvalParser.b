@@ -539,6 +539,7 @@ assignment_exp
 	| '{' initializer_list ',' '}'							{ m_peecContainer->CreateVector( $2, $$ ); }
 	| identifier '=' assignment_exp							{ m_peecContainer->CreateAssignment( $1, $3, '=', false, $$ ); }
 	| custom_var assignment_op assignment_exp				{ m_peecContainer->CreateReAssignment( $1, $3, $2, $$ ); }
+	| EE_CONST identifier '=' assignment_exp				{ m_peecContainer->CreateAssignment( $2, $4, '=', true, $$ ); }
 	| identifier '=' EE_NEW backing_type '(' exp ')'
 															{ m_peecContainer->CreateRawArray( $1, size_t( $4 ), static_cast<size_t>(token::EE_TEMP), $6, size_t( ~0 ), size_t( ~0 ), $$ ); }
 	| identifier '=' EE_NEW backing_type '(' exp ',' backing_persistence ')'
@@ -555,13 +556,12 @@ assignment_exp
 															{ m_peecContainer->CreateRawArray( $1, static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $9.sNodeIndex, $$ ); }
 	| identifier '=' EE_NEW '(' exp ',' backing_persistence ',' exp ',' exp ')'
 															{ m_peecContainer->CreateRawArray( $1, static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $11.sNodeIndex, $$ ); }
-	| EE_CONST identifier '=' assignment_exp				{ m_peecContainer->CreateAssignment( $2, $4, '=', true, $$ ); }
 	| array_var '[' exp ']' assignment_op assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, $5, $$ ); }
 	| address_type exp ']' assignment_op assignment_exp		{ m_peecContainer->CreateAddressAssignment( static_cast<ee::EE_CAST_TYPES>($1), $2, $5, $4, $$ ); }
 	;
 
 initializer
-	: exp													{ m_peecContainer->CreateArrayInitializer( $1, $$ ); }
+	: assignment_exp										{ m_peecContainer->CreateArrayInitializer( $1, $$ ); }
 	;
 	
 initializer_list
