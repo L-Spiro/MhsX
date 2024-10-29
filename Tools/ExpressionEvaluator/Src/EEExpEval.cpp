@@ -13,7 +13,11 @@ namespace ee {
 #endif	// #ifdef __GNUC__
 
 	// == Functions.
-	// Gets the time of initialization.
+	/**
+	 * Gets the time of initialization.
+	 * 
+	 * \return Returns the system time when InitializeExpressionEvaluatorLibrary() was called.
+	 **/
 	uint64_t CExpEval::StartTime() {
 		static uint64_t uiStart = 0;
 		if ( !uiStart ) {
@@ -121,7 +125,14 @@ namespace ee {
 		return 0;
 	}
 
-	// Gets the next UTF-16 character from a stream or error (EE_UTF_INVALID)
+	/**
+	 * Gets the next UTF-16 character from a stream or error (EE_UTF_INVALID).
+	 * 
+	 * \param _pwcString The string to parse.
+	 * \param _sLen The length of the string to which _pwcString points.
+	 * \param _psSize Optional pointer to a size_t that will contain the number of characters eaten from _pwcString during the parsing.
+	 * \return Returns the next character as a UTF-32 code.
+	 **/
 	uint32_t CExpEval::NextUtf16Char( const wchar_t * _pwcString, size_t _sLen, size_t * _psSize ) {
 		if ( _sLen == 0 ) { return 0; }
 
@@ -172,7 +183,14 @@ namespace ee {
 		return ui32Ret;
 	}
 
-	// Gets the next UTF-8 character from a stream or error (EE_UTF_INVALID)
+	/**
+	 * Gets the next UTF-8 character from a stream or error (EE_UTF_INVALID).
+	 * 
+	 * \param _pcString The string to parse.
+	 * \param _sLen The length of the string to which _pcString points.
+	 * \param _psSize Optional pointer to a size_t that will contain the number of characters eaten from _pcString during the parsing.
+	 * \return Returns the next character as a UTF-32 code.
+	 **/
 	uint32_t CExpEval::NextUtf8Char( const char * _pcString, size_t _sLen, size_t * _psSize ) {
 		if ( _sLen == 0 ) { if ( _psSize ) { (*_psSize) = 0; } return 0; }
 
@@ -337,33 +355,19 @@ namespace ee {
 		return ui32Ret;
 	}
 
-	// Converts a wstring to a UTF-8 string.
-	std::string CExpEval::WStringToString( const std::wstring &_wsIn ) {
-#if 0
-		// Problematic; terminates at the first \0 character, making it impossible to use for strings meant for OPENFILENAMEW etc.
-		//return std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes( _wsIn );
-		// Instead, convert up to the \0 and add the \0 manually and then keep converting.
+	/**
+	 * Converts a wstring to a UTF-8 string.  Converts the full length of the string, so embedded 0 characters don't stop the conversion.
+	 * 
+	 * \param _pwcIn The UTF-16 string to convert.
+	 * \param _sLen The number of characters to which _pwcIn points.
+	 * \return Returns the converted UTF-8 string, including any embedded 0's.
+	 **/
+	std::string CExpEval::WStringToString( const wchar_t * _pwcIn, size_t _sLen ) {
 		std::string ssTemp;
-		std::string::size_type sStart = 0;
-		for ( std::string::size_type I = 0; I < _wsIn.size(); ++I ) {
-			if ( _wsIn[I] == '\0' ) {
-				ssTemp.append( std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes( _wsIn.substr( sStart, I - sStart ).data() ) );
-				ssTemp.push_back( '\0' );
-				sStart = I + 1;
-			}
-		}
-
-		if ( sStart < _wsIn.size() ) {
-			ssTemp.append( std::wstring_convert<std::codecvt_utf8<wchar_t>>{}.to_bytes( _wsIn.substr( sStart ).data() ) );
-		}
-		return ssTemp;
-#else
-		std::string ssTemp;
-		const wchar_t * pwcSrc = _wsIn.c_str();
 		size_t I = 0;
 		size_t sSize;
 		do {
-			uint32_t ui32This = NextUtf16Char( &pwcSrc[I], _wsIn.size() - I, &sSize );
+			uint32_t ui32This = NextUtf16Char( &_pwcIn[I], _sLen - I, &sSize );
 			uint32_t ui32Len;
 			uint32_t ui32Converted = Utf32ToUtf8( ui32This, ui32Len );
 			for ( uint32_t J = 0; J < ui32Len; ++J ) {
@@ -371,38 +375,17 @@ namespace ee {
 				ui32Converted >>= 8;
 			}
 			I += sSize;
-		} while ( I < _wsIn.size() );
+		} while ( I < _sLen );
 		return ssTemp;
-#endif
 	}
 
-	// Converts a UTF-8 string to wstring (UTF-16).
-	std::wstring CExpEval::StringToWString( const std::string &_sIn ) {
-#if 0
-		// Problematic; terminates at the first \0 character, making it impossible to use for strings meant for OPENFILENAMEW etc.
-		//return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>{}.from_bytes( _sIn.data() );
-		
-		// Instead, convert up to the \0 and add the \0 manually and then keep converting.
-		std::wstring wTemp;
-		std::string::size_type sStart = 0;
-		for ( std::string::size_type I = 0; I < _sIn.size(); ++I ) {
-			if ( _sIn[I] == '\0' ) {
-				wTemp.append( std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>{}.from_bytes( _sIn.substr( sStart, I - sStart ).data() ) );
-				wTemp.push_back( L'\0' );
-				sStart = I + 1;
-			}
-		}
-
-		if ( sStart < _sIn.size() ) {
-			wTemp.append( std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>{}.from_bytes( _sIn.substr( sStart ).data() ) );
-		}
-		return wTemp;
-#else
-		return StringToWString( static_cast<const char *>(_sIn.c_str()), _sIn.size() );
-#endif
-	}
-
-	// Converts a UTF-8 string to wstring (UTF-16).
+	/**
+	 * Converts a UTF-8 string to wstring (UTF-16).  Converts the full length of the string, so embedded 0 characters don't stop the conversion.
+	 * 
+	 * \param _pcIn The UTF-8 string to convert.
+	 * \param _sLen The number of characters to which _pcIn points.
+	 * \return Returns the converted UTF-16 string, including any embedded 0's.
+	 **/
 	std::wstring CExpEval::StringToWString( const char * _pcIn, size_t _sLen ) {
 		std::wstring swsTemp;
 		size_t I = 0;
@@ -1190,7 +1173,16 @@ namespace ee {
 		return ui64Tally;
 	}
 
-	// String to integer, from any base.  Since std::stoull() raises exceptions etc.
+	/**
+	 * String to integer, from any base.  Since std::stoull() raises exceptions etc.
+	 * 
+	 * \param _pcText The text to parse.
+	 * \param _iBase The base of the number to parse out of the text.
+	 * \param _psEaten Optional pointer to a size_t that will be set to the number of character eaten during parsing.
+	 * \param _uiMax The maximum value after which overflow is considered to have happened.
+	 * \param _pbOverflow An optional pointer to a boolean used to indicate whether overflow has occurred or not.
+	 * \return DESC
+	 **/
 	uint64_t CExpEval::StoULL( const char * _pcText, int _iBase, size_t * _psEaten, uint64_t _uiMax, bool * _pbOverflow ) {
 		if ( _pbOverflow ) { (*_pbOverflow) = false; }
 		const char * _pcOrig = _pcText;
@@ -1284,7 +1276,14 @@ namespace ee {
 		return bNegate ? static_cast<uint64_t>(-static_cast<int64_t>(uiRes)) : uiRes;
 	}
 
-	// String to double.  Unlike std::atof(), this returns the number of characters eaten.
+	/**
+	 * String to double.  Unlike std::atof(), this returns the number of characters eaten, and casts to float when the f postfix is seen.
+	 * 
+	 * \param _pcText The text to parse.
+	 * \param _psEaten The number of characters consumed while parsing the double value.
+	 * \param _pbError Optional pointer to a booleon which will be set to true if there are parsing errors.
+	 * \return Returns the parsed double.
+	 **/
 	double CExpEval::AtoF( const char * _pcText, size_t * _psEaten, bool * _pbError ) {
 		const char * _pcOrig = _pcText;
 		if ( _pbError ) { (*_pbError) = true; }

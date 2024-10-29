@@ -2,7 +2,7 @@
 
 extern "C" {
 
-#if defined(_M_AMD64)
+#if defined( _M_AMD64 )
 
 // 64-bit implementation in MASM.
 // Enable MASM by right clicking your project in solution explorer then:
@@ -24,6 +24,19 @@ inline void SinCos( double _dRadians, double * _pdSin, double * _pdCos ) {
 	}
 	(*_pdSin) = dSin;
 	(*_pdCos) = dCos;
+}
+
+inline void SinCosF( float _fAngle, float * _pfSin, float * _pfCos ) {
+    float fSinT, fCosT;
+    __asm {
+        fld DWORD PTR[_fAngle]		// Load the 32-bit float into the FPU stack.
+        fsincos						// Compute cosine and sine.
+        fstp DWORD PTR[fCosT]		// Store the cosine value.
+        fstp DWORD PTR[fSinT]		// Store the sine value.
+        fwait						// Wait for the FPU to finish.
+    }
+    (*_pfSin) = fSinT;
+    (*_pfCos) = fCosT;
 }
 
 #endif

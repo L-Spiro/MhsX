@@ -64,10 +64,16 @@ namespace ee {
 	class CExpEval {
 	public :
 		// == Functions.
-		// Gets the time of initialization.
+		/**
+		 * Gets the time of initialization.
+		 * 
+		 * \return Returns the system time when InitializeExpressionEvaluatorLibrary() was called.
+		 **/
 		static uint64_t					StartTime();
 
-		// Called at start-up to initialize the Expression Evaluator Library.
+		/**
+		 * Called at start-up to initialize the Expression Evaluator Library.
+		 **/
 		static inline void				InitializeExpressionEvaluatorLibrary() {
 			StartTime();
 		}
@@ -479,7 +485,14 @@ namespace ee {
 			return sRet;
 		}
 
-		// Gets the next UTF-32 character from a stream or error (EE_UTF_INVALID)
+		/**
+		 * Gets the next UTF-32 character from a stream or error (EE_UTF_INVALID).
+		 * 
+		 * \param _puiString The string to parse.
+		 * \param _sLen The length of the string to which _puiString points.
+		 * \param _psSize Optional pointer to a size_t that will contain the number of characters eaten from _puiString during the parsing.
+		 * \return Returns the next character as a UTF-32 code.
+		 **/
 		static inline uint32_t			NextUtf32Char( const uint32_t * _puiString, size_t _sLen, size_t * _psSize = nullptr ) {
 			if ( _sLen == 0 ) {
 				if ( _psSize ) { (*_psSize) = 0; }
@@ -491,28 +504,85 @@ namespace ee {
 			return ui32Ret;
 		}
 
-		// Gets the next UTF-16 character from a stream or error (EE_UTF_INVALID)
+		/**
+		 * Gets the next UTF-16 character from a stream or error (EE_UTF_INVALID).
+		 * 
+		 * \param _pwcString The string to parse.
+		 * \param _sLen The length of the string to which _pwcString points.
+		 * \param _psSize Optional pointer to a size_t that will contain the number of characters eaten from _pwcString during the parsing.
+		 * \return Returns the next character as a UTF-32 code.
+		 **/
 		static uint32_t					NextUtf16Char( const wchar_t * _pwcString, size_t _sLen, size_t * _psSize = nullptr );
 
-		// Gets the next UTF-8 character from a stream or error (EE_UTF_INVALID)
+		/**
+		 * Gets the next UTF-8 character from a stream or error (EE_UTF_INVALID).
+		 * 
+		 * \param _pcString The string to parse.
+		 * \param _sLen The length of the string to which _pcString points.
+		 * \param _psSize Optional pointer to a size_t that will contain the number of characters eaten from _pcString during the parsing.
+		 * \return Returns the next character as a UTF-32 code.
+		 **/
 		static uint32_t					NextUtf8Char( const char * _pcString, size_t _sLen, size_t * _psSize = nullptr );
 
-		// Gets the size of the given UTF-8 character.
+		/**
+		 * Gets the size of the given UTF-8 character.
+		 * 
+		 * \param _pcString Pointer to the UTF-8 characters to decode.
+		 * \param _sLen The number of characters to which _pcString points.
+		 * \return Returns the size of the UTF-8 character to which _pcString points.
+		 **/
 		static size_t					Utf8CharSize( const char * _pcString, size_t _sLen );
 
-		// Converts a UTF-32 character to a UTF-16 character.
+		/**
+		 * Converts a UTF-32 character to a UTF-16 character.
+		 * 
+		 * \param _ui32Utf32 The UTF-32 character to convert to UTF-16.
+		 * \param _ui32Len Holds the returned number of 16-bit characters held in the return value.
+		 * \return Returns up to 2 UTF-16 characters.
+		 **/
 		static uint32_t					Utf32ToUtf16( uint32_t _ui32Utf32, uint32_t &_ui32Len );
 
-		// Converts a UTF-32 character to a UTF-8 character.
+		/**
+		 * Converts a UTF-32 character to a UTF-8 character.
+		 * 
+		 * \param _ui32Utf32 The UTF-32 character to convert to UTF-8.
+		 * \param _ui32Len Holds the returned number of 16-bit characters held in the return value.
+		 * \return Returns up to 4 UTF-8 characters.
+		 **/
 		static uint32_t					Utf32ToUtf8( uint32_t _ui32Utf32, uint32_t &_ui32Len );
 
-		// Converts a wstring to a UTF-8 string.
-		static std::string				WStringToString( const std::wstring &_wsIn );
+		/**
+		 * Converts a wstring to a UTF-8 string.  Converts the full length of the string, so embedded 0 characters don't stop the conversion.
+		 * 
+		 * \param _wsIn The UTF-16 string to convert.
+		 * \return Returns the converted UTF-8 string, including any embedded 0's.
+		 **/
+		static std::string				WStringToString( const std::wstring &_wsIn ) { return WStringToString( _wsIn.c_str(), _wsIn.size() ); }
 
-		// Converts a UTF-8 string to wstring (UTF-16).
-		static std::wstring				StringToWString( const std::string &_sIn );
+		/**
+		 * Converts a wstring to a UTF-8 string.  Converts the full length of the string, so embedded 0 characters don't stop the conversion.
+		 * 
+		 * \param _pwcIn The UTF-16 string to convert.
+		 * \param _sLen The number of characters to which _pwcIn points.
+		 * \return Returns the converted UTF-8 string, including any embedded 0's.
+		 **/
+		static std::string				WStringToString( const wchar_t * _pwcIn, size_t _sLen );
 
-		// Converts a UTF-8 string to wstring (UTF-16).
+		/**
+		 * Converts a UTF-8 string to wstring (UTF-16).  Converts the full length of the string, so embedded 0 characters don't stop the conversion.
+		 * 
+		 * \param _sIn The UTF-8 string to convert.
+		 * \return Returns the converted UTF-16 string, including any embedded 0's.
+		 **/
+		static std::wstring				StringToWString( const std::string &_sIn ) { return StringToWString( _sIn.c_str(), _sIn.size() ); }
+
+		/**
+		 * Converts a UTF-8 string to wstring (UTF-16).  Converts the full length of the string, so embedded 0 characters don't stop the conversion.
+		 * 
+		 * \param _pcIn The UTF-8 string to convert.
+		 * \param _sLen The number of characters to which _pcIn points.
+		 * \return Returns the converted UTF-16 string, including any embedded 0's.
+		 **/
 		static std::wstring				StringToWString( const char * _pcIn, size_t _sLen );
 
 		// Converts a UTF-32 string to a UTF-16 string.
@@ -776,10 +846,26 @@ namespace ee {
 		// Counts the number of UTF-8 code points in the given string.
 		static uint64_t					CountUtfCodePoints( const std::string &_sInput );
 
-		// String to integer, from any base.  Since std::stoull() raises exceptions etc.
+		/**
+		 * String to integer, from any base.  Since std::stoull() raises exceptions etc.
+		 * 
+		 * \param _pcText The text to parse.
+		 * \param _iBase The base of the number to parse out of the text.
+		 * \param _psEaten Optional pointer to a size_t that will be set to the number of character eaten during parsing.
+		 * \param _uiMax The maximum value after which overflow is considered to have happened.
+		 * \param _pbOverflow An optional pointer to a boolean used to indicate whether overflow has occurred or not.
+		 * \return DESC
+		 **/
 		static uint64_t					StoULL( const char * _pcText, int _iBase = 10, size_t * _psEaten = nullptr, uint64_t _uiMax = 0xFFFFFFFFFFFFFFFFULL, bool * _pbOverflow = nullptr );
 
-		// String to double.  Unlike std::atof(), this returns the number of characters eaten.
+		/**
+		 * String to double.  Unlike std::atof(), this returns the number of characters eaten, and casts to float when the f postfix is seen.
+		 * 
+		 * \param _pcText The text to parse.
+		 * \param _psEaten The number of characters consumed while parsing the double value.
+		 * \param _pbError Optional pointer to a booleon which will be set to true if there are parsing errors.
+		 * \return Returns the parsed double.
+		 **/
 		static double					AtoF( const char * _pcText, size_t * _psEaten = nullptr, bool * _pbError = nullptr );
 
 		// Basic epsilon comparison.
