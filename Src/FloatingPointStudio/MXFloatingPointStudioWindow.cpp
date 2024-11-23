@@ -20,7 +20,7 @@ namespace mx {
 	CFloatingPointStudioWindow::MX_PRESET CFloatingPointStudioWindow::m_pPresets[] = {
 		//	bSign	bImpBit	ui8ExpBits	ui8ManBits	pId
 		{ _T_LEN_7D9829FB_half_float16_IEEE_754_2008_binary16_s10e5_fp16,
-			true,	false,	5,			10,			MX_P_FLOAT16 },
+			true,	true,	5,			11,			MX_P_FLOAT16 },
 		{ _T_LEN_D119A670_float_float32_IEEE_754_single_precision_IEEE_754_2008_binary32,
 			true,	true,	8,			24,			MX_P_FLOAT32 },
 		{ _T_LEN_C8A406E9_double_float64_IEEE_754_double_precision_IEEE_754_2008_binary64,
