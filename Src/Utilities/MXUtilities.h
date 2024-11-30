@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "../MXMhsX.h"
 #include "../PE/MXPeStructs.h"
@@ -942,10 +942,10 @@ namespace mx {
 				return _uiChar - (0xFF10 - u8'0');
 			}
 			switch ( _uiChar ) {
-				//case 0x2018 : { return 0x91 /*'‘'*/; }	// 0080
-				//case 0x2019 : { return 0x92 /*'’'*/; }	// 0080
-				//case 0x201C : { return 0x93 /*'“'*/; }	// 0080
-				//case 0x201D : { return 0x94 /*'”'*/; }	// 0080
+				//case 0x2018 : { return 0x91 /*'â€˜'*/; }	// 0080
+				//case 0x2019 : { return 0x92 /*'â€™'*/; }	// 0080
+				//case 0x201C : { return 0x93 /*'â€œ'*/; }	// 0080
+				//case 0x201D : { return 0x94 /*'â€'*/; }	// 0080
 				
 				case 0x2018 : { return u8'\''; }	// 0080
 				case 0x2019 : { return u8'\''; }	// 0080
@@ -953,7 +953,7 @@ namespace mx {
 				case 0x201D : { return u8'"'; }	// 0080
 
 				case 0x3000 : { return u8' '; }	// 0080
-				//case 0x30FB : { return u8'·'; }	// 0090
+				//case 0x30FB : { return u8'Â·'; }	// 0090
 				case 0x30FB : { return u8'.'; }	// 0090
 				case 0xFF01 : { return u8'!'; }	// 0080
 				case 0xFF02 : { return u8'"'; }	// 0080
@@ -1005,8 +1005,8 @@ namespace mx {
 				return _uiChar - (0x2080 - u8'0');
 			}
 			switch ( _uiChar ) {
-				//case 0x2070 : { return 0xB0 /*'°'*/; }	// 0003
-				//case 0x2070 : { return u8'°'; }	// 0003
+				//case 0x2070 : { return 0xB0 /*'Â°'*/; }	// 0003
+				//case 0x2070 : { return u8'Â°'; }	// 0003
 				case 0x2074 : { return u8'4'; }	// 0003
 				case 0x2075 : { return u8'5'; }	// 0003
 				case 0x2076 : { return u8'6'; }	// 0003

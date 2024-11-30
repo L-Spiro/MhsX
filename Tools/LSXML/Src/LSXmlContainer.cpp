@@ -1,4 +1,4 @@
-// TMP.
+﻿// TMP.
 #include <Windows.h>
 
 #include "LSXmlContainer.h"
@@ -582,7 +582,7 @@ namespace lsx {
 						case LSX_N_ATTRIBUTE_DECL : {
 							/*CTree<LSX_XML_ELEMENT> * ptParent = CurStackPointer( vCurElement );
 							ptParent->Value().*/
-							// TODO: Haven�t encountered this case yet.
+							// TODO: Haven’t encountered this case yet.
 							LXM_PUSH( aAttributeDeclObj.sList );
 							break;
 						}

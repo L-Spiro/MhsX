@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "EEObject.h"
 
@@ -91,7 +91,7 @@ namespace ee {
 		 * Operator +.  If _rRet is another vector, a new vector is returned containing the contents of this vector with _rRet appended, otherwise a new vector is returned containing this vector and the new item appended.
 		 *
 		 * \param _rRet The concatenation object.
-		 * \return If _rRet is another vector, a new vector is returned with both this and _rRet’s contents, otherwise an invalid object is returned.
+		 * \return If _rRet is another vector, a new vector is returned with both this and _rRetâ€™s contents, otherwise an invalid object is returned.
 		 */
 		virtual CExpEvalContainer::EE_RESULT		Plus( CExpEvalContainer::EE_RESULT &_rRet );
 
@@ -99,7 +99,7 @@ namespace ee {
 		 * Operator -.  If _rRet is an object, element, otherwise a new vector is returned with element-wise subtraction of the given value.
 		 *
 		 * \param _rRet The concatenation object.
-		 * \return If _rRet is another vector, a new vector is returned with both this and _rRet’s contents, otherwise an invalid object is returned.
+		 * \return If _rRet is another vector, a new vector is returned with both this and _rRetâ€™s contents, otherwise an invalid object is returned.
 		 */
 		virtual CExpEvalContainer::EE_RESULT		Minus( CExpEvalContainer::EE_RESULT &_rRet );
 
@@ -107,7 +107,7 @@ namespace ee {
 		 * Operator *.  If _rRet is a vector, element-wise multiplication is performed, otherwise a new vector is returned with scalar multiplication of the given value.
 		 *
 		 * \param _rRet The concatenation object.
-		 * \return If _rRet is another vector, a new vector is returned with both this and _rRet’s contents, otherwise an invalid object is returned.
+		 * \return If _rRet is another vector, a new vector is returned with both this and _rRetâ€™s contents, otherwise an invalid object is returned.
 		 */
 		virtual CExpEvalContainer::EE_RESULT		Multiply( CExpEvalContainer::EE_RESULT &_rRet );
 
@@ -115,7 +115,7 @@ namespace ee {
 		 * Operator /.  If _rRet is a vector, element-wise division is performed, otherwise a new vector is returned with scalar division by the given value.
 		 *
 		 * \param _rRet The concatenation object.
-		 * \return If _rRet is another vector, a new vector is returned with both this and _rRet’s contents, otherwise an invalid object is returned.
+		 * \return If _rRet is another vector, a new vector is returned with both this and _rRetâ€™s contents, otherwise an invalid object is returned.
 		 */
 		virtual CExpEvalContainer::EE_RESULT		Divide( CExpEvalContainer::EE_RESULT &_rRet );
 

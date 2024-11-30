@@ -1,4 +1,4 @@
-#include "EEVector.h"
+ï»¿#include "EEVector.h"
 
 
 namespace ee {
@@ -207,7 +207,7 @@ namespace ee {
 	 * Operator +.  If _rRet is another vector, a new vector is returned containing the contents of this vector with _rRet appended, otherwise a new vector is returned containing this vector and the new item appended.
 	 *
 	 * \param _rRet The concatenation object.
-	 * \return If _rRet is another vector, a new vector is returned with both this and _rRet’s contents, otherwise an invalid object is returned.
+	 * \return If _rRet is another vector, a new vector is returned with both this and _rRetâ€™s contents, otherwise an invalid object is returned.
 	 */
 	CExpEvalContainer::EE_RESULT CVector::Plus( CExpEvalContainer::EE_RESULT &_rRet ) {
 		if ( _rRet.ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
@@ -258,7 +258,7 @@ namespace ee {
 	 * Operator -.  If _rRet is an object, errors, otherwise a new vector is returned with element-wise subtraction of the given value.
 	 *
 	 * \param _rRet The concatenation object.
-	 * \return If _rRet is another vector, a new vector is returned with both this and _rRet’s contents, otherwise an invalid object is returned.
+	 * \return If _rRet is another vector, a new vector is returned with both this and _rRetâ€™s contents, otherwise an invalid object is returned.
 	 */
 	CExpEvalContainer::EE_RESULT CVector::Minus( CExpEvalContainer::EE_RESULT &_rRet ) {
 		if ( _rRet.ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
@@ -289,7 +289,7 @@ namespace ee {
 	 * Operator *.  If _rRet is a vector, element-wise multiplication is performed, otherwise a new vector is returned with scalar multiplication of the given value.
 	 *
 	 * \param _rRet The concatenation object.
-	 * \return If _rRet is another vector, a new vector is returned with both this and _rRet’s contents, otherwise an invalid object is returned.
+	 * \return If _rRet is another vector, a new vector is returned with both this and _rRetâ€™s contents, otherwise an invalid object is returned.
 	 */
 	CExpEvalContainer::EE_RESULT CVector::Multiply( CExpEvalContainer::EE_RESULT &_rRet ) {
 		if ( _rRet.ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }
@@ -309,7 +309,7 @@ namespace ee {
 	 * Operator /.  If _rRet is a vector, element-wise division is performed, otherwise a new vector is returned with scalar division by the given value.
 	 *
 	 * \param _rRet The concatenation object.
-	 * \return If _rRet is another vector, a new vector is returned with both this and _rRet’s contents, otherwise an invalid object is returned.
+	 * \return If _rRet is another vector, a new vector is returned with both this and _rRetâ€™s contents, otherwise an invalid object is returned.
 	 */
 	CExpEvalContainer::EE_RESULT CVector::Divide( CExpEvalContainer::EE_RESULT &_rRet ) {
 		if ( _rRet.ncType == EE_NC_INVALID ) { return { .ncType = EE_NC_INVALID }; }

@@ -1,4 +1,4 @@
-#include "MXOptionsLayout.h"
+ï»¿#include "MXOptionsLayout.h"
 #include "../Options/MXOptionsWindow.h"
 #include "../System/MXSystem.h"
 #include "MXLayoutMacros.h"
@@ -2077,7 +2077,7 @@ namespace mx {
 			MX_DEF_BUTTON_HEIGHT,					// dwHeight
 			MX_BUTTONSTYLE,							// dwStyle
 			0,										// dwStyleEx
-			L"…",									// pwcText
+			L"â€¦",									// pwcText
 			0,										// sTextLen
 			MX_OI_PROGRAMS,							// dwParentId
 
@@ -2164,7 +2164,7 @@ namespace mx {
 			MX_DEF_BUTTON_HEIGHT,					// dwHeight
 			MX_BUTTONSTYLE,							// dwStyle
 			0,										// dwStyleEx
-			L"…",									// pwcText
+			L"â€¦",									// pwcText
 			0,										// sTextLen
 			MX_OI_PROGRAMS,							// dwParentId
 

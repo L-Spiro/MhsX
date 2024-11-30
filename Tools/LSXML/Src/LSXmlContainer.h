@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 //#include "LSXml.h"
 #include "LSXmlSyntaxNodes.h"
@@ -321,7 +321,7 @@ namespace lsx {
 		 * Gets the data associated with a given element.
 		 *
 		 * \param _ptElement The element whose data is to be returned.
-		 * \param PARM Holds the return value of the element�s data if true is returned.
+		 * \param PARM Holds the return value of the element’s data if true is returned.
 		 * \return Returns true 
 		 */
 

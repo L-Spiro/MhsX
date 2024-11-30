@@ -1,4 +1,4 @@
-#include "MXOptionsPageHotkeys.h"
+ï»¿#include "MXOptionsPageHotkeys.h"
 #include "../Layouts/MXOptionsLayout.h"
 #include "../MemHack/MXMemHack.h"
 #include "../Strings/MXStringDecoder.h"
@@ -655,7 +655,7 @@ namespace mx {
 					CSecureWString wTmp;
 					pophThis->m_bKeyModifier = ::MapVirtualKeyW( (_lParam >> 16) & 0xFF, MAPVK_VSC_TO_VK_EX );
 					CHotkeyManager::ModifierToString( pophThis->m_bKeyModifier, wTmp, bIgnoreLeftRight );
-					wTmp += L"…";
+					wTmp += L"â€¦";
 					::SetWindowTextW( _hWnd, wTmp.c_str() );
 					return 0;
 				}
@@ -663,7 +663,7 @@ namespace mx {
 					UINT uiTemp = ::MapVirtualKeyW( VK_CONTROL, MAPVK_VK_TO_VSC );
 					CSecureWString wTmp = CHotkeyManager::ScanCodeToString( bIgnoreLeftRight ? (uiTemp << 16) : _lParam );
 					pophThis->m_bKeyModifier = bExtended ? VK_RCONTROL : VK_LCONTROL;
-					wTmp += L"…";
+					wTmp += L"â€¦";
 					::SetWindowTextW( _hWnd, wTmp.c_str() );
 					return 0;
 				}
@@ -671,7 +671,7 @@ namespace mx {
 					UINT uiTemp = ::MapVirtualKeyW( VK_MENU, MAPVK_VK_TO_VSC );
 					CSecureWString wTmp = CHotkeyManager::ScanCodeToString( bIgnoreLeftRight ? (uiTemp << 16) : _lParam );
 					pophThis->m_bKeyModifier = bExtended ? VK_RMENU : VK_LMENU;
-					wTmp += L"…";
+					wTmp += L"â€¦";
 					::SetWindowTextW( _hWnd, wTmp.c_str() );
 					return 0;
 				}
@@ -699,7 +699,7 @@ namespace mx {
 				if ( static_cast<BYTE>(_wParam) == VK_MENU ) {
 					pophThis->m_bKeyModifier = bExtended ? VK_RMENU : VK_LMENU;
 					CHotkeyManager::ModifierToString( pophThis->m_bKeyModifier, wTmp, bIgnoreLeftRight );
-					wTmp += L"…";
+					wTmp += L"â€¦";
 					::SetWindowTextW( _hWnd, wTmp.c_str() );
 					return 0;
 				}
