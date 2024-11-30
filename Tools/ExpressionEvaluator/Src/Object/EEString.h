@@ -59,7 +59,8 @@ namespace ee {
 		// Creates a formatted string representation of the object.
 		virtual std::string							FormattedString( const std::string &_sFormat, uint32_t _ui32Flags = EE_TF_NONE ) {
 			if ( _ui32Flags & CObject::EE_TF_C_STRING ) {
-				return std::vformat( _sFormat, std::make_format_args( CExpEval::ToCString( m_sObj ) ) );
+				auto sTmp = CExpEval::ToCString( m_sObj );
+				return std::vformat( _sFormat, std::make_format_args( sTmp ) );
 			}
 			//return std::format( _sFormat, m_sObj );
 			return std::vformat( _sFormat, std::make_format_args( m_sObj ) );
