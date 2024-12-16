@@ -430,10 +430,12 @@ namespace mx {
 
 	// Updates the inputs based on the expression input.
 	void CFloatingPointStudioWindow::UpdateDefault( CWidget * _pwWidget ) {
-		ee::CExpEvalContainer::EE_RESULT rRes;
-		if ( !_pwWidget->GetTextAsDoubleExpression( rRes ) ) { return; }
 		MX_CUR_SETTINGS csSettings;
 		if ( !GatherSettings( csSettings ) ) { return; }
+
+		ee::CExpEvalContainer::EE_RESULT rRes;
+		if ( !_pwWidget->GetTextAsDoubleExpression( rRes ) ) { return; }
+		
 		ee::CFloatX fFloat;
 		fFloat.CreateFromDouble( rRes.u.dVal,
 			csSettings.ui8ExpBits, csSettings.ui8ManBits /*+ csSettings.bImpBit*/, csSettings.bImpBit, csSettings.bSign );
@@ -444,11 +446,13 @@ namespace mx {
 
 	// Updates the inputs based on the hex input.
 	void CFloatingPointStudioWindow::UpdateHex( CWidget * _pwWidget ) {
+		MX_CUR_SETTINGS csSettings;
+		if ( !GatherSettings( csSettings ) ) { return; }
+
 		ee::CExpEvalContainer::EE_RESULT rRes;
 		_pwWidget->SetTreatAsHex( TRUE );
 		if ( !_pwWidget->GetTextAsUInt64Expression( rRes ) ) { return; }
-		MX_CUR_SETTINGS csSettings;
-		if ( !GatherSettings( csSettings ) ) { return; }
+		
 		ee::CFloatX fFloat;
 		fFloat.CreateFromBits( rRes.u.ui64Val,
 			csSettings.ui8ExpBits, csSettings.ui8ManBits /*+ csSettings.bImpBit*/, csSettings.bImpBit, csSettings.bSign );
@@ -459,9 +463,11 @@ namespace mx {
 
 	// Updates the inputs based on the binary input.
 	void CFloatingPointStudioWindow::UpdateBinary( CWidget * _pwWidget ) {
-		uint64_t ui64Val = ee::CExpEval::StoULL( _pwWidget->GetTextA().c_str(), 2 );
 		MX_CUR_SETTINGS csSettings;
 		if ( !GatherSettings( csSettings ) ) { return; }
+
+		uint64_t ui64Val = ee::CExpEval::StoULL( _pwWidget->GetTextA().c_str(), 2 );
+		
 		ee::CFloatX fFloat;
 		fFloat.CreateFromBits( ui64Val,
 			csSettings.ui8ExpBits, csSettings.ui8ManBits /*+ csSettings.bImpBit*/, csSettings.bImpBit, csSettings.bSign );
@@ -474,6 +480,7 @@ namespace mx {
 	void CFloatingPointStudioWindow::UpdateChecks() {
 		MX_CUR_SETTINGS csSettings;
 		if ( !GatherSettings( csSettings ) ) { return; }
+
 		ee::CFloatX fFloat;
 		uint64_t uiVal = 0;
 		CWidget * pwWidget;

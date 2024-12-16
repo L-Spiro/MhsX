@@ -5,6 +5,8 @@
 #include <LSWWin.h>
 #include <MainWindow/LSWMainWindow.h>
 
+#include <fenv.h>
+
 using namespace lsw;
 
 namespace mx {
@@ -83,6 +85,7 @@ namespace mx {
 
 		// For gathering the current parameters for the float.
 		struct MX_CUR_SETTINGS {
+			int								iRoundingMode = FE_TONEAREST;
 			bool							bSign;
 			bool							bImpBit;
 			uint8_t							ui8ExpBits;

@@ -11,6 +11,7 @@
 #include <EEExpEvalContainer.h>
 #include <clocale>
 #include <cwctype>
+#include <fenv.h>
 #include <filesystem>
 #include <mbstring.h>
 #include <random>
@@ -266,6 +267,7 @@ namespace mx {
 			MX_BS_BY_TYPE,
 		};
 
+
 		// == Types.
 		// Various options.
 		struct MX_UTIL_OPTIONS {
@@ -337,6 +339,19 @@ namespace mx {
 		// Boyor Moore data.
 		struct MX_BOYOR_MOORE {
 			std::vector<int32_t>		vBadShifts;
+		};
+
+		/** Temporarily setting the floating-point rounding mode. */
+		struct MX_FEROUNDMODE {
+			MX_FEROUNDMODE( int _iNewMode ) :
+				iPrevMode( ::fegetround() ) {
+				::fesetround( _iNewMode );
+			}
+			~MX_FEROUNDMODE() {
+				::fesetround( iPrevMode );
+			}
+
+			int							iPrevMode;					/**< The previous rounding mode. */
 		};
 
 
