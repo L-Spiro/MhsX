@@ -80,6 +80,9 @@ namespace mx {
 		CSecureWString					wsToText;
 		std::vector<CSecureWString>		vFromHistory;
 		std::vector<CSecureWString>		vToHistory;
+
+		int								iFloatStudioRoundMode			= FE_TONEAREST;
+		std::vector<CSecureWString>		vFloatStudioFormatHistory;
 	};
 
 }	// namespace mx

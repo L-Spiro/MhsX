@@ -867,7 +867,7 @@ namespace mx {
 		bool _bHasSign, bool _bHasExplicitBit,
 		uint16_t _uiExpBits, uint16_t _uiManBits ) {
 		if ( !m_pfpsFloatingPointStudioWindow ) {
-			m_pfpsFloatingPointStudioWindow = static_cast<CFloatingPointStudioWindow *>(CFloatingPointStudioLayout::CreateFloatingPointStudioWindow( nullptr ));
+			m_pfpsFloatingPointStudioWindow = static_cast<CFloatingPointStudioWindow *>(CFloatingPointStudioLayout::CreateFloatingPointStudioWindow( nullptr, m_pmhMemHack ));
 			m_pfpsFloatingPointStudioWindow->SetWidgetParent( this );
 		}
 		if ( m_pfpsFloatingPointStudioWindow ) {

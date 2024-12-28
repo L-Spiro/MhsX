@@ -38,7 +38,14 @@ namespace mx {
 #define MX_FPS_MISC_3_5TH		((MX_FPS_MISC_INTERIOR_W * 2) / 4 + MX_LEFT_JUST + MX_GROUP_LEFT_PXL)
 #define MX_FPS_MISC_4_5TH		((MX_FPS_MISC_INTERIOR_W * 3) / 4 + MX_LEFT_JUST + MX_GROUP_LEFT_PXL)
 #define MX_FPS_MISC_5_5TH		((MX_FPS_MISC_INTERIOR_W * 4) / 4 + MX_LEFT_JUST + MX_GROUP_LEFT_PXL)
-#define MX_FPS_H				(MX_FPS_MISC_GROUP_TOP + MX_FPS_MISC_GROUP_H + MX_TOP_JUST)
+
+#define MX_FPS_OPTS_GROUP_TOP	(MX_FPS_MISC_GROUP_TOP + MX_FPS_MISC_GROUP_H)
+#define MX_FPS_OPTS_GROUP_H		(MX_GROUP_TOP_PXL + MX_GROUP_BOTTOM_PXL + MX_DEF_EDIT_HEIGHT_PXL)
+#define MX_FPS_OPTS_FMT_COMBO_L	(MX_LEFT_JUST + MX_GROUP_LEFT_PXL + MX_FPS_MISC_LABEL_W)
+#define MX_FPS_OPTS_FMT_COMBO_W	(((MX_FPS_MISC_2_5TH - MX_FPS_MISC_1_5TH) + MX_LEFT_JUST) - MX_FPS_MISC_LABEL_W - (MX_LEFT_JUST + MX_GROUP_LEFT_PXL))
+#define MX_FPS_OPTS_FMT_EDIT_L	(MX_FPS_OPTS_FMT_COMBO_L + MX_FPS_OPTS_FMT_COMBO_W + MX_LEFT_JUST)
+
+#define MX_FPS_H				(MX_FPS_OPTS_GROUP_TOP + MX_FPS_OPTS_GROUP_H + MX_TOP_JUST)
 
 	// == Members.
 	// The layout for the PE Works window.
@@ -962,7 +969,7 @@ namespace mx {
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
 			0,										// dwStyleEx
-			MX_MAKE_WCHAR( _T_FD9FF810_Exponent_ ),											// pwcText
+			MX_MAKE_WCHAR( _T_FD9FF810_Exponent_ ),	// pwcText
 			_LEN_FD9FF810,							// sTextLen
 			MX_CI_MAINWINDOW,						// dwParentId
 		},
@@ -1028,8 +1035,8 @@ namespace mx {
 			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
 			MX_STATICSTYLE,							// dwStyle
 			0,										// dwStyleEx
-			MX_MAKE_WCHAR( _T_2F7DD938_Biased_Exp_ ),										// pwcText
-			_LEN_2F7DD938,							// sTextLen
+			MX_MAKE_WCHAR( _T_3C23F378_Biased_Exp__ ),										// pwcText
+			_LEN_3C23F378,							// sTextLen
 			MX_CI_MAINWINDOW,						// dwParentId
 		},
 		{
@@ -1048,9 +1055,97 @@ namespace mx {
 			0,										// sTextLen
 			MX_CI_MAINWINDOW,						// dwParentId
 		},
+
+
+		{
+			LSW_LT_GROUPBOX,						// ltType
+			MX_CI_OPTIONS_GROUP,					// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_LEFT_JUST,							// iLeft
+			MX_FPS_OPTS_GROUP_TOP,					// iTop
+			MX_FPS_W - (MX_LEFT_JUST * 2),			// dwWidth
+			MX_FPS_OPTS_GROUP_H,					// dwHeight
+			MX_GROUPSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_1F88C31B_Options ),	// pwcText
+			_LEN_1F88C31B,							// sTextLen
+			MX_CI_MAINWINDOW,						// dwParentId
+		},
+		{
+			LSW_LT_LABEL,							// ltType
+			MX_CI_OPTIONS_OUT_FORMAT_LABEL,			// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_LEFT_JUST + MX_GROUP_LEFT_PXL,		// iLeft
+			(MX_FPS_OPTS_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + 3,					// iTop
+			MX_FPS_MISC_LABEL_W,					// dwWidth
+			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_0992AAA5_Out_Fmt_ ),	// pwcText
+			_LEN_0992AAA5,							// sTextLen
+			MX_CI_MAINWINDOW,						// dwParentId
+		},
+		{
+			LSW_LT_COMBOBOX,						// ltType
+			MX_CI_OPTIONS_OUT_FORMAT_COMBO,			// wId
+			WC_COMBOBOXW,							// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_FPS_OPTS_FMT_COMBO_L,				// iLeft
+			(MX_FPS_OPTS_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST),						// iTop
+			MX_FPS_OPTS_FMT_COMBO_W,				// dwWidth
+			MX_DEF_COMBO_HEIGHT_PXL,				// dwHeight
+			MX_COMBOSTYLE_LIST,						// dwStyle
+			MX_COMBOSTYLEEX_LIST,					// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_CI_MAINWINDOW,						// dwParentId
+		},
+		{
+			LSW_LT_COMBOBOX,						// ltType
+			MX_CI_OPTIONS_OUT_FORMAT_EDIT_COMBO,	// wId
+			WC_COMBOBOXW,							// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_FPS_OPTS_FMT_EDIT_L,					// iLeft
+			(MX_FPS_OPTS_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST),						// iTop
+			(MX_FPS_MISC_3_5TH) - (MX_FPS_OPTS_FMT_EDIT_L) - (MX_LEFT_JUST + MX_GROUP_LEFT_PXL),									// dwWidth
+			MX_DEF_COMBO_HEIGHT,					// dwHeight
+			MX_COMBOSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_CI_MAINWINDOW,						// dwParentId
+		},
+
+		{
+			LSW_LT_LABEL,							// ltType
+			MX_CI_OPTIONS_OUT_ROUND_LABEL,			// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_FPS_MISC_3_5TH + MX_FPS_MISC_LABEL_W,// iLeft
+			(MX_FPS_OPTS_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST) + 3,					// iTop
+			MX_FPS_PARM_MAN_W + 15,					// dwWidth
+			MX_DEF_STATIC_HEIGHT_PXL,				// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_76783A66_Rounding_Mode_ ),									// pwcText
+			_LEN_76783A66,							// sTextLen
+			MX_CI_MAINWINDOW,						// dwParentId
+		},
 	};
 
 #undef MX_FPS_H
+#undef MX_FPS_OPTS_FMT_EDIT_L
+#undef MX_FPS_OPTS_FMT_COMBO_W
+#undef MX_FPS_OPTS_FMT_COMBO_L
+#undef MX_FPS_OPTS_GROUP_H
+#undef MX_FPS_OPTS_GROUP_TOP
 #undef MX_FPS_MISC_5_5TH
 #undef MX_FPS_MISC_4_5TH
 #undef MX_FPS_MISC_3_5TH
@@ -1084,7 +1179,7 @@ namespace mx {
 
 	// == Functions.
 	// Creates the window.
-	CWidget * CFloatingPointStudioLayout::CreateFloatingPointStudioWindow( CWidget * _pwParent ) {
+	CWidget * CFloatingPointStudioLayout::CreateFloatingPointStudioWindow( CWidget * _pwParent, CMemHack * _pmhMemHack ) {
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
 		std::vector<CSecureString> sStrings;
 		std::vector<CSecureWString> sStringsW;
@@ -1097,7 +1192,7 @@ namespace mx {
 		CFloatingPointStudioWindow::PrepareFloatingPointStudio();
 		CWidget * pwThis = plmLayout->CreateWindowX( &vLayouts[0], MX_ELEMENTS( m_wlMainWindow ),
 			nullptr, 0,
-			_pwParent );
+			_pwParent, reinterpret_cast<uint64_t>(_pmhMemHack) );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
 
 		return pwThis;

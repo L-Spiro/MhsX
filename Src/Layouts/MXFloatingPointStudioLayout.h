@@ -1,5 +1,7 @@
 #pragma once
 
+
+#include "../Options/MXOptions.h"
 #include <Layout/LSWMenuLayout.h>
 #include <Layout/LSWWidgetLayout.h>
 #include <Widget/LSWWidget.h>
@@ -23,12 +25,14 @@ namespace mx {
 			MX_CI_LABEL_START					= MX_CI_CHECK_START + 65,
 			MX_CI_KEY_LABEL_START				= MX_CI_LABEL_START + 65,
 			MX_CI_VALUE_LABEL					= MX_CI_KEY_LABEL_START + 65,
+
 			MX_CI_INPUT_GROUP,
 			MX_CI_VALUE_EDIT,
 			MX_CI_VALUE_HEX_LABEL,
 			MX_CI_VALUE_HEX_EDIT,
 			MX_CI_VALUE_BIN_LABEL,
 			MX_CI_VALUE_BIN_EDIT,
+
 			MX_CI_PARM_GROUP,
 			MX_CI_PARM_SIGNBIT_CHECK,
 			MX_CI_PARM_IMPBIT_CHECK,
@@ -75,7 +79,6 @@ namespace mx {
 			MX_CI_OUT_PREC_LOW_LABEL,
 			MX_CI_OUT_PREC_LOW_EDIT,
 
-
 			MX_CI_MISC_GROUP,
 			MX_CI_MISC_NEXT_ABOVE_LABEL,
 			MX_CI_MISC_NEXT_ABOVE_EDIT,
@@ -91,12 +94,18 @@ namespace mx {
 			MX_CI_MISC_MANTISSA_EDIT,
 			MX_CI_MISC_BIAS_LABEL,
 			MX_CI_MISC_BIAS_EDIT,
+
+			MX_CI_OPTIONS_GROUP,
+			MX_CI_OPTIONS_OUT_FORMAT_LABEL,
+			MX_CI_OPTIONS_OUT_FORMAT_COMBO,
+			MX_CI_OPTIONS_OUT_FORMAT_EDIT_COMBO,
+			MX_CI_OPTIONS_OUT_ROUND_LABEL,
 		};
 
 
 		// == Functions.
 		// Creates the window.
-		static CWidget *						CreateFloatingPointStudioWindow( CWidget * _pwParent );
+		static CWidget *						CreateFloatingPointStudioWindow( CWidget * _pwParent, CMemHack * _pmhMemHack );
 
 
 	protected :

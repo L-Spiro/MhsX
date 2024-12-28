@@ -10,6 +10,8 @@
 #include <CheckButton/LSWCheckButton.h>
 #include <Static/LSWStatic.h>
 
+#include <format>
+
 namespace mx {
 
 	// == Members.
@@ -50,7 +52,8 @@ namespace mx {
 	CFloatingPointStudioWindow::CFloatingPointStudioWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
 		lsw::CMainWindow( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(m_aAtom) ), _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
 		m_pwLastInput( nullptr ),
-		m_bUpdatingInputs( false ) {
+		m_bUpdatingInputs( false ),
+		m_pmhMemHack( reinterpret_cast<CMemHack *>(_ui64Data) ) {
 		
 	}
 	CFloatingPointStudioWindow::~CFloatingPointStudioWindow() {
@@ -227,6 +230,28 @@ namespace mx {
 			pcbCombo->SetCurSelByItemData( MX_P_FLOAT64 );
 			pcbCombo->AutoSetMinListWidth();
 		}
+
+		pcbCombo = static_cast<CComboBox *>(FindChild( CFloatingPointStudioLayout::MX_CI_OPTIONS_OUT_FORMAT_COMBO ));
+		if ( pcbCombo ) {
+			static struct MX_FMT_COMB {
+				const char *									pcStr;
+				size_t											sLen;
+				int												iValue;
+			} fcStrings[] = {
+				{ _T_LEN_2CE33943_Default,						MX_DEFAULT },
+				{ _T_LEN_9631F7BC_Scientific,					MX_SCIENTIFIC },
+				//{ _T_LEN_A3A5D702_sprintf____17f_,				MX_SPRINTF },
+				{ _T_LEN_78A47C44_Python_____17f__,				MX_PYTHON },
+			};
+			for ( size_t I = 0; I < MX_ELEMENTS( fcStrings ); ++I ) {
+				INT iIndex = pcbCombo->AddString( mx::CStringDecoder::DecodeToWString( fcStrings[I].pcStr, fcStrings[I].sLen ).c_str() );
+				if ( iIndex != -1 ) {
+					pcbCombo->SetItemData( iIndex, static_cast<LPARAM>(fcStrings[I].iValue) );
+				}
+			}
+			pcbCombo->SetCurSelByItemData( MX_DEFAULT );
+			pcbCombo->AutoSetMinListWidth();
+		}
 		return LSW_H_CONTINUE;
 	}
 
@@ -318,6 +343,24 @@ namespace mx {
 					}
 					break;
 				}
+				case CFloatingPointStudioLayout::MX_CI_OPTIONS_OUT_FORMAT_COMBO : {
+					switch ( _wCtrlCode ) {
+						case LBN_SELCHANGE : {
+							CComboBox * pcbCombo = static_cast<CComboBox *>(FindChild( _Id ));
+							if ( pcbCombo ) {
+								LPARAM lpSel = pcbCombo->GetCurSelItemData();
+								UpdateByLast();
+							}
+						}
+					}
+					break;
+				}
+				case CFloatingPointStudioLayout::MX_CI_OPTIONS_OUT_FORMAT_EDIT_COMBO : {
+					if ( _wCtrlCode == CBN_EDITCHANGE || _wCtrlCode == CBN_SELCHANGE ) {
+						UpdateByLast();
+					}
+					break;
+				}
 			}
 		}
 		return LSW_H_CONTINUE;
@@ -380,6 +423,15 @@ namespace mx {
 		}
 		else { return false; }
 
+		CComboBox * pcbCombo = static_cast<CComboBox *>(FindChild( CFloatingPointStudioLayout::MX_CI_OPTIONS_OUT_FORMAT_COMBO ));
+		if ( pcbCombo ) {
+			_csSettings.iOutFormat = static_cast<int>(pcbCombo->GetCurSelItemData());
+		}
+		pcbCombo = static_cast<CComboBox *>(FindChild( CFloatingPointStudioLayout::MX_CI_OPTIONS_OUT_FORMAT_EDIT_COMBO ));
+		if ( pcbCombo ) {
+			_csSettings.wsFormatString = pcbCombo->GetTextW();
+		}
+
 		return true;
 	}
 
@@ -387,9 +439,7 @@ namespace mx {
 	void CFloatingPointStudioWindow::UpdateInputs( const ee::CFloatX &_fVal, const MX_CUR_SETTINGS &_csSettings ) {
 		CWidget * pwWidget = FindChild( CFloatingPointStudioLayout::MX_CI_VALUE_EDIT );
 		if ( pwWidget && m_pwLastInput != pwWidget ) {
-			std::string sTemp;
-			CUtilities::ToDouble( _fVal.AsDouble(), sTemp );
-			pwWidget->SetTextA( sTemp.c_str() );
+			SetFloatText( pwWidget, _fVal.AsDouble(), _csSettings );
 		}
 
 		pwWidget = FindChild( CFloatingPointStudioLayout::MX_CI_VALUE_HEX_EDIT );
@@ -404,6 +454,11 @@ namespace mx {
 			std::string sTemp;
 			CUtilities::ToBinary( _fVal.AsUint64(), sTemp, ee::CFloatX::TotalBits( _csSettings.ui8ExpBits, _csSettings.ui8ManBits /*- _csSettings.bImpBit*/, _csSettings.bImpBit, _csSettings.bSign ) );
 			pwWidget->SetTextA( sTemp.c_str() );
+		}
+
+		pwWidget = FindChild( CFloatingPointStudioLayout::MX_CI_OPTIONS_OUT_FORMAT_EDIT_COMBO );
+		if ( pwWidget ) {
+			pwWidget->SetEnabled( _csSettings.iOutFormat != MX_DEFAULT && _csSettings.iOutFormat != MX_SCIENTIFIC );
 		}
 
 		UpdateChecks( _fVal, _csSettings );
@@ -651,9 +706,7 @@ namespace mx {
 		}
 		pwWidget = FindChild( CFloatingPointStudioLayout::MX_CI_OUT_MAX_EDIT_FLT );
 		if ( pwWidget ) {
-			std::string sTemp;
-			CUtilities::ToDouble( fThis.AsDouble(), sTemp );
-			pwWidget->SetTextA( sTemp.c_str() );
+			SetFloatText( pwWidget, fThis.AsDouble(), _csSettings );
 		}
 
 
@@ -666,9 +719,7 @@ namespace mx {
 		}
 		pwWidget = FindChild( CFloatingPointStudioLayout::MX_CI_OUT_MIN_EDIT_FLT );
 		if ( pwWidget ) {
-			std::string sTemp;
-			CUtilities::ToDouble( fThis.AsDouble(), sTemp );
-			pwWidget->SetTextA( sTemp.c_str() );
+			SetFloatText( pwWidget, fThis.AsDouble(), _csSettings );
 		}
 
 
@@ -681,9 +732,7 @@ namespace mx {
 		}
 		pwWidget = FindChild( CFloatingPointStudioLayout::MX_CI_OUT_NMIN_EDIT_FLT );
 		if ( pwWidget ) {
-			std::string sTemp;
-			CUtilities::ToDouble( fThis.AsDouble(), sTemp );
-			pwWidget->SetTextA( sTemp.c_str() );
+			SetFloatText( pwWidget, fThis.AsDouble(), _csSettings );
 		}
 
 
@@ -696,9 +745,7 @@ namespace mx {
 		}
 		pwWidget = FindChild( CFloatingPointStudioLayout::MX_CI_OUT_EPS_EDIT_FLT );
 		if ( pwWidget ) {
-			std::string sTemp;
-			CUtilities::ToDouble( fThis.AsDouble(), sTemp );
-			pwWidget->SetTextA( sTemp.c_str() );
+			SetFloatText( pwWidget, fThis.AsDouble(), _csSettings );
 		}
 
 
@@ -711,9 +758,7 @@ namespace mx {
 
 		pwWidget = FindChild( CFloatingPointStudioLayout::MX_CI_OUT_PREC_EDIT );
 		if ( pwWidget ) {
-			std::string sTemp;
-			CUtilities::ToDouble( ee::CFloatX::Precision( _csSettings.ui8ManBits ), sTemp );
-			pwWidget->SetTextA( sTemp.c_str() );
+			SetFloatText( pwWidget, ee::CFloatX::Precision( _csSettings.ui8ManBits ), _csSettings );
 		}
 	}
 
@@ -725,24 +770,18 @@ namespace mx {
 
 		CWidget * pwWidget = FindChild( CFloatingPointStudioLayout::MX_CI_MISC_NEXT_ABOVE_EDIT );
 		if ( pwWidget ) {
-			std::string sTemp;
-			CUtilities::ToDouble( fCopy.AsDouble(), sTemp );
-			pwWidget->SetTextA( sTemp.c_str() );
+			SetFloatText( pwWidget, fCopy.AsDouble(), _csSettings );
 		}
 
 		pwWidget = FindChild( CFloatingPointStudioLayout::MX_CI_MISC_ACTUAL_EDIT );
 		if ( pwWidget ) {
-			std::string sTemp;
-			CUtilities::ToDouble( dVal, sTemp );
-			pwWidget->SetTextA( sTemp.c_str() );
+			SetFloatText( pwWidget, dVal, _csSettings );
 		}
 
 		fCopy.CreateNextAfterDown( dVal, _csSettings.ui8ExpBits, _csSettings.ui8ManBits, _csSettings.bImpBit, _csSettings.bSign );
 		pwWidget = FindChild( CFloatingPointStudioLayout::MX_CI_MISC_NEXT_BELOW_EDIT );
 		if ( pwWidget ) {
-			std::string sTemp;
-			CUtilities::ToDouble( fCopy.AsDouble(), sTemp );
-			pwWidget->SetTextA( sTemp.c_str() );
+			SetFloatText( pwWidget, fCopy.AsDouble(), _csSettings );
 		}
 
 		pwWidget = FindChild( CFloatingPointStudioLayout::MX_CI_MISC_TOTAL_BITS_EDIT );
@@ -827,6 +866,53 @@ namespace mx {
 			}
 			pcbCombo->SetCurSelByItemData( MX_P_CUSTOM );
 		}
+	}
+
+	// Sets a floating-point string on a widget, applying the selected format.
+	void CFloatingPointStudioWindow::SetFloatText( CWidget * _pwWidget, double _dValue, const MX_CUR_SETTINGS &_csSettings ) {
+		if ( !_pwWidget ) { return; }
+
+		switch ( _csSettings.iOutFormat ) {
+			case MX_SCIENTIFIC : {
+				auto aPrec = std::ceil( ee::CFloatX::Precision( _csSettings.ui8ManBits ) ) + 1.0;
+				aPrec = std::max( aPrec, 4.0 );
+				std::string sTemp;
+				CUtilities::ToDouble( _dValue, sTemp, static_cast<int32_t>(-aPrec) );
+				_pwWidget->SetTextA( sTemp.c_str() );
+				break;
+			}
+			case MX_SPRINTF : {
+				try {
+					std::wstring wsTmp;
+					size_t sLen = 1200;
+					wsTmp.resize( sLen );
+					auto iLen = std::swprintf( wsTmp.data(), _csSettings.wsFormatString.c_str(), wsTmp.size(), _dValue, _dValue, _dValue, _dValue );
+					while ( iLen >= sLen - 3 ) {
+						sLen = iLen + 50;
+						wsTmp.resize( sLen );
+						iLen = std::swprintf( wsTmp.data(), _csSettings.wsFormatString.c_str(), wsTmp.size(), _dValue, _dValue, _dValue, _dValue );
+					}
+					_pwWidget->SetTextW( wsTmp.c_str() );
+				}
+				catch ( ... ) { break; }
+				break;
+			}
+			case MX_PYTHON : {
+				try {
+					auto fFormatArgs = std::make_wformat_args( _dValue, _dValue, _dValue, _dValue );
+					std::wstring sTmp = std::vformat( _csSettings.wsFormatString, fFormatArgs );
+					_pwWidget->SetTextW( sTmp.c_str() );
+				}
+				catch ( ... ) { break; }
+				break;
+			}
+			default : {
+				std::string sTemp;
+				CUtilities::ToDouble( _dValue, sTemp );
+				_pwWidget->SetTextA( sTemp.c_str() );
+			}
+		}
+		
 	}
 
 }	// namespace mx

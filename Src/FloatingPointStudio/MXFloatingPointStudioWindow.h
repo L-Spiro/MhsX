@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../MXMhsX.h"
+#include "../Options/MXOptions.h"
 #include "../Strings/MXStringDecoder.h"
 #include <LSWWin.h>
 #include <MainWindow/LSWMainWindow.h>
@@ -40,6 +41,14 @@ namespace mx {
 			MX_P_AMD_9511,
 			MX_P_PXR24,
 			MX_P_CUSTOM,
+		};
+
+		// Output Format.
+		enum MX_FORMATS {
+			MX_DEFAULT,
+			MX_SCIENTIFIC,
+			MX_SPRINTF,
+			MX_PYTHON,
 		};
 
 
@@ -85,6 +94,8 @@ namespace mx {
 
 		// For gathering the current parameters for the float.
 		struct MX_CUR_SETTINGS {
+			std::wstring					wsFormatString;
+			int								iOutFormat = MX_DEFAULT;
 			int								iRoundingMode = FE_TONEAREST;
 			bool							bSign;
 			bool							bImpBit;
@@ -92,11 +103,15 @@ namespace mx {
 			uint8_t							ui8ManBits;
 		};
 
+
 		// == Members.
 		// The widget of the last input.
 		CWidget *							m_pwLastInput;
 		// Are we updating inputs?
 		bool								m_bUpdatingInputs;
+		// The MemHack object for storing options.
+		CMemHack *							m_pmhMemHack;
+
 
 		// The main window class.
 		static ATOM							m_aAtom;
@@ -143,6 +158,9 @@ namespace mx {
 
 		// Updates the preset list selection or text.
 		void								UpdatePreset( const MX_CUR_SETTINGS &_csSettings );
+
+		// Sets a floating-point string on a widget, applying the selected format.
+		void								SetFloatText( CWidget * _pwWidget, double _dValue, const MX_CUR_SETTINGS &_csSettings );
 	};
 
 }	// namespace mx
