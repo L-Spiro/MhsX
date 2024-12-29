@@ -252,6 +252,34 @@ namespace mx {
 			pcbCombo->SetCurSelByItemData( MX_DEFAULT );
 			pcbCombo->AutoSetMinListWidth();
 		}
+
+		pcbCombo = static_cast<CComboBox *>(FindChild( CFloatingPointStudioLayout::MX_CI_OPTIONS_ROUND_COMBO ));
+		if ( pcbCombo ) {
+			static struct MX_FMT_COMB {
+				const char *									pcStr;
+				size_t											sLen;
+				int												iValue;
+			} fcStrings[] = {
+				{ _T_LEN_1DD6529B_To_Nearest,					FE_TONEAREST },
+				{ _T_LEN_FC785F2F_Upward,						FE_UPWARD },
+				{ _T_LEN_6D055C20_Downward,						FE_DOWNWARD },
+				{ _T_LEN_08746C74_Toward_Zero,					FE_TOWARDZERO },
+			};
+			for ( size_t I = 0; I < MX_ELEMENTS( fcStrings ); ++I ) {
+				INT iIndex = pcbCombo->AddString( mx::CStringDecoder::DecodeToWString( fcStrings[I].pcStr, fcStrings[I].sLen ).c_str() );
+				if ( iIndex != -1 ) {
+					pcbCombo->SetItemData( iIndex, static_cast<LPARAM>(fcStrings[I].iValue) );
+				}
+			}
+			if ( m_pmhMemHack && (m_pmhMemHack->FloatStudioOptions().iFloatStudioRoundMode == FE_TONEAREST ||
+				m_pmhMemHack->FloatStudioOptions().iFloatStudioRoundMode == FE_UPWARD ||
+				m_pmhMemHack->FloatStudioOptions().iFloatStudioRoundMode == FE_DOWNWARD ||
+				m_pmhMemHack->FloatStudioOptions().iFloatStudioRoundMode == FE_TOWARDZERO) ) {
+				pcbCombo->SetCurSelByItemData( m_pmhMemHack->FloatStudioOptions().iFloatStudioRoundMode );
+			}
+			else { pcbCombo->SetCurSelByItemData( FE_TONEAREST ); }
+			pcbCombo->AutoSetMinListWidth();
+		}
 		return LSW_H_CONTINUE;
 	}
 
@@ -361,6 +389,12 @@ namespace mx {
 					}
 					break;
 				}
+				case CFloatingPointStudioLayout::MX_CI_OPTIONS_ROUND_COMBO : {
+					if ( _wCtrlCode == CBN_EDITCHANGE || _wCtrlCode == CBN_SELCHANGE ) {
+						UpdateByLast();
+					}
+					break;
+				}
 			}
 		}
 		return LSW_H_CONTINUE;
@@ -368,8 +402,11 @@ namespace mx {
 
 	// WM_CLOSE.
 	CWidget::LSW_HANDLED CFloatingPointStudioWindow::Close() {
-		
-		//::EndDialog( Wnd(), 0 );
+		MX_CUR_SETTINGS csSettings;
+		GatherSettings( csSettings );
+		if ( m_pmhMemHack ) {
+			m_pmhMemHack->FloatStudioOptions().iFloatStudioRoundMode = csSettings.iRoundingMode;
+		}
 		::DestroyWindow( Wnd() );
 		//CUtilities::PrintTotalGuiObjects( GR_GDIOBJECTS );
 		return LSW_H_HANDLED;
@@ -432,6 +469,11 @@ namespace mx {
 			_csSettings.wsFormatString = pcbCombo->GetTextW();
 		}
 
+		pcbCombo = static_cast<CComboBox *>(FindChild( CFloatingPointStudioLayout::MX_CI_OPTIONS_ROUND_COMBO ));
+		if ( pcbCombo ) {
+			_csSettings.iRoundingMode = static_cast<int>(pcbCombo->GetCurSelItemData());
+		}
+
 		return true;
 	}
 
@@ -489,7 +531,11 @@ namespace mx {
 		if ( !GatherSettings( csSettings ) ) { return; }
 
 		ee::CExpEvalContainer::EE_RESULT rRes;
-		if ( !_pwWidget->GetTextAsDoubleExpression( rRes ) ) { return; }
+		{
+			CUtilities::MX_FEROUNDMODE rmRound( csSettings.iRoundingMode );
+		
+			if ( !_pwWidget->GetTextAsDoubleExpression( rRes ) ) { return; }
+		}
 		
 		ee::CFloatX fFloat;
 		fFloat.CreateFromDouble( rRes.u.dVal,

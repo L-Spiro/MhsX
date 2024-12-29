@@ -1124,7 +1124,7 @@ namespace mx {
 
 		{
 			LSW_LT_LABEL,							// ltType
-			MX_CI_OPTIONS_OUT_ROUND_LABEL,			// wId
+			MX_CI_OPTIONS_ROUND_LABEL,				// wId
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
@@ -1136,6 +1136,22 @@ namespace mx {
 			0,										// dwStyleEx
 			MX_MAKE_WCHAR( _T_76783A66_Rounding_Mode_ ),									// pwcText
 			_LEN_76783A66,							// sTextLen
+			MX_CI_MAINWINDOW,						// dwParentId
+		},
+		{
+			LSW_LT_COMBOBOX,						// ltType
+			MX_CI_OPTIONS_ROUND_COMBO,				// wId
+			WC_COMBOBOXW,							// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_FPS_MISC_4_5TH,						// iLeft
+			(MX_FPS_OPTS_GROUP_TOP + MX_GROUP_TOP_PXL + MX_TOP_JUST),						// iTop
+			(MX_FPS_MISC_5_5TH - MX_FPS_MISC_4_5TH) - (MX_LEFT_JUST + MX_GROUP_LEFT_PXL),	// dwWidth
+			MX_DEF_COMBO_HEIGHT_PXL,				// dwHeight
+			MX_COMBOSTYLE_LIST,						// dwStyle
+			MX_COMBOSTYLEEX_LIST,					// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
 			MX_CI_MAINWINDOW,						// dwParentId
 		},
 	};

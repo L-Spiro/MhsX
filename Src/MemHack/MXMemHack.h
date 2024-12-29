@@ -78,6 +78,9 @@ namespace mx {
 		// Gets the options.
 		const MX_OPTIONS &					Options() const;
 
+		// Gets the Floating-Point Studio options for read and write.
+		MX_FLOAT_STUDIO_OPTIONS &			FloatStudioOptions();
+
 		// Sets the options.
 		virtual void						SetOptions( const MX_OPTIONS &_oOptions );
 
@@ -138,6 +141,8 @@ namespace mx {
 		CProcess							m_pProcess;
 		// Options.
 		mutable MX_OPTIONS					m_oOptions;
+		// Floating-Point Studio options.
+		MX_FLOAT_STUDIO_OPTIONS				m_fsoOptions;
 		// Searcher.
 		CSearcher							m_sSearcher;
 		// Regex system.

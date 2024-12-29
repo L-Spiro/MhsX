@@ -112,6 +112,11 @@ namespace mx {
 		return m_oOptions;
 	}
 
+	// Gets the Floating-Point Studio options for read and write.
+	MX_FLOAT_STUDIO_OPTIONS & CMemHack::FloatStudioOptions() {
+		return m_fsoOptions;
+	}
+
 	// Sets the options.
 	void CMemHack::SetOptions( const MX_OPTIONS &_oOptions ) {
 		m_oOptions = _oOptions;
