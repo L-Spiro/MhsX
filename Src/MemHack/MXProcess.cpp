@@ -157,7 +157,7 @@ namespace mx {
 		size_t stSize = swsTmp.size();
 		while ( stSize == swsTmp.size() ) {
 			DWORD dwSize = static_cast<DWORD>(swsTmp.size());
-			if ( (!::QueryFullProcessImageNameW( ProcHandle(), _dwFlags, swsTmp.data(), &dwSize ) && dwSize == 0) || swsTmp.size() >= 1024 * 1024 ) {
+			if ( (!CSystem::QueryFullProcessImageNameW( ProcHandle(), _dwFlags, swsTmp.data(), &dwSize ) && dwSize == 0) || swsTmp.size() >= 1024 * 1024 ) {
 				return CSecureWString();
 			}
 			if ( dwSize == static_cast<DWORD>(swsTmp.size()) ) {

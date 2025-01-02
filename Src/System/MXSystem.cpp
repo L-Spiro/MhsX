@@ -690,7 +690,7 @@ namespace mx {
 			dwLen += MAX_PATH;
 			vBuffer.resize( dwLen );
 			dwTemp = dwLen;
-			if ( QueryFullProcessImageNameW( _hProcess, 0, &vBuffer[0], &dwTemp ) ) {
+			if ( CSystem::QueryFullProcessImageNameW( _hProcess, 0, &vBuffer[0], &dwTemp ) ) {
 				return dwTemp + 1;
 			}
 		} while ( dwTemp == dwLen && dwLen < 0xFFFF );
