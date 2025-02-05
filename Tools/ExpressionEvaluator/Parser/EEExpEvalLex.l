@@ -744,8 +744,8 @@ RS1_S								[rR]{CS1}
 ("]"|":>")							{ return ']'; }
 "("									{ return '('; }
 ")"									{ return ')'; }
-"{"									{ return '{'; }
-"}"									{ return '}'; }
+("{"|"<%")							{ return '{'; }
+("}"|"%>")							{ return '}'; }
 
 "<<"								{ return yy::CExpEvalParser::token::EE_LEFT_OP; }
 ">>"								{ return yy::CExpEvalParser::token::EE_RIGHT_OP; }
