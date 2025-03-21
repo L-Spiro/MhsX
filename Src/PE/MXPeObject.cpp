@@ -109,9 +109,11 @@ namespace mx {
 		// Import table.
 		m_uiImportOffset = 0;
 		if ( HasImportDesc() ) {
+			/*auto sSizeOf = sizeof( MX_IMAGE_IMPORT_DESCRIPTOR );
+			auto sSize = m_vDataDirectories[MX_IMAGE_DIRECTORY_ENTRY_IMPORT].Size % sizeof( MX_IMAGE_IMPORT_DESCRIPTOR );
 			if ( m_vDataDirectories[MX_IMAGE_DIRECTORY_ENTRY_IMPORT].Size % sizeof( MX_IMAGE_IMPORT_DESCRIPTOR ) != 0 ) {
 				return FALSE;
-			}
+			}*/
 			uint32_t uiMax = m_vDataDirectories[MX_IMAGE_DIRECTORY_ENTRY_IMPORT].Size / sizeof( MX_IMAGE_IMPORT_DESCRIPTOR );
 			uint32_t uiOffset;
 			uint32_t uiIndex = RelocAddrToRelocIndexAndOffset( m_vDataDirectories[MX_IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress, uiOffset );
