@@ -50,6 +50,9 @@ namespace lsw {
 	/** The child-window class. */
 	ATOM CBase::m_aChildWindow = 0;
 
+	/** the TreeListView name. */
+	std::wstring CBase::m_wsTreeListViewName;
+
 	// == Functions.
 	// Initialize.
 	VOID CBase::Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan,
@@ -138,6 +141,7 @@ namespace lsw {
 			wceTreeListView.SetWindPro( CWidget::WindowProc );
 			//wceTreeListView.SetCursor( NULL );
 			m_aTreeListView = CBase::RegisterClassExW( wceTreeListView.Obj() );
+			m_wsTreeListViewName = _pwcTreeListViewClassName;
 		}
 
 		// Register the child-window class.

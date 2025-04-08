@@ -92,7 +92,7 @@ namespace lsw {
 		return SetCurSel( -1 );
 	}
 
-	// Gets the currently selected items data.
+	// Gets the currently selected item's data.
 	LPARAM CListBox::GetCurSelItemData() const {
 		return GetItemData( GetCurSel() );
 	}

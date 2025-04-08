@@ -111,13 +111,13 @@ namespace lsw {
 			return NULL;
 		}
 
-		/*HWND hWnd = */::CreateDialogIndirectParamW( CBase::GetThisHandle(), 
+		HWND hWnd = ::CreateDialogIndirectParamW( CBase::GetThisHandle(), 
 			dtTemplate.pdtTemplate, 
-			_pwParent->Wnd(), 
+			_pwParent ? _pwParent->Wnd() : NULL, 
 			CWidget::DialogProc,
 			reinterpret_cast<LPARAM>(&dtTemplate.vWidgets) );
 		
-#if 0
+#if 1
 		if ( !hWnd ) {
 			CBase::PrintError( L"CreateDialogX" );
 		}
@@ -311,6 +311,23 @@ namespace lsw {
 		return hMenu;
 	}
 
+	// Creates a pop-up menu.
+	BOOL CLayoutManager::CreatePopupMenuEx( CWidget * _pwParent, const LSW_MENU_LAYOUT * _pmlLayout, size_t _sTotal,
+		INT _iX, INT _iY, UINT _uiFlags ) {
+		HMENU hMenu = CreatePopupMenu( _pmlLayout, _sTotal );
+		if ( !hMenu ) { return false; }
+
+		if ( _iX == -1 && _iY == -1 ) {
+			POINT pPos;
+			::GetCursorPos( &pPos );
+			_iX = pPos.x;
+			_iY = pPos.y;
+		}
+		return ::TrackPopupMenu( hMenu,
+			_uiFlags,
+			_iX, _iY, 0, _pwParent ? _pwParent->Wnd() : NULL, NULL );
+	}
+
 	// Takes the given layout and produces a copy with certain things changed as necessary.  For example, if
 	//	the control type is LSW_LT_DOCKWINDOW, the class name is changed to lsw::CBase::DockableAtom().
 	// In other cases this fills in missing information, so if you pass a nullptr control class name, the common name will be filled automatically here, etc.
@@ -339,13 +356,16 @@ namespace lsw {
 				{ LSW_LT_MULTISPLITTER, reinterpret_cast<LPCWSTR>(lsw::CBase::MultiSplitterAtom()) },
 				{ LSW_LT_PROGRESSBAR, PROGRESS_CLASSW },
 				{ LSW_LT_RADIO, WC_BUTTONW },
-				{ LSW_LT_REBAR, REBARCLASSNAMEW },				
+				{ LSW_LT_REBAR, REBARCLASSNAMEW },
 				{ LSW_LT_STATUSBAR, STATUSCLASSNAMEW },
+				{ LSW_LT_SPLITTER, reinterpret_cast<LPCWSTR>(lsw::CBase::SplitterAtom()) },
 				{ LSW_LT_TAB, WC_TABCONTROLW },
 				{ LSW_LT_TRACKBAR, TRACKBAR_CLASS },
 				{ LSW_LT_TOOLBAR, TOOLBARCLASSNAMEW },
 				{ LSW_LT_TOOLTIP, TOOLTIPS_CLASSW },
 				{ LSW_LT_TREEVIEW, WC_TREEVIEWW },
+				// { LSW_LT_TREELISTVIEW, lsw::CBase::TreeListViewString().c_str() },
+				{ LSW_LT_TREELISTVIEW, WC_LISTVIEWW },
 				{ LSW_LT_UPDOWN, UPDOWN_CLASSW },
 			};
 			for ( size_t I = 0; I < LSW_ELEMENTS( aStruct ); ++I ) {
@@ -466,6 +486,18 @@ namespace lsw {
 	SIZE_T CLayoutManager::ItemTemplateString( const WCHAR * _pwcString, WORD * _pwDest ) {
 		SIZE_T sRet = 0;
 		if ( _pwcString ) {
+			if ( HIWORD( _pwcString ) == 0 ) {
+				// It's an atom.
+				if ( _pwDest ) {
+					(*_pwDest++) = 0xFFFF;
+				}
+				sRet += sizeof( WORD );
+				if ( _pwDest ) {
+					(*_pwDest++) = LOWORD( _pwcString );
+				}
+				sRet += sizeof( WORD );
+				return sRet;
+			}
 			while ( (*_pwcString) ) {
 				if ( _pwDest ) {
 					(*_pwDest++) = (*_pwcString);

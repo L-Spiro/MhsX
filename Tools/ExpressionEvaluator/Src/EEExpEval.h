@@ -669,22 +669,61 @@ namespace ee {
 		// Converts from UTF-8 to a C string.
 		static std::string				ToCString( const std::string &_sIn );
 
-		// Represents a value in binary notation.
+		/**
+		 * Represents a value in binary notation.
+		 * 
+		 * \param _ui64Val The value to print.
+		 * \return Returns the printed value.
+		 **/
 		static std::string				ToBinary( uint64_t _ui64Val );
 
-		// Represents a value in binary notation.
+		/**
+		 * Represents a value in binary notation.
+		 * 
+		 * \param _i64Val The value to print.
+		 * \return Returns the printed value.
+		 **/
 		static std::string				ToBinary( int64_t _i64Val );
 
-		// Represents a value in binary notation.
+		/**
+		 * Represents a value in binary notation.
+		 * 
+		 * \param _d4Val The value to print.
+		 * \return Returns the printed value.
+		 **/
 		static std::string				ToBinary( double _d4Val );
 
-		// Represents a value in hexadecimal notation.
+		/**
+		 * Represents a value in binary notation.
+		 * 
+		 * \param _ui64Val The value to print.
+		 * \param _i32Digits The number of digits to print, or a number less than 1 to print only the required number of digits.
+		 * \return Returns the printed value.
+		 **/
+		static std::string				ToBinary( uint64_t _ui64Val, int32_t _i32Digits );
+
+		/**
+		 * Represents a value in hexadecimal notation.
+		 * 
+		 * \param _ui64Val The value to print.
+		 * \return Returns the printed value.
+		 **/
 		static std::string				ToHex( uint64_t _ui64Val );
 
-		// Represents a value in hexadecimal notation.
+		/**
+		 * Represents a value in hexadecimal notation.
+		 * 
+		 * \param _i64Val The value to print.
+		 * \return Returns the printed value.
+		 **/
 		static std::string				ToHex( int64_t _i64Val );
 
-		// Represents a value in hexadecimal notation.
+		/**
+		 * Represents a value in hexadecimal notation.
+		 * 
+		 * \param _d4Val The value to print.
+		 * \return Returns the printed value.
+		 **/
 		static std::string				ToHex( double _d4Val );
 
 		// Represents a value in octadecimal notation.
@@ -854,7 +893,7 @@ namespace ee {
 		 * \param _psEaten Optional pointer to a size_t that will be set to the number of character eaten during parsing.
 		 * \param _uiMax The maximum value after which overflow is considered to have happened.
 		 * \param _pbOverflow An optional pointer to a boolean used to indicate whether overflow has occurred or not.
-		 * \return DESC
+		 * \return Returns the value parsed from the string.
 		 **/
 		static uint64_t					StoULL( const char * _pcText, int _iBase = 10, size_t * _psEaten = nullptr, uint64_t _uiMax = 0xFFFFFFFFFFFFFFFFULL, bool * _pbOverflow = nullptr );
 
@@ -969,7 +1008,7 @@ namespace ee {
 				for ( size_t I = 0; I < _sInput.size(); I += sSize ) {
 					uint32_t ui32Char;
 					if constexpr ( sizeof( _tType::value_type ) == sizeof( char8_t ) ) {
-						ui32Char = NextUtf8Char( &_sInput[I], _sInput.size() - I, &sSize );
+						ui32Char = NextUtf8Char( reinterpret_cast<const char *>(&_sInput[I]), _sInput.size() - I, &sSize );
 					}
 					else if constexpr ( sizeof( _tType::value_type ) == sizeof( char16_t ) ) {
 						ui32Char = NextUtf16Char( &_sInput[I], _sInput.size() - I, &sSize );

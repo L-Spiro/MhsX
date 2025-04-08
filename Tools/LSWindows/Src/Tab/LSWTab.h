@@ -76,12 +76,52 @@ namespace lsw {
 		 */
 		void								SetShowCloseBoxes( bool _bShowClose ) { m_bShowClose = _bShowClose; }
 
+		/**
+		 * Sets a tab to be checkable.
+		 * 
+		 * \param _iItem The index of the tab to set as checkable.
+		 **/
+		void								SetCheckable( int _iItem );
+
+		/**
+		 * Sets a tab as checked or not.
+		 * 
+		 * \param _iItem The index of the tab to set or unset as checked.
+		 * \param _bChecked Checked or unchecked.
+		 * \return Returns true if the given tab exists.
+		 **/
+		bool								SetChecked( int _iItem, bool _bChecked );
+
+		/**
+		 * Toggles the check status of a given tab.
+		 * 
+		 * \param _iItem The tab whose check status is to be toggled.  The tab must be marked as checkable.
+		 **/
+		void								ToggleCheck( int _iItem );
+
+		/**
+		 * Returns true if any tabs are checkable.
+		 * 
+		 * \return Returns true if any tabs are checkable.
+		 **/
+		bool								AnyAreCheckable() const;
+
+		/**
+		 * Checks for the given tab being checked or not.  It must also be checkable.
+		 * 
+		 * \param _iItem The index of the tab to check for being both checkable and checked.
+		 * \return Returns true if the given tab exists, is checkable, and is checked.
+		 **/
+		bool								IsChecked( int _iItem ) const;
+
 	protected :
 		// == Types.
 		// A tab.
 		struct LSW_TAB {
 			CWidget *						pwWidget;
-			size_t							sTextLen;
+			size_t							sTextLen = 0;
+			bool							bCheckable = false;
+			bool							bChecked = false;
 		};
 
 		

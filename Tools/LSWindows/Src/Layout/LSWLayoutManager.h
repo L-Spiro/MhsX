@@ -52,6 +52,10 @@ namespace lsw {
 		// Creates a pop-upmenu given menu layouts.
 		HMENU							CreatePopupMenu( const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotal );
 
+		// Creates a pop-up menu.
+		virtual BOOL					CreatePopupMenuEx( CWidget * _pwParent, const LSW_MENU_LAYOUT * _pmlLayout, size_t _sTotal,
+			INT _iX, INT _iY, UINT _uiFlags = TPM_LEFTALIGN | TPM_RIGHTBUTTON );
+
 		// Takes the given layout and produces a copy with certain things changed as necessary.  For example, if
 		//	the control type is LSW_LT_DOCKWINDOW, the class name is changed to lsw::CBase::DockableAtom().
 		// In other cases this fills in missing information, so if you pass a nullptr control class name, the common name will be filled automatically here, etc.

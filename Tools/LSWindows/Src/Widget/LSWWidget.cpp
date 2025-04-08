@@ -144,7 +144,11 @@ namespace lsw {
 		return ipDlgRes;
 	}
 
-	// The ancestor widget.
+	/**
+	 * The ancestor widget.
+	 * 
+	 * \return Returns a pointer to the most parent object or nullptr.
+	 **/
 	CWidget * CWidget::Ancestor() {
 		CWidget * pwNext = Parent();
 		while ( pwNext && pwNext->Parent() ) {
@@ -153,7 +157,11 @@ namespace lsw {
 		return pwNext;
 	}
 
-	// The ancestor widget.
+	/**
+	 * The ancestor widget.
+	 * 
+	 * \return Returns a pointer to the most parent object or nullptr.
+	 **/
 	const CWidget * CWidget::Ancestor() const {
 		const CWidget * pwNext = Parent();
 		while ( pwNext && pwNext->Parent() ) {
@@ -220,21 +228,21 @@ namespace lsw {
 	BOOL CWidget::GetTextAsInt64Expression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const {
 		if ( !GetTextAsExpression( _eResult, ee::CObject::EE_TF_NONE ) ) { return FALSE; }
 		_eResult = ee::CExpEvalContainer::ConvertResult( _eResult, ee::EE_NC_SIGNED );
-		return TRUE;
+		return _eResult.ncType == ee::EE_NC_SIGNED ? TRUE : FALSE;
 	}
 
 	// Get the value of the text as a uint64_t expression.
 	BOOL CWidget::GetTextAsUInt64Expression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const {
 		if ( !GetTextAsExpression( _eResult, ee::CObject::EE_TF_NONE ) ) { return FALSE; }
 		_eResult = ee::CExpEvalContainer::ConvertResult( _eResult, ee::EE_NC_UNSIGNED );
-		return TRUE;
+		return _eResult.ncType == ee::EE_NC_UNSIGNED ? TRUE : FALSE;
 	}
 
 	// Get the value of the text as a double expression.
 	BOOL CWidget::GetTextAsDoubleExpression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const {
 		if ( !GetTextAsExpression( _eResult, ee::CObject::EE_TF_NONE ) ) { return FALSE; }
 		_eResult = ee::CExpEvalContainer::ConvertResult( _eResult, ee::EE_NC_FLOATING );
-		return TRUE;
+		return _eResult.ncType == ee::EE_NC_FLOATING ? TRUE : FALSE;
 	}
 
 	// If the function succeeds, the return value is the pointer to the window that previously had the keyboard focus.
@@ -340,6 +348,42 @@ namespace lsw {
 		if ( m_pwParent ) {
 			m_pwParent->AddChild( this );
 		}
+	}
+
+	/**
+	 * Sets the small and big icons.
+	 * 
+	 * \param _hSmall The small icon handle or NULL.
+	 * \param _hBig The big icon handle or NULL.
+	 * \return Returns true if all icons were set.
+	 **/
+	bool CWidget::SetIcons( HICON _hSmall, HICON _hBig ) {
+		if ( !Wnd() ) { return false; }
+		::SendMessageW( Wnd(), WM_SETICON, static_cast<WPARAM>(ICON_SMALL), reinterpret_cast<LPARAM>(_hSmall) );
+		::SendMessageW( Wnd(), WM_SETICON, static_cast<WPARAM>(ICON_BIG), reinterpret_cast<LPARAM>(_hBig) );
+		return true;
+	}
+
+	/**
+	 * Sets the small icon, returning the previous icon that was set.
+	 * 
+	 * \param _hSmall The small icon handle or NULL.
+	 * \return Returns the previous icon.
+	 **/
+	HICON CWidget::SetSmallIcon( HICON _hSmall ) {
+		if ( !Wnd() ) { return NULL; }
+		return reinterpret_cast<HICON>(::SendMessageW( Wnd(), WM_SETICON, static_cast<WPARAM>(ICON_SMALL), reinterpret_cast<LPARAM>(_hSmall) ));
+	}
+
+	/**
+	 * Sets the big icon, returning the previous icon that was set.
+	 * 
+	 * \param _hBig The big icon handle or NULL.
+	 * \return Returns the previous icon.
+	 **/
+	HICON CWidget::SetBigIcon( HICON _hBig ) {
+		if ( !Wnd() ) { return NULL; }
+		return reinterpret_cast<HICON>(::SendMessageW( Wnd(), WM_SETICON, static_cast<WPARAM>(ICON_BIG), reinterpret_cast<LPARAM>(_hBig) ));
 	}
 
 	// Translate a child's tooltip text.
@@ -973,27 +1017,32 @@ namespace lsw {
 				CREATESTRUCTW * pcsCreate = reinterpret_cast<CREATESTRUCTW *>(_lParam);
 				::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pcsCreate->lpCreateParams) );
 				pmwThis = reinterpret_cast<CWidget *>(pcsCreate->lpCreateParams);
-				pmwThis->m_hWnd = _hWnd;
+				if ( pmwThis ) {
+					pmwThis->m_hWnd = _hWnd;
 
-				// ControlSetup() called by the layout manager because WM_NCCREATE is inside a constructor.
+					// ControlSetup() called by the layout manager because WM_NCCREATE is inside a constructor.
 
-				LSW_HANDLED hHandled = pmwThis->NcCreate( (*pcsCreate) );
-				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+					LSW_HANDLED hHandled = pmwThis->NcCreate( (*pcsCreate) );
+					if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				}
 				break;
 			}
 			case WM_CREATE : {
 				CREATESTRUCTW * pcsCreate = reinterpret_cast<CREATESTRUCTW *>(_lParam);
-				LSW_HANDLED hHandled = pmwThis->Create( (*pcsCreate) );
-				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				if ( pmwThis ) {
+					LSW_HANDLED hHandled = pmwThis->Create( (*pcsCreate) );
+					if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				}
 				break;
 			}
 			case WM_INITDIALOG : {
 				std::vector<CWidget *> * pvWidgets = reinterpret_cast<std::vector<CWidget *> *>(_lParam);
 				pmwThis = (*pvWidgets)[0];
 				::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pmwThis) );
-				pmwThis->InitControl( _hWnd );
+				if ( pmwThis ) {
+					pmwThis->InitControl( _hWnd );
 				
-				ControlSetup( pmwThis, (*pvWidgets) );
+					ControlSetup( pmwThis, (*pvWidgets) );
 
 				// Window rect.
 #define MX_X	384
@@ -1007,12 +1056,14 @@ namespace lsw {
 #define MX_OFF_X	0
 #define MX_OFF_Y	0
 #endif
-				POINT pConvOrg = PixelsToDialogUnits( _hWnd, 585 - MX_X - MX_OFF_X, 189 - MX_Y - MX_OFF_Y );
-				//POINT pConv = PixelsToDialogUnits( _hWnd, 559 - 548 - 7, 486 - 453 - 30 );
-				POINT pConvClient = PixelsToDialogUnits( _hWnd, 290, 47 );
+					POINT pConvOrg = PixelsToDialogUnits( _hWnd, 585 - MX_X - MX_OFF_X, 189 - MX_Y - MX_OFF_Y );
+					//POINT pConv = PixelsToDialogUnits( _hWnd, 559 - 548 - 7, 486 - 453 - 30 );
+					POINT pConvClient = PixelsToDialogUnits( _hWnd, 290, 47 );
 				
-				pmwThis->InitDialog();
-				LSW_RET( TRUE, TRUE );	// Return TRUE to pass focus on to the control specified by _wParam.
+					pmwThis->InitDialog();
+					LSW_RET( TRUE, TRUE );	// Return TRUE to pass focus on to the control specified by _wParam.
+				}
+				break;
 			}
 			case WM_DESTROY : {
 				if ( pmwThis ) {
@@ -1058,6 +1109,7 @@ namespace lsw {
 				break;
 			}
 			case WM_SIZE : {
+				if ( !pmwThis ) { break; }
 				LSW_HANDLED hHandled;
 				switch ( _wParam ) {
 					case SIZE_MINIMIZED : {
@@ -1077,6 +1129,7 @@ namespace lsw {
 				break;
 			}
 			case WM_MOVE : {
+				if ( !pmwThis ) { break; }
 				if ( !::IsIconic( _hWnd ) ) {
 					/*::GetWindowRect( _hWnd, &pmwThis->m_rRect );
 					::GetClientRect( _hWnd, &pmwThis->m_rClientRect );*/
@@ -1087,6 +1140,7 @@ namespace lsw {
 				break;
 			}
 			case WM_WINDOWPOSCHANGED : {
+				if ( !pmwThis ) { break; }
 				WINDOWPOS * pwpPos = reinterpret_cast<WINDOWPOS *>(_lParam);
 				LSW_HANDLED hHandled = pmwThis->WindowPosChanged( pwpPos );
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
@@ -1281,6 +1335,17 @@ namespace lsw {
 						}
 						if ( ptcClose->pwWidget->Parent() ) {
 							ptcClose->pwWidget->Parent()->ChildTabClosed( ptcClose->pwWidget, ptcClose->iTab );
+						}
+						break;
+					}
+					case LSW_TAB_NM_CHECK : {
+						LSW_NMTABCLOSE * ptcClose = reinterpret_cast<LSW_NMTABCLOSE *>(_lParam);
+						if ( ptcClose->iTab != -1 && ptcClose->pwWidget ) {
+							static_cast<CTab *>(ptcClose->pwWidget)->ToggleCheck( ptcClose->iTab );
+							//static_cast<CTab *>(ptcClose->pwWidget)->SetCurSel( ptcClose->iTab );
+						}
+						if ( ptcClose->pwWidget->Parent() ) {
+							ptcClose->pwWidget->Parent()->TabToggled( ptcClose->pwWidget, ptcClose->iTab );
 						}
 						break;
 					}
@@ -1818,12 +1883,14 @@ namespace lsw {
 			// Scroll.
 			// =======================================
 			case WM_HSCROLL : {
-				LSW_HANDLED hHandled = pmwThis->HScroll( HIWORD( _wParam ), LOWORD( _wParam ), reinterpret_cast<HWND>(_lParam) );
+				CWidget * pwWidget = LSW_WIN2CLASS( reinterpret_cast<HWND>(_lParam) );
+				LSW_HANDLED hHandled = pmwThis->HScroll( HIWORD( _wParam ), LOWORD( _wParam ), pwWidget );
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
 				break;
 			}
 			case WM_VSCROLL : {
-				LSW_HANDLED hHandled = pmwThis->VScroll( HIWORD( _wParam ), LOWORD( _wParam ), reinterpret_cast<HWND>(_lParam) );
+				CWidget * pwWidget = LSW_WIN2CLASS( reinterpret_cast<HWND>(_lParam) );
+				LSW_HANDLED hHandled = pmwThis->VScroll( HIWORD( _wParam ), LOWORD( _wParam ), pwWidget );
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
 				break;
 			}

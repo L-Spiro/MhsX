@@ -54,8 +54,14 @@ namespace lsw {
 			m_vAttachments[sAtt].aAttachment = _aAttachment;
 		}
 		else {
+			if ( !m_vAttachments.size() ) {
+				auto rRect = _pwWidget->ClientRect();
+				m_iHorPos = int( rRect.Height() );
+				m_iVertPos = int( rRect.Width() );
+			}
 			m_vAttachments.push_back( { _pwWidget, _aAttachment } );
 		}
+		SizeAttachments();
 	}
 
 	// Set splitter styles.
@@ -240,6 +246,75 @@ namespace lsw {
 		}
 	}
 
+	/**
+	 * The WM_SIZE handler.
+	 *
+	 * \param _wParam The type of resizing requested.
+	 * \param _lWidth The new width of the client area.
+	 * \param _lHeight The new height of the client area.
+	 * \return Returns a LSW_HANDLED enumeration.
+	 */
+	CWidget::LSW_HANDLED CSplitter::Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight ) {
+		SizeAttachments();
+		return CWidget::Size( _wParam, _lWidth, _lHeight );
+	}
+		
+	/**
+	 * The WM_SIZING handler.
+	 *
+	 * \param _iEdge The edge of the window that is being sized.
+	 * \param _prRect A pointer to a RECT structure with the screen coordinates of the drag rectangle. To change the size or position of the drag rectangle, an application must change the members of this structure.
+	 * \return Returns a LSW_HANDLED enumeration.
+	 */
+	CWidget::LSW_HANDLED CSplitter::Sizing( INT _iEdge, LSW_RECT * _prRect ) {
+		/*for ( size_t I = 0; I < m_vAttachments.size(); ++I ) {
+			::InvalidateRect( m_vAttachments[I].pwWidget->Wnd(), NULL, FALSE );
+			::PostMessageW( m_vAttachments[I].pwWidget->Wnd(), WM_PAINT, 0, 0 );
+		}*/
+		return CWidget::Sizing( _iEdge, _prRect );
+	}
+
+	// WM_PAINT.
+	CWidget::LSW_HANDLED CSplitter::Paint() {
+		for ( size_t I = 0; I < m_vAttachments.size(); ++I ) {
+			::InvalidateRect( m_vAttachments[I].pwWidget->Wnd(), NULL, FALSE );
+			::PostMessageW( m_vAttachments[I].pwWidget->Wnd(), WM_PAINT, 0, 0 );
+		}
+		return LSW_H_CONTINUE;
+	}
+
+	/**
+	 * WM_SETCURSOR.
+	 * 
+	 * \param _pwControl A pointer to the window that contains the cursor
+	 * \param _wHitTest Specifies the hit-test result for the cursor position.
+	 * \param _wIdent Specifies the mouse window message which triggered this event, such as WM_MOUSEMOVE. When the window enters menu mode, this value is zero.
+	 * \return Returns a LSW_HANDLED enumeration.
+	 **/
+	CWidget::LSW_HANDLED CSplitter::SetCursor( CWidget * /*_pwControl*/, WORD _wHitTest, WORD /*_wIdent*/ ) {
+		HCURSOR hCursor = NULL;
+		if ( m_bSetCursorToggle ) {
+			switch ( _wHitTest & LSW_SS_BOTH ) {
+				case 0 : { break; }
+				case LSW_SS_HORIZONTAL : {
+					hCursor = ::LoadCursorW( NULL, IDC_SIZENS );
+					break;
+				}
+				case LSW_SS_VERTICAL : {
+					hCursor = ::LoadCursorW( NULL, IDC_SIZEWE );
+					break;
+				}
+				case LSW_SS_BOTH : {
+					hCursor = ::LoadCursorW( NULL, IDC_SIZEALL );
+					break;
+				}
+			}
+		}
+		::SetCursor( hCursor );
+		m_bSetCursorToggle = false;
+		return LSW_H_CONTINUE;
+	}
+
 	// WM_LBUTTONDOWN.
 	CWidget::LSW_HANDLED CSplitter::LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
 		// If we only have 0 or 1 child, do nothing.
@@ -256,6 +331,10 @@ namespace lsw {
 
 	// WM_MOUSEMOVE.
 	CWidget::LSW_HANDLED CSplitter::MouseMove( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
+		m_bSetCursorToggle = true;
+		for ( size_t I = 0; I < m_vAttachments.size(); ++I ) {
+			::InvalidateRect( m_vAttachments[I].pwWidget->Wnd(), NULL, FALSE );
+		}
 		if ( !m_bDragging ) { return LSW_H_CONTINUE; }
 
 		POINT pCurPos = { _pCursorPos.x, _pCursorPos.y };
@@ -263,7 +342,6 @@ namespace lsw {
 		LSW_RECT rRect = ClientRect( this );
 		DrawBar( m_pLastPoint, rRect, FALSE );
 		DrawBar( pCurPos, rRect, FALSE );
-
 		return LSW_H_CONTINUE;
 	}
 

@@ -100,10 +100,10 @@ namespace lsw {
 		INT									SetCurSel( INT _iIndex );
 
 		// Sets the selection based on item data.
-		INT									SetCurSelByItemData( LPARAM _pData );
+		virtual INT							SetCurSelByItemData( LPARAM _pData );
 
-		// Gets the currently selected items data.
-		LPARAM								GetCurSelItemData() const;
+		// Gets the currently selected item's data.
+		virtual LPARAM						GetCurSelItemData() const;
 
 		// Selects a range of text.  Implemented by CEdit and CComboBox.
 		virtual VOID						SetSel( INT _iStart, INT _iEnd ) const;

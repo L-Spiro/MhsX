@@ -38,6 +38,9 @@ namespace lsw {
 	 */
 	void CTreeListView::InitControl( HWND _hWnd ) {
 		CListView::InitControl( _hWnd );
+		//::SetWindowLongPtrW( Wnd(), GWL_STYLE, LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA );
+		::SetWindowLongPtrW( Wnd(), GWL_EXSTYLE, LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER );
+		::SendMessageW( Wnd(), LVM_SETVIEW, LV_VIEW_DETAILS, 0 );
 		m_wpListViewProc = CHelpers::SetWndProc( Wnd(), ListViewOverride );
 		::SetPropW( Wnd(), m_szProp, reinterpret_cast<HANDLE>(this) );
 
@@ -130,6 +133,29 @@ namespace lsw {
 		const ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( _tiItem );
 		if ( !pntItem ) { return 0; }
 		return pntItem->Value().lpParam;
+	}
+
+	/**
+	 * Counts the total number of expanded items.
+	 *
+	 * \return Returns the total number of items, accounting for expandedness.
+	 */
+	size_t CTreeListView::CountExpanded() const {
+		size_t stCnt = 0;
+		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptTmp = nullptr;
+		while ( (ptTmp = NextByExpansion( ptTmp )) != nullptr ) {
+			++stCnt;
+		}
+		return stCnt;
+	}
+
+	/**
+	 * Deletes all items.
+	 */
+	VOID CTreeListView::DeleteAll() {
+		ClearCache();
+		CListView::DeleteAll();
+		m_tRoot.RemoveAllChildren();
 	}
 
 	/**
@@ -561,20 +587,6 @@ namespace lsw {
 	}
 
 	/**
-	 * Counts the total number of expanded items.
-	 *
-	 * \return Returns the total number of items, accounting for expandedness.
-	 */
-	size_t CTreeListView::CountExpanded() const {
-		size_t stCnt = 0;
-		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptTmp = nullptr;
-		while ( (ptTmp = NextByExpansion( ptTmp )) != nullptr ) {
-			++stCnt;
-		}
-		return stCnt;
-	}
-
-	/**
 	 * Gets the indentation level for an item.
 	 *
 	 * \param _ptThis The item whose indentation level is to be obtained.
@@ -731,6 +743,36 @@ namespace lsw {
 	}
 
 	/**
+	 * WM_LBUTTONDBLCLK.
+	 * 
+	 * \param _dwVirtKeys Indicates whether various virtual keys are down. This parameter can be one or more of the following values: MK_CONTROL, MK_LBUTTON, MK_MBUTTON, MK_RBUTTON, MK_SHIFT, MK_XBUTTON1, MK_XBUTTON2.
+	 * \param _pCursorPos The coordinate of the cursor. The coordinate is relative to the upper-left corner of the client area.
+	 * \return Returns a HANDLED code.
+	 **/
+	CWidget::LSW_HANDLED CTreeListView::LButtonDblClk( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
+		LVHITTESTINFO hitTestInfo;
+		hitTestInfo.pt.x = _pCursorPos.x;
+		hitTestInfo.pt.y = _pCursorPos.y;
+		ListView_HitTest( Wnd(), &hitTestInfo );
+		if ( hitTestInfo.iItem >= 0 ) {
+			auto aItem = ItemByIndex( hitTestInfo.iItem );
+			if ( aItem ) {
+				if ( (aItem->Value().uiState & TVIS_EXPANDED) && aItem->Size() ) {
+					aItem->Value().uiState &= ~TVIS_EXPANDED;
+					UpdateListView();
+					return LSW_H_HANDLED;
+				}
+				else if ( !(aItem->Value().uiState & TVIS_EXPANDED) && aItem->Size() ) {
+					aItem->Value().uiState |= TVIS_EXPANDED;
+					UpdateListView();
+					return LSW_H_HANDLED;
+				}
+			}
+		}
+		return LSW_H_CONTINUE;
+	}
+
+	/**
 	 * WM_LBUTTONDOWN.
 	 * 
 	 * \param _dwVirtKeys Indicates whether various virtual keys are down.
@@ -832,6 +874,12 @@ namespace lsw {
 			}
 		}
 
+		if ( m_pwParent ) {
+			if ( LSW_H_HANDLED == m_pwParent->Notify_ItemChanged( _lplvParm ) ) {
+				return LSW_H_HANDLED;
+			}
+		}
+
 		return LSW_H_CONTINUE;
 	}
 
@@ -866,6 +914,12 @@ namespace lsw {
 			}
 		}
 		
+		if ( m_pwParent ) {
+			if ( LSW_H_HANDLED == m_pwParent->Notify_OdStateChange( _lposcParm ) ) {
+				return LSW_H_HANDLED;
+			}
+		}
+
 		return LSW_H_CONTINUE;
 	}
 
@@ -1115,8 +1169,17 @@ namespace lsw {
 				break;
 			}
 			case WM_LBUTTONDBLCLK : {
-				//LSW_RECT rRect = ptlThis->VirtualClientRect( nullptr );
-				//::MoveWindow( _hWnd, rRect.left, rRect.top, rRect.Width(), rRect.Height(), TRUE );
+				if ( ptlThis ) {
+					POINTS pPos = {
+						GET_X_LPARAM( _lParam ),
+						GET_Y_LPARAM( _lParam ),
+					};
+					LSW_HANDLED hHandled = ptlThis->LButtonDblClk( static_cast<DWORD>(_wParam), pPos );
+
+					// Return value
+					//	An application should return zero if it processes this message.
+					if ( hHandled == LSW_H_HANDLED ) { return 0; }
+				}
 				break;
 			}
 			case WM_NCLBUTTONDBLCLK : {

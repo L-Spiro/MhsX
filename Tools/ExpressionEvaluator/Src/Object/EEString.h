@@ -37,7 +37,7 @@ namespace ee {
 		virtual bool								InitializeFrom( const CExpEvalContainer::EE_RESULT &_rObj );
 
 		// Creates a string representation of the object, with the string usually assumed to be in UTF-8 format.
-		virtual bool								ToString( std::string &_sString, uint32_t _ui32Depth, uint32_t _ui32Flags = EE_TF_NONE ) {
+		virtual bool								ToString( std::string &_sString, uint32_t /*_ui32Depth*/, uint32_t _ui32Flags = EE_TF_NONE ) {
 			if ( _ui32Flags & CObject::EE_TF_C_STRING ) {
 				_sString.reserve( m_sObj.size() + 2 );
 				_sString = "\"";

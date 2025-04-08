@@ -743,7 +743,12 @@ namespace ee {
 		return sRet;
 	}
 
-	// Represents a value in binary notation.
+	/**
+	 * Represents a value in binary notation.
+	 * 
+	 * \param _ui64Val The value to print.
+	 * \return Returns the printed value.
+	 **/
 	std::string CExpEval::ToBinary( uint64_t _ui64Val ) {
 		std::string sTmp;
 		sTmp.push_back( '0' );
@@ -755,7 +760,12 @@ namespace ee {
 		return sTmp;
 	}
 
-	// Represents a value in binary notation.
+	/**
+	 * Represents a value in binary notation.
+	 * 
+	 * \param _i64Val The value to print.
+	 * \return Returns the printed value.
+	 **/
 	std::string CExpEval::ToBinary( int64_t _i64Val ) {
 		std::string sTmp;
 		bool bNeg = _i64Val < 0;
@@ -772,7 +782,12 @@ namespace ee {
 		return sTmp;
 	}
 
-	// Represents a value in binary notation.
+	/**
+	 * Represents a value in binary notation.
+	 * 
+	 * \param _d4Val The value to print.
+	 * \return Returns the printed value.
+	 **/
 	std::string CExpEval::ToBinary( double _d4Val ) {
 		std::string sTmp;
 		int64_t i64Val = (*reinterpret_cast<int64_t *>(&_d4Val));
@@ -790,7 +805,30 @@ namespace ee {
 		return sTmp;
 	}
 
-	// Represents a value in hexadecimal notation.
+	/**
+	 * Represents a value in binary notation.
+	 * 
+	 * \param _ui64Val The value to print.
+	 * \param _i32Digits The number of digits to print, or a number less than 1 to print only the required number of digits.
+	 * \return Returns the printed value.
+	 **/
+	std::string CExpEval::ToBinary( uint64_t _ui64Val, int32_t _i32Digits ) {
+		std::string sTmp;
+		sTmp.push_back( '0' );
+		sTmp.push_back( 'b' );
+		uint32_t ui32Bits = (_i32Digits < 1) ? (HighestSetBit( _ui64Val ) + 1U) : uint32_t( _i32Digits );
+		for ( uint64_t I = 0ULL; I < ui32Bits; ++I ) {
+			sTmp.push_back( (_ui64Val & (1LL << (ui32Bits - I - 1))) ? '1' : '0' );
+		}
+		return sTmp;
+	}
+
+	/**
+	 * Represents a value in hexadecimal notation.
+	 * 
+	 * \param _ui64Val The value to print.
+	 * \return Returns the printed value.
+	 **/
 	std::string CExpEval::ToHex( uint64_t _ui64Val ) {
 		std::string sTmp;
 		std::stringstream ssStream;
@@ -802,7 +840,12 @@ namespace ee {
 		return sTmp;
 	}
 
-	// Represents a value in hexadecimal notation.
+	/**
+	 * Represents a value in hexadecimal notation.
+	 * 
+	 * \param _i64Val The value to print.
+	 * \return Returns the printed value.
+	 **/
 	std::string CExpEval::ToHex( int64_t _i64Val ) {
 		std::string sTmp;
 		std::stringstream ssStream;
@@ -819,7 +862,12 @@ namespace ee {
 		return sTmp;
 	}
 
-	// Represents a value in hexadecimal notation.
+	/**
+	 * Represents a value in hexadecimal notation.
+	 * 
+	 * \param _d4Val The value to print.
+	 * \return Returns the printed value.
+	 **/
 	std::string CExpEval::ToHex( double _d4Val ) {
 		std::string sTmp;
 		std::stringstream ssStream;
@@ -1181,7 +1229,7 @@ namespace ee {
 	 * \param _psEaten Optional pointer to a size_t that will be set to the number of character eaten during parsing.
 	 * \param _uiMax The maximum value after which overflow is considered to have happened.
 	 * \param _pbOverflow An optional pointer to a boolean used to indicate whether overflow has occurred or not.
-	 * \return DESC
+	 * \return Returns the value parsed from the string.
 	 **/
 	uint64_t CExpEval::StoULL( const char * _pcText, int _iBase, size_t * _psEaten, uint64_t _uiMax, bool * _pbOverflow ) {
 		if ( _pbOverflow ) { (*_pbOverflow) = false; }

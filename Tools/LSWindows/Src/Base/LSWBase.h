@@ -66,6 +66,13 @@ namespace lsw {
 		 */
 		static ATOM									ChildWindowAtom() { return m_aChildWindow; }
 
+		/**
+		 * Gets the string name for TreeListViews.
+		 * 
+		 * \return Returns the registerd string for the LSW_LT_TREELISTVIEW class.
+		 **/
+		static const std::wstring &					TreeListViewString() { return m_wsTreeListViewName; }
+
 		// =======================================
 		// Process functions.
 		// =======================================
@@ -171,7 +178,9 @@ namespace lsw {
 
 		/** The child-window class. */
 		static ATOM									m_aChildWindow;
-												
+	
+		/** the TreeListView name. */
+		static std::wstring							m_wsTreeListViewName;
 	};
 
 }	// namespace lsw

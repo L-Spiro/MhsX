@@ -1090,7 +1090,7 @@ namespace ee {
 						return EE_EC_INVALIDTREE;
 					}
 				}
-				return EE_EC_PROCESSINGERROR;
+				//return EE_EC_PROCESSINGERROR;
 			}
 			case CExpEvalParser::token::EE_LOG : {
 				_rExp0 = ConvertResultOrObject( _rExp0, EE_NC_FLOATING );
@@ -1108,7 +1108,7 @@ namespace ee {
 		}
 #pragma warning( pop )
 #undef EE_OP
-		return EE_EC_UNRECOGNIZEDINTRINSIC2;
+		//return EE_EC_UNRECOGNIZEDINTRINSIC2;
 	}
 
 	// Creates a float using the specific parameters.
@@ -2954,7 +2954,7 @@ namespace ee {
 
 	// Ends an array.
 	void CExpEvalContainer::EndArray( /*YYSTYPE::EE_NODE_DATA &_ndNode*/ ) {
-		size_t sIdx = m_vVectorStack[m_vVectorStack.size()-1];
+		//size_t sIdx = m_vVectorStack[m_vVectorStack.size()-1];
 		m_vVectorStack.pop_back();
 		/*_ndNode.nType = EE_N_END_VECTOR;
 		_ndNode.u.sNodeIndex = sIdx;
@@ -3711,7 +3711,6 @@ namespace ee {
 			EE_OP_BOOL( MEMBER, CExpEvalParser::token::EE_OR, || )			\
 			default : { return false; }										\
 		}																	\
-		return false;														\
 	}
 
 				switch ( _rRes.ncType ) {
@@ -3749,7 +3748,6 @@ namespace ee {
 							}
 							default : { return false; }
 						}
-						return false;
 					}
 				}
 

@@ -48,10 +48,10 @@ namespace lsw {
 		INT									SetItemHeight( INT _iIndex, INT _cyItem );
 
 		// Sets the selection based on item data.
-		INT									SetCurSelByItemData( LPARAM _pData );
+		virtual INT							SetCurSelByItemData( LPARAM _pData );
 
-		// Gets the currently selected items data.
-		LPARAM								GetCurSelItemData() const;
+		// Gets the currently selected item's data.
+		virtual LPARAM						GetCurSelItemData() const;
 
 		// Removes all items from the list box.
 		void								ResetContent();

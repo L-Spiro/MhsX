@@ -98,6 +98,13 @@ namespace ee {
 		}
 
 		/**
+		 * Removes all children.
+		 **/
+		void											RemoveAllChildren() {
+			m_vChildren.clear();
+		}
+
+		/**
 		 * Gets a child by index.
 		 *
 		 * \param _stIdx The index of the item to get.

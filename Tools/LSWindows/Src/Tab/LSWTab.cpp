@@ -214,6 +214,92 @@ namespace lsw {
 		::SetWindowLongPtrW( Wnd(), GWL_STYLE, dwStyle | TCS_FIXEDWIDTH | TCS_FORCELABELLEFT | TCS_SINGLELINE );
 	}
 
+	/**
+	 * Sets a tab to be checkable.
+	 * 
+	 * \param _iItem The index of the tab to set as checkable.
+	 **/
+	void CTab::SetCheckable( int _iItem ) {
+		if ( _iItem < 0 ) {
+			for ( auto I = m_vTabs.size(); I--; ) {
+				m_vTabs[I].bCheckable = true;
+			}
+		}
+		else {
+			if ( _iItem < m_vTabs.size() ) { m_vTabs[_iItem].bCheckable = true; }
+		}
+	}
+
+	/**
+	 * Sets a tab as checked or not.
+	 * 
+	 * \param _iItem The index of the tab to set or unset as checked.
+	 * \param _bChecked Checked or unchecked.
+	 * \return Returns true if the given tab exists.
+	 **/
+	bool CTab::SetChecked( int _iItem, bool _bChecked ) {
+		if ( _iItem < 0 ) {
+			for ( auto I = m_vTabs.size(); I--; ) {
+				m_vTabs[I].bChecked = _bChecked;
+			}
+			return true;
+		}
+		else {
+			if ( _iItem < m_vTabs.size() ) {
+				m_vTabs[_iItem].bChecked = _bChecked;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Toggles the check status of a given tab.
+	 * 
+	 * \param _iItem The tab whose check status is to be toggled.  The tab must be marked as checkable.
+	 **/
+	void CTab::ToggleCheck( int _iItem ) {
+		if ( _iItem < 0 ) {
+			for ( auto I = m_vTabs.size(); I--; ) {
+				if ( m_vTabs[I].bCheckable ) {
+					m_vTabs[I].bChecked = !m_vTabs[I].bChecked;
+				}
+			}
+		}
+		else if ( _iItem < m_vTabs.size() ) {
+			if ( m_vTabs[_iItem].bCheckable ) {
+				m_vTabs[_iItem].bChecked = !m_vTabs[_iItem].bChecked;
+			}
+		}
+		::InvalidateRect( Wnd(), NULL, FALSE );
+		Paint();
+	}
+
+	/**
+	 * Returns true if any tabs are checkable.
+	 * 
+	 * \return Returns true if any tabs are checkable.
+	 **/
+	bool CTab::AnyAreCheckable() const {
+		for ( auto I = m_vTabs.size(); I--; ) {
+			if ( m_vTabs[I].bCheckable ) { return true; }
+		}
+		return false;
+	}
+
+	/**
+	 * Checks for the given tab being checked or not.  It must also be checkable.
+	 * 
+	 * \param _iItem The index of the tab to check for being both checkable and checked.
+	 * \return Returns true if the given tab exists, is checkable, and is checked.
+	 **/
+	bool CTab::IsChecked( int _iItem ) const {
+		if ( _iItem < m_vTabs.size() ) {
+			return m_vTabs[_iItem].bCheckable && m_vTabs[_iItem].bChecked;
+		}
+		return false;
+	}
+
 	// == Functions.
 	// WM_SIZE.
 	CWidget::LSW_HANDLED CTab::Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight ) {
@@ -248,7 +334,7 @@ namespace lsw {
 		rReturn.left = _rTabRect.right - iXW - (_bHasFocus ? 2 : ::GetSystemMetrics( SM_CXFRAME ));
 		rReturn.right = rReturn.left + iXW;
 
-		rReturn.top = _rTabRect.top + ((iHeight - iXH) >> 1);
+		rReturn.top = _rTabRect.top + ((iHeight - iXH) >> 1) + 1;
 		rReturn.bottom = rReturn.top + iXH;
 		return rReturn;
 	}
@@ -259,7 +345,7 @@ namespace lsw {
 		WNDPROC pOld = pmwThis->OriginalProc();
 		switch ( _uMsg ) {
 			case WM_NCHITTEST : {
-				if ( pmwThis->m_bShowClose ) {
+				if ( pmwThis->m_bShowClose || pmwThis->AnyAreCheckable() ) {
 					POINTS pPos = MAKEPOINTS( _lParam );
 					LRESULT lrHit = ::CallWindowProcW( reinterpret_cast<WNDPROC>(pOld), _hWnd, _uMsg, _wParam, _lParam );
 					TCHITTESTINFO tTest;
@@ -275,7 +361,12 @@ namespace lsw {
 					rClose = GetCloseRect( rItem, iHit == pmwThis->GetCurSel() );
 			
 					if ( rClose.PtInRect( tTest.pt ) ) {
-						lrHit = HTCLOSE;
+						if ( pmwThis->m_bShowClose ) {
+							lrHit = HTCLOSE;
+						}
+						else if ( pmwThis->m_vTabs[iHit].bCheckable ) {
+							lrHit = HTOBJECT;
+						}
 					}
 					return lrHit;
 				}
@@ -299,10 +390,26 @@ namespace lsw {
 					::SendMessageW( pmwThis->Parent()->Wnd(), WM_NOTIFY, iID, reinterpret_cast<LPARAM>(&hCloser) );
 					return 0;
 				}
+				if ( _wParam == HTOBJECT ) {
+					LSW_NMTABCLOSE hCloser;
+					INT iID = pmwThis->Id();
+					POINTS pPos = MAKEPOINTS( _lParam );
+					TCHITTESTINFO tTest;
+					tTest.pt.x = pPos.x;
+					tTest.pt.y = pPos.y;
+					::ScreenToClient( pmwThis->Wnd(), &tTest.pt );
+					hCloser.hdr.code		= static_cast<UINT>(LSW_TAB_NM_CHECK);
+					hCloser.hdr.hwndFrom	= pmwThis->Wnd();
+					hCloser.hdr.idFrom		= iID;
+					hCloser.iTab			= pmwThis->HitTest( &tTest );
+					hCloser.pwWidget		= pmwThis;
+
+					::SendMessageW( pmwThis->Parent()->Wnd(), WM_NOTIFY, iID, reinterpret_cast<LPARAM>(&hCloser) );
+				}
 				break;
 			}
 			case WM_PAINT : {
-				if ( pmwThis->m_bShowClose ) {
+				if ( pmwThis->m_bShowClose || pmwThis->AnyAreCheckable() ) {
 					/*LONG_PTR hObj = */::GetWindowLongPtrW( _hWnd, 0 );
 					LSW_BEGINPAINT bpPaint( _hWnd );
 
@@ -318,7 +425,11 @@ namespace lsw {
 							LSW_RECT rItem, rClose;
 							rItem = pmwThis->GetItemRect( I );
 							rClose = GetCloseRect( rItem, I == iSel );
-							::DrawFrameControl( bpPaint.hDc, &rClose, DFC_CAPTION, DFCS_CAPTIONCLOSE | DFCS_FLAT );
+							if ( !pmwThis->m_bShowClose && pmwThis->m_vTabs[I].bCheckable ) {
+								::DrawFrameControl( bpPaint.hDc, &rClose, DFC_BUTTON, DFCS_BUTTONCHECK | (pmwThis->m_vTabs[I].bChecked) ? DFCS_CHECKED : 0 );
+							}
+							else if ( pmwThis->m_bShowClose ) { ::DrawFrameControl( bpPaint.hDc, &rClose, DFC_CAPTION, DFCS_CAPTIONCLOSE | DFCS_FLAT ); }
+							
 						}
 					}
 

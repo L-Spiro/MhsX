@@ -38,6 +38,7 @@ namespace ee {
 			m_uiptrStringData( 0 ),
 			m_pfmahMemberAccess( nullptr ),
 			m_uiptrMemberAccess( 0 ),
+			m_sTrans( 0 ),
 			m_pfToString( nullptr ),
 			m_bHasUserVar( false ),
 			m_bHasAddressRead( false ) {
@@ -442,12 +443,12 @@ namespace ee {
 					switch ( _rExp.ncType ) {
 						case EE_NC_SIGNED : {
 							_rResult.ncType = _rExp.ncType;
-							_rResult.u.i64Val = !_rExp.u.i64Val;
+							_rResult.u.i64Val = bool( !_rExp.u.i64Val );
 							return EE_EC_SUCCESS;
 						}
 						case EE_NC_UNSIGNED : {
 							_rResult.ncType = _rExp.ncType;
-							_rResult.u.ui64Val = !_rExp.u.ui64Val;
+							_rResult.u.ui64Val = bool( !_rExp.u.ui64Val );
 							return EE_EC_SUCCESS;
 						}
 						case EE_NC_FLOATING : {

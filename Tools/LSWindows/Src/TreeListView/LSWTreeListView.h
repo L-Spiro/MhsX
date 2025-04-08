@@ -75,6 +75,42 @@ namespace lsw {
 		LPARAM								GetItemLParam( HTREEITEM _tiItem ) const;
 
 		/**
+		 * Gets an item by index accounting for children being expanded or not.
+		 *
+		 * \param _stIdx The index of the item to get with collapsed items being taken into account.
+		 * \return Returns the _stIdx'th item in the tree, accounting for expandedness.
+		 */
+		HTREEITEM							GetItemByIndex( size_t _stIdx ) { return PointerToTreeItem( ItemByIndex( _stIdx ) ); }
+									
+		/**
+		 * Counts the total number of expanded items.
+		 *
+		 * \return Returns the total number of items, accounting for expandedness.
+		 */
+		size_t								CountExpanded() const;
+
+		/**
+		 * Gets the next item based on expansion.
+		 *
+		 * \param _ptThis The items whose next item is to be obtained, accounting for expandedness.
+		 * \return Returns the next item, accounting for expandedness.
+		 */
+		HTREEITEM							GetNextByExpansion( HTREEITEM _ptThis ) const { return PointerToTreeItem( NextByExpansion( const_cast<ee::CTree<LSW_TREE_ROW> *>(TreeItemToPointer( _ptThis )) ) ); }
+
+		/**
+		 * Gets the next item.
+		 *
+		 * \param _ptThis The items whose next item is to be obtained.
+		 * \return Returns the next item.
+		 */
+		HTREEITEM							GetNext( HTREEITEM _ptThis ) const { return PointerToTreeItem( Next( const_cast<ee::CTree<LSW_TREE_ROW> *>(TreeItemToPointer( _ptThis )) ) ); }
+
+		/**
+		 * Deletes all items.
+		 */
+		virtual VOID						DeleteAll();
+
+		/**
 		 * Returns true if this is a CTreeListView class.
 		 *
 		 * \return Returns true.
@@ -339,14 +375,6 @@ namespace lsw {
 			m_stIndexCache = 0;
 		}
 
-
-		/**
-		 * Counts the total number of expanded items.
-		 *
-		 * \return Returns the total number of items, accounting for expandedness.
-		 */
-		size_t								CountExpanded() const;
-
 		/**
 		 * Gets the indentation level for an item.
 		 *
@@ -398,6 +426,15 @@ namespace lsw {
 		 * \return Returns a HANDLED code.
 		 */
 		virtual LSW_HANDLED					KeyDown( UINT _uiKeyCode, UINT _uiFlags );
+
+		/**
+		 * WM_LBUTTONDBLCLK.
+		 * 
+		 * \param _dwVirtKeys Indicates whether various virtual keys are down. This parameter can be one or more of the following values: MK_CONTROL, MK_LBUTTON, MK_MBUTTON, MK_RBUTTON, MK_SHIFT, MK_XBUTTON1, MK_XBUTTON2.
+		 * \param _pCursorPos The coordinate of the cursor. The coordinate is relative to the upper-left corner of the client area.
+		 * \return Returns a HANDLED code.
+		 **/
+		virtual LSW_HANDLED					LButtonDblClk( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos );
 
 		/**
 		 * WM_LBUTTONDOWN.

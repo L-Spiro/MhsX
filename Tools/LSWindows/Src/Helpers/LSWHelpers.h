@@ -697,6 +697,7 @@ namespace lsw {
 				bIsSizing = false;
 				lWindowStyle = lStyle;
 				bInBorderless = true;
+				while ( ::ShowCursor( FALSE ) >= 0 ) {}
 				return true;
 			}
 			return false;
@@ -732,6 +733,7 @@ namespace lsw {
 				bInBorderless = true;
 				return false; }
 			::ShowWindow( _hWnd, SW_NORMAL );
+			while ( ::ShowCursor( TRUE ) < 0 ) {}
 			bIsSizing = false;
 			bInBorderless = false;
 			return true;
@@ -1077,10 +1079,10 @@ namespace lsw {
 		/**
 		 * Helps expand %VAR% environment variables inside a string.  Gets the range of the first %...% encountered and returns the string that should be there.
 		 *
-		 * \param PARM The string in which to seek %...%.
-		 * \param PARM Holds the returned start position of the %...% section.
-		 * \param PARM Holds the returned end position of the %...% section.
-		 * \param PARM Holds the replacement string, if true is returned.
+		 * \param _sString The string in which to seek %...%.
+		 * \param _stStart Holds the returned start position of the %...% section.
+		 * \param _stEnd Holds the returned end position of the %...% section.
+		 * \param _sReplacement Holds the replacement string, if true is returned.
 		 * \return Returns true if a %...% value was found and expanded.
 		 */
 		template <typename _tType>
