@@ -45,7 +45,7 @@ namespace mx {
 		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc );
 
 		// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
-		virtual const LSW_RECT				VirtualClientRect( const CWidget * pwChild ) const;
+		virtual const LSW_RECT				VirtualClientRect( const CWidget * _pwChild ) const;
 
 		// Gets a pointer to the list view.
 		CListView *							ListView();

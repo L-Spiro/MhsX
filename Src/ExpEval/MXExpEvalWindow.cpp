@@ -76,7 +76,7 @@ namespace mx {
 					LSW_REBARBANDINFO riRebarInfo;
 					riRebarInfo.SetColors( ::GetSysColor( COLOR_BTNTEXT ), ::GetSysColor( COLOR_BTNFACE ) );
 					riRebarInfo.SetStyle( RBBS_CHILDEDGE |
-					  RBBS_FIXEDBMP );
+						RBBS_FIXEDBMP );
 					riRebarInfo.SetChild( plvToolBar->Wnd() );
 					riRebarInfo.SetChildSize( plvToolBar->GetMinBoundingRect().Width(), plvToolBar->GetMinBoundingRect().Height() );
 					riRebarInfo.SetId( CExpressionEvaluatorLayout::MX_EE_TOOLBAR0 );
@@ -212,7 +212,7 @@ namespace mx {
 	}
 
 	// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
-	const LSW_RECT CExpEvalWindow::VirtualClientRect( const CWidget * pwChild ) const {
+	const LSW_RECT CExpEvalWindow::VirtualClientRect( const CWidget * /*_pwChild*/ ) const {
 		LSW_RECT rTemp = ClientRect( this );
 		const CRebar * plvRebar = static_cast<const CRebar *>(FindChild( CExpressionEvaluatorLayout::MX_EE_REBAR0 ));
 		if ( plvRebar ) {
