@@ -21,7 +21,7 @@ namespace mx {
 
 		// == Types.
 		// Byte preprocessing.
-		typedef void						(* pfPreprocessFunc)( void * _pvData, size_t _stLen, uint64_t _ui64Parm );
+		typedef void (*						pfPreprocessFunc)( void * _pvData, size_t _stLen, uint64_t _ui64Parm );
 
 
 		// == Functions.

@@ -1,4 +1,5 @@
 #pragma once
+
 #include "../MXMhsX.h"
 #include "../Hotkeys/MXHotkeyManager.h"
 #include "../Options/MXOptions.h"
