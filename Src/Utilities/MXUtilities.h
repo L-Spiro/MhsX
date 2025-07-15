@@ -75,6 +75,14 @@ namespace mx {
 			MX_RT_MANIFEST				= 24,
 		};
 
+		// Types of values.
+		enum MX_VALUE_TYPE {
+			MX_VT_DATA_TYPE,							// An MX_DATA_TYPES value.
+			MX_VT_STRING,								// A string value.  String is of an MX_STRING_TYPES type.
+			MX_VT_POINTER,								// A pointer to a value.  Can point to an MX_DATA_TYPES type.
+			MX_VT_BLOB,									// Any generic blob of data.  Individual elements can be of MX_DATA_TYPES types.
+		};
+
 		// Data types.
 		enum MX_DATA_TYPES {
 			MX_DT_INT8,
@@ -91,6 +99,16 @@ namespace mx {
 			MX_DT_VOID,
 
 			MX_DT_MASK					= 0xF
+		};
+
+		// String types.
+		enum MX_STRING_TYPES {
+			MX_ST_CODE_PAGE,							// A regular string in a given codepage.
+			MX_ST_UTF8,									// A UTF-8 string.
+			MX_ST_UTF16_LE,								// A Little-Endian UTF-16 string.
+			MX_ST_UTF16_BE,								// A Big-Endian UTF-16 string.
+			MX_ST_UTF32_LE,								// A Little-Endian UTF-32 string.
+			MX_ST_UTF32_BE,								// A Big-Endian UTF-32 string.
 		};
 
 		// Wildcard flags.  Adjust values so that they can be combined with MX_DATA_TYPES if more values are added to MX_DATA_TYPES.

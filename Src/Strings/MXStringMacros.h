@@ -17353,3 +17353,12 @@
 #define _DEC_S_3C23F378_Biased_Exp__ mx::CStringDecoder::DecodeToString( _T_3C23F378_Biased_Exp__, _LEN_3C23F378 )
 #define _DEC_WS_3C23F378_Biased_Exp__ mx::CStringDecoder::DecodeToWString( _T_3C23F378_Biased_Exp__, _LEN_3C23F378 )
 
+// &Add Selected
+
+#define _T_0924E89F__Add_Selected "\xAE\x0F\x34\xFF\xB2\x1C\xF3\x33\x35\x2B\x3D\x33\xF6"
+#define _LEN_0924E89F 13
+#define _T_LEN_0924E89F__Add_Selected _T_0924E89F__Add_Selected, _LEN_0924E89F
+#define _DEC_0924E89F__Add_Selected( STR ) mx::CStringDecoder::Decode( _T_0924E89F__Add_Selected, _LEN_0924E89F, STR )
+#define _DEC_S_0924E89F__Add_Selected mx::CStringDecoder::DecodeToString( _T_0924E89F__Add_Selected, _LEN_0924E89F )
+#define _DEC_WS_0924E89F__Add_Selected mx::CStringDecoder::DecodeToWString( _T_0924E89F__Add_Selected, _LEN_0924E89F )
+

@@ -1,9 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "SinCos/EESinCos.h"
 #include <cmath>
 #include <cinttypes>
 #include <numbers>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #ifdef _WIN32
@@ -63,6 +64,11 @@ namespace ee {
 	};
 	class CExpEval {
 	public :
+		// == Types.
+		/** Sinc-filter window function. */
+		template <typename _tType = double>
+		using							PfWindowFunc = bool (*)( size_t _sN, std::vector<_tType> &_vRet );
+
 		// == Functions.
 		/**
 		 * Gets the time of initialization.
@@ -86,19 +92,53 @@ namespace ee {
 		template <typename _tT>
 		static inline _tT				Max( const _tT &_tA, const _tT &_tB ) { return _tA > _tB ? _tA : _tB; }
 
-		// Is the given character valid hex character?
+		/**
+		 * Gets the largest absolute value in the given vector.
+		 * 
+		 * \param _tA The vector to find the max() of.
+		 * \return Returns the maximum absolute value in the given vector.
+		 **/
+		template <typename _tType = std::vector<double>>
+		static inline typename _tType::value_type
+										MaxVec( const _tType &_tA ) {
+			typename _tType::value_type dRet = _tType::value_type( 0 );
+			for ( auto I = _tA.size(); I--; ) {
+				typename _tType::value_type dTmp = _tA[I];
+				dTmp = dTmp < _tType::value_type( 0 ) ? -dTmp : dTmp;
+				dRet = Max( dRet, dTmp );
+			}
+			return dRet;
+		}
+
+		/**
+		 * Is the given character valid binary character?
+		 * 
+		 * \param _cValue The value to test.
+		 * \return Returns true if _cValue is '0' or '1'. 
+		 **/
 		static inline bool				ValidBin( char _cValue ) {
 			return (_cValue >= '0' && _cValue <= '1');
 		}
 
-		// Is the given character valid hex character?
+		/**
+		 * Is the given character valid hex character?
+		 * 
+		 * \param _cValue The value to test.
+		 * \return Returns true if _cValue is a valid hexadecimal character (0-9, a-f, A-F). 
+
+		 **/
 		static inline bool				ValidHex( char _cValue ) {
 			return ((_cValue >= '0' && _cValue <= '9') ||
 				(_cValue >= 'a' && _cValue <= 'f') ||
 				(_cValue >= 'A' && _cValue <= 'F'));
 		}
 
-		// Is the given string valid hex?
+		/**
+		 * Is the given string valid hex?
+		 * 
+		 * \param _pcValue The string to test.
+		 * \return Returns true if all characters in the string are valid hexadecimal characters.
+		 **/
 		static inline bool				ValidHex( const char * _pcValue ) {
 			while ( (*_pcValue++) ) {
 				if ( ((*_pcValue) == ' ' || (*_pcValue) == '\t') ||
@@ -108,12 +148,22 @@ namespace ee {
 			return true;
 		}
 
-		// Is the given character valid octal character?
+		/**
+		 * Is the given character valid octal character?
+		 * 
+		 * \param _cValue The value to test.
+		 * \return Returns true if _cValue is a valid octal character (0-7).
+		 **/
 		static inline bool				ValidOctal( char _cValue ) {
 			return (_cValue >= '0' && _cValue <= '7');
 		}
 
-		// Converts a hex character to an integer.
+		/**
+		 * Converts a hex character to an integer.
+		 * 
+		 * \param _cVal The character to convert.
+		 * \return Returns the converted character between 0 and 15 inclusive.
+		 **/
 		static inline uint32_t			HexToUint32( char _cVal ) {
 			if ( _cVal >= '0' && _cVal <= '9' ) { return _cVal - '0'; }
 			if ( _cVal >= 'A' && _cVal <= 'F' ) { return _cVal - 'A' + 10; }
@@ -121,13 +171,23 @@ namespace ee {
 			return 0;
 		}
 
-		// Converts an octal character to an integer.
+		/**
+		 * Converts an octal character to an integer.
+		 * 
+		 * \param _cVal The character to convert.
+		 * \return Returns the converted character between 0 and 7 inclusive.
+		 **/
 		static inline uint32_t			OctalToUint32( char _cVal ) {
 			if ( _cVal >= '0' && _cVal <= '7' ) { return _cVal - '0'; }
 			return 0;
 		}
 
-		// Checks for whitespace without throwing exceptions.
+		/**
+		 * Checks for whitespace without throwing exceptions.
+		 * 
+		 * \param _cVal The character to test.
+		 * \return Returns true if _cVal is ' ', '\r', '\n', '\t', '\f', or '\v'.
+		 **/
 		static inline bool				IsWhiteSpace( char _cVal ) {
 			return _cVal == ' ' ||
 				_cVal == '\r' ||
@@ -137,18 +197,34 @@ namespace ee {
 				_cVal == '\v';
 		}
 
-		// Checks for digits (0-9) without throwing exceptions.
+		/**
+		 * Checks for digits (0-9) without throwing exceptions.
+		 * 
+		 * \param _cVal The character to test.
+		 * \return Returns true if _cVal is between 0 and 9 inclusive.
+		 **/
 		static inline bool				IsDigit( char _cVal ) {
 			return _cVal >= '0' && _cVal <= '9';
 		}
 
-		// Checks for alpha characters (a-z, A-Z) without throwing exceptions.
+		/**
+		 * Checks for alpha characters (a-z, A-Z) without throwing exceptions.
+		 * 
+		 * \param _cVal The character to test.
+		 * \return Returns true if _cVal is an alpha character (a-z, A-Z).
+		 **/
 		static inline bool				IsAlpha( char _cVal ) {
 			return (_cVal >= 'A' && _cVal <= 'Z') ||
 				(_cVal >= 'a' && _cVal <= 'z');
 		}
 
-		// Determines if a character is an identifier character.  Sets _bIsFirst to false internally.
+		/**
+		 * Determines if a character is an identifier character.  Sets _bIsFirst to false internally.
+		 * 
+		 * \param _cVal		The character to test.
+		 * \param _bIsFirst	Indicates that _cVal is the first character in the string being tested.
+		 * \return			If _bIsFirst, true is returned if _cVal is an alpha character or '_', otherwise true is returned if _cVal is an alpha character, a digit, or '_'.
+		 **/
 		static inline bool				IsIdentifier( char _cVal, bool &_bIsFirst ) {
 			if ( _bIsFirst ) {
 				_bIsFirst = false;
@@ -157,7 +233,13 @@ namespace ee {
 			return IsAlpha( _cVal ) || IsDigit( _cVal ) || _cVal == '_';
 		}
 
-		// Determines if the given string is an identifier.
+		/**
+		 * Determines if the given string is an identifier.
+		 * 
+		 * \param _sIdent		The string to test.
+		 * \tparam _tStringType	The type of string (std::string, std::wstring, std:u8string, etc.)
+		 * \return				Returns true if the whole string is a valid identifier.
+		 **/
 		template <typename _tStringType = std::string>
 		static bool						IsIdentifier( const _tStringType &_sIdent ) {
 			if ( !_sIdent.size() ) { return false; }
@@ -168,7 +250,14 @@ namespace ee {
 			return true;
 		}
 
-		// Decodes a single escape sequence.
+		/**
+		 * Decodes a single escape sequence from a character buffer.
+		 *
+		 * \param _pcValue	Pointer to the input character sequence (may include escape markers).
+		 * \param _sLen		Length of the input buffer available.
+		 * \param _sSize	Output: number of characters consumed from the input buffer.
+		 * \return			The decoded wide character, or 0 if decoding fails.
+		 */
 		static inline wchar_t			DecodeEscape( const char * _pcValue, size_t _sLen, size_t &_sSize ) {
 			struct {
 				// The actual character to find.
@@ -268,7 +357,13 @@ namespace ee {
 			return _pcValue[0];
 		}
 
-		// Converts a string from code form into raw values (decodes escape sequences).
+		/**
+		 * Decodes all escape sequences in a C-string into a raw std::string.
+		 *
+		 * \param _pcValue	Pointer to the null-terminated C-string containing escape sequences.
+		 * \param _sLen		Length of the input buffer (excluding null-terminator).
+		 * \return			A std::string with all escapes decoded.
+		 */
 		static inline std::string		DecodeEscapes( const char * _pcValue, size_t _sLen ) {
 			std::string sRet;
 			size_t ui32Size;
@@ -278,12 +373,24 @@ namespace ee {
 			return sRet;
 		}
 
-		// Converts a string from code form into raw values (decodes escape sequences).
+		/**
+		 * Decodes all escape sequences in a std::string into raw values.
+		 *
+		 * \param _sInput	The input std::string containing escape sequences.
+		 * \return			A new std::string with escapes decoded.
+		 */
 		static inline std::string		DecodeEscapes( const std::string &_sInput ) {
 			return DecodeEscapes( _sInput.c_str(), _sInput.size() );
 		}
 
-		// Removes quotes from the start and end of a string.
+		/**
+		 * Removes leading and trailing quote characters from a C-string.
+		 *
+		 * \param _pcValue	Pointer to the input C-string (including quotes).
+		 * \param _sLen		Length of the input buffer (including quotes).
+		 * \return			A std::string with the surrounding quotes removed,
+		 *					or an empty string if length <= 2.
+		 */
 		static inline std::string		RemoveQuotes( const char * _pcValue, size_t _sLen ) {
 			if ( _sLen <= 2 ) { return std::string(); }
 			std::string sRet = ++_pcValue;
@@ -291,7 +398,14 @@ namespace ee {
 			return sRet;
 		}
 
-		// Remove a character from a string.
+		/**
+		 * Removes all occurrences of a specific character from a string.
+		 *
+		 * \tparam _tStringType		Type of the string (e.g., std::string or std::wstring).
+		 * \param _sInput			The string to modify (in-place).
+		 * \param _ui32RemoveMe		The character code to remove.
+		 * \return					Reference to the modified input string.
+		 */
 		template <typename _tStringType = std::string>
 		static inline _tStringType &	RemoveChar( _tStringType &_sInput, uint32_t _ui32RemoveMe ) {
 			for ( auto I = _sInput.size(); I--; ) {
@@ -302,7 +416,13 @@ namespace ee {
 			return _sInput;
 		}
 
-		// Trims whitespace from the start and end of a given string.
+		/**
+		 * Trims whitespace from both ends of a given string.
+		 *
+		 * \tparam _tType	Type of the string (e.g., std::string).
+		 * \param _sString	The input string to trim.
+		 * \return			A new string with leading and trailing whitespace removed.
+		 */
 		template <typename _tType = std::string>
 		static _tType					TrimWhitespace( const _tType &_sString ) {
 			_tType sCopy = _sString;
@@ -320,7 +440,14 @@ namespace ee {
 			return sCopy;
 		}
 
-		// Counts the number of sequential hex characters in a string starting at the given character.
+		/**
+		 * Counts the number of valid hexadecimal characters from a starting position in a C-string.
+		 *
+		 * \param _pcValue		Pointer to the input buffer.
+		 * \param _sLen			Total length of the buffer.
+		 * \param _sCntFromPos	Index from which to start counting.
+		 * \return				Number of consecutive hex digits found.
+		 */
 		static inline size_t			CountHexChars( const char * _pcValue, size_t _sLen, size_t _sCntFromPos ) {
 			size_t sRet = 0;
 			for ( ; _sCntFromPos < _sLen; ++_sCntFromPos ) {
@@ -330,7 +457,14 @@ namespace ee {
 			return sRet;
 		}
 
-		// Counts the number of sequential octal characters in a string starting at the given character.
+		/**
+		 * Counts the number of valid octal characters from a starting position in a C-string.
+		 *
+		 * \param _pcValue		Pointer to the input buffer.
+		 * \param _sLen			Total length of the buffer.
+		 * \param _sCntFromPos	Index from which to start counting.
+		 * \return				Number of consecutive octal digits found.
+		 */
 		static inline size_t			CountOctalChars( const char * _pcValue, size_t _sLen, size_t _sCntFromPos ) {
 			size_t sRet = 0;
 			for ( ; _sCntFromPos < _sLen; ++_sCntFromPos ) {
@@ -340,7 +474,14 @@ namespace ee {
 			return sRet;
 		}
 
-		// Counts the number of sequential capital and lower-case alphanumeric characters in a string starting at the given character.
+		/**
+		 * Counts the number of alphanumeric or underscore characters from a starting position.
+		 *
+		 * \param _pcValue		Pointer to the input buffer.
+		 * \param _sLen			Total length of the buffer.
+		 * \param _sCntFromPos	Index from which to start counting.
+		 * \return				Number of consecutive alphanumeric or underscore characters.
+		 */
 		static inline size_t			CountAlphanumeric( const char * _pcValue, size_t _sLen, size_t _sCntFromPos ) {
 			size_t sRet = 0;
 			for ( ; _sCntFromPos < _sLen; ++_sCntFromPos ) {
@@ -353,7 +494,15 @@ namespace ee {
 			return sRet;
 		}
 
-		// Convert a \x**** character to a uint32_t.
+		/**
+		 * Parses a hexadecimal escape sequence ("xNNNN") into a uint32_t value.
+		 *
+		 * \param _pcValue				Pointer to the input sequence (starting at 'x').
+		 * \param _sLen					Length of the buffer.
+		 * \param _sCharsConsumed		Output: number of characters consumed (including 'x').
+		 * \param _sMaxAllowedHexChars	Maximum hex digits to parse (default 4).
+		 * \return						Parsed numeric value, or 0 if invalid.
+		 */
 		static inline uint32_t			EscapeX( const char * _pcValue, size_t _sLen, size_t &_sCharsConsumed, size_t _sMaxAllowedHexChars = 4 ) {
 			_sCharsConsumed = 0;
 			if ( _sLen >= 2 && _pcValue[0] == 'x' ) { // 'x' and 1 or more hex characters.
@@ -374,7 +523,15 @@ namespace ee {
 			return 0;
 		}
 
-		// Convert a \*** octal character to a uint32_t.
+		/**
+		 * Parses an octal escape sequence into a uint32_t value.
+		 *
+		 * \param _pcValue					Pointer to the input buffer.
+		 * \param _sLen						Length of the buffer.
+		 * \param _sCharsConsumed			Output: number of octal digits consumed.
+		 * \param _sMaxAllowedOctalChars	Maximum octal digits to parse (default 4).
+		 * \return							Parsed octal value, or 0 if invalid.
+		 */
 		static inline uint32_t			EscapeOctal( const char * _pcValue, size_t _sLen, size_t &_sCharsConsumed, size_t _sMaxAllowedOctalChars = 4 ) {
 			_sCharsConsumed = 0;
 			if ( _sLen >= 1 ) {
@@ -396,7 +553,14 @@ namespace ee {
 			return 0;
 		}
 
-		// Convert a \u**** Unicode character to a uint32_t.  Does not handle surrogate pairs.
+		/**
+		 * Parses a 4-digit Unicode escape ("uNNNN") into a uint32_t value (no surrogate pairs).
+		 *
+		 * \param _pcValue			Pointer starting at 'u'.
+		 * \param _sLen				Buffer length.
+		 * \param _sCharsConsumed	Output: 5 characters consumed (\uNNNN).
+		 * \return					Parsed Unicode codepoint, or 0 if invalid.
+		 */
 		static inline uint32_t			EscapeUnicodeWide4( const char * _pcValue, size_t _sLen, size_t &_sCharsConsumed ) {
 			_sCharsConsumed = 0;
 			if ( _sLen >= (4 + 1) && _pcValue[0] == 'u' ) {
@@ -416,7 +580,14 @@ namespace ee {
 			return 0;
 		}
 
-		// Converts 1 or 2 \u**** Unicode character(s) to a uint32_t.
+		/**
+		 * Parses a Unicode escape sequence with surrogate pair support ("uNNNN"\uNNNN).
+		 *
+		 * \param _pcValue			Pointer starting at first 'u'.
+		 * \param _sLen				Buffer length.
+		 * \param _sCharsConsumed	Output: total characters consumed across both escapes.
+		 * \return					Parsed Unicode codepoint, or first half if no valid pair.
+		 */
 		static inline uint32_t			EscapeUnicodeWide4WithSurrogatePairs( const char * _pcValue, size_t _sLen, size_t &_sCharsConsumed ) {
 			uint32_t uiLeft = EscapeUnicodeWide4( _pcValue, _sLen, _sCharsConsumed );
 			if ( !_sCharsConsumed ) { return uiLeft; }
@@ -488,10 +659,10 @@ namespace ee {
 		/**
 		 * Gets the next UTF-32 character from a stream or error (EE_UTF_INVALID).
 		 * 
-		 * \param _puiString The string to parse.
-		 * \param _sLen The length of the string to which _puiString points.
-		 * \param _psSize Optional pointer to a size_t that will contain the number of characters eaten from _puiString during the parsing.
-		 * \return Returns the next character as a UTF-32 code.
+		 * \param _puiString	The string to parse.
+		 * \param _sLen			The length of the string to which _puiString points.
+		 * \param _psSize		Optional pointer to a size_t that will contain the number of characters eaten from _puiString during the parsing.
+		 * \return				Returns the next character as a UTF-32 code.
 		 **/
 		static inline uint32_t			NextUtf32Char( const uint32_t * _puiString, size_t _sLen, size_t * _psSize = nullptr ) {
 			if ( _sLen == 0 ) {
@@ -507,81 +678,81 @@ namespace ee {
 		/**
 		 * Gets the next UTF-16 character from a stream or error (EE_UTF_INVALID).
 		 * 
-		 * \param _pwcString The string to parse.
-		 * \param _sLen The length of the string to which _pwcString points.
-		 * \param _psSize Optional pointer to a size_t that will contain the number of characters eaten from _pwcString during the parsing.
-		 * \return Returns the next character as a UTF-32 code.
+		 * \param _pwcString	The string to parse.
+		 * \param _sLen			The length of the string to which _pwcString points.
+		 * \param _psSize		Optional pointer to a size_t that will contain the number of characters eaten from _pwcString during the parsing.
+		 * \return				Returns the next character as a UTF-32 code.
 		 **/
 		static uint32_t					NextUtf16Char( const wchar_t * _pwcString, size_t _sLen, size_t * _psSize = nullptr );
 
 		/**
 		 * Gets the next UTF-8 character from a stream or error (EE_UTF_INVALID).
 		 * 
-		 * \param _pcString The string to parse.
-		 * \param _sLen The length of the string to which _pcString points.
-		 * \param _psSize Optional pointer to a size_t that will contain the number of characters eaten from _pcString during the parsing.
-		 * \return Returns the next character as a UTF-32 code.
+		 * \param _pcString		The string to parse.
+		 * \param _sLen			The length of the string to which _pcString points.
+		 * \param _psSize		Optional pointer to a size_t that will contain the number of characters eaten from _pcString during the parsing.
+		 * \return				Returns the next character as a UTF-32 code.
 		 **/
 		static uint32_t					NextUtf8Char( const char * _pcString, size_t _sLen, size_t * _psSize = nullptr );
 
 		/**
 		 * Gets the size of the given UTF-8 character.
 		 * 
-		 * \param _pcString Pointer to the UTF-8 characters to decode.
-		 * \param _sLen The number of characters to which _pcString points.
-		 * \return Returns the size of the UTF-8 character to which _pcString points.
+		 * \param _pcString		Pointer to the UTF-8 characters to decode.
+		 * \param _sLen			The number of characters to which _pcString points.
+		 * \return				Returns the size of the UTF-8 character to which _pcString points.
 		 **/
 		static size_t					Utf8CharSize( const char * _pcString, size_t _sLen );
 
 		/**
 		 * Converts a UTF-32 character to a UTF-16 character.
 		 * 
-		 * \param _ui32Utf32 The UTF-32 character to convert to UTF-16.
-		 * \param _ui32Len Holds the returned number of 16-bit characters held in the return value.
-		 * \return Returns up to 2 UTF-16 characters.
+		 * \param _ui32Utf32	The UTF-32 character to convert to UTF-16.
+		 * \param _ui32Len		Holds the returned number of 16-bit characters held in the return value.
+		 * \return				Returns up to 2 UTF-16 characters.
 		 **/
 		static uint32_t					Utf32ToUtf16( uint32_t _ui32Utf32, uint32_t &_ui32Len );
 
 		/**
 		 * Converts a UTF-32 character to a UTF-8 character.
 		 * 
-		 * \param _ui32Utf32 The UTF-32 character to convert to UTF-8.
-		 * \param _ui32Len Holds the returned number of 16-bit characters held in the return value.
-		 * \return Returns up to 4 UTF-8 characters.
+		 * \param _ui32Utf32	The UTF-32 character to convert to UTF-8.
+		 * \param _ui32Len		Holds the returned number of 16-bit characters held in the return value.
+		 * \return				Returns up to 4 UTF-8 characters.
 		 **/
 		static uint32_t					Utf32ToUtf8( uint32_t _ui32Utf32, uint32_t &_ui32Len );
 
 		/**
 		 * Converts a wstring to a UTF-8 string.  Converts the full length of the string, so embedded 0 characters don't stop the conversion.
 		 * 
-		 * \param _wsIn The UTF-16 string to convert.
-		 * \return Returns the converted UTF-8 string, including any embedded 0's.
+		 * \param _wsIn			The UTF-16 string to convert.
+		 * \return				Returns the converted UTF-8 string, including any embedded 0's.
 		 **/
 		static std::string				WStringToString( const std::wstring &_wsIn ) { return WStringToString( _wsIn.c_str(), _wsIn.size() ); }
 
 		/**
 		 * Converts a wstring to a UTF-8 string.  Converts the full length of the string, so embedded 0 characters don't stop the conversion.
 		 * 
-		 * \param _pwcIn The UTF-16 string to convert.
-		 * \param _sLen The number of characters to which _pwcIn points.
-		 * \return Returns the converted UTF-8 string, including any embedded 0's.
+		 * \param _pwcIn		The UTF-16 string to convert.
+		 * \param _sLen			The number of characters to which _pwcIn points.
+		 * \return				Returns the converted UTF-8 string, including any embedded 0's.
 		 **/
 		static std::string				WStringToString( const wchar_t * _pwcIn, size_t _sLen );
 
 		/**
 		 * Converts a UTF-8 string to wstring (UTF-16).  Converts the full length of the string, so embedded 0 characters don't stop the conversion.
 		 * 
-		 * \param _sIn The UTF-8 string to convert.
-		 * \return Returns the converted UTF-16 string, including any embedded 0's.
+		 * \param _sIn			The UTF-8 string to convert.
+		 * \return				Returns the converted UTF-16 string, including any embedded 0's.
 		 **/
 		static std::wstring				StringToWString( const std::string &_sIn ) { return StringToWString( _sIn.c_str(), _sIn.size() ); }
 
 		/**
 		 * Converts a UTF-8 string to wstring (UTF-16).  Converts the full length of the string, so embedded 0 characters don't stop the conversion.
 		 * 
-		 * \param _pcIn The UTF-8 string to convert.
-		 * \param _sLen The number of characters to which _pcIn points.
-		 * \return Returns the converted UTF-16 string, including any embedded 0's.
+		 * \param _pcIn			The UTF-8 string to convert.
+		 * \param _sLen			The number of characters to which _pcIn points.
+		 * \return				Returns the converted UTF-16 string, including any embedded 0's.
 		 **/
 		static std::wstring				StringToWString( const char * _pcIn, size_t _sLen );
 
@@ -672,57 +843,57 @@ namespace ee {
 		/**
 		 * Represents a value in binary notation.
 		 * 
-		 * \param _ui64Val The value to print.
-		 * \return Returns the printed value.
+		 * \param _ui64Val	The value to print.
+		 * \return			Returns the printed value.
 		 **/
 		static std::string				ToBinary( uint64_t _ui64Val );
 
 		/**
 		 * Represents a value in binary notation.
 		 * 
-		 * \param _i64Val The value to print.
-		 * \return Returns the printed value.
+		 * \param _i64Val	The value to print.
+		 * \return			Returns the printed value.
 		 **/
 		static std::string				ToBinary( int64_t _i64Val );
 
 		/**
 		 * Represents a value in binary notation.
 		 * 
-		 * \param _d4Val The value to print.
-		 * \return Returns the printed value.
+		 * \param _d4Val	The value to print.
+		 * \return			Returns the printed value.
 		 **/
 		static std::string				ToBinary( double _d4Val );
 
 		/**
 		 * Represents a value in binary notation.
 		 * 
-		 * \param _ui64Val The value to print.
-		 * \param _i32Digits The number of digits to print, or a number less than 1 to print only the required number of digits.
-		 * \return Returns the printed value.
+		 * \param _ui64Val		The value to print.
+		 * \param _i32Digits	The number of digits to print, or a number less than 1 to print only the required number of digits.
+		 * \return				Returns the printed value.
 		 **/
 		static std::string				ToBinary( uint64_t _ui64Val, int32_t _i32Digits );
 
 		/**
 		 * Represents a value in hexadecimal notation.
 		 * 
-		 * \param _ui64Val The value to print.
-		 * \return Returns the printed value.
+		 * \param _ui64Val	The value to print.
+		 * \return			Returns the printed value.
 		 **/
 		static std::string				ToHex( uint64_t _ui64Val );
 
 		/**
 		 * Represents a value in hexadecimal notation.
 		 * 
-		 * \param _i64Val The value to print.
-		 * \return Returns the printed value.
+		 * \param _i64Val	The value to print.
+		 * \return			Returns the printed value.
 		 **/
 		static std::string				ToHex( int64_t _i64Val );
 
 		/**
 		 * Represents a value in hexadecimal notation.
 		 * 
-		 * \param _d4Val The value to print.
-		 * \return Returns the printed value.
+		 * \param _d4Val	The value to print.
+		 * \return			Returns the printed value.
 		 **/
 		static std::string				ToHex( double _d4Val );
 
@@ -781,8 +952,8 @@ namespace ee {
 		/**
 		 * Reverses the bits in an 8-bit value.
 		 * 
-		 * \param _ui8Val The value to bit-reverse.
-		 * \return Returns the bit-reversed result.
+		 * \param _ui8Val	The value to bit-reverse.
+		 * \return			Returns the bit-reversed result.
 		 **/
 		static inline uint8_t			ReverseBits8( uint8_t _ui8Val ) {
 			_ui8Val = (_ui8Val & 0xF0) >> 4 | (_ui8Val & 0x0F) << 4;
@@ -794,8 +965,8 @@ namespace ee {
 		/**
 		 * Reverses the bits in an 16-bit value.
 		 * 
-		 * \param _ui16Val The value to bit-reverse.
-		 * \return Returns the bit-reversed result.
+		 * \param _ui16Val	The value to bit-reverse.
+		 * \return			Returns the bit-reversed result.
 		 **/
 		static inline uint16_t			ReverseBits16( uint16_t _ui16Val ) {
 			_ui16Val = ((_ui16Val >> 1) & 0x5555) | ((_ui16Val & 0x5555) << 1);
@@ -808,8 +979,8 @@ namespace ee {
 		/**
 		 * Reverses the bits in an 32-bit value.
 		 * 
-		 * \param _ui32Val The value to bit-reverse.
-		 * \return Returns the bit-reversed result.
+		 * \param _ui32Val	The value to bit-reverse.
+		 * \return			Returns the bit-reversed result.
 		 **/
 		static inline uint32_t			ReverseBits32( uint32_t _ui32Val ) {
 			_ui32Val = ((_ui32Val >> 1) & 0x55555555U) | ((_ui32Val & 0x55555555U) << 1);
@@ -823,8 +994,8 @@ namespace ee {
 		/**
 		 * Reverses the bits in an 64-bit value.
 		 * 
-		 * \param _ui64Val The value to bit-reverse.
-		 * \return Returns the bit-reversed result.
+		 * \param _ui64Val	The value to bit-reverse.
+		 * \return			Returns the bit-reversed result.
 		 **/
 		static inline uint64_t			ReverseBits64( uint64_t _ui64Val ) {
 			_ui64Val = ((_ui64Val >> 1) & 0x5555555555555555ULL) | ((_ui64Val & 0x5555555555555555ULL) << 1);
@@ -888,22 +1059,22 @@ namespace ee {
 		/**
 		 * String to integer, from any base.  Since std::stoull() raises exceptions etc.
 		 * 
-		 * \param _pcText The text to parse.
-		 * \param _iBase The base of the number to parse out of the text.
-		 * \param _psEaten Optional pointer to a size_t that will be set to the number of character eaten during parsing.
-		 * \param _uiMax The maximum value after which overflow is considered to have happened.
-		 * \param _pbOverflow An optional pointer to a boolean used to indicate whether overflow has occurred or not.
-		 * \return Returns the value parsed from the string.
+		 * \param _pcText		The text to parse.
+		 * \param _iBase		The base of the number to parse out of the text.
+		 * \param _psEaten		Optional pointer to a size_t that will be set to the number of character eaten during parsing.
+		 * \param _uiMax		The maximum value after which overflow is considered to have happened.
+		 * \param _pbOverflow	An optional pointer to a boolean used to indicate whether overflow has occurred or not.
+		 * \return				Returns the value parsed from the string.
 		 **/
 		static uint64_t					StoULL( const char * _pcText, int _iBase = 10, size_t * _psEaten = nullptr, uint64_t _uiMax = 0xFFFFFFFFFFFFFFFFULL, bool * _pbOverflow = nullptr );
 
 		/**
 		 * String to double.  Unlike std::atof(), this returns the number of characters eaten, and casts to float when the f postfix is seen.
 		 * 
-		 * \param _pcText The text to parse.
-		 * \param _psEaten The number of characters consumed while parsing the double value.
-		 * \param _pbError Optional pointer to a booleon which will be set to true if there are parsing errors.
-		 * \return Returns the parsed double.
+		 * \param _pcText		The text to parse.
+		 * \param _psEaten		The number of characters consumed while parsing the double value.
+		 * \param _pbError		Optional pointer to a booleon which will be set to true if there are parsing errors.
+		 * \return				Returns the parsed double.
 		 **/
 		static double					AtoF( const char * _pcText, size_t * _psEaten = nullptr, bool * _pbError = nullptr );
 
@@ -1316,9 +1487,9 @@ namespace ee {
 		/**
 		 * Creates a Hann window.
 		 * 
-		 * \param _sN Number of samples.  Generally an odd number.
-		 * \param _vRet The returned vector.
-		 * \return Returns true if there was enough memory to resize the vector.
+		 * \param _sN	Number of samples.  Generally an odd number.
+		 * \param _vRet	The returned vector.
+		 * \return		Returns true if there was enough memory to resize the vector.
 		 **/
 		template <typename _tType = double>
 		static bool						HannWindow( size_t _sN, std::vector<_tType> &_vRet ) {
@@ -1341,9 +1512,9 @@ namespace ee {
 		/**
 		 * Creates a Hamming window.
 		 * 
-		 * \param _sN Number of samples.  Generally an odd number.
-		 * \param _vRet The returned vector.
-		 * \return Returns true if there was enough memory to resize the vector.
+		 * \param _sN	Number of samples.  Generally an odd number.
+		 * \param _vRet	The returned vector.
+		 * \return		Returns true if there was enough memory to resize the vector.
 		 **/
 		template <typename _tType = double>
 		static bool						HammingWindow( size_t _sN, std::vector<_tType> &_vRet ) {
@@ -1366,9 +1537,9 @@ namespace ee {
 		/**
 		 * Creates a Blackman window.
 		 * 
-		 * \param _sN Number of samples.  Generally an odd number.
-		 * \param _vRet The returned vector.
-		 * \return Returns true if there was enough memory to resize the vector.
+		 * \param _sN	Number of samples.  Generally an odd number.
+		 * \param _vRet	The returned vector.
+		 * \return		Returns true if there was enough memory to resize the vector.
 		 **/
 		template <typename _tType = double>
 		static bool						BlackmanWindow( size_t _sN, std::vector<_tType> &_vRet ) {
@@ -1402,9 +1573,9 @@ namespace ee {
 		/**
 		 * Creates a Bartlett window.
 		 * 
-		 * \param _sN Number of samples.  Generally an odd number.
-		 * \param _vRet The returned vector.
-		 * \return Returns true if there was enough memory to resize the vector.
+		 * \param _sN	Number of samples.  Generally an odd number.
+		 * \param _vRet	The returned vector.
+		 * \return		Returns true if there was enough memory to resize the vector.
 		 **/
 		template <typename _tType = double>
 		static bool						BartlettWindow( size_t _sN, std::vector<_tType> &_vRet ) {
@@ -1426,8 +1597,8 @@ namespace ee {
 		/**
 		 * A 0th-order Bessel function needed for the Kaiser window.
 		 * 
-		 * \param _dX The Bessel term.
-		 * \return Returns the Bessel function for the given term.
+		 * \param _dX	The Bessel term.
+		 * \return		Returns the Bessel function for the given term.
 		 **/
 		static inline double			Bessel0( double _dX ) {
 			constexpr double dEspiRatio = 1.0e-16;
@@ -1447,10 +1618,10 @@ namespace ee {
 		/**
 		 * Creates a Kaiser window.
 		 * 
-		 * \param _sN Number of samples.  Generally an odd number.
-		 * \param _tBeta The beta parameter.
-		 * \param _vRet The returned vector.
-		 * \return Returns true if there was enough memory to resize the vector.
+		 * \param _sN		Number of samples.  Generally an odd number.
+		 * \param _tBeta	The beta parameter.
+		 * \param _vRet		The returned vector.
+		 * \return			Returns true if there was enough memory to resize the vector.
 		 **/
 		template <typename _tType = double>
 		static bool						KaiserWindow( size_t _sN, _tType _tBeta, std::vector<_tType> &_vRet ) {
@@ -1477,9 +1648,9 @@ namespace ee {
 		/**
 		 * Creates a Nuttal window.
 		 * 
-		 * \param _sN Number of samples.  Generally an odd number.
-		 * \param _vRet The returned vector.
-		 * \return Returns true if there was enough memory to resize the vector.
+		 * \param _sN	Number of samples.  Generally an odd number.
+		 * \param _vRet	The returned vector.
+		 * \return		Returns true if there was enough memory to resize the vector.
 		 **/
 		template <typename _tType = double>
 		static bool						NuttalWindow( size_t _sN, std::vector<_tType> &_vRet ) {
@@ -1508,9 +1679,9 @@ namespace ee {
 		/**
 		 * Creates a Blackman-Nuttal window.
 		 * 
-		 * \param _sN Number of samples.  Generally an odd number.
-		 * \param _vRet The returned vector.
-		 * \return Returns true if there was enough memory to resize the vector.
+		 * \param _sN	Number of samples.  Generally an odd number.
+		 * \param _vRet	The returned vector.
+		 * \return		Returns true if there was enough memory to resize the vector.
 		 **/
 		template <typename _tType = double>
 		static bool						BlackmanNuttalWindow( size_t _sN, std::vector<_tType> &_vRet ) {
@@ -1539,9 +1710,9 @@ namespace ee {
 		/**
 		 * Creates a Blackman-Harris window.
 		 * 
-		 * \param _sN Number of samples.  Generally an odd number.
-		 * \param _vRet The returned vector.
-		 * \return Returns true if there was enough memory to resize the vector.
+		 * \param _sN	Number of samples.  Generally an odd number.
+		 * \param _vRet	The returned vector.
+		 * \return		Returns true if there was enough memory to resize the vector.
 		 **/
 		template <typename _tType = double>
 		static bool						BlackmanHarrisWindow( size_t _sN, std::vector<_tType> &_vRet ) {
@@ -1570,9 +1741,9 @@ namespace ee {
 		/**
 		 * Creates a FLat-Top window.
 		 * 
-		 * \param _sN Number of samples.  Generally an odd number.
-		 * \param _vRet The returned vector.
-		 * \return Returns true if there was enough memory to resize the vector.
+		 * \param _sN	Number of samples.  Generally an odd number.
+		 * \param _vRet	The returned vector.
+		 * \return		Returns true if there was enough memory to resize the vector.
 		 **/
 		template <typename _tType = double>
 		static bool						FlatTopWindow( size_t _sN, std::vector<_tType> &_vRet ) {
@@ -1603,8 +1774,8 @@ namespace ee {
 		/**
 		 * Standard sinc() function.
 		 * 
-		 * \param _dX The operand.
-		 * \return Returns sin(x*PI) / x*PI.
+		 * \param _dX	The operand.
+		 * \return		Returns sin(x*PI) / x*PI.
 		 **/
 		static inline double			Sinc( double _dX ) {
 			_dX *= std::numbers::pi;
@@ -1614,6 +1785,288 @@ namespace ee {
 
 			return std::sin( _dX ) / _dX;
 		}
+
+		/**
+		 * \brief   Computes the normalized magnitude response |H(f)| of an M-tap rectangular-windowed sinc filter at frequency _dFreqHz.
+		 * 
+		 * \param   _dSampleHz  Sampling rate Fs (Hz).
+		 * \param   _dFreqHz    Frequency at which to evaluate (Hz).
+		 * \param   _sM         Number of taps (must be odd).
+		 * \return  |H(f)| normalized so H(0)=1.
+		 */
+		static double					SincFilterResponse( double _dSampleHz, double _dFreqHz, size_t _sM ) {
+			double dOmega = 2.0 * EE_PI * (_dFreqHz / _dSampleHz);
+			double dNum   = std::sin( _sM * dOmega * 0.5 );
+			double dDen   = _sM * std::sin( dOmega * 0.5 );
+			if ( std::fabs( dDen ) < 1e-16 ) { return 1.0; }
+			return std::fabs( dNum / dDen );
+		}
+
+		/**
+		 * \brief   Estimates the roll-off in dB/octave for an M-tap sinc around cutoff _dFc by comparing H(_dFc) to H(2·_dFc).
+		 * 
+		 * \param   _sM                 Tap-count (odd).
+		 * \param   _dSampleHz          Sampling rate Fs (Hz).
+		 * \param   _dFc                Cut-off frequency (Hz).
+		 * \return  20·log10( H(_dFc) / H(2·_dFc) ), i.e. dB drop per octave.
+		 */
+		static double					CalcSlopeDbPerOctave( size_t _sM, double _dSampleHz, double _dFc ) {
+			double dHfc  = SincFilterResponse( _dSampleHz, _dFc,  _sM );
+			double dH2fc = SincFilterResponse( _dSampleHz, 2.0 * _dFc, _sM );
+			if ( dHfc <= 0.0 || dH2fc <= 0.0 ) { return 0.0; }
+			return 20.0 * std::log10( dHfc / dH2fc );
+		}
+
+		/**
+		 * \brief   Finds an odd tap-count M for a windowed-sinc low-pass whose roll-off near cutoff is closest to the desired dB/octave.
+		 * 
+		 * \param   _dSampleHz              Sampling rate Fs (Hz).
+		 * \param   _dFc                    Cut-off frequency (Hz).
+		 * \param   _dDesiredSlopeDbPerOct  Target slope in dB per octave.
+		 * \return  Best-matching odd tap-count (3…1023).
+		 */
+		static inline size_t			GetSincFilterM( double _dSampleHz, double _dFc, double _dDesiredSlopeDbPerOct ) {
+			constexpr size_t csMaxTaps = 1 * 1024 * 1024 + 1;		// Must be odd.
+			size_t sBestM   = 3;
+			double dBestErr = 1e9;
+
+			for ( size_t sM = 3; sM <= csMaxTaps; sM += 2 ) {
+				double dSlope = CalcSlopeDbPerOctave( sM, _dSampleHz, _dFc );
+				double dErr   = std::fabs( dSlope - _dDesiredSlopeDbPerOct );
+				if ( dErr < dBestErr ) {
+					dBestErr = dErr;
+					sBestM   = sM;
+					if ( dErr < 0.0001 ) { break; } // Close enough.
+				}
+			}
+
+			return sBestM;
+		}
+
+		/**
+		 * \brief Calculates the exponent M for a SINC^M filter to achieve a desired fall‐off slope in dB per octave.
+		 * 
+		 * \param _dSlopeDbPerOctave Desired slope in decibels per octave.
+		 * \return The exponent M to use in the SINC^M filter.
+		 */
+		static inline double			GetSincFilterM( double _dSlopeDbPerOctave ) {
+			//                             6.0205999132796239042747778944899
+			constexpr double cdSlopePerM = 6.02059991327962418239394537522457540035247802734375;	// = 6.0205999132796239042747778944899 dB/octave per unit M (rounded to nearest actual double value).
+			double dM = _dSlopeDbPerOctave / cdSlopePerM;
+			return dM;
+		}
+
+		/**
+		 * Calculates the ideal filter width (M) for a windowed-sinc filter,
+		 * given a desired transition width in Hz.
+		 *
+		 * \param  _dHz						The sample rate in Hz.
+		 * \param  _dTransitionHz			The desired width of the transition band in Hz.
+		 * \param  _TransitionMultiplier	The transition multiplier.
+		 * \return							Returns the calculated (odd) filter length M.
+		 */
+		static inline size_t			CalcIdealSincM( double _dHz, double _dTransitionHz, size_t _TransitionMultiplier = 6.0 ) {
+			/**
+			 * Window			Main-Lobe Width (Null-to-Null)	Transition Multiplier for -6 dB	Multiplier for -40 dB	Multiplier for -60 dB	Typical Attenuation at Sidelobe
+			 * Rectangular		4.0 × dHz/dTrans				4.0								—						—						~-13 dB
+			 * Hanning			8.0 × dHz/dTrans				4.0								8.0						—						~-31 dB
+			 * Hamming			8.0 × dHz/dTrans				4.0								8.0						—						~-41 dB
+			 * Blackman			12.0 × dHz/dTrans				6.0								12.0					—						~-58 dB
+			 * Kaiser (β=8.6)	~12.0 × dHz/dTrans				6.0								12.0					24.0					up to -90 dB (for large β)
+			 **/
+			if ( _dTransitionHz <= 0.0 || _dHz <= 0.0 ) { return 1; }
+			size_t sM = size_t( std::ceil( _TransitionMultiplier * _dHz / _dTransitionHz ) );
+			if ( !( sM & 1 ) ) { ++sM; }  // Make odd for symmetry.
+			return sM;
+		}
+
+		/**
+		 * Creates a windowed sinc low-pass filter.  Call within a try/catch block.
+		 * 
+		 * \tparam _tType			The type of the filter coefficients.
+		 * \param _dHz				The input Hz.
+		 * \param _dFc				The cut-off frequency.
+		 * \param _sM				The size of the coefficient table to create.  On output, it contains the midpoint value for the created coefficient buffer.
+		 * \param _pfWindowFunc		The window function.
+		 * \return					Returns the created sinc-filter coefficients.
+		 * \throws					std::runtime_error on allocation or window error.
+		 **/
+		template <typename _tType = std::vector<double>>
+		static inline _tType			SincFilterLpf( double _dHz, double _dFc, size_t &_sM, PfWindowFunc<typename _tType::value_type> _pfWindowFunc = &BlackmanWindow<_tType::value_type> ) {
+			_tType vFilter;
+			if ( _dFc > _dHz / 2.0 || _dHz <= 0.0 ) {
+				vFilter.push_back( _tType::value_type( 1.0 ) );
+				_sM = 0;
+				return vFilter;
+			}
+			if ( !(_sM & 1) ) { ++_sM; }
+			_dFc /= _dHz;
+			
+			vFilter.resize( _sM );				// Can throw.
+			if ( !_pfWindowFunc( _sM, vFilter ) ) { throw std::runtime_error( "SincFilter(): Failed to apply windowing function." ); }
+
+			size_t sL = _sM / 2;
+			double dFc2 = 2.0 * _dFc;
+			int64_t i64SignedL = int64_t( sL );
+			for ( auto I = _sM; I--; ) {
+				int64_t N = int64_t( I ) - i64SignedL;
+				vFilter[I] = _tType::value_type( vFilter[I] * dFc2 * Sinc( dFc2 * N ) );
+			}
+
+			// Normalize.
+			double dSum = 0.0;
+			for ( auto & I : vFilter ) { dSum += double( I ); }
+			for ( auto & I : vFilter ) { I = _tType::value_type( I / dSum ); }
+			_sM = sL;
+			return vFilter;
+		}
+
+		/**
+		 * Creates a windowed sinc high-pass filter.  Call within a try/catch block.
+		 *
+		 * \tparam _tType			The type of the filter coefficients.
+		 * \param  _dHz				The sample rate in Hz.
+		 * \param  _dFc				The cutoff frequency in Hz.
+		 * \param  _sM				On input, the filter width (may be adjusted to odd); on output, set to half-width.
+		 * \param  _pfWindowFunc	The window function pointer (defaults to Hamming).
+		 * \return					Returns the created filter coefficients.
+		 * \throws					std::runtime_error on allocation or window error.
+		 */
+		template <typename _tType = std::vector<double>>
+		static inline _tType			SincFilterHpf( double _dHz, double _dFc, size_t &_sM, PfWindowFunc<typename _tType::value_type> _pfWindowFunc = &BlackmanWindow<_tType::value_type> ) {
+			_tType vFilter;
+			if ( _dFc > _dHz / 2.0 || _dHz <= 0.0 ) {
+				vFilter.push_back( _tType::value_type( 1.0 ) );
+				_sM = 0;
+				return vFilter;
+			}
+			if ( !(_sM & 1) ) { ++_sM; }
+			_dFc /= _dHz;
+
+			vFilter.resize( _sM );
+			if ( !_pfWindowFunc( _sM, vFilter ) ) { throw std::runtime_error( "SincFilterHpf(): Failed to apply windowing function." ); }
+
+			size_t sL = _sM / 2;
+			double dFc2 = 2.0 * _dFc;
+			int64_t i64SignedL = int64_t( sL );
+			for ( auto I = _sM; I--; ) {
+				int64_t N = int64_t( I ) - i64SignedL;
+				if ( N == 0 ) {
+					// Center tap for HPF
+					vFilter[I] = _tType::value_type( vFilter[I] * (1.0 - dFc2) );
+				}
+				else {
+					vFilter[I] = _tType::value_type( vFilter[I] * (-dFc2 * Sinc( dFc2 * N )) );
+				}
+			}
+
+			// Normalize.
+			double dSum = 0.0;
+			for ( auto & I : vFilter ) { dSum += double( I ); }
+			for ( auto & I : vFilter ) { I = _tType::value_type( I / dSum ); }
+			_sM = sL;
+			return vFilter;
+		}
+
+		/**
+		 * \brief   Creates a windowed sinc band-pass filter.  Call within a try/catch block.
+		 *
+		 * \tparam  _tType			The type of the filter coefficients.
+		 * \param   _dHz			The sample rate in Hz.
+		 * \param   _dF1			The low cutoff frequency in Hz.
+		 * \param   _dF2			The high cutoff frequency in Hz.
+		 * \param   _sM				On input, the filter width (may be adjusted to odd); on output, set to half-width (midpoint index).
+		 * \param   _pfWindowFunc	The window function pointer (defaults to Hamming).
+		 * \return					Returns the created band-pass sinc-filter coefficients.
+		 * \throws					std::runtime_error on allocation or window error.
+		 **/
+		template <typename _tType = std::vector<double>>
+		static inline _tType			SincFilterBpf( double _dHz, double _dF1, double _dF2, size_t &_sM, PfWindowFunc<typename _tType::value_type> _pfWindowFunc = &BlackmanWindow<_tType::value_type> ) {
+			_tType vFilter;
+			if ( _dHz <= 0.0 ||
+				 _dF1 >= _dF2 ||
+				 _dF2 > _dHz * 0.5 ||
+				 _dF1 < 0.0 ) {
+				vFilter.push_back( _tType::value_type( 1.0 ) );
+				_sM = 0;
+				return vFilter;
+			}
+
+			if ( !(_sM & 1) ) { ++_sM; }
+
+			double dF1n = _dF1 / _dHz;
+			double dF2n = _dF2 / _dHz;
+
+			vFilter.resize( _sM );
+			if ( !_pfWindowFunc( _sM, vFilter ) ) { throw std::runtime_error( "SincFilterBpf(): Failed to apply windowing function." ); }
+
+			size_t   sL    = _sM / 2;
+			double   dF12  = 2.0 * dF1n;
+			double   dF22  = 2.0 * dF2n;
+			int64_t  i64L  = int64_t( sL );
+
+			// Build band-pass by subtracting two low-pass responses.
+			for ( auto I = _sM; I--; ) {
+				int64_t N = int64_t( I ) - i64L;
+				if ( N == 0 ) {
+					// Center tap: difference of DC gains.
+					vFilter[I] = _tType::value_type( vFilter[I] * (dF22 - dF12) );
+				}
+				else {
+					// Off-center taps: difference of sinc kernels.
+					double dLo = dF12 * Sinc( dF12 * N );
+					double dHi = dF22 * Sinc( dF22 * N );
+					vFilter[I] = _tType::value_type( vFilter[I] * (dHi - dLo) );
+				}
+			}
+
+			// Normalize.
+			double dSum = 0.0;
+			for ( auto & I : vFilter ) { dSum += double( I ); }
+			for ( auto & I : vFilter ) { I = _tType::value_type( I / dSum ); }
+
+			_sM = sL;
+			return vFilter;
+		}
+
+		/**
+		 * \brief  Calculates a “gated” AC-RMS: subtracts DC and only counts samples above a threshold.
+		 *
+		 * \param  _vSamples    The input samples.
+		 * \param  _dThreshold  The absolute amplitude gate; samples with |x–mean| < _dThreshold are ignored.
+		 * \return              The computed gated RMS; zero if no samples exceed threshold.
+		 * \throws std::runtime_error if _vSamples is empty.
+		 */
+		template <typename _tType = std::vector<double>>
+		static inline double			CalcRmsGated( const _tType &_vSamples, double _dThreshold ) {
+			if ( _vSamples.empty() ) { return 0.0; }
+
+			// Remove DC.
+			double dMean = 0.0;
+			for ( auto I = _vSamples.size(); I--; ) {
+				dMean += double( _vSamples[I] );
+			}
+			/*for ( double dSample : _vSamples ) {
+				dMean += dSample;
+			}*/
+			dMean /= static_cast<double>(_vSamples.size());
+
+			// Accumulate only above threshold.
+			double dSumSq    = 0.0;
+			size_t sCount    = 0;
+			for ( auto I = _vSamples.size(); I--; ) {
+				double dCentered = double( _vSamples[I] ) - dMean;
+				if ( std::abs( dCentered ) >= _dThreshold ) {
+					dSumSq += dCentered * dCentered;
+					++sCount;
+				}
+			}
+			if ( sCount == 0 ) { return 0.0; }
+
+			double dMeanSq = dSumSq / static_cast<double>(sCount);
+			return std::sqrt( dMeanSq );
+		}
+
 	};
 
 }	// namespace ee

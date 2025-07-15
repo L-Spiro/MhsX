@@ -1159,7 +1159,6 @@ namespace lsw {
 				m_stLastSel = LSW_TREELIST_INVALID;
 				return TRUE;
 			}
-			return FALSE;
 		}
 		if ( _lpParm == -1 ) {
 			/*UINT uiState = */GetTreeItemState( _htiItem, &_lpParm );

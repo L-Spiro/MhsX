@@ -547,6 +547,15 @@
     <ClCompile Include="Src\Disassembler x86_x64\MXDisassemGen.cpp">
       <Filter>Source Files\Disassembler x86_x64</Filter>
     </ClCompile>
+    <ClCompile Include="Src\FoundAddresses\MXFoundAddress.cpp">
+      <Filter>Source Files\FoundAddresses</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\FoundAddresses\MXFoundAddressBase.cpp">
+      <Filter>Source Files\FoundAddresses</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\FoundAddresses\MXFoundAddressManager.cpp">
+      <Filter>Source Files\FoundAddresses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -835,6 +844,18 @@
     </ClInclude>
     <ClInclude Include="Src\Utilities\MXStream.h">
       <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\FoundAddresses\MXFoundAddress.h">
+      <Filter>Header Files\FoundAddresses</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\FoundAddresses\MXFoundAddressBase.h">
+      <Filter>Header Files\FoundAddresses</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\FoundAddresses\MXFoundAddressManager.h">
+      <Filter>Header Files\FoundAddresses</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\FoundAddresses\MXFoundAddressGroup.h">
+      <Filter>Header Files\FoundAddresses</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

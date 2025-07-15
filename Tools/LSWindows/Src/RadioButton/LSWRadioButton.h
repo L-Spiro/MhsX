@@ -12,10 +12,17 @@ namespace lsw {
 
 		// == Functions.
 		// Are we checked?
-		virtual BOOL						IsChecked() const { return ::SendMessageW( Wnd(), BM_GETCHECK, 0, 0 ) == BST_CHECKED; }
+		virtual BOOL						IsChecked() const { return CheckState() == BST_CHECKED; }
 
 		// Changes the check state of a button control.
 		virtual VOID						CheckButton( UINT _uCheck ) { ::SendMessageW( Wnd(), BM_SETCHECK, static_cast<WPARAM>(_uCheck), 0L ); }
+
+		/**
+		 * Gets the check state.
+		 * 
+		 * \return Returns the check state.
+		 **/
+		virtual INT							CheckState() const { return static_cast<INT>(::SendMessageW( Wnd(), BM_GETCHECK, 0, 0 )); }
 
 		// Determines the type of control this is.
 		virtual uint32_t					WidgetType() const { return LSW_LT_RADIO; }

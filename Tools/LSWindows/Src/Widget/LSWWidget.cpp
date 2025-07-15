@@ -1,5 +1,6 @@
 #include "LSWWidget.h"
 #include "../Base/LSWBase.h"
+#include "../ComboBox/LSWComboBoxEx.h"
 #include "../Docking/LSWDockable.h"
 #include "../ListView/LSWListView.h"
 #include "../Tab/LSWTab.h"
@@ -12,6 +13,9 @@
 #include <windowsx.h>
 
 namespace lsw {
+
+	/** The tooltip buffer. */
+	WCHAR CWidget::m_wcToolTipBuffer[1024*2];
 
 	CWidget::CWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t /*_ui64Data*/ ) :
 		m_ui64UserData( 0 ),
@@ -42,7 +46,14 @@ namespace lsw {
 		m_dwExtendedStyles = _wlLayout.dwStyleEx;
 
 		if ( _wlLayout.pcToolTip ) {
-			m_sTooltipText.assign( _wlLayout.pcToolTip, _wlLayout.sToolTipLen );
+			auto sLen = _wlLayout.sToolTipLen;
+			if ( !sLen ) {
+				try {
+					sLen = std::strlen( _wlLayout.pcToolTip );
+				}
+				catch ( ... ) { sLen = 0; }
+			}
+			m_sTooltipText.assign( _wlLayout.pcToolTip, sLen );
 		}
 
 		if ( _bCreateWidget ) {
@@ -562,6 +573,8 @@ namespace lsw {
 				CBase::GetThisHandle(),
 				NULL );
 			if ( m_hTooltip ) {
+				::SendMessageW( m_hTooltip, TTM_SETMAXTIPWIDTH, 0, static_cast<LPARAM>(300) );
+
 				::SetWindowPos( m_hTooltip, HWND_TOPMOST, 0, 0, 0, 0,
 					SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE );
 
@@ -1197,6 +1210,20 @@ namespace lsw {
 			case WM_NOTIFY : {
 				LPNMHDR lpHdr = reinterpret_cast<LPNMHDR>(_lParam);
 				switch ( lpHdr->code ) {
+					case CBEN_GETDISPINFOW : {
+						PNMCOMBOBOXEXW plvdiInfo = reinterpret_cast<PNMCOMBOBOXEXW>(_lParam);
+						HWND hFrom = plvdiInfo->hdr.hwndFrom;
+						CWidget * pmwTemp = LSW_WIN2CLASS( hFrom );
+						if ( pmwTemp ) {
+							CComboBoxEx * pcbView = static_cast<CComboBoxEx *>(pmwTemp);
+							if ( !pcbView->GetDispInfoNotify( plvdiInfo ) ) {
+								if ( pmwTemp->Parent() ) {
+									pmwTemp->Parent()->GetDispInfoNotify( plvdiInfo );
+								}
+							}
+						}
+						LSW_RET( 1, TRUE );
+					}
 					case LVN_COLUMNCLICK : {
 						LPNMLISTVIEW plvListView = reinterpret_cast<LPNMLISTVIEW>(_lParam);
 						HWND hFrom = plvListView->hdr.hwndFrom;
@@ -1382,9 +1409,15 @@ namespace lsw {
 						CWidget * pmwTemp = LSW_WIN2CLASS( hFrom );
 						if ( pmwTemp && pmwTemp->m_sTooltipText.size() ) {
 							std::wstring wsText = pmwThis->TranslateTooltip( pmwTemp->m_sTooltipText );
-							::wcsncpy_s( pdiInfo->szText, wsText.c_str(), _TRUNCATE );
-							pdiInfo->szText[LSW_ELEMENTS( pdiInfo->szText )-1] = L'\0';
-					}
+							/*::wcsncpy_s( pdiInfo->szText, wsText.c_str(), _TRUNCATE );
+							pdiInfo->szText[LSW_ELEMENTS( pdiInfo->szText )-1] = L'\0';*/
+
+							::wcsncpy_s( m_wcToolTipBuffer, wsText.c_str(), _TRUNCATE );
+							m_wcToolTipBuffer[LSW_ELEMENTS( m_wcToolTipBuffer )-1] = L'\0';
+							pdiInfo->lpszText = &m_wcToolTipBuffer[0];
+							pdiInfo->uFlags |= TTF_DI_SETITEM;
+							
+						}
 						LSW_RET( 1, TRUE );
 					}
 				}

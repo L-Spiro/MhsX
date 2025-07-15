@@ -69,6 +69,12 @@ namespace mx {
 		// Sets the update speed.
 		void								SetUpdateSpeed( uint32_t _ui32Speed );
 
+		// Gets the total number of selected addresses.
+		size_t								TotalSelected() const;
+
+		// Adds the selected addresses to the main list.
+		bool								AddSelectedAddresses() const;
+
 		// Copies the selected texts' address lines.
 		void								CopySelectedAddresses() const;
 

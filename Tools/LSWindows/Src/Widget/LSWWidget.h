@@ -222,6 +222,13 @@ namespace lsw {
 		// Changes the check state of a button control.  Implemented by CCheckButton and CRadioButton.
 		virtual VOID						CheckButton( UINT /*_uCheck*/ ) {}
 
+		/**
+		 * Gets the check state.
+		 * 
+		 * \return Returns the check state.
+		 **/
+		virtual INT							CheckState() const { return BST_INDETERMINATE; }
+
 		// Sets the button state to BST_CHECKED.
 		virtual VOID						Check() { CheckButton( BST_CHECKED ); }
 
@@ -482,7 +489,10 @@ namespace lsw {
 		/** Custom ID. */
 		WORD								m_wId;
 		/** Tracks whether the control has focus or not. */
-		bool								m_bHasFocus;				
+		bool								m_bHasFocus;
+
+		/** The tooltip buffer. */
+		static WCHAR						m_wcToolTipBuffer[1024*2];
 
 
 		// == Message Handlers.
@@ -806,6 +816,20 @@ namespace lsw {
 		 * \return Returns an LSW_HANDLED code.  Return LSW_H_HANDLED to prevent the command from being sent to the default procedure.
 		 **/
 		virtual LSW_HANDLED					SysCommand( WORD /*_wCommand*/, int /*_iMouseX*/, int /*_iMouseY*/ ) { return LSW_H_CONTINUE; }
+
+		/**
+		 * Requesting information (notification responder).
+		 *
+		 * \return Returns TRUE.
+		 **/
+		virtual BOOL						GetDispInfoNotify( NMLVDISPINFOW * /*_plvdiInfo*/ ) { return FALSE; }
+
+		/**
+		 * Requesting information (notification responder).
+		 *
+		 * \return Returns TRUE.
+		 **/
+		virtual BOOL						GetDispInfoNotify( NMCOMBOBOXEXW * /*_plvdiInfo*/ ) { return FALSE; }
 
 		/**
 		 * The WM_NOTIFY -> LVN_ITEMCHANGED handler.

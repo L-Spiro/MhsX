@@ -1825,6 +1825,7 @@
 "epsilonf( ??, "
 "repsilon( ??, "
 "repsilonf( ??, "
+"&Add Selected"
 "Copy &Address"
 "Copy &Value"
 "Copy &Current Value"

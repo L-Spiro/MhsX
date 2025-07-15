@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../MXMhsX.h"
+#include "../FoundAddresses/MXFoundAddressManager.h"
 #include "../Hotkeys/MXHotkeyManager.h"
 #include "../Options/MXOptions.h"
 #include "../Programs/MXPrograms.h"
@@ -109,6 +110,9 @@ namespace mx {
 		// Gets a const reference to the programs.
 		const std::vector<MX_PROGRAM> &		Programs() const { return m_vPrograms; }
 
+		// Gets the Found Address Manager.
+		CFoundAddressManager &				FoundAddressManager() { return m_famFoundAddresses; }
+
 		// Executes a program by index.
 		bool								ExecuteProgramByIdx( size_t _stIdx );
 
@@ -154,6 +158,8 @@ namespace mx {
 		std::vector<MX_PROGRAM>				m_vPrograms;
 		// Program critical section.
 		mutable CCriticalSection			m_csProgramCrit;
+		// The list of found addresses.
+		CFoundAddressManager				m_famFoundAddresses;
 
 
 		// == Functions.

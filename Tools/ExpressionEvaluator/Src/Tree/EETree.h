@@ -231,6 +231,84 @@ namespace ee {
 			return _ptItem->Parent();
 		}
 
+		/**
+		 * Moves an item one up, if possible.  It does this by swapping with the item in front of it.
+		 **/
+		static void										MoveUp( CTree<_tType> * _ptItem ) {
+			if ( _ptItem && _ptItem->m_ptPrev ) {
+				// Decouple from the link.
+				auto * ptInsertAt = _ptItem->m_ptPrev;
+				if ( _ptItem->Parent() == ptInsertAt->Parent() ) {
+					if ( _ptItem->m_ptPrev ) {
+						(*_ptItem->m_ptPrev).m_ptNext = _ptItem->m_ptNext;
+					}
+					if ( _ptItem->m_ptNext ) {
+						(*_ptItem->m_ptNext).m_ptPrev = _ptItem->m_ptPrev;
+					}
+
+					// Insert again.
+					_ptItem->m_ptPrev = ptInsertAt->m_ptPrev;
+					_ptItem->m_ptNext = ptInsertAt;
+					// Fix neighbors.
+					if ( _ptItem->m_ptPrev ) {
+						(*_ptItem->m_ptPrev).m_ptNext = _ptItem;
+					}
+					if ( _ptItem->m_ptNext ) {
+						(*_ptItem->m_ptNext).m_ptPrev = _ptItem;
+					}
+
+					// Fix the parent array.
+					if ( _ptItem->Parent() ) {
+						for ( size_t I = 1; I < _ptItem->Parent()->Size(); ++I ) {
+							if ( _ptItem->Parent()->m_vChildren[I].get() == _ptItem ) {
+								std::swap( _ptItem->Parent()->m_vChildren[I], _ptItem->Parent()->m_vChildren[I-1] );
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		/**
+		 * Moves an item one down, if possible.  It does this by swapping with the item in front of it.
+		 **/
+		static void										MoveDown( CTree<_tType> * _ptItem ) {
+			if ( _ptItem && _ptItem->m_ptNext ) {
+				// Decouple from the link.
+				auto * ptInsertAt = _ptItem->m_ptNext;
+				if ( _ptItem->Parent() == ptInsertAt->Parent() ) {
+					if ( _ptItem->m_ptPrev ) {
+						(*_ptItem->m_ptPrev).m_ptNext = _ptItem->m_ptNext;
+					}
+					if ( _ptItem->m_ptNext ) {
+						(*_ptItem->m_ptNext).m_ptPrev = _ptItem->m_ptPrev;
+					}
+
+					// Insert again.
+					_ptItem->m_ptPrev = ptInsertAt;
+					_ptItem->m_ptNext = ptInsertAt->m_ptNext;
+					// Fix neighbors.
+					if ( _ptItem->m_ptPrev ) {
+						(*_ptItem->m_ptPrev).m_ptNext = _ptItem;
+					}
+					if ( _ptItem->m_ptNext ) {
+						(*_ptItem->m_ptNext).m_ptPrev = _ptItem;
+					}
+
+					// Fix the parent array.
+					if ( _ptItem->Parent() ) {
+						for ( size_t I = 0; I < _ptItem->Parent()->Size() - 1; ++I ) {
+							if ( _ptItem->Parent()->m_vChildren[I].get() == _ptItem ) {
+								std::swap( _ptItem->Parent()->m_vChildren[I], _ptItem->Parent()->m_vChildren[I+1] );
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+
 
 	protected :
 		// == Members.

@@ -353,7 +353,7 @@ namespace ee {
 			uint32_t ui32Val;
 			CStringBaseApi::UpdateArrayAccessOptimizer( m_sObj, m_vArrayOpt, size_t( aLen.u.ui64Val ), ui32Val );
 		}
-		while ( m_sObj.size() > m_vArrayOpt[aLen.u.ui64Val] ) {
+		while ( m_sObj.size() > m_vArrayOpt[size_t( aLen.u.ui64Val )] ) {
 			m_sObj.pop_back();
 		}
 		//Dirty();

@@ -269,8 +269,11 @@
     <ClCompile Include="Src\Files\MXFile.cpp" />
     <ClCompile Include="Src\Files\MXFileMap.cpp" />
     <ClCompile Include="Src\FloatingPointStudio\MXFloatingPointStudioWindow.cpp" />
+    <ClCompile Include="Src\FoundAddresses\MXFoundAddress.cpp" />
+    <ClCompile Include="Src\FoundAddresses\MXFoundAddressBase.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressesListView.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressesWindow.cpp" />
+    <ClCompile Include="Src\FoundAddresses\MXFoundAddressManager.cpp" />
     <ClCompile Include="Src\Hotkeys\MXHotkeyManager.cpp" />
     <ClCompile Include="Src\Hotkeys\MXHotkeyManBase.cpp" />
     <ClCompile Include="Src\Hotkeys\MXHotkeyPollingMethod.cpp" />
@@ -395,8 +398,12 @@
     <ClInclude Include="Src\Files\MXFileIo.h" />
     <ClInclude Include="Src\Files\MXFileMapIo.h" />
     <ClInclude Include="Src\FloatingPointStudio\MXFloatingPointStudioWindow.h" />
+    <ClInclude Include="Src\FoundAddresses\MXFoundAddress.h" />
+    <ClInclude Include="Src\FoundAddresses\MXFoundAddressBase.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressesListView.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressesWindow.h" />
+    <ClInclude Include="Src\FoundAddresses\MXFoundAddressGroup.h" />
+    <ClInclude Include="Src\FoundAddresses\MXFoundAddressManager.h" />
     <ClInclude Include="Src\Hotkeys\MXHotkeyManager.h" />
     <ClInclude Include="Src\Hotkeys\MXHotkeyManBase.h" />
     <ClInclude Include="Src\Hotkeys\MXHotkeyPollingMethod.h" />

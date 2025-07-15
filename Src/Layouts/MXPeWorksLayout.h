@@ -23,7 +23,7 @@ namespace mx {
 			MX_PEW_TAB_TREELIST_START			= 3400,
 		};
 
-		// Menu items
+		// Menu items.
 		enum MX_MAINWINDOW_MENU_IDS {
 			MX_PEW_MENU_BAR						= 780,
 			MX_PEW_MENU_FILE,

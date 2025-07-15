@@ -4,6 +4,7 @@
 #include "../Layouts/MXLayoutManager.h"
 #include "../Layouts/MXMainWindowLayout.h"
 #include "../MainWindow/MXMhsMainWindow.h"
+#include "../Search/MXSearchResultRef.h"
 #include "../System/MXSystem.h"
 #include "MXFoundAddressesListView.h"
 
@@ -167,6 +168,10 @@ namespace mx {
 	// WM_COMMAND from menu.
 	CWidget::LSW_HANDLED CFoundAddressesWindow::MenuCommand( WORD _Id ) {
 		switch ( _Id ) {
+			case CFoundAddressLayout::MX_BC_ADD : {
+				AddSelectedAddresses();
+				break;
+			}
 			case CFoundAddressLayout::MX_BC_COPY_ADDRESS : {
 				CopySelectedAddresses();
 				break;
@@ -307,6 +312,15 @@ namespace mx {
 		}
 	}
 
+	// Gets the total number of selected addresses.
+	size_t CFoundAddressesWindow::TotalSelected() const {
+		const CFoundAddressesListView * plvAddressList = static_cast<const CFoundAddressesListView *>(ListView());
+		if ( plvAddressList ) {
+			return size_t( plvAddressList->GetSelectedCount() );
+		}
+		return 0;
+	}
+
 	// Sets the update speed.
 	void CFoundAddressesWindow::SetUpdateSpeed( uint32_t _ui32Speed ) {
 		m_uiUpdateSpeed = _ui32Speed;
@@ -315,6 +329,53 @@ namespace mx {
 			//	there is a possibility later it could change.  Solid code.
 			m_uiptrUpdateListTimer = CSystem::SetTimer( Wnd(), m_uiptrUpdateListTimer, m_uiUpdateSpeed, NULL );
 		}
+	}
+
+	// Adds the selected addresses to the main list.
+	bool CFoundAddressesWindow::AddSelectedAddresses() const {
+		try {
+			if ( m_pmmwMhsWindow ) {
+				const CFoundAddressesListView * plvAddressList = static_cast<const CFoundAddressesListView *>(ListView());
+				if ( plvAddressList ) {
+					CSearcher::MX_SEARCH_LOCK slSearchLock( &m_pmmwMhsWindow->MemHack()->Searcher() );
+					std::vector<int> vSelections;
+					if ( plvAddressList->GetSelectedItems( vSelections ) ) {
+						std::vector<size_t> vAdded;
+						for ( size_t I = 0; I < vSelections.size(); I++ ) {
+							const CSearchResultBase * psrbResults = m_pmmwMhsWindow->MemHack()->Searcher().SearchResults();
+							if ( psrbResults ) {
+								psrbResults->Lock();
+								auto spSearchParms = m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms();
+								uint64_t ui64Addr;
+								const uint8_t * pui8Data;
+								if ( psrbResults->GetResultFast( vSelections[I], ui64Addr, pui8Data ) ) {
+									auto faAddress = m_pmmwMhsWindow->MemHack()->FoundAddressManager().AddFoundAddress();
+									if ( faAddress ) {
+										if ( spSearchParms.stType == CUtilities::MX_ST_DATATYPE_SEARCH ) {
+											if ( faAddress->InitWithAddressAndDataType( ui64Addr, spSearchParms.dtLVal.dtType, pui8Data ) ) {
+												vAdded.push_back( faAddress->Id() );
+											}
+										}
+										else if ( spSearchParms.stType == CUtilities::MX_ST_STRING_SEARCH ) {
+										}
+										else if ( spSearchParms.stType == CUtilities::MX_ST_POINTER_SEARCH ) {
+										}
+										else if ( spSearchParms.stType == CUtilities::MX_ST_EXP_SEARCH ) {
+										}
+										else if ( spSearchParms.stType == CUtilities::MX_ST_GROUP_SEARCH ) {
+										}
+									}
+								}
+								psrbResults->Unlock();
+							}
+						}
+						return vAdded.size() == vSelections.size();
+					}
+				}
+			}
+		}
+		catch ( ... ) { return false; }
+		return false;
 	}
 
 	// Copies the selected texts' address lines.
@@ -447,12 +508,15 @@ namespace mx {
 	CWidget::LSW_HANDLED CFoundAddressesWindow::ContextMenu( CWidget * _pwControl, INT _iX, INT _iY ) {
 		switch ( _pwControl->Id() ) {
 			case CFoundAddressLayout::MX_FAW_LIST : {
+				auto sSelected = TotalSelected();
 				LSW_MENU_ITEM miMenuBar[] = {
-					//bIsSeperator	dwId													bCheckable	bChecked	bEnabled	lpwcText, stTextLen												bSkip
-					{ FALSE,		CFoundAddressLayout::MX_BC_COPY_ADDRESS,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_43FCD42E_Copy__Address, _LEN_43FCD42E ),		FALSE },
-					{ FALSE,		CFoundAddressLayout::MX_BC_COPY_VALUE,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_43A1870B_Copy__Value, _LEN_43A1870B ),			FALSE },
-					{ FALSE,		CFoundAddressLayout::MX_BC_COPY_CUR_VALUE,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_C0FE03C5_Copy__Current_Value, _LEN_C0FE03C5 ),	CurValIndex() == -1 },
-					{ FALSE,		CFoundAddressLayout::MX_BC_COPY_ALL,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_9B7D368F_Copy_A_ll, _LEN_9B7D368F ),			FALSE },
+					//bIsSeperator	dwId													bCheckable	bChecked	bEnabled			lpwcText, stTextLen												bSkip
+					{ FALSE,		CFoundAddressLayout::MX_BC_ADD,							FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_0924E89F__Add_Selected, _LEN_0924E89F ),		sSelected == 0 },
+					{ TRUE,			0,														FALSE,		FALSE,		FALSE,				nullptr,  0,													sSelected == 0 },
+					{ FALSE,		CFoundAddressLayout::MX_BC_COPY_ADDRESS,				FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_43FCD42E_Copy__Address, _LEN_43FCD42E ),		FALSE },
+					{ FALSE,		CFoundAddressLayout::MX_BC_COPY_VALUE,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_43A1870B_Copy__Value, _LEN_43A1870B ),			FALSE },
+					{ FALSE,		CFoundAddressLayout::MX_BC_COPY_CUR_VALUE,				FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_C0FE03C5_Copy__Current_Value, _LEN_C0FE03C5 ),	CurValIndex() == -1 },
+					{ FALSE,		CFoundAddressLayout::MX_BC_COPY_ALL,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_9B7D368F_Copy_A_ll, _LEN_9B7D368F ),			FALSE },
 				};
 
 				const LSW_MENU_LAYOUT miMenus[] = {

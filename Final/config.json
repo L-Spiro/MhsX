@@ -46,9 +46,10 @@
         "RegexNegateSingleLine" : true,
         "RegexFlavor" : 10,
         "ByteSwap" : 0,
-        "From" : "DFE40000",
+        "From" : "0",
         "To" : "DFE40000 + 08000000h",
         "FromHistory" : [
+            "0",
             "DFE40000",
             "10000h+0",
             "10000h"
