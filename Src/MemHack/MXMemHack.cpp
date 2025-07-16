@@ -270,6 +270,96 @@ namespace mx {
 		return true;
 	}
 
+	// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
+	// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
+	bool CMemHack::ReadProcessMemory_PreProcessed( LPCVOID _lpBaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, SIZE_T * _lpNumberOfBytesRead ) const {
+		uint64_t ui64Address = reinterpret_cast<uint64_t>(_lpBaseAddress);
+		constexpr uint64_t uiAlignment = 8;
+		uint64_t uiOffsetToData = ui64Address % uiAlignment;
+		uint64_t uiDataStart = (ui64Address / uiAlignment) * uiAlignment;
+		uint64_t uiAdjustedEnd = (((ui64Address + _nSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
+		uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
+
+		try {
+			_vBuffer.resize( static_cast<size_t>(uiAdjustedLen) );
+			if ( !Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
+				_vBuffer.data(), _vBuffer.size(), _lpNumberOfBytesRead ) ) {
+				return false;
+			}
+			CSearcher::PreprocessByteSwap( _vBuffer.data(), uiAdjustedLen, Searcher().LastSearchParms() );
+			_sBufferOffset = size_t( uiOffsetToData );
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
+	// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
+	bool CMemHack::ReadProcessMemory_PreProcessed( LPCVOID _lpBaseAddress, uint8_t * _pui8Buffer, SIZE_T _nSize, size_t &_sBufferOffset, SIZE_T * _lpNumberOfBytesRead ) const {
+		uint64_t ui64Address = reinterpret_cast<uint64_t>(_lpBaseAddress);
+		constexpr uint64_t uiAlignment = 8;
+		uint64_t uiOffsetToData = ui64Address % uiAlignment;
+		uint64_t uiDataStart = (ui64Address / uiAlignment) * uiAlignment;
+		uint64_t uiAdjustedEnd = (((ui64Address + _nSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
+		uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
+
+		try {
+			if ( !Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
+				_pui8Buffer, static_cast<SIZE_T>(uiAdjustedLen), _lpNumberOfBytesRead ) ) {
+				return false;
+			}
+			CSearcher::PreprocessByteSwap( _pui8Buffer, uiAdjustedLen, Searcher().LastSearchParms() );
+			_sBufferOffset = size_t( uiOffsetToData );
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
+	// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
+	bool CMemHack::ReadProcessMemory_PreProcessed( LPCVOID _lpBaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead ) const {
+		uint64_t ui64Address = reinterpret_cast<uint64_t>(_lpBaseAddress);
+		constexpr uint64_t uiAlignment = 8;
+		uint64_t uiOffsetToData = ui64Address % uiAlignment;
+		uint64_t uiDataStart = (ui64Address / uiAlignment) * uiAlignment;
+		uint64_t uiAdjustedEnd = (((ui64Address + _nSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
+		uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
+
+		try {
+			_vBuffer.resize( static_cast<size_t>(uiAdjustedLen) );
+			if ( !Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
+				_vBuffer.data(), _vBuffer.size(), _lpNumberOfBytesRead ) ) {
+				return false;
+			}
+			CSearcher::PreprocessByteSwap( _vBuffer.data(), uiAdjustedLen, _bsSwap );
+			_sBufferOffset = size_t( uiOffsetToData );
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
+	// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
+	bool CMemHack::ReadProcessMemory_PreProcessed( LPCVOID _lpBaseAddress, uint8_t * _pui8Buffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead ) const {
+		uint64_t ui64Address = reinterpret_cast<uint64_t>(_lpBaseAddress);
+		constexpr uint64_t uiAlignment = 8;
+		uint64_t uiOffsetToData = ui64Address % uiAlignment;
+		uint64_t uiDataStart = (ui64Address / uiAlignment) * uiAlignment;
+		uint64_t uiAdjustedEnd = (((ui64Address + _nSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
+		uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
+
+		try {
+			if ( !Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
+				_pui8Buffer, static_cast<SIZE_T>(uiAdjustedLen), _lpNumberOfBytesRead ) ) {
+				return false;
+			}
+			CSearcher::PreprocessByteSwap( _pui8Buffer, uiAdjustedLen, _bsSwap );
+			_sBufferOffset = size_t( uiOffsetToData );
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
 	// The address reader for expressions.
 	bool __stdcall CMemHack::ExpAddressHandler( uint64_t _ui64Address, ee::EE_CAST_TYPES _ctType, uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult ) {
 		CMemHack * _mhMemHack = reinterpret_cast<CMemHack *>(_uiptrData);

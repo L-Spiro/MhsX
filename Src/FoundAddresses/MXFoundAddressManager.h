@@ -36,10 +36,10 @@ namespace mx {
 		bool																SetParent( size_t _sId, size_t _sParent );
 
 		// Adds a normal Found Address.
-		CFoundAddress *														AddFoundAddress();
+		CFoundAddress *														AddFoundAddress( CMemHack * _pmhMemHack );
 
 		// Adds a group.
-		CFoundAddressGroup *												AddGroup();
+		CFoundAddressGroup *												AddGroup( CMemHack * _pmhMemHack );
 
 	protected :
 		// == Members.

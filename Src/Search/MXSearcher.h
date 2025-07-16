@@ -178,7 +178,10 @@ namespace mx {
 		bool								LastSearchWasSubsearch() const { return m_bLastSearchWasSubsearch; }
 
 		// Performs pre-processing byteswapping.
-		static void							PreprocessByteSwap( void * _pvData, size_t _stLen, const MX_SEARCH_PARMS &_spParms );
+		static inline void					PreprocessByteSwap( void * _pvData, size_t _stLen, const MX_SEARCH_PARMS &_spParms ) { return PreprocessByteSwap( _pvData, _stLen, _spParms.bsByteSwapping ); }
+
+		// Performs pre-processing byteswapping.
+		static void							PreprocessByteSwap( void * _pvData, size_t _stLen, CUtilities::MX_BYTESWAP _bsSwap );
 
 		// RAM buffer preprocessing function.
 		static void							RamProcPreprocessByteSwap( void * _pvData, size_t _stLen, uint64_t _ui64Parm ) {

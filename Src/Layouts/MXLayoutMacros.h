@@ -5,11 +5,11 @@
 #define MW_MENU_TXT( ENC_STR, ENC_LEN )	reinterpret_cast<LPCWSTR>(ENC_STR), ENC_LEN
 
 #ifndef MX_MAIN_WINDOW_W
-#define MX_MAIN_WINDOW_W				1000
+#define MX_MAIN_WINDOW_W				1160
 #endif	// MX_MAIN_WINDOW_W
 
 #ifndef MX_MAIN_WINDOW_H
-#define MX_MAIN_WINDOW_H				750
+#define MX_MAIN_WINDOW_H				850
 #endif	// MX_MAIN_WINDOW_H
 
 #ifndef MX_LEFT_ALIGN

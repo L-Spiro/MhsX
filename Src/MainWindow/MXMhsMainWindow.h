@@ -151,6 +151,12 @@ namespace mx {
 		// Shows the options dialog with a page to be selected by default.
 		void								ShowOptions( int32_t _i32Page );
 
+		// Deletes the selected Found Addresses.
+		void								DeleteSelected();
+
+		// Deletes all Found Addresses.
+		void								DeleteAll();
+
 		// Gets the last options page shown.
 		int32_t								LastOptionsShown() const { return m_i32LastOptionsPage; }
 

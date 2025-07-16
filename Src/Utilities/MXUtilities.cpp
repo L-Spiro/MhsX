@@ -875,26 +875,31 @@ namespace mx {
 	}
 
 	// Creates a hexadecimal string.  Returns the internal buffer, which means the result must be copied as it will be overwritten when the next function that uses the internal buffer is called.
-	const CHAR * CUtilities::ToHex( uint64_t _uiValue, uint32_t _uiNumDigits ) {
-		return ToHex( _uiValue, m_szTemp, MX_ELEMENTS( m_szTemp ), _uiNumDigits );
+	const CHAR * CUtilities::ToHex( uint64_t _uiValue, uint32_t _uiNumDigits, bool _bIncludePrefix ) {
+		return ToHex( _uiValue, m_szTemp, MX_ELEMENTS( m_szTemp ), _uiNumDigits, _bIncludePrefix );
 	}
 	
 	// Creates a hexadecimal string.
-	const CHAR * CUtilities::ToHex( uint64_t _uiValue, CHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
+	const CHAR * CUtilities::ToHex( uint64_t _uiValue, CHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits, bool _bIncludePrefix ) {
 		_uiNumDigits = std::max( _uiNumDigits, 1U );
 		CHAR szFormat[32];
-		if ( Options.bUse0xForHex ) {
-			std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "0x%%.%uI64X", _uiNumDigits );
+		if ( _bIncludePrefix ) {
+			if ( Options.bUse0xForHex ) {
+				std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "0x%%.%uI64X", _uiNumDigits );
+			}
+			else {
+				std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64Xh", _uiNumDigits );
+			}
 		}
 		else {
-			std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64Xh", _uiNumDigits );
+			std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64X", _uiNumDigits );
 		}
 		std::snprintf( _pcRet, _sLen, szFormat, _uiValue );
 		return _pcRet;
 	}
 
 	// Creates a hexadecimal string.
-	const CHAR * CUtilities::ToHex( uint64_t _uiValue, std::string &_sString, uint32_t _uiNumDigits ) {
+	const CHAR * CUtilities::ToHex( uint64_t _uiValue, std::string &_sString, uint32_t _uiNumDigits, bool _bIncludePrefix ) {
 		CHAR szTemp[32];
 		ToHex( _uiValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits );
 
@@ -903,23 +908,28 @@ namespace mx {
 	}
 
 	// Creates a hexadecimal string.
-	const WCHAR * CUtilities::ToHex( uint64_t _uiValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
+	const WCHAR * CUtilities::ToHex( uint64_t _uiValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits, bool _bIncludePrefix ) {
 		_uiNumDigits = std::max( _uiNumDigits, 1U );
 		WCHAR szFormat[32];
-		if ( Options.bUse0xForHex ) {
-			std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"0x%%.%uI64X", _uiNumDigits );
+		if ( _bIncludePrefix ) {
+			if ( Options.bUse0xForHex ) {
+				std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"0x%%.%uI64X", _uiNumDigits );
+			}
+			else {
+				std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64Xh", _uiNumDigits );
+			}
 		}
 		else {
-			std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64Xh", _uiNumDigits );
+			std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64X", _uiNumDigits );
 		}
 		std::swprintf( _pcRet, _sLen, szFormat, _uiValue );
 		return _pcRet;
 	}
 
 	// Creates a hexadecimal string.
-	const WCHAR * CUtilities::ToHex( uint64_t _uiValue, std::wstring &_sString, uint32_t _uiNumDigits ) {
+	const WCHAR * CUtilities::ToHex( uint64_t _uiValue, std::wstring &_sString, uint32_t _uiNumDigits, bool _bIncludePrefix ) {
 		WCHAR szTemp[32];
-		ToHex( _uiValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits );
+		ToHex( _uiValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits, _bIncludePrefix );
 
 		_sString += szTemp;
 		return _sString.c_str();
@@ -1249,6 +1259,40 @@ namespace mx {
 		}
 
 		return _sString.c_str();
+	}
+
+	// Creates a string with the given data interpreted as a given type.
+	const WCHAR * CUtilities::ToDataTypeString( const uint8_t * _pui8Value, CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString,
+		bool _bMustPrintNumber ) {
+		ee::CExpEvalContainer::EE_RESULT eVal;
+		switch ( _dtType ) {
+#define MX_CONV( CASE, EE_TYPE, VAL, TYPE )												\
+	case CASE : {																		\
+		eVal.ncType = ee::EE_TYPE;														\
+		eVal.u.VAL = (*reinterpret_cast<const TYPE *>(_pui8Value));						\
+		break;																			\
+	}
+			MX_CONV( MX_DT_INT8, EE_NC_SIGNED, i64Val, int8_t )
+			MX_CONV( MX_DT_INT16, EE_NC_SIGNED, i64Val, int16_t )
+			MX_CONV( MX_DT_INT32, EE_NC_SIGNED, i64Val, int32_t )
+			MX_CONV( MX_DT_INT64, EE_NC_SIGNED, i64Val, int64_t )
+			MX_CONV( MX_DT_UINT8, EE_NC_UNSIGNED, ui64Val, uint8_t )
+			MX_CONV( MX_DT_UINT16, EE_NC_UNSIGNED, ui64Val, uint16_t )
+			MX_CONV( MX_DT_UINT32, EE_NC_UNSIGNED, ui64Val, uint32_t )
+			MX_CONV( MX_DT_UINT64, EE_NC_UNSIGNED, ui64Val, uint64_t )
+			MX_CONV( MX_DT_FLOAT, EE_NC_FLOATING, dVal, float )
+			MX_CONV( MX_DT_DOUBLE, EE_NC_FLOATING, dVal, double )
+			case MX_DT_FLOAT16 : {
+				eVal.ncType = ee::EE_NC_FLOATING;
+				eVal.u.dVal = ee::CFloat16( _pui8Value ).Value();
+				break;
+			}
+			default : {
+				return _sString.c_str();
+			}
+		}
+		return ToDataTypeString( eVal, _dtType, _sString, _bMustPrintNumber );
+#undef MX_CONV
 	}
 
 	// Returns -1 if the given result cast to the given type is -inf, 1 if it is +inf, otherwise 0.

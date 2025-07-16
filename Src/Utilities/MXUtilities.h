@@ -44,6 +44,33 @@
 #define memcpy_7( DEST, SRC )			(*reinterpret_cast<uint32_t *>(DEST)) = (*reinterpret_cast<uint32_t *>(SRC)); reinterpret_cast<uint16_t *>(DEST)[2] = reinterpret_cast<uint16_t *>(SRC)[2]; reinterpret_cast<uint8_t *>(DEST)[6] = reinterpret_cast<uint8_t *>(SRC)[6]
 #define memcpy_8( DEST, SRC )			(*reinterpret_cast<uint64_t *>(DEST)) = (*reinterpret_cast<uint64_t *>(SRC))
 
+
+#if defined( _MSC_VER )
+    // Microsoft Visual Studio Compiler
+    #define MX_ALIGN( n ) 								__declspec( align( n ) )
+	#define	MX_FALLTHROUGH								[[fallthrough]];
+
+	#define MX_FORCEINLINE 								__forceinline
+	#define MX_PREFETCH_LINE( ADDR )					_mm_prefetch( reinterpret_cast<const char *>(ADDR), _MM_HINT_T0 );
+    #define MX_LIKELY( x )								( x ) [[likely]]
+    #define MX_UNLIKELY( x )							( x ) [[unlikely]]
+	#define MX_STDCALL									__stdcall
+#elif defined( __GNUC__ ) || defined( __clang__ )
+    // GNU Compiler Collection (GCC) or Clang
+    #define MX_ALIGN( n ) 								__attribute__( (aligned( n )) )
+	#define	MX_FALLTHROUGH
+
+	#define MX_FORCEINLINE 								__inline__ __attribute__( (__always_inline__) )
+	#define MX_PREFETCH_LINE( ADDR )					__builtin_prefetch( reinterpret_cast<const void *>(ADDR), 1, 1 );
+    #define MX_LIKELY( x )								( __builtin_expect( !!(x), 1 ) )
+    #define MX_UNLIKELY( x )							( __builtin_expect( !!(x), 0 ) )
+    #define __assume( x )
+	#define MX_STDCALL
+#else
+	#define MX_FORCEINLINE								inline
+    #error "Unsupported compiler"
+#endif
+
 namespace mx {
 
 	class CUtilities {
@@ -375,6 +402,25 @@ namespace mx {
 
 		// == Functions.
 		/**
+		 * Converts an * string to a std::wstring.  Call inside try{}catch(...){}.
+		 * 
+		 * \param _pwcStr The string to convert.
+		 * \param _sLen The length of the string or 0.
+		 * \return Returns the converted string.
+		 **/
+		template <typename _tCharType>
+		static inline std::wstring							XStringToWString( const _tCharType * _pwcStr, size_t _sLen ) {
+			std::wstring u16Tmp;
+			if ( _sLen ) {
+				u16Tmp.reserve( _sLen );
+			}
+			for ( size_t I = 0; (_sLen && I < _sLen) || (_sLen == 0 && _pwcStr[I]); ++I ) {
+				u16Tmp.push_back( static_cast<wchar_t>(_pwcStr[I]) );
+			}
+			return u16Tmp;
+		}
+
+		/**
 		 * Convert a single byte to hex.  _pcString must be at least 3 characters long.
 		 * 
 		 * \param _bIn The 8-bit value to convert to a 2-character (plus NULL) string.
@@ -482,19 +528,19 @@ namespace mx {
 		static const CHAR *				CreateDateString( uint64_t _uiTime, std::string &_sString );
 
 		// Creates a hexadecimal string.  Returns the internal buffer, which means the result must be copied as it will be overwritten when the next function that uses the internal buffer is called.
-		static const CHAR *				ToHex( uint64_t _uiValue, uint32_t _uiNumDigits );
+		static const CHAR *				ToHex( uint64_t _uiValue, uint32_t _uiNumDigits, bool _bIncludePrefix = true );
 
 		// Creates a hexadecimal string.
-		static const CHAR *				ToHex( uint64_t _uiValue, CHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits );
+		static const CHAR *				ToHex( uint64_t _uiValue, CHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits, bool _bIncludePrefix = true );
 
 		// Creates a hexadecimal string.
-		static const CHAR *				ToHex( uint64_t _uiValue, std::string &_sString, uint32_t _uiNumDigits );
+		static const CHAR *				ToHex( uint64_t _uiValue, std::string &_sString, uint32_t _uiNumDigits, bool _bIncludePrefix = true );
 
 		// Creates a hexadecimal string.
-		static const WCHAR *			ToHex( uint64_t _uiValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits );
+		static const WCHAR *			ToHex( uint64_t _uiValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits, bool _bIncludePrefix = true );
 
 		// Creates a hexadecimal string.
-		static const WCHAR *			ToHex( uint64_t _uiValue, std::wstring &_sString, uint32_t _uiNumDigits );
+		static const WCHAR *			ToHex( uint64_t _uiValue, std::wstring &_sString, uint32_t _uiNumDigits, bool _bIncludePrefix = true );
 
 		// Creates a binary (0bxxxx) string from an integer value.
 		static const CHAR *				ToBinary( uint64_t _uiValue, std::string &_sString, uint32_t _uiNumDigits );
@@ -559,8 +605,23 @@ namespace mx {
 			return true;
 		}
 
+		// Is the given value a valid data type?
+		static bool						IsDataType( CUtilities::MX_DATA_TYPES _dtType ) {
+			return _dtType >= MX_DT_INT8 && _dtType < MX_DT_VOID;
+		}
+
 		// Creates a string with the given data interpreted as a given type.
 		static const WCHAR *			ToDataTypeString( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString,
+			bool _bMustPrintNumber = false );
+
+		// Creates a string with the given data interpreted as a given type.
+		static inline const WCHAR *		ToDataTypeString( const std::vector<uint8_t> &_vValue, CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString,
+			bool _bMustPrintNumber = false ) {
+			return ToDataTypeString( _vValue.data(), _dtType, _sString, _bMustPrintNumber );
+		}
+
+		// Creates a string with the given data interpreted as a given type.
+		static const WCHAR *			ToDataTypeString( const uint8_t * _pui8Value, CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString,
 			bool _bMustPrintNumber = false );
 
 		// Returns -1 if the given result cast to the given type is -inf, 1 if it is +inf, otherwise 0.

@@ -125,7 +125,7 @@ namespace mx {
 				size_t sLen;
 				DWORD dwWidth;
 			} aTitles[] = {
-				{ _T_LEN_C2F3561D_Address, 86 },
+				{ _T_LEN_C2F3561D_Address, 100 },
 				{ _T_LEN_DCB67730_Value, 120 },
 				{ _T_LEN_31A2F4D5_Current_Value, 120 },
 			};
@@ -151,6 +151,10 @@ namespace mx {
 	// WM_COMMAND from control.
 	CWidget::LSW_HANDLED CFoundAddressesWindow::Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc ) {
 		switch ( _Id ) {
+			case CFoundAddressLayout::MX_BC_ADD : {
+				AddSelectedAddresses();
+				break;
+			}
 			case CFoundAddressLayout::MX_BC_SEARCH : {
 				CMhsMainWindow * pmmwMain = static_cast<CMhsMainWindow *>(FindParent( mx::CMainWindowLayout::MX_MWI_MAINWINDOW ));
 				pmmwMain->ShowLastSearch();
@@ -345,15 +349,33 @@ namespace mx {
 							const CSearchResultBase * psrbResults = m_pmmwMhsWindow->MemHack()->Searcher().SearchResults();
 							if ( psrbResults ) {
 								psrbResults->Lock();
+								auto ptlvTree = m_pmmwMhsWindow->MainTreeView();
+								ptlvTree->BeginLargeUpdate();
 								auto spSearchParms = m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms();
 								uint64_t ui64Addr;
 								const uint8_t * pui8Data;
 								if ( psrbResults->GetResultFast( vSelections[I], ui64Addr, pui8Data ) ) {
-									auto faAddress = m_pmmwMhsWindow->MemHack()->FoundAddressManager().AddFoundAddress();
+									auto faAddress = m_pmmwMhsWindow->MemHack()->FoundAddressManager().AddFoundAddress( m_pmmwMhsWindow->MemHack() );
 									if ( faAddress ) {
 										if ( spSearchParms.stType == CUtilities::MX_ST_DATATYPE_SEARCH ) {
 											if ( faAddress->InitWithAddressAndDataType( ui64Addr, spSearchParms.dtLVal.dtType, pui8Data ) ) {
 												vAdded.push_back( faAddress->Id() );
+												auto wsTmp = faAddress->DescriptionText();
+												TVINSERTSTRUCTW iisItem = lsw::CTreeListView::DefaultItemLParam( wsTmp.c_str(), faAddress->Id() );
+												auto hInserted = ptlvTree->InsertItem( &iisItem );
+
+												// == Address.
+												wsTmp = faAddress->AddressText();
+												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 1 );
+												// == Current Value.
+												wsTmp = faAddress->ValueText();
+												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 2 );
+												// == Value When Locked.
+												wsTmp = faAddress->ValueWhenLockedText();
+												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 3 );
+												// == Type.
+												wsTmp = faAddress->TypeText();
+												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 4 );
 											}
 										}
 										else if ( spSearchParms.stType == CUtilities::MX_ST_STRING_SEARCH ) {
@@ -367,6 +389,7 @@ namespace mx {
 									}
 								}
 								psrbResults->Unlock();
+								ptlvTree->FinishUpdate();
 							}
 						}
 						return vAdded.size() == vSelections.size();

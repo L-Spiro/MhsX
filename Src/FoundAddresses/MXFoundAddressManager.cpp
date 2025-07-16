@@ -21,6 +21,11 @@ namespace mx {
 				pfabParent->RemoveChild( pfabThis );
 			}
 		}
+		for ( auto I = pfabThis->Children().size(); I--; ) {
+			pfabThis->RemoveChild( GetById( pfabThis->Children()[I] ) );
+		}
+
+
 		auto iTmp = m_mFoundAddresses.find( _sId );
 		if ( iTmp != m_mFoundAddresses.end() ) {
 			iTmp->second.reset();
@@ -59,8 +64,8 @@ namespace mx {
 	}
 
 	// Adds a normal Found Address.
-	CFoundAddress * CFoundAddressManager::AddFoundAddress() {
-		auto pfaAddress = std::make_unique<CFoundAddress>();
+	CFoundAddress * CFoundAddressManager::AddFoundAddress( CMemHack * _pmhMemHack ) {
+		auto pfaAddress = std::make_unique<CFoundAddress>( _pmhMemHack );
 		CFoundAddress * pAddress = pfaAddress.get();
 		size_t sKey = pAddress->Id();
 		m_mFoundAddresses.emplace( sKey, std::move( pfaAddress ) );
@@ -68,8 +73,8 @@ namespace mx {
 	}
 
 	// Adds a group.
-	CFoundAddressGroup * CFoundAddressManager::AddGroup() {
-		auto pfaAddress = std::make_unique<CFoundAddressGroup>();
+	CFoundAddressGroup * CFoundAddressManager::AddGroup( CMemHack * _pmhMemHack ) {
+		auto pfaAddress = std::make_unique<CFoundAddressGroup>( _pmhMemHack );
 		CFoundAddressGroup * pAddress = pfaAddress.get();
 		size_t sKey = pAddress->Id();
 		m_mFoundAddresses.emplace( sKey, std::move( pfaAddress ) );

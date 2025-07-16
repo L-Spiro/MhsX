@@ -470,8 +470,8 @@ namespace mx {
 				size_t sLen;
 				DWORD dwWidth;
 			} aTitles[] = {
-				{ _T_EB78CFF1_Description, _LEN_EB78CFF1, 150 },
-				{ _T_C2F3561D_Address, _LEN_C2F3561D, 80 },
+				{ _T_EB78CFF1_Description, _LEN_EB78CFF1, 350 },
+				{ _T_C2F3561D_Address, _LEN_C2F3561D, 100 },
 				{ _T_31A2F4D5_Current_Value, _LEN_31A2F4D5, 120 },
 				{ _T_022E8A69_Value_When_Locked, _LEN_022E8A69, 120 },
 				{ _T_2CECF817_Type, _LEN_2CECF817, 100 },
@@ -620,6 +620,24 @@ namespace mx {
 				ShowFoundAddress();
 				ShowExpEval();
 				ShowConverter();
+				break;
+			}
+
+			case CMainWindowLayout::MX_MWMI_DELETE : {
+				DeleteSelected();
+				break;
+			}
+			case CMainWindowLayout::MX_MWMI_DELETEALL : {
+				DeleteAll();
+				break;
+			}
+			case CMainWindowLayout::MX_MWMI_LOCK : {
+				break;
+			}
+			case CMainWindowLayout::MX_MWMI_UNLOCK : {
+				break;
+			}
+			case CMainWindowLayout::MX_MWMI_EDIT : {
 				break;
 			}
 		}
@@ -832,6 +850,31 @@ namespace mx {
 			m_i32LastOptionsPage = COptionsWindow::LastVisiblePage();
 		}
 		m_pmhMemHack->HotkeyManager().Start();
+	}
+
+	// Deletes the selected Found Addresses.
+	void CMhsMainWindow::DeleteSelected() {
+		m_pmhMemHack->FoundAddressManager().DeleteAll();
+		auto ptlvView = MainTreeView();
+		if ( ptlvView ) {
+			std::vector<LPARAM> vSelected;
+			ptlvView->GatherSelectedLParam( vSelected, true );
+			ptlvView->BeginLargeUpdate();
+			for ( auto & I : vSelected ) {
+				m_pmhMemHack->FoundAddressManager().Delete( I );
+				ptlvView->DeleteByLParam( I );
+			}
+			ptlvView->FinishUpdate();
+		}
+	}
+
+	// Deletes all Found Addresses.
+	void CMhsMainWindow::DeleteAll() {
+		m_pmhMemHack->FoundAddressManager().DeleteAll();
+		auto ptlvView = MainTreeView();
+		if ( ptlvView ) {
+			ptlvView->DeleteAll();
+		}
 	}
 
 	// Shows the PE Works window.  If _pwcFile is not nullptr, it points to a default file to

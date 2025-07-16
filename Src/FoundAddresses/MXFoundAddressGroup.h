@@ -8,7 +8,8 @@ namespace mx {
 
 	class CFoundAddressGroup : public CFoundAddressBase {
 	public :
-		CFoundAddressGroup() {
+		CFoundAddressGroup( CMemHack * _pmhMemHack ) :
+			CFoundAddressBase( _pmhMemHack ) {
 		}
 		virtual ~CFoundAddressGroup() {
 		}

@@ -410,7 +410,7 @@ namespace mx {
 					}
 				}
 				// Fall-through.
-			}
+			}																	MX_FALLTHROUGH
 			case CUtilities::MX_SST_UTF8 : {
 				CSecureWString swsTemp = ee::CExpEval::StringToWString( reinterpret_cast<const char *>(&vData.data()[uiOffsetToData]), arRef.uiSize );
 				swsTemp = CUtilities::EscapeUnprintable( swsTemp, true, false );

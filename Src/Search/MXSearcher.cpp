@@ -590,9 +590,9 @@ namespace mx {
 	}
 
 	// Performs pre-processing byteswapping.
-	void CSearcher::PreprocessByteSwap( void * _pvData, size_t _stLen, const MX_SEARCH_PARMS &_spParms ) {
+	void CSearcher::PreprocessByteSwap( void * _pvData, size_t _stLen, CUtilities::MX_BYTESWAP _bsSwap ) {
 		if ( !_stLen ) { return; }
-		switch ( _spParms.bsByteSwapping ) {
+		switch ( _bsSwap ) {
 			case CUtilities::MX_BS_NONE : { return; }
 			case CUtilities::MX_BS_2BYTE : {
 				uint16_t * puiData = reinterpret_cast<uint16_t *>(_pvData);

@@ -9,7 +9,8 @@ namespace mx {
 	// The ID counter.
 	std::atomic<size_t> CFoundAddressBase::s_aId = 1;
 
-	CFoundAddressBase::CFoundAddressBase() {
+	CFoundAddressBase::CFoundAddressBase( CMemHack * _pmhMemHack ) :
+		m_pmhMemHack( _pmhMemHack ) {
 		try {
 		}
 		catch ( ... ) {
@@ -23,5 +24,7 @@ namespace mx {
 			s_aId = 1;
 		}
 	}
+
+	
 
 }	// namespace mx

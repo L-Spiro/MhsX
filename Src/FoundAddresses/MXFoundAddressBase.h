@@ -9,6 +9,8 @@
 
 namespace mx {
 
+	class CMemHack;
+
 	// == Enumerations.
 	// Types of items that can go into the Found Addresses list.
 	enum MX_FOUND_ADDRESS_TYPES {
@@ -67,6 +69,9 @@ namespace mx {
 			return std::find( m_vChildren.begin(), m_vChildren.end(), _sId ) == m_vChildren.end();
 		}
 
+		// Gets the array of children.
+		inline const std::vector<size_t> &					Children() const { return m_vChildren; }
+
 		// Gets the name of the item.
 		inline const std::wstring &							Name() const { return m_wsName; }
 
@@ -88,10 +93,24 @@ namespace mx {
 			return (*this);
 		}
 
+		// Gets the Description text.
+		inline std::wstring									DescriptionText() const { return m_wsName; }
+
+		// Gets the Address text.
+		virtual std::wstring								AddressText() const { return std::wstring(); }
+
+		// Gets the Value text.
+		virtual std::wstring								ValueText() const { return std::wstring(); }
+
+		// Gets the Value When Locked text.
+		virtual std::wstring								ValueWhenLockedText() const { return std::wstring(); }
+
+		// Gets the Type text.
+		virtual std::wstring								TypeText() const { return std::wstring(); }
 
 
 	protected :
-		CFoundAddressBase();
+		CFoundAddressBase( CMemHack * _pmhMemHack );
 		
 
 		// == Members.
@@ -105,6 +124,8 @@ namespace mx {
 		std::vector<size_t>									m_vChildren;
 		// The color of the item in the display.  If rgbReserved is 0, use the default display color.
 		RGBQUAD												m_rgbqColor = { .rgbReserved = 0 };
+		// Pointer to the MemHack object.
+		CMemHack *											m_pmhMemHack = nullptr;
 
 		
 
