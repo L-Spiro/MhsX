@@ -1,6 +1,6 @@
 # MHS X
 A memory searcher/debugger/research tool with a built-in easy-to-use script language, hex editor, hot keys, disassembler, RAM editor, string editor, floating-point tools, and much more, all in a clean and modern interface.
-<br>Shawn (L. Spiro) Wilcoxen
+<br>
 <br><br>![MHS X](https://i.imgur.com/V6ytGr4.png)
 
 ## Description
