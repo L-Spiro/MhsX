@@ -28,7 +28,7 @@ namespace mx {
 		virtual std::wstring								AddressText() const;
 
 		// Gets the Value text.
-		virtual std::wstring								ValueText() const { return ToText( m_vOriginalData ); }
+		virtual std::wstring								ValueText() const;
 
 		// Gets the Value When Locked text.
 		virtual std::wstring								ValueWhenLockedText() const { return ToText( m_vLockedData ); }
@@ -57,20 +57,39 @@ namespace mx {
 		// Gets the size of the internal buffer needed to contain the data type.
 		size_t												InternalBufferSize() const;
 
+		// Gets the actual final address of the item.
+		uint64_t											FinalAddress() const {
+			if MX_UNLIKELY( m_bDirtyAddress ) {
+				m_bDirtyAddress = false;
+				m_ui64BufferedAddress = GetUpdatedFinalAddress();
+			}
+			return m_ui64BufferedAddress;
+		}
+
+		// Dirties the item.  Address and current data need to be updated after this.
+		void												Dirty() {
+			m_bDirtyAddress = true;
+			m_bDirtyCurValue = true;
+		}
+
 
 	protected :
 		// == Members.
 		// The address expression (as text).
 		std::string											m_sAddressTxt;
 		// The address expression.
-		lsw::CExpression									m_eAddressExp;
+		mutable lsw::CExpression							m_eAddressExp;
 		// The address buffered (if not 0).
 		uint64_t											m_ui64Address = 0;
+		// The buffered address.
+		mutable uint64_t									m_ui64BufferedAddress = 0;
 
 		// The type of data type.
 		CUtilities::MX_VALUE_TYPE							m_vtValueType = CUtilities::MX_VT_DATA_TYPE;
 		// The type of data.
 		CUtilities::MX_DATA_TYPES							m_dtDataType = CUtilities::MX_DT_VOID;
+		// The string format.
+		CUtilities::MX_STRING_TYPES							m_stStringType = CUtilities::MX_ST_CODE_PAGE;
 		// Byteswapping.
 		CUtilities::MX_BYTESWAP								m_bsByteSwap = CUtilities::MX_BS_NONE;
 
@@ -78,17 +97,34 @@ namespace mx {
 		std::vector<uint8_t>								m_vOriginalData;
 		// The data when locked.
 		std::vector<uint8_t>								m_vLockedData;
+		// Current data.
+		mutable std::vector<uint8_t>						m_vCurrentData;
+		// Offset into the buffers where the desired data can be found.
+		mutable size_t										m_sDataOffset = 0;
+
+		// Whether to use a basic address or not.
+		bool												m_bBasicAddress = true;
+		// Does the address need updating?
+		mutable bool										m_bDirtyAddress = true;
+		// Does the current value need updating?
+		mutable bool										m_bDirtyCurValue = true;
 
 
 		// == Functions.
 		// Takes a blob of data and converts it to text.
-		std::wstring										ToText( const std::vector<uint8_t> &_vBlob ) const;
+		inline std::wstring									ToText( const std::vector<uint8_t> &_vBlob ) const { return ToText( _vBlob.data() ); }
 
 		// Takes a blob of data and converts it to text.
 		std::wstring										ToText( const uint8_t * _pui8Blob ) const;
 
 		// Update internal buffers after the size of the item changes.
 		void												UpdateBuffers();
+
+		// Gets the actual final address of the item.
+		uint64_t											GetUpdatedFinalAddress() const;
+
+		// Undirty the current value.
+		bool												UndirtyCurValue() const;
 	};
 
 }	// namespace mx

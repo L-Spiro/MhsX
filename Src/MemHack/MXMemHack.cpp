@@ -272,12 +272,12 @@ namespace mx {
 
 	// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
 	// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
-	bool CMemHack::ReadProcessMemory_PreProcessed( LPCVOID _lpBaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, SIZE_T * _lpNumberOfBytesRead ) const {
-		uint64_t ui64Address = reinterpret_cast<uint64_t>(_lpBaseAddress);
+	bool CMemHack::ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, SIZE_T * _lpNumberOfBytesRead ) const {
+		if ( _ui64BaseAddress > MAXSIZE_T ) { return false; }
 		constexpr uint64_t uiAlignment = 8;
-		uint64_t uiOffsetToData = ui64Address % uiAlignment;
-		uint64_t uiDataStart = (ui64Address / uiAlignment) * uiAlignment;
-		uint64_t uiAdjustedEnd = (((ui64Address + _nSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
+		uint64_t uiOffsetToData = _ui64BaseAddress % uiAlignment;
+		uint64_t uiDataStart = (_ui64BaseAddress / uiAlignment) * uiAlignment;
+		uint64_t uiAdjustedEnd = (((_ui64BaseAddress + _nSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
 		uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
 
 		try {
@@ -295,12 +295,12 @@ namespace mx {
 
 	// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
 	// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
-	bool CMemHack::ReadProcessMemory_PreProcessed( LPCVOID _lpBaseAddress, uint8_t * _pui8Buffer, SIZE_T _nSize, size_t &_sBufferOffset, SIZE_T * _lpNumberOfBytesRead ) const {
-		uint64_t ui64Address = reinterpret_cast<uint64_t>(_lpBaseAddress);
+	bool CMemHack::ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, uint8_t * _pui8Buffer, SIZE_T _nSize, size_t &_sBufferOffset, SIZE_T * _lpNumberOfBytesRead ) const {
+		if ( _ui64BaseAddress > MAXSIZE_T ) { return false; }
 		constexpr uint64_t uiAlignment = 8;
-		uint64_t uiOffsetToData = ui64Address % uiAlignment;
-		uint64_t uiDataStart = (ui64Address / uiAlignment) * uiAlignment;
-		uint64_t uiAdjustedEnd = (((ui64Address + _nSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
+		uint64_t uiOffsetToData = _ui64BaseAddress % uiAlignment;
+		uint64_t uiDataStart = (_ui64BaseAddress / uiAlignment) * uiAlignment;
+		uint64_t uiAdjustedEnd = (((_ui64BaseAddress + _nSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
 		uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
 
 		try {
@@ -317,14 +317,13 @@ namespace mx {
 
 	// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
 	// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
-	bool CMemHack::ReadProcessMemory_PreProcessed( LPCVOID _lpBaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead ) const {
-		uint64_t ui64Address = reinterpret_cast<uint64_t>(_lpBaseAddress);
+	bool CMemHack::ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead ) const {
+		if ( _ui64BaseAddress > MAXSIZE_T ) { return false; }
 		constexpr uint64_t uiAlignment = 8;
-		uint64_t uiOffsetToData = ui64Address % uiAlignment;
-		uint64_t uiDataStart = (ui64Address / uiAlignment) * uiAlignment;
-		uint64_t uiAdjustedEnd = (((ui64Address + _nSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
+		uint64_t uiOffsetToData = _ui64BaseAddress % uiAlignment;
+		uint64_t uiDataStart = (_ui64BaseAddress / uiAlignment) * uiAlignment;
+		uint64_t uiAdjustedEnd = (((_ui64BaseAddress + _nSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
 		uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
-
 		try {
 			_vBuffer.resize( static_cast<size_t>(uiAdjustedLen) );
 			if ( !Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
@@ -340,12 +339,12 @@ namespace mx {
 
 	// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
 	// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
-	bool CMemHack::ReadProcessMemory_PreProcessed( LPCVOID _lpBaseAddress, uint8_t * _pui8Buffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead ) const {
-		uint64_t ui64Address = reinterpret_cast<uint64_t>(_lpBaseAddress);
+	bool CMemHack::ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, uint8_t * _pui8Buffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead ) const {
+		if ( _ui64BaseAddress > MAXSIZE_T ) { return false; }
 		constexpr uint64_t uiAlignment = 8;
-		uint64_t uiOffsetToData = ui64Address % uiAlignment;
-		uint64_t uiDataStart = (ui64Address / uiAlignment) * uiAlignment;
-		uint64_t uiAdjustedEnd = (((ui64Address + _nSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
+		uint64_t uiOffsetToData = _ui64BaseAddress % uiAlignment;
+		uint64_t uiDataStart = (_ui64BaseAddress / uiAlignment) * uiAlignment;
+		uint64_t uiAdjustedEnd = (((_ui64BaseAddress + _nSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
 		uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
 
 		try {

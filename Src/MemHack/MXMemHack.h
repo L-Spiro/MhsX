@@ -136,19 +136,19 @@ namespace mx {
 
 		// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
 		// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
-		virtual bool						ReadProcessMemory_PreProcessed( LPCVOID _lpBaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, SIZE_T * _lpNumberOfBytesRead = nullptr ) const;
+		virtual bool						ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, SIZE_T * _lpNumberOfBytesRead = nullptr ) const;
 
 		// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
 		// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
-		virtual bool						ReadProcessMemory_PreProcessed( LPCVOID _lpBaseAddress, uint8_t * _pui8Buffer, SIZE_T _nSize, size_t &_sBufferOffset, SIZE_T * _lpNumberOfBytesRead = nullptr ) const;
+		virtual bool						ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, uint8_t * _pui8Buffer, SIZE_T _nSize, size_t &_sBufferOffset, SIZE_T * _lpNumberOfBytesRead = nullptr ) const;
 
 		// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
 		// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
-		virtual bool						ReadProcessMemory_PreProcessed( LPCVOID _lpBaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead = nullptr ) const;
+		virtual bool						ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead = nullptr ) const;
 
 		// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
 		// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
-		virtual bool						ReadProcessMemory_PreProcessed( LPCVOID _lpBaseAddress, uint8_t * _pui8Buffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead = nullptr ) const;
+		virtual bool						ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, uint8_t * _pui8Buffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead = nullptr ) const;
 
 		// The address reader for expressions.
 		static bool __stdcall				ExpAddressHandler( uint64_t _ui64Address, ee::EE_CAST_TYPES _ctType, uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult );

@@ -136,6 +136,7 @@ namespace mx {
 			MX_ST_UTF16_BE,								// A Big-Endian UTF-16 string.
 			MX_ST_UTF32_LE,								// A Little-Endian UTF-32 string.
 			MX_ST_UTF32_BE,								// A Big-Endian UTF-32 string.
+			MX_ST_RAW,									// An array of a single type or mixed types.
 		};
 
 		// Wildcard flags.  Adjust values so that they can be combined with MX_DATA_TYPES if more values are added to MX_DATA_TYPES.

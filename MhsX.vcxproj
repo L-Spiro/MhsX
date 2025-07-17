@@ -271,6 +271,7 @@
     <ClCompile Include="Src\FloatingPointStudio\MXFloatingPointStudioWindow.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddress.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressBase.cpp" />
+    <ClCompile Include="Src\FoundAddresses\MXFoundAddressEditWindow.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressesListView.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressesWindow.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressManager.cpp" />
@@ -284,6 +285,7 @@
     <ClCompile Include="Src\Layouts\MXExpressionEvaluatorLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXExpressionSubsearchLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXFloatingPointStudioLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXFoundAddressEditLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXFoundAddressLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXLayoutManager.cpp" />
     <ClCompile Include="Src\Layouts\MXMainWindowLayout.cpp" />
@@ -400,6 +402,7 @@
     <ClInclude Include="Src\FloatingPointStudio\MXFloatingPointStudioWindow.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddress.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressBase.h" />
+    <ClInclude Include="Src\FoundAddresses\MXFoundAddressEditWindow.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressesListView.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressesWindow.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressGroup.h" />
@@ -415,6 +418,7 @@
     <ClInclude Include="Src\Layouts\MXExpressionEvaluatorLayout.h" />
     <ClInclude Include="Src\Layouts\MXExpressionSubsearchLayout.h" />
     <ClInclude Include="Src\Layouts\MXFloatingPointStudioLayout.h" />
+    <ClInclude Include="Src\Layouts\MXFoundAddressEditLayout.h" />
     <ClInclude Include="Src\Layouts\MXFoundAddressLayout.h" />
     <ClInclude Include="Src\Layouts\MXLayoutMacros.h" />
     <ClInclude Include="Src\Layouts\MXLayoutManager.h" />

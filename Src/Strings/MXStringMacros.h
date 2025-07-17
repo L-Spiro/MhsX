@@ -17362,3 +17362,12 @@
 #define _DEC_S_0924E89F__Add_Selected mx::CStringDecoder::DecodeToString( _T_0924E89F__Add_Selected, _LEN_0924E89F )
 #define _DEC_WS_0924E89F__Add_Selected mx::CStringDecoder::DecodeToWString( _T_0924E89F__Add_Selected, _LEN_0924E89F )
 
+// Modify Entry
+
+#define _T_7AE3FDE1_Modify_Entry "\xD5\x3D\x34\x04\xF8\x42\xAE\x0C\x3E\x3C\x3B\x47"
+#define _LEN_7AE3FDE1 12
+#define _T_LEN_7AE3FDE1_Modify_Entry _T_7AE3FDE1_Modify_Entry, _LEN_7AE3FDE1
+#define _DEC_7AE3FDE1_Modify_Entry( STR ) mx::CStringDecoder::Decode( _T_7AE3FDE1_Modify_Entry, _LEN_7AE3FDE1, STR )
+#define _DEC_S_7AE3FDE1_Modify_Entry mx::CStringDecoder::DecodeToString( _T_7AE3FDE1_Modify_Entry, _LEN_7AE3FDE1 )
+#define _DEC_WS_7AE3FDE1_Modify_Entry mx::CStringDecoder::DecodeToWString( _T_7AE3FDE1_Modify_Entry, _LEN_7AE3FDE1 )
+

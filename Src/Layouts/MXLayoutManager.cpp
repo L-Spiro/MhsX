@@ -2,6 +2,7 @@
 #include "../Converter/MXConverterWindow.h"
 #include "../ExpEval/MXExpEvalWindow.h"
 #include "../FloatingPointStudio/MXFloatingPointStudioWindow.h"
+#include "../FoundAddresses/MXFoundAddressEditWindow.h"
 #include "../FoundAddresses/MXFoundAddressesListView.h"
 #include "../FoundAddresses/MXFoundAddressesWindow.h"
 #include "../Layouts/MXLayoutMacros.h"
@@ -63,6 +64,9 @@ namespace mx {
 			}
 			case MX_FOUND_ADDRESSES_LISTVIEW : {
 				return new CFoundAddressesListView( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
+			case MX_FOUND_ADDRESSES_EDIT : {
+				return new CFoundAddressEditWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
 			case MX_EXP_EVAL : {
 				return new CExpEvalWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );

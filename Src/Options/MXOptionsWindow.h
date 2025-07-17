@@ -1,7 +1,10 @@
 #pragma once
+
+#include "../MXMhsX.h"
 #include "../Strings/MXStringDecoder.h"
 #include "MXOptionsPage.h"
 #include "MXOptions.h"
+
 #include <ListBox/LSWListBox.h>
 #include <LSWWin.h>
 #include <MainWindow/LSWMainWindow.h>

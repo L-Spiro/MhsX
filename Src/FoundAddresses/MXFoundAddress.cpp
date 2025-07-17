@@ -1,4 +1,5 @@
 #include "MXFoundAddress.h"
+#include "../MemHack/MXMemHack.h"
 
 #include <Float16/EEFloat16.h>
 
@@ -20,6 +21,7 @@ namespace mx {
 		m_sAddressTxt.clear();
 		m_sAddressTxt = std::string();
 		m_ui64Address = _ui64Address;
+		m_bBasicAddress = true;
 
 		m_vtValueType = CUtilities::MX_VT_DATA_TYPE;
 		m_dtDataType = _dtType;
@@ -27,6 +29,8 @@ namespace mx {
 			m_vOriginalData.resize( CUtilities::DataTypeSize( _dtType ) );
 			std::memcpy( m_vOriginalData.data(), _pui8Data, m_vOriginalData.size() );
 			m_vLockedData = m_vOriginalData;
+
+			Dirty();
 		}
 		catch ( ... ) {
 			return false;
@@ -36,7 +40,8 @@ namespace mx {
 
 	// Gets the Address text.
 	std::wstring CFoundAddress::AddressText() const {
-		if ( m_ui64Address ) {
+		auto aAddr = FinalAddress();
+		if ( m_bBasicAddress ) {
 			std::wstring wTmp;
 			CUtilities::ToHex( m_ui64Address, wTmp, m_ui64Address > UINT_MAX ? 11 : 8, false );
 			return wTmp;
@@ -44,9 +49,15 @@ namespace mx {
 		return std::wstring();
 	}
 
-	// Takes a blob of data and converts it to text.
-	std::wstring CFoundAddress::ToText( const std::vector<uint8_t> &_vBlob ) const {
-		return ToText( _vBlob.data() );
+	// Gets the Value text.
+	std::wstring CFoundAddress::ValueText() const {
+		if MX_LIKELY( m_bDirtyCurValue ) {
+			m_bDirtyCurValue = !UndirtyCurValue();
+		}
+		if MX_LIKELY( m_vCurrentData.size() - m_sDataOffset >= InternalBufferSize() ) {
+			return ToText( &m_vCurrentData[m_sDataOffset] );
+		}
+		return std::wstring();
 	}
 
 	// Takes a blob of data and converts it to text.
@@ -154,6 +165,29 @@ namespace mx {
 			}
 			catch ( ... ) {}
 		}
+	}
+
+	// Gets the actual final address of the item.
+	uint64_t CFoundAddress::GetUpdatedFinalAddress() const {
+		if ( m_bBasicAddress ) {
+			return m_ui64Address;
+		}
+		if MX_UNLIKELY( nullptr == m_eAddressExp.GetContainer() ) {
+			if ( !m_eAddressExp.SetExpression( m_sAddressTxt.c_str() ) ) { return 0; }
+		}
+		if MX_LIKELY( m_eAddressExp.GetContainer() ) {
+			return uint64_t( m_eAddressExp.Evaluate() );
+		}
+		return 0;
+	}
+
+	// Undirty the current value.
+	bool CFoundAddress::UndirtyCurValue() const {
+		auto ui64Addr = FinalAddress();
+		if ( m_pmhMemHack ) {
+			return m_pmhMemHack->ReadProcessMemory_PreProcessed( ui64Addr, m_vCurrentData, InternalBufferSize(), m_sDataOffset, m_bsByteSwap );
+		}
+		return false;
 	}
 
 }	// namespace mx

@@ -323,7 +323,7 @@ namespace mx {
 		uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
 		if ( !CUtilities::Resize( vData, uiAdjustedLen ) ) { return false; }
 		if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
-			&vData[0], vData.size(), nullptr ) ) {
+			vData.data(), vData.size(), nullptr ) ) {
 			std::swprintf( _pwStr, _iMaxLen, L"%s", L"N/A" );
 			return false;
 		}
@@ -492,7 +492,7 @@ namespace mx {
 		return false;
 	}
 
-	// Gets the display test for a string search result.
+	// Gets the display test for an expression search result.
 	bool CFoundAddressesListView::GetExpressionSearchValue( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value ) const {
 		const CSearchResultRef::MX_ADDRESS_REF & arRef = (*reinterpret_cast<const CSearchResultRef::MX_ADDRESS_REF *>(_pui8Value));
 		if ( !arRef.uiSize ) { return true; }
@@ -532,7 +532,7 @@ int iIdx = 0;
 		return true;
 	}
 
-	// Gets the display test for a string search result.
+	// Gets the display test for an expression search result.
 	bool CFoundAddressesListView::GetExpressionSearchValueFixed( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value ) const {
 		// Current Value.
 

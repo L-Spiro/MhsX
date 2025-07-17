@@ -40,10 +40,10 @@ namespace mx {
 		// Gets the display test for a string search result.
 		bool								GetStringSearchValue( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value ) const;
 
-		// Gets the display test for a string search result.
+		// Gets the display test for an expression search result.
 		bool								GetExpressionSearchValue( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value ) const;
 
-		// Gets the display test for a string search result.
+		// Gets the display test for an expression search result.
 		bool								GetExpressionSearchValueFixed( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value ) const;
 	};
 
