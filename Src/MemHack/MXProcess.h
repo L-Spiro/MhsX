@@ -57,12 +57,12 @@ namespace mx {
 		bool							ProcIsOpened() const { LSW_ENT_CRIT( m_csCrit ); return m_hProcHandle.Valid() && m_dwId != DWINVALID && m_opOpenProcThreadMonitor.aAtom == 0; }
 
 		// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
-		virtual bool					ReadProcessMemory( LPCVOID _lpBaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) const;
+		virtual bool					ReadProcessMemory( uint64_t _lpBaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) const;
 
 		// Read from the given data stream.
 		virtual bool					Read( uint64_t _ui64Addr, void * _pvDest, size_t _sSize, size_t * _psBytesRead = nullptr ) const {
 			SIZE_T stRead;
-			if ( ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Addr), _pvDest, _sSize, &stRead ) ) {
+			if ( ReadProcessMemory( _ui64Addr, _pvDest, _sSize, &stRead ) ) {
 				if ( _psBytesRead ) {
 					(*_psBytesRead) = stRead;
 				}
@@ -72,12 +72,12 @@ namespace mx {
 		}
 
 		// Writes data to an area of memory in a specified process. The entire area to be written to must be accessible or the operation fails.
-		virtual bool					WriteProcessMemory( LPVOID _lpBaseAddress, LPCVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesWritten );
+		virtual bool					WriteProcessMemory( uint64_t _lpBaseAddress, LPCVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesWritten );
 
 		// Write to the given data stream.
 		virtual bool					Write( uint64_t _ui64Addr, const void * _pvSrc, size_t _sSize, size_t * _psBytesWritten = nullptr ) {
 			SIZE_T stWritten;
-			if ( WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Addr), _pvSrc, _sSize, &stWritten ) ) {
+			if ( WriteProcessMemory( _ui64Addr, _pvSrc, _sSize, &stWritten ) ) {
 				if ( _psBytesWritten ) {
 					(*_psBytesWritten) = stWritten;
 				}

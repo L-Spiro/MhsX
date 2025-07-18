@@ -226,7 +226,7 @@ namespace lsw {
 			}
 		}
 		else {
-			if ( _iItem < m_vTabs.size() ) { m_vTabs[_iItem].bCheckable = true; }
+			if ( _iItem < int( m_vTabs.size() ) ) { m_vTabs[_iItem].bCheckable = true; }
 		}
 	}
 
@@ -245,7 +245,7 @@ namespace lsw {
 			return true;
 		}
 		else {
-			if ( _iItem < m_vTabs.size() ) {
+			if ( _iItem < int( m_vTabs.size() ) ) {
 				m_vTabs[_iItem].bChecked = _bChecked;
 				return true;
 			}
@@ -266,7 +266,7 @@ namespace lsw {
 				}
 			}
 		}
-		else if ( _iItem < m_vTabs.size() ) {
+		else if ( _iItem < int( m_vTabs.size() ) ) {
 			if ( m_vTabs[_iItem].bCheckable ) {
 				m_vTabs[_iItem].bChecked = !m_vTabs[_iItem].bChecked;
 			}
@@ -294,7 +294,7 @@ namespace lsw {
 	 * \return Returns true if the given tab exists, is checkable, and is checked.
 	 **/
 	bool CTab::IsChecked( int _iItem ) const {
-		if ( _iItem < m_vTabs.size() ) {
+		if ( _iItem < int( m_vTabs.size() ) ) {
 			return m_vTabs[_iItem].bCheckable && m_vTabs[_iItem].bChecked;
 		}
 		return false;

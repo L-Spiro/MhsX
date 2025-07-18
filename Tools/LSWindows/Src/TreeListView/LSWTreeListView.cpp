@@ -462,6 +462,30 @@ namespace lsw {
 	}
 
 	/**
+	 * Gathers all LPARAM values of every tree item visible within the control view space into an array.
+	 * 
+	 * \param _vReturn The array into which to gather the return values.
+	 * \return Returns the total number of items gathered (_vReturn.size()).
+	 **/
+	size_t CTreeListView::GatherInViewLParam( std::vector<LPARAM> &_vReturn ) const {
+		try {
+			_vReturn.clear();
+			int I = -1;
+			while ( (I = ListView_GetNextItem(
+				Wnd(),
+				I,
+				LVNI_ALL | LVNI_VISIBLEONLY )) != -1 ) {
+				ee::CTree<LSW_TREE_ROW> * ptNode = ItemByIndex_Cached( I );
+				if ( ptNode ) {
+					_vReturn.push_back( ptNode->Value().lpParam );
+				}
+			}
+		}
+		catch ( ... ) {}
+		return _vReturn.size();
+	}
+
+	/**
 	 * Gets the index of the highlighted item or returns size_t( -1 ).
 	 *
 	 * \return Returs the index of the highlighted item or size_t( -1 ) if there is none.
@@ -656,7 +680,7 @@ namespace lsw {
 	 * \param _stIdx The index of the item to get with collapsed items being taken into account.
 	 * \return Returns the _stIdx'th item in the tree, accounting for expandedness.
 	 */
-	ee::CTree<CTreeListView::LSW_TREE_ROW> * CTreeListView::ItemByIndex( size_t _stIdx ) {
+	ee::CTree<CTreeListView::LSW_TREE_ROW> * CTreeListView::ItemByIndex( size_t _stIdx ) const {
 		return ItemByIndex( nullptr, _stIdx, 0 );
 	}
 
@@ -666,7 +690,7 @@ namespace lsw {
 	 * \param _stIdx The index of the item to get with collapsed items being taken into account.
 	 * \return Returns the _stIdx'th item in the tree, accounting for expandedness.
 	 */
-	ee::CTree<CTreeListView::LSW_TREE_ROW> * CTreeListView::ItemByIndex( ee::CTree<LSW_TREE_ROW> * _ptStart, size_t _stIdx, size_t _stStartIdx ) {
+	ee::CTree<CTreeListView::LSW_TREE_ROW> * CTreeListView::ItemByIndex( ee::CTree<LSW_TREE_ROW> * _ptStart, size_t _stIdx, size_t _stStartIdx ) const {
 		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptThis = _ptStart;
 		if ( !ptThis ) {
 			ptThis = NextByExpansion( ptThis );
@@ -684,7 +708,7 @@ namespace lsw {
 	 * \param _stIdx The index of the item to get with collapsed items being taken into account.
 	 * \return Returns the _stIdx'th item in the tree, accounting for expandedness.
 	 */
-	ee::CTree<CTreeListView::LSW_TREE_ROW> * CTreeListView::ItemByIndex_Cached( size_t _stIdx ) {
+	ee::CTree<CTreeListView::LSW_TREE_ROW> * CTreeListView::ItemByIndex_Cached( size_t _stIdx ) const {
 		if ( m_ptIndexCache == nullptr ) {
 			m_ptIndexCache = ItemByIndex( _stIdx );
 			m_stIndexCache = _stIdx;
@@ -1103,10 +1127,39 @@ namespace lsw {
 	 * \return Returns an LSW_HANDLED code.
 	 */
 	DWORD CTreeListView::Notify_CustomDraw_ItemPrePaint( LPNMLVCUSTOMDRAW _lpcdParm ) {
-		if ( _lpcdParm->nmcd.dwItemSpec % 2 == 0 ) {
-			_lpcdParm->clrText = ::GetSysColor( COLOR_WINDOWTEXT );//RGB( 0, 0, 0 );
-			_lpcdParm->clrTextBk = RGB( 0xF2, 0xFA, 0xFF );
-			//return CDRF_NEWFONT;
+		constexpr BYTE bDefR = 0xF2;
+		constexpr BYTE bDefG = 0xFA;
+		constexpr BYTE bDefB = 0xFF;
+
+		auto ptiItem = ItemByIndex( _lpcdParm->nmcd.dwItemSpec );
+		if ( ptiItem ) {
+			RGBQUAD rgbColor;
+			if ( ptiItem->Value().rgbColor.rgbReserved == 0xFF ) {
+				_lpcdParm->clrTextBk = RGB( ptiItem->Value().rgbColor.rgbRed, ptiItem->Value().rgbColor.rgbGreen, ptiItem->Value().rgbColor.rgbBlue );
+			}
+			else if ( ptiItem->Value().rgbColor.rgbReserved == 0x00 ) {
+				if ( _lpcdParm->nmcd.dwItemSpec % 2 == 0 ) {
+					_lpcdParm->clrText = ::GetSysColor( COLOR_WINDOWTEXT );
+					_lpcdParm->clrTextBk = RGB( bDefR, bDefG, bDefB );
+				}
+			}
+			else {
+				if ( _lpcdParm->nmcd.dwItemSpec % 2 == 0 ) {
+					_lpcdParm->clrText = ::GetSysColor( COLOR_WINDOWTEXT );
+					//_lpcdParm->clrTextBk = RGB( 0xF2, 0xFA, 0xFF );
+					rgbColor.rgbRed = bDefR;
+					rgbColor.rgbGreen = bDefG;
+					rgbColor.rgbBlue = bDefB;
+				}
+				else {
+					rgbColor.rgbRed = GetRValue( _lpcdParm->clrTextBk );
+					rgbColor.rgbGreen = GetGValue( _lpcdParm->clrTextBk );
+					rgbColor.rgbBlue = GetBValue( _lpcdParm->clrTextBk );
+				}
+
+				_lpcdParm->clrTextBk = CHelpers::MixColorRef( ptiItem->Value().rgbColor.rgbRed, ptiItem->Value().rgbColor.rgbGreen, ptiItem->Value().rgbColor.rgbBlue,
+					rgbColor.rgbRed, rgbColor.rgbGreen, rgbColor.rgbBlue, ptiItem->Value().rgbColor.rgbReserved / 255.0f );
+			}
 		}
 		return (CDRF_DODEFAULT | CDRF_NOTIFYPOSTPAINT);
 	}

@@ -247,6 +247,14 @@ namespace lsw {
 		size_t								GatherAllLParam( std::vector<LPARAM> &_vReturn, bool _bIncludeNonVisible = false ) const;
 
 		/**
+		 * Gathers all LPARAM values of every tree item visible within the control view space into an array.
+		 * 
+		 * \param _vReturn The array into which to gather the return values.
+		 * \return Returns the total number of items gathered (_vReturn.size()).
+		 **/
+		size_t								GatherInViewLParam( std::vector<LPARAM> &_vReturn ) const;
+
+		/**
 		 * Gets the index of the highlighted item or returns size_t( -1 ).
 		 *
 		 * \return Returs the index of the highlighted item or size_t( -1 ) if there is none.
@@ -317,13 +325,14 @@ namespace lsw {
 		 * Internal book-keeping for each row.
 		 */
 		struct LSW_TREE_ROW {
-			std::vector<std::wstring>		vStrings;					// Length matches GetColumnCount().
-			LPARAM							lpParam			= 0;		// The lParam originally associated with the tree item for this row.
+			std::vector<std::wstring>		vStrings;								// Length matches GetColumnCount().
+			LPARAM							lpParam			= 0;					// The lParam originally associated with the tree item for this row.
 			UINT							uiState			= TVIS_EXPANDED;		// State information.
-			UINT							uiStateEx		= 0;		// Additional state information.  Manages multi-select.
-			int								iImage			= 0;		// Index in the tree-view control's image list of the icon image to use when the item is in the nonselected state.
-			int								iSelectedImage	= 0;		// Index in the tree-view control's image list of the icon image to use when the item is in the selected state.
-			int								iExpandedImage	= 0;		// Index of the image in the control's image list to display when the item is in the expanded state.
+			UINT							uiStateEx		= 0;					// Additional state information.  Manages multi-select.
+			int								iImage			= 0;					// Index in the tree-view control's image list of the icon image to use when the item is in the nonselected state.
+			int								iSelectedImage	= 0;					// Index in the tree-view control's image list of the icon image to use when the item is in the selected state.
+			int								iExpandedImage	= 0;					// Index of the image in the control's image list to display when the item is in the expanded state.
+			RGBQUAD							rgbColor		= { .rgbReserved = 0 };	// Color of the item.
 
 			// == Operators.
 			// Less-than against another object.
@@ -408,7 +417,7 @@ namespace lsw {
 		 * \param _stIdx The index of the item to get with collapsed items being taken into account.
 		 * \return Returns the _stIdx'th item in the tree, accounting for expandedness.
 		 */
-		ee::CTree<LSW_TREE_ROW> *			ItemByIndex( size_t _stIdx );
+		ee::CTree<LSW_TREE_ROW> *			ItemByIndex( size_t _stIdx ) const;
 
 		/**
 		 * Gets an item by index accounting for children being expanded or not.
@@ -416,7 +425,7 @@ namespace lsw {
 		 * \param _stIdx The index of the item to get with collapsed items being taken into account.
 		 * \return Returns the _stIdx'th item in the tree, accounting for expandedness.
 		 */
-		ee::CTree<LSW_TREE_ROW> *			ItemByIndex( ee::CTree<LSW_TREE_ROW> * _ptStart, size_t _stIdx, size_t _stStartIdx );
+		ee::CTree<LSW_TREE_ROW> *			ItemByIndex( ee::CTree<LSW_TREE_ROW> * _ptStart, size_t _stIdx, size_t _stStartIdx ) const;
 
 		/**
 		 * Gets an item by index accounting for children being expanded or not, using cached internal values to speed up the process.
@@ -424,7 +433,7 @@ namespace lsw {
 		 * \param _stIdx The index of the item to get with collapsed items being taken into account.
 		 * \return Returns the _stIdx'th item in the tree, accounting for expandedness.
 		 */
-		ee::CTree<LSW_TREE_ROW> *			ItemByIndex_Cached( size_t _stIdx );
+		ee::CTree<LSW_TREE_ROW> *			ItemByIndex_Cached( size_t _stIdx ) const;
 
 		/**
 		 * Clears the cached tree item and index.

@@ -63,7 +63,7 @@ namespace mx {
 			return false;
 		}
 		SIZE_T stRead = 0;
-		if ( !m_ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(cChunk.ui64Start), &m_vBuffer[0], static_cast<SIZE_T>(cChunk.ui64Len), &stRead ) ) {
+		if ( !m_ppProcess->ReadProcessMemory( cChunk.ui64Start, &m_vBuffer[0], static_cast<SIZE_T>(cChunk.ui64Len), &stRead ) ) {
 			return false;
 		}
 		if ( m_pfPreProcFunc ) {

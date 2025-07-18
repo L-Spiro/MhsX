@@ -144,7 +144,7 @@ namespace mx {
 		std::random_device rdRand;
 		std::mt19937 mGen( rdRand() );
 		std::uniform_int_distribution<> uidDist( MX_T_UPDATE_LIST, MX_T_UPDATE_LIST + 16 );
-		m_uiptrUpdateListTimer = CSystem::SetTimer( Wnd(), uidDist( mGen ), m_uiUpdateSpeed, NULL );
+		m_uiptrUpdateListTimer = CSystem::SetTimer( Wnd(), uidDist( mGen ), 1000 / m_pmmwMhsWindow->MemHack()->Options().dwFoundAddressRefresh, NULL );
 		return LSW_H_CONTINUE;
 	}
 

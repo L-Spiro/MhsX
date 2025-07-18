@@ -71,6 +71,11 @@ namespace mx {
 			MX_WH_SHOW_FLOATING_POINT_STUDIO,
 		};
 
+		// Timer.
+		enum MX_TIMER {
+			MX_T_UPDATE_LIST				= 0x3E00
+		};
+
 
 		// == Functions.
 		// WM_INITDIALOG.
@@ -229,6 +234,12 @@ namespace mx {
 			return CStringDecoder::DecodeToWString( _sText.c_str(), _sText.size() );
 		}
 
+		// Update timer speed.
+		void								UpdateTimer();
+
+		// WM_TIMER.
+		CWidget::LSW_HANDLED				Timer( UINT_PTR _uiptrId, TIMERPROC _tpProc );
+
 
 	protected :
 		// == Enumerations.
@@ -285,6 +296,9 @@ namespace mx {
 
 		// The last options page shown.
 		int32_t								m_i32LastOptionsPage;
+
+		// Timer.
+		UINT_PTR							m_uiptrUpdateListTimer = 0;
 
 
 		// == Functions.

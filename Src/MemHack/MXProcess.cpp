@@ -59,10 +59,11 @@ namespace mx {
 	}
 
 	// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
-	bool CProcess::ReadProcessMemory( LPCVOID _lpBaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) const {
+	bool CProcess::ReadProcessMemory( uint64_t _lpBaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) const {
+		if ( _lpBaseAddress > MAXSIZE_T ) { return false; }
 		LSW_ENT_CRIT( m_csCrit );
 		if ( !ProcIsOpened() ) { return false; }
-		if ( !ReadProcessMemoryInternal( _lpBaseAddress, _lpBuffer, _nSize, _lpNumberOfBytesRead ) ) {
+		if ( !ReadProcessMemoryInternal( reinterpret_cast<LPCVOID>(_lpBaseAddress), _lpBuffer, _nSize, _lpNumberOfBytesRead ) ) {
 			if ( m_opmMode == CProcess::MX_OPM_CONSERVATIVE ) {
 				// Add PROCESS_VM_READ and try again.
 				if ( !MX_CHECK_FLAGS_EQ( m_dwOpenProcFlags, PROCESS_VM_READ ) ) {
@@ -78,10 +79,11 @@ namespace mx {
 	}
 
 	// Writes data to an area of memory in a specified process. The entire area to be written to must be accessible or the operation fails.
-	bool CProcess::WriteProcessMemory( LPVOID _lpBaseAddress, LPCVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesWritten ) {
+	bool CProcess::WriteProcessMemory( uint64_t _lpBaseAddress, LPCVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesWritten ) {
+		if ( _lpBaseAddress > MAXSIZE_T ) { return false; }
 		LSW_ENT_CRIT( m_csCrit );
 		if ( !ProcIsOpened() ) { return false; }
-		if ( !WriteProcessMemoryInternal( _lpBaseAddress, _lpBuffer, _nSize, _lpNumberOfBytesWritten ) ) {
+		if ( !WriteProcessMemoryInternal( reinterpret_cast<LPVOID>(_lpBaseAddress), _lpBuffer, _nSize, _lpNumberOfBytesWritten ) ) {
 			if ( m_opmMode == CProcess::MX_OPM_CONSERVATIVE ) {
 				// Add (PROCESS_VM_WRITE | PROCESS_VM_OPERATION) and try again.
 				if ( !MX_CHECK_FLAGS_EQ( m_dwOpenProcFlags, PROCESS_VM_WRITE | PROCESS_VM_OPERATION ) ) {

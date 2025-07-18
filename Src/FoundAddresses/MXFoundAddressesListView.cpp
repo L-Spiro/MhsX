@@ -126,7 +126,7 @@ namespace mx {
 									uint64_t uiAdjustedEnd = (((ui64Address + dwSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
 									uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
 
-									if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
+									if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( uiDataStart,
 										ui8CurVal, uiAdjustedLen, nullptr ) ) {
 										std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
 									}
@@ -151,7 +151,7 @@ namespace mx {
 										uint64_t uiAdjustedEnd = (((ui64Address + dwSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
 										uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
 
-										if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
+										if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( uiDataStart,
 											ui8CurVal, uiAdjustedLen, nullptr ) ) {
 											std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
 										}
@@ -172,7 +172,7 @@ namespace mx {
 										uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
 
 										vData.resize( uiAdjustedLen );
-										if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
+										if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( uiDataStart,
 											&vData[0], uiAdjustedLen, nullptr ) ) {
 											std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
 										}
@@ -322,7 +322,7 @@ namespace mx {
 		uint64_t uiAdjustedEnd = (((_uiAddress + arRef.uiSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
 		uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
 		if ( !CUtilities::Resize( vData, uiAdjustedLen ) ) { return false; }
-		if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
+		if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( uiDataStart,
 			vData.data(), vData.size(), nullptr ) ) {
 			std::swprintf( _pwStr, _iMaxLen, L"%s", L"N/A" );
 			return false;
@@ -507,7 +507,7 @@ namespace mx {
 		uint64_t uiAdjustedEnd = (((_uiAddress + uiSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
 		uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
 		if ( !CUtilities::Resize( vData, uiAdjustedLen ) ) { return false; }
-		if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
+		if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( uiDataStart,
 			&vData[0], vData.size(), nullptr ) ) {
 			std::swprintf( _pwStr, _iMaxLen, L"%s", L"N/A" );
 			return false;

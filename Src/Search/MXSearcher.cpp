@@ -742,7 +742,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( _aclChunks.Chunks()[I].ui64Len - J, vBuffer.size() );
 				if ( sSize < ui32Size ) { break; }
-				if ( m_ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_aclChunks.Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( m_ppProcess->ReadProcessMemory( _aclChunks.Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, _spParms );
 					// Go over the chunk and compare.
 					 
@@ -852,7 +852,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(_aclChunks.Chunks()[I].ui64Len - J), vBuffer.size() );
 				if ( sSize < ui32Size ) { break; }
-				if ( m_ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_aclChunks.Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( m_ppProcess->ReadProcessMemory( _aclChunks.Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, _spParms );
 					// Go over the chunk and compare.
 					 
@@ -962,7 +962,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(_aclChunks.Chunks()[I].ui64Len - J), vBuffer.size() );
 				if ( sSize < ui32Size ) { break; }
-				if ( m_ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_aclChunks.Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( m_ppProcess->ReadProcessMemory( _aclChunks.Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, _spParms );
 					// Go over the chunk and compare.
 					 
@@ -1079,7 +1079,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(_aclChunks.Chunks()[I].ui64Len - J), vBuffer.size() );
 				if ( sSize < ui32Size ) { break; }
-				if ( m_ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_aclChunks.Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( m_ppProcess->ReadProcessMemory( _aclChunks.Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, _spParms );
 					// Go over the chunk and compare.
 					 
@@ -1252,7 +1252,7 @@ namespace mx {
 			for ( uint64_t J = 0; J < _aclChunks.Chunks()[I].ui64Len; ) {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(_aclChunks.Chunks()[I].ui64Len - J), vBuffer.size() );
-				if ( m_ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_aclChunks.Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( m_ppProcess->ReadProcessMemory( _aclChunks.Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, _spParms );
 
 					// Pre-op.
@@ -1414,7 +1414,7 @@ namespace mx {
 			for ( uint64_t J = 0; J < _aclChunks.Chunks()[I].ui64Len; ) {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(_aclChunks.Chunks()[I].ui64Len - J), vBuffer.size() );
-				if ( m_ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_aclChunks.Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( m_ppProcess->ReadProcessMemory( _aclChunks.Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, _spParms );
 
 					// Pre-op.
@@ -1626,7 +1626,7 @@ namespace mx {
 			for ( uint64_t J = 0; J < _aclChunks.Chunks()[I].ui64Len; ) {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(_aclChunks.Chunks()[I].ui64Len - J), vBuffer.size() );
-				if ( m_ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_aclChunks.Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( m_ppProcess->ReadProcessMemory( _aclChunks.Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, _spParms );
 
 					// Pre-op.
@@ -1775,7 +1775,7 @@ namespace mx {
 			for ( uint64_t J = 0; J < _aclChunks.Chunks()[I].ui64Len; ) {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(_aclChunks.Chunks()[I].ui64Len - J), vBuffer.size() );
-				if ( m_ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_aclChunks.Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( m_ppProcess->ReadProcessMemory( _aclChunks.Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, _spParms );
 
 					// Go over the chunk and compare.
@@ -1895,7 +1895,7 @@ namespace mx {
 			for ( uint64_t J = 0; J < _aclChunks.Chunks()[I].ui64Len; ) {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(_aclChunks.Chunks()[I].ui64Len - J), vBuffer.size() );
-				if ( m_ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_aclChunks.Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( m_ppProcess->ReadProcessMemory( _aclChunks.Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, _spParms );
 
 					// Go over the chunk and compare.
@@ -2023,7 +2023,7 @@ namespace mx {
 				for ( uint64_t J = 0; J < _aclChunks.Chunks()[I].ui64Len; ) {
 					// Buffer as much of the chunk as possible.
 					size_t sSize = std::min( static_cast<size_t>(_aclChunks.Chunks()[I].ui64Len - J), vBuffer.size() );
-					if ( m_ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_aclChunks.Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+					if ( m_ppProcess->ReadProcessMemory( _aclChunks.Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 						PreprocessByteSwap( vBuffer.data(), sSize, _spParms );
 
 						// Go over the chunk and compare.
@@ -2147,7 +2147,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( _aclChunks.Chunks()[I].ui64Len - J, vBuffer.size() );
 				if ( sSize < ui32Size ) { break; }
-				if ( m_ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_aclChunks.Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( m_ppProcess->ReadProcessMemory( _aclChunks.Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, _spParms );
 					// Go over the chunk and compare.
 					size_t sEnd = sSize - ui32Size;
@@ -2280,7 +2280,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( _aclChunks.Chunks()[I].ui64Len - J, vBuffer.size() );
 				if ( sSize < ui32Size ) { break; }
-				if ( m_ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_aclChunks.Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( m_ppProcess->ReadProcessMemory( _aclChunks.Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, _spParms );
 					// Go over the chunk and compare.
 					size_t sEnd = sSize - ui32Size;
@@ -2394,7 +2394,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( _aclChunks.Chunks()[I].ui64Len - J, vBuffer.size() );
 				if ( sSize < ui32Size ) { break; }
-				if ( m_ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_aclChunks.Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( m_ppProcess->ReadProcessMemory( _aclChunks.Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, _spParms );
 					// Go over the chunk and compare.
 					size_t sEnd = sSize - ui32Size;
@@ -3930,7 +3930,7 @@ namespace mx {
 			case ee::EE_CT_INT8 : {
 				_rResult.ncType = ee::EE_NC_SIGNED;
 				int8_t i8Val;
-				if ( ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &i8Val, sizeof( i8Val ), NULL ) ) {
+				if ( ppProcess->ReadProcessMemory( _ui64Address, &i8Val, sizeof( i8Val ), NULL ) ) {
 					_rResult.u.i64Val = i8Val;
 					return true;
 				}
@@ -3939,7 +3939,7 @@ namespace mx {
 			case ee::EE_CT_INT16 : {
 				_rResult.ncType = ee::EE_NC_SIGNED;
 				int16_t i16Val;
-				if ( ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &i16Val, sizeof( i16Val ), NULL ) ) {
+				if ( ppProcess->ReadProcessMemory( _ui64Address, &i16Val, sizeof( i16Val ), NULL ) ) {
 					_rResult.u.i64Val = i16Val;
 					return true;
 				}
@@ -3948,7 +3948,7 @@ namespace mx {
 			case ee::EE_CT_INT32 : {
 				_rResult.ncType = ee::EE_NC_SIGNED;
 				int32_t i32Val;
-				if ( ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &i32Val, sizeof( i32Val ), NULL ) ) {
+				if ( ppProcess->ReadProcessMemory( _ui64Address, &i32Val, sizeof( i32Val ), NULL ) ) {
 					_rResult.u.i64Val = i32Val;
 					return true;
 				}
@@ -3956,7 +3956,7 @@ namespace mx {
 			}
 			case ee::EE_CT_INT64 : {
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				if ( ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &_rResult.u.i64Val, sizeof( _rResult.u.i64Val ), NULL ) ) {
+				if ( ppProcess->ReadProcessMemory( _ui64Address, &_rResult.u.i64Val, sizeof( _rResult.u.i64Val ), NULL ) ) {
 					return true;
 				}
 				break;
@@ -3965,29 +3965,29 @@ namespace mx {
 			case ee::EE_CT_UINT8 : {
 				_rResult.ncType = ee::EE_NC_UNSIGNED;
 				_rResult.u.ui64Val = 0;
-				return ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &_rResult.u.ui64Val, sizeof( uint8_t ), NULL );
+				return ppProcess->ReadProcessMemory( _ui64Address, &_rResult.u.ui64Val, sizeof( uint8_t ), NULL );
 			}
 			case ee::EE_CT_UINT16 : {
 				_rResult.ncType = ee::EE_NC_UNSIGNED;
 				_rResult.u.ui64Val = 0;
-				return ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &_rResult.u.ui64Val, sizeof( uint16_t ), NULL );
+				return ppProcess->ReadProcessMemory( _ui64Address, &_rResult.u.ui64Val, sizeof( uint16_t ), NULL );
 			}
 			case ee::EE_CT_UINT32 : {
 				_rResult.ncType = ee::EE_NC_UNSIGNED;
 				_rResult.u.ui64Val = 0;
-				return ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &_rResult.u.ui64Val, sizeof( uint32_t ), NULL );
+				return ppProcess->ReadProcessMemory( _ui64Address, &_rResult.u.ui64Val, sizeof( uint32_t ), NULL );
 			}
 			case ee::EE_CT_UINT64 : {
 				_rResult.ncType = ee::EE_NC_UNSIGNED;
 				_rResult.u.ui64Val = 0;
-				return ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &_rResult.u.ui64Val, sizeof( uint64_t ), NULL );
+				return ppProcess->ReadProcessMemory( _ui64Address, &_rResult.u.ui64Val, sizeof( uint64_t ), NULL );
 			}
 
 
 			case ee::EE_CT_FLOAT16 : {
 				_rResult.ncType = ee::EE_NC_FLOATING;
 				uint16_t ui16Val = 0;
-				if ( ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &ui16Val, sizeof( ui16Val ), NULL ) ) {
+				if ( ppProcess->ReadProcessMemory( _ui64Address, &ui16Val, sizeof( ui16Val ), NULL ) ) {
 					_rResult.u.dVal = ee::CFloat16( ui16Val ).Value();
 					return true;
 				}
@@ -3996,7 +3996,7 @@ namespace mx {
 			case ee::EE_CT_FLOAT : {
 				_rResult.ncType = ee::EE_NC_FLOATING;
 				float fVal = 0.0f;
-				if ( ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &fVal, sizeof( fVal ), NULL ) ) {
+				if ( ppProcess->ReadProcessMemory( _ui64Address, &fVal, sizeof( fVal ), NULL ) ) {
 					_rResult.u.dVal = fVal;
 					return true;
 				}
@@ -4005,7 +4005,7 @@ namespace mx {
 			case ee::EE_CT_DOUBLE : {
 				_rResult.ncType = ee::EE_NC_FLOATING;
 				_rResult.u.dVal = 0;
-				return ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &_rResult.u.dVal, sizeof( _rResult.u.dVal ), NULL );
+				return ppProcess->ReadProcessMemory( _ui64Address, &_rResult.u.dVal, sizeof( _rResult.u.dVal ), NULL );
 			}
 		}
 		_rResult.ncType = ee::EE_NC_INVALID;
@@ -4083,7 +4083,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(ppstParms->paclChunks->Chunks()[I].ui64Len - J), vBuffer.size() );
 				if ( sSize < ppstParms->ui32Size ) { break; }
-				if ( ppstParms->ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(ppstParms->paclChunks->Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( ppstParms->ppProcess->ReadProcessMemory( ppstParms->paclChunks->Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, (*ppstParms->pspParms) );
 					// Go over the chunk and compare.
 					
@@ -4144,7 +4144,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(ppstParms->paclChunks->Chunks()[I].ui64Len - J), vBuffer.size() );
 				if ( sSize < ppstParms->ui32Size ) { break; }
-				if ( ppstParms->ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(ppstParms->paclChunks->Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( ppstParms->ppProcess->ReadProcessMemory( ppstParms->paclChunks->Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, (*ppstParms->pspParms) );
 					// Go over the chunk and compare.
 					 
@@ -4205,7 +4205,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(ppstParms->paclChunks->Chunks()[I].ui64Len - J), vBuffer.size() );
 				if ( sSize < ppstParms->ui32Size ) { break; }
-				if ( ppstParms->ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(ppstParms->paclChunks->Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( ppstParms->ppProcess->ReadProcessMemory( ppstParms->paclChunks->Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, (*ppstParms->pspParms) );
 					// Go over the chunk and compare.
 					 
@@ -4280,7 +4280,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(pustParms->paclChunks->Chunks()[I].ui64Len - J), vBuffer.size() );
 				if ( sSize < 1 ) { break; }
-				if ( pustParms->ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(pustParms->paclChunks->Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( pustParms->ppProcess->ReadProcessMemory( pustParms->paclChunks->Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, (*pustParms->pspParms) );
 
 					if ( pustParms->pspParms->pbAbort && (*pustParms->pspParms->pbAbort) ) { break; }
@@ -4371,7 +4371,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(pustParms->paclChunks->Chunks()[I].ui64Len - J), vBuffer.size() );
 				if ( sSize < 1 ) { break; }
-				if ( pustParms->ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(pustParms->paclChunks->Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( pustParms->ppProcess->ReadProcessMemory( pustParms->paclChunks->Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, (*pustParms->pspParms) );
 
 					if ( pustParms->pspParms->pbAbort && (*pustParms->pspParms->pbAbort) ) { break; }
@@ -4516,7 +4516,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(pustParms->paclChunks->Chunks()[I].ui64Len - J), vBuffer.size() );
 				if ( sSize < pustParms->ui32Size ) { break; }
-				if ( pustParms->ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(pustParms->paclChunks->Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( pustParms->ppProcess->ReadProcessMemory( pustParms->paclChunks->Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, (*pustParms->pspParms) );
 
 					if ( pustParms->pspParms->pbAbort && (*pustParms->pspParms->pbAbort) ) { break; }
@@ -4642,7 +4642,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(pustParms->paclChunks->Chunks()[I].ui64Len - J), vBuffer.size() );
 				if ( sSize < 1 ) { break; }
-				if ( pustParms->ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(pustParms->paclChunks->Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( pustParms->ppProcess->ReadProcessMemory( pustParms->paclChunks->Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, (*pustParms->pspParms) );
 
 					// Go over the chunk and compare.
@@ -4729,7 +4729,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(pustParms->paclChunks->Chunks()[I].ui64Len - J), vBuffer.size() );
 				if ( sSize < 1 ) { break; }
-				if ( pustParms->ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(pustParms->paclChunks->Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( pustParms->ppProcess->ReadProcessMemory( pustParms->paclChunks->Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, (*pustParms->pspParms) );
 
 					// Go over the chunk and compare.
@@ -4806,7 +4806,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(pustParms->paclChunks->Chunks()[I].ui64Len - J), vBuffer.size() );
 				if ( sSize < 1 ) { break; }
-				if ( pustParms->ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(pustParms->paclChunks->Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( pustParms->ppProcess->ReadProcessMemory( pustParms->paclChunks->Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, (*pustParms->pspParms) );
 
 					// Go over the chunk and compare.
@@ -4896,7 +4896,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(pustParms->paclChunks->Chunks()[I].ui64Len - J), vBuffer.size() );
 				if ( sSize < pustParms->ui32Size ) { break; }
-				if ( pustParms->ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(pustParms->paclChunks->Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( pustParms->ppProcess->ReadProcessMemory( pustParms->paclChunks->Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					PreprocessByteSwap( vBuffer.data(), sSize, (*pustParms->pspParms) );
 					// Go over the chunk and compare.
 					
@@ -5010,7 +5010,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(pustParms->paclChunks->Chunks()[I].ui64Len - J), vBuffer.size() );
 				if ( sSize < pustParms->ui32Size ) { break; }
-				if ( pustParms->ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(pustParms->paclChunks->Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( pustParms->ppProcess->ReadProcessMemory( pustParms->paclChunks->Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					escSearchCache.sBaseSize = sSize;
 					escSearchCache.ui64Address = pustParms->paclChunks->Chunks()[I].ui64Start + J;
 					PreprocessByteSwap( vBuffer.data(), sSize, (*pustParms->pspParms) );
@@ -5105,7 +5105,7 @@ namespace mx {
 				// Buffer as much of the chunk as possible.
 				size_t sSize = std::min( static_cast<size_t>(pustParms->paclChunks->Chunks()[I].ui64Len - J), vBuffer.size() );
 				if ( sSize < pustParms->ui32Size ) { break; }
-				if ( pustParms->ppProcess->ReadProcessMemory( reinterpret_cast<LPCVOID>(pustParms->paclChunks->Chunks()[I].ui64Start + J), &vBuffer[0], sSize, nullptr ) ) {
+				if ( pustParms->ppProcess->ReadProcessMemory( pustParms->paclChunks->Chunks()[I].ui64Start + J, &vBuffer[0], sSize, nullptr ) ) {
 					escSearchCache.sBaseSize = sSize;
 					escSearchCache.ui64Address = pustParms->paclChunks->Chunks()[I].ui64Start + J;
 					PreprocessByteSwap( vBuffer.data(), sSize, (*pustParms->pspParms) );

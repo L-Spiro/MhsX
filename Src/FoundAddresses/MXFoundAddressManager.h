@@ -41,6 +41,9 @@ namespace mx {
 		// Adds a group.
 		CFoundAddressGroup *												AddGroup( CMemHack * _pmhMemHack );
 
+		// Dirties all entries.
+		void																DirtyAll();
+
 	protected :
 		// == Members.
 		// The pool of found-address objects.

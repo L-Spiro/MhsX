@@ -108,6 +108,9 @@ namespace mx {
 		// Gets the Type text.
 		virtual std::wstring								TypeText() const { return std::wstring(); }
 
+		// Dirties the item.  Address and current data need to be updated after this.
+		virtual void										Dirty() {}
+
 
 	protected :
 		CFoundAddressBase( CMemHack * _pmhMemHack );

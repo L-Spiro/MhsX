@@ -81,4 +81,13 @@ namespace mx {
 		return pAddress;
 	}
 
+	// Dirties all entries.
+	void CFoundAddressManager::DirtyAll() {
+		for ( auto & I : m_mFoundAddresses ) {
+			if MX_LIKELY( I.second ) {
+				I.second->Dirty();
+			}
+		}
+	}
+
 }	// namespace mx

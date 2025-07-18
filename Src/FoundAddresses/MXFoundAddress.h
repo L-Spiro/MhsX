@@ -67,7 +67,7 @@ namespace mx {
 		}
 
 		// Dirties the item.  Address and current data need to be updated after this.
-		void												Dirty() {
+		virtual void										Dirty() {
 			m_bDirtyAddress = true;
 			m_bDirtyCurValue = true;
 		}

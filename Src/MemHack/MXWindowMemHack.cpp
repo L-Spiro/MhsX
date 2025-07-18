@@ -168,6 +168,7 @@ namespace mx {
 			if ( m_pmmwWindow->FoundAddresses() ) {
 				m_pmmwWindow->FoundAddresses()->SetUpdateSpeed( 1000 / max( Options().dwFoundAddressRefresh, static_cast<DWORD>(1) ) );
 			}
+			m_pmmwWindow->UpdateTimer();
 
 			AddUserProgramsToMenu();
 

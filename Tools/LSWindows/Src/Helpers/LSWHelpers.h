@@ -834,22 +834,34 @@ namespace lsw {
 		 * \param _bA Operand 1.
 		 * \param _bB Operand 2.
 		 * \param _dAmnt The amount to interpolate between the operands.
-		 * \return RETURN
+		 * \return Returns the mixed value.
 		 */
 		static BYTE							Mix( BYTE _bA, BYTE _bB, double _dAmnt ) {
 			return static_cast<BYTE>(std::round( (_bB - _bA) * _dAmnt + _bA ));
 		}
 
 		/**
-		 * Interpolates between 2 bytes.
+		 * Interpolates between 2 values.
 		 *
 		 * \param _dA Operand 1.
 		 * \param _dB Operand 2.
 		 * \param _dAmnt The amount to interpolate between the operands.
-		 * \return RETURN
+		 * \return Returns the mixed value.
 		 */
 		static double						Mix( double _dA, double _dB, double _dAmnt ) {
 			return (_dB - _dA) * _dAmnt + _dA;
+		}
+
+		/**
+		 * Interpolates between 2 values.
+		 *
+		 * \param _fA Operand 1.
+		 * \param _fB Operand 2.
+		 * \param _fAmnt The amount to interpolate between the operands.
+		 * \return Returns the mixed value.
+		 */
+		static float						Mix( float _fA, float _fB, float _fAmnt ) {
+			return (_fB - _fA) * _fAmnt + _fA;
 		}
 
 		/**
@@ -877,6 +889,30 @@ namespace lsw {
 		}
 
 		/**
+		 * Converts from sRGB to linear.
+		 *
+		 * \param _fVal The value to convert.
+		 * \return Returns the color value converted to linear space.
+		 */
+		static float						sRGBtoLinear( float _fVal ) {
+			return _fVal <= 0.04045f ?
+				_fVal * (1.0f / 12.92f) :
+				std::pow( (_fVal + 0.055f) * (1.0f / 1.055f), 2.4f );
+		}
+
+		/**
+		 * Converts from linear to sRGB.
+		 *
+		 * \param _fVal The value to convert.
+		 * \return Returns the value converted to sRGB space.
+		 */
+		static float						LinearTosRGB( float _fVal ) {
+			return _fVal <= 0.0031308f ?
+				_fVal * 12.92f :
+				1.055f * std::pow( _fVal, 1.0f / 2.4f ) - 0.055f;
+		}
+
+		/**
 		 * Mixes between 2 24-bit RGB values.
 		 *
 		 * \param _dwColorA Operand 1.
@@ -894,6 +930,33 @@ namespace lsw {
 			dA = sRGBtoLinear( GetBValue( _dwColorA ) / 255.0 );
 			dB = sRGBtoLinear( GetBValue( _dwColorB ) / 255.0 );
 			BYTE bB = static_cast<BYTE>(std::round( LinearTosRGB( Mix( dA, dB, _dAmnt ) ) * 255.0 ));
+			return RGB( bR, bG, bB );
+		}
+
+		/**
+		 * Mixes between 2 24-bit RGB values.
+		 *
+		 * \param _bRedA Operand 1 (red).
+		 * \param _bRedB Operand 2 (red).
+		 * \param _bGreenA Operand 1 (green).
+		 * \param _bGreenB Operand 2 (green).
+		 * \param _bBlueA Operand 1 (blue).
+		 * \param _bBlueB Operand 2 (blue).
+		 * \param _fAmnt The amount to interpolate between the operands.
+		 * \return Returns the interpolated 24-bit RGB value.
+		 */
+		static DWORD						MixColorRef( BYTE _bRedA, BYTE _bRedB,
+			BYTE _bGreenA, BYTE _bGreenB,
+			BYTE _bBlueA, BYTE _bBlueB, float _fAmnt ) {
+			float dA = sRGBtoLinear( _bRedA / 255.0f );
+			float dB = sRGBtoLinear( _bRedB / 255.0f );
+			BYTE bR = static_cast<BYTE>(std::round( LinearTosRGB( Mix( dA, dB, _fAmnt ) ) * 255.0f ));
+			dA = sRGBtoLinear( _bGreenA / 255.0f );
+			dB = sRGBtoLinear( _bGreenB / 255.0f );
+			BYTE bG = static_cast<BYTE>(std::round( LinearTosRGB( Mix( dA, dB, _fAmnt ) ) * 255.0f ));
+			dA = sRGBtoLinear( _bBlueA / 255.0f );
+			dB = sRGBtoLinear( _bBlueB / 255.0f );
+			BYTE bB = static_cast<BYTE>(std::round( LinearTosRGB( Mix( dA, dB, _fAmnt ) ) * 255.0f ));
 			return RGB( bR, bG, bB );
 		}
 

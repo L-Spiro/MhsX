@@ -336,6 +336,11 @@ namespace mx {
 	}
 
 	CMhsMainWindow::~CMhsMainWindow() {
+		if ( m_uiptrUpdateListTimer ) {
+			CSystem::KillTimer( Wnd(), m_uiptrUpdateListTimer );
+			m_uiptrUpdateListTimer = 0;
+		}
+
 		//delete m_pmhMemHack;
 		m_pmhMemHack = nullptr;
 
@@ -547,6 +552,10 @@ namespace mx {
 		reinterpret_cast<CHotkeyRegisterHotKeyMethod *>(m_pmhMemHack->HotkeyManager().GetRegisteredHotkeyManager())->SetWindow( Wnd() );
 		m_pmhMemHack->HotkeyManager().Start();
 
+		std::random_device rdRand;
+		std::mt19937 mGen( rdRand() );
+		std::uniform_int_distribution<> uidDist( MX_T_UPDATE_LIST, MX_T_UPDATE_LIST + 16 );
+		m_uiptrUpdateListTimer = CSystem::SetTimer( Wnd(), uidDist( mGen ), 1000 / m_pmhMemHack->Options().dwMainRefresh, NULL );
 		return LSW_H_CONTINUE;
 	}
 
@@ -1153,6 +1162,26 @@ namespace mx {
 		}
 
 		return true;
+	}
+
+	// Update timer speed.
+	void CMhsMainWindow::UpdateTimer() {
+		if ( m_uiptrUpdateListTimer ) {
+			m_uiptrUpdateListTimer = CSystem::SetTimer( Wnd(), m_uiptrUpdateListTimer, max( 1000 / MemHack()->Options().dwFoundAddressRefresh, static_cast<DWORD>(1) ), NULL );
+		}
+	}
+
+	// WM_TIMER.
+	CWidget::LSW_HANDLED CMhsMainWindow::Timer( UINT_PTR _uiptrId, TIMERPROC _tpProc ) {
+		if ( _uiptrId == m_uiptrUpdateListTimer ) {
+			// Update the list.
+			auto * plvList = MainTreeView();
+			if ( plvList ) {
+				//MemHack()->FoundAddressManager().DirtyAll();
+				::RedrawWindow( plvList->Wnd(), NULL, NULL, RDW_INVALIDATE | /*RDW_NOCHILDREN | */RDW_UPDATENOW | RDW_FRAME );
+			}
+		}
+		return LSW_H_CONTINUE;
 	}
 
 	// Informs that a child was removed from a child control (IE this control's child had a child control removed from it).

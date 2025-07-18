@@ -282,7 +282,7 @@ namespace mx {
 
 		try {
 			_vBuffer.resize( static_cast<size_t>(uiAdjustedLen) );
-			if ( !Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
+			if ( !Process().ReadProcessMemory( uiDataStart,
 				_vBuffer.data(), _vBuffer.size(), _lpNumberOfBytesRead ) ) {
 				return false;
 			}
@@ -304,7 +304,7 @@ namespace mx {
 		uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
 
 		try {
-			if ( !Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
+			if ( !Process().ReadProcessMemory( uiDataStart,
 				_pui8Buffer, static_cast<SIZE_T>(uiAdjustedLen), _lpNumberOfBytesRead ) ) {
 				return false;
 			}
@@ -326,7 +326,7 @@ namespace mx {
 		uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
 		try {
 			_vBuffer.resize( static_cast<size_t>(uiAdjustedLen) );
-			if ( !Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
+			if ( !Process().ReadProcessMemory( uiDataStart,
 				_vBuffer.data(), _vBuffer.size(), _lpNumberOfBytesRead ) ) {
 				return false;
 			}
@@ -348,7 +348,7 @@ namespace mx {
 		uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
 
 		try {
-			if ( !Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(uiDataStart),
+			if ( !Process().ReadProcessMemory( uiDataStart,
 				_pui8Buffer, static_cast<SIZE_T>(uiAdjustedLen), _lpNumberOfBytesRead ) ) {
 				return false;
 			}
@@ -366,7 +366,7 @@ namespace mx {
 			case ee::EE_CT_INT8 : {
 				_rResult.ncType = ee::EE_NC_SIGNED;
 				int8_t i8Val;
-				if ( _mhMemHack->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &i8Val, sizeof( i8Val ), NULL ) ) {
+				if ( _mhMemHack->Process().ReadProcessMemory( _ui64Address, &i8Val, sizeof( i8Val ), NULL ) ) {
 					_rResult.u.i64Val = i8Val;
 					return true;
 				}
@@ -375,7 +375,7 @@ namespace mx {
 			case ee::EE_CT_INT16 : {
 				_rResult.ncType = ee::EE_NC_SIGNED;
 				int16_t i16Val;
-				if ( _mhMemHack->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &i16Val, sizeof( i16Val ), NULL ) ) {
+				if ( _mhMemHack->Process().ReadProcessMemory( _ui64Address, &i16Val, sizeof( i16Val ), NULL ) ) {
 					_rResult.u.i64Val = i16Val;
 					return true;
 				}
@@ -384,7 +384,7 @@ namespace mx {
 			case ee::EE_CT_INT32 : {
 				_rResult.ncType = ee::EE_NC_SIGNED;
 				int32_t i32Val;
-				if ( _mhMemHack->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &i32Val, sizeof( i32Val ), NULL ) ) {
+				if ( _mhMemHack->Process().ReadProcessMemory( _ui64Address, &i32Val, sizeof( i32Val ), NULL ) ) {
 					_rResult.u.i64Val = i32Val;
 					return true;
 				}
@@ -392,7 +392,7 @@ namespace mx {
 			}
 			case ee::EE_CT_INT64 : {
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				if ( _mhMemHack->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &_rResult.u.i64Val, sizeof( _rResult.u.i64Val ), NULL ) ) {
+				if ( _mhMemHack->Process().ReadProcessMemory( _ui64Address, &_rResult.u.i64Val, sizeof( _rResult.u.i64Val ), NULL ) ) {
 					return true;
 				}
 				break;
@@ -401,29 +401,29 @@ namespace mx {
 			case ee::EE_CT_UINT8 : {
 				_rResult.ncType = ee::EE_NC_UNSIGNED;
 				_rResult.u.ui64Val = 0;
-				return _mhMemHack->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &_rResult.u.ui64Val, sizeof( uint8_t ), NULL );
+				return _mhMemHack->Process().ReadProcessMemory( _ui64Address, &_rResult.u.ui64Val, sizeof( uint8_t ), NULL );
 			}
 			case ee::EE_CT_UINT16 : {
 				_rResult.ncType = ee::EE_NC_UNSIGNED;
 				_rResult.u.ui64Val = 0;
-				return _mhMemHack->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &_rResult.u.ui64Val, sizeof( uint16_t ), NULL );
+				return _mhMemHack->Process().ReadProcessMemory( _ui64Address, &_rResult.u.ui64Val, sizeof( uint16_t ), NULL );
 			}
 			case ee::EE_CT_UINT32 : {
 				_rResult.ncType = ee::EE_NC_UNSIGNED;
 				_rResult.u.ui64Val = 0;
-				return _mhMemHack->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &_rResult.u.ui64Val, sizeof( uint32_t ), NULL );
+				return _mhMemHack->Process().ReadProcessMemory( _ui64Address, &_rResult.u.ui64Val, sizeof( uint32_t ), NULL );
 			}
 			case ee::EE_CT_UINT64 : {
 				_rResult.ncType = ee::EE_NC_UNSIGNED;
 				_rResult.u.ui64Val = 0;
-				return _mhMemHack->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &_rResult.u.ui64Val, sizeof( uint64_t ), NULL );
+				return _mhMemHack->Process().ReadProcessMemory( _ui64Address, &_rResult.u.ui64Val, sizeof( uint64_t ), NULL );
 			}
 
 
 			case ee::EE_CT_FLOAT16 : {
 				_rResult.ncType = ee::EE_NC_FLOATING;
 				uint16_t ui16Val = 0;
-				if ( _mhMemHack->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &ui16Val, sizeof( ui16Val ), NULL ) ) {
+				if ( _mhMemHack->Process().ReadProcessMemory( _ui64Address, &ui16Val, sizeof( ui16Val ), NULL ) ) {
 					_rResult.u.dVal = ee::CFloat16( ui16Val ).Value();
 					return true;
 				}
@@ -432,7 +432,7 @@ namespace mx {
 			case ee::EE_CT_FLOAT : {
 				_rResult.ncType = ee::EE_NC_FLOATING;
 				float fVal = 0.0f;
-				if ( _mhMemHack->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &fVal, sizeof( fVal ), NULL ) ) {
+				if ( _mhMemHack->Process().ReadProcessMemory( _ui64Address, &fVal, sizeof( fVal ), NULL ) ) {
 					_rResult.u.dVal = fVal;
 					return true;
 				}
@@ -441,7 +441,7 @@ namespace mx {
 			case ee::EE_CT_DOUBLE : {
 				_rResult.ncType = ee::EE_NC_FLOATING;
 				_rResult.u.dVal = 0;
-				return _mhMemHack->Process().ReadProcessMemory( reinterpret_cast<LPCVOID>(_ui64Address), &_rResult.u.dVal, sizeof( _rResult.u.dVal ), NULL );
+				return _mhMemHack->Process().ReadProcessMemory( _ui64Address, &_rResult.u.dVal, sizeof( _rResult.u.dVal ), NULL );
 			}
 		}
 		_rResult.ncType = ee::EE_NC_INVALID;
@@ -458,7 +458,7 @@ namespace mx {
 	case ee::EE_CT_INT ## BITS : {																														\
 		_rResult.ncType = ee::EE_NC_SIGNED;																												\
 		int ## BITS ## _t iVal = static_cast<int ## BITS ## _t>(_rResult.u.ui64Val);																	\
-		if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &iVal, sizeof( iVal ), NULL ) ) {						\
+		if ( _mhMemHack->m_pProcess.WriteProcessMemory( _ui64Address, &iVal, sizeof( iVal ), NULL ) ) {													\
 			_rResult.u.i64Val = iVal;																													\
 			return true;																																\
 		}																																				\
@@ -474,7 +474,7 @@ namespace mx {
 	case ee::EE_CT_UINT ## BITS : {																														\
 		_rResult.ncType = ee::EE_NC_UNSIGNED;																											\
 		uint ## BITS ## _t iVal = static_cast<uint ## BITS ## _t>(_rResult.u.ui64Val);																	\
-		if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &iVal, sizeof( iVal ), NULL ) ) {						\
+		if ( _mhMemHack->m_pProcess.WriteProcessMemory( _ui64Address, &iVal, sizeof( iVal ), NULL ) ) {													\
 			_rResult.u.ui64Val = iVal;																													\
 			return true;																																\
 		}																																				\
@@ -489,7 +489,7 @@ namespace mx {
 					case ee::EE_CT_FLOAT : {
 						_rResult.ncType = ee::EE_NC_FLOATING;
 						float fVal = static_cast<float>(_rResult.u.ui64Val);
-						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &fVal, sizeof( fVal ), NULL ) ) {
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( _ui64Address, &fVal, sizeof( fVal ), NULL ) ) {
 							_rResult.u.dVal = fVal;
 							return true;
 						}
@@ -498,7 +498,7 @@ namespace mx {
 					case ee::EE_CT_DOUBLE : {
 						_rResult.ncType = ee::EE_NC_FLOATING;
 						double dVal = static_cast<double>(_rResult.u.ui64Val);
-						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &dVal, sizeof( dVal ), NULL ) ) {
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( _ui64Address, &dVal, sizeof( dVal ), NULL ) ) {
 							_rResult.u.dVal = dVal;
 							return true;
 						}
@@ -508,7 +508,7 @@ namespace mx {
 						_rResult.ncType = ee::EE_NC_FLOATING;
 						ee::CFloat16 f16Val = ee::CFloat16( static_cast<double>(_rResult.u.ui64Val) );
 						uint16_t uiVal = f16Val.RawValue();
-						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &uiVal, sizeof( uiVal ), NULL ) ) {
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( _ui64Address, &uiVal, sizeof( uiVal ), NULL ) ) {
 							_rResult.u.dVal = f16Val.Value();
 							return true;
 						}
@@ -522,7 +522,7 @@ namespace mx {
 	case ee::EE_CT_INT ## BITS : {																														\
 		_rResult.ncType = ee::EE_NC_SIGNED;																												\
 		int ## BITS ## _t iVal = static_cast<int ## BITS ## _t>(_rResult.u.i64Val);																		\
-		if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &iVal, sizeof( iVal ), NULL ) ) {						\
+		if ( _mhMemHack->m_pProcess.WriteProcessMemory( _ui64Address, &iVal, sizeof( iVal ), NULL ) ) {													\
 			_rResult.u.i64Val = iVal;																													\
 			return true;																																\
 		}																																				\
@@ -538,7 +538,7 @@ namespace mx {
 	case ee::EE_CT_UINT ## BITS : {																														\
 		_rResult.ncType = ee::EE_NC_UNSIGNED;																											\
 		uint ## BITS ## _t iVal = static_cast<uint ## BITS ## _t>(_rResult.u.i64Val);																	\
-		if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &iVal, sizeof( iVal ), NULL ) ) {						\
+		if ( _mhMemHack->m_pProcess.WriteProcessMemory( _ui64Address, &iVal, sizeof( iVal ), NULL ) ) {													\
 			_rResult.u.i64Val = iVal;																													\
 			return true;																																\
 		}																																				\
@@ -553,7 +553,7 @@ namespace mx {
 					case ee::EE_CT_FLOAT : {
 						_rResult.ncType = ee::EE_NC_FLOATING;
 						float fVal = static_cast<float>(_rResult.u.i64Val);
-						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &fVal, sizeof( fVal ), NULL ) ) {
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( _ui64Address, &fVal, sizeof( fVal ), NULL ) ) {
 							_rResult.u.dVal = fVal;
 							return true;
 						}
@@ -562,7 +562,7 @@ namespace mx {
 					case ee::EE_CT_DOUBLE : {
 						_rResult.ncType = ee::EE_NC_FLOATING;
 						double dVal = static_cast<double>(_rResult.u.i64Val);
-						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &dVal, sizeof( dVal ), NULL ) ) {
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( _ui64Address, &dVal, sizeof( dVal ), NULL ) ) {
 							_rResult.u.dVal = dVal;
 							return true;
 						}
@@ -572,7 +572,7 @@ namespace mx {
 						_rResult.ncType = ee::EE_NC_FLOATING;
 						ee::CFloat16 f16Val = ee::CFloat16( static_cast<double>(_rResult.u.i64Val) );
 						uint16_t uiVal = f16Val.RawValue();
-						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &uiVal, sizeof( uiVal ), NULL ) ) {
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( _ui64Address, &uiVal, sizeof( uiVal ), NULL ) ) {
 							_rResult.u.dVal = f16Val.Value();
 							return true;
 						}
@@ -586,7 +586,7 @@ namespace mx {
 	case ee::EE_CT_INT ## BITS : {																														\
 		_rResult.ncType = ee::EE_NC_SIGNED;																												\
 		int ## BITS ## _t iVal = static_cast<int ## BITS ## _t>(_rResult.u.dVal);																		\
-		if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &iVal, sizeof( iVal ), NULL ) ) {						\
+		if ( _mhMemHack->m_pProcess.WriteProcessMemory( _ui64Address, &iVal, sizeof( iVal ), NULL ) ) {													\
 			_rResult.u.i64Val = iVal;																													\
 			return true;																																\
 		}																																				\
@@ -602,7 +602,7 @@ namespace mx {
 	case ee::EE_CT_UINT ## BITS : {																														\
 		_rResult.ncType = ee::EE_NC_UNSIGNED;																											\
 		uint ## BITS ## _t iVal = static_cast<uint ## BITS ## _t>(_rResult.u.dVal);																		\
-		if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &iVal, sizeof( iVal ), NULL ) ) {						\
+		if ( _mhMemHack->m_pProcess.WriteProcessMemory( _ui64Address, &iVal, sizeof( iVal ), NULL ) ) {													\
 			_rResult.u.dVal = iVal;																														\
 			return true;																																\
 		}																																				\
@@ -617,7 +617,7 @@ namespace mx {
 					case ee::EE_CT_FLOAT : {
 						_rResult.ncType = ee::EE_NC_FLOATING;
 						float fVal = static_cast<float>(_rResult.u.dVal);
-						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &fVal, sizeof( fVal ), NULL ) ) {
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( _ui64Address, &fVal, sizeof( fVal ), NULL ) ) {
 							_rResult.u.dVal = fVal;
 							return true;
 						}
@@ -626,7 +626,7 @@ namespace mx {
 					case ee::EE_CT_DOUBLE : {
 						_rResult.ncType = ee::EE_NC_FLOATING;
 						double dVal = static_cast<double>(_rResult.u.dVal);
-						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &dVal, sizeof( dVal ), NULL ) ) {
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( _ui64Address, &dVal, sizeof( dVal ), NULL ) ) {
 							_rResult.u.dVal = dVal;
 							return true;
 						}
@@ -636,7 +636,7 @@ namespace mx {
 						_rResult.ncType = ee::EE_NC_FLOATING;
 						ee::CFloat16 f16Val = ee::CFloat16( static_cast<double>(_rResult.u.dVal) );
 						uint16_t uiVal = f16Val.RawValue();
-						if ( _mhMemHack->m_pProcess.WriteProcessMemory( reinterpret_cast<LPVOID>(_ui64Address), &uiVal, sizeof( uiVal ), NULL ) ) {
+						if ( _mhMemHack->m_pProcess.WriteProcessMemory( _ui64Address, &uiVal, sizeof( uiVal ), NULL ) ) {
 							_rResult.u.dVal = f16Val.Value();
 							return true;
 						}
