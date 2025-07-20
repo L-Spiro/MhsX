@@ -127,6 +127,9 @@ namespace mx {
 
 		// WM_CONTEXTMENU.
 		virtual LSW_HANDLED					ContextMenu( CWidget * _pwControl, INT _iX, INT _iY );
+
+		// WM_NOTIFY->NM_DBLCLK on this item (if LSW_HANDLED::LSW_H_CONTINUE, message is passed to owning window).
+		virtual LSW_HANDLED					DblClk( const LPNMITEMACTIVATE _phHdr );
 	};
 
 }	// namespace mx

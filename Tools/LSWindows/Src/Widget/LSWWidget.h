@@ -565,10 +565,13 @@ namespace lsw {
 		virtual LSW_HANDLED					AcceleratorCommand( WORD /*_Id*/ ) { return LSW_H_CONTINUE; }
 
 		// WM_NOTIFY->NM_DBLCLK on this item (if LSW_HANDLED::LSW_H_CONTINUE, message is passed to owning window).
-		virtual LSW_HANDLED					DblClk( const NMHDR * /*_phHdr*/ ) { return LSW_H_CONTINUE; }
+		virtual LSW_HANDLED					DblClk( const LPNMITEMACTIVATE _phHdr ) {
+			if ( m_pwParent ) { return m_pwParent->DblClk( _phHdr ); }
+			return LSW_H_CONTINUE;
+		}
 
 		// WM_NOTIFY->NM_DBLCLK for the owning window if the child either could not be resolved or returned LSW_HANDLED::LSW_H_CONTINUE.
-		virtual LSW_HANDLED					DblClk( const NMHDR * /*_phHdr*/, WORD /*_wControlId*/, CWidget * /*_pwWidget*/ ) { return LSW_H_CONTINUE; }
+		virtual LSW_HANDLED					DblClk( const LPNMITEMACTIVATE /*_phHdr*/, WORD /*_wControlId*/, CWidget * /*_pwWidget*/ ) { return LSW_H_CONTINUE; }
 
 		/**
 		 * The WM_SETFOCUS handler.
@@ -900,6 +903,22 @@ namespace lsw {
 
 		// WM_USER/custom messages.
 		virtual LSW_HANDLED					CustomPrivateMsg( UINT /*_uMsg*/, WPARAM /*_wParam*/, LPARAM /*_lParam*/ ) { return LSW_H_CONTINUE; }
+
+		/**
+		 * Called when a CTreeListView wants text for an item.  Can be used to produce real-time or dynamically changing text for items in the tree.
+		 * 
+		 * \param _pwSrc A pointer to the widget calling the function.
+		 * \param _iItem Index of the item whose text is being drawn.
+		 * \param _iSubItem Index of the column for which to retreive text.
+		 * \param _lpParam The parameter associated with the item.
+		 * \param _wsOptionalBuffer An optional buffer for storing text to make it easier to return a persistent std::wstring pointer.  Not necessary if you already have an std::wstring ready to go.
+		 * \return Return a pointer to a wide-string result containing the text to display for the given item.  If it is convenient, _wsOptionalBuffer can be used to store the text and &_wsOptionalBuffer returned, otherwise you can return a pointer to an existing std::wstring.
+		 *	Return nullptr to use the item's text set by SetItemText().
+		 **/
+		virtual std::wstring *				TreeListView_ItemText( CWidget * _pwSrc, int _iItem, int _iSubItem, LPARAM _lpParam, std::wstring &_wsOptionalBuffer ) {
+			if ( m_pwParent ) { return m_pwParent->TreeListView_ItemText( _pwSrc, _iItem, _iSubItem, _lpParam, _wsOptionalBuffer ); }
+			return nullptr;
+		}
 
 
 		// == Functions.

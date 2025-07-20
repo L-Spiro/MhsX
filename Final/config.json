@@ -2,7 +2,7 @@
     "Version" : 1,
     "General" : {
         "FoundAddressRate" : 10,
-        "MainRefreshRate" : 10,
+        "MainRefreshRate" : 35,
         "LockedRefreshRate" : 1000,
         "ExpressionRefreshRate" : 100,
         "DataAsCodeName" : true,
@@ -46,17 +46,17 @@
         "RegexNegateSingleLine" : true,
         "RegexFlavor" : 10,
         "ByteSwap" : 0,
-        "From" : "0",
-        "To" : "DFE40000 + 08000000h",
+        "From" : "10000h",
+        "To" : "7FFFFFFF0000h",
         "FromHistory" : [
+            "10000h",
             "0",
             "DFE40000",
-            "10000h+0",
-            "10000h"
+            "10000h+0"
         ],
         "ToHistory" : [
-            "DFE40000 + 08000000h",
-            "7FFFFFFF0000h"
+            "7FFFFFFF0000h",
+            "DFE40000 + 08000000h"
         ]
     }
 }

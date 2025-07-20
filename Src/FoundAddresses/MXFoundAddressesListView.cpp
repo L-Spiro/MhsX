@@ -118,23 +118,15 @@ namespace mx {
 									// Current Value.
 									uint8_t ui8CurVal[32];
 									DWORD dwSize = CUtilities::DataTypeSize( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.dtType );
-
-									// Data must be accessed on 8-byte boundaries so that preprocessing will work properly.
-									const uint64_t uiAlignment = 8;
-									uint64_t uiOffsetToData = ui64Address % uiAlignment;
-									uint64_t uiDataStart = (ui64Address / uiAlignment) * uiAlignment;
-									uint64_t uiAdjustedEnd = (((ui64Address + dwSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
-									uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
-
-									if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( uiDataStart,
-										ui8CurVal, uiAdjustedLen, nullptr ) ) {
+									size_t sOffset;
+									if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( ui64Address,
+										ui8CurVal, size_t( dwSize ), sOffset ) ) {
 										std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
 									}
 									else {
-										CSearcher::PreprocessByteSwap( ui8CurVal, uiAdjustedLen, m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms() );
 										GetDataTypeSearchValue( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax,
 											m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.dtType,
-											&ui8CurVal[uiOffsetToData] );
+											&ui8CurVal[sOffset] );
 									}
 									break;
 								}
@@ -143,44 +135,29 @@ namespace mx {
 										// Current Value.
 										uint8_t ui8CurVal[32];
 										DWORD dwSize = CUtilities::DataTypeSize( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.dtType );
-
-										// Data must be accessed on 8-byte boundaries so that preprocessing will work properly.
-										const uint64_t uiAlignment = 8;
-										uint64_t uiOffsetToData = ui64Address % uiAlignment;
-										uint64_t uiDataStart = (ui64Address / uiAlignment) * uiAlignment;
-										uint64_t uiAdjustedEnd = (((ui64Address + dwSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
-										uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
-
-										if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( uiDataStart,
-											ui8CurVal, uiAdjustedLen, nullptr ) ) {
+										size_t sOffset;
+										if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( ui64Address,
+											ui8CurVal, size_t( dwSize ), sOffset ) ) {
 											std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
 										}
 										else {
-											CSearcher::PreprocessByteSwap( ui8CurVal, uiAdjustedLen, m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms() );
 											GetDataTypeSearchValue( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax,
 												m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.dtType,
-												&ui8CurVal[uiOffsetToData] );
+												&ui8CurVal[sOffset] );
 										}
 									}
 									else if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().ui32ExpSearchSize != 0 ) {
 										std::vector<uint8_t> vData;
-										// Data must be accessed on 8-byte boundaries so that preprocessing will work properly.
-										const uint64_t uiAlignment = 8;
-										uint64_t uiOffsetToData = ui64Address % uiAlignment;
-										uint64_t uiDataStart = (ui64Address / uiAlignment) * uiAlignment;
-										uint64_t uiAdjustedEnd = (((ui64Address + m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().ui32ExpSearchSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
-										uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
 
-										vData.resize( uiAdjustedLen );
-										if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( uiDataStart,
-											&vData[0], uiAdjustedLen, nullptr ) ) {
+										size_t sOffset;
+										if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( ui64Address,
+											vData, size_t( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().ui32ExpSearchSize ), sOffset ) ) {
 											std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
 										}
 										else {
-											CSearcher::PreprocessByteSwap( &vData[0], uiAdjustedLen, m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms() );
 											GetExpressionSearchValueFixed( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax,
 												ui64Address,
-												&vData[uiOffsetToData] );
+												&vData[sOffset] );
 										}
 									}
 									break;
@@ -315,19 +292,13 @@ namespace mx {
 
 		// Current Value.
 		std::vector<uint8_t> vData;
-		// Data must be accessed on 8-byte boundaries so that preprocessing will work properly.
-		const uint64_t uiAlignment = 8;
-		uint64_t uiOffsetToData = _uiAddress % uiAlignment;
-		uint64_t uiDataStart = (_uiAddress / uiAlignment) * uiAlignment;
-		uint64_t uiAdjustedEnd = (((_uiAddress + arRef.uiSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
-		uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
-		if ( !CUtilities::Resize( vData, uiAdjustedLen ) ) { return false; }
-		if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( uiDataStart,
-			vData.data(), vData.size(), nullptr ) ) {
+
+		size_t sOffset;
+		if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( _uiAddress,
+			vData, size_t( arRef.uiSize ), sOffset ) ) {
 			std::swprintf( _pwStr, _iMaxLen, L"%s", L"N/A" );
 			return false;
 		}
-		CSearcher::PreprocessByteSwap( vData.data(), vData.size(), m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms() );
 		int iIdx = 0;
 #define MX_PRINT_CHAR( X )				if ( iIdx < _iMaxLen ) { _pwStr[iIdx++] = X; }			\
 										else { _pwStr[_iMaxLen-1] = L'\0'; return true; }
@@ -349,7 +320,7 @@ namespace mx {
 				}
 				case CUtilities::MX_RE_UTF16_BE : {
 					// Byteswap and then handle normally.
-					wchar_t * pwcByteSwapMe = reinterpret_cast<wchar_t *>(&vData.data()[uiOffsetToData]);
+					wchar_t * pwcByteSwapMe = reinterpret_cast<wchar_t *>(&vData.data()[sOffset]);
 					size_t sLen = arRef.uiSize / sizeof( (*pwcByteSwapMe) );
 					for ( size_t I = 0; I < sLen; ++I ) {
 						pwcByteSwapMe[I] = ::_byteswap_ushort( pwcByteSwapMe[I] );
@@ -360,7 +331,7 @@ namespace mx {
 				}
 				case CUtilities::MX_RE_UTF32_BE : {
 					// Byteswap and then handle normally.
-					uint32_t * puiByteSwapMe = reinterpret_cast<uint32_t *>(&vData.data()[uiOffsetToData]);
+					uint32_t * puiByteSwapMe = reinterpret_cast<uint32_t *>(&vData.data()[sOffset]);
 					size_t sLen = arRef.uiSize / sizeof( (*puiByteSwapMe) );
 					for ( size_t I = 0; I < sLen; ++I ) {
 						puiByteSwapMe[I] = ::_byteswap_ulong( puiByteSwapMe[I] );
@@ -373,7 +344,7 @@ namespace mx {
 		}
 		else if ( sstMainSearchType == CUtilities::MX_SST_UTF16_BE ) {
 			// Byteswap and then handle normally.
-			wchar_t * pwcByteSwapMe = reinterpret_cast<wchar_t *>(&vData.data()[uiOffsetToData]);
+			wchar_t * pwcByteSwapMe = reinterpret_cast<wchar_t *>(&vData.data()[sOffset]);
 			size_t sLen = arRef.uiSize / sizeof( (*pwcByteSwapMe) );
 			for ( size_t I = 0; I < sLen; ++I ) {
 				pwcByteSwapMe[I] = ::_byteswap_ushort( pwcByteSwapMe[I] );
@@ -383,7 +354,7 @@ namespace mx {
 		}
 		else if ( sstMainSearchType == CUtilities::MX_SST_UTF32_BE ) {
 			// Byteswap and then handle normally.
-			uint32_t * puiByteSwapMe = reinterpret_cast<uint32_t *>(&vData.data()[uiOffsetToData]);
+			uint32_t * puiByteSwapMe = reinterpret_cast<uint32_t *>(&vData.data()[sOffset]);
 			size_t sLen = arRef.uiSize / sizeof( (*puiByteSwapMe) );
 			for ( size_t I = 0; I < sLen; ++I ) {
 				puiByteSwapMe[I] = ::_byteswap_ulong( puiByteSwapMe[I] );
@@ -395,7 +366,7 @@ namespace mx {
 		switch ( sstMainSearchType ) {
 			case CUtilities::MX_SST_ASCII : {
 				CSecureString sTmp;
-				CUtilities::BytesToCString( &vData.data()[uiOffsetToData], arRef.uiSize, sTmp );
+				CUtilities::BytesToCString( &vData.data()[sOffset], arRef.uiSize, sTmp );
 				for ( size_t I = 0; I < sTmp.size(); ++I ) {
 					MX_PRINT_CHAR( static_cast<uint8_t>(sTmp[I]) );
 				}
@@ -412,7 +383,7 @@ namespace mx {
 				// Fall-through.
 			}																	MX_FALLTHROUGH
 			case CUtilities::MX_SST_UTF8 : {
-				CSecureWString swsTemp = ee::CExpEval::StringToWString( reinterpret_cast<const char *>(&vData.data()[uiOffsetToData]), arRef.uiSize );
+				CSecureWString swsTemp = ee::CExpEval::StringToWString( reinterpret_cast<const char *>(&vData.data()[sOffset]), arRef.uiSize );
 				swsTemp = CUtilities::EscapeUnprintable( swsTemp, true, false );
 				for ( size_t I = 0; I < swsTemp.size(); ++I ) {
 					if ( !swsTemp[I] ) {
@@ -427,7 +398,7 @@ namespace mx {
 				return true;
 			}
 			case CUtilities::MX_SST_UTF16 : {
-				CSecureWString swsTemp( reinterpret_cast<const wchar_t *>(&vData.data()[uiOffsetToData]), arRef.uiSize / sizeof( wchar_t ) );
+				CSecureWString swsTemp( reinterpret_cast<const wchar_t *>(&vData.data()[sOffset]), arRef.uiSize / sizeof( wchar_t ) );
 				swsTemp = CUtilities::EscapeUnprintable( swsTemp, true, false );
 				for ( size_t I = 0; I < swsTemp.size(); ++I ) {
 					if ( !swsTemp[I] ) {
@@ -442,7 +413,7 @@ namespace mx {
 				return true;
 			}
 			case CUtilities::MX_SST_UTF32 : {
-				CSecureWString swsTemp = ee::CExpEval::Utf32StringToWString( reinterpret_cast<const uint32_t *>(&vData.data()[uiOffsetToData]), arRef.uiSize / sizeof( uint32_t ) );
+				CSecureWString swsTemp = ee::CExpEval::Utf32StringToWString( reinterpret_cast<const uint32_t *>(&vData.data()[sOffset]), arRef.uiSize / sizeof( uint32_t ) );
 				swsTemp = CUtilities::EscapeUnprintable( swsTemp, true, false );
 				for ( size_t I = 0; I < swsTemp.size(); ++I ) {
 					if ( !swsTemp[I] ) {
@@ -460,7 +431,7 @@ namespace mx {
 				CUtilities::MX_DATA_TYPES dtDataType = static_cast<CUtilities::MX_DATA_TYPES>(arRef.uiData >> 8);
 				if ( dtDataType == CUtilities::MX_DT_VOID ) {
 					CSecureString ssTmp;
-					CUtilities::BytesToHexWithSpaces( &vData.data()[uiOffsetToData], arRef.uiSize, ssTmp );
+					CUtilities::BytesToHexWithSpaces( &vData.data()[sOffset], arRef.uiSize, ssTmp );
 					/*CSecureWString swsTemp = CUtilities::PrimitiveArrayToStringW( vData.data(), arRef.uiSize, 
 						CUtilities::MX_DT_UINT8, 0,
 						false ? -7 : -11 );*/
@@ -477,7 +448,7 @@ namespace mx {
 					else if ( dtDataType == CUtilities::MX_DT_FLOAT ) {
 						iSig = -MX_FLOAT64_SIG_DIG;
 					}
-					CSecureWString swsTemp = CUtilities::PrimitiveArrayToStringW( &vData.data()[uiOffsetToData], arRef.uiSize, 
+					CSecureWString swsTemp = CUtilities::PrimitiveArrayToStringW( &vData.data()[sOffset], arRef.uiSize, 
 						dtDataType, 0,
 						iSig );
 					for ( size_t I = 0; I < swsTemp.size(); ++I ) {
@@ -500,26 +471,19 @@ namespace mx {
 
 		// Current Value.
 		std::vector<uint8_t> vData;
-		// Data must be accessed on 8-byte boundaries so that preprocessing will work properly.
-		const uint64_t uiAlignment = 8;
-		uint64_t uiOffsetToData = _uiAddress % uiAlignment;
-		uint64_t uiDataStart = (_uiAddress / uiAlignment) * uiAlignment;
-		uint64_t uiAdjustedEnd = (((_uiAddress + uiSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
-		uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
-		if ( !CUtilities::Resize( vData, uiAdjustedLen ) ) { return false; }
-		if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory( uiDataStart,
-			&vData[0], vData.size(), nullptr ) ) {
+
+		size_t sOffset;
+		if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( _uiAddress,
+			vData, size_t( uiSize ), sOffset ) ) {
 			std::swprintf( _pwStr, _iMaxLen, L"%s", L"N/A" );
 			return false;
 		}
-		CSearcher::PreprocessByteSwap( vData.data(), vData.size(), m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms() );
-
-int iIdx = 0;
+		int iIdx = 0;
 #define MX_PRINT_CHAR( X )				if ( iIdx < _iMaxLen ) { _pwStr[iIdx++] = X; }			\
 										else { _pwStr[_iMaxLen-1] = L'\0'; return true; }
 
 		CSecureString ssTmp;
-		CUtilities::BytesToHexWithSpaces( &vData.data()[uiOffsetToData], uiSize, ssTmp );
+		CUtilities::BytesToHexWithSpaces( &vData.data()[sOffset], uiSize, ssTmp );
 		for ( size_t I = 0; I < ssTmp.size(); ++I ) {
 			MX_PRINT_CHAR( ssTmp[I] );
 		}

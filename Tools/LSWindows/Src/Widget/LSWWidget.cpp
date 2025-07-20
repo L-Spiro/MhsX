@@ -1318,9 +1318,9 @@ namespace lsw {
 						HWND hFrom = lpHdr->hwndFrom;
 						CWidget * pmwTemp = LSW_WIN2CLASS( hFrom );
 						if ( pmwTemp ) {
-							if ( pmwTemp->DblClk( lpHdr ) == LSW_HANDLED::LSW_H_HANDLED ) { LSW_RET( 1, TRUE ); }
+							if ( pmwTemp->DblClk( reinterpret_cast<const LPNMITEMACTIVATE>(lpHdr) ) == LSW_HANDLED::LSW_H_HANDLED ) { LSW_RET( 1, TRUE ); }
 						}
-						pmwThis->DblClk( lpHdr, static_cast<WORD>(lpHdr->idFrom), pmwTemp );
+						pmwThis->DblClk( reinterpret_cast<const LPNMITEMACTIVATE>(lpHdr), static_cast<WORD>(lpHdr->idFrom), pmwTemp );
 						LSW_RET( 1, TRUE );
 					}
 					case TBN_QUERYINSERT : {

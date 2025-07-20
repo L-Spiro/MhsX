@@ -1167,7 +1167,7 @@ namespace mx {
 	// Update timer speed.
 	void CMhsMainWindow::UpdateTimer() {
 		if ( m_uiptrUpdateListTimer ) {
-			m_uiptrUpdateListTimer = CSystem::SetTimer( Wnd(), m_uiptrUpdateListTimer, max( 1000 / MemHack()->Options().dwFoundAddressRefresh, static_cast<DWORD>(1) ), NULL );
+			m_uiptrUpdateListTimer = CSystem::SetTimer( Wnd(), m_uiptrUpdateListTimer, max( 1000 / MemHack()->Options().dwMainRefresh, static_cast<DWORD>(1) ), NULL );
 		}
 	}
 
@@ -1177,7 +1177,6 @@ namespace mx {
 			// Update the list.
 			auto * plvList = MainTreeView();
 			if ( plvList ) {
-				//MemHack()->FoundAddressManager().DirtyAll();
 				::RedrawWindow( plvList->Wnd(), NULL, NULL, RDW_INVALIDATE | /*RDW_NOCHILDREN | */RDW_UPDATENOW | RDW_FRAME );
 			}
 		}
@@ -1356,6 +1355,53 @@ namespace mx {
 	void __stdcall CMhsMainWindow::Hotkey_ShowFloatingPointStudio( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
 		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
 		pmhThis->ShowFloatingPointStudio( std::nan( "0" ) );
+	}
+
+	/**
+	 * Called when a CTreeListView wants text for an item.  Can be used to produce real-time or dynamically changing text for items in the tree.
+	 * 
+	 * \param _pwSrc A pointer to the widget calling the function.
+	 * \param _iItem Index of the item whose text is being drawn.
+	 * \param _iSubItem Index of the column for which to retreive text.
+	 * \param _lpParam The parameter associated with the item.
+	 * \param _wsOptionalBuffer An optional buffer for storing text to make it easier to return a persistent std::wstring pointer.  Not necessary if you already have an std::wstring ready to go.
+	 * \return Return a pointer to a wide-string result containing the text to display for the given item.  If it is convenient, _wsOptionalBuffer can be used to store the text and &_wsOptionalBuffer returned, otherwise you can return a pointer to an existing std::wstring.
+	 *	Return nullptr to use the item's text set by SetItemText().
+	 **/
+	std::wstring * CMhsMainWindow::TreeListView_ItemText( CWidget * _pwSrc, int _iItem, int _iSubItem, LPARAM _lpParam, std::wstring &_wsOptionalBuffer ) {
+		auto pwTree = MainTreeView();
+		if MX_LIKELY( pwTree ) {
+			if MX_LIKELY( _pwSrc->Id() == pwTree->Id() ) {
+				if ( _iSubItem == 1 ) {						// Address.
+					auto & famManager = MemHack()->FoundAddressManager();
+					auto pfabItem = famManager.GetById( static_cast<size_t>(_lpParam) );
+					if MX_LIKELY( pfabItem && !pfabItem->SimpleAddress() ) {
+						pfabItem->Dirty();
+						_wsOptionalBuffer = pfabItem->AddressText();
+						return &_wsOptionalBuffer;
+					}
+				}
+				else if ( _iSubItem == 2 ) {				// Current value.
+					auto & famManager = MemHack()->FoundAddressManager();
+					auto pfabItem = famManager.GetById( static_cast<size_t>(_lpParam) );
+					if MX_LIKELY( pfabItem ) {
+						pfabItem->Dirty();
+						_wsOptionalBuffer = pfabItem->ValueText();
+						return &_wsOptionalBuffer;
+					}
+				}
+				else if ( _iSubItem == 4 ) {				// Type.
+					auto & famManager = MemHack()->FoundAddressManager();
+					auto pfabItem = famManager.GetById( static_cast<size_t>(_lpParam) );
+					if MX_LIKELY( pfabItem ) {
+						pfabItem->Dirty();
+						_wsOptionalBuffer = pfabItem->TypeText();
+						return &_wsOptionalBuffer;
+					}
+				}
+			}
+		}
+		return nullptr;
 	}
 
 }	// namespace mx

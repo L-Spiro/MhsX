@@ -368,14 +368,14 @@ namespace mx {
 												wsTmp = faAddress->AddressText();
 												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 1 );
 												// == Current Value.
-												wsTmp = faAddress->ValueText();
-												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 2 );
+												/*wsTmp = faAddress->ValueText();
+												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 2 );*/
 												// == Value When Locked.
 												wsTmp = faAddress->ValueWhenLockedText();
 												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 3 );
 												// == Type.
-												wsTmp = faAddress->TypeText();
-												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 4 );
+												/*wsTmp = faAddress->TypeText();
+												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 4 );*/
 											}
 										}
 										else if ( spSearchParms.stType == CUtilities::MX_ST_STRING_SEARCH ) {
@@ -564,6 +564,14 @@ namespace mx {
 			}
 		}
 		return lsw::CDockable::ContextMenu( _pwControl, _iX, _iY );
+	}
+
+	// WM_NOTIFY->NM_DBLCLK on this item (if LSW_HANDLED::LSW_H_CONTINUE, message is passed to owning window).
+	CWidget::LSW_HANDLED CFoundAddressesWindow::DblClk( const LPNMITEMACTIVATE _phHdr ) {
+		//if ( _phHdr->iItem >= 0 ) {
+			AddSelectedAddresses();
+		//}
+		return LSW_HANDLED::LSW_H_HANDLED;
 	}
 
 }	// namespace mx

@@ -72,6 +72,9 @@ namespace mx {
 			m_bDirtyCurValue = true;
 		}
 
+		// Is the address dynamic?
+		virtual bool										SimpleAddress() const { return m_bBasicAddress; }
+
 
 	protected :
 		// == Members.

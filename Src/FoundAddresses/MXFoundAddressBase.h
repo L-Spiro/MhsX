@@ -111,6 +111,9 @@ namespace mx {
 		// Dirties the item.  Address and current data need to be updated after this.
 		virtual void										Dirty() {}
 
+		// Is the address dynamic?
+		virtual bool										SimpleAddress() const { return true; }
+
 
 	protected :
 		CFoundAddressBase( CMemHack * _pmhMemHack );

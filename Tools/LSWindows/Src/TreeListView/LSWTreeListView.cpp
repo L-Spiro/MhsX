@@ -534,10 +534,10 @@ namespace lsw {
 
 		INT iMask = _plvdiInfo->item.mask;
 		if ( (iMask & LVIF_TEXT) && _plvdiInfo->item.cchTextMax >= 1 ) {
-			if ( size_t( _plvdiInfo->item.iSubItem ) >= m_ptIndexCache->Value().vStrings.size() ) {
+			/*if ( size_t( _plvdiInfo->item.iSubItem ) >= m_ptIndexCache->Value().vStrings.size() ) {
 				std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"" );
 			}
-			else {
+			else {*/
 				//std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", m_ptIndexCache->Value().vStrings[_plvdiInfo->item.iSubItem] );
 				//::wcsncat_s( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, m_ptIndexCache->Value().vStrings[_plvdiInfo->item.iSubItem].c_str(), m_ptIndexCache->Value().vStrings[_plvdiInfo->item.iSubItem].size() );
 				LPWSTR strCopy = _plvdiInfo->item.pszText;
@@ -548,9 +548,21 @@ namespace lsw {
 						--_plvdiInfo->item.cchTextMax;
 					}
 				}
-				std::wcsncpy( strCopy, m_ptIndexCache->Value().vStrings[_plvdiInfo->item.iSubItem].c_str(), _plvdiInfo->item.cchTextMax );
-				strCopy[_plvdiInfo->item.cchTextMax-1] = L'\0';
-			}
+				if ( _plvdiInfo->item.cchTextMax ) {
+					std::wstring wsTmp;
+					auto pwsSrc = CWidget::Parent() ? CWidget::Parent()->TreeListView_ItemText( this, _plvdiInfo->item.iItem, _plvdiInfo->item.iSubItem, m_ptIndexCache->Value().lpParam, wsTmp ) : nullptr;
+					if ( !pwsSrc && size_t( _plvdiInfo->item.iSubItem ) < m_ptIndexCache->Value().vStrings.size() ) {
+						pwsSrc = &m_ptIndexCache->Value().vStrings[_plvdiInfo->item.iSubItem];
+					}
+					if ( !pwsSrc ) {
+						_plvdiInfo->item.pszText[0] = L'\0';
+					}
+					else {
+						std::wcsncpy( strCopy, (*pwsSrc).c_str(), _plvdiInfo->item.cchTextMax );
+						strCopy[_plvdiInfo->item.cchTextMax-1] = L'\0';
+					}
+				}
+			//}
 		}
 		if ( iMask & LVIF_INDENT ) {
 			_plvdiInfo->item.iIndent = GetIndent( m_ptIndexCache ) + 1;
