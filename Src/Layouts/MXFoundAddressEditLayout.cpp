@@ -1,8 +1,12 @@
 #include "MXFoundAddressEditLayout.h"
+#include "../MemHack/MXMemHack.h"
+#include "../FoundAddresses/MXFoundAddressEditWindow.h"
 #include "MXLayoutMacros.h"
 #include "MXLayoutManager.h"
 
 #include <Base/LSWBase.h>
+
+//#define LSN_SEQUE_LOOP_1_4_L								LSN_EVEN_DIVIDE_EX( LSN_INNER_GROUP_W - LSN_GROUP_LEFT - LSN_GROUP_RIGHT, LSN_INNER_GROUP_L + LSN_GROUP_LEFT, 4, 0, LSN_LEFT_JUST )
 
 namespace mx {
 
@@ -12,6 +16,7 @@ namespace mx {
 #define MX_INNER_W											(MX_SECTION1_W + MX_LEFT_JUST + MX_SECTION1_W)
 #define MX_INNER_GROUP_W									(MX_GROUP_LEFT + MX_INNER_W + MX_GROUP_LEFT)
 #define MX_EDIT_W											(MX_GROUP_L + MX_INNER_GROUP_W + MX_GROUP_L)
+#define MX_MID_L											(MX_GROUP_L + MX_SECTION1_W + MX_LEFT_JUST)
 
 #define MX_GROUP_L											MX_LEFT_JUST
 #define MX_SECTION1_L										(MX_GROUP_L + MX_GROUP_LEFT)
@@ -131,11 +136,27 @@ namespace mx {
 			0,												// sTextLen
 			MX_FAEI_GENERAL_PAGE,							// dwParentId
 		},
+		{
+			LSW_LT_CHECK,									// ltType
+			MX_FAEI_GENERAL_ARRAY_CHECK,					// wId
+			WC_BUTTONW,										// lpwcClass
+			TRUE,											// bEnabled
+			FALSE,											// bActive
+			MX_MID_L,										// iLeft
+			(MX_GEN_GROUP_T + MX_GROUP_TOP + MX_TOP_JUST) + ((MX_DEF_COMBO_HEIGHT - MX_DEF_CHECK_HEIGHT) >> 1),											// iTop
+			MX_MAIN_EDIT_W,									// dwWidth
+			MX_DEF_CHECK_HEIGHT,							// dwHeight
+			MX_CHECKSTYLE,									// dwStyle
+			0,												// dwStyleEx
+			MX_MAKE_WCHAR( _T_3CC8FF2A_Add_Array_Indices ),	// pwcText
+			_LEN_3CC8FF2A,									// sTextLen
+			MX_FAEI_GENERAL_PAGE,							// dwParentId
+		},
 	};
 
 	// == Functions.
 	// Creates the Edit dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
-	BOOL CFoundAddressEditLayout::CreateEditDialog( CWidget * _pwParent, CMemHack * _poEdit, int32_t _i32Page ) {
+	BOOL CFoundAddressEditLayout::CreateEditDialog( CWidget * _pwParent, CMemHack * _poMemHack, std::vector<LPARAM> &_vSelected ) {
 		std::vector<CSecureString> sStrings;
 		std::vector<CSecureWString> sStringsW;
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
@@ -145,8 +166,9 @@ namespace mx {
 			sStrings );
 		
 		mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
+		CFoundAddressEditWindow::MX_PARMS pParms = { .pmhMemHack = _poMemHack, .vSelection = _vSelected };
 
-		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], MX_ELEMENTS( m_wlMainDialog ), _pwParent, reinterpret_cast<uint64_t>(_poEdit) );
+		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], MX_ELEMENTS( m_wlMainDialog ), _pwParent, reinterpret_cast<uint64_t>(&pParms) );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
 		if ( ipProc != 0 ) {
 			
@@ -158,12 +180,12 @@ namespace mx {
 	}
 
 	// Creates the general edit page.
-	CWidget * CFoundAddressEditLayout::CreateGeneralPage( CWidget * _pwParent, CMemHack * _poEdit ) {
-		return CreatePage( _pwParent, m_wlOptionsGeneral, MX_ELEMENTS( m_wlOptionsGeneral ), _poEdit );
+	CWidget * CFoundAddressEditLayout::CreateGeneralPage( CWidget * _pwParent, CMemHack * _poMemHack, std::vector<LPARAM> &_vSelected ) {
+		return CreatePage( _pwParent, m_wlOptionsGeneral, MX_ELEMENTS( m_wlOptionsGeneral ), _poMemHack, _vSelected );
 	}
 
 	// Default window-creation.
-	CWidget * CFoundAddressEditLayout::CreatePage( CWidget * _pwParent, const LSW_WIDGET_LAYOUT * _pwlLayout, size_t _sTotal, CMemHack * _poEdit ) {
+	CWidget * CFoundAddressEditLayout::CreatePage( CWidget * _pwParent, const LSW_WIDGET_LAYOUT * _pwlLayout, size_t _sTotal, CMemHack * _poMemHack, std::vector<LPARAM> &_vSelected ) {
 		std::vector<CSecureString> sStrings;
 		std::vector<CSecureWString> sStringsW;
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
@@ -172,7 +194,9 @@ namespace mx {
 			sStringsW,
 			sStrings );
 		
-		CWidget * pwWidget = lsw::CBase::LayoutManager()->CreateDialogX( &vLayouts[0], _sTotal, _pwParent, reinterpret_cast<uint64_t>(_poEdit) );
+		CFoundAddressEditWindow::MX_PARMS pParms = { .pmhMemHack = _poMemHack, .vSelection = _vSelected };
+
+		CWidget * pwWidget = lsw::CBase::LayoutManager()->CreateDialogX( &vLayouts[0], _sTotal, _pwParent, reinterpret_cast<uint64_t>(&pParms) );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
 		//if ( pwWidget ) {
 		//	

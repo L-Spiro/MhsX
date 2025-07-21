@@ -3,6 +3,8 @@
 #include "../Layouts/MXExpressionEvaluatorLayout.h"
 #include "../Layouts/MXFloatingPointStudioLayout.h"
 #include "../Layouts/MXFoundAddressLayout.h"
+#include "../Layouts/MXLayoutMacros.h"
+#include "../Layouts/MXLayoutManager.h"
 #include "../Layouts/MXMainWindowLayout.h"
 #include "../Layouts/MXNewDataTypeSearchLayout.h"
 #include "../Layouts/MXNewExpressionSearchLayout.h"
@@ -1266,6 +1268,102 @@ namespace mx {
 		m_pmhMemHack->HotkeyManager().HandleHookHotkey( _iId );
 	}
 
+	// WM_CONTEXTMENU.
+	CWidget::LSW_HANDLED CMhsMainWindow::ContextMenu( CWidget * _pwControl, INT _iX, INT _iY ) {
+		switch ( _pwControl->Id() ) {
+			case CMainWindowLayout::MX_MWI_SPLITTER : {
+				
+				POINT pt = { _iX, _iY };
+				::ScreenToClient( _pwControl->Wnd(), &pt );
+
+				// Hit-test to get the child window under the cursor.
+				HWND hChild = ::ChildWindowFromPointEx( _pwControl->Wnd(), pt, CWP_SKIPINVISIBLE | CWP_SKIPDISABLED );
+				auto pwTree = MainTreeView();
+				if ( pwTree && hChild == pwTree->Wnd() ) {
+
+					auto sSelected = 1;//TotalSelected();
+					LSW_MENU_ITEM miMenuBar[] = {
+						//bIsSeperator	dwId													bCheckable	bChecked	bEnabled			lpwcText, stTextLen												bSkip
+						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETE,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_0924E89F__Add_Selected, _LEN_0924E89F ),		sSelected == 0 },
+						//{ TRUE,			0,														FALSE,		FALSE,		FALSE,				nullptr,  0,													sSelected == 0 },
+						//{ FALSE,		CFoundAddressLayout::MX_BC_COPY_ADDRESS,				FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_43FCD42E_Copy__Address, _LEN_43FCD42E ),		FALSE },
+						//{ FALSE,		CFoundAddressLayout::MX_BC_COPY_VALUE,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_43A1870B_Copy__Value, _LEN_43A1870B ),			FALSE },
+						//{ FALSE,		CFoundAddressLayout::MX_BC_COPY_CUR_VALUE,				FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_C0FE03C5_Copy__Current_Value, _LEN_C0FE03C5 ),	/*CurValIndex() == -1*/ },
+						//{ FALSE,		CFoundAddressLayout::MX_BC_COPY_ALL,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_9B7D368F_Copy_A_ll, _LEN_9B7D368F ),			FALSE },
+					};
+
+					const LSW_MENU_LAYOUT miMenus[] = {
+						{
+							MX_M_CONTEXT_MENU,
+							0,
+							0,
+							MX_ELEMENTS( miMenuBar ),
+							miMenuBar
+						},
+						/*{
+							MX_MWMI_MENU_FILE,
+							MX_MWMI_MENU_BAR,
+							MX_MWMI_FILE,
+							MX_ELEMENTS( m_miFileMenu ),
+							m_miFileMenu
+						},*/
+					};
+					mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
+					plmLayout->CreatePopupMenuEx( this, miMenus, MX_ELEMENTS( miMenus ), _iX, _iY );
+				}
+				break;
+			}
+		}
+		return CWidget::LSW_H_CONTINUE;
+	}
+
+	/**
+	 * Called when a CTreeListView wants text for an item.  Can be used to produce real-time or dynamically changing text for items in the tree.
+	 * 
+	 * \param _pwSrc A pointer to the widget calling the function.
+	 * \param _iItem Index of the item whose text is being drawn.
+	 * \param _iSubItem Index of the column for which to retreive text.
+	 * \param _lpParam The parameter associated with the item.
+	 * \param _wsOptionalBuffer An optional buffer for storing text to make it easier to return a persistent std::wstring pointer.  Not necessary if you already have an std::wstring ready to go.
+	 * \return Return a pointer to a wide-string result containing the text to display for the given item.  If it is convenient, _wsOptionalBuffer can be used to store the text and &_wsOptionalBuffer returned, otherwise you can return a pointer to an existing std::wstring.
+	 *	Return nullptr to use the item's text set by SetItemText().
+	 **/
+	std::wstring * CMhsMainWindow::TreeListView_ItemText( CWidget * _pwSrc, int _iItem, int _iSubItem, LPARAM _lpParam, std::wstring &_wsOptionalBuffer ) {
+		auto pwTree = MainTreeView();
+		if MX_LIKELY( pwTree ) {
+			if MX_LIKELY( _pwSrc->Id() == pwTree->Id() ) {
+				if ( _iSubItem == 1 ) {						// Address.
+					auto & famManager = MemHack()->FoundAddressManager();
+					auto pfabItem = famManager.GetById( static_cast<size_t>(_lpParam) );
+					if MX_LIKELY( pfabItem && !pfabItem->SimpleAddress() ) {
+						pfabItem->Dirty();
+						_wsOptionalBuffer = pfabItem->AddressText();
+						return &_wsOptionalBuffer;
+					}
+				}
+				else if ( _iSubItem == 2 ) {				// Current value.
+					auto & famManager = MemHack()->FoundAddressManager();
+					auto pfabItem = famManager.GetById( static_cast<size_t>(_lpParam) );
+					if MX_LIKELY( pfabItem ) {
+						pfabItem->Dirty();
+						_wsOptionalBuffer = pfabItem->ValueText();
+						return &_wsOptionalBuffer;
+					}
+				}
+				else if ( _iSubItem == 4 ) {				// Type.
+					auto & famManager = MemHack()->FoundAddressManager();
+					auto pfabItem = famManager.GetById( static_cast<size_t>(_lpParam) );
+					if MX_LIKELY( pfabItem ) {
+						pfabItem->Dirty();
+						_wsOptionalBuffer = pfabItem->TypeText();
+						return &_wsOptionalBuffer;
+					}
+				}
+			}
+		}
+		return nullptr;
+	}
+
 	/**
 	 * Hotkey handler for opening the options window.
 	 *
@@ -1355,53 +1453,6 @@ namespace mx {
 	void __stdcall CMhsMainWindow::Hotkey_ShowFloatingPointStudio( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
 		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
 		pmhThis->ShowFloatingPointStudio( std::nan( "0" ) );
-	}
-
-	/**
-	 * Called when a CTreeListView wants text for an item.  Can be used to produce real-time or dynamically changing text for items in the tree.
-	 * 
-	 * \param _pwSrc A pointer to the widget calling the function.
-	 * \param _iItem Index of the item whose text is being drawn.
-	 * \param _iSubItem Index of the column for which to retreive text.
-	 * \param _lpParam The parameter associated with the item.
-	 * \param _wsOptionalBuffer An optional buffer for storing text to make it easier to return a persistent std::wstring pointer.  Not necessary if you already have an std::wstring ready to go.
-	 * \return Return a pointer to a wide-string result containing the text to display for the given item.  If it is convenient, _wsOptionalBuffer can be used to store the text and &_wsOptionalBuffer returned, otherwise you can return a pointer to an existing std::wstring.
-	 *	Return nullptr to use the item's text set by SetItemText().
-	 **/
-	std::wstring * CMhsMainWindow::TreeListView_ItemText( CWidget * _pwSrc, int _iItem, int _iSubItem, LPARAM _lpParam, std::wstring &_wsOptionalBuffer ) {
-		auto pwTree = MainTreeView();
-		if MX_LIKELY( pwTree ) {
-			if MX_LIKELY( _pwSrc->Id() == pwTree->Id() ) {
-				if ( _iSubItem == 1 ) {						// Address.
-					auto & famManager = MemHack()->FoundAddressManager();
-					auto pfabItem = famManager.GetById( static_cast<size_t>(_lpParam) );
-					if MX_LIKELY( pfabItem && !pfabItem->SimpleAddress() ) {
-						pfabItem->Dirty();
-						_wsOptionalBuffer = pfabItem->AddressText();
-						return &_wsOptionalBuffer;
-					}
-				}
-				else if ( _iSubItem == 2 ) {				// Current value.
-					auto & famManager = MemHack()->FoundAddressManager();
-					auto pfabItem = famManager.GetById( static_cast<size_t>(_lpParam) );
-					if MX_LIKELY( pfabItem ) {
-						pfabItem->Dirty();
-						_wsOptionalBuffer = pfabItem->ValueText();
-						return &_wsOptionalBuffer;
-					}
-				}
-				else if ( _iSubItem == 4 ) {				// Type.
-					auto & famManager = MemHack()->FoundAddressManager();
-					auto pfabItem = famManager.GetById( static_cast<size_t>(_lpParam) );
-					if MX_LIKELY( pfabItem ) {
-						pfabItem->Dirty();
-						_wsOptionalBuffer = pfabItem->TypeText();
-						return &_wsOptionalBuffer;
-					}
-				}
-			}
-		}
-		return nullptr;
 	}
 
 }	// namespace mx

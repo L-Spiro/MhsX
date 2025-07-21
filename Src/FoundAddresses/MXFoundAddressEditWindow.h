@@ -27,17 +27,30 @@ namespace mx {
 			MX_P_HOTKEYS,
 		};
 
+
 		// == Types.
 		// To pass both an options pointer and an index.
 		struct MX_PARMS {
 			CMemHack *						pmhMemHack;
-			std::vector<size_t> &			vSelection;
+			std::vector<LPARAM> &			vSelection;
 		};
+
+
+		// == Functions.
+		// WM_INITDIALOG.
+		virtual LSW_HANDLED					InitDialog();
+
+		// WM_COMMAND from control.
+		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc );
 
 
 	protected :
 		// == Members.
-		MX_PARMS *							m_ppParms;
+		MX_PARMS							m_pParms;
+
+
+	private :
+		typedef lsw::CMainWindow			CParent;
 	};
 
 }	// namespace mx

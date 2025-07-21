@@ -35,7 +35,7 @@ namespace mx {
 
 		// Menu.
 		enum MX_MENU {
-			MX_M_CONTEXT_MENU				= 0x3E00
+			MX_M_CONTEXT_MENU				= 0x3F00
 		};
 
 		

@@ -29,25 +29,25 @@ namespace mx {
 
 		// == Functions.
 		// Creates the Edit dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
-		static BOOL								CreateEditDialog( CWidget * _pwParent, CMemHack * _poEdit, int32_t _i32Page );
+		static BOOL								CreateEditDialog( CWidget * _pwParent, CMemHack * _poMemHack, std::vector<LPARAM> &_vSelected );
 
 		// Creates the general edit page.
-		static CWidget *						CreateGeneralPage( CWidget * _pwParent, CMemHack * _poEdit );
+		static CWidget *						CreateGeneralPage( CWidget * _pwParent, CMemHack * _poMemHack, std::vector<LPARAM> &_vSelected );
 
 		//// Creates the open-process edit page.
-		//static CWidget *						CreateOpenProcPage( CWidget * _pwParent, CMemHack * _poEdit );
+		//static CWidget *						CreateOpenProcPage( CWidget * _pwParent, CMemHack * _poMemHack, std::vector<LPARAM> &_vSelected );
 
 		//// Creates the general search edit page.
-		//static CWidget *						CreateGeneralSearchPage( CWidget * _pwParent, CMemHack * _poEdit );
+		//static CWidget *						CreateGeneralSearchPage( CWidget * _pwParent, CMemHack * _poMemHack, std::vector<LPARAM> &_vSelected );
 
 		//// Creates the extended search edit page.
-		//static CWidget *						CreateSearchExPage( CWidget * _pwParent, CMemHack * _poEdit );
+		//static CWidget *						CreateSearchExPage( CWidget * _pwParent, CMemHack * _poMemHack, std::vector<LPARAM> &_vSelected );
 
 		//// Creates the hotkeys edit page.
-		//static CWidget *						CreateHotkeysPage( CWidget * _pwParent, CMemHack * _poEdit );
+		//static CWidget *						CreateHotkeysPage( CWidget * _pwParent, CMemHack * _poMemHack, std::vector<LPARAM> &_vSelected );
 
 		//// Creates the programs edit page.
-		//static CWidget *						CreateProgramsPage( CWidget * _pwParent, CMemHack * _poEdit );
+		//static CWidget *						CreateProgramsPage( CWidget * _pwParent, CMemHack * _poMemHack, std::vector<LPARAM> &_vSelected );
 
 
 
@@ -62,7 +62,7 @@ namespace mx {
 
 		// == Functions.
 		// Default window-creation.
-		static CWidget *						CreatePage( CWidget * _pwParent, const LSW_WIDGET_LAYOUT * _pwlLayout, size_t _sTotal, CMemHack * _poEdit );
+		static CWidget *						CreatePage( CWidget * _pwParent, const LSW_WIDGET_LAYOUT * _pwlLayout, size_t _sTotal, CMemHack * _poMemHack, std::vector<LPARAM> &_vSelected );
 	};
 
 }	// namespace mx

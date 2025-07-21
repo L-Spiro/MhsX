@@ -17371,3 +17371,12 @@
 #define _DEC_S_7AE3FDE1_Modify_Entry mx::CStringDecoder::DecodeToString( _T_7AE3FDE1_Modify_Entry, _LEN_7AE3FDE1 )
 #define _DEC_WS_7AE3FDE1_Modify_Entry mx::CStringDecoder::DecodeToWString( _T_7AE3FDE1_Modify_Entry, _LEN_7AE3FDE1 )
 
+// Add Array Indices
+
+#define _T_3CC8FF2A_Add_Array_Indices "\xC9\x32\x34\xBB\xD3\x3B\x00\x28\x49\xE8\x12\x3C\xF6\x04\x2A\xED\x41"
+#define _LEN_3CC8FF2A 17
+#define _T_LEN_3CC8FF2A_Add_Array_Indices _T_3CC8FF2A_Add_Array_Indices, _LEN_3CC8FF2A
+#define _DEC_3CC8FF2A_Add_Array_Indices( STR ) mx::CStringDecoder::Decode( _T_3CC8FF2A_Add_Array_Indices, _LEN_3CC8FF2A, STR )
+#define _DEC_S_3CC8FF2A_Add_Array_Indices mx::CStringDecoder::DecodeToString( _T_3CC8FF2A_Add_Array_Indices, _LEN_3CC8FF2A )
+#define _DEC_WS_3CC8FF2A_Add_Array_Indices mx::CStringDecoder::DecodeToWString( _T_3CC8FF2A_Add_Array_Indices, _LEN_3CC8FF2A )
+
