@@ -495,6 +495,9 @@ namespace lsw {
 		static WCHAR						m_wcToolTipBuffer[1024*2];
 
 
+		static uint64_t						m_ui64TMP[5];
+		static UINT							m_uiMsgHistory[6];
+
 		// == Message Handlers.
 		// WM_NCCREATE.
 		virtual LSW_HANDLED					NcCreate( const CREATESTRUCTW &/*_csCreateParms*/ ) { return LSW_H_CONTINUE; }

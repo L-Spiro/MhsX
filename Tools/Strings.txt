@@ -1940,3 +1940,5 @@
 "Upward"
 "Biased Exp.:"
 "Modify Entry"
+"Delete &Selected"
+"Delete &All"

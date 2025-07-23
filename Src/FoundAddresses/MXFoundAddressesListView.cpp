@@ -21,119 +21,104 @@ namespace mx {
 			//_plvdiInfo->item.mask |= LVIF_DI_SETITEM;
 
 			if ( iMask & LVIF_TEXT ) {
-				uint64_t ui64Address;
-				const uint8_t * pui8Data;
-				CSearcher::MX_SEARCH_LOCK slSearchLock( &m_pmmwMhsWindow->MemHack()->Searcher() );
-				const CSearchResultBase * psrbResults = m_pmmwMhsWindow->MemHack()->Searcher().SearchResults();
-				if ( psrbResults ) {
-					psrbResults->Lock();
-					if ( psrbResults->GetResultFast( _plvdiInfo->item.iItem, ui64Address, pui8Data ) ) {
-						if ( _plvdiInfo->item.iSubItem == 0 ) {
-							// Address.
-							if ( m_pmmwMhsWindow->MemHack()->Process().Is32Bit() ) {
-								int iPrinted = std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%.8I64X", ui64Address );
-								_plvdiInfo->item.cchTextMax -= iPrinted;
-							}
-							else {
-								int iPrinted = std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%.11I64X", ui64Address );
-								_plvdiInfo->item.cchTextMax -= iPrinted;
-							}
-							if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().stType == CUtilities::MX_ST_STRING_SEARCH &&
-								m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().sstSearchType == CUtilities::MX_SST_UTFALL ) {
+				if ( _plvdiInfo->item.pszText && _plvdiInfo->item.cchTextMax > 0 ) {
+					uint64_t ui64Address;
+					const uint8_t * pui8Data;
+					CSearcher::MX_SEARCH_LOCK slSearchLock( &m_pmmwMhsWindow->MemHack()->Searcher() );
+					const CSearchResultBase * psrbResults = m_pmmwMhsWindow->MemHack()->Searcher().SearchResults();
+					if ( psrbResults ) {
+						psrbResults->Lock();
+						if ( psrbResults->GetResultFast( _plvdiInfo->item.iItem, ui64Address, pui8Data ) ) {
+							if ( _plvdiInfo->item.iSubItem == 0 ) {
+								auto iTexLen = _plvdiInfo->item.cchTextMax;
+								// Address.
+								if ( m_pmmwMhsWindow->MemHack()->Process().Is32Bit() ) {
+									auto iPrinted = std::swprintf( _plvdiInfo->item.pszText, iTexLen, L"%.8I64X", ui64Address );
+									iTexLen -= iPrinted;
+								}
+								else {
+									auto iPrinted = std::swprintf( _plvdiInfo->item.pszText, iTexLen, L"%.12I64X", ui64Address );
+									iTexLen -= iPrinted;
+								}
+								if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().stType == CUtilities::MX_ST_STRING_SEARCH &&
+									m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().sstSearchType == CUtilities::MX_SST_UTFALL ) {
 
-								const CSearchResultRef::MX_ADDRESS_REF & arRef = (*reinterpret_cast<const CSearchResultRef::MX_ADDRESS_REF *>(pui8Data));
-								if ( _plvdiInfo->item.cchTextMax ) {
-									::wcsncat_s( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L" ", _plvdiInfo->item.cchTextMax - 1 );
-									--_plvdiInfo->item.cchTextMax;
-									if ( _plvdiInfo->item.cchTextMax ) {
-										CSecureWString swsTmp;
+									const CSearchResultRef::MX_ADDRESS_REF & arRef = (*reinterpret_cast<const CSearchResultRef::MX_ADDRESS_REF *>(pui8Data));
+									if ( iTexLen ) {
+										::wcsncat_s( _plvdiInfo->item.pszText, iTexLen, L" ", iTexLen - 1 );
+										--iTexLen;
+										if ( iTexLen ) {
+											CSecureWString swsTmp;
 
-										switch ( arRef.uiData ) {
-											case CUtilities::MX_SST_UTF8 : {
-												swsTmp = _DEC_WS_0E813C50_UTF_8;
-												break;
+											switch ( arRef.uiData ) {
+												case CUtilities::MX_SST_UTF8 : {
+													swsTmp = _DEC_WS_0E813C50_UTF_8;
+													break;
+												}
+												case CUtilities::MX_SST_UTF16 : {
+													swsTmp = _DEC_WS_A71F1195_UTF_16.c_str();
+													break;
+												}
+												case CUtilities::MX_SST_UTF32 : {
+													swsTmp = _DEC_WS_9244B70E_UTF_32.c_str();
+													break;
+												}
+												case CUtilities::MX_SST_UTF16_BE : {
+													swsTmp = _DEC_WS_26FC5333_UTF_16_BE.c_str();
+													break;
+												}
+												case CUtilities::MX_SST_UTF32_BE : {
+													swsTmp = _DEC_WS_D35E9704_UTF_32_BE.c_str();
+													break;
+												}
 											}
-											case CUtilities::MX_SST_UTF16 : {
-												swsTmp = _DEC_WS_A71F1195_UTF_16.c_str();
-												break;
-											}
-											case CUtilities::MX_SST_UTF32 : {
-												swsTmp = _DEC_WS_9244B70E_UTF_32.c_str();
-												break;
-											}
-											case CUtilities::MX_SST_UTF16_BE : {
-												swsTmp = _DEC_WS_26FC5333_UTF_16_BE.c_str();
-												break;
-											}
-											case CUtilities::MX_SST_UTF32_BE : {
-												swsTmp = _DEC_WS_D35E9704_UTF_32_BE.c_str();
-												break;
-											}
+											::wcsncat( _plvdiInfo->item.pszText, swsTmp.c_str(), iTexLen - 1 );
 										}
-										::wcsncat( _plvdiInfo->item.pszText, swsTmp.c_str(), _plvdiInfo->item.cchTextMax - 1 );
 									}
 								}
 							}
-						}
-						else if ( _plvdiInfo->item.iSubItem == 1 ) {
-							// Value.
-							switch ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().stType ) {
-								case CUtilities::MX_ST_DATATYPE_SEARCH : {
-									GetDataTypeSearchValue( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax,
-										m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.dtType,
-										pui8Data );
-									break;
-								}
-								case CUtilities::MX_ST_STRING_SEARCH : {
-									GetStringSearchValue( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, ui64Address, pui8Data );
-									break;
-								}
-								case CUtilities::MX_ST_EXP_SEARCH : {
-									if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().esqmExpSearchType == CUtilities::MX_ESQM_VALUE ) {
-										GetDataTypeSearchValue( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax,
-										m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.dtType,
-										pui8Data );
-									}
-									else if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().ui32ExpSearchSize == 0 ) {
-										GetExpressionSearchValue( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax,
-										ui64Address, pui8Data );
-									}
-									else {
-										GetExpressionSearchValueFixed( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax,
-										ui64Address, pui8Data );
-									}
-									break;
-								}
-								case CUtilities::MX_ST_POINTER_SEARCH : {
-									break;
-								}
-								case CUtilities::MX_ST_GROUP_SEARCH : {
-									break;
-								}
-							}
-						}
-						else if ( _plvdiInfo->item.iSubItem == 2 ) {
-							switch ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().stType ) {
-								case CUtilities::MX_ST_DATATYPE_SEARCH : {
-									// Current Value.
-									uint8_t ui8CurVal[32];
-									DWORD dwSize = CUtilities::DataTypeSize( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.dtType );
-									size_t sOffset;
-									if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( ui64Address,
-										ui8CurVal, size_t( dwSize ), sOffset ) ) {
-										std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
-									}
-									else {
+							else if ( _plvdiInfo->item.iSubItem == 1 ) {
+								// Value.
+								switch ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().stType ) {
+									case CUtilities::MX_ST_DATATYPE_SEARCH : {
 										GetDataTypeSearchValue( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax,
 											m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.dtType,
-											&ui8CurVal[sOffset] );
+											pui8Data );
+										break;
 									}
-									break;
+									case CUtilities::MX_ST_STRING_SEARCH : {
+										GetStringSearchValue( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, ui64Address, pui8Data );
+										break;
+									}
+									case CUtilities::MX_ST_EXP_SEARCH : {
+										if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().esqmExpSearchType == CUtilities::MX_ESQM_VALUE ) {
+											GetDataTypeSearchValue( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax,
+											m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.dtType,
+											pui8Data );
+										}
+										else if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().ui32ExpSearchSize == 0 ) {
+											GetExpressionSearchValue( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax,
+											ui64Address, pui8Data );
+										}
+										else {
+											GetExpressionSearchValueFixed( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax,
+											ui64Address, pui8Data );
+										}
+										break;
+									}
+									case CUtilities::MX_ST_POINTER_SEARCH : {
+										break;
+									}
+									case CUtilities::MX_ST_GROUP_SEARCH : {
+										break;
+									}
 								}
-								case CUtilities::MX_ST_EXP_SEARCH : {
-									if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().esqmExpSearchType == CUtilities::MX_ESQM_VALUE ) {
+							}
+							else if ( _plvdiInfo->item.iSubItem == 2 ) {
+								switch ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().stType ) {
+									case CUtilities::MX_ST_DATATYPE_SEARCH : {
 										// Current Value.
-										uint8_t ui8CurVal[32];
+										uint8_t ui8CurVal[64];
 										DWORD dwSize = CUtilities::DataTypeSize( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.dtType );
 										size_t sOffset;
 										if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( ui64Address,
@@ -145,30 +130,48 @@ namespace mx {
 												m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.dtType,
 												&ui8CurVal[sOffset] );
 										}
+										break;
 									}
-									else if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().ui32ExpSearchSize != 0 ) {
-										std::vector<uint8_t> vData;
+									case CUtilities::MX_ST_EXP_SEARCH : {
+										if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().esqmExpSearchType == CUtilities::MX_ESQM_VALUE ) {
+											// Current Value.
+											uint8_t ui8CurVal[64];
+											DWORD dwSize = CUtilities::DataTypeSize( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.dtType );
+											size_t sOffset;
+											if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( ui64Address,
+												ui8CurVal, size_t( dwSize ), sOffset ) ) {
+												std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
+											}
+											else {
+												GetDataTypeSearchValue( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax,
+													m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.dtType,
+													&ui8CurVal[sOffset] );
+											}
+										}
+										else if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().ui32ExpSearchSize != 0 ) {
+											std::vector<uint8_t> vData;
 
-										size_t sOffset;
-										if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( ui64Address,
-											vData, size_t( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().ui32ExpSearchSize ), sOffset ) ) {
-											std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
+											size_t sOffset;
+											if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( ui64Address,
+												vData, size_t( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().ui32ExpSearchSize ), sOffset ) ) {
+												std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
+											}
+											else {
+												GetExpressionSearchValueFixed( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax,
+													ui64Address,
+													&vData[sOffset] );
+											}
 										}
-										else {
-											GetExpressionSearchValueFixed( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax,
-												ui64Address,
-												&vData[sOffset] );
-										}
+										break;
 									}
-									break;
 								}
 							}
 						}
+						else {
+							std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"---" );
+						}
+						psrbResults->Unlock();
 					}
-					else {
-						std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
-					}
-					psrbResults->Unlock();
 				}
 			}
 		}

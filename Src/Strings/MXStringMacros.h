@@ -17380,3 +17380,30 @@
 #define _DEC_S_3CC8FF2A_Add_Array_Indices mx::CStringDecoder::DecodeToString( _T_3CC8FF2A_Add_Array_Indices, _LEN_3CC8FF2A )
 #define _DEC_WS_3CC8FF2A_Add_Array_Indices mx::CStringDecoder::DecodeToWString( _T_3CC8FF2A_Add_Array_Indices, _LEN_3CC8FF2A )
 
+// Delete Selected
+
+#define _T_44ABEA5F_Delete_Selected "\xCC\x33\x3C\x00\x06\x2E\xAE\x1A\x35\x34\x2E\x31\x06\x00\x2B"
+#define _LEN_44ABEA5F 15
+#define _T_LEN_44ABEA5F_Delete_Selected _T_44ABEA5F_Delete_Selected, _LEN_44ABEA5F
+#define _DEC_44ABEA5F_Delete_Selected( STR ) mx::CStringDecoder::Decode( _T_44ABEA5F_Delete_Selected, _LEN_44ABEA5F, STR )
+#define _DEC_S_44ABEA5F_Delete_Selected mx::CStringDecoder::DecodeToString( _T_44ABEA5F_Delete_Selected, _LEN_44ABEA5F )
+#define _DEC_WS_44ABEA5F_Delete_Selected mx::CStringDecoder::DecodeToWString( _T_44ABEA5F_Delete_Selected, _LEN_44ABEA5F )
+
+// Delete &Selected
+
+#define _T_6E3D07B8_Delete__Selected "\xCC\x33\x3C\x00\x06\x2E\xAE\xED\x23\x2D\x35\x33\xF5\x0F\x2C\xEC"
+#define _LEN_6E3D07B8 16
+#define _T_LEN_6E3D07B8_Delete__Selected _T_6E3D07B8_Delete__Selected, _LEN_6E3D07B8
+#define _DEC_6E3D07B8_Delete__Selected( STR ) mx::CStringDecoder::Decode( _T_6E3D07B8_Delete__Selected, _LEN_6E3D07B8, STR )
+#define _DEC_S_6E3D07B8_Delete__Selected mx::CStringDecoder::DecodeToString( _T_6E3D07B8_Delete__Selected, _LEN_6E3D07B8 )
+#define _DEC_WS_6E3D07B8_Delete__Selected mx::CStringDecoder::DecodeToWString( _T_6E3D07B8_Delete__Selected, _LEN_6E3D07B8 )
+
+// Delete &All
+
+#define _T_E01693C2_Delete__All "\xCC\x33\x3C\x00\x06\x2E\xAE\xED\x11\x34\x35"
+#define _LEN_E01693C2 11
+#define _T_LEN_E01693C2_Delete__All _T_E01693C2_Delete__All, _LEN_E01693C2
+#define _DEC_E01693C2_Delete__All( STR ) mx::CStringDecoder::Decode( _T_E01693C2_Delete__All, _LEN_E01693C2, STR )
+#define _DEC_S_E01693C2_Delete__All mx::CStringDecoder::DecodeToString( _T_E01693C2_Delete__All, _LEN_E01693C2 )
+#define _DEC_WS_E01693C2_Delete__All mx::CStringDecoder::DecodeToWString( _T_E01693C2_Delete__All, _LEN_E01693C2 )
+

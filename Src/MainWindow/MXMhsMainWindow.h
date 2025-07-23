@@ -303,7 +303,7 @@ namespace mx {
 		int32_t								m_i32LastOptionsPage;
 
 		// Timer.
-		UINT_PTR							m_uiptrUpdateListTimer = 0;
+		UINT_PTR							m_uiptrUpdateListTimer = 0;;
 
 
 		// == Functions.

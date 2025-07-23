@@ -43,7 +43,7 @@ namespace mx {
 		auto aAddr = FinalAddress();
 		if ( m_bBasicAddress ) {
 			std::wstring wTmp;
-			CUtilities::ToHex( m_ui64Address, wTmp, m_ui64Address > UINT_MAX ? 11 : 8, false );
+			CUtilities::ToHex( m_ui64Address, wTmp, m_ui64Address > UINT_MAX ? 12 : 8, false );
 			return wTmp;
 		}
 		return std::wstring();

@@ -13,6 +13,7 @@ namespace lsw {
 	// Window property.
 	WCHAR CTreeListView::m_szProp[2] = { 0 };
 
+
 	CTreeListView::CTreeListView( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
 		CListView( _wlLayout.ChangeClass( WC_LISTVIEWW ).AddStyleEx( LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER ).AddStyle( LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA ),
 			_pwParent, _bCreateWidget, _hMenu, _ui64Data ),
@@ -529,51 +530,47 @@ namespace lsw {
 	 * \return Returns TRUE if the requested information could be obtained.  FALSE indicates an internal error.
 	 */
 	BOOL CTreeListView::GetDispInfoNotify( NMLVDISPINFOW * _plvdiInfo ) {
-		m_ptIndexCache = ItemByIndex_Cached( _plvdiInfo->item.iItem );
-		if ( !m_ptIndexCache ) { return FALSE; }
+		try {
+			m_ptIndexCache = ItemByIndex_Cached( _plvdiInfo->item.iItem );
+			if ( !m_ptIndexCache ) { return FALSE; }
 
-		INT iMask = _plvdiInfo->item.mask;
-		if ( (iMask & LVIF_TEXT) && _plvdiInfo->item.cchTextMax >= 1 ) {
-			/*if ( size_t( _plvdiInfo->item.iSubItem ) >= m_ptIndexCache->Value().vStrings.size() ) {
-				std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"" );
-			}
-			else {*/
-				//std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", m_ptIndexCache->Value().vStrings[_plvdiInfo->item.iSubItem] );
-				//::wcsncat_s( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, m_ptIndexCache->Value().vStrings[_plvdiInfo->item.iSubItem].c_str(), m_ptIndexCache->Value().vStrings[_plvdiInfo->item.iSubItem].size() );
+			INT iMask = _plvdiInfo->item.mask;
+			auto iMax = _plvdiInfo->item.cchTextMax;
+			if ( (iMask & LVIF_TEXT) && iMax >= 1 ) {
 				LPWSTR strCopy = _plvdiInfo->item.pszText;
 				if ( _plvdiInfo->item.iSubItem == 0 ) {
-					LPWSTR strEnd = _plvdiInfo->item.pszText + _plvdiInfo->item.cchTextMax - 1;
-					for ( INT I = (GetIndent( m_ptIndexCache ) + 1) * 4; strCopy < strEnd && I--; ) {
+					for ( INT I = (GetIndent( m_ptIndexCache ) + 1) * 4; iMax > 1 && I--; ) {
 						(*strCopy++) = L' ';
-						--_plvdiInfo->item.cchTextMax;
+						--iMax;
 					}
 				}
-				if ( _plvdiInfo->item.cchTextMax ) {
+				if ( iMax ) {
 					std::wstring wsTmp;
 					auto pwsSrc = CWidget::Parent() ? CWidget::Parent()->TreeListView_ItemText( this, _plvdiInfo->item.iItem, _plvdiInfo->item.iSubItem, m_ptIndexCache->Value().lpParam, wsTmp ) : nullptr;
 					if ( !pwsSrc && size_t( _plvdiInfo->item.iSubItem ) < m_ptIndexCache->Value().vStrings.size() ) {
 						pwsSrc = &m_ptIndexCache->Value().vStrings[_plvdiInfo->item.iSubItem];
 					}
 					if ( !pwsSrc ) {
-						_plvdiInfo->item.pszText[0] = L'\0';
+						strCopy[0] = L'\0';
 					}
 					else {
-						std::wcsncpy( strCopy, (*pwsSrc).c_str(), _plvdiInfo->item.cchTextMax );
-						strCopy[_plvdiInfo->item.cchTextMax-1] = L'\0';
+						std::wcsncpy( strCopy, (*pwsSrc).c_str(), iMax );
+						strCopy[iMax-1] = L'\0';
 					}
 				}
-			//}
+			}
+			if ( iMask & LVIF_INDENT ) {
+				_plvdiInfo->item.iIndent = GetIndent( m_ptIndexCache ) + 1;
+			}
+			if ( iMask & LVIF_PARAM ) {
+				_plvdiInfo->item.lParam = reinterpret_cast<LPARAM>(m_ptIndexCache);
+			}
+			/*if ( iMask & LVIF_STATE ) {
+				_plvdiInfo->item.state = 2;
+			}*/
+			return TRUE;
 		}
-		if ( iMask & LVIF_INDENT ) {
-			_plvdiInfo->item.iIndent = GetIndent( m_ptIndexCache ) + 1;
-		}
-		if ( iMask & LVIF_PARAM ) {
-			_plvdiInfo->item.lParam = reinterpret_cast<LPARAM>(m_ptIndexCache);
-		}
-		/*if ( iMask & LVIF_STATE ) {
-			_plvdiInfo->item.state = 2;
-		}*/
-		return TRUE;
+		catch ( ... ) { return FALSE; }
 	}
 
 	/**

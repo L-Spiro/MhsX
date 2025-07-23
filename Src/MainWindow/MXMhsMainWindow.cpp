@@ -37,55 +37,6 @@
 
 namespace mx {
 
-	/*BOOL CALLBACK LocaleEnumprocex( LPWSTR Arg1, DWORD Arg2, LPARAM Arg3 ) {
-		::OutputDebugStringW( Arg1 );
-		::OutputDebugStringA( "\r\n" );
-		return TRUE;
-	}*/
-	/*BOOL CALLBACK EnumCodePagesProc( LPWSTR lpCodePageString ) {
-		UINT uiPage = _wtoi( lpCodePageString );
-		if ( ::IsValidCodePage( uiPage ) ) {
-			CPINFOEXW cpInfo = { 0 };
-			if ( ::GetCPInfoExW( uiPage, 0, &cpInfo ) ) {
-				::OutputDebugStringW( cpInfo.CodePageName );
-				::OutputDebugStringA( "\r\n" );
-			}
-		}
-		else {
-			return TRUE;
-		}
-		
-		return TRUE;
-	}*/
-
-
-/*	std::string VirtualKeyCodeToString(UCHAR virtualKey)
-{
-    UINT scanCode = MapVirtualKeyA(virtualKey, MAPVK_VK_TO_VSC);
-
-    CHAR szName[128];
-    int result = 0;
-    switch (virtualKey)
-    {
-        case VK_LEFT: case VK_UP: case VK_RIGHT: case VK_DOWN:
-        case VK_RCONTROL: case VK_RMENU:
-        case VK_LWIN: case VK_RWIN: case VK_APPS:
-        case VK_PRIOR: case VK_NEXT:
-        case VK_END: case VK_HOME:
-        case VK_INSERT: case VK_DELETE:
-        case VK_DIVIDE:
-        case VK_NUMLOCK:
-            scanCode |= KF_EXTENDED;
-        default:
-            result = GetKeyNameTextA(scanCode << 16, szName, 128);
-    }
-    if(result == 0)
-        throw std::system_error(std::error_code(GetLastError(), std::system_category()),
-                                "WinAPI Error occured.");
-    return szName;
-}*/
-
-
 	CMhsMainWindow::CMhsMainWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
 		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
 		m_pfaFoundAddresses( nullptr ),
@@ -865,7 +816,6 @@ namespace mx {
 
 	// Deletes the selected Found Addresses.
 	void CMhsMainWindow::DeleteSelected() {
-		m_pmhMemHack->FoundAddressManager().DeleteAll();
 		auto ptlvView = MainTreeView();
 		if ( ptlvView ) {
 			std::vector<LPARAM> vSelected;
@@ -1284,7 +1234,8 @@ namespace mx {
 					auto sSelected = 1;//TotalSelected();
 					LSW_MENU_ITEM miMenuBar[] = {
 						//bIsSeperator	dwId													bCheckable	bChecked	bEnabled			lpwcText, stTextLen												bSkip
-						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETE,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_0924E89F__Add_Selected, _LEN_0924E89F ),		sSelected == 0 },
+						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETE,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_6E3D07B8_Delete__Selected, _LEN_6E3D07B8 ),		FALSE },
+						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETEALL,					FALSE,		FALSE,		TRUE,				MW_MENU_TXT( _T_E01693C2_Delete__All, _LEN_E01693C2 ),			FALSE },
 						//{ TRUE,			0,														FALSE,		FALSE,		FALSE,				nullptr,  0,													sSelected == 0 },
 						//{ FALSE,		CFoundAddressLayout::MX_BC_COPY_ADDRESS,				FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_43FCD42E_Copy__Address, _LEN_43FCD42E ),		FALSE },
 						//{ FALSE,		CFoundAddressLayout::MX_BC_COPY_VALUE,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_43A1870B_Copy__Value, _LEN_43A1870B ),			FALSE },

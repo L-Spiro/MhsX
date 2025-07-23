@@ -447,7 +447,7 @@ namespace mx {
 	}
 
 	// WM_NOTIFY->NM_DBLCLK for the owning window if the child either could not be resolved or returned LSW_HANDLED::LSW_H_CONTINUE.
-	CWidget::LSW_HANDLED COpenProcessWindow::DblClk( const NMHDR * _phHdr, WORD _wControlId, CWidget * _pwWidget ) {
+	CWidget::LSW_HANDLED COpenProcessWindow::DblClk( const LPNMITEMACTIVATE _phHdr, WORD _wControlId, CWidget * _pwWidget ) {
 		if ( _wControlId == COpenProcessLayout::MX_OPI_LISTVIEW ) {
 			GetSelectedId();
 			return LSW_H_HANDLED;

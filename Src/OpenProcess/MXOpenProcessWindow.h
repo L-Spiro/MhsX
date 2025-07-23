@@ -134,7 +134,7 @@ namespace mx {
 		const MX_PROCESSES *				FindProcess( const std::vector<MX_PROCESSES> &_pProcesses, DWORD _dwId );
 
 		// WM_NOTIFY->NM_DBLCLK for the owning window if the child either could not be resolved or returned LSW_HANDLED::LSW_H_CONTINUE.
-		virtual LSW_HANDLED					DblClk( const NMHDR * _phHdr, WORD _wControlId, CWidget * _pwWidget );
+		virtual LSW_HANDLED					DblClk( const LPNMITEMACTIVATE _phHdr, WORD _wControlId, CWidget * _pwWidget );
 	};
 
 }	// namespace mx
