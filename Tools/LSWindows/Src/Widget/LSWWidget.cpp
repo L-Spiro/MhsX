@@ -1264,6 +1264,9 @@ namespace lsw {
 						NMLVDISPINFOW * plvdiInfo = reinterpret_cast<NMLVDISPINFOW *>(_lParam);
 						HWND hFrom = plvdiInfo->hdr.hwndFrom;
 						CWidget * pmwTemp = LSW_WIN2CLASS( hFrom );
+						if ( plvdiInfo->item.cchTextMax && plvdiInfo->item.pszText ) {
+							plvdiInfo->item.pszText[0] = L'\0';
+						}
 						int iBefore = plvdiInfo->item.cchTextMax;
 						m_uiMsgHistory[5] = iBefore;
 						if ( pmwTemp ) {
