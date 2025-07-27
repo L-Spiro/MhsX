@@ -2,6 +2,7 @@
 #include "../Layouts/MXConverterLayout.h"
 #include "../Layouts/MXExpressionEvaluatorLayout.h"
 #include "../Layouts/MXFloatingPointStudioLayout.h"
+#include "../Layouts/MXFoundAddressEditLayout.h"
 #include "../Layouts/MXFoundAddressLayout.h"
 #include "../Layouts/MXLayoutMacros.h"
 #include "../Layouts/MXLayoutManager.h"
@@ -996,6 +997,16 @@ namespace mx {
 
 	// Shows the Edit dialog.
 	uint32_t CMhsMainWindow::ShowEdit() {
+		try {
+			auto pwTree = MainTreeView();
+			if ( pwTree ) {
+				std::vector<LPARAM> vSelected;
+				if ( pwTree->GatherSelectedLParam( vSelected, true ) >= 1 ) {		// At least one thing is selected.
+					CFoundAddressEditLayout::CreateEditDialog( this, MemHack(), vSelected );
+				}
+			}
+		}
+		catch ( ... ) {}
 		return 0;
 	}
 
