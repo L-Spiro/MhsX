@@ -222,6 +222,9 @@ namespace mx {
 		// Shows the standard subsearch dialog.
 		uint32_t							ShowStandardSubsearch();
 
+		// Shows the Edit dialog.
+		uint32_t							ShowEdit();
+
 		// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
 		bool								OpenProcess();
 

@@ -994,6 +994,11 @@ namespace mx {
 		return 0;
 	}
 
+	// Shows the Edit dialog.
+	uint32_t CMhsMainWindow::ShowEdit() {
+		return 0;
+	}
+
 	// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
 	bool CMhsMainWindow::OpenProcess() {
 		MX_OPTIONS oOptions = m_pmhMemHack->Options();
