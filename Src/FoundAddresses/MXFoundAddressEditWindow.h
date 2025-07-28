@@ -43,6 +43,9 @@ namespace mx {
 		// WM_COMMAND from control.
 		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc );
 
+		// WM_CLOSE.
+		virtual LSW_HANDLED					Close();
+
 
 	protected :
 		// == Members.

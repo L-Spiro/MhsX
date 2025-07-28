@@ -601,6 +601,7 @@ namespace mx {
 				break;
 			}
 			case CMainWindowLayout::MX_MWMI_EDIT : {
+				ShowEdit();
 				break;
 			}
 		}

@@ -22,4 +22,10 @@ namespace mx {
 		return CParent::Command( _wCtrlCode, _Id, _pwSrc );
 	}
 
+	// WM_CLOSE.
+	CWidget::LSW_HANDLED CFoundAddressEditWindow::Close() {
+		::EndDialog( Wnd(), 0 );
+		return LSW_H_HANDLED;
+	}
+
 }	// namespace mx
