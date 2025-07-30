@@ -1011,17 +1011,6 @@ namespace lsw {
 #define LSW_DLGRET( VAL )				if ( _bIsDlg ) { _ipDiagResult = VAL; }
 #define LSW_RET( WNDVAL, DLGVAL )		LSW_WNDRET( WNDVAL ) LSW_DLGRET( DLGVAL ) return
 
-		CWidget::m_ui64TMP[0] = (uint64_t)_hWnd;
-		CWidget::m_ui64TMP[1] = (uint64_t)_uMsg;
-		CWidget::m_ui64TMP[2] = (uint64_t)_wParam;
-		CWidget::m_ui64TMP[3] = (uint64_t)_lParam;
-		CWidget::m_ui64TMP[4] = (uint64_t)_bIsDlg;
-
-		m_uiMsgHistory[4] = m_uiMsgHistory[3];
-		m_uiMsgHistory[3] = m_uiMsgHistory[2];
-		m_uiMsgHistory[2] = m_uiMsgHistory[1];
-		m_uiMsgHistory[1] = m_uiMsgHistory[0];
-		m_uiMsgHistory[0] = _uMsg;
 #if 0
 		std::string sMes;
 		//CHelpers::WindowsMessageToString( _uMsg, sMes, false );
@@ -1223,7 +1212,6 @@ namespace lsw {
 			// =======================================
 			case WM_NOTIFY : {
 				LPNMHDR lpHdr = reinterpret_cast<LPNMHDR>(_lParam);
-				m_uiMsgHistory[5] = lpHdr->code;
 				switch ( lpHdr->code ) {
 					case CBEN_GETDISPINFOW : {
 						PNMCOMBOBOXEXW plvdiInfo = reinterpret_cast<PNMCOMBOBOXEXW>(_lParam);
