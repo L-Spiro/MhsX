@@ -271,6 +271,7 @@
     <ClCompile Include="Src\FloatingPointStudio\MXFloatingPointStudioWindow.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddress.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressBase.cpp" />
+    <ClCompile Include="Src\FoundAddresses\MXFoundAddressEditMainPage.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressEditWindow.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressesListView.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressesWindow.cpp" />
@@ -402,6 +403,8 @@
     <ClInclude Include="Src\FloatingPointStudio\MXFloatingPointStudioWindow.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddress.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressBase.h" />
+    <ClInclude Include="Src\FoundAddresses\MXFoundAddressEditMainPage.h" />
+    <ClInclude Include="Src\FoundAddresses\MXFoundAddressEditPageBase.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressEditWindow.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressesListView.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressesWindow.h" />

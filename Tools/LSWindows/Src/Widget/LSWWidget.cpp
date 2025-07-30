@@ -14,9 +14,6 @@
 
 namespace lsw {
 
-	uint64_t CWidget::m_ui64TMP[5] = { 0 };
-	UINT CWidget::m_uiMsgHistory[6] = { 0 };
-
 	/** The tooltip buffer. */
 	WCHAR CWidget::m_wcToolTipBuffer[1024*2];
 

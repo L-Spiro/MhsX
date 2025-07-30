@@ -51,6 +51,9 @@ namespace mx {
 		// == Members.
 		MX_PARMS							m_pParms;
 
+		// Options pages.
+		//std::vector<COptionsPage *>			m_vPages;
+
 
 	private :
 		typedef lsw::CMainWindow			CParent;
