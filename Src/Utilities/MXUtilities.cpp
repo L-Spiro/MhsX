@@ -38,9 +38,9 @@ namespace mx {
 		{ MX_DT_UINT32,		_T_LEN_0E2AF381_uint32_t,	_T_LEN_7652642A_Unsigned_Int,		_T_LEN_6022BCC9_0_to_4_294_967_295,										sizeof( uint32_t ),		__alignof( uint32_t ),	FALSE,		FALSE },
 		{ MX_DT_INT64,		_T_LEN_2187E0E2_int64_t,	_T_LEN_DB26D37C_64_bit_Int,			_T_LEN_D27BE76B__9_223_372_036_854_775_808_to_9_223_372_036_854_775_807,sizeof( int64_t ),		__alignof( int64_t ),	FALSE,		TRUE },
 		{ MX_DT_UINT64,		_T_LEN_3D797F01_uint64_t,	_T_LEN_8FFBC537_Unsigned_64_bit_Int,_T_LEN_5539660F_0_to_18_446_744_073_709_551_615,						sizeof( uint64_t ),		__alignof( uint64_t ),	FALSE,		FALSE },
-		{ MX_DT_FLOAT,		_T_LEN_C9A55E95_float,		_T_LEN_08647191_Float,				_T_LEN_B518763F___3_402823466e_38,										sizeof( float ),		__alignof( float ),		TRUE,		TRUE },
+		{ MX_DT_FLOAT,		_T_LEN_C9A55E95_float,		_T_LEN_08647191_Float,				_T_LEN_93C565BD___3_4028235e_38,										sizeof( float ),		__alignof( float ),		TRUE,		TRUE },
 		{ MX_DT_FLOAT16,	_T_LEN_C8DB4BDD_float16,	_T_LEN_5B68EE1F_Half,				_T_LEN_56F7FDCA___65_504,												sizeof( uint16_t ),		__alignof( uint16_t ),	TRUE,		TRUE },
-		{ MX_DT_DOUBLE,		_T_LEN_DAE7F2EF_double,		_T_LEN_DD4BF7D9_Double,				_T_LEN_AC0850FC___1_7976931348623158e_308,								sizeof( double ),		__alignof( double ),	TRUE,		TRUE },
+		{ MX_DT_DOUBLE,		_T_LEN_DAE7F2EF_double,		_T_LEN_DD4BF7D9_Double,				_T_LEN_5D5EE229___1_7976931348623157e_308,								sizeof( double ),		__alignof( double ),	TRUE,		TRUE },
 		{ MX_DT_VOID,		_T_LEN_D27BD9EE_void,		_T_LEN_724976D0_Void,				_T_LEN_5F837256__undefined_,											DWINVALID,				DWINVALID,				FALSE,		FALSE },
 	};
 

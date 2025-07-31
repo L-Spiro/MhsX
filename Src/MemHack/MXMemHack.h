@@ -114,7 +114,7 @@ namespace mx {
 		const std::vector<MX_PROGRAM> &		Programs() const { return m_vPrograms; }
 
 		// Gets the Found Address Manager.
-		CFoundAddressManager &				FoundAddressManager() { return m_famFoundAddresses; }
+		CFoundAddressManager::MX_LOCK		FoundAddressManager() { return CFoundAddressManager::MX_LOCK( &m_famFoundAddresses ); }
 
 		// Executes a program by index.
 		bool								ExecuteProgramByIdx( size_t _stIdx );

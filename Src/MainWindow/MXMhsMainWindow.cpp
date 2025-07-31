@@ -820,11 +820,12 @@ namespace mx {
 	void CMhsMainWindow::DeleteSelected() {
 		auto ptlvView = MainTreeView();
 		if ( ptlvView ) {
+			auto famMan = m_pmhMemHack->FoundAddressManager();
 			std::vector<LPARAM> vSelected;
 			ptlvView->GatherSelectedLParam( vSelected, true );
 			ptlvView->BeginLargeUpdate();
 			for ( auto & I : vSelected ) {
-				m_pmhMemHack->FoundAddressManager().Delete( I );
+				famMan->Delete( I );
 				ptlvView->DeleteByLParam( I );
 			}
 			ptlvView->FinishUpdate();
@@ -833,7 +834,8 @@ namespace mx {
 
 	// Deletes all Found Addresses.
 	void CMhsMainWindow::DeleteAll() {
-		m_pmhMemHack->FoundAddressManager().DeleteAll();
+		auto famMan = m_pmhMemHack->FoundAddressManager();
+		famMan->DeleteAll();
 		auto ptlvView = MainTreeView();
 		if ( ptlvView ) {
 			ptlvView->DeleteAll();
@@ -1001,6 +1003,7 @@ namespace mx {
 		try {
 			auto pwTree = MainTreeView();
 			if ( pwTree ) {
+				auto famMan = m_pmhMemHack->FoundAddressManager();					// Locks the Found Address Manager for modifications.
 				std::vector<LPARAM> vSelected;
 				if ( pwTree->GatherSelectedLParam( vSelected, true ) >= 1 ) {		// At least one thing is selected.
 					CFoundAddressEditLayout::CreateEditDialog( this, MemHack(), vSelected );
@@ -1301,8 +1304,9 @@ namespace mx {
 		if MX_LIKELY( pwTree ) {
 			if MX_LIKELY( _pwSrc->Id() == pwTree->Id() ) {
 				if ( _iSubItem == 1 ) {						// Address.
-					auto & famManager = MemHack()->FoundAddressManager();
-					auto pfabItem = famManager.GetById( static_cast<size_t>(_lpParam) );
+					//CFoundAddressManager::MX_LOCK lLock( &MemHack()->FoundAddressManager() );
+					auto famManager = MemHack()->FoundAddressManager();
+					auto pfabItem = famManager->GetById( static_cast<size_t>(_lpParam) );
 					if MX_LIKELY( pfabItem && !pfabItem->SimpleAddress() ) {
 						pfabItem->Dirty();
 						_wsOptionalBuffer = pfabItem->AddressText();
@@ -1310,8 +1314,8 @@ namespace mx {
 					}
 				}
 				else if ( _iSubItem == 2 ) {				// Current value.
-					auto & famManager = MemHack()->FoundAddressManager();
-					auto pfabItem = famManager.GetById( static_cast<size_t>(_lpParam) );
+					auto famManager = MemHack()->FoundAddressManager();
+					auto pfabItem = famManager->GetById( static_cast<size_t>(_lpParam) );
 					if MX_LIKELY( pfabItem ) {
 						pfabItem->Dirty();
 						_wsOptionalBuffer = pfabItem->ValueText();
@@ -1319,8 +1323,8 @@ namespace mx {
 					}
 				}
 				else if ( _iSubItem == 4 ) {				// Type.
-					auto & famManager = MemHack()->FoundAddressManager();
-					auto pfabItem = famManager.GetById( static_cast<size_t>(_lpParam) );
+					auto famManager = MemHack()->FoundAddressManager();
+					auto pfabItem = famManager->GetById( static_cast<size_t>(_lpParam) );
 					if MX_LIKELY( pfabItem ) {
 						pfabItem->Dirty();
 						_wsOptionalBuffer = pfabItem->TypeText();

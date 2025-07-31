@@ -3,15 +3,31 @@
 
 namespace mx {
 
+	CFoundAddressManager::MX_LOCK::MX_LOCK( CFoundAddressManager * _pfamMan ) :
+		pfamManager( _pfamMan ) {
+		if ( pfamManager ) {
+			pfamManager->Lock();
+		}
+	}
+	CFoundAddressManager::MX_LOCK::~MX_LOCK() {
+		if ( pfamManager ) {
+			pfamManager->UnLock();
+			pfamManager = nullptr;
+		}
+	}
+
 	CFoundAddressManager::CFoundAddressManager() {
 	}
 	CFoundAddressManager::~CFoundAddressManager() {
 		DeleteAll();
+		std::lock_guard<std::recursive_mutex> lg( m_mtxLock );
+		m_aAlive = false;
 	}
 
 	// == Functions.
 	// Removes an item by ID.
 	bool CFoundAddressManager::Delete( size_t _sId ) {
+		MX_LOCK lLock( this );
 		auto pfabThis = GetById( _sId );
 		if ( !pfabThis ) { return false; }
 
@@ -36,6 +52,7 @@ namespace mx {
 
 	// Removes all items.
 	void CFoundAddressManager::DeleteAll() {
+		std::lock_guard<std::recursive_mutex> lg( m_mtxLock );
 		for ( auto & I : m_mFoundAddresses ) {
 			I.second.reset();
 		}
@@ -44,6 +61,7 @@ namespace mx {
 
 	// Sets an item as a child of another.
 	bool CFoundAddressManager::SetParent( size_t _sId, size_t _sParent ) {
+		MX_LOCK lLock( this );
 		auto pfabThis = GetById( _sId );
 		if ( !pfabThis ) { return false; }
 		if ( pfabThis->Parent() == _sParent ) { return true; }
@@ -65,6 +83,9 @@ namespace mx {
 
 	// Adds a normal Found Address.
 	CFoundAddress * CFoundAddressManager::AddFoundAddress( CMemHack * _pmhMemHack ) {
+		std::lock_guard<std::recursive_mutex> lg( m_mtxLock );
+		if ( !m_i32LockCount || !m_aAlive ) { return nullptr; }
+
 		auto pfaAddress = std::make_unique<CFoundAddress>( _pmhMemHack );
 		CFoundAddress * pAddress = pfaAddress.get();
 		size_t sKey = pAddress->Id();
@@ -74,6 +95,9 @@ namespace mx {
 
 	// Adds a group.
 	CFoundAddressGroup * CFoundAddressManager::AddGroup( CMemHack * _pmhMemHack ) {
+		std::lock_guard<std::recursive_mutex> lg( m_mtxLock );
+		if ( !m_i32LockCount || !m_aAlive ) { return nullptr; }
+
 		auto pfaAddress = std::make_unique<CFoundAddressGroup>( _pmhMemHack );
 		CFoundAddressGroup * pAddress = pfaAddress.get();
 		size_t sKey = pAddress->Id();
@@ -83,6 +107,7 @@ namespace mx {
 
 	// Dirties all entries.
 	void CFoundAddressManager::DirtyAll() {
+		std::lock_guard<std::recursive_mutex> lg( m_mtxLock );
 		for ( auto & I : m_mFoundAddresses ) {
 			if MX_LIKELY( I.second ) {
 				I.second->Dirty();

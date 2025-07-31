@@ -1,4 +1,7 @@
 #include "MXFoundAddressEditWindow.h"
+#include "../Layouts/MXFoundAddressEditLayout.h"
+
+#include <Tab/LSWTab.h>
 
 
 namespace mx {
@@ -11,13 +14,18 @@ namespace mx {
 	// == Functions.
 	// WM_INITDIALOG.
 	CWidget::LSW_HANDLED CFoundAddressEditWindow::InitDialog() {
-
+		auto ptTab = reinterpret_cast<lsw::CTab *>(FindChild( CFoundAddressEditLayout::MX_FAEI_TAB ));
+		if ( ptTab ) {
+		}
 
 		return CParent::InitDialog();
 	}
 
 	// WM_COMMAND from control.
 	CWidget::LSW_HANDLED CFoundAddressEditWindow::Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc ) {
+
+		
+
 		
 		return CParent::Command( _wCtrlCode, _Id, _pwSrc );
 	}
