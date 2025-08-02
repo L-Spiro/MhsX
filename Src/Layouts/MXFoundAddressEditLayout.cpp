@@ -16,7 +16,7 @@ namespace mx {
 #define MX_INNER_W											(MX_SECTION1_W + MX_LEFT_JUST + MX_SECTION1_W)
 #define MX_INNER_GROUP_W									(MX_GROUP_LEFT + MX_INNER_W + MX_GROUP_LEFT)
 #define MX_EDIT_W											(MX_GROUP_L + MX_INNER_GROUP_W + MX_GROUP_L)
-#define MX_MID_L											(MX_GROUP_L + MX_SECTION1_W + MX_LEFT_JUST)
+#define MX_MID_L											(MX_SECTION1_L + MX_SECTION1_W + MX_LEFT_JUST)
 
 #define MX_GROUP_L											MX_LEFT_JUST
 #define MX_SECTION1_L										(MX_GROUP_L + MX_GROUP_LEFT)
@@ -166,7 +166,7 @@ namespace mx {
 			sStrings );
 		
 		mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
-		CFoundAddressEditWindow::MX_PARMS pParms = { .pmhMemHack = _poMemHack, .vSelection = _vSelected };
+		CFoundAddressEditPageBase::MX_PARMS pParms = { .pmhMemHack = _poMemHack, .vSelection = _vSelected };
 
 		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], MX_ELEMENTS( m_wlMainDialog ), _pwParent, reinterpret_cast<uint64_t>(&pParms) );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
@@ -194,14 +194,10 @@ namespace mx {
 			sStringsW,
 			sStrings );
 		
-		CFoundAddressEditWindow::MX_PARMS pParms = { .pmhMemHack = _poMemHack, .vSelection = _vSelected };
+		CFoundAddressEditPageBase::MX_PARMS pParms = { .pmhMemHack = _poMemHack, .vSelection = _vSelected };
 
 		CWidget * pwWidget = lsw::CBase::LayoutManager()->CreateDialogX( &vLayouts[0], _sTotal, _pwParent, reinterpret_cast<uint64_t>(&pParms) );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
-		//if ( pwWidget ) {
-		//	
-		//	// Success.  Do stuff.
-		//}
 
 		return pwWidget;
 	}

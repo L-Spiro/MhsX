@@ -350,6 +350,9 @@
     <ClInclude Include="Src\TrackBar\LSWTrackBar.h">
       <Filter>Header Files\TrackBar</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Tab\LSWTabPageBase.h">
+      <Filter>Header Files\Tab</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -459,6 +462,9 @@
     </ClCompile>
     <ClCompile Include="Src\TrackBar\LSWTrackBar.cpp">
       <Filter>Source Files\TrackBar</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Tab\LSWTabPageBase.cpp">
+      <Filter>Source Files\Tab</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

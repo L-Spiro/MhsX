@@ -442,6 +442,7 @@
     <ClCompile Include="Src\Static\LSWStatic.cpp" />
     <ClCompile Include="Src\StatusBar\LSWStatusBar.cpp" />
     <ClCompile Include="Src\Tab\LSWTab.cpp" />
+    <ClCompile Include="Src\Tab\LSWTabPageBase.cpp" />
     <ClCompile Include="Src\Threads\LSWThread.cpp" />
     <ClCompile Include="Src\ToolBar\LSWToolBar.cpp" />
     <ClCompile Include="Src\ToolTip\LSWToolTip.cpp" />
@@ -488,6 +489,7 @@
     <ClInclude Include="Src\Static\LSWStatic.h" />
     <ClInclude Include="Src\StatusBar\LSWStatusBar.h" />
     <ClInclude Include="Src\Tab\LSWTab.h" />
+    <ClInclude Include="Src\Tab\LSWTabPageBase.h" />
     <ClInclude Include="Src\Threads\LSWThread.h" />
     <ClInclude Include="Src\ToolBar\LSWToolBar.h" />
     <ClInclude Include="Src\ToolTip\LSWToolTip.h" />

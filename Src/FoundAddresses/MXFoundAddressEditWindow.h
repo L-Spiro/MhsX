@@ -2,6 +2,7 @@
 
 #include "../MXMhsX.h"
 #include "../Strings/MXStringDecoder.h"
+#include "MXFoundAddressEditMainPage.h"
 
 #include <MainWindow/LSWMainWindow.h>
 #include <Tab/LSWTab.h>
@@ -28,35 +29,27 @@ namespace mx {
 		};
 
 
-		// == Types.
-		// To pass both an options pointer and an index.
-		struct MX_PARMS {
-			CMemHack *						pmhMemHack;
-			std::vector<LPARAM> &			vSelection;
-		};
-
-
 		// == Functions.
 		// WM_INITDIALOG.
-		virtual LSW_HANDLED					InitDialog();
+		virtual LSW_HANDLED									InitDialog();
 
 		// WM_COMMAND from control.
-		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc );
+		virtual LSW_HANDLED									Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc );
 
 		// WM_CLOSE.
-		virtual LSW_HANDLED					Close();
+		virtual LSW_HANDLED									Close();
 
 
 	protected :
 		// == Members.
-		MX_PARMS							m_pParms;
-
+		// Settings.
+		CFoundAddressEditPageBase::MX_PARMS					m_pParms;
 		// Options pages.
-		//std::vector<COptionsPage *>			m_vPages;
+		std::vector<CFoundAddressEditPageBase *>			m_vPages;
 
 
 	private :
-		typedef lsw::CMainWindow			CParent;
+		typedef lsw::CMainWindow							CParent;
 	};
 
 }	// namespace mx

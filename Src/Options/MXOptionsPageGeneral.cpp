@@ -2,8 +2,10 @@
 #include "../Layouts/MXOptionsLayout.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../Utilities/MXUtilities.h"
+
 #include <CheckButton/LSWCheckButton.h>
 #include <ComboBox/LSWComboBox.h>
+
 #include <limits>
 
 namespace mx {

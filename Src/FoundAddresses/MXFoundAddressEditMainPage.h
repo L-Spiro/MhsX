@@ -7,9 +7,9 @@ using namespace lsw;
 
 namespace mx {
 
-	class COptionsPageGeneral : public CFoundAddressEditPageBase {
+	class CFoundAddressEditMainPage : public CFoundAddressEditPageBase {
 	public :
-		COptionsPageGeneral( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
+		CFoundAddressEditMainPage( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 
 
 		// == Functions.
@@ -28,14 +28,10 @@ namespace mx {
 		// Copies all the settings to the MX_OPTIONS structure.
 		virtual BOOL							Finalize();
 
-		// Updates the text example of data-type settings.
-		virtual void							UpdateExample();
-
 
 	protected :
 		// == Members.
-		// Options.
-		//MX_OPTIONS *							m_poOptions;
+		
 	};
 
 }	// namespace mx
