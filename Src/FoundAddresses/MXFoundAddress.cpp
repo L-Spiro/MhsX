@@ -54,6 +54,10 @@ namespace mx {
 		if MX_LIKELY( m_bDirtyCurValue ) {
 			m_bDirtyCurValue = !UndirtyCurValue();
 		}
+		if ( m_bDirtyCurValue ) {
+			// Failed to read RAM.
+			return std::wstring( L"N/A" );
+		}
 		if MX_LIKELY( m_vCurrentData.size() - m_sDataOffset >= InternalBufferSize() ) {
 			return ToText( &m_vCurrentData[m_sDataOffset] );
 		}

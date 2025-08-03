@@ -165,6 +165,14 @@ namespace lsw {
 		// Removes a flag from the current extended style of the window.
 		DWORD								RemoveStyleEx( DWORD _dwFlags ) { return SetStyleEx( GetStyleEx() & ~_dwFlags ); }
 
+		/**
+		 * Determines if the window has a menu.
+		 * 
+		 * \return Returns true if the window has a menu.
+		 **/
+		inline bool							HasMenu() { return Wnd() && (::GetMenu( Wnd() ) != nullptr); }
+
+
 		// Copies the text of the specified window's title bar (if it has one) into a buffer. If the specified window is a control, the text of the control is copied.
 		virtual INT							GetTextA( LPSTR _lpString, INT _nMaxCount ) const { return ::GetWindowTextA( Wnd(), _lpString, _nMaxCount ); }
 

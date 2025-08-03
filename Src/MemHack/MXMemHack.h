@@ -199,6 +199,12 @@ namespace mx {
 
 		// Loads search settings from either a JSON object or a byte buffer.
 		virtual bool						LoadSearchSettings( const lson::CJsonContainer::LSON_JSON_VALUE * _pjJson, lson::CJsonContainer * _pjcContainer, CStream * _psBinary, MX_OPTIONS &_oOptions, uint32_t _ui32Version );
+
+		// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
+		virtual bool						SaveEditSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary, const MX_OPTIONS &_oOptions ) const;
+
+		// Loads edit settings from either a JSON object or a byte buffer.
+		virtual bool						LoadEditSettings( const lson::CJsonContainer::LSON_JSON_VALUE * _pjJson, lson::CJsonContainer * _pjcContainer, CStream * _psBinary, MX_OPTIONS &_oOptions, uint32_t _ui32Version );
 	};
 
 }	// namespace mx

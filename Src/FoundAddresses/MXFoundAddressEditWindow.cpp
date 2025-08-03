@@ -17,10 +17,15 @@ namespace mx {
 		try {
 			auto ptTab = reinterpret_cast<lsw::CTab *>(FindChild( CFoundAddressEditLayout::MX_FAEI_TAB ));
 			if ( ptTab ) {
+				ptTab->SetShowCloseBoxes( false );
+
 				auto pfaempMain = reinterpret_cast<CFoundAddressEditMainPage *>(CFoundAddressEditLayout::CreateGeneralPage( this, m_pParms.pmhMemHack, m_pParms.vSelection ));
 				if ( pfaempMain ) {
 					m_vPages.push_back( pfaempMain );
 				}
+
+
+				lsw::CHelpers::FillTabAndFitWindow( reinterpret_cast<CTabPageBase **>(m_vPages.data()), m_vPages.size(), ptTab, this, FALSE );
 			}
 		}
 		catch ( ... ) {}

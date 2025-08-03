@@ -4497,4 +4497,33 @@ namespace mx {
 		return wsTemp;
 	}
 
+	/**
+	 * Fills a combo box with the given array of MX_COMBO_ENTRY structures.
+	 *
+	 * \param _pwComboBox The combo box to fill.
+	 * \param _pceEntries The array of combo-box entries.
+	 * \param _stTotal The total number of entries to which _pceEntries points.
+	 * \param _lpDefaultSelect The default selection.
+	 * \param _lpSelectBackup The backup selection in case the default selection isn't in the list.
+	 * \return Returns true if _pwComboBox is not nullptr, it is of type CComboBox, and all entries were added.
+	 */
+	bool CUtilities::FillComboBox( lsw::CWidget * _pwComboBox, const MX_COMBO_ENTRY * _pceEntries, size_t _stTotal, LPARAM _lpDefaultSelect, LPARAM _lpSelectBackup ) {
+		if ( nullptr == _pwComboBox ) { return false; }
+		if ( !_pwComboBox->IsComboBox() ) { return false; }
+
+		lsw::CComboBox * pcbBox = static_cast<lsw::CComboBox *>(_pwComboBox);
+		pcbBox->ResetContent();
+		for ( size_t I = 0; I < _stTotal; ++I ) {
+			INT iIdx = pcbBox->AddString( _pceEntries[I].pwcName );
+			if ( CB_ERR == iIdx ) { return false; }
+			if ( CB_ERR == pcbBox->SetItemData( iIdx, _pceEntries[I].lpParm ) ) { return false; }
+		}
+		if ( CB_ERR == pcbBox->SetCurSelByItemData( _lpDefaultSelect ) ) {
+			pcbBox->SetCurSelByItemData( _lpSelectBackup );
+		}
+		pcbBox->AutoSetMinListWidth();
+
+		return true;
+	}
+
 }	// namespace mx

@@ -10,7 +10,7 @@
         "DataRanges" : true,
         "UseXx" : false,
         "UseOo" : false,
-        "ShortEnums" : true
+        "ShortEnums" : false
     },
     "OpenProc" : {
         "OpenProcFlags" : 255
@@ -46,17 +46,26 @@
         "RegexNegateSingleLine" : true,
         "RegexFlavor" : 10,
         "ByteSwap" : 0,
-        "From" : "10000h",
-        "To" : "7FFFFFFF0000h",
+        "From" : "10000h // \u00d7 \x5c\x22'",
+        "To" : "7FFFFFFF0000h /*\u00ae*/",
         "FromHistory" : [
+            "10000h // \u00d7 \x5c\x22'",
+            "10000h // \u00d7\x22'",
+            "10000h // \u00d7",
             "10000h",
             "0",
             "DFE40000",
             "10000h+0"
         ],
         "ToHistory" : [
+            "7FFFFFFF0000h /*\u00ae*/",
             "7FFFFFFF0000h",
             "DFE40000 + 08000000h"
+        ]
+    },
+    "EditSettings" : {
+        "EditDescrHistory" : [
+
         ]
     }
 }

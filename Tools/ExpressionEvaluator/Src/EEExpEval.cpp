@@ -260,7 +260,13 @@ namespace ee {
 		return ui32Ret;
 	}
 
-	// Gets the size of the given UTF-8 character.
+	/**
+	 * Gets the size of the given UTF-8 character.
+	 * 
+	 * \param _pcString		Pointer to the UTF-8 characters to decode.
+	 * \param _sLen			The number of characters to which _pcString points.
+	 * \return				Returns the size of the UTF-8 character to which _pcString points.
+	 **/
 	size_t CExpEval::Utf8CharSize( const char * _pcString, size_t _sLen ) {
 		if ( _sLen == 0 ) { return 0; }
 
@@ -291,7 +297,13 @@ namespace ee {
 		return sLen;
 	}
 
-	// Converts a UTF-32 character to a UTF-16 character.
+	/**
+	 * Converts a UTF-32 character to a UTF-16 character.
+	 * 
+	 * \param _ui32Utf32	The UTF-32 character to convert to UTF-16.
+	 * \param _ui32Len		Holds the returned number of 16-bit characters held in the return value.
+	 * \return				Returns up to 2 UTF-16 characters.
+	 **/
 	uint32_t CExpEval::Utf32ToUtf16( uint32_t _ui32Utf32, uint32_t &_ui32Len ) {
 		if ( _ui32Utf32 > 0x10FFFF ) {
 			_ui32Len = 1;
@@ -312,7 +324,13 @@ namespace ee {
 		return _ui32Utf32;
 	}
 
-	// Converts a UTF-32 character to a UTF-8 character.
+	/**
+	 * Converts a UTF-32 character to a UTF-8 character.
+	 * 
+	 * \param _ui32Utf32	The UTF-32 character to convert to UTF-8.
+	 * \param _ui32Len		Holds the returned number of 16-bit characters held in the return value.
+	 * \return				Returns up to 4 UTF-8 characters.
+	 **/
 	uint32_t CExpEval::Utf32ToUtf8( uint32_t _ui32Utf32, uint32_t &_ui32Len ) {
 		// Handle the single-character case separately since it is a special case.
 		if ( _ui32Utf32 < 0x80U ) {
@@ -358,9 +376,9 @@ namespace ee {
 	/**
 	 * Converts a wstring to a UTF-8 string.  Converts the full length of the string, so embedded 0 characters don't stop the conversion.
 	 * 
-	 * \param _pwcIn The UTF-16 string to convert.
-	 * \param _sLen The number of characters to which _pwcIn points.
-	 * \return Returns the converted UTF-8 string, including any embedded 0's.
+	 * \param _pwcIn		The UTF-16 string to convert.
+	 * \param _sLen			The number of characters to which _pwcIn points.
+	 * \return				Returns the converted UTF-8 string, including any embedded 0's.
 	 **/
 	std::string CExpEval::WStringToString( const wchar_t * _pwcIn, size_t _sLen ) {
 		std::string ssTemp;
@@ -382,9 +400,9 @@ namespace ee {
 	/**
 	 * Converts a UTF-8 string to wstring (UTF-16).  Converts the full length of the string, so embedded 0 characters don't stop the conversion.
 	 * 
-	 * \param _pcIn The UTF-8 string to convert.
-	 * \param _sLen The number of characters to which _pcIn points.
-	 * \return Returns the converted UTF-16 string, including any embedded 0's.
+	 * \param _pcIn			The UTF-8 string to convert.
+	 * \param _sLen			The number of characters to which _pcIn points.
+	 * \return				Returns the converted UTF-16 string, including any embedded 0's.
 	 **/
 	std::wstring CExpEval::StringToWString( const char * _pcIn, size_t _sLen ) {
 		std::wstring swsTemp;
@@ -403,7 +421,13 @@ namespace ee {
 		return swsTemp;
 	}
 
-	// Converts a UTF-32 string to a UTF-16 string.
+	/**
+	 * Converts a UTF-32 string to a UTF-16 string.
+	 * 
+	 * \param _puiUtf32String	Pointer to the UTF-32 character array.
+	 * \param _sLen				Number of code points to convert.
+	 * \return					Returns the converted UTF-16 string.
+	 **/
 	std::wstring CExpEval::Utf32StringToWString( const uint32_t * _puiUtf32String, size_t _sLen ) {
 		std::wstring swsTemp;
 		size_t I = 0;
@@ -421,7 +445,13 @@ namespace ee {
 		return swsTemp;
 	}
 
-	// Gets the Nth Unicode code point in the given string.
+	/**
+	 * Gets the Nth Unicode code point in the given UTF-8 string.
+	 * 
+	 * \param _sIn			The UTF-8 string.
+	 * \param _sIx			The zero-based index of the code point.
+	 * \return				The Unicode code point at the specified index.
+	 **/
 	uint32_t CExpEval::GetUtf8CodePointByIdx( const std::string &_sIn, size_t _sIx ) {
 		uint32_t ui32Char = 0;
 		++_sIx;
@@ -435,7 +465,13 @@ namespace ee {
 		return ui32Char;
 	}
 
-	// Gets the Nth Unicode code point in the given string.
+	/**
+	 * Gets the byte position of the Nth UTF-8 character in the string.
+	 * 
+	 * \param _sIn			The UTF-8 string.
+	 * \param _sIx			The zero-based index of the UTF-8 character.
+	 * \return				The byte position of the character.
+	 **/
 	size_t CExpEval::GetUtf8CharPosByIdx( const std::string &_sIn, size_t _sIx ) {
 		size_t I = 0;
 		size_t sThisSize = 0;
@@ -447,8 +483,12 @@ namespace ee {
 		return I;
 	}
 
-	// Converts a wstring to a UTF-8 string.  The main difference between this and WStringToString() is that this will copy the raw characters over on error
-	//	compared to WStringToString(), which will output an error character (EE_UTF_INVALID).
+	/**
+	 * Converts a UTF-16 wstring to UTF-8. If invalid characters are encountered, raw bytes are copied instead of using EE_UTF_INVALID.
+	 * 
+	 * \param _wsString		The UTF-16 wide string to convert.
+	 * \return				The resulting UTF-8 string.
+	 **/
 	std::string CExpEval::ToUtf8( const std::wstring &_wsString ) {
 		std::string sRet;
 		const wchar_t * pwcInput = _wsString.c_str();
@@ -471,8 +511,12 @@ namespace ee {
 		return sRet;
 	}
 
-	// Converts a u16string to a UTF-8 string.  The main difference between this and WStringToString() is that this will copy the raw characters over on error
-	//	compared to WStringToString(), which will output an error character (EE_UTF_INVALID).
+	/**
+	 * Converts a UTF-16 u16string to UTF-8. If invalid characters are encountered, raw bytes are copied instead of using EE_UTF_INVALID.
+	 * 
+	 * \param _u16String	The UTF-16 string to convert.
+	 * \return				The resulting UTF-8 string.
+	 **/
 	std::string CExpEval::ToUtf8( const std::u16string &_u16String ) {
 		std::string sRet;
 		const char16_t * pc16Input = _u16String.c_str();
@@ -495,7 +539,12 @@ namespace ee {
 		return sRet;
 	}
 
-	// Converts a u32string to a UTF-8 string.
+	/**
+	 * Converts a UTF-32 u32string to UTF-8.
+	 * 
+	 * \param _u32String	The UTF-32 string to convert.
+	 * \return				The resulting UTF-8 string.
+	 **/
 	std::string CExpEval::ToUtf8( const std::u32string &_u32String ) {
 		std::string sRet;
 		const char32_t * pc32Input = _u32String.c_str();
@@ -523,7 +572,12 @@ namespace ee {
 		return sRet;
 	}
 
-	// Converts from UTF-8 to UTF-32, copying the original characters instead of EE_UTF_INVALID.
+	/**
+	 * Converts a UTF-8 string to UTF-32. If invalid characters are encountered, the original bytes are copied instead of substituting EE_UTF_INVALID.
+	 * 
+	 * \param _sIn			The UTF-8 string to convert.
+	 * \return				The resulting UTF-32 string.
+	 **/
 	std::u32string CExpEval::ToUtf32( const std::string &_sIn ) {
 		std::u32string u32Return;
 		const char * pcSrc = _sIn.c_str();
@@ -545,7 +599,12 @@ namespace ee {
 		return u32Return;
 	}
 
-	// Converts from UTF-8 to ASCII.
+	/**
+	 * Converts a UTF-8 string to ASCII by stripping or replacing non-ASCII characters.
+	 * 
+	 * \param _sIn			The UTF-8 string to convert.
+	 * \return				The resulting ASCII string.
+	 **/
 	std::string CExpEval::ToAscii( const std::string &_sIn ) {
 		size_t sSize = _sIn.size();
 		std::string sRet;
@@ -642,7 +701,12 @@ namespace ee {
 		return sRet;
 	}
 
-	// Converts from UTF-8 to a C string.
+	/**
+	 * Converts a UTF-8 string to a null-terminated C string.
+	 * 
+	 * \param _sIn			The UTF-8 string to convert.
+	 * \return				The resulting C string (still std::string but usable as .c_str()).
+	 **/
 	std::string CExpEval::ToCString( const std::string &_sIn ) {
 		size_t sSize = _sIn.size();
 		std::string sRet;
@@ -702,22 +766,79 @@ namespace ee {
 				// ui32Len is greater than 1, so at the very least a \u is needed.
 				ui32BackToUtf8 = Utf32ToUtf16( ui32This, ui32Len );
 				if ( ui32Len == 1 ) {
-					// If only the bottom bits are set, \x can be used instead.
-					if ( ui32BackToUtf8 & ~0xFF ) {
-						// Have to use the longer \u form.
-						std::stringstream ssStream;
-						ssStream << "\\u" <<
-							std::setfill( '0' ) << std::setw( 4 ) <<
-							std::hex << ui32This;
-						sRet.append( ssStream.str() );
+					// Have to use the longer \u form.
+					std::stringstream ssStream;
+					ssStream << "\\u" <<
+						std::setfill( '0' ) << std::setw( 4 ) <<
+						std::hex << ui32This;
+					sRet.append( ssStream.str() );
+				}
+				else {
+					// There was a validity check above for (ui32This != EE_UTF_INVALID) so we know that
+					//	ui32This did decode into a valid value.  \U should work with no further checking.
+					std::stringstream ssStream;
+					ssStream << "\\U" <<
+						std::setfill( '0' ) << std::setw( 8 ) <<
+						std::hex << ui32This;
+					sRet.append( ssStream.str() );
+				}
+				I += sThisSize;
+				continue;
+			}
+			// It was invalid.
+			for ( size_t J = 0; J < sThisSize; ++J ) {
+				std::stringstream ssStream;
+				ssStream << "\\x" <<
+					std::setfill( '0' ) << std::setw( 2 ) <<
+					std::hex << _sIn[I++];
+				sRet.append( ssStream.str() );
+			}
+		}
+		return sRet;
+	}
+
+	/**
+	 * Converts a UTF-8 string to a JSON string.
+	 * 
+	 * \param _sIn			The UTF-8 string to convert.
+	 * \return				The resulting JSON string (still std::string but usable as .c_str()).
+	 **/
+	std::string CExpEval::ToJsonString( const std::string &_sIn ) {
+		size_t sSize = _sIn.size();
+		std::string sRet;
+		
+		for ( size_t I = 0; I < sSize; ) {
+			size_t sThisSize = 0;
+			uint32_t ui32This = NextUtf8Char( &_sIn[I], sSize - I, &sThisSize );
+			if ( ui32This != EE_UTF_INVALID ) {
+				uint32_t ui32Len = 0;
+				uint32_t ui32BackToUtf8 = Utf32ToUtf8( ui32This, ui32Len );
+				if ( ui32Len == 1 ) {
+					// Check if printable.
+					if ( ::isprint( int( ui32This ) ) && static_cast<int8_t>(ui32This) != '\"' && static_cast<int8_t>(ui32This) != '\\' ) {
+						sRet.push_back( static_cast<std::string::value_type>(ui32This) );
+						I += sThisSize;
+						continue;
 					}
-					else {
-						std::stringstream ssStream;
-						ssStream << "\\x" <<
-							std::setfill( '0' ) << std::setw( 2 ) <<
-							std::hex << ui32This;
-						sRet.append( ssStream.str() );
-					}
+					// Not printable.
+					std::stringstream ssStream;
+					ssStream << "\\x" <<
+						std::setfill( '0' ) << std::setw( 2 ) <<
+						std::hex << ui32This;
+					sRet.append( ssStream.str() );
+					
+					I += sThisSize;
+					continue;
+				}
+				// ui32Len is greater than 1, so at the very least a \u is needed.
+				ui32BackToUtf8 = Utf32ToUtf16( ui32This, ui32Len );
+				if ( ui32Len == 1 ) {
+					// Have to use the longer \u form.
+					std::stringstream ssStream;
+					ssStream << "\\u" <<
+						std::setfill( '0' ) << std::setw( 4 ) <<
+						std::hex << ui32This;
+					sRet.append( ssStream.str() );
 				}
 				else {
 					// There was a validity check above for (ui32This != EE_UTF_INVALID) so we know that
@@ -746,8 +867,8 @@ namespace ee {
 	/**
 	 * Represents a value in binary notation.
 	 * 
-	 * \param _ui64Val The value to print.
-	 * \return Returns the printed value.
+	 * \param _ui64Val	The value to print.
+	 * \return			Returns the printed value.
 	 **/
 	std::string CExpEval::ToBinary( uint64_t _ui64Val ) {
 		std::string sTmp;
@@ -763,8 +884,8 @@ namespace ee {
 	/**
 	 * Represents a value in binary notation.
 	 * 
-	 * \param _i64Val The value to print.
-	 * \return Returns the printed value.
+	 * \param _i64Val	The value to print.
+	 * \return			Returns the printed value.
 	 **/
 	std::string CExpEval::ToBinary( int64_t _i64Val ) {
 		std::string sTmp;
@@ -878,7 +999,12 @@ namespace ee {
 		return sTmp;
 	}
 
-	// Represents a value in octadecimal notation.
+	/**
+	 * Represents a value in octal notation.
+	 * 
+	 * \param _ui64Val		The unsigned 64-bit value to convert.
+	 * \return				The value as an octal-formatted string.
+	 **/
 	std::string CExpEval::ToOct( uint64_t _ui64Val ) {
 		std::string sTmp;
 		std::stringstream ssStream;
@@ -890,7 +1016,12 @@ namespace ee {
 		return sTmp;
 	}
 
-	// Represents a value in octadecimal notation.
+	/**
+	 * Represents a value in octal notation.
+	 * 
+	 * \param _i64Val		The signed 64-bit value to convert.
+	 * \return				The value as an octal-formatted string.
+	 **/
 	std::string CExpEval::ToOct( int64_t _i64Val ) {
 		std::string sTmp;
 		std::stringstream ssStream;
@@ -907,7 +1038,12 @@ namespace ee {
 		return sTmp;
 	}
 
-	// Represents a value in octadecimal notation.
+	/**
+	 * Represents a double-precision floating-point value in octal notation.
+	 * 
+	 * \param _d4Val		The double value to convert.
+	 * \return				The value as an octal-formatted string.
+	 **/
 	std::string CExpEval::ToOct( double _d4Val ) {
 		int64_t i64Tmp = (*reinterpret_cast<int64_t *>(&_d4Val));
 		std::string sTmp;
@@ -925,7 +1061,14 @@ namespace ee {
 		return sTmp;
 	}
 
-	// Classifies a string as one of the EE_NUM_CONSTANTS types, IE whether the string is a valid float-point or a signed or unsigned integer.  Or EE_NC_INVALID.
+	/**
+	 * Classifies a string as one of the EE_NUM_CONSTANTS types. Determines whether the string represents a valid floating-point,
+	 * signed integer, unsigned integer, or is invalid.
+	 * 
+	 * \param _sIn				The input string to classify.
+	 * \param _pui8SpecialBase	Optional pointer to receive the detected numeric base (e.g., 8, 10, 16).
+	 * \return					Returns the classification as an EE_STRING_NUMBER_CLASS enum value.
+	 **/
 	EE_STRING_NUMBER_CLASS CExpEval::ClassifyString( const std::string &_sIn, uint8_t * _pui8SpecialBase ) {
 		if ( _pui8SpecialBase ) { (*_pui8SpecialBase) = 0; }
 		size_t stIdx = 0;
@@ -1024,23 +1167,30 @@ namespace ee {
 		return EE_SNC_INVALID;
 	}
 
-	// Resolves escape sequences.  Returns the full string as a 32-bit character array.
-	// \'	single quote	byte 0x27 in ASCII encoding
-	// \"	double quote	byte 0x22 in ASCII encoding
-	// \?	question mark	byte 0x3f in ASCII encoding
-	// \\	backslash	byte 0x5c in ASCII encoding
-	// \a	audible bell	byte 0x07 in ASCII encoding
-	// \b	backspace	byte 0x08 in ASCII encoding
-	// \f	form feed - new page	byte 0x0c in ASCII encoding
-	// \n	line feed - new line	byte 0x0a in ASCII encoding
-	// \r	carriage return	byte 0x0d in ASCII encoding
-	// \t	horizontal tab	byte 0x09 in ASCII encoding
-	// \v	vertical tab	byte 0x0b in ASCII encoding
-	// \nnn	arbitrary octal value	byte nnn
-	// \xnn	arbitrary hexadecimal value	byte nn
-	// \unnnn universal character name (arbitrary Unicode value); may result in several characters	code point U+nnnn
-	// \Unnnnnnnn universal character name (arbitrary Unicode value); may result in several characters	code point U+nnnnnnnn
-	// \N{name} Character named NAME in the Unicode database
+	/**
+	 * Resolves escape sequences in a string and outputs the result as a UTF-32 character array.
+	 * 
+	 * Supported escape sequences:
+	 *  \'         single quote							byte 0x27 in ASCII encoding  
+	 *  \"         double quote                         byte 0x22 in ASCII encoding  
+	 *  \?         question mark                        byte 0x3f in ASCII encoding  
+	 *  \\         backslash                            byte 0x5c in ASCII encoding  
+	 *  \a         audible bell                         byte 0x07 in ASCII encoding  
+	 *  \b         backspace                            byte 0x08 in ASCII encoding  
+	 *  \f         form feed - new page                 byte 0x0c in ASCII encoding  
+	 *  \n         line feed - new line                 byte 0x0a in ASCII encoding  
+	 *  \r         carriage return                      byte 0x0d in ASCII encoding  
+	 *  \t         horizontal tab                       byte 0x09 in ASCII encoding  
+	 *  \v         vertical tab                         byte 0x0b in ASCII encoding  
+	 *  \nnn       arbitrary octal value                byte nnn  
+	 *  \xnn       arbitrary hexadecimal value          byte nn  
+	 *  \unnnn     universal character name             code point U+nnnn  
+	 *  \Unnnnnnnn universal character name             code point U+nnnnnnnn  
+	 *  \N{name}   Unicode character with the given name
+	 * 
+	 * \param _sInput      The input string containing escape sequences.
+	 * \param _vOutput     The output vector that receives UTF-32 code points after escape resolution.
+	 **/
 	void CExpEval::ResolveAllEscapes( const std::string &_sInput, std::vector<uint32_t> &_vOutput ) {
 		size_t sLen = 1;
 		for ( size_t I = 0; I < _sInput.size() && sLen; ) {
@@ -1053,23 +1203,31 @@ namespace ee {
 		}
 	}
 
-	// Resolves escape sequences.  Input and output are both assumed to be UTF-8.
-	// \'	single quote	byte 0x27 in ASCII encoding
-	// \"	double quote	byte 0x22 in ASCII encoding
-	// \?	question mark	byte 0x3f in ASCII encoding
-	// \\	backslash	byte 0x5c in ASCII encoding
-	// \a	audible bell	byte 0x07 in ASCII encoding
-	// \b	backspace	byte 0x08 in ASCII encoding
-	// \f	form feed - new page	byte 0x0c in ASCII encoding
-	// \n	line feed - new line	byte 0x0a in ASCII encoding
-	// \r	carriage return	byte 0x0d in ASCII encoding
-	// \t	horizontal tab	byte 0x09 in ASCII encoding
-	// \v	vertical tab	byte 0x0b in ASCII encoding
-	// \nnn	arbitrary octal value	byte nnn
-	// \xnn	arbitrary hexadecimal value	byte nn
-	// \unnnn universal character name (arbitrary Unicode value); may result in several characters	code point U+nnnn
-	// \Unnnnnnnn universal character name (arbitrary Unicode value); may result in several characters	code point U+nnnnnnnn
-	// \N{name} Character named NAME in the Unicode database
+	/**
+	 * Resolves escape sequences in a string and outputs the result as either UTF-8 or byte-preserved encoding.
+	 * 
+	 * Supported escape sequences:
+	 *  \'         single quote                         byte 0x27 in ASCII encoding  
+	 *  \"         double quote                         byte 0x22 in ASCII encoding  
+	 *  \?         question mark                        byte 0x3f in ASCII encoding  
+	 *  \\         backslash                            byte 0x5c in ASCII encoding  
+	 *  \a         audible bell                         byte 0x07 in ASCII encoding  
+	 *  \b         backspace                            byte 0x08 in ASCII encoding  
+	 *  \f         form feed - new page                 byte 0x0c in ASCII encoding  
+	 *  \n         line feed - new line                 byte 0x0a in ASCII encoding  
+	 *  \r         carriage return                      byte 0x0d in ASCII encoding  
+	 *  \t         horizontal tab                       byte 0x09 in ASCII encoding  
+	 *  \v         vertical tab                         byte 0x0b in ASCII encoding  
+	 *  \nnn       arbitrary octal value                byte nnn  
+	 *  \xnn       arbitrary hexadecimal value          byte nn  
+	 *  \unnnn     universal character name             code point U+nnnn  
+	 *  \Unnnnnnnn universal character name             code point U+nnnnnnnn  
+	 *  \N{name}   Unicode character with the given name
+	 * 
+	 * \param _sInput      The input string containing escape sequences.
+	 * \param _sOutput     The output string with resolved escapes, encoded as UTF-8 if _bIsUtf8 is true.
+	 * \param _bIsUtf8     If true, encodes characters as UTF-8; otherwise encodes as raw bytes.
+	 **/
 	void CExpEval::ResolveAllEscapes( const std::string &_sInput, std::string &_sOutput, bool _bIsUtf8 ) {
 		size_t sLen = 1;
 		for ( size_t I = 0; I < _sInput.size() && sLen; I += sLen ) {
@@ -1094,7 +1252,17 @@ namespace ee {
 		}
 	}
 
-	// Resolves a single escape character, or returns the first input character if not an escape character.
+	/**
+	 * Resolves a single escape sequence from the input (e.g., \n, \x1B, or &#xNNNN;).
+	 * If the input is not an escape sequence, returns the first character as-is.
+	 * 
+	 * \param _pcInput			Pointer to the character buffer to parse.
+	 * \param _sLen				Length of the input buffer.
+	 * \param _sCharLen			Reference to receive the number of characters consumed.
+	 * \param _bIncludeHtml		If true, also resolves HTML/XML escape sequences.
+	 * \param _pbEscapeFound	Optional pointer to receive whether an escape was found.
+	 * \return					Returns the resolved character/code point.
+	 **/
 	uint64_t CExpEval::ResolveEscape( const char * _pcInput, size_t _sLen, size_t &_sCharLen, bool _bIncludeHtml, bool * _pbEscapeFound ) {
 		if ( _pbEscapeFound ) { (*_pbEscapeFound) = false; }
 		if ( !_sLen ) { _sCharLen = 0; return 0; }
@@ -1180,9 +1348,13 @@ namespace ee {
 		}
 	}
 
-	// Resolves HTML/XML characters.
-	// &#nnnn;
-	// &#xhhhh;
+	/**
+	 * Resolves all HTML/XML escape sequences in the input string (e.g., &amp;, &#x20;).
+	 * 
+	 * \param _sInput			The input string to scan for escape sequences.
+	 * \param _sOutput			The output string with resolved characters.
+	 * \param _bIsUtf8			If true, handles UTF-8 encoded content; otherwise assumes narrow encoding.
+	 **/
 	void CExpEval::ResolveAllHtmlXmlEscapes( const std::string &_sInput, std::string &_sOutput, bool _bIsUtf8 ) {
 		size_t sLen = 1;
 		for ( size_t I = 0; I < _sInput.size() && sLen; I += sLen ) {
@@ -1207,7 +1379,12 @@ namespace ee {
 		}
 	}
 
-	// Counts the number of UTF-8 code points in the given string.
+	/**
+	 * Counts the number of Unicode code points in a UTF-8 string.
+	 * 
+	 * \param _sInput			The UTF-8 input string.
+	 * \return					Returns the number of UTF-8 code points.
+	 **/
 	uint64_t CExpEval::CountUtfCodePoints( const std::string &_sInput ) {
 		uint64_t ui64Tally = 0;
 		size_t sPos = 0;

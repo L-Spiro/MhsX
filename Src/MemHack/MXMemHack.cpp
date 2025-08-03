@@ -223,12 +223,17 @@ namespace mx {
 				_peJson->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
 				lson::CJson::CreateObjectElement( _DEC_S_28CEB4AC_SearchSettings, (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
 				if ( !SaveSearchSettings( _peJson->vObjectMembers[_peJson->vObjectMembers.size()-1].get(), _psBinary, _oOptions ) ) { return false; }
+
+				_peJson->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+				lson::CJson::CreateObjectElement( _DEC_S_CAB443AC_EditSettings, (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
+				if ( !SaveEditSettings( _peJson->vObjectMembers[_peJson->vObjectMembers.size()-1].get(), _psBinary, _oOptions ) ) { return false; }
 			}
 			else {
 				_psBinary->WriteUi32( ui32Version );
 				if ( !SaveGeneralSettings( nullptr, _psBinary, _oOptions ) ) { return false; }
 				if ( !SaveOpenProcSettings( nullptr, _psBinary, _oOptions ) ) { return false; }
 				if ( !SaveSearchSettings( nullptr, _psBinary, _oOptions ) ) { return false; }
+				if ( !SaveEditSettings( nullptr, _psBinary, _oOptions ) ) { return false; }
 			}
 		}
 		catch ( ... ) {
@@ -258,6 +263,9 @@ namespace mx {
 
 			pjvVal = _pjJson->GetContainer()->GetMemberByName( jvRoot, _DEC_S_28CEB4AC_SearchSettings );
 			if ( !pjvVal || !LoadSearchSettings( pjvVal, _pjJson->GetContainer(), nullptr, _oOptions, ui32Version ) ) { return false; }
+
+			pjvVal = _pjJson->GetContainer()->GetMemberByName( jvRoot, _DEC_S_CAB443AC_EditSettings );
+			if ( !pjvVal || !LoadEditSettings( pjvVal, _pjJson->GetContainer(), nullptr, _oOptions, ui32Version ) ) { return false; }
 		}
 		else {
 			uint32_t ui32Version;
@@ -266,6 +274,7 @@ namespace mx {
 			if ( !LoadGeneralSettings( nullptr, nullptr, _psBinary, _oOptions, ui32Version ) ) { return false; }
 			if ( !LoadOpenProcSettings( nullptr, nullptr, _psBinary, _oOptions, ui32Version ) ) { return false; }
 			if ( !LoadSearchSettings( nullptr, nullptr, _psBinary, _oOptions, ui32Version ) ) { return false; }
+			if ( !LoadEditSettings( nullptr, nullptr, _psBinary, _oOptions, ui32Version ) ) { return false; }
 		}
 		return true;
 	}
@@ -772,14 +781,13 @@ namespace mx {
 			MX_JSON_NUMBER( _DEC_S_095E5602_RegexFlavor, _oOptions.uiRegexFlavor, _peJson );
 			MX_JSON_NUMBER( _DEC_S_12EECDA8_ByteSwap, _oOptions.bsByteswap, _peJson );
 			{
-				CSecureWString swsTmp = CUtilities::EscapeNonJson( _oOptions.wsFromText, false );
 				_peJson->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
-				lson::CJson::CreateStringElement( _DEC_S_19280E4E_From, ee::CExpEval::ToUtf8( swsTmp ), (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
+				lson::CJson::CreateStringElement( _DEC_S_19280E4E_From, ee::CExpEval::ToJsonString( ee::CExpEval::ToUtf8( _oOptions.wsFromText ) ), (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
 			}
 			{
 				CSecureWString swsTmp = CUtilities::EscapeNonJson( _oOptions.wsToText, false );
 				_peJson->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
-				lson::CJson::CreateStringElement( _DEC_S_4203F666_To, ee::CExpEval::ToUtf8( swsTmp ), (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
+				lson::CJson::CreateStringElement( _DEC_S_4203F666_To, ee::CExpEval::ToJsonString( ee::CExpEval::ToUtf8( _oOptions.wsToText ) ), (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
 			}
 
 			_peJson->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
@@ -788,9 +796,8 @@ namespace mx {
 				lson::CJson::LSON_ELEMENT * peArray = _peJson->vObjectMembers[_peJson->vObjectMembers.size()-1].get();
 				for ( size_t I = 0; I < _oOptions.vFromHistory.size(); ++I ) {
 					{
-						CSecureWString swsTmp = CUtilities::EscapeNonJson( _oOptions.vFromHistory[I], false );
 						peArray->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
-						lson::CJson::CreateStringElement( std::to_string( I ), ee::CExpEval::ToUtf8( swsTmp ), (*peArray->vObjectMembers[peArray->vObjectMembers.size()-1]) );
+						lson::CJson::CreateStringElement( std::to_string( I ), ee::CExpEval::ToJsonString( ee::CExpEval::ToUtf8( _oOptions.vFromHistory[I] ) ), (*peArray->vObjectMembers[peArray->vObjectMembers.size()-1]) );
 					}
 				}
 			}
@@ -801,9 +808,8 @@ namespace mx {
 				lson::CJson::LSON_ELEMENT * peArray = _peJson->vObjectMembers[_peJson->vObjectMembers.size()-1].get();
 				for ( size_t I = 0; I < _oOptions.vToHistory.size(); ++I ) {
 					{
-						CSecureWString swsTmp = CUtilities::EscapeNonJson( _oOptions.vToHistory[I], false );
 						peArray->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
-						lson::CJson::CreateStringElement( std::to_string( I ), ee::CExpEval::ToUtf8( swsTmp ), (*peArray->vObjectMembers[peArray->vObjectMembers.size()-1]) );
+						lson::CJson::CreateStringElement( std::to_string( I ), ee::CExpEval::ToJsonString( ee::CExpEval::ToUtf8( _oOptions.vToHistory[I] ) ), (*peArray->vObjectMembers[peArray->vObjectMembers.size()-1]) );
 					}
 				}
 			}
@@ -928,7 +934,6 @@ namespace mx {
 					}
 				}
 			}
-
 		}
 		else {
 			uint8_t ui8Tmp;
@@ -1006,6 +1011,61 @@ namespace mx {
 				CSecureWString wsTmp;
 				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
 				_oOptions.vToHistory.push_back( wsTmp );
+			}
+			
+		}
+		return true;
+	}
+
+	// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
+	bool CMemHack::SaveEditSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary, const MX_OPTIONS &_oOptions ) const {
+		if ( _peJson ) {
+			_peJson->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+			lson::CJson::CreateArrayElement( _DEC_S_D9701309_EditDescrHistory, (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
+			{
+				lson::CJson::LSON_ELEMENT * peArray = _peJson->vObjectMembers[_peJson->vObjectMembers.size()-1].get();
+				for ( size_t I = 0; I < _oOptions.vEditDescriptionHistory.size(); ++I ) {
+					{
+						peArray->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+						lson::CJson::CreateStringElement( std::to_string( I ), ee::CExpEval::ToJsonString( ee::CExpEval::ToUtf8( _oOptions.vEditDescriptionHistory[I] ) ), (*peArray->vObjectMembers[peArray->vObjectMembers.size()-1]) );
+					}
+				}
+			}
+		}
+		else {
+			if ( !_psBinary->WriteUi32( _oOptions.vEditDescriptionHistory.size() ) ) { return false; }
+			for ( size_t I = 0; I < _oOptions.vEditDescriptionHistory.size(); ++I ) {
+				if ( !_psBinary->WriteStringU16( _oOptions.vEditDescriptionHistory[I] ) ) { return false; }
+			}
+
+		}
+		return true;
+	}
+
+	// Loads edit settings from either a JSON object or a byte buffer.
+	bool CMemHack::LoadEditSettings( const lson::CJsonContainer::LSON_JSON_VALUE * _pjJson, lson::CJsonContainer * _pjcContainer, CStream * _psBinary, MX_OPTIONS &_oOptions, uint32_t _ui32Version ) {
+		if ( nullptr == _pjJson && _psBinary == nullptr ) { return false; }
+		if ( _pjJson ) {
+			const lson::CJsonContainer::LSON_JSON_VALUE * pjvVal;
+			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_D9701309_EditDescrHistory );
+			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+						CSecureString ssTmp;
+						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+						_oOptions.vEditDescriptionHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+					}
+				}
+			}
+		}
+		else {
+			uint32_t ui32Tmp;
+			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+			for ( size_t I = 0; I < ui32Tmp; ++I ) {
+				CSecureWString wsTmp;
+				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+				_oOptions.vEditDescriptionHistory.push_back( wsTmp );
 			}
 		}
 		return true;

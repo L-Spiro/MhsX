@@ -80,6 +80,8 @@ namespace mx {
 		CSecureWString					wsToText;
 		std::vector<CSecureWString>		vFromHistory;
 		std::vector<CSecureWString>		vToHistory;
+
+		std::vector<CSecureWString>		vEditDescriptionHistory;
 	};
 
 	struct MX_FLOAT_STUDIO_OPTIONS {

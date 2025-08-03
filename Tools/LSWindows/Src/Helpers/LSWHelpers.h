@@ -20,6 +20,9 @@
 
 namespace lsw {
 
+	class CTabPageBase;
+	class CWidget;
+
 	struct LSW_RECT : public RECT {
 		LSW_RECT() {}
 		LSW_RECT( const RECT &_rRect ) { 
@@ -40,6 +43,7 @@ namespace lsw {
 		LONG								Width() const { return right - left; }
 		LONG								Height() const { return bottom - top; }
 		LSW_RECT &							Zero() { left = right = top = bottom = 0; return (*this ); }
+		LSW_RECT &							PrepareConsume() { left = top = LONG_MAX; right = bottom = LONG_MIN; return (*this ); }
 		VOID								SetWidth( LONG _lW ) { right = left + _lW; }
 		VOID								SetHeight( LONG _lH ) { bottom = top + _lH; }
 		POINT								UpperLeft() const { return { left, top }; }
@@ -133,6 +137,13 @@ namespace lsw {
 			top = std::max( top, _rRect.top );
 			right = std::min( right, _rRect.right );
 			bottom = std::min( bottom, _rRect.bottom );
+		}
+		// Consumes the given rectangle (this rectangle is adjusted to fit the given rectangle inside it).
+		void								Consume( const LSW_RECT &_rRect ) {
+			left = std::min( left, _rRect.left );
+			top = std::min( top, _rRect.top );
+			right = std::max( right, _rRect.right );
+			bottom = std::max( bottom, _rRect.bottom );
 		}
 	};
 
@@ -1369,6 +1380,17 @@ namespace lsw {
 		static LSW_RECT						TaskBarRect() {
 			return LSW_RECT( TaskBarLeft(), TaskBarTop(), TaskBarRight(), TaskBarBottom() );
 		}
+
+		/**
+		 * Takes an array of CTabPageBase's and fits them into a CTab control, additionally resizing the parent window by the same amount as the tab control is resized.  The tabs are named according to the return value of each CTabPageBase's GetName() method.
+		 * 
+		 * \param _pptpbPages The pages to insert into the tab control.
+		 * \param _stTotal The number of pages to which to _pptpbPages points.
+		 * \param _pwTab The tab control into which to insert the pages.
+		 * \param _pwParent The parent to resize along with the tab control.
+		 * \param _bFitWindow If TRUE, the window is resized to fit the tab control snuggly, otherwise it is reized by the same amount as the tab control, which leaves any extra space around the tab control as-is.
+		 **/
+		static void							FillTabAndFitWindow( CTabPageBase ** _pptpbPages, size_t _stTotal, CWidget * _pwTab, CWidget * _pwParent, bool _bFitWindow );
 
 	protected :
 		// == Types.

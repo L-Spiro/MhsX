@@ -1,4 +1,7 @@
 #include "LSWHelpers.h"
+#include "../Tab/LSWTab.h"
+#include "../Tab/LSWTabPageBase.h"
+#include "../Widget/LSWWidget.h"
 
 #ifdef LSW_USB_INPUTS
 #pragma comment( lib, "Hid.lib" )
@@ -197,7 +200,7 @@ namespace lsw {
 	 */
 	std::vector<uint8_t> CHelpers::GetRawInputData_Input( HRAWINPUT _hRawInput ) {
 		std::vector<uint8_t> vRaw;
-		UINT uiSize;
+		UINT uiSize = 0;
 		if ( ::GetRawInputData( _hRawInput, RID_INPUT, NULL, &uiSize, sizeof( RAWINPUTHEADER ) ) ) {
 			return vRaw;
 		}
@@ -206,6 +209,69 @@ namespace lsw {
 			return std::vector<uint8_t>();
 		}
 		return vRaw;
+	}
+
+	/**
+	 * Takes an array of CTabPageBase's and fits them into a CTab control, additionally resizing the parent window by the same amount as the tab control is resized.  The tabs are named according to the return value of each CTabPageBase's GetName() method.
+	 * 
+	 * \param _pptpbPages The pages to insert into the tab control.
+	 * \param _stTotal The number of pages to which to _pptpbPages points.
+	 * \param _pwTab The tab control into which to insert the pages.
+	 * \param _pwParent The parent to resize along with the tab control.
+	 * \param _bFitWindow If TRUE, the window is resized to fit the tab control snuggly, otherwise it is reized by the same amount as the tab control, which leaves any extra space around the tab control as-is.
+	 **/
+	void CHelpers::FillTabAndFitWindow( CTabPageBase ** _pptpbPages, size_t _stTotal, CWidget * _pwTab, CWidget * _pwParent, bool _bFitWindow ) {
+		if ( !_stTotal || !_pwTab || !_pptpbPages ) { return; }
+
+		auto ptTab = reinterpret_cast<CTab *>(_pwTab);
+		TCITEMW tciItem = { 0 };
+		tciItem.mask = TCIF_TEXT;
+		LSW_RECT rRect;
+		rRect.PrepareConsume();
+
+		for ( size_t I = 0; I < _stTotal; ++I ) {
+			auto rThis = _pptpbPages[I]->WindowRect();			// Get the full rectangle.
+			rThis.MoveBy( -rThis.left, -rThis.top );			// Move to [0,0].
+			rRect.Consume( rThis );								// Get the max width/height of all the items being put into the tab.
+
+			auto wsText = _pptpbPages[I]->GetName();
+			tciItem.pszText = const_cast<LPWSTR>(wsText.c_str());
+			/*int iIdx = */ptTab->InsertItem( int( I ), &tciItem, _pptpbPages[I] );
+		}
+
+		// rRect is the smallest box that will contain all items in the tab control.
+		LSW_RECT rNewTabRect = rRect;
+		ptTab->AdjustRect( TRUE, &rNewTabRect );
+		LSW_RECT rTabWindow = ptTab->WindowRect();
+		LSW_RECT rTabClient = rTabWindow.ScreenToClient( ptTab->Wnd() );
+
+		// Move the CTab.
+		::MoveWindow( ptTab->Wnd(), rTabClient.left, rTabClient.top, rNewTabRect.Width(), rNewTabRect.Height(), FALSE );
+		rRect = ptTab->WindowRect().ScreenToClient( ptTab->Wnd() );
+		rTabClient = rRect;
+		ptTab->AdjustRect( FALSE, &rRect );
+
+		// Resize the pages.
+		for ( size_t I = 0; I < _stTotal; ++I ) {
+			::MoveWindow( _pptpbPages[I]->Wnd(), rRect.left, rRect.top, rRect.Width(), rRect.Height(), FALSE );
+		}
+
+		// Resize the parent.
+		if ( _pwParent ) {
+			LSW_RECT rWindowRect = _pwParent->WindowRect();
+			if ( _bFitWindow ) {
+				LSW_RECT rClientRect;
+				rClientRect.PrepareConsume();
+				rClientRect.Consume( rTabClient );
+				::AdjustWindowRectEx( &rClientRect, _pwParent->GetStyle(), _pwParent->HasMenu(), _pwParent->GetStyleEx() );
+				::MoveWindow( _pwParent->Wnd(), rWindowRect.left, rWindowRect.top, rClientRect.Width(), rClientRect.Height(), FALSE );
+			}
+			else {
+				rWindowRect.right += rTabClient.Width() - rTabWindow.Width();
+				rWindowRect.bottom += rTabClient.Height() - rTabWindow.Height();
+				::MoveWindow( _pwParent->Wnd(), rWindowRect.left, rWindowRect.top, rWindowRect.Width(), rWindowRect.Height(), FALSE );
+			}
+		}
 	}
 
 }	// namespace lsw
