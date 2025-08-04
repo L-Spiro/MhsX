@@ -1,6 +1,8 @@
 #pragma once
 #include "../MXMhsX.h"
+#include "../Strings/MXSecureWString.h"
 #include "MXFoundAddressEditPageBase.h"
+
 #include <LSWWin.h>
 
 using namespace lsw;
@@ -28,9 +30,20 @@ namespace mx {
 		// Copies all the settings to the MX_OPTIONS structure.
 		virtual BOOL							Finalize();
 
+		// Updates the contents of page based on settings etc.
+		virtual void							Update();
+
 
 	protected :
 		// == Members.
+
+
+		// == Functions.
+		// Gathers all descriptions and returns the Description string.
+		CSecureWString							GatherDescriptions() const;
+
+		// Gathers all current value strings.
+		CSecureWString							GatherCurValue() const;
 		
 	};
 

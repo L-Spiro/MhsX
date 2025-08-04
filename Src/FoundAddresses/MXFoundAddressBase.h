@@ -94,7 +94,10 @@ namespace mx {
 		}
 
 		// Gets the Description text.
-		inline std::wstring									DescriptionText() const { return m_wsName; }
+		inline const std::wstring &							DescriptionText() const { return m_wsName; }
+
+		// Sets the Decscription text.
+		inline const std::wstring &							SetDescriptionText( std::wstring _wsText ) { m_wsName = _wsText; return m_wsName; }
 
 		// Gets the Address text.
 		virtual std::wstring								AddressText() const { return std::wstring(); }

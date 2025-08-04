@@ -39,6 +39,9 @@ namespace mx {
 		// Copies all the settings to the MX_OPTIONS structure.
 		virtual BOOL							Finalize() { return TRUE; }
 
+		// Updates the contents of page based on settings etc.
+		virtual void							Update() {};
+
 
 	protected :
 		// == Members.

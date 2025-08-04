@@ -17587,3 +17587,21 @@
 #define _DEC_S_F9B2FD80_Array_Length_ mx::CStringDecoder::DecodeToString( _T_F9B2FD80_Array_Length_, _LEN_F9B2FD80 )
 #define _DEC_WS_F9B2FD80_Array_Length_ mx::CStringDecoder::DecodeToWString( _T_F9B2FD80_Array_Length_, _LEN_F9B2FD80 )
 
+// Locked (Intermediate Check Leaves Locks\r\nAs They Are)
+
+#define _T_3F53C9AD_Locked__Intermediate_Check_Leaves_Locks_r_nAs_They_Are_ "\xD4\x3D\x33\x06\xF7\x2D\xAE\xEF\x19\x36\x3D\x33\x04\x08\x2C\xEC\x37\x31\x0F\xF7\xE9\xD1\x2F\x35\x2B\x34\xEE\xDE\x00\x28\xFE\x33\x43\xBB\xDE\x38\xF1\x32\x43\xD5\xD3\x0F\x05\xBB\x1B\xF0\x33\x49\xBB\xD3\x3B\xF3\xF0"
+#define _LEN_3F53C9AD 53
+#define _T_LEN_3F53C9AD_Locked__Intermediate_Check_Leaves_Locks_r_nAs_They_Are_ _T_3F53C9AD_Locked__Intermediate_Check_Leaves_Locks_r_nAs_They_Are_, _LEN_3F53C9AD
+#define _DEC_3F53C9AD_Locked__Intermediate_Check_Leaves_Locks_r_nAs_They_Are_( STR ) mx::CStringDecoder::Decode( _T_3F53C9AD_Locked__Intermediate_Check_Leaves_Locks_r_nAs_They_Are_, _LEN_3F53C9AD, STR )
+#define _DEC_S_3F53C9AD_Locked__Intermediate_Check_Leaves_Locks_r_nAs_They_Are_ mx::CStringDecoder::DecodeToString( _T_3F53C9AD_Locked__Intermediate_Check_Leaves_Locks_r_nAs_They_Are_, _LEN_3F53C9AD )
+#define _DEC_WS_3F53C9AD_Locked__Intermediate_Check_Leaves_Locks_r_nAs_They_Are_ mx::CStringDecoder::DecodeToWString( _T_3F53C9AD_Locked__Intermediate_Check_Leaves_Locks_r_nAs_They_Are_, _LEN_3F53C9AD )
+
+// Max:
+
+#define _T_20C5D4A7_Max_ "\xD5\x2F\x48\xD5"
+#define _LEN_20C5D4A7 4
+#define _T_LEN_20C5D4A7_Max_ _T_20C5D4A7_Max_, _LEN_20C5D4A7
+#define _DEC_20C5D4A7_Max_( STR ) mx::CStringDecoder::Decode( _T_20C5D4A7_Max_, _LEN_20C5D4A7, STR )
+#define _DEC_S_20C5D4A7_Max_ mx::CStringDecoder::DecodeToString( _T_20C5D4A7_Max_, _LEN_20C5D4A7 )
+#define _DEC_WS_20C5D4A7_Max_ mx::CStringDecoder::DecodeToWString( _T_20C5D4A7_Max_, _LEN_20C5D4A7 )
+

@@ -30,16 +30,22 @@ namespace mx {
 		}
 		catch ( ... ) {}
 
+		for ( auto I = m_vPages.size(); I--; ) {
+			m_vPages[I]->Update();
+		}
+
 		return CParent::InitDialog();
 	}
 
 	// WM_COMMAND from control.
-	CWidget::LSW_HANDLED CFoundAddressEditWindow::Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc ) {
-
+	CWidget::LSW_HANDLED CFoundAddressEditWindow::Command( WORD _wCtrlCode, WORD _wId, CWidget * _pwSrc ) {
+		switch ( _wId ) {
+			case CFoundAddressEditLayout::MX_FAEI_CANCEL : {
+				return Close();
+			}
+		}
 		
-
-		
-		return CParent::Command( _wCtrlCode, _Id, _pwSrc );
+		return CParent::Command( _wCtrlCode, _wId, _pwSrc );
 	}
 
 	// WM_CLOSE.
