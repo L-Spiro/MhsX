@@ -17605,3 +17605,57 @@
 #define _DEC_S_20C5D4A7_Max_ mx::CStringDecoder::DecodeToString( _T_20C5D4A7_Max_, _LEN_20C5D4A7 )
 #define _DEC_WS_20C5D4A7_Max_ mx::CStringDecoder::DecodeToWString( _T_20C5D4A7_Max_, _LEN_20C5D4A7 )
 
+// No Lower Than
+
+#define _T_BF6E62BD_No_Lower_Than "\xD6\x3D\xF0\xE7\x01\x40\xF3\x39\xF0\x1C\x31\x2F\x00"
+#define _LEN_BF6E62BD 13
+#define _T_LEN_BF6E62BD_No_Lower_Than _T_BF6E62BD_No_Lower_Than, _LEN_BF6E62BD
+#define _DEC_BF6E62BD_No_Lower_Than( STR ) mx::CStringDecoder::Decode( _T_BF6E62BD_No_Lower_Than, _LEN_BF6E62BD, STR )
+#define _DEC_S_BF6E62BD_No_Lower_Than mx::CStringDecoder::DecodeToString( _T_BF6E62BD_No_Lower_Than, _LEN_BF6E62BD )
+#define _DEC_WS_BF6E62BD_No_Lower_Than mx::CStringDecoder::DecodeToWString( _T_BF6E62BD_No_Lower_Than, _LEN_BF6E62BD )
+
+// No Greater Than
+
+#define _T_A5F79469_No_Greater_Than "\xD6\x3D\xF0\xE2\x04\x2E\xEF\x3B\x35\x3A\xE9\x22\xFA\xFC\x35"
+#define _LEN_A5F79469 15
+#define _T_LEN_A5F79469_No_Greater_Than _T_A5F79469_No_Greater_Than, _LEN_A5F79469
+#define _DEC_A5F79469_No_Greater_Than( STR ) mx::CStringDecoder::Decode( _T_A5F79469_No_Greater_Than, _LEN_A5F79469, STR )
+#define _DEC_S_A5F79469_No_Greater_Than mx::CStringDecoder::DecodeToString( _T_A5F79469_No_Greater_Than, _LEN_A5F79469 )
+#define _DEC_WS_A5F79469_No_Greater_Than mx::CStringDecoder::DecodeToWString( _T_A5F79469_No_Greater_Than, _LEN_A5F79469 )
+
+// Pointer
+
+#define _T_FDB95134_Pointer "\xD8\x3D\x39\x09\x06\x2E\x00"
+#define _LEN_FDB95134 7
+#define _T_LEN_FDB95134_Pointer _T_FDB95134_Pointer, _LEN_FDB95134
+#define _DEC_FDB95134_Pointer( STR ) mx::CStringDecoder::Decode( _T_FDB95134_Pointer, _LEN_FDB95134, STR )
+#define _DEC_S_FDB95134_Pointer mx::CStringDecoder::DecodeToString( _T_FDB95134_Pointer, _LEN_FDB95134 )
+#define _DEC_WS_FDB95134_Pointer mx::CStringDecoder::DecodeToWString( _T_FDB95134_Pointer, _LEN_FDB95134 )
+
+// String
+
+#define _T_9912B79F_String "\xDB\x42\x42\x04\x00\x30"
+#define _LEN_9912B79F 6
+#define _T_LEN_9912B79F_String _T_9912B79F_String, _LEN_9912B79F
+#define _DEC_9912B79F_String( STR ) mx::CStringDecoder::Decode( _T_9912B79F_String, _LEN_9912B79F, STR )
+#define _DEC_S_9912B79F_String mx::CStringDecoder::DecodeToString( _T_9912B79F_String, _LEN_9912B79F )
+#define _DEC_WS_9912B79F_String mx::CStringDecoder::DecodeToWString( _T_9912B79F_String, _LEN_9912B79F )
+
+// void *
+
+#define _T_301499E2_void__ "\xFE\x3D\x39\xFF\xB2\xF3"
+#define _LEN_301499E2 6
+#define _T_LEN_301499E2_void__ _T_301499E2_void__, _LEN_301499E2
+#define _DEC_301499E2_void__( STR ) mx::CStringDecoder::Decode( _T_301499E2_void__, _LEN_301499E2, STR )
+#define _DEC_S_301499E2_void__ mx::CStringDecoder::DecodeToString( _T_301499E2_void__, _LEN_301499E2 )
+#define _DEC_WS_301499E2_void__ mx::CStringDecoder::DecodeToWString( _T_301499E2_void__, _LEN_301499E2 )
+
+// String/Array
+
+#define _T_A7D24C17_String_Array "\xDB\x42\x42\x04\x00\x30\xBD\x08\x42\x3A\x2A\x47"
+#define _LEN_A7D24C17 12
+#define _T_LEN_A7D24C17_String_Array _T_A7D24C17_String_Array, _LEN_A7D24C17
+#define _DEC_A7D24C17_String_Array( STR ) mx::CStringDecoder::Decode( _T_A7D24C17_String_Array, _LEN_A7D24C17, STR )
+#define _DEC_S_A7D24C17_String_Array mx::CStringDecoder::DecodeToString( _T_A7D24C17_String_Array, _LEN_A7D24C17 )
+#define _DEC_WS_A7D24C17_String_Array mx::CStringDecoder::DecodeToWString( _T_A7D24C17_String_Array, _LEN_A7D24C17 )
+

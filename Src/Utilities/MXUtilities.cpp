@@ -1471,9 +1471,12 @@ namespace mx {
 	}
 
 	// Prints a data type given the options.
-	const CHAR * CUtilities::PrintDataType( std::string &_sString, CUtilities::MX_DATA_TYPES _dtType, DWORD _dwOptions ) {
+	const CHAR * CUtilities::PrintDataType( std::string &_sString, CUtilities::MX_DATA_TYPES _dtType, DWORD _dwOptions, bool _bClearStr ) {
 		if ( _dwOptions == DWINVALID ) {
 			_dwOptions = Options.dwDataTypeOptions;
+		}
+		if ( _bClearStr ) {
+			_sString.clear();
 		}
 
 		for ( size_t I = 0; I < MX_ELEMENTS( DataTypeInfo ); ++I ) {
@@ -1506,9 +1509,12 @@ namespace mx {
 	}
 
 	// Prints a data type given the options.
-	const WCHAR * CUtilities::PrintDataType( std::wstring &_sString, CUtilities::MX_DATA_TYPES _dtType, DWORD _dwOptions ) {
+	const WCHAR * CUtilities::PrintDataType( std::wstring &_sString, CUtilities::MX_DATA_TYPES _dtType, DWORD _dwOptions, bool _bClearStr ) {
 		if ( _dwOptions == DWINVALID ) {
 			_dwOptions = Options.dwDataTypeOptions;
+		}
+		if ( _bClearStr ) {
+			_sString.clear();
 		}
 
 		for ( size_t I = 0; I < MX_ELEMENTS( DataTypeInfo ); ++I ) {
@@ -4514,7 +4520,7 @@ namespace mx {
 		lsw::CComboBox * pcbBox = static_cast<lsw::CComboBox *>(_pwComboBox);
 		pcbBox->ResetContent();
 		for ( size_t I = 0; I < _stTotal; ++I ) {
-			INT iIdx = pcbBox->AddString( _pceEntries[I].pwcName );
+			INT iIdx = pcbBox->AddString( _pceEntries[I].pwcName.c_str() );
 			if ( CB_ERR == iIdx ) { return false; }
 			if ( CB_ERR == pcbBox->SetItemData( iIdx, _pceEntries[I].lpParm ) ) { return false; }
 		}
@@ -4524,6 +4530,114 @@ namespace mx {
 		pcbBox->AutoSetMinListWidth();
 
 		return true;
+	}
+
+	/**
+	 * Fills a combo box with Edit Dialog data types.
+	 * 
+	 * \param _pwComboBox The combo box to fill.
+	 * \param _lpDefaultSelect The default selection.
+	 * \return Returns true if _pwComboBox is not nullptr, it is of type CComboBox, and all entries were added.
+	 **/
+	bool CUtilities::FillComboWithEditTypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect ) {
+		std::wstring wsTmp;
+		MX_COMBO_ENTRY ceEnries[] = {
+			//pwcName																										lpParm
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT8, DWINVALID, true ) ),										LPARAM( MX_DT_INT8 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT8, DWINVALID, true ) ),										LPARAM( MX_DT_UINT8 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT16, DWINVALID, true ) ),										LPARAM( MX_DT_INT16 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT16, DWINVALID, true ) ),										LPARAM( MX_DT_UINT16 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT32, DWINVALID, true ) ),										LPARAM( MX_DT_INT32 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT32, DWINVALID, true ) ),										LPARAM( MX_DT_UINT32 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT64, DWINVALID, true ) ),										LPARAM( MX_DT_INT64 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT64, DWINVALID, true ) ),										LPARAM( MX_DT_UINT64 ),					},
+
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_FLOAT16, DWINVALID, true ) ),										LPARAM( MX_DT_FLOAT16 ),				},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_FLOAT, DWINVALID, true ) ),										LPARAM( MX_DT_FLOAT ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_DOUBLE, DWINVALID, true ) ),										LPARAM( MX_DT_DOUBLE ),					},
+
+			{ (Options.dwDataTypeOptions & MX_DTO_CODENAMES) ? _DEC_WS_301499E2_void__ : _DEC_WS_FDB95134_Pointer,			LPARAM( MX_DT_VOID ),					},
+			{ _DEC_WS_9912B79F_String,																						LPARAM( MX_DT_STRING ),					},
+		};
+		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, MX_DT_UINT32 );
+	}
+
+	/**
+	 * Fills a combo box with lock types.
+	 * 
+	 * \param _pwComboBox The combo box to fill.
+	 * \param _lpDefaultSelect The default selection.
+	 * \return Returns true if _pwComboBox is not nullptr, it is of type CComboBox, and all entries were added.
+	 **/
+	bool CUtilities::FillComboBoxWithLocktypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect ) {
+		MX_COMBO_ENTRY ceEnries[] = {
+			//pwcName													lpParm
+			{ _DEC_WS_396582B1_Exact_Value,								LPARAM( MX_LT_EXACT ),					},
+			{ _DEC_WS_BF6E62BD_No_Lower_Than,							LPARAM( MX_LT_NO_LOWER_THAN ),			},
+			{ _DEC_WS_A5F79469_No_Greater_Than,							LPARAM( MX_LT_NO_GREATER_THAN ),		},
+			{ _DEC_WS_5246754D_Range,									LPARAM( MX_LT_RANGE ),					},
+		};
+		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, MX_LT_EXACT );
+	}
+
+	/**
+	 * Fills the combo box with string types.
+	 * 
+	 * \param _pwComboBox The combo box to fill.
+	 * \param _lpDefaultSelect The default selection.
+	 * \return Returns true if _pwComboBox is not nullptr, it is of type CComboBox, and all entries were added.
+	 **/
+	bool CUtilities::FillComboBoxWithStringTypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect ) {
+		std::wstring wsTmp;
+		MX_COMBO_ENTRY ceEnries[] = {
+			//pwcName																																			lpParm
+			{ _DEC_WS_468B510E_Machine_Code_Page,																												LPARAM( MX_ST_CODE_PAGE ),				},
+			{ _DEC_WS_0E813C50_UTF_8,																															LPARAM( MX_ST_UTF8 ),					},
+			{ _DEC_WS_A71F1195_UTF_16,																															LPARAM( MX_ST_UTF16_LE ),				},
+			{ _DEC_WS_26FC5333_UTF_16_BE,																														LPARAM( MX_ST_UTF16_BE ),				},
+			{ _DEC_WS_9244B70E_UTF_32,																															LPARAM( MX_ST_UTF32_LE ),				},
+			{ _DEC_WS_D35E9704_UTF_32_BE,																														LPARAM( MX_ST_UTF32_BE ),				},
+			/*{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT8, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),											LPARAM( MX_DT_INT8 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT8, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_UINT8 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT16, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_INT16 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT16, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_UINT16 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT32, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_INT32 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT32, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_UINT32 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT64, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_INT64 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT64, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_UINT64 ),					},
+
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_FLOAT16, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_FLOAT16 ),				},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_FLOAT, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_FLOAT ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_DOUBLE, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_DOUBLE ),					},*/
+		};
+		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, MX_ST_CODE_PAGE );
+	}
+
+	/**
+	 * Fills the combo box with standard data types.
+	 * 
+	 * \param _pwComboBox The combo box to fill.
+	 * \param _lpDefaultSelect The default selection.
+	 * \return Returns true if _pwComboBox is not nullptr, it is of type CComboBox, and all entries were added.
+	 **/
+	bool CUtilities::FillComboBoxWithStdDataTypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect ) {
+		std::wstring wsTmp;
+		MX_COMBO_ENTRY ceEnries[] = {
+			//pwcName																																			lpParm
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT8, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),											LPARAM( MX_DT_INT8 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT8, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_UINT8 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT16, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_INT16 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT16, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_UINT16 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT32, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_INT32 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT32, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_UINT32 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT64, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_INT64 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT64, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_UINT64 ),					},
+
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_FLOAT16, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_FLOAT16 ),				},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_FLOAT, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_FLOAT ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_DOUBLE, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_DOUBLE ),					},
+		};
+		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, MX_DT_UINT32 );
 	}
 
 }	// namespace mx

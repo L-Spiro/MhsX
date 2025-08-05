@@ -1,6 +1,7 @@
 #pragma once
 #include "../MXMhsX.h"
 #include "../Strings/MXSecureWString.h"
+#include "../Utilities/MXUtilities.h"
 #include "MXFoundAddressEditPageBase.h"
 
 #include <LSWWin.h>
@@ -44,6 +45,15 @@ namespace mx {
 
 		// Gathers all current value strings.
 		CSecureWString							GatherCurValue() const;
+
+		// Gathers all locked-value strings.
+		CSecureWString							GatherLockedValue() const;
+
+		// Gathers all address strings.
+		CSecureWString							GatherAddress() const;
+
+		// Gathers all data types.
+		CUtilities::MX_DATA_TYPES				GatherDataTypes() const;
 		
 	};
 

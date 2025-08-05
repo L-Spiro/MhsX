@@ -127,7 +127,10 @@ namespace mx {
 			MX_DT_DOUBLE,
 			MX_DT_VOID,
 
-			MX_DT_MASK											= 0xF
+			MX_DT_MASK											= 0xF,
+
+			// Special: Cannot be used with the DataType* functions.
+			MX_DT_STRING
 		};
 
 		// String types.
@@ -315,6 +318,14 @@ namespace mx {
 			MX_BS_BY_TYPE,
 		};
 
+		// Lock types.
+		enum MX_LOCK_TYPES : uint16_t {
+			MX_LT_EXACT,
+			MX_LT_NO_LOWER_THAN,
+			MX_LT_NO_GREATER_THAN,
+			MX_LT_RANGE,
+		};
+
 
 		// == Types.
 		// Various options.
@@ -404,7 +415,7 @@ namespace mx {
 
 		/** An entry in a combo box. */
 		struct MX_COMBO_ENTRY {
-			const wchar_t *										pwcName;					/**< The name of the entry. */
+			CSecureWString										pwcName;					/**< The name of the entry. */
 			LPARAM												lpParm;						/**< The parameter of the entry. */
 		};
 
@@ -670,10 +681,10 @@ namespace mx {
 		static const WCHAR *									DataTypeSize( CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString );
 
 		// Prints a data type given the options.
-		static const CHAR *										PrintDataType( std::string &_sString, CUtilities::MX_DATA_TYPES _dtType, DWORD _dwOptions = DWINVALID );
+		static const CHAR *										PrintDataType( std::string &_sString, CUtilities::MX_DATA_TYPES _dtType, DWORD _dwOptions = DWINVALID, bool _bClearStr = false );
 
 		// Prints a data type given the options.
-		static const WCHAR *									PrintDataType( std::wstring &_sString, CUtilities::MX_DATA_TYPES _dtType, DWORD _dwOptions = DWINVALID );
+		static const WCHAR *									PrintDataType( std::wstring &_sString, CUtilities::MX_DATA_TYPES _dtType, DWORD _dwOptions = DWINVALID, bool _bClearStr = false );
 
 		// Converts a given value to a string given the type.
 		static CSecureString &									DataTypeToString( const void * _pvData, CUtilities::MX_DATA_TYPES _dtType, CSecureString &_sRet, uint32_t _uiNumDigits = 0, int32_t _iSigDigits = 0 );
@@ -1300,7 +1311,42 @@ namespace mx {
 		 * \return Returns true if _pwComboBox is not nullptr, it is of type CComboBox, and all entries were added.
 		 */
 		static bool												FillComboBox( lsw::CWidget * _pwComboBox, const MX_COMBO_ENTRY * _pceEntries, size_t _stTotal, LPARAM _lpDefaultSelect, LPARAM _lpSelectBackup = 0 );
-		
+
+		/**
+		 * Fills a combo box with Edit Dialog data types.
+		 * 
+		 * \param _pwComboBox The combo box to fill.
+		 * \param _lpDefaultSelect The default selection.
+		 * \return Returns true if _pwComboBox is not nullptr, it is of type CComboBox, and all entries were added.
+		 **/
+		static bool												FillComboWithEditTypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect );
+
+		/**
+		 * Fills a combo box with lock types.
+		 * 
+		 * \param _pwComboBox The combo box to fill.
+		 * \param _lpDefaultSelect The default selection.
+		 * \return Returns true if _pwComboBox is not nullptr, it is of type CComboBox, and all entries were added.
+		 **/
+		static bool												FillComboBoxWithLocktypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect );
+
+		/**
+		 * Fills the combo box with string types.
+		 * 
+		 * \param _pwComboBox The combo box to fill.
+		 * \param _lpDefaultSelect The default selection.
+		 * \return Returns true if _pwComboBox is not nullptr, it is of type CComboBox, and all entries were added.
+		 **/
+		static bool												FillComboBoxWithStringTypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect );
+
+		/**
+		 * Fills the combo box with standard data types.
+		 * 
+		 * \param _pwComboBox The combo box to fill.
+		 * \param _lpDefaultSelect The default selection.
+		 * \return Returns true if _pwComboBox is not nullptr, it is of type CComboBox, and all entries were added.
+		 **/
+		static bool												FillComboBoxWithStdDataTypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect );
 
 		// == Members.
 		// Options.

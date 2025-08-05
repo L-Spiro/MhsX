@@ -339,6 +339,22 @@ namespace mx {
 			MX_FAEI_GENERAL_PAGE,							// dwParentId
 		},
 		{
+			LSW_LT_COMBOBOX,								// ltType
+			MX_FAEI_VALUE_TYPE_DATA_COMBO,					// wId
+			WC_COMBOBOXW,									// lpwcClass
+			TRUE,											// bEnabled
+			FALSE,											// bActive
+			MX_MID_L,										// iLeft
+			(MX_VAL_GROUP_T + MX_GROUP_TOP) + (MX_DEF_COMBO_HEIGHT + MX_TOP_JUST) + (MX_DEF_STATIC_HEIGHT + MX_TOP_JUST),
+			MX_MAIN_EDIT_W,									// dwWidth
+			MX_DEF_COMBO_HEIGHT,							// dwHeight
+			MX_COMBOSTYLE_LIST,								// dwStyle
+			0,												// dwStyleEx
+			nullptr,										// pwcText
+			0,												// sTextLen
+			MX_FAEI_GENERAL_PAGE,							// dwParentId
+		},
+		{
 			LSW_LT_CHECK,									// ltType
 			MX_FAEI_VALUE_TYPE_SHOW_AS_HEX_CHECK,			// wId
 			WC_BUTTONW,										// lpwcClass

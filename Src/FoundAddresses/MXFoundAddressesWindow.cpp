@@ -362,7 +362,7 @@ namespace mx {
 										if ( spSearchParms.stType == CUtilities::MX_ST_DATATYPE_SEARCH ) {
 											if ( faAddress->InitWithAddressAndDataType( ui64Addr, spSearchParms.dtLVal.dtType, pui8Data ) ) {
 												vAdded.push_back( faAddress->Id() );
-												faAddress->SetDescriptionText( L"HHHJ" );
+												//faAddress->SetDescriptionText( L"HHHJ" );
 												CSecureWString wsTmp = faAddress->DescriptionText();
 												TVINSERTSTRUCTW iisItem = lsw::CTreeListView::DefaultItemLParam( wsTmp.c_str(), faAddress->Id() );
 												auto hInserted = ptlvTree->InsertItem( &iisItem );

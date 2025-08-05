@@ -1958,3 +1958,8 @@
 "Address:"
 "Module:"
 "Max:"
+"No Lower Than"
+"No Greater Than"
+"Pointer"
+"String"
+"void *"
