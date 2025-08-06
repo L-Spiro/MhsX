@@ -50,7 +50,10 @@ namespace mx {
 	}
 
 	// Gets the Value text.
-	std::wstring CFoundAddress::ValueText() const {
+	std::wstring CFoundAddress::ValueText( bool * _pbRead ) const {
+		if MX_UNLIKELY( _pbRead ) {
+			(*_pbRead) = false;
+		}
 		if MX_LIKELY( m_bDirtyCurValue ) {
 			m_bDirtyCurValue = !UndirtyCurValue();
 		}
@@ -59,6 +62,9 @@ namespace mx {
 			return std::wstring( L"N/A" );
 		}
 		if MX_LIKELY( m_vCurrentData.size() - m_sDataOffset >= InternalBufferSize() ) {
+			if MX_UNLIKELY( _pbRead ) {
+				(*_pbRead) = true;
+			}
 			return ToText( &m_vCurrentData[m_sDataOffset] );
 		}
 		return std::wstring();
@@ -132,10 +138,11 @@ namespace mx {
 		return false;
 	}
 
-	// Sets the Data Type.
+	// Sets the Data Type.  Call within a try/catch block.
 	bool CFoundAddress::SetDataType( CUtilities::MX_DATA_TYPES _dtDataType ) {
 		if ( !CUtilities::IsDataType( _dtDataType ) ) { return false; }
 		m_dtDataType = _dtDataType;
+		PrepareValueStructures();
 		UpdateBuffers();
 		return true;
 	}
@@ -192,6 +199,47 @@ namespace mx {
 			return m_pmhMemHack->ReadProcessMemory_PreProcessed( ui64Addr, m_vCurrentData, InternalBufferSize(), m_sDataOffset, m_bsByteSwap );
 		}
 		return false;
+	}
+
+	// Prepares the MX_VALUE structures based on the value type, array length/stride.  Call within a try/catch block.
+	void CFoundAddress::PrepareValueStructures() {
+		if ( CUtilities::IsDataType( m_dtDataType ) ) {
+			auto dwSize = CUtilities::DataTypeSize( m_dtDataType );
+			m_ui16ActuaArrayStride = std::max<uint16_t>( m_ui16ArrayStride, dwSize );
+
+			m_ui32ArrayLen = std::min<uint32_t>( m_ui32ArrayLen, MaxArrayLen() );
+			auto ui32Elements = std::max<uint32_t>( m_ui32ArrayLen, 1 );
+
+			m_bContiguous = m_ui16ActuaArrayStride == dwSize;
+
+			if ( m_bContiguous ) {
+				m_vCurData.vValue.resize( 1 );
+				m_vCurData.vOffsets.resize( 1 );
+				uint64_t ui64Addr = FinalAddress();
+				uint64_t ui64Len = dwSize * ui32Elements;
+				uint64_t ui64Offset;
+				CUtilities::SnapTo( CUtilities::ByteSwapSize( m_bsByteSwap ), ui64Addr, ui64Len, ui64Offset );
+				if MX_UNLIKELY( ui64Len > MAXSIZE_T ) { throw; }
+				m_vCurData.vValue[0].resize( size_t( ui64Len ) );
+				m_vCurData.vOffsets[0] = size_t( ui64Offset );
+			}
+			else {
+				m_vCurData.vValue.resize( ui32Elements );
+				m_vCurData.vOffsets.resize( ui32Elements );
+				uint64_t ui64Addr = FinalAddress();
+				for ( uint32_t I = 0; I < ui32Elements; ++I ) {
+					uint64_t ui64ThisAddr = ui64Addr;
+					uint64_t ui64Len = dwSize;
+					uint64_t ui64Offset;
+					CUtilities::SnapTo( CUtilities::ByteSwapSize( m_bsByteSwap ), ui64ThisAddr, ui64Len, ui64Offset );
+					if MX_UNLIKELY( ui64Len > MAXSIZE_T ) { throw; }
+					m_vCurData.vValue[I].resize( size_t( ui64Len ) );
+					m_vCurData.vOffsets[I] = size_t( ui64Offset );
+
+					ui64Addr += m_ui16ActuaArrayStride;
+				}
+			}
+		}
 	}
 
 }	// namespace mx

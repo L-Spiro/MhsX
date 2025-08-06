@@ -4542,24 +4542,25 @@ namespace mx {
 	bool CUtilities::FillComboWithEditTypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect ) {
 		std::wstring wsTmp;
 		MX_COMBO_ENTRY ceEnries[] = {
-			//pwcName																										lpParm
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT8, DWINVALID, true ) ),										LPARAM( MX_DT_INT8 ),					},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT8, DWINVALID, true ) ),										LPARAM( MX_DT_UINT8 ),					},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT16, DWINVALID, true ) ),										LPARAM( MX_DT_INT16 ),					},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT16, DWINVALID, true ) ),										LPARAM( MX_DT_UINT16 ),					},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT32, DWINVALID, true ) ),										LPARAM( MX_DT_INT32 ),					},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT32, DWINVALID, true ) ),										LPARAM( MX_DT_UINT32 ),					},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT64, DWINVALID, true ) ),										LPARAM( MX_DT_INT64 ),					},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT64, DWINVALID, true ) ),										LPARAM( MX_DT_UINT64 ),					},
+			//pwcName																																			lpParm
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT8, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),											LPARAM( MX_DT_INT8 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT8, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_UINT8 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT16, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_INT16 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT16, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_UINT16 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT32, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_INT32 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT32, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_UINT32 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT64, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_INT64 ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT64, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_UINT64 ),					},
 
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_FLOAT16, DWINVALID, true ) ),										LPARAM( MX_DT_FLOAT16 ),				},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_FLOAT, DWINVALID, true ) ),										LPARAM( MX_DT_FLOAT ),					},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_DOUBLE, DWINVALID, true ) ),										LPARAM( MX_DT_DOUBLE ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_FLOAT16, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_FLOAT16 ),				},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_FLOAT, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_FLOAT ),					},
+			{ CSecureWString( PrintDataType( wsTmp, MX_DT_DOUBLE, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_DOUBLE ),					},
 
-			{ (Options.dwDataTypeOptions & MX_DTO_CODENAMES) ? _DEC_WS_301499E2_void__ : _DEC_WS_FDB95134_Pointer,			LPARAM( MX_DT_VOID ),					},
-			{ _DEC_WS_9912B79F_String,																						LPARAM( MX_DT_STRING ),					},
+			//{ (Options.dwDataTypeOptions & MX_DTO_CODENAMES) ? _DEC_WS_301499E2_void__ : _DEC_WS_FDB95134_Pointer,												LPARAM( MX_DT_VOID ),					},
+			{ _DEC_WS_FDB95134_Pointer,																															LPARAM( MX_DT_VOID ),					},
+			{ _DEC_WS_9912B79F_String,																															LPARAM( MX_DT_STRING ),					},
 		};
-		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, MX_DT_UINT32 );
+		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, -1 );
 	}
 
 	/**
@@ -4571,13 +4572,13 @@ namespace mx {
 	 **/
 	bool CUtilities::FillComboBoxWithLocktypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect ) {
 		MX_COMBO_ENTRY ceEnries[] = {
-			//pwcName													lpParm
-			{ _DEC_WS_396582B1_Exact_Value,								LPARAM( MX_LT_EXACT ),					},
-			{ _DEC_WS_BF6E62BD_No_Lower_Than,							LPARAM( MX_LT_NO_LOWER_THAN ),			},
-			{ _DEC_WS_A5F79469_No_Greater_Than,							LPARAM( MX_LT_NO_GREATER_THAN ),		},
-			{ _DEC_WS_5246754D_Range,									LPARAM( MX_LT_RANGE ),					},
+			//pwcName																																			lpParm
+			{ _DEC_WS_396582B1_Exact_Value,																														LPARAM( MX_LT_EXACT ),					},
+			{ _DEC_WS_BF6E62BD_No_Lower_Than,																													LPARAM( MX_LT_NO_LOWER_THAN ),			},
+			{ _DEC_WS_A5F79469_No_Greater_Than,																													LPARAM( MX_LT_NO_GREATER_THAN ),		},
+			{ _DEC_WS_5246754D_Range,																															LPARAM( MX_LT_RANGE ),					},
 		};
-		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, MX_LT_EXACT );
+		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, -1 );
 	}
 
 	/**
@@ -4597,20 +4598,9 @@ namespace mx {
 			{ _DEC_WS_26FC5333_UTF_16_BE,																														LPARAM( MX_ST_UTF16_BE ),				},
 			{ _DEC_WS_9244B70E_UTF_32,																															LPARAM( MX_ST_UTF32_LE ),				},
 			{ _DEC_WS_D35E9704_UTF_32_BE,																														LPARAM( MX_ST_UTF32_BE ),				},
-			/*{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT8, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),											LPARAM( MX_DT_INT8 ),					},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT8, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_UINT8 ),					},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT16, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_INT16 ),					},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT16, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_UINT16 ),					},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT32, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_INT32 ),					},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT32, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_UINT32 ),					},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_INT64, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_INT64 ),					},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_UINT64, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_UINT64 ),					},
-
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_FLOAT16, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_FLOAT16 ),				},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_FLOAT, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_FLOAT ),					},
-			{ CSecureWString( PrintDataType( wsTmp, MX_DT_DOUBLE, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_DOUBLE ),					},*/
+			//{ _DEC_WS_F22813AD_Custom,																															LPARAM( MX_ST_SPECIAL ),				},
 		};
-		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, MX_ST_CODE_PAGE );
+		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, -1 );
 	}
 
 	/**
@@ -4637,7 +4627,7 @@ namespace mx {
 			{ CSecureWString( PrintDataType( wsTmp, MX_DT_FLOAT, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_FLOAT ),					},
 			{ CSecureWString( PrintDataType( wsTmp, MX_DT_DOUBLE, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_DOUBLE ),					},
 		};
-		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, MX_DT_UINT32 );
+		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, -1 );
 	}
 
 }	// namespace mx

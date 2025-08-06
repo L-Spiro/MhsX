@@ -17659,3 +17659,21 @@
 #define _DEC_S_A7D24C17_String_Array mx::CStringDecoder::DecodeToString( _T_A7D24C17_String_Array, _LEN_A7D24C17 )
 #define _DEC_WS_A7D24C17_String_Array mx::CStringDecoder::DecodeToWString( _T_A7D24C17_String_Array, _LEN_A7D24C17 )
 
+// Min:
+
+#define _T_324E30C8_Min_ "\xD5\x37\x3E\xD5"
+#define _LEN_324E30C8 4
+#define _T_LEN_324E30C8_Min_ _T_324E30C8_Min_, _LEN_324E30C8
+#define _DEC_324E30C8_Min_( STR ) mx::CStringDecoder::Decode( _T_324E30C8_Min_, _LEN_324E30C8, STR )
+#define _DEC_S_324E30C8_Min_ mx::CStringDecoder::DecodeToString( _T_324E30C8_Min_, _LEN_324E30C8 )
+#define _DEC_WS_324E30C8_Min_ mx::CStringDecoder::DecodeToWString( _T_324E30C8_Min_, _LEN_324E30C8 )
+
+// Array Stride:
+
+#define _T_4CE91014_Array_Stride_ "\xC9\x40\x42\xFC\x0B\xE9\xE1\x3B\x42\x31\x2D\x33\xCC"
+#define _LEN_4CE91014 13
+#define _T_LEN_4CE91014_Array_Stride_ _T_4CE91014_Array_Stride_, _LEN_4CE91014
+#define _DEC_4CE91014_Array_Stride_( STR ) mx::CStringDecoder::Decode( _T_4CE91014_Array_Stride_, _LEN_4CE91014, STR )
+#define _DEC_S_4CE91014_Array_Stride_ mx::CStringDecoder::DecodeToString( _T_4CE91014_Array_Stride_, _LEN_4CE91014 )
+#define _DEC_WS_4CE91014_Array_Stride_ mx::CStringDecoder::DecodeToWString( _T_4CE91014_Array_Stride_, _LEN_4CE91014 )
+

@@ -141,7 +141,7 @@ namespace mx {
 			MX_ST_UTF16_BE,										// A Big-Endian UTF-16 string.
 			MX_ST_UTF32_LE,										// A Little-Endian UTF-32 string.
 			MX_ST_UTF32_BE,										// A Big-Endian UTF-32 string.
-			MX_ST_RAW,											// An array of a single type or mixed types.
+			MX_ST_SPECIAL,										// Special decoding routine provided via Lua or Expression Evaluator.
 		};
 
 		// Wildcard flags.  Adjust values so that they can be combined with MX_DATA_TYPES if more values are added to MX_DATA_TYPES.
@@ -623,6 +623,28 @@ namespace mx {
 			try { _vVector.resize( _sSize ); }
 			catch ( const std::bad_alloc /*& _eE*/ ) { return false;  }
 			return true;
+		}
+
+		// Adjusts an input range to some divisor.
+		static inline void										SnapTo( uint32_t _ui32Snap, uint64_t &_ui64Start, uint64_t &_ui64Len, uint64_t &_ui64Offset ) {
+			_ui64Offset = _ui64Start % _ui32Snap;
+			uint64_t uiDataStart = (_ui64Start / _ui32Snap) * _ui32Snap;
+			uint64_t uiAdjustedEnd = (((_ui64Start + _ui64Len) + (_ui32Snap - 1)) / _ui32Snap) * _ui32Snap;
+			_ui64Len = uiAdjustedEnd - uiDataStart;
+			_ui64Start = uiDataStart;
+		}
+
+		// Gets the size of an MX_BYTESWAP value.
+		static uint32_t											ByteSwapSize( MX_BYTESWAP _bsByteSwap ) {
+			switch ( _bsByteSwap ) {
+				case MX_BS_NONE : { return 1; }
+				case MX_BS_2BYTE : { return 2; }
+				case MX_BS_4BYTE : { return 4; }
+				case MX_BS_8BYTE : { return 8; }
+				default : {
+					return 1;
+				}
+			}
 		}
 
 		// Is the given value a valid data type?

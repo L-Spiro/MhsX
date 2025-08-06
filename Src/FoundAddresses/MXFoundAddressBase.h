@@ -103,7 +103,7 @@ namespace mx {
 		virtual std::wstring								AddressText() const { return std::wstring(); }
 
 		// Gets the Value text.
-		virtual std::wstring								ValueText() const { return std::wstring(); }
+		virtual std::wstring								ValueText( bool * _pbRead = nullptr ) const { return std::wstring(); }
 
 		// Gets the Value When Locked text.
 		virtual std::wstring								ValueWhenLockedText() const { return std::wstring(); }

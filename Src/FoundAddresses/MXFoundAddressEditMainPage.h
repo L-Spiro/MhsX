@@ -1,5 +1,6 @@
 #pragma once
 #include "../MXMhsX.h"
+#include "../Layouts/MXFoundAddressEditLayout.h"
 #include "../Strings/MXSecureWString.h"
 #include "../Utilities/MXUtilities.h"
 #include "MXFoundAddressEditPageBase.h"
@@ -9,6 +10,8 @@
 using namespace lsw;
 
 namespace mx {
+
+	class CFoundAddressBase;
 
 	class CFoundAddressEditMainPage : public CFoundAddressEditPageBase {
 	public :
@@ -54,6 +57,21 @@ namespace mx {
 
 		// Gathers all data types.
 		CUtilities::MX_DATA_TYPES				GatherDataTypes() const;
+
+		// Gathers all lock types.
+		CUtilities::MX_LOCK_TYPES				GatherLockTypes() const;
+
+		// Gathers all array lengths.
+		CSecureWString							GatherArrayLens() const;
+
+		// Gathers all array strides.
+		CSecureWString							GatherArrayStrides() const;
+
+		// Gets the lock type for a given found address.
+		static LPARAM							LockType( CFoundAddressBase * _pfabFoundAddress );
+
+	private :
+		typedef CFoundAddressEditLayout			Layout;
 		
 	};
 

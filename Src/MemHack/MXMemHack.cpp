@@ -297,18 +297,30 @@ namespace mx {
 		if MX_UNLIKELY( _ui64BaseAddress > MAXSIZE_T ) { return false; }
 		
 		try {
-			if MX_LIKELY( _bsSwap == CUtilities::MX_BS_NONE ) {
-				_vBuffer.resize( _nSize );
-				_sBufferOffset = 0;
-				return Process().ReadProcessMemory( _ui64BaseAddress,
-					_vBuffer.data(), _vBuffer.size(), _lpNumberOfBytesRead );
+			uint32_t uiAlignment;
+			switch ( _bsSwap ) {
+				case CUtilities::MX_BS_NONE : {
+					_vBuffer.resize( _nSize );
+					_sBufferOffset = 0;
+					return Process().ReadProcessMemory( _ui64BaseAddress,
+						_vBuffer.data(), _vBuffer.size(), _lpNumberOfBytesRead );
+				}
+				case CUtilities::MX_BS_2BYTE : {
+					uiAlignment = 2;
+					break;
+				}
+				case CUtilities::MX_BS_4BYTE : {
+					uiAlignment = 4;
+					break;
+				}
+				default : {
+					uiAlignment = 8;
+					break;
+				}
 			}
-
-			constexpr uint64_t uiAlignment = 8;
-			uint64_t uiOffsetToData = _ui64BaseAddress % uiAlignment;
-			uint64_t uiDataStart = (_ui64BaseAddress / uiAlignment) * uiAlignment;
-			uint64_t uiAdjustedEnd = (((_ui64BaseAddress + _nSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
-			uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
+			uint64_t uiOffsetToData;
+			uint64_t uiDataStart = _ui64BaseAddress, uiAdjustedLen = _nSize;
+			CUtilities::SnapTo( uiAlignment, uiDataStart, uiAdjustedLen, uiOffsetToData );
 
 			if MX_UNLIKELY( uiAdjustedLen > MAXSIZE_T ) { return false; }
 
@@ -330,18 +342,29 @@ namespace mx {
 		if MX_UNLIKELY( _ui64BaseAddress > MAXSIZE_T ) { return false; }
 		
 		try {
-			if MX_LIKELY( _bsSwap == CUtilities::MX_BS_NONE ) {
-				_sBufferOffset = 0;
-				return Process().ReadProcessMemory( _ui64BaseAddress,
-					_lpvBuffer, _nSize, _lpNumberOfBytesRead );
+			uint32_t uiAlignment;
+			switch ( _bsSwap ) {
+				case CUtilities::MX_BS_NONE : {
+					_sBufferOffset = 0;
+					return Process().ReadProcessMemory( _ui64BaseAddress,
+						_lpvBuffer, _nSize, _lpNumberOfBytesRead );
+				}
+				case CUtilities::MX_BS_2BYTE : {
+					uiAlignment = 2;
+					break;
+				}
+				case CUtilities::MX_BS_4BYTE : {
+					uiAlignment = 4;
+					break;
+				}
+				default : {
+					uiAlignment = 8;
+					break;
+				}
 			}
-
-			constexpr uint64_t uiAlignment = 8;
-			uint64_t uiOffsetToData = _ui64BaseAddress % uiAlignment;
-			uint64_t uiDataStart = (_ui64BaseAddress / uiAlignment) * uiAlignment;
-			uint64_t uiAdjustedEnd = (((_ui64BaseAddress + _nSize) + (uiAlignment - 1)) / uiAlignment) * uiAlignment;
-			uint64_t uiAdjustedLen = uiAdjustedEnd - uiDataStart;
-
+			uint64_t uiOffsetToData;
+			uint64_t uiDataStart = _ui64BaseAddress, uiAdjustedLen = _nSize;
+			CUtilities::SnapTo( uiAlignment, uiDataStart, uiAdjustedLen, uiOffsetToData );
 			if MX_UNLIKELY( uiAdjustedLen > MAXSIZE_T ) { return false; }
 
 			if ( !Process().ReadProcessMemory( uiDataStart,

@@ -405,10 +405,10 @@ namespace mx {
 			MX_FAEI_GENERAL_PAGE,							// dwParentId
 		},
 
-		// Array Type.
+		// Array Stride.
 		{
 			LSW_LT_LABEL,									// ltType
-			MX_FAEI_VALUE_ARRAY_TYPE_LABEL,					// wId
+			MX_FAEI_VALUE_ARRAY_STRIDE_LABEL,				// wId
 			WC_STATICW,										// lpwcClass
 			TRUE,											// bEnabled
 			FALSE,											// bActive
@@ -418,13 +418,13 @@ namespace mx {
 			MX_DEF_STATIC_HEIGHT,							// dwHeight
 			MX_STATICSTYLE,									// dwStyle
 			0,												// dwStyleEx
-			MX_MAKE_WCHAR( _T_636651C3_Array_Type_ ),		// pwcText
-			_LEN_636651C3,									// sTextLen
+			MX_MAKE_WCHAR( _T_4CE91014_Array_Stride_ ),		// pwcText
+			_LEN_4CE91014,									// sTextLen
 			MX_FAEI_GENERAL_PAGE,							// dwParentId
 		},
 		{
 			LSW_LT_COMBOBOX,								// ltType
-			MX_FAEI_VALUE_ARRAY_TYPE_COMBO,					// wId
+			MX_FAEI_VALUE_ARRAY_STRIDE_COMBO,				// wId
 			WC_COMBOBOXW,									// lpwcClass
 			TRUE,											// bEnabled
 			FALSE,											// bActive
@@ -432,7 +432,7 @@ namespace mx {
 			(MX_VAL_GROUP_T + MX_GROUP_TOP) + (MX_DEF_COMBO_HEIGHT + MX_TOP_JUST) * 2 + (MX_DEF_STATIC_HEIGHT + MX_TOP_JUST),
 			MX_MAIN_EDIT_W,									// dwWidth
 			MX_DEF_COMBO_HEIGHT,							// dwHeight
-			MX_COMBOSTYLE_LIST,								// dwStyle
+			MX_COMBOSTYLE,									// dwStyle
 			0,												// dwStyleEx
 			nullptr,										// pwcText
 			0,												// sTextLen
@@ -536,6 +536,22 @@ namespace mx {
 			0,												// dwStyleEx
 			MX_MAKE_WCHAR( _T_320BB0E4_Value_ ),			// pwcText
 			_LEN_320BB0E4,									// sTextLen
+			MX_FAEI_GENERAL_PAGE,							// dwParentId
+		},
+		{
+			LSW_LT_LABEL,									// ltType
+			MX_FAEI_QL_VALUE_WHEN_LOCKED_MIN_LABEL,			// wId
+			WC_STATICW,										// lpwcClass
+			TRUE,											// bEnabled
+			FALSE,											// bActive
+			MX_SECTION1_L + MX_GROUP_LEFT,					// iLeft
+			(MX_VWL_GROUP_T + MX_GROUP_TOP) + ((MX_DEF_COMBO_HEIGHT - MX_DEF_STATIC_HEIGHT) >> 1),
+			MX_MAIN_LABEL_W - MX_GROUP_LEFT,				// dwWidth
+			MX_DEF_STATIC_HEIGHT,							// dwHeight
+			MX_STATICSTYLE,									// dwStyle
+			0,												// dwStyleEx
+			MX_MAKE_WCHAR( _T_324E30C8_Min_ ),				// pwcText
+			_LEN_324E30C8,									// sTextLen
 			MX_FAEI_GENERAL_PAGE,							// dwParentId
 		},
 		{
