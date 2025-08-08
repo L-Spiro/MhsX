@@ -248,6 +248,12 @@ namespace mx {
 		// WM_TIMER.
 		CWidget::LSW_HANDLED				Timer( UINT_PTR _uiptrId, TIMERPROC _tpProc );
 
+		// WM_NOTIFY->NM_DBLCLK on the main list to edit the currently selected values.
+		virtual LSW_HANDLED					DblClk( const LPNMITEMACTIVATE _phHdr );
+
+		// WM_NOTIFY->NM_DBLCLK for the owning window if the child either could not be resolved or returned LSW_HANDLED::LSW_H_CONTINUE.
+		virtual LSW_HANDLED					DblClk( const LPNMITEMACTIVATE /*_phHdr*/, WORD /*_wControlId*/, CWidget * /*_pwWidget*/ );
+
 
 	protected :
 		// == Enumerations.

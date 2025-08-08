@@ -318,9 +318,8 @@ namespace mx {
 					break;
 				}
 			}
-			uint64_t uiOffsetToData;
 			uint64_t uiDataStart = _ui64BaseAddress, uiAdjustedLen = _nSize;
-			CUtilities::SnapTo( uiAlignment, uiDataStart, uiAdjustedLen, uiOffsetToData );
+			CUtilities::SnapTo( uiAlignment, uiDataStart, uiAdjustedLen, _sBufferOffset );
 
 			if MX_UNLIKELY( uiAdjustedLen > MAXSIZE_T ) { return false; }
 
@@ -330,7 +329,6 @@ namespace mx {
 				return false;
 			}
 			CSearcher::PreprocessByteSwap( _vBuffer.data(), uiAdjustedLen, _bsSwap );
-			_sBufferOffset = size_t( uiOffsetToData );
 			return true;
 		}
 		catch ( ... ) { return false; }
@@ -362,9 +360,8 @@ namespace mx {
 					break;
 				}
 			}
-			uint64_t uiOffsetToData;
 			uint64_t uiDataStart = _ui64BaseAddress, uiAdjustedLen = _nSize;
-			CUtilities::SnapTo( uiAlignment, uiDataStart, uiAdjustedLen, uiOffsetToData );
+			CUtilities::SnapTo( uiAlignment, uiDataStart, uiAdjustedLen, _sBufferOffset );
 			if MX_UNLIKELY( uiAdjustedLen > MAXSIZE_T ) { return false; }
 
 			if ( !Process().ReadProcessMemory( uiDataStart,
@@ -372,7 +369,6 @@ namespace mx {
 				return false;
 			}
 			CSearcher::PreprocessByteSwap( _lpvBuffer, uiAdjustedLen, _bsSwap );
-			_sBufferOffset = size_t( uiOffsetToData );
 			return true;
 		}
 		catch ( ... ) { return false; }

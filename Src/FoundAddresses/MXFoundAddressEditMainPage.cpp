@@ -133,6 +133,8 @@ namespace mx {
 				{ Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_LABEL,		iValWhenLocked == LPARAM( CUtilities::MX_LT_RANGE ) },
 				{ Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO,		iValWhenLocked == LPARAM( CUtilities::MX_LT_RANGE ) },
 
+				{ Layout::MX_FAEI_VALUE_TYPE_STRING_COMBO,				iType == LPARAM( CUtilities::MX_DT_STRING ) },
+
 				{ Layout::MX_FAEI_VALUE_ARRAY_LEN_LABEL,				iType != LPARAM( CUtilities::MX_DT_STRING ) },
 				{ Layout::MX_FAEI_VALUE_ARRAY_LEN_COMBO,				iType != LPARAM( CUtilities::MX_DT_STRING ) },
 
@@ -152,8 +154,8 @@ namespace mx {
 				Layout::MX_FOUND_ADDRESS_EDIT_IDS						wId;
 				bool													bCondition0;
 			} cControls[] = {
-				{ Layout::MX_FAEI_VALUE_TYPE_STRING_COMBO,				iType == LPARAM( CUtilities::MX_DT_STRING ) },
-				{ Layout::MX_FAEI_VALUE_TYPE_DATA_COMBO,				iType != LPARAM( CUtilities::MX_DT_STRING ) },
+				//{ Layout::MX_FAEI_VALUE_TYPE_STRING_COMBO,				iType == LPARAM( CUtilities::MX_DT_STRING ) },
+				//{ Layout::MX_FAEI_VALUE_TYPE_DATA_COMBO,				iType != LPARAM( CUtilities::MX_DT_STRING ) },
 				{ Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_LABEL,		iValWhenLocked != LPARAM( CUtilities::MX_LT_RANGE ) },
 				{ Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_MIN_LABEL,		iValWhenLocked == LPARAM( CUtilities::MX_LT_RANGE ) },
 			};

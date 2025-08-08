@@ -640,7 +640,7 @@ namespace ee {
 						continue;
 					}
 					// Check if printable.
-					if ( (static_cast<int8_t>(ui32This) >= -1 || ui32This < 256) && ::isprint( ui32This ) ) {
+					if ( (static_cast<int8_t>(ui32This) >= -1 || ui32This < 256) && std::isprint( ui32This ) ) {
 						sRet.push_back( static_cast<std::string::value_type>(ui32This) );
 						I += sThisSize;
 						continue;
@@ -748,7 +748,7 @@ namespace ee {
 						continue;
 					}
 					// Check if printable.
-					if ( (static_cast<int8_t>(ui32This) >= -1 || ui32This < 256) && ::isprint( ui32This ) ) {
+					if ( (static_cast<int8_t>(ui32This) >= -1 || ui32This < 256) && std::isprint( ui32This ) ) {
 						sRet.push_back( static_cast<std::string::value_type>(ui32This) );
 						I += sThisSize;
 						continue;
@@ -815,20 +815,20 @@ namespace ee {
 				uint32_t ui32BackToUtf8 = Utf32ToUtf8( ui32This, ui32Len );
 				if ( ui32Len == 1 ) {
 					// Check if printable.
-					if ( ::isprint( int( ui32This ) ) && static_cast<int8_t>(ui32This) != '\"' && static_cast<int8_t>(ui32This) != '\\' ) {
+					if ( std::isprint( int( ui32This ) ) && static_cast<int8_t>(ui32This) != '\"' && static_cast<int8_t>(ui32This) != '\\' ) {
 						sRet.push_back( static_cast<std::string::value_type>(ui32This) );
 						I += sThisSize;
 						continue;
 					}
 					// Not printable.
-					std::stringstream ssStream;
+					/*std::stringstream ssStream;
 					ssStream << "\\x" <<
 						std::setfill( '0' ) << std::setw( 2 ) <<
 						std::hex << ui32This;
 					sRet.append( ssStream.str() );
 					
 					I += sThisSize;
-					continue;
+					continue;*/
 				}
 				// ui32Len is greater than 1, so at the very least a \u is needed.
 				ui32BackToUtf8 = Utf32ToUtf16( ui32This, ui32Len );

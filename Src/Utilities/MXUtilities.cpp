@@ -4557,7 +4557,7 @@ namespace mx {
 			{ CSecureWString( PrintDataType( wsTmp, MX_DT_DOUBLE, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_DOUBLE ),					},
 
 			//{ (Options.dwDataTypeOptions & MX_DTO_CODENAMES) ? _DEC_WS_301499E2_void__ : _DEC_WS_FDB95134_Pointer,												LPARAM( MX_DT_VOID ),					},
-			{ _DEC_WS_FDB95134_Pointer,																															LPARAM( MX_DT_VOID ),					},
+			//{ _DEC_WS_FDB95134_Pointer,																															LPARAM( MX_DT_VOID ),					},
 			{ _DEC_WS_9912B79F_String,																															LPARAM( MX_DT_STRING ),					},
 		};
 		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, -1 );

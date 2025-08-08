@@ -626,8 +626,8 @@ namespace mx {
 		}
 
 		// Adjusts an input range to some divisor.
-		static inline void										SnapTo( uint32_t _ui32Snap, uint64_t &_ui64Start, uint64_t &_ui64Len, uint64_t &_ui64Offset ) {
-			_ui64Offset = _ui64Start % _ui32Snap;
+		static inline void										SnapTo( uint32_t _ui32Snap, uint64_t &_ui64Start, uint64_t &_ui64Len, size_t &_stOffset ) {
+			_stOffset = _ui64Start % _ui32Snap;
 			uint64_t uiDataStart = (_ui64Start / _ui32Snap) * _ui32Snap;
 			uint64_t uiAdjustedEnd = (((_ui64Start + _ui64Len) + (_ui32Snap - 1)) / _ui32Snap) * _ui32Snap;
 			_ui64Len = uiAdjustedEnd - uiDataStart;

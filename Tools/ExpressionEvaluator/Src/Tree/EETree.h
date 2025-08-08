@@ -102,6 +102,7 @@ namespace ee {
 		 **/
 		void											RemoveAllChildren() {
 			m_vChildren.clear();
+			m_vChildren = std::vector<EE_PTR_TYPE>();
 		}
 
 		/**

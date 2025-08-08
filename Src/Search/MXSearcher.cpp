@@ -370,10 +370,13 @@ namespace mx {
 				m_psrbCurTmpSearchResults = nullptr;
 				delete srbDeleteMe;
 
+				
+
 				m_bLastSearchWasSubsearch = false;
 				m_ui64LastSearchTotal = 0;
 
 				m_spLastSearchParms = spParmsCopy;
+				m_spLastSearchParms.ssExpression.shrink_to_fit();
 				m_ui64LastSearchTime = CUtilities::CurTimeInMicros() - ui64SearchTimeStart;
 
 				++m_ui32SearchCnt;
@@ -576,6 +579,7 @@ namespace mx {
 				m_bLastSearchWasSubsearch = true;
 
 				m_spLastSubSearchParms = spParmsCopy;
+				m_spLastSubSearchParms.ssExpression.shrink_to_fit();
 				m_ui64LastSearchTime = CUtilities::CurTimeInMicros() - ui64SearchTimeStart;
 			}
 			

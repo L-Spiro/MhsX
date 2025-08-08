@@ -25,6 +25,9 @@ namespace mx {
 
 		// Gets the total number of results.
 		virtual uint64_t					TotalResults() const { return m_ui64Total; }
+
+		// Finalize the list after a search.
+		virtual void						Finalize();
 		
 		// Locks for reading a value quickly.  Unlock when done with the returned pointer.
 		virtual void						Lock() const { m_csCrit.EnterCriticalSection(); }

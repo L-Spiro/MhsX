@@ -29,7 +29,7 @@ namespace mx {
 			m_vOriginalData.resize( CUtilities::DataTypeSize( _dtType ) );
 			std::memcpy( m_vOriginalData.data(), _pui8Data, m_vOriginalData.size() );
 			m_vLockedData = m_vOriginalData;
-
+			PrepareValueStructures();
 			Dirty();
 		}
 		catch ( ... ) {
@@ -61,12 +61,46 @@ namespace mx {
 			// Failed to read RAM.
 			return std::wstring( L"N/A" );
 		}
-		if MX_LIKELY( m_vCurrentData.size() - m_sDataOffset >= InternalBufferSize() ) {
+		try {
+			auto ui32Elements = std::max<uint32_t>( m_ui32ArrayLen, 1 );
+			if MX_LIKELY( m_bContiguous ) {
+				if MX_UNLIKELY( !m_vCurData.vValue.size() ) {
+					std::wstring( L"<C>" );
+				}
+			}
+			else if MX_UNLIKELY( ui32Elements > m_vCurData.vValue.size() ) {
+				std::wstring( L"<A>" );
+			}
+			std::wstring wsReturn;
+			for ( uint32_t I = 0; I < ui32Elements; ++I ) {
+				if ( wsReturn.size() ) {
+					wsReturn += L' ';
+				}
+				if ( m_bContiguous ) {
+					size_t sIdx = m_vCurData.vOffsets[0] + I * m_ui32DataTypeSize;
+					if MX_LIKELY( sIdx + m_ui32DataTypeSize <= m_vCurData.vValue[0].size() ) {
+						wsReturn += ToText( &m_vCurData.vValue[0][sIdx] );
+					}
+					else {
+						wsReturn += L"<E>";
+					}
+				}
+				else {
+					size_t sIdx = m_vCurData.vOffsets[I];
+					if MX_LIKELY( sIdx + m_ui32DataTypeSize <= m_vCurData.vValue[I].size() ) {
+						wsReturn += ToText( &m_vCurData.vValue[I][sIdx] );
+					}
+					else {
+						wsReturn += L"<E>";
+					}
+				}
+			}
 			if MX_UNLIKELY( _pbRead ) {
 				(*_pbRead) = true;
 			}
-			return ToText( &m_vCurrentData[m_sDataOffset] );
+			return wsReturn;
 		}
+		catch ( ... ) { return std::wstring( L"---" ); }
 		return std::wstring();
 	}
 
@@ -143,7 +177,7 @@ namespace mx {
 		if ( !CUtilities::IsDataType( _dtDataType ) ) { return false; }
 		m_dtDataType = _dtDataType;
 		PrepareValueStructures();
-		UpdateBuffers();
+		UpdateBuffers();						// TODO: Merge into PrepareValueStructures().
 		return true;
 	}
 
@@ -167,7 +201,7 @@ namespace mx {
 	}
 
 	// Update internal buffers after the size of the item changes.
-	void CFoundAddress::UpdateBuffers() {
+	void CFoundAddress::UpdateBuffers() {		// TODO: Merge into PrepareValueStructures().
 		auto sSize = InternalBufferSize();
 		if ( sSize ) {
 			try {
@@ -194,52 +228,90 @@ namespace mx {
 
 	// Undirty the current value.
 	bool CFoundAddress::UndirtyCurValue() const {
-		auto ui64Addr = FinalAddress();
-		if ( m_pmhMemHack ) {
-			return m_pmhMemHack->ReadProcessMemory_PreProcessed( ui64Addr, m_vCurrentData, InternalBufferSize(), m_sDataOffset, m_bsByteSwap );
+		if MX_LIKELY( PrepareCurValueBuffer() ) {
+			auto ui64Addr = m_ui64FinalTargetPreparedAddress;
+			if MX_LIKELY( m_pmhMemHack ) {
+				auto ui32Elements = std::max<uint32_t>( m_ui32ArrayLen, 1 );
+				if MX_LIKELY( m_bContiguous ) {
+					return m_pmhMemHack->ReadProcessMemory_PreProcessed( ui64Addr, m_vCurData.vValue[0], m_ui32DataTypeSize * ui32Elements, m_vCurData.vOffsets[0], m_bsByteSwap );
+				}
+				for ( uint32_t I = 0; I < ui32Elements; ++I ) {
+					if ( !m_pmhMemHack->ReadProcessMemory_PreProcessed( ui64Addr, m_vCurData.vValue[I], m_ui32DataTypeSize * ui32Elements, m_vCurData.vOffsets[I], m_bsByteSwap ) ) { return false; }
+					ui64Addr += m_ui16ActuaArrayStride;
+				}
+			}
 		}
 		return false;
 	}
 
 	// Prepares the MX_VALUE structures based on the value type, array length/stride.  Call within a try/catch block.
-	void CFoundAddress::PrepareValueStructures() {
+	void CFoundAddress::PrepareValueStructures() const {
 		if ( CUtilities::IsDataType( m_dtDataType ) ) {
-			auto dwSize = CUtilities::DataTypeSize( m_dtDataType );
-			m_ui16ActuaArrayStride = std::max<uint16_t>( m_ui16ArrayStride, dwSize );
+			m_ui32DataTypeSize = CUtilities::DataTypeSize( m_dtDataType );
+			m_ui16ActuaArrayStride = std::max<uint16_t>( m_ui16ArrayStride, m_ui32DataTypeSize );
+			m_bContiguous = m_ui16ActuaArrayStride == m_ui32DataTypeSize;
 
-			m_ui32ArrayLen = std::min<uint32_t>( m_ui32ArrayLen, MaxArrayLen() );
-			auto ui32Elements = std::max<uint32_t>( m_ui32ArrayLen, 1 );
-
-			m_bContiguous = m_ui16ActuaArrayStride == dwSize;
-
-			if ( m_bContiguous ) {
-				m_vCurData.vValue.resize( 1 );
-				m_vCurData.vOffsets.resize( 1 );
-				uint64_t ui64Addr = FinalAddress();
-				uint64_t ui64Len = dwSize * ui32Elements;
-				uint64_t ui64Offset;
-				CUtilities::SnapTo( CUtilities::ByteSwapSize( m_bsByteSwap ), ui64Addr, ui64Len, ui64Offset );
-				if MX_UNLIKELY( ui64Len > MAXSIZE_T ) { throw; }
-				m_vCurData.vValue[0].resize( size_t( ui64Len ) );
-				m_vCurData.vOffsets[0] = size_t( ui64Offset );
-			}
-			else {
-				m_vCurData.vValue.resize( ui32Elements );
-				m_vCurData.vOffsets.resize( ui32Elements );
-				uint64_t ui64Addr = FinalAddress();
-				for ( uint32_t I = 0; I < ui32Elements; ++I ) {
-					uint64_t ui64ThisAddr = ui64Addr;
-					uint64_t ui64Len = dwSize;
-					uint64_t ui64Offset;
-					CUtilities::SnapTo( CUtilities::ByteSwapSize( m_bsByteSwap ), ui64ThisAddr, ui64Len, ui64Offset );
-					if MX_UNLIKELY( ui64Len > MAXSIZE_T ) { throw; }
-					m_vCurData.vValue[I].resize( size_t( ui64Len ) );
-					m_vCurData.vOffsets[I] = size_t( ui64Offset );
-
-					ui64Addr += m_ui16ActuaArrayStride;
-				}
-			}
+			if ( !PrepareCurValueBuffer() ) { throw; }
 		}
+	}
+
+	// Updates the current-data buffer(s) without reading into them.
+	bool CFoundAddress::PrepareCurValueBuffer() const {
+		bool bReadAddressChain;
+		auto ui64FinalAddr = FinalTargetAddress( &bReadAddressChain );
+		if MX_UNLIKELY( bReadAddressChain && m_ui64FinalTargetPreparedAddress != ui64FinalAddr ) {
+			try {
+				auto ui32Elements = std::max<uint32_t>( m_ui32ArrayLen, 1 );
+				if ( m_bContiguous ) {
+					m_vCurData.vValue.resize( 1 );
+					m_vCurData.vOffsets.resize( 1 );
+					uint64_t ui64Addr = ui64FinalAddr;
+					uint64_t ui64Len = m_ui32DataTypeSize * ui32Elements;
+					CUtilities::SnapTo( CUtilities::ByteSwapSize( m_bsByteSwap ), ui64Addr, ui64Len, m_vCurData.vOffsets[0] );
+					if MX_UNLIKELY( ui64Len > MAXSIZE_T ) { return false; }
+					m_vCurData.vValue[0].resize( size_t( ui64Len ) );
+				}
+				else {
+					m_vCurData.vValue.resize( ui32Elements );
+					m_vCurData.vOffsets.resize( ui32Elements );
+					uint64_t ui64Addr = ui64FinalAddr;
+					for ( uint32_t I = 0; I < ui32Elements; ++I ) {
+						uint64_t ui64ThisAddr = ui64Addr;
+						uint64_t ui64Len = m_ui32DataTypeSize;
+						CUtilities::SnapTo( CUtilities::ByteSwapSize( m_bsByteSwap ), ui64ThisAddr, ui64Len, m_vCurData.vOffsets[I] );
+						if MX_UNLIKELY( ui64Len > MAXSIZE_T ) { return false; }
+						m_vCurData.vValue[I].resize( size_t( ui64Len ) );
+
+						ui64Addr += m_ui16ActuaArrayStride;
+					}
+				}
+				m_ui64FinalTargetPreparedAddress = ui64FinalAddr;
+			}
+			catch ( ... ) { return false; }
+		}
+			
+		return true;
+	}
+
+	// Gets the final target address via derefencing pointers.
+	uint64_t CFoundAddress::FinalTargetAddress( bool * _bSuccess ) const {
+#define MX_FAIL			if ( _bSuccess ) { (*_bSuccess) = false; return 0ULL; }
+		if MX_UNLIKELY( m_pmhMemHack == nullptr ) { MX_FAIL; }
+		auto ui64Addr = FinalAddress();
+
+		uint8_t ui8Cach[16];
+		size_t sOffset;
+		size_t sSize = m_pmhMemHack->Process().Is32Bit() ? 4 : 8;
+		for ( size_t I = 0; I < m_vPointers.size(); ++I ) {
+			if ( !m_pmhMemHack->ReadProcessMemory_PreProcessed( ui64Addr, ui8Cach, sSize, sOffset, m_bsByteSwap ) ) {
+				MX_FAIL;
+			}
+			ui64Addr = (*reinterpret_cast<uint64_t *>(&ui8Cach[sOffset]));
+
+			ui64Addr += uint64_t( int64_t( m_vPointers[I].i32Offset ) );
+		}
+		return ui64Addr;
+#undef MX_FAIL
 	}
 
 }	// namespace mx

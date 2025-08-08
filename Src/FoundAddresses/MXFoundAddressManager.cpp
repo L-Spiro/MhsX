@@ -57,6 +57,7 @@ namespace mx {
 			I.second.reset();
 		}
 		m_mFoundAddresses.clear();
+		m_mFoundAddresses = std::map<size_t, std::unique_ptr<CFoundAddressBase>>();
 	}
 
 	// Sets an item as a child of another.

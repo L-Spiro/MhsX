@@ -29,6 +29,11 @@ namespace mx {
 			std::vector<size_t>								vOffsets;
 		};
 
+		// A pointer.
+		struct MX_POINTER {
+			int32_t											i32Offset = 0;									// The offset to add after the read.
+		};
+
 
 		// == Functions.
 		// Gets the item type.
@@ -89,7 +94,7 @@ namespace mx {
 		inline uint32_t										ArrayLen() const { return m_vtValueType == CUtilities::MX_VT_DATA_TYPE ? m_ui32ArrayLen : 0; }
 
 		// Sets the array length.  Call within a try/catch block.
-		inline void											SetArrayLen( uint32_t _ui32Len ) { m_ui32ArrayLen = _ui32Len; PrepareValueStructures(); }
+		inline void											SetArrayLen( uint32_t _ui32Len ) { m_ui32ArrayLen = std::min<uint32_t>( _ui32Len, MaxArrayLen() ); PrepareValueStructures(); }
 
 		// Gets the array stride.
 		inline uint16_t										ArrayStride() const { return m_vtValueType == CUtilities::MX_VT_DATA_TYPE ? m_ui16ArrayStride : 0; }
@@ -97,6 +102,12 @@ namespace mx {
 		// Sets the array stride.  Call within a try/catch block.
 		inline void											SetArrayStride( uint16_t _ui16Stride ) {
 			m_ui16ArrayStride = _ui16Stride;
+			PrepareValueStructures();
+		}
+
+		// Adds a pointer level.  Call within a try/catch block.
+		inline void											AddPointer( int32_t _i32Offset ) {
+			m_vPointers.push_back( { .i32Offset = _i32Offset } );
 			PrepareValueStructures();
 		}
 
@@ -120,12 +131,14 @@ namespace mx {
 		uint64_t											m_ui64Address = 0;
 		// The buffered address.
 		mutable uint64_t									m_ui64BufferedAddress = 0;
+		// The size of the data type (for m_vtValueType == CUtilities::MX_VT_DATA_TYPE).
+		mutable uint32_t									m_ui32DataTypeSize = 0;
 		// Array length (for m_vtValueType == CUtilities::MX_VT_DATA_TYPE).
 		uint32_t											m_ui32ArrayLen = 0;
 		// Array stride.
-		uint16_t											m_ui16ArrayStride = 0;
+		mutable uint16_t									m_ui16ArrayStride = 0;
 		// Actual array stride.
-		uint16_t											m_ui16ActuaArrayStride = 0;
+		mutable uint16_t									m_ui16ActuaArrayStride = 0;
 
 		// The type of data type.
 		CUtilities::MX_VALUE_TYPE							m_vtValueType = CUtilities::MX_VT_DATA_TYPE;
@@ -139,15 +152,17 @@ namespace mx {
 		// The lock type.
 		CUtilities::MX_LOCK_TYPES							m_ltLockType = CUtilities::MX_LT_EXACT;
 
+		// Any pointers.
+		std::vector<MX_POINTER>								m_vPointers;
+
 		// The original data when added.
 		std::vector<uint8_t>								m_vOriginalData;
 		// The data when locked.
 		std::vector<uint8_t>								m_vLockedData;
 		// Current data.
-		mutable std::vector<uint8_t>						m_vCurrentData;
 		mutable MX_VALUE									m_vCurData;
-		// Offset into the buffers where the desired data can be found.
-		mutable size_t										m_sDataOffset = 0;
+		// The final target address for which the use of m_vCurData has been prepared.
+		mutable uint64_t									m_ui64FinalTargetPreparedAddress = 0;
 
 		// Whether to use a basic address or not.
 		bool												m_bBasicAddress = true;
@@ -156,7 +171,7 @@ namespace mx {
 		// Does the current value need updating?
 		mutable bool										m_bDirtyCurValue = true;
 		// Is the array data contiguous?
-		bool												m_bContiguous = true;
+		mutable bool										m_bContiguous = true;
 
 
 		// == Functions.
@@ -176,7 +191,13 @@ namespace mx {
 		bool												UndirtyCurValue() const;
 
 		// Prepares the MX_VALUE structures based on the value type, array length/stride.  Call within a try/catch block.
-		void												PrepareValueStructures();
+		void												PrepareValueStructures() const;
+
+		// Updates the current-data buffer(s) without reading into them.
+		bool												PrepareCurValueBuffer() const;
+
+		// Gets the final target address via derefencing pointers.
+		uint64_t											FinalTargetAddress( bool * _bSuccess = nullptr ) const;
 	};
 
 }	// namespace mx

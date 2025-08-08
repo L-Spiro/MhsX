@@ -1155,6 +1155,20 @@ namespace mx {
 		return LSW_H_CONTINUE;
 	}
 
+	// WM_NOTIFY->NM_DBLCLK on the main list to edit the currently selected values.
+	CWidget::LSW_HANDLED CMhsMainWindow::DblClk( const LPNMITEMACTIVATE _phHdr ) {
+		if ( _phHdr->hdr.idFrom == CMainWindowLayout::MX_MWI_STOREDADDRESSES ) {
+			ShowEdit();
+			return LSW_H_HANDLED;
+		}
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_NOTIFY->NM_DBLCLK for the owning window if the child either could not be resolved or returned LSW_HANDLED::LSW_H_CONTINUE.
+	CWidget::LSW_HANDLED CMhsMainWindow::DblClk( const LPNMITEMACTIVATE _phHdr, WORD /*_wControlId*/, CWidget * /*_pwWidget*/ ) {
+		return LSW_H_CONTINUE;
+	}
+
 	// Informs that a child was removed from a child control (IE this control's child had a child control removed from it).
 	// Is also called on the control from which a child was removed for convenience.
 	void CMhsMainWindow::ChildWasRemoved( const CWidget * _pwChild ) {

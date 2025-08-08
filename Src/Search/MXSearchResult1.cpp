@@ -59,6 +59,12 @@ namespace mx {
 		return false;
 	}
 
+	// Finalize the list after a search.
+	void CSearchResult1::Finalize() {
+		lsw::CCriticalSection::CEnterCrit ecCrit( m_csCrit );
+		m_vAddressLists.shrink_to_fit();
+	}
+
 	// Gets a result by index.  Does not copy the result into a buffer, instead giving back a pointer directly to its internal storage,
 	//	which means the caller must finish using the data before the search results are updated in any way.
 	bool CSearchResult1::GetResultFast( size_t _stIdx, uint64_t &_ui64Address, const uint8_t * &_pui8Value ) const {
