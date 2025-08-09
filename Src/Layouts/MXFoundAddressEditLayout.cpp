@@ -370,6 +370,39 @@ namespace mx {
 			_LEN_472CF267,									// sTextLen
 			MX_FAEI_GENERAL_PAGE,							// dwParentId
 		},
+		{
+			LSW_LT_CHECK,									// ltType
+			MX_FAEI_VALUE_TYPE_SCIENTIFIC_CHECK,			// wId
+			WC_BUTTONW,										// lpwcClass
+			TRUE,											// bEnabled
+			FALSE,											// bActive
+			MX_MID_L + MX_MAIN_EDIT_W + MX_LEFT_JUST,		// iLeft
+			(MX_VAL_GROUP_T + MX_GROUP_TOP) + (MX_DEF_COMBO_HEIGHT + MX_TOP_JUST) + (MX_DEF_STATIC_HEIGHT + MX_TOP_JUST) + ((MX_DEF_COMBO_HEIGHT - MX_DEF_CHECK_HEIGHT) >> 1),
+			MX_MAIN_LABEL_W,								// dwWidth
+			MX_DEF_CHECK_HEIGHT,							// dwHeight
+			MX_CHECKSTYLE,									// dwStyle
+			0,												// dwStyleEx
+			MX_MAKE_WCHAR( _T_9631F7BC_Scientific ),		// pwcText
+			_LEN_9631F7BC,									// sTextLen
+			MX_FAEI_GENERAL_PAGE,							// dwParentId
+		},
+		{
+			LSW_LT_CHECK,									// ltType
+			MX_FAEI_VALUE_TYPE_ESCAPE_CHECK,				// wId
+			WC_BUTTONW,										// lpwcClass
+			TRUE,											// bEnabled
+			FALSE,											// bActive
+			MX_MID_L + MX_MAIN_EDIT_W + MX_LEFT_JUST,		// iLeft
+			(MX_VAL_GROUP_T + MX_GROUP_TOP) + (MX_DEF_COMBO_HEIGHT + MX_TOP_JUST) + (MX_DEF_STATIC_HEIGHT + MX_TOP_JUST) + ((MX_DEF_COMBO_HEIGHT - MX_DEF_CHECK_HEIGHT) >> 1),
+			MX_MAIN_LABEL_W,								// dwWidth
+			MX_DEF_CHECK_HEIGHT,							// dwHeight
+			MX_CHECKSTYLE,									// dwStyle
+			0,												// dwStyleEx
+			MX_MAKE_WCHAR( _T_2244B5B8_Escape ),			// pwcText
+			_LEN_2244B5B8,									// sTextLen
+			MX_FAEI_GENERAL_PAGE,							// dwParentId
+		},
+		
 
 		// Array Length.
 		{
@@ -477,6 +510,22 @@ namespace mx {
 			MX_FAEI_QL_LOCK_TYPE_COMBO,						// wId
 			WC_COMBOBOXW,									// lpwcClass
 			TRUE,											// bEnabled
+			FALSE,											// bActive
+			MX_SECTION2_L,									// iLeft
+			MX_QL_GROUP_T + MX_GROUP_TOP,					// iTop
+			MX_MAIN_EDIT_W,									// dwWidth
+			MX_DEF_COMBO_HEIGHT,							// dwHeight
+			MX_COMBOSTYLE_LIST,								// dwStyle
+			0,												// dwStyleEx
+			nullptr,										// pwcText
+			0,												// sTextLen
+			MX_FAEI_GENERAL_PAGE,							// dwParentId
+		},
+		{
+			LSW_LT_COMBOBOX,								// ltType
+			MX_FAEI_QL_STRING_LOCK_TYPE_COMBO,				// wId
+			WC_COMBOBOXW,									// lpwcClass
+			FALSE,											// bEnabled
 			FALSE,											// bActive
 			MX_SECTION2_L,									// iLeft
 			MX_QL_GROUP_T + MX_GROUP_TOP,					// iTop

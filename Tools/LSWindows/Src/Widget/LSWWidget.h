@@ -215,6 +215,13 @@ namespace lsw {
 		// Get the value of the text as a double expression.
 		BOOL								GetTextAsDoubleExpression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const;
 
+		/**
+		 * Sets the text limit for the control.
+		 * 
+		 * \param _iLen The maximum number of TCHARs the user can enter, not including the terminating null character. If this parameter is zero, the text length is limited to 0x7FFFFFFE characters.
+		 **/
+		virtual void						LimitText( int _iLen = 0 ) { static_cast<void>(_iLen); }
+
 		// If the function succeeds, the return value is the pointer to the window that previously had the keyboard focus.
 		CWidget *							SetFocus() const;
 

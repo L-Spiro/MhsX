@@ -50,7 +50,7 @@ namespace mx {
 
 		pcbCombo = static_cast<CComboBox *>(FindChild( CStringTheoryLayout::MX_STW_ENCODING_COMBO ));
 		if ( pcbCombo ) {
-			UINT uiSysCodePag = CCodePages::GetSystemDefaultAnsiCodePage();
+			//UINT uiSysCodePag = CCodePages::GetSystemDefaultAnsiCodePage();
 			std::vector<CCodePages::MX_CODE_PAGE> vCodePages;
 			CCodePages::GetSystemCodePages( vCodePages, true );
 			pcbCombo->InitStorage( vCodePages.size(), vCodePages.size() * 15 );
@@ -63,7 +63,7 @@ namespace mx {
 		}
 		pcbCombo = static_cast<CComboBox *>(FindChild( CStringTheoryLayout::MX_STW_INPUT_ENCODING_COMBO ));
 		if ( pcbCombo ) {
-			UINT uiSysCodePag = CCodePages::GetSystemDefaultAnsiCodePage();
+			//UINT uiSysCodePag = CCodePages::GetSystemDefaultAnsiCodePage();
 			std::vector<CCodePages::MX_CODE_PAGE> vCodePages;
 			CCodePages::GetSystemCodePages( vCodePages, true );
 			pcbCombo->InitStorage( vCodePages.size(), vCodePages.size() * 15 );

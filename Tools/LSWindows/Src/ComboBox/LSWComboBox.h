@@ -117,6 +117,13 @@ namespace lsw {
 		// Replaces the selected text in an edit control or a rich edit control with the specified text.
 		virtual void						ReplaceSel( bool _bCanUndo, const wchar_t * _pwcText );
 
+		/**
+		 * Sets the text limit for the control.
+		 * 
+		 * \param _iLen The maximum number of TCHARs the user can enter, not including the terminating null character. If this parameter is zero, the text length is limited to 0x7FFFFFFE characters.
+		 **/
+		virtual void						LimitText( int _iLen = 0 );
+
 
 	private :
 	};

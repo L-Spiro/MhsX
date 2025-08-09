@@ -17677,3 +17677,48 @@
 #define _DEC_S_4CE91014_Array_Stride_ mx::CStringDecoder::DecodeToString( _T_4CE91014_Array_Stride_, _LEN_4CE91014 )
 #define _DEC_WS_4CE91014_Array_Stride_ mx::CStringDecoder::DecodeToWString( _T_4CE91014_Array_Stride_, _LEN_4CE91014 )
 
+// Out of memory.
+
+#define _T_F39F91A5_Out_of_memory_ "\xD7\x43\x44\xBB\x01\x2F\xAE\x34\x35\x35\x38\x40\x0B\xC9"
+#define _LEN_F39F91A5 14
+#define _T_LEN_F39F91A5_Out_of_memory_ _T_F39F91A5_Out_of_memory_, _LEN_F39F91A5
+#define _DEC_F39F91A5_Out_of_memory_( STR ) mx::CStringDecoder::Decode( _T_F39F91A5_Out_of_memory_, _LEN_F39F91A5, STR )
+#define _DEC_S_F39F91A5_Out_of_memory_ mx::CStringDecoder::DecodeToString( _T_F39F91A5_Out_of_memory_, _LEN_F39F91A5 )
+#define _DEC_WS_F39F91A5_Out_of_memory_ mx::CStringDecoder::DecodeToWString( _T_F39F91A5_Out_of_memory_, _LEN_F39F91A5 )
+
+// File not fuond.
+
+#define _T_07FAD6C0_File_not_fuond_ "\xCE\x37\x3C\x00\xB2\x37\xFD\x3B\xF0\x2E\x3E\x3D\x00\xFF\xF5"
+#define _LEN_07FAD6C0 15
+#define _T_LEN_07FAD6C0_File_not_fuond_ _T_07FAD6C0_File_not_fuond_, _LEN_07FAD6C0
+#define _DEC_07FAD6C0_File_not_fuond_( STR ) mx::CStringDecoder::Decode( _T_07FAD6C0_File_not_fuond_, _LEN_07FAD6C0, STR )
+#define _DEC_S_07FAD6C0_File_not_fuond_ mx::CStringDecoder::DecodeToString( _T_07FAD6C0_File_not_fuond_, _LEN_07FAD6C0 )
+#define _DEC_WS_07FAD6C0_File_not_fuond_ mx::CStringDecoder::DecodeToWString( _T_07FAD6C0_File_not_fuond_, _LEN_07FAD6C0 )
+
+// Write operation failed.
+
+#define _T_4ACC9377_Write_operation_failed_ "\xDF\x40\x39\x0F\xF7\xE9\xFD\x37\x35\x3A\x2A\x42\xFB\x0A\x35\xA8\x34\x31\x04\xFE\x2E\xF2\xF5"
+#define _LEN_4ACC9377 23
+#define _T_LEN_4ACC9377_Write_operation_failed_ _T_4ACC9377_Write_operation_failed_, _LEN_4ACC9377
+#define _DEC_4ACC9377_Write_operation_failed_( STR ) mx::CStringDecoder::Decode( _T_4ACC9377_Write_operation_failed_, _LEN_4ACC9377, STR )
+#define _DEC_S_4ACC9377_Write_operation_failed_ mx::CStringDecoder::DecodeToString( _T_4ACC9377_Write_operation_failed_, _LEN_4ACC9377 )
+#define _DEC_WS_4ACC9377_Write_operation_failed_ mx::CStringDecoder::DecodeToWString( _T_4ACC9377_Write_operation_failed_, _LEN_4ACC9377 )
+
+// Read operation failed.
+
+#define _T_417E656D_Read_operation_failed_ "\xDA\x33\x31\xFF\xB2\x38\xFE\x2C\x42\x29\x3D\x37\x01\x09\xE7\xEE\x2F\x39\x07\xF7\x2D\xBC"
+#define _LEN_417E656D 22
+#define _T_LEN_417E656D_Read_operation_failed_ _T_417E656D_Read_operation_failed_, _LEN_417E656D
+#define _DEC_417E656D_Read_operation_failed_( STR ) mx::CStringDecoder::Decode( _T_417E656D_Read_operation_failed_, _LEN_417E656D, STR )
+#define _DEC_S_417E656D_Read_operation_failed_ mx::CStringDecoder::DecodeToString( _T_417E656D_Read_operation_failed_, _LEN_417E656D )
+#define _DEC_WS_417E656D_Read_operation_failed_ mx::CStringDecoder::DecodeToWString( _T_417E656D_Read_operation_failed_, _LEN_417E656D )
+
+// Invalid input: 
+
+#define _T_CEE34699_Invalid_input__ "\xD1\x3C\x46\xFC\xFE\x32\xF2\xE7\x39\x36\x39\x43\x06\xD5\xE7"
+#define _LEN_CEE34699 15
+#define _T_LEN_CEE34699_Invalid_input__ _T_CEE34699_Invalid_input__, _LEN_CEE34699
+#define _DEC_CEE34699_Invalid_input__( STR ) mx::CStringDecoder::Decode( _T_CEE34699_Invalid_input__, _LEN_CEE34699, STR )
+#define _DEC_S_CEE34699_Invalid_input__ mx::CStringDecoder::DecodeToString( _T_CEE34699_Invalid_input__, _LEN_CEE34699 )
+#define _DEC_WS_CEE34699_Invalid_input__ mx::CStringDecoder::DecodeToWString( _T_CEE34699_Invalid_input__, _LEN_CEE34699 )
+

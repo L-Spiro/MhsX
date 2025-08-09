@@ -1,4 +1,5 @@
 #include "MXFoundAddressEditMainPage.h"
+#include "../CodePages/MXCodePages.h"
 #include "../FoundAddresses/MXFoundAddressBase.h"
 #include "../FoundAddresses/MXFoundAddressManager.h"
 #include "../Layouts/MXFoundAddressEditLayout.h"
@@ -33,9 +34,24 @@ namespace mx {
 		if ( pwTmp ) {
 			CUtilities::FillComboBoxWithLocktypes( pwTmp, GatherLockTypes() );
 		}
+		pwTmp = FindChild( Layout::MX_FAEI_QL_STRING_LOCK_TYPE_COMBO );
+		if ( pwTmp ) {
+			CUtilities::FillComboBoxWithLocktypes( pwTmp, CUtilities::MX_LT_EXACT );
+		}
 		pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_STRING_COMBO );
 		if ( pwTmp ) {
-			CUtilities::FillComboBoxWithStringTypes( pwTmp, CUtilities::MX_LT_EXACT );
+			UINT uiSysCodePag = CCodePages::GetSystemDefaultAnsiCodePage();
+			auto pcbCombo = static_cast<CComboBox *>(pwTmp);
+			std::vector<CCodePages::MX_CODE_PAGE> vCodePages;
+			CCodePages::GetSystemCodePages( vCodePages, true );
+			pcbCombo->InitStorage( vCodePages.size(), vCodePages.size() * 15 );
+			for ( size_t I = 0; I < vCodePages.size(); ++I ) {
+				INT iIndex = pcbCombo->AddString( vCodePages[I].swsName.c_str() );
+				pcbCombo->SetItemData( iIndex, vCodePages[I].uiCodePage );
+			}
+
+			pcbCombo->SetCurSelByItemData( /*CCodePages::MX_utf_8*/uiSysCodePag );
+			pcbCombo->AutoSetMinListWidth();
 		}
 		pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_DATA_COMBO );
 		if ( pwTmp ) {
@@ -54,6 +70,7 @@ namespace mx {
 		}
 		pwTmp = FindChild( Layout::MX_FAEI_VALUE_CUR_VAL_COMBO );
 		if ( pwTmp ) {
+			pwTmp->LimitText();
 			auto wsText = GatherCurValue();
 			pwTmp->SetTextW( wsText.c_str() );
 		}
@@ -71,6 +88,7 @@ namespace mx {
 
 		pwTmp = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_COMBO );
 		if ( pwTmp ) {
+			pwTmp->LimitText();
 			auto wsText = GatherLockedValue();
 			pwTmp->SetTextW( wsText.c_str() );
 		}
@@ -130,8 +148,9 @@ namespace mx {
 			} cControls[] = {
 				{ Layout::MX_FAEI_GENERAL_ARRAY_CHECK,					bIsMulti },
 				{ Layout::MX_FAEI_VALUE_TYPE_DATA_COMBO,				iType == LPARAM( CUtilities::MX_DT_VOID ) || iType == -1 },
-				{ Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_LABEL,		iValWhenLocked == LPARAM( CUtilities::MX_LT_RANGE ) },
-				{ Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO,		iValWhenLocked == LPARAM( CUtilities::MX_LT_RANGE ) },
+
+				{ Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_LABEL,		iValWhenLocked == LPARAM( CUtilities::MX_LT_RANGE ) && iType != LPARAM( CUtilities::MX_DT_STRING ) },
+				{ Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO,		iValWhenLocked == LPARAM( CUtilities::MX_LT_RANGE ) && iType != LPARAM( CUtilities::MX_DT_STRING ) },
 
 				{ Layout::MX_FAEI_VALUE_TYPE_STRING_COMBO,				iType == LPARAM( CUtilities::MX_DT_STRING ) },
 
@@ -154,10 +173,15 @@ namespace mx {
 				Layout::MX_FOUND_ADDRESS_EDIT_IDS						wId;
 				bool													bCondition0;
 			} cControls[] = {
-				//{ Layout::MX_FAEI_VALUE_TYPE_STRING_COMBO,				iType == LPARAM( CUtilities::MX_DT_STRING ) },
-				//{ Layout::MX_FAEI_VALUE_TYPE_DATA_COMBO,				iType != LPARAM( CUtilities::MX_DT_STRING ) },
-				{ Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_LABEL,		iValWhenLocked != LPARAM( CUtilities::MX_LT_RANGE ) },
-				{ Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_MIN_LABEL,		iValWhenLocked == LPARAM( CUtilities::MX_LT_RANGE ) },
+				{ Layout::MX_FAEI_VALUE_TYPE_SHOW_AS_HEX_CHECK,			iType != LPARAM( CUtilities::MX_DT_STRING ) && !CUtilities::DataTypeIsFloat( static_cast<CUtilities::MX_DATA_TYPES>(iType) ) },
+				{ Layout::MX_FAEI_VALUE_TYPE_SCIENTIFIC_CHECK,			!!CUtilities::DataTypeIsFloat( static_cast<CUtilities::MX_DATA_TYPES>(iType) ) },
+				{ Layout::MX_FAEI_VALUE_TYPE_ESCAPE_CHECK,				iType == LPARAM( CUtilities::MX_DT_STRING ) },
+
+				{ Layout::MX_FAEI_QL_LOCK_TYPE_COMBO,					iType != LPARAM( CUtilities::MX_DT_STRING ) },
+				{ Layout::MX_FAEI_QL_STRING_LOCK_TYPE_COMBO,			iType == LPARAM( CUtilities::MX_DT_STRING ) },
+
+				{ Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_LABEL,		iValWhenLocked != LPARAM( CUtilities::MX_LT_RANGE ) || iType == LPARAM( CUtilities::MX_DT_STRING ) },
+				{ Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_MIN_LABEL,		iValWhenLocked == LPARAM( CUtilities::MX_LT_RANGE ) && iType != LPARAM( CUtilities::MX_DT_STRING ) },
 			};
 			for ( auto I = MX_ELEMENTS( cControls ); I--; ) {
 				auto pwThis = FindChild( cControls[I].wId );

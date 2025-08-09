@@ -294,4 +294,16 @@ namespace lsw {
 		}
 	}
 
+	/**
+	 * Sets the text limit for the control.
+	 * 
+	 * \param _iLen The maximum number of TCHARs the user can enter, not including the terminating null character. If this parameter is zero, the text length is limited to 0x7FFFFFFE characters.
+	 **/
+	void CComboBox::LimitText( int _iLen ) {
+		if ( Wnd() ) {
+			_iLen = std::clamp( _iLen, 0, 0x7FFFFFFE );
+			::SendMessageW( Wnd(), EM_REPLACESEL, static_cast<LPARAM>(_iLen), 0 );
+		}
+	}
+
 }	// namespace lsw

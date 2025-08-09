@@ -108,7 +108,6 @@ namespace mx {
 		enum MX_VALUE_TYPE {
 			MX_VT_DATA_TYPE,									// An MX_DATA_TYPES value.
 			MX_VT_STRING,										// A string value.  String is of an MX_STRING_TYPES type.
-			MX_VT_POINTER,										// A pointer to a value.  Can point to an MX_DATA_TYPES type.
 			MX_VT_BLOB,											// Any generic blob of data.  Individual elements can be of MX_DATA_TYPES types.
 		};
 
@@ -134,15 +133,15 @@ namespace mx {
 		};
 
 		// String types.
-		enum MX_STRING_TYPES {
-			MX_ST_CODE_PAGE,									// A regular string in a given codepage.
-			MX_ST_UTF8,											// A UTF-8 string.
-			MX_ST_UTF16_LE,										// A Little-Endian UTF-16 string.
-			MX_ST_UTF16_BE,										// A Big-Endian UTF-16 string.
-			MX_ST_UTF32_LE,										// A Little-Endian UTF-32 string.
-			MX_ST_UTF32_BE,										// A Big-Endian UTF-32 string.
-			MX_ST_SPECIAL,										// Special decoding routine provided via Lua or Expression Evaluator.
-		};
+		//enum MX_STRING_TYPES {
+		//	MX_ST_CODE_PAGE,									// A regular string in a given codepage.
+		//	MX_ST_UTF8,											// A UTF-8 string.
+		//	MX_ST_UTF16_LE,										// A Little-Endian UTF-16 string.
+		//	MX_ST_UTF16_BE,										// A Big-Endian UTF-16 string.
+		//	MX_ST_UTF32_LE,										// A Little-Endian UTF-32 string.
+		//	MX_ST_UTF32_BE,										// A Big-Endian UTF-32 string.
+		//	MX_ST_SPECIAL,										// Special decoding routine provided via Lua or Expression Evaluator.
+		//};
 
 		// Wildcard flags.  Adjust values so that they can be combined with MX_DATA_TYPES if more values are added to MX_DATA_TYPES.
 		enum MX_WILDCARD_FLAGS {
@@ -1049,6 +1048,9 @@ namespace mx {
 		// Creates a number string given an array of data.
 		static CSecureWString									PrimitiveArrayToStringW( const void * _pvData, size_t _sLenInBytes, MX_DATA_TYPES _dtTargetType, uint32_t _uiNumDigits = 0, int32_t _iSigDigits = 0 );
 
+		// Takes a string and converts X number of elements into either a single byte array (if contiguous) or into an array of arrays.  Returns the number of items converted.
+		static uint32_t											WStringToArrayBytes( std::vector<std::vector<uint8_t>> &_vDst, const CSecureWString &_swsString, MX_DATA_TYPES _dtTargetType, bool _bContiguous, CSecureWString &_swsError );
+
 		// Converts Katakana characters to Hiragana or returns the original input character.
 		static uint32_t											KatakanaToHiragana( uint32_t _uiChar ) {
 			//return ::towctrans( _uiChar, ::wctrans( "tojhira" ) );
@@ -1359,7 +1361,7 @@ namespace mx {
 		 * \param _lpDefaultSelect The default selection.
 		 * \return Returns true if _pwComboBox is not nullptr, it is of type CComboBox, and all entries were added.
 		 **/
-		static bool												FillComboBoxWithStringTypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect );
+		//static bool												FillComboBoxWithStringTypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect );
 
 		/**
 		 * Fills the combo box with standard data types.

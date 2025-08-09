@@ -127,9 +127,6 @@ namespace mx {
 			case CUtilities::MX_VT_STRING : {
 				break;
 			}
-			case CUtilities::MX_VT_POINTER : {
-				break;
-			}
 			case CUtilities::MX_VT_BLOB : {
 				break;
 			}
@@ -148,9 +145,6 @@ namespace mx {
 			case CUtilities::MX_VT_STRING : {
 				break;
 			}
-			case CUtilities::MX_VT_POINTER : {
-				break;
-			}
 			case CUtilities::MX_VT_BLOB : {
 				break;
 			}
@@ -164,7 +158,6 @@ namespace mx {
 		switch ( m_vtValueType ) {
 			case CUtilities::MX_VT_DATA_TYPE : {}		MX_FALLTHROUGH
 			case CUtilities::MX_VT_STRING : {}			MX_FALLTHROUGH
-			case CUtilities::MX_VT_POINTER : {}			MX_FALLTHROUGH
 			case CUtilities::MX_VT_BLOB : {	
 				return true;
 			}
@@ -189,9 +182,6 @@ namespace mx {
 			}
 			case CUtilities::MX_VT_STRING : {
 				break;
-			}
-			case CUtilities::MX_VT_POINTER : {
-				return CUtilities::DataTypeSize( m_dtDataType );
 			}
 			case CUtilities::MX_VT_BLOB : {
 				break;

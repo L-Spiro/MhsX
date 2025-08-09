@@ -3513,7 +3513,39 @@ namespace mx {
 				if ( !sEaten ) { break; }
 			}
 			else {
-				dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], _iBase, &sEaten, _ui64MaxSingleValue );
+				if ( _iBase <= 0 ) {
+					if ( (sLen - I) >= (2 + 1) ) {
+						if ( _sInput[I] == '0' && _sInput[I+1] == 'x' ) {
+							I += 2;
+							dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], 10, &sEaten, _ui64MaxSingleValue );
+						}
+						else if ( _sInput[I] == '0' && _sInput[I+1] == 'o' ) {
+							I += 2;
+							dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], 8, &sEaten, _ui64MaxSingleValue );
+						}
+						else if ( _sInput[I] == '0' && _sInput[I+1] == 'b' ) {
+							I += 2;
+							dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], 2, &sEaten, _ui64MaxSingleValue );
+						}
+						else if ( _sInput[I] == '0' ) {
+							I += 1;
+							dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], 8, &sEaten, _ui64MaxSingleValue );
+						}
+						else {
+							dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], 10, &sEaten, _ui64MaxSingleValue );
+						}
+					}
+					else if ( (sLen - I) >= (1 + 1) && _sInput[I] == '0' ) {
+						I += 1;
+						dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], 8, &sEaten, _ui64MaxSingleValue );
+					}
+					else {
+						dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], 10, &sEaten, _ui64MaxSingleValue );
+					}
+				}
+				else {
+					dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], _iBase, &sEaten, _ui64MaxSingleValue );
+				}
 				if ( !sEaten ) { break; }
 			}
 			if ( _pvMeta ) { _pvMeta->push_back( 0 ); }
@@ -3711,6 +3743,66 @@ namespace mx {
 			DataTypeToString( pui8Data + I, _dtTargetType, ssResult, _uiNumDigits, _iSigDigits );
 		}
 		return ssResult;
+	}
+
+	// Takes a string and converts X number of elements into either a single byte array (if contiguous) or into an array of arrays.  Returns the number of items converted.
+	uint32_t CUtilities::WStringToArrayBytes( std::vector<std::vector<uint8_t>> &_vDst, const CSecureWString &_swsString, MX_DATA_TYPES _dtTargetType, bool _bContiguous, CSecureWString &_swsError ) {
+		try {
+			// We support full-width Japanese characters.  Convert them to normal characters.
+			CSecureString ssTmp;
+			for ( size_t I = 0; I < _swsString.size(); ++I ) {
+				auto ui32Char = FullWidthToByte( _swsString[I] );
+				if ( ui32Char <= 0xFFFF ) {
+					if ( std::iswprint( wint_t( ui32Char ) ) ) {
+						ssTmp.push_back( char( ui32Char ) );
+					}
+					else if ( std::iswspace( wint_t( ui32Char ) ) ) {
+						ssTmp.push_back( ' ' );
+					}
+				}
+			}
+
+			bool bError;
+			auto vLines = ee::CExpEval::Tokenize( ssTmp, ' ', false, &bError );
+			if ( bError ) {
+				_swsError = _DEC_WS_F39F91A5_Out_of_memory_;
+				return 0;
+			}
+			if ( _bContiguous ) {
+				_vDst.resize( 1 );
+			}
+			else {
+				_vDst.resize( vLines.size() );
+			}
+
+			uint32_t ui32Idx = 0;
+			for ( size_t I = 0; I < vLines.size(); ++I ) {
+				auto ssResult = NumberStringToString( vLines[I], -1, UINT64_MAX, _dtTargetType, nullptr );
+				if ( !ssResult.size() ) {
+					_swsError = _DEC_WS_CEE34699_Invalid_input__;
+					_swsError += ee::CExpEval::ToUtf16<CSecureWString>( vLines[I] );
+					return 0;
+				}
+
+				if ( _bContiguous ) {
+					for ( size_t J = 0; J < ssResult.size(); ++J ) {
+						_vDst[0].push_back( ssResult[J] );
+					}
+				}
+				else {
+					for ( size_t J = 0; J < ssResult.size(); ++J ) {
+						_vDst[I].push_back( ssResult[J] );
+					}
+				}
+				++ui32Idx;
+			}
+			
+			return ui32Idx;
+		}
+		catch ( ... ) {
+			_swsError = _DEC_WS_F39F91A5_Out_of_memory_;
+			return 0;
+		}
 	}
 
 	// Converts Katakana characters to Hiragana across a UTF-8 string.
@@ -4588,20 +4680,20 @@ namespace mx {
 	 * \param _lpDefaultSelect The default selection.
 	 * \return Returns true if _pwComboBox is not nullptr, it is of type CComboBox, and all entries were added.
 	 **/
-	bool CUtilities::FillComboBoxWithStringTypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect ) {
-		std::wstring wsTmp;
-		MX_COMBO_ENTRY ceEnries[] = {
-			//pwcName																																			lpParm
-			{ _DEC_WS_468B510E_Machine_Code_Page,																												LPARAM( MX_ST_CODE_PAGE ),				},
-			{ _DEC_WS_0E813C50_UTF_8,																															LPARAM( MX_ST_UTF8 ),					},
-			{ _DEC_WS_A71F1195_UTF_16,																															LPARAM( MX_ST_UTF16_LE ),				},
-			{ _DEC_WS_26FC5333_UTF_16_BE,																														LPARAM( MX_ST_UTF16_BE ),				},
-			{ _DEC_WS_9244B70E_UTF_32,																															LPARAM( MX_ST_UTF32_LE ),				},
-			{ _DEC_WS_D35E9704_UTF_32_BE,																														LPARAM( MX_ST_UTF32_BE ),				},
-			//{ _DEC_WS_F22813AD_Custom,																															LPARAM( MX_ST_SPECIAL ),				},
-		};
-		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, -1 );
-	}
+	//bool CUtilities::FillComboBoxWithStringTypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect ) {
+	//	std::wstring wsTmp;
+	//	MX_COMBO_ENTRY ceEnries[] = {
+	//		//pwcName																																			lpParm
+	//		{ _DEC_WS_468B510E_Machine_Code_Page,																												LPARAM( MX_ST_CODE_PAGE ),				},
+	//		{ _DEC_WS_0E813C50_UTF_8,																															LPARAM( MX_ST_UTF8 ),					},
+	//		{ _DEC_WS_A71F1195_UTF_16,																															LPARAM( MX_ST_UTF16_LE ),				},
+	//		{ _DEC_WS_26FC5333_UTF_16_BE,																														LPARAM( MX_ST_UTF16_BE ),				},
+	//		{ _DEC_WS_9244B70E_UTF_32,																															LPARAM( MX_ST_UTF32_LE ),				},
+	//		{ _DEC_WS_D35E9704_UTF_32_BE,																														LPARAM( MX_ST_UTF32_BE ),				},
+	//		//{ _DEC_WS_F22813AD_Custom,																															LPARAM( MX_ST_SPECIAL ),				},
+	//	};
+	//	return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, -1 );
+	//}
 
 	/**
 	 * Fills the combo box with standard data types.

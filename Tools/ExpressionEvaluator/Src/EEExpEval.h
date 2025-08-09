@@ -816,7 +816,7 @@ namespace ee {
 		 **/
 		template <typename _tOutType = std::wstring>
 		static inline _tOutType			ToUtf16( const std::string &_sIn ) {
-			std::wstring swsTemp;
+			_tOutType otTmp;
 			const char * pcSrc = _sIn.c_str();
 			size_t sSize = _sIn.size();
 
@@ -825,7 +825,7 @@ namespace ee {
 				uint32_t ui32This = NextUtf8Char( &pcSrc[I], _sIn.size() - I, &sThisSize );
 				if ( ui32This == EE_UTF_INVALID ) {
 					for ( size_t J = 0; J < sThisSize; ++J ) {
-						swsTemp.push_back( static_cast<uint8_t>(pcSrc[I+J]) );
+						otTmp.push_back( static_cast<uint8_t>(pcSrc[I+J]) );
 					}
 					I += sThisSize;
 					continue;
@@ -834,11 +834,11 @@ namespace ee {
 				uint32_t ui32Len;
 				uint32_t ui32Converted = Utf32ToUtf16( ui32This, ui32Len );
 				for ( uint32_t J = 0; J < ui32Len; ++J ) {
-					swsTemp.push_back( static_cast<_tOutType::value_type>(ui32Converted & 0xFFFFU) );
+					otTmp.push_back( static_cast<_tOutType::value_type>(ui32Converted & 0xFFFFU) );
 					ui32Converted >>= 16;
 				}
 			}
-			return swsTemp;
+			return otTmp;
 		}
 
 		/**

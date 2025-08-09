@@ -15,7 +15,11 @@ namespace lsw {
 		// Setting the HWND after the control has been created.
 		virtual void						InitControl( HWND _hWnd );
 
-		// Sets the character limit.
+		/**
+		 * Sets the text limit for the control.
+		 * 
+		 * \param _iLen The maximum number of TCHARs the user can enter, not including the terminating null character. If this parameter is zero, the text length is limited to 0x7FFFFFFE characters.
+		 **/
 		virtual void						LimitText( int _iLen );
 
 		// Selects a range of text.

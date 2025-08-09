@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../MXMhsX.h"
+#include "../CodePages/MXCodePages.h"
 #include "../Utilities/MXUtilities.h"
 #include "MXFoundAddressBase.h"
 
@@ -111,6 +112,9 @@ namespace mx {
 			PrepareValueStructures();
 		}
 
+		// Gets the code page for strings.
+		inline UINT											CodePage() const { return m_uiCodePage; }
+
 		// Dirties the item.  Address and current data need to be updated after this.
 		virtual void										Dirty() {
 			m_bDirtyAddress = true;
@@ -144,10 +148,11 @@ namespace mx {
 		CUtilities::MX_VALUE_TYPE							m_vtValueType = CUtilities::MX_VT_DATA_TYPE;
 		// The type of data.
 		CUtilities::MX_DATA_TYPES							m_dtDataType = CUtilities::MX_DT_VOID;
-		// The string format.
-		CUtilities::MX_STRING_TYPES							m_stStringType = CUtilities::MX_ST_CODE_PAGE;
+		// Codepage (for m_vtValueType == CUtilities::MX_VT_STRING).
+		UINT												m_uiCodePage = CCodePages::GetSystemDefaultAnsiCodePage();
 		// Byteswapping.
 		CUtilities::MX_BYTESWAP								m_bsByteSwap = CUtilities::MX_BS_NONE;
+		
 
 		// The lock type.
 		CUtilities::MX_LOCK_TYPES							m_ltLockType = CUtilities::MX_LT_EXACT;

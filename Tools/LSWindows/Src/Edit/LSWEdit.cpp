@@ -25,7 +25,11 @@ namespace lsw {
 		::SetPropW( Wnd(), m_szProp, reinterpret_cast<HANDLE>(this) );
 	}
 
-	// Sets the character limit.
+	/**
+	 * Sets the text limit for the control.
+	 * 
+	 * \param _iLen The maximum number of TCHARs the user can enter, not including the terminating null character. If this parameter is zero, the text length is limited to 0x7FFFFFFE characters.
+	 **/
 	void CEdit::LimitText( int _iLen ) {
 		if ( Wnd() ) {
 			::SendMessageW( Wnd(), EM_LIMITTEXT, static_cast<WPARAM>(_iLen), 0L );
