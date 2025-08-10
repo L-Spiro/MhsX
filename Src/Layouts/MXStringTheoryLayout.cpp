@@ -1017,7 +1017,7 @@ namespace mx {
 
 		{
 			LSW_LT_RADIO,							// ltType
-			MX_STW_ESPACE_ONLY_NUL,					// wId
+			MX_STW_ESCAPE_ONLY_NUL,					// wId
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			TRUE,									// bActive
@@ -1040,7 +1040,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_RADIO,							// ltType
-			MX_STW_ESPACE_ALL_UNPRINTABLE,			// wId
+			MX_STW_ESCAPE_ALL_UNPRINTABLE,			// wId
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
@@ -1063,7 +1063,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_RADIO,							// ltType
-			MX_STW_ESPACE_ALL,						// wId
+			MX_STW_ESCAPE_ALL,						// wId
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
@@ -1086,7 +1086,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_RADIO,							// ltType
-			MX_STW_ESPACE_ONLY_NUL_AND_BS,			// wId
+			MX_STW_ESCAPE_ONLY_NUL_AND_BS,			// wId
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
@@ -1109,7 +1109,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_RADIO,							// ltType
-			MX_STW_ESPACE_ALL_UNPRINTABLE_AND_BS,	// wId
+			MX_STW_ESCAPE_ALL_UNPRINTABLE_AND_BS,	// wId
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive
@@ -1132,7 +1132,7 @@ namespace mx {
 		},
 		{
 			LSW_LT_RADIO,							// ltType
-			MX_STW_ESPACE_STANDARD,					// wId
+			MX_STW_ESCAPE_STANDARD,					// wId
 			WC_BUTTONW,								// lpwcClass
 			TRUE,									// bEnabled
 			FALSE,									// bActive

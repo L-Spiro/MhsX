@@ -741,7 +741,7 @@ namespace mx {
 		// Converts from any single-byte code page to UTF-8.
 		static CSecureString									FromCodePage( const std::string &_sIn, UINT _uiCodePage, bool * _pbError = nullptr );
 
-		// Maps a UTF-16 (wide character) string to a new character string. The new character string is not necessarily from a multibyte character set.
+		// Maps a UTF-16 (wide character) string to a new character string. The new character string is not necessarily from a multibyte character set.  Call within a try/catch block.
 		static CSecureString									WideCharToMultiByte( UINT _uiCodePage,
 			DWORD _dwFlags,
 			const std::wstring &_wsString,
@@ -1049,7 +1049,7 @@ namespace mx {
 		static CSecureWString									PrimitiveArrayToStringW( const void * _pvData, size_t _sLenInBytes, MX_DATA_TYPES _dtTargetType, uint32_t _uiNumDigits = 0, int32_t _iSigDigits = 0 );
 
 		// Takes a string and converts X number of elements into either a single byte array (if contiguous) or into an array of arrays.  Returns the number of items converted.
-		static uint32_t											WStringToArrayBytes( std::vector<std::vector<uint8_t>> &_vDst, const CSecureWString &_swsString, MX_DATA_TYPES _dtTargetType, bool _bContiguous, CSecureWString &_swsError );
+		static uint32_t											WStringToArrayBytes( std::vector<std::vector<uint8_t>> &_vDst, const CSecureWString &_swsString, MX_DATA_TYPES _dtTargetType, int _iBase, bool _bContiguous, CSecureWString &_swsError );
 
 		// Converts Katakana characters to Hiragana or returns the original input character.
 		static uint32_t											KatakanaToHiragana( uint32_t _uiChar ) {

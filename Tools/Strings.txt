@@ -1971,3 +1971,7 @@
 "Read operation failed."
 "Internal error."
 "Invalid input: "
+"C String"
+"<multiple items>"
+"String conversion error: "
+" bytes)"

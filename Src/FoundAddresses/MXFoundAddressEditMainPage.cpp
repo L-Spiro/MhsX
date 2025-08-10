@@ -40,7 +40,7 @@ namespace mx {
 		}
 		pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_STRING_COMBO );
 		if ( pwTmp ) {
-			UINT uiSysCodePag = CCodePages::GetSystemDefaultAnsiCodePage();
+			UINT uiSysCodePage = CCodePages::GetSystemDefaultAnsiCodePage();
 			auto pcbCombo = static_cast<CComboBox *>(pwTmp);
 			std::vector<CCodePages::MX_CODE_PAGE> vCodePages;
 			CCodePages::GetSystemCodePages( vCodePages, true );
@@ -50,7 +50,7 @@ namespace mx {
 				pcbCombo->SetItemData( iIndex, vCodePages[I].uiCodePage );
 			}
 
-			pcbCombo->SetCurSelByItemData( /*CCodePages::MX_utf_8*/uiSysCodePag );
+			pcbCombo->SetCurSelByItemData( /*CCodePages::MX_utf_8*/uiSysCodePage );
 			pcbCombo->AutoSetMinListWidth();
 		}
 		pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_DATA_COMBO );
@@ -133,6 +133,7 @@ namespace mx {
 
 		pwTmp = FindChild( Layout::MX_FAEI_VALUE_ARRAY_LEN_COMBO );
 		ee::CExpEvalContainer::EE_RESULT rRes;
+		rRes.u.i64Val = 0;
 		if ( pwTmp ) {
 			rRes.u.i64Val = -1;
 			pwTmp->GetTextAsInt64Expression( rRes );
@@ -191,6 +192,84 @@ namespace mx {
 			}
 		}
 
+		
+		
+		auto pwLabel = FindChild( Layout::MX_FAEI_INFO_DESC_LABEL );
+		if ( pwLabel ) {
+			try {
+				// Update the explanation text.
+				CSecureWString swsExpText;
+				switch ( iType ) {
+					case LPARAM( CUtilities::MX_DT_STRING ) : {
+						// ===================
+						// CURRENT VALUE
+						// ===================
+						swsExpText += _DEC_WS_320BB0E4_Value_;
+						swsExpText += L' ';
+						UINT uiSysCodePage = CCodePages::GetSystemDefaultAnsiCodePage();
+						auto pwCodePage = FindChild( Layout::MX_FAEI_VALUE_TYPE_STRING_COMBO );
+						if ( pwCodePage ) {
+							uiSysCodePage = UINT( pwCodePage->GetCurSelItemData() );
+						}
+						bool bEscape = false;
+						auto pwEscape = FindChild( Layout::MX_FAEI_VALUE_TYPE_ESCAPE_CHECK );
+						if ( pwEscape ) {
+							bEscape = !!pwEscape->IsChecked();
+						}
+						CSecureWString swsCurText;
+						auto pwCurVal = FindChild( Layout::MX_FAEI_VALUE_CUR_VAL_COMBO );
+						if ( pwCurVal ) {
+							swsCurText = pwCurVal->GetTextW();
+						}
+						if ( !swsCurText.size() && bIsMulti ) {
+							// Empty string on multi-select means don't change the texts.
+							swsExpText += _DEC_WS_43645600__multiple_items_;
+						}
+						else if ( swsCurText.size() ) {
+							// UTF-16 -> Code Page -> UTF-16.
+							swsExpText += StringToDescr( swsCurText, bEscape, uiSysCodePage );
+						}
+
+						// Current value handled.
+						swsExpText += L'\r';
+						swsExpText += L'\n';
+
+
+
+						// ===================
+						// VALUE WHEN LOCKED
+						// ===================
+						swsExpText += _DEC_WS_022E8A69_Value_When_Locked;
+						swsExpText += L' ';
+
+						pwCurVal = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_COMBO );
+						if ( pwCurVal ) {
+							swsCurText = pwCurVal->GetTextW();
+						}
+						if ( !swsCurText.size() && bIsMulti ) {
+							// Empty string on multi-select means don't change the texts.
+							swsExpText += _DEC_WS_43645600__multiple_items_;
+						}
+						else if ( swsCurText.size() ) {
+							// UTF-16 -> Code Page -> UTF-16.
+							swsExpText += StringToDescr( swsCurText, bEscape, uiSysCodePage );
+						}
+						break;
+					}
+					default : {
+					}
+				}
+				ee::CExpEvalContainer::EE_RESULT rRes;
+
+
+
+				pwLabel->SetTextW( swsExpText.c_str() );
+			}
+			catch ( ... ) {
+				pwLabel->SetTextW( _DEC_WS_F39F91A5_Out_of_memory_.c_str() );
+			}
+		}
+		
 
 	}
 
@@ -366,6 +445,48 @@ namespace mx {
 	LPARAM CFoundAddressEditMainPage::LockType( CFoundAddressBase * _pfabFoundAddress ) {
 		if ( _pfabFoundAddress->Type() != MX_FAT_FOUND_ADDRESS ) { return LPARAM( -1 ); }
 		return LPARAM( reinterpret_cast<CFoundAddress *>(_pfabFoundAddress)->LockType() );
+	}
+
+	// Converts a string to its description.
+	CSecureWString CFoundAddressEditMainPage::StringToDescr( const CSecureWString &_swsString, bool _bResolveEscapes, UINT _uiCodePage ) {
+		CSecureWString swsExpText;
+		CSecureWString swsCopy = _swsString;
+		if ( _bResolveEscapes ) {
+			CSecureString ssResolved;
+			CUtilities::ResolveAllEscapes( ee::CExpEval::ToUtf8( swsCopy ), ssResolved, true );
+			swsCopy = ee::CExpEval::ToUtf16( ssResolved );
+		}
+		CSecureString ssMultiByte;
+		DWORD dwError;
+		auto sCodePaged = CUtilities::WideCharToMultiByte( _uiCodePage, 0, swsCopy, nullptr, nullptr, &dwError );
+		switch ( dwError ) {
+			case ERROR_SUCCESS : {
+				swsExpText += CUtilities::MultiByteToWideChar( _uiCodePage, 0, sCodePaged );
+				swsExpText += L'\r';
+				swsExpText += L'\n';
+				CSecureString ssTmp;
+				CUtilities::BytesToHexWithSpaces( sCodePaged.data(), sCodePaged.size(), ssTmp );
+				swsExpText += ee::CExpEval::ToUtf16( ssTmp );
+				swsExpText += L' ';
+				swsExpText += L'(';
+				swsExpText += std::to_wstring( sCodePaged.size() );
+				swsExpText += _DEC_WS_0FCE4654__bytes_;
+				break;
+			}
+			case ERROR_NOT_ENOUGH_MEMORY : {
+				swsExpText += L'<';
+				swsExpText += _DEC_WS_F39F91A5_Out_of_memory_;
+				swsExpText += L'>';
+				break;
+			}
+			default : {
+				swsExpText += L'<';
+				swsExpText += _DEC_WS_FA427FE5_String_conversion_error__;
+				swsExpText += ee::CExpEval::ToUtf16( ee::CExpEval::ToHex( uint64_t( dwError ) ) );
+				swsExpText += L'>';
+			}
+		}
+		return swsExpText;
 	}
 
 }	// namespace mx

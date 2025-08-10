@@ -1523,7 +1523,7 @@ namespace ee {
 			++_pcText;
 		}
 		if ( _pcText[0] == '0' &&
-			(_pcText[1] == 'x' || _pcText[1] == 'x') &&
+			(_pcText[1] == 'X' || _pcText[1] == 'x') &&
 			(ValidHex( _pcText[2] ) || _pcText[2] == '.') ) {
 			_pcText += 2;
 			// Digits are optional.

@@ -150,12 +150,12 @@ namespace mx {
 			case CStringTheoryLayout::MX_STW_DISCARD_NONSPACING : {}
 			case CStringTheoryLayout::MX_STW_SEP_CHARS : {}
 			case CStringTheoryLayout::MX_STW_NO_BEST_FIT : {}
-			case CStringTheoryLayout::MX_STW_ESPACE_ONLY_NUL_AND_BS : {}
-			case CStringTheoryLayout::MX_STW_ESPACE_ALL_UNPRINTABLE_AND_BS : {}
-			case CStringTheoryLayout::MX_STW_ESPACE_STANDARD : {}
-			case CStringTheoryLayout::MX_STW_ESPACE_ONLY_NUL : {}
-			case CStringTheoryLayout::MX_STW_ESPACE_ALL_UNPRINTABLE : {}
-			case CStringTheoryLayout::MX_STW_ESPACE_ALL : {
+			case CStringTheoryLayout::MX_STW_ESCAPE_ONLY_NUL_AND_BS : {}
+			case CStringTheoryLayout::MX_STW_ESCAPE_ALL_UNPRINTABLE_AND_BS : {}
+			case CStringTheoryLayout::MX_STW_ESCAPE_STANDARD : {}
+			case CStringTheoryLayout::MX_STW_ESCAPE_ONLY_NUL : {}
+			case CStringTheoryLayout::MX_STW_ESCAPE_ALL_UNPRINTABLE : {}
+			case CStringTheoryLayout::MX_STW_ESCAPE_ALL : {
 				if ( _wCtrlCode == STN_CLICKED ) {
 					UpdateDialog();
 				}
@@ -226,12 +226,15 @@ namespace mx {
 			UINT uiSrcEncoding = pcbInputEncodingCombo->GetCurSelItemData();
 
 			CSecureString ssUtf8;
-			if ( bIsHex ) {
-				ssUtf8 = CUtilities::FromHexString( peEdit->GetTextW() );
+			try {
+				if ( bIsHex ) {
+					ssUtf8 = CUtilities::FromHexString( peEdit->GetTextW() );
+				}
+				else {
+					ssUtf8 = ee::CExpEval::ToUtf8( peEdit->GetTextW() );
+				}
 			}
-			else {
-				ssUtf8 = ee::CExpEval::ToUtf8( peEdit->GetTextW() );
-			}
+			catch ( ... ) {}
 			
 
 			// ==================
@@ -239,7 +242,10 @@ namespace mx {
 			// ==================
 			CSecureString ssResolved;
 			if ( MX_IS_CHECKED( MX_STW_RESOLVE_ESCAPES_CHECK ) ) {
-				CUtilities::ResolveAllEscapes( ssUtf8, ssResolved, !bIsHex || (uiSrcEncoding == CCodePages::MX_utf_8) );
+				try {
+					CUtilities::ResolveAllEscapes( ssUtf8, ssResolved, !bIsHex || (uiSrcEncoding == CCodePages::MX_utf_8) );
+				}
+				catch ( ... ) {}
 			}
 			else {
 				ssResolved = ssUtf8;
@@ -247,7 +253,10 @@ namespace mx {
 			if ( MX_IS_CHECKED( MX_STW_RESOLVE_HTML_CHECK ) ) {
 				CSecureString ssTmp = ssResolved;
 				ssResolved.SecureClear();
-				CUtilities::ResolveAllHtmlXmlEscapes( ssTmp, ssResolved, !bIsHex || (uiSrcEncoding == CCodePages::MX_utf_8) );
+				try {
+					CUtilities::ResolveAllHtmlXmlEscapes( ssTmp, ssResolved, !bIsHex || (uiSrcEncoding == CCodePages::MX_utf_8) );
+				}
+				catch ( ... ) {}
 			}
 
 
@@ -255,14 +264,17 @@ namespace mx {
 			// Processing.
 			// ===========
 			CSecureWString swsUtf16;
-			if ( bIsHex ) {
-				swsUtf16 = CUtilities::MultiByteToWideChar( uiSrcEncoding,
-					0,
-					ssResolved );
+			try {
+				if ( bIsHex ) {
+					swsUtf16 = CUtilities::MultiByteToWideChar( uiSrcEncoding,
+						0,
+						ssResolved );
+				}
+				else {
+					swsUtf16 = ee::CExpEval::ToUtf16( ssResolved );
+				}
 			}
-			else {
-				swsUtf16 = ee::CExpEval::ToUtf16( ssResolved );
-			}
+			catch ( ... ) {}
 
 			if ( MX_IS_CHECKED( MX_STW_TO_HIRAGANA ) ) {
 				swsUtf16 = CUtilities::ToHiragana( swsUtf16 );
@@ -319,8 +331,12 @@ namespace mx {
 				}
 				dwFlags |= MX_IS_CHECKED( MX_STW_NO_BEST_FIT ) ? WC_NO_BEST_FIT_CHARS : 0;
 			}
-			CSecureString ssEncodedFinal = CUtilities::WideCharToMultiByte( uiEncoding, dwFlags,
-				swsUtf16, NULL, NULL );
+			CSecureString ssEncodedFinal;
+			try {
+				ssEncodedFinal = CUtilities::WideCharToMultiByte( uiEncoding, dwFlags,
+					swsUtf16, NULL, NULL );
+			}
+			catch ( ... ) {}
 			
 
 			// =========
@@ -331,24 +347,28 @@ namespace mx {
 			if ( !bMustBe0 ) {
 				dwBackToUtf16Flags = ((dwFlags & WC_COMPOSITECHECK) || bNormalized) ? MB_COMPOSITE : MB_PRECOMPOSED;
 			}
-			CSecureWString swsPrintFinal = CUtilities::MultiByteToWideChar( uiEncoding,
-				dwBackToUtf16Flags,
-				ssEncodedFinal,
-				&dwError );
+			CSecureWString swsPrintFinal;
+			try {
+				swsPrintFinal = CUtilities::MultiByteToWideChar( uiEncoding,
+					dwBackToUtf16Flags,
+					ssEncodedFinal,
+					&dwError );
+			}
+			catch ( ... ) {}
 
-			if ( MX_IS_CHECKED( MX_STW_ESPACE_ONLY_NUL ) ) {
+			if ( MX_IS_CHECKED( MX_STW_ESCAPE_ONLY_NUL ) ) {
 				swsPrintFinal = CUtilities::EscapeNulOnly( swsPrintFinal, false );
 			}
-			else if ( MX_IS_CHECKED( MX_STW_ESPACE_ONLY_NUL_AND_BS ) ) {
+			else if ( MX_IS_CHECKED( MX_STW_ESCAPE_ONLY_NUL_AND_BS ) ) {
 				swsPrintFinal = CUtilities::EscapeNulOnly( swsPrintFinal, true );
 			}
-			else if ( MX_IS_CHECKED( MX_STW_ESPACE_ALL_UNPRINTABLE ) ) {
+			else if ( MX_IS_CHECKED( MX_STW_ESCAPE_ALL_UNPRINTABLE ) ) {
 				swsPrintFinal = CUtilities::EscapeUnprintable( swsPrintFinal, false, true );
 			}
-			else if ( MX_IS_CHECKED( MX_STW_ESPACE_ALL_UNPRINTABLE_AND_BS ) ) {
+			else if ( MX_IS_CHECKED( MX_STW_ESCAPE_ALL_UNPRINTABLE_AND_BS ) ) {
 				swsPrintFinal = CUtilities::EscapeUnprintable( swsPrintFinal, true, true );
 			}
-			else if ( MX_IS_CHECKED( MX_STW_ESPACE_ALL ) ) {
+			else if ( MX_IS_CHECKED( MX_STW_ESCAPE_ALL ) ) {
 				switch ( uiEncoding ) {
 					case CCodePages::MX_utf_32 : {}
 					case CCodePages::MX_utf_32BE : {
@@ -383,7 +403,7 @@ namespace mx {
 					}
 				}
 			}
-			else if ( MX_IS_CHECKED( MX_STW_ESPACE_STANDARD ) ) {
+			else if ( MX_IS_CHECKED( MX_STW_ESCAPE_STANDARD ) ) {
 				swsPrintFinal = CUtilities::EscapeStandard( swsPrintFinal, true );
 			}
 

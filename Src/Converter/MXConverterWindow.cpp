@@ -464,7 +464,7 @@ namespace mx {
 	}
 
 	// Gets the value from the given text edit.
-	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValue( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex ) {
+	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValue( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex ) {
 		BOOL bValid = FALSE;
 		ee::CExpEvalContainer::EE_RESULT rRes;
 		_pwControl->SetTreatAsHex( _bHex );
@@ -526,7 +526,7 @@ namespace mx {
 	}
 
 	// Gets the value from the given text edit.
-	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueHex( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex ) {
+	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueHex( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex ) {
 		BOOL bValid = FALSE;
 		ee::CExpEvalContainer::EE_RESULT rRes;
 		_pwControl->SetTreatAsHex( _bHex );
@@ -598,7 +598,7 @@ namespace mx {
 	}
 
 	// Gets the value from the given text edit.
-	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueOct( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex ) {
+	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueOct( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex ) {
 		std::string sText = _pwControl->GetTextA();
 		ee::CExpEvalContainer::EE_RESULT rRes;
 		rRes.ncType = ee::EE_NC_UNSIGNED;
@@ -614,7 +614,7 @@ namespace mx {
 	}
 
 	// Gets the value from the given text edit.
-	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueChar( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool /*_bHex*/ ) {
+	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueChar( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool /*_bHex*/ ) {
 		ee::CExpEvalContainer::EE_RESULT rRes;
 		CSecureString ssTmp = _pwControl->GetTextA();
 		if ( !ssTmp.size() ) {
@@ -628,80 +628,87 @@ namespace mx {
 	}
 
 	// Gets the value from the given text edit.
-	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueUtf8( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex ) {
+	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueUtf8( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex ) {
 		ee::CExpEvalContainer::EE_RESULT rRes;
-		CSecureString ssUtf8 = ee::CExpEval::ToUtf8( _pwControl->GetTextW() );
-		if ( !ssUtf8.size() ) {
-			rRes.ncType = ee::EE_NC_INVALID;
-			return rRes;
+		try {
+			CSecureString ssUtf8 = ee::CExpEval::ToUtf8( _pwControl->GetTextW() );
+			if ( !ssUtf8.size() ) {
+				rRes.ncType = ee::EE_NC_INVALID;
+				return rRes;
+			}
+			CSecureString ssResolved;
+			CUtilities::ResolveAllEscapes( ssUtf8, ssResolved, true );
+			rRes.ncType = _ncType;
+
+
+			size_t sLen = 1;
+			_sSize = 0;
+			for ( size_t I = 0; I < ssResolved.size() && sLen; I += sLen ) {
+				uint64_t uiNext = ee::CExpEval::NextUtf8Char( &ssResolved[I], ssResolved.size() - I, &sLen );
+				if ( _sSize + sLen < sizeof( uint64_t ) ) {
+					_sSize += sLen;
+				}
+				else if ( _sSize + sLen == sizeof( uint64_t ) ) {
+					_sSize += sLen;
+					break;
+				}
+				else {
+					break;
+				}
+			}
+			rRes.u.ui64Val = 0;
+			std::memcpy( &rRes.u.ui64Val, ssResolved.data(), _sSize );
+
+			_sSize *= 8;
 		}
-		CSecureString ssResolved;
-		CUtilities::ResolveAllEscapes( ssUtf8, ssResolved, true );
-		rRes.ncType = _ncType;
-
-
-		size_t sLen = 1;
-		_sSize = 0;
-		for ( size_t I = 0; I < ssResolved.size() && sLen; I += sLen ) {
-			uint64_t uiNext = ee::CExpEval::NextUtf8Char( &ssResolved[I], ssResolved.size() - I, &sLen );
-			if ( _sSize + sLen < sizeof( uint64_t ) ) {
-				_sSize += sLen;
-			}
-			else if ( _sSize + sLen == sizeof( uint64_t ) ) {
-				_sSize += sLen;
-				break;
-			}
-			else {
-				break;
-			}
-		}
-		rRes.u.ui64Val = 0;
-		std::memcpy( &rRes.u.ui64Val, ssResolved.data(), _sSize );
-
-		_sSize *= 8;
+		catch ( ... ) { rRes.ncType = ee::EE_NC_INVALID; }
 		return rRes;
 	}
 
 	// Gets the value from the given text edit.
-	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueUtf16( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex ) {
+	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueUtf16( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex ) {
 		ee::CExpEvalContainer::EE_RESULT rRes;
-		CSecureString ssUtf8 = ee::CExpEval::ToUtf8( _pwControl->GetTextW() );
-		if ( !ssUtf8.size() ) {
-			rRes.ncType = ee::EE_NC_INVALID;
-			return rRes;
+		try {
+			CSecureString ssUtf8 = ee::CExpEval::ToUtf8( _pwControl->GetTextW() );
+			if ( !ssUtf8.size() ) {
+				rRes.ncType = ee::EE_NC_INVALID;
+				return rRes;
+			}
+			CSecureString ssResolved;
+			CUtilities::ResolveAllEscapes( ssUtf8, ssResolved, true );
+			CSecureWString wUtf16 = ee::CExpEval::ToUtf16( ssResolved );
+			rRes.ncType = _ncType;
+
+
+			size_t sLen = 1;
+			_sSize = 0;
+			for ( size_t I = 0; I < wUtf16.size() && sLen; I += sLen ) {
+				uint64_t uiNext = ee::CExpEval::NextUtf16Char( &wUtf16[I], wUtf16.size() - I, &sLen );
+				const size_t sFinalLen = sLen * sizeof( wchar_t );
+				if ( _sSize + sFinalLen < sizeof( uint64_t ) ) {
+					_sSize += sFinalLen;
+				}
+				else if ( _sSize + sFinalLen == sizeof( uint64_t ) ) {
+					_sSize += sFinalLen;
+					break;
+				}
+				else {
+					break;
+				}
+			}
+			rRes.u.ui64Val = 0;
+			std::memcpy( &rRes.u.ui64Val, wUtf16.data(), _sSize );
+
+			_sSize *= 8;
 		}
-		CSecureString ssResolved;
-		CUtilities::ResolveAllEscapes( ssUtf8, ssResolved, true );
-		CSecureWString wUtf16 = ee::CExpEval::ToUtf16( ssResolved );
-		rRes.ncType = _ncType;
-
-
-		size_t sLen = 1;
-		_sSize = 0;
-		for ( size_t I = 0; I < wUtf16.size() && sLen; I += sLen ) {
-			uint64_t uiNext = ee::CExpEval::NextUtf16Char( &wUtf16[I], wUtf16.size() - I, &sLen );
-			const size_t sFinalLen = sLen * sizeof( wchar_t );
-			if ( _sSize + sFinalLen < sizeof( uint64_t ) ) {
-				_sSize += sFinalLen;
-			}
-			else if ( _sSize + sFinalLen == sizeof( uint64_t ) ) {
-				_sSize += sFinalLen;
-				break;
-			}
-			else {
-				break;
-			}
-		}
-		rRes.u.ui64Val = 0;
-		std::memcpy( &rRes.u.ui64Val, wUtf16.data(), _sSize );
-
-		_sSize *= 8;
+		catch ( ... ) { rRes.ncType = ee::EE_NC_INVALID; }
 		return rRes;
 	}
 
 	// Gets the value from the given text edit.
-	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueUtf16_BE( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex ) {
+	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueUtf16_BE( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex ) {
 		ee::CExpEvalContainer::EE_RESULT rRes = GetValueUtf16( _pwControl, _ncType, _sSize, _bHex );
+		
 		uint16_t * pui16Array = reinterpret_cast<uint16_t *>(&rRes.u.ui64Val);
 		for ( size_t I = 0; I < 4; ++I ) {
 			pui16Array[I] = ::_byteswap_ushort( pui16Array[I] );
@@ -710,45 +717,48 @@ namespace mx {
 	}
 
 	// Gets the value from the given text edit.
-	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueUtf32( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex ) {
+	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueUtf32( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex ) {
 		ee::CExpEvalContainer::EE_RESULT rRes;
-		CSecureWString swsTmp = _pwControl->GetTextW();
-		CSecureString ssUtf8 = ee::CExpEval::ToUtf8( swsTmp );
-		if ( !ssUtf8.size() ) {
-			rRes.ncType = ee::EE_NC_INVALID;
-			return rRes;
+		try {
+			CSecureWString swsTmp = _pwControl->GetTextW();
+			CSecureString ssUtf8 = ee::CExpEval::ToUtf8( swsTmp );
+			if ( !ssUtf8.size() ) {
+				rRes.ncType = ee::EE_NC_INVALID;
+				return rRes;
+			}
+			CSecureString ssResolved;
+			CUtilities::ResolveAllEscapes( ssUtf8, ssResolved, true );
+			std::u32string u32Utf32 = ee::CExpEval::ToUtf32( ssResolved );
+			rRes.ncType = _ncType;
+
+
+			size_t sLen = 1;
+			_sSize = 0;
+			for ( size_t I = 0; I < u32Utf32.size() && sLen; I += sLen ) {
+				uint64_t uiNext = ee::CExpEval::NextUtf32Char( reinterpret_cast<const uint32_t *>(&u32Utf32[I]), u32Utf32.size() - I, &sLen );
+				const size_t sFinalLen = sLen * sizeof( uint32_t );
+				if ( _sSize + sFinalLen < sizeof( uint64_t ) ) {
+					_sSize += sFinalLen;
+				}
+				else if ( _sSize + sFinalLen == sizeof( uint64_t ) ) {
+					_sSize += sFinalLen;
+					break;
+				}
+				else {
+					break;
+				}
+			}
+			rRes.u.ui64Val = 0;
+			std::memcpy( &rRes.u.ui64Val, u32Utf32.data(), _sSize );
+
+			_sSize *= 8;
 		}
-		CSecureString ssResolved;
-		CUtilities::ResolveAllEscapes( ssUtf8, ssResolved, true );
-		std::u32string u32Utf32 = ee::CExpEval::ToUtf32( ssResolved );
-		rRes.ncType = _ncType;
-
-
-		size_t sLen = 1;
-		_sSize = 0;
-		for ( size_t I = 0; I < u32Utf32.size() && sLen; I += sLen ) {
-			uint64_t uiNext = ee::CExpEval::NextUtf32Char( reinterpret_cast<const uint32_t *>(&u32Utf32[I]), u32Utf32.size() - I, &sLen );
-			const size_t sFinalLen = sLen * sizeof( uint32_t );
-			if ( _sSize + sFinalLen < sizeof( uint64_t ) ) {
-				_sSize += sFinalLen;
-			}
-			else if ( _sSize + sFinalLen == sizeof( uint64_t ) ) {
-				_sSize += sFinalLen;
-				break;
-			}
-			else {
-				break;
-			}
-		}
-		rRes.u.ui64Val = 0;
-		std::memcpy( &rRes.u.ui64Val, u32Utf32.data(), _sSize );
-
-		_sSize *= 8;
+		catch ( ... ) { rRes.ncType = ee::EE_NC_INVALID; }
 		return rRes;
 	}
 
 	// Gets the value from the given text edit.
-	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueUtf32_BE( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex ) {
+	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueUtf32_BE( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex ) {
 		ee::CExpEvalContainer::EE_RESULT rRes = GetValueUtf32( _pwControl, _ncType, _sSize, _bHex );
 		uint32_t * pui32Array = reinterpret_cast<uint32_t *>(&rRes.u.ui64Val);
 		for ( size_t I = 0; I < 2; ++I ) {
@@ -758,7 +768,7 @@ namespace mx {
 	}
 
 	// Gets the value from the given text edit.
-	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueBinary( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex ) {
+	ee::CExpEvalContainer::EE_RESULT CConverterWindow::GetValueBinary( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex ) {
 		std::string sText = _pwControl->GetTextA();
 		ee::CExpEvalContainer::EE_RESULT rRes;
 		rRes.ncType = ee::EE_NC_UNSIGNED;
@@ -794,60 +804,63 @@ namespace mx {
 			_rRes = ByteSwapBySize( _rRes, _sSize );
 		}
 		CSecureWString swsTmp;
-		switch ( _ncType ) {
-			case ee::EE_NC_SIGNED : {
-				_rRes.u.i64Val = (_rRes.u.i64Val << (64ULL - _sSize)) >> (64ULL - _sSize);
-				CUtilities::ToSigned( _rRes.u.i64Val, swsTmp );
-				break;
-			}
-			case ee::EE_NC_UNSIGNED : {
-				_rRes.u.ui64Val = (_rRes.u.ui64Val << (64ULL - _sSize)) >> (64ULL - _sSize);
-				CUtilities::ToUnsigned( _rRes.u.ui64Val, swsTmp );
-				break;
-			}
-			case ee::EE_NC_FLOATING : {
-				ee::CFloatX fFloat;
-				bool bSci = false;
-				switch ( _sSize ) {
-					case 10 : {
-						fFloat.CreateFromBits( _rRes.u.ui64Val, 5, 6, true, false );
-						CUtilities::ToDouble( fFloat.AsDouble(), swsTmp, bSci ? -MX_FLOAT10_SIG_DIG : 0 );
-						break;
-					}
-					case 11 : {
-						fFloat.CreateFromBits( _rRes.u.ui64Val, 5, 7, true, false );
-						CUtilities::ToDouble( fFloat.AsDouble(), swsTmp, bSci ? -MX_FLOAT11_SIG_DIG : 0 );
-						break;
-					}
-					case 14 : {
-						fFloat.CreateFromBits( _rRes.u.ui64Val, 5, 10, true, false );
-						CUtilities::ToDouble( fFloat.AsDouble(), swsTmp, bSci ? -MX_FLOAT14_SIG_DIG : 0 );
-						break;
-					}
-					case 16 : {
-						fFloat.CreateFromBits( _rRes.u.ui64Val, 5, 11, true, true );
-						CUtilities::ToDouble( fFloat.AsDouble(), swsTmp, bSci ? -MX_FLOAT16_SIG_DIG : 0 );
-						break;
-					}
-					case 24 : {
-						fFloat.CreateFromBits( _rRes.u.ui64Val, 7, 16, false, true );
-						CUtilities::ToDouble( fFloat.AsDouble(), swsTmp, bSci ? -MX_FLOAT24_SIG_DIG : 0 );
-						break;
-					}
-					case 32 : {
-						fFloat.CreateFromBits( _rRes.u.ui64Val, 8, 24, true, true );
-						CUtilities::ToDouble( fFloat.AsDouble(), swsTmp, bSci ? -MX_FLOAT32_SIG_DIG : 0 );
-						break;
-					}
-					case 64 : {
-						fFloat.CreateFromBits( _rRes.u.ui64Val, 11, 53, true, true );
-						CUtilities::ToDouble( fFloat.AsDouble(), swsTmp, bSci ? -MX_FLOAT64_SIG_DIG : 0 );
-						break;
+		try {
+			switch ( _ncType ) {
+				case ee::EE_NC_SIGNED : {
+					_rRes.u.i64Val = (_rRes.u.i64Val << (64ULL - _sSize)) >> (64ULL - _sSize);
+					CUtilities::ToSigned( _rRes.u.i64Val, swsTmp );
+					break;
+				}
+				case ee::EE_NC_UNSIGNED : {
+					_rRes.u.ui64Val = (_rRes.u.ui64Val << (64ULL - _sSize)) >> (64ULL - _sSize);
+					CUtilities::ToUnsigned( _rRes.u.ui64Val, swsTmp );
+					break;
+				}
+				case ee::EE_NC_FLOATING : {
+					ee::CFloatX fFloat;
+					bool bSci = false;
+					switch ( _sSize ) {
+						case 10 : {
+							fFloat.CreateFromBits( _rRes.u.ui64Val, 5, 6, true, false );
+							CUtilities::ToDouble( fFloat.AsDouble(), swsTmp, bSci ? -MX_FLOAT10_SIG_DIG : 0 );
+							break;
+						}
+						case 11 : {
+							fFloat.CreateFromBits( _rRes.u.ui64Val, 5, 7, true, false );
+							CUtilities::ToDouble( fFloat.AsDouble(), swsTmp, bSci ? -MX_FLOAT11_SIG_DIG : 0 );
+							break;
+						}
+						case 14 : {
+							fFloat.CreateFromBits( _rRes.u.ui64Val, 5, 10, true, false );
+							CUtilities::ToDouble( fFloat.AsDouble(), swsTmp, bSci ? -MX_FLOAT14_SIG_DIG : 0 );
+							break;
+						}
+						case 16 : {
+							fFloat.CreateFromBits( _rRes.u.ui64Val, 5, 11, true, true );
+							CUtilities::ToDouble( fFloat.AsDouble(), swsTmp, bSci ? -MX_FLOAT16_SIG_DIG : 0 );
+							break;
+						}
+						case 24 : {
+							fFloat.CreateFromBits( _rRes.u.ui64Val, 7, 16, false, true );
+							CUtilities::ToDouble( fFloat.AsDouble(), swsTmp, bSci ? -MX_FLOAT24_SIG_DIG : 0 );
+							break;
+						}
+						case 32 : {
+							fFloat.CreateFromBits( _rRes.u.ui64Val, 8, 24, true, true );
+							CUtilities::ToDouble( fFloat.AsDouble(), swsTmp, bSci ? -MX_FLOAT32_SIG_DIG : 0 );
+							break;
+						}
+						case 64 : {
+							fFloat.CreateFromBits( _rRes.u.ui64Val, 11, 53, true, true );
+							CUtilities::ToDouble( fFloat.AsDouble(), swsTmp, bSci ? -MX_FLOAT64_SIG_DIG : 0 );
+							break;
+						}
 					}
 				}
 			}
+			_pwControl->SetTextW( swsTmp.c_str() );
 		}
-		_pwControl->SetTextW( swsTmp.c_str() );
+		catch ( ... ) {}
 	}
 
 	// Writes the value to the given edit.
@@ -857,10 +870,13 @@ namespace mx {
 		}
 		_rRes.u.ui64Val = (_rRes.u.ui64Val << (64ULL - _sSrcSize)) >> (64ULL - _sSrcSize);
 		CSecureWString swsTmp;
-		CUtilities::ToHex( _rRes.u.ui64Val, swsTmp, (_sSrcSize + 3) / 4 );
+		try {
+			CUtilities::ToHex( _rRes.u.ui64Val, swsTmp, (_sSrcSize + 3) / 4 );
 
 
-		_pwControl->SetTextW( swsTmp.c_str() );
+			_pwControl->SetTextW( swsTmp.c_str() );
+		}
+		catch ( ... ) {}
 	}
 
 	// Writes the value to the given edit.
@@ -870,102 +886,126 @@ namespace mx {
 		}
 		_rRes.u.ui64Val = (_rRes.u.ui64Val << (64ULL - _sSrcSize)) >> (64ULL - _sSrcSize);
 		CSecureWString swsTmp;
-		CUtilities::ToOct( _rRes.u.ui64Val, swsTmp, 0 );
+		try {
+			CUtilities::ToOct( _rRes.u.ui64Val, swsTmp, 0 );
 
 
-		_pwControl->SetTextW( swsTmp.c_str() );
+			_pwControl->SetTextW( swsTmp.c_str() );
+		}
+		catch ( ... ) {}
 	}
 
 	// Writes the value to the given edit.
 	void CConverterWindow::SetValueChar( CWidget * _pwControl, ee::CExpEvalContainer::EE_RESULT _rRes, ee::EE_NUM_CONSTANTS _ncType, size_t _sSize, bool _bByteSwap, size_t _sSrcSize, bool _bAltDisp ) {
-		CSecureString ssTmp = CSecureString( reinterpret_cast<char *>(&_rRes.u.ui64Val), 1 );
-		CSecureString swsFinal = _bAltDisp ? CUtilities::EscapeAllW( ssTmp, false ) :
-			CUtilities::EscapeStandardAscii( ssTmp, false );
-		_pwControl->SetTextA( swsFinal.c_str() );
+		try {
+			CSecureString ssTmp = CSecureString( reinterpret_cast<char *>(&_rRes.u.ui64Val), 1 );
+			CSecureString swsFinal = _bAltDisp ? CUtilities::EscapeAllW( ssTmp, false ) :
+				CUtilities::EscapeStandardAscii( ssTmp, false );
+			_pwControl->SetTextA( swsFinal.c_str() );
+		}
+		catch ( ... ) {}
 	}
 
 	// Writes the value to the given edit.
 	void CConverterWindow::SetValueUtf8( CWidget * _pwControl, ee::CExpEvalContainer::EE_RESULT _rRes, ee::EE_NUM_CONSTANTS _ncType, size_t _sSize, bool _bByteSwap, size_t _sSrcSize, bool _bAltDisp ) {
-		const char * pcText = reinterpret_cast<const char *>(&_rRes.u.ui64Val);
-		CSecureString ssTmp;
-		for ( size_t I = 0; I < ((_sSrcSize + (sizeof( char ) - 1)) >> 3); ++I ) {
-			ssTmp.push_back( pcText[I] );
+		try {
+			const char * pcText = reinterpret_cast<const char *>(&_rRes.u.ui64Val);
+			CSecureString ssTmp;
+			for ( size_t I = 0; I < ((_sSrcSize + (sizeof( char ) - 1)) >> 3); ++I ) {
+				ssTmp.push_back( pcText[I] );
+			}
+			_pwControl->SetTextW( (_bAltDisp ? ee::CExpEval::ToUtf16( CUtilities::EscapeAllW( ssTmp, false ) ) :
+				ee::CExpEval::ToUtf16( CUtilities::EscapeStandard( ssTmp, false ) ) ).c_str() );
 		}
-		_pwControl->SetTextW( (_bAltDisp ? ee::CExpEval::ToUtf16( CUtilities::EscapeAllW( ssTmp, false ) ) :
-			ee::CExpEval::ToUtf16( CUtilities::EscapeStandard( ssTmp, false ) ) ).c_str() );
+		catch ( ... ) {}
 	}
 
 	// Writes the value to the given edit.
 	void CConverterWindow::SetValueUtf16( CWidget * _pwControl, ee::CExpEvalContainer::EE_RESULT _rRes, ee::EE_NUM_CONSTANTS _ncType, size_t _sSize, bool _bByteSwap, size_t _sSrcSize, bool _bAltDisp ) {
-		const wchar_t * pcText = reinterpret_cast<const wchar_t *>(&_rRes.u.ui64Val);
-		CSecureWString ssTmp;
-		const size_t sSize = ((_sSrcSize + (sizeof( wchar_t ) * 8 - 1)) >> 4);	// Round up to the nearest full char size.
-		for ( size_t I = 0; I < sSize; ++I ) {
-			ssTmp.push_back( pcText[I] );
+		try {
+			const wchar_t * pcText = reinterpret_cast<const wchar_t *>(&_rRes.u.ui64Val);
+			CSecureWString ssTmp;
+			const size_t sSize = ((_sSrcSize + (sizeof( wchar_t ) * 8 - 1)) >> 4);	// Round up to the nearest full char size.
+			for ( size_t I = 0; I < sSize; ++I ) {
+				ssTmp.push_back( pcText[I] );
+			}
+			_pwControl->SetTextW( (_bAltDisp ? CUtilities::EscapeAllW( ssTmp, false ) :
+				CUtilities::EscapeStandard( ssTmp, false )).c_str() );
 		}
-		_pwControl->SetTextW( (_bAltDisp ? CUtilities::EscapeAllW( ssTmp, false ) :
-			CUtilities::EscapeStandard( ssTmp, false )).c_str() );
+		catch ( ... ) {}
 	}
 
 	// Writes the value to the given edit.
 	void CConverterWindow::SetValueUtf16_BE( CWidget * _pwControl, ee::CExpEvalContainer::EE_RESULT _rRes, ee::EE_NUM_CONSTANTS _ncType, size_t _sSize, bool _bByteSwap, size_t _sSrcSize, bool _bAltDisp ) {
-		const wchar_t * pcText = reinterpret_cast<const wchar_t *>(&_rRes.u.ui64Val);
-		CSecureWString ssTmp;
-		const size_t sSize = ((_sSrcSize + (sizeof( wchar_t ) * 8 - 1)) >> 4);	// Round up to the nearest full char size.
-		for ( size_t I = 0; I < sSize; ++I ) {
-			ssTmp.push_back( ::_byteswap_ushort( pcText[I] ) );
+		try {
+			const wchar_t * pcText = reinterpret_cast<const wchar_t *>(&_rRes.u.ui64Val);
+			CSecureWString ssTmp;
+			const size_t sSize = ((_sSrcSize + (sizeof( wchar_t ) * 8 - 1)) >> 4);	// Round up to the nearest full char size.
+			for ( size_t I = 0; I < sSize; ++I ) {
+				ssTmp.push_back( ::_byteswap_ushort( pcText[I] ) );
+			}
+			_pwControl->SetTextW( (_bAltDisp ? CUtilities::EscapeAllW( ssTmp, false ) :
+				CUtilities::EscapeStandard( ssTmp, false )).c_str() );
 		}
-		_pwControl->SetTextW( (_bAltDisp ? CUtilities::EscapeAllW( ssTmp, false ) :
-			CUtilities::EscapeStandard( ssTmp, false )).c_str() );
+		catch ( ... ) {}
 	}
 
 	// Writes the value to the given edit.
 	void CConverterWindow::SetValueUtf32( CWidget * _pwControl, ee::CExpEvalContainer::EE_RESULT _rRes, ee::EE_NUM_CONSTANTS _ncType, size_t _sSize, bool _bByteSwap, size_t _sSrcSize, bool _bAltDisp ) {
-		const uint32_t * pcText = reinterpret_cast<const uint32_t *>(&_rRes.u.ui64Val);
-		std::vector<uint32_t> ssTmp;
-		const size_t sSize = ((_sSrcSize + (sizeof( uint32_t ) * 8 - 1)) >> 5);	// Round up to the nearest full char size.
-		for ( size_t I = 0; I < sSize; ++I ) {
-			ssTmp.push_back( pcText[I] );
+		try {
+			const uint32_t * pcText = reinterpret_cast<const uint32_t *>(&_rRes.u.ui64Val);
+			std::vector<uint32_t> ssTmp;
+			const size_t sSize = ((_sSrcSize + (sizeof( uint32_t ) * 8 - 1)) >> 5);	// Round up to the nearest full char size.
+			for ( size_t I = 0; I < sSize; ++I ) {
+				ssTmp.push_back( pcText[I] );
+			}
+			std::vector<uint32_t> vTmp;
+			if ( _bAltDisp ) {
+				vTmp = CUtilities::EscapeAllW( ssTmp, false );
+			}
+			else {
+				vTmp = CUtilities::EscapeStandard( ssTmp, false );			
+			}
+			_pwControl->SetTextW( ee::CExpEval::Utf32StringToWString( vTmp.data(), vTmp.size() ).c_str() );
 		}
-		std::vector<uint32_t> vTmp;
-		if ( _bAltDisp ) {
-			vTmp = CUtilities::EscapeAllW( ssTmp, false );
-		}
-		else {
-			vTmp = CUtilities::EscapeStandard( ssTmp, false );			
-		}
-		_pwControl->SetTextW( ee::CExpEval::Utf32StringToWString( vTmp.data(), vTmp.size() ).c_str() );
+		catch ( ... ) {}
 	}
 
 	// Writes the value to the given edit.
 	void CConverterWindow::SetValueUtf32_BE( CWidget * _pwControl, ee::CExpEvalContainer::EE_RESULT _rRes, ee::EE_NUM_CONSTANTS _ncType, size_t _sSize, bool _bByteSwap, size_t _sSrcSize, bool _bAltDisp ) {
-		const uint32_t * pcText = reinterpret_cast<const uint32_t *>(&_rRes.u.ui64Val);
-		std::vector<uint32_t> ssTmp;
-		const size_t sSize = ((_sSrcSize + (sizeof( uint32_t ) * 8 - 1)) >> 5);	// Round up to the nearest full char size.
-		for ( size_t I = 0; I < sSize; ++I ) {
-			ssTmp.push_back( ::_byteswap_ulong( pcText[I] ) );
+		try {
+			const uint32_t * pcText = reinterpret_cast<const uint32_t *>(&_rRes.u.ui64Val);
+			std::vector<uint32_t> ssTmp;
+			const size_t sSize = ((_sSrcSize + (sizeof( uint32_t ) * 8 - 1)) >> 5);	// Round up to the nearest full char size.
+			for ( size_t I = 0; I < sSize; ++I ) {
+				ssTmp.push_back( ::_byteswap_ulong( pcText[I] ) );
+			}
+			std::vector<uint32_t> vTmp;
+			if ( _bAltDisp ) {
+				vTmp = CUtilities::EscapeAllW( ssTmp, false );
+			}
+			else {
+				vTmp = CUtilities::EscapeStandard( ssTmp, false );			
+			}
+			_pwControl->SetTextW( ee::CExpEval::Utf32StringToWString( vTmp.data(), vTmp.size() ).c_str() );
 		}
-		std::vector<uint32_t> vTmp;
-		if ( _bAltDisp ) {
-			vTmp = CUtilities::EscapeAllW( ssTmp, false );
-		}
-		else {
-			vTmp = CUtilities::EscapeStandard( ssTmp, false );			
-		}
-		_pwControl->SetTextW( ee::CExpEval::Utf32StringToWString( vTmp.data(), vTmp.size() ).c_str() );
+		catch ( ... ) {}
 	}
 
 	// Writes the value to the given edit.
 	void CConverterWindow::SetValueBinary( CWidget * _pwControl, ee::CExpEvalContainer::EE_RESULT _rRes, ee::EE_NUM_CONSTANTS _ncType, size_t _sSize, bool _bByteSwap, size_t _sSrcSize, bool _bAltDisp ) {
-		if ( _bByteSwap ) {
-			_rRes = ByteSwapBySize( _rRes, _sSrcSize );
+		try {
+			if ( _bByteSwap ) {
+				_rRes = ByteSwapBySize( _rRes, _sSrcSize );
+			}
+			_rRes.u.ui64Val = (_rRes.u.ui64Val << (64ULL - _sSrcSize)) >> (64ULL - _sSrcSize);
+			CSecureWString swsTmp;
+			CUtilities::ToBinary( _rRes.u.ui64Val, swsTmp, _sSrcSize );
+
+
+			_pwControl->SetTextW( swsTmp.c_str() );
 		}
-		_rRes.u.ui64Val = (_rRes.u.ui64Val << (64ULL - _sSrcSize)) >> (64ULL - _sSrcSize);
-		CSecureWString swsTmp;
-		CUtilities::ToBinary( _rRes.u.ui64Val, swsTmp, _sSrcSize );
-
-
-		_pwControl->SetTextW( swsTmp.c_str() );
+		catch ( ... ) {}
 	}
 
 	// Byteswaps based on the number of bits passed.

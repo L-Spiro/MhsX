@@ -17722,3 +17722,48 @@
 #define _DEC_S_CEE34699_Invalid_input__ mx::CStringDecoder::DecodeToString( _T_CEE34699_Invalid_input__, _LEN_CEE34699 )
 #define _DEC_WS_CEE34699_Invalid_input__ mx::CStringDecoder::DecodeToWString( _T_CEE34699_Invalid_input__, _LEN_CEE34699 )
 
+// C String
+
+#define _T_255D35C7_C_String "\xCB\xEE\x23\x0F\x04\x32\xFC\x2E"
+#define _LEN_255D35C7 8
+#define _T_LEN_255D35C7_C_String _T_255D35C7_C_String, _LEN_255D35C7
+#define _DEC_255D35C7_C_String( STR ) mx::CStringDecoder::Decode( _T_255D35C7_C_String, _LEN_255D35C7, STR )
+#define _DEC_S_255D35C7_C_String mx::CStringDecoder::DecodeToString( _T_255D35C7_C_String, _LEN_255D35C7 )
+#define _DEC_WS_255D35C7_C_String mx::CStringDecoder::DecodeToWString( _T_255D35C7_C_String, _LEN_255D35C7 )
+
+// <multiple items>
+
+#define _T_43645600__multiple_items_ "\xC4\x3B\x45\x07\x06\x32\xFE\x33\x35\xE8\x32\x42\xF7\x08\x3A\xC6"
+#define _LEN_43645600 16
+#define _T_LEN_43645600__multiple_items_ _T_43645600__multiple_items_, _LEN_43645600
+#define _DEC_43645600__multiple_items_( STR ) mx::CStringDecoder::Decode( _T_43645600__multiple_items_, _LEN_43645600, STR )
+#define _DEC_S_43645600__multiple_items_ mx::CStringDecoder::DecodeToString( _T_43645600__multiple_items_, _LEN_43645600 )
+#define _DEC_WS_43645600__multiple_items_ mx::CStringDecoder::DecodeToWString( _T_43645600__multiple_items_, _LEN_43645600 )
+
+// String conversion error: 
+
+#define _T_FA427FE5_String_conversion_error__ "\xDB\x42\x42\x04\x00\x30\xAE\x2A\x3F\x36\x3F\x33\x04\x0E\x30\xF7\x3C\xF0\x00\x04\x3B\xFD\x39\x0A\xE8"
+#define _LEN_FA427FE5 25
+#define _T_LEN_FA427FE5_String_conversion_error__ _T_FA427FE5_String_conversion_error__, _LEN_FA427FE5
+#define _DEC_FA427FE5_String_conversion_error__( STR ) mx::CStringDecoder::Decode( _T_FA427FE5_String_conversion_error__, _LEN_FA427FE5, STR )
+#define _DEC_S_FA427FE5_String_conversion_error__ mx::CStringDecoder::DecodeToString( _T_FA427FE5_String_conversion_error__, _LEN_FA427FE5 )
+#define _DEC_WS_FA427FE5_String_conversion_error__ mx::CStringDecoder::DecodeToWString( _T_FA427FE5_String_conversion_error__, _LEN_FA427FE5 )
+
+// bytes)
+
+#define _T_ECDD0115_bytes_ "\xEA\x47\x44\x00\x05\xF2"
+#define _LEN_ECDD0115 6
+#define _T_LEN_ECDD0115_bytes_ _T_ECDD0115_bytes_, _LEN_ECDD0115
+#define _DEC_ECDD0115_bytes_( STR ) mx::CStringDecoder::Decode( _T_ECDD0115_bytes_, _LEN_ECDD0115, STR )
+#define _DEC_S_ECDD0115_bytes_ mx::CStringDecoder::DecodeToString( _T_ECDD0115_bytes_, _LEN_ECDD0115 )
+#define _DEC_WS_ECDD0115_bytes_ mx::CStringDecoder::DecodeToWString( _T_ECDD0115_bytes_, _LEN_ECDD0115 )
+
+//  bytes)
+
+#define _T_0FCE4654__bytes_ "\xA8\x30\x49\x0F\xF7\x3C\xB7"
+#define _LEN_0FCE4654 7
+#define _T_LEN_0FCE4654__bytes_ _T_0FCE4654__bytes_, _LEN_0FCE4654
+#define _DEC_0FCE4654__bytes_( STR ) mx::CStringDecoder::Decode( _T_0FCE4654__bytes_, _LEN_0FCE4654, STR )
+#define _DEC_S_0FCE4654__bytes_ mx::CStringDecoder::DecodeToString( _T_0FCE4654__bytes_, _LEN_0FCE4654 )
+#define _DEC_WS_0FCE4654__bytes_ mx::CStringDecoder::DecodeToWString( _T_0FCE4654__bytes_, _LEN_0FCE4654 )
+

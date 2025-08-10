@@ -1903,7 +1903,7 @@ namespace mx {
 		return ee::CExpEval::WStringToString( swsTmp );
 	}
 
-	// Maps a UTF-16 (wide character) string to a new character string. The new character string is not necessarily from a multibyte character set.
+	// Maps a UTF-16 (wide character) string to a new character string. The new character string is not necessarily from a multibyte character set.  Call within a try/catch block.
 	CSecureString CUtilities::WideCharToMultiByte( UINT _uiCodePage,
 		DWORD _dwFlags,
 		const std::wstring &_wsString,
@@ -1911,6 +1911,7 @@ namespace mx {
 		LPBOOL _lpUsedDefaultChar,
 		DWORD * _pdwLastError ) {
 		if ( _pdwLastError ) { (*_pdwLastError) = ERROR_SUCCESS; }
+		if ( !_wsString.size() ) { return CSecureString(); }
 		
 		switch ( _uiCodePage ) {
 			case CCodePages::MX_utf_16 : {
@@ -2008,6 +2009,7 @@ namespace mx {
 		const std::string &_sString,
 		DWORD * _pdwLastError ) {
 		if ( _pdwLastError ) { (*_pdwLastError) = ERROR_SUCCESS; }
+		if ( !_sString.size() ) { return CSecureWString(); }
 
 		switch ( _uiCodePage ) {
 			case CCodePages::MX_utf_16 : {
@@ -3746,7 +3748,7 @@ namespace mx {
 	}
 
 	// Takes a string and converts X number of elements into either a single byte array (if contiguous) or into an array of arrays.  Returns the number of items converted.
-	uint32_t CUtilities::WStringToArrayBytes( std::vector<std::vector<uint8_t>> &_vDst, const CSecureWString &_swsString, MX_DATA_TYPES _dtTargetType, bool _bContiguous, CSecureWString &_swsError ) {
+	uint32_t CUtilities::WStringToArrayBytes( std::vector<std::vector<uint8_t>> &_vDst, const CSecureWString &_swsString, MX_DATA_TYPES _dtTargetType, int _iBase, bool _bContiguous, CSecureWString &_swsError ) {
 		try {
 			// We support full-width Japanese characters.  Convert them to normal characters.
 			CSecureString ssTmp;
@@ -3777,7 +3779,7 @@ namespace mx {
 
 			uint32_t ui32Idx = 0;
 			for ( size_t I = 0; I < vLines.size(); ++I ) {
-				auto ssResult = NumberStringToString( vLines[I], -1, UINT64_MAX, _dtTargetType, nullptr );
+				auto ssResult = NumberStringToString( vLines[I], _iBase, UINT64_MAX, _dtTargetType, nullptr );
 				if ( !ssResult.size() ) {
 					_swsError = _DEC_WS_CEE34699_Invalid_input__;
 					_swsError += ee::CExpEval::ToUtf16<CSecureWString>( vLines[I] );

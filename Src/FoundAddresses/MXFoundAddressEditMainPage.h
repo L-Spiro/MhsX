@@ -70,6 +70,9 @@ namespace mx {
 		// Gets the lock type for a given found address.
 		static LPARAM							LockType( CFoundAddressBase * _pfabFoundAddress );
 
+		// Converts a string to its description.
+		static CSecureWString					StringToDescr( const CSecureWString &_swsString, bool _bResolveEscapes, UINT _uiCodePage );
+
 	private :
 		typedef CFoundAddressEditLayout			Layout;
 		

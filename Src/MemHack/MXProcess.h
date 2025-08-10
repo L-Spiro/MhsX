@@ -2,6 +2,7 @@
 #include "../MXMhsX.h"
 #include "../IO/MXInOutInterface.h"
 #include "../Strings/MXSecureWString.h"
+
 #include <CriticalSection/LSWCriticalSection.h>
 #include <Helpers/LSWHelpers.h>
 #include <Threads/LSWThread.h.>
@@ -123,8 +124,7 @@ namespace mx {
 		// Open a process structure.
 		struct MX_OPEN_PROC {
 			volatile LONG				aAtom;							// The the atom is set on the main thread, unset on the monitoring thread. (ATOM defines to WORD on MINWIN defined, which is a bug).
-			HANDLE						hHandle;						// The handle returned by OpenProcess().
-			//CProcess *					ppProcess;						// Pointer to this object.
+			HANDLE						hHandle = NULL;					// The handle returned by OpenProcess().
 
 			MX_OPEN_PROC() :
 				aAtom( 1 ) {}
@@ -148,7 +148,7 @@ namespace mx {
 		CCriticalSection				m_csCrit;
 		
 		// The thread to signal when the process is no longer open.
-		CThread							m_tProcOpenThread;
+		lsw::CThread					m_tProcOpenThread;
 
 		// Thread parameters.
 		MX_OPEN_PROC					m_opOpenProcThreadMonitor;
@@ -182,7 +182,7 @@ namespace mx {
 		size_t							VirtualQueryExInternal( uint64_t _lpAddress, PMEMORY_BASIC_INFORMATION64 _lpBuffer );
 
 		// Open-process thread.
-		void							CreateProcessThread( CProcess & _pProcess );
+		//void							CreateProcessThread( CProcess & _pProcess );
 
 		// Open-process thread.  Runs for as long as the target process is open.
 		static DWORD WINAPI				ThreadProc( LPVOID _lpParameter );

@@ -325,11 +325,14 @@ namespace mx {
 		inline bool									WriteStringU16( const CSecureWString &_wsString ) {
 			BOOL bErrored = FALSE;
 			CHAR cDefault = '?';
-			CSecureString sTmp = CUtilities::WideCharToMultiByte( CP_UTF8, WC_DEFAULTCHAR, _wsString, &cDefault, &bErrored );
-			if ( bErrored ) {
-				return WriteString( CSecureString() );
+			try {
+				CSecureString sTmp = CUtilities::WideCharToMultiByte( CP_UTF8, WC_DEFAULTCHAR, _wsString, &cDefault, &bErrored );
+				if ( bErrored ) {
+					return WriteString( CSecureString() );
+				}
+				return WriteString( sTmp );
 			}
-			return WriteString( sTmp );
+			catch ( ... ) { return WriteString( CSecureString() ); }
 		}
 
 

@@ -35,7 +35,7 @@ namespace mx {
 #define MX_VWL_GROUP_H										(MX_GROUP_TOP + MX_DEF_COMBO_HEIGHT + MX_GROUP_BOTTOM + MX_TOP_JUST + (MX_DEF_COMBO_HEIGHT + MX_TOP_JUST))
 
 #define MX_INFO_GROUP_T										(MX_QL_GROUP_T + MX_QL_GROUP_H)
-#define MX_INFO_GROUP_H										(MX_GROUP_TOP + MX_DEF_EDIT_HEIGHT + MX_GROUP_BOTTOM + MX_TOP_JUST)
+#define MX_INFO_GROUP_H										(MX_GROUP_TOP + MX_DEF_EDIT_HEIGHT + (MX_TOP_JUST + MX_DEF_STATIC_HEIGHT * 6) + MX_GROUP_BOTTOM + MX_TOP_JUST)
 
 #define MX_EDIT_H											(MX_INFO_GROUP_T + MX_INFO_GROUP_H + MX_TOP_JUST)
 
@@ -729,6 +729,22 @@ namespace mx {
 			MX_DEF_EDIT_HEIGHT,								// dwHeight
 			MX_EDITSTYLE | ES_READONLY,						// dwStyle
 			WS_EX_CLIENTEDGE,								// dwStyleEx
+			nullptr,										// pwcText
+			0,												// sTextLen
+			MX_FAEI_GENERAL_PAGE,							// dwParentId
+		},
+		{
+			LSW_LT_LABEL,									// ltType
+			MX_FAEI_INFO_DESC_LABEL,						// wId
+			WC_STATICW,										// lpwcClass
+			TRUE,											// bEnabled
+			FALSE,											// bActive
+			MX_SECTION1_L,									// iLeft
+			(MX_INFO_GROUP_T + MX_GROUP_TOP) + MX_DEF_EDIT_HEIGHT + MX_TOP_JUST,
+			MX_INNER_W,										// dwWidth
+			MX_DEF_STATIC_HEIGHT * 6,						// dwHeight
+			MX_STATICSTYLE | SS_EDITCONTROL | SS_NOPREFIX,	// dwStyle
+			0,												// dwStyleEx
 			nullptr,										// pwcText
 			0,												// sTextLen
 			MX_FAEI_GENERAL_PAGE,							// dwParentId

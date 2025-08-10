@@ -1165,9 +1165,9 @@ namespace mx {
 	}
 
 	// WM_NOTIFY->NM_DBLCLK for the owning window if the child either could not be resolved or returned LSW_HANDLED::LSW_H_CONTINUE.
-	CWidget::LSW_HANDLED CMhsMainWindow::DblClk( const LPNMITEMACTIVATE _phHdr, WORD /*_wControlId*/, CWidget * /*_pwWidget*/ ) {
-		return LSW_H_CONTINUE;
-	}
+	//CWidget::LSW_HANDLED CMhsMainWindow::DblClk( const LPNMITEMACTIVATE _phHdr, WORD /*_wControlId*/, CWidget * /*_pwWidget*/ ) {
+	//	return LSW_H_CONTINUE;
+	//}
 
 	// Informs that a child was removed from a child control (IE this control's child had a child control removed from it).
 	// Is also called on the control from which a child was removed for convenience.

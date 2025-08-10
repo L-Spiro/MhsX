@@ -252,7 +252,7 @@ namespace mx {
 		virtual LSW_HANDLED					DblClk( const LPNMITEMACTIVATE _phHdr );
 
 		// WM_NOTIFY->NM_DBLCLK for the owning window if the child either could not be resolved or returned LSW_HANDLED::LSW_H_CONTINUE.
-		virtual LSW_HANDLED					DblClk( const LPNMITEMACTIVATE /*_phHdr*/, WORD /*_wControlId*/, CWidget * /*_pwWidget*/ );
+		//virtual LSW_HANDLED					DblClk( const LPNMITEMACTIVATE /*_phHdr*/, WORD /*_wControlId*/, CWidget * /*_pwWidget*/ );
 
 
 	protected :

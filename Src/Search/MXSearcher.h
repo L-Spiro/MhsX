@@ -39,82 +39,82 @@ namespace mx {
 
 		// == Types.
 		struct MX_SEARCH_CHUNK_OPTIONS {
-			bool							bStaticOnly;
-			DWORD							dwTypes;
+			bool							bStaticOnly = false;
+			DWORD							dwTypes = 0;
 		};
 
 		// Search parameters.
 		struct MX_SEARCH_PARMS {
-			uint64_t						ui64AddressFrom;
-			uint64_t						ui64AddressTo;
-			uint64_t						ui64MaxChunkLen;
-			DWORD							dwRegions;
+			uint64_t						ui64AddressFrom = 0;
+			uint64_t						ui64AddressTo = 0;
+			uint64_t						ui64MaxChunkLen = 0;
+			DWORD							dwRegions = 0;
 
 			// Data-type search.
 			CUtilities::MX_DATA_TYPE		dtLVal;
 			CUtilities::MX_DATA_TYPE		dtRVal;
-			CUtilities::MX_SEARCH_TYPES		stType;
-			int32_t							i32EvalType;
+			CUtilities::MX_SEARCH_TYPES		stType = CUtilities::MX_ST_DATATYPE_SEARCH;
+			int32_t							i32EvalType = 0;
 
 			// String search.
 			std::vector<uint8_t>			vStringSearchValue;
 			std::vector<uint8_t>			vStringMetaData;
-			CUtilities::MX_WILDCARD_USAGE	wuWildcardUsage;
+			CUtilities::MX_WILDCARD_USAGE	wuWildcardUsage = CUtilities::MX_WU_NONE;
 			CUtilities::MX_STRING_SEARCH_TYPES
-											sstSearchType;
-			uint32_t						ui32StringSearchFlags;
-			uint32_t						ui32StringSearchFlagsEx;
-			uint32_t						ui32RegexFlags;
-			CUtilities::MX_DATA_TYPES		dtStringCharType;
-			CUtilities::MX_REGEX_FLAVORS	rfRegexFlavor;
-			CUtilities::MX_REGEX_ENCODING	reRegexEncoding;
+											sstSearchType = CUtilities::MX_SST_ASCII;
+			uint32_t						ui32StringSearchFlags = 0;
+			uint32_t						ui32StringSearchFlagsEx = 0;
+			uint32_t						ui32RegexFlags = 0;
+			CUtilities::MX_DATA_TYPES		dtStringCharType = CUtilities::MX_DT_UINT32;
+			CUtilities::MX_REGEX_FLAVORS	rfRegexFlavor = CUtilities::MX_RF_ONIGURUMA;
+			CUtilities::MX_REGEX_ENCODING	reRegexEncoding = CUtilities::MX_RE_UTF8;
 
 			// Expression search.
 			CSecureString					ssExpression;
 			CUtilities::MX_EXP_SEARCH_QQ_MEANING
-											esqmExpSearchType;
-			uint32_t						ui32ExpSearchSize;
+											esqmExpSearchType = CUtilities::MX_ESQM_VALUE;
+			uint32_t						ui32ExpSearchSize = 0;
 			
 			// Epsilon settings.
-			double							dEpsilonValue;
-			bool							bUseEpsilon;
-			bool							bUseSmartEpsilon;
+			double							dEpsilonValue = 0.0;
+			bool							bUseEpsilon = true;
+			bool							bUseSmartEpsilon = true;
 
 			// Misc.
-			bool							bAligned;
-			bool							bInvertResults;
-			int32_t							ui32Alignment;
-			CUtilities::MX_BYTESWAP			bsByteSwapping;
+			bool							bAligned = true;
+			bool							bInvertResults = false;
+			int32_t							ui32Alignment = 0;
+			CUtilities::MX_BYTESWAP			bsByteSwapping = CUtilities::MX_BS_NONE;
 
 			// System settings & works.
-			bool *							pbAbort;
-			int								iThreadPriority;
-			bool							bPause;
+			bool *							pbAbort = nullptr;
+			int								iThreadPriority = 0;
+			bool							bPause = false;
 		};
 
 		// Subsearch parameters.
 		struct MX_SUBSEARCH_PARMS {
-			uint64_t						ui64MaxChunkLen;
-			CUtilities::MX_SEARCH_TYPES		stInitialType;			// Initial search type.
-			int32_t							i32EvalType;			// MX_SUB_EVAL_TYPES.
+			uint64_t						ui64MaxChunkLen = 0;
+			CUtilities::MX_SEARCH_TYPES		stInitialType = CUtilities::MX_ST_DATATYPE_SEARCH;			// Initial search type.
+			int32_t							i32EvalType = 0;			// MX_SUB_EVAL_TYPES.
 			CUtilities::MX_DATA_TYPE		dtLVal;
 			CUtilities::MX_DATA_TYPE		dtRVal;
 
 			CSecureString					ssExpression;
 
 			// Epsilon settings.
-			double							dEpsilonValue;
-			bool							bUseEpsilon;
-			bool							bUseSmartEpsilon;
+			double							dEpsilonValue = 0.0;
+			bool							bUseEpsilon = false;
+			bool							bUseSmartEpsilon = true;
 
 			// Misc.
-			bool							bInvertResults;
-			CUtilities::MX_BYTESWAP			bsByteSwapping;
+			bool							bInvertResults = false;
+			CUtilities::MX_BYTESWAP			bsByteSwapping = CUtilities::MX_BS_NONE;
 
 			// System settings & works.
-			bool *							pbAbort;
-			int								iThreadPriority;
-			bool							bPause;
+			bool *							pbAbort = nullptr;
+			int								iThreadPriority = 0;
+			bool							bPause = false;
 		};
 
 		// Safely locks the searcher.

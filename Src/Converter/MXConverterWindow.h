@@ -110,43 +110,43 @@ namespace mx {
 
 		// Gets the value from the given text edit.
 		static ee::CExpEvalContainer::EE_RESULT
-											GetValue( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex );
+											GetValue( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex );
 
 		// Gets the value from the given text edit.
 		static ee::CExpEvalContainer::EE_RESULT
-											GetValueHex( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex );
+											GetValueHex( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex );
 
 		// Gets the value from the given text edit.
 		static ee::CExpEvalContainer::EE_RESULT
-											GetValueOct( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex );
+											GetValueOct( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex );
 
 		// Gets the value from the given text edit.
 		static ee::CExpEvalContainer::EE_RESULT
-											GetValueChar( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex );
+											GetValueChar( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex );
 
 		// Gets the value from the given text edit.
 		static ee::CExpEvalContainer::EE_RESULT
-											GetValueUtf8( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex );
+											GetValueUtf8( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex );
 
 		// Gets the value from the given text edit.
 		static ee::CExpEvalContainer::EE_RESULT
-											GetValueUtf16( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex );
+											GetValueUtf16( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex );
 
 		// Gets the value from the given text edit.
 		static ee::CExpEvalContainer::EE_RESULT
-											GetValueUtf16_BE( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex );
+											GetValueUtf16_BE( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex );
 
 		// Gets the value from the given text edit.
 		static ee::CExpEvalContainer::EE_RESULT
-											GetValueUtf32( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex );
+											GetValueUtf32( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex );
 
 		// Gets the value from the given text edit.
 		static ee::CExpEvalContainer::EE_RESULT
-											GetValueUtf32_BE( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex );
+											GetValueUtf32_BE( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex );
 
 		// Gets the value from the given text edit.
 		static ee::CExpEvalContainer::EE_RESULT
-											GetValueBinary( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t & _sSize, bool _bHex );
+											GetValueBinary( CWidget * _pwControl, ee::EE_NUM_CONSTANTS _ncType, size_t &_sSize, bool _bHex );
 
 		// Writes the value to the given edit.
 		static void							SetValueStd( CWidget * _pwControl, ee::CExpEvalContainer::EE_RESULT _rRes, ee::EE_NUM_CONSTANTS _ncType, size_t _sSize, bool _bByteSwap, size_t _sSrcSize );
