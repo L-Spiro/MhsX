@@ -73,6 +73,12 @@ namespace mx {
 		// Converts a string to its description.
 		static CSecureWString					StringToDescr( const CSecureWString &_swsString, bool _bResolveEscapes, UINT _uiCodePage );
 
+		// Converts a float string to is description.
+		static CSecureWString					FloatToDesc( const CSecureWString &_swsString, CUtilities::MX_DATA_TYPES _dtType, bool _bScentific, uint32_t &_ui32ArrayLen, uint32_t _ui32Stride, std::vector<ee::CExpEvalContainer::EE_RESULT> * _pvExps );
+
+		// Converts a not-float string to its description.
+		static CSecureWString					IntegralToDesc( const CSecureWString &_swsString, CUtilities::MX_DATA_TYPES _dtType, bool _bIsHex, uint32_t &_ui32ArrayLen, uint32_t _ui32Stride, std::vector<ee::CExpEvalContainer::EE_RESULT> * _pvExps );
+
 	private :
 		typedef CFoundAddressEditLayout			Layout;
 		

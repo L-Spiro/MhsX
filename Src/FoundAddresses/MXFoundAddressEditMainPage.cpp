@@ -158,8 +158,8 @@ namespace mx {
 				{ Layout::MX_FAEI_VALUE_ARRAY_LEN_LABEL,				iType != LPARAM( CUtilities::MX_DT_STRING ) },
 				{ Layout::MX_FAEI_VALUE_ARRAY_LEN_COMBO,				iType != LPARAM( CUtilities::MX_DT_STRING ) },
 
-				{ Layout::MX_FAEI_VALUE_ARRAY_STRIDE_LABEL,				rRes.u.i64Val >= 2 },
-				{ Layout::MX_FAEI_VALUE_ARRAY_STRIDE_COMBO,				rRes.u.i64Val >= 2 },
+				{ Layout::MX_FAEI_VALUE_ARRAY_STRIDE_LABEL,				rRes.u.i64Val != 1 && iType != LPARAM( CUtilities::MX_DT_STRING ) },
+				{ Layout::MX_FAEI_VALUE_ARRAY_STRIDE_COMBO,				rRes.u.i64Val != 1 && iType != LPARAM( CUtilities::MX_DT_STRING ) },
 			};
 			for ( auto I = MX_ELEMENTS( cControls ); I--; ) {
 				auto pwThis = FindChild( cControls[I].wId );
@@ -239,8 +239,7 @@ namespace mx {
 						// ===================
 						// VALUE WHEN LOCKED
 						// ===================
-						swsExpText += _DEC_WS_022E8A69_Value_When_Locked;
-						swsExpText += L' ';
+						swsExpText += _DEC_WS_E64C54B0_Value_When_Locked__;
 
 						pwCurVal = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_COMBO );
 						if ( pwCurVal ) {
@@ -257,9 +256,369 @@ namespace mx {
 						break;
 					}
 					default : {
+						do {
+							// ===================
+							// CURRENT VALUE
+							// ===================
+							swsExpText += _DEC_WS_320BB0E4_Value_;
+							swsExpText += L' ';
+							ee::CExpEvalContainer::EE_RESULT rRes;
+							if ( CUtilities::DataTypeIsFloat( static_cast<CUtilities::MX_DATA_TYPES>(iType) ) ) {
+								int32_t i32Digits = 17;
+								bool bScientific = false;
+								auto pwCurVal = FindChild( Layout::MX_FAEI_VALUE_TYPE_SCIENTIFIC_CHECK );
+								if ( pwCurVal && pwCurVal->IsChecked() ) {
+									bScientific = true;
+								}
+
+								uint32_t ui32DesiredArrayLen = 0;
+								pwCurVal = FindChild( Layout::MX_FAEI_VALUE_ARRAY_LEN_COMBO );
+								if ( pwCurVal ) {
+									ee::CExpEvalContainer::EE_RESULT rRes;
+									if ( bIsMulti && !pwCurVal->GetTextW().size() ) {
+									}
+									else {
+										if ( !pwCurVal->GetTextAsUInt64Expression( rRes ) ) {
+											swsExpText += _DEC_WS_43849434_Invalid_array_length_;
+											break;
+										}
+										if ( rRes.u.ui64Val > CFoundAddress::MaxArrayLen() ) {
+											swsExpText += _DEC_WS_467E0365_Array_length_must_be_between_0_and_;
+											swsExpText += std::to_wstring( CFoundAddress::MaxArrayLen() );
+											swsExpText += L'.';
+											break;
+										}
+										ui32DesiredArrayLen = uint32_t( rRes.u.ui64Val );
+									}
+								}
+
+								uint32_t ui32Stride = 0;
+								pwCurVal = FindChild( Layout::MX_FAEI_VALUE_ARRAY_STRIDE_COMBO );
+								if ( pwCurVal ) {
+									ee::CExpEvalContainer::EE_RESULT rRes;
+									if ( bIsMulti && !pwCurVal->GetTextW().size() ) {
+									}
+									else {
+										if ( !pwCurVal->GetTextAsUInt64Expression( rRes ) ) {
+											swsExpText += _DEC_WS_0BF61404_Invalid_stride;
+											break;
+										}
+										if ( rRes.u.ui64Val > CFoundAddress::MaxArrayStride() ) {
+											swsExpText += _DEC_WS_F033357E_Stride_must_be_between_0_and_;
+											swsExpText += std::to_wstring( CFoundAddress::MaxArrayStride() );
+											swsExpText += L'.';
+											break;
+										}
+										ui32Stride = uint32_t( rRes.u.ui64Val );
+									}
+								}
+								pwCurVal = FindChild( Layout::MX_FAEI_VALUE_CUR_VAL_COMBO );
+								uint32_t ui32ArrayLen = ui32DesiredArrayLen;
+								if ( pwCurVal ) {
+									auto swsCurText = pwCurVal->GetTextW();
+									if ( !swsCurText.size() && bIsMulti ) {
+										// Empty string on multi-select means don't change the texts.
+										swsExpText += _DEC_WS_43645600__multiple_items_;
+									}
+									else {
+										swsExpText += FloatToDesc( swsCurText, static_cast<CUtilities::MX_DATA_TYPES>(iType), bScientific, ui32ArrayLen, ui32Stride, nullptr );
+									}
+
+								}
+
+								if ( ui32DesiredArrayLen ) {
+									if ( ui32ArrayLen > ui32DesiredArrayLen ) {
+										swsExpText += L'\r';
+										swsExpText += L'\n';
+										swsExpText += _DEC_WS_8869E389_The_current_value_has_more_elements_than_specified_by_Array_Length_;
+										break;
+									}
+								}
+
+								// Current value handled.
+								swsExpText += L'\r';
+								swsExpText += L'\n';
+
+
+
+								// ===================
+								// VALUE WHEN LOCKED
+								// ===================
+								swsExpText += _DEC_WS_E64C54B0_Value_When_Locked__;
+
+								pwCurVal = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_COMBO );
+								uint32_t ui32LeftArrayLen = ui32DesiredArrayLen;
+								std::vector<ee::CExpEvalContainer::EE_RESULT> vLeftResults;
+								if ( pwCurVal ) {
+									auto swsCurText = pwCurVal->GetTextW();
+									if ( !swsCurText.size() && bIsMulti ) {
+										// Empty string on multi-select means don't change the texts.
+										swsExpText += _DEC_WS_43645600__multiple_items_;
+									}
+									else {
+										swsExpText += FloatToDesc( swsCurText, static_cast<CUtilities::MX_DATA_TYPES>(iType), bScientific, ui32LeftArrayLen, ui32Stride, &vLeftResults );
+									}
+								}
+
+								if ( !ui32DesiredArrayLen ) {
+									if ( ui32ArrayLen != ui32LeftArrayLen ) {
+										swsExpText += L'\r';
+										swsExpText += L'\n';
+										swsExpText += _DEC_WS_DD4CBCAB_If_Array_Length_is_0__the_current_value_and_locked_value_s__must_have_the_same_number_of_elements_;
+										break;
+									}
+								}
+								else {
+									if ( ui32LeftArrayLen > ui32DesiredArrayLen ) {
+										swsExpText += L'\r';
+										swsExpText += L'\n';
+										swsExpText += _DEC_WS_FAD3DED1_The_locked_value_has_more_elements_than_specified_by_Array_Length_;
+										break;
+									}
+								}
+
+								if ( iValWhenLocked == LPARAM( CUtilities::MX_LT_RANGE ) ) {
+									pwCurVal = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
+									uint32_t ui32RighttArrayLen = ui32DesiredArrayLen;
+									if ( pwCurVal ) {
+										swsExpText += L'\r';
+										swsExpText += L'\n';
+										swsExpText += _DEC_WS_B09DF1A4_To_;
+										swsExpText += L' ';
+										auto swsCurText = pwCurVal->GetTextW();
+										std::vector<ee::CExpEvalContainer::EE_RESULT> vRightResults;
+										if ( !swsCurText.size() && bIsMulti ) {
+											// Empty string on multi-select means don't change the texts.
+											swsExpText += _DEC_WS_43645600__multiple_items_;
+										}
+										else {
+											swsExpText += FloatToDesc( swsCurText, static_cast<CUtilities::MX_DATA_TYPES>(iType), bScientific, ui32RighttArrayLen, ui32Stride, &vRightResults );
+										}
+
+										// Min and max values must be checked against each other.
+										size_t sLen = std::min<size_t>( vLeftResults.size(), vRightResults.size() );
+										swsExpText += L'\r';
+										swsExpText += L'\n';
+										for ( size_t I = 0; I < sLen; ++I ) {
+											ee::CExpEvalContainer::EE_RESULT rTmp;
+											if ( ee::CExpEvalContainer::EE_EC_SUCCESS != ee::CExpEvalContainer::PerformOp_S( vLeftResults[I], '>', vRightResults[I], rTmp ) ) {
+												swsExpText += _DEC_WS_247BC127_Internal_error_verifying_range_value_consistency_;
+												break;
+											}
+											if ( rTmp.u.ui64Val ) {
+												CSecureWString swsLeft, swsRight;
+												CUtilities::ToDataTypeString( vLeftResults[I], static_cast<CUtilities::MX_DATA_TYPES>(iType), swsLeft );
+												CUtilities::ToDataTypeString( vRightResults[I], static_cast<CUtilities::MX_DATA_TYPES>(iType), swsRight );
+												//swsExpText += std::format( _DEC_WS_4B09D6E2_Invalid_range_min_max_____must_be_lower_than_____index_____, swsLeft, swsRight, I );
+												swsExpText += _DEC_WS_E2E06A5A_Invalid_range_min_max__;
+												swsExpText += swsLeft;
+												swsExpText += _DEC_WS_B0C1E4AB__must_be_lower_than_or_equal_to_;
+												swsExpText += swsRight;
+												swsExpText += _DEC_WS_4F2FE7D3___index_;
+												swsExpText += std::to_wstring( I );
+												swsExpText += _DEC_WS_D94980DB___;
+
+												if ( !ui32DesiredArrayLen ) {
+													if ( ui32ArrayLen != ui32RighttArrayLen ) {
+														swsExpText += L'\r';
+														swsExpText += L'\n';
+														swsExpText += _DEC_WS_DD4CBCAB_If_Array_Length_is_0__the_current_value_and_locked_value_s__must_have_the_same_number_of_elements_;
+														break;
+													}
+												}
+												else {
+													if ( ui32RighttArrayLen > ui32DesiredArrayLen ) {
+														swsExpText += L'\r';
+														swsExpText += L'\n';
+														swsExpText += _DEC_WS_40FB27FE_The_range_lock_max_value_has_more_elements_than_specified_by_Array_Length_;
+														break;
+													}
+												}
+												break;
+											}
+										}
+									}
+								}
+							}
+							else {
+								bool bHex = false;
+								auto pwCurVal = FindChild( Layout::MX_FAEI_VALUE_TYPE_SHOW_AS_HEX_CHECK );
+								if ( pwCurVal && pwCurVal->IsChecked() ) {
+									bHex = true;
+								}
+
+								uint32_t ui32DesiredArrayLen = 0;
+								pwCurVal = FindChild( Layout::MX_FAEI_VALUE_ARRAY_LEN_COMBO );
+								if ( pwCurVal ) {
+									ee::CExpEvalContainer::EE_RESULT rRes;
+									if ( bIsMulti && !pwCurVal->GetTextW().size() ) {
+									}
+									else {
+										if ( !pwCurVal->GetTextAsUInt64Expression( rRes ) ) {
+											swsExpText += _DEC_WS_43849434_Invalid_array_length_;
+											break;
+										}
+										if ( rRes.u.ui64Val > CFoundAddress::MaxArrayLen() ) {
+											swsExpText += _DEC_WS_467E0365_Array_length_must_be_between_0_and_;
+											swsExpText += std::to_wstring( CFoundAddress::MaxArrayLen() );
+											swsExpText += L'.';
+											break;
+										}
+										ui32DesiredArrayLen = uint32_t( rRes.u.ui64Val );
+									}
+								}
+
+								uint32_t ui32Stride = 0;
+								pwCurVal = FindChild( Layout::MX_FAEI_VALUE_ARRAY_STRIDE_COMBO );
+								if ( pwCurVal ) {
+									ee::CExpEvalContainer::EE_RESULT rRes;
+									if ( bIsMulti && !pwCurVal->GetTextW().size() ) {
+									}
+									else {
+										if ( !pwCurVal->GetTextAsUInt64Expression( rRes ) ) {
+											swsExpText += _DEC_WS_0BF61404_Invalid_stride;
+											break;
+										}
+										if ( rRes.u.ui64Val > CFoundAddress::MaxArrayStride() ) {
+											swsExpText += _DEC_WS_F033357E_Stride_must_be_between_0_and_;
+											swsExpText += std::to_wstring( CFoundAddress::MaxArrayStride() );
+											swsExpText += L'.';
+											break;
+										}
+										ui32Stride = uint32_t( rRes.u.ui64Val );
+									}
+								}
+								pwCurVal = FindChild( Layout::MX_FAEI_VALUE_CUR_VAL_COMBO );
+								uint32_t ui32ArrayLen = ui32DesiredArrayLen;
+								if ( pwCurVal ) {
+									auto swsCurText = pwCurVal->GetTextW();
+									if ( !swsCurText.size() && bIsMulti ) {
+										// Empty string on multi-select means don't change the texts.
+										swsExpText += _DEC_WS_43645600__multiple_items_;
+									}
+									else {
+										swsExpText += IntegralToDesc( swsCurText, static_cast<CUtilities::MX_DATA_TYPES>(iType), bHex, ui32ArrayLen, ui32Stride, nullptr );
+									}
+								}
+
+								if ( ui32DesiredArrayLen ) {
+									if ( ui32ArrayLen > ui32DesiredArrayLen ) {
+										swsExpText += L'\r';
+										swsExpText += L'\n';
+										swsExpText += _DEC_WS_8869E389_The_current_value_has_more_elements_than_specified_by_Array_Length_;
+										break;
+									}
+								}
+
+								// Current value handled.
+								swsExpText += L'\r';
+								swsExpText += L'\n';
+
+
+
+								// ===================
+								// VALUE WHEN LOCKED
+								// ===================
+								swsExpText += _DEC_WS_E64C54B0_Value_When_Locked__;
+
+								pwCurVal = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_COMBO );
+								uint32_t ui32LeftArrayLen = ui32DesiredArrayLen;
+								std::vector<ee::CExpEvalContainer::EE_RESULT> vLeftResults;
+								if ( pwCurVal ) {
+									auto swsCurText = pwCurVal->GetTextW();
+									if ( !swsCurText.size() && bIsMulti ) {
+										// Empty string on multi-select means don't change the texts.
+										swsExpText += _DEC_WS_43645600__multiple_items_;
+									}
+									else {
+										swsExpText += IntegralToDesc( swsCurText, static_cast<CUtilities::MX_DATA_TYPES>(iType), bHex, ui32LeftArrayLen, ui32Stride, &vLeftResults );
+									}
+								}
+
+								if ( !ui32DesiredArrayLen ) {
+									if ( ui32ArrayLen != ui32LeftArrayLen ) {
+										swsExpText += L'\r';
+										swsExpText += L'\n';
+										swsExpText += _DEC_WS_DD4CBCAB_If_Array_Length_is_0__the_current_value_and_locked_value_s__must_have_the_same_number_of_elements_;
+										break;
+									}
+								}
+								else {
+									if ( ui32LeftArrayLen > ui32DesiredArrayLen ) {
+										swsExpText += L'\r';
+										swsExpText += L'\n';
+										swsExpText += _DEC_WS_FAD3DED1_The_locked_value_has_more_elements_than_specified_by_Array_Length_;
+										break;
+									}
+								}
+
+								if ( iValWhenLocked == LPARAM( CUtilities::MX_LT_RANGE ) ) {
+									pwCurVal = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
+									uint32_t ui32RighttArrayLen = ui32DesiredArrayLen;
+									if ( pwCurVal ) {
+										swsExpText += L'\r';
+										swsExpText += L'\n';
+										swsExpText += _DEC_WS_B09DF1A4_To_;
+										swsExpText += L' ';
+										auto swsCurText = pwCurVal->GetTextW();
+										std::vector<ee::CExpEvalContainer::EE_RESULT> vRightResults;
+										if ( !swsCurText.size() && bIsMulti ) {
+											// Empty string on multi-select means don't change the texts.
+											swsExpText += _DEC_WS_43645600__multiple_items_;
+										}
+										else {
+											swsExpText += IntegralToDesc( swsCurText, static_cast<CUtilities::MX_DATA_TYPES>(iType), bHex, ui32RighttArrayLen, ui32Stride, &vRightResults );
+										}
+
+										// Min and max values must be checked against each other.
+										size_t sLen = std::min<size_t>( vLeftResults.size(), vRightResults.size() );
+										swsExpText += L'\r';
+										swsExpText += L'\n';
+										for ( size_t I = 0; I < sLen; ++I ) {
+											ee::CExpEvalContainer::EE_RESULT rTmp;
+											if ( ee::CExpEvalContainer::EE_EC_SUCCESS != ee::CExpEvalContainer::PerformOp_S( vLeftResults[I], '>', vRightResults[I], rTmp ) ) {
+												swsExpText += _DEC_WS_247BC127_Internal_error_verifying_range_value_consistency_;
+												break;
+											}
+											if ( rTmp.u.ui64Val ) {
+												CSecureWString swsLeft, swsRight;
+												CUtilities::ToDataTypeString( vLeftResults[I], static_cast<CUtilities::MX_DATA_TYPES>(iType), swsLeft );
+												CUtilities::ToDataTypeString( vRightResults[I], static_cast<CUtilities::MX_DATA_TYPES>(iType), swsRight );
+												//swsExpText += std::format( _DEC_WS_4B09D6E2_Invalid_range_min_max_____must_be_lower_than_____index_____, swsLeft, swsRight, I );
+												swsExpText += _DEC_WS_E2E06A5A_Invalid_range_min_max__;
+												swsExpText += swsLeft;
+												swsExpText += _DEC_WS_B0C1E4AB__must_be_lower_than_or_equal_to_;
+												swsExpText += swsRight;
+												swsExpText += _DEC_WS_4F2FE7D3___index_;
+												swsExpText += std::to_wstring( I );
+												swsExpText += _DEC_WS_D94980DB___;
+
+												if ( !ui32DesiredArrayLen ) {
+													if ( ui32ArrayLen != ui32RighttArrayLen ) {
+														swsExpText += L'\r';
+														swsExpText += L'\n';
+														swsExpText += _DEC_WS_DD4CBCAB_If_Array_Length_is_0__the_current_value_and_locked_value_s__must_have_the_same_number_of_elements_;
+														break;
+													}
+												}
+												else {
+													if ( ui32RighttArrayLen > ui32DesiredArrayLen ) {
+														swsExpText += L'\r';
+														swsExpText += L'\n';
+														swsExpText += _DEC_WS_40FB27FE_The_range_lock_max_value_has_more_elements_than_specified_by_Array_Length_;
+														break;
+													}
+												}
+												break;
+											}
+										}
+									}
+								}
+							}
+						} while ( false );
 					}
 				}
-				ee::CExpEvalContainer::EE_RESULT rRes;
+				
 
 
 
@@ -461,7 +820,7 @@ namespace mx {
 		auto sCodePaged = CUtilities::WideCharToMultiByte( _uiCodePage, 0, swsCopy, nullptr, nullptr, &dwError );
 		switch ( dwError ) {
 			case ERROR_SUCCESS : {
-				swsExpText += CUtilities::MultiByteToWideChar( _uiCodePage, 0, sCodePaged );
+				swsExpText += CUtilities::EscapeNulOnly( CUtilities::MultiByteToWideChar( _uiCodePage, 0, sCodePaged ), false, true );
 				swsExpText += L'\r';
 				swsExpText += L'\n';
 				CSecureString ssTmp;
@@ -470,7 +829,7 @@ namespace mx {
 				swsExpText += L' ';
 				swsExpText += L'(';
 				swsExpText += std::to_wstring( sCodePaged.size() );
-				swsExpText += _DEC_WS_0FCE4654__bytes_;
+				swsExpText += sCodePaged.size() == 1 ? _DEC_WS_4A6BA8AC__byte_ : _DEC_WS_0FCE4654__bytes_;
 				break;
 			}
 			case ERROR_NOT_ENOUGH_MEMORY : {
@@ -487,6 +846,83 @@ namespace mx {
 			}
 		}
 		return swsExpText;
+	}
+
+	// Converts a float string to is description.
+	CSecureWString CFoundAddressEditMainPage::FloatToDesc( const CSecureWString &_swsString, CUtilities::MX_DATA_TYPES _dtType, bool _bScentific, uint32_t &_ui32ArrayLen, uint32_t _ui32Stride, std::vector<ee::CExpEvalContainer::EE_RESULT> * _pvExps ) {
+		//if ( !_swsString.size() ) { _ui32ArrayLen = 0; return CSecureWString(); }
+		int32_t i32Digits = -MX_FLOAT64_SIG_DIG;
+		switch ( _dtType ) {
+			case CUtilities::MX_DT_FLOAT : {
+				i32Digits = -MX_FLOAT32_SIG_DIG;
+				break;
+			}
+			case CUtilities::MX_DT_FLOAT16 : {
+				i32Digits = -MX_FLOAT16_SIG_DIG;
+				break;
+			}
+		}
+		if ( _bScentific ) {
+			i32Digits = -i32Digits;
+		}
+
+		
+		std::vector<std::vector<uint8_t>> vRawvalues;
+		bool bContiguous = _ui32Stride <= CUtilities::DataTypeSize( _dtType );
+		CSecureWString swsError;
+		_ui32ArrayLen = CUtilities::WStringToArrayBytes( vRawvalues, _swsString, _dtType, _ui32ArrayLen, 0, bContiguous, swsError );
+		if ( !_ui32ArrayLen ) {
+			_ui32ArrayLen = 0; return swsError;
+		}
+		CSecureWString swsReturn;
+		auto ui32BackToString = CUtilities::ArrayBytesToWString( vRawvalues, nullptr, swsReturn, _dtType, _ui32ArrayLen, i32Digits, bContiguous, swsError );
+		if ( !ui32BackToString ) {
+			_ui32ArrayLen = 0; return swsError;
+		}
+		if ( _ui32ArrayLen != ui32BackToString ) {
+			_ui32ArrayLen = 0; return _DEC_WS_1468A1DF_Internal_error_;
+		}
+
+		swsReturn += L' ';
+		swsReturn += L'(';
+		swsReturn += std::to_wstring( _ui32ArrayLen );
+		swsReturn += _ui32ArrayLen == 1 ? _DEC_WS_1AEC022F__item_ : _DEC_WS_7B2F1364__items_;
+
+		if ( _pvExps ) {
+			CUtilities::ArrayBytesToResult( vRawvalues, nullptr, _dtType, _ui32ArrayLen, bContiguous, (*_pvExps) );
+		}
+		return swsReturn;
+	}
+
+	// Converts a not-float string to its description.
+	CSecureWString CFoundAddressEditMainPage::IntegralToDesc( const CSecureWString &_swsString, CUtilities::MX_DATA_TYPES _dtType, bool _bIsHex, uint32_t &_ui32ArrayLen, uint32_t _ui32Stride, std::vector<ee::CExpEvalContainer::EE_RESULT> * _pvExps ) {
+		int iBase = _bIsHex ? 16 : -1;
+
+		std::vector<std::vector<uint8_t>> vRawvalues;
+		bool bContiguous = _ui32Stride <= CUtilities::DataTypeSize( _dtType );
+		CSecureWString swsError;
+		_ui32ArrayLen = CUtilities::WStringToArrayBytes( vRawvalues, _swsString, _dtType, _ui32ArrayLen, iBase, bContiguous, swsError );
+		if ( !_ui32ArrayLen ) {
+			_ui32ArrayLen = 0; return swsError;
+		}
+		CSecureWString swsReturn;
+		auto ui32BackToString = CUtilities::ArrayBytesToWString( vRawvalues, nullptr, swsReturn, _dtType, _ui32ArrayLen, 0, bContiguous, swsError );
+		if ( !ui32BackToString ) {
+			_ui32ArrayLen = 0; return swsError;
+		}
+		if ( _ui32ArrayLen != ui32BackToString ) {
+			_ui32ArrayLen = 0; return _DEC_WS_1468A1DF_Internal_error_;
+		}
+
+		swsReturn += L' ';
+		swsReturn += L'(';
+		swsReturn += std::to_wstring( _ui32ArrayLen );
+		swsReturn += _ui32ArrayLen == 1 ? _DEC_WS_1AEC022F__item_ : _DEC_WS_7B2F1364__items_;
+
+		if ( _pvExps ) {
+			CUtilities::ArrayBytesToResult( vRawvalues, nullptr, _dtType, _ui32ArrayLen, bContiguous, (*_pvExps) );
+		}
+		return swsReturn;
 	}
 
 }	// namespace mx

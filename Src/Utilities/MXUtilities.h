@@ -653,17 +653,17 @@ namespace mx {
 
 		// Creates a string with the given data interpreted as a given type.
 		static const WCHAR *									ToDataTypeString( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString,
-			bool _bMustPrintNumber = false );
+			bool _bMustPrintNumber = false, int32_t _iSigDigits = 0 );
 
 		// Creates a string with the given data interpreted as a given type.
 		static inline const WCHAR *								ToDataTypeString( const std::vector<uint8_t> &_vValue, CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString,
-			bool _bMustPrintNumber = false ) {
-			return ToDataTypeString( _vValue.data(), _dtType, _sString, _bMustPrintNumber );
+			bool _bMustPrintNumber = false, int32_t _iSigDigits = 0 ) {
+			return ToDataTypeString( _vValue.data(), _dtType, _sString, _bMustPrintNumber, _iSigDigits );
 		}
 
 		// Creates a string with the given data interpreted as a given type.
 		static const WCHAR *									ToDataTypeString( const uint8_t * _pui8Value, CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString,
-			bool _bMustPrintNumber = false );
+			bool _bMustPrintNumber = false, int32_t _iSigDigits = 0 );
 
 		// Returns -1 if the given result cast to the given type is -inf, 1 if it is +inf, otherwise 0.
 		static int32_t											DataTypeIsInf( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtType );
@@ -714,8 +714,10 @@ namespace mx {
 		static CSecureWString &									DataTypeToString( const void * _pvData, CUtilities::MX_DATA_TYPES _dtType, CSecureWString &_swsRet, uint32_t _uiNumDigits = 0, int32_t _iSigDigits = 0 );
 
 		// Performs a more detailed conversion of a result to one of our data types.
-		static ee::CExpEvalContainer::EE_RESULT
-																DetailedConvertResult( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtType );
+		static ee::CExpEvalContainer::EE_RESULT					DetailedConvertResult( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtType );
+
+		// Converts from our data types to a result.
+		static ee::CExpEvalContainer::EE_RESULT					DataTypeToResult( const void * _pvData, CUtilities::MX_DATA_TYPES _dtType );
 
 		// Converts a MX_REGEX_ENCODING value to an actual code page.
 		static UINT												RegexCodePageToCodePage( MX_REGEX_ENCODING _reEncoding );
@@ -765,7 +767,7 @@ namespace mx {
 			DWORD * _pdwLastError = nullptr );
 
 		// Adds escapes to only NULL characters.
-		static CSecureWString									EscapeNulOnly( const CSecureWString &_swsInput, bool _bIncludeBackSlash );
+		static CSecureWString									EscapeNulOnly( const CSecureWString &_swsInput, bool _bIncludeBackSlash, bool _bUse0 = false );
 
 		// Adds escapes to all unprintable characters.
 		static CSecureWString									EscapeUnprintable( const CSecureWString &_swsInput, bool _bIncludeBackSlash, bool _bKeepNewline );
@@ -1049,7 +1051,13 @@ namespace mx {
 		static CSecureWString									PrimitiveArrayToStringW( const void * _pvData, size_t _sLenInBytes, MX_DATA_TYPES _dtTargetType, uint32_t _uiNumDigits = 0, int32_t _iSigDigits = 0 );
 
 		// Takes a string and converts X number of elements into either a single byte array (if contiguous) or into an array of arrays.  Returns the number of items converted.
-		static uint32_t											WStringToArrayBytes( std::vector<std::vector<uint8_t>> &_vDst, const CSecureWString &_swsString, MX_DATA_TYPES _dtTargetType, int _iBase, bool _bContiguous, CSecureWString &_swsError );
+		static uint32_t											WStringToArrayBytes( std::vector<std::vector<uint8_t>> &_vDst, const CSecureWString &_swsString, MX_DATA_TYPES _dtTargetType, uint32_t _ui32ArrayLen, int _iBase, bool _bContiguous, CSecureWString &_swsError );
+
+		// Takes a contiguous array or an array of arrays and prints the values to a string.  Returns the number of items printed.
+		static uint32_t											ArrayBytesToWString( const std::vector<std::vector<uint8_t>> &_vSrc, const std::vector<size_t> * _pvOffsets, CSecureWString &_swsString, MX_DATA_TYPES _dtTargetType, uint32_t _ui32ArrayLen, int32_t _iSigDigits, bool _bContiguous, CSecureWString &_swsError );
+
+		// Takes a contiguous array or an array of arrays and converts them to a single array of EE_RESULT's so that operations such as >, <, ==, +, etc. can be performed on each element.  Call within a try/catch block.
+		static uint32_t											ArrayBytesToResult( const std::vector<std::vector<uint8_t>> &_vSrc, const std::vector<size_t> * _pvOffsets, MX_DATA_TYPES _dtTargetType, uint32_t _ui32ArrayLen, bool _bContiguous, std::vector<ee::CExpEvalContainer::EE_RESULT> &_vReturn );
 
 		// Converts Katakana characters to Hiragana or returns the original input character.
 		static uint32_t											KatakanaToHiragana( uint32_t _uiChar ) {

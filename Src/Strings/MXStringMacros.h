@@ -17767,3 +17767,228 @@
 #define _DEC_S_0FCE4654__bytes_ mx::CStringDecoder::DecodeToString( _T_0FCE4654__bytes_, _LEN_0FCE4654 )
 #define _DEC_WS_0FCE4654__bytes_ mx::CStringDecoder::DecodeToWString( _T_0FCE4654__bytes_, _LEN_0FCE4654 )
 
+// Invalid Stride
+
+#define _T_0C5A1132_Invalid_Stride "\xD1\x3C\x46\xFC\xFE\x32\xF2\xE7\x23\x3C\x3B\x37\xF6\x00"
+#define _LEN_0C5A1132 14
+#define _T_LEN_0C5A1132_Invalid_Stride _T_0C5A1132_Invalid_Stride, _LEN_0C5A1132
+#define _DEC_0C5A1132_Invalid_Stride( STR ) mx::CStringDecoder::Decode( _T_0C5A1132_Invalid_Stride, _LEN_0C5A1132, STR )
+#define _DEC_S_0C5A1132_Invalid_Stride mx::CStringDecoder::DecodeToString( _T_0C5A1132_Invalid_Stride, _LEN_0C5A1132 )
+#define _DEC_WS_0C5A1132_Invalid_Stride mx::CStringDecoder::DecodeToWString( _T_0C5A1132_Invalid_Stride, _LEN_0C5A1132 )
+
+// Stride must be between 0 and 65535.
+
+#define _T_9AAC911E_Stride_must_be_between_0_and_65535_ "\xDB\x42\x42\x04\xF6\x2E\xAE\x34\x45\x3B\x3D\xEE\xF4\x00\xE7\xEA\x33\x44\x12\xF7\x2E\xFC\xE7\x00\xE8\x2A\x3C\xF6\xBB\xFD\xBD\x03\x03\xD0\xC0"
+#define _LEN_9AAC911E 35
+#define _T_LEN_9AAC911E_Stride_must_be_between_0_and_65535_ _T_9AAC911E_Stride_must_be_between_0_and_65535_, _LEN_9AAC911E
+#define _DEC_9AAC911E_Stride_must_be_between_0_and_65535_( STR ) mx::CStringDecoder::Decode( _T_9AAC911E_Stride_must_be_between_0_and_65535_, _LEN_9AAC911E, STR )
+#define _DEC_S_9AAC911E_Stride_must_be_between_0_and_65535_ mx::CStringDecoder::DecodeToString( _T_9AAC911E_Stride_must_be_between_0_and_65535_, _LEN_9AAC911E )
+#define _DEC_WS_9AAC911E_Stride_must_be_between_0_and_65535_ mx::CStringDecoder::DecodeToWString( _T_9AAC911E_Stride_must_be_between_0_and_65535_, _LEN_9AAC911E )
+
+// Invalid data.
+
+#define _T_CDFBE787_Invalid_data_ "\xD1\x3C\x46\xFC\xFE\x32\xF2\xE7\x34\x29\x3D\x2F\xC0"
+#define _LEN_CDFBE787 13
+#define _T_LEN_CDFBE787_Invalid_data_ _T_CDFBE787_Invalid_data_, _LEN_CDFBE787
+#define _DEC_CDFBE787_Invalid_data_( STR ) mx::CStringDecoder::Decode( _T_CDFBE787_Invalid_data_, _LEN_CDFBE787, STR )
+#define _DEC_S_CDFBE787_Invalid_data_ mx::CStringDecoder::DecodeToString( _T_CDFBE787_Invalid_data_, _LEN_CDFBE787 )
+#define _DEC_WS_CDFBE787_Invalid_data_ mx::CStringDecoder::DecodeToWString( _T_CDFBE787_Invalid_data_, _LEN_CDFBE787 )
+
+// Value When Locked: 
+
+#define _T_E64C54B0_Value_When_Locked__ "\xDE\x2F\x3C\x10\xF7\xE9\xE5\x2F\x35\x36\xE9\x1A\x01\xFE\x32\xED\x32\x0A\xBB"
+#define _LEN_E64C54B0 19
+#define _T_LEN_E64C54B0_Value_When_Locked__ _T_E64C54B0_Value_When_Locked__, _LEN_E64C54B0
+#define _DEC_E64C54B0_Value_When_Locked__( STR ) mx::CStringDecoder::Decode( _T_E64C54B0_Value_When_Locked__, _LEN_E64C54B0, STR )
+#define _DEC_S_E64C54B0_Value_When_Locked__ mx::CStringDecoder::DecodeToString( _T_E64C54B0_Value_When_Locked__, _LEN_E64C54B0 )
+#define _DEC_WS_E64C54B0_Value_When_Locked__ mx::CStringDecoder::DecodeToWString( _T_E64C54B0_Value_When_Locked__, _LEN_E64C54B0 )
+
+//  items)
+
+#define _T_7B2F1364__items_ "\xA8\x37\x44\x00\xFF\x3C\xB7"
+#define _LEN_7B2F1364 7
+#define _T_LEN_7B2F1364__items_ _T_7B2F1364__items_, _LEN_7B2F1364
+#define _DEC_7B2F1364__items_( STR ) mx::CStringDecoder::Decode( _T_7B2F1364__items_, _LEN_7B2F1364, STR )
+#define _DEC_S_7B2F1364__items_ mx::CStringDecoder::DecodeToString( _T_7B2F1364__items_, _LEN_7B2F1364 )
+#define _DEC_WS_7B2F1364__items_ mx::CStringDecoder::DecodeToWString( _T_7B2F1364__items_, _LEN_7B2F1364 )
+
+// Stride must be between 0 and 
+
+#define _T_F033357E_Stride_must_be_between_0_and_ "\xDB\x42\x42\x04\xF6\x2E\xAE\x34\x45\x3B\x3D\xEE\xF4\x00\xE7\xEA\x33\x44\x12\xF7\x2E\xFC\xE7\x00\xE8\x2A\x3C\xF6\xBB"
+#define _LEN_F033357E 29
+#define _T_LEN_F033357E_Stride_must_be_between_0_and_ _T_F033357E_Stride_must_be_between_0_and_, _LEN_F033357E
+#define _DEC_F033357E_Stride_must_be_between_0_and_( STR ) mx::CStringDecoder::Decode( _T_F033357E_Stride_must_be_between_0_and_, _LEN_F033357E, STR )
+#define _DEC_S_F033357E_Stride_must_be_between_0_and_ mx::CStringDecoder::DecodeToString( _T_F033357E_Stride_must_be_between_0_and_, _LEN_F033357E )
+#define _DEC_WS_F033357E_Stride_must_be_between_0_and_ mx::CStringDecoder::DecodeToWString( _T_F033357E_Stride_must_be_between_0_and_, _LEN_F033357E )
+
+// Array length must be between 0 and 
+
+#define _T_467E0365_Array_length_must_be_between_0_and_ "\xC9\x40\x42\xFC\x0B\xE9\xFA\x2C\x3E\x2F\x3D\x36\xB2\x08\x3C\xFB\x42\xF0\xFD\xF7\xE9\xF0\x2C\x44\x3F\x2E\x33\x00\xBB\xF7\xA8\x2F\x3E\xFF\xB2"
+#define _LEN_467E0365 35
+#define _T_LEN_467E0365_Array_length_must_be_between_0_and_ _T_467E0365_Array_length_must_be_between_0_and_, _LEN_467E0365
+#define _DEC_467E0365_Array_length_must_be_between_0_and_( STR ) mx::CStringDecoder::Decode( _T_467E0365_Array_length_must_be_between_0_and_, _LEN_467E0365, STR )
+#define _DEC_S_467E0365_Array_length_must_be_between_0_and_ mx::CStringDecoder::DecodeToString( _T_467E0365_Array_length_must_be_between_0_and_, _LEN_467E0365 )
+#define _DEC_WS_467E0365_Array_length_must_be_between_0_and_ mx::CStringDecoder::DecodeToWString( _T_467E0365_Array_length_must_be_between_0_and_, _LEN_467E0365 )
+
+//  byte)
+
+#define _T_4A6BA8AC__byte_ "\xA8\x30\x49\x0F\xF7\xF2"
+#define _LEN_4A6BA8AC 6
+#define _T_LEN_4A6BA8AC__byte_ _T_4A6BA8AC__byte_, _LEN_4A6BA8AC
+#define _DEC_4A6BA8AC__byte_( STR ) mx::CStringDecoder::Decode( _T_4A6BA8AC__byte_, _LEN_4A6BA8AC, STR )
+#define _DEC_S_4A6BA8AC__byte_ mx::CStringDecoder::DecodeToString( _T_4A6BA8AC__byte_, _LEN_4A6BA8AC )
+#define _DEC_WS_4A6BA8AC__byte_ mx::CStringDecoder::DecodeToWString( _T_4A6BA8AC__byte_, _LEN_4A6BA8AC )
+
+//  item)
+
+#define _T_1AEC022F__item_ "\xA8\x37\x44\x00\xFF\xF2"
+#define _LEN_1AEC022F 6
+#define _T_LEN_1AEC022F__item_ _T_1AEC022F__item_, _LEN_1AEC022F
+#define _DEC_1AEC022F__item_( STR ) mx::CStringDecoder::Decode( _T_1AEC022F__item_, _LEN_1AEC022F, STR )
+#define _DEC_S_1AEC022F__item_ mx::CStringDecoder::DecodeToString( _T_1AEC022F__item_, _LEN_1AEC022F )
+#define _DEC_WS_1AEC022F__item_ mx::CStringDecoder::DecodeToWString( _T_1AEC022F__item_, _LEN_1AEC022F )
+
+// Invalid stride
+
+#define _T_0BF61404_Invalid_stride "\xD1\x3C\x46\xFC\xFE\x32\xF2\xE7\x43\x3C\x3B\x37\xF6\x00"
+#define _LEN_0BF61404 14
+#define _T_LEN_0BF61404_Invalid_stride _T_0BF61404_Invalid_stride, _LEN_0BF61404
+#define _DEC_0BF61404_Invalid_stride( STR ) mx::CStringDecoder::Decode( _T_0BF61404_Invalid_stride, _LEN_0BF61404, STR )
+#define _DEC_S_0BF61404_Invalid_stride mx::CStringDecoder::DecodeToString( _T_0BF61404_Invalid_stride, _LEN_0BF61404 )
+#define _DEC_WS_0BF61404_Invalid_stride mx::CStringDecoder::DecodeToWString( _T_0BF61404_Invalid_stride, _LEN_0BF61404 )
+
+// Invalid array.
+
+#define _T_DAD9E788_Invalid_array_ "\xD1\x3C\x46\xFC\xFE\x32\xF2\xE7\x31\x3A\x3B\x2F\x0B\xC9"
+#define _LEN_DAD9E788 14
+#define _T_LEN_DAD9E788_Invalid_array_ _T_DAD9E788_Invalid_array_, _LEN_DAD9E788
+#define _DEC_DAD9E788_Invalid_array_( STR ) mx::CStringDecoder::Decode( _T_DAD9E788_Invalid_array_, _LEN_DAD9E788, STR )
+#define _DEC_S_DAD9E788_Invalid_array_ mx::CStringDecoder::DecodeToString( _T_DAD9E788_Invalid_array_, _LEN_DAD9E788 )
+#define _DEC_WS_DAD9E788_Invalid_array_ mx::CStringDecoder::DecodeToWString( _T_DAD9E788_Invalid_array_, _LEN_DAD9E788 )
+
+// Invalid array length.
+
+#define _T_43849434_Invalid_array_length_ "\xD1\x3C\x46\xFC\xFE\x32\xF2\xE7\x31\x3A\x3B\x2F\x0B\xBB\x33\xED\x3C\x37\x0F\xFA\xF7"
+#define _LEN_43849434 21
+#define _T_LEN_43849434_Invalid_array_length_ _T_43849434_Invalid_array_length_, _LEN_43849434
+#define _DEC_43849434_Invalid_array_length_( STR ) mx::CStringDecoder::Decode( _T_43849434_Invalid_array_length_, _LEN_43849434, STR )
+#define _DEC_S_43849434_Invalid_array_length_ mx::CStringDecoder::DecodeToString( _T_43849434_Invalid_array_length_, _LEN_43849434 )
+#define _DEC_WS_43849434_Invalid_array_length_ mx::CStringDecoder::DecodeToWString( _T_43849434_Invalid_array_length_, _LEN_43849434 )
+
+// There must be the same number of offsets as array elements.
+
+#define _T_E5E97210_There_must_be_the_same_number_of_offsets_as_array_elements_ "\xDC\x36\x35\x0D\xF7\xE9\xFB\x3C\x43\x3C\xE9\x30\xF7\xBB\x3B\xF0\x33\xF0\x0E\xF3\x36\xF3\xE7\x3E\x3D\x36\x30\xF7\x0D\xE7\xF7\x34\xF0\x0A\xF8\x2F\x01\x2C\x44\x3B\xE9\x2F\x05\xBB\x28\xFA\x40\x31\x14\xB2\x2E\xFA\x2C\x3D\x2D\x37\x42\x05\xC9"
+#define _LEN_E5E97210 59
+#define _T_LEN_E5E97210_There_must_be_the_same_number_of_offsets_as_array_elements_ _T_E5E97210_There_must_be_the_same_number_of_offsets_as_array_elements_, _LEN_E5E97210
+#define _DEC_E5E97210_There_must_be_the_same_number_of_offsets_as_array_elements_( STR ) mx::CStringDecoder::Decode( _T_E5E97210_There_must_be_the_same_number_of_offsets_as_array_elements_, _LEN_E5E97210, STR )
+#define _DEC_S_E5E97210_There_must_be_the_same_number_of_offsets_as_array_elements_ mx::CStringDecoder::DecodeToString( _T_E5E97210_There_must_be_the_same_number_of_offsets_as_array_elements_, _LEN_E5E97210 )
+#define _DEC_WS_E5E97210_There_must_be_the_same_number_of_offsets_as_array_elements_ mx::CStringDecoder::DecodeToWString( _T_E5E97210_There_must_be_the_same_number_of_offsets_as_array_elements_, _LEN_E5E97210 )
+
+// Internal error verifying range value consistency.
+
+#define _T_247BC127_Internal_error_verifying_range_value_consistency_ "\xD1\x3C\x44\x00\x04\x37\xEF\x33\xF0\x2D\x3B\x40\x01\x0D\xE7\xFE\x33\x42\x04\xF8\x42\xF7\x35\x37\xE8\x3B\x2F\x00\x02\x2C\xA8\x44\x31\x07\x07\x2E\xAE\x2A\x3F\x36\x3C\x37\x05\x0F\x2C\xF6\x31\x49\xC9"
+#define _LEN_247BC127 49
+#define _T_LEN_247BC127_Internal_error_verifying_range_value_consistency_ _T_247BC127_Internal_error_verifying_range_value_consistency_, _LEN_247BC127
+#define _DEC_247BC127_Internal_error_verifying_range_value_consistency_( STR ) mx::CStringDecoder::Decode( _T_247BC127_Internal_error_verifying_range_value_consistency_, _LEN_247BC127, STR )
+#define _DEC_S_247BC127_Internal_error_verifying_range_value_consistency_ mx::CStringDecoder::DecodeToString( _T_247BC127_Internal_error_verifying_range_value_consistency_, _LEN_247BC127 )
+#define _DEC_WS_247BC127_Internal_error_verifying_range_value_consistency_ mx::CStringDecoder::DecodeToWString( _T_247BC127_Internal_error_verifying_range_value_consistency_, _LEN_247BC127 )
+
+// Invalid range min/max: {} must be lower than {} (index {}).
+
+#define _T_4B09D6E2_Invalid_range_min_max_____must_be_lower_than_____index_____ "\xD1\x3C\x46\xFC\xFE\x32\xF2\xE7\x42\x29\x37\x35\xF7\xBB\x34\xF1\x3C\xFF\x08\xF3\x41\xC8\xE7\x4B\x45\xE9\x3B\x07\x0E\x3B\xA8\x30\x35\xBB\xFE\x38\x05\x2C\x42\xE8\x3D\x36\xF3\x09\xE7\x03\x4B\xF0\xC3\xFB\x37\xF2\x2C\x48\xE8\x44\x4B\xBB\xC9"
+#define _LEN_4B09D6E2 59
+#define _T_LEN_4B09D6E2_Invalid_range_min_max_____must_be_lower_than_____index_____ _T_4B09D6E2_Invalid_range_min_max_____must_be_lower_than_____index_____, _LEN_4B09D6E2
+#define _DEC_4B09D6E2_Invalid_range_min_max_____must_be_lower_than_____index_____( STR ) mx::CStringDecoder::Decode( _T_4B09D6E2_Invalid_range_min_max_____must_be_lower_than_____index_____, _LEN_4B09D6E2, STR )
+#define _DEC_S_4B09D6E2_Invalid_range_min_max_____must_be_lower_than_____index_____ mx::CStringDecoder::DecodeToString( _T_4B09D6E2_Invalid_range_min_max_____must_be_lower_than_____index_____, _LEN_4B09D6E2 )
+#define _DEC_WS_4B09D6E2_Invalid_range_min_max_____must_be_lower_than_____index_____ mx::CStringDecoder::DecodeToWString( _T_4B09D6E2_Invalid_range_min_max_____must_be_lower_than_____index_____, _LEN_4B09D6E2 )
+
+// Invalid range min/max: 
+
+#define _T_E2E06A5A_Invalid_range_min_max__ "\xD1\x3C\x46\xFC\xFE\x32\xF2\xE7\x42\x29\x37\x35\xF7\xBB\x34\xF1\x3C\xFF\x08\xF3\x41\xC8\xE7"
+#define _LEN_E2E06A5A 23
+#define _T_LEN_E2E06A5A_Invalid_range_min_max__ _T_E2E06A5A_Invalid_range_min_max__, _LEN_E2E06A5A
+#define _DEC_E2E06A5A_Invalid_range_min_max__( STR ) mx::CStringDecoder::Decode( _T_E2E06A5A_Invalid_range_min_max__, _LEN_E2E06A5A, STR )
+#define _DEC_S_E2E06A5A_Invalid_range_min_max__ mx::CStringDecoder::DecodeToString( _T_E2E06A5A_Invalid_range_min_max__, _LEN_E2E06A5A )
+#define _DEC_WS_E2E06A5A_Invalid_range_min_max__ mx::CStringDecoder::DecodeToWString( _T_E2E06A5A_Invalid_range_min_max__, _LEN_E2E06A5A )
+
+//  must be lower than 
+
+#define _T_C78B580C__must_be_lower_than_ "\xA8\x3B\x45\x0E\x06\xE9\xF0\x2C\xF0\x34\x38\x45\xF7\x0D\xE7\xFC\x36\x31\x09\xB2"
+#define _LEN_C78B580C 20
+#define _T_LEN_C78B580C__must_be_lower_than_ _T_C78B580C__must_be_lower_than_, _LEN_C78B580C
+#define _DEC_C78B580C__must_be_lower_than_( STR ) mx::CStringDecoder::Decode( _T_C78B580C__must_be_lower_than_, _LEN_C78B580C, STR )
+#define _DEC_S_C78B580C__must_be_lower_than_ mx::CStringDecoder::DecodeToString( _T_C78B580C__must_be_lower_than_, _LEN_C78B580C )
+#define _DEC_WS_C78B580C__must_be_lower_than_ mx::CStringDecoder::DecodeToWString( _T_C78B580C__must_be_lower_than_, _LEN_C78B580C )
+
+//  (index 
+
+#define _T_4F2FE7D3___index_ "\xA8\xF6\x39\x09\xF6\x2E\x06\xE7"
+#define _LEN_4F2FE7D3 8
+#define _T_LEN_4F2FE7D3___index_ _T_4F2FE7D3___index_, _LEN_4F2FE7D3
+#define _DEC_4F2FE7D3___index_( STR ) mx::CStringDecoder::Decode( _T_4F2FE7D3___index_, _LEN_4F2FE7D3, STR )
+#define _DEC_S_4F2FE7D3___index_ mx::CStringDecoder::DecodeToString( _T_4F2FE7D3___index_, _LEN_4F2FE7D3 )
+#define _DEC_WS_4F2FE7D3___index_ mx::CStringDecoder::DecodeToWString( _T_4F2FE7D3___index_, _LEN_4F2FE7D3 )
+
+// ).
+
+#define _T_D94980DB___ "\xB1\xFC"
+#define _LEN_D94980DB 2
+#define _T_LEN_D94980DB___ _T_D94980DB___, _LEN_D94980DB
+#define _DEC_D94980DB___( STR ) mx::CStringDecoder::Decode( _T_D94980DB___, _LEN_D94980DB, STR )
+#define _DEC_S_D94980DB___ mx::CStringDecoder::DecodeToString( _T_D94980DB___, _LEN_D94980DB )
+#define _DEC_WS_D94980DB___ mx::CStringDecoder::DecodeToWString( _T_D94980DB___, _LEN_D94980DB )
+
+//  must be lower than or equal to 
+
+#define _T_B0C1E4AB__must_be_lower_than_or_equal_to_ "\xA8\x3B\x45\x0E\x06\xE9\xF0\x2C\xF0\x34\x38\x45\xF7\x0D\xE7\xFC\x36\x31\x09\xB2\x38\x00\xE7\x35\x39\x3E\x2F\xFE\xBB\x3B\xF7\xEE"
+#define _LEN_B0C1E4AB 32
+#define _T_LEN_B0C1E4AB__must_be_lower_than_or_equal_to_ _T_B0C1E4AB__must_be_lower_than_or_equal_to_, _LEN_B0C1E4AB
+#define _DEC_B0C1E4AB__must_be_lower_than_or_equal_to_( STR ) mx::CStringDecoder::Decode( _T_B0C1E4AB__must_be_lower_than_or_equal_to_, _LEN_B0C1E4AB, STR )
+#define _DEC_S_B0C1E4AB__must_be_lower_than_or_equal_to_ mx::CStringDecoder::DecodeToString( _T_B0C1E4AB__must_be_lower_than_or_equal_to_, _LEN_B0C1E4AB )
+#define _DEC_WS_B0C1E4AB__must_be_lower_than_or_equal_to_ mx::CStringDecoder::DecodeToWString( _T_B0C1E4AB__must_be_lower_than_or_equal_to_, _LEN_B0C1E4AB )
+
+// Hexadecimal
+
+#define _T_A0692B77_Hexadecimal "\xD0\x33\x48\xFC\xF6\x2E\xF1\x30\x3D\x29\x35"
+#define _LEN_A0692B77 11
+#define _T_LEN_A0692B77_Hexadecimal _T_A0692B77_Hexadecimal, _LEN_A0692B77
+#define _DEC_A0692B77_Hexadecimal( STR ) mx::CStringDecoder::Decode( _T_A0692B77_Hexadecimal, _LEN_A0692B77, STR )
+#define _DEC_S_A0692B77_Hexadecimal mx::CStringDecoder::DecodeToString( _T_A0692B77_Hexadecimal, _LEN_A0692B77 )
+#define _DEC_WS_A0692B77_Hexadecimal mx::CStringDecoder::DecodeToWString( _T_A0692B77_Hexadecimal, _LEN_A0692B77 )
+
+// If Array Length is 0, the current value and locked value(s) must have the same number of elements.
+
+#define _T_DD4CBCAB_If_Array_Length_is_0__the_current_value_and_locked_value_s__must_have_the_same_number_of_elements_ "\xD1\x34\xF0\xDC\x04\x3B\xEF\x40\xF0\x14\x2E\x3C\xF9\x0F\x2F\xA8\x37\x43\xBB\xC2\xF5\xAE\x3B\x38\x2D\xE9\x31\x07\x0D\x39\xED\x3C\x44\xBB\x08\x2A\xFA\x3C\x35\xE8\x2A\x3C\xF6\xBB\x33\xF7\x31\x3B\x00\xF6\xE9\x04\x28\x3C\x3D\x2E\xF6\x05\xC4\xE7\xF5\x43\x43\x0F\xB2\x31\xEF\x3D\x35\xE8\x3D\x36\xF7\xBB\x3A\xE9\x3B\x35\xBB\x00\x3E\xFB\x29\x35\x3A\xE9\x3D\xF8\xBB\x2C\xF4\x33\x3D\x00\x00\x3D\x01\xF5"
+#define _LEN_DD4CBCAB 98
+#define _T_LEN_DD4CBCAB_If_Array_Length_is_0__the_current_value_and_locked_value_s__must_have_the_same_number_of_elements_ _T_DD4CBCAB_If_Array_Length_is_0__the_current_value_and_locked_value_s__must_have_the_same_number_of_elements_, _LEN_DD4CBCAB
+#define _DEC_DD4CBCAB_If_Array_Length_is_0__the_current_value_and_locked_value_s__must_have_the_same_number_of_elements_( STR ) mx::CStringDecoder::Decode( _T_DD4CBCAB_If_Array_Length_is_0__the_current_value_and_locked_value_s__must_have_the_same_number_of_elements_, _LEN_DD4CBCAB, STR )
+#define _DEC_S_DD4CBCAB_If_Array_Length_is_0__the_current_value_and_locked_value_s__must_have_the_same_number_of_elements_ mx::CStringDecoder::DecodeToString( _T_DD4CBCAB_If_Array_Length_is_0__the_current_value_and_locked_value_s__must_have_the_same_number_of_elements_, _LEN_DD4CBCAB )
+#define _DEC_WS_DD4CBCAB_If_Array_Length_is_0__the_current_value_and_locked_value_s__must_have_the_same_number_of_elements_ mx::CStringDecoder::DecodeToWString( _T_DD4CBCAB_If_Array_Length_is_0__the_current_value_and_locked_value_s__must_have_the_same_number_of_elements_, _LEN_DD4CBCAB )
+
+// The current value has more elements than specified by Array Length.
+
+#define _T_8869E389_The_current_value_has_more_elements_than_specified_by_Array_Length_ "\xDC\x36\x35\xBB\xF5\x3E\x00\x39\x35\x36\x3D\xEE\x08\xFC\x33\xFD\x33\xF0\x03\xF3\x3C\xAE\x34\x3F\x3A\x2E\xEE\xF7\x07\x2C\xF5\x33\x3E\x0F\x05\xE9\x02\x2F\x31\x36\xE9\x41\x02\x00\x2A\xF1\x34\x39\x00\xF6\xE9\xF0\x40\xF0\x09\x3B\x40\xF3\x14\xE7\xD4\x33\x3E\x02\x06\x31\xBC"
+#define _LEN_8869E389 67
+#define _T_LEN_8869E389_The_current_value_has_more_elements_than_specified_by_Array_Length_ _T_8869E389_The_current_value_has_more_elements_than_specified_by_Array_Length_, _LEN_8869E389
+#define _DEC_8869E389_The_current_value_has_more_elements_than_specified_by_Array_Length_( STR ) mx::CStringDecoder::Decode( _T_8869E389_The_current_value_has_more_elements_than_specified_by_Array_Length_, _LEN_8869E389, STR )
+#define _DEC_S_8869E389_The_current_value_has_more_elements_than_specified_by_Array_Length_ mx::CStringDecoder::DecodeToString( _T_8869E389_The_current_value_has_more_elements_than_specified_by_Array_Length_, _LEN_8869E389 )
+#define _DEC_WS_8869E389_The_current_value_has_more_elements_than_specified_by_Array_Length_ mx::CStringDecoder::DecodeToWString( _T_8869E389_The_current_value_has_more_elements_than_specified_by_Array_Length_, _LEN_8869E389 )
+
+// The locked value has more elements than specified by Array Length.
+
+#define _T_FAD3DED1_The_locked_value_has_more_elements_than_specified_by_Array_Length_ "\xDC\x36\x35\xBB\xFE\x38\xF1\x32\x35\x2C\xE9\x44\xF3\x07\x3C\xED\xEE\x38\xFC\x05\xE9\xFB\x36\x42\x2D\xE9\x33\xFE\x00\x34\xED\x3C\x44\x0E\xB2\x3D\xF6\x28\x3E\xE8\x3C\x3E\xF7\xFE\x30\xEE\x37\x35\xFF\xB2\x2B\x07\xE7\x11\x3A\x3B\x2F\x0B\xBB\x13\xED\x3C\x37\x0F\xFA\xF7"
+#define _LEN_FAD3DED1 66
+#define _T_LEN_FAD3DED1_The_locked_value_has_more_elements_than_specified_by_Array_Length_ _T_FAD3DED1_The_locked_value_has_more_elements_than_specified_by_Array_Length_, _LEN_FAD3DED1
+#define _DEC_FAD3DED1_The_locked_value_has_more_elements_than_specified_by_Array_Length_( STR ) mx::CStringDecoder::Decode( _T_FAD3DED1_The_locked_value_has_more_elements_than_specified_by_Array_Length_, _LEN_FAD3DED1, STR )
+#define _DEC_S_FAD3DED1_The_locked_value_has_more_elements_than_specified_by_Array_Length_ mx::CStringDecoder::DecodeToString( _T_FAD3DED1_The_locked_value_has_more_elements_than_specified_by_Array_Length_, _LEN_FAD3DED1 )
+#define _DEC_WS_FAD3DED1_The_locked_value_has_more_elements_than_specified_by_Array_Length_ mx::CStringDecoder::DecodeToWString( _T_FAD3DED1_The_locked_value_has_more_elements_than_specified_by_Array_Length_, _LEN_FAD3DED1 )
+
+// The range-lock max value has more elements than specified by Array Length.
+
+#define _T_40FB27FE_The_range_lock_max_value_has_more_elements_than_specified_by_Array_Length_ "\xDC\x36\x35\xBB\x04\x2A\xFC\x2E\x35\xF5\x35\x3D\xF5\x06\xE7\xF5\x2F\x48\xBB\x08\x2A\xFA\x3C\x35\xE8\x31\x2F\x05\xBB\x34\xF7\x40\x35\xBB\xF7\x35\xF3\x34\x35\x36\x3D\x41\xB2\x0F\x2F\xE9\x3C\xF0\x0E\x02\x2E\xF1\x30\x36\x31\x2E\x32\xB2\xFD\x40\xA8\x0F\x42\x0D\xF3\x42\xAE\x13\x35\x36\x30\x42\xFA\xC9"
+#define _LEN_40FB27FE 74
+#define _T_LEN_40FB27FE_The_range_lock_max_value_has_more_elements_than_specified_by_Array_Length_ _T_40FB27FE_The_range_lock_max_value_has_more_elements_than_specified_by_Array_Length_, _LEN_40FB27FE
+#define _DEC_40FB27FE_The_range_lock_max_value_has_more_elements_than_specified_by_Array_Length_( STR ) mx::CStringDecoder::Decode( _T_40FB27FE_The_range_lock_max_value_has_more_elements_than_specified_by_Array_Length_, _LEN_40FB27FE, STR )
+#define _DEC_S_40FB27FE_The_range_lock_max_value_has_more_elements_than_specified_by_Array_Length_ mx::CStringDecoder::DecodeToString( _T_40FB27FE_The_range_lock_max_value_has_more_elements_than_specified_by_Array_Length_, _LEN_40FB27FE )
+#define _DEC_WS_40FB27FE_The_range_lock_max_value_has_more_elements_than_specified_by_Array_Length_ mx::CStringDecoder::DecodeToWString( _T_40FB27FE_The_range_lock_max_value_has_more_elements_than_specified_by_Array_Length_, _LEN_40FB27FE )
+

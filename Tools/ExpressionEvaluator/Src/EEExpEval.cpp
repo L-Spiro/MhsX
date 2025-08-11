@@ -1427,36 +1427,35 @@ namespace ee {
 		}
 
 		// Skip any opening "0", "0x", etc.
-		if ( _iBase == 0 || _iBase == 2 || _iBase == 8 || _iBase == 16 ) {
-			
+		if ( _iBase <= 0 || _iBase == 2 || _iBase == 8 || _iBase == 16 ) {
 			if ( (*_pcText) == '0' ) {
 				++_pcText;
 				
 				if ( (*_pcText) == 'b' || (*_pcText) == 'B' ) {
-					if ( _iBase == 0 || _iBase == 2 ) {
+					//if ( _iBase <= 0 || _iBase == 2 ) {
 						++_pcText;
 						_iBase = 2;
-					}
+					//}
 				}
 				else if ( (*_pcText) == 'x' || (*_pcText) == 'X' ) {
 					++_pcText;
-					if ( _iBase == 0 ) {
+					//if ( _iBase <= 0 ) {
 						_iBase = 16;
-					}
+					//}
 				}
 				else if ( (*_pcText) == 'o' || (*_pcText) == 'O' ) {
 					++_pcText;
-					if ( _iBase == 0 ) {
+					//if ( _iBase <= 0 ) {
 						_iBase = 8;
-					}
+					//}
 				}
-				else if ( _iBase == 0 ) {
+				else if ( _iBase <= 0 ) {
 					_iBase = 8;
 				}
 			}
 			
 		}
-		if ( _iBase == 0 ) {
+		if ( _iBase <= 0 ) {
 			_iBase = 10;
 		}
 		uint64_t uiRes = 0;

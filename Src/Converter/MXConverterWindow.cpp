@@ -1041,28 +1041,31 @@ namespace mx {
 	void CConverterWindow::UpdateAll( CWidget * _pwControl, WORD _wId, const MX_CONV_INFO &_ciInfo ) {
 		static LONG lCount = 0;
 		if ( ::InterlockedIncrement( &lCount ) == 1 ) {
-			m_wLastUpdateCtl = _wId;
-			size_t sSize = _ciInfo.sBits;
-			ee::CExpEvalContainer::EE_RESULT rRes = _ciInfo.pfGetValueFunc( _pwControl, _ciInfo.ncType, sSize, _ciInfo.bHexInput );
-			if ( rRes.ncType != ee::EE_NC_INVALID ) {
+			try {
+				m_wLastUpdateCtl = _wId;
+				size_t sSize = _ciInfo.sBits;
+				ee::CExpEvalContainer::EE_RESULT rRes = _ciInfo.pfGetValueFunc( _pwControl, _ciInfo.ncType, sSize, _ciInfo.bHexInput );
+				if ( rRes.ncType != ee::EE_NC_INVALID ) {
 
-				if ( _ciInfo.bBigEnd ) {
-					rRes = ByteSwapBySize( rRes, sSize );
-				}
+					if ( _ciInfo.bBigEnd ) {
+						rRes = ByteSwapBySize( rRes, sSize );
+					}
 
 
-				bool bAltDisp = false;
-				CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( CConverterLayout::MX_CWI_TOOLBAR0 ));
-				if ( plvToolBar ) {
-					bAltDisp = plvToolBar->IsChecked( CConverterLayout::MX_BC_SCINOT ) ? true : false;
-				}
-				for ( auto I = MX_ELEMENTS( m_ciInfo ); I--; ) {
-					if ( m_ciInfo[I].wId != _wId ) {
-						m_ciInfo[I].pfSetValueFunc( FindChild( m_ciInfo[I].wId ), rRes, m_ciInfo[I].ncType, m_ciInfo[I].sBits, m_ciInfo[I].bBigEnd, sSize,
-							bAltDisp );
+					bool bAltDisp = false;
+					CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( CConverterLayout::MX_CWI_TOOLBAR0 ));
+					if ( plvToolBar ) {
+						bAltDisp = plvToolBar->IsChecked( CConverterLayout::MX_BC_SCINOT ) ? true : false;
+					}
+					for ( auto I = MX_ELEMENTS( m_ciInfo ); I--; ) {
+						if ( m_ciInfo[I].wId != _wId ) {
+							m_ciInfo[I].pfSetValueFunc( FindChild( m_ciInfo[I].wId ), rRes, m_ciInfo[I].ncType, m_ciInfo[I].sBits, m_ciInfo[I].bBigEnd, sSize,
+								bAltDisp );
+						}
 					}
 				}
 			}
+			catch ( ... ) {}
 		}
 		::InterlockedDecrement( &lCount );
 	}

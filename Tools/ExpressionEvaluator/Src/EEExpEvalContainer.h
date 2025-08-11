@@ -392,6 +392,9 @@ namespace ee {
 		// Performs an operation on 2 given results using the given operator.
 		EE_ERROR_CODES						PerformOp( EE_RESULT _rLeft, uint32_t _uiOp, EE_RESULT _rRight, EE_RESULT &_rResult );
 
+		// Performs an operation on 2 given results using the given operator.
+		static EE_ERROR_CODES				PerformOp_S( EE_RESULT _rLeft, uint32_t _uiOp, EE_RESULT _rRight, EE_RESULT &_rResult );
+
 		// Applies a unary operation to a result.
 		inline EE_ERROR_CODES				PerformUnary( EE_RESULT _rExp, uint32_t _uiOp, EE_RESULT &_rResult ) {
 			switch ( _uiOp ) {

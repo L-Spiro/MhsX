@@ -22,6 +22,9 @@ namespace mx {
 		// Maximum array length.
 		static constexpr uint32_t							MaxArrayLen() { return 0x1FFFF; }
 
+		// Maximum stride amount.
+		static constexpr uint16_t							MaxArrayStride() { return UINT16_MAX; }
+
 
 		// == Types.
 		// A value (data/pointer target/string).

@@ -1186,7 +1186,7 @@ namespace mx {
 
 	// Creates a string with the given data interpreted as a given type.
 	const WCHAR * CUtilities::ToDataTypeString( const ee::CExpEvalContainer::EE_RESULT &_rRes, CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString,
-		bool _bMustPrintNumber ) {
+		bool _bMustPrintNumber, int32_t _iSigDigits ) {
 		ee::CExpEvalContainer::EE_RESULT eCopy;
 		//ee::CExpEvalContainer::ConvertResult
 		switch ( _dtType ) {
@@ -1200,7 +1200,7 @@ namespace mx {
 					_sString += _DEC_WS_B5B38EE8_as_float16_0x7E00_;
 				}
 				else {
-					CUtilities::ToDouble( ee::CFloat16( eCopy.u.dVal ).Value(), _sString );
+					CUtilities::ToDouble( ee::CFloat16( eCopy.u.dVal ).Value(), _sString, _iSigDigits );
 				}
 				break;
 			}
@@ -1214,7 +1214,7 @@ namespace mx {
 					_sString += _DEC_WS_FB5B1F0A_as_float32_0x7FC00000_;
 				}
 				else {
-					CUtilities::ToDouble( static_cast<float>(eCopy.u.dVal), _sString );
+					CUtilities::ToDouble( static_cast<float>(eCopy.u.dVal), _sString, _iSigDigits );
 				}
 				break;
 			}
@@ -1228,7 +1228,7 @@ namespace mx {
 					_sString += _DEC_WS_4091EAC5_as_float64_0x7FF8000000000000_;
 				}
 				else {
-					CUtilities::ToDouble( static_cast<double>(eCopy.u.dVal), _sString );
+					CUtilities::ToDouble( static_cast<double>(eCopy.u.dVal), _sString, _iSigDigits );
 				}
 				break;
 			}
@@ -1263,7 +1263,7 @@ namespace mx {
 
 	// Creates a string with the given data interpreted as a given type.
 	const WCHAR * CUtilities::ToDataTypeString( const uint8_t * _pui8Value, CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString,
-		bool _bMustPrintNumber ) {
+		bool _bMustPrintNumber, int32_t _iSigDigits ) {
 		ee::CExpEvalContainer::EE_RESULT eVal;
 		switch ( _dtType ) {
 #define MX_CONV( CASE, EE_TYPE, VAL, TYPE )												\
@@ -1291,7 +1291,7 @@ namespace mx {
 				return _sString.c_str();
 			}
 		}
-		return ToDataTypeString( eVal, _dtType, _sString, _bMustPrintNumber );
+		return ToDataTypeString( eVal, _dtType, _sString, _bMustPrintNumber, _iSigDigits );
 #undef MX_CONV
 	}
 
@@ -1683,6 +1683,80 @@ namespace mx {
 		}
 
 		return ee::CExpEvalContainer::ConvertResult( _rRes, rRet.ncType );
+	}
+
+	// Converts from our data types to a result.
+	ee::CExpEvalContainer::EE_RESULT CUtilities::DataTypeToResult( const void * _pvData, CUtilities::MX_DATA_TYPES _dtType ) {
+		ee::CExpEvalContainer::EE_RESULT rRet;
+		if ( DataTypeIsFloat( _dtType ) ) {
+			rRet.ncType = ee::EE_NC_FLOATING;
+		}
+		else if ( DataTypeIsSigned( _dtType ) ) {
+			rRet.ncType = ee::EE_NC_SIGNED;
+		}
+		else {
+			rRet.ncType = ee::EE_NC_UNSIGNED;
+		}
+
+#define MX_CONV( TYPE )																			\
+	switch ( rRet.ncType ) {																	\
+		case ee::EE_NC_FLOATING : {																\
+			rRet.u.dVal = double( (*reinterpret_cast<const TYPE *>(_pvData)) );					\
+			break;																				\
+		}																						\
+		case ee::EE_NC_SIGNED : {																\
+			rRet.u.i64Val = int64_t( (*reinterpret_cast<const TYPE *>(_pvData)) );				\
+			break;																				\
+		}																						\
+		case ee::EE_NC_UNSIGNED : {																\
+			rRet.u.ui64Val = uint64_t( (*reinterpret_cast<const TYPE *>(_pvData)) );			\
+			break;																				\
+		}																						\
+	}
+
+#define MX_CASE( CASE, TYPE )																	\
+	case CASE : {																				\
+		MX_CONV( TYPE );																		\
+		break;																					\
+	}
+
+		switch ( _dtType ) {
+			MX_CASE( MX_DT_INT8, int8_t )
+			MX_CASE( MX_DT_UINT8, uint8_t )
+			MX_CASE( MX_DT_INT16, int16_t )
+			MX_CASE( MX_DT_UINT16, uint16_t )
+			MX_CASE( MX_DT_INT32, int32_t )
+			MX_CASE( MX_DT_UINT32, uint32_t )
+			MX_CASE( MX_DT_INT64, int64_t )
+			MX_CASE( MX_DT_UINT64, uint64_t )
+			case MX_DT_FLOAT16 : {
+				double dVal = reinterpret_cast<const ee::CFloat16 *>(_pvData)->Value();
+				switch ( rRet.ncType ) {
+					case ee::EE_NC_FLOATING : {
+						rRet.u.dVal = dVal;
+						break;
+					}
+					case ee::EE_NC_SIGNED : {
+						rRet.u.i64Val = int64_t( dVal );
+						break;
+					}
+					case ee::EE_NC_UNSIGNED : {
+						rRet.u.ui64Val = uint64_t( dVal );
+						break;
+					}
+				}
+				break;
+			}
+			MX_CASE( MX_DT_FLOAT, float )
+			MX_CASE( MX_DT_DOUBLE, double )
+			default : {
+				rRet.ncType = ee::EE_NC_INVALID;
+			}
+		}
+
+#undef MX_CASE
+#undef MX_CONV
+		return rRet;
 	}
 
 	// Converts a MX_REGEX_ENCODING value to an actual code page.
@@ -2154,7 +2228,7 @@ namespace mx {
 	}
 
 	// Adds escapes to only NULL characters.
-	CSecureWString CUtilities::EscapeNulOnly( const CSecureWString &_swsInput, bool _bIncludeBackSlash ) {
+	CSecureWString CUtilities::EscapeNulOnly( const CSecureWString &_swsInput, bool _bIncludeBackSlash, bool _bUse0 ) {
 		CSecureWString swsOut;
 		for ( size_t I = 0; I < _swsInput.size(); ++I ) {
 			if ( _swsInput[I] == L'\\' && _bIncludeBackSlash ) {
@@ -2162,12 +2236,18 @@ namespace mx {
 				swsOut.push_back( L'\\' );
 			}
 			else if ( !_swsInput[I] ) {
-				swsOut.push_back( L'\\' );
-				swsOut.push_back( L'u' );
-				swsOut.push_back( L'0' );
-				swsOut.push_back( L'0' );
-				swsOut.push_back( L'0' );
-				swsOut.push_back( L'0' );
+				if ( _bUse0 ) {
+					swsOut.push_back( L'\\' );
+					swsOut.push_back( L'0' );
+				}
+				else {
+					swsOut.push_back( L'\\' );
+					swsOut.push_back( L'u' );
+					swsOut.push_back( L'0' );
+					swsOut.push_back( L'0' );
+					swsOut.push_back( L'0' );
+					swsOut.push_back( L'0' );
+				}
 			}
 			else {
 				swsOut.push_back( _swsInput[I] );
@@ -3515,11 +3595,12 @@ namespace mx {
 				if ( !sEaten ) { break; }
 			}
 			else {
-				if ( _iBase <= 0 ) {
+				dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], _iBase, &sEaten, _ui64MaxSingleValue );
+				/*if ( _iBase <= 0 ) {
 					if ( (sLen - I) >= (2 + 1) ) {
 						if ( _sInput[I] == '0' && _sInput[I+1] == 'x' ) {
 							I += 2;
-							dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], 10, &sEaten, _ui64MaxSingleValue );
+							dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], 16, &sEaten, _ui64MaxSingleValue );
 						}
 						else if ( _sInput[I] == '0' && _sInput[I+1] == 'o' ) {
 							I += 2;
@@ -3530,7 +3611,6 @@ namespace mx {
 							dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], 2, &sEaten, _ui64MaxSingleValue );
 						}
 						else if ( _sInput[I] == '0' ) {
-							I += 1;
 							dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], 8, &sEaten, _ui64MaxSingleValue );
 						}
 						else {
@@ -3538,7 +3618,6 @@ namespace mx {
 						}
 					}
 					else if ( (sLen - I) >= (1 + 1) && _sInput[I] == '0' ) {
-						I += 1;
 						dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], 8, &sEaten, _ui64MaxSingleValue );
 					}
 					else {
@@ -3547,7 +3626,7 @@ namespace mx {
 				}
 				else {
 					dtVal.u.UInt64 = ee::CExpEval::StoULL( &_sInput[I], _iBase, &sEaten, _ui64MaxSingleValue );
-				}
+				}*/
 				if ( !sEaten ) { break; }
 			}
 			if ( _pvMeta ) { _pvMeta->push_back( 0 ); }
@@ -3748,14 +3827,17 @@ namespace mx {
 	}
 
 	// Takes a string and converts X number of elements into either a single byte array (if contiguous) or into an array of arrays.  Returns the number of items converted.
-	uint32_t CUtilities::WStringToArrayBytes( std::vector<std::vector<uint8_t>> &_vDst, const CSecureWString &_swsString, MX_DATA_TYPES _dtTargetType, int _iBase, bool _bContiguous, CSecureWString &_swsError ) {
+	uint32_t CUtilities::WStringToArrayBytes( std::vector<std::vector<uint8_t>> &_vDst, const CSecureWString &_swsString, MX_DATA_TYPES _dtTargetType, uint32_t _ui32ArrayLen, int _iBase, bool _bContiguous, CSecureWString &_swsError ) {
 		try {
 			// We support full-width Japanese characters.  Convert them to normal characters.
 			CSecureString ssTmp;
 			for ( size_t I = 0; I < _swsString.size(); ++I ) {
 				auto ui32Char = FullWidthToByte( _swsString[I] );
 				if ( ui32Char <= 0xFFFF ) {
-					if ( std::iswprint( wint_t( ui32Char ) ) ) {
+					if ( ui32Char == L'\u2026' ) {					// Special case for our needs.  Treat c as whitespace.
+						ssTmp.push_back( ' ' );
+					}
+					else if ( std::iswprint( wint_t( ui32Char ) ) ) {
 						ssTmp.push_back( char( ui32Char ) );
 					}
 					else if ( std::iswspace( wint_t( ui32Char ) ) ) {
@@ -3773,7 +3855,7 @@ namespace mx {
 			if ( _bContiguous ) {
 				_vDst.resize( 1 );
 			}
-			else {
+			else if ( vLines.size() ) {
 				_vDst.resize( vLines.size() );
 			}
 
@@ -3798,6 +3880,24 @@ namespace mx {
 				}
 				++ui32Idx;
 			}
+
+			size_t sSize = size_t( DataTypeSize( _dtTargetType ) );
+			for ( size_t I = vLines.size(); I < size_t( _ui32ArrayLen ); ++I ) {
+				if ( _bContiguous ) {
+					for ( size_t J = 0; J < sSize; ++J ) {
+						_vDst[0].push_back( 0 );
+					}
+				}
+				else {
+					if ( _vDst.size() == I ) {
+						_vDst.push_back( std::vector<uint8_t>() );
+					}
+					for ( size_t J = 0; J < sSize; ++J ) {
+						_vDst[I].push_back( 0 );
+					}
+				}
+				++ui32Idx;
+			}
 			
 			return ui32Idx;
 		}
@@ -3805,6 +3905,83 @@ namespace mx {
 			_swsError = _DEC_WS_F39F91A5_Out_of_memory_;
 			return 0;
 		}
+	}
+
+	// Takes a contiguous array or an array of arrays and prints the values to a string.  Returns the number of items printed.
+	uint32_t CUtilities::ArrayBytesToWString( const std::vector<std::vector<uint8_t>> &_vSrc, const std::vector<size_t> * _pvOffsets, CSecureWString &_swsString, MX_DATA_TYPES _dtTargetType, uint32_t _ui32ArrayLen, int32_t _iSigDigits, bool _bContiguous, CSecureWString &_swsError ) {
+		try {
+			if ( !_vSrc.size() ) { return 0; }
+			if ( _pvOffsets && _pvOffsets->size() < _vSrc.size() ) {
+				_swsError = _DEC_WS_E5E97210_There_must_be_the_same_number_of_offsets_as_array_elements_;
+				return 0;
+			}
+
+			auto sSize = DataTypeSize( _dtTargetType );
+			uint32_t ui32Total = 0;
+			if ( _bContiguous ) {
+				size_t sOffset = _pvOffsets ? (*_pvOffsets)[0] : 0;
+				for ( size_t I = 0; I < _ui32ArrayLen && sOffset + sSize <= _vSrc[0].size(); ++I ) {
+					if ( ui32Total ) {
+						_swsString += L' ';
+					}
+					ToDataTypeString( &_vSrc[0][sOffset], _dtTargetType, _swsString, false, _iSigDigits );
+					
+					++ui32Total;
+					sOffset += sSize;
+				}
+			}
+			else {
+				for ( size_t I = 0; I < _ui32ArrayLen && I < _vSrc.size(); ++I ) {
+					size_t sOffset = _pvOffsets ? (*_pvOffsets)[I] : 0;
+					if ( _vSrc[I].size() < sOffset + sSize ) {
+						_swsError = _DEC_WS_CDFBE787_Invalid_data_;
+						return 0;
+					}
+					if ( ui32Total ) {
+						_swsString += L'\u2026';	// c
+					}
+					ToDataTypeString( &_vSrc[I][sOffset], _dtTargetType, _swsString, false, _iSigDigits );
+					
+					++ui32Total;
+					sOffset += sSize;
+				}
+			}
+
+			return ui32Total;
+		}
+		catch ( ... ) {
+			_swsError = _DEC_WS_F39F91A5_Out_of_memory_;
+			return 0;
+		}
+	}
+
+	// Takes a contiguous array or an array of arrays and converts them to a single array of EE_RESULT's so that operations such as >, <, ==, +, etc. can be performed on each element.  Call within a try/catch block.
+	uint32_t CUtilities::ArrayBytesToResult( const std::vector<std::vector<uint8_t>> &_vSrc, const std::vector<size_t> * _pvOffsets, MX_DATA_TYPES _dtTargetType, uint32_t _ui32ArrayLen, bool _bContiguous, std::vector<ee::CExpEvalContainer::EE_RESULT> &_vReturn ) {
+		if ( !_vSrc.size() ) { return 0; }
+		if ( _pvOffsets && _pvOffsets->size() < _vSrc.size() ) { return 0; }
+
+		auto sSize = DataTypeSize( _dtTargetType );
+		uint32_t ui32Total = 0;
+		if ( _bContiguous ) {
+			size_t sOffset = _pvOffsets ? (*_pvOffsets)[0] : 0;
+			for ( size_t I = 0; I < _ui32ArrayLen && sOffset + sSize <= _vSrc[0].size(); ++I ) {
+				_vReturn.push_back( DataTypeToResult( &_vSrc[0][sOffset], _dtTargetType ) );
+				++ui32Total;
+				sOffset += sSize;
+			}
+		}
+		else {
+			for ( size_t I = 0; I < _ui32ArrayLen && I < _vSrc.size(); ++I ) {
+				size_t sOffset = _pvOffsets ? (*_pvOffsets)[I] : 0;
+				if ( _vSrc[I].size() < sOffset + sSize ) { throw; }
+				_vReturn.push_back( DataTypeToResult( &_vSrc[I][sOffset], _dtTargetType ) );
+					
+				++ui32Total;
+				sOffset += sSize;
+			}
+		}
+
+		return ui32Total;
 	}
 
 	// Converts Katakana characters to Hiragana across a UTF-8 string.

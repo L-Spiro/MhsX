@@ -366,8 +366,8 @@ namespace mx {
 			MX_DEF_CHECK_HEIGHT,							// dwHeight
 			MX_CHECKSTYLE,									// dwStyle
 			0,												// dwStyleEx
-			MX_MAKE_WCHAR( _T_472CF267_Show_as_Hex ),		// pwcText
-			_LEN_472CF267,									// sTextLen
+			MX_MAKE_WCHAR( _T_A0692B77_Hexadecimal ),		// pwcText
+			_LEN_A0692B77,									// sTextLen
 			MX_FAEI_GENERAL_PAGE,							// dwParentId
 		},
 		{

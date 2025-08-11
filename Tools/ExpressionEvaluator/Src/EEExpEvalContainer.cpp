@@ -643,6 +643,143 @@ namespace ee {
 		return EE_EC_SUCCESS;
 	}
 
+	// Performs an operation on 2 given results using the given operator.
+	CExpEvalContainer::EE_ERROR_CODES CExpEvalContainer::PerformOp_S( EE_RESULT _rLeft, uint32_t _uiOp, EE_RESULT _rRight, EE_RESULT &_rResult ) {
+		_rResult.ncType = GetCastType( _rLeft.ncType, _rRight.ncType );
+		if ( _rResult.ncType != EE_NC_OBJECT ) {
+			_rLeft = ConvertResult( _rLeft, _rResult.ncType );
+			if ( _rLeft.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+			_rRight = ConvertResult( _rRight, _rResult.ncType );
+			if ( _rRight.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
+		}
+		else if ( _rLeft.ncType != EE_NC_OBJECT ) {
+			// If casting to objects, the left side must be an object.
+			_rResult.ncType = EE_NC_INVALID;
+			return EE_EC_INVALIDCAST;
+		}
+#define EE_OP( MEMBER, CASE, OP )													\
+	case CASE : {																	\
+		_rResult.u.MEMBER = _rLeft.u.MEMBER OP _rRight.u.MEMBER;					\
+		break;																		\
+	}
+#define EE_OP_NO_ZERO( MEMBER, CASE, OP )											\
+	case CASE : {																	\
+		if ( _rRight.u.MEMBER ) {													\
+			_rResult.u.MEMBER = _rLeft.u.MEMBER OP _rRight.u.MEMBER;				\
+		}																			\
+		else { _rResult.u.MEMBER = 0; }												\
+		break;																		\
+	}
+#define EE_OP_BOOL( MEMBER, CASE, OP )												\
+	case CASE : {																	\
+		_rResult.ncType = EE_NC_UNSIGNED;											\
+		_rResult.u.ui64Val = _rLeft.u.MEMBER OP _rRight.u.MEMBER;					\
+		break;																		\
+	}
+#define EE_INT_CHECK( CASE, MEMBER )												\
+	case CASE : {																	\
+		switch ( _uiOp ) {															\
+			EE_OP( MEMBER, '*', * )													\
+			EE_OP_NO_ZERO( MEMBER, '/', / )											\
+			EE_OP_NO_ZERO( MEMBER, '%', % )											\
+			EE_OP( MEMBER, '+', + )													\
+			EE_OP( MEMBER, '-', - )													\
+			EE_OP( MEMBER, CExpEvalParser::token::EE_RIGHT_OP, >> )					\
+			EE_OP( MEMBER, CExpEvalParser::token::EE_LEFT_OP, << )					\
+			EE_OP( MEMBER, '&', & )													\
+			EE_OP( MEMBER, '^', ^ )													\
+			EE_OP( MEMBER, '|', | )													\
+			EE_OP_BOOL( MEMBER, '<', < )											\
+			EE_OP_BOOL( MEMBER, '>', > )											\
+			EE_OP_BOOL( MEMBER, CExpEvalParser::token::EE_REL_LE, <= )				\
+			EE_OP_BOOL( MEMBER, CExpEvalParser::token::EE_REL_GE, >= )				\
+			EE_OP_BOOL( MEMBER, CExpEvalParser::token::EE_EQU_E, == )				\
+			EE_OP_BOOL( MEMBER, CExpEvalParser::token::EE_EQU_NE, != )				\
+			EE_OP_BOOL( MEMBER, CExpEvalParser::token::EE_AND, && )					\
+			EE_OP_BOOL( MEMBER, CExpEvalParser::token::EE_OR, || )					\
+			default : { return EE_EC_ERRORPROCESSINGOP; }							\
+		}																			\
+		break;																		\
+	}
+
+		switch ( _rResult.ncType ) {
+			EE_INT_CHECK( EE_NC_SIGNED, i64Val )
+			EE_INT_CHECK( EE_NC_UNSIGNED, ui64Val )
+			case EE_NC_FLOATING : {
+				switch ( _uiOp ) {
+					EE_OP( dVal, '*', * )
+					EE_OP( dVal, '/', / )
+					EE_OP( dVal, '+', + )
+					EE_OP( dVal, '-', - )
+					EE_OP_BOOL( dVal, '<', < )
+					EE_OP_BOOL( dVal, '>', > )
+					EE_OP_BOOL( dVal, CExpEvalParser::token::EE_REL_LE, <= )
+					EE_OP_BOOL( dVal, CExpEvalParser::token::EE_REL_GE, >= )
+					EE_OP_BOOL( dVal, CExpEvalParser::token::EE_EQU_E, == )
+					EE_OP_BOOL( dVal, CExpEvalParser::token::EE_EQU_NE, != )
+					EE_OP_BOOL( dVal, CExpEvalParser::token::EE_AND, && )
+					EE_OP_BOOL( dVal, CExpEvalParser::token::EE_OR, || )
+					case CExpEvalParser::token::EE_RIGHT_OP : {
+						_rResult.u.dVal = RShift( _rLeft.u.dVal, _rRight.u.dVal );
+						break;
+					}
+					case CExpEvalParser::token::EE_LEFT_OP : {
+						_rResult.u.dVal = LShift( _rLeft.u.dVal, _rRight.u.dVal );
+						break;
+					}
+					case '%' : {
+						_rResult.u.dVal = std::fmod( _rLeft.u.dVal, _rRight.u.dVal );
+						break;
+					}
+					case '^' : {
+						_rResult.u.dVal = std::pow( _rLeft.u.dVal, _rRight.u.dVal );
+						break;
+					}
+					default : { return EE_EC_INVALIDTREE; }
+				}
+				break;
+			}
+			case EE_NC_OBJECT : {
+				switch ( _uiOp ) {
+					case '+' : {
+						_rResult = _rLeft.u.poObj->Plus( _rRight );
+						break;
+					}
+					case '-' : {
+						_rResult = _rLeft.u.poObj->Minus( _rRight );
+						break;
+					}
+					case '*' : {
+						_rResult = _rLeft.u.poObj->Multiply( _rRight );
+						break;
+					}
+					case '/' : {
+						_rResult = _rLeft.u.poObj->Divide( _rRight );
+						break;
+					}
+					case CExpEvalParser::token::EE_EQU_E : {
+						_rResult.ncType = EE_NC_UNSIGNED;
+						_rResult.u.ui64Val = _rLeft.u.poObj->Equals( _rRight );
+						break;
+					}
+					case CExpEvalParser::token::EE_EQU_NE : {
+						_rResult.ncType = EE_NC_UNSIGNED;
+						_rResult.u.ui64Val = !_rLeft.u.poObj->Equals( _rRight );
+						break;
+					}
+					default : { return EE_EC_INVALIDTREE; }
+				}
+				break;
+			}
+		}
+
+#undef EE_INT_CHECK
+#undef EE_OP_BOOL
+#undef EE_OP_NO_ZERO
+#undef EE_OP
+		return EE_EC_SUCCESS;
+	}
+
 	// Applies a 1-parameter intrinsic to a result.
 	CExpEvalContainer::EE_ERROR_CODES CExpEvalContainer::PerformIntrinsic( EE_RESULT _rExp, uint32_t _uiIntrinsic, EE_RESULT &_rResult, uint32_t _ui32Depth ) {
 		if ( !_ui32Depth && _rExp.ncType == EE_NC_OBJECT && _rExp.u.poObj && (_rExp.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) {
