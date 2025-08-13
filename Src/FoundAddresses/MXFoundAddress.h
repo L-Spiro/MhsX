@@ -46,6 +46,12 @@ namespace mx {
 		// Sets the address, type, and original data.
 		bool												InitWithAddressAndDataType( uint64_t _ui64Address, CUtilities::MX_DATA_TYPES _dtType, const uint8_t * _pui8Data );
 
+		// Sets the Data Type.  Call within a try/catch block.
+		//bool												SetAsDataType( CUtilities::MX_DATA_TYPES _dtDataType );
+
+		// Sets the data type as a string.
+		void												SetAsString( const std::string &_sLockString, UINT _uiCodePage );
+
 		// Gets the Address text.
 		virtual std::wstring								AddressText() const;
 
@@ -57,7 +63,21 @@ namespace mx {
 			if MX_UNLIKELY( m_vtValueType == CUtilities::MX_VT_STRING ) {
 				return LockedLeftText();
 			}
-			return ToText( m_vLockedData );
+			CSecureWString swsTmp, swsError;
+			CUtilities::ArrayBytesToWString( m_vLockedData, nullptr, swsTmp, m_dtDataType, std::max<uint32_t>( m_ui32ArrayLen, 1 ), 0, m_bContiguous, swsError );
+			if ( swsError.size() ) { return swsError; }
+			return swsTmp;
+		}
+
+		// Gets the Max Value When Locked text.
+		virtual std::wstring								MaxValueWhenLockedText() const {
+			if MX_UNLIKELY( m_vtValueType == CUtilities::MX_VT_STRING ) {
+				return std::wstring();
+			}
+			CSecureWString swsTmp, swsError;
+			CUtilities::ArrayBytesToWString( m_vLockedDataMax, nullptr, swsTmp, m_dtDataType, std::max<uint32_t>( m_ui32ArrayLen, 1 ), 0, m_bContiguous, swsError );
+			if ( swsError.size() ) { return swsError; }
+			return swsTmp;
 		}
 
 		// Gets the Type text.
@@ -70,7 +90,7 @@ namespace mx {
 		inline CUtilities::MX_DATA_TYPES					DataType() const { return m_dtDataType; }
 
 		// Gets the pre-processing method (byteswapping).
-		inline CUtilities::MX_BYTESWAP						PreProcessing() const { m_bsByteSwap; }
+		inline CUtilities::MX_BYTESWAP						PreProcessing() const { return m_bsByteSwap; }
 
 		// Gets the lock type.
 		inline CUtilities::MX_LOCK_TYPES					LockType() const { return m_ltLockType; }
@@ -78,11 +98,14 @@ namespace mx {
 		// Sets the lock type.
 		inline void											SetLockType( CUtilities::MX_LOCK_TYPES _ltType ) { m_ltLockType = _ltType; }
 
+		// Gets the locked status.
+		inline bool											Locked() const { return m_bLocked; }
+
+		// Sets the locked status.
+		void												SetLocked( bool _bLocked );
+
 		// Sets the Value Type.
 		//bool												SetValueType( CUtilities::MX_VALUE_TYPE _vtType );
-
-		// Sets the Data Type.  Call within a try/catch block.
-		bool												SetAsDataType( CUtilities::MX_DATA_TYPES _dtDataType );
 
 		// Sets the Pre-Processing Type.  Call within a try/catch block.
 		inline bool											SetPreProcessing( CUtilities::MX_BYTESWAP _bsByteSwap ) { m_bsByteSwap = _bsByteSwap; PrepareValueStructures(); }
@@ -102,17 +125,8 @@ namespace mx {
 		// Gets the array length.
 		inline uint32_t										ArrayLen() const { return m_vtValueType == CUtilities::MX_VT_DATA_TYPE ? m_ui32ArrayLen : 0; }
 
-		// Sets the array length.  Call within a try/catch block.
-		inline void											SetArrayLen( uint32_t _ui32Len ) { m_ui32ArrayLen = std::min<uint32_t>( _ui32Len, MaxArrayLen() ); PrepareValueStructures(); }
-
 		// Gets the array stride.
 		inline uint16_t										ArrayStride() const { return m_vtValueType == CUtilities::MX_VT_DATA_TYPE ? m_ui16ArrayStride : 0; }
-
-		// Sets the array stride.  Call within a try/catch block.
-		inline void											SetArrayStride( uint16_t _ui16Stride ) {
-			m_ui16ArrayStride = _ui16Stride;
-			PrepareValueStructures();
-		}
 
 		// Adds a pointer level.  Call within a try/catch block.
 		inline void											AddPointer( int32_t _i32Offset ) {
@@ -122,9 +136,6 @@ namespace mx {
 
 		// Gets the code page for strings.
 		inline UINT											CodePage() const { return m_uiCodePage; }
-
-		// Sets the data type as a string.
-		void												SetAsString( const std::string &_sString, const std::string &_sLockString, UINT _uiCodePage );
 
 		// Dirties the item.  Address and current data need to be updated after this.
 		virtual void										Dirty() {
@@ -174,7 +185,9 @@ namespace mx {
 		// The original data when added.
 		std::vector<uint8_t>								m_vOriginalData;
 		// The data when locked.
-		std::vector<uint8_t>								m_vLockedData;
+		std::vector<std::vector<uint8_t>>					m_vLockedData;
+		// The data when locked (max).
+		std::vector<std::vector<uint8_t>>					m_vLockedDataMax;
 		// Current data.
 		mutable MX_VALUE									m_vCurData;
 		// The final target address for which the use of m_vCurData has been prepared.
@@ -185,6 +198,8 @@ namespace mx {
 
 		// Whether to use a basic address or not.
 		bool												m_bBasicAddress = true;
+		// Locked.
+		bool												m_bLocked = false;
 		// Does the address need updating?
 		mutable bool										m_bDirtyAddress = true;
 		// Does the current value need updating?
@@ -215,13 +230,23 @@ namespace mx {
 		void												PrepareValueStructures() const;
 
 		// Updates the current-data buffer(s) without reading into them.
-		bool												PrepareCurValueBuffer() const;
+		//bool												PrepareCurValueBuffer() const;
 
 		// Gets the final target address via derefencing pointers.
-		uint64_t											FinalTargetAddress( bool * _bSuccess = nullptr ) const;
+		uint64_t											FinalTargetAddress( bool * _pbSuccess = nullptr ) const;
 
 		// Updates/gets the locked left text.
 		const CSecureWString &								LockedLeftText() const;
+
+		// Sets the array length.  Call within a try/catch block.
+		inline void											SetArrayLen( uint32_t _ui32Len ) { m_ui32ArrayLen = std::min<uint32_t>( _ui32Len, MaxArrayLen() ); PrepareValueStructures(); }
+
+		// Sets the array stride.  Call within a try/catch block.
+		inline void											SetArrayStride( uint16_t _ui16Stride ) {
+			m_ui16ArrayStride = _ui16Stride;
+			PrepareValueStructures();
+		}
+
 	};
 
 }	// namespace mx

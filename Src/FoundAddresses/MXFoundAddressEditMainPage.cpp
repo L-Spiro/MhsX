@@ -38,6 +38,12 @@ namespace mx {
 		if ( pwTmp ) {
 			CUtilities::FillComboBoxWithLocktypes( pwTmp, CUtilities::MX_LT_EXACT );
 		}
+
+		pwTmp = FindChild( Layout::MX_FAEI_QL_LOCKED_CHECK );
+		if ( pwTmp ) {
+			pwTmp->CheckButton( GatherLockedStates() );
+		}
+
 		pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_STRING_COMBO );
 		if ( pwTmp ) {
 			UINT uiSysCodePage = CCodePages::GetSystemDefaultAnsiCodePage();
@@ -90,6 +96,12 @@ namespace mx {
 		if ( pwTmp ) {
 			pwTmp->LimitText();
 			auto wsText = GatherLockedValue();
+			pwTmp->SetTextW( wsText.c_str() );
+		}
+		pwTmp = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
+		if ( pwTmp ) {
+			pwTmp->LimitText();
+			auto wsText = GatherMaxLockedValue();
 			pwTmp->SetTextW( wsText.c_str() );
 		}
 		pwTmp = FindChild( Layout::MX_FAEI_INFO_ADDRESS_EDIT );
@@ -269,10 +281,12 @@ namespace mx {
 
 								bool bContiguous = ui32Stride <= CUtilities::DataTypeSize( dtThisType );
 
+								CSecureWString swsCurVal = swsValue.size() ? swsValue : pfaThis->ValueText();
+
 								std::vector<std::vector<uint8_t>> vRawValues;
 								CSecureWString swsError;
-								auto ui32NewArrayLen = CUtilities::WStringToArrayBytes( vRawValues, swsValue, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
-								if ( !ui32NewArrayLen ) {
+								auto ui32NewArrayLen = CUtilities::WStringToArrayBytes( vRawValues, swsCurVal, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
+								if ( swsError.size() ) {
 									_wsError = swsError;
 									_pwWidget = FindChild( Layout::MX_FAEI_VALUE_CUR_VAL_COMBO );
 									return FALSE;
@@ -285,15 +299,15 @@ namespace mx {
 									}
 								}
 
-
+								CSecureWString swsLeftLockVal = swsLeft.size() ? swsLeft : pfaThis->ValueWhenLockedText();
 								std::vector<std::vector<uint8_t>> vRawLockLeft;
-								auto ui32LeftArrayLen = CUtilities::WStringToArrayBytes( vRawLockLeft, swsValue, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
-								if ( !ui32LeftArrayLen ) {
+								auto ui32LeftArrayLen = CUtilities::WStringToArrayBytes( vRawLockLeft, swsLeftLockVal, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
+								if ( swsError.size() ) {
 									_wsError = swsError;
 									_pwWidget = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_COMBO );
 									return FALSE;
 								}
-								if ( ui32LeftArrayLen != 0 ) {
+								if ( ui32ArrayLen != 0 ) {
 									if ( ui32LeftArrayLen > ui32ArrayLen ) {
 										_wsError = _DEC_WS_FAD3DED1_The_locked_value_has_more_elements_than_specified_by_Array_Length_;
 										_pwWidget = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_COMBO );
@@ -308,14 +322,15 @@ namespace mx {
 
 								CUtilities::MX_LOCK_TYPES ltLockType = (iLockType == -1) ? pfaThis->LockType() : CUtilities::MX_LOCK_TYPES( iLockType );
 								if ( CUtilities::MX_LT_RANGE == ltLockType ) {
+									CSecureWString swsRightLockVal = swsRight.size() ? swsRight : pfaThis->MaxValueWhenLockedText();
 									std::vector<std::vector<uint8_t>> vRawLockRight;
-									auto ui32RightArrayLen = CUtilities::WStringToArrayBytes( vRawLockRight, swsValue, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
-									if ( !ui32RightArrayLen ) {
+									auto ui32RightArrayLen = CUtilities::WStringToArrayBytes( vRawLockRight, swsRight, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
+									if ( swsError.size() ) {
 										_wsError = swsError;
 										_pwWidget = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
 										return FALSE;
 									}
-									if ( ui32RightArrayLen != 0 ) {
+									if ( ui32ArrayLen != 0 ) {
 										if ( ui32RightArrayLen > ui32ArrayLen ) {
 											_wsError = _DEC_WS_FAD3DED1_The_locked_value_has_more_elements_than_specified_by_Array_Length_;
 											_pwWidget = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
@@ -329,12 +344,12 @@ namespace mx {
 									}
 
 									std::vector<ee::CExpEvalContainer::EE_RESULT> vLeftExp, vRightExp;
-									if ( CUtilities::ArrayBytesToResult( vRawLockLeft, nullptr, dtThisType, ui32ArrayLen, bContiguous, vLeftExp ) != ui32LeftArrayLen ) {
+									if ( CUtilities::ArrayBytesToResult( vRawLockLeft, nullptr, dtThisType, ui32LeftArrayLen, bContiguous, vLeftExp ) != ui32LeftArrayLen ) {
 										_wsError = _DEC_WS_1468A1DF_Internal_error_;
 										_pwWidget = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
 										return FALSE;
 									}
-									if ( CUtilities::ArrayBytesToResult( vRawLockRight, nullptr, dtThisType, ui32ArrayLen, bContiguous, vRightExp ) != ui32RightArrayLen ) {
+									if ( CUtilities::ArrayBytesToResult( vRawLockRight, nullptr, dtThisType, ui32RightArrayLen, bContiguous, vRightExp ) != ui32RightArrayLen ) {
 										_wsError = _DEC_WS_1468A1DF_Internal_error_;
 										_pwWidget = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
 										return FALSE;
@@ -482,6 +497,12 @@ namespace mx {
 				bEscape = pwTmp->IsChecked();
 			}
 
+			int32_t i32Locked = BST_INDETERMINATE;
+			pwTmp = FindChild( Layout::MX_FAEI_QL_LOCKED_CHECK );
+			if ( pwTmp ) {
+				i32Locked = pwTmp->CheckState();
+			}
+
 			int iCodePage = -1;
 			pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_STRING_COMBO );
 			if ( pwTmp ) {
@@ -497,13 +518,17 @@ namespace mx {
 					if ( pfabThis ) {
 						if ( pfabThis->Type() == MX_FAT_FOUND_ADDRESS ) {
 							auto pfaThis = static_cast<CFoundAddress *>(pfabThis);
+							bool bLocked = (i32Locked == BST_INDETERMINATE) ? pfaThis->Locked() : (i32Locked == BST_CHECKED);
+							pfaThis->SetLocked( false );
 							CUtilities::MX_DATA_TYPES dtThisType = (iType == -1) ? pfaThis->DataType() : static_cast<CUtilities::MX_DATA_TYPES>(iType);
+							pfaThis->Dirty();
+							uint64_t ui64Address = pfaThis->FinalAddress();
 
 							if ( dtThisType == CUtilities::MX_DT_STRING ) {
 								UINT uiCodePage = (iCodePage == -1) ? pfaThis->CodePage() : UINT( iCodePage );
 
 								CSecureWString swsCopy = swsValue;
-								if ( bEscape ) {
+								if ( bEscape && swsCopy.size() ) {
 									CSecureString ssResolved;
 									CUtilities::ResolveAllEscapes( ee::CExpEval::ToUtf8( swsCopy ), ssResolved, true );
 									swsCopy = ee::CExpEval::ToUtf16( ssResolved );
@@ -513,8 +538,13 @@ namespace mx {
 								DWORD dwError;
 								auto sCodePaged = CUtilities::WideCharToMultiByte( uiCodePage, 0, swsCopy, nullptr, nullptr, &dwError );
 								if ( dwError == ERROR_SUCCESS ) {
+									if ( !bLocked && swsValue.size() ) {
+										// Write the current value to RAM.
+										m_pParms.pmhMemHack->WriteProcessMemory_PreProcessed( ui64Address, sCodePaged.data(), sCodePaged.size(), pfaThis->PreProcessing() );
+									}
+									
 									swsCopy = swsLeft;
-									if ( bEscape ) {
+									if ( bEscape && swsCopy.size() ) {
 										CSecureString ssResolved;
 										CUtilities::ResolveAllEscapes( ee::CExpEval::ToUtf8( swsCopy ), ssResolved, true );
 										swsCopy = ee::CExpEval::ToUtf16( ssResolved );
@@ -522,58 +552,72 @@ namespace mx {
 									auto sLockedCodePaged = CUtilities::WideCharToMultiByte( uiCodePage, 0, swsCopy, nullptr, nullptr, &dwError );
 									if ( dwError == ERROR_SUCCESS ) {
 										// Set the current value as a string.
-										pfaThis->SetAsString( sCodePaged, sLockedCodePaged, uiCodePage );
+										pfaThis->SetAsString( sLockedCodePaged, uiCodePage );
 									}
 								}
 							}
 							else {
 								uint32_t ui32ArrayLen = (i32ArrayLen == -1) ? pfaThis->ArrayLen() : uint32_t( i32ArrayLen );
-								if ( ui32ArrayLen > CFoundAddress::MaxArrayLen() ) { return FALSE; }
+								if ( ui32ArrayLen > CFoundAddress::MaxArrayLen() ) { continue; }
 
 								uint32_t ui32Stride = (i32ArrayStride == -1) ? pfaThis->ArrayStride() : uint32_t( i32ArrayStride );
-								if ( ui32Stride > CFoundAddress::MaxArrayStride() ) { return FALSE; }
+								if ( ui32Stride > CFoundAddress::MaxArrayStride() ) { continue; }
 
 								bool bContiguous = ui32Stride <= CUtilities::DataTypeSize( dtThisType );
 
+								CSecureWString swsCurVal = swsValue.size() ? swsValue : pfaThis->ValueText();
+
 								std::vector<std::vector<uint8_t>> vRawValues;
 								CSecureWString swsError;
-								auto ui32NewArrayLen = CUtilities::WStringToArrayBytes( vRawValues, swsValue, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
-								if ( !ui32NewArrayLen ) { return FALSE; }
+								auto ui32NewArrayLen = CUtilities::WStringToArrayBytes( vRawValues, swsCurVal, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
+								if ( swsError.size() ) { continue; }
 								if ( ui32ArrayLen != 0 ) {
-									if ( ui32NewArrayLen > ui32ArrayLen ) { return FALSE; }
+									if ( ui32NewArrayLen > ui32ArrayLen ) { continue; }
+								}
+
+								if ( !bLocked && swsValue.size() ) {
+									// Write the current value to RAM.
+									//m_pParms.pmhMemHack->WriteProcessMemory_PreProcessed( ui64Address, sCodePaged.data(), sCodePaged.size(), pfaThis->PreProcessing() );
 								}
 
 
+								CSecureWString swsLeftLockVal = swsLeft.size() ? swsLeft : pfaThis->ValueWhenLockedText();
 								std::vector<std::vector<uint8_t>> vRawLockLeft;
-								auto ui32LeftArrayLen = CUtilities::WStringToArrayBytes( vRawLockLeft, swsValue, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
-								if ( !ui32LeftArrayLen ) { return FALSE; }
+								auto ui32LeftArrayLen = CUtilities::WStringToArrayBytes( vRawLockLeft, swsLeftLockVal, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
+								if ( swsError.size() ) { continue; }
 								if ( ui32LeftArrayLen != 0 ) {
-									if ( ui32LeftArrayLen > ui32ArrayLen ) { return FALSE; }
+									if ( ui32LeftArrayLen > ui32ArrayLen ) { continue; }
 								}
-								else if ( ui32LeftArrayLen != ui32NewArrayLen ) { return FALSE; }
+								else if ( ui32LeftArrayLen != ui32NewArrayLen ) { continue; }
 
 								CUtilities::MX_LOCK_TYPES ltLockType = (iLockType == -1) ? pfaThis->LockType() : CUtilities::MX_LOCK_TYPES( iLockType );
+								pfaThis->SetLockType( ltLockType );
 								if ( CUtilities::MX_LT_RANGE == ltLockType ) {
+									CSecureWString swsRightLockVal = swsRight.size() ? swsRight : pfaThis->MaxValueWhenLockedText();
 									std::vector<std::vector<uint8_t>> vRawLockRight;
-									auto ui32RightArrayLen = CUtilities::WStringToArrayBytes( vRawLockRight, swsValue, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
-									if ( !ui32RightArrayLen ) { return FALSE; }
+									auto ui32RightArrayLen = CUtilities::WStringToArrayBytes( vRawLockRight, swsRightLockVal, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
+									if ( swsError.size() ) { continue; }
 									if ( ui32RightArrayLen != 0 ) {
-										if ( ui32RightArrayLen > ui32ArrayLen ) { return FALSE; }
+										if ( ui32RightArrayLen > ui32ArrayLen ) { continue; }
 									}
-									else if ( ui32RightArrayLen != ui32NewArrayLen ) { return FALSE; }
+									else if ( ui32RightArrayLen != ui32NewArrayLen ) { continue; }
 
 									std::vector<ee::CExpEvalContainer::EE_RESULT> vLeftExp, vRightExp;
-									if ( CUtilities::ArrayBytesToResult( vRawLockLeft, nullptr, dtThisType, ui32ArrayLen, bContiguous, vLeftExp ) != ui32LeftArrayLen ) { return FALSE; }
-									if ( CUtilities::ArrayBytesToResult( vRawLockRight, nullptr, dtThisType, ui32ArrayLen, bContiguous, vRightExp ) != ui32RightArrayLen ) { return FALSE; }
+									if ( CUtilities::ArrayBytesToResult( vRawLockLeft, nullptr, dtThisType, ui32LeftArrayLen, bContiguous, vLeftExp ) != ui32LeftArrayLen ) { continue; }
+									if ( CUtilities::ArrayBytesToResult( vRawLockRight, nullptr, dtThisType, ui32RightArrayLen, bContiguous, vRightExp ) != ui32RightArrayLen ) { continue; }
 
 									size_t sLen = std::min<size_t>( vLeftExp.size(), vRightExp.size() );
 									for ( size_t I = 0; I < sLen; ++I ) {
 										ee::CExpEvalContainer::EE_RESULT rTmp;
-										if ( ee::CExpEvalContainer::EE_EC_SUCCESS != ee::CExpEvalContainer::PerformOp_S( vLeftExp[I], '>', vRightExp[I], rTmp ) ) { return FALSE; }
-										if ( rTmp.u.ui64Val ) { return FALSE; }
+										if ( ee::CExpEvalContainer::EE_EC_SUCCESS != ee::CExpEvalContainer::PerformOp_S( vLeftExp[I], '>', vRightExp[I], rTmp ) ) { continue; }
+										if ( rTmp.u.ui64Val ) { continue; }
 									}
 								}
+								else {
+								}
 							}
+							
+							pfaThis->SetLocked( bLocked );
 						}
 					}
 				}
@@ -1159,6 +1203,25 @@ namespace mx {
 		return wswRet;
 	}
 
+	// Gathers all max locked-value strings.
+	CSecureWString CFoundAddressEditMainPage::GatherMaxLockedValue() const {
+		if ( !m_pParms.pmhMemHack || !m_pParms.vSelection.size() ) { return CSecureWString(); }
+		CSecureWString wswRet;
+		auto famManager = m_pParms.pmhMemHack->FoundAddressManager();
+		auto faTmp = famManager->GetById( m_pParms.vSelection[0] );
+		if ( !faTmp ) { return CSecureWString(); }
+		wswRet = faTmp->MaxValueWhenLockedText();
+
+		for ( size_t I = 1; I < m_pParms.vSelection.size(); ++I ) {
+			faTmp = famManager->GetById( m_pParms.vSelection[I] );
+			if ( faTmp ) {
+				if ( faTmp->MaxValueWhenLockedText() != wswRet ) { return CSecureWString(); }
+			}
+		}
+
+		return wswRet;
+	}
+
 	// Gathers all address strings.
 	CSecureWString CFoundAddressEditMainPage::GatherAddress() const {
 		if ( !m_pParms.pmhMemHack || !m_pParms.vSelection.size() ) { return CSecureWString(); }
@@ -1220,6 +1283,28 @@ namespace mx {
 		}
 
 		return dtRet;
+	}
+
+	// Gathers all locked states.
+	int CFoundAddressEditMainPage::GatherLockedStates() const {
+		if ( !m_pParms.pmhMemHack || !m_pParms.vSelection.size() ) { return CUtilities::MX_LOCK_TYPES( -1 ); }
+		bool bLocked = false;
+		auto famManager = m_pParms.pmhMemHack->FoundAddressManager();
+		bool bFound = false;
+
+		for ( size_t I = 0; I < m_pParms.vSelection.size(); ++I ) {
+			auto faTmp = famManager->GetById( m_pParms.vSelection[I] );
+			if ( faTmp && faTmp->Type() == MX_FAT_FOUND_ADDRESS ) {
+				if ( !bFound ) {
+					bLocked = reinterpret_cast<CFoundAddress *>(faTmp)->Locked();
+					bFound = true;
+					continue;
+				}
+				if ( reinterpret_cast<CFoundAddress *>(faTmp)->Locked() != bLocked ) { return BST_INDETERMINATE; }
+			}
+		}
+
+		return bLocked ? BST_CHECKED : BST_UNCHECKED;
 	}
 
 	// Gathers all array lengths.

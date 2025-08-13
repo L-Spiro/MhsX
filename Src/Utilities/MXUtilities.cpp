@@ -3919,6 +3919,10 @@ namespace mx {
 			auto sSize = DataTypeSize( _dtTargetType );
 			uint32_t ui32Total = 0;
 			if ( _bContiguous ) {
+				if ( !_vSrc.size() ) {
+					_swsError = _DEC_WS_1468A1DF_Internal_error_;
+					return 0;
+				}
 				size_t sOffset = _pvOffsets ? (*_pvOffsets)[0] : 0;
 				for ( size_t I = 0; I < _ui32ArrayLen && sOffset + sSize <= _vSrc[0].size(); ++I ) {
 					if ( ui32Total ) {

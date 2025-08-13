@@ -28,7 +28,8 @@ namespace mx {
 		try {
 			m_vOriginalData.resize( CUtilities::DataTypeSize( _dtType ) );
 			std::memcpy( m_vOriginalData.data(), _pui8Data, m_vOriginalData.size() );
-			m_vLockedData = m_vOriginalData;
+			m_vLockedData.clear();
+			m_vLockedData.push_back( m_vOriginalData );
 			PrepareValueStructures();
 			Dirty();
 		}
@@ -43,10 +44,31 @@ namespace mx {
 		auto aAddr = FinalAddress();
 		if ( m_bBasicAddress ) {
 			std::wstring wTmp;
-			CUtilities::ToHex( m_ui64Address, wTmp, m_ui64Address > UINT_MAX ? 12 : 8, false );
+			CUtilities::ToHex( aAddr, wTmp, aAddr > UINT_MAX ? 12 : 8, false );
 			return wTmp;
 		}
 		return std::wstring();
+	}
+
+	// Sets the Data Type.  Call within a try/catch block.
+	//bool CFoundAddress::SetAsDataType( CUtilities::MX_DATA_TYPES _dtDataType ) {
+	//	if ( !CUtilities::IsDataType( _dtDataType ) ) { return false; }
+	//	m_dtDataType = _dtDataType;
+	//	PrepareValueStructures();
+	//	UpdateBuffers();						// TODO: Merge into PrepareValueStructures().
+	//	return true;
+	//}
+
+	// Sets the data type as a string.
+	void CFoundAddress::SetAsString( const std::string &_sLockString, UINT _uiCodePage ) {
+		m_vtValueType = CUtilities::MX_VT_STRING;
+		m_uiCodePage = _uiCodePage;
+
+		m_vLockedData.clear();
+		m_vLockedData.push_back( std::vector<uint8_t>( reinterpret_cast<const uint8_t *>(_sLockString.data()),
+			reinterpret_cast<const uint8_t *>(_sLockString.data()) + _sLockString.size() ) );
+		m_bDirtyLockedLeft = true;
+		Dirty();
 	}
 
 	// Gets the Value text.
@@ -65,11 +87,11 @@ namespace mx {
 			auto ui32Elements = std::max<uint32_t>( m_ui32ArrayLen, 1 );
 			if MX_LIKELY( m_bContiguous ) {
 				if MX_UNLIKELY( !m_vCurData.vValue.size() ) {
-					std::wstring( L"<C>" );
+					return std::wstring( L"<C>" );
 				}
 			}
 			else if MX_UNLIKELY( ui32Elements > m_vCurData.vValue.size() ) {
-				std::wstring( L"<A>" );
+				return std::wstring( L"<A>" );
 			}
 			std::wstring wsReturn;
 			for ( uint32_t I = 0; I < ui32Elements; ++I ) {
@@ -152,26 +174,9 @@ namespace mx {
 		return std::wstring();
 	}
 
-	// Sets the Value Type.
-	/*bool CFoundAddress::SetValueType( CUtilities::MX_VALUE_TYPE _vtType ) {
-		m_vtValueType = _vtType;
-		switch ( m_vtValueType ) {
-			case CUtilities::MX_VT_DATA_TYPE : {}		MX_FALLTHROUGH
-			case CUtilities::MX_VT_STRING : {}			MX_FALLTHROUGH
-			case CUtilities::MX_VT_BLOB : {	
-				return true;
-			}
-		}
-		return false;
-	}*/
-
-	// Sets the Data Type.  Call within a try/catch block.
-	bool CFoundAddress::SetAsDataType( CUtilities::MX_DATA_TYPES _dtDataType ) {
-		if ( !CUtilities::IsDataType( _dtDataType ) ) { return false; }
-		m_dtDataType = _dtDataType;
-		PrepareValueStructures();
-		UpdateBuffers();						// TODO: Merge into PrepareValueStructures().
-		return true;
+	// Sets the locked status.
+	void CFoundAddress::SetLocked( bool _bLocked ) {
+		m_bLocked = _bLocked;
 	}
 
 	// Gets the size of the internal buffer needed to contain the data type.
@@ -188,18 +193,6 @@ namespace mx {
 			}
 		}
 		return 0;
-	}
-
-	// Sets the data type as a string.
-	void CFoundAddress::SetAsString( const std::string &_sString, const std::string &_sLockString, UINT _uiCodePage ) {
-		m_vtValueType = CUtilities::MX_VT_STRING;
-		m_uiCodePage = _uiCodePage;
-
-
-		m_vLockedData.assign( reinterpret_cast<const uint8_t *>( _sLockString.data() ),
-			reinterpret_cast<const uint8_t *>( _sLockString.data() ) + _sLockString.size() );
-		m_bDirtyLockedLeft = true;
-		Dirty();
 	}
 
 	// Update internal buffers after the size of the item changes.
@@ -230,19 +223,33 @@ namespace mx {
 
 	// Undirty the current value.
 	bool CFoundAddress::UndirtyCurValue() const {
-		if MX_LIKELY( PrepareCurValueBuffer() ) {
-			auto ui64Addr = m_ui64FinalTargetPreparedAddress;
+		//if MX_LIKELY( PrepareCurValueBuffer() ) {
+			
+			auto ui64Addr = FinalTargetAddress();//m_ui64FinalTargetPreparedAddress;
 			if MX_LIKELY( m_pmhMemHack ) {
 				auto ui32Elements = std::max<uint32_t>( m_ui32ArrayLen, 1 );
 				if MX_LIKELY( m_bContiguous ) {
+					if MX_UNLIKELY( m_vCurData.vValue.size() != 1 ) {
+						m_vCurData.vValue.resize( 1 );
+					}
+					if MX_UNLIKELY( m_vCurData.vOffsets.size() != 1 ) {
+						m_vCurData.vOffsets.resize( 1 );
+					}
 					return m_pmhMemHack->ReadProcessMemory_PreProcessed( ui64Addr, m_vCurData.vValue[0], m_ui32DataTypeSize * ui32Elements, m_vCurData.vOffsets[0], m_bsByteSwap );
+				}
+
+				if MX_UNLIKELY( m_vCurData.vValue.size() != ui32Elements ) {
+					m_vCurData.vValue.resize( ui32Elements );
+				}
+				if MX_UNLIKELY( m_vCurData.vOffsets.size() != ui32Elements ) {
+					m_vCurData.vOffsets.resize( ui32Elements );
 				}
 				for ( uint32_t I = 0; I < ui32Elements; ++I ) {
 					if ( !m_pmhMemHack->ReadProcessMemory_PreProcessed( ui64Addr, m_vCurData.vValue[I], m_ui32DataTypeSize * ui32Elements, m_vCurData.vOffsets[I], m_bsByteSwap ) ) { return false; }
 					ui64Addr += m_ui16ActuaArrayStride;
 				}
 			}
-		}
+		//}
 		return false;
 	}
 
@@ -253,15 +260,15 @@ namespace mx {
 			m_ui16ActuaArrayStride = std::max<uint16_t>( m_ui16ArrayStride, m_ui32DataTypeSize );
 			m_bContiguous = m_ui16ActuaArrayStride == m_ui32DataTypeSize;
 
-			if ( !PrepareCurValueBuffer() ) { throw; }
+			//if ( !PrepareCurValueBuffer() ) { throw; }
 		}
 	}
 
 	// Updates the current-data buffer(s) without reading into them.
-	bool CFoundAddress::PrepareCurValueBuffer() const {
+	/*bool CFoundAddress::PrepareCurValueBuffer() const {
 		bool bReadAddressChain;
 		auto ui64FinalAddr = FinalTargetAddress( &bReadAddressChain );
-		if MX_UNLIKELY( bReadAddressChain && m_ui64FinalTargetPreparedAddress != ui64FinalAddr ) {
+		if MX_UNLIKELY( bReadAddressChain && (m_ui64FinalTargetPreparedAddress != ui64FinalAddr) ) {
 			try {
 				auto ui32Elements = std::max<uint32_t>( m_ui32ArrayLen, 1 );
 				if ( m_bContiguous ) {
@@ -293,11 +300,11 @@ namespace mx {
 		}
 			
 		return true;
-	}
+	}*/
 
 	// Gets the final target address via derefencing pointers.
-	uint64_t CFoundAddress::FinalTargetAddress( bool * _bSuccess ) const {
-#define MX_FAIL			if ( _bSuccess ) { (*_bSuccess) = false; return 0ULL; }
+	uint64_t CFoundAddress::FinalTargetAddress( bool * _pbSuccess ) const {
+#define MX_FAIL			if ( _pbSuccess ) { (*_pbSuccess) = false; return 0ULL; }
 		if MX_UNLIKELY( m_pmhMemHack == nullptr ) { MX_FAIL; }
 		auto ui64Addr = FinalAddress();
 
@@ -320,8 +327,8 @@ namespace mx {
 	const CSecureWString & CFoundAddress::LockedLeftText() const {
 		if MX_UNLIKELY( m_bDirtyLockedLeft ) {
 			CSecureString ssTmp;
-			ssTmp.assign( reinterpret_cast<const char *>( m_vLockedData.data() ),
-			reinterpret_cast<const char *>( m_vLockedData.data() ) + m_vLockedData.size() );
+			ssTmp.assign( reinterpret_cast<const char *>( m_vLockedData[0].data() ),
+			reinterpret_cast<const char *>( m_vLockedData[0].data() ) + m_vLockedData[0].size() );
 			m_swsLockedLeftText = CUtilities::MultiByteToWideChar( CodePage(), 0, ssTmp );
 			m_bDirtyLockedLeft = false;
 		}

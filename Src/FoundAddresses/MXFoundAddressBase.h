@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../MXMhsX.h"
+#include "../Utilities/MXUtilities.h"
 
 #include <atomic>
 #include <string>
@@ -108,6 +109,9 @@ namespace mx {
 		// Gets the Value When Locked text.
 		virtual std::wstring								ValueWhenLockedText() const { return std::wstring(); }
 
+		// Gets the Max Value When Locked text.
+		virtual std::wstring								MaxValueWhenLockedText() const { return std::wstring(); }
+
 		// Gets the Type text.
 		virtual std::wstring								TypeText() const { return std::wstring(); }
 
@@ -116,6 +120,11 @@ namespace mx {
 
 		// Is the address dynamic?
 		virtual bool										SimpleAddress() const { return true; }
+
+		// Writes to memory (optionally byte-swapping).
+		static bool											WriteProcessMemory_PreProcessed( CMemHack * _pmhMemHack,
+			uint64_t _ui64BaseAddress, const std::vector<std::vector<uint8_t>> &_vBuffer, bool _bContiguous, uint32_t _ui32Stride, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesWritten = nullptr );
+			
 
 
 	protected :

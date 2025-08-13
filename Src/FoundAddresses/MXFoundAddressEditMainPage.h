@@ -52,6 +52,9 @@ namespace mx {
 		// Gathers all locked-value strings.
 		CSecureWString							GatherLockedValue() const;
 
+		// Gathers all max locked-value strings.
+		CSecureWString							GatherMaxLockedValue() const;
+
 		// Gathers all address strings.
 		CSecureWString							GatherAddress() const;
 
@@ -60,6 +63,9 @@ namespace mx {
 
 		// Gathers all lock types.
 		CUtilities::MX_LOCK_TYPES				GatherLockTypes() const;
+
+		// Gathers all locked states.
+		int										GatherLockedStates() const;
 
 		// Gathers all array lengths.
 		CSecureWString							GatherArrayLens() const;
