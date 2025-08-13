@@ -109,17 +109,485 @@ namespace mx {
 
 	// Verifies the options, returning an error string in case of error.
 	BOOL CFoundAddressEditMainPage::Verify( std::wstring &_wsError, CWidget * &_pwWidget ) {
-		return FALSE;
+		try {
+			bool bIsMulti = m_pParms.vSelection.size() >= 2;
+		
+			int iType = -1;
+			auto pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_COMBO );
+			if ( pwTmp ) {
+				iType = pwTmp->GetCurSelItemData();
+			}
+			int iLockType = -1;
+			pwTmp = FindChild( Layout::MX_FAEI_QL_LOCK_TYPE_COMBO );
+			if ( pwTmp ) {
+				iLockType = pwTmp->GetCurSelItemData();
+			}
+
+
+			ee::CExpEvalContainer::EE_RESULT rRes;
+			pwTmp = FindChild( Layout::MX_FAEI_VALUE_ARRAY_LEN_COMBO );
+			rRes.u.i64Val = -1;
+			if ( pwTmp ) {
+				if ( !pwTmp->GetTextAsInt64Expression( rRes ) ) {
+					if ( !bIsMulti ) {
+						_wsError = _DEC_WS_43849434_Invalid_array_length_;
+						_pwWidget = pwTmp;
+						return FALSE;
+					}
+					else {
+						rRes.u.i64Val = -1;
+					}
+				}
+				else if ( rRes.u.i64Val < 0 || rRes.u.i64Val > CFoundAddress::MaxArrayLen() ) {
+					_wsError = _DEC_WS_467E0365_Array_length_must_be_between_0_and_;
+					_wsError += std::to_wstring( CFoundAddress::MaxArrayLen() );
+					_wsError += L'.';
+					_pwWidget = pwTmp;
+					return FALSE;
+				}
+			}
+			int32_t i32ArrayLen = int32_t( rRes.u.i64Val );
+
+			pwTmp = FindChild( Layout::MX_FAEI_VALUE_ARRAY_STRIDE_COMBO );
+			rRes.u.i64Val = -1;
+			if ( pwTmp ) {
+				if ( !pwTmp->GetTextAsInt64Expression( rRes ) ) {
+					if ( !bIsMulti ) {
+						_wsError = _DEC_WS_09B2D04F_Invalid_stride_;
+						_pwWidget = pwTmp;
+						return FALSE;
+					}
+					else {
+						rRes.u.i64Val = -1;
+					}
+				}
+				else if ( rRes.u.i64Val < 0 || rRes.u.i64Val > CFoundAddress::MaxArrayLen() ) {
+					_wsError = _DEC_WS_F033357E_Stride_must_be_between_0_and_;
+					_wsError += std::to_wstring( CFoundAddress::MaxArrayStride() );
+					_wsError += L'.';
+					_pwWidget = pwTmp;
+					return FALSE;
+				}
+			}
+			int32_t i32ArrayStride = int32_t( rRes.u.i64Val );
+
+
+			CSecureWString swsValue;
+			pwTmp = FindChild( Layout::MX_FAEI_VALUE_CUR_VAL_COMBO );
+			if ( pwTmp ) {
+				swsValue = pwTmp->GetTextW();
+			}
+
+			CSecureWString swsLeft;
+			pwTmp = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_COMBO );
+			if ( pwTmp ) {
+				swsLeft = pwTmp->GetTextW();
+			}
+			CSecureWString swsRight;
+			pwTmp = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
+			if ( pwTmp ) {
+				swsRight = pwTmp->GetTextW();
+			}
+
+			bool bHex = false;
+			pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_SHOW_AS_HEX_CHECK );
+			if ( pwTmp ) {
+				bHex = pwTmp->IsChecked();
+			}
+
+			bool bEscape = false;
+			pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_ESCAPE_CHECK );
+			if ( pwTmp ) {
+				bEscape = pwTmp->IsChecked();
+			}
+
+			int iCodePage = -1;
+			pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_STRING_COMBO );
+			if ( pwTmp ) {
+				iCodePage = int( pwTmp->GetCurSelItemData() );
+			}
+
+
+			{
+				auto pfamMan = m_pParms.pmhMemHack->FoundAddressManager();
+				for ( size_t I = 0; I < m_pParms.vSelection.size(); ++I ) {
+					auto pfabThis = pfamMan->GetById( size_t( m_pParms.vSelection[I] ) );
+					if ( pfabThis ) {
+						if ( pfabThis->Type() == MX_FAT_FOUND_ADDRESS ) {
+							auto pfaThis = static_cast<CFoundAddress *>(pfabThis);
+							CUtilities::MX_DATA_TYPES dtThisType = (iType == -1) ? pfaThis->DataType() : static_cast<CUtilities::MX_DATA_TYPES>(iType);
+
+							if ( dtThisType == CUtilities::MX_DT_STRING ) {
+								UINT uiCodePage = (iCodePage == -1) ? pfaThis->CodePage() : UINT( iCodePage );
+
+								CSecureWString swsCopy = swsValue;
+								if ( bEscape ) {
+									CSecureString ssResolved;
+									CUtilities::ResolveAllEscapes( ee::CExpEval::ToUtf8( swsCopy ), ssResolved, true );
+									swsCopy = ee::CExpEval::ToUtf16( ssResolved );
+								}
+
+
+								CSecureString ssMultiByte;
+								DWORD dwError;
+								auto sCodePaged = CUtilities::WideCharToMultiByte( uiCodePage, 0, swsCopy, nullptr, nullptr, &dwError );
+								switch ( dwError ) {
+									case ERROR_SUCCESS : {
+										break;
+									}
+									case ERROR_NOT_ENOUGH_MEMORY : {
+										_wsError = _DEC_WS_F39F91A5_Out_of_memory_;
+										_pwWidget = FindChild( Layout::MX_FAEI_VALUE_CUR_VAL_COMBO );
+										return FALSE;
+									}
+									default : {
+										_wsError = _DEC_WS_FA427FE5_String_conversion_error__;
+										_wsError += ee::CExpEval::ToUtf16( ee::CExpEval::ToHex( uint64_t( dwError ) ) );
+										_pwWidget = FindChild( Layout::MX_FAEI_VALUE_CUR_VAL_COMBO );
+										return FALSE;
+									}
+								}
+							}
+							else {
+								uint32_t ui32ArrayLen = (i32ArrayLen == -1) ? pfaThis->ArrayLen() : uint32_t( i32ArrayLen );
+								if ( ui32ArrayLen > CFoundAddress::MaxArrayLen() ) {
+									_wsError = _DEC_WS_467E0365_Array_length_must_be_between_0_and_;
+									_wsError += std::to_wstring( CFoundAddress::MaxArrayLen() );
+									_wsError += L'.';
+									_pwWidget = FindChild( Layout::MX_FAEI_VALUE_ARRAY_LEN_COMBO );
+									return FALSE;
+								}
+
+								uint32_t ui32Stride = (i32ArrayStride == -1) ? pfaThis->ArrayStride() : uint32_t( i32ArrayStride );
+								if ( ui32Stride > CFoundAddress::MaxArrayStride() ) {
+									_wsError = _DEC_WS_F033357E_Stride_must_be_between_0_and_;
+									_wsError += std::to_wstring( CFoundAddress::MaxArrayStride() );
+									_wsError += L'.';
+									_pwWidget = FindChild( Layout::MX_FAEI_VALUE_ARRAY_STRIDE_COMBO );
+									return FALSE;
+								}
+
+								bool bContiguous = ui32Stride <= CUtilities::DataTypeSize( dtThisType );
+
+								std::vector<std::vector<uint8_t>> vRawValues;
+								CSecureWString swsError;
+								auto ui32NewArrayLen = CUtilities::WStringToArrayBytes( vRawValues, swsValue, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
+								if ( !ui32NewArrayLen ) {
+									_wsError = swsError;
+									_pwWidget = FindChild( Layout::MX_FAEI_VALUE_CUR_VAL_COMBO );
+									return FALSE;
+								}
+								if ( ui32ArrayLen != 0 ) {
+									if ( ui32NewArrayLen > ui32ArrayLen ) {
+										_wsError = _DEC_WS_8869E389_The_current_value_has_more_elements_than_specified_by_Array_Length_;
+										_pwWidget = FindChild( Layout::MX_FAEI_VALUE_CUR_VAL_COMBO );
+										return FALSE;
+									}
+								}
+
+
+								std::vector<std::vector<uint8_t>> vRawLockLeft;
+								auto ui32LeftArrayLen = CUtilities::WStringToArrayBytes( vRawLockLeft, swsValue, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
+								if ( !ui32LeftArrayLen ) {
+									_wsError = swsError;
+									_pwWidget = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_COMBO );
+									return FALSE;
+								}
+								if ( ui32LeftArrayLen != 0 ) {
+									if ( ui32LeftArrayLen > ui32ArrayLen ) {
+										_wsError = _DEC_WS_FAD3DED1_The_locked_value_has_more_elements_than_specified_by_Array_Length_;
+										_pwWidget = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_COMBO );
+										return FALSE;
+									}
+								}
+								else if ( ui32LeftArrayLen != ui32NewArrayLen ) {
+									_wsError = _DEC_WS_DD4CBCAB_If_Array_Length_is_0__the_current_value_and_locked_value_s__must_have_the_same_number_of_elements_;
+									_pwWidget = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_COMBO );
+									return FALSE;
+								}
+
+								CUtilities::MX_LOCK_TYPES ltLockType = (iLockType == -1) ? pfaThis->LockType() : CUtilities::MX_LOCK_TYPES( iLockType );
+								if ( CUtilities::MX_LT_RANGE == ltLockType ) {
+									std::vector<std::vector<uint8_t>> vRawLockRight;
+									auto ui32RightArrayLen = CUtilities::WStringToArrayBytes( vRawLockRight, swsValue, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
+									if ( !ui32RightArrayLen ) {
+										_wsError = swsError;
+										_pwWidget = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
+										return FALSE;
+									}
+									if ( ui32RightArrayLen != 0 ) {
+										if ( ui32RightArrayLen > ui32ArrayLen ) {
+											_wsError = _DEC_WS_FAD3DED1_The_locked_value_has_more_elements_than_specified_by_Array_Length_;
+											_pwWidget = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
+											return FALSE;
+										}
+									}
+									else if ( ui32RightArrayLen != ui32NewArrayLen ) {
+										_wsError = _DEC_WS_DD4CBCAB_If_Array_Length_is_0__the_current_value_and_locked_value_s__must_have_the_same_number_of_elements_;
+										_pwWidget = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
+										return FALSE;
+									}
+
+									std::vector<ee::CExpEvalContainer::EE_RESULT> vLeftExp, vRightExp;
+									if ( CUtilities::ArrayBytesToResult( vRawLockLeft, nullptr, dtThisType, ui32ArrayLen, bContiguous, vLeftExp ) != ui32LeftArrayLen ) {
+										_wsError = _DEC_WS_1468A1DF_Internal_error_;
+										_pwWidget = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
+										return FALSE;
+									}
+									if ( CUtilities::ArrayBytesToResult( vRawLockRight, nullptr, dtThisType, ui32ArrayLen, bContiguous, vRightExp ) != ui32RightArrayLen ) {
+										_wsError = _DEC_WS_1468A1DF_Internal_error_;
+										_pwWidget = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
+										return FALSE;
+									}
+
+									size_t sLen = std::min<size_t>( vLeftExp.size(), vRightExp.size() );
+									for ( size_t I = 0; I < sLen; ++I ) {
+										ee::CExpEvalContainer::EE_RESULT rTmp;
+										if ( ee::CExpEvalContainer::EE_EC_SUCCESS != ee::CExpEvalContainer::PerformOp_S( vLeftExp[I], '>', vRightExp[I], rTmp ) ) {
+											_wsError = _DEC_WS_247BC127_Internal_error_verifying_range_value_consistency_;
+											_pwWidget = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
+											return FALSE;
+										}
+										if ( rTmp.u.ui64Val ) {
+											CSecureWString swsLeft, swsRight;
+											CUtilities::ToDataTypeString( vLeftExp[I], static_cast<CUtilities::MX_DATA_TYPES>(iType), swsLeft );
+											CUtilities::ToDataTypeString( vRightExp[I], static_cast<CUtilities::MX_DATA_TYPES>(iType), swsRight );
+											_wsError = _DEC_WS_E2E06A5A_Invalid_range_min_max__;
+											_wsError += swsLeft;
+											_wsError += _DEC_WS_4FBEB86D__is_greater_than_;
+											_wsError += swsRight;
+											_wsError += _DEC_WS_4F2FE7D3___index_;
+											_wsError += std::to_wstring( I );
+											_wsError += _DEC_WS_D94980DB___;
+
+											_pwWidget = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
+											return FALSE;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		catch ( ... ) {
+			_wsError = _DEC_WS_F39F91A5_Out_of_memory_;
+			_pwWidget = FindChild( Layout::MX_FAEI_VALUE_CUR_VAL_COMBO );
+			return FALSE;
+		}
+
+		return TRUE;
 	}
 
 	// Copies all the settings to the MX_OPTIONS structure.
 	BOOL CFoundAddressEditMainPage::Finalize() {
-		return FALSE;
+		try {
+			bool bIsMulti = m_pParms.vSelection.size() >= 2;
+		
+			int iType = -1;
+			auto pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_COMBO );
+			if ( pwTmp ) {
+				iType = pwTmp->GetCurSelItemData();
+			}
+			int iLockType = -1;
+			pwTmp = FindChild( Layout::MX_FAEI_QL_LOCK_TYPE_COMBO );
+			if ( pwTmp ) {
+				iLockType = pwTmp->GetCurSelItemData();
+			}
+
+
+			ee::CExpEvalContainer::EE_RESULT rRes;
+			pwTmp = FindChild( Layout::MX_FAEI_VALUE_ARRAY_LEN_COMBO );
+			rRes.u.i64Val = -1;
+			if ( pwTmp ) {
+				if ( !pwTmp->GetTextAsInt64Expression( rRes ) ) {
+					if ( !bIsMulti ) { return FALSE; }
+					else { rRes.u.i64Val = -1; }
+				}
+				else if ( rRes.u.i64Val < 0 || rRes.u.i64Val > CFoundAddress::MaxArrayLen() ) { return FALSE; }
+			}
+			int32_t i32ArrayLen = int32_t( rRes.u.i64Val );
+
+			pwTmp = FindChild( Layout::MX_FAEI_VALUE_ARRAY_STRIDE_COMBO );
+			rRes.u.i64Val = -1;
+			if ( pwTmp ) {
+				if ( !pwTmp->GetTextAsInt64Expression( rRes ) ) {
+					if ( !bIsMulti ) { return FALSE; }
+					else { rRes.u.i64Val = -1; }
+				}
+				else if ( rRes.u.i64Val < 0 || rRes.u.i64Val > CFoundAddress::MaxArrayLen() ) { return FALSE; }
+			}
+			int32_t i32ArrayStride = int32_t( rRes.u.i64Val );
+
+
+			CSecureWString swsDesc;
+			pwTmp = FindChild( Layout::MX_FAEI_GENERAL_DESC_COMBO );
+			if ( pwTmp ) {
+				swsDesc = pwTmp->GetTextW();
+			}
+			bool bAddArrayIndices = false;
+			pwTmp = FindChild( Layout::MX_FAEI_GENERAL_ARRAY_CHECK );
+			if ( pwTmp ) {
+				bAddArrayIndices = pwTmp->IsChecked();
+			}
+
+
+			if ( swsDesc.size() || !bIsMulti ) {
+				auto pfamMan = m_pParms.pmhMemHack->FoundAddressManager();
+				for ( size_t I = 0; I < m_pParms.vSelection.size(); ++I ) {
+					auto pfaThis = pfamMan->GetById( size_t( m_pParms.vSelection[I] ) );
+					if ( pfaThis ) {
+						if ( bAddArrayIndices ) {
+							CSecureWString swsTmp = swsDesc;
+							swsTmp += L'[';
+							CUtilities::ToSigned( I, swsTmp, uint32_t( std::ceil( std::log10( double( m_pParms.vSelection.size() ) ) ) ) );
+							swsTmp += L']';
+							pfaThis->SetDescriptionText( swsTmp );
+						}
+						else {
+							pfaThis->SetDescriptionText( swsDesc );
+						}
+					}
+				}
+			}
+
+
+			CSecureWString swsValue;
+			pwTmp = FindChild( Layout::MX_FAEI_VALUE_CUR_VAL_COMBO );
+			if ( pwTmp ) {
+				swsValue = pwTmp->GetTextW();
+			}
+
+			CSecureWString swsLeft;
+			pwTmp = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_COMBO );
+			if ( pwTmp ) {
+				swsLeft = pwTmp->GetTextW();
+			}
+			CSecureWString swsRight;
+			pwTmp = FindChild( Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
+			if ( pwTmp ) {
+				swsRight = pwTmp->GetTextW();
+			}
+
+			bool bHex = false;
+			pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_SHOW_AS_HEX_CHECK );
+			if ( pwTmp ) {
+				bHex = pwTmp->IsChecked();
+			}
+
+			bool bEscape = false;
+			pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_ESCAPE_CHECK );
+			if ( pwTmp ) {
+				bEscape = pwTmp->IsChecked();
+			}
+
+			int iCodePage = -1;
+			pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_STRING_COMBO );
+			if ( pwTmp ) {
+				iCodePage = int( pwTmp->GetCurSelItemData() );
+			}
+
+
+
+			{
+				auto pfamMan = m_pParms.pmhMemHack->FoundAddressManager();
+				for ( size_t I = 0; I < m_pParms.vSelection.size(); ++I ) {
+					auto pfabThis = pfamMan->GetById( size_t( m_pParms.vSelection[I] ) );
+					if ( pfabThis ) {
+						if ( pfabThis->Type() == MX_FAT_FOUND_ADDRESS ) {
+							auto pfaThis = static_cast<CFoundAddress *>(pfabThis);
+							CUtilities::MX_DATA_TYPES dtThisType = (iType == -1) ? pfaThis->DataType() : static_cast<CUtilities::MX_DATA_TYPES>(iType);
+
+							if ( dtThisType == CUtilities::MX_DT_STRING ) {
+								UINT uiCodePage = (iCodePage == -1) ? pfaThis->CodePage() : UINT( iCodePage );
+
+								CSecureWString swsCopy = swsValue;
+								if ( bEscape ) {
+									CSecureString ssResolved;
+									CUtilities::ResolveAllEscapes( ee::CExpEval::ToUtf8( swsCopy ), ssResolved, true );
+									swsCopy = ee::CExpEval::ToUtf16( ssResolved );
+								}
+
+
+								DWORD dwError;
+								auto sCodePaged = CUtilities::WideCharToMultiByte( uiCodePage, 0, swsCopy, nullptr, nullptr, &dwError );
+								if ( dwError == ERROR_SUCCESS ) {
+									swsCopy = swsLeft;
+									if ( bEscape ) {
+										CSecureString ssResolved;
+										CUtilities::ResolveAllEscapes( ee::CExpEval::ToUtf8( swsCopy ), ssResolved, true );
+										swsCopy = ee::CExpEval::ToUtf16( ssResolved );
+									}
+									auto sLockedCodePaged = CUtilities::WideCharToMultiByte( uiCodePage, 0, swsCopy, nullptr, nullptr, &dwError );
+									if ( dwError == ERROR_SUCCESS ) {
+										// Set the current value as a string.
+										pfaThis->SetAsString( sCodePaged, sLockedCodePaged, uiCodePage );
+									}
+								}
+							}
+							else {
+								uint32_t ui32ArrayLen = (i32ArrayLen == -1) ? pfaThis->ArrayLen() : uint32_t( i32ArrayLen );
+								if ( ui32ArrayLen > CFoundAddress::MaxArrayLen() ) { return FALSE; }
+
+								uint32_t ui32Stride = (i32ArrayStride == -1) ? pfaThis->ArrayStride() : uint32_t( i32ArrayStride );
+								if ( ui32Stride > CFoundAddress::MaxArrayStride() ) { return FALSE; }
+
+								bool bContiguous = ui32Stride <= CUtilities::DataTypeSize( dtThisType );
+
+								std::vector<std::vector<uint8_t>> vRawValues;
+								CSecureWString swsError;
+								auto ui32NewArrayLen = CUtilities::WStringToArrayBytes( vRawValues, swsValue, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
+								if ( !ui32NewArrayLen ) { return FALSE; }
+								if ( ui32ArrayLen != 0 ) {
+									if ( ui32NewArrayLen > ui32ArrayLen ) { return FALSE; }
+								}
+
+
+								std::vector<std::vector<uint8_t>> vRawLockLeft;
+								auto ui32LeftArrayLen = CUtilities::WStringToArrayBytes( vRawLockLeft, swsValue, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
+								if ( !ui32LeftArrayLen ) { return FALSE; }
+								if ( ui32LeftArrayLen != 0 ) {
+									if ( ui32LeftArrayLen > ui32ArrayLen ) { return FALSE; }
+								}
+								else if ( ui32LeftArrayLen != ui32NewArrayLen ) { return FALSE; }
+
+								CUtilities::MX_LOCK_TYPES ltLockType = (iLockType == -1) ? pfaThis->LockType() : CUtilities::MX_LOCK_TYPES( iLockType );
+								if ( CUtilities::MX_LT_RANGE == ltLockType ) {
+									std::vector<std::vector<uint8_t>> vRawLockRight;
+									auto ui32RightArrayLen = CUtilities::WStringToArrayBytes( vRawLockRight, swsValue, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
+									if ( !ui32RightArrayLen ) { return FALSE; }
+									if ( ui32RightArrayLen != 0 ) {
+										if ( ui32RightArrayLen > ui32ArrayLen ) { return FALSE; }
+									}
+									else if ( ui32RightArrayLen != ui32NewArrayLen ) { return FALSE; }
+
+									std::vector<ee::CExpEvalContainer::EE_RESULT> vLeftExp, vRightExp;
+									if ( CUtilities::ArrayBytesToResult( vRawLockLeft, nullptr, dtThisType, ui32ArrayLen, bContiguous, vLeftExp ) != ui32LeftArrayLen ) { return FALSE; }
+									if ( CUtilities::ArrayBytesToResult( vRawLockRight, nullptr, dtThisType, ui32ArrayLen, bContiguous, vRightExp ) != ui32RightArrayLen ) { return FALSE; }
+
+									size_t sLen = std::min<size_t>( vLeftExp.size(), vRightExp.size() );
+									for ( size_t I = 0; I < sLen; ++I ) {
+										ee::CExpEvalContainer::EE_RESULT rTmp;
+										if ( ee::CExpEvalContainer::EE_EC_SUCCESS != ee::CExpEvalContainer::PerformOp_S( vLeftExp[I], '>', vRightExp[I], rTmp ) ) { return FALSE; }
+										if ( rTmp.u.ui64Val ) { return FALSE; }
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		catch ( ... ) {
+			return FALSE;
+		}
+
+		return TRUE;
 	}
 
 	// Updates the contents of page based on settings etc.
 	void CFoundAddressEditMainPage::Update() {
-		// Enabled.
 		int iType = -1;
 		auto pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_COMBO );
 		if ( pwTmp ) {
@@ -300,7 +768,7 @@ namespace mx {
 									}
 									else {
 										if ( !pwCurVal->GetTextAsUInt64Expression( rRes ) ) {
-											swsExpText += _DEC_WS_0BF61404_Invalid_stride;
+											swsExpText += _DEC_WS_09B2D04F_Invalid_stride_;
 											break;
 										}
 										if ( rRes.u.ui64Val > CFoundAddress::MaxArrayStride() ) {
@@ -412,7 +880,7 @@ namespace mx {
 												//swsExpText += std::format( _DEC_WS_4B09D6E2_Invalid_range_min_max_____must_be_lower_than_____index_____, swsLeft, swsRight, I );
 												swsExpText += _DEC_WS_E2E06A5A_Invalid_range_min_max__;
 												swsExpText += swsLeft;
-												swsExpText += _DEC_WS_B0C1E4AB__must_be_lower_than_or_equal_to_;
+												swsExpText += _DEC_WS_4FBEB86D__is_greater_than_;
 												swsExpText += swsRight;
 												swsExpText += _DEC_WS_4F2FE7D3___index_;
 												swsExpText += std::to_wstring( I );
@@ -476,7 +944,7 @@ namespace mx {
 									}
 									else {
 										if ( !pwCurVal->GetTextAsUInt64Expression( rRes ) ) {
-											swsExpText += _DEC_WS_0BF61404_Invalid_stride;
+											swsExpText += _DEC_WS_09B2D04F_Invalid_stride_;
 											break;
 										}
 										if ( rRes.u.ui64Val > CFoundAddress::MaxArrayStride() ) {
@@ -587,7 +1055,7 @@ namespace mx {
 												//swsExpText += std::format( _DEC_WS_4B09D6E2_Invalid_range_min_max_____must_be_lower_than_____index_____, swsLeft, swsRight, I );
 												swsExpText += _DEC_WS_E2E06A5A_Invalid_range_min_max__;
 												swsExpText += swsLeft;
-												swsExpText += _DEC_WS_B0C1E4AB__must_be_lower_than_or_equal_to_;
+												swsExpText += _DEC_WS_4FBEB86D__is_greater_than_;
 												swsExpText += swsRight;
 												swsExpText += _DEC_WS_4F2FE7D3___index_;
 												swsExpText += std::to_wstring( I );
@@ -867,15 +1335,15 @@ namespace mx {
 		}
 
 		
-		std::vector<std::vector<uint8_t>> vRawvalues;
+		std::vector<std::vector<uint8_t>> vRawValues;
 		bool bContiguous = _ui32Stride <= CUtilities::DataTypeSize( _dtType );
 		CSecureWString swsError;
-		_ui32ArrayLen = CUtilities::WStringToArrayBytes( vRawvalues, _swsString, _dtType, _ui32ArrayLen, 0, bContiguous, swsError );
+		_ui32ArrayLen = CUtilities::WStringToArrayBytes( vRawValues, _swsString, _dtType, _ui32ArrayLen, 0, bContiguous, swsError );
 		if ( !_ui32ArrayLen ) {
 			_ui32ArrayLen = 0; return swsError;
 		}
 		CSecureWString swsReturn;
-		auto ui32BackToString = CUtilities::ArrayBytesToWString( vRawvalues, nullptr, swsReturn, _dtType, _ui32ArrayLen, i32Digits, bContiguous, swsError );
+		auto ui32BackToString = CUtilities::ArrayBytesToWString( vRawValues, nullptr, swsReturn, _dtType, _ui32ArrayLen, i32Digits, bContiguous, swsError );
 		if ( !ui32BackToString ) {
 			_ui32ArrayLen = 0; return swsError;
 		}
@@ -889,7 +1357,7 @@ namespace mx {
 		swsReturn += _ui32ArrayLen == 1 ? _DEC_WS_1AEC022F__item_ : _DEC_WS_7B2F1364__items_;
 
 		if ( _pvExps ) {
-			CUtilities::ArrayBytesToResult( vRawvalues, nullptr, _dtType, _ui32ArrayLen, bContiguous, (*_pvExps) );
+			CUtilities::ArrayBytesToResult( vRawValues, nullptr, _dtType, _ui32ArrayLen, bContiguous, (*_pvExps) );
 		}
 		return swsReturn;
 	}
@@ -898,15 +1366,15 @@ namespace mx {
 	CSecureWString CFoundAddressEditMainPage::IntegralToDesc( const CSecureWString &_swsString, CUtilities::MX_DATA_TYPES _dtType, bool _bIsHex, uint32_t &_ui32ArrayLen, uint32_t _ui32Stride, std::vector<ee::CExpEvalContainer::EE_RESULT> * _pvExps ) {
 		int iBase = _bIsHex ? 16 : -1;
 
-		std::vector<std::vector<uint8_t>> vRawvalues;
+		std::vector<std::vector<uint8_t>> vRawValues;
 		bool bContiguous = _ui32Stride <= CUtilities::DataTypeSize( _dtType );
 		CSecureWString swsError;
-		_ui32ArrayLen = CUtilities::WStringToArrayBytes( vRawvalues, _swsString, _dtType, _ui32ArrayLen, iBase, bContiguous, swsError );
+		_ui32ArrayLen = CUtilities::WStringToArrayBytes( vRawValues, _swsString, _dtType, _ui32ArrayLen, iBase, bContiguous, swsError );
 		if ( !_ui32ArrayLen ) {
 			_ui32ArrayLen = 0; return swsError;
 		}
 		CSecureWString swsReturn;
-		auto ui32BackToString = CUtilities::ArrayBytesToWString( vRawvalues, nullptr, swsReturn, _dtType, _ui32ArrayLen, 0, bContiguous, swsError );
+		auto ui32BackToString = CUtilities::ArrayBytesToWString( vRawValues, nullptr, swsReturn, _dtType, _ui32ArrayLen, 0, bContiguous, swsError );
 		if ( !ui32BackToString ) {
 			_ui32ArrayLen = 0; return swsError;
 		}
@@ -920,7 +1388,7 @@ namespace mx {
 		swsReturn += _ui32ArrayLen == 1 ? _DEC_WS_1AEC022F__item_ : _DEC_WS_7B2F1364__items_;
 
 		if ( _pvExps ) {
-			CUtilities::ArrayBytesToResult( vRawvalues, nullptr, _dtType, _ui32ArrayLen, bContiguous, (*_pvExps) );
+			CUtilities::ArrayBytesToResult( vRawValues, nullptr, _dtType, _ui32ArrayLen, bContiguous, (*_pvExps) );
 		}
 		return swsReturn;
 	}

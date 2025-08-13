@@ -53,7 +53,12 @@ namespace mx {
 		virtual std::wstring								ValueText( bool * _pbRead = nullptr ) const;
 
 		// Gets the Value When Locked text.
-		virtual std::wstring								ValueWhenLockedText() const { return ToText( m_vLockedData ); }
+		virtual std::wstring								ValueWhenLockedText() const {
+			if MX_UNLIKELY( m_vtValueType == CUtilities::MX_VT_STRING ) {
+				return LockedLeftText();
+			}
+			return ToText( m_vLockedData );
+		}
 
 		// Gets the Type text.
 		virtual std::wstring								TypeText() const;
@@ -74,10 +79,10 @@ namespace mx {
 		inline void											SetLockType( CUtilities::MX_LOCK_TYPES _ltType ) { m_ltLockType = _ltType; }
 
 		// Sets the Value Type.
-		bool												SetValueType( CUtilities::MX_VALUE_TYPE _vtType );
+		//bool												SetValueType( CUtilities::MX_VALUE_TYPE _vtType );
 
 		// Sets the Data Type.  Call within a try/catch block.
-		bool												SetDataType( CUtilities::MX_DATA_TYPES _dtDataType );
+		bool												SetAsDataType( CUtilities::MX_DATA_TYPES _dtDataType );
 
 		// Sets the Pre-Processing Type.  Call within a try/catch block.
 		inline bool											SetPreProcessing( CUtilities::MX_BYTESWAP _bsByteSwap ) { m_bsByteSwap = _bsByteSwap; PrepareValueStructures(); }
@@ -117,6 +122,9 @@ namespace mx {
 
 		// Gets the code page for strings.
 		inline UINT											CodePage() const { return m_uiCodePage; }
+
+		// Sets the data type as a string.
+		void												SetAsString( const std::string &_sString, const std::string &_sLockString, UINT _uiCodePage );
 
 		// Dirties the item.  Address and current data need to be updated after this.
 		virtual void										Dirty() {
@@ -172,12 +180,17 @@ namespace mx {
 		// The final target address for which the use of m_vCurData has been prepared.
 		mutable uint64_t									m_ui64FinalTargetPreparedAddress = 0;
 
+		// The text form of the locked left value.
+		mutable CSecureWString								m_swsLockedLeftText;
+
 		// Whether to use a basic address or not.
 		bool												m_bBasicAddress = true;
 		// Does the address need updating?
 		mutable bool										m_bDirtyAddress = true;
 		// Does the current value need updating?
 		mutable bool										m_bDirtyCurValue = true;
+		// Does the locked value need updating?
+		mutable bool										m_bDirtyLockedLeft = true;
 		// Is the array data contiguous?
 		mutable bool										m_bContiguous = true;
 
@@ -206,6 +219,9 @@ namespace mx {
 
 		// Gets the final target address via derefencing pointers.
 		uint64_t											FinalTargetAddress( bool * _bSuccess = nullptr ) const;
+
+		// Updates/gets the locked left text.
+		const CSecureWString &								LockedLeftText() const;
 	};
 
 }	// namespace mx

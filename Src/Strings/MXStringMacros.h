@@ -17992,3 +17992,21 @@
 #define _DEC_S_40FB27FE_The_range_lock_max_value_has_more_elements_than_specified_by_Array_Length_ mx::CStringDecoder::DecodeToString( _T_40FB27FE_The_range_lock_max_value_has_more_elements_than_specified_by_Array_Length_, _LEN_40FB27FE )
 #define _DEC_WS_40FB27FE_The_range_lock_max_value_has_more_elements_than_specified_by_Array_Length_ mx::CStringDecoder::DecodeToWString( _T_40FB27FE_The_range_lock_max_value_has_more_elements_than_specified_by_Array_Length_, _LEN_40FB27FE )
 
+// Invalid stride.
+
+#define _T_09B2D04F_Invalid_stride_ "\xD1\x3C\x46\xFC\xFE\x32\xF2\xE7\x43\x3C\x3B\x37\xF6\x00\xF5"
+#define _LEN_09B2D04F 15
+#define _T_LEN_09B2D04F_Invalid_stride_ _T_09B2D04F_Invalid_stride_, _LEN_09B2D04F
+#define _DEC_09B2D04F_Invalid_stride_( STR ) mx::CStringDecoder::Decode( _T_09B2D04F_Invalid_stride_, _LEN_09B2D04F, STR )
+#define _DEC_S_09B2D04F_Invalid_stride_ mx::CStringDecoder::DecodeToString( _T_09B2D04F_Invalid_stride_, _LEN_09B2D04F )
+#define _DEC_WS_09B2D04F_Invalid_stride_ mx::CStringDecoder::DecodeToWString( _T_09B2D04F_Invalid_stride_, _LEN_09B2D04F )
+
+//  is greater than 
+
+#define _T_4FBEB86D__is_greater_than_ "\xA8\x37\x43\xBB\xF9\x3B\xF3\x28\x44\x2D\x3B\xEE\x06\x03\x28\xF6\xEE"
+#define _LEN_4FBEB86D 17
+#define _T_LEN_4FBEB86D__is_greater_than_ _T_4FBEB86D__is_greater_than_, _LEN_4FBEB86D
+#define _DEC_4FBEB86D__is_greater_than_( STR ) mx::CStringDecoder::Decode( _T_4FBEB86D__is_greater_than_, _LEN_4FBEB86D, STR )
+#define _DEC_S_4FBEB86D__is_greater_than_ mx::CStringDecoder::DecodeToString( _T_4FBEB86D__is_greater_than_, _LEN_4FBEB86D )
+#define _DEC_WS_4FBEB86D__is_greater_than_ mx::CStringDecoder::DecodeToWString( _T_4FBEB86D__is_greater_than_, _LEN_4FBEB86D )
+

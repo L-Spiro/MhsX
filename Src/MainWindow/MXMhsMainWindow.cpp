@@ -1317,11 +1317,19 @@ namespace mx {
 		auto pwTree = MainTreeView();
 		if MX_LIKELY( pwTree ) {
 			if MX_LIKELY( _pwSrc->Id() == pwTree->Id() ) {
+				if ( _iSubItem == 0 ) {						// Description.
+					auto famManager = MemHack()->FoundAddressManager();
+					auto pfabItem = famManager->GetById( static_cast<size_t>(_lpParam) );
+					if MX_LIKELY( pfabItem ) {
+						_wsOptionalBuffer = pfabItem->DescriptionText();
+						return &_wsOptionalBuffer;
+					}
+				}
 				if ( _iSubItem == 1 ) {						// Address.
 					//CFoundAddressManager::MX_LOCK lLock( &MemHack()->FoundAddressManager() );
 					auto famManager = MemHack()->FoundAddressManager();
 					auto pfabItem = famManager->GetById( static_cast<size_t>(_lpParam) );
-					if MX_LIKELY( pfabItem && !pfabItem->SimpleAddress() ) {
+					if MX_LIKELY( pfabItem /*&& !pfabItem->SimpleAddress()*/ ) {
 						pfabItem->Dirty();
 						_wsOptionalBuffer = pfabItem->AddressText();
 						return &_wsOptionalBuffer;
@@ -1333,6 +1341,14 @@ namespace mx {
 					if MX_LIKELY( pfabItem ) {
 						pfabItem->Dirty();
 						_wsOptionalBuffer = pfabItem->ValueText();
+						return &_wsOptionalBuffer;
+					}
+				}
+				else if ( _iSubItem == 3 ) {				// Lock value.
+					auto famManager = MemHack()->FoundAddressManager();
+					auto pfabItem = famManager->GetById( static_cast<size_t>(_lpParam) );
+					if MX_LIKELY( pfabItem ) {
+						_wsOptionalBuffer = pfabItem->ValueWhenLockedText();
 						return &_wsOptionalBuffer;
 					}
 				}

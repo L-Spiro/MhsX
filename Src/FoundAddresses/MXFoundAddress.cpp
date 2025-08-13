@@ -143,7 +143,7 @@ namespace mx {
 				return wsTmp;
 			}
 			case CUtilities::MX_VT_STRING : {
-				break;
+				return _DEC_WS_9912B79F_String;
 			}
 			case CUtilities::MX_VT_BLOB : {
 				break;
@@ -153,7 +153,7 @@ namespace mx {
 	}
 
 	// Sets the Value Type.
-	bool CFoundAddress::SetValueType( CUtilities::MX_VALUE_TYPE _vtType ) {
+	/*bool CFoundAddress::SetValueType( CUtilities::MX_VALUE_TYPE _vtType ) {
 		m_vtValueType = _vtType;
 		switch ( m_vtValueType ) {
 			case CUtilities::MX_VT_DATA_TYPE : {}		MX_FALLTHROUGH
@@ -163,10 +163,10 @@ namespace mx {
 			}
 		}
 		return false;
-	}
+	}*/
 
 	// Sets the Data Type.  Call within a try/catch block.
-	bool CFoundAddress::SetDataType( CUtilities::MX_DATA_TYPES _dtDataType ) {
+	bool CFoundAddress::SetAsDataType( CUtilities::MX_DATA_TYPES _dtDataType ) {
 		if ( !CUtilities::IsDataType( _dtDataType ) ) { return false; }
 		m_dtDataType = _dtDataType;
 		PrepareValueStructures();
@@ -188,6 +188,18 @@ namespace mx {
 			}
 		}
 		return 0;
+	}
+
+	// Sets the data type as a string.
+	void CFoundAddress::SetAsString( const std::string &_sString, const std::string &_sLockString, UINT _uiCodePage ) {
+		m_vtValueType = CUtilities::MX_VT_STRING;
+		m_uiCodePage = _uiCodePage;
+
+
+		m_vLockedData.assign( reinterpret_cast<const uint8_t *>( _sLockString.data() ),
+			reinterpret_cast<const uint8_t *>( _sLockString.data() ) + _sLockString.size() );
+		m_bDirtyLockedLeft = true;
+		Dirty();
 	}
 
 	// Update internal buffers after the size of the item changes.
@@ -302,6 +314,18 @@ namespace mx {
 		}
 		return ui64Addr;
 #undef MX_FAIL
+	}
+
+	// Updates/gets the locked left text.
+	const CSecureWString & CFoundAddress::LockedLeftText() const {
+		if MX_UNLIKELY( m_bDirtyLockedLeft ) {
+			CSecureString ssTmp;
+			ssTmp.assign( reinterpret_cast<const char *>( m_vLockedData.data() ),
+			reinterpret_cast<const char *>( m_vLockedData.data() ) + m_vLockedData.size() );
+			m_swsLockedLeftText = CUtilities::MultiByteToWideChar( CodePage(), 0, ssTmp );
+			m_bDirtyLockedLeft = false;
+		}
+		return m_swsLockedLeftText;
 	}
 
 }	// namespace mx

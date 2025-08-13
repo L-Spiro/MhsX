@@ -370,14 +370,14 @@ namespace mx {
 												auto hInserted = ptlvTree->InsertItem( &iisItem );
 
 												// == Address.
-												wsTmp = faAddress->AddressText();
-												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 1 );
+												/*wsTmp = faAddress->AddressText();
+												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 1 );*/
 												// == Current Value.
 												/*wsTmp = faAddress->ValueText();
 												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 2 );*/
 												// == Value When Locked.
-												wsTmp = faAddress->ValueWhenLockedText();
-												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 3 );
+												/*wsTmp = faAddress->ValueWhenLockedText();
+												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 3 );*/
 												// == Type.
 												/*wsTmp = faAddress->TypeText();
 												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 4 );*/

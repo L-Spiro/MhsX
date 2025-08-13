@@ -40,6 +40,30 @@ namespace mx {
 	// WM_COMMAND from control.
 	CWidget::LSW_HANDLED CFoundAddressEditWindow::Command( WORD _wCtrlCode, WORD _wId, CWidget * _pwSrc ) {
 		switch ( _wId ) {
+			case CFoundAddressEditLayout::MX_FAEI_OK : {
+				for ( size_t I = 0; I < m_vPages.size(); ++I ) {
+					CSecureWString wsTemp;
+					CWidget * pwTemp = nullptr;
+					if ( !m_vPages[I]->Verify( wsTemp, pwTemp ) ) {
+						auto ptTab = reinterpret_cast<lsw::CTab *>(FindChild( CFoundAddressEditLayout::MX_FAEI_TAB ));
+						if ( ptTab ) {
+							ptTab->SetCurSel( I );
+						}
+						pwTemp->SetFocus();
+						pwTemp->SetSel( 0, -1 );
+						lsw::CBase::MessageBoxError( Wnd(), wsTemp.c_str() );
+						return LSW_H_CONTINUE;
+					}
+				}
+				for ( size_t I = 0; I < m_vPages.size(); ++I ) {
+					/*if ( m_vPages[I]->Visible() ) {
+						m_i32LastVis = static_cast<int32_t>(I);
+					}*/
+					m_vPages[I]->Finalize();
+				}
+				::EndDialog( Wnd(), 1 );
+				return LSW_H_HANDLED;
+			}
 			case CFoundAddressEditLayout::MX_FAEI_CANCEL : {
 				return Close();
 			}
