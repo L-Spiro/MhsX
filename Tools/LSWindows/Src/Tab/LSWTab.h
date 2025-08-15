@@ -34,7 +34,7 @@ namespace lsw {
 		int									SetCurSel( int _iItem );
 
 		// Determines the currently selected tab in a tab control.
-		int									GetCurSel() const;
+		virtual INT							GetCurSel() const;
 
 		// Determines which tab, if any, is at a specified screen position.  Returns the index of the tab, or -1 if no tab is at the specified position.
 		int									HitTest( LPTCHITTESTINFO _lphtiInfo ) const;

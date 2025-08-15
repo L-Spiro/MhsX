@@ -242,6 +242,85 @@ namespace mx {
 		return true;
 	}
 
+	// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
+	bool CHotkeyManager::SaveSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary ) const {
+		if ( _peJson == nullptr && nullptr == _psBinary ) { return false; }
+		try {
+			constexpr uint32_t ui32Version = MX_H_KEY_VERSION;
+			if ( _peJson ) {
+				_peJson->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+				lson::CJson::CreateObjectElement( _DEC_S_8AB28410_Hotkeys, (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
+				auto peParent = _peJson->vObjectMembers[_peJson->vObjectMembers.size()-1].get();
+
+				MX_JSON_NUMBER( _DEC_S_70A1EA5F_Version, ui32Version, peParent );
+
+				peParent->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+				lson::CJson::CreateObjectElement( _DEC_S_05871BCC_Polling, (*peParent->vObjectMembers[peParent->vObjectMembers.size()-1]) );
+				if ( !m_hpmPollingHotkeys.SaveToMemory( peParent->vObjectMembers[peParent->vObjectMembers.size()-1].get(), _psBinary ) ) { return false; }
+
+				peParent->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+				lson::CJson::CreateObjectElement( _DEC_S_D8278C4E_Hotkey, (*peParent->vObjectMembers[peParent->vObjectMembers.size()-1]) );
+				if ( !m_hrhkmRegisteredHotkeys.SaveToMemory( peParent->vObjectMembers[peParent->vObjectMembers.size()-1].get(), _psBinary ) ) { return false; }
+
+				peParent->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+				lson::CJson::CreateObjectElement( _DEC_S_046AEC6B_Hook, (*peParent->vObjectMembers[peParent->vObjectMembers.size()-1]) );
+				if ( !m_hwkmWhKeyboardMethod.SaveToMemory( peParent->vObjectMembers[peParent->vObjectMembers.size()-1].get(), _psBinary ) ) { return false; }
+			}
+			else {
+				if ( !_psBinary->Write( ui32Version ) ) { return false; }
+
+				if ( !m_hpmPollingHotkeys.SaveToMemory( nullptr, _psBinary ) ) { return false; }
+				if ( !m_hrhkmRegisteredHotkeys.SaveToMemory( nullptr, _psBinary ) ) { return false; }
+				if ( !m_hwkmWhKeyboardMethod.SaveToMemory( nullptr, _psBinary ) ) { return false; }
+			}
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	// Loads settings from either a JSON object or a byte buffer.
+	bool CHotkeyManager::LoadSettings( lson::CJson * _pjJson, CStream * _psBinary ) {
+		if ( nullptr == _pjJson && nullptr == _psBinary ) { return false; }
+		if ( _pjJson ) {
+			if ( !_pjJson->GetContainer() ) { return false; }
+			size_t stRoot = _pjJson->GetContainer()->GetRoot();
+			const lson::CJsonContainer::LSON_JSON_VALUE & jvRoot = _pjJson->GetContainer()->GetValue( stRoot );
+
+			const lson::CJsonContainer::LSON_JSON_VALUE * pjvVal = _pjJson->GetContainer()->GetMemberByName( jvRoot, _DEC_S_8AB28410_Hotkeys );
+			if ( !pjvVal ) { return true; }		// No hotkey settings.  That's fine.
+			if ( pjvVal->vtType != lson::CJsonContainer::LSON_VT_OBJECT ) { return false; }
+
+			const lson::CJsonContainer::LSON_JSON_VALUE * pjvVersion = _pjJson->GetContainer()->GetMemberByName( (*pjvVal), _DEC_S_70A1EA5F_Version );
+			if ( pjvVersion ) {
+				if ( pjvVersion->vtType != lson::CJsonContainer::LSON_VT_DECIMAL ) { return false; }
+				uint32_t ui32Version = static_cast<uint32_t>(pjvVersion->u.dDecimal);
+				if ( ui32Version > MX_H_KEY_VERSION ) { return false; }
+
+				const lson::CJsonContainer::LSON_JSON_VALUE * pjvPoll = _pjJson->GetContainer()->GetMemberByName( (*pjvVal), _DEC_S_05871BCC_Polling );
+				if ( !pjvPoll || pjvPoll->vtType != lson::CJsonContainer::LSON_VT_OBJECT ) { return false; }
+				if ( !m_hpmPollingHotkeys.LoadFromMemory( pjvPoll, _pjJson->GetContainer(), nullptr, ui32Version ) ) { return false; }
+
+				const lson::CJsonContainer::LSON_JSON_VALUE * pjvHotkey = _pjJson->GetContainer()->GetMemberByName( (*pjvVal), _DEC_S_D8278C4E_Hotkey );
+				if ( !pjvHotkey || pjvHotkey->vtType != lson::CJsonContainer::LSON_VT_OBJECT ) { return false; }
+				if ( !m_hrhkmRegisteredHotkeys.LoadFromMemory( pjvHotkey, _pjJson->GetContainer(), nullptr, ui32Version ) ) { return false; }
+
+				const lson::CJsonContainer::LSON_JSON_VALUE * pjvHook = _pjJson->GetContainer()->GetMemberByName( (*pjvVal), _DEC_S_046AEC6B_Hook );
+				if ( !pjvHook || pjvHook->vtType != lson::CJsonContainer::LSON_VT_OBJECT ) { return false; }
+				if ( !m_hwkmWhKeyboardMethod.LoadFromMemory( pjvHook, _pjJson->GetContainer(), nullptr, ui32Version ) ) { return false; }
+			}
+		}
+		else {
+			uint32_t ui32Version;
+			if ( !_psBinary->Read( ui32Version ) ) { return false; }
+			if ( ui32Version > MX_H_KEY_VERSION ) { return false; }
+
+			if ( !m_hpmPollingHotkeys.LoadFromMemory( nullptr, nullptr, _psBinary, ui32Version ) ) { return false; }
+			if ( !m_hrhkmRegisteredHotkeys.LoadFromMemory( nullptr, nullptr, _psBinary, ui32Version ) ) { return false; }
+			if ( !m_hwkmWhKeyboardMethod.LoadFromMemory( nullptr, nullptr, _psBinary, ui32Version ) ) { return false; }
+		}
+		return true;
+	}
+
 	// Gets the information about a key.
 	UINT CHotkeyManager::VirtualKeyInfo( UINT _uCode ) {
 		UINT uiResult = 0;

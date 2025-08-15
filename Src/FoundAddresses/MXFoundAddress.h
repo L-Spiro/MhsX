@@ -47,7 +47,7 @@ namespace mx {
 		bool												InitWithAddressAndDataType( uint64_t _ui64Address, CUtilities::MX_DATA_TYPES _dtType, const uint8_t * _pui8Data );
 
 		// Sets the Data Type.  Call within a try/catch block.
-		//bool												SetAsDataType( CUtilities::MX_DATA_TYPES _dtDataType );
+		void												SetAsDataType( std::vector<std::vector<uint8_t>> &_vLockValue, CUtilities::MX_DATA_TYPES _dtDataType, uint32_t _ui32ArrayLen, uint32_t _ui32ArrayStride, std::vector<std::vector<uint8_t>> * _pvMaxLock = nullptr );
 
 		// Sets the data type as a string.
 		void												SetAsString( const std::string &_sLockString, UINT _uiCodePage );
@@ -99,19 +99,18 @@ namespace mx {
 		inline void											SetLockType( CUtilities::MX_LOCK_TYPES _ltType ) { m_ltLockType = _ltType; }
 
 		// Gets the locked status.
-		inline bool											Locked() const { return m_bLocked; }
+		virtual bool										Locked() const { return m_bLocked; }
 
 		// Sets the locked status.
 		void												SetLocked( bool _bLocked );
 
-		// Sets the Value Type.
-		//bool												SetValueType( CUtilities::MX_VALUE_TYPE _vtType );
+		// Gets the item display color.
+		virtual const RGBQUAD &								Color() const {
+			return Locked() ? m_rgbqLockedColor : m_rgbqColor;
+		}
 
 		// Sets the Pre-Processing Type.  Call within a try/catch block.
 		inline bool											SetPreProcessing( CUtilities::MX_BYTESWAP _bsByteSwap ) { m_bsByteSwap = _bsByteSwap; PrepareValueStructures(); }
-
-		// Gets the size of the internal buffer needed to contain the data type.
-		size_t												InternalBufferSize() const;
 
 		// Gets the actual final address of the item.
 		uint64_t											FinalAddress() const {
@@ -146,6 +145,15 @@ namespace mx {
 		// Is the address dynamic?
 		virtual bool										SimpleAddress() const { return m_bBasicAddress; }
 
+		// Applies the lock.  A return of false indicates the process could not be written (or potentially read if needed).
+		virtual bool										ApplyLock();
+
+		// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
+		virtual bool										SaveSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary ) const;
+
+		// Loads settings from either a JSON object or a byte buffer.
+		virtual bool										LoadSettings( lson::CJson * _pjJson, CStream * _psBinary, uint32_t _ui32Version );
+
 
 	protected :
 		// == Members.
@@ -157,6 +165,8 @@ namespace mx {
 		uint64_t											m_ui64Address = 0;
 		// The buffered address.
 		mutable uint64_t									m_ui64BufferedAddress = 0;
+		// The color of the item in the display.  If rgbReserved is 0, use the default display color.
+		RGBQUAD												m_rgbqLockedColor = { .rgbBlue = 0x06, .rgbGreen = 0xEC, .rgbRed = 0x36, .rgbReserved = 0x9F };
 		// The size of the data type (for m_vtValueType == CUtilities::MX_VT_DATA_TYPE).
 		mutable uint32_t									m_ui32DataTypeSize = 0;
 		// Array length (for m_vtValueType == CUtilities::MX_VT_DATA_TYPE).
@@ -191,7 +201,7 @@ namespace mx {
 		// Current data.
 		mutable MX_VALUE									m_vCurData;
 		// The final target address for which the use of m_vCurData has been prepared.
-		mutable uint64_t									m_ui64FinalTargetPreparedAddress = 0;
+		//mutable uint64_t									m_ui64FinalTargetPreparedAddress = 0;
 
 		// The text form of the locked left value.
 		mutable CSecureWString								m_swsLockedLeftText;
@@ -216,9 +226,6 @@ namespace mx {
 
 		// Takes a blob of data and converts it to text.
 		std::wstring										ToText( const uint8_t * _pui8Blob ) const;
-
-		// Update internal buffers after the size of the item changes.
-		void												UpdateBuffers();
 
 		// Gets the actual final address of the item.
 		uint64_t											GetUpdatedFinalAddress() const;

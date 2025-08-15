@@ -1,9 +1,12 @@
 ﻿#pragma once
 
 #include "SinCos/EESinCos.h"
+
 #include <cmath>
 #include <cinttypes>
+#include <iomanip>
 #include <numbers>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -42,7 +45,7 @@
 #endif	// EE_MAX_ITERATION_COUNT
 
 #ifndef EE_PI
-#define EE_PI							3.1415926535897932384626433832795
+#define EE_PI							3.14159265358979323846264338327950288419716939937510	// You can tell how cool a programmer is by how many digits she puts in the PI macro.
 #endif // #ifndef EE_PI
 
 #if defined( _MSC_VER )
@@ -938,6 +941,40 @@ namespace ee {
 		 * \return				Returns the printed value.
 		 **/
 		static std::string				ToBinary( uint64_t _ui64Val, int32_t _i32Digits );
+
+		/**
+		 * Takes an input array of bytes, converts each value to a 2-digit hexadecimal value, and outputs the converted string with optional spaces between each value.
+		 * 
+		 * \tparam _tType The vector/string type.  The contained type must be 1 byte in size.
+		 * \param _tIn The input array of bytes.
+		 * \param _bSpaces If true, spaces will be added between each output hex value.
+		 * \param _pbSuccess An optional pointer to receive the success/failure status.  Failure always means there was a memory failure.
+		 * \return Returns the array of bytes as a string of hexadecimal bytes.
+		 **/
+		template <typename _tType>
+		static inline std::string		ToHexString( const _tType &_tIn, bool _bSpaces = true, bool * _pbSuccess = nullptr ) {
+			static_assert( sizeof( typename _tType::value_type ) == 1U, "*::value_type must be 1 byte." );
+
+			std::string sStr;
+			if ( _pbSuccess ) { (*_pbSuccess) = false; }
+			try {
+				std::stringstream ssStream;
+				for ( size_t I = 0; I < _tIn.size(); ++I ) {
+					ssStream << 
+						std::setfill( '0' ) << std::setw( 2 ) <<
+						std::hex <<
+						std::uppercase <<
+						_tIn[I];
+					if ( _bSpaces ) { ssStream << ' '; }
+				}
+
+				sStr = ssStream.str();
+			}
+			catch ( ... ) {
+			}
+			if ( _pbSuccess ) { (*_pbSuccess) = true; }
+			return sStr;
+		}
 
 		/**
 		 * Represents a value in hexadecimal notation.

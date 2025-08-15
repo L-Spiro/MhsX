@@ -116,7 +116,7 @@ namespace lsw {
 	}
 
 	// Determines the currently selected tab in a tab control.
-	int CTab::GetCurSel() const {
+	INT CTab::GetCurSel() const {
 		if ( !Wnd() ) { return 0; }
 		return static_cast<int>(::SendMessageW( Wnd(), TCM_GETCURSEL, 0L, 0L ));
 	}

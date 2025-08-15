@@ -1,7 +1,12 @@
 #pragma once
 
 #include "../MXMhsX.h"
+#include "../Utilities/MXStream.h"
+
 #include <CriticalSection/LSWCriticalSection.h>
+
+#include <LSONJson.h>
+
 #include <set>
 #include <string>
 #include <vector>
@@ -76,10 +81,10 @@ namespace mx {
 
 		// == Functions.
 		// Loads hotkey data from a file loaded to memory.
-		virtual bool					LoadFromMemory( const std::vector<uint8_t> &_vFile, uint32_t _uiVersion ) = 0 { return false; }
+		virtual bool					LoadFromMemory( const lson::CJsonContainer::LSON_JSON_VALUE * _pjJson, lson::CJsonContainer * _pjcContainer, CStream * _psBinary, uint32_t _uiVersion );
 
 		// Saves hotkey data to an in-memory file image.
-		virtual bool					SaveToMemory( std::vector<uint8_t> &_vFile ) = 0 { return false; }
+		virtual bool					SaveToMemory( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary ) const;
 
 		// Counts the number of hotkeys the trigger on the given virtual key and modifier.
 		virtual size_t					Count( INT _iCode, INT _iMod ) const {

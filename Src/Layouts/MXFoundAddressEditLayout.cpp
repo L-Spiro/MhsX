@@ -547,9 +547,9 @@ namespace mx {
 			(MX_QL_GROUP_T + MX_GROUP_TOP) + ((MX_DEF_COMBO_HEIGHT - (MX_DEF_CHECK_HEIGHT * 2)) >> 1),									// iTop
 			MX_SECTION1_W,									// dwWidth
 			MX_DEF_CHECK_HEIGHT * 2,						// dwHeight
-			MX_CHECKSTYLE | BS_MULTILINE,					// dwStyle
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | BS_MULTILINE | BS_AUTO3STATE,
 			0,												// dwStyleEx
-			MX_MAKE_WCHAR( _T_F52E2EF1_Locked__Intermediate_Check_Leaves_Locks_As_They_Are_ ),										// pwcText
+			MX_MAKE_WCHAR( _T_F52E2EF1_Locked__Intermediate_Check_Leaves_Locks_As_They_Are_ ),											// pwcText
 			_LEN_F52E2EF1,									// sTextLen
 			MX_FAEI_GENERAL_PAGE,							// dwParentId
 		},

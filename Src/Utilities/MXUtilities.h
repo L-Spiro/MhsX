@@ -20,7 +20,10 @@
 #include <string>
 
 
-// == Macros.
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// MACROS
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
 #ifndef MX_COUNT_OF
 #define MX_COUNT_OF( x )										((sizeof( x ) / sizeof( 0[x] )) / (static_cast<size_t>(!(sizeof( x ) % sizeof(0[x])))))
 #define MX_ELEMENTS( x )										MX_COUNT_OF( x )
@@ -72,6 +75,43 @@
 	#define MX_FORCEINLINE										inline
     #error "Unsupported compiler"
 #endif
+
+// Creates a number JSON element.
+#define MX_JSON_NUMBER( NAME, NUMBER, JSON )																																							\
+	(JSON)->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );																													\
+	lson::CJson::CreateNumberElement( (NAME), static_cast<double>(NUMBER), (*(JSON)->vObjectMembers[(JSON)->vObjectMembers.size()-1]) )
+
+// Creates a true or false element.
+#define MX_JSON_BOOL( NAME, VAL, JSON )																																									\
+	(JSON)->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );																													\
+	if ( VAL ) {																																														\
+		lson::CJson::CreateTrueElement( (NAME), (*(JSON)->vObjectMembers[(JSON)->vObjectMembers.size()-1]) );																							\
+	}																																																	\
+	else {																																																\
+		lson::CJson::CreateFalseElement( (NAME), (*(JSON)->vObjectMembers[(JSON)->vObjectMembers.size()-1]) );																							\
+	}
+
+// Gets a numbered JSON element.
+#define MX_JSON_GET_NUMBER( NAME, STORETO, TYPE, LOCAL, PARENT )																																		\
+	LOCAL = _pjcContainer->GetMemberByName( (*PARENT), (NAME) );																																		\
+	if ( LOCAL && LOCAL->vtType == lson::CJsonContainer::LSON_VT_DECIMAL ) {																															\
+		STORETO = static_cast<TYPE>(LOCAL->u.dDecimal);																																					\
+	}
+
+// Gets a boolean JSON element.
+#define MX_JSON_GET_BOOL( NAME, STORETO, LOCAL, PARENT )																																				\
+	LOCAL = _pjcContainer->GetMemberByName( (*PARENT), (NAME) );																																		\
+	if ( LOCAL && (LOCAL->vtType == lson::CJsonContainer::LSON_VT_TRUE || LOCAL->vtType == lson::CJsonContainer::LSON_VT_FALSE) ) {																		\
+		STORETO = LOCAL->vtType == lson::CJsonContainer::LSON_VT_TRUE ? TRUE : FALSE;																													\
+	}
+
+#define MX_JSON_GET_STRING( NAME, STORETO, LOCAL, PARENT )																																				\
+	LOCAL = _pjcContainer->GetMemberByName( (*PARENT), (NAME) );																																		\
+	if ( LOCAL && LOCAL->vtType == lson::CJsonContainer::LSON_VT_STRING ) {																																\
+		CSecureString ssTmp;																																											\
+		CUtilities::ResolveAllEscapes( _pjcContainer->GetString( LOCAL->u.stString ), ssTmp, true );																									\
+		STORETO = ee::CExpEval::ToUtf16( ssTmp );																																						\
+	}
 
 namespace mx {
 

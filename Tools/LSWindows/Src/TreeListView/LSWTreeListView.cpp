@@ -139,6 +139,35 @@ namespace lsw {
 	}
 
 	/**
+	 * Sets an itemÅfs color.
+	 * 
+	 * \param _tiItem The item whose color is to be updated.
+	 * \param _rgbColor The color to apply to the item (alpha respected).
+	 * \return Returns TRUE if the itemÅfs color was set.  FALSE indicates that the item was invalid.
+	 **/
+	BOOL CTreeListView::SetItemColor( HTREEITEM _tiItem, RGBQUAD _rgbColor ) {
+		ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( _tiItem );
+		if ( !pntItem ) { return FALSE; }
+		pntItem->Value().rgbColor = _rgbColor;
+		return TRUE;
+	}
+
+	/**
+	 * Gets an item given an LPARAM.  Only the first item with the given LPARAM is returned.
+	 * 
+	 * \param _lpValue The LPARAM value to find on an item.
+	 * \return Returns the item with the given LPARAM value or NULL.
+	 **/
+	HTREEITEM CTreeListView::GetByLParam( LPARAM _lpValue ) {
+		for ( auto I = m_tRoot.Size(); I--; ) {
+			if ( m_tRoot.GetChild( I )->Value().lpParam == _lpValue ) {
+				return PointerToTreeItem( m_tRoot.GetChild( I ) );
+			}
+		}
+		return NULL;
+	}
+
+	/**
 	 * Counts the total number of expanded items.
 	 *
 	 * \return Returns the total number of items, accounting for expandedness.
@@ -1161,13 +1190,16 @@ namespace lsw {
 					rgbColor.rgbBlue = bDefB;
 				}
 				else {
-					rgbColor.rgbRed = GetRValue( _lpcdParm->clrTextBk );
-					rgbColor.rgbGreen = GetGValue( _lpcdParm->clrTextBk );
-					rgbColor.rgbBlue = GetBValue( _lpcdParm->clrTextBk );
+					auto aBg = ::GetSysColor( COLOR_WINDOW );
+					rgbColor.rgbRed = GetRValue( aBg );
+					rgbColor.rgbGreen = GetGValue( aBg );
+					rgbColor.rgbBlue = GetBValue( aBg );
 				}
 
-				_lpcdParm->clrTextBk = CHelpers::MixColorRef( ptiItem->Value().rgbColor.rgbRed, ptiItem->Value().rgbColor.rgbGreen, ptiItem->Value().rgbColor.rgbBlue,
-					rgbColor.rgbRed, rgbColor.rgbGreen, rgbColor.rgbBlue, ptiItem->Value().rgbColor.rgbReserved / 255.0f );
+				_lpcdParm->clrTextBk = CHelpers::MixColorRef( rgbColor.rgbRed, ptiItem->Value().rgbColor.rgbRed,
+					rgbColor.rgbGreen, ptiItem->Value().rgbColor.rgbGreen,
+					rgbColor.rgbBlue, ptiItem->Value().rgbColor.rgbBlue,
+					ptiItem->Value().rgbColor.rgbReserved / 255.0f );
 			}
 		}
 		return (CDRF_DODEFAULT | CDRF_NOTIFYPOSTPAINT);

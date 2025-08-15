@@ -2,8 +2,6 @@
 #include "Html/EEHtml.h"
 #include "Unicode/EEUnicode.h"
 
-#include <iomanip>
-#include <sstream>
 
 namespace ee {
 
@@ -820,34 +818,16 @@ namespace ee {
 						I += sThisSize;
 						continue;
 					}
-					// Not printable.
-					/*std::stringstream ssStream;
-					ssStream << "\\x" <<
-						std::setfill( '0' ) << std::setw( 2 ) <<
-						std::hex << ui32This;
-					sRet.append( ssStream.str() );
-					
-					I += sThisSize;
-					continue;*/
 				}
 				// ui32Len is greater than 1, so at the very least a \u is needed.
 				ui32BackToUtf8 = Utf32ToUtf16( ui32This, ui32Len );
-				if ( ui32Len == 1 ) {
-					// Have to use the longer \u form.
+				for ( uint32_t J = 0; J < ui32Len; ++J ) {
 					std::stringstream ssStream;
 					ssStream << "\\u" <<
 						std::setfill( '0' ) << std::setw( 4 ) <<
-						std::hex << ui32This;
+						std::hex << uint16_t( ui32BackToUtf8 );
 					sRet.append( ssStream.str() );
-				}
-				else {
-					// There was a validity check above for (ui32This != EE_UTF_INVALID) so we know that
-					//	ui32This did decode into a valid value.  \U should work with no further checking.
-					std::stringstream ssStream;
-					ssStream << "\\U" <<
-						std::setfill( '0' ) << std::setw( 8 ) <<
-						std::hex << ui32This;
-					sRet.append( ssStream.str() );
+					ui32BackToUtf8 >>= 16;
 				}
 				I += sThisSize;
 				continue;

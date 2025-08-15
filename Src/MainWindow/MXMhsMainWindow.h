@@ -69,6 +69,10 @@ namespace mx {
 			MX_WH_SHOW_PE_WORKS,
 			MX_WH_SHOW_STRING_THEORY,
 			MX_WH_SHOW_FLOATING_POINT_STUDIO,
+			MX_WH_LOCK_SELECTED,
+			MX_WH_UNLOCK_SELECTED,
+			MX_WH_UNLOCK_ALL,
+			MX_WH_SHOW_EDIT,
 		};
 
 		// Timer.
@@ -123,13 +127,7 @@ namespace mx {
 		const CStatusBar *					StatusBar() const;
 
 		// Gets the list view.
-		CListView *							MainListView();
-
-		// Gets the list view.
 		CTreeListView *						MainTreeView();
-
-		// Gets the list view.
-		const CListView *					MainListView() const;
 
 		// Gets the multi-splitter.
 		CMultiSplitter *					MultiSplitter();
@@ -225,6 +223,15 @@ namespace mx {
 		// Shows the Edit dialog.
 		uint32_t							ShowEdit();
 
+		// Locks the selected items.
+		void								LockSelected();
+
+		// Unlocks the selected items.
+		void								UnlockSelected();
+
+		// Unlocks all items.
+		void								UnlockAll();
+
 		// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
 		bool								OpenProcess();
 
@@ -236,6 +243,12 @@ namespace mx {
 
 		// Gets the MemHack object.
 		CMemHack *							MemHack() { return m_pmhMemHack; }
+
+		// Saves all program settings.
+		virtual bool						SaveSettings( const std::wstring &_wsPath, bool _bAsJson ) const;
+
+		// Loads all program settings.
+		virtual bool						LoadSettings( const std::wstring &_wsPath, bool _bAsJson );
 
 		// Translate a child's tooltip text.
 		virtual std::wstring				TranslateTooltip( const std::string &_sText ) { 
@@ -311,8 +324,11 @@ namespace mx {
 		// The last options page shown.
 		int32_t								m_i32LastOptionsPage;
 
-		// Timer.
-		UINT_PTR							m_uiptrUpdateListTimer = 0;;
+		// List timer.
+		UINT_PTR							m_uiptrUpdateListTimer = 0;
+
+		// Locks timer.
+		UINT_PTR							m_uiptrUpdateLocksTimer = 0;
 
 
 		// == Functions.
@@ -334,6 +350,13 @@ namespace mx {
 
 		// WM_CONTEXTMENU.
 		virtual LSW_HANDLED					ContextMenu( CWidget * _pwControl, INT _iX, INT _iY );
+
+		
+		// Performs a Save As operation.
+		void								SaveAs();
+
+		// Performs a Save operation.
+		void								Save();
 
 		/**
 		 * Called when a CTreeListView wants text for an item.  Can be used to produce real-time or dynamically changing text for items in the tree.
@@ -417,6 +440,46 @@ namespace mx {
 		 * \param _uiParm3 Unused.
 		 */
 		static void __stdcall				Hotkey_ShowFloatingPointStudio( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
+
+		/**
+		 * Hotkey handler for showing the Modify Entry dialog.
+		 *
+		 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+		 * \param _uiParm1 Unused.
+		 * \param _uiParm2 Unused.
+		 * \param _uiParm3 Unused.
+		 */
+		static void __stdcall				Hotkey_ShowEdit( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
+
+		/**
+		 * Hotkey handler for locking selected entries.
+		 *
+		 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+		 * \param _uiParm1 Unused.
+		 * \param _uiParm2 Unused.
+		 * \param _uiParm3 Unused.
+		 */
+		static void __stdcall				Hotkey_LockSelected( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
+
+		/**
+		 * Hotkey handler for unlocking selected entries.
+		 *
+		 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+		 * \param _uiParm1 Unused.
+		 * \param _uiParm2 Unused.
+		 * \param _uiParm3 Unused.
+		 */
+		static void __stdcall				Hotkey_UnLockSelected( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
+
+		/**
+		 * Hotkey handler for unlocking all entries.
+		 *
+		 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+		 * \param _uiParm1 Unused.
+		 * \param _uiParm2 Unused.
+		 * \param _uiParm3 Unused.
+		 */
+		static void __stdcall				Hotkey_UnLockAll( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
 
 	};
 

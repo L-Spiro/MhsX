@@ -21,7 +21,7 @@
         "MemMapped" : true,
         "ThreadPriority" : 15,
         "BufferSize" : 4194304,
-        "PauseTarget" : true,
+        "PauseTarget" : false,
         "UseEpsilon" : true,
         "SmartEpsilon" : true,
         "Epsilon" : 0.0009765625,
@@ -46,9 +46,10 @@
         "RegexNegateSingleLine" : true,
         "RegexFlavor" : 10,
         "ByteSwap" : 0,
-        "From" : "10000h // \u00d7 \u005c\u0022'",
+        "From" : "10000h // \u00d7 \u005c\u0022' \ud83d\udd12",
         "To" : "7FFFFFFF0000h /*\u00ae*/",
         "FromHistory" : [
+            "10000h // \u00d7 \u005c\u0022' \ud83d\udd12",
             "10000h // \u00d7 \u005c\u0022'",
             "10000h // \u00d7\u0022'",
             "10000h // \u00d7",
@@ -67,5 +68,23 @@
         "EditDescrHistory" : [
 
         ]
+    },
+    "Hotkeys" : {
+        "Version" : 1,
+        "Polling" : {
+            "Keys" : [
+
+            ]
+        },
+        "Hotkey" : {
+            "Keys" : [
+
+            ]
+        },
+        "Hook" : {
+            "Keys" : [
+
+            ]
+        }
     }
 }

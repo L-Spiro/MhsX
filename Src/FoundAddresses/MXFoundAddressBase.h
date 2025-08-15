@@ -1,11 +1,17 @@
 #pragma once
 
 #include "../MXMhsX.h"
+#include "../Utilities/MXStream.h"
 #include "../Utilities/MXUtilities.h"
+
+#include <LSONJson.h>
 
 #include <atomic>
 #include <string>
 #include <vector>
+
+
+#define MX_FOUND_ADDRESS_VERSION							1
 
 
 namespace mx {
@@ -83,7 +89,7 @@ namespace mx {
 		virtual MX_FOUND_ADDRESS_TYPES						Type() const { return MX_FAT_INVALID; }
 
 		// Gets the item display color.
-		inline const RGBQUAD &								Color() const { return m_rgbqColor; }
+		virtual const RGBQUAD &								Color() const { return m_rgbqColor; }
 
 		// Sets the display color.
 		inline CFoundAddressBase &							SetColor( BYTE _bR, BYTE _bG, BYTE _bB, BYTE _bA ) {
@@ -106,6 +112,9 @@ namespace mx {
 		// Gets the Value text.
 		virtual std::wstring								ValueText( bool * _pbRead = nullptr ) const { return std::wstring(); }
 
+		// Gets the locked status.
+		virtual bool										Locked() const { return false; }
+
 		// Gets the Value When Locked text.
 		virtual std::wstring								ValueWhenLockedText() const { return std::wstring(); }
 
@@ -120,6 +129,12 @@ namespace mx {
 
 		// Is the address dynamic?
 		virtual bool										SimpleAddress() const { return true; }
+
+		// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
+		virtual bool										SaveSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary ) const;
+
+		// Loads settings from either a JSON object or a byte buffer.
+		virtual bool										LoadSettings( lson::CJson * _pjJson, CStream * _psBinary, uint32_t _ui32Version );
 
 		// Writes to memory (optionally byte-swapping).
 		static bool											WriteProcessMemory_PreProcessed( CMemHack * _pmhMemHack,

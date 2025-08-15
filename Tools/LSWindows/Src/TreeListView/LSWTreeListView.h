@@ -75,12 +75,29 @@ namespace lsw {
 		LPARAM								GetItemLParam( HTREEITEM _tiItem ) const;
 
 		/**
+		 * Sets an itemÅfs color.
+		 * 
+		 * \param _tiItem The item whose color is to be updated.
+		 * \param _rgbColor The color to apply to the item (alpha respected).
+		 * \return Returns TRUE if the itemÅfs color was set.  FALSE indicates that the item was invalid.
+		 **/
+		BOOL								SetItemColor( HTREEITEM _tiItem, RGBQUAD _rgbColor );
+
+		/**
 		 * Gets an item by index accounting for children being expanded or not.
 		 *
 		 * \param _stIdx The index of the item to get with collapsed items being taken into account.
 		 * \return Returns the _stIdx'th item in the tree, accounting for expandedness.
 		 */
 		HTREEITEM							GetItemByIndex( size_t _stIdx ) { return PointerToTreeItem( ItemByIndex( _stIdx ) ); }
+
+		/**
+		 * Gets an item given an LPARAM.  Only the first item with the given LPARAM is returned.
+		 * 
+		 * \param _lpValue The LPARAM value to find on an item.
+		 * \return Returns the item with the given LPARAM value or NULL.
+		 **/
+		HTREEITEM							GetByLParam( LPARAM _lpValue );
 									
 		/**
 		 * Counts the total number of expanded items.

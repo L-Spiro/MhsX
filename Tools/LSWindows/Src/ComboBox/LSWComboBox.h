@@ -55,7 +55,7 @@ namespace lsw {
 		virtual INT							GetTextLengthW() const;
 
 		// Gets the index of the currently selected item in a combo box.
-		INT									GetCurSel() const;
+		virtual INT							GetCurSel() const;
 
 		// Gets the application-defined value associated with the specified list item in a combo box.
 		LRESULT								GetItemData( INT _iIndex ) const;

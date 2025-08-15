@@ -90,13 +90,13 @@ namespace mx {
 		INT									m_iImageMap[MX_I_TOTAL];
 
 		// Timer.
-		UINT_PTR							m_uiptrUpdateListTimer;
+		UINT_PTR							m_uiptrUpdateListTimer = 0;
 
-		// Timer update speed.
-		UINT								m_uiUpdateSpeed;
+		// List-update timer update speed.
+		UINT								m_uiUpdateSpeed = 100;
 
 		// Decoding mode.
-		CUtilities::MX_DECODING				m_dDecoding;
+		CUtilities::MX_DECODING				m_dDecoding = CUtilities::MX_D_STANDARD;
 
 		// The array of expressions.
 		std::vector<CExpression *>			m_vExpressions;

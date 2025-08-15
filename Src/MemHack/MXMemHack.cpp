@@ -131,6 +131,12 @@ namespace mx {
 		CUtilities::Options.bShortenEnumNames = m_oOptions.bShortEnums;
 	}
 
+	// Applies the lock to all timer-based locked Found Addresses.
+	void CMemHack::ApplyFoundAddressLocks( bool _bAllLocked ) {
+		auto famMan = FoundAddressManager();
+		famMan->ApplyTimerLocks();
+	}
+
 	// Executes a program by index.
 	bool CMemHack::ExecuteProgramByIdx( size_t _stIdx ) {
 		if ( _stIdx >= m_vPrograms.size() ) { return false; }
@@ -143,66 +149,66 @@ namespace mx {
 		return reinterpret_cast<INT_PTR>(hReturn) > 32;
 	}
 
-	// Saves all program settings.
-	bool CMemHack::SaveSettings( const std::wstring &_wsPath, bool _bAsJson ) const {
-		CSecureWString wsFinalPath = CSystem::GetSelfPathW();
-		if ( _wsPath.size() ) {
-			wsFinalPath += _wsPath;
-		}
-		else {
-			wsFinalPath += _bAsJson ? _DEC_WS_3F15B0CA_config_json : _DEC_WS_7B969963_app_config;
-		}
-		std::vector<uint8_t> vBuffer;
-		if ( _bAsJson ) {
-			lson::CJson::LSON_ELEMENT eRoot;
-			lson::CJson::CreateObjectElement( "", eRoot );
-			if ( !SaveSettings( &eRoot, nullptr, Options() ) ) { return false; }
-			if ( !lson::CJson::WriteElement( eRoot, vBuffer, 0 ) ) { return false; }
-			/*vBuffer.push_back( 0 );
-			::OutputDebugStringA( reinterpret_cast<LPCSTR>(vBuffer.data()) );*/
-		}
-		else {
-			
-			CStream sStream( vBuffer );
-			if ( !SaveSettings( nullptr, &sStream, Options() ) ) { return false; }
-		}
-		
-		CFile fFile;
-		if ( !fFile.CreateNewFile( wsFinalPath.c_str(), FALSE ) ) { return false; }
-		if ( !fFile.Write( vBuffer.data(), static_cast<DWORD>(vBuffer.size()) ) ) { return false; }
-		
-		return true;
-	}
+	//// Saves all program settings.
+	//bool CMemHack::SaveSettings( const std::wstring &_wsPath, bool _bAsJson ) const {
+	//	CSecureWString wsFinalPath = CSystem::GetSelfPathW();
+	//	if ( _wsPath.size() ) {
+	//		wsFinalPath += _wsPath;
+	//	}
+	//	else {
+	//		wsFinalPath += _bAsJson ? _DEC_WS_3F15B0CA_config_json : _DEC_WS_7B969963_app_config;
+	//	}
+	//	std::vector<uint8_t> vBuffer;
+	//	if ( _bAsJson ) {
+	//		lson::CJson::LSON_ELEMENT eRoot;
+	//		lson::CJson::CreateObjectElement( "", eRoot );
+	//		if ( !SaveSettings( &eRoot, nullptr, Options() ) ) { return false; }
+	//		if ( !lson::CJson::WriteElement( eRoot, vBuffer, 0 ) ) { return false; }
+	//		/*vBuffer.push_back( 0 );
+	//		::OutputDebugStringA( reinterpret_cast<LPCSTR>(vBuffer.data()) );*/
+	//	}
+	//	else {
+	//		
+	//		CStream sStream( vBuffer );
+	//		if ( !SaveSettings( nullptr, &sStream, Options() ) ) { return false; }
+	//	}
+	//	
+	//	CFile fFile;
+	//	if ( !fFile.CreateNewFile( wsFinalPath.c_str(), FALSE ) ) { return false; }
+	//	if ( !fFile.Write( vBuffer.data(), static_cast<DWORD>(vBuffer.size()) ) ) { return false; }
+	//	
+	//	return true;
+	//}
 
-	// Loads all program settings.
-	bool CMemHack::LoadSettings( const std::wstring &_wsPath, bool _bAsJson ) {
-		CSecureWString wsFinalPath = CSystem::GetSelfPathW();
-		if ( _wsPath.size() ) {
-			wsFinalPath += _wsPath;
-		}
-		else {
-			wsFinalPath += _bAsJson ? _DEC_WS_3F15B0CA_config_json : _DEC_WS_7B969963_app_config;
-		}
-		std::vector<uint8_t> vBuffer;
-		CFile fFile;
-		fFile.LoadToMemory( wsFinalPath.c_str(), vBuffer );
-		if ( vBuffer.size() == 0 ) { return false; }
+	//// Loads all program settings.
+	//bool CMemHack::LoadSettings( const std::wstring &_wsPath, bool _bAsJson ) {
+	//	CSecureWString wsFinalPath = CSystem::GetSelfPathW();
+	//	if ( _wsPath.size() ) {
+	//		wsFinalPath += _wsPath;
+	//	}
+	//	else {
+	//		wsFinalPath += _bAsJson ? _DEC_WS_3F15B0CA_config_json : _DEC_WS_7B969963_app_config;
+	//	}
+	//	std::vector<uint8_t> vBuffer;
+	//	CFile fFile;
+	//	fFile.LoadToMemory( wsFinalPath.c_str(), vBuffer );
+	//	if ( vBuffer.size() == 0 ) { return false; }
 
-		if ( _bAsJson ) {
-			lson::CJson jSon;
-			vBuffer.push_back( 0 );
+	//	if ( _bAsJson ) {
+	//		lson::CJson jSon;
+	//		vBuffer.push_back( 0 );
 
-			if ( !jSon.SetJson( reinterpret_cast<const char *>(vBuffer.data()) ) ) { return false; }
-			if ( !LoadSettings( &jSon, nullptr, m_oOptions ) ) { return false; }
-		}
-		else {
-			CStream sStream( vBuffer );
-			if ( !LoadSettings( nullptr, &sStream, m_oOptions ) ) { return false; }
-		}
-		SetOptions( m_oOptions );
+	//		if ( !jSon.SetJson( reinterpret_cast<const char *>(vBuffer.data()) ) ) { return false; }
+	//		if ( !LoadSettings( &jSon, nullptr, m_oOptions ) ) { return false; }
+	//	}
+	//	else {
+	//		CStream sStream( vBuffer );
+	//		if ( !LoadSettings( nullptr, &sStream, m_oOptions ) ) { return false; }
+	//	}
+	//	SetOptions( m_oOptions );
 
-		return true;
-	}
+	//	return true;
+	//}
 
 	// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
 	bool CMemHack::SaveSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary, const MX_OPTIONS &_oOptions ) const {

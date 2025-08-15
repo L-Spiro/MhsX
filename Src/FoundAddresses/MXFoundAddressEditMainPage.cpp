@@ -126,12 +126,12 @@ namespace mx {
 		
 			int iType = -1;
 			auto pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_COMBO );
-			if ( pwTmp ) {
+			if ( pwTmp && pwTmp->GetCurSel() != -1 ) {
 				iType = pwTmp->GetCurSelItemData();
 			}
 			int iLockType = -1;
 			pwTmp = FindChild( Layout::MX_FAEI_QL_LOCK_TYPE_COMBO );
-			if ( pwTmp ) {
+			if ( pwTmp && pwTmp->GetCurSel() != -1 ) {
 				iLockType = pwTmp->GetCurSelItemData();
 			}
 
@@ -215,7 +215,7 @@ namespace mx {
 
 			int iCodePage = -1;
 			pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_STRING_COMBO );
-			if ( pwTmp ) {
+			if ( pwTmp && pwTmp->GetCurSel() != -1 ) {
 				iCodePage = int( pwTmp->GetCurSelItemData() );
 			}
 
@@ -227,7 +227,7 @@ namespace mx {
 					if ( pfabThis ) {
 						if ( pfabThis->Type() == MX_FAT_FOUND_ADDRESS ) {
 							auto pfaThis = static_cast<CFoundAddress *>(pfabThis);
-							CUtilities::MX_DATA_TYPES dtThisType = (iType == -1) ? pfaThis->DataType() : static_cast<CUtilities::MX_DATA_TYPES>(iType);
+							CUtilities::MX_DATA_TYPES dtThisType = (iType == -1) ? DataType( pfaThis ) : static_cast<CUtilities::MX_DATA_TYPES>(iType);
 
 							if ( dtThisType == CUtilities::MX_DT_STRING ) {
 								UINT uiCodePage = (iCodePage == -1) ? pfaThis->CodePage() : UINT( iCodePage );
@@ -402,12 +402,12 @@ namespace mx {
 		
 			int iType = -1;
 			auto pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_COMBO );
-			if ( pwTmp ) {
+			if ( pwTmp && pwTmp->GetCurSel() != -1 ) {
 				iType = pwTmp->GetCurSelItemData();
 			}
 			int iLockType = -1;
 			pwTmp = FindChild( Layout::MX_FAEI_QL_LOCK_TYPE_COMBO );
-			if ( pwTmp ) {
+			if ( pwTmp && pwTmp->GetCurSel() != -1 ) {
 				iLockType = pwTmp->GetCurSelItemData();
 			}
 
@@ -505,7 +505,7 @@ namespace mx {
 
 			int iCodePage = -1;
 			pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_STRING_COMBO );
-			if ( pwTmp ) {
+			if ( pwTmp && pwTmp->GetCurSel() != -1 ) {
 				iCodePage = int( pwTmp->GetCurSelItemData() );
 			}
 
@@ -520,7 +520,7 @@ namespace mx {
 							auto pfaThis = static_cast<CFoundAddress *>(pfabThis);
 							bool bLocked = (i32Locked == BST_INDETERMINATE) ? pfaThis->Locked() : (i32Locked == BST_CHECKED);
 							pfaThis->SetLocked( false );
-							CUtilities::MX_DATA_TYPES dtThisType = (iType == -1) ? pfaThis->DataType() : static_cast<CUtilities::MX_DATA_TYPES>(iType);
+							CUtilities::MX_DATA_TYPES dtThisType = (iType == -1) ? DataType( pfaThis ) : static_cast<CUtilities::MX_DATA_TYPES>(iType);
 							pfaThis->Dirty();
 							uint64_t ui64Address = pfaThis->FinalAddress();
 
@@ -562,6 +562,7 @@ namespace mx {
 
 								uint32_t ui32Stride = (i32ArrayStride == -1) ? pfaThis->ArrayStride() : uint32_t( i32ArrayStride );
 								if ( ui32Stride > CFoundAddress::MaxArrayStride() ) { continue; }
+								uint32_t ui32ActualStride = std::max<uint32_t>( ui32Stride, CUtilities::DataTypeSize( dtThisType ) );
 
 								bool bContiguous = ui32Stride <= CUtilities::DataTypeSize( dtThisType );
 
@@ -577,7 +578,8 @@ namespace mx {
 
 								if ( !bLocked && swsValue.size() ) {
 									// Write the current value to RAM.
-									//m_pParms.pmhMemHack->WriteProcessMemory_PreProcessed( ui64Address, sCodePaged.data(), sCodePaged.size(), pfaThis->PreProcessing() );
+									CFoundAddressBase::WriteProcessMemory_PreProcessed( m_pParms.pmhMemHack,
+										ui64Address, vRawValues, bContiguous, ui32ActualStride, pfaThis->PreProcessing() );
 								}
 
 
@@ -585,7 +587,7 @@ namespace mx {
 								std::vector<std::vector<uint8_t>> vRawLockLeft;
 								auto ui32LeftArrayLen = CUtilities::WStringToArrayBytes( vRawLockLeft, swsLeftLockVal, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
 								if ( swsError.size() ) { continue; }
-								if ( ui32LeftArrayLen != 0 ) {
+								if ( ui32ArrayLen != 0 ) {
 									if ( ui32LeftArrayLen > ui32ArrayLen ) { continue; }
 								}
 								else if ( ui32LeftArrayLen != ui32NewArrayLen ) { continue; }
@@ -597,23 +599,16 @@ namespace mx {
 									std::vector<std::vector<uint8_t>> vRawLockRight;
 									auto ui32RightArrayLen = CUtilities::WStringToArrayBytes( vRawLockRight, swsRightLockVal, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
 									if ( swsError.size() ) { continue; }
-									if ( ui32RightArrayLen != 0 ) {
+									if ( ui32ArrayLen != 0 ) {
 										if ( ui32RightArrayLen > ui32ArrayLen ) { continue; }
 									}
 									else if ( ui32RightArrayLen != ui32NewArrayLen ) { continue; }
 
-									std::vector<ee::CExpEvalContainer::EE_RESULT> vLeftExp, vRightExp;
-									if ( CUtilities::ArrayBytesToResult( vRawLockLeft, nullptr, dtThisType, ui32LeftArrayLen, bContiguous, vLeftExp ) != ui32LeftArrayLen ) { continue; }
-									if ( CUtilities::ArrayBytesToResult( vRawLockRight, nullptr, dtThisType, ui32RightArrayLen, bContiguous, vRightExp ) != ui32RightArrayLen ) { continue; }
-
-									size_t sLen = std::min<size_t>( vLeftExp.size(), vRightExp.size() );
-									for ( size_t I = 0; I < sLen; ++I ) {
-										ee::CExpEvalContainer::EE_RESULT rTmp;
-										if ( ee::CExpEvalContainer::EE_EC_SUCCESS != ee::CExpEvalContainer::PerformOp_S( vLeftExp[I], '>', vRightExp[I], rTmp ) ) { continue; }
-										if ( rTmp.u.ui64Val ) { continue; }
-									}
+									
+									pfaThis->SetAsDataType( vRawLockLeft, dtThisType, ui32LeftArrayLen, ui32Stride, &vRawLockRight );
 								}
 								else {
+									pfaThis->SetAsDataType( vRawLockLeft, dtThisType, ui32LeftArrayLen, ui32Stride );
 								}
 							}
 							
@@ -649,6 +644,11 @@ namespace mx {
 		if ( pwTmp ) {
 			rRes.u.i64Val = -1;
 			pwTmp->GetTextAsInt64Expression( rRes );
+		}
+		CSecureWString swsCurText;
+		auto pwCurVal = FindChild( Layout::MX_FAEI_VALUE_CUR_VAL_COMBO );
+		if ( pwCurVal ) {
+			swsCurText = pwCurVal->GetTextW();
 		}
 
 		bool bIsMulti = m_pParms.vSelection.size() >= 2;
@@ -686,6 +686,8 @@ namespace mx {
 				Layout::MX_FOUND_ADDRESS_EDIT_IDS						wId;
 				bool													bCondition0;
 			} cControls[] = {
+				{ Layout::MX_FAEI_VALUE_CUR_VAL_DESC_LABEL,				swsCurText.size() != 0 },
+
 				{ Layout::MX_FAEI_VALUE_TYPE_SHOW_AS_HEX_CHECK,			iType != LPARAM( CUtilities::MX_DT_STRING ) && !CUtilities::DataTypeIsFloat( static_cast<CUtilities::MX_DATA_TYPES>(iType) ) },
 				{ Layout::MX_FAEI_VALUE_TYPE_SCIENTIFIC_CHECK,			!!CUtilities::DataTypeIsFloat( static_cast<CUtilities::MX_DATA_TYPES>(iType) ) },
 				{ Layout::MX_FAEI_VALUE_TYPE_ESCAPE_CHECK,				iType == LPARAM( CUtilities::MX_DT_STRING ) },
@@ -728,11 +730,7 @@ namespace mx {
 						if ( pwEscape ) {
 							bEscape = !!pwEscape->IsChecked();
 						}
-						CSecureWString swsCurText;
-						auto pwCurVal = FindChild( Layout::MX_FAEI_VALUE_CUR_VAL_COMBO );
-						if ( pwCurVal ) {
-							swsCurText = pwCurVal->GetTextW();
-						}
+						
 						if ( !swsCurText.size() && bIsMulti ) {
 							// Empty string on multi-select means don't change the texts.
 							swsExpText += _DEC_WS_43645600__multiple_items_;
@@ -1252,11 +1250,11 @@ namespace mx {
 			auto faTmp = famManager->GetById( m_pParms.vSelection[I] );
 			if ( faTmp && faTmp->Type() == MX_FAT_FOUND_ADDRESS ) {
 				if ( !bFound ) {
-					dtRet = reinterpret_cast<CFoundAddress *>(faTmp)->DataType();
+					dtRet = DataType( faTmp );
 					bFound = true;
 					continue;
 				}
-				if ( reinterpret_cast<CFoundAddress *>(faTmp)->DataType() != dtRet ) { return CUtilities::MX_DATA_TYPES( -1 ); }
+				if ( DataType( faTmp ) != dtRet ) { return CUtilities::MX_DATA_TYPES( -1 ); }
 			}
 		}
 
@@ -1287,7 +1285,7 @@ namespace mx {
 
 	// Gathers all locked states.
 	int CFoundAddressEditMainPage::GatherLockedStates() const {
-		if ( !m_pParms.pmhMemHack || !m_pParms.vSelection.size() ) { return CUtilities::MX_LOCK_TYPES( -1 ); }
+		if ( !m_pParms.pmhMemHack || !m_pParms.vSelection.size() ) { return BST_INDETERMINATE; }
 		bool bLocked = false;
 		auto famManager = m_pParms.pmhMemHack->FoundAddressManager();
 		bool bFound = false;
@@ -1357,6 +1355,14 @@ namespace mx {
 	LPARAM CFoundAddressEditMainPage::LockType( CFoundAddressBase * _pfabFoundAddress ) {
 		if ( _pfabFoundAddress->Type() != MX_FAT_FOUND_ADDRESS ) { return LPARAM( -1 ); }
 		return LPARAM( reinterpret_cast<CFoundAddress *>(_pfabFoundAddress)->LockType() );
+	}
+
+	// Gets the data type for a given found address.
+	CUtilities::MX_DATA_TYPES CFoundAddressEditMainPage::DataType( CFoundAddressBase * _pfabFoundAddress ) {
+		if ( _pfabFoundAddress->Type() != MX_FAT_FOUND_ADDRESS ) { return CUtilities::MX_DATA_TYPES( -1 ); }
+		if ( reinterpret_cast<CFoundAddress *>(_pfabFoundAddress)->ValueType() == CUtilities::MX_VT_STRING ) { return CUtilities::MX_DT_STRING; }
+		if ( reinterpret_cast<CFoundAddress *>(_pfabFoundAddress)->ValueType() == CUtilities::MX_VT_BLOB ) { return CUtilities::MX_DATA_TYPES( -1 ); }
+		return reinterpret_cast<CFoundAddress *>(_pfabFoundAddress)->DataType();
 	}
 
 	// Converts a string to its description.

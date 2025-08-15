@@ -27,7 +27,7 @@ namespace lsw {
 		INT									GetSelCount() const;
 		
 		// Gets the index of the currently selected item in a single-selection list box.
-		INT									GetCurSel() const;
+		virtual INT							GetCurSel() const;
 
 		// Sets the currently selected item in a single-selection list box
 		INT									SetCurSel( INT _iIndex );

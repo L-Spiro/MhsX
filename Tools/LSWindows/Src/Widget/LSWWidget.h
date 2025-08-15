@@ -259,6 +259,9 @@ namespace lsw {
 		// Gets the currently selected item's data.
 		virtual LPARAM						GetCurSelItemData() const { return LPARAM( -1 ); }
 
+		// Gets the index of the currently selected item in a combo box.
+		virtual INT							GetCurSel() const { return -1; }
+
 		/**
 		 * Informs the control that a child tab control has just had a check toggled.
 		 * 

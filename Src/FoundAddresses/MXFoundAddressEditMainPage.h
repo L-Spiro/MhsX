@@ -76,6 +76,9 @@ namespace mx {
 		// Gets the lock type for a given found address.
 		static LPARAM							LockType( CFoundAddressBase * _pfabFoundAddress );
 
+		// Gets the data type for a given found address.
+		static CUtilities::MX_DATA_TYPES		DataType( CFoundAddressBase * _pfabFoundAddress );
+
 		// Converts a string to its description.
 		static CSecureWString					StringToDescr( const CSecureWString &_swsString, bool _bResolveEscapes, UINT _uiCodePage );
 

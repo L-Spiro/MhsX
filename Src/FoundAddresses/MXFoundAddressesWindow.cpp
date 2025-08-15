@@ -368,6 +368,7 @@ namespace mx {
 												faAddress->SetDescriptionText( wsTmp );
 												TVINSERTSTRUCTW iisItem = lsw::CTreeListView::DefaultItemLParam( wsTmp.c_str(), faAddress->Id() );
 												auto hInserted = ptlvTree->InsertItem( &iisItem );
+												ptlvTree->SetItemColor( hInserted, faAddress->Color() );
 
 												// == Address.
 												/*wsTmp = faAddress->AddressText();

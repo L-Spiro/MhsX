@@ -29,12 +29,11 @@
 #include <ToolBar/LSWToolBar.h>
 
 #include <cctype>
+#include <commdlg.h>
 #include <mbctype.h>
 #include <mbstring.h>
 
 //#include <MLang.h>
-
-#define MX_USE_LISTVIEW
 
 namespace mx {
 
@@ -294,6 +293,11 @@ namespace mx {
 			CSystem::KillTimer( Wnd(), m_uiptrUpdateListTimer );
 			m_uiptrUpdateListTimer = 0;
 		}
+		if ( m_uiptrUpdateLocksTimer ) {
+			CSystem::KillTimer( Wnd(), m_uiptrUpdateLocksTimer );
+			m_uiptrUpdateLocksTimer = 0;
+		}
+		
 
 		//delete m_pmhMemHack;
 		m_pmhMemHack = nullptr;
@@ -317,43 +321,25 @@ namespace mx {
 	// == Functions.
 	// WM_INITDIALOG.
 	CWidget::LSW_HANDLED CMhsMainWindow::InitDialog() {
-		{
-														//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
-			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_OpenOptions,				{ _T_LEN_159BB63C_Show_Options },				MX_WH_SHOW_OPTIONS,					0 };
-			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
-		}
-		{
-														//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
-			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowFoundAddresses,		{ _T_LEN_A5501E10_Show_Found_Addresses },		MX_WH_SHOW_FOUND_ADDRESSES,			0 };
-			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
-		}
-		{
-														//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
-			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowExpressionEvaluator,	{ _T_LEN_0661F178_Show_Expression_Evaluator },	MX_WH_SHOW_EXPRESSION_EVALUATOR,	0 };
-			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
-		}
-		{
-														//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
-			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowConverter,			{ _T_LEN_9118A28E_Show_Converter },				MX_WH_SHOW_CONVERTER,				0 };
-			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
+		static CHotkeyManBase::MX_HOTKEY_HANDLER hhHandlers[] = {
+		//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowEdit,				{ _T_LEN_F2BB02E1_Show_Found_Address_Edit },	MX_WH_SHOW_EDIT,					0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_OpenOptions,				{ _T_LEN_159BB63C_Show_Options },				MX_WH_SHOW_OPTIONS,					0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowFoundAddresses,		{ _T_LEN_A5501E10_Show_Found_Addresses },		MX_WH_SHOW_FOUND_ADDRESSES,			0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowExpressionEvaluator,	{ _T_LEN_0661F178_Show_Expression_Evaluator },	MX_WH_SHOW_EXPRESSION_EVALUATOR,	0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowConverter,			{ _T_LEN_9118A28E_Show_Converter },				MX_WH_SHOW_CONVERTER,				0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowPeWorks,				{ _T_LEN_759D0F03_Show_PE_Works },				MX_WH_SHOW_PE_WORKS,				0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowStringTheory,		{ _T_LEN_B7A8A10D_Show_String_Theory },			MX_WH_SHOW_STRING_THEORY,			0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowFloatingPointStudio,	{ _T_LEN_155439B4_Show_Floating_Point_Studio },	MX_WH_SHOW_FLOATING_POINT_STUDIO,	0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_LockSelected,			{ _T_LEN_14B8120F_Lock_Selected },				MX_WH_LOCK_SELECTED,				0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_UnLockSelected,			{ _T_LEN_85399C8F_Unlock_Selected },			MX_WH_UNLOCK_SELECTED,				0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_UnLockAll,				{ _T_LEN_EE088C0D_Unlock_All },					MX_WH_UNLOCK_ALL,					0 },
+		};
+		for ( size_t I = 0; I < MX_ELEMENTS( hhHandlers ); ++I ) {
+			CHotkeyManBase::RegisterHotkeyHandler( hhHandlers[I] );
 		}
 
-		{
-														//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
-			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowPeWorks,				{ _T_LEN_759D0F03_Show_PE_Works },				MX_WH_SHOW_PE_WORKS,				0 };
-			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
-		}
-		{
-														//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
-			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowStringTheory,		{ _T_LEN_B7A8A10D_Show_String_Theory },			MX_WH_SHOW_STRING_THEORY,			0 };
-			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
-		}
-		{
-														//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
-			CHotkeyManBase::MX_HOTKEY_HANDLER hhHandler = { reinterpret_cast<uint64_t>(this),	Hotkey_ShowFloatingPointStudio,	{ _T_LEN_155439B4_Show_Floating_Point_Studio },	MX_WH_SHOW_FLOATING_POINT_STUDIO,	0 };
-			CHotkeyManBase::RegisterHotkeyHandler( hhHandler );
-		}
-
+		
 
 		CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( CMainWindowLayout::MX_MWI_TOOLBAR0 ));
 		CRebar * plvRebar = static_cast<CRebar *>(FindChild( CMainWindowLayout::MX_MWI_REBAR0 ));
@@ -419,9 +405,8 @@ namespace mx {
 		}
 
 
-#ifdef MX_USE_LISTVIEW
 		// ==== LIST VIEW ==== //
-		CListView * plvAddressList = MainListView();
+		CTreeListView * plvAddressList = MainTreeView();
 		if ( plvAddressList ) {
 			plvAddressList->DeleteAllColumns();
 			const struct {
@@ -442,33 +427,6 @@ namespace mx {
 			}
 			//plvAddressList->SetColumnWidth( plvAddressList->GetTotalColumns(), LVSCW_AUTOSIZE_USEHEADER );
 		}
-#else
-		// ==== TREE LIST ==== //
-		CTreeList * ptlAddressList = MainTreeView();
-		if ( ptlAddressList ) {
-			const struct {
-				const char * _pcText;
-				size_t sLen;
-				DWORD dwWidth;
-			} aTitles[] = {
-				{ _T_EB78CFF1_Description, _LEN_EB78CFF1, 150 },
-				{ _T_C2F3561D_Address, _LEN_C2F3561D, 80 },
-				{ _T_31A2F4D5_Current_Value, _LEN_31A2F4D5, 120 },
-				{ _T_022E8A69_Value_When_Locked, _LEN_022E8A69, 120 },
-				{ _T_2CECF817_Type, _LEN_2CECF817, 100 },
-			};
-			for ( INT I = 0; I < MX_ELEMENTS( aTitles ); I++ ) {
-				if ( I == 0 ) {
-					if ( !ptlAddressList->SetColumnText( mx::CStringDecoder::DecodeToWString( aTitles[I]._pcText, aTitles[I].sLen ).c_str(), 0 ) ) { break; }
-					if ( !ptlAddressList->SetColumnWidth( 0, aTitles[I].dwWidth ) ) { break; }
-				}
-				else {
-					if ( !ptlAddressList->InsertColumn( mx::CStringDecoder::DecodeToWString( aTitles[I]._pcText, aTitles[I].sLen ).c_str(), aTitles[I].dwWidth, -1 ) ) { break; }
-				}
-			}
-			//plvAddressList->SetColumnWidth( plvAddressList->GetTotalColumns(), LVSCW_AUTOSIZE_USEHEADER );
-		}
-#endif	// MX_USE_LISTVIEW
 
 		// TEMP.
 		/*CSplitter * pwSplitter = static_cast<CSplitter *>(FindChild( CMainWindowLayout::MX_MWI_SPLITTER ));
@@ -481,11 +439,7 @@ namespace mx {
 		aAttach.dwId = pwSplitter->RootId();
 		aAttach.pwWidget = FindChild( CMainWindowLayout::MX_MWI_TEST0 );
 		//pwSplitter->Attach( aAttach );
-#ifdef MX_USE_LISTVIEW
-		aAttach.pwWidget = MainListView();
-#else
 		aAttach.pwWidget = MainTreeView();
-#endif	// MX_USE_LISTVIEW
 		pwSplitter->Attach( aAttach );
 
 		aAttach.atAttachTo = CMultiSplitter::LSW_AT_TOP;
@@ -495,7 +449,7 @@ namespace mx {
 
 		ForceSizeUpdate();
 
-		m_pmhMemHack->LoadSettings( CSecureWString(), true );
+		LoadSettings( CSecureWString(), true );
 
 		ShowFoundAddress();
 		ShowExpEval();
@@ -510,6 +464,8 @@ namespace mx {
 		std::mt19937 mGen( rdRand() );
 		std::uniform_int_distribution<> uidDist( MX_T_UPDATE_LIST, MX_T_UPDATE_LIST + 16 );
 		m_uiptrUpdateListTimer = CSystem::SetTimer( Wnd(), uidDist( mGen ), 1000 / m_pmhMemHack->Options().dwMainRefresh, NULL );
+		m_uiptrUpdateLocksTimer = CSystem::SetTimer( Wnd(), uidDist( mGen ), 1000 / m_pmhMemHack->Options().dwLockedRefresh, NULL );
+		
 		return LSW_H_CONTINUE;
 	}
 
@@ -585,7 +541,14 @@ namespace mx {
 				ShowConverter();
 				break;
 			}
-
+			case CMainWindowLayout::MX_MWMI_SAVE : {
+				Save();
+				break;
+			}
+			case CMainWindowLayout::MX_MWMI_SAVEAS : {
+				SaveAs();
+				break;
+			}
 			case CMainWindowLayout::MX_MWMI_DELETE : {
 				DeleteSelected();
 				break;
@@ -595,9 +558,15 @@ namespace mx {
 				break;
 			}
 			case CMainWindowLayout::MX_MWMI_LOCK : {
+				LockSelected();
 				break;
 			}
 			case CMainWindowLayout::MX_MWMI_UNLOCK : {
+				UnlockSelected();
+				break;
+			}
+			case CMainWindowLayout::MX_MWMI_UNLOCK_ALL : {
+				UnlockAll();
 				break;
 			}
 			case CMainWindowLayout::MX_MWMI_EDIT : {
@@ -621,7 +590,8 @@ namespace mx {
 	// WM_DESTROY.
 	CWidget::LSW_HANDLED CMhsMainWindow::Destroy() {
 		if ( m_pmhMemHack ) {
-			m_pmhMemHack->SaveSettings( CSecureWString(), true );
+			//m_pmhMemHack->SaveSettings( CSecureWString(), true );
+			SaveSettings( CSecureWString(), true );
 		}
 		return LSW_H_CONTINUE;
 	}
@@ -691,18 +661,8 @@ namespace mx {
 	}
 
 	// Gets the list view.
-	CListView * CMhsMainWindow::MainListView() {
-		return static_cast<CListView *>(FindChild( CMainWindowLayout::MX_MWI_STOREDADDRESSES ));
-	}
-
-	// Gets the list view.
 	CTreeListView * CMhsMainWindow::MainTreeView() {
 		return static_cast<CTreeListView *>(FindChild( CMainWindowLayout::MX_MWI_STOREDADDRESSES ));
-	}
-
-	// Gets the list view.
-	const CListView * CMhsMainWindow::MainListView() const {
-		return static_cast<const CListView *>(FindChild( CMainWindowLayout::MX_MWI_STOREDADDRESSES ));
 	}
 
 	// Gets the multi-splitter.
@@ -1007,11 +967,88 @@ namespace mx {
 				std::vector<LPARAM> vSelected;
 				if ( pwTree->GatherSelectedLParam( vSelected, true ) >= 1 ) {		// At least one thing is selected.
 					CFoundAddressEditLayout::CreateEditDialog( this, MemHack(), vSelected );
+
+					// Update colors.
+					for ( auto I = vSelected.size(); I--; ) {
+						auto hItem = pwTree->GetByLParam( vSelected[I] );
+						if ( hItem ) {
+							auto pfabThis = famMan->GetById( size_t( vSelected[I] ) );
+							if ( pfabThis ) {
+								pwTree->SetItemColor( hItem, pfabThis->Color() );
+							}
+						}
+					}
 				}
 			}
 		}
 		catch ( ... ) {}
 		return 0;
+	}
+
+	// Locks the selected items.
+	void CMhsMainWindow::LockSelected() {
+		auto pwTree = MainTreeView();
+		if ( pwTree ) {
+			auto famMan = m_pmhMemHack->FoundAddressManager();					// Locks the Found Address Manager for modifications.
+			std::vector<LPARAM> vSelected;
+			if ( pwTree->GatherSelectedLParam( vSelected, true ) >= 1 ) {		// At least one thing is selected.
+				for ( auto I = vSelected.size(); I--; ) {
+					auto hItem = pwTree->GetByLParam( vSelected[I] );
+					if ( hItem ) {
+						auto pfabThis = famMan->GetById( size_t( vSelected[I] ) );
+						if ( pfabThis && pfabThis->Type() == MX_FAT_FOUND_ADDRESS ) {
+							reinterpret_cast<CFoundAddress *>(pfabThis)->SetLocked( true );
+							pwTree->SetItemColor( hItem, pfabThis->Color() );
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Unlocks the selected items.
+	void CMhsMainWindow::UnlockSelected() {
+		auto pwTree = MainTreeView();
+		if ( pwTree ) {
+			auto famMan = m_pmhMemHack->FoundAddressManager();					// Locks the Found Address Manager for modifications.
+			std::vector<LPARAM> vSelected;
+			if ( pwTree->GatherSelectedLParam( vSelected, true ) >= 1 ) {		// At least one thing is selected.
+				for ( auto I = vSelected.size(); I--; ) {
+					auto hItem = pwTree->GetByLParam( vSelected[I] );
+					if ( hItem ) {
+						auto pfabThis = famMan->GetById( size_t( vSelected[I] ) );
+						if ( pfabThis && pfabThis->Type() == MX_FAT_FOUND_ADDRESS ) {
+							reinterpret_cast<CFoundAddress *>(pfabThis)->SetLocked( false );
+							pwTree->SetItemColor( hItem, pfabThis->Color() );
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Unlocks all items.
+	void CMhsMainWindow::UnlockAll() {
+		auto famMan = m_pmhMemHack->FoundAddressManager();						// Locks the Found Address Manager for modifications.
+		(*famMan).UnlockAll();
+
+		auto pwTree = MainTreeView();
+		if ( pwTree ) {
+			auto famMan = m_pmhMemHack->FoundAddressManager();					// Locks the Found Address Manager for modifications.
+			std::vector<LPARAM> vSelected;
+			if ( pwTree->GatherAllLParam( vSelected, true ) >= 1 ) {			// At least one thing is selected.
+				for ( auto I = vSelected.size(); I--; ) {
+					auto hItem = pwTree->GetByLParam( vSelected[I] );
+					if ( hItem ) {
+						auto pfabThis = famMan->GetById( size_t( vSelected[I] ) );
+						if ( pfabThis && pfabThis->Type() == MX_FAT_FOUND_ADDRESS ) {
+							reinterpret_cast<CFoundAddress *>(pfabThis)->SetLocked( false );
+							pwTree->SetItemColor( hItem, pfabThis->Color() );
+						}
+					}
+				}
+			}
+		}
 	}
 
 	// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
@@ -1136,10 +1173,78 @@ namespace mx {
 		return true;
 	}
 
+	// Saves all program settings.
+	bool CMhsMainWindow::SaveSettings( const std::wstring &_wsPath, bool _bAsJson ) const {
+		CSecureWString wsFinalPath = CSystem::GetSelfPathW();
+		if ( _wsPath.size() ) {
+			wsFinalPath += _wsPath;
+		}
+		else {
+			wsFinalPath += _bAsJson ? _DEC_WS_3F15B0CA_config_json : _DEC_WS_7B969963_app_config;
+		}
+		std::vector<uint8_t> vBuffer;
+		if ( _bAsJson ) {
+			lson::CJson::LSON_ELEMENT eRoot;
+			lson::CJson::CreateObjectElement( "", eRoot );
+			if ( !m_pmhMemHack->SaveSettings( &eRoot, nullptr, m_pmhMemHack->Options() ) ) { return false; }
+			if ( !m_pmhMemHack->HotkeyManager().SaveSettings( &eRoot, nullptr ) ) { return false; }
+			if ( !lson::CJson::WriteElement( eRoot, vBuffer, 0 ) ) { return false; }
+			/*vBuffer.push_back( 0 );
+			::OutputDebugStringA( reinterpret_cast<LPCSTR>(vBuffer.data()) );*/
+		}
+		else {
+			
+			CStream sStream( vBuffer );
+			if ( !m_pmhMemHack->SaveSettings( nullptr, &sStream, m_pmhMemHack->Options() ) ) { return false; }
+			if ( !m_pmhMemHack->HotkeyManager().SaveSettings( nullptr, &sStream ) ) { return false; }
+		}
+		
+		CFile fFile;
+		if ( !fFile.CreateNewFile( wsFinalPath.c_str(), FALSE ) ) { return false; }
+		if ( !fFile.Write( vBuffer.data(), static_cast<DWORD>(vBuffer.size()) ) ) { return false; }
+		
+		return true;
+	}
+
+	// Loads all program settings.
+	bool CMhsMainWindow::LoadSettings( const std::wstring &_wsPath, bool _bAsJson ) {
+		CSecureWString wsFinalPath = CSystem::GetSelfPathW();
+		if ( _wsPath.size() ) {
+			wsFinalPath += _wsPath;
+		}
+		else {
+			wsFinalPath += _bAsJson ? _DEC_WS_3F15B0CA_config_json : _DEC_WS_7B969963_app_config;
+		}
+		std::vector<uint8_t> vBuffer;
+		CFile fFile;
+		fFile.LoadToMemory( wsFinalPath.c_str(), vBuffer );
+		if ( vBuffer.size() == 0 ) { return false; }
+		MX_OPTIONS oOptions = m_pmhMemHack->Options();
+		if ( _bAsJson ) {
+			lson::CJson jSon;
+			vBuffer.push_back( 0 );
+
+			if ( !jSon.SetJson( reinterpret_cast<const char *>(vBuffer.data()) ) ) { return false; }
+			if ( !m_pmhMemHack->LoadSettings( &jSon, nullptr, oOptions ) ) { return false; }
+			if ( !m_pmhMemHack->HotkeyManager().LoadSettings( &jSon, nullptr ) ) { return false; }
+		}
+		else {
+			CStream sStream( vBuffer );
+			if ( !m_pmhMemHack->LoadSettings( nullptr, &sStream, oOptions ) ) { return false; }
+			if ( !m_pmhMemHack->HotkeyManager().LoadSettings( nullptr, &sStream ) ) { return false; }
+		}
+		m_pmhMemHack->SetOptions( oOptions );
+
+		return true;
+	}
+
 	// Update timer speed.
 	void CMhsMainWindow::UpdateTimer() {
 		if ( m_uiptrUpdateListTimer ) {
 			m_uiptrUpdateListTimer = CSystem::SetTimer( Wnd(), m_uiptrUpdateListTimer, max( 1000 / MemHack()->Options().dwMainRefresh, static_cast<DWORD>(1) ), NULL );
+		}
+		if ( m_uiptrUpdateLocksTimer ) {
+			m_uiptrUpdateLocksTimer = CSystem::SetTimer( Wnd(), m_uiptrUpdateLocksTimer, max( 1000 / MemHack()->Options().dwLockedRefresh, static_cast<DWORD>(1) ), NULL );
 		}
 	}
 
@@ -1151,6 +1256,9 @@ namespace mx {
 			if ( plvList ) {
 				::RedrawWindow( plvList->Wnd(), NULL, NULL, RDW_INVALIDATE | /*RDW_NOCHILDREN | */RDW_UPDATENOW | RDW_FRAME );
 			}
+		}
+		if ( _uiptrId == m_uiptrUpdateLocksTimer ) {
+			MemHack()->ApplyFoundAddressLocks();
 		}
 		return LSW_H_CONTINUE;
 	}
@@ -1264,12 +1372,23 @@ namespace mx {
 				HWND hChild = ::ChildWindowFromPointEx( _pwControl->Wnd(), pt, CWP_SKIPINVISIBLE | CWP_SKIPDISABLED );
 				auto pwTree = MainTreeView();
 				if ( pwTree && hChild == pwTree->Wnd() ) {
-
-					auto sSelected = 1;//TotalSelected();
+					size_t sSelected;
+					size_t sTotal = 0;
+					{
+						auto famMan = m_pmhMemHack->FoundAddressManager();						// Locks the Found Address Manager for modifications.
+						sTotal = famMan->Total();
+						std::vector<LPARAM> vSelected;
+						sSelected = pwTree->GatherSelectedLParam( vSelected, true );;
+					}
 					LSW_MENU_ITEM miMenuBar[] = {
 						//bIsSeperator	dwId													bCheckable	bChecked	bEnabled			lpwcText, stTextLen												bSkip
+						{ FALSE,		CMainWindowLayout::MX_MWMI_EDIT,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_D6B53E08_Edit_Selected, _LEN_D6B53E08 ),		FALSE },
+						{ FALSE,		CMainWindowLayout::MX_MWMI_LOCK,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_14B8120F_Lock_Selected, _LEN_14B8120F ),		FALSE },
+						{ FALSE,		CMainWindowLayout::MX_MWMI_UNLOCK,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_85399C8F_Unlock_Selected, _LEN_85399C8F ),		FALSE },
+						{ FALSE,		CMainWindowLayout::MX_MWMI_UNLOCK_ALL,					FALSE,		FALSE,		sTotal != 0,		MW_MENU_TXT( _T_EE088C0D_Unlock_All, _LEN_EE088C0D ),			FALSE },
+						{ TRUE,			0,														FALSE,		FALSE,		FALSE,				nullptr,  0,													FALSE },
 						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETE,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_6E3D07B8_Delete__Selected, _LEN_6E3D07B8 ),		FALSE },
-						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETEALL,					FALSE,		FALSE,		TRUE,				MW_MENU_TXT( _T_E01693C2_Delete__All, _LEN_E01693C2 ),			FALSE },
+						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETEALL,					FALSE,		FALSE,		sTotal != 0,		MW_MENU_TXT( _T_E01693C2_Delete__All, _LEN_E01693C2 ),			FALSE },
 						//{ TRUE,			0,														FALSE,		FALSE,		FALSE,				nullptr,  0,													sSelected == 0 },
 						//{ FALSE,		CFoundAddressLayout::MX_BC_COPY_ADDRESS,				FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_43FCD42E_Copy__Address, _LEN_43FCD42E ),		FALSE },
 						//{ FALSE,		CFoundAddressLayout::MX_BC_COPY_VALUE,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_43A1870B_Copy__Value, _LEN_43A1870B ),			FALSE },
@@ -1302,6 +1421,65 @@ namespace mx {
 		return CWidget::LSW_H_CONTINUE;
 	}
 
+	// Performs a Save As operation.
+	void CMhsMainWindow::SaveAs() {
+		if ( m_pmhMemHack ) {
+			auto ptvlTree = MainTreeView();
+			if ( ptvlTree ) {
+				try {
+					OPENFILENAMEW ofnOpenFile = { sizeof( ofnOpenFile ) };
+					CSecureWString szFileName;
+					szFileName.resize( 0xFFFF + 2 );
+
+					CSecureWString wsFilter = _DEC_WS_CC54D980_Save_Files____json____mhssave__0__json___mhssave_0_0;
+					ofnOpenFile.hwndOwner = Wnd();
+					ofnOpenFile.lpstrFilter = wsFilter.c_str();
+					ofnOpenFile.lpstrFile = szFileName.data();
+					ofnOpenFile.nMaxFile = DWORD( szFileName.size() );
+					ofnOpenFile.Flags = OFN_EXPLORER | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
+					ofnOpenFile.lpstrInitialDir = m_pmhMemHack->Options().wsLastFoundAddressSaveDirectory.c_str();
+
+					if ( ::GetSaveFileNameW( &ofnOpenFile ) ) {
+						auto oOptions = m_pmhMemHack->Options();
+						oOptions.wsLastFoundAddressSaveDirectory = std::filesystem::path( ofnOpenFile.lpstrFile ).remove_filename().generic_wstring();
+						
+						
+						auto pPath = std::filesystem::path( ofnOpenFile.lpstrFile );
+						if ( !pPath.has_extension() ) {
+							pPath += ".json";
+						}
+						std::vector<LPARAM> vAll;
+						ptvlTree->GatherAllLParam( vAll, true );
+						if ( m_pmhMemHack->FoundAddressManager()->SaveSettings( pPath, ::_wcsicmp( pPath.extension().c_str(), L".json" ) == 0, vAll ) ) {
+							oOptions.wsLastFoundAddressSaveFile = pPath.generic_wstring();
+						}
+						m_pmhMemHack->SetOptions( oOptions );
+					}
+				}
+				catch ( ... ) {}
+			}
+		}
+	}
+
+	// Performs a Save operation.
+	void CMhsMainWindow::Save() {
+		if ( m_pmhMemHack ) {
+			if ( !m_pmhMemHack->Options().wsLastFoundAddressSaveFile.size() ) {
+				SaveAs();
+			}
+			else {
+				auto ptvlTree = MainTreeView();
+				if ( ptvlTree ) {
+					std::vector<LPARAM> vAll;
+					ptvlTree->GatherAllLParam( vAll, true );
+					if ( m_pmhMemHack->FoundAddressManager()->SaveSettings( m_pmhMemHack->Options().wsLastFoundAddressSaveFile, ::_wcsicmp( std::filesystem::path( m_pmhMemHack->Options().wsLastFoundAddressSaveFile.c_str() ).extension().c_str(), L".json" ) == 0, vAll ) ) {
+						SaveAs();
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 * Called when a CTreeListView wants text for an item.  Can be used to produce real-time or dynamically changing text for items in the tree.
 	 * 
@@ -1314,55 +1492,63 @@ namespace mx {
 	 *	Return nullptr to use the item's text set by SetItemText().
 	 **/
 	std::wstring * CMhsMainWindow::TreeListView_ItemText( CWidget * _pwSrc, int _iItem, int _iSubItem, LPARAM _lpParam, std::wstring &_wsOptionalBuffer ) {
-		auto pwTree = MainTreeView();
-		if MX_LIKELY( pwTree ) {
-			if MX_LIKELY( _pwSrc->Id() == pwTree->Id() ) {
-				if ( _iSubItem == 0 ) {						// Description.
-					auto famManager = MemHack()->FoundAddressManager();
-					auto pfabItem = famManager->GetById( static_cast<size_t>(_lpParam) );
-					if MX_LIKELY( pfabItem ) {
-						_wsOptionalBuffer = pfabItem->DescriptionText();
-						return &_wsOptionalBuffer;
+		try {
+			auto pwTree = MainTreeView();
+			if MX_LIKELY( pwTree ) {
+				if MX_LIKELY( _pwSrc->Id() == pwTree->Id() ) {
+					if ( _iSubItem == 0 ) {						// Description.
+						auto famManager = MemHack()->FoundAddressManager();
+						auto pfabItem = famManager->GetById( static_cast<size_t>(_lpParam) );
+						if MX_LIKELY( pfabItem ) {
+							//_wsOptionalBuffer = reinterpret_cast<const wchar_t *>(pfabItem->Locked() ? u"\uD83D\uDD12 " : u"\uD83D\uDD13 ");
+							/*_wsOptionalBuffer = wchar_t( 0xD83D );
+							_wsOptionalBuffer += pfabItem->Locked() ? wchar_t( 0xDD12 ) : wchar_t( 0xDD13 );*/
+							_wsOptionalBuffer = pfabItem->Locked() ? wchar_t( 0x25A0 ) : wchar_t( 0x25CB );
+							_wsOptionalBuffer += L' ';
+							_wsOptionalBuffer += pfabItem->DescriptionText();
+							return &_wsOptionalBuffer;
+						}
 					}
-				}
-				if ( _iSubItem == 1 ) {						// Address.
-					//CFoundAddressManager::MX_LOCK lLock( &MemHack()->FoundAddressManager() );
-					auto famManager = MemHack()->FoundAddressManager();
-					auto pfabItem = famManager->GetById( static_cast<size_t>(_lpParam) );
-					if MX_LIKELY( pfabItem /*&& !pfabItem->SimpleAddress()*/ ) {
-						pfabItem->Dirty();
-						_wsOptionalBuffer = pfabItem->AddressText();
-						return &_wsOptionalBuffer;
+					else if ( _iSubItem == 1 ) {				// Address.
+						//CFoundAddressManager::MX_LOCK lLock( &MemHack()->FoundAddressManager() );
+						auto famManager = MemHack()->FoundAddressManager();
+						auto pfabItem = famManager->GetById( static_cast<size_t>(_lpParam) );
+						if MX_LIKELY( pfabItem /*&& !pfabItem->SimpleAddress()*/ ) {
+							pfabItem->Dirty();
+							_wsOptionalBuffer = pfabItem->AddressText();
+							return &_wsOptionalBuffer;
+						}
 					}
-				}
-				else if ( _iSubItem == 2 ) {				// Current value.
-					auto famManager = MemHack()->FoundAddressManager();
-					auto pfabItem = famManager->GetById( static_cast<size_t>(_lpParam) );
-					if MX_LIKELY( pfabItem ) {
-						pfabItem->Dirty();
-						_wsOptionalBuffer = pfabItem->ValueText();
-						return &_wsOptionalBuffer;
+					else if ( _iSubItem == 2 ) {				// Current value.
+						auto famManager = MemHack()->FoundAddressManager();
+						auto pfabItem = famManager->GetById( static_cast<size_t>(_lpParam) );
+						if MX_LIKELY( pfabItem ) {
+							pfabItem->Dirty();
+							_wsOptionalBuffer = pfabItem->ValueText();
+							return &_wsOptionalBuffer;
+						}
 					}
-				}
-				else if ( _iSubItem == 3 ) {				// Lock value.
-					auto famManager = MemHack()->FoundAddressManager();
-					auto pfabItem = famManager->GetById( static_cast<size_t>(_lpParam) );
-					if MX_LIKELY( pfabItem ) {
-						_wsOptionalBuffer = pfabItem->ValueWhenLockedText();
-						return &_wsOptionalBuffer;
+					else if ( _iSubItem == 3 ) {				// Lock value.
+						auto famManager = MemHack()->FoundAddressManager();
+						auto pfabItem = famManager->GetById( static_cast<size_t>(_lpParam) );
+						if MX_LIKELY( pfabItem ) {
+							_wsOptionalBuffer = pfabItem->ValueWhenLockedText();
+							return &_wsOptionalBuffer;
+						}
 					}
-				}
-				else if ( _iSubItem == 4 ) {				// Type.
-					auto famManager = MemHack()->FoundAddressManager();
-					auto pfabItem = famManager->GetById( static_cast<size_t>(_lpParam) );
-					if MX_LIKELY( pfabItem ) {
-						pfabItem->Dirty();
-						_wsOptionalBuffer = pfabItem->TypeText();
-						return &_wsOptionalBuffer;
+					else if ( _iSubItem == 4 ) {				// Type.
+						auto famManager = MemHack()->FoundAddressManager();
+						auto pfabItem = famManager->GetById( static_cast<size_t>(_lpParam) );
+						if MX_LIKELY( pfabItem ) {
+							pfabItem->Dirty();
+							_wsOptionalBuffer = pfabItem->TypeText();
+							return &_wsOptionalBuffer;
+						}
 					}
 				}
 			}
 		}
+		catch ( ... ) {}
 		return nullptr;
 	}
 
@@ -1455,6 +1641,58 @@ namespace mx {
 	void __stdcall CMhsMainWindow::Hotkey_ShowFloatingPointStudio( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
 		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
 		pmhThis->ShowFloatingPointStudio( std::nan( "0" ) );
+	}
+
+	/**
+	 * Hotkey handler for showing the Modify Entry dialog.
+	 *
+	 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+	 * \param _uiParm1 Unused.
+	 * \param _uiParm2 Unused.
+	 * \param _uiParm3 Unused.
+	 */
+	void __stdcall CMhsMainWindow::Hotkey_ShowEdit( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
+		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
+		pmhThis->ShowEdit();
+	}
+
+	/**
+	 * Hotkey handler for locking selected entries.
+	 *
+	 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+	 * \param _uiParm1 Unused.
+	 * \param _uiParm2 Unused.
+	 * \param _uiParm3 Unused.
+	 */
+	void __stdcall CMhsMainWindow::Hotkey_LockSelected( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
+		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
+		pmhThis->LockSelected();
+	}
+
+	/**
+	 * Hotkey handler for unlocking selected entries.
+	 *
+	 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+	 * \param _uiParm1 Unused.
+	 * \param _uiParm2 Unused.
+	 * \param _uiParm3 Unused.
+	 */
+	void __stdcall CMhsMainWindow::Hotkey_UnLockSelected( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
+		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
+		pmhThis->UnlockSelected();
+	}
+
+	/**
+	 * Hotkey handler for unlocking all entries.
+	 *
+	 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+	 * \param _uiParm1 Unused.
+	 * \param _uiParm2 Unused.
+	 * \param _uiParm3 Unused.
+	 */
+	void __stdcall CMhsMainWindow::Hotkey_UnLockAll( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
+		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
+		pmhThis->UnlockAll();
 	}
 
 }	// namespace mx

@@ -21,10 +21,10 @@ namespace mx {
 		size_t							HandleWM_HOTKEY( INT _iId, INT _iCode, INT _iMod );
 
 		// Loads hotkey data from a file loaded to memory.
-		virtual bool					LoadFromMemory( const std::vector<uint8_t> &_vFile, uint32_t _uiVersion ) { return false; }
+		virtual bool					LoadFromMemory( const lson::CJsonContainer::LSON_JSON_VALUE * _pjJson, lson::CJsonContainer * _pjcContainer, CStream * _psBinary, uint32_t _uiVersion ) { return CHotkeyManBase::LoadFromMemory( _pjJson, _pjcContainer, _psBinary, _uiVersion ); }
 
 		// Saves hotkey data to an in-memory file image.
-		virtual bool					SaveToMemory( std::vector<uint8_t> &_vFile ) { return false; }
+		virtual bool					SaveToMemory( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary ) const { return CHotkeyManBase::SaveToMemory( _peJson, _psBinary ); }
 
 		// Adds a key and returns the ID or 0.
 		virtual LONG					AddKey( INT _iCode, INT _iMod, UINT _uiScanCode, uint32_t _ui32Function,

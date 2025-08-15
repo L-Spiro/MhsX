@@ -1,8 +1,11 @@
 #pragma once
 
 #include "../MXMhsX.h"
+#include "../Utilities/MXStream.h"
 #include "MXFoundAddress.h"
 #include "MXFoundAddressGroup.h"
+
+#include <LSONJson.h>
 
 #include <map>
 #include <memory>
@@ -54,6 +57,9 @@ namespace mx {
 			return nullptr;
 		}
 
+		// Gets the total number of items.
+		inline size_t														Total() const { return m_mFoundAddresses.size(); }
+
 		// Removes an item by ID.
 		bool																Delete( size_t _sId );
 
@@ -69,9 +75,20 @@ namespace mx {
 		// Adds a group.
 		CFoundAddressGroup *												AddGroup( CMemHack * _pmhMemHack );
 
+		// Unlocks all entries.
+		void																UnlockAll();
+
 		// Dirties all entries.
 		void																DirtyAll();
 
+		// Applies all timer-based locks.
+		void																ApplyTimerLocks( bool _bIncludethreadLocks = false );
+
+		// Saves all program settings.
+		bool																SaveSettings( const std::wstring &_wsPath, bool _bAsJson, const std::vector<LPARAM> &_vOrder ) const;
+
+		// Loads all program settings.
+		bool																LoadSettings( const std::wstring &_wsPath, bool _bAsJson );
 		
 
 	protected :
@@ -79,7 +96,7 @@ namespace mx {
 		// The pool of found-address objects.
 		std::map<size_t, std::unique_ptr<CFoundAddressBase>>				m_mFoundAddresses;
 		// The lock critical section.
-		std::recursive_mutex												m_mtxLock;
+		mutable std::recursive_mutex										m_mtxLock;
 		// Are we alive?
 		std::atomic<bool>													m_aAlive = true;
 		// Lock count.

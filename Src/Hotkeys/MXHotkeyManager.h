@@ -13,6 +13,8 @@
 #define MX_H_KEY_LPARAM_METHOD_SHIFT				28
 #define MX_H_KEY_LPARAM_ID_MASK						0xFFFFFFF
 
+#define MX_H_KEY_VERSION							1
+
 
 namespace mx {
 
@@ -128,6 +130,12 @@ namespace mx {
 
 		// Fills a list box with the hotkey instances.
 		virtual bool								FillListBoxWithHotkeys( lsw::CListBox * _plbBox, const std::set<LPARAM> &_sSelections );
+
+		// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
+		virtual bool								SaveSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary ) const;
+
+		// Loads settings from either a JSON object or a byte buffer.
+		virtual bool								LoadSettings( lson::CJson * _pjJson, CStream * _psBinary );
 
 		// Gets the information about a key.
 		static UINT									VirtualKeyInfo( UINT _uCode );

@@ -19,10 +19,10 @@ namespace mx {
 		virtual void					SetWindow( HWND _hWnd ) { m_hWnd = _hWnd; }
 
 		// Loads hotkey data from a file loaded to memory.
-		virtual bool					LoadFromMemory( const std::vector<uint8_t> &_vFile, uint32_t _uiVersion ) { return false; }
+		virtual bool					LoadFromMemory( const lson::CJsonContainer::LSON_JSON_VALUE * _pjJson, lson::CJsonContainer * _pjcContainer, CStream * _psBinary, uint32_t _uiVersion ) { return CHotkeyManBase::LoadFromMemory( _pjJson, _pjcContainer, _psBinary, _uiVersion ); }
 
 		// Saves hotkey data to an in-memory file image.
-		virtual bool					SaveToMemory( std::vector<uint8_t> &_vFile ) { return false; }
+		virtual bool					SaveToMemory( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary ) const { return CHotkeyManBase::SaveToMemory( _peJson, _psBinary ); }
 
 		// Begins polling or registers the hotkeys.
 		virtual bool					Start();

@@ -15,46 +15,6 @@
 #include <Helpers/LSWHelpers.h>
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-// MACROS
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-// Creates a number JSON element.
-#define MX_JSON_NUMBER( NAME, NUMBER, JSON )																																							\
-	(JSON)->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );																													\
-	lson::CJson::CreateNumberElement( (NAME), static_cast<double>(NUMBER), (*(JSON)->vObjectMembers[(JSON)->vObjectMembers.size()-1]) )
-
-// Creates a true or false element.
-#define MX_JSON_BOOL( NAME, VAL, JSON )																																									\
-	(JSON)->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );																													\
-	if ( VAL ) {																																														\
-		lson::CJson::CreateTrueElement( (NAME), (*(JSON)->vObjectMembers[(JSON)->vObjectMembers.size()-1]) );																							\
-	}																																																	\
-	else {																																																\
-		lson::CJson::CreateFalseElement( (NAME), (*(JSON)->vObjectMembers[(JSON)->vObjectMembers.size()-1]) );																							\
-	}
-
-// Gets a numbered JSON element.
-#define MX_JSON_GET_NUMBER( NAME, STORETO, TYPE, LOCAL, PARENT )																																		\
-	LOCAL = _pjcContainer->GetMemberByName( (*PARENT), (NAME) );																																		\
-	if ( LOCAL && LOCAL->vtType == lson::CJsonContainer::LSON_VT_DECIMAL ) {																															\
-		STORETO = static_cast<TYPE>(LOCAL->u.dDecimal);																																					\
-	}
-
-// Gets a boolean JSON element.
-#define MX_JSON_GET_BOOL( NAME, STORETO, LOCAL, PARENT )																																				\
-	LOCAL = _pjcContainer->GetMemberByName( (*PARENT), (NAME) );																																		\
-	if ( LOCAL && (LOCAL->vtType == lson::CJsonContainer::LSON_VT_TRUE || LOCAL->vtType == lson::CJsonContainer::LSON_VT_FALSE) ) {																		\
-		STORETO = LOCAL->vtType == lson::CJsonContainer::LSON_VT_TRUE ? TRUE : FALSE;																													\
-	}
-
-#define MX_JSON_GET_STRING( NAME, STORETO, LOCAL, PARENT )																																				\
-	LOCAL = _pjcContainer->GetMemberByName( (*PARENT), (NAME) );																																		\
-	if ( LOCAL && LOCAL->vtType == lson::CJsonContainer::LSON_VT_STRING ) {																																\
-		CSecureString ssTmp;																																											\
-		CUtilities::ResolveAllEscapes( _pjcContainer->GetString( LOCAL->u.stString ), ssTmp, true );																									\
-		STORETO = ee::CExpEval::ToUtf16( ssTmp );																																						\
-	}
-
 namespace mx {
 
 	// Base class for the MHS object.
@@ -119,17 +79,20 @@ namespace mx {
 		// Gets the Found Address Manager.
 		CFoundAddressManager::MX_LOCK		FoundAddressManager() { return CFoundAddressManager::MX_LOCK( &m_famFoundAddresses ); }
 
+		// Applies the lock to all timer-based locked Found Addresses.
+		void								ApplyFoundAddressLocks( bool _bAllLocked = false );
+
 		// Executes a program by index.
 		bool								ExecuteProgramByIdx( size_t _stIdx );
 
 		// Updates the window title.
 		virtual void						UpdateWindowTitle() {}
 
-		// Saves all program settings.
-		virtual bool						SaveSettings( const std::wstring &_wsPath, bool _bAsJson ) const;
+		//// Saves all program settings.
+		//virtual bool						SaveSettings( const std::wstring &_wsPath, bool _bAsJson ) const;
 
-		// Loads all program settings.
-		virtual bool						LoadSettings( const std::wstring &_wsPath, bool _bAsJson );
+		//// Loads all program settings.
+		//virtual bool						LoadSettings( const std::wstring &_wsPath, bool _bAsJson );
 
 		// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
 		virtual bool						SaveSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary, const MX_OPTIONS &_oOptions ) const;

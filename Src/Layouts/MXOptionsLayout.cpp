@@ -1414,8 +1414,8 @@ namespace mx {
 			MX_DEF_BUTTON_HEIGHT,					// dwHeight
 			MX_BUTTONSTYLE,							// dwStyle
 			0,										// dwStyleEx
-			MX_MAKE_WCHAR( _T_53AE02A5_New ),		// pwcText
-			_LEN_53AE02A5,							// sTextLen
+			MX_MAKE_WCHAR( _T_C5573507_Add ),		// pwcText
+			_LEN_C5573507,							// sTextLen
 			MX_OI_DIALOG,							// dwParentId
 
 			LSW_NO_SIZE_EXP,

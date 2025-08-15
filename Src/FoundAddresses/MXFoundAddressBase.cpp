@@ -27,6 +27,26 @@ namespace mx {
 	}
 
 	// == Functions.
+	// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
+	bool CFoundAddressBase::SaveSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary ) const {
+		if ( _peJson == nullptr && nullptr == _psBinary ) { return false; }
+		try {
+			if ( _peJson ) {
+			}
+			else {
+			}
+		}
+		catch ( ... ) { return false; }
+		return true;
+	}
+
+	// Loads settings from either a JSON object or a byte buffer.
+	bool CFoundAddressBase::LoadSettings( lson::CJson * _pjJson, CStream * _psBinary, uint32_t _ui32Version ) {
+		if ( _ui32Version > MX_FOUND_ADDRESS_VERSION ) { return false; }
+
+		return true;
+	}
+
 	// Writes to memory (optionally byte-swapping).
 	bool CFoundAddressBase::WriteProcessMemory_PreProcessed( CMemHack * _pmhMemHack,
 		uint64_t _ui64BaseAddress, const std::vector<std::vector<uint8_t>> &_vBuffer, bool _bContiguous, uint32_t _ui32Stride, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesWritten ) {
@@ -47,6 +67,7 @@ namespace mx {
 			}
 
 			if ( _lpNumberOfBytesWritten ) { (*_lpNumberOfBytesWritten) += sSize; }
+			sSize = 0;
 			_ui64BaseAddress += _ui32Stride;
 		}
 		return true;
