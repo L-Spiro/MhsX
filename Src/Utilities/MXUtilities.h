@@ -9,6 +9,7 @@
 #include <ComboBox/LSWComboBox.h>
 #include <CriticalSection/LSWCriticalSection.h>
 #include <EEExpEvalContainer.h>
+#include <TreeListView/LSWTreeListView.h>
 #include <Widget/LSWWidget.h>
 
 #include <clocale>
@@ -114,6 +115,8 @@
 	}
 
 namespace mx {
+
+	class CFoundAddressBase;
 
 	class CUtilities {
 	public :
@@ -1419,6 +1422,9 @@ namespace mx {
 		 * \return Returns true if _pwComboBox is not nullptr, it is of type CComboBox, and all entries were added.
 		 **/
 		static bool												FillComboBoxWithStdDataTypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect );
+
+		// Adds a Found Address to a TreeListView.
+		static bool												AddFoundAddressToTreeListView( lsw::CTreeListView * _ptlvTree, CFoundAddressBase * _pfabItem, const CSecureWString * _pswsName );
 
 		// == Members.
 		// Options.

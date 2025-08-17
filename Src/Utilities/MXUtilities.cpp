@@ -1,5 +1,6 @@
 #include "MXUtilities.h"
 #include "../CodePages/MXCodePages.h"
+#include "../FoundAddresses/MXFoundAddressBase.h"
 #include "../Html/MXHtml.h"
 #include "../MemHack/MXProcess.h"
 #include "../Options/MXOptions.h"
@@ -4903,6 +4904,20 @@ namespace mx {
 			{ CSecureWString( PrintDataType( wsTmp, MX_DT_DOUBLE, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_DOUBLE ),					},
 		};
 		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, -1 );
+	}
+
+	// Adds a Found Address to a TreeListView.
+	bool CUtilities::AddFoundAddressToTreeListView( lsw::CTreeListView * _ptlvTree, CFoundAddressBase * _pfabItem, const CSecureWString * _pswsName ) {
+		if ( !_ptlvTree || !_pfabItem ) { return false; }
+		if ( _pswsName ) {
+			_pfabItem->SetDescriptionText( (*_pswsName) );
+		}
+		CSecureWString swsTmp = _pfabItem->DescriptionText();
+		TVINSERTSTRUCTW iisItem = lsw::CTreeListView::DefaultItemLParam( swsTmp.c_str(), _pfabItem->Id() );
+		auto hInserted = _ptlvTree->InsertItem( &iisItem );
+		if ( NULL == hInserted ) { return false; }
+		_ptlvTree->SetItemColor( hInserted, _pfabItem->Color() );
+		return true;
 	}
 
 }	// namespace mx

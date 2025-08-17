@@ -88,7 +88,7 @@ namespace mx {
 		bool																SaveSettings( const std::wstring &_wsPath, bool _bAsJson, const std::vector<LPARAM> &_vOrder ) const;
 
 		// Loads all program settings.
-		bool																LoadSettings( const std::wstring &_wsPath, bool _bAsJson );
+		bool																LoadSettings( const std::wstring &_wsPath, bool _bAsJson, CMemHack * _pmhMemHack, std::vector<CFoundAddressBase *> &_vLoaded );
 		
 
 	protected :

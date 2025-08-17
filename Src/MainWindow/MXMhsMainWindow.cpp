@@ -541,6 +541,10 @@ namespace mx {
 				ShowConverter();
 				break;
 			}
+			case CMainWindowLayout::MX_MWMI_OPENSAVEFILE : {
+				Open();
+				break;
+			}
 			case CMainWindowLayout::MX_MWMI_SAVE : {
 				Save();
 				break;
@@ -1472,10 +1476,59 @@ namespace mx {
 				if ( ptvlTree ) {
 					std::vector<LPARAM> vAll;
 					ptvlTree->GatherAllLParam( vAll, true );
-					if ( m_pmhMemHack->FoundAddressManager()->SaveSettings( m_pmhMemHack->Options().wsLastFoundAddressSaveFile, ::_wcsicmp( std::filesystem::path( m_pmhMemHack->Options().wsLastFoundAddressSaveFile.c_str() ).extension().c_str(), L".json" ) == 0, vAll ) ) {
+					if ( !m_pmhMemHack->FoundAddressManager()->SaveSettings( m_pmhMemHack->Options().wsLastFoundAddressSaveFile, ::_wcsicmp( std::filesystem::path( m_pmhMemHack->Options().wsLastFoundAddressSaveFile.c_str() ).extension().c_str(), L".json" ) == 0, vAll ) ) {
 						SaveAs();
 					}
 				}
+			}
+		}
+	}
+
+	// Performs an Open operation.
+	void CMhsMainWindow::Open() {
+		if ( m_pmhMemHack ) {
+			auto ptvlTree = MainTreeView();
+			if ( ptvlTree ) {
+				try {
+					OPENFILENAMEW ofnOpenFile = { sizeof( ofnOpenFile ) };
+					CSecureWString szFileName;
+					szFileName.resize( 0xFFFF + 2 );
+
+					CSecureWString wsFilter = _DEC_WS_CC54D980_Save_Files____json____mhssave__0__json___mhssave_0_0;
+					ofnOpenFile.hwndOwner = Wnd();
+					ofnOpenFile.lpstrFilter = wsFilter.c_str();
+					ofnOpenFile.lpstrFile = szFileName.data();
+					ofnOpenFile.nMaxFile = DWORD( szFileName.size() );
+					ofnOpenFile.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST;
+					ofnOpenFile.lpstrInitialDir = m_pmhMemHack->Options().wsLastFoundAddressSaveDirectory.c_str();
+
+					if ( ::GetOpenFileNameW( &ofnOpenFile ) ) {
+						auto oOptions = m_pmhMemHack->Options();
+						oOptions.wsLastFoundAddressSaveDirectory = std::filesystem::path( ofnOpenFile.lpstrFile ).remove_filename().generic_wstring();
+						
+						
+						auto pPath = std::filesystem::path( ofnOpenFile.lpstrFile );
+						if ( !pPath.has_extension() ) {
+							pPath += ".json";
+						}
+						std::vector<CFoundAddressBase *> vAdded;
+						auto famMan = m_pmhMemHack->FoundAddressManager();
+						if ( !famMan->LoadSettings( pPath, ::_wcsicmp( pPath.extension().c_str(), L".json" ) == 0, MemHack(), vAdded ) ) {
+							// Show error.
+						}
+						else {
+							// Add them to the listview.
+							for ( size_t I = 0; I < vAdded.size(); ++I ) {
+								if ( !CUtilities::AddFoundAddressToTreeListView( ptvlTree, vAdded[I], nullptr ) ) {
+									// If it couldn't be added to the tree then it can't be addressed.
+									famMan->Delete( vAdded[I]->Id() );
+								}
+							}
+						}
+						m_pmhMemHack->SetOptions( oOptions );
+					}
+				}
+				catch ( ... ) {}
 			}
 		}
 	}

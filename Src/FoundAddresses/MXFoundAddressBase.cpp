@@ -32,8 +32,33 @@ namespace mx {
 		if ( _peJson == nullptr && nullptr == _psBinary ) { return false; }
 		try {
 			if ( _peJson ) {
+				MX_JSON_NUMBER( _DEC_S_2ABD43F2_Id, m_sId, _peJson );
+				MX_JSON_NUMBER( _DEC_S_3A226579_Parent, m_sParent, _peJson );
+				
+				{
+					_peJson->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+					lson::CJson::CreateStringElement( _DEC_S_FE11D138_Name, ee::CExpEval::ToJsonString( ee::CExpEval::ToUtf8( m_wsName ) ), (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
+
+					_peJson->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+					lson::CJson::CreateArrayElement( _DEC_S_58E1D3EC_Children, (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
+					{
+						lson::CJson::LSON_ELEMENT * peArray = _peJson->vObjectMembers[_peJson->vObjectMembers.size()-1].get();
+						for ( size_t I = 0; I < m_vChildren.size(); ++I ) {
+							MX_JSON_NUMBER( "", m_vChildren[I], peArray );
+						}
+					}
+				}
 			}
 			else {
+				if ( !_psBinary->WriteUi32( m_sId ) ) { return false; }
+				if ( !_psBinary->WriteUi32( m_sParent ) ) { return false; }
+
+				if ( !_psBinary->WriteStringU16( m_wsName ) ) { return false; }
+
+				if ( !_psBinary->WriteUi32( m_vChildren.size() ) ) { return false; }
+				for ( size_t I = 0; I < m_vChildren.size(); ++I ) {
+					if ( !_psBinary->WriteUi32( m_vChildren[I] ) ) { return false; }
+				}
 			}
 		}
 		catch ( ... ) { return false; }
@@ -41,10 +66,72 @@ namespace mx {
 	}
 
 	// Loads settings from either a JSON object or a byte buffer.
-	bool CFoundAddressBase::LoadSettings( lson::CJson * _pjJson, CStream * _psBinary, uint32_t _ui32Version ) {
+	bool CFoundAddressBase::LoadSettings( const lson::CJsonContainer::LSON_JSON_VALUE * _pjJson, lson::CJsonContainer * _pjcContainer, CStream * _psBinary, uint32_t _ui32Version, size_t &_sId ) {
 		if ( _ui32Version > MX_FOUND_ADDRESS_VERSION ) { return false; }
+		if ( nullptr == _pjJson && _psBinary == nullptr ) { return false; }
+		try {
+			if ( _pjJson ) {
+				const lson::CJsonContainer::LSON_JSON_VALUE * pjvVal;
+				MX_JSON_GET_NUMBER( _DEC_S_2ABD43F2_Id, _sId, size_t, pjvVal, _pjJson );
+				MX_JSON_GET_NUMBER( _DEC_S_3A226579_Parent, m_sParent, size_t, pjvVal, _pjJson );
 
+				MX_JSON_GET_STRING( _DEC_S_FE11D138_Name, m_wsName, pjvVal, _pjJson );
+
+				const lson::CJsonContainer::LSON_JSON_VALUE * pjvKeys = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_58E1D3EC_Children );
+				if ( !pjvKeys || pjvKeys->vtType != lson::CJsonContainer::LSON_VT_ARRAY ) { return false; }
+
+				for ( size_t I = 0; I < pjvKeys->vArray.size(); ++I ) {
+					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvKeys->vArray[I] );
+					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_DECIMAL ) {
+						m_vChildren.push_back( size_t( std::round( jvArrayVal.u.dDecimal ) ) );
+					}
+				}
+			}
+			else {
+				uint32_t ui32Tmp;
+				if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+				_sId = size_t( ui32Tmp );
+				if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+				m_sParent = size_t( ui32Tmp );
+
+				CSecureWString * pwsStr = reinterpret_cast<CSecureWString *>(&m_wsName);
+				if ( !_psBinary->ReadStringU16( (*pwsStr) ) ) { return false; }
+
+				size_t sTotal;
+				if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+				sTotal = size_t( ui32Tmp );
+				for ( size_t I = 0; I < sTotal; ++I ) {
+					if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+					m_vChildren.push_back( size_t( ui32Tmp ) );
+				}
+			}
+		}
+		catch ( ... ) { return false; }
 		return true;
+	}
+
+	// Remaps ID's after a file load.
+	void CFoundAddressBase::RemapIds( const std::map<size_t, size_t> &_mMap ) {
+		// Missing entries is not a case for failure.  Items that used to have parents can be used to a file without their parents (and children etc.)
+		if ( m_sParent ) {
+			auto iHasit = _mMap.find( m_sParent );
+			if ( iHasit != _mMap.end() ) {
+				m_sParent = iHasit->second;
+			}
+			else {
+				m_sParent = 0;
+			}
+		}
+
+		for ( auto I = m_vChildren.size(); I--; ) {
+			auto iHasit = _mMap.find( m_vChildren[I] );
+			if ( iHasit != _mMap.end() ) {
+				m_vChildren[I] = iHasit->second;
+			}
+			else {
+				m_vChildren.erase( m_vChildren.begin() + I );
+			}
+		}
 	}
 
 	// Writes to memory (optionally byte-swapping).

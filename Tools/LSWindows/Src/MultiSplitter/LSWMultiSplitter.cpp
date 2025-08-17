@@ -379,7 +379,7 @@ namespace lsw {
 			if ( _mrRect.bLockToFar ) {
 				LONG lMaxBottom = static_cast<LONG>(_rRect.top + m_iBarWidth * ((_stTotalRectsInLayer - 1) - _stRectIndexInLayer));
 				rCopy.top = std::max( lMaxBottom, (rCopy.bottom - _mrRect.iDist) );
-				rCopy.top = std::min( rCopy.top, rCopy.top );
+				rCopy.top = std::min( rCopy.top, rCopy.bottom );
 			}
 			else {
 				LONG lMaxBottom = static_cast<LONG>(_rRect.bottom - m_iBarWidth * ((_stTotalRectsInLayer - 1) - _stRectIndexInLayer));
@@ -796,10 +796,17 @@ namespace lsw {
 				// Something was found.
 				mdDetachInfo.pmlLayer->vRects.erase( mdDetachInfo.pmlLayer->vRects.begin() + mdDetachInfo.sIndex );
 				
-				if ( mdDetachInfo.pmlLayer->vRects.size() == 0 ) {
+				if ( mdDetachInfo.pmlLayer->vRects.empty() ) {
 					// The layer is now empty.  Collapse it down if possible.
+					LSW_MS_LAYER * pEmpty = mdDetachInfo.pmlLayer;
+
+					// If this was the root layer, sever the root link.
+					if ( m_meRoot.u.pmlLayer == pEmpty ) {
+						m_meRoot.u.pmlLayer = nullptr;
+					}
+
 					for ( size_t I = m_vLayers.size(); I--; ) {
-						if ( m_vLayers[I] == mdDetachInfo.pmlLayer ) {
+						if ( m_vLayers[I] == pEmpty ) {
 							LSW_MS_LAYER * pmlTemp = m_vLayers[I];
 							m_vLayers[I] = nullptr;
 							delete pmlTemp;

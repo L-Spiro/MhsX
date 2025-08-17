@@ -18181,3 +18181,138 @@
 #define _DEC_S_CC54D980_Save_Files____json____mhssave__0__json___mhssave_0_0 mx::CStringDecoder::DecodeToString( _T_CC54D980_Save_Files____json____mhssave__0__json___mhssave_0_0, _LEN_CC54D980 )
 #define _DEC_WS_CC54D980_Save_Files____json____mhssave__0__json___mhssave_0_0 mx::CStringDecoder::DecodeToWString( _T_CC54D980_Save_Files____json____mhssave__0__json___mhssave_0_0, _LEN_CC54D980 )
 
+// Id
+
+#define _T_2ABD43F2_Id "\xD1\x32"
+#define _LEN_2ABD43F2 2
+#define _T_LEN_2ABD43F2_Id _T_2ABD43F2_Id, _LEN_2ABD43F2
+#define _DEC_2ABD43F2_Id( STR ) mx::CStringDecoder::Decode( _T_2ABD43F2_Id, _LEN_2ABD43F2, STR )
+#define _DEC_S_2ABD43F2_Id mx::CStringDecoder::DecodeToString( _T_2ABD43F2_Id, _LEN_2ABD43F2 )
+#define _DEC_WS_2ABD43F2_Id mx::CStringDecoder::DecodeToWString( _T_2ABD43F2_Id, _LEN_2ABD43F2 )
+
+// Children
+
+#define _T_58E1D3EC_Children "\xCB\x36\x39\x07\xF6\x3B\xF3\x35"
+#define _LEN_58E1D3EC 8
+#define _T_LEN_58E1D3EC_Children _T_58E1D3EC_Children, _LEN_58E1D3EC
+#define _DEC_58E1D3EC_Children( STR ) mx::CStringDecoder::Decode( _T_58E1D3EC_Children, _LEN_58E1D3EC, STR )
+#define _DEC_S_58E1D3EC_Children mx::CStringDecoder::DecodeToString( _T_58E1D3EC_Children, _LEN_58E1D3EC )
+#define _DEC_WS_58E1D3EC_Children mx::CStringDecoder::DecodeToWString( _T_58E1D3EC_Children, _LEN_58E1D3EC )
+
+// AddressExpression
+
+#define _T_6E13FA7E_AddressExpression "\xC9\x32\x34\x0D\xF7\x3C\x01\x0C\x48\x38\x3B\x33\x05\x0E\x30\xF7\x3C"
+#define _LEN_6E13FA7E 17
+#define _T_LEN_6E13FA7E_AddressExpression _T_6E13FA7E_AddressExpression, _LEN_6E13FA7E
+#define _DEC_6E13FA7E_AddressExpression( STR ) mx::CStringDecoder::Decode( _T_6E13FA7E_AddressExpression, _LEN_6E13FA7E, STR )
+#define _DEC_S_6E13FA7E_AddressExpression mx::CStringDecoder::DecodeToString( _T_6E13FA7E_AddressExpression, _LEN_6E13FA7E )
+#define _DEC_WS_6E13FA7E_AddressExpression mx::CStringDecoder::DecodeToWString( _T_6E13FA7E_AddressExpression, _LEN_6E13FA7E )
+
+// ValueWhenLocked
+
+#define _T_C00CB9AD_ValueWhenLocked "\xDE\x2F\x3C\x10\xF7\x20\xF6\x2C\x3E\x14\x38\x31\xFD\x00\x2B"
+#define _LEN_C00CB9AD 15
+#define _T_LEN_C00CB9AD_ValueWhenLocked _T_C00CB9AD_ValueWhenLocked, _LEN_C00CB9AD
+#define _DEC_C00CB9AD_ValueWhenLocked( STR ) mx::CStringDecoder::Decode( _T_C00CB9AD_ValueWhenLocked, _LEN_C00CB9AD, STR )
+#define _DEC_S_C00CB9AD_ValueWhenLocked mx::CStringDecoder::DecodeToString( _T_C00CB9AD_ValueWhenLocked, _LEN_C00CB9AD )
+#define _DEC_WS_C00CB9AD_ValueWhenLocked mx::CStringDecoder::DecodeToWString( _T_C00CB9AD_ValueWhenLocked, _LEN_C00CB9AD )
+
+// ValueWhenLockedMax
+
+#define _T_482AF340_ValueWhenLockedMax "\xDE\x2F\x3C\x10\xF7\x20\xF6\x2C\x3E\x14\x38\x31\xFD\x00\x2B\xD5\x2F\x48"
+#define _LEN_482AF340 18
+#define _T_LEN_482AF340_ValueWhenLockedMax _T_482AF340_ValueWhenLockedMax, _LEN_482AF340
+#define _DEC_482AF340_ValueWhenLockedMax( STR ) mx::CStringDecoder::Decode( _T_482AF340_ValueWhenLockedMax, _LEN_482AF340, STR )
+#define _DEC_S_482AF340_ValueWhenLockedMax mx::CStringDecoder::DecodeToString( _T_482AF340_ValueWhenLockedMax, _LEN_482AF340 )
+#define _DEC_WS_482AF340_ValueWhenLockedMax mx::CStringDecoder::DecodeToWString( _T_482AF340_ValueWhenLockedMax, _LEN_482AF340 )
+
+// ValueType
+
+#define _T_B083E9A2_ValueType "\xDE\x2F\x3C\x10\xF7\x1D\x07\x37\x35"
+#define _LEN_B083E9A2 9
+#define _T_LEN_B083E9A2_ValueType _T_B083E9A2_ValueType, _LEN_B083E9A2
+#define _DEC_B083E9A2_ValueType( STR ) mx::CStringDecoder::Decode( _T_B083E9A2_ValueType, _LEN_B083E9A2, STR )
+#define _DEC_S_B083E9A2_ValueType mx::CStringDecoder::DecodeToString( _T_B083E9A2_ValueType, _LEN_B083E9A2 )
+#define _DEC_WS_B083E9A2_ValueType mx::CStringDecoder::DecodeToWString( _T_B083E9A2_ValueType, _LEN_B083E9A2 )
+
+// DataType
+
+#define _T_DC7D620E_DataType "\xCC\x2F\x44\xFC\xE6\x42\xFE\x2C"
+#define _LEN_DC7D620E 8
+#define _T_LEN_DC7D620E_DataType _T_DC7D620E_DataType, _LEN_DC7D620E
+#define _DEC_DC7D620E_DataType( STR ) mx::CStringDecoder::Decode( _T_DC7D620E_DataType, _LEN_DC7D620E, STR )
+#define _DEC_S_DC7D620E_DataType mx::CStringDecoder::DecodeToString( _T_DC7D620E_DataType, _LEN_DC7D620E )
+#define _DEC_WS_DC7D620E_DataType mx::CStringDecoder::DecodeToWString( _T_DC7D620E_DataType, _LEN_DC7D620E )
+
+// LockType
+
+#define _T_0BC42864_LockType "\xD4\x3D\x33\x06\xE6\x42\xFE\x2C"
+#define _LEN_0BC42864 8
+#define _T_LEN_0BC42864_LockType _T_0BC42864_LockType, _LEN_0BC42864
+#define _DEC_0BC42864_LockType( STR ) mx::CStringDecoder::Decode( _T_0BC42864_LockType, _LEN_0BC42864, STR )
+#define _DEC_S_0BC42864_LockType mx::CStringDecoder::DecodeToString( _T_0BC42864_LockType, _LEN_0BC42864 )
+#define _DEC_WS_0BC42864_LockType mx::CStringDecoder::DecodeToWString( _T_0BC42864_LockType, _LEN_0BC42864 )
+
+// Pointers
+
+#define _T_3A4782EF_Pointers "\xD8\x3D\x39\x09\x06\x2E\x00\x3A"
+#define _LEN_3A4782EF 8
+#define _T_LEN_3A4782EF_Pointers _T_3A4782EF_Pointers, _LEN_3A4782EF
+#define _DEC_3A4782EF_Pointers( STR ) mx::CStringDecoder::Decode( _T_3A4782EF_Pointers, _LEN_3A4782EF, STR )
+#define _DEC_S_3A4782EF_Pointers mx::CStringDecoder::DecodeToString( _T_3A4782EF_Pointers, _LEN_3A4782EF )
+#define _DEC_WS_3A4782EF_Pointers mx::CStringDecoder::DecodeToWString( _T_3A4782EF_Pointers, _LEN_3A4782EF )
+
+// OriginalValue
+
+#define _T_389827E8_OriginalValue "\xD7\x40\x39\x02\xFB\x37\xEF\x33\x26\x29\x35\x43\xF7"
+#define _LEN_389827E8 13
+#define _T_LEN_389827E8_OriginalValue _T_389827E8_OriginalValue, _LEN_389827E8
+#define _DEC_389827E8_OriginalValue( STR ) mx::CStringDecoder::Decode( _T_389827E8_OriginalValue, _LEN_389827E8, STR )
+#define _DEC_S_389827E8_OriginalValue mx::CStringDecoder::DecodeToString( _T_389827E8_OriginalValue, _LEN_389827E8 )
+#define _DEC_WS_389827E8_OriginalValue mx::CStringDecoder::DecodeToWString( _T_389827E8_OriginalValue, _LEN_389827E8 )
+
+// Color
+
+#define _T_A79767ED_Color "\xCB\x3D\x3C\x0A\x04"
+#define _LEN_A79767ED 5
+#define _T_LEN_A79767ED_Color _T_A79767ED_Color, _LEN_A79767ED
+#define _DEC_A79767ED_Color( STR ) mx::CStringDecoder::Decode( _T_A79767ED_Color, _LEN_A79767ED, STR )
+#define _DEC_S_A79767ED_Color mx::CStringDecoder::DecodeToString( _T_A79767ED_Color, _LEN_A79767ED )
+#define _DEC_WS_A79767ED_Color mx::CStringDecoder::DecodeToWString( _T_A79767ED_Color, _LEN_A79767ED )
+
+// ArrayLen
+
+#define _T_C46D6620_ArrayLen "\xC9\x40\x42\xFC\x0B\x15\xF3\x35"
+#define _LEN_C46D6620 8
+#define _T_LEN_C46D6620_ArrayLen _T_C46D6620_ArrayLen, _LEN_C46D6620
+#define _DEC_C46D6620_ArrayLen( STR ) mx::CStringDecoder::Decode( _T_C46D6620_ArrayLen, _LEN_C46D6620, STR )
+#define _DEC_S_C46D6620_ArrayLen mx::CStringDecoder::DecodeToString( _T_C46D6620_ArrayLen, _LEN_C46D6620 )
+#define _DEC_WS_C46D6620_ArrayLen mx::CStringDecoder::DecodeToWString( _T_C46D6620_ArrayLen, _LEN_C46D6620 )
+
+// ArrayStride
+
+#define _T_09286372_ArrayStride "\xC9\x40\x42\xFC\x0B\x1C\x02\x39\x39\x2C\x2E"
+#define _LEN_09286372 11
+#define _T_LEN_09286372_ArrayStride _T_09286372_ArrayStride, _LEN_09286372
+#define _DEC_09286372_ArrayStride( STR ) mx::CStringDecoder::Decode( _T_09286372_ArrayStride, _LEN_09286372, STR )
+#define _DEC_S_09286372_ArrayStride mx::CStringDecoder::DecodeToString( _T_09286372_ArrayStride, _LEN_09286372 )
+#define _DEC_WS_09286372_ArrayStride mx::CStringDecoder::DecodeToWString( _T_09286372_ArrayStride, _LEN_09286372 )
+
+// BasicAddress
+
+#define _T_DA9281A7_BasicAddress "\xCA\x2F\x43\x04\xF5\x0A\xF2\x2B\x42\x2D\x3C\x41"
+#define _LEN_DA9281A7 12
+#define _T_LEN_DA9281A7_BasicAddress _T_DA9281A7_BasicAddress, _LEN_DA9281A7
+#define _DEC_DA9281A7_BasicAddress( STR ) mx::CStringDecoder::Decode( _T_DA9281A7_BasicAddress, _LEN_DA9281A7, STR )
+#define _DEC_S_DA9281A7_BasicAddress mx::CStringDecoder::DecodeToString( _T_DA9281A7_BasicAddress, _LEN_DA9281A7 )
+#define _DEC_WS_DA9281A7_BasicAddress mx::CStringDecoder::DecodeToWString( _T_DA9281A7_BasicAddress, _LEN_DA9281A7 )
+
+// Locked
+
+#define _T_ED7ECDA7_Locked "\xD4\x3D\x33\x06\xF7\x2D"
+#define _LEN_ED7ECDA7 6
+#define _T_LEN_ED7ECDA7_Locked _T_ED7ECDA7_Locked, _LEN_ED7ECDA7
+#define _DEC_ED7ECDA7_Locked( STR ) mx::CStringDecoder::Decode( _T_ED7ECDA7_Locked, _LEN_ED7ECDA7, STR )
+#define _DEC_S_ED7ECDA7_Locked mx::CStringDecoder::DecodeToString( _T_ED7ECDA7_Locked, _LEN_ED7ECDA7 )
+#define _DEC_WS_ED7ECDA7_Locked mx::CStringDecoder::DecodeToWString( _T_ED7ECDA7_Locked, _LEN_ED7ECDA7 )
+

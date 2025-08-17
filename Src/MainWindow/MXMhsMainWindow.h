@@ -358,6 +358,9 @@ namespace mx {
 		// Performs a Save operation.
 		void								Save();
 
+		// Performs an Open operation.
+		void								Open();
+
 		/**
 		 * Called when a CTreeListView wants text for an item.  Can be used to produce real-time or dynamically changing text for items in the tree.
 		 * 

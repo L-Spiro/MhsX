@@ -361,14 +361,17 @@ namespace mx {
 									if ( faAddress ) {
 										if ( spSearchParms.stType == CUtilities::MX_ST_DATATYPE_SEARCH ) {
 											if ( faAddress->InitWithAddressAndDataType( ui64Addr, spSearchParms.dtLVal.dtType, pui8Data ) ) {
-												vAdded.push_back( faAddress->Id() );
+												
 												CSecureWString wsTmp = _DEC_WS_77CAA9B0_Address_;
 												wsTmp += L' ';
 												CUtilities::ToHex( ui64Addr, wsTmp, ui64Addr > UINT_MAX ? 12 : 8 );
-												faAddress->SetDescriptionText( wsTmp );
+												if ( CUtilities::AddFoundAddressToTreeListView( ptlvTree, faAddress, &wsTmp ) ) {
+													vAdded.push_back( faAddress->Id() );
+												}
+												/*faAddress->SetDescriptionText( wsTmp );
 												TVINSERTSTRUCTW iisItem = lsw::CTreeListView::DefaultItemLParam( wsTmp.c_str(), faAddress->Id() );
 												auto hInserted = ptlvTree->InsertItem( &iisItem );
-												ptlvTree->SetItemColor( hInserted, faAddress->Color() );
+												ptlvTree->SetItemColor( hInserted, faAddress->Color() );*/
 
 												// == Address.
 												/*wsTmp = faAddress->AddressText();

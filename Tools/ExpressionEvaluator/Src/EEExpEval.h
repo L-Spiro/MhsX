@@ -954,26 +954,74 @@ namespace ee {
 		template <typename _tType>
 		static inline std::string		ToHexString( const _tType &_tIn, bool _bSpaces = true, bool * _pbSuccess = nullptr ) {
 			static_assert( sizeof( typename _tType::value_type ) == 1U, "*::value_type must be 1 byte." );
+			using _tVal = typename _tType::value_type;
 
 			std::string sStr;
 			if ( _pbSuccess ) { (*_pbSuccess) = false; }
 			try {
 				std::stringstream ssStream;
+				ssStream.setf( std::ios::hex, std::ios::basefield );
+				ssStream.setf( std::ios::uppercase );
+				ssStream.setf( std::ios::fmtflags( 0 ), std::ios::showbase ); // Ensure no 0x.
+				ssStream.fill( '0' );
+
 				for ( size_t I = 0; I < _tIn.size(); ++I ) {
-					ssStream << 
-						std::setfill( '0' ) << std::setw( 2 ) <<
-						std::hex <<
-						std::uppercase <<
-						_tIn[I];
-					if ( _bSpaces ) { ssStream << ' '; }
+					if ( _bSpaces && I ) { ssStream << ' '; }
+					const auto u =
+						[] ( const _tVal &_v ) -> unsigned int {
+							if constexpr ( std::is_same<_tVal, std::byte>::value ) {
+								return std::to_integer<unsigned int>(_v);
+							}
+							else {
+								return static_cast<unsigned int>(static_cast<unsigned char>(_v));
+							}
+						}( _tIn[I] );
+					ssStream << std::setw( 2 ) << u;
 				}
 
 				sStr = ssStream.str();
 			}
-			catch ( ... ) {
-			}
+			catch ( ... ) { return sStr; }
 			if ( _pbSuccess ) { (*_pbSuccess) = true; }
 			return sStr;
+		}
+
+		/**
+		 * Takes a hex string (created by ToHexString()) and creates a container of a 1-byte type.
+		 * 
+		 * \param _sString The input hex string.
+		 * \param _pbSuccess An optional pointer to receive the success/failure status.  Failure always means there was a memory failure.
+		 * \return Returns the raw bytes encoded into the string.
+		 **/
+		template <typename _tOutType, typename _tStrType>
+		static inline _tOutType			FromHexString( const _tStrType &_sString, bool * _pbSuccess = nullptr ) {
+			static_assert( sizeof( typename _tOutType::value_type ) == 1U, "*::value_type must be 1 byte." );
+			using _tInVal = typename _tStrType::value_type;
+
+			_tOutType otOutput;
+			if ( _pbSuccess ) { (*_pbSuccess) = false; }
+			try {
+				uint8_t ui8Byte = 0;
+				bool bCnt = false;
+				for ( size_t I = 0; I < _sString.size(); ++I ) {
+					if constexpr ( sizeof( _tInVal ) != 1U ) {
+						if ( _sString[I] > UINT8_MAX ) { continue; }
+					}
+					char cThis = char( _sString[I] );
+					if ( ValidHex( cThis ) ) {
+						ui8Byte <<= 4;
+						ui8Byte = ui8Byte & 0xF0;
+						ui8Byte |= HexToUint32( cThis );
+						bCnt = !bCnt;
+						if ( !bCnt ) {
+							otOutput.push_back( _tOutType::value_type( ui8Byte ) );
+						}
+					}
+				}
+			}
+			catch ( ... ) { return otOutput; }
+			if ( _pbSuccess ) { (*_pbSuccess) = true; }
+			return otOutput;
 		}
 
 		/**

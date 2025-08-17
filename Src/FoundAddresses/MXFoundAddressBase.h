@@ -134,7 +134,10 @@ namespace mx {
 		virtual bool										SaveSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary ) const;
 
 		// Loads settings from either a JSON object or a byte buffer.
-		virtual bool										LoadSettings( lson::CJson * _pjJson, CStream * _psBinary, uint32_t _ui32Version );
+		virtual bool										LoadSettings( const lson::CJsonContainer::LSON_JSON_VALUE * _pjJson, lson::CJsonContainer * _pjcContainer, CStream * _psBinary, uint32_t _ui32Version, size_t &_sId );
+
+		// Remaps ID's after a file load.
+		void												RemapIds( const std::map<size_t, size_t> &_mMap );
 
 		// Writes to memory (optionally byte-swapping).
 		static bool											WriteProcessMemory_PreProcessed( CMemHack * _pmhMemHack,

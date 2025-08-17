@@ -12,6 +12,7 @@
 #include "../MXMhsX.h"
 #include "../Strings/MXSecureString.h"
 #include "MXUtilities.h"
+
 #include <vector>
 
 
@@ -169,7 +170,7 @@ namespace mx {
 		}
 
 		/**
-		 * REads a u16char_t string from the stream.
+		 * Reads a u16char_t string from the stream.
 		 * 
 		 * \param _wsString Holds the return string.
 		 * \return Returns true if there was enough space left in the stream to write the string.
@@ -180,6 +181,26 @@ namespace mx {
 			DWORD dwError;
 			_wsString = CUtilities::MultiByteToWideChar( CP_UTF8, MB_ERR_INVALID_CHARS, sTmp, &dwError );
 			return ERROR_SUCCESS == dwError;
+		}
+
+		/**
+		 * Reads a vector from the stream.
+		 * 
+		 * \param _vArray The array of data to write.
+		 * \return Returns true if all values were written to the stream.
+		 **/
+		inline bool									ReadSizeAndBytes( std::vector<uint8_t> &_vArray ) {
+			uint64_t ui64Size;
+			if ( !ReadUi64( ui64Size ) ) { return false; }
+			if ( ui64Size > MAXSSIZE_T ) { return false; }
+			try {
+				_vArray.resize( size_t( ui64Size ) );
+			}
+			catch ( ... ) { return false; }
+			for ( size_t I = 0; I < _vArray.size(); ++I ) {
+				if ( !ReadUi8( _vArray[I] ) ) { return false; }
+			}
+			return true;
 		}
 
 
@@ -333,6 +354,33 @@ namespace mx {
 				return WriteString( sTmp );
 			}
 			catch ( ... ) { return WriteString( CSecureString() ); }
+		}
+
+		/**
+		 * Writes an array of bytes to the stream.  The size of the data is not written
+		 * 
+		 * \param _vArray The array of data to write.
+		 * \return Returns true if all values were written to the stream.
+		 **/
+		inline bool									WriteBytes( const std::vector<uint8_t> &_vArray ) {
+			for ( size_t I = 0; I < _vArray.size(); ++I ) {
+				if ( !WriteUi8( _vArray[I] ) ) { return false; }
+			}
+			return true;
+		}
+
+		/**
+		 * Writes an array of bytes to the stream, including the number of bytes.
+		 * 
+		 * \param _vArray The array of data to write.
+		 * \return Returns true if all values were written to the stream.
+		 **/
+		inline bool									WriteSizeAndBytes( const std::vector<uint8_t> &_vArray ) {
+			if ( !WriteUi64( _vArray.size() ) ) { return false; }
+			for ( size_t I = 0; I < _vArray.size(); ++I ) {
+				if ( !WriteUi8( _vArray[I] ) ) { return false; }
+			}
+			return true;
 		}
 
 
