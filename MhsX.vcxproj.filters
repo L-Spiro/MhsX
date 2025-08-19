@@ -176,6 +176,12 @@
     <Filter Include="Source Files\Disassembler x86_x64">
       <UniqueIdentifier>{0bf85e4e-9e48-4d1e-abe3-3ec8704a36a1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\HexEditor">
+      <UniqueIdentifier>{573509c3-0766-4233-a10b-9ddbd91b63cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\HexEditor">
+      <UniqueIdentifier>{0daef47f-a6b0-4dc2-9ec4-5ac54a0aea35}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Strings\MXStringDecoder.cpp">
@@ -565,6 +571,15 @@
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressEditMainPage.cpp">
       <Filter>Source Files\FoundAddresses</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Files\MXLargeCoWFileWindow.cpp">
+      <Filter>Source Files\Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXAddFoundAddressWindowLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\FoundAddresses\MXAddFoundAddressWindow.cpp">
+      <Filter>Source Files\FoundAddresses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -876,6 +891,15 @@
       <Filter>Header Files\FoundAddresses</Filter>
     </ClInclude>
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressEditPageBase.h">
+      <Filter>Header Files\FoundAddresses</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Files\MXLargeCoWFileWindow.h">
+      <Filter>Header Files\Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXAddFoundAddressWindowLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\FoundAddresses\MXAddFoundAddressWindow.h">
       <Filter>Header Files\FoundAddresses</Filter>
     </ClInclude>
   </ItemGroup>

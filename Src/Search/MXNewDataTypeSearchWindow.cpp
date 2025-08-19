@@ -94,9 +94,10 @@ namespace mx {
 
 			pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_FROM_COMBO ));
 			if ( pcbCombo ) {
-				for ( size_t I = 0; I < m_pmhMemHack->Options().vFromHistory.size(); ++I ) {
+				CUtilities::FillComboWithStrings( pcbCombo, m_pmhMemHack->Options().vFromHistory, 0 );
+				/*for ( size_t I = 0; I < m_pmhMemHack->Options().vFromHistory.size(); ++I ) {
 					pcbCombo->AddString( m_pmhMemHack->Options().vFromHistory[I].c_str() );
-				}
+				}*/
 				if ( m_pmhMemHack->Options().wsFromText.size() == 0 ) {
 					uintptr_t uiptrTemp = reinterpret_cast<uintptr_t>(mx::CSystem::GetSystemInfo().lpMinimumApplicationAddress);
 					std::string sTemp = CUtilities::ToHex( uiptrTemp, 4 );
@@ -296,24 +297,26 @@ namespace mx {
 			pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_FROM_COMBO ));
 			if ( pcbCombo ) {
 				oOpts.wsFromText = pcbCombo->GetTextW();
-				if ( oOpts.wsFromText.size() ) {
+				CUtilities::AddOrMove( oOpts.vFromHistory, oOpts.wsFromText );
+				/*if ( oOpts.wsFromText.size() ) {
 					auto aFound = std::find( oOpts.vFromHistory.begin(), oOpts.vFromHistory.end(), oOpts.wsFromText );
 					if ( aFound != oOpts.vFromHistory.end() ) {
 						oOpts.vFromHistory.erase( aFound );
 					}
 					oOpts.vFromHistory.insert( oOpts.vFromHistory.begin(), oOpts.wsFromText );
-				}
+				}*/
 			}
 			pcbCombo = static_cast<CComboBox *>(FindChild( CNewDataTypeSearchLayout::MX_NDSI_TO_COMBO ));
 			if ( pcbCombo ) {
 				oOpts.wsToText = pcbCombo->GetTextW();
-				if ( oOpts.wsToText.size() ) {
+				CUtilities::AddOrMove( oOpts.vToHistory, oOpts.wsToText );
+				/*if ( oOpts.wsToText.size() ) {
 					auto aFound = std::find( oOpts.vToHistory.begin(), oOpts.vToHistory.end(), oOpts.wsToText );
 					if ( aFound != oOpts.vToHistory.end() ) {
 						oOpts.vToHistory.erase( aFound );
 					}
 					oOpts.vToHistory.insert( oOpts.vToHistory.begin(), oOpts.wsToText );
-				}
+				}*/
 			}
 
 			m_pmhMemHack->SetOptions( oOpts );

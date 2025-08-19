@@ -1,5 +1,6 @@
 #include "MXFoundAddressEditWindow.h"
 #include "../Layouts/MXFoundAddressEditLayout.h"
+#include "../MemHack/MXMemHack.h"
 
 #include <Tab/LSWTab.h>
 

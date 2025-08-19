@@ -415,7 +415,7 @@ namespace mx {
 				uint32_t										Pointer32;
 				uint64_t										Pointer64;
 			}													u;
-			MX_DATA_TYPES										dtType;
+			MX_DATA_TYPES										dtType = MX_DT_UINT32;
 		};
 
 		// A helper for reliably pausing and unpausing a process.
@@ -1355,16 +1355,16 @@ namespace mx {
 		 * \return Returns true if the combo box will filled.  _pwComboBox must not be nullptr, must be of type CComboBox, and the adding of each item must succeed.
 		 */
 		template <typename _tType>
-		static bool												FillComboWithStrings( lsw::CWidget * _pwComboBox, const std::vector<_tType> &_vStrings, LPARAM _lpDefaultSelect ) {
+		static bool												FillComboWithStrings( lsw::CWidget * _pwComboBox, const std::vector<_tType> &_vStrings, LPARAM _lpDefaultSelect, LPARAM _lpSelectBackup = 0 ) {
 			std::vector<MX_COMBO_ENTRY> vEntries;
 			try {
-				if ( !_vStrings.size() ) { return FillComboBox( _pwComboBox, nullptr, 0, _lpDefaultSelect ); }
+				if ( !_vStrings.size() ) { return FillComboBox( _pwComboBox, nullptr, 0, _lpDefaultSelect, _lpSelectBackup ); }
 				vEntries.resize( _vStrings.size() );
 				for ( size_t I = 0; I < _vStrings.size(); ++I ) {
 					vEntries[I].pwcName = reinterpret_cast<const wchar_t *>(_vStrings[I].c_str());
 					vEntries[I].lpParm = LPARAM( I );
 				}
-				if ( FillComboBox( _pwComboBox, &vEntries[0], vEntries.size(), _lpDefaultSelect ) ) {
+				if ( FillComboBox( _pwComboBox, &vEntries[0], vEntries.size(), _lpDefaultSelect, _lpSelectBackup ) ) {
 					lsw::CComboBox * pcbCombo = reinterpret_cast<lsw::CComboBox *>(_pwComboBox);
 					pcbCombo->SetSel( 0, 0 );
 					return true;
@@ -1425,6 +1425,50 @@ namespace mx {
 
 		// Adds a Found Address to a TreeListView.
 		static bool												AddFoundAddressToTreeListView( lsw::CTreeListView * _ptlvTree, CFoundAddressBase * _pfabItem, const CSecureWString * _pswsName );
+
+		/**
+		 * Is a string entirely whitespace?
+		 * 
+		 * \param _tValue The string to test.
+		 * \return Returns true if all characters in the given string are whitespace, false otherwise.
+		 **/
+		template <typename _tType = std::u16string>
+		static inline bool										IsWhiteSpace( const _tType &_tValue ) {
+			bool bHasNonZero = false;
+			for ( auto I = _tValue.size(); I--; ) {
+				if ( _tValue[I] && !std::iswspace( _tValue[I] ) ) { return false; }
+				if ( _tValue[I] ) { bHasNonZero = true; }
+			}
+			return !bHasNonZero;
+		}
+
+		/**
+		 * Adds an element to index 0 for moves it to the bottom (index 0) of an array.  Empty strings and whitespace are not added, and are removed from the array on every call.
+		 * 
+		 * \param _vArray The array to update.
+		 * \param _tValue The value to insert or move.
+		 * \param _stMax The maximum size of the array.
+		 **/
+		template <typename _tType = std::u16string>
+		static inline void										AddOrMove( std::vector<_tType> &_vArray, const _tType &_tValue, size_t _stMax = 100 ) {
+			try {
+				for ( auto I = _vArray.size(); I--; ) {
+					if ( !_vArray[I].size() || IsWhiteSpace( _vArray[I] ) ) { _vArray.erase( _vArray.begin() + I ); }
+				}
+				if ( _tValue.size() ) {
+					auto aTmp = std::find( _vArray.begin(), _vArray.end(), _tValue );
+					while ( aTmp != _vArray.end() ) {
+						_vArray.erase( aTmp );
+						aTmp = std::find( _vArray.begin(), _vArray.end(), _tValue );
+					}
+					_vArray.insert( _vArray.begin(), _tValue );
+				}
+				if ( _vArray.size() > _stMax ) {
+					_vArray.resize( _stMax );
+				}
+			}
+			catch ( ... ) {}
+		}
 
 		// == Members.
 		// Options.

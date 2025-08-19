@@ -110,7 +110,7 @@ namespace mx {
 		}
 
 		// Sets the Pre-Processing Type.  Call within a try/catch block.
-		inline bool											SetPreProcessing( CUtilities::MX_BYTESWAP _bsByteSwap ) { m_bsByteSwap = _bsByteSwap; PrepareValueStructures(); }
+		inline void											SetPreProcessing( CUtilities::MX_BYTESWAP _bsByteSwap ) { m_bsByteSwap = _bsByteSwap; PrepareValueStructures(); }
 
 		// Gets the actual final address of the item.
 		uint64_t											FinalAddress() const {

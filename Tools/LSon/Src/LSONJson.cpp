@@ -44,14 +44,14 @@ namespace lson {
 
 		m_pjcContainer = new( std::nothrow ) CJsonContainer( pjlLexer.get() );
 
-		std::unique_ptr<CJsonParser> ppppParser = std::make_unique<CJsonParser>( pjlLexer.get(), m_pjcContainer );
-		if ( !ppppParser ) {
+		std::unique_ptr<CJsonParser> pjppParser = std::make_unique<CJsonParser>( pjlLexer.get(), m_pjcContainer );
+		if ( !pjppParser ) {
 			Reset();
 			return false;
 		}
 
 
-		if ( ppppParser->parse() == 0 ) {
+		if ( pjppParser->parse() == 0 ) {
 			//m_pjcContainer->PrintNode( m_pjcContainer->Root(), 0 );
 			m_pjcContainer->BuildTree();
 			//m_pjcContainer->PrintTree();

@@ -833,6 +833,7 @@ namespace lsw {
 					//mdDetachInfo.pmlParentLayer->vRects[mdDetachInfo.sParentIndex].
 
 				}
+
 				CalcRects();
 				ForceSizeUpdate();
 				return true;

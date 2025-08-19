@@ -366,6 +366,7 @@ namespace mx {
 												wsTmp += L' ';
 												CUtilities::ToHex( ui64Addr, wsTmp, ui64Addr > UINT_MAX ? 12 : 8 );
 												if ( CUtilities::AddFoundAddressToTreeListView( ptlvTree, faAddress, &wsTmp ) ) {
+													faAddress->SetPreProcessing( spSearchParms.bsByteSwapping );
 													vAdded.push_back( faAddress->Id() );
 												}
 												/*faAddress->SetDescriptionText( wsTmp );

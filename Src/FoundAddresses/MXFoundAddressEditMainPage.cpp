@@ -26,6 +26,7 @@ namespace mx {
 
 	// WM_INITDIALOG.
 	CWidget::LSW_HANDLED CFoundAddressEditMainPage::InitDialog() {
+		// Selectable values.
 		auto pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_COMBO );
 		if ( pwTmp ) {
 			CUtilities::FillComboWithEditTypes( pwTmp, GatherDataTypes() );
@@ -63,12 +64,36 @@ namespace mx {
 		if ( pwTmp ) {
 			CUtilities::FillComboBoxWithStdDataTypes( pwTmp, GatherDataTypes() );
 		}
-		/*pwTmp = FindChild( Layout::MX_FAEI_VALUE_ARRAY_STRIDE_COMBO );
+		
+
+		// History.
+		pwTmp = FindChild( CFoundAddressEditLayout::MX_FAEI_GENERAL_DESC_COMBO );
 		if ( pwTmp ) {
-			CUtilities::FillComboBoxWithStdDataTypes( pwTmp, GatherDataTypes() );
-		}*/
+			CUtilities::FillComboWithStrings( pwTmp, m_pParms.pmhMemHack->Options().vEditDescriptionHistory, -1, -1 );
+		}
+		pwTmp = FindChild( CFoundAddressEditLayout::MX_FAEI_VALUE_CUR_VAL_COMBO );
+		if ( pwTmp ) {
+			CUtilities::FillComboWithStrings( pwTmp, m_pParms.pmhMemHack->Options().vEditCurValHistory, -1, -1 );
+		}
+		pwTmp = FindChild( CFoundAddressEditLayout::MX_FAEI_VALUE_ARRAY_LEN_COMBO );
+		if ( pwTmp ) {
+			CUtilities::FillComboWithStrings( pwTmp, m_pParms.pmhMemHack->Options().vEditArrayLengthHistory, -1, -1 );
+		}
+		pwTmp = FindChild( CFoundAddressEditLayout::MX_FAEI_VALUE_ARRAY_STRIDE_COMBO );
+		if ( pwTmp ) {
+			CUtilities::FillComboWithStrings( pwTmp, m_pParms.pmhMemHack->Options().vEditArrayStrideHistory, -1, -1 );
+		}
+		pwTmp = FindChild( CFoundAddressEditLayout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_COMBO );
+		if ( pwTmp ) {
+			CUtilities::FillComboWithStrings( pwTmp, m_pParms.pmhMemHack->Options().vEditLockedLeftHistory, -1, -1 );
+		}
+		pwTmp = FindChild( CFoundAddressEditLayout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
+		if ( pwTmp ) {
+			CUtilities::FillComboWithStrings( pwTmp, m_pParms.pmhMemHack->Options().vEditLockedRightHistory, -1, -1 );
+		}
 
 
+		// Derived values
 		pwTmp = FindChild( Layout::MX_FAEI_GENERAL_DESC_COMBO );
 		if ( pwTmp ) {
 			auto wsText = GatherDescriptions();
@@ -281,7 +306,14 @@ namespace mx {
 
 								bool bContiguous = ui32Stride <= CUtilities::DataTypeSize( dtThisType );
 
-								CSecureWString swsCurVal = swsValue.size() ? swsValue : pfaThis->ValueText();
+								bool bValid = true;
+								CSecureWString swsCurVal = swsValue.size() ? swsValue : pfaThis->ValueText( &bValid );
+								CSecureWString swsLeftLockVal = swsLeft.size() ? swsLeft : pfaThis->ValueWhenLockedText();
+								if ( !bValid ) {
+									// The Current Value text is empty, AND the current value canÅft be read from memory.
+									// Since this address lost the ability to access the target memory, its contents donÅft really matter.  Just match it to the Locked Value.
+									swsCurVal = swsLeftLockVal;
+								}
 
 								std::vector<std::vector<uint8_t>> vRawValues;
 								CSecureWString swsError;
@@ -299,7 +331,7 @@ namespace mx {
 									}
 								}
 
-								CSecureWString swsLeftLockVal = swsLeft.size() ? swsLeft : pfaThis->ValueWhenLockedText();
+								
 								std::vector<std::vector<uint8_t>> vRawLockLeft;
 								auto ui32LeftArrayLen = CUtilities::WStringToArrayBytes( vRawLockLeft, swsLeftLockVal, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
 								if ( swsError.size() ) {
@@ -566,7 +598,12 @@ namespace mx {
 
 								bool bContiguous = ui32Stride <= CUtilities::DataTypeSize( dtThisType );
 
+								bool bValid = true;
 								CSecureWString swsCurVal = swsValue.size() ? swsValue : pfaThis->ValueText();
+								CSecureWString swsLeftLockVal = swsLeft.size() ? swsLeft : pfaThis->ValueWhenLockedText();
+								if ( !bValid ) {
+									swsCurVal = swsLeftLockVal;
+								}
 
 								std::vector<std::vector<uint8_t>> vRawValues;
 								CSecureWString swsError;
@@ -583,7 +620,7 @@ namespace mx {
 								}
 
 
-								CSecureWString swsLeftLockVal = swsLeft.size() ? swsLeft : pfaThis->ValueWhenLockedText();
+								
 								std::vector<std::vector<uint8_t>> vRawLockLeft;
 								auto ui32LeftArrayLen = CUtilities::WStringToArrayBytes( vRawLockLeft, swsLeftLockVal, dtThisType, ui32ArrayLen, bHex ? 16 : 10, bContiguous, swsError );
 								if ( swsError.size() ) { continue; }
@@ -621,6 +658,33 @@ namespace mx {
 		catch ( ... ) {
 			return FALSE;
 		}
+
+		MX_OPTIONS oOption = m_pParms.pmhMemHack->Options();
+		auto pwTmp = FindChild( CFoundAddressEditLayout::MX_FAEI_GENERAL_DESC_COMBO );
+		if ( pwTmp ) {
+			CUtilities::AddOrMove<CSecureWString>( oOption.vEditDescriptionHistory, pwTmp->GetTextW() );
+		}
+		pwTmp = FindChild( CFoundAddressEditLayout::MX_FAEI_VALUE_CUR_VAL_COMBO );
+		if ( pwTmp ) {
+			CUtilities::AddOrMove<CSecureWString>( oOption.vEditCurValHistory, pwTmp->GetTextW() );
+		}
+		pwTmp = FindChild( CFoundAddressEditLayout::MX_FAEI_VALUE_ARRAY_LEN_COMBO );
+		if ( pwTmp ) {
+			CUtilities::AddOrMove<CSecureWString>( oOption.vEditArrayLengthHistory, pwTmp->GetTextW() );
+		}
+		pwTmp = FindChild( CFoundAddressEditLayout::MX_FAEI_VALUE_ARRAY_STRIDE_COMBO );
+		if ( pwTmp ) {
+			CUtilities::AddOrMove<CSecureWString>( oOption.vEditArrayStrideHistory, pwTmp->GetTextW() );
+		}
+		pwTmp = FindChild( CFoundAddressEditLayout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_COMBO );
+		if ( pwTmp ) {
+			CUtilities::AddOrMove<CSecureWString>( oOption.vEditLockedLeftHistory, pwTmp->GetTextW() );
+		}
+		pwTmp = FindChild( CFoundAddressEditLayout::MX_FAEI_QL_VALUE_WHEN_LOCKED_RIGHT_COMBO );
+		if ( pwTmp ) {
+			CUtilities::AddOrMove<CSecureWString>( oOption.vEditLockedRightHistory, pwTmp->GetTextW() );
+		}
+		m_pParms.pmhMemHack->SetOptions( oOption );
 
 		return TRUE;
 	}

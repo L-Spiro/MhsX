@@ -30,40 +30,46 @@ namespace mx {
 		// Writes to the opened file.
 		DWORD					Write( LPCVOID _lpvBuffer, UINT64 _ui64From, DWORD _dwNumberOfBytesToWrite );
 
+		// Sets the chunk size.
+		inline VOID				SetChunkSize( DWORD _dwSize ) { m_dwChunkSize = _dwSize; }
+
+		// Map a region of the file.
+		BOOL					MapRegion( UINT64 _ui64Offset, DWORD _dwSize ) const;
+
 
 	protected :
 		// == Members.
 		// The actual file handle.
-		HANDLE					m_hFile;
+		HANDLE					m_hFile = INVALID_HANDLE_VALUE;
 
 		// File-mapping handle.
-		HANDLE					m_hMap;
+		HANDLE					m_hMap = INVALID_HANDLE_VALUE;
 
 		// Mapped bytes.
-		mutable PBYTE			m_pbMapBuffer;
+		mutable PBYTE			m_pbMapBuffer = nullptr;
+
+		// Mapping chunk size.
+		DWORD					m_dwChunkSize = static_cast<DWORD>(8 * 1024 * 1024);
 
 		// Is the file 0-sized?
-		BOOL					m_bIsEmpty;
+		BOOL					m_bIsEmpty = TRUE;
 
 		// Read-only or read-write?
-		BOOL					m_bWritable;
+		BOOL					m_bWritable = TRUE;
 
 		// Size of the file.
-		mutable UINT64			m_ui64Size;
+		mutable UINT64			m_ui64Size = 0;
 
 		// Map start.
-		mutable UINT64			m_ui64MapStart;
+		mutable UINT64			m_ui64MapStart = MAXUINT64;
 
 		// Mapped size.
-		mutable DWORD			m_dwMapSize;
+		mutable DWORD			m_dwMapSize = 0;
 
 
 		// == Functions.
 		// Creates the file map.
 		BOOL					CreateFileMap();
-
-		// Map a region of the file.
-		BOOL					MapRegion( UINT64 _ui64Offset, DWORD _dwSize ) const;
 
 		// Adjusts the input to the nearest mapping offset.
 		UINT64					AdjustBase( UINT64 _ui64Offset ) const;

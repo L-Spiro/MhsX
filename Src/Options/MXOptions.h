@@ -81,10 +81,20 @@ namespace mx {
 		std::vector<CSecureWString>		vFromHistory;
 		std::vector<CSecureWString>		vToHistory;
 
-		std::vector<CSecureWString>		vEditDescriptionHistory;
+		
 
 		CSecureWString					wsLastFoundAddressSaveFile;
 		CSecureWString					wsLastFoundAddressSaveDirectory;
+
+		std::vector<CSecureWString>		vEditDescriptionHistory;
+		std::vector<CSecureWString>		vEditCurValHistory;
+		std::vector<CSecureWString>		vEditArrayLengthHistory;
+		std::vector<CSecureWString>		vEditArrayStrideHistory;
+		std::vector<CSecureWString>		vEditLockedLeftHistory;
+		std::vector<CSecureWString>		vEditLockedRightHistory;
+
+		std::vector<CSecureWString>		vAddValDescriptionHistory;
+		std::vector<CSecureWString>		vAddValAddrHistory;
 	};
 
 	struct MX_FLOAT_STUDIO_OPTIONS {

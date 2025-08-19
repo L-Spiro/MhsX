@@ -34,6 +34,8 @@ namespace mx {
 		// Adds user programs to the menu.
 		void								AddUserProgramsToMenu();
 
+		// Gets a pointer to the window.
+		CMhsMainWindow *					Window() { return m_pmmwWindow; }
 
 
 	protected :

@@ -268,7 +268,9 @@
     <ClCompile Include="Src\ExpEval\MXExpEvalWindow.cpp" />
     <ClCompile Include="Src\Files\MXFile.cpp" />
     <ClCompile Include="Src\Files\MXFileMap.cpp" />
+    <ClCompile Include="Src\Files\MXLargeCoWFileWindow.cpp" />
     <ClCompile Include="Src\FloatingPointStudio\MXFloatingPointStudioWindow.cpp" />
+    <ClCompile Include="Src\FoundAddresses\MXAddFoundAddressWindow.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddress.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressBase.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressEditMainPage.cpp" />
@@ -282,6 +284,7 @@
     <ClCompile Include="Src\Hotkeys\MXHotkeyRegisterHotKeyMethod.cpp" />
     <ClCompile Include="Src\Hotkeys\MXHotkeyWhKeyboardMethod.cpp" />
     <ClCompile Include="Src\Html\MXHtml.cpp" />
+    <ClCompile Include="Src\Layouts\MXAddFoundAddressWindowLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXConverterLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXExpressionEvaluatorLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXExpressionSubsearchLayout.cpp" />
@@ -400,7 +403,9 @@
     <ClInclude Include="Src\ExpEval\MXExpEvalWindow.h" />
     <ClInclude Include="Src\Files\MXFileIo.h" />
     <ClInclude Include="Src\Files\MXFileMapIo.h" />
+    <ClInclude Include="Src\Files\MXLargeCoWFileWindow.h" />
     <ClInclude Include="Src\FloatingPointStudio\MXFloatingPointStudioWindow.h" />
+    <ClInclude Include="Src\FoundAddresses\MXAddFoundAddressWindow.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddress.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressBase.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressEditMainPage.h" />
@@ -417,6 +422,7 @@
     <ClInclude Include="Src\Hotkeys\MXHotkeyWhKeyboardMethod.h" />
     <ClInclude Include="Src\Html\MXHtml.h" />
     <ClInclude Include="Src\IO\MXInOutInterface.h" />
+    <ClInclude Include="Src\Layouts\MXAddFoundAddressWindowLayout.h" />
     <ClInclude Include="Src\Layouts\MXConverterLayout.h" />
     <ClInclude Include="Src\Layouts\MXExpressionEvaluatorLayout.h" />
     <ClInclude Include="Src\Layouts\MXExpressionSubsearchLayout.h" />

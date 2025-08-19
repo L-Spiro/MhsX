@@ -2,6 +2,7 @@
 #include "../Converter/MXConverterWindow.h"
 #include "../ExpEval/MXExpEvalWindow.h"
 #include "../FloatingPointStudio/MXFloatingPointStudioWindow.h"
+#include "../FoundAddresses/MXAddFoundAddressWindow.h"
 #include "../FoundAddresses/MXFoundAddressEditMainPage.h"
 #include "../FoundAddresses/MXFoundAddressEditWindow.h"
 #include "../FoundAddresses/MXFoundAddressesListView.h"
@@ -72,6 +73,9 @@ namespace mx {
 			case MX_FOUND_ADDRESSES_MAIN_PAGE : {
 				return new CFoundAddressEditMainPage( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
+			case MX_ADD_FOUND_ADDRESS : {
+				return new CAddFoundAddressWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
 			case MX_EXP_EVAL : {
 				return new CExpEvalWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
@@ -134,7 +138,7 @@ namespace mx {
 		}
 		::TrackPopupMenu( hMenu,
 			TPM_LEFTALIGN | TPM_RIGHTBUTTON,
-			_iX, _iY, 0, _pwParent ? _pwParent->Wnd() : NULL, NULL );
+			_iX, _iY, 0, _pwParent ? _pwParent->Wnd() : reinterpret_cast<HWND>(NULL), NULL );
 
 		CLayoutManager::CleanEncryptedMenu( vMenuItems, vMenuStrings );
 

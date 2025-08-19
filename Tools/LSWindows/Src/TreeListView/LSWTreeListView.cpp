@@ -1215,7 +1215,7 @@ namespace lsw {
 		m_ptIndexCache = ItemByIndex_Cached( _lpcdParm->nmcd.dwItemSpec );
 		if ( m_ptIndexCache ) {
 			if ( m_ptIndexCache->Size() ) {
-				HTHEME hTheme = ::OpenThemeData( _lpcdParm->nmcd.hdr.hwndFrom, L"TREEVIEW" );
+				HTHEME hTheme = ::OpenThemeData( _lpcdParm->nmcd.hdr.hwndFrom, L"tV" );
 				if ( hTheme ) {
 					int iState = GLPS_OPENED;
 					if ( m_ptIndexCache->Value().uiState & TVIS_EXPANDED ) {

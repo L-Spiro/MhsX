@@ -8,15 +8,7 @@
 
 namespace mx {
 
-	CFileMap::CFileMap() :
-		m_hFile( INVALID_HANDLE_VALUE ),
-		m_hMap( INVALID_HANDLE_VALUE ),
-		m_pbMapBuffer( nullptr ),
-		m_bIsEmpty( TRUE ),
-		m_bWritable( TRUE ),
-		m_ui64Size( 0 ),
-		m_ui64MapStart( MAXUINT64 ),
-		m_dwMapSize( 0 ) {
+	CFileMap::CFileMap() {
 	}
 	CFileMap::~CFileMap() {
 		Close();
@@ -74,6 +66,7 @@ namespace mx {
 			m_hFile = INVALID_HANDLE_VALUE;
 		}
 		m_bIsEmpty = TRUE;
+		m_bWritable = TRUE;
 		m_ui64Size = 0;
 		m_ui64MapStart = MAXUINT64;
 		m_dwMapSize = 0;
@@ -94,7 +87,7 @@ namespace mx {
 		PBYTE pbDst = static_cast<PBYTE>(_lpvBuffer);
 		DWORD dwWritten = 0;
 		while ( _dwNumberOfBytesToRead ) {
-			DWORD dwReadAmount = std::min( static_cast<DWORD>(8 * 1024 * 1024), _dwNumberOfBytesToRead );
+			DWORD dwReadAmount = std::min( m_dwChunkSize, _dwNumberOfBytesToRead );
 			if ( !MapRegion( _ui64From, dwReadAmount ) ) {
 				return dwWritten;
 			}
@@ -115,7 +108,7 @@ namespace mx {
 		const BYTE * pbSrc = static_cast<const BYTE *>(_lpvBuffer);
 		DWORD dwWritten = 0;
 		while ( _dwNumberOfBytesToWrite ) {
-			DWORD dwWriteAmount = std::min( static_cast<DWORD>(8 * 1024 * 1024), _dwNumberOfBytesToWrite );
+			DWORD dwWriteAmount = std::min( m_dwChunkSize, _dwNumberOfBytesToWrite );
 			if ( !MapRegion( _ui64From, dwWriteAmount ) ) {
 				return dwWritten;
 			}
@@ -127,29 +120,6 @@ namespace mx {
 			pbSrc += dwWriteAmount;
 		}
 		return dwWritten;
-	}
-
-	// Creates the file map.
-	BOOL CFileMap::CreateFileMap() {
-		if ( m_hFile == INVALID_HANDLE_VALUE ) { return FALSE; }
-		// Can't open 0-sized files.  Emulate the successful mapping of such a file.
-		m_bIsEmpty = Size() == 0;
-		if ( m_bIsEmpty ) { return TRUE; }
-		m_hMap = ::CreateFileMappingW( m_hFile,
-			NULL,
-			m_bWritable ? PAGE_READWRITE : PAGE_READONLY,
-			0,
-			0,
-			NULL );
-		if ( m_hMap == NULL ) {
-			// For some reason ::CreateFileMapping() returns NULL rather than INVALID_HANDLE_VALUE.
-			m_hMap = INVALID_HANDLE_VALUE;
-			Close();
-			return FALSE;
-		}
-		m_ui64MapStart = MAXUINT64;
-		m_dwMapSize = 0;
-		return TRUE;
 	}
 
 	// Map a region of the file.
@@ -176,6 +146,29 @@ namespace mx {
 		if ( !m_pbMapBuffer ) { return FALSE; }
 		m_ui64MapStart = ui64Adjusted;
 		m_dwMapSize = dwNewSize;
+		return TRUE;
+	}
+
+	// Creates the file map.
+	BOOL CFileMap::CreateFileMap() {
+		if ( m_hFile == INVALID_HANDLE_VALUE ) { return FALSE; }
+		// Can't open 0-sized files.  Emulate the successful mapping of such a file.
+		m_bIsEmpty = Size() == 0;
+		if ( m_bIsEmpty ) { return TRUE; }
+		m_hMap = ::CreateFileMappingW( m_hFile,
+			NULL,
+			m_bWritable ? PAGE_READWRITE : PAGE_READONLY,
+			0,
+			0,
+			NULL );
+		if ( m_hMap == NULL ) {
+			// For some reason ::CreateFileMapping() returns NULL rather than INVALID_HANDLE_VALUE.
+			m_hMap = INVALID_HANDLE_VALUE;
+			Close();
+			return FALSE;
+		}
+		m_ui64MapStart = MAXUINT64;
+		m_dwMapSize = 0;
 		return TRUE;
 	}
 

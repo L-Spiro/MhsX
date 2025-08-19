@@ -1,4 +1,5 @@
 ﻿#include "MXMhsMainWindow.h"
+#include "../Layouts/MXAddFoundAddressWindowLayout.h"
 #include "../Layouts/MXConverterLayout.h"
 #include "../Layouts/MXExpressionEvaluatorLayout.h"
 #include "../Layouts/MXFloatingPointStudioLayout.h"
@@ -539,6 +540,10 @@ namespace mx {
 				ShowFoundAddress();
 				ShowExpEval();
 				ShowConverter();
+				break;
+			}
+			case CMainWindowLayout::MX_MWMI_ADDENTRY : {
+				AddEntry();
 				break;
 			}
 			case CMainWindowLayout::MX_MWMI_OPENSAVEFILE : {
@@ -1386,18 +1391,14 @@ namespace mx {
 					}
 					LSW_MENU_ITEM miMenuBar[] = {
 						//bIsSeperator	dwId													bCheckable	bChecked	bEnabled			lpwcText, stTextLen												bSkip
-						{ FALSE,		CMainWindowLayout::MX_MWMI_EDIT,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_D6B53E08_Edit_Selected, _LEN_D6B53E08 ),		FALSE },
-						{ FALSE,		CMainWindowLayout::MX_MWMI_LOCK,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_14B8120F_Lock_Selected, _LEN_14B8120F ),		FALSE },
-						{ FALSE,		CMainWindowLayout::MX_MWMI_UNLOCK,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_85399C8F_Unlock_Selected, _LEN_85399C8F ),		FALSE },
-						{ FALSE,		CMainWindowLayout::MX_MWMI_UNLOCK_ALL,					FALSE,		FALSE,		sTotal != 0,		MW_MENU_TXT( _T_EE088C0D_Unlock_All, _LEN_EE088C0D ),			FALSE },
+						{ FALSE,		CMainWindowLayout::MX_MWMI_ADDENTRY,					FALSE,		FALSE,		TRUE,				MW_MENU_TXT( _T_68168A4D__Add_Entry, _LEN_68168A4D ),			FALSE },
+						{ FALSE,		CMainWindowLayout::MX_MWMI_EDIT,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_3DDC3223__Edit_Selected, _LEN_3DDC3223 ),		FALSE },
+						{ FALSE,		CMainWindowLayout::MX_MWMI_LOCK,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_FFD11E24__Lock_Selected, _LEN_FFD11E24 ),		FALSE },
+						{ FALSE,		CMainWindowLayout::MX_MWMI_UNLOCK,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_FAFFC6A4__Unlock_Selected, _LEN_FAFFC6A4 ),		FALSE },
+						{ FALSE,		CMainWindowLayout::MX_MWMI_UNLOCK_ALL,					FALSE,		FALSE,		sTotal != 0,		MW_MENU_TXT( _T_C7B383F0_Unloc_k_All, _LEN_C7B383F0 ),			FALSE },
 						{ TRUE,			0,														FALSE,		FALSE,		FALSE,				nullptr,  0,													FALSE },
-						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETE,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_6E3D07B8_Delete__Selected, _LEN_6E3D07B8 ),		FALSE },
-						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETEALL,					FALSE,		FALSE,		sTotal != 0,		MW_MENU_TXT( _T_E01693C2_Delete__All, _LEN_E01693C2 ),			FALSE },
-						//{ TRUE,			0,														FALSE,		FALSE,		FALSE,				nullptr,  0,													sSelected == 0 },
-						//{ FALSE,		CFoundAddressLayout::MX_BC_COPY_ADDRESS,				FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_43FCD42E_Copy__Address, _LEN_43FCD42E ),		FALSE },
-						//{ FALSE,		CFoundAddressLayout::MX_BC_COPY_VALUE,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_43A1870B_Copy__Value, _LEN_43A1870B ),			FALSE },
-						//{ FALSE,		CFoundAddressLayout::MX_BC_COPY_CUR_VALUE,				FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_C0FE03C5_Copy__Current_Value, _LEN_C0FE03C5 ),	/*CurValIndex() == -1*/ },
-						//{ FALSE,		CFoundAddressLayout::MX_BC_COPY_ALL,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_9B7D368F_Copy_A_ll, _LEN_9B7D368F ),			FALSE },
+						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETE,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_3B6DB074__Delete_Selected, _LEN_3B6DB074 ),		FALSE },
+						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETEALL,					FALSE,		FALSE,		sTotal != 0,		MW_MENU_TXT( _T_29AE3287_Dele_te_All, _LEN_29AE3287 ),			FALSE },
 					};
 
 					const LSW_MENU_LAYOUT miMenus[] = {
@@ -1408,13 +1409,6 @@ namespace mx {
 							MX_ELEMENTS( miMenuBar ),
 							miMenuBar
 						},
-						/*{
-							MX_MWMI_MENU_FILE,
-							MX_MWMI_MENU_BAR,
-							MX_MWMI_FILE,
-							MX_ELEMENTS( m_miFileMenu ),
-							m_miFileMenu
-						},*/
 					};
 					mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
 					plmLayout->CreatePopupMenuEx( this, miMenus, MX_ELEMENTS( miMenus ), _iX, _iY );
@@ -1530,6 +1524,13 @@ namespace mx {
 				}
 				catch ( ... ) {}
 			}
+		}
+	}
+
+	// Add Entry.
+	void CMhsMainWindow::AddEntry() {
+		if ( m_pmhMemHack ) {
+			CAddFoundAddressWindowLayout::CreateAddEntryDialog( this, m_pmhMemHack );
 		}
 	}
 
