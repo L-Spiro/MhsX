@@ -18523,3 +18523,12 @@
 #define _DEC_S_29AE3287_Dele_te_All mx::CStringDecoder::DecodeToString( _T_29AE3287_Dele_te_All, _LEN_29AE3287 )
 #define _DEC_WS_29AE3287_Dele_te_All mx::CStringDecoder::DecodeToWString( _T_29AE3287_Dele_te_All, _LEN_29AE3287 )
 
+// Dues Hex Machina
+
+#define _T_9DAF7683_Dues_Hex_Machina "\xCC\x43\x35\x0E\xB2\x11\xF3\x3F\xF0\x15\x2A\x31\xFA\x04\x35\xE9"
+#define _LEN_9DAF7683 16
+#define _T_LEN_9DAF7683_Dues_Hex_Machina _T_9DAF7683_Dues_Hex_Machina, _LEN_9DAF7683
+#define _DEC_9DAF7683_Dues_Hex_Machina( STR ) mx::CStringDecoder::Decode( _T_9DAF7683_Dues_Hex_Machina, _LEN_9DAF7683, STR )
+#define _DEC_S_9DAF7683_Dues_Hex_Machina mx::CStringDecoder::DecodeToString( _T_9DAF7683_Dues_Hex_Machina, _LEN_9DAF7683 )
+#define _DEC_WS_9DAF7683_Dues_Hex_Machina mx::CStringDecoder::DecodeToWString( _T_9DAF7683_Dues_Hex_Machina, _LEN_9DAF7683 )
+

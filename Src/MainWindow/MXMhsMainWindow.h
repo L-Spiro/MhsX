@@ -73,6 +73,7 @@ namespace mx {
 			MX_WH_UNLOCK_SELECTED,
 			MX_WH_UNLOCK_ALL,
 			MX_WH_SHOW_EDIT,
+			MX_WH_SHOW_ADD_ENTRY,
 		};
 
 		// Timer.
@@ -446,6 +447,16 @@ namespace mx {
 		 * \param _uiParm3 Unused.
 		 */
 		static void __stdcall				Hotkey_ShowFloatingPointStudio( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
+
+		/**
+		 * Hotkey handler for showing the Add Entry dialog.
+		 *
+		 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+		 * \param _uiParm1 Unused.
+		 * \param _uiParm2 Unused.
+		 * \param _uiParm3 Unused.
+		 */
+		static void __stdcall				Hotkey_ShowAddFoundAddress( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
 
 		/**
 		 * Hotkey handler for showing the Modify Entry dialog.

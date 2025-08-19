@@ -13,6 +13,20 @@ namespace mx {
 		~CFile();
 
 
+		// == Enumerations.
+		/**
+		 * \brief Deletes all files in a directory. Directories are left intact.
+		 *
+		 * If _fMode is MX_FDM_RECURSIVE, files in subdirectories are also removed.
+		 * Symlinks are removed as files. Errors are ignored per-entry; the function
+		 * returns the number of successfully deleted files.
+		 */
+		enum MX_FILE_DELETE_MODE {
+			MX_FDM_NON_RECURSIVE = 0,				/**< Only delete files directly under _pDir. */
+			MX_FDM_RECURSIVE						/**< Delete files under _pDir and all subdirectories. */
+		};
+
+
 		// == Types.
 		struct MX_FILE_ATTR {
 			DWORD				dwAttr;				// The file system attribute information for a file or directory.
@@ -112,11 +126,11 @@ namespace mx {
 		/**
 		 * Finds files/folders in a given directory.
 		 * 
-		 * \param _pcFolderPath The path to the directory to search.
-		 * \param _pcSearchString A wildcard search string to find only certain files/folders.
-		 * \param _bIncludeFolders If true, folders are included in the return.
-		 * \param _vResult The return array.  Found files and folders are appended to the array.
-		 * \return Returns _vResult.
+		 * \param _pcFolderPath		The path to the directory to search.
+		 * \param _pcSearchString	A wildcard search string to find only certain files/folders.
+		 * \param _bIncludeFolders	If true, folders are included in the return.
+		 * \param _vResult			The return array.  Found files and folders are appended to the array.
+		 * \return					Returns _vResult.
 		 **/
 		static std::vector<std::wstring> &
 								FindFiles( const wchar_t * _pcFolderPath, const wchar_t * _pcSearchString, bool _bIncludeFolders, std::vector<std::wstring> &_vResult );
@@ -124,12 +138,49 @@ namespace mx {
 		/**
 		 * Delets all files of a given type in a given folder.
 		 * 
-		 * \param _pcFolderPath The directory in which to delete files.
-		 * \param _pcType The file type to delete.
-		 * \param _bIncludeFolders Whether to include subfolders or not.
-		 * \return Returns the number of files deleted.
+		 * \param _pcFolderPath		The directory in which to delete files.
+		 * \param _pcType			The file type to delete.
+		 * \param _bIncludeFolders	Whether to include subfolders or not.
+		 * \return					Returns the number of files deleted.
 		 **/
 		static size_t			DeleteFiles( const wchar_t * _pcFolderPath, const wchar_t * _pcType, bool _bIncludeFolders );
+
+		/**
+		 * \brief Deletes files under the given directory, optionally recursively.
+		 *
+		 * \param _pDir				Directory whose files should be deleted.
+		 * \param _fMode			Deletion mode (recursive or not).
+		 * \return					Count of files successfully deleted.
+		 */
+		static size_t			EraseFilesInDirectory( const std::filesystem::path &_pDir, MX_FILE_DELETE_MODE _fMode = MX_FDM_NON_RECURSIVE ) {
+			namespace fs = std::filesystem;
+			std::size_t sDeleted = 0U;
+			std::error_code ecError;
+
+			auto TryRemove = [&]( const fs::path &_pPath ) {
+				if ( fs::is_directory( _pPath, ecError ) ) {
+					ecError.clear();
+					return;
+				}
+				if ( fs::remove( _pPath, ecError ) ) {
+					++sDeleted;
+				}
+				ecError.clear();
+			};
+
+			if ( _fMode == MX_FDM_RECURSIVE ) {
+				for ( fs::recursive_directory_iterator it( _pDir, fs::directory_options::skip_permission_denied ), end; it != end; ++it ) {
+					TryRemove( it->path() );
+				}
+			}
+			else {
+				for ( fs::directory_iterator it( _pDir, fs::directory_options::skip_permission_denied ), end; it != end; ++it ) {
+					TryRemove( it->path() );
+				}
+			}
+
+			return sDeleted;
+		}
 
 
 	protected :

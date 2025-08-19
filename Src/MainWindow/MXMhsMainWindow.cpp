@@ -324,6 +324,7 @@ namespace mx {
 	CWidget::LSW_HANDLED CMhsMainWindow::InitDialog() {
 		static CHotkeyManBase::MX_HOTKEY_HANDLER hhHandlers[] = {
 		//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowAddFoundAddress,		{ _T_LEN_2FD68502_Add_Entry },					MX_WH_SHOW_ADD_ENTRY,				0 },
 			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowEdit,				{ _T_LEN_F2BB02E1_Show_Found_Address_Edit },	MX_WH_SHOW_EDIT,					0 },
 			{ reinterpret_cast<uint64_t>(this),	Hotkey_OpenOptions,				{ _T_LEN_159BB63C_Show_Options },				MX_WH_SHOW_OPTIONS,					0 },
 			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowFoundAddresses,		{ _T_LEN_A5501E10_Show_Found_Addresses },		MX_WH_SHOW_FOUND_ADDRESSES,			0 },
@@ -1695,6 +1696,19 @@ namespace mx {
 	void __stdcall CMhsMainWindow::Hotkey_ShowFloatingPointStudio( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
 		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
 		pmhThis->ShowFloatingPointStudio( std::nan( "0" ) );
+	}
+
+	/**
+	 * Hotkey handler for showing the Add Entry dialog.
+	 *
+	 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+	 * \param _uiParm1 Unused.
+	 * \param _uiParm2 Unused.
+	 * \param _uiParm3 Unused.
+	 */
+	void __stdcall CMhsMainWindow::Hotkey_ShowAddFoundAddress( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
+		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
+		pmhThis->AddEntry();
 	}
 
 	/**
