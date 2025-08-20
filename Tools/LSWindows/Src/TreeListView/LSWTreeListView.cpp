@@ -574,8 +574,10 @@ namespace lsw {
 					}
 				}
 				if ( iMax ) {
-					std::wstring wsTmp;
-					auto pwsSrc = CWidget::Parent() ? CWidget::Parent()->TreeListView_ItemText( this, _plvdiInfo->item.iItem, _plvdiInfo->item.iSubItem, m_ptIndexCache->Value().lpParam, wsTmp ) : nullptr;
+					std::wstring wsTmp = GetCellText( _plvdiInfo->item.iItem, _plvdiInfo->item.iSubItem, m_ptIndexCache );
+					std::wcsncpy( strCopy, wsTmp.c_str(), iMax );
+					strCopy[iMax-1] = L'\0';
+					/*auto pwsSrc = CWidget::Parent() ? CWidget::Parent()->TreeListView_ItemText( this, _plvdiInfo->item.iItem, _plvdiInfo->item.iSubItem, m_ptIndexCache->Value().lpParam, wsTmp ) : nullptr;
 					if ( !pwsSrc && size_t( _plvdiInfo->item.iSubItem ) < m_ptIndexCache->Value().vStrings.size() ) {
 						pwsSrc = &m_ptIndexCache->Value().vStrings[_plvdiInfo->item.iSubItem];
 					}
@@ -585,7 +587,7 @@ namespace lsw {
 					else {
 						std::wcsncpy( strCopy, (*pwsSrc).c_str(), iMax );
 						strCopy[iMax-1] = L'\0';
-					}
+					}*/
 				}
 			}
 			if ( iMask & LVIF_INDENT ) {
@@ -597,6 +599,25 @@ namespace lsw {
 			/*if ( iMask & LVIF_STATE ) {
 				_plvdiInfo->item.state = 2;
 			}*/
+			return TRUE;
+		}
+		catch ( ... ) { return FALSE; }
+	}
+
+	/**
+	 * Sorts items.
+	 * 
+	 * \param _iSubItem The index of the sub-item.
+	 * \return Returns TRUE if successful, or FALSE otherwise.
+	 **/
+	BOOL CTreeListView::SortItems( INT _iSubItem ) {
+		try {
+			if ( _iSubItem >= m_tRoot.Value().vSortAscNext.size() ) {
+				m_tRoot.Value().vSortAscNext.resize( _iSubItem + 1 );
+			}
+			SortChildren( &m_tRoot, _iSubItem, m_tRoot.Value().vSortAscNext[_iSubItem], ee::EE_TP_ORDINAL_CI );
+			m_tRoot.Value().vSortAscNext[_iSubItem] = !m_tRoot.Value().vSortAscNext[_iSubItem];
+			UpdateListView();
 			return TRUE;
 		}
 		catch ( ... ) { return FALSE; }
@@ -766,6 +787,27 @@ namespace lsw {
 	}
 
 	/**
+	 * Gets the text for a given item.  The row is counted by skipping over collapsed items, and can refer to different items depending on the collapsed/expanded state of the tree.
+	 * 
+	 * \param _sRow The index of the item.
+	 * \param _Column The column of the item.
+	 * \param _ptrRow A pointer to the _sRow'th item.
+	 * \return Returns the text of the given cell.
+	 **/
+	std::wstring CTreeListView::GetCellText( size_t _sRow, size_t _Column, ee::CTree<LSW_TREE_ROW> * _ptrRow ) {
+		if ( !_ptrRow ) { return std::wstring(); }
+		if ( _sRow > INT_MAX || _Column > INT_MAX ) { return std::wstring(); }
+
+		std::wstring wsTmp;
+		auto pwsSrc = CWidget::Parent() ? CWidget::Parent()->TreeListView_ItemText( this, int( _sRow ), int( _Column ), _ptrRow->Value().lpParam, wsTmp ) : nullptr;
+		if ( !pwsSrc && size_t( _Column ) < _ptrRow->Value().vStrings.size() ) {
+			pwsSrc = &_ptrRow->Value().vStrings[_Column];
+		}
+		if ( !pwsSrc ) { return std::wstring(); }
+		return (*pwsSrc);
+	}
+
+	/**
 	 * Gets the indentation level for an item.
 	 *
 	 * \param _ptThis The item whose indentation level is to be obtained.
@@ -875,6 +917,26 @@ namespace lsw {
 			_ptThis = _ptThis->Prev();
 			++i64ThisIdx;
 		}
+	}
+
+	/**
+	 * Sorts the children of a given item.
+	 * 
+	 * \param _ptObj The object whose children are to be sorted.
+	 * \param _sColumn The column by which to sort rows.
+	 * \param _bAsc Ascending or descending sort.
+	 * \param _tpCmpPolicy The text-compare policy.
+	 **/
+	void CTreeListView::SortChildren( ee::CTree<LSW_TREE_ROW> * _ptObj, size_t _sColumn, bool _bAsc, ee::EE_TEXTPOLICY _tpCmpPolicy ) {
+		if ( !_ptObj ) { return; }
+		if ( !_ptObj->Size() ) { return; }
+
+		auto GetItemText = [this]( size_t _sRow, size_t _sColumn )->const std::wstring {
+            return GetCellText( _sRow, _sColumn );
+        };
+
+		auto vOrder = BuildOrderByColumnGeneric( _ptObj->Size(), GetItemText, _sColumn, _bAsc, _tpCmpPolicy );
+		_ptObj->ArrangeChildren( vOrder );
 	}
 
 	/**
@@ -1215,7 +1277,7 @@ namespace lsw {
 		m_ptIndexCache = ItemByIndex_Cached( _lpcdParm->nmcd.dwItemSpec );
 		if ( m_ptIndexCache ) {
 			if ( m_ptIndexCache->Size() ) {
-				HTHEME hTheme = ::OpenThemeData( _lpcdParm->nmcd.hdr.hwndFrom, L"tV" );
+				HTHEME hTheme = ::OpenThemeData( _lpcdParm->nmcd.hdr.hwndFrom, L"TREEVIEW" );
 				if ( hTheme ) {
 					int iState = GLPS_OPENED;
 					if ( m_ptIndexCache->Value().uiState & TVIS_EXPANDED ) {

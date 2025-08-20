@@ -2,8 +2,11 @@
 #include "../LSWWin.h"
 #include "../Layout/LSWWidgetLayout.h"
 #include "../ListView/LSWListView.h"
-#include <Tree/EETree.h>
 #include "../Widget/LSWWidget.h"
+
+#include <Tree/EETree.h>
+
+#include <numeric>
 
 #ifndef LSW_TREELIST_INVALID
 #define LSW_TREELIST_INVALID				static_cast<size_t>(~static_cast<size_t>(0))
@@ -315,6 +318,25 @@ namespace lsw {
 		virtual BOOL						GetDispInfoNotify( NMLVDISPINFOW * _plvdiInfo );
 
 		/**
+		 * Gets the text for a given item.  The row is counted by skipping over collapsed items, and can refer to different items depending on the collapsed/expanded state of the tree.
+		 * 
+		 * \param _sRow The index of the item.
+		 * \param _Column The column of the item.
+		 * \return Returns the text of the given cell.
+		 **/
+		std::wstring						GetCellText( size_t _sRow, size_t _Column ) {
+			return GetCellText( _sRow, _Column, ItemByIndex_Cached( _sRow ) );
+		}
+
+		/**
+		 * Sorts items.
+		 * 
+		 * \param _iSubItem The index of the sub-item.
+		 * \return Returns TRUE if successful, or FALSE otherwise.
+		 **/
+		virtual BOOL						SortItems( INT _iSubItem );
+
+		/**
 		 * A helper to easily create a tree view item to be inserted with only text.
 		 *
 		 * \param _pwcText The item text.
@@ -350,6 +372,7 @@ namespace lsw {
 			int								iSelectedImage	= 0;					// Index in the tree-view control's image list of the icon image to use when the item is in the selected state.
 			int								iExpandedImage	= 0;					// Index of the image in the control's image list to display when the item is in the expanded state.
 			RGBQUAD							rgbColor		= { .rgbReserved = 0 };	// Color of the item.
+			std::vector<bool>				vSortAscNext;							// Tobble between ascending sort and descending sort for a given column.
 
 			// == Operators.
 			// Less-than against another object.
@@ -461,6 +484,16 @@ namespace lsw {
 		}
 
 		/**
+		 * Gets the text for a given item.  The row is counted by skipping over collapsed items, and can refer to different items depending on the collapsed/expanded state of the tree.
+		 * 
+		 * \param _sRow The index of the item.
+		 * \param _Column The column of the item.
+		 * \param _ptrRow A pointer to the _sRow'th item.
+		 * \return Returns the text of the given cell.
+		 **/
+		std::wstring						GetCellText( size_t _sRow, size_t _Column, ee::CTree<LSW_TREE_ROW> * _ptrRow );
+		
+		/**
 		 * Gets the indentation level for an item.
 		 *
 		 * \param _ptThis The item whose indentation level is to be obtained.
@@ -499,6 +532,72 @@ namespace lsw {
 		 * \param _sItems The array of LPARAM items to move down 1 index.
 		 **/
 		virtual VOID						MoveDown( ee::CTree<LSW_TREE_ROW> * _ptThis, const std::set<LPARAM> &_sItems );
+
+		/**
+		 * Sorts the children of a given item.
+		 * 
+		 * \param _ptObj The object whose children are to be sorted.
+		 * \param _sColumn The column by which to sort rows.
+		 * \param _bAsc Ascending or descending sort.
+		 * \param _tpCmpPolicy The text-compare policy.
+		 **/
+		void								SortChildren( ee::CTree<LSW_TREE_ROW> * _ptObj, size_t _sColumn, bool _bAsc, ee::EE_TEXTPOLICY _tpCmpPolicy );
+
+		/**
+		 * Build a stable permutation for a flat list given a (row, col)->text accessor.
+		 * 
+		 * \tparam _tGetText A function for getting item texts based on row and column.
+		 * \param _rRows The number of rows to process.
+		 * \param _pfGetText A pointer to a function of type _tGetText.
+		 * \param _sCol The column by which to sort.
+		 * \param _bAsc Ascend or descend.
+		 * \param _tpCmpPolicy The text-compare policy.
+		 * \return Returns an ordered list with the new order of the children following the sort.
+		 **/
+		template <typename _tGetText>
+		static inline std::vector<size_t>	BuildOrderByColumnGeneric( size_t _rRows, const _tGetText &_pfGetText, size_t _sCol, bool _bAsc, ee::EE_TEXTPOLICY _tpCmpPolicy ) {
+			std::vector<size_t> vOrder( _rRows );
+			std::iota( vOrder.begin(), vOrder.end(), size_t( 0 ) );
+			std::stable_sort(
+				vOrder.begin(), vOrder.end(),
+				MakeIndexComparerText( _pfGetText, _sCol, _bAsc, _tpCmpPolicy )
+			);
+			return vOrder;
+		}
+
+		/**
+		 * Creates an index comparator for text cells using a user-provided accessor.
+		 * 
+		 * The accessor must have the signature:
+		 *     std::wstring GetText( size_t _iRow, size_t _sCol )
+		 * 
+		 * The returned comparator captures _sCol, _bAsc, and _eKind, fetches cell strings via the accessor,
+		 * then applies numeric-aware parsing (int/float) or CmpTextNoWin32() for text.
+		 * 
+		 * \tparam _tGetText Callable type of the accessor.
+		 * \param _GetText Accessor returning a const std::wstring & for (_iRow, _sCol).
+		 * \param _sCol Column index to sort by.
+		 * \param _bAsc Sort direction; true for ascending, false for descending.
+		 * \param _tpCmpPolicy The text-compare policy.
+		 * \return Returns a comparator suitable for std::(stable_)sort over row indices.
+		 **/
+		template <typename _tGetText>
+		static inline auto MakeIndexComparerText(
+			const _tGetText &_GetText,
+			size_t _sCol,
+			bool _bAsc,
+			ee::EE_TEXTPOLICY _tpCmpPolicy ) {
+			return [&_GetText, _sCol, _bAsc, _tpCmpPolicy]( size_t _sA, size_t _sB ) {
+				std::wstring wsA = _GetText( _sA, _sCol );
+				std::wstring wsB = _GetText( _sB, _sCol );
+
+
+				// Fallback to text compare.
+				int32_t i32C = ee::CExpEval::CmpText( wsA, wsB, _tpCmpPolicy );
+				if( _bAsc ) { return i32C < 0; }
+				else { return i32C > 0; }
+			};
+		}
 
 		/**
 		 * WM_SIZE.

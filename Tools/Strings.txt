@@ -2045,4 +2045,5 @@
 "&Add Entry"
 "Invalid Address"
 "Failed to add address (out of memory)."
-"Dues Hex Machina"
+"Move U&p"
+"Move Dow&n"

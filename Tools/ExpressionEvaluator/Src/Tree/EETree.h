@@ -191,6 +191,50 @@ namespace ee {
 		size_t											Size() const { return m_vChildren.size(); }
 
 		/**
+		 * Sorts the children of this item.
+		 * 
+		 * \param _vOrder Vector of indices in the new order for the children.
+		 * \return returns true if the children of this item were reanngaed into the new order specified by _vOrder.
+		 **/
+		bool											ArrangeChildren( const std::vector<size_t> &_vOrder ) {
+			if ( _vOrder.size() != m_vChildren.size() ) { return false; }
+
+			try {
+				std::vector<EE_PTR_TYPE> vTmp;
+				std::vector<bool> vSeen;
+				vTmp.reserve( m_vChildren.size() );
+				vSeen.resize( m_vChildren.size(), false );
+				for( size_t I = 0; I < _vOrder.size(); ++I ) {
+					if ( _vOrder[I] >= m_vChildren.size() ) { return false; }
+					if ( vSeen[_vOrder[I]] ) { return false; }
+					vTmp.emplace_back( std::move( m_vChildren[_vOrder[I]] ) );
+					vSeen[_vOrder[I]] = true;
+				}
+				// Fix Next()/Prev() pointers.
+				for ( size_t I = 0; I < vTmp.size(); ++I ) {
+					if ( I == 0 ) {
+						vTmp[I]->m_ptPrev = nullptr;
+					}
+					else {
+						vTmp[I]->m_ptPrev = vTmp[I-1].get();
+					}
+
+					if ( I == _vOrder.size() - 1 ) {
+						vTmp[I]->m_ptNext = nullptr;
+					}
+					else {
+						vTmp[I]->m_ptNext = vTmp[I+1].get();
+					}
+				}
+
+				// Move.
+				m_vChildren = std::move( vTmp );
+			}
+			catch ( ... ) { return false; }
+			return true;
+		}
+
+		/**
 		 * Gets the next child linearly down the tree.
 		 *
 		 * \param _ptItem The item after this item is returned or nullptr is returned if this is the last item in the tree.

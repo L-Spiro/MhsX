@@ -583,6 +583,14 @@ namespace mx {
 				ShowEdit();
 				break;
 			}
+			case CMainWindowLayout::MX_MWMI_MOVE_UP : {
+				MoveUp();
+				break;
+			}
+			case CMainWindowLayout::MX_MWMI_MOVE_DOWN : {
+				MoveDown();
+				break;
+			}
 		}
 		return LSW_H_CONTINUE;
 	}
@@ -1046,7 +1054,7 @@ namespace mx {
 		if ( pwTree ) {
 			auto famMan = m_pmhMemHack->FoundAddressManager();					// Locks the Found Address Manager for modifications.
 			std::vector<LPARAM> vSelected;
-			if ( pwTree->GatherAllLParam( vSelected, true ) >= 1 ) {			// At least one thing is selected.
+			if ( pwTree->GatherAllLParam( vSelected, true ) >= 1 ) {			// At least one thing exists.
 				for ( auto I = vSelected.size(); I--; ) {
 					auto hItem = pwTree->GetByLParam( vSelected[I] );
 					if ( hItem ) {
@@ -1057,6 +1065,28 @@ namespace mx {
 						}
 					}
 				}
+			}
+		}
+	}
+
+	// Move selected items up.
+	void CMhsMainWindow::MoveUp() {
+		auto pwTree = MainTreeView();
+		if ( pwTree ) {
+			std::vector<LPARAM> vSelected;
+			if ( pwTree->GatherSelectedLParam( vSelected, true ) >= 1 ) {		// At least one thing is selected.
+				pwTree->MoveUp( vSelected );
+			}
+		}
+	}
+
+	// Move selected items down.
+	void CMhsMainWindow::MoveDown() {
+		auto pwTree = MainTreeView();
+		if ( pwTree ) {
+			std::vector<LPARAM> vSelected;
+			if ( pwTree->GatherSelectedLParam( vSelected, true ) >= 1 ) {		// At least one thing is selected.
+				pwTree->MoveDown( vSelected );
 			}
 		}
 	}
@@ -1392,14 +1422,17 @@ namespace mx {
 					}
 					LSW_MENU_ITEM miMenuBar[] = {
 						//bIsSeperator	dwId													bCheckable	bChecked	bEnabled			lpwcText, stTextLen												bSkip
-						{ FALSE,		CMainWindowLayout::MX_MWMI_ADDENTRY,					FALSE,		FALSE,		TRUE,				MW_MENU_TXT( _T_68168A4D__Add_Entry, _LEN_68168A4D ),			FALSE },
-						{ FALSE,		CMainWindowLayout::MX_MWMI_EDIT,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_3DDC3223__Edit_Selected, _LEN_3DDC3223 ),		FALSE },
-						{ FALSE,		CMainWindowLayout::MX_MWMI_LOCK,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_FFD11E24__Lock_Selected, _LEN_FFD11E24 ),		FALSE },
-						{ FALSE,		CMainWindowLayout::MX_MWMI_UNLOCK,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_FAFFC6A4__Unlock_Selected, _LEN_FAFFC6A4 ),		FALSE },
-						{ FALSE,		CMainWindowLayout::MX_MWMI_UNLOCK_ALL,					FALSE,		FALSE,		sTotal != 0,		MW_MENU_TXT( _T_C7B383F0_Unloc_k_All, _LEN_C7B383F0 ),			FALSE },
+						{ FALSE,		CMainWindowLayout::MX_MWMI_ADDENTRY,					FALSE,		FALSE,		TRUE,				MW_MENU_TXT( _T_68168A4D__Add_Entry, _LEN_68168A4D ),			FALSE },	// &A
+						{ FALSE,		CMainWindowLayout::MX_MWMI_EDIT,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_3DDC3223__Edit_Selected, _LEN_3DDC3223 ),		FALSE },	// &E
+						{ FALSE,		CMainWindowLayout::MX_MWMI_LOCK,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_FFD11E24__Lock_Selected, _LEN_FFD11E24 ),		FALSE },	// &L
+						{ FALSE,		CMainWindowLayout::MX_MWMI_UNLOCK,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_FAFFC6A4__Unlock_Selected, _LEN_FAFFC6A4 ),		FALSE },	// &U
+						{ FALSE,		CMainWindowLayout::MX_MWMI_UNLOCK_ALL,					FALSE,		FALSE,		sTotal != 0,		MW_MENU_TXT( _T_C7B383F0_Unloc_k_All, _LEN_C7B383F0 ),			FALSE },	// &K
 						{ TRUE,			0,														FALSE,		FALSE,		FALSE,				nullptr,  0,													FALSE },
-						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETE,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_3B6DB074__Delete_Selected, _LEN_3B6DB074 ),		FALSE },
-						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETEALL,					FALSE,		FALSE,		sTotal != 0,		MW_MENU_TXT( _T_29AE3287_Dele_te_All, _LEN_29AE3287 ),			FALSE },
+						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETE,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_3B6DB074__Delete_Selected, _LEN_3B6DB074 ),		FALSE },	// &D
+						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETEALL,					FALSE,		FALSE,		sTotal != 0,		MW_MENU_TXT( _T_29AE3287_Dele_te_All, _LEN_29AE3287 ),			FALSE },	// &T
+						{ TRUE,			0,														FALSE,		FALSE,		FALSE,				nullptr,  0,													FALSE },
+						{ FALSE,		CMainWindowLayout::MX_MWMI_MOVE_UP,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_7F7393C5_Move_U_p, _LEN_7F7393C5 ),				FALSE },	// &P
+						{ FALSE,		CMainWindowLayout::MX_MWMI_MOVE_DOWN,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_4955FC02_Move_Dow_n, _LEN_4955FC02 ),			FALSE },	// &N
 					};
 
 					const LSW_MENU_LAYOUT miMenus[] = {

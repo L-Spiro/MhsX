@@ -233,6 +233,12 @@ namespace mx {
 		// Unlocks all items.
 		void								UnlockAll();
 
+		// Move selected items up.
+		void								MoveUp();
+
+		// Move selected items down.
+		void								MoveDown();
+
 		// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
 		bool								OpenProcess();
 

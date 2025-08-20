@@ -18532,3 +18532,21 @@
 #define _DEC_S_9DAF7683_Dues_Hex_Machina mx::CStringDecoder::DecodeToString( _T_9DAF7683_Dues_Hex_Machina, _LEN_9DAF7683 )
 #define _DEC_WS_9DAF7683_Dues_Hex_Machina mx::CStringDecoder::DecodeToWString( _T_9DAF7683_Dues_Hex_Machina, _LEN_9DAF7683 )
 
+// Move U&p
+
+#define _T_7F7393C5_Move_U_p "\xD5\x3D\x46\x00\xB2\x1E\xB4\x37"
+#define _LEN_7F7393C5 8
+#define _T_LEN_7F7393C5_Move_U_p _T_7F7393C5_Move_U_p, _LEN_7F7393C5
+#define _DEC_7F7393C5_Move_U_p( STR ) mx::CStringDecoder::Decode( _T_7F7393C5_Move_U_p, _LEN_7F7393C5, STR )
+#define _DEC_S_7F7393C5_Move_U_p mx::CStringDecoder::DecodeToString( _T_7F7393C5_Move_U_p, _LEN_7F7393C5 )
+#define _DEC_WS_7F7393C5_Move_U_p mx::CStringDecoder::DecodeToWString( _T_7F7393C5_Move_U_p, _LEN_7F7393C5 )
+
+// Move Dow&n
+
+#define _T_4955FC02_Move_Dow_n "\xD5\x3D\x46\x00\xB2\x0D\xFD\x3E\xF6\x36"
+#define _LEN_4955FC02 10
+#define _T_LEN_4955FC02_Move_Dow_n _T_4955FC02_Move_Dow_n, _LEN_4955FC02
+#define _DEC_4955FC02_Move_Dow_n( STR ) mx::CStringDecoder::Decode( _T_4955FC02_Move_Dow_n, _LEN_4955FC02, STR )
+#define _DEC_S_4955FC02_Move_Dow_n mx::CStringDecoder::DecodeToString( _T_4955FC02_Move_Dow_n, _LEN_4955FC02 )
+#define _DEC_WS_4955FC02_Move_Dow_n mx::CStringDecoder::DecodeToWString( _T_4955FC02_Move_Dow_n, _LEN_4955FC02 )
+

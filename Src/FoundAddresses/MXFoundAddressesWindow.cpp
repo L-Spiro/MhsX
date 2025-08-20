@@ -355,7 +355,6 @@ namespace mx {
 								uint64_t ui64Addr;
 								const uint8_t * pui8Data;
 								if ( psrbResults->GetResultFast( vSelections[I], ui64Addr, pui8Data ) ) {
-									//CFoundAddressManager::MX_LOCK lLock( &m_pmmwMhsWindow->MemHack()->FoundAddressManager() );
 									auto famMan = m_pmmwMhsWindow->MemHack()->FoundAddressManager();
 									auto faAddress = famMan->AddFoundAddress( m_pmmwMhsWindow->MemHack() );
 									if ( faAddress ) {
