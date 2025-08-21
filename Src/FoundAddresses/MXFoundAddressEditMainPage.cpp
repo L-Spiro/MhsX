@@ -599,7 +599,7 @@ namespace mx {
 								bool bContiguous = ui32Stride <= CUtilities::DataTypeSize( dtThisType );
 
 								bool bValid = true;
-								CSecureWString swsCurVal = swsValue.size() ? swsValue : pfaThis->ValueText();
+								CSecureWString swsCurVal = swsValue.size() ? swsValue : pfaThis->ValueText( &bValid );
 								CSecureWString swsLeftLockVal = swsLeft.size() ? swsLeft : pfaThis->ValueWhenLockedText();
 								if ( !bValid ) {
 									swsCurVal = swsLeftLockVal;

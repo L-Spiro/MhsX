@@ -10,7 +10,7 @@
         "DataRanges" : true,
         "UseXx" : false,
         "UseOo" : false,
-        "ShortEnums" : false
+        "ShortEnums" : true
     },
     "OpenProc" : {
         "OpenProcFlags" : 255
@@ -66,10 +66,13 @@
     },
     "EditSettings" : {
         "EditDescrHistory" : [
-            "Address: 001A02E0h \u005c\u005c\u005c\u2026",
-            "Address: 001302E0h"
+            "Address: 7D4D1800h",
+            "Address: 001302E0h",
+            "Address: 001A02E0h \u005c\u005c\u005c\u2026"
         ],
         "EditCurValHistory" : [
+            "1",
+            "3",
             "32"
         ],
         "EditArrayLenHistory" : [
@@ -79,7 +82,11 @@
             "0"
         ],
         "EditLockedLeftHistory" : [
-            "5757"
+            "5757",
+            "100.0",
+            "3.2",
+            "3",
+            "3.3"
         ],
         "EditLockedRightHistory" : [
 

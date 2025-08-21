@@ -345,6 +345,8 @@ namespace mx {
 	// Fills a tree-list with the associated PE object's information.
 	bool CPeWorksWindow::FillTree( MX_TAB &_tTab ) {
 		lsw::CTreeListView * ptlTree = static_cast<lsw::CTreeListView *>(_tTab.ptWidget);
+		if ( !ptlTree ) { return false; }
+		ptlTree->SetSortable( false );
 		// Create the header items.
 		if ( !ptlTree->SetColumnText( mx::CStringDecoder::DecodeToWString( _T_LEN_D902CC4C_Field_Name ).c_str(), 0 ) ) { return false; }
 		if ( !ptlTree->SetColumnWidth( 0, 230 ) ) { return false; }

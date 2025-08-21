@@ -139,12 +139,12 @@ namespace lsw {
 		 * \param _iCol An index of the column to delete.
 		 * \return Returns TRUE if successful, or FALSE otherwise.
 		 **/
-		BOOL								DeleteColumn( INT _iCol );
+		virtual BOOL						DeleteColumn( INT _iCol );
 
 		/**
 		 * Deletes all columns.
 		 **/
-		VOID								DeleteAllColumns();
+		virtual VOID						DeleteAllColumns();
 
 		/**
 		 * Gets the total number of columns in the list view.

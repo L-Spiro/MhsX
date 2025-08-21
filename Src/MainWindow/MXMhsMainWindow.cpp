@@ -428,6 +428,8 @@ namespace mx {
 				if ( !bAdded ) { break; }
 			}
 			//plvAddressList->SetColumnWidth( plvAddressList->GetTotalColumns(), LVSCW_AUTOSIZE_USEHEADER );
+			plvAddressList->SetSortMethod( 2, ee::EE_TP_NATURAL_CI );
+			plvAddressList->SetSortMethod( 3, ee::EE_TP_NATURAL_CI );
 		}
 
 		// TEMP.

@@ -337,6 +337,57 @@ namespace lsw {
 		virtual BOOL						SortItems( INT _iSubItem );
 
 		/**
+		 * Sets the sort method for a given column.
+		 * 
+		 * \param _iColumn The column by which to sort.
+		 * \param _eMethod The sorting text-compare method.
+		 **/
+		void								SetSortMethod( INT _iColumn, ee::EE_TEXTPOLICY _eMethod ) {
+			if ( _iColumn >= m_vSortMethod.size() && _iColumn < GetColumnCount() ) {
+				try {
+					m_vSortMethod.resize( _iColumn + 1 );
+				}
+				catch ( ... ) { return; }
+			}
+			m_vSortMethod[_iColumn] = _eMethod;
+		}
+
+		/**
+		 * Sets sorting enabled or disabled.
+		 * 
+		 * \param PARM Whether sorting of columns is enabled or disabled.
+		 **/
+		void								SetSortable( bool _bSortable ) { m_bSort = _bSortable; }
+
+		/**
+		 * Deletes a column.
+		 * 
+		 * \param _iCol An index of the column to delete.
+		 * \return Returns TRUE if successful, or FALSE otherwise.
+		 **/
+		virtual BOOL						DeleteColumn( INT _iCol ) {
+			if ( CListView::DeleteColumn( _iCol ) ) {
+				if ( _iCol < m_vSortMethod.size() ) {
+					m_vSortMethod.erase( m_vSortMethod.begin() + _iCol );
+				}
+				DeleteColumn( &m_tRoot, _iCol );
+				return TRUE;
+			}
+			return FALSE;
+		}
+
+		/**
+		 * Deletes all columns.
+		 **/
+		virtual VOID						DeleteAllColumns() {
+			for ( auto I = GetColumnCount(); I--; ) {
+				DeleteColumn( &m_tRoot, I );
+			}
+			CListView::DeleteAllColumns();
+			m_vSortMethod.clear();
+		}
+
+		/**
 		 * A helper to easily create a tree view item to be inserted with only text.
 		 *
 		 * \param _pwcText The item text.
@@ -390,6 +441,8 @@ namespace lsw {
 
 
 		// == Members.
+		/** Column sorting method. */
+		std::vector<ee::EE_TEXTPOLICY>		m_vSortMethod;
 		/** Original list-view message handler. */
 		WNDPROC								m_wpListViewProc;
 		/** Book keeping.  One entry per row. */
@@ -404,8 +457,11 @@ namespace lsw {
 		LONG								m_lSpaceWidth;
 		/** If set, the listview is not updated when inserting/removing an item.  FinishUpdate() must be called to update the listview after the tree is modified. */
 		bool								m_bDontUpdate;
+		/** Set whether sorting is enabled. */
+		bool								m_bSort = true;
 		/** Window property. */
 		static WCHAR						m_szProp[2];
+		
 
 
 		// == Functions.
@@ -482,6 +538,14 @@ namespace lsw {
 			m_ptIndexCache = nullptr;
 			m_stIndexCache = 0;
 		}
+
+		/**
+		 * Deletes a column from the given element and all of its children.
+		 * 
+		 * \param PARM The element from which to delete a column.
+		 * \param PARM the column to delete.
+		 **/
+		void								DeleteColumn( ee::CTree<CTreeListView::LSW_TREE_ROW> * _ptThis, INT _iCol );
 
 		/**
 		 * Gets the text for a given item.  The row is counted by skipping over collapsed items, and can refer to different items depending on the collapsed/expanded state of the tree.

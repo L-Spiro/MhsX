@@ -611,11 +611,13 @@ namespace lsw {
 	 * \return Returns TRUE if successful, or FALSE otherwise.
 	 **/
 	BOOL CTreeListView::SortItems( INT _iSubItem ) {
+		if ( !m_bSort ) { return FALSE; }
 		try {
 			if ( _iSubItem >= m_tRoot.Value().vSortAscNext.size() ) {
 				m_tRoot.Value().vSortAscNext.resize( _iSubItem + 1 );
 			}
-			SortChildren( &m_tRoot, _iSubItem, m_tRoot.Value().vSortAscNext[_iSubItem], ee::EE_TP_ORDINAL_CI );
+			auto eSortMethod = (_iSubItem < m_vSortMethod.size()) ? m_vSortMethod[_iSubItem] : ee::EE_TP_ORDINAL_CI;
+			SortChildren( &m_tRoot, _iSubItem, m_tRoot.Value().vSortAscNext[_iSubItem], eSortMethod );
 			m_tRoot.Value().vSortAscNext[_iSubItem] = !m_tRoot.Value().vSortAscNext[_iSubItem];
 			UpdateListView();
 			return TRUE;
@@ -784,6 +786,26 @@ namespace lsw {
 			m_stIndexCache = _stIdx;
 		}
 		return m_ptIndexCache;
+	}
+
+	/**
+	 * Deletes a column from the given element and all of its children.
+	 * 
+	 * \param PARM The element from which to delete a column.
+	 * \param PARM the column to delete.
+	 **/
+	void CTreeListView::DeleteColumn( ee::CTree<CTreeListView::LSW_TREE_ROW> * _ptThis, INT _iCol ) {
+		if ( _ptThis ) {
+			if ( _iCol < _ptThis->Value().vSortAscNext.size() ) {
+				_ptThis->Value().vSortAscNext.erase( _ptThis->Value().vSortAscNext.begin() + _iCol );
+			}
+			if ( _iCol < _ptThis->Value().vStrings.size() ) {
+				_ptThis->Value().vStrings.erase( _ptThis->Value().vStrings.begin() + _iCol );
+			}
+			for ( auto I = _ptThis->Size(); I--; ) {
+				DeleteColumn( _ptThis->GetChild( I ), _iCol );
+			}
+		}
 	}
 
 	/**
