@@ -7,7 +7,7 @@
 #include "../Layouts/MXFoundAddressLayout.h"
 #include "../Layouts/MXLayoutMacros.h"
 #include "../Layouts/MXLayoutManager.h"
-#include "../Layouts/MXMainWindowLayout.h"
+#include "../Layouts/MXMoveAddressesWindowLayout.h"
 #include "../Layouts/MXNewDataTypeSearchLayout.h"
 #include "../Layouts/MXNewExpressionSearchLayout.h"
 #include "../Layouts/MXNewPointerSearchLayout.h"
@@ -343,8 +343,8 @@ namespace mx {
 
 		
 
-		CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( CMainWindowLayout::MX_MWI_TOOLBAR0 ));
-		CRebar * plvRebar = static_cast<CRebar *>(FindChild( CMainWindowLayout::MX_MWI_REBAR0 ));
+		CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( Layout::MX_MWI_TOOLBAR0 ));
+		CRebar * plvRebar = static_cast<CRebar *>(FindChild( Layout::MX_MWI_REBAR0 ));
 
 		// ==== TOOL BAR ==== //
 		plvToolBar->SetImageList( 0, m_iImages );
@@ -352,22 +352,22 @@ namespace mx {
 #define MX_TOOL_STR( TXT )						0
 		const TBBUTTON bButtons[] = {
 			// iBitmap							idCommand									fsState				fsStyle			bReserved	dwData	iString
-			{ m_iImageMap[MX_I_OPENPROCESS],	CMainWindowLayout::MX_MWMI_OPENPROCESS,		TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Open Process" ) },
-			{ m_iImageMap[MX_I_OPENFORDEBUG],	CMainWindowLayout::MX_MWMI_OPENFORDEBUG,	TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Open for Debug") },
+			{ m_iImageMap[MX_I_OPENPROCESS],	Layout::MX_MWMI_OPENPROCESS,		TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Open Process" ) },
+			{ m_iImageMap[MX_I_OPENFORDEBUG],	Layout::MX_MWMI_OPENFORDEBUG,	TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Open for Debug") },
 			{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
-			{ m_iImageMap[MX_I_ADDENTRY],		CMainWindowLayout::MX_MWMI_ADDENTRY,		TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Add Entry" ) },
-			{ m_iImageMap[MX_I_OPENENTRY],		CMainWindowLayout::MX_MWMI_OPENSAVEFILE,	TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Open Save File" ) },
-			{ m_iImageMap[MX_I_SAVEENTRY],		CMainWindowLayout::MX_MWMI_SAVE,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Save Entries" ) },
+			{ m_iImageMap[MX_I_ADDENTRY],		Layout::MX_MWMI_ADDENTRY,		TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Add Entry" ) },
+			{ m_iImageMap[MX_I_OPENENTRY],		Layout::MX_MWMI_OPENSAVEFILE,	TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Open Save File" ) },
+			{ m_iImageMap[MX_I_SAVEENTRY],		Layout::MX_MWMI_SAVE,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Save Entries" ) },
 			{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
-			{ m_iImageMap[MX_I_DELETEENTRY],	CMainWindowLayout::MX_MWMI_DELETE,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Delete Entry" ) },
-			{ m_iImageMap[MX_I_DELETEALL],		CMainWindowLayout::MX_MWMI_DELETEALL,		TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Delete All Entries" ) },
+			{ m_iImageMap[MX_I_DELETEENTRY],	Layout::MX_MWMI_DELETE,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Delete Entry" ) },
+			{ m_iImageMap[MX_I_DELETEALL],		Layout::MX_MWMI_DELETEALL,		TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Delete All Entries" ) },
 			{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
-			{ m_iImageMap[MX_I_LOCK],			CMainWindowLayout::MX_MWMI_LOCK,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Lock Selected" ) },
-			{ m_iImageMap[MX_I_UNLOCK],			CMainWindowLayout::MX_MWMI_UNLOCK,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Unlock Selected" ) },
+			{ m_iImageMap[MX_I_LOCK],			Layout::MX_MWMI_LOCK,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Lock Selected" ) },
+			{ m_iImageMap[MX_I_UNLOCK],			Layout::MX_MWMI_UNLOCK,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Unlock Selected" ) },
 			{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
-			{ m_iImageMap[MX_I_EDIT],			CMainWindowLayout::MX_MWMI_EDIT,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Edit Selected" ) },
+			{ m_iImageMap[MX_I_EDIT],			Layout::MX_MWMI_EDIT,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Edit Selected" ) },
 			{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
-			{ m_iImageMap[MX_I_OPTIONS],		CMainWindowLayout::MX_MWMI_OPTIONS,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Options" ) },
+			{ m_iImageMap[MX_I_OPTIONS],		Layout::MX_MWMI_OPTIONS,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Options" ) },
 		};
 #undef MX_TOOL_STR
 
@@ -381,7 +381,7 @@ namespace mx {
 			  RBBS_FIXEDBMP );
 			riRebarInfo.SetChild( plvToolBar->Wnd() );
 			riRebarInfo.SetChildSize( plvToolBar->GetMinBoundingRect().Width(), plvToolBar->GetMinBoundingRect().Height() );
-			riRebarInfo.SetId( CMainWindowLayout::MX_MWI_TOOLBAR0 );
+			riRebarInfo.SetId( Layout::MX_MWI_TOOLBAR0 );
 			plvRebar->InsertBand( -1, riRebarInfo );
 		}
 
@@ -433,7 +433,7 @@ namespace mx {
 		}
 
 		// TEMP.
-		/*CSplitter * pwSplitter = static_cast<CSplitter *>(FindChild( CMainWindowLayout::MX_MWI_SPLITTER ));
+		/*CSplitter * pwSplitter = static_cast<CSplitter *>(FindChild( Layout::MX_MWI_SPLITTER ));
 		pwSplitter->SetSplitterType( CSplitter::LSW_SS_VERTICAL );
 		pwSplitter->Attach( MainListView(), CSplitter::LSW_A_RIGHT );*/
 
@@ -441,13 +441,13 @@ namespace mx {
 		CMultiSplitter::LSW_DT_ATTACH aAttach;
 		aAttach.atAttachTo = CMultiSplitter::LSW_AT_RIGHT;
 		aAttach.dwId = pwSplitter->RootId();
-		aAttach.pwWidget = FindChild( CMainWindowLayout::MX_MWI_TEST0 );
+		aAttach.pwWidget = FindChild( Layout::MX_MWI_TEST0 );
 		//pwSplitter->Attach( aAttach );
 		aAttach.pwWidget = MainTreeView();
 		pwSplitter->Attach( aAttach );
 
 		aAttach.atAttachTo = CMultiSplitter::LSW_AT_TOP;
-		aAttach.pwWidget = FindChild( CMainWindowLayout::MX_MWI_TEST1 );
+		aAttach.pwWidget = FindChild( Layout::MX_MWI_TEST1 );
 		//pwSplitter->Attach( aAttach );
 
 
@@ -475,122 +475,130 @@ namespace mx {
 
 	// WM_COMMAND from control.
 	CWidget::LSW_HANDLED CMhsMainWindow::Command( WORD _wCtrlCode, WORD _wId, CWidget * _pwSrc ) {
-		if ( _wId >= CMainWindowLayout::MX_MWMI_USER_PROGRAMS_BASE ) {
+		if ( _wId >= Layout::MX_MWMI_USER_PROGRAMS_BASE ) {
 			if ( !m_pmhMemHack ) { return LSW_H_CONTINUE; }
-			size_t stIdx = _wId - CMainWindowLayout::MX_MWMI_USER_PROGRAMS_BASE;
+			size_t stIdx = _wId - Layout::MX_MWMI_USER_PROGRAMS_BASE;
 
 			m_pmhMemHack->ExecuteProgramByIdx( stIdx );
 			return LSW_H_CONTINUE;
 		}
 		switch ( _wId ) {
-			case CMainWindowLayout::MX_MWMI_OPENPROCESS : {
+			case Layout::MX_MWMI_OPENPROCESS : {
 				OpenProcess();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_DATATYPE : {
+			case Layout::MX_MWMI_DATATYPE : {
 				ShowNewDataTypeSearch();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_POINTER : {
+			case Layout::MX_MWMI_POINTER : {
 				ShowNewPointerSearch();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_STRING : {
+			case Layout::MX_MWMI_STRING : {
 				ShowNewStringSearch();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_SEARCHOPTIONS : {
+			case Layout::MX_MWMI_SEARCHOPTIONS : {
 				ShowOptions( SearchOptionsPageClamp() );
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_OPTIONS : {
+			case Layout::MX_MWMI_OPTIONS : {
 				ShowOptions( LastOptionsShown() );
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_PEWORKS : {
+			case Layout::MX_MWMI_PEWORKS : {
 				ShowPeWorks();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_STRINGTHEORY : {
+			case Layout::MX_MWMI_STRINGTHEORY : {
 				ShowStringTheory();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_FLOATINGPOINTSTUDIO : {
+			case Layout::MX_MWMI_FLOATINGPOINTSTUDIO : {
 				ShowFloatingPointStudio( std::nan( "" ) );
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_EXPRESSION : {
+			case Layout::MX_MWMI_EXPRESSION : {
 				ShowNewExpressionSearch();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_SUB : {
+			case Layout::MX_MWMI_SUB : {
 				ShowStandardSubsearch();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_SHOWFOUNDADDR : {
+			case Layout::MX_MWMI_SHOWFOUNDADDR : {
 				ShowFoundAddress();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_SHOW_EXPEVAL : {
+			case Layout::MX_MWMI_SHOW_EXPEVAL : {
 				ShowExpEval();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_SHOW_CONVERTER : {
+			case Layout::MX_MWMI_SHOW_CONVERTER : {
 				ShowConverter();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_SHOW_ALL : {
+			case Layout::MX_MWMI_SHOW_ALL : {
 				ShowFoundAddress();
 				ShowExpEval();
 				ShowConverter();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_ADDENTRY : {
+			case Layout::MX_MWMI_ADDENTRY : {
 				AddEntry();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_OPENSAVEFILE : {
+			case Layout::MX_MWMI_OPENSAVEFILE : {
 				Open();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_SAVE : {
+			case Layout::MX_MWMI_SAVE : {
 				Save();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_SAVEAS : {
+			case Layout::MX_MWMI_SAVEAS : {
 				SaveAs();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_DELETE : {
+			case Layout::MX_MWMI_DELETE : {
 				DeleteSelected();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_DELETEALL : {
+			case Layout::MX_MWMI_DELETEALL : {
 				DeleteAll();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_LOCK : {
+			case Layout::MX_MWMI_LOCK : {
 				LockSelected();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_UNLOCK : {
+			case Layout::MX_MWMI_UNLOCK : {
 				UnlockSelected();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_UNLOCK_ALL : {
+			case Layout::MX_MWMI_UNLOCK_ALL : {
 				UnlockAll();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_EDIT : {
+			case Layout::MX_MWMI_EDIT : {
 				ShowEdit();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_MOVE_UP : {
+			case Layout::MX_MWMI_MOVE_UP : {
 				MoveUp();
 				break;
 			}
-			case CMainWindowLayout::MX_MWMI_MOVE_DOWN : {
+			case Layout::MX_MWMI_MOVE_DOWN : {
 				MoveDown();
+				break;
+			}
+			case Layout::MX_MWMI_SET_MOVE_ADDRESS_SOURCE : {
+				SetMoveAddressSource();
+				break;
+			}
+			case Layout::MX_MWMI_MOVE_ADDRESS : {
+				MoveSelectedAddresses();
 				break;
 			}
 		}
@@ -672,33 +680,33 @@ namespace mx {
 
 	// Gets the status bar.
 	CStatusBar * CMhsMainWindow::StatusBar() {
-		return static_cast<CStatusBar *>(FindChild( CMainWindowLayout::MX_MWI_STATUSBAR ));
+		return static_cast<CStatusBar *>(FindChild( Layout::MX_MWI_STATUSBAR ));
 	}
 
 	// Gets the status bar.
 	const CStatusBar * CMhsMainWindow::StatusBar() const {
-		return static_cast<const CStatusBar *>(FindChild( CMainWindowLayout::MX_MWI_STATUSBAR ));
+		return static_cast<const CStatusBar *>(FindChild( Layout::MX_MWI_STATUSBAR ));
 	}
 
 	// Gets the list view.
 	CTreeListView * CMhsMainWindow::MainTreeView() {
-		return static_cast<CTreeListView *>(FindChild( CMainWindowLayout::MX_MWI_STOREDADDRESSES ));
+		return static_cast<CTreeListView *>(FindChild( Layout::MX_MWI_STOREDADDRESSES ));
 	}
 
 	// Gets the multi-splitter.
 	CMultiSplitter * CMhsMainWindow::MultiSplitter() {
-		return static_cast<CMultiSplitter *>(FindChild( CMainWindowLayout::MX_MWI_SPLITTER ));
+		return static_cast<CMultiSplitter *>(FindChild( Layout::MX_MWI_SPLITTER ));
 	}
 
 	// Gets the multi-splitter.
 	const CMultiSplitter * CMhsMainWindow::MultiSplitter() const {
-		return static_cast<const CMultiSplitter *>(FindChild( CMainWindowLayout::MX_MWI_SPLITTER ));
+		return static_cast<const CMultiSplitter *>(FindChild( Layout::MX_MWI_SPLITTER ));
 	}
 
 	// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
 	const LSW_RECT CMhsMainWindow::VirtualClientRect( const CWidget * pwChild ) const {
 		LSW_RECT rTemp = ClientRect( this );
-		const CRebar * plvRebar = static_cast<const CRebar *>(FindChild( CMainWindowLayout::MX_MWI_REBAR0 ));
+		const CRebar * plvRebar = static_cast<const CRebar *>(FindChild( Layout::MX_MWI_REBAR0 ));
 		if ( plvRebar ) {
 			LSW_RECT rRebar = plvRebar->ClientRect( this );
 			rTemp.top += rRebar.Height();
@@ -1093,6 +1101,30 @@ namespace mx {
 		}
 	}
 
+	// Sets the source address for the Move Address dialog.
+	void CMhsMainWindow::SetMoveAddressSource() {
+		auto pwTree = MainTreeView();
+		if ( pwTree ) {
+			int iCaret = m_iContextHitTest;
+			if ( -1 != iCaret ) {
+				auto htiItem = pwTree->GetItemByIndex( iCaret );
+				if ( htiItem ) {
+					LPARAM lpId = pwTree->GetItemLParam( htiItem );
+					auto famMan = m_pmhMemHack->FoundAddressManager();					// Locks the Found Address Manager for modifications.
+					auto pfabThis = famMan->GetById( size_t( lpId ) );
+					if ( pfabThis && pfabThis->Type() == MX_FAT_FOUND_ADDRESS ) {
+						m_ui64MoveAddressesSourceAddr = reinterpret_cast<CFoundAddress *>(pfabThis)->FinalAddress();
+					}
+				}
+			}
+		}
+	}
+
+	// Move selected addresses.
+	void CMhsMainWindow::MoveSelectedAddresses() {
+		CMoveAddressesWindowLayout::CreateMoveAddressDialog( this, MemHack() );
+	}
+
 	// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
 	bool CMhsMainWindow::OpenProcess() {
 		MX_OPTIONS oOptions = m_pmhMemHack->Options();
@@ -1307,7 +1339,7 @@ namespace mx {
 
 	// WM_NOTIFY->NM_DBLCLK on the main list to edit the currently selected values.
 	CWidget::LSW_HANDLED CMhsMainWindow::DblClk( const LPNMITEMACTIVATE _phHdr ) {
-		if ( _phHdr->hdr.idFrom == CMainWindowLayout::MX_MWI_STOREDADDRESSES ) {
+		if ( _phHdr->hdr.idFrom == Layout::MX_MWI_STOREDADDRESSES ) {
 			ShowEdit();
 			return LSW_H_HANDLED;
 		}
@@ -1351,9 +1383,9 @@ namespace mx {
 		HMENU hMenu = ::GetMenu( Wnd() );
 		if ( hMenu ) {
 			//BOOL bCheck = m_pfaFoundAddresses && m_pfaFoundAddresses->
-			::CheckMenuItem( hMenu, CMainWindowLayout::MX_MWMI_SHOWFOUNDADDR, m_pfaFoundAddresses ? MF_CHECKED : MF_UNCHECKED );
-			::CheckMenuItem( hMenu, CMainWindowLayout::MX_MWMI_SHOW_EXPEVAL, m_peeExpEval ? MF_CHECKED : MF_UNCHECKED );
-			::CheckMenuItem( hMenu, CMainWindowLayout::MX_MWMI_SHOW_CONVERTER, m_cwConverter ? MF_CHECKED : MF_UNCHECKED );
+			::CheckMenuItem( hMenu, Layout::MX_MWMI_SHOWFOUNDADDR, m_pfaFoundAddresses ? MF_CHECKED : MF_UNCHECKED );
+			::CheckMenuItem( hMenu, Layout::MX_MWMI_SHOW_EXPEVAL, m_peeExpEval ? MF_CHECKED : MF_UNCHECKED );
+			::CheckMenuItem( hMenu, Layout::MX_MWMI_SHOW_CONVERTER, m_cwConverter ? MF_CHECKED : MF_UNCHECKED );
 		}
 	}
 
@@ -1404,37 +1436,77 @@ namespace mx {
 
 	// WM_CONTEXTMENU.
 	CWidget::LSW_HANDLED CMhsMainWindow::ContextMenu( CWidget * _pwControl, INT _iX, INT _iY ) {
+		bool iKeyBoard = -1 == _iX && -1 == _iY;
 		switch ( _pwControl->Id() ) {
-			case CMainWindowLayout::MX_MWI_SPLITTER : {
+			case Layout::MX_MWI_MAINWINDOW : { if ( !iKeyBoard ) { break; } }	MX_FALLTHROUGH
+			case Layout::MX_MWI_SPLITTER : {
 				
-				POINT pt = { _iX, _iY };
-				::ScreenToClient( _pwControl->Wnd(), &pt );
+				POINT pPoint = { _iX, _iY };
+				::ScreenToClient( _pwControl->Wnd(), &pPoint );
 
 				// Hit-test to get the child window under the cursor.
-				HWND hChild = ::ChildWindowFromPointEx( _pwControl->Wnd(), pt, CWP_SKIPINVISIBLE | CWP_SKIPDISABLED );
+				HWND hChild = ::ChildWindowFromPointEx( _pwControl->Wnd(), pPoint, CWP_SKIPINVISIBLE | CWP_SKIPDISABLED );
 				auto pwTree = MainTreeView();
-				if ( pwTree && hChild == pwTree->Wnd() ) {
+				
+				if ( pwTree && (hChild == pwTree->Wnd() || iKeyBoard/*(iKeyBoard && _pwControl->Id() == Layout::MX_MWI_MAINWINDOW))*/) ) {
+					int iCaret = -1;
+					if ( iKeyBoard ) {
+						int iFocused = pwTree->GetCaretIndex();
+						if ( iFocused >= 0 ) {
+							iCaret = iFocused;
+							LSW_RECT rRect{};
+							pwTree->GetSubItemRect( iFocused, 0, LVIR_LABEL, &rRect );
+							POINT pThis{ rRect.left, rRect.bottom };
+							::ClientToScreen( _pwControl->Wnd(), &pThis );
+							_iX = static_cast<INT>(pThis.x);
+							_iY = static_cast<INT>(pThis.y);
+						}
+						else {
+							auto rRect = pwTree->ClientRect();					// WindowRect() doesn’t work for this.
+							rRect = rRect.ClientToScreen( pwTree->Wnd() );
+							_iX = static_cast<INT>(rRect.left + (rRect.Width() >> 1));
+							_iY = static_cast<INT>(rRect.top + (rRect.Height() >> 1));
+						}
+					}
+					else {
+						LVHITTESTINFO htiInfo{};
+						POINT pTmp = { _iX, _iY };
+						::ScreenToClient( pwTree->Wnd(), &pTmp );
+						htiInfo.pt = pTmp;
+						const int iHit = pwTree->SubItemHitTest( &htiInfo );
+						if ( iHit >= 0 && (htiInfo.flags & (LVHT_ONITEMICON | LVHT_ONITEMLABEL | LVHT_ONITEMSTATEICON)) ) {
+							//pwTree->SetItemSelection( iHit, TRUE );
+							iCaret = htiInfo.iItem;
+							//m_iCtxSub  = htiInfo.iSubItem;
+						}
+					}
+					m_iContextHitTest = iCaret;
+
+
 					size_t sSelected;
 					size_t sTotal = 0;
+					
 					{
 						auto famMan = m_pmhMemHack->FoundAddressManager();						// Locks the Found Address Manager for modifications.
 						sTotal = famMan->Total();
 						std::vector<LPARAM> vSelected;
-						sSelected = pwTree->GatherSelectedLParam( vSelected, true );;
+						sSelected = pwTree->GatherSelectedLParam( vSelected, true );
 					}
 					LSW_MENU_ITEM miMenuBar[] = {
-						//bIsSeperator	dwId													bCheckable	bChecked	bEnabled			lpwcText, stTextLen												bSkip
-						{ FALSE,		CMainWindowLayout::MX_MWMI_ADDENTRY,					FALSE,		FALSE,		TRUE,				MW_MENU_TXT( _T_68168A4D__Add_Entry, _LEN_68168A4D ),			FALSE },	// &A
-						{ FALSE,		CMainWindowLayout::MX_MWMI_EDIT,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_3DDC3223__Edit_Selected, _LEN_3DDC3223 ),		FALSE },	// &E
-						{ FALSE,		CMainWindowLayout::MX_MWMI_LOCK,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_FFD11E24__Lock_Selected, _LEN_FFD11E24 ),		FALSE },	// &L
-						{ FALSE,		CMainWindowLayout::MX_MWMI_UNLOCK,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_FAFFC6A4__Unlock_Selected, _LEN_FAFFC6A4 ),		FALSE },	// &U
-						{ FALSE,		CMainWindowLayout::MX_MWMI_UNLOCK_ALL,					FALSE,		FALSE,		sTotal != 0,		MW_MENU_TXT( _T_C7B383F0_Unloc_k_All, _LEN_C7B383F0 ),			FALSE },	// &K
-						{ TRUE,			0,														FALSE,		FALSE,		FALSE,				nullptr,  0,													FALSE },
-						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETE,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_3B6DB074__Delete_Selected, _LEN_3B6DB074 ),		FALSE },	// &D
-						{ FALSE,		CMainWindowLayout::MX_MWMI_DELETEALL,					FALSE,		FALSE,		sTotal != 0,		MW_MENU_TXT( _T_29AE3287_Dele_te_All, _LEN_29AE3287 ),			FALSE },	// &T
-						{ TRUE,			0,														FALSE,		FALSE,		FALSE,				nullptr,  0,													FALSE },
-						{ FALSE,		CMainWindowLayout::MX_MWMI_MOVE_UP,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_7F7393C5_Move_U_p, _LEN_7F7393C5 ),				FALSE },	// &P
-						{ FALSE,		CMainWindowLayout::MX_MWMI_MOVE_DOWN,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_4955FC02_Move_Dow_n, _LEN_4955FC02 ),			FALSE },	// &N
+						//bIsSeperator	dwId											bCheckable	bChecked	bEnabled			lpwcText, stTextLen																											bSkip
+						{ FALSE,		Layout::MX_MWMI_ADDENTRY,						FALSE,		FALSE,		TRUE,				MW_MENU_TXT( _T_68168A4D__Add_Entry, _LEN_68168A4D ),																		FALSE },	// &A
+						{ FALSE,		Layout::MX_MWMI_EDIT,							FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_3DDC3223__Edit_Selected, _LEN_3DDC3223 ),																	FALSE },	// &E
+						{ FALSE,		Layout::MX_MWMI_LOCK,							FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_FFD11E24__Lock_Selected, _LEN_FFD11E24 ),																	FALSE },	// &L
+						{ FALSE,		Layout::MX_MWMI_UNLOCK,							FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_FAFFC6A4__Unlock_Selected, _LEN_FAFFC6A4 ),																	FALSE },	// &U
+						{ FALSE,		Layout::MX_MWMI_UNLOCK_ALL,						FALSE,		FALSE,		sTotal != 0,		MW_MENU_TXT( _T_C7B383F0_Unloc_k_All, _LEN_C7B383F0 ),																		FALSE },	// &K
+						{ TRUE,			0,												FALSE,		FALSE,		FALSE,				nullptr,  0,																												FALSE },
+						{ FALSE,		Layout::MX_MWMI_DELETE,							FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_3B6DB074__Delete_Selected, _LEN_3B6DB074 ),																	FALSE },	// &D
+						{ FALSE,		Layout::MX_MWMI_DELETEALL,						FALSE,		FALSE,		sTotal != 0,		MW_MENU_TXT( _T_29AE3287_Dele_te_All, _LEN_29AE3287 ),																		FALSE },	// &T
+						{ TRUE,			0,												FALSE,		FALSE,		FALSE,				nullptr,  0,																												FALSE },
+						{ FALSE,		Layout::MX_MWMI_MOVE_UP,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_7F7393C5_Move_U_p, _LEN_7F7393C5 ),																			FALSE },	// &P
+						{ FALSE,		Layout::MX_MWMI_MOVE_DOWN,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_4955FC02_Move_Dow_n, _LEN_4955FC02 ),																		FALSE },	// &N
+						{ FALSE,		Layout::MX_MWMI_SET_MOVE_ADDRESS_SOURCE,		FALSE,		FALSE,		iCaret != -1,		MW_MENU_TXT( _T_EA7D6530_Set____Move_Selected_Addresses__________Where_the_Address__Was____Address, _LEN_EA7D6530 ),		FALSE },	// &N
+						{ FALSE,		Layout::MX_MWMI_MOVE_ADDRESS,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_40D39513_Mo_ve_Selected_Addresses, _LEN_40D39513 ),															FALSE },	// &N
 					};
 
 					const LSW_MENU_LAYOUT miMenus[] = {

@@ -4,6 +4,7 @@
 #include "../ExpEval/MXExpEvalWindow.h"
 #include "../FloatingPointStudio/MXFloatingPointStudioWindow.h"
 #include "../FoundAddresses/MXFoundAddressesWindow.h"
+#include "../Layouts/MXMainWindowLayout.h"
 #include "../MemHack/MXMemHack.h"
 #include "../Options/MXOptionsWindow.h"
 #include "../PE/MXPeWorksWindow.h"
@@ -239,6 +240,12 @@ namespace mx {
 		// Move selected items down.
 		void								MoveDown();
 
+		// Sets the source address for the Move Address dialog.
+		void								SetMoveAddressSource();
+
+		// Move selected addresses.
+		void								MoveSelectedAddresses();
+
 		// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
 		bool								OpenProcess();
 
@@ -292,6 +299,9 @@ namespace mx {
 
 
 		// == Members.
+		// The Move Address source address.
+		UINT64								m_ui64MoveAddressesSourceAddr = 0;
+
 		// Image list.
 		CImageList							m_iImages;
 
@@ -336,6 +346,9 @@ namespace mx {
 
 		// Locks timer.
 		UINT_PTR							m_uiptrUpdateLocksTimer = 0;
+
+		// Last context-menu hit-test;
+		int									m_iContextHitTest = -1;
 
 
 		// == Functions.
@@ -504,6 +517,8 @@ namespace mx {
 		 */
 		static void __stdcall				Hotkey_UnLockAll( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
 
+	private :
+		typedef CMainWindowLayout			Layout;
 	};
 
 }	// namespace mx

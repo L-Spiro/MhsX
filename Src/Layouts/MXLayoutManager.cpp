@@ -7,6 +7,7 @@
 #include "../FoundAddresses/MXFoundAddressEditWindow.h"
 #include "../FoundAddresses/MXFoundAddressesListView.h"
 #include "../FoundAddresses/MXFoundAddressesWindow.h"
+#include "../FoundAddresses/MXMoveAddressesWindow.h"
 #include "../Layouts/MXLayoutMacros.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../OpenProcess/MXOpenProcessWindow.h"
@@ -75,6 +76,9 @@ namespace mx {
 			}
 			case MX_ADD_FOUND_ADDRESS : {
 				return new CAddFoundAddressWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
+			case MX_MOVE_ADDRESSES : {
+				return new CMoveAddressWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
 			case MX_EXP_EVAL : {
 				return new CExpEvalWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );

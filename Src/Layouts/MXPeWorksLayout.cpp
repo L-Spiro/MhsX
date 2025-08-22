@@ -22,8 +22,8 @@ namespace mx {
 			nullptr,								// lpwcClass
 			TRUE,									// bEnabled
 			TRUE,									// bActive
-			35,										// iLeft
-			50,										// iTop
+			135,									// iLeft
+			150,									// iTop
 			MX_PEW_W,								// dwWidth
 			MX_PEW_H,								// dwHeight
 			WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS | DS_3DLOOK | DS_SETFONT,				// dwStyle

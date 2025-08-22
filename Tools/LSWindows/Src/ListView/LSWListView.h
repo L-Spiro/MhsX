@@ -45,6 +45,54 @@ namespace lsw {
 		UINT								GetSelectedCount() const;
 
 		/**
+		 * Gets the caret (focused) item index from a SysListView32 control.
+		 * 
+		 * Uses LVNI_FOCUSED. Returns -1 if no item has the focus state.
+		 * 
+		 * \return Returns the zero-based caret index, or -1 if none.
+		 **/
+		inline int							GetCaretIndex() {
+			return static_cast<int>(::SendMessageW( Wnd(), LVM_GETNEXTITEM, static_cast<WPARAM>(-1), MAKELPARAM( LVNI_FOCUSED, 0 ) ));
+		}
+		
+		/**
+		 * Gets the selection anchor (Ågselection markÅh) index.
+		 * 
+		 * The selection mark is the anchor used for Shift+click range selection and
+		 * can differ from the focused item. Returns -1 if not set.
+		 * 
+		 * \return Returns the zero-based selection mark index, or -1 if none.
+		 **/
+		inline int							GetListViewSelectionMark() {
+			return static_cast<int>(::SendMessageW( Wnd(), LVM_GETSELECTIONMARK, 0, 0 ));
+		}
+
+		/**
+		 * Gets information about the rectangle that surrounds a subitem in a list-view control.
+		 * 
+		 * \param _iItem The index of the subitem's parent item.
+		 * \param _iSubItem The one-based index of the subitem.
+		 * \param _iCode A portion of the list-view subitem for which to retrieve the bounding rectangle information. This value can be one of the following: LVIR_BOUNDS, LVIR_ICON, or LVIR_LABEL.
+		 * \param _pRc Pointer to a RECT structure that receives the subitem bounding rectangle information
+		 * \return Returns nonzero if successful, or zero otherwise.
+		 **/
+		inline BOOL							GetSubItemRect( int _iItem, int _iSubItem, int _iCode, LPRECT _pRc ) {
+			return static_cast<BOOL>(::SendMessageW( Wnd(), LVM_GETSUBITEMRECT, static_cast<WPARAM>(_iItem),
+				(_pRc ? ((_pRc->top = _iSubItem), (_pRc->left = _iCode), reinterpret_cast<LPARAM>(_pRc)) :
+				reinterpret_cast<LPARAM>(nullptr))));
+		}
+
+		/**
+		 * Determines which list-view item or subitem is located at a given position.
+		 * 
+		 * \param _plvhtiInfo A pointer to an LVHITTESTINFO structure. The POINT structure within LVHITTESTINFO must be set to the client coordinates to be hit-tested.
+		 * \return Returns the index of the item or subitem tested, if any, or -1 otherwise. If an item or subitem is at the given coordinates, the fields of the LVHITTESTINFO structure will be filled with the applicable hit information.
+		 **/
+		inline INT							SubItemHitTest( LPLVHITTESTINFO _plvhtiInfo ) {
+			return ListView_SubItemHitTest( Wnd(), _plvhtiInfo );
+		}
+
+		/**
 		 * Removes an item from a list-view control.
 		 * 
 		 * \param _iItem An index of the list-view item to delete.

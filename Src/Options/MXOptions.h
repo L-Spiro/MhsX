@@ -24,6 +24,7 @@ namespace mx {
 
 	struct MX_OPTIONS {
 		class CMemHack *				pmhMemHackObj;
+
 		// General.
 		DWORD							dwFoundAddressRefresh			= 10;
 		DWORD							dwMainRefresh					= 10;
@@ -95,6 +96,9 @@ namespace mx {
 
 		std::vector<CSecureWString>		vAddValDescriptionHistory;
 		std::vector<CSecureWString>		vAddValAddrHistory;
+
+		std::vector<CSecureWString>		vMoveAddrSourceHistory;
+		std::vector<CSecureWString>		vMoveAddrTargetHistory;
 	};
 
 	struct MX_FLOAT_STUDIO_OPTIONS {
