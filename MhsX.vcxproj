@@ -278,6 +278,7 @@
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressesListView.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressesWindow.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressManager.cpp" />
+    <ClCompile Include="Src\FoundAddresses\MXMoveAddressesWindow.cpp" />
     <ClCompile Include="Src\Hotkeys\MXHotkeyManager.cpp" />
     <ClCompile Include="Src\Hotkeys\MXHotkeyManBase.cpp" />
     <ClCompile Include="Src\Hotkeys\MXHotkeyPollingMethod.cpp" />
@@ -293,6 +294,7 @@
     <ClCompile Include="Src\Layouts\MXFoundAddressLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXLayoutManager.cpp" />
     <ClCompile Include="Src\Layouts\MXMainWindowLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXMoveAddressesWindowLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXNewDataTypeSearchLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXNewExpressionSearchLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXNewPointerSearchLayout.cpp" />
@@ -415,6 +417,7 @@
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressesWindow.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressGroup.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressManager.h" />
+    <ClInclude Include="Src\FoundAddresses\MXMoveAddressesWindow.h" />
     <ClInclude Include="Src\Hotkeys\MXHotkeyManager.h" />
     <ClInclude Include="Src\Hotkeys\MXHotkeyManBase.h" />
     <ClInclude Include="Src\Hotkeys\MXHotkeyPollingMethod.h" />
@@ -432,6 +435,7 @@
     <ClInclude Include="Src\Layouts\MXLayoutMacros.h" />
     <ClInclude Include="Src\Layouts\MXLayoutManager.h" />
     <ClInclude Include="Src\Layouts\MXMainWindowLayout.h" />
+    <ClInclude Include="Src\Layouts\MXMoveAddressesWindowLayout.h" />
     <ClInclude Include="Src\Layouts\MXNewDataTypeSearchLayout.h" />
     <ClInclude Include="Src\Layouts\MXNewExpressionSearchLayout.h" />
     <ClInclude Include="Src\Layouts\MXNewPointerSearchLayout.h" />

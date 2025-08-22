@@ -580,6 +580,12 @@
     <ClCompile Include="Src\FoundAddresses\MXAddFoundAddressWindow.cpp">
       <Filter>Source Files\FoundAddresses</Filter>
     </ClCompile>
+    <ClCompile Include="Src\FoundAddresses\MXMoveAddressesWindow.cpp">
+      <Filter>Source Files\FoundAddresses</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXMoveAddressesWindowLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -901,6 +907,12 @@
     </ClInclude>
     <ClInclude Include="Src\FoundAddresses\MXAddFoundAddressWindow.h">
       <Filter>Header Files\FoundAddresses</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\FoundAddresses\MXMoveAddressesWindow.h">
+      <Filter>Header Files\FoundAddresses</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXMoveAddressesWindowLayout.h">
+      <Filter>Header Files\Layouts</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
