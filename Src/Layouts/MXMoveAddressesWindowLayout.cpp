@@ -154,38 +154,38 @@ namespace mx {
 		//	MX_MAI_DIALOG,									// dwParentId
 		//},
 
-		//{
-		//	LSW_LT_BUTTON,									// ltType
-		//	MX_MAI_OK,										// wId
-		//	WC_BUTTONW,										// lpwcClass
-		//	TRUE,											// bEnabled
-		//	TRUE,											// bActive
-		//	MX_LEFT_JUST,									// iLeft
-		//	MX_DLG_H - MX_DEF_BUTTON_HEIGHT - MX_TOP_JUST,	// iTop
-		//	MX_DEF_BUTTON_WIDTH,							// dwWidth
-		//	MX_DEF_BUTTON_HEIGHT,							// dwHeight
-		//	MX_DEFBUTTONSTYLE,								// dwStyle
-		//	WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,																// dwStyleEx
-		//	MX_MAKE_WCHAR( _T_D736D92D_OK ),				// pwcText
-		//	_LEN_D736D92D,									// sTextLen
-		//	MX_MAI_DIALOG,									// dwParentId
-		//},
-		//{
-		//	LSW_LT_BUTTON,									// ltType
-		//	MX_MAI_CANCEL,									// wId
-		//	WC_BUTTONW,										// lpwcClass
-		//	TRUE,											// bEnabled
-		//	FALSE,											// bActive
-		//	MX_DLG_W - MX_DEF_BUTTON_WIDTH * 1 - MX_LEFT_JUST,																							// iLeft
-		//	MX_DLG_H - MX_DEF_BUTTON_HEIGHT - MX_TOP_JUST,	// iTop
-		//	MX_DEF_BUTTON_WIDTH,							// dwWidth
-		//	MX_DEF_BUTTON_HEIGHT,							// dwHeight
-		//	MX_BUTTONSTYLE,									// dwStyle
-		//	WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,																// dwStyleEx
-		//	MX_MAKE_WCHAR( _T_51BAC044_Cancel ),			// pwcText
-		//	_LEN_51BAC044,									// sTextLen
-		//	MX_MAI_DIALOG,									// dwParentId
-		//},
+		{
+			LSW_LT_BUTTON,									// ltType
+			MX_MAI_OK,										// wId
+			WC_BUTTONW,										// lpwcClass
+			TRUE,											// bEnabled
+			TRUE,											// bActive
+			MX_LEFT_JUST,									// iLeft
+			MX_DLG_H - MX_DEF_BUTTON_HEIGHT - MX_TOP_JUST,	// iTop
+			MX_DEF_BUTTON_WIDTH,							// dwWidth
+			MX_DEF_BUTTON_HEIGHT,							// dwHeight
+			MX_DEFBUTTONSTYLE,								// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,																// dwStyleEx
+			MX_MAKE_WCHAR( _T_D736D92D_OK ),				// pwcText
+			_LEN_D736D92D,									// sTextLen
+			MX_MAI_DIALOG,									// dwParentId
+		},
+		{
+			LSW_LT_BUTTON,									// ltType
+			MX_MAI_CANCEL,									// wId
+			WC_BUTTONW,										// lpwcClass
+			TRUE,											// bEnabled
+			FALSE,											// bActive
+			MX_DLG_W - MX_DEF_BUTTON_WIDTH * 1 - MX_LEFT_JUST,																							// iLeft
+			MX_DLG_H - MX_DEF_BUTTON_HEIGHT - MX_TOP_JUST,	// iTop
+			MX_DEF_BUTTON_WIDTH,							// dwWidth
+			MX_DEF_BUTTON_HEIGHT,							// dwHeight
+			MX_BUTTONSTYLE,									// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,																// dwStyleEx
+			MX_MAKE_WCHAR( _T_51BAC044_Cancel ),			// pwcText
+			_LEN_51BAC044,									// sTextLen
+			MX_MAI_DIALOG,									// dwParentId
+		},
 	};
 
 	// == Functions.

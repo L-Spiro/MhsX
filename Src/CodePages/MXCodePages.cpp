@@ -527,19 +527,6 @@ namespace mx {
 			}
 		}
 		return _vRet;
-		/*std::map<UINT, CSecureWString> mMap;
-		CPINFOEXW cpInfo = { 0 };
-		for ( uint64_t I = 0; I <= 0xFFFF; ++I ) {
-			if ( ::IsValidCodePage( static_cast<UINT>(I) ) ) {
-				if ( ::GetCPInfoExW( static_cast<UINT>(I), 0, &cpInfo ) ) {
-					mMap[cpInfo.CodePage] = cpInfo.CodePageName;
-				}
-			}
-		}
-		for ( auto I = mMap.begin(); I != mMap.end(); ++I ) {
-			_vRet.push_back( { I->first, I->second } );
-		}
-		return _vRet;*/
 	}
 
 	// Gets the system default Windows ANSI code page.
