@@ -1407,7 +1407,7 @@ namespace ee {
 		}
 
 		// Skip any opening "0", "0x", etc.
-		if ( _iBase <= 0 || _iBase == 2 || _iBase == 8 || _iBase == 16 ) {
+		//if ( _iBase <= 0 || _iBase == 2 || _iBase == 8 || _iBase == 16 ) {
 			if ( (*_pcText) == '0' ) {
 				++_pcText;
 				
@@ -1433,8 +1433,7 @@ namespace ee {
 					_iBase = 8;
 				}
 			}
-			
-		}
+		//}
 		if ( _iBase <= 0 ) {
 			_iBase = 10;
 		}
