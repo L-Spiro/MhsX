@@ -12,7 +12,7 @@ using namespace lsw;
 
 namespace mx {
 
-	class CMemHack;
+	class CWindowMemHack;
 
 	class CMoveAddressWindow : public lsw::CMainWindow {
 	public :
@@ -33,7 +33,7 @@ namespace mx {
 	protected :
 		// == Members.
 		// Options.
-		CMemHack *											m_pmhMemHack;
+		CWindowMemHack *									m_pmhMemHack;
 
 
 	private :

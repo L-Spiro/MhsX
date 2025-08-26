@@ -50,7 +50,7 @@ namespace mx {
 		m_sstLastSubsearchType( MX_SST_STANDARD ),
 		m_i32LastOptionsPage( COptionsWindow::MX_P_GENERAL ) {
 
-		m_pmhMemHack = reinterpret_cast<CMemHack *>(_ui64Data);
+		m_pmhMemHack = reinterpret_cast<CWindowMemHack *>(_ui64Data);
 		
 
 		static const struct {

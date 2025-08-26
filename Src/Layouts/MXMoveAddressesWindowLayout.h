@@ -8,7 +8,7 @@ using namespace lsw;
 
 namespace mx {
 
-	class CMemHack;
+	class CWindowMemHack;
 	
 	class CMoveAddressesWindowLayout {
 	public :
@@ -36,7 +36,7 @@ namespace mx {
 
 		// == Functions.
 		// Creates the Move Addresses dialog.
-		static BOOL								CreateMoveAddressDialog( CWidget * _pwParent, CMemHack * _pmhMemHack );
+		static BOOL								CreateMoveAddressDialog( CWidget * _pwParent, CWindowMemHack * _pmhMemHack );
 
 
 	protected :

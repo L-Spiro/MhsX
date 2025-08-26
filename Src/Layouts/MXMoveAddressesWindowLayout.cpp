@@ -1,5 +1,5 @@
 #include "MXMoveAddressesWindowLayout.h"
-#include "../MemHack/MXMemHack.h"
+#include "../MemHack/MXWindowMemHack.h"
 #include "MXLayoutMacros.h"
 #include "MXLayoutManager.h"
 
@@ -190,7 +190,7 @@ namespace mx {
 
 	// == Functions.
 	// Creates the Move Addresses dialog.
-	BOOL CMoveAddressesWindowLayout::CreateMoveAddressDialog( CWidget * _pwParent, CMemHack * _pmhMemHack ) {
+	BOOL CMoveAddressesWindowLayout::CreateMoveAddressDialog( CWidget * _pwParent, CWindowMemHack * _pmhMemHack ) {
 		std::vector<CSecureString> sStrings;
 		std::vector<CSecureWString> sStringsW;
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;

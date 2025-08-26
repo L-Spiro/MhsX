@@ -5,7 +5,7 @@
 #include "../FloatingPointStudio/MXFloatingPointStudioWindow.h"
 #include "../FoundAddresses/MXFoundAddressesWindow.h"
 #include "../Layouts/MXMainWindowLayout.h"
-#include "../MemHack/MXMemHack.h"
+#include "../MemHack/MXWindowMemHack.h"
 #include "../Options/MXOptionsWindow.h"
 #include "../PE/MXPeWorksWindow.h"
 #include "../Search/MXSearcher.h"
@@ -256,7 +256,10 @@ namespace mx {
 		bool								Subsearch( CSearcher::MX_SUBSEARCH_PARMS * _pspParms, CWidget * _pwParent, bool _bUseSepThread = true, CWidget * _pwProgress = nullptr );
 
 		// Gets the MemHack object.
-		CMemHack *							MemHack() { return m_pmhMemHack; }
+		CWindowMemHack *					MemHack() { return m_pmhMemHack; }
+
+		// Gets the stored "Move From" address.
+		UINT64								MoveFromAddr() const { return m_ui64MoveAddressesSourceAddr; }
 
 		// Saves all program settings.
 		virtual bool						SaveSettings( const std::wstring &_wsPath, bool _bAsJson ) const;
@@ -312,7 +315,7 @@ namespace mx {
 		INT									m_iImageMap[MX_I_TOTAL];
 
 		// The MHS object.
-		CMemHack *							m_pmhMemHack;
+		CWindowMemHack *					m_pmhMemHack;
 
 		// The Found Address dockable.
 		CFoundAddressesWindow *				m_pfaFoundAddresses;

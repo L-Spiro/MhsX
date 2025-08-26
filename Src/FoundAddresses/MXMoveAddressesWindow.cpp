@@ -10,23 +10,22 @@ namespace mx {
 
 	CMoveAddressWindow::CMoveAddressWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
 		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
-		m_pmhMemHack( reinterpret_cast<CMemHack *>(_ui64Data) ) {
+		m_pmhMemHack( reinterpret_cast<CWindowMemHack *>(_ui64Data) ) {
 	}
 
 	// == Functions.
 	// WM_INITDIALOG.
 	CWidget::LSW_HANDLED CMoveAddressWindow::InitDialog() {
 		try {
-			/*auto pwTmp = FindChild( Layout::MX_MAI_TYPE_COMBO );
+			auto pwTmp = FindChild( Layout::MX_MAI_ADDR_START_COMBO );
 			if ( pwTmp ) {
-				LPARAM lpParm = m_pmhMemHack->Searcher().LastSearchParms().dtLVal.dtType;
-				if ( m_pmhMemHack->Searcher().LastSearchParms().stType == CUtilities::MX_ST_STRING_SEARCH ) {
-					lpParm = CUtilities::MX_DT_STRING;
+				CUtilities::FillComboWithStrings( pwTmp, m_pmhMemHack->Options().vMoveAddrSourceHistory, 0 );
+				if ( m_pmhMemHack->Window()->MoveFromAddr() ) {
+					//CUtilities::Prit
 				}
-				CUtilities::FillComboWithEditTypes( pwTmp, lpParm );
 			}
 
-
+			/*
 			pwTmp = FindChild( Layout::MX_MAI_DESC_COMBO );
 			if ( pwTmp ) {
 				CUtilities::FillComboWithStrings( pwTmp, m_pmhMemHack->Options().vAddValDescriptionHistory, 0 );
