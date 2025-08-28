@@ -358,6 +358,10 @@ namespace mx {
 				SaveAs();
 				break;
 			}
+			case Layout::MX_MWMI_SAVE_SELECTED_AS : {
+				SaveSelectedAs();
+				break;
+			}
 			case Layout::MX_MWMI_DELETE : {
 				DeleteSelected();
 				break;
@@ -396,6 +400,15 @@ namespace mx {
 			}
 			case Layout::MX_MWMI_MOVE_ADDRESS : {
 				MoveSelectedAddresses();
+				break;
+			}
+			case Layout::MX_MWMI_COPY_ADDRESS : {
+				CopySelectedAddresses();
+				break;
+			}
+			case Layout::MX_MWMI_EXIT : {
+				Destroy();
+				NcDestroy();
 				break;
 			}
 		}
@@ -788,9 +801,9 @@ namespace mx {
 		try {
 			auto pwTree = MainTreeView();
 			if ( pwTree ) {
-				auto famMan = m_pmhMemHack->FoundAddressManager();					// Locks the Found Address Manager for modifications.
+				auto famMan = m_pmhMemHack->FoundAddressManager();				// Locks the Found Address Manager for modifications.
 				std::vector<LPARAM> vSelected;
-				if ( pwTree->GatherSelectedLParam( vSelected, true ) >= 1 ) {		// At least one thing is selected.
+				if ( pwTree->GatherSelectedLParam( vSelected, true ) >= 1 ) {	// At least one thing is selected.
 					CFoundAddressEditLayout::CreateEditDialog( this, MemHack(), vSelected );
 
 					// Update colors.
@@ -907,7 +920,7 @@ namespace mx {
 				auto htiItem = pwTree->GetItemByIndex( iCaret );
 				if ( htiItem ) {
 					LPARAM lpId = pwTree->GetItemLParam( htiItem );
-					auto famMan = m_pmhMemHack->FoundAddressManager();					// Locks the Found Address Manager for modifications.
+					auto famMan = m_pmhMemHack->FoundAddressManager();			// Locks the Found Address Manager for modifications.
 					auto pfabThis = famMan->GetById( size_t( lpId ) );
 					if ( pfabThis && pfabThis->Type() == MX_FAT_FOUND_ADDRESS ) {
 						m_ui64MoveAddressesSourceAddr = reinterpret_cast<CFoundAddress *>(pfabThis)->FinalAddress();
@@ -920,6 +933,37 @@ namespace mx {
 	// Move selected addresses.
 	void CMhsMainWindow::MoveSelectedAddresses() {
 		CMoveAddressesWindowLayout::CreateMoveAddressDialog( this, MemHack() );
+	}
+
+	// Copy the selected addresses to the clipboard.
+	void CMhsMainWindow::CopySelectedAddresses() {
+		try {
+			auto pwTree = MainTreeView();
+			if ( pwTree ) {
+				std::vector<LPARAM> vSelected;
+				if ( pwTree->GatherSelectedLParam( vSelected, true ) >= 1 ) {		// At least one thing is selected.
+					CSecureString ssClipText;
+					auto famMan = m_pmhMemHack->FoundAddressManager();				// Locks the Found Address Manager for modifications.
+					for ( size_t I = 0; I < vSelected.size(); ++I ) {
+						auto pfabThis = famMan->GetById( size_t( vSelected[I] ) );
+						if ( pfabThis && pfabThis->Type() == MX_FAT_FOUND_ADDRESS ) {
+							if ( ssClipText.size() ) {
+								ssClipText += ',';
+								ssClipText += ' ';
+							}
+							CUtilities::PrintAddress( reinterpret_cast<CFoundAddress *>(pfabThis)->FinalAddress(), ssClipText );
+						}
+					}
+					if ( ssClipText.size() ) {
+						lsw::LSW_CLIPBOARD cbClibBoard( Wnd(), true );
+						cbClibBoard.SetText( ssClipText.c_str(), ssClipText.size() );
+					}
+				}
+			}
+		}
+		catch ( ... ) {
+			// TODO: Display Error.
+		}
 	}
 
 	// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
@@ -1302,8 +1346,10 @@ namespace mx {
 						{ TRUE,			0,												FALSE,		FALSE,		FALSE,				nullptr,  0,																												FALSE },
 						{ FALSE,		Layout::MX_MWMI_MOVE_UP,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_7F7393C5_Move_U_p, _LEN_7F7393C5 ),																			FALSE },	// &P
 						{ FALSE,		Layout::MX_MWMI_MOVE_DOWN,						FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_4955FC02_Move_Dow_n, _LEN_4955FC02 ),																		FALSE },	// &N
-						{ FALSE,		Layout::MX_MWMI_SET_MOVE_ADDRESS_SOURCE,		FALSE,		FALSE,		iCaret != -1,		MW_MENU_TXT( _T_EA7D6530_Set____Move_Selected_Addresses__________Where_the_Address__Was____Address, _LEN_EA7D6530 ),		FALSE },	// &N
-						{ FALSE,		Layout::MX_MWMI_MOVE_ADDRESS,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_40D39513_Mo_ve_Selected_Addresses, _LEN_40D39513 ),															FALSE },	// &N
+						{ TRUE,			0,												FALSE,		FALSE,		FALSE,				nullptr,  0,																												FALSE },
+						{ FALSE,		Layout::MX_MWMI_SET_MOVE_ADDRESS_SOURCE,		FALSE,		FALSE,		iCaret != -1,		MW_MENU_TXT( _T_EA7D6530_Set____Move_Selected_Addresses__________Where_the_Address__Was____Address, _LEN_EA7D6530 ),		FALSE },	// &W
+						{ FALSE,		Layout::MX_MWMI_COPY_ADDRESS,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_B1221868__Copy_Selected_Addresses, _LEN_B1221868 ),															FALSE },	// &C
+						{ FALSE,		Layout::MX_MWMI_MOVE_ADDRESS,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_40D39513_Mo_ve_Selected_Addresses, _LEN_40D39513 ),															FALSE },	// &V
 					};
 
 					const LSW_MENU_LAYOUT miMenus[] = {
@@ -1353,6 +1399,46 @@ namespace mx {
 						}
 						std::vector<LPARAM> vAll;
 						ptvlTree->GatherAllLParam( vAll, true );
+						if ( m_pmhMemHack->FoundAddressManager()->SaveSettings( pPath, ::_wcsicmp( pPath.extension().c_str(), L".json" ) == 0, vAll ) ) {
+							oOptions.wsLastFoundAddressSaveFile = pPath.generic_wstring();
+						}
+						m_pmhMemHack->SetOptions( oOptions );
+					}
+				}
+				catch ( ... ) {}
+			}
+		}
+	}
+
+	// Performs a Save Selected As operation.
+	void CMhsMainWindow::SaveSelectedAs() {
+		if ( m_pmhMemHack ) {
+			auto ptvlTree = MainTreeView();
+			if ( ptvlTree ) {
+				try {
+					OPENFILENAMEW ofnOpenFile = { sizeof( ofnOpenFile ) };
+					CSecureWString szFileName;
+					szFileName.resize( 0xFFFF + 2 );
+
+					CSecureWString wsFilter = _DEC_WS_CC54D980_Save_Files____json____mhssave__0__json___mhssave_0_0;
+					ofnOpenFile.hwndOwner = Wnd();
+					ofnOpenFile.lpstrFilter = wsFilter.c_str();
+					ofnOpenFile.lpstrFile = szFileName.data();
+					ofnOpenFile.nMaxFile = DWORD( szFileName.size() );
+					ofnOpenFile.Flags = OFN_EXPLORER | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
+					ofnOpenFile.lpstrInitialDir = m_pmhMemHack->Options().wsLastFoundAddressSaveDirectory.c_str();
+
+					if ( ::GetSaveFileNameW( &ofnOpenFile ) ) {
+						auto oOptions = m_pmhMemHack->Options();
+						oOptions.wsLastFoundAddressSaveDirectory = std::filesystem::path( ofnOpenFile.lpstrFile ).remove_filename().generic_wstring();
+						
+						
+						auto pPath = std::filesystem::path( ofnOpenFile.lpstrFile );
+						if ( !pPath.has_extension() ) {
+							pPath += ".json";
+						}
+						std::vector<LPARAM> vAll;
+						ptvlTree->GatherSelectedLParam( vAll, true );
 						if ( m_pmhMemHack->FoundAddressManager()->SaveSettings( pPath, ::_wcsicmp( pPath.extension().c_str(), L".json" ) == 0, vAll ) ) {
 							oOptions.wsLastFoundAddressSaveFile = pPath.generic_wstring();
 						}

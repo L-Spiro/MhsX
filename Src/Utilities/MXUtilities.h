@@ -750,6 +750,12 @@ namespace mx {
 		// Prints a data type given the options.
 		static const WCHAR *									PrintDataType( std::wstring &_sString, CUtilities::MX_DATA_TYPES _dtType, DWORD _dwOptions = DWINVALID, bool _bClearStr = false );
 
+		// Prints an address.
+		template <typename _tType>
+		static inline const _tType::value_type	*				PrintAddress( uint64_t _ui64Address, _tType &_tString, bool _bIncludeFormatIndicator = true ) {
+			return CUtilities::ToHex( _ui64Address, _tString, _ui64Address > UINT_MAX ? 12 : 8, _bIncludeFormatIndicator );
+		}
+
 		// Converts a given value to a string given the type.
 		static CSecureString &									DataTypeToString( const void * _pvData, CUtilities::MX_DATA_TYPES _dtType, CSecureString &_sRet, uint32_t _uiNumDigits = 0, int32_t _iSigDigits = 0 );
 

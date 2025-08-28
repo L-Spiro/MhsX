@@ -29,11 +29,28 @@ namespace mx {
 		// WM_CLOSE.
 		virtual LSW_HANDLED									Close();
 
+		// Updates the dialog based on inputs from the From Address.
+		void												FromAddressUpdate();
+
+		// Updates the dialog based on inputs from the To Address.
+		void												ToAddressUpdate();
+
+		// Updates the dialog based on inputs from the By Amount.
+		void												ByUpdate();
+
+		// Updates the UI state.
+		void												Update();
+
 
 	protected :
 		// == Members.
 		// Options.
 		CWindowMemHack *									m_pmhMemHack;
+
+
+		// == Functions.
+		// Gets the adjustment amount.
+		int64_t												AdjustAmount( bool &_bSuccess );
 
 
 	private :

@@ -66,12 +66,15 @@ namespace lsw {
 		if ( !iLen ) { return CB_ERR; }
 
 		LPWSTR lpszBuffer = new( std::nothrow ) WCHAR[iLen+1];
-		INT iRet = static_cast<INT>(static_cast<DWORD>(::SendMessageW( Wnd(), CB_GETLBTEXT, static_cast<WPARAM>(_iIndex), reinterpret_cast<LPARAM>(lpszBuffer) )));
-		if ( iRet != CB_ERR ) {
-			_wString = lpszBuffer;
+		if ( lpszBuffer ) {
+			INT iRet = static_cast<INT>(static_cast<DWORD>(::SendMessageW( Wnd(), CB_GETLBTEXT, static_cast<WPARAM>(_iIndex), reinterpret_cast<LPARAM>(lpszBuffer) )));
+			if ( iRet != CB_ERR ) {
+				_wString = lpszBuffer;
+			}
+			delete [] lpszBuffer;
+			return iRet;
 		}
-		delete [] lpszBuffer;
-		return iRet;
+		return CB_ERR;
 	}
 
 	// Copies the text of the specified window's title bar (if it has one) into a buffer. If the specified window is a control, the text of the control is copied.

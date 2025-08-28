@@ -121,6 +121,13 @@ namespace mx {
 			return m_ui64BufferedAddress;
 		}
 
+		// Adjusts the basic address by the given amount.  Returns the new basic address.
+		uint64_t											AdjustAddress( int64_t _i64Amnt ) {
+			if MX_UNLIKELY ( !_i64Amnt ) { return m_ui64Address; }
+			m_bDirtyAddress = true;
+			return m_ui64Address += _i64Amnt;
+		}
+
 		// Gets the array length.
 		inline uint32_t										ArrayLen() const { return m_vtValueType == CUtilities::MX_VT_DATA_TYPE ? m_ui32ArrayLen : 0; }
 

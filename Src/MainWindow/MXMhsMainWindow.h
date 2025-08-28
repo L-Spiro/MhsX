@@ -246,6 +246,9 @@ namespace mx {
 		// Move selected addresses.
 		void								MoveSelectedAddresses();
 
+		// Copy the selected addresses to the clipboard.
+		void								CopySelectedAddresses();
+
 		// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
 		bool								OpenProcess();
 
@@ -377,6 +380,9 @@ namespace mx {
 		
 		// Performs a Save As operation.
 		void								SaveAs();
+
+		// Performs a Save Selected As operation.
+		void								SaveSelectedAs();
 
 		// Performs a Save operation.
 		void								Save();

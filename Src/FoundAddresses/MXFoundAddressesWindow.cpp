@@ -363,7 +363,8 @@ namespace mx {
 												
 												CSecureWString wsTmp = _DEC_WS_77CAA9B0_Address_;
 												wsTmp += L' ';
-												CUtilities::ToHex( ui64Addr, wsTmp, ui64Addr > UINT_MAX ? 12 : 8 );
+												//CUtilities::ToHex( ui64Addr, wsTmp, ui64Addr > UINT_MAX ? 12 : 8 );
+												CUtilities::PrintAddress( ui64Addr, wsTmp );
 												if ( CUtilities::AddFoundAddressToTreeListView( ptlvTree, faAddress, &wsTmp ) ) {
 													faAddress->SetPreProcessing( spSearchParms.bsByteSwapping );
 													vAdded.push_back( faAddress->Id() );

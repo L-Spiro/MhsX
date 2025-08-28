@@ -1223,6 +1223,40 @@ namespace mx {
 					}
 				}
 			}
+
+			_peJson->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+			lson::CJson::CreateArrayElement( _DEC_S_4943A68F_MoveAddrFrom, (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
+			{
+				lson::CJson::LSON_ELEMENT * peArray = _peJson->vObjectMembers[_peJson->vObjectMembers.size()-1].get();
+				for ( size_t I = 0; I < _oOptions.vMoveAddrSourceHistory.size(); ++I ) {
+					{
+						peArray->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+						lson::CJson::CreateStringElement( std::to_string( I ), ee::CExpEval::ToJsonString( ee::CExpEval::ToUtf8( _oOptions.vMoveAddrSourceHistory[I] ) ), (*peArray->vObjectMembers[peArray->vObjectMembers.size()-1]) );
+					}
+				}
+			}
+			_peJson->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+			lson::CJson::CreateArrayElement( _DEC_S_F0F861F1_MoveAddrTo, (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
+			{
+				lson::CJson::LSON_ELEMENT * peArray = _peJson->vObjectMembers[_peJson->vObjectMembers.size()-1].get();
+				for ( size_t I = 0; I < _oOptions.vMoveAddrTargetHistory.size(); ++I ) {
+					{
+						peArray->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+						lson::CJson::CreateStringElement( std::to_string( I ), ee::CExpEval::ToJsonString( ee::CExpEval::ToUtf8( _oOptions.vMoveAddrTargetHistory[I] ) ), (*peArray->vObjectMembers[peArray->vObjectMembers.size()-1]) );
+					}
+				}
+			}
+			_peJson->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+			lson::CJson::CreateArrayElement( _DEC_S_18B46177_MoveAddrBy, (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
+			{
+				lson::CJson::LSON_ELEMENT * peArray = _peJson->vObjectMembers[_peJson->vObjectMembers.size()-1].get();
+				for ( size_t I = 0; I < _oOptions.vMoveAddrByHistory.size(); ++I ) {
+					{
+						peArray->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+						lson::CJson::CreateStringElement( std::to_string( I ), ee::CExpEval::ToJsonString( ee::CExpEval::ToUtf8( _oOptions.vMoveAddrByHistory[I] ) ), (*peArray->vObjectMembers[peArray->vObjectMembers.size()-1]) );
+					}
+				}
+			}
 		}
 		else {
 			if ( !_psBinary->WriteUi32( _oOptions.vEditDescriptionHistory.size() ) ) { return false; }
@@ -1262,6 +1296,19 @@ namespace mx {
 			if ( !_psBinary->WriteUi32( _oOptions.vAddValAddrHistory.size() ) ) { return false; }
 			for ( size_t I = 0; I < _oOptions.vAddValAddrHistory.size(); ++I ) {
 				if ( !_psBinary->WriteStringU16( _oOptions.vAddValAddrHistory[I] ) ) { return false; }
+			}
+
+			if ( !_psBinary->WriteUi32( _oOptions.vMoveAddrSourceHistory.size() ) ) { return false; }
+			for ( size_t I = 0; I < _oOptions.vMoveAddrSourceHistory.size(); ++I ) {
+				if ( !_psBinary->WriteStringU16( _oOptions.vMoveAddrSourceHistory[I] ) ) { return false; }
+			}
+			if ( !_psBinary->WriteUi32( _oOptions.vMoveAddrTargetHistory.size() ) ) { return false; }
+			for ( size_t I = 0; I < _oOptions.vMoveAddrTargetHistory.size(); ++I ) {
+				if ( !_psBinary->WriteStringU16( _oOptions.vMoveAddrTargetHistory[I] ) ) { return false; }
+			}
+			if ( !_psBinary->WriteUi32( _oOptions.vMoveAddrByHistory.size() ) ) { return false; }
+			for ( size_t I = 0; I < _oOptions.vMoveAddrByHistory.size(); ++I ) {
+				if ( !_psBinary->WriteStringU16( _oOptions.vMoveAddrByHistory[I] ) ) { return false; }
 			}
 		}
 		return true;
@@ -1366,6 +1413,41 @@ namespace mx {
 					}
 				}
 			}
+
+
+			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_4943A68F_MoveAddrFrom );
+			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+						CSecureString ssTmp;
+						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+						_oOptions.vMoveAddrSourceHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+					}
+				}
+			}
+			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_F0F861F1_MoveAddrTo );
+			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+						CSecureString ssTmp;
+						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+						_oOptions.vMoveAddrTargetHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+					}
+				}
+			}
+			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_18B46177_MoveAddrBy );
+			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+						CSecureString ssTmp;
+						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+						_oOptions.vMoveAddrByHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+					}
+				}
+			}
 		}
 		else {
 			uint32_t ui32Tmp;
@@ -1422,6 +1504,25 @@ namespace mx {
 				CSecureWString wsTmp;
 				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
 				_oOptions.vAddValAddrHistory.push_back( wsTmp );
+			}
+
+			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+			for ( size_t I = 0; I < ui32Tmp; ++I ) {
+				CSecureWString wsTmp;
+				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+				_oOptions.vMoveAddrSourceHistory.push_back( wsTmp );
+			}
+			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+			for ( size_t I = 0; I < ui32Tmp; ++I ) {
+				CSecureWString wsTmp;
+				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+				_oOptions.vMoveAddrTargetHistory.push_back( wsTmp );
+			}
+			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+			for ( size_t I = 0; I < ui32Tmp; ++I ) {
+				CSecureWString wsTmp;
+				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+				_oOptions.vMoveAddrByHistory.push_back( wsTmp );
 			}
 		}
 		return true;

@@ -19,21 +19,34 @@ namespace mx {
 		try {
 			auto pwTmp = FindChild( Layout::MX_MAI_ADDR_START_COMBO );
 			if ( pwTmp ) {
-				CUtilities::FillComboWithStrings( pwTmp, m_pmhMemHack->Options().vMoveAddrSourceHistory, 0 );
+				CUtilities::FillComboWithStrings( pwTmp, m_pmhMemHack->Options().vMoveAddrSourceHistory, -1, -1 );
 				if ( m_pmhMemHack->Window()->MoveFromAddr() ) {
-					//CUtilities::Prit
+					CSecureWString swsTmp;
+					pwTmp->SetTextW( CUtilities::PrintAddress( m_pmhMemHack->Window()->MoveFromAddr(), swsTmp ) );
 				}
 			}
 
-			/*
-			pwTmp = FindChild( Layout::MX_MAI_DESC_COMBO );
+			pwTmp = FindChild( Layout::MX_MAI_MOVE_BY_COMBO );
 			if ( pwTmp ) {
-				CUtilities::FillComboWithStrings( pwTmp, m_pmhMemHack->Options().vAddValDescriptionHistory, 0 );
+				CUtilities::FillComboWithStrings( pwTmp, m_pmhMemHack->Options().vMoveAddrByHistory, -1, -1 );
+				if ( m_pmhMemHack->Options().vMoveAddrByHistory.size() ) {
+					pwTmp->SetTextW( m_pmhMemHack->Options().vMoveAddrByHistory[0].c_str() );
+				}
 			}
-			pwTmp = FindChild( Layout::MX_MAI_ADDRESS_COMBO );
+
+			pwTmp = FindChild( Layout::MX_MAI_ADDR_END_COMBO );
 			if ( pwTmp ) {
-				CUtilities::FillComboWithStrings( pwTmp, m_pmhMemHack->Options().vAddValAddrHistory, 0 );
-			}*/
+				CUtilities::FillComboWithStrings( pwTmp, m_pmhMemHack->Options().vMoveAddrTargetHistory, -1, -1 );
+				if ( m_pmhMemHack->Options().vMoveAddrTargetHistory.size() ) {
+					pwTmp->SetTextW( m_pmhMemHack->Options().vMoveAddrTargetHistory[0].c_str() );
+				}
+				pwTmp->SetFocus();
+				pwTmp->SetSel( 0, -1 );
+			}
+
+			
+
+			FromAddressUpdate();
 		}
 		catch ( ... ) {}
 
@@ -45,80 +58,76 @@ namespace mx {
 		switch ( _wId ) {
 			case Layout::MX_MAI_OK : {
 				{
-					/*CSecureWString swsStr;
-					auto pwTmp = FindChild( Layout::MX_MAI_DESC_COMBO );
-					if ( pwTmp ) {
-						swsStr = pwTmp->GetTextW();
-					}
-					uint64_t ui64Address;
-					pwTmp = FindChild( Layout::MX_MAI_ADDRESS_COMBO );
-					if ( pwTmp ) {
-						ee::CExpEvalContainer::EE_RESULT rRes;
-						if ( !pwTmp->GetTextAsUInt64Expression( rRes ) ) {
-							lsw::CBase::MessageBoxError( Wnd(), _DEC_WS_55A026BA_Invalid_Address.c_str() );
-							return LSW_H_HANDLED;
-						}
-						ui64Address = rRes.u.ui64Val;
-					}
-
-					CUtilities::MX_DATA_TYPES dtType = CUtilities::MX_DT_UINT32;
-					pwTmp = FindChild( Layout::MX_MAI_TYPE_COMBO );
-					if ( pwTmp ) {
-						dtType = static_cast<CUtilities::MX_DATA_TYPES>(pwTmp->GetCurSelItemData());
-					}
-					try {
-						auto famMan = m_pmhMemHack->FoundAddressManager();
-						auto faAddress = famMan->AddFoundAddress( m_pmhMemHack );
-						if ( faAddress ) {
-							if ( dtType == CUtilities::MX_DT_STRING ) {
-							}
-							else {
-								size_t sOffset = 0;
-								std::vector<uint8_t> vData( CUtilities::DataTypeSize( dtType ) );
-								m_pmhMemHack->ReadProcessMemory_PreProcessed( ui64Address, vData, CUtilities::DataTypeSize( dtType ), sOffset );
-								if ( !faAddress->InitWithAddressAndDataType( ui64Address, dtType, vData.data() ) ) {
-									famMan->Delete( faAddress->Id() );
-									lsw::CBase::MessageBoxError( Wnd(), _DEC_WS_55A026BA_Invalid_Address.c_str() );
-									return LSW_H_HANDLED;
+					bool bSuccess;
+					int64_t i64Offset = AdjustAmount( bSuccess );
+					if ( !bSuccess ) { break; }
+					if ( m_pmhMemHack->Window() ) {
+						auto pwTree = m_pmhMemHack->Window()->MainTreeView();
+						if ( pwTree ) {
+							auto famMan = m_pmhMemHack->FoundAddressManager();
+							std::vector<LPARAM> vSelected;
+							if ( pwTree->GatherSelectedLParam( vSelected, true ) >= 1 ) {
+								pwTree->BeginLargeUpdate();
+								for ( auto I = vSelected.size(); I--; ) {
+									auto pfabThis = famMan->GetById( size_t( vSelected[I] ) );
+									if ( pfabThis && pfabThis->Type() == MX_FAT_FOUND_ADDRESS ) {
+										reinterpret_cast<CFoundAddress *>(pfabThis)->AdjustAddress( i64Offset );
+									}
 								}
-								faAddress->SetPreProcessing( m_pmhMemHack->Searcher().LastSearchParms().bsByteSwapping );
-								
-								auto ptlvTree = static_cast<CWindowMemHack *>(m_pmhMemHack)->Window()->MainTreeView();
-								if ( ptlvTree ) {
-									CUtilities::AddFoundAddressToTreeListView( ptlvTree, faAddress, &swsStr );
-								}
+								pwTree->FinishUpdate();
 							}
 						}
-						else {
-							lsw::CBase::MessageBoxError( Wnd(), _DEC_WS_F39F91A5_Out_of_memory_.c_str() );
-							return LSW_H_HANDLED;
-						}
 					}
-					catch ( ... ) {
-
-					}*/
 				}
-				/*{
+				{
 					MX_OPTIONS oOption = m_pmhMemHack->Options();
-					auto pwTmp = FindChild( Layout::MX_MAI_DESC_COMBO );
+					auto pwTmp = FindChild( Layout::MX_MAI_ADDR_START_COMBO );
 					if ( pwTmp ) {
-						CUtilities::AddOrMove<CSecureWString>( oOption.vAddValDescriptionHistory, pwTmp->GetTextW() );
+						CUtilities::AddOrMove<CSecureWString>( oOption.vMoveAddrSourceHistory, pwTmp->GetTextW() );
 					}
-					pwTmp = FindChild( Layout::MX_MAI_ADDRESS_COMBO );
+					pwTmp = FindChild( Layout::MX_MAI_ADDR_END_COMBO );
 					if ( pwTmp ) {
-						CUtilities::AddOrMove<CSecureWString>( oOption.vAddValAddrHistory, pwTmp->GetTextW() );
+						CUtilities::AddOrMove<CSecureWString>( oOption.vMoveAddrTargetHistory, pwTmp->GetTextW() );
+					}
+					pwTmp = FindChild( Layout::MX_MAI_MOVE_BY_COMBO );
+					if ( pwTmp ) {
+						CUtilities::AddOrMove<CSecureWString>( oOption.vMoveAddrByHistory, pwTmp->GetTextW() );
 					}
 					m_pmhMemHack->SetOptions( oOption );
-				}*/
+				}
 				::EndDialog( Wnd(), 1 );
 				return LSW_H_HANDLED;
 			}
 			case Layout::MX_MAI_CANCEL : {
 				return Close();
 			}
-			return LSW_H_CONTINUE;
+
+			case Layout::MX_MAI_ADDR_START_COMBO : {
+				if ( _wCtrlCode == CBN_EDITCHANGE || _wCtrlCode == CBN_SELCHANGE ) {
+					FromAddressUpdate();
+					Update();
+					return LSW_H_HANDLED;
+				}
+				break;
+			}
+			case Layout::MX_MAI_ADDR_END_COMBO : {
+				if ( _wCtrlCode == CBN_EDITCHANGE || _wCtrlCode == CBN_SELCHANGE ) {
+					ToAddressUpdate();
+					Update();
+					return LSW_H_HANDLED;
+				}
+				break;
+			}
+			case Layout::MX_MAI_MOVE_BY_COMBO : {
+				if ( _wCtrlCode == CBN_EDITCHANGE || _wCtrlCode == CBN_SELCHANGE ) {
+					ByUpdate();
+					Update();
+					return LSW_H_HANDLED;
+				}
+				break;
+			}
 		}
-		
+		Update();
 		return CParent::Command( _wCtrlCode, _wId, _pwSrc );
 	}
 
@@ -126,6 +135,69 @@ namespace mx {
 	CWidget::LSW_HANDLED CMoveAddressWindow::Close() {
 		::EndDialog( Wnd(), 0 );
 		return LSW_H_HANDLED;
+	}
+
+	// Updates the dialog based on inputs from the From Address.
+	void CMoveAddressWindow::FromAddressUpdate() {
+		ee::CExpEvalContainer::EE_RESULT rPoint, rTo;
+		auto pwTmp = FindChild( Layout::MX_MAI_ADDR_START_COMBO );
+		if ( !pwTmp ) { return; }
+		if ( !pwTmp->GetTextAsUInt64Expression( rPoint ) ) { return; }
+
+
+		CWidget * pwTo = FindChild( Layout::MX_MAI_ADDR_END_COMBO );
+		if ( pwTo && pwTo->GetTextAsUInt64Expression( rTo ) ) {
+			pwTmp = FindChild( Layout::MX_MAI_MOVE_BY_COMBO );
+			if ( pwTmp ) {
+				int64_t i64MoveBy = int64_t( rTo.u.ui64Val - rPoint.u.ui64Val );
+				pwTmp->SetTextW( std::to_wstring( i64MoveBy ).c_str() );
+			}
+		}
+	}
+
+	// Updates the dialog based on inputs from the To Address.
+	void CMoveAddressWindow::ToAddressUpdate() {
+		FromAddressUpdate();
+	}
+
+	// Updates the dialog based on inputs from the By Amount.
+	void CMoveAddressWindow::ByUpdate() {
+		ee::CExpEvalContainer::EE_RESULT rPoint, rBy;
+		auto pwTmp = FindChild( Layout::MX_MAI_ADDR_START_COMBO );
+		if ( !pwTmp ) { return; }
+		if ( !pwTmp->GetTextAsUInt64Expression( rPoint ) ) { return; }
+
+
+		CWidget * pwTo = FindChild( Layout::MX_MAI_MOVE_BY_COMBO );
+		if ( pwTo && pwTo->GetTextAsUInt64Expression( rBy ) ) {
+			pwTmp = FindChild( Layout::MX_MAI_ADDR_END_COMBO );
+			if ( pwTmp ) {
+				CSecureWString swsTmp;
+				pwTmp->SetTextW( CUtilities::PrintAddress( rBy.u.ui64Val + rPoint.u.ui64Val, swsTmp ) );
+			}
+		}
+	}
+
+	// Updates the UI state.
+	void CMoveAddressWindow::Update() {
+		auto pwTmp = FindChild( Layout::MX_MAI_OK );
+		if ( pwTmp ) {
+			bool bSuccess;
+			AdjustAmount( bSuccess );
+			pwTmp->SetEnabled( bSuccess );
+		}
+	}
+
+	// Gets the adjustment amount.
+	int64_t CMoveAddressWindow::AdjustAmount( bool &_bSuccess ) {
+		_bSuccess = false;
+		ee::CExpEvalContainer::EE_RESULT rPoint;
+		auto pwTmp = FindChild( Layout::MX_MAI_MOVE_BY_COMBO );
+		if ( !pwTmp ) { return 0; }
+		if ( !pwTmp->GetTextAsInt64Expression( rPoint ) ) { return 0; }
+
+		_bSuccess = true;
+		return rPoint.u.i64Val;
 	}
 
 }	// namespace mx
