@@ -1,6 +1,7 @@
 #include "LSWLayoutManager.h"
 #include "../Base/LSWBase.h"
 #include "../Button/LSWButton.h"
+#include "../Button/LSWColorButton.h"
 #include "../CheckButton/LSWCheckButton.h"
 #include "../ChildWindow/LSWChildWindow.h"
 #include "../ComboBox/LSWComboBox.h"
@@ -184,6 +185,7 @@ namespace lsw {
 	CWidget * CLayoutManager::CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) {
 		switch ( _wlLayout.ltType ) {
 			case LSW_LT_BUTTON : { return new CButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
+			case LSW_LT_COLORBUTTON : { return new CColorButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 			case LSW_LT_CHECK : { return new CCheckButton( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 			case LSW_LT_CHILDWINDOW : { return new CChildWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
 			case LSW_LT_COMBOBOX : { return new CComboBox( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ); }
@@ -343,6 +345,7 @@ namespace lsw {
 				LPCWSTR							lpwsClass;
 			} aStruct [] = {
 				{ LSW_LT_BUTTON, WC_BUTTONW },
+				{ LSW_LT_COLORBUTTON, WC_BUTTONW },
 				{ LSW_LT_CHECK, WC_BUTTONW },
 				{ LSW_LT_CHILDWINDOW, reinterpret_cast<LPCWSTR>(lsw::CBase::ChildWindowAtom()) },
 				{ LSW_LT_COMBOBOX, WC_COMBOBOXW },

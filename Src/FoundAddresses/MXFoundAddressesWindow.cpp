@@ -363,7 +363,7 @@ namespace mx {
 												
 												CSecureWString wsTmp = _DEC_WS_77CAA9B0_Address_;
 												wsTmp += L' ';
-												//CUtilities::ToHex( ui64Addr, wsTmp, ui64Addr > UINT_MAX ? 12 : 8 );
+
 												CUtilities::PrintAddress( ui64Addr, wsTmp );
 												if ( CUtilities::AddFoundAddressToTreeListView( ptlvTree, faAddress, &wsTmp ) ) {
 													faAddress->SetPreProcessing( spSearchParms.bsByteSwapping );
@@ -373,19 +373,6 @@ namespace mx {
 												TVINSERTSTRUCTW iisItem = lsw::CTreeListView::DefaultItemLParam( wsTmp.c_str(), faAddress->Id() );
 												auto hInserted = ptlvTree->InsertItem( &iisItem );
 												ptlvTree->SetItemColor( hInserted, faAddress->Color() );*/
-
-												// == Address.
-												/*wsTmp = faAddress->AddressText();
-												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 1 );*/
-												// == Current Value.
-												/*wsTmp = faAddress->ValueText();
-												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 2 );*/
-												// == Value When Locked.
-												/*wsTmp = faAddress->ValueWhenLockedText();
-												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 3 );*/
-												// == Type.
-												/*wsTmp = faAddress->TypeText();
-												ptlvTree->SetItemText( hInserted, wsTmp.c_str(), 4 );*/
 											}
 										}
 										else if ( spSearchParms.stType == CUtilities::MX_ST_STRING_SEARCH ) {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <LSWWin.h>
+#include "../Files/MXFileMap.h"
 
 #include <filesystem>
 #include <mutex>
@@ -24,71 +25,71 @@ namespace mx {
 	protected :
 		// == Types.
 		// A single file map with a single file view.
-		struct MX_FILE_MAP {
-			MX_FILE_MAP() :
-				ui32Id( ++s_nInstanceCount ) {
-			}
+		//struct MX_FILE_MAP {
+		//	MX_FILE_MAP() :
+		//		ui32Id( ++s_nInstanceCount ) {
+		//	}
 
 
-			// == Functions.
-			// Open a file and create a map.
-			bool												OpenFile( const std::filesystem::path &_pFile );
+		//	// == Functions.
+		//	// Open a file and create a map.
+		//	bool												OpenFile( const std::filesystem::path &_pFile );
 
-			// Closes the current file.
-			void												Close();
+		//	// Closes the current file.
+		//	void												Close();
 
-			// Gets the size of the file.
-			uint64_t											Size() const;
+		//	// Gets the size of the file.
+		//	uint64_t											Size() const;
 
-			// Map a region of the file.
-			bool												MapRegion( uint64_t _ui64Offset, DWORD _dwSize );
+		//	// Map a region of the file.
+		//	bool												MapRegion( uint64_t _ui64Offset, DWORD _dwSize );
 
-			// Maps a full file.
-			bool												MapFullRegion() { return MapRegion( 0, Size() ); }
+		//	// Maps a full file.
+		//	bool												MapFullRegion() { return MapRegion( 0, Size() ); }
 
-			// Unmap.
-			void												Upmap();
+		//	// Unmap.
+		//	void												Upmap();
 
-			// Gets the ID of this map.
-			uint32_t											Id() const { return ui32Id; }
-
-
-		protected :
-			// == Members.
-			// Size of the file.
-			mutable uint64_t									ui64Size = 0;
-			// Map start.
-			uint64_t											ui64MapStart = UINT64_MAX;
-			// The path to the file.
-			std::filesystem::path								pPath;
-			// The actual file handle.
-			HANDLE												hFile = INVALID_HANDLE_VALUE;
-			// File-mapping handle.
-			HANDLE												hMap = INVALID_HANDLE_VALUE;
-			// Mapped bytes.
-			mutable uint8_t *									pui8MapBuffer = nullptr;
-			// Mapped size.
-			uint32_t											ui32MapSize = 0;
-			// ID.
-			uint32_t											ui32Id = 0;
-			// Is the file 0-sized?
-			bool												bIsEmpty = true;
+		//	// Gets the ID of this map.
+		//	uint32_t											Id() const { return ui32Id; }
 
 
-			// == Functions.
-			// Creates the file map.
-			bool												CreateFileMap();
+		//protected :
+		//	// == Members.
+		//	// Size of the file.
+		//	mutable uint64_t									ui64Size = 0;
+		//	// Map start.
+		//	uint64_t											ui64MapStart = UINT64_MAX;
+		//	// The path to the file.
+		//	std::filesystem::path								pPath;
+		//	// The actual file handle.
+		//	HANDLE												hFile = INVALID_HANDLE_VALUE;
+		//	// File-mapping handle.
+		//	HANDLE												hMap = INVALID_HANDLE_VALUE;
+		//	// Mapped bytes.
+		//	mutable uint8_t *									pui8MapBuffer = nullptr;
+		//	// Mapped size.
+		//	uint32_t											ui32MapSize = 0;
+		//	// ID.
+		//	uint32_t											ui32Id = 0;
+		//	// Is the file 0-sized?
+		//	bool												bIsEmpty = true;
 
-		private :
-			// == Members.
-			inline static std::atomic<size_t>					s_nInstanceCount{ 0 };
-		};
+
+		//	// == Functions.
+		//	// Creates the file map.
+		//	bool												CreateFileMap();
+
+		//private :
+		//	// == Members.
+		//	inline static std::atomic<size_t>					s_nInstanceCount{ 0 };
+		//};
 
 
 		// == Members.
-		MX_FILE_MAP												m_fmMainMap;									// The map for the main file being edited.
-		std::vector<MX_FILE_MAP>								m_vEditedMaps;									// Mappings of edited copies.
-		std::vector<size_t>										m_vActiveSegments;								// List of edited segments currently loaded into RAM.  Sorted by most-recent access.
+		CFileMap												m_fmMainMap;									// The map for the main file being edited.
+		std::vector<CFileMap>									m_vEditedMaps;									// Mappings of edited copies.
+		std::vector<uint64_t>									m_vActiveSegments;								// List of edited segments currently loaded into RAM.  Sorted by most-recent access.
 		std::filesystem::path									m_pEditDiractory;								// Folder where edited copies go.
 
 	};

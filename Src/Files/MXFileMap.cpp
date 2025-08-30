@@ -8,6 +8,9 @@
 
 namespace mx {
 
+	// ID generator.
+	std::atomic<uint64_t> CFileMap::s_aId = 0;
+
 	CFileMap::CFileMap() {
 	}
 	CFileMap::~CFileMap() {
@@ -16,27 +19,9 @@ namespace mx {
 
 	// == Functions.
 	// Creates a file mapping.  Always opens for read, may also open for write.
-	BOOL CFileMap::CreateMap( LPCSTR _lpcFile, BOOL _bOpenForWrite ) {
+	BOOL CFileMap::CreateMap( const std::filesystem::path &_pFile, BOOL _bOpenForWrite ) {
 		Close();
-		m_hFile = ::CreateFileA( _lpcFile,
-			_bOpenForWrite ? (GENERIC_READ | GENERIC_WRITE) : GENERIC_READ,
-			0,
-			NULL,
-			OPEN_EXISTING,
-			FILE_ATTRIBUTE_NORMAL,
-			NULL );
-
-		if ( m_hFile == INVALID_HANDLE_VALUE ) {
-			return FALSE;
-		}
-		m_bWritable = _bOpenForWrite;
-		return CreateFileMap();
-	}
-
-	// Creates a file mapping.  Always opens for read, may also open for write.
-	BOOL CFileMap::CreateMap( LPCWSTR _lpwFile, BOOL _bOpenForWrite ) {
-		Close();
-		m_hFile = ::CreateFileW( _lpwFile,
+		m_hFile = ::CreateFileW( _pFile.generic_wstring().c_str(),
 			_bOpenForWrite ? (GENERIC_READ | GENERIC_WRITE) : GENERIC_READ,
 			0,
 			NULL,
@@ -53,10 +38,7 @@ namespace mx {
 
 	// Closes the opened file map.
 	VOID CFileMap::Close() {
-		if ( m_pbMapBuffer ) {
-			::UnmapViewOfFile( m_pbMapBuffer );
-			m_pbMapBuffer = nullptr;
-		}
+		UnMapRegion();
 		if ( m_hMap != INVALID_HANDLE_VALUE ) {
 			::CloseHandle( m_hMap );
 			m_hMap = INVALID_HANDLE_VALUE;
@@ -68,8 +50,6 @@ namespace mx {
 		m_bIsEmpty = TRUE;
 		m_bWritable = TRUE;
 		m_ui64Size = 0;
-		m_ui64MapStart = MAXUINT64;
-		m_dwMapSize = 0;
 	}
 
 	// Gets the size of the file.
@@ -85,11 +65,11 @@ namespace mx {
 		_dwNumberOfBytesToRead = static_cast<DWORD>(std::min( static_cast<UINT64>(_dwNumberOfBytesToRead), Size() - _ui64From ));
 		// Read in 8-megabyte chunks.
 		PBYTE pbDst = static_cast<PBYTE>(_lpvBuffer);
-		DWORD dwWritten = 0;
+		DWORD dwRead = 0;
 		while ( _dwNumberOfBytesToRead ) {
 			DWORD dwReadAmount = std::min( m_dwChunkSize, _dwNumberOfBytesToRead );
 			if ( !MapRegion( _ui64From, dwReadAmount ) ) {
-				return dwWritten;
+				return dwRead;
 			}
 			std::memcpy( pbDst, &m_pbMapBuffer[_ui64From-m_ui64MapStart], dwReadAmount );
 
@@ -97,8 +77,9 @@ namespace mx {
 			_dwNumberOfBytesToRead -= dwReadAmount;
 			_ui64From += dwReadAmount;
 			pbDst += dwReadAmount;
+			dwRead += dwReadAmount;
 		}
-		return dwWritten;
+		return dwRead;
 	}
 
 	// Writes to the opened file.
@@ -118,6 +99,7 @@ namespace mx {
 			_dwNumberOfBytesToWrite -= dwWriteAmount;
 			_ui64From += dwWriteAmount;
 			pbSrc += dwWriteAmount;
+			dwWritten += dwWriteAmount;
 		}
 		return dwWritten;
 	}
@@ -130,13 +112,7 @@ namespace mx {
 		dwNewSize = static_cast<DWORD>(std::min( static_cast<UINT64>(dwNewSize), Size() - ui64Adjusted ));
 		if ( m_pbMapBuffer && ui64Adjusted == m_ui64MapStart && dwNewSize == m_dwMapSize ) { return TRUE; }
 
-		if ( m_pbMapBuffer ) {
-			// Unmap existing buffer.
-			::UnmapViewOfFile( m_pbMapBuffer );
-			m_pbMapBuffer = nullptr;
-			m_ui64MapStart = MAXUINT64;
-			m_dwMapSize = 0;
-		}
+		const_cast<CFileMap *>(this)->UnMapRegion();
 
 		m_pbMapBuffer = static_cast<PBYTE>(::MapViewOfFile( m_hMap,
 			(m_bWritable ? FILE_MAP_WRITE : 0) | FILE_MAP_READ,
@@ -147,6 +123,17 @@ namespace mx {
 		m_ui64MapStart = ui64Adjusted;
 		m_dwMapSize = dwNewSize;
 		return TRUE;
+	}
+
+	// Closes the current region map.
+	void CFileMap::UnMapRegion() {
+		if ( m_pbMapBuffer ) {
+			// Unmap existing buffer.
+			::UnmapViewOfFile( m_pbMapBuffer );
+			m_pbMapBuffer = nullptr;
+			m_ui64MapStart = MAXUINT64;
+			m_dwMapSize = 0;
+		}
 	}
 
 	// Creates the file map.

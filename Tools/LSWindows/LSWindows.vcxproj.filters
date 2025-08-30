@@ -353,6 +353,9 @@
     <ClInclude Include="Src\Tab\LSWTabPageBase.h">
       <Filter>Header Files\Tab</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Button\LSWColorButton.h">
+      <Filter>Header Files\Button</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">
@@ -465,6 +468,9 @@
     </ClCompile>
     <ClCompile Include="Src\Tab\LSWTabPageBase.cpp">
       <Filter>Source Files\Tab</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Button\LSWColorButton.cpp">
+      <Filter>Source Files\Button</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -293,15 +293,16 @@ namespace lsw {
 	};
 
 	struct LSW_SELECTOBJECT {
-		LSW_SELECTOBJECT( HDC _hDc, HGDIOBJ _hgdiobj, bool _bDeleteNewObjAfter = false ) :
+		LSW_SELECTOBJECT( HDC _hDc, HGDIOBJ _hgdioObj, bool _bDeleteNewObjAfter = false ) :
 			hDc( _hDc ),
-			hCur( _hgdiobj ),
-			hPrev( ::SelectObject( _hDc, _hgdiobj ) ),
+			hCur( _hgdioObj ),
+			hPrev( ::SelectObject( _hDc, _hgdioObj ) ),
 			bDeleteAfter( _bDeleteNewObjAfter ) {
 		}
 		~LSW_SELECTOBJECT() {
 			if ( bDeleteAfter ) {
-				::DeleteObject( ::SelectObject( hDc, hPrev ) );
+				::SelectObject( hDc, hPrev );
+				::DeleteObject( hCur );
 			}
 			else {
 				::SelectObject( hDc, hPrev );

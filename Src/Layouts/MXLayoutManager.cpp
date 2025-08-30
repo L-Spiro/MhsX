@@ -116,6 +116,9 @@ namespace mx {
 			case MX_FLOATING_POINT_STUDIO : {
 				return new CFloatingPointStudioWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
+			case MX_DEUS_HEX_MACHINA : {
+				
+			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 	}

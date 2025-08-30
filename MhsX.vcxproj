@@ -264,6 +264,7 @@
   <ItemGroup>
     <ClCompile Include="Src\CodePages\MXCodePages.cpp" />
     <ClCompile Include="Src\Converter\MXConverterWindow.cpp" />
+    <ClCompile Include="Src\CRC\MXCrc.cpp" />
     <ClCompile Include="Src\Disassembler x86_x64\MXDisassemGen.cpp" />
     <ClCompile Include="Src\ExpEval\MXExpEvalWindow.cpp" />
     <ClCompile Include="Src\Files\MXFile.cpp" />
@@ -287,6 +288,7 @@
     <ClCompile Include="Src\Html\MXHtml.cpp" />
     <ClCompile Include="Src\Layouts\MXAddFoundAddressWindowLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXConverterLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXDeuHexMachinaWindowLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXExpressionEvaluatorLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXExpressionSubsearchLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXFloatingPointStudioLayout.cpp" />
@@ -400,6 +402,7 @@
   <ItemGroup>
     <ClInclude Include="Src\CodePages\MXCodePages.h" />
     <ClInclude Include="Src\Converter\MXConverterWindow.h" />
+    <ClInclude Include="Src\CRC\MXCrc.h" />
     <ClInclude Include="Src\Disassembler x86_x64\MXDisassem.h" />
     <ClInclude Include="Src\Disassembler x86_x64\MXDisassemGen.h" />
     <ClInclude Include="Src\ExpEval\MXExpEvalWindow.h" />
@@ -427,6 +430,7 @@
     <ClInclude Include="Src\IO\MXInOutInterface.h" />
     <ClInclude Include="Src\Layouts\MXAddFoundAddressWindowLayout.h" />
     <ClInclude Include="Src\Layouts\MXConverterLayout.h" />
+    <ClInclude Include="Src\Layouts\MXDeuHexMachinaWindowLayout.h" />
     <ClInclude Include="Src\Layouts\MXExpressionEvaluatorLayout.h" />
     <ClInclude Include="Src\Layouts\MXExpressionSubsearchLayout.h" />
     <ClInclude Include="Src\Layouts\MXFloatingPointStudioLayout.h" />

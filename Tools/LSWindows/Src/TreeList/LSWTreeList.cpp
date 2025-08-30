@@ -876,7 +876,7 @@ namespace lsw {
 		HTREEITEM hStart = TreeView_GetFirstVisible( m_hTreeView );
 		INT iStartIndex = GetIndexOf( hStart, TreeView_GetRoot( m_hTreeView ), iPos );
 		LSW_SELECTOBJECT soFontOrig( bpPaint.hDc, reinterpret_cast<HGDIOBJ>(::SendMessageW( m_hTreeView, WM_GETFONT, 0, 0 )) );	// Destructor sets the original font back.
-		LSW_SELECTOBJECT soPenOrig( bpPaint.hDc, reinterpret_cast<HGDIOBJ>(::CreatePen( PS_SOLID, 1, ::GetSysColor( COLOR_3DFACE ) )), true );	// Destructor sets the original pen back and deletes it.
+		LSW_SELECTOBJECT soPenOrig( bpPaint.hDc, reinterpret_cast<HGDIOBJ>(::CreatePen( PS_SOLID, 1, ::GetSysColor( COLOR_3DFACE ) )), true );	// Destructor sets the original pen back and deletes the new one.
 
 		LSW_PAINTPARMS ppParms;
 		ppParms.hStart = hStart;

@@ -182,6 +182,12 @@
     <Filter Include="Source Files\HexEditor">
       <UniqueIdentifier>{0daef47f-a6b0-4dc2-9ec4-5ac54a0aea35}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\CRC">
+      <UniqueIdentifier>{88e4822f-e7db-46ab-a7c7-40af0b78faaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CRC">
+      <UniqueIdentifier>{0e5d6c1b-d721-4dbc-9e17-942568ca6a79}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Strings\MXStringDecoder.cpp">
@@ -586,6 +592,12 @@
     <ClCompile Include="Src\Layouts\MXMoveAddressesWindowLayout.cpp">
       <Filter>Source Files\Layouts</Filter>
     </ClCompile>
+    <ClCompile Include="Src\CRC\MXCrc.cpp">
+      <Filter>Source Files\CRC</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXDeuHexMachinaWindowLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -912,6 +924,12 @@
       <Filter>Header Files\FoundAddresses</Filter>
     </ClInclude>
     <ClInclude Include="Src\Layouts\MXMoveAddressesWindowLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\CRC\MXCrc.h">
+      <Filter>Header Files\CRC</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXDeuHexMachinaWindowLayout.h">
       <Filter>Header Files\Layouts</Filter>
     </ClInclude>
   </ItemGroup>

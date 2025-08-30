@@ -9,6 +9,8 @@
 
 
 #define LSW_WIN2CLASS( H )					reinterpret_cast<CWidget *>(::GetWindowLongPtrW( H, GWLP_USERDATA ))
+#define LSW_TOTAL_INTERNAL_CUSTOM_COMMANDS	0x100
+#define LSW_USER							(WM_USER + LSW_TOTAL_INTERNAL_CUSTOM_COMMANDS)
 
 namespace lsw {
 
@@ -32,6 +34,11 @@ namespace lsw {
 			LSW_TAB_NM_BASE					= (0U - 3048U),
 			LSW_TAB_NM_CLOSE				= (LSW_TAB_NM_BASE - 0),
 			LSW_TAB_NM_CHECK,
+		};
+
+		enum LSN_CUSTOM_COMMANDS {
+			// We have up to LSW_TOTAL_INTERNAL_CUSTOM_COMMANDS commands.
+			LSW_BN_COLOR_CHANGED			= WM_USER,
 		};
 
 
@@ -326,6 +333,9 @@ namespace lsw {
 
 		// Returns true if this is a CButton class.
 		virtual bool						IsButton() const { return false; }
+
+		// Returns true if this is a CColorButton class.
+		virtual bool						IsColorButton() const { return false; }
 
 		// Returns true if this is a CCheckButton class.
 		virtual bool						IsCheckButton() const { return false; }

@@ -55,7 +55,7 @@ namespace mx {
 
 		// Custom messages.
 		enum MX_CUSTOM_MESSAGE : uint16_t {
-			MX_CM_UPDATE_FA					= WM_USER + 0x0000,
+			MX_CM_UPDATE_FA					= LSW_USER + 0x0000,
 			MX_CM_HOTKEY,
 			MX_CM_HOOKKEY,
 			MX_CM_DETATCHED,

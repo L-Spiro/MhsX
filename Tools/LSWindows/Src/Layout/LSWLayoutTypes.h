@@ -7,6 +7,7 @@ namespace lsw {
 	enum LSW_LAYOUTTYPES : DWORD {
 		LSW_LT_WIDGET,
 		LSW_LT_BUTTON,							// WC_BUTTONW
+		LSW_LT_COLORBUTTON,						// WC_BUTTONW
 		LSW_LT_CHECK,							// WC_BUTTONW
 		LSW_LT_CHILDWINDOW,						// lsw::CBase::ChildWindowAtom()
 		LSW_LT_COMBOBOX,						// WC_COMBOBOXW

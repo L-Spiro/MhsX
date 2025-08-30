@@ -22,7 +22,7 @@
 #define _WIN32_IE							0x0601
 #define WINVER								0x0601
 #define _WIN32_WINNT						0x0601
-#define WIN32_LEAN_AND_MEAN
+//#define WIN32_LEAN_AND_MEAN
 #define OEMRESOURCE							// For OBM_* bitmaps etc.
 #define NOMINMAX
 #include <Windows.h>

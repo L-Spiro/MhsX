@@ -41,6 +41,7 @@ namespace mx {
 		MX_STRING_THEORY_OPERATIONS,
 		MX_STRING_THEORY,
 		MX_FLOATING_POINT_STUDIO,
+		MX_DEUS_HEX_MACHINA,
 	};
 
 	class CLayoutManager : public lsw::CLayoutManager {

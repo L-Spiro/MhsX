@@ -207,7 +207,7 @@ namespace mx {
 			MX_FAEI_GENERAL_PAGE,							// dwParentId
 		},
 		{
-			LSW_LT_BUTTON,									// ltType
+			LSW_LT_COLORBUTTON,								// ltType
 			MX_FAEI_GENERAL_COLOR_BUTTON,					// wId
 			WC_BUTTONW,										// lpwcClass
 			TRUE,											// bEnabled
@@ -218,8 +218,8 @@ namespace mx {
 			MX_DEF_BUTTON_HEIGHT,							// dwHeight
 			MX_BUTTONSTYLE,									// dwStyle
 			0,												// dwStyleEx
-			nullptr,										// pwcText
-			0,												// sTextLen
+			MX_MAKE_WCHAR( _T_A79767ED_Color ),				// pwcText
+			_LEN_A79767ED,									// sTextLen
 			MX_FAEI_GENERAL_PAGE,							// dwParentId
 		},
 
