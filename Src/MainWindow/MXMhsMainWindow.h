@@ -40,11 +40,13 @@ namespace mx {
 			MX_I_ADDENTRY,
 			MX_I_OPENENTRY,
 			MX_I_SAVEENTRY,
+			MX_I_SAVEENTRYAS,
 
 			MX_I_DELETEENTRY,
 			MX_I_DELETEALL,
 			MX_I_LOCK,
 			MX_I_UNLOCK,
+			MX_I_LOCKONCE,
 
 			MX_I_EDIT,
 
@@ -233,6 +235,9 @@ namespace mx {
 
 		// Unlocks all items.
 		void								UnlockAll();
+
+		// Writes the lock value once.
+		void								WriteOnce();
 
 		// Move selected items up.
 		void								MoveUp();

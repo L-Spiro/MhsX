@@ -63,12 +63,14 @@ namespace mx {
 			{ L"1", MX_I_ADDENTRY },
 			{ L"52", MX_I_OPENENTRY },
 			{ L"22", MX_I_SAVEENTRY },
+			{ L"86", MX_I_SAVEENTRYAS },
 
 			{ L"33", MX_I_DELETEENTRY },
 			{ L"31", MX_I_DELETEALL },
 
 			{ L"27", MX_I_LOCK },
 			{ L"28", MX_I_UNLOCK },
+			{ L"127", MX_I_LOCKONCE },
 
 			{ L"96", MX_I_EDIT },
 
@@ -149,22 +151,24 @@ namespace mx {
 #define MX_TOOL_STR( TXT )						0
 		const TBBUTTON bButtons[] = {
 			// iBitmap							idCommand									fsState				fsStyle			bReserved	dwData	iString
-			{ m_iImageMap[MX_I_OPENPROCESS],	Layout::MX_MWMI_OPENPROCESS,		TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Open Process" ) },
-			{ m_iImageMap[MX_I_OPENFORDEBUG],	Layout::MX_MWMI_OPENFORDEBUG,	TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Open for Debug") },
+			{ m_iImageMap[MX_I_OPENPROCESS],	Layout::MX_MWMI_OPENPROCESS,				TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Open Process" ) },
+			{ m_iImageMap[MX_I_OPENFORDEBUG],	Layout::MX_MWMI_OPENFORDEBUG,				TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Open for Debug") },
 			{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
-			{ m_iImageMap[MX_I_ADDENTRY],		Layout::MX_MWMI_ADDENTRY,		TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Add Entry" ) },
-			{ m_iImageMap[MX_I_OPENENTRY],		Layout::MX_MWMI_OPENSAVEFILE,	TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Open Save File" ) },
-			{ m_iImageMap[MX_I_SAVEENTRY],		Layout::MX_MWMI_SAVE,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Save Entries" ) },
+			{ m_iImageMap[MX_I_ADDENTRY],		Layout::MX_MWMI_ADDENTRY,					TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Add Entry" ) },
+			{ m_iImageMap[MX_I_OPENENTRY],		Layout::MX_MWMI_OPENSAVEFILE,				TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Open Save File" ) },
+			{ m_iImageMap[MX_I_SAVEENTRY],		Layout::MX_MWMI_SAVE,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Save Entries" ) },
+			{ m_iImageMap[MX_I_SAVEENTRYAS],	Layout::MX_MWMI_SAVEAS,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Save Entries As" ) },
 			{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
-			{ m_iImageMap[MX_I_DELETEENTRY],	Layout::MX_MWMI_DELETE,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Delete Entry" ) },
-			{ m_iImageMap[MX_I_DELETEALL],		Layout::MX_MWMI_DELETEALL,		TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Delete All Entries" ) },
+			{ m_iImageMap[MX_I_DELETEENTRY],	Layout::MX_MWMI_DELETE,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Delete Entry" ) },
+			{ m_iImageMap[MX_I_DELETEALL],		Layout::MX_MWMI_DELETEALL,					TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Delete All Entries" ) },
 			{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
-			{ m_iImageMap[MX_I_LOCK],			Layout::MX_MWMI_LOCK,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Lock Selected" ) },
-			{ m_iImageMap[MX_I_UNLOCK],			Layout::MX_MWMI_UNLOCK,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Unlock Selected" ) },
+			{ m_iImageMap[MX_I_LOCK],			Layout::MX_MWMI_LOCK,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Lock Selected" ) },
+			{ m_iImageMap[MX_I_UNLOCK],			Layout::MX_MWMI_UNLOCK,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Unlock Selected" ) },
+			{ m_iImageMap[MX_I_LOCKONCE],		Layout::MX_MWMI_LOCK_ONCE,					TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Write Once" ) },
 			{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
-			{ m_iImageMap[MX_I_EDIT],			Layout::MX_MWMI_EDIT,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Edit Selected" ) },
+			{ m_iImageMap[MX_I_EDIT],			Layout::MX_MWMI_EDIT,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Edit Selected" ) },
 			{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
-			{ m_iImageMap[MX_I_OPTIONS],		Layout::MX_MWMI_OPTIONS,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Options" ) },
+			{ m_iImageMap[MX_I_OPTIONS],		Layout::MX_MWMI_OPTIONS,					TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Options" ) },
 		};
 #undef MX_TOOL_STR
 
@@ -380,6 +384,10 @@ namespace mx {
 			}
 			case Layout::MX_MWMI_UNLOCK_ALL : {
 				UnlockAll();
+				break;
+			}
+			case Layout::MX_MWMI_LOCK_ONCE : {
+				WriteOnce();
 				break;
 			}
 			case Layout::MX_MWMI_EDIT : {
@@ -882,6 +890,26 @@ namespace mx {
 						if ( pfabThis && pfabThis->Type() == MX_FAT_FOUND_ADDRESS ) {
 							reinterpret_cast<CFoundAddress *>(pfabThis)->SetLocked( false );
 							pwTree->SetItemColor( hItem, pfabThis->Color() );
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Writes the lock value once.
+	void CMhsMainWindow::WriteOnce() {
+		auto pwTree = MainTreeView();
+		if ( pwTree ) {
+			auto famMan = m_pmhMemHack->FoundAddressManager();					// Locks the Found Address Manager for modifications.
+			std::vector<LPARAM> vSelected;
+			if ( pwTree->GatherSelectedLParam( vSelected, true ) >= 1 ) {		// At least one thing is selected.
+				for ( auto I = vSelected.size(); I--; ) {
+					auto hItem = pwTree->GetByLParam( vSelected[I] );
+					if ( hItem ) {
+						auto pfabThis = famMan->GetById( size_t( vSelected[I] ) );
+						if ( pfabThis && pfabThis->Type() == MX_FAT_FOUND_ADDRESS ) {
+							reinterpret_cast<CFoundAddress *>(pfabThis)->ApplyLock( true );
 						}
 					}
 				}

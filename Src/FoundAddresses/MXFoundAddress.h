@@ -153,7 +153,7 @@ namespace mx {
 		virtual bool										SimpleAddress() const { return m_bBasicAddress; }
 
 		// Applies the lock.  A return of false indicates the process could not be written (or potentially read if needed).
-		virtual bool										ApplyLock();
+		virtual bool										ApplyLock( bool _bEvenIfNotLocked = false );
 
 		// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
 		virtual bool										SaveSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary ) const;

@@ -172,8 +172,8 @@ namespace mx {
 	}
 
 	// Applies the lock.  A return of false indicates the process could not be written (or potentially read if needed).
-	bool CFoundAddress::ApplyLock() {
-		if ( !m_bLocked ) { return true; }
+	bool CFoundAddress::ApplyLock( bool _bEvenIfNotLocked ) {
+		if ( !(m_bLocked || _bEvenIfNotLocked) ) { return true; }
 		bool bSuccess = false;
 		auto ui64Addr = FinalTargetAddress( &bSuccess );
 		if MX_UNLIKELY( !bSuccess ) { return false; }
