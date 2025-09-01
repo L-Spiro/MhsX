@@ -21,77 +21,54 @@ namespace mx {
 		// Resets the object back to scratch.
 		void													Reset();
 
+		// Sets the segment file size.
+		void													SetSegmentFileSize( size_t _sSize ) { m_sSegmentFileSize = _sSize; }
+
 
 	protected :
+		// == Enumerations.
+		enum MX_SECTION_TYPE {
+			MX_ST_ORIGINAL_FILE,								// A section from the original file.
+			MX_ST_SEGMENT,										// A section from a segment file.
+		};
+
+
 		// == Types.
-		// A single file map with a single file view.
-		//struct MX_FILE_MAP {
-		//	MX_FILE_MAP() :
-		//		ui32Id( ++s_nInstanceCount ) {
-		//	}
+		// A modification segment addreess.
+		struct MX_SEGMENT_ADDRESS {
+			size_t												sFile;											// Index into m_vEditedMaps.
+			uint64_t											ui64Offset;										// Offset into the file.
+		};
 
+		// A snippet from the original file.
+		struct MX_ORIGINAL_ADDRESS {
+			uint64_t											ui64Offset;										// Offset into the file.
+		};
 
-		//	// == Functions.
-		//	// Open a file and create a map.
-		//	bool												OpenFile( const std::filesystem::path &_pFile );
-
-		//	// Closes the current file.
-		//	void												Close();
-
-		//	// Gets the size of the file.
-		//	uint64_t											Size() const;
-
-		//	// Map a region of the file.
-		//	bool												MapRegion( uint64_t _ui64Offset, DWORD _dwSize );
-
-		//	// Maps a full file.
-		//	bool												MapFullRegion() { return MapRegion( 0, Size() ); }
-
-		//	// Unmap.
-		//	void												Upmap();
-
-		//	// Gets the ID of this map.
-		//	uint32_t											Id() const { return ui32Id; }
-
-
-		//protected :
-		//	// == Members.
-		//	// Size of the file.
-		//	mutable uint64_t									ui64Size = 0;
-		//	// Map start.
-		//	uint64_t											ui64MapStart = UINT64_MAX;
-		//	// The path to the file.
-		//	std::filesystem::path								pPath;
-		//	// The actual file handle.
-		//	HANDLE												hFile = INVALID_HANDLE_VALUE;
-		//	// File-mapping handle.
-		//	HANDLE												hMap = INVALID_HANDLE_VALUE;
-		//	// Mapped bytes.
-		//	mutable uint8_t *									pui8MapBuffer = nullptr;
-		//	// Mapped size.
-		//	uint32_t											ui32MapSize = 0;
-		//	// ID.
-		//	uint32_t											ui32Id = 0;
-		//	// Is the file 0-sized?
-		//	bool												bIsEmpty = true;
-
-
-		//	// == Functions.
-		//	// Creates the file map.
-		//	bool												CreateFileMap();
-
-		//private :
-		//	// == Members.
-		//	inline static std::atomic<size_t>					s_nInstanceCount{ 0 };
-		//};
+		// A logical section of the file.
+		struct MX_LOGICAL_SECTION {
+			MX_SECTION_TYPE										stType;											// A segment from the original file or from a segment file.
+			uint64_t											ui64Start;										// The logical starting point of the section.
+			uint64_t											ui64Size;										// The logical size of the section.
+			union {
+				MX_ORIGINAL_ADDRESS								oaOriginalAddress;								// The address inside the original file.
+				MX_SEGMENT_ADDRESS								saSegmentAddress;								// The address inside a segment file.
+			}													u;
+		};
 
 
 		// == Members.
 		CFileMap												m_fmMainMap;									// The map for the main file being edited.
-		std::vector<CFileMap>									m_vEditedMaps;									// Mappings of edited copies.
+		std::vector<std::unique_ptr<CFileMap>>					m_vEditedMaps;									// Mappings of edited copies.
 		std::vector<uint64_t>									m_vActiveSegments;								// List of edited segments currently loaded into RAM.  Sorted by most-recent access.
 		std::filesystem::path									m_pEditDiractory;								// Folder where edited copies go.
+		std::vector<MX_LOGICAL_SECTION>							m_vLogicalMap;									// The logical file map.
+		size_t													m_sSegmentFileSize = 24 * 1024 * 1024;			// Segment file size.  Defaults to 24 megabytes.
 
+
+		// == Functions.
+		// Updates the list of active segments.  Call within a try/catch block.
+		void													UpdateActiveSegments( uint64_t _ui64Id, size_t _sMax );
 	};
 
 }	// namespace mx

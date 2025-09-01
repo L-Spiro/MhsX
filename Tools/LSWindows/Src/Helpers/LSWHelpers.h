@@ -972,6 +972,19 @@ namespace lsw {
 			return RGB( bR, bG, bB );
 		}
 
+		
+
+		/**
+		 * \brief Chooses black or white text for best contrast against a given background color.
+		 *
+		 * \param _crBack Background color to evaluate.
+		 * \return Returns RGB( 0, 0, 0 ) or RGB( 255, 255, 255 ) for best legibility.
+		 */
+		static inline COLORREF				ContrastingTextColor( COLORREF _crBack ) {
+			const int iY = ( (GetRValue( _crBack ) * 299) + (GetGValue( _crBack ) * 587) + (GetBValue( _crBack ) * 114) ) / 1000;
+			return iY >= 140 ? RGB( 0, 0, 0 ) : RGB( 255, 255, 255 );
+		}
+
 		/**
 		 * Gets the average character width for the font set on the given HDC.
 		 *

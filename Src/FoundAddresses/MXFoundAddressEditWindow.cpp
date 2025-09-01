@@ -2,6 +2,7 @@
 #include "../Layouts/MXFoundAddressEditLayout.h"
 #include "../MemHack/MXMemHack.h"
 
+#include <Button/LSWColorButton.h>
 #include <Tab/LSWTab.h>
 
 

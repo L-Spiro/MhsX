@@ -34,6 +34,7 @@ namespace mx {
 			if ( _peJson ) {
 				MX_JSON_NUMBER( _DEC_S_2ABD43F2_Id, m_sId, _peJson );
 				MX_JSON_NUMBER( _DEC_S_3A226579_Parent, m_sParent, _peJson );
+				MX_JSON_NUMBER( _DEC_S_A79767ED_Color, (*reinterpret_cast<const uint32_t *>(&m_rgbqColor)), _peJson );
 				
 				{
 					_peJson->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
@@ -52,6 +53,7 @@ namespace mx {
 			else {
 				if ( !_psBinary->WriteUi32( m_sId ) ) { return false; }
 				if ( !_psBinary->WriteUi32( m_sParent ) ) { return false; }
+				if ( !_psBinary->WriteUi32( (*reinterpret_cast<const uint32_t *>(&m_rgbqColor)) ) ) { return false; }
 
 				if ( !_psBinary->WriteStringU16( m_wsName ) ) { return false; }
 
@@ -74,6 +76,7 @@ namespace mx {
 				const lson::CJsonContainer::LSON_JSON_VALUE * pjvVal;
 				MX_JSON_GET_NUMBER( _DEC_S_2ABD43F2_Id, _sId, size_t, pjvVal, _pjJson );
 				MX_JSON_GET_NUMBER( _DEC_S_3A226579_Parent, m_sParent, size_t, pjvVal, _pjJson );
+				MX_JSON_GET_NUMBER( _DEC_S_A79767ED_Color,  (*reinterpret_cast<uint32_t *>(&m_rgbqColor)), uint32_t, pjvVal, _pjJson );
 
 				MX_JSON_GET_STRING( _DEC_S_FE11D138_Name, m_wsName, pjvVal, _pjJson );
 
@@ -93,6 +96,9 @@ namespace mx {
 				_sId = size_t( ui32Tmp );
 				if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
 				m_sParent = size_t( ui32Tmp );
+				if ( _ui32Version >= 2 ) {
+					if ( !_psBinary->ReadUi32( (*reinterpret_cast<uint32_t *>(&m_rgbqColor)) ) ) { return false; }
+				}
 
 				CSecureWString * pwsStr = reinterpret_cast<CSecureWString *>(&m_wsName);
 				if ( !_psBinary->ReadStringU16( (*pwsStr) ) ) { return false; }

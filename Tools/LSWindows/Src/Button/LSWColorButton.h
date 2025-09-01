@@ -17,8 +17,58 @@ namespace lsw {
 		// Determines the type of control this is.
 		virtual uint32_t							WidgetType() const { return LSW_LT_COLORBUTTON; }
 
-		// Returns true if this is a CColorButton class.
+		/**
+		 * Returns true if this is a CColorButton class.
+		 * 
+		 * \return Returns true.
+		 **/
 		virtual bool								IsColorButton() const { return true; }
+
+		/**
+		 * Sets the current color.
+		 * 
+		 * \param _crColor The color to set.
+		 **/
+		inline void									SetColor( const COLORREF &_crColor ) { m_crColor = _crColor; }
+
+		/**
+		 * Gets the current color.
+		 * 
+		 * \return Returns the current color.
+		 **/
+		inline COLORREF								GetColor() const { return m_crColor; }
+
+		/**
+		 * Sets the color history.
+		 * 
+		 * \param _vColors A vector containing the colors to set.  Should be sized to 16.
+		 **/
+		inline void									SetColors( const std::vector<COLORREF> &_vColors ) {
+			auto sSize = std::clamp<size_t>( _vColors.size(), 0, LSW_ELEMENTS( m_acrCust ) );
+			std::memcpy( m_acrCust, _vColors.data(), sSize * sizeof( COLORREF ) );
+		}
+
+		/**
+		 * Gets the history colors.
+		 * 
+		 * \return Returns the history colors.
+		 **/
+		inline std::vector<COLORREF>				GetColors() const {
+			std::vector<COLORREF> vRet;
+			try {
+				vRet.resize( LSW_ELEMENTS( m_acrCust ) );
+				std::memcpy( vRet.data(), m_acrCust, sizeof( m_acrCust ) );
+			}
+			catch ( ... ) {}
+			return vRet;
+		}
+
+		/**
+		 * Determines if a color has been selected.
+		 * 
+		 * \return Returns TRUE if a color has been selected.
+		 **/
+		inline BOOL									ColorPicked() const { return m_bColorWasSelected; }
 
 
 	protected :
@@ -29,28 +79,18 @@ namespace lsw {
 			RGB( 0, 255, 0 ), RGB( 0, 255, 128 ), RGB( 0, 255, 255 ), RGB( 0, 128, 255 ),
 			RGB( 0, 0, 255 ), RGB( 128, 0, 255 ), RGB( 255, 0, 255 ), RGB( 255, 0, 128 )
 		};
-
-		COLORREF									m_crColor;								/**< The current face color of the button. */
+		HFONT										m_hFont = NULL;							/**< The text font. */
+		COLORREF									m_crColor = RGB( 0xFF, 0xFF, 0xFF );	/**< The current face color of the button. */
 		WCHAR										m_wsText[256];							/**< Cached window text used during painting. */
-		BOOL										m_bHot;									/**< Hover flag (mouse inside client area). */
-		BOOL										m_bPressed;								/**< Pressed flag (mouse down inside). */
-		BOOL										m_bFocus;								/**< Focus flag. */
+		BOOL										m_bHot = FALSE;							/**< Hover flag (mouse inside client area). */
+		BOOL										m_bPressed = FALSE;						/**< Pressed flag (mouse down inside). */
+		BOOL										m_bFocus = FALSE;						/**< Focus flag. */
+		BOOL										m_bColorWasSelected = FALSE;			/**< Set to TRUE if a color is chosen. */
 
 
 		// == Functions.
 		// Setting the HWND after the control has been created.
 		virtual void								InitControl( HWND _hWnd );
-
-		/**
-		 * \brief Chooses black or white text for best contrast against a given background color.
-		 *
-		 * \param _crBack Background color to evaluate.
-		 * \return Returns RGB( 0, 0, 0 ) or RGB( 255, 255, 255 ) for best legibility.
-		 */
-		inline COLORREF								ContrastingTextColor( COLORREF _crBack ) {
-			const int iY = ( (GetRValue( _crBack ) * 299) + (GetGValue( _crBack ) * 587) + (GetBValue( _crBack ) * 114) ) / 1000;
-			return iY >= 140 ? RGB( 0, 0, 0 ) : RGB( 255, 255, 255 );
-		}
 
 		/**
 		 * \brief Draws the colored button face, border, text, and focus cues.

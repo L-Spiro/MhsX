@@ -1258,6 +1258,7 @@ namespace lsw {
 			RGBQUAD rgbColor;
 			if ( ptiItem->Value().rgbColor.rgbReserved == 0xFF ) {
 				_lpcdParm->clrTextBk = RGB( ptiItem->Value().rgbColor.rgbRed, ptiItem->Value().rgbColor.rgbGreen, ptiItem->Value().rgbColor.rgbBlue );
+				_lpcdParm->clrText = CHelpers::ContrastingTextColor( _lpcdParm->clrTextBk );
 			}
 			else if ( ptiItem->Value().rgbColor.rgbReserved == 0x00 ) {
 				if ( _lpcdParm->nmcd.dwItemSpec % 2 == 0 ) {
@@ -1267,7 +1268,7 @@ namespace lsw {
 			}
 			else {
 				if ( _lpcdParm->nmcd.dwItemSpec % 2 == 0 ) {
-					_lpcdParm->clrText = ::GetSysColor( COLOR_WINDOWTEXT );
+					//_lpcdParm->clrText = ::GetSysColor( COLOR_WINDOWTEXT );
 					//_lpcdParm->clrTextBk = RGB( 0xF2, 0xFA, 0xFF );
 					rgbColor.rgbRed = bDefR;
 					rgbColor.rgbGreen = bDefG;
@@ -1280,10 +1281,19 @@ namespace lsw {
 					rgbColor.rgbBlue = GetBValue( aBg );
 				}
 
-				_lpcdParm->clrTextBk = CHelpers::MixColorRef( rgbColor.rgbRed, ptiItem->Value().rgbColor.rgbRed,
-					rgbColor.rgbGreen, ptiItem->Value().rgbColor.rgbGreen,
-					rgbColor.rgbBlue, ptiItem->Value().rgbColor.rgbBlue,
-					ptiItem->Value().rgbColor.rgbReserved / 255.0f );
+				uint64_t ui64Key = (static_cast<uint64_t>(*reinterpret_cast<uint32_t *>(&rgbColor)) << 32ULL) | (*reinterpret_cast<uint32_t *>(&ptiItem->Value().rgbColor));
+				auto aKey = m_mColorLookup.find( ui64Key );
+				if ( aKey == m_mColorLookup.end() ) {
+					_lpcdParm->clrTextBk = CHelpers::MixColorRef( rgbColor.rgbRed, ptiItem->Value().rgbColor.rgbRed,
+						rgbColor.rgbGreen, ptiItem->Value().rgbColor.rgbGreen,
+						rgbColor.rgbBlue, ptiItem->Value().rgbColor.rgbBlue,
+						ptiItem->Value().rgbColor.rgbReserved / 255.0f );
+					m_mColorLookup[ui64Key] = _lpcdParm->clrTextBk;
+				}
+				else {
+					_lpcdParm->clrTextBk = aKey->second;
+				}
+				_lpcdParm->clrText = CHelpers::ContrastingTextColor( _lpcdParm->clrTextBk );
 			}
 		}
 		return (CDRF_DODEFAULT | CDRF_NOTIFYPOSTPAINT);

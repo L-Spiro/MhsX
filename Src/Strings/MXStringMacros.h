@@ -18694,3 +18694,21 @@
 #define _DEC_S_6ADD8CE5_E_xit mx::CStringDecoder::DecodeToString( _T_6ADD8CE5_E_xit, _LEN_6ADD8CE5 )
 #define _DEC_WS_6ADD8CE5_E_xit mx::CStringDecoder::DecodeToWString( _T_6ADD8CE5_E_xit, _LEN_6ADD8CE5 )
 
+// PublicId
+
+#define _T_F0717BC3_PublicId "\xD8\x43\x32\x07\xFB\x2C\xD7\x2B"
+#define _LEN_F0717BC3 8
+#define _T_LEN_F0717BC3_PublicId _T_F0717BC3_PublicId, _LEN_F0717BC3
+#define _DEC_F0717BC3_PublicId( STR ) mx::CStringDecoder::Decode( _T_F0717BC3_PublicId, _LEN_F0717BC3, STR )
+#define _DEC_S_F0717BC3_PublicId mx::CStringDecoder::DecodeToString( _T_F0717BC3_PublicId, _LEN_F0717BC3 )
+#define _DEC_WS_F0717BC3_PublicId mx::CStringDecoder::DecodeToWString( _T_F0717BC3_PublicId, _LEN_F0717BC3 )
+
+// ColorHistory
+
+#define _T_2C1B6B5E_ColorHistory "\xCB\x3D\x3C\x0A\x04\x11\xF7\x3A\x44\x37\x3B\x47"
+#define _LEN_2C1B6B5E 12
+#define _T_LEN_2C1B6B5E_ColorHistory _T_2C1B6B5E_ColorHistory, _LEN_2C1B6B5E
+#define _DEC_2C1B6B5E_ColorHistory( STR ) mx::CStringDecoder::Decode( _T_2C1B6B5E_ColorHistory, _LEN_2C1B6B5E, STR )
+#define _DEC_S_2C1B6B5E_ColorHistory mx::CStringDecoder::DecodeToString( _T_2C1B6B5E_ColorHistory, _LEN_2C1B6B5E )
+#define _DEC_WS_2C1B6B5E_ColorHistory mx::CStringDecoder::DecodeToWString( _T_2C1B6B5E_ColorHistory, _LEN_2C1B6B5E )
+

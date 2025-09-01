@@ -52,6 +52,12 @@ namespace mx {
 		// Sets the data type as a string.
 		void												SetAsString( const std::string &_sLockString, UINT _uiCodePage );
 
+		// Public ID.
+		inline uint32_t										PublicId() const { return m_ui32PublicId; }
+
+		// Sets the public ID.
+		inline void											SetPublicIf( uint32_t _ui32Id ) { m_ui32PublicId = _ui32Id; }
+
 		// Gets the Address text.
 		virtual std::wstring								AddressText() const;
 
@@ -108,6 +114,12 @@ namespace mx {
 		virtual const RGBQUAD &								Color() const {
 			return Locked() ? m_rgbqLockedColor : m_rgbqColor;
 		}
+
+		// Gets the base color (doesn't depend on being locked or not).
+		inline const RGBQUAD &								BaseColor() const { return m_rgbqColor; }
+
+		// Gets the locked color.
+		inline const RGBQUAD &								LockedColor() const { return m_rgbqLockedColor; }
 
 		// Sets the Pre-Processing Type.  Call within a try/catch block.
 		inline void											SetPreProcessing( CUtilities::MX_BYTESWAP _bsByteSwap ) { m_bsByteSwap = _bsByteSwap; PrepareValueStructures(); }
@@ -172,6 +184,8 @@ namespace mx {
 		uint64_t											m_ui64Address = 0;
 		// The buffered address.
 		mutable uint64_t									m_ui64BufferedAddress = 0;
+		// The public ID.
+		uint32_t											m_ui32PublicId = 0;
 		// The color of the item in the display.  If rgbReserved is 0, use the default display color.
 		RGBQUAD												m_rgbqLockedColor = { .rgbBlue = 0x06, .rgbGreen = 0xEC, .rgbRed = 0x36, .rgbReserved = 0x9F };
 		// The size of the data type (for m_vtValueType == CUtilities::MX_VT_DATA_TYPE).

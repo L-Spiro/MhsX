@@ -198,7 +198,7 @@ namespace mx {
 				lson::CJson::CreateStringElement( _DEC_S_6E13FA7E_AddressExpression, ee::CExpEval::ToJsonString( m_sAddressTxt ), (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
 
 				MX_JSON_NUMBER( _DEC_S_C2F3561D_Address, m_ui64Address, _peJson );
-				MX_JSON_NUMBER( _DEC_S_A79767ED_Color, (*reinterpret_cast<const uint32_t *>(&m_rgbqLockedColor)), _peJson );
+				MX_JSON_NUMBER( _DEC_S_F0717BC3_PublicId, m_ui32PublicId, _peJson );
 
 				MX_JSON_NUMBER( _DEC_S_B083E9A2_ValueType, m_vtValueType, _peJson );
 				MX_JSON_NUMBER( _DEC_S_DC7D620E_DataType, m_dtDataType, _peJson );
@@ -248,7 +248,7 @@ namespace mx {
 				if ( !_psBinary->WriteString( m_sAddressTxt ) ) { return false; }
 
 				if ( !_psBinary->Write( m_ui64Address ) ) { return false; }
-				if ( !_psBinary->Write( (*reinterpret_cast<const uint32_t *>(&m_rgbqLockedColor)) ) ) { return false; }
+				if ( !_psBinary->Write( m_ui32PublicId ) ) { return false; }
 
 				if ( !_psBinary->Write( m_vtValueType ) ) { return false; }
 				if ( !_psBinary->Write( m_dtDataType ) ) { return false; }
@@ -297,7 +297,7 @@ namespace mx {
 				m_sAddressTxt = ee::CExpEval::ToUtf8( swsTmp );
 
 				MX_JSON_GET_NUMBER( _DEC_S_C2F3561D_Address, m_ui64Address, uint64_t, pjvVal, _pjJson );
-				MX_JSON_GET_NUMBER( _DEC_S_A79767ED_Color, (*reinterpret_cast<uint32_t *>(&m_rgbqLockedColor)), uint32_t, pjvVal, _pjJson );
+				MX_JSON_GET_NUMBER( _DEC_S_F0717BC3_PublicId, m_ui32PublicId, uint32_t, pjvVal, _pjJson );
 
 				MX_JSON_GET_NUMBER( _DEC_S_B083E9A2_ValueType, m_vtValueType, CUtilities::MX_VALUE_TYPE, pjvVal, _pjJson );
 				MX_JSON_GET_NUMBER( _DEC_S_DC7D620E_DataType, m_dtDataType, CUtilities::MX_DATA_TYPES, pjvVal, _pjJson );
@@ -363,7 +363,14 @@ namespace mx {
 				if ( !_psBinary->ReadString( (*pwsStr) ) ) { return false; }
 
 				if ( !_psBinary->Read( m_ui64Address ) ) { return false; }
-				if ( !_psBinary->Read( (*reinterpret_cast<uint32_t *>(&m_rgbqLockedColor)) ) ) { return false; }
+				if ( _ui32Version <= 2 ) {
+					uint32_t ui32Discard;
+					if ( !_psBinary->Read( ui32Discard ) ) { return false; }
+				}
+				if ( _ui32Version >= 4 ) {
+					if ( !_psBinary->Read( m_ui32PublicId ) ) { return false; }
+				}
+				else { m_ui32PublicId = 0; }
 
 				if ( !_psBinary->Read( m_vtValueType ) ) { return false; }
 				if ( !_psBinary->Read( m_dtDataType ) ) { return false; }

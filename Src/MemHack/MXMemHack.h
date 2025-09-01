@@ -8,8 +8,9 @@
 #include "../RegEx/MXOnigurumaSystem.h"
 #include "../Search/MXSearcher.h"
 #include "../Utilities/MXStream.h"
-#include <CriticalSection/LSWCriticalSection.h>
 #include "MXProcess.h"
+
+#include <CriticalSection/LSWCriticalSection.h>
 #include <LSONJson.h>
 #include <LSWWin.h>
 #include <Helpers/LSWHelpers.h>

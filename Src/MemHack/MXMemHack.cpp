@@ -1257,6 +1257,19 @@ namespace mx {
 					}
 				}
 			}
+
+
+			_peJson->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+			lson::CJson::CreateArrayElement( _DEC_S_2C1B6B5E_ColorHistory, (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
+			{
+				lson::CJson::LSON_ELEMENT * peArray = _peJson->vObjectMembers[_peJson->vObjectMembers.size()-1].get();
+				for ( size_t I = 0; I < _oOptions.vEditColorHistory.size(); ++I ) {
+					{
+						peArray->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+						lson::CJson::CreateNumberElement( std::to_string( I ), _oOptions.vEditColorHistory[I], (*peArray->vObjectMembers[peArray->vObjectMembers.size()-1]) );
+					}
+				}
+			}
 		}
 		else {
 			if ( !_psBinary->WriteUi32( _oOptions.vEditDescriptionHistory.size() ) ) { return false; }
@@ -1310,6 +1323,11 @@ namespace mx {
 			for ( size_t I = 0; I < _oOptions.vMoveAddrByHistory.size(); ++I ) {
 				if ( !_psBinary->WriteStringU16( _oOptions.vMoveAddrByHistory[I] ) ) { return false; }
 			}
+
+			if ( !_psBinary->WriteUi8( _oOptions.vEditColorHistory.size() ) ) { return false; }
+			for ( size_t I = 0; I < _oOptions.vEditColorHistory.size(); ++I ) {
+				if ( !_psBinary->WriteUi32( _oOptions.vEditColorHistory[I] ) ) { return false; }
+			}
 		}
 		return true;
 	}
@@ -1317,214 +1335,237 @@ namespace mx {
 	// Loads edit settings from either a JSON object or a byte buffer.
 	bool CMemHack::LoadEditSettings( const lson::CJsonContainer::LSON_JSON_VALUE * _pjJson, lson::CJsonContainer * _pjcContainer, CStream * _psBinary, MX_OPTIONS &_oOptions, uint32_t _ui32Version ) {
 		if ( nullptr == _pjJson && _psBinary == nullptr ) { return false; }
-		if ( _pjJson ) {
-			const lson::CJsonContainer::LSON_JSON_VALUE * pjvVal;
-			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_D9701309_EditDescrHistory );
-			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
-				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
-					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
-					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
-						CSecureString ssTmp;
-						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
-						_oOptions.vEditDescriptionHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+		try {
+			if ( _pjJson ) {
+				const lson::CJsonContainer::LSON_JSON_VALUE * pjvVal;
+				pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_D9701309_EditDescrHistory );
+				if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+					for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+						const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+						if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+							CSecureString ssTmp;
+							CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+							_oOptions.vEditDescriptionHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+						}
 					}
 				}
-			}
 
-			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_5D257711_EditCurValHistory );
-			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
-				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
-					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
-					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
-						CSecureString ssTmp;
-						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
-						_oOptions.vEditCurValHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+				pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_5D257711_EditCurValHistory );
+				if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+					for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+						const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+						if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+							CSecureString ssTmp;
+							CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+							_oOptions.vEditCurValHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+						}
 					}
 				}
-			}
 
-			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_EAA4CEA0_EditArrayLenHistory );
-			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
-				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
-					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
-					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
-						CSecureString ssTmp;
-						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
-						_oOptions.vEditArrayLengthHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+				pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_EAA4CEA0_EditArrayLenHistory );
+				if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+					for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+						const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+						if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+							CSecureString ssTmp;
+							CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+							_oOptions.vEditArrayLengthHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+						}
 					}
 				}
-			}
 
-			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_E812A96B_EditArrayStrideHistory );
-			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
-				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
-					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
-					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
-						CSecureString ssTmp;
-						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
-						_oOptions.vEditArrayStrideHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+				pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_E812A96B_EditArrayStrideHistory );
+				if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+					for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+						const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+						if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+							CSecureString ssTmp;
+							CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+							_oOptions.vEditArrayStrideHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+						}
 					}
 				}
-			}
 
-			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_606FA739_EditLockedLeftHistory );
-			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
-				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
-					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
-					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
-						CSecureString ssTmp;
-						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
-						_oOptions.vEditLockedLeftHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+				pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_606FA739_EditLockedLeftHistory );
+				if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+					for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+						const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+						if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+							CSecureString ssTmp;
+							CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+							_oOptions.vEditLockedLeftHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+						}
 					}
 				}
-			}
 
-			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_356C0745_EditLockedRightHistory );
-			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
-				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
-					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
-					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
-						CSecureString ssTmp;
-						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
-						_oOptions.vEditLockedRightHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+				pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_356C0745_EditLockedRightHistory );
+				if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+					for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+						const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+						if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+							CSecureString ssTmp;
+							CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+							_oOptions.vEditLockedRightHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+						}
 					}
 				}
-			}
 
-			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_5B6DE347_AddDescHistory );
-			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
-				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
-					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
-					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
-						CSecureString ssTmp;
-						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
-						_oOptions.vAddValDescriptionHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+				pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_5B6DE347_AddDescHistory );
+				if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+					for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+						const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+						if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+							CSecureString ssTmp;
+							CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+							_oOptions.vAddValDescriptionHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+						}
 					}
 				}
-			}
-			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_008F947E_AddAddressHistory );
-			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
-				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
-					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
-					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
-						CSecureString ssTmp;
-						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
-						_oOptions.vAddValAddrHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+				pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_008F947E_AddAddressHistory );
+				if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+					for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+						const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+						if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+							CSecureString ssTmp;
+							CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+							_oOptions.vAddValAddrHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+						}
 					}
 				}
-			}
 
 
-			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_4943A68F_MoveAddrFrom );
-			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
-				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
-					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
-					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
-						CSecureString ssTmp;
-						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
-						_oOptions.vMoveAddrSourceHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+				pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_4943A68F_MoveAddrFrom );
+				if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+					for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+						const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+						if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+							CSecureString ssTmp;
+							CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+							_oOptions.vMoveAddrSourceHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+						}
+					}
+				}
+				pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_F0F861F1_MoveAddrTo );
+				if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+					for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+						const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+						if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+							CSecureString ssTmp;
+							CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+							_oOptions.vMoveAddrTargetHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+						}
+					}
+				}
+				pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_18B46177_MoveAddrBy );
+				if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+					for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+						const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+						if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
+							CSecureString ssTmp;
+							CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
+							_oOptions.vMoveAddrByHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+						}
+					}
+				}
+
+
+				pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_2C1B6B5E_ColorHistory );
+				if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
+					for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
+						const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
+						if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_DECIMAL ) {
+							_oOptions.vEditColorHistory.push_back( COLORREF( std::round( jvArrayVal.u.dDecimal ) ) );
+						}
 					}
 				}
 			}
-			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_F0F861F1_MoveAddrTo );
-			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
-				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
-					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
-					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
-						CSecureString ssTmp;
-						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
-						_oOptions.vMoveAddrTargetHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
-					}
+			else {
+				uint32_t ui32Tmp;
+				if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+				for ( size_t I = 0; I < ui32Tmp; ++I ) {
+					CSecureWString wsTmp;
+					if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+					_oOptions.vEditDescriptionHistory.push_back( wsTmp );
 				}
-			}
-			pjvVal = _pjcContainer->GetMemberByName( (*_pjJson), _DEC_S_18B46177_MoveAddrBy );
-			if ( pjvVal && pjvVal->vtType == lson::CJsonContainer::LSON_VT_ARRAY ) {
-				for ( size_t I = 0; I < pjvVal->vArray.size(); ++I ) {
-					const lson::CJsonContainer::LSON_JSON_VALUE & jvArrayVal = _pjcContainer->GetValue( pjvVal->vArray[I] );
-					if ( jvArrayVal.vtType == lson::CJsonContainer::LSON_VT_STRING ) {
-						CSecureString ssTmp;
-						CUtilities::ResolveAllEscapes( _pjcContainer->GetString( jvArrayVal.u.stString ), ssTmp, true );
-						_oOptions.vMoveAddrByHistory.push_back( ee::CExpEval::ToUtf16( ssTmp ) );
+
+				if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+				for ( size_t I = 0; I < ui32Tmp; ++I ) {
+					CSecureWString wsTmp;
+					if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+					_oOptions.vEditCurValHistory.push_back( wsTmp );
+				}
+
+				if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+				for ( size_t I = 0; I < ui32Tmp; ++I ) {
+					CSecureWString wsTmp;
+					if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+					_oOptions.vEditArrayLengthHistory.push_back( wsTmp );
+				}
+
+				if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+				for ( size_t I = 0; I < ui32Tmp; ++I ) {
+					CSecureWString wsTmp;
+					if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+					_oOptions.vEditArrayStrideHistory.push_back( wsTmp );
+				}
+
+				if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+				for ( size_t I = 0; I < ui32Tmp; ++I ) {
+					CSecureWString wsTmp;
+					if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+					_oOptions.vEditLockedLeftHistory.push_back( wsTmp );
+				}
+
+				if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+				for ( size_t I = 0; I < ui32Tmp; ++I ) {
+					CSecureWString wsTmp;
+					if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+					_oOptions.vEditLockedRightHistory.push_back( wsTmp );
+				}
+
+				if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+				for ( size_t I = 0; I < ui32Tmp; ++I ) {
+					CSecureWString wsTmp;
+					if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+					_oOptions.vAddValDescriptionHistory.push_back( wsTmp );
+				}
+				if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+				for ( size_t I = 0; I < ui32Tmp; ++I ) {
+					CSecureWString wsTmp;
+					if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+					_oOptions.vAddValAddrHistory.push_back( wsTmp );
+				}
+
+				if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+				for ( size_t I = 0; I < ui32Tmp; ++I ) {
+					CSecureWString wsTmp;
+					if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+					_oOptions.vMoveAddrSourceHistory.push_back( wsTmp );
+				}
+				if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+				for ( size_t I = 0; I < ui32Tmp; ++I ) {
+					CSecureWString wsTmp;
+					if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+					_oOptions.vMoveAddrTargetHistory.push_back( wsTmp );
+				}
+				if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+				for ( size_t I = 0; I < ui32Tmp; ++I ) {
+					CSecureWString wsTmp;
+					if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
+					_oOptions.vMoveAddrByHistory.push_back( wsTmp );
+				}
+
+				if ( _ui32Version >= 4 ) {
+					uint8_t ui8Tmp;
+					if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+					for ( size_t I = 0; I < ui8Tmp; ++I ) {
+						if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
+						_oOptions.vEditColorHistory.push_back( ui32Tmp );
 					}
 				}
 			}
 		}
-		else {
-			uint32_t ui32Tmp;
-			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
-			for ( size_t I = 0; I < ui32Tmp; ++I ) {
-				CSecureWString wsTmp;
-				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
-				_oOptions.vEditDescriptionHistory.push_back( wsTmp );
-			}
-
-			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
-			for ( size_t I = 0; I < ui32Tmp; ++I ) {
-				CSecureWString wsTmp;
-				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
-				_oOptions.vEditCurValHistory.push_back( wsTmp );
-			}
-
-			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
-			for ( size_t I = 0; I < ui32Tmp; ++I ) {
-				CSecureWString wsTmp;
-				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
-				_oOptions.vEditArrayLengthHistory.push_back( wsTmp );
-			}
-
-			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
-			for ( size_t I = 0; I < ui32Tmp; ++I ) {
-				CSecureWString wsTmp;
-				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
-				_oOptions.vEditArrayStrideHistory.push_back( wsTmp );
-			}
-
-			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
-			for ( size_t I = 0; I < ui32Tmp; ++I ) {
-				CSecureWString wsTmp;
-				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
-				_oOptions.vEditLockedLeftHistory.push_back( wsTmp );
-			}
-
-			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
-			for ( size_t I = 0; I < ui32Tmp; ++I ) {
-				CSecureWString wsTmp;
-				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
-				_oOptions.vEditLockedRightHistory.push_back( wsTmp );
-			}
-
-			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
-			for ( size_t I = 0; I < ui32Tmp; ++I ) {
-				CSecureWString wsTmp;
-				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
-				_oOptions.vAddValDescriptionHistory.push_back( wsTmp );
-			}
-			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
-			for ( size_t I = 0; I < ui32Tmp; ++I ) {
-				CSecureWString wsTmp;
-				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
-				_oOptions.vAddValAddrHistory.push_back( wsTmp );
-			}
-
-			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
-			for ( size_t I = 0; I < ui32Tmp; ++I ) {
-				CSecureWString wsTmp;
-				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
-				_oOptions.vMoveAddrSourceHistory.push_back( wsTmp );
-			}
-			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
-			for ( size_t I = 0; I < ui32Tmp; ++I ) {
-				CSecureWString wsTmp;
-				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
-				_oOptions.vMoveAddrTargetHistory.push_back( wsTmp );
-			}
-			if ( !_psBinary->ReadUi32( ui32Tmp ) ) { return false; }
-			for ( size_t I = 0; I < ui32Tmp; ++I ) {
-				CSecureWString wsTmp;
-				if ( !_psBinary->ReadStringU16( wsTmp ) ) { return false; }
-				_oOptions.vMoveAddrByHistory.push_back( wsTmp );
-			}
-		}
+		catch ( ... ) { return false; }
 		return true;
 	}
 

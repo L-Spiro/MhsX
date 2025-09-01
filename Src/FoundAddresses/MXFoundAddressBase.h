@@ -11,7 +11,7 @@
 #include <vector>
 
 
-#define MX_FOUND_ADDRESS_VERSION							1
+#define MX_FOUND_ADDRESS_VERSION							4
 
 
 namespace mx {
@@ -159,7 +159,7 @@ namespace mx {
 		// The children items.
 		std::vector<size_t>									m_vChildren;
 		// The color of the item in the display.  If rgbReserved is 0, use the default display color.
-		RGBQUAD												m_rgbqColor = { .rgbReserved = 0 };
+		RGBQUAD												m_rgbqColor = { .rgbBlue = 0xFF, .rgbGreen = 0xFF, .rgbRed = 0xFF, .rgbReserved = 0 };
 		// Pointer to the MemHack object.
 		CMemHack *											m_pmhMemHack = nullptr;
 

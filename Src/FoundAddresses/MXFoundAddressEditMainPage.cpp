@@ -6,6 +6,7 @@
 #include "../MemHack/MXMemHack.h"
 #include "../Strings/MXStringDecoder.h"
 
+#include <Button/LSWColorButton.h>
 #include <CheckButton/LSWCheckButton.h>
 
 #include <EEExpEvalContainer.h>
@@ -63,6 +64,14 @@ namespace mx {
 		pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_DATA_COMBO );
 		if ( pwTmp ) {
 			CUtilities::FillComboBoxWithStdDataTypes( pwTmp, GatherDataTypes() );
+		}
+
+		{
+			auto pcbTmp = reinterpret_cast<lsw::CColorButton *>(FindChild( CFoundAddressEditLayout::MX_FAEI_GENERAL_COLOR_BUTTON ));
+			if ( pcbTmp ) {
+				pcbTmp->SetColor( GatherColors() );
+				pcbTmp->SetColors( m_pParms.pmhMemHack->Options().vEditColorHistory );
+			}
 		}
 		
 
@@ -479,6 +488,25 @@ namespace mx {
 				bAddArrayIndices = pwTmp->IsChecked();
 			}
 
+			bool bSetColor = false;
+			RGBQUAD rgbColor;
+			auto pcbTmp = reinterpret_cast<lsw::CColorButton *>(FindChild( CFoundAddressEditLayout::MX_FAEI_GENERAL_COLOR_BUTTON ));
+			if ( pcbTmp ) {
+				bSetColor = pcbTmp->ColorPicked() != FALSE;
+				auto crColor = pcbTmp->GetColor();
+				rgbColor.rgbRed = GetRValue( crColor );
+				rgbColor.rgbGreen = GetGValue( crColor );
+				rgbColor.rgbBlue = GetBValue( crColor );
+				rgbColor.rgbReserved = 0xFF;
+				if ( rgbColor.rgbRed == rgbColor.rgbGreen && rgbColor.rgbGreen == rgbColor.rgbBlue && rgbColor.rgbBlue == 0xFF ) {
+					rgbColor.rgbReserved = 0x00;
+				}
+
+				auto oTmp = m_pParms.pmhMemHack->Options();
+				oTmp.vEditColorHistory = pcbTmp->GetColors();
+				m_pParms.pmhMemHack->SetOptions( oTmp );
+			}
+
 
 			if ( swsDesc.size() || !bIsMulti ) {
 				auto pfamMan = m_pParms.pmhMemHack->FoundAddressManager();
@@ -495,6 +523,15 @@ namespace mx {
 						else {
 							pfaThis->SetDescriptionText( swsDesc );
 						}
+					}
+				}
+			}
+			if ( bSetColor ) {
+				auto pfamMan = m_pParms.pmhMemHack->FoundAddressManager();
+				for ( size_t I = 0; I < m_pParms.vSelection.size(); ++I ) {
+					auto pfaThis = pfamMan->GetById( size_t( m_pParms.vSelection[I] ) );
+					if ( pfaThis ) {
+						pfaThis->SetColor( rgbColor.rgbRed, rgbColor.rgbGreen, rgbColor.rgbBlue, rgbColor.rgbReserved );
 					}
 				}
 			}
@@ -1223,6 +1260,30 @@ namespace mx {
 		}
 
 		return wswRet;
+	}
+
+	// Gathers all colors.
+	COLORREF CFoundAddressEditMainPage::GatherColors() const {
+		if ( !m_pParms.pmhMemHack || !m_pParms.vSelection.size() ) { return RGB( 0xFF, 0xFF, 0xFF ); }
+		COLORREF crRet = RGB( 0xFF, 0xFF, 0xFF );
+		auto famManager = m_pParms.pmhMemHack->FoundAddressManager();
+		bool bFound = false;
+
+		for ( size_t I = 0; I < m_pParms.vSelection.size(); ++I ) {
+			auto faTmp = famManager->GetById( m_pParms.vSelection[I] );
+			if ( faTmp && faTmp->Type() == MX_FAT_FOUND_ADDRESS ) {
+				auto rgbColor = reinterpret_cast<CFoundAddress *>(faTmp)->BaseColor();
+				COLORREF crConverted = RGB( rgbColor.rgbRed, rgbColor.rgbGreen, rgbColor.rgbBlue );
+				if ( !bFound ) {
+					crRet = crConverted;
+					bFound = true;
+					continue;
+				}
+				if ( crConverted != crRet ) { return RGB( 0xFF, 0xFF, 0xFF ); }
+			}
+		}
+
+		return crRet;
 	}
 
 	// Gathers all current value strings.

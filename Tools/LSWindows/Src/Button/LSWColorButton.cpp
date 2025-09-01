@@ -18,6 +18,9 @@ namespace lsw {
 	// Setting the HWND after the control has been created.
 	void CColorButton::InitControl( HWND _hWnd ) {
 		Parent::InitControl( _hWnd );
+
+		m_hFont = reinterpret_cast<HFONT>(::SendMessageW( _hWnd, WM_GETFONT, 0L, 0L ));
+
 		constexpr const UINT_PTR k_uSubclassId = 0xC0105BEEU;
 		if ( ::SetWindowSubclass( _hWnd, ColorButtonSubclassProc, k_uSubclassId, reinterpret_cast<DWORD_PTR>(this) ) ) {
 			std::memset( m_wsText, 0, sizeof( m_wsText ) );
@@ -33,7 +36,7 @@ namespace lsw {
 	 */
 	inline void CColorButton::DrawColorButton( HDC _hDcPaint, const RECT &_rcClient ) {
 		const COLORREF crFace = m_crColor;
-		const COLORREF crText = ContrastingTextColor( crFace );
+		const COLORREF crText = CHelpers::ContrastingTextColor( crFace );
 
 		//{
 		//	LSW_SELECTOBJECT soPenOuter( _hDcPaint, reinterpret_cast<HGDIOBJ>(::CreatePen( PS_SOLID, 1, RGB( 60, 60, 60 ) )), true );	// Destructor sets the original pen back and deletes the new one.
@@ -49,6 +52,7 @@ namespace lsw {
 		}
 		
 
+		LSW_SELECTOBJECT soFontOrig( _hDcPaint, m_hFont );																				// Destructor sets the original font back.
 		int iOldBkMode = ::SetBkMode( _hDcPaint, TRANSPARENT );
 		COLORREF crOldText = ::SetTextColor( _hDcPaint, crText );
 		RECT rcText = _rcClient;
@@ -57,6 +61,11 @@ namespace lsw {
 		::SetTextColor( _hDcPaint, crOldText );
 		::SetBkMode( _hDcPaint, iOldBkMode );
 
+		if ( m_bFocus && !m_bPressed ) {
+			RECT rcFocus = _rcClient;
+			::InflateRect( &rcFocus, -4, -4 );
+			::DrawFocusRect( _hDcPaint, &rcFocus );
+		}
 		/*if ( m_bFocus && !m_bPressed ) {
 			RECT rcFocus = _rcClient;
 			::InflateRect( &rcFocus, -4, -4 );
@@ -83,6 +92,7 @@ namespace lsw {
 		ccPick.Flags = CC_FULLOPEN | CC_RGBINIT;
 		if ( ::ChooseColorW( &ccPick ) ) {
 			_crIo = ccPick.rgbResult;
+			m_bColorWasSelected = TRUE;
 			return TRUE;
 		}
 		else {
@@ -116,24 +126,35 @@ namespace lsw {
 				return CWidget::WindowProc( _hWnd, _uiMsg, _wParam, _lParam );
 			}
 			case WM_SETTEXT : {
-				LRESULT lrResult = ::DefSubclassProc( _hWnd, _uiMsg, _wParam, _lParam );
+				/*LRESULT lrResult = */::DefSubclassProc( _hWnd, _uiMsg, _wParam, _lParam );
 				::GetWindowTextW( _hWnd, pmwThis->m_wsText, int( sizeof( pmwThis->m_wsText ) / sizeof( pmwThis->m_wsText[0] ) ) );
 				::InvalidateRect( _hWnd, nullptr, TRUE );
-				return lrResult;
+				//return lrResult;
+				return CWidget::WindowProc( _hWnd, _uiMsg, _wParam, _lParam );
+			}
+			case WM_SETFONT : {
+				pmwThis->m_hFont = reinterpret_cast<HFONT>(_wParam);
+				/*LRESULT lrResult = */::DefSubclassProc( _hWnd, _uiMsg, _wParam, _lParam );
+				if ( _lParam ) { ::InvalidateRect( _hWnd, nullptr, TRUE ); }
+				//return lrResult;
+				return CWidget::WindowProc( _hWnd, _uiMsg, _wParam, _lParam );
 			}
 			case WM_ENABLE : {
 				::InvalidateRect( _hWnd, nullptr, TRUE );
-				return ::DefSubclassProc( _hWnd, _uiMsg, _wParam, _lParam );
+				//return ::DefSubclassProc( _hWnd, _uiMsg, _wParam, _lParam );
+				return CWidget::WindowProc( _hWnd, _uiMsg, _wParam, _lParam );
 			}
 			case WM_SETFOCUS : {
 				pmwThis->m_bFocus = TRUE;
 				::InvalidateRect( _hWnd, nullptr, TRUE );
-				return ::DefSubclassProc( _hWnd, _uiMsg, _wParam, _lParam );
+				//return ::DefSubclassProc( _hWnd, _uiMsg, _wParam, _lParam );
+				return CWidget::WindowProc( _hWnd, _uiMsg, _wParam, _lParam );
 			}
 			case WM_KILLFOCUS : {
 				pmwThis->m_bFocus = FALSE;
 				::InvalidateRect( _hWnd, nullptr, TRUE );
-				return ::DefSubclassProc( _hWnd, _uiMsg, _wParam, _lParam );
+				//return ::DefSubclassProc( _hWnd, _uiMsg, _wParam, _lParam );
+				return CWidget::WindowProc( _hWnd, _uiMsg, _wParam, _lParam );
 			}
 			case WM_MOUSEMOVE : {
 				if ( !pmwThis->m_bHot ) {
@@ -142,18 +163,21 @@ namespace lsw {
 					::TrackMouseEvent( &tme );
 					::InvalidateRect( _hWnd, nullptr, FALSE );
 				}
-				return ::DefSubclassProc( _hWnd, _uiMsg, _wParam, _lParam );
+				//return ::DefSubclassProc( _hWnd, _uiMsg, _wParam, _lParam );
+				return CWidget::WindowProc( _hWnd, _uiMsg, _wParam, _lParam );
 			}
 			case WM_MOUSELEAVE : {
 				pmwThis->m_bHot = FALSE;
 				::InvalidateRect( _hWnd, nullptr, FALSE );
-				return 0;
+				//return 0;
+				return CWidget::WindowProc( _hWnd, _uiMsg, _wParam, _lParam );
 			}
 			case WM_LBUTTONDOWN : {
 				pmwThis->m_bPressed = TRUE;
 				::SetCapture( _hWnd );
 				::InvalidateRect( _hWnd, nullptr, FALSE );
-				return 0;
+				//return 0;
+				return CWidget::WindowProc( _hWnd, _uiMsg, _wParam, _lParam );
 			}
 			case WM_LBUTTONUP : {
 				if ( pmwThis->m_bPressed ) {
@@ -176,7 +200,8 @@ namespace lsw {
 						}
 					}
 				}
-				return 0;
+				//return 0;
+				return CWidget::WindowProc( _hWnd, _uiMsg, _wParam, _lParam );
 			}
 			case WM_KEYDOWN : {
 				if ( _wParam == VK_SPACE || _wParam == VK_RETURN ) {
@@ -193,7 +218,8 @@ namespace lsw {
 					}
 					return 0;
 				}
-				return ::DefSubclassProc( _hWnd, _uiMsg, _wParam, _lParam );
+				//return ::DefSubclassProc( _hWnd, _uiMsg, _wParam, _lParam );
+				return CWidget::WindowProc( _hWnd, _uiMsg, _wParam, _lParam );
 			}
 			case WM_ERASEBKGND : {
 				return 1;

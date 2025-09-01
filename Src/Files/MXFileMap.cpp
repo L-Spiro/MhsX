@@ -18,20 +18,52 @@ namespace mx {
 	}
 
 	// == Functions.
-	// Creates a file mapping.  Always opens for read, may also open for write.
-	BOOL CFileMap::CreateMap( const std::filesystem::path &_pFile, BOOL _bOpenForWrite ) {
+	/**
+	 * Creates (or opens) a file and its mapping.
+	 * \brief If _ui64CreationSize != 0, the file is (re)created and resized to that many bytes.
+	 *
+	 * \param _pFile Path to the file.
+	 * \param _bOpenForWrite TRUE to open for write when not creating; ignored when creating (write is forced).
+	 * \param _ui64CreationSize If non-zero, (re)create the file and set its size to this value.
+	 * \return Returns TRUE on success.
+	 */
+	BOOL CFileMap::CreateMap( const std::filesystem::path &_pFile, BOOL _bOpenForWrite, uint64_t _ui64CreationSize ) {
 		Close();
-		m_hFile = ::CreateFileW( _pFile.generic_wstring().c_str(),
-			_bOpenForWrite ? (GENERIC_READ | GENERIC_WRITE) : GENERIC_READ,
+		const bool bCreate = (_ui64CreationSize != 0ULL);
+		const DWORD dwDesiredAccess = bCreate ? (GENERIC_READ | GENERIC_WRITE)
+			: (_bOpenForWrite ? (GENERIC_READ | GENERIC_WRITE) : GENERIC_READ);
+		const DWORD dwCreationDisposition = bCreate ? CREATE_ALWAYS : OPEN_EXISTING;
+
+		m_hFile = ::CreateFileW(
+			_pFile.generic_wstring().c_str(),
+			dwDesiredAccess,
 			0,
 			NULL,
-			OPEN_EXISTING,
+			dwCreationDisposition,
 			FILE_ATTRIBUTE_NORMAL,
-			NULL );
+			NULL
+		);
 
-		if ( m_hFile == INVALID_HANDLE_VALUE ) {
-			return FALSE;
+		if ( m_hFile == INVALID_HANDLE_VALUE ) { return FALSE; }
+
+		// If creating, resize to _ui64CreationSize bytes.
+		if ( bCreate ) {
+			LARGE_INTEGER liSize;
+			liSize.QuadPart = static_cast<LONGLONG>(_ui64CreationSize);
+
+			if ( !::SetFilePointerEx( m_hFile, liSize, nullptr, FILE_BEGIN ) ) {
+				Close();
+				return FALSE;
+			}
+			if ( !::SetEndOfFile( m_hFile ) ) {
+				Close();
+				return FALSE;
+			}
+			liSize.QuadPart = 0;
+			::SetFilePointerEx( m_hFile, liSize, nullptr, FILE_BEGIN );
 		}
+
+
 		m_bWritable = _bOpenForWrite;
 		return CreateFileMap();
 	}

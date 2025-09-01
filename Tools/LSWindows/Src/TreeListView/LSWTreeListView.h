@@ -443,6 +443,8 @@ namespace lsw {
 		// == Members.
 		/** Column sorting method. */
 		std::vector<ee::EE_TEXTPOLICY>		m_vSortMethod;
+		/** Mixed-color lookup. */
+		std::map<uint64_t, COLORREF>		m_mColorLookup;
 		/** Original list-view message handler. */
 		WNDPROC								m_wpListViewProc;
 		/** Book keeping.  One entry per row. */

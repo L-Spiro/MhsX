@@ -2062,3 +2062,5 @@
 "&Copy Selected Addresses"
 "Move Address(es) By:"
 "E&xit"
+"PublicId"
+"ColorHistory"

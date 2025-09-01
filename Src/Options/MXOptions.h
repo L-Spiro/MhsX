@@ -100,6 +100,7 @@ namespace mx {
 		std::vector<CSecureWString>		vMoveAddrSourceHistory;
 		std::vector<CSecureWString>		vMoveAddrTargetHistory;
 		std::vector<CSecureWString>		vMoveAddrByHistory;
+		std::vector<COLORREF>			vEditColorHistory;
 	};
 
 	struct MX_FLOAT_STUDIO_OPTIONS {

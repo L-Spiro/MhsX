@@ -140,6 +140,12 @@ namespace mx {
 			m_pEditDiractory /= _pFile.filename();
 			m_pEditDiractory += std::to_string( ui32Crc );
 			CFile::EraseFilesInDirectory( m_pEditDiractory );
+
+			// Make a single section that spans the whole file.
+			MX_LOGICAL_SECTION lsSection = { .stType = MX_ST_ORIGINAL_FILE,
+				.ui64Start = 0, .ui64Size = ui64Size };
+			lsSection.u.oaOriginalAddress.ui64Offset = 0;
+			m_vLogicalMap.push_back( lsSection );
 		}
 		catch ( ... ) {
 			Reset();
@@ -151,8 +157,62 @@ namespace mx {
 	// Resets the object back to scratch.
 	void CLargeCoWFileWindow::Reset() {
 		m_fmMainMap.Close();
-		m_vEditedMaps = std::vector<CFileMap>();
+		m_vEditedMaps = std::vector<std::unique_ptr<CFileMap>>();
 		m_pEditDiractory = std::filesystem::path();
+		m_vLogicalMap = std::vector<MX_LOGICAL_SECTION>();
+	}
+
+	// Updates the list of active segments.  Call within a try/catch block.
+	void CLargeCoWFileWindow::UpdateActiveSegments( uint64_t _ui64Id, size_t _sMax ) {
+		// Erase any null pointers.
+		m_vEditedMaps.erase(
+			std::remove_if(
+				m_vEditedMaps.begin(),
+				m_vEditedMaps.end(),
+				[]( const std::unique_ptr<CFileMap> &_upMap ) { return !_upMap; }
+			),
+			m_vEditedMaps.end()
+		);
+		// Remove the insertion ID and invalid ID's from the list.
+		for ( auto I = m_vActiveSegments.size(); I--; ) {
+			const uint64_t ui64IdAtI = m_vActiveSegments[I];
+
+			if ( m_vActiveSegments[I] == _ui64Id ) {
+				m_vActiveSegments.erase( m_vActiveSegments.begin() + I );
+				continue;
+			}
+
+			auto aFound = std::find_if(
+				m_vEditedMaps.begin(),
+				m_vEditedMaps.end(),
+				[ui64IdAtI]( const std::unique_ptr<CFileMap> &_upMap ) { return _upMap->Id() == ui64IdAtI; }
+			);
+			if ( aFound == m_vEditedMaps.end() ) {
+				m_vActiveSegments.erase( m_vActiveSegments.begin() + I );
+				continue;
+			}
+		}
+		// Insert at the top.
+		m_vActiveSegments.insert( m_vActiveSegments.begin(), _ui64Id );
+
+		// Resize.
+		if ( _sMax > 0 && m_vActiveSegments.size() > _sMax ) {
+			m_vActiveSegments.resize( _sMax );
+		}
+
+		// Close an mappings not in the hot cache.
+		for ( auto I = m_vEditedMaps.size(); I--; ) {
+			const uint64_t ui64Id = m_vEditedMaps[I]->Id();
+			auto aFound = std::find_if(
+				m_vActiveSegments.begin(),
+				m_vActiveSegments.end(),
+				[ui64Id]( const size_t _sId ) { return _sId == ui64Id; }
+			);
+			if ( aFound == m_vActiveSegments.end() ) {
+				// This ID was not in the m_vActiveSegments list.  Remove its mapping.
+				m_vEditedMaps[I]->UnMapRegion();
+			}
+		}
 	}
 
 }	// namespace mx

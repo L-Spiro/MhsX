@@ -567,7 +567,6 @@ namespace mx {
 			m_pfaFoundAddresses = static_cast<CFoundAddressesWindow *>(CFoundAddressLayout::CreateFoundAddressesWindow( MultiSplitter(), this ));
 			if ( !m_pfaFoundAddresses ) { return; }
 			m_pfaFoundAddresses->SetUpdateSpeed( 1000 / max( m_pmhMemHack->Options().dwFoundAddressRefresh, static_cast<DWORD>(1) ) );
-			//m_pfaFoundAddresses = static_cast<CFoundAddressesWindow *>(CFoundAddressLayout::CreateFoundAddressesWindow( this ));
 			m_pfaFoundAddresses->AddDockTarget( MultiSplitter() );
 			m_pfaFoundAddresses->UpdateHeaders( MemHack()->Searcher().LastSearchType() );
 			m_pfaFoundAddresses->AddFoundAddresses();
@@ -584,7 +583,6 @@ namespace mx {
 		if ( !m_peeExpEval ) {
 			m_peeExpEval = static_cast<CExpEvalWindow *>(CExpressionEvaluatorLayout::CreateExpEvalWindow( MultiSplitter() ));
 			m_peeExpEval->SetUpdateSpeed( 1000 / max( m_pmhMemHack->Options().dwExpressionRefresh, static_cast<DWORD>(1) ) );
-			//m_peeExpEval = static_cast<CExpEvalWindow *>(CExpressionEvaluatorLayout::CreateExpEvalWindow( this ));
 			m_peeExpEval->AddDockTarget( MultiSplitter() );
 			m_peeExpEval->SetAddressHandler( CMemHack::ExpAddressHandler, reinterpret_cast<uintptr_t>(m_pmhMemHack) );
 			m_peeExpEval->SetAddressWriteHandler( CMemHack::ExpAddressWriteHandler, reinterpret_cast<uintptr_t>(m_pmhMemHack) );
@@ -599,8 +597,6 @@ namespace mx {
 	void CMhsMainWindow::ShowConverter() {
 		if ( !m_cwConverter ) {
 			m_cwConverter = static_cast<CConverterWindow *>(CConverterLayout::CreateConverterWindow( MultiSplitter() ));
-			//m_cwConverter->SetUpdateSpeed( 1000 / max( m_pmhMemHack->Options().dwExpressionRefresh, static_cast<DWORD>(1) ) );
-			//m_cwConverter = static_cast<CExpEvalWindow *>(CExpressionEvaluatorLayout::CreateExpEvalWindow( this ));
 			m_cwConverter->AddDockTarget( MultiSplitter() );
 			m_cwConverter->SetAddressHandler( CMemHack::ExpAddressHandler, reinterpret_cast<uintptr_t>(m_pmhMemHack) );
 		}
@@ -702,23 +698,6 @@ namespace mx {
 
 		//MX_OPTIONS oOptions = m_pmhMemHack->Options();
 		return CNewDataTypeSearchLayout::CreateNewDataTypeSearchDialog( this, m_pmhMemHack );
-		// TODO: Come up with a more graceful way to do this.
-		// A few options can be modified directly in the dialog.  This is a simple way to add
-		//	those to a list to check if options need to be updated
-		/*struct {
-			const BOOL *			pbSrc;
-			BOOL *					pbCopy;
-		} aStruct[] = {
-			{ &m_pmhMemHack->Options().bAligned, &oOptions.bAligned },
-			{ &m_pmhMemHack->Options().bSameAsOriginal, &oOptions.bSameAsOriginal },
-		};
-		for ( size_t I = MX_ELEMENTS( aStruct ); I--; ) {
-			if ( (*aStruct[I].pbSrc) != (*aStruct[I].pbCopy) ) {
-				m_pmhMemHack->SetOptions( oOptions );
-				break;
-			}
-		}*/
-		//return 0;
 	}
 
 	// Shows a new pointer search.

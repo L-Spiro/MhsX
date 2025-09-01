@@ -50,8 +50,16 @@ namespace mx {
 
 
 		// == Functions.
-		// Creates a file mapping.  Always opens for read, may also open for write.
-		BOOL							CreateMap( const std::filesystem::path &_pFile, BOOL _bOpenForWrite );
+		/**
+		 * Creates (or opens) a file and its mapping.
+		 * \brief If _ui64CreationSize != 0, the file is (re)created and resized to that many bytes.
+		 *
+		 * \param _pFile Path to the file.
+		 * \param _bOpenForWrite TRUE to open for write when not creating; ignored when creating (write is forced).
+		 * \param _ui64CreationSize If non-zero, (re)create the file and set its size to this value.
+		 * \return Returns TRUE on success.
+		 */
+		BOOL							CreateMap( const std::filesystem::path &_pFile, BOOL _bOpenForWrite, uint64_t _ui64CreationSize = 0 );
 
 		// Closes the opened file map.
 		VOID							Close();

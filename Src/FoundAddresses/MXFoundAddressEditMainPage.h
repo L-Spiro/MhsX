@@ -46,6 +46,9 @@ namespace mx {
 		// Gathers all descriptions and returns the Description string.
 		CSecureWString							GatherDescriptions() const;
 
+		// Gathers all colors.
+		COLORREF								GatherColors() const;
+
 		// Gathers all current value strings.
 		CSecureWString							GatherCurValue() const;
 
