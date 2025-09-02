@@ -1031,6 +1031,8 @@
 "&Tools"
 "&Window"
 "&Help"
+"&Open File"
+"Open &Current Process"
 "Open &Process"
 "Open &Recent"
 "Open for &Debug"

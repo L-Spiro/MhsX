@@ -39,6 +39,23 @@ namespace mx {
 		return true;
 	}
 
+	// Sets the address, string type, and original data.
+	bool CFoundAddress::InitWithAddressandStringType( uint64_t _ui64Address, UINT _uiCodePage, const uint8_t * _pui8Data, size_t _sLen ) {
+		m_eAddressExp.Reset();
+		m_sAddressTxt.clear();
+		m_sAddressTxt = std::string();
+		m_ui64Address = _ui64Address;
+		m_bBasicAddress = true;
+
+		try {
+			std::string sTmp( reinterpret_cast<const char *>(_pui8Data),
+				reinterpret_cast<const char *>(_pui8Data) + _sLen );
+			SetAsString( sTmp, _uiCodePage );
+		}
+		catch ( ... ) { return false; }
+		return true;
+	}
+
 	// Sets the Data Type.  Call within a try/catch block.
 	void CFoundAddress::SetAsDataType( std::vector<std::vector<uint8_t>> &_vLockValue, CUtilities::MX_DATA_TYPES _dtDataType, uint32_t _ui32ArrayLen, uint32_t _ui32ArrayStride, std::vector<std::vector<uint8_t>> * _pvMaxLock ) {
 		m_vtValueType = CUtilities::MX_VT_DATA_TYPE;

@@ -18712,3 +18712,21 @@
 #define _DEC_S_2C1B6B5E_ColorHistory mx::CStringDecoder::DecodeToString( _T_2C1B6B5E_ColorHistory, _LEN_2C1B6B5E )
 #define _DEC_WS_2C1B6B5E_ColorHistory mx::CStringDecoder::DecodeToWString( _T_2C1B6B5E_ColorHistory, _LEN_2C1B6B5E )
 
+// &Open File
+
+#define _T_2BEA22F9__Open_File "\xAE\x1D\x40\x00\x00\xE9\xD4\x30\x3C\x2D"
+#define _LEN_2BEA22F9 10
+#define _T_LEN_2BEA22F9__Open_File _T_2BEA22F9__Open_File, _LEN_2BEA22F9
+#define _DEC_2BEA22F9__Open_File( STR ) mx::CStringDecoder::Decode( _T_2BEA22F9__Open_File, _LEN_2BEA22F9, STR )
+#define _DEC_S_2BEA22F9__Open_File mx::CStringDecoder::DecodeToString( _T_2BEA22F9__Open_File, _LEN_2BEA22F9 )
+#define _DEC_WS_2BEA22F9__Open_File mx::CStringDecoder::DecodeToWString( _T_2BEA22F9__Open_File, _LEN_2BEA22F9 )
+
+// Open &Current Process
+
+#define _T_3E14AB9A_Open__Current_Process "\xD7\x3E\x35\x09\xB2\xEF\xD1\x3C\x42\x3A\x2E\x3C\x06\xBB\x17\xFA\x3D\x33\x00\x05\x3C"
+#define _LEN_3E14AB9A 21
+#define _T_LEN_3E14AB9A_Open__Current_Process _T_3E14AB9A_Open__Current_Process, _LEN_3E14AB9A
+#define _DEC_3E14AB9A_Open__Current_Process( STR ) mx::CStringDecoder::Decode( _T_3E14AB9A_Open__Current_Process, _LEN_3E14AB9A, STR )
+#define _DEC_S_3E14AB9A_Open__Current_Process mx::CStringDecoder::DecodeToString( _T_3E14AB9A_Open__Current_Process, _LEN_3E14AB9A )
+#define _DEC_WS_3E14AB9A_Open__Current_Process mx::CStringDecoder::DecodeToWString( _T_3E14AB9A_Open__Current_Process, _LEN_3E14AB9A )
+

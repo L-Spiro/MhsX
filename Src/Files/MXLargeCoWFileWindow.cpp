@@ -143,8 +143,7 @@ namespace mx {
 
 			// Make a single section that spans the whole file.
 			MX_LOGICAL_SECTION lsSection = { .stType = MX_ST_ORIGINAL_FILE,
-				.ui64Start = 0, .ui64Size = ui64Size };
-			lsSection.u.oaOriginalAddress.ui64Offset = 0;
+				.ui64Start = 0, .ui64Size = ui64Size, .ui64Offset = 0 };
 			m_vLogicalMap.push_back( lsSection );
 		}
 		catch ( ... ) {
@@ -212,6 +211,49 @@ namespace mx {
 				// This ID was not in the m_vActiveSegments list.  Remove its mapping.
 				m_vEditedMaps[I]->UnMapRegion();
 			}
+		}
+	}
+
+	// Simplifies the logical view.
+	void CLargeCoWFileWindow::SimplifyLogicalView() {
+		m_vLogicalMap.erase(
+			std::remove_if(
+				m_vLogicalMap.begin(),
+				m_vLogicalMap.end(),
+				[]( const auto &_lsThis ) { return _lsThis.ui64Size == 0ULL; }
+			),
+			m_vLogicalMap.end()
+		);
+
+
+		for ( size_t I = 1; I < m_vLogicalMap.size(); ) {
+			// If they both point to the same medium.
+			auto & lsPrev = m_vLogicalMap[I-1];
+			auto & lsCur = m_vLogicalMap[I];
+
+			bool bSameBacking = false;
+			if ( lsPrev.stType == lsCur.stType ) {
+				if ( lsPrev.stType == MX_ST_ORIGINAL_FILE ) {
+					bSameBacking = true;	// Only one original file.
+				}
+				else if ( lsPrev.stType == MX_ST_SEGMENT ) {
+					bSameBacking = (lsPrev.u.saSegmentAddress.sFile == lsCur.u.saSegmentAddress.sFile);
+				}
+			}
+
+
+			if ( bSameBacking ) {
+				// If they point to contiguous data inside the medium.
+				if ( lsPrev.ui64Offset + lsPrev.ui64Size == lsCur.ui64Offset ) {
+					// The current section can be merged into the previous section.
+					uint64_t ui64Size = lsCur.ui64Size;
+					m_vLogicalMap.erase( m_vLogicalMap.begin() + I );
+					// lsPrev and lsCur are invalidated.
+					m_vLogicalMap[I-1].ui64Size += ui64Size;
+					continue;
+				}
+			}
+			++I;
 		}
 	}
 

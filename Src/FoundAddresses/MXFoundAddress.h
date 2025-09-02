@@ -46,6 +46,9 @@ namespace mx {
 		// Sets the address, type, and original data.
 		bool												InitWithAddressAndDataType( uint64_t _ui64Address, CUtilities::MX_DATA_TYPES _dtType, const uint8_t * _pui8Data );
 
+		// Sets the address, string type, and original data.
+		bool												InitWithAddressandStringType( uint64_t _ui64Address, UINT _uiCodePage, const uint8_t * _pui8Data, size_t _sLen );
+
 		// Sets the Data Type.  Call within a try/catch block.
 		void												SetAsDataType( std::vector<std::vector<uint8_t>> &_vLockValue, CUtilities::MX_DATA_TYPES _dtDataType, uint32_t _ui32ArrayLen, uint32_t _ui32ArrayStride, std::vector<std::vector<uint8_t>> * _pvMaxLock = nullptr );
 

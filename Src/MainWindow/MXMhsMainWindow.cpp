@@ -271,12 +271,23 @@ namespace mx {
 		m_uiptrUpdateListTimer = CSystem::SetTimer( Wnd(), uidDist( mGen ), 1000 / m_pmhMemHack->Options().dwMainRefresh, NULL );
 		m_uiptrUpdateLocksTimer = CSystem::SetTimer( Wnd(), uidDist( mGen ), 1000 / m_pmhMemHack->Options().dwLockedRefresh, NULL );
 		
+
+		UpdateOpenRecent();
 		return LSW_H_CONTINUE;
 	}
 
 	// WM_COMMAND from control.
 	CWidget::LSW_HANDLED CMhsMainWindow::Command( WORD _wCtrlCode, WORD _wId, CWidget * _pwSrc ) {
-		if ( _wId >= Layout::MX_MWMI_USER_PROGRAMS_BASE ) {
+		if ( _wId >= Layout::MX_MWMI_SHOW_RECENT_BASE ) {
+			_wId -= Layout::MX_MWMI_SHOW_RECENT_BASE;
+			if ( _wId < m_pmhMemHack->Options().vProcessHistory.size() ) {
+				if ( m_pmhMemHack->Options().vProcessHistory[_wId].size() ) {
+					OpenProcessByPath( m_pmhMemHack->Options().vProcessHistory[_wId] );
+				}
+			}
+			return LSW_H_CONTINUE;
+		}
+		if ( _wId >= Layout::MX_MWMI_USER_PROGRAMS_BASE && _wId < Layout::MX_MWMI_SHOW_RECENT_BASE ) {
 			if ( !m_pmhMemHack ) { return LSW_H_CONTINUE; }
 			size_t stIdx = _wId - Layout::MX_MWMI_USER_PROGRAMS_BASE;
 
@@ -980,10 +991,64 @@ namespace mx {
 		DWORD dwId = COpenProcessLayout::CreateOpenProcessDialog( this, &oOptions );
 		if ( dwId != DWINVALID ) {
 			if ( m_pmhMemHack->OpenProcess( dwId ) ) {
+				UpdateOpenRecent();
 				return true;
 			}
 		}
 		return false;
+	}
+
+	// Opens a process given its path.
+	bool CMhsMainWindow::OpenProcessByPath( const CSecureWString &_swsPath ) {
+		MX_OPTIONS oOptions = m_pmhMemHack->Options();
+
+		/*CUtilities::AddOrMove( oOptions.vProcessHistory, _swsPath, MX_R_RECENT_PROCESSES_SIZE );
+		m_pmhMemHack->SetOptions( oOptions );*/
+
+		UpdateOpenRecent();
+		return true;
+	}
+
+	// Updates the Open Recent menu.
+	void CMhsMainWindow::UpdateOpenRecent() {
+		HMENU hMenu = ::GetSubMenu( ::GetMenu( Wnd() ), 0 );
+		HMENU hListMenu = ::GetSubMenu( hMenu, 1 );
+		if ( hListMenu != NULL ) {
+			if ( ::DestroyMenu( hListMenu ) ) {
+				hListMenu = NULL;
+			}
+		}
+
+		// Store a local copy so that the main list is able to change while we work (should never happen in practice but let's just code safely).
+		std::vector<CSecureWString> vList = m_pmhMemHack->Options().vProcessHistory;
+		::DeleteMenu( hMenu, 1, MF_BYPOSITION );
+		auto swsOpenRecent = _DEC_WS_EA79B404_Open__Recent;
+		if ( vList.size() ) {
+			std::vector<LSW_MENU_ITEM> vMenu;
+			LSW_MENU_ITEM miItem = { FALSE, 0, FALSE, FALSE, TRUE };
+			for ( size_t I = 0; I < vList.size(); ++I ) {
+				miItem.dwId = DWORD( Layout::MX_MWMI_SHOW_RECENT_BASE + I );
+				miItem.lpwcText = reinterpret_cast<LPCWSTR>(vList[I].c_str());
+				vMenu.push_back( miItem );
+			}
+			LSW_MENU_LAYOUT miMenus = {
+				Layout::MX_MWMI_OPENRECENT,
+				0,
+				0,
+				vMenu.size(),
+				vMenu.data()
+			};
+			HMENU hThis = lsw::CBase::LayoutManager()->CreateMenu( &miMenus, 1 );
+			//if ( !::ModifyMenuW( hMenu, CMainWindowLayout::LSN_MWMI_OPENRECENT, MF_BYCOMMAND | MF_POPUP | MF_STRING,
+			//	reinterpret_cast<UINT_PTR>(hThis), LSN_LSTR( LSN_OPEN_REC_ENT ) ) ) {
+			if ( ::InsertMenuW( hMenu, 1, MF_BYPOSITION | MF_POPUP | MF_STRING,
+				reinterpret_cast<UINT_PTR>(hThis), swsOpenRecent.c_str() ) ) {
+				::DestroyMenu( hThis );
+			}
+			return;
+		}
+		::InsertMenuW( hMenu, 1, MF_BYPOSITION | MF_GRAYED | MF_STRING,
+			static_cast<UINT_PTR>(Layout::MX_MWMI_OPENRECENT), swsOpenRecent.c_str() );
 	}
 
 	// Starts a search on the current thread (when activated via script or plug-in) or on a new thread (normal).

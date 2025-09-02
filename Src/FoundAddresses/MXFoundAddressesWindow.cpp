@@ -376,6 +376,160 @@ namespace mx {
 											}
 										}
 										else if ( spSearchParms.stType == CUtilities::MX_ST_STRING_SEARCH ) {
+											const CSearchResultRef::MX_ADDRESS_REF & arRef = (*reinterpret_cast<const CSearchResultRef::MX_ADDRESS_REF *>(pui8Data));
+
+											// Current Value.
+											std::vector<uint8_t> vData;
+
+											size_t sOffset;
+											if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( ui64Addr,
+												vData, size_t( arRef.uiSize ), sOffset, spSearchParms.bsByteSwapping ) ) {
+												return false;
+											}
+											switch ( spSearchParms.sstSearchType ) {
+												case CUtilities::MX_SST_ASCII : {
+													if ( !faAddress->InitWithAddressandStringType( ui64Addr, CCodePages::GetSystemDefaultAnsiCodePage(), vData.data() + sOffset, size_t( arRef.uiSize ) ) ) {
+														return false;
+													}
+													break;
+												}
+												case CUtilities::MX_SST_UTF8 : {
+													if ( !faAddress->InitWithAddressandStringType( ui64Addr, CCodePages::MX_utf_8, vData.data() + sOffset, size_t( arRef.uiSize ) ) ) {
+														return false;
+													}
+													break;
+												}
+												case CUtilities::MX_SST_UTF16_BE : {
+													if ( !faAddress->InitWithAddressandStringType( ui64Addr, CCodePages::MX_utf_16BE, vData.data() + sOffset, size_t( arRef.uiSize ) ) ) {
+														return false;
+													}
+													break;
+												}
+												case CUtilities::MX_SST_UTF16 : {
+													if ( !faAddress->InitWithAddressandStringType( ui64Addr, CCodePages::MX_utf_16, vData.data() + sOffset, size_t( arRef.uiSize ) ) ) {
+														return false;
+													}
+													break;
+												}
+												case CUtilities::MX_SST_UTF32_BE : {
+													if ( !faAddress->InitWithAddressandStringType( ui64Addr, CCodePages::MX_utf_32BE, vData.data() + sOffset, size_t( arRef.uiSize ) ) ) {
+														return false;
+													}
+													break;
+												}
+												case CUtilities::MX_SST_UTF32 : {
+													if ( !faAddress->InitWithAddressandStringType( ui64Addr, CCodePages::MX_utf_32, vData.data() + sOffset, size_t( arRef.uiSize ) ) ) {
+														return false;
+													}
+													break;
+												}
+												case CUtilities::MX_SST_UTFALL : {
+													switch ( arRef.uiData ) {
+														case CUtilities::MX_SST_UTF8 : {
+															if ( !faAddress->InitWithAddressandStringType( ui64Addr, CCodePages::MX_utf_8, vData.data() + sOffset, size_t( arRef.uiSize ) ) ) {
+																return false;
+															}
+															break;
+														}
+														case CUtilities::MX_SST_UTF16 : {
+															if ( !faAddress->InitWithAddressandStringType( ui64Addr, CCodePages::MX_utf_16, vData.data() + sOffset, size_t( arRef.uiSize ) ) ) {
+																return false;
+															}
+															break;
+														}
+														case CUtilities::MX_SST_UTF32 : {
+															if ( !faAddress->InitWithAddressandStringType( ui64Addr, CCodePages::MX_utf_32, vData.data() + sOffset, size_t( arRef.uiSize ) ) ) {
+																return false;
+															}
+															break;
+														}
+														case CUtilities::MX_SST_UTF16_BE : {
+															if ( !faAddress->InitWithAddressandStringType( ui64Addr, CCodePages::MX_utf_16BE, vData.data() + sOffset, size_t( arRef.uiSize ) ) ) {
+																return false;
+															}
+															break;
+														}
+														case CUtilities::MX_SST_UTF32_BE : {
+															if ( !faAddress->InitWithAddressandStringType( ui64Addr, CCodePages::MX_utf_32BE, vData.data() + sOffset, size_t( arRef.uiSize ) ) ) {
+																return false;
+															}
+															break;
+														}
+													}
+													break;
+												}
+												/*case CUtilities::MX_SST_RAW : {
+													CUtilities::MX_DATA_TYPES dtDataType = static_cast<CUtilities::MX_DATA_TYPES>(arRef.uiData >> 8);
+													switch ( dtDataType ) {
+														case CUtilities::MX_DT_INT8 : {
+															bRet = RawArraySearch<int8_t>( spParmsCopy, aclChunks, _hProgressUpdate );
+															break;
+														}
+														case CUtilities::MX_DT_UINT8 : {
+															bRet = RawArraySearch<uint8_t>( spParmsCopy, aclChunks, _hProgressUpdate );
+															break;
+														}
+														case CUtilities::MX_DT_INT16 : {
+															bRet = RawArraySearch<int16_t>( spParmsCopy, aclChunks, _hProgressUpdate );
+															break;
+														}
+														case CUtilities::MX_DT_UINT16 : {
+															bRet = RawArraySearch<uint16_t>( spParmsCopy, aclChunks, _hProgressUpdate );
+															break;
+														}
+														case CUtilities::MX_DT_INT32 : {
+															bRet = RawArraySearch<int32_t>( spParmsCopy, aclChunks, _hProgressUpdate );
+															break;
+														}
+														case CUtilities::MX_DT_UINT32 : {
+															bRet = RawArraySearch<uint32_t>( spParmsCopy, aclChunks, _hProgressUpdate );
+															break;
+														}
+														case CUtilities::MX_DT_INT64 : {
+															bRet = RawArraySearch<int64_t>( spParmsCopy, aclChunks, _hProgressUpdate );
+															break;
+														}
+														case CUtilities::MX_DT_UINT64 : {
+															bRet = RawArraySearch<uint64_t>( spParmsCopy, aclChunks, _hProgressUpdate );
+															break;
+														}
+														case CUtilities::MX_DT_FLOAT16 : {
+															bRet = RawArraySearch<uint16_t>( spParmsCopy, aclChunks, _hProgressUpdate );
+															break;
+														}
+														case CUtilities::MX_DT_FLOAT : {
+															bRet = RawArraySearch<float>( spParmsCopy, aclChunks, _hProgressUpdate );
+															break;
+														}
+														case CUtilities::MX_DT_DOUBLE : {
+															bRet = RawArraySearch<double>( spParmsCopy, aclChunks, _hProgressUpdate );
+															break;
+														}
+														case CUtilities::MX_DT_VOID : {
+															bRet = RawArrayMultiType( spParmsCopy, aclChunks, _hProgressUpdate );
+															break;
+														}
+														default : { return false; }
+													}
+													break;
+												}*/
+												case CUtilities::MX_SST_REGEX : {
+													CUtilities::MX_REGEX_ENCODING reEncoding = static_cast<CUtilities::MX_REGEX_ENCODING>((arRef.uiData >> 8) & 0xFF);
+													if ( !faAddress->InitWithAddressandStringType( ui64Addr, CUtilities::RegexCodePageToCodePage( reEncoding ), vData.data() + sOffset, size_t( arRef.uiSize ) ) ) {
+														return false;
+													}
+													break;
+												}
+												default : { return false; }
+											}
+											CSecureWString wsTmp = _DEC_WS_77CAA9B0_Address_;
+											wsTmp += L' ';
+
+											CUtilities::PrintAddress( ui64Addr, wsTmp );
+											if ( CUtilities::AddFoundAddressToTreeListView( ptlvTree, faAddress, &wsTmp ) ) {
+												faAddress->SetPreProcessing( spSearchParms.bsByteSwapping );
+												vAdded.push_back( faAddress->Id() );
+											}
 										}
 										else if ( spSearchParms.stType == CUtilities::MX_ST_POINTER_SEARCH ) {
 										}

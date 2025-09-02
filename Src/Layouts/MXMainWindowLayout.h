@@ -91,6 +91,7 @@ namespace mx {
 
 
 			MX_MWMI_USER_PROGRAMS_BASE			= 1000,
+			MX_MWMI_SHOW_RECENT_BASE			= 2000,
 		};
 
 

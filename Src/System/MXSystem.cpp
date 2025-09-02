@@ -348,6 +348,7 @@ namespace mx {
 		HMODULE hMod = _pwcPath ? ::GetModuleHandleW( _pwcPath ) : NULL;
 		for ( DWORD I = 1024; TRUE; I += 1024 ) {
 			WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[I];
+			if ( nullptr == pwcBuffer ) { return 1; }	// A NULL character.
 			DWORD dwLen = ::GetModuleFileNameW( hMod, pwcBuffer, I );
 			::ZeroMemory( pwcBuffer, dwLen );
 			delete [] pwcBuffer;

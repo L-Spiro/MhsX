@@ -32,6 +32,12 @@ namespace mx {
 
 
 		// == Enumerations.
+		// Recent Processes history size.
+		enum MX_RECENT {
+			MX_R_RECENT_PROCESSES_SIZE		= 25,
+		};
+
+
 		// Images.
 		enum MX_IMAGES {
 			MX_I_OPENPROCESS,
@@ -256,6 +262,12 @@ namespace mx {
 
 		// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
 		bool								OpenProcess();
+
+		// Opens a process given its path.
+		bool								OpenProcessByPath( const CSecureWString &_swsPath );
+
+		// Updates the Open Recent menu.
+		void								UpdateOpenRecent();
 
 		// Starts a search on the current thread (when activated via script or plug-in) or on a new thread (normal).
 		bool								Search( CSearcher::MX_SEARCH_PARMS * _pspParms, CWidget * _pwParent, bool _bUseSepThread = true, CWidget * _pwProgress = nullptr );

@@ -1,6 +1,8 @@
 #include "MXMemHack.h"
 #include "../Files/MXFile.h"
+#include "../MainWindow/MXMhsMainWindow.h"
 #include "../Utilities/MXUtilities.h"
+
 #include <Base/LSWBase.h>
 #include <EEExpEval.h>
 
@@ -73,19 +75,12 @@ namespace mx {
 		}
 		
 		OpenedProcess();
-
 		return true;
 	}
 
 	// Opened a process.
 	void CMemHack::OpenedProcess() {
-		/*CSearcher sSearcher( &m_pProcess );
-		CAddressChunkList adcList;
-		uint64_t ui64ChunkSize = 1024 * 1024 * 32;
-		uint64_t uiMin = (uint64_t)mx::CSystem::GetSystemInfo().lpMinimumApplicationAddress;
-		uint64_t uiMax = (uint64_t)mx::CSystem::GetSystemInfo().lpMaximumApplicationAddress;
-		sSearcher.GenerateChunks( adcList, ui64ChunkSize );
-		ui64ChunkSize = 31ULL * 1024 * 1024 * 1024;*/
+		CUtilities::AddOrMove( m_oOptions.vProcessHistory, m_pProcess.QueryProcessImageName(), CMhsMainWindow::MX_R_RECENT_PROCESSES_SIZE );
 	}
 
 	// Failed to open a process.
