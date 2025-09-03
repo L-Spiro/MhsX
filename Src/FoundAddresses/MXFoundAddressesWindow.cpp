@@ -382,7 +382,7 @@ namespace mx {
 											std::vector<uint8_t> vData;
 
 											size_t sOffset;
-											if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( ui64Addr,
+											if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory_PreProcessed( ui64Addr,
 												vData, size_t( arRef.uiSize ), sOffset, spSearchParms.bsByteSwapping ) ) {
 												return false;
 											}

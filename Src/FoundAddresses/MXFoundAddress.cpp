@@ -48,6 +48,8 @@ namespace mx {
 		m_bBasicAddress = true;
 
 		try {
+			m_vOriginalData.assign( _pui8Data,
+				_pui8Data + _sLen );
 			std::string sTmp( reinterpret_cast<const char *>(_pui8Data),
 				reinterpret_cast<const char *>(_pui8Data) + _sLen );
 			SetAsString( sTmp, _uiCodePage );
@@ -78,10 +80,13 @@ namespace mx {
 		m_vtValueType = CUtilities::MX_VT_STRING;
 		m_uiCodePage = _uiCodePage;
 
-		m_vLockedData.clear();
-		m_vLockedData.push_back( std::vector<uint8_t>( reinterpret_cast<const uint8_t *>(_sLockString.data()),
-			reinterpret_cast<const uint8_t *>(_sLockString.data()) + _sLockString.size() ) );
-		m_bDirtyLockedLeft = true;
+		if ( _sLockString.size() ) {
+			m_vLockedData.clear();
+			m_vLockedData.push_back( std::vector<uint8_t>( reinterpret_cast<const uint8_t *>(_sLockString.data()),
+				reinterpret_cast<const uint8_t *>(_sLockString.data()) + _sLockString.size() ) );
+			m_bDirtyLockedLeft = true;
+		}
+		PrepareValueStructures();
 		Dirty();
 	}
 
@@ -130,40 +135,52 @@ namespace mx {
 				}
 				return wsReturn;
 			}
+			else if ( m_vtValueType == CUtilities::MX_VT_STRING ) {
+				if MX_UNLIKELY( _pbRead ) {
+					(*_pbRead) = true;
+				}
+				if ( m_vCurData.vValue.size() && m_vCurData.vValue[0].size() ) {
+					CSecureString ssTmp;
+					ssTmp.assign( reinterpret_cast<const char *>(m_vCurData.vValue[0].data()),
+					reinterpret_cast<const char *>(m_vCurData.vValue[0].data() ) + m_vCurData.vValue[0].size());
+					
+					return CUtilities::EscapeUnprintable( CUtilities::MultiByteToWideChar( CodePage(), 0, ssTmp ), true, false );
+				}
+			}
 		}
 		catch ( ... ) { return std::wstring( L"---" ); }
 		return std::wstring();
 	}
 
-	// Takes a blob of data and converts it to text.
-	std::wstring CFoundAddress::ToText( const uint8_t * _pui8Blob ) const {
-		switch ( m_vtValueType ) {
-			case CUtilities::MX_VT_DATA_TYPE : {
-				switch ( m_dtDataType ) {
-					case CUtilities::MX_DT_INT8 : {
-						char szBuffer[32];
-						int32_t i32Temp = (*reinterpret_cast<const int8_t *>(_pui8Blob));
-						CUtilities::ByteToCString( (*_pui8Blob), szBuffer, FALSE, FALSE );
-						//int iOffset = std::swprintf( _pwStr, _iMaxLen, L"%d (%S)", i32Temp, szBuffer );
-						return std::format( L"{} ({})", i32Temp, CUtilities::XStringToWString( szBuffer, 0 ) );
-					}
-					default : {
-						std::wstring wsTmp;
-						CUtilities::ToDataTypeString( _pui8Blob, m_dtDataType, wsTmp );
-						return wsTmp;
-					}
-				}
-				break;
-			}
-			case CUtilities::MX_VT_STRING : {
-				break;
-			}
-			case CUtilities::MX_VT_BLOB : {
-				break;
-			}
-		}
-		return std::wstring();
-	}
+	//// Takes a blob of data and converts it to text.
+	//std::wstring CFoundAddress::ToText( const uint8_t * _pui8Blob, size_t _sSize ) const {
+	//	switch ( m_vtValueType ) {
+	//		case CUtilities::MX_VT_DATA_TYPE : {
+	//			switch ( m_dtDataType ) {
+	//				case CUtilities::MX_DT_INT8 : {
+	//					char szBuffer[32];
+	//					int32_t i32Temp = (*reinterpret_cast<const int8_t *>(_pui8Blob));
+	//					CUtilities::ByteToCString( (*_pui8Blob), szBuffer, FALSE, FALSE );
+	//					//int iOffset = std::swprintf( _pwStr, _iMaxLen, L"%d (%S)", i32Temp, szBuffer );
+	//					return std::format( L"{} ({})", i32Temp, CUtilities::XStringToWString( szBuffer, 0 ) );
+	//				}
+	//				default : {
+	//					std::wstring wsTmp;
+	//					CUtilities::ToDataTypeString( _pui8Blob, m_dtDataType, wsTmp );
+	//					return wsTmp;
+	//				}
+	//			}
+	//			break;
+	//		}
+	//		case CUtilities::MX_VT_STRING : {
+	//			break;
+	//		}
+	//		case CUtilities::MX_VT_BLOB : {
+	//			break;
+	//		}
+	//	}
+	//	return std::wstring();
+	//}
 
 	// Gets the Type text.
 	std::wstring CFoundAddress::TypeText() const {
@@ -458,7 +475,7 @@ namespace mx {
 				if MX_UNLIKELY( m_vCurData.vOffsets.size() != 1 ) {
 					m_vCurData.vOffsets.resize( 1 );
 				}
-				return m_pmhMemHack->ReadProcessMemory_PreProcessed( ui64Addr, m_vCurData.vValue[0], m_ui32DataTypeSize * ui32Elements, m_vCurData.vOffsets[0], m_bsByteSwap );
+				return m_pmhMemHack->Process().ReadProcessMemory_PreProcessed( ui64Addr, m_vCurData.vValue[0], m_ui32DataTypeSize * ui32Elements, m_vCurData.vOffsets[0], m_bsByteSwap );
 			}
 
 			if MX_UNLIKELY( m_vCurData.vValue.size() != ui32Elements ) {
@@ -468,7 +485,7 @@ namespace mx {
 				m_vCurData.vOffsets.resize( ui32Elements );
 			}
 			for ( uint32_t I = 0; I < ui32Elements; ++I ) {
-				if ( !m_pmhMemHack->ReadProcessMemory_PreProcessed( ui64Addr, m_vCurData.vValue[I], m_ui32DataTypeSize, m_vCurData.vOffsets[I], m_bsByteSwap ) ) { return false; }
+				if ( !m_pmhMemHack->Process().ReadProcessMemory_PreProcessed( ui64Addr, m_vCurData.vValue[I], m_ui32DataTypeSize, m_vCurData.vOffsets[I], m_bsByteSwap ) ) { return false; }
 				ui64Addr += m_ui16ActuaArrayStride;
 			}
 			return true;
@@ -478,7 +495,12 @@ namespace mx {
 
 	// Prepares the MX_VALUE structures based on the value type, array length/stride.  Call within a try/catch block.
 	void CFoundAddress::PrepareValueStructures() const {
-		if ( CUtilities::IsDataType( m_dtDataType ) ) {
+		if ( m_vtValueType == CUtilities::MX_VT_STRING ) {
+			m_ui32DataTypeSize = m_vLockedData.size() ? m_vLockedData[0].size() : 0;
+			m_ui16ActuaArrayStride = 0;
+			m_bContiguous = true;
+		}
+		else if ( CUtilities::IsDataType( m_dtDataType ) ) {
 			m_ui32DataTypeSize = CUtilities::DataTypeSize( m_dtDataType );
 			m_ui16ActuaArrayStride = std::max<uint16_t>( m_ui16ArrayStride, m_ui32DataTypeSize );
 			m_bContiguous = m_ui16ActuaArrayStride == m_ui32DataTypeSize;
@@ -497,7 +519,7 @@ namespace mx {
 		size_t sOffset;
 		size_t sSize = m_pmhMemHack->Process().Is32Bit() ? 4 : 8;
 		for ( size_t I = 0; I < m_vPointers.size(); ++I ) {
-			if ( !m_pmhMemHack->ReadProcessMemory_PreProcessed( ui64Addr, ui8Cach, sSize, sOffset, m_bsByteSwap ) ) {
+			if ( !m_pmhMemHack->Process().ReadProcessMemory_PreProcessed( ui64Addr, ui8Cach, sSize, sOffset, m_bsByteSwap ) ) {
 				MX_FAIL;
 			}
 			ui64Addr = (*reinterpret_cast<uint64_t *>(&ui8Cach[sOffset]));
@@ -513,9 +535,9 @@ namespace mx {
 	const CSecureWString & CFoundAddress::LockedLeftText() const {
 		if MX_UNLIKELY( m_bDirtyLockedLeft ) {
 			CSecureString ssTmp;
-			ssTmp.assign( reinterpret_cast<const char *>( m_vLockedData[0].data() ),
-			reinterpret_cast<const char *>( m_vLockedData[0].data() ) + m_vLockedData[0].size() );
-			m_swsLockedLeftText = CUtilities::MultiByteToWideChar( CodePage(), 0, ssTmp );
+			ssTmp.assign( reinterpret_cast<const char *>(m_vLockedData[0].data()),
+			reinterpret_cast<const char *>(m_vLockedData[0].data() ) + m_vLockedData[0].size());
+			m_swsLockedLeftText = CUtilities::EscapeUnprintable( CUtilities::MultiByteToWideChar( CodePage(), 0, ssTmp ), true, true );
 			m_bDirtyLockedLeft = false;
 		}
 		return m_swsLockedLeftText;

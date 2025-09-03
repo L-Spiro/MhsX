@@ -280,185 +280,6 @@ namespace mx {
 		return true;
 	}
 
-	// Reads data from an area of memory in the current process. The entire area to be read must be accessible or the operation fails.
-	// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
-	bool CMemHack::ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, SIZE_T * _lpNumberOfBytesRead ) const {
-		return ReadProcessMemory_PreProcessed( _ui64BaseAddress, _vBuffer, _nSize, _sBufferOffset, Searcher().LastSearchParms().bsByteSwapping, _lpNumberOfBytesRead );
-	}
-
-	// Reads data from an area of memory in the current process. The entire area to be read must be accessible or the operation fails.
-	// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
-	bool CMemHack::ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, LPVOID _lpvBuffer, SIZE_T _nSize, size_t &_sBufferOffset, SIZE_T * _lpNumberOfBytesRead ) const {
-		return ReadProcessMemory_PreProcessed( _ui64BaseAddress, _lpvBuffer, _nSize, _sBufferOffset, Searcher().LastSearchParms().bsByteSwapping, _lpNumberOfBytesRead );
-	}
-
-	// Reads data from an area of memory in the current process. The entire area to be read must be accessible or the operation fails.
-	// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
-	bool CMemHack::ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead ) const {
-		if MX_UNLIKELY( _ui64BaseAddress > MAXSIZE_T ) { return false; }
-		
-		try {
-			uint32_t uiAlignment;
-			switch ( _bsSwap ) {
-				case CUtilities::MX_BS_NONE : {
-					_vBuffer.resize( _nSize );
-					_sBufferOffset = 0;
-					return Process().ReadProcessMemory( _ui64BaseAddress,
-						_vBuffer.data(), _vBuffer.size(), _lpNumberOfBytesRead );
-				}
-				case CUtilities::MX_BS_2BYTE : {
-					uiAlignment = 2;
-					break;
-				}
-				case CUtilities::MX_BS_4BYTE : {
-					uiAlignment = 4;
-					break;
-				}
-				default : {
-					uiAlignment = 8;
-					break;
-				}
-			}
-			uint64_t uiDataStart = _ui64BaseAddress, uiAdjustedLen = _nSize;
-			CUtilities::SnapTo( uiAlignment, uiDataStart, uiAdjustedLen, _sBufferOffset );
-			if ( _lpNumberOfBytesRead ) { (*_lpNumberOfBytesRead) = 0; }
-			if MX_UNLIKELY( uiAdjustedLen > MAXSIZE_T ) { return false; }
-
-			_vBuffer.resize( static_cast<size_t>(uiAdjustedLen) );
-			if ( !Process().ReadProcessMemory( uiDataStart,
-				_vBuffer.data(), _vBuffer.size(), _lpNumberOfBytesRead ) ) {
-				return false;
-			}
-			CSearcher::PreprocessByteSwap( _vBuffer.data(), uiAdjustedLen, _bsSwap );
-			return true;
-		}
-		catch ( ... ) { return false; }
-	}
-
-	// Reads data from an area of memory in the current process. The entire area to be read must be accessible or the operation fails.
-	// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
-	bool CMemHack::ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, LPVOID _lpvBuffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead ) const {
-		if MX_UNLIKELY( _ui64BaseAddress > MAXSIZE_T ) { return false; }
-		
-		try {
-			uint32_t uiAlignment;
-			switch ( _bsSwap ) {
-				case CUtilities::MX_BS_NONE : {
-					_sBufferOffset = 0;
-					return Process().ReadProcessMemory( _ui64BaseAddress,
-						_lpvBuffer, _nSize, _lpNumberOfBytesRead );
-				}
-				case CUtilities::MX_BS_2BYTE : {
-					uiAlignment = 2;
-					break;
-				}
-				case CUtilities::MX_BS_4BYTE : {
-					uiAlignment = 4;
-					break;
-				}
-				default : {
-					uiAlignment = 8;
-					break;
-				}
-			}
-			uint64_t uiDataStart = _ui64BaseAddress, uiAdjustedLen = _nSize;
-			CUtilities::SnapTo( uiAlignment, uiDataStart, uiAdjustedLen, _sBufferOffset );
-			if ( _lpNumberOfBytesRead ) { (*_lpNumberOfBytesRead) = 0; }
-			if MX_UNLIKELY( uiAdjustedLen > MAXSIZE_T ) { return false; }
-
-			if ( !Process().ReadProcessMemory( uiDataStart,
-				_lpvBuffer, static_cast<SIZE_T>(uiAdjustedLen), _lpNumberOfBytesRead ) ) {
-				return false;
-			}
-			CSearcher::PreprocessByteSwap( _lpvBuffer, uiAdjustedLen, _bsSwap );
-			return true;
-		}
-		catch ( ... ) { return false; }
-	}
-
-	// Writes data to an area of memory in the current process.  If the data is preprocessed and misaligned, it could result in up to 3 writes to memory.
-	bool CMemHack::WriteProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, LPCVOID _lpvBuffer, SIZE_T _nSize, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesWritten ) {
-		if MX_UNLIKELY( _ui64BaseAddress > MAXSIZE_T ) { return false; }
-
-		try {
-			uint32_t uiAlignment;
-			switch ( _bsSwap ) {
-				case CUtilities::MX_BS_NONE : {
-					return Process().WriteProcessMemory( _ui64BaseAddress,
-						_lpvBuffer, _nSize, _lpNumberOfBytesWritten );
-				}
-				case CUtilities::MX_BS_2BYTE : {
-					uiAlignment = 2;
-					break;
-				}
-				case CUtilities::MX_BS_4BYTE : {
-					uiAlignment = 4;
-					break;
-				}
-				default : {
-					uiAlignment = 8;
-					break;
-				}
-			}
-
-			uint64_t uiDataStart = _ui64BaseAddress, uiAdjustedLen = _nSize;
-			size_t sBufferOffset = 0;
-			CUtilities::SnapTo( uiAlignment, uiDataStart, uiAdjustedLen, sBufferOffset );
-			if ( _lpNumberOfBytesWritten ) { (*_lpNumberOfBytesWritten) = 0; }
-			if MX_UNLIKELY( uiAdjustedLen > MAXSIZE_T ) { return false; }
-
-			/*std::vector<uint8_t> vCopy( reinterpret_cast<const uint8_t *>(_lpvBuffer),
-				reinterpret_cast<const uint8_t *>(_lpvBuffer) + _nSize );*/
-			std::vector<uint8_t> vCopy( uiAdjustedLen );
-			std::memcpy( vCopy.data() + sBufferOffset, _lpvBuffer, _nSize );
-			CSearcher::PreprocessByteSwap( vCopy.data(), uiAdjustedLen, _bsSwap );
-			if ( sBufferOffset == 0 && uiAdjustedLen == _nSize ) {
-				// The byte-swapping did not cause disjointing of the data, so it can be copied in one go.
-				return Process().WriteProcessMemory( _ui64BaseAddress,
-					vCopy.data(), _nSize, _lpNumberOfBytesWritten );
-			}
-
-			_ui64BaseAddress -= sBufferOffset;
-			// Some disjointing will have occurred.  Create a disjoint map.
-			std::vector<uint8_t> vDisjointMap( uiAdjustedLen );
-			std::memset( vDisjointMap.data() + sBufferOffset, 0xFF, _nSize );
-			CSearcher::PreprocessByteSwap( vDisjointMap.data(), uiAdjustedLen, _bsSwap );
-			size_t sCnt = 0;
-			size_t sLastIdx = 0;
-			SIZE_T sTotalWritten = 0;
-			for ( size_t I = 0; I < uiAdjustedLen; ++I ) {
-				if ( !vDisjointMap[I] ) {
-					// Write whatever we have accumulated up to this point.
-					if ( sCnt ) {
-						SIZE_T sTmp = 0;
-						if ( !Process().WriteProcessMemory( _ui64BaseAddress + sLastIdx,
-							vCopy.data() + sLastIdx, sCnt, &sTmp ) ) {
-							if ( _lpNumberOfBytesWritten ) { (*_lpNumberOfBytesWritten) = sTotalWritten + sTmp; }
-							return false;
-						}
-						sTotalWritten += sTmp;
-					}
-					sCnt = 0;
-				}
-				else {
-					if ( !sCnt++ ) { sLastIdx = I; }
-				}
-			}
-			if ( sCnt ) {
-				SIZE_T sTmp = 0;
-				if ( !Process().WriteProcessMemory( _ui64BaseAddress + sLastIdx,
-					vCopy.data() + sLastIdx, sCnt, &sTmp ) ) {
-					if ( _lpNumberOfBytesWritten ) { (*_lpNumberOfBytesWritten) = sTotalWritten + sTmp; }
-					return false;
-				}
-				sTotalWritten += sTmp;
-			}
-			if ( _lpNumberOfBytesWritten ) { (*_lpNumberOfBytesWritten) = sTotalWritten; }
-			return true;
-		}
-		catch ( ... ) { return false; }
-	}
-
 	// The address reader for expressions.
 	bool __stdcall CMemHack::ExpAddressHandler( uint64_t _ui64Address, ee::EE_CAST_TYPES _ctType, uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult ) {
 		CMemHack * _mhMemHack = reinterpret_cast<CMemHack *>(_uiptrData);
@@ -468,7 +289,7 @@ namespace mx {
 			case ee::EE_CT_INT8 : {
 				_rResult.ncType = ee::EE_NC_SIGNED;
 				int8_t i8Val;
-				if ( _mhMemHack->ReadProcessMemory_PreProcessed( _ui64Address, &i8Val, sizeof( i8Val ), sOffset, bsByteSwap, NULL ) ) {
+				if ( _mhMemHack->Process().ReadProcessMemory_PreProcessed( _ui64Address, &i8Val, sizeof( i8Val ), sOffset, bsByteSwap, NULL ) ) {
 					_rResult.u.i64Val = i8Val;
 					return true;
 				}
@@ -477,7 +298,7 @@ namespace mx {
 			case ee::EE_CT_INT16 : {
 				_rResult.ncType = ee::EE_NC_SIGNED;
 				int16_t i16Val;
-				if ( _mhMemHack->ReadProcessMemory_PreProcessed( _ui64Address, &i16Val, sizeof( i16Val ), sOffset, bsByteSwap, NULL ) ) {
+				if ( _mhMemHack->Process().ReadProcessMemory_PreProcessed( _ui64Address, &i16Val, sizeof( i16Val ), sOffset, bsByteSwap, NULL ) ) {
 					_rResult.u.i64Val = i16Val;
 					return true;
 				}
@@ -486,7 +307,7 @@ namespace mx {
 			case ee::EE_CT_INT32 : {
 				_rResult.ncType = ee::EE_NC_SIGNED;
 				int32_t i32Val;
-				if ( _mhMemHack->ReadProcessMemory_PreProcessed( _ui64Address, &i32Val, sizeof( i32Val ), sOffset, bsByteSwap, NULL ) ) {
+				if ( _mhMemHack->Process().ReadProcessMemory_PreProcessed( _ui64Address, &i32Val, sizeof( i32Val ), sOffset, bsByteSwap, NULL ) ) {
 					_rResult.u.i64Val = i32Val;
 					return true;
 				}
@@ -494,7 +315,7 @@ namespace mx {
 			}
 			case ee::EE_CT_INT64 : {
 				_rResult.ncType = ee::EE_NC_SIGNED;
-				if ( _mhMemHack->ReadProcessMemory_PreProcessed( _ui64Address, &_rResult.u.i64Val, sizeof( _rResult.u.i64Val ), sOffset, bsByteSwap, NULL ) ) {
+				if ( _mhMemHack->Process().ReadProcessMemory_PreProcessed( _ui64Address, &_rResult.u.i64Val, sizeof( _rResult.u.i64Val ), sOffset, bsByteSwap, NULL ) ) {
 					return true;
 				}
 				break;
@@ -503,29 +324,29 @@ namespace mx {
 			case ee::EE_CT_UINT8 : {
 				_rResult.ncType = ee::EE_NC_UNSIGNED;
 				_rResult.u.ui64Val = 0;
-				return _mhMemHack->ReadProcessMemory_PreProcessed( _ui64Address, &_rResult.u.ui64Val, sizeof( uint8_t ), sOffset, bsByteSwap, NULL );
+				return _mhMemHack->Process().ReadProcessMemory_PreProcessed( _ui64Address, &_rResult.u.ui64Val, sizeof( uint8_t ), sOffset, bsByteSwap, NULL );
 			}
 			case ee::EE_CT_UINT16 : {
 				_rResult.ncType = ee::EE_NC_UNSIGNED;
 				_rResult.u.ui64Val = 0;
-				return _mhMemHack->ReadProcessMemory_PreProcessed( _ui64Address, &_rResult.u.ui64Val, sizeof( uint16_t ), sOffset, bsByteSwap, NULL );
+				return _mhMemHack->Process().ReadProcessMemory_PreProcessed( _ui64Address, &_rResult.u.ui64Val, sizeof( uint16_t ), sOffset, bsByteSwap, NULL );
 			}
 			case ee::EE_CT_UINT32 : {
 				_rResult.ncType = ee::EE_NC_UNSIGNED;
 				_rResult.u.ui64Val = 0;
-				return _mhMemHack->ReadProcessMemory_PreProcessed( _ui64Address, &_rResult.u.ui64Val, sizeof( uint32_t ), sOffset, bsByteSwap, NULL );
+				return _mhMemHack->Process().ReadProcessMemory_PreProcessed( _ui64Address, &_rResult.u.ui64Val, sizeof( uint32_t ), sOffset, bsByteSwap, NULL );
 			}
 			case ee::EE_CT_UINT64 : {
 				_rResult.ncType = ee::EE_NC_UNSIGNED;
 				_rResult.u.ui64Val = 0;
-				return _mhMemHack->ReadProcessMemory_PreProcessed( _ui64Address, &_rResult.u.ui64Val, sizeof( uint64_t ), sOffset, bsByteSwap, NULL );
+				return _mhMemHack->Process().ReadProcessMemory_PreProcessed( _ui64Address, &_rResult.u.ui64Val, sizeof( uint64_t ), sOffset, bsByteSwap, NULL );
 			}
 
 
 			case ee::EE_CT_FLOAT16 : {
 				_rResult.ncType = ee::EE_NC_FLOATING;
 				uint16_t ui16Val = 0;
-				if ( _mhMemHack->ReadProcessMemory_PreProcessed( _ui64Address, &ui16Val, sizeof( ui16Val ), sOffset, bsByteSwap, NULL ) ) {
+				if ( _mhMemHack->Process().ReadProcessMemory_PreProcessed( _ui64Address, &ui16Val, sizeof( ui16Val ), sOffset, bsByteSwap, NULL ) ) {
 					_rResult.u.dVal = ee::CFloat16( ui16Val ).Value();
 					return true;
 				}
@@ -534,7 +355,7 @@ namespace mx {
 			case ee::EE_CT_FLOAT : {
 				_rResult.ncType = ee::EE_NC_FLOATING;
 				float fVal = 0.0f;
-				if ( _mhMemHack->ReadProcessMemory_PreProcessed( _ui64Address, &fVal, sizeof( fVal ), sOffset, bsByteSwap, NULL ) ) {
+				if ( _mhMemHack->Process().ReadProcessMemory_PreProcessed( _ui64Address, &fVal, sizeof( fVal ), sOffset, bsByteSwap, NULL ) ) {
 					_rResult.u.dVal = fVal;
 					return true;
 				}
@@ -543,7 +364,7 @@ namespace mx {
 			case ee::EE_CT_DOUBLE : {
 				_rResult.ncType = ee::EE_NC_FLOATING;
 				_rResult.u.dVal = 0;
-				return _mhMemHack->ReadProcessMemory_PreProcessed( _ui64Address, &_rResult.u.dVal, sizeof( _rResult.u.dVal ), sOffset, bsByteSwap, NULL );
+				return _mhMemHack->Process().ReadProcessMemory_PreProcessed( _ui64Address, &_rResult.u.dVal, sizeof( _rResult.u.dVal ), sOffset, bsByteSwap, NULL );
 			}
 		}
 		_rResult.ncType = ee::EE_NC_INVALID;

@@ -246,10 +246,10 @@ namespace mx {
 
 		// == Functions.
 		// Takes a blob of data and converts it to text.
-		inline std::wstring									ToText( const std::vector<uint8_t> &_vBlob ) const { return ToText( _vBlob.data() ); }
+		//inline std::wstring									ToText( const std::vector<uint8_t> &_vBlob ) const { return ToText( _vBlob.data(), _vBlob.size() ); }
 
-		// Takes a blob of data and converts it to text.
-		std::wstring										ToText( const uint8_t * _pui8Blob ) const;
+		//// Takes a blob of data and converts it to text.
+		//std::wstring										ToText( const uint8_t * _pui8Blob, size_t _sSize ) const;
 
 		// Gets the actual final address of the item.
 		uint64_t											GetUpdatedFinalAddress() const;

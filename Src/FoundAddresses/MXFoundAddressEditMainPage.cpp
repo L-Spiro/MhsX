@@ -46,6 +46,11 @@ namespace mx {
 			pwTmp->CheckButton( GatherLockedStates() );
 		}
 
+		pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_ESCAPE_CHECK );
+		if ( pwTmp ) {
+			pwTmp->CheckButton( true );
+		}
+
 		pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_STRING_COMBO );
 		if ( pwTmp ) {
 			UINT uiSysCodePage = CCodePages::GetSystemDefaultAnsiCodePage();
@@ -58,7 +63,7 @@ namespace mx {
 				pcbCombo->SetItemData( iIndex, vCodePages[I].uiCodePage );
 			}
 
-			pcbCombo->SetCurSelByItemData( /*CCodePages::MX_utf_8*/uiSysCodePage );
+			pcbCombo->SetCurSelByItemData( GatherCodePages() );
 			pcbCombo->AutoSetMinListWidth();
 		}
 		pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_DATA_COMBO );
@@ -609,7 +614,7 @@ namespace mx {
 								if ( dwError == ERROR_SUCCESS ) {
 									if ( !bLocked && swsValue.size() ) {
 										// Write the current value to RAM.
-										m_pParms.pmhMemHack->WriteProcessMemory_PreProcessed( ui64Address, sCodePaged.data(), sCodePaged.size(), pfaThis->PreProcessing() );
+										m_pParms.pmhMemHack->Process().WriteProcessMemory_PreProcessed( ui64Address, sCodePaged.data(), sCodePaged.size(), pfaThis->PreProcessing() );
 									}
 									
 									swsCopy = swsLeft;
@@ -1384,6 +1389,28 @@ namespace mx {
 		}
 
 		return dtRet;
+	}
+
+	// Gathers all code pages.
+	LRESULT CFoundAddressEditMainPage::GatherCodePages() const {
+		if ( !m_pParms.pmhMemHack || !m_pParms.vSelection.size() ) { return LRESULT( -1 ); }
+		LRESULT lrRet = LRESULT( -1 );
+		auto famManager = m_pParms.pmhMemHack->FoundAddressManager();
+		bool bFound = false;
+
+		for ( size_t I = 0; I < m_pParms.vSelection.size(); ++I ) {
+			auto faTmp = famManager->GetById( m_pParms.vSelection[I] );
+			if ( faTmp && faTmp->Type() == MX_FAT_FOUND_ADDRESS ) {
+				if ( !bFound ) {
+					lrRet = reinterpret_cast<CFoundAddress *>(faTmp)->CodePage();
+					bFound = true;
+					continue;
+				}
+				if ( reinterpret_cast<CFoundAddress *>(faTmp)->CodePage() != lrRet ) { return LRESULT( -1 ); }
+			}
+		}
+
+		return lrRet;
 	}
 
 	// Gathers all lock types.

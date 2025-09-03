@@ -1,10 +1,45 @@
+/**
+ * Copyright L. Spiro 2025
+ *
+ * Written by: Shawn (L. Spiro) Wilcoxen
+ *
+ * Description: A standard file-mapping wrapper.
+ */
+ 
 #include "MXFileMap.h"
 #include "../System/MXSystem.h"
 
 #include <algorithm>
 
 // == Macros.
-#define MX_MAP_BUF_SIZE			static_cast<UINT64>(mx::CSystem::GetSystemInfo().dwAllocationGranularity * 64)
+#if defined( _WIN32 )
+	// == Windows ============================================
+	// Buffer size is 64Å~ the allocation granularity.
+	#define MX_MAP_BUF_SIZE				static_cast<uint64_t>(mx::CSystem::GetSystemInfo().dwAllocationGranularity * 64)
+#else
+	// == POSIX: macOS / iOS / Linux =========================
+	#include <unistd.h>
+	#include <fcntl.h>
+	#include <sys/mman.h>
+	#include <sys/stat.h>
+	#include <sys/types.h>
+	#include <errno.h>
+
+	// Provide INVALID_HANDLE_VALUE compatibility if not present.
+	#ifndef INVALID_HANDLE_VALUE
+		#define INVALID_HANDLE_VALUE reinterpret_cast<HANDLE>(-1)
+	#endif
+
+	namespace mx::detail {
+		static inline uint64_t			MapBufSize() {
+			long lPg = ::sysconf( _SC_PAGESIZE );
+			if ( lPg <= 0 ) { lPg = 4096; }
+			static const uint64_t s_ui64 = static_cast<uint64_t>(lPg) * 64ULL;
+			return s_ui64;
+		}
+	}
+	#define MX_MAP_BUF_SIZE				mx::detail::MapBufSize()
+#endif
 
 namespace mx {
 
@@ -23,19 +58,21 @@ namespace mx {
 	 * \brief If _ui64CreationSize != 0, the file is (re)created and resized to that many bytes.
 	 *
 	 * \param _pFile Path to the file.
-	 * \param _bOpenForWrite TRUE to open for write when not creating; ignored when creating (write is forced).
+	 * \param _bOpenForWrite true to open for write when not creating; ignored when creating (write is forced).
 	 * \param _ui64CreationSize If non-zero, (re)create the file and set its size to this value.
-	 * \return Returns TRUE on success.
+	 * \return Returns true on success.
 	 */
-	BOOL CFileMap::CreateMap( const std::filesystem::path &_pFile, BOOL _bOpenForWrite, uint64_t _ui64CreationSize ) {
+	bool CFileMap::CreateMap( const std::filesystem::path &_pFile, bool _bOpenForWrite, uint64_t _ui64CreationSize ) {
 		Close();
 		const bool bCreate = (_ui64CreationSize != 0ULL);
-		const DWORD dwDesiredAccess = bCreate ? (GENERIC_READ | GENERIC_WRITE)
+
+#if defined( _WIN32 )
+		const uint32_t dwDesiredAccess = bCreate ? (GENERIC_READ | GENERIC_WRITE)
 			: (_bOpenForWrite ? (GENERIC_READ | GENERIC_WRITE) : GENERIC_READ);
-		const DWORD dwCreationDisposition = bCreate ? CREATE_ALWAYS : OPEN_EXISTING;
+		const uint32_t dwCreationDisposition = bCreate ? CREATE_ALWAYS : OPEN_EXISTING;
 
 		m_hFile = ::CreateFileW(
-			_pFile.generic_wstring().c_str(),
+			_pFile.c_str(),
 			dwDesiredAccess,
 			0,
 			NULL,
@@ -44,7 +81,7 @@ namespace mx {
 			NULL
 		);
 
-		if ( m_hFile == INVALID_HANDLE_VALUE ) { return FALSE; }
+		if ( m_hFile == INVALID_HANDLE_VALUE ) { return false; }
 
 		// If creating, resize to _ui64CreationSize bytes.
 		if ( bCreate ) {
@@ -53,24 +90,60 @@ namespace mx {
 
 			if ( !::SetFilePointerEx( m_hFile, liSize, nullptr, FILE_BEGIN ) ) {
 				Close();
-				return FALSE;
+				return false;
 			}
 			if ( !::SetEndOfFile( m_hFile ) ) {
 				Close();
-				return FALSE;
+				return false;
 			}
 			liSize.QuadPart = 0;
 			::SetFilePointerEx( m_hFile, liSize, nullptr, FILE_BEGIN );
+			m_bWritable = true;
+		}
+		else {
+			m_bWritable = _bOpenForWrite;
+		}
+		return CreateFileMap();
+#else
+		int flags = 0;
+		int mode = 0644;
+
+		if ( bCreate ) {
+			flags = O_CREAT | O_TRUNC | O_RDWR;
+		}
+		else {
+			flags = _bOpenForWrite ? O_RDWR : O_RDONLY;
 		}
 
+		int fd = ::open( _pFile.c_str(), flags, mode );
+		if ( fd < 0 ) { return false; }
 
-		m_bWritable = _bOpenForWrite;
+		m_hFile = fd;
+
+		if ( bCreate ) {
+			// Set size to _ui64CreationSize.
+			if ( ::ftruncate( fd, static_cast<off_t>(_ui64CreationSize) ) != 0 ) {
+				Close();
+				return false;
+			}
+			m_bWritable = true;
+		}
+		else {
+			m_bWritable = _bOpenForWrite;
+		}
+
 		return CreateFileMap();
+#endif
 	}
 
-	// Closes the opened file map.
-	VOID CFileMap::Close() {
+	/**
+	 * Closes the file and mapping.
+	 * \brief Releases any open handles and unmaps any active view.
+	 */
+	void CFileMap::Close() {
 		UnMapRegion();
+
+#if defined( _WIN32 )
 		if ( m_hMap != INVALID_HANDLE_VALUE ) {
 			::CloseHandle( m_hMap );
 			m_hMap = INVALID_HANDLE_VALUE;
@@ -79,31 +152,66 @@ namespace mx {
 			::CloseHandle( m_hFile );
 			m_hFile = INVALID_HANDLE_VALUE;
 		}
-		m_bIsEmpty = TRUE;
-		m_bWritable = TRUE;
+#else
+		// On POSIX we alias m_hMap to the same fd as m_hFile; just close the fd once.
+		if ( m_hFile != INVALID_HANDLE_VALUE ) {
+			int fd = m_hFile;
+			::close( fd );
+			m_hFile = INVALID_HANDLE_VALUE;
+			m_hMap = INVALID_HANDLE_VALUE;
+		}
+#endif
+		m_bIsEmpty = true;
+		m_bWritable = false;
 		m_ui64Size = 0;
 	}
 
-	// Gets the size of the file.
-	UINT64 CFileMap::Size() const {
-		if ( !m_ui64Size ) {
+	/**
+	 * Gets the file size in bytes.
+	 * \brief Returns the cached size if available; may query the OS when needed.
+	 * 
+	 * \return Returns the size of the underlying file.
+	 */
+	uint64_t CFileMap::Size() const {
+		if MX_UNLIKELY( !m_ui64Size ) {
+#if defined( _WIN32 )
 			m_ui64Size = CFile::Size( m_hFile );
+#else
+			if ( m_hFile != INVALID_HANDLE_VALUE ) {
+				int fd = m_hFile;
+				struct stat st;
+				if ( ::fstat( fd, &st ) == 0 ) {
+					m_ui64Size = static_cast<uint64_t>(st.st_size);
+				}
+			}
+#endif
 		}
 		return m_ui64Size;
 	}
 
-	// Reads from the opened file.
-	DWORD CFileMap::Read( LPVOID _lpvBuffer, UINT64 _ui64From, DWORD _dwNumberOfBytesToRead ) const {
-		_dwNumberOfBytesToRead = static_cast<DWORD>(std::min( static_cast<UINT64>(_dwNumberOfBytesToRead), Size() - _ui64From ));
+	/**
+	 * Reads from the opened file.
+	 * \brief Copies data starting at a given file offset into a caller-provided buffer, using a temporary or provided region map.
+	 * 
+	 * \param _lpvBuffer Destination buffer to receive the bytes.
+	 * \param _ui64From File-relative byte offset to begin reading.
+	 * \param _dwNumberOfBytesToRead Number of bytes to read into the destination buffer.
+	 * \param _prmMap Optional pointer to a CRegionMap to reuse; if nullptr, a transient map is used internally.
+	 * \return Returns the number of bytes actually read; 0 on failure.
+	 */
+	uint32_t CFileMap::Read( LPVOID _lpvBuffer, uint64_t _ui64From, uint32_t _dwNumberOfBytesToRead, CRegionMap * _prmMap ) const {
+		if MX_UNLIKELY( _ui64From >= Size() ) { return 0; }
+		CRegionMap * pmrUseMe = _prmMap ? _prmMap : &m_rmMap;
+		_dwNumberOfBytesToRead = static_cast<uint32_t>(std::min( static_cast<uint64_t>(_dwNumberOfBytesToRead), Size() - _ui64From ));
 		// Read in 8-megabyte chunks.
-		PBYTE pbDst = static_cast<PBYTE>(_lpvBuffer);
-		DWORD dwRead = 0;
+		uint8_t * pbDst = static_cast<uint8_t *>(_lpvBuffer);
+		uint32_t dwRead = 0;
 		while ( _dwNumberOfBytesToRead ) {
-			DWORD dwReadAmount = std::min( m_dwChunkSize, _dwNumberOfBytesToRead );
-			if ( !MapRegion( _ui64From, dwReadAmount ) ) {
+			uint32_t dwReadAmount = std::min( m_dwChunkSize, _dwNumberOfBytesToRead );
+			if MX_UNLIKELY( !MapRegion( _ui64From, dwReadAmount, pmrUseMe ) ) {
 				return dwRead;
 			}
-			std::memcpy( pbDst, &m_pbMapBuffer[_ui64From-m_ui64MapStart], dwReadAmount );
+			std::memcpy( pbDst, &pmrUseMe->Data()[_ui64From-pmrUseMe->Start()], dwReadAmount );
 
 
 			_dwNumberOfBytesToRead -= dwReadAmount;
@@ -114,18 +222,29 @@ namespace mx {
 		return dwRead;
 	}
 
-	// Writes to the opened file.
-	DWORD CFileMap::Write( LPCVOID _lpvBuffer, UINT64 _ui64From, DWORD _dwNumberOfBytesToWrite ) {
-		_dwNumberOfBytesToWrite = static_cast<DWORD>(std::min( static_cast<UINT64>(_dwNumberOfBytesToWrite), Size() - _ui64From ));
+	/**
+	 * Writes to the opened file.
+	 * \brief Copies data from a caller-provided buffer into the file at a given offset, using a temporary or provided region map.
+	 * 
+	 * \param _lpvBuffer Source buffer containing the bytes to write.
+	 * \param _ui64From File-relative byte offset to begin writing.
+	 * \param _dwNumberOfBytesToWrite Number of bytes to write from the source buffer.
+	 * \param _prmMap Optional pointer to a CRegionMap to reuse; if nullptr, a transient map is used internally.
+	 * \return Returns the number of bytes actually written; 0 on failure.
+	 */
+	uint32_t CFileMap::Write( LPCVOID _lpvBuffer, uint64_t _ui64From, uint32_t _dwNumberOfBytesToWrite, CRegionMap * _prmMap ) {
+		if MX_UNLIKELY( !m_bWritable || _ui64From >= Size() ) { return 0; }
+		CRegionMap * pmrUseMe = _prmMap ? _prmMap : &m_rmMap;
+		_dwNumberOfBytesToWrite = static_cast<uint32_t>(std::min( static_cast<uint64_t>(_dwNumberOfBytesToWrite), Size() - _ui64From ));
 		// Write in 8-megabyte chunks.
 		const BYTE * pbSrc = static_cast<const BYTE *>(_lpvBuffer);
-		DWORD dwWritten = 0;
+		uint32_t dwWritten = 0;
 		while ( _dwNumberOfBytesToWrite ) {
-			DWORD dwWriteAmount = std::min( m_dwChunkSize, _dwNumberOfBytesToWrite );
-			if ( !MapRegion( _ui64From, dwWriteAmount ) ) {
+			uint32_t dwWriteAmount = std::min( m_dwChunkSize, _dwNumberOfBytesToWrite );
+			if MX_UNLIKELY( !MapRegion( _ui64From, dwWriteAmount, pmrUseMe ) ) {
 				return dwWritten;
 			}
-			std::memcpy( &m_pbMapBuffer[_ui64From-m_ui64MapStart], pbSrc, dwWriteAmount );
+			std::memcpy( &pmrUseMe->Data()[_ui64From-pmrUseMe->Start()], pbSrc, dwWriteAmount );
 
 
 			_dwNumberOfBytesToWrite -= dwWriteAmount;
@@ -136,44 +255,57 @@ namespace mx {
 		return dwWritten;
 	}
 
-	// Map a region of the file.
-	BOOL CFileMap::MapRegion( UINT64 _ui64Offset, DWORD _dwSize ) const {
-		if ( m_hMap == INVALID_HANDLE_VALUE ) { return FALSE; }
-		UINT64 ui64Adjusted = AdjustBase( _ui64Offset );
-		DWORD dwNewSize = static_cast<DWORD>((_ui64Offset - ui64Adjusted) + _dwSize);
-		dwNewSize = static_cast<DWORD>(std::min( static_cast<UINT64>(dwNewSize), Size() - ui64Adjusted ));
-		if ( m_pbMapBuffer && ui64Adjusted == m_ui64MapStart && dwNewSize == m_dwMapSize ) { return TRUE; }
+	/**
+	 * Maps a region of the file into memory.
+	 * \brief Ensures a view covering the requested range is available, using _prmMap if provided.
+	 * 
+	 * \param _ui64Offset File-relative byte offset where the view should begin.
+	 * \param _sSize Minimum number of bytes that must be accessible from the view.
+	 * \param _prmMap Optional pointer to a CRegionMap to receive/reuse the mapping; if nullptr, uses an internal map.
+	 * \return Returns true on success; false on failure.
+	 */
+	bool CFileMap::MapRegion( uint64_t _ui64Offset, size_t _sSize, CRegionMap * _prmMap ) const {
+#if defined( _WIN32 )
+		if ( m_hMap == INVALID_HANDLE_VALUE ) { return false; }
+#else
+		if ( m_hFile == INVALID_HANDLE_VALUE ) { return false; }
+		// On POSIX we alias m_hMap to the same fd as m_hFile.
+		if ( m_hMap == INVALID_HANDLE_VALUE ) { m_hMap = m_hFile; }
+#endif
 
-		const_cast<CFileMap *>(this)->UnMapRegion();
+		CRegionMap * pmrUseMe = _prmMap ? _prmMap : &m_rmMap;
 
-		m_pbMapBuffer = static_cast<PBYTE>(::MapViewOfFile( m_hMap,
-			(m_bWritable ? FILE_MAP_WRITE : 0) | FILE_MAP_READ,
-			static_cast<DWORD>(ui64Adjusted >> 32),
-			static_cast<DWORD>(ui64Adjusted),
-			dwNewSize ));
-		if ( !m_pbMapBuffer ) { return FALSE; }
-		m_ui64MapStart = ui64Adjusted;
-		m_dwMapSize = dwNewSize;
-		return TRUE;
+		uint64_t ui64Adjusted = AdjustBase( _ui64Offset );
+		size_t sNewSize = static_cast<uint32_t>((_ui64Offset - ui64Adjusted) + _sSize);
+		sNewSize = std::min<size_t>( static_cast<uint64_t>(sNewSize), Size() - ui64Adjusted );
+		if ( pmrUseMe->Data() &&
+			ui64Adjusted >= pmrUseMe->Start() && (sNewSize + ui64Adjusted) == (pmrUseMe->Size() + pmrUseMe->Start()) ) { return true; }
+
+		return pmrUseMe->MapRegion( m_hMap, ui64Adjusted, sNewSize, m_bWritable );
 	}
 
-	// Closes the current region map.
+	/**
+	 * Unmaps any currently mapped region.
+	 * \brief Convenience wrapper that clears the active region map associated with this file map.
+	 */
 	void CFileMap::UnMapRegion() {
-		if ( m_pbMapBuffer ) {
-			// Unmap existing buffer.
-			::UnmapViewOfFile( m_pbMapBuffer );
-			m_pbMapBuffer = nullptr;
-			m_ui64MapStart = MAXUINT64;
-			m_dwMapSize = 0;
-		}
+		m_rmMap.UnMapRegion();
 	}
 
-	// Creates the file map.
-	BOOL CFileMap::CreateFileMap() {
-		if ( m_hFile == INVALID_HANDLE_VALUE ) { return FALSE; }
+	/**
+	 * Creates the file-mapping object for the currently opened file.
+	 * \brief Initializes m_hMap from m_hFile using CreateFileMapping(); does not map a view.
+	 * 
+	 * \return Returns true on success; false on failure (m_hMap remains INVALID_HANDLE_VALUE).
+	 */
+	bool CFileMap::CreateFileMap() {
+		m_rmMap.UnMapRegion();
+		if ( m_hFile == INVALID_HANDLE_VALUE ) { return false; }
+
+#if defined( _WIN32 )
 		// Can't open 0-sized files.  Emulate the successful mapping of such a file.
 		m_bIsEmpty = Size() == 0;
-		if ( m_bIsEmpty ) { return TRUE; }
+		if ( m_bIsEmpty ) { return true; }
 		m_hMap = ::CreateFileMappingW( m_hFile,
 			NULL,
 			m_bWritable ? PAGE_READWRITE : PAGE_READONLY,
@@ -184,18 +316,34 @@ namespace mx {
 			// For some reason ::CreateFileMapping() returns NULL rather than INVALID_HANDLE_VALUE.
 			m_hMap = INVALID_HANDLE_VALUE;
 			Close();
-			return FALSE;
+			return false;
 		}
-		m_ui64MapStart = MAXUINT64;
-		m_dwMapSize = 0;
-		return TRUE;
+#else
+		// Can't open 0-sized files.  Emulate the successful mapping of such a file.
+		m_bIsEmpty = Size() == 0;
+		if ( m_bIsEmpty ) {
+			m_hMap = INVALID_HANDLE_VALUE;	// No mapping handle needed.
+			return true;
+		}
+
+		// On POSIX there is no separate mapping handle; pass the fd via m_hMap.
+		m_hMap = m_hFile;
+#endif
+		return true;
 	}
 
-	// Adjusts the input to the nearest mapping offset.
-	UINT64 CFileMap::AdjustBase( UINT64 _ui64Offset ) const {
-		if ( _ui64Offset < (MX_MAP_BUF_SIZE >> 1) ) { return 0; }
-		if ( Size() <= MX_MAP_BUF_SIZE ) { return 0; }
-		return ((_ui64Offset + (MX_MAP_BUF_SIZE >> 2)) & (~((MX_MAP_BUF_SIZE >> 1) - 1))) - (MX_MAP_BUF_SIZE >> 1);
+	/**
+	 * Adjusts a requested file offset down to a valid mapping base.
+	 * \brief Aligns _ui64Offset to the system allocation granularity for MapViewOfFile().
+	 * 
+	 * \param _ui64Offset Requested file-relative byte offset for mapping.
+	 * \return Returns the aligned base offset suitable for MapViewOfFile().
+	 */
+	uint64_t CFileMap::AdjustBase( uint64_t _ui64Offset ) const {
+		const uint64_t ui64Size = MX_MAP_BUF_SIZE;
+		if ( _ui64Offset < (ui64Size >> 1) ) { return 0; }
+		if ( Size() <= ui64Size ) { return 0; }
+		return ((_ui64Offset + (ui64Size >> 2)) & (~((ui64Size >> 1) - 1))) - (ui64Size >> 1);
 	}
 
 }	// namespace mx

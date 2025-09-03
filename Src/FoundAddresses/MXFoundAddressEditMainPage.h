@@ -64,6 +64,9 @@ namespace mx {
 		// Gathers all data types.
 		CUtilities::MX_DATA_TYPES				GatherDataTypes() const;
 
+		// Gathers all code pages.
+		LRESULT									GatherCodePages() const;
+
 		// Gathers all lock types.
 		CUtilities::MX_LOCK_TYPES				GatherLockTypes() const;
 

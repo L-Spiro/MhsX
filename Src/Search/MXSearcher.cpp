@@ -593,35 +593,6 @@ namespace mx {
 		return bRet;
 	}
 
-	// Performs pre-processing byteswapping.
-	void CSearcher::PreprocessByteSwap( void * _pvData, size_t _stLen, CUtilities::MX_BYTESWAP _bsSwap ) {
-		if ( !_stLen ) { return; }
-		switch ( _bsSwap ) {
-			case CUtilities::MX_BS_NONE : { return; }
-			case CUtilities::MX_BS_2BYTE : {
-				uint16_t * puiData = reinterpret_cast<uint16_t *>(_pvData);
-				for ( size_t I = _stLen >> 1; I--; ) {
-					puiData[I] = ::_byteswap_ushort( puiData[I] );
-				}
-				return;
-			}
-			case CUtilities::MX_BS_4BYTE : {
-				uint32_t * puiData = reinterpret_cast<uint32_t *>(_pvData);
-				for ( size_t I = _stLen >> 2; I--; ) {
-					puiData[I] = ::_byteswap_ulong( puiData[I] );
-				}
-				return;
-			}
-			case CUtilities::MX_BS_8BYTE : {
-				uint64_t * puiData = reinterpret_cast<uint64_t *>(_pvData);
-				for ( size_t I = _stLen >> 3; I--; ) {
-					puiData[I] = ::_byteswap_uint64( puiData[I] );
-				}
-				return;
-			}
-		}
-	}
-
 	// Divides the results into treadable parts.
 	bool CSearcher::DivideResultsForSubsearch( CSearchResultBase * _psrbResults, std::vector<MX_SUBSEARCH_DIV> &_vResult,
 		uint64_t _ui64MinResults, const CAddressChunkList &_aclList ) {

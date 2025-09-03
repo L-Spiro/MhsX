@@ -121,8 +121,8 @@ namespace mx {
 										uint8_t ui8CurVal[64];
 										DWORD dwSize = CUtilities::DataTypeSize( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.dtType );
 										size_t sOffset;
-										if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( ui64Address,
-											ui8CurVal, size_t( dwSize ), sOffset ) ) {
+										if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory_PreProcessed( ui64Address,
+											ui8CurVal, size_t( dwSize ), sOffset, m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().bsByteSwapping ) ) {
 											std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
 										}
 										else {
@@ -138,8 +138,8 @@ namespace mx {
 											uint8_t ui8CurVal[64];
 											DWORD dwSize = CUtilities::DataTypeSize( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().dtLVal.dtType );
 											size_t sOffset;
-											if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( ui64Address,
-												ui8CurVal, size_t( dwSize ), sOffset ) ) {
+											if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory_PreProcessed( ui64Address,
+												ui8CurVal, size_t( dwSize ), sOffset, m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().bsByteSwapping ) ) {
 												std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
 											}
 											else {
@@ -152,8 +152,8 @@ namespace mx {
 											std::vector<uint8_t> vData;
 
 											size_t sOffset;
-											if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( ui64Address,
-												vData, size_t( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().ui32ExpSearchSize ), sOffset ) ) {
+											if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory_PreProcessed( ui64Address,
+												vData, size_t( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().ui32ExpSearchSize ), sOffset, m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().bsByteSwapping ) ) {
 												std::swprintf( _plvdiInfo->item.pszText, _plvdiInfo->item.cchTextMax, L"%s", L"N/A" );
 											}
 											else {
@@ -297,8 +297,8 @@ namespace mx {
 		std::vector<uint8_t> vData;
 
 		size_t sOffset;
-		if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( _uiAddress,
-			vData, size_t( arRef.uiSize ), sOffset ) ) {
+		if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory_PreProcessed( _uiAddress,
+			vData, size_t( arRef.uiSize ), sOffset, m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().bsByteSwapping ) ) {
 			std::swprintf( _pwStr, _iMaxLen, L"%s", L"N/A" );
 			return false;
 		}
@@ -308,128 +308,144 @@ namespace mx {
 
 
 		CUtilities::MX_STRING_SEARCH_TYPES sstMainSearchType = static_cast<CUtilities::MX_STRING_SEARCH_TYPES>(arRef.uiData & 0xFF);
+		UINT uiCodePage = CCodePages::GetSystemDefaultAnsiCodePage();
 		if ( sstMainSearchType == CUtilities::MX_SST_REGEX ) {
 			CUtilities::MX_REGEX_ENCODING reEncoding = static_cast<CUtilities::MX_REGEX_ENCODING>((arRef.uiData >> 8) & 0xFF);
-			switch ( reEncoding ) {
-				case CUtilities::MX_RE_UTF16_LE : {
-					// Handle below.
-					sstMainSearchType = CUtilities::MX_SST_UTF16;
-					break;
-				}
-				case CUtilities::MX_RE_UTF32_LE : {
-					// Handle below.
-					sstMainSearchType = CUtilities::MX_SST_UTF32;
-					break;
-				}
-				case CUtilities::MX_RE_UTF16_BE : {
-					// Byteswap and then handle normally.
-					wchar_t * pwcByteSwapMe = reinterpret_cast<wchar_t *>(&vData.data()[sOffset]);
-					size_t sLen = arRef.uiSize / sizeof( (*pwcByteSwapMe) );
-					for ( size_t I = 0; I < sLen; ++I ) {
-						pwcByteSwapMe[I] = ::_byteswap_ushort( pwcByteSwapMe[I] );
-					}
-					// Handle below.
-					sstMainSearchType = CUtilities::MX_SST_UTF16;
-					break;
-				}
-				case CUtilities::MX_RE_UTF32_BE : {
-					// Byteswap and then handle normally.
-					uint32_t * puiByteSwapMe = reinterpret_cast<uint32_t *>(&vData.data()[sOffset]);
-					size_t sLen = arRef.uiSize / sizeof( (*puiByteSwapMe) );
-					for ( size_t I = 0; I < sLen; ++I ) {
-						puiByteSwapMe[I] = ::_byteswap_ulong( puiByteSwapMe[I] );
-					}
-					// Handle below.
-					sstMainSearchType = CUtilities::MX_SST_UTF32;
-					break;
-				}
-			}
+			uiCodePage = CUtilities::RegexCodePageToCodePage( reEncoding );
+			//switch ( reEncoding ) {
+			//	case CUtilities::MX_RE_UTF16_LE : {
+			//		// Handle below.
+			//		sstMainSearchType = CUtilities::MX_SST_UTF16;
+			//		break;
+			//	}
+			//	case CUtilities::MX_RE_UTF32_LE : {
+			//		// Handle below.
+			//		sstMainSearchType = CUtilities::MX_SST_UTF32;
+			//		break;
+			//	}
+			//	case CUtilities::MX_RE_UTF16_BE : {
+			//		// Byteswap and then handle normally.
+			//		wchar_t * pwcByteSwapMe = reinterpret_cast<wchar_t *>(&vData.data()[sOffset]);
+			//		size_t sLen = arRef.uiSize / sizeof( (*pwcByteSwapMe) );
+			//		for ( size_t I = 0; I < sLen; ++I ) {
+			//			pwcByteSwapMe[I] = ::_byteswap_ushort( pwcByteSwapMe[I] );
+			//		}
+			//		// Handle below.
+			//		sstMainSearchType = CUtilities::MX_SST_UTF16;
+			//		break;
+			//	}
+			//	case CUtilities::MX_RE_UTF32_BE : {
+			//		// Byteswap and then handle normally.
+			//		uint32_t * puiByteSwapMe = reinterpret_cast<uint32_t *>(&vData.data()[sOffset]);
+			//		size_t sLen = arRef.uiSize / sizeof( (*puiByteSwapMe) );
+			//		for ( size_t I = 0; I < sLen; ++I ) {
+			//			puiByteSwapMe[I] = ::_byteswap_ulong( puiByteSwapMe[I] );
+			//		}
+			//		// Handle below.
+			//		sstMainSearchType = CUtilities::MX_SST_UTF32;
+			//		break;
+			//	}
+			//}
+		}
+		else if ( sstMainSearchType == CUtilities::MX_SST_UTF8 ) {
+			uiCodePage = CCodePages::MX_utf_8;
+		}
+		else if ( sstMainSearchType == CUtilities::MX_SST_UTF16 ) {
+			uiCodePage = CCodePages::MX_utf_16;
 		}
 		else if ( sstMainSearchType == CUtilities::MX_SST_UTF16_BE ) {
+			uiCodePage = CCodePages::MX_utf_16BE;
 			// Byteswap and then handle normally.
-			wchar_t * pwcByteSwapMe = reinterpret_cast<wchar_t *>(&vData.data()[sOffset]);
-			size_t sLen = arRef.uiSize / sizeof( (*pwcByteSwapMe) );
-			for ( size_t I = 0; I < sLen; ++I ) {
-				pwcByteSwapMe[I] = ::_byteswap_ushort( pwcByteSwapMe[I] );
-			}
-			// Handle below.
-			sstMainSearchType = CUtilities::MX_SST_UTF16;
+			//wchar_t * pwcByteSwapMe = reinterpret_cast<wchar_t *>(&vData.data()[sOffset]);
+			//size_t sLen = arRef.uiSize / sizeof( (*pwcByteSwapMe) );
+			//for ( size_t I = 0; I < sLen; ++I ) {
+			//	pwcByteSwapMe[I] = ::_byteswap_ushort( pwcByteSwapMe[I] );
+			//}
+			//// Handle below.
+			//sstMainSearchType = CUtilities::MX_SST_UTF16;
+		}
+		else if ( sstMainSearchType == CUtilities::MX_SST_UTF32 ) {
+			uiCodePage = CCodePages::MX_utf_32;
 		}
 		else if ( sstMainSearchType == CUtilities::MX_SST_UTF32_BE ) {
+			uiCodePage = CCodePages::MX_utf_32BE;
 			// Byteswap and then handle normally.
-			uint32_t * puiByteSwapMe = reinterpret_cast<uint32_t *>(&vData.data()[sOffset]);
-			size_t sLen = arRef.uiSize / sizeof( (*puiByteSwapMe) );
-			for ( size_t I = 0; I < sLen; ++I ) {
-				puiByteSwapMe[I] = ::_byteswap_ulong( puiByteSwapMe[I] );
-			}
-			// Handle below.
-			sstMainSearchType = CUtilities::MX_SST_UTF32;
+			//uint32_t * puiByteSwapMe = reinterpret_cast<uint32_t *>(&vData.data()[sOffset]);
+			//size_t sLen = arRef.uiSize / sizeof( (*puiByteSwapMe) );
+			//for ( size_t I = 0; I < sLen; ++I ) {
+			//	puiByteSwapMe[I] = ::_byteswap_ulong( puiByteSwapMe[I] );
+			//}
+			//// Handle below.
+			//sstMainSearchType = CUtilities::MX_SST_UTF32;
+		}
+		else if ( sstMainSearchType == CUtilities::MX_SST_UTFALL ) {
+			uiCodePage = arRef.uiData;
 		}
 
 		switch ( sstMainSearchType ) {
-			case CUtilities::MX_SST_ASCII : {
-				CSecureString sTmp;
-				CUtilities::BytesToCString( &vData.data()[sOffset], arRef.uiSize, sTmp );
-				for ( size_t I = 0; I < sTmp.size(); ++I ) {
-					MX_PRINT_CHAR( static_cast<uint8_t>(sTmp[I]) );
-				}
-				if ( iIdx < _iMaxLen ) { _pwStr[iIdx] = L'\0'; }
-				return true;
-			}
-			case CUtilities::MX_SST_REGEX : {
-				switch ( (arRef.uiData >> 8) & 0xFF ) {
-					case CUtilities::MX_RE_UTF16_LE : {
-						// Regular UTF-16 on Windows.
+			//case CUtilities::MX_SST_ASCII : {
+			//	CSecureString sTmp;
+			//	CUtilities::BytesToCString( &vData.data()[sOffset], arRef.uiSize, sTmp );
+			//	for ( size_t I = 0; I < sTmp.size(); ++I ) {
+			//		MX_PRINT_CHAR( static_cast<uint8_t>(sTmp[I]) );
+			//	}
+			//	if ( iIdx < _iMaxLen ) { _pwStr[iIdx] = L'\0'; }
+			//	return true;
+			//}
+			//case CUtilities::MX_SST_REGEX : {
+			//	switch ( (arRef.uiData >> 8) & 0xFF ) {
+			//		case CUtilities::MX_RE_UTF16_LE : {
+			//			// Regular UTF-16 on Windows.
 
-					}
-				}
-				// Fall-through.
-			}																	MX_FALLTHROUGH
-			case CUtilities::MX_SST_UTF8 : {
-				CSecureWString swsTemp = ee::CExpEval::StringToWString( reinterpret_cast<const char *>(&vData.data()[sOffset]), arRef.uiSize );
-				swsTemp = CUtilities::EscapeUnprintable( swsTemp, true, false );
-				for ( size_t I = 0; I < swsTemp.size(); ++I ) {
-					if ( !swsTemp[I] ) {
-						MX_PRINT_CHAR( L'\\' );
-						MX_PRINT_CHAR( L'0' );
-					}
-					else {
-						MX_PRINT_CHAR( swsTemp[I] );
-					}
-				}
-				if ( iIdx < _iMaxLen ) { _pwStr[iIdx] = L'\0'; }
-				return true;
-			}
-			case CUtilities::MX_SST_UTF16 : {
-				CSecureWString swsTemp( reinterpret_cast<const wchar_t *>(&vData.data()[sOffset]), arRef.uiSize / sizeof( wchar_t ) );
-				swsTemp = CUtilities::EscapeUnprintable( swsTemp, true, false );
-				for ( size_t I = 0; I < swsTemp.size(); ++I ) {
-					if ( !swsTemp[I] ) {
-						MX_PRINT_CHAR( L'\\' );
-						MX_PRINT_CHAR( L'0' );
-					}
-					else {
-						MX_PRINT_CHAR( swsTemp[I] );
-					}
-				}
-				if ( iIdx < _iMaxLen ) { _pwStr[iIdx] = L'\0'; }
-				return true;
-			}
-			case CUtilities::MX_SST_UTF32 : {
-				CSecureWString swsTemp = ee::CExpEval::Utf32StringToWString( reinterpret_cast<const uint32_t *>(&vData.data()[sOffset]), arRef.uiSize / sizeof( uint32_t ) );
-				swsTemp = CUtilities::EscapeUnprintable( swsTemp, true, false );
-				for ( size_t I = 0; I < swsTemp.size(); ++I ) {
-					if ( !swsTemp[I] ) {
-						MX_PRINT_CHAR( L'\\' );
-						MX_PRINT_CHAR( L'0' );
-					}
-					else {
-						MX_PRINT_CHAR( swsTemp[I] );
-					}
-				}
-				if ( iIdx < _iMaxLen ) { _pwStr[iIdx] = L'\0'; }
-				return true;
-			}
+			//		}
+			//	}
+			//	// Fall-through.
+			//}																	MX_FALLTHROUGH
+			//case CUtilities::MX_SST_UTF8 : {
+			//	CSecureWString swsTemp = ee::CExpEval::StringToWString( reinterpret_cast<const char *>(&vData.data()[sOffset]), arRef.uiSize );
+			//	swsTemp = CUtilities::EscapeUnprintable( swsTemp, true, false );
+			//	for ( size_t I = 0; I < swsTemp.size(); ++I ) {
+			//		if ( !swsTemp[I] ) {
+			//			MX_PRINT_CHAR( L'\\' );
+			//			MX_PRINT_CHAR( L'0' );
+			//		}
+			//		else {
+			//			MX_PRINT_CHAR( swsTemp[I] );
+			//		}
+			//	}
+			//	if ( iIdx < _iMaxLen ) { _pwStr[iIdx] = L'\0'; }
+			//	return true;
+			//}
+			//case CUtilities::MX_SST_UTF16 : {
+			//	CSecureWString swsTemp( reinterpret_cast<const wchar_t *>(&vData.data()[sOffset]), arRef.uiSize / sizeof( wchar_t ) );
+			//	swsTemp = CUtilities::EscapeUnprintable( swsTemp, true, false );
+			//	for ( size_t I = 0; I < swsTemp.size(); ++I ) {
+			//		if ( !swsTemp[I] ) {
+			//			MX_PRINT_CHAR( L'\\' );
+			//			MX_PRINT_CHAR( L'0' );
+			//		}
+			//		else {
+			//			MX_PRINT_CHAR( swsTemp[I] );
+			//		}
+			//	}
+			//	if ( iIdx < _iMaxLen ) { _pwStr[iIdx] = L'\0'; }
+			//	return true;
+			//}
+			//case CUtilities::MX_SST_UTF32 : {
+			//	CSecureWString swsTemp = ee::CExpEval::Utf32StringToWString( reinterpret_cast<const uint32_t *>(&vData.data()[sOffset]), arRef.uiSize / sizeof( uint32_t ) );
+			//	swsTemp = CUtilities::EscapeUnprintable( swsTemp, true, false );
+			//	for ( size_t I = 0; I < swsTemp.size(); ++I ) {
+			//		if ( !swsTemp[I] ) {
+			//			MX_PRINT_CHAR( L'\\' );
+			//			MX_PRINT_CHAR( L'0' );
+			//		}
+			//		else {
+			//			MX_PRINT_CHAR( swsTemp[I] );
+			//		}
+			//	}
+			//	if ( iIdx < _iMaxLen ) { _pwStr[iIdx] = L'\0'; }
+			//	return true;
+			//}
 			case CUtilities::MX_SST_RAW : {
 				CUtilities::MX_DATA_TYPES dtDataType = static_cast<CUtilities::MX_DATA_TYPES>(arRef.uiData >> 8);
 				if ( dtDataType == CUtilities::MX_DT_VOID ) {
@@ -461,6 +477,18 @@ namespace mx {
 				}
 				return true;
 			}
+			default : {
+				CSecureString ssTmp;
+				ssTmp.assign( reinterpret_cast<const char *>(&vData.data()[sOffset]),
+				reinterpret_cast<const char *>(&vData.data()[sOffset]) + arRef.uiSize );
+				auto swsResult = CUtilities::EscapeUnprintable( CUtilities::MultiByteToWideChar( uiCodePage, 0, ssTmp ), true, false );
+				
+				for ( size_t I = 0; I < swsResult.size(); ++I ) {
+					MX_PRINT_CHAR( swsResult[I] );
+				}
+				if ( iIdx < _iMaxLen ) { _pwStr[iIdx] = L'\0'; }
+				return true;
+			}
 		}
 #undef MX_PRINT_CHAR
 		return false;
@@ -476,8 +504,8 @@ namespace mx {
 		std::vector<uint8_t> vData;
 
 		size_t sOffset;
-		if ( !m_pmmwMhsWindow->MemHack()->ReadProcessMemory_PreProcessed( _uiAddress,
-			vData, size_t( uiSize ), sOffset ) ) {
+		if ( !m_pmmwMhsWindow->MemHack()->Process().ReadProcessMemory_PreProcessed( _uiAddress,
+			vData, size_t( uiSize ), sOffset, m_pmmwMhsWindow->MemHack()->Searcher().LastSearchParms().bsByteSwapping ) ) {
 			std::swprintf( _pwStr, _iMaxLen, L"%s", L"N/A" );
 			return false;
 		}

@@ -689,6 +689,9 @@ namespace mx {
 			}
 		}
 
+		// Performs pre-processing byteswapping.
+		static void												PreprocessByteSwap( void * _pvData, size_t _stLen, CUtilities::MX_BYTESWAP _bsSwap );
+
 		// Is the given value a valid data type?
 		static bool												IsDataType( CUtilities::MX_DATA_TYPES _dtType ) {
 			return _dtType >= MX_DT_INT8 && _dtType < MX_DT_VOID;

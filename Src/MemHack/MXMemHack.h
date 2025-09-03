@@ -103,37 +103,30 @@ namespace mx {
 
 		// Reads data from an area of memory in the current process. The entire area to be read must be accessible or the operation fails.
 		// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
-		virtual bool						ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, SIZE_T * _lpNumberOfBytesRead = nullptr ) const;
+		virtual bool						ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, SIZE_T * _lpNumberOfBytesRead = nullptr ) const {
+			return Process().ReadProcessMemory_PreProcessed( _ui64BaseAddress, _vBuffer, _nSize, _sBufferOffset, static_cast<CUtilities::MX_BYTESWAP>(Options().bsByteswap), _lpNumberOfBytesRead );
+		}
 
 		// Reads data from an area of memory in the current process. The entire area to be read must be accessible or the operation fails.
 		// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
-		virtual bool						ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, LPVOID _lpvBuffer, SIZE_T _nSize, size_t &_sBufferOffset, SIZE_T * _lpNumberOfBytesRead = nullptr ) const;
-
-		// Reads data from an area of memory in the current process. The entire area to be read must be accessible or the operation fails.
-		// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
-		virtual bool						ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead = nullptr ) const;
-
-		// Reads data from an area of memory in the current process. The entire area to be read must be accessible or the operation fails.
-		// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
-		virtual bool						ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, LPVOID _lpvBuffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead = nullptr ) const;
+		virtual bool						ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, LPVOID _lpvBuffer, SIZE_T _nSize, size_t &_sBufferOffset, SIZE_T * _lpNumberOfBytesRead = nullptr ) const {
+			return Process().ReadProcessMemory_PreProcessed( _ui64BaseAddress, _lpvBuffer, _nSize, _sBufferOffset, static_cast<CUtilities::MX_BYTESWAP>(Options().bsByteswap), _lpNumberOfBytesRead );
+		}
 
 		// Writes data to an area of memory in the current process.  If the data is preprocessed and misaligned, it could result in up to 3 writes to memory.
 		virtual bool						WriteProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, const LPVOID _lpvBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesWritten = nullptr ) {
-			return WriteProcessMemory_PreProcessed( _ui64BaseAddress, _lpvBuffer, _nSize, Searcher().LastSearchParms().bsByteSwapping, _lpNumberOfBytesWritten );
+			return Process().WriteProcessMemory_PreProcessed( _ui64BaseAddress, _lpvBuffer, _nSize, static_cast<CUtilities::MX_BYTESWAP>(Options().bsByteswap), _lpNumberOfBytesWritten );
 		}
 
 		// Writes data to an area of memory in the current process.  If the data is preprocessed and misaligned, it could result in up to 3 writes to memory.
 		virtual bool						WriteProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, const std::vector<uint8_t> &_vBuffer, SIZE_T * _lpNumberOfBytesWritten = nullptr ) {
-			return WriteProcessMemory_PreProcessed( _ui64BaseAddress, reinterpret_cast<LPCVOID>(_vBuffer.data()), _vBuffer.size(), Searcher().LastSearchParms().bsByteSwapping, _lpNumberOfBytesWritten );
+			return Process().WriteProcessMemory_PreProcessed( _ui64BaseAddress, reinterpret_cast<LPCVOID>(_vBuffer.data()), _vBuffer.size(), static_cast<CUtilities::MX_BYTESWAP>(Options().bsByteswap), _lpNumberOfBytesWritten );
 		}
 
 		// Writes data to an area of memory in the current process.  If the data is preprocessed and misaligned, it could result in up to 3 writes to memory.
 		virtual bool						WriteProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, const std::vector<uint8_t> &_vBuffer, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesWritten = nullptr ) {
-			return WriteProcessMemory_PreProcessed( _ui64BaseAddress, reinterpret_cast<LPCVOID>(_vBuffer.data()), _vBuffer.size(), _bsSwap, _lpNumberOfBytesWritten );
+			return Process().WriteProcessMemory_PreProcessed( _ui64BaseAddress, reinterpret_cast<LPCVOID>(_vBuffer.data()), _vBuffer.size(), _bsSwap, _lpNumberOfBytesWritten );
 		}
-
-		// Writes data to an area of memory in the current process.  If the data is preprocessed and misaligned, it could result in up to 3 writes to memory.
-		virtual bool						WriteProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, LPCVOID _lpvBuffer, SIZE_T _nSize, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesWritten = nullptr );
 
 		// The address reader for expressions.
 		static bool __stdcall				ExpAddressHandler( uint64_t _ui64Address, ee::EE_CAST_TYPES _ctType, uintptr_t _uiptrData, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult );
