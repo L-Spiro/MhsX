@@ -45,9 +45,9 @@ namespace mx {
 			m_lOriginalTypeWidth = 0;
 			if ( pcbCombo ) {
 				static const struct {
-					const char *					pcName;
-					size_t							sLen;
-					MX_STRING_TYPE					stType;
+					const char *							pcName;
+					size_t									sLen;
+					MX_STRING_TYPE							stType;
 				} sCombo[] = {
 					{ _T_LEN_468B510E_Machine_Code_Page,	MX_ST_ANSI },
 					{ _T_LEN_0E813C50_UTF_8,				MX_ST_UTF8 },
@@ -197,7 +197,15 @@ namespace mx {
 				{ _T_LEN_CD45848F_GB_18030,											CUtilities::MX_RE_GB_18030 },
 			};
 			for ( size_t I = 0; I < MX_ELEMENTS( sCombo ); ++I ) {
-				INT iIndex = pcbCombo->AddString( CStringDecoder::DecodeToString( sCombo[I].pcName, sCombo[I].sLen ).c_str() );
+				UINT uiCodePage = CUtilities::RegexCodePageToCodePage( sCombo[I].reEncoding );
+				CSecureWString swsName, swsDesc;
+				INT iIndex;
+				if ( CCodePages::CodePageToString( uiCodePage, swsName, swsDesc ) ) {
+					iIndex = pcbCombo->AddString( swsDesc.c_str() );
+				}
+				else {
+					iIndex = pcbCombo->AddString( CStringDecoder::DecodeToString( sCombo[I].pcName, sCombo[I].sLen ).c_str() );
+				}
 				pcbCombo->SetItemData( iIndex, sCombo[I].reEncoding );
 			}
 			pcbCombo->AutoSetMinListWidth();

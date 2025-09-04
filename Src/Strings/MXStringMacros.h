@@ -18730,3 +18730,12 @@
 #define _DEC_S_3E14AB9A_Open__Current_Process mx::CStringDecoder::DecodeToString( _T_3E14AB9A_Open__Current_Process, _LEN_3E14AB9A )
 #define _DEC_WS_3E14AB9A_Open__Current_Process mx::CStringDecoder::DecodeToWString( _T_3E14AB9A_Open__Current_Process, _LEN_3E14AB9A )
 
+// ASCII+ANSI
+
+#define _T_F6D0A17F_ASCII_ANSI "\xC9\x21\x13\xE4\xDB\xF4\xCF\x15\x23\x11"
+#define _LEN_F6D0A17F 10
+#define _T_LEN_F6D0A17F_ASCII_ANSI _T_F6D0A17F_ASCII_ANSI, _LEN_F6D0A17F
+#define _DEC_F6D0A17F_ASCII_ANSI( STR ) mx::CStringDecoder::Decode( _T_F6D0A17F_ASCII_ANSI, _LEN_F6D0A17F, STR )
+#define _DEC_S_F6D0A17F_ASCII_ANSI mx::CStringDecoder::DecodeToString( _T_F6D0A17F_ASCII_ANSI, _LEN_F6D0A17F )
+#define _DEC_WS_F6D0A17F_ASCII_ANSI mx::CStringDecoder::DecodeToWString( _T_F6D0A17F_ASCII_ANSI, _LEN_F6D0A17F )
+
