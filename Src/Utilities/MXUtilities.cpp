@@ -4887,26 +4887,30 @@ namespace mx {
 	}
 
 	/**
-	 * Fills the combo box with string types.
-	 * 
-	 * \param _pwComboBox The combo box to fill.
-	 * \param _lpDefaultSelect The default selection.
-	 * \return Returns true if _pwComboBox is not nullptr, it is of type CComboBox, and all entries were added.
-	 **/
-	//bool CUtilities::FillComboBoxWithStringTypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect ) {
-	//	std::wstring wsTmp;
-	//	MX_COMBO_ENTRY ceEnries[] = {
-	//		//pwcName																																			lpParm
-	//		{ _DEC_WS_468B510E_Machine_Code_Page,																												LPARAM( MX_ST_CODE_PAGE ),				},
-	//		{ _DEC_WS_0E813C50_UTF_8,																															LPARAM( MX_ST_UTF8 ),					},
-	//		{ _DEC_WS_A71F1195_UTF_16,																															LPARAM( MX_ST_UTF16_LE ),				},
-	//		{ _DEC_WS_26FC5333_UTF_16_BE,																														LPARAM( MX_ST_UTF16_BE ),				},
-	//		{ _DEC_WS_9244B70E_UTF_32,																															LPARAM( MX_ST_UTF32_LE ),				},
-	//		{ _DEC_WS_D35E9704_UTF_32_BE,																														LPARAM( MX_ST_UTF32_BE ),				},
-	//		//{ _DEC_WS_F22813AD_Custom,																															LPARAM( MX_ST_SPECIAL ),				},
-	//	};
-	//	return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, -1 );
-	//}
+	* Fills the combo box with code pages.
+	* 
+	* \param _pwComboBox The combo box to fill.
+	* \param _lpDefaultSelect The default selection.
+	* \return Returns true if _pwComboBox is not nullptr, it is of type CComboBox, and all entries were added.
+	**/
+	bool CUtilities::FillComboBoxWithCodePages( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect ) {
+		if ( !_pwComboBox->IsComboBox() ) { return false; }
+		UINT uiSysCodePage = CCodePages::GetSystemDefaultAnsiCodePage();
+		auto pcbCombo = static_cast<CComboBox *>(_pwComboBox);
+		std::vector<CCodePages::MX_CODE_PAGE> vCodePages;
+		CCodePages::GetSystemCodePages( vCodePages, true );
+		pcbCombo->InitStorage( vCodePages.size(), vCodePages.size() * 15 );
+		for ( size_t I = 0; I < vCodePages.size(); ++I ) {
+			INT iIndex = pcbCombo->AddString( vCodePages[I].swsName.c_str() );
+			pcbCombo->SetItemData( iIndex, vCodePages[I].uiCodePage );
+		}
+
+		if ( CB_ERR == pcbCombo->SetCurSelByItemData( _lpDefaultSelect ) ) {
+			pcbCombo->SetCurSelByItemData( uiSysCodePage );
+		}
+		pcbCombo->AutoSetMinListWidth();
+		return true;
+	}
 
 	/**
 	 * Fills the combo box with standard data types.

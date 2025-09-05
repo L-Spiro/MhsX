@@ -35,6 +35,12 @@ namespace mx {
 			if ( pwTmp ) {
 				CUtilities::FillComboWithStrings( pwTmp, m_pmhMemHack->Options().vAddValAddrHistory, 0 );
 			}
+			pwTmp = FindChild( Layout::MX_ADI_CODEPAGE_COMBO );
+			if ( pwTmp ) {
+				CUtilities::FillComboBoxWithCodePages( pwTmp, -1 );
+			}
+
+			Update();
 		}
 		catch ( ... ) {}
 
@@ -72,6 +78,14 @@ namespace mx {
 						auto faAddress = famMan->AddFoundAddress( m_pmhMemHack );
 						if ( faAddress ) {
 							if ( dtType == CUtilities::MX_DT_STRING ) {
+								UINT uiCodePage = CCodePages::GetSystemDefaultAnsiCodePage();
+								pwTmp = FindChild( Layout::MX_ADI_CODEPAGE_COMBO );
+								if ( pwTmp ) {
+									uiCodePage = static_cast<UINT>(pwTmp->GetCurSelItemData());
+									if MX_UNLIKELY( uiCodePage == static_cast<UINT>(-1) ) {
+										uiCodePage = CCodePages::GetSystemDefaultAnsiCodePage();
+									}
+								}
 							}
 							else {
 								size_t sOffset = 0;
@@ -119,7 +133,7 @@ namespace mx {
 			}
 			return LSW_H_CONTINUE;
 		}
-		
+		Update();
 		return CParent::Command( _wCtrlCode, _wId, _pwSrc );
 	}
 
@@ -127,6 +141,25 @@ namespace mx {
 	CWidget::LSW_HANDLED CAddFoundAddressWindow::Close() {
 		::EndDialog( Wnd(), 0 );
 		return LSW_H_HANDLED;
+	}
+
+	// Updates the dialog after changing some parameters.
+	void CAddFoundAddressWindow::Update() {
+		CUtilities::MX_DATA_TYPES dtType = CUtilities::MX_DT_UINT32;
+		auto pwTmp = FindChild( Layout::MX_ADI_TYPE_COMBO );
+		if ( pwTmp ) {
+			dtType = static_cast<CUtilities::MX_DATA_TYPES>(pwTmp->GetCurSelItemData());
+		}
+
+
+		pwTmp = FindChild( Layout::MX_ADI_CODEPAGE_LABEL );
+		if ( pwTmp ) {
+			pwTmp->SetEnabled( dtType == CUtilities::MX_DT_STRING );
+		}
+		pwTmp = FindChild( Layout::MX_ADI_CODEPAGE_COMBO );
+		if ( pwTmp ) {
+			pwTmp->SetEnabled( dtType == CUtilities::MX_DT_STRING );
+		}
 	}
 
 }	// namespace mx

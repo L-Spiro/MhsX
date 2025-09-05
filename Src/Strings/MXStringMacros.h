@@ -18739,3 +18739,147 @@
 #define _DEC_S_F6D0A17F_ASCII_ANSI mx::CStringDecoder::DecodeToString( _T_F6D0A17F_ASCII_ANSI, _LEN_F6D0A17F )
 #define _DEC_WS_F6D0A17F_ASCII_ANSI mx::CStringDecoder::DecodeToWString( _T_F6D0A17F_ASCII_ANSI, _LEN_F6D0A17F )
 
+// ISO 8859 1 Latin-1, Western European
+
+#define _T_00A240F3_ISO_8859_1_Latin_1__Western_European "\xD1\x21\x1F\xBB\xCA\x01\xC3\x00\xF0\xF9\xE9\x1A\xF3\x0F\x30\xF6\xFB\x01\xC7\xB2\x20\xF3\x3A\x44\x2D\x3B\x3C\xB2\xE0\x3C\xFA\x3D\x40\x00\xF3\x37"
+#define _LEN_00A240F3 36
+#define _T_LEN_00A240F3_ISO_8859_1_Latin_1__Western_European _T_00A240F3_ISO_8859_1_Latin_1__Western_European, _LEN_00A240F3
+#define _DEC_00A240F3_ISO_8859_1_Latin_1__Western_European( STR ) mx::CStringDecoder::Decode( _T_00A240F3_ISO_8859_1_Latin_1__Western_European, _LEN_00A240F3, STR )
+#define _DEC_S_00A240F3_ISO_8859_1_Latin_1__Western_European mx::CStringDecoder::DecodeToString( _T_00A240F3_ISO_8859_1_Latin_1__Western_European, _LEN_00A240F3 )
+#define _DEC_WS_00A240F3_ISO_8859_1_Latin_1__Western_European mx::CStringDecoder::DecodeToWString( _T_00A240F3_ISO_8859_1_Latin_1__Western_European, _LEN_00A240F3 )
+
+// ISO 8859 2 Latin-2, Central European
+
+#define _T_B85FA333_ISO_8859_2_Latin_2__Central_European "\xD1\x21\x1F\xBB\xCA\x01\xC3\x00\xF0\xFA\xE9\x1A\xF3\x0F\x30\xF6\xFB\x02\xC7\xB2\x0C\xF3\x35\x44\x3A\x2A\x3A\xB2\xE0\x3C\xFA\x3D\x40\x00\xF3\x37"
+#define _LEN_B85FA333 36
+#define _T_LEN_B85FA333_ISO_8859_2_Latin_2__Central_European _T_B85FA333_ISO_8859_2_Latin_2__Central_European, _LEN_B85FA333
+#define _DEC_B85FA333_ISO_8859_2_Latin_2__Central_European( STR ) mx::CStringDecoder::Decode( _T_B85FA333_ISO_8859_2_Latin_2__Central_European, _LEN_B85FA333, STR )
+#define _DEC_S_B85FA333_ISO_8859_2_Latin_2__Central_European mx::CStringDecoder::DecodeToString( _T_B85FA333_ISO_8859_2_Latin_2__Central_European, _LEN_B85FA333 )
+#define _DEC_WS_B85FA333_ISO_8859_2_Latin_2__Central_European mx::CStringDecoder::DecodeToWString( _T_B85FA333_ISO_8859_2_Latin_2__Central_European, _LEN_B85FA333 )
+
+// ISO 8859 3 Latin-3, South European
+
+#define _T_E6E4D1C9_ISO_8859_3_Latin_3__South_European "\xD1\x21\x1F\xBB\xCA\x01\xC3\x00\xF0\xFB\xE9\x1A\xF3\x0F\x30\xF6\xFB\x03\xC7\xB2\x1C\xFD\x3C\x44\x30\xE9\x13\x07\x0D\x36\xF8\x33\x31\x09"
+#define _LEN_E6E4D1C9 34
+#define _T_LEN_E6E4D1C9_ISO_8859_3_Latin_3__South_European _T_E6E4D1C9_ISO_8859_3_Latin_3__South_European, _LEN_E6E4D1C9
+#define _DEC_E6E4D1C9_ISO_8859_3_Latin_3__South_European( STR ) mx::CStringDecoder::Decode( _T_E6E4D1C9_ISO_8859_3_Latin_3__South_European, _LEN_E6E4D1C9, STR )
+#define _DEC_S_E6E4D1C9_ISO_8859_3_Latin_3__South_European mx::CStringDecoder::DecodeToString( _T_E6E4D1C9_ISO_8859_3_Latin_3__South_European, _LEN_E6E4D1C9 )
+#define _DEC_WS_E6E4D1C9_ISO_8859_3_Latin_3__South_European mx::CStringDecoder::DecodeToWString( _T_E6E4D1C9_ISO_8859_3_Latin_3__South_European, _LEN_E6E4D1C9 )
+
+// ISO 8859 4 Latin-4, North European
+
+#define _T_ADF6F492_ISO_8859_4_Latin_4__North_European "\xD1\x21\x1F\xBB\xCA\x01\xC3\x00\xF0\xFC\xE9\x1A\xF3\x0F\x30\xF6\xFB\x04\xC7\xB2\x17\xFD\x39\x44\x30\xE9\x13\x07\x0D\x36\xF8\x33\x31\x09"
+#define _LEN_ADF6F492 34
+#define _T_LEN_ADF6F492_ISO_8859_4_Latin_4__North_European _T_ADF6F492_ISO_8859_4_Latin_4__North_European, _LEN_ADF6F492
+#define _DEC_ADF6F492_ISO_8859_4_Latin_4__North_European( STR ) mx::CStringDecoder::Decode( _T_ADF6F492_ISO_8859_4_Latin_4__North_European, _LEN_ADF6F492, STR )
+#define _DEC_S_ADF6F492_ISO_8859_4_Latin_4__North_European mx::CStringDecoder::DecodeToString( _T_ADF6F492_ISO_8859_4_Latin_4__North_European, _LEN_ADF6F492 )
+#define _DEC_WS_ADF6F492_ISO_8859_4_Latin_4__North_European mx::CStringDecoder::DecodeToWString( _T_ADF6F492_ISO_8859_4_Latin_4__North_European, _LEN_ADF6F492 )
+
+// ISO 8859 5 Latin/Cyrillic
+
+#define _T_68252C49_ISO_8859_5_Latin_Cyrillic "\xD1\x21\x1F\xBB\xCA\x01\xC3\x00\xF0\xFD\xE9\x1A\xF3\x0F\x30\xF6\xFD\x13\x14\x04\x32\xFA\x33\x39\x2B"
+#define _LEN_68252C49 25
+#define _T_LEN_68252C49_ISO_8859_5_Latin_Cyrillic _T_68252C49_ISO_8859_5_Latin_Cyrillic, _LEN_68252C49
+#define _DEC_68252C49_ISO_8859_5_Latin_Cyrillic( STR ) mx::CStringDecoder::Decode( _T_68252C49_ISO_8859_5_Latin_Cyrillic, _LEN_68252C49, STR )
+#define _DEC_S_68252C49_ISO_8859_5_Latin_Cyrillic mx::CStringDecoder::DecodeToString( _T_68252C49_ISO_8859_5_Latin_Cyrillic, _LEN_68252C49 )
+#define _DEC_WS_68252C49_ISO_8859_5_Latin_Cyrillic mx::CStringDecoder::DecodeToWString( _T_68252C49_ISO_8859_5_Latin_Cyrillic, _LEN_68252C49 )
+
+// ISO 8859 6 Latin/Arabic
+
+#define _T_7DB4F15E_ISO_8859_6_Latin_Arabic "\xD1\x21\x1F\xBB\xCA\x01\xC3\x00\xF0\xFE\xE9\x1A\xF3\x0F\x30\xF6\xFD\x11\x0D\xF3\x2B\xF7\x2A"
+#define _LEN_7DB4F15E 23
+#define _T_LEN_7DB4F15E_ISO_8859_6_Latin_Arabic _T_7DB4F15E_ISO_8859_6_Latin_Arabic, _LEN_7DB4F15E
+#define _DEC_7DB4F15E_ISO_8859_6_Latin_Arabic( STR ) mx::CStringDecoder::Decode( _T_7DB4F15E_ISO_8859_6_Latin_Arabic, _LEN_7DB4F15E, STR )
+#define _DEC_S_7DB4F15E_ISO_8859_6_Latin_Arabic mx::CStringDecoder::DecodeToString( _T_7DB4F15E_ISO_8859_6_Latin_Arabic, _LEN_7DB4F15E )
+#define _DEC_WS_7DB4F15E_ISO_8859_6_Latin_Arabic mx::CStringDecoder::DecodeToWString( _T_7DB4F15E_ISO_8859_6_Latin_Arabic, _LEN_7DB4F15E )
+
+// ISO 8859 7 Latin/Greek
+
+#define _T_4895ECD8_ISO_8859_7_Latin_Greek "\xD1\x21\x1F\xBB\xCA\x01\xC3\x00\xF0\xFF\xE9\x1A\xF3\x0F\x30\xF6\xFD\x17\x0D\xF7\x2E\xF9"
+#define _LEN_4895ECD8 22
+#define _T_LEN_4895ECD8_ISO_8859_7_Latin_Greek _T_4895ECD8_ISO_8859_7_Latin_Greek, _LEN_4895ECD8
+#define _DEC_4895ECD8_ISO_8859_7_Latin_Greek( STR ) mx::CStringDecoder::Decode( _T_4895ECD8_ISO_8859_7_Latin_Greek, _LEN_4895ECD8, STR )
+#define _DEC_S_4895ECD8_ISO_8859_7_Latin_Greek mx::CStringDecoder::DecodeToString( _T_4895ECD8_ISO_8859_7_Latin_Greek, _LEN_4895ECD8 )
+#define _DEC_WS_4895ECD8_ISO_8859_7_Latin_Greek mx::CStringDecoder::DecodeToWString( _T_4895ECD8_ISO_8859_7_Latin_Greek, _LEN_4895ECD8 )
+
+// ISO 8859 8 Latin/Hebrew
+
+#define _T_FB1C296B_ISO_8859_8_Latin_Hebrew "\xD1\x21\x1F\xBB\xCA\x01\xC3\x00\xF0\x00\xE9\x1A\xF3\x0F\x30\xF6\xFD\x18\x00\xF4\x3B\xF3\x3E"
+#define _LEN_FB1C296B 23
+#define _T_LEN_FB1C296B_ISO_8859_8_Latin_Hebrew _T_FB1C296B_ISO_8859_8_Latin_Hebrew, _LEN_FB1C296B
+#define _DEC_FB1C296B_ISO_8859_8_Latin_Hebrew( STR ) mx::CStringDecoder::Decode( _T_FB1C296B_ISO_8859_8_Latin_Hebrew, _LEN_FB1C296B, STR )
+#define _DEC_S_FB1C296B_ISO_8859_8_Latin_Hebrew mx::CStringDecoder::DecodeToString( _T_FB1C296B_ISO_8859_8_Latin_Hebrew, _LEN_FB1C296B )
+#define _DEC_WS_FB1C296B_ISO_8859_8_Latin_Hebrew mx::CStringDecoder::DecodeToWString( _T_FB1C296B_ISO_8859_8_Latin_Hebrew, _LEN_FB1C296B )
+
+// ISO 8859 9 Latin-5, Turkish
+
+#define _T_10E617C3_ISO_8859_9_Latin_5__Turkish "\xD1\x21\x1F\xBB\xCA\x01\xC3\x00\xF0\x01\xE9\x1A\xF3\x0F\x30\xF6\xFB\x05\xC7\xB2\x1D\x03\x39\x3B\x31\x3C\x36"
+#define _LEN_10E617C3 27
+#define _T_LEN_10E617C3_ISO_8859_9_Latin_5__Turkish _T_10E617C3_ISO_8859_9_Latin_5__Turkish, _LEN_10E617C3
+#define _DEC_10E617C3_ISO_8859_9_Latin_5__Turkish( STR ) mx::CStringDecoder::Decode( _T_10E617C3_ISO_8859_9_Latin_5__Turkish, _LEN_10E617C3, STR )
+#define _DEC_S_10E617C3_ISO_8859_9_Latin_5__Turkish mx::CStringDecoder::DecodeToString( _T_10E617C3_ISO_8859_9_Latin_5__Turkish, _LEN_10E617C3 )
+#define _DEC_WS_10E617C3_ISO_8859_9_Latin_5__Turkish mx::CStringDecoder::DecodeToWString( _T_10E617C3_ISO_8859_9_Latin_5__Turkish, _LEN_10E617C3 )
+
+// ISO 8859 10 Latin-6, Nordic
+
+#define _T_66A2D467_ISO_8859_10_Latin_6__Nordic "\xD1\x21\x1F\xBB\xCA\x01\xC3\x00\xF0\xF9\xF9\xEE\xDE\xFC\x3B\xF1\x3C\xFD\xD1\xBE\xE9\xDC\x36\x42\x2C\x32\x31"
+#define _LEN_66A2D467 27
+#define _T_LEN_66A2D467_ISO_8859_10_Latin_6__Nordic _T_66A2D467_ISO_8859_10_Latin_6__Nordic, _LEN_66A2D467
+#define _DEC_66A2D467_ISO_8859_10_Latin_6__Nordic( STR ) mx::CStringDecoder::Decode( _T_66A2D467_ISO_8859_10_Latin_6__Nordic, _LEN_66A2D467, STR )
+#define _DEC_S_66A2D467_ISO_8859_10_Latin_6__Nordic mx::CStringDecoder::DecodeToString( _T_66A2D467_ISO_8859_10_Latin_6__Nordic, _LEN_66A2D467 )
+#define _DEC_WS_66A2D467_ISO_8859_10_Latin_6__Nordic mx::CStringDecoder::DecodeToWString( _T_66A2D467_ISO_8859_10_Latin_6__Nordic, _LEN_66A2D467 )
+
+// ISO 8859 11 Latin/Thai
+
+#define _T_314B219F_ISO_8859_11_Latin_Thai "\xD1\x21\x1F\xBB\xCA\x01\xC3\x00\xF0\xF9\xFA\xEE\xDE\xFC\x3B\xF1\x3C\xFF\xEF\xFA\x2A\xF7"
+#define _LEN_314B219F 22
+#define _T_LEN_314B219F_ISO_8859_11_Latin_Thai _T_314B219F_ISO_8859_11_Latin_Thai, _LEN_314B219F
+#define _DEC_314B219F_ISO_8859_11_Latin_Thai( STR ) mx::CStringDecoder::Decode( _T_314B219F_ISO_8859_11_Latin_Thai, _LEN_314B219F, STR )
+#define _DEC_S_314B219F_ISO_8859_11_Latin_Thai mx::CStringDecoder::DecodeToString( _T_314B219F_ISO_8859_11_Latin_Thai, _LEN_314B219F )
+#define _DEC_WS_314B219F_ISO_8859_11_Latin_Thai mx::CStringDecoder::DecodeToWString( _T_314B219F_ISO_8859_11_Latin_Thai, _LEN_314B219F )
+
+// ISO 8859 13 Latin-7, Baltic Rim
+
+#define _T_077AD00A_ISO_8859_13_Latin_7__Baltic_Rim "\xD1\x21\x1F\xBB\xCA\x01\xC3\x00\xF0\xF9\xFC\xEE\xDE\xFC\x3B\xF1\x3C\xFD\xD2\xBE\xE9\xD0\x28\x3C\x3C\x32\x31\xB2\xED\x30\xF5"
+#define _LEN_077AD00A 31
+#define _T_LEN_077AD00A_ISO_8859_13_Latin_7__Baltic_Rim _T_077AD00A_ISO_8859_13_Latin_7__Baltic_Rim, _LEN_077AD00A
+#define _DEC_077AD00A_ISO_8859_13_Latin_7__Baltic_Rim( STR ) mx::CStringDecoder::Decode( _T_077AD00A_ISO_8859_13_Latin_7__Baltic_Rim, _LEN_077AD00A, STR )
+#define _DEC_S_077AD00A_ISO_8859_13_Latin_7__Baltic_Rim mx::CStringDecoder::DecodeToString( _T_077AD00A_ISO_8859_13_Latin_7__Baltic_Rim, _LEN_077AD00A )
+#define _DEC_WS_077AD00A_ISO_8859_13_Latin_7__Baltic_Rim mx::CStringDecoder::DecodeToWString( _T_077AD00A_ISO_8859_13_Latin_7__Baltic_Rim, _LEN_077AD00A )
+
+// ISO 8859 14 Latin-8, Celtic
+
+#define _T_87A6A099_ISO_8859_14_Latin_8__Celtic "\xD1\x21\x1F\xBB\xCA\x01\xC3\x00\xF0\xF9\xFD\xEE\xDE\xFC\x3B\xF1\x3C\xFD\xD3\xBE\xE9\xD1\x2C\x3C\x3C\x32\x31"
+#define _LEN_87A6A099 27
+#define _T_LEN_87A6A099_ISO_8859_14_Latin_8__Celtic _T_87A6A099_ISO_8859_14_Latin_8__Celtic, _LEN_87A6A099
+#define _DEC_87A6A099_ISO_8859_14_Latin_8__Celtic( STR ) mx::CStringDecoder::Decode( _T_87A6A099_ISO_8859_14_Latin_8__Celtic, _LEN_87A6A099, STR )
+#define _DEC_S_87A6A099_ISO_8859_14_Latin_8__Celtic mx::CStringDecoder::DecodeToString( _T_87A6A099_ISO_8859_14_Latin_8__Celtic, _LEN_87A6A099 )
+#define _DEC_WS_87A6A099_ISO_8859_14_Latin_8__Celtic mx::CStringDecoder::DecodeToWString( _T_87A6A099_ISO_8859_14_Latin_8__Celtic, _LEN_87A6A099 )
+
+// ISO 8859 15 Latin-9
+
+#define _T_18038902_ISO_8859_15_Latin_9 "\xD1\x21\x1F\xBB\xCA\x01\xC3\x00\xF0\xF9\xFE\xEE\xDE\xFC\x3B\xF1\x3C\xFD\xD4"
+#define _LEN_18038902 19
+#define _T_LEN_18038902_ISO_8859_15_Latin_9 _T_18038902_ISO_8859_15_Latin_9, _LEN_18038902
+#define _DEC_18038902_ISO_8859_15_Latin_9( STR ) mx::CStringDecoder::Decode( _T_18038902_ISO_8859_15_Latin_9, _LEN_18038902, STR )
+#define _DEC_S_18038902_ISO_8859_15_Latin_9 mx::CStringDecoder::DecodeToString( _T_18038902_ISO_8859_15_Latin_9, _LEN_18038902 )
+#define _DEC_WS_18038902_ISO_8859_15_Latin_9 mx::CStringDecoder::DecodeToWString( _T_18038902_ISO_8859_15_Latin_9, _LEN_18038902 )
+
+// ISO 8859 16 Latin-10, South-Eastern European
+
+#define _T_33F87610_ISO_8859_16_Latin_10__South_Eastern_European "\xD1\x21\x1F\xBB\xCA\x01\xC3\x00\xF0\xF9\xFF\xEE\xDE\xFC\x3B\xF1\x3C\xFD\xCC\xC2\xF5\xAE\x1A\x3F\x3D\x3D\x36\xBF\xE0\x28\xFB\x42\x35\x0D\x00\xE9\xD3\x3C\x42\x37\x39\x33\xF3\x09"
+#define _LEN_33F87610 44
+#define _T_LEN_33F87610_ISO_8859_16_Latin_10__South_Eastern_European _T_33F87610_ISO_8859_16_Latin_10__South_Eastern_European, _LEN_33F87610
+#define _DEC_33F87610_ISO_8859_16_Latin_10__South_Eastern_European( STR ) mx::CStringDecoder::Decode( _T_33F87610_ISO_8859_16_Latin_10__South_Eastern_European, _LEN_33F87610, STR )
+#define _DEC_S_33F87610_ISO_8859_16_Latin_10__South_Eastern_European mx::CStringDecoder::DecodeToString( _T_33F87610_ISO_8859_16_Latin_10__South_Eastern_European, _LEN_33F87610 )
+#define _DEC_WS_33F87610_ISO_8859_16_Latin_10__South_Eastern_European mx::CStringDecoder::DecodeToWString( _T_33F87610_ISO_8859_16_Latin_10__South_Eastern_European, _LEN_33F87610 )
+
+// Code Page:
+
+#define _T_B7C996CD_Code_Page_ "\xCB\x3D\x34\x00\xB2\x19\xEF\x2E\x35\x02"
+#define _LEN_B7C996CD 10
+#define _T_LEN_B7C996CD_Code_Page_ _T_B7C996CD_Code_Page_, _LEN_B7C996CD
+#define _DEC_B7C996CD_Code_Page_( STR ) mx::CStringDecoder::Decode( _T_B7C996CD_Code_Page_, _LEN_B7C996CD, STR )
+#define _DEC_S_B7C996CD_Code_Page_ mx::CStringDecoder::DecodeToString( _T_B7C996CD_Code_Page_, _LEN_B7C996CD )
+#define _DEC_WS_B7C996CD_Code_Page_ mx::CStringDecoder::DecodeToWString( _T_B7C996CD_Code_Page_, _LEN_B7C996CD )
+

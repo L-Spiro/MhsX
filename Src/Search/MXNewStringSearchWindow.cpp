@@ -170,21 +170,21 @@ namespace mx {
 				{ _T_LEN_A71F1195_UTF_16,											CUtilities::MX_RE_UTF16_LE },
 				{ _T_LEN_D35E9704_UTF_32_BE,										CUtilities::MX_RE_UTF32_BE },
 				{ _T_LEN_9244B70E_UTF_32,											CUtilities::MX_RE_UTF32_LE },
-				{ _T_LEN_4A2B64E8_ISO_8859_1__Latin_1__Western_European_,			CUtilities::MX_RE_ISO_8859_1 },
-				{ _T_LEN_762137F0_ISO_8859_2__Latin_2__Central_European_,			CUtilities::MX_RE_ISO_8859_2 },
-				{ _T_LEN_67696996_ISO_8859_3__Latin_3__South_European_,				CUtilities::MX_RE_ISO_8859_3 },
-				{ _T_LEN_918DCE6F_ISO_8859_4__Latin_4__North_European_,				CUtilities::MX_RE_ISO_8859_4 },
-				{ _T_LEN_97F4EA6D_ISO_8859_5__Latin_Cyrillic_,						CUtilities::MX_RE_ISO_8859_5 },
-				{ _T_LEN_5C684CC3_ISO_8859_6__Latin_Arabic_,						CUtilities::MX_RE_ISO_8859_6 },
-				{ _T_LEN_95FCC49F_ISO_8859_7__Latin_Greek_,							CUtilities::MX_RE_ISO_8859_7 },
-				{ _T_LEN_C7ACCEE6_ISO_8859_8__Latin_Hebrew_,						CUtilities::MX_RE_ISO_8859_8 },
-				{ _T_LEN_B5C41944_ISO_8859_9__Latin_5__Turkish_,					CUtilities::MX_RE_ISO_8859_9 },
-				{ _T_LEN_3CD377C1_ISO_8859_10__Latin_6__Nordic_,					CUtilities::MX_RE_ISO_8859_10 },
-				{ _T_LEN_692656F3_ISO_8859_11__Latin_Thai_,							CUtilities::MX_RE_ISO_8859_11 },
-				{ _T_LEN_6502C877_ISO_8859_13__Latin_7__Baltic_Rim_,				CUtilities::MX_RE_ISO_8859_13 },
-				{ _T_LEN_84F7764A_ISO_8859_14__Latin_8__Celtic_,					CUtilities::MX_RE_ISO_8859_14 },
-				{ _T_LEN_62416340_ISO_8859_15__Latin_9_,							CUtilities::MX_RE_ISO_8859_15 },
-				{ _T_LEN_B8F1F96A_ISO_8859_16__Latin_10__South_Eastern_European_,	CUtilities::MX_RE_ISO_8859_16 },
+				{ _T_LEN_00A240F3_ISO_8859_1_Latin_1__Western_European,				CUtilities::MX_RE_ISO_8859_1 },
+				{ _T_LEN_B85FA333_ISO_8859_2_Latin_2__Central_European,				CUtilities::MX_RE_ISO_8859_2 },
+				{ _T_LEN_E6E4D1C9_ISO_8859_3_Latin_3__South_European,				CUtilities::MX_RE_ISO_8859_3 },
+				{ _T_LEN_ADF6F492_ISO_8859_4_Latin_4__North_European,				CUtilities::MX_RE_ISO_8859_4 },
+				{ _T_LEN_68252C49_ISO_8859_5_Latin_Cyrillic,						CUtilities::MX_RE_ISO_8859_5 },
+				{ _T_LEN_7DB4F15E_ISO_8859_6_Latin_Arabic,							CUtilities::MX_RE_ISO_8859_6 },
+				{ _T_LEN_4895ECD8_ISO_8859_7_Latin_Greek,							CUtilities::MX_RE_ISO_8859_7 },
+				{ _T_LEN_FB1C296B_ISO_8859_8_Latin_Hebrew,							CUtilities::MX_RE_ISO_8859_8 },
+				{ _T_LEN_10E617C3_ISO_8859_9_Latin_5__Turkish,						CUtilities::MX_RE_ISO_8859_9 },
+				{ _T_LEN_66A2D467_ISO_8859_10_Latin_6__Nordic,						CUtilities::MX_RE_ISO_8859_10 },
+				{ _T_LEN_314B219F_ISO_8859_11_Latin_Thai,							CUtilities::MX_RE_ISO_8859_11 },
+				{ _T_LEN_077AD00A_ISO_8859_13_Latin_7__Baltic_Rim,					CUtilities::MX_RE_ISO_8859_13 },
+				{ _T_LEN_87A6A099_ISO_8859_14_Latin_8__Celtic,						CUtilities::MX_RE_ISO_8859_14 },
+				{ _T_LEN_18038902_ISO_8859_15_Latin_9,								CUtilities::MX_RE_ISO_8859_15 },
+				{ _T_LEN_33F87610_ISO_8859_16_Latin_10__South_Eastern_European,		CUtilities::MX_RE_ISO_8859_16 },
 				{ _T_LEN_C66DAEDC_EUC_JP,											CUtilities::MX_RE_EUC_JP },
 				{ _T_LEN_8C4804A0_EUC_TW,											CUtilities::MX_RE_EUC_TW },
 				{ _T_LEN_3178FEB1_EUC_KR,											CUtilities::MX_RE_EUC_KR },
@@ -198,15 +198,17 @@ namespace mx {
 			};
 			for ( size_t I = 0; I < MX_ELEMENTS( sCombo ); ++I ) {
 				UINT uiCodePage = CUtilities::RegexCodePageToCodePage( sCombo[I].reEncoding );
-				CSecureWString swsName, swsDesc;
-				INT iIndex;
-				if ( CCodePages::CodePageToString( uiCodePage, swsName, swsDesc ) ) {
-					iIndex = pcbCombo->AddString( swsDesc.c_str() );
+				if ( CCodePages::Supported( uiCodePage ) ) {
+					CSecureWString swsName, swsDesc;
+					INT iIndex;
+					if ( CCodePages::CodePageToString( uiCodePage, swsName, swsDesc ) ) {
+						iIndex = pcbCombo->AddString( swsDesc.c_str() );
+					}
+					else {
+						iIndex = pcbCombo->AddString( (std::to_string( uiCodePage ) + " (" + CStringDecoder::DecodeToString( sCombo[I].pcName, sCombo[I].sLen ) + ")").c_str() );
+					}
+					pcbCombo->SetItemData( iIndex, sCombo[I].reEncoding );
 				}
-				else {
-					iIndex = pcbCombo->AddString( CStringDecoder::DecodeToString( sCombo[I].pcName, sCombo[I].sLen ).c_str() );
-				}
-				pcbCombo->SetItemData( iIndex, sCombo[I].reEncoding );
 			}
 			pcbCombo->AutoSetMinListWidth();
 

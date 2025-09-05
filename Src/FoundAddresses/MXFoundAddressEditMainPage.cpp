@@ -53,18 +53,7 @@ namespace mx {
 
 		pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_STRING_COMBO );
 		if ( pwTmp ) {
-			UINT uiSysCodePage = CCodePages::GetSystemDefaultAnsiCodePage();
-			auto pcbCombo = static_cast<CComboBox *>(pwTmp);
-			std::vector<CCodePages::MX_CODE_PAGE> vCodePages;
-			CCodePages::GetSystemCodePages( vCodePages, true );
-			pcbCombo->InitStorage( vCodePages.size(), vCodePages.size() * 15 );
-			for ( size_t I = 0; I < vCodePages.size(); ++I ) {
-				INT iIndex = pcbCombo->AddString( vCodePages[I].swsName.c_str() );
-				pcbCombo->SetItemData( iIndex, vCodePages[I].uiCodePage );
-			}
-
-			pcbCombo->SetCurSelByItemData( GatherCodePages() );
-			pcbCombo->AutoSetMinListWidth();
+			CUtilities::FillComboBoxWithCodePages( pwTmp, GatherCodePages() );
 		}
 		pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_DATA_COMBO );
 		if ( pwTmp ) {

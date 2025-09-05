@@ -1415,13 +1415,13 @@ namespace mx {
 		static bool												FillComboBoxWithLocktypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect );
 
 		/**
-		 * Fills the combo box with string types.
+		 * Fills the combo box with code pages.
 		 * 
 		 * \param _pwComboBox The combo box to fill.
 		 * \param _lpDefaultSelect The default selection.
 		 * \return Returns true if _pwComboBox is not nullptr, it is of type CComboBox, and all entries were added.
 		 **/
-		//static bool												FillComboBoxWithStringTypes( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect );
+		static bool												FillComboBoxWithCodePages( lsw::CWidget * _pwComboBox, LPARAM _lpDefaultSelect );
 
 		/**
 		 * Fills the combo box with standard data types.

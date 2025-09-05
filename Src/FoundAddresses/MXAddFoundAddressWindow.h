@@ -29,6 +29,9 @@ namespace mx {
 		// WM_CLOSE.
 		virtual LSW_HANDLED									Close();
 
+		// Updates the dialog after changing some parameters.
+		void												Update();
+
 
 	protected :
 		// == Members.

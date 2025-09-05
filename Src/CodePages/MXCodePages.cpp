@@ -159,6 +159,28 @@ namespace mx {
 	// == Functions.
 	// Decodes a code page into a text value and description.  _pcValue and _pcDesc should be _T_MAX_LEN characters long.
 	BOOL CCodePages::CodePageToString( uint32_t _uiCode, CHAR * _pcValue, CHAR * _pcDesc ) {
+		CPINFOEXA cpInfo = { 0 };
+		if ( ::GetCPInfoExA( _uiCode, 0, &cpInfo ) ) {
+			::strcpy( _pcDesc, cpInfo.CodePageName );
+			return TRUE;
+		}
+		if ( MX_utf_16 == _uiCode ) {
+			::strcpy( _pcDesc, _DEC_S_99793C4E_1200__UTF_16_LE_.c_str() );
+			return TRUE;
+		}
+		if ( MX_utf_16BE == _uiCode ) {
+			::strcpy( _pcDesc, _DEC_S_4E71C8C1_1201__UTF_16_BE_.c_str() );
+			return TRUE;
+		}
+		if ( MX_utf_32 == _uiCode ) {
+			::strcpy( _pcDesc, _DEC_S_3B7FE4CA_12000__UTF_32_LE_.c_str() );
+			return TRUE;
+		}
+		if ( MX_utf_32BE == _uiCode ) {
+			::strcpy( _pcDesc, _DEC_S_EC771045_12001__UTF_32_BE_.c_str() );
+			return TRUE;
+		}
+
 		// 2 tables because that is just easier to do with the tools.  Tables generated with MhsXStrings.exe.
 		// TODO: Add unnamed codes from https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx
 		struct {
@@ -460,7 +482,9 @@ namespace mx {
 		for ( size_t I = 0; I < sizeof( aTable ) / sizeof( aTable[0] ); ++I ) {
 			if ( aTable[I].cpCode == _uiCode ) {
 				CStringDecoder::Decode( aTable[I].pcName, aTable[I].ui32NameLen, _pcValue );
-				CStringDecoder::Decode( aDesc[I].pcName, aDesc[I].ui32NameLen, _pcDesc );
+				CHAR szTmp[256];
+				CStringDecoder::Decode( aDesc[I].pcName, aDesc[I].ui32NameLen, szTmp );
+				std::sprintf( _pcDesc, "%u (%s)", _uiCode, szTmp );
 				return TRUE;
 			}
 		}
@@ -536,6 +560,24 @@ namespace mx {
 			return cpInfo.CodePage;
 		}
 		return static_cast<UINT>(-1);
+	}
+
+	// Is the given code page supported?
+	bool CCodePages::Supported( UINT _uiCodePage ) {
+		switch ( _uiCodePage ) {
+			case MX_utf_8 : {}		MX_FALLTHROUGH
+			case MX_utf_16BE : {}	MX_FALLTHROUGH
+			case MX_utf_32 : {}		MX_FALLTHROUGH
+			case MX_utf_16 : {}		MX_FALLTHROUGH
+			case MX_utf_32BE : {
+				return true;
+			}
+		}
+		LSW_ENT_CRIT( m_csCrit );
+		if ( !m_sSystemCodePages.size() ) {
+			::EnumSystemCodePagesW( CCodePages::EnumCodePagesProc, CP_SUPPORTED );
+		}
+		return std::find( m_sSystemCodePages.begin(), m_sSystemCodePages.end(), _uiCodePage ) != m_sSystemCodePages.end();
 	}
 
 	// Gathers code pages.

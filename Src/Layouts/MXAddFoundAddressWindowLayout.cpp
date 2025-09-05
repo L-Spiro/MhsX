@@ -18,7 +18,7 @@ namespace mx {
 
 #define MX_GROUP_L											MX_LEFT_JUST
 #define MX_GROUP_T											MX_TOP_JUST
-#define MX_GROUP_H											(MX_GROUP_TOP + MX_DEF_COMBO_HEIGHT + (MX_TOP_JUST + MX_DEF_COMBO_HEIGHT) * 2 + MX_GROUP_BOTTOM + MX_TOP_JUST)
+#define MX_GROUP_H											(MX_GROUP_TOP + MX_DEF_COMBO_HEIGHT + (MX_TOP_JUST + MX_DEF_COMBO_HEIGHT) * 3 + MX_GROUP_BOTTOM + MX_TOP_JUST)
 
 #define MX_DLG_H											(MX_GROUP_T + MX_GROUP_H + 26)
 
@@ -154,6 +154,42 @@ namespace mx {
 			MX_ADI_DIALOG,									// dwParentId
 		},
 
+		// Code page.
+		{
+			LSW_LT_LABEL,									// ltType
+			MX_ADI_CODEPAGE_LABEL,							// wId
+			WC_STATICW,										// lpwcClass
+			TRUE,											// bEnabled
+			FALSE,											// bActive
+			MX_INNER_L,										// iLeft
+			(MX_GROUP_T + MX_GROUP_TOP) + (MX_DEF_COMBO_HEIGHT + MX_TOP_JUST) * 3 + ((MX_DEF_COMBO_HEIGHT - MX_DEF_STATIC_HEIGHT) >> 1),				// iTop
+			MX_MAIN_LABEL_W,								// dwWidth
+			MX_DEF_STATIC_HEIGHT,							// dwHeight
+			MX_STATICSTYLE,									// dwStyle
+			0,												// dwStyleEx
+			MX_MAKE_WCHAR( _T_B7C996CD_Code_Page_ ),		// pwcText
+			_LEN_B7C996CD,									// sTextLen
+			MX_ADI_DIALOG,									// dwParentId
+		},
+		{
+			LSW_LT_COMBOBOX,								// ltType
+			MX_ADI_CODEPAGE_COMBO,							// wId
+			WC_COMBOBOXW,									// lpwcClass
+			TRUE,											// bEnabled
+			FALSE,											// bActive
+			MX_COMBO_L,										// iLeft
+			(MX_GROUP_T + MX_GROUP_TOP) + (MX_DEF_COMBO_HEIGHT + MX_TOP_JUST) * 3,																		// iTop
+			MX_MAIN_EDIT_W,									// dwWidth
+			MX_DEF_COMBO_HEIGHT,							// dwHeight
+			MX_COMBOSTYLE_LIST,								// dwStyle
+			0,												// dwStyleEx
+			nullptr,										// pwcText
+			0,												// sTextLen
+			MX_ADI_DIALOG,									// dwParentId
+		},
+
+
+		// OK/Cancel.
 		{
 			LSW_LT_BUTTON,									// ltType
 			MX_ADI_OK,										// wId

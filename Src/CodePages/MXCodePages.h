@@ -188,6 +188,9 @@ namespace mx {
 		// Gets the system default Windows ANSI code page.
 		static UINT						GetSystemDefaultAnsiCodePage();
 
+		// Is the given code page supported?
+		static bool						Supported( UINT _uiCodePage );
+
 	protected :
 		// == Members.
 		// The internal list of code pages.
