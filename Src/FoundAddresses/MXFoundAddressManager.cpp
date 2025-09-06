@@ -126,6 +126,16 @@ namespace mx {
 		}
 	}
 
+	// Notifies all that a process has been opened.
+	void CFoundAddressManager::ProcessOpened() {
+		std::lock_guard<std::recursive_mutex> lg( m_mtxLock );
+		for ( auto & I : m_mFoundAddresses ) {
+			if MX_LIKELY( I.second ) {
+				I.second->ProcessOpened();
+			}
+		}
+	}
+
 	// Applies all timer-based locks.
 	void CFoundAddressManager::ApplyTimerLocks( bool /*_bIncludethreadLocks*/ ) {
 		std::lock_guard<std::recursive_mutex> lg( m_mtxLock );

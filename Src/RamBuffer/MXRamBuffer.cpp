@@ -1,4 +1,5 @@
 #include "MXRamBuffer.h"
+#include "../Search/MXAddressChunkList.h"
 
 
 namespace mx {

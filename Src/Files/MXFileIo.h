@@ -2,6 +2,7 @@
 #include "../MXMhsX.h"
 #include "MXFile.h"
 #include "../IO/MXInOutInterface.h"
+#include "../Utilities/MXUtilities.h"
 
 namespace mx {
 

@@ -66,6 +66,7 @@
     },
     "EditSettings" : {
         "EditDescrHistory" : [
+            "Address: 7FF70CEC0008h",
             "Address: 01FFCCBA01D8h",
             "Address: 7FFD43449FECh",
             "Address: 7FF70D6EA8DCh",
@@ -119,6 +120,7 @@
             "Address: 001A02E0h \u005c\u005c\u005c\u2026"
         ],
         "EditCurValHistory" : [
+            "5757",
             "765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff#",
             "H\uff48\u6b15\u0d7a\u0f00\u441f",
             "QAbstractSpinBox@",
@@ -217,8 +219,7 @@
             "1299",
             "999",
             "699",
-            "499",
-            "299"
+            "499"
         ],
         "EditArrayLenHistory" : [
             "0",
@@ -236,6 +237,7 @@
             "0"
         ],
         "EditLockedLeftHistory" : [
+            "5757",
             "765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff#",
             "H\uff48\u6b15\u0d7a\u0f00\u441f",
             "QAbstractSpinBox@",
@@ -294,7 +296,6 @@
             "-128",
             "128",
             "5",
-            "5757",
             "100.0",
             "3.2",
             "3.3"

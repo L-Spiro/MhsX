@@ -439,6 +439,22 @@ namespace lsw {
 	}
 
 	/**
+	 * Gets the data of an item by index.
+	 * 
+	 * \param _iItem The index of the item whose data is to be obtained.
+	 * \return Returns the item's data or -1.
+	 **/
+	LPARAM CListView::GetItemData( INT _iItem ) const {
+		LVITEMW lvItem;
+		lvItem.mask = LVIF_PARAM;
+		if ( GetItem( _iItem, 0, lvItem ) ) {
+			return lvItem.lParam;
+		}
+
+		return -1;
+	}
+
+	/**
 	 * Sets selection on an item by index.
 	 *
 	 * \param _iItem The item to update.

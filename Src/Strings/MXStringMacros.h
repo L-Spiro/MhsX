@@ -18883,3 +18883,21 @@
 #define _DEC_S_B7C996CD_Code_Page_ mx::CStringDecoder::DecodeToString( _T_B7C996CD_Code_Page_, _LEN_B7C996CD )
 #define _DEC_WS_B7C996CD_Code_Page_ mx::CStringDecoder::DecodeToWString( _T_B7C996CD_Code_Page_, _LEN_B7C996CD )
 
+// Module
+
+#define _T_0B88231E_Module "\xD5\x3D\x34\x10\xFE\x2E"
+#define _LEN_0B88231E 6
+#define _T_LEN_0B88231E_Module _T_0B88231E_Module, _LEN_0B88231E
+#define _DEC_0B88231E_Module( STR ) mx::CStringDecoder::Decode( _T_0B88231E_Module, _LEN_0B88231E, STR )
+#define _DEC_S_0B88231E_Module mx::CStringDecoder::DecodeToString( _T_0B88231E_Module, _LEN_0B88231E )
+#define _DEC_WS_0B88231E_Module mx::CStringDecoder::DecodeToWString( _T_0B88231E_Module, _LEN_0B88231E )
+
+// ModuleAddress
+
+#define _T_22BDBA44_ModuleAddress "\xD5\x3D\x34\x10\xFE\x2E\xCF\x2B\x34\x3A\x2E\x41\x05"
+#define _LEN_22BDBA44 13
+#define _T_LEN_22BDBA44_ModuleAddress _T_22BDBA44_ModuleAddress, _LEN_22BDBA44
+#define _DEC_22BDBA44_ModuleAddress( STR ) mx::CStringDecoder::Decode( _T_22BDBA44_ModuleAddress, _LEN_22BDBA44, STR )
+#define _DEC_S_22BDBA44_ModuleAddress mx::CStringDecoder::DecodeToString( _T_22BDBA44_ModuleAddress, _LEN_22BDBA44 )
+#define _DEC_WS_22BDBA44_ModuleAddress mx::CStringDecoder::DecodeToWString( _T_22BDBA44_ModuleAddress, _LEN_22BDBA44 )
+

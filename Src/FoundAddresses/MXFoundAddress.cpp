@@ -20,12 +20,13 @@ namespace mx {
 		m_eAddressExp.Reset();
 		m_sAddressTxt.clear();
 		m_sAddressTxt = std::string();
-		m_ui64Address = _ui64Address;
+		
 		m_bBasicAddress = true;
 
 		m_vtValueType = CUtilities::MX_VT_DATA_TYPE;
 		m_dtDataType = _dtType;
 		try {
+			AdjustAddressToModule( _ui64Address );
 			m_vOriginalData.resize( CUtilities::DataTypeSize( _dtType ) );
 			std::memcpy( m_vOriginalData.data(), _pui8Data, m_vOriginalData.size() );
 			m_vLockedData.clear();
@@ -44,10 +45,10 @@ namespace mx {
 		m_eAddressExp.Reset();
 		m_sAddressTxt.clear();
 		m_sAddressTxt = std::string();
-		m_ui64Address = _ui64Address;
 		m_bBasicAddress = true;
 
 		try {
+			AdjustAddressToModule( _ui64Address );
 			m_vOriginalData.assign( _pui8Data,
 				_pui8Data + _sLen );
 			std::string sTmp( reinterpret_cast<const char *>(_pui8Data),
@@ -222,6 +223,17 @@ namespace mx {
 		return false;
 	}
 
+	// Called when a process is opened, used to update module/offset addresses.
+	void CFoundAddress::ProcessOpened() {
+		if ( m_wsModuleName.size() ) {
+			auto meEntry = m_pmhMemHack->Process().FindModuleByName( ee::CExpEval::ToUtf8( m_wsModuleName ) );
+			if ( meEntry.meEntry.dwSize != 0 ) {
+				m_ui64ModuleAddress = reinterpret_cast<uintptr_t>(meEntry.meEntry.modBaseAddr);
+				m_ui64Address = m_ui64ModuleAddress + m_ui64ModuleOffset;
+			}
+		}
+	}
+
 	// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
 	bool CFoundAddress::SaveSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary ) const {
 		if ( _peJson == nullptr && nullptr == _psBinary ) { return false; }
@@ -230,6 +242,10 @@ namespace mx {
 			if ( _peJson ) {
 				_peJson->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
 				lson::CJson::CreateStringElement( _DEC_S_6E13FA7E_AddressExpression, ee::CExpEval::ToJsonString( m_sAddressTxt ), (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
+
+				_peJson->vObjectMembers.push_back( std::make_unique<lson::CJson::LSON_ELEMENT>() );
+				lson::CJson::CreateStringElement( _DEC_S_0B88231E_Module, ee::CExpEval::ToJsonString( ee::CExpEval::ToUtf8( m_wsModuleName ) ), (*_peJson->vObjectMembers[_peJson->vObjectMembers.size()-1]) );
+				MX_JSON_NUMBER( _DEC_S_22BDBA44_ModuleAddress, m_ui64ModuleOffset, _peJson );
 
 				MX_JSON_NUMBER( _DEC_S_C2F3561D_Address, m_ui64Address, _peJson );
 				MX_JSON_NUMBER( _DEC_S_F0717BC3_PublicId, m_ui32PublicId, _peJson );
@@ -280,6 +296,8 @@ namespace mx {
 			}
 			else {
 				if ( !_psBinary->WriteString( m_sAddressTxt ) ) { return false; }
+				if ( !_psBinary->WriteStringU16( m_wsModuleName ) ) { return false; }
+				if ( !_psBinary->Write( m_ui64ModuleOffset ) ) { return false; }
 
 				if ( !_psBinary->Write( m_ui64Address ) ) { return false; }
 				if ( !_psBinary->Write( m_ui32PublicId ) ) { return false; }
@@ -323,14 +341,18 @@ namespace mx {
 		if ( _ui32Version > MX_FOUND_ADDRESS_VERSION ) { return false; }
 		if ( !CFoundAddressBase::LoadSettings( _pjJson, _pjcContainer, _psBinary, _ui32Version, _sId ) ) { return false; }
 		if ( nullptr == _pjJson && _psBinary == nullptr ) { return false; }
+		m_wsModuleName.clear();
+		m_ui64ModuleAddress = 0;
+		m_ui64ModuleOffset = 0;
 		try {
 			if ( _pjJson ) {
 				const lson::CJsonContainer::LSON_JSON_VALUE * pjvVal;
-				CSecureWString swsTmp;
-				MX_JSON_GET_STRING( _DEC_S_6E13FA7E_AddressExpression, swsTmp, pjvVal, _pjJson );
-				m_sAddressTxt = ee::CExpEval::ToUtf8( swsTmp );
+				MX_JSON_GET_STRING_UTF8( _DEC_S_6E13FA7E_AddressExpression, m_sAddressTxt, pjvVal, _pjJson );
+				MX_JSON_GET_STRING( _DEC_S_0B88231E_Module, m_wsModuleName, pjvVal, _pjJson );
+				MX_JSON_GET_NUMBER( _DEC_S_22BDBA44_ModuleAddress, m_ui64ModuleOffset, uint64_t, pjvVal, _pjJson );
 
 				MX_JSON_GET_NUMBER( _DEC_S_C2F3561D_Address, m_ui64Address, uint64_t, pjvVal, _pjJson );
+
 				MX_JSON_GET_NUMBER( _DEC_S_F0717BC3_PublicId, m_ui32PublicId, uint32_t, pjvVal, _pjJson );
 
 				MX_JSON_GET_NUMBER( _DEC_S_B083E9A2_ValueType, m_vtValueType, CUtilities::MX_VALUE_TYPE, pjvVal, _pjJson );
@@ -395,6 +417,11 @@ namespace mx {
 			else {
 				CSecureString * pwsStr = reinterpret_cast<CSecureString *>(&m_sAddressTxt);
 				if ( !_psBinary->ReadString( (*pwsStr) ) ) { return false; }
+				if ( _ui32Version >= 5 ) {
+					CSecureWString * pwwsStr = reinterpret_cast<CSecureWString *>(&m_wsModuleName);
+					if ( !_psBinary->ReadStringU16( (*pwwsStr) ) ) { return false; }
+					if ( !_psBinary->Read( m_ui64ModuleOffset ) ) { return false; }
+				}
 
 				if ( !_psBinary->Read( m_ui64Address ) ) { return false; }
 				if ( _ui32Version <= 2 ) {
@@ -443,6 +470,18 @@ namespace mx {
 			}
 		}
 		catch ( ... ) { return false; }
+
+		if ( m_wsModuleName.size() ) {
+			auto meModule = m_pmhMemHack->Process().FindModuleByName( ee::CExpEval::ToUtf8( m_wsModuleName ) );
+			if ( meModule.meEntry.dwSize ) {
+				m_ui64ModuleAddress = reinterpret_cast<uintptr_t>(meModule.meEntry.modBaseAddr);
+				m_ui64Address = m_ui64ModuleAddress + m_ui64ModuleOffset;
+			}
+		}
+		else {
+			AdjustAddressToModule( m_ui64Address );
+		}
+
 		PrepareValueStructures();
 		m_bDirtyLockedLeft = true;
 		Dirty();
@@ -541,6 +580,23 @@ namespace mx {
 			m_bDirtyLockedLeft = false;
 		}
 		return m_swsLockedLeftText;
+	}
+
+	// Adjusts the addess to be relative to a module.
+	void CFoundAddress::AdjustAddressToModule( uint64_t _ui64Address ) {
+		auto meEntry = m_pmhMemHack->Process().FindModuleForAddress( _ui64Address );
+		m_ui64Address = _ui64Address;
+		if ( meEntry.dwSize == 0 ) {
+			m_ui64ModuleAddress = 0;
+			m_ui64ModuleOffset = 0;
+			m_wsModuleName.clear();
+		}
+		else {
+			m_ui64ModuleAddress = reinterpret_cast<uintptr_t>(meEntry.modBaseAddr);
+			m_ui64ModuleOffset = m_ui64Address - m_ui64ModuleAddress;
+			m_wsModuleName = meEntry.szModule;
+		}
+		//m_ui64Address -= m_ui64ModuleAddress;
 	}
 
 }	// namespace mx

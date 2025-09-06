@@ -11,7 +11,7 @@
 #include <vector>
 
 
-#define MX_FOUND_ADDRESS_VERSION							4
+#define MX_FOUND_ADDRESS_VERSION							5
 
 
 namespace mx {
@@ -130,6 +130,9 @@ namespace mx {
 		// Is the address dynamic?
 		virtual bool										SimpleAddress() const { return true; }
 
+		// Called when a process is opened, used to update module/offset addresses.
+		virtual void										ProcessOpened() {}
+
 		// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
 		virtual bool										SaveSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary ) const;
 
@@ -162,7 +165,6 @@ namespace mx {
 		RGBQUAD												m_rgbqColor = { .rgbBlue = 0xFF, .rgbGreen = 0xFF, .rgbRed = 0xFF, .rgbReserved = 0 };
 		// Pointer to the MemHack object.
 		CMemHack *											m_pmhMemHack = nullptr;
-
 		
 
 		// The number of instances of this class.

@@ -114,6 +114,14 @@
 		STORETO = ee::CExpEval::ToUtf16( ssTmp );																																						\
 	}
 
+#define MX_JSON_GET_STRING_UTF8( NAME, STORETO, LOCAL, PARENT )																																			\
+	LOCAL = _pjcContainer->GetMemberByName( (*PARENT), (NAME) );																																		\
+	if ( LOCAL && LOCAL->vtType == lson::CJsonContainer::LSON_VT_STRING ) {																																\
+		CSecureString ssTmp;																																											\
+		CUtilities::ResolveAllEscapes( _pjcContainer->GetString( LOCAL->u.stString ), ssTmp, true );																									\
+		STORETO = ssTmp;																																												\
+	}
+
 namespace mx {
 
 	class CFoundAddressBase;

@@ -2,9 +2,10 @@
 #include "../MXMhsX.h"
 #include "../MemHack/MXProcess.h"
 #include "../Utilities/MXUtilities.h"
-#include <Float16/EEFloat16.h>
 #include "MXAddressChunkList.h"
 #include "MXSearchResultBase.h"
+
+#include <Float16/EEFloat16.h>
 
 #include <cassert>
 #include <filesystem>

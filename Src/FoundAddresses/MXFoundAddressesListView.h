@@ -45,6 +45,14 @@ namespace mx {
 
 		// Gets the display test for an expression search result.
 		bool								GetExpressionSearchValueFixed( LPWSTR _pwStr, int _iMaxLen, uint64_t _uiAddress, const uint8_t * _pui8Value ) const;
+
+		/**
+		 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_ITEMPREPAINT handler.
+		 *
+		 * \param _lpcdParm The notifacation structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual DWORD						Notify_CustomDraw_ItemPrePaint( LPNMLVCUSTOMDRAW /*_lpcdParm*/ );
 	};
 
 }	// namespace mx

@@ -19,7 +19,7 @@ namespace mx {
 		try {
 			auto pwTmp = FindChild( Layout::MX_ADI_TYPE_COMBO );
 			if ( pwTmp ) {
-				LPARAM lpParm = m_pmhMemHack->Searcher().LastSearchParms().dtLVal.dtType;
+				LPARAM lpParm = m_pmhMemHack->Options().lpAddValLastType == LPARAM( -1 ) ? m_pmhMemHack->Searcher().LastSearchParms().dtLVal.dtType : m_pmhMemHack->Options().lpAddValLastType;
 				if ( m_pmhMemHack->Searcher().LastSearchParms().stType == CUtilities::MX_ST_STRING_SEARCH ) {
 					lpParm = CUtilities::MX_DT_STRING;
 				}
@@ -37,7 +37,7 @@ namespace mx {
 			}
 			pwTmp = FindChild( Layout::MX_ADI_CODEPAGE_COMBO );
 			if ( pwTmp ) {
-				CUtilities::FillComboBoxWithCodePages( pwTmp, -1 );
+				CUtilities::FillComboBoxWithCodePages( pwTmp, m_pmhMemHack->Options().lpAddValLastCodePage );
 			}
 
 			Update();
@@ -122,6 +122,14 @@ namespace mx {
 					pwTmp = FindChild( Layout::MX_ADI_ADDRESS_COMBO );
 					if ( pwTmp ) {
 						CUtilities::AddOrMove<CSecureWString>( oOption.vAddValAddrHistory, pwTmp->GetTextW() );
+					}
+					pwTmp = FindChild( Layout::MX_ADI_TYPE_COMBO );
+					if ( pwTmp ) {
+						oOption.lpAddValLastType = pwTmp->GetCurSelItemData();
+					}
+					pwTmp = FindChild( Layout::MX_ADI_CODEPAGE_COMBO );
+					if ( pwTmp ) {
+						oOption.lpAddValLastCodePage = pwTmp->GetCurSelItemData();
 					}
 					m_pmhMemHack->SetOptions( oOption );
 				}

@@ -81,6 +81,9 @@ namespace mx {
 		// Dirties all entries.
 		void																DirtyAll();
 
+		// Notifies all that a process has been opened.
+		void																ProcessOpened();
+
 		// Applies all timer-based locks.
 		void																ApplyTimerLocks( bool _bIncludethreadLocks = false );
 

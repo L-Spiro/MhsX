@@ -61,6 +61,9 @@ namespace mx {
 		// Gathers all address strings.
 		CSecureWString							GatherAddress() const;
 
+		// Gathers all module strings.
+		CSecureWString							GatherModuleNames() const;
+
 		// Gathers all data types.
 		CUtilities::MX_DATA_TYPES				GatherDataTypes() const;
 

@@ -81,6 +81,8 @@ namespace mx {
 	// Opened a process.
 	void CMemHack::OpenedProcess() {
 		CUtilities::AddOrMove( m_oOptions.vProcessHistory, m_pProcess.QueryProcessImageName(), CMhsMainWindow::MX_R_RECENT_PROCESSES_SIZE );
+
+		FoundAddressManager()->ProcessOpened();
 	}
 
 	// Failed to open a process.

@@ -2068,3 +2068,5 @@
 "PublicId"
 "ColorHistory"
 "Code Page:"
+"Module"
+"ModuleAddress"

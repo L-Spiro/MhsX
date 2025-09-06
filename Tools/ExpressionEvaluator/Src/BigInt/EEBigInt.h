@@ -395,7 +395,7 @@ namespace ee {
 			uint32_t const _uiMultiplier ) EE_BI_THROW {
 			uint32_t uiCarry = 0;
 			for ( uint32_t I = 0; I != _uiMultiplicandCount; ++I ) {
-				uint64_t const ui64Res = static_cast<uint64_t>( _uiMultiplicand[I] ) * _uiMultiplier + uiCarry;
+				uint64_t const ui64Res = static_cast<uint64_t>(_uiMultiplicand[I]) * _uiMultiplier + uiCarry;
 				_uiMultiplicand[I] = static_cast<uint32_t>(ui64Res);
 				uiCarry = static_cast<uint32_t>(ui64Res >> 32);
 			}
@@ -670,7 +670,7 @@ namespace ee {
 				}
 
 				ee::CBigInt::EE_UNPACK_INDEX index{};
-				index.ui64Offset = static_cast<uint16_t>( vElements.size() );
+				index.ui64Offset = static_cast<uint16_t>(vElements.size());
 				index.ui8Zeroes = uint8_t( CountLeadingZeroes( biX ) );
 				index.ui8Size = uint8_t( biX.m_ui32Used - index.ui8Zeroes );
 
@@ -857,7 +857,7 @@ namespace ee {
 
 				// Divide to get the quotient digit:
 				uint64_t ui64UuQuo = ui64UuNum / uiUDen;
-				uint64_t ui64UuRem = static_cast<uint32_t>( ui64UuNum % uiUDen );
+				uint64_t ui64UuRem = static_cast<uint32_t>(ui64UuNum % uiUDen);
 
 				if ( ui64UuQuo > UINT32_MAX ) {
 					ui64UuRem += uiUDen * (ui64UuQuo - UINT32_MAX);
@@ -1058,7 +1058,7 @@ namespace ee {
 
 				// Divide to get the quotient digit:
 				uint64_t ui64UuQuo = ui64UuNum / uiUDen;
-				uint64_t ui64UuRem = static_cast<uint32_t>( ui64UuNum % uiUDen );
+				uint64_t ui64UuRem = static_cast<uint32_t>(ui64UuNum % uiUDen);
 
 				if ( ui64UuQuo > UINT32_MAX ) {
 					ui64UuRem += uiUDen * (ui64UuQuo - UINT32_MAX);

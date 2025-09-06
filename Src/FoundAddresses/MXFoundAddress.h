@@ -59,10 +59,16 @@ namespace mx {
 		inline uint32_t										PublicId() const { return m_ui32PublicId; }
 
 		// Sets the public ID.
-		inline void											SetPublicIf( uint32_t _ui32Id ) { m_ui32PublicId = _ui32Id; }
+		inline void											SetPublicId( uint32_t _ui32Id ) { m_ui32PublicId = _ui32Id; }
 
 		// Gets the Address text.
 		virtual std::wstring								AddressText() const;
+
+		// Gets the name of the enclosing module, if any.
+		inline const std::wstring &							EnclosingModule() const { return m_wsModuleName; }
+
+		// Gets the enclosing module's address.
+		inline uint64_t										EnclosingModuleAddress() const { return m_ui64ModuleAddress; }
 
 		// Gets the Value text.
 		virtual std::wstring								ValueText( bool * _pbRead = nullptr ) const;
@@ -140,6 +146,9 @@ namespace mx {
 		uint64_t											AdjustAddress( int64_t _i64Amnt ) {
 			if MX_UNLIKELY ( !_i64Amnt ) { return m_ui64Address; }
 			m_bDirtyAddress = true;
+			if ( m_wsModuleName.size() ) {
+				m_ui64ModuleOffset += _i64Amnt;
+			}
 			return m_ui64Address += _i64Amnt;
 		}
 
@@ -170,6 +179,9 @@ namespace mx {
 		// Applies the lock.  A return of false indicates the process could not be written (or potentially read if needed).
 		virtual bool										ApplyLock( bool _bEvenIfNotLocked = false );
 
+		// Called when a process is opened, used to update module/offset addresses.
+		virtual void										ProcessOpened();
+
 		// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
 		virtual bool										SaveSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary ) const;
 
@@ -183,10 +195,18 @@ namespace mx {
 		std::string											m_sAddressTxt;
 		// The address expression.
 		mutable lsw::CExpression							m_eAddressExp;
+
 		// The address buffered (if not 0).
 		uint64_t											m_ui64Address = 0;
+		// Module name, if any.
+		std::wstring										m_wsModuleName;
+		// Module address.
+		uint64_t											m_ui64ModuleAddress = 0;
+		// Module offset.
+		uint64_t											m_ui64ModuleOffset = 0;
 		// The buffered address.
 		mutable uint64_t									m_ui64BufferedAddress = 0;
+
 		// The public ID.
 		uint32_t											m_ui32PublicId = 0;
 		// The color of the item in the display.  If rgbReserved is 0, use the default display color.
@@ -277,6 +297,9 @@ namespace mx {
 			m_ui16ArrayStride = _ui16Stride;
 			PrepareValueStructures();
 		}
+
+		// Adjusts the addess to be relative to a module.
+		void												AdjustAddressToModule( uint64_t _ui64Address );
 
 	};
 

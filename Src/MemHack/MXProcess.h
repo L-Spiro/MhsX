@@ -2,11 +2,14 @@
 #include "../MXMhsX.h"
 #include "../IO/MXInOutInterface.h"
 #include "../Strings/MXSecureWString.h"
-#include "../Utilities\MXUtilities.h"
+#include "../Utilities/MXUtilities.h"
 
 #include <CriticalSection/LSWCriticalSection.h>
 #include <Helpers/LSWHelpers.h>
 #include <Threads/LSWThread.h.>
+
+#include <set>
+#include <map>
 
 using namespace lsw;
 
@@ -34,6 +37,90 @@ namespace mx {
 		// == Types.
 		// The callback function type for detatch events.
 		typedef void					(* PfDetatchCallback)( void *, uintptr_t );
+
+		/**
+		 * \brief Half-open address range [ui64Start, ui64Start + ui64Size).
+		 *
+		 * Optimized membership check uses a single unsigned comparison:
+		 *     (addr - start) < size
+		 */
+		struct MX_ADDRESS_RANGE {
+			uint64_t					ui64Start;
+			uint64_t					ui64Size;
+			
+
+			// == Operators.
+			/** Ordering for std::map/set keyed by ranges (start-only, strict-weak). */
+			inline bool					operator < ( const MX_ADDRESS_RANGE &_arOther ) const {
+				return ui64Start < _arOther.ui64Start;
+			}
+
+			inline bool					operator == ( const MX_ADDRESS_RANGE &_arOther ) const {
+				return ui64Start == _arOther.ui64Start && ui64Size == _arOther.ui64Size;
+			}
+
+
+			// == Functions.
+			/** Returns end (exclusive). */
+			inline uint64_t				End() const {
+				return ui64Start + ui64Size;
+			}
+
+			/** Fast membership test. */
+			inline bool					Contains( uint64_t _ui64Addr ) const {
+				return (_ui64Addr - ui64Start) < ui64Size;
+			}
+
+			/** True if this immediately precedes _arOther (contiguous). */
+			inline bool					IsContiguousWith( const MX_ADDRESS_RANGE &_arOther ) const {
+				return End() == _arOther.ui64Start;
+			}
+
+			/** Extend to include _arOther (assumes contiguous and same backing store). */
+			inline void					MergeContiguous( const MX_ADDRESS_RANGE &_arOther ) {
+				ui64Size += _arOther.ui64Size;
+			}
+		};
+
+		/**
+		 * \brief Wrapper around MODULEENTRY32W with UTF-8 name/path and set-friendly operators.
+		 *
+		 * Blank line after the \brief.
+		 *
+		 * Ordered by case-insensitive module name (file name, not path).
+		 * This makes std::set lookups by name O(log N).
+		 */
+		struct MX_MODULE_ENTRY {
+			MODULEENTRY32W				meEntry;				/**< Original Toolhelp module entry. */
+			std::string					sNameUtf8;				/**< Module file name (e.g., "kernel32.dll"), UTF-8. */
+			std::string					sPathUtf8;				/**< Full path (UTF-8). */
+			std::string					sKeyLower;				/**< Lower-cased name for case-insensitive ordering. */
+
+
+			// == Operators.
+			/** std::set ordering: case-insensitive by file name. */
+			inline bool					operator < ( const MX_MODULE_ENTRY &_meEntry ) const {
+				return sKeyLower < _meEntry.sKeyLower;
+			}
+
+			/** Equality by key (case-insensitive name). */
+			inline bool					operator == ( const MX_MODULE_ENTRY &_meEntry ) const {
+				return sKeyLower == _meEntry.sKeyLower;
+			}
+			
+			
+			// == Functions.
+			/** Range helpers. */
+			inline uint64_t				Start() const {
+				return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(meEntry.modBaseAddr));
+			}
+			inline uint64_t				Size() const {
+				return static_cast<uint64_t>(meEntry.modBaseSize);
+			}
+			inline MX_ADDRESS_RANGE		Range() const {
+				return MX_ADDRESS_RANGE { Start(), Size() };
+			}
+		};
 
 
 		// == Functions.
@@ -99,6 +186,72 @@ namespace mx {
 		// Writes data to an area of memory in the current process.  If the data is preprocessed and misaligned, it could result in up to 3 writes to memory.
 		virtual bool					WriteProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, LPCVOID _lpvBuffer, SIZE_T _nSize, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesWritten = nullptr );
 
+		// Remote std::strlen() and std::strcpy().
+		template <typename _tType = std::string>
+		inline size_t					RemoteStrLen_StrCpy( uint64_t _ui64BaseAddress, _tType * _psStr, CUtilities::MX_BYTESWAP _bsSwap ) const {
+			if MX_UNLIKELY( _ui64BaseAddress > MAXSIZE_T ) { return 0; }
+			using tCharType = typename _tType::value_type;
+
+			size_t sRet = 0;
+			try {
+				size_t sOffset;
+				DWORD dwPageSize = mx::CSystem::GetSystemInfo().dwPageSize;
+				uint64_t ui64NextPage = ((_ui64BaseAddress / dwPageSize) + 1) * dwPageSize;	// No need to handle wrap-around.
+				size_t sBufferSize = size_t( ui64NextPage - _ui64BaseAddress );
+				// If the buffer size is not large enough to hold even a single character, go to the next next page.
+				if ( sBufferSize < sizeof( tCharType ) ) {
+					ui64NextPage = ((_ui64BaseAddress / dwPageSize) + 2) * dwPageSize;
+					sBufferSize = size_t( ui64NextPage - _ui64BaseAddress );
+				}
+				SIZE_T sRead = 0;
+				std::vector<uint8_t> vLocalBuffer;
+				while ( ReadProcessMemory_PreProcessed( _ui64BaseAddress, vLocalBuffer, sBufferSize, sOffset, _bsSwap, &sRead ) ) {
+					if ( !sRead ) { break; }
+					sRead = sRead / sizeof( tCharType ) * sizeof( tCharType );
+					_ui64BaseAddress += sRead;
+					for ( size_t I = sOffset; I < sRead; I += sizeof( tCharType ) ) {
+						if ( !(*reinterpret_cast<tCharType *>(&vLocalBuffer[I])) ) {
+							if ( _psStr ) {
+								_psStr->append( reinterpret_cast<const tCharType *>(&vLocalBuffer.data()[sOffset]), (I - sOffset) / sizeof( tCharType ) );
+							}
+							return sRet;
+						}
+						++sRet;
+					}
+
+					// The whole buffer contains no 0's.
+					if ( _psStr ) {
+						_psStr->append( reinterpret_cast<const tCharType *>(&vLocalBuffer.data()[sOffset]), (sRead - sOffset) / sizeof( tCharType ) );
+					}
+
+					ui64NextPage = ((_ui64BaseAddress / dwPageSize) + 1) * dwPageSize;	// No need to handle wrap-around.
+					sBufferSize = size_t( ui64NextPage - _ui64BaseAddress );
+					// If the buffer size is not large enough to hold even a single character, go to the next next page.
+					if ( sBufferSize < sizeof( tCharType ) ) {
+						ui64NextPage = ((_ui64BaseAddress / dwPageSize) + 2) * dwPageSize;
+						sBufferSize = size_t( ui64NextPage - _ui64BaseAddress );
+					}
+				}
+				sRead = sRead / sizeof( tCharType ) * sizeof( tCharType );
+				if ( sRead ) {
+					for ( size_t I = sOffset; I < sRead; I += sizeof( tCharType ) ) {
+						if ( !(*reinterpret_cast<tCharType *>(&vLocalBuffer[I])) ) {
+							if ( _psStr ) {
+								_psStr->append( reinterpret_cast<const tCharType *>(&vLocalBuffer.data()[sOffset]), (I - sOffset) / sizeof( tCharType ) );
+							}
+							return sRet;
+						}
+						++sRet;
+					}
+					if ( _psStr ) {
+						_psStr->append( reinterpret_cast<const tCharType *>(&vLocalBuffer.data()[sOffset]), (sRead - sOffset) / sizeof( tCharType ) );
+					}
+				}
+			}
+			catch ( ... ) {}
+			return sRet;
+		}
+
 		// Changes the protection on a region of committed pages in the virtual address space of a specified process.
 		virtual bool					VirtualProtectEx( LPVOID _lpAddress, SIZE_T _dwSize, DWORD _flNewProtect, PDWORD _lpflOldProtect );
 
@@ -129,6 +282,182 @@ namespace mx {
 		// Sets the detatch callback.
 		void							SetDetatchCallback( PfDetatchCallback _pfFunc, void * _pvParm1,  uintptr_t _uiptrParm2 );
 
+		/**
+		 * \brief Finds the module covering an address, if any. Returns nullptr if not found.
+		 */
+		inline MODULEENTRY32W			FindModuleForAddress( uint64_t _ui64Addr ) const {
+			if MX_UNLIKELY( m_dwId == DWINVALID ) { return { .dwSize = 0 }; }
+			if MX_UNLIKELY( !m_mModuleCache.size() ) {
+				m_mModuleCache = GetStaticAddressRangesByPid( m_dwId );
+			}
+			auto pmeEntry = FindModuleForAddress( m_mModuleCache, _ui64Addr );
+			MODULEENTRY32W meNull = { .dwSize = 0 };
+			return pmeEntry ? (*pmeEntry) : meNull;
+		}
+
+		// Determines if an address is part of a module in the target process.
+		inline bool						AddressIsInModule( uint64_t _ui64Addr ) const {
+			if MX_UNLIKELY( m_dwId == DWINVALID ) { return false; }
+			if MX_UNLIKELY( !m_mModuleCache.size() ) {
+				m_mModuleCache = GetStaticAddressRangesByPid( m_dwId );
+			}
+			auto pmeEntry = FindModuleForAddress( m_mModuleCache, _ui64Addr );
+			return pmeEntry != nullptr;
+		}
+
+		// Resets the internal module cache so that it can be freshly generated next time it is accessed.
+		inline void						ClearModuleCache() {
+			m_mModuleCache.clear();
+			m_sModulesByName.clear();
+		}
+
+		/**
+		 * Finds a module by UTF-8 name (case-insensitive). Name is the file name, e.g., "kernel32.dll".
+		 *
+		 * \param _sModules     Set of modules (ordered by case-insensitive name).
+		 * \param _sNameUtf8    Name to find (UTF-8).
+		 * \return Returns pointer to the found entry or nullptr if not found.
+		 */
+		inline MX_MODULE_ENTRY			FindModuleByName( std::string_view _sNameUtf8 ) {
+			MX_MODULE_ENTRY meRet;
+			meRet.meEntry.dwSize = 0;
+			if MX_UNLIKELY( m_dwId == DWINVALID ) { return meRet; }
+			if MX_UNLIKELY( !m_sModulesByName.size() ) {
+				GatherModulesByPid( m_dwId, m_sModulesByName );
+			}
+			auto pmeEntry = FindModuleByName( m_sModulesByName, _sNameUtf8 );
+			return pmeEntry ? (*pmeEntry) : meRet;
+		}
+
+		/**
+		 * \brief Gathers static (image) ranges using Toolhelp for a given PID.
+		 *
+		 * Each module yields one range: [modBaseAddr, modBaseAddr + modBaseSize).
+		 * The map value is the MODULEENTRY32W record for that module.
+		 *
+		 * \param _dwPid            Target process ID.
+		 * \param _mOut             Output map of ranges Å® MODULEENTRY32W.
+		 * \return Returns true on success (snapshot opened and at least attempted).
+		 */
+		static inline bool				GatherStaticAddressRangesByPid( DWORD _dwPid,
+			std::map<MX_ADDRESS_RANGE, MODULEENTRY32W> &_mOut ) {
+
+			_mOut.clear();
+
+			if ( _dwPid == 0 || DWINVALID == _dwPid ) { return false; }
+
+			LSW_HANDLE hSnap = CSystem::CreateToolhelp32Snapshot( TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, _dwPid );
+			if ( !hSnap.Valid()) { return false; }
+
+			MODULEENTRY32W meEntry;
+			meEntry.dwSize = sizeof( meEntry );
+
+			if ( !CSystem::Module32FirstW( hSnap.hHandle, &meEntry ) ) { return false; }
+
+			do {
+				// Some tools zero-check these; be defensive.
+				if ( meEntry.modBaseAddr != nullptr && meEntry.modBaseSize != 0 ) {
+					MX_ADDRESS_RANGE arRange {
+						static_cast<uint64_t>(reinterpret_cast<uintptr_t>(meEntry.modBaseAddr)),
+						static_cast<uint64_t>(meEntry.modBaseSize)
+					};
+
+					// Insert; keys are unique by start. If a duplicate start appears, keep the first.
+					_mOut.emplace( arRange, meEntry );
+				}
+				meEntry.dwSize = sizeof( meEntry );
+			}
+			while ( CSystem::Module32NextW( hSnap.hHandle, &meEntry ) );
+			return true;
+		}
+
+		/**
+		 * \brief Convenience: builds and returns the static range map for a PID.
+		 */
+		static inline std::map<MX_ADDRESS_RANGE, MODULEENTRY32W>
+										GetStaticAddressRangesByPid( DWORD _dwPid ) {
+			std::map<MX_ADDRESS_RANGE, MODULEENTRY32W> mOut;
+			GatherStaticAddressRangesByPid( _dwPid, mOut );
+			return mOut;
+		}
+
+		/**
+		 * \brief Finds the module covering an address, if any. Returns nullptr if not found.
+		 */
+		static inline const MODULEENTRY32W *
+										FindModuleForAddress(
+			const std::map<MX_ADDRESS_RANGE, MODULEENTRY32W> &_mMap,
+			uint64_t _ui64Addr ) {
+
+			// First range with start > addr.
+			MX_ADDRESS_RANGE arKey { _ui64Addr, 1 };
+			auto itUpper = _mMap.upper_bound( arKey );
+			if ( itUpper == _mMap.begin() ) {
+				return nullptr;
+			}
+			--itUpper;
+			return itUpper->first.Contains( _ui64Addr ) ? &itUpper->second : nullptr;
+		}
+
+		/**
+		 * Enumerates modules in the target PID into a std::set<MX_MODULE_ENTRY> ordered by name.
+		 *
+		 * \param _dwPid    Target process ID.
+		 * \param _sOut     Output set of modules (cleared first).
+		 * \return Returns true if enumeration succeeded and at least attempted.
+		 */
+		static inline bool				GatherModulesByPid( DWORD _dwPid, std::set<MX_MODULE_ENTRY> &_sOut ) {
+			_sOut.clear();
+
+			if ( _dwPid == 0 || DWINVALID == _dwPid ) { return false; }
+
+			LSW_HANDLE hSnap = CSystem::CreateToolhelp32Snapshot( TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, _dwPid );
+			if ( !hSnap.Valid()) { return false; }
+
+			MODULEENTRY32W meEntry;
+			meEntry.dwSize = sizeof( meEntry );
+
+			if ( !CSystem::Module32FirstW( hSnap.hHandle, &meEntry ) ) { return false; }
+
+			do {
+				if ( meEntry.modBaseAddr != nullptr && meEntry.modBaseSize != 0 ) {
+					MX_MODULE_ENTRY meThis {};
+					meThis.meEntry = meEntry;
+
+					// szModule and szExePath are WCHAR buffers. Copy to std::wstring first.
+					std::wstring wName( meEntry.szModule );
+					std::wstring wPath( meEntry.szExePath );
+
+					meThis.sNameUtf8 = ee::CExpEval::ToUtf8( wName );
+					meThis.sPathUtf8 = ee::CExpEval::ToUtf8( wPath );
+					meThis.sKeyLower = CUtilities::ToLower( meThis.sNameUtf8 );
+
+					_sOut.emplace( std::move( meThis ) );
+				}
+				meEntry.dwSize = sizeof( meEntry );
+			}
+			while ( CSystem::Module32NextW( hSnap.hHandle, &meEntry ) );
+			return true;
+		}
+
+		/**
+		 * Finds a module by UTF-8 name (case-insensitive). Name is the file name, e.g., "kernel32.dll".
+		 *
+		 * \param _sModules     Set of modules (ordered by case-insensitive name).
+		 * \param _sNameUtf8    Name to find (UTF-8).
+		 * \return Returns pointer to the found entry or nullptr if not found.
+		 */
+		static inline const MX_MODULE_ENTRY *
+										FindModuleByName(
+			const std::set<MX_MODULE_ENTRY> &_sModules,
+			std::string_view _sNameUtf8 ) {
+
+			MX_MODULE_ENTRY key {};
+			key.sKeyLower = CUtilities::ToLower( std::string( _sNameUtf8 ) );
+
+			auto pmeEntry = _sModules.find( key );
+			return (pmeEntry == _sModules.end()) ? nullptr : &(*pmeEntry);
+		}
 
 
 	protected :
@@ -145,13 +474,12 @@ namespace mx {
 
 		// == Members.
 		// Process ID.
-		DWORD							m_dwId;
-
+		DWORD							m_dwId = DWINVALID;
 		// Handle to the process.  May be recreated many times, so do not make copies.
 		LSW_HANDLE						m_hProcHandle;
 
 		// OpenProcess() flags.
-		DWORD							m_dwOpenProcFlags;
+		DWORD							m_dwOpenProcFlags = 0;
 
 		// Mode for accessing the target process.
 		MX_OPEN_PROC_MODE				m_opmMode;
@@ -171,6 +499,14 @@ namespace mx {
 		void *							m_pvDetatchParm1;
 		// Detatch parameter 2.
 		uintptr_t						m_uiptrDetatchParm2;
+
+		// Module address ranges for determining where static addresses are.
+		mutable std::map<MX_ADDRESS_RANGE, MODULEENTRY32W>
+										m_mModuleCache;
+
+		// Module information sorted by name.
+		mutable std::set<MX_MODULE_ENTRY>
+										m_sModulesByName;
 
 
 

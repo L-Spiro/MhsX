@@ -547,4 +547,33 @@ int iIdx = 0;
 		return true;
 	}
 
+	/**
+	 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_ITEMPREPAINT handler.
+	 *
+	 * \param _lpcdParm The notifacation structure.
+	 * \return Returns an LSW_HANDLED code.
+	 */
+	DWORD CFoundAddressesListView::Notify_CustomDraw_ItemPrePaint( LPNMLVCUSTOMDRAW _lpcdParm ) {
+		{
+			uint64_t ui64Address;
+			const uint8_t * pui8Data;
+			CSearcher::MX_SEARCH_LOCK slSearchLock( &m_pmmwMhsWindow->MemHack()->Searcher() );
+			const CSearchResultBase * psrbResults = m_pmmwMhsWindow->MemHack()->Searcher().SearchResults();
+			if ( psrbResults ) {
+				psrbResults->Lock();
+				if ( psrbResults->GetResultFast( _lpcdParm->nmcd.dwItemSpec, ui64Address, pui8Data ) ) {
+					psrbResults->Unlock();
+					bool bStatic = m_pmmwMhsWindow->MemHack()->Process().AddressIsInModule( ui64Address );
+					if ( bStatic ) {
+						_lpcdParm->clrText = ::GetSysColor( COLOR_WINDOWTEXT );
+						_lpcdParm->clrTextBk = (_lpcdParm->nmcd.dwItemSpec & 1) ? RGB( 0x83, 0xA5, 0xCB ) : RGB( 0x70, 0x8E, 0xAE );
+						return CDRF_NEWFONT;
+					}
+				}
+				else { psrbResults->Unlock(); }
+			}
+		}
+		return lsw::CListView::Notify_CustomDraw_ItemPrePaint( _lpcdParm );
+	}
+
 }	// namespace mx

@@ -96,6 +96,8 @@ namespace mx {
 
 		std::vector<CSecureWString>		vAddValDescriptionHistory;
 		std::vector<CSecureWString>		vAddValAddrHistory;
+		LPARAM							lpAddValLastType				= -1;
+		LPARAM							lpAddValLastCodePage			= -1;
 
 		std::vector<CSecureWString>		vMoveAddrSourceHistory;
 		std::vector<CSecureWString>		vMoveAddrTargetHistory;

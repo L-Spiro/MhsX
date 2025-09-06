@@ -137,6 +137,11 @@ namespace mx {
 			auto wsText = GatherAddress();
 			pwTmp->SetTextW( wsText.c_str() );
 		}
+		pwTmp = FindChild( Layout::MX_FAEI_INFO_MODULE_EDIT );
+		if ( pwTmp ) {
+			auto wsText = GatherModuleNames();
+			pwTmp->SetTextW( wsText.c_str() );
+		}
 		return LSW_H_CONTINUE;
 	}
 
@@ -1356,6 +1361,28 @@ namespace mx {
 		}
 
 		return wswRet;
+	}
+
+	// Gathers all module strings.
+	CSecureWString CFoundAddressEditMainPage::GatherModuleNames() const {
+		if ( !m_pParms.pmhMemHack || !m_pParms.vSelection.size() ) { return CSecureWString(); }
+		CSecureWString wsRet;
+		auto famManager = m_pParms.pmhMemHack->FoundAddressManager();
+		bool bFound = false;
+
+		for ( size_t I = 0; I < m_pParms.vSelection.size(); ++I ) {
+			auto faTmp = famManager->GetById( m_pParms.vSelection[I] );
+			if ( faTmp && faTmp->Type() == MX_FAT_FOUND_ADDRESS ) {
+				if ( !bFound ) {
+					wsRet = reinterpret_cast<CFoundAddress *>(faTmp)->EnclosingModule();
+					bFound = true;
+					continue;
+				}
+				if ( reinterpret_cast<CFoundAddress *>(faTmp)->EnclosingModule() != wsRet ) { return CSecureWString(); }
+			}
+		}
+
+		return wsRet;
 	}
 
 	// Gathers all data types.

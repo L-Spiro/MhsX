@@ -353,6 +353,14 @@ namespace lsw {
 		LPARAM								GetSelData() const;
 
 		/**
+		 * Gets the data of an item by index.
+		 * 
+		 * \param _iItem The index of the item whose data is to be obtained.
+		 * \return Returns the item's data or -1.
+		 **/
+		LPARAM								GetItemData( INT _iItem ) const;
+
+		/**
 		 * Sets selection on an item by index.
 		 *
 		 * \param _iItem The item to update.

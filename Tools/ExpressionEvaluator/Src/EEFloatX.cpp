@@ -329,7 +329,7 @@ namespace ee {
 				// NaN or Inf.
 				uint32_t uiNanBit = 0;
 				if ( !uiCoef ) { uiNanBit = 0x0200; }
-				return static_cast<uint16_t>( (uiSign >> 16) | 0x7C00 | uiNanBit | (uiCoef >> 13) );
+				return static_cast<uint16_t>((uiSign >> 16) | 0x7C00 | uiNanBit | (uiCoef >> 13));
 			}
 			uint32_t uiHalfSign = uiSign >> 16;
 			int32_t iUnbiasedExp = (uiExp >> 23) - 127;
