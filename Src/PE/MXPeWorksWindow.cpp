@@ -475,6 +475,10 @@ namespace mx {
 			for ( size_t I = 0; I < vResources.size(); ++I ) {
 				if ( vResources[I].vDirEntries.size() > 0 ) {
 					switch ( vResources[I].vDirEntries[0].NameId ) {
+						case static_cast<uint32_t>(reinterpret_cast<UINT_PTR>(RT_STRING)) : {
+							DecodeString( (*ptlTree), TVI_ROOT, vResources[I], (*_tTab.ppoPeObject) );
+							break;
+						}
 						case static_cast<uint32_t>(reinterpret_cast<UINT_PTR>(RT_VERSION)) : {
 							DecodeVersion( (*ptlTree), TVI_ROOT, vResources[I], (*_tTab.ppoPeObject) );
 #if 0
@@ -2927,6 +2931,55 @@ namespace mx {
 
 		return true;
 #undef MW_STANDARD_DATA_PRINT
+	}
+
+	// Decodes an RT_STRING resource.
+	bool CPeWorksWindow::DecodeString( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const CPeObject::MX_EXTRACTED_RESOURCE &_erResource, const mx::CPeObject &_poPeObject ) {
+		if ( _erResource.vResourceData.size() ) {
+			// Block ID is level-2 NameId under RT_STRING; needed to compute the global String ID.
+			uint32_t ui32BlockId = 0;
+			if ( _erResource.vDirEntries.size() >= 2 ) {
+				ui32BlockId = _erResource.vDirEntries[1].NameId;
+			}
+
+
+			const uint8_t * pCur = _erResource.vResourceData.data();
+			const uint8_t * pEnd = pCur + _erResource.vResourceData.size();
+
+			// Each block contains up to 16 UTF-16 strings.
+			uint32_t ui32BaseId = ui32BlockId ? ((ui32BlockId - 1U) << 4) : 0U;
+
+			CSecureWString swsTemp;
+			{
+				swsTemp = CreateResourceNameString( _erResource, _poPeObject );
+				TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( swsTemp.c_str(), -1, _tiParent );
+				_tiParent = _tlTree.InsertItem( &isInsertMe );
+			}
+			
+
+			for ( uint32_t I = 0; I < 16; ++I ) {
+				if ( pCur + sizeof( uint16_t ) > pEnd ) { break; }
+
+				uint16_t ui16Len = (*reinterpret_cast<const uint16_t *>(pCur));
+				pCur += sizeof( uint16_t );
+
+				if ( ui16Len == 0 ) { continue; }
+
+				size_t stBytes = static_cast<size_t>(ui16Len) * sizeof( wchar_t );
+				if ( pCur + stBytes > pEnd ) { break; }
+
+				swsTemp.SecureClear();
+				const wchar_t * pW = reinterpret_cast<const wchar_t *>(pCur);
+				swsTemp.assign( pW, pW + ui16Len );
+				pCur += stBytes;
+
+				TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( L"", -1, _tiParent );
+				HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
+				if ( !_tlTree.SetItemText( hItem, swsTemp.c_str(), MW_PE_VALUE ) ) { return false; }
+			}
+
+		}
+		return true;
 	}
 
 	// Decodes an RT_VERSION resource.

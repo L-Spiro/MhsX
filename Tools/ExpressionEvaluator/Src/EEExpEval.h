@@ -1127,7 +1127,7 @@ namespace ee {
 		 **/
 		template <typename _tType>
 		static inline std::string		ToHexString( const _tType &_tIn, bool _bSpaces = true, bool * _pbSuccess = nullptr ) {
-			static_assert( sizeof( typename _tType::value_type ) == 1U, "*::value_type must be 1 byte." );
+			static_assert( sizeof( typename _tType::value_type ) == 1U, "_tType::value_type must be 1 byte." );
 			using _tVal = typename _tType::value_type;
 
 			std::string sStr;
@@ -1141,16 +1141,8 @@ namespace ee {
 
 				for ( size_t I = 0; I < _tIn.size(); ++I ) {
 					if ( _bSpaces && I ) { ssStream << ' '; }
-					const auto u =
-						[] ( const _tVal &_v ) -> unsigned int {
-							if constexpr ( std::is_same<_tVal, std::byte>::value ) {
-								return std::to_integer<unsigned int>(_v);
-							}
-							else {
-								return static_cast<unsigned int>(static_cast<unsigned char>(_v));
-							}
-						}( _tIn[I] );
-					ssStream << std::setw( 2 ) << u;
+					const unsigned int uiVal = static_cast<unsigned int>(static_cast<uint8_t>(_tIn[I]));
+					ssStream << std::setw( 2 ) << uiVal;
 				}
 
 				sStr = ssStream.str();
@@ -1169,7 +1161,7 @@ namespace ee {
 		 **/
 		template <typename _tOutType, typename _tStrType>
 		static inline _tOutType			FromHexString( const _tStrType &_sString, bool * _pbSuccess = nullptr ) {
-			static_assert( sizeof( typename _tOutType::value_type ) == 1U, "*::value_type must be 1 byte." );
+			static_assert( sizeof( typename _tOutType::value_type ) == 1U, "_tOutType::value_type must be 1 byte." );
 			using _tInVal = typename _tStrType::value_type;
 
 			_tOutType otOutput;

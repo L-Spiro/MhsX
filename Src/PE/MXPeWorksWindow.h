@@ -177,6 +177,9 @@ namespace mx {
 		// Decodes the resource tree.
 		bool								AddResourceTree( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const MX_IMAGE_RESOURCE_DIRECTORY_ENTRY * _pirdeEntry, uint32_t _uiSectionIndex, const mx::CPeObject &_poPeObject, uint32_t _uiLevel );
 
+		// Decodes an RT_STRING resource.
+		bool								DecodeString( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const CPeObject::MX_EXTRACTED_RESOURCE &_erResource, const mx::CPeObject &_poPeObject );
+
 		// Decodes an RT_VERSION resource.
 		bool								DecodeVersion( lsw::CTreeListView &_tlTree, HTREEITEM _tiParent, const CPeObject::MX_EXTRACTED_RESOURCE &_erResource, const mx::CPeObject &_poPeObject );
 
