@@ -2943,8 +2943,8 @@ namespace mx {
 			}
 
 
-			const uint8_t * pCur = _erResource.vResourceData.data();
-			const uint8_t * pEnd = pCur + _erResource.vResourceData.size();
+			const uint8_t * pui8Cur = _erResource.vResourceData.data();
+			const uint8_t * pui8End = pui8Cur + _erResource.vResourceData.size();
 
 			// Each block contains up to 16 UTF-16 strings.
 			uint32_t ui32BaseId = ui32BlockId ? ((ui32BlockId - 1U) << 4) : 0U;
@@ -2958,20 +2958,20 @@ namespace mx {
 			
 
 			for ( uint32_t I = 0; I < 16; ++I ) {
-				if ( pCur + sizeof( uint16_t ) > pEnd ) { break; }
+				if ( pui8Cur + sizeof( uint16_t ) > pui8End ) { break; }
 
-				uint16_t ui16Len = (*reinterpret_cast<const uint16_t *>(pCur));
-				pCur += sizeof( uint16_t );
+				uint16_t ui16Len = (*reinterpret_cast<const uint16_t *>(pui8Cur));
+				pui8Cur += sizeof( uint16_t );
 
 				if ( ui16Len == 0 ) { continue; }
 
 				size_t stBytes = static_cast<size_t>(ui16Len) * sizeof( wchar_t );
-				if ( pCur + stBytes > pEnd ) { break; }
+				if ( pui8Cur + stBytes > pui8End ) { break; }
 
 				swsTemp.SecureClear();
-				const wchar_t * pW = reinterpret_cast<const wchar_t *>(pCur);
+				const wchar_t * pW = reinterpret_cast<const wchar_t *>(pui8Cur);
 				swsTemp.assign( pW, pW + ui16Len );
-				pCur += stBytes;
+				pui8Cur += stBytes;
 
 				TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( L"", -1, _tiParent );
 				HTREEITEM hItem = _tlTree.InsertItem( &isInsertMe );
