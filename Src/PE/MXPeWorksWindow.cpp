@@ -2969,8 +2969,8 @@ namespace mx {
 				if ( pui8Cur + stBytes > pui8End ) { break; }
 
 				swsTemp.SecureClear();
-				const wchar_t * pW = reinterpret_cast<const wchar_t *>(pui8Cur);
-				swsTemp.assign( pW, pW + ui16Len );
+				const wchar_t * pwcCur = reinterpret_cast<const wchar_t *>(pui8Cur);
+				swsTemp.assign( pwcCur, pwcCur + ui16Len );
 				pui8Cur += stBytes;
 
 				TVINSERTSTRUCTW isInsertMe = lsw::CTreeListView::DefaultItemLParam( L"", -1, _tiParent );

@@ -219,6 +219,9 @@ MhsX.VC.db
 Tools/ExpressionEvaluator/Src/Fmt/*
 Tools/LSXML/Win32/*
 Tools/LSon/Win32/*
-/Final
+Final/*
+!Final/*
+!Final/Resources/*
 Final.rar
+MHS X.zip
 /enc_temp_folder
