@@ -18901,3 +18901,21 @@
 #define _DEC_S_22BDBA44_ModuleAddress mx::CStringDecoder::DecodeToString( _T_22BDBA44_ModuleAddress, _LEN_22BDBA44 )
 #define _DEC_WS_22BDBA44_ModuleAddress mx::CStringDecoder::DecodeToWString( _T_22BDBA44_ModuleAddress, _LEN_22BDBA44 )
 
+// Deus Hex Machina
+
+#define _T_BF7FD5A0_Deus_Hex_Machina "\xCC\x33\x45\x0E\xB2\x11\xF3\x3F\xF0\x15\x2A\x31\xFA\x04\x35\xE9"
+#define _LEN_BF7FD5A0 16
+#define _T_LEN_BF7FD5A0_Deus_Hex_Machina _T_BF7FD5A0_Deus_Hex_Machina, _LEN_BF7FD5A0
+#define _DEC_BF7FD5A0_Deus_Hex_Machina( STR ) mx::CStringDecoder::Decode( _T_BF7FD5A0_Deus_Hex_Machina, _LEN_BF7FD5A0, STR )
+#define _DEC_S_BF7FD5A0_Deus_Hex_Machina mx::CStringDecoder::DecodeToString( _T_BF7FD5A0_Deus_Hex_Machina, _LEN_BF7FD5A0 )
+#define _DEC_WS_BF7FD5A0_Deus_Hex_Machina mx::CStringDecoder::DecodeToWString( _T_BF7FD5A0_Deus_Hex_Machina, _LEN_BF7FD5A0 )
+
+// Deus &Hex Machina
+
+#define _T_EAEFED39_Deus__Hex_Machina "\xCC\x33\x45\x0E\xB2\xEF\xD6\x2C\x48\xE8\x16\x2F\xF5\x03\x30\xF6\x2F"
+#define _LEN_EAEFED39 17
+#define _T_LEN_EAEFED39_Deus__Hex_Machina _T_EAEFED39_Deus__Hex_Machina, _LEN_EAEFED39
+#define _DEC_EAEFED39_Deus__Hex_Machina( STR ) mx::CStringDecoder::Decode( _T_EAEFED39_Deus__Hex_Machina, _LEN_EAEFED39, STR )
+#define _DEC_S_EAEFED39_Deus__Hex_Machina mx::CStringDecoder::DecodeToString( _T_EAEFED39_Deus__Hex_Machina, _LEN_EAEFED39 )
+#define _DEC_WS_EAEFED39_Deus__Hex_Machina mx::CStringDecoder::DecodeToWString( _T_EAEFED39_Deus__Hex_Machina, _LEN_EAEFED39 )
+

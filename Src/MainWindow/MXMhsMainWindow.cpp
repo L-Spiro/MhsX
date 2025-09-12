@@ -5,6 +5,7 @@
 #include "../Layouts/MXFloatingPointStudioLayout.h"
 #include "../Layouts/MXFoundAddressEditLayout.h"
 #include "../Layouts/MXFoundAddressLayout.h"
+#include "../Layouts/MXDeuHexMachinaWindowLayout.h"
 #include "../Layouts/MXLayoutMacros.h"
 #include "../Layouts/MXLayoutManager.h"
 #include "../Layouts/MXMoveAddressesWindowLayout.h"
@@ -113,6 +114,9 @@ namespace mx {
 
 		delete m_pfpsFloatingPointStudioWindow;
 		m_pfpsFloatingPointStudioWindow = nullptr;
+
+		delete m_pdhmwDeusHexMachinaWindow;
+		m_pdhmwDeusHexMachinaWindow = nullptr;
 
 		delete m_cwConverter;
 		m_cwConverter = nullptr;
@@ -329,6 +333,10 @@ namespace mx {
 			}
 			case Layout::MX_MWMI_FLOATINGPOINTSTUDIO : {
 				ShowFloatingPointStudio( std::nan( "" ) );
+				break;
+			}
+			case Layout::MX_MWMI_DEUS_HEX_MACHINA : {
+				ShowDeusHexMachina();
 				break;
 			}
 			case Layout::MX_MWMI_EXPRESSION : {
@@ -693,6 +701,14 @@ namespace mx {
 		}
 		if ( m_pfpsFloatingPointStudioWindow ) {
 
+		}
+	}
+
+	// Shows the Deus Hex Machina window.
+	void CMhsMainWindow::ShowDeusHexMachina() {
+		if ( !m_pdhmwDeusHexMachinaWindow ) {
+			m_pdhmwDeusHexMachinaWindow = static_cast<CDeusHexMachinaWindow *>(CDeusHexMachinaLayout::CreateDeusHexMachinaWindow( nullptr ));
+			m_pdhmwDeusHexMachinaWindow->SetWidgetParent( this );
 		}
 	}
 
@@ -1287,6 +1303,9 @@ namespace mx {
 		}
 		if ( m_pfpsFloatingPointStudioWindow && static_cast<CWidget *>(m_pfpsFloatingPointStudioWindow) == _pwChild ) {
 			m_pfpsFloatingPointStudioWindow = nullptr;
+		}
+		if ( m_pdhmwDeusHexMachinaWindow && static_cast<CWidget *>(m_pdhmwDeusHexMachinaWindow) == _pwChild ) {
+			m_pdhmwDeusHexMachinaWindow = nullptr;
 		}
 		CMainWindow::ChildWasRemoved( _pwChild );
 	}

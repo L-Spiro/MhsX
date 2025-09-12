@@ -8,6 +8,7 @@
 #include "../FoundAddresses/MXFoundAddressesListView.h"
 #include "../FoundAddresses/MXFoundAddressesWindow.h"
 #include "../FoundAddresses/MXMoveAddressesWindow.h"
+#include "../HexEditor/MXDeusHexMachinaWindow.h"
 #include "../Layouts/MXLayoutMacros.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../OpenProcess/MXOpenProcessWindow.h"
@@ -117,7 +118,7 @@ namespace mx {
 				return new CFloatingPointStudioWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
 			case MX_DEUS_HEX_MACHINA : {
-				
+				return new CDeusHexMachinaWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );

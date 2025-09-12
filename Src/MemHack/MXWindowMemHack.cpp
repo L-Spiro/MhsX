@@ -199,7 +199,7 @@ namespace mx {
 				}
 			}
 			if ( bVisible ) {
-				int iInsertBefore = CMainWindowLayout::MX_MWMI_FLOATINGPOINTSTUDIO;
+				int iInsertBefore = CMainWindowLayout::MX_MWMI_DEUS_HEX_MACHINA;
 				vIds = CHelpers::GetMenuItemIDs( hMenu );
 				for ( auto I = vIds.size(); I--; ) {
 					if ( vIds[I] == iInsertBefore ) {

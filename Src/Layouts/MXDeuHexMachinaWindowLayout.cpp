@@ -1,5 +1,5 @@
 #include "MXDeuHexMachinaWindowLayout.h"
-//#include "../PE/MXDeusHexMachinaWindow.h"
+#include "../HexEditor/MXDeusHexMachinaWindow.h"
 #include "../Utilities/MXUtilities.h"
 #include "../Strings/MXStringDecoder.h"
 #include "MXLayoutMacros.h"
@@ -17,7 +17,7 @@ namespace mx {
 	// The layout for the PE Works window.
 	LSW_WIDGET_LAYOUT CDeusHexMachinaLayout::m_wlMainWindow[] = {
 		{
-			MX_PE_WORKS,									// ltType
+			MX_DEUS_HEX_MACHINA,							// ltType
 			MX_W_MAINWINDOW,								// wId
 			nullptr,										// lpwcClass
 			TRUE,											// bEnabled
@@ -28,8 +28,8 @@ namespace mx {
 			MX_W_H,											// dwHeight
 			WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS | DS_3DLOOK | DS_SETFONT,				// dwStyle
 			WS_EX_WINDOWEDGE | WS_EX_CONTROLPARENT,														// dwStyleEx
-			MX_MAKE_WCHAR( _T_D09DA91D_PE_Works ),			// pwcText
-			_LEN_D09DA91D,									// sTextLen
+			MX_MAKE_WCHAR( _T_BF7FD5A0_Deus_Hex_Machina ),	// pwcText
+			_LEN_BF7FD5A0,									// sTextLen
 			MX_W_NONE,										// dwParentId
 			/*
 			MX_PARENT_VCLEFT,						// pcLeftSizeExp
@@ -216,7 +216,7 @@ namespace mx {
 
 
 		mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
-		//CDeusHexMachinaWindow::PrepareDeusHexMachina();
+		CDeusHexMachinaWindow::PrepareWindow();
 		CWidget * pwThis = plmLayout->CreateWindowX( &vLayouts[0], MX_ELEMENTS( m_wlMainWindow ),
 			vMenus.size() ? &vMenus[0] : nullptr, vMenus.size(),
 			_pwParent );

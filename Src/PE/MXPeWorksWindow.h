@@ -4,6 +4,7 @@
 #include "../Strings/MXStringDecoder.h"
 #include "MXPeObject.h"
 #include "MXPeStructs.h"
+
 #include <ImageList/LSWImageList.h>
 #include <Images/LSWBitmap.h>
 #include <LSWWin.h>

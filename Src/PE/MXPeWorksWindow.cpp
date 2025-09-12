@@ -6,6 +6,7 @@
 #include "../Strings/MXStringDecoder.h"
 #include "../System/MXSystem.h"
 #include "../Utilities/MXUtilities.h"
+
 #include <Base/LSWBase.h>
 #include <Base/LSWWndClassEx.h>
 #include <Rebar/LSWRebar.h>

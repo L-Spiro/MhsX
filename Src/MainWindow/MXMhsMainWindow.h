@@ -4,6 +4,7 @@
 #include "../ExpEval/MXExpEvalWindow.h"
 #include "../FloatingPointStudio/MXFloatingPointStudioWindow.h"
 #include "../FoundAddresses/MXFoundAddressesWindow.h"
+#include "../HexEditor/MXDeusHexMachinaWindow.h"
 #include "../Layouts/MXMainWindowLayout.h"
 #include "../MemHack/MXWindowMemHack.h"
 #include "../Options/MXOptionsWindow.h"
@@ -204,6 +205,9 @@ namespace mx {
 			bool _bHasSign = true, bool _bHasExplicitBit = true,
 			uint16_t _uiExpBits = EE_FLOATX_DBL_EXP_BITS, uint16_t _uiManBits = EE_FLOATX_DBL_MAN_BITS );
 
+		// Shows the Deus Hex Machina window.
+		void								ShowDeusHexMachina();
+
 		// Shows a new search.
 		uint32_t							ShowNewDataTypeSearch();
 
@@ -341,16 +345,19 @@ namespace mx {
 		CFoundAddressesWindow *				m_pfaFoundAddresses;
 
 		// The Expression Evaluator dockable.
-		CExpEvalWindow *					m_peeExpEval;
+		CExpEvalWindow *					m_peeExpEval = nullptr;
 
 		// The PE Works window.
-		CPeWorksWindow *					m_ppwPeWorks;
+		CPeWorksWindow *					m_ppwPeWorks = nullptr;
 
 		// The String Theory window.
-		CStringTheoryWindow	*				m_pstwStringTheory;
+		CStringTheoryWindow	*				m_pstwStringTheory = nullptr;
 
 		// The Floating-Point Studio window.
-		CFloatingPointStudioWindow *		m_pfpsFloatingPointStudioWindow;
+		CFloatingPointStudioWindow *		m_pfpsFloatingPointStudioWindow = nullptr;
+
+		// The Deus Hex Machina window.
+		CDeusHexMachinaWindow *				m_pdhmwDeusHexMachinaWindow = nullptr;
 
 		// The Converter window.
 		CConverterWindow *					m_cwConverter;
