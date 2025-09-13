@@ -12,6 +12,7 @@
 #include <Rebar/LSWRebar.h>
 #include <ToolBar/LSWToolBar.h>
 #include <TreeListView/LSWTreeListView.h>
+
 #include <commdlg.h>
 #include <strsafe.h>
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../MXMhsX.h"
+#include "../Layouts/MXDeuHexMachinaWindowLayout.h"
 #include "../Strings/MXStringDecoder.h"
 
 #include <ImageList/LSWImageList.h>
@@ -39,11 +40,48 @@ namespace mx {
 		// Prepares to create the window.  Creates the atom if necessary.
 		static void									PrepareWindow();
 
+		// Gets the base tab control.
+		CTab *										GetTab() const;
+
+		// WM_INITDIALOG.
+		virtual LSW_HANDLED							InitDialog();
+
+		// WM_CLOSE.
+		virtual LSW_HANDLED							Close();
+
+		// WM_ERASEBKGND.
+		virtual LSW_HANDLED							EraseBkgnd( HDC _hDc );
+
+		// Translate a child's tooltip text.
+		virtual std::wstring						TranslateTooltip( const std::string &_sText ) { 
+			return CStringDecoder::DecodeToWString( _sText.c_str(), _sText.size() );
+		}
+
+		// Gets the status bar.
+		CStatusBar *								StatusBar();
+
+		// Gets the status bar.
+		const CStatusBar *							StatusBar() const;
+
+		// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
+		virtual const LSW_RECT						VirtualClientRect( const CWidget * pwChild ) const;
+
 
 	protected :
 		// == Members.
+		// Image list.
+		CImageList									m_iImages;
+		// Images.
+		CBitmap										m_bBitmaps[MX_I_TOTAL];
+		// Image mapping.
+		INT											m_iImageMap[MX_I_TOTAL];
+
 		// The main window class.
 		static ATOM									m_aAtom;
+
+
+	private :
+		typedef CDeusHexMachinaLayout				Layout;
 	};
 
 
