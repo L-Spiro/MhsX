@@ -487,6 +487,97 @@ namespace mx {
 		{ FALSE,		MX_M_VIEW_HIGHLIGHTING_AUTO_HIGHLIGHT_OPS,		TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_7D4510D2_Auto_Hightlight_Options, _LEN_7D4510D2 ) },
 	};
 
+	// View -> Ruler menu.
+	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miViewRulerMenu[] = {
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
+		{ FALSE,		MX_M_VIEW_RULER_SHOW,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_8A9236B5_Show__Ruler, _LEN_8A9236B5 ) },
+		{ FALSE,		MX_M_VIEW_RULER_SHOW_LABELS,					TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_38AD007B_Show__Labels, _LEN_38AD007B ) },
+		{ FALSE,		MX_M_VIEW_RULER_SHOW_ARROWS,					TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_57CBE724_Show__Arrows, _LEN_57CBE724 ) },
+		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
+		{ FALSE,		MX_M_VIEW_RULER_DISPLAY_FMT,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_95DC5454__Display_Format, _LEN_95DC5454 ) },
+	};
+
+	// View -> Ruler -> Display Format menu.
+	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miViewRulerFmtMenu[] = {
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
+		{ FALSE,		MX_M_VIEW_RULER_DISPLAY_FMT_HEX,				TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_9CC0956A__Hex, _LEN_9CC0956A ) },
+		{ FALSE,		MX_M_VIEW_RULER_DISPLAY_FMT_DEC,				TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_5217E1C9__Decimal, _LEN_5217E1C9 ) },
+	};
+
+	// View -> Mini Map menu.
+	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miViewMiniMapMenu[] = {
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
+		{ FALSE,		MX_M_VIEW_MINI_MAP_SHOW,						TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_D5B24A37__Show_Mini_Map, _LEN_D5B24A37 ) },
+		{ FALSE,		MX_M_VIEW_MINI_MAP_OPTIONS,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_88AE254B_Mini_Map__Options___, _LEN_88AE254B ) },
+	};
+
+	// View -> Status Bar menu.
+	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miViewStatusBarMenu[] = {
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_FILE_POS_FORMAT,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_12D71705_File__Position_Format, _LEN_12D71705 ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_FILE_SIZE_FORMAT,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_0A21046B_File__Size_Format, _LEN_0A21046B ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_SEL_SIZE_FORMAT,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_A0AF5D5A_S_election_Size_Format, _LEN_A0AF5D5A ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_BYTE_VALUE_FORMAT,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_75C0E37F_Byte__Value_Format, _LEN_75C0E37F ) },
+	};
+
+	// View -> Status Bar -> File Position Format menu.
+	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miViewStatusBarFilePosMenu[] = {
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_POS_FMT_BYTE_HEX,			TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_F8B0A24D_Byte_Number___Hex_, _LEN_F8B0A24D ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_POS_FMT_BYTE_DEC,			TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_A88B8F34_Byte_Number___Decimal_, _LEN_A88B8F34 ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_POS_FMT_BYTE_DEC_HEX,		TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_75D47148_Byte_Number__Decimal_He_x_, _LEN_75D47148 ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_POS_FMT_BYTE_OCT,			TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_113603DC_Byte_Number___Octal_, _LEN_113603DC ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_POS_FMT_LINE_DEC,			TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_FFAAE152__Line_Number__Decimal_, _LEN_FFAAE152 ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_POS_FMT_SHORT_HEX,			TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_18B5D2F2_S_hort_Number__Hex_, _LEN_18B5D2F2 ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_POS_FMT_SHORT_DEC,			TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_C1493B68_Sho_rt_Number__Decimal_, _LEN_C1493B68 ) },
+	};
+
+	// View -> Status Bar -> File Size Format menu.
+	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miViewStatusBarFileSizeMenu[] = {
+		
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_FILE_SIZE_FMT_BYTE_HEX,	TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_F8B0A24D_Byte_Number___Hex_, _LEN_F8B0A24D ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_FILE_SIZE_FMT_BYTE_DEC,	TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_A88B8F34_Byte_Number___Decimal_, _LEN_A88B8F34 ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_FILE_SIZE_FMT_BYTE_DEC_HEX,TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_75D47148_Byte_Number__Decimal_He_x_, _LEN_75D47148 ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_FILE_SIZE_FMT_BYTE_OCT,	TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_113603DC_Byte_Number___Octal_, _LEN_113603DC ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_FILE_SIZE_FMT_LINE_DEC,	TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_FFAAE152__Line_Number__Decimal_, _LEN_FFAAE152 ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_FILE_SIZE_FMT_SHORT_HEX,	TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_18B5D2F2_S_hort_Number__Hex_, _LEN_18B5D2F2 ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_FILE_SIZE_FMT_SHORT_DEC,	TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_C1493B68_Sho_rt_Number__Decimal_, _LEN_C1493B68 ) },
+		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_FILE_SIZE_FMT_COMMAS,		TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_97D96D25_Include_Com_mas, _LEN_97D96D25 ) },
+	};
+
+	// View -> Status Bar -> Selection Size Format menu.
+	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miViewStatusBarSelSizeMenu[] = {
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_SEL_SIZE_FMT_BYTE_HEX,		TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_F8B0A24D_Byte_Number___Hex_, _LEN_F8B0A24D ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_SEL_SIZE_FMT_BYTE_DEC,		TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_A88B8F34_Byte_Number___Decimal_, _LEN_A88B8F34 ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_SEL_SIZE_FMT_BYTE_DEC_HEX,	TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_75D47148_Byte_Number__Decimal_He_x_, _LEN_75D47148 ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_SEL_SIZE_FMT_BYTE_OCT,		TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_113603DC_Byte_Number___Octal_, _LEN_113603DC ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_SEL_SIZE_FMT_LINE_DEC,		TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_FFAAE152__Line_Number__Decimal_, _LEN_FFAAE152 ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_SEL_SIZE_FMT_SHORT_HEX,	TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_18B5D2F2_S_hort_Number__Hex_, _LEN_18B5D2F2 ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_SEL_SIZE_FMT_SHORT_DEC,	TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_C1493B68_Sho_rt_Number__Decimal_, _LEN_C1493B68 ) },
+	};
+
+	// View -> Status Bar -> Byte Value Format menu.
+	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miViewStatusBarByteValueMenu[] = {
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_BYTE_VAL_FMT_DEC,			TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_5217E1C9__Decimal, _LEN_5217E1C9 ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_BYTE_VAL_FMT_HEX,			TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_9CC0956A__Hex, _LEN_9CC0956A ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_BYTE_VAL_FMT_DEC_HEX,		TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_6CDE7BC0_De_cimal_Hex, _LEN_6CDE7BC0 ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_BYTE_VAL_FMT_DEC_HEX_BIN,	TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_AF2D9A1F_Decimal_Hex__Binary, _LEN_AF2D9A1F ) },
+		{ FALSE,		MX_M_VIEW_STATUS_BAR_BYTE_VAL_FMT_NONE,			TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_76455D54__None, _LEN_76455D54 ) },
+	};
+
+	// View -> Endian menu.
+	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miViewEndianMenu[] = {
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled
+		{ FALSE,		MX_M_VIEW_ENDIAN_LE,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_89DF1A9E__Little_Endian__Intel_, _LEN_89DF1A9E ) },
+		{ FALSE,		MX_M_VIEW_ENDIAN_BE,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_2381E8C6__Big_Endian__Motorola_, _LEN_2381E8C6 ) },
+		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
+		{ FALSE,		MX_M_VIEW_ENDIAN_TOGGLE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_8CE449C7__Toggle_Endian, _LEN_8CE449C7 ) },
+	};
+
 	// Format menu.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miFormatMenu[] = {
 		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
@@ -646,6 +737,69 @@ namespace mx {
 			MX_M_VIEW_HIGHLIGHTING,
 			MX_ELEMENTS( m_miViewHighlightMenu ),
 			m_miViewHighlightMenu
+		},
+		{
+			MX_M_RULER,
+			MX_M_VIEW,
+			MX_M_VIEW_RULER,
+			MX_ELEMENTS( m_miViewRulerMenu ),
+			m_miViewRulerMenu
+		},
+		{
+			MX_M_RULER_FMT,
+			MX_M_RULER,
+			MX_M_VIEW_RULER_DISPLAY_FMT,
+			MX_ELEMENTS( m_miViewRulerFmtMenu ),
+			m_miViewRulerFmtMenu
+		},
+		{
+			MX_M_MINI_MAP,
+			MX_M_VIEW,
+			MX_M_VIEW_MINI_MAP,
+			MX_ELEMENTS( m_miViewMiniMapMenu ),
+			m_miViewMiniMapMenu
+		},
+		{
+			MX_M_STATUS_BAR,
+			MX_M_VIEW,
+			MX_M_VIEW_STATUS_BAR,
+			MX_ELEMENTS( m_miViewStatusBarMenu ),
+			m_miViewStatusBarMenu
+		},
+		{
+			MX_M_STATUS_BAR_FILE_POS_FMT,
+			MX_M_STATUS_BAR,
+			MX_M_VIEW_STATUS_BAR_FILE_POS_FORMAT,
+			MX_ELEMENTS( m_miViewStatusBarFilePosMenu ),
+			m_miViewStatusBarFilePosMenu
+		},
+		{
+			MX_M_STATUS_BAR_FILE_SIZE_FMT,
+			MX_M_STATUS_BAR,
+			MX_M_VIEW_STATUS_BAR_FILE_SIZE_FORMAT,
+			MX_ELEMENTS( m_miViewStatusBarFileSizeMenu ),
+			m_miViewStatusBarFileSizeMenu
+		},
+		{
+			MX_M_STATUS_BAR_SEL_SIZE_FMT,
+			MX_M_STATUS_BAR,
+			MX_M_VIEW_STATUS_BAR_SEL_SIZE_FORMAT,
+			MX_ELEMENTS( m_miViewStatusBarSelSizeMenu ),
+			m_miViewStatusBarSelSizeMenu
+		},
+		{
+			MX_M_STATUS_BAR_BYTE_VALUE_FMT,
+			MX_M_STATUS_BAR,
+			MX_M_VIEW_STATUS_BAR_BYTE_VALUE_FORMAT,
+			MX_ELEMENTS( m_miViewStatusBarByteValueMenu ),
+			m_miViewStatusBarByteValueMenu
+		},
+		{
+			MX_M_ENDIAN,
+			MX_M_VIEW,
+			MX_M_VIEW_ENDIAN,
+			MX_ELEMENTS( m_miViewEndianMenu ),
+			m_miViewEndianMenu
 		},
 	};
 

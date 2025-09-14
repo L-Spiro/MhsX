@@ -21079,3 +21079,21 @@
 #define _DEC_S_4887B201__Pointers mx::CStringDecoder::DecodeToString( _T_4887B201__Pointers, _LEN_4887B201 )
 #define _DEC_WS_4887B201__Pointers mx::CStringDecoder::DecodeToWString( _T_4887B201__Pointers, _LEN_4887B201 )
 
+// Include Com&mas
+
+#define _T_97D96D25_Include_Com_mas "\xD1\x3C\x33\x07\x07\x2D\xF3\xE7\x13\x37\x36\xF4\xFF\xFC\x3A"
+#define _LEN_97D96D25 15
+#define _T_LEN_97D96D25_Include_Com_mas _T_97D96D25_Include_Com_mas, _LEN_97D96D25
+#define _DEC_97D96D25_Include_Com_mas( STR ) mx::CStringDecoder::Decode( _T_97D96D25_Include_Com_mas, _LEN_97D96D25, STR )
+#define _DEC_S_97D96D25_Include_Com_mas mx::CStringDecoder::DecodeToString( _T_97D96D25_Include_Com_mas, _LEN_97D96D25 )
+#define _DEC_WS_97D96D25_Include_Com_mas mx::CStringDecoder::DecodeToWString( _T_97D96D25_Include_Com_mas, _LEN_97D96D25 )
+
+// Byte Number (Decimal/He&x)
+
+#define _T_75D47148_Byte_Number__Decimal_He_x_ "\xCA\x47\x44\x00\xB2\x17\x03\x34\x32\x2D\x3B\xEE\xBA\xDF\x2C\xEB\x37\x3D\xFC\xFE\xF8\xD6\x2C\xF6\x40\xF2"
+#define _LEN_75D47148 26
+#define _T_LEN_75D47148_Byte_Number__Decimal_He_x_ _T_75D47148_Byte_Number__Decimal_He_x_, _LEN_75D47148
+#define _DEC_75D47148_Byte_Number__Decimal_He_x_( STR ) mx::CStringDecoder::Decode( _T_75D47148_Byte_Number__Decimal_He_x_, _LEN_75D47148, STR )
+#define _DEC_S_75D47148_Byte_Number__Decimal_He_x_ mx::CStringDecoder::DecodeToString( _T_75D47148_Byte_Number__Decimal_He_x_, _LEN_75D47148 )
+#define _DEC_WS_75D47148_Byte_Number__Decimal_He_x_ mx::CStringDecoder::DecodeToWString( _T_75D47148_Byte_Number__Decimal_He_x_, _LEN_75D47148 )
+
