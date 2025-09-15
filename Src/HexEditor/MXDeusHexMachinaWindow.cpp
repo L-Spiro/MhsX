@@ -15,12 +15,29 @@ namespace mx {
 
 	CDeusHexMachinaWindow::CDeusHexMachinaWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
 		lsw::CMainWindow( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(m_aAtom) ), _pwParent, _bCreateWidget, _hMenu, _ui64Data ) {
-		//CUtilities::PrintTotalGuiObjects( GR_GDIOBJECTS );
 		static const struct {
 			LPCWSTR				lpwsImageName;
 			DWORD				dwConst;
 		} sImages[] = {
-			{ L"52", MX_I_OPENFILE },
+			{ L"fn",			MX_I_NEW },
+			{ L"fo",			MX_I_OPENFILE },
+			{ L"fs",			MX_I_SAVE },
+			{ L"fsa",			MX_I_SAVEAS },
+			{ L"sa",			MX_I_SAVEALL },
+			{ L"fc",			MX_I_CLOSE },
+
+			{ L"cut",			MX_I_CUT },
+			{ L"copy",			MX_I_COPY },
+			{ L"paste",			MX_I_PASTE },
+			{ L"undo",			MX_I_UNDO },
+			{ L"redo",			MX_I_REDO },
+			
+			{ L"find",			MX_I_FIND },
+			{ L"goto",			MX_I_GOTO },
+			
+			{ L"calc",			MX_I_EXP },
+			{ L"comp",			MX_I_COMPARE },
+			{ L"his",			MX_I_HISTOGRAM },
 		};
 		m_iImages.Create( 24, 24, ILC_COLOR32, MX_I_TOTAL, MX_I_TOTAL );
 
@@ -52,7 +69,25 @@ namespace mx {
 #define MX_TOOL_STR( TXT )						0
 		const TBBUTTON bButtons[] = {
 			// iBitmap							idCommand									fsState				fsStyle			bReserved	dwData	iString
-			{ m_iImageMap[MX_I_OPENFILE],		Layout::MX_M_FILE_OPENFILE,					TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Open File" ) },
+			{ m_iImageMap[MX_I_NEW],			Layout::MX_M_FILE_NEW,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"New" ) },
+			{ m_iImageMap[MX_I_OPENFILE],		Layout::MX_M_FILE_OPENFILE,					TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Open" ) },
+			{ m_iImageMap[MX_I_SAVE],			Layout::MX_M_FILE_SAVE,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Save" ) },
+			{ m_iImageMap[MX_I_SAVEAS],			Layout::MX_M_FILE_SAVE_AS,					TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Save As" ) },
+			{ m_iImageMap[MX_I_SAVEALL],		Layout::MX_M_FILE_SAVE_ALL,					TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Save All" ) },
+			{ m_iImageMap[MX_I_CLOSE],			Layout::MX_M_FILE_CLOSE,					TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Close" ) },
+			{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
+			{ m_iImageMap[MX_I_CUT],			Layout::MX_M_EDIT_CUT,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Cut" ) },
+			{ m_iImageMap[MX_I_COPY],			Layout::MX_M_EDIT_COPY,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Copy" ) },
+			{ m_iImageMap[MX_I_PASTE],			Layout::MX_M_EDIT_PASTE,					TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Paste" ) },
+			{ m_iImageMap[MX_I_UNDO],			Layout::MX_M_EDIT_UNDO,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Undo" ) },
+			{ m_iImageMap[MX_I_REDO],			Layout::MX_M_EDIT_REDO,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Redo" ) },
+			{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
+			{ m_iImageMap[MX_I_FIND],			Layout::MX_M_FIND_FIND,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Find" ) },
+			{ m_iImageMap[MX_I_GOTO],			Layout::MX_M_FIND_GOTO,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Goto" ) },
+			{ -1,								0,											TBSTATE_ENABLED,	BTNS_SEP,		{ 0 },		0,		0 },
+			{ m_iImageMap[MX_I_EXP],			Layout::MX_M_TOOLS_EXPRESSION_EVALUATOR,	TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Expression Evaluator" ) },
+			{ m_iImageMap[MX_I_COMPARE],		Layout::MX_M_TOOLS_COMPARE_FILES,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Compare Files" ) },
+			{ m_iImageMap[MX_I_HISTOGRAM],		Layout::MX_M_TOOLS_HISTOGRAM,				TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Histogram/Entropy" ) },
 		};
 #undef MX_TOOL_STR
 
@@ -81,16 +116,26 @@ namespace mx {
 		CStatusBar * psbStatus = StatusBar();
 		if ( psbStatus ) {
 			const CStatusBar::LSW_STATUS_PART spParts[] = {
-				// Last status message.
-				//{ 450, TRUE },
-				// Current process ID.
-				//{ 450 + 48, TRUE },
-				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 32, TRUE },
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 523, TRUE },
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 192, TRUE },
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 168, TRUE },
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 132, TRUE },
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 96, TRUE },
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 48, TRUE },
 
 				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height(), TRUE },
 			};
 			psbStatus->SetParts( spParts, MX_ELEMENTS( spParts ) );
 		}
+
+
+		// ==== SPLITTER ==== //
+		CMultiSplitter * pwSplitter = MultiSplitter();
+		CMultiSplitter::LSW_DT_ATTACH aAttach;
+		aAttach.atAttachTo = CMultiSplitter::LSW_AT_RIGHT;
+		aAttach.dwId = pwSplitter->RootId();
+		aAttach.pwWidget = Tab();
+		pwSplitter->Attach( aAttach );
 
 		ForceSizeUpdate();
 		return LSW_H_CONTINUE;

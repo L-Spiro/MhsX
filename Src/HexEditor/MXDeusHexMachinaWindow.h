@@ -8,6 +8,7 @@
 #include <Images/LSWBitmap.h>
 #include <LSWWin.h>
 #include <MainWindow/LSWMainWindow.h>
+#include <MultiSplitter/LSWMultiSplitter.h>
 #include <StatusBar/LSWStatusBar.h>
 #include <Tab/LSWTab.h>
 #include <TreeListView/LSWTreeListView.h>
@@ -25,7 +26,25 @@ namespace mx {
 		// == Enumerations.
 		// Images.
 		enum MX_IMAGES {
+			MX_I_NEW,
 			MX_I_OPENFILE,
+			MX_I_SAVE,
+			MX_I_SAVEAS,
+			MX_I_SAVEALL,
+			MX_I_CLOSE,
+
+			MX_I_CUT,
+			MX_I_COPY,
+			MX_I_PASTE,
+			MX_I_UNDO,
+			MX_I_REDO,
+
+			MX_I_FIND,
+			MX_I_GOTO,
+
+			MX_I_EXP,
+			MX_I_COMPARE,
+			MX_I_HISTOGRAM,
 
 			MX_I_TOTAL,
 		};
@@ -65,6 +84,16 @@ namespace mx {
 
 		// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
 		virtual const LSW_RECT						VirtualClientRect( const CWidget * pwChild ) const;
+
+		// Gets the multi-splitter.
+		CMultiSplitter *							MultiSplitter() {
+			return static_cast<CMultiSplitter *>(FindChild( Layout::MX_W_MAIN_SPLITTER ));
+		}
+
+		// Gets the main tab.
+		CTab *										Tab() {
+			return static_cast<CTab *>(FindChild( Layout::MX_W_TABS ));
+		}
 
 
 	protected :

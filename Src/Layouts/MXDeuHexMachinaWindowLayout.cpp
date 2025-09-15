@@ -63,7 +63,7 @@ namespace mx {
 			nullptr, 0,										// pcWidthSizeExp
 			nullptr, 0,										// pcHeightSizeExp
 		},
-#if 1
+
 		{
 			LSW_LT_REBAR,									// ltType
 			MX_W_REBAR0,									// wId
@@ -106,7 +106,29 @@ namespace mx {
 			0,												// sTextLen
 			MX_W_MAINWINDOW,								// dwParentId
 		},
-#endif
+		{
+			LSW_LT_MULTISPLITTER,							// ltType
+			MX_W_MAIN_SPLITTER,								// wId
+			nullptr,										// lpwcClass
+			TRUE,											// bEnabled
+			FALSE,											// bActive
+			0,												// iLeft
+			0,												// iTop
+			255,											// dwWidth
+			110,											// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE,					// dwStyle
+			0,												// dwStyleEx
+			nullptr,										// pwcText
+			0,												// sTextLen
+			MX_W_MAINWINDOW,								// dwParentId
+
+			MX_PARENT_VCLEFT,								// pcLeftSizeExp
+			MX_PARENT_VCRIGHT,								// pcRightSizeExp
+			MX_PARENT_VCTOP,								// pcTopSizeExp
+			MX_PARENT_VCBOTTOM,								// pcBottomSizeExp
+			nullptr, 0,										// pcWidthSizeExp
+			nullptr, 0,										// pcHeightSizeExp
+		},
 		{
 			LSW_LT_TAB,										// ltType
 			MX_W_TABS,										// wId
@@ -121,7 +143,7 @@ namespace mx {
 			WS_EX_ACCEPTFILES,								// dwStyleEx
 			nullptr,										// pwcText
 			0,												// sTextLen
-			MX_W_MAINWINDOW,								// dwParentId
+			MX_W_MAIN_SPLITTER,								// dwParentId
 
 			MX_PARENT_VCLEFT,								// pcLeftSizeExp
 			MX_PARENT_VCRIGHT,								// pcRightSizeExp
@@ -581,7 +603,29 @@ namespace mx {
 	// Format menu.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miFormatMenu[] = {
 		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
-		{ FALSE,		MX_M_FIND_FIND,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_6E0D9949__Find___, _LEN_6E0D9949 ) },
+		{ FALSE,		MX_M_FORMAT_UPPERCASE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_5B53353D__Uppercase, _LEN_5B53353D ) },
+		{ FALSE,		MX_M_FORMAT_LOWERCASE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_3B0CDC1E__Lowercase, _LEN_3B0CDC1E ) },
+		{ FALSE,		MX_M_FORMAT_CAPITALIZE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_75171D41_C_apitalize, _LEN_75171D41 ) },
+		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
+		{ FALSE,		MX_M_FORMAT_DUPLICATE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_E087F80E_Du_plicate, _LEN_E087F80E ) },
+		{ FALSE,		MX_M_FORMAT_MOVE_LINES_UP,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_18339527_M_ove_Lines_Up, _LEN_18339527 ) },
+		{ FALSE,		MX_M_FORMAT_MOVE_LINES_DOWN,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_D182ED9C__Move_Lines_Down, _LEN_D182ED9C ) },
+		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
+		{ FALSE,		MX_M_FORMAT_TABIFY,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_CE1B0D5A__Tabify, _LEN_CE1B0D5A ) },
+		{ FALSE,		MX_M_FORMAT_UNTABIFY,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_291BFE29__Untabify, _LEN_291BFE29 ) },
+		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
+		{ FALSE,		MX_M_FORMAT_COMMENT_SELECTION,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_2905B988__Comment_Selection, _LEN_2905B988 ) },
+		{ FALSE,		MX_M_FORMAT_UNCOMMENT_SELECTION,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_D524AE68_Uncomment__Selection, _LEN_D524AE68 ) },
+		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
+		{ FALSE,		MX_M_FORMAT_INCREASE_LINE_INDENT,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_E013E416__Increase_Line_Indent, _LEN_E013E416 ) },
+		{ FALSE,		MX_M_FORMAT_DECREASE_LINE_INDENT,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_8A5CCCB5__Deccrease_Line_Indent, _LEN_8A5CCCB5 ) },
+		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
+		{ FALSE,		MX_M_FORMAT_DELETE_LINE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_25465489_Delete_Lin_e, _LEN_25465489 ) },
+		{ FALSE,		MX_M_FORMAT_DELETE_BLANK_LINES,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_15E9AFA2_Delete__Blank_Lines, _LEN_15E9AFA2 ) },
+		{ FALSE,		MX_M_FORMAT_DELETE_LEFT_WORD,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_F2328AA0_Deleft_Le_ft_Word, _LEN_F2328AA0 ) },
+		{ FALSE,		MX_M_FORMAT_DELETE_RIGHT_WORD,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_CBC886D3_Delete_Ri_ght_Word, _LEN_CBC886D3 ) },
+		{ FALSE,		MX_M_FORMAT_DELETE_TO_END_OF_LINE,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_0D9540DD_Delete_to_E_nd_of_Line, _LEN_0D9540DD ) },
+		{ FALSE,		MX_M_FORMAT_TRIM_TRAILING_WHITESPACE,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_D5AB7255_T_rim_Trailing_Whitespace, _LEN_D5AB7255 ) },
 	};
 
 	// Menus.
@@ -800,6 +844,15 @@ namespace mx {
 			MX_M_VIEW_ENDIAN,
 			MX_ELEMENTS( m_miViewEndianMenu ),
 			m_miViewEndianMenu
+		},
+
+		
+		{
+			MX_M_FORMAT,
+			MX_M_MENU_BAR,
+			MX_M_MENU_FORMAT,
+			MX_ELEMENTS( m_miFormatMenu ),
+			m_miFormatMenu
 		},
 	};
 

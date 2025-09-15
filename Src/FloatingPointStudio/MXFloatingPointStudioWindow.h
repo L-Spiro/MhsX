@@ -19,13 +19,6 @@ namespace mx {
 
 
 		// == Enumerations.
-		// Images.
-		enum MX_IMAGES {
-			MX_I_OPENFILE,
-
-			MX_I_TOTAL,
-		};
-
 		// Presets.
 		enum MX_PRESETS {
 			MX_P_FLOAT32,

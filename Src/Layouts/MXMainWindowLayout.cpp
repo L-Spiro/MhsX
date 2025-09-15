@@ -54,7 +54,7 @@ namespace mx {
 			nullptr, 0,								// pcWidthSizeExp
 			nullptr, 0,								// pcHeightSizeExp
 		},
-#if 1
+
 		{
 			LSW_LT_REBAR,							// ltType
 			MX_MWI_REBAR0,							// wId
@@ -98,7 +98,7 @@ namespace mx {
 			0,										// sTextLen
 			MX_MWI_MAINWINDOW,						// dwParentId
 		},
-#endif
+
 		{
 			LSW_LT_MULTISPLITTER,					// ltType
 			MX_MWI_SPLITTER,						// wId
@@ -145,7 +145,6 @@ namespace mx {
 		//	nullptr, 0,								// pcWidthSizeExp
 		//	nullptr, 0,								// pcHeightSizeExp
 		//},
-#if 1
 		{
 			LSW_LT_TREELISTVIEW,					// ltType
 			MX_MWI_STOREDADDRESSES,					// wId
@@ -169,116 +168,6 @@ namespace mx {
 			nullptr, 0,								// pcWidthSizeExp
 			nullptr, 0,								// pcHeightSizeExp
 		},
-#else
-		{
-			LSW_LT_LISTVIEW,						// ltType
-			MX_MWI_STOREDADDRESSES,					// wId
-			nullptr,								// lpwcClass
-			TRUE,									// bEnabled
-			FALSE,									// bActive
-			0,										// iLeft
-			0,										// iTop
-			255,									// dwWidth
-			110,									// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT,		// dwStyle
-			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,																				// dwStyleEx
-			nullptr,								// pwcText
-			0,										// sTextLen
-			MX_MWI_SPLITTER,						// dwParentId
-
-			MX_PARENT_VCLEFT,						// pcLeftSizeExp
-			MX_PARENT_VCRIGHT,						// pcRightSizeExp
-			MX_PARENT_VCTOP,						// pcTopSizeExp
-			MX_PARENT_VCBOTTOM,						// pcBottomSizeExp
-			nullptr, 0,								// pcWidthSizeExp
-			nullptr, 0,								// pcHeightSizeExp
-		},
-#endif
-
-
-#if 0
-		{
-			LSW_LT_LISTVIEW,						// ltType
-			MX_MWI_TEST0,							// wId
-			nullptr,								// lpwcClass
-			TRUE,									// bEnabled
-			FALSE,									// bActive
-			0,										// iLeft
-			0,										// iTop
-			255,									// dwWidth
-			110,									// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT,		// dwStyle
-			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,																				// dwStyleEx
-			nullptr,								// pwcText
-			0,										// sTextLen
-			MX_MWI_SPLITTER,						// dwParentId
-
-			MX_PARENT_VCLEFT,						// pcLeftSizeExp
-			MX_PARENT_VCRIGHT,						// pcRightSizeExp
-			MX_PARENT_VCTOP,						// pcTopSizeExp
-			MX_PARENT_VCBOTTOM,						// pcBottomSizeExp
-			nullptr, 0,								// pcWidthSizeExp
-			nullptr, 0,								// pcHeightSizeExp
-		},
-
-
-		{
-			LSW_LT_LISTVIEW,						// ltType
-			MX_MWI_TEST1,							// wId
-			nullptr,								// lpwcClass
-			TRUE,									// bEnabled
-			FALSE,									// bActive
-			0,										// iLeft
-			0,										// iTop
-			255,									// dwWidth
-			110,									// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT,		// dwStyle
-			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,																				// dwStyleEx
-			nullptr,								// pwcText
-			0,										// sTextLen
-			MX_MWI_SPLITTER,						// dwParentId
-
-			MX_PARENT_VCLEFT,						// pcLeftSizeExp
-			MX_PARENT_VCRIGHT,						// pcRightSizeExp
-			MX_PARENT_VCTOP,						// pcTopSizeExp
-			MX_PARENT_VCBOTTOM,						// pcBottomSizeExp
-			nullptr, 0,								// pcWidthSizeExp
-			nullptr, 0,								// pcHeightSizeExp
-		},
-#endif	// #if 0
-		/*{
-			LSW_LT_COMBOBOXEX,						// ltType
-			50,										// wId
-			WC_COMBOBOXEXW,						// lpwcClass
-			TRUE,									// bEnabled
-			FALSE,									// bActive
-			10,										// iLeft
-			30,										// iTop
-			250,										// dwWidth
-			150,										// dwHeight
-			WS_VISIBLE | WS_CHILD | WS_TABSTOP |
-				WS_VSCROLL | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | CCS_NORESIZE |
-				CBS_AUTOHSCROLL | CBS_DROPDOWNLIST,		// dwStyle
-			0,																		// dwStyleEx
-			nullptr,								// pwcText
-			0,										// sTextLen
-			MX_MWI_REBAR0,						// dwParentId
-		},*/
-		/*{
-			LSW_LT_LISTVIEW,						// ltType
-			MX_MWI_STOREDADDRESSES,					// wId
-			WC_LISTVIEWW,							// lpwcClass
-			TRUE,									// bEnabled
-			FALSE,									// bActive
-			64,										// iLeft
-			64,										// iTop
-			50,									// dwWidth
-			50,									// dwHeight
-			WS_CHILD | LVS_REPORT | LVS_EDITLABELS | WS_VISIBLE,		// dwStyle
-			0,										// dwStyleEx
-			nullptr,								// pwcText
-			MX_MWI_MAINWINDOW,						// dwParentId
-		},*/
 	};
 
 	// Menu bar items for the main window.
