@@ -1,5 +1,6 @@
 #include "MXDeuHexMachinaWindowLayout.h"
 #include "../HexEditor/MXDeusHexMachinaWindow.h"
+#include "../MemHack/MXWindowMemHack.h"
 #include "../Utilities/MXUtilities.h"
 #include "../Strings/MXStringDecoder.h"
 #include "MXLayoutMacros.h"
@@ -31,14 +32,6 @@ namespace mx {
 			MX_MAKE_WCHAR( _T_BF7FD5A0_Deus_Hex_Machina ),	// pwcText
 			_LEN_BF7FD5A0,									// sTextLen
 			MX_W_NONE,										// dwParentId
-			/*
-			MX_PARENT_VCLEFT,						// pcLeftSizeExp
-			MX_PARENT_VCRIGHT,						// pcRightSizeExp
-			MX_PARENT_VCTOP,						// pcTopSizeExp
-			MX_PARENT_VCBOTTOM,						// pcBottomSizeExp
-			nullptr, 0,								// pcWidthSizeExp
-			nullptr, 0,								// pcHeightSizeExp
-			*/
 		},
 		{
 			LSW_LT_STATUSBAR,								// ltType
@@ -114,8 +107,8 @@ namespace mx {
 			FALSE,											// bActive
 			0,												// iLeft
 			0,												// iTop
-			255,											// dwWidth
-			110,											// dwHeight
+			MX_W_W,											// dwWidth
+			MX_W_H,											// dwHeight
 			WS_CHILDWINDOW | WS_VISIBLE,					// dwStyle
 			0,												// dwStyleEx
 			nullptr,										// pwcText
@@ -152,29 +145,6 @@ namespace mx {
 			nullptr, 0,										// pcWidthSizeExp
 			nullptr, 0,										// pcHeightSizeExp
 		},
-		/*{
-			LSW_LT_TREELIST,						// ltType
-			MX_W_TESTTREELIST,					// wId
-			nullptr,								// lpwcClass
-			TRUE,									// bEnabled
-			FALSE,									// bActive
-			0,										// iLeft
-			0,										// iTop
-			255,									// dwWidth
-			110,									// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP,								// dwStyle
-			0,																		// dwStyleEx
-			nullptr,								// pwcText
-			0,										// sTextLen
-			MX_W_MAINWINDOW,						// dwParentId
-
-			MX_PARENT_VCLEFT,						// pcLeftSizeExp
-			MX_PARENT_VCRIGHT,						// pcRightSizeExp
-			MX_PARENT_VCTOP,						// pcTopSizeExp
-			MX_PARENT_VCBOTTOM,						// pcBottomSizeExp
-			nullptr, 0,								// pcWidthSizeExp
-			nullptr, 0,								// pcHeightSizeExp
-		},*/
 	};
 
 #undef MX_W_W
@@ -858,7 +828,7 @@ namespace mx {
 
 	// == Functions.
 	// Creates the PE Works window.
-	CWidget * CDeusHexMachinaLayout::CreateDeusHexMachinaWindow( CWidget * _pwParent ) {
+	CWidget * CDeusHexMachinaLayout::CreateDeusHexMachinaWindow( CWidget * _pwParent, CWindowMemHack * _pmhMemHack ) {
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
 		std::vector<CSecureString> sStrings;
 		std::vector<CSecureWString> sStringsW;
@@ -880,7 +850,7 @@ namespace mx {
 		CDeusHexMachinaWindow::PrepareWindow();
 		CWidget * pwThis = plmLayout->CreateWindowX( &vLayouts[0], MX_ELEMENTS( m_wlMainWindow ),
 			vMenus.size() ? &vMenus[0] : nullptr, vMenus.size(),
-			_pwParent );
+			_pwParent, static_cast<uint64_t>(reinterpret_cast<uintptr_t>(_pmhMemHack)) );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
 		CLayoutManager::CleanEncryptedMenu( vMenuItems, vMenuStrings );
 

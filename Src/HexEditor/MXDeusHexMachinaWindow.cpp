@@ -1,4 +1,5 @@
 #include "MXDeusHexMachinaWindow.h"
+#include "../MemHack/MXWindowMemHack.h"
 #include "../Utilities/MXUtilities.h"
 
 #include <Base/LSWWndClassEx.h>
@@ -14,7 +15,8 @@ namespace mx {
 	ATOM CDeusHexMachinaWindow::m_aAtom = 0;
 
 	CDeusHexMachinaWindow::CDeusHexMachinaWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
-		lsw::CMainWindow( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(m_aAtom) ), _pwParent, _bCreateWidget, _hMenu, _ui64Data ) {
+		lsw::CMainWindow( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(m_aAtom) ), _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
+		m_pmhMemHack( reinterpret_cast<CWindowMemHack *>(_ui64Data) ) {
 		static const struct {
 			LPCWSTR				lpwsImageName;
 			DWORD				dwConst;
@@ -141,26 +143,46 @@ namespace mx {
 		return LSW_H_CONTINUE;
 	}
 
-	// Prepares to create the window.  Creates the atom if necessary.
-	void CDeusHexMachinaWindow::PrepareWindow() {
-		if ( !m_aAtom ) {
-			lsw::CWndClassEx wceEx;
-			wceEx.SetInstance( lsw::CBase::GetThisHandle() );
-			WCHAR szStr[23];
-			mx::CUtilities::RandomString( szStr, MX_ELEMENTS( szStr ) );
-			wceEx.SetClassName( szStr );
-			wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(CTLCOLOR_DLG + 1) );
-			wceEx.SetWindPro( CWidget::WindowProc );
-			m_aAtom = lsw::CBase::RegisterClassExW( wceEx.Obj() );
+	// WM_COMMAND from control.
+	CWidget::LSW_HANDLED CDeusHexMachinaWindow::Command( WORD _wCtrlCode, WORD _wId, CWidget * _pwSrc ) {
+		if ( _wId >= Layout::MX_M_SHOW_RECENT_BASE ) {
+			_wId -= Layout::MX_M_SHOW_RECENT_BASE;
+			/*if ( _wId < m_pmhMemHack->Options().vProcessHistory.size() ) {
+				if ( m_pmhMemHack->Options().vProcessHistory[_wId].size() ) {
+					OpenProcessByPath( m_pmhMemHack->Options().vProcessHistory[_wId] );
+				}
+			}*/
+			return LSW_H_CONTINUE;
 		}
+		if ( _wId >= Layout::MX_M_USER_PROGRAMS_BASE && _wId < Layout::MX_M_SHOW_RECENT_BASE ) {
+			/*if ( !m_pmhMemHack ) { return LSW_H_CONTINUE; }
+			size_t stIdx = _wId - Layout::MX_M_USER_PROGRAMS_BASE;
+
+			m_pmhMemHack->ExecuteProgramByIdx( stIdx );*/
+			return LSW_H_CONTINUE;
+		}
+
+		switch ( _wId ) {
+			case Layout::MX_M_FILE_OPENFILE : {
+				Open();
+				break;
+			}
+			case Layout::MX_M_FILE_EXIT : {
+				Close();
+				break;
+			}
+		}
+		return LSW_H_CONTINUE;
+	}
+
+	// WM_COMMAND from menu.
+	CWidget::LSW_HANDLED CDeusHexMachinaWindow::MenuCommand( WORD _wId ) {
+		return Command( 0, _wId, NULL );
 	}
 
 	// WM_CLOSE.
 	CWidget::LSW_HANDLED CDeusHexMachinaWindow::Close() {
-		
-		//::EndDialog( Wnd(), 0 );
 		::DestroyWindow( Wnd() );
-		//CUtilities::PrintTotalGuiObjects( GR_GDIOBJECTS );
 		return LSW_H_HANDLED;
 	}
 
@@ -194,6 +216,82 @@ namespace mx {
 			rTemp.bottom -= rStatus.Height();
 		}
 		return rTemp;
+	}
+
+	// Prepares to create the window.  Creates the atom if necessary.
+	void CDeusHexMachinaWindow::PrepareWindow() {
+		if ( !m_aAtom ) {
+			lsw::CWndClassEx wceEx;
+			wceEx.SetInstance( lsw::CBase::GetThisHandle() );
+			WCHAR szStr[23];
+			mx::CUtilities::RandomString( szStr, MX_ELEMENTS( szStr ) );
+			wceEx.SetClassName( szStr );
+			wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(CTLCOLOR_DLG + 1) );
+			wceEx.SetWindPro( CWidget::WindowProc );
+			m_aAtom = lsw::CBase::RegisterClassExW( wceEx.Obj() );
+		}
+	}
+
+	// Performs a Save As operation.
+	void CDeusHexMachinaWindow::SaveAs() {
+	}
+
+	// Performs a Save operation.
+	void CDeusHexMachinaWindow::Save() {
+	}
+
+	// Performs an Open operation.
+	void CDeusHexMachinaWindow::Open() {
+		if ( m_pmhMemHack ) {
+			try {
+				OPENFILENAMEW ofnOpenFile = { sizeof( ofnOpenFile ) };
+				CSecureWString szFileName;
+				szFileName.resize( 0xFFFF + 2 );
+
+				CSecureWString wsFilter = _DEC_WS_6331FDE9_All_Files_______0____0;
+				ofnOpenFile.hwndOwner = Wnd();
+				ofnOpenFile.lpstrFilter = wsFilter.c_str();
+				ofnOpenFile.lpstrFile = szFileName.data();
+				ofnOpenFile.nMaxFile = DWORD( szFileName.size() );
+				ofnOpenFile.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST;
+				ofnOpenFile.lpstrInitialDir = m_pmhMemHack->Options().heHexEditorOptions.wsLastOpenFileDirectory.c_str();
+
+				if ( ::GetOpenFileNameW( &ofnOpenFile ) ) {
+					auto oOptions = m_pmhMemHack->Options();
+					oOptions.heHexEditorOptions.wsLastOpenFileDirectory = std::filesystem::path( ofnOpenFile.lpstrFile ).remove_filename().generic_wstring();
+						
+						
+					auto pPath = std::filesystem::path( ofnOpenFile.lpstrFile );
+					Open( pPath );
+					//std::vector<CFoundAddressBase *> vAdded;
+					//auto famMan = m_pmhMemHack->FoundAddressManager();
+					//if ( !famMan->LoadSettings( pPath, ::_wcsicmp( pPath.extension().c_str(), L".json" ) == 0, MemHack(), vAdded ) ) {
+					//	// Show error.
+					//}
+					//else {
+					//	// Add them to the listview.
+					//	for ( size_t I = 0; I < vAdded.size(); ++I ) {
+					//		if ( !CUtilities::AddFoundAddressToTreeListView( ptTab, vAdded[I], nullptr ) ) {
+					//			// If it couldn't be added to the tree then it can't be addressed.
+					//			famMan->Delete( vAdded[I]->Id() );
+					//		}
+					//	}
+					//}
+					m_pmhMemHack->SetOptions( oOptions );
+				}
+			}
+			catch ( ... ) {}
+		}
+	}
+
+	// Performs an Open operation.
+	void CDeusHexMachinaWindow::Open( const std::filesystem::path &_pPath ) {
+		try {
+			auto ptTab = Tab();
+			if ( ptTab ) {
+			}
+		}
+		catch ( ... ) {}
 	}
 
 }	// namespace mx

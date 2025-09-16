@@ -707,7 +707,7 @@ namespace mx {
 	// Shows the Deus Hex Machina window.
 	void CMhsMainWindow::ShowDeusHexMachina() {
 		if ( !m_pdhmwDeusHexMachinaWindow ) {
-			m_pdhmwDeusHexMachinaWindow = static_cast<CDeusHexMachinaWindow *>(CDeusHexMachinaLayout::CreateDeusHexMachinaWindow( nullptr ));
+			m_pdhmwDeusHexMachinaWindow = static_cast<CDeusHexMachinaWindow *>(CDeusHexMachinaLayout::CreateDeusHexMachinaWindow( nullptr, m_pmhMemHack ));
 			m_pdhmwDeusHexMachinaWindow->SetWidgetParent( this );
 		}
 	}
@@ -1584,9 +1584,6 @@ namespace mx {
 						
 						
 						auto pPath = std::filesystem::path( ofnOpenFile.lpstrFile );
-						if ( !pPath.has_extension() ) {
-							pPath += ".json";
-						}
 						std::vector<CFoundAddressBase *> vAdded;
 						auto famMan = m_pmhMemHack->FoundAddressManager();
 						if ( !famMan->LoadSettings( pPath, ::_wcsicmp( pPath.extension().c_str(), L".json" ) == 0, MemHack(), vAdded ) ) {

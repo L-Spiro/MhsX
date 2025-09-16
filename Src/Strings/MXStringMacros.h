@@ -21097,3 +21097,12 @@
 #define _DEC_S_75D47148_Byte_Number__Decimal_He_x_ mx::CStringDecoder::DecodeToString( _T_75D47148_Byte_Number__Decimal_He_x_, _LEN_75D47148 )
 #define _DEC_WS_75D47148_Byte_Number__Decimal_He_x_ mx::CStringDecoder::DecodeToWString( _T_75D47148_Byte_Number__Decimal_He_x_, _LEN_75D47148 )
 
+// All Files (*.*)\0*.*\0
+
+#define _T_6331FDE9_All_Files_______0____0 "\xC9\x3A\x3C\xBB\xD8\x32\xFA\x2C\x43\xE8\xF1\xF8\xC0\xC5\xF0\x88\xF8\xFE\xC5\x92"
+#define _LEN_6331FDE9 20
+#define _T_LEN_6331FDE9_All_Files_______0____0 _T_6331FDE9_All_Files_______0____0, _LEN_6331FDE9
+#define _DEC_6331FDE9_All_Files_______0____0( STR ) mx::CStringDecoder::Decode( _T_6331FDE9_All_Files_______0____0, _LEN_6331FDE9, STR )
+#define _DEC_S_6331FDE9_All_Files_______0____0 mx::CStringDecoder::DecodeToString( _T_6331FDE9_All_Files_______0____0, _LEN_6331FDE9 )
+#define _DEC_WS_6331FDE9_All_Files_______0____0 mx::CStringDecoder::DecodeToWString( _T_6331FDE9_All_Files_______0____0, _LEN_6331FDE9 )
+

@@ -105,6 +105,10 @@ namespace mx {
 		std::vector<COLORREF>			vEditColorHistory;
 
 		std::vector<CSecureWString>		vProcessHistory;
+
+		struct MX_HEX_EDITOR {
+			CSecureWString				wsLastOpenFileDirectory;
+		}								heHexEditorOptions;
 	};
 
 	struct MX_FLOAT_STUDIO_OPTIONS {

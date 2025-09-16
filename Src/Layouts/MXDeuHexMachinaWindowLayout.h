@@ -8,6 +8,8 @@ using namespace lsw;
 
 namespace mx {
 
+	class CWindowMemHack;
+
 	class CDeusHexMachinaLayout {
 	public :
 		// == Enumerations.
@@ -347,12 +349,18 @@ namespace mx {
 			MX_M_TOOLS_DISASSEMBLER,
 			MX_M_TOOLS_BASE_CONVERTER,
 			MX_M_TOOLS_OPTIONS,
+
+
+
+
+			MX_M_USER_PROGRAMS_BASE,
+			MX_M_SHOW_RECENT_BASE				= MX_M_USER_PROGRAMS_BASE + 200,
 		};
 
 
 		// == Functions.
 		// Creates the PE Works window.
-		static CWidget *						CreateDeusHexMachinaWindow( CWidget * _pwParent );
+		static CWidget *						CreateDeusHexMachinaWindow( CWidget * _pwParent, CWindowMemHack * _pmhMemHack );
 
 
 	protected :

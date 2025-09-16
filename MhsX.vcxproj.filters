@@ -601,6 +601,9 @@
     <ClCompile Include="Src\HexEditor\MXDeusHexMachinaWindow.cpp">
       <Filter>Source Files\HexEditor</Filter>
     </ClCompile>
+    <ClCompile Include="Src\HexEditor\MXHexEditorControl.cpp">
+      <Filter>Source Files\HexEditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -936,6 +939,9 @@
       <Filter>Header Files\Layouts</Filter>
     </ClInclude>
     <ClInclude Include="Src\HexEditor\MXDeusHexMachinaWindow.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXHexEditorControl.h">
       <Filter>Header Files\HexEditor</Filter>
     </ClInclude>
   </ItemGroup>

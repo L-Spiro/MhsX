@@ -13,9 +13,13 @@
 #include <Tab/LSWTab.h>
 #include <TreeListView/LSWTreeListView.h>
 
+#include <filesystem>
+
 using namespace lsw;
 
 namespace mx {
+	
+	class CWindowMemHack;
 
 	class CDeusHexMachinaWindow : public lsw::CMainWindow {
 	public :
@@ -56,14 +60,17 @@ namespace mx {
 
 
 		// == Functions.
-		// Prepares to create the window.  Creates the atom if necessary.
-		static void									PrepareWindow();
-
 		// Gets the base tab control.
 		CTab *										GetTab() const;
 
 		// WM_INITDIALOG.
 		virtual LSW_HANDLED							InitDialog();
+
+		// WM_COMMAND from control.
+		virtual LSW_HANDLED							Command( WORD _wCtrlCode, WORD _wId, CWidget * _pwSrc );
+
+		// WM_COMMAND from menu.
+		virtual LSW_HANDLED							MenuCommand( WORD _wId );
 
 		// WM_CLOSE.
 		virtual LSW_HANDLED							Close();
@@ -94,6 +101,9 @@ namespace mx {
 		CTab *										Tab() {
 			return static_cast<CTab *>(FindChild( Layout::MX_W_TABS ));
 		}
+		
+		// Prepares to create the window.  Creates the atom if necessary.
+		static void									PrepareWindow();
 
 
 	protected :
@@ -105,8 +115,25 @@ namespace mx {
 		// Image mapping.
 		INT											m_iImageMap[MX_I_TOTAL];
 
+		// The MHS object where we can access the current process and our options.
+		CWindowMemHack *							m_pmhMemHack = nullptr;
+
 		// The main window class.
 		static ATOM									m_aAtom;
+
+
+		// == Functions.
+		// Performs a Save As operation.
+		void										SaveAs();
+
+		// Performs a Save operation.
+		void										Save();
+
+		// Performs an Open operation.
+		void										Open();
+
+		// Performs an Open operation.
+		void										Open( const std::filesystem::path &_pPath );
 
 
 	private :

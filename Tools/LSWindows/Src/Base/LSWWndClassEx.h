@@ -9,7 +9,7 @@ namespace lsw {
 	public :
 		CWndClassEx( WNDPROC _lpfnWndProc = nullptr,
 			LPCWSTR _lpszClassName = nullptr,
-			UINT _style = CS_DBLCLKS | CS_OWNDC | CS_HREDRAW | CS_VREDRAW,
+			UINT _uiStyle = CS_DBLCLKS | CS_OWNDC | CS_HREDRAW | CS_VREDRAW,
 			HINSTANCE _hInstance = CBase::GetThisHandle(),
 			HICON _hIcon = nullptr,
 			HCURSOR _hCursor = ::LoadCursor( NULL, IDC_ARROW ),	// Not ::LoadCursorW().
@@ -21,7 +21,7 @@ namespace lsw {
 			) :
 			m_wceWndClsEx( {
 				sizeof( m_wceWndClsEx ),		// cbSize
-				_style,
+				_uiStyle,
 				_lpfnWndProc,
 				_cbClsExtra,
 				_cbWndExtra,
@@ -52,7 +52,7 @@ namespace lsw {
 		CWndClassEx &								SetXByteAlignClient( BOOL _bVal ) { LSW_FLAG( CS_BYTEALIGNCLIENT ); return (*this); }
 		CWndClassEx &								SetXByteAlignWindow( BOOL _bVal ) { LSW_FLAG( CS_BYTEALIGNWINDOW ); return (*this); }
 		CWndClassEx &								SetGlobalClass( BOOL _bVal ) { LSW_FLAG( CS_GLOBALCLASS ); return (*this); }	// Allows DLL's to use your window type.
-		CWndClassEx &								SetStyle( UINT _style ) { m_wceWndClsEx.style = _style; return (*this); }
+		CWndClassEx &								SetStyle( UINT _uiStyle ) { m_wceWndClsEx.style = _uiStyle; return (*this); }
 
 #undef LSW_FLAG
 

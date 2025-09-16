@@ -2332,3 +2332,4 @@
 "&Help Topics"
 "&About"
 
+"All Files (*.*)\0*.*\0"
