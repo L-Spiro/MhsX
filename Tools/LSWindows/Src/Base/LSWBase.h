@@ -130,6 +130,9 @@ namespace lsw {
 		// Gets the default status-bar font.
 		static HFONT								StatusBarFont() { return m_hStatusFont; }
 
+		// Non-client metrics.
+		static NONCLIENTMETRICSW					NonClientMetrics() { return m_ncmNonClientMetrics; }
+
 		// =======================================
 		// Debug.
 		// =======================================

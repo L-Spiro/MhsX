@@ -9,6 +9,7 @@
 #include "../FoundAddresses/MXFoundAddressesWindow.h"
 #include "../FoundAddresses/MXMoveAddressesWindow.h"
 #include "../HexEditor/MXDeusHexMachinaWindow.h"
+#include "../HexEditor/MXHexEditorControl.h"
 #include "../Layouts/MXLayoutMacros.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../OpenProcess/MXOpenProcessWindow.h"
@@ -119,6 +120,9 @@ namespace mx {
 			}
 			case MX_DEUS_HEX_MACHINA : {
 				return new CDeusHexMachinaWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
+			case MX_HEX_CONTROL : {
+				return new CHexEditorControl( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );

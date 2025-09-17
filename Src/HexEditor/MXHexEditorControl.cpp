@@ -13,10 +13,34 @@ namespace mx {
 	ATOM CHexEditorControl::m_aAtom = 0;
 
 	CHexEditorControl::CHexEditorControl( const lsw::LSW_WIDGET_LAYOUT &_wlLayout, lsw::CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
-		CParent( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ) {
+		CParent( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(m_aAtom) ).AddStyle( WS_VSCROLL | WS_HSCROLL ).AddStyleEx( WS_EX_CLIENTEDGE ).RemoveStyleEx( WS_EX_WINDOWEDGE ), _pwParent, _bCreateWidget, _hMenu, _ui64Data ) {
 	}
 
 	// == Functions.
+	// // WM_NCCREATE.
+	lsw::CWidget::LSW_HANDLED CHexEditorControl::NcCreate( const CREATESTRUCTW &_csCreateParms ) {
+		m_iCxChar = m_iCyChar = 0;
+		m_iClientW = m_iClientH = 0;
+		m_uiBytesPerRow = 16;
+		/*m_pData = nullptr;
+		m_ui64Size = 0ULL;*/
+		m_iVPos = 0;
+		m_iHPos = 0;
+		m_iPageLines = m_iPageCols = 1;
+		m_iAddrDigits = 8;
+		//SetState( _hWnd, ps );
+
+		ChooseDefaultFont();
+		ComputeFontMetrics();
+
+		return CParent::NcCreate( _csCreateParms );
+	}
+
+	// WM_NCDESTROY.
+	lsw::CWidget::LSW_HANDLED CHexEditorControl::NcDestroy() {
+		return CParent::NcDestroy();
+	}
+
 	// Setting the HWND after the control has been created.
 	void CHexEditorControl::InitControl( HWND _hWnd ) {
 		CParent::InitControl( _hWnd );

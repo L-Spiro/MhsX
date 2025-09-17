@@ -404,7 +404,7 @@ namespace lsw {
 
 
 
-		LOGFONTW lf =  { 0 };
+		LOGFONTW lf = { 0 };
 		lf.lfCharSet = SYMBOL_CHARSET;
 		// Avoiding searchable strings.
 		//::wcscpy_s( lf.lfFaceName, LSW_COUNT_OF( lf.lfFaceName ), L"Webdings" );

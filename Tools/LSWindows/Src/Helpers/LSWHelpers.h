@@ -179,6 +179,47 @@ namespace lsw {
 		HANDLE								hHandle;
 	};
 
+	struct LSW_FONT {
+		LSW_FONT() : hFont( NULL ) {}
+		LSW_FONT( HFONT _hFont ) : hFont( _hFont ) {}
+		~LSW_FONT() {
+			Reset();
+		}
+
+		LSW_FONT &							operator = ( const HFONT _hFont ) {
+			Reset();
+			hFont = _hFont;
+			bDeleteIt = false;
+			return (*this);
+		}
+
+
+		// == Functions.
+		HFONT								CreateFontIndirectW( const LOGFONTW * _lplfFont ) {
+			Reset();
+			hFont = ::CreateFontIndirectW( _lplfFont );
+			bDeleteIt = true;
+			return hFont;
+		}
+
+		VOID								Reset() {
+			if ( Valid() && bDeleteIt ) {
+				::DeleteObject( hFont );
+			}
+			bDeleteIt = false;
+			hFont = NULL;
+		}
+
+		inline BOOL							Valid() const { return Valid( hFont ); }
+
+		static inline  BOOL					Valid( HANDLE _hFont ) { return _hFont != NULL; }
+
+
+		// == Members.
+		HFONT								hFont = NULL;
+		bool								bDeleteIt = false;
+	};
+
 	struct LSW_HMODULE {
 		LSW_HMODULE() : hHandle( NULL ) {}
 		LSW_HMODULE( LPCSTR _sPath ) :
@@ -296,16 +337,19 @@ namespace lsw {
 		LSW_SELECTOBJECT( HDC _hDc, HGDIOBJ _hgdioObj, bool _bDeleteNewObjAfter = false ) :
 			hDc( _hDc ),
 			hCur( _hgdioObj ),
-			hPrev( ::SelectObject( _hDc, _hgdioObj ) ),
+			hPrev( NULL ),
 			bDeleteAfter( _bDeleteNewObjAfter ) {
+
+			if ( _hgdioObj ) {
+				hPrev = ::SelectObject( _hDc, _hgdioObj );
+			}
 		}
 		~LSW_SELECTOBJECT() {
-			if ( bDeleteAfter ) {
+			if ( hPrev ) {
 				::SelectObject( hDc, hPrev );
-				::DeleteObject( hCur );
 			}
-			else {
-				::SelectObject( hDc, hPrev );
+			if ( bDeleteAfter && NULL != hCur ) {
+				::DeleteObject( hCur );
 			}
 		}
 

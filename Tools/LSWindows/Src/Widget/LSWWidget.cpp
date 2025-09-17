@@ -452,6 +452,25 @@ namespace lsw {
 		return LSW_H_CONTINUE;
 	}
 
+	/**
+	 * Handles the WM_DPICHANGED message.
+	 * 
+	 * \param _wX The X-axis value of the new dpi of the window.
+	 * \param _wY The Y-axis value of the new dpi of the window.
+	 * \param _pRect A pointer to a RECT structure that provides a suggested size and position of the current window scaled for the new DPI. The expectation is that apps will reposition and resize windows based on the suggestions provided by lParam when handling this message.
+	 * \return Returns an LSW_HANDLED code.
+	 **/
+	CWidget::LSW_HANDLED CWidget::DpiChanged( WORD /*_wX*/, WORD /*_wY*/, LPRECT _pRect ) {
+		::SetWindowPos( Wnd(),
+            NULL,
+            _pRect->left,
+            _pRect->top,
+            _pRect->right - _pRect->left,
+            _pRect->bottom - _pRect->top,
+            SWP_NOZORDER | SWP_NOACTIVATE );
+		return LSW_H_CONTINUE;
+	}
+
 	// == Functions.
 	// Remove a child.
 	void CWidget::RemoveChild( const CWidget * _pwChild ) {
@@ -1032,6 +1051,11 @@ namespace lsw {
 				pmwThis = reinterpret_cast<CWidget *>(pcsCreate->lpCreateParams);
 				if ( pmwThis ) {
 					pmwThis->m_hWnd = _hWnd;
+
+					HDC hDc = ::GetDC( _hWnd );
+					pmwThis->m_wDpiX = static_cast<WORD>(::GetDeviceCaps( hDc, LOGPIXELSX ));
+					pmwThis->m_wDpiY = static_cast<WORD>(::GetDeviceCaps( hDc, LOGPIXELSY ));
+					::ReleaseDC( _hWnd, hDc );
 
 					// ControlSetup() called by the layout manager because WM_NCCREATE is inside a constructor.
 
@@ -1993,6 +2017,35 @@ namespace lsw {
 			case WM_SYSCOMMAND : {
 				LSW_HANDLED hHandled = pmwThis->SysCommand( static_cast<WORD>(_wParam), GET_X_LPARAM( _lParam ), GET_Y_LPARAM( _lParam ) );
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
+
+			// =======================================
+			// Fonts.
+			// =======================================
+			case WM_DPICHANGED : {
+				if ( pmwThis ) {
+					pmwThis->m_wDpiX = LOWORD( _wParam );
+					pmwThis->m_wDpiY = HIWORD( _wParam );
+
+					LSW_HANDLED hHandled = pmwThis->DpiChanged( pmwThis->m_wDpiX, pmwThis->m_wDpiY, reinterpret_cast<LPRECT>(_lParam) );
+					// If an application processes this message, it should return zero.
+					if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				}
+				break;
+			}
+			case WM_SETFONT : {
+				if ( pmwThis ) {
+					pmwThis->SetFont( reinterpret_cast<HFONT>(_wParam) );
+				}
+				break;
+			}
+			case WM_GETFONT : {
+				if ( pmwThis ) {
+					auto hFont = pmwThis->GetFont();
+					if ( reinterpret_cast<HFONT>(-1) == hFont ) { break; }
+					LSW_RET( reinterpret_cast<LRESULT>(hFont), reinterpret_cast<LRESULT>(hFont) );
+				}
 				break;
 			}
 		}

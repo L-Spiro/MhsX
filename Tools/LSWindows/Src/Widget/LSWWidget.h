@@ -515,6 +515,10 @@ namespace lsw {
 		BOOL								m_bInDestructor;
 		/** Custom ID. */
 		WORD								m_wId;
+		/** The X DPI. */
+		WORD								m_wDpiX = USER_DEFAULT_SCREEN_DPI;
+		/** The Y DPI. */
+		WORD								m_wDpiY = USER_DEFAULT_SCREEN_DPI;
 		/** Tracks whether the control has focus or not. */
 		bool								m_bHasFocus;
 
@@ -574,6 +578,30 @@ namespace lsw {
 
 		// WM_GETMINMAXINFO.
 		virtual LSW_HANDLED					GetMinMaxInfo( MINMAXINFO * /*_pmmiInfo*/ ) { return LSW_H_CONTINUE; }
+
+		/**
+		 * Handles the WM_DPICHANGED message.
+		 * 
+		 * \param _wX The X-axis value of the new dpi of the window.
+		 * \param _wY The Y-axis value of the new dpi of the window.
+		 * \param _pRect A pointer to a RECT structure that provides a suggested size and position of the current window scaled for the new DPI. The expectation is that apps will reposition and resize windows based on the suggestions provided by lParam when handling this message.
+		 * \return Returns an LSW_HANDLED code.
+		 **/
+		virtual LSW_HANDLED					DpiChanged( WORD _wX, WORD _wY, LPRECT _pRect );
+
+		/**
+		 * The WM_SETFONT handler.
+		 *
+		 * \param _hFont The new font being set.
+		 */
+		virtual void						SetFont( HFONT /*_hFont*/ ) {}
+
+		/**
+		 * The WM_GETFONT handler.
+		 *
+		 * \param Returns -1 to perform the default routine, otherwise NULL or a handle to a font.
+		 */
+		virtual HFONT						GetFont() { return reinterpret_cast<HFONT>(-1); }
 
 		/**
 		 * Handles the WM_COMMAND message.
