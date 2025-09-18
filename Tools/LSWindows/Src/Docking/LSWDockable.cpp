@@ -427,10 +427,10 @@ namespace lsw {
 		lf.lfStrikeOut = FALSE;
 		lf.lfUnderline = FALSE;
 		lf.lfPitchAndFamily = VARIABLE_PITCH | FF_ROMAN;
-		HFONT hFont = ::CreateFontIndirectW( &lf );
-
+		lsw::LSW_FONT hFont;// = ::CreateFontIndirectW( &lf );
+		hFont.CreateFontIndirectW( &lf );
 		{
-			LSW_SELECTOBJECT soBrushOrig( bpPaint.hDc, hFont );	// Destructor sets the original brush back.
+			LSW_SELECTOBJECT soBrushOrig( bpPaint.hDc, hFont.hFont );	// Destructor sets the original brush back.
 			ABCFLOAT abcfWidth;
 			::GetCharABCWidthsFloatA( bpPaint.hDc, 'r', 'r', &abcfWidth );
 			INT iCharWidth = static_cast<INT>(abcfWidth.abcfA + abcfWidth.abcfB + abcfWidth.abcfC);
@@ -463,7 +463,7 @@ namespace lsw {
 			rChar.right = rCliRight;
 			::ExtTextOutA( bpPaint.hDc, rChar.left, rChar.top, ETO_OPAQUE | ETO_CLIPPED, &rChar, "", 0, NULL );
 		}
-		::DeleteObject( hFont );
+		//::DeleteObject( hFont );
 
 		return LSW_H_HANDLED;
 	}

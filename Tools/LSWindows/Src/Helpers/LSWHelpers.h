@@ -180,13 +180,13 @@ namespace lsw {
 	};
 
 	struct LSW_FONT {
-		LSW_FONT() : hFont( NULL ) {}
-		LSW_FONT( HFONT _hFont ) : hFont( _hFont ) {}
+		LSW_FONT() : hFont( NULL ), bDeleteIt( false ) {}
+		LSW_FONT( HFONT _hFont ) : hFont( _hFont ), bDeleteIt( false ) {}
 		~LSW_FONT() {
 			Reset();
 		}
 
-		LSW_FONT &							operator = ( const HFONT _hFont ) {
+		LSW_FONT &							operator = ( HFONT _hFont ) {
 			Reset();
 			hFont = _hFont;
 			bDeleteIt = false;

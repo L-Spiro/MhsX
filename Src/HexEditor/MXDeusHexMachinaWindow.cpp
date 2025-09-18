@@ -1,4 +1,6 @@
 #include "MXDeusHexMachinaWindow.h"
+#include "../HexEditor/MXHexEditorControl.h"
+#include "../Layouts/MXLayoutManager.h"
 #include "../MemHack/MXWindowMemHack.h"
 #include "../Utilities/MXUtilities.h"
 
@@ -289,6 +291,65 @@ namespace mx {
 		try {
 			auto ptTab = Tab();
 			if ( ptTab ) {
+				CHexEditorControl::PrepareControl();
+				
+
+				CSecureString sLeftSizeExp;
+				mx::CStringDecoder::Decode( _T_2762F803_____P__VCL, _LEN_2762F803, sLeftSizeExp );
+				CSecureString sRightSizeExp;
+				mx::CStringDecoder::Decode( _T_DD6DC560_____P__VCR, _LEN_DD6DC560, sRightSizeExp );
+				CSecureString sTopSizeExp;
+				mx::CStringDecoder::Decode( _T_340E6055_____P__VCT, _LEN_340E6055, sTopSizeExp );
+				CSecureString sBottomSizeExp;
+				mx::CStringDecoder::Decode( _T_C0DAD504_____P__VCB, _LEN_C0DAD504, sBottomSizeExp );
+				LSW_WIDGET_LAYOUT wlLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->FixLayout( LSW_WIDGET_LAYOUT{
+					MX_HEX_CONTROL,									// ltType
+					static_cast<WORD>(Layout::MX_W_TAB_START + ptTab->GetItemCount()),	// wId
+					nullptr,										// lpwcClass
+					TRUE,											// bEnabled
+					TRUE,											// bActive
+					0,												// iLeft
+					0,												// iTop
+					0,												// dwWidth
+					0,												// dwHeight
+					WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP,		// dwStyle
+					0,												// dwStyleEx
+					nullptr,										// pwcText
+					0,												// sTextLen
+					static_cast<DWORD>(ptTab->Id()),				// dwParentId
+
+//#if 0
+					sLeftSizeExp.c_str(), 0,						// pcLeftSizeExp
+					sRightSizeExp.c_str(), 0,						// pcRightSizeExp
+					sTopSizeExp.c_str(), 0,							// pcTopSizeExp
+					sBottomSizeExp.c_str(), 0,						// pcBottomSizeExp
+					nullptr, 0,										// pcWidthSizeExp
+					nullptr, 0,										// pcHeightSizeExp
+//#endif
+				} );
+				auto phecHexControl = static_cast<CHexEditorControl *>(static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->CreateWidget( wlLayout, ptTab, TRUE, NULL, 0 ));
+				if ( !phecHexControl ) {
+					//delete tTab.ppoPeObject;
+					return;
+				}
+				phecHexControl->InitControl( phecHexControl->Wnd() );
+
+				auto wsTabname = _pPath.filename().generic_wstring();
+				TCITEMW tciItem = { 0 };
+				tciItem.mask = TCIF_TEXT;
+				tciItem.pszText = const_cast<LPWSTR>(wsTabname.c_str());
+
+
+
+				if ( ptTab->InsertItem( 0, &tciItem, phecHexControl ) == -1 ) {
+					delete phecHexControl;
+					return;
+				}
+				LSW_RECT rInternalSize = ptTab->WindowRect().ScreenToClient( ptTab->Wnd() );
+				ptTab->AdjustRect( FALSE, &rInternalSize );
+				::MoveWindow( phecHexControl->Wnd(), rInternalSize.left, rInternalSize.top, rInternalSize.Width(), rInternalSize.Height(), TRUE );
+		
+				//m_vTabs.insert( m_vTabs.begin(), tTab );
 			}
 		}
 		catch ( ... ) {}

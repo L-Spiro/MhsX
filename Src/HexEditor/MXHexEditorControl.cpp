@@ -13,7 +13,7 @@ namespace mx {
 	ATOM CHexEditorControl::m_aAtom = 0;
 
 	CHexEditorControl::CHexEditorControl( const lsw::LSW_WIDGET_LAYOUT &_wlLayout, lsw::CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
-		CParent( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(m_aAtom) ).AddStyle( WS_VSCROLL | WS_HSCROLL ).AddStyleEx( WS_EX_CLIENTEDGE ).RemoveStyleEx( WS_EX_WINDOWEDGE ), _pwParent, _bCreateWidget, _hMenu, _ui64Data ) {
+		CParent( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(m_aAtom) ).AddStyle( WS_VSCROLL | WS_HSCROLL )/*.AddStyleEx( WS_EX_CLIENTEDGE ).RemoveStyleEx( WS_EX_WINDOWEDGE )*/, _pwParent, _bCreateWidget, _hMenu, _ui64Data ) {
 	}
 
 	// == Functions.
@@ -54,7 +54,7 @@ namespace mx {
 			WCHAR szStr[15];
 			mx::CUtilities::RandomString( szStr, MX_ELEMENTS( szStr ) );
 			wceEx.SetClassName( szStr );
-			wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(CTLCOLOR_DLG + 1) );
+			wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(/*CTLCOLOR_DLG*/CTLCOLOR_STATIC + 1) );
 			wceEx.SetWindPro( CWidget::WindowProc );
 			m_aAtom = lsw::CBase::RegisterClassExW( wceEx.Obj() );
 		}
