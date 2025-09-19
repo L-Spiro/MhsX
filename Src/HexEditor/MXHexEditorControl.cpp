@@ -46,6 +46,17 @@ namespace mx {
 		CParent::InitControl( _hWnd );
 	}
 
+	// WM_PAINT.
+	lsw::CWidget::LSW_HANDLED CHexEditorControl::Paint() {
+		lsw::LSW_BEGINPAINT bpPaint( Wnd() );
+
+		lsw::LSW_RECT rClient = ClientRect();
+
+		::FillRect( bpPaint.hDc, &rClient, reinterpret_cast<HBRUSH>( ::GetStockObject( DKGRAY_BRUSH ) ) );
+
+		return lsw::CWidget::LSW_H_HANDLED;
+	}
+
 	// Registers the control if it has not been registered already.  Redundant calls have no effect.  Must be called before creating this control.
 	void CHexEditorControl::PrepareControl() {
 		if ( !m_aAtom ) {

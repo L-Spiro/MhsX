@@ -122,6 +122,7 @@
             "Address: 001A02E0h \u005c\u005c\u005c\u2026"
         ],
         "EditCurValHistory" : [
+            "5757",
             "5",
             "122",
             "1",
@@ -130,7 +131,6 @@
             "136",
             "2",
             "3",
-            "5757",
             "765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff#",
             "H\uff48\u6b15\u0d7a\u0f00\u441f",
             "QAbstractSpinBox@",
@@ -239,6 +239,7 @@
             "0"
         ],
         "EditLockedLeftHistory" : [
+            "5757",
             "5",
             "122",
             "1",
@@ -247,7 +248,6 @@
             "2",
             "8",
             "3",
-            "5757",
             "765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff765\u00ff#",
             "H\uff48\u6b15\u0d7a\u0f00\u441f",
             "QAbstractSpinBox@",

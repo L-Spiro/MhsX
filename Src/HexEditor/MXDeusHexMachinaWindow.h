@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../MXMhsX.h"
+#include "../HexEditor/MXHexEditorControl.h"
 #include "../Layouts/MXDeuHexMachinaWindowLayout.h"
 #include "../Strings/MXStringDecoder.h"
 
@@ -92,6 +93,9 @@ namespace mx {
 		// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
 		virtual const LSW_RECT						VirtualClientRect( const CWidget * pwChild ) const;
 
+		// Informs tha a child tab closed one of it headers.
+		virtual void								ChildTabClosed( CWidget * _pwChild, INT _iTab );
+
 		// Gets the multi-splitter.
 		CMultiSplitter *							MultiSplitter() {
 			return static_cast<CMultiSplitter *>(FindChild( Layout::MX_W_MAIN_SPLITTER ));
@@ -114,6 +118,8 @@ namespace mx {
 		CBitmap										m_bBitmaps[MX_I_TOTAL];
 		// Image mapping.
 		INT											m_iImageMap[MX_I_TOTAL];
+		// The hex-editor controls.
+		std::vector<CHexEditorControl *>			m_vTabs;
 
 		// The MHS object where we can access the current process and our options.
 		CWindowMemHack *							m_pmhMemHack = nullptr;

@@ -1,5 +1,4 @@
 #include "MXDeusHexMachinaWindow.h"
-#include "../HexEditor/MXHexEditorControl.h"
 #include "../Layouts/MXLayoutManager.h"
 #include "../MemHack/MXWindowMemHack.h"
 #include "../Utilities/MXUtilities.h"
@@ -55,6 +54,9 @@ namespace mx {
 		}
 	}
 	CDeusHexMachinaWindow::~CDeusHexMachinaWindow() {
+		for ( auto I = m_vTabs.size(); I--; ) {
+			delete m_vTabs[I];
+		}
 	}
 
 	// == Functions.
@@ -140,6 +142,7 @@ namespace mx {
 		aAttach.dwId = pwSplitter->RootId();
 		aAttach.pwWidget = Tab();
 		pwSplitter->Attach( aAttach );
+		pwSplitter->ShowCursor( true );
 
 		ForceSizeUpdate();
 		return LSW_H_CONTINUE;
@@ -149,18 +152,18 @@ namespace mx {
 	CWidget::LSW_HANDLED CDeusHexMachinaWindow::Command( WORD _wCtrlCode, WORD _wId, CWidget * _pwSrc ) {
 		if ( _wId >= Layout::MX_M_SHOW_RECENT_BASE ) {
 			_wId -= Layout::MX_M_SHOW_RECENT_BASE;
-			/*if ( _wId < m_pmhMemHack->Options().vProcessHistory.size() ) {
+			if ( _wId < m_pmhMemHack->Options().vProcessHistory.size() ) {
 				if ( m_pmhMemHack->Options().vProcessHistory[_wId].size() ) {
-					OpenProcessByPath( m_pmhMemHack->Options().vProcessHistory[_wId] );
+					Open( std::filesystem::path( static_cast<const std::wstring &>(m_pmhMemHack->Options().vProcessHistory[_wId]) ) );
 				}
-			}*/
+			}
 			return LSW_H_CONTINUE;
 		}
 		if ( _wId >= Layout::MX_M_USER_PROGRAMS_BASE && _wId < Layout::MX_M_SHOW_RECENT_BASE ) {
-			/*if ( !m_pmhMemHack ) { return LSW_H_CONTINUE; }
+			if ( !m_pmhMemHack ) { return LSW_H_CONTINUE; }
 			size_t stIdx = _wId - Layout::MX_M_USER_PROGRAMS_BASE;
 
-			m_pmhMemHack->ExecuteProgramByIdx( stIdx );*/
+			m_pmhMemHack->ExecuteProgramByIdx( stIdx );
 			return LSW_H_CONTINUE;
 		}
 
@@ -218,6 +221,16 @@ namespace mx {
 			rTemp.bottom -= rStatus.Height();
 		}
 		return rTemp;
+	}
+
+	// Informs tha a child tab closed one of it headers.
+	void CDeusHexMachinaWindow::ChildTabClosed( CWidget * _pwChild, INT _iTab ) {
+		if ( _pwChild == Tab() ) {
+			if ( _iTab < m_vTabs.size() ) {
+				//delete m_vTabs[_iTab];					// Deleted by the tab.
+				m_vTabs.erase( m_vTabs.begin() + _iTab );
+			}
+		}
 	}
 
 	// Prepares to create the window.  Creates the atom if necessary.
@@ -288,6 +301,7 @@ namespace mx {
 
 	// Performs an Open operation.
 	void CDeusHexMachinaWindow::Open( const std::filesystem::path &_pPath ) {
+		CHexEditorControl * phecHexControl = nullptr;
 		try {
 			auto ptTab = Tab();
 			if ( ptTab ) {
@@ -327,12 +341,14 @@ namespace mx {
 					nullptr, 0,										// pcHeightSizeExp
 //#endif
 				} );
-				auto phecHexControl = static_cast<CHexEditorControl *>(static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->CreateWidget( wlLayout, ptTab, TRUE, NULL, 0 ));
+				phecHexControl = static_cast<CHexEditorControl *>(static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->CreateWidget( wlLayout, ptTab, TRUE, NULL, 0 ));
 				if ( !phecHexControl ) {
 					//delete tTab.ppoPeObject;
 					return;
 				}
 				phecHexControl->InitControl( phecHexControl->Wnd() );
+
+				m_vTabs.insert( m_vTabs.begin(), phecHexControl );
 
 				auto wsTabname = _pPath.filename().generic_wstring();
 				TCITEMW tciItem = { 0 };
@@ -349,10 +365,12 @@ namespace mx {
 				ptTab->AdjustRect( FALSE, &rInternalSize );
 				::MoveWindow( phecHexControl->Wnd(), rInternalSize.left, rInternalSize.top, rInternalSize.Width(), rInternalSize.Height(), TRUE );
 		
-				//m_vTabs.insert( m_vTabs.begin(), tTab );
+				
 			}
 		}
-		catch ( ... ) {}
+		catch ( ... ) {
+			delete phecHexControl;
+		}
 	}
 
 }	// namespace mx

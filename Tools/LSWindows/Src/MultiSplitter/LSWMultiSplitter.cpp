@@ -513,7 +513,7 @@ namespace lsw {
 
 	// WM_SETCURSOR.
 	CWidget::LSW_HANDLED CMultiSplitter::SetCursor( CWidget * /*_pwControl*/, WORD /*_wHitTest*/, WORD /*_wIdent*/ ) {
-		HCURSOR hCursor = NULL;
+		HCURSOR hCursor = m_bShowCursor ? ::LoadCursorW( NULL, IDC_ARROW ) : NULL;
 		if ( m_bSetCursorToggle ) {
 			LSW_MS_LAYER * pmlDragLayer = nullptr;
 			size_t sDragBarIdx;

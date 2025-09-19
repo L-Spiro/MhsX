@@ -225,14 +225,12 @@ namespace lsw {
 				return 1;
 			}
 			case WM_PAINT : {
-				PAINTSTRUCT psPaint{};
-				HDC hDcPaint = ::BeginPaint( _hWnd, &psPaint );
+				LSW_BEGINPAINT bpPaint( _hWnd );
 				RECT rcClient{}; ::GetClientRect( _hWnd, &rcClient );
 				if ( pmwThis->m_wsText[0] == L'\0' ) {
 					::GetWindowTextW( _hWnd, pmwThis->m_wsText, int( sizeof( pmwThis->m_wsText ) / sizeof( pmwThis->m_wsText[0] ) ) );
 				}
-				pmwThis->DrawColorButton( hDcPaint, rcClient );
-				::EndPaint( _hWnd, &psPaint );
+				pmwThis->DrawColorButton( bpPaint.hDc, rcClient );
 				return 0;
 			}
 			default : {

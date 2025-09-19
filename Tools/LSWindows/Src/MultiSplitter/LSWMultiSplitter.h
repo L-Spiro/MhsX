@@ -52,6 +52,18 @@ namespace lsw {
 		// Returns true if this is a CMultiSplitter class.
 		virtual bool						IsMultiSplitter() const { return true; }
 
+		/**
+		 * To show the default cursor in the main client area (not a drag bar) of the splitter or not.
+		 * 
+		 * \param _bShow A boolean indicating whether to show the default cursor in t
+		 * \return Returns the previous show-cursor value.
+		 **/
+		bool								ShowCursor( bool _bShow ) {
+			auto bPrev = m_bShowCursor;
+			m_bShowCursor = _bShow;
+			return bPrev;
+		}
+
 	private :
 		// == Types.
 		// A single rectangle.
@@ -120,6 +132,8 @@ namespace lsw {
 		POINT								m_pLastMouseMove;
 		// Set when the mouse moves, unset when SetCursor() is called.
 		bool								m_bSetCursorToggle;
+		// Show the default cursor?
+		bool								m_bShowCursor = false;
 		// IDs.
 		static DWORD						m_dwIds;
 

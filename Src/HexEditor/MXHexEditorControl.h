@@ -28,6 +28,9 @@ namespace mx {
 		// WM_ERASEBKGND.
 		virtual LSW_HANDLED							EraseBkgnd( HDC _hDc ) { return LSW_H_HANDLED; }
 
+		// WM_PAINT.
+		virtual LSW_HANDLED							Paint();
+
 		/**
 		 * The WM_GETFONT handler.
 		 *

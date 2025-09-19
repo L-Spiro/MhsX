@@ -988,7 +988,11 @@ namespace lsw {
 		virtual void						ChildWasRemoved( const CWidget * _pwChild );
 
 		// Informs tha a child tab closed one of it headers.
-		virtual void						ChildTabClosed( CWidget * /*_pwChild*/, INT /*_iTab*/ ) {}
+		virtual void						ChildTabClosed( CWidget * _pwChild, INT _iTab ) {
+			if ( Parent() ) {
+				Parent()->ChildTabClosed( _pwChild, _iTab );
+			}
+		}
 
 		// Evaluates expressions to determine a new rectangle for the control.
 		virtual void						EvalNewSize();
