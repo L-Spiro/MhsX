@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../LSWWin.h"
+#include "../Brush/LSWBrushCache.h"
+
 #include <map>
 #include <string>
 
@@ -20,7 +22,22 @@ namespace lsw {
 		// =======================================
 		// Create/Destroy.
 		// =======================================
-		// Initialize.
+		/**
+		 * Initializes process-wide UI helpers and registers framework window classes.
+		 * \brief Sets up class atoms, stores the HINSTANCE and layout manager, and registers optional custom classes.
+		 *
+		 * Registers the dockable, splitter, multi-splitter, tree view, tree-list view, and child-window classes
+		 * if names are provided. Safe to call once at startup before any windows are created.
+		 *
+		 * \param _hInst The module instance for this process.
+		 * \param _plmLayoutMan Pointer to the layout manager used by the framework.
+		 * \param _pwcDockableClassName Optional registered class name for dockable windows (nullptr to skip).
+		 * \param _pwcSplitterClassName Optional registered class name for splitter windows (nullptr to skip).
+		 * \param _pwcMultiSplitterClassName Optional registered class name for multi-splitter windows (nullptr to skip).
+		 * \param _pwcTreeViewClassName Optional registered class name for tree-view windows (nullptr to skip).
+		 * \param _pwcTreeListViewClassName Optional registered class name for tree-list view windows (nullptr to skip).
+		 * \param _pwcChildWindowClassName Optional registered class name for generic child windows (nullptr to skip).
+		 */
 		static VOID									Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan,
 			const WCHAR * _pwcDockableClassName = nullptr,
 			const WCHAR * _pwcSplitterClassName = nullptr,
@@ -29,34 +46,83 @@ namespace lsw {
 			const WCHAR * _pwcTreeListViewClassName = nullptr,
 			const WCHAR * _pwcChildWindowClassName = nullptr );
 
-		// Shut down (frees memory).
+		/**
+		 * Shuts down the UI helpers.
+		 * \brief Frees allocated resources and unregisters state created by Initialize().
+		 *
+		 * Safe to call once during process shutdown after all framework windows are destroyed.
+		 */
 		static VOID									ShutDown();
+
 
 		// =======================================
 		// Windows/controls.
 		// =======================================
-		// Wrapper for ::RegisterClassEx().
+		/**
+		 * Registers a window class.
+		 * \brief Thin wrapper around ::RegisterClassExW().
+		 *
+		 * \param _wceClss The WNDCLASSEXW structure describing the class to register.
+		 * \return Returns the ATOM identifying the registered class, or 0 on failure.
+		 */
 		static ATOM									RegisterClassExW( const WNDCLASSEXW &_wceClss );
 
-		// Gets the ATOM associated with a class registered via RegisterClassExW().
+		/**
+		 * Looks up a class ATOM by its Unicode name.
+		 * \brief Retrieves the atom for a class previously registered via RegisterClassExW().
+		 *
+		 * \param _lpwcClass The Unicode class name to query.
+		 * \return Returns the ATOM for the class, or 0 if not found.
+		 */
 		static ATOM									GetRegisteredClassAtom( LPCWSTR _lpwcClass );
 
-		// Gets the ATOM associated with a class registered via RegisterClassExW().
+		/**
+		 * Looks up a class ATOM by its Unicode name.
+		 * \brief std::wstring overload for GetRegisteredClassAtom().
+		 *
+		 * \param _wsClass The Unicode class name to query.
+		 * \return Returns the ATOM for the class, or 0 if not found.
+		 */
 		static ATOM									GetRegisteredClassAtom( const std::wstring &_wsClass );
 
-		// Gets the ATOM for dockable windows.
+		/**
+		 * Gets the ATOM for dockable windows.
+		 * \brief Accessor for the dockable window class atom.
+		 *
+		 * \return Returns the ATOM for dockable windows.
+		 */
 		static ATOM									DockableAtom() { return m_aDockable; }
 
-		// Gets the ATOM for splitter windows.
+		/**
+		 * Gets the ATOM for splitter windows.
+		 * \brief Accessor for the splitter window class atom.
+		 *
+		 * \return Returns the ATOM for splitter windows.
+		 */
 		static ATOM									SplitterAtom() { return m_aSplitter; }
 
-		// Gets the ATOM for multi-splitter windows.
+		/**
+		 * Gets the ATOM for multi-splitter windows.
+		 * \brief Accessor for the multi-splitter window class atom.
+		 *
+		 * \return Returns the ATOM for multi-splitter windows.
+		 */
 		static ATOM									MultiSplitterAtom() { return m_aMultiSplitter; }
 
-		// Gets the ATOM for tree view windows.
+		/**
+		 * Gets the ATOM for tree view windows.
+		 * \brief Accessor for the tree-view window class atom.
+		 *
+		 * \return Returns the ATOM for tree-view windows.
+		 */
 		static ATOM									TreeListAtom() { return m_aTreeView; }
 
-		// Gets the ATOM for tree-list view windows.
+		/**
+		 * Gets the ATOM for tree-list view windows.
+		 * \brief Accessor for the tree-list view window class atom.
+		 *
+		 * \return Returns the ATOM for tree-list view windows.
+		 */
 		static ATOM									TreeListViewAtom() { return m_aTreeListView; }
 
 		/**
@@ -73,70 +139,187 @@ namespace lsw {
 		 **/
 		static const std::wstring &					TreeListViewString() { return m_wsTreeListViewName; }
 
+
 		// =======================================
 		// Process functions.
 		// =======================================
-		// Wrapper for ::GetModuleHandleW().
+		/**
+		 * Gets a module handle by name (Unicode).
+		 * \brief Thin wrapper around ::GetModuleHandleW().
+		 *
+		 * \param _lpModuleName The Unicode module name, or nullptr for the calling process.
+		 * \return Returns the module handle on success, or nullptr on failure.
+		 */
 		static HMODULE								GetModuleHandleW( LPCWSTR _lpModuleName );
 
-		// Wrapper for ::GetModuleHandleA().
+		/**
+		 * Gets a module handle by name (ANSI).
+		 * \brief Thin wrapper around ::GetModuleHandleA().
+		 *
+		 * \param _lpModuleName The ANSI module name, or nullptr for the calling process.
+		 * \return Returns the module handle on success, or nullptr on failure.
+		 */
 		static HMODULE								GetModuleHandleA( LPCSTR _lpModuleName );
 
-		// Gets the module handle for this executable.
+		/**
+		 * Gets the module handle for this executable.
+		 * \brief Accessor for the HINSTANCE provided to Initialize().
+		 *
+		 * \return Returns the HMODULE for this process.
+		 */
 		static HMODULE								GetThisHandle() { return m_hInstance; }
+
 
 		// =======================================
 		// Layouts.
 		// =======================================
-		// Gets the layout manager.
+		/**
+		 * Gets the layout manager.
+		 * \brief Accessor for the process-wide CLayoutManager.
+		 *
+		 * \return Returns the layout manager pointer, or nullptr if not initialized.
+		 */
 		static CLayoutManager *						LayoutManager() { return m_plmLayoutMan; }
+
 
 		// =======================================
 		// Error-related.
 		// =======================================
-		// Prints the current error (from ::GetLastError()).
+		/**
+		 * Prints a formatted error message.
+		 * \brief Logs a message with the provided text and Win32 error code.
+		 *
+		 * If _dwError is UINT_MAX, the current ::GetLastError() value is used.
+		 *
+		 * \param _pwcText A brief description of the failing operation.
+		 * \param _dwError The Win32 error code to print, or UINT_MAX to query ::GetLastError().
+		 */
 		static VOID									PrintError( LPCWSTR _pwcText, DWORD _dwError = UINT_MAX );
 
-		// Appends error text to a string.
+		/**
+		 * Appends formatted error text to a string.
+		 * \brief Extends _wsRet with _pwcText and the given Win32 error description.
+		 *
+		 * If _dwError is UINT_MAX, the current ::GetLastError() value is used.
+		 *
+		 * \param _pwcText A brief description of the failing operation.
+		 * \param _wsRet Destination string to which the formatted error is appended.
+		 * \param _dwError The Win32 error code to append, or UINT_MAX to query ::GetLastError().
+		 * \return Returns the reference to _wsRet for chaining.
+		 */
 		static std::wstring							AppendError( LPCWSTR _pwcText, std::wstring &_wsRet, DWORD _dwError = UINT_MAX );
 
-		// Displays a message box with the given title and message.
+		/**
+		 * Displays an error message box (Unicode).
+		 * \brief Shows a message box with MB_ICONERROR using a Unicode title and message.
+		 *
+		 * \param _hWnd Owner window handle (may be nullptr).
+		 * \param _pwcMsg The Unicode message to display.
+		 * \param _pwcTitle The Unicode title (defaults to L"Error").
+		 */
 		static VOID									MessageBoxError( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle = L"Error" );
 
-		// Displays a message box with the given title and message.
+		/**
+		 * Displays an error message box (ANSI).
+		 * \brief Shows a message box with MB_ICONERROR using an ANSI title and message.
+		 *
+		 * \param _hWnd Owner window handle (may be nullptr).
+		 * \param _pcMsg The ANSI message to display.
+		 * \param _pcTitle The ANSI title (defaults to "Error").
+		 */
 		static VOID									MessageBoxError( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle = "Error" );
+
 
 		// =======================================
 		// Prompting.
 		// =======================================
-		// Prompts with MB_ICONINFORMATION and IDOK.
+		/**
+		 * Shows an informational OK prompt (ANSI).
+		 * \brief Displays MB_ICONINFORMATION with OK, or OK/Cancel if requested.
+		 *
+		 * \param _hWnd Owner window handle (may be nullptr).
+		 * \param _pcMsg The ANSI message to display.
+		 * \param _pcTitle The ANSI title to display.
+		 * \param _bIncludeCancel True to show OK/Cancel, false for OK only.
+		 * \return Returns true if the user accepted (IDOK), otherwise false.
+		 */
 		static bool									PromptOk( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle, bool _bIncludeCancel = true );
 
-		// Prompts with MB_ICONINFORMATION and IDOK.
+		/**
+		 * Shows an informational OK prompt (Unicode).
+		 * \brief Displays MB_ICONINFORMATION with OK, or OK/Cancel if requested.
+		 *
+		 * \param _hWnd Owner window handle (may be nullptr).
+		 * \param _pwcMsg The Unicode message to display.
+		 * \param _pwcTitle The Unicode title to display.
+		 * \param _bIncludeCancel True to show OK/Cancel, false for OK only.
+		 * \return Returns true if the user accepted (IDOK), otherwise false.
+		 */
 		static bool									PromptOk( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle, bool _bIncludeCancel = true );
 
-		// Prompts with MB_ICONQUESTION and IDYES.
+		/**
+		 * Shows a Yes/No question prompt (ANSI).
+		 * \brief Displays MB_ICONQUESTION with Yes and No buttons.
+		 *
+		 * \param _hWnd Owner window handle (may be nullptr).
+		 * \param _pcMsg The ANSI question text.
+		 * \param _pcTitle The ANSI title to display.
+		 * \return Returns true if the user chose Yes (IDYES), otherwise false.
+		 */
 		static bool									PromptYesNo( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle );
 
-		// Prompts with MB_ICONQUESTION and IDYES.
+		/**
+		 * Shows a Yes/No question prompt (Unicode).
+		 * \brief Displays MB_ICONQUESTION with Yes and No buttons.
+		 *
+		 * \param _hWnd Owner window handle (may be nullptr).
+		 * \param _pwcMsg The Unicode question text.
+		 * \param _pwcTitle The Unicode title to display.
+		 * \return Returns true if the user chose Yes (IDYES), otherwise false.
+		 */
 		static bool									PromptYesNo( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle );
+
 
 		// =======================================
 		// Fonts.
 		// =======================================
-		// Gets the default message-box font.
+		/**
+		 * Gets the default message-box font.
+		 * \brief Accessor for the font used by message dialogs.
+		 *
+		 * \return Returns the HFONT for message boxes.
+		 */
 		static HFONT								MessageBoxFont() { return m_hMessageFont; }
 
-		// Gets the default status-bar font.
+		/**
+		 * Gets the default status-bar font.
+		 * \brief Accessor for the font used by status bars.
+		 *
+		 * \return Returns the HFONT for status bars.
+		 */
 		static HFONT								StatusBarFont() { return m_hStatusFont; }
 
-		// Non-client metrics.
+		/**
+		 * Gets the non-client metrics.
+		 * \brief Returns the cached NONCLIENTMETRICSW filled at initialization.
+		 *
+		 * \return Returns the NONCLIENTMETRICSW structure with current metrics.
+		 */
 		static NONCLIENTMETRICSW					NonClientMetrics() { return m_ncmNonClientMetrics; }
+
 
 		// =======================================
 		// Debug.
 		// =======================================
+		/**
+		 * Converts a message ID to its textual name.
+		 * \brief Writes a human-readable symbolic name for a WM_* message into _sName.
+		 *
+		 * \param _wMessage The message ID (e.g., WM_PAINT).
+		 * \param _sName Output string receiving the message name.
+		 */
 		static VOID									MessageToText( WORD _wMessage, std::string &_sName );
+
 
 	protected :
 		// == Types.
@@ -163,6 +346,8 @@ namespace lsw {
 
 		// Status font.
 		static HFONT								m_hStatusFont;
+
+		static CBrushCache							m_bcBrushes;							/**< Cache of brushes not created via CBrush.  These are intended to be created once and then remain alive throughout the life of the program, being destroyed only at shut-down. */
 
 		// The dockable class.
 		static ATOM									m_aDockable;

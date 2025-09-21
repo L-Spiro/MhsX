@@ -32,6 +32,8 @@ namespace lsw {
 	// Status font.
 	HFONT CBase::m_hStatusFont = NULL;
 
+	CBrushCache CBase::m_bcBrushes;													/**< Cache of brushes not created via CBrush.  These are intended to be created once and then remain alive throughout the life of the program, being destroyed only at shut-down. */
+
 	// The dockable class.
 	ATOM CBase::m_aDockable = 0;
 
@@ -54,7 +56,22 @@ namespace lsw {
 	std::wstring CBase::m_wsTreeListViewName;
 
 	// == Functions.
-	// Initialize.
+	/**
+	 * Initializes process-wide UI helpers and registers framework window classes.
+	 * \brief Sets up class atoms, stores the HINSTANCE and layout manager, and registers optional custom classes.
+	 *
+	 * Registers the dockable, splitter, multi-splitter, tree view, tree-list view, and child-window classes
+	 * if names are provided. Safe to call once at startup before any windows are created.
+	 *
+	 * \param _hInst The module instance for this process.
+	 * \param _plmLayoutMan Pointer to the layout manager used by the framework.
+	 * \param _pwcDockableClassName Optional registered class name for dockable windows (nullptr to skip).
+	 * \param _pwcSplitterClassName Optional registered class name for splitter windows (nullptr to skip).
+	 * \param _pwcMultiSplitterClassName Optional registered class name for multi-splitter windows (nullptr to skip).
+	 * \param _pwcTreeViewClassName Optional registered class name for tree-view windows (nullptr to skip).
+	 * \param _pwcTreeListViewClassName Optional registered class name for tree-list view windows (nullptr to skip).
+	 * \param _pwcChildWindowClassName Optional registered class name for generic child windows (nullptr to skip).
+	 */
 	VOID CBase::Initialize( HINSTANCE _hInst, CLayoutManager * _plmLayoutMan,
 		const WCHAR * _pwcDockableClassName,
 		const WCHAR * _pwcSplitterClassName,
@@ -157,7 +174,12 @@ namespace lsw {
 		}
 	}
 
-	// Shut down (frees memory).
+	/**
+	 * Shuts down the UI helpers.
+	 * \brief Frees allocated resources and unregisters state created by Initialize().
+	 *
+	 * Safe to call once during process shutdown after all framework windows are destroyed.
+	 */
 	VOID CBase::ShutDown() {
 		for ( auto it = m_mClasses.begin(); it != m_mClasses.end(); ++it ) {
 			::UnregisterClassW( (*it).second.lpszClassName, (*it).second.hInstance );
@@ -170,9 +192,17 @@ namespace lsw {
 
 		::DeleteObject( m_hStatusFont );
 		::DeleteObject( m_hMessageFont );
+
+		m_bcBrushes.Reset();
 	}
 
-	// Wrapper for ::RegisterClassEx().
+	/**
+	 * Registers a window class.
+	 * \brief Thin wrapper around ::RegisterClassExW().
+	 *
+	 * \param _wceClss The WNDCLASSEXW structure describing the class to register.
+	 * \return Returns the ATOM identifying the registered class, or 0 on failure.
+	 */
 	ATOM CBase::RegisterClassExW( const WNDCLASSEXW &_wceClss ) {
 		std::wstring wTemp = _wceClss.lpszClassName;
 		ATOM aPrev = GetRegisteredClassAtom( wTemp );
@@ -186,13 +216,25 @@ namespace lsw {
 		return wceTemp.aAtom;
 	}
 
-	// Gets the ATOM associated with a class registered via RegisterClassExW().
+	/**
+	 * Looks up a class ATOM by its Unicode name.
+	 * \brief Retrieves the atom for a class previously registered via RegisterClassExW().
+	 *
+	 * \param _lpwcClass The Unicode class name to query.
+	 * \return Returns the ATOM for the class, or 0 if not found.
+	 */
 	ATOM CBase::GetRegisteredClassAtom( LPCWSTR _lpwcClass ) {
 		std::wstring wTemp = _lpwcClass;
 		return GetRegisteredClassAtom( wTemp );
 	}
 
-	// Gets the ATOM associated with a class registered via RegisterClassExW().
+	/**
+	 * Looks up a class ATOM by its Unicode name.
+	 * \brief std::wstring overload for GetRegisteredClassAtom().
+	 *
+	 * \param _wsClass The Unicode class name to query.
+	 * \return Returns the ATOM for the class, or 0 if not found.
+	 */
 	ATOM CBase::GetRegisteredClassAtom( const std::wstring &_wsClass ) {
 		auto aThis = m_mClasses.find( _wsClass );
 		if ( aThis != m_mClasses.end() ) {
@@ -201,24 +243,54 @@ namespace lsw {
 		return 0;
 	}
 
-	// Wrapper for ::GetModuleHandleW().
+	/**
+	 * Gets a module handle by name (Unicode).
+	 * \brief Thin wrapper around ::GetModuleHandleW().
+	 *
+	 * \param _lpModuleName The Unicode module name, or nullptr for the calling process.
+	 * \return Returns the module handle on success, or nullptr on failure.
+	 */
 	HMODULE CBase::GetModuleHandleW( LPCWSTR _lpModuleName ) {
 		return _lpModuleName ? ::GetModuleHandleW( _lpModuleName ) : m_hInstance;
 	}
 
-	// Wrapper for ::GetModuleHandleA().
+	/**
+	 * Gets a module handle by name (ANSI).
+	 * \brief Thin wrapper around ::GetModuleHandleA().
+	 *
+	 * \param _lpModuleName The ANSI module name, or nullptr for the calling process.
+	 * \return Returns the module handle on success, or nullptr on failure.
+	 */
 	HMODULE CBase::GetModuleHandleA( LPCSTR _lpModuleName ) {
 		return _lpModuleName ? ::GetModuleHandleA( _lpModuleName ) : m_hInstance;
 	}
 
-	// Prints the current error (from ::GetLastError()).
+	/**
+	 * Prints a formatted error message.
+	 * \brief Logs a message with the provided text and Win32 error code.
+	 *
+	 * If _dwError is UINT_MAX, the current ::GetLastError() value is used.
+	 *
+	 * \param _pwcText A brief description of the failing operation.
+	 * \param _dwError The Win32 error code to print, or UINT_MAX to query ::GetLastError().
+	 */
 	VOID CBase::PrintError( LPCWSTR _pwcText, DWORD _dwError ) {
 		std::wstring swText;
 		AppendError( _pwcText, swText, _dwError );
 		::MessageBoxW( NULL, swText.c_str(), L"Error", MB_OK );
 	}
 
-	// Appends error text to a string.
+	/**
+	 * Appends formatted error text to a string.
+	 * \brief Extends _wsRet with _pwcText and the given Win32 error description.
+	 *
+	 * If _dwError is UINT_MAX, the current ::GetLastError() value is used.
+	 *
+	 * \param _pwcText A brief description of the failing operation.
+	 * \param _wsRet Destination string to which the formatted error is appended.
+	 * \param _dwError The Win32 error code to append, or UINT_MAX to query ::GetLastError().
+	 * \return Returns the reference to _wsRet for chaining.
+	 */
 	std::wstring CBase::AppendError( LPCWSTR _pwcText, std::wstring &_wsRet, DWORD _dwError ) {
 		DWORD dwError = (_dwError == UINT_MAX) ? ::GetLastError() : _dwError;
 		LPVOID lpMsgBuf;
@@ -251,36 +323,91 @@ namespace lsw {
 		return _wsRet;
 	}
 
-	// Displays a message box with the given title and message.
+	/**
+	 * Displays an error message box (Unicode).
+	 * \brief Shows a message box with MB_ICONERROR using a Unicode title and message.
+	 *
+	 * \param _hWnd Owner window handle (may be nullptr).
+	 * \param _pwcMsg The Unicode message to display.
+	 * \param _pwcTitle The Unicode title (defaults to L"Error").
+	 */
 	VOID CBase::MessageBoxError( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle ) {
 		::MessageBoxW( _hWnd, _pwcMsg, _pwcTitle, MB_ICONERROR );
 	}
 
-	// Displays a message box with the given title and message.
+	/**
+	 * Displays an error message box (ANSI).
+	 * \brief Shows a message box with MB_ICONERROR using an ANSI title and message.
+	 *
+	 * \param _hWnd Owner window handle (may be nullptr).
+	 * \param _pcMsg The ANSI message to display.
+	 * \param _pcTitle The ANSI title (defaults to "Error").
+	 */
 	VOID CBase::MessageBoxError( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle ) {
 		::MessageBoxA( _hWnd, _pcMsg, _pcTitle, MB_ICONERROR );
 	}
 
-	// Prompts with MB_ICONINFORMATION and IDOK.
+	/**
+	 * Shows an informational OK prompt (ANSI).
+	 * \brief Displays MB_ICONINFORMATION with OK, or OK/Cancel if requested.
+	 *
+	 * \param _hWnd Owner window handle (may be nullptr).
+	 * \param _pcMsg The ANSI message to display.
+	 * \param _pcTitle The ANSI title to display.
+	 * \param _bIncludeCancel True to show OK/Cancel, false for OK only.
+	 * \return Returns true if the user accepted (IDOK), otherwise false.
+	 */
 	bool CBase::PromptOk( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle, bool _bIncludeCancel ) {
 		return ::MessageBoxA( _hWnd, _pcMsg, _pcTitle, MB_ICONINFORMATION | (_bIncludeCancel ? MB_OKCANCEL : 0)) == IDOK;
 	}
 
-	// Prompts with MB_ICONINFORMATION and IDOK.
+	/**
+	 * Shows an informational OK prompt (Unicode).
+	 * \brief Displays MB_ICONINFORMATION with OK, or OK/Cancel if requested.
+	 *
+	 * \param _hWnd Owner window handle (may be nullptr).
+	 * \param _pwcMsg The Unicode message to display.
+	 * \param _pwcTitle The Unicode title to display.
+	 * \param _bIncludeCancel True to show OK/Cancel, false for OK only.
+	 * \return Returns true if the user accepted (IDOK), otherwise false.
+	 */
 	bool CBase::PromptOk( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle, bool _bIncludeCancel ) {
 		return ::MessageBoxW( _hWnd, _pwcMsg, _pwcTitle, MB_ICONINFORMATION | (_bIncludeCancel ? MB_OKCANCEL : 0)) == IDOK;
 	}
 
-	// Prompts with MB_ICONQUESTION and IDYES.
+	/**
+	 * Shows a Yes/No question prompt (ANSI).
+	 * \brief Displays MB_ICONQUESTION with Yes and No buttons.
+	 *
+	 * \param _hWnd Owner window handle (may be nullptr).
+	 * \param _pcMsg The ANSI question text.
+	 * \param _pcTitle The ANSI title to display.
+	 * \return Returns true if the user chose Yes (IDYES), otherwise false.
+	 */
 	bool CBase::PromptYesNo( HWND _hWnd, LPCSTR _pcMsg, LPCSTR _pcTitle ) {
 		return ::MessageBoxA( _hWnd, _pcMsg, _pcTitle, MB_ICONQUESTION | MB_YESNO ) == IDYES;
 	}
 
-	// Prompts with MB_ICONQUESTION and IDYES.
+	/**
+	 * Shows a Yes/No question prompt (Unicode).
+	 * \brief Displays MB_ICONQUESTION with Yes and No buttons.
+	 *
+	 * \param _hWnd Owner window handle (may be nullptr).
+	 * \param _pwcMsg The Unicode question text.
+	 * \param _pwcTitle The Unicode title to display.
+	 * \return Returns true if the user chose Yes (IDYES), otherwise false.
+	 */
 	bool CBase::PromptYesNo( HWND _hWnd, LPCWSTR _pwcMsg, LPCWSTR _pwcTitle ) {
 		return ::MessageBoxW( _hWnd, _pwcMsg, _pwcTitle, MB_ICONQUESTION | MB_YESNO ) == IDYES;
 	}
-
+	
+	/**
+	 * Converts a message ID to its textual name.
+	 * \brief Writes a human-readable symbolic name for a WM_* message into _sName.
+	 *
+	 * \param _wMessage The message ID (e.g., WM_PAINT).
+	 * \param _sName Output string receiving the message name.
+	 */
 #ifdef _DEBUG
 	VOID CBase::MessageToText( WORD _wMessage, std::string &_sName ) {
 		static const struct {

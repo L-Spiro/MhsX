@@ -1,9 +1,10 @@
 #pragma once
 
 #include "../MXMhsX.h"
-#include "../HexEditor/MXHexEditorControl.h"
 #include "../Layouts/MXDeuHexMachinaWindowLayout.h"
 #include "../Strings/MXStringDecoder.h"
+#include "MXHexEditorControl.h"
+#include "MXHexEditorInterface.h"
 
 #include <ImageList/LSWImageList.h>
 #include <Images/LSWBitmap.h>
@@ -111,6 +112,14 @@ namespace mx {
 
 
 	protected :
+		// == Types.
+		/** Data for a tab. */
+		struct MX_HEX_TAB {
+			CHexEditorControl *						phecWidget = nullptr;
+			CHexEditorInterface *					pheiInterface = nullptr;
+		};
+
+
 		// == Members.
 		// Image list.
 		CImageList									m_iImages;
@@ -119,7 +128,7 @@ namespace mx {
 		// Image mapping.
 		INT											m_iImageMap[MX_I_TOTAL];
 		// The hex-editor controls.
-		std::vector<CHexEditorControl *>			m_vTabs;
+		std::vector<MX_HEX_TAB>						m_vTabs;
 
 		// The MHS object where we can access the current process and our options.
 		CWindowMemHack *							m_pmhMemHack = nullptr;

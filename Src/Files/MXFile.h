@@ -152,35 +152,32 @@ namespace mx {
 		 * \param _fMode			Deletion mode (recursive or not).
 		 * \return					Count of files successfully deleted.
 		 */
-		static size_t			EraseFilesInDirectory( const std::filesystem::path &_pDir, MX_FILE_DELETE_MODE _fMode = MX_FDM_NON_RECURSIVE ) {
-			namespace fs = std::filesystem;
-			std::size_t sDeleted = 0U;
-			std::error_code ecError;
+		static size_t			EraseFilesInDirectory( const std::filesystem::path &_pDir, MX_FILE_DELETE_MODE _fMode = MX_FDM_NON_RECURSIVE );
 
-			auto TryRemove = [&]( const fs::path &_pPath ) {
-				if ( fs::is_directory( _pPath, ecError ) ) {
-					ecError.clear();
-					return;
-				}
-				if ( fs::remove( _pPath, ecError ) ) {
-					++sDeleted;
-				}
-				ecError.clear();
-			};
+		/**
+		 * \brief Safely deletes a directory tree (non-throwing).
+		 *
+		 * Ensures the target exists and is a real directory (or a directory symlink),
+		 * refuses to operate on root/suspicious paths, normalizes permissions
+		 * (clears read-only) before removal, and never follows directory symlinks.
+		 *
+		 * \param _pDir The directory to delete.
+		 * \return Returns true if the directory (or link) was removed or did not exist; false on failure.
+		 */
+		static bool				DeleteDirectorySafely( const std::filesystem::path &_pDir );
 
-			if ( _fMode == MX_FDM_RECURSIVE ) {
-				for ( fs::recursive_directory_iterator it( _pDir, fs::directory_options::skip_permission_denied ), end; it != end; ++it ) {
-					TryRemove( it->path() );
-				}
-			}
-			else {
-				for ( fs::directory_iterator it( _pDir, fs::directory_options::skip_permission_denied ), end; it != end; ++it ) {
-					TryRemove( it->path() );
-				}
-			}
-
-			return sDeleted;
-		}
+		/**
+		 * \brief Safely creates a directory (and parents) if needed (non-throwing).
+		 *
+		 * Validates the target path, refuses root/suspicious paths, rejects any parent
+		 * component that is a symlink (to avoid traversal through links), and creates
+		 * all missing components. If the target already exists and is a directory, this
+		 * returns true. Uses error_code overloads (no exceptions).
+		 *
+		 * \param _pDir				The directory to create.
+		 * \return					Returns true if the directory exists by the end (created or pre-existing); false on failure.
+		 */
+		static bool				MakeDirectorySafely( const std::filesystem::path &_pDir );
 
 
 	protected :

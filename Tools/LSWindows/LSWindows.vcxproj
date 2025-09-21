@@ -468,6 +468,7 @@
     <ClInclude Include="Src\Base\LSWGlobalAlloc.h" />
     <ClInclude Include="Src\Base\LSWWndClassEx.h" />
     <ClInclude Include="Src\Brush\LSWBrush.h" />
+    <ClInclude Include="Src\Brush\LSWBrushCache.h" />
     <ClInclude Include="Src\Button\LSWButton.h" />
     <ClInclude Include="Src\Button\LSWColorButton.h" />
     <ClInclude Include="Src\CheckButton\LSWCheckButton.h" />

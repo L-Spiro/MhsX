@@ -1,4 +1,4 @@
-#include "MXFile.h"
+﻿#include "MXFile.h"
 #include <string>
 
 
@@ -387,6 +387,220 @@ namespace mx {
 			}
 		}
 		return sCnt;
+	}
+
+	/**
+	 * \brief Deletes files under the given directory, optionally recursively.
+	 *
+	 * \param _pDir				Directory whose files should be deleted.
+	 * \param _fMode			Deletion mode (recursive or not).
+	 * \return					Count of files successfully deleted.
+	 */
+	size_t CFile::EraseFilesInDirectory( const std::filesystem::path &_pDir, MX_FILE_DELETE_MODE _fMode ) {
+		namespace fs = std::filesystem;
+		std::size_t sDeleted = 0U;
+		std::error_code ecError;
+
+		// Validate target: must exist and be a directory.
+		if ( !fs::exists( _pDir, ecError ) ) {
+			ecError.clear();
+			return 0U;
+		}
+		if ( !fs::is_directory( _pDir, ecError ) ) {
+			ecError.clear();
+			return 0U;
+		}
+		ecError.clear();
+
+		auto TryRemove = [&]( const fs::path &_pPath ) {
+			if ( fs::is_directory( _pPath, ecError ) ) {
+				ecError.clear();
+				return;
+			}
+			if ( fs::remove( _pPath, ecError ) ) {
+				++sDeleted;
+			}
+			ecError.clear();
+		};
+
+		if ( _fMode == MX_FDM_RECURSIVE ) {
+			fs::recursive_directory_iterator it( _pDir, fs::directory_options::skip_permission_denied, ecError ), end;
+			ecError.clear();
+			for ( ; it != end; it.increment( ecError ) ) {
+				if ( ecError ) { ecError.clear(); continue; }
+				TryRemove( it->path() );
+			}
+		}
+		else {
+			fs::directory_iterator it( _pDir, fs::directory_options::skip_permission_denied, ecError ), end;
+			ecError.clear();
+			for ( ; it != end; it.increment( ecError ) ) {
+				if ( ecError ) { ecError.clear(); continue; }
+				TryRemove( it->path() );
+			}
+		}
+
+		return sDeleted;
+	}
+
+	/**
+	 * \brief Safely deletes a directory tree (non-throwing).
+	 *
+	 * Ensures the target exists and is a real directory (or a directory symlink),
+	 * refuses to operate on root/suspicious paths, normalizes permissions
+	 * (clears read-only) before removal, and never follows directory symlinks.
+	 *
+	 * \param _pDir				The directory to delete.
+	 * \return					Returns true if the directory (or link) was removed or did not exist; false on failure.
+	 */
+	bool CFile::DeleteDirectorySafely( const std::filesystem::path &_pDir ) {
+		namespace fs = std::filesystem;
+		std::error_code ecError;
+
+		// === Quick rejects / guards.
+		if ( _pDir.empty() ) { return false; }											// Empty path.
+		if ( _pDir.filename() == "." || _pDir.filename() == ".." ) { return false; }	// Suspicious.
+		// Refuse to delete roots like "C:\" or "/" (path equal to its root_path).
+		{
+			fs::path pNorm = _pDir;
+			pNorm.make_preferred();
+			if ( pNorm == pNorm.root_path() ) { return false; }
+		}
+
+		// Not existing? Consider "deleted".
+		if ( !fs::exists( _pDir, ecError ) ) { ecError.clear(); return true; }
+		ecError.clear();
+
+		// If it's a symlink, just remove the link (do not traverse).
+		if ( fs::is_symlink( _pDir, ecError ) ) {
+			ecError.clear();
+			return fs::remove( _pDir, ecError ), ecError.clear(), !fs::exists( _pDir );
+		}
+		ecError.clear();
+
+		// Must be a directory at this point.
+		if ( !fs::is_directory( _pDir, ecError ) ) { ecError.clear(); return false; }
+		ecError.clear();
+
+		// Helper: make a file/dir deletable (clear read-only etc.).
+		auto MakeDeletable = [&]( const fs::path &_pPath ) {
+			// Try to add write perms for owner; ignore errors (best-effort).
+			fs::permissions(
+				_pPath,
+				fs::perms::owner_write | fs::perms::owner_read | fs::perms::owner_exec,
+				fs::perm_options::add,
+				ecError
+			);
+			ecError.clear();
+		};
+
+		// First pass: ensure everything is writable so removal won't fail on read-only items.
+		{
+			fs::recursive_directory_iterator it(
+				_pDir,
+				fs::directory_options::skip_permission_denied,							// Do not follow symlinks automatically.
+				ecError
+			), end;
+			ecError.clear();
+
+			for ( ; it != end; it.increment( ecError ) ) {
+				if ( ecError ) { ecError.clear(); continue; }
+				const fs::path & pCur = it->path();
+
+				// Do NOT descend into directory symlinks (iterator won’t, because we didn't set follow_directory_symlink).
+				// If you encounter a symlink (file or dir), just make the link itself deletable; remove_all will remove links as links.
+				MakeDeletable( pCur );
+			}
+		}
+
+		// Second pass: remove the whole tree. remove_all does post-order removal.
+		{
+			(void)fs::permissions(
+				_pDir,
+				fs::perms::owner_write | fs::perms::owner_read | fs::perms::owner_exec,
+				fs::perm_options::add,
+				ecError
+			);
+			ecError.clear();
+
+			std::uintmax_t umRemoved = fs::remove_all( _pDir, ecError );
+			(void)umRemoved; // Not strictly needed; success determined by existence check below.
+			ecError.clear();
+		}
+
+		// Confirm deletion.
+		return !fs::exists( _pDir, ecError );
+	}
+
+	/**
+	 * \brief Safely creates a directory (and parents) if needed (non-throwing).
+	 *
+	 * Validates the target path, refuses root/suspicious paths, rejects any parent
+	 * component that is a symlink (to avoid traversal through links), and creates
+	 * all missing components. If the target already exists and is a directory, this
+	 * returns true. Uses error_code overloads (no exceptions).
+	 *
+	 * \param _pDir				The directory to create.
+	 * \return					Returns true if the directory exists by the end (created or pre-existing); false on failure.
+	 */
+	bool CFile::MakeDirectorySafely( const std::filesystem::path &_pDir ) {
+		namespace fs = std::filesystem;
+		std::error_code ecError;
+
+		// === Quick rejects / guards.
+		if ( _pDir.empty() ) { return false; }
+		if ( _pDir.filename() == "." || _pDir.filename() == ".." ) { return false; }
+
+		// Normalize and forbid root like "C:\" or "/".
+		fs::path pNorm = _pDir;
+		pNorm.make_preferred();
+		if ( pNorm == pNorm.root_path() ) { return false; }
+
+		// If it already exists:
+		if ( fs::exists( pNorm, ecError ) ) {
+			ecError.clear();
+			if ( fs::is_directory( pNorm, ecError ) ) { ecError.clear(); return true; }
+			ecError.clear();
+			// Exists but not a directory (e.g., file or special): fail safely.
+			return false;
+		}
+		ecError.clear();
+
+		// Refuse to traverse through symlinked parents.
+		{
+			fs::path pAccum = pNorm.is_absolute() ? pNorm.root_path() : fs::current_path( ecError );
+			ecError.clear();
+			for ( const fs::path & pPart : pNorm.relative_path() ) {
+				pAccum /= pPart;
+				// Only check parents (skip the final leaf check here — it's fine if it doesn't exist).
+				if ( pAccum != pNorm && fs::exists( pAccum, ecError ) ) {
+					bool bIsLink = fs::is_symlink( pAccum, ecError );
+					ecError.clear();
+					if ( bIsLink ) { return false; }
+				}
+				ecError.clear();
+			}
+		}
+
+		// Create all missing components (non-throwing).
+		if ( !fs::create_directories( pNorm, ecError ) ) {
+			// If creation reported "no", verify we actually have a directory now (possible race).
+			ecError.clear();
+			if ( !fs::is_directory( pNorm, ecError ) ) { ecError.clear(); return false; }
+		}
+		ecError.clear();
+
+		// Make sure it is writable (best-effort).
+		fs::permissions(
+			pNorm,
+			fs::perms::owner_read | fs::perms::owner_write | fs::perms::owner_exec,
+			fs::perm_options::add,
+			ecError
+		);
+		ecError.clear();
+
+		// Confirm.
+		return fs::is_directory( pNorm, ecError );
 	}
 
 	// Converts a WIN32_FILE_ATTRIBUTE_DATA structure to an MX_FILE_ATTR structure.

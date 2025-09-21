@@ -719,6 +719,14 @@ namespace lsw {
 		virtual LSW_HANDLED					InputDeviceChanged( INT /*_iNotifCode*/, HANDLE /*_hDevice*/ ) { return LSW_H_CONTINUE; }
 
 		/**
+		 * The WM_GETDLGCODE handler.
+		 * 
+		 * \param _wKey The virtual key, pressed by the user, that prompted Windows to issue this notification. The handler must selectively handle these keys. For instance, the handler might accept and process VK_RETURN but delegate VK_TAB to the owner window.
+		 * \return Returns an LSW_HANDLED code.
+		 **/
+		virtual WORD						GetDlgCode( WORD /*_wKey*/ ) { return 0xFFFF;/*DLGC_WANTTAB*/; }
+
+		/**
 		 * The WM_KEYDOWN handler.
 		 *
 		 * \param _uiKeyCode The virtual-key code of the nonsystem key.

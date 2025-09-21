@@ -282,6 +282,7 @@
     <ClCompile Include="Src\FoundAddresses\MXMoveAddressesWindow.cpp" />
     <ClCompile Include="Src\HexEditor\MXDeusHexMachinaWindow.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexEditorControl.cpp" />
+    <ClCompile Include="Src\HexEditor\MXHexEditorFile.cpp" />
     <ClCompile Include="Src\Hotkeys\MXHotkeyManager.cpp" />
     <ClCompile Include="Src\Hotkeys\MXHotkeyManBase.cpp" />
     <ClCompile Include="Src\Hotkeys\MXHotkeyPollingMethod.cpp" />
@@ -425,6 +426,8 @@
     <ClInclude Include="Src\FoundAddresses\MXMoveAddressesWindow.h" />
     <ClInclude Include="Src\HexEditor\MXDeusHexMachinaWindow.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorControl.h" />
+    <ClInclude Include="Src\HexEditor\MXHexEditorFile.h" />
+    <ClInclude Include="Src\HexEditor\MXHexEditorInterface.h" />
     <ClInclude Include="Src\Hotkeys\MXHotkeyManager.h" />
     <ClInclude Include="Src\Hotkeys\MXHotkeyManBase.h" />
     <ClInclude Include="Src\Hotkeys\MXHotkeyPollingMethod.h" />
@@ -505,6 +508,7 @@
     <ClInclude Include="Src\Strings\MXSecureWString.h" />
     <ClInclude Include="Src\StringTheory\MXStringTheoryOperationsWindow.h" />
     <ClInclude Include="Src\StringTheory\MXStringTheoryWindow.h" />
+    <ClInclude Include="Src\Utilities\MXLargeVector.h" />
     <ClInclude Include="Src\Utilities\MXStream.h" />
     <ClInclude Include="Src\Utilities\MXTemplateWindow.h" />
     <ClInclude Include="Src\Utilities\MXUtilities.h" />

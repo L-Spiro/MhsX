@@ -74,7 +74,7 @@ namespace mx {
 		m_hFile = ::CreateFileW(
 			_pFile.c_str(),
 			dwDesiredAccess,
-			0,
+			FILE_SHARE_READ,
 			NULL,
 			dwCreationDisposition,
 			FILE_ATTRIBUTE_NORMAL,

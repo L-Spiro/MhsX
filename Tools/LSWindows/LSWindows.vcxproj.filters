@@ -356,6 +356,9 @@
     <ClInclude Include="Src\Button\LSWColorButton.h">
       <Filter>Header Files\Button</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Brush\LSWBrushCache.h">
+      <Filter>Header Files\Brush</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">

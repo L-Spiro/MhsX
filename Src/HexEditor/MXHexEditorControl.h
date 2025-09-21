@@ -1,6 +1,8 @@
 #pragma once
 
+#include "../MXMhsX.h"
 #include "../Strings/MXStringDecoder.h"
+#include "MXHexEditorInterface.h"
 
 #include <LSWWin.h>
 #include <Helpers/LSWHelpers.h>
@@ -15,6 +17,18 @@ namespace mx {
 		CHexEditorControl( const lsw::LSW_WIDGET_LAYOUT &_wlLayout, lsw::CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 
 
+		// == Enumerations.
+		/** Address formats. */
+		enum MX_ADDRESS_FMT {
+			MX_AF_BYTES_HEX,						// Example: 1:1D9E:53C8
+			MX_AF_BYTES_DEC,						// Example: 6562337568 (right-aligned, padded with spaces on the left)
+			MX_AF_BYTES_OCT,						// Example: 60411251440
+			MX_AF_LINE_NUMBER,						// Example: 820292197 (right-aligned, padded with spaces on the left)
+			MX_AF_SHORT_HEX,						// Example: C392:A990w
+			MX_AF_SHORT_DEC,						// Example: 2395961428w (right-aligned, padded with spaces on the left)
+		};
+
+
 		// == Functions.
 		// WM_NCCREATE.
 		virtual LSW_HANDLED							NcCreate( const CREATESTRUCTW &_csCreateParms );
@@ -25,11 +39,39 @@ namespace mx {
 		// Setting the HWND after the control has been created.
 		virtual void								InitControl( HWND _hWnd );
 
+		/**
+		 * The WM_GETDLGCODE handler.
+		 * 
+		 * \param _wKey The virtual key, pressed by the user, that prompted Windows to issue this notification. The handler must selectively handle these keys. For instance, the handler might accept and process VK_RETURN but delegate VK_TAB to the owner window.
+		 * \return Returns an LSW_HANDLED code.
+		 **/
+		virtual WORD								GetDlgCode( WORD _wKey );
+
 		// WM_ERASEBKGND.
 		virtual LSW_HANDLED							EraseBkgnd( HDC _hDc ) { return LSW_H_HANDLED; }
 
 		// WM_PAINT.
 		virtual LSW_HANDLED							Paint();
+
+		/**
+		 * The WM_SIZE handler.
+		 *
+		 * \param _wParam The type of resizing requested.
+		 * \param _lWidth The new width of the client area.
+		 * \param _lHeight The new height of the client area.
+		 * \return Returns a LSW_HANDLED enumeration.
+		 */
+		virtual LSW_HANDLED							Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight );
+
+		/**
+		 * Handles the WM_DPICHANGED message.
+		 * 
+		 * \param _wX The X-axis value of the new dpi of the window.
+		 * \param _wY The Y-axis value of the new dpi of the window.
+		 * \param _pRect A pointer to a RECT structure that provides a suggested size and position of the current window scaled for the new DPI. The expectation is that apps will reposition and resize windows based on the suggestions provided by lParam when handling this message.
+		 * \return Returns an LSW_HANDLED code.
+		 **/
+		virtual LSW_HANDLED							DpiChanged( WORD _wX, WORD _wY, LPRECT _pRect );
 
 		/**
 		 * The WM_GETFONT handler.
@@ -38,26 +80,64 @@ namespace mx {
 		 */
 		virtual HFONT								GetFont() { return m_fFont.hFont; }
 
+		// WM_LBUTTONDOWN.
+		virtual LSW_HANDLED							LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &/*_pCursorPos*/ );
+
+		/**
+		 * The WM_KEYDOWN handler.
+		 *
+		 * \param _uiKeyCode The virtual-key code of the nonsystem key.
+		 * \param _uiFlags The repeat count, scan code, extended-key flag, context code, previous key-state flag, and transition-state flag.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED							KeyDown( UINT _uiKeyCode, UINT /*_uiFlags*/ );
+
+		// WM_HSCROLL
+		virtual LSW_HANDLED							HScroll( USHORT /*_uScrollPos*/, USHORT _uScrollType, CWidget * /*_pwWidget*/ );
+
+		// WM_VSCROLL
+		virtual LSW_HANDLED							VScroll( USHORT /*_uScrollPos*/, USHORT _uScrollType, CWidget * /*_pwWidget*/ );
+
+		// WM_MOUSEWHEEL.
+		virtual LSW_HANDLED							MouseWheel( DWORD _dwVirtKeys, const POINTS &/*_pCursorPos*/ );
+
+		// WM_MOUSEHWHEEL.
+		virtual LSW_HANDLED							MouseHWheel( DWORD _dwVirtKeys, const POINTS &/*_pCursorPos*/ );
+
 		// Translate a child's tooltip text.
 		virtual std::wstring						TranslateTooltip( const std::string &_sText ) { 
 			return CStringDecoder::DecodeToWString( _sText.c_str(), _sText.size() );
 		}
+
+		// Sets the target stream.
+		inline void									SetStream( CHexEditorInterface * _pediStream ) { m_pheiTarget = _pediStream; RecalcAndInvalidate(); }
+
+		// Gets the size of the handled data.
+		inline uint64_t								Size() const { return m_pheiTarget ? m_pheiTarget->Size() : 0; }
 
 		// Registers the control if it has not been registered already.  Redundant calls have no effect.  Must be called before creating this control.
 		static void									PrepareControl();
 
 
 	protected :
+		// == Yypes.
+		/** The hex-view information. */
+		struct MX_HEX {
+			UINT									uiBytesPerRow = 0;				// Bytes per displayed row (default 16).
+		};
+
+
 		// == Members.
+		CHexEditorInterface *						m_pheiTarget = nullptr;			// The stream of data to handle.
 		lsw::LSW_FONT								m_fFont;						// Current font (monospace).
+		MX_HEX										m_hHex;							// Hex view settings.
 		int											m_iCxChar;						// Char width in pixels.
 		int											m_iCyChar;						// Char height in pixels.
 		int											m_iClientW;						// Client width.
 		int											m_iClientH;						// Client height.
 		//UINT										m_uiDpi;						// Window DPI.
-		UINT										m_uiBytesPerRow;				// Bytes per displayed row (default 16).
 		//const uint8_t *								m_pData;					// Data pointer (not owned).
-		uint64_t									m_ui64Size = 0;					// Data size in bytes.  TMP.
+		//uint64_t									m_ui64Size = 0;					// Data size in bytes.  TMP.
 		int											m_iVPos;						// Vertical position (first visible line index).
 		int											m_iHPos;						// Horizontal position (columns).
 		int											m_iPageLines;					// How many text rows fit.
@@ -70,6 +150,9 @@ namespace mx {
 
 
 		// == Functions.
+		// Draws the hex-editor view.
+		bool										PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect );
+
 		// Computes font metrics.
 		void										ComputeFontMetrics() {
 			HDC hDc = ::GetDC( Wnd() );
@@ -98,15 +181,15 @@ namespace mx {
 		// Updates font and other render settings and invalidates the control for redrawing.
 		void										RecalcAndInvalidate() {
 			ComputeFontMetrics();
-			m_iAddrDigits = AddrDigitsForSize( m_ui64Size );
-			//UpdateScrollbars();
+			m_iAddrDigits = AddrDigitsForSize( Size() );
+			UpdateScrollbars();
 			::InvalidateRect( Wnd(), nullptr, FALSE );
 		}
 
 		// Gets the total number of lines in the display.
-		inline uint64_t								TotalLines() {
-			if ( !m_uiBytesPerRow ) { return 0ULL; }
-			return (m_ui64Size + m_uiBytesPerRow - 1ULL) / m_uiBytesPerRow;
+		inline uint64_t								TotalLines_Hex() {
+			if ( !m_hHex.uiBytesPerRow ) { return 0ULL; }
+			return (Size() + m_hHex.uiBytesPerRow - 1ULL) / m_hHex.uiBytesPerRow;
 		}
 
 		// Gets the address size (number of digits).
@@ -115,17 +198,18 @@ namespace mx {
 		}
 
 		// Compute how many character columns our content needs.
-		inline int									TotalColumns() {
+		inline int									TotalColumns_Hex() {
 			// Address: digits + ':' + space.
 			const int iAddr  = m_iAddrDigits + 2;
 			// Hex area: each byte = "XX " (3 chars), extra spacer after 8 bytes.
-			const int iHex   = static_cast<int>( m_uiBytesPerRow ) * 3 + ((m_uiBytesPerRow > 8) ? 1 : 0);
+			const int iHex   = static_cast<int>(m_hHex.uiBytesPerRow) * 3 + ((m_hHex.uiBytesPerRow > 8) ? 1 : 0);
 			// Gap + ASCII area: 2 + bytes.
-			const int iAscii = 2 + static_cast<int>( m_uiBytesPerRow );
+			const int iAscii = 2 + static_cast<int>(m_hHex.uiBytesPerRow);
 			return iAddr + iHex + iAscii;
 		}
 
-
+		// Updates the scrollbars.
+		void										UpdateScrollbars();
 	private :
 		typedef lsw::CWidget						CParent;
 	};

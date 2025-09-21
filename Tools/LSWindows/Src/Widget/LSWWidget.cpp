@@ -1130,8 +1130,20 @@ namespace lsw {
 				break;
 			}
 			case WM_CANCELMODE : {
-				LSW_HANDLED hHandled = pmwThis->CancelMode();
-				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				if ( pmwThis ) {
+					LSW_HANDLED hHandled = pmwThis->CancelMode();
+					if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				}
+				break;
+			}
+			case WM_GETDLGCODE : {
+				if ( pmwThis ) {
+					WORD wTmp = pmwThis->GetDlgCode( WORD( _wParam ) );
+					if ( 0xFFFF == wTmp ) {
+						break;
+					}
+					LSW_RET( wTmp, wTmp );
+				}
 				break;
 			}
 

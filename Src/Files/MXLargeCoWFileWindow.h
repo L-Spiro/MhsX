@@ -5,6 +5,7 @@
 
 #include <filesystem>
 #include <mutex>
+#include <vector>
 
 namespace mx {
 
@@ -23,6 +24,9 @@ namespace mx {
 
 		// Sets the segment file size.
 		void													SetSegmentFileSize( size_t _sSize ) { m_sSegmentFileSize = _sSize; }
+
+		// The file size.
+		inline uint64_t											Size() const { return m_ui64Size; }
 
 
 	protected :
@@ -72,6 +76,7 @@ namespace mx {
 
 
 		// == Members.
+		uint64_t												m_ui64Size = 0;									// File size, derived from the logical view.
 		CFileMap												m_fmMainMap;									// The map for the main file being edited.
 		std::vector<std::unique_ptr<CFileMap>>					m_vEditedMaps;									// Mappings of edited copies.
 		std::vector<uint64_t>									m_vActiveSegments;								// List of edited segments currently loaded into RAM.  Sorted by most-recent access.
@@ -79,6 +84,7 @@ namespace mx {
 		std::vector<MX_LOGICAL_SECTION>							m_vLogicalMap;									// The logical file map.
 		size_t													m_sSegmentFileSize = 24 * 1024 * 1024;			// Segment file size.  Defaults to 24 megabytes.
 		size_t													m_sFileId = 0;									// The file names for segments.
+		uint32_t												m_ui32OriginalCrc = 0;							// The CRC at the time of loading.
 
 
 		// == Functions.
@@ -87,6 +93,23 @@ namespace mx {
 
 		// Simplifies the logical view.
 		void													SimplifyLogicalView();
+
+		// Updates the file size as per the logical view.
+		void													UpdateSize();
+
+		/**
+		 * Performs a logical DELETE on a vector of MX_LOGICAL_SECTION items.
+		 * \brief Removes the logical range [_ui64DelStart, _ui64DelStart + _ui64DelSize) and compacts everything after by shifting left.
+		 *
+		 * Sections that overlap the deleted range are trimmed or split as needed. Sections entirely after the
+		 * deleted range have their ui64Start reduced by _ui64DelSize. Adjacent compatible sections are coalesced.
+		 *
+		 * \param _vSections Vector of sections sorted by ui64Start (ties are not expected but tolerated).
+		 * \param _ui64DelStart Logical start of the delete range.
+		 * \param _ui64DelSize Logical size of the delete range. A value of 0 is a no-op.
+		 * \return Returns true if any modification was made to _vSections.
+		 **/
+		bool													DeleteRange( std::vector<MX_LOGICAL_SECTION> &_vSections, uint64_t _ui64DelStart, uint64_t _ui64DelSize );
 	};
 
 }	// namespace mx

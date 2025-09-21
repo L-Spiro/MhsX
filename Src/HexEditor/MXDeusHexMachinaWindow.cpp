@@ -2,6 +2,7 @@
 #include "../Layouts/MXLayoutManager.h"
 #include "../MemHack/MXWindowMemHack.h"
 #include "../Utilities/MXUtilities.h"
+#include "MXHexEditorFile.h"
 
 #include <Base/LSWWndClassEx.h>
 #include <Rebar/LSWRebar.h>
@@ -55,7 +56,7 @@ namespace mx {
 	}
 	CDeusHexMachinaWindow::~CDeusHexMachinaWindow() {
 		for ( auto I = m_vTabs.size(); I--; ) {
-			delete m_vTabs[I];
+			delete m_vTabs[I].pheiInterface;
 		}
 	}
 
@@ -227,7 +228,7 @@ namespace mx {
 	void CDeusHexMachinaWindow::ChildTabClosed( CWidget * _pwChild, INT _iTab ) {
 		if ( _pwChild == Tab() ) {
 			if ( _iTab < m_vTabs.size() ) {
-				//delete m_vTabs[_iTab];					// Deleted by the tab.
+				delete m_vTabs[_iTab].pheiInterface;
 				m_vTabs.erase( m_vTabs.begin() + _iTab );
 			}
 		}
@@ -301,7 +302,7 @@ namespace mx {
 
 	// Performs an Open operation.
 	void CDeusHexMachinaWindow::Open( const std::filesystem::path &_pPath ) {
-		CHexEditorControl * phecHexControl = nullptr;
+		MX_HEX_TAB htTab;
 		try {
 			auto ptTab = Tab();
 			if ( ptTab ) {
@@ -341,35 +342,43 @@ namespace mx {
 					nullptr, 0,										// pcHeightSizeExp
 //#endif
 				} );
-				phecHexControl = static_cast<CHexEditorControl *>(static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->CreateWidget( wlLayout, ptTab, TRUE, NULL, 0 ));
-				if ( !phecHexControl ) {
+				htTab.phecWidget = static_cast<CHexEditorControl *>(static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->CreateWidget( wlLayout, ptTab, TRUE, NULL, 0 ));
+				if ( !htTab.phecWidget ) {
 					//delete tTab.ppoPeObject;
 					return;
 				}
-				phecHexControl->InitControl( phecHexControl->Wnd() );
+				htTab.phecWidget->InitControl( htTab.phecWidget->Wnd() );
 
-				m_vTabs.insert( m_vTabs.begin(), phecHexControl );
+				htTab.pheiInterface = new( std::nothrow ) CHexEditorFile();
+				if ( !htTab.pheiInterface || !static_cast<CHexEditorFile*>(htTab.pheiInterface)->SetFile( _pPath ) ) {
+					delete htTab.phecWidget;
+					delete htTab.pheiInterface;
+					return;
+				}
+
+				m_vTabs.insert( m_vTabs.begin(), htTab );
 
 				auto wsTabname = _pPath.filename().generic_wstring();
 				TCITEMW tciItem = { 0 };
 				tciItem.mask = TCIF_TEXT;
 				tciItem.pszText = const_cast<LPWSTR>(wsTabname.c_str());
 
-
-
-				if ( ptTab->InsertItem( 0, &tciItem, phecHexControl ) == -1 ) {
-					delete phecHexControl;
+				if ( ptTab->InsertItem( 0, &tciItem, htTab.phecWidget ) == -1 ) {
+					delete htTab.phecWidget;
+					delete htTab.pheiInterface;
 					return;
 				}
+
+				htTab.phecWidget->SetStream( htTab.pheiInterface );
+
 				LSW_RECT rInternalSize = ptTab->WindowRect().ScreenToClient( ptTab->Wnd() );
 				ptTab->AdjustRect( FALSE, &rInternalSize );
-				::MoveWindow( phecHexControl->Wnd(), rInternalSize.left, rInternalSize.top, rInternalSize.Width(), rInternalSize.Height(), TRUE );
-		
-				
+				::MoveWindow( htTab.phecWidget->Wnd(), rInternalSize.left, rInternalSize.top, rInternalSize.Width(), rInternalSize.Height(), TRUE );
 			}
 		}
 		catch ( ... ) {
-			delete phecHexControl;
+			delete htTab.phecWidget;
+			delete htTab.pheiInterface;
 		}
 	}
 
