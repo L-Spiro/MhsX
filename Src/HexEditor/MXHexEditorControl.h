@@ -120,10 +120,49 @@ namespace mx {
 
 
 	protected :
-		// == Yypes.
+		// == Types.
+		/** What to draw and how to size the address gutter. */
+		struct MX_ADDR_STYLE {
+			uint64_t								ui64StartAddress = 0;			// Starting address bias (Set Starting Address).
+			//uint64_t								ui64FileSize;					// File size in bytes.
+			uint64_t								ui64FirstVisibleLine = 0;		// Top visible line index (0-based).
+			uint32_t								ui32MinAddrDigits = 4;			// Clamp minimum digits (HEX: 4..16 typical).
+			//uint32_t								ui32BytesPerRow;				// Bytes per displayed row.
+
+			uint32_t								ui32VisibleLines = 0;			// Count of visible lines.
+
+			//HFONT									hFont = NULL;					// Font used for drawing.
+			COLORREF								crText;							// Text color (use your theme).
+			MX_ADDRESS_FMT							afFormat = MX_AF_BYTES_HEX;     // Address format.
+			bool									bLowercaseHex = false;			// Use lowercase a..f for HEX.
+			bool									bShowColonIn = true;			// Insert ':' every 4 HEX digits (>4 only).
+			bool									bShowColonAfter = false;		// Append ':' after the address.
+			bool									bShowTypeSpec = false;			// Append 'h' (hex) or 'o' (oct).
+			bool									bMinimizeDigits = false;		// Size digits for current page, not whole file.
+			bool									bUseShortSuffixW = true;		// Append 'w' for Short addressing (matches your examples).
+		};
+
+		/** Measured glyph metrics for the address gutter font. */
+		struct MX_ADDR_GLYPHS {
+			int										iDigitMaxCx = 0;				// Max over '0'..'9' (and 'a'..'f' or 'A'..'F' when HEX).
+			int										iColonCx = 0;					// Width of ':'.
+			int										iSpaceCx = 0;					// Width of ' '.
+			int										iSpecHexCx = 0;					// Width of 'h'.
+			int										iSpecOctCx = 0;					// Width of 'o'.
+			int										iShortWcx = 0;					// Width of 'w'.
+			int										iCharCy = 0;					// Baseline advance (line height; you already have m_iCyChar).
+		};
+
+		/** General style settings. */
+		struct MX_STYLE {
+			MX_ADDR_STYLE							daAddressStyle;					// Address style.
+			MX_ADDR_GLYPHS							agGlyphs;						// Glyph settings.
+			uint32_t								uiBytesPerRow = 16;				// Bytes per displayed row (default 16).
+		};
+
 		/** The hex-view information. */
 		struct MX_HEX {
-			UINT									uiBytesPerRow = 0;				// Bytes per displayed row (default 16).
+			MX_STYLE								sStyle;							// Style settings for the Hex View.
 		};
 
 
@@ -188,8 +227,8 @@ namespace mx {
 
 		// Gets the total number of lines in the display.
 		inline uint64_t								TotalLines_Hex() {
-			if ( !m_hHex.uiBytesPerRow ) { return 0ULL; }
-			return (Size() + m_hHex.uiBytesPerRow - 1ULL) / m_hHex.uiBytesPerRow;
+			if ( !m_hHex.sStyle.uiBytesPerRow ) { return 0ULL; }
+			return (Size() + m_hHex.sStyle.uiBytesPerRow - 1ULL) / m_hHex.sStyle.uiBytesPerRow;
 		}
 
 		// Gets the address size (number of digits).
@@ -202,9 +241,9 @@ namespace mx {
 			// Address: digits + ':' + space.
 			const int iAddr  = m_iAddrDigits + 2;
 			// Hex area: each byte = "XX " (3 chars), extra spacer after 8 bytes.
-			const int iHex   = static_cast<int>(m_hHex.uiBytesPerRow) * 3 + ((m_hHex.uiBytesPerRow > 8) ? 1 : 0);
+			const int iHex   = static_cast<int>(m_hHex.sStyle.uiBytesPerRow) * 3 + ((m_hHex.sStyle.uiBytesPerRow > 8) ? 1 : 0);
 			// Gap + ASCII area: 2 + bytes.
-			const int iAscii = 2 + static_cast<int>(m_hHex.uiBytesPerRow);
+			const int iAscii = 2 + static_cast<int>(m_hHex.sStyle.uiBytesPerRow);
 			return iAddr + iHex + iAscii;
 		}
 

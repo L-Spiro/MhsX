@@ -12,6 +12,15 @@
 #define LSW_ELEMENTS( x )							LSW_COUNT_OF( x )
 #endif	// #ifndef LSW_COUNT_OF
 
+#ifndef LSW_WIN16_SCROLLBAR_MAX
+#define LSW_WIN16_SCROLLBAR_MAX						0x7FFF
+#endif	// #ifndef LSW_WIN16_SCROLLBAR_MAX
+
+#ifndef LSW_WIN32_SCROLLBAR_MAX
+#define LSW_WIN32_SCROLLBAR_MAX						0x7FFFFFFF
+#endif	// #ifndef LSW_WIN32_SCROLLBAR_MAX
+
+
 namespace lsw {
 
 	class											CLayoutManager;
@@ -138,6 +147,41 @@ namespace lsw {
 		 * \return Returns the registerd string for the LSW_LT_TREELISTVIEW class.
 		 **/
 		static const std::wstring &					TreeListViewString() { return m_wsTreeListViewName; }
+
+		/**
+		 * \brief Set 64-bit scrollbar info (wrapper that scales into Win32 SCROLLINFO).
+		 *
+		 * Description: Maintains a virtual 64-bit scroll range [0.._ui64Max] and position _ui64Pos,
+		 *  scaling them to a smaller physical range for Win32 scrollbars. For ÅgnormalÅh ranges
+		 *  (<= 0x7FFFFFFF) it passes values straight through. For larger ranges it maps into a
+		 *  0..0x7FFF space and computes nPos proportionally.
+		 *
+		 * \param _hWnd The window owning the scrollbar.
+		 * \param _iBar SB_VERT or SB_HORZ.
+		 * \param _uiMask Standard SIF_* mask (e.g., SIF_ALL).
+		 * \param _ui64Max The virtual 64-bit maximum (inclusive end position).
+		 * \param _ui64Pos The virtual 64-bit current position.
+		 * \param _iPage The page size in Ågvirtual unitsÅh (commonly rows visible).
+		 * \param _bRedraw TRUE to redraw the scrollbar.
+		 * \return Returns non-zero on success.
+		 */
+		static BOOL									SetScrollInfo64( HWND _hWnd, int _iBar, UINT _uiMask,
+			uint64_t _ui64Max, uint64_t _ui64Pos, int _iPage, BOOL _bRedraw );
+
+		/**
+		 * \brief Get 64-bit scrollbar position (wrapper around GetScrollInfo).
+		 *
+		 * Description: Converts the physical 32/16-bit thumb position back into the virtual
+		 *  64-bit space. Handles both SIF_POS and SIF_TRACKPOS. Special-cases the end of range
+		 *  to compensate for integer division truncation.
+		 *
+		 * \param _hWnd The window owning the scrollbar.
+		 * \param _iBar SB_VERT or SB_HORZ.
+		 * \param _uiMask Either SIF_POS or SIF_TRACKPOS (optionally OR with SIF_PAGE; we add it).
+		 * \param _ui64Max The virtual 64-bit maximum (inclusive end position).
+		 * \return Returns the virtual 64-bit position.
+		 */
+		static uint64_t								GetScrollPos64( HWND _hWnd, int _iBar, UINT _uiMask, uint64_t _ui64Max );
 
 
 		// =======================================

@@ -244,6 +244,130 @@ namespace lsw {
 	}
 
 	/**
+	 * \brief Set 64-bit scrollbar info (wrapper that scales into Win32 SCROLLINFO).
+	 *
+	 * Description: Maintains a virtual 64-bit scroll range [0.._ui64Max] and position _ui64Pos,
+	 *  scaling them to a smaller physical range for Win32 scrollbars. For ÅgnormalÅh ranges
+	 *  (<= 0x7FFFFFFF) it passes values straight through. For larger ranges it maps into a
+	 *  0..0x7FFF space and computes nPos proportionally.
+	 *
+	 * \param _hWnd The window owning the scrollbar.
+	 * \param _iBar SB_VERT or SB_HORZ.
+	 * \param _uiMask Standard SIF_* mask (e.g., SIF_ALL).
+	 * \param _ui64Max The virtual 64-bit maximum (inclusive end position).
+	 * \param _ui64Pos The virtual 64-bit current position.
+	 * \param _iPage The page size in Ågvirtual unitsÅh (commonly rows visible).
+	 * \param _bRedraw TRUE to redraw the scrollbar.
+	 * \return Returns non-zero on success.
+	 */
+	BOOL CBase::SetScrollInfo64( HWND _hWnd, int _iBar, UINT _uiMask,
+		uint64_t _ui64Max, uint64_t _ui64Pos, int _iPage, BOOL _bRedraw ) {
+
+		SCROLLINFO siInfo{ sizeof( siInfo ) };
+		siInfo.fMask = _uiMask;
+
+		// Normalize page.
+		if ( _iPage < 0 ) { _iPage = 0; }
+
+		// Trivial case: empty range.
+		if ( _ui64Max == 0ULL ) {
+			siInfo.nMin  = 0;
+			siInfo.nMax  = 0;
+			siInfo.nPage = static_cast<UINT>(_iPage);
+			siInfo.nPos  = 0;
+			return ::SetScrollInfo( _hWnd, _iBar, &siInfo, _bRedraw );
+		}
+
+		// If the virtual maximum fits in a 32-bit signed range, use the native API directly.
+		if ( _ui64Max <= static_cast<uint64_t>(LSW_WIN32_SCROLLBAR_MAX) ) {
+			const int iMax32 = static_cast<int>(_ui64Max);
+			int iPos32 = static_cast<int>((_ui64Pos <= _ui64Max) ? _ui64Pos : _ui64Max);
+
+			siInfo.nMin		= 0;
+			siInfo.nMax		= iMax32;
+			siInfo.nPage	= static_cast<UINT>(_iPage);
+			siInfo.nPos		= iPos32;
+			return ::SetScrollInfo( _hWnd, _iBar, &siInfo, _bRedraw );
+		}
+
+		// Large range: scale into 0..0x7FFF.
+		// pos32 = pos64 / (max64 / MAX16)
+		const int iMax16 = LSW_WIN16_SCROLLBAR_MAX;
+		const uint64_t ui64Div = (_ui64Max / static_cast<uint64_t>(iMax16));
+
+		int iPos32		= 0;
+		if ( ui64Div != 0ULL ) {
+			iPos32 = static_cast<int>(_ui64Pos / ui64Div);
+			if ( iPos32 < 0 ) { iPos32 = 0; }
+			if ( iPos32 > iMax16 ) { iPos32 = iMax16; }
+		}
+
+		siInfo.nMin		= 0;
+		siInfo.nMax		= iMax16;
+		siInfo.nPage	= static_cast<UINT>(_iPage);
+		siInfo.nPos		= iPos32;
+		return ::SetScrollInfo( _hWnd, _iBar, &siInfo, _bRedraw );
+	}
+
+	/**
+	 * \brief Get 64-bit scrollbar position (wrapper around GetScrollInfo).
+	 *
+	 * Description: Converts the physical 32/16-bit thumb position back into the virtual
+	 *  64-bit space. Handles both SIF_POS and SIF_TRACKPOS. Special-cases the end of range
+	 *  to compensate for integer division truncation.
+	 *
+	 * \param _hWnd The window owning the scrollbar.
+	 * \param _iBar SB_VERT or SB_HORZ.
+	 * \param _uiMask Either SIF_POS or SIF_TRACKPOS (optionally OR with SIF_PAGE; we add it).
+	 * \param _ui64Max The virtual 64-bit maximum (inclusive end position).
+	 * \return Returns the virtual 64-bit position.
+	 */
+	uint64_t CBase::GetScrollPos64( HWND _hWnd, int _iBar, UINT _uiMask, uint64_t _ui64Max ) {
+		// Always fetch PAGE so we can fix the Ågat endÅh case.
+		SCROLLINFO siInfo{ sizeof( siInfo ) };
+		siInfo.fMask = (_uiMask | SIF_PAGE | SIF_POS | SIF_TRACKPOS);
+
+		if ( !::GetScrollInfo( _hWnd, _iBar, &siInfo ) ) {
+			return 0ULL;
+		}
+
+		// Trivial/empty.
+		if ( _ui64Max == 0ULL ) {
+			return 0ULL;
+		}
+
+		// Select physical position source.
+		uint64_t ui64Pos32 = 0ULL;
+		if ( (_uiMask & SIF_TRACKPOS) != 0 ) {
+			ui64Pos32 = static_cast<uint64_t>(static_cast<uint32_t>(siInfo.nTrackPos));
+		}
+		else {
+			ui64Pos32 = static_cast<uint64_t>(static_cast<uint32_t>(siInfo.nPos));
+		}
+
+		// If the virtual maximum fits in 32-bit, no scaling required.
+		if ( _ui64Max <= static_cast<uint64_t>(LSW_WIN32_SCROLLBAR_MAX) ) {
+			if ( ui64Pos32 > _ui64Max ) { ui64Pos32 = _ui64Max; }
+			return ui64Pos32;
+		}
+
+		// Large range: invert scaling.
+		// pos64 = pos32 * (max64 / MAX16)
+		const uint64_t ui64Max16 = static_cast<uint64_t>(LSW_WIN16_SCROLLBAR_MAX);
+		const uint64_t ui64Step  = (_ui64Max / ui64Max16);
+
+		// End-of-range compensation:
+		// when the thumb is at the last pixel, integer math may otherwise produce pos64 < max64.
+		const uint64_t ui64PhysEnd = static_cast<uint64_t>(LSW_WIN16_SCROLLBAR_MAX) - static_cast<uint64_t>(siInfo.nPage) + 1ULL;
+		if ( ui64Pos32 == ui64PhysEnd ) {
+			const uint64_t ui64End = _ui64Max - static_cast<uint64_t>(siInfo.nPage) + 1ULL;
+			return ui64End;
+		}
+
+		return ui64Pos32 * (ui64Step ? ui64Step : 1ULL);
+	}
+
+	/**
 	 * Gets a module handle by name (Unicode).
 	 * \brief Thin wrapper around ::GetModuleHandleW().
 	 *

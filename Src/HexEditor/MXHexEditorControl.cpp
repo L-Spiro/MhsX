@@ -33,7 +33,7 @@ namespace mx {
 	void CHexEditorControl::InitControl( HWND _hWnd ) {
 		m_iCxChar = m_iCyChar = 0;
 		m_iClientW = m_iClientH = 0;
-		m_hHex.uiBytesPerRow = 16;
+		//m_hHex.sStyle.uiBytesPerRow = 16;
 		/*m_pData = nullptr;
 		m_ui64Size = 0ULL;*/
 		m_iVPos = 0;
@@ -157,8 +157,8 @@ namespace mx {
 		switch ( _uScrollType ) {
 			case SB_LINELEFT :		{ iPos -= 1; break; }
 			case SB_LINERIGHT :		{ iPos += 1; break; }
-			case SB_PAGELEFT :		{ iPos -= static_cast<int>( siInfo.nPage ); break; }
-			case SB_PAGERIGHT :		{ iPos += static_cast<int>( siInfo.nPage ); break; }
+			case SB_PAGELEFT :		{ iPos -= static_cast<int>(siInfo.nPage); break; }
+			case SB_PAGERIGHT :		{ iPos += static_cast<int>(siInfo.nPage); break; }
 			case SB_THUMBPOSITION :	{}		MX_FALLTHROUGH
 			case SB_THUMBTRACK :	{ iPos = siInfo.nTrackPos; break; }
 			case SB_LEFT :			{ iPos = siInfo.nMin; break; }
@@ -188,8 +188,8 @@ namespace mx {
 			case SB_BOTTOM :		{ iPos = siInfo.nMax; break; }
 			case SB_LINEUP :		{ iPos -= 1; break; }
 			case SB_LINEDOWN :		{ iPos += 1; break; }
-			case SB_PAGEUP :		{ iPos -= static_cast<int>( siInfo.nPage ); break; }
-			case SB_PAGEDOWN :		{ iPos += static_cast<int>( siInfo.nPage ); break; }
+			case SB_PAGEUP :		{ iPos -= static_cast<int>(siInfo.nPage); break; }
+			case SB_PAGEDOWN :		{ iPos += static_cast<int>(siInfo.nPage); break; }
 			case SB_THUMBPOSITION :	{}		MX_FALLTHROUGH
 			case SB_THUMBTRACK :	{ iPos = siInfo.nTrackPos; break; }
 		}
@@ -241,7 +241,7 @@ namespace mx {
 	// Draws the hex-editor view.
 	bool CHexEditorControl::PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect ) {
 
-		::FillRect( _hDc, &_rRect, reinterpret_cast<HBRUSH>( ::GetStockObject( DKGRAY_BRUSH ) ) );
+		::FillRect( _hDc, &_rRect, reinterpret_cast<HBRUSH>(::GetStockObject( DKGRAY_BRUSH )) );
 
 		return true;
 	}
@@ -264,7 +264,7 @@ namespace mx {
 		siV.nMin	= 0;
 		siV.nMax	= iMaxV;
 		siV.nPos	= m_iVPos;
-		siV.nPage	= static_cast<UINT>( m_iPageLines );
+		siV.nPage	= static_cast<UINT>(m_iPageLines);
 		::SetScrollInfo( m_hWnd, SB_VERT, &siV, TRUE );
 
 		// Horizontal (columns).
@@ -277,7 +277,7 @@ namespace mx {
 		siH.nMin	= 0;
 		siH.nMax	= iMaxH;
 		siH.nPos	= m_iHPos;
-		siH.nPage	= static_cast<UINT>( m_iPageCols );
+		siH.nPage	= static_cast<UINT>(m_iPageCols);
 		::SetScrollInfo( m_hWnd, SB_HORZ, &siH, TRUE );
 	}
 

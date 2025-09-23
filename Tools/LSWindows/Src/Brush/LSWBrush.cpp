@@ -13,7 +13,15 @@ namespace lsw {
 	}
 
 	// == Functions.
-	// The CreateSolidBrush function creates a logical brush that has the specified solid color.
+	/**
+	 * Creates a solid-color brush.
+	 * \brief Wraps ::CreateSolidBrush() and stores the resulting HBRUSH on success.
+	 *
+	 * Any previously owned handle is released before storing the new one.
+	 *
+	 * \param _crColor The COLORREF specifying the solid color (0x00BBGGRR).
+	 * \return Returns TRUE on success; otherwise FALSE.
+	 */
 	BOOL CBrush::CreateSolidBrush( COLORREF _crColor ) {
 		Reset();
 		m_hHandle = ::CreateSolidBrush( _crColor );
@@ -25,7 +33,16 @@ namespace lsw {
 		return m_hHandle ? TRUE : FALSE;
 	}
 
-	// The CreatePatternBrush function creates a logical brush with the specified bitmap pattern.
+	/**
+	 * Creates a pattern brush from a bitmap.
+	 * \brief Wraps ::CreatePatternBrush() using the given CBitmap.
+	 *
+	 * Any previously owned handle is released before storing the new one.
+	 * The pattern alignment follows the current brush origin.
+	 *
+	 * \param _bBitmap The source bitmap used to define the pattern.
+	 * \return Returns TRUE on success; otherwise FALSE.
+	 */
 	BOOL CBrush::CreatePatternBrush( const CBitmap &_bBitmap ) {
 		Reset();
 		m_hHandle = ::CreatePatternBrush( _bBitmap.Handle() );
@@ -37,7 +54,10 @@ namespace lsw {
 		return m_hHandle ? TRUE : FALSE;
 	}
 
-	// Resets the brush.
+	/**
+	 * Resets the brush to an empty state.
+	 * \brief Releases the owned HBRUSH and sets the internal handle to NULL.
+	 */
 	VOID CBrush::Reset() {
 		if ( m_hHandle ) {
 			::DeleteObject( m_hHandle );

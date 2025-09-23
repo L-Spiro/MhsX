@@ -1062,6 +1062,19 @@ namespace lsw {
 		}
 
 		/**
+		 * \brief Measure a set of characters and return the maximum advance width.
+		 */
+		static int							MeasureMax( HDC _hDc, const wchar_t * _pwszChars ) {
+			SIZE sThis {};
+			int iMax = 0;
+			for ( const wchar_t * pwcP = _pwszChars; *pwcP; ++pwcP ) {
+				::GetTextExtentPoint32W( _hDc, pwcP, 1, &sThis );
+				if ( sThis.cx > iMax ) { iMax = sThis.cx; }
+			}
+			return iMax;
+		}
+
+		/**
 		 * Gets the size of a given string printed with the given HDC.
 		 *
 		 * \param _wsString The string whose length in pixels is to be found.

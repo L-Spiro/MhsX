@@ -112,7 +112,7 @@ namespace mx {
 					if ( !ofs ) { throw std::runtime_error( "Failed to create disk file." ); }
 					T tDefVal{};
 					for ( size_t i = 0; i < m_nTotalSize; ++i ) {
-						ofs.write( reinterpret_cast<const char *>( &tDefVal ), sizeof( T ) );
+						ofs.write( reinterpret_cast<const char *>(&tDefVal), sizeof( T ) );
 					}
 				}
 
@@ -392,7 +392,7 @@ namespace mx {
 				// Write large block directly.
 				m_ofsDisk.seekp( m_nTotalSize * sizeof( T ), std::ios::beg );
 				m_ofsDisk.write(
-					reinterpret_cast<const char *>( _pArray ),
+					reinterpret_cast<const char *>(_pArray),
 					_nCount * sizeof( T )
 				);
 				m_nTotalSize += _nCount;
@@ -576,10 +576,10 @@ namespace mx {
 
 				m_ofsDisk.seekg( nSrc * sizeof( T ), std::ios::beg );
 				vBlock.resize( sChunk );
-				m_ofsDisk.read( reinterpret_cast<char *>( vBlock.data() ), sChunk * sizeof( T ) );
+				m_ofsDisk.read( reinterpret_cast<char *>(vBlock.data()), sChunk * sizeof( T ) );
 
 				m_ofsDisk.seekp( (nSrc - _nCount) * sizeof( T ), std::ios::beg );
-				m_ofsDisk.write( reinterpret_cast<const char *>( vBlock.data() ), sChunk * sizeof( T ) );
+				m_ofsDisk.write( reinterpret_cast<const char *>(vBlock.data()), sChunk * sizeof( T ) );
 			}
 
 			m_ofsDisk.close();
@@ -622,7 +622,7 @@ namespace mx {
 				m_ofsDisk.seekp( m_nTotalSize * sizeof( T ), std::ios::beg );
 				T tDef{};
 				for ( size_t i = m_nTotalSize; i < _nNewSize; ++i ) {
-					m_ofsDisk.write( reinterpret_cast<const char *>( &tDef ), sizeof( T ) );
+					m_ofsDisk.write( reinterpret_cast<const char *>(&tDef), sizeof( T ) );
 				}
 			}
 			else if ( _nNewSize < m_nTotalSize ) {
@@ -679,7 +679,7 @@ namespace mx {
 				if ( !m_ofsDisk ) { throw std::runtime_error( "Failed to seek for flushCurrentSection()." ); }
 				size_t sWriteLen = std::vector<T, Allocator>::size() * sizeof( T );
 				m_ofsDisk.write(
-					reinterpret_cast<const char *>( std::vector<T, Allocator>::data() ),
+					reinterpret_cast<const char *>(std::vector<T, Allocator>::data()),
 					sWriteLen
 				);
 				if ( !m_ofsDisk ) { throw std::runtime_error( "Failed to write in flushCurrentSection()." ); }
@@ -704,7 +704,7 @@ namespace mx {
 				throw std::runtime_error( "Failed to seek for loadSection()." );
 			}
 			m_ofsDisk.read(
-				reinterpret_cast<char *>( std::vector<T, Allocator>::data() ),
+				reinterpret_cast<char *>(std::vector<T, Allocator>::data()),
 				nItemsToLoad * sizeof( T )
 			);
 			if ( !m_ofsDisk ) {
@@ -727,7 +727,7 @@ namespace mx {
 					std::ios::beg
 				);
 				m_ofsDisk.write(
-					reinterpret_cast<const char *>( m_vWriteBuffer.data() ),
+					reinterpret_cast<const char *>(m_vWriteBuffer.data()),
 					m_vWriteBuffer.size() * sizeof( T )
 				);
 				m_vWriteBuffer.clear();

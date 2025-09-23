@@ -211,10 +211,10 @@ namespace ee {
 
 		static __forceinline uint32_t __cdecl			BitScanRev( uint64_t const _uiValue ) EE_BI_THROW {
 			if ( _uiValue > UINT32_MAX ) {
-				return BitScanRev( reinterpret_cast<uint32_t const*>( &_uiValue )[1] ) + 32;
+				return BitScanRev( reinterpret_cast<uint32_t const*>(&_uiValue )[1]) + 32;
 			}
 			else {
-				return BitScanRev( reinterpret_cast<uint32_t const*>( &_uiValue )[0] );
+				return BitScanRev( reinterpret_cast<uint32_t const*>(&_uiValue )[0]);
 			}
 		}
 

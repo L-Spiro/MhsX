@@ -139,7 +139,19 @@ namespace lsw {
 
 	
 	// == Functions.
-	// The default message handler.
+	/**
+	 * Default top-level window procedure.
+	 * \brief Routes messages to the appropriate handler and provides default processing.
+	 *
+	 * Subclasses may forward unhandled messages here. This procedure must be static and is typically
+	 * associated with the registered window class for CWidget-based windows.
+	 *
+	 * \param _hWnd Window receiving the message.
+	 * \param _uMsg Message identifier (WM_*).
+	 * \param _wParam WPARAM message data.
+	 * \param _lParam LPARAM message data.
+	 * \return Returns an LRESULT as defined by the message semantics.
+	 */
 	LRESULT CALLBACK CWidget::WindowProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam ) {
 		LRESULT lrWndRes = 0;
 		INT_PTR ipDlgRes = 0;
@@ -147,7 +159,19 @@ namespace lsw {
 		return lrWndRes;
 	}
 
-	// The default dialog message handler.
+	/**
+	 * Default dialog box procedure.
+	 * \brief Handles dialog-specific messages and dispatches notifications.
+	 *
+	 * Use this for dialog templates associated with CWidget-based dialogs. Unhandled messages
+	 * are passed to ::DefDlgProc().
+	 *
+	 * \param _hWnd Dialog window handle.
+	 * \param _uMsg Message identifier (WM_*).
+	 * \param _wParam WPARAM message data.
+	 * \param _lParam LPARAM message data.
+	 * \return Returns TRUE if the message is processed; otherwise FALSE (or a control-specific INT_PTR).
+	 */
 	INT_PTR CALLBACK CWidget::DialogProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam ) {
 		LRESULT lrWndRes = 0;
 		INT_PTR ipDlgRes = 0;
@@ -181,7 +205,12 @@ namespace lsw {
 		return pwNext;
 	}
 
-	// Gets the window text.
+	/**
+	 * Gets the window text as std::string (ANSI).
+	 * \brief Returns the control text encoded as the current ANSI code page.
+	 *
+	 * \return Returns the text string.
+	 */
 	std::string CWidget::GetTextA() const {
 		INT iLen = GetTextLengthA() + 1;
 		CHAR * pcBuffer = new( std::nothrow ) CHAR[iLen];
@@ -191,7 +220,12 @@ namespace lsw {
 		return sRet;
 	}
 
-	// Gets the window text.
+	/**
+	 * Gets the window text as std::wstring (Unicode).
+	 * \brief Returns the control text as UTF-16.
+	 *
+	 * \return Returns the wide text string.
+	 */
 	std::wstring CWidget::GetTextW() const {
 		INT iLen = GetTextLengthW() + 1;
 		WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[iLen];
@@ -201,13 +235,29 @@ namespace lsw {
 		return sRet;
 	}
 
-	// Gets the window text in UTF-8.
+	/**
+	 * Gets the window text encoded as UTF-8.
+	 * \brief Converts the control text to a UTF-8 std::string.
+	 *
+	 * \return Returns the UTF-8 text string.
+	 */
 	std::string CWidget::GetTextUTF8() const {
 		std::wstring wText = GetTextW();
 		return ee::CExpEval::WStringToString( wText );
 	}
 
-	// Get the value of the text as an expression.
+	/**
+	 * Evaluates the control text as an expression.
+	 * \brief Parses the text and computes a value using the expression evaluator.
+	 *
+	 * The evaluator may consult the address handler to resolve symbols or memory references.
+	 *
+	 * \param _eResult Receives the evaluated result and type.
+	 * \param _ui32Flags Evaluation flags controlling parsing behavior.
+	 * \param _pbExpIsValid Optional pointer to receive TRUE if expression was valid.
+	 * \param _psObjStringResult Optional pointer to receive object-string output.
+	 * \return Returns TRUE on success; otherwise FALSE.
+	 */
 	BOOL CWidget::GetTextAsExpression( ee::CExpEvalContainer::EE_RESULT &_eResult, uint32_t _ui32Flags, BOOL * _pbExpIsValid, std::string * _psObjStringResult ) const {
 		if ( _pbExpIsValid ) { (*_pbExpIsValid) = FALSE; }
 		CExpression eExp;
@@ -235,28 +285,51 @@ namespace lsw {
 		return TRUE;
 	}
 
-	// Get the value of the text as an int64_t expression.
+	/**
+	 * Evaluates the control text as a signed 64-bit expression.
+	 * \brief Convenience wrapper that requests an int64_t result.
+	 *
+	 * \param _eResult Receives the evaluated result.
+	 * \return Returns TRUE on success; otherwise FALSE.
+	 */
 	BOOL CWidget::GetTextAsInt64Expression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const {
 		if ( !GetTextAsExpression( _eResult, ee::CObject::EE_TF_NONE ) ) { return FALSE; }
 		_eResult = ee::CExpEvalContainer::ConvertResult( _eResult, ee::EE_NC_SIGNED );
 		return _eResult.ncType == ee::EE_NC_SIGNED ? TRUE : FALSE;
 	}
 
-	// Get the value of the text as a uint64_t expression.
+	/**
+	 * Evaluates the control text as an unsigned 64-bit expression.
+	 * \brief Convenience wrapper that requests a uint64_t result.
+	 *
+	 * \param _eResult Receives the evaluated result.
+	 * \return Returns TRUE on success; otherwise FALSE.
+	 */
 	BOOL CWidget::GetTextAsUInt64Expression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const {
 		if ( !GetTextAsExpression( _eResult, ee::CObject::EE_TF_NONE ) ) { return FALSE; }
 		_eResult = ee::CExpEvalContainer::ConvertResult( _eResult, ee::EE_NC_UNSIGNED );
 		return _eResult.ncType == ee::EE_NC_UNSIGNED ? TRUE : FALSE;
 	}
 
-	// Get the value of the text as a double expression.
+	/**
+	 * Evaluates the control text as a double-precision expression.
+	 * \brief Convenience wrapper that requests a double result.
+	 *
+	 * \param _eResult Receives the evaluated result.
+	 * \return Returns TRUE on success; otherwise FALSE.
+	 */
 	BOOL CWidget::GetTextAsDoubleExpression( ee::CExpEvalContainer::EE_RESULT &_eResult ) const {
 		if ( !GetTextAsExpression( _eResult, ee::CObject::EE_TF_NONE ) ) { return FALSE; }
 		_eResult = ee::CExpEvalContainer::ConvertResult( _eResult, ee::EE_NC_FLOATING );
 		return _eResult.ncType == ee::EE_NC_FLOATING ? TRUE : FALSE;
 	}
 
-	// If the function succeeds, the return value is the pointer to the window that previously had the keyboard focus.
+	/**
+	 * Gives the keyboard focus to this window.
+	 * \brief Calls ::SetFocus() and updates internal focus tracking.
+	 *
+	 * \return Returns the previously focused widget, or nullptr.
+	 */
 	CWidget * CWidget::SetFocus() const {
 		if ( !Wnd() ) { return nullptr; }
 		HWND hWnd = ::SetFocus( Wnd() );
@@ -267,20 +340,33 @@ namespace lsw {
 		return pwRet;
 	}
 
-	// Gets the value of the boolean that tracks the window's focus.
+	/**
+	 * Queries the internal focus flag.
+	 * \brief Returns true if this widget currently believes it has focus.
+	 *
+	 * \return Returns true if focused; otherwise false.
+	 */
 	bool CWidget::GetFocus() const {
 		return m_bHasFocus;
 	}
 
-	// Sets the parent window.
+	/**
+	 * Sets the logical parent widget.
+	 * \brief Updates the containment hierarchy and returns the previous parent.
+	 *
+	 * \param _pwParent The new parent widget.
+	 * \return Returns the previous parent widget pointer.
+	 */
 	CWidget * CWidget::SetParent( CWidget * _pwParent ) {
 		HWND hWnd = _pwParent ? _pwParent->Wnd() : NULL;
 		hWnd = ::SetParent( Wnd(), hWnd );
 		return LSW_WIN2CLASS( hWnd );
 	}
 
-	// Updates all rectangles with the current window rectangles.  If a control changes size and you wish to set the new size as its "base" size,
-	//	call this.
+	/**
+	 * Updates cached rectangles from current window metrics.
+	 * \brief Captures current WindowRect() and ClientRect() as the new base sizes.
+	 */
 	VOID CWidget::UpdateRects() {
 		/*::GetWindowRect( Wnd(), &m_rRect );
 		::GetClientRect( Wnd(), &m_rClientRect );*/
@@ -295,7 +381,13 @@ namespace lsw {
 		//m_rStartingClientRect.MoveBy( { -m_rStartingRect.left, -m_rStartingRect.top } );
 	}
 
-	// Do we have a given child widget?
+	/**
+	 * Tests whether this widget owns a given child widget.
+	 * \brief Walks the child list to locate the specified widget.
+	 *
+	 * \param _pwChild The child widget to find.
+	 * \return Returns true if the child is contained; otherwise false.
+	 */
 	bool CWidget::HasChild( const CWidget * _pwChild ) const {
 		for ( size_t I = m_vChildren.size(); I--; ) {
 			if ( m_vChildren[I] == _pwChild ) {
@@ -305,7 +397,13 @@ namespace lsw {
 		return false;
 	}
 
-	// Gets a pointer to a child with the given ID.
+	/**
+	 * Finds a child by control ID.
+	 * \brief Returns a direct child whose ID matches _wId.
+	 *
+	 * \param _wId The child control ID.
+	 * \return Returns a pointer to the child, or nullptr if not found.
+	 */
 	CWidget * CWidget::FindChild( WORD _wId ) {
 		for ( size_t I = m_vChildren.size(); I--; ) {
 			if ( m_vChildren[I]->Id() == _wId ) {
@@ -317,7 +415,13 @@ namespace lsw {
 		return nullptr;
 	}
 
-	// Gets a pointer to a child with the given ID.
+	/**
+	 * Finds a child by control ID (const).
+	 * \brief Const overload returning a const pointer.
+	 *
+	 * \param _wId The child control ID.
+	 * \return Returns a const pointer to the child, or nullptr if not found.
+	 */
 	const CWidget * CWidget::FindChild( WORD _wId ) const {
 		for ( size_t I = m_vChildren.size(); I--; ) {
 			if ( m_vChildren[I]->Id() == _wId ) {
@@ -329,7 +433,13 @@ namespace lsw {
 		return nullptr;
 	}
 
-	// Gets a pointer to a parent with the given ID.
+	/**
+	 * Finds a parent by control ID.
+	 * \brief Walks up the parent chain until an ID match is found.
+	 *
+	 * \param _wId The parent control ID.
+	 * \return Returns a pointer to the parent, or nullptr if not found.
+	 */
 	CWidget * CWidget::FindParent( WORD _wId ) {
 		CWidget * pwParent = Parent();
 		while ( pwParent ) {
@@ -339,7 +449,13 @@ namespace lsw {
 		return nullptr;
 	}
 
-	// Gets a pointer to a parent with the given ID.
+	/**
+	 * Finds a parent by control ID (const).
+	 * \brief Const overload returning a const pointer.
+	 *
+	 * \param _wId The parent control ID.
+	 * \return Returns a const pointer to the parent, or nullptr if not found.
+	 */
 	const CWidget * CWidget::FindParent( WORD _wId ) const {
 		const CWidget * pwParent = Parent();
 		while ( pwParent ) {
@@ -349,7 +465,15 @@ namespace lsw {
 		return nullptr;
 	}
 
-	// Set the parent.
+	/**
+	 * Sets the logical parent pointer only.
+	 * \brief Updates the stored parent widget without changing Win32 parentage.
+	 *
+	 * This does not call ::SetParent(); it only updates the internal pointer used by the layout
+	 * and widget hierarchy.
+	 *
+	 * \param _pwParent The new parent widget pointer.
+	 */
 	void CWidget::SetWidgetParent( CWidget * _pwParent ) {
 		if ( m_pwParent == _pwParent ) { return; }
 		if ( m_pwParent ) {
@@ -434,30 +558,44 @@ namespace lsw {
 
 	// == Message Handlers.
 	/**
-	 * The WM_SIZE handler.
+	 * Handles WM_SIZE.
+	 * \brief Responds to client-area size changes.
 	 *
-	 * \param _wParam The type of resizing requested.
-	 * \param _lWidth The new width of the client area.
-	 * \param _lHeight The new height of the client area.
-	 * \return Returns a LSW_HANDLED enumeration.
+	 * Called after the window's client size changes. Override to update layouts,
+	 * reposition children, or cache new sizes.
+	 *
+	 * \param _wParam The requested sizing type (e.g., SIZE_RESTORED, SIZE_MINIMIZED).
+	 * \param _lWidth The new client width, in pixels.
+	 * \param _lHeight The new client height, in pixels.
+	 * \return Returns a LSW_HANDLED code.
 	 */
 	CWidget::LSW_HANDLED CWidget::Size( WPARAM /*_wParam*/, LONG /*_lWidth*/, LONG /*_lHeight*/ ) {
 		::EnumChildWindows( Wnd(), EnumChildWindows_ResizeControls, 0 );
 		return LSW_H_CONTINUE;
 	}
 
-	// WM_MOVE.
+	/**
+	 * Handles WM_MOVE.
+	 * \brief Notified when the window is moved.
+	 *
+	 * \param _lX New x-position of the window (screen coordinates).
+	 * \param _lY New y-position of the window (screen coordinates).
+	 * \return Returns a LSW_HANDLED code.
+	 */
 	CWidget::LSW_HANDLED CWidget::Move( LONG /*_lX*/, LONG /*_lY*/ ) {
 		::EnumChildWindows( Wnd(), EnumChildWindows_ResizeControls, 0 );
 		return LSW_H_CONTINUE;
 	}
 
 	/**
-	 * Handles the WM_DPICHANGED message.
-	 * 
-	 * \param _wX The X-axis value of the new dpi of the window.
-	 * \param _wY The Y-axis value of the new dpi of the window.
-	 * \param _pRect A pointer to a RECT structure that provides a suggested size and position of the current window scaled for the new DPI. The expectation is that apps will reposition and resize windows based on the suggestions provided by lParam when handling this message.
+	 * Handles WM_DPICHANGED.
+	 * \brief Responds to per-monitor DPI changes by resizing and repositioning the window.
+	 *
+	 * Use _pRect as the suggested new window rectangle scaled for the new DPI.
+	 *
+	 * \param _wX The new horizontal DPI.
+	 * \param _wY The new vertical DPI.
+	 * \param _pRect Suggested new window rectangle (screen coordinates).
 	 * \return Returns an LSW_HANDLED code.
 	 **/
 	CWidget::LSW_HANDLED CWidget::DpiChanged( WORD /*_wX*/, WORD /*_wY*/, LPRECT _pRect ) {
@@ -472,7 +610,12 @@ namespace lsw {
 	}
 
 	// == Functions.
-	// Remove a child.
+	/**
+	 * Removes a child widget from this widget.
+	 * \brief Detaches the child from the internal child list.
+	 *
+	 * \param _pwChild The child to remove.
+	 */
 	void CWidget::RemoveChild( const CWidget * _pwChild ) {
 		for ( size_t I = m_vChildren.size(); I--; ) {
 			if ( m_vChildren[I] == _pwChild ) {
@@ -482,22 +625,34 @@ namespace lsw {
 		ChildWasRemoved( _pwChild );
 	}
 
-	// Add a child.
+	/**
+	 * Adds a child widget to this widget.
+	 * \brief Attaches the child to the internal child list.
+	 *
+	 * \param _pwChild The child to add.
+	 */
 	void CWidget::AddChild( CWidget * _pwChild ) {
 		if ( !HasChild( _pwChild ) ) {
 			m_vChildren.push_back( _pwChild );
 		}
 	}
 
-	// Informs that a child was removed from a child control (IE this control's child had a child control removed from it).
-	// Is also called on the control from which a child was removed for convenience.
+	/**
+	 * Notified when a child is removed.
+	 * \brief Called on this widget and on the widget that lost a child for convenience.
+	 *
+	 * \param _pwChild The child that was removed.
+	 */
 	void CWidget::ChildWasRemoved( const CWidget * _pwChild ) {
 		if ( Parent() ) {
 			Parent()->ChildWasRemoved( _pwChild );
 		}
 	}
 
-	// Evaluates expressions to determine a new rectangle for the control.
+	/**
+	 * Evaluates expressions to compute a new size for the control.
+	 * \brief Applies expression-driven layout to determine bounds.
+	 */
 	void CWidget::EvalNewSize() {
 		LSW_RECT rNewSize = WindowRect( this );
 		// Each axis has 3 possible expressions.
@@ -575,7 +730,12 @@ namespace lsw {
 		::GetClientRect( Wnd(), &m_rClientRect );*/
 	}
 
-	// Setting the HWND after the control has been created.
+	/**
+	 * Attaches an HWND to this widget after creation.
+	 * \brief Finalizes control initialization once the window handle exists.
+	 *
+	 * \param _hWnd The created window handle.
+	 */
 	void CWidget::InitControl( HWND _hWnd ) {
 		m_hWnd = _hWnd;
 
@@ -607,7 +767,12 @@ namespace lsw {
 		}
 	}
 
-	// Adds a dockable window to the list of dockable windows.
+	/**
+	 * Adds a dockable window to this widget's dockable list.
+	 * \brief Registers a CDockable for activation/visibility management.
+	 *
+	 * \param _pdDock The dockable window pointer.
+	 */
 	void CWidget::AddDockable( CDockable * _pdDock ) {
 		for ( size_t I = 0; I < m_vDockables.size(); ++I ) {
 			::SetActiveWindow( m_vDockables[I]->Wnd() );
@@ -616,14 +781,25 @@ namespace lsw {
 		m_vDockables.push_back( _pdDock );
 	}
 
-	// Removes a dockable window from the list of dockable windows.
+	/**
+	 * Removes a dockable window from this widget's dockable list.
+	 * \brief Unregisters a CDockable from management.
+	 *
+	 * \param _pdDock The dockable window pointer.
+	 */
 	void CWidget::RemDockable( CDockable * _pdDock ) {
 		for ( size_t I = m_vDockables.size(); I--; ) {
 			if ( m_vDockables[I] == _pdDock ) { m_vDockables.erase( m_vDockables.begin() + I ); }
 		}
 	}
 
-	// Gets the array of dockables, optionally including this object.
+	/**
+	 * Retrieves dockable windows.
+	 * \brief Fills a vector with dockable widgets, optionally including this widget.
+	 *
+	 * \param _vReturn Output vector receiving dockables.
+	 * \param _bIncludeParent TRUE to include this widget in the list.
+	 */
 	void CWidget::GetDockables( std::vector<CWidget *> &_vReturn, BOOL _bIncludeParent ) {
 		_vReturn.clear();
 		for ( size_t I = 0; I < m_vDockables.size(); ++I ) {
@@ -634,10 +810,16 @@ namespace lsw {
 		}
 	}
 
-	// Handle WM_NCACTIVATE for dockables.  Should be called on the owner window.
-	//	_pwWnd = Pointer to window that received WM_NCACTIVATE (can be the owner or one of its tool windows).
-	//	_wParam = WPARAM of the WM_NCACTIVATE message.
-	//	_lParam = LPARAM of the WM_NCACTIVATE message.
+	/**
+	 * Handles WM_NCACTIVATE for dockable windows.
+	 * \brief Call on the owner window to propagate activation to tool windows.
+	 *
+	 * \param _pwWnd Pointer to the window that received WM_NCACTIVATE.
+	 * \param _wParam WPARAM from WM_NCACTIVATE.
+	 * \param _lParam LPARAM from WM_NCACTIVATE.
+	 * \param _bCallDefault TRUE to call the default procedure.
+	 * \return Returns the LRESULT from handling or default processing.
+	 */
 	LRESULT CALLBACK CWidget::DockNcActivate( CWidget * _pwWnd, WPARAM _wParam, LPARAM _lParam, BOOL _bCallDefault ) {
 		LSW_HANDLED hHandled = _pwWnd->NcActivate( static_cast<BOOL>(_wParam), _lParam );
 
@@ -686,10 +868,16 @@ namespace lsw {
 			FALSE;
 	}
 
-	// Handle WM_ENABLE for Should be called on the owner window.
-	//	_pwWnd = Pointer to window that received WM_ENABLE (can be the owner or one of its tool windows).
-	//	_wParam = WPARAM of the WM_ENABLE message.
-	//	_lParam = LPARAM of the WM_ENABLE message.
+	/**
+	 * Handles WM_ENABLE for dockable windows.
+	 * \brief Call on the owner window to propagate enable/disable state.
+	 *
+	 * \param _pwWnd Pointer to the window that received WM_ENABLE.
+	 * \param _wParam WPARAM from WM_ENABLE.
+	 * \param _lParam LPARAM from WM_ENABLE.
+	 * \param _bCallDefault TRUE to call the default procedure.
+	 * \return Returns the LRESULT from handling or default processing.
+	 */
 	LRESULT CALLBACK CWidget::DockEnable( CWidget * _pwWnd, WPARAM _wParam, LPARAM _lParam, BOOL _bCallDefault ) {
 		LSW_HANDLED hHandled = _pwWnd->Enable( static_cast<BOOL>(_wParam) );
 
@@ -715,7 +903,14 @@ namespace lsw {
 			0;
 	}
 
-	// Attaches a control/window to its CWidget.
+	/**
+	 * EnumChildWindows callback that attaches HWNDs to CWidget instances.
+	 * \brief Associates child windows with their owning widgets.
+	 *
+	 * \param _hWnd Child window handle.
+	 * \param _lParam Caller-supplied parameter.
+	 * \return Returns TRUE to continue enumeration; otherwise FALSE.
+	 */
 	BOOL CALLBACK CWidget::EnumChildWindows_AttachWindowToWidget( HWND _hWnd, LPARAM _lParam ) {
 		std::vector<CWidget *> * pvWidgets = reinterpret_cast<std::vector<CWidget *> *>(_lParam);
 		int iId = ::GetDlgCtrlID( _hWnd );
@@ -730,7 +925,14 @@ namespace lsw {
 		return TRUE;
 	}
 
-	// Applies enabled/disabled settings.
+	/**
+	 * EnumChildWindows callback that applies enable/disable state.
+	 * \brief Sets enabled state on enumerated children.
+	 *
+	 * \param _hWnd Child window handle.
+	 * \param _lParam Caller-supplied parameter.
+	 * \return Returns TRUE to continue enumeration; otherwise FALSE.
+	 */
 	BOOL CALLBACK CWidget::EnumChildWindows_SetEnabled( HWND _hWnd, LPARAM /*_lParam*/ ) {
 		CWidget * pwThis = LSW_WIN2CLASS( _hWnd );
 		if ( pwThis ) {
@@ -739,7 +941,14 @@ namespace lsw {
 		return TRUE;
 	}
 
-	// Sets all the starting rectangles for all widgets.
+	/**
+	 * EnumChildWindows callback that stores starting rectangles.
+	 * \brief Captures initial window/client rectangles for layout.
+	 *
+	 * \param _hWnd Child window handle.
+	 * \param _lParam Caller-supplied parameter.
+	 * \return Returns TRUE to continue enumeration; otherwise FALSE.
+	 */
 	BOOL CALLBACK CWidget::EnumChildWindows_SetStartingRect( HWND _hWnd, LPARAM /*_lParam*/ ) {
 		CWidget * pwThis = LSW_WIN2CLASS( _hWnd );
 		if ( pwThis ) {
@@ -748,7 +957,14 @@ namespace lsw {
 		return TRUE;
 	}
 
-	// Resizes all controls when the window resizes.
+	/**
+	 * EnumChildWindows callback that resizes controls on parent resize.
+	 * \brief Performs per-child layout when the window size changes.
+	 *
+	 * \param _hWnd Child window handle.
+	 * \param _lParam Caller-supplied parameter (typically new client rect).
+	 * \return Returns TRUE to continue enumeration; otherwise FALSE.
+	 */
 	BOOL CALLBACK CWidget::EnumChildWindows_ResizeControls( HWND _hWnd, LPARAM /*_lParam*/ ) {
 		CWidget * pwThis = LSW_WIN2CLASS( _hWnd );
 		if ( pwThis ) {
@@ -757,14 +973,32 @@ namespace lsw {
 		return TRUE;
 	}
 
-	// Evaluates "??" inside expressions.  ?? = this pointer.
+	/**
+	 * Expression evaluator user-variable handler for "??".
+	 * \brief Resolves "??" to the current widget pointer in expressions.
+	 *
+	 * \param _uiptrData Opaque user data provided by the caller.
+	 * \param _peecContainer Evaluator container.
+	 * \param _rResult Receives the resolved result.
+	 * \return Returns true on success; otherwise false.
+	 */
 	bool __stdcall CWidget::WidgetUserVarHandler( uintptr_t _uiptrData, ee::CExpEvalContainer * /*_peecContainer*/, ee::CExpEvalContainer::EE_RESULT &_rResult ) {
 		_rResult.ncType = ee::EE_NC_UNSIGNED;
 		_rResult.u.ui64Val = _uiptrData;
 		return true;
 	}
 
-	// Evaluates member access in expressions.
+	/**
+	 * Expression evaluator member-access handler.
+	 * \brief Resolves member access on the left-hand result for widget fields.
+	 *
+	 * \param _rLeft The left-hand evaluated result.
+	 * \param _sMember The member name requested.
+	 * \param _uiptrData Opaque user data provided by the caller.
+	 * \param _peecContainer Evaluator container.
+	 * \param _rResult Receives the resolved result.
+	 * \return Returns true on success; otherwise false.
+	 */
 	bool __stdcall CWidget::WidgetMemberAccessHandler( const ee::CExpEvalContainer::EE_RESULT &_rLeft, const std::string &_sMember, uintptr_t /*_uiptrData*/, ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult ) {
 		// Expecting that _rLeft evaluates to a CWidget *.
 		if ( _rLeft.ncType != ee::EE_NC_UNSIGNED ) {
@@ -1002,7 +1236,13 @@ namespace lsw {
 		return false;
 	}
 
-	// Handles control setup.
+	/**
+	 * Performs control setup for a list of widgets.
+	 * \brief Creates and initializes child controls under a parent.
+	 *
+	 * \param _pwParent The parent widget.
+	 * \param _vWidgetList The list of widgets to set up.
+	 */
 	VOID CWidget::ControlSetup( CWidget * _pwParent, const std::vector<CWidget *> &_vWidgetList ) {
 		/*::GetWindowRect( _pwParent->Wnd(), &_pwParent->m_rRect );
 		::GetClientRect( _pwParent->Wnd(), &_pwParent->m_rClientRect );*/
@@ -1021,7 +1261,18 @@ namespace lsw {
 		::EnumChildWindows( _pwParent->Wnd(), EnumChildWindows_SetStartingRect, reinterpret_cast<LPARAM>(&_vWidgetList) );
 	}
 
-	// The default message handler.
+	/**
+	 * Shared window/dialog procedure.
+	 * \brief Default message handler for both windows and dialogs.
+	 *
+	 * \param _hWnd Target window handle.
+	 * \param _uMsg Message identifier.
+	 * \param _wParam WPARAM data.
+	 * \param _lParam LPARAM data.
+	 * \param _bIsDlg TRUE if a dialog; otherwise FALSE.
+	 * \param _lrWndResult Out parameter receiving the LRESULT for window procs.
+	 * \param _ipDiagResult Out parameter receiving the INT_PTR for dialog procs.
+	 */
 	VOID CALLBACK CWidget::WndDlgProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam, BOOL _bIsDlg, LRESULT &_lrWndResult, INT_PTR &_ipDiagResult ) {
 #define LSW_WNDRET( VAL )				if ( !_bIsDlg ) { _lrWndResult = VAL; }
 #define LSW_DLGRET( VAL )				if ( _bIsDlg ) { _ipDiagResult = VAL; }

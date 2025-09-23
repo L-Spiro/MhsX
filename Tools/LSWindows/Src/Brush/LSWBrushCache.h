@@ -32,6 +32,8 @@ namespace lsw {
 			Reset();
 		}
 
+
+		// == Functions.
 		/**
 		 * \brief Gets (or creates) a solid brush for a color.
 		 *
