@@ -78,7 +78,7 @@ namespace mx {
 		 *
 		 * \param Returns -1 to perform the default routine, otherwise NULL or a handle to a font.
 		 */
-		virtual HFONT								GetFont() { return m_fFont.hFont; }
+		virtual HFONT								GetFont() { return CurStyle()->fFont.hFont; }
 
 		// WM_LBUTTONDOWN.
 		virtual LSW_HANDLED							LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &/*_pCursorPos*/ );
@@ -131,7 +131,6 @@ namespace mx {
 
 			uint32_t								ui32VisibleLines = 0;			// Count of visible lines.
 
-			//HFONT									hFont = NULL;					// Font used for drawing.
 			COLORREF								crText;							// Text color (use your theme).
 			MX_ADDRESS_FMT							afFormat = MX_AF_BYTES_HEX;     // Address format.
 			bool									bLowercaseHex = false;			// Use lowercase a..f for HEX.
@@ -155,6 +154,7 @@ namespace mx {
 
 		/** General style settings. */
 		struct MX_STYLE {
+			lsw::LSW_FONT							fFont;							// Current font (monospace).
 			MX_ADDR_STYLE							daAddressStyle;					// Address style.
 			MX_ADDR_GLYPHS							agGlyphs;						// Glyph settings.
 			uint32_t								uiBytesPerRow = 16;				// Bytes per displayed row (default 16).
@@ -168,8 +168,9 @@ namespace mx {
 
 		// == Members.
 		CHexEditorInterface *						m_pheiTarget = nullptr;			// The stream of data to handle.
-		lsw::LSW_FONT								m_fFont;						// Current font (monospace).
+		//lsw::LSW_FONT								m_fFont;						// Current font (monospace).
 		MX_HEX										m_hHex;							// Hex view settings.
+		MX_STYLE *									m_pwCurStyle = nullptr;			// The current style.
 		int											m_iCxChar;						// Char width in pixels.
 		int											m_iCyChar;						// Char height in pixels.
 		int											m_iClientW;						// Client width.
@@ -189,6 +190,9 @@ namespace mx {
 
 
 		// == Functions.
+		// Gets the current style settings.
+		MX_STYLE *									CurStyle() { return m_pwCurStyle ? m_pwCurStyle : &m_hHex.sStyle; }
+
 		// Draws the hex-editor view.
 		bool										PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect );
 
@@ -196,7 +200,7 @@ namespace mx {
 		void										ComputeFontMetrics() {
 			HDC hDc = ::GetDC( Wnd() );
 			{
-				lsw::LSW_SELECTOBJECT soFontOrig( hDc, m_fFont.hFont );	// Destructor sets the original font back.
+				lsw::LSW_SELECTOBJECT soFontOrig( hDc, CurStyle()->fFont.hFont );	// Destructor sets the original font back.
 				TEXTMETRICW tmMetrics {};
 				::GetTextMetricsW( hDc, &tmMetrics );
 				m_iCxChar = tmMetrics.tmAveCharWidth;
@@ -214,7 +218,7 @@ namespace mx {
 			int iPt = 10;
 
 			lfFont.lfHeight = -::MulDiv( iPt, static_cast<int>(m_wDpiY), 72 );
-			m_fFont.CreateFontIndirectW( &lfFont );
+			CurStyle()->fFont.CreateFontIndirectW( &lfFont );
 		}
 
 		// Updates font and other render settings and invalidates the control for redrawing.
