@@ -12,7 +12,13 @@ namespace lsw {
 
 
 		// == Functions.
-		// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
+		/**
+		 * Gets the virtual client rectangle.
+		 * \brief Allows parents to adjust available space for toolbars, status bars, or splitters.
+		 *
+		 * \param pwChild Optional child for which the virtual rect is requested.
+		 * \return Returns the virtual client rectangle.
+		 */
 		virtual const LSW_RECT				VirtualClientRect( const CWidget * pwChild ) const;
 
 		// Calculates a tab control's display area given a window rectangle, or calculates the window rectangle that would correspond to a specified display area.
@@ -57,16 +63,26 @@ namespace lsw {
 		// Gets item text.
 		std::wstring						GetItemTextW( int _iItem ) const;
 
-		// Setting the HWND after the control has been created.
+		/**
+		 * Attaches an HWND to this widget after creation.
+		 * \brief Finalizes control initialization once the window handle exists.
+		 *
+		 * \param _hWnd The created window handle.
+		 */
 		virtual void						InitControl( HWND _hWnd );
 
 		// Gets the original tab proc.
 		WNDPROC								OriginalProc() const { return reinterpret_cast<WNDPROC>(m_lpOriginProc); }
 
-		// Determines the type of control this is.
+		/**
+		 * Gets the widget type identifier.
+		 * \brief Returns one of LSW_LT_* constants.
+		 *
+		 * \return Returns LSW_LT_WIDGET in the base class.
+		 */
 		virtual uint32_t					WidgetType() const { return LSW_LT_TAB; }
 
-		// Returns true if this is a CTab class.
+		/** \brief Returns true if this is a CTab. */
 		virtual bool						IsTab() const { return true; }
 
 		/**
@@ -135,10 +151,28 @@ namespace lsw {
 
 
 		// == Functions.
-		// // WM_SIZE.
+		/**
+		 * Handles WM_SIZE.
+		 * \brief Responds to client-area size changes.
+		 *
+		 * Called after the window's client size changes. Override to update layouts,
+		 * reposition children, or cache new sizes.
+		 *
+		 * \param _wParam The requested sizing type (e.g., SIZE_RESTORED, SIZE_MINIMIZED).
+		 * \param _lWidth The new client width, in pixels.
+		 * \param _lHeight The new client height, in pixels.
+		 * \return Returns a LSW_HANDLED code.
+		 */
 		virtual LSW_HANDLED					Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight );
 
-		// WM_MOVE.
+		/**
+		 * Handles WM_MOVE.
+		 * \brief Notified when the window is moved.
+		 *
+		 * \param _lX New x-position of the window (screen coordinates).
+		 * \param _lY New y-position of the window (screen coordinates).
+		 * \return Returns a LSW_HANDLED code.
+		 */
 		virtual LSW_HANDLED					Move( LONG _lX, LONG _lY );
 
 		// Determines the close rectangle.

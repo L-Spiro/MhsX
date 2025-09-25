@@ -23,7 +23,13 @@ namespace lsw {
 	}
 
 	// == Functions.
-	// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
+	/**
+	 * Gets the virtual client rectangle.
+	 * \brief Allows parents to adjust available space for toolbars, status bars, or splitters.
+	 *
+	 * \param pwChild Optional child for which the virtual rect is requested.
+	 * \return Returns the virtual client rectangle.
+	 */
 	const LSW_RECT CTab::VirtualClientRect( const CWidget * /*pwChild*/ ) const {
 		LSW_RECT rRect = ClientRect();
 		AdjustRect( FALSE, &rRect );
@@ -204,7 +210,12 @@ namespace lsw {
 		return sTemp;
 	}
 
-	// Setting the HWND after the control has been created.
+	/**
+	 * Attaches an HWND to this widget after creation.
+	 * \brief Finalizes control initialization once the window handle exists.
+	 *
+	 * \param _hWnd The created window handle.
+	 */
 	void CTab::InitControl( HWND _hWnd ) {
 		CWidget::InitControl( _hWnd );
 		m_lpOriginProc = ::GetWindowLongPtrW( Wnd(), GWLP_WNDPROC );
@@ -301,7 +312,18 @@ namespace lsw {
 	}
 
 	// == Functions.
-	// WM_SIZE.
+	/**
+	 * Handles WM_SIZE.
+	 * \brief Responds to client-area size changes.
+	 *
+	 * Called after the window's client size changes. Override to update layouts,
+	 * reposition children, or cache new sizes.
+	 *
+	 * \param _wParam The requested sizing type (e.g., SIZE_RESTORED, SIZE_MINIMIZED).
+	 * \param _lWidth The new client width, in pixels.
+	 * \param _lHeight The new client height, in pixels.
+	 * \return Returns a LSW_HANDLED code.
+	 */
 	CWidget::LSW_HANDLED CTab::Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight ) {
 		CWidget::Size( _wParam, _lWidth, _lHeight );
 		//::ShowScrollBar( Wnd(), SB_VERT, FALSE );
@@ -314,7 +336,14 @@ namespace lsw {
 		return LSW_H_CONTINUE;
 	}
 
-	// WM_MOVE.
+	/**
+	 * Handles WM_MOVE.
+	 * \brief Notified when the window is moved.
+	 *
+	 * \param _lX New x-position of the window (screen coordinates).
+	 * \param _lY New y-position of the window (screen coordinates).
+	 * \return Returns a LSW_HANDLED code.
+	 */
 	CWidget::LSW_HANDLED CTab::Move( LONG _lX, LONG _lY ) {
 		CWidget::Move( _lX, _lY );
 		//ResizeControls( VirtualClientRect( nullptr ) );
