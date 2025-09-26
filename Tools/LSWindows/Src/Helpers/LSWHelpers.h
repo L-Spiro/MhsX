@@ -359,6 +359,19 @@ namespace lsw {
 		bool								bDeleteAfter;
 	};
 
+	struct LSW_HDC {
+		LSW_HDC( HWND _hWnd ) :
+			hWnd( _hWnd ),
+			hDc( ::GetDC( _hWnd ) ) {
+		}
+		~LSW_HDC() {
+			if ( hDc ) { ::ReleaseDC( hWnd, hDc ); }
+		}
+
+		HWND								hWnd;
+		HDC									hDc;
+	};
+
 	struct LSW_BEGINPAINT {
 		LSW_BEGINPAINT( HWND _hWnd ) :
 			hWnd( _hWnd ) {
@@ -1062,7 +1075,11 @@ namespace lsw {
 		}
 
 		/**
-		 * \brief Measure a set of characters and return the maximum advance width.
+		 * Measure a set of characters and return the maximum advance width.
+		 *
+		 * \param _hDc The HDC on which to measure the characters. The caller is responsible for selecting the desired font.
+		 * \param _pwszChars A null-terminated string containing the characters to measure.
+		 * \return Returns the maximum pixel width among all characters in the string when rendered to the given HDC.
 		 */
 		static int							MeasureMax( HDC _hDc, const wchar_t * _pwszChars ) {
 			SIZE sThis {};

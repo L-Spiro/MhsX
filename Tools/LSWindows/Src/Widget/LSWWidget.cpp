@@ -1303,10 +1303,11 @@ namespace lsw {
 				if ( pmwThis ) {
 					pmwThis->m_hWnd = _hWnd;
 
-					HDC hDc = ::GetDC( _hWnd );
-					pmwThis->m_wDpiX = static_cast<WORD>(::GetDeviceCaps( hDc, LOGPIXELSX ));
-					pmwThis->m_wDpiY = static_cast<WORD>(::GetDeviceCaps( hDc, LOGPIXELSY ));
-					::ReleaseDC( _hWnd, hDc );
+					{
+						lsw::LSW_HDC hDc( _hWnd );
+						pmwThis->m_wDpiX = static_cast<WORD>(::GetDeviceCaps( hDc.hDc, LOGPIXELSX ));
+						pmwThis->m_wDpiY = static_cast<WORD>(::GetDeviceCaps( hDc.hDc, LOGPIXELSY ));
+					}
 
 					// ControlSetup() called by the layout manager because WM_NCCREATE is inside a constructor.
 

@@ -779,7 +779,8 @@ namespace lsw {
 		static const WORD wDotPatternBmp2[] = {
 			0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF
 		};
-		HDC hDc = ::GetDC( NULL );
+
+		lsw::LSW_HDC hDc( NULL );
 		const WORD * pwBitmap = (m_ddrtDragRectType == CDockable::LSW_DDRT_CHECKERED) ? wDotPatternBmp2 : wDotPatternBmp1;
 		INT iBorder = (m_ddrtDragRectType == CDockable::LSW_DDRT_CHECKERED) ? 1 : 3;
 
@@ -787,18 +788,16 @@ namespace lsw {
 		bBitmap.CreateBitmap( 8, 8, 1, 1, pwBitmap );
 		CBrush bBrush;
 		bBrush.CreatePatternBrush( bBitmap );
-		::SetBrushOrgEx( hDc, m_rDragPlacementRect.left, m_rDragPlacementRect.top, NULL );
+		::SetBrushOrgEx( hDc.hDc, m_rDragPlacementRect.left, m_rDragPlacementRect.top, NULL );
 
-		LSW_SELECTOBJECT soBrushOrig( hDc, bBrush.Handle() );	// Destructor sets the original brush back.
+		LSW_SELECTOBJECT soBrushOrig( hDc.hDc, bBrush.Handle() );	// Destructor sets the original brush back.
 
 		LONG lWidth = m_rDragPlacementRect.right - m_rDragPlacementRect.left;
 		LONG lHeight = m_rDragPlacementRect.bottom - m_rDragPlacementRect.top;
-		::PatBlt( hDc, m_rDragPlacementRect.left + iBorder, m_rDragPlacementRect.top, lWidth - iBorder, iBorder, PATINVERT );
-		::PatBlt( hDc, m_rDragPlacementRect.left + lWidth - iBorder, m_rDragPlacementRect.top + iBorder, iBorder, lHeight - iBorder, PATINVERT );
-		::PatBlt( hDc, m_rDragPlacementRect.left, m_rDragPlacementRect.top + lHeight - iBorder, lWidth - iBorder,  iBorder, PATINVERT );
-		::PatBlt( hDc, m_rDragPlacementRect.left, m_rDragPlacementRect.top, iBorder, lHeight - iBorder, PATINVERT );
-
-		::ReleaseDC( 0, hDc );
+		::PatBlt( hDc.hDc, m_rDragPlacementRect.left + iBorder, m_rDragPlacementRect.top, lWidth - iBorder, iBorder, PATINVERT );
+		::PatBlt( hDc.hDc, m_rDragPlacementRect.left + lWidth - iBorder, m_rDragPlacementRect.top + iBorder, iBorder, lHeight - iBorder, PATINVERT );
+		::PatBlt( hDc.hDc, m_rDragPlacementRect.left, m_rDragPlacementRect.top + lHeight - iBorder, lWidth - iBorder,  iBorder, PATINVERT );
+		::PatBlt( hDc.hDc, m_rDragPlacementRect.left, m_rDragPlacementRect.top, iBorder, lHeight - iBorder, PATINVERT );
 	}
 
 }	// namespace lsw

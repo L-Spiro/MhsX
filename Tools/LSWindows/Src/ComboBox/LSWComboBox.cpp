@@ -222,18 +222,18 @@ namespace lsw {
 #if ( WINVER >= 0x0500 )
 			COMBOBOXINFO cbiInfo = { sizeof( cbiInfo ) };
 			::GetComboBoxInfo( Wnd(), &cbiInfo );
-			HDC hDc = ::GetDC( cbiInfo.hwndList );
+
+			lsw::LSW_HDC hDc( cbiInfo.hwndList );
 
 			HFONT hFont = reinterpret_cast<HFONT>(::SendMessageW( cbiInfo.hwndList, WM_GETFONT, 0L, 0L ));
 			{
-				LSW_SELECTOBJECT soFontOrig( hDc, hFont );	// Destructor sets the original font back.
+				LSW_SELECTOBJECT soFontOrig( hDc.hDc, hFont );	// Destructor sets the original font back.
 
 				std::wstring wString;
 				GetLBText( _iIndex, wString );
-				::DrawTextW( hDc, wString.c_str(), static_cast<int>(wString.size()), &rRet, DT_CALCRECT );
+				::DrawTextW( hDc.hDc, wString.c_str(), static_cast<int>(wString.size()), &rRet, DT_CALCRECT );
 			}
 
-			::ReleaseDC( cbiInfo.hwndList, hDc );
 #else
 #endif	// #if ( WINVER >= 0x0500 )
 		}

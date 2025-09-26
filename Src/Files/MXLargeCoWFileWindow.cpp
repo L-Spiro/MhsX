@@ -47,6 +47,7 @@ namespace mx {
 			//m_ui32OriginalCrc = ~m_ui32OriginalCrc;
 
 			m_pEditDiractory = std::filesystem::temp_directory_path() / _DEC_S_9DAF7683_Dues_Hex_Machina.c_str();
+			::OutputDebugStringW( (m_pEditDiractory.generic_wstring() + L"\r\n").c_str() );
 			m_pEditDiractory /= _pFile.filename();
 			//m_pEditDiractory += std::to_string( m_ui32OriginalCrc );
 			std::error_code ecError;
