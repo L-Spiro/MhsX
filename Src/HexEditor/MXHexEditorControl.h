@@ -313,7 +313,7 @@ namespace mx {
 			lfFont.lfCharSet = DEFAULT_CHARSET;
 			lfFont.lfHeight = -::MulDiv( iPt, static_cast<int>(m_wDpiY), 72 );
 
-			HDC hDc = ::GetDC( Wnd() );
+			lsw::LSW_HDC hDc( Wnd() );
 			for ( size_t i = 0; i < _countof( s_ppwszFaces ); ++i ) {
 				::wcscpy_s( lfFont.lfFaceName, s_ppwszFaces[i] );
 
@@ -321,21 +321,18 @@ namespace mx {
 				//lsw::LSW_FONT fTry;
 				if ( CurStyle()->fFont.CreateFontIndirectW( &lfFont ) ) {
 					// Verify it is TrueType by asking for outline metrics.
-					lsw::LSW_SELECTOBJECT soFont( hDc, CurStyle()->fFont.hFont );
+					lsw::LSW_SELECTOBJECT soFont( hDc.hDc, CurStyle()->fFont.hFont );
 
 					// Two-call pattern to see if OTM exists (TrueType/OpenType only).
-					UINT uNeed = ::GetOutlineTextMetricsW( hDc, 0, NULL );
+					UINT uNeed = ::GetOutlineTextMetricsW( hDc.hDc, 0, NULL );
 					if ( uNeed != 0 ) {
 						// Success: keep this one.
-						/*CurStyle()->fFont.Reset();
-						CurStyle()->fFont = fTry;
-						CurStyle()->fFont.bDeleteIt = true;*/
-						break;
+						return;
 					}
 					// else: not TrueType, try next fallback.
 				}
 			}
-			::ReleaseDC( Wnd(), hDc );
+			//::ReleaseDC( Wnd(), hDc );
 		}
 
 		/**
@@ -366,16 +363,17 @@ namespace mx {
 		// Gets the minimum address digits.
 		uint32_t									MinAddrDigits() const {
 			uint64_t ui64TotalLines = Size() / CurStyle()->uiBytesPerRow * CurStyle()->uiBytesPerRow;
+			uint32_t ui32Result = 4;
 			switch( CurStyle()->daAddressStyle.afFormat ) {
-				case MX_AF_BYTES_HEX :		{ return uint32_t( DigitCount( ui64TotalLines, 16 ) ); }
-				case MX_AF_BYTES_DEC :		{ return uint32_t( DigitCount( ui64TotalLines, 10 ) ); }
-				case MX_AF_BYTES_OCT :		{ return uint32_t( DigitCount( ui64TotalLines, 8 ) ); }
-				case MX_AF_LINE_NUMBER :	{ return 1; }
-				case MX_AF_SHORT_HEX :		{ return uint32_t( DigitCount( (ui64TotalLines) >> 1, 16 ) ); }
-				case MX_AF_SHORT_DEC :		{ return uint32_t( DigitCount( (ui64TotalLines) >> 1, 10 ) ); }
-				default :					{ return uint32_t( DigitCount( ui64TotalLines, 16 ) ); }
+				case MX_AF_BYTES_HEX :		{ ui32Result = uint32_t( DigitCount( ui64TotalLines, 16 ) ); break; }
+				case MX_AF_BYTES_DEC :		{ return uint32_t( DigitCount( ui64TotalLines, 10 ) ); break; }
+				case MX_AF_BYTES_OCT :		{ return uint32_t( DigitCount( ui64TotalLines, 8 ) ); break; }
+				case MX_AF_LINE_NUMBER :	{ return 1; break; }
+				case MX_AF_SHORT_HEX :		{ return uint32_t( DigitCount( (ui64TotalLines) >> 1, 16 ) ); break; }
+				case MX_AF_SHORT_DEC :		{ return uint32_t( DigitCount( (ui64TotalLines) >> 1, 10 ) ); break; }
+				default :					{ return uint32_t( DigitCount( ui64TotalLines, 16 ) ); break; }
 			}
-			//CurStyle()->daAddressStyle.ui32MinAddrDigits
+			return std::max( ui32Result, 4U );
 		}
 
 		// Gets the address size (number of digits).

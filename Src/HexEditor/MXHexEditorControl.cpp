@@ -277,7 +277,7 @@ namespace mx {
 	bool CHexEditorControl::PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect ) {
 
 		lsw::LSW_RECT rTmp = _rRect;
-		//rTmp.right = rTmp.left + ComputeAddressGutterWidthPx() + 2;
+		rTmp.right = rTmp.left + ComputeAddressGutterWidthPx() + 3;
 		::FillRect( _hDc, &rTmp,
 			lsw::CBase::BrushCache().Brush( RGB( 0x23, 0x22, 0x20 ) )
 			/*reinterpret_cast<HBRUSH>(::GetStockObject( DKGRAY_BRUSH ))*/ );	// RGB( 0x23, 0x22, 0x20 )
