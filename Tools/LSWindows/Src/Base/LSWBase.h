@@ -325,7 +325,7 @@ namespace lsw {
 
 
 		// =======================================
-		// Fonts.
+		// Fonts/Drawing.
 		// =======================================
 		/**
 		 * Gets the default message-box font.
@@ -350,6 +350,13 @@ namespace lsw {
 		 * \return Returns the NONCLIENTMETRICSW structure with current metrics.
 		 */
 		static NONCLIENTMETRICSW					NonClientMetrics() { return m_ncmNonClientMetrics; }
+
+		/**
+		 * Gets the brush cache.
+		 * 
+		 * \return Returns a reference to the brush cache
+		 **/
+		static CBrushCache &						BrushCache() { return m_bcBrushes; }
 
 
 		// =======================================

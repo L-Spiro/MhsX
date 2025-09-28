@@ -277,12 +277,12 @@ namespace mx {
 	bool CHexEditorControl::PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect ) {
 
 		lsw::LSW_RECT rTmp = _rRect;
-		rTmp.right = rTmp.left + ComputeAddressGutterWidthPx() + 2;
+		//rTmp.right = rTmp.left + ComputeAddressGutterWidthPx() + 2;
 		::FillRect( _hDc, &rTmp,
-			//lsw::CBase::BrushC
-			reinterpret_cast<HBRUSH>(::GetStockObject( DKGRAY_BRUSH )) );	// RGB( 0x23, 0x22, 0x20 )
+			lsw::CBase::BrushCache().Brush( RGB( 0x23, 0x22, 0x20 ) )
+			/*reinterpret_cast<HBRUSH>(::GetStockObject( DKGRAY_BRUSH ))*/ );	// RGB( 0x23, 0x22, 0x20 )
 
-		DrawAddressGutter( _hDc, 2, 0, m_iPageLines );
+		DrawAddressGutter( _hDc, 3, 0, m_iPageLines + 1 );
 		return true;
 	}
 
@@ -358,13 +358,13 @@ namespace mx {
 			uint64_t v = 0ULL;
 			bool bHex = false, bOct = false, bDec = false;
 			switch( st.afFormat ) {
-				case MX_AF_BYTES_HEX :   v = ui64ByteBase; bHex = true; break;
-				case MX_AF_BYTES_DEC :   v = ui64ByteBase; bDec = true; break;
-				case MX_AF_BYTES_OCT :   v = ui64ByteBase; bOct = true; break;
-				case MX_AF_LINE_NUMBER : v = _ui64Line;    bDec = true; break;
-				case MX_AF_SHORT_HEX :   v = (ui64ByteBase >> 1); bHex = true; break;
-				case MX_AF_SHORT_DEC :   v = (ui64ByteBase >> 1); bDec = true; break;
-				default :                v = ui64ByteBase; bHex = true; break;
+				case MX_AF_BYTES_HEX :		{ v = ui64ByteBase; bHex = true; break; }
+				case MX_AF_BYTES_DEC :		{ v = ui64ByteBase; bDec = true; break; }
+				case MX_AF_BYTES_OCT :		{ v = ui64ByteBase; bOct = true; break; }
+				case MX_AF_LINE_NUMBER :	{ v = _ui64Line;    bDec = true; break; }
+				case MX_AF_SHORT_HEX :		{ v = (ui64ByteBase >> 1); bHex = true; break; }
+				case MX_AF_SHORT_DEC :		{ v = (ui64ByteBase >> 1); bDec = true; break; }
+				default :					{ v = ui64ByteBase; bHex = true; break; }
 			}
 
 			// Convert to string in the selected base.
@@ -374,8 +374,9 @@ namespace mx {
 			else { core = ToBase( v, 10, false ); }
 
 			// Minimum digits: hex/oct padded with '0'; decimal padded with spaces on the left.
-			if ( st.ui32MinAddrDigits && core.size() < st.ui32MinAddrDigits ) {
-				const size_t pad = st.ui32MinAddrDigits - core.size();
+			uint32_t ui32MinDigits = MinAddrDigits();
+			if ( ui32MinDigits && core.size() < ui32MinDigits ) {
+				const size_t pad = ui32MinDigits - core.size();
 				if ( bHex || bOct ) {
 					core.insert( core.begin(), pad, L'0' );
 				}
@@ -486,7 +487,8 @@ namespace mx {
 					case MX_AF_LINE_NUMBER : default : bDec = true; ui32Base = 10; break;
 				}
 				uint32_t ui32Digits = DigitCount( ui64Disp, ui32Base );
-				if ( asAddrStyle.ui32MinAddrDigits ) { ui32Digits = std::max( ui32Digits, asAddrStyle.ui32MinAddrDigits ); }
+				uint32_t ui32MinDigits = MinAddrDigits();
+				if ( ui32MinDigits ) { ui32Digits = std::max( ui32Digits, ui32MinDigits ); }
 
 				iWidth = int( ui32Digits ) * agGlyphs.iDigitMaxCx;
 
@@ -507,8 +509,8 @@ namespace mx {
 					iWidth += agGlyphs.iShortWcx;
 				}
 				// Optional left-space padding for right-aligned DEC up to MinDigits (if you do that).
-				if ( bDec && asAddrStyle.ui32MinAddrDigits && ui32Digits < asAddrStyle.ui32MinAddrDigits ) {
-					const uint32_t ui32Pads = asAddrStyle.ui32MinAddrDigits - ui32Digits;
+				if ( bDec && ui32MinDigits && ui32Digits < ui32MinDigits ) {
+					const uint32_t ui32Pads = ui32MinDigits - ui32Digits;
 					iWidth += int( ui32Pads ) * agGlyphs.iSpaceCx;
 				}
 			}

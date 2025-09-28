@@ -155,7 +155,7 @@ namespace mx {
 		struct MX_ADDR_STYLE {
 			uint64_t								ui64StartAddress = 0;				// Starting address bias (Set Starting Address).
 			uint64_t								ui64FirstVisibleLine = 0;			// Top visible line index (0-based).
-			uint32_t								ui32MinAddrDigits = 4;				// Clamp minimum digits (HEX: 4..16 typical).
+			//uint32_t								ui32MinAddrDigits = 4;				// Clamp minimum digits (HEX: 4..16 typical).
 
 			uint32_t								ui32VisibleLines = 0;				// Count of visible lines.
 
@@ -301,7 +301,15 @@ namespace mx {
 			lfFont.lfWeight = FW_NORMAL;//FW_BOLD;
 			lfFont.lfItalic = FALSE;
 			lfFont.lfOutPrecision = OUT_TT_PRECIS;
+
+			lfFont.lfQuality = PROOF_QUALITY;
+#if ( WINVER >= 0x0400 )
+			lfFont.lfQuality = ANTIALIASED_QUALITY;
+#endif	// #if ( WINVER >= 0x0400 )
+#if ( _WIN32_WINNT >= _WIN32_WINNT_WINXP )
 			lfFont.lfQuality = CLEARTYPE_NATURAL_QUALITY;
+#endif	// #if ( _WIN32_WINNT >= _WIN32_WINNT_WINXP )
+
 			lfFont.lfCharSet = DEFAULT_CHARSET;
 			lfFont.lfHeight = -::MulDiv( iPt, static_cast<int>(m_wDpiY), 72 );
 
@@ -344,6 +352,7 @@ namespace mx {
 			ComputeFontMetrics();
 			//CurStyle()->ui64FileSize = Size();
 			//m_iAddrDigits = AddrDigitsForSize( Size() );
+			
 			UpdateScrollbars();
 			::InvalidateRect( Wnd(), nullptr, FALSE );
 		}
@@ -352,6 +361,21 @@ namespace mx {
 		inline uint64_t								TotalLines_Hex() const {
 			if ( !m_hHex.sStyle.uiBytesPerRow ) { return 0ULL; }
 			return (Size() + m_hHex.sStyle.uiBytesPerRow - 1ULL) / m_hHex.sStyle.uiBytesPerRow;
+		}
+
+		// Gets the minimum address digits.
+		uint32_t									MinAddrDigits() const {
+			uint64_t ui64TotalLines = Size() / CurStyle()->uiBytesPerRow * CurStyle()->uiBytesPerRow;
+			switch( CurStyle()->daAddressStyle.afFormat ) {
+				case MX_AF_BYTES_HEX :		{ return uint32_t( DigitCount( ui64TotalLines, 16 ) ); }
+				case MX_AF_BYTES_DEC :		{ return uint32_t( DigitCount( ui64TotalLines, 10 ) ); }
+				case MX_AF_BYTES_OCT :		{ return uint32_t( DigitCount( ui64TotalLines, 8 ) ); }
+				case MX_AF_LINE_NUMBER :	{ return 1; }
+				case MX_AF_SHORT_HEX :		{ return uint32_t( DigitCount( (ui64TotalLines) >> 1, 16 ) ); }
+				case MX_AF_SHORT_DEC :		{ return uint32_t( DigitCount( (ui64TotalLines) >> 1, 10 ) ); }
+				default :					{ return uint32_t( DigitCount( ui64TotalLines, 16 ) ); }
+			}
+			//CurStyle()->daAddressStyle.ui32MinAddrDigits
 		}
 
 		// Gets the address size (number of digits).
