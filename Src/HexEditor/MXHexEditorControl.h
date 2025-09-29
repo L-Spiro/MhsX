@@ -2,6 +2,7 @@
 
 #include "../MXMhsX.h"
 #include "../Strings/MXStringDecoder.h"
+#include "../Utilities/MXUtilities.h"
 #include "MXHexEditorInterface.h"
 
 #include <LSWWin.h>
@@ -110,6 +111,33 @@ namespace mx {
 		 */
 		virtual HFONT								GetFont() { return CurStyle()->fFont.hFont; }
 
+		/**
+		 * Increases the font size.  Returns the new font parameters and the view type.  Hex, Octal, and Bindary displays are linked, etc.
+		 * 
+		 * \param _lfFont Holds the returned font for applying to other tabs
+		 * \return Returns true if the view type is Hex, Octal, or Binary.
+		 **/
+		bool										IncreaseFontSize( LOGFONTW &_lfFont );
+
+		/**
+		 * Decreases the font size.  Returns the new font parameters and the view type.  Hex, Octal, and Bindary displays are linked, etc.
+		 * 
+		 * \param _lfFont Holds the returned font for applying to other tabs
+		 * \return Returns true if the view type is Hex, Octal, or Binary.
+		 **/
+		bool										DecreaseFontSize( LOGFONTW &_lfFont );
+
+		/**
+		 * Sets the default font size.
+		 * 
+		 * \param _lfFont Holds the returned font for applying to other tabs
+		 * \return Returns true if the view type is Hex, Octal, or Binary.
+		 **/
+		bool										DefaultFontSize( LOGFONTW &_lfFont );
+
+		// Sets a default font.
+		bool										ChooseDefaultFont();
+
 		// WM_LBUTTONDOWN.
 		virtual LSW_HANDLED							LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &/*_pCursorPos*/ );
 
@@ -153,51 +181,57 @@ namespace mx {
 		// == Types.
 		/** What to draw and how to size the address gutter. */
 		struct MX_ADDR_STYLE {
-			uint64_t								ui64StartAddress = 0;				// Starting address bias (Set Starting Address).
-			uint64_t								ui64FirstVisibleLine = 0;			// Top visible line index (0-based).
-			//uint32_t								ui32MinAddrDigits = 4;				// Clamp minimum digits (HEX: 4..16 typical).
+			uint64_t								ui64StartAddress = 0;									// Starting address bias (Set Starting Address).
+			uint64_t								ui64FirstVisibleLine = 0;								// Top visible line index (0-based).
 
-			uint32_t								ui32VisibleLines = 0;				// Count of visible lines.
+			uint32_t								ui32VisibleLines = 0;									// Count of visible lines.
 
-			COLORREF								crText = RGB( 0x92, 0x92, 0x92 );	// Text color (use your theme).
-			MX_ADDRESS_FMT							afFormat = MX_AF_BYTES_HEX;			// Address format.
-			bool									bLowercaseHex = false;				// Use lowercase a..f for HEX.
-			bool									bShowColonIn = true;				// Insert ':' every 4 HEX digits (>4 only).
-			bool									bShowColonAfter = false;			// Append ':' after the address.
-			bool									bShowTypeSpec = false;				// Append 'h' (hex) or 'o' (oct).
-			bool									bMinimizeDigits = false;			// Size digits for current page, not whole file.
-			bool									bUseShortSuffixW = true;			// Append 'w' for Short addressing (matches your examples).
+			MX_ADDRESS_FMT							afFormat = MX_AF_BYTES_HEX;								// Address format.
+			bool									bLowercaseHex = false;									// Use lowercase a..f for HEX.
+			bool									bShowColonIn = true;									// Insert ':' every 4 HEX digits (>4 only).
+			bool									bShowColonAfter = false;								// Append ':' after the address.
+			bool									bShowTypeSpec = false;									// Append 'h' (hex) or 'o' (oct).
+			bool									bMinimizeDigits = false;								// Size digits for current page, not whole file.
+			bool									bUseShortSuffixW = true;								// Append 'w' for Short addressing (matches your examples).
 		};
 
 		/** Measured glyph metrics for the address gutter font. */
 		struct MX_ADDR_GLYPHS {
-			int										iDigitMaxCx = 0;					// Max over '0'..'9' (and 'a'..'f' or 'A'..'F' when HEX).
-			int										iColonCx = 0;						// Width of ':'.
-			int										iSpaceCx = 0;						// Width of ' '.
-			int										iSpecHexCx = 0;						// Width of 'h'.
-			int										iSpecOctCx = 0;						// Width of 'o'.
-			int										iShortWcx = 0;						// Width of 'w'.
+			int										iDigitMaxCx = 0;										// Max over '0'..'9' (and 'a'..'f' or 'A'..'F' when HEX).
+			int										iColonCx = 0;											// Width of ':'.
+			int										iSpaceCx = 0;											// Width of ' '.
+			int										iSpecHexCx = 0;											// Width of 'h'.
+			int										iSpecOctCx = 0;											// Width of 'o'.
+			int										iShortWcx = 0;											// Width of 'w'.
 		};
 
 		/** General style settings. */
 		struct MX_STYLE {
-			lsw::LSW_FONT							fFont;								// Current font.
-			MX_ADDR_STYLE							daAddressStyle;						// Address style.
-			MX_ADDR_GLYPHS							agGlyphs;							// Glyph settings (filled on demand).
-			uint32_t								uiBytesPerRow = 16;					// Bytes per displayed row.
-			uint64_t								ui64FileSize = 0;					// File size in bytes (needed for address digits).
+			lsw::LSW_FONT							fFont;													// Current font.
+			LOGFONTW								lfFontParms {};											// The current font parameters.
+			TEXTMETRICW								tmMetrics {};											// The current font's metrics.
+			int										iPointSize = 10;										// The font size.
+			MX_ADDR_STYLE							daAddressStyle;											// Address style.
+			MX_ADDR_GLYPHS							agGlyphs;												// Glyph settings (filled on demand).
+			uint32_t								uiBytesPerRow = 16;										// Bytes per displayed row.
+			uint64_t								ui64FileSize = 0;										// File size in bytes (needed for address digits).
 
 			// Visibility.
-			bool									bShowAddressGutter = true;
-			bool									bShowLeftNumbers   = true;			// Hex/Dec/Oct/Bin column.
-			bool									bShowRightText     = true;			// ASCII column.
-			bool									bShowMiniMap       = false;			// Fixed panel on right.
+			bool									bShowAddressGutter	= true;
+			bool									bShowLeftNumbers	= true;								// Hex/Dec/Oct/Bin column.
+			bool									bShowRightArea		= true;								// ASCII column.
+			bool									bShowMiniMap		= false;							// Fixed panel on right.
+			bool									bShowRuler			= true;								// Show/hide ruler row.
+
 
 			// Left numbers formatting.
 			MX_DATA_FMT								dfLeftNumbersFmt = MX_DF_HEX;
-			uint32_t								uiGroupSize = 8;                    // Extra spacing after every N bytes.
-			uint32_t								uiSpacesBetweenBytes = 1;           // Count of ' ' between adjacent bytes.
-			uint32_t								uiExtraSpacesBetweenGroups = 1;     // Extra ' ' at group boundary.
+			uint32_t								uiGroupSize = 1;                   						// Extra spacing after every N bytes.
+			uint32_t								uiSpacesBetweenBytes = 1;          						// Count of ' ' between adjacent bytes.
+			uint32_t								uiExtraSpacesBetweenGroups = 1;     					// Extra ' ' at group boundary.
+
+			// Right formatting.
+			MX_DATA_FMT								dfRightNumbersFmt = MX_DF_CHAR;
 
 			// Paddings/gaps (pixels).
 			int										iPadAfterGutterPx = 8;
@@ -210,7 +244,10 @@ namespace mx {
 			int										iPadBeforeMiniMapPx = 8;
 			int										iLineSpacingPx = 2;
 			int										iCharCx = 0;
-			int										iCharCy = 0;						// Baseline advance
+			int										iCharCy = 0;											// Baseline advance.
+
+			// Ruler.
+			
 
 			// Mini-map geometry (pixels).
 			int										iMiniMapWidthPx = 140;
@@ -219,25 +256,26 @@ namespace mx {
 
 		/** The hex-view information. */
 		struct MX_HEX {
-			MX_STYLE								sStyle;								// Style settings for the Hex View.
+			MX_STYLE								sStyle;													// Style settings for the Hex View.
 		};
 
 
 		// == Members.
-		uint64_t									m_ui64VPos = 0;						// First visible line (virtual).
-		uint64_t									m_ui64HPx = 0;						// First visible column (virtual).
-		MX_EDIT_AS									m_eaEditAs = MX_ES_HEX;				// The view type.
+		uint64_t									m_ui64VPos = 0;											// First visible line (virtual).
+		uint64_t									m_ui64HPx = 0;											// First visible column (virtual).
+		MX_EDIT_AS									m_eaEditAs = MX_ES_HEX;									// The view type.
+		COLORREF									m_crText = MX_RGBA( 0x92, 0x92, 0x92, 0xFF );			// Text color.
+		COLORREF									m_crAddSepLine = MX_RGBA( 0x42, 0x42, 0x42, 0x00 );		// Address separator line.
+		COLORREF									m_crRulerText = MX_RGBA( 0x57, 0x57, 0x57, 0xFF );		// Ruler text color.
+		COLORREF									m_crRulerLine = MX_RGBA( 0x57, 0x57, 0x57, 0x00 );		// Ruler line.
+		COLORREF									m_crRulerMarker = MX_RGBA( 0x81, 0x81, 0x81, 0xFF );	// Ruler marker color.
+		COLORREF									m_crEditorBk = MX_RGBA( 0x23, 0x22, 0x20, 0xFF );		// Background color for the whole editor.
 
-		CHexEditorInterface *						m_pheiTarget = nullptr;				// The stream of data to handle.
-		MX_HEX										m_hHex;								// Hex view settings.
-		MX_STYLE *									m_pwCurStyle = nullptr;				// The current style.
-		//int											m_iCxChar;							// Char width in pixels.
-		//int											m_iCyChar;							// Char height in pixels.
-		//int											m_iClientW;							// Client width.
-		//int											m_iClientH;							// Client height.
-		int											m_iPageLines;						// How many text rows fit.
-		int											m_iPageCols;						// How many text columns fit.
-		//int											m_iAddrDigits;						// 8 or 16.
+		CHexEditorInterface *						m_pheiTarget = nullptr;									// The stream of data to handle.
+		MX_HEX										m_hHex;													// Hex view settings.
+		MX_STYLE *									m_pwCurStyle = nullptr;									// The current style.
+		int											m_iPageLines;											// How many text rows fit.
+		int											m_iPageCols;											// How many text columns fit.
 
 
 		// The main window class.
@@ -273,6 +311,23 @@ namespace mx {
 		 */
 		void										DrawAddressGutter( HDC _hDc, int _iXLeft, int _iYTop, uint32_t _ui32LinesToDraw );
 
+		/**
+		 * \brief Draws the ruler at the given position.
+		 *
+		 * \param _hDc Destination HDC.
+		 * \param _iXLeft Pixel X where the scrollable content begins (after gutter; already includes horizontal scroll offset).
+		 * \param _iYTop Pixel Y top where the ruler should be drawn.
+		 * \param _dfLeftFmt Format for the left area.
+		 * \param _dfRightFmt Format for the right area.
+		 *
+		 * Description:
+		 *  - The ruler width equals the sum of the left numbers block and the right text block (if visible),
+		 *    including the inter-block gap. The mini-map and gutter do not scroll and are not part of the ruler.
+		 *  - Each group label is centered within its group rect, computed by GetGroupRectForIndex().
+		 *  - The rulerfs height equals the base character height for the font; line spacing is ignored.
+		 */
+		void										DrawRuler( HDC _hDc, int _iXLeft, int _iYTop, MX_DATA_FMT _dfLeftFmt, MX_DATA_FMT _dfRightFmt );
+
 		// Computes font metrics.
 		void										ComputeFontMetrics() {
 			lsw::LSW_HDC hDc( Wnd() );
@@ -282,57 +337,8 @@ namespace mx {
 				::GetTextMetricsW( hDc.hDc, &tmMetrics );
 				CurStyle()->iCharCx = tmMetrics.tmAveCharWidth;
 				CurStyle()->iCharCy = tmMetrics.tmHeight + tmMetrics.tmExternalLeading;
+				CurStyle()->tmMetrics = tmMetrics;
 			}
-		}
-
-		// Sets a default font.
-		void										ChooseDefaultFont() {
-			static const wchar_t * s_ppwszFaces[] = {
-				L"Droid Sans Mono",   // preferred
-				L"Consolas",          // modern Windows TT
-				L"Lucida Console"     // older Windows TT
-			};
-
-			const int iPt = 10;
-
-			LOGFONTW lfFont {};
-			lfFont = lsw::CBase().NonClientMetrics().lfMessageFont;
-			lfFont.lfPitchAndFamily = FIXED_PITCH | FF_MODERN;
-			lfFont.lfWeight = FW_NORMAL;//FW_BOLD;
-			lfFont.lfItalic = FALSE;
-			lfFont.lfOutPrecision = OUT_TT_PRECIS;
-
-			lfFont.lfQuality = PROOF_QUALITY;
-#if ( WINVER >= 0x0400 )
-			lfFont.lfQuality = ANTIALIASED_QUALITY;
-#endif	// #if ( WINVER >= 0x0400 )
-#if ( _WIN32_WINNT >= _WIN32_WINNT_WINXP )
-			lfFont.lfQuality = CLEARTYPE_NATURAL_QUALITY;
-#endif	// #if ( _WIN32_WINNT >= _WIN32_WINNT_WINXP )
-
-			lfFont.lfCharSet = DEFAULT_CHARSET;
-			lfFont.lfHeight = -::MulDiv( iPt, static_cast<int>(m_wDpiY), 72 );
-
-			lsw::LSW_HDC hDc( Wnd() );
-			for ( size_t i = 0; i < _countof( s_ppwszFaces ); ++i ) {
-				::wcscpy_s( lfFont.lfFaceName, s_ppwszFaces[i] );
-
-				// Create the candidate.
-				//lsw::LSW_FONT fTry;
-				if ( CurStyle()->fFont.CreateFontIndirectW( &lfFont ) ) {
-					// Verify it is TrueType by asking for outline metrics.
-					lsw::LSW_SELECTOBJECT soFont( hDc.hDc, CurStyle()->fFont.hFont );
-
-					// Two-call pattern to see if OTM exists (TrueType/OpenType only).
-					UINT uNeed = ::GetOutlineTextMetricsW( hDc.hDc, 0, NULL );
-					if ( uNeed != 0 ) {
-						// Success: keep this one.
-						return;
-					}
-					// else: not TrueType, try next fallback.
-				}
-			}
-			//::ReleaseDC( Wnd(), hDc );
 		}
 
 		/**
@@ -382,6 +388,13 @@ namespace mx {
 		}
 
 		/**
+		 * Determines whether the current Edit As type is a fixed-width type (hex, octal, or binary).
+		 * 
+		 * \return Returns true if the view type is Hex, Binary, Code, or a process.
+		 **/
+		inline bool									IsFixedRowLength() const { return m_eaEditAs == MX_ES_HEX || m_eaEditAs == MX_ES_BINARY || m_eaEditAs == MX_ES_CUR_PROCESS || m_eaEditAs == MX_ES_PROCESS; }
+
+		/**
 		 * Computes the pixel width of the address gutter for the current options and font.
 		 *
 		 * \return Returns the pixel width of the address gutter. Returns 0 if the gutter is hidden.
@@ -389,18 +402,57 @@ namespace mx {
 		int											ComputeAddressGutterWidthPx();
 
 		/**
+		 * \brief Returns the ruler height in pixels.
+		 *
+		 * Description: The ruler height equals the base character height for the current font
+		 *  (line spacing does not apply to the ruler). Returns 0 if the ruler is hidden.
+		 */
+		int											GetRulerHeightPx() const {
+			if ( !CurStyle()->bShowRuler ) { return 0; }
+			return CurStyle()->iCharCy;
+		}
+
+		/**
+		 * \brief Computes the left X and width (in pixels) of a group at index for an area.
+		 *
+		 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
+		 * \param _ui32Index Zero-based group index within the row (e.g., 0..(groups-1)).
+		 * \param _bRightArea False for the left numbers area; true for the right text area.
+		 * \param _iXBase The pixel X of the beginning of the area (not including gutter; includes horizontal scroll offset).
+		 * \param _iXLeft [out] Receives the pixel X of the groupfs left edge.
+		 * \param _iWidth [out] Receives the pixel width of the group (internal bytes/chars and normal intra-byte spacing).
+		 * \return Returns true if the index is valid for the current layout; false otherwise.
+		 *
+		 * Description:
+		 *  - A ggrouph is composed of N adjacent cells (bytes for HEX/DEC/OCT/BIN, characters for CHAR),
+		 *    where N is the areafs grouping size. The width includes intra-cell spacing inside the group.
+		 *  - The extra spacing that separates two adjacent groups (group gap) is not included in the width
+		 *    of the current group; it is placed after it.
+		 *  - The caller can center text within the returned [left,width] using a text measurement.
+		 */
+		bool										GetGroupRectForIndex(
+			MX_DATA_FMT _dfDataFmt,
+			uint32_t _ui32Index,
+			bool _bRightArea,
+			int _iXBase,
+			int & _iXLeft,
+			int & _iWidth
+		) const;
+
+		/**
 		 * Computes the pixel width of the left numeric (hex/dec/oct/bin/char) column for one row.
 		 *
+		 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
 		 * \return Returns the pixel width of the left numbers block; 0 if hidden.
 		 */
-		int											ComputeLeftNumbersWidthPx();
+		int											ComputeAreaWidthPx( MX_DATA_FMT _dfDataFmt );
 
 		/**
 		 * Computes the pixel width of the right ASCII/text column for one row.
 		 *
 		 * \return Returns the pixel width of the text block; 0 if hidden.
 		 */
-		int											ComputeRightTextWidthPx();
+		//int											ComputeRightTextWidthPx();
 
 		/**
 		 * Computes the total width, in pixels, of the horizontally scrollable content (one row).
@@ -409,21 +461,12 @@ namespace mx {
 		 */
 		inline int									TotalContentWidthPx() {
 			int iCx = 0;
-			iCx += ComputeLeftNumbersWidthPx();
-			iCx += ComputeRightTextWidthPx();
+			iCx += ComputeAreaWidthPx( CurStyle()->dfLeftNumbersFmt );
+			if ( CurStyle()->bShowRightArea ) {
+				iCx += ComputeAreaWidthPx( CurStyle()->dfRightNumbersFmt );
+			}
 			return max( iCx, 1 );
 		}
-
-		// Compute how many character columns our content needs.
-		//inline int									TotalColumns_Hex() {
-		//	// Address: digits + ':' + space.
-		//	const int iAddr  = m_iAddrDigits + 2;
-		//	// Hex area: each byte = "XX " (3 chars), extra spacer after 8 bytes.
-		//	const int iHex   = static_cast<int>(m_hHex.sStyle.uiBytesPerRow) * 3 + ((m_hHex.sStyle.uiBytesPerRow > 8) ? 1 : 0);
-		//	// Gap + ASCII area: 2 + bytes.
-		//	const int iAscii = 2 + static_cast<int>(m_hHex.sStyle.uiBytesPerRow);
-		//	return iAddr + iHex + iAscii;
-		//}
 
 		// Gets the total number of lines based on which view type is active.
 		uint64_t									TotalLines() const;

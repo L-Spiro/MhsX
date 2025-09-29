@@ -93,9 +93,125 @@ namespace mx {
 	 * \return Returns an LSW_HANDLED code.
 	 **/
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::DpiChanged( WORD _wX, WORD _wY, LPRECT _pRect ) {
-		ChooseDefaultFont();
+		//ChooseDefaultFont();
+		CurStyle()->lfFontParms.lfHeight = -::MulDiv( CurStyle()->iPointSize, static_cast<int>(m_wDpiY), 72 );
+		CurStyle()->fFont.CreateFontIndirectW( &CurStyle()->lfFontParms );
 		RecalcAndInvalidate();
 		return CParent::DpiChanged( _wX, _wY, _pRect );
+	}
+
+	/**
+	 * Increases the font size.  Returns the new font parameters and the view type.  Hex, Octal, and Bindary displays are linked, etc.
+	 * 
+	 * \param _lfFont Holds the returned font for applying to other tabs
+	 * \return Returns true if the view type is Hex, Octal, or Binary.
+	 **/
+	bool CHexEditorControl::IncreaseFontSize( LOGFONTW &_lfFont ) {
+		_lfFont = CurStyle()->lfFontParms;
+		_lfFont.lfHeight = -::MulDiv( CurStyle()->iPointSize + 1, static_cast<int>(m_wDpiY), 72 );
+
+		if ( CurStyle()->fFont.CreateFontIndirectW( &_lfFont ) ) {
+			CurStyle()->iPointSize++;
+			CurStyle()->lfFontParms = _lfFont;
+			RecalcAndInvalidate();
+		}
+		else {
+			_lfFont = CurStyle()->lfFontParms;
+		}
+		return IsFixedRowLength();
+	}
+
+	/**
+	 * Decreases the font size.  Returns the new font parameters and the view type.  Hex, Octal, and Bindary displays are linked, etc.
+	 * 
+	 * \param _lfFont Holds the returned font for applying to other tabs
+	 * \return Returns true if the view type is Hex, Octal, or Binary.
+	 **/
+	bool CHexEditorControl::DecreaseFontSize( LOGFONTW &_lfFont ) {
+		_lfFont = CurStyle()->lfFontParms;
+		if ( CurStyle()->iPointSize <= 2 ) { return true; }
+		_lfFont.lfHeight = -::MulDiv( CurStyle()->iPointSize - 1, static_cast<int>(m_wDpiY), 72 );
+
+		if ( CurStyle()->fFont.CreateFontIndirectW( &_lfFont ) ) {
+			CurStyle()->iPointSize--;
+			CurStyle()->lfFontParms = _lfFont;
+			RecalcAndInvalidate();
+		}
+		else {
+			_lfFont = CurStyle()->lfFontParms;
+		}
+		return IsFixedRowLength();
+	}
+
+	/**
+	 * Sets the default font size.
+	 * 
+	 * \param _lfFont Holds the returned font for applying to other tabs
+	 * \return Returns true if the view type is Hex, Octal, or Binary.
+	 **/
+	bool CHexEditorControl::DefaultFontSize( LOGFONTW &_lfFont ) {
+		_lfFont = CurStyle()->lfFontParms;
+		_lfFont.lfHeight = -::MulDiv( 10, static_cast<int>(m_wDpiY), 72 );
+
+		if ( CurStyle()->fFont.CreateFontIndirectW( &_lfFont ) ) {
+			CurStyle()->iPointSize--;
+			CurStyle()->lfFontParms = _lfFont;
+			RecalcAndInvalidate();
+		}
+		else {
+			_lfFont = CurStyle()->lfFontParms;
+		}
+		return IsFixedRowLength();
+	}
+
+	// Sets a default font.
+	bool CHexEditorControl::ChooseDefaultFont() {
+		static const wchar_t * s_ppwszFaces[] = {
+			L"Droid Sans Mono",   // Preferred.
+			L"Consolas",          // Modern Windows TT.
+			L"Lucida Console"     // Older Windows TT.
+		};
+
+		const int iPt = CurStyle()->iPointSize;
+
+		LOGFONTW lfFont {};
+		lfFont = lsw::CBase().NonClientMetrics().lfMessageFont;
+		lfFont.lfPitchAndFamily = FIXED_PITCH | FF_MODERN;
+		lfFont.lfWeight = FW_NORMAL;//FW_BOLD;
+		lfFont.lfItalic = FALSE;
+		lfFont.lfOutPrecision = OUT_TT_PRECIS;
+
+		lfFont.lfQuality = PROOF_QUALITY;
+#if ( WINVER >= 0x0400 )
+		lfFont.lfQuality = ANTIALIASED_QUALITY;
+#endif	// #if ( WINVER >= 0x0400 )
+#if ( _WIN32_WINNT >= _WIN32_WINNT_WINXP )
+		lfFont.lfQuality = CLEARTYPE_NATURAL_QUALITY;
+#endif	// #if ( _WIN32_WINNT >= _WIN32_WINNT_WINXP )
+
+		lfFont.lfCharSet = DEFAULT_CHARSET;
+		lfFont.lfHeight = -::MulDiv( iPt, static_cast<int>(m_wDpiY), 72 );
+
+		lsw::LSW_HDC hDc( Wnd() );
+		for ( size_t i = 0; i < _countof( s_ppwszFaces ); ++i ) {
+			::wcscpy_s( lfFont.lfFaceName, s_ppwszFaces[i] );
+
+			if ( CurStyle()->fFont.CreateFontIndirectW( &lfFont ) ) {
+				// Verify it is TrueType by asking for outline metrics.
+				lsw::LSW_SELECTOBJECT soFont( hDc.hDc, CurStyle()->fFont.hFont );
+
+				// Two-call pattern to see if OTM exists (TrueType/OpenType only).
+				UINT uNeed = ::GetOutlineTextMetricsW( hDc.hDc, 0, NULL );
+				if ( uNeed != 0 ) {
+					// Success: keep this one.
+					CurStyle()->lfFontParms = lfFont;
+					return true;
+				}
+				// else: not TrueType, try next fallback.
+			}
+		}
+		CurStyle()->fFont.CreateFontIndirectW( &CurStyle()->lfFontParms );
+		return false;
 	}
 
 	// WM_LBUTTONDOWN.
@@ -275,14 +391,40 @@ namespace mx {
 
 	// Draws the hex-editor view.
 	bool CHexEditorControl::PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect ) {
-
+		const int iGutterW = ComputeAddressGutterWidthPx();
 		lsw::LSW_RECT rTmp = _rRect;
-		rTmp.right = rTmp.left + ComputeAddressGutterWidthPx() + 3;
-		::FillRect( _hDc, &rTmp,
-			lsw::CBase::BrushCache().Brush( RGB( 0x23, 0x22, 0x20 ) )
-			/*reinterpret_cast<HBRUSH>(::GetStockObject( DKGRAY_BRUSH ))*/ );	// RGB( 0x23, 0x22, 0x20 )
+		
+		int iX = iGutterW + 3 - m_ui64HPx, iY = 0;
+		if ( CurStyle()->bShowRuler ) {
+			rTmp.bottom = rTmp.top + GetRulerHeightPx();
+			::FillRect( _hDc, &rTmp,
+				lsw::CBase::BrushCache().Brush( MX_GetRgbValue( m_crEditorBk ) ) );
+			if ( MX_GetAValue( m_crRulerLine ) ) {
+				const int iThisY = rTmp.bottom - 1;
+				lsw::LSW_HPEN pPen( PS_SOLID, 1, m_crRulerLine );
+				lsw::LSW_SELECTOBJECT soPen( _hDc, pPen.hPen );
+				::MoveToEx( _hDc, rTmp.left, iThisY, NULL );
+				::LineTo( _hDc, rTmp.right, iThisY );
+			}
+			DrawRuler( _hDc, iX, 0, CurStyle()->dfLeftNumbersFmt, CurStyle()->dfRightNumbersFmt );
+			iY += GetRulerHeightPx();
+		}
 
-		DrawAddressGutter( _hDc, 3, 0, m_iPageLines + 1 );
+
+		if ( CurStyle()->bShowAddressGutter ) {
+			rTmp = _rRect;
+			rTmp.right = rTmp.left + iGutterW + 3;
+			::FillRect( _hDc, &rTmp,
+				lsw::CBase::BrushCache().Brush( MX_GetRgbValue( m_crEditorBk ) ) );
+			if ( MX_GetAValue( m_crAddSepLine ) || m_ui64HPx != 0 ) {
+				const int iThisX = rTmp.right - 1;
+				lsw::LSW_HPEN pPen( PS_SOLID, 1, m_crRulerLine );
+				lsw::LSW_SELECTOBJECT soPen( _hDc, pPen.hPen );
+				::MoveToEx( _hDc, iThisX, iY, NULL );
+				::LineTo( _hDc, iThisX, rTmp.bottom );
+			}
+			DrawAddressGutter( _hDc, 3, iY, m_iPageLines + 1 );
+		}
 		return true;
 	}
 
@@ -314,8 +456,9 @@ namespace mx {
 		EnsureAddrGlyphs( _hDc );
 		const MX_ADDR_GLYPHS & g = stAll.agGlyphs;
 
-		::SetBkMode( _hDc, TRANSPARENT );
-		::SetTextColor( _hDc, st.crText );
+
+		lsw::LSW_SETBKMODE sbmBkMode( _hDc, TRANSPARENT );
+		lsw::LSW_SETTEXTCOLOR stcTextColor( _hDc, MX_GetRgbValue( m_crText ) );
 
 		// Helpers: convert value to string in base, then apply options.
 		auto ToBase = [&]( uint64_t _ui64V, uint32_t _ui32Base, bool _bLower ) -> std::wstring {
@@ -428,6 +571,91 @@ namespace mx {
 	}
 
 	/**
+	 * \brief Draws the ruler at the given position.
+	 *
+	 * \param _hDc Destination HDC.
+	 * \param _iXLeft Pixel X where the scrollable content begins (after gutter; already includes horizontal scroll offset).
+	 * \param _iYTop Pixel Y top where the ruler should be drawn.
+	 * \param _dfLeftFmt Format for the left area.
+	 * \param _dfRightFmt Format for the right area.
+	 *
+	 * Description:
+	 *  - The ruler width equals the sum of the left numbers block and the right text block (if visible),
+	 *    including the inter-block gap. The mini-map and gutter do not scroll and are not part of the ruler.
+	 *  - Each group label is centered within its group rect, computed by GetGroupRectForIndex().
+	 *  - The rulerfs height equals the base character height for the font; line spacing is ignored.
+	 */
+	void CHexEditorControl::DrawRuler( HDC _hDc, int _iXLeft, int _iYTop, MX_DATA_FMT _dfLeftFmt, MX_DATA_FMT _dfRightFmt ) {
+		const MX_STYLE & stAll = *CurStyle();
+		if ( !stAll.bShowRuler ) { return; }
+
+		// Select font, set colors.
+		lsw::LSW_SELECTOBJECT soFont( _hDc, stAll.fFont.hFont );
+		EnsureAddrGlyphs( _hDc );
+		const int iRulerCy = GetRulerHeightPx();
+
+		lsw::LSW_SETBKMODE sbmBkMode( _hDc, TRANSPARENT );
+		lsw::LSW_SETTEXTCOLOR stcTextColor( _hDc, MX_GetRgbValue( m_crRulerText ) );
+
+		// Helper: hex label for a group start index (byte index within row).
+		auto HexLabel = []( uint32_t _ui32V ) -> std::wstring {
+			static const wchar_t * pwsS = L"0123456789ABCDEF";
+			std::wstring wsOut;
+			if ( _ui32V < 16U ) { wsOut.push_back( pwsS[_ui32V] ); }
+			else {
+				// wider rows: use more digits
+				uint32_t ui32N = _ui32V;
+				std::wstring wsTmp;
+				while ( ui32N ) { wsTmp.push_back( pwsS[ui32N & 0xF] ); ui32N >>= 4; }
+				std::reverse( wsTmp.begin(), wsTmp.end() );
+				wsOut.swap( wsTmp );
+			}
+			return wsOut;
+		};
+
+		// Draw one area (left or right) using its data format and group rules.
+		auto DrawArea = [&]( bool _bRightArea, MX_DATA_FMT _dfFmt, int _iAreaXBase ) {
+			// Number of groups in this area.
+			const uint32_t ui32Bpr		= stAll.uiBytesPerRow ? stAll.uiBytesPerRow : 16;
+			const uint32_t ui32GroupSz	= stAll.uiGroupSize ? stAll.uiGroupSize : 1;
+			if ( ui32GroupSz == 0U ) { return; }
+
+			const uint32_t ui32Groups = (ui32Bpr + ui32GroupSz - 1U) / ui32GroupSz;
+
+			for ( uint32_t I = 0; I < ui32Groups; ++I ) {
+				int iGX = 0, iGW = 0;
+				if ( !GetGroupRectForIndex( _dfFmt, I, _bRightArea, _iAreaXBase, iGX, iGW ) ) { break; }
+
+				// Label is the byte index of the first item in the group within the row.
+				const uint32_t ui32ByteIndexInRow = I * ui32GroupSz;
+				std::wstring wsTmp = HexLabel( ui32ByteIndexInRow );
+
+				// Center horizontally inside [iGX, iGW].
+				SIZE sSize {};
+				::GetTextExtentPoint32W( _hDc, wsTmp.c_str(), int( wsTmp.size() ), &sSize );
+				const int iTextX = iGX + (iGW - sSize.cx) / 2;
+				const int iTextY = _iYTop + (iRulerCy - CurStyle()->iCharCy) / 2;
+
+				::TextOutW( _hDc, iTextX, iTextY, wsTmp.c_str(), int( wsTmp.size() ) );
+			}
+		};
+
+		// LEFT area (numbers).
+		//if ( stAll.bShowLeftNumbers ) {
+		{
+			const int iLeftBase = _iXLeft; // already the start of scrollable content
+			DrawArea( false, _dfLeftFmt, iLeftBase );
+		}
+		//}
+
+		// RIGHT area (text).
+		if ( stAll.bShowRightArea ) {
+			const int iRightBase = _iXLeft + ComputeAreaWidthPx( _dfLeftFmt );
+			DrawArea( true, _dfRightFmt, iRightBase );
+		}
+	}
+
+	/**
 	 * Computes the pixel width of the address gutter for the current options and font.
 	 *
 	 * \return Returns the pixel width of the address gutter. Returns 0 if the gutter is hidden.
@@ -447,29 +675,29 @@ namespace mx {
 				const MX_ADDR_GLYPHS & agGlyphs = stAll.agGlyphs;
 
 				// File/page bound (last visible byte vs last file byte).
-				const uint64_t ui64Bpr       = stAll.uiBytesPerRow ? stAll.uiBytesPerRow : 16;
-				const uint64_t ui64FileLast  = (ui64FileSize ? (ui64FileSize - 1ULL) : 0ULL);
-				const uint64_t ui64FileMax   = asAddrStyle.ui64StartAddress + ui64FileLast;
+				const uint64_t ui64Bpr			= stAll.uiBytesPerRow ? stAll.uiBytesPerRow : 16;
+				const uint64_t ui64FileLast		= (ui64FileSize ? (ui64FileSize - 1ULL) : 0ULL);
+				const uint64_t ui64FileMax		= asAddrStyle.ui64StartAddress + ui64FileLast;
 
-				const uint64_t ui64TopLine   = asAddrStyle.ui64FirstVisibleLine;
-				const uint64_t ui64LastLine  = ui64TopLine + (asAddrStyle.ui32VisibleLines ? (asAddrStyle.ui32VisibleLines - 1ULL) : 0ULL);
-				const uint64_t ui64PageLast  = asAddrStyle.ui64StartAddress + (ui64LastLine * ui64Bpr + (ui64Bpr ? (ui64Bpr - 1ULL) : 0ULL));
-				const uint64_t ui64BoundByte = asAddrStyle.bMinimizeDigits ? std::min( ui64PageLast, ui64FileMax ) : ui64FileMax;
+				const uint64_t ui64TopLine		= asAddrStyle.ui64FirstVisibleLine;
+				const uint64_t ui64LastLine		= ui64TopLine + (asAddrStyle.ui32VisibleLines ? (asAddrStyle.ui32VisibleLines - 1ULL) : 0ULL);
+				const uint64_t ui64PageLast		= asAddrStyle.ui64StartAddress + (ui64LastLine * ui64Bpr + (ui64Bpr ? (ui64Bpr - 1ULL) : 0ULL));
+				const uint64_t ui64BoundByte	= asAddrStyle.bMinimizeDigits ? std::min( ui64PageLast, ui64FileMax ) : ui64FileMax;
 
 				// Map bound to displayed scalar by format.
 				auto MapToDisplayed = [&]( uint64_t _ui64Byte ) -> uint64_t {
 					switch ( asAddrStyle.afFormat ) {
-						case MX_AF_BYTES_HEX :
-						case MX_AF_BYTES_DEC :
-						case MX_AF_BYTES_OCT : return _ui64Byte;
+						case MX_AF_BYTES_HEX : {}	MX_FALLTHROUGH
+						case MX_AF_BYTES_DEC : {}	MX_FALLTHROUGH
+						case MX_AF_BYTES_OCT : { return _ui64Byte; }
 						case MX_AF_LINE_NUMBER : {
 							if ( stAll.uiBytesPerRow == 0 ) { return 0ULL; }
 							const uint64_t ui64Lines = (ui64FileSize + stAll.uiBytesPerRow - 1ULL) / stAll.uiBytesPerRow;
 							return ui64Lines ? (ui64Lines - 1ULL) : 0ULL;
 						}
-						case MX_AF_SHORT_HEX :
-						case MX_AF_SHORT_DEC : return (_ui64Byte >> 1);
-						default : return _ui64Byte;
+						case MX_AF_SHORT_HEX : {}	MX_FALLTHROUGH
+						case MX_AF_SHORT_DEC : { return (_ui64Byte >> 1); }
+						default : { return _ui64Byte; }
 					}
 				};
 
@@ -479,12 +707,13 @@ namespace mx {
 				bool bHex = false, bOct = false, bDec = false;
 				uint32_t ui32Base = 10;
 				switch ( asAddrStyle.afFormat ) {
-					case MX_AF_BYTES_HEX :
-					case MX_AF_SHORT_HEX : bHex = true; ui32Base = 16; break;
-					case MX_AF_BYTES_OCT : bOct = true; ui32Base = 8;  break;
-					case MX_AF_BYTES_DEC :
-					case MX_AF_SHORT_DEC :
-					case MX_AF_LINE_NUMBER : default : bDec = true; ui32Base = 10; break;
+					case MX_AF_BYTES_HEX : {}	MX_FALLTHROUGH
+					case MX_AF_SHORT_HEX : { bHex = true; ui32Base = 16; break; }
+					case MX_AF_BYTES_OCT : { bOct = true; ui32Base = 8; break; }
+					case MX_AF_BYTES_DEC : {}	MX_FALLTHROUGH
+					case MX_AF_SHORT_DEC : {}	MX_FALLTHROUGH
+					case MX_AF_LINE_NUMBER : {}	MX_FALLTHROUGH
+					default : { bDec = true; ui32Base = 10; break; }
 				}
 				uint32_t ui32Digits = DigitCount( ui64Disp, ui32Base );
 				uint32_t ui32MinDigits = MinAddrDigits();
@@ -520,11 +749,87 @@ namespace mx {
 	}
 
 	/**
+	 * \brief Computes the left X and width (in pixels) of a group at index for an area.
+	 *
+	 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
+	 * \param _ui32Index Zero-based group index within the row (e.g., 0..(groups-1)).
+	 * \param _bRightArea False for the left numbers area; true for the right text area.
+	 * \param _iXBase The pixel X of the beginning of the area (not including gutter; includes horizontal scroll offset).
+	 * \param _iXLeft [out] Receives the pixel X of the groupfs left edge.
+	 * \param _iWidth [out] Receives the pixel width of the group (internal bytes/chars and normal intra-byte spacing).
+	 * \return Returns true if the index is valid for the current layout; false otherwise.
+	 *
+	 * Description:
+	 *  - A ggrouph is composed of N adjacent cells (bytes for HEX/DEC/OCT/BIN, characters for CHAR),
+	 *    where N is the areafs grouping size. The width includes intra-cell spacing inside the group.
+	 *  - The extra spacing that separates two adjacent groups (group gap) is not included in the width
+	 *    of the current group; it is placed after it.
+	 *  - The caller can center text within the returned [left,width] using a text measurement.
+	 */
+	bool CHexEditorControl::GetGroupRectForIndex(
+		MX_DATA_FMT _dfDataFmt,
+		uint32_t _ui32Index,
+		bool _bRightArea,
+		int _iXBase,
+		int & _iXLeft,
+		int & _iWidth ) const {
+		const MX_STYLE & st = (*CurStyle());
+		const MX_ADDR_GLYPHS & g = st.agGlyphs;
+
+		// Bytes per row for both areas (ruler uses the row layout).
+		const uint32_t ui32Bpr = st.uiBytesPerRow ? st.uiBytesPerRow : 16;
+
+		// Cell width by format (worst-case stable cell).
+		auto CellWidthForFmt = [&]( MX_DATA_FMT _dfFmt ) -> int {
+			switch( _dfFmt ) {
+				case MX_DF_HEX :	{ return 2 * g.iDigitMaxCx; }				// "FF"
+				case MX_DF_DEC :	{ return 3 * g.iDigitMaxCx; }				// "255"
+				case MX_DF_OCT :	{ return 3 * g.iDigitMaxCx; }				// "377"
+				case MX_DF_BIN :	{ return 8 * g.iDigitMaxCx; }				// "11111111"
+				case MX_DF_CHAR :	{ return st.tmMetrics.tmMaxCharWidth; }		// Printable cell.
+				default :			{ return 2 * g.iDigitMaxCx; }
+			}
+		};
+
+		// Choose per-area layout knobs.
+		const int iCellCx				= CellWidthForFmt( _dfDataFmt );
+		const uint32_t ui32ItemGroup	= _dfDataFmt == MX_DF_CHAR ? 1 : st.uiGroupSize; // items per group
+		const int iSpaceBetweenItems	= int( _dfDataFmt == MX_DF_CHAR ? 1 : st.uiSpacesBetweenBytes ) * g.iSpaceCx;
+		const int iExtraGroupGap		= int( st.uiExtraSpacesBetweenGroups ) * g.iSpaceCx * (ui32ItemGroup > 1 ? 1 : 0);
+
+		// Check index validity (number of groups in the row).
+		const uint32_t ui32Groups = (ui32ItemGroup ? ( (ui32Bpr + ui32ItemGroup - 1U) / ui32ItemGroup ) : 0U);
+		if ( ui32ItemGroup == 0U || _ui32Index >= ui32Groups ) { return false; }
+
+		// Prepend area-local leading pad (for left numbers or right text; we baked pads into our area widths).
+		int iX = _iXBase;
+		if ( !_bRightArea ) {
+			// Left numbers starts with its own left pad.
+			iX += st.iPadNumbersLeftPx;
+		}
+		else {
+			// Right text begins after the inter-block gap.
+			iX += st.iPadBetweenNumbersAndTextPx;
+		}
+
+		// Walk to the requested group.
+		const int iSingleItemWithSpace	= iCellCx + iSpaceBetweenItems;
+		const int iGroupBodyWidth		= int( ui32ItemGroup ) * iCellCx + int( ui32ItemGroup > 1 ? ((ui32ItemGroup - 1U) * uint32_t( iSpaceBetweenItems )) : 0U );
+
+		iX += int( _ui32Index ) * (iGroupBodyWidth + iExtraGroupGap);
+
+		_iXLeft = iX;
+		_iWidth = iGroupBodyWidth;
+		return true;
+	}
+
+	/**
 	 * Computes the pixel width of the left numeric (hex/dec/oct/bin/char) column for one row.
 	 *
+	 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
 	 * \return Returns the pixel width of the left numbers block; 0 if hidden.
 	 */
-	int CHexEditorControl::ComputeLeftNumbersWidthPx() {
+	int CHexEditorControl::ComputeAreaWidthPx( MX_DATA_FMT _dfDataFmt ) {
 		const MX_STYLE & asAddrStyle = (*CurStyle());
 		if ( !asAddrStyle.bShowLeftNumbers ) { return 0; }
 			
@@ -536,13 +841,13 @@ namespace mx {
 				EnsureAddrGlyphs( hDc.hDc );
 				const MX_ADDR_GLYPHS & agGlyphs = asAddrStyle.agGlyphs;
 
-				auto CellWidthForFmt = [&]( MX_DATA_FMT _df ) -> int {
-					switch ( _df ) {
-						case MX_DF_HEX :	{ return 2 * agGlyphs.iDigitMaxCx; }	// "FF"
-						case MX_DF_DEC :	{ return 3 * agGlyphs.iDigitMaxCx; }	// "255"
-						case MX_DF_OCT :	{ return 3 * agGlyphs.iDigitMaxCx; }	// "377"
-						case MX_DF_BIN :	{ return 8 * agGlyphs.iDigitMaxCx; }	// "11111111"
-						case MX_DF_CHAR :	{ return agGlyphs.iDigitMaxCx; }		// fixed cell (refine if you later measure ASCII separately)
+				auto CellWidthForFmt = [&]( MX_DATA_FMT _dfDataFmt ) -> int {
+					switch ( _dfDataFmt ) {
+						case MX_DF_HEX :	{ return 2 * agGlyphs.iDigitMaxCx; }					// "FF"
+						case MX_DF_DEC :	{ return 3 * agGlyphs.iDigitMaxCx; }					// "255"
+						case MX_DF_OCT :	{ return 3 * agGlyphs.iDigitMaxCx; }					// "377"
+						case MX_DF_BIN :	{ return 8 * agGlyphs.iDigitMaxCx; }					// "11111111"
+						case MX_DF_CHAR :	{ return asAddrStyle.tmMetrics.tmMaxCharWidth; }		// Fixed cell.
 						default :			{ return 2 * agGlyphs.iDigitMaxCx; }
 					}
 				};
@@ -550,7 +855,7 @@ namespace mx {
 				const uint32_t ui32Bpr		= asAddrStyle.uiBytesPerRow ? asAddrStyle.uiBytesPerRow : 16;
 				const uint32_t ui32GroupSz	= asAddrStyle.uiGroupSize ? asAddrStyle.uiGroupSize : 1;
 
-				const int iCellCx			= CellWidthForFmt( asAddrStyle.dfLeftNumbersFmt );
+				const int iCellCx			= CellWidthForFmt( _dfDataFmt );
 				const int iSpaceB			= int( asAddrStyle.uiSpacesBetweenBytes ) * agGlyphs.iSpaceCx;
 				const int iSpaceGrp			= int( asAddrStyle.uiExtraSpacesBetweenGroups ) * agGlyphs.iSpaceCx;
 
@@ -568,34 +873,6 @@ namespace mx {
 
 				iCx = iTotal;
 			}
-		}
-		return iCx;
-	}
-
-	/**
-	 * Computes the pixel width of the right ASCII/text column for one row.
-	 *
-	 * \return Returns the pixel width of the text block; 0 if hidden.
-	 */
-	int CHexEditorControl::ComputeRightTextWidthPx() {
-		const MX_STYLE & asAddrStyle = (*CurStyle());
-		if ( !asAddrStyle.bShowRightText ) { return 0; }
-
-		int iCx = 0;
-		{
-			lsw::LSW_HDC hDc( Wnd() );
-			lsw::LSW_SELECTOBJECT soFont( hDc.hDc, asAddrStyle.fFont.hFont );
-			EnsureAddrGlyphs( hDc.hDc );
-			const MX_ADDR_GLYPHS & agGlyphs = asAddrStyle.agGlyphs;
-
-			const uint32_t ui32Bpr = asAddrStyle.uiBytesPerRow ? asAddrStyle.uiBytesPerRow : 16;
-
-			int iTotal = 0;
-			iTotal += asAddrStyle.iPadBetweenNumbersAndTextPx;     // gap from left block
-			iTotal += static_cast<int>(ui32Bpr) * agGlyphs.iDigitMaxCx; // fixed per-char cell
-			iTotal += asAddrStyle.iPadTextRightPx;
-
-			iCx = iTotal;
 		}
 		return iCx;
 	}

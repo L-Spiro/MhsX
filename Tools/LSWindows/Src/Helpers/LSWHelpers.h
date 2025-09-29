@@ -9,6 +9,7 @@
 #include <EEExpEval.h>
 
 #include <string>
+#include <unordered_set>
 #include <Uxtheme.h>
 #include <vector>
 
@@ -212,12 +213,49 @@ namespace lsw {
 
 		inline BOOL							Valid() const { return Valid( hFont ); }
 
-		static inline  BOOL					Valid( HANDLE _hFont ) { return _hFont != NULL; }
+		static inline  BOOL					Valid( HFONT _hFont ) { return _hFont != NULL; }
 
 
 		// == Members.
 		HFONT								hFont = NULL;
 		bool								bDeleteIt = false;
+	};
+
+	struct LSW_HPEN {
+		LSW_HPEN( int _iStyle, int _cWidth, COLORREF _cColor ) : hPen( ::CreatePen( _iStyle, _cWidth, _cColor & RGB( 0xFF, 0xFF, 0xFF ) ) ) {}
+		~LSW_HPEN() {
+			Reset();
+		}
+
+		LSW_HPEN &							operator = ( HPEN &_hFont ) {
+			Reset();
+			hPen = _hFont;
+			_hFont = NULL;
+			return (*this);
+		}
+
+
+		// == Functions.
+		HPEN								CreatePen( int _iStyle, int _cWidth, COLORREF _cColor ) {
+			Reset();
+			hPen = ::CreatePen( _iStyle, _cWidth, _cColor & RGB( 0xFF, 0xFF, 0xFF ) );
+			return hPen;
+		}
+
+		VOID								Reset() {
+			if ( Valid() ) {
+				::DeleteObject( hPen );
+				hPen = NULL;
+			}
+		}
+
+		inline BOOL							Valid() const { return Valid( hPen ); }
+
+		static inline  BOOL					Valid( HPEN _hPen ) { return _hPen != NULL; }
+
+
+		// == Members.
+		HPEN								hPen = NULL;
 	};
 
 	struct LSW_HMODULE {
@@ -825,8 +863,49 @@ namespace lsw {
 		LPVOID								pvBuffer;
 	};
 
+	struct LSW_CI_HASH {
+		size_t operator()( const std::wstring & _wsVal ) const {
+			std::wstring wsTmp = _wsVal;
+			for ( wchar_t & wCh : wsTmp ) { wCh = ::towlower( wCh ); }
+			return std::hash<std::wstring>{}( wsTmp );
+		}
+	};
+
+	struct LSW_CI_EQ {
+		bool operator()( const std::wstring & _a, const std::wstring & _b ) const {
+			if ( _a.size() != _b.size() ) { return false; }
+			for ( size_t I = 0; I < _a.size(); ++I ) {
+				if ( ::towlower( _a[I] ) != ::towlower( _b[I] ) ) { return false; }
+			}
+			return true;
+		}
+	};
+
 	class CHelpers {
+		/** Context passed via lParam for the styles callback. */
+		struct LSW_ENUM_STYLES_CTX {
+			std::unordered_set<std::wstring, LSW_CI_HASH, LSW_CI_EQ> *
+											pusNames;
+		};
 	public :
+		/**
+		 * \brief A Unicode block range.
+		 */
+		struct LSW_UC_RANGE {
+			uint32_t						ui32Start;						/**< Inclusive start code point. */
+			uint32_t						ui32End;						/**< Inclusive end code point. */
+		};
+
+		/**
+		 * \brief A writing system definition expressed as one or more Unicode ranges.
+		 * If ui32CountRanges == 0, it means "Any".
+		 */
+		struct LSW_WRITING_SYSTEM {
+			const wchar_t *					pwszName;						/**< Display name (e.g., L"Greek"). */
+			const LSW_UC_RANGE *			prRanges;						/**< Pointer to array of ranges. */
+			uint32_t						ui32CountRanges;				/**< Number of ranges in prRanges. */
+		};
+
 		/**
 		 * Aligns a WORD pointer to a 4-byte address.
 		 *
@@ -1029,8 +1108,6 @@ namespace lsw {
 			return RGB( bR, bG, bB );
 		}
 
-		
-
 		/**
 		 * \brief Chooses black or white text for best contrast against a given background color.
 		 *
@@ -1116,6 +1193,73 @@ namespace lsw {
 			::GetTextExtentPoint32A( _hDc, _sString.c_str(), static_cast<int>(_sString.size()), &sResult );
 			return sResult;
 		}
+
+		/** FONTENUMPROCW-compatible callback to collect style names. */
+		static int CALLBACK					EnumStylesProc(
+			const LOGFONTW * _plfEnum,
+			const TEXTMETRICW * _ptmEnum,
+			DWORD /*_dwType*/,
+			LPARAM _lpParam ) {
+			LSW_ENUM_STYLES_CTX * pCtx = reinterpret_cast<LSW_ENUM_STYLES_CTX *>(_lpParam);
+
+			const ENUMLOGFONTEXW * pElf = reinterpret_cast<const ENUMLOGFONTEXW *>(_plfEnum);
+			/*const NEWTEXTMETRICEXW * pNtmEx = reinterpret_cast<const NEWTEXTMETRICEXW *>(_ptmEnum);
+			(void)pNtmEx;*/
+
+			std::wstring wsStyle = pElf->elfStyle;	// Preferred: actual UI style name.
+			if ( wsStyle.empty() ) {
+				const NEWTEXTMETRICW * pNtm = reinterpret_cast<const NEWTEXTMETRICW *>(_ptmEnum);
+				bool bItalic = (_plfEnum->lfItalic != 0);
+				bool bBold = pNtm->tmWeight >= FW_SEMIBOLD;
+				if ( bBold && bItalic ) { wsStyle = L"Bold Italic"; }
+				else if ( bBold ) { wsStyle = L"Bold"; }
+				else if ( bItalic ) { wsStyle = L"Italic"; }
+				else { wsStyle = L"Regular"; }
+			}
+
+			pCtx->pusNames->insert( wsStyle );
+			return 1;
+		}
+
+		/**
+		 * \brief Enumerates full style names for a given family using ENUMLOGFONTEXW.
+		 * 
+		 * \param _wsFamily The family whose styles to enumerate.
+		 * \param _vOutStyles Receives unique style names as reported by GDI (e.g., L"Regular", L"Light", L"Light Italic", L"Black").
+		 * \return Returns void.
+		 */
+		static VOID							EnumStylesForFamily( const std::wstring &_wsFamily, std::vector<std::wstring> &_vOutStyles );
+
+		/**
+		 * \brief Tests whether a GLYPHSET fully covers the Unicode range [ _ui32A, _ui32B ] (inclusive).
+		 * 
+		 * \param _pgsGlyphs Pointer to a GLYPHSET returned by GetFontUnicodeRanges().
+		 * \param _ui32A Inclusive start code point.
+		 * \param _ui32B Inclusive end code point.
+		 * \return Returns true if the glyph set contains every code point in the interval.
+		 */
+		static bool							GlyphSetHasRange( const GLYPHSET * _pgsGlyphs, uint32_t _ui32A, uint32_t _ui32B ) {
+			if ( _pgsGlyphs == nullptr ) { return false; }
+			for ( DWORD I = 0; I < _pgsGlyphs->cRanges; ++I ) {
+				const WCRANGE & rRange = _pgsGlyphs->ranges[I];
+				uint32_t ui32Start = rRange.wcLow;
+				uint32_t ui32End   = rRange.wcLow + rRange.cGlyphs - 1;
+				if ( ui32End < _ui32A ) { continue; }
+				if ( ui32Start > _ui32B ) { break; }
+				if ( ui32Start <= _ui32A && ui32End >= _ui32B ) { return true; }
+			}
+			return false;
+		}
+
+		/**
+		 * \brief Determines if a specific LOGFONT face supports a writing system.
+		 * 
+		 *        Internally creates the HFONT, selects it into a memory DC, and calls GetFontUnicodeRanges().
+		 * \param _lfFace LOGFONTW describing the face to check (lfHeight is ignored and may be 0).
+		 * \param _wsSystem Writing system definition to test.
+		 * \return Returns true if the face covers all required Unicode blocks for _wsSystem (or always true for "Any").
+		 */
+		static bool							FaceSupportsWritingSystem( const LOGFONTW &_lfFace, const LSW_WRITING_SYSTEM &_wsSystem );
 
 		/**
 		 * Maps a given scan code to a into a virtual-key code as text.

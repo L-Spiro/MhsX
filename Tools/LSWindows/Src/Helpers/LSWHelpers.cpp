@@ -9,6 +9,31 @@
 
 namespace lsw {
 
+	// == Private Statics.
+	static constexpr CHelpers::LSW_UC_RANGE g_lrLatin[]      = { { 0x0000, 0x00FF }, { 0x0100, 0x017F } };
+	static constexpr CHelpers::LSW_UC_RANGE g_lrGreek[]      = { { 0x0370, 0x03FF } };
+	static constexpr CHelpers::LSW_UC_RANGE g_lrCyrillic[]   = { { 0x0400, 0x04FF } };
+	static constexpr CHelpers::LSW_UC_RANGE g_lrArmenian[]   = { { 0x0530, 0x058F } };
+	static constexpr CHelpers::LSW_UC_RANGE g_lrHebrew[]     = { { 0x0590, 0x05FF } };
+	static constexpr CHelpers::LSW_UC_RANGE g_lrArabic[]     = { { 0x0600, 0x06FF } };
+	static constexpr CHelpers::LSW_UC_RANGE g_lrSyriac[]     = { { 0x0700, 0x074F } };
+	static constexpr CHelpers::LSW_UC_RANGE g_lrThaana[]     = { { 0x0780, 0x07BF } };
+	static constexpr CHelpers::LSW_UC_RANGE g_lrDevanagari[] = { { 0x0900, 0x097F } };
+
+	static constexpr CHelpers::LSW_WRITING_SYSTEM g_wsList[] = {
+		{ L"Any",			nullptr,				0 },
+		{ L"Latin",			g_lrLatin,				static_cast<uint32_t>(LSW_ELEMENTS( g_lrLatin )) },
+		{ L"Greek",			g_lrGreek,				static_cast<uint32_t>(LSW_ELEMENTS( g_lrGreek )) },
+		{ L"Cyrillic",		g_lrCyrillic,			static_cast<uint32_t>(LSW_ELEMENTS( g_lrCyrillic )) },
+		{ L"Armenian",		g_lrArmenian,			static_cast<uint32_t>(LSW_ELEMENTS( g_lrArmenian )) },
+		{ L"Hebrew",		g_lrHebrew,				static_cast<uint32_t>(LSW_ELEMENTS( g_lrHebrew )) },
+		{ L"Arabic",		g_lrArabic,				static_cast<uint32_t>(LSW_ELEMENTS( g_lrArabic )) },
+		{ L"Syriac",		g_lrSyriac,				static_cast<uint32_t>(LSW_ELEMENTS( g_lrSyriac )) },
+		{ L"Thaana",		g_lrThaana,				static_cast<uint32_t>(LSW_ELEMENTS( g_lrThaana )) },
+		{ L"Devanagari",	g_lrDevanagari,			static_cast<uint32_t>(LSW_ELEMENTS( g_lrDevanagari )) },
+	};
+
+
 	// == Members.
 #ifdef LSW_USB_INPUTS
 	/** GUID for all USB serial host PnP drivers. */
@@ -48,6 +73,106 @@ namespace lsw {
 		}
 #endif	// #ifdef _DEBUG
 		return _sRet;
+	}
+
+	/**
+	 * \brief Enumerates full style names for a given family using ENUMLOGFONTEXW.
+	 * 
+	 * \param _wsFamily The family whose styles to enumerate.
+	 * \param _vOutStyles Receives unique style names as reported by GDI (e.g., L"Regular", L"Light", L"Light Italic", L"Black").
+	 * \return Returns void.
+	 */
+	VOID CHelpers::EnumStylesForFamily( const std::wstring &_wsFamily, std::vector<std::wstring> &_vOutStyles ) {
+		_vOutStyles.clear();
+
+		LOGFONTW lfQuery{};
+		::wcsncpy_s( lfQuery.lfFaceName, _wsFamily.c_str(), _TRUNCATE );
+		lfQuery.lfCharSet = DEFAULT_CHARSET;
+
+		std::unordered_set<std::wstring, LSW_CI_HASH, LSW_CI_EQ> usNames;
+		LSW_ENUM_STYLES_CTX sCtx{ &usNames };
+
+		HDC hDc = ::GetDC( NULL );
+		::EnumFontFamiliesExW( hDc, &lfQuery, EnumStylesProc, reinterpret_cast<LPARAM>(&sCtx), 0 );
+		::ReleaseDC( NULL, hDc );
+
+
+		if ( usNames.empty() ) {
+			usNames.insert( L"Regular" );
+		}
+
+		// Stable order: put ÅgRegularÅh first, then others alphabetically.
+		if ( usNames.find( L"Regular" ) != usNames.end() ) {
+			_vOutStyles.push_back( L"Regular" );
+		}
+		std::vector<std::wstring> vTmp;
+		for ( const std::wstring & wsThis : usNames ) {
+			if ( ::_wcsicmp( wsThis.c_str(), L"Regular" ) != 0 ) {
+				vTmp.push_back( wsThis );
+			}
+		}
+		std::sort( vTmp.begin(), vTmp.end(), []( const std::wstring & _wsA, const std::wstring & _wsB ) {
+			return ::_wcsicmp( _wsA.c_str(), _wsB.c_str() ) < 0;
+		} );
+		for ( const std::wstring & wsThis : vTmp ) {
+			_vOutStyles.push_back( wsThis );
+		}
+	}
+
+	/**
+	 * \brief Determines if a specific LOGFONT face supports a writing system.
+	 * 
+	 *        Internally creates the HFONT, selects it into a memory DC, and calls GetFontUnicodeRanges().
+	 * \param _lfFace LOGFONTW describing the face to check (lfHeight is ignored and may be 0).
+	 * \param _wsSystem Writing system definition to test.
+	 * \return Returns true if the face covers all required Unicode blocks for _wsSystem (or always true for "Any").
+	 */
+	bool CHelpers::FaceSupportsWritingSystem( const LOGFONTW &_lfFace, const LSW_WRITING_SYSTEM &_wsSystem ) {
+		// Create font at default height for coverage query.
+		LSW_FONT fFace;
+		LOGFONTW lfTmp = _lfFace;
+		lfTmp.lfHeight = 0;
+
+		if ( !fFace.CreateFontIndirectW( &lfTmp ) ) {
+			return false;
+		}
+
+		HDC hDcLocal = ::CreateCompatibleDC( NULL );
+		if ( !hDcLocal ) {
+			return false;
+		}
+
+		{
+			LSW_SELECTOBJECT oSel( hDcLocal, fFace.hFont );
+			DWORD dwBytes = ::GetFontUnicodeRanges( hDcLocal, NULL );
+			if ( dwBytes == 0 ) {
+				::DeleteDC( hDcLocal );
+				return false;
+			}
+
+			std::vector<BYTE> vBuffer( dwBytes );
+			GLYPHSET * pgs = reinterpret_cast<GLYPHSET *>(vBuffer.data());
+			if ( ::GetFontUnicodeRanges( hDcLocal, pgs ) == 0 ) {
+				::DeleteDC( hDcLocal );
+				return false;
+			}
+
+			if ( _wsSystem.ui32CountRanges == 0 ) {
+				::DeleteDC( hDcLocal );
+				return true;		// "Any".
+			}
+
+			for ( uint32_t I = 0; I < _wsSystem.ui32CountRanges; ++I ) {
+				const LSW_UC_RANGE & rR = _wsSystem.prRanges[I];
+				if ( !GlyphSetHasRange( pgs, rR.ui32Start, rR.ui32End ) ) {
+					::DeleteDC( hDcLocal );
+					return false;
+				}
+			}
+		}
+
+		::DeleteDC( hDcLocal );
+		return true;
 	}
 
 	/**

@@ -51,15 +51,16 @@ namespace lsw {
 			::FillRect( _hDcPaint, &_rcClient, bBrush.Handle() );
 		}
 		
+		RECT rcText = _rcClient;
 
 		LSW_SELECTOBJECT soFontOrig( _hDcPaint, m_hFont );																				// Destructor sets the original font back.
-		int iOldBkMode = ::SetBkMode( _hDcPaint, TRANSPARENT );
-		COLORREF crOldText = ::SetTextColor( _hDcPaint, crText );
-		RECT rcText = _rcClient;
-		rcText.left += 6; rcText.right -= 6; rcText.top += 2; rcText.bottom -= 2;
-		::DrawTextW( _hDcPaint, m_wsText, -1, &rcText, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS );
-		::SetTextColor( _hDcPaint, crOldText );
-		::SetBkMode( _hDcPaint, iOldBkMode );
+		{
+			lsw::LSW_SETBKMODE sbmBkMode( _hDcPaint, TRANSPARENT );
+			lsw::LSW_SETTEXTCOLOR stcTextColor( _hDcPaint, crText & RGB( 0xFF, 0xFF, 0xFF ) );
+		
+			rcText.left += 6; rcText.right -= 6; rcText.top += 2; rcText.bottom -= 2;
+			::DrawTextW( _hDcPaint, m_wsText, -1, &rcText, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS );
+		}
 
 		if ( m_bFocus && !m_bPressed ) {
 			RECT rcFocus = _rcClient;

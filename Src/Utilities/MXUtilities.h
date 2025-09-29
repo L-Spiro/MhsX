@@ -61,6 +61,9 @@
     #define MX_LIKELY( x )										( x ) [[likely]]
     #define MX_UNLIKELY( x )									( x ) [[unlikely]]
 	#define MX_STDCALL											__stdcall
+	#define MX_RGBA( R, G, B, A )								(RGB( R, G, B ) | (static_cast<COLORREF>((static_cast<DWORD>(static_cast<BYTE>(A))<<24))))
+	#define MX_GetAValue( RGBA )								(LOBYTE( (RGBA) >> 24))
+	#define MX_GetRgbValue( RGBA )								static_cast<COLORREF>((RGBA) & RGB( 0xFF, 0xFF, 0xFF ))
 #elif defined( __GNUC__ ) || defined( __clang__ )
     // GNU Compiler Collection (GCC) or Clang
     #define MX_ALIGN( n ) 										__attribute__( (aligned( n )) )
@@ -72,6 +75,9 @@
     #define MX_UNLIKELY( x )									( __builtin_expect( !!(x), 0 ) )
     #define __assume( x )
 	#define MX_STDCALL
+	#define MX_RGBA( R, G, B, A )								(static_cast<COLORREF>((static_cast<BYTE>(R)|(static_cast<WORD>(static_cast<BYTE>(G))<<8))|((static_cast<DWORD>(static_cast<BYTE>(B))<<16))) | (static_cast<COLORREF>((static_cast<DWORD>(static_cast<BYTE>(A))<<24))))
+	#define MX_GetAValue( RGBA )								static_cast<BYTE>( (RGBA) >> 24 )
+	#define MX_GetRgbValue( RGBA )								((RGBA) & RGB( 0xFF, 0xFF, 0xFF ))
 #else
 	#define MX_FORCEINLINE										inline
     #error "Unsupported compiler"

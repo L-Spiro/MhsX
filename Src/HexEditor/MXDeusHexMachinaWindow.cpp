@@ -177,6 +177,10 @@ namespace mx {
 				Close();
 				break;
 			}
+
+			case Layout::MX_M_VIEW_FONT_ENLARGE_FONT : {
+				break;
+			}
 		}
 		return LSW_H_CONTINUE;
 	}
