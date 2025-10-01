@@ -66,7 +66,8 @@ namespace lsw {
 
 
 	static const CFonts::LSW_WRITING_SYSTEM g_wsList[] = {
-		// pwszName					pwszSample																							prRanges			ui32CountRanges
+		// pwszName					pwszSample																							prRanges			ui32CountRanges	pfSpecial
+		{ L"Any",					L"\x41\x61\x42\x62\x7A\x5A",													/*AaBbzZ*/			nullptr,			0,				nullptr },
 		{ L"Latin",					L"\x41\x61\u00C3\u00E1\x5A\x7A",												/*AaÃáZz*/			g_lrLatinCore,		2,				nullptr },
 		{ L"Greek",					L"\u0393\u03B1\u03A9\u03C9",													/*ΓαΩω*/			g_lrGreek,			1,				nullptr },
 		{ L"Cyrillic",				L"\u0414\u0434\u0436\u044F",													/*Дджя*/			g_lrCyrillic,		1,				nullptr },
@@ -112,6 +113,37 @@ namespace lsw {
 	);
 
 	// == Functions.
+	/**
+	 * \brief FONTENUMPROCW-compatible callback used by FamilyIsOther() to scan faces within a family.
+	 *
+	 * The callback checks each enumerated face with FaceIsOther(). If any face is classified as "Other",
+	 * the context flag is set and enumeration is terminated.
+	 *
+	 * \param _plfEnum Pointer to LOGFONTW for the enumerated face (ENUMLOGFONTEXW-compatible).
+	 * \param _ptmMetrics Pointer to TEXTMETRICW for the enumerated face (may actually be NEWTEXTMETRICEXW for TrueType).
+	 * \param _dwType Font type flags (bitwise OR of TRUETYPE_FONTTYPE/RASTER_FONTTYPE/DEVICE_FONTTYPE). Unused here.
+	 * \param _lpParam LPARAM pointing to an lsw::CFonts::LSW_CTX instance that receives the result flag.
+	 * \return Returns 0 to stop enumeration when a match is found; otherwise returns nonzero to continue.
+	 */
+	int CALLBACK CFonts::EnumFamilyIsOther_Proc(
+		const LOGFONTW * _plfEnum,
+		const TEXTMETRICW * /*_ptmMetrics*/,
+		DWORD /*_dwType*/,
+		LPARAM _lpParam ) {
+		bool * pbCtx = reinterpret_cast<bool *>(_lpParam);
+		if ( pbCtx == nullptr || _plfEnum == nullptr ) {
+			return 1; // continue safely if inputs are unexpected
+		}
+
+		// FaceIsOther() must be declared elsewhere in this namespace:
+		// bool FaceIsOther( const LOGFONTW & _lfFace );
+		if ( FaceIsOther( (*_plfEnum) ) ) {
+			(*pbCtx) = true;
+			return 0; // stop early: we found at least one "Other" face in this family
+		}
+		return 1; // keep scanning other faces in the same family
+	}
+
 	/**
 	 * FONTENUMPROCW-compatible callback used by EnumSizesForFace().
 	 * 
@@ -159,9 +191,9 @@ namespace lsw {
 		const TEXTMETRICW * _ptmEnum,
 		DWORD _dwType,
 		LPARAM _lpParam ) {
-		CSystemFonts * pvOut = reinterpret_cast<CSystemFonts *>(_lpParam);
+		LSW_FAMILY_ENUM_CTX * pvOut = reinterpret_cast<LSW_FAMILY_ENUM_CTX *>(_lpParam);
 
-		if ( pvOut == nullptr || _plfEnum == nullptr || _ptmEnum == nullptr ) { return 1; }
+		if ( pvOut == nullptr || pvOut->psfFonts == nullptr || _plfEnum == nullptr || _ptmEnum == nullptr ) { return 1; }
 
 		try {
 			LSW_SYSTEM_FONTS sSfTmp{};
@@ -181,7 +213,11 @@ namespace lsw {
 			}
 
 			if ( !IsVerticalAtFace( sSfTmp.lfLogFont.lfFaceName ) ) {
-				pvOut->insert( sSfTmp );
+				if ( pvOut->wiWritingId == LSW_WS_ANY ||
+					((pvOut->wiWritingId == LSW_WS_OTHER && FaceIsOther( (*_plfEnum) )) ||
+					(pvOut->wiWritingId != LSW_WS_OTHER && FaceSupportsWritingSystem( (*_plfEnum), WritingSystem( pvOut->wiWritingId ) ))) ) {
+					pvOut->psfFonts->insert( sSfTmp );
+				}
 			}
 		}
 		catch ( ... ) { return 0; }
@@ -292,20 +328,23 @@ namespace lsw {
 	}
 
 	/**
-	 * \brief Enumerate all faces (Family + Style) on the system.
+	 * \brief Enumerate all faces (Family + Style) on the system for a given writing style.
 	 * 
+	 * \param _uDpi		DPI used to convert pixel heights to points for raster faces.
+	 * \param _wiId		The writing style for which to gather fonts.
 	 * \return Returns an array of system fonts.
 	 */
-	CFonts::CSystemFonts CFonts::EnumAllFaces( uint32_t _uDpi ) {
+	CFonts::CSystemFonts CFonts::EnumAllFaces( uint32_t _uDpi, LSW_WS_ID _wiId ) {
 		LOGFONTW lfQuery {};
 		lfQuery.lfCharSet = DEFAULT_CHARSET;
 		lfQuery.lfFaceName[0] = L'\0';
 
 		CSystemFonts sfCtx;
+		LSW_FAMILY_ENUM_CTX fecCtx = { &sfCtx, _uDpi, _wiId };
 
 		HDC hDc = ::GetDC( NULL );
 		if ( hDc ) {
-			::EnumFontFamiliesExW( hDc, &lfQuery, EnumFamilies_Proc, reinterpret_cast<LPARAM>(&sfCtx), 0 );
+			::EnumFontFamiliesExW( hDc, &lfQuery, EnumFamilies_Proc, reinterpret_cast<LPARAM>(&fecCtx), 0 );
 			::ReleaseDC( NULL, hDc );
 		}
 
@@ -324,7 +363,6 @@ namespace lsw {
 	 * 
 	 * \param _wsFamily The family whose styles to enumerate.
 	 * \param _vOutStyles Receives unique style names as reported by GDI (e.g., L"Regular", L"Light", L"Light Italic", L"Black").
-	 * \return Returns void.
 	 */
 	VOID CFonts::EnumStylesForFamily( const std::wstring &_wsFamily, std::vector<std::wstring> &_vOutStyles ) {
 		_vOutStyles.clear();
@@ -368,7 +406,6 @@ namespace lsw {
 	 * 
 	 * \param _wcFaceName The family whose styles to enumerate.
 	 * \param _sOutStyles Receives the styles for the given font family.
-	 * \return Returns void.
 	 */
 	VOID CFonts::EnumStylesForFamily( const WCHAR _wcFaceName[LF_FACESIZE], CFontStyles &_sOutStyles ) {
 		_sOutStyles.clear();
@@ -403,7 +440,6 @@ namespace lsw {
 	 * \param _fsStyle    In/out style record. Uses _fsStyle.lWeight/_fsStyle.bItalic to select the face;
 	 *                    populates _fsStyle.sSizes with available point sizes.
 	 * \param _uDpi       DPI used to convert pixel heights to points for raster faces.
-	 * \return Returns void.
 	 */
 	VOID CFonts::EnumSizesForFace( const WCHAR _wcFaceName[LF_FACESIZE], LSW_FONT_STYLE & _fsStyle, uint32_t _uDpi ) {
 		// Reset output.
@@ -482,6 +518,7 @@ namespace lsw {
 			return false;
 		}
 
+		bool bResult = false;
 		{
 			LSW_SELECTOBJECT oSel( hDcLocal, fFace.hFont );
 			DWORD dwBytes = ::GetFontUnicodeRanges( hDcLocal, NULL );
@@ -497,22 +534,32 @@ namespace lsw {
 				return false;
 			}
 
-			if ( _wsSystem.ui32CountRanges == 0 ) {
-				::DeleteDC( hDcLocal );
-				return true;		// "Any".
-			}
+			const bool bHasRanges   = (_wsSystem.ui32CountRanges != 0 && _wsSystem.prRanges != nullptr);
+			const bool bHasSpecial  = (_wsSystem.pfSpecial != nullptr);
+			const bool bNoCriteria  = (!bHasRanges && !bHasSpecial);
 
-			for ( uint32_t I = 0; I < _wsSystem.ui32CountRanges; ++I ) {
-				const LSW_UC_RANGE & rR = _wsSystem.prRanges[I];
-				if ( !GlyphSetHasRange( pgs, rR.ui32Start, rR.ui32End ) ) {
-					::DeleteDC( hDcLocal );
-					return false;
+			bool bRangesOk = true;
+			if ( bHasRanges ) {
+				for ( uint32_t I = 0; I < _wsSystem.ui32CountRanges; ++I ) {
+					const LSW_UC_RANGE & rR = _wsSystem.prRanges[I];
+					if ( !GlyphSetHasRange( pgs, rR.ui32Start, rR.ui32End ) ) {
+						bRangesOk = false;
+						break;
+					}
 				}
 			}
+
+			bool bSpecialOk = true;
+			if ( bHasSpecial ) {
+				// Signature assumed: bool (*pfSpecial)(HDC, const GLYPHSET *)
+				bSpecialOk = _wsSystem.pfSpecial( hDcLocal, pgs );
+			}
+
+			bResult = bNoCriteria || ( bRangesOk && bSpecialOk );
 		}
 
 		::DeleteDC( hDcLocal );
-		return true;
+		return bResult;
 	}
 
 	/**

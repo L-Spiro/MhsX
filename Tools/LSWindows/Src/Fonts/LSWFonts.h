@@ -72,42 +72,43 @@ namespace lsw {
 	public :
 		// == Enumerations.
 		enum LSW_WS_ID : uint32_t {
-			LSW_WS_LATIN = 0,                 // Latin
-			LSW_WS_GREEK,                     // Greek
-			LSW_WS_CYRILLIC,                  // Cyrillic
-			LSW_WS_ARMENIAN,                  // Armenian
-			LSW_WS_HEBREW,                    // Hebrew
-			LSW_WS_ARABIC,                    // Arabic
-			LSW_WS_SYRIAC,                    // Syriac
-			LSW_WS_THAANA,                    // Thaana
-			LSW_WS_DEVANAGARI,                // Devanagari
-			LSW_WS_BENGALI,                   // Bengali
-			LSW_WS_GURMUKHI,                  // Gurmukhi
-			LSW_WS_GUJARATI,                  // Gujarati
-			LSW_WS_ORIYA,                     // Oriya
-			LSW_WS_TAMIL,                     // Tamil
-			LSW_WS_TELUGU,                    // Telugu
-			LSW_WS_KANNADA,                   // Kannada
-			LSW_WS_MALAYALAM,                 // Malayalam
-			LSW_WS_SINHALA,                   // Sinhala
-			LSW_WS_THAI,                      // Thai
-			LSW_WS_LAO,                       // Lao
-			LSW_WS_TIBETAN,                   // Tibetan
-			LSW_WS_MYANMAR,                   // Myanmar
-			LSW_WS_GEORGIAN,                  // Georgian
-			LSW_WS_KHMER,                     // Khmer
-			LSW_WS_SIMPLIFIED_CHINESE,        // Simplified Chinese
-			LSW_WS_TRADITIONAL_CHINESE,       // Traditional Chinese
-			LSW_WS_JAPANESE,                  // Japanese
-			LSW_WS_KOREAN,                    // Korean
-			LSW_WS_VIETNAMESE,                // Vietnamese
-			LSW_WS_SYMBOL,                    // Symbol
-			LSW_WS_OTHER,                     // Other
-			LSW_WS_OGHAM,                     // Ogham
-			LSW_WS_RUNIC,                     // Runic
-			LSW_WS_NKO,                       // N’ko
+			LSW_WS_ANY = 0,						// Any
+			LSW_WS_LATIN,						// Latin
+			LSW_WS_GREEK,						// Greek
+			LSW_WS_CYRILLIC,					// Cyrillic
+			LSW_WS_ARMENIAN,					// Armenian
+			LSW_WS_HEBREW,						// Hebrew
+			LSW_WS_ARABIC,						// Arabic
+			LSW_WS_SYRIAC,						// Syriac
+			LSW_WS_THAANA,						// Thaana
+			LSW_WS_DEVANAGARI,					// Devanagari
+			LSW_WS_BENGALI,						// Bengali
+			LSW_WS_GURMUKHI,					// Gurmukhi
+			LSW_WS_GUJARATI,					// Gujarati
+			LSW_WS_ORIYA,						// Oriya
+			LSW_WS_TAMIL,						// Tamil
+			LSW_WS_TELUGU,						// Telugu
+			LSW_WS_KANNADA,						// Kannada
+			LSW_WS_MALAYALAM,					// Malayalam
+			LSW_WS_SINHALA,						// Sinhala
+			LSW_WS_THAI,						// Thai
+			LSW_WS_LAO,							// Lao
+			LSW_WS_TIBETAN,						// Tibetan
+			LSW_WS_MYANMAR,						// Myanmar
+			LSW_WS_GEORGIAN,					// Georgian
+			LSW_WS_KHMER,						// Khmer
+			LSW_WS_SIMPLIFIED_CHINESE,			// Simplified Chinese
+			LSW_WS_TRADITIONAL_CHINESE,			// Traditional Chinese
+			LSW_WS_JAPANESE,					// Japanese
+			LSW_WS_KOREAN,						// Korean
+			LSW_WS_VIETNAMESE,					// Vietnamese
+			LSW_WS_SYMBOL,						// Symbol
+			LSW_WS_OTHER,						// Other
+			LSW_WS_OGHAM,						// Ogham
+			LSW_WS_RUNIC,						// Runic
+			LSW_WS_NKO,							// N’ko
 
-			LSW_WS__COUNT                     // Count/sentinel
+			LSW_WS__COUNT						// Count/sentinel
 		};
 
 
@@ -237,8 +238,32 @@ namespace lsw {
 		typedef std::set<LSW_SYSTEM_FONTS, LSW_SYSTEM_FONTS_LESS>
 											CSystemFonts;
 
+		/** Family-enumeration context. */
+		struct LSW_FAMILY_ENUM_CTX {
+			CSystemFonts *					psfFonts;
+			uint32_t						ui32Dpi;
+			LSW_WS_ID						wiWritingId;
+		};
 
 		// == Functions.
+		/**
+		 * \brief FONTENUMPROCW-compatible callback used by FamilyIsOther() to scan faces within a family.
+		 *
+		 * The callback checks each enumerated face with FaceIsOther(). If any face is classified as "Other",
+		 * the context flag is set and enumeration is terminated.
+		 *
+		 * \param _plfEnum Pointer to LOGFONTW for the enumerated face (ENUMLOGFONTEXW-compatible).
+		 * \param _ptmMetrics Pointer to TEXTMETRICW for the enumerated face (may actually be NEWTEXTMETRICEXW for TrueType).
+		 * \param _dwType Font type flags (bitwise OR of TRUETYPE_FONTTYPE/RASTER_FONTTYPE/DEVICE_FONTTYPE). Unused here.
+		 * \param _lpParam LPARAM pointing to an lsw::CFonts::LSW_CTX instance that receives the result flag.
+		 * \return Returns 0 to stop enumeration when a match is found; otherwise returns nonzero to continue.
+		 */
+		static int CALLBACK					EnumFamilyIsOther_Proc(
+			const LOGFONTW * _plfEnum,
+			const TEXTMETRICW * /*_ptmMetrics*/,
+			DWORD /*_dwType*/,
+			LPARAM _lpParam );
+
 		/** FONTENUMPROCW-compatible callback to collect style names. */
 		static int CALLBACK					EnumStylesProc(
 			const LOGFONTW * _plfEnum,
@@ -326,24 +351,25 @@ namespace lsw {
 		 * \param _lpParam LPARAM pointing to an LSW_ENUM_SIZES_CTX.
 		 * \return Returns nonzero to continue enumeration; zero to stop.
 		 */
-		static int CALLBACK EnumSizes_Proc( const LOGFONTW * /*_plfEnum*/,
+		static int CALLBACK					EnumSizes_Proc( const LOGFONTW * /*_plfEnum*/,
 			const TEXTMETRICW * _ptmEnum,
 			DWORD _dwType,
 			LPARAM _lpParam );
 
 		/**
-		 * \brief Enumerate all faces (Family + Style) on the system.
+		 * \brief Enumerate all faces (Family + Style) on the system for a given writing style.
 		 * 
+		 * \param _uDpi		DPI used to convert pixel heights to points for raster faces.
+		 * \param _wiId		The writing style for which to gather fonts.
 		 * \return Returns an array of system fonts.
 		 */
-		static CSystemFonts					EnumAllFaces( uint32_t _uDpi );
+		static CSystemFonts					EnumAllFaces( uint32_t _uDpi, LSW_WS_ID _wiId = LSW_WS_ANY );
 
 		/**
 		 * \brief Enumerates full style names for a given family using ENUMLOGFONTEXW.
 		 * 
 		 * \param _wsFamily The family whose styles to enumerate.
 		 * \param _vOutStyles Receives unique style names as reported by GDI (e.g., L"Regular", L"Light", L"Light Italic", L"Black").
-		 * \return Returns void.
 		 */
 		static VOID							EnumStylesForFamily( const std::wstring &_wsFamily, std::vector<std::wstring> &_vOutStyles );
 
@@ -352,7 +378,6 @@ namespace lsw {
 		 * 
 		 * \param _wcFaceName The family whose styles to enumerate.
 		 * \param _sOutStyles Receives the styles for the given font family.
-		 * \return Returns void.
 		 */
 		static VOID							EnumStylesForFamily( const WCHAR _wcFaceName[LF_FACESIZE], CFontStyles &_sOutStyles );
 
@@ -366,7 +391,6 @@ namespace lsw {
 		 * \param _fsStyle    In/out style record. Uses _fsStyle.lWeight/_fsStyle.bItalic to select the face;
 		 *                    populates _fsStyle.sSizes with available point sizes.
 		 * \param _uDpi       DPI used to convert pixel heights to points for raster faces.
-		 * \return Returns void.
 		 */
 		static VOID							EnumSizesForFace( const WCHAR _wcFaceName[LF_FACESIZE], LSW_FONT_STYLE &_fsStyle, uint32_t _uDpi );
 
@@ -387,6 +411,7 @@ namespace lsw {
 				if ( ui32End < _ui32A ) { continue; }
 				if ( ui32Start > _ui32B ) { break; }
 				if ( ui32Start <= _ui32A && ui32End >= _ui32B ) { return true; }
+				if ( ui32Start >= _ui32A && ui32Start < _ui32B ) { return true; }
 			}
 			return false;
 		}
@@ -419,7 +444,6 @@ namespace lsw {
 		 * 
 		 * \param _wsStyle Style string from the styles list.
 		 * \param _lfInOut LOGFONT to modify: sets lfWeight and lfItalic; preserves other fields.
-		 * \return Returns void.
 		 */
 		static inline VOID					ApplyStyleToLogFont( const std::wstring &_wsStyle, LOGFONTW &_lfInOut ) {
 			std::wstring wsTmp = _wsStyle;
@@ -502,21 +526,25 @@ namespace lsw {
 
 		/** Family predicate for "Other". */
 		static inline bool					FamilyIsOther( const wchar_t * _pwszFamily ) {
-			LOGFONTW lfLogFont {};
-			lfLogFont.lfCharSet = DEFAULT_CHARSET;
-			::wcsncpy_s( lfLogFont.lfFaceName, _pwszFamily, _TRUNCATE );
+			if ( _pwszFamily == nullptr || _pwszFamily[0] == L'\0' ) { return false; }
 
-			struct LSW_CTX { bool bIsOther; } sCtx{ false };
-			auto CALLBACK fnEnum = []( const LOGFONTW * _plf, const TEXTMETRICW * /*_ptmMetrics*/, DWORD /*_dwT*/, LPARAM _lpParam ) -> int {
-				LSW_CTX * pcCtx = reinterpret_cast<LSW_CTX *>(_lpParam);
-				if ( FaceIsOther( (*_plf) ) ) { pcCtx->bIsOther = true; return 0; }
-				return 1;
-			};
+			LOGFONTW lfQuery {};
+			lfQuery.lfCharSet = DEFAULT_CHARSET;
+			::wcsncpy_s( lfQuery.lfFaceName, _pwszFamily, _TRUNCATE );
+
+			bool bIsIt = false;
 
 			HDC hDc = ::GetDC( NULL );
-			::EnumFontFamiliesExW( hDc, &lfLogFont, fnEnum, reinterpret_cast<LPARAM>(&sCtx), 0 );
-			::ReleaseDC( NULL, hDc );
-			return sCtx.bIsOther;
+			if ( hDc ) {
+				::EnumFontFamiliesExW(
+					hDc,
+					&lfQuery,
+					EnumFamilyIsOther_Proc,
+					reinterpret_cast<LPARAM>(&bIsIt),
+					0 );
+				::ReleaseDC( NULL, hDc );
+			}
+			return bIsIt;
 		}
 
 		/**
