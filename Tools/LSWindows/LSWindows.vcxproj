@@ -436,6 +436,7 @@
     <ClCompile Include="Src\Docking\LSWDockTarget.cpp" />
     <ClCompile Include="Src\Edit\LSWEdit.cpp" />
     <ClCompile Include="Src\Expressions\LSWExpressions.cpp" />
+    <ClCompile Include="Src\Fonts\LSWFonts.cpp" />
     <ClCompile Include="Src\GroupBox\LSWGroupBox.cpp" />
     <ClCompile Include="Src\Helpers\LSWHelpers.cpp" />
     <ClCompile Include="Src\Helpers\LSWInputListenerBase.cpp" />
@@ -480,6 +481,7 @@
     <ClInclude Include="Src\Docking\LSWDockTarget.h" />
     <ClInclude Include="Src\Edit\LSWEdit.h" />
     <ClInclude Include="Src\Expressions\LSWExpression.h" />
+    <ClInclude Include="Src\Fonts\LSWFonts.h" />
     <ClInclude Include="Src\GroupBox\LSWGroupBox.h" />
     <ClInclude Include="Src\Helpers\LSWHelpers.h" />
     <ClInclude Include="Src\Helpers\LSWInputListenerBase.h" />
