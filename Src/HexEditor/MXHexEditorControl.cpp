@@ -26,7 +26,7 @@ namespace mx {
 	void CHexEditorControl::InitControl( HWND _hWnd ) {
 		//m_iCxChar = m_iCyChar = 0;
 		//m_iClientW = m_iClientH = 0;
-		//m_hHex.sStyle.uiBytesPerRow = 16;
+		//m_sStyles[MX_ES_HEX].uiBytesPerRow = 16;
 		/*m_pData = nullptr;
 		m_ui64Size = 0ULL;*/
 		/*m_iVPos = 0;
@@ -141,6 +141,31 @@ namespace mx {
 			_lfFont = CurStyle()->lfFontParms;
 		}
 		return IsFixedRowLength();
+	}
+
+	/**
+	 * Sets the current font.
+	 * 
+	 * \param _lfFont The font to set.
+	 * \param _bFixedRowLength If true, the fixed-sized fonts are updated, otherwise the variable-row-length fonts are updated.
+	 * \return Returns true if setting the font succeeded,
+	 **/
+	bool CHexEditorControl::SetFont( const LOGFONTW &_lfFont, bool _bFixedRowLength ) {
+		 LOGFONTW lfTmp = _lfFont;
+		 bool bRet = false;
+		 if ( _bFixedRowLength ) {
+			if ( m_sStyles[MX_ES_HEX].fFont.CreateFontIndirectW( &_lfFont ) ) {
+				m_sStyles[MX_ES_HEX].lfFontParms = _lfFont;
+				ComputeFontMetrics( m_sStyles[MX_ES_HEX] );
+				bRet = true;
+			}
+		 }
+
+		 if ( bRet ) {
+			 UpdateScrollbars();
+			::InvalidateRect( Wnd(), nullptr, FALSE );
+		}
+		return bRet;
 	}
 
 	/**
@@ -387,6 +412,56 @@ namespace mx {
 			wceEx.SetWindPro( CWidget::WindowProc );
 			m_aAtom = lsw::CBase::RegisterClassExW( wceEx.Obj() );
 		}
+	}
+
+	// Sets a default font.
+	bool CHexEditorControl::ChooseDefaultFont( MX_FONT_SET &_fsFont, WORD _wDpi, HWND _hWnd ) {
+		static const wchar_t * s_ppwszFaces[] = {
+			L"Droid Sans Mono",   // Preferred.
+			L"Consolas",          // Modern Windows TT.
+			L"Lucida Console"     // Older Windows TT.
+		};
+
+		const int32_t iPt = _fsFont.i32PointSize;
+
+		LOGFONTW lfFont {};
+		lfFont = lsw::CBase().NonClientMetrics().lfMessageFont;
+		lfFont.lfPitchAndFamily = FIXED_PITCH | FF_MODERN;
+		lfFont.lfWeight = FW_NORMAL;//FW_BOLD;
+		lfFont.lfItalic = FALSE;
+		lfFont.lfOutPrecision = OUT_TT_PRECIS;
+
+		lfFont.lfQuality = PROOF_QUALITY;
+#if ( WINVER >= 0x0400 )
+		lfFont.lfQuality = ANTIALIASED_QUALITY;
+#endif	// #if ( WINVER >= 0x0400 )
+#if ( _WIN32_WINNT >= _WIN32_WINNT_WINXP )
+		lfFont.lfQuality = CLEARTYPE_NATURAL_QUALITY;
+#endif	// #if ( _WIN32_WINNT >= _WIN32_WINNT_WINXP )
+
+		lfFont.lfCharSet = DEFAULT_CHARSET;
+		lfFont.lfHeight = -::MulDiv( iPt, static_cast<int>(_wDpi), 72 );
+
+		lsw::LSW_HDC hDc( _hWnd );
+		for ( size_t i = 0; i < _countof( s_ppwszFaces ); ++i ) {
+			::wcscpy_s( lfFont.lfFaceName, s_ppwszFaces[i] );
+
+			if ( _fsFont.fFont.CreateFontIndirectW( &lfFont ) ) {
+				// Verify it is TrueType by asking for outline metrics.
+				lsw::LSW_SELECTOBJECT soFont( hDc.hDc, _fsFont.fFont.hFont );
+
+				// Two-call pattern to see if OTM exists (TrueType/OpenType only).
+				UINT uNeed = ::GetOutlineTextMetricsW( hDc.hDc, 0, NULL );
+				if ( uNeed != 0 ) {
+					// Success: keep this one.
+					_fsFont.lfFontParms = lfFont;
+					return true;
+				}
+				// else: not TrueType, try next fallback.
+			}
+		}
+		_fsFont.fFont.CreateFontIndirectW( &_fsFont.lfFontParms );
+		return false;
 	}
 
 	// Draws the hex-editor view.

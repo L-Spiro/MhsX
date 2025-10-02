@@ -106,6 +106,15 @@ namespace mx {
 		CTab *										Tab() {
 			return static_cast<CTab *>(FindChild( Layout::MX_W_TABS ));
 		}
+
+		// Gets the currently active hex-editor control.
+		CHexEditorControl *							CurrentEditor() {
+			auto ptTab = Tab();
+			if ( !ptTab ) { return nullptr; }
+			size_t sIdx = size_t( ptTab->GetCurSel() );
+			if ( sIdx >= m_vTabs.size() ) { return nullptr; }
+			return m_vTabs[sIdx].phecWidget;
+		}
 		
 		// Prepares to create the window.  Creates the atom if necessary.
 		static void									PrepareWindow();
@@ -121,6 +130,10 @@ namespace mx {
 
 
 		// == Members.
+		// The font for fixed-row views.
+		CHexEditorControl::MX_FONT_SET				m_fsFixedRowFont;
+		// The font for text views.
+		CHexEditorControl::MX_FONT_SET				m_fsTextViewFont;
 		// Image list.
 		CImageList									m_iImages;
 		// Images.
@@ -149,6 +162,12 @@ namespace mx {
 
 		// Performs an Open operation.
 		void										Open( const std::filesystem::path &_pPath );
+
+		// Enlarge font.
+		void										EnlargeFont();
+
+		// Ensmall font.
+		void										EnsmallFont();
 
 
 	private :

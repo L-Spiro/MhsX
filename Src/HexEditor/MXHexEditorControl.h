@@ -19,6 +19,12 @@ namespace mx {
 
 
 		// == Enumerations.
+		/** Shared fonts. */
+		enum MX_FONT_TYPE {
+			MX_FT_FIXED_ROW,
+			MX_FT_TEXT_VIEW,
+		};
+
 		/** View types. */
 		enum MX_EDIT_AS {
 			MX_ES_TEXT,
@@ -33,6 +39,8 @@ namespace mx {
 			MX_ES_CUR_PROCESS,
 			MX_ES_CODE,
 			MX_ES_TAGGED,
+
+			MX_ES_TOTAL
 		};
 
 		/** Address formats. */
@@ -54,6 +62,21 @@ namespace mx {
 			MX_DF_CHAR								// Textual: printable byte or '.'
 		};
 
+
+		// == Types.
+		/** A set of font data. */
+		struct MX_FONT_SET {
+			lsw::LSW_FONT							fFont;													// Current font.
+			LOGFONTW								lfFontParms {};											// The current font parameters.
+			TEXTMETRICW								tmMetrics {};											// The current font's metrics.
+			int32_t									i32PointSize = 10;										// The font point size.
+		};
+
+		/** Creation parameters. */
+		struct MX_CREATION_PARMS {
+			MX_FONT_SET *							pfsFixedRowFont = nullptr;								/**< The shared font for fixed-row views. */
+			MX_FONT_SET *							pfsDynamicRowFont = nullptr;							/**< The shared font for text views. */
+		};
 
 
 		// == Functions.
@@ -128,6 +151,25 @@ namespace mx {
 		bool										DecreaseFontSize( LOGFONTW &_lfFont );
 
 		/**
+		 * Sets the current font.
+		 * 
+		 * \param _lfFont The font to set.
+		 * \param _bFixedRowLength If true, the fixed-sized fonts are updated, otherwise the variable-row-length fonts are updated.
+		 * \return Returns true if setting the font succeeded,
+		 **/
+		bool										SetFont( const LOGFONTW &_lfFont, bool _bFixedRowLength );
+
+		/**
+		 * Gets the font for either fixed-row- or dynamic-row- length.
+		 * 
+		 * \param _bFixedRowLength Whether to return the fixed-row font or the dynamic-row font.
+		 * \return Returns the selected font.
+		 **/
+		inline LOGFONTW								GetFont( bool _bFixedRowLength ) {
+			return _bFixedRowLength ? m_sStyles[MX_ES_HEX].lfFontParms : m_sStyles[MX_ES_HEX].lfFontParms;	// TODO.
+		}
+
+		/**
 		 * Sets the default font size.
 		 * 
 		 * \param _lfFont Holds the returned font for applying to other tabs
@@ -175,6 +217,9 @@ namespace mx {
 
 		// Registers the control if it has not been registered already.  Redundant calls have no effect.  Must be called before creating this control.
 		static void									PrepareControl();
+
+		// Sets a default font.
+		static bool									ChooseDefaultFont( MX_FONT_SET &_fsFont, WORD _wDpi, HWND _hWnd );
 
 
 	protected :
@@ -254,15 +299,11 @@ namespace mx {
 		};
 
 
-		/** The hex-view information. */
-		struct MX_HEX {
-			MX_STYLE								sStyle;													// Style settings for the Hex View.
-		};
-
 
 		// == Members.
 		uint64_t									m_ui64VPos = 0;											// First visible line (virtual).
 		uint64_t									m_ui64HPx = 0;											// First visible column (virtual).
+		MX_FONT_SET *								m_pfsFonts[2] = {};										// Shared fonts.
 		MX_EDIT_AS									m_eaEditAs = MX_ES_HEX;									// The view type.
 		COLORREF									m_crText = MX_RGBA( 0x92, 0x92, 0x92, 0xFF );			// Text color.
 		COLORREF									m_crAddSepLine = MX_RGBA( 0x42, 0x42, 0x42, 0x00 );		// Address separator line.
@@ -272,8 +313,8 @@ namespace mx {
 		COLORREF									m_crEditorBk = MX_RGBA( 0x23, 0x22, 0x20, 0xFF );		// Background color for the whole editor.
 
 		CHexEditorInterface *						m_pheiTarget = nullptr;									// The stream of data to handle.
-		MX_HEX										m_hHex;													// Hex view settings.
-		MX_STYLE *									m_pwCurStyle = nullptr;									// The current style.
+		MX_STYLE									m_sStyles[MX_ES_TOTAL];									// View settings.
+		//MX_STYLE *									m_pwCurStyle = nullptr;									// The current style.
 		int											m_iPageLines;											// How many text rows fit.
 		int											m_iPageCols;											// How many text columns fit.
 
@@ -284,10 +325,10 @@ namespace mx {
 
 		// == Functions.
 		// Gets the current style settings.
-		MX_STYLE *									CurStyle() { return m_pwCurStyle ? m_pwCurStyle : &m_hHex.sStyle; }
+		MX_STYLE *									CurStyle() { return &m_sStyles[m_eaEditAs]; }
 
 		// Gets the current style settings.
-		const MX_STYLE *							CurStyle() const { return m_pwCurStyle ? m_pwCurStyle : &m_hHex.sStyle; }
+		const MX_STYLE *							CurStyle() const { return &m_sStyles[m_eaEditAs]; }
 
 		// Draws the hex-editor view.
 		bool										PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect );
@@ -330,14 +371,27 @@ namespace mx {
 
 		// Computes font metrics.
 		void										ComputeFontMetrics() {
+			ComputeFontMetrics( (*CurStyle()) );
+		}
+
+		// Computes font metrics.
+		void										ComputeFontMetrics( MX_STYLE &_sStyle ) {
 			lsw::LSW_HDC hDc( Wnd() );
 			{
-				lsw::LSW_SELECTOBJECT soFontOrig( hDc.hDc, CurStyle()->fFont.hFont );	// Destructor sets the original font back.
+				lsw::LSW_SELECTOBJECT soFontOrig( hDc.hDc, _sStyle.fFont.hFont );	// Destructor sets the original font back.
 				TEXTMETRICW tmMetrics {};
 				::GetTextMetricsW( hDc.hDc, &tmMetrics );
-				CurStyle()->iCharCx = tmMetrics.tmAveCharWidth;
-				CurStyle()->iCharCy = tmMetrics.tmHeight + tmMetrics.tmExternalLeading;
-				CurStyle()->tmMetrics = tmMetrics;
+				_sStyle.iCharCx = tmMetrics.tmAveCharWidth;
+				_sStyle.iCharCy = tmMetrics.tmHeight + tmMetrics.tmExternalLeading;
+				_sStyle.tmMetrics = tmMetrics;
+				int32_t i32EmPx = static_cast<int32_t>(tmMetrics.tmHeight - tmMetrics.tmInternalLeading);
+				if ( i32EmPx <= 0 ) {
+					i32EmPx = static_cast<int32_t>(tmMetrics.tmHeight);
+				}
+				float fPoints = static_cast<float>(i32EmPx) * 72.0f / static_cast<float>(m_wDpiY);
+				_sStyle.iPointSize = std::round( fPoints );
+				_sStyle.agGlyphs.iDigitMaxCx = 0;
+				_sStyle.iCharCy = 0;
 			}
 		}
 
@@ -362,8 +416,8 @@ namespace mx {
 
 		// Gets the total number of lines in the display.
 		inline uint64_t								TotalLines_Hex() const {
-			if ( !m_hHex.sStyle.uiBytesPerRow ) { return 0ULL; }
-			return (Size() + m_hHex.sStyle.uiBytesPerRow - 1ULL) / m_hHex.sStyle.uiBytesPerRow;
+			if ( !&m_sStyles[MX_ES_HEX].uiBytesPerRow ) { return 0ULL; }
+			return (Size() + m_sStyles[MX_ES_HEX].uiBytesPerRow - 1ULL) / m_sStyles[MX_ES_HEX].uiBytesPerRow;
 		}
 
 		// Gets the minimum address digits.
