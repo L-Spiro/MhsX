@@ -25,7 +25,7 @@ namespace mx {
 		return false;
 	}
 
-	// Does the given data stream allow insertion and deleteion?  Processes return true.
+	// Does the given data stream allow insertion and deletion?  Processes return true.
 	bool CHexEditorFile::OverwriteOnly() const {
 		return false;
 	}

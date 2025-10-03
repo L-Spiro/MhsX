@@ -280,6 +280,7 @@
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressesWindow.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressManager.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXMoveAddressesWindow.cpp" />
+    <ClCompile Include="Src\HexEditor\MXCharSets.cpp" />
     <ClCompile Include="Src\HexEditor\MXDeusHexMachinaWindow.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexEditorControl.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexEditorFile.cpp" />
@@ -424,6 +425,7 @@
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressGroup.h" />
     <ClInclude Include="Src\FoundAddresses\MXFoundAddressManager.h" />
     <ClInclude Include="Src\FoundAddresses\MXMoveAddressesWindow.h" />
+    <ClInclude Include="Src\HexEditor\MXCharSets.h" />
     <ClInclude Include="Src\HexEditor\MXDeusHexMachinaWindow.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorControl.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorFile.h" />

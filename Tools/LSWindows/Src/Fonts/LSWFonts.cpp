@@ -534,9 +534,9 @@ namespace lsw {
 				return false;
 			}
 
-			const bool bHasRanges   = (_wsSystem.ui32CountRanges != 0 && _wsSystem.prRanges != nullptr);
-			const bool bHasSpecial  = (_wsSystem.pfSpecial != nullptr);
-			const bool bNoCriteria  = (!bHasRanges && !bHasSpecial);
+			const bool bHasRanges	= (_wsSystem.ui32CountRanges != 0 && _wsSystem.prRanges != nullptr);
+			const bool bHasSpecial	= (_wsSystem.pfSpecial != nullptr);
+			const bool bNoCriteria	= (!bHasRanges && !bHasSpecial);
 
 			bool bRangesOk = true;
 			if ( bHasRanges ) {

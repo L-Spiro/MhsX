@@ -71,6 +71,11 @@ namespace mx {
 		CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( Layout::MX_W_TOOLBAR0 ));
 		CRebar * plvRebar = static_cast<CRebar *>(FindChild( Layout::MX_W_REBAR0 ));
 
+		CHexEditorControl::ChooseDefaultFont( m_fsFixedRowFont, m_wDpiY, Wnd() );
+		CHexEditorControl::ComputeFontMetrics( m_fsFixedRowFont, m_wDpiY, Wnd() );
+		CHexEditorControl::ChooseDefaultFont( m_fsTextViewFont, m_wDpiY, Wnd() );
+		CHexEditorControl::ComputeFontMetrics( m_fsTextViewFont, m_wDpiY, Wnd() );
+
 		plvToolBar->SetImageList( 0, m_iImages );
 		//#define MX_TOOL_STR( TXT )					reinterpret_cast<INT_PTR>(TXT)
 #define MX_TOOL_STR( TXT )						0
@@ -179,6 +184,11 @@ namespace mx {
 			}
 
 			case Layout::MX_M_VIEW_FONT_ENLARGE_FONT : {
+				EnlargeFont();
+				break;
+			}
+			case Layout::MX_M_VIEW_FONT_SHRINK_FONT : {
+				EnsmallFont();
 				break;
 			}
 		}
@@ -346,7 +356,10 @@ namespace mx {
 					nullptr, 0,										// pcHeightSizeExp
 //#endif
 				} );
-				htTab.phecWidget = static_cast<CHexEditorControl *>(static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->CreateWidget( wlLayout, ptTab, TRUE, NULL, 0 ));
+				CHexEditorControl::MX_CREATION_PARMS cpCreation;
+				cpCreation.pfsFixedRowFont = &m_fsFixedRowFont;
+				cpCreation.pfsDynamicRowFont = &m_fsTextViewFont;
+				htTab.phecWidget = static_cast<CHexEditorControl *>(static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->CreateWidget( wlLayout, ptTab, TRUE, NULL, reinterpret_cast<uint64_t>(&cpCreation) ));
 				if ( !htTab.phecWidget ) {
 					//delete tTab.ppoPeObject;
 					return;
@@ -367,6 +380,8 @@ namespace mx {
 				tciItem.mask = TCIF_TEXT;
 				tciItem.pszText = const_cast<LPWSTR>(wsTabname.c_str());
 
+				
+
 				if ( ptTab->InsertItem( 0, &tciItem, htTab.phecWidget ) == -1 ) {
 					delete htTab.phecWidget;
 					delete htTab.pheiInterface;
@@ -384,6 +399,22 @@ namespace mx {
 			delete htTab.phecWidget;
 			delete htTab.pheiInterface;
 		}
+	}
+
+	// Enlarge font.
+	void CDeusHexMachinaWindow::EnlargeFont() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		LOGFONTW lfFont;
+		phecControl->IncreaseFontSize( lfFont );
+	}
+
+	// Ensmall font.
+	void CDeusHexMachinaWindow::EnsmallFont() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		LOGFONTW lfFont;
+		phecControl->DecreaseFontSize( lfFont );
 	}
 
 }	// namespace mx

@@ -68,6 +68,9 @@ namespace mx {
 		// Moves the file pointer to the given file position.
 		UINT64					MovePointerTo( UINT64 _ui64Pos, BOOL _bFromEnd = FALSE ) const;
 
+		// Read-only?
+		bool					ReadOnly() const;
+
 
 		// == Statics.
 		// Gets the size of a file given its path.
@@ -122,6 +125,14 @@ namespace mx {
 
 		// Determines if the given path represents an existing folder (not file).
 		static bool				IsFolder( LPCWSTR _lpwFolder );
+
+		/**
+		 * Determines whether the currently opened data stream is read-only.
+		 *
+		 * \return Returns true if the file cannot be written to due to the file's read-only attribute
+		 * or the volume being write-protected; false otherwise.
+		 */
+		static bool				ReadOnly( const std::filesystem::path _pPath );
 
 		/**
 		 * Finds files/folders in a given directory.
@@ -184,6 +195,8 @@ namespace mx {
 		// == Members.
 		// The actual file handle.
 		HANDLE					m_hFile;
+		// The file path.
+		std::filesystem::path	m_pFilePath;
 
 		// Converts a WIN32_FILE_ATTRIBUTE_DATA structure to an MX_FILE_ATTR structure.
 		static MX_FILE_ATTR		Win32AttrToMxAttr( const WIN32_FILE_ATTRIBUTE_DATA &_wfadData );

@@ -67,14 +67,15 @@ namespace mx {
 		const bool bCreate = (_ui64CreationSize != 0ULL);
 
 #if defined( _WIN32 )
-		const uint32_t dwDesiredAccess = bCreate ? (GENERIC_READ | GENERIC_WRITE)
+		const DWORD dwDesiredAccess = bCreate ? (GENERIC_READ | GENERIC_WRITE)
 			: (_bOpenForWrite ? (GENERIC_READ | GENERIC_WRITE) : GENERIC_READ);
-		const uint32_t dwCreationDisposition = bCreate ? CREATE_ALWAYS : OPEN_EXISTING;
+		const DWORD dwCreationDisposition = bCreate ? CREATE_ALWAYS : OPEN_EXISTING;
+		const DWORD dwShare = (_bOpenForWrite || bCreate) ? FILE_SHARE_READ : (FILE_SHARE_READ | FILE_SHARE_WRITE);
 
 		m_hFile = ::CreateFileW(
 			_pFile.c_str(),
 			dwDesiredAccess,
-			FILE_SHARE_READ,
+			dwShare,
 			NULL,
 			dwCreationDisposition,
 			FILE_ATTRIBUTE_NORMAL,
@@ -290,6 +291,61 @@ namespace mx {
 	 */
 	void CFileMap::UnMapRegion() {
 		m_rmMap.UnMapRegion();
+	}
+
+	/**
+	 * Is the opened file read-only?
+	 * 
+	 * \return Returns true if the file is read-only.
+	 **/
+	bool CFileMap::ReadOnly() const {
+		if ( m_hFile == nullptr || m_hFile == INVALID_HANDLE_VALUE ) { return true; }
+
+		// Query granted access on this handle.
+		IO_STATUS_BLOCK sIos = {};
+		FILE_ACCESS_INFORMATION sFai = {};
+		NTSTATUS nsStatus = CSystem::NtQueryInformationFile(
+			m_hFile,
+			&sIos,
+			&sFai,
+			sizeof( sFai ),
+			FileAccessInformation
+		);
+
+		// STATUS_SUCCESS == 0.
+		if ( nsStatus == 0 ) {
+			static constexpr ACCESS_MASK amWriteLike =
+				FILE_WRITE_DATA | FILE_APPEND_DATA | FILE_WRITE_ATTRIBUTES | FILE_WRITE_EA | DELETE;
+			return ((sFai.AccessFlags & amWriteLike) == 0);
+		}
+
+		// Fallback #1: try creating a RW mapping on the existing handle (no file modification).
+		if ( HANDLE hMap = ::CreateFileMappingW( m_hFile, nullptr, PAGE_READWRITE, 0, 0, nullptr ) ) {
+			::CloseHandle( hMap );
+			return false;	// RW mapping succeeded => not read-only.
+		}
+		if ( ::GetLastError() == ERROR_ACCESS_DENIED ) { return true; }
+
+		// Fallback #2: probe with a separate write-open by path (covers ACL/environment if the above failed).
+		if ( !m_pFilePath.empty() ) {
+			const HANDLE hProbe = ::CreateFileW(
+				m_pFilePath.c_str(),
+				FILE_WRITE_DATA,
+				FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+				nullptr,
+				OPEN_EXISTING,
+				FILE_ATTRIBUTE_NORMAL,
+				nullptr
+			);
+			if ( hProbe != INVALID_HANDLE_VALUE ) {
+				::CloseHandle( hProbe );
+				return false;
+			}
+			if ( ::GetLastError() == ERROR_ACCESS_DENIED ) { return true; }
+		}
+
+		// Could not positively prove read-only; assume writable to avoid disabling features unnecessarily.
+		return false;
 	}
 
 	/**

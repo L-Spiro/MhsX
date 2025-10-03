@@ -326,10 +326,25 @@ namespace mx {
 		 */
 		inline uint64_t						Id() const { return m_ui64Id; }
 
+		/**
+		 * Is the opened file read-only?
+		 * 
+		 * \return Returns true if the file is read-only.
+		 **/
+		bool								ReadOnly() const;
+
+		/**
+		 * Was the file opened for write?
+		 * 
+		 * \return Returns true if the file was opened for writing.
+		 **/
+		inline bool							Writeable() const { return m_bWritable; }
+
 
 	protected :
 		// == Members.
 		uint64_t							m_ui64Id{ ++s_aId };									/**< Unique identifier for this instance. */
+		std::filesystem::path				m_pFilePath;											/**< The file path. */
 		MX_FILE_HANDLE						m_hFile = MX_INVALID_FILE;								/**< OS file handle (HANDLE or fd). */
 		MX_MAP_HANDLE						m_hMap = MX_INVALID_MAP;								/**< File-mapping object handle. */
 		mutable CRegionMap					m_rmMap;												/**< Reusable region map. */

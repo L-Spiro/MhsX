@@ -19,6 +19,10 @@
 
 #define MX_PTR2UINT( X )				static_cast<uint64_t>(reinterpret_cast<uintptr_t>(X))
 
+#ifndef STATUS_PROCEDURE_NOT_FOUND
+	#define STATUS_PROCEDURE_NOT_FOUND	((NTSTATUS)0xC000007AL)
+#endif
+
 // == Types.
 typedef BOOL (WINAPI * LPFN_READPROCESSMEMORY)( HANDLE, LPCVOID, LPVOID, SIZE_T, SIZE_T * );
 typedef BOOL (WINAPI * LPFN_WRITEPROCESSMEMORY)( HANDLE, LPVOID, LPCVOID, SIZE_T, SIZE_T * );
@@ -74,6 +78,28 @@ typedef BOOL (WINAPI * LPFN_GETKEYBOARDSTATE)( PBYTE );
 typedef SHORT (WINAPI * LPFN_GETASYNCKEYSTATE)( int );
 typedef BOOL (WINAPI * LPFN_BEEP)( DWORD, DWORD );
 typedef BOOL (WINAPI * LPFN_GETPROCESSTIMES)( HANDLE, LPFILETIME, LPFILETIME, LPFILETIME, LPFILETIME );
+
+typedef struct _IO_STATUS_BLOCK {
+	union { NTSTATUS Status; PVOID Pointer; };
+	ULONG_PTR										Information;
+} IO_STATUS_BLOCK, *PIO_STATUS_BLOCK;
+
+typedef enum _FILE_INFORMATION_CLASS {
+	FileDirectoryInformation						= 1,
+	FileFullDirectoryInformation					= 2,
+	FileBothDirectoryInformation					= 3,
+	FileBasicInformation							= 4,
+	FileStandardInformation							= 5,
+	FileInternalInformation							= 6,
+	FileEaInformation								= 7,
+	FileAccessInformation							= 8,
+} FILE_INFORMATION_CLASS;
+
+typedef struct _FILE_ACCESS_INFORMATION {
+	ULONG											AccessFlags;
+} FILE_ACCESS_INFORMATION;
+
+typedef NTSTATUS (NTAPI * LPFN_NTQUERYINFORMATIONFILE)( HANDLE, PIO_STATUS_BLOCK, PVOID, ULONG, FILE_INFORMATION_CLASS );
 
 
 
@@ -363,6 +389,9 @@ namespace mx {
 		// GetProcessTimes.
 		static BOOL WINAPI				GetProcessTimes( HANDLE _hProcess, LPFILETIME _lpCreationTime, LPFILETIME _lpExitTime, LPFILETIME _lpKernelTime, LPFILETIME _lpUserTime );
 
+		// NtQueryInformationFile.
+		static NTSTATUS NTAPI			NtQueryInformationFile( HANDLE _hFileHandle, PIO_STATUS_BLOCK _sbIoStatusBlock, PVOID _pvFileInformation, ULONG _ulLength, FILE_INFORMATION_CLASS _ficFileInformationClass );
+
 
 
 		// Determines if the given address is out of the native range of this process.
@@ -552,6 +581,10 @@ namespace mx {
 
 		// GetProcessTimes().
 		static LPFN_GETPROCESSTIMES		m_pfGetProcessTimes;
+
+		// NtQueryInformationFile().
+		static LPFN_NTQUERYINFORMATIONFILE
+										m_pfNtQueryInformationFile;
 
 
 		// == Functions.

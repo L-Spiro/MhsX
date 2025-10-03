@@ -14,6 +14,22 @@ namespace mx {
 
 	CHexEditorControl::CHexEditorControl( const lsw::LSW_WIDGET_LAYOUT &_wlLayout, lsw::CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
 		CParent( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(m_aAtom) ).AddStyle( WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL | WS_HSCROLL )/*.AddStyleEx( WS_EX_CLIENTEDGE ).RemoveStyleEx( WS_EX_WINDOWEDGE )*/, _pwParent, _bCreateWidget, _hMenu, _ui64Data ) {
+		MX_CREATION_PARMS * pcpParms = reinterpret_cast<MX_CREATION_PARMS *>(_ui64Data);
+		m_pfsFonts[MX_FT_FIXED_ROW] = pcpParms->pfsFixedRowFont;
+		m_pfsFonts[MX_FT_TEXT_VIEW] = pcpParms->pfsDynamicRowFont;
+
+		m_sStyles[MX_ES_TEXT].ftFont = MX_FT_TEXT_VIEW;
+		m_sStyles[MX_ES_HEX].ftFont = MX_FT_FIXED_ROW;
+		m_sStyles[MX_ES_BINARY].ftFont = MX_FT_FIXED_ROW;
+		m_sStyles[MX_ES_SCRIPT].ftFont = MX_FT_TEXT_VIEW;
+		m_sStyles[MX_ES_TEMPLATE].ftFont = MX_FT_TEXT_VIEW;
+		m_sStyles[MX_ES_EBCDIC].ftFont = MX_FT_TEXT_VIEW;
+		m_sStyles[MX_ES_UTF16].ftFont = MX_FT_TEXT_VIEW;
+		m_sStyles[MX_ES_UTF8].ftFont = MX_FT_TEXT_VIEW;
+		m_sStyles[MX_ES_PROCESS].ftFont = MX_FT_FIXED_ROW;
+		m_sStyles[MX_ES_CUR_PROCESS].ftFont = MX_FT_FIXED_ROW;
+		m_sStyles[MX_ES_CODE].ftFont = MX_FT_TEXT_VIEW;
+		m_sStyles[MX_ES_TAGGED].ftFont = MX_FT_TEXT_VIEW;
 	}
 
 	// == Functions.
@@ -35,7 +51,7 @@ namespace mx {
 		//m_iAddrDigits = 8;
 		//SetState( _hWnd, ps );
 
-		ChooseDefaultFont();
+		//ChooseDefaultFont();
 		ComputeFontMetrics();
 
 		CParent::InitControl( _hWnd );
@@ -94,8 +110,8 @@ namespace mx {
 	 **/
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::DpiChanged( WORD _wX, WORD _wY, LPRECT _pRect ) {
 		//ChooseDefaultFont();
-		CurStyle()->lfFontParms.lfHeight = -::MulDiv( CurStyle()->iPointSize, static_cast<int>(m_wDpiY), 72 );
-		CurStyle()->fFont.CreateFontIndirectW( &CurStyle()->lfFontParms );
+		Font()->lfFontParms.lfHeight = -::MulDiv( Font()->i32PointSize, static_cast<int>(m_wDpiY), 72 );
+		Font()->fFont.CreateFontIndirectW( &Font()->lfFontParms );
 		RecalcAndInvalidate();
 		return CParent::DpiChanged( _wX, _wY, _pRect );
 	}
@@ -107,16 +123,16 @@ namespace mx {
 	 * \return Returns true if the view type is Hex, Octal, or Binary.
 	 **/
 	bool CHexEditorControl::IncreaseFontSize( LOGFONTW &_lfFont ) {
-		_lfFont = CurStyle()->lfFontParms;
-		_lfFont.lfHeight = -::MulDiv( CurStyle()->iPointSize + 1, static_cast<int>(m_wDpiY), 72 );
+		_lfFont = Font()->lfFontParms;
+		_lfFont.lfHeight = -::MulDiv( Font()->i32PointSize + 1, static_cast<int>(m_wDpiY), 72 );
 
-		if ( CurStyle()->fFont.CreateFontIndirectW( &_lfFont ) ) {
-			CurStyle()->iPointSize++;
-			CurStyle()->lfFontParms = _lfFont;
+		if ( Font()->fFont.CreateFontIndirectW( &_lfFont ) ) {
+			Font()->i32PointSize++;
+			Font()->lfFontParms = _lfFont;
 			RecalcAndInvalidate();
 		}
 		else {
-			_lfFont = CurStyle()->lfFontParms;
+			_lfFont = Font()->lfFontParms;
 		}
 		return IsFixedRowLength();
 	}
@@ -128,17 +144,17 @@ namespace mx {
 	 * \return Returns true if the view type is Hex, Octal, or Binary.
 	 **/
 	bool CHexEditorControl::DecreaseFontSize( LOGFONTW &_lfFont ) {
-		_lfFont = CurStyle()->lfFontParms;
-		if ( CurStyle()->iPointSize <= 2 ) { return true; }
-		_lfFont.lfHeight = -::MulDiv( CurStyle()->iPointSize - 1, static_cast<int>(m_wDpiY), 72 );
+		_lfFont = Font()->lfFontParms;
+		if ( Font()->i32PointSize <= 2 ) { return true; }
+		_lfFont.lfHeight = -::MulDiv( Font()->i32PointSize - 1, static_cast<int>(m_wDpiY), 72 );
 
-		if ( CurStyle()->fFont.CreateFontIndirectW( &_lfFont ) ) {
-			CurStyle()->iPointSize--;
-			CurStyle()->lfFontParms = _lfFont;
+		if ( Font()->fFont.CreateFontIndirectW( &_lfFont ) ) {
+			Font()->i32PointSize--;
+			Font()->lfFontParms = _lfFont;
 			RecalcAndInvalidate();
 		}
 		else {
-			_lfFont = CurStyle()->lfFontParms;
+			_lfFont = Font()->lfFontParms;
 		}
 		return IsFixedRowLength();
 	}
@@ -153,13 +169,13 @@ namespace mx {
 	bool CHexEditorControl::SetFont( const LOGFONTW &_lfFont, bool _bFixedRowLength ) {
 		 LOGFONTW lfTmp = _lfFont;
 		 bool bRet = false;
-		 if ( _bFixedRowLength ) {
-			if ( m_sStyles[MX_ES_HEX].fFont.CreateFontIndirectW( &_lfFont ) ) {
-				m_sStyles[MX_ES_HEX].lfFontParms = _lfFont;
-				ComputeFontMetrics( m_sStyles[MX_ES_HEX] );
-				bRet = true;
-			}
-		 }
+		 MX_FONT_TYPE ftType = _bFixedRowLength ? MX_FT_FIXED_ROW : MX_FT_TEXT_VIEW;
+
+		if ( m_pfsFonts[ftType]->fFont.CreateFontIndirectW( &_lfFont ) ) {
+			m_pfsFonts[ftType]->lfFontParms = _lfFont;
+			ComputeFontMetrics( (*m_pfsFonts[ftType]), m_wDpiY, Wnd() );
+			bRet = true;
+		}
 
 		 if ( bRet ) {
 			 UpdateScrollbars();
@@ -175,68 +191,18 @@ namespace mx {
 	 * \return Returns true if the view type is Hex, Octal, or Binary.
 	 **/
 	bool CHexEditorControl::DefaultFontSize( LOGFONTW &_lfFont ) {
-		_lfFont = CurStyle()->lfFontParms;
+		_lfFont = Font()->lfFontParms;
 		_lfFont.lfHeight = -::MulDiv( 10, static_cast<int>(m_wDpiY), 72 );
 
-		if ( CurStyle()->fFont.CreateFontIndirectW( &_lfFont ) ) {
-			CurStyle()->iPointSize--;
-			CurStyle()->lfFontParms = _lfFont;
+		if ( Font()->fFont.CreateFontIndirectW( &_lfFont ) ) {
+			Font()->i32PointSize--;
+			Font()->lfFontParms = _lfFont;
 			RecalcAndInvalidate();
 		}
 		else {
-			_lfFont = CurStyle()->lfFontParms;
+			_lfFont = Font()->lfFontParms;
 		}
 		return IsFixedRowLength();
-	}
-
-	// Sets a default font.
-	bool CHexEditorControl::ChooseDefaultFont() {
-		static const wchar_t * s_ppwszFaces[] = {
-			L"Droid Sans Mono",   // Preferred.
-			L"Consolas",          // Modern Windows TT.
-			L"Lucida Console"     // Older Windows TT.
-		};
-
-		const int iPt = CurStyle()->iPointSize;
-
-		LOGFONTW lfFont {};
-		lfFont = lsw::CBase().NonClientMetrics().lfMessageFont;
-		lfFont.lfPitchAndFamily = FIXED_PITCH | FF_MODERN;
-		lfFont.lfWeight = FW_NORMAL;//FW_BOLD;
-		lfFont.lfItalic = FALSE;
-		lfFont.lfOutPrecision = OUT_TT_PRECIS;
-
-		lfFont.lfQuality = PROOF_QUALITY;
-#if ( WINVER >= 0x0400 )
-		lfFont.lfQuality = ANTIALIASED_QUALITY;
-#endif	// #if ( WINVER >= 0x0400 )
-#if ( _WIN32_WINNT >= _WIN32_WINNT_WINXP )
-		lfFont.lfQuality = CLEARTYPE_NATURAL_QUALITY;
-#endif	// #if ( _WIN32_WINNT >= _WIN32_WINNT_WINXP )
-
-		lfFont.lfCharSet = DEFAULT_CHARSET;
-		lfFont.lfHeight = -::MulDiv( iPt, static_cast<int>(m_wDpiY), 72 );
-
-		lsw::LSW_HDC hDc( Wnd() );
-		for ( size_t i = 0; i < _countof( s_ppwszFaces ); ++i ) {
-			::wcscpy_s( lfFont.lfFaceName, s_ppwszFaces[i] );
-
-			if ( CurStyle()->fFont.CreateFontIndirectW( &lfFont ) ) {
-				// Verify it is TrueType by asking for outline metrics.
-				lsw::LSW_SELECTOBJECT soFont( hDc.hDc, CurStyle()->fFont.hFont );
-
-				// Two-call pattern to see if OTM exists (TrueType/OpenType only).
-				UINT uNeed = ::GetOutlineTextMetricsW( hDc.hDc, 0, NULL );
-				if ( uNeed != 0 ) {
-					// Success: keep this one.
-					CurStyle()->lfFontParms = lfFont;
-					return true;
-				}
-				// else: not TrueType, try next fallback.
-			}
-		}
-		CurStyle()->fFont.CreateFontIndirectW( &CurStyle()->lfFontParms );
-		return false;
 	}
 
 	// WM_LBUTTONDOWN.
@@ -284,7 +250,7 @@ namespace mx {
 
 	// WM_HSCROLL
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::HScroll( USHORT /*_uScrollPos*/, USHORT _uScrollType, CWidget * /*_pwWidget*/ ) {
-		const int32_t iLineStepPx = (CurStyle()->iCharCx > 0) ? CurStyle()->iCharCx : 1;
+		const int32_t iLineStepPx = (Font()->iCharCx > 0) ? Font()->iCharCx : 1;
 		const int32_t iPagePx     = GetClientWidth();
 
 		const uint64_t ui64ContentPx = static_cast<uint64_t>(TotalContentWidthPx());
@@ -335,7 +301,7 @@ namespace mx {
 
 	// WM_VSCROLL
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::VScroll( USHORT /*_uScrollPos*/, USHORT _uScrollType, CWidget * /*_pwWidget*/ ) {
-		const int32_t iPageLines = m_iPageLines;
+		const int32_t iPageLines = std::max( 1, m_iPageLines - 2 );
 		const int32_t iStep      = 1;
 
 		const uint64_t ui64Lines = TotalLines_Hex();
@@ -522,14 +488,15 @@ namespace mx {
 	 */
 	void CHexEditorControl::DrawAddressGutter( HDC _hDc, int _iXLeft, int _iYTop, uint32_t _ui32LinesToDraw ) {
 		const MX_STYLE & stAll = (*CurStyle());
-		if ( !stAll.bShowAddressGutter || _ui32LinesToDraw == 0 ) { return; }
+		if ( !stAll.bShowAddressGutter || _ui32LinesToDraw == 0 || nullptr == Font() ) { return; }
+		const MX_FONT_SET & fsFont = (*Font());
 
-		const MX_ADDR_STYLE & st = stAll.daAddressStyle;
+		const MX_ADDR_STYLE & asAddrStyle = stAll.daAddressStyle;
 
 		// Select font and ensure glyph metrics.
-		lsw::LSW_SELECTOBJECT soFont( _hDc, stAll.fFont.hFont );
+		lsw::LSW_SELECTOBJECT soFont( _hDc, fsFont.fFont.hFont );
 		EnsureAddrGlyphs( _hDc );
-		const MX_ADDR_GLYPHS & g = stAll.agGlyphs;
+		const MX_ADDR_GLYPHS & agGlyphs = fsFont.agGlyphs;
 
 
 		lsw::LSW_SETBKMODE sbmBkMode( _hDc, TRANSPARENT );
@@ -552,7 +519,7 @@ namespace mx {
 		};
 
 		auto InsertHexGroupingColons = [&]( std::wstring & _s ) {
-			if ( !st.bShowColonIn || _s.size() <= 4 ) { return; }
+			if ( !asAddrStyle.bShowColonIn || _s.size() <= 4 ) { return; }
 			std::wstring grouped;
 			size_t r = _s.size();
 			int cnt = 0;
@@ -570,12 +537,12 @@ namespace mx {
 		auto FormatAddressForLine = [&]( uint64_t _ui64Line ) -> std::wstring {
 			// Base byte index for the start of this line.
 			const uint64_t ui64Bpr = stAll.uiBytesPerRow ? stAll.uiBytesPerRow : 16;
-			const uint64_t ui64ByteBase = st.ui64StartAddress + _ui64Line * ui64Bpr;
+			const uint64_t ui64ByteBase = asAddrStyle.ui64StartAddress + _ui64Line * ui64Bpr;
 
 			// Map to displayed scalar according to format.
 			uint64_t v = 0ULL;
 			bool bHex = false, bOct = false, bDec = false;
-			switch( st.afFormat ) {
+			switch( asAddrStyle.afFormat ) {
 				case MX_AF_BYTES_HEX :		{ v = ui64ByteBase; bHex = true; break; }
 				case MX_AF_BYTES_DEC :		{ v = ui64ByteBase; bDec = true; break; }
 				case MX_AF_BYTES_OCT :		{ v = ui64ByteBase; bOct = true; break; }
@@ -587,7 +554,7 @@ namespace mx {
 
 			// Convert to string in the selected base.
 			std::wstring core;
-			if ( bHex ) { core = ToBase( v, 16, st.bLowercaseHex ); }
+			if ( bHex ) { core = ToBase( v, 16, asAddrStyle.bLowercaseHex ); }
 			else if ( bOct ) { core = ToBase( v, 8, false ); }
 			else { core = ToBase( v, 10, false ); }
 
@@ -609,18 +576,18 @@ namespace mx {
 			}
 
 			// Trailing colon after the address if enabled.
-			if ( st.bShowColonAfter ) {
+			if ( asAddrStyle.bShowColonAfter ) {
 				core.push_back( L':' );
 			}
 
 			// Optional type specifier.
-			if ( st.bShowTypeSpec ) {
+			if ( asAddrStyle.bShowTypeSpec ) {
 				if ( bHex ) { core.push_back( L'h' ); }
 				else if ( bOct ) { core.push_back( L'o' ); }
 			}
 
 			// Optional short suffix 'w' for Short addressing.
-			if ( st.bUseShortSuffixW && (st.afFormat == MX_AF_SHORT_HEX || st.afFormat == MX_AF_SHORT_DEC) ) {
+			if ( asAddrStyle.bUseShortSuffixW && (asAddrStyle.afFormat == MX_AF_SHORT_HEX || asAddrStyle.afFormat == MX_AF_SHORT_DEC) ) {
 				core.push_back( L'w' );
 			}
 
@@ -628,10 +595,10 @@ namespace mx {
 		};
 
 		// Line height.
-		const int iLineAdv = CurStyle()->iCharCy + stAll.iLineSpacingPx;
+		const int iLineAdv = fsFont.iCharCy + stAll.iLineSpacingPx;
 
 		// First visible line (top) comes from style; draw consecutive lines.
-		uint64_t ui64Line = st.ui64FirstVisibleLine;
+		uint64_t ui64Line = asAddrStyle.ui64FirstVisibleLine;
 
 		auto ui64MaxLines = TotalLines() - ui64Line;
 		_ui32LinesToDraw = uint32_t( std::min<uint64_t>( _ui32LinesToDraw, ui64MaxLines ) );
@@ -662,10 +629,11 @@ namespace mx {
 	 */
 	void CHexEditorControl::DrawRuler( HDC _hDc, int _iXLeft, int _iYTop, MX_DATA_FMT _dfLeftFmt, MX_DATA_FMT _dfRightFmt ) {
 		const MX_STYLE & stAll = *CurStyle();
-		if ( !stAll.bShowRuler ) { return; }
+		if ( !stAll.bShowRuler || !Font() ) { return; }
+		const MX_FONT_SET & fsFont = (*Font());
 
 		// Select font, set colors.
-		lsw::LSW_SELECTOBJECT soFont( _hDc, stAll.fFont.hFont );
+		lsw::LSW_SELECTOBJECT soFont( _hDc, fsFont.fFont.hFont );
 		EnsureAddrGlyphs( _hDc );
 		const int iRulerCy = GetRulerHeightPx();
 
@@ -709,7 +677,7 @@ namespace mx {
 				SIZE sSize {};
 				::GetTextExtentPoint32W( _hDc, wsTmp.c_str(), int( wsTmp.size() ), &sSize );
 				const int iTextX = iGX + (iGW - sSize.cx) / 2;
-				const int iTextY = _iYTop + (iRulerCy - CurStyle()->iCharCy) / 2;
+				const int iTextY = _iYTop + (iRulerCy - fsFont.iCharCy) / 2;
 
 				::TextOutW( _hDc, iTextX, iTextY, wsTmp.c_str(), int( wsTmp.size() ) );
 			}
@@ -736,7 +704,8 @@ namespace mx {
 	 * \return Returns the pixel width of the address gutter. Returns 0 if the gutter is hidden.
 	 */
 	int CHexEditorControl::ComputeAddressGutterWidthPx() {
-		if ( !CurStyle()->bShowAddressGutter ) { return 0; }
+		if ( !CurStyle()->bShowAddressGutter || !Font() ) { return 0; }
+		MX_FONT_SET & fsFont = (*Font());
 
 		const MX_STYLE & stAll = (*CurStyle());
 		const MX_ADDR_STYLE & asAddrStyle = stAll.daAddressStyle;
@@ -745,9 +714,9 @@ namespace mx {
 		{
 			lsw::LSW_HDC hDc( Wnd() );
 			{
-				lsw::LSW_SELECTOBJECT soFont( hDc.hDc, stAll.fFont.hFont );
+				lsw::LSW_SELECTOBJECT soFont( hDc.hDc, fsFont.fFont.hFont );
 				EnsureAddrGlyphs( hDc.hDc );
-				const MX_ADDR_GLYPHS & agGlyphs = stAll.agGlyphs;
+				const MX_ADDR_GLYPHS & agGlyphs = fsFont.agGlyphs;
 
 				// File/page bound (last visible byte vs last file byte).
 				const uint64_t ui64Bpr			= stAll.uiBytesPerRow ? stAll.uiBytesPerRow : 16;
@@ -848,11 +817,12 @@ namespace mx {
 		int _iXBase,
 		int & _iXLeft,
 		int & _iWidth ) const {
-		const MX_STYLE & st = (*CurStyle());
-		const MX_ADDR_GLYPHS & g = st.agGlyphs;
+		const MX_STYLE & stStyle = (*CurStyle());
+		const MX_FONT_SET & fsFont = (*Font());
+		const MX_ADDR_GLYPHS & g = fsFont.agGlyphs;
 
 		// Bytes per row for both areas (ruler uses the row layout).
-		const uint32_t ui32Bpr = st.uiBytesPerRow ? st.uiBytesPerRow : 16;
+		const uint32_t ui32Bpr = stStyle.uiBytesPerRow ? stStyle.uiBytesPerRow : 16;
 
 		// Cell width by format (worst-case stable cell).
 		auto CellWidthForFmt = [&]( MX_DATA_FMT _dfFmt ) -> int {
@@ -861,16 +831,16 @@ namespace mx {
 				case MX_DF_DEC :	{ return 3 * g.iDigitMaxCx; }				// "255"
 				case MX_DF_OCT :	{ return 3 * g.iDigitMaxCx; }				// "377"
 				case MX_DF_BIN :	{ return 8 * g.iDigitMaxCx; }				// "11111111"
-				case MX_DF_CHAR :	{ return st.tmMetrics.tmMaxCharWidth; }		// Printable cell.
+				case MX_DF_CHAR :	{ return fsFont.tmMetrics.tmMaxCharWidth; }	// Printable cell.
 				default :			{ return 2 * g.iDigitMaxCx; }
 			}
 		};
 
 		// Choose per-area layout knobs.
 		const int iCellCx				= CellWidthForFmt( _dfDataFmt );
-		const uint32_t ui32ItemGroup	= _dfDataFmt == MX_DF_CHAR ? 1 : st.uiGroupSize; // items per group
-		const int iSpaceBetweenItems	= int( _dfDataFmt == MX_DF_CHAR ? 1 : st.uiSpacesBetweenBytes ) * g.iSpaceCx;
-		const int iExtraGroupGap		= int( st.uiExtraSpacesBetweenGroups ) * g.iSpaceCx * (ui32ItemGroup > 1 ? 1 : 0);
+		const uint32_t ui32ItemGroup	= _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiGroupSize; // items per group
+		const int iSpaceBetweenItems	= int( _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiSpacesBetweenBytes ) * g.iSpaceCx;
+		const int iExtraGroupGap		= int( stStyle.uiExtraSpacesBetweenGroups ) * g.iSpaceCx * (ui32ItemGroup > 1 ? 1 : 0);
 
 		// Check index validity (number of groups in the row).
 		const uint32_t ui32Groups = (ui32ItemGroup ? ( (ui32Bpr + ui32ItemGroup - 1U) / ui32ItemGroup ) : 0U);
@@ -880,11 +850,11 @@ namespace mx {
 		int iX = _iXBase;
 		if ( !_bRightArea ) {
 			// Left numbers starts with its own left pad.
-			iX += st.iPadNumbersLeftPx;
+			iX += stStyle.iPadNumbersLeftPx;
 		}
 		else {
 			// Right text begins after the inter-block gap.
-			iX += st.iPadBetweenNumbersAndTextPx;
+			iX += stStyle.iPadBetweenNumbersAndTextPx;
 		}
 
 		// Walk to the requested group.
@@ -906,15 +876,16 @@ namespace mx {
 	 */
 	int CHexEditorControl::ComputeAreaWidthPx( MX_DATA_FMT _dfDataFmt ) {
 		const MX_STYLE & asAddrStyle = (*CurStyle());
-		if ( !asAddrStyle.bShowLeftNumbers ) { return 0; }
+		if ( !asAddrStyle.bShowLeftNumbers || !Font() ) { return 0; }
+		const MX_FONT_SET & fsFont = (*Font());
 			
 		int iCx = 0;
 		{
 			lsw::LSW_HDC hDc( Wnd() );
 			{
-				lsw::LSW_SELECTOBJECT soFont( hDc.hDc, asAddrStyle.fFont.hFont );
+				lsw::LSW_SELECTOBJECT soFont( hDc.hDc, fsFont.fFont.hFont );
 				EnsureAddrGlyphs( hDc.hDc );
-				const MX_ADDR_GLYPHS & agGlyphs = asAddrStyle.agGlyphs;
+				const MX_ADDR_GLYPHS & agGlyphs = fsFont.agGlyphs;
 
 				auto CellWidthForFmt = [&]( MX_DATA_FMT _dfDataFmt ) -> int {
 					switch ( _dfDataFmt ) {
@@ -922,7 +893,7 @@ namespace mx {
 						case MX_DF_DEC :	{ return 3 * agGlyphs.iDigitMaxCx; }					// "255"
 						case MX_DF_OCT :	{ return 3 * agGlyphs.iDigitMaxCx; }					// "377"
 						case MX_DF_BIN :	{ return 8 * agGlyphs.iDigitMaxCx; }					// "11111111"
-						case MX_DF_CHAR :	{ return asAddrStyle.tmMetrics.tmMaxCharWidth; }		// Fixed cell.
+						case MX_DF_CHAR :	{ return fsFont.tmMetrics.tmMaxCharWidth; }				// Fixed cell.
 						default :			{ return 2 * agGlyphs.iDigitMaxCx; }
 					}
 				};
@@ -969,7 +940,7 @@ namespace mx {
 		m_iPageLines = (iLineAdv ? (iClientH / iLineAdv) : 0);
 		if ( m_iPageLines < 1 ) { m_iPageLines = 1; }
 
-		m_iPageCols = (CurStyle()->iCharCx ? (iClientH / CurStyle()->iCharCx) : 0);
+		m_iPageCols = (Font()->iCharCx ? (iClientH / Font()->iCharCx) : 0);
 		if ( m_iPageCols < 1 ) { m_iPageCols = 1; }
 
 		// == Vertical (lines; virtual units are line indices 0..N-1).

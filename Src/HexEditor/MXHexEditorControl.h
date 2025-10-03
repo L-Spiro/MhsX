@@ -64,12 +64,27 @@ namespace mx {
 
 
 		// == Types.
+		/** Measured glyph metrics for the address gutter font. */
+		struct MX_ADDR_GLYPHS {
+			int										iDigitMaxCx = 0;										// Max over '0'..'9' (and 'A'..'F' when HEX).
+			int										iDigitMaxCxLower = 0;									// Max over '0'..'9' (and 'a'..'f' when HEX).
+			int										iColonCx = 0;											// Width of ':'.
+			int										iSpaceCx = 0;											// Width of ' '.
+			int										iSpecHexCx = 0;											// Width of 'h'.
+			int										iSpecOctCx = 0;											// Width of 'o'.
+			int										iShortWcx = 0;											// Width of 'w'.
+		};
+
 		/** A set of font data. */
 		struct MX_FONT_SET {
 			lsw::LSW_FONT							fFont;													// Current font.
 			LOGFONTW								lfFontParms {};											// The current font parameters.
 			TEXTMETRICW								tmMetrics {};											// The current font's metrics.
+			MX_ADDR_GLYPHS							agGlyphs;												// Glyph settings (filled on demand).
 			int32_t									i32PointSize = 10;										// The font point size.
+
+			int										iCharCx = 0;
+			int										iCharCy = 0;											// Baseline advance.
 		};
 
 		/** Creation parameters. */
@@ -132,7 +147,7 @@ namespace mx {
 		 *
 		 * \param Returns -1 to perform the default routine, otherwise NULL or a handle to a font.
 		 */
-		virtual HFONT								GetFont() { return CurStyle()->fFont.hFont; }
+		virtual HFONT								GetFont() { return Font()->fFont.hFont; }
 
 		/**
 		 * Increases the font size.  Returns the new font parameters and the view type.  Hex, Octal, and Bindary displays are linked, etc.
@@ -166,7 +181,7 @@ namespace mx {
 		 * \return Returns the selected font.
 		 **/
 		inline LOGFONTW								GetFont( bool _bFixedRowLength ) {
-			return _bFixedRowLength ? m_sStyles[MX_ES_HEX].lfFontParms : m_sStyles[MX_ES_HEX].lfFontParms;	// TODO.
+			return Font()->lfFontParms;
 		}
 
 		/**
@@ -177,8 +192,11 @@ namespace mx {
 		 **/
 		bool										DefaultFontSize( LOGFONTW &_lfFont );
 
-		// Sets a default font.
-		bool										ChooseDefaultFont();
+		// Gets the current font.
+		MX_FONT_SET *								Font() { return m_pfsFonts[m_sStyles[m_eaEditAs].ftFont]; }
+
+		// Gets the current font.
+		const MX_FONT_SET *							Font() const { return m_pfsFonts[m_sStyles[m_eaEditAs].ftFont]; }
 
 		// WM_LBUTTONDOWN.
 		virtual LSW_HANDLED							LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &/*_pCursorPos*/ );
@@ -221,6 +239,28 @@ namespace mx {
 		// Sets a default font.
 		static bool									ChooseDefaultFont( MX_FONT_SET &_fsFont, WORD _wDpi, HWND _hWnd );
 
+		// Computes font metrics.
+		static void									ComputeFontMetrics( MX_FONT_SET &_fsFont, WORD _wDpi, HWND _hWnd ) {
+			lsw::LSW_HDC hDc( _hWnd );
+			{
+				lsw::LSW_SELECTOBJECT soFontOrig( hDc.hDc, _fsFont.fFont.hFont );	// Destructor sets the original font back.
+				TEXTMETRICW tmMetrics {};
+				::GetTextMetricsW( hDc.hDc, &tmMetrics );
+				/*_fsFont.iCharCx = tmMetrics.tmAveCharWidth;
+				_fsFont.iCharCy = tmMetrics.tmHeight + tmMetrics.tmExternalLeading;*/
+				_fsFont.tmMetrics = tmMetrics;
+				int32_t i32EmPx = static_cast<int32_t>(tmMetrics.tmHeight - tmMetrics.tmInternalLeading);
+				if ( i32EmPx <= 0 ) {
+					i32EmPx = static_cast<int32_t>(tmMetrics.tmHeight);
+				}
+				float fPoints = static_cast<float>(i32EmPx) * 72.0f / static_cast<float>(_wDpi);
+				_fsFont.i32PointSize = std::round( fPoints );
+				// To be set by EnsureAddrGlyphs().
+				_fsFont.agGlyphs.iDigitMaxCx = 0;
+				_fsFont.iCharCy = 0;
+			}
+		}
+
 
 	protected :
 		// == Types.
@@ -240,24 +280,10 @@ namespace mx {
 			bool									bUseShortSuffixW = true;								// Append 'w' for Short addressing (matches your examples).
 		};
 
-		/** Measured glyph metrics for the address gutter font. */
-		struct MX_ADDR_GLYPHS {
-			int										iDigitMaxCx = 0;										// Max over '0'..'9' (and 'a'..'f' or 'A'..'F' when HEX).
-			int										iColonCx = 0;											// Width of ':'.
-			int										iSpaceCx = 0;											// Width of ' '.
-			int										iSpecHexCx = 0;											// Width of 'h'.
-			int										iSpecOctCx = 0;											// Width of 'o'.
-			int										iShortWcx = 0;											// Width of 'w'.
-		};
-
 		/** General style settings. */
 		struct MX_STYLE {
-			lsw::LSW_FONT							fFont;													// Current font.
-			LOGFONTW								lfFontParms {};											// The current font parameters.
-			TEXTMETRICW								tmMetrics {};											// The current font's metrics.
-			int										iPointSize = 10;										// The font size.
+			MX_FONT_TYPE							ftFont = MX_FT_FIXED_ROW;								// The shared font to use.
 			MX_ADDR_STYLE							daAddressStyle;											// Address style.
-			MX_ADDR_GLYPHS							agGlyphs;												// Glyph settings (filled on demand).
 			uint32_t								uiBytesPerRow = 16;										// Bytes per displayed row.
 			uint64_t								ui64FileSize = 0;										// File size in bytes (needed for address digits).
 
@@ -267,7 +293,6 @@ namespace mx {
 			bool									bShowRightArea		= true;								// ASCII column.
 			bool									bShowMiniMap		= false;							// Fixed panel on right.
 			bool									bShowRuler			= true;								// Show/hide ruler row.
-
 
 			// Left numbers formatting.
 			MX_DATA_FMT								dfLeftNumbersFmt = MX_DF_HEX;
@@ -288,21 +313,17 @@ namespace mx {
 			int										iPadScrollableRightPx = 0;
 			int										iPadBeforeMiniMapPx = 8;
 			int										iLineSpacingPx = 2;
-			int										iCharCx = 0;
-			int										iCharCy = 0;											// Baseline advance.
 
 			// Ruler.
-			
 
 			// Mini-map geometry (pixels).
 			int										iMiniMapWidthPx = 140;
 		};
 
 
-
 		// == Members.
 		uint64_t									m_ui64VPos = 0;											// First visible line (virtual).
-		uint64_t									m_ui64HPx = 0;											// First visible column (virtual).
+		uint64_t									m_ui64HPx = 0;											// Horizontal scroll offset.
 		MX_FONT_SET *								m_pfsFonts[2] = {};										// Shared fonts.
 		MX_EDIT_AS									m_eaEditAs = MX_ES_HEX;									// The view type.
 		COLORREF									m_crText = MX_RGBA( 0x92, 0x92, 0x92, 0xFF );			// Text color.
@@ -314,10 +335,8 @@ namespace mx {
 
 		CHexEditorInterface *						m_pheiTarget = nullptr;									// The stream of data to handle.
 		MX_STYLE									m_sStyles[MX_ES_TOTAL];									// View settings.
-		//MX_STYLE *									m_pwCurStyle = nullptr;									// The current style.
 		int											m_iPageLines;											// How many text rows fit.
 		int											m_iPageCols;											// How many text columns fit.
-
 
 		// The main window class.
 		static ATOM									m_aAtom;
@@ -371,28 +390,7 @@ namespace mx {
 
 		// Computes font metrics.
 		void										ComputeFontMetrics() {
-			ComputeFontMetrics( (*CurStyle()) );
-		}
-
-		// Computes font metrics.
-		void										ComputeFontMetrics( MX_STYLE &_sStyle ) {
-			lsw::LSW_HDC hDc( Wnd() );
-			{
-				lsw::LSW_SELECTOBJECT soFontOrig( hDc.hDc, _sStyle.fFont.hFont );	// Destructor sets the original font back.
-				TEXTMETRICW tmMetrics {};
-				::GetTextMetricsW( hDc.hDc, &tmMetrics );
-				_sStyle.iCharCx = tmMetrics.tmAveCharWidth;
-				_sStyle.iCharCy = tmMetrics.tmHeight + tmMetrics.tmExternalLeading;
-				_sStyle.tmMetrics = tmMetrics;
-				int32_t i32EmPx = static_cast<int32_t>(tmMetrics.tmHeight - tmMetrics.tmInternalLeading);
-				if ( i32EmPx <= 0 ) {
-					i32EmPx = static_cast<int32_t>(tmMetrics.tmHeight);
-				}
-				float fPoints = static_cast<float>(i32EmPx) * 72.0f / static_cast<float>(m_wDpiY);
-				_sStyle.iPointSize = std::round( fPoints );
-				_sStyle.agGlyphs.iDigitMaxCx = 0;
-				_sStyle.iCharCy = 0;
-			}
+			ComputeFontMetrics( (*Font()), m_wDpiY, Wnd() );
 		}
 
 		/**
@@ -401,7 +399,7 @@ namespace mx {
 		 * Description: Base line height (m_iCyChar or measured glyph height) plus CurStyle()->iLineSpacingPx.
 		 */
 		int											LineAdvanceCy() const {
-			return CurStyle()->iCharCy + CurStyle()->iLineSpacingPx;
+			return Font()->iCharCy + CurStyle()->iLineSpacingPx;
 		}
 
 		// Updates font and other render settings and invalidates the control for redrawing.
@@ -463,7 +461,7 @@ namespace mx {
 		 */
 		int											GetRulerHeightPx() const {
 			if ( !CurStyle()->bShowRuler ) { return 0; }
-			return CurStyle()->iCharCy;
+			return Font()->iCharCy;
 		}
 
 		/**
@@ -552,17 +550,16 @@ namespace mx {
 
 		/** Ensures CurStyle()->agGlyphs is populated for the current font/options. */
 		void										EnsureAddrGlyphs( HDC _hDc ) {
-			MX_ADDR_GLYPHS & agGlyphs = CurStyle()->agGlyphs;
-			if ( agGlyphs.iDigitMaxCx > 0 && CurStyle()->iCharCy > 0 ) { return; }
+			MX_ADDR_GLYPHS & agGlyphs = Font()->agGlyphs;
+			if ( agGlyphs.iDigitMaxCx > 0 && Font()->iCharCy > 0 ) { return; }
 
 			TEXTMETRICW tmMetrics {};
 			::GetTextMetricsW( _hDc, &tmMetrics );
-			CurStyle()->iCharCy = tmMetrics.tmHeight + tmMetrics.tmExternalLeading;
+			Font()->iCharCy = tmMetrics.tmHeight + tmMetrics.tmExternalLeading;
 
 			agGlyphs.iDigitMaxCx = lsw::CHelpers::MeasureMax( _hDc, L"0123456789" );
-			const bool bLower = CurStyle()->daAddressStyle.bLowercaseHex;
-			const int iHexCx  = lsw::CHelpers::MeasureMax( _hDc, bLower ? L"abcdef" : L"ABCDEF" );
-			if ( iHexCx > agGlyphs.iDigitMaxCx ) { agGlyphs.iDigitMaxCx = iHexCx; }
+			agGlyphs.iDigitMaxCx = std::max( agGlyphs.iDigitMaxCx, lsw::CHelpers::MeasureMax( _hDc, L"ABCDEF" ) );
+			agGlyphs.iDigitMaxCxLower = std::max( agGlyphs.iDigitMaxCx, lsw::CHelpers::MeasureMax( _hDc, L"abcdef" ) );
 
 			SIZE sSize {};
 			::GetTextExtentPoint32W( _hDc, L":", 1, &sSize ); agGlyphs.iColonCx = sSize.cx;

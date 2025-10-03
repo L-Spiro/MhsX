@@ -24,13 +24,16 @@ namespace mx {
 	bool CLargeCoWFileWindow::OpenFile( const std::filesystem::path &_pFile ) {
 		Reset();
 
-		if ( !m_fmMainMap.CreateMap( _pFile, FALSE ) ) {
-			Reset();
-			return false;
+		if ( !m_fmMainMap.CreateMap( _pFile, TRUE ) ) {
+			if ( !m_fmMainMap.CreateMap( _pFile, FALSE ) ) {
+				Reset();
+				return false;
+			}
 		}
 		try {
 			uint64_t ui64Size = m_fmMainMap.Size();
 			CCrc::Init();
+			m_pFilePath = _pFile;
 			//m_ui32OriginalCrc = UINT32_MAX;
 			//
 			//std::vector<uint8_t> vBuffer;
@@ -45,17 +48,9 @@ namespace mx {
 			//	I += dwRead;
 			//}
 			//m_ui32OriginalCrc = ~m_ui32OriginalCrc;
-
-			m_pEditDiractory = std::filesystem::temp_directory_path() / _DEC_S_9DAF7683_Dues_Hex_Machina.c_str();
-			::OutputDebugStringW( (m_pEditDiractory.generic_wstring() + L"\r\n").c_str() );
-			m_pEditDiractory /= _pFile.filename();
-			//m_pEditDiractory += std::to_string( m_ui32OriginalCrc );
-			std::error_code ecError;
-			while ( std::filesystem::exists( m_pEditDiractory, ecError ) ) {
-				m_pEditDiractory += L'-';
+			if ( !ReadOnly() ) {
+				CreateWriteDirectories();
 			}
-			CFile::EraseFilesInDirectory( m_pEditDiractory );
-			if ( !CFile::MakeDirectorySafely( m_pEditDiractory ) ) { return false; }
 
 			// Make a single section that spans the whole file.
 			MX_LOGICAL_SECTION lsSection = { .stType = MX_ST_ORIGINAL_FILE,
@@ -297,6 +292,25 @@ namespace mx {
 		_vSections.swap( vCoalesced );*/
 		_vSections.swap( vOut );
 		SimplifyLogicalView();
+		return true;
+	}
+
+	/**
+	 * Creates the directories needed to make it not read-only.
+	 * 
+	 * \return Returns true if the file was successfully made read/write.
+	 **/
+	bool CLargeCoWFileWindow::CreateWriteDirectories() {
+		m_pEditDiractory = std::filesystem::temp_directory_path() / _DEC_S_9DAF7683_Dues_Hex_Machina.c_str();
+		::OutputDebugStringW( (m_pEditDiractory.generic_wstring() + L"\r\n").c_str() );
+		m_pEditDiractory /= m_pFilePath.filename();
+		//m_pEditDiractory += std::to_string( m_ui32OriginalCrc );
+		std::error_code ecError;
+		while ( std::filesystem::exists( m_pEditDiractory, ecError ) ) {
+			m_pEditDiractory += L'-';
+		}
+		CFile::EraseFilesInDirectory( m_pEditDiractory );
+		if ( !CFile::MakeDirectorySafely( m_pEditDiractory ) ) { return false; }
 		return true;
 	}
 

@@ -179,6 +179,9 @@ namespace mx {
 	// GetProcessTimes().
 	LPFN_GETPROCESSTIMES CSystem::m_pfGetProcessTimes = nullptr;
 
+	// NtQueryInformationFile().
+	LPFN_NTQUERYINFORMATIONFILE CSystem::m_pfNtQueryInformationFile = nullptr;
+
 
 	// == Types.
 	typedef BOOL (WINAPI * LPFN_ISWOW64PROCESS)( HANDLE, PBOOL );
@@ -903,6 +906,12 @@ namespace mx {
 		return m_pfGetProcessTimes ? m_pfGetProcessTimes( _hProcess, _lpCreationTime, _lpExitTime, _lpKernelTime, _lpUserTime ) : FALSE;
 	}
 
+	// NtQueryInformationFile.
+	NTSTATUS NTAPI CSystem::NtQueryInformationFile( HANDLE _hFileHandle, PIO_STATUS_BLOCK _sbIoStatusBlock, PVOID _pvFileInformation, ULONG _ulLength, FILE_INFORMATION_CLASS _ficFileInformationClass ) {
+		return m_pfNtQueryInformationFile ? m_pfNtQueryInformationFile( _hFileHandle, _sbIoStatusBlock, _pvFileInformation, _ulLength, _ficFileInformationClass ) : STATUS_PROCEDURE_NOT_FOUND;
+			
+	}
+
 	// Load kernel32.dll functions.
 	VOID CSystem::LoadKernel32() {
 		CHAR szKernel32[_LEN_6AE69F02+1];
@@ -1107,6 +1116,7 @@ namespace mx {
 
 		MX_PROCADDR( NtSuspendProcess, _T_1C2211DA_NtSuspendProcess, _LEN_1C2211DA );
 		MX_PROCADDR( NtResumeProcess, _T_4CF489E5_NtResumeProcess, _LEN_4CF489E5 );
+		MX_PROCADDR( NtQueryInformationFile, _T_F675D37D_NtQueryInformationFile, _LEN_F675D37D );
 
 		::ZeroMemory( szAtDll, MX_ELEMENTS( szAtDll ) );
 #undef MX_CHECK

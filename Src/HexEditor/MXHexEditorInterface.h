@@ -13,8 +13,11 @@ namespace mx {
 		// Read from the given data stream.
 		virtual bool				Read( uint64_t _ui64Addr, void * _pvDest, size_t _sSize ) const = 0;
 
-		// Does the given data stream allow insertion and deleteion?  Processes return true.
+		// Does the given data stream allow insertion and deletion?  Processes return true.
 		virtual bool				OverwriteOnly() const = 0;
+
+		// Is the given data stream read-only?
+		virtual bool				ReadOnly() const { return false; }
 
 		// Insert bytes at a given address.
 		virtual bool				Insert( uint64_t _ui64Addr, const void * _pvSrc, size_t _sSize ) = 0;

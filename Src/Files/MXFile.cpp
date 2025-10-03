@@ -1,4 +1,6 @@
 ﻿#include "MXFile.h"
+#include "../System/MXSystem.h"
+
 #include <string>
 
 
@@ -26,6 +28,7 @@ namespace mx {
 		if ( m_hFile == INVALID_HANDLE_VALUE ) {
 			return FALSE;
 		}
+		m_pFilePath = _lpcFile;
 		return TRUE;
 	}
 
@@ -43,6 +46,7 @@ namespace mx {
 		if ( m_hFile == INVALID_HANDLE_VALUE ) {
 			return FALSE;
 		}
+		m_pFilePath = _lpwFile;
 		return TRUE;
 	}
 
@@ -59,6 +63,7 @@ namespace mx {
 		if ( m_hFile == INVALID_HANDLE_VALUE ) {
 			return FALSE;
 		}
+		m_pFilePath = _lpcFile;
 		return TRUE;
 	}
 
@@ -75,6 +80,7 @@ namespace mx {
 		if ( m_hFile == INVALID_HANDLE_VALUE ) {
 			return FALSE;
 		}
+		m_pFilePath = _lpwFile;
 		return TRUE;
 	}
 
@@ -84,6 +90,7 @@ namespace mx {
 			::CloseHandle( m_hFile );
 			m_hFile = INVALID_HANDLE_VALUE;
 		}
+		m_pFilePath.clear();
 	}
 
 	// Reads from the opened file.
@@ -133,6 +140,57 @@ namespace mx {
 		LARGE_INTEGER liNewPos;
 		if ( ::SetFilePointerEx( m_hFile, liMoveBy, &liNewPos, _bFromEnd ? FILE_END : FILE_BEGIN ) ) { return liNewPos.QuadPart; }
 		return 0;
+	}
+
+	// Read-only?
+	bool CFile::ReadOnly() const {
+		if ( m_hFile == nullptr || m_hFile == INVALID_HANDLE_VALUE ) { return true; }
+
+		// Query granted access on this handle.
+		IO_STATUS_BLOCK sIos = {};
+		FILE_ACCESS_INFORMATION sFai = {};
+		NTSTATUS nsStatus = CSystem::NtQueryInformationFile(
+			m_hFile,
+			&sIos,
+			&sFai,
+			sizeof( sFai ),
+			FileAccessInformation
+		);
+
+		// STATUS_SUCCESS == 0.
+		if ( nsStatus == 0 ) {
+			static constexpr ACCESS_MASK amWriteLike =
+				FILE_WRITE_DATA | FILE_APPEND_DATA | FILE_WRITE_ATTRIBUTES | FILE_WRITE_EA | DELETE;
+			return ((sFai.AccessFlags & amWriteLike) == 0);
+		}
+
+		// Fallback #1: try creating a RW mapping on the existing handle (no file modification).
+		if ( HANDLE hMap = ::CreateFileMappingW( m_hFile, nullptr, PAGE_READWRITE, 0, 0, nullptr ) ) {
+			::CloseHandle( hMap );
+			return false;	// RW mapping succeeded => not read-only.
+		}
+		if ( ::GetLastError() == ERROR_ACCESS_DENIED ) { return true; }
+
+		// Fallback #2: probe with a separate write-open by path (covers ACL/environment if the above failed).
+		if ( !m_pFilePath.empty() ) {
+			const HANDLE hProbe = ::CreateFileW(
+				m_pFilePath.c_str(),
+				FILE_WRITE_DATA,
+				FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+				nullptr,
+				OPEN_EXISTING,
+				FILE_ATTRIBUTE_NORMAL,
+				nullptr
+			);
+			if ( hProbe != INVALID_HANDLE_VALUE ) {
+				::CloseHandle( hProbe );
+				return false;
+			}
+			if ( ::GetLastError() == ERROR_ACCESS_DENIED ) { return true; }
+		}
+
+		// Could not positively prove read-only; assume writable to avoid disabling features unnecessarily.
+		return false;
 	}
 
 	// == Statics.
@@ -312,6 +370,33 @@ namespace mx {
 		DWORD dwAttr = ::GetFileAttributesW( wsTmp.c_str() );
 		return (dwAttr != INVALID_FILE_ATTRIBUTES) &&
 			(dwAttr & FILE_ATTRIBUTE_DIRECTORY);
+	}
+
+	/**
+	 * Determines whether the currently opened data stream is read-only.
+	 *
+	 * \return Returns true if the file cannot be written to due to the file's read-only attribute
+	 * or the volume being write-protected; false otherwise.
+	 */
+	bool CFile::ReadOnly( const std::filesystem::path _pPath ) {
+		if ( _pPath.empty() ) { return true; }
+
+		const DWORD dwAttrs = ::GetFileAttributesW( _pPath.c_str() );
+		if ( dwAttrs == INVALID_FILE_ATTRIBUTES ) { return true; }
+
+		// Directories and files explicitly marked read-only are treated as non-writable targets.
+		if ( (dwAttrs & FILE_ATTRIBUTE_DIRECTORY) || (dwAttrs & FILE_ATTRIBUTE_READONLY) ) { return true; }
+
+		// If the volume is read-only (e.g., write-protected media), the stream is effectively read-only.
+		wchar_t wszRoot[MAX_PATH] = {};
+		if ( ::GetVolumePathNameW( _pPath.c_str(), wszRoot, DWORD( std::size( wszRoot ) ) ) ) {
+			DWORD dwVolFlags = 0;
+			if ( ::GetVolumeInformationW( wszRoot, nullptr, 0, nullptr, nullptr, &dwVolFlags, nullptr, 0 ) ) {
+				if ( dwVolFlags & FILE_READ_ONLY_VOLUME ) { return true; }
+			}
+		}
+
+		return false;
 	}
 
 	/**

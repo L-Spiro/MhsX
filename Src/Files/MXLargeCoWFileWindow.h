@@ -28,6 +28,9 @@ namespace mx {
 		// The file size.
 		inline uint64_t											Size() const { return m_ui64Size; }
 
+		// Is the given data stream read-only?
+		inline bool												ReadOnly() const { return m_fmMainMap.ReadOnly(); }
+
 
 	protected :
 		// == Enumerations.
@@ -78,6 +81,7 @@ namespace mx {
 		// == Members.
 		uint64_t												m_ui64Size = 0;									// File size, derived from the logical view.
 		CFileMap												m_fmMainMap;									// The map for the main file being edited.
+		std::filesystem::path									m_pFilePath;									// the path to the file.
 		std::vector<std::unique_ptr<CFileMap>>					m_vEditedMaps;									// Mappings of edited copies.
 		std::vector<uint64_t>									m_vActiveSegments;								// List of edited segments currently loaded into RAM.  Sorted by most-recent access.
 		std::filesystem::path									m_pEditDiractory;								// Folder where edited copies go.
@@ -110,6 +114,13 @@ namespace mx {
 		 * \return Returns true if any modification was made to _vSections.
 		 **/
 		bool													DeleteRange( std::vector<MX_LOGICAL_SECTION> &_vSections, uint64_t _ui64DelStart, uint64_t _ui64DelSize );
+
+		/**
+		 * Creates the directories needed to make it not read-only.
+		 * 
+		 * \return Returns true if the file was successfully made read/write.
+		 **/
+		bool													CreateWriteDirectories();
 	};
 
 }	// namespace mx
