@@ -36,8 +36,9 @@ namespace lsw {
 		if ( !_sTotal ) { return nullptr; }
 
 		HMENU hMenu = NULL;
+		std::vector<ACCEL> vHotkeys;
 		if ( _pmlLayouts ) {
-			hMenu = CreateMenu( _pmlLayouts, _sTotalMenus );
+			hMenu = CreateMenu( _pmlLayouts, _sTotalMenus, vHotkeys );
 		}
 		LSW_WIDGET_LAYOUT wlMainLayout = FixLayout( _pwlLayouts[0] );
 		LSW_RECT rMainRect = { wlMainLayout.iLeft, wlMainLayout.iTop, static_cast<LONG>(wlMainLayout.iLeft + wlMainLayout.dwWidth), static_cast<LONG>(wlMainLayout.iTop + wlMainLayout.dwHeight) };
@@ -74,7 +75,11 @@ namespace lsw {
 		::EnumChildWindows( pwMain->Wnd(), CWidget::EnumChildWindows_SetFont, reinterpret_cast<LPARAM>(CBase::MessageBoxFont()) );
 		CWidget::ControlSetup( pwMain, vWidgets );
 
-		// WM_NCCREATE and WM_CREATE occer in constructors so virtual overloads don't work on them.
+		if ( vHotkeys.size() ) {
+			CBase::GetAccelHandler().CreateAndRegister( pwMain->Wnd(), vHotkeys.data(), int( vHotkeys.size() ) );
+		}
+
+		// WM_NCCREATE and WM_CREATE occur in constructors so virtual overloads don't work on them.
 		// Now that construction is over and everything is ready, fake a WM_INITDIALOG.
 		pwMain->InitDialog();
 
@@ -218,10 +223,10 @@ namespace lsw {
 	}
 
 	// Creates a menu given a menu layout.
-	HMENU CLayoutManager::CreateMenu( const LSW_MENU_LAYOUT &_mlLayout ) {
+	HMENU CLayoutManager::CreateMenu( const LSW_MENU_LAYOUT &_mlLayout, std::vector<ACCEL> &_vAccelerators ) {
 		HMENU hMenu = ::CreateMenu();
 		for ( SIZE_T I = 0; I < _mlLayout.stTotalMenuItems; ++I ) {
-			if ( !AppendMenuItem( hMenu, _mlLayout.pmiItems[I] ) ) {
+			if ( !AppendMenuItem( hMenu, _mlLayout.pmiItems[I], _vAccelerators ) ) {
 				::DestroyMenu( hMenu );
 				return NULL;
 			}
@@ -230,11 +235,11 @@ namespace lsw {
 	}
 
 	// Creates menus given menu layouts.
-	HMENU CLayoutManager::CreateMenu( const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotal ) {
+	HMENU CLayoutManager::CreateMenu( const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotal, std::vector<ACCEL> &_vAccelerators ) {
 		std::map<DWORD, HMENU> mIdToMenu;
 		HMENU hMenu = NULL;
 		for ( SIZE_T I = 0; I < _sTotal; ++I ) {
-			HMENU hTemp = CreateMenu( _pmlLayouts[I] );
+			HMENU hTemp = CreateMenu( _pmlLayouts[I], _vAccelerators );
 			if ( !hTemp ) {
 				for ( auto J = mIdToMenu.begin(); J != mIdToMenu.end(); ++J ) {
 					::DestroyMenu( J->second );
@@ -268,8 +273,9 @@ namespace lsw {
 	// Creates a pop-upmenu given a menu layout.
 	HMENU CLayoutManager::CreatePopupMenu( const LSW_MENU_LAYOUT &_mlLayout ) {
 		HMENU hMenu = ::CreatePopupMenu();
+		std::vector<ACCEL> vHotkeys;
 		for ( SIZE_T I = 0; I < _mlLayout.stTotalMenuItems; ++I ) {
-			if ( !AppendMenuItem( hMenu, _mlLayout.pmiItems[I] ) ) {
+			if ( !AppendMenuItem( hMenu, _mlLayout.pmiItems[I], vHotkeys ) ) {
 				::DestroyMenu( hMenu );
 				return NULL;
 			}
@@ -280,9 +286,10 @@ namespace lsw {
 	// Creates a pop-upmenu given menu layouts.
 	HMENU CLayoutManager::CreatePopupMenu( const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotal ) {
 		std::map<DWORD, HMENU> mIdToMenu;
+		std::vector<ACCEL> vHotkeys;
 		HMENU hMenu = NULL;
 		for ( SIZE_T I = 0; I < _sTotal; ++I ) {
-			HMENU hTemp = I == 0 ? CreatePopupMenu( _pmlLayouts[I] ) : CreateMenu( _pmlLayouts[I] );
+			HMENU hTemp = I == 0 ? CreatePopupMenu( _pmlLayouts[I] ) : CreateMenu( _pmlLayouts[I], vHotkeys );
 			if ( !hTemp ) {
 				for ( auto J = mIdToMenu.begin(); J != mIdToMenu.end(); ++J ) {
 					::DestroyMenu( J->second );
@@ -519,17 +526,26 @@ namespace lsw {
 	}
 
 	// Appends a menu item to a menu.
-	BOOL CLayoutManager::AppendMenuItem( HMENU _hMenu, const LSW_MENU_ITEM &_miItem ) {
+	BOOL CLayoutManager::AppendMenuItem( HMENU _hMenu, const LSW_MENU_ITEM &_miItem, std::vector<ACCEL> &_vAccelerators ) {
 		if ( _miItem.bSkip ) { return TRUE; }
 		if ( _miItem.bIsSeperator ) {
 			return ::AppendMenuW( _hMenu, MF_SEPARATOR, 0, NULL );
 		}
-		UINT uiFlags = MF_STRING;
+
+		std::wstring wsTmp = _miItem.lpwcText ? _miItem.lpwcText : L"";
+		if ( _miItem.aHotkey.cmd || _miItem.aHotkey.key ) {
+			_vAccelerators.push_back( _miItem.aHotkey );
+			wsTmp += L'\t';
+			wsTmp += CHelpers::AccelToPrintable( _miItem.aHotkey, false );
+		}
+
+
+		UINT uiFlags = _miItem.lpwcText ? MF_STRING : 0;
 		if ( _miItem.bCheckable ) {
 			uiFlags |= _miItem.bChecked ? MF_CHECKED : MF_UNCHECKED;
 		}
 		uiFlags |= _miItem.bEnabled ? MF_ENABLED : MF_GRAYED;
-		return ::AppendMenuW( _hMenu, uiFlags, _miItem.dwId, _miItem.lpwcText );
+		return ::AppendMenuW( _hMenu, uiFlags, _miItem.dwId, wsTmp.c_str() );
 	}
 
 }	// namespace lsw

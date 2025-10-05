@@ -1054,7 +1054,8 @@ namespace mx {
 				vMenu.size(),
 				vMenu.data()
 			};
-			HMENU hThis = lsw::CBase::LayoutManager()->CreateMenu( &miMenus, 1 );
+			std::vector<ACCEL> vHotkeys;
+			HMENU hThis = lsw::CBase::LayoutManager()->CreateMenu( &miMenus, 1, vHotkeys );
 			//if ( !::ModifyMenuW( hMenu, CMainWindowLayout::LSN_MWMI_OPENRECENT, MF_BYCOMMAND | MF_POPUP | MF_STRING,
 			//	reinterpret_cast<UINT_PTR>(hThis), LSN_LSTR( LSN_OPEN_REC_ENT ) ) ) {
 			if ( ::InsertMenuW( hMenu, 1, MF_BYPOSITION | MF_POPUP | MF_STRING,

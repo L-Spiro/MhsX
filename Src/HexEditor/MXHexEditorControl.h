@@ -81,7 +81,7 @@ namespace mx {
 			LOGFONTW								lfFontParms {};											// The current font parameters.
 			TEXTMETRICW								tmMetrics {};											// The current font's metrics.
 			MX_ADDR_GLYPHS							agGlyphs;												// Glyph settings (filled on demand).
-			int32_t									i32PointSize = 10;										// The font point size.
+			int32_t									i32PointSize = DefaultPointSize();						// The font point size.
 
 			int										iCharCx = 0;
 			int										iCharCy = 0;											// Baseline advance.
@@ -166,6 +166,14 @@ namespace mx {
 		bool										DecreaseFontSize( LOGFONTW &_lfFont );
 
 		/**
+		 * Sets the font size.
+		 * 
+		 * \param _i32PtSize The font size to set.
+		 * \return Returns true if the font was changed.
+		 **/
+		bool										SetFontSize( int32_t _i32PtSize );
+
+		/**
 		 * Sets the current font.
 		 * 
 		 * \param _lfFont The font to set.
@@ -180,7 +188,7 @@ namespace mx {
 		 * \param _bFixedRowLength Whether to return the fixed-row font or the dynamic-row font.
 		 * \return Returns the selected font.
 		 **/
-		inline LOGFONTW								GetFont( bool _bFixedRowLength ) {
+		inline LOGFONTW								GetThisFont() {
 			return Font()->lfFontParms;
 		}
 
@@ -232,6 +240,15 @@ namespace mx {
 
 		// Gets the size of the handled data.
 		inline uint64_t								Size() const { return m_pheiTarget ? m_pheiTarget->Size() : 0; }
+		
+
+		// Updates font and other render settings and invalidates the control for redrawing.
+		void										RecalcAndInvalidate() {
+			ComputeFontMetrics();
+			
+			UpdateScrollbars();
+			::InvalidateRect( Wnd(), NULL, FALSE );
+		}
 
 		// Registers the control if it has not been registered already.  Redundant calls have no effect.  Must be called before creating this control.
 		static void									PrepareControl();
@@ -246,8 +263,8 @@ namespace mx {
 				lsw::LSW_SELECTOBJECT soFontOrig( hDc.hDc, _fsFont.fFont.hFont );	// Destructor sets the original font back.
 				TEXTMETRICW tmMetrics {};
 				::GetTextMetricsW( hDc.hDc, &tmMetrics );
-				/*_fsFont.iCharCx = tmMetrics.tmAveCharWidth;
-				_fsFont.iCharCy = tmMetrics.tmHeight + tmMetrics.tmExternalLeading;*/
+				_fsFont.iCharCx = tmMetrics.tmAveCharWidth;
+				_fsFont.iCharCy = tmMetrics.tmHeight + tmMetrics.tmExternalLeading;
 				_fsFont.tmMetrics = tmMetrics;
 				int32_t i32EmPx = static_cast<int32_t>(tmMetrics.tmHeight - tmMetrics.tmInternalLeading);
 				if ( i32EmPx <= 0 ) {
@@ -257,9 +274,12 @@ namespace mx {
 				_fsFont.i32PointSize = std::round( fPoints );
 				// To be set by EnsureAddrGlyphs().
 				_fsFont.agGlyphs.iDigitMaxCx = 0;
-				_fsFont.iCharCy = 0;
+				//_fsFont.iCharCy = 0;
 			}
 		}
+
+		// Gets the default font size (later to be replaced with a settings value).
+		static int32_t								DefaultPointSize() { return 10; }
 
 
 	protected :
@@ -401,16 +421,6 @@ namespace mx {
 		 */
 		int											LineAdvanceCy() const {
 			return Font()->iCharCy + CurStyle()->iLineSpacingPx;
-		}
-
-		// Updates font and other render settings and invalidates the control for redrawing.
-		void										RecalcAndInvalidate() {
-			ComputeFontMetrics();
-			//CurStyle()->ui64FileSize = Size();
-			//m_iAddrDigits = AddrDigitsForSize( Size() );
-			
-			UpdateScrollbars();
-			::InvalidateRect( Wnd(), nullptr, FALSE );
 		}
 
 		// Gets the total number of lines in the display.

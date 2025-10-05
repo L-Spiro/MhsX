@@ -115,6 +115,7 @@ namespace lsw {
 	CWidget::~CWidget() {
 		m_bInDestructor = TRUE;
 		if ( m_hWnd != NULL ) {
+			CBase::GetAccelHandler().Unregister( m_hWnd );
 			::DestroyWindow( m_hWnd );
 			m_hWnd = NULL;
 		}
@@ -1366,6 +1367,9 @@ namespace lsw {
 					LSW_HANDLED hHandled = pmwThis->NcDestroy();
 					if ( !_bIsDlg ) {
 						::SetWindowLongPtrW( _hWnd, GWLP_USERDATA, 0L );
+						if ( pmwThis->m_hWnd ) {
+							CBase::GetAccelHandler().Unregister( pmwThis->m_hWnd );
+						}
 						pmwThis->m_hWnd = NULL;	// Destructor calls ::DestroyWindow(), which would send WM_DESTROY and WM_NCDESTROY again.
 						if ( !pmwThis->m_bInDestructor ) {
 							delete pmwThis;
@@ -1480,6 +1484,9 @@ namespace lsw {
 						}
 						case 1 : {
 							hHandled = pmwThis->AcceleratorCommand( wId );
+							if ( LSW_H_CONTINUE == hHandled ) {
+								hHandled = pmwThis->Command( HIWORD( _wParam ), wId, nullptr );
+							}
 							break;
 						}
 						default : {

@@ -168,21 +168,21 @@ namespace mx {
 
 	// File menu.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miFileMenu[] {
-		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen													bSkip	aHotkey
 		{ FALSE,		MX_M_FILE_NEW,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_08F2F449__New, _LEN_08F2F449 ) },
-		{ FALSE,		MX_M_FILE_OPENFILE,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_2BEA22F9__Open_File, _LEN_2BEA22F9 ) },
-		{ FALSE,		MX_M_FILE_OPENCURPROCESS,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_3E14AB9A_Open__Current_Process, _LEN_3E14AB9A ) },
-		{ FALSE,		MX_M_FILE_OPENFILE,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_364A9A57_Open__Process, _LEN_364A9A57 ) },
+		{ FALSE,		MX_M_FILE_OPENFILE,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_2BEA22F9__Open_File, _LEN_2BEA22F9 ),				false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'O', MX_M_FILE_OPENFILE } },
+		{ FALSE,		MX_M_FILE_OPENCURPROCESS,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_3E14AB9A_Open__Current_Process, _LEN_3E14AB9A ),	false, },
+		{ FALSE,		MX_M_FILE_OPENPROCESS,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_364A9A57_Open__Process, _LEN_364A9A57 ),			false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FSHIFT), 'P', MX_M_FILE_OPENPROCESS } },
 		{ FALSE,		MX_M_FILE_OPENRECENT,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_EA79B404_Open__Recent, _LEN_EA79B404 ) },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_M_FILE_SAVE,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_5CB36745__Save, _LEN_5CB36745 ) },
-		{ FALSE,		MX_M_FILE_SAVE_AS,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_034D4A63_Save__As___, _LEN_034D4A63 ) },
+		{ FALSE,		MX_M_FILE_SAVE,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_5CB36745__Save, _LEN_5CB36745 ),					false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'S', MX_M_FILE_SAVE } },
+		{ FALSE,		MX_M_FILE_SAVE_AS,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_034D4A63_Save__As___, _LEN_034D4A63 ),				false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FSHIFT), 'S', MX_M_FILE_SAVE_AS } },
 		{ FALSE,		MX_M_FILE_SAVE_A_COPY,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_EE6562A1_Save_a_Cop_y___, _LEN_EE6562A1 ) },
 		{ FALSE,		MX_M_FILE_SAVE_SELECTION,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_B78BF6D5_Save_Selec_tion___, _LEN_B78BF6D5 ) },
 		{ FALSE,		MX_M_FILE_SAVE_ALL,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_CD75926E_Sa_ve_All, _LEN_CD75926E ) },
-		{ FALSE,		MX_M_FILE_CLOSE,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_74D51E55__Close, _LEN_74D51E55 ) },
-		{ FALSE,		MX_M_FILE_CLOSE_ALL,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_1D146047_C_lose_All, _LEN_1D146047 ) },
-		{ FALSE,		MX_M_FILE_REVERT_REFRESH,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_1E3CFF84_Revert_Refres_h, _LEN_1E3CFF84 ) },
+		{ FALSE,		MX_M_FILE_CLOSE,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_74D51E55__Close, _LEN_74D51E55 ),					false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'W', MX_M_FILE_CLOSE } },
+		{ FALSE,		MX_M_FILE_CLOSE_ALL,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_1D146047_C_lose_All, _LEN_1D146047 ),				false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FALT), 'W', MX_M_FILE_CLOSE_ALL } },
+		{ FALSE,		MX_M_FILE_REVERT_REFRESH,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_1E3CFF84_Revert_Refres_h, _LEN_1E3CFF84 ),			false,	{ static_cast<BYTE>(FVIRTKEY), VK_F6, MX_M_FILE_REVERT_REFRESH } },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_M_FILE_SPECIAL,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_2EF51FCB_Spec_ial, _LEN_2EF51FCB ) },
 		{ FALSE,		MX_M_FILE_IMPORT_HEX,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_CE0CAA04_I_mport_Hex___, _LEN_CE0CAA04 ) },
@@ -194,8 +194,8 @@ namespace mx {
 	// File -> New menu.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miFileNewMenu[] = {
 		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
-		{ FALSE,		MX_M_FILE_NEW_TEXT_FILE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_E8E120C8_New__Text_File, _LEN_E8E120C8 ) },
-		{ FALSE,		MX_M_FILE_NEW_HEX_FILE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_99EE2388_New__Hex_File, _LEN_99EE2388 ) },
+		{ FALSE,		MX_M_FILE_NEW_TEXT_FILE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_E8E120C8_New__Text_File, _LEN_E8E120C8 ),			false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'N', MX_M_FILE_NEW_TEXT_FILE } },
+		{ FALSE,		MX_M_FILE_NEW_HEX_FILE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_99EE2388_New__Hex_File, _LEN_99EE2388 ),			false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FSHIFT), 'N', MX_M_FILE_NEW_HEX_FILE } },
 		{ FALSE,		MX_M_FILE_NEW_UNICODE_FILE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_D9722ACF_New__Unicode_File, _LEN_D9722ACF ) },
 		{ FALSE,		MX_M_FILE_NEW_UTF8_FILE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_D9129A81_New_UTF__8_File, _LEN_D9129A81 ) },
 		{ FALSE,		MX_M_FILE_NEW_C_FILE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_AA94A061_New__C_C___File, _LEN_AA94A061 ) },

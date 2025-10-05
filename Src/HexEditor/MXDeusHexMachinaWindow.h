@@ -163,11 +163,23 @@ namespace mx {
 		// Performs an Open operation.
 		void										Open( const std::filesystem::path &_pPath );
 
+		// Closes the active tab.
+		void										CloseTab();
+
+		// Close all tabs.
+		void										CloseAllTabs();
+
 		// Enlarge font.
 		void										EnlargeFont();
 
 		// Ensmall font.
 		void										EnsmallFont();
+
+		// Reset font.
+		void										ResetFont();
+
+		// Sets the font size back to normal.
+		void										ResetFontSize();
 
 
 	private :

@@ -1166,6 +1166,18 @@ namespace lsw {
 			if ( ::GetKeyNameTextW( _uiKey, szBufText, LSW_ELEMENTS( szBufText ) ) ) {
 				wsRet += szBufText;
 			}
+			else {
+				// Fallbacks: function keys or hex VK.
+				if ( _uiKey >= VK_F1 && _uiKey <= VK_F24 ) {
+					wsRet = L"F" + std::to_wstring( _uiKey - VK_F1 + 1 );
+				}
+				else {
+					wchar_t wfb[16] = {};
+					::wsprintfW( wfb, L"VK_%02X", static_cast<unsigned>(_uiKey) );
+					wsRet = wfb;
+				}
+			}
+
 			return wsRet;
 		}
 
@@ -1208,6 +1220,47 @@ namespace lsw {
 			}
 			wTmp += CHelpers::ScanCodeToString( UINT( _kKey.dwScanCode ) );
 			return wTmp;
+		}
+
+		/**
+		 * \brief Converts an ACCEL into a printable shortcut using ScanCodeToString() and ModifierToString().
+		 *
+		 * Handles both FVIRTKEY (VK-based) and character accelerators. Modifiers come from fVirt.
+		 */
+		static std::wstring					AccelToPrintable( const ACCEL &_aAccelerator, bool _bIgnoreLeftRight = true ) {
+			std::wstring wsOut;
+
+			if ( _aAccelerator.fVirt & FCONTROL ) {
+				if ( !wsOut.empty() ) { wsOut += L"+"; }
+				ModifierToString( VK_CONTROL, wsOut, _bIgnoreLeftRight );
+			}
+			if ( _aAccelerator.fVirt & FALT ) {
+				if ( !wsOut.empty() ) { wsOut += L"+"; }
+				ModifierToString( VK_MENU, wsOut, _bIgnoreLeftRight );
+			}
+			if ( _aAccelerator.fVirt & FSHIFT ) {
+				if ( !wsOut.empty() ) { wsOut += L"+"; }
+				ModifierToString( VK_SHIFT, wsOut, _bIgnoreLeftRight );
+			}
+
+			if ( !wsOut.empty() ) { wsOut += L"+"; }
+
+			if ( _aAccelerator.fVirt & FVIRTKEY ) {
+				UINT uiScan = ::MapVirtualKeyW( _aAccelerator.key, MAPVK_VK_TO_VSC_EX );
+				UINT uiExt  = (uiScan & 0x0100) ? KF_EXTENDED : 0;
+				std::wstring wsKey = ScanCodeToString( (uiScan | uiExt) << 16 );
+				wsOut += wsKey;
+			}
+			else {
+				// Character accelerator (ASCII). Show the character itself.
+				wchar_t wcTmp = static_cast<wchar_t>(_aAccelerator.key);
+				// Win32, locale-aware:
+				::CharUpperBuffW( &wcTmp, 1 );
+				wchar_t wszTmpBuffer[2] = { wcTmp, 0 };
+				wsOut += wcTmp;
+			}
+
+			return wsOut;
 		}
 
 		/**

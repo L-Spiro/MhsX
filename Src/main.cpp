@@ -94,6 +94,11 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 		if ( mMsg.message == WM_QUIT ) {
 			break;
 		}
+		if ( lsw::CBase::GetAccelHandler().Translate( mMsg ) ) { continue; }
+
+		if ( mMsg.hwnd && ::IsDialogMessageW( ::GetAncestor( mMsg.hwnd, GA_ROOT ), &mMsg ) ) { continue; }
+
+		
 		::TranslateMessage( &mMsg );
 		::DispatchMessageW( &mMsg );
 	}

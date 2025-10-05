@@ -465,6 +465,7 @@
     <ClCompile Include="Src\Widget\LSWWidget.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Base\LSWAccelRouter.h" />
     <ClInclude Include="Src\Base\LSWBase.h" />
     <ClInclude Include="Src\Base\LSWGlobalAlloc.h" />
     <ClInclude Include="Src\Base\LSWWndClassEx.h" />

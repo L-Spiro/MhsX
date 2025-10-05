@@ -26,6 +26,9 @@ namespace lsw {
 	// Non-client metrics.
 	NONCLIENTMETRICSW CBase::m_ncmNonClientMetrics = { sizeof( m_ncmNonClientMetrics ) };
 
+	// The accelerator handler.
+	CAccelRouter CBase::m_arAccelRouter;
+
 	// Message-box font.
 	HFONT CBase::m_hMessageFont = NULL;
 
@@ -194,6 +197,7 @@ namespace lsw {
 		::DeleteObject( m_hMessageFont );
 
 		m_bcBrushes.Reset();
+		m_arAccelRouter.Reset();
 	}
 
 	/**

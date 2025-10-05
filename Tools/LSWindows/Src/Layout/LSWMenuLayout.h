@@ -16,6 +16,7 @@ namespace lsw {
 		// Shortcut.
 		SIZE_T						stTextLen;					// If 0, string ends with 0.
 		BOOL						bSkip;						// If TRUE, the menu item is skipped instead of being added.
+		ACCEL						aHotkey {};					// The menu hotkey.
 	};
 
 	// A menu.

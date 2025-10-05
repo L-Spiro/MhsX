@@ -368,6 +368,9 @@
     <ClInclude Include="Src\Fonts\LSWFonts.h">
       <Filter>Header Files\Fonts</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Base\LSWAccelRouter.h">
+      <Filter>Header Files\Base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base\LSWBase.cpp">

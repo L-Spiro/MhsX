@@ -41,10 +41,10 @@ namespace lsw {
 		virtual CWidget *				CreateWidget( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data );
 
 		// Creates a menu given a menu layout.
-		HMENU							CreateMenu( const LSW_MENU_LAYOUT &_mlLayout );
+		HMENU							CreateMenu( const LSW_MENU_LAYOUT &_mlLayout, std::vector<ACCEL> &_vAccelerators );
 
 		// Creates menus given menu layouts.
-		HMENU							CreateMenu( const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotal );
+		HMENU							CreateMenu( const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotal, std::vector<ACCEL> &_vAccelerators );
 
 		// Creates a pop-upmenu given a menu layout.
 		HMENU							CreatePopupMenu( const LSW_MENU_LAYOUT &_mlLayout );
@@ -74,7 +74,7 @@ namespace lsw {
 		SIZE_T							ItemTemplateString( const WCHAR * _pwcString, WORD * _pwDest );
 
 		// Appends a menu item to a menu.
-		BOOL							AppendMenuItem( HMENU _hMenu, const LSW_MENU_ITEM &_miItem );
+		BOOL							AppendMenuItem( HMENU _hMenu, const LSW_MENU_ITEM &_miItem, std::vector<ACCEL> &_vAccelerators );
 
 	};
 

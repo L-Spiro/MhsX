@@ -160,6 +160,27 @@ namespace mx {
 	}
 
 	/**
+	 * Sets the font size.
+	 * 
+	 * \param _i32PtSize The font size to set.
+	 * \return Returns true if the font was changed.
+	 **/
+	bool CHexEditorControl::SetFontSize( int32_t _i32PtSize ) {
+		if ( _i32PtSize <= 0 || _i32PtSize > 72 ) { return false; }
+		Font()->i32PointSize = _i32PtSize;
+		auto lfTmp = GetThisFont();
+		lfTmp.lfHeight = -::MulDiv( Font()->i32PointSize, static_cast<int>(m_wDpiY), 72 );
+		if ( Font()->fFont.CreateFontIndirectW( &lfTmp ) ) {
+			Font()->lfFontParms = lfTmp;
+			RecalcAndInvalidate();
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	/**
 	 * Sets the current font.
 	 * 
 	 * \param _lfFont The font to set.
@@ -942,6 +963,10 @@ namespace mx {
 
 	// Updates the scrollbars.
 	void CHexEditorControl::UpdateScrollbars() {
+		/*{
+			lsw::LSW_HDC hDc( Wnd() );
+			EnsureAddrGlyphs( hDc.hDc );
+		}*/
 		// Compute visible page sizes (lines / columns-on-screen).
 		int iClientH = int( ClientRect().Height() );
 

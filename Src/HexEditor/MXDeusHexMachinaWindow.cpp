@@ -178,6 +178,14 @@ namespace mx {
 				Open();
 				break;
 			}
+			case Layout::MX_M_FILE_CLOSE : {
+				CloseTab();
+				break;
+			}
+			case Layout::MX_M_FILE_CLOSE_ALL : {
+				CloseAllTabs();
+				break;
+			}
 			case Layout::MX_M_FILE_EXIT : {
 				Close();
 				break;
@@ -189,6 +197,14 @@ namespace mx {
 			}
 			case Layout::MX_M_VIEW_FONT_SHRINK_FONT : {
 				EnsmallFont();
+				break;
+			}
+			case Layout::MX_M_VIEW_FONT_RESET_FONT_SIZE : {
+				ResetFontSize();
+				break;
+			}
+			case Layout::MX_M_VIEW_FONT_RESET_FONT : {
+				ResetFont();
 				break;
 			}
 		}
@@ -401,12 +417,37 @@ namespace mx {
 		}
 	}
 
+	// Closes the active tab.
+	void CDeusHexMachinaWindow::CloseTab() {
+		auto ptTab = Tab();
+		if ( !ptTab ) { return; }
+		size_t sIdx = size_t( ptTab->GetCurSel() );
+		if ( sIdx >= m_vTabs.size() ) { return; }
+		//m_vTabs[sIdx].phecWidget->
+		ptTab->DeleteItem( int( sIdx ) );
+		delete m_vTabs[sIdx].pheiInterface;
+		m_vTabs.erase( m_vTabs.begin() + sIdx );
+	}
+
+	// Close all tabs.
+	void CDeusHexMachinaWindow::CloseAllTabs() {
+		while ( m_vTabs.size() ) {
+			CloseTab();
+		}
+	}
+
 	// Enlarge font.
 	void CDeusHexMachinaWindow::EnlargeFont() {
 		auto phecControl = CurrentEditor();
 		if ( !phecControl ) { return; }
 		LOGFONTW lfFont;
 		phecControl->IncreaseFontSize( lfFont );
+
+		for ( size_t I = m_vTabs.size(); I--; ) {
+			if ( m_vTabs[I].phecWidget != phecControl ) {
+				m_vTabs[I].phecWidget->RecalcAndInvalidate();
+			}
+		}
 	}
 
 	// Ensmall font.
@@ -415,6 +456,41 @@ namespace mx {
 		if ( !phecControl ) { return; }
 		LOGFONTW lfFont;
 		phecControl->DecreaseFontSize( lfFont );
+
+		for ( size_t I = m_vTabs.size(); I--; ) {
+			if ( m_vTabs[I].phecWidget != phecControl ) {
+				m_vTabs[I].phecWidget->RecalcAndInvalidate();
+			}
+		}
+	}
+
+	// Reset font.
+	void CDeusHexMachinaWindow::ResetFont() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+
+		CHexEditorControl::MX_FONT_SET * fsSet = phecControl->Font();
+		fsSet->i32PointSize = CHexEditorControl::DefaultPointSize();
+		CHexEditorControl::ChooseDefaultFont( (*fsSet), m_wDpiY, Wnd() );
+		CHexEditorControl::ComputeFontMetrics( (*fsSet), m_wDpiY, Wnd() );
+
+		for ( size_t I = m_vTabs.size(); I--; ) {
+			m_vTabs[I].phecWidget->RecalcAndInvalidate();
+		}
+	}
+
+	// Sets the font size back to normal.
+	void CDeusHexMachinaWindow::ResetFontSize() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+
+		phecControl->SetFontSize( CHexEditorControl::DefaultPointSize() );
+
+		for ( size_t I = m_vTabs.size(); I--; ) {
+			if ( m_vTabs[I].phecWidget != phecControl ) {
+				m_vTabs[I].phecWidget->RecalcAndInvalidate();
+			}
+		}
 	}
 
 }	// namespace mx

@@ -206,7 +206,7 @@ namespace mx {
 		{ TRUE,			0,							FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_MWMI_SUB,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_BDE91628_S_ubsearch, _LEN_BDE91628 ) },
 		{ TRUE,			0,							FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_MWMI_INSERT,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_ED5B72E3__Insert_Address, _LEN_ED5B72E3 ) },
+		{ FALSE,		MX_MWMI_ADDENTRY,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_ED5B72E3__Insert_Address, _LEN_ED5B72E3 ) },
 		{ TRUE,			0,							FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_MWMI_SEARCHOPTIONS,		FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_6F5731F2_Search__Options, _LEN_6F5731F2 ) },
 	};
@@ -355,8 +355,12 @@ namespace mx {
 	// Creates the main menu and adds it to the window.
 	BOOL CMainWindowLayout::CreateMenu( CWidget * _pwMainWindow ) {
 		if ( !_pwMainWindow ) { return FALSE; }
-		HMENU hMenu = lsw::CBase::LayoutManager()->CreateMenu( m_miMenus, MX_ELEMENTS( m_miMenus ) );
+		std::vector<ACCEL> vHotkeys;
+		HMENU hMenu = lsw::CBase::LayoutManager()->CreateMenu( m_miMenus, MX_ELEMENTS( m_miMenus ), vHotkeys );
 		if ( !hMenu ) { return FALSE; }
+		if ( vHotkeys.size() ) {
+			CBase::GetAccelHandler().CreateAndRegister( _pwMainWindow->Wnd(), vHotkeys.data(), int( vHotkeys.size() ) );
+		}
 		return ::SetMenu( _pwMainWindow->Wnd(), hMenu );
 	}
 

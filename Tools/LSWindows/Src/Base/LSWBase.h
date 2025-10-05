@@ -2,6 +2,7 @@
 
 #include "../LSWWin.h"
 #include "../Brush/LSWBrushCache.h"
+#include "LSWAccelRouter.h"
 
 #include <map>
 #include <string>
@@ -182,6 +183,13 @@ namespace lsw {
 		 * \return Returns the virtual 64-bit position.
 		 */
 		static uint64_t								GetScrollPos64( HWND _hWnd, int _iBar, UINT _uiMask, uint64_t _ui64Max );
+
+		/**
+		 * Gets a reference to the accelerator handler.
+		 * 
+		 * \return Returns a reference to the accelerator handler.
+		 **/
+		static CAccelRouter &						GetAccelHandler() { return m_arAccelRouter; }
 
 
 		// =======================================
@@ -391,6 +399,9 @@ namespace lsw {
 
 		// Non-client metrics.
 		static NONCLIENTMETRICSW					m_ncmNonClientMetrics;
+
+		// The accelerator handler.
+		static CAccelRouter							m_arAccelRouter;
 
 		// Message-box font.
 		static HFONT								m_hMessageFont;
