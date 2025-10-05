@@ -117,7 +117,7 @@ namespace mx {
 			auto aFound = std::find_if(
 				m_vActiveSegments.begin(),
 				m_vActiveSegments.end(),
-				[ui64Id]( const size_t _sId ) { return _sId == ui64Id; }
+				[ui64Id]( const uint64_t _ui64Id ) { return _ui64Id == ui64Id; }
 			);
 			if ( aFound == m_vActiveSegments.end() ) {
 				// This ID was not in the m_vActiveSegments list.  Remove its mapping.

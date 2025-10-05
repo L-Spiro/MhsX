@@ -304,7 +304,7 @@ namespace mx {
 		const int32_t iPageLines = std::max( 1, m_iPageLines - 2 );
 		const int32_t iStep      = 1;
 
-		const uint64_t ui64Lines = TotalLines_Hex();
+		const uint64_t ui64Lines = TotalLines_FixedWidth();
 		const uint64_t ui64MaxV  = ui64Lines ? (ui64Lines - 1ULL) : 0ULL;
 
 		uint64_t ui64Pos = m_ui64VPos;
@@ -435,7 +435,7 @@ namespace mx {
 		const int iGutterW = ComputeAddressGutterWidthPx();
 		lsw::LSW_RECT rTmp = _rRect;
 		
-		int iX = iGutterW + 3 - m_ui64HPx, iY = 0;
+		int iX = iGutterW - m_ui64HPx, iY = 0;
 		if ( CurStyle()->bShowRuler ) {
 			rTmp.bottom = rTmp.top + GetRulerHeightPx();
 			::FillRect( _hDc, &rTmp,
@@ -454,7 +454,7 @@ namespace mx {
 
 		if ( CurStyle()->bShowAddressGutter ) {
 			rTmp = _rRect;
-			rTmp.right = rTmp.left + iGutterW + 3;
+			rTmp.right = rTmp.left + iGutterW;
 			::FillRect( _hDc, &rTmp,
 				lsw::CBase::BrushCache().Brush( MX_GetRgbValue( m_crEditorBk ) ) );
 			if ( MX_GetAValue( m_crAddSepLine ) || m_ui64HPx != 0 ) {
@@ -464,7 +464,7 @@ namespace mx {
 				::MoveToEx( _hDc, iThisX, iY, NULL );
 				::LineTo( _hDc, iThisX, rTmp.bottom );
 			}
-			DrawAddressGutter( _hDc, 3, iY, m_iPageLines + 1 );
+			DrawAddressGutter( _hDc, CurStyle()->i32LeftAddrPadding, iY, m_iPageLines + 1 );
 		}
 		return true;
 	}
@@ -628,7 +628,7 @@ namespace mx {
 	 *  - The rulerfs height equals the base character height for the font; line spacing is ignored.
 	 */
 	void CHexEditorControl::DrawRuler( HDC _hDc, int _iXLeft, int _iYTop, MX_DATA_FMT _dfLeftFmt, MX_DATA_FMT _dfRightFmt ) {
-		const MX_STYLE & stAll = *CurStyle();
+		const MX_STYLE & stAll = (*CurStyle());
 		if ( !stAll.bShowRuler || !Font() ) { return; }
 		const MX_FONT_SET & fsFont = (*Font());
 
@@ -686,14 +686,14 @@ namespace mx {
 		// LEFT area (numbers).
 		//if ( stAll.bShowLeftNumbers ) {
 		{
-			const int iLeftBase = _iXLeft; // already the start of scrollable content
+			const int iLeftBase = _iXLeft + stAll.iPadNumbersLeftPx; // already the start of scrollable content
 			DrawArea( false, _dfLeftFmt, iLeftBase );
 		}
 		//}
 
 		// RIGHT area (text).
 		if ( stAll.bShowRightArea ) {
-			const int iRightBase = _iXLeft + ComputeAreaWidthPx( _dfLeftFmt );
+			const int iRightBase = _iXLeft + stAll.iPadNumbersLeftPx + ComputeAreaWidthPx( _dfLeftFmt ) + stAll.iPadNumbersRightPx + stAll.iPadBetweenNumbersAndTextPx;
 			DrawArea( true, _dfRightFmt, iRightBase );
 		}
 	}
@@ -789,7 +789,7 @@ namespace mx {
 			}
 		}
 
-		return iWidth + CurStyle()->iPadAfterGutterPx;
+		return stAll.i32LeftAddrPadding + iWidth + stAll.iPadAfterGutterPx;
 	}
 
 	/**
@@ -819,32 +819,38 @@ namespace mx {
 		int & _iWidth ) const {
 		const MX_STYLE & stStyle = (*CurStyle());
 		const MX_FONT_SET & fsFont = (*Font());
-		const MX_ADDR_GLYPHS & g = fsFont.agGlyphs;
+		const MX_ADDR_GLYPHS & agGlyphs = fsFont.agGlyphs;
 
 		// Bytes per row for both areas (ruler uses the row layout).
-		const uint32_t ui32Bpr = stStyle.uiBytesPerRow ? stStyle.uiBytesPerRow : 16;
+		//const uint32_t ui32Bpr = stStyle.uiBytesPerRow ? stStyle.uiBytesPerRow : 16;
 
 		// Cell width by format (worst-case stable cell).
 		auto CellWidthForFmt = [&]( MX_DATA_FMT _dfFmt ) -> int {
 			switch( _dfFmt ) {
-				case MX_DF_HEX :	{ return 2 * g.iDigitMaxCx; }				// "FF"
-				case MX_DF_DEC :	{ return 3 * g.iDigitMaxCx; }				// "255"
-				case MX_DF_OCT :	{ return 3 * g.iDigitMaxCx; }				// "377"
-				case MX_DF_BIN :	{ return 8 * g.iDigitMaxCx; }				// "11111111"
-				case MX_DF_CHAR :	{ return fsFont.tmMetrics.tmMaxCharWidth; }	// Printable cell.
-				default :			{ return 2 * g.iDigitMaxCx; }
+				case MX_DF_HEX :	{ return 2 * agGlyphs.iDigitMaxCx; }				// "FF"
+				case MX_DF_DEC :	{ return 3 * agGlyphs.iDigitMaxCx; }				// "255"
+				case MX_DF_OCT :	{ return 3 * agGlyphs.iDigitMaxCx; }				// "377"
+				case MX_DF_BIN :	{ return 8 * agGlyphs.iDigitMaxCx; }				// "11111111"
+				case MX_DF_CHAR :	{ return fsFont.tmMetrics.tmMaxCharWidth; }			// Printable cell.
+				default :			{ return 2 * agGlyphs.iDigitMaxCx; }
 			}
 		};
 
 		// Choose per-area layout knobs.
-		const int iCellCx				= CellWidthForFmt( _dfDataFmt );
-		const uint32_t ui32ItemGroup	= _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiGroupSize; // items per group
-		const int iSpaceBetweenItems	= int( _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiSpacesBetweenBytes ) * g.iSpaceCx;
-		const int iExtraGroupGap		= int( stStyle.uiExtraSpacesBetweenGroups ) * g.iSpaceCx * (ui32ItemGroup > 1 ? 1 : 0);
+		//const int iCellCx				= CellWidthForFmt( _dfDataFmt );
+		//const uint32_t ui32ItemGroup	= _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiGroupSize; // items per group
+		//const int iSpaceBetweenItems	= int( _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiSpacesBetweenBytes ) * agGlyphs.iSpaceCx;
+		//const int iExtraGroupGap		= int( stStyle.uiExtraSpacesBetweenGroups ) * agGlyphs.iSpaceCx * (ui32ItemGroup > 1 ? 1 : 0);
+
+		const uint32_t ui32Bpr		= stStyle.uiBytesPerRow ? stStyle.uiBytesPerRow : 16;
+		const uint32_t ui32GroupSz	= (stStyle.uiGroupSize && _dfDataFmt != MX_DF_CHAR) ? stStyle.uiGroupSize : 1;		// Items per group.
+
+		const int iCellCx			= CellWidthForFmt( _dfDataFmt );
+		const int iSpaceB			= int( _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiSpacesBetweenBytes ) * agGlyphs.iSpaceCx;
 
 		// Check index validity (number of groups in the row).
-		const uint32_t ui32Groups = (ui32ItemGroup ? ( (ui32Bpr + ui32ItemGroup - 1U) / ui32ItemGroup ) : 0U);
-		if ( ui32ItemGroup == 0U || _ui32Index >= ui32Groups ) { return false; }
+		/*const uint32_t ui32Groups = (ui32ItemGroup ? ( (ui32Bpr + ui32ItemGroup - 1U) / ui32ItemGroup ) : 0U);
+		if ( ui32ItemGroup == 0U || _ui32Index >= ui32Groups ) { return false; }*/
 
 		// Prepend area-local leading pad (for left numbers or right text; we baked pads into our area widths).
 		int iX = _iXBase;
@@ -857,14 +863,15 @@ namespace mx {
 			iX += stStyle.iPadBetweenNumbersAndTextPx;
 		}
 
-		// Walk to the requested group.
-		const int iSingleItemWithSpace	= iCellCx + iSpaceBetweenItems;
+		/*const int iSingleItemWithSpace	= iCellCx + iSpaceBetweenItems;
 		const int iGroupBodyWidth		= int( ui32ItemGroup ) * iCellCx + int( ui32ItemGroup > 1 ? ((ui32ItemGroup - 1U) * uint32_t( iSpaceBetweenItems )) : 0U );
 
-		iX += int( _ui32Index ) * (iGroupBodyWidth + iExtraGroupGap);
+		iX += int( _ui32Index ) * (iGroupBodyWidth + iExtraGroupGap);*/
 
-		_iXLeft = iX;
-		_iWidth = iGroupBodyWidth;
+		iX += (iCellCx * _ui32Index) + (((_ui32Index / ui32GroupSz)) * iSpaceB);
+
+		_iXLeft = iX + (iCellCx / 2);
+		_iWidth = iCellCx * ui32GroupSz;
 		return true;
 	}
 
@@ -875,8 +882,8 @@ namespace mx {
 	 * \return Returns the pixel width of the left numbers block; 0 if hidden.
 	 */
 	int CHexEditorControl::ComputeAreaWidthPx( MX_DATA_FMT _dfDataFmt ) {
-		const MX_STYLE & asAddrStyle = (*CurStyle());
-		if ( !asAddrStyle.bShowLeftNumbers || !Font() ) { return 0; }
+		const MX_STYLE & stStyle = (*CurStyle());
+		if ( !stStyle.bShowLeftNumbers || !Font() ) { return 0; }
 		const MX_FONT_SET & fsFont = (*Font());
 			
 		int iCx = 0;
@@ -898,15 +905,17 @@ namespace mx {
 					}
 				};
 
-				const uint32_t ui32Bpr		= asAddrStyle.uiBytesPerRow ? asAddrStyle.uiBytesPerRow : 16;
-				const uint32_t ui32GroupSz	= asAddrStyle.uiGroupSize ? asAddrStyle.uiGroupSize : 1;
+				const uint32_t ui32Bpr		= stStyle.uiBytesPerRow ? stStyle.uiBytesPerRow : 16;
+				const uint32_t ui32GroupSz	= (stStyle.uiGroupSize && _dfDataFmt != MX_DF_CHAR) ? stStyle.uiGroupSize : 1;		// Items per group.
 
 				const int iCellCx			= CellWidthForFmt( _dfDataFmt );
-				const int iSpaceB			= int( asAddrStyle.uiSpacesBetweenBytes ) * agGlyphs.iSpaceCx;
-				const int iSpaceGrp			= int( asAddrStyle.uiExtraSpacesBetweenGroups ) * agGlyphs.iSpaceCx;
+				const int iSpaceB			= int( _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiSpacesBetweenBytes ) * agGlyphs.iSpaceCx;
+				//const int iSpaceGrp			= int( stStyle.uiExtraSpacesBetweenGroups ) * agGlyphs.iSpaceCx;
 
-				int iTotal = asAddrStyle.iPadNumbersLeftPx;
-				for ( uint32_t I = 0; I < ui32Bpr; ++I ) {
+				int iTotal = stStyle.iPadNumbersLeftPx;
+
+				iTotal += (iCellCx * ui32Bpr) + (((ui32Bpr / ui32GroupSz) - 1) * iSpaceB);
+				/*for ( uint32_t I = 0; I < ui32Bpr; ++I ) {
 					iTotal += iCellCx;
 					if ( I + 1 < ui32Bpr ) {
 						iTotal += iSpaceB;
@@ -914,10 +923,10 @@ namespace mx {
 							iTotal += iSpaceGrp;
 						}
 					}
-				}
-				iTotal += asAddrStyle.iPadNumbersRightPx;
+				}*/
+				iTotal += stStyle.iPadNumbersRightPx;
 
-				iCx = iTotal;
+				iCx = iTotal + (iCellCx / 2);
 			}
 		}
 		return iCx;
@@ -926,7 +935,7 @@ namespace mx {
 	// Gets the total number of lines based on which view type is active.
 	uint64_t CHexEditorControl::TotalLines() const {
 		switch ( m_eaEditAs ) {
-			case MX_ES_HEX : { return TotalLines_Hex(); }
+			case MX_ES_HEX : { return TotalLines_FixedWidth(); }
 		}
 		return 0;
 	}

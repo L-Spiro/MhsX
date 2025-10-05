@@ -343,7 +343,7 @@ namespace lsw {
 		 * \param _eMethod The sorting text-compare method.
 		 **/
 		void								SetSortMethod( INT _iColumn, ee::EE_TEXTPOLICY _eMethod ) {
-			if ( _iColumn >= m_vSortMethod.size() && _iColumn < GetColumnCount() ) {
+			if ( _iColumn >= INT( m_vSortMethod.size() ) && _iColumn < GetColumnCount() ) {
 				try {
 					m_vSortMethod.resize( _iColumn + 1 );
 				}
@@ -367,7 +367,7 @@ namespace lsw {
 		 **/
 		virtual BOOL						DeleteColumn( INT _iCol ) {
 			if ( CListView::DeleteColumn( _iCol ) ) {
-				if ( _iCol < m_vSortMethod.size() ) {
+				if ( _iCol < INT( m_vSortMethod.size() ) ) {
 					m_vSortMethod.erase( m_vSortMethod.begin() + _iCol );
 				}
 				DeleteColumn( &m_tRoot, _iCol );

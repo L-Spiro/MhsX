@@ -299,6 +299,8 @@ namespace mx {
 	 * \return Returns true if the file is read-only.
 	 **/
 	bool CFileMap::ReadOnly() const {
+		return !m_bWritable;
+#if 0
 		if ( m_hFile == nullptr || m_hFile == INVALID_HANDLE_VALUE ) { return true; }
 
 		// Query granted access on this handle.
@@ -346,6 +348,7 @@ namespace mx {
 
 		// Could not positively prove read-only; assume writable to avoid disabling features unnecessarily.
 		return false;
+#endif	// #if 0
 	}
 
 	/**

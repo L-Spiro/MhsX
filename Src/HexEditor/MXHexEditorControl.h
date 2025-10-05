@@ -304,20 +304,21 @@ namespace mx {
 			MX_DATA_FMT								dfRightNumbersFmt = MX_DF_CHAR;
 
 			// Paddings/gaps (pixels).
-			int										iPadAfterGutterPx = 8;
-			int										iPadBetweenNumbersAndTextPx = 16;
-			int										iPadNumbersLeftPx = 0;
-			int										iPadNumbersRightPx = 0;
-			int										iPadTextRightPx = 0;
-			int										iPadScrollableLeftPx = 0;
-			int										iPadScrollableRightPx = 0;
-			int										iPadBeforeMiniMapPx = 8;
-			int										iLineSpacingPx = 2;
+			int32_t									i32LeftAddrPadding = 3;										// Left padding.
+			int32_t									iPadAfterGutterPx = 8;
+			int32_t									iPadBetweenNumbersAndTextPx = 16;
+			int32_t									iPadNumbersLeftPx = 0;
+			int32_t									iPadNumbersRightPx = 0;
+			int32_t									iPadTextRightPx = 0;
+			int32_t									iPadScrollableLeftPx = 0;
+			int32_t									iPadScrollableRightPx = 0;
+			int32_t									iPadBeforeMiniMapPx = 8;
+			int32_t									iLineSpacingPx = 2;
 
 			// Ruler.
 
 			// Mini-map geometry (pixels).
-			int										iMiniMapWidthPx = 140;
+			int32_t									iMiniMapWidthPx = 140;
 		};
 
 
@@ -413,7 +414,7 @@ namespace mx {
 		}
 
 		// Gets the total number of lines in the display.
-		inline uint64_t								TotalLines_Hex() const {
+		inline uint64_t								TotalLines_FixedWidth() const {
 			if ( !&m_sStyles[MX_ES_HEX].uiBytesPerRow ) { return 0ULL; }
 			return (Size() + m_sStyles[MX_ES_HEX].uiBytesPerRow - 1ULL) / m_sStyles[MX_ES_HEX].uiBytesPerRow;
 		}
@@ -500,22 +501,16 @@ namespace mx {
 		int											ComputeAreaWidthPx( MX_DATA_FMT _dfDataFmt );
 
 		/**
-		 * Computes the pixel width of the right ASCII/text column for one row.
-		 *
-		 * \return Returns the pixel width of the text block; 0 if hidden.
-		 */
-		//int											ComputeRightTextWidthPx();
-
-		/**
 		 * Computes the total width, in pixels, of the horizontally scrollable content (one row).
 		 *
 		 * \return Returns the pixel width of the scrollable content area (numbers + ASCII). Always >= 1.
 		 */
 		inline int									TotalContentWidthPx() {
+			const MX_STYLE & stAll = (*CurStyle());
 			int iCx = 0;
-			iCx += ComputeAreaWidthPx( CurStyle()->dfLeftNumbersFmt );
+			iCx += stAll.iPadNumbersLeftPx + ComputeAreaWidthPx( stAll.dfLeftNumbersFmt ) + stAll.iPadNumbersRightPx;
 			if ( CurStyle()->bShowRightArea ) {
-				iCx += ComputeAreaWidthPx( CurStyle()->dfRightNumbersFmt );
+				iCx += stAll.iPadBetweenNumbersAndTextPx + ComputeAreaWidthPx( stAll.dfRightNumbersFmt );
 			}
 			return max( iCx, 1 );
 		}
