@@ -316,7 +316,7 @@ namespace mx {
 
 			// Left numbers formatting.
 			MX_DATA_FMT								dfLeftNumbersFmt = MX_DF_HEX;
-			uint32_t								uiGroupSize = 1;                   						// Extra spacing after every N bytes.
+			uint32_t								uiGroupSize = 2;                   						// Extra spacing after every N bytes.
 			uint32_t								uiSpacesBetweenBytes = 1;          						// Count of ' ' between adjacent bytes.
 			uint32_t								uiExtraSpacesBetweenGroups = 1;     					// Extra ' ' at group boundary.
 
@@ -568,7 +568,7 @@ namespace mx {
 
 			SIZE sSize {};
 			::GetTextExtentPoint32W( _hDc, L":", 1, &sSize ); agGlyphs.iColonCx = sSize.cx;
-			::GetTextExtentPoint32W( _hDc, L" ", 1, &sSize ); agGlyphs.iSpaceCx = sSize.cx;
+			::GetTextExtentPoint32W( _hDc, L" ", 1, &sSize ); agGlyphs.iSpaceCx = (sSize.cx + 1) / 2 * 2;	// Round up to the nearest even number.
 			::GetTextExtentPoint32W( _hDc, L"h", 1, &sSize ); agGlyphs.iSpecHexCx = sSize.cx;
 			::GetTextExtentPoint32W( _hDc, L"o", 1, &sSize ); agGlyphs.iSpecOctCx = sSize.cx;
 			::GetTextExtentPoint32W( _hDc, L"w", 1, &sSize ); agGlyphs.iShortWcx  = sSize.cx;

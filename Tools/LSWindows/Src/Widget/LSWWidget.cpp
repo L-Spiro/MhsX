@@ -2270,6 +2270,12 @@ namespace lsw {
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
 				break;
 			}
+			case WM_INITMENU : {
+				LSW_HANDLED hHandled = pmwThis->InitMenu( reinterpret_cast<HMENU>(_wParam) );
+				// If an application processes this message, it should return zero.
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
 			case WM_INITMENUPOPUP : {
 				LSW_HANDLED hHandled = pmwThis->InitMenuPopup( reinterpret_cast<HMENU>(_wParam), LOWORD( _lParam ), static_cast<BOOL>(HIWORD( _lParam )) );
 				// If an application processes this message, it should return zero.

@@ -865,6 +865,13 @@ namespace lsw {
 
 	class CHelpers {
 	public :
+		// == Types.
+		/** Location of a found menu item. */
+		struct LSW_MENU_LOC {
+			HMENU							hMenu;					/**< The HMENU that directly owns the item. */
+			UINT							uPos;					/*< The zero-based position within hMenu. */
+		};
+
 		// == Functions.
 		/**
 		 * Aligns a WORD pointer to a 4-byte address.
@@ -1299,6 +1306,33 @@ namespace lsw {
 					}
 				}
 			}
+		}
+
+		/**
+		 * \brief Recursively find a menu item by command ID anywhere under _hMenu.
+		 *
+		 * \param _hMenu The root to search (e.g., GetMenu( hWnd )).
+		 * \param _uId The command ID to find.
+		 * \param _mlOut Locates the owning HMENU and position on success.
+		 * \return Returns true if found.
+		 */
+		static bool							FindMenuItemById( HMENU _hMenu, UINT _uId, LSW_MENU_LOC &_mlOut ) {
+			const int iCount = ::GetMenuItemCount( _hMenu );
+			for ( int I = 0; I < iCount; ++I ) {
+				const UINT uId = ::GetMenuItemID( _hMenu, I );
+				if ( uId == _uId ) {
+					_mlOut.hMenu = _hMenu;
+					_mlOut.uPos = static_cast<UINT>(I);
+					return true;
+				}
+				// If this position is a popup, recurse.
+				if ( uId == static_cast<UINT>(-1) ) {
+					if ( HMENU hSub = ::GetSubMenu( _hMenu, I ) ) {
+						if ( FindMenuItemById( hSub, _uId, _mlOut ) ) { return true; }
+					}
+				}
+			}
+			return false;
 		}
 
 		/**

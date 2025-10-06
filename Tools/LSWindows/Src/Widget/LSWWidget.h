@@ -1597,6 +1597,15 @@ namespace lsw {
 		virtual LSW_HANDLED					ContextMenu( CWidget * /*_pwControl*/, INT /*_iX*/, INT /*_iY*/ ) { return LSW_H_CONTINUE; }
 
 		/**
+		 * Handles WM_INITMENU.
+		 * \brief Sent when a menu is about to become active. It occurs when the user clicks an item on the menu bar or presses a menu key. This allows the application to modify the menu before it is displayed.
+		 *
+		 * \param _hMenu Handle to the popup or submenu.
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					InitMenu( HMENU /*_hMenu*/ ) { return LSW_H_CONTINUE; }
+
+		/**
 		 * Handles WM_INITMENUPOPUP.
 		 * \brief Initializes a popup or submenu before it is displayed.
 		 *

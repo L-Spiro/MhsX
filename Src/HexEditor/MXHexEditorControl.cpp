@@ -124,6 +124,7 @@ namespace mx {
 	 **/
 	bool CHexEditorControl::IncreaseFontSize( LOGFONTW &_lfFont ) {
 		_lfFont = Font()->lfFontParms;
+		if ( Font()->i32PointSize >= 72 ) { return IsFixedRowLength(); }
 		_lfFont.lfHeight = -::MulDiv( Font()->i32PointSize + 1, static_cast<int>(m_wDpiY), 72 );
 
 		if ( Font()->fFont.CreateFontIndirectW( &_lfFont ) ) {
@@ -145,7 +146,7 @@ namespace mx {
 	 **/
 	bool CHexEditorControl::DecreaseFontSize( LOGFONTW &_lfFont ) {
 		_lfFont = Font()->lfFontParms;
-		if ( Font()->i32PointSize <= 2 ) { return true; }
+		if ( Font()->i32PointSize <= 2 ) { return IsFixedRowLength(); }
 		_lfFont.lfHeight = -::MulDiv( Font()->i32PointSize - 1, static_cast<int>(m_wDpiY), 72 );
 
 		if ( Font()->fFont.CreateFontIndirectW( &_lfFont ) ) {
@@ -686,19 +687,19 @@ namespace mx {
 
 			const uint32_t ui32Groups = (ui32Bpr + ui32GroupSz - 1U) / ui32GroupSz;
 
-			for ( uint32_t I = 0; I < ui32Groups; ++I ) {
+			for ( uint32_t I = 0; I < ui32Bpr; ++I ) {
 				int iGX = 0, iGW = 0;
 				if ( !GetGroupRectForIndex( _dfFmt, I, _bRightArea, _iAreaXBase, iGX, iGW ) ) { break; }
 
 				// Label is the byte index of the first item in the group within the row.
-				const uint32_t ui32ByteIndexInRow = I * ui32GroupSz;
+				const uint32_t ui32ByteIndexInRow = I;
 				std::wstring wsTmp = HexLabel( ui32ByteIndexInRow );
 
 				// Center horizontally inside [iGX, iGW].
 				SIZE sSize {};
 				::GetTextExtentPoint32W( _hDc, wsTmp.c_str(), int( wsTmp.size() ), &sSize );
 				const int iTextX = iGX + (iGW - sSize.cx) / 2;
-				const int iTextY = _iYTop + (iRulerCy - fsFont.iCharCy) / 2;
+				const int iTextY = (_iYTop + (iRulerCy - fsFont.iCharCy) / 2);
 
 				::TextOutW( _hDc, iTextX, iTextY, wsTmp.c_str(), int( wsTmp.size() ) );
 			}
@@ -892,7 +893,7 @@ namespace mx {
 		iX += (iCellCx * _ui32Index) + (((_ui32Index / ui32GroupSz)) * iSpaceB);
 
 		_iXLeft = iX + (iCellCx / 2);
-		_iWidth = iCellCx * ui32GroupSz;
+		_iWidth = iCellCx;
 		return true;
 	}
 

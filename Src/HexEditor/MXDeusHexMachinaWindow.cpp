@@ -278,6 +278,55 @@ namespace mx {
 		}
 	}
 
+	/**
+	 * The WM_INITMENUPOPUP handler.
+	 *
+	 * \param _hMenu A handle to the drop-down menu or submenu.
+	 * \param _wPos The zero-based relative position of the menu item that opens the drop-down menu or submenu.
+	 * \param _bIsWindowMenu Indicates whether the drop-down menu is the window menu. If the menu is the window menu, this parameter is TRUE; otherwise, it is FALSE.
+	 * \return Returns an LSW_HANDLED code.
+	 */
+	CWidget::LSW_HANDLED CDeusHexMachinaWindow::InitMenuPopup( HMENU _hMenu, WORD /*_wPos*/, BOOL _bIsWindowMenu ) {
+		if ( _bIsWindowMenu ) { return LSW_H_CONTINUE; }
+		auto ptTab = Tab();
+		if ( !ptTab ) { return LSW_H_CONTINUE; }
+		size_t sIdx = size_t( ptTab->GetCurSel() );
+		auto phecControl = CurrentEditor();
+		bool bTabIsOpen = sIdx < m_vTabs.size() && ptTab->GetItemCount() && phecControl;
+
+		for ( int I = ::GetMenuItemCount( _hMenu ); --I >= 0; ) {
+			UINT uiId = ::GetMenuItemID( _hMenu, I );
+			switch ( uiId ) {
+				case Layout::MX_M_FILE_SAVE : {}				MX_FALLTHROUGH
+				case Layout::MX_M_FILE_SAVE_AS : {}				MX_FALLTHROUGH
+				case Layout::MX_M_FILE_SAVE_A_COPY : {}			MX_FALLTHROUGH
+				case Layout::MX_M_FILE_SAVE_ALL : {}			MX_FALLTHROUGH
+				case Layout::MX_M_FILE_CLOSE : {}				MX_FALLTHROUGH
+				case Layout::MX_M_FILE_CLOSE_ALL : {}			MX_FALLTHROUGH
+				case Layout::MX_M_FILE_REVERT_REFRESH : {
+					::EnableMenuItem(
+						_hMenu, uiId,
+						MF_BYCOMMAND | (phecControl ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_VIEW_FONT_ENLARGE_FONT : {
+					::EnableMenuItem(
+						_hMenu, uiId,
+						MF_BYCOMMAND | ((phecControl && phecControl->Font()->i32PointSize < 72) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_VIEW_FONT_SHRINK_FONT : {
+					::EnableMenuItem(
+						_hMenu, uiId,
+						MF_BYCOMMAND | ((phecControl && phecControl->Font()->i32PointSize > 2) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+			}
+		}
+
+		return LSW_H_HANDLED;
+	}
+
 	// Performs a Save As operation.
 	void CDeusHexMachinaWindow::SaveAs() {
 	}
