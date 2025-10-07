@@ -962,6 +962,12 @@
     <ClInclude Include="Src\HexEditor\MXCharSets.h">
       <Filter>Header Files\HexEditor</Filter>
     </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXHexEditorColors.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXHexEditorColorImpl.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="MhsX.exe.intermediate.manifest">

@@ -427,6 +427,8 @@
     <ClInclude Include="Src\FoundAddresses\MXMoveAddressesWindow.h" />
     <ClInclude Include="Src\HexEditor\MXCharSets.h" />
     <ClInclude Include="Src\HexEditor\MXDeusHexMachinaWindow.h" />
+    <ClInclude Include="Src\HexEditor\MXHexEditorColorImpl.h" />
+    <ClInclude Include="Src\HexEditor\MXHexEditorColors.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorControl.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorFile.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorInterface.h" />

@@ -17,6 +17,8 @@ namespace mx {
 		MX_CREATION_PARMS * pcpParms = reinterpret_cast<MX_CREATION_PARMS *>(_ui64Data);
 		m_pfsFonts[MX_FT_FIXED_ROW] = pcpParms->pfsFixedRowFont;
 		m_pfsFonts[MX_FT_TEXT_VIEW] = pcpParms->pfsDynamicRowFont;
+		m_phecForeColors = pcpParms->phecFg;
+		m_phecBackColors = pcpParms->phecBg;
 
 		m_sStyles[MX_ES_TEXT].ftFont = MX_FT_TEXT_VIEW;
 		m_sStyles[MX_ES_HEX].ftFont = MX_FT_FIXED_ROW;
@@ -47,7 +49,7 @@ namespace mx {
 		m_ui64Size = 0ULL;*/
 		/*m_iVPos = 0;
 		m_iHPos = 0;*/
-		m_iPageLines = m_iPageCols = 1;
+		m_i32PageLines = m_i32PageCols = 1;
 		//m_iAddrDigits = 8;
 		//SetState( _hWnd, ps );
 
@@ -323,7 +325,7 @@ namespace mx {
 
 	// WM_VSCROLL
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::VScroll( USHORT /*_uScrollPos*/, USHORT _uScrollType, CWidget * /*_pwWidget*/ ) {
-		const int32_t iPageLines = std::max( 1, m_iPageLines - 2 );
+		const int32_t iPageLines = std::max( 1, m_i32PageLines - 2 );
 		const int32_t iStep      = 1;
 
 		const uint64_t ui64Lines = TotalLines_FixedWidth();
@@ -461,10 +463,10 @@ namespace mx {
 		if ( CurStyle()->bShowRuler ) {
 			rTmp.bottom = rTmp.top + GetRulerHeightPx();
 			::FillRect( _hDc, &rTmp,
-				lsw::CBase::BrushCache().Brush( MX_GetRgbValue( m_crEditorBk ) ) );
-			if ( MX_GetAValue( m_crRulerLine ) ) {
+				lsw::CBase::BrushCache().Brush( MX_GetRgbValue( BackColors()->crEditor ) ) );
+			if ( MX_GetAValue( ForeColors()->crRulerLine ) ) {
 				const int iThisY = rTmp.bottom - 1;
-				lsw::LSW_HPEN pPen( PS_SOLID, 1, m_crRulerLine );
+				lsw::LSW_HPEN pPen( PS_SOLID, 1, ForeColors()->crRulerLine );
 				lsw::LSW_SELECTOBJECT soPen( _hDc, pPen.hPen );
 				::MoveToEx( _hDc, rTmp.left, iThisY, NULL );
 				::LineTo( _hDc, rTmp.right, iThisY );
@@ -478,15 +480,15 @@ namespace mx {
 			rTmp = _rRect;
 			rTmp.right = rTmp.left + iGutterW;
 			::FillRect( _hDc, &rTmp,
-				lsw::CBase::BrushCache().Brush( MX_GetRgbValue( m_crEditorBk ) ) );
-			if ( MX_GetAValue( m_crAddSepLine ) || m_ui64HPx != 0 ) {
+				lsw::CBase::BrushCache().Brush( MX_GetRgbValue( BackColors()->crEditor ) ) );
+			if ( MX_GetAValue( ForeColors()->crAddressSeparatorLine ) || m_ui64HPx != 0 ) {
 				const int iThisX = rTmp.right - 1;
-				lsw::LSW_HPEN pPen( PS_SOLID, 1, m_crRulerLine );
+				lsw::LSW_HPEN pPen( PS_SOLID, 1, ForeColors()->crAddressSeparatorLine );
 				lsw::LSW_SELECTOBJECT soPen( _hDc, pPen.hPen );
 				::MoveToEx( _hDc, iThisX, iY, NULL );
 				::LineTo( _hDc, iThisX, rTmp.bottom );
 			}
-			DrawAddressGutter( _hDc, CurStyle()->i32LeftAddrPadding, iY, m_iPageLines + 1 );
+			DrawAddressGutter( _hDc, CurStyle()->i32LeftAddrPadding, iY, m_i32PageLines + 1 );
 		}
 		return true;
 	}
@@ -522,7 +524,7 @@ namespace mx {
 
 
 		lsw::LSW_SETBKMODE sbmBkMode( _hDc, TRANSPARENT );
-		lsw::LSW_SETTEXTCOLOR stcTextColor( _hDc, MX_GetRgbValue( m_crText ) );
+		lsw::LSW_SETTEXTCOLOR stcTextColor( _hDc, MX_GetRgbValue( ForeColors()->crEditor ) );
 
 		// Helpers: convert value to string in base, then apply options.
 		auto ToBase = [&]( uint64_t _ui64V, uint32_t _ui32Base, bool _bLower ) -> std::wstring {
@@ -617,7 +619,7 @@ namespace mx {
 		};
 
 		// Line height.
-		const int iLineAdv = fsFont.iCharCy + stAll.iLineSpacingPx;
+		const int iLineAdv = fsFont.iCharCy + stAll.i32LineSpacingPx;
 
 		// First visible line (top) comes from style; draw consecutive lines.
 		uint64_t ui64Line = asAddrStyle.ui64FirstVisibleLine;
@@ -646,7 +648,7 @@ namespace mx {
 	 * Description:
 	 *  - The ruler width equals the sum of the left numbers block and the right text block (if visible),
 	 *    including the inter-block gap. The mini-map and gutter do not scroll and are not part of the ruler.
-	 *  - Each group label is centered within its group rect, computed by GetGroupRectForIndex().
+	 *  - Each group label is centered within its group rect, computed by GetTextRectForIndex().
 	 *  - The rulerfs height equals the base character height for the font; line spacing is ignored.
 	 */
 	void CHexEditorControl::DrawRuler( HDC _hDc, int _iXLeft, int _iYTop, MX_DATA_FMT _dfLeftFmt, MX_DATA_FMT _dfRightFmt ) {
@@ -660,7 +662,7 @@ namespace mx {
 		const int iRulerCy = GetRulerHeightPx();
 
 		lsw::LSW_SETBKMODE sbmBkMode( _hDc, TRANSPARENT );
-		lsw::LSW_SETTEXTCOLOR stcTextColor( _hDc, MX_GetRgbValue( m_crRulerText ) );
+		lsw::LSW_SETTEXTCOLOR stcTextColor( _hDc, MX_GetRgbValue( ForeColors()->crRulerFileBar ) );
 
 		// Helper: hex label for a group start index (byte index within row).
 		auto HexLabel = []( uint32_t _ui32V ) -> std::wstring {
@@ -689,7 +691,7 @@ namespace mx {
 
 			for ( uint32_t I = 0; I < ui32Bpr; ++I ) {
 				int iGX = 0, iGW = 0;
-				if ( !GetGroupRectForIndex( _dfFmt, I, _bRightArea, _iAreaXBase, iGX, iGW ) ) { break; }
+				if ( !GetTextRectForIndex( _dfFmt, I, _bRightArea, _iAreaXBase, iGX, iGW ) ) { break; }
 
 				// Label is the byte index of the first item in the group within the row.
 				const uint32_t ui32ByteIndexInRow = I;
@@ -708,14 +710,14 @@ namespace mx {
 		// LEFT area (numbers).
 		//if ( stAll.bShowLeftNumbers ) {
 		{
-			const int iLeftBase = _iXLeft + stAll.iPadNumbersLeftPx; // already the start of scrollable content
+			const int iLeftBase = _iXLeft + stAll.i32PadNumbersLeftPx; // already the start of scrollable content
 			DrawArea( false, _dfLeftFmt, iLeftBase );
 		}
 		//}
 
 		// RIGHT area (text).
 		if ( stAll.bShowRightArea ) {
-			const int iRightBase = _iXLeft + stAll.iPadNumbersLeftPx + ComputeAreaWidthPx( _dfLeftFmt ) + stAll.iPadNumbersRightPx + stAll.iPadBetweenNumbersAndTextPx;
+			const int iRightBase = _iXLeft + stAll.i32PadNumbersLeftPx + ComputeAreaWidthPx( _dfLeftFmt ) + stAll.i32PadNumbersRightPx + stAll.i32PadBetweenNumbersAndTextPx;
 			DrawArea( true, _dfRightFmt, iRightBase );
 		}
 	}
@@ -811,11 +813,11 @@ namespace mx {
 			}
 		}
 
-		return stAll.i32LeftAddrPadding + iWidth + stAll.iPadAfterGutterPx;
+		return stAll.i32LeftAddrPadding + iWidth + stAll.i32PadAfterGutterPx;
 	}
 
 	/**
-	 * \brief Computes the left X and width (in pixels) of a group at index for an area.
+	 * \brief Computes the left X and width (in pixels) of a text cell at index for an area.
 	 *
 	 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
 	 * \param _ui32Index Zero-based group index within the row (e.g., 0..(groups-1)).
@@ -832,13 +834,13 @@ namespace mx {
 	 *    of the current group; it is placed after it.
 	 *  - The caller can center text within the returned [left,width] using a text measurement.
 	 */
-	bool CHexEditorControl::GetGroupRectForIndex(
+	bool CHexEditorControl::GetTextRectForIndex(
 		MX_DATA_FMT _dfDataFmt,
 		uint32_t _ui32Index,
 		bool _bRightArea,
 		int _iXBase,
-		int & _iXLeft,
-		int & _iWidth ) const {
+		int &_iXLeft,
+		int &_iWidth ) const {
 		const MX_STYLE & stStyle = (*CurStyle());
 		const MX_FONT_SET & fsFont = (*Font());
 		const MX_ADDR_GLYPHS & agGlyphs = fsFont.agGlyphs;
@@ -859,41 +861,72 @@ namespace mx {
 		};
 
 		// Choose per-area layout knobs.
-		//const int iCellCx				= CellWidthForFmt( _dfDataFmt );
-		//const uint32_t ui32ItemGroup	= _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiGroupSize; // items per group
-		//const int iSpaceBetweenItems	= int( _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiSpacesBetweenBytes ) * agGlyphs.iSpaceCx;
-		//const int iExtraGroupGap		= int( stStyle.uiExtraSpacesBetweenGroups ) * agGlyphs.iSpaceCx * (ui32ItemGroup > 1 ? 1 : 0);
-
 		const uint32_t ui32Bpr		= stStyle.uiBytesPerRow ? stStyle.uiBytesPerRow : 16;
-		const uint32_t ui32GroupSz	= (stStyle.uiGroupSize && _dfDataFmt != MX_DF_CHAR) ? stStyle.uiGroupSize : 1;		// Items per group.
+		const uint32_t ui32GroupSz	= (stStyle.uiGroupSize && _dfDataFmt != MX_DF_CHAR) ? stStyle.uiGroupSize : 1;
 
 		const int iCellCx			= CellWidthForFmt( _dfDataFmt );
 		const int iSpaceB			= int( _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiSpacesBetweenBytes ) * agGlyphs.iSpaceCx;
-
-		// Check index validity (number of groups in the row).
-		/*const uint32_t ui32Groups = (ui32ItemGroup ? ( (ui32Bpr + ui32ItemGroup - 1U) / ui32ItemGroup ) : 0U);
-		if ( ui32ItemGroup == 0U || _ui32Index >= ui32Groups ) { return false; }*/
 
 		// Prepend area-local leading pad (for left numbers or right text; we baked pads into our area widths).
 		int iX = _iXBase;
 		if ( !_bRightArea ) {
 			// Left numbers starts with its own left pad.
-			iX += stStyle.iPadNumbersLeftPx;
+			iX += stStyle.i32PadNumbersLeftPx;
 		}
 		else {
 			// Right text begins after the inter-block gap.
-			iX += stStyle.iPadBetweenNumbersAndTextPx;
+			iX += stStyle.i32PadBetweenNumbersAndTextPx;
 		}
-
-		/*const int iSingleItemWithSpace	= iCellCx + iSpaceBetweenItems;
-		const int iGroupBodyWidth		= int( ui32ItemGroup ) * iCellCx + int( ui32ItemGroup > 1 ? ((ui32ItemGroup - 1U) * uint32_t( iSpaceBetweenItems )) : 0U );
-
-		iX += int( _ui32Index ) * (iGroupBodyWidth + iExtraGroupGap);*/
 
 		iX += (iCellCx * _ui32Index) + (((_ui32Index / ui32GroupSz)) * iSpaceB);
 
 		_iXLeft = iX + (iCellCx / 2);
 		_iWidth = iCellCx;
+		return true;
+	}
+
+	/**
+	 * \brief Computes the left X and width (in pixels) of a background cell at index for an area.
+	 *
+	 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
+	 * \param _ui32Index Zero-based group index within the row (e.g., 0..(groups-1)).
+	 * \param _bRightArea False for the left numbers area; true for the right text area.
+	 * \param _iXBase The pixel X of the beginning of the area (not including gutter; includes horizontal scroll offset).
+	 * \param _iXLeft [out] Receives the pixel X of the groupfs left edge.
+	 * \param _iWidth [out] Receives the pixel width of the group (internal bytes/chars and normal intra-byte spacing).
+	 * \return Returns true if the index is valid for the current layout; false otherwise.
+	 *
+	 * Description:
+	 *  - A ggrouph is composed of N adjacent cells (bytes for HEX/DEC/OCT/BIN, characters for CHAR),
+	 *    where N is the areafs grouping size. The width includes intra-cell spacing inside the group.
+	 *  - The extra spacing that separates two adjacent groups (group gap) is not included in the width
+	 *    of the current group; it is placed after it.
+	 *  - The caller can center text within the returned [left,width] using a text measurement.
+	 */
+	bool CHexEditorControl::GetBackgrondRectForIndex(
+		MX_DATA_FMT _dfDataFmt,
+		uint32_t _ui32Index,
+		bool _bRightArea,
+		int _iXBase,
+		int &_iXLeft,
+		int &_iWidth ) const {
+		if MX_UNLIKELY( !GetTextRectForIndex( _dfDataFmt, _ui32Index, _bRightArea, _iXBase, _iXLeft, _iWidth ) ) { return false; }
+
+		const MX_STYLE & stStyle = (*CurStyle());
+		const MX_ADDR_GLYPHS & agGlyphs = Font()->agGlyphs;
+
+		const uint32_t ui32GroupSz	= (stStyle.uiGroupSize && _dfDataFmt != MX_DF_CHAR) ? stStyle.uiGroupSize : 1;
+		const uint32_t ui32Mod = _ui32Index % ui32GroupSz;
+		const int i32Adj = agGlyphs.iSpaceCx / 2;
+		// If at the group start, increase size to the left.
+		if ( ui32Mod == 0 ) {
+			_iXLeft -= i32Adj;
+			_iWidth += i32Adj;
+		}
+		// If at the end of a group, increase size to the right.
+		if ( ui32Mod == ui32GroupSz - 1 ) {
+			_iWidth += i32Adj;
+		}
 		return true;
 	}
 
@@ -932,23 +965,13 @@ namespace mx {
 
 				const int iCellCx			= CellWidthForFmt( _dfDataFmt );
 				const int iSpaceB			= int( _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiSpacesBetweenBytes ) * agGlyphs.iSpaceCx;
-				//const int iSpaceGrp			= int( stStyle.uiExtraSpacesBetweenGroups ) * agGlyphs.iSpaceCx;
 
-				int iTotal = stStyle.iPadNumbersLeftPx;
+				int iTotal = stStyle.i32PadNumbersLeftPx;
 
 				iTotal += (iCellCx * ui32Bpr) + (((ui32Bpr / ui32GroupSz) - 1) * iSpaceB);
-				/*for ( uint32_t I = 0; I < ui32Bpr; ++I ) {
-					iTotal += iCellCx;
-					if ( I + 1 < ui32Bpr ) {
-						iTotal += iSpaceB;
-						if ( ui32GroupSz > 1 && ((I + 1) % ui32GroupSz) == 0 ) {
-							iTotal += iSpaceGrp;
-						}
-					}
-				}*/
-				iTotal += stStyle.iPadNumbersRightPx;
+				iTotal += stStyle.i32PadNumbersRightPx;
 
-				iCx = iTotal + (iCellCx / 2);
+				iCx = iTotal + (iCellCx / 1);
 			}
 		}
 		return iCx;
@@ -964,19 +987,15 @@ namespace mx {
 
 	// Updates the scrollbars.
 	void CHexEditorControl::UpdateScrollbars() {
-		/*{
-			lsw::LSW_HDC hDc( Wnd() );
-			EnsureAddrGlyphs( hDc.hDc );
-		}*/
 		// Compute visible page sizes (lines / columns-on-screen).
 		int iClientH = int( ClientRect().Height() );
 
 		const int iLineAdv = LineAdvanceCy();
-		m_iPageLines = (iLineAdv ? (iClientH / iLineAdv) : 0);
-		if ( m_iPageLines < 1 ) { m_iPageLines = 1; }
+		m_i32PageLines = (iLineAdv ? (iClientH / iLineAdv) : 0);
+		if ( m_i32PageLines < 1 ) { m_i32PageLines = 1; }
 
-		m_iPageCols = (Font()->iCharCx ? (iClientH / Font()->iCharCx) : 0);
-		if ( m_iPageCols < 1 ) { m_iPageCols = 1; }
+		m_i32PageCols = (Font()->iCharCx ? (iClientH / Font()->iCharCx) : 0);
+		if ( m_i32PageCols < 1 ) { m_i32PageCols = 1; }
 
 		// == Vertical (lines; virtual units are line indices 0..N-1).
 		const uint64_t ui64Lines = TotalLines();
@@ -985,7 +1004,7 @@ namespace mx {
 
 		// Keep style in sync.
 		const_cast<MX_STYLE *>(CurStyle())->daAddressStyle.ui64FirstVisibleLine = m_ui64VPos;
-		const_cast<MX_STYLE *>(CurStyle())->daAddressStyle.ui32VisibleLines     = static_cast<uint32_t>(m_iPageLines);
+		const_cast<MX_STYLE *>(CurStyle())->daAddressStyle.ui32VisibleLines     = static_cast<uint32_t>(m_i32PageLines);
 
 		// Physical page = 1 so the thumb can reach the end.
 		lsw::CBase::SetScrollInfo64( m_hWnd, SB_VERT, SIF_PAGE | SIF_RANGE | SIF_POS,

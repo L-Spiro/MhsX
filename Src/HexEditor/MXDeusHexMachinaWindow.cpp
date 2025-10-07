@@ -53,6 +53,11 @@ namespace mx {
 			m_bBitmaps[sImages[I].dwConst].LoadFromFile( wsTemp.c_str(), 0, 0, LR_CREATEDIBSECTION );
 			m_iImageMap[sImages[I].dwConst] = m_iImages.Add( m_bBitmaps[sImages[I].dwConst].Handle() );
 		}
+
+
+		
+		m_hecFgColors.DefaultDarkTheme_Fg();
+		m_hecBgColors.DefaultDarkTheme_Bg();
 	}
 	CDeusHexMachinaWindow::~CDeusHexMachinaWindow() {
 		for ( auto I = m_vTabs.size(); I--; ) {
@@ -424,6 +429,8 @@ namespace mx {
 				CHexEditorControl::MX_CREATION_PARMS cpCreation;
 				cpCreation.pfsFixedRowFont = &m_fsFixedRowFont;
 				cpCreation.pfsDynamicRowFont = &m_fsTextViewFont;
+				cpCreation.phecFg = &m_hecFgColors;
+				cpCreation.phecBg = &m_hecBgColors;
 				htTab.phecWidget = static_cast<CHexEditorControl *>(static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->CreateWidget( wlLayout, ptTab, TRUE, NULL, reinterpret_cast<uint64_t>(&cpCreation) ));
 				if ( !htTab.phecWidget ) {
 					//delete tTab.ppoPeObject;

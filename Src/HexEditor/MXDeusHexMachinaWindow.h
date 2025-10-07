@@ -134,6 +134,10 @@ namespace mx {
 		CHexEditorControl::MX_FONT_SET				m_fsFixedRowFont;
 		// The font for text views.
 		CHexEditorControl::MX_FONT_SET				m_fsTextViewFont;
+		// Foreground colors.
+		MX_HEX_EDITOR_COLORS						m_hecFgColors;
+		// Background colors.
+		MX_HEX_EDITOR_COLORS						m_hecBgColors;
 		// Image list.
 		CImageList									m_iImages;
 		// Images.

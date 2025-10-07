@@ -3,6 +3,7 @@
 #include "../MXMhsX.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../Utilities/MXUtilities.h"
+#include "MXHexEditorColors.h"
 #include "MXHexEditorInterface.h"
 
 #include <LSWWin.h>
@@ -91,6 +92,8 @@ namespace mx {
 		struct MX_CREATION_PARMS {
 			MX_FONT_SET *							pfsFixedRowFont = nullptr;								/**< The shared font for fixed-row views. */
 			MX_FONT_SET *							pfsDynamicRowFont = nullptr;							/**< The shared font for text views. */
+			MX_HEX_EDITOR_COLORS *					phecFg = nullptr;										/**< Foreground colors. */
+			MX_HEX_EDITOR_COLORS *					phecBg = nullptr;										/**< Background colors. */
 		};
 
 
@@ -201,10 +204,22 @@ namespace mx {
 		bool										DefaultFontSize( LOGFONTW &_lfFont );
 
 		// Gets the current font.
-		MX_FONT_SET *								Font() { return m_pfsFonts[m_sStyles[m_eaEditAs].ftFont]; }
+		inline MX_FONT_SET *						Font() { return m_pfsFonts[m_sStyles[m_eaEditAs].ftFont]; }
 
 		// Gets the current font.
-		const MX_FONT_SET *							Font() const { return m_pfsFonts[m_sStyles[m_eaEditAs].ftFont]; }
+		const inline MX_FONT_SET *					Font() const { return m_pfsFonts[m_sStyles[m_eaEditAs].ftFont]; }
+
+		// Gets a foreground color.
+		inline MX_HEX_EDITOR_COLORS *				ForeColors() { return m_phecForeColors; }
+
+		// Gets a foreground color.
+		inline const MX_HEX_EDITOR_COLORS *			ForeColors() const { return m_phecForeColors; }
+
+		// Gets a background color.
+		inline MX_HEX_EDITOR_COLORS *				BackColors() { return m_phecBackColors; }
+
+		// Gets a background color.
+		inline const MX_HEX_EDITOR_COLORS *			BackColors() const { return m_phecBackColors; }
 
 		// WM_LBUTTONDOWN.
 		virtual LSW_HANDLED							LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &/*_pCursorPos*/ );
@@ -316,7 +331,7 @@ namespace mx {
 
 			// Left numbers formatting.
 			MX_DATA_FMT								dfLeftNumbersFmt = MX_DF_HEX;
-			uint32_t								uiGroupSize = 2;                   						// Extra spacing after every N bytes.
+			uint32_t								uiGroupSize = 4;                   						// Extra spacing after every N bytes.
 			uint32_t								uiSpacesBetweenBytes = 1;          						// Count of ' ' between adjacent bytes.
 			uint32_t								uiExtraSpacesBetweenGroups = 1;     					// Extra ' ' at group boundary.
 
@@ -324,21 +339,21 @@ namespace mx {
 			MX_DATA_FMT								dfRightNumbersFmt = MX_DF_CHAR;
 
 			// Paddings/gaps (pixels).
-			int32_t									i32LeftAddrPadding = 3;										// Left padding.
-			int32_t									iPadAfterGutterPx = 8;
-			int32_t									iPadBetweenNumbersAndTextPx = 16;
-			int32_t									iPadNumbersLeftPx = 0;
-			int32_t									iPadNumbersRightPx = 0;
-			int32_t									iPadTextRightPx = 0;
-			int32_t									iPadScrollableLeftPx = 0;
-			int32_t									iPadScrollableRightPx = 0;
-			int32_t									iPadBeforeMiniMapPx = 8;
-			int32_t									iLineSpacingPx = 2;
+			int32_t									i32LeftAddrPadding = 3;									// Left padding.
+			int32_t									i32PadAfterGutterPx = 8;
+			int32_t									i32PadBetweenNumbersAndTextPx = 16;
+			int32_t									i32PadNumbersLeftPx = 0;
+			int32_t									i32PadNumbersRightPx = 0;
+			int32_t									i32PadTextRightPx = 0;
+			int32_t									i32PadScrollableLeftPx = 0;
+			int32_t									i32PadScrollableRightPx = 0;
+			int32_t									i32PadBeforeMiniMapPx = 8;
+			int32_t									i32LineSpacingPx = 2;
 
 			// Ruler.
 
 			// Mini-map geometry (pixels).
-			int32_t									iMiniMapWidthPx = 140;
+			int32_t									i32MiniMapWidthPx = 140;
 		};
 
 
@@ -346,18 +361,20 @@ namespace mx {
 		uint64_t									m_ui64VPos = 0;											// First visible line (virtual).
 		uint64_t									m_ui64HPx = 0;											// Horizontal scroll offset.
 		MX_FONT_SET *								m_pfsFonts[2] = {};										// Shared fonts.
+		MX_HEX_EDITOR_COLORS *						m_phecForeColors = nullptr;								// Pointer to shared foreground colors.
+		MX_HEX_EDITOR_COLORS *						m_phecBackColors = nullptr;								// Pointer to shared background colors.
 		MX_EDIT_AS									m_eaEditAs = MX_ES_HEX;									// The view type.
-		COLORREF									m_crText = MX_RGBA( 0x92, 0x92, 0x92, 0xFF );			// Text color.
-		COLORREF									m_crAddSepLine = MX_RGBA( 0x42, 0x42, 0x42, 0x00 );		// Address separator line.
-		COLORREF									m_crRulerText = MX_RGBA( 0x57, 0x57, 0x57, 0xFF );		// Ruler text color.
-		COLORREF									m_crRulerLine = MX_RGBA( 0x57, 0x57, 0x57, 0x00 );		// Ruler line.
-		COLORREF									m_crRulerMarker = MX_RGBA( 0x81, 0x81, 0x81, 0xFF );	// Ruler marker color.
-		COLORREF									m_crEditorBk = MX_RGBA( 0x23, 0x22, 0x20, 0xFF );		// Background color for the whole editor.
+		//COLORREF									m_crText = MX_RGBA( 0x92, 0x92, 0x92, 0xFF );			// Text color.
+		//COLORREF									m_crAddSepLine = MX_RGBA( 0x42, 0x42, 0x42, 0x00 );		// Address separator line.
+		//COLORREF									m_crRulerText = MX_RGBA( 0x57, 0x57, 0x57, 0xFF );		// Ruler text color.
+		//COLORREF									m_crRulerLine = MX_RGBA( 0x57, 0x57, 0x57, 0x00 );		// Ruler line.
+		//COLORREF									m_crRulerMarker = MX_RGBA( 0x81, 0x81, 0x81, 0xFF );	// Ruler marker color.
+		//COLORREF									BackColors()->crEditor = MX_RGBA( 0x23, 0x22, 0x20, 0xFF );		// Background color for the whole editor.
 
 		CHexEditorInterface *						m_pheiTarget = nullptr;									// The stream of data to handle.
 		MX_STYLE									m_sStyles[MX_ES_TOTAL];									// View settings.
-		int											m_iPageLines;											// How many text rows fit.
-		int											m_iPageCols;											// How many text columns fit.
+		int32_t										m_i32PageLines;											// How many text rows fit.
+		int32_t										m_i32PageCols;											// How many text columns fit.
 
 		// The main window class.
 		static ATOM									m_aAtom;
@@ -404,7 +421,7 @@ namespace mx {
 		 * Description:
 		 *  - The ruler width equals the sum of the left numbers block and the right text block (if visible),
 		 *    including the inter-block gap. The mini-map and gutter do not scroll and are not part of the ruler.
-		 *  - Each group label is centered within its group rect, computed by GetGroupRectForIndex().
+		 *  - Each group label is centered within its group rect, computed by GetTextRectForIndex().
 		 *  - The rulerfs height equals the base character height for the font; line spacing is ignored.
 		 */
 		void										DrawRuler( HDC _hDc, int _iXLeft, int _iYTop, MX_DATA_FMT _dfLeftFmt, MX_DATA_FMT _dfRightFmt );
@@ -417,10 +434,10 @@ namespace mx {
 		/**
 		 * \brief Returns the vertical advance, in pixels, between consecutive rows.
 		 *
-		 * Description: Base line height (m_iCyChar or measured glyph height) plus CurStyle()->iLineSpacingPx.
+		 * Description: Base line height (m_iCyChar or measured glyph height) plus CurStyle()->i32LineSpacingPx.
 		 */
 		int											LineAdvanceCy() const {
-			return Font()->iCharCy + CurStyle()->iLineSpacingPx;
+			return Font()->iCharCy + CurStyle()->i32LineSpacingPx;
 		}
 
 		// Gets the total number of lines in the display.
@@ -476,7 +493,7 @@ namespace mx {
 		}
 
 		/**
-		 * \brief Computes the left X and width (in pixels) of a group at index for an area.
+		 * \brief Computes the left X and width (in pixels) of a text cell at index for an area.
 		 *
 		 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
 		 * \param _ui32Index Zero-based group index within the row (e.g., 0..(groups-1)).
@@ -493,14 +510,39 @@ namespace mx {
 		 *    of the current group; it is placed after it.
 		 *  - The caller can center text within the returned [left,width] using a text measurement.
 		 */
-		bool										GetGroupRectForIndex(
+		bool										GetTextRectForIndex(
 			MX_DATA_FMT _dfDataFmt,
 			uint32_t _ui32Index,
 			bool _bRightArea,
 			int _iXBase,
-			int & _iXLeft,
-			int & _iWidth
-		) const;
+			int &_iXLeft,
+			int &_iWidth ) const;
+
+		/**
+		 * \brief Computes the left X and width (in pixels) of a background cell at index for an area.
+		 *
+		 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
+		 * \param _ui32Index Zero-based group index within the row (e.g., 0..(groups-1)).
+		 * \param _bRightArea False for the left numbers area; true for the right text area.
+		 * \param _iXBase The pixel X of the beginning of the area (not including gutter; includes horizontal scroll offset).
+		 * \param _iXLeft [out] Receives the pixel X of the groupfs left edge.
+		 * \param _iWidth [out] Receives the pixel width of the group (internal bytes/chars and normal intra-byte spacing).
+		 * \return Returns true if the index is valid for the current layout; false otherwise.
+		 *
+		 * Description:
+		 *  - A ggrouph is composed of N adjacent cells (bytes for HEX/DEC/OCT/BIN, characters for CHAR),
+		 *    where N is the areafs grouping size. The width includes intra-cell spacing inside the group.
+		 *  - The extra spacing that separates two adjacent groups (group gap) is not included in the width
+		 *    of the current group; it is placed after it.
+		 *  - The caller can center text within the returned [left,width] using a text measurement.
+		 */
+		bool										GetBackgrondRectForIndex(
+			MX_DATA_FMT _dfDataFmt,
+			uint32_t _ui32Index,
+			bool _bRightArea,
+			int _iXBase,
+			int &_iXLeft,
+			int &_iWidth ) const;
 
 		/**
 		 * Computes the pixel width of the left numeric (hex/dec/oct/bin/char) column for one row.
@@ -518,9 +560,9 @@ namespace mx {
 		inline int									TotalContentWidthPx() {
 			const MX_STYLE & stAll = (*CurStyle());
 			int iCx = 0;
-			iCx += stAll.iPadNumbersLeftPx + ComputeAreaWidthPx( stAll.dfLeftNumbersFmt ) + stAll.iPadNumbersRightPx;
+			iCx += stAll.i32PadNumbersLeftPx + ComputeAreaWidthPx( stAll.dfLeftNumbersFmt ) + stAll.i32PadNumbersRightPx;
 			if ( CurStyle()->bShowRightArea ) {
-				iCx += stAll.iPadBetweenNumbersAndTextPx + ComputeAreaWidthPx( stAll.dfRightNumbersFmt );
+				iCx += stAll.i32PadBetweenNumbersAndTextPx + ComputeAreaWidthPx( stAll.dfRightNumbersFmt );
 			}
 			return max( iCx, 1 );
 		}
@@ -538,13 +580,13 @@ namespace mx {
 
 			int iW = int( ClientRect().Width()); //m_iClientW;
 			if ( asAddrStyle.bShowAddressGutter ) {
-				iW -= ComputeAddressGutterWidthPx();          // Includes iPadAfterGutterPx.
+				iW -= ComputeAddressGutterWidthPx();          // Includes i32PadAfterGutterPx.
 			}
-			iW -= asAddrStyle.iPadScrollableLeftPx;
-			iW -= asAddrStyle.iPadScrollableRightPx;
+			iW -= asAddrStyle.i32PadScrollableLeftPx;
+			iW -= asAddrStyle.i32PadScrollableRightPx;
 
 			if ( asAddrStyle.bShowMiniMap ) {
-				iW -= (asAddrStyle.iMiniMapWidthPx + asAddrStyle.iPadBeforeMiniMapPx);
+				iW -= (asAddrStyle.i32MiniMapWidthPx + asAddrStyle.i32PadBeforeMiniMapPx);
 			}
 			return (iW > 0) ? iW : 1;
 		}

@@ -214,31 +214,31 @@ namespace mx {
 	// Edit menu.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miEditMenu[] = {
 		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
-		{ FALSE,		MX_M_EDIT_UNDO,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_EAA5E669__Undo, _LEN_EAA5E669 ) },
-		{ FALSE,		MX_M_EDIT_REDO,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_7B273131__Redo, _LEN_7B273131 ) },
+		{ FALSE,		MX_M_EDIT_UNDO,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_EAA5E669__Undo, _LEN_EAA5E669 ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'Z', MX_M_EDIT_UNDO } },
+		{ FALSE,		MX_M_EDIT_REDO,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_7B273131__Redo, _LEN_7B273131 ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'Y', MX_M_EDIT_UNDO } },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_M_EDIT_CUT,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_6E69B475_Cu_t, _LEN_6E69B475 ) },
-		{ FALSE,		MX_M_EDIT_COPY,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_446FE619__Copy, _LEN_446FE619 ) },
+		{ FALSE,		MX_M_EDIT_CUT,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_6E69B475_Cu_t, _LEN_6E69B475 ),							false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'X', MX_M_EDIT_CUT } },
+		{ FALSE,		MX_M_EDIT_COPY,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_446FE619__Copy, _LEN_446FE619 ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'C', MX_M_EDIT_COPY } },
 		{ FALSE,		MX_M_EDIT_COPY_AS_,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_F479063A_Cop_y_As, _LEN_F479063A ) },
-		{ FALSE,		MX_M_EDIT_PASTE,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_FB82E709__Paste, _LEN_FB82E709 ) },
+		{ FALSE,		MX_M_EDIT_PASTE,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_FB82E709__Paste, _LEN_FB82E709 ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'V', MX_M_EDIT_PASTE } },
 		{ FALSE,		MX_M_EDIT_PASTE_SPECIAL,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_5C3FAC38_Paste_Spec_ial___, _LEN_5C3FAC38 ) },
 		{ FALSE,		MX_M_EDIT_DELETE,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_3DBE79B1_Delete, _LEN_3DBE79B1 ) },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_M_EDIT_INSERT_OVERWRITE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_CB4B4FA5_Insert_O_verwrite, _LEN_CB4B4FA5 ) },
 		{ FALSE,		MX_M_EDIT_INSERT_COLOR,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_B57D707F_Insert_Co_lor___, _LEN_B57D707F ) },
-		{ FALSE,		MX_M_EDIT_INSERT_DATE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_BB3A17D9_I_nsert_Data_Time, _LEN_BB3A17D9 ) },
+		{ FALSE,		MX_M_EDIT_INSERT_DATE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_BB3A17D9_I_nsert_Data_Time, _LEN_BB3A17D9 ),			false,	{ static_cast<BYTE>(FVIRTKEY | FSHIFT), VK_F5, MX_M_EDIT_INSERT_DATE } },
 		{ FALSE,		MX_M_EDIT_SET_FILE_SIZE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_90E4EE8E_Set_File_Si_ze___, _LEN_90E4EE8E ) },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_M_EDIT_READ_ONLY,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_03A5AEDB_Read__Only, _LEN_03A5AEDB ) },
 		{ FALSE,		MX_M_EDIT_KEEP_FILE_TIME,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_381FB8E7__Keep_File_Time, _LEN_381FB8E7 ) },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_M_EDIT_PROPERTIES,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_CB94BF68_Prop_erties, _LEN_CB94BF68 ) },
+		{ FALSE,		MX_M_EDIT_PROPERTIES,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_CB94BF68_Prop_erties, _LEN_CB94BF68 ),					false,	{ static_cast<BYTE>(FVIRTKEY | FALT), VK_RETURN, MX_M_EDIT_PROPERTIES } },
 	};
 
 	// Edit -> Copy As menu.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miEditCopyAsMenu[] = {
 		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
-		{ FALSE,		MX_M_EDIT_COPY_AS_HEX,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_2F29967F__Copy_as_Hex_Text, _LEN_2F29967F ) },
+		{ FALSE,		MX_M_EDIT_COPY_AS_HEX,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_2F29967F__Copy_as_Hex_Text, _LEN_2F29967F ),			false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FSHIFT), 'C', MX_M_EDIT_COPY_AS_HEX } },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_M_EDIT_COPY_AS_DECIMAL,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_1E422E7D_Copy_as__Decimal_Text, _LEN_1E422E7D ) },
 		{ FALSE,		MX_M_EDIT_COPY_AS_BINARY,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_83F240E0_Copy_as_B_inary_Text, _LEN_83F240E0 ) },
@@ -261,8 +261,8 @@ namespace mx {
 	// Edit -> Insert/Overwrite.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miEditInsertOverwriteMenu[] = {
 		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
-		{ FALSE,		MX_M_EDIT_INSERT_FILE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_899D8058_Insert__File___, _LEN_899D8058 ) },
-		{ FALSE,		MX_M_EDIT_INSERT_BYTES,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_09EEA57F_Insert__Bytes___, _LEN_09EEA57F ) },
+		{ FALSE,		MX_M_EDIT_INSERT_FILE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_899D8058_Insert__File___, _LEN_899D8058 ),			false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'I', MX_M_EDIT_INSERT_FILE } },
+		{ FALSE,		MX_M_EDIT_INSERT_BYTES,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_09EEA57F_Insert__Bytes___, _LEN_09EEA57F ),			false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FSHIFT), 'I', MX_M_EDIT_INSERT_BYTES } },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_M_EDIT_OVERWRITE_FILE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_9BAF9C05__Overwrite_File___, _LEN_9BAF9C05 ) },
 		{ FALSE,		MX_M_EDIT_OVERWRITE_BYTES,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_B6216D76_O_verwrite_Bytes___, _LEN_B6216D76 ) },
