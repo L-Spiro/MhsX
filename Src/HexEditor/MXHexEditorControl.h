@@ -341,10 +341,9 @@ namespace mx {
 			// Paddings/gaps (pixels).
 			int32_t									i32LeftAddrPadding = 3;									// Left padding.
 			int32_t									i32PadAfterGutterPx = 8;
-			int32_t									i32PadBetweenNumbersAndTextPx = 16;
+			int32_t									i32PadBetweenNumbersAndTextPx = 9;
 			int32_t									i32PadNumbersLeftPx = 0;
 			int32_t									i32PadNumbersRightPx = 0;
-			int32_t									i32PadTextRightPx = 0;
 			int32_t									i32PadScrollableLeftPx = 0;
 			int32_t									i32PadScrollableRightPx = 0;
 			int32_t									i32PadBeforeMiniMapPx = 8;
@@ -364,12 +363,7 @@ namespace mx {
 		MX_HEX_EDITOR_COLORS *						m_phecForeColors = nullptr;								// Pointer to shared foreground colors.
 		MX_HEX_EDITOR_COLORS *						m_phecBackColors = nullptr;								// Pointer to shared background colors.
 		MX_EDIT_AS									m_eaEditAs = MX_ES_HEX;									// The view type.
-		//COLORREF									m_crText = MX_RGBA( 0x92, 0x92, 0x92, 0xFF );			// Text color.
-		//COLORREF									m_crAddSepLine = MX_RGBA( 0x42, 0x42, 0x42, 0x00 );		// Address separator line.
-		//COLORREF									m_crRulerText = MX_RGBA( 0x57, 0x57, 0x57, 0xFF );		// Ruler text color.
-		//COLORREF									m_crRulerLine = MX_RGBA( 0x57, 0x57, 0x57, 0x00 );		// Ruler line.
-		//COLORREF									m_crRulerMarker = MX_RGBA( 0x81, 0x81, 0x81, 0xFF );	// Ruler marker color.
-		//COLORREF									BackColors()->crEditor = MX_RGBA( 0x23, 0x22, 0x20, 0xFF );		// Background color for the whole editor.
+		std::map<uint64_t, COLORREF>				m_mColorLookup;											// Quick mixing of colors.
 
 		CHexEditorInterface *						m_pheiTarget = nullptr;									// The stream of data to handle.
 		MX_STYLE									m_sStyles[MX_ES_TOTAL];									// View settings.
@@ -410,7 +404,7 @@ namespace mx {
 		void										DrawAddressGutter( HDC _hDc, int _iXLeft, int _iYTop, uint32_t _ui32LinesToDraw );
 
 		/**
-		 * \brief Draws the ruler at the given position.
+		 * Draws the ruler at the given position.
 		 *
 		 * \param _hDc Destination HDC.
 		 * \param _iXLeft Pixel X where the scrollable content begins (after gutter; already includes horizontal scroll offset).
@@ -425,6 +419,18 @@ namespace mx {
 		 *  - The rulerfs height equals the base character height for the font; line spacing is ignored.
 		 */
 		void										DrawRuler( HDC _hDc, int _iXLeft, int _iYTop, MX_DATA_FMT _dfLeftFmt, MX_DATA_FMT _dfRightFmt );
+
+		/**
+		 * Draws an area at a given position.
+		 * 
+		 * \param _hDc Destination HDC.
+		 * \param _iXLeft Pixel X where the scrollable content begins (after gutter; already includes horizontal scroll offset).
+		 * \param _iYTop Pixel Y top where the area should be drawn.
+		 * \param _dfFmt Format of the area.
+		 * \param _bRightArea False for the left numbers area; true for the right text area.
+		 * \param _ui32LinesToDraw The number of rows to draw (typically page lines).
+		 **/
+		void										DrawArea( HDC _hDc, int _iXLeft, int _iYTop, MX_DATA_FMT _dfFmt, bool _bRightArea, uint32_t _ui32LinesToDraw );
 
 		// Computes font metrics.
 		void										ComputeFontMetrics() {
@@ -445,6 +451,14 @@ namespace mx {
 			if ( !&m_sStyles[MX_ES_HEX].uiBytesPerRow ) { return 0ULL; }
 			return (Size() + m_sStyles[MX_ES_HEX].uiBytesPerRow - 1ULL) / m_sStyles[MX_ES_HEX].uiBytesPerRow;
 		}
+
+		/**
+		 * Gets the color of a hex/octal/binary cell by address.
+		 * 
+		 * \param _ui64Address The address of the data in the cell.
+		 * \return Returns the background color for the given cell.
+		 **/
+		COLORREF									CellBgColor( uint64_t _ui64Address );
 
 		// Gets the minimum address digits.
 		uint32_t									MinAddrDigits() const {
@@ -496,7 +510,7 @@ namespace mx {
 		 * \brief Computes the left X and width (in pixels) of a text cell at index for an area.
 		 *
 		 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
-		 * \param _ui32Index Zero-based group index within the row (e.g., 0..(groups-1)).
+		 * \param _ui32Index Zero-based cell index within the row.
 		 * \param _bRightArea False for the left numbers area; true for the right text area.
 		 * \param _iXBase The pixel X of the beginning of the area (not including gutter; includes horizontal scroll offset).
 		 * \param _iXLeft [out] Receives the pixel X of the groupfs left edge.
@@ -522,19 +536,12 @@ namespace mx {
 		 * \brief Computes the left X and width (in pixels) of a background cell at index for an area.
 		 *
 		 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
-		 * \param _ui32Index Zero-based group index within the row (e.g., 0..(groups-1)).
+		 * \param _ui32Index Zero-based cell index within the row.
 		 * \param _bRightArea False for the left numbers area; true for the right text area.
 		 * \param _iXBase The pixel X of the beginning of the area (not including gutter; includes horizontal scroll offset).
 		 * \param _iXLeft [out] Receives the pixel X of the groupfs left edge.
 		 * \param _iWidth [out] Receives the pixel width of the group (internal bytes/chars and normal intra-byte spacing).
 		 * \return Returns true if the index is valid for the current layout; false otherwise.
-		 *
-		 * Description:
-		 *  - A ggrouph is composed of N adjacent cells (bytes for HEX/DEC/OCT/BIN, characters for CHAR),
-		 *    where N is the areafs grouping size. The width includes intra-cell spacing inside the group.
-		 *  - The extra spacing that separates two adjacent groups (group gap) is not included in the width
-		 *    of the current group; it is placed after it.
-		 *  - The caller can center text within the returned [left,width] using a text measurement.
 		 */
 		bool										GetBackgrondRectForIndex(
 			MX_DATA_FMT _dfDataFmt,
@@ -591,7 +598,6 @@ namespace mx {
 			return (iW > 0) ? iW : 1;
 		}
 
-
 		// Updates the scrollbars.
 		void										UpdateScrollbars();
 
@@ -631,6 +637,7 @@ namespace mx {
 			}
 			return ui32Val;
 		}
+
 	private :
 		typedef lsw::CWidget						CParent;
 	};

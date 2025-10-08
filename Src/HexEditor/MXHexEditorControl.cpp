@@ -325,7 +325,7 @@ namespace mx {
 
 	// WM_VSCROLL
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::VScroll( USHORT /*_uScrollPos*/, USHORT _uScrollType, CWidget * /*_pwWidget*/ ) {
-		const int32_t iPageLines = std::max( 1, m_i32PageLines - 2 );
+		const int32_t iPageLines = std::max( 1, m_i32PageLines - 1 );
 		const int32_t iStep      = 1;
 
 		const uint64_t ui64Lines = TotalLines_FixedWidth();
@@ -456,14 +456,27 @@ namespace mx {
 
 	// Draws the hex-editor view.
 	bool CHexEditorControl::PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect ) {
+		const MX_STYLE & stAll = (*CurStyle());
 		const int iGutterW = ComputeAddressGutterWidthPx();
 		lsw::LSW_RECT rTmp = _rRect;
-		
 		int iX = iGutterW - m_ui64HPx, iY = 0;
-		if ( CurStyle()->bShowRuler ) {
+		DrawArea( _hDc, iX, stAll.bShowRuler ? GetRulerHeightPx() : 0, stAll.dfLeftNumbersFmt, false, m_i32PageLines + 1 );
+		if ( stAll.bShowRightArea ) {
+			DrawArea( _hDc, iX + ComputeAreaWidthPx( stAll.dfLeftNumbersFmt ),
+				stAll.bShowRuler ? GetRulerHeightPx() : 0, stAll.dfRightNumbersFmt, true, m_i32PageLines + 1 );
+		}
+		
+		
+		if ( stAll.bShowRuler ) {
 			rTmp.bottom = rTmp.top + GetRulerHeightPx();
-			::FillRect( _hDc, &rTmp,
-				lsw::CBase::BrushCache().Brush( MX_GetRgbValue( BackColors()->crEditor ) ) );
+			if ( MX_GetAValue( BackColors()->crRulerFileBar ) ) {
+				::FillRect( _hDc, &rTmp,
+					lsw::CBase::BrushCache().Brush( MX_GetRgbValue( BackColors()->crRulerFileBar ) ) );
+			}
+			else {
+				::FillRect( _hDc, &rTmp,
+					lsw::CBase::BrushCache().Brush( MX_GetRgbValue( BackColors()->crEditor ) ) );
+			}
 			if ( MX_GetAValue( ForeColors()->crRulerLine ) ) {
 				const int iThisY = rTmp.bottom - 1;
 				lsw::LSW_HPEN pPen( PS_SOLID, 1, ForeColors()->crRulerLine );
@@ -471,16 +484,22 @@ namespace mx {
 				::MoveToEx( _hDc, rTmp.left, iThisY, NULL );
 				::LineTo( _hDc, rTmp.right, iThisY );
 			}
-			DrawRuler( _hDc, iX, 0, CurStyle()->dfLeftNumbersFmt, CurStyle()->dfRightNumbersFmt );
+			DrawRuler( _hDc, iX, 0, stAll.dfLeftNumbersFmt, stAll.dfRightNumbersFmt );
 			iY += GetRulerHeightPx();
 		}
 
 
-		if ( CurStyle()->bShowAddressGutter ) {
+		if ( stAll.bShowAddressGutter ) {
 			rTmp = _rRect;
 			rTmp.right = rTmp.left + iGutterW;
-			::FillRect( _hDc, &rTmp,
-				lsw::CBase::BrushCache().Brush( MX_GetRgbValue( BackColors()->crEditor ) ) );
+			if ( MX_GetAValue( BackColors()->crAddresses ) ) {
+				::FillRect( _hDc, &rTmp,
+					lsw::CBase::BrushCache().Brush( MX_GetRgbValue( BackColors()->crAddresses ) ) );
+			}
+			else {
+				::FillRect( _hDc, &rTmp,
+					lsw::CBase::BrushCache().Brush( MX_GetRgbValue( BackColors()->crEditor ) ) );
+			}
 			if ( MX_GetAValue( ForeColors()->crAddressSeparatorLine ) || m_ui64HPx != 0 ) {
 				const int iThisX = rTmp.right - 1;
 				lsw::LSW_HPEN pPen( PS_SOLID, 1, ForeColors()->crAddressSeparatorLine );
@@ -488,7 +507,7 @@ namespace mx {
 				::MoveToEx( _hDc, iThisX, iY, NULL );
 				::LineTo( _hDc, iThisX, rTmp.bottom );
 			}
-			DrawAddressGutter( _hDc, CurStyle()->i32LeftAddrPadding, iY, m_i32PageLines + 1 );
+			DrawAddressGutter( _hDc, stAll.i32LeftAddrPadding, iY, m_i32PageLines + 1 );
 		}
 		return true;
 	}
@@ -529,32 +548,32 @@ namespace mx {
 		// Helpers: convert value to string in base, then apply options.
 		auto ToBase = [&]( uint64_t _ui64V, uint32_t _ui32Base, bool _bLower ) -> std::wstring {
 			if ( _ui64V == 0 ) { return L"0"; }
-			std::wstring s;
+			std::wstring wsStr;
 			while ( _ui64V ) {
-				const uint32_t d = static_cast<uint32_t>(_ui64V % _ui32Base);
-				wchar_t c = 0;
-				if ( d < 10 ) { c = wchar_t( L'0' + d ); }
-				else { c = wchar_t( (_bLower ? L'a' : L'A') + (d - 10) ); }
-				s.push_back( c );
+				const uint32_t ui32D = static_cast<uint32_t>(_ui64V % _ui32Base);
+				wchar_t wcC = 0;
+				if ( ui32D < 10 ) { wcC = wchar_t( L'0' + ui32D ); }
+				else { wcC = wchar_t( (_bLower ? L'a' : L'A') + (ui32D - 10) ); }
+				wsStr.push_back( wcC );
 				_ui64V /= _ui32Base;
 			}
-			std::reverse( s.begin(), s.end() );
-			return s;
+			std::reverse( wsStr.begin(), wsStr.end() );
+			return wsStr;
 		};
 
-		auto InsertHexGroupingColons = [&]( std::wstring & _s ) {
-			if ( !asAddrStyle.bShowColonIn || _s.size() <= 4 ) { return; }
-			std::wstring grouped;
-			size_t r = _s.size();
-			int cnt = 0;
-			while ( r-- ) {
-				grouped.push_back( _s[r] );
-				if ( (++cnt % 4) == 0 && r != SIZE_MAX ) {
-					grouped.push_back( L':' );
+		auto InsertHexGroupingColons = [&]( std::wstring & _wsStr ) {
+			if ( !asAddrStyle.bShowColonIn || _wsStr.size() <= 4 ) { return; }
+			std::wstring wsGrouped;
+			size_t sR = _wsStr.size();
+			int32_t i32Cnt = 0;
+			while ( sR-- ) {
+				wsGrouped.push_back( _wsStr[sR] );
+				if ( (++i32Cnt % 4) == 0 && sR != SIZE_MAX && sR != 0 ) {
+					wsGrouped.push_back( L':' );
 				}
 			}
-			std::reverse( grouped.begin(), grouped.end() );
-			_s.swap( grouped );
+			std::reverse( wsGrouped.begin(), wsGrouped.end() );
+			_wsStr.swap( wsGrouped );
 		};
 
 		// Per-line formatter: computes the address string shown for a given line index.
@@ -577,67 +596,67 @@ namespace mx {
 			}
 
 			// Convert to string in the selected base.
-			std::wstring core;
-			if ( bHex ) { core = ToBase( v, 16, asAddrStyle.bLowercaseHex ); }
-			else if ( bOct ) { core = ToBase( v, 8, false ); }
-			else { core = ToBase( v, 10, false ); }
+			std::wstring wsCore;
+			if ( bHex ) { wsCore = ToBase( v, 16, asAddrStyle.bLowercaseHex ); }
+			else if ( bOct ) { wsCore = ToBase( v, 8, false ); }
+			else { wsCore = ToBase( v, 10, false ); }
 
 			// Minimum digits: hex/oct padded with '0'; decimal padded with spaces on the left.
 			uint32_t ui32MinDigits = MinAddrDigits();
-			if ( ui32MinDigits && core.size() < ui32MinDigits ) {
-				const size_t pad = ui32MinDigits - core.size();
+			if ( ui32MinDigits && wsCore.size() < ui32MinDigits ) {
+				const size_t pad = ui32MinDigits - wsCore.size();
 				if ( bHex || bOct ) {
-					core.insert( core.begin(), pad, L'0' );
+					wsCore.insert( wsCore.begin(), pad, L'0' );
 				}
-				else { // decimal / line-number
-					core.insert( core.begin(), pad, L' ' );
+				else {
+					wsCore.insert( wsCore.begin(), pad, L' ' );
 				}
 			}
 
 			// Internal grouping with ':' every 4 hex digits (after zero-padding).
 			if ( bHex ) {
-				InsertHexGroupingColons( core );
+				InsertHexGroupingColons( wsCore );
 			}
 
 			// Trailing colon after the address if enabled.
 			if ( asAddrStyle.bShowColonAfter ) {
-				core.push_back( L':' );
+				wsCore.push_back( L':' );
 			}
 
 			// Optional type specifier.
 			if ( asAddrStyle.bShowTypeSpec ) {
-				if ( bHex ) { core.push_back( L'h' ); }
-				else if ( bOct ) { core.push_back( L'o' ); }
+				if ( bHex ) { wsCore.push_back( L'h' ); }
+				else if ( bOct ) { wsCore.push_back( L'o' ); }
 			}
 
 			// Optional short suffix 'w' for Short addressing.
 			if ( asAddrStyle.bUseShortSuffixW && (asAddrStyle.afFormat == MX_AF_SHORT_HEX || asAddrStyle.afFormat == MX_AF_SHORT_DEC) ) {
-				core.push_back( L'w' );
+				wsCore.push_back( L'w' );
 			}
 
-			return core;
+			return wsCore;
 		};
 
 		// Line height.
-		const int iLineAdv = fsFont.iCharCy + stAll.i32LineSpacingPx;
+		const int32_t iLineAdv = fsFont.iCharCy + stAll.i32LineSpacingPx;
 
 		// First visible line (top) comes from style; draw consecutive lines.
 		uint64_t ui64Line = asAddrStyle.ui64FirstVisibleLine;
 
 		auto ui64MaxLines = TotalLines() - ui64Line;
 		_ui32LinesToDraw = uint32_t( std::min<uint64_t>( _ui32LinesToDraw, ui64MaxLines ) );
-		std::wstring ws;
-		for( uint32_t i = 0; i < _ui32LinesToDraw; ++i, ++ui64Line ) {
-			ws = FormatAddressForLine( ui64Line );
-			const int iY = _iYTop + int( i ) * iLineAdv;
+		std::wstring wsTmp;
+		for( uint32_t I = 0; I < _ui32LinesToDraw; ++I, ++ui64Line ) {
+			wsTmp = FormatAddressForLine( ui64Line );
+			const int32_t iY = _iYTop + int32_t( I ) * iLineAdv;
 
 			// Decimal is right-aligned by spaces we injected above; just draw at left edge.
-			::TextOutW( _hDc, _iXLeft, iY, ws.c_str(), static_cast<int>(ws.size()) );
+			::TextOutW( _hDc, _iXLeft, iY, wsTmp.c_str(), static_cast<int32_t>(wsTmp.size()) );
 		}
 	}
 
 	/**
-	 * \brief Draws the ruler at the given position.
+	 * Draws the ruler at the given position.
 	 *
 	 * \param _hDc Destination HDC.
 	 * \param _iXLeft Pixel X where the scrollable content begins (after gutter; already includes horizontal scroll offset).
@@ -659,7 +678,7 @@ namespace mx {
 		// Select font, set colors.
 		lsw::LSW_SELECTOBJECT soFont( _hDc, fsFont.fFont.hFont );
 		EnsureAddrGlyphs( _hDc );
-		const int iRulerCy = GetRulerHeightPx();
+		const int32_t iRulerCy = GetRulerHeightPx();
 
 		lsw::LSW_SETBKMODE sbmBkMode( _hDc, TRANSPARENT );
 		lsw::LSW_SETTEXTCOLOR stcTextColor( _hDc, MX_GetRgbValue( ForeColors()->crRulerFileBar ) );
@@ -681,7 +700,7 @@ namespace mx {
 		};
 
 		// Draw one area (left or right) using its data format and group rules.
-		auto DrawArea = [&]( bool _bRightArea, MX_DATA_FMT _dfFmt, int _iAreaXBase ) {
+		auto DrawArea = [&]( bool _bRightArea, MX_DATA_FMT _dfFmt, int32_t _iAreaXBase ) {
 			// Number of groups in this area.
 			const uint32_t ui32Bpr		= stAll.uiBytesPerRow ? stAll.uiBytesPerRow : 16;
 			const uint32_t ui32GroupSz	= stAll.uiGroupSize ? stAll.uiGroupSize : 1;
@@ -690,7 +709,7 @@ namespace mx {
 			const uint32_t ui32Groups = (ui32Bpr + ui32GroupSz - 1U) / ui32GroupSz;
 
 			for ( uint32_t I = 0; I < ui32Bpr; ++I ) {
-				int iGX = 0, iGW = 0;
+				int32_t iGX = 0, iGW = 0;
 				if ( !GetTextRectForIndex( _dfFmt, I, _bRightArea, _iAreaXBase, iGX, iGW ) ) { break; }
 
 				// Label is the byte index of the first item in the group within the row.
@@ -699,27 +718,110 @@ namespace mx {
 
 				// Center horizontally inside [iGX, iGW].
 				SIZE sSize {};
-				::GetTextExtentPoint32W( _hDc, wsTmp.c_str(), int( wsTmp.size() ), &sSize );
-				const int iTextX = iGX + (iGW - sSize.cx) / 2;
-				const int iTextY = (_iYTop + (iRulerCy - fsFont.iCharCy) / 2);
+				::GetTextExtentPoint32W( _hDc, wsTmp.c_str(), int32_t( wsTmp.size() ), &sSize );
+				const int32_t iTextX = iGX + (iGW - sSize.cx) / 2;
+				const int32_t iTextY = (_iYTop + (iRulerCy - fsFont.iCharCy) / 2);
 
-				::TextOutW( _hDc, iTextX, iTextY, wsTmp.c_str(), int( wsTmp.size() ) );
+				::TextOutW( _hDc, iTextX, iTextY, wsTmp.c_str(), int32_t( wsTmp.size() ) );
 			}
 		};
 
-		// LEFT area (numbers).
-		//if ( stAll.bShowLeftNumbers ) {
 		{
-			const int iLeftBase = _iXLeft + stAll.i32PadNumbersLeftPx; // already the start of scrollable content
-			DrawArea( false, _dfLeftFmt, iLeftBase );
+			const int32_t i32LeftBase = _iXLeft; // already the start of scrollable content
+			DrawArea( false, _dfLeftFmt, i32LeftBase );
 		}
-		//}
-
-		// RIGHT area (text).
 		if ( stAll.bShowRightArea ) {
-			const int iRightBase = _iXLeft + stAll.i32PadNumbersLeftPx + ComputeAreaWidthPx( _dfLeftFmt ) + stAll.i32PadNumbersRightPx + stAll.i32PadBetweenNumbersAndTextPx;
-			DrawArea( true, _dfRightFmt, iRightBase );
+			const int32_t i32RightBase = _iXLeft + ComputeAreaWidthPx( _dfLeftFmt );
+			DrawArea( true, _dfRightFmt, i32RightBase );
 		}
+	}
+
+	/**
+	 * Draws an area at a given position.
+	 * 
+	 * \param _hDc Destination HDC.
+	 * \param _iXLeft Pixel X where the scrollable content begins (after gutter; already includes horizontal scroll offset).
+	 * \param _iYTop Pixel Y top where the area should be drawn.
+	 * \param _dfFmt Format of the area.
+	 * \param _bRightArea False for the left numbers area; true for the right text area.
+	 * \param _ui32LinesToDraw The number of rows to draw (typically page lines).
+	 **/
+	void CHexEditorControl::DrawArea( HDC _hDc, int _iXLeft, int _iYTop, MX_DATA_FMT _dfFmt, bool _bRightArea, uint32_t _ui32LinesToDraw ) {
+		const MX_STYLE & stAll = (*CurStyle());
+		if ( !stAll.bShowAddressGutter || _ui32LinesToDraw == 0 || nullptr == Font() ) { return; }
+		const MX_FONT_SET & fsFont = (*Font());
+
+		const MX_ADDR_STYLE & asAddrStyle = stAll.daAddressStyle;
+
+		// Select font and ensure glyph metrics.
+		lsw::LSW_SELECTOBJECT soFont( _hDc, fsFont.fFont.hFont );
+		EnsureAddrGlyphs( _hDc );
+		const MX_ADDR_GLYPHS & agGlyphs = fsFont.agGlyphs;
+
+		const uint32_t ui32Bpr = stAll.uiBytesPerRow ? stAll.uiBytesPerRow : 16;
+
+		// Line height.
+		const int32_t iLineAdv = fsFont.iCharCy + stAll.i32LineSpacingPx;
+
+		// First visible line (top) comes from style; draw consecutive lines.
+		uint64_t ui64Line = asAddrStyle.ui64FirstVisibleLine;
+
+		auto ui64MaxLines = TotalLines() - ui64Line;
+		_ui32LinesToDraw = uint32_t( std::min<uint64_t>( _ui32LinesToDraw, ui64MaxLines ) );
+		std::wstring wsTmp;
+		for( uint32_t I = 0; I < _ui32LinesToDraw; ++I, ui64Line += ui32Bpr ) {
+			//wsTmp = FormatAddressForLine( ui64Line );
+			const int32_t iY = _iYTop + int32_t( I ) * iLineAdv;
+
+			// Draw the background.  Try to reduce to as few calls as possible for a row.
+			int iL, iW;
+			auto crColor = CellBgColor( ui64Line );
+			GetBackgrondRectForIndex( _dfFmt, 0, _bRightArea, _iXLeft, iL, iW );
+			for ( int32_t J = 1; J < ui32Bpr; ++J ) {
+				int iL2, iW2;
+				GetBackgrondRectForIndex( _dfFmt, J, _bRightArea, _iXLeft, iL2, iW2 );
+				auto crThisColor = CellBgColor( ui64Line + J );
+				if ( crThisColor != crColor || (iL + iW) == iL2 ) {
+					lsw::LSW_RECT rRect;
+					rRect.top = iY;
+					rRect.left = iL;
+					rRect.right = iL + iW;
+					rRect.bottom = rRect.top + iLineAdv;
+					::FillRect( _hDc, &rRect,
+						lsw::CBase::BrushCache().Brush( MX_GetRgbValue( crColor ) ) );
+					iL = iL2, iW = iW2;
+					crColor = crThisColor;
+				}
+				else {
+					iW += iW2;
+				}
+			}
+			{
+				lsw::LSW_RECT rRect;
+				rRect.top = iY;
+				rRect.left = iL;
+				rRect.right = iL + iW;
+				rRect.bottom = rRect.top + iLineAdv;
+				::FillRect( _hDc, &rRect,
+					lsw::CBase::BrushCache().Brush( MX_GetRgbValue( crColor ) ) );
+			}
+
+			for ( int32_t J = 0; J < ui32Bpr; ++J ) {
+			}
+
+			// Decimal is right-aligned by spaces we injected above; just draw at left edge.
+			//::TextOutW( _hDc, _iXLeft, iY, wsTmp.c_str(), static_cast<int32_t>(wsTmp.size()) );
+		}
+	}
+
+	/**
+	 * Gets the color of a hex/octal/binary cell by address.
+	 * 
+	 * \param _ui64Address The address of the data in the cell.
+	 * \return Returns the background color for the given cell.
+	 **/
+	COLORREF CHexEditorControl::CellBgColor( uint64_t /*_ui64Address*/ ) {
+		return BackColors()->crEditor;
 	}
 
 	/**
@@ -820,7 +922,7 @@ namespace mx {
 	 * \brief Computes the left X and width (in pixels) of a text cell at index for an area.
 	 *
 	 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
-	 * \param _ui32Index Zero-based group index within the row (e.g., 0..(groups-1)).
+	 * \param _ui32Index Zero-based cell index within the row.
 	 * \param _bRightArea False for the left numbers area; true for the right text area.
 	 * \param _iXBase The pixel X of the beginning of the area (not including gutter; includes horizontal scroll offset).
 	 * \param _iXLeft [out] Receives the pixel X of the groupfs left edge.
@@ -878,9 +980,16 @@ namespace mx {
 			iX += stStyle.i32PadBetweenNumbersAndTextPx;
 		}
 
-		iX += (iCellCx * _ui32Index) + (((_ui32Index / ui32GroupSz)) * iSpaceB);
+		if ( _dfDataFmt == MX_DF_CHAR ) {
+			iX += (iCellCx * _ui32Index);
+			_iXLeft = iX;
+		}
+		else {
+			iX += (iCellCx * _ui32Index) + (((_ui32Index / ui32GroupSz)) * iSpaceB);
+			_iXLeft = iX + (agGlyphs.iSpaceCx / 2);
+		}
 
-		_iXLeft = iX + (iCellCx / 2);
+		
 		_iWidth = iCellCx;
 		return true;
 	}
@@ -889,19 +998,12 @@ namespace mx {
 	 * \brief Computes the left X and width (in pixels) of a background cell at index for an area.
 	 *
 	 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
-	 * \param _ui32Index Zero-based group index within the row (e.g., 0..(groups-1)).
+	 * \param _ui32Index Zero-based cell index within the row.
 	 * \param _bRightArea False for the left numbers area; true for the right text area.
 	 * \param _iXBase The pixel X of the beginning of the area (not including gutter; includes horizontal scroll offset).
 	 * \param _iXLeft [out] Receives the pixel X of the groupfs left edge.
 	 * \param _iWidth [out] Receives the pixel width of the group (internal bytes/chars and normal intra-byte spacing).
 	 * \return Returns true if the index is valid for the current layout; false otherwise.
-	 *
-	 * Description:
-	 *  - A ggrouph is composed of N adjacent cells (bytes for HEX/DEC/OCT/BIN, characters for CHAR),
-	 *    where N is the areafs grouping size. The width includes intra-cell spacing inside the group.
-	 *  - The extra spacing that separates two adjacent groups (group gap) is not included in the width
-	 *    of the current group; it is placed after it.
-	 *  - The caller can center text within the returned [left,width] using a text measurement.
 	 */
 	bool CHexEditorControl::GetBackgrondRectForIndex(
 		MX_DATA_FMT _dfDataFmt,
@@ -911,6 +1013,7 @@ namespace mx {
 		int &_iXLeft,
 		int &_iWidth ) const {
 		if MX_UNLIKELY( !GetTextRectForIndex( _dfDataFmt, _ui32Index, _bRightArea, _iXBase, _iXLeft, _iWidth ) ) { return false; }
+		if ( _dfDataFmt == MX_DF_CHAR ) { return true; }
 
 		const MX_STYLE & stStyle = (*CurStyle());
 		const MX_ADDR_GLYPHS & agGlyphs = Font()->agGlyphs;
@@ -968,10 +1071,16 @@ namespace mx {
 
 				int iTotal = stStyle.i32PadNumbersLeftPx;
 
-				iTotal += (iCellCx * ui32Bpr) + (((ui32Bpr / ui32GroupSz) - 1) * iSpaceB);
+				if ( _dfDataFmt == MX_DF_CHAR ) {
+					iTotal += (iCellCx * ui32Bpr);
+				}
+				else {
+					iTotal += (iCellCx * ui32Bpr) + (((ui32Bpr / ui32GroupSz) - 0) * iSpaceB);
+				}
+
 				iTotal += stStyle.i32PadNumbersRightPx;
 
-				iCx = iTotal + (iCellCx / 1);
+				iCx = iTotal;// + (iCellCx / 1);
 			}
 		}
 		return iCx;
