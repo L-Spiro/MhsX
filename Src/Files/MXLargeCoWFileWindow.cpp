@@ -6,6 +6,7 @@
 #include "MXFile.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
 
 namespace mx {
@@ -73,6 +74,46 @@ namespace mx {
 		m_ui32OriginalCrc = 0;
 	}
 
+	// Read from the file.
+	bool CLargeCoWFileWindow::Read( uint64_t _ui64Addr, CHexEditorInterface::CBuffer &_bDst, size_t _sSize ) const {
+		_sSize = std::min<size_t>( _sSize, Size() - _ui64Addr );
+
+		try {
+			if MX_UNLIKELY( _sSize == 0 ) {
+				_bDst.clear();
+				return true;
+			}
+			_bDst.resize( _sSize );
+		}
+		catch ( ... ) { return false; }
+
+		size_t sSizeCopy = _sSize;
+		uint8_t * pbDst = _bDst.data();
+		for ( size_t I = 0; I < m_vLogicalMap.size(); ++I ) {
+			uint64_t ui64LogicalEnd = m_vLogicalMap[I].ui64Start + m_vLogicalMap[I].ui64Size;
+			if ( _ui64Addr >= m_vLogicalMap[I].ui64Start && _ui64Addr < ui64LogicalEnd ) {
+				uint64_t ui64MaxSize = std::min<uint64_t>( ui64LogicalEnd - _ui64Addr, sSizeCopy );
+
+				switch ( m_vLogicalMap[I].stType ) {
+					case MX_ST_ORIGINAL_FILE : {
+						if ( ui64MaxSize != static_cast<uint64_t>(m_fmMainMap.Read( pbDst, _ui64Addr, sSizeCopy )) ) { return false; }
+						sSizeCopy -= ui64MaxSize;
+						if ( !sSizeCopy ) { return true; }
+						break;
+					}
+					case MX_ST_SEGMENT : {
+						return false;
+						break;
+					}
+					default: { return false; }
+				}
+			}
+		}
+		// If there is anything left, something went wrong internally.
+		//assert( false );
+		return false;
+	}
+
 	// Updates the list of active segments.  Call within a try/catch block.
 	void CLargeCoWFileWindow::UpdateActiveSegments( uint64_t _ui64Id, size_t _sMax ) {
 		// Erase any null pointers.
@@ -111,7 +152,7 @@ namespace mx {
 			m_vActiveSegments.resize( _sMax );
 		}
 
-		// Close an mappings not in the hot cache.
+		// Close any mappings not in the hot cache.
 		for ( auto I = m_vEditedMaps.size(); I--; ) {
 			const uint64_t ui64Id = m_vEditedMaps[I]->Id();
 			auto aFound = std::find_if(

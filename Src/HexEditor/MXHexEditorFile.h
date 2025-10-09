@@ -23,7 +23,7 @@ namespace mx {
 		void						Reset();
 
 		// Read from the given data stream.
-		virtual bool				Read( uint64_t _ui64Addr, void * _pvDest, size_t _sSize ) const;
+		virtual bool				Read( uint64_t _ui64Addr, CBuffer &_bDst, size_t _sSize ) const;
 
 		// Does the given data stream allow insertion and deletion?  Processes return true.
 		virtual bool				OverwriteOnly() const;

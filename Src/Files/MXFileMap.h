@@ -229,7 +229,7 @@ namespace mx {
 				MX_FM_COPY( m_ui64Id, 0 );
 				MX_FM_COPY( m_hFile, INVALID_HANDLE_VALUE );
 				MX_FM_COPY( m_hMap, INVALID_HANDLE_VALUE );
-				MX_FM_COPY( m_dwChunkSize, static_cast<uint32_t>(8 * 1024 * 1024) );
+				MX_FM_COPY( m_ui32ChunkSize, static_cast<uint32_t>(8 * 1024 * 1024) );
 				MX_FM_COPY( m_bIsEmpty, TRUE );
 				MX_FM_COPY( m_bWritable, TRUE );
 				MX_FM_COPY( m_ui64Size, 0 );
@@ -275,11 +275,11 @@ namespace mx {
 		 * 
 		 * \param _lpvBuffer Destination buffer to receive the bytes.
 		 * \param _ui64From File-relative byte offset to begin reading.
-		 * \param _dwNumberOfBytesToRead Number of bytes to read into the destination buffer.
+		 * \param _sNumberOfBytesToRead Number of bytes to read into the destination buffer.
 		 * \param _prmMap Optional pointer to a CRegionMap to reuse; if nullptr, a transient map is used internally.
 		 * \return Returns the number of bytes actually read; 0 on failure.
 		 */
-		uint32_t							Read( LPVOID _lpvBuffer, uint64_t _ui64From, uint32_t _dwNumberOfBytesToRead, CRegionMap * _prmMap = nullptr ) const;
+		size_t							Read( LPVOID _lpvBuffer, uint64_t _ui64From, size_t _sNumberOfBytesToRead, CRegionMap * _prmMap = nullptr ) const;
 
 		/**
 		 * Writes to the opened file.
@@ -299,7 +299,7 @@ namespace mx {
 		 * 
 		 * \param _ui32Size Desired chunk size in bytes.
 		 */
-		inline void							SetChunkSize( uint32_t _ui32Size ) { m_dwChunkSize = _ui32Size; }
+		inline void							SetChunkSize( uint32_t _ui32Size ) { m_ui32ChunkSize = _ui32Size; }
 
 		/**
 		 * Maps a region of the file into memory.
@@ -348,7 +348,7 @@ namespace mx {
 		MX_FILE_HANDLE						m_hFile = MX_INVALID_FILE;								/**< OS file handle (HANDLE or fd). */
 		MX_MAP_HANDLE						m_hMap = MX_INVALID_MAP;								/**< File-mapping object handle. */
 		mutable CRegionMap					m_rmMap;												/**< Reusable region map. */
-		uint32_t							m_dwChunkSize = static_cast<uint32_t>(8 * 1024 * 1024);	/**< Mapping chunk size in bytes. */
+		uint32_t							m_ui32ChunkSize = static_cast<uint32_t>(8 * 1024 * 1024);	/**< Mapping chunk size in bytes. */
 		bool								m_bIsEmpty = true;										/**< Flag indicating whether the file is empty. */
 		bool								m_bWritable = false;									/**< Flag indicating writable access. */
 		mutable uint64_t					m_ui64Size = 0;											/**< Cached file size in bytes. */

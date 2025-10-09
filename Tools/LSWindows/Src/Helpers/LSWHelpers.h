@@ -865,6 +865,16 @@ namespace lsw {
 
 	class CHelpers {
 	public :
+		// == Enumerations.
+		/** Mask for DrawRectOutlineMasked(). */
+		enum LSW_RECT_SIDE {
+			LSW_RS_TOP		= 1U << 0,
+			LSW_RS_LEFT		= 1U << 1,
+			LSW_RS_BOTTOM	= 1U << 2,
+			LSW_RS_RIGHT	= 1U << 3,
+		};
+
+
 		// == Types.
 		/** Location of a found menu item. */
 		struct LSW_MENU_LOC {
@@ -1085,6 +1095,66 @@ namespace lsw {
 			const int iY = ( (GetRValue( _crBack ) * 299) + (GetGValue( _crBack ) * 587) + (GetBValue( _crBack ) * 114) ) / 1000;
 			return iY >= 140 ? RGB( 0, 0, 0 ) : RGB( 255, 255, 255 );
 		}
+
+		/**
+		 * Draw a 1-pixel outline around a rectangle according to a side mask.
+		 *
+		 * \brief
+		 * Renders individual 1-pixel strokes for the rectangle's top, left, bottom, and/or right
+		 * edges based on a 4-bit mask. Each bit enables one side: bit 0 = top, bit 1 = left,
+		 * bit 2 = bottom, bit 3 = right. Uses FillRect with a solid brush for pixel-exact lines.
+		 *
+		 * \param _hDc The destination device context.
+		 * \param _rcRect The target rectangle in client coordinates.
+		 * \param _uiMask The side mask: LSW_RS_TOP(1), LSW_RS_LEFT(2), LSW_RS_BOTTOM(4), LSW_RS_RIGHT(8).
+		 * \param _crColor The outline color (COLORREF).
+		 */
+		static void							DrawRectOutlineMasked( HDC _hDc, const RECT &_rcRect, UINT _uiMask, COLORREF _crColor ) {
+			// Nothing to draw if empty.
+			if ( _rcRect.right <= _rcRect.left || _rcRect.bottom <= _rcRect.top || !_uiMask ) { return; }
+			
+
+			RECT rTmp;
+			auto hBrush = lsw::CBase::BrushCache().Brush( static_cast<COLORREF>((_crColor) & RGB( 0xFF, 0xFF, 0xFF )) );
+			if ( !hBrush ) { return; }
+
+			// Top: [left, top, right, top+1).
+			if ( _uiMask & LSW_RS_TOP ) {
+				rTmp.left = _rcRect.left;
+				rTmp.top = _rcRect.top;
+				rTmp.right = _rcRect.right;
+				rTmp.bottom = _rcRect.top + 1;
+				::FillRect( _hDc, &rTmp, hBrush );
+			}
+
+			// Left: [left, top, left+1, bottom).
+			if ( _uiMask & LSW_RS_LEFT ) {
+				rTmp.left = _rcRect.left;
+				rTmp.top = _rcRect.top;
+				rTmp.right = _rcRect.left + 1;
+				rTmp.bottom = _rcRect.bottom;
+				::FillRect( _hDc, &rTmp, hBrush );
+			}
+
+			// Bottom: [left, bottom-1, right, bottom).
+			if ( _uiMask & LSW_RS_BOTTOM ) {
+				rTmp.left = _rcRect.left;
+				rTmp.top = _rcRect.bottom - 1;
+				rTmp.right = _rcRect.right;
+				rTmp.bottom = _rcRect.bottom;
+				::FillRect( _hDc, &rTmp, hBrush );
+			}
+
+			// Right: [right-1, top, right, bottom).
+			if ( _uiMask & LSW_RS_RIGHT ) {
+				rTmp.left = _rcRect.right - 1;
+				rTmp.top = _rcRect.top;
+				rTmp.right = _rcRect.right;
+				rTmp.bottom = _rcRect.bottom;
+				::FillRect( _hDc, &rTmp, hBrush );
+			}
+		}
+
 
 		/**
 		 * Gets the average character width for the font set on the given HDC.

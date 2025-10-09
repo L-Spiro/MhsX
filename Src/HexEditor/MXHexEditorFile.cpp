@@ -21,8 +21,8 @@ namespace mx {
 	}
 
 	// Read from the given data stream.
-	bool CHexEditorFile::Read( uint64_t _ui64Addr, void * _pvDest, size_t _sSize ) const {
-		return false;
+	bool CHexEditorFile::Read( uint64_t _ui64Addr, CBuffer &_bDst, size_t _sSize ) const {
+		return m_lcwfwFile.Read( _ui64Addr, _bDst, _sSize );
 	}
 
 	// Does the given data stream allow insertion and deletion?  Processes return true.

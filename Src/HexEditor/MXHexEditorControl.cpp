@@ -407,8 +407,9 @@ namespace mx {
 	// Sets a default font.
 	bool CHexEditorControl::ChooseDefaultFont( MX_FONT_SET &_fsFont, WORD _wDpi, HWND _hWnd ) {
 		static const wchar_t * s_ppwszFaces[] = {
-			L"Droid Sans Mono",   // Preferred.
-			L"Consolas",          // Modern Windows TT.
+			//L"Brush Script MT",
+			//L"Droid Sans Mono",   // Preferred.
+			//L"Consolas",          // Modern Windows TT.
 			L"Lucida Console"     // Older Windows TT.
 		};
 
@@ -460,10 +461,32 @@ namespace mx {
 		const int iGutterW = ComputeAddressGutterWidthPx();
 		lsw::LSW_RECT rTmp = _rRect;
 		int iX = iGutterW - m_ui64HPx, iY = 0;
-		DrawArea( _hDc, iX, stAll.bShowRuler ? GetRulerHeightPx() : 0, stAll.dfLeftNumbersFmt, false, m_i32PageLines + 1 );
-		if ( stAll.bShowRightArea ) {
-			DrawArea( _hDc, iX + ComputeAreaWidthPx( stAll.dfLeftNumbersFmt ),
-				stAll.bShowRuler ? GetRulerHeightPx() : 0, stAll.dfRightNumbersFmt, true, m_i32PageLines + 1 );
+		{
+			if ( m_pheiTarget ) {
+				if ( m_pheiTarget->Read( stAll.daAddressStyle.ui64FirstVisibleLine * stAll.uiBytesPerRow, m_bCurBuffer, (m_i32PageLines + 1) * stAll.uiBytesPerRow ) ) {
+					int32_t i32Top = stAll.bShowRuler ? GetRulerHeightPx() : 0;
+					DrawArea( _hDc, iX, i32Top, stAll.dfLeftNumbersFmt, false, m_i32PageLines + 1, m_bCurBuffer );
+					if ( stAll.bShowRightArea ) {
+						DrawArea( _hDc, iX + ComputeAreaWidthPx( stAll.dfLeftNumbersFmt ) + stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx,
+							i32Top, stAll.dfRightNumbersFmt, true, m_i32PageLines + 1, m_bCurBuffer );
+
+						// Draw the separator.
+						lsw::LSW_RECT rSep;
+						rSep.left = iX + ComputeAreaWidthPx( stAll.dfLeftNumbersFmt );
+						rSep.right = rSep.left + stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx;
+						rSep.top = i32Top;
+						rSep.bottom = rTmp.bottom;
+						::FillRect( _hDc, &rSep,
+							lsw::CBase::BrushCache().Brush( MX_GetRgbValue( BackColors()->crEditor ) ) );
+						if ( MX_GetAValue( ForeColors()->crAreaSeparator ) ) {
+							rSep.left += stAll.i32PadNumbersLeftPx;
+							rSep.right -= stAll.i32PadNumbersRightPx;
+							::FillRect( _hDc, &rSep,
+								lsw::CBase::BrushCache().Brush( MX_GetRgbValue( ForeColors()->crAreaSeparator ) ) );
+						}
+					}
+				}
+			}
 		}
 		
 		
@@ -543,7 +566,7 @@ namespace mx {
 
 
 		lsw::LSW_SETBKMODE sbmBkMode( _hDc, TRANSPARENT );
-		lsw::LSW_SETTEXTCOLOR stcTextColor( _hDc, MX_GetRgbValue( ForeColors()->crEditor ) );
+		lsw::LSW_SETTEXTCOLOR stcTextColor( _hDc, MX_GetRgbValue( ForeColors()->crLineNumbers ) );
 
 		// Helpers: convert value to string in base, then apply options.
 		auto ToBase = [&]( uint64_t _ui64V, uint32_t _ui32Base, bool _bLower ) -> std::wstring {
@@ -651,7 +674,7 @@ namespace mx {
 			const int32_t iY = _iYTop + int32_t( I ) * iLineAdv;
 
 			// Decimal is right-aligned by spaces we injected above; just draw at left edge.
-			::TextOutW( _hDc, _iXLeft, iY, wsTmp.c_str(), static_cast<int32_t>(wsTmp.size()) );
+			::TextOutW( _hDc, _iXLeft, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int32_t>(wsTmp.size()) );
 		}
 	}
 
@@ -683,38 +706,44 @@ namespace mx {
 		lsw::LSW_SETBKMODE sbmBkMode( _hDc, TRANSPARENT );
 		lsw::LSW_SETTEXTCOLOR stcTextColor( _hDc, MX_GetRgbValue( ForeColors()->crRulerFileBar ) );
 
+		uint32_t ui32Digits = DigitCount( stAll.uiBytesPerRow - 1, 16 );
+
 		// Helper: hex label for a group start index (byte index within row).
-		auto HexLabel = []( uint32_t _ui32V ) -> std::wstring {
+		auto HexLabel = []( uint32_t _ui32V, uint32_t _ui32Digits ) -> std::wstring {
 			static const wchar_t * pwsS = L"0123456789ABCDEF";
 			std::wstring wsOut;
-			if ( _ui32V < 16U ) { wsOut.push_back( pwsS[_ui32V] ); }
+			if MX_LIKELY( _ui32V < 16U && _ui32Digits == 1 ) { wsOut.push_back( pwsS[_ui32V] ); }
 			else {
-				// wider rows: use more digits
+				// Wider rows: use more digits.
 				uint32_t ui32N = _ui32V;
 				std::wstring wsTmp;
-				while ( ui32N ) { wsTmp.push_back( pwsS[ui32N & 0xF] ); ui32N >>= 4; }
+				while ( ui32N ) { wsTmp.push_back( pwsS[ui32N&0xF] ); ui32N >>= 4; }
+				while ( wsTmp.size() < _ui32Digits ) { wsTmp.push_back( L'0' ); }
 				std::reverse( wsTmp.begin(), wsTmp.end() );
 				wsOut.swap( wsTmp );
 			}
 			return wsOut;
 		};
 
+		
 		// Draw one area (left or right) using its data format and group rules.
-		auto DrawArea = [&]( bool _bRightArea, MX_DATA_FMT _dfFmt, int32_t _iAreaXBase ) {
+		auto DrawArea = [&]( bool _bRightArea, MX_DATA_FMT _dfFmt, int32_t _iAreaXBase, uint32_t _ui32Digits ) {
+			if ( _dfFmt == MX_DF_CHAR ) { _ui32Digits = 1; }
 			// Number of groups in this area.
-			const uint32_t ui32Bpr		= stAll.uiBytesPerRow ? stAll.uiBytesPerRow : 16;
+			const uint32_t ui32Bpr		= stAll.uiBytesPerRow;
 			const uint32_t ui32GroupSz	= stAll.uiGroupSize ? stAll.uiGroupSize : 1;
 			if ( ui32GroupSz == 0U ) { return; }
 
 			const uint32_t ui32Groups = (ui32Bpr + ui32GroupSz - 1U) / ui32GroupSz;
 
-			for ( uint32_t I = 0; I < ui32Bpr; ++I ) {
+			uint32_t ui32Stride = std::min<uint32_t>( _ui32Digits, 2 );
+			for ( uint32_t I = 0; I < ui32Bpr; I += ui32Stride ) {
 				int32_t iGX = 0, iGW = 0;
 				if ( !GetTextRectForIndex( _dfFmt, I, _bRightArea, _iAreaXBase, iGX, iGW ) ) { break; }
 
 				// Label is the byte index of the first item in the group within the row.
 				const uint32_t ui32ByteIndexInRow = I;
-				std::wstring wsTmp = HexLabel( ui32ByteIndexInRow );
+				std::wstring wsTmp = HexLabel( _dfFmt == MX_DF_CHAR ? (ui32ByteIndexInRow & 0x0F) : ui32ByteIndexInRow, _ui32Digits );
 
 				// Center horizontally inside [iGX, iGW].
 				SIZE sSize {};
@@ -727,12 +756,12 @@ namespace mx {
 		};
 
 		{
-			const int32_t i32LeftBase = _iXLeft; // already the start of scrollable content
-			DrawArea( false, _dfLeftFmt, i32LeftBase );
+			const int32_t i32LeftBase = _iXLeft;
+			DrawArea( false, _dfLeftFmt, i32LeftBase, ui32Digits );
 		}
 		if ( stAll.bShowRightArea ) {
-			const int32_t i32RightBase = _iXLeft + ComputeAreaWidthPx( _dfLeftFmt );
-			DrawArea( true, _dfRightFmt, i32RightBase );
+			const int32_t i32RightBase = _iXLeft + ComputeAreaWidthPx( _dfLeftFmt ) + stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx;
+			DrawArea( true, _dfRightFmt, i32RightBase, ui32Digits );
 		}
 	}
 
@@ -745,8 +774,9 @@ namespace mx {
 	 * \param _dfFmt Format of the area.
 	 * \param _bRightArea False for the left numbers area; true for the right text area.
 	 * \param _ui32LinesToDraw The number of rows to draw (typically page lines).
+	 * \param _bData The actual values at the addresses to render.
 	 **/
-	void CHexEditorControl::DrawArea( HDC _hDc, int _iXLeft, int _iYTop, MX_DATA_FMT _dfFmt, bool _bRightArea, uint32_t _ui32LinesToDraw ) {
+	void CHexEditorControl::DrawArea( HDC _hDc, int _iXLeft, int _iYTop, MX_DATA_FMT _dfFmt, bool _bRightArea, uint32_t _ui32LinesToDraw, const CHexEditorInterface::CBuffer &_bData ) {
 		const MX_STYLE & stAll = (*CurStyle());
 		if ( !stAll.bShowAddressGutter || _ui32LinesToDraw == 0 || nullptr == Font() ) { return; }
 		const MX_FONT_SET & fsFont = (*Font());
@@ -763,32 +793,53 @@ namespace mx {
 		// Line height.
 		const int32_t iLineAdv = fsFont.iCharCy + stAll.i32LineSpacingPx;
 
+		// Fill in the most likely color for each cell.
+		COLORREF crBackColor = MX_GetRgbValue( BackColors()->crEditor );
+		{
+			lsw::LSW_RECT rRect;
+			rRect.top = _iYTop;
+			rRect.left = _iXLeft;
+			rRect.right = rRect.left + ComputeAreaWidthPx( _dfFmt );
+			rRect.bottom = rRect.top + iLineAdv * _ui32LinesToDraw;
+			::FillRect( _hDc, &rRect,
+				lsw::CBase::BrushCache().Brush( crBackColor ) );
+		}
+
 		// First visible line (top) comes from style; draw consecutive lines.
 		uint64_t ui64Line = asAddrStyle.ui64FirstVisibleLine;
+		uint64_t ui64StartAddress = asAddrStyle.ui64FirstVisibleLine * ui32Bpr;
 
 		auto ui64MaxLines = TotalLines() - ui64Line;
 		_ui32LinesToDraw = uint32_t( std::min<uint64_t>( _ui32LinesToDraw, ui64MaxLines ) );
+
+		// The values to render.
+		const uint8_t * pui8Data = _bData.data();
+		size_t sDataSize = _bData.size();
+
+		lsw::LSW_SETBKMODE sbmBkMode( _hDc, TRANSPARENT );
+		lsw::LSW_SETTEXTCOLOR stcTextColor( _hDc, MX_GetRgbValue( ForeColors()->crEditor ) );
 		std::wstring wsTmp;
 		for( uint32_t I = 0; I < _ui32LinesToDraw; ++I, ui64Line += ui32Bpr ) {
-			//wsTmp = FormatAddressForLine( ui64Line );
 			const int32_t iY = _iYTop + int32_t( I ) * iLineAdv;
 
 			// Draw the background.  Try to reduce to as few calls as possible for a row.
 			int iL, iW;
-			auto crColor = CellBgColor( ui64Line );
+			auto crColor = CellBgColor( ui64Line, pui8Data, sDataSize );
 			GetBackgrondRectForIndex( _dfFmt, 0, _bRightArea, _iXLeft, iL, iW );
 			for ( int32_t J = 1; J < ui32Bpr; ++J ) {
 				int iL2, iW2;
 				GetBackgrondRectForIndex( _dfFmt, J, _bRightArea, _iXLeft, iL2, iW2 );
-				auto crThisColor = CellBgColor( ui64Line + J );
+				auto crThisColor = CellBgColor( ui64Line + J, pui8Data + J, sDataSize - J );
 				if ( crThisColor != crColor || (iL + iW) == iL2 ) {
-					lsw::LSW_RECT rRect;
-					rRect.top = iY;
-					rRect.left = iL;
-					rRect.right = iL + iW;
-					rRect.bottom = rRect.top + iLineAdv;
-					::FillRect( _hDc, &rRect,
-						lsw::CBase::BrushCache().Brush( MX_GetRgbValue( crColor ) ) );
+					if ( crBackColor != MX_GetRgbValue( crColor ) ) {
+						lsw::LSW_RECT rRect;
+						rRect.top = iY;
+						rRect.left = iL;
+						rRect.right = iL + iW;
+						rRect.bottom = rRect.top + iLineAdv;
+						::FillRect( _hDc, &rRect,
+							lsw::CBase::BrushCache().Brush( MX_GetRgbValue( crColor ) ) );
+					}
 					iL = iL2, iW = iW2;
 					crColor = crThisColor;
 				}
@@ -797,20 +848,120 @@ namespace mx {
 				}
 			}
 			{
-				lsw::LSW_RECT rRect;
-				rRect.top = iY;
-				rRect.left = iL;
-				rRect.right = iL + iW;
-				rRect.bottom = rRect.top + iLineAdv;
-				::FillRect( _hDc, &rRect,
-					lsw::CBase::BrushCache().Brush( MX_GetRgbValue( crColor ) ) );
+				if ( crBackColor != MX_GetRgbValue( crColor ) ) {
+					lsw::LSW_RECT rRect;
+					rRect.top = iY;
+					rRect.left = iL;
+					rRect.right = iL + iW;
+					rRect.bottom = rRect.top + iLineAdv;
+					::FillRect( _hDc, &rRect,
+						lsw::CBase::BrushCache().Brush( MX_GetRgbValue( crColor ) ) );
+				}
 			}
 
 			for ( int32_t J = 0; J < ui32Bpr; ++J ) {
+				if ( J >= sDataSize ) { break; }
+				
+				uint8_t ui8Value = J < sDataSize ? pui8Data[J] : 0;
+				GetTextRectForIndex( _dfFmt, J, _bRightArea, _iXLeft, iL, iW );
+				
+				if ( MX_DF_CHAR != _dfFmt ) {
+					// Draw division lines.
+					int32_t iL2, iW2;
+					GetBackgrondRectForIndex( _dfFmt, J, _bRightArea, _iXLeft, iL2, iW2 );
+					lsw::LSW_RECT rRect;
+					rRect.top = iY - 1;
+					rRect.left = iL2;
+					rRect.right = iL2 + iW2 + 1;
+					rRect.bottom = iY + iLineAdv;
+
+					uint64_t ui64ThisAddr = ui64StartAddress + I * ui32Bpr + J;
+					uint64_t ui64ThisMod = ui64ThisAddr % stAll.ui64DivisionSpacing;
+					uint64_t ui64ThisDiv = ui64ThisAddr / stAll.ui64DivisionSpacing;
+					lsw::CHelpers::DrawRectOutlineMasked( _hDc, rRect,
+						//(ui64ThisAddr >= ui32Bpr && ((ui64ThisAddr - ui32Bpr) % stAll.ui64DivisionSpacing != ui64ThisMod) ? lsw::CHelpers::LSW_RS_TOP : 0) |																						// Cell above this one.
+						(((ui64ThisAddr + ui32Bpr) % stAll.ui64DivisionSpacing != ui64ThisMod && (ui64ThisAddr + ui32Bpr) / stAll.ui64DivisionSpacing != ui64ThisDiv) ? lsw::CHelpers::LSW_RS_BOTTOM : 0) |											// Cell below this one.
+						((((ui64ThisAddr + 1) % stAll.ui64DivisionSpacing) == 0) ? lsw::CHelpers::LSW_RS_RIGHT : 0),																																// Cell to the right.
+						MX_GetRgbValue( ForeColors()->crDivisionLines ) );
+				}
+				
+				switch ( _dfFmt ) {
+					case MX_DF_OCT : {
+						try {
+							wsTmp.resize( 3 );
+							for ( size_t K = 0; K < 3; ++K ) {
+								wsTmp[2-K] = (ui8Value & 0x07) + L'0';
+								ui8Value >>= 3;
+							}
+
+							
+						}
+						catch ( ... ) {}
+						break;
+					}
+					case MX_DF_BIN : {
+						try {
+							wsTmp.resize( 8 );
+							for ( size_t K = 0; K < 8; ++K ) {
+								wsTmp[7-K] = (ui8Value & 0x01) + L'0';
+								ui8Value >>= 1;
+							}
+						}
+						catch ( ... ) {}
+						break;
+					}
+					case MX_DF_DEC : {
+						try {
+							wsTmp.resize( 3 );
+							for ( size_t K = 0; K < 3; ++K ) {
+								wsTmp[2-K] = (ui8Value % 10) + L'0';
+								ui8Value /= 10;
+							}
+						}
+						catch ( ... ) {}
+						break;
+					}
+					case MX_DF_CHAR : {
+						// TODO: Account for advanced character-set functionality.
+						try {
+							wsTmp.resize( 1 );
+							if ( !CUtilities::ByteIsPrintable( ui8Value, true ) ) { ui8Value = L'.'; }
+							wsTmp[0] = wchar_t( ui8Value );
+						}
+						catch ( ... ) {}
+						break;
+					}
+					default : {
+						try {
+							wsTmp.resize( 2 );
+							for ( size_t K = 0; K < 2; ++K ) {
+								uint8_t uiThis = (ui8Value & 0x0F);
+								if ( uiThis >= 10 ) {
+									wsTmp[1-K] = uiThis + (L'A' - 10);
+								}
+								else {
+									wsTmp[1-K] = uiThis + L'0';
+								}
+								ui8Value >>= 4;
+							}
+						}
+						catch ( ... ) {}
+						break;
+					}
+				}
+				::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int32_t>(wsTmp.size()) );
 			}
 
 			// Decimal is right-aligned by spaces we injected above; just draw at left edge.
-			//::TextOutW( _hDc, _iXLeft, iY, wsTmp.c_str(), static_cast<int32_t>(wsTmp.size()) );
+			
+			if ( ui32Bpr >= sDataSize ) {
+				pui8Data = nullptr;
+				sDataSize = 0;
+			}
+			else {
+				pui8Data += ui32Bpr;
+				sDataSize -= ui32Bpr;
+			}
 		}
 	}
 
@@ -818,9 +969,11 @@ namespace mx {
 	 * Gets the color of a hex/octal/binary cell by address.
 	 * 
 	 * \param _ui64Address The address of the data in the cell.
+	 * \param _pui8Value The address of the data in the cell.
+	 * \param _sSize The address of the data in the cell.
 	 * \return Returns the background color for the given cell.
 	 **/
-	COLORREF CHexEditorControl::CellBgColor( uint64_t /*_ui64Address*/ ) {
+	COLORREF CHexEditorControl::CellBgColor( uint64_t /*_ui64Address*/, const uint8_t * /*_pui8Value*/, size_t /*_sSize*/ ) {
 		return BackColors()->crEditor;
 	}
 
@@ -894,23 +1047,23 @@ namespace mx {
 				// Internal grouping (HEX): ':' every 4 hex digits.
 				if ( bHex && asAddrStyle.bShowColonIn && ui32Digits > 4 ) {
 					const uint32_t ui32Groups = (ui32Digits - 1U) / 4U;
-					iWidth += int( ui32Groups ) * agGlyphs.iColonCx;
+					iWidth += int( ui32Groups ) * agGlyphs.i32ColonCx;
 				}
 				// Trailing colon.
-				if ( asAddrStyle.bShowColonAfter ) { iWidth += agGlyphs.iColonCx; }
+				if ( asAddrStyle.bShowColonAfter ) { iWidth += agGlyphs.i32ColonCx; }
 				// Type spec 'h'/'o'.
 				if ( asAddrStyle.bShowTypeSpec ) {
-					if ( bHex ) { iWidth += agGlyphs.iSpecHexCx; }
-					else if ( bOct ) { iWidth += agGlyphs.iSpecOctCx; }
+					if ( bHex ) { iWidth += agGlyphs.i32SpecHexCx; }
+					else if ( bOct ) { iWidth += agGlyphs.i32SpecOctCx; }
 				}
 				// Short suffix 'w'.
 				if ( asAddrStyle.bUseShortSuffixW && (asAddrStyle.afFormat == MX_AF_SHORT_HEX || asAddrStyle.afFormat == MX_AF_SHORT_DEC) ) {
-					iWidth += agGlyphs.iShortWcx;
+					iWidth += agGlyphs.i32ShortWcx;
 				}
 				// Optional left-space padding for right-aligned DEC up to MinDigits (if you do that).
 				if ( bDec && ui32MinDigits && ui32Digits < ui32MinDigits ) {
 					const uint32_t ui32Pads = ui32MinDigits - ui32Digits;
-					iWidth += int( ui32Pads ) * agGlyphs.iSpaceCx;
+					iWidth += int( ui32Pads ) * agGlyphs.i32SpaceCx;
 				}
 			}
 		}
@@ -940,9 +1093,9 @@ namespace mx {
 		MX_DATA_FMT _dfDataFmt,
 		uint32_t _ui32Index,
 		bool _bRightArea,
-		int _iXBase,
-		int &_iXLeft,
-		int &_iWidth ) const {
+		int32_t _iXBase,
+		int32_t &_iXLeft,
+		int32_t &_iWidth ) const {
 		const MX_STYLE & stStyle = (*CurStyle());
 		const MX_FONT_SET & fsFont = (*Font());
 		const MX_ADDR_GLYPHS & agGlyphs = fsFont.agGlyphs;
@@ -957,7 +1110,7 @@ namespace mx {
 				case MX_DF_DEC :	{ return 3 * agGlyphs.iDigitMaxCx; }				// "255"
 				case MX_DF_OCT :	{ return 3 * agGlyphs.iDigitMaxCx; }				// "377"
 				case MX_DF_BIN :	{ return 8 * agGlyphs.iDigitMaxCx; }				// "11111111"
-				case MX_DF_CHAR :	{ return fsFont.tmMetrics.tmMaxCharWidth; }			// Printable cell.
+				case MX_DF_CHAR :	{ return agGlyphs.i32MaxAsciiAnsi; }				// Printable cell.
 				default :			{ return 2 * agGlyphs.iDigitMaxCx; }
 			}
 		};
@@ -967,26 +1120,17 @@ namespace mx {
 		const uint32_t ui32GroupSz	= (stStyle.uiGroupSize && _dfDataFmt != MX_DF_CHAR) ? stStyle.uiGroupSize : 1;
 
 		const int iCellCx			= CellWidthForFmt( _dfDataFmt );
-		const int iSpaceB			= int( _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiSpacesBetweenBytes ) * agGlyphs.iSpaceCx;
+		const int iSpaceB			= int( _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiSpacesBetweenBytes ) * agGlyphs.i32SpaceCx;
 
 		// Prepend area-local leading pad (for left numbers or right text; we baked pads into our area widths).
 		int iX = _iXBase;
-		if ( !_bRightArea ) {
-			// Left numbers starts with its own left pad.
-			iX += stStyle.i32PadNumbersLeftPx;
-		}
-		else {
-			// Right text begins after the inter-block gap.
-			iX += stStyle.i32PadBetweenNumbersAndTextPx;
-		}
-
 		if ( _dfDataFmt == MX_DF_CHAR ) {
 			iX += (iCellCx * _ui32Index);
 			_iXLeft = iX;
 		}
 		else {
 			iX += (iCellCx * _ui32Index) + (((_ui32Index / ui32GroupSz)) * iSpaceB);
-			_iXLeft = iX + (agGlyphs.iSpaceCx / 2);
+			_iXLeft = iX + (agGlyphs.i32SpaceCx / 2);
 		}
 
 		
@@ -1009,9 +1153,9 @@ namespace mx {
 		MX_DATA_FMT _dfDataFmt,
 		uint32_t _ui32Index,
 		bool _bRightArea,
-		int _iXBase,
-		int &_iXLeft,
-		int &_iWidth ) const {
+		int32_t _iXBase,
+		int32_t &_iXLeft,
+		int32_t &_iWidth ) const {
 		if MX_UNLIKELY( !GetTextRectForIndex( _dfDataFmt, _ui32Index, _bRightArea, _iXBase, _iXLeft, _iWidth ) ) { return false; }
 		if ( _dfDataFmt == MX_DF_CHAR ) { return true; }
 
@@ -1020,7 +1164,7 @@ namespace mx {
 
 		const uint32_t ui32GroupSz	= (stStyle.uiGroupSize && _dfDataFmt != MX_DF_CHAR) ? stStyle.uiGroupSize : 1;
 		const uint32_t ui32Mod = _ui32Index % ui32GroupSz;
-		const int i32Adj = agGlyphs.iSpaceCx / 2;
+		const int i32Adj = agGlyphs.i32SpaceCx / 2;
 		// If at the group start, increase size to the left.
 		if ( ui32Mod == 0 ) {
 			_iXLeft -= i32Adj;
@@ -1058,7 +1202,7 @@ namespace mx {
 						case MX_DF_DEC :	{ return 3 * agGlyphs.iDigitMaxCx; }					// "255"
 						case MX_DF_OCT :	{ return 3 * agGlyphs.iDigitMaxCx; }					// "377"
 						case MX_DF_BIN :	{ return 8 * agGlyphs.iDigitMaxCx; }					// "11111111"
-						case MX_DF_CHAR :	{ return fsFont.tmMetrics.tmMaxCharWidth; }				// Fixed cell.
+						case MX_DF_CHAR :	{ return agGlyphs.i32MaxAsciiAnsi; }					// Fixed cell.
 						default :			{ return 2 * agGlyphs.iDigitMaxCx; }
 					}
 				};
@@ -1067,9 +1211,9 @@ namespace mx {
 				const uint32_t ui32GroupSz	= (stStyle.uiGroupSize && _dfDataFmt != MX_DF_CHAR) ? stStyle.uiGroupSize : 1;		// Items per group.
 
 				const int iCellCx			= CellWidthForFmt( _dfDataFmt );
-				const int iSpaceB			= int( _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiSpacesBetweenBytes ) * agGlyphs.iSpaceCx;
+				const int iSpaceB			= int( _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiSpacesBetweenBytes ) * agGlyphs.i32SpaceCx;
 
-				int iTotal = stStyle.i32PadNumbersLeftPx;
+				int iTotal = 0;//stStyle.i32PadNumbersLeftPx;
 
 				if ( _dfDataFmt == MX_DF_CHAR ) {
 					iTotal += (iCellCx * ui32Bpr);
@@ -1078,7 +1222,7 @@ namespace mx {
 					iTotal += (iCellCx * ui32Bpr) + (((ui32Bpr / ui32GroupSz) - 0) * iSpaceB);
 				}
 
-				iTotal += stStyle.i32PadNumbersRightPx;
+				//iTotal += stStyle.i32PadNumbersRightPx;
 
 				iCx = iTotal;// + (iCellCx / 1);
 			}

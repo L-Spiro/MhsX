@@ -196,31 +196,31 @@ namespace mx {
 	 * 
 	 * \param _lpvBuffer Destination buffer to receive the bytes.
 	 * \param _ui64From File-relative byte offset to begin reading.
-	 * \param _dwNumberOfBytesToRead Number of bytes to read into the destination buffer.
+	 * \param _sNumberOfBytesToRead Number of bytes to read into the destination buffer.
 	 * \param _prmMap Optional pointer to a CRegionMap to reuse; if nullptr, a transient map is used internally.
 	 * \return Returns the number of bytes actually read; 0 on failure.
 	 */
-	uint32_t CFileMap::Read( LPVOID _lpvBuffer, uint64_t _ui64From, uint32_t _dwNumberOfBytesToRead, CRegionMap * _prmMap ) const {
+	size_t CFileMap::Read( LPVOID _lpvBuffer, uint64_t _ui64From, size_t _sNumberOfBytesToRead, CRegionMap * _prmMap ) const {
 		if MX_UNLIKELY( _ui64From >= Size() ) { return 0; }
 		CRegionMap * pmrUseMe = _prmMap ? _prmMap : &m_rmMap;
-		_dwNumberOfBytesToRead = static_cast<uint32_t>(std::min( static_cast<uint64_t>(_dwNumberOfBytesToRead), Size() - _ui64From ));
+		_sNumberOfBytesToRead = static_cast<size_t>(std::min( static_cast<uint64_t>(_sNumberOfBytesToRead), Size() - _ui64From ));
 		// Read in 8-megabyte chunks.
 		uint8_t * pbDst = static_cast<uint8_t *>(_lpvBuffer);
-		uint32_t dwRead = 0;
-		while ( _dwNumberOfBytesToRead ) {
-			uint32_t dwReadAmount = std::min( m_dwChunkSize, _dwNumberOfBytesToRead );
+		size_t sRead = 0;
+		while ( _sNumberOfBytesToRead ) {
+			uint32_t dwReadAmount = std::min<size_t>( m_ui32ChunkSize, _sNumberOfBytesToRead );
 			if MX_UNLIKELY( !MapRegion( _ui64From, dwReadAmount, pmrUseMe ) ) {
-				return dwRead;
+				return sRead;
 			}
 			std::memcpy( pbDst, &pmrUseMe->Data()[_ui64From-pmrUseMe->Start()], dwReadAmount );
 
 
-			_dwNumberOfBytesToRead -= dwReadAmount;
+			_sNumberOfBytesToRead -= dwReadAmount;
 			_ui64From += dwReadAmount;
 			pbDst += dwReadAmount;
-			dwRead += dwReadAmount;
+			sRead += dwReadAmount;
 		}
-		return dwRead;
+		return sRead;
 	}
 
 	/**
@@ -241,7 +241,7 @@ namespace mx {
 		const BYTE * pbSrc = static_cast<const BYTE *>(_lpvBuffer);
 		uint32_t dwWritten = 0;
 		while ( _dwNumberOfBytesToWrite ) {
-			uint32_t dwWriteAmount = std::min( m_dwChunkSize, _dwNumberOfBytesToWrite );
+			uint32_t dwWriteAmount = std::min( m_ui32ChunkSize, _dwNumberOfBytesToWrite );
 			if MX_UNLIKELY( !MapRegion( _ui64From, dwWriteAmount, pmrUseMe ) ) {
 				return dwWritten;
 			}

@@ -2,6 +2,7 @@
 
 #include <LSWWin.h>
 #include "../Files/MXFileMap.h"
+#include "../HexEditor/MXHexEditorInterface.h"
 
 #include <filesystem>
 #include <mutex>
@@ -30,6 +31,9 @@ namespace mx {
 
 		// Is the given data stream read-only?
 		inline bool												ReadOnly() const { return m_fmMainMap.ReadOnly(); }
+
+		// Read from the file.
+		bool													Read( uint64_t _ui64Addr, CHexEditorInterface::CBuffer &_bDst, size_t _sSize ) const;
 
 
 	protected :

@@ -67,13 +67,15 @@ namespace mx {
 		// == Types.
 		/** Measured glyph metrics for the address gutter font. */
 		struct MX_ADDR_GLYPHS {
-			int										iDigitMaxCx = 0;										// Max over '0'..'9' (and 'A'..'F' when HEX).
-			int										iDigitMaxCxLower = 0;									// Max over '0'..'9' (and 'a'..'f' when HEX).
-			int										iColonCx = 0;											// Width of ':'.
-			int										iSpaceCx = 0;											// Width of ' '.
-			int										iSpecHexCx = 0;											// Width of 'h'.
-			int										iSpecOctCx = 0;											// Width of 'o'.
-			int										iShortWcx = 0;											// Width of 'w'.
+			int32_t									iDigitMaxCx = 0;										// Max over '0'..'9' (and 'A'..'F' when HEX).
+			int32_t									iDigitMaxCxLower = 0;									// Max over '0'..'9' (and 'a'..'f' when HEX).
+			int32_t									i32ColonCx = 0;											// Width of ':'.
+			int32_t									i32SpaceCx = 0;											// Width of ' '.
+			int32_t									i32SpecHexCx = 0;										// Width of 'h'.
+			int32_t									i32SpecOctCx = 0;										// Width of 'o'.
+			int32_t									i32ShortWcx = 0;										// Width of 'w'.
+			int32_t									i32MaxAscii = 0;										// Maximum width of ASCII characters.
+			int32_t									i32MaxAsciiAnsi = 0;									// Maximum width of ASCII+ANSI characters.
 		};
 
 		/** A set of font data. */
@@ -84,8 +86,8 @@ namespace mx {
 			MX_ADDR_GLYPHS							agGlyphs;												// Glyph settings (filled on demand).
 			int32_t									i32PointSize = DefaultPointSize();						// The font point size.
 
-			int										iCharCx = 0;
-			int										iCharCy = 0;											// Baseline advance.
+			int32_t									iCharCx = 0;
+			int32_t									iCharCy = 0;											// Baseline advance.
 		};
 
 		/** Creation parameters. */
@@ -265,6 +267,9 @@ namespace mx {
 			::InvalidateRect( Wnd(), NULL, FALSE );
 		}
 
+		// Gets the area separator width in pixels.
+		int32_t										AreaSeparatorWidth() const { return CurStyle()->i32PadBetweenNumbersAndTextPx + 6; }
+
 		// Registers the control if it has not been registered already.  Redundant calls have no effect.  Must be called before creating this control.
 		static void									PrepareControl();
 
@@ -301,26 +306,26 @@ namespace mx {
 		// == Types.
 		/** What to draw and how to size the address gutter. */
 		struct MX_ADDR_STYLE {
-			uint64_t								ui64StartAddress = 0;									// Starting address bias (Set Starting Address).
-			uint64_t								ui64FirstVisibleLine = 0;								// Top visible line index (0-based).
+			uint64_t								ui64StartAddress	= 0;								// Starting address bias (Set Starting Address).
+			uint64_t								ui64FirstVisibleLine= 0;								// Top visible line index (0-based).
 
-			uint32_t								ui32VisibleLines = 0;									// Count of visible lines.
+			uint32_t								ui32VisibleLines	= 0;								// Count of visible lines.
 
-			MX_ADDRESS_FMT							afFormat = MX_AF_BYTES_HEX;								// Address format.
-			bool									bLowercaseHex = false;									// Use lowercase a..f for HEX.
-			bool									bShowColonIn = true;									// Insert ':' every 4 HEX digits (>4 only).
-			bool									bShowColonAfter = false;								// Append ':' after the address.
-			bool									bShowTypeSpec = false;									// Append 'h' (hex) or 'o' (oct).
-			bool									bMinimizeDigits = false;								// Size digits for current page, not whole file.
-			bool									bUseShortSuffixW = true;								// Append 'w' for Short addressing (matches your examples).
+			MX_ADDRESS_FMT							afFormat			= MX_AF_BYTES_HEX;					// Address format.
+			bool									bLowercaseHex		= false;							// Use lowercase a..f for HEX.
+			bool									bShowColonIn		= true;								// Insert ':' every 4 HEX digits (>4 only).
+			bool									bShowColonAfter		= false;							// Append ':' after the address.
+			bool									bShowTypeSpec		= false;							// Append 'h' (hex) or 'o' (oct).
+			bool									bMinimizeDigits		= false;							// Size digits for current page, not whole file.
+			bool									bUseShortSuffixW	= true;								// Append 'w' for Short addressing.
 		};
 
 		/** General style settings. */
 		struct MX_STYLE {
-			MX_FONT_TYPE							ftFont = MX_FT_FIXED_ROW;								// The shared font to use.
+			MX_FONT_TYPE							ftFont				= MX_FT_FIXED_ROW;								// The shared font to use.
 			MX_ADDR_STYLE							daAddressStyle;											// Address style.
-			uint32_t								uiBytesPerRow = 16;										// Bytes per displayed row.
-			uint64_t								ui64FileSize = 0;										// File size in bytes (needed for address digits).
+			uint32_t								uiBytesPerRow		= 16;								// Bytes per displayed row.
+			uint64_t								ui64DivisionSpacing = 4;								// Spacing between division lines.
 
 			// Visibility.
 			bool									bShowAddressGutter	= true;
@@ -330,29 +335,29 @@ namespace mx {
 			bool									bShowRuler			= true;								// Show/hide ruler row.
 
 			// Left numbers formatting.
-			MX_DATA_FMT								dfLeftNumbersFmt = MX_DF_HEX;
-			uint32_t								uiGroupSize = 4;                   						// Extra spacing after every N bytes.
-			uint32_t								uiSpacesBetweenBytes = 1;          						// Count of ' ' between adjacent bytes.
+			MX_DATA_FMT								dfLeftNumbersFmt	= MX_DF_HEX;
+			uint32_t								uiGroupSize			= 1;                   				// Extra spacing after every N bytes.
+			uint32_t								uiSpacesBetweenBytes= 1;          						// Count of ' ' between adjacent bytes.
 			uint32_t								uiExtraSpacesBetweenGroups = 1;     					// Extra ' ' at group boundary.
 
 			// Right formatting.
-			MX_DATA_FMT								dfRightNumbersFmt = MX_DF_CHAR;
+			MX_DATA_FMT								dfRightNumbersFmt	= MX_DF_CHAR;
 
 			// Paddings/gaps (pixels).
-			int32_t									i32LeftAddrPadding = 3;									// Left padding.
-			int32_t									i32PadAfterGutterPx = 8;
-			int32_t									i32PadBetweenNumbersAndTextPx = 9;
-			int32_t									i32PadNumbersLeftPx = 0;
-			int32_t									i32PadNumbersRightPx = 0;
+			int32_t									i32LeftAddrPadding	= 3;								// Left padding.
+			int32_t									i32PadAfterGutterPx	= 8;
+			int32_t									i32PadBetweenNumbersAndTextPx = 3;
+			int32_t									i32PadNumbersLeftPx	= 3;
+			int32_t									i32PadNumbersRightPx= 3;
 			int32_t									i32PadScrollableLeftPx = 0;
 			int32_t									i32PadScrollableRightPx = 0;
 			int32_t									i32PadBeforeMiniMapPx = 8;
-			int32_t									i32LineSpacingPx = 2;
+			int32_t									i32LineSpacingPx	= 2;
 
 			// Ruler.
 
 			// Mini-map geometry (pixels).
-			int32_t									i32MiniMapWidthPx = 140;
+			int32_t									i32MiniMapWidthPx	= 140;
 		};
 
 
@@ -364,6 +369,8 @@ namespace mx {
 		MX_HEX_EDITOR_COLORS *						m_phecBackColors = nullptr;								// Pointer to shared background colors.
 		MX_EDIT_AS									m_eaEditAs = MX_ES_HEX;									// The view type.
 		std::map<uint64_t, COLORREF>				m_mColorLookup;											// Quick mixing of colors.
+
+		CHexEditorInterface::CBuffer				m_bCurBuffer;											// The current data buffer being displayed.
 
 		CHexEditorInterface *						m_pheiTarget = nullptr;									// The stream of data to handle.
 		MX_STYLE									m_sStyles[MX_ES_TOTAL];									// View settings.
@@ -401,7 +408,7 @@ namespace mx {
 		 *  height (m_iCyChar if set, otherwise the measured font metrics). Text is drawn with transparent
 		 *  background using CurStyle()->daAddressStyle.crText.
 		 */
-		void										DrawAddressGutter( HDC _hDc, int _iXLeft, int _iYTop, uint32_t _ui32LinesToDraw );
+		void										DrawAddressGutter( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, uint32_t _ui32LinesToDraw );
 
 		/**
 		 * Draws the ruler at the given position.
@@ -418,7 +425,7 @@ namespace mx {
 		 *  - Each group label is centered within its group rect, computed by GetTextRectForIndex().
 		 *  - The rulerfs height equals the base character height for the font; line spacing is ignored.
 		 */
-		void										DrawRuler( HDC _hDc, int _iXLeft, int _iYTop, MX_DATA_FMT _dfLeftFmt, MX_DATA_FMT _dfRightFmt );
+		void										DrawRuler( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, MX_DATA_FMT _dfLeftFmt, MX_DATA_FMT _dfRightFmt );
 
 		/**
 		 * Draws an area at a given position.
@@ -429,8 +436,9 @@ namespace mx {
 		 * \param _dfFmt Format of the area.
 		 * \param _bRightArea False for the left numbers area; true for the right text area.
 		 * \param _ui32LinesToDraw The number of rows to draw (typically page lines).
+		 * \param _bData The actual values at the addresses to render.
 		 **/
-		void										DrawArea( HDC _hDc, int _iXLeft, int _iYTop, MX_DATA_FMT _dfFmt, bool _bRightArea, uint32_t _ui32LinesToDraw );
+		void										DrawArea( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, MX_DATA_FMT _dfFmt, bool _bRightArea, uint32_t _ui32LinesToDraw, const CHexEditorInterface::CBuffer &_bData );
 
 		// Computes font metrics.
 		void										ComputeFontMetrics() {
@@ -442,7 +450,7 @@ namespace mx {
 		 *
 		 * Description: Base line height (m_iCyChar or measured glyph height) plus CurStyle()->i32LineSpacingPx.
 		 */
-		int											LineAdvanceCy() const {
+		int32_t										LineAdvanceCy() const {
 			return Font()->iCharCy + CurStyle()->i32LineSpacingPx;
 		}
 
@@ -456,9 +464,11 @@ namespace mx {
 		 * Gets the color of a hex/octal/binary cell by address.
 		 * 
 		 * \param _ui64Address The address of the data in the cell.
+		 * \param _pui8Value The address of the data in the cell.
+		 * \param _sSize The address of the data in the cell.
 		 * \return Returns the background color for the given cell.
 		 **/
-		COLORREF									CellBgColor( uint64_t _ui64Address );
+		COLORREF									CellBgColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize );
 
 		// Gets the minimum address digits.
 		uint32_t									MinAddrDigits() const {
@@ -477,7 +487,7 @@ namespace mx {
 		}
 
 		// Gets the address size (number of digits).
-		inline int									AddrDigitsForSize( uint64_t _ui64Size ) const {
+		inline int32_t								AddrDigitsForSize( uint64_t _ui64Size ) const {
 			return (_ui64Size > UINT_MAX) ? 16 : 8;
 		}
 
@@ -493,7 +503,7 @@ namespace mx {
 		 *
 		 * \return Returns the pixel width of the address gutter. Returns 0 if the gutter is hidden.
 		 */
-		int											ComputeAddressGutterWidthPx();
+		int32_t										ComputeAddressGutterWidthPx();
 
 		/**
 		 * \brief Returns the ruler height in pixels.
@@ -501,7 +511,7 @@ namespace mx {
 		 * Description: The ruler height equals the base character height for the current font
 		 *  (line spacing does not apply to the ruler). Returns 0 if the ruler is hidden.
 		 */
-		int											GetRulerHeightPx() const {
+		int32_t										GetRulerHeightPx() const {
 			if ( !CurStyle()->bShowRuler ) { return 0; }
 			return Font()->iCharCy;
 		}
@@ -528,9 +538,9 @@ namespace mx {
 			MX_DATA_FMT _dfDataFmt,
 			uint32_t _ui32Index,
 			bool _bRightArea,
-			int _iXBase,
-			int &_iXLeft,
-			int &_iWidth ) const;
+			int32_t _iXBase,
+			int32_t &_iXLeft,
+			int32_t &_iWidth ) const;
 
 		/**
 		 * \brief Computes the left X and width (in pixels) of a background cell at index for an area.
@@ -547,9 +557,9 @@ namespace mx {
 			MX_DATA_FMT _dfDataFmt,
 			uint32_t _ui32Index,
 			bool _bRightArea,
-			int _iXBase,
-			int &_iXLeft,
-			int &_iWidth ) const;
+			int32_t _iXBase,
+			int32_t &_iXLeft,
+			int32_t &_iWidth ) const;
 
 		/**
 		 * Computes the pixel width of the left numeric (hex/dec/oct/bin/char) column for one row.
@@ -557,18 +567,19 @@ namespace mx {
 		 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
 		 * \return Returns the pixel width of the left numbers block; 0 if hidden.
 		 */
-		int											ComputeAreaWidthPx( MX_DATA_FMT _dfDataFmt );
+		int32_t										ComputeAreaWidthPx( MX_DATA_FMT _dfDataFmt );
 
 		/**
 		 * Computes the total width, in pixels, of the horizontally scrollable content (one row).
 		 *
 		 * \return Returns the pixel width of the scrollable content area (numbers + ASCII). Always >= 1.
 		 */
-		inline int									TotalContentWidthPx() {
+		inline int32_t								TotalContentWidthPx() {
 			const MX_STYLE & stAll = (*CurStyle());
-			int iCx = 0;
-			iCx += stAll.i32PadNumbersLeftPx + ComputeAreaWidthPx( stAll.dfLeftNumbersFmt ) + stAll.i32PadNumbersRightPx;
+			int32_t iCx = 0;
+			iCx += ComputeAreaWidthPx( stAll.dfLeftNumbersFmt );
 			if ( CurStyle()->bShowRightArea ) {
+				iCx += stAll.i32PadNumbersLeftPx + stAll.i32PadNumbersRightPx;
 				iCx += stAll.i32PadBetweenNumbersAndTextPx + ComputeAreaWidthPx( stAll.dfRightNumbersFmt );
 			}
 			return max( iCx, 1 );
@@ -582,10 +593,10 @@ namespace mx {
 		 *
 		 * \return Returns client width minus fixed panels (address gutter, mini-map) and outer paddings. Always >= 1.
 		 */
-		int											GetClientWidth() {
+		int32_t										GetClientWidth() {
 			const MX_STYLE & asAddrStyle = (*CurStyle());
 
-			int iW = int( ClientRect().Width()); //m_iClientW;
+			int32_t iW = int32_t( ClientRect().Width()); //m_iClientW;
 			if ( asAddrStyle.bShowAddressGutter ) {
 				iW -= ComputeAddressGutterWidthPx();          // Includes i32PadAfterGutterPx.
 			}
@@ -615,11 +626,24 @@ namespace mx {
 			agGlyphs.iDigitMaxCxLower = std::max( agGlyphs.iDigitMaxCx, lsw::CHelpers::MeasureMax( _hDc, L"abcdef" ) );
 
 			SIZE sSize {};
-			::GetTextExtentPoint32W( _hDc, L":", 1, &sSize ); agGlyphs.iColonCx = sSize.cx;
-			::GetTextExtentPoint32W( _hDc, L" ", 1, &sSize ); agGlyphs.iSpaceCx = (sSize.cx + 1) / 2 * 2;	// Round up to the nearest even number.
-			::GetTextExtentPoint32W( _hDc, L"h", 1, &sSize ); agGlyphs.iSpecHexCx = sSize.cx;
-			::GetTextExtentPoint32W( _hDc, L"o", 1, &sSize ); agGlyphs.iSpecOctCx = sSize.cx;
-			::GetTextExtentPoint32W( _hDc, L"w", 1, &sSize ); agGlyphs.iShortWcx  = sSize.cx;
+			::GetTextExtentPoint32W( _hDc, L":", 1, &sSize ); agGlyphs.i32ColonCx = sSize.cx;
+			::GetTextExtentPoint32W( _hDc, L" ", 1, &sSize ); agGlyphs.i32SpaceCx = (sSize.cx + 1) / 2 * 2;	// Round up to the nearest even number.
+			::GetTextExtentPoint32W( _hDc, L"h", 1, &sSize ); agGlyphs.i32SpecHexCx = sSize.cx;
+			::GetTextExtentPoint32W( _hDc, L"o", 1, &sSize ); agGlyphs.i32SpecOctCx = sSize.cx;
+			::GetTextExtentPoint32W( _hDc, L"w", 1, &sSize ); agGlyphs.i32ShortWcx  = sSize.cx;
+
+			agGlyphs.i32MaxAscii = 0;
+			agGlyphs.i32MaxAsciiAnsi = 0;
+			for ( wchar_t I = 32; I < 256; ++I ) {
+				if ( CUtilities::ByteIsPrintable( I, false ) ) {
+					::GetTextExtentPoint32W( _hDc, &I, 1, &sSize );
+					agGlyphs.i32MaxAscii = std::max<int32_t>( agGlyphs.i32MaxAscii, sSize.cx );
+				}
+				if ( CUtilities::ByteIsPrintable( I, true ) ) {
+					::GetTextExtentPoint32W( _hDc, &I, 1, &sSize );
+					agGlyphs.i32MaxAsciiAnsi = std::max<int32_t>( agGlyphs.i32MaxAsciiAnsi, sSize.cx );
+				}
+			}
 		}
 
 		/**

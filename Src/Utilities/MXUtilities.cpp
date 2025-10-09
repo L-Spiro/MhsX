@@ -195,7 +195,9 @@ namespace mx {
 
 	// Is the given character printable?  If not, it should be printed as a space or question mark.
 	BOOL CUtilities::ByteIsPrintable( BYTE _bIn, BOOL _bPrintExtended ) {
-		if ( _bIn < 32 || _bIn == 127 ) { return FALSE; }
+		if ( _bIn < 32 || _bIn == 127 ||
+		_bIn == 129 || _bIn == 141 || _bIn == 143 || _bIn == 144 ||
+		_bIn == 157 || _bIn == 173 ) { return FALSE; }
 		return _bIn < 128 || _bPrintExtended;
 	}
 
