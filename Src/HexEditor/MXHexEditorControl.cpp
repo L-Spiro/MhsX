@@ -19,19 +19,8 @@ namespace mx {
 		m_pfsFonts[MX_FT_TEXT_VIEW] = pcpParms->pfsDynamicRowFont;
 		m_phecForeColors = pcpParms->phecFg;
 		m_phecBackColors = pcpParms->phecBg;
-
-		m_sStyles[MX_ES_TEXT].ftFont = MX_FT_TEXT_VIEW;
-		m_sStyles[MX_ES_HEX].ftFont = MX_FT_FIXED_ROW;
-		m_sStyles[MX_ES_BINARY].ftFont = MX_FT_FIXED_ROW;
-		m_sStyles[MX_ES_SCRIPT].ftFont = MX_FT_TEXT_VIEW;
-		m_sStyles[MX_ES_TEMPLATE].ftFont = MX_FT_TEXT_VIEW;
-		m_sStyles[MX_ES_EBCDIC].ftFont = MX_FT_TEXT_VIEW;
-		m_sStyles[MX_ES_UTF16].ftFont = MX_FT_TEXT_VIEW;
-		m_sStyles[MX_ES_UTF8].ftFont = MX_FT_TEXT_VIEW;
-		m_sStyles[MX_ES_PROCESS].ftFont = MX_FT_FIXED_ROW;
-		m_sStyles[MX_ES_CUR_PROCESS].ftFont = MX_FT_FIXED_ROW;
-		m_sStyles[MX_ES_CODE].ftFont = MX_FT_TEXT_VIEW;
-		m_sStyles[MX_ES_TAGGED].ftFont = MX_FT_TEXT_VIEW;
+		m_psOptions = pcpParms->psOptions;
+		
 	}
 
 	// == Functions.
@@ -75,13 +64,13 @@ namespace mx {
 		lsw::LSW_BEGINPAINT bpPaint( Wnd() );
 		
 		HDC hDcMem = ::CreateCompatibleDC( bpPaint.hDc );
-		HBITMAP hBmp = ::CreateCompatibleBitmap( bpPaint.hDc, int( rRect.Width() ), int( rRect.Height() ) );
+		HBITMAP hBmp = ::CreateCompatibleBitmap( bpPaint.hDc, int32_t( rRect.Width() ), int32_t( rRect.Height() ) );
 		{
 			lsw::LSW_SELECTOBJECT soBmp( hDcMem, hBmp );
 			PaintHex( hDcMem, rRect );
 
 
-			::BitBlt( bpPaint.hDc, 0, 0, int( rRect.Width() ), int( rRect.Height() ), hDcMem, 0, 0, SRCCOPY );
+			::BitBlt( bpPaint.hDc, 0, 0, int32_t( rRect.Width() ), int32_t( rRect.Height() ), hDcMem, 0, 0, SRCCOPY );
 		}
 		::DeleteObject( hBmp );
 		::DeleteDC( hDcMem );
@@ -112,7 +101,7 @@ namespace mx {
 	 **/
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::DpiChanged( WORD _wX, WORD _wY, LPRECT _pRect ) {
 		//ChooseDefaultFont();
-		Font()->lfFontParms.lfHeight = -::MulDiv( Font()->i32PointSize, static_cast<int>(m_wDpiY), 72 );
+		Font()->lfFontParms.lfHeight = -::MulDiv( Font()->i32PointSize, static_cast<int32_t>(m_wDpiY), 72 );
 		Font()->fFont.CreateFontIndirectW( &Font()->lfFontParms );
 		RecalcAndInvalidate();
 		return CParent::DpiChanged( _wX, _wY, _pRect );
@@ -127,7 +116,7 @@ namespace mx {
 	bool CHexEditorControl::IncreaseFontSize( LOGFONTW &_lfFont ) {
 		_lfFont = Font()->lfFontParms;
 		if ( Font()->i32PointSize >= 72 ) { return IsFixedRowLength(); }
-		_lfFont.lfHeight = -::MulDiv( Font()->i32PointSize + 1, static_cast<int>(m_wDpiY), 72 );
+		_lfFont.lfHeight = -::MulDiv( Font()->i32PointSize + 1, static_cast<int32_t>(m_wDpiY), 72 );
 
 		if ( Font()->fFont.CreateFontIndirectW( &_lfFont ) ) {
 			Font()->i32PointSize++;
@@ -149,7 +138,7 @@ namespace mx {
 	bool CHexEditorControl::DecreaseFontSize( LOGFONTW &_lfFont ) {
 		_lfFont = Font()->lfFontParms;
 		if ( Font()->i32PointSize <= 2 ) { return IsFixedRowLength(); }
-		_lfFont.lfHeight = -::MulDiv( Font()->i32PointSize - 1, static_cast<int>(m_wDpiY), 72 );
+		_lfFont.lfHeight = -::MulDiv( Font()->i32PointSize - 1, static_cast<int32_t>(m_wDpiY), 72 );
 
 		if ( Font()->fFont.CreateFontIndirectW( &_lfFont ) ) {
 			Font()->i32PointSize--;
@@ -172,7 +161,7 @@ namespace mx {
 		if ( _i32PtSize <= 0 || _i32PtSize > 72 ) { return false; }
 		Font()->i32PointSize = _i32PtSize;
 		auto lfTmp = GetThisFont();
-		lfTmp.lfHeight = -::MulDiv( Font()->i32PointSize, static_cast<int>(m_wDpiY), 72 );
+		lfTmp.lfHeight = -::MulDiv( Font()->i32PointSize, static_cast<int32_t>(m_wDpiY), 72 );
 		if ( Font()->fFont.CreateFontIndirectW( &lfTmp ) ) {
 			Font()->lfFontParms = lfTmp;
 			RecalcAndInvalidate();
@@ -216,7 +205,7 @@ namespace mx {
 	 **/
 	bool CHexEditorControl::DefaultFontSize( LOGFONTW &_lfFont ) {
 		_lfFont = Font()->lfFontParms;
-		_lfFont.lfHeight = -::MulDiv( 10, static_cast<int>(m_wDpiY), 72 );
+		_lfFont.lfHeight = -::MulDiv( 10, static_cast<int32_t>(m_wDpiY), 72 );
 
 		if ( Font()->fFont.CreateFontIndirectW( &_lfFont ) ) {
 			Font()->i32PointSize--;
@@ -431,7 +420,7 @@ namespace mx {
 #endif	// #if ( _WIN32_WINNT >= _WIN32_WINNT_WINXP )
 
 		lfFont.lfCharSet = DEFAULT_CHARSET;
-		lfFont.lfHeight = -::MulDiv( iPt, static_cast<int>(_wDpi), 72 );
+		lfFont.lfHeight = -::MulDiv( iPt, static_cast<int32_t>(_wDpi), 72 );
 
 		lsw::LSW_HDC hDc( _hWnd );
 		for ( size_t i = 0; i < _countof( s_ppwszFaces ); ++i ) {
@@ -458,21 +447,28 @@ namespace mx {
 	// Draws the hex-editor view.
 	bool CHexEditorControl::PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect ) {
 		const MX_STYLE & stAll = (*CurStyle());
-		const int iGutterW = ComputeAddressGutterWidthPx();
+		const int32_t iGutterW = ComputeAddressGutterWidthPx();
 		lsw::LSW_RECT rTmp = _rRect;
-		int iX = iGutterW - m_ui64HPx, iY = 0;
+		int32_t iX = iGutterW - m_ui64HPx, iY = 0;
+		lsw::LSW_RECT rBlankArea = _rRect;
 		{
 			if ( m_pheiTarget ) {
 				if ( m_pheiTarget->Read( stAll.daAddressStyle.ui64FirstVisibleLine * stAll.uiBytesPerRow, m_bCurBuffer, (m_i32PageLines + 1) * stAll.uiBytesPerRow ) ) {
 					int32_t i32Top = stAll.bShowRuler ? GetRulerHeightPx() : 0;
 					DrawArea( _hDc, iX, i32Top, stAll.dfLeftNumbersFmt, false, m_i32PageLines + 1, m_bCurBuffer );
+					auto ui32WidthL = ComputeAreaWidthPx( stAll.dfLeftNumbersFmt );
+					rBlankArea.top = i32Top;
+					rBlankArea.left = iX + ui32WidthL;
+
 					if ( stAll.bShowRightArea ) {
-						DrawArea( _hDc, iX + ComputeAreaWidthPx( stAll.dfLeftNumbersFmt ) + stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx,
+						DrawArea( _hDc, iX + ui32WidthL + stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx,
 							i32Top, stAll.dfRightNumbersFmt, true, m_i32PageLines + 1, m_bCurBuffer );
+
+						rBlankArea.left += stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx + ComputeAreaWidthPx( stAll.dfRightNumbersFmt );
 
 						// Draw the separator.
 						lsw::LSW_RECT rSep;
-						rSep.left = iX + ComputeAreaWidthPx( stAll.dfLeftNumbersFmt );
+						rSep.left = iX + ui32WidthL;
 						rSep.right = rSep.left + stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx;
 						rSep.top = i32Top;
 						rSep.bottom = rTmp.bottom;
@@ -484,8 +480,14 @@ namespace mx {
 							::FillRect( _hDc, &rSep,
 								lsw::CBase::BrushCache().Brush( MX_GetRgbValue( ForeColors()->crAreaSeparator ) ) );
 						}
+
 					}
 				}
+			}
+			if ( rBlankArea.left < rBlankArea.right ) {
+				COLORREF crBlankArea = MX_GetAValue( BackColors()->crEmptyArea ) ? MX_GetRgbValue( BackColors()->crEmptyArea ) : MX_GetRgbValue( BackColors()->crEditor );
+				::FillRect( _hDc, &rBlankArea,
+					lsw::CBase::BrushCache().Brush( crBlankArea ) );
 			}
 		}
 		
@@ -501,7 +503,7 @@ namespace mx {
 					lsw::CBase::BrushCache().Brush( MX_GetRgbValue( BackColors()->crEditor ) ) );
 			}
 			if ( MX_GetAValue( ForeColors()->crRulerLine ) ) {
-				const int iThisY = rTmp.bottom - 1;
+				const int32_t iThisY = rTmp.bottom - 1;
 				lsw::LSW_HPEN pPen( PS_SOLID, 1, ForeColors()->crRulerLine );
 				lsw::LSW_SELECTOBJECT soPen( _hDc, pPen.hPen );
 				::MoveToEx( _hDc, rTmp.left, iThisY, NULL );
@@ -524,7 +526,7 @@ namespace mx {
 					lsw::CBase::BrushCache().Brush( MX_GetRgbValue( BackColors()->crEditor ) ) );
 			}
 			if ( MX_GetAValue( ForeColors()->crAddressSeparatorLine ) || m_ui64HPx != 0 ) {
-				const int iThisX = rTmp.right - 1;
+				const int32_t iThisX = rTmp.right - 1;
 				lsw::LSW_HPEN pPen( PS_SOLID, 1, ForeColors()->crAddressSeparatorLine );
 				lsw::LSW_SELECTOBJECT soPen( _hDc, pPen.hPen );
 				::MoveToEx( _hDc, iThisX, iY, NULL );
@@ -552,7 +554,7 @@ namespace mx {
 	 *  height (m_iCyChar if set, otherwise the measured font metrics). Text is drawn with transparent
 	 *  background using CurStyle()->daAddressStyle.crText.
 	 */
-	void CHexEditorControl::DrawAddressGutter( HDC _hDc, int _iXLeft, int _iYTop, uint32_t _ui32LinesToDraw ) {
+	void CHexEditorControl::DrawAddressGutter( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, uint32_t _ui32LinesToDraw ) {
 		const MX_STYLE & stAll = (*CurStyle());
 		if ( !stAll.bShowAddressGutter || _ui32LinesToDraw == 0 || nullptr == Font() ) { return; }
 		const MX_FONT_SET & fsFont = (*Font());
@@ -693,7 +695,7 @@ namespace mx {
 	 *  - Each group label is centered within its group rect, computed by GetTextRectForIndex().
 	 *  - The rulerÅfs height equals the base character height for the font; line spacing is ignored.
 	 */
-	void CHexEditorControl::DrawRuler( HDC _hDc, int _iXLeft, int _iYTop, MX_DATA_FMT _dfLeftFmt, MX_DATA_FMT _dfRightFmt ) {
+	void CHexEditorControl::DrawRuler( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, MX_DATA_FMT _dfLeftFmt, MX_DATA_FMT _dfRightFmt ) {
 		const MX_STYLE & stAll = (*CurStyle());
 		if ( !stAll.bShowRuler || !Font() ) { return; }
 		const MX_FONT_SET & fsFont = (*Font());
@@ -776,7 +778,7 @@ namespace mx {
 	 * \param _ui32LinesToDraw The number of rows to draw (typically page lines).
 	 * \param _bData The actual values at the addresses to render.
 	 **/
-	void CHexEditorControl::DrawArea( HDC _hDc, int _iXLeft, int _iYTop, MX_DATA_FMT _dfFmt, bool _bRightArea, uint32_t _ui32LinesToDraw, const CHexEditorInterface::CBuffer &_bData ) {
+	void CHexEditorControl::DrawArea( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, MX_DATA_FMT _dfFmt, bool _bRightArea, uint32_t _ui32LinesToDraw, const CHexEditorInterface::CBuffer &_bData ) {
 		const MX_STYLE & stAll = (*CurStyle());
 		if ( !stAll.bShowAddressGutter || _ui32LinesToDraw == 0 || nullptr == Font() ) { return; }
 		const MX_FONT_SET & fsFont = (*Font());
@@ -823,11 +825,11 @@ namespace mx {
 			const int32_t iY = _iYTop + int32_t( I ) * iLineAdv;
 
 			// Draw the background.  Try to reduce to as few calls as possible for a row.
-			int iL, iW;
+			int32_t iL, iW;
 			auto crColor = CellBgColor( ui64Line, pui8Data, sDataSize );
 			GetBackgrondRectForIndex( _dfFmt, 0, _bRightArea, _iXLeft, iL, iW );
 			for ( int32_t J = 1; J < ui32Bpr; ++J ) {
-				int iL2, iW2;
+				int32_t iL2, iW2;
 				GetBackgrondRectForIndex( _dfFmt, J, _bRightArea, _iXLeft, iL2, iW2 );
 				auto crThisColor = CellBgColor( ui64Line + J, pui8Data + J, sDataSize - J );
 				if ( crThisColor != crColor || (iL + iW) == iL2 ) {
@@ -982,14 +984,14 @@ namespace mx {
 	 *
 	 * \return Returns the pixel width of the address gutter. Returns 0 if the gutter is hidden.
 	 */
-	int CHexEditorControl::ComputeAddressGutterWidthPx() {
+	int32_t CHexEditorControl::ComputeAddressGutterWidthPx() {
 		if ( !CurStyle()->bShowAddressGutter || !Font() ) { return 0; }
 		MX_FONT_SET & fsFont = (*Font());
 
 		const MX_STYLE & stAll = (*CurStyle());
 		const MX_ADDR_STYLE & asAddrStyle = stAll.daAddressStyle;
 		const uint64_t ui64FileSize = Size();
-		int iWidth = 0;
+		int32_t iWidth = 0;
 		{
 			lsw::LSW_HDC hDc( Wnd() );
 			{
@@ -1042,12 +1044,12 @@ namespace mx {
 				uint32_t ui32MinDigits = MinAddrDigits();
 				if ( ui32MinDigits ) { ui32Digits = std::max( ui32Digits, ui32MinDigits ); }
 
-				iWidth = int( ui32Digits ) * agGlyphs.iDigitMaxCx;
+				iWidth = int32_t( ui32Digits ) * agGlyphs.iDigitMaxCx;
 
 				// Internal grouping (HEX): ':' every 4 hex digits.
 				if ( bHex && asAddrStyle.bShowColonIn && ui32Digits > 4 ) {
 					const uint32_t ui32Groups = (ui32Digits - 1U) / 4U;
-					iWidth += int( ui32Groups ) * agGlyphs.i32ColonCx;
+					iWidth += int32_t( ui32Groups ) * agGlyphs.i32ColonCx;
 				}
 				// Trailing colon.
 				if ( asAddrStyle.bShowColonAfter ) { iWidth += agGlyphs.i32ColonCx; }
@@ -1063,7 +1065,7 @@ namespace mx {
 				// Optional left-space padding for right-aligned DEC up to MinDigits (if you do that).
 				if ( bDec && ui32MinDigits && ui32Digits < ui32MinDigits ) {
 					const uint32_t ui32Pads = ui32MinDigits - ui32Digits;
-					iWidth += int( ui32Pads ) * agGlyphs.i32SpaceCx;
+					iWidth += int32_t( ui32Pads ) * agGlyphs.i32SpaceCx;
 				}
 			}
 		}
@@ -1104,7 +1106,7 @@ namespace mx {
 		//const uint32_t ui32Bpr = stStyle.uiBytesPerRow ? stStyle.uiBytesPerRow : 16;
 
 		// Cell width by format (worst-case stable cell).
-		auto CellWidthForFmt = [&]( MX_DATA_FMT _dfFmt ) -> int {
+		auto CellWidthForFmt = [&]( MX_DATA_FMT _dfFmt ) -> int32_t {
 			switch( _dfFmt ) {
 				case MX_DF_HEX :	{ return 2 * agGlyphs.iDigitMaxCx; }				// "FF"
 				case MX_DF_DEC :	{ return 3 * agGlyphs.iDigitMaxCx; }				// "255"
@@ -1119,11 +1121,11 @@ namespace mx {
 		const uint32_t ui32Bpr		= stStyle.uiBytesPerRow ? stStyle.uiBytesPerRow : 16;
 		const uint32_t ui32GroupSz	= (stStyle.uiGroupSize && _dfDataFmt != MX_DF_CHAR) ? stStyle.uiGroupSize : 1;
 
-		const int iCellCx			= CellWidthForFmt( _dfDataFmt );
-		const int iSpaceB			= int( _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiSpacesBetweenBytes ) * agGlyphs.i32SpaceCx;
+		const int32_t iCellCx			= CellWidthForFmt( _dfDataFmt );
+		const int32_t iSpaceB			= int32_t( _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiSpacesBetweenBytes ) * agGlyphs.i32SpaceCx;
 
 		// Prepend area-local leading pad (for left numbers or right text; we baked pads into our area widths).
-		int iX = _iXBase;
+		int32_t iX = _iXBase;
 		if ( _dfDataFmt == MX_DF_CHAR ) {
 			iX += (iCellCx * _ui32Index);
 			_iXLeft = iX;
@@ -1164,7 +1166,7 @@ namespace mx {
 
 		const uint32_t ui32GroupSz	= (stStyle.uiGroupSize && _dfDataFmt != MX_DF_CHAR) ? stStyle.uiGroupSize : 1;
 		const uint32_t ui32Mod = _ui32Index % ui32GroupSz;
-		const int i32Adj = agGlyphs.i32SpaceCx / 2;
+		const int32_t i32Adj = agGlyphs.i32SpaceCx / 2;
 		// If at the group start, increase size to the left.
 		if ( ui32Mod == 0 ) {
 			_iXLeft -= i32Adj;
@@ -1183,12 +1185,12 @@ namespace mx {
 	 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
 	 * \return Returns the pixel width of the left numbers block; 0 if hidden.
 	 */
-	int CHexEditorControl::ComputeAreaWidthPx( MX_DATA_FMT _dfDataFmt ) {
+	int32_t CHexEditorControl::ComputeAreaWidthPx( MX_DATA_FMT _dfDataFmt ) {
 		const MX_STYLE & stStyle = (*CurStyle());
 		if ( !stStyle.bShowLeftNumbers || !Font() ) { return 0; }
 		const MX_FONT_SET & fsFont = (*Font());
 			
-		int iCx = 0;
+		int32_t iCx = 0;
 		{
 			lsw::LSW_HDC hDc( Wnd() );
 			{
@@ -1196,7 +1198,7 @@ namespace mx {
 				EnsureAddrGlyphs( hDc.hDc );
 				const MX_ADDR_GLYPHS & agGlyphs = fsFont.agGlyphs;
 
-				auto CellWidthForFmt = [&]( MX_DATA_FMT _dfDataFmt ) -> int {
+				auto CellWidthForFmt = [&]( MX_DATA_FMT _dfDataFmt ) -> int32_t {
 					switch ( _dfDataFmt ) {
 						case MX_DF_HEX :	{ return 2 * agGlyphs.iDigitMaxCx; }					// "FF"
 						case MX_DF_DEC :	{ return 3 * agGlyphs.iDigitMaxCx; }					// "255"
@@ -1210,10 +1212,10 @@ namespace mx {
 				const uint32_t ui32Bpr		= stStyle.uiBytesPerRow ? stStyle.uiBytesPerRow : 16;
 				const uint32_t ui32GroupSz	= (stStyle.uiGroupSize && _dfDataFmt != MX_DF_CHAR) ? stStyle.uiGroupSize : 1;		// Items per group.
 
-				const int iCellCx			= CellWidthForFmt( _dfDataFmt );
-				const int iSpaceB			= int( _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiSpacesBetweenBytes ) * agGlyphs.i32SpaceCx;
+				const int32_t iCellCx			= CellWidthForFmt( _dfDataFmt );
+				const int32_t iSpaceB			= int32_t( _dfDataFmt == MX_DF_CHAR ? 1 : stStyle.uiSpacesBetweenBytes ) * agGlyphs.i32SpaceCx;
 
-				int iTotal = 0;//stStyle.i32PadNumbersLeftPx;
+				int32_t iTotal = 0;//stStyle.i32PadNumbersLeftPx;
 
 				if ( _dfDataFmt == MX_DF_CHAR ) {
 					iTotal += (iCellCx * ui32Bpr);
@@ -1232,18 +1234,16 @@ namespace mx {
 
 	// Gets the total number of lines based on which view type is active.
 	uint64_t CHexEditorControl::TotalLines() const {
-		switch ( m_eaEditAs ) {
-			case MX_ES_HEX : { return TotalLines_FixedWidth(); }
-		}
+		if ( IsFixedRowLength() ) { return TotalLines_FixedWidth(); }
 		return 0;
 	}
 
 	// Updates the scrollbars.
 	void CHexEditorControl::UpdateScrollbars() {
 		// Compute visible page sizes (lines / columns-on-screen).
-		int iClientH = int( ClientRect().Height() );
+		int32_t iClientH = int32_t( ClientRect().Height() );
 
-		const int iLineAdv = LineAdvanceCy();
+		const int32_t iLineAdv = LineAdvanceCy();
 		m_i32PageLines = (iLineAdv ? (iClientH / iLineAdv) : 0);
 		if ( m_i32PageLines < 1 ) { m_i32PageLines = 1; }
 

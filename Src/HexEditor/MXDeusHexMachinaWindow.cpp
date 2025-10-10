@@ -58,6 +58,31 @@ namespace mx {
 		
 		m_hecFgColors.DefaultDarkTheme_Fg();
 		m_hecBgColors.DefaultDarkTheme_Bg();
+
+		m_sOptions[CHexEditorControl::MX_ES_TEXT].ftFont = CHexEditorControl::MX_FT_TEXT_VIEW;
+		m_sOptions[CHexEditorControl::MX_ES_HEX].ftFont = CHexEditorControl::MX_FT_FIXED_ROW;
+		m_sOptions[CHexEditorControl::MX_ES_BINARY].ftFont = CHexEditorControl::MX_FT_FIXED_ROW;
+		m_sOptions[CHexEditorControl::MX_ES_SCRIPT].ftFont = CHexEditorControl::MX_FT_TEXT_VIEW;
+		m_sOptions[CHexEditorControl::MX_ES_TEMPLATE].ftFont = CHexEditorControl::MX_FT_TEXT_VIEW;
+		m_sOptions[CHexEditorControl::MX_ES_EBCDIC].ftFont = CHexEditorControl::MX_FT_TEXT_VIEW;
+		m_sOptions[CHexEditorControl::MX_ES_UTF16].ftFont = CHexEditorControl::MX_FT_TEXT_VIEW;
+		m_sOptions[CHexEditorControl::MX_ES_UTF8].ftFont = CHexEditorControl::MX_FT_TEXT_VIEW;
+		m_sOptions[CHexEditorControl::MX_ES_PROCESS].ftFont = CHexEditorControl::MX_FT_FIXED_ROW;
+		m_sOptions[CHexEditorControl::MX_ES_CUR_PROCESS].ftFont = CHexEditorControl::MX_FT_FIXED_ROW;
+		m_sOptions[CHexEditorControl::MX_ES_CODE].ftFont = CHexEditorControl::MX_FT_TEXT_VIEW;
+		m_sOptions[CHexEditorControl::MX_ES_TAGGED].ftFont = CHexEditorControl::MX_FT_TEXT_VIEW;
+
+		m_sOptions[CHexEditorControl::MX_ES_HEX].dfLeftNumbersFmt = CHexEditorControl::MX_DF_HEX;
+		m_sOptions[CHexEditorControl::MX_ES_HEX].dfRightNumbersFmt = CHexEditorControl::MX_DF_CHAR;
+
+		m_sOptions[CHexEditorControl::MX_ES_BINARY].dfLeftNumbersFmt = CHexEditorControl::MX_DF_BIN;
+		m_sOptions[CHexEditorControl::MX_ES_BINARY].dfRightNumbersFmt = CHexEditorControl::MX_DF_CHAR;
+
+		m_sOptions[CHexEditorControl::MX_ES_CUR_PROCESS].dfLeftNumbersFmt = CHexEditorControl::MX_DF_HEX;
+		m_sOptions[CHexEditorControl::MX_ES_CUR_PROCESS].dfRightNumbersFmt = CHexEditorControl::MX_DF_CHAR;
+
+		m_sOptions[CHexEditorControl::MX_ES_PROCESS].dfLeftNumbersFmt = CHexEditorControl::MX_DF_HEX;
+		m_sOptions[CHexEditorControl::MX_ES_PROCESS].dfRightNumbersFmt = CHexEditorControl::MX_DF_CHAR;
 	}
 	CDeusHexMachinaWindow::~CDeusHexMachinaWindow() {
 		for ( auto I = m_vTabs.size(); I--; ) {
@@ -427,6 +452,7 @@ namespace mx {
 //#endif
 				} );
 				CHexEditorControl::MX_CREATION_PARMS cpCreation;
+				cpCreation.psOptions = m_sOptions;
 				cpCreation.pfsFixedRowFont = &m_fsFixedRowFont;
 				cpCreation.pfsDynamicRowFont = &m_fsTextViewFont;
 				cpCreation.phecFg = &m_hecFgColors;

@@ -90,8 +90,69 @@ namespace mx {
 			int32_t									iCharCy = 0;											// Baseline advance.
 		};
 
+		/** What to draw and how to size the address gutter. */
+		struct MX_ADDR_STYLE {
+			uint64_t								ui64StartAddress	= 0;								// Starting address bias (Set Starting Address).
+			uint64_t								ui64FirstVisibleLine= 0;								// Top visible line index (0-based).
+
+			uint32_t								ui32VisibleLines	= 0;								// Count of visible lines.
+
+			MX_ADDRESS_FMT							afFormat			= MX_AF_BYTES_HEX;					// Address format.
+			bool									bLowercaseHex		= false;							// Use lowercase a..f for HEX.
+			bool									bShowColonIn		= true;								// Insert ':' every 4 HEX digits (>4 only).
+			bool									bShowColonAfter		= false;							// Append ':' after the address.
+			bool									bShowTypeSpec		= false;							// Append 'h' (hex) or 'o' (oct).
+			bool									bMinimizeDigits		= false;							// Size digits for current page, not whole file.
+			bool									bUseShortSuffixW	= true;								// Append 'w' for Short addressing.
+		};
+
+		/** General style settings. */
+		struct MX_STYLE {
+			MX_FONT_SET								fsFonts[2] = {};										// Shared fonts.
+			MX_FONT_TYPE							ftFont				= MX_FT_FIXED_ROW;					// The shared font to use.
+			MX_ADDR_STYLE							daAddressStyle;											// Address style.
+			uint32_t								uiBytesPerRow		= 16;								// Bytes per displayed row.
+			uint64_t								ui64DivisionSpacing = 4;								// Spacing between division lines.
+
+			// Visibility.
+			bool									bShowAddressGutter	= true;
+			bool									bShowLeftNumbers	= true;								// Hex/Dec/Oct/Bin column.
+			bool									bShowRightArea		= true;								// ASCII column.
+			bool									bShowMiniMap		= true;								// Fixed panel on right.
+			bool									bShowRuler			= true;								// Show/hide ruler row.
+
+			// Left numbers formatting.
+			MX_DATA_FMT								dfLeftNumbersFmt	= MX_DF_HEX;
+			uint32_t								uiGroupSize			= 1;                   				// Extra spacing after every N bytes.
+			uint32_t								uiSpacesBetweenBytes= 1;          						// Count of ' ' between adjacent bytes.
+			uint32_t								uiExtraSpacesBetweenGroups = 1;     					// Extra ' ' at group boundary.
+
+			// Right formatting.
+			MX_DATA_FMT								dfRightNumbersFmt	= MX_DF_CHAR;
+
+			// Paddings/gaps (pixels).
+			int32_t									i32LeftAddrPadding	= 3;								// Left padding.
+			int32_t									i32PadAfterGutterPx	= 8;
+			int32_t									i32PadBetweenNumbersAndTextPx = 3;
+			int32_t									i32PadNumbersLeftPx	= 3;
+			int32_t									i32PadNumbersRightPx= 3;
+			int32_t									i32PadScrollableLeftPx = 0;
+			int32_t									i32PadScrollableRightPx = 0;
+			int32_t									i32PadBeforeMiniMapPx = 8;
+			int32_t									i32LineSpacingPx	= 2;
+
+			// Ruler.
+
+			// Mini-map geometry (pixels).
+			int32_t									i32MiniMapWidthPx	= 140;
+
+			// Colors.
+			
+		};
+
 		/** Creation parameters. */
 		struct MX_CREATION_PARMS {
+			MX_STYLE *								psOptions = nullptr;									/**< Shared options. */
 			MX_FONT_SET *							pfsFixedRowFont = nullptr;								/**< The shared font for fixed-row views. */
 			MX_FONT_SET *							pfsDynamicRowFont = nullptr;							/**< The shared font for text views. */
 			MX_HEX_EDITOR_COLORS *					phecFg = nullptr;										/**< Foreground colors. */
@@ -206,10 +267,10 @@ namespace mx {
 		bool										DefaultFontSize( LOGFONTW &_lfFont );
 
 		// Gets the current font.
-		inline MX_FONT_SET *						Font() { return m_pfsFonts[m_sStyles[m_eaEditAs].ftFont]; }
+		inline MX_FONT_SET *						Font() { return m_pfsFonts[m_psOptions[m_eaEditAs].ftFont]; }
 
 		// Gets the current font.
-		const inline MX_FONT_SET *					Font() const { return m_pfsFonts[m_sStyles[m_eaEditAs].ftFont]; }
+		const inline MX_FONT_SET *					Font() const { return m_pfsFonts[m_psOptions[m_eaEditAs].ftFont]; }
 
 		// Gets a foreground color.
 		inline MX_HEX_EDITOR_COLORS *				ForeColors() { return m_phecForeColors; }
@@ -303,68 +364,11 @@ namespace mx {
 
 
 	protected :
-		// == Types.
-		/** What to draw and how to size the address gutter. */
-		struct MX_ADDR_STYLE {
-			uint64_t								ui64StartAddress	= 0;								// Starting address bias (Set Starting Address).
-			uint64_t								ui64FirstVisibleLine= 0;								// Top visible line index (0-based).
-
-			uint32_t								ui32VisibleLines	= 0;								// Count of visible lines.
-
-			MX_ADDRESS_FMT							afFormat			= MX_AF_BYTES_HEX;					// Address format.
-			bool									bLowercaseHex		= false;							// Use lowercase a..f for HEX.
-			bool									bShowColonIn		= true;								// Insert ':' every 4 HEX digits (>4 only).
-			bool									bShowColonAfter		= false;							// Append ':' after the address.
-			bool									bShowTypeSpec		= false;							// Append 'h' (hex) or 'o' (oct).
-			bool									bMinimizeDigits		= false;							// Size digits for current page, not whole file.
-			bool									bUseShortSuffixW	= true;								// Append 'w' for Short addressing.
-		};
-
-		/** General style settings. */
-		struct MX_STYLE {
-			MX_FONT_TYPE							ftFont				= MX_FT_FIXED_ROW;								// The shared font to use.
-			MX_ADDR_STYLE							daAddressStyle;											// Address style.
-			uint32_t								uiBytesPerRow		= 16;								// Bytes per displayed row.
-			uint64_t								ui64DivisionSpacing = 4;								// Spacing between division lines.
-
-			// Visibility.
-			bool									bShowAddressGutter	= true;
-			bool									bShowLeftNumbers	= true;								// Hex/Dec/Oct/Bin column.
-			bool									bShowRightArea		= true;								// ASCII column.
-			bool									bShowMiniMap		= false;							// Fixed panel on right.
-			bool									bShowRuler			= true;								// Show/hide ruler row.
-
-			// Left numbers formatting.
-			MX_DATA_FMT								dfLeftNumbersFmt	= MX_DF_HEX;
-			uint32_t								uiGroupSize			= 1;                   				// Extra spacing after every N bytes.
-			uint32_t								uiSpacesBetweenBytes= 1;          						// Count of ' ' between adjacent bytes.
-			uint32_t								uiExtraSpacesBetweenGroups = 1;     					// Extra ' ' at group boundary.
-
-			// Right formatting.
-			MX_DATA_FMT								dfRightNumbersFmt	= MX_DF_CHAR;
-
-			// Paddings/gaps (pixels).
-			int32_t									i32LeftAddrPadding	= 3;								// Left padding.
-			int32_t									i32PadAfterGutterPx	= 8;
-			int32_t									i32PadBetweenNumbersAndTextPx = 3;
-			int32_t									i32PadNumbersLeftPx	= 3;
-			int32_t									i32PadNumbersRightPx= 3;
-			int32_t									i32PadScrollableLeftPx = 0;
-			int32_t									i32PadScrollableRightPx = 0;
-			int32_t									i32PadBeforeMiniMapPx = 8;
-			int32_t									i32LineSpacingPx	= 2;
-
-			// Ruler.
-
-			// Mini-map geometry (pixels).
-			int32_t									i32MiniMapWidthPx	= 140;
-		};
-
-
 		// == Members.
+		MX_STYLE *									m_psOptions = nullptr;									// Pointer to the shared options.
+		MX_FONT_SET *								m_pfsFonts[2] = {};										// Shared fonts.
 		uint64_t									m_ui64VPos = 0;											// First visible line (virtual).
 		uint64_t									m_ui64HPx = 0;											// Horizontal scroll offset.
-		MX_FONT_SET *								m_pfsFonts[2] = {};										// Shared fonts.
 		MX_HEX_EDITOR_COLORS *						m_phecForeColors = nullptr;								// Pointer to shared foreground colors.
 		MX_HEX_EDITOR_COLORS *						m_phecBackColors = nullptr;								// Pointer to shared background colors.
 		MX_EDIT_AS									m_eaEditAs = MX_ES_HEX;									// The view type.
@@ -373,7 +377,6 @@ namespace mx {
 		CHexEditorInterface::CBuffer				m_bCurBuffer;											// The current data buffer being displayed.
 
 		CHexEditorInterface *						m_pheiTarget = nullptr;									// The stream of data to handle.
-		MX_STYLE									m_sStyles[MX_ES_TOTAL];									// View settings.
 		int32_t										m_i32PageLines;											// How many text rows fit.
 		int32_t										m_i32PageCols;											// How many text columns fit.
 
@@ -383,10 +386,10 @@ namespace mx {
 
 		// == Functions.
 		// Gets the current style settings.
-		MX_STYLE *									CurStyle() { return &m_sStyles[m_eaEditAs]; }
+		MX_STYLE *									CurStyle() { return &m_psOptions[m_eaEditAs]; }
 
 		// Gets the current style settings.
-		const MX_STYLE *							CurStyle() const { return &m_sStyles[m_eaEditAs]; }
+		const MX_STYLE *							CurStyle() const { return &m_psOptions[m_eaEditAs]; }
 
 		// Draws the hex-editor view.
 		bool										PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect );
@@ -456,8 +459,8 @@ namespace mx {
 
 		// Gets the total number of lines in the display.
 		inline uint64_t								TotalLines_FixedWidth() const {
-			if ( !&m_sStyles[MX_ES_HEX].uiBytesPerRow ) { return 0ULL; }
-			return (Size() + m_sStyles[MX_ES_HEX].uiBytesPerRow - 1ULL) / m_sStyles[MX_ES_HEX].uiBytesPerRow;
+			if ( !CurStyle()->uiBytesPerRow ) { return 0ULL; }
+			return (Size() + CurStyle()->uiBytesPerRow - 1ULL) / CurStyle()->uiBytesPerRow;
 		}
 
 		/**

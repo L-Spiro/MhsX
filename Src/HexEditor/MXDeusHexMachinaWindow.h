@@ -130,14 +130,16 @@ namespace mx {
 
 
 		// == Members.
-		// The font for fixed-row views.
-		CHexEditorControl::MX_FONT_SET				m_fsFixedRowFont;
-		// The font for text views.
-		CHexEditorControl::MX_FONT_SET				m_fsTextViewFont;
-		// Foreground colors.
+		// The shared options.
+		CHexEditorControl::MX_STYLE					m_sOptions[CHexEditorControl::MX_ES_TOTAL];
+		// The control foreground colors.
 		MX_HEX_EDITOR_COLORS						m_hecFgColors;
-		// Background colors.
+		// The control background colors.
 		MX_HEX_EDITOR_COLORS						m_hecBgColors;
+		// Fixed-width view font.
+		CHexEditorControl::MX_FONT_SET				m_fsFixedRowFont;
+		// Variable-width view font.
+		CHexEditorControl::MX_FONT_SET				m_fsTextViewFont;
 		// Image list.
 		CImageList									m_iImages;
 		// Images.
