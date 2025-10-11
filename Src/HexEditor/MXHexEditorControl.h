@@ -28,20 +28,20 @@ namespace mx {
 
 		/** View types. */
 		enum MX_EDIT_AS {
-			MX_ES_TEXT,
-			MX_ES_HEX,
-			MX_ES_BINARY,
-			MX_ES_SCRIPT,
-			MX_ES_TEMPLATE,
-			MX_ES_EBCDIC,
-			MX_ES_UTF16,
-			MX_ES_UTF8,
-			MX_ES_PROCESS,
-			MX_ES_CUR_PROCESS,
-			MX_ES_CODE,
-			MX_ES_TAGGED,
+			MX_EA_TEXT,
+			MX_EA_HEX,
+			MX_EA_BINARY,
+			MX_EA_SCRIPT,
+			MX_EA_TEMPLATE,
+			MX_EA_EBCDIC,
+			MX_EA_UTF16,
+			MX_EA_UTF8,
+			MX_EA_PROCESS,
+			MX_EA_CUR_PROCESS,
+			MX_EA_CODE,
+			MX_EA_TAGGED,
 
-			MX_ES_TOTAL
+			MX_EA_TOTAL
 		};
 
 		/** Address formats. */
@@ -54,7 +54,7 @@ namespace mx {
 			MX_AF_SHORT_DEC,						// Example: 2395961428w (right-aligned, padded with spaces on the left)
 		};
 
-		/** Data display for the left (numbers) and right (text) columns. */
+		/** Data display for the left and right columns. */
 		enum MX_DATA_FMT {
 			MX_DF_HEX,								// "00 FF 2A"
 			MX_DF_DEC,								// "000 255 042"
@@ -92,11 +92,6 @@ namespace mx {
 
 		/** What to draw and how to size the address gutter. */
 		struct MX_ADDR_STYLE {
-			uint64_t								ui64StartAddress	= 0;								// Starting address bias (Set Starting Address).
-			uint64_t								ui64FirstVisibleLine= 0;								// Top visible line index (0-based).
-
-			uint32_t								ui32VisibleLines	= 0;								// Count of visible lines.
-
 			MX_ADDRESS_FMT							afFormat			= MX_AF_BYTES_HEX;					// Address format.
 			bool									bLowercaseHex		= false;							// Use lowercase a..f for HEX.
 			bool									bShowColonIn		= true;								// Insert ':' every 4 HEX digits (>4 only).
@@ -163,10 +158,133 @@ namespace mx {
 		// == Functions.
 		// Sets the view type.
 		void										SetViewType( MX_EDIT_AS _eaType ) {
-			m_ui64VPos = 0;
-			m_ui64HPx = 0;
-			m_eaEditAs = _eaType;
+			if ( m_eaEditAs != _eaType && _eaType >= MX_EA_TEXT && _eaType < MX_EA_TOTAL ) {
+				m_eaEditAs = _eaType;
+				m_sdScrollView[_eaType].ui64VPos = 0;
+				m_sdScrollView[_eaType].ui64HPx = 0;
+
+				RecalcAndInvalidate();
+			}
 		}
+
+		// Gets the editing type of the control.
+		inline MX_EDIT_AS							GetViewType() const { return m_eaEditAs; }
+
+		// Sets show-addresses.
+		void										SetShowAddressGutter( bool _bShowAddress ) {
+			if ( CurStyle()->bShowAddressGutter != _bShowAddress ) {
+				CurStyle()->bShowAddressGutter = _bShowAddress;
+				RecalcAndInvalidate();
+			}
+		}
+
+		// Gets the show-addresses flag.
+		inline bool									GetShowAddressGutter() const { return CurStyle()->bShowAddressGutter; }
+
+		// Sets the address-gutter format.
+		void										SetAddressGutterFmt( MX_ADDRESS_FMT _afFmt ) {
+			if ( CurStyle()->daAddressStyle.afFormat != _afFmt ) {
+				CurStyle()->daAddressStyle.afFormat = _afFmt;
+				RecalcAndInvalidate();
+			}
+		}
+
+		// Gets the address-gutter format.
+		inline MX_ADDRESS_FMT						GetAddressGutterFmr() const { return CurStyle()->daAddressStyle.afFormat; }
+
+		// Sets the row width.
+		void										SetLineWidth( uint32_t _ui32Width ) {
+			// TODO: Set Auto Line Width to false.
+			if ( CurStyle()->uiBytesPerRow != _ui32Width && _ui32Width >= 1 ) {
+				CurStyle()->uiBytesPerRow = _ui32Width;
+				// Group size must be a multiple of the line size.
+				if ( _ui32Width % CurStyle()->uiGroupSize ) {
+					uint32_t I;
+					for ( I = 1; I != _ui32Width; ++I ) {
+						if ( I ) {
+							if ( (_ui32Width % I) == 0 ) {
+								if ( (_ui32Width / I) <= CurStyle()->uiGroupSize ) {
+									break;
+								}
+							}
+						}
+					}
+					CurStyle()->uiGroupSize = _ui32Width / I;
+				}
+
+				RecalcAndInvalidate();
+			}
+		}
+
+		// Gets the row width.
+		inline uint32_t								GetLineWidth() const { return CurStyle()->uiBytesPerRow; }
+
+		// Sets thr row width to Auto.
+		void										SetLineWidthdAuto( bool /*_bSet*/ ) {
+		}
+
+		// Gets the Auto status of the row width.
+		inline bool									GetLineWidthAuto() const { return false; }
+
+		// Sets the group size.
+		void										SetGroupSize( uint32_t _ui32GroupSize ) {
+			if ( CurStyle()->uiGroupSize != _ui32GroupSize && _ui32GroupSize >= 1 ) {
+				CurStyle()->uiGroupSize = _ui32GroupSize;
+				// Line width umust be a multiple of group size.
+				if ( CurStyle()->uiBytesPerRow % _ui32GroupSize ) {
+					CurStyle()->uiBytesPerRow = (CurStyle()->uiBytesPerRow + (_ui32GroupSize - 1)) / _ui32GroupSize * _ui32GroupSize;
+				}
+				RecalcAndInvalidate();
+			}
+		}
+
+		// Gets the group size.
+		inline uint32_t								GetGroupSize() const { return CurStyle()->uiGroupSize; }
+
+		// Sets the division lines.
+		void										SetDivionLines( uint64_t _ui64Spacing ) {
+			if ( CurStyle()->ui64DivisionSpacing != _ui64Spacing ) {
+				CurStyle()->ui64DivisionSpacing = _ui64Spacing;
+				RecalcAndInvalidate();
+			}
+		}
+
+		// Gets the division-line spacing.
+		inline uint64_t								GetDivisionLines() const { return CurStyle()->ui64DivisionSpacing; }
+
+		// Sets the left area format.
+		void										SetLeftAreaFormat( MX_DATA_FMT _fdfFmt ) {
+			if ( CurStyle()->dfLeftNumbersFmt != _fdfFmt ) {
+				CurStyle()->dfLeftNumbersFmt = _fdfFmt;
+				RecalcAndInvalidate();
+			}
+		}
+
+		// Gets the left-area type.
+		inline MX_DATA_FMT							GetLeftAreaFormat() const { return CurStyle()->dfLeftNumbersFmt; }
+
+		// Sets the right area format.
+		void										SetRightAreaFormat( MX_DATA_FMT _fdfFmt ) {
+			if ( CurStyle()->dfRightNumbersFmt != _fdfFmt || RightAreaHidden() ) {
+				CurStyle()->dfRightNumbersFmt = _fdfFmt;
+				CurStyle()->bShowRightArea = true;
+				RecalcAndInvalidate();
+			}
+		}
+
+		// Gets the right-area type.
+		inline MX_DATA_FMT							GetRightAreaFormat() const { return CurStyle()->dfRightNumbersFmt; }
+
+		// Hides the right area.
+		void										HideRightArea() {
+			if ( CurStyle()->bShowRightArea ) {
+				CurStyle()->bShowRightArea = false;
+				RecalcAndInvalidate();
+			}
+		}
+
+		// Gets the right-area-hidden setting.
+		inline bool									RightAreaHidden() const { return !CurStyle()->bShowRightArea; }
 
 		// WM_NCDESTROY.
 		virtual LSW_HANDLED							NcDestroy();
@@ -364,21 +482,34 @@ namespace mx {
 
 
 	protected :
+		// == Types.
+		/** Scroll/view data. */
+		struct MX_SCROLL_DATA {
+			uint64_t								ui64StartAddress	= 0;								// Starting address bias (Set Starting Address).
+			uint64_t								ui64FirstVisibleLine= 0;								// Top visible line index (0-based).
+
+			uint32_t								ui32VisibleLines	= 0;								// Count of visible lines.
+
+			uint64_t								ui64VPos			= 0;								// First visible line (virtual).
+			uint64_t								ui64HPx				= 0;								// Horizontal scroll offset.
+
+			int32_t									i32PageLines		= 0;								// How many text rows fit.
+			int32_t									i32PageCols			= 0;								// How many text columns fit.
+		};
+
 		// == Members.
 		MX_STYLE *									m_psOptions = nullptr;									// Pointer to the shared options.
 		MX_FONT_SET *								m_pfsFonts[2] = {};										// Shared fonts.
-		uint64_t									m_ui64VPos = 0;											// First visible line (virtual).
-		uint64_t									m_ui64HPx = 0;											// Horizontal scroll offset.
+		
 		MX_HEX_EDITOR_COLORS *						m_phecForeColors = nullptr;								// Pointer to shared foreground colors.
 		MX_HEX_EDITOR_COLORS *						m_phecBackColors = nullptr;								// Pointer to shared background colors.
-		MX_EDIT_AS									m_eaEditAs = MX_ES_HEX;									// The view type.
+		MX_EDIT_AS									m_eaEditAs = MX_EA_HEX;									// The view type.
+		MX_SCROLL_DATA								m_sdScrollView[MX_EA_TOTAL];							// The scroll/view data for each view type.
 		std::map<uint64_t, COLORREF>				m_mColorLookup;											// Quick mixing of colors.
 
 		CHexEditorInterface::CBuffer				m_bCurBuffer;											// The current data buffer being displayed.
 
 		CHexEditorInterface *						m_pheiTarget = nullptr;									// The stream of data to handle.
-		int32_t										m_i32PageLines;											// How many text rows fit.
-		int32_t										m_i32PageCols;											// How many text columns fit.
 
 		// The main window class.
 		static ATOM									m_aAtom;
@@ -475,16 +606,17 @@ namespace mx {
 
 		// Gets the minimum address digits.
 		uint32_t									MinAddrDigits() const {
-			uint64_t ui64TotalLines = Size() / CurStyle()->uiBytesPerRow * CurStyle()->uiBytesPerRow;
+			uint64_t ui64Rows = Size() / CurStyle()->uiBytesPerRow;
+			uint64_t ui64TotalLines = ui64Rows * CurStyle()->uiBytesPerRow;
 			uint32_t ui32Result = 4;
 			switch( CurStyle()->daAddressStyle.afFormat ) {
 				case MX_AF_BYTES_HEX :		{ ui32Result = uint32_t( DigitCount( ui64TotalLines, 16 ) ); break; }
-				case MX_AF_BYTES_DEC :		{ return uint32_t( DigitCount( ui64TotalLines, 10 ) ); break; }
-				case MX_AF_BYTES_OCT :		{ return uint32_t( DigitCount( ui64TotalLines, 8 ) ); break; }
-				case MX_AF_LINE_NUMBER :	{ return 1; break; }
-				case MX_AF_SHORT_HEX :		{ return uint32_t( DigitCount( (ui64TotalLines) >> 1, 16 ) ); break; }
-				case MX_AF_SHORT_DEC :		{ return uint32_t( DigitCount( (ui64TotalLines) >> 1, 10 ) ); break; }
-				default :					{ return uint32_t( DigitCount( ui64TotalLines, 16 ) ); break; }
+				case MX_AF_BYTES_DEC :		{ ui32Result = uint32_t( DigitCount( ui64TotalLines, 10 ) ); break; }
+				case MX_AF_BYTES_OCT :		{ ui32Result = uint32_t( DigitCount( ui64TotalLines, 8 ) ); break; }
+				case MX_AF_LINE_NUMBER :	{ ui32Result = uint32_t( DigitCount( ui64Rows + 1, 10 ) ); break; }
+				case MX_AF_SHORT_HEX :		{ ui32Result = uint32_t( DigitCount( (ui64TotalLines) >> 1, 16 ) ); break; }
+				case MX_AF_SHORT_DEC :		{ ui32Result = uint32_t( DigitCount( (ui64TotalLines) >> 1, 10 ) ); break; }
+				default :					{ ui32Result = uint32_t( DigitCount( ui64TotalLines, 16 ) ); break; }
 			}
 			return std::max( ui32Result, 4U );
 		}
@@ -499,7 +631,7 @@ namespace mx {
 		 * 
 		 * \return Returns true if the view type is Hex, Binary, Code, or a process.
 		 **/
-		inline bool									IsFixedRowLength() const { return m_eaEditAs == MX_ES_HEX || m_eaEditAs == MX_ES_BINARY || m_eaEditAs == MX_ES_CUR_PROCESS || m_eaEditAs == MX_ES_PROCESS; }
+		inline bool									IsFixedRowLength() const { return m_eaEditAs == MX_EA_HEX || m_eaEditAs == MX_EA_BINARY || m_eaEditAs == MX_EA_CUR_PROCESS || m_eaEditAs == MX_EA_PROCESS; }
 
 		/**
 		 * Computes the pixel width of the address gutter for the current options and font.

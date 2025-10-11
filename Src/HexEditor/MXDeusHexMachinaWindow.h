@@ -131,7 +131,7 @@ namespace mx {
 
 		// == Members.
 		// The shared options.
-		CHexEditorControl::MX_STYLE					m_sOptions[CHexEditorControl::MX_ES_TOTAL];
+		CHexEditorControl::MX_STYLE					m_sOptions[CHexEditorControl::MX_EA_TOTAL];
 		// The control foreground colors.
 		MX_HEX_EDITOR_COLORS						m_hecFgColors;
 		// The control background colors.
@@ -167,6 +167,8 @@ namespace mx {
 		 */
 		virtual LSW_HANDLED							InitMenuPopup( HMENU _hMenu, WORD /*_wPos*/, BOOL _bIsWindowMenu );
 		
+		// Recalc all but the given control.
+		void										RecalcAllBut( const CHexEditorControl * _phecSkipMe );
 
 		// Performs a Save As operation.
 		void										SaveAs();

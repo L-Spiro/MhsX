@@ -175,6 +175,15 @@ namespace lsw {
 		 */
 		virtual LSW_HANDLED					Move( LONG _lX, LONG _lY );
 
+		/**
+		 * Handles WM_ERASEBKGND.
+		 * \brief Allows custom background erasing.
+		 *
+		 * \param _hDc Device context provided for erasing.
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		//virtual LSW_HANDLED					EraseBkgnd( HDC /*_hDc*/ );
+
 		// Determines the close rectangle.
 		static LSW_RECT						GetCloseRect( const LSW_RECT &_rTabRect, bool _bHasFocus );
 

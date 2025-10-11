@@ -132,7 +132,7 @@ namespace mx {
 			0,												// iTop
 			MX_W_W,											// dwWidth
 			MX_W_H,											// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | TCS_HOTTRACK,				// dwStyle
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | TCS_HOTTRACK | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,				// dwStyle
 			WS_EX_ACCEPTFILES,								// dwStyleEx
 			nullptr,										// pwcText
 			0,												// sTextLen
@@ -379,7 +379,7 @@ namespace mx {
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_M_VIEW_CHAR_SET_CODEPAGE,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_C677D49F__Code_Page___, _LEN_C677D49F ) },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_M_VIEW_CHAR_SET_USE_DEFAULT_CHAR_SET,		FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_D138DECB_Reset_Font_Si_ze, _LEN_D138DECB ) },
+		{ FALSE,		MX_M_VIEW_CHAR_SET_USE_DEFAULT_CHAR_SET,		FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_20990615_Use__Default_Char_Set_for_____Hex___, _LEN_20990615 ) },
 	};
 
 	// View -> Addresses menu.

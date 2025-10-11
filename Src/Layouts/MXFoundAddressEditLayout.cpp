@@ -68,7 +68,7 @@ namespace mx {
 			0,												// iTop
 			MX_EDIT_W,										// dwWidth
 			MX_EDIT_H - 26,									// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | TCS_HOTTRACK,																	// dwStyle
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | TCS_HOTTRACK | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,				// dwStyle
 			0,												// dwStyleEx
 			nullptr,										// pwcText
 			0,												// sTextLen

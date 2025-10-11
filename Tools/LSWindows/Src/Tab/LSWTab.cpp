@@ -111,14 +111,70 @@ namespace lsw {
 	// Selects a tab in a tab control.  Returns the index of the previously selected tab if successful, or -1 otherwise.
 	int CTab::SetCurSel( int _iItem ) {
 		if ( !Wnd() ) { return -1; }
-		int iRet = static_cast<int>(::SendMessageW( Wnd(), TCM_SETCURSEL, static_cast<WPARAM>(_iItem), 0L ));
-		// Do not check iRet for -1.
-		for ( size_t I = 0; I < m_vTabs.size(); ++I ) {
+		int iPrev = static_cast<int>(::SendMessageW( Wnd(), TCM_SETCURSEL, static_cast<WPARAM>(_iItem), 0L ));
+
+		// Gather target + count.
+		size_t stCount = m_vTabs.size();
+		if ( _iItem < 0 || static_cast<size_t>(_iItem) >= stCount ) { return iPrev; }
+
+		HWND hParent = ::GetParent( Wnd() );
+		HWND hTarget = m_vTabs[static_cast<size_t>(_iItem)].pwWidget ? m_vTabs[static_cast<size_t>(_iItem)].pwWidget->Wnd() : nullptr;
+
+		// Disable redraw on parent to avoid intermediate paints.
+		::SendMessageW( hParent, WM_SETREDRAW, FALSE, 0 );
+		::SendMessageW( Wnd(), WM_SETREDRAW, FALSE, 0 );
+
+		// Batch Z-order + visibility changes.
+		HDWP hDwp = ::BeginDeferWindowPos( static_cast<int>(stCount) );
+
+		// 1) Bring the target to the top and show it.
+		if ( hTarget ) {
+			hDwp = ::DeferWindowPos(
+				hDwp,
+				hTarget,
+				HWND_TOP,						// ensure it is above siblings so WS_CLIPSIBLINGS wonÅft occlude it
+				0, 0, 0, 0,
+				SWP_NOMOVE | SWP_NOSIZE | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW
+			);
+		}
+
+		// 2) Hide all other pages.
+		for ( size_t I = 0; I < stCount; ++I ) {
+			if ( I == static_cast<size_t>(_iItem) ) { continue; }
 			if ( m_vTabs[I].pwWidget ) {
-				m_vTabs[I].pwWidget->SetVisible( I == static_cast<size_t>(_iItem) );
+				hDwp = ::DeferWindowPos(
+					hDwp,
+					m_vTabs[I].pwWidget->Wnd(),
+					nullptr,
+					0, 0, 0, 0,
+					SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW
+				);
 			}
 		}
-		return iRet;
+
+		if ( hDwp ) { ::EndDeferWindowPos( hDwp ); }
+
+		// Re-enable redraw.
+		::SendMessageW( Wnd(), WM_SETREDRAW, TRUE, 0 );
+		::SendMessageW( hParent, WM_SETREDRAW, TRUE, 0 );
+
+		// *** Critical: explicitly repaint the selected page now. ***
+		if ( hTarget ) {
+			::RedrawWindow(
+				hTarget,
+				nullptr, nullptr,
+				RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW
+			);
+		}
+
+		// Also refresh the container frame once (no NOERASE to avoid stale buffer).
+		::RedrawWindow(
+			hParent,
+			nullptr, nullptr,
+			RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW | RDW_FRAME
+		);
+
+		return iPrev;
 	}
 
 	// Determines the currently selected tab in a tab control.
@@ -353,6 +409,15 @@ namespace lsw {
 
 		return LSW_H_CONTINUE;
 	}
+
+	/**
+	 * Handles WM_ERASEBKGND.
+	 * \brief Allows custom background erasing.
+	 *
+	 * \param _hDc Device context provided for erasing.
+	 * \return Returns a LSW_HANDLED code.
+	 */
+	//CWidget::LSW_HANDLED CTab::EraseBkgnd( HDC /*_hDc*/ ) { return LSW_H_HANDLED; }
 
 	// Determines the close rectangle.
 	LSW_RECT CTab::GetCloseRect( const LSW_RECT &_rTabRect, bool _bHasFocus ) {

@@ -33,12 +33,12 @@ namespace mx {
 	void CHexEditorControl::InitControl( HWND _hWnd ) {
 		//m_iCxChar = m_iCyChar = 0;
 		//m_iClientW = m_iClientH = 0;
-		//m_sStyles[MX_ES_HEX].uiBytesPerRow = 16;
+		//m_sStyles[MX_EA_HEX].uiBytesPerRow = 16;
 		/*m_pData = nullptr;
 		m_ui64Size = 0ULL;*/
 		/*m_iVPos = 0;
 		m_iHPos = 0;*/
-		m_i32PageLines = m_i32PageCols = 1;
+		m_sdScrollView[m_eaEditAs].i32PageLines = m_sdScrollView[m_eaEditAs].i32PageCols = 1;
 		//m_iAddrDigits = 8;
 		//SetState( _hWnd, ps );
 
@@ -269,7 +269,7 @@ namespace mx {
 		const uint64_t ui64ContentPx = static_cast<uint64_t>(TotalContentWidthPx());
 		const uint64_t ui64MaxH      = ui64ContentPx ? (ui64ContentPx - 1ULL) : 0ULL;
 
-		uint64_t ui64Pos = m_ui64HPx;
+		uint64_t ui64Pos = m_sdScrollView[m_eaEditAs].ui64HPx;
 
 		switch ( _uScrollType ) {
 			case SB_LINELEFT : {
@@ -304,9 +304,9 @@ namespace mx {
 		}
 
 		if ( ui64Pos > ui64MaxH ) { ui64Pos = ui64MaxH; }
-		if ( ui64Pos != m_ui64HPx ) {
-			m_ui64HPx = ui64Pos;
-			lsw::CBase::SetScrollInfo64( Wnd(), SB_HORZ, SIF_POS, ui64MaxH, m_ui64HPx, 1, TRUE );
+		if ( ui64Pos != m_sdScrollView[m_eaEditAs].ui64HPx ) {
+			m_sdScrollView[m_eaEditAs].ui64HPx = ui64Pos;
+			lsw::CBase::SetScrollInfo64( Wnd(), SB_HORZ, SIF_POS, ui64MaxH, m_sdScrollView[m_eaEditAs].ui64HPx, 1, TRUE );
 			::InvalidateRect( Wnd(), nullptr, FALSE );
 		}
 		return lsw::CWidget::LSW_H_HANDLED;
@@ -314,13 +314,13 @@ namespace mx {
 
 	// WM_VSCROLL
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::VScroll( USHORT /*_uScrollPos*/, USHORT _uScrollType, CWidget * /*_pwWidget*/ ) {
-		const int32_t iPageLines = std::max( 1, m_i32PageLines - 1 );
+		const int32_t iPageLines = std::max( 1, m_sdScrollView[m_eaEditAs].i32PageLines - 1 );
 		const int32_t iStep      = 1;
 
 		const uint64_t ui64Lines = TotalLines_FixedWidth();
 		const uint64_t ui64MaxV  = ui64Lines ? (ui64Lines - 1ULL) : 0ULL;
 
-		uint64_t ui64Pos = m_ui64VPos;
+		uint64_t ui64Pos = m_sdScrollView[m_eaEditAs].ui64VPos;
 
 		switch ( _uScrollType ) {
 			case SB_TOP :			{ ui64Pos = 0ULL; break; }
@@ -348,13 +348,13 @@ namespace mx {
 		}
 
 		if ( ui64Pos > ui64MaxV ) { ui64Pos = ui64MaxV; }
-		if ( ui64Pos != m_ui64VPos ) {
-			m_ui64VPos = ui64Pos;
+		if ( ui64Pos != m_sdScrollView[m_eaEditAs].ui64VPos ) {
+			m_sdScrollView[m_eaEditAs].ui64VPos = ui64Pos;
 
 			// Keep style in sync with the new top visible line.
-			const_cast<MX_STYLE *>(CurStyle())->daAddressStyle.ui64FirstVisibleLine = m_ui64VPos;
+			m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine = m_sdScrollView[m_eaEditAs].ui64VPos;
 
-			lsw::CBase::SetScrollInfo64( Wnd(), SB_VERT, SIF_POS, ui64MaxV, m_ui64VPos, 1, TRUE );
+			lsw::CBase::SetScrollInfo64( Wnd(), SB_VERT, SIF_POS, ui64MaxV, m_sdScrollView[m_eaEditAs].ui64VPos, 1, TRUE );
 			::InvalidateRect( Wnd(), nullptr, FALSE );
 		}
 		return lsw::CWidget::LSW_H_HANDLED;
@@ -449,20 +449,20 @@ namespace mx {
 		const MX_STYLE & stAll = (*CurStyle());
 		const int32_t iGutterW = ComputeAddressGutterWidthPx();
 		lsw::LSW_RECT rTmp = _rRect;
-		int32_t iX = iGutterW - m_ui64HPx, iY = 0;
+		int32_t iX = iGutterW - m_sdScrollView[m_eaEditAs].ui64HPx, iY = 0;
 		lsw::LSW_RECT rBlankArea = _rRect;
 		{
 			if ( m_pheiTarget ) {
-				if ( m_pheiTarget->Read( stAll.daAddressStyle.ui64FirstVisibleLine * stAll.uiBytesPerRow, m_bCurBuffer, (m_i32PageLines + 1) * stAll.uiBytesPerRow ) ) {
+				if ( m_pheiTarget->Read( m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine * stAll.uiBytesPerRow, m_bCurBuffer, (m_sdScrollView[m_eaEditAs].i32PageLines + 1) * stAll.uiBytesPerRow ) ) {
 					int32_t i32Top = stAll.bShowRuler ? GetRulerHeightPx() : 0;
-					DrawArea( _hDc, iX, i32Top, stAll.dfLeftNumbersFmt, false, m_i32PageLines + 1, m_bCurBuffer );
+					DrawArea( _hDc, iX, i32Top, stAll.dfLeftNumbersFmt, false, m_sdScrollView[m_eaEditAs].i32PageLines + 1, m_bCurBuffer );
 					auto ui32WidthL = ComputeAreaWidthPx( stAll.dfLeftNumbersFmt );
 					rBlankArea.top = i32Top;
 					rBlankArea.left = iX + ui32WidthL;
 
 					if ( stAll.bShowRightArea ) {
 						DrawArea( _hDc, iX + ui32WidthL + stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx,
-							i32Top, stAll.dfRightNumbersFmt, true, m_i32PageLines + 1, m_bCurBuffer );
+							i32Top, stAll.dfRightNumbersFmt, true, m_sdScrollView[m_eaEditAs].i32PageLines + 1, m_bCurBuffer );
 
 						rBlankArea.left += stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx + ComputeAreaWidthPx( stAll.dfRightNumbersFmt );
 
@@ -525,14 +525,14 @@ namespace mx {
 				::FillRect( _hDc, &rTmp,
 					lsw::CBase::BrushCache().Brush( MX_GetRgbValue( BackColors()->crEditor ) ) );
 			}
-			if ( MX_GetAValue( ForeColors()->crAddressSeparatorLine ) || m_ui64HPx != 0 ) {
+			if ( MX_GetAValue( ForeColors()->crAddressSeparatorLine ) || m_sdScrollView[m_eaEditAs].ui64HPx != 0 ) {
 				const int32_t iThisX = rTmp.right - 1;
 				lsw::LSW_HPEN pPen( PS_SOLID, 1, ForeColors()->crAddressSeparatorLine );
 				lsw::LSW_SELECTOBJECT soPen( _hDc, pPen.hPen );
 				::MoveToEx( _hDc, iThisX, iY, NULL );
 				::LineTo( _hDc, iThisX, rTmp.bottom );
 			}
-			DrawAddressGutter( _hDc, stAll.i32LeftAddrPadding, iY, m_i32PageLines + 1 );
+			DrawAddressGutter( _hDc, stAll.i32LeftAddrPadding, iY, m_sdScrollView[m_eaEditAs].i32PageLines + 1 );
 		}
 		return true;
 	}
@@ -578,7 +578,7 @@ namespace mx {
 				const uint32_t ui32D = static_cast<uint32_t>(_ui64V % _ui32Base);
 				wchar_t wcC = 0;
 				if ( ui32D < 10 ) { wcC = wchar_t( L'0' + ui32D ); }
-				else { wcC = wchar_t( (_bLower ? L'a' : L'A') + (ui32D - 10) ); }
+				else { wcC = wchar_t( (_bLower ? (L'a' - 10) : (L'A' - 10)) + ui32D ); }
 				wsStr.push_back( wcC );
 				_ui64V /= _ui32Base;
 			}
@@ -605,19 +605,19 @@ namespace mx {
 		auto FormatAddressForLine = [&]( uint64_t _ui64Line ) -> std::wstring {
 			// Base byte index for the start of this line.
 			const uint64_t ui64Bpr = stAll.uiBytesPerRow ? stAll.uiBytesPerRow : 16;
-			const uint64_t ui64ByteBase = asAddrStyle.ui64StartAddress + _ui64Line * ui64Bpr;
+			const uint64_t ui64ByteBase = m_sdScrollView[m_eaEditAs].ui64StartAddress + _ui64Line * ui64Bpr;
 
 			// Map to displayed scalar according to format.
 			uint64_t v = 0ULL;
 			bool bHex = false, bOct = false, bDec = false;
 			switch( asAddrStyle.afFormat ) {
-				case MX_AF_BYTES_HEX :		{ v = ui64ByteBase; bHex = true; break; }
-				case MX_AF_BYTES_DEC :		{ v = ui64ByteBase; bDec = true; break; }
-				case MX_AF_BYTES_OCT :		{ v = ui64ByteBase; bOct = true; break; }
-				case MX_AF_LINE_NUMBER :	{ v = _ui64Line;    bDec = true; break; }
-				case MX_AF_SHORT_HEX :		{ v = (ui64ByteBase >> 1); bHex = true; break; }
-				case MX_AF_SHORT_DEC :		{ v = (ui64ByteBase >> 1); bDec = true; break; }
-				default :					{ v = ui64ByteBase; bHex = true; break; }
+				case MX_AF_BYTES_HEX :		{ v = ui64ByteBase;			bHex = true; break; }
+				case MX_AF_BYTES_DEC :		{ v = ui64ByteBase;			bDec = true; break; }
+				case MX_AF_BYTES_OCT :		{ v = ui64ByteBase;			bOct = true; break; }
+				case MX_AF_LINE_NUMBER :	{ v = _ui64Line + 1;		bDec = true; break; }
+				case MX_AF_SHORT_HEX :		{ v = (ui64ByteBase >> 1);	bHex = true; break; }
+				case MX_AF_SHORT_DEC :		{ v = (ui64ByteBase >> 1);	bDec = true; break; }
+				default :					{ v = ui64ByteBase;			bHex = true; break; }
 			}
 
 			// Convert to string in the selected base.
@@ -630,7 +630,7 @@ namespace mx {
 			uint32_t ui32MinDigits = MinAddrDigits();
 			if ( ui32MinDigits && wsCore.size() < ui32MinDigits ) {
 				const size_t pad = ui32MinDigits - wsCore.size();
-				if ( bHex || bOct ) {
+				if ( bHex ) {
 					wsCore.insert( wsCore.begin(), pad, L'0' );
 				}
 				else {
@@ -666,7 +666,7 @@ namespace mx {
 		const int32_t iLineAdv = fsFont.iCharCy + stAll.i32LineSpacingPx;
 
 		// First visible line (top) comes from style; draw consecutive lines.
-		uint64_t ui64Line = asAddrStyle.ui64FirstVisibleLine;
+		uint64_t ui64Line = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine;
 
 		auto ui64MaxLines = TotalLines() - ui64Line;
 		_ui32LinesToDraw = uint32_t( std::min<uint64_t>( _ui32LinesToDraw, ui64MaxLines ) );
@@ -780,7 +780,7 @@ namespace mx {
 	 **/
 	void CHexEditorControl::DrawArea( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, MX_DATA_FMT _dfFmt, bool _bRightArea, uint32_t _ui32LinesToDraw, const CHexEditorInterface::CBuffer &_bData ) {
 		const MX_STYLE & stAll = (*CurStyle());
-		if ( !stAll.bShowAddressGutter || _ui32LinesToDraw == 0 || nullptr == Font() ) { return; }
+		if ( _ui32LinesToDraw == 0 || nullptr == Font() ) { return; }
 		const MX_FONT_SET & fsFont = (*Font());
 
 		const MX_ADDR_STYLE & asAddrStyle = stAll.daAddressStyle;
@@ -808,8 +808,8 @@ namespace mx {
 		}
 
 		// First visible line (top) comes from style; draw consecutive lines.
-		uint64_t ui64Line = asAddrStyle.ui64FirstVisibleLine;
-		uint64_t ui64StartAddress = asAddrStyle.ui64FirstVisibleLine * ui32Bpr;
+		uint64_t ui64Line = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine;
+		uint64_t ui64StartAddress = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine * ui32Bpr;
 
 		auto ui64MaxLines = TotalLines() - ui64Line;
 		_ui32LinesToDraw = uint32_t( std::min<uint64_t>( _ui32LinesToDraw, ui64MaxLines ) );
@@ -867,7 +867,7 @@ namespace mx {
 				uint8_t ui8Value = J < sDataSize ? pui8Data[J] : 0;
 				GetTextRectForIndex( _dfFmt, J, _bRightArea, _iXLeft, iL, iW );
 				
-				if ( MX_DF_CHAR != _dfFmt ) {
+				if ( MX_DF_CHAR != _dfFmt && stAll.ui64DivisionSpacing ) {
 					// Draw division lines.
 					int32_t iL2, iW2;
 					GetBackgrondRectForIndex( _dfFmt, J, _bRightArea, _iXLeft, iL2, iW2 );
@@ -1002,11 +1002,11 @@ namespace mx {
 				// File/page bound (last visible byte vs last file byte).
 				const uint64_t ui64Bpr			= stAll.uiBytesPerRow ? stAll.uiBytesPerRow : 16;
 				const uint64_t ui64FileLast		= (ui64FileSize ? (ui64FileSize - 1ULL) : 0ULL);
-				const uint64_t ui64FileMax		= asAddrStyle.ui64StartAddress + ui64FileLast;
+				const uint64_t ui64FileMax		= m_sdScrollView[m_eaEditAs].ui64StartAddress + ui64FileLast;
 
-				const uint64_t ui64TopLine		= asAddrStyle.ui64FirstVisibleLine;
-				const uint64_t ui64LastLine		= ui64TopLine + (asAddrStyle.ui32VisibleLines ? (asAddrStyle.ui32VisibleLines - 1ULL) : 0ULL);
-				const uint64_t ui64PageLast		= asAddrStyle.ui64StartAddress + (ui64LastLine * ui64Bpr + (ui64Bpr ? (ui64Bpr - 1ULL) : 0ULL));
+				const uint64_t ui64TopLine		= m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine;
+				const uint64_t ui64LastLine		= ui64TopLine + (m_sdScrollView[m_eaEditAs].ui32VisibleLines ? (m_sdScrollView[m_eaEditAs].ui32VisibleLines - 1ULL) : 0ULL);
+				const uint64_t ui64PageLast		= m_sdScrollView[m_eaEditAs].ui64StartAddress + (ui64LastLine * ui64Bpr + (ui64Bpr ? (ui64Bpr - 1ULL) : 0ULL));
 				const uint64_t ui64BoundByte	= asAddrStyle.bMinimizeDigits ? std::min( ui64PageLast, ui64FileMax ) : ui64FileMax;
 
 				// Map bound to displayed scalar by format.
@@ -1244,33 +1244,33 @@ namespace mx {
 		int32_t iClientH = int32_t( ClientRect().Height() );
 
 		const int32_t iLineAdv = LineAdvanceCy();
-		m_i32PageLines = (iLineAdv ? (iClientH / iLineAdv) : 0);
-		if ( m_i32PageLines < 1 ) { m_i32PageLines = 1; }
+		m_sdScrollView[m_eaEditAs].i32PageLines = (iLineAdv ? (iClientH / iLineAdv) : 0);
+		if ( m_sdScrollView[m_eaEditAs].i32PageLines < 1 ) { m_sdScrollView[m_eaEditAs].i32PageLines = 1; }
 
-		m_i32PageCols = (Font()->iCharCx ? (iClientH / Font()->iCharCx) : 0);
-		if ( m_i32PageCols < 1 ) { m_i32PageCols = 1; }
+		m_sdScrollView[m_eaEditAs].i32PageCols = (Font()->iCharCx ? (iClientH / Font()->iCharCx) : 0);
+		if ( m_sdScrollView[m_eaEditAs].i32PageCols < 1 ) { m_sdScrollView[m_eaEditAs].i32PageCols = 1; }
 
 		// == Vertical (lines; virtual units are line indices 0..N-1).
 		const uint64_t ui64Lines = TotalLines();
 		const uint64_t ui64MaxV  = ui64Lines ? (ui64Lines - 1ULL) : 0ULL;	// inclusive; allow last line at top
-		if ( m_ui64VPos > ui64MaxV ) { m_ui64VPos = ui64MaxV; }
+		if ( m_sdScrollView[m_eaEditAs].ui64VPos > ui64MaxV ) { m_sdScrollView[m_eaEditAs].ui64VPos = ui64MaxV; }
 
 		// Keep style in sync.
-		const_cast<MX_STYLE *>(CurStyle())->daAddressStyle.ui64FirstVisibleLine = m_ui64VPos;
-		const_cast<MX_STYLE *>(CurStyle())->daAddressStyle.ui32VisibleLines     = static_cast<uint32_t>(m_i32PageLines);
+		m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine = m_sdScrollView[m_eaEditAs].ui64VPos;
+		m_sdScrollView[m_eaEditAs].ui32VisibleLines     = static_cast<uint32_t>(m_sdScrollView[m_eaEditAs].i32PageLines);
 
 		// Physical page = 1 so the thumb can reach the end.
 		lsw::CBase::SetScrollInfo64( m_hWnd, SB_VERT, SIF_PAGE | SIF_RANGE | SIF_POS,
-			ui64MaxV, m_ui64VPos, 1, TRUE );
+			ui64MaxV, m_sdScrollView[m_eaEditAs].ui64VPos, 1, TRUE );
 
 		// == Horizontal (pixels; virtual units are pixel offsets 0..contentPx-1).
 		const uint64_t ui64ContentPx = static_cast<uint64_t>(TotalContentWidthPx());
 		const uint64_t ui64MaxH      = ui64ContentPx ? (ui64ContentPx - 1ULL) : 0ULL; // inclusive; allow last pixel at left
-		if ( m_ui64HPx > ui64MaxH ) { m_ui64HPx = ui64MaxH; }
+		if ( m_sdScrollView[m_eaEditAs].ui64HPx > ui64MaxH ) { m_sdScrollView[m_eaEditAs].ui64HPx = ui64MaxH; }
 
 		// Physical page = 1 for the same reason; weÅfll use client width for paging behavior.
 		lsw::CBase::SetScrollInfo64( m_hWnd, SB_HORZ, SIF_PAGE | SIF_RANGE | SIF_POS,
-			ui64MaxH, m_ui64HPx, 1, TRUE );
+			ui64MaxH, m_sdScrollView[m_eaEditAs].ui64HPx, 1, TRUE );
 	}
 
 

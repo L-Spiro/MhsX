@@ -27,7 +27,7 @@ namespace mx {
 			MX_PEW_W,								// dwWidth
 			MX_PEW_H,								// dwHeight
 			WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS | DS_3DLOOK | DS_SETFONT,				// dwStyle
-			WS_EX_WINDOWEDGE | WS_EX_CONTROLPARENT,														// dwStyleEx
+			WS_EX_WINDOWEDGE | WS_EX_CONTROLPARENT,	// dwStyleEx
 			MX_MAKE_WCHAR( _T_D09DA91D_PE_Works ),	// pwcText
 			_LEN_D09DA91D,							// sTextLen
 			MX_PEW_NONE,							// dwParentId
@@ -102,7 +102,7 @@ namespace mx {
 			0,										// dwHeight
 			WS_CHILD | TBSTYLE_FLAT | TBSTYLE_TOOLTIPS | WS_CLIPCHILDREN |
 				WS_CLIPSIBLINGS | CCS_NODIVIDER | CCS_NORESIZE | WS_VISIBLE | CCS_ADJUSTABLE,		// dwStyle
-			0,																						// dwStyleEx
+			0,										// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_PEW_MAINWINDOW,						// dwParentId
@@ -118,8 +118,8 @@ namespace mx {
 			0,										// iTop
 			255,									// dwWidth
 			110,									// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | TCS_HOTTRACK,				// dwStyle
-			WS_EX_ACCEPTFILES,														// dwStyleEx
+			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP | TCS_HOTTRACK | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,				// dwStyle
+			WS_EX_ACCEPTFILES,						// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_PEW_MAINWINDOW,						// dwParentId
