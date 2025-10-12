@@ -3,6 +3,7 @@
 #include "../MXMhsX.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../Utilities/MXUtilities.h"
+#include "MXCharSets.h"
 #include "MXHexEditorColors.h"
 #include "MXHexEditorInterface.h"
 
@@ -101,48 +102,47 @@ namespace mx {
 			bool									bUseShortSuffixW	= true;								// Append 'w' for Short addressing.
 		};
 
-		/** General style settings. */
+		/** Per-view-type style settings. */
 		struct MX_STYLE {
-			MX_FONT_SET								fsFonts[2] = {};										// Shared fonts.
-			MX_FONT_TYPE							ftFont				= MX_FT_FIXED_ROW;					// The shared font to use.
-			MX_ADDR_STYLE							daAddressStyle;											// Address style.
-			uint32_t								uiBytesPerRow		= 16;								// Bytes per displayed row.
-			uint64_t								ui64DivisionSpacing = 4;								// Spacing between division lines.
+			MX_FONT_SET								fsFonts[2]						= {};						// Shared fonts.
+			MX_FONT_TYPE							ftFont							= MX_FT_FIXED_ROW;			// The shared font to use.
+			CCharSets::MX_CHAR_SETS					csCharSet						= CCharSets::MX_CS_ASCII;	// the current character set.
+			MX_ADDR_STYLE							daAddressStyle;												// Address style.
+			uint32_t								uiBytesPerRow					= 16;						// Bytes per displayed row.
+			uint64_t								ui64DivisionSpacing				= 4;						// Spacing between division lines.
 
 			// Visibility.
-			bool									bShowAddressGutter	= true;
-			bool									bShowLeftNumbers	= true;								// Hex/Dec/Oct/Bin column.
-			bool									bShowRightArea		= true;								// ASCII column.
-			bool									bShowMiniMap		= true;								// Fixed panel on right.
-			bool									bShowRuler			= true;								// Show/hide ruler row.
+			bool									bShowAddressGutter				= true;
+			bool									bShowLeftNumbers				= true;						// Hex/Dec/Oct/Bin column.
+			bool									bShowRightArea					= true;						// ASCII column.
+			bool									bShowMiniMap					= true;						// Fixed panel on right.
+			bool									bShowRuler						= true;						// Show/hide ruler row.
 
 			// Left numbers formatting.
-			MX_DATA_FMT								dfLeftNumbersFmt	= MX_DF_HEX;
-			uint32_t								uiGroupSize			= 1;                   				// Extra spacing after every N bytes.
-			uint32_t								uiSpacesBetweenBytes= 1;          						// Count of ' ' between adjacent bytes.
-			uint32_t								uiExtraSpacesBetweenGroups = 1;     					// Extra ' ' at group boundary.
+			MX_DATA_FMT								dfLeftNumbersFmt				= MX_DF_HEX;
+			uint32_t								uiGroupSize						= 1;                   		// Extra spacing after every N bytes.
+			uint32_t								uiSpacesBetweenBytes			= 1;          				// Count of ' ' between adjacent bytes.
+			uint32_t								uiExtraSpacesBetweenGroups		= 1;     					// Extra ' ' at group boundary.
 
 			// Right formatting.
-			MX_DATA_FMT								dfRightNumbersFmt	= MX_DF_CHAR;
+			MX_DATA_FMT								dfRightNumbersFmt				= MX_DF_CHAR;
 
 			// Paddings/gaps (pixels).
-			int32_t									i32LeftAddrPadding	= 3;								// Left padding.
-			int32_t									i32PadAfterGutterPx	= 8;
-			int32_t									i32PadBetweenNumbersAndTextPx = 3;
-			int32_t									i32PadNumbersLeftPx	= 3;
-			int32_t									i32PadNumbersRightPx= 3;
-			int32_t									i32PadScrollableLeftPx = 0;
-			int32_t									i32PadScrollableRightPx = 0;
-			int32_t									i32PadBeforeMiniMapPx = 8;
-			int32_t									i32LineSpacingPx	= 2;
+			int32_t									i32LeftAddrPadding				= 3;						// Left padding.
+			int32_t									i32PadAfterGutterPx				= 8;
+			int32_t									i32PadBetweenNumbersAndTextPx	= 3;
+			int32_t									i32PadNumbersLeftPx				= 3;
+			int32_t									i32PadNumbersRightPx			= 3;
+			int32_t									i32PadScrollableLeftPx			= 0;
+			int32_t									i32PadScrollableRightPx			= 0;
+			int32_t									i32PadBeforeMiniMapPx			= 8;
+			int32_t									i32LineSpacingPx				= 2;
 
 			// Ruler.
 
 			// Mini-map geometry (pixels).
-			int32_t									i32MiniMapWidthPx	= 140;
+			int32_t									i32MiniMapWidthPx				= 140;
 
-			// Colors.
-			
 		};
 
 		/** Creation parameters. */
@@ -568,11 +568,10 @@ namespace mx {
 		 * \param _iXLeft Pixel X where the scrollable content begins (after gutter; already includes horizontal scroll offset).
 		 * \param _iYTop Pixel Y top where the area should be drawn.
 		 * \param _dfFmt Format of the area.
-		 * \param _bRightArea False for the left numbers area; true for the right text area.
 		 * \param _ui32LinesToDraw The number of rows to draw (typically page lines).
 		 * \param _bData The actual values at the addresses to render.
 		 **/
-		void										DrawArea( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, MX_DATA_FMT _dfFmt, bool _bRightArea, uint32_t _ui32LinesToDraw, const CHexEditorInterface::CBuffer &_bData );
+		void										DrawArea( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, MX_DATA_FMT _dfFmt, uint32_t _ui32LinesToDraw, const CHexEditorInterface::CBuffer &_bData );
 
 		// Computes font metrics.
 		void										ComputeFontMetrics() {
@@ -656,23 +655,14 @@ namespace mx {
 		 *
 		 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
 		 * \param _ui32Index Zero-based cell index within the row.
-		 * \param _bRightArea False for the left numbers area; true for the right text area.
 		 * \param _iXBase The pixel X of the beginning of the area (not including gutter; includes horizontal scroll offset).
 		 * \param _iXLeft [out] Receives the pixel X of the groupÅfs left edge.
 		 * \param _iWidth [out] Receives the pixel width of the group (internal bytes/chars and normal intra-byte spacing).
 		 * \return Returns true if the index is valid for the current layout; false otherwise.
-		 *
-		 * Description:
-		 *  - A ÅggroupÅh is composed of N adjacent cells (bytes for HEX/DEC/OCT/BIN, characters for CHAR),
-		 *    where N is the areaÅfs grouping size. The width includes intra-cell spacing inside the group.
-		 *  - The extra spacing that separates two adjacent groups (group gap) is not included in the width
-		 *    of the current group; it is placed after it.
-		 *  - The caller can center text within the returned [left,width] using a text measurement.
 		 */
 		bool										GetTextRectForIndex(
 			MX_DATA_FMT _dfDataFmt,
 			uint32_t _ui32Index,
-			bool _bRightArea,
 			int32_t _iXBase,
 			int32_t &_iXLeft,
 			int32_t &_iWidth ) const;
@@ -682,7 +672,6 @@ namespace mx {
 		 *
 		 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
 		 * \param _ui32Index Zero-based cell index within the row.
-		 * \param _bRightArea False for the left numbers area; true for the right text area.
 		 * \param _iXBase The pixel X of the beginning of the area (not including gutter; includes horizontal scroll offset).
 		 * \param _iXLeft [out] Receives the pixel X of the groupÅfs left edge.
 		 * \param _iWidth [out] Receives the pixel width of the group (internal bytes/chars and normal intra-byte spacing).
@@ -691,7 +680,6 @@ namespace mx {
 		bool										GetBackgrondRectForIndex(
 			MX_DATA_FMT _dfDataFmt,
 			uint32_t _ui32Index,
-			bool _bRightArea,
 			int32_t _iXBase,
 			int32_t &_iXLeft,
 			int32_t &_iWidth ) const;

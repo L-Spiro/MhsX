@@ -2339,9 +2339,9 @@ namespace mx {
 				}
 				if ( bFound ) { ++I; continue; }
 				if ( (vTypeData[I] & C1_CNTRL) ||
-					!::iswprint( _swsInput[I] ) ||
+					/*!::iswprint( _swsInput[I] ) ||*/
 					!(vTypeData[I] & C1_DEFINED) ||
-					(vType3Data[I] & (C3_HIGHSURROGATE | C3_LOWSURROGATE)) ) {
+					(vType3Data[I] & (C3_HIGHSURROGATE | C3_LOWSURROGATE | C3_NONSPACING | C3_DIACRITIC | C3_VOWELMARK)) ) {
 					char szBuffer[16];
 					std::sprintf( szBuffer, "\\u%.4X", static_cast<uint16_t>(_swsInput[I]) );
 					char * pcTmp = szBuffer;
@@ -2414,8 +2414,9 @@ namespace mx {
 					wType3Data );
 
 				if ( (wTypeData[0] & C1_CNTRL) ||
-					!::iswprint( static_cast<wint_t>(ui32Conv) ) ||
-					!(wTypeData[0] & C1_DEFINED) ) {
+					/*!::iswprint( static_cast<wint_t>(ui32Conv) ) ||*/
+					!(wTypeData[0] & C1_DEFINED) ||
+					!(wType3Data[0] & (C3_NONSPACING | C3_DIACRITIC | C3_VOWELMARK)) ) {
 					char szBuffer[16];
 					std::sprintf( szBuffer, "\\U%.8X", static_cast<uint32_t>(_swsInput[I]) );
 					char * pcTmp = szBuffer;

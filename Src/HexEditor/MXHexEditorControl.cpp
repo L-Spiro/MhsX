@@ -455,14 +455,14 @@ namespace mx {
 			if ( m_pheiTarget ) {
 				if ( m_pheiTarget->Read( m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine * stAll.uiBytesPerRow, m_bCurBuffer, (m_sdScrollView[m_eaEditAs].i32PageLines + 1) * stAll.uiBytesPerRow ) ) {
 					int32_t i32Top = stAll.bShowRuler ? GetRulerHeightPx() : 0;
-					DrawArea( _hDc, iX, i32Top, stAll.dfLeftNumbersFmt, false, m_sdScrollView[m_eaEditAs].i32PageLines + 1, m_bCurBuffer );
+					DrawArea( _hDc, iX, i32Top, stAll.dfLeftNumbersFmt, m_sdScrollView[m_eaEditAs].i32PageLines + 1, m_bCurBuffer );
 					auto ui32WidthL = ComputeAreaWidthPx( stAll.dfLeftNumbersFmt );
 					rBlankArea.top = i32Top;
 					rBlankArea.left = iX + ui32WidthL;
 
 					if ( stAll.bShowRightArea ) {
 						DrawArea( _hDc, iX + ui32WidthL + stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx,
-							i32Top, stAll.dfRightNumbersFmt, true, m_sdScrollView[m_eaEditAs].i32PageLines + 1, m_bCurBuffer );
+							i32Top, stAll.dfRightNumbersFmt, m_sdScrollView[m_eaEditAs].i32PageLines + 1, m_bCurBuffer );
 
 						rBlankArea.left += stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx + ComputeAreaWidthPx( stAll.dfRightNumbersFmt );
 
@@ -729,7 +729,7 @@ namespace mx {
 
 		
 		// Draw one area (left or right) using its data format and group rules.
-		auto DrawArea = [&]( bool _bRightArea, MX_DATA_FMT _dfFmt, int32_t _iAreaXBase, uint32_t _ui32Digits ) {
+		auto DrawArea = [&]( MX_DATA_FMT _dfFmt, int32_t _iAreaXBase, uint32_t _ui32Digits ) {
 			if ( _dfFmt == MX_DF_CHAR ) { _ui32Digits = 1; }
 			// Number of groups in this area.
 			const uint32_t ui32Bpr		= stAll.uiBytesPerRow;
@@ -741,7 +741,7 @@ namespace mx {
 			uint32_t ui32Stride = std::min<uint32_t>( _ui32Digits, 2 );
 			for ( uint32_t I = 0; I < ui32Bpr; I += ui32Stride ) {
 				int32_t iGX = 0, iGW = 0;
-				if ( !GetTextRectForIndex( _dfFmt, I, _bRightArea, _iAreaXBase, iGX, iGW ) ) { break; }
+				if ( !GetTextRectForIndex( _dfFmt, I, _iAreaXBase, iGX, iGW ) ) { break; }
 
 				// Label is the byte index of the first item in the group within the row.
 				const uint32_t ui32ByteIndexInRow = I;
@@ -759,11 +759,11 @@ namespace mx {
 
 		{
 			const int32_t i32LeftBase = _iXLeft;
-			DrawArea( false, _dfLeftFmt, i32LeftBase, ui32Digits );
+			DrawArea( _dfLeftFmt, i32LeftBase, ui32Digits );
 		}
 		if ( stAll.bShowRightArea ) {
 			const int32_t i32RightBase = _iXLeft + ComputeAreaWidthPx( _dfLeftFmt ) + stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx;
-			DrawArea( true, _dfRightFmt, i32RightBase, ui32Digits );
+			DrawArea( _dfRightFmt, i32RightBase, ui32Digits );
 		}
 	}
 
@@ -778,7 +778,7 @@ namespace mx {
 	 * \param _ui32LinesToDraw The number of rows to draw (typically page lines).
 	 * \param _bData The actual values at the addresses to render.
 	 **/
-	void CHexEditorControl::DrawArea( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, MX_DATA_FMT _dfFmt, bool _bRightArea, uint32_t _ui32LinesToDraw, const CHexEditorInterface::CBuffer &_bData ) {
+	void CHexEditorControl::DrawArea( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, MX_DATA_FMT _dfFmt, uint32_t _ui32LinesToDraw, const CHexEditorInterface::CBuffer &_bData ) {
 		const MX_STYLE & stAll = (*CurStyle());
 		if ( _ui32LinesToDraw == 0 || nullptr == Font() ) { return; }
 		const MX_FONT_SET & fsFont = (*Font());
@@ -827,10 +827,10 @@ namespace mx {
 			// Draw the background.  Try to reduce to as few calls as possible for a row.
 			int32_t iL, iW;
 			auto crColor = CellBgColor( ui64Line, pui8Data, sDataSize );
-			GetBackgrondRectForIndex( _dfFmt, 0, _bRightArea, _iXLeft, iL, iW );
+			GetBackgrondRectForIndex( _dfFmt, 0, _iXLeft, iL, iW );
 			for ( int32_t J = 1; J < ui32Bpr; ++J ) {
 				int32_t iL2, iW2;
-				GetBackgrondRectForIndex( _dfFmt, J, _bRightArea, _iXLeft, iL2, iW2 );
+				GetBackgrondRectForIndex( _dfFmt, J, _iXLeft, iL2, iW2 );
 				auto crThisColor = CellBgColor( ui64Line + J, pui8Data + J, sDataSize - J );
 				if ( crThisColor != crColor || (iL + iW) == iL2 ) {
 					if ( crBackColor != MX_GetRgbValue( crColor ) ) {
@@ -865,12 +865,12 @@ namespace mx {
 				if ( J >= sDataSize ) { break; }
 				
 				uint8_t ui8Value = J < sDataSize ? pui8Data[J] : 0;
-				GetTextRectForIndex( _dfFmt, J, _bRightArea, _iXLeft, iL, iW );
+				GetTextRectForIndex( _dfFmt, J, _iXLeft, iL, iW );
 				
 				if ( MX_DF_CHAR != _dfFmt && stAll.ui64DivisionSpacing ) {
 					// Draw division lines.
 					int32_t iL2, iW2;
-					GetBackgrondRectForIndex( _dfFmt, J, _bRightArea, _iXLeft, iL2, iW2 );
+					GetBackgrondRectForIndex( _dfFmt, J, _iXLeft, iL2, iW2 );
 					lsw::LSW_RECT rRect;
 					rRect.top = iY - 1;
 					rRect.left = iL2;
@@ -1078,23 +1078,14 @@ namespace mx {
 	 *
 	 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
 	 * \param _ui32Index Zero-based cell index within the row.
-	 * \param _bRightArea False for the left numbers area; true for the right text area.
 	 * \param _iXBase The pixel X of the beginning of the area (not including gutter; includes horizontal scroll offset).
 	 * \param _iXLeft [out] Receives the pixel X of the groupfs left edge.
 	 * \param _iWidth [out] Receives the pixel width of the group (internal bytes/chars and normal intra-byte spacing).
 	 * \return Returns true if the index is valid for the current layout; false otherwise.
-	 *
-	 * Description:
-	 *  - A ggrouph is composed of N adjacent cells (bytes for HEX/DEC/OCT/BIN, characters for CHAR),
-	 *    where N is the areafs grouping size. The width includes intra-cell spacing inside the group.
-	 *  - The extra spacing that separates two adjacent groups (group gap) is not included in the width
-	 *    of the current group; it is placed after it.
-	 *  - The caller can center text within the returned [left,width] using a text measurement.
 	 */
 	bool CHexEditorControl::GetTextRectForIndex(
 		MX_DATA_FMT _dfDataFmt,
 		uint32_t _ui32Index,
-		bool _bRightArea,
 		int32_t _iXBase,
 		int32_t &_iXLeft,
 		int32_t &_iWidth ) const {
@@ -1145,7 +1136,6 @@ namespace mx {
 	 *
 	 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
 	 * \param _ui32Index Zero-based cell index within the row.
-	 * \param _bRightArea False for the left numbers area; true for the right text area.
 	 * \param _iXBase The pixel X of the beginning of the area (not including gutter; includes horizontal scroll offset).
 	 * \param _iXLeft [out] Receives the pixel X of the groupfs left edge.
 	 * \param _iWidth [out] Receives the pixel width of the group (internal bytes/chars and normal intra-byte spacing).
@@ -1154,11 +1144,10 @@ namespace mx {
 	bool CHexEditorControl::GetBackgrondRectForIndex(
 		MX_DATA_FMT _dfDataFmt,
 		uint32_t _ui32Index,
-		bool _bRightArea,
 		int32_t _iXBase,
 		int32_t &_iXLeft,
 		int32_t &_iWidth ) const {
-		if MX_UNLIKELY( !GetTextRectForIndex( _dfDataFmt, _ui32Index, _bRightArea, _iXBase, _iXLeft, _iWidth ) ) { return false; }
+		if MX_UNLIKELY( !GetTextRectForIndex( _dfDataFmt, _ui32Index, _iXBase, _iXLeft, _iWidth ) ) { return false; }
 		if ( _dfDataFmt == MX_DF_CHAR ) { return true; }
 
 		const MX_STYLE & stStyle = (*CurStyle());
