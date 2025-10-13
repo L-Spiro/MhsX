@@ -1,4 +1,6 @@
 #include "MXHexEditorControl.h"
+#include "../Layouts/MXLayoutManager.h"
+#include "../MainWindow/MXMhsMainWindow.h"
 #include "../Utilities/MXUtilities.h"
 
 #include <Base/LSWBase.h>
@@ -360,14 +362,34 @@ namespace mx {
 		return lsw::CWidget::LSW_H_HANDLED;
 	}
 
-
 	// WM_MOUSEWHEEL.
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::MouseWheel( DWORD _dwVirtKeys, const POINTS &/*_pCursorPos*/ ) {
+		const bool bCtrl = (::GetKeyState( VK_CONTROL ) & 0x8000) != 0;
 		UINT uiLines = 3;
 		::SystemParametersInfoW( SPI_GETWHEELSCROLLLINES, 0, &uiLines, 0 );
 		int16_t sDelta = GET_WHEEL_DELTA_WPARAM( _dwVirtKeys );
 		int32_t iSteps = static_cast<int32_t>((sDelta / WHEEL_DELTA) * static_cast<int32_t>(uiLines));
-		::SendMessageW( Wnd(), WM_VSCROLL, MAKELONG( (iSteps < 0) ? SB_LINEDOWN : SB_LINEUP, 0 ), 0 );
+		if ( !bCtrl ) {
+			
+			::SendMessageW( Wnd(), WM_VSCROLL, MAKELONG( (iSteps < 0) ? SB_LINEDOWN : SB_LINEUP, 0 ), 0 );
+		}
+		else {
+			// Zoom in/out.
+			LOGFONTW lfFont;
+			if ( iSteps > 0 ) {
+				while ( iSteps != 0 ) {
+					IncreaseFontSize( lfFont );
+					--iSteps;
+				}
+			}
+			else {
+				while ( iSteps != 0 ) {
+					DecreaseFontSize( lfFont );
+					++iSteps;
+				}
+			}
+			UpdateSiblings();
+		}
 		return lsw::CWidget::LSW_H_HANDLED;
 	}
 
@@ -398,7 +420,7 @@ namespace mx {
 		static const wchar_t * s_ppwszFaces[] = {
 			//L"Brush Script MT",
 			//L"Droid Sans Mono",   // Preferred.
-			//L"Consolas",          // Modern Windows TT.
+			L"Consolas",          // Modern Windows TT.
 			L"Lucida Console"     // Older Windows TT.
 		};
 
@@ -443,6 +465,20 @@ namespace mx {
 		_fsFont.fFont.CreateFontIndirectW( &_fsFont.lfFontParms );
 		return false;
 	}
+
+	/**
+	 * Tells the parent to update the other hex controls due to the changing of some shared values.  Typically scroll must be updated.
+	 **/
+	void CHexEditorControl::UpdateSiblings() const {
+		auto pwTmp = m_pwParent;
+		while ( pwTmp ) {
+			if ( pwTmp->WidgetType() == MX_DEUS_HEX_MACHINA ) {
+				::PostMessageW( pwTmp->Wnd(), CMhsMainWindow::MX_CUSTOM_MESSAGE::MX_CM_UPDATE_HEX_SIBLINGS, reinterpret_cast<WPARAM>(this), 0 );
+				return;
+			}
+			pwTmp = pwTmp->Parent();
+		}
+	};
 
 	// Draws the hex-editor view.
 	bool CHexEditorControl::PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect ) {
@@ -739,6 +775,9 @@ namespace mx {
 			const uint32_t ui32Groups = (ui32Bpr + ui32GroupSz - 1U) / ui32GroupSz;
 
 			uint32_t ui32Stride = std::min<uint32_t>( _ui32Digits, 2 );
+			if ( _dfFmt == MX_DF_CHAR && CurStyle()->csCharSet == CCharSets::MX_CS_UNICODE ) {
+				ui32Stride = 2;
+			}
 			for ( uint32_t I = 0; I < ui32Bpr; I += ui32Stride ) {
 				int32_t iGX = 0, iGW = 0;
 				if ( !GetTextRectForIndex( _dfFmt, I, _iAreaXBase, iGX, iGW ) ) { break; }
@@ -821,6 +860,9 @@ namespace mx {
 		lsw::LSW_SETBKMODE sbmBkMode( _hDc, TRANSPARENT );
 		lsw::LSW_SETTEXTCOLOR stcTextColor( _hDc, MX_GetRgbValue( ForeColors()->crEditor ) );
 		std::wstring wsTmp;
+		wchar_t wcDefChar = L'\0';
+		int32_t i32CharSizeCounter = 0;
+		uint32_t ui32Stride = (_dfFmt == MX_DF_CHAR && CurStyle()->csCharSet == CCharSets::MX_CS_UNICODE) ? 2 : 1;
 		for( uint32_t I = 0; I < _ui32LinesToDraw; ++I, ui64Line += ui32Bpr ) {
 			const int32_t iY = _iYTop + int32_t( I ) * iLineAdv;
 
@@ -861,10 +903,12 @@ namespace mx {
 				}
 			}
 
-			for ( int32_t J = 0; J < ui32Bpr; ++J ) {
+			for ( int32_t J = 0; J < ui32Bpr; J += ui32Stride ) {
 				if ( J >= sDataSize ) { break; }
 				
-				uint8_t ui8Value = J < sDataSize ? pui8Data[J] : 0;
+				size_t sBuffSize = J < sDataSize ? sDataSize - J : 0;
+				const uint8_t * pui8Value = sBuffSize ? &pui8Data[J] : reinterpret_cast<const uint8_t *>(&wcDefChar);
+				uint8_t ui8Value = (*pui8Value);
 				GetTextRectForIndex( _dfFmt, J, _iXLeft, iL, iW );
 				
 				if ( MX_DF_CHAR != _dfFmt && stAll.ui64DivisionSpacing ) {
@@ -924,11 +968,16 @@ namespace mx {
 						break;
 					}
 					case MX_DF_CHAR : {
-						// TODO: Account for advanced character-set functionality.
 						try {
 							wsTmp.resize( 1 );
-							if ( !CUtilities::ByteIsPrintable( ui8Value, true ) ) { ui8Value = L'.'; }
-							wsTmp[0] = wchar_t( ui8Value );
+							i32CharSizeCounter -= ui32Stride;
+							if ( i32CharSizeCounter <= 2 ) {
+								i32CharSizeCounter = int32_t( CCharSets::m_csSets[stAll.csCharSet].pfDisplayable( pui8Value, sBuffSize, wsTmp[0] ) );
+								if MX_UNLIKELY( (wsTmp[0] >= 0x80 && CCharSets::m_csSets[stAll.csCharSet].bHideOver127) ) {
+									wsTmp[0] = L'.';
+								}
+							}
+							else { wsTmp[0] = L'\0'; }
 						}
 						catch ( ... ) {}
 						break;
@@ -951,7 +1000,14 @@ namespace mx {
 						break;
 					}
 				}
-				::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int32_t>(wsTmp.size()) );
+				auto crThisColor = CellFgColor( ui64Line + J, pui8Data + J, sDataSize - J );
+				if ( crThisColor != MX_GetRgbValue( ForeColors()->crEditor ) ) {
+					lsw::LSW_SETTEXTCOLOR stcTextColor2( _hDc, MX_GetRgbValue( crThisColor ) );
+					::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int32_t>(wsTmp.size()) );
+				}
+				else {
+					::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int32_t>(wsTmp.size()) );
+				}
 			}
 
 			// Decimal is right-aligned by spaces we injected above; just draw at left edge.
@@ -965,6 +1021,41 @@ namespace mx {
 				sDataSize -= ui32Bpr;
 			}
 		}
+	}
+
+	/**
+	 * Gets the text color of a hex/octal/binary cell by address.
+	 * 
+	 * \param _ui64Address The address of the data in the cell.
+	 * \param _pui8Value The address of the data in the cell.
+	 * \param _sSize The address of the data in the cell.
+	 * \return Returns the background color for the given cell.
+	 **/
+	COLORREF CHexEditorControl::CellFgColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize ) {
+		if ( !_sSize ) {
+			return ForeColors()->crEditor;
+		}
+		const MX_STYLE & stAll = (*CurStyle());
+		if ( stAll.bHighlightNewLines && ((*_pui8Value) == '\r' || (*_pui8Value) == '\n') ) {
+			return ForeColors()->crHighlightingHex;
+		}
+		if ( stAll.bHighlightAlphaNumeric && std::isalnum( (*_pui8Value) ) ) {
+			return ForeColors()->crHighlightingHex;
+		}
+		if ( stAll.bHighlightControl && std::iscntrl( (*_pui8Value) ) ) {
+			return ForeColors()->crHighlightingHex;
+		}
+		if ( stAll.bHighlightNonAscii && (*_pui8Value) >= 0x80 ) {
+			return ForeColors()->crHighlightingHex;
+		}
+		if ( stAll.bHighlightZeros && (*_pui8Value) == 0x00 ) {
+			return ForeColors()->crHighlightingHex;
+		}
+		/*if ( stAll.bHighlightPointers && (*_pui8Value) == 0x00 ) {
+			return ForeColors()->crHighlightingHex;
+		}*/
+
+		return ForeColors()->crEditor;
 	}
 
 	/**
@@ -1099,11 +1190,11 @@ namespace mx {
 		// Cell width by format (worst-case stable cell).
 		auto CellWidthForFmt = [&]( MX_DATA_FMT _dfFmt ) -> int32_t {
 			switch( _dfFmt ) {
-				case MX_DF_HEX :	{ return 2 * agGlyphs.iDigitMaxCx; }				// "FF"
-				case MX_DF_DEC :	{ return 3 * agGlyphs.iDigitMaxCx; }				// "255"
-				case MX_DF_OCT :	{ return 3 * agGlyphs.iDigitMaxCx; }				// "377"
-				case MX_DF_BIN :	{ return 8 * agGlyphs.iDigitMaxCx; }				// "11111111"
-				case MX_DF_CHAR :	{ return agGlyphs.i32MaxAsciiAnsi; }				// Printable cell.
+				case MX_DF_HEX :	{ return 2 * agGlyphs.iDigitMaxCx; }																							// "FF"
+				case MX_DF_DEC :	{ return 3 * agGlyphs.iDigitMaxCx; }																							// "255"
+				case MX_DF_OCT :	{ return 3 * agGlyphs.iDigitMaxCx; }																							// "377"
+				case MX_DF_BIN :	{ return 8 * agGlyphs.iDigitMaxCx; }																							// "11111111"
+				case MX_DF_CHAR :	{ return CCharSets::m_csSets[stStyle.csCharSet].bHideOver127 ? agGlyphs.i32MaxAscii : agGlyphs.i32MaxAsciiAnsi; }				// Printable cell.
 				default :			{ return 2 * agGlyphs.iDigitMaxCx; }
 			}
 		};
@@ -1189,11 +1280,11 @@ namespace mx {
 
 				auto CellWidthForFmt = [&]( MX_DATA_FMT _dfDataFmt ) -> int32_t {
 					switch ( _dfDataFmt ) {
-						case MX_DF_HEX :	{ return 2 * agGlyphs.iDigitMaxCx; }					// "FF"
-						case MX_DF_DEC :	{ return 3 * agGlyphs.iDigitMaxCx; }					// "255"
-						case MX_DF_OCT :	{ return 3 * agGlyphs.iDigitMaxCx; }					// "377"
-						case MX_DF_BIN :	{ return 8 * agGlyphs.iDigitMaxCx; }					// "11111111"
-						case MX_DF_CHAR :	{ return agGlyphs.i32MaxAsciiAnsi; }					// Fixed cell.
+						case MX_DF_HEX :	{ return 2 * agGlyphs.iDigitMaxCx; }																								// "FF"
+						case MX_DF_DEC :	{ return 3 * agGlyphs.iDigitMaxCx; }																								// "255"
+						case MX_DF_OCT :	{ return 3 * agGlyphs.iDigitMaxCx; }																								// "377"
+						case MX_DF_BIN :	{ return 8 * agGlyphs.iDigitMaxCx; }																								// "11111111"
+						case MX_DF_CHAR :	{ return CCharSets::m_csSets[stStyle.csCharSet].bHideOver127 ? agGlyphs.i32MaxAscii : agGlyphs.i32MaxAsciiAnsi; }					// Fixed cell.
 						default :			{ return 2 * agGlyphs.iDigitMaxCx; }
 					}
 				};

@@ -68,6 +68,7 @@ namespace mx {
 			MX_CM_HOTKEY,
 			MX_CM_HOOKKEY,
 			MX_CM_DETATCHED,
+			MX_CM_UPDATE_HEX_SIBLINGS,
 		};
 
 		// Our hotkeys.  Ranging from 100-200.

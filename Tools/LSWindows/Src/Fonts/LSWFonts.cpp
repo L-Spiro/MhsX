@@ -132,16 +132,14 @@ namespace lsw {
 		LPARAM _lpParam ) {
 		bool * pbCtx = reinterpret_cast<bool *>(_lpParam);
 		if ( pbCtx == nullptr || _plfEnum == nullptr ) {
-			return 1; // continue safely if inputs are unexpected
+			return 1;
 		}
 
-		// FaceIsOther() must be declared elsewhere in this namespace:
-		// bool FaceIsOther( const LOGFONTW & _lfFace );
 		if ( FaceIsOther( (*_plfEnum) ) ) {
 			(*pbCtx) = true;
-			return 0; // stop early: we found at least one "Other" face in this family
+			return 0;
 		}
-		return 1; // keep scanning other faces in the same family
+		return 1;
 	}
 
 	/**

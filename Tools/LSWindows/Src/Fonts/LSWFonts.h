@@ -417,6 +417,22 @@ namespace lsw {
 		}
 
 		/**
+		 * \brief Tests whether the currently selected font in an HDC provides a non-zero glyph
+		 *        for the given UTF-16 code unit (i.e., the glyph exists in that face).
+		 *
+		 * \param _hDc The device context with the intended HFONT already selected.
+		 * \param _wcCh The UTF-16 code unit to probe.
+		 * \return Returns true if the selected font maps the character to a non-zero glyph index; false otherwise.
+		 */
+		static inline bool					GdiFontHasGlyph( HDC _hDc, WCHAR _wcCh ) {
+			WORD wGlyph{};
+			if ( ::GetGlyphIndicesW( _hDc, &_wcCh, 1, &wGlyph, GGI_MARK_NONEXISTING_GLYPHS ) == GDI_ERROR ) {
+				return false;
+			}
+			return wGlyph != 0;
+		}
+
+		/**
 		 * \brief Returns a numeric rank for a style name to sort by weight then italic.
 		 * 
 		 * \param _wsStyle Style name.

@@ -1,5 +1,6 @@
 #include "MXDeusHexMachinaWindow.h"
 #include "../Layouts/MXLayoutManager.h"
+#include "../MainWindow/MXMhsMainWindow.h"
 #include "../MemHack/MXWindowMemHack.h"
 #include "../Utilities/MXUtilities.h"
 #include "MXHexEditorFile.h"
@@ -184,7 +185,15 @@ namespace mx {
 		return LSW_H_CONTINUE;
 	}
 
-	// WM_COMMAND from control.
+	/**
+	 * Handles WM_COMMAND dispatch.
+	 * \brief Routes command notifications from menus, accelerators, or child controls.
+	 *
+	 * \param _wCtrlCode 0 = from menu, 1 = from accelerator; otherwise a control notification code.
+	 * \param _wId The identifier for the command or control.
+	 * \param _pwSrc The source control for control notifications; otherwise nullptr.
+	 * \return Returns a LSW_HANDLED code.
+	 */
 	CWidget::LSW_HANDLED CDeusHexMachinaWindow::Command( WORD _wCtrlCode, WORD _wId, CWidget * _pwSrc ) {
 		if ( _wId >= Layout::MX_M_SHOW_RECENT_BASE ) {
 			_wId -= Layout::MX_M_SHOW_RECENT_BASE;
@@ -315,6 +324,216 @@ namespace mx {
 					else {
 						phecControl->SetViewType( CHexEditorControl::MX_EA_TEXT );
 					}
+				}
+				break;
+			}
+
+			case Layout::MX_M_VIEW_CHAR_SET_ASCII : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_ASCII );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_ASCII_ANSI : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_ASCII_ANSI );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_ASCII_OEM : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_ASCII_OEM );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_EBCDIC : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_EBCDIC );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_UNICODE : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_UNICODE );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_UTF8 : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_UTF8 );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_MACINTOSH : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_MACINTOSH );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_ARABIC_WINDOWS : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_ARABIC_WINDOWS );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_ARABIC_ISO : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_ARABIC_ISO );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_BALTIC_WINDOWS : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_BALTIC_WINDOWS );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_BALTIC_ISO : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_BALTIC_ISO );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_CHINESE_SIMP : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_CHINESE_SIMPLIFIED );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_CHINESE_TRAD : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_CHINESE_TRADITIONAL );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_CYRILLIC_WINDOWS : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_CYRILLIC_WINDOWS );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_CYRILLIC_KOI8R : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_CYRILLIC_KOI8_R );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_CYRILLIC_KOI8U : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_CYRILLIC_KOI8_U );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_CYRILLIC_ISO : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_CYRILLIC_ISO );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_EASTERN_EUR_WINDOWS : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_EASTERN_EUROPE_WINDOWS );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_EASTERN_EUR_ISO : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_EASTERN_EUROPE_ISO );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_GREEK_WINDOWS : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_GREEK_WINDOWS );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_GREEK_ISO : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_GREEK_ISO );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_HEBREW_WINDOWS : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_HEBREW_WINDOWS );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_HEBREW_ISO : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_HEBREW_ISO );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_JAPANESE_JIS : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_JAPANESE_JIS );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_JAPANESE_EUC : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_JAPANESE_EUC_JP );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_KOREAN : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_KOREAN );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_THAI : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_THAI );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_TURKISH_WINDOWS : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_TURKISH_WINDWOS );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_TURKISH_ISO : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_TURKISH_ISO );
+					RecalcAllBut( phecControl );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_CHAR_SET_VIETNAMESE : {
+				if ( phecControl ) {
+					phecControl->SetCharacterSet( CCharSets::MX_CS_VIETNAMESE );
+					RecalcAllBut( phecControl );
 				}
 				break;
 			}
@@ -562,6 +781,62 @@ namespace mx {
 				}
 				break;
 			}
+
+			case Layout::MX_M_VIEW_HIGHLIGHTING_LINEFEED_CHARS : {
+				if ( phecControl ) {
+					phecControl->SetHighlightingLinefeed( !phecControl->GetHighlightingLinefeed() );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_HIGHLIGHTING_ALPHA_CHARS : {
+				if ( phecControl ) {
+					phecControl->SetHighlightingAlphaNumeric( !phecControl->GetHighlightingAlphaNumeric() );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_HIGHLIGHTING_CONTROL_CHARS : {
+				if ( phecControl ) {
+					phecControl->SetHighlightingControl( !phecControl->GetHighlightingControl() );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_HIGHLIGHTING_NON_ASCII : {
+				if ( phecControl ) {
+					phecControl->SetHighlightingNonAscii( !phecControl->GetHighlightingNonAscii() );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_HIGHLIGHTING_ZEROES : {
+				if ( phecControl ) {
+					phecControl->SetHighlightingZeros( !phecControl->GetHighlightingZeros() );
+				}
+				break;
+			}
+			case Layout::MX_M_VIEW_HIGHLIGHTING_POINTERS : {
+				if ( phecControl ) {
+					phecControl->SetHighlightingPointers( !phecControl->GetHighlightingPointers() );
+				}
+				break;
+			}
+		}
+		return LSW_H_CONTINUE;
+	}
+
+	/**
+	 * Custom user-defined message handler.
+	 * \brief Handles WM_USER and other private messages.
+	 *
+	 * \param _uMsg Message identifier.
+	 * \param _wParam WPARAM data.
+	 * \param _lParam LPARAM data.
+	 * \return Returns a LSW_HANDLED code.
+	 */
+	CWidget::LSW_HANDLED CDeusHexMachinaWindow::CustomPrivateMsg( UINT _uMsg, WPARAM _wParam, LPARAM /*_lParam*/ ) {
+		switch ( _uMsg ) {
+			case CMhsMainWindow::MX_CM_UPDATE_HEX_SIBLINGS : {
+				RecalcAllBut( reinterpret_cast<CHexEditorControl *>(_wParam) );
+				return LSW_H_HANDLED;
+			}
 		}
 		return LSW_H_CONTINUE;
 	}
@@ -729,6 +1004,157 @@ namespace mx {
 				}
 				case Layout::MX_M_VIEW_EDIT_AS_TAGGED : {
 					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetViewType() == CHexEditorControl::MX_EA_TAGGED) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+
+				case Layout::MX_M_VIEW_CHAR_SET_ASCII : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_ASCII) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_ASCII_ANSI : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_ASCII_ANSI) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_ASCII_OEM : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_ASCII_OEM) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_EBCDIC : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_EBCDIC) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_UNICODE : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_UNICODE) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_UTF8 : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_UTF8) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_MACINTOSH : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_MACINTOSH) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_ARABIC_WINDOWS : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_ARABIC_WINDOWS) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_ARABIC_ISO : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_ARABIC_ISO) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_BALTIC_WINDOWS : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_BALTIC_WINDOWS) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_BALTIC_ISO : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_BALTIC_ISO) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_CHINESE_SIMP : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_CHINESE_SIMPLIFIED) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_CHINESE_TRAD : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_CHINESE_TRADITIONAL) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_CYRILLIC_WINDOWS : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_CYRILLIC_WINDOWS) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_CYRILLIC_KOI8R : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_CYRILLIC_KOI8_R) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_CYRILLIC_KOI8U : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_CYRILLIC_KOI8_U) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_CYRILLIC_ISO : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_CYRILLIC_ISO) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_EASTERN_EUR_WINDOWS : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_EASTERN_EUROPE_WINDOWS) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_EASTERN_EUR_ISO : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_EASTERN_EUROPE_ISO) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_GREEK_WINDOWS : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_GREEK_WINDOWS) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_GREEK_ISO : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_GREEK_ISO) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_HEBREW_WINDOWS : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_HEBREW_WINDOWS) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_HEBREW_ISO : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_HEBREW_ISO) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_JAPANESE_JIS : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_JAPANESE_JIS) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_JAPANESE_EUC : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_JAPANESE_EUC_JP) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_KOREAN : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_KOREAN) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_THAI : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_THAI) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_TURKISH_WINDOWS : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_TURKISH_WINDWOS) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_TURKISH_ISO : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_TURKISH_ISO) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_CHAR_SET_VIETNAMESE : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetCharacterSet() == CCharSets::MX_CS_VIETNAMESE) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
@@ -925,6 +1351,37 @@ namespace mx {
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_HIDE : {
 					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+
+				case Layout::MX_M_VIEW_HIGHLIGHTING_LINEFEED_CHARS : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetHighlightingLinefeed()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_HIGHLIGHTING_ALPHA_CHARS : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetHighlightingAlphaNumeric()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_HIGHLIGHTING_CONTROL_CHARS : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetHighlightingControl()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_HIGHLIGHTING_NON_ASCII : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetHighlightingNonAscii()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_HIGHLIGHTING_ZEROES : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetHighlightingZeros()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_HIGHLIGHTING_POINTERS : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetHighlightingPointers()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}

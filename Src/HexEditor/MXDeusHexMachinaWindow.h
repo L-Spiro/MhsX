@@ -2,6 +2,7 @@
 
 #include "../MXMhsX.h"
 #include "../Layouts/MXDeuHexMachinaWindowLayout.h"
+#include "../Layouts/MXLayoutManager.h"
 #include "../Strings/MXStringDecoder.h"
 #include "MXHexEditorControl.h"
 #include "MXHexEditorInterface.h"
@@ -68,8 +69,27 @@ namespace mx {
 		// WM_INITDIALOG.
 		virtual LSW_HANDLED							InitDialog();
 
-		// WM_COMMAND from control.
+		/**
+		 * Handles WM_COMMAND dispatch.
+		 * \brief Routes command notifications from menus, accelerators, or child controls.
+		 *
+		 * \param _wCtrlCode 0 = from menu, 1 = from accelerator; otherwise a control notification code.
+		 * \param _wId The identifier for the command or control.
+		 * \param _pwSrc The source control for control notifications; otherwise nullptr.
+		 * \return Returns a LSW_HANDLED code.
+		 */
 		virtual LSW_HANDLED							Command( WORD _wCtrlCode, WORD _wId, CWidget * _pwSrc );
+
+		/**
+		 * Custom user-defined message handler.
+		 * \brief Handles WM_USER and other private messages.
+		 *
+		 * \param _uMsg Message identifier.
+		 * \param _wParam WPARAM data.
+		 * \param _lParam LPARAM data.
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED							CustomPrivateMsg( UINT _uMsg, WPARAM _wParam, LPARAM /*_lParam*/ );
 
 		// WM_COMMAND from menu.
 		virtual LSW_HANDLED							MenuCommand( WORD _wId );
@@ -106,6 +126,14 @@ namespace mx {
 		CTab *										Tab() {
 			return static_cast<CTab *>(FindChild( Layout::MX_W_TABS ));
 		}
+
+		/**
+		 * Gets the widget type identifier.
+		 * \brief Returns one of LSW_LT_* constants.
+		 *
+		 * \return Returns LSW_LT_WIDGET in the base class.
+		 */
+		virtual uint32_t							WidgetType() const { return MX_DEUS_HEX_MACHINA; }
 
 		// Gets the currently active hex-editor control.
 		CHexEditorControl *							CurrentEditor() {

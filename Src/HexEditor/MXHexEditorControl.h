@@ -106,7 +106,7 @@ namespace mx {
 		struct MX_STYLE {
 			MX_FONT_SET								fsFonts[2]						= {};						// Shared fonts.
 			MX_FONT_TYPE							ftFont							= MX_FT_FIXED_ROW;			// The shared font to use.
-			CCharSets::MX_CHAR_SETS					csCharSet						= CCharSets::MX_CS_ASCII;	// the current character set.
+			CCharSets::MX_CHAR_SETS					csCharSet						= CCharSets::MX_CS_ASCII;	// The current character set.
 			MX_ADDR_STYLE							daAddressStyle;												// Address style.
 			uint32_t								uiBytesPerRow					= 16;						// Bytes per displayed row.
 			uint64_t								ui64DivisionSpacing				= 4;						// Spacing between division lines.
@@ -139,10 +139,19 @@ namespace mx {
 			int32_t									i32LineSpacingPx				= 2;
 
 			// Ruler.
+			bool									bDecimal						= false;					// Decimal numbers instead of hex.
+			bool									bNumbers						= true;						// Show numbers in the ruler.
 
 			// Mini-map geometry (pixels).
 			int32_t									i32MiniMapWidthPx				= 140;
 
+			// Highlighting.
+			bool									bHighlightNewLines				= true;						// Highlight new-line characters.
+			bool									bHighlightAlphaNumeric			= false;					// Highlight alphanumeric characters.
+			bool									bHighlightControl				= false;					// Highlight control characters.
+			bool									bHighlightNonAscii				= false;					// Highilght characters above 127.
+			bool									bHighlightZeros					= false;					// Highlight zeros.
+			bool									bHighlightPointers				= false;					// Highlight pointers.
 		};
 
 		/** Creation parameters. */
@@ -169,6 +178,18 @@ namespace mx {
 
 		// Gets the editing type of the control.
 		inline MX_EDIT_AS							GetViewType() const { return m_eaEditAs; }
+
+		// Sets the character set.
+		void										SetCharacterSet( CCharSets::MX_CHAR_SETS _csSet ) {
+			if ( CurStyle()->csCharSet != _csSet ) {
+				CurStyle()->csCharSet = _csSet;
+
+				RecalcAndInvalidate();
+			}
+		};
+
+		// Gets the current character set.
+		inline CCharSets::MX_CHAR_SETS				GetCharacterSet() const { return CurStyle()->csCharSet; }
 
 		// Sets show-addresses.
 		void										SetShowAddressGutter( bool _bShowAddress ) {
@@ -286,6 +307,60 @@ namespace mx {
 		// Gets the right-area-hidden setting.
 		inline bool									RightAreaHidden() const { return !CurStyle()->bShowRightArea; }
 
+		// Sets line-feed highlighting.
+		void										SetHighlightingLinefeed( bool _bEnable ) {
+			CurStyle()->bHighlightNewLines = _bEnable;
+			::InvalidateRect( Wnd(), NULL, FALSE );
+		}
+
+		// Gets line-feed highlighing.
+		inline bool									GetHighlightingLinefeed() const { return CurStyle()->bHighlightNewLines; }
+
+		// Sets alphanumerica highlighting.
+		void										SetHighlightingAlphaNumeric( bool _bEnable ) {
+			CurStyle()->bHighlightAlphaNumeric = _bEnable;
+			::InvalidateRect( Wnd(), NULL, FALSE );
+		}
+
+		// Gets alphanumerica highlighing.
+		inline bool									GetHighlightingAlphaNumeric() const { return CurStyle()->bHighlightAlphaNumeric; }
+
+		// Sets control highlighting.
+		void										SetHighlightingControl( bool _bEnable ) {
+			CurStyle()->bHighlightControl = _bEnable;
+			::InvalidateRect( Wnd(), NULL, FALSE );
+		}
+
+		// Gets control highlighing.
+		inline bool									GetHighlightingControl() const { return CurStyle()->bHighlightControl; }
+
+		// Sets non-ASCII highlighting.
+		void										SetHighlightingNonAscii( bool _bEnable ) {
+			CurStyle()->bHighlightNonAscii = _bEnable;
+			::InvalidateRect( Wnd(), NULL, FALSE );
+		}
+
+		// Gets non-ASCII highlighing.
+		inline bool									GetHighlightingNonAscii() const { return CurStyle()->bHighlightNonAscii; }
+
+		// Sets zeros highlighting.
+		void										SetHighlightingZeros( bool _bEnable ) {
+			CurStyle()->bHighlightZeros = _bEnable;
+			::InvalidateRect( Wnd(), NULL, FALSE );
+		}
+
+		// Gets zeros highlighing.
+		inline bool									GetHighlightingZeros() const { return CurStyle()->bHighlightZeros; }
+
+		// Sets pointer highlighting.
+		void										SetHighlightingPointers( bool _bEnable ) {
+			CurStyle()->bHighlightPointers = _bEnable;
+			::InvalidateRect( Wnd(), NULL, FALSE );
+		}
+
+		// Gets pointer highlighing.
+		inline bool									GetHighlightingPointers() const { return CurStyle()->bHighlightPointers; }
+
 		// WM_NCDESTROY.
 		virtual LSW_HANDLED							NcDestroy();
 
@@ -389,6 +464,9 @@ namespace mx {
 
 		// Gets the current font.
 		const inline MX_FONT_SET *					Font() const { return m_pfsFonts[m_psOptions[m_eaEditAs].ftFont]; }
+
+		// Gets the current character set.
+		inline const CCharSets::MX_CHAR_SET &		CharSet() const { return CCharSets::m_csSets[CurStyle()->csCharSet]; }
 
 		// Gets a foreground color.
 		inline MX_HEX_EDITOR_COLORS *				ForeColors() { return m_phecForeColors; }
@@ -522,6 +600,11 @@ namespace mx {
 		// Gets the current style settings.
 		const MX_STYLE *							CurStyle() const { return &m_psOptions[m_eaEditAs]; }
 
+		/**
+		 * Tells the parent to update the other hex controls due to the changing of some shared values.  Typically scroll must be updated.
+		 **/
+		void										UpdateSiblings() const;
+
 		// Draws the hex-editor view.
 		bool										PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect );
 
@@ -592,6 +675,16 @@ namespace mx {
 			if ( !CurStyle()->uiBytesPerRow ) { return 0ULL; }
 			return (Size() + CurStyle()->uiBytesPerRow - 1ULL) / CurStyle()->uiBytesPerRow;
 		}
+
+		/**
+		 * Gets the text color of a hex/octal/binary cell by address.
+		 * 
+		 * \param _ui64Address The address of the data in the cell.
+		 * \param _pui8Value The address of the data in the cell.
+		 * \param _sSize The address of the data in the cell.
+		 * \return Returns the background color for the given cell.
+		 **/
+		COLORREF									CellFgColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize );
 
 		/**
 		 * Gets the color of a hex/octal/binary cell by address.
@@ -755,16 +848,30 @@ namespace mx {
 			::GetTextExtentPoint32W( _hDc, L"o", 1, &sSize ); agGlyphs.i32SpecOctCx = sSize.cx;
 			::GetTextExtentPoint32W( _hDc, L"w", 1, &sSize ); agGlyphs.i32ShortWcx  = sSize.cx;
 
-			agGlyphs.i32MaxAscii = 0;
-			agGlyphs.i32MaxAsciiAnsi = 0;
-			for ( wchar_t I = 32; I < 256; ++I ) {
-				if ( CUtilities::ByteIsPrintable( I, false ) ) {
-					::GetTextExtentPoint32W( _hDc, &I, 1, &sSize );
-					agGlyphs.i32MaxAscii = std::max<int32_t>( agGlyphs.i32MaxAscii, sSize.cx );
-				}
-				if ( CUtilities::ByteIsPrintable( I, true ) ) {
-					::GetTextExtentPoint32W( _hDc, &I, 1, &sSize );
+			if ( CharSet().bSinglePage ) {
+				agGlyphs.i32MaxAscii = 0;
+				agGlyphs.i32MaxAsciiAnsi = 0;
+				for ( wchar_t I = 0; I < 256; ++I ) {
+					wchar_t wcChar = I;
+					CharSet().pfDisplayable( reinterpret_cast<uint8_t *>(&wcChar), 2, wcChar );
+					::GetTextExtentPoint32W( _hDc, &wcChar, 1, &sSize );
 					agGlyphs.i32MaxAsciiAnsi = std::max<int32_t>( agGlyphs.i32MaxAsciiAnsi, sSize.cx );
+					if ( wcChar <= 0x7F ) {
+						agGlyphs.i32MaxAscii = std::max<int32_t>( agGlyphs.i32MaxAscii, sSize.cx );
+					}
+				}
+			}
+			else {
+				agGlyphs.i32MaxAscii = 0;
+				agGlyphs.i32MaxAsciiAnsi = tmMetrics.tmMaxCharWidth;
+				if ( CurStyle()->csCharSet == CCharSets::MX_CS_UNICODE ) {
+					agGlyphs.i32MaxAsciiAnsi = ((agGlyphs.i32MaxAsciiAnsi + 1) / 2) + (agGlyphs.i32MaxAsciiAnsi / 8);
+				}
+				for ( wchar_t I = 0; I < 0x80; ++I ) {
+					wchar_t wcChar = I;
+					CharSet().pfDisplayable( reinterpret_cast<uint8_t *>(&wcChar), 2, wcChar );
+					::GetTextExtentPoint32W( _hDc, &wcChar, 1, &sSize );
+					agGlyphs.i32MaxAscii = std::max<int32_t>( agGlyphs.i32MaxAscii, sSize.cx );
 				}
 			}
 		}
@@ -784,6 +891,7 @@ namespace mx {
 			}
 			return ui32Val;
 		}
+
 
 	private :
 		typedef lsw::CWidget						CParent;

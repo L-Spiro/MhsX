@@ -4,6 +4,8 @@
 #include "../CodePages/MXCodePages.h"
 #include "../Utilities/MXUtilities.h"
 
+#include <EEExpEval.h>
+
 namespace mx {
 
 	class CCharSets {
@@ -58,6 +60,7 @@ namespace mx {
 			uint32_t													ui32Id = 0;										/** ID. */
 			bool														bHideOver127 = true;							/** Hide values over 127. */
 			bool														bTopMenu = false;								/** Show in the top-level menu. */
+			bool														bSinglePage = true;								/** The whole character set is a single 8-bit page. */
 		};
 
 
@@ -79,7 +82,7 @@ namespace mx {
 			auto ui8Char = (*_pui8Char);
 			if MX_UNLIKELY( !_sSize || ui8Char < 32 || ui8Char == 127 ||
 				ui8Char == 129 || ui8Char == 141 || ui8Char == 143 || ui8Char == 144 ||
-				ui8Char == 157 || ui8Char == 173 ) { return 0; }
+				ui8Char == 157 || ui8Char == 173 ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcAsciiAnsi[ui8Char-0x20];
 			return 1;
@@ -95,7 +98,7 @@ namespace mx {
 		 **/
 		static uint32_t													AsciiOemDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
 			auto ui8Char = (*_pui8Char);
-			if MX_UNLIKELY( !_sSize || ui8Char == 0 ) { return 0; }
+			if MX_UNLIKELY( !_sSize || ui8Char == 0 ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcAsciiOEM[ui8Char];
 			return 1;
@@ -111,7 +114,7 @@ namespace mx {
 		 **/
 		static uint32_t													EbcdicDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
 			auto ui8Char = (*_pui8Char);
-			if MX_UNLIKELY( !_sSize || ui8Char < 0x40 || ui8Char == 0xCA || ui8Char == 0xFF ) { return 0; }
+			if MX_UNLIKELY( !_sSize || ui8Char < 0x40 || ui8Char == 0xCA || ui8Char == 0xFF ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcEbcdic[ui8Char-0x40];
 			return 1;
@@ -126,24 +129,51 @@ namespace mx {
 		 * \return Returns 0 if not displayable, otherwise the number of bytes that make up the character.  _wcChar is filled with the character to print.
 		 **/
 		static uint32_t													Utf16Display( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
-			if MX_UNLIKELY( _sSize < 2 ) { return 0; }
-			_wcChar = (*reinterpret_cast<wchar_t *>(*_pui8Char));
+			if MX_UNLIKELY( _sSize < 2 ) { _wcChar = L'.'; return 0; }
+			_wcChar = (*reinterpret_cast<const wchar_t *>(_pui8Char));
 
-			if MX_UNLIKELY( _wcChar >= 0xD800 && _wcChar <= 0xDFFF ) { return 0; }
+			if MX_UNLIKELY( _wcChar >= 0xD7FC && _wcChar <= 0xF8FF ) { _wcChar = L'.'; return 0; }
 			// Reject noncharacters.
-			if MX_UNLIKELY( _wcChar == 0xFFFE || _wcChar == 0xFFFF ) { return 0; }
-			if MX_UNLIKELY( _wcChar >= 0xFDD0 && _wcChar <= 0xFDEF ) { return 0; }
+			if MX_UNLIKELY( _wcChar == 0xFFFE || _wcChar == 0xFFFF ) { _wcChar = L'.'; return 0; }
+			if MX_UNLIKELY( _wcChar >= 0xFDD0 && _wcChar <= 0xFDEF ) { _wcChar = L'.'; return 0; }
+			if MX_UNLIKELY( _wcChar >= 0xFFEF && _wcChar <= 0xFFFB ) { _wcChar = L'.'; return 0; }
+			if MX_UNLIKELY( _wcChar >= 0xFFFD ) { _wcChar = L'.'; return 0; }
 
 			WORD wType1{}, wType3{};
-			if MX_UNLIKELY( !::GetStringTypeW( CT_CTYPE1, &_wcChar, 1, &wType1 ) ) { return 0; }
-			if MX_UNLIKELY( !::GetStringTypeW( CT_CTYPE3, &_wcChar, 1, &wType3 ) ) { return 0; }
+			if MX_UNLIKELY( !::GetStringTypeW( CT_CTYPE1, &_wcChar, 1, &wType1 ) ) { _wcChar = L'.'; return 0; }
+			if MX_UNLIKELY( !::GetStringTypeW( CT_CTYPE3, &_wcChar, 1, &wType3 ) ) { _wcChar = L'.'; return 0; }
 
 			// Controls are unprintable.
-			if MX_UNLIKELY( (wType1 & C1_CNTRL) || !(wType1 & C1_DEFINED) ) { return 0; }
+			if MX_UNLIKELY( (wType1 & C1_CNTRL) || !(wType1 & C1_DEFINED) ) { _wcChar = L'.'; return 0; }
 			// Combining marks on their own are unprintable (Mn/Mc).
-			if MX_UNLIKELY( wType3 & (C3_HIGHSURROGATE | C3_LOWSURROGATE | C3_NONSPACING | C3_DIACRITIC | C3_VOWELMARK) ) { return 0; }
+			if MX_UNLIKELY( wType3 & (C3_HIGHSURROGATE | C3_LOWSURROGATE | C3_NONSPACING | C3_DIACRITIC | C3_VOWELMARK) ) { _wcChar = L'.'; return 0; }
 
 			return 2;
+		}
+
+		/**
+		 * Determines if a character is displayable in UTF-8.
+		 * 
+		 * \param _pui8Char The character buffer to examine.
+		 * \param _sSize The length of the bugger to which _pui8Char points.
+		 * \param _wcChar The actual character to display.
+		 * \return Returns 0 if not displayable, otherwise the number of bytes that make up the character.  _wcChar is filled with the character to print.
+		 **/
+		static uint32_t													Utf8Display( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
+			size_t sChars;
+			uint32_t ui32Char = ee::CExpEval::NextUtf8Char( reinterpret_cast<const char *>(_pui8Char), _sSize, &sChars );
+			if ( ui32Char == EE_UTF_INVALID ) {
+				_wcChar = L'.'; return 1;
+			}
+			uint32_t ui32Utf16Chars;
+			uint32_t ui32Utf16Char = ee::CExpEval::Utf32ToUtf16( ui32Char, ui32Utf16Chars );
+			if ( ui32Utf16Chars == 2 ) { _wcChar = L'.'; return 1; }
+
+			if ( !Utf16Display( reinterpret_cast<const uint8_t *>(&ui32Utf16Char), 2, _wcChar ) ) { return 1; }
+
+			//if ( !std::isprint( _wcChar ) ) { _wcChar = L'.'; return 1; }
+
+			return uint32_t( sChars );
 		}
 
 		/**
@@ -156,7 +186,7 @@ namespace mx {
 		 **/
 		static uint32_t													MacintoshDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
 			auto ui8Char = (*_pui8Char);
-			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0x7F || ui8Char == 0xF0 ) { return 0; }
+			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0x7F || ui8Char == 0xF0 ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcMac[ui8Char-0x20];
 			return 1;
@@ -172,7 +202,7 @@ namespace mx {
 		 **/
 		static uint32_t													ArabicWindowsDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
 			auto ui8Char = (*_pui8Char);
-			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0x7F || ui8Char == 0x9D || ui8Char == 0x9E || ui8Char == 0xAD ) { return 0; }
+			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0x7F || ui8Char == 0x9D || ui8Char == 0x9E || ui8Char == 0xAD ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcArabicWindows[ui8Char-0x20];
 			return 1;
@@ -196,7 +226,7 @@ namespace mx {
 				(ui8Char >= 0xBC && ui8Char <= 0xBE) ||
 				ui8Char == 0xC0 ||
 				(ui8Char >= 0xD8 && ui8Char <= 0xDF) ||
-				ui8Char >= 0xF3 ) { return 0; }
+				ui8Char >= 0xF3 ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcArabicIso[ui8Char-0x20];
 			return 1;
@@ -215,7 +245,7 @@ namespace mx {
 			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0x7F ||
 				ui8Char == 0x81 || ui8Char == 0x83 || ui8Char == 0x88 || ui8Char == 0x8A || ui8Char == 0x8C ||
 				ui8Char == 0x90 || ui8Char == 0x98 || ui8Char == 0x9A || ui8Char == 0x9C || ui8Char == 0x9F ||
-				ui8Char == 0xA1 || ui8Char == 0xA5 || ui8Char == 0xAD ) { return 0; }
+				ui8Char == 0xA1 || ui8Char == 0xA5 || ui8Char == 0xAD ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcBalticWindows[ui8Char-0x20];
 			return 1;
@@ -232,7 +262,7 @@ namespace mx {
 		static uint32_t													BalticIsoDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
 			auto ui8Char = (*_pui8Char);
 			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0xAD ||
-				(ui8Char == 0x7F && ui8Char == 0x9F) ) { return 0; }
+				(ui8Char == 0x7F && ui8Char == 0x9F) ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcBalticIso[ui8Char-0x20];
 			return 1;
@@ -249,7 +279,7 @@ namespace mx {
 		static uint32_t													CyrillicWindowsDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
 			auto ui8Char = (*_pui8Char);
 			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0x7F ||
-				ui8Char == 0x98 || ui8Char == 0xAD ) { return 0; }
+				ui8Char == 0x98 || ui8Char == 0xAD ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcCyrillicWindows[ui8Char-0x20];
 			return 1;
@@ -265,7 +295,7 @@ namespace mx {
 		 **/
 		static uint32_t													CyrillicKoi8RDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
 			auto ui8Char = (*_pui8Char);
-			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0x7F ) { return 0; }
+			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0x7F ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcCyrillicKoi8R[ui8Char-0x20];
 			return 1;
@@ -281,7 +311,7 @@ namespace mx {
 		 **/
 		static uint32_t													CyrillicKoi8UDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
 			auto ui8Char = (*_pui8Char);
-			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0x7F ) { return 0; }
+			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0x7F ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcCyrillicKoi8U[ui8Char-0x20];
 			return 1;
@@ -298,7 +328,7 @@ namespace mx {
 		static uint32_t													CyrillicIsoDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
 			auto ui8Char = (*_pui8Char);
 			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0xAD ||
-			(ui8Char >= 0x7F && ui8Char <= 0x9F) ) { return 0; }
+			(ui8Char >= 0x7F && ui8Char <= 0x9F) ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcCyrillicIso[ui8Char-0x20];
 			return 1;
@@ -314,7 +344,7 @@ namespace mx {
 		 **/
 		static uint32_t													EasternEuropeWindowsDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
 			auto ui8Char = (*_pui8Char);
-			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0x7F || ui8Char == 0x81 || ui8Char == 0x83 || ui8Char == 0x88 || ui8Char == 0x90 || ui8Char == 0x98 || ui8Char == 0xAD ) { return 0; }
+			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0x7F || ui8Char == 0x81 || ui8Char == 0x83 || ui8Char == 0x88 || ui8Char == 0x90 || ui8Char == 0x98 || ui8Char == 0xAD ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcEasternEuropeWindows[ui8Char-0x20];
 			return 1;
@@ -331,7 +361,7 @@ namespace mx {
 		static uint32_t													EasternEuropeIsoDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
 			auto ui8Char = (*_pui8Char);
 			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0xAD ||
-			(ui8Char >= 0x7F && ui8Char <= 0x9F) ) { return 0; }
+			(ui8Char >= 0x7F && ui8Char <= 0x9F) ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcEasternEuropeISO[ui8Char-0x20];
 			return 1;
@@ -352,7 +382,7 @@ namespace mx {
 				ui8Char == 0x90 || ui8Char == 0x98 || ui8Char == 0x9A || ui8Char == 0x9C || ui8Char == 0x9D || ui8Char == 0x9E || ui8Char == 0x9F ||
 				ui8Char == 0xAA || ui8Char == 0xAD ||
 				ui8Char == 0xD2 ||
-				ui8Char == 0xFF ) { return 0; }
+				ui8Char == 0xFF ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcGreekWindows[ui8Char-0x20];
 			return 1;
@@ -371,9 +401,126 @@ namespace mx {
 			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || (ui8Char >= 0x7F && ui8Char <= 0x9F) ||
 				ui8Char == 0xA4 || ui8Char == 0xA5 || ui8Char == 0xAA || ui8Char == 0xAD || ui8Char == 0xAE ||
 				ui8Char == 0xD2 ||
-				ui8Char == 0xFF ) { return 0; }
+				ui8Char == 0xFF ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcGreekIso[ui8Char-0x20];
+			return 1;
+		}
+
+		/**
+		 * Determines if a character is displayable in Hebrew Windows.
+		 * 
+		 * \param _pui8Char The character buffer to examine.
+		 * \param _sSize The length of the bugger to which _pui8Char points.
+		 * \param _wcChar The actual character to display.
+		 * \return Returns 0 if not displayable, otherwise the number of bytes that make up the character.  _wcChar is filled with the character to print.
+		 **/
+		static uint32_t													HebrewWindowsDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
+			auto ui8Char = (*_pui8Char);
+			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0x7F ||
+				ui8Char == 0x81 || ui8Char == 0x8A || ui8Char == 0x8C || ui8Char == 0x8D || ui8Char == 0x8E || ui8Char == 0x8F ||
+				ui8Char == 0x90 || ui8Char == 0x9A || ui8Char == 0x9C || ui8Char == 0x9D || ui8Char == 0x9E || ui8Char == 0x9F ||
+				ui8Char == 0xAD ||
+				ui8Char == 0xCA ||
+				(ui8Char >= 0xD9 && ui8Char <= 0xDF) ||
+				(ui8Char >= 0xFB && ui8Char <= 0xFF) ) { _wcChar = L'.'; return 0; }
+
+			_wcChar = m_wcHebrewWindows[ui8Char-0x20];
+			return 1;
+		}
+
+		/**
+		 * Determines if a character is displayable in Hebrew ISO.
+		 * 
+		 * \param _pui8Char The character buffer to examine.
+		 * \param _sSize The length of the bugger to which _pui8Char points.
+		 * \param _wcChar The actual character to display.
+		 * \return Returns 0 if not displayable, otherwise the number of bytes that make up the character.  _wcChar is filled with the character to print.
+		 **/
+		static uint32_t													HebrewIsoDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
+			auto ui8Char = (*_pui8Char);
+			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || (ui8Char >= 0x7F && ui8Char <= 0x9F) ||
+				(ui8Char >= 0xBF && ui8Char <= 0xDE) ||
+				ui8Char == 0xA1 || ui8Char == 0xAD ||
+				ui8Char >= 0xFB ) { _wcChar = L'.'; return 0; }
+
+			_wcChar = m_wcHebrewIso[ui8Char-0x20];
+			return 1;
+		}
+
+		/**
+		 * Determines if a character is displayable in Thai.
+		 * 
+		 * \param _pui8Char The character buffer to examine.
+		 * \param _sSize The length of the bugger to which _pui8Char points.
+		 * \param _wcChar The actual character to display.
+		 * \return Returns 0 if not displayable, otherwise the number of bytes that make up the character.  _wcChar is filled with the character to print.
+		 **/
+		static uint32_t													ThaiDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
+			auto ui8Char = (*_pui8Char);
+			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0x7F ||
+				ui8Char == 0x81 || ui8Char == 0x82 || ui8Char == 0x83 || ui8Char == 0x84 || ui8Char == 0x86 || ui8Char == 0x87 || ui8Char == 0x88 || ui8Char == 0x89 || ui8Char == 0x8A || ui8Char == 0x8B || ui8Char == 0x8C || ui8Char == 0x8D || ui8Char == 0x8E || ui8Char == 0x8F ||
+				ui8Char == 0x90 || (ui8Char >= 0x98 && ui8Char <= 0x9F) ||
+				ui8Char == 0xA0 ||
+				(ui8Char >= 0xDB && ui8Char <= 0xDE) ||
+				(ui8Char >= 0xFC && ui8Char <= 0xFF) ) { _wcChar = L'.'; return 0; }
+
+			_wcChar = m_wcThai[ui8Char-0x20];
+			return 1;
+		}
+
+		/**
+		 * Determines if a character is displayable in Turkish Windows.
+		 * 
+		 * \param _pui8Char The character buffer to examine.
+		 * \param _sSize The length of the bugger to which _pui8Char points.
+		 * \param _wcChar The actual character to display.
+		 * \return Returns 0 if not displayable, otherwise the number of bytes that make up the character.  _wcChar is filled with the character to print.
+		 **/
+		static uint32_t													TurkishWindowsDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
+			auto ui8Char = (*_pui8Char);
+			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0x7F ||
+				ui8Char == 0x81 || ui8Char == 0x8D || ui8Char == 0x8E || ui8Char == 0x8F ||
+				ui8Char == 0x90 || ui8Char == 0x9D || ui8Char == 0x9E ||
+				ui8Char == 0xAD ) { _wcChar = L'.'; return 0; }
+
+			_wcChar = m_wcTurkishWindows[ui8Char-0x20];
+			return 1;
+		}
+
+		/**
+		 * Determines if a character is displayable in Turkish ISO.
+		 * 
+		 * \param _pui8Char The character buffer to examine.
+		 * \param _sSize The length of the bugger to which _pui8Char points.
+		 * \param _wcChar The actual character to display.
+		 * \return Returns 0 if not displayable, otherwise the number of bytes that make up the character.  _wcChar is filled with the character to print.
+		 **/
+		static uint32_t													TurkishIsoDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
+			auto ui8Char = (*_pui8Char);
+			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0xAD ||
+			(ui8Char >= 0x7F && ui8Char <= 0x9F) ) { _wcChar = L'.'; return 0; }
+
+			_wcChar = m_wcTurkishISO[ui8Char-0x20];
+			return 1;
+		}
+
+		/**
+		 * Determines if a character is displayable in Vietnamese.
+		 * 
+		 * \param _pui8Char The character buffer to examine.
+		 * \param _sSize The length of the bugger to which _pui8Char points.
+		 * \param _wcChar The actual character to display.
+		 * \return Returns 0 if not displayable, otherwise the number of bytes that make up the character.  _wcChar is filled with the character to print.
+		 **/
+		static uint32_t													VietnameseDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
+			auto ui8Char = (*_pui8Char);
+			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0x7F ||
+			ui8Char == 0x81 || ui8Char == 0x8A || ui8Char == 0x8D || ui8Char == 0x8E || ui8Char == 0x8F ||
+			ui8Char == 0x90 || ui8Char == 0x9A || ui8Char == 0x9D || ui8Char == 0x9E ||
+			ui8Char == 0xAD ) { _wcChar = L'.'; return 0; }
+
+			_wcChar = m_wcTurkishISO[ui8Char-0x20];
 			return 1;
 		}
 
@@ -396,6 +543,13 @@ namespace mx {
 		static const wchar_t											m_wcEasternEuropeISO[];							/** Eastern Europe ISO characters. */
 		static const wchar_t											m_wcGreekWindows[];								/** Greek Windows characters. */
 		static const wchar_t											m_wcGreekIso[];									/** Greek ISO characters. */
+		static const wchar_t											m_wcHebrewWindows[];							/** Hebrew Windows characters. */
+		static const wchar_t											m_wcHebrewIso[];								/** Hebrew ISO characters. */
+		static const wchar_t											m_wcThai[];										/** Thai characters. */
+		static const wchar_t											m_wcTurkishWindows[];							/** Turkish Windows characters. */
+		static const wchar_t											m_wcTurkishISO[];								/** Turkish ISO characters. */
+		static const wchar_t											m_wcVietnamese[];								/** Vietnamese characters. */
+
 
 	};
 

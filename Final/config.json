@@ -66,6 +66,7 @@
     },
     "EditSettings" : {
         "EditDescrHistory" : [
+            "ChinSimp Table A9",
             "Address: 7FF73A918211h",
             "Music Tempo",
             "Song Trigger",
@@ -224,8 +225,8 @@
             "1299"
         ],
         "EditArrayLenHistory" : [
-            "1",
             "0",
+            "1",
             "3",
             "488",
             "6",
@@ -239,6 +240,8 @@
             "0"
         ],
         "EditLockedLeftHistory" : [
+            "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ",
+            "                                                                                                                                                                                                                                                                ",
             "5757",
             "5",
             "122",
@@ -308,6 +311,7 @@
 
         ],
         "AddDescHistory" : [
+            "ChinSimp Table A9",
             "Music Tempo",
             "Magical Boomerang in Inventory",
             "Magic Shield in Inventory",
@@ -335,6 +339,8 @@
             "This is a Desc."
         ],
         "AddAddressHistory" : [
+            "2205557478496",
+            "7FFFFF898AD0",
             "7FF73A918233h",
             "7FF661916875",
             "7FF661916876",

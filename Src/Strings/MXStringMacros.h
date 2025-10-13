@@ -21979,3 +21979,30 @@
 #define _DEC_S_A61D0EFA_Modified mx::CStringDecoder::DecodeToString( _T_A61D0EFA_Modified, _LEN_A61D0EFA )
 #define _DEC_WS_A61D0EFA_Modified mx::CStringDecoder::DecodeToWString( _T_A61D0EFA_Modified, _LEN_A61D0EFA )
 
+// &Standard
+
+#define _T_9B41853F__Standard "\xAE\x21\x44\xFC\x00\x2D\xEF\x39\x34"
+#define _LEN_9B41853F 9
+#define _T_LEN_9B41853F__Standard _T_9B41853F__Standard, _LEN_9B41853F
+#define _DEC_9B41853F__Standard( STR ) mx::CStringDecoder::Decode( _T_9B41853F__Standard, _LEN_9B41853F, STR )
+#define _DEC_S_9B41853F__Standard mx::CStringDecoder::DecodeToString( _T_9B41853F__Standard, _LEN_9B41853F )
+#define _DEC_WS_9B41853F__Standard mx::CStringDecoder::DecodeToWString( _T_9B41853F__Standard, _LEN_9B41853F )
+
+// &International
+
+#define _T_4DD9B233__International "\xAE\x17\x3E\x0F\xF7\x3B\xFC\x28\x44\x31\x38\x3C\xF3\x07"
+#define _LEN_4DD9B233 14
+#define _T_LEN_4DD9B233__International _T_4DD9B233__International, _LEN_4DD9B233
+#define _DEC_4DD9B233__International( STR ) mx::CStringDecoder::Decode( _T_4DD9B233__International, _LEN_4DD9B233, STR )
+#define _DEC_S_4DD9B233__International mx::CStringDecoder::DecodeToString( _T_4DD9B233__International, _LEN_4DD9B233 )
+#define _DEC_WS_4DD9B233__International mx::CStringDecoder::DecodeToWString( _T_4DD9B233__International, _LEN_4DD9B233 )
+
+// Auto-Highlight Options
+
+#define _T_A217AC73_Auto_Highlight_Options "\xC9\x43\x44\x0A\xBF\x11\xF7\x2E\x38\x34\x32\x35\xFA\x0F\xE7\xD7\x3E\x44\x04\x01\x37\x01"
+#define _LEN_A217AC73 22
+#define _T_LEN_A217AC73_Auto_Highlight_Options _T_A217AC73_Auto_Highlight_Options, _LEN_A217AC73
+#define _DEC_A217AC73_Auto_Highlight_Options( STR ) mx::CStringDecoder::Decode( _T_A217AC73_Auto_Highlight_Options, _LEN_A217AC73, STR )
+#define _DEC_S_A217AC73_Auto_Highlight_Options mx::CStringDecoder::DecodeToString( _T_A217AC73_Auto_Highlight_Options, _LEN_A217AC73 )
+#define _DEC_WS_A217AC73_Auto_Highlight_Options mx::CStringDecoder::DecodeToWString( _T_A217AC73_Auto_Highlight_Options, _LEN_A217AC73 )
+
