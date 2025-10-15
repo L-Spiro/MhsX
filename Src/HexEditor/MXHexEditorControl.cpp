@@ -602,7 +602,7 @@ namespace mx {
 		EnsureAddrGlyphs( _hDc );
 		const MX_ADDR_GLYPHS & agGlyphs = fsFont.agGlyphs;
 
-
+		
 		lsw::LSW_SETBKMODE sbmBkMode( _hDc, TRANSPARENT );
 		lsw::LSW_SETTEXTCOLOR stcTextColor( _hDc, MX_GetRgbValue( ForeColors()->crLineNumbers ) );
 
@@ -860,7 +860,8 @@ namespace mx {
 		lsw::LSW_SETBKMODE sbmBkMode( _hDc, TRANSPARENT );
 		lsw::LSW_SETTEXTCOLOR stcTextColor( _hDc, MX_GetRgbValue( ForeColors()->crEditor ) );
 		std::wstring wsTmp;
-		wchar_t wcDefChar = L'\0';
+		wchar_t wcDefChar = L'\0', wcHold;
+		bool bHolding = false;
 		int32_t i32CharSizeCounter = 0;
 		uint32_t ui32Stride = (_dfFmt == MX_DF_CHAR && CurStyle()->csCharSet == CCharSets::MX_CS_UNICODE) ? 2 : 1;
 		for( uint32_t I = 0; I < _ui32LinesToDraw; ++I, ui64Line += ui32Bpr ) {
@@ -971,10 +972,23 @@ namespace mx {
 						try {
 							wsTmp.resize( 1 );
 							i32CharSizeCounter -= ui32Stride;
-							if ( i32CharSizeCounter <= 2 ) {
-								i32CharSizeCounter = int32_t( CCharSets::m_csSets[stAll.csCharSet].pfDisplayable( pui8Value, sBuffSize, wsTmp[0] ) );
-								if MX_UNLIKELY( (wsTmp[0] >= 0x80 && CCharSets::m_csSets[stAll.csCharSet].bHideOver127) ) {
-									wsTmp[0] = L'.';
+							if ( i32CharSizeCounter <= 1 ) {
+								if ( bHolding ) {
+									wsTmp[0] = wcHold;
+									bHolding = false;
+								}
+								else {
+									i32CharSizeCounter = int32_t( CCharSets::m_csSets[stAll.csCharSet].pfDisplayable( pui8Value, sBuffSize, wcHold ) );
+									if MX_UNLIKELY( (wcHold >= 0x80 && CCharSets::m_csSets[stAll.csCharSet].bHideOver127) ) {
+										wcHold = L'.';
+									}
+									if ( i32CharSizeCounter > ui32Stride ) {
+										wsTmp[0] = L'\0';
+										bHolding = true;
+									}
+									else {
+										wsTmp[0] = wcHold;
+									}
 								}
 							}
 							else { wsTmp[0] = L'\0'; }
@@ -1009,9 +1023,7 @@ namespace mx {
 					::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int32_t>(wsTmp.size()) );
 				}
 			}
-
-			// Decimal is right-aligned by spaces we injected above; just draw at left edge.
-			
+		
 			if ( ui32Bpr >= sDataSize ) {
 				pui8Data = nullptr;
 				sDataSize = 0;

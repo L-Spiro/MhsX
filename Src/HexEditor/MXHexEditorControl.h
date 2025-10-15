@@ -6,6 +6,7 @@
 #include "MXCharSets.h"
 #include "MXHexEditorColors.h"
 #include "MXHexEditorInterface.h"
+#include "MXMiniMap.h"
 
 #include <LSWWin.h>
 #include <Helpers/LSWHelpers.h>
@@ -583,6 +584,7 @@ namespace mx {
 		MX_HEX_EDITOR_COLORS *						m_phecBackColors = nullptr;								// Pointer to shared background colors.
 		MX_EDIT_AS									m_eaEditAs = MX_EA_HEX;									// The view type.
 		MX_SCROLL_DATA								m_sdScrollView[MX_EA_TOTAL];							// The scroll/view data for each view type.
+		CMiniMap									m_mmMiniMap;											// The mini-map.
 		std::map<uint64_t, COLORREF>				m_mColorLookup;											// Quick mixing of colors.
 
 		CHexEditorInterface::CBuffer				m_bCurBuffer;											// The current data buffer being displayed.
