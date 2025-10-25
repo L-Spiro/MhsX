@@ -24,6 +24,14 @@ Allows you to fully define your search.  There is nothing you can’t code.
 Easily decode/research any floating-point format, even custom ones.
 <br>![Floating-Point Studio](https://i.imgur.com/rlZ1QSm.png)
 
+## Deus Hex Machina (Hex Editor)
+Currently under construction: A full-featured modern hex editor.
+<img width="2560" height="1392" alt="image" src="https://github.com/user-attachments/assets/1b181599-fb6f-4327-bce4-5759e4138b04" />
+<img width="2560" height="1392" alt="image" src="https://github.com/user-attachments/assets/e760ec61-2023-47e3-a3d4-369bc989a8d5" />
+<img width="2560" height="1392" alt="image" src="https://github.com/user-attachments/assets/1ddb67f8-f23b-4443-9c2b-e8935bd5d43b" />
+<img width="1253" height="992" alt="image" src="https://github.com/user-attachments/assets/0433f458-0a45-489d-9280-612d400c5fd9" />
+<img width="2560" height="1392" alt="image" src="https://github.com/user-attachments/assets/11e3c99b-911c-482e-984c-267509449707" />
+
 ## Expression Evaluator
 The Expression Evaluator is a handy ready-to-use simple way to evaluate snippets of code, mathematical expressions, etc.  Supports branching, loops, typed and typeless values, the full C++ \<cmath\> library, strings, and more.  It’s a full programming language that is easy to use; just start typing!
 <br>![Expression Evaluator](https://i.imgur.com/WLF2Xad.png)
