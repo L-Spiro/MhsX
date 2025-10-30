@@ -145,6 +145,12 @@ namespace mx {
 		// Is a process open?
 		bool							ProcIsOpened() const { LSW_ENT_CRIT( m_csCrit ); return m_hProcHandle.Valid() && m_dwId != DWINVALID && m_opOpenProcThreadMonitor.aAtom == 0; }
 
+		// Can we read from the target process?
+		inline bool						Readable() const { LSW_ENT_CRIT( m_csCrit ); return ProcIsOpened() && ((m_dwOpenProcFlags & PROCESS_VM_READ) != 0); }
+
+		// Can we write to the target process?
+		inline bool						Writeable() const { LSW_ENT_CRIT( m_csCrit ); return ProcIsOpened() && ((m_dwOpenProcFlags & (PROCESS_VM_WRITE | PROCESS_VM_OPERATION)) == (PROCESS_VM_WRITE | PROCESS_VM_OPERATION)); }
+
 		// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
 		virtual bool					ReadProcessMemory( uint64_t _lpBaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) const;
 
@@ -256,7 +262,7 @@ namespace mx {
 		virtual bool					VirtualProtectEx( LPVOID _lpAddress, SIZE_T _dwSize, DWORD _flNewProtect, PDWORD _lpflOldProtect );
 
 		// Retrieves information about a range of pages within the virtual address space of a specified process.
-		virtual bool					VirtualQueryEx( uint64_t _lpAddress, PMEMORY_BASIC_INFORMATION64 _lpBuffer );
+		virtual bool					VirtualQueryEx( uint64_t _lpAddress, PMEMORY_BASIC_INFORMATION64 _lpBuffer ) const;
 
 		// Determines whether the specified process is running under WOW64.
 		virtual bool					IsWow64Process() const;
@@ -286,6 +292,7 @@ namespace mx {
 		 * \brief Finds the module covering an address, if any. Returns nullptr if not found.
 		 */
 		inline MODULEENTRY32W			FindModuleForAddress( uint64_t _ui64Addr ) const {
+			LSW_ENT_CRIT( m_csCrit );
 			if MX_UNLIKELY( m_dwId == DWINVALID ) { return { .dwSize = 0 }; }
 			if MX_UNLIKELY( !m_mModuleCache.size() ) {
 				m_mModuleCache = GetStaticAddressRangesByPid( m_dwId );
@@ -297,6 +304,7 @@ namespace mx {
 
 		// Determines if an address is part of a module in the target process.
 		inline bool						AddressIsInModule( uint64_t _ui64Addr ) const {
+			LSW_ENT_CRIT( m_csCrit );
 			if MX_UNLIKELY( m_dwId == DWINVALID ) { return false; }
 			if MX_UNLIKELY( !m_mModuleCache.size() ) {
 				m_mModuleCache = GetStaticAddressRangesByPid( m_dwId );
@@ -307,8 +315,12 @@ namespace mx {
 
 		// Resets the internal module cache so that it can be freshly generated next time it is accessed.
 		inline void						ClearModuleCache() {
+			LSW_ENT_CRIT( m_csCrit );
 			m_mModuleCache.clear();
 			m_sModulesByName.clear();
+
+			m_ui64LastIsReadablePage = 0;
+			m_bLastIsReadableResult = false;
 		}
 
 		/**
@@ -321,6 +333,7 @@ namespace mx {
 		inline MX_MODULE_ENTRY			FindModuleByName( std::string_view _sNameUtf8 ) {
 			MX_MODULE_ENTRY meRet;
 			meRet.meEntry.dwSize = 0;
+			LSW_ENT_CRIT( m_csCrit );
 			if MX_UNLIKELY( m_dwId == DWINVALID ) { return meRet; }
 			if MX_UNLIKELY( !m_sModulesByName.size() ) {
 				GatherModulesByPid( m_dwId, m_sModulesByName );
@@ -328,6 +341,59 @@ namespace mx {
 			auto pmeEntry = FindModuleByName( m_sModulesByName, _sNameUtf8 );
 			return pmeEntry ? (*pmeEntry) : meRet;
 		}
+
+		/**
+		 * \brief Returns true if the page containing the address is committed and readable (not GUARD/NOACCESS).
+		 *
+		 * \param _ui64Addr Address to test.
+		 * \return true if the page looks readable by protection flags; false otherwise.
+		 *
+		 * \note This is a best-effort check. Protections can change between the query and use.
+		 */
+		bool							IsReadableByQuery( uint64_t _ui64Addr ) const;
+
+		/**
+		 * \brief Probes a single remote address by reading 1 byte.
+		 *
+		 * \param _ui64Addr Remote virtual address to test.
+		 * \return true if a 1-byte read succeeds; false otherwise.
+		 *
+		 * \note Use a 64-bit build for 64-bit targets to avoid address truncation.
+		 */
+		bool							IsAddressReadable( uint64_t _ui64Addr ) const;
+
+		/**
+		 * \brief Returns true if the page containing the address is committed and executable.
+		 *
+		 * \param _ui64Addr Remote virtual address to test (single pointer).
+		 * \return true if the page is MEM_COMMIT and executable; false otherwise.
+		 *
+		 * \note When State != MEM_COMMIT, Protect/Type are undefined and must be ignored.
+		 * \note Control Flow Guard (CFG) may still block indirect calls/jumps even on executable pages.
+		 */
+		bool							IsExecutableByQuery( uint64_t _ui64Addr ) const;
+
+		/**
+		 * \brief Reads the image base from the target's PEB (robust path).
+		 *
+		 * \param _hProc Handle to target process opened with PROCESS_QUERY_INFORMATION (or PROCESS_QUERY_LIMITED_INFORMATION) | PROCESS_VM_READ.
+		 * \return Base address of the main module on success; nullptr on failure.
+		 *
+		 * \note Same-bitness path. For cross-bitness (32-bit tool Å® 64-bit target), use the WOW64
+		 *       variants (NtWow64QueryInformationProcess64 + NtWow64ReadVirtualMemory64) or build x64.
+		 */
+		uint64_t						GetMainModuleBase_PEB() const;
+
+		/**
+		 * \brief Gets the base address of the main module using ToolHelp (easy path).
+		 *
+		 * \param _dwPid Target process ID.
+		 * \return Base address of the main module on success; nullptr on failure.
+		 *
+		 * \note Works when caller and target have compatible bitness (x64Å®x64 or x86Å®x86).
+		 *       A 32-bit caller cannot enumerate 64-bit modules of a 64-bit target.
+		 */
+		static uint64_t					GetMainModuleBase_Toolhelp( DWORD _dwPid );
 
 		/**
 		 * \brief Gathers static (image) ranges using Toolhelp for a given PID.
@@ -459,6 +525,24 @@ namespace mx {
 			return (pmeEntry == _sModules.end()) ? nullptr : &(*pmeEntry);
 		}
 
+		/**
+		 * \brief Returns true if the given protection value allows execution.
+		 *
+		 * \param _dwProt Page protection from MEMORY_BASIC_INFORMATION::Protect.
+		 * \return true if executable; false otherwise.
+		 */
+		static bool						ProtIsExecutable( DWORD _dwProt ) {
+			// Mask off non-core modifiers that don't affect exec permission.
+			const DWORD dwCore = (_dwProt & ~(PAGE_GUARD | PAGE_NOCACHE | PAGE_WRITECOMBINE | PAGE_TARGETS_INVALID | PAGE_TARGETS_NO_UPDATE));
+			switch ( dwCore ) {
+				case PAGE_EXECUTE : {}				MX_FALLTHROUGH
+				case PAGE_EXECUTE_READ : {}			MX_FALLTHROUGH
+				case PAGE_EXECUTE_READWRITE : {}	MX_FALLTHROUGH
+				case PAGE_EXECUTE_WRITECOPY : { return true; }
+				default : { return false; }
+			}
+		}
+
 
 	protected :
 		// == Types.
@@ -508,6 +592,16 @@ namespace mx {
 		mutable std::set<MX_MODULE_ENTRY>
 										m_sModulesByName;
 
+		// The last "is readable" page.
+		mutable uint64_t				m_ui64LastIsReadablePage = 0;
+		// The last "is readable" result.
+		mutable bool					m_bLastIsReadableResult = false;
+
+		// The last "is executable" page.
+		mutable uint64_t				m_ui64LastIsExecuteablePage = 0;
+		// The last "is executable" result.
+		mutable bool					m_bLastIsExecuteableResult = false;
+
 
 
 		// == Functions.
@@ -527,7 +621,7 @@ namespace mx {
 		bool							VirtualProtectExInternal( LPVOID _lpAddress, SIZE_T _dwSize, DWORD _flNewProtect, PDWORD _lpflOldProtect );
 
 		// Retrieves information about a range of pages within the virtual address space of a specified process.
-		size_t							VirtualQueryExInternal( uint64_t _lpAddress, PMEMORY_BASIC_INFORMATION64 _lpBuffer );
+		size_t							VirtualQueryExInternal( uint64_t _lpAddress, PMEMORY_BASIC_INFORMATION64 _lpBuffer ) const;
 
 		// Open-process thread.
 		//void							CreateProcessThread( CProcess & _pProcess );

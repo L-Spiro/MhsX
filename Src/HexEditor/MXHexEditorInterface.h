@@ -7,6 +7,16 @@ namespace mx {
 	class CHexEditorInterface {
 	public :
 		virtual ~CHexEditorInterface() {}
+		// == Enumerations.
+		// Interface types.
+		enum MX_HEX_EDITOR_TYPES {
+			MX_HET_NONE,
+			MX_HET_FILE,
+			MX_HET_PROCESS,
+			MX_HET_CUR_PROCESS
+		};
+
+
 		// == Types.
 		// Read/write buffer.
 		typedef std::vector<uint8_t>		CBuffer;
@@ -33,6 +43,9 @@ namespace mx {
 
 		// Gets the size of the data source.
 		virtual uint64_t					Size() const = 0;
+
+		// Gets the interface type.
+		virtual MX_HEX_EDITOR_TYPES			Type() const = 0 { return MX_HET_NONE; }
 	};
 
 }	// namespace mx

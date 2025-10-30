@@ -22006,3 +22006,39 @@
 #define _DEC_S_A217AC73_Auto_Highlight_Options mx::CStringDecoder::DecodeToString( _T_A217AC73_Auto_Highlight_Options, _LEN_A217AC73 )
 #define _DEC_WS_A217AC73_Auto_Highlight_Options mx::CStringDecoder::DecodeToWString( _T_A217AC73_Auto_Highlight_Options, _LEN_A217AC73 )
 
+// Unreadable Address
+
+#define _T_13605A71_Unreadable_Address "\xDD\x3C\x42\x00\xF3\x2D\xEF\x29\x3C\x2D\xE9\x0F\xF6\xFF\x39\xED\x41\x43"
+#define _LEN_13605A71 18
+#define _T_LEN_13605A71_Unreadable_Address _T_13605A71_Unreadable_Address, _LEN_13605A71
+#define _DEC_13605A71_Unreadable_Address( STR ) mx::CStringDecoder::Decode( _T_13605A71_Unreadable_Address, _LEN_13605A71, STR )
+#define _DEC_S_13605A71_Unreadable_Address mx::CStringDecoder::DecodeToString( _T_13605A71_Unreadable_Address, _LEN_13605A71 )
+#define _DEC_WS_13605A71_Unreadable_Address mx::CStringDecoder::DecodeToWString( _T_13605A71_Unreadable_Address, _LEN_13605A71 )
+
+// Executable Address
+
+#define _T_7F9B2FA8_Executable_Address "\xCD\x46\x35\xFE\x07\x3D\xEF\x29\x3C\x2D\xE9\x0F\xF6\xFF\x39\xED\x41\x43"
+#define _LEN_7F9B2FA8 18
+#define _T_LEN_7F9B2FA8_Executable_Address _T_7F9B2FA8_Executable_Address, _LEN_7F9B2FA8
+#define _DEC_7F9B2FA8_Executable_Address( STR ) mx::CStringDecoder::Decode( _T_7F9B2FA8_Executable_Address, _LEN_7F9B2FA8, STR )
+#define _DEC_S_7F9B2FA8_Executable_Address mx::CStringDecoder::DecodeToString( _T_7F9B2FA8_Executable_Address, _LEN_7F9B2FA8 )
+#define _DEC_WS_7F9B2FA8_Executable_Address mx::CStringDecoder::DecodeToWString( _T_7F9B2FA8_Executable_Address, _LEN_7F9B2FA8 )
+
+// Static Address
+
+#define _T_E365F96B_Static_Address "\xDB\x42\x31\x0F\xFB\x2C\xAE\x08\x34\x2C\x3B\x33\x05\x0E"
+#define _LEN_E365F96B 14
+#define _T_LEN_E365F96B_Static_Address _T_E365F96B_Static_Address, _LEN_E365F96B
+#define _DEC_E365F96B_Static_Address( STR ) mx::CStringDecoder::Decode( _T_E365F96B_Static_Address, _LEN_E365F96B, STR )
+#define _DEC_S_E365F96B_Static_Address mx::CStringDecoder::DecodeToString( _T_E365F96B_Static_Address, _LEN_E365F96B )
+#define _DEC_WS_E365F96B_Static_Address mx::CStringDecoder::DecodeToWString( _T_E365F96B_Static_Address, _LEN_E365F96B )
+
+// NtQueryInformationProcess
+
+#define _T_A5C44C50_NtQueryInformationProcess "\xD6\x42\x21\x10\xF7\x3B\x07\x10\x3E\x2E\x38\x40\xFF\xFC\x3B\xF1\x3D\x3E\xEB\x04\x38\xF1\x2C\x43\x3B"
+#define _LEN_A5C44C50 25
+#define _T_LEN_A5C44C50_NtQueryInformationProcess _T_A5C44C50_NtQueryInformationProcess, _LEN_A5C44C50
+#define _DEC_A5C44C50_NtQueryInformationProcess( STR ) mx::CStringDecoder::Decode( _T_A5C44C50_NtQueryInformationProcess, _LEN_A5C44C50, STR )
+#define _DEC_S_A5C44C50_NtQueryInformationProcess mx::CStringDecoder::DecodeToString( _T_A5C44C50_NtQueryInformationProcess, _LEN_A5C44C50 )
+#define _DEC_WS_A5C44C50_NtQueryInformationProcess mx::CStringDecoder::DecodeToWString( _T_A5C44C50_NtQueryInformationProcess, _LEN_A5C44C50 )
+

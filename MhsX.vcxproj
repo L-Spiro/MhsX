@@ -284,6 +284,7 @@
     <ClCompile Include="Src\HexEditor\MXDeusHexMachinaWindow.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexEditorControl.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexEditorFile.cpp" />
+    <ClCompile Include="Src\HexEditor\MXHexEditorProcess.cpp" />
     <ClCompile Include="Src\HexEditor\MXMiniMap.cpp" />
     <ClCompile Include="Src\Hotkeys\MXHotkeyManager.cpp" />
     <ClCompile Include="Src\Hotkeys\MXHotkeyManBase.cpp" />
@@ -433,6 +434,7 @@
     <ClInclude Include="Src\HexEditor\MXHexEditorControl.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorFile.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorInterface.h" />
+    <ClInclude Include="Src\HexEditor\MXHexEditorProcess.h" />
     <ClInclude Include="Src\HexEditor\MXMiniMap.h" />
     <ClInclude Include="Src\Hotkeys\MXHotkeyManager.h" />
     <ClInclude Include="Src\Hotkeys\MXHotkeyManBase.h" />

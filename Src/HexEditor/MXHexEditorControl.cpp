@@ -2,6 +2,7 @@
 #include "../Layouts/MXLayoutManager.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../Utilities/MXUtilities.h"
+#include "MXHexEditorProcess.h"
 
 #include <Base/LSWBase.h>
 #include <Base/LSWWndClassEx.h>
@@ -26,6 +27,40 @@ namespace mx {
 	}
 
 	// == Functions.
+	// Goes to a given address.
+	void CHexEditorControl::GoTo( uint64_t _ui64Addr, bool _bShowAtTop ) {
+		_ui64Addr = std::min( _ui64Addr, Size() );
+
+
+		// Compute visible page sizes (lines / columns-on-screen).
+		int32_t iClientH = int32_t( ClientRect().Height() );
+
+		const int32_t iLineAdv = LineAdvanceCy();
+		m_sdScrollView[m_eaEditAs].i32PageLines = (iLineAdv ? (iClientH / iLineAdv) : 0);
+		if ( m_sdScrollView[m_eaEditAs].i32PageLines < 1 ) { m_sdScrollView[m_eaEditAs].i32PageLines = 1; }
+
+
+		const uint64_t ui64Lines = TotalLines_FixedWidth();
+		const uint64_t ui64MaxV  = ui64Lines ? (ui64Lines - 1ULL) : 0ULL;
+
+		uint64_t ui64Pos = _ui64Addr / CurStyle()->uiBytesPerRow;
+		if ( !_bShowAtTop ) {
+			if ( ui64Pos <= m_sdScrollView[m_eaEditAs].i32PageLines / 2 ) {
+				ui64Pos = 0;
+			}
+			else {
+				ui64Pos -= m_sdScrollView[m_eaEditAs].i32PageLines / 2;
+			}
+		}
+		m_sdScrollView[m_eaEditAs].ui64VPos = ui64Pos;
+
+		// Keep style in sync with the new top visible line.
+		m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine = m_sdScrollView[m_eaEditAs].ui64VPos;
+
+		lsw::CBase::SetScrollInfo64( Wnd(), SB_VERT, SIF_POS, ui64MaxV, m_sdScrollView[m_eaEditAs].ui64VPos, 1, TRUE );
+		::InvalidateRect( Wnd(), nullptr, FALSE );
+	}
+
 	// WM_NCDESTROY.
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::NcDestroy() {
 		return CParent::NcDestroy();
@@ -399,6 +434,18 @@ namespace mx {
 		int32_t iSteps = (sDelta / WHEEL_DELTA);
 		::SendMessageW( Wnd(), WM_HSCROLL, MAKELONG( (iSteps < 0) ? SB_LINERIGHT : SB_LINELEFT, 0 ), 0 );
 		return lsw::CWidget::LSW_H_HANDLED;
+	}
+
+	// Sets the target stream.
+	void CHexEditorControl::SetStream( CHexEditorInterface * _pediStream ) {
+		m_pheiTarget = _pediStream;
+
+		if ( m_pheiTarget && (m_pheiTarget->Type() == CHexEditorInterface::MX_HET_PROCESS || m_pheiTarget->Type() == CHexEditorInterface::MX_HET_CUR_PROCESS) ) {
+			CHexEditorProcess * phepProc = static_cast<CHexEditorProcess *>(m_pheiTarget);
+			GoTo( phepProc->Process().GetMainModuleBase_PEB() );
+		}
+		
+		RecalcAndInvalidate();
 	}
 
 	// Registers the control if it has not been registered already.  Redundant calls have no effect.  Must be called before creating this control.
@@ -869,12 +916,14 @@ namespace mx {
 
 			// Draw the background.  Try to reduce to as few calls as possible for a row.
 			int32_t iL, iW;
-			auto crColor = CellBgColor( ui64Line, pui8Data, sDataSize );
+			uint64_t ui64ThisAddr = ui64StartAddress + I * ui32Bpr;
+			auto crColor = CellBgColor( ui64ThisAddr, pui8Data, sDataSize );
 			GetBackgrondRectForIndex( _dfFmt, 0, _iXLeft, iL, iW );
 			for ( int32_t J = 1; J < ui32Bpr; ++J ) {
 				int32_t iL2, iW2;
 				GetBackgrondRectForIndex( _dfFmt, J, _iXLeft, iL2, iW2 );
-				auto crThisColor = CellBgColor( ui64Line + J, pui8Data + J, sDataSize - J );
+				ui64ThisAddr = ui64StartAddress + I * ui32Bpr + J;
+				auto crThisColor = CellBgColor( ui64ThisAddr, pui8Data + J, sDataSize - J );
 				if ( crThisColor != crColor || (iL + iW) == iL2 ) {
 					if ( crBackColor != MX_GetRgbValue( crColor ) ) {
 						lsw::LSW_RECT rRect;
@@ -906,7 +955,8 @@ namespace mx {
 
 			for ( int32_t J = 0; J < ui32Bpr; J += ui32Stride ) {
 				if ( J >= sDataSize ) { break; }
-				
+
+				ui64ThisAddr = ui64StartAddress + I * ui32Bpr + J;
 				size_t sBuffSize = J < sDataSize ? sDataSize - J : 0;
 				const uint8_t * pui8Value = sBuffSize ? &pui8Data[J] : reinterpret_cast<const uint8_t *>(&wcDefChar);
 				uint8_t ui8Value = (*pui8Value);
@@ -922,7 +972,6 @@ namespace mx {
 					rRect.right = iL2 + iW2 + 1;
 					rRect.bottom = iY + iLineAdv;
 
-					uint64_t ui64ThisAddr = ui64StartAddress + I * ui32Bpr + J;
 					uint64_t ui64ThisMod = ui64ThisAddr % stAll.ui64DivisionSpacing;
 					uint64_t ui64ThisDiv = ui64ThisAddr / stAll.ui64DivisionSpacing;
 					lsw::CHelpers::DrawRectOutlineMasked( _hDc, rRect,
@@ -1014,7 +1063,7 @@ namespace mx {
 						break;
 					}
 				}
-				auto crThisColor = CellFgColor( ui64Line + J, pui8Data + J, sDataSize - J );
+				auto crThisColor = CellFgColor( ui64ThisAddr, pui8Data + J, sDataSize - J );
 				if ( crThisColor != MX_GetRgbValue( ForeColors()->crEditor ) ) {
 					lsw::LSW_SETTEXTCOLOR stcTextColor2( _hDc, MX_GetRgbValue( crThisColor ) );
 					::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int32_t>(wsTmp.size()) );
@@ -1078,7 +1127,19 @@ namespace mx {
 	 * \param _sSize The address of the data in the cell.
 	 * \return Returns the background color for the given cell.
 	 **/
-	COLORREF CHexEditorControl::CellBgColor( uint64_t /*_ui64Address*/, const uint8_t * /*_pui8Value*/, size_t /*_sSize*/ ) {
+	COLORREF CHexEditorControl::CellBgColor( uint64_t _ui64Address, const uint8_t * /*_pui8Value*/, size_t /*_sSize*/ ) {
+		if ( m_pheiTarget && (m_pheiTarget->Type() == CHexEditorInterface::MX_HET_PROCESS || m_pheiTarget->Type() == CHexEditorInterface::MX_HET_CUR_PROCESS) ) {
+			CHexEditorProcess * phepProc = static_cast<CHexEditorProcess *>(m_pheiTarget);
+			if ( !phepProc->Process().IsReadableByQuery( _ui64Address ) ) {
+				return ForeColors()->crUnreadable;
+			}
+			if ( phepProc->Process().IsExecutableByQuery( _ui64Address ) ) {
+				return ForeColors()->crExecutable;
+			}
+			if ( phepProc->Process().AddressIsInModule( _ui64Address ) ) {
+				return ForeColors()->crStaticAddress;
+			}
+		}
 		return BackColors()->crEditor;
 	}
 

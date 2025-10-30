@@ -182,6 +182,9 @@ namespace mx {
 	// NtQueryInformationFile().
 	LPFN_NTQUERYINFORMATIONFILE CSystem::m_pfNtQueryInformationFile = nullptr;
 
+	// NtQueryInformationProcess().
+	LPFN_NTQUERYINFORMATIONPROCESS CSystem::m_pfNtQueryInformationProcess = nullptr;
+
 
 	// == Types.
 	typedef BOOL (WINAPI * LPFN_ISWOW64PROCESS)( HANDLE, PBOOL );
@@ -909,7 +912,11 @@ namespace mx {
 	// NtQueryInformationFile.
 	NTSTATUS NTAPI CSystem::NtQueryInformationFile( HANDLE _hFileHandle, PIO_STATUS_BLOCK _sbIoStatusBlock, PVOID _pvFileInformation, ULONG _ulLength, FILE_INFORMATION_CLASS _ficFileInformationClass ) {
 		return m_pfNtQueryInformationFile ? m_pfNtQueryInformationFile( _hFileHandle, _sbIoStatusBlock, _pvFileInformation, _ulLength, _ficFileInformationClass ) : STATUS_PROCEDURE_NOT_FOUND;
-			
+	}
+
+	// NtQueryInformationFile.
+	NTSTATUS NTAPI CSystem::NtQueryInformationProcess( HANDLE _hProcessHandle, PROCESSINFOCLASS _picProcessInformationClass, PVOID _pvProcessInformation, ULONG _ulProcessInformationLength, PULONG _pulReturnLength ) {
+		return m_pfNtQueryInformationProcess ? m_pfNtQueryInformationProcess( _hProcessHandle, _picProcessInformationClass, _pvProcessInformation, _ulProcessInformationLength, _pulReturnLength ) : STATUS_PROCEDURE_NOT_FOUND;
 	}
 
 	// Load kernel32.dll functions.
@@ -1117,6 +1124,7 @@ namespace mx {
 		MX_PROCADDR( NtSuspendProcess, _T_1C2211DA_NtSuspendProcess, _LEN_1C2211DA );
 		MX_PROCADDR( NtResumeProcess, _T_4CF489E5_NtResumeProcess, _LEN_4CF489E5 );
 		MX_PROCADDR( NtQueryInformationFile, _T_F675D37D_NtQueryInformationFile, _LEN_F675D37D );
+		MX_PROCADDR( NtQueryInformationProcess, _T_A5C44C50_NtQueryInformationProcess, _LEN_A5C44C50 );
 
 		::ZeroMemory( szAtDll, MX_ELEMENTS( szAtDll ) );
 #undef MX_CHECK

@@ -1,9 +1,11 @@
 #include "MXDeusHexMachinaWindow.h"
 #include "../Layouts/MXLayoutManager.h"
+#include "../Layouts/MXOpenProcessLayout.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../MemHack/MXWindowMemHack.h"
 #include "../Utilities/MXUtilities.h"
 #include "MXHexEditorFile.h"
+#include "MXHexEditorProcess.h"
 
 #include <Base/LSWWndClassEx.h>
 #include <Rebar/LSWRebar.h>
@@ -218,6 +220,10 @@ namespace mx {
 		switch ( _wId ) {
 			case Layout::MX_M_FILE_OPENFILE : {
 				Open();
+				break;
+			}
+			case Layout::MX_M_FILE_OPENPROCESS : {
+				OpenProcess();
 				break;
 			}
 			case Layout::MX_M_FILE_CLOSE : {
@@ -1454,92 +1460,76 @@ namespace mx {
 
 	// Performs an Open operation.
 	void CDeusHexMachinaWindow::Open( const std::filesystem::path &_pPath ) {
-		MX_HEX_TAB htTab;
 		try {
-			auto ptTab = Tab();
-			if ( ptTab ) {
-				CHexEditorControl::PrepareControl();
-				
+			auto wsTabname = _pPath.filename().generic_wstring();
 
-				CSecureString sLeftSizeExp;
-				mx::CStringDecoder::Decode( _T_2762F803_____P__VCL, _LEN_2762F803, sLeftSizeExp );
-				CSecureString sRightSizeExp;
-				mx::CStringDecoder::Decode( _T_DD6DC560_____P__VCR, _LEN_DD6DC560, sRightSizeExp );
-				CSecureString sTopSizeExp;
-				mx::CStringDecoder::Decode( _T_340E6055_____P__VCT, _LEN_340E6055, sTopSizeExp );
-				CSecureString sBottomSizeExp;
-				mx::CStringDecoder::Decode( _T_C0DAD504_____P__VCB, _LEN_C0DAD504, sBottomSizeExp );
-				LSW_WIDGET_LAYOUT wlLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->FixLayout( LSW_WIDGET_LAYOUT{
-					MX_HEX_CONTROL,									// ltType
-					static_cast<WORD>(Layout::MX_W_TAB_START + ptTab->GetItemCount()),	// wId
-					nullptr,										// lpwcClass
-					TRUE,											// bEnabled
-					TRUE,											// bActive
-					0,												// iLeft
-					0,												// iTop
-					0,												// dwWidth
-					0,												// dwHeight
-					WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP,		// dwStyle
-					0,												// dwStyleEx
-					nullptr,										// pwcText
-					0,												// sTextLen
-					static_cast<DWORD>(ptTab->Id()),				// dwParentId
-
-//#if 0
-					sLeftSizeExp.c_str(), 0,						// pcLeftSizeExp
-					sRightSizeExp.c_str(), 0,						// pcRightSizeExp
-					sTopSizeExp.c_str(), 0,							// pcTopSizeExp
-					sBottomSizeExp.c_str(), 0,						// pcBottomSizeExp
-					nullptr, 0,										// pcWidthSizeExp
-					nullptr, 0,										// pcHeightSizeExp
-//#endif
-				} );
-				CHexEditorControl::MX_CREATION_PARMS cpCreation;
-				cpCreation.psOptions = m_sOptions;
-				cpCreation.pfsFixedRowFont = &m_fsFixedRowFont;
-				cpCreation.pfsDynamicRowFont = &m_fsTextViewFont;
-				cpCreation.phecFg = &m_hecFgColors;
-				cpCreation.phecBg = &m_hecBgColors;
-				htTab.phecWidget = static_cast<CHexEditorControl *>(static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->CreateWidget( wlLayout, ptTab, TRUE, NULL, reinterpret_cast<uint64_t>(&cpCreation) ));
-				if ( !htTab.phecWidget ) {
-					//delete tTab.ppoPeObject;
-					return;
-				}
-				htTab.phecWidget->InitControl( htTab.phecWidget->Wnd() );
-
-				htTab.pheiInterface = new( std::nothrow ) CHexEditorFile();
-				if ( !htTab.pheiInterface || !static_cast<CHexEditorFile*>(htTab.pheiInterface)->SetFile( _pPath ) ) {
-					delete htTab.phecWidget;
-					delete htTab.pheiInterface;
-					return;
-				}
-
-				m_vTabs.insert( m_vTabs.begin(), htTab );
-
-				auto wsTabname = _pPath.filename().generic_wstring();
-				TCITEMW tciItem = { 0 };
-				tciItem.mask = TCIF_TEXT;
-				tciItem.pszText = const_cast<LPWSTR>(wsTabname.c_str());
-
-				
-
-				if ( ptTab->InsertItem( 0, &tciItem, htTab.phecWidget ) == -1 ) {
-					delete htTab.phecWidget;
-					delete htTab.pheiInterface;
-					return;
-				}
-
-				htTab.phecWidget->SetStream( htTab.pheiInterface );
-
-				LSW_RECT rInternalSize = ptTab->WindowRect().ScreenToClient( ptTab->Wnd() );
-				ptTab->AdjustRect( FALSE, &rInternalSize );
-				::MoveWindow( htTab.phecWidget->Wnd(), rInternalSize.left, rInternalSize.top, rInternalSize.Width(), rInternalSize.Height(), TRUE );
+			CHexEditorInterface * pheiInterface = new( std::nothrow ) CHexEditorFile();
+			if ( !pheiInterface || !static_cast<CHexEditorFile*>(pheiInterface)->SetFile( _pPath ) ) {
+				delete pheiInterface;
+				return;
 			}
+
+			AddTab( pheiInterface, wsTabname );
 		}
-		catch ( ... ) {
-			delete htTab.phecWidget;
-			delete htTab.pheiInterface;
+		catch ( ... ) {}
+	}
+
+	// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
+	bool CDeusHexMachinaWindow::OpenProcess() {
+		MX_OPTIONS oOptions = m_pmhMemHack->Options();
+		oOptions.pmhMemHackObj = m_pmhMemHack;
+		DWORD dwId = COpenProcessLayout::CreateOpenProcessDialog( this, &oOptions );
+		if ( dwId != DWINVALID ) {
+			// CProcess::MX_OPM_FIXED
+			//
+			// PROCESS_CREATE_THREAD: CreateThread()
+			// PROCESS_DUP_HANDLE: DuplicateHandle()
+			// PROCESS_VM_READ: ReadProcessMemory()
+			// PROCESS_VM_WRITE: WriteProcessMemory()
+			// PROCESS_VM_OPERATION: VirtualProtectEx(), WriteProcessMemory()
+			// PROCESS_QUERY_INFORMATION: OpenProcessToken(), GetProcessMemoryInfo(), GetExitCodeProcess(), GetPriorityClass(), IsProcessInJob(), QueryFullProcessImageNameW()
+			// PROCESS_QUERY_LIMITED_INFORMATION: GetProcessMemoryInfo(), GetExitCodeProcess(), GetPriorityClass(), IsProcessInJob(), QueryFullProcessImageNameW()
+			// PROCESS_SUSPEND_RESUME: NtSuspendProcess(), NtResumeProcess()
+			// PROCESS_TERMINATE: TerminateProcess()
+			// SYNCHRONIZE: SignalObjectAndWait(), WaitForSingleObject(), WaitForSingleObjectEx(), WaitForMultipleObjects(), WaitForMultipleObjectsEx(), MsgWaitForMultipleObjects(), MsgWaitForMultipleObjectsEx(), etc.
+
+			try {
+				CHexEditorInterface * pheiInterface = new( std::nothrow ) CHexEditorProcess();
+				if ( !pheiInterface /*|| !static_cast<CHexEditorProcess*>(pheiInterface)->SetFile( _pPath )*/ ) {
+					return false;
+				}
+
+				DWORD dwAttempts[] = {
+					PROCESS_CREATE_THREAD |											// The full range of what we might want to do.
+						PROCESS_VM_READ | PROCESS_VM_WRITE |
+						PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION |
+						PROCESS_SUSPEND_RESUME,
+					PROCESS_CREATE_THREAD |											// Maybe we can live without suspending the process.
+						PROCESS_VM_READ | PROCESS_VM_WRITE |
+						PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION,
+
+					PROCESS_QUERY_INFORMATION,										// The bare minimum.
+					/*PROCESS_CREATE_THREAD |											// Maybe we can live without suspending the process.
+						PROCESS_VM_READ | PROCESS_VM_WRITE |
+						PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION,*/
+				};
+				for ( size_t I = 0; I < MX_ELEMENTS( dwAttempts ); ++I ) {
+					if ( static_cast<CHexEditorProcess *>(pheiInterface)->SetProcess( dwId, CProcess::MX_OPM_FIXED, dwAttempts[I] ) ) {
+						break;
+					}
+				}
+				if ( !static_cast<CHexEditorProcess *>(pheiInterface)->Process().ProcIsOpened() ) {
+					delete pheiInterface;
+					return false;
+				}
+				auto swsPath = static_cast<CHexEditorProcess *>(pheiInterface)->Process().QueryProcessImageName();
+				auto wsTabname = std::filesystem::path( swsPath.c_str() ).filename().generic_wstring();
+
+				AddTab( pheiInterface, wsTabname );
+			}
+			catch ( ... ) {}
 		}
+		return false;
 	}
 
 	// Closes the active tab.
@@ -1602,6 +1592,90 @@ namespace mx {
 		phecControl->SetFontSize( CHexEditorControl::DefaultPointSize() );
 
 		RecalcAllBut( phecControl );
+	}
+
+	// Adds a tab.
+	bool CDeusHexMachinaWindow::AddTab( CHexEditorInterface * _pheiInterface, const std::wstring &_wsName ) {
+		MX_HEX_TAB htTab;
+		htTab.pheiInterface = _pheiInterface;
+		try {
+			auto ptTab = Tab();
+			if ( ptTab ) {
+				CHexEditorControl::PrepareControl();
+				
+
+				CSecureString sLeftSizeExp;
+				mx::CStringDecoder::Decode( _T_2762F803_____P__VCL, _LEN_2762F803, sLeftSizeExp );
+				CSecureString sRightSizeExp;
+				mx::CStringDecoder::Decode( _T_DD6DC560_____P__VCR, _LEN_DD6DC560, sRightSizeExp );
+				CSecureString sTopSizeExp;
+				mx::CStringDecoder::Decode( _T_340E6055_____P__VCT, _LEN_340E6055, sTopSizeExp );
+				CSecureString sBottomSizeExp;
+				mx::CStringDecoder::Decode( _T_C0DAD504_____P__VCB, _LEN_C0DAD504, sBottomSizeExp );
+				LSW_WIDGET_LAYOUT wlLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->FixLayout( LSW_WIDGET_LAYOUT{
+					MX_HEX_CONTROL,									// ltType
+					static_cast<WORD>(Layout::MX_W_TAB_START + ptTab->GetItemCount()),	// wId
+					nullptr,										// lpwcClass
+					TRUE,											// bEnabled
+					TRUE,											// bActive
+					0,												// iLeft
+					0,												// iTop
+					0,												// dwWidth
+					0,												// dwHeight
+					WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP,		// dwStyle
+					0,												// dwStyleEx
+					nullptr,										// pwcText
+					0,												// sTextLen
+					static_cast<DWORD>(ptTab->Id()),				// dwParentId
+
+					sLeftSizeExp.c_str(), 0,						// pcLeftSizeExp
+					sRightSizeExp.c_str(), 0,						// pcRightSizeExp
+					sTopSizeExp.c_str(), 0,							// pcTopSizeExp
+					sBottomSizeExp.c_str(), 0,						// pcBottomSizeExp
+					nullptr, 0,										// pcWidthSizeExp
+					nullptr, 0,										// pcHeightSizeExp
+				} );
+				CHexEditorControl::MX_CREATION_PARMS cpCreation;
+				cpCreation.psOptions = m_sOptions;
+				cpCreation.pfsFixedRowFont = &m_fsFixedRowFont;
+				cpCreation.pfsDynamicRowFont = &m_fsTextViewFont;
+				cpCreation.phecFg = &m_hecFgColors;
+				cpCreation.phecBg = &m_hecBgColors;
+				htTab.phecWidget = static_cast<CHexEditorControl *>(static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager())->CreateWidget( wlLayout, ptTab, TRUE, NULL, reinterpret_cast<uint64_t>(&cpCreation) ));
+				if ( !htTab.phecWidget ) {
+					//delete tTab.ppoPeObject;
+					return false;
+				}
+				htTab.phecWidget->InitControl( htTab.phecWidget->Wnd() );
+
+				m_vTabs.insert( m_vTabs.begin(), htTab );
+
+				
+				TCITEMW tciItem = { 0 };
+				tciItem.mask = TCIF_TEXT;
+				tciItem.pszText = const_cast<LPWSTR>(_wsName.c_str());
+
+				
+
+				if ( ptTab->InsertItem( 0, &tciItem, htTab.phecWidget ) == -1 ) {
+					delete htTab.phecWidget;
+					delete htTab.pheiInterface;
+					return false;
+				}
+
+				htTab.phecWidget->SetStream( htTab.pheiInterface );
+
+				LSW_RECT rInternalSize = ptTab->WindowRect().ScreenToClient( ptTab->Wnd() );
+				ptTab->AdjustRect( FALSE, &rInternalSize );
+				::MoveWindow( htTab.phecWidget->Wnd(), rInternalSize.left, rInternalSize.top, rInternalSize.Width(), rInternalSize.Height(), TRUE );
+				return true;
+			}
+		}
+		catch ( ... ) {
+			delete htTab.phecWidget;
+			delete htTab.pheiInterface;
+		}
+		return false;
 	}
 
 }	// namespace mx

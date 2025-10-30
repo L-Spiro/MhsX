@@ -210,6 +210,9 @@ namespace mx {
 		// Performs an Open operation.
 		void										Open( const std::filesystem::path &_pPath );
 
+		// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
+		bool										OpenProcess();
+
 		// Closes the active tab.
 		void										CloseTab();
 
@@ -228,6 +231,8 @@ namespace mx {
 		// Sets the font size back to normal.
 		void										ResetFontSize();
 
+		// Adds a tab.
+		bool										AddTab( CHexEditorInterface * _pheiInterface, const std::wstring &_wsName );
 
 	private :
 		typedef CDeusHexMachinaLayout				Layout;

@@ -8,6 +8,7 @@
 #include <string>
 #include <TlHelp32.h>
 #include <vector>
+//#include <winternl.h>
 
 // == Macros.
 #ifndef MX_COUNT_OF
@@ -15,7 +16,7 @@
 #define MX_ELEMENTS( x )				MX_COUNT_OF( x )
 #endif	// #ifndef MX_COUNT_OF
 
-#define MX_CHECK_FLAGS_EQ( L, R )		(((L) & (R)) == (L))
+#define MX_CHECK_FLAGS_EQ( L, R )		(((L) & (R)) == (R))
 
 #define MX_PTR2UINT( X )				static_cast<uint64_t>(reinterpret_cast<uintptr_t>(X))
 
@@ -100,6 +101,24 @@ typedef struct _FILE_ACCESS_INFORMATION {
 } FILE_ACCESS_INFORMATION;
 
 typedef NTSTATUS (NTAPI * LPFN_NTQUERYINFORMATIONFILE)( HANDLE, PIO_STATUS_BLOCK, PVOID, ULONG, FILE_INFORMATION_CLASS );
+
+typedef enum _PROCESSINFOCLASS {
+    ProcessBasicInformation = 0,
+    ProcessDebugPort = 7,
+    ProcessWow64Information = 26,
+    ProcessImageFileName = 27,
+    ProcessBreakOnTermination = 29
+} PROCESSINFOCLASS;
+
+typedef struct _PROCESS_BASIC_INFORMATION_LOCAL {
+    PVOID  Reserved1;
+    PVOID  PebBaseAddress;
+    PVOID  Reserved2[2];
+    ULONG_PTR UniqueProcessId;
+    PVOID  Reserved3;
+} PROCESS_BASIC_INFORMATION_LOCAL;
+
+typedef NTSTATUS (NTAPI * LPFN_NTQUERYINFORMATIONPROCESS)( HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG );
 
 
 
@@ -392,6 +411,9 @@ namespace mx {
 		// NtQueryInformationFile.
 		static NTSTATUS NTAPI			NtQueryInformationFile( HANDLE _hFileHandle, PIO_STATUS_BLOCK _sbIoStatusBlock, PVOID _pvFileInformation, ULONG _ulLength, FILE_INFORMATION_CLASS _ficFileInformationClass );
 
+		// NtQueryInformationFile.
+		static NTSTATUS NTAPI			NtQueryInformationProcess( HANDLE _hProcessHandle, PROCESSINFOCLASS _picProcessInformationClass, PVOID _pvProcessInformation, ULONG _ulProcessInformationLength, PULONG _pulReturnLength );
+
 
 
 		// Determines if the given address is out of the native range of this process.
@@ -585,6 +607,10 @@ namespace mx {
 		// NtQueryInformationFile().
 		static LPFN_NTQUERYINFORMATIONFILE
 										m_pfNtQueryInformationFile;
+
+		// NtQueryInformationProcess().
+		static LPFN_NTQUERYINFORMATIONPROCESS
+										m_pfNtQueryInformationProcess;
 
 
 		// == Functions.

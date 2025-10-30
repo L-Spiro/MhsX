@@ -9,10 +9,10 @@ namespace mx {
 	// == Types.
 	/** Mini-map immutable inputs per frame. */
 	struct MX_MINIMAP_INPUTS {
-		uint64_t								ui64TotalBytes;					/**< Total file size in bytes. */
-		uint32_t								ui32BytesPerRow;				/**< CurStyle()->uiBytesPerRow. */
-		uint64_t								ui64FirstVisibleLine;			/**< m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine. */
-		int32_t									i32PageLines;					/**< m_sdScrollView[m_eaEditAs].i32PageLines (>=1). */
+		//uint64_t								ui64TotalBytes;					/**< Total file size in bytes. */
+		//uint32_t								ui32BytesPerRow;				/**< CurStyle()->uiBytesPerRow. */
+		//uint64_t								ui64FirstVisibleLine;			/**< m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine. */
+		//int32_t									i32PageLines;					/**< m_sdScrollView[m_eaEditAs].i32PageLines (>=1). */
 		//uint32_t								ui32ScreenSize;					/**< Screen height. */
 		// Widget geometry (device/screen pixels).
 		int32_t									i32X;
@@ -49,8 +49,8 @@ namespace mx {
 
 		
 
-		static COLORREF								m_crRainbow[16*16];			/**< Rainbow color scheme. */
-		static COLORREF								m_crAscii[16*16];			/**< ASCII color scheme. */
+		static const COLORREF						m_crRainbow[16*16];			/**< Rainbow color scheme. */
+		static const COLORREF						m_crAscii[16*16];			/**< ASCII color scheme. */
 	};
 
 }	//namespace mx

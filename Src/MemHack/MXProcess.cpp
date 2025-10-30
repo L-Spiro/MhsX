@@ -80,8 +80,6 @@ namespace mx {
 		return true;
 	}
 
-	
-
 	// Reads data from an area of memory in the current process. The entire area to be read must be accessible or the operation fails.
 	// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
 	bool CProcess::ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead ) const {
@@ -289,14 +287,14 @@ namespace mx {
 	}
 
 	// Retrieves information about a range of pages within the virtual address space of a specified process.
-	bool CProcess::VirtualQueryEx( uint64_t _lpAddress, PMEMORY_BASIC_INFORMATION64 _lpBuffer ) {
+	bool CProcess::VirtualQueryEx( uint64_t _lpAddress, PMEMORY_BASIC_INFORMATION64 _lpBuffer ) const {
 		LSW_ENT_CRIT( m_csCrit );
 		if ( !ProcIsOpened() ) { return false; }
 		if ( !VirtualQueryExInternal( _lpAddress, _lpBuffer ) ) {
 			if ( m_opmMode == CProcess::MX_OPM_CONSERVATIVE ) {
 				// Add (PROCESS_QUERY_INFORMATION) and try again.
 				if ( !MX_CHECK_FLAGS_EQ( m_dwOpenProcFlags, PROCESS_QUERY_INFORMATION ) ) {
-					if ( OpenProcInternal( m_dwId, m_dwOpenProcFlags | (PROCESS_QUERY_INFORMATION) ) ) {
+					if ( const_cast<CProcess *>(this)->OpenProcInternal( m_dwId, m_dwOpenProcFlags | (PROCESS_QUERY_INFORMATION) ) ) {
 						// Try again.
 						return VirtualQueryExInternal( _lpAddress, _lpBuffer ) != 0;
 					}
@@ -383,6 +381,150 @@ namespace mx {
 		m_uiptrDetatchParm2 = _uiptrParm2;
 	}
 
+	/**
+	 * \brief Returns true if the page containing the address is committed and readable (not GUARD/NOACCESS).
+	 *
+	 * \param _ui64Addr Address to test.
+	 * \return true if the page looks readable by protection flags; false otherwise.
+	 *
+	 * \note This is a best-effort check. Protections can change between the query and use.
+	 */
+	bool CProcess::IsReadableByQuery( uint64_t _ui64Addr ) const {
+		LSW_ENT_CRIT( m_csCrit );
+		if MX_UNLIKELY( !ProcIsOpened() || !_ui64Addr ) { return false; }
+
+		uint64_t ui64Page = _ui64Addr / CSystem::GetSystemInfo().dwPageSize * CSystem::GetSystemInfo().dwPageSize;
+		if ( ui64Page == m_ui64LastIsReadablePage ) { return m_bLastIsReadableResult; }
+
+		m_ui64LastIsReadablePage = ui64Page;
+		m_bLastIsReadableResult = false;
+
+		MEMORY_BASIC_INFORMATION64 mbiInfo{};
+		if ( !VirtualQueryEx( _ui64Addr, &mbiInfo ) ) { return false; }
+		if ( mbiInfo.State != MEM_COMMIT ) { return false; }
+
+		const DWORD dwProt = mbiInfo.Protect;
+		if ( (dwProt & (PAGE_GUARD | PAGE_NOACCESS)) ) { return false; }
+
+		const DWORD dwCoreProt = (dwProt & ~(PAGE_GUARD | PAGE_NOCACHE | PAGE_WRITECOMBINE));
+		switch ( dwCoreProt ) {
+			case PAGE_READONLY : {}				MX_FALLTHROUGH
+			case PAGE_READWRITE : {}			MX_FALLTHROUGH
+			case PAGE_WRITECOPY : {}			MX_FALLTHROUGH
+			case PAGE_EXECUTE_READ : {}			MX_FALLTHROUGH
+			case PAGE_EXECUTE_READWRITE : {}	MX_FALLTHROUGH
+			case PAGE_EXECUTE_WRITECOPY : {
+				m_bLastIsReadableResult = true;
+				return true;
+			}
+			default : { return false; }
+		}
+	}
+
+	/**
+	 * \brief Probes a single remote address by reading 1 byte.
+	 *
+	 * \param _ui64Addr Remote virtual address to test.
+	 * \return true if a 1-byte read succeeds; false otherwise.
+	 *
+	 * \note Use a 64-bit build for 64-bit targets to avoid address truncation.
+	 */
+	bool CProcess::IsAddressReadable( uint64_t _ui64Addr ) const {
+		LSW_ENT_CRIT( m_csCrit );
+		if MX_UNLIKELY( !ProcIsOpened() || !_ui64Addr ) { return false; }
+
+		uint64_t ui64Page = _ui64Addr / CSystem::GetSystemInfo().dwPageSize * CSystem::GetSystemInfo().dwPageSize;
+		if ( ui64Page == m_ui64LastIsReadablePage ) { return m_bLastIsReadableResult; }
+
+		m_ui64LastIsReadablePage = ui64Page;
+
+		BYTE bByte;
+		SIZE_T stRead = 0;
+		m_bLastIsReadableResult = (ReadProcessMemory( _ui64Addr, &bByte, sizeof( bByte ), &stRead ) != FALSE) && (stRead == sizeof( bByte ));
+		return m_bLastIsReadableResult;
+	}
+
+	/**
+	 * \brief Returns true if the page containing the address is committed and executable.
+	 *
+	 * \param _ui64Addr Remote virtual address to test (single pointer).
+	 * \return true if the page is MEM_COMMIT and executable; false otherwise.
+	 *
+	 * \note When State != MEM_COMMIT, Protect/Type are undefined and must be ignored.
+	 * \note Control Flow Guard (CFG) may still block indirect calls/jumps even on executable pages.
+	 */
+	bool CProcess::IsExecutableByQuery( uint64_t _ui64Addr ) const {
+		LSW_ENT_CRIT( m_csCrit );
+		if MX_UNLIKELY( !ProcIsOpened() || !_ui64Addr ) { return false; }
+
+		uint64_t ui64Page = _ui64Addr / CSystem::GetSystemInfo().dwPageSize * CSystem::GetSystemInfo().dwPageSize;
+		if ( ui64Page == m_ui64LastIsExecuteablePage ) { return m_bLastIsExecuteableResult; }
+
+		m_ui64LastIsExecuteablePage = ui64Page;
+		m_bLastIsExecuteableResult = false;
+
+		MEMORY_BASIC_INFORMATION64 mbiInfo{};
+		SIZE_T sSize = VirtualQueryEx( _ui64Addr, &mbiInfo );
+		if ( !sSize ) { return false; }
+
+		if ( mbiInfo.State != MEM_COMMIT ) { return false; }
+		if ( mbiInfo.Protect & PAGE_GUARD ) { return false; }
+		if ( mbiInfo.Protect & PAGE_NOACCESS ) { return false; }
+
+		m_bLastIsExecuteableResult = ProtIsExecutable( mbiInfo.Protect );
+		return m_bLastIsExecuteableResult;
+	}
+
+	/**
+	 * \brief Reads the image base from the target's PEB (robust path).
+	 *
+	 * \param _hProc Handle to target process opened with PROCESS_QUERY_INFORMATION (or PROCESS_QUERY_LIMITED_INFORMATION) | PROCESS_VM_READ.
+	 * \return Base address of the main module on success; nullptr on failure.
+	 *
+	 * \note Same-bitness path. For cross-bitness (32-bit tool Å® 64-bit target), use the WOW64
+	 *       variants (NtWow64QueryInformationProcess64 + NtWow64ReadVirtualMemory64) or build x64.
+	 */
+	uint64_t CProcess::GetMainModuleBase_PEB() const {
+		LSW_ENT_CRIT( m_csCrit );
+		if MX_UNLIKELY( !ProcIsOpened() ) { return false; }
+
+		PROCESS_BASIC_INFORMATION_LOCAL pbilInfo{};
+		NTSTATUS stStatus = CSystem::NtQueryInformationProcess( m_hProcHandle.hHandle, ProcessBasicInformation, &pbilInfo, sizeof( pbilInfo ), nullptr );
+		if ( stStatus < 0 || !pbilInfo.PebBaseAddress ) { return 0; }
+
+		// The ImageBaseAddress is at PEB + offset 0x10 on both x86/x64, but we read it generically.
+		// Define a tiny struct with just enough layout to reach ImageBaseAddress.
+		struct PEB_MIN {
+			BYTE        Reserved[0x10];
+			PVOID       ImageBaseAddress;
+		} pebMin;
+
+		SIZE_T stRead = 0;
+		if ( !ReadProcessMemory( static_cast<uint64_t>(reinterpret_cast<uintptr_t>(pbilInfo.PebBaseAddress)), &pebMin, sizeof( pebMin ), &stRead ) || stRead < sizeof( pebMin ) ) { return 0; }
+		return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(pebMin.ImageBaseAddress));
+	}
+
+	/**
+	 * \brief Gets the base address of the main module using ToolHelp (easy path).
+	 *
+	 * \param _dwPid Target process ID.
+	 * \return Base address of the main module on success; nullptr on failure.
+	 *
+	 * \note Works when caller and target have compatible bitness (x64Å®x64 or x86Å®x86).
+	 *       A 32-bit caller cannot enumerate 64-bit modules of a 64-bit target.
+	 */
+	uint64_t CProcess::GetMainModuleBase_Toolhelp( DWORD _dwPid ) {
+		LSW_HANDLE hSnap = CSystem::CreateToolhelp32Snapshot( TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, _dwPid );
+		if ( !hSnap.Valid() ) { return 0; }
+
+		MODULEENTRY32W meEntry{};
+		meEntry.dwSize = sizeof( meEntry );
+		if ( CSystem::Module32FirstW( hSnap.hHandle, &meEntry ) ) {
+			return reinterpret_cast<uint64_t>(meEntry.modBaseAddr);	// First module is the main module.
+		}
+		return 0;
+	}
+
 	// Internal open process.
 	bool CProcess::OpenProcInternal( DWORD _dwId, DWORD _dwFlags ) {
 		LSW_ENT_CRIT( m_csCrit );
@@ -430,7 +572,7 @@ namespace mx {
 	}
 
 	// Retrieves information about a range of pages within the virtual address space of a specified process.
-	size_t CProcess::VirtualQueryExInternal( uint64_t _lpAddress, PMEMORY_BASIC_INFORMATION64 _lpBuffer ) {
+	size_t CProcess::VirtualQueryExInternal( uint64_t _lpAddress, PMEMORY_BASIC_INFORMATION64 _lpBuffer ) const {
 		if ( !_lpBuffer ) { return 0; }
 
 		// Detect a range that can't be accessed with the Win32 API:

@@ -61,8 +61,22 @@ namespace mx {
 			MX_DF_HEX,								// "00 FF 2A"
 			MX_DF_DEC,								// "000 255 042"
 			MX_DF_OCT,								// "000 377 052"
-			MX_DF_BIN,								// Optional: "00000000"
-			MX_DF_CHAR								// Textual: printable byte or '.'
+			MX_DF_BIN,								// "00000000"
+			MX_DF_CHAR,								// Textual: printable byte or '.'
+			MX_DF_UINT8,							// "  0 255  42"
+			MX_DF_INT8,								// "  0  -1  42"
+			MX_DF_UINT16,							// "    0 65535    42"
+			MX_DF_INT16,							// "    0    -1    42"
+			MX_DF_UINT32,							// "         0 4294967295         42"
+			MX_DF_INT32,							// "         0         -1         42"
+			MX_DF_UINT64,							// "                   0 18446744073709551615                   42"
+			MX_DF_INT64,							// "                   0                   -1                   42"
+			MX_DF_FLOAT10,							// "0 3.125 -42"
+			MX_DF_FLOAT11,							// "0 3.125 -42"
+			MX_DF_BFLOAT16,							// "0 3.141 -42"
+			MX_DF_FLOAT16,							// "0 3.1406 -42"
+			MX_DF_FLOAT32,							// "0 3.1415925 -42"
+			MX_DF_FLOAT64,							// "0 3.1415926535897931 -42"
 		};
 
 
@@ -361,6 +375,9 @@ namespace mx {
 
 		// Gets pointer highlighing.
 		inline bool									GetHighlightingPointers() const { return CurStyle()->bHighlightPointers; }
+		
+		// Goes to a given address.
+		void										GoTo( uint64_t _ui64Addr, bool _bShowAtTop = false );
 
 		// WM_NCDESTROY.
 		virtual LSW_HANDLED							NcDestroy();
@@ -511,11 +528,10 @@ namespace mx {
 		}
 
 		// Sets the target stream.
-		inline void									SetStream( CHexEditorInterface * _pediStream ) { m_pheiTarget = _pediStream; RecalcAndInvalidate(); }
+		void										SetStream( CHexEditorInterface * _pediStream );
 
 		// Gets the size of the handled data.
 		inline uint64_t								Size() const { return m_pheiTarget ? m_pheiTarget->Size() : 0; }
-		
 
 		// Updates font and other render settings and invalidates the control for redrawing.
 		void										RecalcAndInvalidate() {

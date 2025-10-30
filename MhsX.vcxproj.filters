@@ -613,6 +613,9 @@
     <ClCompile Include="Src\HexEditor\MXMiniMap.cpp">
       <Filter>Source Files\HexEditor</Filter>
     </ClCompile>
+    <ClCompile Include="Src\HexEditor\MXHexEditorProcess.cpp">
+      <Filter>Source Files\HexEditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -972,6 +975,9 @@
       <Filter>Header Files\HexEditor</Filter>
     </ClInclude>
     <ClInclude Include="Src\HexEditor\MXMiniMap.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXHexEditorProcess.h">
       <Filter>Header Files\HexEditor</Filter>
     </ClInclude>
   </ItemGroup>
