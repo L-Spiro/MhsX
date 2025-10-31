@@ -127,6 +127,42 @@ namespace mx {
 			return static_cast<CTab *>(FindChild( Layout::MX_W_TABS ));
 		}
 
+		// Performs a Save As operation.
+		void										SaveAs();
+
+		// Performs a Save operation.
+		void										Save();
+
+		// Performs an Open operation.
+		void										Open();
+
+		// Performs an Open operation.
+		void										Open( const std::filesystem::path &_pPath );
+
+		// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
+		bool										OpenProcess();
+
+		// Handles opening the current process (opens the Open Process dialog if necessary) (returns true if a process was actually opened).
+		bool										OpenCurProcess( uint64_t _ui64StartAddress = 0 ) {}
+
+		// Closes the active tab.
+		void										CloseTab();
+
+		// Close all tabs.
+		void										CloseAllTabs();
+
+		// Enlarge font.
+		void										EnlargeFont();
+
+		// Ensmall font.
+		void										EnsmallFont();
+
+		// Reset font.
+		void										ResetFont();
+
+		// Sets the font size back to normal.
+		void										ResetFontSize();
+
 		/**
 		 * Gets the widget type identifier.
 		 * \brief Returns one of LSW_LT_* constants.
@@ -197,39 +233,6 @@ namespace mx {
 		
 		// Recalc all but the given control.
 		void										RecalcAllBut( const CHexEditorControl * _phecSkipMe );
-
-		// Performs a Save As operation.
-		void										SaveAs();
-
-		// Performs a Save operation.
-		void										Save();
-
-		// Performs an Open operation.
-		void										Open();
-
-		// Performs an Open operation.
-		void										Open( const std::filesystem::path &_pPath );
-
-		// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
-		bool										OpenProcess();
-
-		// Closes the active tab.
-		void										CloseTab();
-
-		// Close all tabs.
-		void										CloseAllTabs();
-
-		// Enlarge font.
-		void										EnlargeFont();
-
-		// Ensmall font.
-		void										EnsmallFont();
-
-		// Reset font.
-		void										ResetFont();
-
-		// Sets the font size back to normal.
-		void										ResetFontSize();
 
 		// Adds a tab.
 		bool										AddTab( CHexEditorInterface * _pheiInterface, const std::wstring &_wsName );
