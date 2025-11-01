@@ -900,6 +900,194 @@ namespace mx {
 		}
 	}
 
+	// Performs a Save As operation.
+	void CDeusHexMachinaWindow::SaveAs() {
+	}
+
+	// Performs a Save operation.
+	void CDeusHexMachinaWindow::Save() {
+	}
+
+	// Performs an Open operation.
+	void CDeusHexMachinaWindow::Open() {
+		if ( m_pmhMemHack ) {
+			try {
+				OPENFILENAMEW ofnOpenFile = { sizeof( ofnOpenFile ) };
+				CSecureWString szFileName;
+				szFileName.resize( 0xFFFF + 2 );
+
+				CSecureWString wsFilter = _DEC_WS_6331FDE9_All_Files_______0____0;
+				ofnOpenFile.hwndOwner = Wnd();
+				ofnOpenFile.lpstrFilter = wsFilter.c_str();
+				ofnOpenFile.lpstrFile = szFileName.data();
+				ofnOpenFile.nMaxFile = DWORD( szFileName.size() );
+				ofnOpenFile.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST;
+				ofnOpenFile.lpstrInitialDir = m_pmhMemHack->Options().heHexEditorOptions.wsLastOpenFileDirectory.c_str();
+
+				if ( ::GetOpenFileNameW( &ofnOpenFile ) ) {
+					auto oOptions = m_pmhMemHack->Options();
+					oOptions.heHexEditorOptions.wsLastOpenFileDirectory = std::filesystem::path( ofnOpenFile.lpstrFile ).remove_filename().generic_wstring();
+						
+						
+					auto pPath = std::filesystem::path( ofnOpenFile.lpstrFile );
+					Open( pPath );
+					//std::vector<CFoundAddressBase *> vAdded;
+					//auto famMan = m_pmhMemHack->FoundAddressManager();
+					//if ( !famMan->LoadSettings( pPath, ::_wcsicmp( pPath.extension().c_str(), L".json" ) == 0, MemHack(), vAdded ) ) {
+					//	// Show error.
+					//}
+					//else {
+					//	// Add them to the listview.
+					//	for ( size_t I = 0; I < vAdded.size(); ++I ) {
+					//		if ( !CUtilities::AddFoundAddressToTreeListView( ptTab, vAdded[I], nullptr ) ) {
+					//			// If it couldn't be added to the tree then it can't be addressed.
+					//			famMan->Delete( vAdded[I]->Id() );
+					//		}
+					//	}
+					//}
+					m_pmhMemHack->SetOptions( oOptions );
+				}
+			}
+			catch ( ... ) {}
+		}
+	}
+
+	// Performs an Open operation.
+	void CDeusHexMachinaWindow::Open( const std::filesystem::path &_pPath ) {
+		try {
+			auto wsTabname = _pPath.filename().generic_wstring();
+
+			CHexEditorInterface * pheiInterface = new( std::nothrow ) CHexEditorFile();
+			if ( !pheiInterface || !static_cast<CHexEditorFile*>(pheiInterface)->SetFile( _pPath ) ) {
+				delete pheiInterface;
+				return;
+			}
+
+			AddTab( pheiInterface, wsTabname );
+		}
+		catch ( ... ) {}
+	}
+
+	// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
+	bool CDeusHexMachinaWindow::OpenProcess() {
+		MX_OPTIONS oOptions = m_pmhMemHack->Options();
+		oOptions.pmhMemHackObj = m_pmhMemHack;
+		DWORD dwId = COpenProcessLayout::CreateOpenProcessDialog( this, &oOptions );
+		if ( dwId != DWINVALID ) {
+			// CProcess::MX_OPM_FIXED
+			//
+			// PROCESS_CREATE_THREAD: CreateThread()
+			// PROCESS_DUP_HANDLE: DuplicateHandle()
+			// PROCESS_VM_READ: ReadProcessMemory()
+			// PROCESS_VM_WRITE: WriteProcessMemory()
+			// PROCESS_VM_OPERATION: VirtualProtectEx(), WriteProcessMemory()
+			// PROCESS_QUERY_INFORMATION: OpenProcessToken(), GetProcessMemoryInfo(), GetExitCodeProcess(), GetPriorityClass(), IsProcessInJob(), QueryFullProcessImageNameW()
+			// PROCESS_QUERY_LIMITED_INFORMATION: GetProcessMemoryInfo(), GetExitCodeProcess(), GetPriorityClass(), IsProcessInJob(), QueryFullProcessImageNameW()
+			// PROCESS_SUSPEND_RESUME: NtSuspendProcess(), NtResumeProcess()
+			// PROCESS_TERMINATE: TerminateProcess()
+			// SYNCHRONIZE: SignalObjectAndWait(), WaitForSingleObject(), WaitForSingleObjectEx(), WaitForMultipleObjects(), WaitForMultipleObjectsEx(), MsgWaitForMultipleObjects(), MsgWaitForMultipleObjectsEx(), etc.
+
+			try {
+				CHexEditorInterface * pheiInterface = new( std::nothrow ) CHexEditorProcess();
+				if ( !pheiInterface /*|| !static_cast<CHexEditorProcess*>(pheiInterface)->SetFile( _pPath )*/ ) {
+					return false;
+				}
+
+				DWORD dwAttempts[] = {
+					PROCESS_CREATE_THREAD |											// The full range of what we might want to do.
+						PROCESS_VM_READ | PROCESS_VM_WRITE |
+						PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION |
+						PROCESS_SUSPEND_RESUME,
+					PROCESS_CREATE_THREAD |											// Maybe we can live without suspending the process.
+						PROCESS_VM_READ | PROCESS_VM_WRITE |
+						PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION,
+
+					PROCESS_QUERY_INFORMATION,										// The bare minimum.
+					/*PROCESS_CREATE_THREAD |											// Maybe we can live without suspending the process.
+						PROCESS_VM_READ | PROCESS_VM_WRITE |
+						PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION,*/
+				};
+				for ( size_t I = 0; I < MX_ELEMENTS( dwAttempts ); ++I ) {
+					if ( static_cast<CHexEditorProcess *>(pheiInterface)->SetProcess( dwId, CProcess::MX_OPM_FIXED, dwAttempts[I] ) ) {
+						break;
+					}
+				}
+				if ( !static_cast<CHexEditorProcess *>(pheiInterface)->Process().ProcIsOpened() ) {
+					delete pheiInterface;
+					return false;
+				}
+				auto swsPath = static_cast<CHexEditorProcess *>(pheiInterface)->Process().QueryProcessImageName();
+				auto wsTabname = std::filesystem::path( swsPath.c_str() ).filename().generic_wstring();
+
+				AddTab( pheiInterface, wsTabname );
+			}
+			catch ( ... ) {}
+		}
+		return false;
+	}
+
+	// Closes the active tab.
+	void CDeusHexMachinaWindow::CloseTab() {
+		auto ptTab = Tab();
+		if ( !ptTab ) { return; }
+		size_t sIdx = size_t( ptTab->GetCurSel() );
+		if ( sIdx >= m_vTabs.size() ) { return; }
+		//m_vTabs[sIdx].phecWidget->
+		ptTab->DeleteItem( int( sIdx ) );
+		delete m_vTabs[sIdx].pheiInterface;
+		m_vTabs.erase( m_vTabs.begin() + sIdx );
+	}
+
+	// Close all tabs.
+	void CDeusHexMachinaWindow::CloseAllTabs() {
+		while ( m_vTabs.size() ) {
+			CloseTab();
+		}
+	}
+
+	// Enlarge font.
+	void CDeusHexMachinaWindow::EnlargeFont() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		LOGFONTW lfFont;
+		phecControl->IncreaseFontSize( lfFont );
+
+		RecalcAllBut( phecControl );
+	}
+
+	// Ensmall font.
+	void CDeusHexMachinaWindow::EnsmallFont() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		LOGFONTW lfFont;
+		phecControl->DecreaseFontSize( lfFont );
+
+		RecalcAllBut( phecControl );
+	}
+
+	// Reset font.
+	void CDeusHexMachinaWindow::ResetFont() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+
+		CHexEditorControl::MX_FONT_SET * fsSet = phecControl->Font();
+		fsSet->i32PointSize = CHexEditorControl::DefaultPointSize();
+		CHexEditorControl::ChooseDefaultFont( (*fsSet), m_wDpiY, Wnd() );
+		CHexEditorControl::ComputeFontMetrics( (*fsSet), m_wDpiY, Wnd() );
+
+		RecalcAllBut( phecControl );
+	}
+
+	// Sets the font size back to normal.
+	void CDeusHexMachinaWindow::ResetFontSize() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+
+		phecControl->SetFontSize( CHexEditorControl::DefaultPointSize() );
+
+		RecalcAllBut( phecControl );
+	}
+
 	// Prepares to create the window.  Creates the atom if necessary.
 	void CDeusHexMachinaWindow::PrepareWindow() {
 		if ( !m_aAtom ) {
@@ -1404,194 +1592,6 @@ namespace mx {
 				m_vTabs[I].phecWidget->RecalcAndInvalidate();
 			}
 		}
-	}
-
-	// Performs a Save As operation.
-	void CDeusHexMachinaWindow::SaveAs() {
-	}
-
-	// Performs a Save operation.
-	void CDeusHexMachinaWindow::Save() {
-	}
-
-	// Performs an Open operation.
-	void CDeusHexMachinaWindow::Open() {
-		if ( m_pmhMemHack ) {
-			try {
-				OPENFILENAMEW ofnOpenFile = { sizeof( ofnOpenFile ) };
-				CSecureWString szFileName;
-				szFileName.resize( 0xFFFF + 2 );
-
-				CSecureWString wsFilter = _DEC_WS_6331FDE9_All_Files_______0____0;
-				ofnOpenFile.hwndOwner = Wnd();
-				ofnOpenFile.lpstrFilter = wsFilter.c_str();
-				ofnOpenFile.lpstrFile = szFileName.data();
-				ofnOpenFile.nMaxFile = DWORD( szFileName.size() );
-				ofnOpenFile.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST;
-				ofnOpenFile.lpstrInitialDir = m_pmhMemHack->Options().heHexEditorOptions.wsLastOpenFileDirectory.c_str();
-
-				if ( ::GetOpenFileNameW( &ofnOpenFile ) ) {
-					auto oOptions = m_pmhMemHack->Options();
-					oOptions.heHexEditorOptions.wsLastOpenFileDirectory = std::filesystem::path( ofnOpenFile.lpstrFile ).remove_filename().generic_wstring();
-						
-						
-					auto pPath = std::filesystem::path( ofnOpenFile.lpstrFile );
-					Open( pPath );
-					//std::vector<CFoundAddressBase *> vAdded;
-					//auto famMan = m_pmhMemHack->FoundAddressManager();
-					//if ( !famMan->LoadSettings( pPath, ::_wcsicmp( pPath.extension().c_str(), L".json" ) == 0, MemHack(), vAdded ) ) {
-					//	// Show error.
-					//}
-					//else {
-					//	// Add them to the listview.
-					//	for ( size_t I = 0; I < vAdded.size(); ++I ) {
-					//		if ( !CUtilities::AddFoundAddressToTreeListView( ptTab, vAdded[I], nullptr ) ) {
-					//			// If it couldn't be added to the tree then it can't be addressed.
-					//			famMan->Delete( vAdded[I]->Id() );
-					//		}
-					//	}
-					//}
-					m_pmhMemHack->SetOptions( oOptions );
-				}
-			}
-			catch ( ... ) {}
-		}
-	}
-
-	// Performs an Open operation.
-	void CDeusHexMachinaWindow::Open( const std::filesystem::path &_pPath ) {
-		try {
-			auto wsTabname = _pPath.filename().generic_wstring();
-
-			CHexEditorInterface * pheiInterface = new( std::nothrow ) CHexEditorFile();
-			if ( !pheiInterface || !static_cast<CHexEditorFile*>(pheiInterface)->SetFile( _pPath ) ) {
-				delete pheiInterface;
-				return;
-			}
-
-			AddTab( pheiInterface, wsTabname );
-		}
-		catch ( ... ) {}
-	}
-
-	// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
-	bool CDeusHexMachinaWindow::OpenProcess() {
-		MX_OPTIONS oOptions = m_pmhMemHack->Options();
-		oOptions.pmhMemHackObj = m_pmhMemHack;
-		DWORD dwId = COpenProcessLayout::CreateOpenProcessDialog( this, &oOptions );
-		if ( dwId != DWINVALID ) {
-			// CProcess::MX_OPM_FIXED
-			//
-			// PROCESS_CREATE_THREAD: CreateThread()
-			// PROCESS_DUP_HANDLE: DuplicateHandle()
-			// PROCESS_VM_READ: ReadProcessMemory()
-			// PROCESS_VM_WRITE: WriteProcessMemory()
-			// PROCESS_VM_OPERATION: VirtualProtectEx(), WriteProcessMemory()
-			// PROCESS_QUERY_INFORMATION: OpenProcessToken(), GetProcessMemoryInfo(), GetExitCodeProcess(), GetPriorityClass(), IsProcessInJob(), QueryFullProcessImageNameW()
-			// PROCESS_QUERY_LIMITED_INFORMATION: GetProcessMemoryInfo(), GetExitCodeProcess(), GetPriorityClass(), IsProcessInJob(), QueryFullProcessImageNameW()
-			// PROCESS_SUSPEND_RESUME: NtSuspendProcess(), NtResumeProcess()
-			// PROCESS_TERMINATE: TerminateProcess()
-			// SYNCHRONIZE: SignalObjectAndWait(), WaitForSingleObject(), WaitForSingleObjectEx(), WaitForMultipleObjects(), WaitForMultipleObjectsEx(), MsgWaitForMultipleObjects(), MsgWaitForMultipleObjectsEx(), etc.
-
-			try {
-				CHexEditorInterface * pheiInterface = new( std::nothrow ) CHexEditorProcess();
-				if ( !pheiInterface /*|| !static_cast<CHexEditorProcess*>(pheiInterface)->SetFile( _pPath )*/ ) {
-					return false;
-				}
-
-				DWORD dwAttempts[] = {
-					PROCESS_CREATE_THREAD |											// The full range of what we might want to do.
-						PROCESS_VM_READ | PROCESS_VM_WRITE |
-						PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION |
-						PROCESS_SUSPEND_RESUME,
-					PROCESS_CREATE_THREAD |											// Maybe we can live without suspending the process.
-						PROCESS_VM_READ | PROCESS_VM_WRITE |
-						PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION,
-
-					PROCESS_QUERY_INFORMATION,										// The bare minimum.
-					/*PROCESS_CREATE_THREAD |											// Maybe we can live without suspending the process.
-						PROCESS_VM_READ | PROCESS_VM_WRITE |
-						PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION,*/
-				};
-				for ( size_t I = 0; I < MX_ELEMENTS( dwAttempts ); ++I ) {
-					if ( static_cast<CHexEditorProcess *>(pheiInterface)->SetProcess( dwId, CProcess::MX_OPM_FIXED, dwAttempts[I] ) ) {
-						break;
-					}
-				}
-				if ( !static_cast<CHexEditorProcess *>(pheiInterface)->Process().ProcIsOpened() ) {
-					delete pheiInterface;
-					return false;
-				}
-				auto swsPath = static_cast<CHexEditorProcess *>(pheiInterface)->Process().QueryProcessImageName();
-				auto wsTabname = std::filesystem::path( swsPath.c_str() ).filename().generic_wstring();
-
-				AddTab( pheiInterface, wsTabname );
-			}
-			catch ( ... ) {}
-		}
-		return false;
-	}
-
-	// Closes the active tab.
-	void CDeusHexMachinaWindow::CloseTab() {
-		auto ptTab = Tab();
-		if ( !ptTab ) { return; }
-		size_t sIdx = size_t( ptTab->GetCurSel() );
-		if ( sIdx >= m_vTabs.size() ) { return; }
-		//m_vTabs[sIdx].phecWidget->
-		ptTab->DeleteItem( int( sIdx ) );
-		delete m_vTabs[sIdx].pheiInterface;
-		m_vTabs.erase( m_vTabs.begin() + sIdx );
-	}
-
-	// Close all tabs.
-	void CDeusHexMachinaWindow::CloseAllTabs() {
-		while ( m_vTabs.size() ) {
-			CloseTab();
-		}
-	}
-
-	// Enlarge font.
-	void CDeusHexMachinaWindow::EnlargeFont() {
-		auto phecControl = CurrentEditor();
-		if ( !phecControl ) { return; }
-		LOGFONTW lfFont;
-		phecControl->IncreaseFontSize( lfFont );
-
-		RecalcAllBut( phecControl );
-	}
-
-	// Ensmall font.
-	void CDeusHexMachinaWindow::EnsmallFont() {
-		auto phecControl = CurrentEditor();
-		if ( !phecControl ) { return; }
-		LOGFONTW lfFont;
-		phecControl->DecreaseFontSize( lfFont );
-
-		RecalcAllBut( phecControl );
-	}
-
-	// Reset font.
-	void CDeusHexMachinaWindow::ResetFont() {
-		auto phecControl = CurrentEditor();
-		if ( !phecControl ) { return; }
-
-		CHexEditorControl::MX_FONT_SET * fsSet = phecControl->Font();
-		fsSet->i32PointSize = CHexEditorControl::DefaultPointSize();
-		CHexEditorControl::ChooseDefaultFont( (*fsSet), m_wDpiY, Wnd() );
-		CHexEditorControl::ComputeFontMetrics( (*fsSet), m_wDpiY, Wnd() );
-
-		RecalcAllBut( phecControl );
-	}
-
-	// Sets the font size back to normal.
-	void CDeusHexMachinaWindow::ResetFontSize() {
-		auto phecControl = CurrentEditor();
-		if ( !phecControl ) { return; }
-
-		phecControl->SetFontSize( CHexEditorControl::DefaultPointSize() );
-
-		RecalcAllBut( phecControl );
 	}
 
 	// Adds a tab.
