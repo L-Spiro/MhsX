@@ -1016,6 +1016,7 @@
 "Has Not Changed"
 "Has Changed"
 "You must open a process before you can perform a search.\r\nOpen a process now?"
+"No process has been opened.\r\nOpen a process now?"
 "No Process Opened"
 "Searching…"
 "An error occurred during the search."

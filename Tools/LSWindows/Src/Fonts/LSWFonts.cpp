@@ -161,7 +161,7 @@ namespace lsw {
 
 		if ( (_dwType & TRUETYPE_FONTTYPE) != 0 ) {
 			(*(pCtx->pbIsTrueType)) = true;
-			return 0;	// stop early; scalable sizes will be used
+			return 0;	// Scalable sizes will be used.
 		}
 
 		if ( (_dwType & RASTER_FONTTYPE) != 0 ) {

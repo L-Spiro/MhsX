@@ -821,11 +821,212 @@ namespace mx {
 		static CSecureWString									MultiByteToWideChar( UINT _uiCodePage,
 			DWORD _dwFlags,
 			const std::string &_sString,
-			DWORD * _pdwLastError = nullptr
-		);
+			DWORD * _pdwLastError = nullptr ) { return MultiByteToWideChar( _uiCodePage, _dwFlags, _sString.c_str(), _sString.size(), _pdwLastError ); }
+
+		// Maps a character string to a UTF-16 (wide character) string. The character string is not necessarily from a multibyte character set.
+		static CSecureWString									MultiByteToWideChar( UINT _uiCodePage,
+			DWORD _dwFlags,
+			const char * _pcStr,
+			size_t _sLen,
+			DWORD * _pdwLastError = nullptr );
 
 		// Determines if _dwFlags must be 0 for a call to MultiByteToWideChar().
 		static bool												MultiByteWideChar_FlagsMustBe0( UINT _uiCodePage );
+
+		/**
+		 * \brief Determines the length (in bytes) of a single GB18030 character at the given pointer.
+		 *
+		 * 
+		 * This performs syntactic validation of GB18030 lead/trail byte ranges and returns how many bytes
+		 * the next character occupies: 1, 2, or 4. Returns 0 if the sequence is invalid or truncated.
+		 * Notes:
+		 *  - ASCII 0x00..0x7F are single-byte.
+		 *  - 0x80 is treated as a valid single-byte (Euro sign in GBK compatibility).
+		 *  - 2-byte form: lead 0x81..0xFE, trail 0x40..0xFE excluding 0x7F.
+		 *  - 4-byte form: b1 0x81..0xFE, b2 0x30..0x39, b3 0x81..0xFE, b4 0x30..0x39.
+		 *
+		 * \param _pui8Bytes Pointer to the first byte of the prospective GB18030 character.
+		 * \param _sAvail Number of bytes available starting at _pui8Bytes.
+		 * \return Returns 1, 2, or 4 for the character length; 0 if invalid or insufficient bytes.
+		 */
+		static inline size_t									Gb18030CharLen( const uint8_t * _pui8Bytes, size_t _sAvail ) {
+			if ( !_pui8Bytes || _sAvail == 0 ) { return 0; }
+
+			const uint8_t ui8B0 = _pui8Bytes[0];
+
+			// 1-byte: ASCII and 0x80.
+			if ( ui8B0 <= 0x7F || ui8B0 == 0x80 ) {
+				return 1;
+			}
+
+			// Multi-byte must start with 0x81..0xFE.
+			if ( !(ui8B0 >= 0x81 && ui8B0 <= 0xFE) ) { return 0; }
+			if ( _sAvail < 2 ) { return 0; }
+
+			const uint8_t ui8B1 = _pui8Bytes[1];
+
+			// If second is a digit, this is a potential 4-byte sequence.
+			if ( ui8B1 >= 0x30 && ui8B1 <= 0x39 ) {
+				if ( _sAvail < 4 ) { return 0; }
+				const uint8_t ui8B2 = _pui8Bytes[2];
+				const uint8_t ui8B3 = _pui8Bytes[3];
+				if ( (ui8B2 >= 0x81 && ui8B2 <= 0xFE) && (ui8B3 >= 0x30 && ui8B3 <= 0x39) ) { return 4; }
+				else { return 0; }
+			}
+			// Otherwise check 2-byte GBK trail (excluding 0x7F).
+			else if ( (ui8B1 >= 0x40 && ui8B1 <= 0xFE) && ui8B1 != 0x7F ) { return 2; }
+			else { return 0; }
+		}
+
+		/**
+		 * \brief Determines the length (in bytes) of a single CP-950 (Big5) character at the given pointer.
+		 *
+		 * 
+		 * CP-950 characters are either 1 byte (ASCII 0x00..0x7F) or 2 bytes:
+		 * lead 0x81..0xFE followed by trail 0x40..0x7E or 0xA1..0xFE (0x7F is invalid).
+		 * Returns 0 if the sequence is invalid or truncated.
+		 *
+		 * \param _pui8Bytes Pointer to the first byte of the prospective CP-950 character.
+		 * \param _sAvail Number of bytes available starting at _pui8Bytes.
+		 * \return Returns 1 or 2 for the character length; 0 if invalid or insufficient bytes.
+		 */
+		static inline size_t								Cp950CharLen( const uint8_t * _pui8Bytes, size_t _sAvail ) {
+			if ( !_pui8Bytes || _sAvail == 0 ) { return 0; }
+
+			const uint8_t ui8B0 = _pui8Bytes[0];
+
+			// 1-byte ASCII: 0x00..0x7F
+			if ( ui8B0 <= 0x7F ) { return 1; }
+
+			// 2-byte lead must be 0x81..0xFE.
+			if ( ui8B0 < 0x81 || ui8B0 > 0xFE ) { return 0; }
+			if ( _sAvail < 2 ) { return 0; }
+
+			const uint8_t ui8B1 = _pui8Bytes[1];
+
+			// Valid trails: 0x40..0x7E or 0xA1..0xFE (excluding 0x7F).
+			if ( (ui8B1 >= 0x40 && ui8B1 <= 0x7E) || (ui8B1 >= 0xA1 && ui8B1 <= 0xFE) ) { return 2; }
+			return 0;
+		}
+
+		/**
+		 * \brief Determines the length (in bytes) of a single CP-932 (Shift_JIS) character at the given pointer.
+		 *
+		 * 
+		 * CP-932 units are either 1 or 2 bytes:
+		 *  - 1-byte: 0x00..0x7F (ASCII) and 0xA1..0xDF (half-width katakana).
+		 *  - 2-byte: lead 0x81..0x9F or 0xE0..0xFC, followed by trail 0x40..0x7E or 0x80..0xFC (0x7F is invalid).
+		 * Returns 0 if the sequence is invalid or truncated.
+		 *
+		 * \param _pui8Bytes Pointer to the first byte of the prospective CP-932 character.
+		 * \param _sAvail Number of bytes available starting at _pui8Bytes.
+		 * \return Returns 1 or 2 for the character length; 0 if invalid or insufficient bytes.
+		 */
+		static inline size_t									Cp932CharLen( const uint8_t * _pui8Bytes, size_t _sAvail ) {
+			if ( !_pui8Bytes || _sAvail == 0 ) { return 0; }
+
+			const uint8_t ui8B0 = _pui8Bytes[0];
+
+			// 1-byte ASCII and half-width katakana.
+			if ( ui8B0 <= 0x7F || (ui8B0 >= 0xA1 && ui8B0 <= 0xDF) ) { return 1; }
+
+			// Lead byte ranges for CP-932 (Shift_JIS).
+			const bool isLead = ( (ui8B0 >= 0x81 && ui8B0 <= 0x9F) || (ui8B0 >= 0xE0 && ui8B0 <= 0xFC) );
+			if ( !isLead ) { return 0; }
+			if ( _sAvail < 2 ) { return 0; }
+
+			const uint8_t ui8B1 = _pui8Bytes[1];
+
+			// Valid trail: 0x40..0x7E or 0x80..0xFC (excluding 0x7F).
+			if ( (ui8B1 >= 0x40 && ui8B1 <= 0x7E) || (ui8B1 >= 0x80 && ui8B1 <= 0xFC) ) { return 2; }
+
+			return 0;
+		}
+
+		/**
+		 * \brief Determines the length (in bytes) of a single CP-20932 (EUC-JP) character at the given pointer.
+		 *
+		 * 
+		 * CP-20932 (EUC-JP) encodes characters as:
+		 *  - 1 byte: ASCII 0x00..0x7F.
+		 *  - 2 bytes: JIS X 0208 (first 0xA1..0xFE, second 0xA1..0xFE).
+		 *  - 2 bytes: Half-width katakana via SS2 (0x8E, then 0xA1..0xDF).
+		 *  - 3 bytes: JIS X 0212 via SS3 (0x8F, then 0xA1..0xFE, 0xA1..0xFE).
+		 * Returns 0 if the sequence is invalid or truncated.
+		 *
+		 * \param _pui8Bytes Pointer to the first byte of the prospective CP-20932 character.
+		 * \param _sAvail Number of bytes available starting at _pui8Bytes.
+		 * \return Returns 1, 2, or 3 for the character length; 0 if invalid or insufficient bytes.
+		 */
+		static inline size_t									Cp20932CharLen( const uint8_t * _pui8Bytes, size_t _sAvail ) {
+			if ( !_pui8Bytes || _sAvail == 0 ) { return 0; }
+
+			const uint8_t ui8B0 = _pui8Bytes[0];
+
+			// 1-byte ASCII.
+			if ( ui8B0 <= 0x7F ) { return 1; }
+
+			// SS2: half-width katakana (0x8E, 0xA1..0xDF).
+			if ( ui8B0 == 0x8E ) {
+				if ( _sAvail < 2 ) { return 0; }
+				const uint8_t ui8B1 = _pui8Bytes[1];
+				return (ui8B1 >= 0xA1 && ui8B1 <= 0xDF) ? 2 : 0;
+			}
+
+			// SS3: JIS X 0212 (0x8F, 0xA1..0xFE, 0xA1..0xFE).
+			if ( ui8B0 == 0x8F ) {
+				if ( _sAvail < 3 ) { return 0; }
+				const uint8_t ui8B1 = _pui8Bytes[1];
+				const uint8_t ui8B2 = _pui8Bytes[2];
+				return (ui8B1 >= 0xA1 && ui8B1 <= 0xFE && ui8B2 >= 0xA1 && ui8B2 <= 0xFE) ? 3 : 0;
+			}
+
+			// JIS X 0208 two-byte (first 0xA1..0xFE, second 0xA1..0xFE).
+			if ( ui8B0 >= 0xA1 && ui8B0 <= 0xFE ) {
+				if ( _sAvail < 2 ) { return 0; }
+				const uint8_t ui8B1 = _pui8Bytes[1];
+				return (ui8B1 >= 0xA1 && ui8B1 <= 0xFE) ? 2 : 0;
+			}
+
+			// Invalid lead for EUC-JP.
+			return 0;
+		}
+
+		/**
+		 * \brief Determines the length (in bytes) of a single CP-51949 (EUC-KR) character at the given pointer.
+		 *
+		 * 
+		 * CP-51949 (EUC-KR) encodes:
+		 *  - 1 byte: ASCII 0x00..0x7F.
+		 *  - 2 bytes: KS X 1001 plane; both bytes 0xA1..0xFE.
+		 * No SS2/SS3 lead bytes are used in EUC-KR. Returns 0 if invalid or truncated.
+		 *
+		 * \param _pui8Bytes Pointer to the first byte of the prospective CP-51949 character.
+		 * \param _sAvail Number of bytes available starting at _pui8Bytes.
+		 * \return Returns 1 or 2 for the character length; 0 if invalid or insufficient bytes.
+		 */
+		static inline size_t									Cp51949CharLen( const uint8_t * _pui8Bytes, size_t _sAvail ) {
+			if ( !_pui8Bytes || _sAvail == 0 ) { return 0; }
+
+			const uint8_t ui8B0 = _pui8Bytes[0];
+
+			// 1-byte: ASCII.
+			if ( ui8B0 <= 0x7F ) {
+				return 1;
+			}
+
+			// 2-byte EUC-KR: both bytes 0xA1..0xFE.
+			if ( ui8B0 >= 0xA1 && ui8B0 <= 0xFE ) {
+				if ( _sAvail < 2 ) {
+					return 0;
+				}
+				const uint8_t ui8B1 = _pui8Bytes[1];
+				return (ui8B1 >= 0xA1 && ui8B1 <= 0xFE) ? 2 : 0;
+			}
+
+			// Invalid lead for EUC-KR.
+			return 0;
+		}
 
 		// Normalizes characters of a text string according to Unicode 4.0 TR#15.
 		static CSecureWString									NormalizeString( NORM_FORM _nfNormForm,

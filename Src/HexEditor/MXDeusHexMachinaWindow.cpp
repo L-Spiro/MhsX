@@ -4,6 +4,7 @@
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../MemHack/MXWindowMemHack.h"
 #include "../Utilities/MXUtilities.h"
+#include "MXHexEditorCurProcess.h"
 #include "MXHexEditorFile.h"
 #include "MXHexEditorProcess.h"
 
@@ -224,6 +225,10 @@ namespace mx {
 			}
 			case Layout::MX_M_FILE_OPENPROCESS : {
 				OpenProcess();
+				break;
+			}
+			case Layout::MX_M_FILE_OPENCURPROCESS : {
+				OpenCurProcess();
 				break;
 			}
 			case Layout::MX_M_FILE_CLOSE : {
@@ -824,6 +829,12 @@ namespace mx {
 				}
 				break;
 			}
+
+			case Layout::MX_M_VIEW_RULER_SHOW : {
+				if ( phecControl ) {
+					phecControl->SetShowRuler( !phecControl->GetShowRuler() );
+				}
+			}
 		}
 		return LSW_H_CONTINUE;
 	}
@@ -1019,10 +1030,38 @@ namespace mx {
 				auto swsPath = static_cast<CHexEditorProcess *>(pheiInterface)->Process().QueryProcessImageName();
 				auto wsTabname = std::filesystem::path( swsPath.c_str() ).filename().generic_wstring();
 
-				AddTab( pheiInterface, wsTabname );
+				return AddTab( pheiInterface, wsTabname );
 			}
 			catch ( ... ) {}
 		}
+		return false;
+	}
+
+	// Handles opening the current process (opens the Open Process dialog if necessary) (returns true if a process was actually opened).
+	bool CDeusHexMachinaWindow::OpenCurProcess( uint64_t _ui64StartAddress ) {
+		if ( !m_pmhMemHack->Process().ProcIsOpened() ) {
+			if ( !CBase::PromptYesNo( Wnd(), _DEC_WS_A4FA31FF_No_process_has_been_opened__r_nOpen_a_process_now_.c_str(),
+				_DEC_WS_8C0AA5EB_No_Process_Opened.c_str() ) ) { return 0; }
+			if ( !m_pmhMemHack->Window()->OpenProcess() ) { return 0; }
+		}
+		// Should not be possible, but just one last check.
+		if ( !m_pmhMemHack->Process().ProcIsOpened() ) { return 0; }
+
+		try {
+			CHexEditorInterface * pheiInterface = new( std::nothrow ) CHexEditorCurProcess( m_pmhMemHack->Process() );
+			if ( !pheiInterface ) {
+				return false;
+			}
+			if ( !static_cast<CHexEditorCurProcess *>(pheiInterface)->Process().ProcIsOpened() ) {
+				delete pheiInterface;
+				return false;
+			}
+			auto swsPath = static_cast<CHexEditorCurProcess *>(pheiInterface)->Process().QueryProcessImageName();
+			auto wsTabname = std::filesystem::path( swsPath.c_str() ).filename().generic_wstring();
+
+			return AddTab( pheiInterface, wsTabname );
+		}
+		catch ( ... ) {}
 		return false;
 	}
 
@@ -1576,6 +1615,12 @@ namespace mx {
 				}
 				case Layout::MX_M_VIEW_HIGHLIGHTING_POINTERS : {
 					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetHighlightingPointers()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+
+				case Layout::MX_M_VIEW_RULER_SHOW : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetShowRuler()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}

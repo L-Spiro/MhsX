@@ -2,6 +2,7 @@
 #include "../Layouts/MXLayoutManager.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../Utilities/MXUtilities.h"
+#include "MXHexEditorCurProcess.h"
 #include "MXHexEditorProcess.h"
 
 #include <Base/LSWBase.h>
@@ -27,6 +28,28 @@ namespace mx {
 	}
 
 	// == Functions.
+	// Sets the view type.
+	void CHexEditorControl::SetViewType( MX_EDIT_AS _eaType ) {
+		if ( m_eaEditAs != _eaType && _eaType >= MX_EA_TEXT && _eaType < MX_EA_TOTAL ) {
+			m_eaEditAs = _eaType;
+				
+			if ( m_pheiTarget && m_pheiTarget->Type() == CHexEditorInterface::MX_HET_PROCESS ) {
+				CHexEditorProcess * phepProc = static_cast<CHexEditorProcess *>(m_pheiTarget);
+				GoTo( phepProc->Process().GetMainModuleBase_PEB() );
+			}
+			else if ( m_pheiTarget && m_pheiTarget->Type() == CHexEditorInterface::MX_HET_CUR_PROCESS ) {
+				CHexEditorCurProcess * phepProc = static_cast<CHexEditorCurProcess *>(m_pheiTarget);
+				GoTo( phepProc->Process().GetMainModuleBase_PEB() );
+			}
+			else {
+				m_sdScrollView[_eaType].ui64VPos = 0;
+				m_sdScrollView[_eaType].ui64HPx = 0;
+			}
+
+			RecalcAndInvalidate();
+		}
+	}
+
 	// Goes to a given address.
 	void CHexEditorControl::GoTo( uint64_t _ui64Addr, bool _bShowAtTop ) {
 		_ui64Addr = std::min( _ui64Addr, Size() );
@@ -440,8 +463,12 @@ namespace mx {
 	void CHexEditorControl::SetStream( CHexEditorInterface * _pediStream ) {
 		m_pheiTarget = _pediStream;
 
-		if ( m_pheiTarget && (m_pheiTarget->Type() == CHexEditorInterface::MX_HET_PROCESS || m_pheiTarget->Type() == CHexEditorInterface::MX_HET_CUR_PROCESS) ) {
+		if ( m_pheiTarget && m_pheiTarget->Type() == CHexEditorInterface::MX_HET_PROCESS ) {
 			CHexEditorProcess * phepProc = static_cast<CHexEditorProcess *>(m_pheiTarget);
+			GoTo( phepProc->Process().GetMainModuleBase_PEB() );
+		}
+		else if ( m_pheiTarget && m_pheiTarget->Type() == CHexEditorInterface::MX_HET_CUR_PROCESS ) {
+			CHexEditorCurProcess * phepProc = static_cast<CHexEditorCurProcess *>(m_pheiTarget);
 			GoTo( phepProc->Process().GetMainModuleBase_PEB() );
 		}
 		
@@ -1128,18 +1155,24 @@ namespace mx {
 	 * \return Returns the background color for the given cell.
 	 **/
 	COLORREF CHexEditorControl::CellBgColor( uint64_t _ui64Address, const uint8_t * /*_pui8Value*/, size_t /*_sSize*/ ) {
-		if ( m_pheiTarget && (m_pheiTarget->Type() == CHexEditorInterface::MX_HET_PROCESS || m_pheiTarget->Type() == CHexEditorInterface::MX_HET_CUR_PROCESS) ) {
-			CHexEditorProcess * phepProc = static_cast<CHexEditorProcess *>(m_pheiTarget);
-			if ( !phepProc->Process().IsReadableByQuery( _ui64Address ) ) {
-				return ForeColors()->crUnreadable;
-			}
-			if ( phepProc->Process().IsExecutableByQuery( _ui64Address ) ) {
-				return ForeColors()->crExecutable;
-			}
-			if ( phepProc->Process().AddressIsInModule( _ui64Address ) ) {
-				return ForeColors()->crStaticAddress;
-			}
-		}
+#define MX_CHECK_PROC( CAST, ENUM )																																	\
+	if ( m_pheiTarget && m_pheiTarget->Type() == CHexEditorInterface::ENUM ) {																						\
+		CAST * phepProc = static_cast<CAST *>(m_pheiTarget);																										\
+		if ( !phepProc->Process().IsReadableByQuery( _ui64Address ) ) {																								\
+			return ForeColors()->crUnreadable;																														\
+		}																																							\
+		if ( phepProc->Process().IsExecutableByQuery( _ui64Address ) ) {																							\
+			return ForeColors()->crExecutable;																														\
+		}																																							\
+		if ( phepProc->Process().AddressIsInModule( _ui64Address ) ) {																								\
+			return ForeColors()->crStaticAddress;																													\
+		}																																							\
+	}
+
+		MX_CHECK_PROC( CHexEditorProcess, MX_HET_PROCESS )
+		MX_CHECK_PROC( CHexEditorCurProcess, MX_HET_CUR_PROCESS )
+#undef MX_CHECK_PROC
+
 		return BackColors()->crEditor;
 	}
 

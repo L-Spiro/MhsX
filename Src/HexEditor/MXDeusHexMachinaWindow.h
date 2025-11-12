@@ -143,7 +143,7 @@ namespace mx {
 		bool										OpenProcess();
 
 		// Handles opening the current process (opens the Open Process dialog if necessary) (returns true if a process was actually opened).
-		bool										OpenCurProcess( uint64_t _ui64StartAddress = 0 ) {}
+		bool										OpenCurProcess( uint64_t _ui64StartAddress = 0 );
 
 		// Closes the active tab.
 		void										CloseTab();

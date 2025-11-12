@@ -269,6 +269,81 @@ namespace mx {
 		}
 
 		/**
+		 * Determines if a character is displayable in Chinese (Simplified).
+		 * 
+		 * \param _pui8Char The character buffer to examine.
+		 * \param _sSize The length of the bugger to which _pui8Char points.
+		 * \param _wcChar The actual character to display.
+		 * \return Returns 0 if not displayable, otherwise the number of bytes that make up the character.  _wcChar is filled with the character to print.
+		 **/
+		static uint32_t													ChineseSimplifiedDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
+			auto sLen = CUtilities::Gb18030CharLen( _pui8Char, _sSize );
+			if ( !sLen ) { _wcChar = L'.'; return 1; }
+			if ( sLen == 1 ) {
+				if MX_UNLIKELY( (*_pui8Char) < 0x7F && (*_pui8Char) >= 0x20 ) {
+					_wcChar = (*_pui8Char);
+					return 1;
+				}
+				_wcChar = L'.';
+				return 0;
+			}
+
+			DWORD dwErr;
+
+			auto wswTmp = CUtilities::MultiByteToWideChar( CCodePages::MX_GB18030, MB_ERR_INVALID_CHARS, reinterpret_cast<const char *>(_pui8Char), sLen, &dwErr );
+			if ( dwErr != ERROR_SUCCESS || !wswTmp.size() ) { _wcChar = L'.'; return sLen; }
+			_wcChar = wswTmp[0];
+
+			WORD wType1{}, wType3{};
+			if MX_UNLIKELY( !::GetStringTypeW( CT_CTYPE1, &_wcChar, 1, &wType1 ) ) { _wcChar = L'.'; return sLen; }
+			if MX_UNLIKELY( !::GetStringTypeW( CT_CTYPE3, &_wcChar, 1, &wType3 ) ) { _wcChar = L'.'; return sLen; }
+
+			// Controls are unprintable.
+			if MX_UNLIKELY( (wType1 & C1_CNTRL) || !(wType1 & C1_DEFINED) ) { _wcChar = L'.'; return sLen; }
+			// Combining marks on their own are unprintable (Mn/Mc).
+			if MX_UNLIKELY( wType3 & (C3_HIGHSURROGATE | C3_LOWSURROGATE | C3_NONSPACING | C3_DIACRITIC | C3_VOWELMARK) ) { _wcChar = L'.'; return sLen; }
+
+			return sLen;
+		}
+
+		/**
+		 * Determines if a character is displayable in Chinese (Traditional).
+		 * 
+		 * \param _pui8Char The character buffer to examine.
+		 * \param _sSize The length of the bugger to which _pui8Char points.
+		 * \param _wcChar The actual character to display.
+		 * \return Returns 0 if not displayable, otherwise the number of bytes that make up the character.  _wcChar is filled with the character to print.
+		 **/
+		static uint32_t													ChineseTraditionalDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
+			auto sLen = CUtilities::Cp950CharLen( _pui8Char, _sSize );
+			if ( !sLen ) { _wcChar = L'.'; return 1; }
+			if ( sLen == 1 ) {
+				if MX_UNLIKELY( (*_pui8Char) < 0x7F && (*_pui8Char) >= 0x20 ) {
+					_wcChar = (*_pui8Char);
+					return 1;
+				}
+				_wcChar = L'.';
+				return 1;
+			}
+			DWORD dwErr;
+
+			auto wswTmp = CUtilities::MultiByteToWideChar( CCodePages::MX_big5, MB_ERR_INVALID_CHARS, reinterpret_cast<const char *>(_pui8Char), sLen, &dwErr );
+			if ( dwErr != ERROR_SUCCESS || !wswTmp.size() ) { _wcChar = L'.'; return sLen; }
+			_wcChar = wswTmp[0];
+
+			WORD wType1{}, wType3{};
+			if MX_UNLIKELY( !::GetStringTypeW( CT_CTYPE1, &_wcChar, 1, &wType1 ) ) { _wcChar = L'.'; return sLen; }
+			if MX_UNLIKELY( !::GetStringTypeW( CT_CTYPE3, &_wcChar, 1, &wType3 ) ) { _wcChar = L'.'; return sLen; }
+
+			// Controls are unprintable.
+			if MX_UNLIKELY( (wType1 & C1_CNTRL) || !(wType1 & C1_DEFINED) ) { _wcChar = L'.'; return sLen; }
+			// Combining marks on their own are unprintable (Mn/Mc).
+			if MX_UNLIKELY( wType3 & (C3_HIGHSURROGATE | C3_LOWSURROGATE | C3_NONSPACING | C3_DIACRITIC | C3_VOWELMARK) ) { _wcChar = L'.'; return sLen; }
+
+			return sLen;
+		}
+
+		/**
 		 * Determines if a character is displayable in Cyrillic Windows.
 		 * 
 		 * \param _pui8Char The character buffer to examine.
@@ -446,6 +521,114 @@ namespace mx {
 
 			_wcChar = m_wcHebrewIso[ui8Char-0x20];
 			return 1;
+		}
+
+		/**
+		 * Determines if a character is displayable in Japanese Shift JIS.
+		 * 
+		 * \param _pui8Char The character buffer to examine.
+		 * \param _sSize The length of the bugger to which _pui8Char points.
+		 * \param _wcChar The actual character to display.
+		 * \return Returns 0 if not displayable, otherwise the number of bytes that make up the character.  _wcChar is filled with the character to print.
+		 **/
+		static uint32_t													JapaneseShiftJisDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
+			auto sLen = CUtilities::Cp932CharLen( _pui8Char, _sSize );
+			if ( !sLen ) { _wcChar = L'.'; return 1; }
+			if ( sLen == 1 ) {
+				if MX_UNLIKELY( (*_pui8Char) < 0x20 ) { _wcChar = L'.'; return 1; }
+				if MX_UNLIKELY( (*_pui8Char) >= 0x7F && (*_pui8Char) <= 0xA0 ) { _wcChar = L'.'; return 1; }
+				if MX_UNLIKELY( (*_pui8Char) >= 0xE0 ) { _wcChar = L'.'; return 1; }
+			}
+			DWORD dwErr;
+
+			auto wswTmp = CUtilities::MultiByteToWideChar( CCodePages::MX_shift_jis, MB_ERR_INVALID_CHARS, reinterpret_cast<const char *>(_pui8Char), sLen, &dwErr );
+			if ( dwErr != ERROR_SUCCESS || !wswTmp.size() ) { _wcChar = L'.'; return sLen; }
+			_wcChar = wswTmp[0];
+
+			WORD wType1{}, wType3{};
+			if MX_UNLIKELY( !::GetStringTypeW( CT_CTYPE1, &_wcChar, 1, &wType1 ) ) { _wcChar = L'.'; return sLen; }
+			if MX_UNLIKELY( !::GetStringTypeW( CT_CTYPE3, &_wcChar, 1, &wType3 ) ) { _wcChar = L'.'; return sLen; }
+
+			// Controls are unprintable.
+			if MX_UNLIKELY( (wType1 & C1_CNTRL) || !(wType1 & C1_DEFINED) ) { _wcChar = L'.'; return sLen; }
+			// Combining marks on their own are unprintable (Mn/Mc).
+			if MX_UNLIKELY( wType3 & (C3_HIGHSURROGATE | C3_LOWSURROGATE | C3_NONSPACING | C3_DIACRITIC | C3_VOWELMARK) ) { _wcChar = L'.'; return sLen; }
+
+			return sLen;
+		}
+
+		/**
+		 * Determines if a character is displayable in Japanese EUC.
+		 * 
+		 * \param _pui8Char The character buffer to examine.
+		 * \param _sSize The length of the bugger to which _pui8Char points.
+		 * \param _wcChar The actual character to display.
+		 * \return Returns 0 if not displayable, otherwise the number of bytes that make up the character.  _wcChar is filled with the character to print.
+		 **/
+		static uint32_t													JapaneseEucDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
+			auto sLen = CUtilities::Cp20932CharLen( _pui8Char, _sSize );
+			if ( !sLen ) { _wcChar = L'.'; return 1; }
+			if ( sLen == 1 ) {
+				if MX_UNLIKELY( (*_pui8Char) < 0x7F && (*_pui8Char) >= 0x20 ) {
+					_wcChar = (*_pui8Char);
+					return 1;
+				}
+				_wcChar = L'.';
+				return 1;
+			}
+			DWORD dwErr;
+
+			auto wswTmp = CUtilities::MultiByteToWideChar( CCodePages::MX_EUC_JP, MB_ERR_INVALID_CHARS, reinterpret_cast<const char *>(_pui8Char), sLen, &dwErr );
+			if ( dwErr != ERROR_SUCCESS || !wswTmp.size() ) { _wcChar = L'.'; return sLen; }
+			_wcChar = wswTmp[0];
+
+			WORD wType1{}, wType3{};
+			if MX_UNLIKELY( !::GetStringTypeW( CT_CTYPE1, &_wcChar, 1, &wType1 ) ) { _wcChar = L'.'; return sLen; }
+			if MX_UNLIKELY( !::GetStringTypeW( CT_CTYPE3, &_wcChar, 1, &wType3 ) ) { _wcChar = L'.'; return sLen; }
+
+			// Controls are unprintable.
+			if MX_UNLIKELY( (wType1 & C1_CNTRL) || !(wType1 & C1_DEFINED) ) { _wcChar = L'.'; return sLen; }
+			// Combining marks on their own are unprintable (Mn/Mc).
+			if MX_UNLIKELY( wType3 & (C3_HIGHSURROGATE | C3_LOWSURROGATE | C3_NONSPACING | C3_DIACRITIC | C3_VOWELMARK) ) { _wcChar = L'.'; return sLen; }
+
+			return sLen;
+		}
+
+		/**
+		 * Determines if a character is displayable in Korean EUC.
+		 * 
+		 * \param _pui8Char The character buffer to examine.
+		 * \param _sSize The length of the bugger to which _pui8Char points.
+		 * \param _wcChar The actual character to display.
+		 * \return Returns 0 if not displayable, otherwise the number of bytes that make up the character.  _wcChar is filled with the character to print.
+		 **/
+		static uint32_t													KoreanEucDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
+			auto sLen = CUtilities::Cp51949CharLen( _pui8Char, _sSize );
+			if ( !sLen ) { _wcChar = L'.'; return 1; }
+			if ( sLen == 1 ) {
+				if MX_UNLIKELY( (*_pui8Char) < 0x7F && (*_pui8Char) >= 0x20 ) {
+					_wcChar = (*_pui8Char);
+					return 1;
+				}
+				_wcChar = L'.';
+				return 1;
+			}
+			DWORD dwErr;
+
+			auto wswTmp = CUtilities::MultiByteToWideChar( CCodePages::MX_euc_kr, MB_ERR_INVALID_CHARS, reinterpret_cast<const char *>(_pui8Char), sLen, &dwErr );
+			if ( dwErr != ERROR_SUCCESS || !wswTmp.size() ) { _wcChar = L'.'; return sLen; }
+			_wcChar = wswTmp[0];
+
+			WORD wType1{}, wType3{};
+			if MX_UNLIKELY( !::GetStringTypeW( CT_CTYPE1, &_wcChar, 1, &wType1 ) ) { _wcChar = L'.'; return sLen; }
+			if MX_UNLIKELY( !::GetStringTypeW( CT_CTYPE3, &_wcChar, 1, &wType3 ) ) { _wcChar = L'.'; return sLen; }
+
+			// Controls are unprintable.
+			if MX_UNLIKELY( (wType1 & C1_CNTRL) || !(wType1 & C1_DEFINED) ) { _wcChar = L'.'; return sLen; }
+			// Combining marks on their own are unprintable (Mn/Mc).
+			if MX_UNLIKELY( wType3 & (C3_HIGHSURROGATE | C3_LOWSURROGATE | C3_NONSPACING | C3_DIACRITIC | C3_VOWELMARK) ) { _wcChar = L'.'; return sLen; }
+
+			return sLen;
 		}
 
 		/**

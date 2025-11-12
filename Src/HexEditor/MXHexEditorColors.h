@@ -35,13 +35,6 @@ namespace mx {
 	cr ## NAME = NAME ## Default_Bg();
 #include "MXHexEditorColorImpl.h"
 		}
-
-	//	COLORREF									crText = MX_RGBA( 0x92, 0x92, 0x92, 0xFF );				// Text color.
-	//	COLORREF									crAddSepLine = MX_RGBA( 0x42, 0x42, 0x42, 0x00 );		// Address separator line.
-	//	COLORREF									crRulerText = MX_RGBA( 0x57, 0x57, 0x57, 0xFF );		// Ruler text color.
-	//	COLORREF									crRulerLine = MX_RGBA( 0x57, 0x57, 0x57, 0x00 );		// Ruler line.
-	//	COLORREF									crRulerMarker = MX_RGBA( 0x81, 0x81, 0x81, 0xFF );		// Ruler marker color.
-	//	COLORREF									crEditorBk = MX_RGBA( 0x23, 0x22, 0x20, 0xFF );			// Background color for the whole editor.
 	};
 
 }	// namespace mx

@@ -181,15 +181,7 @@ namespace mx {
 
 		// == Functions.
 		// Sets the view type.
-		void										SetViewType( MX_EDIT_AS _eaType ) {
-			if ( m_eaEditAs != _eaType && _eaType >= MX_EA_TEXT && _eaType < MX_EA_TOTAL ) {
-				m_eaEditAs = _eaType;
-				m_sdScrollView[_eaType].ui64VPos = 0;
-				m_sdScrollView[_eaType].ui64HPx = 0;
-
-				RecalcAndInvalidate();
-			}
-		}
+		void										SetViewType( MX_EDIT_AS _eaType );
 
 		// Gets the editing type of the control.
 		inline MX_EDIT_AS							GetViewType() const { return m_eaEditAs; }
@@ -375,7 +367,16 @@ namespace mx {
 
 		// Gets pointer highlighing.
 		inline bool									GetHighlightingPointers() const { return CurStyle()->bHighlightPointers; }
+
+		// Sets the showing of the ruler.
+		void										SetShowRuler( bool _bEnable ) {
+			CurStyle()->bShowRuler = _bEnable;
+			::InvalidateRect( Wnd(), NULL, FALSE );
+		}
 		
+		// Gets the showing of the ruler.
+		inline bool									GetShowRuler() const { return CurStyle()->bShowRuler; }
+
 		// Goes to a given address.
 		void										GoTo( uint64_t _ui64Addr, bool _bShowAtTop = false );
 

@@ -283,6 +283,7 @@
     <ClCompile Include="Src\HexEditor\MXCharSets.cpp" />
     <ClCompile Include="Src\HexEditor\MXDeusHexMachinaWindow.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexEditorControl.cpp" />
+    <ClCompile Include="Src\HexEditor\MXHexEditorCurProcess.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexEditorFile.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexEditorProcess.cpp" />
     <ClCompile Include="Src\HexEditor\MXMiniMap.cpp" />
@@ -432,6 +433,7 @@
     <ClInclude Include="Src\HexEditor\MXHexEditorColorImpl.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorColors.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorControl.h" />
+    <ClInclude Include="Src\HexEditor\MXHexEditorCurProcess.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorFile.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorInterface.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorProcess.h" />

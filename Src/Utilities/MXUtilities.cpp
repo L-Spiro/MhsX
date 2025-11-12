@@ -2112,35 +2112,37 @@ namespace mx {
 	// Maps a character string to a UTF-16 (wide character) string. The character string is not necessarily from a multibyte character set.
 	CSecureWString CUtilities::MultiByteToWideChar( UINT _uiCodePage,
 		DWORD _dwFlags,
-		const std::string &_sString,
+		const char * _pcStr,
+		size_t _sLen,
 		DWORD * _pdwLastError ) {
+
 		if ( _pdwLastError ) { (*_pdwLastError) = ERROR_SUCCESS; }
-		if ( !_sString.size() ) { return CSecureWString(); }
+		if ( !_sLen ) { return CSecureWString(); }
 
 		switch ( _uiCodePage ) {
 			case CCodePages::MX_utf_16 : {
 				// From UTF-16 to UTF-16.  Just copy over.
-				const WCHAR * _pcSrc = reinterpret_cast<const WCHAR *>(_sString.c_str());
+				const WCHAR * _pcSrc = reinterpret_cast<const WCHAR *>(_pcStr);
 				CSecureWString swsRet;
-				for ( size_t I = _sString.size() / sizeof( WCHAR ); I--; ) {
+				for ( size_t I = _sLen / sizeof( WCHAR ); I--; ) {
 					swsRet.push_back( (*_pcSrc++) );
 				}
 				return swsRet;
 			}
 			case CCodePages::MX_utf_16BE : {
 				// From bytswapped UTF-16 BE to UTF-16.  Un-byteswap and then copy.
-				const WCHAR * _pcSrc = reinterpret_cast<const WCHAR *>(_sString.c_str());
+				const WCHAR * _pcSrc = reinterpret_cast<const WCHAR *>(_pcStr);
 				CSecureWString swsRet;
-				for ( size_t I = _sString.size() / sizeof( WCHAR ); I--; ) {
+				for ( size_t I = _sLen / sizeof( WCHAR ); I--; ) {
 					swsRet.push_back( ::_byteswap_ushort( (*_pcSrc++) ) );
 				}
 				return swsRet;
 			}
 			case CCodePages::MX_utf_32 : {
 				// 32-bit raw characters to UTF-16.  Convert.
-				const uint32_t * _puiSrc = reinterpret_cast<const uint32_t *>(_sString.c_str());
+				const uint32_t * _puiSrc = reinterpret_cast<const uint32_t *>(_pcStr);
 				CSecureWString swsRet;
-				for ( size_t I = _sString.size() / sizeof( uint32_t ); I--; ) {
+				for ( size_t I = _sLen / sizeof( uint32_t ); I--; ) {
 					uint32_t uiLen;
 					uint32_t ui32This = ee::CExpEval::Utf32ToUtf16( (*_puiSrc++), uiLen );
 
@@ -2162,9 +2164,9 @@ namespace mx {
 			}
 			case CCodePages::MX_utf_32BE : {
 				// Byteswapped 32-bit raw characters to UTF-16.  Byteswap and convert.
-				const uint32_t * _puiSrc = reinterpret_cast<const uint32_t *>(_sString.c_str());
+				const uint32_t * _puiSrc = reinterpret_cast<const uint32_t *>(_pcStr);
 				CSecureWString swsRet;
-				for ( size_t I = _sString.size() / sizeof( uint32_t ); I--; ) {
+				for ( size_t I = _sLen / sizeof( uint32_t ); I--; ) {
 					uint32_t uiLen;
 					uint32_t ui32This = ee::CExpEval::Utf32ToUtf16( ::_byteswap_ulong( (*_puiSrc++) ), uiLen );
 
@@ -2186,7 +2188,7 @@ namespace mx {
 			}
 		}
 
-		int iLen = ::MultiByteToWideChar( _uiCodePage, _dwFlags, _sString.c_str(), _sString.size(),
+		int iLen = ::MultiByteToWideChar( _uiCodePage, _dwFlags, _pcStr, _sLen,
 			NULL, 0 );
 		if ( iLen <= 0 ) {
 			if ( _pdwLastError ) { (*_pdwLastError) = ::GetLastError(); }
@@ -2199,7 +2201,7 @@ namespace mx {
 			return CSecureWString();
 		}
 
-		::MultiByteToWideChar( _uiCodePage, _dwFlags, _sString.c_str(), _sString.size(),
+		::MultiByteToWideChar( _uiCodePage, _dwFlags, _pcStr, _sLen,
 			reinterpret_cast<LPWSTR>(vResult.data()), vResult.size() );
 		return CSecureWString( reinterpret_cast<const CSecureWString::value_type *>(vResult.data()), vResult.size() );
 	}

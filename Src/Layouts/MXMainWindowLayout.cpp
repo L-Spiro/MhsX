@@ -315,40 +315,6 @@ namespace mx {
 		_pwMain->lpwcClass = nullptr;
 		_pwMain->pwcText = nullptr;
 		CLayoutManager::CleanEncryptedMenu( vMenuItems, vMenuStrings );
-		//::ZeroMemory( szTempTitle, MX_ELEMENTS( szTempTitle ) );
-
-
-		// *** TEMP ***
-		/*HMENU hMenu = lsw::CBase::LayoutManager()->CreateMenu( m_miMenus, MX_ELEMENTS( m_miMenus ) );
-		::SetMenu( m_pwMainWindow->Wnd(), hMenu );
-		::RedrawWindow( m_pwMainWindow->Wnd(), NULL, NULL, RDW_INVALIDATE | RDW_INTERNALPAINT | RDW_ERASE );*/
-
-		/*HMENU hMenu = ::CreateMenu();
-		AppendMenuW(
-			hMenu,
-			MF_ENABLED | MF_STRING,
-			3,
-			L"&File" );
-		AppendMenuW(
-			hMenu,
-			MF_ENABLED | MF_STRING,
-			4,
-			L"&Blah" );
-
-		MENUITEMINFOW miItem = {
-			sizeof( MENUITEMINFOW ),
-		};
-		miItem.fMask = MIIM_ID | MIIM_TYPE | MIIM_STATE;
-		miItem.fType = MFT_STRING;
-		miItem.fState = MFS_GRAYED;
-		miItem.wID = 15;
-		miItem.dwTypeData = L"Coo&l";
-		miItem.cch = lstrlenW( miItem.dwTypeData );
-
-		InsertMenuItem( hMenu, 4, FALSE, &miItem );
-		//SetMenuItemInfo( 
-
-		::SetMenu( m_pwMainWindow->Wnd(), hMenu );*/
 		return m_pwMainWindow;
 	}
 

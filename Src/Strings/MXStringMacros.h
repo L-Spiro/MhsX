@@ -22042,3 +22042,12 @@
 #define _DEC_S_A5C44C50_NtQueryInformationProcess mx::CStringDecoder::DecodeToString( _T_A5C44C50_NtQueryInformationProcess, _LEN_A5C44C50 )
 #define _DEC_WS_A5C44C50_NtQueryInformationProcess mx::CStringDecoder::DecodeToWString( _T_A5C44C50_NtQueryInformationProcess, _LEN_A5C44C50 )
 
+// No process has been opened.\r\nOpen a process now?
+
+#define _T_A4FA31FF_No_process_has_been_opened__r_nOpen_a_process_now_ "\xD6\x3D\xF0\x0B\x04\x38\xF1\x2C\x43\x3B\xE9\x36\xF3\x0E\xE7\xEA\x33\x35\x09\xB2\x38\xFE\x2C\x3E\x2D\x2D\xFC\x9F\xA5\x16\xF8\x33\x3E\xBB\xF3\xE9\xFE\x39\x3F\x2B\x2E\x41\x05\xBB\x35\xF7\x45\x0F"
+#define _LEN_A4FA31FF 48
+#define _T_LEN_A4FA31FF_No_process_has_been_opened__r_nOpen_a_process_now_ _T_A4FA31FF_No_process_has_been_opened__r_nOpen_a_process_now_, _LEN_A4FA31FF
+#define _DEC_A4FA31FF_No_process_has_been_opened__r_nOpen_a_process_now_( STR ) mx::CStringDecoder::Decode( _T_A4FA31FF_No_process_has_been_opened__r_nOpen_a_process_now_, _LEN_A4FA31FF, STR )
+#define _DEC_S_A4FA31FF_No_process_has_been_opened__r_nOpen_a_process_now_ mx::CStringDecoder::DecodeToString( _T_A4FA31FF_No_process_has_been_opened__r_nOpen_a_process_now_, _LEN_A4FA31FF )
+#define _DEC_WS_A4FA31FF_No_process_has_been_opened__r_nOpen_a_process_now_ mx::CStringDecoder::DecodeToWString( _T_A4FA31FF_No_process_has_been_opened__r_nOpen_a_process_now_, _LEN_A4FA31FF )
+
