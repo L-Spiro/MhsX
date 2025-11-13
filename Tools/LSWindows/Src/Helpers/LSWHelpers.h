@@ -1155,6 +1155,36 @@ namespace lsw {
 			}
 		}
 
+		/**
+		 * \brief Draws a single-pixel-thick line on an HDC.
+		 *
+		 * Uses MoveToEx()/LineTo() with a solid pen of width 1. The final endpoint
+		 * pixel is explicitly set because LineTo() does not draw the last pixel.
+		 *
+		 * \param _hDc Target device context.
+		 * \param _i32X0 Starting X coordinate.
+		 * \param _i32Y0 Starting Y coordinate.
+		 * \param _i32X1 Ending X coordinate.
+		 * \param _i32Y1 Ending Y coordinate.
+		 * \param _crColor COLORREF of the line color.
+		 */
+		static inline void					DrawLineSinglePixel_Inclusive( HDC _hDc,
+			int32_t _i32X0, int32_t _i32Y0,
+			int32_t _i32X1, int32_t _i32Y1,
+			COLORREF _crColor ) {
+			if( !_hDc ) { return; }
+
+			LSW_HPEN hPen( PS_SOLID, 1, _crColor & RGB( 0xFF, 0xFF, 0xFF ) );
+			if( !hPen.hPen ) { return; }
+
+			LSW_SELECTOBJECT soPen( _hDc, hPen.hPen );
+			POINT ptOld;
+			::MoveToEx( _hDc, _i32X0, _i32Y0, &ptOld );
+			::LineTo( _hDc, _i32X1, _i32Y1 );
+
+			// Explicitly set the final endpoint pixel so the line is inclusive.
+			::SetPixel( _hDc, _i32X1, _i32Y1, _crColor & RGB( 0xFF, 0xFF, 0xFF ) );
+		}
 
 		/**
 		 * Gets the average character width for the font set on the given HDC.

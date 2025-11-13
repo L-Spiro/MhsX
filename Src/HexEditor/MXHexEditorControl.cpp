@@ -856,17 +856,31 @@ namespace mx {
 				int32_t iGX = 0, iGW = 0;
 				if ( !GetTextRectForIndex( _dfFmt, I, _iAreaXBase, iGX, iGW ) ) { break; }
 
-				// Label is the byte index of the first item in the group within the row.
-				const uint32_t ui32ByteIndexInRow = I;
-				std::wstring wsTmp = HexLabel( _dfFmt == MX_DF_CHAR ? (ui32ByteIndexInRow & 0x0F) : ui32ByteIndexInRow, _ui32Digits );
+				if ( stAll.bShowRulerArrows ) {
+					// TODO: Get caret position.
+					//ForeColors()->crRulerMarker
+				}
 
-				// Center horizontally inside [iGX, iGW].
-				SIZE sSize {};
-				::GetTextExtentPoint32W( _hDc, wsTmp.c_str(), int32_t( wsTmp.size() ), &sSize );
-				const int32_t iTextX = iGX + (iGW - sSize.cx) / 2;
-				const int32_t iTextY = (_iYTop + (iRulerCy - fsFont.iCharCy) / 2);
+				if ( stAll.bShowRulerLabels ) {
+					// Label is the byte index of the first item in the group within the row.
+					const uint32_t ui32ByteIndexInRow = I;
+					std::wstring wsTmp = HexLabel( _dfFmt == MX_DF_CHAR ? (ui32ByteIndexInRow & 0x0F) : ui32ByteIndexInRow, _ui32Digits );
 
-				::TextOutW( _hDc, iTextX, iTextY, wsTmp.c_str(), int32_t( wsTmp.size() ) );
+					// Center horizontally inside [iGX, iGW].
+					SIZE sSize {};
+					::GetTextExtentPoint32W( _hDc, wsTmp.c_str(), int32_t( wsTmp.size() ), &sSize );
+					const int32_t iTextX = iGX + (iGW - sSize.cx) / 2;
+					const int32_t iTextY = (_iYTop + (iRulerCy - fsFont.iCharCy) / 2);
+
+					::TextOutW( _hDc, iTextX, iTextY, wsTmp.c_str(), int32_t( wsTmp.size() ) );
+				}
+				else {
+					// Ruler Display Format == Hex.
+					// Draw small centered lines with lengths: 3 1 1 1 2 1 1 1 [repeat].
+					static const uint32_t ui32Lens[] = { 3, 1, 1, 1, 2, 1, 1, 1 };
+					auto i32X = iGX + (iGW / 2);
+					lsw::CHelpers::DrawLineSinglePixel_Inclusive( _hDc, i32X, _iYTop, i32X, _iYTop + ui32Lens[I%std::size( ui32Lens )], ForeColors()->crRulerFileBar );
+				}
 			}
 		};
 

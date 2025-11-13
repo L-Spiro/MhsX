@@ -83,38 +83,38 @@ namespace mx {
 		// == Types.
 		/** Measured glyph metrics for the address gutter font. */
 		struct MX_ADDR_GLYPHS {
-			int32_t									iDigitMaxCx = 0;										// Max over '0'..'9' (and 'A'..'F' when HEX).
-			int32_t									iDigitMaxCxLower = 0;									// Max over '0'..'9' (and 'a'..'f' when HEX).
-			int32_t									i32ColonCx = 0;											// Width of ':'.
-			int32_t									i32SpaceCx = 0;											// Width of ' '.
-			int32_t									i32SpecHexCx = 0;										// Width of 'h'.
-			int32_t									i32SpecOctCx = 0;										// Width of 'o'.
-			int32_t									i32ShortWcx = 0;										// Width of 'w'.
-			int32_t									i32MaxAscii = 0;										// Maximum width of ASCII characters.
-			int32_t									i32MaxAsciiAnsi = 0;									// Maximum width of ASCII+ANSI characters.
+			int32_t									iDigitMaxCx						= 0;						// Max over '0'..'9' (and 'A'..'F' when HEX).
+			int32_t									iDigitMaxCxLower				= 0;						// Max over '0'..'9' (and 'a'..'f' when HEX).
+			int32_t									i32ColonCx						= 0;						// Width of ':'.
+			int32_t									i32SpaceCx						= 0;						// Width of ' '.
+			int32_t									i32SpecHexCx					= 0;						// Width of 'h'.
+			int32_t									i32SpecOctCx					= 0;						// Width of 'o'.
+			int32_t									i32ShortWcx						= 0;						// Width of 'w'.
+			int32_t									i32MaxAscii						= 0;						// Maximum width of ASCII characters.
+			int32_t									i32MaxAsciiAnsi					= 0;						// Maximum width of ASCII+ANSI characters.
 		};
 
 		/** A set of font data. */
 		struct MX_FONT_SET {
-			lsw::LSW_FONT							fFont;													// Current font.
-			LOGFONTW								lfFontParms {};											// The current font parameters.
-			TEXTMETRICW								tmMetrics {};											// The current font's metrics.
-			MX_ADDR_GLYPHS							agGlyphs;												// Glyph settings (filled on demand).
-			int32_t									i32PointSize = DefaultPointSize();						// The font point size.
+			lsw::LSW_FONT							fFont;														// Current font.
+			LOGFONTW								lfFontParms {};												// The current font parameters.
+			TEXTMETRICW								tmMetrics {};												// The current font's metrics.
+			MX_ADDR_GLYPHS							agGlyphs;													// Glyph settings (filled on demand).
+			int32_t									i32PointSize					= DefaultPointSize();		// The font point size.
 
-			int32_t									iCharCx = 0;
-			int32_t									iCharCy = 0;											// Baseline advance.
+			int32_t									iCharCx							= 0;
+			int32_t									iCharCy							= 0;						// Baseline advance.
 		};
 
 		/** What to draw and how to size the address gutter. */
 		struct MX_ADDR_STYLE {
-			MX_ADDRESS_FMT							afFormat			= MX_AF_BYTES_HEX;					// Address format.
-			bool									bLowercaseHex		= false;							// Use lowercase a..f for HEX.
-			bool									bShowColonIn		= true;								// Insert ':' every 4 HEX digits (>4 only).
-			bool									bShowColonAfter		= false;							// Append ':' after the address.
-			bool									bShowTypeSpec		= false;							// Append 'h' (hex) or 'o' (oct).
-			bool									bMinimizeDigits		= false;							// Size digits for current page, not whole file.
-			bool									bUseShortSuffixW	= true;								// Append 'w' for Short addressing.
+			MX_ADDRESS_FMT							afFormat						= MX_AF_BYTES_HEX;			// Address format.
+			bool									bLowercaseHex					= false;					// Use lowercase a..f for HEX.
+			bool									bShowColonIn					= true;						// Insert ':' every 4 HEX digits (>4 only).
+			bool									bShowColonAfter					= false;					// Append ':' after the address.
+			bool									bShowTypeSpec					= false;					// Append 'h' (hex) or 'o' (oct).
+			bool									bMinimizeDigits					= false;					// Size digits for current page, not whole file.
+			bool									bUseShortSuffixW				= true;						// Append 'w' for Short addressing.
 		};
 
 		/** Per-view-type style settings. */
@@ -132,15 +132,17 @@ namespace mx {
 			bool									bShowRightArea					= true;						// ASCII column.
 			bool									bShowMiniMap					= true;						// Fixed panel on right.
 			bool									bShowRuler						= true;						// Show/hide ruler row.
+			bool									bShowRulerLabels				= true;						// Show/hide ruler labels.
+			bool									bShowRulerArrows				= true;						// Show/hide ruler arrow.
 
 			// Left numbers formatting.
-			MX_DATA_FMT								dfLeftNumbersFmt				= MX_DF_HEX;
+			MX_DATA_FMT								dfLeftNumbersFmt				= MX_DF_HEX;				// Left area view type.
 			uint32_t								uiGroupSize						= 1;                   		// Extra spacing after every N bytes.
 			uint32_t								uiSpacesBetweenBytes			= 1;          				// Count of ' ' between adjacent bytes.
 			uint32_t								uiExtraSpacesBetweenGroups		= 1;     					// Extra ' ' at group boundary.
 
 			// Right formatting.
-			MX_DATA_FMT								dfRightNumbersFmt				= MX_DF_CHAR;
+			MX_DATA_FMT								dfRightNumbersFmt				= MX_DF_CHAR;				// Right area view type.
 
 			// Paddings/gaps (pixels).
 			int32_t									i32LeftAddrPadding				= 3;						// Left padding.
@@ -376,6 +378,24 @@ namespace mx {
 		
 		// Gets the showing of the ruler.
 		inline bool									GetShowRuler() const { return CurStyle()->bShowRuler; }
+
+		// Sets the showing of the ruler caret.
+		void										SetShowRulerCaret( bool _bEnable ) {
+			CurStyle()->bShowRulerArrows = _bEnable;
+			::InvalidateRect( Wnd(), NULL, FALSE );
+		}
+		
+		// Gets the showing of the ruler caret.
+		inline bool									GetShowRulerCaret() const { return CurStyle()->bShowRulerArrows; }
+
+		// Sets the showing of the ruler labels.
+		void										SetShowRulerLabels( bool _bEnable ) {
+			CurStyle()->bShowRulerLabels = _bEnable;
+			::InvalidateRect( Wnd(), NULL, FALSE );
+		}
+		
+		// Gets the showing of the ruler labels.
+		inline bool									GetShowRulerLabels() const { return CurStyle()->bShowRulerLabels; }
 
 		// Goes to a given address.
 		void										GoTo( uint64_t _ui64Addr, bool _bShowAtTop = false );
@@ -759,7 +779,7 @@ namespace mx {
 		 */
 		int32_t										GetRulerHeightPx() const {
 			if ( !CurStyle()->bShowRuler ) { return 0; }
-			return Font()->iCharCy;
+			return CurStyle()->bShowRulerLabels ? std::max( Font()->iCharCy, 4 ) : 4;
 		}
 
 		/**
