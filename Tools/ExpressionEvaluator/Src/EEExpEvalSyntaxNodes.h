@@ -154,9 +154,14 @@ namespace ee {
 		EE_N_STRING_TOKENIZE,
 		EE_N_BARTLETT,
 		EE_N_BLACKMAN,
+		EE_N_BLACKMANHARRIS,
+		EE_N_BLACKMANNUTTAL,
+		EE_N_FLATTOP,
 		EE_N_HAMMING,
 		EE_N_HANN,
 		EE_N_KAISER,
+		EE_N_LANCZOS,
+		EE_N_NUTTAL,
 	};
 
 	// Constant types.  Ordered by cast priority.

@@ -87,7 +87,7 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 
 %token EE_ADD EE_APPEND EE_ASSIGN EE_AT EE_CAPACITY EE_CLEAR EE_CROSS EE_DOT EE_EMPTY EE_ERASE EE_INSERT EE_MAX_SIZE EE_MAG EE_MAGSQ EE_MUL EE_NORMALIZE EE_RESERVE EE_RESIZE EE_POP_BACK EE_PUSH_BACK EE_SHRINK_TO_FIT EE_SIZE EE_SUB EE_SUM EE_SWAP EE_TOKENIZE
 
-%token EE_BARTLETT EE_BLACKMAN EE_HAMMING EE_HANN EE_KAISER
+%token EE_BARTLETT EE_BLACKMAN EE_BLACKMANHARRIS EE_BLACKMANNUTTAL EE_FLATTOP EE_HAMMING EE_HANN EE_KAISER EE_LANCZOS EE_NUTTAL
 
 %type <sStringIndex>										identifier
 %type <sStringIndex>										string
@@ -796,9 +796,14 @@ intrinsic
 	
 	| EE_BARTLETT '(' exp ')'								{ m_peecContainer->CreateWindowBartlett( $3, $$ ); }
 	| EE_BLACKMAN '(' exp ')'								{ m_peecContainer->CreateWindowBlackman( $3, $$ ); }
+	| EE_BLACKMANHARRIS '(' exp ')'							{ m_peecContainer->CreateWindowBlackmanHarris( $3, $$ ); }
+	| EE_BLACKMANNUTTAL '(' exp ')'							{ m_peecContainer->CreateWindowBlackmanNuttal( $3, $$ ); }
+	| EE_FLATTOP '(' exp ')'								{ m_peecContainer->CreateWindowFlatTop( $3, $$ ); }
 	| EE_HAMMING '(' exp ')'								{ m_peecContainer->CreateWindowHamming( $3, $$ ); }
 	| EE_HANN '(' exp ')'									{ m_peecContainer->CreateWindowHann( $3, $$ ); }
 	| EE_KAISER '(' exp ',' exp ')'							{ m_peecContainer->CreateWindowKaiser( $3, $5, $$ ); }
+	| EE_LANCZOS '(' exp ')'								{ m_peecContainer->CreateWindowLanczos( $3, $$ ); }
+	| EE_NUTTAL '(' exp ')'									{ m_peecContainer->CreateWindowNuttal( $3, $$ ); }
 	;
 
 exp

@@ -1065,6 +1065,15 @@ namespace ee {
 		// Creates a Blackman window.
 		void								CreateWindowBlackman( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a Blackman-Harris window.
+		void								CreateWindowBlackmanHarris( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a Blackman-Nuttal window.
+		void								CreateWindowBlackmanNuttal( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a Flat Top window.
+		void								CreateWindowFlatTop( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
+
 		// Creates a Hamming window.
 		void								CreateWindowHamming( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
 
@@ -1073,6 +1082,12 @@ namespace ee {
 
 		// Creates a Kaiser window.
 		void								CreateWindowKaiser( const YYSTYPE::EE_NODE_DATA &_ndSize, const YYSTYPE::EE_NODE_DATA &_ndBeta, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a Lanczos window.
+		void								CreateWindowLanczos( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates a Nuttal window.
+		void								CreateWindowNuttal( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Sets the translation-unit node.
 		void								SetTrans( YYSTYPE::EE_NODE_DATA &_ndNode );

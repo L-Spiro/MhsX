@@ -575,10 +575,15 @@ RS1_S								[rR]{CS1}
 
 "bartlett"							{ return yy::CExpEvalParser::token::EE_BARTLETT; }
 "blackman"							{ return yy::CExpEvalParser::token::EE_BLACKMAN; }
+"blackmanharris"					{ return yy::CExpEvalParser::token::EE_BLACKMANHARRIS; }
+"blackmannuttal"					{ return yy::CExpEvalParser::token::EE_BLACKMANNUTTAL; }
+"flattop"							{ return yy::CExpEvalParser::token::EE_FLATTOP; }
 "hamming"							{ return yy::CExpEvalParser::token::EE_HAMMING; }
 "hann"								{ return yy::CExpEvalParser::token::EE_HANN; }
 "hanning"							{ return yy::CExpEvalParser::token::EE_HANN; }
 "kaiser"							{ return yy::CExpEvalParser::token::EE_KAISER; }
+"lanczos"							{ return yy::CExpEvalParser::token::EE_LANCZOS; }
+"nuttal"							{ return yy::CExpEvalParser::token::EE_NUTTAL; }
 "sinc"								{ return yy::CExpEvalParser::token::EE_SINC; }
 
 

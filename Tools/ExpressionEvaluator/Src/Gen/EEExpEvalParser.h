@@ -441,15 +441,20 @@ namespace yy {
      EE_TOKENIZE = 581,
      EE_BARTLETT = 582,
      EE_BLACKMAN = 583,
-     EE_HAMMING = 584,
-     EE_HANN = 585,
-     EE_KAISER = 586,
-     EE_OR = 587,
-     EE_AND = 588,
-     EE_LOG_NOT = 589,
-     EE_UNARY_1SCOMPL = 590,
-     EE_UPLUS = 591,
-     EE_UMINUS = 592
+     EE_BLACKMANHARRIS = 584,
+     EE_BLACKMANNUTTAL = 585,
+     EE_FLATTOP = 586,
+     EE_HAMMING = 587,
+     EE_HANN = 588,
+     EE_KAISER = 589,
+     EE_LANCZOS = 590,
+     EE_NUTTAL = 591,
+     EE_OR = 592,
+     EE_AND = 593,
+     EE_LOG_NOT = 594,
+     EE_UNARY_1SCOMPL = 595,
+     EE_UPLUS = 596,
+     EE_UMINUS = 597
    };
 
     };
