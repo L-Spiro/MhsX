@@ -1059,35 +1059,51 @@ namespace ee {
 		// Creates a string tokenization.
 		void								CreateStringTokenize( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndTokenizer, const YYSTYPE::EE_NODE_DATA &_ndIncludeEmpty, YYSTYPE::EE_NODE_DATA &_ndNode );
 
-		// Creates a Bartlett window.
-		void								CreateWindowBartlett( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
+		// Creates a 1-parameter node of a given object type.
+		template <ee::EE_NODES _nType, typename _tType>
+		void								CreateBasicObjectNode( const YYSTYPE::EE_NODE_DATA &_ndParm1, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+			_ndNode.nType = _nType;
+			_ndNode.u.sNodeIndex = _ndParm1.sNodeIndex;
+			_ndNode.w.sNodeIndex = m_vObjects.size();
+			AllocateObject<_tType>();
+			AddNode( _ndNode );
+		}
 
-		// Creates a Blackman window.
-		void								CreateWindowBlackman( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
+		// Creates a 2-parameter node of a given object type.
+		template <ee::EE_NODES _nType, typename _tType>
+		void								CreateBasicObjectNode( const YYSTYPE::EE_NODE_DATA &_ndParm1, const YYSTYPE::EE_NODE_DATA &_ndParm2, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+			_ndNode.nType = _nType;
+			_ndNode.u.sNodeIndex = _ndParm1.sNodeIndex;
+			_ndNode.v.sNodeIndex = _ndParm2.sNodeIndex;
+			_ndNode.w.sNodeIndex = m_vObjects.size();
+			AllocateObject<_tType>();
+			AddNode( _ndNode );
+		}
 
-		// Creates a Blackman-Harris window.
-		void								CreateWindowBlackmanHarris( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
+		// Creates a 3-parameter node of a given object type.
+		template <ee::EE_NODES _nType, typename _tType>
+		void								CreateBasicObjectNode( const YYSTYPE::EE_NODE_DATA &_ndParm1, const YYSTYPE::EE_NODE_DATA &_ndParm2, const YYSTYPE::EE_NODE_DATA &_ndParm3, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+			_ndNode.nType = _nType;
+			_ndNode.u.sNodeIndex = _ndParm1.sNodeIndex;
+			_ndNode.v.sNodeIndex = _ndParm2.sNodeIndex;
+			_ndNode.x.sNodeIndex = _ndParm3.sNodeIndex;
+			_ndNode.w.sNodeIndex = m_vObjects.size();
+			AllocateObject<_tType>();
+			AddNode( _ndNode );
+		}
 
-		// Creates a Blackman-Nuttal window.
-		void								CreateWindowBlackmanNuttal( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
-
-		// Creates a Flat Top window.
-		void								CreateWindowFlatTop( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
-
-		// Creates a Hamming window.
-		void								CreateWindowHamming( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
-
-		// Creates a Hann window.
-		void								CreateWindowHann( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
-
-		// Creates a Kaiser window.
-		void								CreateWindowKaiser( const YYSTYPE::EE_NODE_DATA &_ndSize, const YYSTYPE::EE_NODE_DATA &_ndBeta, YYSTYPE::EE_NODE_DATA &_ndNode );
-
-		// Creates a Lanczos window.
-		void								CreateWindowLanczos( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
-
-		// Creates a Nuttal window.
-		void								CreateWindowNuttal( const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode );
+		// Creates a 4-parameter node of a given object type.
+		template <ee::EE_NODES _nType, typename _tType>
+		void								CreateBasicObjectNode( const YYSTYPE::EE_NODE_DATA &_ndParm1, const YYSTYPE::EE_NODE_DATA &_ndParm2, const YYSTYPE::EE_NODE_DATA &_ndParm3, const YYSTYPE::EE_NODE_DATA &_ndParm4, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+			_ndNode.nType = _nType;
+			_ndNode.u.sNodeIndex = _ndParm1.sNodeIndex;
+			_ndNode.v.sNodeIndex = _ndParm2.sNodeIndex;
+			_ndNode.x.sNodeIndex = _ndParm3.sNodeIndex;
+			_ndNode.y.sNodeIndex = _ndParm4.sNodeIndex;
+			_ndNode.w.sNodeIndex = m_vObjects.size();
+			AllocateObject<_tType>();
+			AddNode( _ndNode );
+		}
 
 		// Sets the translation-unit node.
 		void								SetTrans( YYSTYPE::EE_NODE_DATA &_ndNode );

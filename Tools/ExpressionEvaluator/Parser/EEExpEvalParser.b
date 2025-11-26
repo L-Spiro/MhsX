@@ -32,6 +32,7 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 
 
 #include "../EEExpEvalSyntaxNodes.h"
+#include "../Object/EEVector.h"
 
 
 %}
@@ -87,7 +88,7 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 
 %token EE_ADD EE_APPEND EE_ASSIGN EE_AT EE_CAPACITY EE_CLEAR EE_CROSS EE_DOT EE_EMPTY EE_ERASE EE_INSERT EE_MAX_SIZE EE_MAG EE_MAGSQ EE_MUL EE_NORMALIZE EE_RESERVE EE_RESIZE EE_POP_BACK EE_PUSH_BACK EE_SHRINK_TO_FIT EE_SIZE EE_SUB EE_SUM EE_SWAP EE_TOKENIZE
 
-%token EE_BARTLETT EE_BLACKMAN EE_BLACKMANHARRIS EE_BLACKMANNUTTAL EE_FLATTOP EE_HAMMING EE_HANN EE_KAISER EE_LANCZOS EE_NUTTAL
+%token EE_BARTHANN EE_BARTLETT EE_BLACKMAN EE_BLACKMANHARRIS EE_BLACKMANNUTTAL EE_BOHMAN EE_BOXCAR EE_CHEBWIN EE_COSINE EE_EXPONENTIAL EE_FLATTOP EE_GAUSSIAN EE_GENERAL_COSINE EE_GENERAL_GUASSIAN EE_GENERAL_HAMMING EE_HAMMING EE_HANN EE_KAISER EE_KAISER_BESSEL EE_LANCZOS EE_NUTTAL EE_PARZEN EE_TAYLOR EE_TRIANG EE_TUKEY
 
 %type <sStringIndex>										identifier
 %type <sStringIndex>										string
@@ -794,16 +795,31 @@ intrinsic
 	| EE_TOKENIZE '(' exp ',' exp ',' exp ')'				{ m_peecContainer->CreateStringTokenize( $3, $5, $7, $$ ); }
 	| EE_TOKENIZE '(' string ',' exp ',' exp ')'			{ m_peecContainer->CreateStringTokenize( $3, $5, $7, $$ ); }
 	
-	| EE_BARTLETT '(' exp ')'								{ m_peecContainer->CreateWindowBartlett( $3, $$ ); }
-	| EE_BLACKMAN '(' exp ')'								{ m_peecContainer->CreateWindowBlackman( $3, $$ ); }
-	| EE_BLACKMANHARRIS '(' exp ')'							{ m_peecContainer->CreateWindowBlackmanHarris( $3, $$ ); }
-	| EE_BLACKMANNUTTAL '(' exp ')'							{ m_peecContainer->CreateWindowBlackmanNuttal( $3, $$ ); }
-	| EE_FLATTOP '(' exp ')'								{ m_peecContainer->CreateWindowFlatTop( $3, $$ ); }
-	| EE_HAMMING '(' exp ')'								{ m_peecContainer->CreateWindowHamming( $3, $$ ); }
-	| EE_HANN '(' exp ')'									{ m_peecContainer->CreateWindowHann( $3, $$ ); }
-	| EE_KAISER '(' exp ',' exp ')'							{ m_peecContainer->CreateWindowKaiser( $3, $5, $$ ); }
-	| EE_LANCZOS '(' exp ')'								{ m_peecContainer->CreateWindowLanczos( $3, $$ ); }
-	| EE_NUTTAL '(' exp ')'									{ m_peecContainer->CreateWindowNuttal( $3, $$ ); }
+	| EE_BARTHANN '(' exp ')'								{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_BARTHANN, ee::CVector>( $3, $$ ); }
+	| EE_BARTLETT '(' exp ')'								{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_BARTLETT, ee::CVector>( $3, $$ ); }
+	| EE_BLACKMAN '(' exp ')'								{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_BLACKMAN, ee::CVector>( $3, $$ ); }
+	| EE_BLACKMANHARRIS '(' exp ')'							{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_BLACKMANHARRIS, ee::CVector>( $3, $$ ); }
+	| EE_BLACKMANNUTTAL '(' exp ')'							{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_BLACKMANNUTTAL, ee::CVector>( $3, $$ ); }
+	| EE_BOHMAN '(' exp ')'									{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_BOHMAN, ee::CVector>( $3, $$ ); }
+	| EE_BOXCAR '(' exp ')'									{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_BOXCAR, ee::CVector>( $3, $$ ); }
+	| EE_CHEBWIN '(' exp ',' exp ')'						{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_CHEBWIN, ee::CVector>( $3, $5, $$ ); }
+	| EE_COSINE '(' exp ')'									{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_COSINE, ee::CVector>( $3, $$ ); }
+	| EE_EXPONENTIAL '(' exp ',' exp ',' exp ')'			{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_EXPONENTIAL, ee::CVector>( $3, $5, $7, $$ ); }
+	| EE_FLATTOP '(' exp ')'								{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_FLATTOP, ee::CVector>( $3, $$ ); }
+	| EE_GAUSSIAN '(' exp ',' exp ')'						{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_GAUSSIAN, ee::CVector>( $3, $5, $$ ); }
+	| EE_GENERAL_COSINE '(' exp ',' exp ')'					{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_GENERAL_COSINE, ee::CVector>( $3, $5, $$ ); }
+	| EE_GENERAL_GUASSIAN '(' exp ',' exp ',' exp ')'		{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_GENERAL_GAUSSIAN, ee::CVector>( $3, $5, $7, $$ ); }
+	| EE_GENERAL_HAMMING '(' exp ',' exp ')'				{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_GENERAL_HAMMING, ee::CVector>( $3, $5, $$ ); }
+	| EE_HANN '(' exp ')'									{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_HANN, ee::CVector>( $3, $$ ); }
+	| EE_HAMMING '(' exp ')'								{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_HAMMING, ee::CVector>( $3, $$ ); }
+	| EE_KAISER '(' exp ',' exp ')'							{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_KAISER, ee::CVector>( $3, $5, $$ ); }
+	| EE_KAISER_BESSEL '(' exp ',' exp ')'					{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_KAISER_BESSEL, ee::CVector>( $3, $5, $$ ); }
+	| EE_LANCZOS '(' exp ')'								{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_LANCZOS, ee::CVector>( $3, $$ ); }
+	| EE_NUTTAL '(' exp ')'									{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_NUTTAL, ee::CVector>( $3, $$ ); }
+	| EE_PARZEN '(' exp ')'									{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_PARZEN, ee::CVector>( $3, $$ ); }
+	| EE_TAYLOR '(' exp ',' exp ',' exp ',' exp ')'			{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_TAYLOR, ee::CVector>( $3, $5, $7, $9, $$ ); }
+	| EE_TRIANG '(' exp ')'									{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_TRIANG, ee::CVector>( $3, $$ ); }
+	| EE_TUKEY '(' exp ',' exp ')'							{ m_peecContainer->CreateBasicObjectNode<ee::EE_N_TUKEY, ee::CVector>( $3, $5, $$ ); }
 	;
 
 exp

@@ -573,18 +573,34 @@ RS1_S								[rR]{CS1}
 "swap"								{ return yy::CExpEvalParser::token::EE_SWAP; }
 "tokenize"							{ return yy::CExpEvalParser::token::EE_TOKENIZE; }
 
+"barthann"							{ return yy::CExpEvalParser::token::EE_BARTHANN; }
 "bartlett"							{ return yy::CExpEvalParser::token::EE_BARTLETT; }
 "blackman"							{ return yy::CExpEvalParser::token::EE_BLACKMAN; }
 "blackmanharris"					{ return yy::CExpEvalParser::token::EE_BLACKMANHARRIS; }
-"blackmannuttal"					{ return yy::CExpEvalParser::token::EE_BLACKMANNUTTAL; }
+"blackmannuttall"					{ return yy::CExpEvalParser::token::EE_BLACKMANNUTTAL; }
+"bohman"							{ return yy::CExpEvalParser::token::EE_BOHMAN; }
+"boxcar"							{ return yy::CExpEvalParser::token::EE_BOXCAR; }
+"chebwin"							{ return yy::CExpEvalParser::token::EE_CHEBWIN; }
+"cosine"							{ return yy::CExpEvalParser::token::EE_COSINE; }
+"exponential"						{ return yy::CExpEvalParser::token::EE_EXPONENTIAL; }
 "flattop"							{ return yy::CExpEvalParser::token::EE_FLATTOP; }
+"gaussian"							{ return yy::CExpEvalParser::token::EE_GAUSSIAN; }
+"general_cosine"					{ return yy::CExpEvalParser::token::EE_GENERAL_COSINE; }
+"general_gaussian"					{ return yy::CExpEvalParser::token::EE_GENERAL_GUASSIAN; }
+"general_hamming"					{ return yy::CExpEvalParser::token::EE_GENERAL_HAMMING; }
 "hamming"							{ return yy::CExpEvalParser::token::EE_HAMMING; }
 "hann"								{ return yy::CExpEvalParser::token::EE_HANN; }
 "hanning"							{ return yy::CExpEvalParser::token::EE_HANN; }
 "kaiser"							{ return yy::CExpEvalParser::token::EE_KAISER; }
+"kaiser_bessel_derived"				{ return yy::CExpEvalParser::token::EE_KAISER_BESSEL; }
 "lanczos"							{ return yy::CExpEvalParser::token::EE_LANCZOS; }
-"nuttal"							{ return yy::CExpEvalParser::token::EE_NUTTAL; }
+"nuttall"							{ return yy::CExpEvalParser::token::EE_NUTTAL; }
+"parzen"							{ return yy::CExpEvalParser::token::EE_PARZEN; }
 "sinc"								{ return yy::CExpEvalParser::token::EE_SINC; }
+"taylor"							{ return yy::CExpEvalParser::token::EE_TAYLOR; }
+"triang"							{ return yy::CExpEvalParser::token::EE_TRIANG; }
+"tukey"								{ return yy::CExpEvalParser::token::EE_TUKEY; }
+
 
 
 "CHAR_BIT"							{ return yy::CExpEvalParser::token::EE_CHAR_BIT; }

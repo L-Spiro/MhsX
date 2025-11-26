@@ -64,6 +64,9 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 	MX_NEW_STRING( szMSplitter, 10 );
 	MX_NEW_STRING( szTreeView, 14 );
 	MX_NEW_STRING( szTreeListView, 12 );
+
+	mx::CUtilities::MX_FEROUNDMODE rmRound( FE_TONEAREST );
+
 #undef MX_NEW_STRING
 	lsw::CBase::Initialize( _hInstance, new mx::CLayoutManager(),
 		&szDockable[0],

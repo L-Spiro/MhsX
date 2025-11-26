@@ -195,8 +195,8 @@ namespace ee {
 		 * \return Returns the digit value in the range 0..9 on success; otherwise -1.
 		 **/
 		static inline int32_t			DigitValWide( wchar_t _wcVal ) {
-			if( _wcVal >= L'0' && _wcVal <= L'9' ) { return static_cast<int32_t>(_wcVal - L'0'); }
-			if( _wcVal >= L'\uFF10' && _wcVal <= L'\uFF19' ) { return static_cast<int32_t>(_wcVal - L'\uFF10'); }
+			if ( _wcVal >= L'0' && _wcVal <= L'9' ) { return static_cast<int32_t>(_wcVal - L'0'); }
+			if ( _wcVal >= L'\uFF10' && _wcVal <= L'\uFF19' ) { return static_cast<int32_t>(_wcVal - L'\uFF10'); }
 			return -1;
 		}
 
@@ -385,9 +385,9 @@ namespace ee {
 					}
 
 					// Same effective length: compare digit-by-digit.
-					for( size_t i = 0; i < sLenA; ++i ) {
-						const int32_t i32A = DigitValWide( FoldCharBasicJa( _wsA[sZa + i] ) );
-						const int32_t i32B = DigitValWide( FoldCharBasicJa( _wsB[sZb + i] ) );
+					for ( size_t I = 0; I < sLenA; ++I ) {
+						const int32_t i32A = DigitValWide( FoldCharBasicJa( _wsA[sZa + I] ) );
+						const int32_t i32B = DigitValWide( FoldCharBasicJa( _wsB[sZb + I] ) );
 						if ( i32A < i32B ) { return -1; }
 						if ( i32A > i32B ) { return 1; }
 					}
@@ -1873,113 +1873,28 @@ namespace ee {
 		static bool						PreprocessingDirectives( const std::string &_sInput, std::string &_sDirective, std::string &_sParms );
 
 		/**
-		 * Creates a Hann window.
+		 * Internal helper to guard trivial window sizes.
 		 * 
-		 * \param _sN	Number of samples.  Generally an odd number.
-		 * \param _vRet	The returned vector.
-		 * \return		Returns true if there was enough memory to resize the vector.
+		 * \param _sN   Number of samples.
+		 * \param _vRet Returned vector.
+		 * \return      Returns true if handled or memory was available; false on allocation failure.
 		 **/
-		template <typename _tType = double>
-		static bool						HannWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+		template <typename _tType>
+		static bool						HandleTrivialWindow( size_t _sN, std::vector<_tType> &_vRet ) {
 			try {
-				_vRet.resize( _sN );
-
-				const double dTau = 2.0 * std::numbers::pi;
-				size_t stMax = _vRet.size() - 1;
-				double dInvMax = 1.0 / stMax;
-				double dTauInvMax = dTau * dInvMax;
-				for ( auto I = _vRet.size(); I--; ) {
-					_vRet[I] = _tType( 0.5 - 0.5 * std::cos( dTauInvMax * I ) );
+				if ( _sN == 0 ) {
+					_vRet.clear();
+					return true;
 				}
-
+				_vRet.resize( _sN );
+				if ( _sN == 1 ) {
+					_vRet[0] = _tType( 1 );
+				}
 				return true;
 			}
-			catch ( ... ) { return false; }
-		}
-
-		/**
-		 * Creates a Hamming window.
-		 * 
-		 * \param _sN	Number of samples.  Generally an odd number.
-		 * \param _vRet	The returned vector.
-		 * \return		Returns true if there was enough memory to resize the vector.
-		 **/
-		template <typename _tType = double>
-		static bool						HammingWindow( size_t _sN, std::vector<_tType> &_vRet ) {
-			try {
-				_vRet.resize( _sN );
-
-				const double dTau = 2.0 * std::numbers::pi;
-				size_t stMax = _vRet.size() - 1;
-				double dInvMax = 1.0 / stMax;
-				double dTauInvMax = dTau * dInvMax;
-				for ( auto I = _vRet.size(); I--; ) {
-					_vRet[I] = _tType( 0.53836 - 0.46164 * std::cos( dTauInvMax * I ) );
-				}
-
-				return true;
+			catch ( ... ) {
+				return false;
 			}
-			catch ( ... ) { return false; }
-		}
-
-		/**
-		 * Creates a Blackman window.
-		 * 
-		 * \param _sN	Number of samples.  Generally an odd number.
-		 * \param _vRet	The returned vector.
-		 * \return		Returns true if there was enough memory to resize the vector.
-		 **/
-		template <typename _tType = double>
-		static bool						BlackmanWindow( size_t _sN, std::vector<_tType> &_vRet ) {
-			// These exact values place zeros at the third and fourth sidelobes, but result in a discontinuity at the edges and a 6 dB/oct fall-off.
-			//constexpr double dA0 = 7938.0 / 18608.0;	// 0.42659071367153911236158592146239243447780609130859375
-			//constexpr double dA1 = 9240.0 / 18608.0;	// 0.4965606190885640813803547644056379795074462890625
-			//constexpr double dA2 = 1430.0 / 18608.0;	// 0.07684866723989682013584712194642634131014347076416015625
-			
-			// The truncated coefficients do not null the sidelobes as well, but have an improved 18 dB/oct fall-off.
-			constexpr double dA = 0.16;					// 0.1600000000000000033306690738754696212708950042724609375
-			constexpr double dA0 = (1.0 - dA) / 2.0;	// 0.419999999999999984456877655247808434069156646728515625
-			constexpr double dA1 = 1.0 / 2.0;			// 0.5
-			constexpr double dA2 = dA / 2.0;			// 0.08000000000000000166533453693773481063544750213623046875
-			try {
-				_vRet.resize( _sN );
-
-				const double dTau = 2.0 * std::numbers::pi;
-				size_t stMax = _vRet.size() - 1;
-				double dInvMax = 1.0 / stMax;
-				double dTauInvMax = dTau * dInvMax;
-				double dTauInvMax2 = 2.0 * dTauInvMax;
-				for ( auto I = _vRet.size(); I--; ) {
-					_vRet[I] = _tType( dA0 - dA1 * std::cos( dTauInvMax * I ) + dA2 * std::cos( dTauInvMax2 * I ) );
-				}
-
-				return true;
-			}
-			catch ( ... ) { return false; }
-		}
-
-		/**
-		 * Creates a Bartlett window.
-		 * 
-		 * \param _sN	Number of samples.  Generally an odd number.
-		 * \param _vRet	The returned vector.
-		 * \return		Returns true if there was enough memory to resize the vector.
-		 **/
-		template <typename _tType = double>
-		static bool						BartlettWindow( size_t _sN, std::vector<_tType> &_vRet ) {
-			try {
-				_vRet.resize( _sN );
-
-				size_t stMax = _vRet.size() - 1;
-				double d2InvMax = 2.0 / stMax;
-				double dHalfMax = stMax / 2.0;
-				for ( auto I = _vRet.size(); I--; ) {
-					_vRet[I] = _tType( d2InvMax * (dHalfMax - std::abs( I - dHalfMax )) );
-				}
-
-				return true;
-			}
-			catch ( ... ) { return false; }
 		}
 
 		/**
@@ -2004,95 +1919,90 @@ namespace ee {
 		}
 
 		/**
-		 * Creates a Kaiser window.
+		 * Barthann (modified Bartlett-Hann) window.
 		 * 
-		 * \param _sN		Number of samples.  Generally an odd number.
-		 * \param _tBeta	The beta parameter.
-		 * \param _vRet		The returned vector.
-		 * \return			Returns true if there was enough memory to resize the vector.
+		 * \brief
+		 * Returns a modified Bartlett-Hann window (Barthann).
+		 * A common definition is:
+		 *   x = n / (N-1)
+		 *   w[n] = 0.62
+		 *          - 0.48 * |x - 0.5|
+		 *          - 0.38 * cos( 2*pi*x ).
+		 * 
+		 * \param _sN   Number of samples.
+		 * \param _vRet Returned vector.
+		 * \return      Returns true if there was enough memory to resize the vector.
 		 **/
 		template <typename _tType = double>
-		static bool						KaiserWindow( size_t _sN, _tType _tBeta, std::vector<_tType> &_vRet ) {
-			try {
-				_vRet.resize( _sN );
+		static bool						BarthannWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN == 1 ) { return true; }
 
-				double dDenominator = Bessel0( double( _tBeta ) );
-
-				for ( size_t I = 0; I < _sN; ++I ) {
-					double dRatio = 0.0;
-					if ( _sN > 1 ) {
-						dRatio = (2.0 * I) / (_sN - 1) - 1.0;
-					}
-					double dArg = _tBeta * std::sqrt( 1.0 - dRatio * dRatio );
-					_vRet[I] = _tType( Bessel0( dArg ) / dDenominator );
-				}
-
-
-				return true;
+			double dDen = double( _sN - 1 );
+			for ( auto I = _sN; I--; ) {
+				double dX = double( I ) / dDen;
+				double dV = 0.62
+							- 0.48 * std::fabs( dX - 0.5 )
+							- 0.38 * std::cos( 2.0 * EE_PI * dX );
+				_vRet[I] = _tType( dV );
 			}
-			catch ( ... ) { return false; }
+			return true;
 		}
 
 		/**
-		 * Creates a Nuttal window.
+		 * Creates a Bartlett window.
 		 * 
 		 * \param _sN	Number of samples.  Generally an odd number.
 		 * \param _vRet	The returned vector.
 		 * \return		Returns true if there was enough memory to resize the vector.
 		 **/
 		template <typename _tType = double>
-		static bool						NuttalWindow( size_t _sN, std::vector<_tType> &_vRet ) {
-			constexpr double dA0 = 0.355768;			// 0.35576799999999997314859001562581397593021392822265625
-			constexpr double dA1 = 0.487396;			// 0.487395999999999995910826555700623430311679840087890625
-			constexpr double dA2 = 0.144232;			// 0.1442319999999999990958343687452725134789943695068359375
-			constexpr double dA3 = 0.012604;			// 0.0126040000000000006197264923457623808644711971282958984375
-			try {
-				_vRet.resize( _sN );
+		static bool						BartlettWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN <= 1 ) { return true; }
 
-				const double dTau = 2.0 * std::numbers::pi;
-				size_t stMax = _vRet.size() - 1;
-				double dInvMax = 1.0 / stMax;
-				double dTauInvMax = dTau * dInvMax;
-				double dTauInvMax2 = 2.0 * dTauInvMax;
-				double dTauInvMax3 = 3.0 * dTauInvMax;
-				for ( auto I = _vRet.size(); I--; ) {
-					_vRet[I] = _tType( dA0 - dA1 * std::cos( dTauInvMax * I ) + dA2 * std::cos( dTauInvMax2 * I ) - dA3 * std::cos( dTauInvMax3 * I ) );
-				}
-
-				return true;
+			size_t stMax = _vRet.size() - 1;
+			double d2InvMax = 2.0 / stMax;
+			double dHalfMax = stMax / 2.0;
+			for ( auto I = _sN; I--; ) {
+				_vRet[I] = _tType( d2InvMax * (dHalfMax - std::abs( I - dHalfMax )) );
 			}
-			catch ( ... ) { return false; }
+
+			return true;
 		}
 
 		/**
-		 * Creates a Blackman-Nuttal window.
+		 * Creates a Blackman window.
 		 * 
 		 * \param _sN	Number of samples.  Generally an odd number.
 		 * \param _vRet	The returned vector.
 		 * \return		Returns true if there was enough memory to resize the vector.
 		 **/
 		template <typename _tType = double>
-		static bool						BlackmanNuttalWindow( size_t _sN, std::vector<_tType> &_vRet ) {
-			constexpr double dA0 = 0.3635819;			// 0.3635819000000000134065203383215703070163726806640625
-			constexpr double dA1 = 0.4891775;			// 0.489177499999999987334575735076214186847209930419921875
-			constexpr double dA2 = 0.1365995;			// 0.1365995000000000125783827797931735403835773468017578125
-			constexpr double dA3 = 0.0106411;			// 0.01064110000000000055830895462349872104823589324951171875
-			try {
-				_vRet.resize( _sN );
+		static bool						BlackmanWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			// These exact values place zeros at the third and fourth sidelobes, but result in a discontinuity at the edges and a 6 dB/oct fall-off.
+			//constexpr double dA0 = 7938.0 / 18608.0;	// 0.42659071367153911236158592146239243447780609130859375
+			//constexpr double dA1 = 9240.0 / 18608.0;	// 0.4965606190885640813803547644056379795074462890625
+			//constexpr double dA2 = 1430.0 / 18608.0;	// 0.07684866723989682013584712194642634131014347076416015625
+			
+			// The truncated coefficients do not null the sidelobes as well, but have an improved 18 dB/oct fall-off.
+			constexpr double dA = 0.16;					// 0.1600000000000000033306690738754696212708950042724609375
+			constexpr double dA0 = (1.0 - dA) / 2.0;	// 0.419999999999999984456877655247808434069156646728515625
+			constexpr double dA1 = 1.0 / 2.0;			// 0.5
+			constexpr double dA2 = dA / 2.0;			// 0.08000000000000000166533453693773481063544750213623046875
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN <= 1 ) { return true; }
 
-				const double dTau = 2.0 * std::numbers::pi;
-				size_t stMax = _vRet.size() - 1;
-				double dInvMax = 1.0 / stMax;
-				double dTauInvMax = dTau * dInvMax;
-				double dTauInvMax2 = 2.0 * dTauInvMax;
-				double dTauInvMax3 = 3.0 * dTauInvMax;
-				for ( auto I = _vRet.size(); I--; ) {
-					_vRet[I] = _tType( dA0 - dA1 * std::cos( dTauInvMax * I ) + dA2 * std::cos( dTauInvMax2 * I ) - dA3 * std::cos( dTauInvMax3 * I ) );
-				}
-
-				return true;
+			const double dTau = 2.0 * std::numbers::pi;
+			size_t stMax = _vRet.size() - 1;
+			double dInvMax = 1.0 / stMax;
+			double dTauInvMax = dTau * dInvMax;
+			double dTauInvMax2 = 2.0 * dTauInvMax;
+			for ( auto I = _sN; I--; ) {
+				_vRet[I] = _tType( dA0 - dA1 * std::cos( dTauInvMax * I ) + dA2 * std::cos( dTauInvMax2 * I ) );
 			}
-			catch ( ... ) { return false; }
+
+			return true;
 		}
 
 		/**
@@ -2108,19 +2018,471 @@ namespace ee {
 			constexpr double dA1 = 0.48829;				// 0.48829000000000000181188397618825547397136688232421875
 			constexpr double dA2 = 0.14128;				// 0.1412799999999999889244151063394383527338504791259765625
 			constexpr double dA3 = 0.01168;				// 0.0116799999999999994104715739240418770350515842437744140625
-			try {
-				_vRet.resize( _sN );
 
-				const double dTau = 2.0 * std::numbers::pi;
-				size_t stMax = _vRet.size() - 1;
-				double dInvMax = 1.0 / stMax;
-				double dTauInvMax = dTau * dInvMax;
-				double dTauInvMax2 = 2.0 * dTauInvMax;
-				double dTauInvMax3 = 3.0 * dTauInvMax;
-				for ( auto I = _vRet.size(); I--; ) {
-					_vRet[I] = _tType( dA0 - dA1 * std::cos( dTauInvMax * I ) + dA2 * std::cos( dTauInvMax2 * I ) - dA3 * std::cos( dTauInvMax3 * I ) );
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN <= 1 ) { return true; }
+
+			const double dTau = 2.0 * std::numbers::pi;
+			size_t stMax = _vRet.size() - 1;
+			double dInvMax = 1.0 / stMax;
+			double dTauInvMax = dTau * dInvMax;
+			double dTauInvMax2 = 2.0 * dTauInvMax;
+			double dTauInvMax3 = 3.0 * dTauInvMax;
+			for ( auto I = _sN; I--; ) {
+				_vRet[I] = _tType( dA0 - dA1 * std::cos( dTauInvMax * I ) + dA2 * std::cos( dTauInvMax2 * I ) - dA3 * std::cos( dTauInvMax3 * I ) );
+			}
+
+			return true;
+		}
+
+		/**
+		 * Creates a Blackman-Nuttal window.
+		 * 
+		 * \param _sN	Number of samples.  Generally an odd number.
+		 * \param _vRet	The returned vector.
+		 * \return		Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						BlackmanNuttalWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			constexpr double dA0 = 0.3635819;			// 0.3635819000000000134065203383215703070163726806640625
+			constexpr double dA1 = 0.4891775;			// 0.489177499999999987334575735076214186847209930419921875
+			constexpr double dA2 = 0.1365995;			// 0.1365995000000000125783827797931735403835773468017578125
+			constexpr double dA3 = 0.0106411;			// 0.01064110000000000055830895462349872104823589324951171875
+
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN <= 1 ) { return true; }
+
+			const double dTau = 2.0 * std::numbers::pi;
+			size_t stMax = _vRet.size() - 1;
+			double dInvMax = 1.0 / stMax;
+			double dTauInvMax = dTau * dInvMax;
+			double dTauInvMax2 = 2.0 * dTauInvMax;
+			double dTauInvMax3 = 3.0 * dTauInvMax;
+			for ( auto I = _sN; I--; ) {
+				_vRet[I] = _tType( dA0 - dA1 * std::cos( dTauInvMax * I ) + dA2 * std::cos( dTauInvMax2 * I ) - dA3 * std::cos( dTauInvMax3 * I ) );
+			}
+
+			return true;
+		}
+
+		/**
+		 * Bohman window.
+		 * 
+		 * \brief
+		 * Returns a Bohman window:
+		 * Let M = (N - 1) / 2.
+		 *   r = |k / M - 1|
+		 *   w[k] = (1 - r) cos( pi*r ) + (1/pi) sin( pi*r ).
+		 * 
+		 * \param _sN   Number of samples.
+		 * \param _vRet Returned vector.
+		 * \return      Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						BohmanWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN == 1 ) { return true; }
+
+			try {
+				double dM = (double( _sN ) - 1.0) * 0.5;
+				double dInvPi = 1.0 / EE_PI;
+				for ( auto I = _sN; I--; ) {
+					double dR = std::fabs( double(I) / dM - 1.0 );
+					double dCr, dSr;
+					::SinCos( EE_PI * dR, &dSr, &dCr );
+					double dV = (1.0 - dR) * dCr + dInvPi * dSr;
+					_vRet[I] = _tType( dV );
+				}
+				return true;
+			}
+			catch ( ... ) { return false; }
+		}
+
+		/**
+		 * Boxcar (rectangular) window.
+		 * 
+		 * \brief
+		 * Returns a simple boxcar window of ones.
+		 * 
+		 * \param _sN   Number of samples.
+		 * \param _vRet Returned vector.
+		 * \return      Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						BoxcarWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			for ( auto I = _sN; I--; ) {
+				_vRet[I] = _tType( 1 );
+			}
+			return true;
+		}
+
+		/**
+		 * Creates a Dolph-Chebyshev (Chebwin) window.
+		 * 
+		 * \brief
+		 * Implements the same Chebyshev window as scipy.signal.windows.chebwin()
+		 * / MATLAB's chebwin(), using the Lyons procedure:
+		 *   - M samples total.
+		 *   - Sidelobe attenuation of _dAt dB.
+		 *   - Window is normalized so that max( w[n] ) == 1.
+		 * 
+		 * \param _sM	Number of samples in the window (M).
+		 * \param _dAt	Sidelobe attenuation in dB (e.g., 100.0).
+		 * \param _vRet	The returned window values.
+		 * \return		Returns true if there was enough memory to resize the vector.
+		 **/
+		template<typename _tType = double>
+		static bool						ChebwinWindow( size_t _sM, double _dAt, std::vector<_tType> &_vRet ) {
+			try {
+				if ( !HandleTrivialWindow( _sM, _vRet ) ) { return false; }
+				if ( _sM == 1 ) { return true; }
+
+				// Non-positive attenuation degenerates toward a boxcar.
+				if ( _dAt <= 0.0 ) {
+					for ( size_t I = 0; I < _sM; ++I ) {
+						_vRet[I] = _tType( 1 );
+					}
+					return true;
 				}
 
+				const size_t sM = _sM;
+				const size_t sN = sM - 1;		// Lyons: N = M - 1.
+
+				// Step 2: γ controls sidelobe level, sidelobes at -20*γ dB.
+				const double dGamma = _dAt / 20.0;
+				const double dTenGamma = std::pow( 10.0, dGamma );
+
+				// Step 3: α = cosh( acosh(10^γ) / N ).
+				const double dAlpha = std::cosh( std::acosh( dTenGamma ) / double( sN ) );
+
+				// Step 4 & 5: Build W(m) sequence in the frequency domain.
+				std::vector<double> vW;
+				vW.resize( sN );
+
+				for ( size_t M = 0; M < sN; ++M ) {
+					const double dCos = std::cos( EE_PI * double( M ) / double( sN ) );
+					const double dA = std::fabs( dAlpha * dCos );
+
+					double dVal;
+					if ( dA > 1.0 ) {
+						// W(M) = (-1)^M * cosh( N * acosh( |A(M)| ) ).
+						dVal = std::cosh( double( sN ) * std::acosh( dA ) );
+					}
+					else {
+						// W(M) = (-1)^M * cos( N * acos( |A(M)| ) ).
+						dVal = std::cos( double( sN ) * std::acos( dA ) );
+					}
+
+					if ( M & 1 ) { dVal = -dVal; }
+					vW[M] = dVal;
+				}
+
+				// Lyons 2011 update: If M is even and we used |A(m)|, flip the last M/2 - 1 W(m)'s.
+				if ( (sM & 1) == 0 ) {
+					const size_t sHalf = sM / 2;
+					if ( sHalf > 1 ) {
+						const size_t sCount = sHalf - 1;
+						const size_t sStart = sN - sCount;
+						for ( size_t m = sStart; m < sN; ++m ) {
+							vW[m] = -vW[m];
+						}
+					}
+				}
+
+				// Step 6: N-point inverse DFT of W(m), but we can ignore the 1/N scale factor
+				// because we'll normalize later. Only the real part is needed, so we use cos().
+				std::vector<double> vTmp;
+				vTmp.resize( sN );
+
+				for ( size_t N = 0; N < sN; ++N ) {
+					double dSum = 0.0;
+					for ( size_t K = 0; K < sN; ++K ) {
+						const double dAngle = 2.0 * EE_PI * double( N * K ) / double( sN );
+						dSum += vW[K] * std::cos( dAngle );
+					}
+					vTmp[N] = dSum;
+				}
+
+				// Step 7: Replace w(0) with w(0)/2.
+				vTmp[0] *= 0.5;
+
+				// Step 8: Append w(0) to create M-sample symmetric sequence.
+				std::vector<double> vCheb;
+				vCheb.resize( sM );
+				for ( size_t N = 0; N < sN; ++N ) {
+					vCheb[N] = vTmp[N];
+				}
+				vCheb[sM-1] = vTmp[0];
+
+				// Step 9: Normalize so that max( |w(k)| ) == 1.
+				double dMax = 0.0;
+				for ( size_t N = 0; N < sM; ++N ) {
+					const double dAbs = std::fabs( vCheb[N] );
+					if ( dAbs > dMax ) {
+						dMax = dAbs;
+					}
+				}
+				if ( dMax == 0.0 ) {
+					dMax = 1.0;
+				}
+
+				for ( size_t N = 0; N < sM; ++N ) {
+					_vRet[N] = _tType( vCheb[N] / dMax );
+				}
+
+				return true;
+			}
+			catch ( ... ) { return false; }
+		}
+
+		/**
+		 * Cosine window (a.k.a. sine window).
+		 * 
+		 * \brief
+		 * Returns a window with a simple cosine shape:
+		 *   w[n] = sin( pi * n / (N-1) ),  0 <= n < N, N > 1.
+		 * 
+		 * \param _sN   Number of samples.
+		 * \param _vRet Returned vector.
+		 * \return      Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						CosineWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN == 1 ) { return true; }
+
+			double dDen = double( _sN - 1 );
+			for ( auto I = _sN; I--; ) {
+				double dV = std::sin( EE_PI * double(I) / dDen );
+				_vRet[I] = _tType( dV );
+			}
+			return true;
+		}
+
+		/**
+		 * Computes Discrete Prolate Spheroidal Sequences (DPSS), similar to scipy.signal.windows.dpss().
+		 * 
+		 * \brief
+		 * Generates the first Kmax DPSS tapers (orders [0..(_sKmax-1)]) for a given sequence length and
+		 * time-halfbandwidth product NW. The tapers are the eigenvectors of a symmetric tridiagonal matrix
+		 * (Percival & Walden form), found here via power iteration with deflation.
+		 * 
+		 * \param _sM          Length of each window (M). 0 => No output. 1 => All windows are [1].
+		 * \param _dNW         Time-halfbandwidth product NW (standardized half bandwidth).
+		 * \param _sKmax       Number of windows to generate (orders 0.._sKmax-1). 0 => No output.
+		 * \param _vvRet       Returned windows. On success, resized to [_sKmax][_sM]. Each window has L2 norm 1.
+		 * \param _pvRatios    Optional output for associated eigenvalues (concentration-like ratios). Can be nullptr.
+		 * \return             Returns true if all allocations succeeded.
+		 **/
+		template<typename _tType = double>
+		static bool							DpssWindows( size_t _sM, double _dNW, size_t _sKmax, std::vector<std::vector<_tType>> &_vvRet, std::vector<double> *_pvRatios = nullptr ) {
+			try {
+				_vvRet.clear();
+				if ( _pvRatios ) {
+					_pvRatios->clear();
+				}
+
+				if ( _sM == 0 || _sKmax == 0 ) { return true; }
+
+				_vvRet.resize( _sKmax );
+				for ( size_t K = 0; K < _sKmax; ++K ) { _vvRet[K].resize( _sM ); }
+
+				if ( _sM == 1 ) {
+					// Trivial 1-sample windows: all [1].
+					for ( size_t K = 0; K < _sKmax; ++K ) {
+						_vvRet[K][0] = _tType( 1 );
+						if ( _pvRatios ) { _pvRatios->push_back( 1.0 ); }
+					}
+					return true;
+				}
+
+				// ===============================
+				// Build the symmetric tridiagonal matrix.
+				// ===============================
+				std::vector<double> vDiag( _sM );
+				std::vector<double> vOff( _sM > 1 ? _sM - 1 : 0 );
+
+				// W = NW / M; the cosine term uses cos( 2*pi*W ) == cos( 2*pi*NW/M ).
+				double dCos = std::cos( 2.0 * EE_PI * _dNW / double( _sM ) );
+
+				for ( size_t I = 0; I < _sM; ++I ) {
+					double dTmp = 0.5 * (double( _sM ) - 2.0 * double( I ) - 1.0);
+					vDiag[I] = dTmp * dTmp * dCos;
+				}
+				for ( size_t I = 1; I < _sM; ++I ) {
+					// Off-diagonal entries: 0.5 * n * (M - n), n = 1..M-1.
+					vOff[I-1] = 0.5 * double( I ) * (double( _sM ) - double( I ));
+				}
+
+				// ===============================
+				// Helper: y = A * x for symmetric tridiagonal A.
+				// ===============================
+				auto MatVec = [&vDiag, &vOff]( const std::vector<double> &_vIn, std::vector<double> &_vOut ) {
+					size_t sN = vDiag.size();
+					_vOut.resize( sN );
+					if ( sN == 0 ) { return; }
+					if ( sN == 1 ) {
+						_vOut[0] = vDiag[0] * _vIn[0];
+						return;
+					}
+
+					_vOut[0] = vDiag[0] * _vIn[0] + vOff[0] * _vIn[1];
+					for ( size_t I = 1; I + 1 < sN; ++I ) {
+						_vOut[I] = vOff[I-1] * _vIn[I-1] + vDiag[I] * _vIn[I] + vOff[I] * _vIn[I+1];
+					}
+					_vOut[sN-1] = vOff[sN-2] * _vIn[sN-2] + vDiag[sN-1] * _vIn[sN-1];
+				};
+
+				// ===============================
+				// Power iteration with simple deflation to get Kmax largest eigenpairs.
+				// ===============================
+				const uint32_t ui32MaxIter = 2000;
+				const double dTol = 1.0e-12;
+
+				std::vector<double> vCur( _sM );
+				std::vector<double> vNext( _sM );
+				std::vector<double> vAx( _sM );
+				std::vector<std::vector<double>> vPrevEig;
+				vPrevEig.reserve( _sKmax );
+				if ( _pvRatios ) {
+					_pvRatios->reserve( _sKmax );
+				}
+
+				for ( size_t K = 0; K < _sKmax; ++K ) {
+					// ---- Initial guess.
+					// Start with a simple constant vector, then gently modulate for higher orders.
+					for ( size_t I = 0; I < _sM; ++I ) {
+						vCur[I] = 1.0;
+					}
+					if ( K > 0 ) {
+						for ( size_t I = 0; I < _sM; ++I ) {
+							double dPhase = EE_PI * double( K * (2 * I + 1) ) / (2.0 * double( _sM ));
+							vCur[I] *= std::cos( dPhase );
+						}
+					}
+
+					// Orthogonalize initial guess against previously found eigenvectors.
+					for ( size_t J = 0; J < vPrevEig.size(); ++J ) {
+						double dDot = 0.0;
+						for ( size_t I = 0; I < _sM; ++I ) {
+							dDot += vCur[I] * vPrevEig[J][I];
+						}
+						for ( size_t I = 0; I < _sM; ++I ) {
+							vCur[I] -= dDot * vPrevEig[J][I];
+						}
+					}
+
+					// Normalize initial vector.
+					double dNorm = 0.0;
+					for ( size_t I = 0; I < _sM; ++I ) {
+						dNorm += vCur[I] * vCur[I];
+					}
+					dNorm = std::sqrt( dNorm );
+					if ( dNorm == 0.0 ) {
+						vCur[0] = 1.0;
+						dNorm = 1.0;
+					}
+					for ( size_t I = 0; I < _sM; ++I ) { vCur[I] /= dNorm; }
+
+					// ---- Power iteration loop.
+					for ( uint32_t ui32Iter = 0; ui32Iter < ui32MaxIter; ++ui32Iter ) {
+						// w = A * v.
+						MatVec( vCur, vNext );
+
+						// Deflate: remove components along earlier eigenvectors.
+						for ( size_t J = 0; J < vPrevEig.size(); ++J ) {
+							double dDot = 0.0;
+							for ( size_t I = 0; I < _sM; ++I ) {
+								dDot += vNext[I] * vPrevEig[J][I];
+							}
+							for ( size_t I = 0; I < _sM; ++I ) {
+								vNext[I] -= dDot * vPrevEig[J][I];
+							}
+						}
+
+						// Normalize w.
+						dNorm = 0.0;
+						for ( size_t I = 0; I < _sM; ++I ) { dNorm += vNext[I] * vNext[I]; }
+						dNorm = std::sqrt( dNorm );
+						if ( dNorm == 0.0 ) { break; }
+						for ( size_t I = 0; I < _sM; ++I ) { vNext[I] /= dNorm; }
+
+						// Check convergence: ||w - v||_2.
+						double dDiff = 0.0;
+						for ( size_t I = 0; I < _sM; ++I ) {
+							double dDelta = vNext[I] - vCur[I];
+							dDiff += dDelta * dDelta;
+						}
+						dDiff = std::sqrt( dDiff );
+						vCur.swap( vNext );
+						if ( dDiff < dTol ) { break; }
+					}
+
+					// Enforce deterministic sign: make the center sample non-negative.
+					size_t sCenter = _sM / 2;
+					if ( vCur[sCenter] < 0.0 ) {
+						for ( size_t I = 0; I < _sM; ++I ) {
+							vCur[I] = -vCur[I];
+						}
+					}
+
+					// Compute associated eigenvalue (Rayleigh quotient).
+					MatVec( vCur, vAx );
+					double dLambda = 0.0;
+					for ( size_t I = 0; I < _sM; ++I ) {
+						dLambda += vCur[I] * vAx[I];
+					}
+					if ( _pvRatios ) {
+						_pvRatios->push_back( dLambda );
+					}
+
+					// Store eigenvector for deflation.
+					vPrevEig.emplace_back( _sM );
+					for ( size_t I = 0; I < _sM; ++I ) {
+						vPrevEig.back()[I] = vCur[I];
+					}
+
+					// Copy to output (cast to requested type).
+					for ( size_t I = 0; I < _sM; ++I ) {
+						_vvRet[K][I] = _tType( vCur[I] );
+					}
+				}
+
+				return true;
+			}
+			catch ( ... ) { return false; }
+		}
+
+		/**
+		 * Exponential window.
+		 * 
+		 * \brief
+		 * Returns an exponential window:
+		 *   w[n] = exp( -|n - center| / tau ).
+		 * 
+		 * \param _sN       Number of samples.
+		 * \param _dTau     The decay parameter tau (> 0).
+		 * \param _dCenter  The center position. If < 0, the center is (N-1)/2.
+		 * \param _vRet     Returned vector.
+		 * \return          Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						ExponentialWindow( size_t _sN, double _dTau, double _dCenter, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN == 1 ) { return true; }
+
+			if ( _dTau <= 0.0 ) { _dTau = 1.0; }
+			if ( _dCenter < 0.0 || _dCenter > double( _sN - 1 ) ) {
+				_dCenter = (double( _sN ) - 1.0) * 0.5;
+			}
+
+			try {
+				for ( auto I = _sN; I--; ) {
+					double dN = double(I);
+					double dV = std::exp( -std::fabs( dN - _dCenter ) / _dTau );
+					_vRet[I] = _tType( dV );
+				}
 				return true;
 			}
 			catch ( ... ) { return false; }
@@ -2140,9 +2502,11 @@ namespace ee {
 			constexpr double dA2 = 0.277263158;			// 0.2772631580000000095509449238306842744350433349609375
 			constexpr double dA3 = 0.083578947;			// 0.08357894700000000065553962258491083048284053802490234375
 			constexpr double dA4 = 0.006947368;			// 0.006947367999999999772786640761523813125677406787872314453125
-			try {
-				_vRet.resize( _sN );
 
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN <= 1 ) { return true; }
+
+			try {
 				const double dTau = 2.0 * std::numbers::pi;
 				size_t stMax = _vRet.size() - 1;
 				double dInvMax = 1.0 / stMax;
@@ -2150,8 +2514,295 @@ namespace ee {
 				double dTauInvMax2 = 2.0 * dTauInvMax;
 				double dTauInvMax3 = 3.0 * dTauInvMax;
 				double dTauInvMax4 = 4.0 * dTauInvMax;
-				for ( auto I = _vRet.size(); I--; ) {
+				for ( auto I = _sN; I--; ) {
 					_vRet[I] = _tType( dA0 - dA1 * std::cos( dTauInvMax * I ) + dA2 * std::cos( dTauInvMax2 * I ) - dA3 * std::cos( dTauInvMax3 * I ) + dA4 * std::cos( dTauInvMax4 * I ) );
+				}
+
+				return true;
+			}
+			catch ( ... ) { return false; }
+		}
+
+		/**
+		 * Gaussian window.
+		 * 
+		 * \brief
+		 * Returns a Gaussian window:
+		 *   n = 0..N-1; m = (N-1)/2
+		 *   w[n] = exp( -0.5 * ((n - m) / sigma)^2 ).
+		 * 
+		 * \param _sN       Number of samples.
+		 * \param _dSigma   Standard deviation of the Gaussian in samples.
+		 * \param _vRet     Returned vector.
+		 * \return          Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						GaussianWindow( size_t _sN, double _dSigma, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN == 1 ) { return true; }
+
+			if ( _dSigma <= 0.0 ) { _dSigma = 1.0; }
+
+			double dM = (double( _sN ) - 1.0) * 0.5;
+			for ( auto I = _sN; I--; ) {
+				double dN = double( I ) - dM;
+				double dV = std::exp( -0.5 * (dN / _dSigma) * (dN / _dSigma) );
+				_vRet[I] = _tType( dV );
+			}
+			return true;
+		}
+
+		/**
+		 * Generalized cosine window.
+		 * 
+		 * \brief
+		 * Returns a window defined by a sum of cosine terms.
+		 * 
+		 * \param _sN   Number of samples.
+		 * \param _vA   Coefficients a_k for the cosine terms (a[0] + a[1] cos(...) + ...).
+		 * \param _vRet The returned vector.
+		 * \return      Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool                     GeneralCosineWindow( size_t _sN, const std::vector<_tType> &_vA, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN <= 1 ) { return true; }
+
+			if ( _vA.empty() ) {
+				for ( auto I = _sN; I--; ) {
+					_vRet[I] = _tType( 1 );
+				}
+				return true;
+			}
+
+			double dStep = (2.0 * EE_PI) / double( _sN - 1 );
+			for ( auto I = _sN; I--; ) {
+				double dX = -EE_PI + dStep * double( I );
+				double dSum = 0.0;
+				for ( size_t K = 0; K < _vA.size(); ++K ) {
+					dSum += double( _vA[K] ) * std::cos( double( K ) * dX );
+				}
+				_vRet[I] = _tType( dSum );
+			}
+			return true;
+		}
+
+		/**
+		 * Generalized Gaussian window.
+		 * 
+		 * \brief
+		 * Returns a window with a generalized Gaussian shape:
+		 *   w[n] = exp( -0.5 * ((n - m) / sigma)^(2p) ).
+		 * 
+		 * \param _sN       Number of samples.
+		 * \param _dP       Shape parameter p.
+		 * \param _dSigma   Sigma parameter.
+		 * \param _vRet     Returned vector.
+		 * \return          Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						GeneralGaussianWindow( size_t _sN, double _dP, double _dSigma, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN == 1 ) { return true; }
+
+			if ( _dP <= 0.0 ) { _dP = 1.0; }
+			if ( _dSigma <= 0.0 ) { _dSigma = 1.0; }
+
+			double dM = (double( _sN ) - 1.0) * 0.5;
+			double dPow = 2.0 * _dP;
+			for ( auto I = _sN; I--; ) {
+				double dN = (double( I ) - dM) / _dSigma;
+				double dAbs = std::fabs( dN );
+				double dTerm = std::pow( dAbs, dPow );
+				double dV = std::exp( -0.5 * dTerm );
+				_vRet[I] = _tType( dV );
+			}
+			return true;
+		}
+
+		/**
+		 * Generalized Hamming window.
+		 * 
+		 * \brief
+		 * Returns a generalized Hamming window:
+		 *   w[n] = alpha - (1 - alpha) cos( 2*pi*n / (N-1) ).
+		 * 
+		 * \param _sN       Number of samples.
+		 * \param _dAlpha   Alpha parameter.
+		 * \param _vRet     Returned vector.
+		 * \return          Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						GeneralHammingWindow( size_t _sN, double _dAlpha, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN == 1 ) { return true; }
+
+			double dDen = double( _sN - 1 );
+			for ( auto I = _sN; I--; ) {
+				double dCos = std::cos( 2.0 * EE_PI * double( I ) / dDen );
+				double dV = _dAlpha - (1.0 - _dAlpha) * dCos;
+				_vRet[I] = _tType( dV );
+			}
+			return true;
+		}
+
+		/**
+		 * Creates a Hann window.
+		 * 
+		 * \param _sN	Number of samples.  Generally an odd number.
+		 * \param _vRet	The returned vector.
+		 * \return		Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						HannWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN <= 1 ) { return true; }
+
+			const double dTau = 2.0 * std::numbers::pi;
+			size_t stMax = _vRet.size() - 1;
+			double dInvMax = 1.0 / stMax;
+			double dTauInvMax = dTau * dInvMax;
+			for ( auto I = _sN; I--; ) {
+				_vRet[I] = _tType( 0.5 - 0.5 * std::cos( dTauInvMax * I ) );
+			}
+
+			return true;
+		}
+
+		/**
+		 * Creates a Hamming window.
+		 * 
+		 * \param _sN	Number of samples.  Generally an odd number.
+		 * \param _vRet	The returned vector.
+		 * \return		Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						HammingWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN <= 1 ) { return true; }
+
+			const double dTau = 2.0 * std::numbers::pi;
+			size_t stMax = _vRet.size() - 1;
+			double dInvMax = 1.0 / stMax;
+			double dTauInvMax = dTau * dInvMax;
+			for ( auto I = _sN; I--; ) {
+				_vRet[I] = _tType( 0.53836 - 0.46164 * std::cos( dTauInvMax * I ) );
+			}
+
+			return true;
+		}
+
+		/**
+		 * Creates a Kaiser window.
+		 * 
+		 * \param _sN		Number of samples.  Generally an odd number.
+		 * \param _tBeta	The beta parameter.
+		 * \param _vRet		The returned vector.
+		 * \return			Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						KaiserWindow( size_t _sN, _tType _tBeta, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN <= 1 ) { return true; }
+
+			double dDenominator = Bessel0( double( _tBeta ) );
+
+			for ( auto I = _sN; I--; ) {
+				double dRatio = 0.0;
+				if ( _sN > 1 ) {
+					dRatio = (2.0 * I) / (_sN - 1) - 1.0;
+				}
+				double dArg = _tBeta * std::sqrt( 1.0 - dRatio * dRatio );
+				_vRet[I] = _tType( Bessel0( dArg ) / dDenominator );
+			}
+
+			return true;
+		}
+
+		/**
+		 * Kaiser-Bessel derived (KBD) window.
+		 * 
+		 * \brief
+		 * Returns a symmetric Kaiser-Bessel derived window of length N with shape 0 -> 1 -> 0,
+		 * matching scipy.signal.windows.kaiser_bessel_derived (symmetry always symmetric here).
+		 * 
+		 * The algorithm:
+		 *   Let N = _sN and H = ceil(N/2).
+		 *   1) Build a Kaiser window k of length H.
+		 *   2) Compute cumulative sum c[n] = sum_{i=0..n} k[i].
+		 *   3) Normalize: h[n] = sqrt( c[n] / c[H-1] ),  n = 0..H-1.  (0 -> 1).
+		 *   4) Mirror h[] to get full length N:
+		 *       If N is odd (N = 2H-1):
+		 *           w[0..H-1]   = h[0..H-1]
+		 *           w[H..N-1]   = h[H-2..0]
+		 *       If N is even (N = 2H):
+		 *           w[0..H-1]   = h[0..H-1]
+		 *           w[H..N-1]   = h[H-1..0]
+		 * 
+		 * \param _sN       Number of samples.
+		 * \param _dBeta    Beta parameter for the underlying Kaiser window.
+		 * \param _vRet     Returned vector (size _sN), symmetric 0 -> 1 -> 0.
+		 * \return          Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						KaiserBesselDerivedWindow( size_t _sN, double _dBeta, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN <= 1 ) { return true; }
+
+			try {
+				const bool bOdd   = ((_sN & 1) != 0);
+				const size_t sHalf = (_sN + 1) / 2;        // H = ceil(N/2).
+
+				// ---- Build Kaiser window of length sHalf.
+				std::vector<double> vKaiser( sHalf );
+				const double dI0Beta = Bessel0( EE_PI * _dBeta );
+				const size_t sLenMinus1 = (sHalf > 1 ? (sHalf - 1) : 1);
+
+				for ( size_t I = 0; I < sHalf; ++I ) {
+					double dX   = (2.0 * double( I ) / double( sLenMinus1 )) - 1.0;
+					double dRad = std::sqrt( std::max( 0.0, 1.0 - dX * dX ) );
+					double dVal = Bessel0( EE_PI * _dBeta * dRad ) / dI0Beta;
+					vKaiser[I] = dVal;
+				}
+
+				// ---- Cumulative sum of Kaiser.
+				std::vector<double> vCum( sHalf );
+				double dSum = 0.0;
+				for ( size_t I = 0; I < sHalf; ++I ) {
+					dSum += vKaiser[I];
+					vCum[I] = dSum;
+				}
+				double dNorm = vCum[sHalf - 1];
+				if ( dNorm == 0.0 ) { dNorm = 1.0; }
+
+				// ---- Half KBD window: 0 -> 1.
+				std::vector<double> vHalf( sHalf );
+				for ( size_t I = 0; I < sHalf; ++I ) {
+					vHalf[I] = std::sqrt( vCum[I] / dNorm );
+				}
+
+				// ---- Mirror to full symmetric window: 0 -> 1 -> 0.
+				if ( bOdd ) {
+					// N = 2*H - 1
+					// Left + center:
+					for ( size_t I = 0; I < sHalf; ++I ) {
+						_vRet[I] = _tType( vHalf[I] );
+					}
+					// Right (mirror excluding center).
+					for ( size_t I = 0; I < sHalf - 1; ++I ) {
+						_vRet[_sN-1-I] = _tType( vHalf[I] );
+					}
+				}
+				else {
+					// N = 2*H
+					// Left:
+					for ( size_t I = 0; I < sHalf; ++I ) {
+						_vRet[I] = _tType( vHalf[I] );
+					}
+					// Right (mirror including last half sample).
+					for ( size_t I = 0; I < sHalf; ++I ) {
+						_vRet[_sN-1-I] = _tType( vHalf[I] );
+					}
 				}
 
 				return true;
@@ -2168,19 +2819,279 @@ namespace ee {
 		 **/
 		template <typename _tType = double>
 		static bool						LanczosWindow( size_t _sN, std::vector<_tType> &_vRet ) {
-			try {
-				_vRet.resize( _sN );
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN <= 1 ) { return true; }
 
-				const double dNMinus1  = _sN ? (_sN - 1.0) : 0.0;
-				const double dHalf = dNMinus1 / 2.0;
-				for ( auto I = _vRet.size(); I--; ) {
-					_vRet[I] = _tType( Sinc( ((std::fabs( I - dHalf ) * 2.0) / dNMinus1) ) );	// Refactored to produce fully symmetrical values.
-					//_vRet[I] = _tType( Sinc( ((I * 2.0) / dNMinus1) - 1.0 ) );
+			const double dNMinus1  = _sN ? (_sN - 1.0) : 0.0;
+			const double dHalf = dNMinus1 / 2.0;
+			for ( auto I = _sN; I--; ) {
+				_vRet[I] = _tType( Sinc( ((std::fabs( I - dHalf ) * 2.0) / dNMinus1) ) );	// Refactored to produce fully symmetrical values.
+				//_vRet[I] = _tType( Sinc( ((I * 2.0) / dNMinus1) - 1.0 ) );
+			}
+
+			return true;
+		}
+
+		/**
+		 * Creates a Nuttall window.
+		 * 
+		 * \param _sN	Number of samples.  Generally an odd number.
+		 * \param _vRet	The returned vector.
+		 * \return		Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						NuttallWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			constexpr double dA0 = 0.355768;			// 0.35576799999999997314859001562581397593021392822265625
+			constexpr double dA1 = 0.487396;			// 0.487395999999999995910826555700623430311679840087890625
+			constexpr double dA2 = 0.144232;			// 0.1442319999999999990958343687452725134789943695068359375
+			constexpr double dA3 = 0.012604;			// 0.0126040000000000006197264923457623808644711971282958984375
+
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN <= 1 ) { return true; }
+
+			const double dTau = 2.0 * std::numbers::pi;
+			size_t stMax = _vRet.size() - 1;
+			double dInvMax = 1.0 / stMax;
+			double dTauInvMax = dTau * dInvMax;
+			double dTauInvMax2 = 2.0 * dTauInvMax;
+			double dTauInvMax3 = 3.0 * dTauInvMax;
+			for ( auto I = _sN; I--; ) {
+				_vRet[I] = _tType( dA0 - dA1 * std::cos( dTauInvMax * I ) + dA2 * std::cos( dTauInvMax2 * I ) - dA3 * std::cos( dTauInvMax3 * I ) );
+			}
+
+			return true;
+		}
+
+		/**
+		 * Parzen window.
+		 * 
+		 * \brief
+		 * Returns a Parzen (de la Vallée Poussin) window:
+		 * Let m = (N-1)/2 and r = |n - m| / m.
+		 *   if 0 <= r <= 0.5:
+		 *       w = 1 - 6 r^2 + 6 r^3
+		 *   else if 0.5 < r <= 1:
+		 *       t = 1 - r
+		 *       w = 2 t^3
+		 *   else:
+		 *       w = 0
+		 * 
+		 * \param _sN   Number of samples.
+		 * \param _vRet Returned vector.
+		 * \return      Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool                     ParzenWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN == 1 ) { return true; }
+
+			double dM = (double( _sN ) - 1.0) * 0.5;
+			for ( auto I = _sN; I--; ) {
+				double dR = std::fabs( double( I ) - dM ) / dM;
+				double dV = 0.0;
+				if ( dR <= 0.5 ) {
+					double dR2 = dR * dR;
+					double dR3 = dR2 * dR;
+					dV = 1.0 - (6.0 * dR2) + (6.0 * dR3);
+				}
+				else if ( dR <= 1.0 ) {
+					double dT = 1.0 - dR;
+					double dT2 = dT * dT;
+					double dT3 = dT2 * dT;
+					dV = 2.0 * dT3;
+				}
+				_vRet[I] = _tType( dV );
+			}
+			return true;
+		}
+
+		/**
+		 * Generates a Taylor window.
+		 *
+		 * \param _sN		Number of samples.
+		 * \param _iNBar	Number of nearly constant level sidelobes adjacent to the mainlobe (nbar).
+		 * \param _dSll	Desired sidelobe level (positive, in dB) relative to the mainlobe.
+		 * \param _bNorm	If true, normalize so the maximum sample is 1.0.
+		 * \param _vRet		The returned vector.
+		 * \return			Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						TaylorWindow( size_t _sN, int _iNBar, double _dSll, bool _bNorm, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN == 1 ) { return true; }
+			try {
+				if ( _dSll < 0.0 ) { _dSll = -_dSll; }
+
+				constexpr double dTwoPi = EE_PI * 2.0;
+				const double dNBar = static_cast<double>(_iNBar);
+
+				// A = acosh(10^(SLL/20)) / pi  (SLL positive).
+				const double dA = std::acosh( std::pow( 10.0, _dSll / 20.0 ) ) / EE_PI;
+
+				// sigma^2 term (often written as S^2 or similar).
+				const double dSp2 = (dNBar * dNBar) / (dA * dA + (dNBar - 0.5) * (dNBar - 0.5));
+
+				// Precompute F_m for m = 1..nbar-1.
+				std::vector<double> vFm;
+				vFm.resize( static_cast<size_t>(_iNBar > 1 ? (_iNBar - 1) : 0) );
+
+				for ( int M = 1; M < _iNBar; ++M ) {
+					const double dM = static_cast<double>( M );
+
+					double dNum = 1.0;
+					double dDen = 1.0;
+
+					for ( int N = 1; N < _iNBar; ++N ) {
+						const double dN = static_cast<double>( N );
+
+						// Numerator product term.
+						const double dNumTerm =
+							1.0 - (dM * dM) / (dSp2 * (dA * dA + (dN - 0.5) * (dN - 0.5)));
+						dNum *= dNumTerm;
+
+						// Denominator product term (exclude N == M).
+						if ( N != M ) {
+							const double dDenTerm = 1.0 - (dM * dM) / (dN * dN);
+							dDen *= dDenTerm;
+						}
+					}
+
+					// (-1)^(M+1) without calling std::pow().
+					const double dSign = (M & 1) ? 1.0 : -1.0;
+
+					vFm[static_cast<size_t>(M-1)] = (dSign * dNum) / (2.0 * dDen);
+				}
+
+				// Generate window samples.
+				const double dHalfN = 0.5 * static_cast<double>( _sN );
+
+				for ( size_t I = 0; I < _sN; ++I ) {
+					const double dK = static_cast<double>( I );
+					// Xi in [-0.5, 0.5) as per common Taylor window implementations.
+					const double dXi = (dK - dHalfN + 0.5) / static_cast<double>( _sN );
+
+					double dSum = 0.0;
+					for ( int M = 1; M < _iNBar; ++M ) {
+						dSum += vFm[static_cast<size_t>( M - 1 )] *
+							std::cos( dTwoPi * static_cast<double>( M ) * dXi );
+					}
+
+					const double dVal = 1.0 + 2.0 * dSum;
+					_vRet[I] = static_cast<_tType>(dVal);
+				}
+
+				// Optional normalization so that max == 1.0.
+				if ( _bNorm ) {
+					double dMax = 0.0;
+					for ( size_t I = 0; I < _sN; ++I ) {
+						const double dAbs = std::abs( static_cast<double>(_vRet[I]) );
+						if ( dAbs > dMax ) { dMax = dAbs; }
+					}
+					if ( dMax > 0.0 ) {
+						const double dInvMax = 1.0 / dMax;
+						for ( size_t I = 0; I < _sN; ++I ) {
+							_vRet[I] = static_cast<_tType>(static_cast<double>(_vRet[I]) * dInvMax);
+						}
+					}
 				}
 
 				return true;
 			}
-			catch ( ... ) { return false; }
+			catch ( ... ) {
+				return false;
+			}
+		}
+
+		/**
+		 * Triangular window (SciPy's triang).
+		 * 
+		 * \brief
+		 * Returns a symmetric triangular window with peak 1 and endpoints > 0:
+		 *   center = (N-1)/2
+		 *   denom  = N/2
+		 *   w[n] = 1 - |(n - center) / denom|.
+		 * 
+		 * \param _sN   Number of samples.
+		 * \param _vRet Returned vector.
+		 * \return      Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						TriangWindow( size_t _sN, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN == 1 ) { return true; }
+
+			double dCenter = (double( _sN ) - 1.0) * 0.5;
+			double dDen = double( _sN ) * 0.5;
+			for ( auto I = _sN; I--; ) {
+				double dV = 1.0 - std::fabs( (double( I ) - dCenter) / dDen );
+				_vRet[I] = _tType( dV );
+			}
+			return true;
+		}
+
+		/**
+		 * Tukey window (tapered cosine).
+		 * 
+		 * \brief
+		 * Returns a Tukey window with parameter alpha:
+		 *   alpha <= 0  -> rectangular window
+		 *   alpha >= 1  -> Hann window
+		 *   else:
+		 *       taper length L = alpha * (N-1)
+		 *       first half of taper:  0 <= n < L/2
+		 *           w[n] = 0.5 * (1 - cos( 2*pi*n / L ))
+		 *       flat region: L/2 <= n <= (N-1) - L/2
+		 *           w[n] = 1
+		 *       trailing taper: symmetric.
+		 * 
+		 * \param _sN       Number of samples.
+		 * \param _dAlpha   Alpha parameter in [0,1].
+		 * \param _vRet     Returned vector.
+		 * \return          Returns true if there was enough memory to resize the vector.
+		 **/
+		template <typename _tType = double>
+		static bool						TukeyWindow( size_t _sN, double _dAlpha, std::vector<_tType> &_vRet ) {
+			if ( !HandleTrivialWindow( _sN, _vRet ) ) { return false; }
+			if ( _sN == 1 ) { return true; }
+
+			if ( _dAlpha <= 0.0 ) {
+				return BoxcarWindow<_tType>( _sN, _vRet );
+			}
+			if ( _dAlpha >= 1.0 ) {
+				// Hann window.
+				double dDen = double( _sN - 1 );
+				for ( size_t I = 0; I < _sN; ++I ) {
+					double dV = 0.5 * (1.0 - std::cos( 2.0 * EE_PI * double( I ) / dDen ));
+					_vRet[I] = _tType( dV );
+				}
+				return true;
+			}
+
+			double dN1 = double( _sN - 1 );
+			double dL = _dAlpha * dN1;
+			double dHalfL = dL * 0.5;
+			double dFlatStart = dHalfL;
+			double dFlatEnd = dN1 - dHalfL;
+
+			for ( size_t I = 0; I < _sN; ++I ) {
+				double dN = double( I );
+				double dV = 0.0;
+				if ( dN < dFlatStart ) {
+					// Rising cosine.
+					dV = 0.5 * (1.0 - std::cos( 2.0 * EE_PI * dN / dL ));
+				}
+				else if ( dN <= dFlatEnd ) {
+					// Flat region.
+					dV = 1.0;
+				}
+				else {
+					// Falling cosine (symmetric).
+					double dNr = dN1 - dN;
+					dV = 0.5 * (1.0 - std::cos( 2.0 * EE_PI * dNr / dL ));
+				}
+				_vRet[I] = _tType( dV );
+			}
+			return true;
 		}
 
 		/**
