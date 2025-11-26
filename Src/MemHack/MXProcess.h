@@ -363,6 +363,18 @@ namespace mx {
 		bool							IsAddressReadable( uint64_t _ui64Addr ) const;
 
 		/**
+		 * \brief Returns true if the page containing the address is committed and writable (not GUARD/NOACCESS).
+		 *
+		 * \param _ui64Addr Remote address to test (single pointer).
+		 * \return Returns true if the containing page is MEM_COMMIT and writable by protection flags; false otherwise.
+		 *
+		 * \note When State != MEM_COMMIT, Protect/Type are undefined and must be ignored.
+		 * \note PAGE_WRITECOPY (and EXECUTE_WRITECOPY) indicate copy-on-write; the first write creates a private copy in the target.
+		 *       From a tool perspective, they still count as writable.
+		 */
+		bool							IsWritableByQuery( uint64_t _ui64Addr ) const;
+
+		/**
 		 * \brief Returns true if the page containing the address is committed and executable.
 		 *
 		 * \param _ui64Addr Remote virtual address to test (single pointer).
@@ -537,6 +549,45 @@ namespace mx {
 			switch ( dwCore ) {
 				case PAGE_EXECUTE : {}				MX_FALLTHROUGH
 				case PAGE_EXECUTE_READ : {}			MX_FALLTHROUGH
+				case PAGE_EXECUTE_READWRITE : {}	MX_FALLTHROUGH
+				case PAGE_EXECUTE_WRITECOPY : { return true; }
+				default : { return false; }
+			}
+		}
+
+		/**
+		 * \brief Tests whether a protection mask implies read capability.
+		 *
+		 * \param _dwProt The MEMORY_BASIC_INFORMATION::Protect value.
+		 * \return Returns true if the protection allows reading; false otherwise.
+		 */
+		static bool						ProtIsReadable( DWORD _dwProt ) {
+			// Mask out modifiers that don't affect read permission.
+			const DWORD dwCoreProt = (_dwProt & ~(PAGE_GUARD | PAGE_NOCACHE | PAGE_WRITECOMBINE));
+			switch ( dwCoreProt ) {
+				case PAGE_READONLY : {}				MX_FALLTHROUGH
+				case PAGE_READWRITE : {}			MX_FALLTHROUGH
+				case PAGE_WRITECOPY : {}			MX_FALLTHROUGH
+				case PAGE_EXECUTE_READ : {}			MX_FALLTHROUGH
+				case PAGE_EXECUTE_READWRITE : {}	MX_FALLTHROUGH
+				case PAGE_EXECUTE_WRITECOPY : { return true; }
+				default : { return false; }
+			}
+		}
+
+		/**
+		 * \brief Tests whether a protection mask implies write capability.
+		 *
+		 * \param _dwProt The MEMORY_BASIC_INFORMATION::Protect value.
+		 * \return Returns true if the protection allows writing; false otherwise.
+		 */
+		static bool						ProtIsWritable( DWORD _dwProt ) {
+			// Mask out modifiers that don't affect write permission.
+			const DWORD dwCore = (_dwProt & ~(PAGE_GUARD | PAGE_NOCACHE | PAGE_WRITECOMBINE | PAGE_TARGETS_INVALID | PAGE_TARGETS_NO_UPDATE));
+
+			switch ( dwCore ) {
+				case PAGE_READWRITE : {}			MX_FALLTHROUGH
+				case PAGE_WRITECOPY : {}			MX_FALLTHROUGH
 				case PAGE_EXECUTE_READWRITE : {}	MX_FALLTHROUGH
 				case PAGE_EXECUTE_WRITECOPY : { return true; }
 				default : { return false; }

@@ -46,6 +46,12 @@ namespace mx {
 
 		// Gets the interface type.
 		virtual MX_HEX_EDITOR_TYPES			Type() const = 0 { return MX_HET_NONE; }
+
+		// Default starting address.
+		virtual uint64_t					DefaultAddress() const { return 0; }
+
+		// Does the given range of addresses contain anything real-time?
+		virtual bool						RangeContainsRealTime( uint64_t _ui64Start, uint64_t _ui64Total ) const { return false; }
 	};
 
 }	// namespace mx

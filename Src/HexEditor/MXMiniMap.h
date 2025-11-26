@@ -6,36 +6,42 @@
 
 namespace mx {
 
-	// == Types.
-	/** Mini-map immutable inputs per frame. */
-	struct MX_MINIMAP_INPUTS {
-		//uint64_t								ui64TotalBytes;					/**< Total file size in bytes. */
-		//uint32_t								ui32BytesPerRow;				/**< CurStyle()->uiBytesPerRow. */
-		//uint64_t								ui64FirstVisibleLine;			/**< m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine. */
-		//int32_t									i32PageLines;					/**< m_sdScrollView[m_eaEditAs].i32PageLines (>=1). */
-		//uint32_t								ui32ScreenSize;					/**< Screen height. */
-		// Widget geometry (device/screen pixels).
-		int32_t									i32X;
-		int32_t									i32Y;
-		int32_t									i32W;
-		int32_t									i32H;
-		// Options.
-		bool									bAutoSnap;						/**< Auto Snap. */
-		uint32_t								ui32SnapLines;					/**< Snap granularity (UI edit, default 16). */
-	};
-
-	/** The mini-map data. */
-	struct MX_MINI_MAP {
-		// == Members.
-		std::vector<COLORREF>					vBuffer;						/**< The draw buffer. */
-	};
-
 	class CMiniMap {
 	public :
 		// == Enumerations.
-		/** Render flags. */
+		/** Colors. */
+		enum MX_COLORS {
+			MX_C_NONE,
+			MX_C_ASCII,
+			MX_C_RAINBOW,
+			MX_C_HEAT,
+			MX_C_OCEAN,
+			MX_C_GREY,
+			MX_C_CUSTOM
+		};
 
 		
+		// == Types.
+		/** The mini-map data. */
+		struct MX_MINI_MAP {
+			MX_COLORS								cColors = MX_C_NONE;				/**< Color palette. */
+			int32_t									i32Brightness = 0;					/**< Brightness (-100..100). */
+			uint32_t								ui32Contrast = 50;					/**< Contrast (0..100). */
+			uint32_t								ui32Zoom = 2;						/**< Pixel size. */
+			uint32_t								ui32SnapLines = 16;					/**< Snap granularity (UI edit, default 16). */
+			COLORREF								crCusLow = RGB( 0, 0, 0 );			/**< The custom-color low end. */
+			COLORREF								crCusHi = RGB( 0xFF, 0xFF, 0xFF );	/**< The custom-color low end. */
+			bool									bAutoSnap = false;					/**< Auto Snap. */
+			bool									bRightSize = true;					/**< Set to the right side of the screen (drag bar is on the left).  If false, the drag bar is on the right. */
+			bool									bHighlightStructs = true;			/**< Highlight structures from templates in the Mini Map. */
+		};
+
+		/** The mini-map state. */
+		struct MX_MINI_MAP_STATE {
+			std::vector<COLORREF>					vBuffer;							/**< The draw buffer. */
+			uint64_t								ui64Address = 0;					/**< The start address. */
+			uint64_t								ui64End = 0;						/**< The end address. */
+		};
 
 
 		// == Functions.
@@ -49,8 +55,8 @@ namespace mx {
 
 		
 
-		static const COLORREF						m_crRainbow[16*16];			/**< Rainbow color scheme. */
-		static const COLORREF						m_crAscii[16*16];			/**< ASCII color scheme. */
+		static const COLORREF						m_crRainbow[16*16];					/**< Rainbow color scheme. */
+		static const COLORREF						m_crAscii[16*16];					/**< ASCII color scheme. */
 	};
 
 }	//namespace mx

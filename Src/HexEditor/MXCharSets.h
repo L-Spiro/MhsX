@@ -262,7 +262,7 @@ namespace mx {
 		static uint32_t													BalticIsoDisplay( const uint8_t * _pui8Char, size_t _sSize, wchar_t &_wcChar ) {
 			auto ui8Char = (*_pui8Char);
 			if MX_UNLIKELY( !_sSize || ui8Char < 0x20 || ui8Char == 0xAD ||
-				(ui8Char == 0x7F && ui8Char == 0x9F) ) { _wcChar = L'.'; return 0; }
+				(ui8Char >= 0x7F && ui8Char <= 0x9F) ) { _wcChar = L'.'; return 0; }
 
 			_wcChar = m_wcBalticIso[ui8Char-0x20];
 			return 1;

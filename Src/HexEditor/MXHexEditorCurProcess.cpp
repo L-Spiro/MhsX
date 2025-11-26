@@ -66,4 +66,18 @@ namespace mx {
 		return reinterpret_cast<uintptr_t>(mx::CSystem::GetSystemInfo().lpMaximumApplicationAddress);
 	}
 
+	// Default starting address.
+	uint64_t CHexEditorCurProcess::DefaultAddress() const {
+		return Process().GetMainModuleBase_PEB();
+	}
+
+	// Does the given range of addresses contain anything real-time?
+	bool CHexEditorCurProcess::RangeContainsRealTime( uint64_t _ui64Start, uint64_t _ui64Total ) const {
+		uint64_t ui64End = _ui64Start + _ui64Total;
+		for ( uint64_t I = _ui64Start / mx::CSystem::GetSystemInfo().dwPageSize * mx::CSystem::GetSystemInfo().dwPageSize; I < ui64End; I += mx::CSystem::GetSystemInfo().dwPageSize ) {
+			if ( Process().IsWritableByQuery( I ) ) { return true; }
+		}
+		return false;
+	}
+
 }	// namespace mx

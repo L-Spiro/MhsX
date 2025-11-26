@@ -406,19 +406,8 @@ namespace mx {
 		const DWORD dwProt = mbiInfo.Protect;
 		if ( (dwProt & (PAGE_GUARD | PAGE_NOACCESS)) ) { return false; }
 
-		const DWORD dwCoreProt = (dwProt & ~(PAGE_GUARD | PAGE_NOCACHE | PAGE_WRITECOMBINE));
-		switch ( dwCoreProt ) {
-			case PAGE_READONLY : {}				MX_FALLTHROUGH
-			case PAGE_READWRITE : {}			MX_FALLTHROUGH
-			case PAGE_WRITECOPY : {}			MX_FALLTHROUGH
-			case PAGE_EXECUTE_READ : {}			MX_FALLTHROUGH
-			case PAGE_EXECUTE_READWRITE : {}	MX_FALLTHROUGH
-			case PAGE_EXECUTE_WRITECOPY : {
-				m_bLastIsReadableResult = true;
-				return true;
-			}
-			default : { return false; }
-		}
+		m_bLastIsReadableResult = ProtIsReadable( dwProt );
+		return m_bLastIsReadableResult;
 	}
 
 	/**
@@ -442,6 +431,31 @@ namespace mx {
 		SIZE_T stRead = 0;
 		m_bLastIsReadableResult = (ReadProcessMemory( _ui64Addr, &bByte, sizeof( bByte ), &stRead ) != FALSE) && (stRead == sizeof( bByte ));
 		return m_bLastIsReadableResult;
+	}
+
+	/**
+	 * \brief Returns true if the page containing the address is committed and writable (not GUARD/NOACCESS).
+	 *
+	 * \param _ui64Addr Remote address to test (single pointer).
+	 * \return Returns true if the containing page is MEM_COMMIT and writable by protection flags; false otherwise.
+	 *
+	 * \note When State != MEM_COMMIT, Protect/Type are undefined and must be ignored.
+	 * \note PAGE_WRITECOPY (and EXECUTE_WRITECOPY) indicate copy-on-write; the first write creates a private copy in the target.
+	 *       From a tool perspective, they still count as writable.
+	 */
+	bool CProcess::IsWritableByQuery( uint64_t _ui64Addr ) const {
+		LSW_ENT_CRIT( m_csCrit );
+		if MX_UNLIKELY( !ProcIsOpened() || !_ui64Addr ) { return false; }
+
+		MEMORY_BASIC_INFORMATION64 mbiInfo{};
+		if ( !VirtualQueryEx( _ui64Addr, &mbiInfo ) ) {
+			return false;
+		}
+
+		if ( mbiInfo.State != MEM_COMMIT ) { return false; }
+		if ( (mbiInfo.Protect & PAGE_GUARD) || (mbiInfo.Protect & PAGE_NOACCESS) ) { return false; }
+
+		return ProtIsWritable( mbiInfo.Protect );
 	}
 
 	/**

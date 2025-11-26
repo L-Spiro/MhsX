@@ -33,18 +33,7 @@ namespace mx {
 		if ( m_eaEditAs != _eaType && _eaType >= MX_EA_TEXT && _eaType < MX_EA_TOTAL ) {
 			m_eaEditAs = _eaType;
 				
-			if ( m_pheiTarget && m_pheiTarget->Type() == CHexEditorInterface::MX_HET_PROCESS ) {
-				CHexEditorProcess * phepProc = static_cast<CHexEditorProcess *>(m_pheiTarget);
-				GoTo( phepProc->Process().GetMainModuleBase_PEB() );
-			}
-			else if ( m_pheiTarget && m_pheiTarget->Type() == CHexEditorInterface::MX_HET_CUR_PROCESS ) {
-				CHexEditorCurProcess * phepProc = static_cast<CHexEditorCurProcess *>(m_pheiTarget);
-				GoTo( phepProc->Process().GetMainModuleBase_PEB() );
-			}
-			else {
-				m_sdScrollView[_eaType].ui64VPos = 0;
-				m_sdScrollView[_eaType].ui64HPx = 0;
-			}
+			GoTo( m_pheiTarget->DefaultAddress() );
 
 			RecalcAndInvalidate();
 		}
@@ -463,14 +452,7 @@ namespace mx {
 	void CHexEditorControl::SetStream( CHexEditorInterface * _pediStream ) {
 		m_pheiTarget = _pediStream;
 
-		if ( m_pheiTarget && m_pheiTarget->Type() == CHexEditorInterface::MX_HET_PROCESS ) {
-			CHexEditorProcess * phepProc = static_cast<CHexEditorProcess *>(m_pheiTarget);
-			GoTo( phepProc->Process().GetMainModuleBase_PEB() );
-		}
-		else if ( m_pheiTarget && m_pheiTarget->Type() == CHexEditorInterface::MX_HET_CUR_PROCESS ) {
-			CHexEditorCurProcess * phepProc = static_cast<CHexEditorCurProcess *>(m_pheiTarget);
-			GoTo( phepProc->Process().GetMainModuleBase_PEB() );
-		}
+		GoTo( m_pheiTarget->DefaultAddress() );
 		
 		RecalcAndInvalidate();
 	}
