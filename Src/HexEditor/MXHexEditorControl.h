@@ -415,10 +415,21 @@ namespace mx {
 		 **/
 		virtual WORD								GetDlgCode( WORD _wKey );
 
-		// WM_ERASEBKGND.
-		virtual LSW_HANDLED							EraseBkgnd( HDC _hDc ) { return LSW_H_HANDLED; }
+		/**
+		 * Handles WM_ERASEBKGND.
+		 * \brief Allows custom background erasing.
+		 *
+		 * \param _hDc Device context provided for erasing.
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED							EraseBkgnd( HDC /*_hDc*/ ) { return LSW_H_HANDLED; }
 
-		// WM_PAINT.
+		/**
+		 * Handles WM_PAINT.
+		 * \brief Performs painting for the client area.
+		 *
+		 * \return Returns a LSW_HANDLED code.
+		 */
 		virtual LSW_HANDLED							Paint();
 
 		/**
@@ -915,6 +926,27 @@ namespace mx {
 					agGlyphs.i32MaxAscii = std::max<int32_t>( agGlyphs.i32MaxAscii, sSize.cx );
 				}
 			}
+		}
+
+		/**
+		 * Mixes two colors.  Alpha is taken from crRight.
+		 * 
+		 * \param crLeft The left color.
+		 * \param crRight The right color.
+		 * \return Returns the mixed color.
+		 **/
+		COLORREF									Mix( COLORREF crLeft, COLORREF crRight ) {
+			uint64_t ui64Key = (static_cast<uint64_t>(*reinterpret_cast<uint32_t *>(&crLeft)) << 32ULL) | (*reinterpret_cast<uint32_t *>(&crRight));
+			auto aKey = m_mColorLookup.find( ui64Key );
+			if ( aKey == m_mColorLookup.end() ) {
+				COLORREF cdRes = lsw::CHelpers::MixColorRef_NosRGB( GetRValue( crLeft ), GetRValue( crRight ),
+					GetGValue( crLeft ), GetGValue( crRight ),
+					GetBValue( crLeft ), GetBValue( crRight ),
+					MX_GetAValue( crRight ) / 255.0f );
+				m_mColorLookup[ui64Key] = cdRes;
+				return cdRes;
+			}
+			return aKey->second;
 		}
 
 		/**

@@ -107,7 +107,12 @@ namespace mx {
 		return DLGC_WANTARROWS | DLGC_WANTTAB | DLGC_WANTALLKEYS | DLGC_WANTCHARS;
 	}
 
-	// WM_PAINT.
+	/**
+	 * Handles WM_PAINT.
+	 * \brief Performs painting for the client area.
+	 *
+	 * \return Returns a LSW_HANDLED code.
+	 */
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::Paint() {
 		lsw::LSW_RECT rRect = ClientRect();
 		lsw::LSW_BEGINPAINT bpPaint( Wnd() );
@@ -465,7 +470,8 @@ namespace mx {
 			WCHAR szStr[15];
 			mx::CUtilities::RandomString( szStr, MX_ELEMENTS( szStr ) );
 			wceEx.SetClassName( szStr );
-			wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(/*CTLCOLOR_DLG*/CTLCOLOR_STATIC + 1) );
+			wceEx.SetStyle( CS_OWNDC );
+			wceEx.SetBackgroundBrush( /*reinterpret_cast<HBRUSH>(CTLCOLOR_STATIC + 1)*/NULL );
 			wceEx.SetWindPro( CWidget::WindowProc );
 			m_aAtom = lsw::CBase::RegisterClassExW( wceEx.Obj() );
 		}
@@ -475,7 +481,7 @@ namespace mx {
 	bool CHexEditorControl::ChooseDefaultFont( MX_FONT_SET &_fsFont, WORD _wDpi, HWND _hWnd ) {
 		static const wchar_t * s_ppwszFaces[] = {
 			//L"Brush Script MT",
-			//L"Droid Sans Mono",   // Preferred.
+			L"Droid Sans Mono",   // Preferred.
 			L"Consolas",          // Modern Windows TT.
 			L"Lucida Console"     // Older Windows TT.
 		};
@@ -1151,25 +1157,39 @@ namespace mx {
 	 * \return Returns the background color for the given cell.
 	 **/
 	COLORREF CHexEditorControl::CellBgColor( uint64_t _ui64Address, const uint8_t * /*_pui8Value*/, size_t /*_sSize*/ ) {
+		COLORREF crBaseColor;
 #define MX_CHECK_PROC( CAST, ENUM )																																	\
 	if ( m_pheiTarget && m_pheiTarget->Type() == CHexEditorInterface::ENUM ) {																						\
 		CAST * phepProc = static_cast<CAST *>(m_pheiTarget);																										\
 		if ( !phepProc->Process().IsReadableByQuery( _ui64Address ) ) {																								\
-			return ForeColors()->crUnreadable;																														\
+			crBaseColor = ForeColors()->crUnreadable; goto PostBase;																								\
 		}																																							\
 		if ( phepProc->Process().IsExecutableByQuery( _ui64Address ) ) {																							\
-			return ForeColors()->crExecutable;																														\
+			crBaseColor = ForeColors()->crExecutable; goto PostBase;																								\
 		}																																							\
 		if ( phepProc->Process().AddressIsInModule( _ui64Address ) ) {																								\
-			return ForeColors()->crStaticAddress;																													\
+			crBaseColor = ForeColors()->crStaticAddress; goto PostBase;																								\
 		}																																							\
 	}
 
 		MX_CHECK_PROC( CHexEditorProcess, MX_HET_PROCESS )
 		MX_CHECK_PROC( CHexEditorCurProcess, MX_HET_CUR_PROCESS )
 #undef MX_CHECK_PROC
+		
+		if ( MX_GetAValue( BackColors()->crAlternatingHexLines ) && ((_ui64Address / CurStyle()->uiBytesPerRow) & 1) == 0 ) {
+			crBaseColor = BackColors()->crAlternatingHexLines;
+			goto PostBase;
+		}
 
-		return BackColors()->crEditor;
+		crBaseColor = BackColors()->crEditor;
+	PostBase :
+		// Mix colors.
+		uint64_t ui64Caret = 0;
+		if ( MX_GetAValue( BackColors()->crHighlightLineHexEditor ) && ui64Caret / CurStyle()->uiBytesPerRow == (_ui64Address / CurStyle()->uiBytesPerRow) ) {
+			crBaseColor = Mix( crBaseColor, BackColors()->crHighlightLineHexEditor );
+		}
+
+		return crBaseColor;
 	}
 
 	/**

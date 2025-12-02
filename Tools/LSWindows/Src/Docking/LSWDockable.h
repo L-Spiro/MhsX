@@ -233,7 +233,21 @@ namespace lsw {
 		// WM_CLOSE.
 		virtual LSW_HANDLED					Close();
 
-		// WM_PAINT.
+		/**
+		 * Handles WM_ERASEBKGND.
+		 * \brief Allows custom background erasing.
+		 *
+		 * \param _hDc Device context provided for erasing.
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					EraseBkgnd( HDC /*_hDc*/ ) { return Floating() ? LSW_H_CONTINUE : LSW_H_HANDLED; }
+
+		/**
+		 * Handles WM_PAINT.
+		 * \brief Performs painting for the client area.
+		 *
+		 * \return Returns a LSW_HANDLED code.
+		 */
 		virtual LSW_HANDLED					Paint();
 
 		// Setting the HWND after the control has been created.

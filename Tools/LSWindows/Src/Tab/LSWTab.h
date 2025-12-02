@@ -130,6 +130,16 @@ namespace lsw {
 		 **/
 		bool								IsChecked( int _iItem ) const;
 
+		/**
+		 * Handles WM_ERASEBKGND.
+		 * \brief Allows custom background erasing.
+		 *
+		 * \param _hDc Device context provided for erasing.
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		//virtual LSW_HANDLED					EraseBkgnd( HDC /*_hDc*/ ) { return m_vTabs.size() ? LSW_H_HANDLED : LSW_H_CONTINUE; }
+
+
 	protected :
 		// == Types.
 		// A tab.

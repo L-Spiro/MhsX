@@ -34,7 +34,7 @@ namespace lsw {
 	CDockable::LSW_DOCK_DRAG_RECT_TYPE CDockable::m_ddrtDragRectType = CDockable::LSW_DDRT_CHECKERED;
 
 	CDockable::CDockable( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
-		CWidget( _wlLayout.ChangeStyle( LSW_POPUP_STYLES | (_wlLayout.dwStyle & WS_VISIBLE) ).ChangeStyleEx( LSW_POPUP_STYLESEX ).ChangeClass( reinterpret_cast<LPCWSTR>(CBase::DockableAtom()) ), _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
+		CWidget( _wlLayout.ChangeStyle( LSW_POPUP_STYLES | (_wlLayout.dwStyle & WS_VISIBLE) ).ChangeStyleEx( LSW_POPUP_STYLESEX ).ChangeClass( reinterpret_cast<LPCWSTR>(CBase::DockableAtom()) ).AddStyle( WS_CLIPCHILDREN ), _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
 		m_dwState( LSW_DS_FLOATING ),
 		m_dwDockStyle( LSW_DS_ALLOW_DOCKALL ),
 		m_iFrameWidth( 0 ),
@@ -384,11 +384,41 @@ namespace lsw {
 		return LSW_H_HANDLED;
 	}
 
-	// WM_PAINT.
+	/**
+	 * Handles WM_PAINT.
+	 * \brief Performs painting for the client area.
+	 *
+	 * \return Returns a LSW_HANDLED code.
+	 */
 	CWidget::LSW_HANDLED CDockable::Paint() {
 		if ( Floating() ) { return LSW_H_CONTINUE; }
 
 		LSW_BEGINPAINT bpPaint( Wnd() );
+
+		// Clip out child windows so we donÅft paint under them.
+		HWND hChild = ::GetWindow( Wnd(), GW_CHILD );
+		while ( hChild ) {
+			RECT rcChild{};
+			::GetWindowRect( hChild, &rcChild );
+			::MapWindowPoints( nullptr, Wnd(), reinterpret_cast<POINT *>(&rcChild), 2 );
+
+			::ExcludeClipRect(
+				bpPaint.hDc,
+				rcChild.left,
+				rcChild.top,
+				rcChild.right,
+				rcChild.bottom
+			);
+
+			hChild = ::GetWindow( hChild, GW_HWNDNEXT );
+		}
+
+		RECT rcClient{};
+		::GetClientRect( Wnd(), &rcClient );
+
+		// Use your splitter background brush here.
+		HBRUSH hbr = GetSysColorBrush( COLOR_3DFACE );
+		::FillRect( bpPaint.hDc, &rcClient, hbr );
 
 		int iH = ::GetSystemMetrics( SM_CYSMCAPTION );
 		LSW_RECT rRect;

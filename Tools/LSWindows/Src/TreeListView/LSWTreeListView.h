@@ -685,6 +685,15 @@ namespace lsw {
 		virtual LSW_HANDLED					Move( LONG _lX, LONG _lY );
 
 		/**
+		 * Handles WM_ERASEBKGND.
+		 * \brief Allows custom background erasing.
+		 *
+		 * \param _hDc Device context provided for erasing.
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					EraseBkgnd( HDC /*_hDc*/ ) { return LSW_H_HANDLED; }
+
+		/**
 		 * WM_KEYDOWN.
 		 *
 		 * \param _uiKeyCode The virtual-key code of the nonsystem key.

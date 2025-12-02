@@ -9,7 +9,7 @@
 namespace mx {
 
 	CAddFoundAddressWindow::CAddFoundAddressWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
-		lsw::CMainWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
+		lsw::CMainWindow( _wlLayout.AddStyle( WS_CLIPCHILDREN ), _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
 		m_pmhMemHack( reinterpret_cast<CMemHack *>(_ui64Data) ) {
 	}
 

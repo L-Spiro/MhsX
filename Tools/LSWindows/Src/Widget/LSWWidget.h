@@ -1118,7 +1118,7 @@ namespace lsw {
 		 *
 		 * \return Returns a LSW_HANDLED code.
 		 */
-		virtual LSW_HANDLED					Paint() { return LSW_H_CONTINUE; }
+		virtual LSW_HANDLED					Paint();// { return LSW_H_CONTINUE; }
 
 		/**
 		 * Handles WM_NCPAINT.

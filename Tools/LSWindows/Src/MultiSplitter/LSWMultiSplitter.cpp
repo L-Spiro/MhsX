@@ -11,7 +11,7 @@ namespace lsw {
 	DWORD CMultiSplitter::m_dwIds = 0;
 
 	CMultiSplitter::CMultiSplitter( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
-		CWidget( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(CBase::MultiSplitterAtom()) ), _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
+		CWidget( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(CBase::MultiSplitterAtom()) ).AddStyle( WS_CLIPCHILDREN ), _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
 		m_iBarWidth( 4 ),
 		m_pmlDragLayer( nullptr ),
 		m_sDragBarIndex( 0 ),

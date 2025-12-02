@@ -1086,6 +1086,33 @@ namespace lsw {
 		}
 
 		/**
+		 * Mixes between 2 24-bit RGB values without gamma-correction.
+		 *
+		 * \param _bRedA Operand 1 (red).
+		 * \param _bRedB Operand 2 (red).
+		 * \param _bGreenA Operand 1 (green).
+		 * \param _bGreenB Operand 2 (green).
+		 * \param _bBlueA Operand 1 (blue).
+		 * \param _bBlueB Operand 2 (blue).
+		 * \param _fAmnt The amount to interpolate between the operands.
+		 * \return Returns the interpolated 24-bit RGB value.
+		 */
+		static DWORD						MixColorRef_NosRGB( BYTE _bRedA, BYTE _bRedB,
+			BYTE _bGreenA, BYTE _bGreenB,
+			BYTE _bBlueA, BYTE _bBlueB, float _fAmnt ) {
+			float dA = _bRedA / 255.0f;
+			float dB = _bRedB / 255.0f;
+			BYTE bR = static_cast<BYTE>(std::round( Mix( dA, dB, _fAmnt ) * 255.0f ));
+			dA = _bGreenA / 255.0f;
+			dB = _bGreenB / 255.0f;
+			BYTE bG = static_cast<BYTE>(std::round( Mix( dA, dB, _fAmnt ) * 255.0f ));
+			dA = _bBlueA / 255.0f;
+			dB = _bBlueB / 255.0f;
+			BYTE bB = static_cast<BYTE>(std::round( Mix( dA, dB, _fAmnt ) * 255.0f ));
+			return RGB( bR, bG, bB );
+		}
+
+		/**
 		 * \brief Chooses black or white text for best contrast against a given background color.
 		 *
 		 * \param _crBack Background color to evaluate.

@@ -1690,7 +1690,7 @@ namespace mx {
 					0,												// iTop
 					0,												// dwWidth
 					0,												// dwHeight
-					WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP,		// dwStyle
+					WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP ,		// dwStyle
 					0,												// dwStyleEx
 					nullptr,										// pwcText
 					0,												// sTextLen
