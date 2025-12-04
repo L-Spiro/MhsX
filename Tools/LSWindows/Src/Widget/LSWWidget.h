@@ -779,6 +779,42 @@ namespace lsw {
 		// Converts a point from pixels to dialog units.
 		static POINT						PixelsToDialogUnits( HWND _hWnd, LONG _lX, LONG _lY );
 
+		/**
+		 * Determines if the given HWND is a group box.
+		 * 
+		 * \param _hWnd The handle to test for being that of a group box.
+		 * \return Returns true if the control is of class type Button and has the BS_GROUPBOX style set.
+		 **/
+		static inline bool					IsGroupBox( HWND _hWnd ) {
+			wchar_t szClass[32]{};
+			if ( ::GetClassNameW( _hWnd, szClass, static_cast<int>(std::size( szClass )) ) ) {
+				if ( ::lstrcmpiW( szClass, L"Button" ) == 0 ) {
+					LONG_PTR lpStyle = ::GetWindowLongPtrW( _hWnd, GWL_STYLE );
+					return (lpStyle & BS_GROUPBOX) != 0;
+				}
+			}
+			return false;
+		}
+
+		/**
+		 * Does the given control have a group box child anywhere?
+		 * 
+		 * \param _hWnd The window/control to check for having a child that is a group box.
+		 * \return Returns true if any nested child is a group box.
+		 **/
+		static inline bool					HasGroupBoxChild( HWND _hWnd ) {
+			HWND hChild = ::GetWindow( _hWnd, GW_CHILD );
+			while ( hChild ) {
+				if ( IsGroupBox( hChild ) ) { return true; }
+
+				HWND hThisChild = ::GetWindow( hChild, GW_CHILD );
+				if ( hThisChild ) { if ( HasGroupBoxChild( hThisChild ) ) { return true; } }
+
+				hChild = ::GetWindow( hChild, GW_HWNDNEXT );
+			}
+			return false;
+		}
+
 
 	protected :
 		// == Members.
@@ -1118,7 +1154,7 @@ namespace lsw {
 		 *
 		 * \return Returns a LSW_HANDLED code.
 		 */
-		virtual LSW_HANDLED					Paint();// { return LSW_H_CONTINUE; }
+		virtual LSW_HANDLED					Paint() { return LSW_H_CONTINUE; }
 
 		/**
 		 * Handles WM_NCPAINT.

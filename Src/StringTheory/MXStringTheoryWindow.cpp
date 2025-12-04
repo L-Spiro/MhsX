@@ -17,7 +17,7 @@ namespace mx {
 	ATOM CStringTheoryWindow::m_aAtom = 0;
 
 	CStringTheoryWindow::CStringTheoryWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
-		lsw::CMainWindow( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(m_aAtom) ), _pwParent, _bCreateWidget, _hMenu, _ui64Data ) {
+		lsw::CMainWindow( _wlLayout.ChangeClass( reinterpret_cast<LPCWSTR>(m_aAtom) )/*.AddStyle( WS_CLIPCHILDREN )*/, _pwParent, _bCreateWidget, _hMenu, _ui64Data ) {
 	}
 	CStringTheoryWindow::~CStringTheoryWindow() {
 	}

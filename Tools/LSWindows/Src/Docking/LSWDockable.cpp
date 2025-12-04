@@ -417,7 +417,7 @@ namespace lsw {
 		::GetClientRect( Wnd(), &rcClient );
 
 		// Use your splitter background brush here.
-		HBRUSH hbr = GetSysColorBrush( COLOR_3DFACE );
+		HBRUSH hbr = ::GetSysColorBrush( COLOR_3DFACE );
 		::FillRect( bpPaint.hDc, &rcClient, hbr );
 
 		int iH = ::GetSystemMetrics( SM_CYSMCAPTION );

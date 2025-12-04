@@ -29,6 +29,15 @@ namespace mx {
 		// Updates the dialog.
 		void								UpdateDialog();
 
+		/**
+		 * Handles WM_ERASEBKGND.
+		 * \brief Allows custom background erasing.
+		 *
+		 * \param _hDc Device context provided for erasing.
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					EraseBkgnd( HDC /*_hDc*/ ) { return LSW_H_CONTINUE; }
+
 		// Prepares to create the window.  Creates the atom if necessary.
 		static void							PrepareStringTheory();
 

@@ -40,6 +40,15 @@ namespace mx {
 		// Returns the desired height when first docking into a horizontal split.
 		virtual INT							PreferredDockHeight() { return 200; }
 
+		/**
+		 * Handles WM_ERASEBKGND.
+		 * \brief Allows custom background erasing.
+		 *
+		 * \param _hDc Device context provided for erasing.
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					EraseBkgnd( HDC /*_hDc*/ ) { return LSW_H_CONTINUE; }
+
 
 	protected :
 		// == Types.

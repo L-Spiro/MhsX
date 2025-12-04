@@ -219,6 +219,9 @@ namespace mx {
 
 	// WM_INITDIALOG.
 	CWidget::LSW_HANDLED CConverterWindow::InitDialog() {
+		LONG lStyle = ::GetWindowLongW( Wnd(), GWL_STYLE ) & ~WS_CLIPCHILDREN;
+		::SetWindowLongW( Wnd(), GWL_STYLE, lStyle );
+
 		CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( CConverterLayout::MX_CWI_TOOLBAR0 ));
 		CRebar * plvRebar = static_cast<CRebar *>(FindChild( CConverterLayout::MX_CWI_REBAR0 ));
 

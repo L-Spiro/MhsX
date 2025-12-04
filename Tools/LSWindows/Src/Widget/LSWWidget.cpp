@@ -611,41 +611,60 @@ namespace lsw {
 	}
 
 	/**
+	 * Handles WM_ERASEBKGND.
+	 * \brief Allows custom background erasing.
+	 *
+	 * \param _hDc Device context provided for erasing.
+	 * \return Returns a LSW_HANDLED code.
+	 */
+	//CWidget::LSW_HANDLED CWidget::EraseBkgnd( HDC /*_hDc*/ ) {
+	//	if ( HasGroupBoxChild( Wnd() ) ) { return LSW_H_CONTINUE; }
+	//	/*HWND hChild = ::GetWindow( Wnd(), GW_CHILD );
+	//	while ( hChild ) {
+	//		if ( !IsGroupBox( hChild ) ) { return LSW_H_CONTINUE; }
+	//		hChild = ::GetWindow( hChild, GW_HWNDNEXT );
+	//	}*/
+	//	return LSW_H_HANDLED;
+	//}
+
+	/**
 	 * Handles WM_PAINT.
 	 * \brief Performs painting for the client area.
 	 *
 	 * \return Returns a LSW_HANDLED code.
 	 */
-	CWidget::LSW_HANDLED CWidget::Paint() {
-		lsw::LSW_BEGINPAINT bpPaint( Wnd() );
+	//CWidget::LSW_HANDLED CWidget::Paint() {
+	//	lsw::LSW_BEGINPAINT bpPaint( Wnd() );
 
-		// Clip out child windows so we donÅft paint under them.
-		HWND hChild = ::GetWindow( Wnd(), GW_CHILD );
-		while ( hChild ) {
-			RECT rcChild{};
-			::GetWindowRect( hChild, &rcChild );
-			::MapWindowPoints( nullptr, Wnd(), reinterpret_cast<POINT *>(&rcChild), 2 );
+	//	// Clip out child windows so we donÅft paint under them.
+	//	HWND hChild = ::GetWindow( Wnd(), GW_CHILD );
+	//	while ( hChild ) {
+	//		if ( !IsGroupBox( hChild ) ) {
+	//			RECT rcChild{};
+	//			::GetWindowRect( hChild, &rcChild );
+	//			::MapWindowPoints( nullptr, Wnd(), reinterpret_cast<POINT *>(&rcChild), 2 );
 
-			::ExcludeClipRect(
-				bpPaint.hDc,
-				rcChild.left,
-				rcChild.top,
-				rcChild.right,
-				rcChild.bottom
-			);
+	//			::ExcludeClipRect(
+	//				bpPaint.hDc,
+	//				rcChild.left,
+	//				rcChild.top,
+	//				rcChild.right,
+	//				rcChild.bottom
+	//			);
+	//		}
 
-			hChild = ::GetWindow( hChild, GW_HWNDNEXT );
-		}
+	//		hChild = ::GetWindow( hChild, GW_HWNDNEXT );
+	//	}
 
-		RECT rcClient{};
-		::GetClientRect( Wnd(), &rcClient );
+	//	RECT rcClient{};
+	//	::GetClientRect( Wnd(), &rcClient );
 
-		// Use your splitter background brush here.
-		HBRUSH hbr = GetSysColorBrush( COLOR_3DFACE );
-		::FillRect( bpPaint.hDc, &rcClient, hbr );
+	//	// Use your splitter background brush here.
+	//	HBRUSH hbr = ::GetSysColorBrush( /*COLOR_3DFACE*/COLOR_3DSHADOW );
+	//	::FillRect( bpPaint.hDc, &rcClient, hbr );
 
-		return CWidget::LSW_H_CONTINUE;
-	}
+	//	return CWidget::LSW_H_CONTINUE;
+	//}
 
 	// == Functions.
 	/**

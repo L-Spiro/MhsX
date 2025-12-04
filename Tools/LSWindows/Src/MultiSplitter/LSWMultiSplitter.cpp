@@ -138,6 +138,45 @@ namespace lsw {
 		return LONG_MAX;
 	}
 
+	/**
+	 * Handles WM_PAINT.
+	 * \brief Performs painting for the client area.
+	 *
+	 * \return Returns a LSW_HANDLED code.
+	 */
+	CWidget::LSW_HANDLED CMultiSplitter::Paint() {
+		lsw::LSW_BEGINPAINT bpPaint( Wnd() );
+
+		// Clip out child windows so we donÅft paint under them.
+		HWND hChild = ::GetWindow( Wnd(), GW_CHILD );
+		while ( hChild ) {
+			if ( !IsGroupBox( hChild ) ) {
+				RECT rcChild{};
+				::GetWindowRect( hChild, &rcChild );
+				::MapWindowPoints( nullptr, Wnd(), reinterpret_cast<POINT *>(&rcChild), 2 );
+
+				::ExcludeClipRect(
+					bpPaint.hDc,
+					rcChild.left,
+					rcChild.top,
+					rcChild.right,
+					rcChild.bottom
+				);
+			}
+
+			hChild = ::GetWindow( hChild, GW_HWNDNEXT );
+		}
+
+		RECT rcClient{};
+		::GetClientRect( Wnd(), &rcClient );
+
+		// Use your splitter background brush here.
+		HBRUSH hbr = ::GetSysColorBrush( COLOR_3DFACE/*COLOR_3DSHADOW*/ );
+		::FillRect( bpPaint.hDc, &rcClient, hbr );
+
+		return CWidget::LSW_H_CONTINUE;
+	}
+
 	// Draw the XOR bar.
 	void CMultiSplitter::DrawXorBar( HDC _hDc, INT _iX1, INT _iY1, INT _iWidth, INT _iHeight ) {
 		static WORD wDotPattern[8] = {
