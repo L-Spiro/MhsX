@@ -601,6 +601,11 @@ RS1_S								[rR]{CS1}
 "triang"							{ return yy::CExpEvalParser::token::EE_TRIANG; }
 "tukey"								{ return yy::CExpEvalParser::token::EE_TUKEY; }
 
+"trapezoid"							{ return yy::CExpEvalParser::token::EE_TRAPAZOID; }
+"cumulative_trapezoid"				{ return yy::CExpEvalParser::token::EE_CUM_TRAPAZOID; }
+"simpson"							{ return yy::CExpEvalParser::token::EE_SIMPSON; }
+"cumulative_simpson"				{ return yy::CExpEvalParser::token::EE_CUM_SIMPSON; }
+"romb"								{ return yy::CExpEvalParser::token::EE_ROMB; }
 
 
 "CHAR_BIT"							{ return yy::CExpEvalParser::token::EE_CHAR_BIT; }

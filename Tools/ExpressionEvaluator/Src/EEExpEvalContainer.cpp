@@ -5880,6 +5880,33 @@ namespace ee {
 						EE_PUSH( _ndExp.y.sNodeIndex );		// soProcessMe.sSubResults[3] = NORMALIZE.
 						continue;
 					}
+
+					case EE_N_TRAPAZOID_1 : {}				EE_FALLTHROUGH
+					case EE_N_SIMPSON_1 : {
+						EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[0] = PARM0.
+						continue;
+					}
+					case EE_N_TRAPAZOID_2 : {}				EE_FALLTHROUGH
+					case EE_N_SIMPSON_2 : {
+						EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[0] = PARM0.
+						EE_PUSH( _ndExp.v.sNodeIndex );		// soProcessMe.sSubResults[1] = PARM1.
+						continue;
+					}
+					case EE_N_TRAPAZOIDSTRIDED_4 : {
+						EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[0] = PARM0.
+						EE_PUSH( _ndExp.v.sNodeIndex );		// soProcessMe.sSubResults[1] = PARM1.
+						EE_PUSH( _ndExp.w.sNodeIndex );		// soProcessMe.sSubResults[2] = PARM2.
+						EE_PUSH( _ndExp.x.sNodeIndex );		// soProcessMe.sSubResults[3] = PARM3.
+						continue;
+					}
+					case EE_N_TRAPAZOIDSTRIDED_5 : {
+						EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[0] = PARM0.
+						EE_PUSH( _ndExp.v.sNodeIndex );		// soProcessMe.sSubResults[1] = PARM1.
+						EE_PUSH( _ndExp.w.sNodeIndex );		// soProcessMe.sSubResults[2] = PARM2.
+						EE_PUSH( _ndExp.x.sNodeIndex );		// soProcessMe.sSubResults[3] = PARM3.
+						EE_PUSH( _ndExp.y.sNodeIndex );		// soProcessMe.sSubResults[4] = PARM4.
+						continue;
+					}
 				}
 			}
 			else {
@@ -7735,14 +7762,7 @@ namespace ee {
 		if ( !CExpEval::FUNC<double>( size_t( aRet.u.ui64Val ), dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }								\
 																																															\
 		ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);																									\
-		try {																																												\
-			pvThis->GetBacking().resize( dTmp.size() );																																		\
-			for ( auto I = dTmp.size(); I--; ) {																																			\
-				pvThis->GetBacking()[I].ncType = EE_NC_FLOATING;																															\
-				pvThis->GetBacking()[I].u.dVal = dTmp[I];																																	\
-			}																																												\
-		}																																													\
-		catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }																					\
+		if ( !pvThis->FromPrimitiveArray<double, EE_NC_FLOATING>( dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }								\
 		(*soProcessMe.prResult) = pvThis->CreateResult();																																	\
 		break;																																												\
 	}
@@ -7775,14 +7795,7 @@ namespace ee {
 						if ( !CExpEval::ChebwinWindow<double>( size_t( aRet.u.ui64Val ), rAt.u.dVal, dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
 
 						ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);
-						try {
-							pvThis->GetBacking().resize( dTmp.size() );
-							for ( auto I = dTmp.size(); I--; ) {
-								pvThis->GetBacking()[I].ncType = EE_NC_FLOATING;
-								pvThis->GetBacking()[I].u.dVal = dTmp[I];
-							}
-						}
-						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						if ( !pvThis->FromPrimitiveArray<double, EE_NC_FLOATING>( dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
 						(*soProcessMe.prResult) = pvThis->CreateResult();
 						break;
 					}
@@ -7800,14 +7813,7 @@ namespace ee {
 						if ( !CExpEval::ExponentialWindow<double>( size_t( aRet.u.ui64Val ), rTau.u.dVal, rCenter.u.dVal, dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
 
 						ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);
-						try {
-							pvThis->GetBacking().resize( dTmp.size() );
-							for ( auto I = dTmp.size(); I--; ) {
-								pvThis->GetBacking()[I].ncType = EE_NC_FLOATING;
-								pvThis->GetBacking()[I].u.dVal = dTmp[I];
-							}
-						}
-						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						if ( !pvThis->FromPrimitiveArray<double, EE_NC_FLOATING>( dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
 						(*soProcessMe.prResult) = pvThis->CreateResult();
 						break;
 					}
@@ -7823,14 +7829,7 @@ namespace ee {
 						if ( !CExpEval::GaussianWindow<double>( size_t( aRet.u.ui64Val ), aSigma.u.dVal, dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
 
 						ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);
-						try {
-							pvThis->GetBacking().resize( dTmp.size() );
-							for ( auto I = dTmp.size(); I--; ) {
-								pvThis->GetBacking()[I].ncType = EE_NC_FLOATING;
-								pvThis->GetBacking()[I].u.dVal = dTmp[I];
-							}
-						}
-						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						if ( !pvThis->FromPrimitiveArray<double, EE_NC_FLOATING>( dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
 						(*soProcessMe.prResult) = pvThis->CreateResult();
 						break;
 					}
@@ -7841,19 +7840,8 @@ namespace ee {
 						if ( aA.ncType != EE_NC_OBJECT ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
 						if ( !aA.u.poObj || !(aA.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
 						auto pvVec = static_cast<CVector *>(aA.u.poObj);
-						const auto & vASrc = pvVec->GetBacking();
 						std::vector<double> vA;
-						if ( vASrc.size() ) {
-							try {
-								vA.resize( vASrc.size() );
-								for ( auto I = vASrc.size(); I--; ) {
-									auto rTmp = ConvertResultOrObject( vASrc[I], EE_NC_FLOATING );
-									if ( rTmp.ncType != EE_NC_FLOATING ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
-									vA[I] = rTmp.u.dVal;
-								}
-							}
-							catch ( ... ) {  (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
-						}
+						if ( !pvVec->ToPrimitiveArray<double, EE_NC_FLOATING>( vA ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
 
 						if ( _ndExp.w.sNodeIndex >= m_vObjects.size() ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
 						if ( !(m_vObjects[_ndExp.w.sNodeIndex]->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
@@ -7861,14 +7849,7 @@ namespace ee {
 						if ( !CExpEval::GeneralCosineWindow<double>( size_t( aRet.u.ui64Val ), vA, dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
 
 						ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);
-						try {
-							pvThis->GetBacking().resize( dTmp.size() );
-							for ( auto I = dTmp.size(); I--; ) {
-								pvThis->GetBacking()[I].ncType = EE_NC_FLOATING;
-								pvThis->GetBacking()[I].u.dVal = dTmp[I];
-							}
-						}
-						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						if ( !pvThis->FromPrimitiveArray<double, EE_NC_FLOATING>( dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
 						(*soProcessMe.prResult) = pvThis->CreateResult();
 						break;
 					}
@@ -7886,14 +7867,7 @@ namespace ee {
 						if ( !CExpEval::GeneralGaussianWindow<double>( size_t( aRet.u.ui64Val ), aP.u.dVal, aSigma.u.dVal, dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
 
 						ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);
-						try {
-							pvThis->GetBacking().resize( dTmp.size() );
-							for ( auto I = dTmp.size(); I--; ) {
-								pvThis->GetBacking()[I].ncType = EE_NC_FLOATING;
-								pvThis->GetBacking()[I].u.dVal = dTmp[I];
-							}
-						}
-						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						if ( !pvThis->FromPrimitiveArray<double, EE_NC_FLOATING>( dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
 						(*soProcessMe.prResult) = pvThis->CreateResult();
 						break;
 					}
@@ -7909,14 +7883,7 @@ namespace ee {
 						if ( !CExpEval::GeneralHammingWindow<double>( size_t( aRet.u.ui64Val ), aAlpha.u.dVal, dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
 
 						ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);
-						try {
-							pvThis->GetBacking().resize( dTmp.size() );
-							for ( auto I = dTmp.size(); I--; ) {
-								pvThis->GetBacking()[I].ncType = EE_NC_FLOATING;
-								pvThis->GetBacking()[I].u.dVal = dTmp[I];
-							}
-						}
-						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						if ( !pvThis->FromPrimitiveArray<double, EE_NC_FLOATING>( dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
 						(*soProcessMe.prResult) = pvThis->CreateResult();
 						break;
 					}
@@ -7932,14 +7899,7 @@ namespace ee {
 						if ( !CExpEval::KaiserWindow<double>( size_t( aRet.u.ui64Val ), aBeta.u.dVal, dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
 
 						ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);
-						try {
-							pvThis->GetBacking().resize( dTmp.size() );
-							for ( auto I = dTmp.size(); I--; ) {
-								pvThis->GetBacking()[I].ncType = EE_NC_FLOATING;
-								pvThis->GetBacking()[I].u.dVal = dTmp[I];
-							}
-						}
-						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						if ( !pvThis->FromPrimitiveArray<double, EE_NC_FLOATING>( dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
 						(*soProcessMe.prResult) = pvThis->CreateResult();
 						break;
 					}
@@ -7955,14 +7915,7 @@ namespace ee {
 						if ( !CExpEval::KaiserBesselDerivedWindow<double>( size_t( aRet.u.ui64Val ), aBeta.u.dVal, dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
 
 						ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);
-						try {
-							pvThis->GetBacking().resize( dTmp.size() );
-							for ( auto I = dTmp.size(); I--; ) {
-								pvThis->GetBacking()[I].ncType = EE_NC_FLOATING;
-								pvThis->GetBacking()[I].u.dVal = dTmp[I];
-							}
-						}
-						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						if ( !pvThis->FromPrimitiveArray<double, EE_NC_FLOATING>( dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
 						(*soProcessMe.prResult) = pvThis->CreateResult();
 						break;
 					}
@@ -7982,14 +7935,7 @@ namespace ee {
 						if ( !CExpEval::TaylorWindow<double>( size_t( aRet.u.ui64Val ), static_cast<int>(rNBar.u.i64Val), rSll.u.dVal, rNorm.u.i64Val != 0, dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
 
 						ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);
-						try {
-							pvThis->GetBacking().resize( dTmp.size() );
-							for ( auto I = dTmp.size(); I--; ) {
-								pvThis->GetBacking()[I].ncType = EE_NC_FLOATING;
-								pvThis->GetBacking()[I].u.dVal = dTmp[I];
-							}
-						}
-						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						if ( !pvThis->FromPrimitiveArray<double, EE_NC_FLOATING>( dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
 						(*soProcessMe.prResult) = pvThis->CreateResult();
 						break;
 					}
@@ -8001,22 +7947,122 @@ namespace ee {
 
 						if ( _ndExp.w.sNodeIndex >= m_vObjects.size() ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
 						if ( !(m_vObjects[_ndExp.w.sNodeIndex]->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
-						std::vector<double> dTmp;
-						if ( !CExpEval::TukeyWindow<double>( size_t( aRet.u.ui64Val ), rAlpha.u.dVal, dTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						std::vector<double> vTmp;
+						if ( !CExpEval::TukeyWindow<double>( size_t( aRet.u.ui64Val ), rAlpha.u.dVal, vTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
 
 						ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);
-						try {
-							pvThis->GetBacking().resize( dTmp.size() );
-							for ( auto I = dTmp.size(); I--; ) {
-								pvThis->GetBacking()[I].ncType = EE_NC_FLOATING;
-								pvThis->GetBacking()[I].u.dVal = dTmp[I];
-							}
-						}
-						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						if ( !pvThis->FromPrimitiveArray<double, EE_NC_FLOATING>( vTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
 						(*soProcessMe.prResult) = pvThis->CreateResult();
 						break;
 					}
 
+					case EE_N_TRAPAZOID_1 : {
+						// _vY must be a vector.
+						auto rY = soProcessMe.sSubResults[0];
+						if ( rY.ncType != EE_NC_OBJECT ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+						if ( !rY.u.poObj || !(rY.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+
+						std::vector<double> vY;
+						ee::CVector * pvY = static_cast<ee::CVector *>(rY.u.poObj);
+						if ( !pvY->ToPrimitiveArray<double, EE_NC_FLOATING>( vY ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						
+						try {
+							(*soProcessMe.prResult).u.dVal = CExpEval::Trapezoid1D<double>( vY, 1.0 );
+						}
+						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
+						break;
+					}
+					case EE_N_TRAPAZOID_2 : {
+						// _vY must be a vector.
+						auto rY = soProcessMe.sSubResults[0];
+						if ( rY.ncType != EE_NC_OBJECT ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+						if ( !rY.u.poObj || !(rY.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+
+						std::vector<double> vY;
+						ee::CVector * pvY = static_cast<ee::CVector *>(rY.u.poObj);
+						if ( !pvY->ToPrimitiveArray<double, EE_NC_FLOATING>( vY ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						
+						// The 2nd parameter can be either a vector or a primitive.
+						auto rParm2 = soProcessMe.sSubResults[1];
+						if ( rParm2.ncType == EE_NC_OBJECT ) {
+							if ( !rParm2.u.poObj || !(rParm2.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+
+							ee::CVector * pvX = static_cast<ee::CVector *>(rParm2.u.poObj);
+							std::vector<double> vX;
+							if ( !pvX->ToPrimitiveArray<double, EE_NC_FLOATING>( vX ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+							try {
+								(*soProcessMe.prResult).u.dVal = CExpEval::Trapezoid1D<double>( vY, vX );
+							}
+							catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						}
+						else {
+							// Must be a basic primitive.
+							auto rDx = ConvertResultOrObject( rParm2, EE_NC_FLOATING );
+							if ( rDx.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+
+							try {
+								(*soProcessMe.prResult).u.dVal = CExpEval::Trapezoid1D<double>( vY, rDx.u.dVal );
+							}
+							catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						}
+						(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
+						break;
+					}
+
+					case EE_N_SIMPSON_1 : {
+						// _vY must be a vector.
+						auto rY = soProcessMe.sSubResults[0];
+						if ( rY.ncType != EE_NC_OBJECT ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+						if ( !rY.u.poObj || !(rY.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+
+						std::vector<double> vY;
+						ee::CVector * pvY = static_cast<ee::CVector *>(rY.u.poObj);
+						if ( !pvY->ToPrimitiveArray<double, EE_NC_FLOATING>( vY ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						
+						try {
+							(*soProcessMe.prResult).u.dVal = CExpEval::Simpson1D<double>( vY, 1.0 );
+						}
+						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
+						break;
+					}
+					case EE_N_SIMPSON_2 : {
+						// _vY must be a vector.
+						auto rY = soProcessMe.sSubResults[0];
+						if ( rY.ncType != EE_NC_OBJECT ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+						if ( !rY.u.poObj || !(rY.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+
+						std::vector<double> vY;
+						ee::CVector * pvY = static_cast<ee::CVector *>(rY.u.poObj);
+						if ( !pvY->ToPrimitiveArray<double, EE_NC_FLOATING>( vY ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						
+						// The 2nd parameter can be either a vector or a primitive.
+						auto rParm2 = soProcessMe.sSubResults[1];
+						if ( rParm2.ncType == EE_NC_OBJECT ) {
+							if ( !rParm2.u.poObj || !(rParm2.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+
+							ee::CVector * pvX = static_cast<ee::CVector *>(rParm2.u.poObj);
+							std::vector<double> vX;
+							if ( !pvX->ToPrimitiveArray<double, EE_NC_FLOATING>( vX ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+							try {
+								(*soProcessMe.prResult).u.dVal = CExpEval::Simpson1D<double>( vY, vX );
+							}
+							catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						}
+						else {
+							// Must be a basic primitive.
+							auto rDx = ConvertResultOrObject( rParm2, EE_NC_FLOATING );
+							if ( rDx.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+
+							try {
+								(*soProcessMe.prResult).u.dVal = CExpEval::Simpson1D<double>( vY, rDx.u.dVal );
+							}
+							catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						}
+						(*soProcessMe.prResult).ncType = EE_NC_FLOATING;
+						break;
+					}
 				}
 
 

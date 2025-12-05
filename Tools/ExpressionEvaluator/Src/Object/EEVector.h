@@ -191,6 +191,69 @@ namespace ee {
 			return rRes;
 		}
 
+		/**
+		 * Converts the array to an array of primitives.
+		 * 
+		 * \param _vRet The array to fill with the converted values.
+		 * \return Returns true if the array was allocated and all values were successfully cast to the target type.
+		 **/
+		template <typename _tVecType, EE_NUM_CONSTANTS _ncType>
+		bool										ToPrimitiveArray( std::vector<_tVecType> &_vRet ) const {
+			try {
+				if ( !m_vBacking.size() ) {
+					_vRet.clear();
+					return true;
+				}
+				_vRet.resize( m_vBacking.size() );
+				for ( auto I = m_vBacking.size(); I--; ) {
+					auto rTmp = m_peecContainer->ConvertResultOrObject( m_vBacking[I], _ncType );
+					if ( rTmp.ncType != _ncType ) { return false; }
+					if constexpr ( _ncType == EE_NC_SIGNED ) {
+						_vRet[I] = _tVecType( rTmp.u.i64Val );
+					}
+					else if constexpr ( _ncType == EE_NC_UNSIGNED ) {
+						_vRet[I] = _tVecType( rTmp.u.ui64Val );
+					}
+					else if constexpr ( _ncType == EE_NC_FLOATING ) {
+						_vRet[I] = _tVecType( rTmp.u.dVal );
+					}
+				}
+			}
+			catch ( ... ) { return false; }
+			return true;
+		}
+
+		/**
+		 * Sets the array based off a vector of primitives.
+		 * 
+		 * \param _vRet The array of primitives to be used to fill this vector.
+		 * \return Returns true if this vector was able to size correctly.
+		 **/
+		template <typename _tVecType, EE_NUM_CONSTANTS _ncType>
+		bool										FromPrimitiveArray( const std::vector<_tVecType> &_vRet ) {
+			try {
+				if ( !_vRet.size() ) {
+					m_vBacking.clear();
+					return true;
+				}
+				m_vBacking.resize( _vRet.size() );
+				for ( auto I = _vRet.size(); I--; ) {
+					m_vBacking[I].ncType = _ncType;
+					if constexpr ( _ncType == EE_NC_SIGNED ) {
+						m_vBacking[I].u.i64Val = _tVecType( _vRet[I] );
+					}
+					else if constexpr ( _ncType == EE_NC_UNSIGNED ) {
+						m_vBacking[I].u.ui64Val = _tVecType( _vRet[I] );
+					}
+					else if constexpr ( _ncType == EE_NC_FLOATING ) {
+						m_vBacking[I].u.dVal = _tVecType( _vRet[I] );
+					}
+				}
+			}
+			catch ( ... ) { return false; }
+			return true;
+		}
+
 		// Gets the octadecimal form of the object as a string (0o****).
 		virtual CExpEvalContainer::EE_RESULT		Oct() const { return { EE_NC_INVALID }; }
 

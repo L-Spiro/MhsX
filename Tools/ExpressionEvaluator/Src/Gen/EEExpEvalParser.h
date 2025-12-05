@@ -464,12 +464,17 @@ namespace yy {
      EE_TAYLOR = 604,
      EE_TRIANG = 605,
      EE_TUKEY = 606,
-     EE_OR = 607,
-     EE_AND = 608,
-     EE_LOG_NOT = 609,
-     EE_UNARY_1SCOMPL = 610,
-     EE_UPLUS = 611,
-     EE_UMINUS = 612
+     EE_CUM_SIMPSON = 607,
+     EE_CUM_TRAPAZOID = 608,
+     EE_ROMB = 609,
+     EE_SIMPSON = 610,
+     EE_TRAPAZOID = 611,
+     EE_OR = 612,
+     EE_AND = 613,
+     EE_LOG_NOT = 614,
+     EE_UNARY_1SCOMPL = 615,
+     EE_UPLUS = 616,
+     EE_UMINUS = 617
    };
 
     };

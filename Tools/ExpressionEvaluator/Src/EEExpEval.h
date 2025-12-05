@@ -3120,12 +3120,12 @@ namespace ee {
 		 **/
 		template <typename _tType = double>
 		static inline _tType			Trapezoid1D( const std::vector<_tType> &_vY, _tType _tDx = _tType( 1 ) ) {
-			if ( _vY.size() < size_t( 2 ) ) { return _tType( 0 ); }
+			if ( _vY.size() < 2 ) { return _tType( 0 ); }
 
 			_tType tIntegrate = _tType( 0 );
 
 			// Interior points.
-			for ( size_t I = size_t( 1 ); I + size_t( 1 ) < _vY.size(); ++I ) {
+			for ( size_t I = 1; I + 1 < _vY.size(); ++I ) {
 				tIntegrate += _vY[I];
 			}
 
@@ -3136,7 +3136,7 @@ namespace ee {
 		}
 
 		/**
-		 * \brief Computes the trapezoidal integral over 1D data with non-uniform spacing. Must be called within a try/catch block.
+		 * \brief Computes the trapezoidal integral over 1D data with non-uniform spacing.  Call within a try/catch block.
 		 * 
 		 * This matches scipy.integrate.trapezoid( y, x=x ) for 1D input.
 		 * 
@@ -3148,15 +3148,15 @@ namespace ee {
 		template <typename _tType = double>
 		static inline _tType			Trapezoid1D( const std::vector<_tType> &_vY, const std::vector<_tType> &_vX ) {
 			if ( _vX.size() != _vY.size() ) {
-				throw std::invalid_argument();
+				throw std::invalid_argument( "" );
 			}
-			if ( _vY.size() < size_t( 2 ) ) { return _tType( 0 ); }
+			if ( _vY.size() < 2 ) { return _tType( 0 ); }
 
 			_tType tIntegrate = _tType( 0 );
 
-			for ( size_t I = size_t( 0 ); I + size_t( 1 ) < _vY.size(); ++I ) {
-				const _tType tDx  = _vX[I+size_t(1)] - _vX[I];
-				const _tType tAvg = _tType( 0.5 ) * (_vY[I] + _vY[I+size_t(1)]);
+			for ( size_t I = 0; I + 1 < _vY.size(); ++I ) {
+				const _tType tDx  = _vX[I+1] - _vX[I];
+				const _tType tAvg = _tType( 0.5 ) * (_vY[I] + _vY[I+1]);
 				tIntegrate += tDx * tAvg;
 			}
 
@@ -3164,7 +3164,7 @@ namespace ee {
 		}
 
 		/**
-		 * \brief Trapezoidal integration along a strided axis with uniform spacing. Must be called within a try/catch block.
+		 * \brief Trapezoidal integration along a strided axis with uniform spacing.  Call within a try/catch block.
 		 * 
 		 * This is analogous to scipy.integrate.trapezoid( y, dx=dx, axis=axis ) on a
 		 * view of the array along 'axis', flattened to a 1D strided line.
@@ -3183,9 +3183,9 @@ namespace ee {
 			size_t _sCount,
 			size_t _sStride,
 			_tType _tDx = _tType( 1 ) ) {
-			if ( _sCount < size_t( 2 ) ) { return _tType( 0 ); }
+			if ( _sCount < 2 ) { return _tType( 0 ); }
 
-			const size_t sLastIndex = _sStart + ( _sCount - size_t( 1 ) ) * _sStride;
+			const size_t sLastIndex = _sStart + ( _sCount - 1 ) * _sStride;
 			if ( sLastIndex >= _vY.size() ) { throw std::out_of_range(); }
 
 			_tType tIntegrate = _tType( 0 );
@@ -3195,7 +3195,7 @@ namespace ee {
 			const _tType tLast  = _vY[sLastIndex];
 
 			// Interior samples.
-			for ( size_t I = size_t( 1 ); I + size_t( 1 ) < _sCount; ++I ) {
+			for ( size_t I = 1; I + 1 < _sCount; ++I ) {
 				const size_t sIdx = _sStart + I * _sStride;
 				tIntegrate += _vY[sIdx];
 			}
@@ -3206,7 +3206,7 @@ namespace ee {
 		}
 
 		/**
-		 * \brief Trapezoidal integration along a strided axis with non-uniform spacing. Must be called within a try/catch block.
+		 * \brief Trapezoidal integration along a strided axis with non-uniform spacing.  Call within a try/catch block.
 		 * 
 		 * This is analogous to scipy.integrate.trapezoid( y, x=x, axis=axis ) where x is
 		 * 1D and y is multi-dimensional. The integration is performed along a single
@@ -3226,20 +3226,20 @@ namespace ee {
 			const std::vector<_tType> &_vX ) {
 			const size_t sCount = _vX.size();
 
-			if ( sCount < size_t( 2 ) ) { return _tType( 0 ); }
+			if ( sCount < 2 ) { return _tType( 0 ); }
 
-			const size_t sLastIndex = _sStart + ( sCount - size_t( 1 ) ) * _sStride;
+			const size_t sLastIndex = _sStart + ( sCount - 1 ) * _sStride;
 			if ( sLastIndex >= _vY.size() ) { throw std::out_of_range(); }
 
 			_tType tIntegrate = _tType( 0 );
 
-			for ( size_t I = size_t( 0 ); I + size_t( 1 ) < sCount; ++I ) {
+			for ( size_t I = 0; I + 1 < sCount; ++I ) {
 				const size_t sIdx0 = _sStart + I * _sStride;
-				const size_t sIdx1 = _sStart + (I + size_t( 1 )) * _sStride;
+				const size_t sIdx1 = _sStart + (I + 1) * _sStride;
 
 				const _tType tY0  = _vY[sIdx0];
 				const _tType tY1  = _vY[sIdx1];
-				const _tType tDx  = _vX[I+size_t(1)] - _vX[I];
+				const _tType tDx  = _vX[I+1] - _vX[I];
 				const _tType tAvg = _tType( 0.5 ) * (tY0 + tY1);
 
 				tIntegrate += tDx * tAvg;
@@ -3262,17 +3262,17 @@ namespace ee {
 		template <typename _tType = double>
 		static inline std::vector<_tType>
 										CumulativeTrapezoid1D( const std::vector<_tType> &_vY, _tType _tDx = _tType( 1 ) ) {
-			if ( _vY.size() < size_t( 2 ) ) { return std::vector<_tType>(); }
+			if ( _vY.size() < 2 ) { return std::vector<_tType>(); }
 
 			std::vector<_tType> vOut;
-			vOut.resize( _vY.size() - size_t( 1 ) );
+			vOut.resize( _vY.size() - 1 );
 
 			_tType tIntegrate = _tType( 0 );
 
-			for ( size_t I = size_t( 1 ); I < _vY.size(); ++I ) {
-				const _tType tArea = _tDx * _tType( 0.5 ) * (_vY[I-size_t(1)] + _vY[I]);
+			for ( size_t I = 1; I < _vY.size(); ++I ) {
+				const _tType tArea = _tDx * _tType( 0.5 ) * (_vY[I-1] + _vY[I]);
 				tIntegrate += tArea;
-				vOut[I-size_t(1)] = tIntegrate;
+				vOut[I-1] = tIntegrate;
 			}
 
 			return vOut;
@@ -3301,8 +3301,8 @@ namespace ee {
 			vOut[0] = _tInitial;
 			_tType tIntegrate = _tInitial;
 
-			for ( size_t I = size_t( 1 ); I < _vY.size(); ++I ) {
-				const _tType tArea = _tDx * _tType( 0.5 ) * (_vY[I-size_t(1)] + _vY[I]);
+			for ( size_t I = 1; I < _vY.size(); ++I ) {
+				const _tType tArea = _tDx * _tType( 0.5 ) * (_vY[I-1] + _vY[I]);
 				tIntegrate += tArea;
 				vOut[I] = tIntegrate;
 			}
@@ -3311,7 +3311,7 @@ namespace ee {
 		}
 
 		/**
-		 * \brief Computes the cumulative trapezoidal integral over 1D data with non-uniform spacing. Must be called within a try/catch block.
+		 * \brief Computes the cumulative trapezoidal integral over 1D data with non-uniform spacing.  Call within a try/catch block.
 		 * 
 		 * This matches scipy.integrate.cumulative_trapezoid( y, x=x, initial=None )
 		 * in behavior for 1D input (no initial term).
@@ -3324,26 +3324,26 @@ namespace ee {
 		template <typename _tType = double>
 		static inline std::vector<_tType>
 										CumulativeTrapezoid1D( const std::vector<_tType> &_vY, const std::vector<_tType> &_vX ) {
-			if ( _vX.size() != _vY.size() ) { throw std::invalid_argument(); }
-			if ( _vY.size() < size_t( 2 ) ) { return std::vector<_tType>(); }
+			if ( _vX.size() != _vY.size() ) { throw std::invalid_argument( "" ); }
+			if ( _vY.size() < 2 ) { return std::vector<_tType>(); }
 
 			std::vector<_tType> vOut;
-			vOut.resize( _vY.size() - size_t( 1 ) );
+			vOut.resize( _vY.size() - 1 );
 
 			_tType tIntegrate = _tType( 0 );
 
-			for ( size_t I = size_t( 1 ); I < _vY.size(); ++I ) {
-				const _tType tDx   = _vX[I] - _vX[I-size_t(1)];
-				const _tType tArea = tDx * _tType( 0.5 ) * (_vY[I-size_t(1)] + _vY[I]);
+			for ( size_t I = 1; I < _vY.size(); ++I ) {
+				const _tType tDx   = _vX[I] - _vX[I-1];
+				const _tType tArea = tDx * _tType( 0.5 ) * (_vY[I-1] + _vY[I]);
 				tIntegrate += tArea;
-				vOut[I-size_t(1)] = tIntegrate;
+				vOut[I-1] = tIntegrate;
 			}
 
 			return vOut;
 		}
 
 		/**
-		 * \brief Computes the cumulative trapezoidal integral over 1D data with non-uniform spacing and an initial value. Must be called within a try/catch block.
+		 * \brief Computes the cumulative trapezoidal integral over 1D data with non-uniform spacing and an initial value.  Call within a try/catch block.
 		 * 
 		 * This matches scipy.integrate.cumulative_trapezoid( y, x=x, initial=initial )
 		 * in behavior for 1D input (output has the same length as _vY).
@@ -3359,7 +3359,7 @@ namespace ee {
 										CumulativeTrapezoid1D( const std::vector<_tType> &_vY,
 			const std::vector<_tType> &_vX,
 			_tType _tInitial ) {
-			if ( _vX.size() != _vY.size() ) { throw std::invalid_argument(); }
+			if ( _vX.size() != _vY.size() ) { throw std::invalid_argument( "" ); }
 			if ( _vY.empty() ) { return std::vector<_tType>(); }
 
 			std::vector<_tType> vOut;
@@ -3368,9 +3368,9 @@ namespace ee {
 			vOut[0] = _tInitial;
 			_tType tIntegrate = _tInitial;
 
-			for ( size_t I = size_t( 1 ); I < _vY.size(); ++I ) {
-				const _tType tDx   = _vX[I] - _vX[I-size_t(1)];
-				const _tType tArea = tDx * _tType( 0.5 ) * (_vY[I-size_t(1)] + _vY[I]);
+			for ( size_t I = 1; I < _vY.size(); ++I ) {
+				const _tType tDx   = _vX[I] - _vX[I-1];
+				const _tType tArea = tDx * _tType( 0.5 ) * (_vY[I-1] + _vY[I]);
 				tIntegrate += tArea;
 				vOut[I] = tIntegrate;
 			}
@@ -3400,15 +3400,15 @@ namespace ee {
 			const size_t sCount = _sEnd - _sStart;
 			if ( sCount < size_t( 3 ) ) { return _tType( 0 ); }
 
-			_tType tSum = _vY[_sStart] + _vY[_sEnd-size_t(1)];
+			_tType tSum = _vY[_sStart] + _vY[_sEnd-1];
 
 			// Odd-indexed terms (4 * y_i).
-			for ( size_t I = _sStart + size_t( 1 ); I + size_t( 1 ) < _sEnd; I += size_t( 2 ) ) {
+			for ( size_t I = _sStart + 1; I + 1 < _sEnd; I += 2 ) {
 				tSum += _tType( 4 ) * _vY[I];
 			}
 
 			// Even-indexed interior terms (2 * y_i).
-			for ( size_t I = _sStart + size_t( 2 ); I + size_t( 1 ) < _sEnd; I += size_t( 2 ) ) {
+			for ( size_t I = _sStart + 2; I + 1 < _sEnd; I += 2 ) {
 				tSum += _tType( 2 ) * _vY[I];
 			}
 
@@ -3438,19 +3438,19 @@ namespace ee {
 			_tType _tDx ) {
 			if ( _sCount < size_t( 3 ) ) { return _tType( 0 ); }
 
-			const size_t sLastIndex = _sStart + ( _sCount - size_t( 1 ) ) * _sStride;
+			const size_t sLastIndex = _sStart + ( _sCount - 1 ) * _sStride;
 			if ( sLastIndex >= _vY.size() ) { throw std::out_of_range(); }
 
 			_tType tSum = _vY[_sStart] + _vY[sLastIndex];
 
 			// Odd-indexed terms (4 * y_i).
-			for ( size_t I = size_t( 1 ); I + size_t( 1 ) < _sCount; I += size_t( 2 ) ) {
+			for ( size_t I = 1; I + 1 < _sCount; I += 2 ) {
 				const size_t sIdx = _sStart + I * _sStride;
 				tSum += _tType( 4 ) * _vY[sIdx];
 			}
 
 			// Even-indexed interior terms (2 * y_i).
-			for ( size_t I = size_t( 2 ); I + size_t( 1 ) < _sCount; I += size_t( 2 ) ) {
+			for ( size_t I = 2; I + 1 < _sCount; I += 2 ) {
 				const size_t sIdx = _sStart + I * _sStride;
 				tSum += _tType( 2 ) * _vY[sIdx];
 			}
@@ -3472,30 +3472,30 @@ namespace ee {
 		template <typename _tType = double>
 		static inline _tType			Simpson1D( const std::vector<_tType> &_vY, _tType _tDx = _tType( 1 ) ) {
 			const size_t sCount = _vY.size();
-			if ( sCount < size_t( 2 ) ) { return _tType( 0 ); }
+			if ( sCount < 2 ) { return _tType( 0 ); }
 
 			// For exactly two samples, Simpson's rule degenerates to the trapezoidal rule.
-			if ( sCount == size_t( 2 ) ) {
+			if ( sCount == 2 ) {
 				return _tDx * _tType( 0.5 ) * ( _vY[0] + _vY[1] );
 			}
 
 			// Odd number of samples -> even number of intervals: standard composite Simpson.
-			if ( (sCount % size_t( 2 )) == size_t( 1 ) ) {
-				return SimpsonUniformRange( _vY, size_t( 0 ), sCount, _tDx );
+			if ( (sCount % 2) == 1 ) {
+				return SimpsonUniformRange( _vY, 0, sCount, _tDx );
 			}
 
 			// Even number of samples: emulate SciPy's even='avg':
 			// 1) Simpson on first N-1 points + trapezoid on last interval.
 			// 2) Simpson on last N-1 points  + trapezoid on first interval.
 			// Then average the two results.
-			const size_t sLast = sCount - size_t( 1 );
+			const size_t sLast = sCount - 1;
 
-			const _tType tS1 = SimpsonUniformRange( _vY, size_t( 0 ), sLast, _tDx );
+			const _tType tS1 = SimpsonUniformRange( _vY, 0, sLast, _tDx );
 			const _tType tTrapLast = _tDx * _tType( 0.5 ) *
-				(_vY[sLast - size_t( 1 )] + _vY[sLast]);
+				(_vY[sLast - 1] + _vY[sLast]);
 			const _tType tR1 = tS1 + tTrapLast;
 
-			const _tType tS2 = SimpsonUniformRange( _vY, size_t( 1 ), sCount, _tDx );
+			const _tType tS2 = SimpsonUniformRange( _vY, 1, sCount, _tDx );
 			const _tType tTrapFirst = _tDx * _tType( 0.5 ) *
 				(_vY[0] + _vY[1]);
 			const _tType tR2 = tS2 + tTrapFirst;
@@ -3504,7 +3504,7 @@ namespace ee {
 		}
 
 		/**
-		 * \brief Computes the Simpson integral over 1D data with non-uniform spacing. Must be called within a try/catch block.
+		 * \brief Computes the Simpson integral over 1D data with non-uniform spacing.  Call within a try/catch block.
 		 * 
 		 * This matches scipy.integrate.simpson( y, x=x ) for 1D input, using the
 		 * standard non-uniform composite Simpson's rule formulation (including the
@@ -3517,45 +3517,45 @@ namespace ee {
 		 **/
 		template <typename _tType = double>
 		static inline _tType			Simpson1D( const std::vector<_tType> &_vY, const std::vector<_tType> &_vX ) {
-			if ( _vX.size() != _vY.size() ) { throw std::invalid_argument(); }
-			if ( _vY.size() < size_t( 2 ) ) { return _tType( 0 ); }
+			if ( _vX.size() != _vY.size() ) { throw std::invalid_argument( "" ); }
+			if ( _vY.size() < 2 ) { return _tType( 0 ); }
 
 			const size_t sCount = _vX.size();
-			const size_t sN = sCount - size_t( 1 );     // Number of intervals.
+			const size_t sN = sCount - 1;     // Number of intervals.
 
 			std::vector<_tType> vH;
 			vH.resize( sN );
 
-			for ( size_t I = size_t( 0 ); I < sN; ++I ) {
-				vH[I] = _vX[I+size_t(1)] - _vX[I];
+			for ( size_t I = 0; I < sN; ++I ) {
+				vH[I] = _vX[I+1] - _vX[I];
 			}
 
 			_tType tResult = _tType( 0 );
 
 			// Main Simpson contributions over pairs of adjacent intervals.
-			for ( size_t I = size_t( 1 ); I < sN; I += size_t( 2 ) ) {
-				const _tType tH0 = vH[I - size_t( 1 )];
+			for ( size_t I = 1; I < sN; I += 2 ) {
+				const _tType tH0 = vH[I - 1];
 				const _tType tH1 = vH[I];
 				const _tType tHph = tH1 + tH0;
 				const _tType tHdh = tH1 / tH0;
 				const _tType tHmh = tH1 * tH0;
 
 				tResult += (tHph / _tType( 6 )) *
-					((_tType( 2 ) - tHdh) * _vY[I-size_t(1)]
+					((_tType( 2 ) - tHdh) * _vY[I-1]
 						+ ( ( tHph * tHph ) / tHmh ) * _vY[I]
-						+ (_tType( 2 ) - _tType( 1 ) / tHdh) * _vY[I+size_t(1)]);
+						+ (_tType( 2 ) - _tType( 1 ) / tHdh) * _vY[I+1]);
 			}
 
 			// If there is an odd number of intervals, adjust the last one as in the standard formula.
-			if ( (sN % size_t( 2 )) == size_t( 1 ) ) {
-				const _tType tH0 = vH[sN-size_t(2)];
-				const _tType tH1 = vH[sN-size_t(1)];
+			if ( (sN % 2) == 1 ) {
+				const _tType tH0 = vH[sN-2];
+				const _tType tH1 = vH[sN-1];
 
 				tResult += _vY[sN] * (_tType( 2 ) * tH1 * tH1 + _tType( 3 ) * tH0 * tH1) /
 					(_tType( 6 ) * ( tH0 + tH1 ));
-				tResult += _vY[sN-size_t(1)] * (tH1 * tH1 + _tType( 3 ) * tH1 * tH0) /
+				tResult += _vY[sN-1] * (tH1 * tH1 + _tType( 3 ) * tH1 * tH0) /
 					(_tType( 6 ) * tH0);
-				tResult -= _vY[sN-size_t(2)] * (tH1 * tH1 * tH1) /
+				tResult -= _vY[sN-2] * (tH1 * tH1 * tH1) /
 					(_tType( 6 ) * tH0 * (tH0 + tH1));
 			}
 
@@ -3563,7 +3563,7 @@ namespace ee {
 		}
 
 		/**
-		 * \brief Computes the Simpson integral over a strided 1D line with uniform spacing. Must be called within a try/catch block.
+		 * \brief Computes the Simpson integral over a strided 1D line with uniform spacing.  Call within a try/catch block.
 		 * 
 		 * This is analogous to scipy.integrate.simpson( y, dx=dx, axis=axis ) on a
 		 * view of the array along 'axis', flattened to a 1D strided line.
@@ -3582,20 +3582,20 @@ namespace ee {
 			size_t _sCount,
 			size_t _sStride,
 			_tType _tDx = _tType( 1 ) ) {
-			if ( _sCount < size_t( 2 ) ) { return _tType( 0 ); }
+			if ( _sCount < 2 ) { return _tType( 0 ); }
 
-			const size_t sLastIndex = _sStart + ( _sCount - size_t( 1 ) ) * _sStride;
+			const size_t sLastIndex = _sStart + ( _sCount - 1 ) * _sStride;
 			if ( sLastIndex >= _vY.size() ) { throw std::out_of_range(); }
 
 			// For exactly two samples, Simpson's rule degenerates to the trapezoidal rule.
-			if ( _sCount == size_t( 2 ) ) {
+			if ( _sCount == 2 ) {
 				const _tType tY0 = _vY[_sStart];
 				const _tType tY1 = _vY[_sStart + _sStride];
 				return _tDx * _tType( 0.5 ) * (tY0 + tY1);
 			}
 
 			// Odd number of samples -> even number of intervals: standard composite Simpson.
-			if ( (_sCount % size_t( 2 )) == size_t( 1 ) ) {
+			if ( (_sCount % 2) == 1 ) {
 				return SimpsonUniformRangeStrided( _vY, _sStart, _sStride, _sCount, _tDx );
 			}
 
@@ -3603,11 +3603,11 @@ namespace ee {
 			// 1) Simpson on first N-1 points + trapezoid on last interval.
 			// 2) Simpson on last N-1 points  + trapezoid on first interval.
 			// Then average the two results.
-			const size_t sLast = _sCount - size_t( 1 );
+			const size_t sLast = _sCount - 1;
 
 			const _tType tS1 = SimpsonUniformRangeStrided( _vY, _sStart, _sStride, sLast, _tDx );
 			{
-				const size_t sIdxA = _sStart + (sLast - size_t( 1 )) * _sStride;
+				const size_t sIdxA = _sStart + (sLast - 1) * _sStride;
 				const size_t sIdxB = _sStart + sLast * _sStride;
 				const _tType tTrapLast = _tDx * _tType( 0.5 ) * (_vY[sIdxA] + _vY[sIdxB]);
 				const _tType tR1 = tS1 + tTrapLast;
@@ -3626,7 +3626,7 @@ namespace ee {
 		}
 
 		/**
-		 * \brief Computes the Simpson integral over a strided 1D line with non-uniform spacing. Must be called within a try/catch block.
+		 * \brief Computes the Simpson integral over a strided 1D line with non-uniform spacing.  Call within a try/catch block.
 		 * 
 		 * This is analogous to scipy.integrate.simpson( y, x=x, axis=axis ) where x is
 		 * 1D and y is multi-dimensional. The integration is performed along a single
@@ -3645,62 +3645,545 @@ namespace ee {
 			size_t _sStride,
 			const std::vector<_tType> &_vX ) {
 			const size_t sCount = _vX.size();
-			if ( sCount < size_t( 2 ) ) {
-				return _tType( 0 );
-			}
+			if ( sCount < 2 ) { return _tType( 0 ); }
 
-			const size_t sLastIndex = _sStart + ( sCount - size_t( 1 ) ) * _sStride;
-			if ( sLastIndex >= _vY.size() ) {
-				throw std::out_of_range( "SimpsonStrided: Range exceeds _vY.size()." );
-			}
+			const size_t sLastIndex = _sStart + (sCount - 1) * _sStride;
+			if ( sLastIndex >= _vY.size() ) { throw std::out_of_range(); }
 
-			const size_t sN = sCount - size_t( 1 );     // Number of intervals.
+			const size_t sN = sCount - 1;     // Number of intervals.
 
 			std::vector<_tType> vH;
 			vH.resize( sN );
 
-			for ( size_t I = size_t( 0 ); I < sN; ++I ) {
-				vH[I] = _vX[I + size_t( 1 )] - _vX[I];
+			for ( size_t I = 0; I < sN; ++I ) {
+				vH[I] = _vX[I+1] - _vX[I];
 			}
 
 			_tType tResult = _tType( 0 );
 
 			// Main Simpson contributions over pairs of adjacent intervals.
-			for ( size_t I = size_t( 1 ); I < sN; I += size_t( 2 ) ) {
-				const _tType tH0 = vH[I - size_t( 1 )];
+			for ( size_t I = 1; I < sN; I += 2 ) {
+				const _tType tH0 = vH[I-1];
 				const _tType tH1 = vH[I];
 				const _tType tHph = tH1 + tH0;
 				const _tType tHdh = tH1 / tH0;
 				const _tType tHmh = tH1 * tH0;
 
-				const size_t sIdx0 = _sStart + ( I - size_t( 1 ) ) * _sStride;
+				const size_t sIdx0 = _sStart + (I - 1) * _sStride;
 				const size_t sIdx1 = _sStart + I * _sStride;
-				const size_t sIdx2 = _sStart + ( I + size_t( 1 ) ) * _sStride;
+				const size_t sIdx2 = _sStart + (I + 1) * _sStride;
 
-				tResult += ( tHph / _tType( 6 ) )
-					* ( ( _tType( 2 ) - tHdh ) * _vY[sIdx0]
-						+ ( ( tHph * tHph ) / tHmh ) * _vY[sIdx1]
-						+ ( _tType( 2 ) - _tType( 1 ) / tHdh ) * _vY[sIdx2] );
+				tResult += (tHph / _tType( 6 )) *
+					(( _tType( 2 ) - tHdh) * _vY[sIdx0] +
+					((tHph * tHph) / tHmh) * _vY[sIdx1] +
+					(_tType( 2 ) - _tType( 1 ) / tHdh) * _vY[sIdx2]);
 			}
 
 			// If there is an odd number of intervals, adjust the last one as in the standard formula.
-			if ( (sN % size_t( 2 )) == size_t( 1 ) ) {
-				const _tType tH0 = vH[sN - size_t( 2 )];
-				const _tType tH1 = vH[sN - size_t( 1 )];
+			if ( (sN % 2) == 1 ) {
+				const _tType tH0 = vH[sN-2];
+				const _tType tH1 = vH[sN-1];
 
 				const size_t sIdxN   = _sStart + sN * _sStride;
-				const size_t sIdxNm1 = _sStart + ( sN - size_t( 1 ) ) * _sStride;
-				const size_t sIdxNm2 = _sStart + ( sN - size_t( 2 ) ) * _sStride;
+				const size_t sIdxNm1 = _sStart + (sN - 1) * _sStride;
+				const size_t sIdxNm2 = _sStart + (sN - 2) * _sStride;
 
-				tResult += _vY[sIdxN] * ( _tType( 2 ) * tH1 * tH1 + _tType( 3 ) * tH0 * tH1 )
-					/ ( _tType( 6 ) * ( tH0 + tH1 ) );
-				tResult += _vY[sIdxNm1] * ( tH1 * tH1 + _tType( 3 ) * tH1 * tH0 )
-					/ ( _tType( 6 ) * tH0 );
-				tResult -= _vY[sIdxNm2] * ( tH1 * tH1 * tH1 )
-					/ ( _tType( 6 ) * tH0 * ( tH0 + tH1 ) );
+				tResult += _vY[sIdxN] * (_tType( 2 ) * tH1 * tH1 + _tType( 3 ) * tH0 * tH1) /
+					(_tType( 6 ) * (tH0 + tH1));
+				tResult += _vY[sIdxNm1] * (tH1 * tH1 + _tType( 3 ) * tH1 * tH0) /
+					(_tType( 6 ) * tH0);
+				tResult -= _vY[sIdxNm2] * (tH1 * tH1 * tH1) /
+					(_tType( 6 ) * tH0 * (tH0 + tH1));
 			}
 
 			return tResult;
+		}
+
+		/**
+		 * \brief Computes Simpson sub-interval integrals for equally spaced samples.  Call within a try/catch block.
+		 * 
+		 * Helper for cumulative Simpson integration with equal interval widths.
+		 * Given N samples in _vY and N-1 spacings in _vDx, returns N-2 sub-interval
+		 * integrals corresponding to the "h1" intervals (Cartwright equal-interval
+		 * formula).
+		 * 
+		 * \tparam _tType The value type stored in the vectors (defaults to double).
+		 * \param _vY The sample values y[i].
+		 * \param _vDx The spacing between consecutive x-values, size _vY.size() - 1.
+		 * \return Returns a vector of size _vY.size() - 2 with sub-interval integrals.
+		 **/
+		template <typename _tType = double>
+		static inline std::vector<_tType>
+										CumulativeSimpsonEqualIntervalsSub( const std::vector<_tType> &_vY,
+			const std::vector<_tType> &_vDx ) {
+			if ( _vY.size() < size_t( 3 ) ) { return std::vector<_tType>(); }
+
+			if ( _vDx.size() + 1 != _vY.size() ) { throw std::invalid_argument( "" ); }
+
+			std::vector<_tType> vSub;
+			vSub.resize( _vY.size() - 2 );
+
+			for ( size_t I = 0; I + 2 < _vY.size(); ++I ) {
+				const _tType tD  = _vDx[I];
+				const _tType tF1 = _vY[I];
+				const _tType tF2 = _vY[I + 1];
+				const _tType tF3 = _vY[I + 2];
+
+				const _tType tInner = (_tType( 5 ) * tF1 / _tType( 4 )) +
+					(_tType( 2 ) * tF2) -
+					(tF3 / _tType( 4 ));
+
+				vSub[I] = tD * tInner / _tType( 3 );
+			}
+
+			return vSub;
+		}
+
+		/**
+		 * \brief Computes Simpson sub-interval integrals for unequally spaced samples.  Call within a try/catch block.
+		 * 
+		 * Helper for cumulative Simpson integration with unequal interval widths.
+		 * Given N samples in _vY and N-1 spacings in _vDx, returns N-2 sub-interval
+		 * integrals corresponding to the "h1" intervals (Cartwright unequal-interval
+		 * formula).
+		 * 
+		 * \tparam _tType The value type stored in the vectors (defaults to double).
+		 * \param _vY The sample values y[i].
+		 * \param _vDx The spacing between consecutive x-values, size _vY.size() - 1.
+		 * \return Returns a vector of size _vY.size() - 2 with sub-interval integrals.
+		 **/
+		template <typename _tType = double>
+		static inline std::vector<_tType>
+										CumulativeSimpsonUnequalIntervalsSub( const std::vector<_tType> &_vY,
+			const std::vector<_tType> &_vDx ) {
+			if ( _vY.size() < size_t( 3 ) ) { return std::vector<_tType>(); }
+
+			if ( _vDx.size() + 1 != _vY.size() ) { throw std::invalid_argument( "" ); }
+
+			std::vector<_tType> vSub;
+			vSub.resize( _vY.size() - 2 );
+
+			for ( size_t I = 0; I + 2 < _vY.size(); ++I ) {
+				const _tType tX21 = _vDx[I];
+				const _tType tX32 = _vDx[I + 1];
+
+				const _tType tF1 = _vY[I];
+				const _tType tF2 = _vY[I + 1];
+				const _tType tF3 = _vY[I + 2];
+
+				const _tType tX31               = tX21 + tX32;
+				const _tType tX21_x31           = tX21 / tX31;
+				const _tType tX21_x32           = tX21 / tX32;
+				const _tType tX21x21_x31x32     = tX21_x31 * tX21_x32;
+				const _tType tCoeff1            = _tType( 3 ) - tX21_x31;
+				const _tType tCoeff2            = _tType( 3 ) + tX21x21_x31x32 + tX21_x31;
+				const _tType tCoeff3            = -tX21x21_x31x32;
+
+				vSub[I] = (tX21 / _tType( 6 )) * (tCoeff1 * tF1 + tCoeff2 * tF2 + tCoeff3 * tF3);
+			}
+
+			return vSub;
+		}
+
+		/**
+		 * \brief Combines "h1" and "h2" Simpson sub-interval integrals and returns per-interval contributions.  Call within a try/catch block.
+		 * 
+		 * This mirrors SciPy's _cumulatively_sum_simpson_integrals behavior in 1D:
+		 * sub-interval integrals from the left-biased (h1) and right-biased (h2)
+		 * formulas are interleaved, and the last interval uses the final h2 value.
+		 * 
+		 * \tparam _tType The value type stored in the vectors (defaults to double).
+		 * \param _vSubH1 The sub-interval integrals for h1 intervals (size N-2).
+		 * \param _vSubH2 The sub-interval integrals for h2 intervals (size N-2).
+		 * \return Returns a vector of size N-1 with per-interval contributions.
+		 **/
+		template <typename _tType = double>
+		static inline std::vector<_tType>
+										CumulativeSimpsonCombineSubIntervals( const std::vector<_tType> &_vSubH1,
+			const std::vector<_tType> &_vSubH2 ) {
+			if ( _vSubH1.size() != _vSubH2.size() ) { throw std::invalid_argument( "" );
+			}
+			if ( _vSubH1.empty() ) { return std::vector<_tType>(); }
+
+			const size_t sSubCount   = _vSubH1.size();       // N-2
+			const size_t sIntervalCt = sSubCount + 1;  // N-1
+
+			std::vector<_tType> vSub;
+			vSub.resize( sIntervalCt );
+
+			// sub_integrals[..., :-1:2] = sub_integrals_h1[..., ::2]
+			for ( size_t J = 0; J + 1 < sIntervalCt; J += 2 ) {
+				vSub[J] = _vSubH1[J];
+			}
+
+			// sub_integrals[..., 1::2] = sub_integrals_h2[..., ::2]
+			for ( size_t J = 1, R = 0;
+				  J < sIntervalCt && R < sSubCount;
+				  J += 2, R += 2 ) {
+				vSub[J] = _vSubH2[R];
+			}
+
+			// sub_integrals[..., -1] = sub_integrals_h2[..., -1]
+			vSub[sIntervalCt - 1] = _vSubH2[sSubCount - 1];
+
+			return vSub;
+		}
+
+		/**
+		 * \brief Cumulatively integrates 1D data using the composite Simpson's 1/3 rule with uniform spacing.
+		 * 
+		 * For fewer than 3 points, falls back to the cumulative trapezoidal rule.
+		 * This matches scipy.integrate.cumulative_simpson( y, dx=dx, x=None, initial=None ) for 1D input.
+		 * 
+		 * \tparam _tType The value type stored in the vector (defaults to double).
+		 * \param _vY The sample values y[i].
+		 * \param _tDx The uniform spacing between samples.
+		 * \return Returns a vector of size _vY.size() - 1 containing the cumulative integral.
+		 **/
+		template <typename _tType = double>
+		static inline std::vector<_tType>
+										CumulativeSimpson1D( const std::vector<_tType> &_vY, _tType _tDx = _tType( 1 ) ) {
+			if ( _vY.size() < 2 ) { return std::vector<_tType>(); }
+
+			// For 2 points, no Simpson; use cumulative trapezoid.
+			if ( _vY.size() < size_t( 3 ) ) {
+				std::vector<_tType> vOut;
+				vOut.resize( _vY.size() - 1 );
+
+				_tType tIntegrate = _tType( 0 );
+				for ( size_t I = 1; I < _vY.size(); ++I ) {
+					const _tType tArea = _tDx * _tType( 0.5 ) * (_vY[I-1] + _vY[I]);
+					tIntegrate += tArea;
+					vOut[I-1] = tIntegrate;
+				}
+				return vOut;
+			}
+
+			// Build dx array (equal intervals).
+			std::vector<_tType> vDx;
+			vDx.resize( _vY.size() - 1 );
+			for ( size_t I = 0; I < vDx.size(); ++I ) {
+				vDx[I] = _tDx;
+			}
+
+			// h1 contributions.
+			std::vector<_tType> vSubH1 = CumulativeSimpsonEqualIntervalsSub( _vY, vDx );
+
+			// h2 contributions: reverse inputs, compute, then reverse results.
+			std::vector<_tType> vYRev( _vY.rbegin(), _vY.rend() );
+			std::vector<_tType> vDxRev( vDx.rbegin(), vDx.rend() );
+			std::vector<_tType> vSubH2Rev = CumulativeSimpsonEqualIntervalsSub( vYRev, vDxRev );
+			std::vector<_tType> vSubH2( vSubH2Rev.rbegin(), vSubH2Rev.rend() );
+
+			// Combine h1 and h2 into per-interval contributions.
+			std::vector<_tType> vSub = CumulativeSimpsonCombineSubIntervals( vSubH1, vSubH2 );
+
+			// Cumulative sum of interval contributions.
+			std::vector<_tType> vOut;
+			vOut.resize( vSub.size() );
+
+			_tType tIntegrate = _tType( 0 );
+			for ( size_t I = 0; I < vSub.size(); ++I ) {
+				tIntegrate += vSub[I];
+				vOut[I] = tIntegrate;
+			}
+
+			return vOut;
+		}
+
+		/**
+		 * \brief Cumulatively integrates 1D data using the composite Simpson's 1/3 rule with uniform spacing and an initial value.
+		 * 
+		 * For fewer than 3 points, falls back to the cumulative trapezoidal rule.
+		 * The result matches scipy.integrate.cumulative_simpson( y, dx=dx, x=None, initial=initial )
+		 * for 1D input.
+		 * 
+		 * \tparam _tType The value type stored in the vector (defaults to double).
+		 * \param _vY The sample values y[i].
+		 * \param _tDx The uniform spacing between samples.
+		 * \param _tInitial The initial integral value (inserted at the beginning and added to the cumulative result).
+		 * \return Returns a vector of size _vY.size() containing the cumulative integral.
+		 **/
+		template <typename _tType = double>
+		static inline std::vector<_tType>
+										CumulativeSimpson1D( const std::vector<_tType> &_vY,
+			_tType _tDx,
+			_tType _tInitial ) {
+			if ( _vY.empty() ) { return std::vector<_tType>(); }
+
+			// Base cumulative Simpson (no initial).
+			std::vector<_tType> vBase = CumulativeSimpson1D( _vY, _tDx );
+
+			std::vector<_tType> vOut;
+			vOut.resize( _vY.size() );
+
+			vOut[0] = _tInitial;
+			for ( size_t I = 0; I < vBase.size(); ++I ) {
+				vOut[I+1] = _tInitial + vBase[I];
+			}
+
+			return vOut;
+		}
+
+		/**
+		 * \brief Cumulatively integrates 1D data using the composite Simpson's 1/3 rule with non-uniform spacing.  Call within a try/catch block.
+		 * 
+		 * For fewer than 3 points, falls back to the cumulative trapezoidal rule with non-uniform spacing.
+		 * This matches scipy.integrate.cumulative_simpson( y, x=x, dx=1.0, initial=None ) for 1D input.
+		 * 
+		 * \tparam _tType The value type stored in the vectors (defaults to double).
+		 * \param _vY The sample values y[i].
+		 * \param _vX The sample locations x[i], same size as _vY and strictly increasing.
+		 * \return Returns a vector of size _vY.size() - 1 containing the cumulative integral.
+		 **/
+		template <typename _tType = double>
+		static inline std::vector<_tType>
+										CumulativeSimpson1D( const std::vector<_tType> &_vY, const std::vector<_tType> &_vX ) {
+			if ( _vX.size() != _vY.size() ) { throw std::invalid_argument( "" ); }
+
+			if ( _vY.size() < 2 ) { return std::vector<_tType>(); }
+
+			// Build dx and check strictly increasing x.
+			std::vector<_tType> vDx;
+			vDx.resize( _vX.size() - 1 );
+			for ( size_t I = 1; I < _vX.size(); ++I ) {
+				const _tType tDx = _vX[I] - _vX[I - 1];
+				if ( tDx <= _tType( 0 ) ) {
+					throw std::invalid_argument( "" );
+				}
+				vDx[I - 1] = tDx;
+			}
+
+			// For 2 points, no Simpson; use cumulative trapezoid.
+			if ( _vY.size() < size_t( 3 ) ) {
+				std::vector<_tType> vOut;
+				vOut.resize( _vY.size() - 1 );
+
+				_tType tIntegrate = _tType( 0 );
+				for ( size_t I = 1; I < _vY.size(); ++I ) {
+					const _tType tArea = vDx[I-1] * _tType( 0.5 ) * (_vY[I-1] + _vY[I]);
+					tIntegrate += tArea;
+					vOut[I - 1] = tIntegrate;
+				}
+				return vOut;
+			}
+
+			// h1 contributions (unequal intervals).
+			std::vector<_tType> vSubH1 = CumulativeSimpsonUnequalIntervalsSub( _vY, vDx );
+
+			// h2 contributions: reverse inputs, compute, then reverse results.
+			std::vector<_tType> vYRev( _vY.rbegin(), _vY.rend() );
+			std::vector<_tType> vDxRev( vDx.rbegin(), vDx.rend() );
+			std::vector<_tType> vSubH2Rev = CumulativeSimpsonUnequalIntervalsSub( vYRev, vDxRev );
+			std::vector<_tType> vSubH2( vSubH2Rev.rbegin(), vSubH2Rev.rend() );
+
+			// Combine h1 and h2 into per-interval contributions.
+			std::vector<_tType> vSub = CumulativeSimpsonCombineSubIntervals( vSubH1, vSubH2 );
+
+			// Cumulative sum of interval contributions.
+			std::vector<_tType> vOut;
+			vOut.resize( vSub.size() );
+
+			_tType tIntegrate = _tType( 0 );
+			for ( size_t I = 0; I < vSub.size(); ++I ) {
+				tIntegrate += vSub[I];
+				vOut[I] = tIntegrate;
+			}
+
+			return vOut;
+		}
+
+		/**
+		 * \brief Cumulatively integrates 1D data using the composite Simpson's 1/3 rule with non-uniform spacing and an initial value.  Call within a try/catch block.
+		 * 
+		 * For fewer than 3 points, falls back to the cumulative trapezoidal rule with non-uniform spacing.
+		 * This matches scipy.integrate.cumulative_simpson( y, x=x, initial=initial ) for 1D input.
+		 * 
+		 * \tparam _tType The value type stored in the vectors (defaults to double).
+		 * \param _vY The sample values y[i].
+		 * \param _vX The sample locations x[i], same size as _vY and strictly increasing.
+		 * \param _tInitial The initial integral value (inserted at the beginning and added to the cumulative result).
+		 * \return Returns a vector of size _vY.size() containing the cumulative integral.
+		 **/
+		template <typename _tType = double>
+		static inline std::vector<_tType>
+										CumulativeSimpson1D( const std::vector<_tType> &_vY,
+			const std::vector<_tType> &_vX,
+			_tType _tInitial ) {
+			if ( _vY.empty() ) { return std::vector<_tType>(); }
+
+			std::vector<_tType> vBase = CumulativeSimpson1D( _vY, _vX );
+
+			std::vector<_tType> vOut;
+			vOut.resize( _vY.size() );
+
+			vOut[0] = _tInitial;
+			for ( size_t I = 0; I < vBase.size(); ++I ) {
+				vOut[I+1] = _tInitial + vBase[I];
+			}
+
+			return vOut;
+		}
+
+		/**
+		 * \brief Romberg integration over a 1D array of equally spaced samples. Must be called within a try/catch block.
+		 * 
+		 * The number of samples must be 2^k + 1 for some integer k >= 1. The spacing between samples is _tDx.
+		 * This mirrors scipy.integrate.romb( y, dx=dx ) for 1D input.
+		 * 
+		 * \tparam _tType The floating-point type used for accumulation and return (defaults to double).
+		 * \param _vY The vector of function samples y[0..N-1].
+		 * \param _tDx The spacing between consecutive samples.
+		 * \return Returns the Romberg approximation to the integral over the sampled interval.
+		 * \throw std::invalid_argument Thrown if the input size is invalid.
+		 **/
+		template <typename _tType = double>
+		static inline _tType			Romb1D( const std::vector<_tType> &_vY, _tType _tDx = _tType( 1 ) ) {
+			const size_t stNsamps = _vY.size();
+			if ( stNsamps < 2 ) { throw std::invalid_argument( "" ); }
+
+			const size_t stNinterv = stNsamps - 1;
+			if ( (stNinterv & (stNinterv - 1)) != 0 ) { throw std::invalid_argument( "" ); }
+
+			// Number of Romberg levels k such that stNinterv == 2^k.
+			size_t stK = 0;
+			{
+				size_t stTmp = stNinterv;
+				while ( stTmp > 1 ) {
+					stTmp >>= 1;
+					++stK;
+				}
+			}
+
+			// Romberg table rows (we only keep previous and current).
+			std::vector<_tType> vRowPrev;
+			std::vector<_tType> vRowCurr;
+			vRowPrev.reserve( stK + 1 );
+			vRowCurr.reserve( stK + 1 );
+
+			const size_t stLastIndex = stNsamps - 1;
+
+			// Build T_l (trapezoid approximations) for l = 0..k from the pre-sampled data.
+			// For each level l:
+			//  * Number of intervals  = 2^l
+			//  * Index step in samples = 2^(k-l)
+			//  * Step width h_l = step * dx
+			for ( size_t stL = 0; stL <= stK; ++stL ) {
+				const size_t stStep      = 1 << (stK - stL);   // Index step between samples.
+				const size_t stIntervals = 1 << stL;           // Number of intervals.
+				const _tType tH          = _tDx * static_cast<_tType>( stStep );
+
+				// Trapezoid T_l over this coarser grid.
+				_tType tSum = _vY[0] + _vY[stLastIndex];
+				for ( size_t stJ = 1; stJ < stIntervals; ++stJ ) {
+					const size_t stIdx = stJ * stStep;
+					tSum += _vY[stIdx];
+				}
+				const _tType tT = tH * tSum * _tType( 0.5 );
+
+				vRowCurr.resize( stL + 1 );
+				vRowCurr[0] = tT;
+
+				// Richardson extrapolation for this row.
+				for ( size_t stM = 1; stM <= stL; ++stM ) {
+					const _tType tFourPow = static_cast<_tType>(1 << (2 * stM));
+					const _tType tDenom   = tFourPow - _tType( 1 );
+					const _tType tPrev    = vRowCurr[stM-1];
+
+					vRowCurr[stM] = tPrev + (tPrev - vRowPrev[stM-1]) / tDenom; 
+				}
+
+				vRowPrev = vRowCurr;
+			}
+
+			return vRowPrev[stK];
+		}
+
+		/**
+		 * \brief Romberg integration over a strided 1D line of equally spaced samples. Must be called within a try/catch block.
+		 * 
+		 * This is the "axis" analogue of Romb1D. It integrates along the logical sequence
+		 * 
+		 *     y[k] = _vY[_sStart + k * _sStride],  k = 0..(_sCount-1),
+		 * 
+		 * where the length _sCount must be 2^k + 1 for some integer k >= 1. The spacing
+		 * between samples along this line is _tDx. This mirrors scipy.integrate.romb( y, dx=dx, axis=axis )
+		 * for one axis slice at a time.
+		 * 
+		 * \tparam _tType The floating-point type used for accumulation and return (defaults to double).
+		 * \param _vY The full data buffer.
+		 * \param _sStart The starting index in _vY for this integration line.
+		 * \param _sCount The number of samples along this line (must be 2^k + 1).
+		 * \param _sStride The stride (in elements) between successive samples along the line.
+		 * \param _tDx The spacing between consecutive samples along the line.
+		 * \return Returns the Romberg approximation to the integral over the sampled line.
+		 * \throw std::invalid_argument Thrown if _sCount is invalid.
+		 * \throw std::out_of_range Thrown if the line exceeds _vY.size().
+		 **/
+		template <typename _tType = double>
+		_tType RombStrided( const std::vector<_tType> &_vY,
+			size_t _sStart,
+			size_t _sCount,
+			size_t _sStride,
+			_tType _tDx = _tType( 1 ) ) {
+			if ( _sCount < 2 ) { throw std::invalid_argument( "" ); }
+
+			const size_t stLastIndex = _sStart + ( _sCount - 1 ) * _sStride;
+			if ( stLastIndex >= _vY.size() ) { throw std::out_of_range(); }
+
+			const size_t stNinterv = _sCount - 1;
+			if ( (stNinterv & (stNinterv - 1)) != 0 ) { throw std::invalid_argument( "" ); }
+
+			// Number of Romberg levels k such that stNinterv == 2^k.
+			size_t stK = 0;
+			{
+				size_t stTmp = stNinterv;
+				while ( stTmp > 1 ) {
+					stTmp >>= 1;
+					++stK;
+				}
+			}
+
+			std::vector<_tType> vRowPrev;
+			std::vector<_tType> vRowCurr;
+			vRowPrev.reserve( stK + 1 );
+			vRowCurr.reserve( stK + 1 );
+
+			// Build T_l (trapezoid approximations) for l = 0..k along the strided line.
+			for ( size_t stL = 0; stL <= stK; ++stL ) {
+				const size_t stStep			= 1 << (stK - stL);   // Step in "logical sample index" units.
+				const size_t stIntervals	= 1 << stL;           // Number of intervals.
+				const _tType tH				= _tDx * static_cast<_tType>(stStep);
+
+				const size_t stIdx0			= _sStart;
+				const size_t stIdxLast		= _sStart + (_sCount - 1) * _sStride;
+
+				_tType tSum = _vY[stIdx0] + _vY[stIdxLast];
+
+				for ( size_t stJ = 1; stJ < stIntervals; ++stJ ) {
+					const size_t stLogicalIdx = stJ * stStep;
+					const size_t stIdx        = _sStart + stLogicalIdx * _sStride;
+					tSum += _vY[stIdx];
+				}
+
+				const _tType tT = tH * tSum * _tType( 0.5 );
+
+				vRowCurr.resize( stL + 1 );
+				vRowCurr[0] = tT;
+
+				for ( size_t stM = 1; stM <= stL; ++stM ) {
+					const _tType tFourPow = static_cast<_tType>(1 << (2 * stM));
+					const _tType tDenom   = tFourPow - _tType( 1 );
+					const _tType tPrev    = vRowCurr[stM-1];
+
+					vRowCurr[stM] = tPrev +
+						(tPrev - vRowPrev[stM-1]) / tDenom;
+				}
+
+				vRowPrev = vRowCurr;
+			}
+
+			return vRowPrev[stK];
 		}
 
 		/**

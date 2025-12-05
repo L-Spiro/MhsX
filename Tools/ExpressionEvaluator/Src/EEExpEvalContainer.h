@@ -1059,6 +1059,51 @@ namespace ee {
 		// Creates a string tokenization.
 		void								CreateStringTokenize( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndTokenizer, const YYSTYPE::EE_NODE_DATA &_ndIncludeEmpty, YYSTYPE::EE_NODE_DATA &_ndNode );
 
+		// Creates a 1-parameter node of a given primitive type.
+		void								CreateBasicNode( const YYSTYPE::EE_NODE_DATA &_ndParm1, YYSTYPE::EE_NODE_DATA &_ndNode, ee::EE_NODES _nType ) {
+			_ndNode.nType = _nType;
+			_ndNode.u.sNodeIndex = _ndParm1.sNodeIndex;
+			AddNode( _ndNode );
+		}
+
+		// Creates a 2-parameter node of a given primitive type.
+		void								CreateBasicNode( const YYSTYPE::EE_NODE_DATA &_ndParm1, const YYSTYPE::EE_NODE_DATA &_ndParm2, YYSTYPE::EE_NODE_DATA &_ndNode, ee::EE_NODES _nType ) {
+			_ndNode.nType = _nType;
+			_ndNode.u.sNodeIndex = _ndParm1.sNodeIndex;
+			_ndNode.v.sNodeIndex = _ndParm2.sNodeIndex;
+			AddNode( _ndNode );
+		}
+
+		// Creates a 3-parameter node of a given primitive type.
+		void								CreateBasicNode( const YYSTYPE::EE_NODE_DATA &_ndParm1, const YYSTYPE::EE_NODE_DATA &_ndParm2, const YYSTYPE::EE_NODE_DATA &_ndParm3, YYSTYPE::EE_NODE_DATA &_ndNode, ee::EE_NODES _nType ) {
+			_ndNode.nType = _nType;
+			_ndNode.u.sNodeIndex = _ndParm1.sNodeIndex;
+			_ndNode.v.sNodeIndex = _ndParm2.sNodeIndex;
+			_ndNode.w.sNodeIndex = _ndParm3.sNodeIndex;
+			AddNode( _ndNode );
+		}
+
+		// Creates a 4-parameter node of a given primitive type.
+		void								CreateBasicNode( const YYSTYPE::EE_NODE_DATA &_ndParm1, const YYSTYPE::EE_NODE_DATA &_ndParm2, const YYSTYPE::EE_NODE_DATA &_ndParm3, const YYSTYPE::EE_NODE_DATA &_ndParm4, YYSTYPE::EE_NODE_DATA &_ndNode, ee::EE_NODES _nType ) {
+			_ndNode.nType = _nType;
+			_ndNode.u.sNodeIndex = _ndParm1.sNodeIndex;
+			_ndNode.v.sNodeIndex = _ndParm2.sNodeIndex;
+			_ndNode.w.sNodeIndex = _ndParm3.sNodeIndex;
+			_ndNode.x.sNodeIndex = _ndParm4.sNodeIndex;
+			AddNode( _ndNode );
+		}
+
+		// Creates a 5-parameter node of a given primitive type.
+		void								CreateBasicNode( const YYSTYPE::EE_NODE_DATA &_ndParm1, const YYSTYPE::EE_NODE_DATA &_ndParm2, const YYSTYPE::EE_NODE_DATA &_ndParm3, const YYSTYPE::EE_NODE_DATA &_ndParm4, const YYSTYPE::EE_NODE_DATA &_ndParm5, YYSTYPE::EE_NODE_DATA &_ndNode, ee::EE_NODES _nType ) {
+			_ndNode.nType = _nType;
+			_ndNode.u.sNodeIndex = _ndParm1.sNodeIndex;
+			_ndNode.v.sNodeIndex = _ndParm2.sNodeIndex;
+			_ndNode.w.sNodeIndex = _ndParm3.sNodeIndex;
+			_ndNode.x.sNodeIndex = _ndParm4.sNodeIndex;
+			_ndNode.y.sNodeIndex = _ndParm5.sNodeIndex;
+			AddNode( _ndNode );
+		}
+
 		// Creates a 1-parameter node of a given object type.
 		template <ee::EE_NODES _nType, typename _tType>
 		void								CreateBasicObjectNode( const YYSTYPE::EE_NODE_DATA &_ndParm1, YYSTYPE::EE_NODE_DATA &_ndNode ) {
