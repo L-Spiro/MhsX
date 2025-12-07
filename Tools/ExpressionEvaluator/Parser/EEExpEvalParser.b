@@ -561,6 +561,7 @@ assignment_exp
 															{ m_peecContainer->CreateRawArray( $1, static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $9.sNodeIndex, $$ ); }
 	| identifier '=' EE_NEW '(' exp ',' backing_persistence ',' exp ',' exp ')'
 															{ m_peecContainer->CreateRawArray( $1, static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $11.sNodeIndex, $$ ); }
+	| custom_var '[' exp ']' assignment_op assignment_exp	{ m_peecContainer->CreateArrayReAssignmentObj( $1, $3, $6, $5, $$ ); }
 	| array_var '[' exp ']' assignment_op assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, $5, $$ ); }
 	//| postfix_exp '[' assignment_exp ']' assignment_op assignment_exp
 	//														{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, $5, $$ ); }

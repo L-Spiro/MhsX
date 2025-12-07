@@ -835,6 +835,9 @@ namespace ee {
 		void								CreateArrayReAssignment( size_t _sArrayIndex, const YYSTYPE::EE_NODE_DATA &_ndArray, const YYSTYPE::EE_NODE_DATA &_ndValue, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Creates an assignment operator to assign a value in an array.
+		void								CreateArrayReAssignmentObj( size_t _sArrayIndex, const YYSTYPE::EE_NODE_DATA &_ndIdx, const YYSTYPE::EE_NODE_DATA &_ndValue, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode );
+
+		// Creates an assignment operator to assign a value in an array.
 		void								CreateArrayReAssignment( const YYSTYPE::EE_NODE_DATA &_ndObj, const YYSTYPE::EE_NODE_DATA &_ndArray, const YYSTYPE::EE_NODE_DATA &_ndValue, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode );
 
 		// Creates an assignment operator to write to an external address.

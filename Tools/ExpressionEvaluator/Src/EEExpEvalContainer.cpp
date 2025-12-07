@@ -2289,6 +2289,17 @@ namespace ee {
 	}
 
 	// Creates an assignment operator to assign a value in an array.
+	void CExpEvalContainer::CreateArrayReAssignmentObj( size_t _sArrayIndex, const YYSTYPE::EE_NODE_DATA &_ndIdx, const YYSTYPE::EE_NODE_DATA &_ndValue, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_ARRAY_ASSIGNMENT_OBJ;
+		_ndNode.v.ui32Op = _uiOp;
+		_ndNode.u.sNodeIndex = _ndIdx.sNodeIndex;
+		_ndNode.w.sNodeIndex = _sArrayIndex;
+		_ndNode.x.sNodeIndex = _ndValue.sNodeIndex;
+
+		AddNode( _ndNode );
+	}
+
+	// Creates an assignment operator to assign a value in an array.
 	void CExpEvalContainer::CreateArrayReAssignment( const YYSTYPE::EE_NODE_DATA &_ndObj, const YYSTYPE::EE_NODE_DATA &_ndArray, const YYSTYPE::EE_NODE_DATA &_ndValue, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARRAY_ASSIGNMENT_OBJ;
 		_ndNode.v.ui32Op = _uiOp;
@@ -5626,9 +5637,15 @@ namespace ee {
 						continue;
 					}
 					case EE_N_ARRAY_ASSIGNMENT_OBJ : {
-						EE_PUSH( _ndExp.w.sNodeIndex );		// soProcessMe.sSubResults[0] = OBJ.
-						EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[1] = IDX.
-						EE_PUSH( _ndExp.x.sNodeIndex );		// soProcessMe.sSubResults[2] = VAL.
+						auto aFind = m_mCustomVariables.find( _ndExp.w.sNodeIndex );
+						if ( aFind == m_mCustomVariables.end() ) { EE_ERROR( EE_EC_INVALIDTREE ); }
+						// If this were const and the assignment expression were const, then the variable would have been
+						//	declared and assigned during compilation.  If this is const and it still tries to pass through
+						//	EE_N_ASSIGNMENT then the assignment expression wasn't const.
+						if ( (*aFind).second.bIsConst ) { EE_ERROR( EE_EC_CONST_VAR_REQUIRES_CONST_EPRESSION ); }
+
+						EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[0] = IDX.
+						EE_PUSH( _ndExp.x.sNodeIndex );		// soProcessMe.sSubResults[1] = VAL.
 						continue;
 					}
 					case EE_N_ADDRESS_ASSIGNMENT : {
@@ -7118,71 +7135,73 @@ namespace ee {
 						break;
 					}
 					case EE_N_ARRAY_ASSIGNMENT_OBJ : {
-						//EE_PUSH( _ndExp.w.sNodeIndex );		// soProcessMe.sSubResults[0] = OBJ.
-						//EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[1] = IDX.
-						//EE_PUSH( _ndExp.x.sNodeIndex );		// soProcessMe.sSubResults[2] = VAL.
+						//EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[0] = IDX.
+						//EE_PUSH( _ndExp.x.sNodeIndex );		// soProcessMe.sSubResults[1] = VAL.
 						// If the object is not an array type then fail.
-						if ( soProcessMe.sSubResults[0].ncType != EE_NC_OBJECT || !soProcessMe.sSubResults[0].u.poObj ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
-						if ( !(soProcessMe.sSubResults[0].u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+						auto aFind = m_mCustomVariables.find( _ndExp.w.sNodeIndex );
+						if ( aFind == m_mCustomVariables.end() ) { EE_ERROR( EE_EC_INVALIDTREE ); }
+						if ( aFind->second.rRes.ncType != EE_NC_OBJECT ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+						if ( aFind->second.rRes.u.poObj == nullptr ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+						if ( !(aFind->second.rRes.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
 
-						EE_RESULT rTemp = ConvertResultOrObject( soProcessMe.sSubResults[1], EE_NC_UNSIGNED );
-						if ( rTemp.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+						EE_RESULT rIdx = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						if ( rIdx.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
 
-						ee::CVector * pvThis = static_cast<ee::CVector *>(soProcessMe.sSubResults[0].u.poObj);
-						auto sIdx = CObject::ArrayIndexToLinearIndex( rTemp.u.ui64Val, pvThis->GetBacking().size() );
+						ee::CVector * pvThis = static_cast<ee::CVector *>(aFind->second.rRes.u.poObj);
+						auto sIdx = CObject::ArrayIndexToLinearIndex( rIdx.u.ui64Val, pvThis->GetBacking().size() );
 						if ( sIdx == EE_INVALID_IDX ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_BADARRAYIDX ); }
 						switch ( _ndExp.v.ui32Op ) {
 							case '=' : {
-								pvThis->GetBacking()[sIdx] = soProcessMe.sSubResults[2];
+								pvThis->GetBacking()[sIdx] = soProcessMe.sSubResults[1];
 								break;
 							}
 							case CExpEvalParser::token::EE_ASS_PLUSEQUALS : {
-								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], '+', soProcessMe.sSubResults[2], pvThis->GetBacking()[sIdx] );
+								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], '+', soProcessMe.sSubResults[1], pvThis->GetBacking()[sIdx] );
 								if ( aCode != EE_EC_SUCCESS ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( aCode ); }
 								break;
 							}
 							case CExpEvalParser::token::EE_ASS_MINUSEQUALS : {
-								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], '-', soProcessMe.sSubResults[2], pvThis->GetBacking()[sIdx] );
+								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], '-', soProcessMe.sSubResults[1], pvThis->GetBacking()[sIdx] );
 								if ( aCode != EE_EC_SUCCESS ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( aCode ); }
 								break;
 							}
 							case CExpEvalParser::token::EE_ASS_TIMESEQUALS : {
-								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], '*', soProcessMe.sSubResults[2], pvThis->GetBacking()[sIdx] );
+								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], '*', soProcessMe.sSubResults[1], pvThis->GetBacking()[sIdx] );
 								if ( aCode != EE_EC_SUCCESS ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( aCode ); }
 								break;
 							}
 							case CExpEvalParser::token::EE_ASS_MODEQUALS : {
-								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], '%', soProcessMe.sSubResults[2], pvThis->GetBacking()[sIdx] );
+								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], '%', soProcessMe.sSubResults[1], pvThis->GetBacking()[sIdx] );
 								if ( aCode != EE_EC_SUCCESS ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( aCode ); }
 								break;
 							}
 							case CExpEvalParser::token::EE_ASS_DIVEQUALS : {
-								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], '/', soProcessMe.sSubResults[2], pvThis->GetBacking()[sIdx] );
+								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], '/', soProcessMe.sSubResults[1], pvThis->GetBacking()[sIdx] );
 								if ( aCode != EE_EC_SUCCESS ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( aCode ); }
 								break;
 							}
 							case CExpEvalParser::token::EE_ASS_CARROTEQUALS : {
-								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], '^', soProcessMe.sSubResults[2], pvThis->GetBacking()[sIdx] );
+								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], '^', soProcessMe.sSubResults[1], pvThis->GetBacking()[sIdx] );
 								if ( aCode != EE_EC_SUCCESS ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( aCode ); }
 								break;
 							}
 							case CExpEvalParser::token::EE_ASS_SHLEFTEQUALS : {
-								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], CExpEvalParser::token::EE_LEFT_OP, soProcessMe.sSubResults[2], pvThis->GetBacking()[sIdx] );
+								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], CExpEvalParser::token::EE_LEFT_OP, soProcessMe.sSubResults[1], pvThis->GetBacking()[sIdx] );
 								if ( aCode != EE_EC_SUCCESS ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( aCode ); }
 								break;
 							}
 							case CExpEvalParser::token::EE_ASS_SHRIGHTEQUALS : {
-								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], CExpEvalParser::token::EE_RIGHT_OP, soProcessMe.sSubResults[2], pvThis->GetBacking()[sIdx] );
+								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], CExpEvalParser::token::EE_RIGHT_OP, soProcessMe.sSubResults[1], pvThis->GetBacking()[sIdx] );
 								if ( aCode != EE_EC_SUCCESS ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( aCode ); }
 								break;
 							}
 							case CExpEvalParser::token::EE_ASS_OREQUALS : {
-								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], '|', soProcessMe.sSubResults[2], pvThis->GetBacking()[sIdx] );
+								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], '|', soProcessMe.sSubResults[1], pvThis->GetBacking()[sIdx] );
 								if ( aCode != EE_EC_SUCCESS ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( aCode ); }
 								break;
 							}
 							case CExpEvalParser::token::EE_ASS_ANDEQUALS : {
-								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], '&', soProcessMe.sSubResults[2], pvThis->GetBacking()[sIdx] );
+								auto aCode = PerformOp( pvThis->GetBacking()[sIdx], '&', soProcessMe.sSubResults[1], pvThis->GetBacking()[sIdx] );
 								if ( aCode != EE_EC_SUCCESS ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( aCode ); }
 								break;
 							}
