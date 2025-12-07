@@ -465,16 +465,17 @@ namespace yy {
      EE_TRIANG = 605,
      EE_TUKEY = 606,
      EE_CUM_SIMPSON = 607,
-     EE_CUM_TRAPAZOID = 608,
+     EE_CUM_TRAPEZOID = 608,
      EE_ROMB = 609,
      EE_SIMPSON = 610,
-     EE_TRAPAZOID = 611,
-     EE_OR = 612,
-     EE_AND = 613,
-     EE_LOG_NOT = 614,
-     EE_UNARY_1SCOMPL = 615,
-     EE_UPLUS = 616,
-     EE_UMINUS = 617
+     EE_TRAPEZOID = 611,
+     EE_LINSPACE = 612,
+     EE_OR = 613,
+     EE_AND = 614,
+     EE_LOG_NOT = 615,
+     EE_UNARY_1SCOMPL = 616,
+     EE_UPLUS = 617,
+     EE_UMINUS = 618
    };
 
     };
@@ -568,8 +569,8 @@ namespace yy {
     /// - if positive, shift that token.
     /// - if negative, reduce the rule which number is the opposite.
     /// - if zero, do what YYDEFACT says.
-    static const unsigned short int yytable_[];
-    static const signed char yytable_ninf_;
+    static const short int yytable_[];
+    static const short int yytable_ninf_;
 
     static const short int yycheck_[];
 

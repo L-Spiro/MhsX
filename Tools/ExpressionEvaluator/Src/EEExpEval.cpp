@@ -625,7 +625,7 @@ namespace ee {
 						{ 't', '\t' },
 					};
 					bool bFound = false;
-					for ( auto J = EE_COUNT_OF( sEscapes ); J--; ) {
+					for ( auto J = std::size( sEscapes ); J--; ) {
 						if ( ui32BackToUtf8 == static_cast<uint8_t>(sEscapes[J].cValue) ) {
 							sRet.push_back( '\\' );
 							sRet.push_back( sEscapes[J].cEscape );
@@ -733,7 +733,7 @@ namespace ee {
 						{ '\\', '\\' },
 					};
 					bool bFound = false;
-					for ( auto J = EE_COUNT_OF( sEscapes ); J--; ) {
+					for ( auto J = std::size( sEscapes ); J--; ) {
 						if ( ui32BackToUtf8 == static_cast<uint8_t>(sEscapes[J].cValue) ) {
 							sRet.push_back( '\\' );
 							sRet.push_back( sEscapes[J].cEscape );

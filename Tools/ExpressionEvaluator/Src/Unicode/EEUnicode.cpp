@@ -18,7 +18,7 @@ namespace ee {
 	// == Functions.
 	// Gets the number of names.
 	size_t CUnicode::TotalNames() {
-		return EE_COUNT_OF( m_nNames );
+		return std::size( m_nNames );
 	}
 
 	// Gets a name by index.
@@ -6107,7 +6107,7 @@ namespace ee {
 		const char * pcKey = EE_UNICODE_DECRYPT;
 		static const size_t sKeyLen = std::strlen( pcKey );
 		::OutputDebugStringA( "CUnicode::EE_NICKS CUnicode::m_nNames[] = {\r\n" );
-		for ( size_t I = 0; I < EE_COUNT_OF( sStruct ); ++I ) {
+		for ( size_t I = 0; I < std::size( sStruct ); ++I ) {
 			std::vector<uint8_t> sTemp;
 			std::string sTempString;
 			for ( size_t J = 0; sStruct[I].pcName[J]; ++J ) {

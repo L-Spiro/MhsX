@@ -25,10 +25,6 @@
 #define EE_MAX_( A, B )					(((A) > (B)) ? (A) : (B))
 #endif	// EE_MAX_
 
-#ifndef EE_COUNT_OF
-#define EE_COUNT_OF( x )				((sizeof( x ) / sizeof( 0[x] )) / (static_cast<size_t>(!(sizeof( x ) % sizeof(0[x])))))
-#endif	// EE_COUNT_OF
-
 #ifndef EE_UTF_INVALID
 #define EE_UTF_INVALID					~static_cast<uint32_t>(0)
 #endif	// EE_UTF_INVALID
@@ -46,7 +42,7 @@
 #endif	// EE_MAX_ITERATION_COUNT
 
 #ifndef EE_PI
-#define EE_PI							3.14159265358979323846264338327950288419716939937510	// You can tell how cool a programmer is by how many digits she puts in the PI macro.
+#define EE_PI							3.141592653589793115997963468544185161590576171875	// 3.14159265358979323846264338327950288419716939937510 rounded to the nearest representable double.
 #endif // #ifndef EE_PI
 
 #if defined( _MSC_VER )
@@ -3185,8 +3181,8 @@ namespace ee {
 			_tType _tDx = _tType( 1 ) ) {
 			if ( _sCount < 2 ) { return _tType( 0 ); }
 
-			const size_t sLastIndex = _sStart + ( _sCount - 1 ) * _sStride;
-			if ( sLastIndex >= _vY.size() ) { throw std::out_of_range(); }
+			const size_t sLastIndex = _sStart + (_sCount - 1) * _sStride;
+			if ( sLastIndex >= _vY.size() ) { throw std::out_of_range( "" ); }
 
 			_tType tIntegrate = _tType( 0 );
 
@@ -3228,8 +3224,8 @@ namespace ee {
 
 			if ( sCount < 2 ) { return _tType( 0 ); }
 
-			const size_t sLastIndex = _sStart + ( sCount - 1 ) * _sStride;
-			if ( sLastIndex >= _vY.size() ) { throw std::out_of_range(); }
+			const size_t sLastIndex = _sStart + (sCount - 1) * _sStride;
+			if ( sLastIndex >= _vY.size() ) { throw std::out_of_range( "" ); }
 
 			_tType tIntegrate = _tType( 0 );
 
@@ -3438,8 +3434,8 @@ namespace ee {
 			_tType _tDx ) {
 			if ( _sCount < size_t( 3 ) ) { return _tType( 0 ); }
 
-			const size_t sLastIndex = _sStart + ( _sCount - 1 ) * _sStride;
-			if ( sLastIndex >= _vY.size() ) { throw std::out_of_range(); }
+			const size_t sLastIndex = _sStart + (_sCount - 1) * _sStride;
+			if ( sLastIndex >= _vY.size() ) { throw std::out_of_range( "" ); }
 
 			_tType tSum = _vY[_sStart] + _vY[sLastIndex];
 
@@ -3584,8 +3580,8 @@ namespace ee {
 			_tType _tDx = _tType( 1 ) ) {
 			if ( _sCount < 2 ) { return _tType( 0 ); }
 
-			const size_t sLastIndex = _sStart + ( _sCount - 1 ) * _sStride;
-			if ( sLastIndex >= _vY.size() ) { throw std::out_of_range(); }
+			const size_t sLastIndex = _sStart + (_sCount - 1) * _sStride;
+			if ( sLastIndex >= _vY.size() ) { throw std::out_of_range( "" ); }
 
 			// For exactly two samples, Simpson's rule degenerates to the trapezoidal rule.
 			if ( _sCount == 2 ) {
@@ -3648,7 +3644,7 @@ namespace ee {
 			if ( sCount < 2 ) { return _tType( 0 ); }
 
 			const size_t sLastIndex = _sStart + (sCount - 1) * _sStride;
-			if ( sLastIndex >= _vY.size() ) { throw std::out_of_range(); }
+			if ( sLastIndex >= _vY.size() ) { throw std::out_of_range( "" ); }
 
 			const size_t sN = sCount - 1;     // Number of intervals.
 
@@ -4121,15 +4117,15 @@ namespace ee {
 		 * \throw std::out_of_range Thrown if the line exceeds _vY.size().
 		 **/
 		template <typename _tType = double>
-		_tType RombStrided( const std::vector<_tType> &_vY,
+		_tType							RombStrided( const std::vector<_tType> &_vY,
 			size_t _sStart,
 			size_t _sCount,
 			size_t _sStride,
 			_tType _tDx = _tType( 1 ) ) {
 			if ( _sCount < 2 ) { throw std::invalid_argument( "" ); }
 
-			const size_t stLastIndex = _sStart + ( _sCount - 1 ) * _sStride;
-			if ( stLastIndex >= _vY.size() ) { throw std::out_of_range(); }
+			const size_t stLastIndex = _sStart + (_sCount - 1) * _sStride;
+			if ( stLastIndex >= _vY.size() ) { throw std::out_of_range( "" ); }
 
 			const size_t stNinterv = _sCount - 1;
 			if ( (stNinterv & (stNinterv - 1)) != 0 ) { throw std::invalid_argument( "" ); }
@@ -4184,6 +4180,83 @@ namespace ee {
 			}
 
 			return vRowPrev[stK];
+		}
+
+		/**
+		 * \brief Creates a 1D vector of linearly spaced values. Must be called within a try/catch block.
+		 * 
+		 * This function emulates numpy.linspace for 1D data:
+		 * 
+		 *   - If _stNum == 0, returns an empty vector.
+		 *   - If _stNum == 1, returns {_tStart} regardless of _bEndpoint.
+		 *   - If _bEndpoint is true, the last element equals _tStop.
+		 *   - If _bEndpoint is false, the sequence goes up to but does not include _tStop.
+		 * 
+		 * If _ptStep is not nullptr, the step size used to generate the sequence is
+		 * written to *_ptStep (similar to retstep=True in NumPy).
+		 * 
+		 * \tparam _tType
+		 *      The value type used for the sequence (defaults to double).
+		 * \param _tStart
+		 *      The starting value of the sequence.
+		 * \param _tStop
+		 *      The final value of the sequence (inclusive if _bEndpoint is true).
+		 * \param _stNum
+		 *      The number of samples to generate.
+		 * \param _bEndpoint
+		 *      If true, _tStop is included as the last sample. If false, _tStop is excluded.
+		 * \param _ptStep
+		 *      Optional pointer that, if non-null, receives the step size used.
+		 * \return
+		 *      Returns a vector containing the generated samples.
+		 **/
+		template <typename _tType = double>
+		static inline std::vector<_tType>
+										Linspace( _tType _tStart,
+			_tType _tStop,
+			size_t _stNum = 50,
+			bool _bEndpoint = true,
+			_tType * _ptStep = nullptr ) {
+			std::vector<_tType> vOut;
+
+			if ( _stNum == 0 ) {
+				if ( _ptStep ) {
+					(*_ptStep) = _tType( 0 );
+				}
+				return vOut;
+			}
+
+			vOut.resize( _stNum );
+
+			if ( _stNum == 1 ) {
+				vOut[0] = _tStart;
+				if ( _ptStep ) {
+					(*_ptStep) = _tType( 0 );
+				}
+				return vOut;
+			}
+
+			const double dDiv = _bEndpoint ?
+				static_cast<double>(_stNum - 1.0) :
+				static_cast<double>(_stNum);
+
+			const double dStep = static_cast<double>(_tStop - _tStart) / dDiv;
+
+			if ( _ptStep ) {
+				(*_ptStep) = _tType( dStep );
+			}
+
+			for ( size_t I = 0; I < _stNum; ++I ) {
+				vOut[I] = static_cast<_tType>(_tStart + dStep * I);
+			}
+
+			// For _bEndpoint == true, the formula already gives vOut.back() == _tStop
+			// algebraically, but a direct assignment avoids any accumulated rounding.
+			if ( _bEndpoint ) {
+				vOut[_stNum-1] = static_cast<_tType>(_tStop);
+			}
+
+			return vOut;
 		}
 
 		/**

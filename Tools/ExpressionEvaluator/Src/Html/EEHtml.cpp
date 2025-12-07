@@ -2142,7 +2142,7 @@ namespace ee {
 	// == Functions.
 	// Gets the number of names.
 	size_t CHtml::TotalNames() {
-		return EE_COUNT_OF( m_tNames );
+		return std::size( m_tNames );
 	}
 
 	// Gets a name by index.
@@ -4328,7 +4328,7 @@ namespace ee {
 		static const size_t sKeyLen = std::strlen( pcKey );
 		::OutputDebugStringA( "CHtml::EE_TABLE CHtml::m_tNames[] = {\r\n" );
 		size_t sMax = 0;
-		for ( size_t I = 0; I < EE_COUNT_OF( sStruct ); ++I ) {
+		for ( size_t I = 0; I < std::size( sStruct ); ++I ) {
 			std::vector<uint8_t> sTemp;
 			std::string sTempString;
 			for ( size_t J = 0; sStruct[I].pcName[J]; ++J ) {

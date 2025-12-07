@@ -603,8 +603,8 @@ namespace ee {
 
 			uint32_t uiLargePower = _uiPower / 10;
 			while ( uiLargePower != 0 ) {
-				uint32_t const uiCurPower = uiLargePower > EE_COUNT_OF( uiLargePwrIndices )
-					? EE_COUNT_OF( uiLargePwrIndices )
+				uint32_t const uiCurPower = uiLargePower > std::size( uiLargePwrIndices )
+					? std::size( uiLargePwrIndices )
 					: uiLargePower;
 
 				ee::CBigInt::EE_UNPACK_INDEX const & uiIndex = uiLargePwrIndices[uiCurPower-1];
