@@ -514,11 +514,11 @@ namespace ee {
 			_rRight = ConvertResultOrObject( _rRight, _rResult.ncType );
 			if ( _rRight.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
 		}
-		else if ( _rLeft.ncType != EE_NC_OBJECT ) {
-			// If casting to objects, the left side must be an object.
-			_rResult.ncType = EE_NC_INVALID;
-			return EE_EC_INVALIDCAST;
-		}
+		//else if ( _rLeft.ncType != EE_NC_OBJECT ) {
+		//	// If casting to objects, the left side must be an object.
+		//	_rResult.ncType = EE_NC_INVALID;
+		//	return EE_EC_INVALIDCAST;
+		//}
 #define EE_OP( MEMBER, CASE, OP )													\
 	case CASE : {																	\
 		_rResult.u.MEMBER = _rLeft.u.MEMBER OP _rRight.u.MEMBER;					\
@@ -602,34 +602,71 @@ namespace ee {
 				break;
 			}
 			case EE_NC_OBJECT : {
-				switch ( _uiOp ) {
-					case '+' : {
-						_rResult = _rLeft.u.poObj->Plus( _rRight );
-						break;
+				if ( _rLeft.ncType == EE_NC_OBJECT ) {
+					// Left is an object, right may or may not be.
+					switch ( _uiOp ) {
+						case '+' : {
+							_rResult = _rLeft.u.poObj->Plus( _rRight );
+							break;
+						}
+						case '-' : {
+							_rResult = _rLeft.u.poObj->Minus( _rRight );
+							break;
+						}
+						case '*' : {
+							_rResult = _rLeft.u.poObj->Multiply( _rRight );
+							break;
+						}
+						case '/' : {
+							_rResult = _rLeft.u.poObj->Divide( _rRight );
+							break;
+						}
+						case CExpEvalParser::token::EE_EQU_E : {
+							_rResult.ncType = EE_NC_UNSIGNED;
+							_rResult.u.ui64Val = _rLeft.u.poObj->Equals( _rRight );
+							break;
+						}
+						case CExpEvalParser::token::EE_EQU_NE : {
+							_rResult.ncType = EE_NC_UNSIGNED;
+							_rResult.u.ui64Val = !_rLeft.u.poObj->Equals( _rRight );
+							break;
+						}
+						default : { return EE_EC_INVALIDTREE; }
 					}
-					case '-' : {
-						_rResult = _rLeft.u.poObj->Minus( _rRight );
-						break;
+				}
+				else if ( _rRight.ncType == EE_NC_OBJECT ) {
+					// Left is NOT an object, right is.
+					// If it is a vector, apply operator to each element.
+					if ( _rRight.u.poObj && (_rRight.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) {
+						ee::CVector * psObj = reinterpret_cast<ee::CVector *>(AllocateObject<ee::CVector>());
+						if ( !psObj ) {
+							_rResult.ncType = EE_NC_INVALID;
+							return EE_EC_OUTOFMEMORY;
+						}
+
+						ee::CVector * pThis = static_cast<ee::CVector *>(_rRight.u.poObj);
+						try {
+							psObj->Resize( pThis->Size().u.ui64Val );
+						}
+						catch ( ... ) {
+							DeallocateObject( psObj );
+							_rResult.ncType = EE_NC_INVALID;
+							return EE_EC_OUTOFMEMORY;
+						}
+
+						
+						for ( auto I = pThis->GetBacking().size(); I--; ) {
+							auto aRes = PerformOp( _rLeft, _uiOp, pThis->GetBacking()[I], psObj->GetBacking()[I] );
+							if ( aRes != EE_EC_SUCCESS ) { return aRes; }
+						}
+						_rResult = psObj->CreateResult();
+						return EE_EC_SUCCESS;
 					}
-					case '*' : {
-						_rResult = _rLeft.u.poObj->Multiply( _rRight );
-						break;
+					else {
+						// Not a vector or is malformed.
+						_rResult.ncType = EE_NC_INVALID;
+						return EE_EC_INVALIDCAST;
 					}
-					case '/' : {
-						_rResult = _rLeft.u.poObj->Divide( _rRight );
-						break;
-					}
-					case CExpEvalParser::token::EE_EQU_E : {
-						_rResult.ncType = EE_NC_UNSIGNED;
-						_rResult.u.ui64Val = _rLeft.u.poObj->Equals( _rRight );
-						break;
-					}
-					case CExpEvalParser::token::EE_EQU_NE : {
-						_rResult.ncType = EE_NC_UNSIGNED;
-						_rResult.u.ui64Val = !_rLeft.u.poObj->Equals( _rRight );
-						break;
-					}
-					default : { return EE_EC_INVALIDTREE; }
 				}
 				//_rLeft.u.poObj->Ord
 				break;

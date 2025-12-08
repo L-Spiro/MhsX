@@ -198,6 +198,8 @@ namespace ee {
 		EE_N_ROMB,
 		EE_N_ROMBSTRIDED,
 
+		EE_N_ARANGE,
+
 		EE_N_LINSPACE_2,
 		EE_N_LINSPACE_3,
 		EE_N_LINSPACE_4,

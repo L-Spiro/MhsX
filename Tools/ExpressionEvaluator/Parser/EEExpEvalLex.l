@@ -607,6 +607,7 @@ RS1_S								[rR]{CS1}
 "cumulative_simpson"				{ return yy::CExpEvalParser::token::EE_CUM_SIMPSON; }
 "romb"								{ return yy::CExpEvalParser::token::EE_ROMB; }
 
+"arange"							{ return yy::CExpEvalParser::token::EE_ARANGE; }
 "linspace"							{ return yy::CExpEvalParser::token::EE_LINSPACE; }
 
 

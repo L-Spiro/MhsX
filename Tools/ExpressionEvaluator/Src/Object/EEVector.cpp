@@ -215,7 +215,6 @@ namespace ee {
 		if ( !psObj ) { return { .ncType = EE_NC_INVALID }; }
 
 		if ( _rRet.ncType == EE_NC_OBJECT && _rRet.u.poObj ) {
-
 			if ( (_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) {
 				try {
 					psObj->m_vBacking.reserve( m_vBacking.size() + static_cast<const ee::CVector *>(_rRet.u.poObj)->m_vBacking.size() );
@@ -226,7 +225,7 @@ namespace ee {
 						psObj->m_vBacking.push_back( static_cast<const ee::CVector *>(_rRet.u.poObj)->m_vBacking[I] );
 					}
 				}
-				catch ( ... ) { return { .ncType = EE_NC_INVALID }; }
+				catch ( ... ) { m_peecContainer->DeallocateObject( psObj ); return { .ncType = EE_NC_INVALID }; }
 				_rRet = static_cast<const ee::CVector *>(_rRet.u.poObj)->CreateResult();
 				return psObj->CreateResult();
 			}

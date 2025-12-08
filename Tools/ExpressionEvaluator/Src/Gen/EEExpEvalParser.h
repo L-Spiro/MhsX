@@ -469,13 +469,14 @@ namespace yy {
      EE_ROMB = 609,
      EE_SIMPSON = 610,
      EE_TRAPEZOID = 611,
-     EE_LINSPACE = 612,
-     EE_OR = 613,
-     EE_AND = 614,
-     EE_LOG_NOT = 615,
-     EE_UNARY_1SCOMPL = 616,
-     EE_UPLUS = 617,
-     EE_UMINUS = 618
+     EE_ARANGE = 612,
+     EE_LINSPACE = 613,
+     EE_OR = 614,
+     EE_AND = 615,
+     EE_LOG_NOT = 616,
+     EE_UNARY_1SCOMPL = 617,
+     EE_UPLUS = 618,
+     EE_UMINUS = 619
    };
 
     };

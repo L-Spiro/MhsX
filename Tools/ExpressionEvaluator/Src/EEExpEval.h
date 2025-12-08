@@ -4260,6 +4260,283 @@ namespace ee {
 		}
 
 		/**
+		 * \brief Creates a 1D vector with values in the half-open interval [0, _tStop). Must be called within a try/catch block.
+		 * 
+		 * This emulates numpy.arange( stop ) for 1D data.
+		 * 
+		 * \tparam _tType
+		 *      The value type used for the sequence (defaults to double).
+		 * \param _tStop
+		 *      The end of the half-open interval [0, _tStop).
+		 * \return
+		 *      Returns a vector containing the generated samples.
+		 **/
+		template <typename _tType = double>
+		static inline std::vector<_tType>
+										Arange( _tType _tStop ) {
+			return Arange<_tType>( _tType( 0 ), _tStop, _tType( 1 ) );
+		}
+
+		/**
+		 * \brief Creates a 1D vector with values in the half-open interval [_tStart, _tStop) with a given step. Must be called within a try/catch block.
+		 * 
+		 * This emulates numpy.arange( start, stop, step ) for 1D data.
+		 * 
+		 * \tparam _tType
+		 *      The value type used for the sequence (defaults to double).
+		 * \param _tStart
+		 *      The start of the half-open interval.
+		 * \param _tStop
+		 *      The end of the half-open interval.
+		 * \param _tStep
+		 *      The step between consecutive samples (must be non-zero).
+		 * \return
+		 *      Returns a vector containing the generated samples.
+		 * \throw std::invalid_argument
+		 *      Thrown if _tStep is zero or has the wrong sign for the given interval.
+		 **/
+		template <typename _tType = double>
+		static inline std::vector<_tType>
+										Arange( _tType _tStart, _tType _tStop, _tType _tStep ) {
+			if ( _tStep == _tType( 0 ) ) { throw std::invalid_argument( "" ); }
+
+			std::vector<_tType> vOut;
+
+			const bool bIncreasing = (_tStep > _tType( 0 ));
+			_tType tValue = _tStart;
+
+			if ( bIncreasing ) {
+				while ( tValue < _tStop ) {
+					vOut.push_back( tValue );
+					tValue += _tStep;
+				}
+			}
+			else {
+				while ( tValue > _tStop ) {
+					vOut.push_back( tValue );
+					tValue += _tStep;
+				}
+			}
+
+			return vOut;
+		}
+
+		/**
+		 * \brief Creates a 1D vector filled with zeros. Must be called within a try/catch block.
+		 * 
+		 * This emulates numpy.zeros( shape ) for 1D data.
+		 * 
+		 * \tparam _tType
+		 *      The value type stored in the vector (defaults to double).
+		 * \param _stCount
+		 *      The number of elements.
+		 * \return
+		 *      Returns a vector of length _stCount, filled with zero.
+		 **/
+		template <typename _tType = double>
+		static inline std::vector<_tType>
+										Zeros( size_t _stCount ) {
+			return std::vector<_tType>( _stCount, _tType( 0 ) );
+		}
+
+		/**
+		 * \brief Creates a 1D vector filled with zeros, matching the length of another vector. Must be called within a try/catch block.
+		 * 
+		 * This emulates numpy.zeros_like( a ) for 1D data.
+		 * 
+		 * \tparam _tType
+		 *      The value type stored in the vectors.
+		 * \param _vRef
+		 *      The reference vector whose length is used.
+		 * \return
+		 *      Returns a vector of length _vRef.size(), filled with zero.
+		 **/
+		template <typename _tType>
+		static inline std::vector<_tType>
+										ZerosLike( const std::vector<_tType> &_vRef ) {
+			return std::vector<_tType>( _vRef.size(), _tType( 0 ) );
+		}
+
+		/**
+		 * \brief Creates a 1D vector filled with ones. Must be called within a try/catch block.
+		 * 
+		 * This emulates numpy.ones( shape ) for 1D data.
+		 * 
+		 * \tparam _tType
+		 *      The value type stored in the vector (defaults to double).
+		 * \param _stCount
+		 *      The number of elements.
+		 * \return
+		 *      Returns a vector of length _stCount, filled with one.
+		 **/
+		template <typename _tType = double>
+		static inline std::vector<_tType>
+										Ones( size_t _stCount ) {
+			return std::vector<_tType>( _stCount, _tType( 1 ) );
+		}
+
+		/**
+		 * \brief Creates a 1D vector filled with ones, matching the length of another vector. Must be called within a try/catch block.
+		 * 
+		 * This emulates numpy.ones_like( a ) for 1D data.
+		 * 
+		 * \tparam _tType
+		 *      The value type stored in the vectors.
+		 * \param _vRef
+		 *      The reference vector whose length is used.
+		 * \return
+		 *      Returns a vector of length _vRef.size(), filled with one.
+		 **/
+		template <typename _tType>
+		static inline std::vector<_tType>
+										OnesLike( const std::vector<_tType> &_vRef ) {
+			return std::vector<_tType>( _vRef.size(), _tType( 1 ) );
+		}
+
+		/**
+		 * \brief Creates a 1D vector filled with a constant value. Must be called within a try/catch block.
+		 * 
+		 * This emulates numpy.full( shape, fill_value ) for 1D data.
+		 * 
+		 * \tparam _tType
+		 *      The value type stored in the vector (defaults to double).
+		 * \param _stCount
+		 *      The number of elements.
+		 * \param _tValue
+		 *      The value with which to fill the vector.
+		 * \return
+		 *      Returns a vector of length _stCount, filled with _tValue.
+		 **/
+		template <typename _tType = double>
+		static inline std::vector<_tType>
+										Full( size_t _stCount, _tType _tValue ) {
+			return std::vector<_tType>( _stCount, _tValue );
+		}
+
+		/**
+		 * \brief Creates a 1D vector filled with a constant value, matching the length of another vector. Must be called within a try/catch block.
+		 * 
+		 * This emulates numpy.full_like( a, fill_value ) for 1D data.
+		 * 
+		 * \tparam _tType
+		 *      The value type stored in the vectors.
+		 * \param _vRef
+		 *      The reference vector whose length is used.
+		 * \param _tValue
+		 *      The value with which to fill the vector.
+		 * \return
+		 *      Returns a vector of length _vRef.size(), filled with _tValue.
+		 **/
+		template <typename _tType>
+		static inline std::vector<_tType>
+										FullLike( const std::vector<_tType> &_vRef, _tType _tValue ) {
+			return std::vector<_tType>( _vRef.size(), _tValue );
+		}
+
+		/**
+		 * \brief Creates a 1D vector of numbers spaced evenly on a log scale. Must be called within a try/catch block.
+		 * 
+		 * This emulates numpy.logspace( start, stop, num, base, endpoint=True ) for 1D data.
+		 * 
+		 * Conceptually:
+		 *     exponents = Linspace( _tStart, _tStop, _stNum, _bEndpoint )
+		 *     vOut[i]   = pow( _tBase, exponents[i] )
+		 * 
+		 * \tparam _tType
+		 *      The floating-point type used for the sequence (defaults to double).
+		 * \param _tStart
+		 *      The starting exponent.
+		 * \param _tStop
+		 *      The final exponent.
+		 * \param _stNum
+		 *      The number of samples to generate.
+		 * \param _bEndpoint
+		 *      If true, the last sample is pow( _tBase, _tStop ); otherwise it is excluded.
+		 * \param _tBase
+		 *      The base of the log space (defaults to 10).
+		 * \return
+		 *      Returns a vector of log-spaced samples.
+		 **/
+		template <typename _tType = double>
+		static inline std::vector<_tType>
+										Logspace( _tType _tStart,
+			_tType _tStop,
+			size_t _stNum,
+			bool _bEndpoint = true,
+			_tType _tBase = _tType( 10 ) ) {
+			std::vector<_tType> vExp = Linspace<_tType>( _tStart, _tStop, _stNum, _bEndpoint );
+
+			std::vector<_tType> vOut;
+			vOut.resize( vExp.size() );
+
+			for ( size_t I = 0; I < vExp.size(); ++I ) {
+				vOut[I] = static_cast<_tType>(std::pow( static_cast<_tType>(_tBase),
+					static_cast<_tType>(vExp[I]) ));
+			}
+
+			return vOut;
+		}
+
+		/**
+		 * \brief Creates a 1D vector of numbers spaced evenly on a multiplicative (geometric) scale. Must be called within a try/catch block.
+		 * 
+		 * This emulates numpy.geomspace( start, stop, num, endpoint=True ) for positive start/stop.
+		 * 
+		 * Implementation is based on:
+		 *     log_base = log( _tBase )
+		 *     a = log( _tStart ) / log_base
+		 *     b = log( _tStop )  / log_base
+		 *     exponents = Linspace( a, b, _stNum, _bEndpoint )
+		 *     vOut[i]   = pow( _tBase, exponents[i] )
+		 * 
+		 * For the common case _tBase == e, this reduces to:
+		 *     exponents = Linspace( log( start ), log( stop ), num, endpoint )
+		 *     vOut[i]   = exp( exponents[i] )
+		 * 
+		 * \tparam _tType
+		 *      The floating-point type used for the sequence (defaults to double).
+		 * \param _tStart
+		 *      The starting value (must be > 0).
+		 * \param _tStop
+		 *      The final value (must be > 0).
+		 * \param _stNum
+		 *      The number of samples to generate.
+		 * \param _bEndpoint
+		 *      If true, the last sample is _tStop; otherwise it is excluded.
+		 * \param _tBase
+		 *      The base for the internal logarithms (defaults to e).
+		 * \return
+		 *      Returns a vector of geometrically spaced samples.
+		 * \throw std::invalid_argument
+		 *      Thrown if _tStart <= 0 or _tStop <= 0.
+		 **/
+		template <typename _tType = double>
+		static inline std::vector<_tType>
+										Geomspace( _tType _tStart,
+			_tType _tStop,
+			size_t _stNum,
+			bool _bEndpoint = true,
+			_tType _tBase = static_cast<_tType>(std::exp( 1.0 )) ) {
+			if ( _tStart <= _tType( 0 ) || _tStop <= _tType( 0 ) ) { throw std::invalid_argument( "" ); }
+
+			const _tType tLogBase = static_cast<_tType>(std::log( static_cast<double>(_tBase) ));
+			const _tType tA = static_cast<_tType>(std::log( static_cast<double>(_tStart) )) / tLogBase;
+			const _tType tB = static_cast<_tType>(std::log( static_cast<double>(_tStop) )) / tLogBase;
+
+			std::vector<_tType> vExp = Linspace<_tType>( tA, tB, _stNum, _bEndpoint );
+
+			std::vector<_tType> vOut;
+			vOut.resize( vExp.size() );
+
+			for ( size_t I = 0; I < vExp.size(); ++I ) {
+				vOut[I] = static_cast<_tType>(std::pow( static_cast<_tType>(_tBase),
+					static_cast<_tType>(vExp[I]) ));
+			}
+
+			return vOut;
+		}
+
+		/**
 		 * \brief   Computes the normalized magnitude response |H(f)| of an M-tap rectangular-windowed sinc filter at frequency _dFreqHz.
 		 * 
 		 * \param   _dSampleHz  Sampling rate Fs (Hz).

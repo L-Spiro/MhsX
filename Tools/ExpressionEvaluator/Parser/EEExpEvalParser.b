@@ -92,7 +92,7 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 
 %token EE_CUM_SIMPSON EE_CUM_TRAPEZOID EE_ROMB EE_SIMPSON EE_TRAPEZOID
 
-%token EE_LINSPACE
+%token EE_ARANGE EE_LINSPACE
 
 %type <sStringIndex>										identifier
 %type <sStringIndex>										string
@@ -847,6 +847,35 @@ intrinsic
 															{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_LINSPACE_3, ee::CVector>( $3, $5, $7, $9, $$ ); }
 	| EE_LINSPACE '(' exp ',' exp ',' exp ',' exp ',' backing_type ')'
 															{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_LINSPACE_4, ee::CVector>( $3, $5, $7, $9, $11, $$ ); }
+															
+	| EE_ARANGE '(' exp ',' exp ',' exp ',' backing_type ')'
+															{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_ARANGE, ee::CVector>( $3, $5, $7, $9, $$ ); }
+	| EE_ARANGE '(' exp ',' exp ',' exp ')'					{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_ARANGE, ee::CVector>( $3, $5, $7, CExpEvalParser::token::EE_DEFAULT, $$ ); }
+	
+	| EE_ARANGE '(' exp ',' exp ',' backing_type ')'		{
+																YYSTYPE::EE_NODE_DATA ndStep;
+																m_peecContainer->CreateDouble( "1.0", ndStep );
+																m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_ARANGE, ee::CVector>( $3, $5, ndStep, $7, $$ );
+															}
+	| EE_ARANGE '(' exp ',' exp ')'							{
+																YYSTYPE::EE_NODE_DATA ndStep;
+																m_peecContainer->CreateDouble( "1.0", ndStep );
+																m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_ARANGE, ee::CVector>( $3, $5, ndStep, CExpEvalParser::token::EE_DEFAULT, $$ );
+															}
+	| EE_ARANGE '(' exp ',' backing_type ')'				{
+																YYSTYPE::EE_NODE_DATA ndStart;
+																m_peecContainer->CreateDouble( "0.0", ndStart );
+																YYSTYPE::EE_NODE_DATA ndStep;
+																m_peecContainer->CreateDouble( "1.0", ndStep );
+																m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_ARANGE, ee::CVector>( ndStart, $3, ndStep, $5, $$ );
+															}
+	| EE_ARANGE '(' exp ')'									{
+																YYSTYPE::EE_NODE_DATA ndStart;
+																m_peecContainer->CreateDouble( "0.0", ndStart );
+																YYSTYPE::EE_NODE_DATA ndStep;
+																m_peecContainer->CreateDouble( "1.0", ndStep );
+																m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_ARANGE, ee::CVector>( ndStart, $3, ndStep, CExpEvalParser::token::EE_DEFAULT, $$ );
+															}
 	;
 
 exp
