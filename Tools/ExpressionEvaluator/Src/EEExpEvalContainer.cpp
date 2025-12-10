@@ -5964,6 +5964,27 @@ namespace ee {
 						continue;
 					}
 
+					case EE_N_ARANGE : {
+						EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[0] = PARM0.
+						EE_PUSH( _ndExp.v.sNodeIndex );		// soProcessMe.sSubResults[1] = PARM1.
+						EE_PUSH( _ndExp.x.sNodeIndex );		// soProcessMe.sSubResults[2] = PARM2.
+						continue;
+					}
+					case EE_N_FULL : {}						EE_FALLTHROUGH
+					case EE_N_FULL_LIKE : {
+						EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[0] = PARM0.
+						EE_PUSH( _ndExp.v.sNodeIndex );		// soProcessMe.sSubResults[1] = PARM1.
+						continue;
+					}
+
+					case EE_N_GEOMSPACE : {
+						EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[0] = PARM0.
+						EE_PUSH( _ndExp.v.sNodeIndex );		// soProcessMe.sSubResults[1] = PARM1.
+						EE_PUSH( _ndExp.x.sNodeIndex );		// soProcessMe.sSubResults[2] = PARM2.
+						EE_PUSH( _ndExp.y.sNodeIndex );		// soProcessMe.sSubResults[3] = PARM3.
+						continue;
+					}
+
 					case EE_N_LINSPACE_2 : {
 						EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[0] = PARM0.
 						EE_PUSH( _ndExp.v.sNodeIndex );		// soProcessMe.sSubResults[1] = PARM1.
@@ -5980,6 +6001,23 @@ namespace ee {
 						EE_PUSH( _ndExp.v.sNodeIndex );		// soProcessMe.sSubResults[1] = PARM1.
 						EE_PUSH( _ndExp.x.sNodeIndex );		// soProcessMe.sSubResults[2] = PARM2.
 						EE_PUSH( _ndExp.y.sNodeIndex );		// soProcessMe.sSubResults[3] = PARM3.
+						continue;
+					}
+
+					case EE_N_LOGSPACE : {
+						EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[0] = PARM0.
+						EE_PUSH( _ndExp.v.sNodeIndex );		// soProcessMe.sSubResults[1] = PARM1.
+						EE_PUSH( _ndExp.x.sNodeIndex );		// soProcessMe.sSubResults[2] = PARM2.
+						EE_PUSH( _ndExp.y.sNodeIndex );		// soProcessMe.sSubResults[3] = PARM3.
+						EE_PUSH( _ndExp.a.sNodeIndex );		// soProcessMe.sSubResults[4] = PARM4.
+						continue;
+					}
+
+					case EE_N_ONES : {}
+					case EE_N_ONES_LIKE : {}
+					case EE_N_ZEROS : {}
+					case EE_N_ZEROS_LIKE : {
+						EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[0] = PARM0.
 						continue;
 					}
 				}
@@ -8251,6 +8289,250 @@ namespace ee {
 						break;
 					}
 
+					case EE_N_ARANGE : {
+						if ( _ndExp.w.sNodeIndex >= m_vObjects.size() ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						if ( !(m_vObjects[_ndExp.w.sNodeIndex]->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+
+						
+
+						try {
+							switch ( _ndExp.z.sNodeIndex ) {
+#define EE_LINSPACE( CASE, TYPE, MEMBER, NC_TYPE )																														\
+	case CASE : {																																						\
+		auto rStart = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_FLOATING );																				\
+		if ( rStart.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }										\
+		auto rEnd = ConvertResultOrObject( soProcessMe.sSubResults[1], EE_NC_FLOATING );																				\
+		if ( rEnd.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }											\
+		auto rStep = ConvertResultOrObject( soProcessMe.sSubResults[2], EE_NC_FLOATING );																				\
+		if ( rStep.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }											\
+		std::vector<TYPE> vTmp = ee::CExpEval::Arange<TYPE>( rStart.u.dVal, rEnd.u.dVal, rStep.u.dVal );																\
+		ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);																				\
+		if ( !pvThis->FromPrimitiveArray<TYPE, NC_TYPE>( vTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }					\
+		(*soProcessMe.prResult) = pvThis->CreateResult();																												\
+		break;																																							\
+	}
+								EE_LINSPACE( CExpEvalParser::token::EE_INT8, int8_t, i64Val, EE_NC_SIGNED )
+								EE_LINSPACE( CExpEvalParser::token::EE_INT16, int16_t, i64Val, EE_NC_SIGNED )
+								EE_LINSPACE( CExpEvalParser::token::EE_INT32, int32_t, i64Val, EE_NC_SIGNED )
+								EE_LINSPACE( CExpEvalParser::token::EE_INT64, int64_t, i64Val, EE_NC_SIGNED )
+								EE_LINSPACE( CExpEvalParser::token::EE_UINT8, uint8_t, ui64Val, EE_NC_UNSIGNED )
+								EE_LINSPACE( CExpEvalParser::token::EE_UINT16, uint16_t, ui64Val, EE_NC_UNSIGNED )
+								EE_LINSPACE( CExpEvalParser::token::EE_UINT32, uint32_t, ui64Val, EE_NC_UNSIGNED )
+								EE_LINSPACE( CExpEvalParser::token::EE_UINT64, uint64_t, ui64Val, EE_NC_UNSIGNED )
+
+								EE_LINSPACE( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
+								case CExpEvalParser::token::EE_DEFAULT : {}				EE_FALLTHROUGH
+								EE_LINSPACE( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+
+							}
+						}
+						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+#undef EE_LINSPACE
+						break;
+					}
+
+					case EE_N_FULL : {
+						if ( _ndExp.w.sNodeIndex >= m_vObjects.size() ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						if ( !(m_vObjects[_ndExp.w.sNodeIndex]->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);
+
+						auto rCount = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						if ( rCount.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+
+						
+						try {
+							uint32_t ui32Type = uint32_t( _ndExp.z.sNodeIndex );
+							if ( ui32Type == CExpEvalParser::token::EE_DEFAULT ) {
+								switch ( soProcessMe.sSubResults[1].ncType ) {
+									case EE_NC_SIGNED : {
+										ui32Type = CExpEvalParser::token::EE_INT64;		// Handle below.
+										break;
+									}
+									case EE_NC_UNSIGNED : {
+										ui32Type = CExpEvalParser::token::EE_UINT64;	// Handle below.
+										break;
+									}
+									case EE_NC_FLOATING : {
+										ui32Type = CExpEvalParser::token::EE_DOUBLE;	// Handle below.
+										break;
+									}
+									case EE_NC_OBJECT : {
+										auto eRes = pvThis->Resize( size_t( rCount.u.ui64Val ) );
+										if ( eRes.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+										for ( auto I = pvThis->GetBacking().size() ; I--; ) {
+											pvThis->GetBacking()[I] = soProcessMe.sSubResults[1];
+										}
+										(*soProcessMe.prResult) = pvThis->CreateResult();
+										break;
+									}
+									default : {
+										(*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT );
+									}
+								}
+							}
+
+							switch ( ui32Type ) {
+#define EE_FULL( CASE, TYPE, MEMBER, NC_TYPE )																															\
+	case CASE : {																																						\
+		auto rVal = ConvertResultOrObject( soProcessMe.sSubResults[1], NC_TYPE );																						\
+		if ( rVal.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }											\
+		std::vector<TYPE> vTmp = ee::CExpEval::Full<TYPE>( size_t( rCount.u.ui64Val ), TYPE( rVal.u.MEMBER ) );															\
+		if ( !pvThis->FromPrimitiveArray<TYPE, NC_TYPE>( vTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }					\
+		(*soProcessMe.prResult) = pvThis->CreateResult();																												\
+		break;																																							\
+	}
+								EE_FULL( CExpEvalParser::token::EE_INT8, int8_t, i64Val, EE_NC_SIGNED )
+								EE_FULL( CExpEvalParser::token::EE_INT16, int16_t, i64Val, EE_NC_SIGNED )
+								EE_FULL( CExpEvalParser::token::EE_INT32, int32_t, i64Val, EE_NC_SIGNED )
+								EE_FULL( CExpEvalParser::token::EE_INT64, int64_t, i64Val, EE_NC_SIGNED )
+								EE_FULL( CExpEvalParser::token::EE_UINT8, uint8_t, ui64Val, EE_NC_UNSIGNED )
+								EE_FULL( CExpEvalParser::token::EE_UINT16, uint16_t, ui64Val, EE_NC_UNSIGNED )
+								EE_FULL( CExpEvalParser::token::EE_UINT32, uint32_t, ui64Val, EE_NC_UNSIGNED )
+								EE_FULL( CExpEvalParser::token::EE_UINT64, uint64_t, ui64Val, EE_NC_UNSIGNED )
+
+								EE_FULL( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
+								EE_FULL( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+#undef EE_FULL
+							}
+						}
+						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						break;
+					}
+					case EE_N_FULL_LIKE : {
+						if ( _ndExp.w.sNodeIndex >= m_vObjects.size() ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						if ( !(m_vObjects[_ndExp.w.sNodeIndex]->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);
+
+						// PARM0 must be a vector.
+						auto rY = soProcessMe.sSubResults[0];
+						if ( rY.ncType != EE_NC_OBJECT ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+						if ( !rY.u.poObj || !(rY.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+						ee::CVector * pvY = static_cast<ee::CVector *>(rY.u.poObj);
+
+						
+						try {
+							uint32_t ui32Type = uint32_t( _ndExp.z.sNodeIndex );
+							if ( ui32Type == CExpEvalParser::token::EE_DEFAULT ) {
+								switch ( soProcessMe.sSubResults[1].ncType ) {
+									case EE_NC_SIGNED : {
+										ui32Type = CExpEvalParser::token::EE_INT64;		// Handle below.
+										break;
+									}
+									case EE_NC_UNSIGNED : {
+										ui32Type = CExpEvalParser::token::EE_UINT64;	// Handle below.
+										break;
+									}
+									case EE_NC_FLOATING : {
+										ui32Type = CExpEvalParser::token::EE_DOUBLE;	// Handle below.
+										break;
+									}
+									case EE_NC_OBJECT : {
+										auto eRes = pvThis->Resize( size_t( pvY->Size().u.ui64Val ) );
+										if ( eRes.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+										for ( auto I = pvThis->GetBacking().size() ; I--; ) {
+											pvThis->GetBacking()[I] = soProcessMe.sSubResults[1];
+										}
+										(*soProcessMe.prResult) = pvThis->CreateResult();
+										break;
+									}
+									default : {
+										(*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT );
+									}
+								}
+							}
+
+							switch ( ui32Type ) {
+#define EE_FULL( CASE, TYPE, MEMBER, NC_TYPE )																															\
+	case CASE : {																																						\
+		auto rVal = ConvertResultOrObject( soProcessMe.sSubResults[1], NC_TYPE );																						\
+		if ( rVal.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }											\
+		std::vector<TYPE> vTmp = ee::CExpEval::Full<TYPE>( size_t( pvY->Size().u.ui64Val ), TYPE( rVal.u.MEMBER ) );													\
+		if ( !pvThis->FromPrimitiveArray<TYPE, NC_TYPE>( vTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }					\
+		(*soProcessMe.prResult) = pvThis->CreateResult();																												\
+		break;																																							\
+	}
+								EE_FULL( CExpEvalParser::token::EE_INT8, int8_t, i64Val, EE_NC_SIGNED )
+								EE_FULL( CExpEvalParser::token::EE_INT16, int16_t, i64Val, EE_NC_SIGNED )
+								EE_FULL( CExpEvalParser::token::EE_INT32, int32_t, i64Val, EE_NC_SIGNED )
+								EE_FULL( CExpEvalParser::token::EE_INT64, int64_t, i64Val, EE_NC_SIGNED )
+								EE_FULL( CExpEvalParser::token::EE_UINT8, uint8_t, ui64Val, EE_NC_UNSIGNED )
+								EE_FULL( CExpEvalParser::token::EE_UINT16, uint16_t, ui64Val, EE_NC_UNSIGNED )
+								EE_FULL( CExpEvalParser::token::EE_UINT32, uint32_t, ui64Val, EE_NC_UNSIGNED )
+								EE_FULL( CExpEvalParser::token::EE_UINT64, uint64_t, ui64Val, EE_NC_UNSIGNED )
+
+								EE_FULL( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
+								EE_FULL( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+#undef EE_FULL
+							}
+						}
+						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+						break;
+					}
+
+					case EE_N_GEOMSPACE : {
+						if ( _ndExp.w.sNodeIndex >= m_vObjects.size() ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						if ( !(m_vObjects[_ndExp.w.sNodeIndex]->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+
+						auto sNum = ConvertResultOrObject( soProcessMe.sSubResults[2], EE_NC_UNSIGNED );
+						if ( sNum.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+
+						auto sEndPt = ConvertResultOrObject( soProcessMe.sSubResults[3], EE_NC_UNSIGNED );
+						if ( sEndPt.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+
+						try {
+							uint32_t ui32Type = uint32_t( _ndExp.z.sNodeIndex );
+							if ( ui32Type == CExpEvalParser::token::EE_DEFAULT ) {
+								switch ( GetCastType( soProcessMe.sSubResults[0].ncType, soProcessMe.sSubResults[1].ncType ) ) {
+									case EE_NC_SIGNED : {
+										ui32Type = CExpEvalParser::token::EE_DOUBLE;	// Handle below.
+										break;
+									}
+									case EE_NC_UNSIGNED : {
+										ui32Type = CExpEvalParser::token::EE_DOUBLE;	// Handle below.
+										break;
+									}
+									case EE_NC_FLOATING : {
+										ui32Type = CExpEvalParser::token::EE_DOUBLE;	// Handle below.
+										break;
+									}
+									default : {
+										(*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT );
+									}
+								}
+							}
+
+							switch ( ui32Type ) {
+#define EE_GEOMSPACE( CASE, TYPE, MEMBER, NC_TYPE )																														\
+	case CASE : {																																						\
+		auto rStart = ConvertResultOrObject( soProcessMe.sSubResults[0], NC_TYPE );																						\
+		if ( rStart.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }										\
+		auto rEnd = ConvertResultOrObject( soProcessMe.sSubResults[1], NC_TYPE );																						\
+		if ( rEnd.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }											\
+		std::vector<TYPE> vTmp = ee::CExpEval::Geomspace<TYPE>( TYPE( rStart.u.MEMBER ), TYPE( rEnd.u.MEMBER ), size_t( sNum.u.ui64Val ), sEndPt.u.ui64Val != 0 );		\
+		ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);																				\
+		if ( !pvThis->FromPrimitiveArray<TYPE, NC_TYPE>( vTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }					\
+		(*soProcessMe.prResult) = pvThis->CreateResult();																												\
+		break;																																							\
+	}
+								EE_GEOMSPACE( CExpEvalParser::token::EE_INT8, int8_t, i64Val, EE_NC_SIGNED )
+								EE_GEOMSPACE( CExpEvalParser::token::EE_INT16, int16_t, i64Val, EE_NC_SIGNED )
+								EE_GEOMSPACE( CExpEvalParser::token::EE_INT32, int32_t, i64Val, EE_NC_SIGNED )
+								EE_GEOMSPACE( CExpEvalParser::token::EE_INT64, int64_t, i64Val, EE_NC_SIGNED )
+								EE_GEOMSPACE( CExpEvalParser::token::EE_UINT8, uint8_t, ui64Val, EE_NC_UNSIGNED )
+								EE_GEOMSPACE( CExpEvalParser::token::EE_UINT16, uint16_t, ui64Val, EE_NC_UNSIGNED )
+								EE_GEOMSPACE( CExpEvalParser::token::EE_UINT32, uint32_t, ui64Val, EE_NC_UNSIGNED )
+								EE_GEOMSPACE( CExpEvalParser::token::EE_UINT64, uint64_t, ui64Val, EE_NC_UNSIGNED )
+
+								EE_GEOMSPACE( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
+								EE_GEOMSPACE( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+
+							}
+						}
+						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+#undef EE_GEOMSPACE
+						break;
+					}
+
 					case EE_N_LINSPACE_2 : {
 						if ( _ndExp.w.sNodeIndex >= m_vObjects.size() ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
 						if ( !(m_vObjects[_ndExp.w.sNodeIndex]->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
@@ -8369,6 +8651,316 @@ namespace ee {
 						}
 						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
 #undef EE_LINSPACE
+						break;
+					}
+
+					case EE_N_LOGSPACE : {
+						if ( _ndExp.w.sNodeIndex >= m_vObjects.size() ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						if ( !(m_vObjects[_ndExp.w.sNodeIndex]->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+
+						auto sNum = ConvertResultOrObject( soProcessMe.sSubResults[2], EE_NC_UNSIGNED );
+						if ( sNum.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+
+						auto sEndPt = ConvertResultOrObject( soProcessMe.sSubResults[3], EE_NC_UNSIGNED );
+						if ( sEndPt.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+
+						try {
+							uint32_t ui32Type = uint32_t( _ndExp.z.sNodeIndex );
+							if ( ui32Type == CExpEvalParser::token::EE_DEFAULT ) {
+								switch ( GetCastType( soProcessMe.sSubResults[0].ncType, soProcessMe.sSubResults[1].ncType ) ) {
+									case EE_NC_SIGNED : {
+										ui32Type = CExpEvalParser::token::EE_DOUBLE;	// Handle below.
+										break;
+									}
+									case EE_NC_UNSIGNED : {
+										ui32Type = CExpEvalParser::token::EE_DOUBLE;	// Handle below.
+										break;
+									}
+									case EE_NC_FLOATING : {
+										ui32Type = CExpEvalParser::token::EE_DOUBLE;	// Handle below.
+										break;
+									}
+									default : {
+										(*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT );
+									}
+								}
+							}
+
+							switch ( ui32Type ) {
+#define EE_LOGSPACE( CASE, TYPE, MEMBER, NC_TYPE )																																	\
+	case CASE : {																																									\
+		auto rStart = ConvertResultOrObject( soProcessMe.sSubResults[0], NC_TYPE );																									\
+		if ( rStart.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }													\
+		auto rEnd = ConvertResultOrObject( soProcessMe.sSubResults[1], NC_TYPE );																									\
+		if ( rEnd.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }														\
+		auto rBase = ConvertResultOrObject( soProcessMe.sSubResults[4], EE_NC_FLOATING );																							\
+		if ( rBase.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }														\
+		std::vector<TYPE> vTmp = ee::CExpEval::Logspace<TYPE>( TYPE( rStart.u.MEMBER ), TYPE( rEnd.u.MEMBER ), size_t( sNum.u.ui64Val ), sEndPt.u.ui64Val != 0, rBase.u.dVal );		\
+		ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);																							\
+		if ( !pvThis->FromPrimitiveArray<TYPE, NC_TYPE>( vTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }								\
+		(*soProcessMe.prResult) = pvThis->CreateResult();																															\
+		break;																																										\
+	}
+								EE_LOGSPACE( CExpEvalParser::token::EE_INT8, int8_t, i64Val, EE_NC_SIGNED )
+								EE_LOGSPACE( CExpEvalParser::token::EE_INT16, int16_t, i64Val, EE_NC_SIGNED )
+								EE_LOGSPACE( CExpEvalParser::token::EE_INT32, int32_t, i64Val, EE_NC_SIGNED )
+								EE_LOGSPACE( CExpEvalParser::token::EE_INT64, int64_t, i64Val, EE_NC_SIGNED )
+								EE_LOGSPACE( CExpEvalParser::token::EE_UINT8, uint8_t, ui64Val, EE_NC_UNSIGNED )
+								EE_LOGSPACE( CExpEvalParser::token::EE_UINT16, uint16_t, ui64Val, EE_NC_UNSIGNED )
+								EE_LOGSPACE( CExpEvalParser::token::EE_UINT32, uint32_t, ui64Val, EE_NC_UNSIGNED )
+								EE_LOGSPACE( CExpEvalParser::token::EE_UINT64, uint64_t, ui64Val, EE_NC_UNSIGNED )
+
+								EE_LOGSPACE( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
+								EE_LOGSPACE( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+
+							}
+						}
+						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+#undef EE_LOGSPACE
+						break;
+					}
+
+					case EE_N_ONES : {
+						if ( _ndExp.w.sNodeIndex >= m_vObjects.size() ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						if ( !(m_vObjects[_ndExp.w.sNodeIndex]->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+
+						auto sNum = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						if ( sNum.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+
+						try {
+							uint32_t ui32Type = uint32_t( _ndExp.z.sNodeIndex );
+							if ( ui32Type == CExpEvalParser::token::EE_DEFAULT ) {
+								switch ( soProcessMe.sSubResults[0].ncType ) {
+									case EE_NC_SIGNED : {
+										ui32Type = CExpEvalParser::token::EE_INT64;		// Handle below.
+										break;
+									}
+									case EE_NC_UNSIGNED : {
+										ui32Type = CExpEvalParser::token::EE_UINT64;	// Handle below.
+										break;
+									}
+									case EE_NC_FLOATING : {
+										ui32Type = CExpEvalParser::token::EE_DOUBLE;	// Handle below.
+										break;
+									}
+									default : {
+										(*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT );
+									}
+								}
+							}
+
+							switch ( ui32Type ) {
+#define EE_ONES( CASE, TYPE, MEMBER, NC_TYPE )																													\
+	case CASE : {																																				\
+		std::vector<TYPE> vTmp = ee::CExpEval::Ones<TYPE>( size_t( sNum.u.MEMBER ) );																			\
+		ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);																		\
+		if ( !pvThis->FromPrimitiveArray<TYPE, NC_TYPE>( vTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }			\
+		(*soProcessMe.prResult) = pvThis->CreateResult();																										\
+		break;																																					\
+	}
+								EE_ONES( CExpEvalParser::token::EE_INT8, int8_t, i64Val, EE_NC_SIGNED )
+								EE_ONES( CExpEvalParser::token::EE_INT16, int16_t, i64Val, EE_NC_SIGNED )
+								EE_ONES( CExpEvalParser::token::EE_INT32, int32_t, i64Val, EE_NC_SIGNED )
+								EE_ONES( CExpEvalParser::token::EE_INT64, int64_t, i64Val, EE_NC_SIGNED )
+								EE_ONES( CExpEvalParser::token::EE_UINT8, uint8_t, ui64Val, EE_NC_UNSIGNED )
+								EE_ONES( CExpEvalParser::token::EE_UINT16, uint16_t, ui64Val, EE_NC_UNSIGNED )
+								EE_ONES( CExpEvalParser::token::EE_UINT32, uint32_t, ui64Val, EE_NC_UNSIGNED )
+								EE_ONES( CExpEvalParser::token::EE_UINT64, uint64_t, ui64Val, EE_NC_UNSIGNED )
+
+								EE_ONES( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
+								EE_ONES( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+
+							}
+						}
+						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+#undef EE_ONES
+						break;
+					}
+
+					case EE_N_ONES_LIKE : {
+						if ( _ndExp.w.sNodeIndex >= m_vObjects.size() ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						if ( !(m_vObjects[_ndExp.w.sNodeIndex]->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);
+
+						// PARM0 must be a vector.
+						auto rY = soProcessMe.sSubResults[0];
+						if ( rY.ncType != EE_NC_OBJECT ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+						if ( !rY.u.poObj || !(rY.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+						ee::CVector * pvY = static_cast<ee::CVector *>(rY.u.poObj);
+
+						try {
+							uint32_t ui32Type = uint32_t( _ndExp.z.sNodeIndex );
+							if ( ui32Type == CExpEvalParser::token::EE_DEFAULT ) {
+								auto eRes = pvThis->Resize( pvY->GetBacking().size() );
+								if ( eRes.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+								for ( auto I = pvThis->GetBacking().size() ; I--; ) {
+									pvThis->GetBacking()[I] = pvY->GetBacking()[I];
+									switch ( pvY->GetBacking()[I].ncType ) {
+										case EE_NC_SIGNED : {
+											pvThis->GetBacking()[I].u.i64Val = 1;
+											break;
+										}
+										case EE_NC_UNSIGNED : {
+											pvThis->GetBacking()[I].u.ui64Val = 1;
+											break;
+										}
+										case EE_NC_FLOATING : {
+											pvThis->GetBacking()[I].u.dVal = 1.0;
+											break;
+										}
+										default : { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+									}
+									
+								}
+								(*soProcessMe.prResult) = pvThis->CreateResult();
+							}
+
+							switch ( ui32Type ) {
+#define EE_ONES( CASE, TYPE, MEMBER, NC_TYPE )																													\
+	case CASE : {																																				\
+		std::vector<TYPE> vTmp = ee::CExpEval::Ones<TYPE>( pvY->GetBacking().size() );																			\
+		if ( !pvThis->FromPrimitiveArray<TYPE, NC_TYPE>( vTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }			\
+		(*soProcessMe.prResult) = pvThis->CreateResult();																										\
+		break;																																					\
+	}
+								EE_ONES( CExpEvalParser::token::EE_INT8, int8_t, i64Val, EE_NC_SIGNED )
+								EE_ONES( CExpEvalParser::token::EE_INT16, int16_t, i64Val, EE_NC_SIGNED )
+								EE_ONES( CExpEvalParser::token::EE_INT32, int32_t, i64Val, EE_NC_SIGNED )
+								EE_ONES( CExpEvalParser::token::EE_INT64, int64_t, i64Val, EE_NC_SIGNED )
+								EE_ONES( CExpEvalParser::token::EE_UINT8, uint8_t, ui64Val, EE_NC_UNSIGNED )
+								EE_ONES( CExpEvalParser::token::EE_UINT16, uint16_t, ui64Val, EE_NC_UNSIGNED )
+								EE_ONES( CExpEvalParser::token::EE_UINT32, uint32_t, ui64Val, EE_NC_UNSIGNED )
+								EE_ONES( CExpEvalParser::token::EE_UINT64, uint64_t, ui64Val, EE_NC_UNSIGNED )
+
+								EE_ONES( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
+								EE_ONES( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+
+							}
+						}
+						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+#undef EE_ONES
+						break;
+					}
+
+					case EE_N_ZEROS : {
+						if ( _ndExp.w.sNodeIndex >= m_vObjects.size() ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						if ( !(m_vObjects[_ndExp.w.sNodeIndex]->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+
+						auto sNum = ConvertResultOrObject( soProcessMe.sSubResults[0], EE_NC_UNSIGNED );
+						if ( sNum.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+
+						try {
+							uint32_t ui32Type = uint32_t( _ndExp.z.sNodeIndex );
+							if ( ui32Type == CExpEvalParser::token::EE_DEFAULT ) {
+								switch ( soProcessMe.sSubResults[0].ncType ) {
+									case EE_NC_SIGNED : {
+										ui32Type = CExpEvalParser::token::EE_INT64;		// Handle below.
+										break;
+									}
+									case EE_NC_UNSIGNED : {
+										ui32Type = CExpEvalParser::token::EE_UINT64;	// Handle below.
+										break;
+									}
+									case EE_NC_FLOATING : {
+										ui32Type = CExpEvalParser::token::EE_DOUBLE;	// Handle below.
+										break;
+									}
+									default : {
+										(*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT );
+									}
+								}
+							}
+
+							switch ( ui32Type ) {
+#define EE_ZEROS( CASE, TYPE, MEMBER, NC_TYPE )																													\
+	case CASE : {																																				\
+		std::vector<TYPE> vTmp = ee::CExpEval::Zeros<TYPE>( size_t( sNum.u.MEMBER ) );																			\
+		ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);																		\
+		if ( !pvThis->FromPrimitiveArray<TYPE, NC_TYPE>( vTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }			\
+		(*soProcessMe.prResult) = pvThis->CreateResult();																										\
+		break;																																					\
+	}
+								EE_ZEROS( CExpEvalParser::token::EE_INT8, int8_t, i64Val, EE_NC_SIGNED )
+								EE_ZEROS( CExpEvalParser::token::EE_INT16, int16_t, i64Val, EE_NC_SIGNED )
+								EE_ZEROS( CExpEvalParser::token::EE_INT32, int32_t, i64Val, EE_NC_SIGNED )
+								EE_ZEROS( CExpEvalParser::token::EE_INT64, int64_t, i64Val, EE_NC_SIGNED )
+								EE_ZEROS( CExpEvalParser::token::EE_UINT8, uint8_t, ui64Val, EE_NC_UNSIGNED )
+								EE_ZEROS( CExpEvalParser::token::EE_UINT16, uint16_t, ui64Val, EE_NC_UNSIGNED )
+								EE_ZEROS( CExpEvalParser::token::EE_UINT32, uint32_t, ui64Val, EE_NC_UNSIGNED )
+								EE_ZEROS( CExpEvalParser::token::EE_UINT64, uint64_t, ui64Val, EE_NC_UNSIGNED )
+
+								EE_ZEROS( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
+								EE_ZEROS( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+
+							}
+						}
+						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+#undef EE_ZEROS
+						break;
+					}
+
+					case EE_N_ZEROS_LIKE : {
+						if ( _ndExp.w.sNodeIndex >= m_vObjects.size() ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						if ( !(m_vObjects[_ndExp.w.sNodeIndex]->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_PROCESSINGERROR ); }
+						ee::CVector * pvThis = static_cast<ee::CVector *>(m_vObjects[_ndExp.w.sNodeIndex]);
+
+						// PARM0 must be a vector.
+						auto rY = soProcessMe.sSubResults[0];
+						if ( rY.ncType != EE_NC_OBJECT ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+						if ( !rY.u.poObj || !(rY.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
+						ee::CVector * pvY = static_cast<ee::CVector *>(rY.u.poObj);
+
+						try {
+							uint32_t ui32Type = uint32_t( _ndExp.z.sNodeIndex );
+							if ( ui32Type == CExpEvalParser::token::EE_DEFAULT ) {
+								auto eRes = pvThis->Resize( pvY->GetBacking().size() );
+								if ( eRes.ncType == EE_NC_INVALID ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+								for ( auto I = pvThis->GetBacking().size() ; I--; ) {
+									pvThis->GetBacking()[I] = pvY->GetBacking()[I];
+									switch ( pvY->GetBacking()[I].ncType ) {
+										case EE_NC_SIGNED : {
+											pvThis->GetBacking()[I].u.i64Val = 0;
+											break;
+										}
+										case EE_NC_UNSIGNED : {
+											pvThis->GetBacking()[I].u.ui64Val = 0;
+											break;
+										}
+										case EE_NC_FLOATING : {
+											pvThis->GetBacking()[I].u.dVal = 0.0;
+											break;
+										}
+										default : { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALIDCAST ); }
+									}
+									
+								}
+								(*soProcessMe.prResult) = pvThis->CreateResult();
+							}
+
+							switch ( ui32Type ) {
+#define EE_ZEROS( CASE, TYPE, MEMBER, NC_TYPE )																													\
+	case CASE : {																																				\
+		std::vector<TYPE> vTmp = ee::CExpEval::Zeros<TYPE>( pvY->GetBacking().size() );																			\
+		if ( !pvThis->FromPrimitiveArray<TYPE, NC_TYPE>( vTmp ) ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }			\
+		(*soProcessMe.prResult) = pvThis->CreateResult();																										\
+		break;																																					\
+	}
+								EE_ZEROS( CExpEvalParser::token::EE_INT8, int8_t, i64Val, EE_NC_SIGNED )
+								EE_ZEROS( CExpEvalParser::token::EE_INT16, int16_t, i64Val, EE_NC_SIGNED )
+								EE_ZEROS( CExpEvalParser::token::EE_INT32, int32_t, i64Val, EE_NC_SIGNED )
+								EE_ZEROS( CExpEvalParser::token::EE_INT64, int64_t, i64Val, EE_NC_SIGNED )
+								EE_ZEROS( CExpEvalParser::token::EE_UINT8, uint8_t, ui64Val, EE_NC_UNSIGNED )
+								EE_ZEROS( CExpEvalParser::token::EE_UINT16, uint16_t, ui64Val, EE_NC_UNSIGNED )
+								EE_ZEROS( CExpEvalParser::token::EE_UINT32, uint32_t, ui64Val, EE_NC_UNSIGNED )
+								EE_ZEROS( CExpEvalParser::token::EE_UINT64, uint64_t, ui64Val, EE_NC_UNSIGNED )
+
+								EE_ZEROS( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
+								EE_ZEROS( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+
+							}
+						}
+						catch ( ... ) { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_OUTOFMEMORY ); }
+#undef EE_ZEROS
 						break;
 					}
 				}

@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cinttypes>
 #include <cwctype>
+#include <fenv.h>
 #include <iomanip>
 #include <numbers>
 #include <sstream>
@@ -37,7 +38,7 @@
 #ifndef NDEBUG
 #define EE_MAX_ITERATION_COUNT			90000
 #else
-#define EE_MAX_ITERATION_COUNT			0x10000000
+#define EE_MAX_ITERATION_COUNT			0x80000000
 #endif	// NDEBUG
 #endif	// EE_MAX_ITERATION_COUNT
 
@@ -79,6 +80,20 @@ namespace ee {
 		/** Sinc-filter window function. */
 		template <typename _tType = double>
 		using							PfWindowFunc = bool (*)( size_t _sN, std::vector<_tType> &_vRet );
+
+		/** Temporarily setting the floating-point rounding mode. */
+		struct							EE_FEROUNDMODE {
+			EE_FEROUNDMODE( int _iNewMode ) :
+				iPrevMode( ::fegetround() ) {
+				::fesetround( _iNewMode );
+			}
+			~EE_FEROUNDMODE() {
+				::fesetround( iPrevMode );
+			}
+
+			int													iPrevMode;					/**< The previous rounding mode. */
+			// FE_TONEAREST FE_DOWNWARD FE_UPWARD FE_TOWARDZERO
+		};
 
 		// == Functions.
 		/**
@@ -4280,41 +4295,76 @@ namespace ee {
 		/**
 		 * \brief Creates a 1D vector with values in the half-open interval [_tStart, _tStop) with a given step. Must be called within a try/catch block.
 		 * 
-		 * This emulates numpy.arange( start, stop, step ) for 1D data.
+		 * This emulates numpy.arange( start, stop, step, dtype=_tOut ) for 1D data.
 		 * 
-		 * \tparam _tType
-		 *      The value type used for the sequence (defaults to double).
-		 * \param _tStart
+		 * For floating-point arguments, the length is computed as:
+		 *     ceil((stop - start) / step)
+		 * 
+		 * The actual step used to populate the array matches NumPy's documented behavior:
+		 *     step_actual = dtype(start + step) - dtype(start)
+		 * 
+		 * \tparam _tOut
+		 *      The output element type (NumPy's dtype). Defaults to double.
+		 * \tparam _tStart
+		 *      The type of the start parameter.
+		 * \tparam _tStop
+		 *      The type of the stop parameter.
+		 * \tparam _tStep
+		 *      The type of the step parameter.
+		 * \param _tStartVal
 		 *      The start of the half-open interval.
-		 * \param _tStop
+		 * \param _tStopVal
 		 *      The end of the half-open interval.
-		 * \param _tStep
+		 * \param _tStepVal
 		 *      The step between consecutive samples (must be non-zero).
 		 * \return
 		 *      Returns a vector containing the generated samples.
 		 * \throw std::invalid_argument
-		 *      Thrown if _tStep is zero or has the wrong sign for the given interval.
+		 *      Thrown if _tStepVal is zero.
 		 **/
-		template <typename _tType = double>
-		static inline std::vector<_tType>
-										Arange( _tType _tStart, _tType _tStop, _tType _tStep ) {
-			if ( _tStep == _tType( 0 ) ) { throw std::invalid_argument( "" ); }
+		template <typename _tOut = double, typename _tStart, typename _tStop, typename _tStep>
+		static inline std::vector<_tOut>Arange( _tStart _tStartVal, _tStop _tStopVal, _tStep _tStepVal ) {
+			const long double ldStart = static_cast<long double>(_tStartVal);
+			const long double ldStop  = static_cast<long double>(_tStopVal);
+			const long double ldStep  = static_cast<long double>(_tStepVal);
 
-			std::vector<_tType> vOut;
+			if ( ldStep == static_cast<long double>(0) ) { throw std::invalid_argument( "" ); }
 
-			const bool bIncreasing = (_tStep > _tType( 0 ));
-			_tType tValue = _tStart;
+			size_t stCount = 0;
 
-			if ( bIncreasing ) {
-				while ( tValue < _tStop ) {
-					vOut.push_back( tValue );
-					tValue += _tStep;
+			// Only produce values if we can move from start toward stop using the sign of step.
+			if ( (ldStep > static_cast<long double>(0) && ldStart < ldStop) ||
+				 (ldStep < static_cast<long double>(0) && ldStart > ldStop) ) {
+				const long double ldSpan = ldStop - ldStart;
+				const long double ldRawCount = ldSpan / ldStep;
+
+				long double ldCeilCount = std::ceill( ldRawCount );
+				if ( ldCeilCount < static_cast<long double>(0) ) {
+					ldCeilCount = static_cast<long double>(0);
 				}
+
+				stCount = static_cast<size_t>(ldCeilCount);
 			}
 			else {
-				while ( tValue > _tStop ) {
-					vOut.push_back( tValue );
-					tValue += _tStep;
+				stCount = 0;
+			}
+
+			std::vector<_tOut> vOut;
+			vOut.resize( stCount );
+
+			if ( stCount == 0 ) { return vOut; }
+
+			// NumPy uses dtype(start + step) - dtype(start) as the internal step,
+			// which reproduces the documented "instabilities" for integer dtypes.
+			const _tOut tStartCast = static_cast<_tOut>( ldStart );
+			vOut[0] = tStartCast;
+
+			if ( stCount > 1 ) {
+				const _tOut tNextCast = static_cast<_tOut>(ldStart + ldStep);
+				const _tOut tStepActual = static_cast<_tOut>(tNextCast - tStartCast);
+
+				for ( size_t I = 1; I < stCount; ++I ) {
+					vOut[I] = static_cast<_tOut>(vOut[I-1] + tStepActual);
 				}
 			}
 
@@ -4436,42 +4486,106 @@ namespace ee {
 		/**
 		 * \brief Creates a 1D vector of numbers spaced evenly on a log scale. Must be called within a try/catch block.
 		 * 
-		 * This emulates numpy.logspace( start, stop, num, base, endpoint=True ) for 1D data.
+		 * This emulates numpy.logspace( start, stop, num=50, endpoint=True, base=10.0, dtype=_tType, axis=0 )
+		 * for real dtypes in 1D.
 		 * 
-		 * Conceptually:
-		 *     exponents = Linspace( _tStart, _tStop, _stNum, _bEndpoint )
-		 *     vOut[i]   = pow( _tBase, exponents[i] )
+		 * Floating-point _tType:
+		 *     Behaves like NumPy's logspace for real inputs.
+		 * Integer _tType:
+		 *     Behaves like np.around(np.logspace(...)).astype(int), which avoids
+		 *     truncation artifacts when values are very close to integers.
 		 * 
 		 * \tparam _tType
-		 *      The floating-point type used for the sequence (defaults to double).
-		 * \param _tStart
+		 *      The result dtype (NumPy's dtype analogue). Defaults to double.
+		 * \tparam _tStart
+		 *      Type of the starting exponent.
+		 * \tparam _tStop
+		 *      Type of the final exponent.
+		 * \param _tStartExp
 		 *      The starting exponent.
-		 * \param _tStop
+		 * \param _tStopExp
 		 *      The final exponent.
 		 * \param _stNum
-		 *      The number of samples to generate.
+		 *      The number of samples to generate (default 50).
 		 * \param _bEndpoint
-		 *      If true, the last sample is pow( _tBase, _tStop ); otherwise it is excluded.
-		 * \param _tBase
-		 *      The base of the log space (defaults to 10).
+		 *      If true, the last sample is approximately base**_tStopExp; otherwise it is excluded.
+		 * \param _dBase
+		 *      The base of the log scale (default 10.0).
 		 * \return
 		 *      Returns a vector of log-spaced samples.
+		 * \throw std::overflow_error
+		 *      Thrown for integer _tType if a rounded value is out of range for _tType.
 		 **/
-		template <typename _tType = double>
+		template <typename _tType = double, typename _tStart, typename _tStop>
 		static inline std::vector<_tType>
-										Logspace( _tType _tStart,
-			_tType _tStop,
-			size_t _stNum,
+										Logspace( _tStart _tStartExp,
+			_tStop _tStopExp,
+			size_t _stNum = 50,
 			bool _bEndpoint = true,
-			_tType _tBase = _tType( 10 ) ) {
-			std::vector<_tType> vExp = Linspace<_tType>( _tStart, _tStop, _stNum, _bEndpoint );
-
+			double _dBase = 10.0 ) {
 			std::vector<_tType> vOut;
-			vOut.resize( vExp.size() );
 
-			for ( size_t I = 0; I < vExp.size(); ++I ) {
-				vOut[I] = static_cast<_tType>(std::pow( static_cast<_tType>(_tBase),
-					static_cast<_tType>(vExp[I]) ));
+			if ( _stNum == 0 ) { return vOut; }
+
+			vOut.resize( _stNum );
+
+			if ( _stNum == 1 ) {
+				// NumPy returns base**start when num == 1
+				const double dStartExp = static_cast<double>(_tStartExp);
+				const double dVal      = std::pow( _dBase, dStartExp );
+
+				if constexpr ( std::is_integral_v<_tType> ) {
+					long long ll = std::llround( static_cast<long double>(dVal) );
+
+					if ( ll < static_cast<long long>(std::numeric_limits<_tType>::min()) ||
+						 ll > static_cast<long long>(std::numeric_limits<_tType>::max()) ) { throw std::overflow_error( "" ); }
+
+					vOut[0] = static_cast<_tType>(ll);
+				}
+				else { vOut[0] = static_cast<_tType>(dVal); }
+
+				return vOut;
+			}
+
+			// Internal exponents in double (NumPy uses float64 logic here).
+			const double dStartExp = static_cast<double>(_tStartExp);
+			const double dStopExp  = static_cast<double>(_tStopExp);
+
+			const double dCount   = static_cast<double>(_stNum);
+			const double dDivisor = _bEndpoint
+				? (dCount - 1.0)
+				: dCount;
+
+			const double dStepExp = (dStopExp - dStartExp) / dDivisor;
+
+			for ( size_t I = 0; I < _stNum; ++I ) {
+				const double dExp = dStartExp + dStepExp * static_cast<double>(I);
+				const double dVal = std::pow( _dBase, dExp );
+
+				if constexpr ( std::is_integral_v<_tType> ) {
+					long long ll = std::llround( static_cast<long double>(dVal) );
+
+					if ( ll < static_cast<long long>(std::numeric_limits<_tType>::min()) ||
+						 ll > static_cast<long long>(std::numeric_limits<_tType>::max()) ) { throw std::overflow_error( "" ); }
+
+					vOut[I] = static_cast<_tType>(ll);
+				}
+				else { vOut[I] = static_cast<_tType>(dVal); }
+			}
+
+			// Force exact endpoint when requested.
+			if ( _bEndpoint ) {
+				const double dEndVal = std::pow( _dBase, dStopExp );
+
+				if constexpr ( std::is_integral_v<_tType> ) {
+					long long ll = std::llround( static_cast<long double>(dEndVal) );
+
+					if ( ll < static_cast<long long>(std::numeric_limits<_tType>::min()) ||
+						 ll > static_cast<long long>(std::numeric_limits<_tType>::max()) ) { throw std::overflow_error( "" ); }
+
+					vOut[_stNum-1] = static_cast<_tType>(ll);
+				}
+				else { vOut[_stNum-1] = static_cast<_tType>(dEndVal); }
 			}
 
 			return vOut;
@@ -4480,61 +4594,165 @@ namespace ee {
 		/**
 		 * \brief Creates a 1D vector of numbers spaced evenly on a multiplicative (geometric) scale. Must be called within a try/catch block.
 		 * 
-		 * This emulates numpy.geomspace( start, stop, num, endpoint=True ) for positive start/stop.
+		 * This emulates numpy.geomspace( start, stop, num=50, endpoint=True, dtype=_tType, axis=0 )
+		 * for real dtypes in 1D.
 		 * 
-		 * Implementation is based on:
-		 *     log_base = log( _tBase )
-		 *     a = log( _tStart ) / log_base
-		 *     b = log( _tStop )  / log_base
-		 *     exponents = Linspace( a, b, _stNum, _bEndpoint )
-		 *     vOut[i]   = pow( _tBase, exponents[i] )
+		 * Floating-point _tType:
+		 *     Behaves like NumPy's geomspace for real inputs.
+		 * Integer _tType:
+		 *     Behaves like np.around(np.geomspace(...)).astype(int), which avoids
+		 *     truncation artifacts when values are very close to integers.
 		 * 
-		 * For the common case _tBase == e, this reduces to:
-		 *     exponents = Linspace( log( start ), log( stop ), num, endpoint )
-		 *     vOut[i]   = exp( exponents[i] )
+		 * If start and stop have opposite signs, the real-valued version cannot reproduce
+		 * NumPy's complex-valued spiral and will throw.
 		 * 
 		 * \tparam _tType
-		 *      The floating-point type used for the sequence (defaults to double).
+		 *      The result type (NumPy's dtype analogue). Defaults to double.
 		 * \param _tStart
-		 *      The starting value (must be > 0).
+		 *      The starting value.
 		 * \param _tStop
-		 *      The final value (must be > 0).
+		 *      The final value.
 		 * \param _stNum
-		 *      The number of samples to generate.
+		 *      The number of samples to generate (default 50).
 		 * \param _bEndpoint
-		 *      If true, the last sample is _tStop; otherwise it is excluded.
-		 * \param _tBase
-		 *      The base for the internal logarithms (defaults to e).
+		 *      If true, the last sample is (approximately) _tStop; otherwise it is excluded.
 		 * \return
 		 *      Returns a vector of geometrically spaced samples.
 		 * \throw std::invalid_argument
-		 *      Thrown if _tStart <= 0 or _tStop <= 0.
+		 *      Thrown if start and stop have opposite signs.
+		 * \throw std::overflow_error
+		 *      Thrown for integer _tType if a rounded value is out of range for _tType.
 		 **/
 		template <typename _tType = double>
 		static inline std::vector<_tType>
 										Geomspace( _tType _tStart,
 			_tType _tStop,
-			size_t _stNum,
-			bool _bEndpoint = true,
-			_tType _tBase = static_cast<_tType>(std::exp( 1.0 )) ) {
-			if ( _tStart <= _tType( 0 ) || _tStop <= _tType( 0 ) ) { throw std::invalid_argument( "" ); }
-
-			const _tType tLogBase = static_cast<_tType>(std::log( static_cast<double>(_tBase) ));
-			const _tType tA = static_cast<_tType>(std::log( static_cast<double>(_tStart) )) / tLogBase;
-			const _tType tB = static_cast<_tType>(std::log( static_cast<double>(_tStop) )) / tLogBase;
-
-			std::vector<_tType> vExp = Linspace<_tType>( tA, tB, _stNum, _bEndpoint );
-
+			size_t _stNum = size_t( 50 ),
+			bool _bEndpoint = true ) {
 			std::vector<_tType> vOut;
-			vOut.resize( vExp.size() );
 
-			for ( size_t I = 0; I < vExp.size(); ++I ) {
-				vOut[I] = static_cast<_tType>(std::pow( static_cast<_tType>(_tBase),
-					static_cast<_tType>(vExp[I]) ));
+			if ( _stNum == 0 ) { return vOut; }
+
+			vOut.resize( _stNum );
+
+			if ( _stNum == 1 ) {
+				vOut[0] = static_cast<_tType>( _tStart );
+				return vOut;
+			}
+
+			// Internal work in double to match NumPy's float64 behaviour.
+			const double dStart = static_cast<double>(_tStart);
+			const double dStop  = static_cast<double>(_tStop);
+
+			const bool bNegStart = (dStart < 0.0);
+			const bool bNegStop  = (dStop < 0.0);
+
+			int iSign = 1;
+			double dMagStart = dStart;
+			double dMagStop  = dStop;
+
+			if ( bNegStart && bNegStop ) {
+				dMagStart = -dStart;
+				dMagStop  = -dStop;
+				iSign = -1;
+			}
+			else if ( bNegStart != bNegStop ) { throw std::invalid_argument( "" ); }
+
+			// Ratio of magnitudes.
+			const double dRatio = dMagStop / dMagStart;
+
+			// Exponent goes from 0 to 1 (endpoint) or 0 to 1 - 1/num (no endpoint).
+			const double dExpStart = 0.0;
+			const double dExpStop  = _bEndpoint ?
+				1.0 :
+				1.0 - 1.0 / static_cast<double>(_stNum);
+			const double dStepExp  = (dExpStop - dExpStart) /
+									 static_cast<double>(_stNum - 1);
+
+			for ( size_t I = 0; I < _stNum; ++I ) {
+				const double dExp = dExpStart + dStepExp * static_cast<double>(I);
+				const double dValMag = dMagStart * std::pow( dRatio, dExp );
+				const double dSignedVal = static_cast<double>(iSign) * dValMag;
+
+				if constexpr ( std::is_integral_v<_tType> ) {
+					long double ld = static_cast<long double>(dSignedVal);
+					long long ll = std::llround( ld );
+
+					if ( ll < static_cast<long long>(std::numeric_limits<_tType>::min()) ||
+						 ll > static_cast<long long>(std::numeric_limits<_tType>::max()) ) { throw std::overflow_error( "" ); }
+
+					vOut[I] = static_cast<_tType>(ll);
+				}
+				else { vOut[I] = static_cast<_tType>(dSignedVal); }
+			}
+
+			// Force exact endpoint equality when requested.
+			if ( _bEndpoint ) { vOut[_stNum-1] = static_cast<_tType>(_tStop); }
+
+			return vOut;
+		}
+
+		/**
+		 * \brief Converts a single value to another type using NumPy-style astype semantics.
+		 * 
+		 * This emulates numpy.asarray(x).astype(_tOut)[...] for a single value:
+		 * 
+		 *   - Floating-point to integer: Truncates toward zero (via static_cast).
+		 *   - Integer to floating-point: Converts exactly where representable.
+		 *   - Any numeric type to bool: Zero becomes false, non-zero becomes true.
+		 * 
+		 * No range checking is performed; overflow and underflow follow normal C++ conversion
+		 * rules for static_cast.
+		 * 
+		 * \tparam _tOut
+		 *      The output type (NumPy's dtype analogue).
+		 * \tparam _tIn
+		 *      The input type.
+		 * \param _tValue
+		 *      The value to convert.
+		 * \return
+		 *      Returns the converted value.
+		 **/
+		template <typename _tOut, typename _tIn>
+		static inline _tOut				Astype( _tIn _tValue ) {
+			return static_cast<_tOut>(_tValue);
+		}
+
+		/**
+		 * \brief Converts a vector to another type using NumPy-style astype semantics. Must be called within a try/catch block.
+		 * 
+		 * This emulates numpy.asarray(v).astype(_tOut) for 1D arrays:
+		 * 
+		 *   - A new vector is always created (like copy=True in NumPy).
+		 *   - Floating-point to integer: Truncates toward zero (via static_cast).
+		 *   - Integer to floating-point: Converts exactly where representable.
+		 *   - Any numeric type to bool: Zero becomes false, non-zero becomes true.
+		 * 
+		 * No range checking is performed; overflow and underflow follow normal C++ conversion
+		 * rules for static_cast (similar in spirit to NumPy's casting='unsafe').
+		 * 
+		 * \tparam _tOut
+		 *      The output element type (NumPy's dtype analogue).
+		 * \tparam _tIn
+		 *      The input element type.
+		 * \param _vIn
+		 *      The input vector.
+		 * \return
+		 *      Returns a new vector whose elements are converted to _tOut.
+		 **/
+		template <typename _tOut, typename _tIn>
+		static inline std::vector<_tOut>
+										Astype( const std::vector<_tIn> &_vIn ) {
+			std::vector<_tOut> vOut;
+			vOut.resize( _vIn.size() );
+
+			for ( size_t I = 0; I < _vIn.size(); ++I ) {
+				vOut[I] = static_cast<_tOut>(_vIn[I]);
 			}
 
 			return vOut;
 		}
+
 
 		/**
 		 * \brief   Computes the normalized magnitude response |H(f)| of an M-tap rectangular-windowed sinc filter at frequency _dFreqHz.

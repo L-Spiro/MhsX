@@ -282,15 +282,6 @@ RS1_S								[rR]{CS1}
 
 "add"								{ return yy::CExpEvalParser::token::EE_ADD; }
 
-"#"{D}+{IS}?						{ return yy::CExpEvalParser::token::EE_PUREDEC_CONSTANT; }
-0[bB]{B}+{IS}?						{ return yy::CExpEvalParser::token::EE_BIN_CONSTANT; }
-0[oO]{O}+{IS}?						{ return yy::CExpEvalParser::token::EE_OCT_CONSTANT; }
-0[xX]{H}+{IS}?						{ return yy::CExpEvalParser::token::EE_HEX_CONSTANT1; }
-{H}+{IS}?[hH]						{ return yy::CExpEvalParser::token::EE_HEX_CONSTANT2; }
-0{O}+{IS}?							{ return yy::CExpEvalParser::token::EE_OCT_CONSTANT; }
-{D}+{IS}?							{ return yy::CExpEvalParser::token::EE_DEC_CONSTANT; }
-{H}+{IS}?							{ return yy::CExpEvalParser::token::EE_HEX_CONSTANT3; }
-
 (?i:_Pi_)							{ return yy::CExpEvalParser::token::EE_PI_; }
 (?i:_HalfPi_)						{ return yy::CExpEvalParser::token::EE_HALFPI; }
 (?i:_E_)							{ return yy::CExpEvalParser::token::EE_E; }
@@ -608,7 +599,15 @@ RS1_S								[rR]{CS1}
 "romb"								{ return yy::CExpEvalParser::token::EE_ROMB; }
 
 "arange"							{ return yy::CExpEvalParser::token::EE_ARANGE; }
+"full"								{ return yy::CExpEvalParser::token::EE_FULL; }
+"full_like"							{ return yy::CExpEvalParser::token::EE_FULL_LIKE; }
+"geomspace"							{ return yy::CExpEvalParser::token::EE_GEOMSPACE; }
 "linspace"							{ return yy::CExpEvalParser::token::EE_LINSPACE; }
+"logspace"							{ return yy::CExpEvalParser::token::EE_LOGSPACE; }
+"ones"								{ return yy::CExpEvalParser::token::EE_ONES; }
+"ones_like"							{ return yy::CExpEvalParser::token::EE_ONES_LIKE; }
+"zeros"								{ return yy::CExpEvalParser::token::EE_ZEROS; }
+"zeros_like"						{ return yy::CExpEvalParser::token::EE_ZEROS_LIKE; }
 
 
 "CHAR_BIT"							{ return yy::CExpEvalParser::token::EE_CHAR_BIT; }
@@ -739,6 +738,15 @@ RS1_S								[rR]{CS1}
 "ms_since_start"					{ return yy::CExpEvalParser::token::EE_MILLISECONDS_SINCE_START; }
 "microseconds_since_start"			{ return yy::CExpEvalParser::token::EE_MICROSECONDS_SINCE_START; }
 "micros_since_start"				{ return yy::CExpEvalParser::token::EE_MICROSECONDS_SINCE_START; }
+
+"#"{D}+{IS}?						{ return yy::CExpEvalParser::token::EE_PUREDEC_CONSTANT; }
+0[bB]{B}+{IS}?						{ return yy::CExpEvalParser::token::EE_BIN_CONSTANT; }
+0[oO]{O}+{IS}?						{ return yy::CExpEvalParser::token::EE_OCT_CONSTANT; }
+0[xX]{H}+{IS}?						{ return yy::CExpEvalParser::token::EE_HEX_CONSTANT1; }
+{H}+{IS}?[hH]						{ return yy::CExpEvalParser::token::EE_HEX_CONSTANT2; }
+0{O}+{IS}?							{ return yy::CExpEvalParser::token::EE_OCT_CONSTANT; }
+{D}+{IS}?							{ return yy::CExpEvalParser::token::EE_DEC_CONSTANT; }
+{H}+{IS}?							{ return yy::CExpEvalParser::token::EE_HEX_CONSTANT3; }
 
 {D}+{E}{FS}?						{ return yy::CExpEvalParser::token::EE_FLOAT_CONSTANT; }
 {D}*"."{D}+({E})?{FS}?				{ return yy::CExpEvalParser::token::EE_FLOAT_CONSTANT; }

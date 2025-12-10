@@ -1203,6 +1203,21 @@ namespace ee {
 			AddNode( _ndNode );
 		}
 
+		// Creates a 5-parameter node of a given object type.
+		template <ee::EE_NODES _nType, typename _tType>
+		void								CreateBasicObjectNode_Ex1( const YYSTYPE::EE_NODE_DATA &_ndParm1, const YYSTYPE::EE_NODE_DATA &_ndParm2, const YYSTYPE::EE_NODE_DATA &_ndParm3, const YYSTYPE::EE_NODE_DATA &_ndParm4, const YYSTYPE::EE_NODE_DATA &_ndParm5, uint32_t _ui32Ex, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+			_ndNode.nType = _nType;
+			_ndNode.u.sNodeIndex = _ndParm1.sNodeIndex;
+			_ndNode.v.sNodeIndex = _ndParm2.sNodeIndex;
+			_ndNode.x.sNodeIndex = _ndParm3.sNodeIndex;
+			_ndNode.y.sNodeIndex = _ndParm4.sNodeIndex;
+			_ndNode.a.sNodeIndex = _ndParm5.sNodeIndex;
+			_ndNode.z.sNodeIndex = size_t( _ui32Ex );
+			_ndNode.w.sNodeIndex = m_vObjects.size();
+			AllocateObject<_tType>();
+			AddNode( _ndNode );
+		}
+
 		// Sets the translation-unit node.
 		void								SetTrans( YYSTYPE::EE_NODE_DATA &_ndNode );
 

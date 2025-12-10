@@ -470,13 +470,21 @@ namespace yy {
      EE_SIMPSON = 610,
      EE_TRAPEZOID = 611,
      EE_ARANGE = 612,
-     EE_LINSPACE = 613,
-     EE_OR = 614,
-     EE_AND = 615,
-     EE_LOG_NOT = 616,
-     EE_UNARY_1SCOMPL = 617,
-     EE_UPLUS = 618,
-     EE_UMINUS = 619
+     EE_FULL = 613,
+     EE_FULL_LIKE = 614,
+     EE_GEOMSPACE = 615,
+     EE_LINSPACE = 616,
+     EE_LOGSPACE = 617,
+     EE_ONES = 618,
+     EE_ONES_LIKE = 619,
+     EE_ZEROS = 620,
+     EE_ZEROS_LIKE = 621,
+     EE_OR = 622,
+     EE_AND = 623,
+     EE_LOG_NOT = 624,
+     EE_UNARY_1SCOMPL = 625,
+     EE_UPLUS = 626,
+     EE_UMINUS = 627
    };
 
     };

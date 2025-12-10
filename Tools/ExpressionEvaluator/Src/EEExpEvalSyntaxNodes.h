@@ -199,10 +199,17 @@ namespace ee {
 		EE_N_ROMBSTRIDED,
 
 		EE_N_ARANGE,
-
+		EE_N_FULL,
+		EE_N_FULL_LIKE,
+		EE_N_GEOMSPACE,
 		EE_N_LINSPACE_2,
 		EE_N_LINSPACE_3,
 		EE_N_LINSPACE_4,
+		EE_N_LOGSPACE,
+		EE_N_ONES,
+		EE_N_ONES_LIKE,
+		EE_N_ZEROS,
+		EE_N_ZEROS_LIKE,
 	};
 
 	// Constant types.  Ordered by cast priority.

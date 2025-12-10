@@ -92,7 +92,7 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 
 %token EE_CUM_SIMPSON EE_CUM_TRAPEZOID EE_ROMB EE_SIMPSON EE_TRAPEZOID
 
-%token EE_ARANGE EE_LINSPACE
+%token EE_ARANGE EE_FULL EE_FULL_LIKE EE_GEOMSPACE EE_LINSPACE EE_LOGSPACE EE_ONES EE_ONES_LIKE EE_ZEROS EE_ZEROS_LIKE
 
 %type <sStringIndex>										identifier
 %type <sStringIndex>										string
@@ -876,6 +876,103 @@ intrinsic
 																m_peecContainer->CreateDouble( "1.0", ndStep );
 																m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_ARANGE, ee::CVector>( ndStart, $3, ndStep, CExpEvalParser::token::EE_DEFAULT, $$ );
 															}
+															
+															
+	| EE_FULL '(' exp ',' exp ',' backing_type ')'			{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_FULL, ee::CVector>( $3, $5, $7, $$ ); }
+	| EE_FULL '(' exp ',' exp ')'							{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_FULL, ee::CVector>( $3, $5, CExpEvalParser::token::EE_DEFAULT, $$ ); }
+	| EE_FULL_LIKE '(' exp ',' exp ',' backing_type ')'		{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_FULL_LIKE, ee::CVector>( $3, $5, $7, $$ ); }
+	| EE_FULL_LIKE '(' exp ',' exp ')'						{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_FULL_LIKE, ee::CVector>( $3, $5, CExpEvalParser::token::EE_DEFAULT, $$ ); }
+	
+	| EE_GEOMSPACE '(' exp ',' exp ',' exp ',' exp ',' backing_type ')'
+															{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_GEOMSPACE, ee::CVector>( $3, $5, $7, $9, $11, $$ ); }
+	| EE_GEOMSPACE '(' exp ',' exp ',' exp ',' exp ')'		{
+																YYSTYPE::EE_NODE_DATA ndBase;
+																m_peecContainer->CreateNumber( 10.0, ndBase );
+																m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_GEOMSPACE, ee::CVector>( $3, $5, $7, $9, CExpEvalParser::token::EE_DEFAULT, $$ );
+															}
+	
+	| EE_GEOMSPACE '(' exp ',' exp ',' exp ',' backing_type ')'
+															{
+																YYSTYPE::EE_NODE_DATA ndEndPoint;
+																m_peecContainer->CreateNumber( 1, ndEndPoint );
+																m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_GEOMSPACE, ee::CVector>( $3, $5, $7, ndEndPoint, $9, $$ );
+															}
+	| EE_GEOMSPACE '(' exp ',' exp ',' exp ')'				{
+																YYSTYPE::EE_NODE_DATA ndEndPoint;
+																m_peecContainer->CreateNumber( 1, ndEndPoint );
+																m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_GEOMSPACE, ee::CVector>( $3, $5, $7, ndEndPoint, CExpEvalParser::token::EE_DEFAULT, $$ );
+															}
+	| EE_GEOMSPACE '(' exp ',' exp ',' backing_type ')'		{
+																YYSTYPE::EE_NODE_DATA ndNum;
+																m_peecContainer->CreateNumber( 50, ndNum );
+																YYSTYPE::EE_NODE_DATA ndEndPoint;
+																m_peecContainer->CreateNumber( 1, ndEndPoint );
+																m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_GEOMSPACE, ee::CVector>( $3, $5, ndNum, ndEndPoint, $7, $$ );
+															}
+	| EE_GEOMSPACE '(' exp ',' exp ')'						{
+																YYSTYPE::EE_NODE_DATA ndNum;
+																m_peecContainer->CreateNumber( 50, ndNum );
+																YYSTYPE::EE_NODE_DATA ndEndPoint;
+																m_peecContainer->CreateNumber( 1, ndEndPoint );
+																m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_GEOMSPACE, ee::CVector>( $3, $5, ndNum, ndEndPoint, CExpEvalParser::token::EE_DEFAULT, $$ );
+															}
+	| EE_LOGSPACE '(' exp ',' exp ',' exp ',' exp ',' exp ',' backing_type ')'
+															{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_LOGSPACE, ee::CVector>( $3, $5, $7, $9, $11, $13, $$ ); }
+	| EE_LOGSPACE '(' exp ',' exp ',' exp ',' exp ',' exp ')'
+															{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_LOGSPACE, ee::CVector>( $3, $5, $7, $9, $11, CExpEvalParser::token::EE_DEFAULT, $$ ); }
+	| EE_LOGSPACE '(' exp ',' exp ',' exp ',' exp ',' backing_type ')'
+															{
+																YYSTYPE::EE_NODE_DATA ndBase;
+																m_peecContainer->CreateNumber( 10.0, ndBase );
+																m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_LOGSPACE, ee::CVector>( $3, $5, $7, $9, ndBase, $11, $$ );
+															}
+	| EE_LOGSPACE '(' exp ',' exp ',' exp ',' exp ')'		{
+																YYSTYPE::EE_NODE_DATA ndBase;
+																m_peecContainer->CreateNumber( 10.0, ndBase );
+																m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_LOGSPACE, ee::CVector>( $3, $5, $7, $9, ndBase, CExpEvalParser::token::EE_DEFAULT, $$ );
+															}
+	
+	| EE_LOGSPACE '(' exp ',' exp ',' exp ',' backing_type ')'
+															{
+																YYSTYPE::EE_NODE_DATA ndEndPoint;
+																m_peecContainer->CreateNumber( 1, ndEndPoint );
+																YYSTYPE::EE_NODE_DATA ndBase;
+																m_peecContainer->CreateNumber( 10.0, ndBase );
+																m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_LOGSPACE, ee::CVector>( $3, $5, $7, ndEndPoint, ndBase, $9, $$ );
+															}
+	| EE_LOGSPACE '(' exp ',' exp ',' exp ')'				{
+																YYSTYPE::EE_NODE_DATA ndEndPoint;
+																m_peecContainer->CreateNumber( 1, ndEndPoint );
+																YYSTYPE::EE_NODE_DATA ndBase;
+																m_peecContainer->CreateNumber( 10.0, ndBase );
+																m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_LOGSPACE, ee::CVector>( $3, $5, $7, ndEndPoint, ndBase, CExpEvalParser::token::EE_DEFAULT, $$ );
+															}
+	| EE_LOGSPACE '(' exp ',' exp ',' backing_type ')'		{
+																YYSTYPE::EE_NODE_DATA ndNum;
+																m_peecContainer->CreateNumber( 50, ndNum );
+																YYSTYPE::EE_NODE_DATA ndEndPoint;
+																m_peecContainer->CreateNumber( 1, ndEndPoint );
+																YYSTYPE::EE_NODE_DATA ndBase;
+																m_peecContainer->CreateNumber( 10.0, ndBase );
+																m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_LOGSPACE, ee::CVector>( $3, $5, ndNum, ndEndPoint, ndBase, $7, $$ );
+															}
+	| EE_LOGSPACE '(' exp ',' exp ')'						{
+																YYSTYPE::EE_NODE_DATA ndNum;
+																m_peecContainer->CreateNumber( 50, ndNum );
+																YYSTYPE::EE_NODE_DATA ndEndPoint;
+																m_peecContainer->CreateNumber( 1, ndEndPoint );
+																YYSTYPE::EE_NODE_DATA ndBase;
+																m_peecContainer->CreateNumber( 10.0, ndBase );
+																m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_LOGSPACE, ee::CVector>( $3, $5, ndNum, ndEndPoint, ndBase, CExpEvalParser::token::EE_DEFAULT, $$ );
+															}
+	| EE_ONES '(' exp ',' backing_type ')'					{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_ONES, ee::CVector>( $3, $5, $$ ); }
+	| EE_ONES '(' exp ')'									{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_ONES, ee::CVector>( $3, CExpEvalParser::token::EE_DEFAULT, $$ ); }
+	| EE_ONES_LIKE '(' exp ',' backing_type ')'				{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_ONES_LIKE, ee::CVector>( $3, $5, $$ ); }
+	| EE_ONES_LIKE '(' exp ')'								{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_ONES_LIKE, ee::CVector>( $3, CExpEvalParser::token::EE_DEFAULT, $$ ); }
+	| EE_ZEROS '(' exp ',' backing_type ')'					{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_ZEROS, ee::CVector>( $3, $5, $$ ); }
+	| EE_ZEROS '(' exp ')'									{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_ZEROS, ee::CVector>( $3, CExpEvalParser::token::EE_DEFAULT, $$ ); }
+	| EE_ZEROS_LIKE '(' exp ',' backing_type ')'			{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_ZEROS_LIKE, ee::CVector>( $3, $5, $$ ); }
+	| EE_ZEROS_LIKE '(' exp ')'								{ m_peecContainer->CreateBasicObjectNode_Ex1<ee::EE_N_ZEROS_LIKE, ee::CVector>( $3, CExpEvalParser::token::EE_DEFAULT, $$ ); }
 	;
 
 exp

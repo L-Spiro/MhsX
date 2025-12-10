@@ -5,9 +5,11 @@
 #include "../Strings/MXStringDecoder.h"
 #include "../System/MXSystem.h"
 #include "../Utilities/MXUtilities.h"
+
 #include <Base/LSWBase.h>
 #include <Base/LSWWndClassEx.h>
 #include <CheckButton/LSWCheckButton.h>
+#include <EEExpEval.h>
 #include <Static/LSWStatic.h>
 
 #include <format>
@@ -532,7 +534,7 @@ namespace mx {
 
 		ee::CExpEvalContainer::EE_RESULT rRes;
 		{
-			CUtilities::MX_FEROUNDMODE rmRound( csSettings.iRoundingMode );
+			ee::CExpEval::EE_FEROUNDMODE rmRound( csSettings.iRoundingMode );
 		
 			if ( !_pwWidget->GetTextAsDoubleExpression( rRes ) ) { return; }
 		}
