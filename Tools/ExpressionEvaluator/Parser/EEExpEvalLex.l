@@ -524,6 +524,19 @@ RS1_S								[rR]{CS1}
 "__rbitf32"							{ return yy::CExpEvalParser::token::EE_BITSWAPF32; }
 "__rbitf64"							{ return yy::CExpEvalParser::token::EE_BITSWAPF64; }
 "__rbit"							{ return yy::CExpEvalParser::token::EE_BITSWAP32; }
+"M_E"								{ return yy::CExpEvalParser::token::EE_M_E; }
+"M_LOG2E"							{ return yy::CExpEvalParser::token::EE_M_LOG2E; }
+"M_LOG10E"							{ return yy::CExpEvalParser::token::EE_M_LOG10E; }
+"M_LN2"								{ return yy::CExpEvalParser::token::EE_M_LN2; }
+"M_LN10"							{ return yy::CExpEvalParser::token::EE_M_LN10; }
+"M_PI"								{ return yy::CExpEvalParser::token::EE_M_PI; }
+"M_PI_2"							{ return yy::CExpEvalParser::token::EE_M_PI_2; }
+"M_PI_4"							{ return yy::CExpEvalParser::token::EE_M_PI_4; }
+"M_1_PI"							{ return yy::CExpEvalParser::token::EE_M_1_PI; }
+"M_2_PI"							{ return yy::CExpEvalParser::token::EE_M_2_PI; }
+"M_2_SQRTPI"						{ return yy::CExpEvalParser::token::EE_M_2_SQRTPI; }
+"M_SQRT2"							{ return yy::CExpEvalParser::token::EE_M_SQRT2; }
+"M_SQRT1_2"							{ return yy::CExpEvalParser::token::EE_M_SQRT1_2; }
 
 "format"							{ return yy::CExpEvalParser::token::EE_FORMAT; }
 

@@ -12,6 +12,7 @@
 #include <Object/EEObject.h>
 
 #include <algorithm>
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include <codecvt>
 #include <ctime>
