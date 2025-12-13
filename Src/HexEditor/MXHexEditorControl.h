@@ -22,6 +22,12 @@ namespace mx {
 
 
 		// == Enumerations.
+		/** Selection mode. */
+		enum LSN_SELECTION_MODE : uint32_t {
+			LSN_SM_NORMAL = 0,						/**< Normal mode. */
+			LSN_SM_COLUMN = 1						/**< Column mode. */
+		};
+
 		/** Shared fonts. */
 		enum MX_FONT_TYPE {
 			MX_FT_FIXED_ROW,
@@ -48,35 +54,35 @@ namespace mx {
 
 		/** Address formats. */
 		enum MX_ADDRESS_FMT {
-			MX_AF_BYTES_HEX,						// Example: 1:1D9E:53C8
-			MX_AF_BYTES_DEC,						// Example: 6562337568 (right-aligned, padded with spaces on the left)
-			MX_AF_BYTES_OCT,						// Example: 60411251440
-			MX_AF_LINE_NUMBER,						// Example: 820292197 (right-aligned, padded with spaces on the left)
-			MX_AF_SHORT_HEX,						// Example: C392:A990w
-			MX_AF_SHORT_DEC,						// Example: 2395961428w (right-aligned, padded with spaces on the left)
+			MX_AF_BYTES_HEX,						/**< Example: 1:1D9E:53C8 */
+			MX_AF_BYTES_DEC,						/**< Example: 6562337568 (right-aligned, padded with spaces on the left) */
+			MX_AF_BYTES_OCT,						/**< Example: 60411251440 */
+			MX_AF_LINE_NUMBER,						/**< Example: 820292197 (right-aligned, padded with spaces on the left) */
+			MX_AF_SHORT_HEX,						/**< Example: C392:A990w */
+			MX_AF_SHORT_DEC,						/**< Example: 2395961428w (right-aligned, padded with spaces on the left) */
 		};
 
 		/** Data display for the left and right columns. */
 		enum MX_DATA_FMT {
-			MX_DF_HEX,								// "00 FF 2A"
-			MX_DF_DEC,								// "000 255 042"
-			MX_DF_OCT,								// "000 377 052"
-			MX_DF_BIN,								// "00000000"
-			MX_DF_CHAR,								// Textual: printable byte or '.'
-			MX_DF_UINT8,							// "  0 255  42"
-			MX_DF_INT8,								// "  0  -1  42"
-			MX_DF_UINT16,							// "    0 65535    42"
-			MX_DF_INT16,							// "    0    -1    42"
-			MX_DF_UINT32,							// "         0 4294967295         42"
-			MX_DF_INT32,							// "         0         -1         42"
-			MX_DF_UINT64,							// "                   0 18446744073709551615                   42"
-			MX_DF_INT64,							// "                   0                   -1                   42"
-			MX_DF_FLOAT10,							// "0 3.125 -42"
-			MX_DF_FLOAT11,							// "0 3.125 -42"
-			MX_DF_BFLOAT16,							// "0 3.141 -42"
-			MX_DF_FLOAT16,							// "0 3.1406 -42"
-			MX_DF_FLOAT32,							// "0 3.1415925 -42"
-			MX_DF_FLOAT64,							// "0 3.1415926535897931 -42"
+			MX_DF_HEX,								/**< "00 FF 2A" */
+			MX_DF_DEC,								/**< "000 255 042" */
+			MX_DF_OCT,								/**< "000 377 052" */
+			MX_DF_BIN,								/**< "00000000" */
+			MX_DF_CHAR,								/**< Textual: printable byte or '.' */
+			MX_DF_UINT8,							/**< "  0 255  42" */
+			MX_DF_INT8,								/**< "  0  -1  42" */
+			MX_DF_UINT16,							/**< "    0 65535    42" */
+			MX_DF_INT16,							/**< "    0    -1    42" */
+			MX_DF_UINT32,							/**< "         0 4294967295         42" */
+			MX_DF_INT32,							/**< "         0         -1         42" */
+			MX_DF_UINT64,							/**< "                   0 18446744073709551615                   42" */
+			MX_DF_INT64,							/**< "                   0                   -1                   42" */
+			MX_DF_FLOAT10,							/**< "0 3.125 -42" */
+			MX_DF_FLOAT11,							/**< "0 3.125 -42" */
+			MX_DF_BFLOAT16,							/**< "0 3.141 -42" */
+			MX_DF_FLOAT16,							/**< "0 3.1406 -42" */
+			MX_DF_FLOAT32,							/**< "0 3.1415925 -42" */
+			MX_DF_FLOAT64,							/**< "0 3.1415926535897931 -42" */
 		};
 
 
@@ -134,6 +140,7 @@ namespace mx {
 			bool									bShowRuler						= true;						// Show/hide ruler row.
 			bool									bShowRulerLabels				= true;						// Show/hide ruler labels.
 			bool									bShowRulerArrows				= true;						// Show/hide ruler arrow.
+			bool									bSelectColumnMode				= false;					/**< Global selection mode. */
 
 			// Left numbers formatting.
 			MX_DATA_FMT								dfLeftNumbersFmt				= MX_DF_HEX;				// Left area view type.
@@ -398,8 +405,22 @@ namespace mx {
 		// Gets the showing of the ruler labels.
 		inline bool									GetShowRulerLabels() const { return CurStyle()->bShowRulerLabels; }
 
-		// Goes to a given address.
+		/**
+		 * Goes to a given address.
+		 * 
+		 * \param _ui64Addr The address to which to go.
+		 * \param _bShowAtTop If true, the scroll be aligned such that the address is on the top of the screen, otherwise it will be in the center of the screen.
+		 **/
 		void										GoTo( uint64_t _ui64Addr, bool _bShowAtTop = false );
+
+		/**
+		 * Ensures a given address is visible.  If the address is already visible, no scrolling is done, otherwise it scrolls just enough to put the address on the top
+		 *	or bottom of the screen.
+		 * 
+		 * \param _ui64Addr The address to make visible.
+		 * \param _bRefresh If true, the control is redrawn.
+		 **/
+		void										EnsureVisible( uint64_t _ui64Addr, bool _bRefresh = true );
 
 		// WM_NCDESTROY.
 		virtual LSW_HANDLED							NcDestroy();
@@ -532,7 +553,13 @@ namespace mx {
 		inline const MX_HEX_EDITOR_COLORS *			BackColors() const { return m_phecBackColors; }
 
 		// WM_LBUTTONDOWN.
-		virtual LSW_HANDLED							LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &/*_pCursorPos*/ );
+		virtual LSW_HANDLED							LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos );
+
+		/** \brief Handles WM_MOUSEMOVE. */
+		virtual LSW_HANDLED							MouseMove( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos );
+
+		/** \brief Handles WM_LBUTTONUP. */
+		virtual LSW_HANDLED							LButtonUp( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos );
 
 		/**
 		 * The WM_KEYDOWN handler.
@@ -577,6 +604,16 @@ namespace mx {
 		// Gets the area separator width in pixels.
 		int32_t										AreaSeparatorWidth() const { return CurStyle()->i32PadBetweenNumbersAndTextPx + 6; }
 
+		/**
+		 * Gets the address under the given mouse point.
+		 * 
+		 * \param _pPoint The client-space point under which to find the address.
+		 * \param _ui64Addr The return address in the case that the function returns true.
+		 * \param _bRightArea If true, the click happened in the right area.
+		 * \return Returns true if there is a cell representing an address under the given point.  The address will always be valid (in the range of the opened file, memory space, etc.) if the function returns true.
+		 **/
+		bool										PointToAddress( const POINT &_pPoint, uint64_t &_ui64Addr, bool &_bRightArea );
+
 		// Registers the control if it has not been registered already.  Redundant calls have no effect.  Must be called before creating this control.
 		static void									PrepareControl();
 
@@ -613,33 +650,164 @@ namespace mx {
 		// == Types.
 		/** Scroll/view data. */
 		struct MX_SCROLL_DATA {
-			uint64_t								ui64StartAddress	= 0;								// Starting address bias (Set Starting Address).
-			uint64_t								ui64FirstVisibleLine= 0;								// Top visible line index (0-based).
+			uint64_t								ui64StartAddress	= 0;								/**< Starting address bias (Set Starting Address). */
+			uint64_t								ui64FirstVisibleLine= 0;								/**< Top visible line index (0-based). */
 
-			uint32_t								ui32VisibleLines	= 0;								// Count of visible lines.
+			uint32_t								ui32VisibleLines	= 0;								/**< Count of visible lines. */
 
-			uint64_t								ui64VPos			= 0;								// First visible line (virtual).
-			uint64_t								ui64HPx				= 0;								// Horizontal scroll offset.
+			uint64_t								ui64VPos			= 0;								/**< First visible line (virtual). */
+			uint64_t								ui64HPx				= 0;								/**< Horizontal scroll offset. */
 
-			int32_t									i32PageLines		= 0;								// How many text rows fit.
-			int32_t									i32PageCols			= 0;								// How many text columns fit.
+			int32_t									i32PageLines		= 0;								/**< How many text rows fit. */
+			int32_t									i32PageCols			= 0;								/**< How many text columns fit. */
+		};
+
+		/** A Normal selection: [startAddr, endAddr] inclusive, normalized. */
+		struct MX_SEL_NORMAL {
+			uint64_t								ui64Start			= 0;								/**< Inclusive start address. */
+			uint64_t								ui64End				= 0;								/**< Inclusive end address. */
+
+
+			// == Functions.
+			/** Normalize start/end so start <= end. */
+			inline void								Normalize() {
+				if ( ui64Start > ui64End ) { std::swap( ui64Start, ui64End ); }
+			}
+
+			/** True if a single-point selection. */
+			inline bool								Empty() const { return ui64Start == ui64End; }
+
+			/**
+			 * Determines if a given address is in the selection.
+			 * 
+			 * \param _ui64Address The address to test for being selected.
+			 * \return Returns true if there is a selection and if the given address is part of that selection.
+			 **/
+			inline bool								IsSelected( uint64_t _ui64Address ) {
+				return _ui64Address >= ui64Start && _ui64Address <= ui64End;
+			}
+		};
+
+		/**
+		 * Column selection anchored to a top-left address.
+		 * Width is in columns (cells), height is in lines (rows). Both are >= 1 when valid.
+		 * This form survives any bytes-per-row changes; visualization is realized per current layout.
+		 */
+		struct MX_SEL_COLUMN {
+			uint64_t								ui64AnchorAddr		= 0;								/**< Absolute address of the top-left cell. */
+			uint32_t								ui32Cols			= 1;								/**< Width in byte columns. */
+			uint64_t								ui64Lines			= 1;								/**< Height in rows (lines). */
+
+
+			// == Functions.
+			/** Returns true if degenerate (treated as empty on end-gesture). */
+			inline bool								Empty() const { return ui32Cols == 0 || ui64Lines == 0; }
+
+			/**
+			 * Determines if a given address is in the selection.
+			 * 
+			 * \param _ui64Address The address to test for being selected.
+			 * \param _ui32BytesPerRow The Number of bytes in a row.
+			 * \return Returns true if there is a selection and if the given address is part of that selection.
+			 **/
+			inline bool								IsSelected( uint64_t _ui64Address, uint32_t _ui32BytesPerRow ) {
+				uint64_t ui64AnchorRow = ui64AnchorAddr / _ui32BytesPerRow;
+				uint64_t ui64AnchorCol = ui64AnchorAddr % _ui32BytesPerRow;
+
+				uint64_t ui64AddrRow = _ui64Address / _ui32BytesPerRow;
+				if ( ui64AddrRow < ui64AnchorRow || ui64AddrRow > ui64AnchorRow + ui64Lines ) { return false; }
+
+				uint64_t ui64AddrCol = _ui64Address % _ui32BytesPerRow;
+				return ui64AddrCol >= ui64AnchorCol && ui64AddrCol <= ui64AnchorCol + ui32Cols;
+			}
+		};
+
+		/**
+		 * The active selection (either Normal or Column).
+		 * Stores payload for the active mode and exposes helpers shared by both.
+		 */
+		struct MX_SELECTION {
+			LSN_SELECTION_MODE						smMode				= LSN_SM_NORMAL;					/**< Active selection mode. */
+			bool									bHas				= false;							/**< True if there is an active selection. */
+			MX_SEL_NORMAL							sn;														/**< Normal selection payload. */
+			MX_SEL_COLUMN							sc;														/**< Column selection payload. */
+
+
+			// == Functions.
+			/**
+			 * True if selection is limited to a single logical row (for Normal) or single row (for Column).
+			 * Used for conversion logic.
+			 *
+			 * \param _ui32BytesPerRow Current bytes-per-row.
+			 * \return Returns true if the selection occupies exactly one logical row.
+			 */
+			inline bool								IsSingleRow( uint32_t _ui32BytesPerRow ) const {
+				if ( smMode == LSN_SM_COLUMN ) {
+					return sc.ui64Lines == 1;
+				}
+				const uint64_t ui64StartLine = sn.ui64Start / _ui32BytesPerRow;
+				const uint64_t ui64EndLine   = sn.ui64End   / _ui32BytesPerRow;
+				return ui64StartLine == ui64EndLine;
+			}
+
+			/**
+			 * Determines if a given address is in the selection.
+			 * 
+			 * \param _ui64Address The address to test for being selected.
+			 * \param _ui32BytesPerRow The Number of bytes in a row.
+			 * \return Returns true if there is a selection and if the given address is part of that selection.
+			 **/
+			inline bool								IsSelected( uint64_t _ui64Address, uint32_t _ui32BytesPerRow ) {
+				if ( !bHas ) { return false; }
+				if ( smMode == LSN_SM_NORMAL ) {
+					return sn.IsSelected( _ui64Address );
+				}
+				return sc.IsSelected( _ui64Address, _ui32BytesPerRow );
+			}
+		};
+
+		/**
+		 * \brief Drag/gesture state captured on mouse down.
+		 *
+		 * Stores only what is required to later start/drive a selection:
+		 * - The clicked address (anchor) and current address (caret), both absolute.
+		 * - Whether the click landed in the right (text) area.
+		 * - The half-cell horizontal threshold used to decide when a drag begins.
+		 * - The per-gesture CurrentMode decided at mouse-down.
+		 * - Flags for “pending threshold” and “actively selecting”.
+		 */
+		struct MX_SELECT_GESTURE {
+			LSN_SELECTION_MODE						smCurrent			= LSN_SM_NORMAL;					/**< CurrentMode for this gesture. */
+
+			uint64_t								ui64AnchorAddr		= 0;								/**< Address at mouse-down (top-left for column mode). */
+			uint64_t								ui64CaretAddr		= 0;								/**< Address under the mouse during drag. */
+			int32_t									i32CaretIdx			= -1;								/**< The index into the text where the caret is (IE if a value at an address is E7, this could be 0 to put the caret under the E, or 1 to put it under the 7). */
+
+			POINT									ptDown				= { 0, 0 };							/**< Client-space mouse-down point. */
+			//int32_t									i32HalfCellW		= 0;								/**< Half of the clicked cell’s width in pixels. */
+
+			bool									bSelecting			= false;							/**< True after threshold is exceeded. */
+			bool									bPendingThreshold	= false;							/**< True between mouse-down and threshold. */
+			bool									bRightArea			= false;							/**< True if click hit the right (text) area. */
 		};
 
 		// == Members.
-		MX_STYLE *									m_psOptions = nullptr;									// Pointer to the shared options.
-		MX_FONT_SET *								m_pfsFonts[2] = {};										// Shared fonts.
+		MX_STYLE *									m_psOptions = nullptr;									/**< Pointer to the shared options. */
+		MX_FONT_SET *								m_pfsFonts[2] = {};										/**< Shared fonts. */
 		
-		MX_HEX_EDITOR_COLORS *						m_phecForeColors = nullptr;								// Pointer to shared foreground colors.
-		MX_HEX_EDITOR_COLORS *						m_phecBackColors = nullptr;								// Pointer to shared background colors.
-		MX_EDIT_AS									m_eaEditAs = MX_EA_HEX;									// The view type.
-		MX_SCROLL_DATA								m_sdScrollView[MX_EA_TOTAL];							// The scroll/view data for each view type.
-		CMiniMap::MX_MINI_MAP_STATE					m_mmsMiniMap;											// The mini-map.
+		MX_HEX_EDITOR_COLORS *						m_phecForeColors = nullptr;								/**< Pointer to shared foreground colors. */
+		MX_HEX_EDITOR_COLORS *						m_phecBackColors = nullptr;								/**< Pointer to shared background colors. */
+		MX_EDIT_AS									m_eaEditAs = MX_EA_HEX;									/**< The view type. */
+		MX_SCROLL_DATA								m_sdScrollView[MX_EA_TOTAL];							/**< The scroll/view data for each view type. */
+		CMiniMap::MX_MINI_MAP_STATE					m_mmsMiniMap;											/**< The mini-map. */
 
-		std::map<uint64_t, COLORREF>				m_mColorLookup;											// Quick mixing of colors.
+		std::map<uint64_t, COLORREF>				m_mColorLookup;											/**< Quick mixing of colors. */
 
-		CHexEditorInterface::CBuffer				m_bCurBuffer;											// The current data buffer being displayed.
+		CHexEditorInterface::CBuffer				m_bCurBuffer;											/**< The current data buffer being displayed. */
 
-		CHexEditorInterface *						m_pheiTarget = nullptr;									// The stream of data to handle.
+		CHexEditorInterface *						m_pheiTarget = nullptr;									/**< The stream of data to handle. */
+		MX_SELECT_GESTURE							m_sgSelGesture {};										/**< Selection action. */
+		MX_SELECTION								m_sSel {};												/**< Actual selection. */
 
 		// The main window class.
 		static ATOM									m_aAtom;
@@ -704,9 +872,10 @@ namespace mx {
 		 * \param _iYTop Pixel Y top where the area should be drawn.
 		 * \param _dfFmt Format of the area.
 		 * \param _ui32LinesToDraw The number of rows to draw (typically page lines).
+		 * \param _bRightArea The right or left area.
 		 * \param _bData The actual values at the addresses to render.
 		 **/
-		void										DrawArea( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, MX_DATA_FMT _dfFmt, uint32_t _ui32LinesToDraw, const CHexEditorInterface::CBuffer &_bData );
+		void										DrawArea( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, MX_DATA_FMT _dfFmt, uint32_t _ui32LinesToDraw, const CHexEditorInterface::CBuffer &_bData, bool _bRightArea );
 
 		// Computes font metrics.
 		void										ComputeFontMetrics() {
@@ -734,9 +903,10 @@ namespace mx {
 		 * \param _ui64Address The address of the data in the cell.
 		 * \param _pui8Value The address of the data in the cell.
 		 * \param _sSize The address of the data in the cell.
+		 * \param _bRightArea The right area or the left area.
 		 * \return Returns the background color for the given cell.
 		 **/
-		COLORREF									CellFgColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize );
+		COLORREF									CellFgColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize, bool _bRightArea );
 
 		/**
 		 * Gets the color of a hex/octal/binary cell by address.
@@ -744,9 +914,10 @@ namespace mx {
 		 * \param _ui64Address The address of the data in the cell.
 		 * \param _pui8Value The address of the data in the cell.
 		 * \param _sSize The address of the data in the cell.
+		 * \param _bRightArea The right area or the left area.
 		 * \return Returns the background color for the given cell.
 		 **/
-		COLORREF									CellBgColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize );
+		COLORREF									CellBgColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize, bool _bRightArea );
 
 		// Gets the minimum address digits.
 		uint32_t									MinAddrDigits() const {
@@ -796,7 +967,7 @@ namespace mx {
 		}
 
 		/**
-		 * \brief Computes the left X and width (in pixels) of a text cell at index for an area.
+		 * \brief Computes the left X and width (in pixels) of a text cell at index _ui32Index for an area.
 		 *
 		 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
 		 * \param _ui32Index Zero-based cell index within the row.
@@ -926,6 +1097,86 @@ namespace mx {
 					agGlyphs.i32MaxAscii = std::max<int32_t>( agGlyphs.i32MaxAscii, sSize.cx );
 				}
 			}
+		}
+
+		/**
+		 * Begin a selection gesture (mouse down). Applies Column/Normal rules and Shift/Ctrl modifiers.
+		 *
+		 * \param _ptClient Client-space mouse location.
+		 * \param _bShift True if Shift is pressed.
+		 * \param _bCtrl True if Ctrl is pressed.
+		 * \param _bCtrlShift True if Ctrl+Shift are pressed.
+		 */
+		void										SelectionBeginGesture( const POINT &_ptClient, bool _bShift, bool _bCtrl, bool _bCtrlShift );
+
+		/**
+		 * Update selection during mouse move. Starts a new selection after threshold when appropriate.
+		 *
+		 * \param _ptClient Client-space mouse location.
+		 * \param _bShift True if Shift is pressed.
+		 * \param _bCtrl True if Ctrl is pressed.
+		 * \param _bCtrlShift True if Ctrl+Shift are pressed.
+		 */
+		void										SelectionUpdateGesture( const POINT &_ptClient, bool _bShift, bool _bCtrl, bool _bCtrlShift );
+
+		/**
+		 * End a selection gesture (mouse up). Collapses zero-length selections created by clicks without drag.
+		 */
+		void										SelectionEndGesture();
+
+		/**
+		 * \brief Initialize a Shift-extend gesture on an existing Normal selection.
+		 *
+		 * The endpoint (start or end) whose address is closest to the clicked address is moved to the clicked
+		 * address. The other endpoint remains fixed. We implement this by setting the gesture anchor to the
+		 * fixed endpoint and the caret to the clicked address, then calling SelectionUpdateGesture().
+		 *
+		 * \param _ui64ClickAddr Address that was Shift-clicked.
+		 * \param _ptClient Client-space mouse location.
+		 * \param _bShift True if Shift is pressed.
+		 * \param _bCtrl True if Ctrl is pressed.
+		 * \param _bCtrlShift True if Ctrl+Shift are pressed.
+		 */
+		void										InitShiftExtendNormal( uint64_t _ui64ClickAddr,
+			const POINT &_ptClient,
+			bool _bShift,
+			bool _bCtrl,
+			bool _bCtrlShift ) {
+
+			// Normalized local copies.
+			uint64_t ui64Start = m_sSel.sn.ui64Start;
+			uint64_t ui64End   = m_sSel.sn.ui64End;
+			if ( ui64Start > ui64End ) {
+				std::swap( ui64Start, ui64End );
+			}
+
+			const uint64_t ui64DistStart = (ui64Start > _ui64ClickAddr) ? (ui64Start - _ui64ClickAddr) : (_ui64ClickAddr - ui64Start);
+			const uint64_t ui64DistEnd   = (ui64End   > _ui64ClickAddr) ? (ui64End   - _ui64ClickAddr) : (_ui64ClickAddr - ui64End);
+
+			// If click is closer to Start, move Start; anchor is End.
+			// If click is closer to End, move End; anchor is Start.
+			const uint64_t ui64AnchorAddr = (ui64DistStart <= ui64DistEnd) ? ui64End : ui64Start;
+
+			// Prime gesture state.
+			m_sgSelGesture = MX_SELECT_GESTURE{};
+			m_sgSelGesture.ptDown = _ptClient;
+			m_sgSelGesture.bPendingThreshold = false;			// We are already selecting.
+			m_sgSelGesture.bSelecting = true;
+			m_sgSelGesture.smCurrent = LSN_SM_NORMAL;			// Shift-extend is always Normal here.
+
+			m_sgSelGesture.ui64AnchorAddr = ui64AnchorAddr;		// Fixed endpoint.
+			m_sgSelGesture.ui64CaretAddr  = _ui64ClickAddr;		// Moving endpoint at click.
+
+			// Let the normal update logic build m_sSel from anchor/caret.
+			SelectionUpdateGesture( _ptClient, _bShift, _bCtrl, _bCtrlShift );
+		}
+
+		/**
+		 * Clears the current selection.
+		 **/
+		void										ClearSelection() {
+			m_sgSelGesture.bSelecting = false;
+			m_sSel.bHas = false;
 		}
 
 		/**

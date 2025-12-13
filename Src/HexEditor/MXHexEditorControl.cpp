@@ -39,7 +39,12 @@ namespace mx {
 		}
 	}
 
-	// Goes to a given address.
+	/**
+	 * Goes to a given address.
+	 * 
+	 * \param _ui64Addr The address to which to go.
+	 * \param _bShowAtTop If true, the scroll be aligned such that the address is on the top of the screen, otherwise it will be in the center of the screen.
+	 **/
 	void CHexEditorControl::GoTo( uint64_t _ui64Addr, bool _bShowAtTop ) {
 		_ui64Addr = std::min( _ui64Addr, Size() );
 
@@ -71,6 +76,49 @@ namespace mx {
 
 		lsw::CBase::SetScrollInfo64( Wnd(), SB_VERT, SIF_POS, ui64MaxV, m_sdScrollView[m_eaEditAs].ui64VPos, 1, TRUE );
 		::InvalidateRect( Wnd(), nullptr, FALSE );
+	}
+
+	/**
+	 * Ensures a given address is visible.  If the address is already visible, no scrolling is done, otherwise it scrolls just enough to put the address on the top
+	 *	or bottom of the screen.
+	 * 
+	 * \param _ui64Addr The address to make visible.
+	 * \param _bRefresh If true, the control is redrawn.
+	 **/
+	void CHexEditorControl::EnsureVisible( uint64_t _ui64Addr, bool _bRefresh ) {
+		_ui64Addr = std::min( _ui64Addr, Size() );
+
+
+		// Compute visible page sizes (lines / columns-on-screen).
+		int32_t iClientH = int32_t( ClientRect().Height() );
+
+		const int32_t iLineAdv = LineAdvanceCy();
+		m_sdScrollView[m_eaEditAs].i32PageLines = (iLineAdv ? (iClientH / iLineAdv) : 0);
+		if ( m_sdScrollView[m_eaEditAs].i32PageLines < 1 ) { m_sdScrollView[m_eaEditAs].i32PageLines = 1; }
+
+		const uint64_t ui64Lines = TotalLines_FixedWidth();
+		const uint64_t ui64MaxV  = ui64Lines ? (ui64Lines - 1ULL) : 0ULL;
+
+		uint64_t ui64Pos = _ui64Addr / CurStyle()->uiBytesPerRow;
+
+		if ( ui64Pos >= m_sdScrollView[m_eaEditAs].ui64VPos && ui64Pos < m_sdScrollView[m_eaEditAs].ui64VPos + m_sdScrollView[m_eaEditAs].i32PageLines ) {
+			if ( _bRefresh ) {
+				::InvalidateRect( Wnd(), nullptr, FALSE );
+			}
+			return;
+		}
+		if ( ui64Pos >= m_sdScrollView[m_eaEditAs].ui64VPos + m_sdScrollView[m_eaEditAs].i32PageLines ) {
+			ui64Pos = (ui64Pos - m_sdScrollView[m_eaEditAs].i32PageLines) + 1;
+		}
+
+		m_sdScrollView[m_eaEditAs].ui64VPos = ui64Pos;
+		// Keep style in sync with the new top visible line.
+		m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine = m_sdScrollView[m_eaEditAs].ui64VPos;
+
+		lsw::CBase::SetScrollInfo64( Wnd(), SB_VERT, SIF_POS, ui64MaxV, m_sdScrollView[m_eaEditAs].ui64VPos, 1, TRUE );
+		if ( _bRefresh ) {
+			::InvalidateRect( Wnd(), nullptr, FALSE );
+		}
 	}
 
 	// WM_NCDESTROY.
@@ -273,10 +321,42 @@ namespace mx {
 	}
 
 	// WM_LBUTTONDOWN.
-	lsw::CWidget::LSW_HANDLED CHexEditorControl::LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &/*_pCursorPos*/ ) {
-		this->SetFocus();                   // ensure keyboard focus lands here
-		//::SetCapture( Wnd() );
+	lsw::CWidget::LSW_HANDLED CHexEditorControl::LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
+		this->SetFocus();
+		::SetCapture( Wnd() );
+
+		const bool bShift = ((::GetKeyState( VK_SHIFT ) & 0x8000) != 0);
+		const bool bCtrl  = ((::GetKeyState( VK_CONTROL ) & 0x8000) != 0);
+		const bool bCtrlShift = bCtrl && bShift;
+
+		POINT ptPoint { _pCursorPos.x, _pCursorPos.y };
+
+		SelectionBeginGesture( ptPoint, bShift, bCtrl, bCtrlShift );
+
+		::InvalidateRect( Wnd(), NULL, FALSE );
 		return lsw::CWidget::LSW_H_HANDLED;
+	}
+
+	/** \brief Handles WM_MOUSEMOVE. */
+	lsw::CWidget::LSW_HANDLED CHexEditorControl::MouseMove( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
+		if ( ::GetCapture() != Wnd() ) { return lsw::CWidget::LSW_H_CONTINUE; }
+
+		const bool bShift = ((::GetKeyState( VK_SHIFT ) & 0x8000) != 0);
+		const bool bCtrl  = ((::GetKeyState( VK_CONTROL ) & 0x8000) != 0);
+		const bool bCtrlShift = bCtrl && bShift;
+
+		POINT ptPoint { _pCursorPos.x, _pCursorPos.y };
+		SelectionUpdateGesture( ptPoint, bShift, bCtrl, bCtrlShift );
+		::InvalidateRect( Wnd(), NULL, FALSE );
+		return lsw::CWidget::LSW_H_HANDLED;
+	}
+
+	/** \brief Handles WM_LBUTTONUP. */
+	lsw::CWidget::LSW_HANDLED CHexEditorControl::LButtonUp( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
+		if ( ::GetCapture() == Wnd() ) { ::ReleaseCapture(); }
+		SelectionEndGesture();
+		::InvalidateRect( Wnd(), NULL, FALSE );
+		return LSW_H_HANDLED;
 	}
 
 	/**
@@ -289,26 +369,106 @@ namespace mx {
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::KeyDown( UINT _uiKeyCode, UINT /*_uiFlags*/ ) {
 		const bool bCtrl = (::GetKeyState( VK_CONTROL ) & 0x8000) != 0;
 
+		const int32_t iPageLines = std::max( 1, m_sdScrollView[m_eaEditAs].i32PageLines - 1 );
+
 		switch ( _uiKeyCode ) {
-			case VK_UP :		{ ::SendMessageW( Wnd(), WM_VSCROLL, MAKELONG( SB_LINEUP, 0 ), 0 ); break; }
-			case VK_DOWN :		{ ::SendMessageW( Wnd(), WM_VSCROLL, MAKELONG( SB_LINEDOWN, 0 ), 0 ); break; }
-			case VK_PRIOR :		{ ::SendMessageW( Wnd(), WM_VSCROLL, MAKELONG( SB_PAGEUP, 0 ), 0 ); break; }
-			case VK_NEXT :		{ ::SendMessageW( Wnd(), WM_VSCROLL, MAKELONG( SB_PAGEDOWN, 0 ), 0 ); break; }
+			case VK_UP : {
+				if ( bCtrl ) {
+					::SendMessageW( Wnd(), WM_VSCROLL, MAKELONG( SB_LINEUP, 0 ), 0 );
+				}
+				else {
+					if ( m_sgSelGesture.ui64CaretAddr < CurStyle()->uiBytesPerRow ) { m_sgSelGesture.ui64CaretAddr = 0; }
+					else { m_sgSelGesture.ui64CaretAddr -= CurStyle()->uiBytesPerRow; }
+					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+				}
+				break;
+			}
+			case VK_DOWN : {
+				if ( bCtrl ) {
+					::SendMessageW( Wnd(), WM_VSCROLL, MAKELONG( SB_LINEDOWN, 0 ), 0 );
+				}
+				else {
+					if ( (m_sgSelGesture.ui64CaretAddr + CurStyle()->uiBytesPerRow) < m_sgSelGesture.ui64CaretAddr ) { m_sgSelGesture.ui64CaretAddr = Size(); }
+					else { m_sgSelGesture.ui64CaretAddr = std::min( m_sgSelGesture.ui64CaretAddr + CurStyle()->uiBytesPerRow, Size() ); }
+					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+				}
+				break;
+			}
+			case VK_PRIOR : {
+				if ( !bCtrl ) {
+					uint64_t ui64Jump = static_cast<uint64_t>(iPageLines) * CurStyle()->uiBytesPerRow;
+					m_sgSelGesture.ui64CaretAddr = (m_sgSelGesture.ui64CaretAddr > ui64Jump) ? (m_sgSelGesture.ui64CaretAddr - ui64Jump) : 0ULL;
+					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+				}
+				break;
+			}
+			case VK_NEXT : {
+				if ( !bCtrl ) {
+					uint64_t ui64Jump = static_cast<uint64_t>(iPageLines) * CurStyle()->uiBytesPerRow;
+					m_sgSelGesture.ui64CaretAddr = (Size() - m_sgSelGesture.ui64CaretAddr > ui64Jump) ? (m_sgSelGesture.ui64CaretAddr + ui64Jump) : Size();
+					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+				}
+				break;
+			}
 
 			case VK_HOME : {
-				if ( bCtrl )	{ ::SendMessageW( Wnd(), WM_VSCROLL, MAKELONG( SB_TOP, 0 ), 0 ); }
-				else			{ ::SendMessageW( Wnd(), WM_HSCROLL, MAKELONG( SB_LEFT, 0 ), 0 ); }
+				if ( bCtrl ) {
+					// Go to the beginning of the document.
+					m_sgSelGesture.ui64CaretAddr = 0;
+					m_sgSelGesture.i32CaretIdx = 0;
+					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+				}
+				else			{
+					// Go to the beginning of the line.
+					m_sgSelGesture.ui64CaretAddr = m_sgSelGesture.ui64CaretAddr / CurStyle()->uiBytesPerRow * CurStyle()->uiBytesPerRow;
+					m_sgSelGesture.i32CaretIdx = 0;
+					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+				}
 				break;
 			}
-
 			case VK_END : {
-				if ( bCtrl )	{ ::SendMessageW( Wnd(), WM_VSCROLL, MAKELONG( SB_BOTTOM, 0 ), 0 ); }
-				else			{ ::SendMessageW( Wnd(), WM_HSCROLL, MAKELONG( SB_RIGHT, 0 ), 0 ); }
+				if ( bCtrl ) {
+					// Go to the end of the document.
+					m_sgSelGesture.ui64CaretAddr = Size();
+					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+					/*::InvalidateRect( Wnd(), nullptr, FALSE );
+					::SendMessageW( Wnd(), WM_VSCROLL, MAKELONG( SB_BOTTOM, 0 ), 0 );*/
+				}
+				else {
+					// Go to the end of the line.
+					m_sgSelGesture.ui64CaretAddr = (m_sgSelGesture.ui64CaretAddr / CurStyle()->uiBytesPerRow * CurStyle()->uiBytesPerRow) + (CurStyle()->uiBytesPerRow - 1);
+					m_sgSelGesture.ui64CaretAddr = std::min( m_sgSelGesture.ui64CaretAddr, Size() );
+					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+					//::SendMessageW( Wnd(), WM_HSCROLL, MAKELONG( SB_RIGHT, 0 ), 0 );
+				}
 				break;
 			}
 
-			case VK_LEFT :		{ ::SendMessageW( Wnd(), WM_HSCROLL, MAKELONG( SB_LINELEFT, 0 ), 0 ); break; }
-			case VK_RIGHT :		{ ::SendMessageW( Wnd(), WM_HSCROLL, MAKELONG( SB_LINERIGHT, 0 ), 0 ); break; }
+			case VK_LEFT : {
+				if ( !bCtrl )	{
+					// CTRL = move whole byte at a time, otherwise move i32CaretIdx.
+					if ( m_sgSelGesture.ui64CaretAddr ) { --m_sgSelGesture.ui64CaretAddr; }
+					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+				}
+				else {
+					::SendMessageW( Wnd(), WM_HSCROLL, MAKELONG( SB_LINELEFT, 0 ), 0 );
+				}
+				/*::InvalidateRect( Wnd(), nullptr, FALSE );
+				*/
+				break;
+			}
+			case VK_RIGHT : {
+				if ( !bCtrl )	{
+					// CTRL = move whole byte at a time, otherwise move i32CaretIdx.
+					if ( (m_sgSelGesture.ui64CaretAddr + 1) < m_sgSelGesture.ui64CaretAddr ) { m_sgSelGesture.ui64CaretAddr = Size(); }
+					else { m_sgSelGesture.ui64CaretAddr = std::min( m_sgSelGesture.ui64CaretAddr + 1, Size() ); }
+					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+				}
+				else {
+					::SendMessageW( Wnd(), WM_HSCROLL, MAKELONG( SB_LINERIGHT, 0 ), 0 );
+				}
+				break;
+			}
 		}
 
 
@@ -462,6 +622,65 @@ namespace mx {
 		RecalcAndInvalidate();
 	}
 
+	/**
+	 * Gets the address under the given mouse point.
+	 * 
+	 * \param _pPoint The client-space point under which to find the address.
+	 * \param _ui64Addr The return address in the case that the function returns true.
+	 * \param _bRightArea If true, the click happened in the right area.
+	 * \return Returns true if there is a cell representing an address under the given point.  The address will always be valid (in the range of the opened file, memory space, etc.) if the function returns true.
+	 **/
+	bool CHexEditorControl::PointToAddress( const POINT &_pPoint, uint64_t &_ui64Addr, bool &_bRightArea ) {
+		uint64_t ui64Max = Size();
+		if MX_UNLIKELY( ui64Max == 0 ) { return false; }
+		if MX_LIKELY( m_pheiTarget ) {
+			const MX_STYLE & stAll = (*CurStyle());
+			const int32_t iGutterW = ComputeAddressGutterWidthPx();
+
+			int32_t i32Top = GetRulerHeightPx();
+			if MX_UNLIKELY( _pPoint.y < i32Top ) { return false; }
+			if MX_UNLIKELY( _pPoint.x < iGutterW ) { return false; }
+
+			POINT pThis = { _pPoint.x - iGutterW, _pPoint.y - i32Top };
+
+
+			// Line height.
+			const MX_FONT_SET & fsFont = (*Font());
+			const int32_t iLineAdv = fsFont.iCharCy + stAll.i32LineSpacingPx;
+			uint64_t ui64TopAddress = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine * stAll.uiBytesPerRow;
+			ui64TopAddress += pThis.y / iLineAdv * stAll.uiBytesPerRow;
+
+			auto ui32WidthL = ComputeAreaWidthPx( stAll.dfLeftNumbersFmt ) + stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx;
+			for ( size_t I = 0; I < stAll.uiBytesPerRow; ++I ) {
+				lsw::LSW_RECT rRect;
+
+				int32_t iGX = 0, iGW = 0;
+				if ( GetBackgrondRectForIndex( stAll.dfLeftNumbersFmt, I, int32_t( -int64_t( m_sdScrollView[m_eaEditAs].ui64HPx ) ), iGX, iGW ) ) {
+					if ( pThis.x >= iGX && pThis.x < (iGX + iGW) ) {
+						_bRightArea = false;
+						ui64TopAddress += I;
+						_ui64Addr = std::min( ui64Max, ui64TopAddress );
+						return true;
+					}
+				}
+				if ( stAll.bShowRightArea ) {
+					if ( GetBackgrondRectForIndex( stAll.dfRightNumbersFmt, I, int32_t( -int64_t( m_sdScrollView[m_eaEditAs].ui64HPx ) ) + ui32WidthL, iGX, iGW ) ) {
+						if ( pThis.x >= iGX && pThis.x < (iGX + iGW) ) {
+							_bRightArea = true;
+							ui64TopAddress += I;
+							_ui64Addr = std::min( ui64Max, ui64TopAddress );
+							return true;
+						}
+					}
+				}
+
+			}
+
+			return false;
+		}
+		return false;
+	}
+
 	// Registers the control if it has not been registered already.  Redundant calls have no effect.  Must be called before creating this control.
 	void CHexEditorControl::PrepareControl() {
 		if ( !m_aAtom ) {
@@ -550,17 +769,17 @@ namespace mx {
 		int32_t iX = iGutterW - m_sdScrollView[m_eaEditAs].ui64HPx, iY = 0;
 		lsw::LSW_RECT rBlankArea = _rRect;
 		{
-			if ( m_pheiTarget ) {
-				if ( m_pheiTarget->Read( m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine * stAll.uiBytesPerRow, m_bCurBuffer, (m_sdScrollView[m_eaEditAs].i32PageLines + 1) * stAll.uiBytesPerRow ) ) {
-					int32_t i32Top = stAll.bShowRuler ? GetRulerHeightPx() : 0;
-					DrawArea( _hDc, iX, i32Top, stAll.dfLeftNumbersFmt, m_sdScrollView[m_eaEditAs].i32PageLines + 1, m_bCurBuffer );
+			if MX_LIKELY( m_pheiTarget ) {
+				if MX_LIKELY( m_pheiTarget->Read( m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine * stAll.uiBytesPerRow, m_bCurBuffer, (m_sdScrollView[m_eaEditAs].i32PageLines + 1) * stAll.uiBytesPerRow ) ) {
+					int32_t i32Top = GetRulerHeightPx();
+					DrawArea( _hDc, iX, i32Top, stAll.dfLeftNumbersFmt, m_sdScrollView[m_eaEditAs].i32PageLines + 1, m_bCurBuffer, false );
 					auto ui32WidthL = ComputeAreaWidthPx( stAll.dfLeftNumbersFmt );
 					rBlankArea.top = i32Top;
 					rBlankArea.left = iX + ui32WidthL;
 
 					if ( stAll.bShowRightArea ) {
 						DrawArea( _hDc, iX + ui32WidthL + stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx,
-							i32Top, stAll.dfRightNumbersFmt, m_sdScrollView[m_eaEditAs].i32PageLines + 1, m_bCurBuffer );
+							i32Top, stAll.dfRightNumbersFmt, m_sdScrollView[m_eaEditAs].i32PageLines + 1, m_bCurBuffer, true );
 
 						rBlankArea.left += stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx + ComputeAreaWidthPx( stAll.dfRightNumbersFmt );
 
@@ -891,9 +1110,10 @@ namespace mx {
 	 * \param _dfFmt Format of the area.
 	 * \param _bRightArea False for the left numbers area; true for the right text area.
 	 * \param _ui32LinesToDraw The number of rows to draw (typically page lines).
+	 * \param _bRightArea The right or left area.
 	 * \param _bData The actual values at the addresses to render.
 	 **/
-	void CHexEditorControl::DrawArea( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, MX_DATA_FMT _dfFmt, uint32_t _ui32LinesToDraw, const CHexEditorInterface::CBuffer &_bData ) {
+	void CHexEditorControl::DrawArea( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, MX_DATA_FMT _dfFmt, uint32_t _ui32LinesToDraw, const CHexEditorInterface::CBuffer &_bData, bool _bRightArea ) {
 		const MX_STYLE & stAll = (*CurStyle());
 		if ( _ui32LinesToDraw == 0 || nullptr == Font() ) { return; }
 		const MX_FONT_SET & fsFont = (*Font());
@@ -946,13 +1166,13 @@ namespace mx {
 			// Draw the background.  Try to reduce to as few calls as possible for a row.
 			int32_t iL, iW;
 			uint64_t ui64ThisAddr = ui64StartAddress + I * ui32Bpr;
-			auto crColor = CellBgColor( ui64ThisAddr, pui8Data, sDataSize );
+			auto crColor = CellBgColor( ui64ThisAddr, pui8Data, sDataSize, _bRightArea );
 			GetBackgrondRectForIndex( _dfFmt, 0, _iXLeft, iL, iW );
 			for ( int32_t J = 1; J < ui32Bpr; ++J ) {
 				int32_t iL2, iW2;
 				GetBackgrondRectForIndex( _dfFmt, J, _iXLeft, iL2, iW2 );
 				ui64ThisAddr = ui64StartAddress + I * ui32Bpr + J;
-				auto crThisColor = CellBgColor( ui64ThisAddr, pui8Data + J, sDataSize - J );
+				auto crThisColor = CellBgColor( ui64ThisAddr, pui8Data + J, sDataSize - J, _bRightArea );
 				if ( crThisColor != crColor || (iL + iW) == iL2 ) {
 					if ( crBackColor != MX_GetRgbValue( crColor ) ) {
 						lsw::LSW_RECT rRect;
@@ -1092,7 +1312,7 @@ namespace mx {
 						break;
 					}
 				}
-				auto crThisColor = CellFgColor( ui64ThisAddr, pui8Data + J, sDataSize - J );
+				auto crThisColor = CellFgColor( ui64ThisAddr, pui8Data + J, sDataSize - J, _bRightArea );
 				if ( crThisColor != MX_GetRgbValue( ForeColors()->crEditor ) ) {
 					lsw::LSW_SETTEXTCOLOR stcTextColor2( _hDc, MX_GetRgbValue( crThisColor ) );
 					::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int32_t>(wsTmp.size()) );
@@ -1119,33 +1339,44 @@ namespace mx {
 	 * \param _ui64Address The address of the data in the cell.
 	 * \param _pui8Value The address of the data in the cell.
 	 * \param _sSize The address of the data in the cell.
+	 * \param _bRightArea The right area or the left area.
 	 * \return Returns the background color for the given cell.
 	 **/
-	COLORREF CHexEditorControl::CellFgColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize ) {
+	COLORREF CHexEditorControl::CellFgColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize, bool /*_bRightArea*/ ) {
 		if ( !_sSize ) {
 			return ForeColors()->crEditor;
 		}
 		const MX_STYLE & stAll = (*CurStyle());
+
+		COLORREF crBaseColor = ForeColors()->crEditor;
+
 		if ( stAll.bHighlightNewLines && ((*_pui8Value) == '\r' || (*_pui8Value) == '\n') ) {
-			return ForeColors()->crHighlightingHex;
+			crBaseColor = ForeColors()->crHighlightingHex;
 		}
-		if ( stAll.bHighlightAlphaNumeric && std::isalnum( (*_pui8Value) ) ) {
-			return ForeColors()->crHighlightingHex;
+		else if ( stAll.bHighlightAlphaNumeric && std::isalnum( (*_pui8Value) ) ) {
+			crBaseColor = ForeColors()->crHighlightingHex;
 		}
-		if ( stAll.bHighlightControl && std::iscntrl( (*_pui8Value) ) ) {
-			return ForeColors()->crHighlightingHex;
+		else if ( stAll.bHighlightControl && std::iscntrl( (*_pui8Value) ) ) {
+			crBaseColor = ForeColors()->crHighlightingHex;
 		}
-		if ( stAll.bHighlightNonAscii && (*_pui8Value) >= 0x80 ) {
-			return ForeColors()->crHighlightingHex;
+		else if ( stAll.bHighlightNonAscii && (*_pui8Value) >= 0x80 ) {
+			crBaseColor = ForeColors()->crHighlightingHex;
 		}
-		if ( stAll.bHighlightZeros && (*_pui8Value) == 0x00 ) {
-			return ForeColors()->crHighlightingHex;
+		else if ( stAll.bHighlightZeros && (*_pui8Value) == 0x00 ) {
+			crBaseColor = ForeColors()->crHighlightingHex;
 		}
-		/*if ( stAll.bHighlightPointers && (*_pui8Value) == 0x00 ) {
-			return ForeColors()->crHighlightingHex;
+		/*else if ( stAll.bHighlightPointers && (*_pui8Value) == 0x00 ) {
+			crBaseColor = ForeColors()->crHighlightingHex;
 		}*/
 
-		return ForeColors()->crEditor;
+
+		if ( m_sSel.bHas ) {
+			if ( _ui64Address < Size() && m_sSel.IsSelected( _ui64Address, CurStyle()->uiBytesPerRow ) && MX_GetAValue( ForeColors()->crSelected ) ) {
+				crBaseColor = Mix( crBaseColor, ForeColors()->crSelected );
+			}
+		}
+
+		return crBaseColor;
 	}
 
 	/**
@@ -1154,9 +1385,10 @@ namespace mx {
 	 * \param _ui64Address The address of the data in the cell.
 	 * \param _pui8Value The address of the data in the cell.
 	 * \param _sSize The address of the data in the cell.
+	 * \param _bRightArea The right area or the left area.
 	 * \return Returns the background color for the given cell.
 	 **/
-	COLORREF CHexEditorControl::CellBgColor( uint64_t _ui64Address, const uint8_t * /*_pui8Value*/, size_t /*_sSize*/ ) {
+	COLORREF CHexEditorControl::CellBgColor( uint64_t _ui64Address, const uint8_t * /*_pui8Value*/, size_t /*_sSize*/, bool _bRightArea ) {
 		COLORREF crBaseColor;
 #define MX_CHECK_PROC( CAST, ENUM )																																	\
 	if ( m_pheiTarget && m_pheiTarget->Type() == CHexEditorInterface::ENUM ) {																						\
@@ -1184,9 +1416,26 @@ namespace mx {
 		crBaseColor = BackColors()->crEditor;
 	PostBase :
 		// Mix colors.
-		uint64_t ui64Caret = 0;
-		if ( MX_GetAValue( BackColors()->crHighlightLineHexEditor ) && ui64Caret / CurStyle()->uiBytesPerRow == (_ui64Address / CurStyle()->uiBytesPerRow) ) {
-			crBaseColor = Mix( crBaseColor, BackColors()->crHighlightLineHexEditor );
+		uint64_t ui64Caret = m_sgSelGesture.ui64CaretAddr;
+		if ( !m_sSel.bHas ) {
+			if ( _bRightArea != m_sgSelGesture.bRightArea && _ui64Address < Size() && ui64Caret == _ui64Address ) {
+				crBaseColor = BackColors()->crHighlightByte;
+			}
+			else {
+				
+				if ( MX_GetAValue( BackColors()->crHighlightLineHexEditor ) && ui64Caret / CurStyle()->uiBytesPerRow == (_ui64Address / CurStyle()->uiBytesPerRow) ) {
+					crBaseColor = Mix( crBaseColor, BackColors()->crHighlightLineHexEditor );
+				}
+			}
+		}
+		else {
+			if ( _ui64Address < Size() && m_sSel.IsSelected( _ui64Address, CurStyle()->uiBytesPerRow ) && MX_GetAValue( BackColors()->crSelected ) ) {
+				crBaseColor = Mix( crBaseColor, BackColors()->crSelected );
+			}
+			/*COLORREF crTmp = _bRightArea == m_sgSelGesture.bRightArea ? BackColors()->crSelected : BackColors()->crHighlightByte;
+			if ( MX_GetAValue( crTmp ) && m_sgSelGesture.ui64AnchorAddr == _ui64Address && _ui64Address < Size() ) {
+				crBaseColor = Mix( crBaseColor, crTmp );
+			}*/
 		}
 
 		return crBaseColor;
@@ -1287,7 +1536,7 @@ namespace mx {
 	}
 
 	/**
-	 * \brief Computes the left X and width (in pixels) of a text cell at index for an area.
+	 * \brief Computes the left X and width (in pixels) of a text cell at index _ui32Index for an area.
 	 *
 	 * \param _dfDataFmt Data format of the area (HEX/DEC/OCT/BIN/CHAR).
 	 * \param _ui32Index Zero-based cell index within the row.
@@ -1475,5 +1724,105 @@ namespace mx {
 			ui64MaxH, m_sdScrollView[m_eaEditAs].ui64HPx, 1, TRUE );
 	}
 
+	/**
+	 * Begin a selection gesture (mouse down). Applies Column/Normal rules and Shift/Ctrl modifiers.
+	 *
+	 * \param _ptClient Client-space mouse location.
+	 * \param _bShift True if Shift is pressed.
+	 * \param _bCtrl True if Ctrl is pressed.
+	 * \param _bCtrlShift True if Ctrl+Shift are pressed.
+	 */
+	void CHexEditorControl::SelectionBeginGesture( const POINT &_ptClient, bool _bShift, bool _bCtrl, bool _bCtrlShift ) {
+		bool bRightArea = false;
+		uint64_t ui64Addr = 0;
+		if ( !PointToAddress( _ptClient, ui64Addr, bRightArea ) ) { return; }
+		
+
+		if ( _bShift && m_sSel.bHas && m_sSel.smMode == LSN_SM_NORMAL ) {
+			InitShiftExtendNormal( ui64Addr, _ptClient, _bShift, _bCtrl, _bCtrlShift );
+			return;
+		}
+
+		m_sgSelGesture.bSelecting = false;
+		m_sgSelGesture.bPendingThreshold = true;
+		m_sgSelGesture.ptDown = _ptClient;
+		m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64CaretAddr = ui64Addr;
+		m_sgSelGesture.bRightArea = bRightArea;
+
+		m_sgSelGesture.smCurrent = _bCtrlShift ? LSN_SM_COLUMN : (CurStyle()->bSelectColumnMode ? LSN_SM_COLUMN : LSN_SM_NORMAL);
+
+		m_sSel.bHas = false;
+	}
+
+	/**
+	 * Update selection during mouse move. Starts a new selection after threshold when appropriate.
+	 *
+	 * \param _ptClient Client-space mouse location.
+	 * \param _bShift True if Shift is pressed.
+	 * \param _bCtrl True if Ctrl is pressed.
+	 * \param _bCtrlShift True if Ctrl+Shift are pressed.
+	 */
+	void CHexEditorControl::SelectionUpdateGesture( const POINT &_ptClient, bool _bShift, bool _bCtrl, bool _bCtrlShift ) {
+		if ( !m_sgSelGesture.bSelecting && !m_sgSelGesture.bPendingThreshold ) { return; }
+		bool bRightArea = false;
+		uint64_t ui64Addr = 0;
+		if ( !PointToAddress( _ptClient, ui64Addr, bRightArea ) ) {
+			return;
+		}
+
+		m_sgSelGesture.ui64CaretAddr = ui64Addr;
+
+		if ( m_sgSelGesture.bPendingThreshold ) {
+			const int32_t iDx = std::abs( _ptClient.x - m_sgSelGesture.ptDown.x );
+			const int32_t iDy = std::abs( _ptClient.y - m_sgSelGesture.ptDown.y );
+			const int32_t i32Range = 4;
+			if ( iDx >= i32Range || iDy >= i32Range ) {
+				m_sgSelGesture.bPendingThreshold = false;
+				m_sgSelGesture.bSelecting = true;
+			}
+		}
+
+
+		if ( !m_sgSelGesture.bSelecting ) { return; }
+
+
+
+		m_sSel.bHas = true;
+
+		if ( m_sgSelGesture.smCurrent == LSN_SM_NORMAL ) {
+			// ---- Normal selection: linear address range.
+			m_sSel.smMode = LSN_SM_NORMAL;
+			m_sSel.sn.ui64Start = std::min( m_sgSelGesture.ui64AnchorAddr, m_sgSelGesture.ui64CaretAddr );
+			m_sSel.sn.ui64End   = std::max( m_sgSelGesture.ui64AnchorAddr, m_sgSelGesture.ui64CaretAddr );
+		}
+		else {
+			const uint32_t ui32Bpr = CurStyle()->uiBytesPerRow;
+			const uint64_t ui64A = m_sgSelGesture.ui64AnchorAddr;
+			const uint64_t ui64B = m_sgSelGesture.ui64CaretAddr;
+
+			const uint64_t ui64RowA = ui64A / ui32Bpr;
+			const uint32_t ui32ColA = static_cast<uint32_t>(ui64A % ui32Bpr);
+			const uint64_t ui64RowB = ui64B / ui32Bpr;
+			const uint32_t ui32ColB = static_cast<uint32_t>(ui64B % ui32Bpr);
+
+			const uint64_t ui64TlRow = std::min( ui64RowA, ui64RowB );
+			const uint32_t ui32TlCol = std::min( ui32ColA, ui32ColB );
+			const uint64_t ui64BrRow = std::max( ui64RowA, ui64RowB );
+			const uint32_t ui32BrCol = std::max( ui32ColA, ui32ColB );
+
+			m_sSel.smMode = LSN_SM_COLUMN;
+			m_sSel.sc.ui64AnchorAddr = ui64TlRow * ui32Bpr + ui32TlCol;
+			m_sSel.sc.ui32Cols       = (ui32BrCol - ui32TlCol);
+			m_sSel.sc.ui64Lines      = (ui64BrRow - ui64TlRow);
+
+		}
+
+	}
+
+	/**
+	 * End a selection gesture (mouse up). Collapses zero-length selections created by clicks without drag.
+	 */
+	void CHexEditorControl::SelectionEndGesture() {
+	}
 
 }	// namespace mx

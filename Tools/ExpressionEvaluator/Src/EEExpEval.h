@@ -4754,6 +4754,48 @@ namespace ee {
 			return vOut;
 		}
 
+		/**
+		 * \brief Computes the n-th discrete difference along a 1D array. Must be called within a try/catch block.
+		 * 
+		 * This emulates numpy.diff( a, n=_stN ) for 1D input:
+		 * 
+		 *   - If _stN == 0, a copy of _vX is returned.
+		 *   - Each application of the difference reduces the length by 1.
+		 *   - If _stN > 0 and _vX.size() <= _stN, an empty vector is returned.
+		 * 
+		 * \tparam _tType
+		 *      The value type stored in the vector (defaults to double).
+		 * \param _vX
+		 *      The input samples.
+		 * \param _stN
+		 *      The order of the difference (default 1).
+		 * \return
+		 *      Returns the n-th order difference of _vX.
+		 **/
+		template <typename _tType = double>
+		static inline std::vector<_tType>
+										Diff1D( const std::vector<_tType> &_vX, size_t _stN = 1 ) {
+			if ( _stN == 0 ) { return _vX; }
+
+			if ( _vX.size() <= _stN ) { return std::vector<_tType>(); }
+
+			std::vector<_tType> vCur = _vX;
+
+			for ( size_t N = 0; N < _stN; ++N ) {
+				if ( vCur.size() < 2 ) { return std::vector<_tType>(); }
+
+				std::vector<_tType> vNext;
+				vNext.resize( vCur.size() - 1 );
+
+				for ( size_t I = 0; I + 1 < vCur.size(); ++I ) {
+					vNext[I] = vCur[I+1] - vCur[I];
+				}
+
+				vCur.swap( vNext );
+			}
+
+			return vCur;
+		}
 
 		/**
 		 * \brief   Computes the normalized magnitude response |H(f)| of an M-tap rectangular-windowed sinc filter at frequency _dFreqHz.
