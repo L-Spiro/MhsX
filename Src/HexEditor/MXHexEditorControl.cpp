@@ -40,6 +40,304 @@ namespace mx {
 	}
 
 	/**
+	 * Selects the whole file.  Not available when opening processes.
+	 * 
+	 * \return Returns true if the current view is not into a process.
+	 **/
+	bool CHexEditorControl::SelectAll() {
+		if ( IsProcess() ) { return false; }
+
+		m_sSel.bHas = Size() != 0;
+		m_sSel.smMode = LSN_SM_NORMAL;
+		m_sSel.sn.ui64Start = 0;
+		m_sSel.sn.ui64End   = Size() - 1;
+
+		SetCaretAddr( m_sSel.sn.ui64End + 1 );
+		return true;
+	}
+
+	/**
+	 * \brief Select the "word" according to improved Normal-mode semantics.
+	 *
+	 * Normal Mode (with an existing selection):
+	 *  - Start of selection:
+	 *      * If the start byte is a word character, expand toward 0 until a word boundary
+	 *        (first non-word byte when scanning backward).
+	 *      * Otherwise, move upward (toward the end of the selection) until a word boundary
+	 *        is found or the end of the selection is reached. The word boundary in this case
+	 *        is the first word byte encountered when scanning forward.
+	 *  - End of selection:
+	 *      * If the end byte is a word character, move toward the end of the file until a
+	 *        word boundary is found (first non-word byte scanning forward).
+	 *      * Otherwise, move toward 0 until a word boundary is found or the beginning of the
+	 *        selection is reached. The word boundary here is the first word byte encountered
+	 *        when scanning backward.
+	 *
+	 * Column Mode or no Normal selection:
+	 *  - Falls back to caret-based behavior: If the caret is on a word byte, expand left/right
+	 *    to cover that word; otherwise select the single caret byte.
+	 */
+	void CHexEditorControl::SelectWord() {
+		const uint64_t ui64TotalBytes = Size();
+		if ( ui64TotalBytes == 0 || !m_pheiTarget ) {
+			ClearSelection();
+			return;
+		}
+		try {
+			bool bIsFirst = false;
+			CHexEditorInterface::CBuffer bTmp;
+			bTmp.resize( 1 );
+
+			// ===== Column mode or no selection: caret-based behavior. =====
+			if ( !m_sSel.bHas || m_sSel.smMode != LSN_SM_NORMAL ) {
+				const uint64_t ui64CaretAddr = GetCaretAddr();
+				if ( ui64CaretAddr >= ui64TotalBytes ) {
+					return;
+				}
+
+				if ( !m_pheiTarget->Read( ui64CaretAddr, bTmp, 1 ) ) {
+					return;
+				}
+
+				// If caret is on a non-word character, unselect.
+				if ( !ee::CExpEval::IsIdentifier( bTmp[0], bIsFirst ) ) {
+					ClearSelection();
+					::InvalidateRect( Wnd(), nullptr, FALSE );
+					return;
+				}
+
+				uint64_t ui64SelStart = ui64CaretAddr;
+				uint64_t ui64SelEnd   = ui64CaretAddr;
+
+				// Expand left using FindWordBoundary (backward).
+				uint64_t ui64Boundary = 0;
+				if ( FindWordBoundary( ui64CaretAddr, false, 0, ui64Boundary ) ) {
+					// Boundary is first non-word; word starts at boundary+1.
+					ui64SelStart = ui64Boundary + 1;
+				}
+				else {
+					ui64SelStart = 0;
+				}
+
+				// Expand right using FindWordBoundary (forward).
+				if ( FindWordBoundary( ui64CaretAddr, true, ui64TotalBytes - 1, ui64Boundary ) ) {
+					// Boundary is first non-word; word ends at boundary-1.
+					if ( ui64Boundary > 0 ) {
+						ui64SelEnd = ui64Boundary - 1;
+					}
+					else {
+						ui64SelEnd = 0;
+					}
+				}
+				else {
+					ui64SelEnd = ui64TotalBytes - 1;
+				}
+
+				m_sSel.bHas = true;
+				m_sSel.smMode = LSN_SM_NORMAL;
+				m_sSel.sn.ui64Start = ui64SelStart;
+				m_sSel.sn.ui64End   = ui64SelEnd;
+
+				SetCaretAddr( m_sSel.sn.ui64End + 1 );
+				return;
+			}
+
+			// ===== Normal mode with an existing selection: improved semantics. =====
+			// Work on a normalized copy of the selection range.
+			uint64_t ui64SelStart = m_sSel.sn.ui64Start;
+			uint64_t ui64SelEnd   = m_sSel.sn.ui64End;
+			if ( ui64SelStart > ui64SelEnd ) {
+				std::swap( ui64SelStart, ui64SelEnd );
+			}
+			if ( ui64SelStart >= ui64TotalBytes ) {
+				return;
+			}
+			if ( ui64SelEnd >= ui64TotalBytes ) {
+				ui64SelEnd = ui64TotalBytes - 1;
+			}
+
+			uint64_t ui64NewStart = ui64SelStart;
+			uint64_t ui64NewEnd   = ui64SelEnd;
+
+			// ----- Adjust start side. -----
+			bool bStartIsWord = m_pheiTarget->Read( ui64NewStart, bTmp, 1 ) && ee::CExpEval::IsIdentifier( bTmp[0], bIsFirst );
+
+			if ( bStartIsWord ) {
+				// Start is inside a word: expand toward 0 until first non-word.
+				uint64_t ui64Boundary = 0;
+				if ( FindWordBoundary( ui64NewStart, false, 0, ui64Boundary ) ) {
+					ui64NewStart = ui64Boundary + 1;
+				}
+				else {
+					ui64NewStart = 0;
+				}
+			}
+			else {
+				// Start is not a word: move upward toward the end of the selection until
+				// we encounter a word boundary (first word byte) or reach ui64SelEnd.
+				uint64_t ui64Boundary = 0;
+				if ( FindWordBoundary( ui64NewStart, true, ui64SelEnd, ui64Boundary ) ) {
+					// Boundary is first word byte in that direction.
+					ui64NewStart = ui64Boundary;
+				}
+				// If no boundary found, we leave ui64NewStart where it is (no word in that span).
+			}
+
+			// ----- Adjust end side. -----
+			bool bEndIsWord = m_pheiTarget->Read( ui64NewEnd, bTmp, 1 ) && ee::CExpEval::IsIdentifier( bTmp[0], bIsFirst );
+
+			if ( bEndIsWord ) {
+				// End is inside a word: move toward EOF until first non-word.
+				uint64_t ui64Boundary = 0;
+				if ( FindWordBoundary( ui64NewEnd, true, ui64TotalBytes - 1, ui64Boundary ) ) {
+					if ( ui64Boundary > 0 ) {
+						ui64NewEnd = ui64Boundary - 1;
+					}
+					else {
+						ui64NewEnd = 0;
+					}
+				}
+				else {
+					ui64NewEnd = ui64TotalBytes - 1;
+				}
+			}
+			else {
+				// End is not a word: move toward 0 until a word boundary or beginning of selection.
+				uint64_t ui64Boundary = 0;
+				if ( ui64NewEnd > ui64NewStart &&
+					FindWordBoundary( ui64NewEnd, false, ui64NewStart, ui64Boundary ) ) {
+					// Boundary is first word byte when scanning backward; treat it as the new end.
+					ui64NewEnd = ui64Boundary;
+				}
+				// If no boundary found, ui64NewEnd stays where it is (no word on that side).
+			}
+
+			// Ensure new range is sane.
+			if ( ui64NewStart > ui64NewEnd ) {
+				// No usable word inside the selection; vanish the selection.
+				ClearSelection();
+				::InvalidateRect( Wnd(), nullptr, FALSE );
+				return;
+			}
+
+			// Final safety: if both endpoints are non-word, treat as "no word in selection" and vanish.
+			bool bStartFinalWord = false;
+			bool bEndFinalWord = false;
+			if ( m_pheiTarget->Read( ui64NewStart, bTmp, 1 ) ) {
+				bStartFinalWord = ee::CExpEval::IsIdentifier( bTmp[0], bIsFirst );
+			}
+			if ( m_pheiTarget->Read( ui64NewEnd, bTmp, 1 ) ) {
+				bEndFinalWord = ee::CExpEval::IsIdentifier( bTmp[0], bIsFirst );
+			}
+			if ( !bStartFinalWord && !bEndFinalWord ) {
+				ClearSelection();
+				::InvalidateRect( Wnd(), nullptr, FALSE );
+				return;
+			}
+
+			m_sSel.bHas = true;
+			m_sSel.smMode = LSN_SM_NORMAL;
+			m_sSel.sn.ui64Start = ui64NewStart;
+			m_sSel.sn.ui64End   = ui64NewEnd;
+
+			SetCaretAddr( m_sSel.sn.ui64End + 1 );
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * \brief Select the entire line containing the current selection or caret.
+	 *
+	 * In Hex View:
+	 *  - NORMAL mode:
+	 *      * Takes the low address of the selection (min of start/end) as the reference.
+	 *  - COLUMN mode:
+	 *      * Takes the lower-left corner of the selection (last row, leftmost column) as the reference.
+	 *  - No selection:
+	 *      * Uses the current caret address as the reference.
+	 *
+	 * The reference address determines the line (row) as address / bytes-per-row.
+	 * The resulting selection is always a NORMAL selection from the beginning of that line
+	 * (row * bytes-per-row) to the end of that line (clamped to the end of the file).
+	 */
+	void CHexEditorControl::SelectLine() {
+		const uint64_t ui64TotalBytes = Size();
+		if ( ui64TotalBytes == 0 ) {
+			ClearSelection();
+			return;
+		}
+
+		const uint32_t ui32Bpr = CurStyle()->uiBytesPerRow;
+		if ( ui32Bpr == 0 ) {
+			ClearSelection();
+			return;
+		}
+
+		uint64_t ui64StartRef = 0;
+		uint64_t ui64EndRef   = 0;
+
+		if ( m_sSel.bHas ) {
+			if ( m_sSel.smMode == LSN_SM_NORMAL ) {
+				// Low/high of the Normal selection.
+				const uint64_t ui64SelStart = m_sSel.sn.ui64Start;
+				const uint64_t ui64SelEnd   = m_sSel.sn.ui64End;
+				ui64StartRef = (ui64SelStart <= ui64SelEnd) ? ui64SelStart : ui64SelEnd;
+				ui64EndRef   = (ui64SelStart <= ui64SelEnd) ? ui64SelEnd   : ui64SelStart;
+			}
+			else {
+				// COLUMN mode: lower-left and upper-right corners.
+				const uint64_t ui64AnchorAddr = m_sSel.sc.ui64AnchorAddr;
+				const uint64_t ui64AnchorRow  = ui64AnchorAddr / ui32Bpr;
+				const uint32_t ui32AnchorCol  = static_cast<uint32_t>(ui64AnchorAddr % ui32Bpr);
+
+				const uint64_t ui64LastRow = ui64AnchorRow + m_sSel.sc.ui64Lines;
+				const uint32_t ui32LastCol = ui32AnchorCol + m_sSel.sc.ui32Cols;
+
+				// Lower-left: last row, leftmost column.
+				const uint64_t ui64LowerLeftAddr = ui64LastRow * ui32Bpr + ui32AnchorCol;
+				// Upper-right: first row, rightmost column.
+				const uint64_t ui64UpperRightAddr = ui64AnchorRow * ui32Bpr + ui32LastCol;
+
+				ui64StartRef = ui64UpperRightAddr;
+				ui64EndRef   = ui64LowerLeftAddr;
+			}
+		}
+		else {
+			// No selection: use caret as both start and end reference.
+			const uint64_t ui64CaretAddr = GetCaretAddr();
+			if ( ui64CaretAddr >= ui64TotalBytes ) { return; }
+			ui64StartRef = ui64CaretAddr;
+			ui64EndRef   = ui64CaretAddr;
+		}
+
+		// Clamp into file range.
+		if ( ui64StartRef >= ui64TotalBytes ) {
+			ui64StartRef = ui64TotalBytes - 1;
+		}
+		if ( ui64EndRef >= ui64TotalBytes ) {
+			ui64EndRef = ui64TotalBytes - 1;
+		}
+
+
+		const uint64_t ui64StartRow     = ui64StartRef / ui32Bpr;
+		const uint64_t ui64EndRow       = ui64EndRef   / ui32Bpr;
+		const uint64_t ui64LineStartAdr = ui64StartRow * ui32Bpr;
+		uint64_t ui64LineEndAdr         = (ui64EndRow + 1) * ui32Bpr - 1;
+
+		if ( ui64LineEndAdr >= ui64TotalBytes ) {
+			ui64LineEndAdr = ui64TotalBytes - 1;
+		}
+
+
+		m_sSel.bHas = true;
+		m_sSel.smMode = LSN_SM_NORMAL;
+		m_sSel.sn.ui64Start = ui64LineStartAdr;
+		m_sSel.sn.ui64End   = ui64LineEndAdr;
+
+		SetCaretAddr( m_sSel.sn.ui64End + 1 );
+	}
+
+	/**
 	 * Goes to a given address.
 	 * 
 	 * \param _ui64Addr The address to which to go.
@@ -1349,30 +1647,37 @@ namespace mx {
 		const MX_STYLE & stAll = (*CurStyle());
 
 		COLORREF crBaseColor = ForeColors()->crEditor;
+		bool bDefaultBaseColor = true;
 
 		if ( stAll.bHighlightNewLines && ((*_pui8Value) == '\r' || (*_pui8Value) == '\n') ) {
 			crBaseColor = ForeColors()->crHighlightingHex;
+			bDefaultBaseColor = false;
 		}
 		else if ( stAll.bHighlightAlphaNumeric && std::isalnum( (*_pui8Value) ) ) {
 			crBaseColor = ForeColors()->crHighlightingHex;
+			bDefaultBaseColor = false;
 		}
 		else if ( stAll.bHighlightControl && std::iscntrl( (*_pui8Value) ) ) {
 			crBaseColor = ForeColors()->crHighlightingHex;
+			bDefaultBaseColor = false;
 		}
 		else if ( stAll.bHighlightNonAscii && (*_pui8Value) >= 0x80 ) {
 			crBaseColor = ForeColors()->crHighlightingHex;
+			bDefaultBaseColor = false;
 		}
 		else if ( stAll.bHighlightZeros && (*_pui8Value) == 0x00 ) {
 			crBaseColor = ForeColors()->crHighlightingHex;
+			bDefaultBaseColor = false;
 		}
 		/*else if ( stAll.bHighlightPointers && (*_pui8Value) == 0x00 ) {
 			crBaseColor = ForeColors()->crHighlightingHex;
+			bDefaultBaseColor = false;
 		}*/
 
 
 		if ( m_sSel.bHas ) {
-			if ( _ui64Address < Size() && m_sSel.IsSelected( _ui64Address, CurStyle()->uiBytesPerRow ) && MX_GetAValue( ForeColors()->crSelected ) ) {
-				crBaseColor = Mix( crBaseColor, ForeColors()->crSelected );
+			if ( _ui64Address < Size() && m_sSel.IsSelected( _ui64Address, CurStyle()->uiBytesPerRow ) && (MX_GetAValue( ForeColors()->crSelected ) || bDefaultBaseColor) ) {
+				crBaseColor = bDefaultBaseColor ? ForeColors()->crSelected : Mix( crBaseColor, ForeColors()->crSelected );
 			}
 		}
 
@@ -1390,17 +1695,18 @@ namespace mx {
 	 **/
 	COLORREF CHexEditorControl::CellBgColor( uint64_t _ui64Address, const uint8_t * /*_pui8Value*/, size_t /*_sSize*/, bool _bRightArea ) {
 		COLORREF crBaseColor;
+		bool bDefaultBaseColor = false;
 #define MX_CHECK_PROC( CAST, ENUM )																																	\
 	if ( m_pheiTarget && m_pheiTarget->Type() == CHexEditorInterface::ENUM ) {																						\
 		CAST * phepProc = static_cast<CAST *>(m_pheiTarget);																										\
 		if ( !phepProc->Process().IsReadableByQuery( _ui64Address ) ) {																								\
-			crBaseColor = ForeColors()->crUnreadable; goto PostBase;																								\
+			crBaseColor = BackColors()->crUnreadable; goto PostBase;																								\
 		}																																							\
 		if ( phepProc->Process().IsExecutableByQuery( _ui64Address ) ) {																							\
-			crBaseColor = ForeColors()->crExecutable; goto PostBase;																								\
+			crBaseColor = BackColors()->crExecutable; goto PostBase;																								\
 		}																																							\
 		if ( phepProc->Process().AddressIsInModule( _ui64Address ) ) {																								\
-			crBaseColor = ForeColors()->crStaticAddress; goto PostBase;																								\
+			crBaseColor = BackColors()->crStaticAddress; goto PostBase;																								\
 		}																																							\
 	}
 
@@ -1408,6 +1714,8 @@ namespace mx {
 		MX_CHECK_PROC( CHexEditorCurProcess, MX_HET_CUR_PROCESS )
 #undef MX_CHECK_PROC
 		
+
+		bDefaultBaseColor = true;
 		if ( MX_GetAValue( BackColors()->crAlternatingHexLines ) && ((_ui64Address / CurStyle()->uiBytesPerRow) & 1) == 0 ) {
 			crBaseColor = BackColors()->crAlternatingHexLines;
 			goto PostBase;
@@ -1429,8 +1737,8 @@ namespace mx {
 			}
 		}
 		else {
-			if ( _ui64Address < Size() && m_sSel.IsSelected( _ui64Address, CurStyle()->uiBytesPerRow ) && MX_GetAValue( BackColors()->crSelected ) ) {
-				crBaseColor = Mix( crBaseColor, BackColors()->crSelected );
+			if ( _ui64Address < Size() && m_sSel.IsSelected( _ui64Address, CurStyle()->uiBytesPerRow ) && (MX_GetAValue( BackColors()->crSelected ) || bDefaultBaseColor) ) {
+				crBaseColor = bDefaultBaseColor ? BackColors()->crSelected : Mix( crBaseColor, BackColors()->crSelected );
 			}
 			/*COLORREF crTmp = _bRightArea == m_sgSelGesture.bRightArea ? BackColors()->crSelected : BackColors()->crHighlightByte;
 			if ( MX_GetAValue( crTmp ) && m_sgSelGesture.ui64AnchorAddr == _ui64Address && _ui64Address < Size() ) {
@@ -1738,8 +2046,18 @@ namespace mx {
 		if ( !PointToAddress( _ptClient, ui64Addr, bRightArea ) ) { return; }
 		
 
+		if ( _bCtrlShift && m_sSel.bHas && m_sSel.smMode == LSN_SM_NORMAL && NormalSelectionIsSingleRow() ) {
+			ConvertSingleRowNormalToColumn();
+			SelectionUpdateGesture( _ptClient, _bShift, _bCtrl, _bCtrlShift );
+			return;
+		}
+
 		if ( _bShift && m_sSel.bHas && m_sSel.smMode == LSN_SM_NORMAL ) {
 			InitShiftExtendNormal( ui64Addr, _ptClient, _bShift, _bCtrl, _bCtrlShift );
+			return;
+		}
+		if ( _bShift && m_sSel.bHas && m_sSel.smMode == LSN_SM_COLUMN ) {
+			InitShiftExtendColumn( ui64Addr, _ptClient, _bShift, _bCtrl, _bCtrlShift );
 			return;
 		}
 
@@ -1749,7 +2067,7 @@ namespace mx {
 		m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64CaretAddr = ui64Addr;
 		m_sgSelGesture.bRightArea = bRightArea;
 
-		m_sgSelGesture.smCurrent = _bCtrlShift ? LSN_SM_COLUMN : (CurStyle()->bSelectColumnMode ? LSN_SM_COLUMN : LSN_SM_NORMAL);
+		m_sgSelGesture.smCurrent = _bCtrl ? LSN_SM_COLUMN : (CurStyle()->bSelectColumnMode ? LSN_SM_COLUMN : LSN_SM_NORMAL);
 
 		m_sSel.bHas = false;
 	}
@@ -1823,6 +2141,252 @@ namespace mx {
 	 * End a selection gesture (mouse up). Collapses zero-length selections created by clicks without drag.
 	 */
 	void CHexEditorControl::SelectionEndGesture() {
+	}
+
+	/**
+	 * \brief Initialize a Shift-extend gesture on an existing Column selection.
+	 *
+	 * The corner (top-left or bottom-right) whose grid position is closest to the clicked
+	 * address is moved to the clicked address. The opposite corner remains fixed.
+	 * We implement this by:
+	 *  - Choosing the fixed corner's address as the gesture anchor.
+	 *  - Using the clicked address as the gesture caret.
+	 *  - Forcing Column mode and immediately calling SelectionUpdateGesture().
+	 *
+	 * \param _ui64ClickAddr Address that was Shift-clicked.
+	 * \param _ptClient Client-space mouse location.
+	 * \param _bShift True if Shift is pressed.
+	 * \param _bCtrl True if Ctrl is pressed.
+	 * \param _bCtrlShift True if Ctrl+Shift are pressed.
+	 */
+	void CHexEditorControl::InitShiftExtendColumn( uint64_t _ui64ClickAddr,
+		const POINT &_ptClient,
+		bool _bShift,
+		bool _bCtrl,
+		bool _bCtrlShift ) {
+
+		if ( !m_sSel.bHas || m_sSel.smMode != LSN_SM_COLUMN ) { return; }
+
+		const uint32_t ui32Bpr = CurStyle()->uiBytesPerRow;
+		if ( ui32Bpr == 0 ) { return; }
+
+		// Current column selection corners under this BPR.
+		const uint64_t ui64AnchorAddr = m_sSel.sc.ui64AnchorAddr;		// Top-left.
+		const uint64_t ui64AnchorRow  = ui64AnchorAddr / ui32Bpr;
+		const uint32_t ui32AnchorCol  = static_cast<uint32_t>(ui64AnchorAddr % ui32Bpr);
+
+		const uint64_t ui64BrRow = ui64AnchorRow + m_sSel.sc.ui64Lines;
+		const uint32_t ui32BrCol = ui32AnchorCol + m_sSel.sc.ui32Cols;
+		const uint64_t ui64BrAddr = ui64BrRow * ui32Bpr + ui32BrCol;		// Bottom-right.
+
+		// Click position in grid space.
+		const uint64_t ui64ClickRow = _ui64ClickAddr / ui32Bpr;
+		const uint32_t ui32ClickCol = static_cast<uint32_t>(_ui64ClickAddr % ui32Bpr);
+
+		// Distances to TL and BR in grid space (row distance weighted by bytes-per-row).
+		const int64_t i64DrTl = static_cast<int64_t>(ui64AnchorRow) - static_cast<int64_t>(ui64ClickRow);
+		const int64_t i64DcTl = static_cast<int64_t>(ui32AnchorCol) - static_cast<int64_t>(ui32ClickCol);
+		const int64_t i64DrBr = static_cast<int64_t>(ui64BrRow)     - static_cast<int64_t>(ui64ClickRow);
+		const int64_t i64DcBr = static_cast<int64_t>(ui32BrCol)     - static_cast<int64_t>(ui32ClickCol);
+
+		const uint64_t ui64DistTl = static_cast<uint64_t>(std::llabs( i64DrTl )) * ui32Bpr +
+			static_cast<uint64_t>(std::llabs( i64DcTl ));
+		const uint64_t ui64DistBr = static_cast<uint64_t>(std::llabs( i64DrBr )) * ui32Bpr +
+			static_cast<uint64_t>(std::llabs( i64DcBr ));
+
+		// If click is closer to TL, move TL (fix BR). Otherwise move BR (fix TL).
+		const uint64_t ui64FixedAddr = (ui64DistTl <= ui64DistBr) ? ui64BrAddr : ui64AnchorAddr;
+
+		// Prime the gesture: fixed corner as anchor, clicked cell as caret.
+		m_sgSelGesture = MX_SELECT_GESTURE {};
+		m_sgSelGesture.ptDown = _ptClient;
+		m_sgSelGesture.bPendingThreshold = false;		// Already selecting.
+		m_sgSelGesture.bSelecting = true;
+		m_sgSelGesture.smCurrent = LSN_SM_COLUMN;
+
+		m_sgSelGesture.ui64AnchorAddr = ui64FixedAddr;
+		m_sgSelGesture.ui64CaretAddr  = _ui64ClickAddr;
+		m_sgSelGesture.bRightArea = false;				// Column highlight usually applies to both areas.
+
+		// Let the common update logic rebuild m_sSel.sc from anchor/caret.
+		SelectionUpdateGesture( _ptClient, _bShift, _bCtrl, _bCtrlShift );
+	}
+
+	/**
+	 * \brief Convert the current single-row Normal selection into a Column selection.
+	 *
+	 * Precondition: NormalSelectionIsSingleRow() is true.
+	 */
+	void CHexEditorControl::ConvertSingleRowNormalToColumn() {
+		if ( !m_sSel.bHas || m_sSel.smMode != LSN_SM_NORMAL ) {
+			return;
+		}
+
+		const uint32_t ui32Bpr = CurStyle()->uiBytesPerRow;
+		if ( ui32Bpr == 0 ) { return; }
+
+		uint64_t ui64Start = m_sSel.sn.ui64Start;
+		uint64_t ui64End   = m_sSel.sn.ui64End;
+		if ( ui64Start > ui64End ) { std::swap( ui64Start, ui64End ); }
+
+		const uint64_t ui64Row     = ui64Start / ui32Bpr;
+		const uint32_t ui32ColBeg  = static_cast<uint32_t>(ui64Start % ui32Bpr);
+		const uint32_t ui32ColEnd  = static_cast<uint32_t>(ui64End   % ui32Bpr);
+		const uint32_t ui32Cols    = (ui32ColEnd - ui32ColBeg) + 1;
+
+		m_sSel.smMode = LSN_SM_COLUMN;
+		m_sSel.sc.ui64AnchorAddr = ui64Row * ui32Bpr + ui32ColBeg;
+		m_sSel.sc.ui32Cols       = ui32Cols;
+		m_sSel.sc.ui64Lines      = 1;
+
+		m_sgSelGesture.smCurrent = LSN_SM_COLUMN;
+	}
+
+	/**
+	 * \brief Returns true if the active Normal selection lies entirely on one logical row.
+	 */
+	bool CHexEditorControl::NormalSelectionIsSingleRow() const {
+		if ( !m_sSel.bHas || m_sSel.smMode != LSN_SM_NORMAL ) { return false; }
+
+		const uint32_t ui32Bpr = CurStyle()->uiBytesPerRow;
+		if ( ui32Bpr == 0 ) { return false; }
+
+		uint64_t ui64Start = m_sSel.sn.ui64Start;
+		uint64_t ui64End   = m_sSel.sn.ui64End;
+		if ( ui64Start > ui64End ) { std::swap( ui64Start, ui64End ); }
+
+		const uint64_t ui64RowStart = ui64Start / ui32Bpr;
+		const uint64_t ui64RowEnd   = ui64End   / ui32Bpr;
+		return ui64RowStart == ui64RowEnd;
+	}
+
+	/**
+	 * \brief Finds a word boundary relative to a starting address, scanning toward a given endpoint.
+	 *
+	 * A word boundary is defined as the first address whose word/non-word classification differs
+	 * from the classification of the byte at _ui64StartAddr (using MX_IsWordByte()).
+	 *
+	 * For forward scans:
+	 *  - Scans ( _ui64StartAddr + 1 ) up to and including _ui64EndAddr.
+	 *  - _ui64EndAddr must be >= _ui64StartAddr (after clamping).
+	 *
+	 * For backward scans:
+	 *  - Scans ( _ui64StartAddr - 1 ) down to and including _ui64EndAddr.
+	 *  - _ui64EndAddr must be <= _ui64StartAddr (after clamping).
+	 *
+	 * The function reads data in chunks to minimize per-byte overhead.
+	 *
+	 * \param _ui64StartAddr Starting address whose classification is treated as the base.
+	 * \param _bForward True to scan forward (toward increasing addresses), false to scan backward.
+	 * \param _ui64EndAddr Inclusive endpoint in the scan direction. It will be clamped to the file range.
+	 * \param _ui64FoundAddr [out] Receives the address of the first boundary if one is found.
+	 * \return Returns true if a boundary is found; false if none is found in the given range or on read failure.
+	 */
+	bool CHexEditorControl::FindWordBoundary( uint64_t _ui64StartAddr,
+		bool _bForward,
+		uint64_t _ui64EndAddr,
+		uint64_t &_ui64FoundAddr ) const {
+
+		_ui64FoundAddr = 0;
+
+		if ( !m_pheiTarget ) { return false; }
+
+		const uint64_t ui64TotalBytes = Size();
+		if ( ui64TotalBytes == 0 ) {
+			return false;
+		}
+		if ( _ui64StartAddr >= ui64TotalBytes ) {
+			return false;
+		}
+
+		// Clamp endpoint into file range.
+		if ( _ui64EndAddr >= ui64TotalBytes ) {
+			_ui64EndAddr = ui64TotalBytes - 1;
+		}
+
+		// If there is no range to scan in the given direction, bail out.
+		if ( _bForward ) {
+			if ( _ui64EndAddr <= _ui64StartAddr ) { return false; }
+		}
+		else {
+			if ( _ui64EndAddr >= _ui64StartAddr ) { return false; }
+		}
+
+		// Read classification at the starting address.
+		try {
+			bool bFirst = false;
+
+			CHexEditorInterface::CBuffer bStart;
+			bStart.resize( 1 );
+			if ( !m_pheiTarget->Read( _ui64StartAddr, bStart, 1 ) ) {
+				return false;
+			}
+			const uint8_t * pui8Start = static_cast<const uint8_t *>(bStart.data());
+			if ( !pui8Start ) { return false; }
+			const bool bStartIsWord = ee::CExpEval::IsIdentifier( pui8Start[0], bFirst );
+
+			// Shared buffer for chunked reads.
+			const size_t sChunkSize = 4096 * 100;
+			CHexEditorInterface::CBuffer bChunk;
+			bChunk.resize( sChunkSize );
+			uint8_t * pui8Chunk = static_cast<uint8_t *>(bChunk.data());
+			if ( !pui8Chunk ) { return false; }
+
+			if ( _bForward ) {
+				// Forward: scan from start+1 up to end.
+				uint64_t ui64Cur = _ui64StartAddr + 1;
+				while ( ui64Cur <= _ui64EndAddr ) {
+					const uint64_t ui64BytesRemaining = (_ui64EndAddr - ui64Cur) + 1;
+					const size_t sThisChunk = static_cast<size_t>(std::min<uint64_t>( ui64BytesRemaining, static_cast<uint64_t>(sChunkSize) ));
+
+					if ( sThisChunk == 0 ) { break; }
+
+					if ( !m_pheiTarget->Read( ui64Cur, bChunk, sThisChunk ) ) { return false; }
+
+					for ( size_t sIdx = 0; sIdx < sThisChunk; ++sIdx ) {
+						const uint8_t ui8Byte = pui8Chunk[sIdx];
+						const bool bIsWord = ee::CExpEval::IsIdentifier( ui8Byte, bFirst );
+						if ( bIsWord != bStartIsWord ) {
+							_ui64FoundAddr = ui64Cur + static_cast<uint64_t>(sIdx);
+							return true;
+						}
+					}
+
+					ui64Cur += sThisChunk;
+				}
+			}
+			else {
+				// Backward: scan from start-1 down to end.
+				uint64_t ui64CurEnd = _ui64StartAddr - 1;
+				while ( ui64CurEnd >= _ui64EndAddr ) {
+					const uint64_t ui64Span = ( ui64CurEnd - _ui64EndAddr ) + 1;
+					const size_t sThisChunk = static_cast<size_t>(std::min<uint64_t>( ui64Span, static_cast<uint64_t>(sChunkSize) ));
+
+					const uint64_t ui64ChunkStart = ui64CurEnd - static_cast<uint64_t>(sThisChunk - 1);
+
+					if ( !m_pheiTarget->Read( ui64ChunkStart, bChunk, sThisChunk ) ) { return false; }
+
+					// Scan this chunk backwards in memory.
+					for ( size_t sIdx = 0; sIdx < sThisChunk; ++sIdx ) {
+						const size_t sRevIdx = sThisChunk - 1 - sIdx;
+						const uint8_t ui8Byte = pui8Chunk[sRevIdx];
+						const bool bIsWord = ee::CExpEval::IsIdentifier( ui8Byte, bFirst );
+						if ( bIsWord != bStartIsWord ) {
+							_ui64FoundAddr = ui64ChunkStart + static_cast<uint64_t>(sRevIdx);
+							return true;
+						}
+					}
+
+					// Move to the previous chunk.
+					if ( ui64ChunkStart == 0 ) { break; }
+					ui64CurEnd = ui64ChunkStart - 1;
+					if ( ui64CurEnd < _ui64EndAddr ) { break; }
+				}
+			}
+		}
+		catch ( ... ) { return false; }
+
+		return false;
 	}
 
 }	// namespace mx

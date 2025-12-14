@@ -406,6 +406,91 @@ namespace mx {
 		inline bool									GetShowRulerLabels() const { return CurStyle()->bShowRulerLabels; }
 
 		/**
+		 * Determines if a process is being viewed.
+		 * 
+		 * \return Returns true if the current view is to a process.
+		 **/
+		inline bool									IsProcess() const {
+			if ( m_pheiTarget ) {
+				return m_pheiTarget->Type() == CHexEditorInterface::MX_HET_PROCESS ||
+					m_pheiTarget->Type() == CHexEditorInterface::MX_HET_CUR_PROCESS;
+			}
+			return false;
+		}
+
+		/**
+		 * Gets the caret address.
+		 * 
+		 * \return Returns the caret address.
+		 **/
+		inline uint64_t								GetCaretAddr() const { return m_sgSelGesture.ui64CaretAddr; }
+
+		/**
+		 * Sets the caret address.
+		 * 
+		 * \param _ui64Addr The new address to set as the caret position.
+		 * \param _bRedraw If true the screen is redrawn immediately.
+		 **/
+		inline void									SetCaretAddr( uint64_t _ui64Addr, bool _bRedraw = true ) {
+			m_sgSelGesture.ui64CaretAddr = _ui64Addr;
+			EnsureVisible( m_sgSelGesture.ui64CaretAddr, _bRedraw );
+		}
+
+		/**
+		 * Determines if there are selected bytes or not.
+		 * 
+		 * \return Return strue if both the file size is not 0 and there is an active selection.
+		 **/
+		inline bool									HasSelection() const { return Size() > 0 && m_sSel.bHas; }
+
+		/**
+		 * Selects the whole file.  Not available when opening processes.
+		 * 
+		 * \return Returns true if the current view is not into a process.
+		 **/
+		bool										SelectAll();
+
+		/**
+		 * \brief Select the "word" according to improved Normal-mode semantics.
+		 *
+		 * Normal Mode (with an existing selection):
+		 *  - Start of selection:
+		 *      * If the start byte is a word character, expand toward 0 until a word boundary
+		 *        (first non-word byte when scanning backward).
+		 *      * Otherwise, move upward (toward the end of the selection) until a word boundary
+		 *        is found or the end of the selection is reached. The word boundary in this case
+		 *        is the first word byte encountered when scanning forward.
+		 *  - End of selection:
+		 *      * If the end byte is a word character, move toward the end of the file until a
+		 *        word boundary is found (first non-word byte scanning forward).
+		 *      * Otherwise, move toward 0 until a word boundary is found or the beginning of the
+		 *        selection is reached. The word boundary here is the first word byte encountered
+		 *        when scanning backward.
+		 *
+		 * Column Mode or no Normal selection:
+		 *  - Falls back to caret-based behavior: If the caret is on a word byte, expand left/right
+		 *    to cover that word; otherwise select the single caret byte.
+		 */
+		void										SelectWord();
+
+		/**
+		 * \brief Select the entire line containing the current selection or caret.
+		 *
+		 * In Hex View:
+		 *  - NORMAL mode:
+		 *      * Takes the low address of the selection (min of start/end) as the reference.
+		 *  - COLUMN mode:
+		 *      * Takes the lower-left corner of the selection (last row, leftmost column) as the reference.
+		 *  - No selection:
+		 *      * Uses the current caret address as the reference.
+		 *
+		 * The reference address determines the line (row) as address / bytes-per-row.
+		 * The resulting selection is always a NORMAL selection from the beginning of that line
+		 * (row * bytes-per-row) to the end of that line (clamped to the end of the file).
+		 */
+		void										SelectLine();
+
+		/**
 		 * Goes to a given address.
 		 * 
 		 * \param _ui64Addr The address to which to go.
@@ -1170,6 +1255,67 @@ namespace mx {
 			// Let the normal update logic build m_sSel from anchor/caret.
 			SelectionUpdateGesture( _ptClient, _bShift, _bCtrl, _bCtrlShift );
 		}
+
+		/**
+		 * \brief Initialize a Shift-extend gesture on an existing Column selection.
+		 *
+		 * The corner (top-left or bottom-right) whose grid position is closest to the clicked
+		 * address is moved to the clicked address. The opposite corner remains fixed.
+		 * We implement this by:
+		 *  - Choosing the fixed corner's address as the gesture anchor.
+		 *  - Using the clicked address as the gesture caret.
+		 *  - Forcing Column mode and immediately calling SelectionUpdateGesture().
+		 *
+		 * \param _ui64ClickAddr Address that was Shift-clicked.
+		 * \param _ptClient Client-space mouse location.
+		 * \param _bShift True if Shift is pressed.
+		 * \param _bCtrl True if Ctrl is pressed.
+		 * \param _bCtrlShift True if Ctrl+Shift are pressed.
+		 */
+		void										InitShiftExtendColumn( uint64_t _ui64ClickAddr,
+			const POINT &_ptClient,
+			bool _bShift,
+			bool _bCtrl,
+			bool _bCtrlShift );
+
+		/**
+		 * \brief Convert the current single-row Normal selection into a Column selection.
+		 *
+		 * Precondition: NormalSelectionIsSingleRow() is true.
+		 */
+		void										ConvertSingleRowNormalToColumn();
+
+		/**
+		 * \brief Returns true if the active Normal selection lies entirely on one logical row.
+		 */
+		bool										NormalSelectionIsSingleRow() const;
+
+		/**
+		 * \brief Finds a word boundary relative to a starting address, scanning toward a given endpoint.
+		 *
+		 * A word boundary is defined as the first address whose word/non-word classification differs
+		 * from the classification of the byte at _ui64StartAddr (using MX_IsWordByte()).
+		 *
+		 * For forward scans:
+		 *  - Scans ( _ui64StartAddr + 1 ) up to and including _ui64EndAddr.
+		 *  - _ui64EndAddr must be >= _ui64StartAddr (after clamping).
+		 *
+		 * For backward scans:
+		 *  - Scans ( _ui64StartAddr - 1 ) down to and including _ui64EndAddr.
+		 *  - _ui64EndAddr must be <= _ui64StartAddr (after clamping).
+		 *
+		 * The function reads data in chunks to minimize per-byte overhead.
+		 *
+		 * \param _ui64StartAddr Starting address whose classification is treated as the base.
+		 * \param _bForward True to scan forward (toward increasing addresses), false to scan backward.
+		 * \param _ui64EndAddr Inclusive endpoint in the scan direction. It will be clamped to the file range.
+		 * \param _ui64FoundAddr [out] Receives the address of the first boundary if one is found.
+		 * \return Returns true if a boundary is found; false if none is found in the given range or on read failure.
+		 */
+		bool										FindWordBoundary( uint64_t _ui64StartAddr,
+			bool _bForward,
+			uint64_t _ui64EndAddr,
+			uint64_t &_ui64FoundAddr ) const;
 
 		/**
 		 * Clears the current selection.

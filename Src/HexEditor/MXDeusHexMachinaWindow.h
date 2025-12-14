@@ -151,6 +151,15 @@ namespace mx {
 		// Close all tabs.
 		void										CloseAllTabs();
 
+		// Select all.
+		void										SelectAll();
+
+		// Select word.
+		void										SelectWord();
+
+		// Select line.
+		void										SelectLine();
+
 		// Enlarge font.
 		void										EnlargeFont();
 

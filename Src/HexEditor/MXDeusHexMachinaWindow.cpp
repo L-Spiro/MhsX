@@ -244,6 +244,19 @@ namespace mx {
 				break;
 			}
 
+			case Layout::MX_M_SELECT_SELECT_ALL : {
+				SelectAll();
+				break;
+			}
+			case Layout::MX_M_SELECT_WORD : {
+				SelectWord();
+				break;
+			}
+			case Layout::MX_M_SELECT_LINE : {
+				SelectLine();
+				break;
+			}
+
 			case Layout::MX_M_VIEW_FONT_ENLARGE_FONT : {
 				EnlargeFont();
 				break;
@@ -1097,6 +1110,27 @@ namespace mx {
 		}
 	}
 
+	// Select all.
+	void CDeusHexMachinaWindow::SelectAll() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		phecControl->SelectAll();
+	}
+
+	// Select word.
+	void CDeusHexMachinaWindow::SelectWord() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		phecControl->SelectWord();
+	}
+
+	// Select line.
+	void CDeusHexMachinaWindow::SelectLine() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		phecControl->SelectLine();
+	}
+
 	// Enlarge font.
 	void CDeusHexMachinaWindow::EnlargeFont() {
 		auto phecControl = CurrentEditor();
@@ -1185,6 +1219,26 @@ namespace mx {
 						MF_BYCOMMAND | (phecControl ? MF_ENABLED : MF_GRAYED) );
 					break;
 				}
+
+				case Layout::MX_M_SELECT_SELECT_ALL : {
+					::EnableMenuItem(
+						_hMenu, uiId,
+						MF_BYCOMMAND | ((phecControl && !phecControl->IsProcess()) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_SELECT_WORD : {
+					::EnableMenuItem(
+						_hMenu, uiId,
+						MF_BYCOMMAND | ((phecControl && phecControl->Size()) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_SELECT_LINE : {
+					::EnableMenuItem(
+						_hMenu, uiId,
+						MF_BYCOMMAND | ((phecControl && phecControl->Size()) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+
 				case Layout::MX_M_VIEW_FONT_ENLARGE_FONT : {
 					::EnableMenuItem(
 						_hMenu, uiId,
