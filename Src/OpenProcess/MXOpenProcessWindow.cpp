@@ -46,7 +46,7 @@ namespace mx {
 		};
 		DWORD dwFlags = m_poOptions ? m_poOptions->dwOpenProc : MX_OP_SHOW_ALL;
 		CListView * plvList = static_cast<CListView *>(FindChild( COpenProcessLayout::MX_OPI_LISTVIEW ));
-		for ( INT I = 0; I < MX_ELEMENTS( aTitles ); I++ ) {
+		for ( INT I = 0; I < std::size( aTitles ); I++ ) {
 			if ( !aTitles[I].dwFlag || (aTitles[I].dwFlag & dwFlags) ) {
 				INT iCol = plvList->AddColumn( mx::CStringDecoder::DecodeToWString( aTitles[I]._pcText, aTitles[I].sLen ).c_str() );
 				plvList->SetColumnWidth( iCol, aTitles[I].dwWidth );

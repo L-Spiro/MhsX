@@ -2024,12 +2024,12 @@ namespace mx {
 		std::vector<CSecureString> sStrings;
 		std::vector<CSecureWString> sStringsW;
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
-		CLayoutManager::UnencryptLayouts( m_wlMainWindow, MX_ELEMENTS( m_wlMainWindow ),
+		CLayoutManager::UnencryptLayouts( m_wlMainWindow, std::size( m_wlMainWindow ),
 			vLayouts,
 			sStringsW,
 			sStrings );
 		mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
-		CWidget * pwThis = plmLayout->CreateWindowX( &vLayouts[0], MX_ELEMENTS( m_wlMainWindow ), nullptr, 0, _pwParent );
+		CWidget * pwThis = plmLayout->CreateWindowX( &vLayouts[0], std::size( m_wlMainWindow ), nullptr, 0, _pwParent );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
 
 		return pwThis;

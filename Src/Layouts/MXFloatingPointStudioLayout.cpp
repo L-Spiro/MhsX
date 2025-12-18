@@ -1199,14 +1199,14 @@ namespace mx {
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
 		std::vector<CSecureString> sStrings;
 		std::vector<CSecureWString> sStringsW;
-		CLayoutManager::UnencryptLayouts( m_wlMainWindow, MX_ELEMENTS( m_wlMainWindow ),
+		CLayoutManager::UnencryptLayouts( m_wlMainWindow, std::size( m_wlMainWindow ),
 			vLayouts,
 			sStringsW,
 			sStrings );
 
 		mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
 		CFloatingPointStudioWindow::PrepareFloatingPointStudio();
-		CWidget * pwThis = plmLayout->CreateWindowX( &vLayouts[0], MX_ELEMENTS( m_wlMainWindow ),
+		CWidget * pwThis = plmLayout->CreateWindowX( &vLayouts[0], std::size( m_wlMainWindow ),
 			nullptr, 0,
 			_pwParent, reinterpret_cast<uint64_t>(_pmhMemHack) );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );

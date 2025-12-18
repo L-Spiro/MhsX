@@ -416,6 +416,6 @@ namespace mx {
 
 	// == Functions.
 	// Gets the total number of presets.
-	size_t CCharSets::Total() { return MX_ELEMENTS( m_csSets ); }
+	size_t CCharSets::Total() { return std::size( m_csSets ); }
 
 }	// namespace mx

@@ -771,7 +771,7 @@ namespace mx {
 			SYNCHRONIZE,
 		};
 		DWORD dwRet = 0;
-		for ( size_t I = 0; I < MX_ELEMENTS( dwFlags ); ++I ) {
+		for ( size_t I = 0; I < std::size( dwFlags ); ++I ) {
 			lsw::LSW_HANDLE hHandle = CSystem::OpenProcess( dwFlags[I], FALSE, _dwId );
 			if ( hHandle.Valid() ) {
 				dwRet |= dwFlags[I];
@@ -926,11 +926,11 @@ namespace mx {
 		CPeObject poObj;
 		CFile fFile;
 		if ( !FindDll( szKernel32, fFile ) ) {
-			::ZeroMemory( szKernel32, MX_ELEMENTS( szKernel32 ) );
+			::ZeroMemory( szKernel32, std::size( szKernel32 ) );
 			return;
 		}
 		if ( !poObj.LoadImageFromMemory( fFile ) ) {
-			::ZeroMemory( szKernel32, MX_ELEMENTS( szKernel32 ) );
+			::ZeroMemory( szKernel32, std::size( szKernel32 ) );
 			return;
 		}
 
@@ -1001,7 +1001,7 @@ namespace mx {
 		assert( pfTemp == m_pfEnumProcesses );
 #endif	// #ifdef _DEBUG
 
-		::ZeroMemory( szKernel32, MX_ELEMENTS( szKernel32 ) );
+		::ZeroMemory( szKernel32, std::size( szKernel32 ) );
 #undef MX_CHECK
 #undef MX_PROCADDR
 	}
@@ -1013,11 +1013,11 @@ namespace mx {
 		CPeObject poObj;
 		CFile fFile;
 		if ( !FindDll( szUser32, fFile ) ) {
-			::ZeroMemory( szUser32, MX_ELEMENTS( szUser32 ) );
+			::ZeroMemory( szUser32, std::size( szUser32 ) );
 			return;
 		}
 		if ( !poObj.LoadImageFromMemory( fFile ) ) {
-			::ZeroMemory( szUser32, MX_ELEMENTS( szUser32 ) );
+			::ZeroMemory( szUser32, std::size( szUser32 ) );
 			return;
 		}
 
@@ -1047,7 +1047,7 @@ namespace mx {
 		MX_PROCADDR( GetKeyboardState, _T_D4F7673B_GetKeyboardState, _LEN_D4F7673B );
 		MX_PROCADDR( GetAsyncKeyState, _T_84029700_GetAsyncKeyState, _LEN_84029700 );
 
-		::ZeroMemory( szUser32, MX_ELEMENTS( szUser32 ) );
+		::ZeroMemory( szUser32, std::size( szUser32 ) );
 #undef MX_CHECK
 #undef MX_PROCADDR
 	}
@@ -1059,11 +1059,11 @@ namespace mx {
 		CPeObject poObj;
 		CFile fFile;
 		if ( !FindDll( szAdvapi32, fFile ) ) {
-			::ZeroMemory( szAdvapi32, MX_ELEMENTS( szAdvapi32 ) );
+			::ZeroMemory( szAdvapi32, std::size( szAdvapi32 ) );
 			return;
 		}
 		if ( !poObj.LoadImageFromMemory( fFile ) ) {
-			::ZeroMemory( szAdvapi32, MX_ELEMENTS( szAdvapi32 ) );
+			::ZeroMemory( szAdvapi32, std::size( szAdvapi32 ) );
 			return;
 		}
 
@@ -1086,7 +1086,7 @@ namespace mx {
 		MX_PROCADDR( LookupPrivilegeValueW, _T_2E530A33_LookupPrivilegeValueW, _LEN_2E530A33 );
 		MX_PROCADDR( AdjustTokenPrivileges, _T_0DE3E5CF_AdjustTokenPrivileges, _LEN_0DE3E5CF );
 
-		::ZeroMemory( szAdvapi32, MX_ELEMENTS( szAdvapi32 ) );
+		::ZeroMemory( szAdvapi32, std::size( szAdvapi32 ) );
 #undef MX_CHECK
 #undef MX_PROCADDR
 	}
@@ -1098,11 +1098,11 @@ namespace mx {
 		CPeObject poObj;
 		CFile fFile;
 		if ( !FindDll( szAtDll, fFile ) ) {
-			::ZeroMemory( szAtDll, MX_ELEMENTS( szAtDll ) );
+			::ZeroMemory( szAtDll, std::size( szAtDll ) );
 			return;
 		}
 		if ( !poObj.LoadImageFromMemory( fFile ) ) {
-			::ZeroMemory( szAtDll, MX_ELEMENTS( szAtDll ) );
+			::ZeroMemory( szAtDll, std::size( szAtDll ) );
 			return;
 		}
 
@@ -1126,7 +1126,7 @@ namespace mx {
 		MX_PROCADDR( NtQueryInformationFile, _T_F675D37D_NtQueryInformationFile, _LEN_F675D37D );
 		MX_PROCADDR( NtQueryInformationProcess, _T_A5C44C50_NtQueryInformationProcess, _LEN_A5C44C50 );
 
-		::ZeroMemory( szAtDll, MX_ELEMENTS( szAtDll ) );
+		::ZeroMemory( szAtDll, std::size( szAtDll ) );
 #undef MX_CHECK
 #undef MX_PROCADDR
 	}

@@ -2225,7 +2225,7 @@ namespace mx {
 		std::vector<CSecureString> sStrings;
 		std::vector<CSecureWString> sStringsW;
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
-		CLayoutManager::UnencryptLayouts( m_wlOptionsDialog, MX_ELEMENTS( m_wlOptionsDialog ),
+		CLayoutManager::UnencryptLayouts( m_wlOptionsDialog, std::size( m_wlOptionsDialog ),
 			vLayouts,
 			sStringsW,
 			sStrings );
@@ -2236,7 +2236,7 @@ namespace mx {
 			_i32Page
 		};
 
-		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], MX_ELEMENTS( m_wlOptionsDialog ), _pwParent, reinterpret_cast<uint64_t>(&pParms) );
+		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], std::size( m_wlOptionsDialog ), _pwParent, reinterpret_cast<uint64_t>(&pParms) );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
 		if ( ipProc != 0 ) {
 			
@@ -2249,32 +2249,32 @@ namespace mx {
 
 	// Creates the general options page.
 	CWidget * COptionsLayout::CreateGeneralPage( CWidget * _pwParent, MX_OPTIONS * _poOptions ) {
-		return CreatePage( _pwParent, m_wlOptionsGeneral, MX_ELEMENTS( m_wlOptionsGeneral ), _poOptions );
+		return CreatePage( _pwParent, m_wlOptionsGeneral, std::size( m_wlOptionsGeneral ), _poOptions );
 	}
 
 	// Creates the open-process options page.
 	CWidget * COptionsLayout::CreateOpenProcPage( CWidget * _pwParent, MX_OPTIONS * _poOptions ) {
-		return CreatePage( _pwParent, m_wlOptionsOpenProc, MX_ELEMENTS( m_wlOptionsOpenProc ), _poOptions );
+		return CreatePage( _pwParent, m_wlOptionsOpenProc, std::size( m_wlOptionsOpenProc ), _poOptions );
 	}
 
 	// Creates the general search options page.
 	CWidget * COptionsLayout::CreateGeneralSearchPage( CWidget * _pwParent, MX_OPTIONS * _poOptions ) {
-		return CreatePage( _pwParent, m_wlOptionsGeneralSearch, MX_ELEMENTS( m_wlOptionsGeneralSearch ), _poOptions );
+		return CreatePage( _pwParent, m_wlOptionsGeneralSearch, std::size( m_wlOptionsGeneralSearch ), _poOptions );
 	}
 
 	// Creates the extended search options page.
 	CWidget * COptionsLayout::CreateSearchExPage( CWidget * _pwParent, MX_OPTIONS * _poOptions ) {
-		return CreatePage( _pwParent, m_wlOptionsSearchEx, MX_ELEMENTS( m_wlOptionsSearchEx ), _poOptions );
+		return CreatePage( _pwParent, m_wlOptionsSearchEx, std::size( m_wlOptionsSearchEx ), _poOptions );
 	}
 
 	// Creates the hotkeys options page.
 	CWidget * COptionsLayout::CreateHotkeysPage( CWidget * _pwParent, MX_OPTIONS * _poOptions ) {
-		return CreatePage( _pwParent, m_wlOptionsHotkeys, MX_ELEMENTS( m_wlOptionsHotkeys ), _poOptions );
+		return CreatePage( _pwParent, m_wlOptionsHotkeys, std::size( m_wlOptionsHotkeys ), _poOptions );
 	}
 
 		// Creates the programs options page.
 	CWidget * COptionsLayout::CreateProgramsPage( CWidget * _pwParent, MX_OPTIONS * _poOptions ) {
-		return CreatePage( _pwParent, m_wlOptionsPrograms, MX_ELEMENTS( m_wlOptionsPrograms ), _poOptions );
+		return CreatePage( _pwParent, m_wlOptionsPrograms, std::size( m_wlOptionsPrograms ), _poOptions );
 	}
 
 	// Default window-creation.

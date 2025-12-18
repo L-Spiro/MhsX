@@ -59,7 +59,7 @@ namespace mx {
 					{ _T_LEN_CF8E9225_Regular_Expression,	MX_ST_REGEX },
 					{ _T_LEN_751205D5_Byte_Array,			MX_ST_BYTE_ARRAY },
 				};
-				for ( size_t I = 0; I < MX_ELEMENTS( sCombo ); ++I ) {
+				for ( size_t I = 0; I < std::size( sCombo ); ++I ) {
 					INT iIndex = pcbCombo->AddString( CStringDecoder::DecodeToString( sCombo[I].pcName, sCombo[I].sLen ).c_str() );
 					pcbCombo->SetItemData( iIndex, sCombo[I].stType );
 				}
@@ -91,7 +91,7 @@ namespace mx {
 					{ _T_LEN_6C687233_Ruby,					CUtilities::MX_RF_RUBY },
 					{ _T_LEN_6144B512_Oniguruma,			CUtilities::MX_RF_ONIGURUMA },
 				};
-				for ( size_t I = 0; I < MX_ELEMENTS( sCombo ); ++I ) {
+				for ( size_t I = 0; I < std::size( sCombo ); ++I ) {
 					INT iIndex = pcbCombo->AddString( CStringDecoder::DecodeToString( sCombo[I].pcName, sCombo[I].sLen ).c_str() );
 					pcbCombo->SetItemData( iIndex, sCombo[I].rfType );
 				}
@@ -118,7 +118,7 @@ namespace mx {
 				CUtilities::MX_DT_DOUBLE,
 				CUtilities::MX_DT_VOID
 			};
-			for ( size_t I = 0; I < MX_ELEMENTS( dtTypes ); ++I ) {
+			for ( size_t I = 0; I < std::size( dtTypes ); ++I ) {
 				if ( dtTypes[I] == CUtilities::MX_DT_VOID ) {
 					INT iIndex = pcbCombo->AddString( _DEC_WS_28D8D027_Mixed.c_str() );
 					pcbCombo->SetItemData( iIndex, dtTypes[I] );
@@ -196,7 +196,7 @@ namespace mx {
 				{ _T_LEN_993E07D4_Big_5,											CUtilities::MX_RE_BIG_5 },
 				{ _T_LEN_CD45848F_GB_18030,											CUtilities::MX_RE_GB_18030 },
 			};
-			for ( size_t I = 0; I < MX_ELEMENTS( sCombo ); ++I ) {
+			for ( size_t I = 0; I < std::size( sCombo ); ++I ) {
 				UINT uiCodePage = CUtilities::RegexCodePageToCodePage( sCombo[I].reEncoding );
 				if ( CCodePages::Supported( uiCodePage ) ) {
 					CSecureWString swsName, swsDesc;
@@ -330,7 +330,7 @@ namespace mx {
 				{ _T_LEN_D87A4D1D_Extended_Groups_____name_subexp______name_subexp__Defines_named_group_ },
 
 			};
-			for ( size_t I = 0; I < MX_ELEMENTS( sCombo ); ++I ) {
+			for ( size_t I = 0; I < std::size( sCombo ); ++I ) {
 				INT iIndex = pcbCombo->AddString( CStringDecoder::DecodeToWString( sCombo[I].pcName, sCombo[I].sLen ).c_str() );
 				pcbCombo->SetItemData( iIndex, I );
 			}
@@ -747,7 +747,7 @@ namespace mx {
 				{ CNewStringSearchLayout::MX_SSI_NORM_IGNOREWIDTH_CHECK,			CUtilities::MX_SSF_NORM_IGNOREWIDTH },
 			};
 			_spParmsIfValid.ui32StringSearchFlags = 0;
-			for ( size_t I = 0; I < MX_ELEMENTS( sFlags ); ++I ) {
+			for ( size_t I = 0; I < std::size( sFlags ); ++I ) {
 				pcbCheck = static_cast<CCheckButton *>(FindChild( sFlags[I].wCheckId ));
 				if ( pcbCheck ) {
 					if ( pcbCheck->IsChecked() ) {
@@ -772,7 +772,7 @@ namespace mx {
 				{ CNewStringSearchLayout::MX_SSI_WILDCARD_CHECK,					CUtilities::MX_SSF_WILDCARD },
 			};
 			_spParmsIfValid.ui32StringSearchFlagsEx = 0;
-			for ( size_t I = 0; I < MX_ELEMENTS( sFlagsEx ); ++I ) {
+			for ( size_t I = 0; I < std::size( sFlagsEx ); ++I ) {
 				pcbCheck = static_cast<CCheckButton *>(FindChild( sFlagsEx[I].wCheckId ));
 				if ( pcbCheck ) {
 					if ( pcbCheck->IsChecked() ) {
@@ -801,7 +801,7 @@ namespace mx {
 				{ CNewStringSearchLayout::MX_SSI_IGNORE_CASE_CHECK,					CUtilities::MX_RO_IGNORE_CASE },
 			};
 			_spParmsIfValid.ui32RegexFlags = 0;
-			for ( size_t I = 0; I < MX_ELEMENTS( sFlags ); ++I ) {
+			for ( size_t I = 0; I < std::size( sFlags ); ++I ) {
 				pcbCheck = static_cast<CCheckButton *>(FindChild( sFlags[I].wCheckId ));
 				if ( pcbCheck ) {
 					if ( pcbCheck->IsChecked() ) { _spParmsIfValid.ui32RegexFlags |= sFlags[I].uiFlag; }
@@ -1186,7 +1186,7 @@ namespace mx {
 						};
 						std::set<std::vector<uint8_t>> sVariants;
 						sVariants.insert( vFinalBytes );
-						for ( size_t I = 0; I < MX_ELEMENTS( uiStrTypes ); ++I ) {
+						for ( size_t I = 0; I < std::size( uiStrTypes ); ++I ) {
 							std::vector<uint8_t> vTmp, vTmpMeta;
 							CUtilities::MX_WILDCARD_USAGE wuTmp;
 							if ( GetFinalSearchBytes( uiStrTypes[I],

@@ -182,14 +182,14 @@ namespace mx {
 			MX_PEW_MENU_BAR,
 			0,
 			0,
-			MX_ELEMENTS( m_miMenuBar ),
+			std::size( m_miMenuBar ),
 			m_miMenuBar
 		},
 		{
 			MX_PEW_FILE,
 			MX_PEW_MENU_BAR,
 			MX_PEW_MENU_FILE,
-			MX_ELEMENTS( m_miFileMenu ),
+			std::size( m_miFileMenu ),
 			m_miFileMenu
 		},
 	};
@@ -200,7 +200,7 @@ namespace mx {
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
 		std::vector<CSecureString> sStrings;
 		std::vector<CSecureWString> sStringsW;
-		CLayoutManager::UnencryptLayouts( m_wlMainWindow, MX_ELEMENTS( m_wlMainWindow ),
+		CLayoutManager::UnencryptLayouts( m_wlMainWindow, std::size( m_wlMainWindow ),
 			vLayouts,
 			sStringsW,
 			sStrings );
@@ -208,7 +208,7 @@ namespace mx {
 		std::vector<LSW_MENU_LAYOUT> vMenus;
 		std::vector<std::vector<LSW_MENU_ITEM> *> vMenuItems;
 		std::vector<std::vector<CSecureWString> *> vMenuStrings;
-		CLayoutManager::UnencryptMenu( m_miMenus, MX_ELEMENTS( m_miMenus ),
+		CLayoutManager::UnencryptMenu( m_miMenus, std::size( m_miMenus ),
 			vMenus,
 			vMenuItems,
 			vMenuStrings );
@@ -216,7 +216,7 @@ namespace mx {
 
 		mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
 		CPeWorksWindow::PreparePeWorks();
-		CWidget * pwThis = plmLayout->CreateWindowX( &vLayouts[0], MX_ELEMENTS( m_wlMainWindow ),
+		CWidget * pwThis = plmLayout->CreateWindowX( &vLayouts[0], std::size( m_wlMainWindow ),
 			vMenus.size() ? &vMenus[0] : nullptr, vMenus.size(),
 			_pwParent );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );

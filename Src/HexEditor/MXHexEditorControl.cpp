@@ -1,5 +1,6 @@
 #include "MXHexEditorControl.h"
 #include "../Layouts/MXLayoutManager.h"
+#include "../Layouts/MXUiIds.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../Utilities/MXUtilities.h"
 #include "MXHexEditorCurProcess.h"
@@ -24,7 +25,7 @@ namespace mx {
 		m_phecForeColors = pcpParms->phecFg;
 		m_phecBackColors = pcpParms->phecBg;
 		m_psOptions = pcpParms->psOptions;
-		
+		StartCaretBlink();
 	}
 
 	// == Functions.
@@ -40,6 +41,59 @@ namespace mx {
 	}
 
 	/**
+	 * Sets the caret address.
+	 * 
+	 * \param _ui64Addr The new address to set as the caret position.
+	 * \param _i32SubCaret The caret subindex.
+	 * \param _bUpdateSelection If true, the selection is updated.  If false, the selection is cleared.
+	 * \param _bRedraw If true the screen is redrawn immediately.
+	 **/
+	void CHexEditorControl::SetCaretAddr( uint64_t _ui64Addr, int32_t _i32SubCaret, bool _bUpdateSelection, bool _bRedraw ) {
+		m_sgSelGesture.ui64CaretAddr = std::min( _ui64Addr, Size() );
+		m_sgSelGesture.i32CaretIdx = _i32SubCaret;
+
+		if ( _bUpdateSelection ) {
+			m_sSel.bHas = true;
+
+			if ( m_sgSelGesture.smCurrent == LSN_SM_NORMAL ) {
+				// ---- Normal selection: linear address range.
+				m_sSel.smMode = LSN_SM_NORMAL;
+				m_sSel.sn.ui64Start = std::min( m_sgSelGesture.ui64AnchorAddr, m_sgSelGesture.ui64CaretAddr );
+				m_sSel.sn.ui64End   = std::max( m_sgSelGesture.ui64AnchorAddr, m_sgSelGesture.ui64CaretAddr );
+			}
+			else {
+				const uint32_t ui32Bpr = CurStyle()->uiBytesPerRow;
+				const uint64_t ui64A = m_sgSelGesture.ui64AnchorAddr;
+				const uint64_t ui64B = m_sgSelGesture.ui64CaretAddr;
+
+				const uint64_t ui64RowA = ui64A / ui32Bpr;
+				const uint32_t ui32ColA = static_cast<uint32_t>(ui64A % ui32Bpr);
+				const uint64_t ui64RowB = ui64B / ui32Bpr;
+				const uint32_t ui32ColB = static_cast<uint32_t>(ui64B % ui32Bpr);
+
+				const uint64_t ui64TlRow = std::min( ui64RowA, ui64RowB );
+				const uint32_t ui32TlCol = std::min( ui32ColA, ui32ColB );
+				const uint64_t ui64BrRow = std::max( ui64RowA, ui64RowB );
+				const uint32_t ui32BrCol = std::max( ui32ColA, ui32ColB );
+
+				m_sSel.smMode = LSN_SM_COLUMN;
+				m_sSel.sc.ui64AnchorAddr = ui64TlRow * ui32Bpr + ui32TlCol;
+				m_sSel.sc.ui32Cols       = (ui32BrCol - ui32TlCol);
+				m_sSel.sc.ui64Lines      = (ui64BrRow - ui64TlRow);
+
+			}
+		}
+		else {
+			ClearSelection();
+			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = _ui64Addr;
+			m_sgSelGesture.smCurrent = CurStyle()->bSelectColumnMode ? LSN_SM_COLUMN : LSN_SM_NORMAL;
+		}
+
+		StartCaretBlink();
+		EnsureVisible( m_sgSelGesture.ui64CaretAddr, _bRedraw );
+	}
+
+	/**
 	 * Selects the whole file.  Not available when opening processes.
 	 * 
 	 * \return Returns true if the current view is not into a process.
@@ -48,11 +102,11 @@ namespace mx {
 		if ( IsProcess() ) { return false; }
 
 		m_sSel.bHas = Size() != 0;
-		m_sSel.smMode = LSN_SM_NORMAL;
+		m_sSel.smMode = m_sgSelGesture.smCurrent = LSN_SM_NORMAL;
 		m_sSel.sn.ui64Start = 0;
 		m_sSel.sn.ui64End   = Size() - 1;
-
-		SetCaretAddr( m_sSel.sn.ui64End + 1 );
+		m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sn.ui64Start;
+		SetCaretAddr( Size(), 0, true );
 		return true;
 	}
 
@@ -89,18 +143,20 @@ namespace mx {
 			bTmp.resize( 1 );
 
 			// ===== Column mode or no selection: caret-based behavior. =====
-			if ( !m_sSel.bHas || m_sSel.smMode != LSN_SM_NORMAL ) {
+			if ( !m_sSel.HasSelection() || m_sSel.smMode != LSN_SM_NORMAL ) {
 				const uint64_t ui64CaretAddr = GetCaretAddr();
 				if ( ui64CaretAddr >= ui64TotalBytes ) {
 					return;
 				}
 
-				if ( !m_pheiTarget->Read( ui64CaretAddr, bTmp, 1 ) ) {
-					return;
-				}
+				if ( !m_pheiTarget->Read( ui64CaretAddr, bTmp, 1 ) ) { return; }
+
+				wchar_t wcHold = bTmp[0];
+				if ( int32_t( CCharSets::m_csSets[CurStyle()->csCharSet].pfDisplayable( bTmp.data(), 1, wcHold ) ) == 1 ) {}
+				else { wcHold = L'\0'; }
 
 				// If caret is on a non-word character, unselect.
-				if ( !ee::CExpEval::IsIdentifier( bTmp[0], bIsFirst ) ) {
+				if ( !ee::CExpEval::IsIdentifier( char( wcHold ), bIsFirst ) ) {
 					ClearSelection();
 					::InvalidateRect( Wnd(), nullptr, FALSE );
 					return;
@@ -115,9 +171,7 @@ namespace mx {
 					// Boundary is first non-word; word starts at boundary+1.
 					ui64SelStart = ui64Boundary + 1;
 				}
-				else {
-					ui64SelStart = 0;
-				}
+				else { ui64SelStart = 0; }
 
 				// Expand right using FindWordBoundary (forward).
 				if ( FindWordBoundary( ui64CaretAddr, true, ui64TotalBytes - 1, ui64Boundary ) ) {
@@ -125,33 +179,27 @@ namespace mx {
 					if ( ui64Boundary > 0 ) {
 						ui64SelEnd = ui64Boundary - 1;
 					}
-					else {
-						ui64SelEnd = 0;
-					}
+					else { ui64SelEnd = 0; }
 				}
-				else {
-					ui64SelEnd = ui64TotalBytes - 1;
-				}
+				else { ui64SelEnd = ui64TotalBytes - 1; }
 
 				m_sSel.bHas = true;
-				m_sSel.smMode = LSN_SM_NORMAL;
+				m_sSel.smMode = m_sgSelGesture.smCurrent = LSN_SM_NORMAL;
 				m_sSel.sn.ui64Start = ui64SelStart;
 				m_sSel.sn.ui64End   = ui64SelEnd;
-
-				SetCaretAddr( m_sSel.sn.ui64End + 1 );
+				m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sn.ui64Start;
+				SetCaretAddr( m_sSel.sn.ui64End + 1, 0, true );
 				return;
 			}
 
 			// ===== Normal mode with an existing selection: improved semantics. =====
 			// Work on a normalized copy of the selection range.
 			uint64_t ui64SelStart = m_sSel.sn.ui64Start;
-			uint64_t ui64SelEnd   = m_sSel.sn.ui64End;
+			uint64_t ui64SelEnd   = m_sSel.sn.ui64End ? (m_sSel.sn.ui64End - 1) : m_sSel.sn.ui64End;
 			if ( ui64SelStart > ui64SelEnd ) {
 				std::swap( ui64SelStart, ui64SelEnd );
 			}
-			if ( ui64SelStart >= ui64TotalBytes ) {
-				return;
-			}
+			if ( ui64SelStart >= ui64TotalBytes ) { return; }
 			if ( ui64SelEnd >= ui64TotalBytes ) {
 				ui64SelEnd = ui64TotalBytes - 1;
 			}
@@ -160,7 +208,15 @@ namespace mx {
 			uint64_t ui64NewEnd   = ui64SelEnd;
 
 			// ----- Adjust start side. -----
-			bool bStartIsWord = m_pheiTarget->Read( ui64NewStart, bTmp, 1 ) && ee::CExpEval::IsIdentifier( bTmp[0], bIsFirst );
+			bool bStartIsWord = m_pheiTarget->Read( ui64NewStart, bTmp, 1 );
+			wchar_t wcHold = bTmp[0];
+			if ( int32_t( CCharSets::m_csSets[CurStyle()->csCharSet].pfDisplayable( bTmp.data(), 1, wcHold ) ) == 1 ) {
+					
+			}
+			else {
+				wcHold = L'\0';
+			}
+			bStartIsWord = ee::CExpEval::IsIdentifier( char( wcHold ), bIsFirst );
 
 			if ( bStartIsWord ) {
 				// Start is inside a word: expand toward 0 until first non-word.
@@ -184,7 +240,11 @@ namespace mx {
 			}
 
 			// ----- Adjust end side. -----
-			bool bEndIsWord = m_pheiTarget->Read( ui64NewEnd, bTmp, 1 ) && ee::CExpEval::IsIdentifier( bTmp[0], bIsFirst );
+			bool bEndIsWord = m_pheiTarget->Read( ui64NewEnd, bTmp, 1 );
+			wcHold = bTmp[0];
+			if ( int32_t( CCharSets::m_csSets[CurStyle()->csCharSet].pfDisplayable( bTmp.data(), 1, wcHold ) ) == 1 ) {}
+			else { wcHold = L'\0'; }
+			bEndIsWord = ee::CExpEval::IsIdentifier( char( wcHold ), bIsFirst );
 
 			if ( bEndIsWord ) {
 				// End is inside a word: move toward EOF until first non-word.
@@ -224,10 +284,16 @@ namespace mx {
 			bool bStartFinalWord = false;
 			bool bEndFinalWord = false;
 			if ( m_pheiTarget->Read( ui64NewStart, bTmp, 1 ) ) {
-				bStartFinalWord = ee::CExpEval::IsIdentifier( bTmp[0], bIsFirst );
+				wchar_t wcHold = bTmp[0];
+				if ( int32_t( CCharSets::m_csSets[CurStyle()->csCharSet].pfDisplayable( bTmp.data(), 1, wcHold ) ) == 1 ) {}
+				else { wcHold = L'\0'; }
+				bStartFinalWord = ee::CExpEval::IsIdentifier( char( wcHold ), bIsFirst );
 			}
 			if ( m_pheiTarget->Read( ui64NewEnd, bTmp, 1 ) ) {
-				bEndFinalWord = ee::CExpEval::IsIdentifier( bTmp[0], bIsFirst );
+				wchar_t wcHold = bTmp[0];
+				if ( int32_t( CCharSets::m_csSets[CurStyle()->csCharSet].pfDisplayable( bTmp.data(), 1, wcHold ) ) == 1 ) {}
+				else { wcHold = L'\0'; }
+				bEndFinalWord = ee::CExpEval::IsIdentifier( char( wcHold ), bIsFirst );
 			}
 			if ( !bStartFinalWord && !bEndFinalWord ) {
 				ClearSelection();
@@ -236,11 +302,11 @@ namespace mx {
 			}
 
 			m_sSel.bHas = true;
-			m_sSel.smMode = LSN_SM_NORMAL;
+			m_sSel.smMode = m_sgSelGesture.smCurrent = LSN_SM_NORMAL;
 			m_sSel.sn.ui64Start = ui64NewStart;
 			m_sSel.sn.ui64End   = ui64NewEnd;
-
-			SetCaretAddr( m_sSel.sn.ui64End + 1 );
+			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sn.ui64Start;
+			SetCaretAddr( m_sSel.sn.ui64End + 1, 0, true );
 		}
 		catch ( ... ) {}
 	}
@@ -328,13 +394,14 @@ namespace mx {
 			ui64LineEndAdr = ui64TotalBytes - 1;
 		}
 
-
+		
 		m_sSel.bHas = true;
-		m_sSel.smMode = LSN_SM_NORMAL;
+		m_sSel.smMode = m_sgSelGesture.smCurrent = LSN_SM_NORMAL;
 		m_sSel.sn.ui64Start = ui64LineStartAdr;
 		m_sSel.sn.ui64End   = ui64LineEndAdr;
+		m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sn.ui64Start;
 
-		SetCaretAddr( m_sSel.sn.ui64End + 1 );
+		SetCaretAddr( m_sSel.sn.ui64End + 1, 0, true );
 	}
 
 	/**
@@ -451,6 +518,32 @@ namespace mx {
 	 **/
 	WORD CHexEditorControl::GetDlgCode( WORD _wKey ) {
 		return DLGC_WANTARROWS | DLGC_WANTTAB | DLGC_WANTALLKEYS | DLGC_WANTCHARS;
+	}
+
+	/**
+	 * Handles WM_SETFOCUS.
+	 * \brief Notified when the window receives keyboard focus.
+	 *
+	 * \param _hPrevFocus The window that previously had focus.
+	 * \return Returns a LSW_HANDLED code.
+	 */
+	lsw::CWidget::LSW_HANDLED CHexEditorControl::SetFocus( HWND /*_hPrevFocus*/ ) {
+		StartCaretBlink();
+		::InvalidateRect( Wnd(), nullptr, FALSE );
+		return lsw::CWidget::LSW_H_CONTINUE;
+	}
+
+	/**
+	 * Handles WM_KILLFOCUS.
+	 * \brief Notified when the window loses keyboard focus.
+	 *
+	 * \param _hNewFocus The window receiving focus (may be NULL).
+	 * \return Returns a LSW_HANDLED code.
+	 */
+	lsw::CWidget::LSW_HANDLED CHexEditorControl::KillFocus( HWND /*_hNewFocus*/ ) {
+		StopCaretBlink();
+		::InvalidateRect( Wnd(), nullptr, FALSE );
+		return lsw::CWidget::LSW_H_CONTINUE;
 	}
 
 	/**
@@ -591,8 +684,7 @@ namespace mx {
 		}
 
 		 if ( bRet ) {
-			 UpdateScrollbars();
-			::InvalidateRect( Wnd(), nullptr, FALSE );
+			 RecalcAndInvalidate();
 		}
 		return bRet;
 	}
@@ -618,9 +710,25 @@ namespace mx {
 		return IsFixedRowLength();
 	}
 
+	/**
+	 * Handles WM_TIMER.
+	 * \brief Notified when a timer elapses.
+	 *
+	 * \param _uiptrId Timer identifier.
+	 * \param _tpProc Optional callback associated with the timer.
+	 * \return Returns a LSW_HANDLED code.
+	 */
+	lsw::CWidget::LSW_HANDLED CHexEditorControl::Timer( UINT_PTR _uiptrId, TIMERPROC /*_tpProc*/ ) {
+		if ( _uiptrId == m_tCaretBlink.uiptrActiveId ) {
+			m_bCaretOn = !m_bCaretOn;
+			::InvalidateRect( Wnd(), nullptr, FALSE );
+		}
+		return lsw::CWidget::LSW_H_HANDLED;
+	}
+
 	// WM_LBUTTONDOWN.
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
-		this->SetFocus();
+		this->CWidget::SetFocus();
 		::SetCapture( Wnd() );
 
 		const bool bShift = ((::GetKeyState( VK_SHIFT ) & 0x8000) != 0);
@@ -666,6 +774,7 @@ namespace mx {
 	 */
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::KeyDown( UINT _uiKeyCode, UINT /*_uiFlags*/ ) {
 		const bool bCtrl = (::GetKeyState( VK_CONTROL ) & 0x8000) != 0;
+		const bool bShift = (::GetKeyState( VK_SHIFT ) & 0x8000) != 0;
 
 		const int32_t iPageLines = std::max( 1, m_sdScrollView[m_eaEditAs].i32PageLines - 1 );
 
@@ -675,9 +784,7 @@ namespace mx {
 					::SendMessageW( Wnd(), WM_VSCROLL, MAKELONG( SB_LINEUP, 0 ), 0 );
 				}
 				else {
-					if ( m_sgSelGesture.ui64CaretAddr < CurStyle()->uiBytesPerRow ) { m_sgSelGesture.ui64CaretAddr = 0; }
-					else { m_sgSelGesture.ui64CaretAddr -= CurStyle()->uiBytesPerRow; }
-					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+					SubCaret( CurStyle()->uiBytesPerRow, m_sgSelGesture.i32CaretIdx, bShift );
 				}
 				break;
 			}
@@ -686,25 +793,21 @@ namespace mx {
 					::SendMessageW( Wnd(), WM_VSCROLL, MAKELONG( SB_LINEDOWN, 0 ), 0 );
 				}
 				else {
-					if ( (m_sgSelGesture.ui64CaretAddr + CurStyle()->uiBytesPerRow) < m_sgSelGesture.ui64CaretAddr ) { m_sgSelGesture.ui64CaretAddr = Size(); }
-					else { m_sgSelGesture.ui64CaretAddr = std::min( m_sgSelGesture.ui64CaretAddr + CurStyle()->uiBytesPerRow, Size() ); }
-					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+					AddCaret( CurStyle()->uiBytesPerRow, m_sgSelGesture.i32CaretIdx, bShift );
 				}
 				break;
 			}
 			case VK_PRIOR : {
 				if ( !bCtrl ) {
 					uint64_t ui64Jump = static_cast<uint64_t>(iPageLines) * CurStyle()->uiBytesPerRow;
-					m_sgSelGesture.ui64CaretAddr = (m_sgSelGesture.ui64CaretAddr > ui64Jump) ? (m_sgSelGesture.ui64CaretAddr - ui64Jump) : 0ULL;
-					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+					SubCaret( ui64Jump, m_sgSelGesture.i32CaretIdx, bShift );
 				}
 				break;
 			}
 			case VK_NEXT : {
 				if ( !bCtrl ) {
 					uint64_t ui64Jump = static_cast<uint64_t>(iPageLines) * CurStyle()->uiBytesPerRow;
-					m_sgSelGesture.ui64CaretAddr = (Size() - m_sgSelGesture.ui64CaretAddr > ui64Jump) ? (m_sgSelGesture.ui64CaretAddr + ui64Jump) : Size();
-					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+					AddCaret( ui64Jump, m_sgSelGesture.i32CaretIdx, bShift );
 				}
 				break;
 			}
@@ -712,41 +815,30 @@ namespace mx {
 			case VK_HOME : {
 				if ( bCtrl ) {
 					// Go to the beginning of the document.
-					m_sgSelGesture.ui64CaretAddr = 0;
-					m_sgSelGesture.i32CaretIdx = 0;
-					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+					SetCaretAddr( 0, 0, bShift );
 				}
 				else			{
 					// Go to the beginning of the line.
-					m_sgSelGesture.ui64CaretAddr = m_sgSelGesture.ui64CaretAddr / CurStyle()->uiBytesPerRow * CurStyle()->uiBytesPerRow;
-					m_sgSelGesture.i32CaretIdx = 0;
-					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+					SetCaretAddr( m_sgSelGesture.ui64CaretAddr / CurStyle()->uiBytesPerRow * CurStyle()->uiBytesPerRow, 0, bShift );
 				}
 				break;
 			}
 			case VK_END : {
 				if ( bCtrl ) {
 					// Go to the end of the document.
-					m_sgSelGesture.ui64CaretAddr = Size();
-					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
-					/*::InvalidateRect( Wnd(), nullptr, FALSE );
-					::SendMessageW( Wnd(), WM_VSCROLL, MAKELONG( SB_BOTTOM, 0 ), 0 );*/
+					SetCaretAddr( Size(), 0, bShift );
 				}
 				else {
 					// Go to the end of the line.
-					m_sgSelGesture.ui64CaretAddr = (m_sgSelGesture.ui64CaretAddr / CurStyle()->uiBytesPerRow * CurStyle()->uiBytesPerRow) + (CurStyle()->uiBytesPerRow - 1);
-					m_sgSelGesture.ui64CaretAddr = std::min( m_sgSelGesture.ui64CaretAddr, Size() );
-					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
-					//::SendMessageW( Wnd(), WM_HSCROLL, MAKELONG( SB_RIGHT, 0 ), 0 );
+					SetCaretAddr( (m_sgSelGesture.ui64CaretAddr / CurStyle()->uiBytesPerRow * CurStyle()->uiBytesPerRow) + CurStyle()->uiBytesPerRow, 0, bShift );
 				}
 				break;
 			}
 
 			case VK_LEFT : {
 				if ( !bCtrl )	{
-					// CTRL = move whole byte at a time, otherwise move i32CaretIdx.
-					if ( m_sgSelGesture.ui64CaretAddr ) { --m_sgSelGesture.ui64CaretAddr; }
-					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+					// TODO: CTRL = move whole byte at a time, otherwise move i32CaretIdx.
+					SubCaret( 1, m_sgSelGesture.i32CaretIdx, bShift );
 				}
 				else {
 					::SendMessageW( Wnd(), WM_HSCROLL, MAKELONG( SB_LINELEFT, 0 ), 0 );
@@ -757,10 +849,8 @@ namespace mx {
 			}
 			case VK_RIGHT : {
 				if ( !bCtrl )	{
-					// CTRL = move whole byte at a time, otherwise move i32CaretIdx.
-					if ( (m_sgSelGesture.ui64CaretAddr + 1) < m_sgSelGesture.ui64CaretAddr ) { m_sgSelGesture.ui64CaretAddr = Size(); }
-					else { m_sgSelGesture.ui64CaretAddr = std::min( m_sgSelGesture.ui64CaretAddr + 1, Size() ); }
-					EnsureVisible( m_sgSelGesture.ui64CaretAddr );
+					// TODO: CTRL = move whole byte at a time, otherwise move i32CaretIdx.
+					AddCaret( 1, m_sgSelGesture.i32CaretIdx, bShift );
 				}
 				else {
 					::SendMessageW( Wnd(), WM_HSCROLL, MAKELONG( SB_LINERIGHT, 0 ), 0 );
@@ -912,7 +1002,8 @@ namespace mx {
 	}
 
 	// Sets the target stream.
-	void CHexEditorControl::SetStream( CHexEditorInterface * _pediStream ) {
+	void CHexEditorControl::SetStream( CHexEditorInterface * _pediStream, CWidget * _pwMainCtrl ) {
+		m_pwHexParent = _pwMainCtrl;
 		m_pheiTarget = _pediStream;
 
 		GoTo( m_pheiTarget->DefaultAddress() );
@@ -985,7 +1076,7 @@ namespace mx {
 			lsw::CWndClassEx wceEx;
 			wceEx.SetInstance( lsw::CBase::GetThisHandle() );
 			WCHAR szStr[15];
-			mx::CUtilities::RandomString( szStr, MX_ELEMENTS( szStr ) );
+			mx::CUtilities::RandomString( szStr, std::size( szStr ) );
 			wceEx.SetClassName( szStr );
 			wceEx.SetStyle( CS_OWNDC );
 			wceEx.SetBackgroundBrush( /*reinterpret_cast<HBRUSH>(CTLCOLOR_STATIC + 1)*/NULL );
@@ -1286,7 +1377,7 @@ namespace mx {
 		auto ui64MaxLines = TotalLines() - ui64Line;
 		_ui32LinesToDraw = uint32_t( std::min<uint64_t>( _ui32LinesToDraw, ui64MaxLines ) );
 		std::wstring wsTmp;
-		for( uint32_t I = 0; I < _ui32LinesToDraw; ++I, ++ui64Line ) {
+		for ( uint32_t I = 0; I < _ui32LinesToDraw; ++I, ++ui64Line ) {
 			wsTmp = FormatAddressForLine( ui64Line );
 			const int32_t iY = _iYTop + int32_t( I ) * iLineAdv;
 
@@ -1415,7 +1506,6 @@ namespace mx {
 		const MX_STYLE & stAll = (*CurStyle());
 		if ( _ui32LinesToDraw == 0 || nullptr == Font() ) { return; }
 		const MX_FONT_SET & fsFont = (*Font());
-
 		const MX_ADDR_STYLE & asAddrStyle = stAll.daAddressStyle;
 
 		// Select font and ensure glyph metrics.
@@ -1458,19 +1548,32 @@ namespace mx {
 		bool bHolding = false;
 		int32_t i32CharSizeCounter = 0;
 		uint32_t ui32Stride = (_dfFmt == MX_DF_CHAR && CurStyle()->csCharSet == CCharSets::MX_CS_UNICODE) ? 2 : 1;
-		for( uint32_t I = 0; I < _ui32LinesToDraw; ++I, ui64Line += ui32Bpr ) {
+		std::vector<COLORREF> vBgColors;
+		try {
+			vBgColors.resize( ui32Bpr );
+		} catch ( ... ) {}
+		lsw::LSW_RECT rCarect;
+		bool bDrawCaret = false;
+		COLORREF crCaretColor;
+		for ( uint32_t I = 0; I < _ui32LinesToDraw; ++I, ui64Line += ui32Bpr ) {
 			const int32_t iY = _iYTop + int32_t( I ) * iLineAdv;
 
 			// Draw the background.  Try to reduce to as few calls as possible for a row.
 			int32_t iL, iW;
 			uint64_t ui64ThisAddr = ui64StartAddress + I * ui32Bpr;
 			auto crColor = CellBgColor( ui64ThisAddr, pui8Data, sDataSize, _bRightArea );
+			if ( 0 < vBgColors.size() ) {
+				vBgColors[0] = crColor;
+			}
 			GetBackgrondRectForIndex( _dfFmt, 0, _iXLeft, iL, iW );
 			for ( int32_t J = 1; J < ui32Bpr; ++J ) {
 				int32_t iL2, iW2;
 				GetBackgrondRectForIndex( _dfFmt, J, _iXLeft, iL2, iW2 );
 				ui64ThisAddr = ui64StartAddress + I * ui32Bpr + J;
 				auto crThisColor = CellBgColor( ui64ThisAddr, pui8Data + J, sDataSize - J, _bRightArea );
+				if ( J < vBgColors.size() ) {
+					vBgColors[J] = crThisColor;
+				}
 				if ( crThisColor != crColor || (iL + iW) == iL2 ) {
 					if ( crBackColor != MX_GetRgbValue( crColor ) ) {
 						lsw::LSW_RECT rRect;
@@ -1613,10 +1716,39 @@ namespace mx {
 				auto crThisColor = CellFgColor( ui64ThisAddr, pui8Data + J, sDataSize - J, _bRightArea );
 				if ( crThisColor != MX_GetRgbValue( ForeColors()->crEditor ) ) {
 					lsw::LSW_SETTEXTCOLOR stcTextColor2( _hDc, MX_GetRgbValue( crThisColor ) );
-					::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int32_t>(wsTmp.size()) );
+					::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int>(wsTmp.size()) );
 				}
 				else {
-					::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int32_t>(wsTmp.size()) );
+					::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int>(wsTmp.size()) );
+				}
+
+				// Caret.
+				if ( ui64ThisAddr == m_sgSelGesture.ui64CaretAddr ) {
+					rCarect.top = iY + iLineAdv - 1;
+					rCarect.left = iL;
+					rCarect.right = iL + iW;
+					rCarect.bottom = rCarect.top + 2;
+
+					auto pwAncestor = m_pwHexParent;
+					bool bFocus = (pwAncestor && pwAncestor->GetFocus()) || m_bHasFocus || (m_pwParent && m_pwParent->GetFocus()) ||
+						(m_pwParent && m_pwParent->Parent() && m_pwParent->Parent()->GetFocus());
+					
+					bool bRightCaret = m_sgSelGesture.bRightArea && stAll.bShowRightArea;
+					if ( _bRightArea == bRightCaret ) {
+						if ( !bFocus ) {
+							COLORREF crColor = ForeColors()->crInactiveCaret;
+							if ( J < vBgColors.size() ) {
+								crColor = Mix( vBgColors[J], ForeColors()->crInactiveCaret );
+							}
+							bDrawCaret = true;
+							crCaretColor = MX_GetRgbValue( crColor );
+						}
+						else if ( m_bCaretOn ) {
+							bDrawCaret = true;
+							crCaretColor = MX_GetRgbValue( ForeColors()->crCaret );
+							
+						}
+					}
 				}
 			}
 		
@@ -1628,6 +1760,10 @@ namespace mx {
 				pui8Data += ui32Bpr;
 				sDataSize -= ui32Bpr;
 			}
+		}
+		if ( bDrawCaret ) {
+			::FillRect( _hDc, &rCarect,
+				lsw::CBase::BrushCache().Brush( crCaretColor ) );
 		}
 	}
 
@@ -1675,7 +1811,7 @@ namespace mx {
 		}*/
 
 
-		if ( m_sSel.bHas ) {
+		if ( !m_sSel.HasSelection() ) {
 			if ( _ui64Address < Size() && m_sSel.IsSelected( _ui64Address, CurStyle()->uiBytesPerRow ) && (MX_GetAValue( ForeColors()->crSelected ) || bDefaultBaseColor) ) {
 				crBaseColor = bDefaultBaseColor ? ForeColors()->crSelected : Mix( crBaseColor, ForeColors()->crSelected );
 			}
@@ -1725,8 +1861,8 @@ namespace mx {
 	PostBase :
 		// Mix colors.
 		uint64_t ui64Caret = m_sgSelGesture.ui64CaretAddr;
-		if ( !m_sSel.bHas ) {
-			if ( _bRightArea != m_sgSelGesture.bRightArea && _ui64Address < Size() && ui64Caret == _ui64Address ) {
+		if ( !m_sSel.HasSelection() ) {
+			if ( _bRightArea != (m_sgSelGesture.bRightArea && CurStyle()->bShowRightArea) && _ui64Address < Size() && ui64Caret == _ui64Address ) {
 				crBaseColor = BackColors()->crHighlightByte;
 			}
 			else {
@@ -1740,13 +1876,37 @@ namespace mx {
 			if ( _ui64Address < Size() && m_sSel.IsSelected( _ui64Address, CurStyle()->uiBytesPerRow ) && (MX_GetAValue( BackColors()->crSelected ) || bDefaultBaseColor) ) {
 				crBaseColor = bDefaultBaseColor ? BackColors()->crSelected : Mix( crBaseColor, BackColors()->crSelected );
 			}
-			/*COLORREF crTmp = _bRightArea == m_sgSelGesture.bRightArea ? BackColors()->crSelected : BackColors()->crHighlightByte;
-			if ( MX_GetAValue( crTmp ) && m_sgSelGesture.ui64AnchorAddr == _ui64Address && _ui64Address < Size() ) {
-				crBaseColor = Mix( crBaseColor, crTmp );
-			}*/
 		}
 
 		return crBaseColor;
+	}
+
+	/**
+	 * Gets the rectangle for a cell's text.
+	 * 
+	 * \param _ui64Address The address whose cell is to be gotten.
+	 * \param _bRightArea If true, the cell is in the right area, otherwise it is in the left area.
+	 * \return Returns the client rectable for the given text cell.
+	 **/
+	lsw::LSW_RECT CHexEditorControl::GetCellTextRect( uint64_t _ui64Address, bool _bRightArea ) {
+		lsw::LSW_RECT rRet = lsw::LSW_RECT().Zero();
+		const MX_STYLE & stAll = (*CurStyle());
+		const int32_t iGutterW = ComputeAddressGutterWidthPx();
+		rRet.left = iGutterW - m_sdScrollView[m_eaEditAs].ui64HPx;
+		const MX_FONT_SET & fsFont = (*Font());
+		rRet.top = GetRulerHeightPx() + ((fsFont.iCharCy + stAll.i32LineSpacingPx) * ((_ui64Address / stAll.uiBytesPerRow) - m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine));
+		rRet.bottom = rRet.top + (fsFont.iCharCy + stAll.i32LineSpacingPx);
+
+		int32_t iL, iW;
+		_bRightArea = _bRightArea && stAll.bShowRightArea;
+		if ( GetTextRectForIndex( _bRightArea ? stAll.dfRightNumbersFmt : stAll.dfLeftNumbersFmt,
+			_ui64Address % stAll.uiBytesPerRow, int32_t( rRet.left ), iL, iW ) ) {
+			if ( _bRightArea ) {
+				rRet.left += ComputeAreaWidthPx( stAll.dfLeftNumbersFmt ) + stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx;
+			}
+			rRet.right = rRet.left + iW;
+		}
+		return rRet;
 	}
 
 	/**
@@ -2046,26 +2206,57 @@ namespace mx {
 		if ( !PointToAddress( _ptClient, ui64Addr, bRightArea ) ) { return; }
 		
 
+		m_sgSelGesture.bRightArea = bRightArea;
+
 		if ( _bCtrlShift && m_sSel.bHas && m_sSel.smMode == LSN_SM_NORMAL && NormalSelectionIsSingleRow() ) {
+			//m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64AnchorAddr;
 			ConvertSingleRowNormalToColumn();
 			SelectionUpdateGesture( _ptClient, _bShift, _bCtrl, _bCtrlShift );
 			return;
 		}
 
 		if ( _bShift && m_sSel.bHas && m_sSel.smMode == LSN_SM_NORMAL ) {
+			//m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64AnchorAddr;
 			InitShiftExtendNormal( ui64Addr, _ptClient, _bShift, _bCtrl, _bCtrlShift );
 			return;
 		}
 		if ( _bShift && m_sSel.bHas && m_sSel.smMode == LSN_SM_COLUMN ) {
+			//m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64AnchorAddr;
 			InitShiftExtendColumn( ui64Addr, _ptClient, _bShift, _bCtrl, _bCtrlShift );
+			return;
+		}
+		if ( _bShift ) {
+			//m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64AnchorAddr;
+			if ( m_sgSelGesture.smCurrent == LSN_SM_NORMAL ) {
+				if ( ui64Addr >= m_sgSelGesture.ui64MouseAnchorAddr ) {
+					m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr;
+					SetCaretAddr( ui64Addr + 1, 0, true, false );
+				}
+				else {
+					m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr + 1;
+					SetCaretAddr( ui64Addr, 0, true, false );
+				}
+			}
+			else {
+				if ( ui64Addr % CurStyle()->uiBytesPerRow >= m_sgSelGesture.ui64MouseAnchorAddr % CurStyle()->uiBytesPerRow ) {
+					m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr;
+					SetCaretAddr( ui64Addr + 1, 0, true, false );
+				}
+				else {
+					m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr + 1;
+					SetCaretAddr( ui64Addr, 0, true, false );
+				}
+			}
+			m_sgSelGesture.bPendingThreshold = false;
+			m_sgSelGesture.bSelecting = true;
 			return;
 		}
 
 		m_sgSelGesture.bSelecting = false;
 		m_sgSelGesture.bPendingThreshold = true;
 		m_sgSelGesture.ptDown = _ptClient;
-		m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64CaretAddr = ui64Addr;
-		m_sgSelGesture.bRightArea = bRightArea;
+		m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64CaretAddr = ui64Addr;
+		
 
 		m_sgSelGesture.smCurrent = _bCtrl ? LSN_SM_COLUMN : (CurStyle()->bSelectColumnMode ? LSN_SM_COLUMN : LSN_SM_NORMAL);
 
@@ -2088,7 +2279,7 @@ namespace mx {
 			return;
 		}
 
-		m_sgSelGesture.ui64CaretAddr = ui64Addr;
+		//m_sgSelGesture.ui64CaretAddr = ui64Addr;
 
 		if ( m_sgSelGesture.bPendingThreshold ) {
 			const int32_t iDx = std::abs( _ptClient.x - m_sgSelGesture.ptDown.x );
@@ -2103,38 +2294,26 @@ namespace mx {
 
 		if ( !m_sgSelGesture.bSelecting ) { return; }
 
-
-
-		m_sSel.bHas = true;
-
 		if ( m_sgSelGesture.smCurrent == LSN_SM_NORMAL ) {
-			// ---- Normal selection: linear address range.
-			m_sSel.smMode = LSN_SM_NORMAL;
-			m_sSel.sn.ui64Start = std::min( m_sgSelGesture.ui64AnchorAddr, m_sgSelGesture.ui64CaretAddr );
-			m_sSel.sn.ui64End   = std::max( m_sgSelGesture.ui64AnchorAddr, m_sgSelGesture.ui64CaretAddr );
+			if ( ui64Addr >= m_sgSelGesture.ui64MouseAnchorAddr ) {
+				m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr;
+				SetCaretAddr( ui64Addr + 1, 0, true, false );
+			}
+			else {
+				m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr + 1;
+				SetCaretAddr( ui64Addr, 0, true, false );
+			}
 		}
 		else {
-			const uint32_t ui32Bpr = CurStyle()->uiBytesPerRow;
-			const uint64_t ui64A = m_sgSelGesture.ui64AnchorAddr;
-			const uint64_t ui64B = m_sgSelGesture.ui64CaretAddr;
-
-			const uint64_t ui64RowA = ui64A / ui32Bpr;
-			const uint32_t ui32ColA = static_cast<uint32_t>(ui64A % ui32Bpr);
-			const uint64_t ui64RowB = ui64B / ui32Bpr;
-			const uint32_t ui32ColB = static_cast<uint32_t>(ui64B % ui32Bpr);
-
-			const uint64_t ui64TlRow = std::min( ui64RowA, ui64RowB );
-			const uint32_t ui32TlCol = std::min( ui32ColA, ui32ColB );
-			const uint64_t ui64BrRow = std::max( ui64RowA, ui64RowB );
-			const uint32_t ui32BrCol = std::max( ui32ColA, ui32ColB );
-
-			m_sSel.smMode = LSN_SM_COLUMN;
-			m_sSel.sc.ui64AnchorAddr = ui64TlRow * ui32Bpr + ui32TlCol;
-			m_sSel.sc.ui32Cols       = (ui32BrCol - ui32TlCol);
-			m_sSel.sc.ui64Lines      = (ui64BrRow - ui64TlRow);
-
+			if ( ui64Addr % CurStyle()->uiBytesPerRow >= m_sgSelGesture.ui64MouseAnchorAddr % CurStyle()->uiBytesPerRow ) {
+				m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr;
+				SetCaretAddr( ui64Addr + 1, 0, true, false );
+			}
+			else {
+				m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr + 1;
+				SetCaretAddr( ui64Addr, 0, true, false );
+			}
 		}
-
 	}
 
 	/**
@@ -2197,8 +2376,6 @@ namespace mx {
 		// If click is closer to TL, move TL (fix BR). Otherwise move BR (fix TL).
 		const uint64_t ui64FixedAddr = (ui64DistTl <= ui64DistBr) ? ui64BrAddr : ui64AnchorAddr;
 
-		// Prime the gesture: fixed corner as anchor, clicked cell as caret.
-		m_sgSelGesture = MX_SELECT_GESTURE {};
 		m_sgSelGesture.ptDown = _ptClient;
 		m_sgSelGesture.bPendingThreshold = false;		// Already selecting.
 		m_sgSelGesture.bSelecting = true;
@@ -2206,7 +2383,6 @@ namespace mx {
 
 		m_sgSelGesture.ui64AnchorAddr = ui64FixedAddr;
 		m_sgSelGesture.ui64CaretAddr  = _ui64ClickAddr;
-		m_sgSelGesture.bRightArea = false;				// Column highlight usually applies to both areas.
 
 		// Let the common update logic rebuild m_sSel.sc from anchor/caret.
 		SelectionUpdateGesture( _ptClient, _bShift, _bCtrl, _bCtrlShift );
@@ -2321,9 +2497,14 @@ namespace mx {
 			if ( !m_pheiTarget->Read( _ui64StartAddr, bStart, 1 ) ) {
 				return false;
 			}
-			const uint8_t * pui8Start = static_cast<const uint8_t *>(bStart.data());
-			if ( !pui8Start ) { return false; }
-			const bool bStartIsWord = ee::CExpEval::IsIdentifier( pui8Start[0], bFirst );
+			/*const uint8_t * pui8Start = static_cast<const uint8_t *>(bStart.data());
+			if ( !pui8Start ) { return false; }*/
+			wchar_t wcHold = bStart[0];
+			if ( int32_t( CCharSets::m_csSets[CurStyle()->csCharSet].pfDisplayable( bStart.data(), 1, wcHold ) ) == 1 ) {}
+			else { wcHold = L'\0'; }
+			const bool bStartIsWord = ee::CExpEval::IsIdentifier( char( wcHold ), bFirst );
+
+			//const bool bStartIsWord = ee::CExpEval::IsIdentifier( pui8Start[0], bFirst );
 
 			// Shared buffer for chunked reads.
 			const size_t sChunkSize = 4096 * 100;
@@ -2344,8 +2525,11 @@ namespace mx {
 					if ( !m_pheiTarget->Read( ui64Cur, bChunk, sThisChunk ) ) { return false; }
 
 					for ( size_t sIdx = 0; sIdx < sThisChunk; ++sIdx ) {
-						const uint8_t ui8Byte = pui8Chunk[sIdx];
-						const bool bIsWord = ee::CExpEval::IsIdentifier( ui8Byte, bFirst );
+						//const uint8_t ui8Byte = pui8Chunk[sIdx];
+						wchar_t wcHold = pui8Chunk[sIdx];
+						if ( int32_t( CCharSets::m_csSets[CurStyle()->csCharSet].pfDisplayable( &pui8Chunk[sIdx], 1, wcHold ) ) == 1 ) {}
+						else { wcHold = L'\0'; }
+						const bool bIsWord = ee::CExpEval::IsIdentifier( char( wcHold ), bFirst );
 						if ( bIsWord != bStartIsWord ) {
 							_ui64FoundAddr = ui64Cur + static_cast<uint64_t>(sIdx);
 							return true;
@@ -2369,8 +2553,12 @@ namespace mx {
 					// Scan this chunk backwards in memory.
 					for ( size_t sIdx = 0; sIdx < sThisChunk; ++sIdx ) {
 						const size_t sRevIdx = sThisChunk - 1 - sIdx;
-						const uint8_t ui8Byte = pui8Chunk[sRevIdx];
-						const bool bIsWord = ee::CExpEval::IsIdentifier( ui8Byte, bFirst );
+						wchar_t wcHold = pui8Chunk[sRevIdx];
+						if ( int32_t( CCharSets::m_csSets[CurStyle()->csCharSet].pfDisplayable( &pui8Chunk[sRevIdx], 1, wcHold ) ) == 1 ) {}
+						else { wcHold = L'\0'; }
+						const bool bIsWord = ee::CExpEval::IsIdentifier( char( wcHold ), bFirst );
+						/*const uint8_t ui8Byte = pui8Chunk[sRevIdx];
+						const bool bIsWord = ee::CExpEval::IsIdentifier( ui8Byte, bFirst );*/
 						if ( bIsWord != bStartIsWord ) {
 							_ui64FoundAddr = ui64ChunkStart + static_cast<uint64_t>(sRevIdx);
 							return true;

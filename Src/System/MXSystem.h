@@ -11,10 +11,6 @@
 //#include <winternl.h>
 
 // == Macros.
-#ifndef MX_COUNT_OF
-#define MX_COUNT_OF(x)					((sizeof( x ) / sizeof( 0[x] )) / (static_cast<size_t>(!(sizeof( x ) % sizeof( 0[x] )))))
-#define MX_ELEMENTS( x )				MX_COUNT_OF( x )
-#endif	// #ifndef MX_COUNT_OF
 
 #define MX_CHECK_FLAGS_EQ( L, R )		(((L) & (R)) == (R))
 

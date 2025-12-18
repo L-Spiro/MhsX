@@ -137,7 +137,7 @@ namespace mx {
 		};
 #undef MX_TOOL_STR
 
-		plvToolBar->AddButtons( bButtons, MX_ELEMENTS( bButtons ) );
+		plvToolBar->AddButtons( bButtons, std::size( bButtons ) );
 
 		plvRebar->SetImageList( m_iImages );
 		{
@@ -171,7 +171,7 @@ namespace mx {
 
 				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height(), TRUE },
 			};
-			psbStatus->SetParts( spParts, MX_ELEMENTS( spParts ) );
+			psbStatus->SetParts( spParts, std::size( spParts ) );
 		}
 
 
@@ -256,6 +256,11 @@ namespace mx {
 				SelectLine();
 				break;
 			}
+			case Layout::MX_M_SELECT_COLUMN_MODE : {
+				ToggleColumnSelection();
+				break;
+			}
+			
 
 			case Layout::MX_M_VIEW_FONT_ENLARGE_FONT : {
 				EnlargeFont();
@@ -900,6 +905,34 @@ namespace mx {
 		return LSW_H_HANDLED;
 	}
 
+	/**
+	 * Handles WM_SETFOCUS.
+	 * \brief Notified when the window receives keyboard focus.
+	 *
+	 * \param _hPrevFocus The window that previously had focus.
+	 * \return Returns a LSW_HANDLED code.
+	 */
+	CWidget::LSW_HANDLED CDeusHexMachinaWindow::SetFocus( HWND _hPrevFocus ) {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return LSW_H_CONTINUE; }
+		phecControl->CHexEditorControl::SetFocus( _hPrevFocus );
+		return LSW_H_CONTINUE;
+	}
+
+	/**
+	 * Handles WM_KILLFOCUS.
+	 * \brief Notified when the window loses keyboard focus.
+	 *
+	 * \param _hNewFocus The window receiving focus (may be NULL).
+	 * \return Returns a LSW_HANDLED code.
+	 */
+	CWidget::LSW_HANDLED CDeusHexMachinaWindow::KillFocus( HWND _hNewFocus ) {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return LSW_H_CONTINUE; }
+		phecControl->CHexEditorControl::KillFocus( _hNewFocus );
+		return LSW_H_CONTINUE;
+	}
+
 	// Gets the status bar.
 	CStatusBar * CDeusHexMachinaWindow::StatusBar() {
 		return static_cast<CStatusBar *>(FindChild( Layout::MX_W_STATUSBAR ));
@@ -1044,7 +1077,7 @@ namespace mx {
 						PROCESS_VM_READ | PROCESS_VM_WRITE |
 						PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION,*/
 				};
-				for ( size_t I = 0; I < MX_ELEMENTS( dwAttempts ); ++I ) {
+				for ( size_t I = 0; I < std::size( dwAttempts ); ++I ) {
 					if ( static_cast<CHexEditorProcess *>(pheiInterface)->SetProcess( dwId, CProcess::MX_OPM_FIXED, dwAttempts[I] ) ) {
 						break;
 					}
@@ -1131,6 +1164,13 @@ namespace mx {
 		phecControl->SelectLine();
 	}
 
+	// Toggle column mode.
+	void CDeusHexMachinaWindow::ToggleColumnSelection() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		phecControl->SetSelectionIsColumn( !phecControl->SelectionIsColumn() );
+	}
+
 	// Enlarge font.
 	void CDeusHexMachinaWindow::EnlargeFont() {
 		auto phecControl = CurrentEditor();
@@ -1180,7 +1220,7 @@ namespace mx {
 			lsw::CWndClassEx wceEx;
 			wceEx.SetInstance( lsw::CBase::GetThisHandle() );
 			WCHAR szStr[23];
-			mx::CUtilities::RandomString( szStr, MX_ELEMENTS( szStr ) );
+			mx::CUtilities::RandomString( szStr, std::size( szStr ) );
 			wceEx.SetClassName( szStr );
 			wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(CTLCOLOR_DLG + 1) );
 			wceEx.SetWindPro( CWidget::WindowProc );
@@ -1236,6 +1276,11 @@ namespace mx {
 					::EnableMenuItem(
 						_hMenu, uiId,
 						MF_BYCOMMAND | ((phecControl && phecControl->Size()) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_SELECT_COLUMN_MODE : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->SelectionIsColumn()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 
@@ -1785,7 +1830,7 @@ namespace mx {
 					return false;
 				}
 
-				htTab.phecWidget->SetStream( htTab.pheiInterface );
+				htTab.phecWidget->SetStream( htTab.pheiInterface, this );
 
 				LSW_RECT rInternalSize = ptTab->WindowRect().ScreenToClient( ptTab->Wnd() );
 				ptTab->AdjustRect( FALSE, &rInternalSize );

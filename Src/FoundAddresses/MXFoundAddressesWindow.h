@@ -28,11 +28,6 @@ namespace mx {
 			MX_I_TOTAL
 		};
 
-		// Timer.
-		enum MX_TIMER {
-			MX_T_UPDATE_LIST				= 0x3D00
-		};
-
 		// Menu.
 		enum MX_MENU {
 			MX_M_CONTEXT_MENU				= 0x3F00
@@ -115,7 +110,7 @@ namespace mx {
 		std::vector<INT>					m_vHeaderWidths;
 
 		// Timer.
-		UINT_PTR							m_uiptrUpdateListTimer;
+		CUtilities::MX_TIMER				m_tUpdateListTimer;
 
 		// Timer update speed.
 		UINT								m_uiUpdateSpeed;

@@ -75,7 +75,7 @@ namespace mx {
 			&m_hwkmWhKeyboardMethod,
 			&m_hrhkmRegisteredHotkeys
 		};
-		for ( size_t J = 0; J < MX_ELEMENTS( iMethods ); ++J ) {
+		for ( size_t J = 0; J < std::size( iMethods ); ++J ) {
 			if ( !phmbHotkeys[J] ) { continue; }
 			// Separate them out by hotkey type.
 			std::set<INT> sSingleListMovers;
@@ -103,7 +103,7 @@ namespace mx {
 			&m_hwkmWhKeyboardMethod,
 			&m_hrhkmRegisteredHotkeys
 		};
-		for ( size_t J = 0; J < MX_ELEMENTS( iMethods ); ++J ) {
+		for ( size_t J = 0; J < std::size( iMethods ); ++J ) {
 			if ( !phmbHotkeys[J] ) { continue; }
 			// Separate them out by hotkey type.
 			std::set<INT> sSingleListMovers;
@@ -329,8 +329,8 @@ namespace mx {
 
 		WCHAR szBufText[64];
 		WCHAR szBufText2[64];
-		if ( !::GetKeyNameTextW( (uiKey << 16), szBufText, MX_ELEMENTS( szBufText ) ) ) { return false; }
-		if ( ::GetKeyNameTextW( ((uiKey | KF_EXTENDED) << 16), szBufText2, MX_ELEMENTS( szBufText2 ) ) ) {
+		if ( !::GetKeyNameTextW( (uiKey << 16), szBufText, std::size( szBufText ) ) ) { return false; }
+		if ( ::GetKeyNameTextW( ((uiKey | KF_EXTENDED) << 16), szBufText2, std::size( szBufText2 ) ) ) {
 			if ( std::wcscmp( szBufText2, szBufText ) != 0 ) {
 				uiResult |= MX_K_HAS_EXTENDED;
 			}
@@ -350,7 +350,7 @@ namespace mx {
 		//WCHAR szBufText[64];
 		UINT uiKey = ::MapVirtualKeyW( _uCode, MAPVK_VK_TO_VSC_EX );
 		return ScanCodeToString( ((uiKey | (bExtended ? KF_EXTENDED : 0)) << 16) );
-		/*if ( ::GetKeyNameTextW( ((uiKey | (bExtended ? KF_EXTENDED : 0)) << 16), szBufText, MX_ELEMENTS( szBufText ) ) ) {
+		/*if ( ::GetKeyNameTextW( ((uiKey | (bExtended ? KF_EXTENDED : 0)) << 16), szBufText, std::size( szBufText ) ) ) {
 			wsRet += szBufText;
 		}
 		return wsRet;*/
@@ -392,7 +392,7 @@ namespace mx {
 	CSecureWString CHotkeyManager::ScanCodeToString( UINT _uiKey ) {
 		CSecureWString wsRet;
 		WCHAR szBufText[64];
-		if ( ::GetKeyNameTextW( _uiKey, szBufText, MX_ELEMENTS( szBufText ) ) ) {
+		if ( ::GetKeyNameTextW( _uiKey, szBufText, std::size( szBufText ) ) ) {
 			wsRet += CUtilities::EscapeUnprintable( szBufText, true, false );
 		}
 		return wsRet;
@@ -419,7 +419,7 @@ namespace mx {
 
 		for ( UINT I = 0; I <= 0xFF; ++I ) {
 			bool bSkip = false;
-			for ( auto J = MX_ELEMENTS( uiSkip ); J--; ) {
+			for ( auto J = std::size( uiSkip ); J--; ) {
 				if ( uiSkip[J] == I ) { bSkip = true; break; }
 			}
 			if ( bSkip ) { continue; }
@@ -562,7 +562,7 @@ namespace mx {
 			{ VK_LMENU },
 			{ VK_RMENU, KF_EXTENDED },*/
 		};
-		for ( auto J = 0; J < MX_ELEMENTS( sData ); ++J ) {
+		for ( auto J = 0; J < std::size( sData ); ++J ) {
 			CSecureWString wsFinalName;
 			UINT uiKey = ::MapVirtualKeyW( sData[J].uiCode, MAPVK_VK_TO_VSC_EX );
 
@@ -591,7 +591,7 @@ namespace mx {
 			//{ _T_LEN_046AEC6B_Hook, MX_M_HOOK },			// Commenting this out is the only reason the feature is not available.  Until DLL injection works it will be of limited use.
 			{ _T_LEN_D8278C4E_Hotkey, MX_M_HOTKEY },
 		};
-		for ( auto J = 0; J < MX_ELEMENTS( sMethods ); ++J ) {
+		for ( auto J = 0; J < std::size( sMethods ); ++J ) {
 			INT iIndex = _pcbCombo->AddString( mx::CStringDecoder::DecodeToWString( sMethods[J].pcName, sMethods[J].sLen ).c_str() );
 			_pcbCombo->SetItemData( iIndex, sMethods[J].ui32Method );
 		}
@@ -637,7 +637,7 @@ namespace mx {
 					pcFormat = ssTmp.c_str();
 				}
 				char szBuffer[64];
-				std::snprintf( szBuffer, MX_ELEMENTS( szBuffer ), pcFormat, _hiInst.uiParms[I], _hiInst.uiParms[I], _hiInst.uiParms[I] );
+				std::snprintf( szBuffer, std::size( szBuffer ), pcFormat, _hiInst.uiParms[I], _hiInst.uiParms[I], _hiInst.uiParms[I] );
 				_sRes += szBuffer;
 			}
 

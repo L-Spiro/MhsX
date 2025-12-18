@@ -19,6 +19,7 @@
 #include "../Layouts/MXSearchProgressLayout.h"
 #include "../Layouts/MXStandardSubsearchLayout.h"
 #include "../Layouts/MXStringTheoryLayout.h"
+#include "../Layouts/MXUiIds.h"
 //#include "../Search/MXNewDataTypeSearchWindow.h"
 #include "../System/MXSystem.h"
 #include "../Utilities/MXUtilities.h"
@@ -90,14 +91,8 @@ namespace mx {
 	}
 
 	CMhsMainWindow::~CMhsMainWindow() {
-		if ( m_uiptrUpdateListTimer ) {
-			CSystem::KillTimer( Wnd(), m_uiptrUpdateListTimer );
-			m_uiptrUpdateListTimer = 0;
-		}
-		if ( m_uiptrUpdateLocksTimer ) {
-			CSystem::KillTimer( Wnd(), m_uiptrUpdateLocksTimer );
-			m_uiptrUpdateLocksTimer = 0;
-		}
+		m_tUpdateListTimer.Stop();
+		m_tUpdateLocksTimer.Stop();
 		
 
 		//delete m_pmhMemHack;
@@ -140,7 +135,7 @@ namespace mx {
 			{ reinterpret_cast<uint64_t>(this),	Hotkey_UnLockSelected,			{ _T_LEN_85399C8F_Unlock_Selected },			MX_WH_UNLOCK_SELECTED,				0 },
 			{ reinterpret_cast<uint64_t>(this),	Hotkey_UnLockAll,				{ _T_LEN_EE088C0D_Unlock_All },					MX_WH_UNLOCK_ALL,					0 },
 		};
-		for ( size_t I = 0; I < MX_ELEMENTS( hhHandlers ); ++I ) {
+		for ( size_t I = 0; I < std::size( hhHandlers ); ++I ) {
 			CHotkeyManBase::RegisterHotkeyHandler( hhHandlers[I] );
 		}
 
@@ -176,7 +171,7 @@ namespace mx {
 		};
 #undef MX_TOOL_STR
 
-		plvToolBar->AddButtons( bButtons, MX_ELEMENTS( bButtons ) );
+		plvToolBar->AddButtons( bButtons, std::size( bButtons ) );
 
 		plvRebar->SetImageList( m_iImages );
 		{
@@ -208,7 +203,7 @@ namespace mx {
 
 				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height(), TRUE },
 			};
-			psbStatus->SetParts( spParts, MX_ELEMENTS( spParts ) );
+			psbStatus->SetParts( spParts, std::size( spParts ) );
 		}
 
 
@@ -227,7 +222,7 @@ namespace mx {
 				{ _T_022E8A69_Value_When_Locked, _LEN_022E8A69, 120 },
 				{ _T_2CECF817_Type, _LEN_2CECF817, 100 },
 			};
-			for ( INT I = 0; I < MX_ELEMENTS( aTitles ); I++ ) {
+			for ( INT I = 0; I < std::size( aTitles ); I++ ) {
 				INT iCol = plvAddressList->AddColumn( mx::CStringDecoder::DecodeToWString( aTitles[I]._pcText, aTitles[I].sLen ).c_str() );
 				BOOL bAdded = plvAddressList->SetColumnWidth( iCol, aTitles[I].dwWidth );
 				if ( !bAdded ) { break; }
@@ -271,9 +266,14 @@ namespace mx {
 
 		std::random_device rdRand;
 		std::mt19937 mGen( rdRand() );
-		std::uniform_int_distribution<> uidDist( MX_T_UPDATE_LIST, MX_T_UPDATE_LIST + 16 );
-		m_uiptrUpdateListTimer = CSystem::SetTimer( Wnd(), uidDist( mGen ), 1000 / m_pmhMemHack->Options().dwMainRefresh, NULL );
-		m_uiptrUpdateLocksTimer = CSystem::SetTimer( Wnd(), uidDist( mGen ), 1000 / m_pmhMemHack->Options().dwLockedRefresh, NULL );
+		std::uniform_int_distribution<> uidDist( MX_TI_MAIN_WINDOW_UPDATE_LIST, MX_TI_MAIN_WINDOW_UPDATE_LIST + 16 );
+		UINT_PTR uiTmp = uidDist( mGen );
+		m_tUpdateListTimer.Start( Wnd(), uiTmp, 1000 / m_pmhMemHack->Options().dwMainRefresh, NULL );
+		UINT_PTR uiTmp2 = uidDist( mGen );
+		while ( uiTmp2 == uiTmp ) {
+			uiTmp2 = uidDist( mGen );
+		}
+		m_tUpdateLocksTimer.Start( Wnd(), uiTmp2, 1000 / m_pmhMemHack->Options().dwLockedRefresh, NULL );
 		
 
 		UpdateOpenRecent();
@@ -1244,24 +1244,24 @@ namespace mx {
 
 	// Update timer speed.
 	void CMhsMainWindow::UpdateTimer() {
-		if ( m_uiptrUpdateListTimer ) {
-			m_uiptrUpdateListTimer = CSystem::SetTimer( Wnd(), m_uiptrUpdateListTimer, max( 1000 / MemHack()->Options().dwMainRefresh, static_cast<DWORD>(1) ), NULL );
+		if ( m_tUpdateListTimer.uiptrActiveId ) {
+			m_tUpdateListTimer.ReStart( std::max( 1000 / MemHack()->Options().dwMainRefresh, static_cast<DWORD>(1) ) );
 		}
-		if ( m_uiptrUpdateLocksTimer ) {
-			m_uiptrUpdateLocksTimer = CSystem::SetTimer( Wnd(), m_uiptrUpdateLocksTimer, max( 1000 / MemHack()->Options().dwLockedRefresh, static_cast<DWORD>(1) ), NULL );
+		if ( m_tUpdateLocksTimer.uiptrActiveId ) {
+			m_tUpdateLocksTimer.ReStart( std::max( 1000 / MemHack()->Options().dwLockedRefresh, static_cast<DWORD>(1) ) );
 		}
 	}
 
 	// WM_TIMER.
 	CWidget::LSW_HANDLED CMhsMainWindow::Timer( UINT_PTR _uiptrId, TIMERPROC _tpProc ) {
-		if ( _uiptrId == m_uiptrUpdateListTimer ) {
+		if ( _uiptrId == m_tUpdateListTimer.uiptrActiveId ) {
 			// Update the list.
 			auto * plvList = MainTreeView();
 			if ( plvList ) {
 				::RedrawWindow( plvList->Wnd(), NULL, NULL, RDW_INVALIDATE | /*RDW_NOCHILDREN | */RDW_UPDATENOW | RDW_FRAME );
 			}
 		}
-		if ( _uiptrId == m_uiptrUpdateLocksTimer ) {
+		if ( _uiptrId == m_tUpdateLocksTimer.uiptrActiveId ) {
 			MemHack()->ApplyFoundAddressLocks();
 		}
 		return LSW_H_CONTINUE;
@@ -1449,12 +1449,12 @@ namespace mx {
 							MX_M_CONTEXT_MENU,
 							0,
 							0,
-							MX_ELEMENTS( miMenuBar ),
+							std::size( miMenuBar ),
 							miMenuBar
 						},
 					};
 					mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
-					plmLayout->CreatePopupMenuEx( this, miMenus, MX_ELEMENTS( miMenus ), _iX, _iY );
+					plmLayout->CreatePopupMenuEx( this, miMenus, std::size( miMenus ), _iX, _iY );
 				}
 				break;
 			}

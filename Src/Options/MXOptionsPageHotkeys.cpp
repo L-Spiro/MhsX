@@ -272,7 +272,7 @@ namespace mx {
 			{ COptionsLayout::MX_OI_GENERAL_SEARCH_TP_HIGH, THREAD_PRIORITY_HIGHEST },
 			{ COptionsLayout::MX_OI_GENERAL_SEARCH_TP_CRIT, THREAD_PRIORITY_TIME_CRITICAL },
 		};
-		for ( size_t I = 0; I < MX_ELEMENTS( aTemp ); ++I ) {
+		for ( size_t I = 0; I < std::size( aTemp ); ++I ) {
 			prbRadio = static_cast<CRadioButton *>(FindChild( aTemp[I].iId ));
 			if ( prbRadio ) {
 				if ( prbRadio->IsChecked() ) {
@@ -321,7 +321,7 @@ namespace mx {
 			static_cast<CStatic *>(FindChild( COptionsLayout::MX_OI_HOTKEYS_OPTIONS_PARM3_DESC_LABEL )),
 		};
 
-		for ( size_t I = 0; I < MX_ELEMENTS( peParms ); ++I ) {
+		for ( size_t I = 0; I < std::size( peParms ); ++I ) {
 			if ( peParms[I] ) {
 				peParms[I]->SetEnabled( I < phhHandler->sParms );
 			}
@@ -394,7 +394,7 @@ namespace mx {
 			static_cast<CEdit *>(FindChild( COptionsLayout::MX_OI_HOTKEYS_OPTIONS_PARM3_EDIT )),
 		};
 		ee::CExpEvalContainer::EE_RESULT rRes[3] = {};
-		/*for ( auto I = MX_ELEMENTS( peParms ); I--; ) {
+		/*for ( auto I = std::size( peParms ); I--; ) {
 			if ( !peParms[I] ) {
 				CSystem::MessageBoxError( Wnd(), _T_LEN_A756CF10_Internal_Error );
 				return false;
@@ -412,7 +412,7 @@ namespace mx {
 			}
 			if ( !peParms[I]->GetTextAsInt64Expression( rRes[I] ) ) {
 				/*char szBuffer[64];
-				int iLen = ::_snprintf( szBuffer, MX_ELEMENTS( szBuffer ), "%s (%u)", _DEC_S_02BBA31E_Invalid_expression_.c_str(), static_cast<uint32_t>(I) );
+				int iLen = ::_snprintf( szBuffer, std::size( szBuffer ), "%s (%u)", _DEC_S_02BBA31E_Invalid_expression_.c_str(), static_cast<uint32_t>(I) );
 				CSystem::MessageBoxError( Wnd(), szBuffer );*/
 				CSystem::MessageBoxError( Wnd(), _T_LEN_02BBA31E_Invalid_expression_ );
 				peParms[I]->SetFocus();

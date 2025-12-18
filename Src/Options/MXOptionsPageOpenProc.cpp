@@ -71,7 +71,7 @@ namespace mx {
 			{ COptionsLayout::MX_OI_OPEN_PROCESS_32_BIT_FLAG, MX_OP_TITLE_BAR_X86_FLAG },
 			{ COptionsLayout::MX_OI_OPEN_PROCESS_INSERT_RANDOM, MX_OP_TITLE_BAR_RANDOM },
 		};
-		for ( size_t I = 0; I < MX_ELEMENTS( aTemp ); ++I ) {
+		for ( size_t I = 0; I < std::size( aTemp ); ++I ) {
 			if ( aTemp[I].wId == _Id ) {
 				CCheckButton * pcbCheck = static_cast<CCheckButton *>(FindChild( _Id ));
 				if ( pcbCheck ) {

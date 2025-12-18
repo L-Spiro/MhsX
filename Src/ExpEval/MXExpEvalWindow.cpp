@@ -1,5 +1,6 @@
 #include "MXExpEvalWindow.h"
 #include "../Layouts/MXExpressionEvaluatorLayout.h"
+#include "../Layouts/MXUiIds.h"
 #include "../System/MXSystem.h"
 
 #include <Object/EEObject.h>
@@ -23,7 +24,7 @@ namespace mx {
 		};
 		m_iImages.Create( 24, 24, ILC_COLOR32, MX_I_TOTAL, MX_I_TOTAL );
 
-		for ( size_t I = 0; I < MX_ELEMENTS( sImages ); ++I ) {
+		for ( size_t I = 0; I < std::size( sImages ); ++I ) {
 			CSecureWString wsTemp = CSystem::GetResourcesPathW();
 			wsTemp += sImages[I].lpwsImageName;
 			wsTemp += L".bmp";
@@ -34,9 +35,7 @@ namespace mx {
 
 	}
 	CExpEvalWindow::~CExpEvalWindow() {
-		if ( m_uiptrUpdateListTimer ) {
-			CSystem::KillTimer( Wnd(), m_uiptrUpdateListTimer );
-		}
+		m_tUpdateListTimer.Stop();
 		for ( size_t I = 0; I < m_vExpressions.size(); ++I ) {
 			delete m_vExpressions[I];
 			m_vExpressions[I] = nullptr;
@@ -66,7 +65,7 @@ namespace mx {
 			};
 #undef MX_TOOL_STR
 
-			plvToolBar->AddButtons( bButtons, MX_ELEMENTS( bButtons ) );
+			plvToolBar->AddButtons( bButtons, std::size( bButtons ) );
 
 			if ( plvRebar ) {
 				plvRebar->SetImageList( m_iImages );
@@ -111,7 +110,7 @@ namespace mx {
 				{ _T_LEN_DCCBE329_Extended, CUtilities::MX_D_EXTENDED },
 				{ _T_LEN_4F544F37_Time___Date, CUtilities::MX_D_TIME },
 			};
-			for ( size_t I = 0; I < MX_ELEMENTS( aTitles ); I++ ) {
+			for ( size_t I = 0; I < std::size( aTitles ); I++ ) {
 				INT iIndex = pcbOutputFormat->AddString( mx::CStringDecoder::DecodeToWString( aTitles[I].pcText, aTitles[I].sLen ).c_str() );
 				if ( iIndex != -1 ) {
 					pcbOutputFormat->SetItemData( iIndex, static_cast<LPARAM>(aTitles[I].dParam) );
@@ -144,7 +143,7 @@ namespace mx {
 				{ _T_976D55D1_Expression, _LEN_976D55D1, 120 },
 				{ _T_14C6C425_Result, _LEN_14C6C425, 200 },
 			};
-			for ( INT I = 0; I < MX_ELEMENTS( aTitles ); I++ ) {
+			for ( INT I = 0; I < std::size( aTitles ); I++ ) {
 				INT iCol = plvAddressList->AddColumn( mx::CStringDecoder::DecodeToWString( aTitles[I]._pcText, aTitles[I].sLen ).c_str() );
 				BOOL bAdded = plvAddressList->SetColumnWidth( iCol, aTitles[I].dwWidth );
 				if ( !bAdded ) { break; }
@@ -157,8 +156,8 @@ namespace mx {
 
 		std::random_device rdRand;
 		std::mt19937 mGen( rdRand() );
-		std::uniform_int_distribution<> uidDist( MX_T_UPDATE_LIST, MX_T_UPDATE_LIST + 16 );
-		m_uiptrUpdateListTimer = CSystem::SetTimer( Wnd(), uidDist( mGen ), m_uiUpdateSpeed, NULL );
+		std::uniform_int_distribution<> uidDist( MX_TI_EXP_EVAL_UPDATE_LIST, MX_TI_EXP_EVAL_UPDATE_LIST + 16 );
+		m_tUpdateListTimer.Start( Wnd(), uidDist( mGen ), m_uiUpdateSpeed, NULL );
 		return LSW_H_CONTINUE;
 	}
 
@@ -313,10 +312,8 @@ namespace mx {
 	// Sets the update speed.
 	void CExpEvalWindow::SetUpdateSpeed( uint32_t _ui32Speed ) {
 		m_uiUpdateSpeed = _ui32Speed;
-		if ( m_uiptrUpdateListTimer ) {
-			// Overwrites the existing timer. ID does not change, meaning = is technically redundant, but let's assume
-			//	there is a possibility later it could change.  Solid code.
-			m_uiptrUpdateListTimer = CSystem::SetTimer( Wnd(), m_uiptrUpdateListTimer, m_uiUpdateSpeed, NULL );
+		if ( m_tUpdateListTimer.uiptrActiveId ) {
+			m_tUpdateListTimer.ReStart( m_uiUpdateSpeed );
 		}
 	}
 
@@ -332,7 +329,7 @@ namespace mx {
 
 	// WM_TIMER.
 	CWidget::LSW_HANDLED CExpEvalWindow::Timer( UINT_PTR _uiptrId, TIMERPROC _tpProc ) {
-		if ( _uiptrId == m_uiptrUpdateListTimer ) {
+		if ( _uiptrId == m_tUpdateListTimer.uiptrActiveId ) {
 			std::string sObj;
 			// Update the list.
 			CListView * plvList = ListView();

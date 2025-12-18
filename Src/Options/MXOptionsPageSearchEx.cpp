@@ -37,7 +37,7 @@ namespace mx {
 				{ _T_LEN_38B24DFD_Every_8_Bytes, CUtilities::MX_BS_8BYTE },
 				//{ _T_LEN_E5665240_By_Data_Type, CUtilities::MX_BS_BY_TYPE },
 			};
-			for ( size_t I = 0; I < MX_ELEMENTS( aTitles ); I++ ) {
+			for ( size_t I = 0; I < std::size( aTitles ); I++ ) {
 				INT iIndex = pcbCombo->AddString( mx::CStringDecoder::DecodeToWString( aTitles[I].pcText, aTitles[I].sLen ).c_str() );
 				if ( iIndex != -1 ) {
 					pcbCombo->SetItemData( iIndex, static_cast<LPARAM>(aTitles[I].dParam) );

@@ -3,6 +3,7 @@
 #include "../Layouts/MXLayoutMacros.h"
 #include "../Layouts/MXLayoutManager.h"
 #include "../Layouts/MXMainWindowLayout.h"
+#include "../Layouts/MXUiIds.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../Search/MXSearchResultRef.h"
 #include "../System/MXSystem.h"
@@ -18,7 +19,6 @@ namespace mx {
 	CFoundAddressesWindow::CFoundAddressesWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
 		lsw::CDockable( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
 		m_pmmwMhsWindow( reinterpret_cast<CMhsMainWindow *>(_ui64Data) ),
-		m_uiptrUpdateListTimer( 0 ),
 		m_uiUpdateSpeed( 100 ) {
 		static const struct {
 			LPCWSTR				lpwsImageName;
@@ -51,9 +51,6 @@ namespace mx {
 		}
 	}
 	CFoundAddressesWindow::~CFoundAddressesWindow() {
-		if ( m_uiptrUpdateListTimer ) {
-			CSystem::KillTimer( Wnd(), m_uiptrUpdateListTimer );
-		}
 	}
 
 	// == Functions.
@@ -79,7 +76,7 @@ namespace mx {
 			};
 #undef MX_TOOL_STR
 
-			plvToolBar->AddButtons( bButtons, MX_ELEMENTS( bButtons ) );
+			plvToolBar->AddButtons( bButtons, std::size( bButtons ) );
 
 			if ( plvRebar ) {
 				plvRebar->SetImageList( m_iImages );
@@ -129,7 +126,7 @@ namespace mx {
 				{ _T_LEN_DCB67730_Value, 120 },
 				{ _T_LEN_31A2F4D5_Current_Value, 120 },
 			};
-			for ( INT I = 0; I < MX_ELEMENTS( aTitles ); I++ ) {
+			for ( INT I = 0; I < std::size( aTitles ); I++ ) {
 				INT iCol = plvAddressList->AddColumn( mx::CStringDecoder::DecodeToWString( aTitles[I]._pcText, aTitles[I].sLen ).c_str() );
 				BOOL bAdded = plvAddressList->SetColumnWidth( iCol, aTitles[I].dwWidth );
 				if ( !bAdded ) { break; }
@@ -143,8 +140,8 @@ namespace mx {
 
 		std::random_device rdRand;
 		std::mt19937 mGen( rdRand() );
-		std::uniform_int_distribution<> uidDist( MX_T_UPDATE_LIST, MX_T_UPDATE_LIST + 16 );
-		m_uiptrUpdateListTimer = CSystem::SetTimer( Wnd(), uidDist( mGen ), 1000 / m_pmmwMhsWindow->MemHack()->Options().dwFoundAddressRefresh, NULL );
+		std::uniform_int_distribution<> uidDist( MX_TI_FA_UPDATE_LIST, MX_TI_FA_UPDATE_LIST + 16 );
+		m_tUpdateListTimer.Start( Wnd(), uidDist( mGen ), 1000 / m_pmmwMhsWindow->MemHack()->Options().dwFoundAddressRefresh, NULL );
 		return LSW_H_CONTINUE;
 	}
 
@@ -265,7 +262,7 @@ namespace mx {
 			char cKey[] = {
 				'A', 'B', 'C', 'D', 'E', 'F'
 			};
-			for ( size_t I = 0; I < MX_ELEMENTS( cKey ); ++I ) {
+			for ( size_t I = 0; I < std::size( cKey ); ++I ) {
 				// 7XXXXXXXXXX
 				CSecureString sTmp = "7";
 				size_t sTotal = m_pmmwMhsWindow->MemHack()->Process().Is32Bit() ? 7 : 10;
@@ -284,7 +281,7 @@ namespace mx {
 						{ _T_LEN_26FC5333_UTF_16_BE },
 						{ _T_LEN_D35E9704_UTF_32_BE },
 					};
-					for ( size_t K = 0; K < MX_ELEMENTS( sData ); ++K ) {
+					for ( size_t K = 0; K < std::size( sData ); ++K ) {
 						CSecureString sNewTmp = sTmp;
 						sNewTmp.push_back( ' ' );
 						sNewTmp += CStringDecoder::DecodeToString( sData[K].pcText, sData[K].sLen );
@@ -328,10 +325,10 @@ namespace mx {
 	// Sets the update speed.
 	void CFoundAddressesWindow::SetUpdateSpeed( uint32_t _ui32Speed ) {
 		m_uiUpdateSpeed = _ui32Speed;
-		if ( m_uiptrUpdateListTimer ) {
+		if ( m_tUpdateListTimer.uiptrActiveId ) {
 			// Overwrites the existing timer. ID does not change, meaning = is technically redundant, but let's assume
 			//	there is a possibility later it could change.  Solid code.
-			m_uiptrUpdateListTimer = CSystem::SetTimer( Wnd(), m_uiptrUpdateListTimer, m_uiUpdateSpeed, NULL );
+			m_tUpdateListTimer.ReStart( m_uiUpdateSpeed );
 		}
 	}
 
@@ -668,7 +665,7 @@ namespace mx {
 
 	// WM_TIMER.
 	CWidget::LSW_HANDLED CFoundAddressesWindow::Timer( UINT_PTR _uiptrId, TIMERPROC _tpProc ) {
-		if ( _uiptrId == m_uiptrUpdateListTimer ) {
+		if ( _uiptrId == m_tUpdateListTimer.uiptrActiveId ) {
 			// Update the list.
 			CListView * plvList = ListView();
 			if ( plvList ) {
@@ -698,19 +695,19 @@ namespace mx {
 						MX_M_CONTEXT_MENU,
 						0,
 						0,
-						MX_ELEMENTS( miMenuBar ),
+						std::size( miMenuBar ),
 						miMenuBar
 					},
 					/*{
 						MX_MWMI_MENU_FILE,
 						MX_MWMI_MENU_BAR,
 						MX_MWMI_FILE,
-						MX_ELEMENTS( m_miFileMenu ),
+						std::size( m_miFileMenu ),
 						m_miFileMenu
 					},*/
 				};
 				mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
-				plmLayout->CreatePopupMenuEx( this, miMenus, MX_ELEMENTS( miMenus ), _iX, _iY );
+				plmLayout->CreatePopupMenuEx( this, miMenus, std::size( miMenus ), _iX, _iY );
 				break;
 			}
 		}

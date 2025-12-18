@@ -239,35 +239,35 @@ namespace mx {
 			MX_MWMI_MENU_BAR,
 			0,
 			0,
-			MX_ELEMENTS( m_miMenuBar ),
+			std::size( m_miMenuBar ),
 			m_miMenuBar
 		},
 		{
 			MX_MWMI_MENU_FILE,
 			MX_MWMI_MENU_BAR,
 			MX_MWMI_FILE,
-			MX_ELEMENTS( m_miFileMenu ),
+			std::size( m_miFileMenu ),
 			m_miFileMenu
 		},
 		{
 			MX_MWMI_MENU_SEARCH,
 			MX_MWMI_MENU_BAR,
 			MX_MWMI_SEARCH,
-			MX_ELEMENTS( m_miSearchMenu ),
+			std::size( m_miSearchMenu ),
 			m_miSearchMenu
 		},
 		{
 			MX_MWMI_MENU_TOOLS,
 			MX_MWMI_MENU_BAR,
 			MX_MWMI_TOOLS,
-			MX_ELEMENTS( m_miOptionsMenu ),
+			std::size( m_miOptionsMenu ),
 			m_miOptionsMenu
 		},
 		{
 			MX_MWMI_MENU_WINDOW,
 			MX_MWMI_MENU_BAR,
 			MX_MWMI_WINDOW,
-			MX_ELEMENTS( m_miWindowsMenu ),
+			std::size( m_miWindowsMenu ),
 			m_miWindowsMenu
 		},
 	};
@@ -284,7 +284,7 @@ namespace mx {
 		if ( !m_aMainClass ) {
 			// Register the window classes we need.
 			WCHAR szTemp[5];
-			CUtilities::RandomString( szTemp, MX_ELEMENTS( szTemp ) );
+			CUtilities::RandomString( szTemp, std::size( szTemp ) );
 			lsw::CWndClassEx wceEx( lsw::CWidget::WindowProc, szTemp );
 			wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1) );
 			m_aMainClass = lsw::CBase::RegisterClassExW( wceEx.Obj() );	
@@ -293,14 +293,14 @@ namespace mx {
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
 		std::vector<CSecureString> sStrings;
 		std::vector<CSecureWString> sStringsW;
-		CLayoutManager::UnencryptLayouts( m_wlMainWindow, MX_ELEMENTS( m_wlMainWindow ),
+		CLayoutManager::UnencryptLayouts( m_wlMainWindow, std::size( m_wlMainWindow ),
 			vLayouts,
 			sStringsW,
 			sStrings );
 		std::vector<LSW_MENU_LAYOUT> vMenus;
 		std::vector<std::vector<LSW_MENU_ITEM> *> vMenuItems;
 		std::vector<std::vector<CSecureWString> *> vMenuStrings;
-		CLayoutManager::UnencryptMenu( m_miMenus, MX_ELEMENTS( m_miMenus ),
+		CLayoutManager::UnencryptMenu( m_miMenus, std::size( m_miMenus ),
 			vMenus,
 			vMenuItems,
 			vMenuStrings );
@@ -322,7 +322,7 @@ namespace mx {
 	BOOL CMainWindowLayout::CreateMenu( CWidget * _pwMainWindow ) {
 		if ( !_pwMainWindow ) { return FALSE; }
 		std::vector<ACCEL> vHotkeys;
-		HMENU hMenu = lsw::CBase::LayoutManager()->CreateMenu( m_miMenus, MX_ELEMENTS( m_miMenus ), vHotkeys );
+		HMENU hMenu = lsw::CBase::LayoutManager()->CreateMenu( m_miMenus, std::size( m_miMenus ), vHotkeys );
 		if ( !hMenu ) { return FALSE; }
 		if ( vHotkeys.size() ) {
 			CBase::GetAccelHandler().CreateAndRegister( _pwMainWindow->Wnd(), vHotkeys.data(), int( vHotkeys.size() ) );

@@ -110,12 +110,12 @@ namespace mx {
 					static_cast<SIZE_T>(_sSize) ));
 				if ( !m_pbMapBuffer ) { return false; }
 #else
-				const int fd = MX_HandleToFd( _hMap );
-				const int prot = PROT_READ | (_bWrite ? PROT_WRITE : 0);
-				void * pv = ::mmap( nullptr, _sSize, prot, MAP_SHARED, fd, static_cast<off_t>(_ui64Offset) );
-				if ( pv == MAP_FAILED ) { return false; }
+				const int iFd = MX_HandleToFd( _hMap );
+				const int iProt = PROT_READ | (_bWrite ? PROT_WRITE : 0);
+				void * pvMap = ::mmap( nullptr, _sSize, iProt, MAP_SHARED, iFd, static_cast<off_t>(_ui64Offset) );
+				if ( pvMap == MAP_FAILED ) { return false; }
 
-				m_pbMapBuffer = static_cast<uint8_t *>(pv);
+				m_pbMapBuffer = static_cast<uint8_t *>(pvMap);
 #endif
 				m_ui64MapStart = _ui64Offset;
 				m_sMapSize = _sSize;

@@ -43,7 +43,7 @@ namespace mx {
 					ONIG_ENCODING_BIG5,
 					ONIG_ENCODING_GB18030,
 				};
-				::onig_initialize( oeEncodings, MX_ELEMENTS( oeEncodings ) );
+				::onig_initialize( oeEncodings, std::size( oeEncodings ) );
 			}
 		}
 		~COnigurumaSystem() {

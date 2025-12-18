@@ -136,7 +136,7 @@ namespace mx {
 		std::vector<CSecureString> sStrings;
 		std::vector<CSecureWString> sStringsW;
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
-		CLayoutManager::UnencryptLayouts( m_wlOperationsDialog, MX_ELEMENTS( m_wlOperationsDialog ),
+		CLayoutManager::UnencryptLayouts( m_wlOperationsDialog, std::size( m_wlOperationsDialog ),
 			vLayouts,
 			sStringsW,
 			sStrings );
@@ -147,7 +147,7 @@ namespace mx {
 			_i32Page
 		};*/
 
-		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], MX_ELEMENTS( m_wlOperationsDialog ), _pwParent, static_cast<uint64_t>(0) );
+		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], std::size( m_wlOperationsDialog ), _pwParent, static_cast<uint64_t>(0) );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
 		if ( ipProc != 0 ) {
 			
@@ -160,7 +160,7 @@ namespace mx {
 
 	// Creates the general options page.
 	CWidget * CStringTheoryOperationsLayout::CreateStringReplacePage( CWidget * _pwParent, MX_OPTIONS * _poOptions ) {
-		return CreatePage( _pwParent, m_wlOperationsReplace, MX_ELEMENTS( m_wlOperationsReplace ), _poOptions );
+		return CreatePage( _pwParent, m_wlOperationsReplace, std::size( m_wlOperationsReplace ), _poOptions );
 	}
 
 	// Default window-creation.

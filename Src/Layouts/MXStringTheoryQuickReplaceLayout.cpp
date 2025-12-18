@@ -70,13 +70,13 @@ namespace mx {
 		std::vector<CSecureString> sStrings;
 		std::vector<CSecureWString> sStringsW;
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
-		CLayoutManager::UnencryptLayouts( m_wlQuickReplaceDialog, MX_ELEMENTS( m_wlQuickReplaceDialog ),
+		CLayoutManager::UnencryptLayouts( m_wlQuickReplaceDialog, std::size( m_wlQuickReplaceDialog ),
 			vLayouts,
 			sStringsW,
 			sStrings );
 		
 		mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
-		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], MX_ELEMENTS( m_wlQuickReplaceDialog ), _pwParent, reinterpret_cast<uint64_t>(_pmhMemHack) );
+		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], std::size( m_wlQuickReplaceDialog ), _pwParent, reinterpret_cast<uint64_t>(_pmhMemHack) );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
 		if ( ipProc != 0 ) {
 			

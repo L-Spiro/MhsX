@@ -470,6 +470,7 @@
     <ClInclude Include="Src\Layouts\MXStringTheoryOperationsLayout.h" />
     <ClInclude Include="Src\Layouts\MXStringTheoryQuickReplaceLayout.h" />
     <ClInclude Include="Src\Layouts\MXTemplateLayout.h" />
+    <ClInclude Include="Src\Layouts\MXUiIds.h" />
     <ClInclude Include="Src\MainWindow\MXMhsMainWindow.h" />
     <ClInclude Include="Src\MemHack\MXMemHack.h" />
     <ClInclude Include="Src\MemHack\MXProcess.h" />

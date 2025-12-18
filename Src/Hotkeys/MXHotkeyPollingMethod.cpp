@@ -56,13 +56,13 @@ namespace mx {
 
 		lsw::CCriticalSection::CEnterCrit ecCrit( m_csHandlerCrit );
 		for ( size_t I = 0; I < m_vHotkeys.size(); ++I ) {
-			if ( m_vHotkeys[I].iCode < MX_ELEMENTS( sKeyState ) ) {
+			if ( m_vHotkeys[I].iCode < std::size( sKeyState ) ) {
 				SHORT sKey = MX_KEY( m_vHotkeys[I].iCode );
 				bool bJustHit = (sKey & 0x8001) == 0x8001;
 				if ( bJustHit ) {
 					bool bSuccess = false;
 					if ( m_vHotkeys[I].iMod ) {
-						if ( m_vHotkeys[I].iMod < MX_ELEMENTS( sKeyState ) ) {
+						if ( m_vHotkeys[I].iMod < std::size( sKeyState ) ) {
 							sKey = MX_KEY( m_vHotkeys[I].iMod );
 							bSuccess = sKey & 0x8000;
 						}

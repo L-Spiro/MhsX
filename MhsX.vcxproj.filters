@@ -986,6 +986,9 @@
     <ClInclude Include="Src\HexEditor\MXHexEditorCurProcess.h">
       <Filter>Header Files\HexEditor</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Layouts\MXUiIds.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="MhsX.exe.intermediate.manifest">

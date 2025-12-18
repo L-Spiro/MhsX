@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../MXMhsX.h"
+#include "../Layouts/MXUiIds.h"
 #include "../Strings/MXStringDecoder.h"
 #include "../Utilities/MXUtilities.h"
 #include "MXCharSets.h"
@@ -429,12 +430,52 @@ namespace mx {
 		 * Sets the caret address.
 		 * 
 		 * \param _ui64Addr The new address to set as the caret position.
+		 * \param _i32SubCaret The caret subindex.
+		 * \param _bUpdateSelection If true, the selection is updated.  If false, the selection is cleared.
 		 * \param _bRedraw If true the screen is redrawn immediately.
 		 **/
-		inline void									SetCaretAddr( uint64_t _ui64Addr, bool _bRedraw = true ) {
-			m_sgSelGesture.ui64CaretAddr = _ui64Addr;
-			EnsureVisible( m_sgSelGesture.ui64CaretAddr, _bRedraw );
+		void										SetCaretAddr( uint64_t _ui64Addr, int32_t _i32SubCaret = 0, bool _bUpdateSelection = false, bool _bRedraw = true );
+
+		/**
+		 * Moves the caret forward (to a higher address) by the given amount.
+		 * 
+		 * \param _ui64Amount The amount by which to increase the caret position.
+		 * \param _i32SubCaret The caret subindex.
+		 * \param _bUpdateSelection If true, the selection is updated.  If false, the selection is cleared.
+		 * \param _bRedraw If true the screen is redrawn immediately.
+		 **/
+		inline void									AddCaret( uint64_t _ui64Amount, int32_t _i32SubCaret = 0, bool _bUpdateSelection = false, bool _bRedraw = true ) {
+			auto ui64NewAddr = GetCaretAddr() + _ui64Amount;
+			if ( ui64NewAddr < GetCaretAddr() ) { SetCaretAddr( Size(), _i32SubCaret, _bUpdateSelection, _bRedraw ); }
+			else { SetCaretAddr( ui64NewAddr, _i32SubCaret, _bUpdateSelection, _bRedraw ); }
 		}
+
+		/**
+		 * Moves the caret backward (to a lower address) by the given amount.
+		 * 
+		 * \param _ui64Amount The amount by which to decrease the caret position.
+		 * \param _i32SubCaret The caret subindex.
+		 * \param _bUpdateSelection If true, the selection is updated.  If false, the selection is cleared.
+		 * \param _bRedraw If true the screen is redrawn immediately.
+		 **/
+		inline void									SubCaret( uint64_t _ui64Amount, int32_t _i32SubCaret = 0, bool _bUpdateSelection = false, bool _bRedraw = true ) {
+			if ( _ui64Amount >= GetCaretAddr() ) { SetCaretAddr( 0, _i32SubCaret, _bUpdateSelection, _bRedraw ); }
+			else { SetCaretAddr( GetCaretAddr() - _ui64Amount, _i32SubCaret, _bUpdateSelection, _bRedraw ); }
+		}
+
+		/**
+		 * Returns true if the selection mode is set to COLUMN.
+		 * 
+		 * \return Returns true if the selection mode is set to COLUMN.
+		 **/
+		inline bool									SelectionIsColumn() const { return CurStyle()->bSelectColumnMode; }
+
+		/**
+		 * Sets the default selection mode.
+		 * 
+		 * \param _bColumnMode If true, the default selection mode is COLUMN, otherwise it is NORMAL.
+		 **/
+		inline void									SetSelectionIsColumn( bool _bColumnMode ) { CurStyle()->bSelectColumnMode = _bColumnMode; }
 
 		/**
 		 * Determines if there are selected bytes or not.
@@ -529,6 +570,24 @@ namespace mx {
 		 * \return Returns a LSW_HANDLED code.
 		 */
 		virtual LSW_HANDLED							EraseBkgnd( HDC /*_hDc*/ ) { return LSW_H_HANDLED; }
+
+		/**
+		 * Handles WM_SETFOCUS.
+		 * \brief Notified when the window receives keyboard focus.
+		 *
+		 * \param _hPrevFocus The window that previously had focus.
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED							SetFocus( HWND /*_hPrevFocus*/ ) override;
+
+		/**
+		 * Handles WM_KILLFOCUS.
+		 * \brief Notified when the window loses keyboard focus.
+		 *
+		 * \param _hNewFocus The window receiving focus (may be NULL).
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED							KillFocus( HWND /*_hNewFocus*/ ) override;
 
 		/**
 		 * Handles WM_PAINT.
@@ -637,6 +696,16 @@ namespace mx {
 		// Gets a background color.
 		inline const MX_HEX_EDITOR_COLORS *			BackColors() const { return m_phecBackColors; }
 
+		/**
+		 * Handles WM_TIMER.
+		 * \brief Notified when a timer elapses.
+		 *
+		 * \param _uiptrId Timer identifier.
+		 * \param _tpProc Optional callback associated with the timer.
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED							Timer( UINT_PTR _uiptrId, TIMERPROC /*_tpProc*/ );
+
 		// WM_LBUTTONDOWN.
 		virtual LSW_HANDLED							LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos );
 
@@ -673,7 +742,7 @@ namespace mx {
 		}
 
 		// Sets the target stream.
-		void										SetStream( CHexEditorInterface * _pediStream );
+		void										SetStream( CHexEditorInterface * _pediStream, CWidget * _pwMainCtrl );
 
 		// Gets the size of the handled data.
 		inline uint64_t								Size() const { return m_pheiTarget ? m_pheiTarget->Size() : 0; }
@@ -769,7 +838,7 @@ namespace mx {
 			 * \return Returns true if there is a selection and if the given address is part of that selection.
 			 **/
 			inline bool								IsSelected( uint64_t _ui64Address ) {
-				return _ui64Address >= ui64Start && _ui64Address <= ui64End;
+				return _ui64Address >= ui64Start && _ui64Address < ui64End;
 			}
 		};
 
@@ -786,7 +855,7 @@ namespace mx {
 
 			// == Functions.
 			/** Returns true if degenerate (treated as empty on end-gesture). */
-			inline bool								Empty() const { return ui32Cols == 0 || ui64Lines == 0; }
+			inline bool								Empty() const { return ui32Cols == 0 /*|| ui64Lines == 0*/; }
 
 			/**
 			 * Determines if a given address is in the selection.
@@ -803,7 +872,7 @@ namespace mx {
 				if ( ui64AddrRow < ui64AnchorRow || ui64AddrRow > ui64AnchorRow + ui64Lines ) { return false; }
 
 				uint64_t ui64AddrCol = _ui64Address % _ui32BytesPerRow;
-				return ui64AddrCol >= ui64AnchorCol && ui64AddrCol <= ui64AnchorCol + ui32Cols;
+				return ui64AddrCol >= ui64AnchorCol && ui64AddrCol < ui64AnchorCol + ui32Cols;
 			}
 		};
 
@@ -819,6 +888,17 @@ namespace mx {
 
 
 			// == Functions.
+			/**
+			 * Is there an actual selection?
+			 * 
+			 * \return Returns true if both bHas is true and the selection region has a non-0 area.
+			 **/
+			inline bool								HasSelection() const {
+				if ( !bHas ) { return false; }
+				if ( smMode == LSN_SM_NORMAL ) { return !sn.Empty(); }
+				return !sc.Empty();
+			}
+
 			/**
 			 * True if selection is limited to a single logical row (for Normal) or single row (for Column).
 			 * Used for conversion logic.
@@ -864,8 +944,9 @@ namespace mx {
 		struct MX_SELECT_GESTURE {
 			LSN_SELECTION_MODE						smCurrent			= LSN_SM_NORMAL;					/**< CurrentMode for this gesture. */
 
-			uint64_t								ui64AnchorAddr		= 0;								/**< Address at mouse-down (top-left for column mode). */
-			uint64_t								ui64CaretAddr		= 0;								/**< Address under the mouse during drag. */
+			uint64_t								ui64AnchorAddr		= 0;								/**< Selection "from" address. */
+			uint64_t								ui64MouseAnchorAddr	= 0;								/**< Original anchor address when beginning a mouse drag. */
+			uint64_t								ui64CaretAddr		= 0;								/**< Selection "to" address. */
 			int32_t									i32CaretIdx			= -1;								/**< The index into the text where the caret is (IE if a value at an address is E7, this could be 0 to put the caret under the E, or 1 to put it under the 7). */
 
 			POINT									ptDown				= { 0, 0 };							/**< Client-space mouse-down point. */
@@ -877,6 +958,7 @@ namespace mx {
 		};
 
 		// == Members.
+		CWidget *									m_pwHexParent = nullptr;								/**< The main hex-editor window. */
 		MX_STYLE *									m_psOptions = nullptr;									/**< Pointer to the shared options. */
 		MX_FONT_SET *								m_pfsFonts[2] = {};										/**< Shared fonts. */
 		
@@ -893,6 +975,8 @@ namespace mx {
 		CHexEditorInterface *						m_pheiTarget = nullptr;									/**< The stream of data to handle. */
 		MX_SELECT_GESTURE							m_sgSelGesture {};										/**< Selection action. */
 		MX_SELECTION								m_sSel {};												/**< Actual selection. */
+		CUtilities::MX_TIMER						m_tCaretBlink;											/**< The blinking of the caret. */
+		bool										m_bCaretOn = true;										/**< Caret on or off during active blink. */
 
 		// The main window class.
 		static ATOM									m_aAtom;
@@ -962,6 +1046,63 @@ namespace mx {
 		 **/
 		void										DrawArea( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, MX_DATA_FMT _dfFmt, uint32_t _ui32LinesToDraw, const CHexEditorInterface::CBuffer &_bData, bool _bRightArea );
 
+		/**
+		 * \brief Starts the caret blink timer.
+		 *
+		 * If the caret blink timer is not already running, this function creates a
+		 * Win32 timer using the system caret blink time (or a reasonable default
+		 * if the system value is disabled). The caret is set to the "on" phase and
+		 * its rectangle is invalidated when the timer begins.
+		 */
+		inline void									StartCaretBlink() {
+			UINT uBlink = ::GetCaretBlinkTime();
+			if ( uBlink == 0 || uBlink == INFINITE ) {
+				uBlink = 500;
+			}
+			m_bCaretOn = true;
+			m_tCaretBlink.Start( Wnd(), MX_TI_HEX_CARET, uBlink, nullptr );
+			/*lsw::LSW_RECT rCaret;
+			if ( GetCaretRect( rCaret ) ) {
+				::InvalidateRect( Wnd(), &rCaret, FALSE );
+			}*/
+		}
+
+		/**
+		 * \brief Stops the caret blink timer and hides the caret.
+		 *
+		 * If a caret timer is active, this function cancels the timer and forces
+		 * the caret to the "off" phase. The caret rectangle is invalidated so that
+		 * the caret is erased from the display.
+		 */
+		void										StopCaretBlink() {
+			m_tCaretBlink.Stop();
+			m_bCaretOn = false;
+				
+			/*lsw::LSW_RECT rCaret;
+			if ( GetCaretRect( rCaret ) ) {
+				::InvalidateRect( Wnd(), &rCaret, FALSE );
+			}*/
+		}
+
+		/**
+		 * \brief Resets the caret blink phase after a caret move.
+		 *
+		 * When the caret address changes due to keyboard or mouse input, this
+		 * function forces the caret into the "on" phase and invalidates the caret
+		 * rectangle so that it is redrawn immediately without waiting for the next
+		 * timer tick.
+		 */
+		void										ResetCaretBlinkPhase() {
+			// Called whenever caret moves (keyboard, mouse, etc.).
+			if ( m_tCaretBlink.uiptrActiveId == 0 ) { return; }
+			m_bCaretOn = true;
+			/*lsw::LSW_RECT rCaret;
+			if ( GetCaretRect( rCaret ) ) {
+				::InvalidateRect( Wnd(), &rCaret, FALSE );
+			}*/
+		}
+
+
 		// Computes font metrics.
 		void										ComputeFontMetrics() {
 			ComputeFontMetrics( (*Font()), m_wDpiY, Wnd() );
@@ -1003,6 +1144,15 @@ namespace mx {
 		 * \return Returns the background color for the given cell.
 		 **/
 		COLORREF									CellBgColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize, bool _bRightArea );
+
+		/**
+		 * Gets the rectangle for a cell's text.
+		 * 
+		 * \param _ui64Address The address whose cell is to be gotten.
+		 * \param _bRightArea If true, the cell is in the right area, otherwise it is in the left area.
+		 * \return Returns the client rectable for the given text cell.
+		 **/
+		lsw::LSW_RECT								GetCellTextRect( uint64_t _ui64Address, bool _bRightArea );
 
 		// Gets the minimum address digits.
 		uint32_t									MinAddrDigits() const {
@@ -1242,8 +1392,6 @@ namespace mx {
 			// If click is closer to End, move End; anchor is Start.
 			const uint64_t ui64AnchorAddr = (ui64DistStart <= ui64DistEnd) ? ui64End : ui64Start;
 
-			// Prime gesture state.
-			m_sgSelGesture = MX_SELECT_GESTURE{};
 			m_sgSelGesture.ptDown = _ptClient;
 			m_sgSelGesture.bPendingThreshold = false;			// We are already selecting.
 			m_sgSelGesture.bSelecting = true;
@@ -1336,7 +1484,7 @@ namespace mx {
 			uint64_t ui64Key = (static_cast<uint64_t>(*reinterpret_cast<uint32_t *>(&crLeft)) << 32ULL) | (*reinterpret_cast<uint32_t *>(&crRight));
 			auto aKey = m_mColorLookup.find( ui64Key );
 			if ( aKey == m_mColorLookup.end() ) {
-				COLORREF cdRes = lsw::CHelpers::MixColorRef_NosRGB( GetRValue( crLeft ), GetRValue( crRight ),
+				COLORREF cdRes = lsw::CHelpers::MixColorRef( GetRValue( crLeft ), GetRValue( crRight ),
 					GetGValue( crLeft ), GetGValue( crRight ),
 					GetBValue( crLeft ), GetBValue( crRight ),
 					MX_GetAValue( crRight ) / 255.0f );

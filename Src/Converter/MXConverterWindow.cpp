@@ -180,7 +180,7 @@ namespace mx {
 		};
 		m_iImages.Create( 24, 24, ILC_COLOR32, MX_I_TOTAL, MX_I_TOTAL );
 
-		for ( size_t I = 0; I < MX_ELEMENTS( sImages ); ++I ) {
+		for ( size_t I = 0; I < std::size( sImages ); ++I ) {
 			CSecureWString wsTemp = CSystem::GetResourcesPathW();
 			wsTemp += sImages[I].lpwsImageName;
 			wsTemp += L".bmp";
@@ -237,7 +237,7 @@ namespace mx {
 			};
 #undef MX_TOOL_STR
 
-			plvToolBar->AddButtons( bButtons, MX_ELEMENTS( bButtons ) );
+			plvToolBar->AddButtons( bButtons, std::size( bButtons ) );
 
 			if ( plvRebar ) {
 				plvRebar->SetImageList( m_iImages );
@@ -310,7 +310,7 @@ namespace mx {
 			case CConverterLayout::MX_CWI_BINARY_BE : {
 				switch ( _wCtrlCode ) {
 					case EN_CHANGE : {
-						for ( auto I = MX_ELEMENTS( m_ciInfo ); I-- > 0; ) {
+						for ( auto I = std::size( m_ciInfo ); I-- > 0; ) {
 							if ( m_ciInfo[I].wId == _Id ) {
 								UpdateAll( _pwSrc, _Id, m_ciInfo[I] );
 								break;
@@ -354,7 +354,7 @@ namespace mx {
 					CConverterLayout::MX_CWI_FLOAT14_LE, CConverterLayout::MX_CWI_FLOAT14_BE,
 					CConverterLayout::MX_CWI_FLOAT24_LE, CConverterLayout::MX_CWI_FLOAT24_BE,
 				};
-				for ( auto I = MX_ELEMENTS( wId ); I--; ) {
+				for ( auto I = std::size( wId ); I--; ) {
 					if ( _pwControl->Id() == wId[I] ) {
 						//_hBrush = static_cast<HBRUSH>(::GetStockObject( LTGRAY_BRUSH )); //::GetSysColorBrush( COLOR_APPWORKSPACE );
 						_hBrush = m_hRarest;
@@ -368,7 +368,7 @@ namespace mx {
 					CConverterLayout::MX_CWI_FLOAT32_LE, CConverterLayout::MX_CWI_FLOAT32_BE,
 					CConverterLayout::MX_CWI_FLOAT64_LE, CConverterLayout::MX_CWI_FLOAT64_BE,
 				};
-				for ( auto I = MX_ELEMENTS( wId ); I--; ) {
+				for ( auto I = std::size( wId ); I--; ) {
 					if ( _pwControl->Id() == wId[I] ) {
 						//_hBrush = static_cast<HBRUSH>(::GetStockObject( LTGRAY_BRUSH )); //::GetSysColorBrush( COLOR_APPWORKSPACE );
 						_hBrush = m_hFloats;
@@ -383,7 +383,7 @@ namespace mx {
 					CConverterLayout::MX_CWI_INT32_LE, CConverterLayout::MX_CWI_INT32_BE,
 					CConverterLayout::MX_CWI_INT64_LE, CConverterLayout::MX_CWI_INT64_BE,
 				};
-				for ( auto I = MX_ELEMENTS( wId ); I--; ) {
+				for ( auto I = std::size( wId ); I--; ) {
 					if ( _pwControl->Id() == wId[I] ) {
 						//_hBrush = static_cast<HBRUSH>(::GetStockObject( LTGRAY_BRUSH )); //::GetSysColorBrush( COLOR_APPWORKSPACE );
 						_hBrush = m_hSign;
@@ -398,7 +398,7 @@ namespace mx {
 					CConverterLayout::MX_CWI_UINT32_LE, CConverterLayout::MX_CWI_UINT32_BE,
 					CConverterLayout::MX_CWI_UINT64_LE, CConverterLayout::MX_CWI_UINT64_BE,
 				};
-				for ( auto I = MX_ELEMENTS( wId ); I--; ) {
+				for ( auto I = std::size( wId ); I--; ) {
 					if ( _pwControl->Id() == wId[I] ) {
 						_hBrush = m_hUnsign;
 						return LSW_H_HANDLED;
@@ -410,7 +410,7 @@ namespace mx {
 				WORD wId[] = {
 					CConverterLayout::MX_CWI_HEX_LE, CConverterLayout::MX_CWI_HEX_BE,
 				};
-				for ( auto I = MX_ELEMENTS( wId ); I--; ) {
+				for ( auto I = std::size( wId ); I--; ) {
 					if ( _pwControl->Id() == wId[I] ) {
 						_hBrush = m_hHex;
 						return LSW_H_HANDLED;
@@ -421,7 +421,7 @@ namespace mx {
 				WORD wId[] = {
 					CConverterLayout::MX_CWI_OCT_LE, CConverterLayout::MX_CWI_OCT_BE,
 				};
-				for ( auto I = MX_ELEMENTS( wId ); I--; ) {
+				for ( auto I = std::size( wId ); I--; ) {
 					if ( _pwControl->Id() == wId[I] ) {
 						_hBrush = m_hOct;
 						return LSW_H_HANDLED;
@@ -432,7 +432,7 @@ namespace mx {
 				WORD wId[] = {
 					CConverterLayout::MX_CWI_BINARY_LE, CConverterLayout::MX_CWI_BINARY_BE,
 				};
-				for ( auto I = MX_ELEMENTS( wId ); I--; ) {
+				for ( auto I = std::size( wId ); I--; ) {
 					if ( _pwControl->Id() == wId[I] ) {
 						_hBrush = m_hBinary;
 						return LSW_H_HANDLED;
@@ -445,7 +445,7 @@ namespace mx {
 					CConverterLayout::MX_CWI_UTF16_LE, CConverterLayout::MX_CWI_UTF16_BE,
 					CConverterLayout::MX_CWI_UTF32_LE, CConverterLayout::MX_CWI_UTF32_BE,
 				};
-				for ( auto I = MX_ELEMENTS( wId ); I--; ) {
+				for ( auto I = std::size( wId ); I--; ) {
 					if ( _pwControl->Id() == wId[I] ) {
 						_hBrush = m_hStrings;
 						return LSW_H_HANDLED;
@@ -1060,7 +1060,7 @@ namespace mx {
 					if ( plvToolBar ) {
 						bAltDisp = plvToolBar->IsChecked( CConverterLayout::MX_BC_SCINOT ) ? true : false;
 					}
-					for ( auto I = MX_ELEMENTS( m_ciInfo ); I--; ) {
+					for ( auto I = std::size( m_ciInfo ); I--; ) {
 						if ( m_ciInfo[I].wId != _wId ) {
 							m_ciInfo[I].pfSetValueFunc( FindChild( m_ciInfo[I].wId ), rRes, m_ciInfo[I].ncType, m_ciInfo[I].sBits, m_ciInfo[I].bBigEnd, sSize,
 								bAltDisp );
@@ -1077,7 +1077,7 @@ namespace mx {
 	void CConverterWindow::UpdateAll() {
 		if ( !m_wLastUpdateCtl ) { return; }
 
-		for ( auto I = MX_ELEMENTS( m_ciInfo ); I-- > 0; ) {
+		for ( auto I = std::size( m_ciInfo ); I-- > 0; ) {
 			if ( m_ciInfo[I].wId == m_wLastUpdateCtl ) {
 				UpdateAll( FindChild( m_wLastUpdateCtl ), m_wLastUpdateCtl, m_ciInfo[I] );
 				break;

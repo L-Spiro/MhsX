@@ -56,7 +56,7 @@ namespace mx {
 			lsw::CWndClassEx wceEx;
 			wceEx.SetInstance( lsw::CBase::GetThisHandle() );
 			WCHAR szStr[9];
-			mx::CUtilities::RandomString( szStr, MX_ELEMENTS( szStr ) );
+			mx::CUtilities::RandomString( szStr, std::size( szStr ) );
 			wceEx.SetClassName( szStr );
 			wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(CTLCOLOR_DLG + 1) );
 			wceEx.SetWindPro( CWidget::WindowProc );

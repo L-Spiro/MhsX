@@ -223,7 +223,7 @@ namespace mx {
 
 		CComboBox * pcbCombo = static_cast<CComboBox *>(FindChild( CFloatingPointStudioLayout::MX_CI_PARM_PRESET_COMBO ));
 		if ( pcbCombo ) {
-			for ( size_t I = 0; I < MX_ELEMENTS( m_pPresets ); ++I ) {
+			for ( size_t I = 0; I < std::size( m_pPresets ); ++I ) {
 				INT iIndex = pcbCombo->AddString( mx::CStringDecoder::DecodeToWString( m_pPresets[I].pcEncryptedName, m_pPresets[I].sNameLen ).c_str() );
 				if ( iIndex != -1 ) {
 					pcbCombo->SetItemData( iIndex, static_cast<LPARAM>(m_pPresets[I].pId) );
@@ -245,7 +245,7 @@ namespace mx {
 				//{ _T_LEN_A3A5D702_sprintf____17f_,				MX_SPRINTF },
 				{ _T_LEN_78A47C44_Python_____17f__,				MX_PYTHON },
 			};
-			for ( size_t I = 0; I < MX_ELEMENTS( fcStrings ); ++I ) {
+			for ( size_t I = 0; I < std::size( fcStrings ); ++I ) {
 				INT iIndex = pcbCombo->AddString( mx::CStringDecoder::DecodeToWString( fcStrings[I].pcStr, fcStrings[I].sLen ).c_str() );
 				if ( iIndex != -1 ) {
 					pcbCombo->SetItemData( iIndex, static_cast<LPARAM>(fcStrings[I].iValue) );
@@ -267,7 +267,7 @@ namespace mx {
 				{ _T_LEN_6D055C20_Downward,						FE_DOWNWARD },
 				{ _T_LEN_08746C74_Toward_Zero,					FE_TOWARDZERO },
 			};
-			for ( size_t I = 0; I < MX_ELEMENTS( fcStrings ); ++I ) {
+			for ( size_t I = 0; I < std::size( fcStrings ); ++I ) {
 				INT iIndex = pcbCombo->AddString( mx::CStringDecoder::DecodeToWString( fcStrings[I].pcStr, fcStrings[I].sLen ).c_str() );
 				if ( iIndex != -1 ) {
 					pcbCombo->SetItemData( iIndex, static_cast<LPARAM>(fcStrings[I].iValue) );
@@ -300,7 +300,7 @@ namespace mx {
 							if ( pcbCombo ) {
 								LPARAM lpSel = pcbCombo->GetCurSelItemData();
 								if ( lpSel != MX_P_CUSTOM ) {
-									for ( size_t I = 0; I < MX_ELEMENTS( m_pPresets ); ++I ) {
+									for ( size_t I = 0; I < std::size( m_pPresets ); ++I ) {
 										if ( m_pPresets[I].pId == lpSel ) {
 
 											CWidget * pwWidget = FindChild( CFloatingPointStudioLayout::MX_CI_PARM_SIGNBIT_CHECK );
@@ -425,7 +425,7 @@ namespace mx {
 			lsw::CWndClassEx wceEx;
 			wceEx.SetInstance( lsw::CBase::GetThisHandle() );
 			WCHAR szStr[9];
-			mx::CUtilities::RandomString( szStr, MX_ELEMENTS( szStr ) );
+			mx::CUtilities::RandomString( szStr, std::size( szStr ) );
 			wceEx.SetClassName( szStr );
 			wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(CTLCOLOR_DLG + 1) );
 			wceEx.SetWindPro( CWidget::WindowProc );
@@ -889,7 +889,7 @@ namespace mx {
 			CFloatingPointStudioLayout::MX_CI_MISC_BIAS_EDIT,
 		};
 		if ( _pwControl ) {
-			for ( size_t I = 0; I < MX_ELEMENTS( wList ); ++I ) {
+			for ( size_t I = 0; I < std::size( wList ); ++I ) {
 				if ( wList[I] == _pwControl->Id() ) {
 					_hBrush = ::GetSysColorBrush( COLOR_WINDOW );
 					return LSW_H_HANDLED;
@@ -903,7 +903,7 @@ namespace mx {
 	void CFloatingPointStudioWindow::UpdatePreset( const MX_CUR_SETTINGS &_csSettings ) {
 		CComboBox * pcbCombo = static_cast<CComboBox *>(FindChild( CFloatingPointStudioLayout::MX_CI_PARM_PRESET_COMBO ));
 		if ( pcbCombo ) {
-			for ( size_t I = 0; I < MX_ELEMENTS( m_pPresets ); ++I ) {
+			for ( size_t I = 0; I < std::size( m_pPresets ); ++I ) {
 				if ( m_pPresets[I].bSign == _csSettings.bSign &&
 					m_pPresets[I].bImpBit == _csSettings.bImpBit &&
 					m_pPresets[I].ui8ExpBits == _csSettings.ui8ExpBits &&

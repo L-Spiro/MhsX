@@ -775,7 +775,7 @@ namespace mx {
 			{ SW_SHOWDEFAULT, _T_LEN_18095A2F_SHOWDEFAULT },
 			{ SW_FORCEMINIMIZE, _T_LEN_C2DC3EA7_FORCEMINIMIZE },
 		};
-		for ( size_t I = 0; I < MX_ELEMENTS( aTable ); ++I ) {
+		for ( size_t I = 0; I < std::size( aTable ); ++I ) {
 			if ( _iVal == aTable[I].iType ) {
 				CHAR szBuffer[_T_MAX_LEN];
 				if ( !_bShort ) {
@@ -866,13 +866,13 @@ namespace mx {
 			CHAR szTemp[128];
 			CHAR szTemp2[128];
 			std::strftime( szTemp, sizeof( szTemp ),"%d-%m-%Y %I:%M:%S %Z", ptTimeInfo );
-			std::snprintf( szTemp2, MX_ELEMENTS( szTemp2 ), "%s (%I64u)", szTemp, _uiTime );
-			szTemp2[MX_ELEMENTS(szTemp2)-1] = '\0';
+			std::snprintf( szTemp2, std::size( szTemp2 ), "%s (%I64u)", szTemp, _uiTime );
+			szTemp2[std::size(szTemp2)-1] = '\0';
 			_sString = szTemp2;
 		}
 		else {
 			CHAR szTemp2[128];
-			std::snprintf( szTemp2, MX_ELEMENTS( szTemp2 ), "%I64u", _uiTime );
+			std::snprintf( szTemp2, std::size( szTemp2 ), "%I64u", _uiTime );
 			_sString = szTemp2;
 		}
 		return _sString.c_str();
@@ -880,7 +880,7 @@ namespace mx {
 
 	// Creates a hexadecimal string.  Returns the internal buffer, which means the result must be copied as it will be overwritten when the next function that uses the internal buffer is called.
 	const CHAR * CUtilities::ToHex( uint64_t _uiValue, uint32_t _uiNumDigits, bool _bIncludePrefix ) {
-		return ToHex( _uiValue, m_szTemp, MX_ELEMENTS( m_szTemp ), _uiNumDigits, _bIncludePrefix );
+		return ToHex( _uiValue, m_szTemp, std::size( m_szTemp ), _uiNumDigits, _bIncludePrefix );
 	}
 	
 	// Creates a hexadecimal string.
@@ -889,14 +889,14 @@ namespace mx {
 		CHAR szFormat[32];
 		if ( _bIncludePrefix ) {
 			if ( Options.bUse0xForHex ) {
-				std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "0x%%.%uI64X", _uiNumDigits );
+				std::snprintf( szFormat, std::size( szFormat ), "0x%%.%uI64X", _uiNumDigits );
 			}
 			else {
-				std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64Xh", _uiNumDigits );
+				std::snprintf( szFormat, std::size( szFormat ), "%%.%uI64Xh", _uiNumDigits );
 			}
 		}
 		else {
-			std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64X", _uiNumDigits );
+			std::snprintf( szFormat, std::size( szFormat ), "%%.%uI64X", _uiNumDigits );
 		}
 		std::snprintf( _pcRet, _sLen, szFormat, _uiValue );
 		return _pcRet;
@@ -905,7 +905,7 @@ namespace mx {
 	// Creates a hexadecimal string.
 	const CHAR * CUtilities::ToHex( uint64_t _uiValue, std::string &_sString, uint32_t _uiNumDigits, bool _bIncludePrefix ) {
 		CHAR szTemp[32];
-		ToHex( _uiValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits );
+		ToHex( _uiValue, szTemp, std::size( szTemp ), _uiNumDigits );
 
 		_sString += szTemp;
 		return _sString.c_str();
@@ -917,14 +917,14 @@ namespace mx {
 		WCHAR szFormat[32];
 		if ( _bIncludePrefix ) {
 			if ( Options.bUse0xForHex ) {
-				std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"0x%%.%uI64X", _uiNumDigits );
+				std::swprintf( szFormat, std::size( szFormat ), L"0x%%.%uI64X", _uiNumDigits );
 			}
 			else {
-				std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64Xh", _uiNumDigits );
+				std::swprintf( szFormat, std::size( szFormat ), L"%%.%uI64Xh", _uiNumDigits );
 			}
 		}
 		else {
-			std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64X", _uiNumDigits );
+			std::swprintf( szFormat, std::size( szFormat ), L"%%.%uI64X", _uiNumDigits );
 		}
 		std::swprintf( _pcRet, _sLen, szFormat, _uiValue );
 		return _pcRet;
@@ -933,7 +933,7 @@ namespace mx {
 	// Creates a hexadecimal string.
 	const WCHAR * CUtilities::ToHex( uint64_t _uiValue, std::wstring &_sString, uint32_t _uiNumDigits, bool _bIncludePrefix ) {
 		WCHAR szTemp[32];
-		ToHex( _uiValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits, _bIncludePrefix );
+		ToHex( _uiValue, szTemp, std::size( szTemp ), _uiNumDigits, _bIncludePrefix );
 
 		_sString += szTemp;
 		return _sString.c_str();
@@ -1025,14 +1025,14 @@ namespace mx {
 
 	// Creates an unsigned integer string.  Returns the internal buffer, which means the result must be copied as it will be overwritten when the next function that uses the internal buffer is called.
 	const CHAR * CUtilities::ToUnsigned( uint64_t _uiValue, uint32_t _uiNumDigits ) {
-		return ToUnsigned( _uiValue, m_szTemp, MX_ELEMENTS( m_szTemp ), _uiNumDigits );
+		return ToUnsigned( _uiValue, m_szTemp, std::size( m_szTemp ), _uiNumDigits );
 	}
 
 	// Creates an unsigned integer string.
 	const CHAR * CUtilities::ToUnsigned( uint64_t _uiValue, CHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
 		_uiNumDigits = std::max( _uiNumDigits, 1U );
 		CHAR szFormat[32];
-		std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64u", _uiNumDigits );
+		std::snprintf( szFormat, std::size( szFormat ), "%%.%uI64u", _uiNumDigits );
 		std::snprintf( _pcRet, _sLen, szFormat, _uiValue );
 		return _pcRet;
 	}
@@ -1040,7 +1040,7 @@ namespace mx {
 	// Creates an unsigned integer string.
 	const CHAR * CUtilities::ToUnsigned( uint64_t _uiValue, std::string &_sString, uint32_t _uiNumDigits ) {
 		CHAR szTemp[32];
-		ToUnsigned( _uiValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits );
+		ToUnsigned( _uiValue, szTemp, std::size( szTemp ), _uiNumDigits );
 
 		_sString += szTemp;
 		return _sString.c_str();
@@ -1050,7 +1050,7 @@ namespace mx {
 	const WCHAR * CUtilities::ToUnsigned( uint64_t _uiValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
 		_uiNumDigits = std::max( _uiNumDigits, 1U );
 		WCHAR szFormat[32];
-		std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64u", _uiNumDigits );
+		std::swprintf( szFormat, std::size( szFormat ), L"%%.%uI64u", _uiNumDigits );
 		std::swprintf( _pcRet, _sLen, szFormat, _uiValue );
 		return _pcRet;
 	}
@@ -1058,7 +1058,7 @@ namespace mx {
 	// Creates an unsigned integer string.
 	const WCHAR * CUtilities::ToUnsigned( uint64_t _uiValue, std::wstring &_sString, uint32_t _uiNumDigits ) {
 		WCHAR szTemp[32];
-		ToUnsigned( _uiValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits );
+		ToUnsigned( _uiValue, szTemp, std::size( szTemp ), _uiNumDigits );
 
 		_sString += szTemp;
 		return _sString.c_str();
@@ -1068,7 +1068,7 @@ namespace mx {
 	const CHAR * CUtilities::ToSigned( int64_t _iValue, CHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
 		_uiNumDigits = std::max( _uiNumDigits, 1U );
 		CHAR szFormat[32];
-		std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "%%.%uI64d", _uiNumDigits );
+		std::snprintf( szFormat, std::size( szFormat ), "%%.%uI64d", _uiNumDigits );
 		std::snprintf( _pcRet, _sLen, szFormat, _iValue );
 		return _pcRet;
 	}
@@ -1076,7 +1076,7 @@ namespace mx {
 	// Creates a signed integer string.
 	const CHAR * CUtilities::ToSigned( int64_t _iValue, std::string &_sString, uint32_t _uiNumDigits ) {
 		CHAR szTemp[32];
-		ToSigned( _iValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits );
+		ToSigned( _iValue, szTemp, std::size( szTemp ), _uiNumDigits );
 
 		_sString += szTemp;
 		return _sString.c_str();
@@ -1086,7 +1086,7 @@ namespace mx {
 	const WCHAR * CUtilities::ToSigned( int64_t _iValue, WCHAR * _pcRet, size_t _sLen, uint32_t _uiNumDigits ) {
 		_uiNumDigits = std::max( _uiNumDigits, 1U );
 		WCHAR szFormat[32];
-		std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"%%.%uI64d", _uiNumDigits );
+		std::swprintf( szFormat, std::size( szFormat ), L"%%.%uI64d", _uiNumDigits );
 		std::swprintf( _pcRet, _sLen, szFormat, _iValue );
 		return _pcRet;
 	}
@@ -1094,7 +1094,7 @@ namespace mx {
 	// Creates an signed integer string.
 	const WCHAR * CUtilities::ToSigned( int64_t _iValue, std::wstring &_sString, uint32_t _uiNumDigits ) {
 		WCHAR szTemp[32];
-		ToSigned( _iValue, szTemp, MX_ELEMENTS( szTemp ), _uiNumDigits );
+		ToSigned( _iValue, szTemp, std::size( szTemp ), _uiNumDigits );
 
 		_sString += szTemp;
 		return _sString.c_str();
@@ -1113,12 +1113,12 @@ namespace mx {
 		}
 		else if ( _iSigDigits < 0 ) {
 			CHAR szFormat[32];
-			std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "%%.%ug", -_iSigDigits );
+			std::snprintf( szFormat, std::size( szFormat ), "%%.%ug", -_iSigDigits );
 			iLen = std::snprintf( pcBuffer, sLen, szFormat, _dValue );
 		}
 		else {
 			CHAR szFormat[32];
-			std::snprintf( szFormat, MX_ELEMENTS( szFormat ), "%%.%ue", _iSigDigits );
+			std::snprintf( szFormat, std::size( szFormat ), "%%.%ue", _iSigDigits );
 			iLen = std::snprintf( pcBuffer, sLen, szFormat, _dValue );
 		}
 		_sString.append( pcBuffer, iLen );
@@ -1157,12 +1157,12 @@ namespace mx {
 		}
 		else if ( _iSigDigits < 0 ) {
 			WCHAR szFormat[32];
-			std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"%%.%ug", -_iSigDigits );
+			std::swprintf( szFormat, std::size( szFormat ), L"%%.%ug", -_iSigDigits );
 			iLen = std::swprintf( pcBuffer, sLen, szFormat, _dValue );
 		}
 		else {
 			WCHAR szFormat[32];
-			std::swprintf( szFormat, MX_ELEMENTS( szFormat ), L"%%.%ue", _iSigDigits );
+			std::swprintf( szFormat, std::size( szFormat ), L"%%.%ue", _iSigDigits );
 			iLen = std::swprintf( pcBuffer, sLen, szFormat, _dValue );
 		}
 		_sString.append( pcBuffer, iLen );
@@ -1379,7 +1379,7 @@ namespace mx {
 
 	// Gets the size of a data type.
 	DWORD CUtilities::DataTypeSize( CUtilities::MX_DATA_TYPES _dtType ) {
-		for ( size_t I = 0; I < MX_ELEMENTS( DataTypeInfo ); ++I ) {
+		for ( size_t I = 0; I < std::size( DataTypeInfo ); ++I ) {
 			if ( DataTypeInfo[I].dtType == _dtType ) { return DataTypeInfo[I].dwSize; }
 		}
 		return 0;
@@ -1387,7 +1387,7 @@ namespace mx {
 
 	// Gets the alignment of a data type.
 	DWORD CUtilities::DataTypeAlign( CUtilities::MX_DATA_TYPES _dtType ) {
-		for ( size_t I = 0; I < MX_ELEMENTS( DataTypeInfo ); ++I ) {
+		for ( size_t I = 0; I < std::size( DataTypeInfo ); ++I ) {
 			if ( DataTypeInfo[I].dtType == _dtType ) { return DataTypeInfo[I].dwAlign; }
 		}
 		return 0;
@@ -1395,7 +1395,7 @@ namespace mx {
 
 	// Is the data type a float type?
 	BOOL CUtilities::DataTypeIsFloat( CUtilities::MX_DATA_TYPES _dtType ) {
-		for ( size_t I = 0; I < MX_ELEMENTS( DataTypeInfo ); ++I ) {
+		for ( size_t I = 0; I < std::size( DataTypeInfo ); ++I ) {
 			if ( DataTypeInfo[I].dtType == _dtType ) { return DataTypeInfo[I].bIsFloat; }
 		}
 		return FALSE;
@@ -1403,7 +1403,7 @@ namespace mx {
 
 	// Is the data type signed?
 	BOOL CUtilities::DataTypeIsSigned( CUtilities::MX_DATA_TYPES _dtType ) {
-		for ( size_t I = 0; I < MX_ELEMENTS( DataTypeInfo ); ++I ) {
+		for ( size_t I = 0; I < std::size( DataTypeInfo ); ++I ) {
 			if ( DataTypeInfo[I].dtType == _dtType ) { return DataTypeInfo[I].bIsSigned; }
 		}
 		return FALSE;
@@ -1457,7 +1457,7 @@ namespace mx {
 
 	// Gets the range of a data type as a string.
 	const CHAR * CUtilities::DataTypeRange( CUtilities::MX_DATA_TYPES _dtType, std::string &_sString ) {
-		for ( size_t I = 0; I < MX_ELEMENTS( DataTypeInfo ); ++I ) {
+		for ( size_t I = 0; I < std::size( DataTypeInfo ); ++I ) {
 			if ( DataTypeInfo[I].dtType == _dtType ) {
 				_sString.append( mx::CStringDecoder::DecodeToString( DataTypeInfo[I].pcRange, DataTypeInfo[I].sRangeLen ) );
 				break;
@@ -1468,7 +1468,7 @@ namespace mx {
 
 	// Gets the range of a data type as a string.
 	const WCHAR * CUtilities::DataTypeRange( CUtilities::MX_DATA_TYPES _dtType, std::wstring &_sString ) {
-		for ( size_t I = 0; I < MX_ELEMENTS( DataTypeInfo ); ++I ) {
+		for ( size_t I = 0; I < std::size( DataTypeInfo ); ++I ) {
 			if ( DataTypeInfo[I].dtType == _dtType ) {
 				_sString.append( mx::CStringDecoder::DecodeToWString( DataTypeInfo[I].pcRange, DataTypeInfo[I].sRangeLen ) );
 				break;
@@ -1512,7 +1512,7 @@ namespace mx {
 			_sString.clear();
 		}
 
-		for ( size_t I = 0; I < MX_ELEMENTS( DataTypeInfo ); ++I ) {
+		for ( size_t I = 0; I < std::size( DataTypeInfo ); ++I ) {
 			if ( DataTypeInfo[I].dtType == _dtType ) {
 				_sString.append( (_dwOptions & MX_DTO_CODENAMES) ?
 					mx::CStringDecoder::DecodeToString( DataTypeInfo[I].pcCodeName, DataTypeInfo[I].sCodeNameLen ) :
@@ -1550,7 +1550,7 @@ namespace mx {
 			_sString.clear();
 		}
 
-		for ( size_t I = 0; I < MX_ELEMENTS( DataTypeInfo ); ++I ) {
+		for ( size_t I = 0; I < std::size( DataTypeInfo ); ++I ) {
 			if ( DataTypeInfo[I].dtType == _dtType ) {
 				_sString.append( (_dwOptions & MX_DTO_CODENAMES) ?
 					mx::CStringDecoder::DecodeToWString( DataTypeInfo[I].pcCodeName, DataTypeInfo[I].sCodeNameLen ) :
@@ -1611,7 +1611,7 @@ namespace mx {
 			}
 			case MX_DT_VOID : {
 				char szBuffer[32];
-				int iLen = std::snprintf( szBuffer, MX_ELEMENTS( szBuffer ), "%.11I64X", _pdtData->u.Pointer64 );
+				int iLen = std::snprintf( szBuffer, std::size( szBuffer ), "%.11I64X", _pdtData->u.Pointer64 );
 				_sRet.append( szBuffer, iLen );
 				break;
 			}
@@ -1653,7 +1653,7 @@ namespace mx {
 			}
 			case MX_DT_VOID : {
 				wchar_t szBuffer[32];
-				int iLen = std::swprintf( szBuffer, MX_ELEMENTS( szBuffer ), L"%.11I64X", _pdtData->u.Pointer64 );
+				int iLen = std::swprintf( szBuffer, std::size( szBuffer ), L"%.11I64X", _pdtData->u.Pointer64 );
 				_swsRet.append( szBuffer, iLen );
 				break;
 			}
@@ -1830,7 +1830,7 @@ namespace mx {
 			{ MX_RE_BIG_5,			CCodePages::MX_big5 },
 			{ MX_RE_GB_18030,		CCodePages::MX_GB18030 },
 		};
-		for ( size_t I = MX_ELEMENTS( sTable ); I--; ) {
+		for ( size_t I = std::size( sTable ); I--; ) {
 			if ( sTable[I].reValue == _reEncoding ) {
 				return sTable[I].uiRet;
 			}
@@ -1852,7 +1852,7 @@ namespace mx {
 			{ _T_LEN_62CB7D7B_Group_Search,		MX_ST_GROUP_SEARCH },
 		};
 
-		for ( size_t I = MX_ELEMENTS( aData ); I--; ) {
+		for ( size_t I = std::size( aData ); I--; ) {
 			if ( aData[I].ui32Id == _stType ) {
 				_sString += mx::CStringDecoder::DecodeToWString( aData[I].pcName, aData[I].sLen );
 				return _sString.c_str();
@@ -1878,7 +1878,7 @@ namespace mx {
 			{ _T_LEN_8558CA08_Quick_Expression,		MX_ET_QUICK_EXP },
 		};
 
-		for ( size_t I = MX_ELEMENTS( aData ); I--; ) {
+		for ( size_t I = std::size( aData ); I--; ) {
 			if ( aData[I].ui32Id == _etType ) {
 				_sString += mx::CStringDecoder::DecodeToWString( aData[I].pcName, aData[I].sLen );
 				return _sString.c_str();
@@ -1913,7 +1913,7 @@ namespace mx {
 			{ _T_LEN_8558CA08_Quick_Expression,		MX_SET_QUICK_EXP },
 		};
 
-		for ( size_t I = MX_ELEMENTS( aData ); I--; ) {
+		for ( size_t I = std::size( aData ); I--; ) {
 			if ( aData[I].ui32Id == _setType ) {
 				_sString += mx::CStringDecoder::DecodeToWString( aData[I].pcName, aData[I].sLen );
 				return _sString.c_str();
@@ -2222,7 +2222,7 @@ namespace mx {
 			CCodePages::MX_GB18030,
 			CCodePages::MX_hz_gb_2312
 		};
-		for ( size_t I = 0; I < MX_ELEMENTS( uiList ); ++I ) {
+		for ( size_t I = 0; I < std::size( uiList ); ++I ) {
 			if ( uiList[I] == _uiCodePage ) { return true; }
 		}
 		return _uiCodePage >= 57002 && _uiCodePage <= 57011;
@@ -2323,7 +2323,7 @@ namespace mx {
 			uint32_t ui32This = ee::CExpEval::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			if ( sLen == 1 ) {
 				bool bFound = false;
-				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
+				for ( size_t J = 0; J < std::size( sTable ) && !bFound; ++J ) {
 					if ( _swsInput[I] == sTable[J].wcSrc ) {
 						swsOut.push_back( L'\\' );
 						swsOut.push_back( sTable[J].wcDst );
@@ -2385,7 +2385,7 @@ namespace mx {
 			uint32_t ui32This = ee::CExpEval::NextUtf32Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			if ( sLen == 1 && MX_UTF_INVALID != ui32This ) {
 				bool bFound = false;
-				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
+				for ( size_t J = 0; J < std::size( sTable ) && !bFound; ++J ) {
 					if ( _swsInput[I] == sTable[J].wcSrc ) {
 						vOutput.push_back( L'\\' );
 						vOutput.push_back( sTable[J].wcDst );
@@ -2598,7 +2598,7 @@ namespace mx {
 			uint32_t ui32This = ee::CExpEval::NextUtf8Char( &_ssInput[I], _ssInput.size() - I, &sLen );
 			if ( sLen == 1 && MX_UTF_INVALID != ui32This ) {
 				bool bFound = false;
-				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
+				for ( size_t J = 0; J < std::size( sTable ) && !bFound; ++J ) {
 					if ( _ssInput[I] == sTable[J].cSrc ) {
 						vOutput.push_back( '\\' );
 						vOutput.push_back( sTable[J].cDst );
@@ -2683,7 +2683,7 @@ namespace mx {
 			uint32_t ui32This = ee::CExpEval::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			if ( sLen == 1 ) {
 				bool bFound = false;
-				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
+				for ( size_t J = 0; J < std::size( sTable ) && !bFound; ++J ) {
 					if ( _swsInput[I] == sTable[J].wcSrc ) {
 						swsOut.push_back( L'\\' );
 						swsOut.push_back( sTable[J].wcDst );
@@ -2760,7 +2760,7 @@ namespace mx {
 			uint32_t ui32This = ee::CExpEval::NextUtf32Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			if ( sLen == 1 && MX_UTF_INVALID != ui32This ) {
 				bool bFound = false;
-				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
+				for ( size_t J = 0; J < std::size( sTable ) && !bFound; ++J ) {
 					if ( _swsInput[I] == sTable[J].wcSrc ) {
 						vOutput.push_back( L'\\' );
 						vOutput.push_back( sTable[J].wcDst );
@@ -2829,7 +2829,7 @@ namespace mx {
 		CSecureString vOutput;
 		for ( size_t I = 0; I < _ssInput.size(); ++I ) {
 			bool bFound = false;
-			for ( size_t J = 0; J < MX_ELEMENTS( sTable ); ++J ) {
+			for ( size_t J = 0; J < std::size( sTable ); ++J ) {
 				if ( _ssInput[I] == sTable[J].cSrc ) {
 					bFound = true;
 					vOutput.push_back( '\\' );
@@ -2871,7 +2871,7 @@ namespace mx {
 			uint32_t ui32This = ee::CExpEval::NextUtf16Char( &_swsInput[I], _swsInput.size() - I, &sLen );
 			if ( sLen == 1 ) {
 				bool bFound = false;
-				for ( size_t J = 0; J < MX_ELEMENTS( sTable ) && !bFound; ++J ) {
+				for ( size_t J = 0; J < std::size( sTable ) && !bFound; ++J ) {
 					if ( _swsInput[I] == sTable[J].wcSrc ) {
 						swsOut.push_back( L'\\' );
 						swsOut.push_back( sTable[J].wcDst );
@@ -3162,7 +3162,7 @@ namespace mx {
 
 	// Gets the number of elements in DataTypeInfo.
 	size_t CUtilities::DataTypeInfoLen() {
-		return MX_ELEMENTS( DataTypeInfo );
+		return std::size( DataTypeInfo );
 	}
 
 	// Prints an ee::CExpEvalContainer::EE_RESULT value and appends it to _sString, then returns _sString.
@@ -4117,7 +4117,7 @@ namespace mx {
 			{ NeedsType2( _uiFlags ), CT_CTYPE2, &_wC2Props },
 			{ NeedsType3( _uiFlags ), CT_CTYPE3, &_wC3Props },
 		};
-		for ( size_t I = 0; I < MX_ELEMENTS( bArray ); ++I ) {
+		for ( size_t I = 0; I < std::size( bArray ); ++I ) {
 			if ( bArray[I].bNeedsType ) {
 				if ( bArray[I].pvBuffer->size() < _sBytes ) {
 					try { bArray[I].pvBuffer->resize( _sBytes ); }
@@ -4157,7 +4157,7 @@ namespace mx {
 			{ NeedsType2( _uiFlags ), CT_CTYPE2, &_wC2Props },
 			{ NeedsType3( _uiFlags ), CT_CTYPE3, &_wC3Props },
 		};
-		for ( size_t I = 0; I < MX_ELEMENTS( bArray ); ++I ) {
+		for ( size_t I = 0; I < std::size( bArray ); ++I ) {
 			if ( bArray[I].bNeedsType ) {
 				if ( bArray[I].pvBuffer->size() < _sBytes ) {
 					try { bArray[I].pvBuffer->resize( _sBytes ); }
@@ -4196,7 +4196,7 @@ namespace mx {
 			{ NeedsType2( _uiFlags ), CT_CTYPE2, &_wC2Props },
 			{ NeedsType3( _uiFlags ), CT_CTYPE3, &_wC3Props },
 		};
-		for ( size_t I = 0; I < MX_ELEMENTS( bArray ); ++I ) {
+		for ( size_t I = 0; I < std::size( bArray ); ++I ) {
 			if ( bArray[I].bNeedsType ) {
 				if ( bArray[I].pvBuffer->size() < _sBytes ) {
 					try { bArray[I].pvBuffer->resize( _sBytes ); }
@@ -4235,7 +4235,7 @@ namespace mx {
 			{ NeedsType2( _uiFlags ), CT_CTYPE2, &_wC2Props },
 			{ NeedsType3( _uiFlags ), CT_CTYPE3, &_wC3Props },
 		};
-		for ( size_t I = 0; I < MX_ELEMENTS( bArray ); ++I ) {
+		for ( size_t I = 0; I < std::size( bArray ); ++I ) {
 			if ( bArray[I].bNeedsType ) {
 				if ( bArray[I].pvBuffer->size() < _sBytes ) {
 					try { bArray[I].pvBuffer->resize( _sBytes ); }
@@ -4279,7 +4279,7 @@ namespace mx {
 			if ( (_uiFlags & MX_SSF_LINGUISTIC_IGNOREDIACRITIC) && (_wC3Props[I] & C3_DIACRITIC) ) {
 				//uint32_t ui32This;
 				WCHAR szBuffer[8];
-				int iRet = ::MultiByteToWideChar( CP_ACP, MB_ERR_INVALID_CHARS | MB_COMPOSITE, reinterpret_cast<LPCCH>(&ui32Converted), 1, szBuffer, MX_ELEMENTS( szBuffer ) );
+				int iRet = ::MultiByteToWideChar( CP_ACP, MB_ERR_INVALID_CHARS | MB_COMPOSITE, reinterpret_cast<LPCCH>(&ui32Converted), 1, szBuffer, std::size( szBuffer ) );
 				if ( iRet ) {
 					ui32Converted = szBuffer[0];
 				}
@@ -4332,7 +4332,7 @@ namespace mx {
 				uint32_t ui32Converted = ee::CExpEval::Utf32ToUtf16( ui32Temp, ui32Len );
 				if ( (_uiFlags & MX_SSF_LINGUISTIC_IGNOREDIACRITIC) && (_wC3Props[I] & C3_DIACRITIC) ) {
 					wchar_t szBuffer[32];
-					int iNorm = ::NormalizeString( NormalizationKD, reinterpret_cast<LPCWCH>(&ui32Converted), ui32Len, szBuffer, MX_ELEMENTS( szBuffer ) );
+					int iNorm = ::NormalizeString( NormalizationKD, reinterpret_cast<LPCWCH>(&ui32Converted), ui32Len, szBuffer, std::size( szBuffer ) );
 					if ( iNorm > 0 ) {
 						ui32Converted = szBuffer[0];
 						ui32Len = 1;
@@ -4406,7 +4406,7 @@ namespace mx {
 				uint32_t ui32Converted = ee::CExpEval::Utf32ToUtf16( ui32Temp, ui32Len );
 				if ( (_uiFlags & MX_SSF_LINGUISTIC_IGNOREDIACRITIC) && (_wC3Props[sIdx] & C3_DIACRITIC) ) {
 					wchar_t szBuffer[32];
-					int iNorm = ::NormalizeString( NormalizationKD, reinterpret_cast<LPCWCH>(&ui32Converted), ui32Len, szBuffer, MX_ELEMENTS( szBuffer ) );
+					int iNorm = ::NormalizeString( NormalizationKD, reinterpret_cast<LPCWCH>(&ui32Converted), ui32Len, szBuffer, std::size( szBuffer ) );
 					if ( iNorm > 0 ) {
 						ui32Converted = szBuffer[0];
 						ui32Len = 1;
@@ -4471,7 +4471,7 @@ namespace mx {
 				uint32_t ui32Converted = ee::CExpEval::Utf32ToUtf16( ui32Temp, ui32Len );
 				if ( (_uiFlags & MX_SSF_LINGUISTIC_IGNOREDIACRITIC) && (_wC3Props[sIdx] & C3_DIACRITIC) ) {
 					wchar_t szBuffer[32];
-					int iNorm = ::NormalizeString( NormalizationKD, reinterpret_cast<LPCWCH>(&ui32Converted), ui32Len, szBuffer, MX_ELEMENTS( szBuffer ) );
+					int iNorm = ::NormalizeString( NormalizationKD, reinterpret_cast<LPCWCH>(&ui32Converted), ui32Len, szBuffer, std::size( szBuffer ) );
 					if ( iNorm > 0 ) {
 						ui32Converted = szBuffer[0];
 						ui32Len = 1;
@@ -4795,7 +4795,7 @@ namespace mx {
 
 		
 		WCHAR szBuffer[256];
-		std::swprintf( szBuffer, MX_ELEMENTS( szBuffer ), L"%uy:%ud:%.2uh:%.2um:", uiYears, uiDays, uiHours, uiMinutes );
+		std::swprintf( szBuffer, std::size( szBuffer ), L"%uy:%ud:%.2uh:%.2um:", uiYears, uiDays, uiHours, uiMinutes );
 		wsTemp.append( szBuffer );
 		ToDouble( uiSeconds + dFrac, wsTemp );
 		wsTemp.push_back( L's' );
@@ -4805,7 +4805,7 @@ namespace mx {
 		}
 		else {
 			WCHAR szBuffer[256];
-			//std::swprintf( szBuffer, MX_ELEMENTS( szBuffer ), L"%.2000f", _dValue );
+			//std::swprintf( szBuffer, std::size( szBuffer ), L"%.2000f", _dValue );
 		}
 
 		/*if ( _bClosingPar ) {
@@ -4871,7 +4871,7 @@ namespace mx {
 			//{ _DEC_WS_FDB95134_Pointer,																															LPARAM( MX_DT_VOID ),					},
 			{ _DEC_WS_9912B79F_String,																															LPARAM( MX_DT_STRING ),					},
 		};
-		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, -1 );
+		return FillComboBox( _pwComboBox, ceEnries, std::size( ceEnries ), _lpDefaultSelect, -1 );
 	}
 
 	/**
@@ -4889,7 +4889,7 @@ namespace mx {
 			{ _DEC_WS_A5F79469_No_Greater_Than,																													LPARAM( MX_LT_NO_GREATER_THAN ),		},
 			{ _DEC_WS_5246754D_Range,																															LPARAM( MX_LT_RANGE ),					},
 		};
-		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, -1 );
+		return FillComboBox( _pwComboBox, ceEnries, std::size( ceEnries ), _lpDefaultSelect, -1 );
 	}
 
 	/**
@@ -4942,7 +4942,7 @@ namespace mx {
 			{ CSecureWString( PrintDataType( wsTmp, MX_DT_FLOAT, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_FLOAT ),					},
 			{ CSecureWString( PrintDataType( wsTmp, MX_DT_DOUBLE, Options.dwDataTypeOptions & MX_DTO_CODENAMES, true ) ),										LPARAM( MX_DT_DOUBLE ),					},
 		};
-		return FillComboBox( _pwComboBox, ceEnries, MX_ELEMENTS( ceEnries ), _lpDefaultSelect, -1 );
+		return FillComboBox( _pwComboBox, ceEnries, std::size( ceEnries ), _lpDefaultSelect, -1 );
 	}
 
 	// Adds a Found Address to a TreeListView.

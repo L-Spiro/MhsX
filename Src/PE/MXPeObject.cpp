@@ -411,13 +411,13 @@ namespace mx {
 	VOID CPeObject::RelocAddressToStringwithSection( uint64_t _uiRelocAddr, std::string &_sReturn ) const {
 		CHAR szBuffer[128];
 		if ( !_uiRelocAddr ) {
-			CUtilities::ToHex( _uiRelocAddr, szBuffer, MX_ELEMENTS( szBuffer ), 8 );
+			CUtilities::ToHex( _uiRelocAddr, szBuffer, std::size( szBuffer ), 8 );
 		}
 		else {
 			CHAR szTemp[32];
 			std::sprintf( szBuffer, "%s (%s after loading)",
 				CUtilities::ToHex( _uiRelocAddr, 8 ),
-				CUtilities::ToHex( _uiRelocAddr + ImageBase(), szTemp, MX_ELEMENTS( szTemp ), 0 ) );
+				CUtilities::ToHex( _uiRelocAddr + ImageBase(), szTemp, std::size( szTemp ), 0 ) );
 		}
 		_sReturn += szBuffer;
 		if ( _uiRelocAddr ) {

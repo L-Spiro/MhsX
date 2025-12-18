@@ -22,7 +22,7 @@ namespace mx {
 			{ CUtilities::MX_RO_IGNORE_CASE,		ONIG_OPTION_IGNORECASE },
 		};
 		unsigned int uiRet = ONIG_OPTION_DONT_CAPTURE_GROUP | ONIG_OPTION_FIND_NOT_EMPTY;
-		for ( size_t I = MX_ELEMENTS( sTable ); I--; ) {
+		for ( size_t I = std::size( sTable ); I--; ) {
 			if ( _uiFLags & sTable[I].uiMhsFlag ) {
 				uiRet |= sTable[I].uiOniFlag;
 			}
@@ -49,7 +49,7 @@ namespace mx {
 			{ CUtilities::MX_RF_ONIGURUMA,			ONIG_SYNTAX_ONIGURUMA },
 		};
 		unsigned int uiRet = ONIG_OPTION_DONT_CAPTURE_GROUP | ONIG_OPTION_FIND_NOT_EMPTY;
-		for ( size_t I = MX_ELEMENTS( sTable ); I--; ) {
+		for ( size_t I = std::size( sTable ); I--; ) {
 			if ( _rfFlavor == sTable[I].rfMhsFlavor ) { return sTable[I].postSyntax; }
 		}
 		return ONIG_SYNTAX_ONIGURUMA;
@@ -94,7 +94,7 @@ namespace mx {
 			{ CUtilities::MX_RE_GB_18030,			ONIG_ENCODING_GB18030 },
 		};
 		unsigned int uiRet = ONIG_OPTION_DONT_CAPTURE_GROUP | ONIG_OPTION_FIND_NOT_EMPTY;
-		for ( size_t I = MX_ELEMENTS( sTable ); I--; ) {
+		for ( size_t I = std::size( sTable ); I--; ) {
 			if ( _reEncoding == sTable[I].reMhsEncoding ) {
 				return sTable[I].poetEncoding;
 			}

@@ -46,7 +46,7 @@ namespace mx {
 				CUtilities::MX_DT_FLOAT,
 				CUtilities::MX_DT_DOUBLE
 			};
-			for ( size_t I = 0; I < MX_ELEMENTS( dtTypes ); ++I ) {
+			for ( size_t I = 0; I < std::size( dtTypes ); ++I ) {
 				CSecureWString sTemp;
 				CUtilities::PrintDataType( sTemp, dtTypes[I] );
 				INT iIndex = pcbCombo->AddString( sTemp.c_str() );
@@ -68,7 +68,7 @@ namespace mx {
 				{ _T_LEN_141B20E3_Current_Value_____Val__________, CUtilities::MX_ESQM_VALUE },
 			};
 
-			for ( size_t I = 0; I < MX_ELEMENTS( sTable ); ++I ) {
+			for ( size_t I = 0; I < std::size( sTable ); ++I ) {
 				//CSecureWString sTemp;
 				INT iIndex = pcbCombo->AddString( mx::CStringDecoder::DecodeToWString( sTable[I].pcText, sTable[I].sLen ).c_str() );
 				pcbCombo->SetItemData( iIndex, sTable[I].esqmType );

@@ -170,7 +170,7 @@ namespace mx {
 		};
 #undef MX_TOOL_STR
 
-		plvToolBar->AddButtons( bButtons, MX_ELEMENTS( bButtons ) );
+		plvToolBar->AddButtons( bButtons, std::size( bButtons ) );
 
 		plvRebar->SetImageList( m_iImages );
 		{
@@ -203,7 +203,7 @@ namespace mx {
 
 				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height(), TRUE },
 			};
-			psbStatus->SetParts( spParts, MX_ELEMENTS( spParts ) );
+			psbStatus->SetParts( spParts, std::size( spParts ) );
 		}
 
 		ForceSizeUpdate();
@@ -329,7 +329,7 @@ namespace mx {
 			lsw::CWndClassEx wceEx;
 			wceEx.SetInstance( lsw::CBase::GetThisHandle() );
 			WCHAR szStr[23];
-			mx::CUtilities::RandomString( szStr, MX_ELEMENTS( szStr ) );
+			mx::CUtilities::RandomString( szStr, std::size( szStr ) );
 			wceEx.SetClassName( szStr );
 			wceEx.SetBackgroundBrush( reinterpret_cast<HBRUSH>(CTLCOLOR_DLG + 1) );
 			wceEx.SetWindPro( CWidget::WindowProc );
@@ -1997,7 +1997,7 @@ namespace mx {
 			CHAR szTemp[32];
 			CHAR szBuffer[48];
 			std::sprintf( szBuffer, mx::CStringDecoder::DecodeToString( _T_LEN_03FE75A1__s___s_after_loading_ ).c_str(), CUtilities::ToHex( _ishHeader.VirtualAddress, 8 ),
-				CUtilities::ToHex( _ishHeader.VirtualAddress + _uiImageBase, szTemp, MX_ELEMENTS( szTemp ), 0 ) );
+				CUtilities::ToHex( _ishHeader.VirtualAddress + _uiImageBase, szTemp, std::size( szTemp ), 0 ) );
 			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( szBuffer ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::BytesToHexWithSpaces( &_ishHeader.VirtualAddress, sizeof( _ishHeader.VirtualAddress ), ssRaw );
@@ -2333,8 +2333,8 @@ namespace mx {
 			CHAR szBuffer[128];
 			CHAR szTempOff1[32], szTempOff2[32];
 			std::sprintf( szBuffer, mx::CStringDecoder::DecodeToString( _T_LEN_03E23EE2__s__file_offset__s_ ).c_str(),
-				CUtilities::ToHex( _iidDesc.Characteristics, szTempOff1, MX_ELEMENTS( szTempOff1 ), 8 ),
-				CUtilities::ToHex( _poPeObject.RelocAddressToFileOffset( _iidDesc.Characteristics ), szTempOff2, MX_ELEMENTS( szTempOff2 ), 8 ) );
+				CUtilities::ToHex( _iidDesc.Characteristics, szTempOff1, std::size( szTempOff1 ), 8 ),
+				CUtilities::ToHex( _poPeObject.RelocAddressToFileOffset( _iidDesc.Characteristics ), szTempOff2, std::size( szTempOff2 ), 8 ) );
 			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( szBuffer ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
 			CUtilities::MW_HEX_PRINT( &_iidDesc.Characteristics, sizeof( _iidDesc.Characteristics ), ssRaw );
@@ -2426,7 +2426,7 @@ namespace mx {
 			CHAR szTempOff[32];
 			std::sprintf( szBuffer, "%s (file offset %s)",
 				CUtilities::ToHex( _iidDesc.FirstThunk, 8 ),
-				CUtilities::ToHex( _poPeObject.RelocAddressToFileOffset( _iidDesc.FirstThunk ), szTempOff, MX_ELEMENTS( szTempOff ), 8 ) );
+				CUtilities::ToHex( _poPeObject.RelocAddressToFileOffset( _iidDesc.FirstThunk ), szTempOff, std::size( szTempOff ), 8 ) );
 
 			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( szBuffer ).c_str(), MW_PE_VALUE ) ) { return false; }
 			ssRaw.SecureClear();
@@ -2647,10 +2647,10 @@ namespace mx {
 			CHAR szHex1[32], szU1[32];
 			CHAR szHex2[32], szU2[32];
 			CHAR szOffset[128];
-			std::snprintf( szOffset, MX_ELEMENTS( szOffset ), mx::CStringDecoder::DecodeToString( _T_LEN_7D6FFEED__s___s____s___s____s___s_ ).c_str(),
-				CUtilities::ToHex( _vList[I].ui64FileOffsetAddr, szHex0, MX_ELEMENTS( szHex0 ), 8 ), CUtilities::ToUnsigned( _vList[I].ui64FileOffsetAddr, szU0, MX_ELEMENTS( szU0 ) ),
-				CUtilities::ToHex( _vList[I].ui64FileOffsetOrd, szHex1, MX_ELEMENTS( szHex1 ), 8 ), CUtilities::ToUnsigned( _vList[I].ui64FileOffsetOrd, szU1, MX_ELEMENTS( szU1 ) ),
-				CUtilities::ToHex( _vList[I].ui64FileOffsetName, szHex2, MX_ELEMENTS( szHex2 ), 8 ), CUtilities::ToUnsigned( _vList[I].ui64FileOffsetName, szU2, MX_ELEMENTS( szU2 ) ) );
+			std::snprintf( szOffset, std::size( szOffset ), mx::CStringDecoder::DecodeToString( _T_LEN_7D6FFEED__s___s____s___s____s___s_ ).c_str(),
+				CUtilities::ToHex( _vList[I].ui64FileOffsetAddr, szHex0, std::size( szHex0 ), 8 ), CUtilities::ToUnsigned( _vList[I].ui64FileOffsetAddr, szU0, std::size( szU0 ) ),
+				CUtilities::ToHex( _vList[I].ui64FileOffsetOrd, szHex1, std::size( szHex1 ), 8 ), CUtilities::ToUnsigned( _vList[I].ui64FileOffsetOrd, szU1, std::size( szU1 ) ),
+				CUtilities::ToHex( _vList[I].ui64FileOffsetName, szHex2, std::size( szHex2 ), 8 ), CUtilities::ToUnsigned( _vList[I].ui64FileOffsetName, szU2, std::size( szU2 ) ) );
 			if ( !_tlTree.SetItemText( hItem, ee::CExpEval::StringToWString( szOffset ).c_str(), MW_PE_OFFSET ) ) { return false; }
 
 
@@ -3255,19 +3255,19 @@ namespace mx {
 					MX_M_CONTEXT_MENU,
 					0,
 					0,
-					MX_ELEMENTS( miMenuBar ),
+					std::size( miMenuBar ),
 					miMenuBar
 				},
 				/*{
 					MX_MWMI_MENU_FILE,
 					MX_MWMI_MENU_BAR,
 					MX_MWMI_FILE,
-					MX_ELEMENTS( m_miFileMenu ),
+					std::size( m_miFileMenu ),
 					m_miFileMenu
 				},*/
 			};
 			mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
-			plmLayout->CreatePopupMenuEx( this, miMenus, MX_ELEMENTS( miMenus ), _iX, _iY );
+			plmLayout->CreatePopupMenuEx( this, miMenus, std::size( miMenus ), _iX, _iY );
 		}
 		return lsw::CMainWindow::ContextMenu( _pwControl, _iX, _iY );
 	}

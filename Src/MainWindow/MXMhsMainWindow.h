@@ -87,11 +87,6 @@ namespace mx {
 			MX_WH_SHOW_ADD_ENTRY,
 		};
 
-		// Timer.
-		enum MX_TIMER {
-			MX_T_UPDATE_LIST				= 0x3E00
-		};
-
 		// Menu.
 		enum MX_MENU {
 			MX_M_CONTEXT_MENU				= 0x4100
@@ -373,10 +368,10 @@ namespace mx {
 		int32_t								m_i32LastOptionsPage;
 
 		// List timer.
-		UINT_PTR							m_uiptrUpdateListTimer = 0;
+		CUtilities::MX_TIMER				m_tUpdateListTimer;
 
 		// Locks timer.
-		UINT_PTR							m_uiptrUpdateLocksTimer = 0;
+		CUtilities::MX_TIMER				m_tUpdateLocksTimer;
 
 		// Last context-menu hit-test;
 		int									m_iContextHitTest = -1;

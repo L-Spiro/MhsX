@@ -186,7 +186,7 @@ namespace mx {
 		dvInfo.item.iSubItem = 0;
 		WCHAR wszBuffer[32];
 		dvInfo.item.pszText = wszBuffer;
-		dvInfo.item.cchTextMax = MX_ELEMENTS( wszBuffer );
+		dvInfo.item.cchTextMax = std::size( wszBuffer );
 		if ( const_cast<CFoundAddressesListView *>(this)->GetDispInfoNotify( &dvInfo ) ) {
 			_wsResult.append( wszBuffer );
 			return true;

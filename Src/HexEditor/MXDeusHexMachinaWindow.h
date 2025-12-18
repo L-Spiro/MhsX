@@ -100,6 +100,24 @@ namespace mx {
 		// WM_ERASEBKGND.
 		virtual LSW_HANDLED							EraseBkgnd( HDC _hDc );
 
+		/**
+		 * Handles WM_SETFOCUS.
+		 * \brief Notified when the window receives keyboard focus.
+		 *
+		 * \param _hPrevFocus The window that previously had focus.
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED							SetFocus( HWND /*_hPrevFocus*/ ) override;
+
+		/**
+		 * Handles WM_KILLFOCUS.
+		 * \brief Notified when the window loses keyboard focus.
+		 *
+		 * \param _hNewFocus The window receiving focus (may be NULL).
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED							KillFocus( HWND /*_hNewFocus*/ ) override;
+
 		// Translate a child's tooltip text.
 		virtual std::wstring						TranslateTooltip( const std::string &_sText ) { 
 			return CStringDecoder::DecodeToWString( _sText.c_str(), _sText.size() );
@@ -159,6 +177,9 @@ namespace mx {
 
 		// Select line.
 		void										SelectLine();
+
+		// Toggle column mode.
+		void										ToggleColumnSelection();
 
 		// Enlarge font.
 		void										EnlargeFont();

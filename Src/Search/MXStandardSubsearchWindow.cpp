@@ -44,7 +44,7 @@ namespace mx {
 				//CUtilities::MX_SET_SAME_AS_ORIGINAL,
 				CUtilities::MX_SET_QUICK_EXP,
 			};
-			for ( size_t I = 0; I < MX_ELEMENTS( stTypes ); ++I ) {
+			for ( size_t I = 0; I < std::size( stTypes ); ++I ) {
 				CSecureWString sTemp;
 				CUtilities::SubEvaluationTypeToString( stTypes[I], sTemp );
 				INT iIndex = pcbCombo->AddString( sTemp.c_str() );
@@ -153,7 +153,7 @@ namespace mx {
 		pcbStatic = static_cast<CStatic *>(FindChild( CStandardSubsearchLayout::MX_C_INFO_RESULTS_VAL_LABEL ));
 		if ( pcbStatic ) {
 			char szBuffer[64];
-			CUtilities::ToUnsigned( m_pmhMemHack->Searcher().TotalResultsQuick(), szBuffer, MX_ELEMENTS( szBuffer ) );
+			CUtilities::ToUnsigned( m_pmhMemHack->Searcher().TotalResultsQuick(), szBuffer, std::size( szBuffer ) );
 			pcbStatic->SetTextA( szBuffer );
 		}
 		UpdateDialog();
@@ -585,7 +585,7 @@ namespace mx {
 
 						CUtilities::ToDataTypeString( rRes, dtDataType, wsRight );
 						WCHAR wszBuffer[512];
-						std::swprintf( wszBuffer, MX_ELEMENTS( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
+						std::swprintf( wszBuffer, std::size( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
 
 						wText = wszBuffer;
 
@@ -613,7 +613,7 @@ namespace mx {
 
 						CUtilities::ToDataTypeString( rRes, dtDataType, wsRight );
 						WCHAR wszBuffer[512];
-						std::swprintf( wszBuffer, MX_ELEMENTS( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
+						std::swprintf( wszBuffer, std::size( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
 
 						wText = wszBuffer;
 
@@ -632,7 +632,7 @@ namespace mx {
 					CUtilities::PrintDataType( wsLeft, dtDataType, CUtilities::Options.dwDataTypeOptions & CUtilities::MX_DTO_CODENAMES );
 
 					WCHAR wszBuffer[512];
-					std::swprintf( wszBuffer, MX_ELEMENTS( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str() );
+					std::swprintf( wszBuffer, std::size( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str() );
 
 					wText = wszBuffer;
 
@@ -650,7 +650,7 @@ namespace mx {
 					CUtilities::PrintDataType( wsLeft, dtDataType, CUtilities::Options.dwDataTypeOptions & CUtilities::MX_DTO_CODENAMES );
 
 					WCHAR wszBuffer[512];
-					std::swprintf( wszBuffer, MX_ELEMENTS( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str() );
+					std::swprintf( wszBuffer, std::size( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str() );
 
 					wText = wszBuffer;
 
@@ -694,7 +694,7 @@ namespace mx {
 								CUtilities::ToDataTypeString( rRes, dtDataType, wsStr2 );
 
 								WCHAR wszBuffer[512];
-								std::swprintf( wszBuffer, MX_ELEMENTS( wszBuffer ), wsTemp.c_str(), wsStr0.c_str(), wsNegation.c_str(), wsStr1.c_str(), wsStr2.c_str() );
+								std::swprintf( wszBuffer, std::size( wszBuffer ), wsTemp.c_str(), wsStr0.c_str(), wsNegation.c_str(), wsStr1.c_str(), wsStr2.c_str() );
 
 								wText = wszBuffer;
 
@@ -724,7 +724,7 @@ namespace mx {
 
 						CUtilities::ToDataTypeString( rRes, dtDataType, wsRight );
 						WCHAR wszBuffer[512];
-						std::swprintf( wszBuffer, MX_ELEMENTS( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
+						std::swprintf( wszBuffer, std::size( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
 
 						wText = wszBuffer;
 
@@ -752,7 +752,7 @@ namespace mx {
 
 						CUtilities::ToDataTypeString( rRes, dtDataType, wsRight );
 						WCHAR wszBuffer[512];
-						std::swprintf( wszBuffer, MX_ELEMENTS( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
+						std::swprintf( wszBuffer, std::size( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
 
 						wText = wszBuffer;
 
@@ -771,7 +771,7 @@ namespace mx {
 					CUtilities::PrintDataType( wsLeft, dtDataType, CUtilities::Options.dwDataTypeOptions & CUtilities::MX_DTO_CODENAMES );
 
 					WCHAR wszBuffer[512];
-					std::swprintf( wszBuffer, MX_ELEMENTS( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str() );
+					std::swprintf( wszBuffer, std::size( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str() );
 
 					wText = wszBuffer;
 
@@ -789,7 +789,7 @@ namespace mx {
 					CUtilities::PrintDataType( wsLeft, dtDataType, CUtilities::Options.dwDataTypeOptions & CUtilities::MX_DTO_CODENAMES );
 
 					WCHAR wszBuffer[512];
-					std::swprintf( wszBuffer, MX_ELEMENTS( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str() );
+					std::swprintf( wszBuffer, std::size( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str() );
 
 					wText = wszBuffer;
 
@@ -816,7 +816,7 @@ namespace mx {
 
 						CUtilities::ToDataTypeString( rRes, dtDataType, wsRight );
 						WCHAR wszBuffer[512];
-						std::swprintf( wszBuffer, MX_ELEMENTS( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
+						std::swprintf( wszBuffer, std::size( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
 
 						wText = wszBuffer;
 
@@ -844,7 +844,7 @@ namespace mx {
 
 						CUtilities::ToDataTypeString( rRes, CUtilities::MX_DT_DOUBLE, wsRight );
 						WCHAR wszBuffer[512];
-						std::swprintf( wszBuffer, MX_ELEMENTS( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
+						std::swprintf( wszBuffer, std::size( wszBuffer ), wsTemp.c_str(), wsLeft.c_str(), wsNegation.c_str(), wsRight.c_str() );
 
 						wText = wszBuffer;
 
@@ -890,7 +890,7 @@ namespace mx {
 								CUtilities::ToDataTypeString( rRes, dtDataType, wsStr2 );
 
 								WCHAR wszBuffer[512];
-								std::swprintf( wszBuffer, MX_ELEMENTS( wszBuffer ), wsTemp.c_str(), wsStr0.c_str(), wsNegation.c_str(), wsStr1.c_str(), wsStr2.c_str() );
+								std::swprintf( wszBuffer, std::size( wszBuffer ), wsTemp.c_str(), wsStr0.c_str(), wsNegation.c_str(), wsStr1.c_str(), wsStr2.c_str() );
 
 								wText = wszBuffer;
 
@@ -937,8 +937,8 @@ namespace mx {
 								CUtilities::ToDataTypeString( rRes, CUtilities::MX_DT_DOUBLE, wsStr2 );
 
 								WCHAR wszBuffer[512];
-								//std::swprintf( wszBuffer, MX_ELEMENTS( wszBuffer ), wsTemp.c_str(), wsStr0.c_str(), wsNegation.c_str(), wsStr1.c_str(), wsStr2.c_str() );
-								std::swprintf( wszBuffer, MX_ELEMENTS( wszBuffer ), wsTemp.c_str(), wsStr0.c_str(), wsNegation.c_str(), wsStr1.c_str(), wsStr2.c_str() );
+								//std::swprintf( wszBuffer, std::size( wszBuffer ), wsTemp.c_str(), wsStr0.c_str(), wsNegation.c_str(), wsStr1.c_str(), wsStr2.c_str() );
+								std::swprintf( wszBuffer, std::size( wszBuffer ), wsTemp.c_str(), wsStr0.c_str(), wsNegation.c_str(), wsStr1.c_str(), wsStr2.c_str() );
 
 								wText = wszBuffer;
 

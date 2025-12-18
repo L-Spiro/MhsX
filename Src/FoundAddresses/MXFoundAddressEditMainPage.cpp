@@ -773,7 +773,7 @@ namespace mx {
 				{ Layout::MX_FAEI_VALUE_ARRAY_STRIDE_LABEL,				rRes.u.i64Val != 1 && iType != LPARAM( CUtilities::MX_DT_STRING ) },
 				{ Layout::MX_FAEI_VALUE_ARRAY_STRIDE_COMBO,				rRes.u.i64Val != 1 && iType != LPARAM( CUtilities::MX_DT_STRING ) },
 			};
-			for ( auto I = MX_ELEMENTS( cControls ); I--; ) {
+			for ( auto I = std::size( cControls ); I--; ) {
 				auto pwThis = FindChild( cControls[I].wId );
 				if ( pwThis ) {
 					pwThis->SetEnabled( cControls[I].bCondition0 );
@@ -798,7 +798,7 @@ namespace mx {
 				{ Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_LEFT_LABEL,		iValWhenLocked != LPARAM( CUtilities::MX_LT_RANGE ) || iType == LPARAM( CUtilities::MX_DT_STRING ) },
 				{ Layout::MX_FAEI_QL_VALUE_WHEN_LOCKED_MIN_LABEL,		iValWhenLocked == LPARAM( CUtilities::MX_LT_RANGE ) && iType != LPARAM( CUtilities::MX_DT_STRING ) },
 			};
-			for ( auto I = MX_ELEMENTS( cControls ); I--; ) {
+			for ( auto I = std::size( cControls ); I--; ) {
 				auto pwThis = FindChild( cControls[I].wId );
 				if ( pwThis ) {
 					pwThis->SetVisible( cControls[I].bCondition0 );

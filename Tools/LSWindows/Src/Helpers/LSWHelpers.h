@@ -44,8 +44,8 @@ namespace lsw {
 		// == Functions.
 		LONG								Width() const { return right - left; }
 		LONG								Height() const { return bottom - top; }
-		LSW_RECT &							Zero() { left = right = top = bottom = 0; return (*this ); }
-		LSW_RECT &							PrepareConsume() { left = top = LONG_MAX; right = bottom = LONG_MIN; return (*this ); }
+		LSW_RECT &							Zero() { left = right = top = bottom = 0; return (*this); }
+		LSW_RECT &							PrepareConsume() { left = top = LONG_MAX; right = bottom = LONG_MIN; return (*this); }
 		VOID								SetWidth( LONG _lW ) { right = left + _lW; }
 		VOID								SetHeight( LONG _lH ) { bottom = top + _lH; }
 		POINT								UpperLeft() const { return { left, top }; }
@@ -862,6 +862,83 @@ namespace lsw {
 		// == Members.
 		/** The mapped address for access to the mapped region. */
 		LPVOID								pvBuffer;
+	};
+
+	struct LSW_TIMER {
+		LSW_TIMER( HWND _hWnd, UINT_PTR _nIDEvent, UINT _uElapse, TIMERPROC _lpTimerFunc ) :
+			hWnd( _hWnd ),
+			uiptrEvent( _nIDEvent ),
+			uiTime( _uElapse ),
+			lpTimerFunc( _lpTimerFunc ) {
+			uiptrActiveId = ::SetTimer( _hWnd, _nIDEvent, _uElapse, _lpTimerFunc );
+		}
+		LSW_TIMER() {}
+		~LSW_TIMER() {
+			Stop();
+		}
+
+
+		// == Functions.
+		/**
+		 * Starts the timer.
+		 * 
+		 * \param _hWnd A handle to the window to be associated with the timer. This window must be owned by the calling thread. If a NULL value for _hWnd is passed in along with an _nIDEvent of an existing timer, that timer will be replaced in the same way that an existing non-NULL _hWnd timer will be.
+		 * \param _nIDEvent A nonzero timer identifier. If the _hWnd parameter is NULL, and the _nIDEvent does not match an existing timer then it is ignored and a new timer ID is generated. If the _hWnd parameter is not NULL and the window specified by _hWnd already has a timer with the value _nIDEvent, then the existing timer is replaced by the new timer. When Start replaces a timer, the timer is reset. Therefore, a message will be sent after the current time-out value elapses, but the previously set time-out value is ignored. If the call is not intended to replace an existing timer, _nIDEvent should be 0 if the _hWnd is NULL.
+		 * \param _uElapse The time-out value, in milliseconds.
+		 *	If _uElapse is less than USER_TIMER_MINIMUM (0x0000000A), the timeout is set to USER_TIMER_MINIMUM. If _uElapse is greater than USER_TIMER_MAXIMUM (0x7FFFFFFF), the timeout is set to USER_TIMER_MAXIMUM
+		 * \param _lpTimerFunc A pointer to the function to be notified when the time-out value elapses. If _lpTimerFunc is NULL, the system posts a WM_TIMER message to the application queue. The hwnd member of the message's MSG structure contains the value of the hWnd parameter.
+		 * \return Returns the ID of the created timer.
+		 **/
+		UINT_PTR							Start( HWND _hWnd, UINT_PTR _nIDEvent, UINT _uElapse, TIMERPROC _lpTimerFunc ) {
+			Stop();
+			hWnd = _hWnd;
+			uiptrEvent = _nIDEvent;
+			uiTime = _uElapse;
+			lpTimerFunc = _lpTimerFunc;
+			uiptrActiveId = ::SetTimer( hWnd, uiptrEvent, uiTime, lpTimerFunc );
+			return uiptrActiveId;
+		}
+
+		/**
+		 * Restarts an existing timer.
+		 * 
+		 * \param _uElapse The new duration.
+		 * \return Returns the ID of the created timer.
+		 **/
+		UINT_PTR							ReStart( UINT _uElapse ) {
+			uiTime = _uElapse;
+			uiptrActiveId = ::SetTimer( hWnd, uiptrEvent, uiTime, lpTimerFunc );
+			return uiptrActiveId;
+		}
+
+		/**
+		 * Stops the timer.
+		 * 
+		 * \return If the function succeeds, the return value is nonzero. If the function fails, the return value is zero. To get extended error information, call GetLastError.
+		 **/
+		BOOL								Stop() {
+			if ( uiptrActiveId ) {
+				if ( ::KillTimer( hWnd, uiptrActiveId ) ) {
+					uiptrActiveId = 0;
+					return TRUE;
+				}
+				return FALSE;
+			}
+			return TRUE;
+		}
+
+
+		// == Members.
+		/** The associated window. */
+		HWND								hWnd = NULL;
+		/** The ID. */
+		UINT_PTR							uiptrEvent = 0;
+		/** The time. */
+		UINT								uiTime = 0;
+		/** The timer function. */
+		TIMERPROC							lpTimerFunc = nullptr;
+		/** Active ID. */
+		UINT_PTR							uiptrActiveId = 0;
 	};
 
 	class CHelpers {

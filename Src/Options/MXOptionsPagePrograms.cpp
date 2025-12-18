@@ -77,7 +77,7 @@ namespace mx {
 				SW_FORCEMINIMIZE
 			};
 			std::string sName;
-			for ( size_t I = 0; I < MX_ELEMENTS( iTable ); ++I ) {
+			for ( size_t I = 0; I < std::size( iTable ); ++I ) {
 				sName.clear();
 				INT iIdx = pcbCombo->AddString( CUtilities::ShowWindowToString( iTable[I], sName ) );
 				if ( iIdx != -1 ) {

@@ -757,7 +757,7 @@ namespace mx {
 		std::vector<CSecureString> sStrings;
 		std::vector<CSecureWString> sStringsW;
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
-		CLayoutManager::UnencryptLayouts( m_wlMainDialog, MX_ELEMENTS( m_wlMainDialog ),
+		CLayoutManager::UnencryptLayouts( m_wlMainDialog, std::size( m_wlMainDialog ),
 			vLayouts,
 			sStringsW,
 			sStrings );
@@ -765,7 +765,7 @@ namespace mx {
 		mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
 		CFoundAddressEditPageBase::MX_PARMS pParms = { .pmhMemHack = _poMemHack, .vSelection = _vSelected };
 
-		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], MX_ELEMENTS( m_wlMainDialog ), _pwParent, reinterpret_cast<uint64_t>(&pParms) );
+		INT_PTR ipProc = plmLayout->DialogBoxX( &vLayouts[0], std::size( m_wlMainDialog ), _pwParent, reinterpret_cast<uint64_t>(&pParms) );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
 		if ( ipProc != 0 ) {
 			
@@ -778,7 +778,7 @@ namespace mx {
 
 	// Creates the general edit page.
 	CWidget * CFoundAddressEditLayout::CreateGeneralPage( CWidget * _pwParent, CMemHack * _poMemHack, std::vector<LPARAM> &_vSelected ) {
-		return CreatePage( _pwParent, m_wlOptionsGeneral, MX_ELEMENTS( m_wlOptionsGeneral ), _poMemHack, _vSelected );
+		return CreatePage( _pwParent, m_wlOptionsGeneral, std::size( m_wlOptionsGeneral ), _poMemHack, _vSelected );
 	}
 
 	// Default window-creation.

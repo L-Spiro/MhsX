@@ -274,19 +274,19 @@ namespace mx {
 		{ FALSE,		MX_M_SELECT_SELECT_ALL,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_0D2831F4_Select__All, _LEN_0D2831F4 ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'A', MX_M_SELECT_SELECT_ALL } },
 		{ FALSE,		MX_M_SELECT_WORD,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_8175DD3D_Select__Word, _LEN_8175DD3D ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), VK_OEM_PERIOD, MX_M_SELECT_WORD } },
 		{ FALSE,		MX_M_SELECT_LINE,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_93901CDA_Select__Line, _LEN_93901CDA ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'L', MX_M_SELECT_LINE } },
-		{ FALSE,		MX_M_SELECT_SELECT_RANGE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_2ED4F2F2__Select_Range___, _LEN_2ED4F2F2 ) },
+		{ FALSE,		MX_M_SELECT_SELECT_RANGE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_2ED4F2F2__Select_Range___, _LEN_2ED4F2F2 ),					false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FALT), 'A', MX_M_SELECT_SELECT_RANGE } },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_M_SELECT_EXPAND_SELECTION,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_48180F4F_E_xpand_Selection, _LEN_48180F4F ) },
+		{ FALSE,		MX_M_SELECT_EXPAND_SELECTION,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_48180F4F_E_xpand_Selection, _LEN_48180F4F ),				false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'J', MX_M_SELECT_EXPAND_SELECTION } },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_M_SELECT_REVSERSE_SELECTION,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_D0352186__Reverse_Selection, _LEN_D0352186 ) },
+		{ FALSE,		MX_M_SELECT_REVSERSE_SELECTION,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_D0352186__Reverse_Selection, _LEN_D0352186 ),				false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), VK_OEM_7, MX_M_SELECT_REVSERSE_SELECTION } },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_M_SELECT_MARK_SELECTION_START,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_3AD86671__Mark_Selection_Start, _LEN_3AD86671 ) },
-		{ FALSE,		MX_M_SELECT_MARK_SELECTION_END,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_235B2698_Mark_Selection__End, _LEN_235B2698 ) },
+		{ FALSE,		MX_M_SELECT_MARK_SELECTION_START,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_3AD86671__Mark_Selection_Start, _LEN_3AD86671 ),			false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FALT), VK_OEM_COMMA, MX_M_SELECT_MARK_SELECTION_START } },
+		{ FALSE,		MX_M_SELECT_MARK_SELECTION_END,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_235B2698_Mark_Selection__End, _LEN_235B2698 ),				false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FALT), VK_OEM_PERIOD, MX_M_SELECT_MARK_SELECTION_END } },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_M_SELECT_COLUMN_MODE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_B29A2EA2__Column_Mode, _LEN_B29A2EA2 ) },
+		{ FALSE,		MX_M_SELECT_COLUMN_MODE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_B29A2EA2__Column_Mode, _LEN_B29A2EA2 ),						false,	{ static_cast<BYTE>(FVIRTKEY | FALT), 'C', MX_M_SELECT_COLUMN_MODE } },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_M_SELECT_MOVE_SELECTION_BACK,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_F1AEC748_Move_Selection__Back, _LEN_F1AEC748 ) },
-		{ FALSE,		MX_M_SELECT_MOVE_SELECTION_FORWARD,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_A3D4C6A9_Move_Selection__Forward, _LEN_A3D4C6A9 ) },
+		{ FALSE,		MX_M_SELECT_MOVE_SELECTION_BACK,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_F1AEC748_Move_Selection__Back, _LEN_F1AEC748 ),				false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FALT), VK_LEFT, MX_M_SELECT_MOVE_SELECTION_BACK } },
+		{ FALSE,		MX_M_SELECT_MOVE_SELECTION_FORWARD,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_A3D4C6A9_Move_Selection__Forward, _LEN_A3D4C6A9 ),			false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FALT), VK_RIGHT, MX_M_SELECT_MOVE_SELECTION_FORWARD } },
 	};
 
 	// Find menu.
@@ -646,7 +646,7 @@ namespace mx {
 			MX_M_MENU_BAR,
 			0,
 			0,
-			MX_ELEMENTS( m_miMenuBar ),
+			std::size( m_miMenuBar ),
 			m_miMenuBar
 		},
 
@@ -654,21 +654,21 @@ namespace mx {
 			MX_M_FILE,
 			MX_M_MENU_BAR,
 			MX_M_MENU_FILE,
-			MX_ELEMENTS( m_miFileMenu ),
+			std::size( m_miFileMenu ),
 			m_miFileMenu
 		},
 		{
 			MX_M_NEW,
 			MX_M_FILE,
 			MX_M_FILE_NEW,
-			MX_ELEMENTS( m_miFileNewMenu ),
+			std::size( m_miFileNewMenu ),
 			m_miFileNewMenu
 		},
 		{
 			MX_M_SPECIAL,
 			MX_M_FILE,
 			MX_M_FILE_SPECIAL,
-			MX_ELEMENTS( m_miFileSpecialMenu ),
+			std::size( m_miFileSpecialMenu ),
 			m_miFileSpecialMenu
 		},
 
@@ -676,21 +676,21 @@ namespace mx {
 			MX_M_EDIT,
 			MX_M_MENU_BAR,
 			MX_M_MENU_EDIT,
-			MX_ELEMENTS( m_miEditMenu ),
+			std::size( m_miEditMenu ),
 			m_miEditMenu
 		},
 		{
 			MX_M_COPY_AS,
 			MX_M_EDIT,
 			MX_M_EDIT_COPY_AS_,
-			MX_ELEMENTS( m_miEditCopyAsMenu ),
+			std::size( m_miEditCopyAsMenu ),
 			m_miEditCopyAsMenu
 		},
 		{
 			MX_M_INSERT_OVERWRITE,
 			MX_M_EDIT,
 			MX_M_EDIT_INSERT_OVERWRITE,
-			MX_ELEMENTS( m_miEditInsertOverwriteMenu ),
+			std::size( m_miEditInsertOverwriteMenu ),
 			m_miEditInsertOverwriteMenu
 		},
 
@@ -698,7 +698,7 @@ namespace mx {
 			MX_M_SELECT,
 			MX_M_MENU_BAR,
 			MX_M_MENU_SELECT,
-			MX_ELEMENTS( m_miSelectMenu ),
+			std::size( m_miSelectMenu ),
 			m_miSelectMenu
 		},
 
@@ -706,7 +706,7 @@ namespace mx {
 			MX_M_FIND,
 			MX_M_MENU_BAR,
 			MX_M_MENU_FIND,
-			MX_ELEMENTS( m_miFindMenu ),
+			std::size( m_miFindMenu ),
 			m_miFindMenu
 		},
 
@@ -714,42 +714,42 @@ namespace mx {
 			MX_M_VIEW,
 			MX_M_MENU_BAR,
 			MX_M_MENU_VIEW,
-			MX_ELEMENTS( m_miViewMenu ),
+			std::size( m_miViewMenu ),
 			m_miViewMenu
 		},
 		{
 			MX_M_EDIT_AS,
 			MX_M_VIEW,
 			MX_M_VIEW_EDIT_AS_,
-			MX_ELEMENTS( m_miViewEditAsMenu ),
+			std::size( m_miViewEditAsMenu ),
 			m_miViewEditAsMenu
 		},
 		{
 			MX_M_FONT,
 			MX_M_VIEW,
 			MX_M_VIEW_FONT,
-			MX_ELEMENTS( m_miViewFontMenu ),
+			std::size( m_miViewFontMenu ),
 			m_miViewFontMenu
 		},
 		{
 			MX_M_CHAR_SET,
 			MX_M_VIEW,
 			MX_M_VIEW_CHARACTER_SET,
-			MX_ELEMENTS( m_miViewCharSetMenu ),
+			std::size( m_miViewCharSetMenu ),
 			m_miViewCharSetMenu
 		},
 		{
 			MX_M_CHAR_SET_STANDARD,
 			MX_M_CHAR_SET,
 			MX_M_VIEW_CHAR_SET_STANDARD,
-			MX_ELEMENTS( m_miViewCharSetStandardMenu ),
+			std::size( m_miViewCharSetStandardMenu ),
 			m_miViewCharSetStandardMenu
 		},
 		{
 			MX_M_CHAR_SET_INTERNATIONAL,
 			MX_M_CHAR_SET,
 			MX_M_VIEW_CHAR_SET_INTERNATIONAL,
-			MX_ELEMENTS( m_miViewCharSetInternationalMenu ),
+			std::size( m_miViewCharSetInternationalMenu ),
 			m_miViewCharSetInternationalMenu
 		},
 		
@@ -758,119 +758,119 @@ namespace mx {
 			MX_M_ADDRESSES,
 			MX_M_VIEW,
 			MX_M_VIEW_ADDRESSES,
-			MX_ELEMENTS( m_miViewAddressesMenu ),
+			std::size( m_miViewAddressesMenu ),
 			m_miViewAddressesMenu
 		},
 		{
 			MX_M_ADDRESSES_DISPLAY_FORMATS,
 			MX_M_ADDRESSES,
 			MX_M_VIEW_ADDRESSES_DISPLAY_FORMATS,
-			MX_ELEMENTS( m_miViewAddressesDisplayMenu ),
+			std::size( m_miViewAddressesDisplayMenu ),
 			m_miViewAddressesDisplayMenu
 		},
 		{
 			MX_M_LINE_WIDTH,
 			MX_M_VIEW,
 			MX_M_VIEW_LINE_WIDTH,
-			MX_ELEMENTS( m_miViewLineWidthMenu ),
+			std::size( m_miViewLineWidthMenu ),
 			m_miViewLineWidthMenu
 		},
 		{
 			MX_M_GROUP_BY,
 			MX_M_VIEW,
 			MX_M_VIEW_GROUP_BY,
-			MX_ELEMENTS( m_miViewGroupByMenu ),
+			std::size( m_miViewGroupByMenu ),
 			m_miViewGroupByMenu
 		},
 		{
 			MX_M_DIVISION_LINES,
 			MX_M_VIEW,
 			MX_M_VIEW_DIVISION_LINES,
-			MX_ELEMENTS( m_miViewDivisionLinesMenu ),
+			std::size( m_miViewDivisionLinesMenu ),
 			m_miViewDivisionLinesMenu
 		},
 		{
 			MX_M_LEFT_AREA,
 			MX_M_VIEW,
 			MX_M_VIEW_LEFT_AREA,
-			MX_ELEMENTS( m_miViewLeftAreaMenu ),
+			std::size( m_miViewLeftAreaMenu ),
 			m_miViewLeftAreaMenu
 		},
 		{
 			MX_M_RIGHT_AREA,
 			MX_M_VIEW,
 			MX_M_VIEW_RIGHT_AREA,
-			MX_ELEMENTS( m_miViewRightAreaMenu ),
+			std::size( m_miViewRightAreaMenu ),
 			m_miViewRightAreaMenu
 		},
 		{
 			MX_M_HIGHLIGHTING,
 			MX_M_VIEW,
 			MX_M_VIEW_HIGHLIGHTING,
-			MX_ELEMENTS( m_miViewHighlightMenu ),
+			std::size( m_miViewHighlightMenu ),
 			m_miViewHighlightMenu
 		},
 		{
 			MX_M_RULER,
 			MX_M_VIEW,
 			MX_M_VIEW_RULER,
-			MX_ELEMENTS( m_miViewRulerMenu ),
+			std::size( m_miViewRulerMenu ),
 			m_miViewRulerMenu
 		},
 		{
 			MX_M_RULER_FMT,
 			MX_M_RULER,
 			MX_M_VIEW_RULER_DISPLAY_FMT,
-			MX_ELEMENTS( m_miViewRulerFmtMenu ),
+			std::size( m_miViewRulerFmtMenu ),
 			m_miViewRulerFmtMenu
 		},
 		{
 			MX_M_MINI_MAP,
 			MX_M_VIEW,
 			MX_M_VIEW_MINI_MAP,
-			MX_ELEMENTS( m_miViewMiniMapMenu ),
+			std::size( m_miViewMiniMapMenu ),
 			m_miViewMiniMapMenu
 		},
 		{
 			MX_M_STATUS_BAR,
 			MX_M_VIEW,
 			MX_M_VIEW_STATUS_BAR,
-			MX_ELEMENTS( m_miViewStatusBarMenu ),
+			std::size( m_miViewStatusBarMenu ),
 			m_miViewStatusBarMenu
 		},
 		{
 			MX_M_STATUS_BAR_FILE_POS_FMT,
 			MX_M_STATUS_BAR,
 			MX_M_VIEW_STATUS_BAR_FILE_POS_FORMAT,
-			MX_ELEMENTS( m_miViewStatusBarFilePosMenu ),
+			std::size( m_miViewStatusBarFilePosMenu ),
 			m_miViewStatusBarFilePosMenu
 		},
 		{
 			MX_M_STATUS_BAR_FILE_SIZE_FMT,
 			MX_M_STATUS_BAR,
 			MX_M_VIEW_STATUS_BAR_FILE_SIZE_FORMAT,
-			MX_ELEMENTS( m_miViewStatusBarFileSizeMenu ),
+			std::size( m_miViewStatusBarFileSizeMenu ),
 			m_miViewStatusBarFileSizeMenu
 		},
 		{
 			MX_M_STATUS_BAR_SEL_SIZE_FMT,
 			MX_M_STATUS_BAR,
 			MX_M_VIEW_STATUS_BAR_SEL_SIZE_FORMAT,
-			MX_ELEMENTS( m_miViewStatusBarSelSizeMenu ),
+			std::size( m_miViewStatusBarSelSizeMenu ),
 			m_miViewStatusBarSelSizeMenu
 		},
 		{
 			MX_M_STATUS_BAR_BYTE_VALUE_FMT,
 			MX_M_STATUS_BAR,
 			MX_M_VIEW_STATUS_BAR_BYTE_VALUE_FORMAT,
-			MX_ELEMENTS( m_miViewStatusBarByteValueMenu ),
+			std::size( m_miViewStatusBarByteValueMenu ),
 			m_miViewStatusBarByteValueMenu
 		},
 		{
 			MX_M_ENDIAN,
 			MX_M_VIEW,
 			MX_M_VIEW_ENDIAN,
-			MX_ELEMENTS( m_miViewEndianMenu ),
+			std::size( m_miViewEndianMenu ),
 			m_miViewEndianMenu
 		},
 
@@ -879,7 +879,7 @@ namespace mx {
 			MX_M_FORMAT,
 			MX_M_MENU_BAR,
 			MX_M_MENU_FORMAT,
-			MX_ELEMENTS( m_miFormatMenu ),
+			std::size( m_miFormatMenu ),
 			m_miFormatMenu
 		},
 	};
@@ -890,7 +890,7 @@ namespace mx {
 		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
 		std::vector<CSecureString> sStrings;
 		std::vector<CSecureWString> sStringsW;
-		CLayoutManager::UnencryptLayouts( m_wlMainWindow, MX_ELEMENTS( m_wlMainWindow ),
+		CLayoutManager::UnencryptLayouts( m_wlMainWindow, std::size( m_wlMainWindow ),
 			vLayouts,
 			sStringsW,
 			sStrings );
@@ -898,7 +898,7 @@ namespace mx {
 		std::vector<LSW_MENU_LAYOUT> vMenus;
 		std::vector<std::vector<LSW_MENU_ITEM> *> vMenuItems;
 		std::vector<std::vector<CSecureWString> *> vMenuStrings;
-		CLayoutManager::UnencryptMenu( m_miMenus, MX_ELEMENTS( m_miMenus ),
+		CLayoutManager::UnencryptMenu( m_miMenus, std::size( m_miMenus ),
 			vMenus,
 			vMenuItems,
 			vMenuStrings );
@@ -906,7 +906,7 @@ namespace mx {
 
 		mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
 		CDeusHexMachinaWindow::PrepareWindow();
-		CWidget * pwThis = plmLayout->CreateWindowX( &vLayouts[0], MX_ELEMENTS( m_wlMainWindow ),
+		CWidget * pwThis = plmLayout->CreateWindowX( &vLayouts[0], std::size( m_wlMainWindow ),
 			vMenus.size() ? &vMenus[0] : nullptr, vMenus.size(),
 			_pwParent, static_cast<uint64_t>(reinterpret_cast<uintptr_t>(_pmhMemHack)) );
 		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );

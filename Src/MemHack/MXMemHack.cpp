@@ -57,7 +57,7 @@ namespace mx {
 						PROCESS_VM_READ | PROCESS_VM_WRITE |
 						PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION,*/
 				};
-				for ( size_t I = 0; I < MX_ELEMENTS( dwAttempts ); ++I ) {
+				for ( size_t I = 0; I < std::size( dwAttempts ); ++I ) {
 					if ( m_pProcess.OpenProc( _dwId, opmMode, dwAttempts[I] ) ) {
 						break;
 					}

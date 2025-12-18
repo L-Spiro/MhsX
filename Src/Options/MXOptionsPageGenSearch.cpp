@@ -140,7 +140,7 @@ namespace mx {
 			{ COptionsLayout::MX_OI_GENERAL_SEARCH_TP_HIGH, THREAD_PRIORITY_HIGHEST },
 			{ COptionsLayout::MX_OI_GENERAL_SEARCH_TP_CRIT, THREAD_PRIORITY_TIME_CRITICAL },
 		};
-		for ( size_t I = 0; I < MX_ELEMENTS( aTemp ); ++I ) {
+		for ( size_t I = 0; I < std::size( aTemp ); ++I ) {
 			prbRadio = static_cast<CRadioButton *>(FindChild( aTemp[I].iId ));
 			if ( prbRadio ) {
 				if ( prbRadio->IsChecked() ) {

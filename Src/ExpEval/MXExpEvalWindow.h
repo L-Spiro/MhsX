@@ -31,11 +31,6 @@ namespace mx {
 			MX_I_TOTAL
 		};
 
-		// Timer.
-		enum MX_TIMER {
-			MX_T_UPDATE_LIST				= 0x3C00
-		};
-
 
 		// == Functions.
 		// WM_INITDIALOG.
@@ -90,7 +85,7 @@ namespace mx {
 		INT									m_iImageMap[MX_I_TOTAL];
 
 		// Timer.
-		UINT_PTR							m_uiptrUpdateListTimer = 0;
+		CUtilities::MX_TIMER				m_tUpdateListTimer;
 
 		// List-update timer update speed.
 		UINT								m_uiUpdateSpeed = 100;

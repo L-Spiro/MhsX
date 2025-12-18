@@ -142,7 +142,7 @@ namespace mx {
 				{ "Z",	"RCM" },				// The instruction has no ModR/M byte; the three least-significant bits of the opcode byte selects a general-purpose register.
 			};
 			auto lReplace = [&]( const std::string &_sReplaceMe ) {
-				for ( size_t J = MX_ELEMENTS( rReplacements ); J--; ) {
+				for ( size_t J = std::size( rReplacements ); J--; ) {
 					if ( _sReplaceMe == rReplacements[J].pcSrc ) { return rReplacements[J].pcDst; }
 				}
 				return "";
