@@ -525,6 +525,7 @@ namespace mx {
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miViewRulerMenu[] = {
 		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
 		{ FALSE,		MX_M_VIEW_RULER_SHOW,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_8A9236B5_Show__Ruler, _LEN_8A9236B5 ) },
+		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_M_VIEW_RULER_SHOW_LABELS,					TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_38AD007B_Show__Labels, _LEN_38AD007B ) },
 		{ FALSE,		MX_M_VIEW_RULER_SHOW_ARROWS,					TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_57CBE724_Show__Arrows, _LEN_57CBE724 ) },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },

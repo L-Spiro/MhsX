@@ -866,6 +866,12 @@ namespace mx {
 				}
 				break;
 			}
+			case Layout::MX_M_VIEW_MINI_MAP_SHOW : {
+				if ( phecControl ) {
+					phecControl->SetShowMiniMap( !phecControl->GetShowMiniMap() );
+				}
+				break;
+			}
 		}
 		return LSW_H_CONTINUE;
 	}
@@ -1743,6 +1749,11 @@ namespace mx {
 				}
 				case Layout::MX_M_VIEW_RULER_SHOW_ARROWS : {
 					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetShowRulerCaret()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_MINI_MAP_SHOW : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetShowMiniMap()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}

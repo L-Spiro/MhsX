@@ -2,6 +2,7 @@
 
 #include "SinCos/EESinCos.h"
 
+#include <cassert>
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <cinttypes>
@@ -5081,3 +5082,630 @@ namespace ee {
 	};
 
 }	// namespace ee
+
+
+// ===============================
+// Count Leading Zeros
+// ===============================
+#if defined( _MSC_VER )
+		#pragma intrinsic( _BitScanReverse )
+	#ifdef _WIN64
+		#pragma intrinsic( _BitScanReverse64 )
+	#endif  // #ifdef _WIN64
+#endif  // #if defined( _MSC_VER )
+
+inline unsigned int						CountLeadingZeros( uint16_t _ui16X ) {
+#if defined( _MSC_VER )
+	unsigned long ulIndex;
+	auto ucIsNonZero = ::_BitScanReverse( &ulIndex, _ui16X );
+	return ucIsNonZero ? (15 - static_cast<int>(ulIndex - 16)) : 16;
+#else
+	return _ui32X != 0 ? (__builtin_clz( static_cast<uint32_t>(_ui16X) ) - 16) : 16;
+#endif  // #if defined( _MSC_VER )
+}
+
+inline unsigned int						CountLeadingZeros( uint32_t _ui32X ) {
+#if defined( _MSC_VER )
+	unsigned long ulIndex;
+	auto ucIsNonZero = ::_BitScanReverse( &ulIndex, _ui32X );
+	return ucIsNonZero ? (31 - static_cast<int>(ulIndex)) : 32;
+#else
+	return _ui32X != 0 ? __builtin_clz( _ui32X ) : 32;
+#endif  // #if defined( _MSC_VER )
+}
+
+inline unsigned int						CountLeadingZeros( uint64_t _ui64X ) {
+#if defined( _MSC_VER )
+	#if defined( _WIN64 )
+		// Benchmark against (1000000*50) values.
+		// _BitScanReverse64(): 0.06879443333333333 seconds
+		// Manual version: 0.188431 seconds.
+		#if 1
+			unsigned long ulIndex;
+			auto ucIsNonZero = ::_BitScanReverse64( &ulIndex, _ui64X ) != 0;
+			//return ((63 - static_cast<int>(ulIndex)) * ucIsNonZero) + (64 * !ucIsNonZero);
+			return ucIsNonZero ? (63 - static_cast<int>(ulIndex)) : 64;
+		#else
+			unsigned long uiN = 0;
+			if ( _ui64X == 0 ) { return 64; }
+			if ( (_ui64X & 0xFFFFFFFF00000000ULL) == 0 ) { uiN += 32; _ui64X <<= 32; }
+			if ( (_ui64X & 0xFFFF000000000000ULL) == 0 ) { uiN += 16; _ui64X <<= 16; }
+			if ( (_ui64X & 0xFF00000000000000ULL) == 0 ) { uiN += 8;  _ui64X <<= 8; }
+			if ( (_ui64X & 0xF000000000000000ULL) == 0 ) { uiN += 4;  _ui64X <<= 4; }
+			if ( (_ui64X & 0xC000000000000000ULL) == 0 ) { uiN += 2;  _ui64X <<= 2; }
+			if ( (_ui64X & 0x8000000000000000ULL) == 0 ) { uiN += 1; }
+
+			return uiN;
+		#endif  // #if 0
+	#else
+		if ( _ui64X == 0 ) { return 64; }
+		unsigned int uiN = 0;
+
+		#if 0
+			// Benchmark against (1000000*50) values (x86 on x64 hardware). 
+			// 0.0002651
+			// 0.0002426333333333333
+			if ( (_ui64X & 0xFFFFFFFF00000000ULL) == 0 ) { uiN += 32; _ui64X <<= 32; }
+			if ( (_ui64X & 0xFFFF000000000000ULL) == 0 ) { uiN += 16; _ui64X <<= 16; }
+			if ( (_ui64X & 0xFF00000000000000ULL) == 0 ) { uiN += 8;  _ui64X <<= 8; }
+			if ( (_ui64X & 0xF000000000000000ULL) == 0 ) { uiN += 4;  _ui64X <<= 4; }
+			if ( (_ui64X & 0xC000000000000000ULL) == 0 ) { uiN += 2;  _ui64X <<= 2; }
+			if ( (_ui64X & 0x8000000000000000ULL) == 0 ) { uiN += 1; }
+			return uiN;
+		#else
+			// Benchmark against (1000000*50) values (x86 on x64 hardware). 
+			// 0.0002392 seconds.
+			if ( _ui64X & 0xFFFFFFFF00000000ULL )        { uiN += 32; _ui64X >>= 32; }
+			if ( _ui64X & 0xFFFF0000 )                   { uiN += 16; _ui64X >>= 16; }
+			if ( _ui64X & 0xFFFFFF00 )                   { uiN += 8;  _ui64X >>= 8; }
+			if ( _ui64X & 0xFFFFFFF0 )                   { uiN += 4;  _ui64X >>= 4; }
+			if ( _ui64X & 0xFFFFFFFC )                   { uiN += 2;  _ui64X >>= 2; }
+			if ( _ui64X & 0xFFFFFFFE )                   { uiN += 1; }
+			return 63 - uiN;
+		#endif  // #if 0
+	#endif  // #if defined( _WIN64 )
+#elif defined( __GNUC__ )
+	return _ui64X != 0 ? __builtin_clzll( _ui64X ) : 64;
+#endif  // #if defined( __GNUC__ )
+}
+
+
+// ===============================
+// 128-Bit Div/Mul
+// ===============================
+#if defined( _MSC_VER )
+    #ifdef _WIN64
+		#include <immintrin.h>
+		#pragma intrinsic( _udiv128 )
+		#pragma intrinsic( _div128 )
+		#pragma intrinsic( _umul128 )
+		#pragma intrinsic( _mul128 )
+    #else
+		#include <bit>
+		#include <cassert>
+		#include <intrin.h>
+
+		/**
+		 * \brief Performs unsigned 128-bit-by-64-bit division returning a 64-bit unsigned quotient and (optionally) a 64-bit unsigned remainder.
+		 *
+		 * Given a unsigned 128-bit dividend split into high and low 64-bit parts, and a unsigned 64-bit divisor,
+		 * this routine computes the C/C++-semantics result where the quotient is truncated toward zero and the remainder
+		 * has the same sign as the dividend with |remainder| < |divisor|.
+		 * Internally it reduces to an unsigned divide via _udiv128() on absolute magnitudes and then fixes signs,
+		 * detecting overflow of the 64-bit unsigned quotient.
+		 *
+		 * \param _ui64High			The unsigned high 64 bits of the 128-bit dividend (sign bit is taken from this).
+		 * \param _ui64Low			The unsigned low 64 bits of the 128-bit dividend.
+		 * \param _ui64Divisor      The unsigned 64-bit divisor.
+		 * \param _pui64Remainder   Optional pointer that receives the unsigned remainder (same sign as the dividend).
+		 * \return Returns the unsigned 64-bit quotient.
+		 * \throws std::overflow_error On division by zero or when the true quotient does not fit in a unsigned 64-bit integer.
+		 */
+		inline uint64_t                _udiv128( uint64_t _ui64High, uint64_t _ui64Low, uint64_t _ui64Divisor, uint64_t * _pui64Remainder ) {
+			if ( _ui64Divisor == 0 ) [[unlikely]] { throw std::overflow_error( "Division by zero is not allowed." ); }
+			if ( _ui64High >= _ui64Divisor ) [[unlikely]] { throw std::overflow_error( "The division would overflow the 64-bit quotient." ); }
+			if ( _ui64High == 0 ) {
+				if ( _pui64Remainder ) { (*_pui64Remainder) = _ui64Low % _ui64Divisor; }
+				return _ui64Low / _ui64Divisor;
+			}
+
+			// == Knuth-style division in base b = 2^32.
+			constexpr uint64_t ui64BitsPerWord = sizeof( uint64_t ) * 8;
+			constexpr uint64_t ui64Base = 1ULL << (ui64BitsPerWord / 2);	// b = 2^32
+
+			uint64_t ui64V = _ui64Divisor;
+			uint64_t ui64Un64;												// High "digit" after normalization step.
+			uint64_t ui64Un10;												// Low 64 after normalization step.
+
+			// Normalize: shift left so that the top bit of ui64V is set.
+			unsigned int uiShift = static_cast<unsigned int>(std::countl_zero( ui64V ));
+			if ( uiShift > 0 ) {
+				ui64V = ui64V << uiShift;
+				ui64Un64 = (_ui64High << uiShift) | (_ui64Low >> (ui64BitsPerWord - uiShift));
+				ui64Un10 = _ui64Low << uiShift;
+			}
+			else {
+				// Avoid (x >> 64) UB for uiShift==0.
+				ui64Un64 = _ui64High;
+				ui64Un10 = _ui64Low;
+			}
+
+			// Split divisor into two 32-bit digits.
+			const uint64_t ui64Vn1 = ui64V >> (ui64BitsPerWord / 2);
+			const uint64_t ui64Vn0 = ui64V & 0xFFFFFFFFULL;
+
+			// Split the low (normalized) 64 into two 32-bit digits.
+			uint64_t ui64Un1 = ui64Un10 >> (ui64BitsPerWord / 2);
+			uint64_t ui64Un0 = ui64Un10 & 0xFFFFFFFFULL;
+
+			// First quotient digit q1.
+			uint64_t ui64Q1 = ui64Un64 / ui64Vn1;
+			uint64_t ui64Rhat = ui64Un64 - ui64Q1 * ui64Vn1;
+
+			// Correct q1 (at most 2 decrements).
+			while ( ui64Q1 >= ui64Base || ui64Q1 * ui64Vn0 > ui64Base * ui64Rhat + ui64Un1 ) {
+				ui64Q1 -= 1;
+				ui64Rhat += ui64Vn1;
+				if ( ui64Rhat >= ui64Base ) { break; }
+			}
+
+			// Combine and subtract q1 * v.
+			uint64_t ui64Un21 = ui64Un64 * ui64Base + ui64Un1 - ui64Q1 * ui64V;
+
+			// Second quotient digit q0.
+			uint64_t ui64Q0 = ui64Un21 / ui64Vn1;
+			ui64Rhat = ui64Un21 - ui64Q0 * ui64Vn1;
+
+			// Correct q0 (at most 2 decrements).
+			while ( ui64Q0 >= ui64Base || ui64Q0 * ui64Vn0 > ui64Base * ui64Rhat + ui64Un0 ) {
+				ui64Q0 -= 1;
+				ui64Rhat += ui64Vn1;
+				if ( ui64Rhat >= ui64Base ) { break; }
+			}
+
+			// Remainder (denormalize back).
+			if ( _pui64Remainder ) {
+				(*_pui64Remainder) = ((ui64Un21 * ui64Base + ui64Un0) - ui64Q0 * ui64V) >> uiShift;
+			}
+
+			// Quotient.
+			return ui64Q1 * ui64Base + ui64Q0;
+
+			/*uint64_t ui64Q = 0;
+			uint64_t ui64R = _ui64High;
+
+			for ( int I = 63; I >= 0; --I ) {
+				ui64R = (ui64R << 1) | ((_ui64Low >> I) & 1);
+
+				if ( ui64R >= _ui64Divisor ) {
+					ui64R -= _ui64Divisor;
+					ui64Q |= 1ULL << I;
+				}
+			}
+
+			if ( _pui64Remainder ) { (*_pui64Remainder) = ui64R; }
+			return ui64Q;*/
+		}
+
+		/**
+		 * \brief Performs signed 128-bit-by-64-bit division returning a 64-bit signed quotient and (optionally) a 64-bit signed remainder.
+		 *
+		 * Given a signed 128-bit dividend split into high and low 64-bit parts, and a signed 64-bit divisor,
+		 * this routine computes the C/C++-semantics result where the quotient is truncated toward zero and the remainder
+		 * has the same sign as the dividend with |remainder| < |divisor|.
+		 * Internally it reduces to an unsigned divide via _udiv128() on absolute magnitudes and then fixes signs,
+		 * detecting overflow of the 64-bit signed quotient.
+		 *
+		 * \param _i64HighDividend The signed high 64 bits of the 128-bit dividend (sign bit is taken from this).
+		 * \param _i64LowDividend  The signed low 64 bits of the 128-bit dividend.
+		 * \param _i64Divisor      The signed 64-bit divisor.
+		 * \param _pi64Remainder   Optional pointer that receives the signed remainder (same sign as the dividend).
+		 * \return Returns the signed 64-bit quotient.
+		 * \throws std::overflow_error On division by zero or when the true quotient does not fit in a signed 64-bit integer.
+		 */
+		inline int64_t					_div128( int64_t _i64HighDividend, int64_t _i64LowDividend, int64_t _i64Divisor, int64_t * _pi64Remainder ) {
+			// Validate divisor.
+			if ( _i64Divisor == 0 ) [[unlikely]] { throw std::overflow_error( "Division by zero is not allowed." ); }
+
+			// Determine signs and compute absolute magnitudes without invoking UB on INT64_MIN.
+			const bool bDividendNeg		= (_i64HighDividend < 0);
+			const bool bDivisorNeg		= (_i64Divisor < 0);
+			const bool bQuotNeg			= (bDividendNeg != bDivisorNeg);		// XOR: quotient sign.
+			const bool bRemNeg			= bDividendNeg;							// Remainder sign matches dividend (C++ semantics).
+
+			// Represent the 128-bit dividend as unsigned parts; bit patterns preserved on cast.
+			uint64_t ui64Hi = static_cast<uint64_t>(_i64HighDividend);
+			uint64_t ui64Lo = static_cast<uint64_t>(_i64LowDividend);
+
+			// Two's-complement negate (128-bit) if the dividend is negative: (hi,lo) = - (hi,lo).
+			auto Negate128 = []( uint64_t &_ui64Hi, uint64_t &_ui64Lo ) {
+				uint64_t ui64NewLo = ~_ui64Lo + 1ULL;							// Add 1 to low after invert.
+				_ui64Hi = ~_ui64Hi + (ui64NewLo == 0ULL ? 1ULL : 0ULL);			// Propagate carry into high if low wrapped.
+				_ui64Lo = ui64NewLo;
+			};
+			if ( bDividendNeg ) {
+				Negate128( ui64Hi, ui64Lo );
+			}
+
+			// Absolute value of the divisor as unsigned using two's-complement trick (works for INT64_MIN).
+			uint64_t ui64Div = bDivisorNeg ? static_cast<uint64_t>(0ULL - static_cast<uint64_t>(_i64Divisor)) :
+				static_cast<uint64_t>(_i64Divisor);
+
+			// Use existing unsigned 128/64 divide to get magnitude of quotient and remainder.
+			uint64_t ui64Rem = 0ULL;
+			const uint64_t ui64UQuot = _udiv128( ui64Hi, ui64Lo, ui64Div, &ui64Rem );
+
+			// Check for signed 64-bit overflow of the quotient's final value.
+			// If the result is non-negative, it must be <= INT64_MAX.
+			// If the result is negative, magnitude may be up to 2^63 (i.e., 0x8000'0000'0000'0000).
+			if ( !bQuotNeg ) {
+				if ( ui64UQuot > static_cast<uint64_t>(INT64_MAX) ) [[unlikely]] {
+					throw std::overflow_error( "The division would overflow the 64-bit signed quotient." );
+				}
+			}
+			else {
+				if ( ui64UQuot > (1ULL << 63) ) [[unlikely]] {
+					throw std::overflow_error( "The division would overflow the 64-bit signed quotient." );
+				}
+			}
+
+			// Form the signed quotient without invoking UB on INT64_MIN.
+			// For negative: two's-complement via (0 - magnitude) in unsigned domain then cast.
+			const int64_t i64Quot = bQuotNeg ? static_cast<int64_t>(static_cast<uint64_t>(0ULL - ui64UQuot)) :
+				static_cast<int64_t>(ui64UQuot);
+
+			// Signed remainder (same sign as dividend).
+			if ( _pi64Remainder ) {
+				(*_pi64Remainder) = bRemNeg ? static_cast<int64_t>(static_cast<uint64_t>(0ULL - ui64Rem)) :
+					static_cast<int64_t>(ui64Rem);
+			}
+
+			return i64Quot;
+		}
+
+		/**
+		 * \brief Computes u64 * u64 -> u128, returning the low 64 bits and writing the high 64 bits.
+		 *
+		 * \param _ui64Multiplier The first operand.
+		 * \param _ui64Multiplicand The second operand.
+		 * \param _pui64ProductHi Receives the high 64 bits of the product.
+		 * \return Returns the low 64 bits of the product.
+		 **/
+		inline uint64_t NN9_FASTCALL	_umul128( uint64_t _ui64Multiplier, uint64_t _ui64Multiplicand, uint64_t * _pui64ProductHi ) {
+			assert( _pui64ProductHi );
+
+			// _ui64Multiplier   = ab = a * 2^32 + b
+			// _ui64Multiplicand = cd = c * 2^32 + d
+			// ab * cd = a * c * 2^64 + (a * d + b * c) * 2^32 + b * d
+			uint64_t ui64A = _ui64Multiplier >> 32;
+			uint64_t ui64B = static_cast<uint32_t>(_ui64Multiplier);
+			uint64_t ui64C = _ui64Multiplicand >> 32;
+			uint64_t ui64D = static_cast<uint32_t>(_ui64Multiplicand);
+
+			uint64_t ui64Ad = __emulu( static_cast<unsigned int>(ui64A), static_cast<unsigned int>(ui64D) );
+			uint64_t ui64Bd = __emulu( static_cast<unsigned int>(ui64B), static_cast<unsigned int>(ui64D) );
+
+			uint64_t ui64Abdc = ui64Ad + __emulu( static_cast<unsigned int>(ui64B), static_cast<unsigned int>(ui64C) );
+			uint64_t ui64AbdcCarry = (ui64Abdc < ui64Ad);
+
+			// _ui64Multiplier * _ui64Multiplicand = _pui64ProductHi * 2^64 + ui64ProductLo
+			uint64_t ui64ProductLo = ui64Bd + (ui64Abdc << 32);
+			uint64_t ui64ProductLoCarry = (ui64ProductLo < ui64Bd);
+			(*_pui64ProductHi) = __emulu( static_cast<unsigned int>(ui64A), static_cast<unsigned int>(ui64C) ) + (ui64Abdc >> 32) + (ui64AbdcCarry << 32) + ui64ProductLoCarry;
+
+			return ui64ProductLo;
+		}
+
+		/**
+		 * \brief Computes s64 * s64 -> s128, returning the low 64 bits and writing the high 64 bits.
+		 *
+		 * \param _i64Multiplier The first operand.
+		 * \param _i64Multiplicand The second operand.
+		 * \param _pi64HighProduct Receives the high 64 bits of the product.
+		 * \return Returns the low 64 bits of the product.
+		 **/
+		inline int64_t NN9_FASTCALL		_mul128( int64_t _i64Multiplier, int64_t _i64Multiplicand, int64_t * _pi64HighProduct ) {
+			assert( _pi64HighProduct );
+
+			// Do unsigned multiply on magnitudes, then apply sign to the 128-bit result.
+			uint64_t ui64A = static_cast<uint64_t>(_i64Multiplier);
+			uint64_t ui64B = static_cast<uint64_t>(_i64Multiplicand);
+
+			const bool bNegA = (_i64Multiplier < 0);
+			const bool bNegB = (_i64Multiplicand < 0);
+			const bool bNeg = (bNegA != bNegB);
+
+			if ( bNegA ) { ui64A = (~ui64A) + 1ULL; }
+			if ( bNegB ) { ui64B = (~ui64B) + 1ULL; }
+
+			uint64_t ui64Hi = 0;
+			uint64_t ui64Lo = _umul128( ui64A, ui64B, &ui64Hi );
+
+			if ( bNeg ) {
+				// Two's-complement negate 128-bit (hi:lo).
+				ui64Lo = (~ui64Lo) + 1ULL;
+				ui64Hi = (~ui64Hi) + (ui64Lo == 0 ? 1ULL : 0ULL);
+			}
+
+			(*_pi64HighProduct) = static_cast<int64_t>(ui64Hi);
+			return static_cast<int64_t>(ui64Lo);
+		}
+    #endif  // #ifdef _WIN64
+#elif defined( __x86_64__ ) || defined( _M_X64 )
+	#include <immintrin.h>
+
+	/**
+	 * \brief Performs unsigned 128-bit-by-64-bit division returning a 64-bit unsigned quotient and (optionally) a 64-bit unsigned remainder.
+	 *
+	 * Given a unsigned 128-bit dividend split into high and low 64-bit parts, and a unsigned 64-bit divisor,
+	 * this routine computes the C/C++-semantics result where the quotient is truncated toward zero and the remainder
+	 * has the same sign as the dividend with |remainder| < |divisor|.
+	 * Internally it reduces to an unsigned divide via _udiv128() on absolute magnitudes and then fixes signs,
+	 * detecting overflow of the 64-bit unsigned quotient.  Implementation using x86_64 assembly for GCC and Clang.
+	 *
+	 * \param _ui64High			The unsigned high 64 bits of the 128-bit dividend (sign bit is taken from this).
+	 * \param _ui64Low			The unsigned low 64 bits of the 128-bit dividend.
+	 * \param _ui64Divisor      The unsigned 64-bit divisor.
+	 * \param _pui64Remainder   Optional pointer that receives the unsigned remainder (same sign as the dividend).
+	 * \return Returns the unsigned 64-bit quotient.
+	 * \throws std::overflow_error On division by zero or when the true quotient does not fit in a unsigned 64-bit integer.
+	 */ 
+	inline uint64_t                    _udiv128( uint64_t _ui64High, uint64_t _ui64Low, uint64_t _ui64Divisor, uint64_t * _pui64Remainder ) {
+		uint64_t ui64Quot, ui64Rem;
+
+		asm volatile(
+			"divq %4"
+			: "=a"(ui64Quot), "=d"(ui64Rem)
+			: "a"(_ui64Low), "d"(_ui64High), "r"(_ui64Divisor)
+			: "cc"
+		);
+
+		if ( _pui64Remainder ) {
+			(*_pui64Remainder) = ui64Rem;
+		}
+		return ui64Quot;
+	}
+
+	/**
+	 * \brief Performs signed 128-bit-by-64-bit division returning a 64-bit signed quotient and (optionally) a 64-bit signed remainder.
+	 *
+	 * Given a signed 128-bit dividend split into high and low 64-bit parts, and a signed 64-bit divisor,
+	 * this routine computes the C/C++-semantics result where the quotient is truncated toward zero and the remainder
+	 * has the same sign as the dividend with |remainder| < |divisor|.
+	 * Internally it reduces to an unsigned divide via _udiv128() on absolute magnitudes and then fixes signs,
+	 * detecting overflow of the 64-bit signed quotient.  Signed 128/64 -> 64 division (RDX:RAX / r/m64), quotient in RAX, remainder in RDX.
+	 *
+	 * \param _i64HighDividend The signed high 64 bits of the 128-bit dividend (sign bit is taken from this).
+	 * \param _i64LowDividend  The signed low 64 bits of the 128-bit dividend.
+	 * \param _i64Divisor      The signed 64-bit divisor.
+	 * \param _pi64Remainder   Optional pointer that receives the signed remainder (same sign as the dividend).
+	 * \return Returns the signed 64-bit quotient.
+	 * \throws std::overflow_error On division by zero or when the true quotient does not fit in a signed 64-bit integer.
+	 */
+	inline int64_t						_div128( int64_t _i64High, int64_t _i64Low, int64_t _i64Divisor, int64_t * _pi64Remainder ) {
+		int64_t i64Quot = 0;
+		int64_t i64Rem = 0;
+
+		asm volatile(
+			"idivq %4"
+			: "=a"(i64Quot), "=d"(i64Rem)
+			: "a"(_i64Low), "d"(_i64High), "rm"(_i64Divisor)
+			: "cc"
+		);
+
+		if ( _pi64Remainder ) {
+			(*_pi64Remainder) = i64Rem;
+		}
+		return i64Quot;
+	}
+
+	/**
+	 * \brief Computes u64 * u64 -> u128, returning the low 64 bits and writing the high 64 bits.  Unsigned 64 * 64 -> 128: RDX:RAX = RAX * r/m64.
+	 *
+	 * \param _ui64Multiplier The first operand.
+	 * \param _ui64Multiplicand The second operand.
+	 * \param _pui64ProductHi Receives the high 64 bits of the product.
+	 * \return Returns the low 64 bits of the product.
+	 **/
+	inline uint64_t						_umul128( uint64_t _ui64Multiplier, uint64_t _ui64Multiplicand, uint64_t * _pui64HighProduct ) {
+		uint64_t ui64A = _ui64Multiplier;	// RAX input -> low output.
+		uint64_t ui64D = 0;					// RDX output.
+
+		asm volatile(
+			"mulq %2"
+			: "+a"(ui64A), "=d"(ui64D)
+			: "rm"(_ui64Multiplicand)
+			: "cc"
+		);
+
+		if ( _pui64HighProduct ) {
+			(*_pui64HighProduct) = ui64D;
+		}
+		return ui64A;
+	}
+
+	/**
+	 * \brief Computes s64 * s64 -> s128, returning the low 64 bits and writing the high 64 bits.  Signed 64 * 64 -> 128: RDX:RAX = RAX * r/m64 (signed).
+	 *
+	 * \param _i64Multiplier The first operand.
+	 * \param _i64Multiplicand The second operand.
+	 * \param _pi64HighProduct Receives the high 64 bits of the product.
+	 * \return Returns the low 64 bits of the product.
+	 **/
+	inline int64_t						_mul128( int64_t _i64Multiplier, int64_t _i64Multiplicand, int64_t * _pi64HighProduct ) {
+		int64_t i64A = _i64Multiplier;		// RAX input -> low output.
+		int64_t i64D = 0;					// RDX output.
+
+		asm volatile(
+			"imulq %2"
+			: "+a"(i64A), "=d"(i64D)
+			: "rm"(_i64Multiplicand)
+			: "cc"
+		);
+
+		if ( _pi64HighProduct ) {
+			(*_pi64HighProduct) = i64D;
+		}
+		return i64A;
+	}
+
+#elif defined( __SIZEOF_INT128__ )
+	// Implementation for compilers that support __uint128_t (e.g., GCC, Clang)
+	inline uint64_t                     _udiv128( uint64_t _ui64High, uint64_t _ui64Low, uint64_t _ui64Divisor, uint64_t * _pui64Remainder ) {
+		if ( _ui64Divisor == 0 ) {
+			throw std::overflow_error( "_udiv128: Division by zero is not allowed." );
+		}
+
+		if ( _ui64High >= _ui64Divisor ) {
+			throw std::overflow_error( "_udiv128: The division would overflow the 64-bit quotient." );
+		}
+
+		if ( _ui64High == 0 ) {
+			if ( _pui64Remainder ) { (*_pui64Remainder) = _ui64Low % _ui64Divisor; }
+			return _ui64Low / _ui64Divisor;
+		}
+	
+		// Combine the high and low parts into a single __uint128_t value.
+		__uint128_t ui128Dividend = static_cast<__uint128_t>(_ui64High) << 64 | _ui64Low;
+	
+		if ( _pui64Remainder ) {
+			(*_pui64Remainder) = static_cast<uint64_t>(ui128Dividend % _ui64Divisor);
+		}
+		return static_cast<uint64_t>(ui128Dividend / _ui64Divisor);
+	}
+
+	// Implementation for compilers that support __int128 (e.g., GCC, Clang).
+	inline int64_t						_div128( int64_t _i64High, int64_t _i64Low, int64_t _i64Divisor, int64_t * _pi64Remainder ) {
+		if ( _i64Divisor == 0 ) {
+			throw std::overflow_error( "_div128: Division by zero is not allowed." );
+		}
+
+		// Combine the high and low parts into a single __int128 value.
+		// Note: The low part is treated as an unsigned 64-bit chunk when OR'ing into the 128-bit value.
+		const __int128 i128Dividend =
+			(static_cast<__int128>(_i64High) << 64) |
+			static_cast<__int128>(static_cast<unsigned __int128>(static_cast<uint64_t>(_i64Low)));
+
+		// Compute quotient and remainder using truncation toward zero (C/C++ semantics).
+		const __int128 i128Quot = i128Dividend / static_cast<__int128>(_i64Divisor);
+		const __int128 i128Rem = i128Dividend % static_cast<__int128>(_i64Divisor);
+
+		// The MSVC-style _div128 contract returns an int64 quotient; overflow must be reported.
+		if ( i128Quot < static_cast<__int128>(INT64_MIN) || i128Quot > static_cast<__int128>(INT64_MAX) ) {
+			throw std::overflow_error( "_div128: The division would overflow the 64-bit quotient." );
+		}
+
+		if ( _pi64Remainder ) {
+			// Remainder is always in [-|divisor|+1, |divisor|-1], so it fits in int64_t.
+			(*_pi64Remainder) = static_cast<int64_t>(i128Rem);
+		}
+
+		return static_cast<int64_t>(i128Quot);
+	}
+
+	/**
+	 * \brief Computes u64 * u64 -> u128, returning the low 64 bits and writing the high 64 bits.
+	 *
+	 * \param _ui64Multiplier The first operand.
+	 * \param _ui64Multiplicand The second operand.
+	 * \param _pui64ProductHi Receives the high 64 bits of the product.
+	 * \return Returns the low 64 bits of the product.
+	 **/
+	inline uint64_t						_umul128( uint64_t _ui64Multiplier, uint64_t _ui64Multiplicand, uint64_t * _pui64ProductHi ) {
+		assert( _pui64ProductHi );
+
+		__uint128_t ui128Tmp = static_cast<__uint128_t>(_ui64Multiplier) * static_cast<__uint128_t>(_ui64Multiplicand);
+		(*_pui64ProductHi) = static_cast<uint64_t>(ui128Tmp >> 64);
+		return static_cast<uint64_t>(ui128Tmp);
+	}
+
+	/**
+	 * \brief Computes s64 * s64 -> s128, returning the low 64 bits and writing the high 64 bits.
+	 *
+	 * \param _i64Multiplier The first operand.
+	 * \param _i64Multiplicand The second operand.
+	 * \param _pi64HighProduct Receives the high 64 bits of the product.
+	 * \return Returns the low 64 bits of the product.
+	 **/
+	inline int64_t NN9_FASTCALL			_mul128( int64_t _i64Multiplier, int64_t _i64Multiplicand, int64_t * _pi64HighProduct ) {
+		assert( _pi64HighProduct );
+
+		const __int128 i128Prod = static_cast<__int128>(_i64Multiplier) * static_cast<__int128>(_i64Multiplicand);
+		(*_pi64HighProduct) = static_cast<int64_t>(i128Prod >> 64);
+		return static_cast<int64_t>(i128Prod);
+	}
+#endif  // #if defined( _MSC_VER )
+
+
+/**
+ * \brief Multiplies two 64-bit unsigned values to a 128-bit intermediate, then divides by a 64-bit unsigned divisor.
+ *
+ * This is effectively: (a * b) / d with full 128-bit intermediate precision.
+ *
+ * Precondition (same as udiv128-style contract): d != 0 and high(a*b) < d (quotient fits in 64 bits).
+ *
+ * \param _ui64A The first multiplicand.
+ * \param _ui64B The second multiplicand.
+ * \param _ui64Divisor The divisor.
+ * \param _pui64Remainder Receives the remainder.
+ * \return Returns the 64-bit quotient.
+ **/
+static inline uint64_t					_umuldiv128( uint64_t _ui64A, uint64_t _ui64B, uint64_t _ui64Divisor, uint64_t * _pui64Remainder ) {
+	assert( _pui64Remainder );
+	assert( _ui64Divisor != 0 );
+
+	uint64_t ui64Hi = 0;
+	const uint64_t ui64Lo = _umul128( _ui64A, _ui64B, &ui64Hi );
+
+	// Same contract as _udiv128(): quotient must fit in 64 bits.
+	assert( ui64Hi < _ui64Divisor );
+
+	return _udiv128( ui64Hi, ui64Lo, _ui64Divisor, _pui64Remainder );
+}
+
+/**
+ * \brief Checked version of _umuldiv128() that returns false if the quotient would not fit in 64 bits.
+ *
+ * \param _ui64A The first multiplicand.
+ * \param _ui64B The second multiplicand.
+ * \param _ui64Divisor The divisor.
+ * \param _pui64Quotient Receives the quotient.
+ * \param _pui64Remainder Receives the remainder.
+ * \return Returns true if the quotient fits in 64 bits; otherwise false (outputs not written).
+ **/
+static inline bool						_umuldiv128_checked( uint64_t _ui64A, uint64_t _ui64B, uint64_t _ui64Divisor, uint64_t * _pui64Quotient, uint64_t * _pui64Remainder ) {
+	assert( _pui64Quotient );
+	assert( _pui64Remainder );
+	assert( _ui64Divisor != 0 );
+
+	uint64_t ui64Hi = 0;
+	const uint64_t ui64Lo = _umul128( _ui64A, _ui64B, &ui64Hi );
+
+	if ( ui64Hi >= _ui64Divisor ) { return false; }
+
+	(*_pui64Quotient) = _udiv128( ui64Hi, ui64Lo, _ui64Divisor, _pui64Remainder );
+	return true;
+}
+
+/**
+ * \brief Multiplies two 64-bit signed values to a 128-bit intermediate, then divides by a 64-bit signed divisor.
+ *
+ * This is effectively: (a * b) / d with full 128-bit intermediate precision (truncates toward 0).
+ *
+ * Precondition: d != 0 and quotient fits in 64 bits (same style/contract as _div128()).
+ *
+ * \param _i64A The first multiplicand.
+ * \param _i64B The second multiplicand.
+ * \param _i64Divisor The divisor.
+ * \param _pi64Remainder Receives the remainder (same sign as dividend, per C/C++).
+ * \return Returns the 64-bit quotient.
+ **/
+static inline int64_t					_muldiv128( int64_t _i64A, int64_t _i64B, int64_t _i64Divisor, int64_t * _pi64Remainder ) {
+	assert( _pi64Remainder );
+	assert( _i64Divisor != 0 );
+
+	int64_t i64Hi = 0;
+	const int64_t i64Lo = _mul128( _i64A, _i64B, &i64Hi );
+
+	return _div128( i64Hi, i64Lo, _i64Divisor, _pi64Remainder );
+}

@@ -729,6 +729,87 @@ namespace mx {
 	// WM_LBUTTONDOWN.
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
 		this->CWidget::SetFocus();
+
+		// If clicking on the drag line, begin dragging mini-map width and avoid selection logic.
+		int32_t i32DragX = 0;
+		if ( CurStyle()->bShowMiniMap && MiniMapHitDragLine( _pCursorPos, i32DragX ) ) {
+			m_mmsMiniMap.bDraggingWidth = true;
+			m_mmsMiniMap.i32DragStartX = _pCursorPos.x;
+			m_mmsMiniMap.i32DragStartWidth = CurStyle()->i32MiniMapWidthPx;
+
+			::SetCapture( Wnd() );
+			::SetCursor( ::LoadCursorW( NULL, IDC_SIZEWE ) );
+			return lsw::CWidget::LSW_H_HANDLED;
+		}
+
+		// Mini-map click handling.
+		if ( CurStyle()->bShowMiniMap ) {
+			uint64_t ui64MiniLine = 0;
+			uint32_t ui32ByteOff = 0;
+			if ( MiniMapCursorToLineByte( _pCursorPos, ui64MiniLine, ui32ByteOff ) ) {
+				CMiniMap::MX_MINI_MAP & mmMiniMap = CurStyle()->mmMiniMap;
+
+				const uint64_t ui64TotalBytes = Size();
+				const uint32_t ui32MiniBpr = mmMiniMap.ui32BytesPerRow ? mmMiniMap.ui32BytesPerRow : 1U;
+
+				uint64_t ui64ClickAddr = MiniMapLineToAddress( ui64MiniLine ) + static_cast<uint64_t>( ui32ByteOff );
+				if ( ui64ClickAddr > ui64TotalBytes ) { ui64ClickAddr = ui64TotalBytes; }
+
+				// Current main-view address range.
+				const uint64_t ui64TopLineMain = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine;
+				const int32_t i32PageLines = (m_sdScrollView[m_eaEditAs].i32PageLines > 0) ? m_sdScrollView[m_eaEditAs].i32PageLines : 1;
+				const uint32_t ui32MainBpr = CurStyle()->uiBytesPerRow ? CurStyle()->uiBytesPerRow : 1U;
+
+				const uint64_t ui64ViewStartAddr = ui64TopLineMain * static_cast<uint64_t>(ui32MainBpr);
+				uint64_t ui64ViewEndAddr = ui64ViewStartAddr + (static_cast<uint64_t>(i32PageLines) * static_cast<uint64_t>(ui32MainBpr));
+				if ( ui64ViewEndAddr > ui64TotalBytes ) { ui64ViewEndAddr = ui64TotalBytes; }
+
+				if ( ui64ClickAddr < ui64ViewStartAddr || ui64ClickAddr >= ui64ViewEndAddr ) {
+					// Click outside current view: jump 3 screens.
+					const int64_t i64Diff = static_cast<int64_t>(ui64ClickAddr) - (static_cast<int64_t>(ui64ViewStartAddr / 2) + static_cast<int64_t>(ui64ViewEndAddr / 2));
+					int64_t i64Delta = std::max( std::abs( i64Diff / int64_t( ui32MainBpr ) / i32PageLines ), 1LL );
+					if ( i64Diff < 0 ) { i64Delta = -i64Delta; }
+
+					int64_t i64NewFirst = (ui64ClickAddr / ui32MainBpr) - i32PageLines / 2;//static_cast<int64_t>(ui64TopLineMain) + (i64Delta * static_cast<int64_t>(i32PageLines));
+					if ( i64NewFirst < 0 ) { i64NewFirst = 0; }
+
+					const uint64_t ui64TotalMainLines = (ui64TotalBytes + ui32MainBpr - 1ULL) / ui32MainBpr;
+					const uint64_t ui64MaxFirst = ui64TotalMainLines ? (ui64TotalMainLines - 1ULL) : 0ULL;
+
+					uint64_t ui64NewFirst = static_cast<uint64_t>(i64NewFirst);
+					if ( ui64NewFirst > ui64MaxFirst ) { ui64NewFirst = ui64MaxFirst; }
+
+					m_sdScrollView[m_eaEditAs].ui64VPos = ui64NewFirst;
+					m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine = ui64NewFirst;
+					const uint64_t ui64Lines = TotalLines_FixedWidth();
+					const uint64_t ui64MaxV  = ui64Lines ? (ui64Lines - 1ULL) : 0ULL;
+					lsw::CBase::SetScrollInfo64( Wnd(), SB_VERT, SIF_POS, ui64MaxV, m_sdScrollView[m_eaEditAs].ui64VPos, 1, TRUE );
+					::InvalidateRect( Wnd(), NULL, FALSE );
+					return lsw::CWidget::LSW_H_HANDLED;
+				}
+
+				// Click inside current view: begin drag-scroll.
+				{
+					// Compute current mid-line in mini-map line space.
+					const uint64_t ui64TopAddrMain = ui64ViewStartAddr;
+					const uint64_t ui64PageBytesMain = static_cast<uint64_t>(i32PageLines) * static_cast<uint64_t>(ui32MainBpr);
+					const uint64_t ui64MidAddrMain = ui64TopAddrMain + (ui64PageBytesMain >> 1);
+
+					const uint64_t ui64MidLineMini = ui64MidAddrMain / static_cast<uint64_t>(ui32MiniBpr);
+
+					// The mini-map line under the cursor is m_mmsMiniMap.ui64Address/miniBpr + ui64MiniLine.
+					const uint64_t ui64MiniStartLine = m_mmsMiniMap.ui64Address / static_cast<uint64_t>(ui32MiniBpr);
+					const int64_t i64CursorLineMini = static_cast<int64_t>( ui64MiniStartLine + ui64MiniLine );
+
+					m_mmsMiniMap.bDraggingScroll = true;
+					m_mmsMiniMap.i64DragMidLineOffset = i64CursorLineMini - static_cast<int64_t>(ui64MidLineMini);
+
+					::SetCapture( Wnd() );
+					return lsw::CWidget::LSW_H_HANDLED;
+				}
+			}
+		}
+
 		::SetCapture( Wnd() );
 
 		const bool bShift = ((::GetKeyState( VK_SHIFT ) & 0x8000) != 0);
@@ -760,6 +841,40 @@ namespace mx {
 					bRefresh = true;
 				}
 			}
+
+			// If we are dragging the mini-map width, update it and skip selection logic.
+			if ( m_mmsMiniMap.bDraggingWidth ) {
+				CMiniMap::MX_MINI_MAP & mmMiniMap = CurStyle()->mmMiniMap;
+
+				int32_t i32Delta;
+				if ( mmMiniMap.bRightSize ) {
+					// Drag bar is on the left edge; moving left increases width.
+					i32Delta = m_mmsMiniMap.i32DragStartX - _pCursorPos.x;
+				}
+				else {
+					// Drag bar is on the right edge; moving right increases width.
+					i32Delta = _pCursorPos.x - m_mmsMiniMap.i32DragStartX;
+				}
+
+				const int32_t i32NewW = MiniMapClampWidth( m_mmsMiniMap.i32DragStartWidth + i32Delta );
+				if ( i32NewW != CurStyle()->i32MiniMapWidthPx ) {
+					CurStyle()->i32MiniMapWidthPx = i32NewW;
+					::InvalidateRect( Wnd(), NULL, FALSE );
+				}
+
+				::SetCursor( ::LoadCursorW( NULL, IDC_SIZEWE ) );
+				return lsw::CWidget::LSW_H_HANDLED;
+			}
+
+			// Not dragging: if hovering on the drag line, show horizontal resize cursor.
+			int32_t i32DragX = 0;
+			if ( MiniMapHitDragLine( _pCursorPos, i32DragX ) && ::GetCapture() != Wnd() ) {
+				::SetCursor( ::LoadCursorW( NULL, IDC_SIZEWE ) );
+				if ( bRefresh ) {
+					::InvalidateRect( Wnd(), NULL, FALSE );
+				}
+				return lsw::CWidget::LSW_H_HANDLED;
+			}
 		}
 		if ( ::GetCapture() != Wnd() ) {
 			if ( bRefresh ) {
@@ -781,6 +896,7 @@ namespace mx {
 	/** \brief Handles WM_LBUTTONUP. */
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::LButtonUp( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
 		if ( ::GetCapture() == Wnd() ) { ::ReleaseCapture(); }
+		m_mmsMiniMap.bDraggingWidth = false;
 		SelectionEndGesture();
 		::InvalidateRect( Wnd(), NULL, FALSE );
 		return LSW_H_HANDLED;
@@ -1317,19 +1433,20 @@ namespace mx {
 		}
 		if ( mmMiniMap.bAutoSnap ) {
 			ui32SrcW = i32VisualWidth / (mmMiniMap.ui32SnapLines * mmMiniMap.ui32Zoom) * mmMiniMap.ui32SnapLines;
+			ui32SrcW = std::max( ui32SrcW, mmMiniMap.ui32SnapLines );
 		}
 		MiniMapAddressRange( i32RectH, ui64AddrStart, ui64AddrEnd, ui32SrcW );
 
 		m_mmsMiniMap.ui64Address = ui64AddrStart;
 		m_mmsMiniMap.ui64End = ui64AddrEnd;
 		size_t sTotal = size_t( m_mmsMiniMap.ui64End - m_mmsMiniMap.ui64Address );
-		
+		if ( !sTotal || !ui32SrcW ) { return; }
 
 		
 		const size_t sSrcW = static_cast<size_t>(ui32SrcW);
 		const size_t sSrcH = (sTotal + (sSrcW - 1U)) / sSrcW;
 		
-		if ( !sTotal ) { return; }
+		
 
 		try {
 			CHexEditorInterface::CBuffer bBuffer;
@@ -1524,7 +1641,7 @@ namespace mx {
 		// First visible line (top) comes from style; draw consecutive lines.
 		uint64_t ui64Line = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine;
 
-		auto ui64MaxLines = TotalLines() - ui64Line;
+		auto ui64MaxLines = TotalLines() - ui64Line + 1;
 		_ui32LinesToDraw = uint32_t( std::min<uint64_t>( _ui32LinesToDraw, ui64MaxLines ) );
 		std::wstring wsTmp;
 		for ( uint32_t I = 0; I < _ui32LinesToDraw; ++I, ++ui64Line ) {
@@ -1602,9 +1719,11 @@ namespace mx {
 				int32_t iGX = 0, iGW = 0;
 				if ( !GetTextRectForIndex( _dfFmt, I, _iAreaXBase, iGX, iGW ) ) { break; }
 
-				if ( stAll.bShowRulerArrows ) {
-					// TODO: Get caret position.
-					//ForeColors()->crRulerMarker
+				if ( stAll.bShowRulerArrows && (I / ui32Stride == (m_sgSelGesture.ui64CaretAddr % ui32Bpr) / ui32Stride) ) {
+					auto i32X = iGX + (iGW / 2);
+					lsw::CHelpers::DrawLineSinglePixel_Inclusive( _hDc, i32X - 2, _iYTop, i32X + 2, _iYTop, ForeColors()->crRulerMarker );
+					lsw::CHelpers::DrawLineSinglePixel_Inclusive( _hDc, i32X - 1, _iYTop + 1, i32X + 1, _iYTop + 1, ForeColors()->crRulerMarker );
+					lsw::CHelpers::DrawLineSinglePixel_Inclusive( _hDc, i32X - 0, _iYTop + 2, i32X + 0, _iYTop + 2, ForeColors()->crRulerMarker );
 				}
 
 				if ( stAll.bShowRulerLabels ) {
@@ -1684,7 +1803,7 @@ namespace mx {
 		uint64_t ui64Line = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine;
 		uint64_t ui64StartAddress = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine * ui32Bpr;
 
-		auto ui64MaxLines = TotalLines() - ui64Line;
+		auto ui64MaxLines = TotalLines() - ui64Line + 1;
 		_ui32LinesToDraw = uint32_t( std::min<uint64_t>( _ui32LinesToDraw, ui64MaxLines ) );
 
 		// The values to render.
@@ -1754,126 +1873,126 @@ namespace mx {
 			}
 
 			for ( int32_t J = 0; J < ui32Bpr; J += ui32Stride ) {
-				if ( J >= sDataSize ) { break; }
-
 				ui64ThisAddr = ui64StartAddress + I * ui32Bpr + J;
-				size_t sBuffSize = J < sDataSize ? sDataSize - J : 0;
-				const uint8_t * pui8Value = sBuffSize ? &pui8Data[J] : reinterpret_cast<const uint8_t *>(&wcDefChar);
-				uint8_t ui8Value = (*pui8Value);
 				GetTextRectForIndex( _dfFmt, J, _iXLeft, iL, iW );
+				if ( J < sDataSize ) {
+					size_t sBuffSize = J < sDataSize ? sDataSize - J : 0;
+					const uint8_t * pui8Value = sBuffSize ? &pui8Data[J] : reinterpret_cast<const uint8_t *>(&wcDefChar);
+					uint8_t ui8Value = (*pui8Value);
 				
-				if ( MX_DF_CHAR != _dfFmt && stAll.ui64DivisionSpacing ) {
-					// Draw division lines.
-					int32_t iL2, iW2;
-					GetBackgrondRectForIndex( _dfFmt, J, _iXLeft, iL2, iW2 );
-					lsw::LSW_RECT rRect;
-					rRect.top = iY - 1;
-					rRect.left = iL2;
-					rRect.right = iL2 + iW2 + 1;
-					rRect.bottom = iY + iLineAdv;
+					if ( MX_DF_CHAR != _dfFmt && stAll.ui64DivisionSpacing ) {
+						// Draw division lines.
+						int32_t iL2, iW2;
+						GetBackgrondRectForIndex( _dfFmt, J, _iXLeft, iL2, iW2 );
+						lsw::LSW_RECT rRect;
+						rRect.top = iY - 1;
+						rRect.left = iL2;
+						rRect.right = iL2 + iW2 + 1;
+						rRect.bottom = iY + iLineAdv;
 
-					uint64_t ui64ThisMod = ui64ThisAddr % stAll.ui64DivisionSpacing;
-					uint64_t ui64ThisDiv = ui64ThisAddr / stAll.ui64DivisionSpacing;
-					lsw::CHelpers::DrawRectOutlineMasked( _hDc, rRect,
-						//(ui64ThisAddr >= ui32Bpr && ((ui64ThisAddr - ui32Bpr) % stAll.ui64DivisionSpacing != ui64ThisMod) ? lsw::CHelpers::LSW_RS_TOP : 0) |																						// Cell above this one.
-						(((ui64ThisAddr + ui32Bpr) % stAll.ui64DivisionSpacing != ui64ThisMod && (ui64ThisAddr + ui32Bpr) / stAll.ui64DivisionSpacing != ui64ThisDiv) ? lsw::CHelpers::LSW_RS_BOTTOM : 0) |											// Cell below this one.
-						((((ui64ThisAddr + 1) % stAll.ui64DivisionSpacing) == 0) ? lsw::CHelpers::LSW_RS_RIGHT : 0),																																// Cell to the right.
-						MX_GetRgbValue( ForeColors()->crDivisionLines ) );
-				}
+						uint64_t ui64ThisMod = ui64ThisAddr % stAll.ui64DivisionSpacing;
+						uint64_t ui64ThisDiv = ui64ThisAddr / stAll.ui64DivisionSpacing;
+						lsw::CHelpers::DrawRectOutlineMasked( _hDc, rRect,
+							//(ui64ThisAddr >= ui32Bpr && ((ui64ThisAddr - ui32Bpr) % stAll.ui64DivisionSpacing != ui64ThisMod) ? lsw::CHelpers::LSW_RS_TOP : 0) |																						// Cell above this one.
+							(((ui64ThisAddr + ui32Bpr) % stAll.ui64DivisionSpacing != ui64ThisMod && (ui64ThisAddr + ui32Bpr) / stAll.ui64DivisionSpacing != ui64ThisDiv) ? lsw::CHelpers::LSW_RS_BOTTOM : 0) |											// Cell below this one.
+							((((ui64ThisAddr + 1) % stAll.ui64DivisionSpacing) == 0) ? lsw::CHelpers::LSW_RS_RIGHT : 0),																																// Cell to the right.
+							MX_GetRgbValue( ForeColors()->crDivisionLines ) );
+					}
 				
-				switch ( _dfFmt ) {
-					case MX_DF_OCT : {
-						try {
-							wsTmp.resize( 3 );
-							for ( size_t K = 0; K < 3; ++K ) {
-								wsTmp[2-K] = (ui8Value & 0x07) + L'0';
-								ui8Value >>= 3;
-							}
+					switch ( _dfFmt ) {
+						case MX_DF_OCT : {
+							try {
+								wsTmp.resize( 3 );
+								for ( size_t K = 0; K < 3; ++K ) {
+									wsTmp[2-K] = (ui8Value & 0x07) + L'0';
+									ui8Value >>= 3;
+								}
 
 							
-						}
-						catch ( ... ) {}
-						break;
-					}
-					case MX_DF_BIN : {
-						try {
-							wsTmp.resize( 8 );
-							for ( size_t K = 0; K < 8; ++K ) {
-								wsTmp[7-K] = (ui8Value & 0x01) + L'0';
-								ui8Value >>= 1;
 							}
+							catch ( ... ) {}
+							break;
 						}
-						catch ( ... ) {}
-						break;
-					}
-					case MX_DF_DEC : {
-						try {
-							wsTmp.resize( 3 );
-							for ( size_t K = 0; K < 3; ++K ) {
-								wsTmp[2-K] = (ui8Value % 10) + L'0';
-								ui8Value /= 10;
-							}
-						}
-						catch ( ... ) {}
-						break;
-					}
-					case MX_DF_CHAR : {
-						try {
-							wsTmp.resize( 1 );
-							i32CharSizeCounter -= ui32Stride;
-							if ( i32CharSizeCounter <= 1 ) {
-								if ( bHolding ) {
-									wsTmp[0] = wcHold;
-									bHolding = false;
+						case MX_DF_BIN : {
+							try {
+								wsTmp.resize( 8 );
+								for ( size_t K = 0; K < 8; ++K ) {
+									wsTmp[7-K] = (ui8Value & 0x01) + L'0';
+									ui8Value >>= 1;
 								}
-								else {
-									i32CharSizeCounter = int32_t( CCharSets::m_csSets[stAll.csCharSet].pfDisplayable( pui8Value, sBuffSize, wcHold ) );
-									if MX_UNLIKELY( (wcHold >= 0x80 && CCharSets::m_csSets[stAll.csCharSet].bHideOver127) ) {
-										wcHold = L'.';
-									}
-									if ( i32CharSizeCounter > ui32Stride ) {
-										wsTmp[0] = L'\0';
-										bHolding = true;
+							}
+							catch ( ... ) {}
+							break;
+						}
+						case MX_DF_DEC : {
+							try {
+								wsTmp.resize( 3 );
+								for ( size_t K = 0; K < 3; ++K ) {
+									wsTmp[2-K] = (ui8Value % 10) + L'0';
+									ui8Value /= 10;
+								}
+							}
+							catch ( ... ) {}
+							break;
+						}
+						case MX_DF_CHAR : {
+							try {
+								wsTmp.resize( 1 );
+								i32CharSizeCounter -= ui32Stride;
+								if ( i32CharSizeCounter <= 1 ) {
+									if ( bHolding ) {
+										wsTmp[0] = wcHold;
+										bHolding = false;
 									}
 									else {
-										wsTmp[0] = wcHold;
+										i32CharSizeCounter = int32_t( CCharSets::m_csSets[stAll.csCharSet].pfDisplayable( pui8Value, sBuffSize, wcHold ) );
+										if MX_UNLIKELY( (wcHold >= 0x80 && CCharSets::m_csSets[stAll.csCharSet].bHideOver127) ) {
+											wcHold = L'.';
+										}
+										if ( i32CharSizeCounter > ui32Stride ) {
+											wsTmp[0] = L'\0';
+											bHolding = true;
+										}
+										else {
+											wsTmp[0] = wcHold;
+										}
 									}
 								}
+								else { wsTmp[0] = L'\0'; }
 							}
-							else { wsTmp[0] = L'\0'; }
+							catch ( ... ) {}
+							break;
 						}
-						catch ( ... ) {}
-						break;
-					}
-					default : {
-						try {
-							wsTmp.resize( 2 );
-							for ( size_t K = 0; K < 2; ++K ) {
-								uint8_t uiThis = (ui8Value & 0x0F);
-								if ( uiThis >= 10 ) {
-									wsTmp[1-K] = uiThis + (L'A' - 10);
+						default : {
+							try {
+								wsTmp.resize( 2 );
+								for ( size_t K = 0; K < 2; ++K ) {
+									uint8_t uiThis = (ui8Value & 0x0F);
+									if ( uiThis >= 10 ) {
+										wsTmp[1-K] = uiThis + (L'A' - 10);
+									}
+									else {
+										wsTmp[1-K] = uiThis + L'0';
+									}
+									ui8Value >>= 4;
 								}
-								else {
-									wsTmp[1-K] = uiThis + L'0';
-								}
-								ui8Value >>= 4;
 							}
+							catch ( ... ) {}
+							break;
 						}
-						catch ( ... ) {}
-						break;
 					}
-				}
-				auto crThisColor = CellFgColor( ui64ThisAddr, pui8Data + J, sDataSize - J, _bRightArea );
-				if ( crThisColor != MX_GetRgbValue( ForeColors()->crEditor ) ) {
-					lsw::LSW_SETTEXTCOLOR stcTextColor2( _hDc, MX_GetRgbValue( crThisColor ) );
-					::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int>(wsTmp.size()) );
-				}
-				else {
-					::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int>(wsTmp.size()) );
+					auto crThisColor = CellFgColor( ui64ThisAddr, pui8Data + J, sDataSize - J, _bRightArea );
+					if ( crThisColor != MX_GetRgbValue( ForeColors()->crEditor ) ) {
+						lsw::LSW_SETTEXTCOLOR stcTextColor2( _hDc, MX_GetRgbValue( crThisColor ) );
+						::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int>(wsTmp.size()) );
+					}
+					else {
+						::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int>(wsTmp.size()) );
+					}
 				}
 
 				// Caret.
-				if ( ui64ThisAddr == m_sgSelGesture.ui64CaretAddr ) {
+				if ( ui64ThisAddr / ui32Stride == m_sgSelGesture.ui64CaretAddr / ui32Stride ) {
 					rCarect.top = iY + iLineAdv - 1;
 					rCarect.left = iL;
 					rCarect.right = iL + iW;
@@ -1896,7 +2015,6 @@ namespace mx {
 						else if ( m_bCaretOn ) {
 							bDrawCaret = true;
 							crCaretColor = MX_GetRgbValue( ForeColors()->crCaret );
-							
 						}
 					}
 				}
@@ -2299,7 +2417,7 @@ namespace mx {
 	void CHexEditorControl::MiniMapAddressRange( int32_t _i32ScreenHeight, uint64_t &_ui64StartAddr, uint64_t &_ui64EndAddr, uint32_t _ui32BytesPerRow ) {
 		CMiniMap::MX_MINI_MAP & mmMiniMap = CurStyle()->mmMiniMap;
 
-		if ( _i32ScreenHeight <= 0 ) {
+		if ( _i32ScreenHeight <= 0 || !_ui32BytesPerRow ) {
 			_ui64StartAddr = 0;
 			_ui64EndAddr = 0;
 			return;
@@ -2368,6 +2486,128 @@ namespace mx {
 		if ( _ui64EndAddr > ui64TotalBytes ) {
 			_ui64EndAddr = ui64TotalBytes;
 		}
+	}
+
+	/**
+	 * \brief Determines if the cursor is on the mini-map drag line.
+	 *
+	 * \param _pCursorPos The cursor position in client coordinates.
+	 * \param _i32DragX Holds the returned drag-line X coordinate if the hit-test succeeds.
+	 * \return Returns true if the cursor is on the drag line.
+	 */
+	bool CHexEditorControl::MiniMapHitDragLine( const POINTS &_pCursorPos, int32_t &_i32DragX ) const {
+		if ( !CurStyle()->bShowMiniMap ) { return false; }
+
+		const lsw::LSW_RECT & rClient = ClientRect();
+		const int32_t i32Left = MiniMapLeft( rClient );
+		const int32_t i32Right = i32Left + CurStyle()->i32MiniMapWidthPx;
+
+		const CMiniMap::MX_MINI_MAP & mmMiniMap = CurStyle()->mmMiniMap;
+
+		// Drag bar is on the left when bRightSize is true; otherwise it is on the right.
+		const int32_t i32DragX = mmMiniMap.bRightSize ? i32Left : i32Right;
+
+		// A thin vertical hit zone.
+		const int32_t i32Grip = 3;
+		if ( _pCursorPos.x < (i32DragX - i32Grip) || _pCursorPos.x > (i32DragX + i32Grip) ) { return false; }
+		if ( _pCursorPos.y < rClient.top || _pCursorPos.y > rClient.bottom ) { return false; }
+
+		_i32DragX = i32DragX;
+		return true;
+	}
+
+	/**
+	 * \brief Snaps and clamps a proposed mini-map width.
+	 *
+	 * \param _i32Width The proposed width.
+	 * \return Returns the snapped and clamped width.
+	 */
+	int32_t CHexEditorControl::MiniMapClampWidth( int32_t _i32Width ) const {
+		const lsw::LSW_RECT & rClient = ClientRect();
+
+		constexpr int32_t i32MinW = 1;
+		const int32_t i32MaxW = std::max<int32_t>( rClient.Width() - 1, i32MinW );
+
+		int32_t i32W = _i32Width;
+		if ( i32W < i32MinW ) { i32W = i32MinW; }
+		if ( i32W > i32MaxW ) { i32W = i32MaxW; }
+
+		const CMiniMap::MX_MINI_MAP & mmMiniMap = CurStyle()->mmMiniMap;
+		if ( mmMiniMap.bAutoSnap ) {
+			// Note: ui32SnapLines is used as the snap granularity for width (pixels) here.
+			const int32_t i32Snap = std::max<int32_t>( static_cast<int32_t>(mmMiniMap.ui32SnapLines), 1 );
+			i32W = ((i32W + (i32Snap >> 1)) / i32Snap) * i32Snap;
+			if ( i32W < i32MinW ) { i32W = i32MinW; }
+			if ( i32W > i32MaxW ) { i32W = i32MaxW; }
+		}
+
+		return i32W + 1;
+	}
+
+	/**
+	 * \brief Converts a cursor position to a mini-map source line and a byte offset within that line.
+	 *
+	 * \param _pCursorPos Cursor position in client coordinates.
+	 * \param _ui64MiniLine Holds the returned mini-map source line.
+	 * \param _ui32ByteOff Holds the returned byte offset within the mini-map row.
+	 * \return Returns true if the cursor is inside the mini-map rectangle.
+	 */
+	bool CHexEditorControl::MiniMapCursorToLineByte( const POINTS &_pCursorPos, uint64_t &_ui64MiniLine, uint32_t &_ui32ByteOff ) const {
+		lsw::LSW_RECT rMini;
+		if ( !MiniMapRect( rMini ) ) { return false; }
+
+		if ( _pCursorPos.x < rMini.left || _pCursorPos.x >= rMini.right ) { return false; }
+		if ( _pCursorPos.y < rMini.top || _pCursorPos.y >= rMini.bottom ) { return false; }
+
+		const CMiniMap::MX_MINI_MAP & mmMiniMap = CurStyle()->mmMiniMap;
+
+		const uint32_t ui32MiniBpr = mmMiniMap.ui32BytesPerRow ? mmMiniMap.ui32BytesPerRow : 1U;
+		const uint32_t ui32Zoom = mmMiniMap.ui32Zoom ? mmMiniMap.ui32Zoom : 1U;
+
+		const uint64_t ui64TotalBytes = Size();
+		if ( ui64TotalBytes == 0 ) { return false; }
+
+		const int32_t i32DstW = rMini.Width();
+		const int32_t i32DstH = rMini.Height();
+		if ( i32DstW <= 0 || i32DstH <= 0 ) { return false; }
+
+		// Source bitmap height in "mini-lines" for the current view.
+		const uint64_t ui64SpanMiniLines = std::max( static_cast<uint64_t>(i32DstH) / static_cast<uint64_t>(ui32Zoom), 1ULL );
+
+		const int32_t i32RelX = _pCursorPos.x - rMini.left;
+		const int32_t i32RelY = _pCursorPos.y - rMini.top;
+
+		// Map destination pixel to source line.
+		uint64_t ui64Y = (static_cast<uint64_t>(i32RelY) * ui64SpanMiniLines) / static_cast<uint64_t>(i32DstH);
+		if ( ui64Y >= ui64SpanMiniLines ) { ui64Y = ui64SpanMiniLines - 1ULL; }
+
+		// Map destination pixel to source byte within row.
+		uint64_t ui64X = (static_cast<uint64_t>(i32RelX) * static_cast<uint64_t>(ui32MiniBpr)) / static_cast<uint64_t>(i32DstW);
+		if ( ui64X >= ui32MiniBpr ) { ui64X = ui32MiniBpr - 1ULL; }
+
+		_ui64MiniLine = ui64Y;
+		_ui32ByteOff = static_cast<uint32_t>( ui64X );
+		return true;
+	}
+
+	/**
+	 * \brief Converts a mini-map source line to the corresponding address in the file.
+	 *
+	 * \param _ui64MiniLine Source line in the mini-map bitmap.
+	 * \return Returns the file address clamped to Size().
+	 */
+	uint64_t CHexEditorControl::MiniMapLineToAddress( uint64_t _ui64MiniLine ) const {
+		const CMiniMap::MX_MINI_MAP & mmMiniMap = CurStyle()->mmMiniMap;
+
+		uint32_t ui32MiniBpr = mmMiniMap.bAutoSnap ?
+			std::max<uint32_t>( (CurStyle()->i32MiniMapWidthPx - 1) / (mmMiniMap.ui32SnapLines * mmMiniMap.ui32Zoom) * mmMiniMap.ui32SnapLines, mmMiniMap.ui32SnapLines ) :
+			(mmMiniMap.ui32BytesPerRow);
+		ui32MiniBpr = std::max( ui32MiniBpr, 1U );
+		const uint64_t ui64TotalBytes = Size();
+
+		uint64_t ui64Addr = m_mmsMiniMap.ui64Address + (_ui64MiniLine * static_cast<uint64_t>(ui32MiniBpr));
+		if ( ui64Addr > ui64TotalBytes ) { ui64Addr = ui64TotalBytes; }
+		return ui64Addr;
 	}
 
 	/**

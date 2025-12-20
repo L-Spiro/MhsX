@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../EEExpEval.h"
+
 #include <climits>
 #include <crtdbg.h>
 #include <cstdint>

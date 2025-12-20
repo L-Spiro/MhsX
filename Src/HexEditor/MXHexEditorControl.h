@@ -406,6 +406,15 @@ namespace mx {
 		// Gets the showing of the ruler labels.
 		inline bool									GetShowRulerLabels() const { return CurStyle()->bShowRulerLabels; }
 
+		// Sets the showing of the ruler caret.
+		void										SetShowMiniMap( bool _bEnable ) {
+			CurStyle()->bShowMiniMap = _bEnable;
+			::InvalidateRect( Wnd(), NULL, FALSE );
+		}
+		
+		// Gets the showing of the ruler caret.
+		inline bool									GetShowMiniMap() const { return CurStyle()->bShowMiniMap; }
+
 		/**
 		 * Determines if a process is being viewed.
 		 * 
@@ -1092,7 +1101,6 @@ namespace mx {
 			::InvalidateRect( Wnd(), nullptr, FALSE );
 		}
 
-
 		// Computes font metrics.
 		void										ComputeFontMetrics() {
 			ComputeFontMetrics( (*Font()), m_wDpiY, Wnd() );
@@ -1163,6 +1171,55 @@ namespace mx {
 		 * \param _ui32BytesPerRow The number of bytes per row.
 		 **/
 		void										MiniMapAddressRange( int32_t _i32ScreenHeight, uint64_t &_ui64StartAddr, uint64_t &_ui64EndAddr, uint32_t _ui32BytesPerRow );
+
+		/**
+		 * \brief Determines if the cursor is on the mini-map drag line.
+		 *
+		 * \param _pCursorPos The cursor position in client coordinates.
+		 * \param _i32DragX Holds the returned drag-line X coordinate if the hit-test succeeds.
+		 * \return Returns true if the cursor is on the drag line.
+		 */
+		bool										MiniMapHitDragLine( const POINTS &_pCursorPos, int32_t &_i32DragX ) const;
+
+		/**
+		 * \brief Snaps and clamps a proposed mini-map width.
+		 *
+		 * \param _i32Width The proposed width.
+		 * \return Returns the snapped and clamped width.
+		 */
+		int32_t										MiniMapClampWidth( int32_t _i32Width ) const;
+
+		/**
+		 * \brief Gets the mini-map rectangle in client coordinates.
+		 *
+		 * \param _rOut Holds the returned rectangle.
+		 * \return Returns true if the mini-map is visible.
+		 */
+		inline bool									MiniMapRect( lsw::LSW_RECT &_rOut ) const {
+			if ( !CurStyle()->bShowMiniMap ) { return false; }
+			const lsw::LSW_RECT rClient = ClientRect();
+			const int32_t i32Left = MiniMapLeft( rClient );
+			_rOut = lsw::LSW_RECT( i32Left, 0, i32Left + CurStyle()->i32MiniMapWidthPx, rClient.Height() );
+			return true;
+		}
+
+		/**
+		 * \brief Converts a cursor position to a mini-map source line and a byte offset within that line.
+		 *
+		 * \param _pCursorPos Cursor position in client coordinates.
+		 * \param _ui64MiniLine Holds the returned mini-map source line.
+		 * \param _ui32ByteOff Holds the returned byte offset within the mini-map row.
+		 * \return Returns true if the cursor is inside the mini-map rectangle.
+		 */
+		bool										MiniMapCursorToLineByte( const POINTS &_pCursorPos, uint64_t &_ui64MiniLine, uint32_t &_ui32ByteOff ) const;
+
+		/**
+		 * \brief Converts a mini-map source line to the corresponding address in the file.
+		 *
+		 * \param _ui64MiniLine Source line in the mini-map bitmap.
+		 * \return Returns the file address clamped to Size().
+		 */
+		uint64_t									MiniMapLineToAddress( uint64_t _ui64MiniLine ) const;
 
 		// Gets the minimum address digits.
 		uint32_t									MinAddrDigits() const {
@@ -1346,7 +1403,8 @@ namespace mx {
 				agGlyphs.i32MaxAscii = 0;
 				agGlyphs.i32MaxAsciiAnsi = tmMetrics.tmMaxCharWidth;
 				if ( CurStyle()->csCharSet == CCharSets::MX_CS_UNICODE ) {
-					agGlyphs.i32MaxAsciiAnsi = ((agGlyphs.i32MaxAsciiAnsi + 1) / 2) + (agGlyphs.i32MaxAsciiAnsi / 8);
+					//agGlyphs.i32MaxAsciiAnsi = ((agGlyphs.i32MaxAsciiAnsi + 1) / 2) + (agGlyphs.i32MaxAsciiAnsi / 8);
+					agGlyphs.i32MaxAsciiAnsi = ((agGlyphs.i32MaxAsciiAnsi + 1) / 2 * 2);// + (agGlyphs.i32MaxAsciiAnsi / 12);
 				}
 				for ( wchar_t I = 0; I < 0x80; ++I ) {
 					wchar_t wcChar = I;

@@ -43,7 +43,7 @@ namespace mx {
 			uint32_t								ui32BytesPerRow = 16;				/**< Mini-map bytes per line. */
 			uint32_t								ui32SnapLines = 16;					/**< Snap granularity (UI edit, default 16). */
 			COLORREF								crCusLow = RGB( 0, 0, 0 );			/**< The custom-color low end. */
-			COLORREF								crCusHi = RGB( 0xFF, 0xFF, 0xFF );	/**< The custom-color low end. */
+			COLORREF								crCusHi = RGB( 0xFF, 0xFF, 0xFF );	/**< The custom-color high end. */
 			bool									bAutoSnap = true;					/**< Auto Snap. */
 			bool									bRightSize = true;					/**< Set to the right side of the screen (drag bar is on the left).  If false, the drag bar is on the right. */
 			bool									bHighlightStructs = true;			/**< Highlight structures from templates in the Mini Map. */
@@ -58,6 +58,11 @@ namespace mx {
 			uint64_t								ui64Address = 0;					/**< The start address. */
 			uint64_t								ui64End = 0;						/**< The end address. */
 			bool									bHighlight = false;					/**< If true, draw the Mini-Map with a highlight (indicates the mouse is over the Mini-Map). */
+			bool									bDraggingWidth = false;				/**< True while dragging the mini-map drag bar. */
+			int32_t									i32DragStartX = 0;					/**< Mouse X at drag start. */
+			int32_t									i32DragStartWidth = 0;				/**< Mini-map width at drag start. */
+			bool									bDraggingScroll = false;			/**< True while dragging the mini-map to scroll vertically. */
+			int64_t									i64DragMidLineOffset = 0;			/**< Cursor mini-line - current mid mini-line. */
 		};
 
 
