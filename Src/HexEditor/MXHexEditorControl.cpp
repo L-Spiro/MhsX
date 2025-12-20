@@ -542,7 +542,7 @@ namespace mx {
 	 */
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::KillFocus( HWND /*_hNewFocus*/ ) {
 		StopCaretBlink();
-		::InvalidateRect( Wnd(), nullptr, FALSE );
+		
 		return lsw::CWidget::LSW_H_CONTINUE;
 	}
 
@@ -745,7 +745,28 @@ namespace mx {
 
 	/** \brief Handles WM_MOUSEMOVE. */
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::MouseMove( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
-		if ( ::GetCapture() != Wnd() ) { return lsw::CWidget::LSW_H_CONTINUE; }
+		bool bRefresh = false;
+		if ( CurStyle()->bShowMiniMap ) {
+			int32_t i32Left = MiniMapLeft( ClientRect() );
+			if ( _pCursorPos.x >= i32Left && _pCursorPos.x <= (i32Left + CurStyle()->i32MiniMapWidthPx) ) {
+				if ( !m_mmsMiniMap.bHighlight ) {
+					m_mmsMiniMap.bHighlight = true;
+					bRefresh = true;
+				}
+			}
+			else {
+				if ( m_mmsMiniMap.bHighlight ) {
+					m_mmsMiniMap.bHighlight = false;
+					bRefresh = true;
+				}
+			}
+		}
+		if ( ::GetCapture() != Wnd() ) {
+			if ( bRefresh ) {
+				::InvalidateRect( Wnd(), NULL, FALSE );
+			}
+			return lsw::CWidget::LSW_H_CONTINUE;
+		}
 
 		const bool bShift = ((::GetKeyState( VK_SHIFT ) & 0x8000) != 0);
 		const bool bCtrl  = ((::GetKeyState( VK_CONTROL ) & 0x8000) != 0);
@@ -1240,7 +1261,136 @@ namespace mx {
 			}
 			DrawAddressGutter( _hDc, stAll.i32LeftAddrPadding, iY, m_sdScrollView[m_eaEditAs].i32PageLines + 1 );
 		}
+
+		if ( stAll.bShowMiniMap ) {
+			DrawMiniMap( _hDc,
+				MiniMapLeft( _rRect ),
+				0, _rRect );
+		}
 		return true;
+	}
+
+	/**
+	 * \brief Draws the mini-map.
+	 * 
+	 * \param _hDc The device context to which to draw.
+	 * \param _iXLeft The left X coordinate of the mini-map.
+	 * \param _iYTop The top Y coordinate of the mini-map.
+	 * \param _rRect The destination rectangle for the mini-map.
+	 */
+	void CHexEditorControl::DrawMiniMap( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, const lsw::LSW_RECT &_rRect ) {
+		if MX_UNLIKELY( !_hDc || !m_pheiTarget ) { return; }
+
+		CMiniMap::MX_MINI_MAP & mmMiniMap = CurStyle()->mmMiniMap;
+
+		const int32_t i32RectH = _rRect.Height();
+		uint64_t ui64AddrStart, ui64AddrEnd;
+		uint32_t ui32SrcW = mmMiniMap.ui32BytesPerRow;
+		int32_t i32VisualWidth;
+		{
+			lsw::LSW_RECT rBg = _rRect;
+			
+			if ( mmMiniMap.bRightSize ) {
+				rBg.left = _iXLeft + 1;
+				rBg.right = _rRect.right;
+				i32VisualWidth = int32_t( _rRect.right - rBg.left );
+			}
+			else {
+				rBg.left = 0;
+				rBg.right = _iXLeft - 1;
+				i32VisualWidth = int32_t( rBg.left );
+			}
+			if ( rBg.Width() >= 0 ) {
+				::FillRect( _hDc, &rBg,
+					lsw::CBase::BrushCache().Brush( MX_GetRgbValue( BackColors()->crEditor ) ) );
+			}
+			if ( mmMiniMap.bRightSize ) {
+				rBg.left--;
+				rBg.right = rBg.left + 1;
+			}
+			else {
+				rBg.left = rBg.right;
+				rBg.right++;
+			}
+			::FillRect( _hDc, &rBg,
+				lsw::CBase::BrushCache().Brush( MX_GetRgbValue( ForeColors()->crMiniMapSeparatorLine ) ) );
+		}
+		if ( mmMiniMap.bAutoSnap ) {
+			ui32SrcW = i32VisualWidth / (mmMiniMap.ui32SnapLines * mmMiniMap.ui32Zoom) * mmMiniMap.ui32SnapLines;
+		}
+		MiniMapAddressRange( i32RectH, ui64AddrStart, ui64AddrEnd, ui32SrcW );
+
+		m_mmsMiniMap.ui64Address = ui64AddrStart;
+		m_mmsMiniMap.ui64End = ui64AddrEnd;
+		size_t sTotal = size_t( m_mmsMiniMap.ui64End - m_mmsMiniMap.ui64Address );
+		
+
+		
+		const size_t sSrcW = static_cast<size_t>(ui32SrcW);
+		const size_t sSrcH = (sTotal + (sSrcW - 1U)) / sSrcW;
+		
+		if ( !sTotal ) { return; }
+
+		try {
+			CHexEditorInterface::CBuffer bBuffer;
+			if ( !m_pheiTarget->Read( m_mmsMiniMap.ui64Address, bBuffer, sTotal ) ) { return; }
+
+			m_mmsMiniMap.vBuffer.resize( sSrcW * sSrcH );
+			if ( mmMiniMap.cColors == CMiniMap::MX_C_NONE ) {
+				CMiniMap::ContrastEndpoints( mmMiniMap.ui32Contrast, mmMiniMap.ui8Lo, mmMiniMap.ui8Hi );
+			}
+
+			for ( size_t I = 0; I < m_mmsMiniMap.vBuffer.size(); ++I ) {
+				if ( I < bBuffer.size() ) {
+					m_mmsMiniMap.vBuffer[I] = MiniMapColor( m_mmsMiniMap.ui64Address + I, bBuffer.data() + I, bBuffer.size() - I );
+				}
+				else {
+					m_mmsMiniMap.vBuffer[I] = BackColors()->crEditor;
+				}
+			}
+
+			struct MX_BMI32 {
+				BITMAPINFOHEADER					bih;
+				DWORD								dwMasks[3];
+			} bmi = {};
+
+			bmi.bih.biSize = sizeof( bmi.bih );
+			bmi.bih.biWidth = static_cast<LONG>(ui32SrcW);
+			bmi.bih.biHeight = -static_cast<LONG>(sSrcH);				// Top-down.
+			bmi.bih.biPlanes = 1;
+			bmi.bih.biBitCount = 32;
+			bmi.bih.biCompression = BI_BITFIELDS;
+
+			// COLORREF is 0x00BBGGRR, so interpret DWORD pixels using these masks.
+			bmi.dwMasks[0] = 0x000000FF;								// Red.
+			bmi.dwMasks[1] = 0x0000FF00;								// Green.
+			bmi.dwMasks[2] = 0x00FF0000;								// Blue.
+
+			if ( mmMiniMap.bRightSize ) {
+				++_iXLeft;
+			}
+			else {
+				_iXLeft = _iXLeft - 1 - (sSrcW * mmMiniMap.ui32Zoom);
+			}
+
+			::StretchDIBits(
+				_hDc,
+				_iXLeft,
+				_iYTop,
+				sSrcW * mmMiniMap.ui32Zoom,
+				sSrcH * mmMiniMap.ui32Zoom,
+				0,
+				0,
+				static_cast<int32_t>(ui32SrcW),
+				static_cast<int32_t>(sSrcH),
+				m_mmsMiniMap.vBuffer.data(),
+				reinterpret_cast<const BITMAPINFO *>(&bmi),
+				DIB_RGB_COLORS,
+				SRCCOPY
+			);
+
+		}
+		catch ( ... ) {}
 	}
 
 	/**
@@ -1882,6 +2032,235 @@ namespace mx {
 	}
 
 	/**
+	 * Gets the color of a Mini-Map pixel.
+	 * 
+	 * \param _ui64Address The address of the data in the cell.
+	 * \param _pui8Value The address of the data in the cell.
+	 * \param _sSize The address of the data in the cell.
+	 * \return Returns the color for the given Mini-Map pixel.
+	 **/
+	COLORREF CHexEditorControl::MiniMapColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize ) {
+		const MX_STYLE & stAll = (*CurStyle());
+		COLORREF crBaseColor;
+		bool bDefaultBaseColor = false;
+		bool bReadable = true;
+#define MX_CHECK_PROC( CAST, ENUM )																																	\
+	if ( m_pheiTarget && m_pheiTarget->Type() == CHexEditorInterface::ENUM ) {																						\
+		CAST * phepProc = static_cast<CAST *>(m_pheiTarget);																										\
+		if ( !phepProc->Process().IsReadableByQuery( _ui64Address ) ) {																								\
+			bReadable = false; crBaseColor = BackColors()->crUnreadable; goto PostBase;																				\
+		}																																							\
+		if ( phepProc->Process().IsExecutableByQuery( _ui64Address ) ) {																							\
+			crBaseColor = BackColors()->crExecutable; goto PostBase;																								\
+		}																																							\
+		if ( phepProc->Process().AddressIsInModule( _ui64Address ) ) {																								\
+			crBaseColor = BackColors()->crStaticAddress; goto PostBase;																								\
+		}																																							\
+	}
+
+		MX_CHECK_PROC( CHexEditorProcess, MX_HET_PROCESS )
+		MX_CHECK_PROC( CHexEditorCurProcess, MX_HET_CUR_PROCESS )
+#undef MX_CHECK_PROC
+		
+
+		bDefaultBaseColor = true;
+		crBaseColor = BackColors()->crEditor;
+	PostBase :
+
+		
+		if ( stAll.bHighlightNewLines && ((*_pui8Value) == '\r' || (*_pui8Value) == '\n') ) {
+			crBaseColor = bDefaultBaseColor ? ForeColors()->crHighlightingHex : Mix( crBaseColor, ForeColors()->crHighlightingHex );
+			bDefaultBaseColor = false;
+		}
+		else if ( stAll.bHighlightAlphaNumeric && std::isalnum( (*_pui8Value) ) ) {
+			crBaseColor = bDefaultBaseColor ? ForeColors()->crHighlightingHex : Mix( crBaseColor, ForeColors()->crHighlightingHex );
+			bDefaultBaseColor = false;
+		}
+		else if ( stAll.bHighlightControl && std::iscntrl( (*_pui8Value) ) ) {
+			crBaseColor = bDefaultBaseColor ? ForeColors()->crHighlightingHex : Mix( crBaseColor, ForeColors()->crHighlightingHex );
+			bDefaultBaseColor = false;
+		}
+		else if ( stAll.bHighlightNonAscii && (*_pui8Value) >= 0x80 ) {
+			crBaseColor = bDefaultBaseColor ? ForeColors()->crHighlightingHex : Mix( crBaseColor, ForeColors()->crHighlightingHex );
+			bDefaultBaseColor = false;
+		}
+		else if ( stAll.bHighlightZeros && (*_pui8Value) == 0x00 ) {
+			crBaseColor = bDefaultBaseColor ? ForeColors()->crHighlightingHex : Mix( crBaseColor, ForeColors()->crHighlightingHex );
+			bDefaultBaseColor = false;
+		}
+
+
+		// Mix colors.
+		uint64_t ui64Caret = m_sgSelGesture.ui64CaretAddr;
+		if ( !m_sSel.HasSelection() ) {
+			{
+				if ( MX_GetAValue( BackColors()->crHighlightLineHexEditor ) && ui64Caret / stAll.uiBytesPerRow == (_ui64Address / stAll.uiBytesPerRow) ) {
+					crBaseColor = Mix( crBaseColor, BackColors()->crHighlightLineHexEditor );
+					bDefaultBaseColor = false;
+				}
+			}
+		}
+		else {
+			if ( _ui64Address < Size() && m_sSel.IsSelected( _ui64Address, stAll.uiBytesPerRow ) && (MX_GetAValue( BackColors()->crSelected ) || bDefaultBaseColor) ) {
+				crBaseColor = bDefaultBaseColor ? BackColors()->crSelected : Mix( crBaseColor, BackColors()->crSelected );
+				bDefaultBaseColor = false;
+			}
+		}
+
+		uint8_t ui8Value = (_pui8Value && _sSize) ? (*_pui8Value) : 0;
+		COLORREF crRampColor = 0;
+		switch ( stAll.mmMiniMap.cColors ) {
+			case CMiniMap::MX_C_NONE : {
+				crRampColor = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, CMiniMap::ApplyContrast( ui8Value, stAll.mmMiniMap.ui8Lo, stAll.mmMiniMap.ui8Hi ) );
+				crRampColor = MX_RGBA( crRampColor, crRampColor, crRampColor, 0x7F );
+				break;
+			}
+			case CMiniMap::MX_C_ASCII : {
+				auto crColor = CMiniMap::m_crAscii[ui8Value];
+				uint8_t ui8R = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetRValue( crColor ) );
+				uint8_t ui8G = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetGValue( crColor ) );
+				uint8_t ui8B = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetBValue( crColor ) );
+				crRampColor = MX_RGBA( ui8R, ui8G, ui8B, 0x7F );
+				break;
+			}
+			case CMiniMap::MX_C_RAINBOW : {
+				auto crColor = CMiniMap::m_crRainbow[ui8Value];
+				uint8_t ui8R = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetRValue( crColor ) );
+				uint8_t ui8G = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetGValue( crColor ) );
+				uint8_t ui8B = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetBValue( crColor ) );
+				crRampColor = MX_RGBA( ui8R, ui8G, ui8B, 0x7F );
+				break;
+			}
+			case CMiniMap::MX_C_HEAT : {
+				uint8_t ui8R = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, 0xBF );
+				uint8_t ui8G = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, CMiniMap::ApplyContrast( ui8Value, 0x01, 0xBF ) );
+				uint8_t ui8B = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, 0x01 );
+				crRampColor = MX_RGBA( ui8R, ui8G, ui8B, 0x7F );
+				break;
+			}
+			case CMiniMap::MX_C_OCEAN : {
+				uint8_t ui8R = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, CMiniMap::ApplyContrast( ui8Value, 0x07, 0x6F ) );
+				uint8_t ui8G = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, CMiniMap::ApplyContrast( ui8Value, 0x3E, 0xA4 ) );
+				uint8_t ui8B = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, CMiniMap::ApplyContrast( ui8Value, 0x75, 0xBF ) );
+				crRampColor = MX_RGBA( ui8R, ui8G, ui8B, 0x7F );
+				break;
+			}
+			case CMiniMap::MX_C_GREY : {
+				uint8_t ui8R = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, CMiniMap::ApplyContrast( ui8Value, 0x01, 0xBF ) );
+				crRampColor = MX_RGBA( ui8R, ui8R, ui8R, 0x7F );
+				break;
+			}
+			case CMiniMap::MX_C_CUBEHELIX : {
+				auto crColor = CMiniMap::m_crCubehelix[ui8Value];
+				uint8_t ui8R = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetRValue( crColor ) );
+				uint8_t ui8G = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetGValue( crColor ) );
+				uint8_t ui8B = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetBValue( crColor ) );
+				crRampColor = MX_RGBA( ui8R, ui8G, ui8B, 0x7F );
+				break;
+			}
+			case CMiniMap::MX_C_VIRIDIS : {
+				auto crColor = CMiniMap::Palette16( CMiniMap::m_crViridis16, ui8Value );
+				uint8_t ui8R = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetRValue( crColor ) );
+				uint8_t ui8G = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetGValue( crColor ) );
+				uint8_t ui8B = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetBValue( crColor ) );
+				crRampColor = MX_RGBA( ui8R, ui8G, ui8B, 0x7F );
+				break;
+			}
+			case CMiniMap::MX_C_PLASMA : {
+				auto crColor = CMiniMap::Palette16( CMiniMap::m_crPlasma16, ui8Value );
+				uint8_t ui8R = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetRValue( crColor ) );
+				uint8_t ui8G = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetGValue( crColor ) );
+				uint8_t ui8B = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetBValue( crColor ) );
+				crRampColor = MX_RGBA( ui8R, ui8G, ui8B, 0x7F );
+				break;
+			}
+			case CMiniMap::MX_C_MAGMA : {
+				auto crColor = CMiniMap::Palette16( CMiniMap::m_crMagma16, ui8Value );
+				uint8_t ui8R = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetRValue( crColor ) );
+				uint8_t ui8G = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetGValue( crColor ) );
+				uint8_t ui8B = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetBValue( crColor ) );
+				crRampColor = MX_RGBA( ui8R, ui8G, ui8B, 0x7F );
+				break;
+			}
+			case CMiniMap::MX_C_INFERNO : {
+				auto crColor = CMiniMap::Palette16( CMiniMap::m_crInferno16, ui8Value );
+				uint8_t ui8R = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetRValue( crColor ) );
+				uint8_t ui8G = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetGValue( crColor ) );
+				uint8_t ui8B = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetBValue( crColor ) );
+				crRampColor = MX_RGBA( ui8R, ui8G, ui8B, 0x7F );
+				break;
+			}
+			case CMiniMap::MX_C_CIVIDIS : {
+				auto crColor = CMiniMap::Palette16( CMiniMap::m_crCividis16, ui8Value );
+				uint8_t ui8R = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetRValue( crColor ) );
+				uint8_t ui8G = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetGValue( crColor ) );
+				uint8_t ui8B = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetBValue( crColor ) );
+				crRampColor = MX_RGBA( ui8R, ui8G, ui8B, 0x7F );
+				break;
+			}
+			case CMiniMap::MX_C_TURBO : {
+				auto crColor = CMiniMap::Palette16( CMiniMap::m_crTurbo16, ui8Value );
+				uint8_t ui8R = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetRValue( crColor ) );
+				uint8_t ui8G = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetGValue( crColor ) );
+				uint8_t ui8B = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetBValue( crColor ) );
+				crRampColor = MX_RGBA( ui8R, ui8G, ui8B, 0x7F );
+				break;
+			}
+			case CMiniMap::MX_C_COOLWARM : {
+				auto crColor = CMiniMap::Palette16( CMiniMap::m_crCoolWarm16, ui8Value );
+				uint8_t ui8R = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetRValue( crColor ) );
+				uint8_t ui8G = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetGValue( crColor ) );
+				uint8_t ui8B = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetBValue( crColor ) );
+				crRampColor = MX_RGBA( ui8R, ui8G, ui8B, 0x7F );
+				break;
+			}
+			case CMiniMap::MX_C_BLUEWHITERED : {
+				auto crColor = CMiniMap::Palette16( CMiniMap::m_crBlueWhiteRed16, ui8Value );
+				uint8_t ui8R = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetRValue( crColor ) );
+				uint8_t ui8G = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetGValue( crColor ) );
+				uint8_t ui8B = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetBValue( crColor ) );
+				crRampColor = MX_RGBA( ui8R, ui8G, ui8B, 0x7F );
+				break;
+			}
+			case CMiniMap::MX_C_TWILIGHT : {
+				auto crColor = CMiniMap::Palette16( CMiniMap::m_crTwilight16, ui8Value );
+				uint8_t ui8R = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetRValue( crColor ) );
+				uint8_t ui8G = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetGValue( crColor ) );
+				uint8_t ui8B = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetBValue( crColor ) );
+				crRampColor = MX_RGBA( ui8R, ui8G, ui8B, 0x7F );
+				break;
+			}
+			case CMiniMap::MX_C_TWILIGHTSHIFTED : {
+				auto crColor = CMiniMap::Palette16( CMiniMap::m_crTwilightShifted16, ui8Value );
+				uint8_t ui8R = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetRValue( crColor ) );
+				uint8_t ui8G = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetGValue( crColor ) );
+				uint8_t ui8B = CMiniMap::BrightnessValue( stAll.mmMiniMap.i32Brightness, GetBValue( crColor ) );
+				crRampColor = MX_RGBA( ui8R, ui8G, ui8B, 0x7F );
+				break;
+			}
+		}
+
+		if ( !bReadable ) {
+			crRampColor = crBaseColor;
+		}
+		
+		// Mini-Map post-processing.
+		COLORREF crFinalMix = bDefaultBaseColor ? crRampColor : Mix( crBaseColor, crRampColor );
+		if ( MX_GetAValue( BackColors()->crMiniMapHexSelectionBox )  || (m_mmsMiniMap.bHighlight && MX_GetAValue( BackColors()->crMiniMapHexSelectionBoxHighlight )) ) {
+			const MX_FONT_SET & fsFont = (*Font());
+			const int32_t iLineAdv = fsFont.iCharCy + stAll.i32LineSpacingPx;
+			uint64_t ui64TopAddress = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine * stAll.uiBytesPerRow;
+			uint64_t ui64BottomAddress = ui64TopAddress + (m_sdScrollView[m_eaEditAs].i32PageLines) * stAll.uiBytesPerRow;
+			//uint64_t ui64TopViewRow = ui64TopAddress / stAll.mmMiniMap.
+
+			if ( _ui64Address >= ui64TopAddress && _ui64Address < ui64BottomAddress ) {
+				crFinalMix = Mix( crFinalMix, m_mmsMiniMap.bHighlight ? BackColors()->crMiniMapHexSelectionBoxHighlight : BackColors()->crMiniMapHexSelectionBox );
+			}
+		}
+		return crFinalMix;
+	}
+
+	/**
 	 * Gets the rectangle for a cell's text.
 	 * 
 	 * \param _ui64Address The address whose cell is to be gotten.
@@ -1907,6 +2286,88 @@ namespace mx {
 			rRet.right = rRet.left + iW;
 		}
 		return rRet;
+	}
+
+	/**
+	 * Computes the start and end addresses for the Mini-Map.
+	 * 
+	 * \param _i32ScreenHeight The height of the display area.
+	 * \param _ui64StartAddr Holds the returned start address.
+	 * \param _ui64EndAddr Holds the returned end address.
+	 * \param _ui32BytesPerRow The number of bytes per row.
+	 **/
+	void CHexEditorControl::MiniMapAddressRange( int32_t _i32ScreenHeight, uint64_t &_ui64StartAddr, uint64_t &_ui64EndAddr, uint32_t _ui32BytesPerRow ) {
+		CMiniMap::MX_MINI_MAP & mmMiniMap = CurStyle()->mmMiniMap;
+
+		if ( _i32ScreenHeight <= 0 ) {
+			_ui64StartAddr = 0;
+			_ui64EndAddr = 0;
+			return;
+		}
+
+		const uint64_t ui64TotalBytes = Size();
+		if ( ui64TotalBytes == 0 ) {
+			_ui64StartAddr = 0;
+			_ui64EndAddr = 0;
+			return;
+		}
+
+		// Mini-map bytes-per-row and zoom (pixel scale 1..10).
+		const uint32_t ui32Zoom = mmMiniMap.ui32Zoom ? mmMiniMap.ui32Zoom : 1U;
+
+		// Total mini-map "lines" in the file based on mini-map bytes-per-row.
+		const uint64_t ui64TotalMiniLines = (ui64TotalBytes + _ui32BytesPerRow - 1ULL) / _ui32BytesPerRow;
+
+		// Number of mini-map lines we can display in the given rectangle at this zoom.
+		// Higher zoom -> fewer lines (zoomed in).
+		uint64_t ui64SpanMiniLines = static_cast<uint64_t>(_i32ScreenHeight) / static_cast<uint64_t>(ui32Zoom) + 1ULL;
+
+		// Main editor visible range in lines (using main bytes-per-row).
+		const uint64_t ui64TopLineMain = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine;
+		const int32_t i32PageLines = (m_sdScrollView[m_eaEditAs].i32PageLines > 0) ?
+			m_sdScrollView[m_eaEditAs].i32PageLines : 1;
+
+		const uint32_t ui32MainBpr = CurStyle()->uiBytesPerRow ? CurStyle()->uiBytesPerRow : 1U;
+
+		// Compute the midpoint address of the main window:
+		// midAddr = topAddr + (pageLines * mainBpr) / 2.
+		const uint64_t ui64TopAddrMain = ui64TopLineMain * static_cast<uint64_t>(ui32MainBpr);
+		const uint64_t ui64PageBytesMain = static_cast<uint64_t>(i32PageLines) * static_cast<uint64_t>(ui32MainBpr);
+		const uint64_t ui64MidAddrMain = ui64TopAddrMain + (ui64PageBytesMain >> 1);
+
+		// Map that midpoint address into mini-map line space.
+		const uint64_t ui64MidLineMini = ui64MidAddrMain / static_cast<uint64_t>(_ui32BytesPerRow);
+
+		// Center the mini-map span around ui64MidLineMini.
+		const uint64_t ui64HalfSpanMini = ui64SpanMiniLines >> 1;
+
+		uint64_t ui64FirstLineMini;
+		if ( ui64MidLineMini > ui64HalfSpanMini ) {
+			ui64FirstLineMini = ui64MidLineMini - ui64HalfSpanMini;
+		}
+		else {
+			ui64FirstLineMini = 0;
+		}
+
+		uint64_t ui64LastLineMini = ui64FirstLineMini + ui64SpanMiniLines;
+		if ( ui64LastLineMini > ui64TotalMiniLines ) {
+			ui64LastLineMini = ui64TotalMiniLines;
+
+			// Keep the span size when clamping at the bottom if possible.
+			if ( ui64LastLineMini > ui64SpanMiniLines ) {
+				ui64FirstLineMini = ui64LastLineMini - ui64SpanMiniLines;
+			}
+			else {
+				ui64FirstLineMini = 0;
+			}
+		}
+
+		// Convert mini-map line range to byte addresses and clamp to file size.
+		_ui64StartAddr = ui64FirstLineMini * static_cast<uint64_t>(_ui32BytesPerRow);
+		_ui64EndAddr = ui64LastLineMini * static_cast<uint64_t>(_ui32BytesPerRow);
+		if ( _ui64EndAddr > ui64TotalBytes ) {
+			_ui64EndAddr = ui64TotalBytes;
+		}
 	}
 
 	/**

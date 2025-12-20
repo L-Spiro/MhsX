@@ -103,57 +103,57 @@ namespace mx {
 
 		/** A set of font data. */
 		struct MX_FONT_SET {
-			lsw::LSW_FONT							fFont;														// Current font.
-			LOGFONTW								lfFontParms {};												// The current font parameters.
-			TEXTMETRICW								tmMetrics {};												// The current font's metrics.
-			MX_ADDR_GLYPHS							agGlyphs;													// Glyph settings (filled on demand).
-			int32_t									i32PointSize					= DefaultPointSize();		// The font point size.
+			lsw::LSW_FONT							fFont;														/**< Current font. */
+			LOGFONTW								lfFontParms {};												/**< The current font parameters. */
+			TEXTMETRICW								tmMetrics {};												/**< The current font's metrics. */
+			MX_ADDR_GLYPHS							agGlyphs;													/**< Glyph settings (filled on demand). */
+			int32_t									i32PointSize					= DefaultPointSize();		/**< The font point size. */
 
 			int32_t									iCharCx							= 0;
-			int32_t									iCharCy							= 0;						// Baseline advance.
+			int32_t									iCharCy							= 0;						/**< Baseline advance. */
 		};
 
 		/** What to draw and how to size the address gutter. */
 		struct MX_ADDR_STYLE {
-			MX_ADDRESS_FMT							afFormat						= MX_AF_BYTES_HEX;			// Address format.
-			bool									bLowercaseHex					= false;					// Use lowercase a..f for HEX.
-			bool									bShowColonIn					= true;						// Insert ':' every 4 HEX digits (>4 only).
-			bool									bShowColonAfter					= false;					// Append ':' after the address.
-			bool									bShowTypeSpec					= false;					// Append 'h' (hex) or 'o' (oct).
-			bool									bMinimizeDigits					= false;					// Size digits for current page, not whole file.
-			bool									bUseShortSuffixW				= true;						// Append 'w' for Short addressing.
+			MX_ADDRESS_FMT							afFormat						= MX_AF_BYTES_HEX;			/**< Address format. */
+			bool									bLowercaseHex					= false;					/**< Use lowercase a..f for HEX. */
+			bool									bShowColonIn					= true;						/**< Insert ':' every 4 HEX digits (>4 only). */
+			bool									bShowColonAfter					= false;					/**< Append ':' after the address. */
+			bool									bShowTypeSpec					= false;					/**< Append 'h' (hex) or 'o' (oct). */
+			bool									bMinimizeDigits					= false;					/**< Size digits for current page, not whole file. */
+			bool									bUseShortSuffixW				= true;						/**< Append 'w' for Short addressing. */
 		};
 
 		/** Per-view-type style settings. */
 		struct MX_STYLE {
-			MX_FONT_SET								fsFonts[2]						= {};						// Shared fonts.
-			MX_FONT_TYPE							ftFont							= MX_FT_FIXED_ROW;			// The shared font to use.
-			CCharSets::MX_CHAR_SETS					csCharSet						= CCharSets::MX_CS_ASCII;	// The current character set.
-			MX_ADDR_STYLE							daAddressStyle;												// Address style.
-			uint32_t								uiBytesPerRow					= 16;						// Bytes per displayed row.
-			uint64_t								ui64DivisionSpacing				= 4;						// Spacing between division lines.
+			MX_FONT_SET								fsFonts[2]						= {};						/**< Shared fonts. */
+			MX_FONT_TYPE							ftFont							= MX_FT_FIXED_ROW;			/**< The shared font to use. */
+			CCharSets::MX_CHAR_SETS					csCharSet						= CCharSets::MX_CS_ASCII;	/**< The current character set. */
+			MX_ADDR_STYLE							daAddressStyle;												/**< Address style. */
+			uint32_t								uiBytesPerRow					= 16;						/**< Bytes per displayed row. */
+			uint64_t								ui64DivisionSpacing				= 4;						/**< Spacing between division lines. */
 
 			// Visibility.
 			bool									bShowAddressGutter				= true;
-			bool									bShowLeftNumbers				= true;						// Hex/Dec/Oct/Bin column.
-			bool									bShowRightArea					= true;						// ASCII column.
-			bool									bShowMiniMap					= true;						// Fixed panel on right.
-			bool									bShowRuler						= true;						// Show/hide ruler row.
-			bool									bShowRulerLabels				= true;						// Show/hide ruler labels.
-			bool									bShowRulerArrows				= true;						// Show/hide ruler arrow.
+			bool									bShowLeftNumbers				= true;						/**< Hex/Dec/Oct/Bin column. */
+			bool									bShowRightArea					= true;						/**< ASCII column. */
+			bool									bShowMiniMap					= true;						/**< Fixed panel on right. */
+			bool									bShowRuler						= true;						/**< Show/hide ruler row. */
+			bool									bShowRulerLabels				= true;						/**< Show/hide ruler labels. */
+			bool									bShowRulerArrows				= true;						/**< Show/hide ruler arrow. */
 			bool									bSelectColumnMode				= false;					/**< Global selection mode. */
 
 			// Left numbers formatting.
-			MX_DATA_FMT								dfLeftNumbersFmt				= MX_DF_HEX;				// Left area view type.
-			uint32_t								uiGroupSize						= 1;                   		// Extra spacing after every N bytes.
-			uint32_t								uiSpacesBetweenBytes			= 1;          				// Count of ' ' between adjacent bytes.
-			uint32_t								uiExtraSpacesBetweenGroups		= 1;     					// Extra ' ' at group boundary.
+			MX_DATA_FMT								dfLeftNumbersFmt				= MX_DF_HEX;				/**< Left area view type. */
+			uint32_t								uiGroupSize						= 1;                   		/**< Extra spacing after every N bytes. */
+			uint32_t								uiSpacesBetweenBytes			= 1;          				/**< Count of ' ' between adjacent bytes. */
+			uint32_t								uiExtraSpacesBetweenGroups		= 1;     					/**< Extra ' ' at group boundary. */
 
 			// Right formatting.
-			MX_DATA_FMT								dfRightNumbersFmt				= MX_DF_CHAR;				// Right area view type.
+			MX_DATA_FMT								dfRightNumbersFmt				= MX_DF_CHAR;				/**< Right area view type. */
 
 			// Paddings/gaps (pixels).
-			int32_t									i32LeftAddrPadding				= 3;						// Left padding.
+			int32_t									i32LeftAddrPadding				= 3;						/**< Left padding. */
 			int32_t									i32PadAfterGutterPx				= 8;
 			int32_t									i32PadBetweenNumbersAndTextPx	= 3;
 			int32_t									i32PadNumbersLeftPx				= 3;
@@ -164,29 +164,29 @@ namespace mx {
 			int32_t									i32LineSpacingPx				= 2;
 
 			// Ruler.
-			bool									bDecimal						= false;					// Decimal numbers instead of hex.
-			bool									bNumbers						= true;						// Show numbers in the ruler.
+			bool									bDecimal						= false;					/**< Decimal numbers instead of hex. */
+			bool									bNumbers						= true;						/**< Show numbers in the ruler. */
 
 			// Mini-map geometry (pixels).
-			int32_t									i32MiniMapWidthPx				= 140;
-			CMiniMap::MX_MINI_MAP					mmMiniMap;													// Mini Map options.
+			int32_t									i32MiniMapWidthPx				= 16 * 4 + 1;
+			CMiniMap::MX_MINI_MAP					mmMiniMap;													/**< Mini Map options. */
 
 			// Highlighting.
-			bool									bHighlightNewLines				= true;						// Highlight new-line characters.
-			bool									bHighlightAlphaNumeric			= false;					// Highlight alphanumeric characters.
-			bool									bHighlightControl				= false;					// Highlight control characters.
-			bool									bHighlightNonAscii				= false;					// Highilght characters above 127.
-			bool									bHighlightZeros					= false;					// Highlight zeros.
-			bool									bHighlightPointers				= false;					// Highlight pointers.
+			bool									bHighlightNewLines				= false;					/**< Highlight new-line characters. */
+			bool									bHighlightAlphaNumeric			= false;					/**< Highlight alphanumeric characters. */
+			bool									bHighlightControl				= false;					/**< Highlight control characters. */
+			bool									bHighlightNonAscii				= false;					/**< Highilght characters above 127. */
+			bool									bHighlightZeros					= false;					/**< Highlight zeros. */
+			bool									bHighlightPointers				= false;					/**< Highlight pointers. */
 		};
 
 		/** Creation parameters. */
 		struct MX_CREATION_PARMS {
-			MX_STYLE *								psOptions = nullptr;									/**< Shared options. */
-			MX_FONT_SET *							pfsFixedRowFont = nullptr;								/**< The shared font for fixed-row views. */
-			MX_FONT_SET *							pfsDynamicRowFont = nullptr;							/**< The shared font for text views. */
-			MX_HEX_EDITOR_COLORS *					phecFg = nullptr;										/**< Foreground colors. */
-			MX_HEX_EDITOR_COLORS *					phecBg = nullptr;										/**< Background colors. */
+			MX_STYLE *								psOptions						= nullptr;					/**< Shared options. */
+			MX_FONT_SET *							pfsFixedRowFont					= nullptr;					/**< The shared font for fixed-row views. */
+			MX_FONT_SET *							pfsDynamicRowFont				= nullptr;					/**< The shared font for text views. */
+			MX_HEX_EDITOR_COLORS *					phecFg							= nullptr;					/**< Foreground colors. */
+			MX_HEX_EDITOR_COLORS *					phecBg							= nullptr;					/**< Background colors. */
 		};
 
 
@@ -957,6 +957,7 @@ namespace mx {
 			bool									bRightArea			= false;							/**< True if click hit the right (text) area. */
 		};
 
+
 		// == Members.
 		CWidget *									m_pwHexParent = nullptr;								/**< The main hex-editor window. */
 		MX_STYLE *									m_psOptions = nullptr;									/**< Pointer to the shared options. */
@@ -996,6 +997,16 @@ namespace mx {
 
 		// Draws the hex-editor view.
 		bool										PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect );
+
+		/**
+		 * \brief Draws the mini-map.
+		 * 
+		 * \param _hDc The device context to which to draw.
+		 * \param _iXLeft The left X coordinate of the mini-map.
+		 * \param _iYTop The top Y coordinate of the mini-map.
+		 * \param _rRect The destination rectangle for the mini-map.
+		 */
+		void										DrawMiniMap( HDC _hDc, int32_t _iXLeft, int32_t _iYTop, const lsw::LSW_RECT &_rRect );
 
 		/**
 		 * Draws the address gutter starting at a given Y position.
@@ -1078,28 +1089,7 @@ namespace mx {
 			m_tCaretBlink.Stop();
 			m_bCaretOn = false;
 				
-			/*lsw::LSW_RECT rCaret;
-			if ( GetCaretRect( rCaret ) ) {
-				::InvalidateRect( Wnd(), &rCaret, FALSE );
-			}*/
-		}
-
-		/**
-		 * \brief Resets the caret blink phase after a caret move.
-		 *
-		 * When the caret address changes due to keyboard or mouse input, this
-		 * function forces the caret into the "on" phase and invalidates the caret
-		 * rectangle so that it is redrawn immediately without waiting for the next
-		 * timer tick.
-		 */
-		void										ResetCaretBlinkPhase() {
-			// Called whenever caret moves (keyboard, mouse, etc.).
-			if ( m_tCaretBlink.uiptrActiveId == 0 ) { return; }
-			m_bCaretOn = true;
-			/*lsw::LSW_RECT rCaret;
-			if ( GetCaretRect( rCaret ) ) {
-				::InvalidateRect( Wnd(), &rCaret, FALSE );
-			}*/
+			::InvalidateRect( Wnd(), nullptr, FALSE );
 		}
 
 
@@ -1146,6 +1136,16 @@ namespace mx {
 		COLORREF									CellBgColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize, bool _bRightArea );
 
 		/**
+		 * Gets the color of a Mini-Map pixel.
+		 * 
+		 * \param _ui64Address The address of the data in the cell.
+		 * \param _pui8Value The address of the data in the cell.
+		 * \param _sSize The address of the data in the cell.
+		 * \return Returns the color for the given Mini-Map pixel.
+		 **/
+		COLORREF									MiniMapColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize );
+
+		/**
 		 * Gets the rectangle for a cell's text.
 		 * 
 		 * \param _ui64Address The address whose cell is to be gotten.
@@ -1153,6 +1153,16 @@ namespace mx {
 		 * \return Returns the client rectable for the given text cell.
 		 **/
 		lsw::LSW_RECT								GetCellTextRect( uint64_t _ui64Address, bool _bRightArea );
+
+		/**
+		 * Computes the start and end addresses for the Mini-Map.
+		 * 
+		 * \param _i32ScreenHeight The height of the display area.
+		 * \param _ui64StartAddr Holds the returned start address.
+		 * \param _ui64EndAddr Holds the returned end address.
+		 * \param _ui32BytesPerRow The number of bytes per row.
+		 **/
+		void										MiniMapAddressRange( int32_t _i32ScreenHeight, uint64_t &_ui64StartAddr, uint64_t &_ui64EndAddr, uint32_t _ui32BytesPerRow );
 
 		// Gets the minimum address digits.
 		uint32_t									MinAddrDigits() const {
@@ -1242,6 +1252,19 @@ namespace mx {
 		 * \return Returns the pixel width of the left numbers block; 0 if hidden.
 		 */
 		int32_t										ComputeAreaWidthPx( MX_DATA_FMT _dfDataFmt );
+
+		/**
+		 * Gets the Mini-Map left.
+		 * 
+		 * \param _rRect The client rectangle.
+		 * \return Returns the left position of the Mini-Map.
+		 **/
+		int32_t										MiniMapLeft( const lsw::LSW_RECT &_rRect ) const {
+			const MX_STYLE & stAll = (*CurStyle());
+			return stAll.mmMiniMap.bRightSize ?
+				_rRect.Width() - (stAll.i32MiniMapWidthPx) :
+				(stAll.i32MiniMapWidthPx);
+		}
 
 		/**
 		 * Computes the total width, in pixels, of the horizontally scrollable content (one row).

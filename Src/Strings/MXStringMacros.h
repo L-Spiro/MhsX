@@ -22051,3 +22051,66 @@
 #define _DEC_S_A4FA31FF_No_process_has_been_opened__r_nOpen_a_process_now_ mx::CStringDecoder::DecodeToString( _T_A4FA31FF_No_process_has_been_opened__r_nOpen_a_process_now_, _LEN_A4FA31FF )
 #define _DEC_WS_A4FA31FF_No_process_has_been_opened__r_nOpen_a_process_now_ mx::CStringDecoder::DecodeToWString( _T_A4FA31FF_No_process_has_been_opened__r_nOpen_a_process_now_, _LEN_A4FA31FF )
 
+// Separator Line
+
+#define _T_171412FE_Separator_Line "\xDB\x33\x40\xFC\x04\x2A\x02\x36\x42\xE8\x15\x37\x00\x00"
+#define _LEN_171412FE 14
+#define _T_LEN_171412FE_Separator_Line _T_171412FE_Separator_Line, _LEN_171412FE
+#define _DEC_171412FE_Separator_Line( STR ) mx::CStringDecoder::Decode( _T_171412FE_Separator_Line, _LEN_171412FE, STR )
+#define _DEC_S_171412FE_Separator_Line mx::CStringDecoder::DecodeToString( _T_171412FE_Separator_Line, _LEN_171412FE )
+#define _DEC_WS_171412FE_Separator_Line mx::CStringDecoder::DecodeToWString( _T_171412FE_Separator_Line, _LEN_171412FE )
+
+// Text Selection Box
+
+#define _T_18BBC8F4_Text_Selection_Box "\xDC\x33\x48\x0F\xB2\x1C\xF3\x33\x35\x2B\x3D\x37\x01\x09\xE7\xCA\x3D\x48"
+#define _LEN_18BBC8F4 18
+#define _T_LEN_18BBC8F4_Text_Selection_Box _T_18BBC8F4_Text_Selection_Box, _LEN_18BBC8F4
+#define _DEC_18BBC8F4_Text_Selection_Box( STR ) mx::CStringDecoder::Decode( _T_18BBC8F4_Text_Selection_Box, _LEN_18BBC8F4, STR )
+#define _DEC_S_18BBC8F4_Text_Selection_Box mx::CStringDecoder::DecodeToString( _T_18BBC8F4_Text_Selection_Box, _LEN_18BBC8F4 )
+#define _DEC_WS_18BBC8F4_Text_Selection_Box mx::CStringDecoder::DecodeToWString( _T_18BBC8F4_Text_Selection_Box, _LEN_18BBC8F4 )
+
+// Text Selection Box Highlight
+
+#define _T_C4A2B074_Text_Selection_Box_Highlight "\xDC\x33\x48\x0F\xB2\x1C\xF3\x33\x35\x2B\x3D\x37\x01\x09\xE7\xCA\x3D\x48\xBB\xDA\x32\xF5\x2F\x3C\x31\x30\x36\x06"
+#define _LEN_C4A2B074 28
+#define _T_LEN_C4A2B074_Text_Selection_Box_Highlight _T_C4A2B074_Text_Selection_Box_Highlight, _LEN_C4A2B074
+#define _DEC_C4A2B074_Text_Selection_Box_Highlight( STR ) mx::CStringDecoder::Decode( _T_C4A2B074_Text_Selection_Box_Highlight, _LEN_C4A2B074, STR )
+#define _DEC_S_C4A2B074_Text_Selection_Box_Highlight mx::CStringDecoder::DecodeToString( _T_C4A2B074_Text_Selection_Box_Highlight, _LEN_C4A2B074 )
+#define _DEC_WS_C4A2B074_Text_Selection_Box_Highlight mx::CStringDecoder::DecodeToWString( _T_C4A2B074_Text_Selection_Box_Highlight, _LEN_C4A2B074 )
+
+// Hex Selection Box
+
+#define _T_BF4C49B1_Hex_Selection_Box "\xD0\x33\x48\xBB\xE5\x2E\xFA\x2C\x33\x3C\x32\x3D\x00\xBB\x09\xF7\x46"
+#define _LEN_BF4C49B1 17
+#define _T_LEN_BF4C49B1_Hex_Selection_Box _T_BF4C49B1_Hex_Selection_Box, _LEN_BF4C49B1
+#define _DEC_BF4C49B1_Hex_Selection_Box( STR ) mx::CStringDecoder::Decode( _T_BF4C49B1_Hex_Selection_Box, _LEN_BF4C49B1, STR )
+#define _DEC_S_BF4C49B1_Hex_Selection_Box mx::CStringDecoder::DecodeToString( _T_BF4C49B1_Hex_Selection_Box, _LEN_BF4C49B1 )
+#define _DEC_WS_BF4C49B1_Hex_Selection_Box mx::CStringDecoder::DecodeToWString( _T_BF4C49B1_Hex_Selection_Box, _LEN_BF4C49B1 )
+
+// Hex Selection Box Highlight
+
+#define _T_BABD982F_Hex_Selection_Box_Highlight "\xD0\x33\x48\xBB\xE5\x2E\xFA\x2C\x33\x3C\x32\x3D\x00\xBB\x09\xF7\x46\xF0\xE3\xFB\x30\xF6\x33\x39\x2F\x31\x42"
+#define _LEN_BABD982F 27
+#define _T_LEN_BABD982F_Hex_Selection_Box_Highlight _T_BABD982F_Hex_Selection_Box_Highlight, _LEN_BABD982F
+#define _DEC_BABD982F_Hex_Selection_Box_Highlight( STR ) mx::CStringDecoder::Decode( _T_BABD982F_Hex_Selection_Box_Highlight, _LEN_BABD982F, STR )
+#define _DEC_S_BABD982F_Hex_Selection_Box_Highlight mx::CStringDecoder::DecodeToString( _T_BABD982F_Hex_Selection_Box_Highlight, _LEN_BABD982F )
+#define _DEC_WS_BABD982F_Hex_Selection_Box_Highlight mx::CStringDecoder::DecodeToWString( _T_BABD982F_Hex_Selection_Box_Highlight, _LEN_BABD982F )
+
+// Hex Highlight Line
+
+#define _T_7C1BAFC6_Hex_Highlight_Line "\xD0\x33\x48\xBB\xDA\x32\xF5\x2F\x3C\x31\x30\x36\x06\xBB\x13\xF1\x3C\x35"
+#define _LEN_7C1BAFC6 18
+#define _T_LEN_7C1BAFC6_Hex_Highlight_Line _T_7C1BAFC6_Hex_Highlight_Line, _LEN_7C1BAFC6
+#define _DEC_7C1BAFC6_Hex_Highlight_Line( STR ) mx::CStringDecoder::Decode( _T_7C1BAFC6_Hex_Highlight_Line, _LEN_7C1BAFC6, STR )
+#define _DEC_S_7C1BAFC6_Hex_Highlight_Line mx::CStringDecoder::DecodeToString( _T_7C1BAFC6_Hex_Highlight_Line, _LEN_7C1BAFC6 )
+#define _DEC_WS_7C1BAFC6_Hex_Highlight_Line mx::CStringDecoder::DecodeToWString( _T_7C1BAFC6_Hex_Highlight_Line, _LEN_7C1BAFC6 )
+
+// Hex Highlight Struct
+
+#define _T_EFB1853E_Hex_Highlight_Struct "\xD0\x33\x48\xBB\xDA\x32\xF5\x2F\x3C\x31\x30\x36\x06\xBB\x1A\xFC\x40\x45\xFE\x06"
+#define _LEN_EFB1853E 20
+#define _T_LEN_EFB1853E_Hex_Highlight_Struct _T_EFB1853E_Hex_Highlight_Struct, _LEN_EFB1853E
+#define _DEC_EFB1853E_Hex_Highlight_Struct( STR ) mx::CStringDecoder::Decode( _T_EFB1853E_Hex_Highlight_Struct, _LEN_EFB1853E, STR )
+#define _DEC_S_EFB1853E_Hex_Highlight_Struct mx::CStringDecoder::DecodeToString( _T_EFB1853E_Hex_Highlight_Struct, _LEN_EFB1853E )
+#define _DEC_WS_EFB1853E_Hex_Highlight_Struct mx::CStringDecoder::DecodeToWString( _T_EFB1853E_Hex_Highlight_Struct, _LEN_EFB1853E )
+

@@ -57,6 +57,7 @@
 	#define MX_STDCALL											__stdcall
 	#define MX_RGBA( R, G, B, A )								(RGB( R, G, B ) | (static_cast<COLORREF>((static_cast<DWORD>(static_cast<BYTE>(A))<<24))))
 	#define MX_GetAValue( RGBA )								(LOBYTE( (RGBA) >> 24))
+	#define MX_SetAValue( RGBA, A )								MX_RGBA( GetRValue( RGBA ), GetGValue( RGBA ), GetBValue( RGBA ), A )
 	#define MX_GetRgbValue( RGBA )								static_cast<COLORREF>((RGBA) & RGB( 0xFF, 0xFF, 0xFF ))
 #elif defined( __GNUC__ ) || defined( __clang__ )
     // GNU Compiler Collection (GCC) or Clang

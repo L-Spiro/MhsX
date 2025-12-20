@@ -2446,3 +2446,11 @@
 "Sector Lines"
 "Template Results Header"
 "Template Results Line"
+
+"Separator Line"
+"Text Selection Box"
+"Text Selection Box Highlight"
+"Hex Selection Box"
+"Hex Selection Box Highlight"
+"Hex Highlight Line"
+"Hex Highlight Struct"
