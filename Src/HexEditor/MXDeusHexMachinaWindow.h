@@ -178,6 +178,15 @@ namespace mx {
 		// Select line.
 		void										SelectLine();
 
+		// Reverse the selection.
+		void										ReverseSelection();
+
+		// Sets the caret to the beginning of the selection.
+		void										MarkSelectionStart();
+
+		// Sets the caret to the end of the selection.
+		void										MarkSelectionEnd();
+
 		// Toggle column mode.
 		void										ToggleColumnSelection();
 

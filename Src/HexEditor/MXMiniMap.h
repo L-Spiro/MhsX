@@ -61,8 +61,15 @@ namespace mx {
 			bool									bDraggingWidth = false;				/**< True while dragging the mini-map drag bar. */
 			int32_t									i32DragStartX = 0;					/**< Mouse X at drag start. */
 			int32_t									i32DragStartWidth = 0;				/**< Mini-map width at drag start. */
-			bool									bDraggingScroll = false;			/**< True while dragging the mini-map to scroll vertically. */
-			int64_t									i64DragMidLineOffset = 0;			/**< Cursor mini-line - current mid mini-line. */
+			
+			bool									bDraggingScroll = false;			/**< True while dragging the mini-map view thumb. */
+			int32_t									i32ScrollGrabY = 0;					/**< MouseY - thumbTop at drag start. */
+
+			int32_t									i32DragMiniTop = 0;					/**< Frozen mini-map top for drag. */
+			int32_t									i32DragTrack = 0;					/**< Frozen track height for drag. */
+			int32_t									i32DragThumbHeight = 0;				/**< Frozen thumb height for drag. */
+			int32_t									i32DragThumbTop = 0;				/**< Current thumb top while dragging. */
+			uint64_t								ui64DragMaxFirstLine = 0;			/**< Frozen max-first-line for drag (totalLines - pageLines). */
 		};
 
 

@@ -61,17 +61,17 @@ namespace mx {
 	}
 
 	// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
-	bool CProcess::ReadProcessMemory( uint64_t _lpBaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) const {
-		if ( _lpBaseAddress > MAXSIZE_T ) { return false; }
+	bool CProcess::ReadProcessMemory( uint64_t _ui64BaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) const {
+		if ( _ui64BaseAddress > UINTPTR_MAX ) { return false; }
 		LSW_ENT_CRIT( m_csCrit );
 		if ( !ProcIsOpened() ) { return false; }
-		if ( !ReadProcessMemoryInternal( reinterpret_cast<LPCVOID>(_lpBaseAddress), _lpBuffer, _nSize, _lpNumberOfBytesRead ) ) {
+		if ( !ReadProcessMemoryInternal( _ui64BaseAddress, _lpBuffer, _nSize, _lpNumberOfBytesRead ) ) {
 			if ( m_opmMode == CProcess::MX_OPM_CONSERVATIVE ) {
 				// Add PROCESS_VM_READ and try again.
 				if ( !MX_CHECK_FLAGS_EQ( m_dwOpenProcFlags, PROCESS_VM_READ ) ) {
 					if ( const_cast<CProcess *>(this)->OpenProcInternal( m_dwId, m_dwOpenProcFlags | PROCESS_VM_READ ) ) {
 						// Try again.
-						return ReadProcessMemory( _lpBaseAddress, _lpBuffer, _nSize, _lpNumberOfBytesRead );
+						return ReadProcessMemory( _ui64BaseAddress, _lpBuffer, _nSize, _lpNumberOfBytesRead );
 					}
 				}
 			}
@@ -83,7 +83,7 @@ namespace mx {
 	// Reads data from an area of memory in the current process. The entire area to be read must be accessible or the operation fails.
 	// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
 	bool CProcess::ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead ) const {
-		if MX_UNLIKELY( _ui64BaseAddress > MAXSIZE_T ) { return false; }
+		if MX_UNLIKELY( _ui64BaseAddress > UINTPTR_MAX ) { return false; }
 		
 		try {
 			uint32_t uiAlignment;
@@ -110,7 +110,7 @@ namespace mx {
 			uint64_t uiDataStart = _ui64BaseAddress, uiAdjustedLen = _nSize;
 			CUtilities::SnapTo( uiAlignment, uiDataStart, uiAdjustedLen, _sBufferOffset );
 			if ( _lpNumberOfBytesRead ) { (*_lpNumberOfBytesRead) = 0; }
-			if MX_UNLIKELY( uiAdjustedLen > MAXSIZE_T ) { return false; }
+			if MX_UNLIKELY( uiAdjustedLen > UINTPTR_MAX ) { return false; }
 
 			_vBuffer.resize( static_cast<size_t>(uiAdjustedLen) );
 			if ( !ReadProcessMemory( uiDataStart,
@@ -126,7 +126,7 @@ namespace mx {
 	// Reads data from an area of memory in the current process. The entire area to be read must be accessible or the operation fails.
 	// Preprocesses the data (applies byteswapping), which means an area larger than the requested size must be read.  _sBufferOffset returns the offset into _vBuffer where the requested data is actually stored.
 	bool CProcess::ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, LPVOID _lpvBuffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead ) const {
-		if MX_UNLIKELY( _ui64BaseAddress > MAXSIZE_T ) { return false; }
+		if MX_UNLIKELY( _ui64BaseAddress > UINTPTR_MAX ) { return false; }
 		
 		try {
 			uint32_t uiAlignment;
@@ -152,7 +152,7 @@ namespace mx {
 			uint64_t uiDataStart = _ui64BaseAddress, uiAdjustedLen = _nSize;
 			CUtilities::SnapTo( uiAlignment, uiDataStart, uiAdjustedLen, _sBufferOffset );
 			if ( _lpNumberOfBytesRead ) { (*_lpNumberOfBytesRead) = 0; }
-			if MX_UNLIKELY( uiAdjustedLen > MAXSIZE_T ) { return false; }
+			if MX_UNLIKELY( uiAdjustedLen > UINTPTR_MAX ) { return false; }
 
 			if ( !ReadProcessMemory( uiDataStart,
 				_lpvBuffer, static_cast<SIZE_T>(uiAdjustedLen), _lpNumberOfBytesRead ) ) {
@@ -165,17 +165,17 @@ namespace mx {
 	}
 
 	// Writes data to an area of memory in a specified process. The entire area to be written to must be accessible or the operation fails.
-	bool CProcess::WriteProcessMemory( uint64_t _lpBaseAddress, LPCVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesWritten ) {
-		if ( _lpBaseAddress > MAXSIZE_T ) { return false; }
+	bool CProcess::WriteProcessMemory( uint64_t _ui64BaseAddress, LPCVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesWritten ) {
+		if ( _ui64BaseAddress > UINTPTR_MAX ) { return false; }
 		LSW_ENT_CRIT( m_csCrit );
 		if ( !ProcIsOpened() ) { return false; }
-		if ( !WriteProcessMemoryInternal( reinterpret_cast<LPVOID>(_lpBaseAddress), _lpBuffer, _nSize, _lpNumberOfBytesWritten ) ) {
+		if ( !WriteProcessMemoryInternal( _ui64BaseAddress, _lpBuffer, _nSize, _lpNumberOfBytesWritten ) ) {
 			if ( m_opmMode == CProcess::MX_OPM_CONSERVATIVE ) {
 				// Add (PROCESS_VM_WRITE | PROCESS_VM_OPERATION) and try again.
 				if ( !MX_CHECK_FLAGS_EQ( m_dwOpenProcFlags, PROCESS_VM_WRITE | PROCESS_VM_OPERATION ) ) {
 					if ( OpenProcInternal( m_dwId, m_dwOpenProcFlags | (PROCESS_VM_WRITE | PROCESS_VM_OPERATION) ) ) {
 						// Try again.
-						return WriteProcessMemory( _lpBaseAddress, _lpBuffer, _nSize, _lpNumberOfBytesWritten );
+						return WriteProcessMemory( _ui64BaseAddress, _lpBuffer, _nSize, _lpNumberOfBytesWritten );
 					}
 				}
 			}
@@ -186,7 +186,7 @@ namespace mx {
 
 	// Writes data to an area of memory in the current process.  If the data is preprocessed and misaligned, it could result in up to 3 writes to memory.
 	bool CProcess::WriteProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, LPCVOID _lpvBuffer, SIZE_T _nSize, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesWritten ) {
-		if MX_UNLIKELY( _ui64BaseAddress > MAXSIZE_T ) { return false; }
+		if MX_UNLIKELY( _ui64BaseAddress > UINTPTR_MAX ) { return false; }
 
 		try {
 			uint32_t uiAlignment;
@@ -213,7 +213,7 @@ namespace mx {
 			size_t sBufferOffset = 0;
 			CUtilities::SnapTo( uiAlignment, uiDataStart, uiAdjustedLen, sBufferOffset );
 			if ( _lpNumberOfBytesWritten ) { (*_lpNumberOfBytesWritten) = 0; }
-			if MX_UNLIKELY( uiAdjustedLen > MAXSIZE_T ) { return false; }
+			if MX_UNLIKELY( uiAdjustedLen > UINTPTR_MAX ) { return false; }
 
 			/*std::vector<uint8_t> vCopy( reinterpret_cast<const uint8_t *>(_lpvBuffer),
 				reinterpret_cast<const uint8_t *>(_lpvBuffer) + _nSize );*/
@@ -268,16 +268,16 @@ namespace mx {
 	}
 
 	// Changes the protection on a region of committed pages in the virtual address space of a specified process.
-	bool CProcess::VirtualProtectEx( LPVOID _lpAddress, SIZE_T _dwSize, DWORD _flNewProtect, PDWORD _lpflOldProtect ) {
+	bool CProcess::VirtualProtectEx( uint64_t _ui64Address, SIZE_T _dwSize, DWORD _flNewProtect, PDWORD _lpflOldProtect ) {
 		LSW_ENT_CRIT( m_csCrit );
 		if ( !ProcIsOpened() ) { return false; }
-		if ( !VirtualProtectExInternal( _lpAddress, _dwSize, _flNewProtect, _lpflOldProtect ) ) {
+		if ( !VirtualProtectExInternal( _ui64Address, _dwSize, _flNewProtect, _lpflOldProtect ) ) {
 			if ( m_opmMode == CProcess::MX_OPM_CONSERVATIVE ) {
 				// Add (PROCESS_VM_OPERATION) and try again.
 				if ( !MX_CHECK_FLAGS_EQ( m_dwOpenProcFlags, PROCESS_VM_OPERATION ) ) {
 					if ( OpenProcInternal( m_dwId, m_dwOpenProcFlags | (PROCESS_VM_OPERATION) ) ) {
 						// Try again.
-						return VirtualProtectExInternal( _lpAddress, _dwSize, _flNewProtect, _lpflOldProtect );
+						return VirtualProtectExInternal( _ui64Address, _dwSize, _flNewProtect, _lpflOldProtect );
 					}
 				}
 			}
@@ -287,16 +287,16 @@ namespace mx {
 	}
 
 	// Retrieves information about a range of pages within the virtual address space of a specified process.
-	bool CProcess::VirtualQueryEx( uint64_t _lpAddress, PMEMORY_BASIC_INFORMATION64 _lpBuffer ) const {
+	bool CProcess::VirtualQueryEx( uint64_t _ui64Address, PMEMORY_BASIC_INFORMATION64 _lpBuffer ) const {
 		LSW_ENT_CRIT( m_csCrit );
 		if ( !ProcIsOpened() ) { return false; }
-		if ( !VirtualQueryExInternal( _lpAddress, _lpBuffer ) ) {
+		if ( !VirtualQueryExInternal( _ui64Address, _lpBuffer ) ) {
 			if ( m_opmMode == CProcess::MX_OPM_CONSERVATIVE ) {
 				// Add (PROCESS_QUERY_INFORMATION) and try again.
 				if ( !MX_CHECK_FLAGS_EQ( m_dwOpenProcFlags, PROCESS_QUERY_INFORMATION ) ) {
 					if ( const_cast<CProcess *>(this)->OpenProcInternal( m_dwId, m_dwOpenProcFlags | (PROCESS_QUERY_INFORMATION) ) ) {
 						// Try again.
-						return VirtualQueryExInternal( _lpAddress, _lpBuffer ) != 0;
+						return VirtualQueryExInternal( _ui64Address, _lpBuffer ) != 0;
 					}
 				}
 			}
@@ -345,17 +345,31 @@ namespace mx {
 	}
 
 	// Gets the base and size of a region given an address.
-	bool CProcess::GetChunk( uint64_t _lpAddress, uint64_t &_uiBaseAddress, uint64_t &_uiRegionSize ) {
+	bool CProcess::GetChunk( uint64_t _ui64Address, uint64_t &_uiBaseAddress, uint64_t &_uiRegionSize ) {
 		// Have to handle cases where the address is out of native range differently.
-		if ( !CSystem::AddressIsInNativeMemoryRange( _lpAddress ) ) {
+		if ( !CSystem::AddressIsInNativeMemoryRange( _ui64Address ) ) {
 			// For now, abort.
 			return false;
 		}
 		MEMORY_BASIC_INFORMATION64 mbiInfo;
-		if ( !VirtualQueryEx( _lpAddress, &mbiInfo ) ) { return false; }
+		if ( !VirtualQueryEx( _ui64Address, &mbiInfo ) ) { return false; }
 		_uiBaseAddress = mbiInfo.BaseAddress;
 		_uiRegionSize = mbiInfo.RegionSize;
 		return true;
+	}
+
+	// Gets the chunks that overlap the given range of addresses.  Call within try/catch.
+	std::vector<uint64_t> CProcess::GetChunks( uint64_t _ui64StartAddress, uint64_t _ui64EndAddress ) {
+		std::vector<uint64_t> vReturn;
+
+		uint64_t ui64Base = _ui64StartAddress, ui64Size;
+		do {
+			if ( !GetChunk( _ui64StartAddress, ui64Base, ui64Size ) ) { return vReturn; }
+			vReturn.push_back( ui64Base );
+			ui64Base += ui64Size;
+		}
+		while ( ui64Base < _ui64EndAddress );
+		return vReturn;
 	}
 
 	// Resets all assocations with the current process.
@@ -571,18 +585,21 @@ namespace mx {
 	}
 
 	// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
-	bool CProcess::ReadProcessMemoryInternal( LPCVOID _lpBaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) const {
-		return CSystem::ReadProcessMemory( m_hProcHandle.hHandle, _lpBaseAddress, _lpBuffer, _nSize, _lpNumberOfBytesRead ) != 0;
+	bool CProcess::ReadProcessMemoryInternal( uint64_t _ui64Address, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) const {
+		if ( _ui64Address > UINTPTR_MAX ) { return false; }
+		return CSystem::ReadProcessMemory( m_hProcHandle.hHandle, reinterpret_cast<LPCVOID>(static_cast<uintptr_t>(_ui64Address)), _lpBuffer, _nSize, _lpNumberOfBytesRead ) != 0;
 	}
 
 	// Writes data to an area of memory in a specified process. The entire area to be written to must be accessible or the operation fails.
-	bool CProcess::WriteProcessMemoryInternal( LPVOID _lpBaseAddress, LPCVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesWritten ) {
-		return CSystem::WriteProcessMemory( m_hProcHandle.hHandle, _lpBaseAddress, _lpBuffer, _nSize, _lpNumberOfBytesWritten ) != 0;
+	bool CProcess::WriteProcessMemoryInternal( uint64_t _ui64Address, LPCVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesWritten ) {
+		if ( _ui64Address > UINTPTR_MAX ) { return false; }
+		return CSystem::WriteProcessMemory( m_hProcHandle.hHandle, reinterpret_cast<LPVOID>(static_cast<uintptr_t>(_ui64Address)), _lpBuffer, _nSize, _lpNumberOfBytesWritten ) != 0;
 	}
 
 	// Changes the protection on a region of committed pages in the virtual address space of a specified process.
-	bool CProcess::VirtualProtectExInternal( LPVOID _lpAddress, SIZE_T _dwSize, DWORD _flNewProtect, PDWORD _lpflOldProtect ) {
-		return CSystem::VirtualProtectEx( m_hProcHandle.hHandle, _lpAddress, _dwSize, _flNewProtect, _lpflOldProtect );
+	bool CProcess::VirtualProtectExInternal( uint64_t _ui64Address, SIZE_T _dwSize, DWORD _flNewProtect, PDWORD _lpflOldProtect ) {
+		if ( _ui64Address > UINTPTR_MAX ) { return false; }
+		return CSystem::VirtualProtectEx( m_hProcHandle.hHandle, reinterpret_cast<LPVOID>(static_cast<uintptr_t>(_ui64Address)), _dwSize, _flNewProtect, _lpflOldProtect );
 	}
 
 	// Retrieves information about a range of pages within the virtual address space of a specified process.

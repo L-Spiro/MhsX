@@ -152,7 +152,7 @@ namespace mx {
 		inline bool						Writeable() const { LSW_ENT_CRIT( m_csCrit ); return ProcIsOpened() && ((m_dwOpenProcFlags & (PROCESS_VM_WRITE | PROCESS_VM_OPERATION)) == (PROCESS_VM_WRITE | PROCESS_VM_OPERATION)); }
 
 		// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
-		virtual bool					ReadProcessMemory( uint64_t _lpBaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) const;
+		virtual bool					ReadProcessMemory( uint64_t _ui64BaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) const;
 
 		// Read from the given data stream.
 		virtual bool					Read( uint64_t _ui64Addr, void * _pvDest, size_t _sSize, size_t * _psBytesRead = nullptr ) const {
@@ -175,7 +175,7 @@ namespace mx {
 		virtual bool					ReadProcessMemory_PreProcessed( uint64_t _ui64BaseAddress, std::vector<uint8_t> &_vBuffer, SIZE_T _nSize, size_t &_sBufferOffset, CUtilities::MX_BYTESWAP _bsSwap, SIZE_T * _lpNumberOfBytesRead = nullptr ) const;
 
 		// Writes data to an area of memory in a specified process. The entire area to be written to must be accessible or the operation fails.
-		virtual bool					WriteProcessMemory( uint64_t _lpBaseAddress, LPCVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesWritten );
+		virtual bool					WriteProcessMemory( uint64_t _ui64BaseAddress, LPCVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesWritten );
 
 		// Write to the given data stream.
 		virtual bool					Write( uint64_t _ui64Addr, const void * _pvSrc, size_t _sSize, size_t * _psBytesWritten = nullptr ) {
@@ -195,7 +195,7 @@ namespace mx {
 		// Remote std::strlen() and std::strcpy().
 		template <typename _tType = std::string>
 		inline size_t					RemoteStrLen_StrCpy( uint64_t _ui64BaseAddress, _tType * _psStr, CUtilities::MX_BYTESWAP _bsSwap ) const {
-			if MX_UNLIKELY( _ui64BaseAddress > MAXSIZE_T ) { return 0; }
+			if MX_UNLIKELY( _ui64BaseAddress > UINTPTR_MAX ) { return 0; }
 			using tCharType = typename _tType::value_type;
 
 			size_t sRet = 0;
@@ -259,10 +259,10 @@ namespace mx {
 		}
 
 		// Changes the protection on a region of committed pages in the virtual address space of a specified process.
-		virtual bool					VirtualProtectEx( LPVOID _lpAddress, SIZE_T _dwSize, DWORD _flNewProtect, PDWORD _lpflOldProtect );
+		virtual bool					VirtualProtectEx( uint64_t _ui64Address, SIZE_T _dwSize, DWORD _flNewProtect, PDWORD _lpflOldProtect );
 
 		// Retrieves information about a range of pages within the virtual address space of a specified process.
-		virtual bool					VirtualQueryEx( uint64_t _lpAddress, PMEMORY_BASIC_INFORMATION64 _lpBuffer ) const;
+		virtual bool					VirtualQueryEx( uint64_t _ui64Address, PMEMORY_BASIC_INFORMATION64 _lpBuffer ) const;
 
 		// Determines whether the specified process is running under WOW64.
 		virtual bool					IsWow64Process() const;
@@ -274,7 +274,10 @@ namespace mx {
 		virtual CSecureWString			QueryProcessImageName( DWORD _dwFlags = 0 ) const;
 
 		// Gets the base and size of a region given an address.
-		virtual bool					GetChunk( uint64_t _lpAddress, uint64_t &_uiBaseAddress, uint64_t &_uiRegionSize );
+		virtual bool					GetChunk( uint64_t _ui64Address, uint64_t &_uiBaseAddress, uint64_t &_uiRegionSize );
+
+		// Gets the chunks that overlap the given range of addresses.  Call within try/catch.
+		virtual std::vector<uint64_t>	GetChunks( uint64_t _ui64StartAddress, uint64_t _ui64EndAddress );
 
 		// Resets all assocations with the current process.
 		virtual void					Reset();
@@ -663,13 +666,13 @@ namespace mx {
 		bool							OpenProcConservative( DWORD _dwId );
 
 		// Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the operation fails.
-		bool							ReadProcessMemoryInternal( LPCVOID _lpBaseAddress, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) const;
+		bool							ReadProcessMemoryInternal( uint64_t _ui64Address, LPVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesRead ) const;
 
 		// Writes data to an area of memory in a specified process. The entire area to be written to must be accessible or the operation fails.
-		bool							WriteProcessMemoryInternal( LPVOID _lpBaseAddress, LPCVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesWritten );
+		bool							WriteProcessMemoryInternal( uint64_t _ui64Address, LPCVOID _lpBuffer, SIZE_T _nSize, SIZE_T * _lpNumberOfBytesWritten );
 
 		// Changes the protection on a region of committed pages in the virtual address space of a specified process.
-		bool							VirtualProtectExInternal( LPVOID _lpAddress, SIZE_T _dwSize, DWORD _flNewProtect, PDWORD _lpflOldProtect );
+		bool							VirtualProtectExInternal( uint64_t _ui64Address, SIZE_T _dwSize, DWORD _flNewProtect, PDWORD _lpflOldProtect );
 
 		// Retrieves information about a range of pages within the virtual address space of a specified process.
 		size_t							VirtualQueryExInternal( uint64_t _lpAddress, PMEMORY_BASIC_INFORMATION64 _lpBuffer ) const;

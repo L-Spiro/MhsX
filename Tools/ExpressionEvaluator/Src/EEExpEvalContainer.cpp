@@ -645,7 +645,7 @@ namespace ee {
 
 						ee::CVector * pThis = static_cast<ee::CVector *>(_rRight.u.poObj);
 						try {
-							psObj->Resize( pThis->Size().u.ui64Val );
+							psObj->Resize( size_t( pThis->Size().u.ui64Val ) );
 						}
 						catch ( ... ) {
 							DeallocateObject( psObj );

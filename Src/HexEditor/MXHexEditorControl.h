@@ -78,25 +78,43 @@ namespace mx {
 			MX_DF_INT32,							/**< "         0         -1         42" */
 			MX_DF_UINT64,							/**< "                   0 18446744073709551615                   42" */
 			MX_DF_INT64,							/**< "                   0                   -1                   42" */
+			MX_DF_POINTER16,						/**< "FFFF" */
+			MX_DF_POINTER32,						/**< "FFFFFFFF" */
+			MX_DF_POINTER64,						/**< "FFFFFFFFFFFFFFFF" */
 			MX_DF_FLOAT10,							/**< "0 3.125 -42" */
 			MX_DF_FLOAT11,							/**< "0 3.125 -42" */
 			MX_DF_BFLOAT16,							/**< "0 3.141 -42" */
 			MX_DF_FLOAT16,							/**< "0 3.1406 -42" */
 			MX_DF_FLOAT32,							/**< "0 3.1415925 -42" */
 			MX_DF_FLOAT64,							/**< "0 3.1415926535897931 -42" */
+
+			MX_DF_PCM8,								/**< "0 -1 0.1647" */
+			MX_DF_PCM16,							/**< "0 -1 0.1647" */
+			MX_DF_PCM24,							/**< "0 -1 0.1647" */
+			MX_DF_PCM32,							/**< "0 -1 0.1647" */
 		};
 
+		/** Ruler formats. */
+		enum MX_RULER_FMT {
+			MX_RF_HEX,
+			MX_RF_DEC,
+		};
 
 		// == Types.
 		/** Measured glyph metrics for the address gutter font. */
 		struct MX_ADDR_GLYPHS {
-			int32_t									iDigitMaxCx						= 0;						// Max over '0'..'9' (and 'A'..'F' when HEX).
-			int32_t									iDigitMaxCxLower				= 0;						// Max over '0'..'9' (and 'a'..'f' when HEX).
+			int32_t									i320_9DigitMaxCx				= 0;						// Max over '0'..'9'.
+			int32_t									i32DigitMaxCx					= 0;						// Max over '0'..'9' (and 'A'..'F' when HEX).
+			int32_t									i32DigitMaxCxLower				= 0;						// Max over '0'..'9' (and 'a'..'f' when HEX).
 			int32_t									i32ColonCx						= 0;						// Width of ':'.
 			int32_t									i32SpaceCx						= 0;						// Width of ' '.
 			int32_t									i32SpecHexCx					= 0;						// Width of 'h'.
 			int32_t									i32SpecOctCx					= 0;						// Width of 'o'.
 			int32_t									i32ShortWcx						= 0;						// Width of 'w'.
+			int32_t									i32PeriodCx						= 0;						// Width of '.'.
+			int32_t									i32Ecx							= 0;						// Width of 'e'.
+			int32_t									i32MinusCx						= 0;						// Width of '-'.
+			int32_t									i32PlusMinusSpaceMaxCx			= 0;						// Max width between ' ', '+', and '-'.
 			int32_t									i32MaxAscii						= 0;						// Maximum width of ASCII characters.
 			int32_t									i32MaxAsciiAnsi					= 0;						// Maximum width of ASCII+ANSI characters.
 		};
@@ -131,7 +149,9 @@ namespace mx {
 			CCharSets::MX_CHAR_SETS					csCharSet						= CCharSets::MX_CS_ASCII;	/**< The current character set. */
 			MX_ADDR_STYLE							daAddressStyle;												/**< Address style. */
 			uint32_t								uiBytesPerRow					= 16;						/**< Bytes per displayed row. */
+			uint32_t								uiDesiredBytesPerRow			= 16;						/**< Desired bytes per row. */
 			uint64_t								ui64DivisionSpacing				= 4;						/**< Spacing between division lines. */
+			uint32_t								ui32FloatDigits					= 18;						/**< Number of digits to display for floating-point numbers. */
 
 			// Visibility.
 			bool									bShowAddressGutter				= true;
@@ -164,6 +184,7 @@ namespace mx {
 			int32_t									i32LineSpacingPx				= 2;
 
 			// Ruler.
+			MX_RULER_FMT							rfRulerFmt						= MX_RF_HEX;				/**< The ruler format. */
 			bool									bDecimal						= false;					/**< Decimal numbers instead of hex. */
 			bool									bNumbers						= true;						/**< Show numbers in the ruler. */
 
@@ -233,22 +254,35 @@ namespace mx {
 
 		// Sets the row width.
 		void										SetLineWidth( uint32_t _ui32Width ) {
+			auto & stAll = (*CurStyle());
+			stAll.uiDesiredBytesPerRow = _ui32Width;
 			// TODO: Set Auto Line Width to false.
-			if ( CurStyle()->uiBytesPerRow != _ui32Width && _ui32Width >= 1 ) {
-				CurStyle()->uiBytesPerRow = _ui32Width;
+				
+			auto ui32PrimSize = StrideForFormat( stAll.dfLeftNumbersFmt );
+			if ( stAll.bShowRightArea ) {
+				ui32PrimSize = ee::CExpEval::Lcm( ui32PrimSize, StrideForFormat( stAll.dfRightNumbersFmt ) );
+			}
+			// Effective width must be a common denominator of the view strides.
+			uint32_t ui32LcdWidth = ee::CExpEval::Lcm( ui32PrimSize, _ui32Width );
+			uint32_t ui32LcdWidth2 = ui32LcdWidth << 1;
+			// Set effective width to the nearest multiple.
+			_ui32Width = ((_ui32Width * 2) + ui32LcdWidth) / ui32LcdWidth2 * ui32LcdWidth;
+			_ui32Width = std::max( _ui32Width, ui32LcdWidth );
+			if ( stAll.uiBytesPerRow != _ui32Width && _ui32Width >= 1 ) {
+				stAll.uiBytesPerRow = _ui32Width;
 				// Group size must be a multiple of the line size.
-				if ( _ui32Width % CurStyle()->uiGroupSize ) {
+				if ( _ui32Width % stAll.uiGroupSize ) {
 					uint32_t I;
 					for ( I = 1; I != _ui32Width; ++I ) {
 						if ( I ) {
 							if ( (_ui32Width % I) == 0 ) {
-								if ( (_ui32Width / I) <= CurStyle()->uiGroupSize ) {
+								if ( (_ui32Width / I) <= stAll.uiGroupSize ) {
 									break;
 								}
 							}
 						}
 					}
-					CurStyle()->uiGroupSize = _ui32Width / I;
+					stAll.uiGroupSize = _ui32Width / I;
 				}
 
 				RecalcAndInvalidate();
@@ -260,6 +294,7 @@ namespace mx {
 
 		// Sets thr row width to Auto.
 		void										SetLineWidthdAuto( bool /*_bSet*/ ) {
+			//CurStyle()->bAuto
 		}
 
 		// Gets the Auto status of the row width.
@@ -267,11 +302,26 @@ namespace mx {
 
 		// Sets the group size.
 		void										SetGroupSize( uint32_t _ui32GroupSize ) {
-			if ( CurStyle()->uiGroupSize != _ui32GroupSize && _ui32GroupSize >= 1 ) {
-				CurStyle()->uiGroupSize = _ui32GroupSize;
+			auto & stAll = (*CurStyle());
+			if ( _ui32GroupSize != 1 ) {
+				auto ui32PrimSize = StrideForFormat( stAll.dfLeftNumbersFmt );
+				if ( stAll.bShowRightArea ) {
+					ui32PrimSize = ee::CExpEval::Lcm( ui32PrimSize, StrideForFormat( stAll.dfRightNumbersFmt ) );
+				}
+				if ( std::max( ui32PrimSize, _ui32GroupSize ) % std::min( ui32PrimSize, _ui32GroupSize ) ) {
+					// Effective width must be a common denominator of the view strides.
+					uint32_t ui32LcdWidth = ee::CExpEval::Lcm( ui32PrimSize, _ui32GroupSize );
+					uint32_t ui32LcdWidth2 = ui32LcdWidth << 1;
+					// Set effective width to the nearest multiple.
+					_ui32GroupSize = ((_ui32GroupSize * 2) + ui32LcdWidth) / ui32LcdWidth2 * ui32LcdWidth;
+					_ui32GroupSize = std::max( _ui32GroupSize, ui32LcdWidth );
+				}
+			}
+			if ( stAll.uiGroupSize != _ui32GroupSize && _ui32GroupSize >= 1 ) {
+				stAll.uiGroupSize = _ui32GroupSize;
 				// Line width umust be a multiple of group size.
-				if ( CurStyle()->uiBytesPerRow % _ui32GroupSize ) {
-					CurStyle()->uiBytesPerRow = (CurStyle()->uiBytesPerRow + (_ui32GroupSize - 1)) / _ui32GroupSize * _ui32GroupSize;
+				if ( stAll.uiBytesPerRow % _ui32GroupSize ) {
+					stAll.uiBytesPerRow = (stAll.uiBytesPerRow + (_ui32GroupSize - 1)) / _ui32GroupSize * _ui32GroupSize;
 				}
 				RecalcAndInvalidate();
 			}
@@ -295,6 +345,7 @@ namespace mx {
 		void										SetLeftAreaFormat( MX_DATA_FMT _fdfFmt ) {
 			if ( CurStyle()->dfLeftNumbersFmt != _fdfFmt ) {
 				CurStyle()->dfLeftNumbersFmt = _fdfFmt;
+				SetLineWidth( CurStyle()->uiDesiredBytesPerRow );
 				RecalcAndInvalidate();
 			}
 		}
@@ -307,6 +358,7 @@ namespace mx {
 			if ( CurStyle()->dfRightNumbersFmt != _fdfFmt || RightAreaHidden() ) {
 				CurStyle()->dfRightNumbersFmt = _fdfFmt;
 				CurStyle()->bShowRightArea = true;
+				SetLineWidth( CurStyle()->uiDesiredBytesPerRow );
 				RecalcAndInvalidate();
 			}
 		}
@@ -318,6 +370,7 @@ namespace mx {
 		void										HideRightArea() {
 			if ( CurStyle()->bShowRightArea ) {
 				CurStyle()->bShowRightArea = false;
+				SetLineWidth( CurStyle()->uiDesiredBytesPerRow );
 				RecalcAndInvalidate();
 			}
 		}
@@ -400,11 +453,24 @@ namespace mx {
 		// Sets the showing of the ruler labels.
 		void										SetShowRulerLabels( bool _bEnable ) {
 			CurStyle()->bShowRulerLabels = _bEnable;
-			::InvalidateRect( Wnd(), NULL, FALSE );
+			if ( CurStyle()->bShowRuler ) {
+				::InvalidateRect( Wnd(), NULL, FALSE );
+			}
 		}
 		
 		// Gets the showing of the ruler labels.
 		inline bool									GetShowRulerLabels() const { return CurStyle()->bShowRulerLabels; }
+
+		// Sets the ruler format.
+		void										SetRulerFormat( MX_RULER_FMT _rfFmt ) {
+			CurStyle()->rfRulerFmt = _rfFmt;
+			if ( CurStyle()->bShowRuler ) {
+				::InvalidateRect( Wnd(), NULL, FALSE );
+			}
+		}
+
+		// Gets the ruler format.
+		inline MX_RULER_FMT							GetRulerFormat() const { return CurStyle()->rfRulerFmt; }
 
 		// Sets the showing of the ruler caret.
 		void										SetShowMiniMap( bool _bEnable ) {
@@ -454,6 +520,14 @@ namespace mx {
 		 * \param _bRedraw If true the screen is redrawn immediately.
 		 **/
 		inline void									AddCaret( uint64_t _ui64Amount, int32_t _i32SubCaret = 0, bool _bUpdateSelection = false, bool _bRedraw = true ) {
+			bool bRight = m_sgSelGesture.bRightArea && CurStyle()->bShowRightArea;
+			auto dfFmt = bRight ? CurStyle()->dfRightNumbersFmt : CurStyle()->dfLeftNumbersFmt;
+			auto ui32Stride = StrideForFormat( dfFmt );
+			// ui32Stride - (m_sgSelGesture.ui64CaretAddr % ui32Stride)
+			if ( _ui64Amount % ui32Stride ) {
+				_ui64Amount = ((_ui64Amount / ui32Stride) + 1) * ui32Stride;
+			}
+
 			auto ui64NewAddr = GetCaretAddr() + _ui64Amount;
 			if ( ui64NewAddr < GetCaretAddr() ) { SetCaretAddr( Size(), _i32SubCaret, _bUpdateSelection, _bRedraw ); }
 			else { SetCaretAddr( ui64NewAddr, _i32SubCaret, _bUpdateSelection, _bRedraw ); }
@@ -468,8 +542,73 @@ namespace mx {
 		 * \param _bRedraw If true the screen is redrawn immediately.
 		 **/
 		inline void									SubCaret( uint64_t _ui64Amount, int32_t _i32SubCaret = 0, bool _bUpdateSelection = false, bool _bRedraw = true ) {
+			bool bRight = m_sgSelGesture.bRightArea && CurStyle()->bShowRightArea;
+			auto dfFmt = bRight ? CurStyle()->dfRightNumbersFmt : CurStyle()->dfLeftNumbersFmt;
+			auto ui32Stride = StrideForFormat( dfFmt );
+			// ui32Stride - (m_sgSelGesture.ui64CaretAddr % ui32Stride)
+			if ( _ui64Amount % ui32Stride ) {
+				_ui64Amount = ((_ui64Amount / ui32Stride) + 1) * ui32Stride;
+			}
+
 			if ( _ui64Amount >= GetCaretAddr() ) { SetCaretAddr( 0, _i32SubCaret, _bUpdateSelection, _bRedraw ); }
 			else { SetCaretAddr( GetCaretAddr() - _ui64Amount, _i32SubCaret, _bUpdateSelection, _bRedraw ); }
+		}
+
+		/**
+		 * Increases the sub-caret by 1.
+		 * 
+		 * \param _bRedraw If true the screen is redrawn immediately.
+		 **/
+		inline void									IncSubCaret( bool _bRedraw = true ) {
+			bool bRight = m_sgSelGesture.bRightArea && CurStyle()->bShowRightArea;
+			auto dfFmt = bRight ? CurStyle()->dfRightNumbersFmt : CurStyle()->dfLeftNumbersFmt;
+			int32_t i32Max = SubCaretCountForFormat( dfFmt );
+			auto ui32Stride = StrideForFormat( dfFmt );
+			if ( ui32Stride > 1 ) {
+				AddCaret( ui32Stride - (m_sgSelGesture.ui64CaretAddr % ui32Stride), 0, false, _bRedraw );
+			}
+			else if ( std::clamp( m_sgSelGesture.i32CaretIdx, 0, i32Max ) == i32Max - 1 ) {
+				AddCaret( 1, 0, false, _bRedraw );
+			}
+			else {
+				if ( m_sgSelGesture.ui64CaretAddr < Size() ) {
+					++m_sgSelGesture.i32CaretIdx;
+					StartCaretBlink();
+					if ( _bRedraw ) {
+						::InvalidateRect( Wnd(), nullptr, FALSE );
+					}
+				}
+			}
+		}
+
+		/**
+		 * Decreases the sub-caret by 1.
+		 * 
+		 * \param _bRedraw If true the screen is redrawn immediately.
+		 **/
+		inline void									DecSubCaret( bool _bRedraw = true ) {
+			bool bRight = m_sgSelGesture.bRightArea && CurStyle()->bShowRightArea;
+			auto dfFmt = bRight ? CurStyle()->dfRightNumbersFmt : CurStyle()->dfLeftNumbersFmt;
+			int32_t i32Max = SubCaretCountForFormat( dfFmt );
+			auto ui32Stride = StrideForFormat( dfFmt );
+			if ( ui32Stride > 1 ) {
+				SubCaret( (m_sgSelGesture.ui64CaretAddr % ui32Stride) + ui32Stride, 0, false, _bRedraw );
+			}
+			else if ( std::clamp( m_sgSelGesture.i32CaretIdx, 0, i32Max ) == 0 ) {
+				if ( m_sgSelGesture.ui64CaretAddr ) {
+					SubCaret( 1, i32Max - 1, false, _bRedraw );
+				}
+				else {
+					SubCaret( 1, 0, false, _bRedraw );
+				}
+			}
+			else {
+				--m_sgSelGesture.i32CaretIdx;
+				StartCaretBlink();
+				if ( _bRedraw ) {
+					::InvalidateRect( Wnd(), nullptr, FALSE );
+				}
+			}
 		}
 
 		/**
@@ -541,6 +680,21 @@ namespace mx {
 		void										SelectLine();
 
 		/**
+		 * Reverses the selection (swaps the caret and anchor points).
+		 **/
+		void										ReverseSelection();
+
+		/**
+		 * Sets the caret to the beginning of the selection.
+		 **/
+		void										MarkSelectionStart();
+
+		/**
+		 * Sets the caret to the end of the selection.
+		 **/
+		void										MarkSelectionEnd();
+
+		/**
 		 * Goes to a given address.
 		 * 
 		 * \param _ui64Addr The address to which to go.
@@ -597,6 +751,17 @@ namespace mx {
 		 * \return Returns a LSW_HANDLED code.
 		 */
 		virtual LSW_HANDLED							KillFocus( HWND /*_hNewFocus*/ ) override;
+
+		/**
+		 * Handles WM_SETCURSOR.
+		 * \brief Sets the cursor for the window or its child controls.
+		 *
+		 * \param _pwControl The control under the cursor, or nullptr.
+		 * \param _wHitTest Hit-test code (HT*).
+		 * \param _wIdent Mouse message identifier (e.g., WM_MOUSEMOVE).
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED							SetCursor( CWidget * /*_pwControl*/, WORD /*_wHitTest*/, WORD /*_wIdent*/ ) override { return LSW_H_HANDLED; }
 
 		/**
 		 * Handles WM_PAINT.
@@ -772,10 +937,11 @@ namespace mx {
 		 * 
 		 * \param _pPoint The client-space point under which to find the address.
 		 * \param _ui64Addr The return address in the case that the function returns true.
+		 * \param _i32SubCaret The subcaret.
 		 * \param _bRightArea If true, the click happened in the right area.
 		 * \return Returns true if there is a cell representing an address under the given point.  The address will always be valid (in the range of the opened file, memory space, etc.) if the function returns true.
 		 **/
-		bool										PointToAddress( const POINT &_pPoint, uint64_t &_ui64Addr, bool &_bRightArea );
+		bool										PointToAddress( const POINT &_pPoint, uint64_t &_ui64Addr, int32_t &_i32SubCaret, bool &_bRightArea );
 
 		// Registers the control if it has not been registered already.  Redundant calls have no effect.  Must be called before creating this control.
 		static void									PrepareControl();
@@ -800,7 +966,7 @@ namespace mx {
 				float fPoints = static_cast<float>(i32EmPx) * 72.0f / static_cast<float>(_wDpi);
 				_fsFont.i32PointSize = std::round( fPoints );
 				// To be set by EnsureAddrGlyphs().
-				_fsFont.agGlyphs.iDigitMaxCx = 0;
+				_fsFont.agGlyphs.i32DigitMaxCx = 0;
 				//_fsFont.iCharCy = 0;
 			}
 		}
@@ -1081,10 +1247,6 @@ namespace mx {
 			}
 			m_bCaretOn = true;
 			m_tCaretBlink.Start( Wnd(), MX_TI_HEX_CARET, uBlink, nullptr );
-			/*lsw::LSW_RECT rCaret;
-			if ( GetCaretRect( rCaret ) ) {
-				::InvalidateRect( Wnd(), &rCaret, FALSE );
-			}*/
 		}
 
 		/**
@@ -1214,12 +1376,70 @@ namespace mx {
 		bool										MiniMapCursorToLineByte( const POINTS &_pCursorPos, uint64_t &_ui64MiniLine, uint32_t &_ui32ByteOff ) const;
 
 		/**
+		 * \brief Converts a cursor position inside the mini-map to an absolute mini-map line index.
+		 *
+		 * \param _pCursorPos Cursor position in client coordinates.
+		 * \param _rClient The client rectangle.
+		 * \param _ui32BytesPerRow Mini-map bytes-per-row.
+		 * \param _ui64MiniLine Holds the returned absolute mini-line.
+		 * \return Returns true if the cursor is inside the mini-map rectangle.
+		 */
+		bool										MiniMapCursorToMiniLine( const POINTS &_pCursorPos, const lsw::LSW_RECT &_rClient, uint32_t _ui32BytesPerRow, uint64_t &_ui64MiniLine ) const {
+			if ( !CurStyle()->bShowMiniMap || !_ui32BytesPerRow ) { return false; }
+
+			const CMiniMap::MX_MINI_MAP & mmMiniMap = CurStyle()->mmMiniMap;
+
+			const int32_t i32Left = MiniMapLeft( _rClient );
+			const int32_t i32Right = i32Left + CurStyle()->i32MiniMapWidthPx;
+			const int32_t i32Top = 0;
+			const int32_t i32Bottom = _rClient.Height();
+
+			if ( _pCursorPos.x < i32Left || _pCursorPos.x >= i32Right ) { return false; }
+			if ( _pCursorPos.y < i32Top || _pCursorPos.y >= i32Bottom ) { return false; }
+
+			const uint32_t ui32Zoom = mmMiniMap.ui32Zoom ? mmMiniMap.ui32Zoom : 1U;
+
+			const uint64_t ui64SpanMiniLines = static_cast<uint64_t>( i32Bottom - i32Top ) / static_cast<uint64_t>( ui32Zoom ) + 1ULL;
+			if ( ui64SpanMiniLines == 0 ) { return false; }
+
+			const uint64_t ui64DispFirstLine = m_mmsMiniMap.ui64Address / static_cast<uint64_t>( _ui32BytesPerRow );
+
+			// Line within the displayed span.
+			const uint64_t ui64RelY = static_cast<uint64_t>( _pCursorPos.y - i32Top );
+			const uint64_t ui64H = static_cast<uint64_t>( i32Bottom - i32Top );
+
+			uint64_t ui64LineInSpan = (ui64RelY * ui64SpanMiniLines) / ui64H;
+			if ( ui64LineInSpan >= ui64SpanMiniLines ) { ui64LineInSpan = ui64SpanMiniLines - 1ULL; }
+
+			_ui64MiniLine = ui64DispFirstLine + ui64LineInSpan;
+			return true;
+		}
+
+		/**
 		 * \brief Converts a mini-map source line to the corresponding address in the file.
 		 *
 		 * \param _ui64MiniLine Source line in the mini-map bitmap.
 		 * \return Returns the file address clamped to Size().
 		 */
 		uint64_t									MiniMapLineToAddress( uint64_t _ui64MiniLine ) const;
+
+		/**
+		 * \brief Gets mini-map rectangle and thumb metrics for scroll dragging.
+		 *
+		 * \param _rClient The client rectangle.
+		 * \param _i32MiniLeft Holds the mini-map left.
+		 * \param _i32MiniRight Holds the mini-map right (exclusive).
+		 * \param _i32MiniTop Holds the mini-map top.
+		 * \param _i32MiniBottom Holds the mini-map bottom (exclusive).
+		 * \param _i32ThumbTop Holds the thumb top.
+		 * \param _i32ThumbHeight Holds the thumb height.
+		 * \param _i32Track Holds the track height (miniHeight - thumbHeight).
+		 * \param _ui64MaxFirstLine Holds the maximum ui64FirstVisibleLine.
+		 * \return Returns true if mini-map is visible and metrics are valid.
+		 */
+		bool										MiniMapThumbMetrics( const lsw::LSW_RECT &_rClient,
+			int32_t &_i32MiniLeft, int32_t &_i32MiniRight, int32_t &_i32MiniTop, int32_t &_i32MiniBottom,
+			int32_t &_i32ThumbTop, int32_t &_i32ThumbHeight, int32_t &_i32Track, uint64_t &_ui64MaxFirstLine ) const;
 
 		// Gets the minimum address digits.
 		uint32_t									MinAddrDigits() const {
@@ -1369,22 +1589,28 @@ namespace mx {
 		/** Ensures CurStyle()->agGlyphs is populated for the current font/options. */
 		void										EnsureAddrGlyphs( HDC _hDc ) {
 			MX_ADDR_GLYPHS & agGlyphs = Font()->agGlyphs;
-			if ( agGlyphs.iDigitMaxCx > 0 && Font()->iCharCy > 0 ) { return; }
+			if ( agGlyphs.i32DigitMaxCx > 0 && Font()->iCharCy > 0 ) { return; }
 
 			TEXTMETRICW tmMetrics {};
 			::GetTextMetricsW( _hDc, &tmMetrics );
 			Font()->iCharCy = tmMetrics.tmHeight + tmMetrics.tmExternalLeading;
 
-			agGlyphs.iDigitMaxCx = lsw::CHelpers::MeasureMax( _hDc, L"0123456789" );
-			agGlyphs.iDigitMaxCx = std::max( agGlyphs.iDigitMaxCx, lsw::CHelpers::MeasureMax( _hDc, L"ABCDEF" ) );
-			agGlyphs.iDigitMaxCxLower = std::max( agGlyphs.iDigitMaxCx, lsw::CHelpers::MeasureMax( _hDc, L"abcdef" ) );
+			agGlyphs.i320_9DigitMaxCx = lsw::CHelpers::MeasureMax( _hDc, L"0123456789" );
+			agGlyphs.i32DigitMaxCx = std::max( agGlyphs.i320_9DigitMaxCx, lsw::CHelpers::MeasureMax( _hDc, L"ABCDEF" ) );
+			agGlyphs.i32DigitMaxCxLower = std::max( agGlyphs.i32DigitMaxCx, lsw::CHelpers::MeasureMax( _hDc, L"abcdef" ) );
 
 			SIZE sSize {};
-			::GetTextExtentPoint32W( _hDc, L":", 1, &sSize ); agGlyphs.i32ColonCx = sSize.cx;
-			::GetTextExtentPoint32W( _hDc, L" ", 1, &sSize ); agGlyphs.i32SpaceCx = (sSize.cx + 1) / 2 * 2;	// Round up to the nearest even number.
-			::GetTextExtentPoint32W( _hDc, L"h", 1, &sSize ); agGlyphs.i32SpecHexCx = sSize.cx;
-			::GetTextExtentPoint32W( _hDc, L"o", 1, &sSize ); agGlyphs.i32SpecOctCx = sSize.cx;
-			::GetTextExtentPoint32W( _hDc, L"w", 1, &sSize ); agGlyphs.i32ShortWcx  = sSize.cx;
+			::GetTextExtentPoint32W( _hDc, L":", 1, &sSize ); agGlyphs.i32ColonCx				= sSize.cx;
+			::GetTextExtentPoint32W( _hDc, L" ", 1, &sSize ); agGlyphs.i32SpaceCx				= (sSize.cx + 1) / 2 * 2;	// Round up to the nearest even number.
+			::GetTextExtentPoint32W( _hDc, L"h", 1, &sSize ); agGlyphs.i32SpecHexCx				= sSize.cx;
+			::GetTextExtentPoint32W( _hDc, L"o", 1, &sSize ); agGlyphs.i32SpecOctCx				= sSize.cx;
+			::GetTextExtentPoint32W( _hDc, L"w", 1, &sSize ); agGlyphs.i32ShortWcx				= sSize.cx;
+			::GetTextExtentPoint32W( _hDc, L"+", 1, &sSize ); agGlyphs.i32PlusMinusSpaceMaxCx	= std::max<int32_t>( agGlyphs.i32SpaceCx, sSize.cx );
+			::GetTextExtentPoint32W( _hDc, L"-", 1, &sSize ); agGlyphs.i32MinusCx				= sSize.cx;
+			::GetTextExtentPoint32W( _hDc, L".", 1, &sSize ); agGlyphs.i32PeriodCx				= sSize.cx;
+			::GetTextExtentPoint32W( _hDc, L"e", 1, &sSize ); agGlyphs.i32Ecx					= sSize.cx;
+			agGlyphs.i32PlusMinusSpaceMaxCx	= std::max<int32_t>( agGlyphs.i32PlusMinusSpaceMaxCx, agGlyphs.i32MinusCx );
+			
 
 			if ( CharSet().bSinglePage ) {
 				agGlyphs.i32MaxAscii = 0;
@@ -1555,6 +1781,48 @@ namespace mx {
 		}
 
 		/**
+		 * Gets the pixel width of a cell given its format.
+		 * 
+		 * \param _dfFmt The format of the cell.
+		 * \return Returns the pixel width for the text in the cell.
+		 **/
+		inline int32_t								CellWidthForFmt( MX_DATA_FMT _dfFmt ) const {
+			const MX_STYLE & stStyle = (*CurStyle());
+			const MX_FONT_SET & fsFont = (*Font());
+			const MX_ADDR_GLYPHS & agGlyphs = fsFont.agGlyphs;
+			switch( _dfFmt ) {
+				case MX_DF_HEX :		{ return 2 * agGlyphs.i32DigitMaxCx; }																																				/**< "FF" */
+				case MX_DF_DEC :		{ return 3 * agGlyphs.i320_9DigitMaxCx; }																																			/**< "255" */
+				case MX_DF_OCT :		{ return 3 * agGlyphs.i320_9DigitMaxCx; }																																			/**< "377" */
+				case MX_DF_BIN :		{ return 8 * agGlyphs.i320_9DigitMaxCx; }																																			/**< "11111111" */
+				case MX_DF_CHAR :		{ return CCharSets::m_csSets[stStyle.csCharSet].bHideOver127 ? agGlyphs.i32MaxAscii : agGlyphs.i32MaxAsciiAnsi; }																	/**< Printable cell. */
+				case MX_DF_UINT8 :		{ return 3 * agGlyphs.i320_9DigitMaxCx; }																																			/**< "255" */
+				case MX_DF_INT8 :		{ return 3 * agGlyphs.i320_9DigitMaxCx + agGlyphs.i32MinusCx; }																														/**< "-128" */
+				case MX_DF_UINT16 :		{ return (5 * agGlyphs.i320_9DigitMaxCx) / 2; }																																		/**< "65535" */
+				case MX_DF_INT16 :		{ return (5 * agGlyphs.i320_9DigitMaxCx + agGlyphs.i32MinusCx) / 2; }																												/**< "-32768" */
+				case MX_DF_UINT32 :		{ return (10 * agGlyphs.i320_9DigitMaxCx) / 4; }																																	/**< "4294967295" */
+				case MX_DF_INT32 :		{ return (10 * agGlyphs.i320_9DigitMaxCx + agGlyphs.i32MinusCx) / 4; }																												/**< "-2147483648" */
+				case MX_DF_UINT64 :		{ return (20 * agGlyphs.i320_9DigitMaxCx) / 8; }																																	/**< "18446744073709551615" */
+				case MX_DF_INT64 :		{ return (19 * agGlyphs.i320_9DigitMaxCx + agGlyphs.i32MinusCx) / 8; }																												/**< "-9223372036854775808" */
+				case MX_DF_POINTER16 :	{ return (4 * agGlyphs.i320_9DigitMaxCx) / 2; }																																		/**< "FFFF" */
+				case MX_DF_POINTER32 :	{ return (8 * agGlyphs.i320_9DigitMaxCx) / 4; }																																		/**< "FFFFFFFF" */
+				case MX_DF_POINTER64 :	{ return (16 * agGlyphs.i320_9DigitMaxCx) / 8; }																																	/**< "FFFFFFFFFFFFFFFF" */
+				case MX_DF_FLOAT10 :	{ return ((stStyle.ui32FloatDigits + 2) * agGlyphs.i320_9DigitMaxCx + agGlyphs.i32MinusCx + agGlyphs.i32PlusMinusSpaceMaxCx + agGlyphs.i32PeriodCx + agGlyphs.i32Ecx) / 2; }		/**< "0 3.125 -42" */
+				case MX_DF_FLOAT11 :	{ return ((stStyle.ui32FloatDigits + 2) * agGlyphs.i320_9DigitMaxCx + agGlyphs.i32MinusCx + agGlyphs.i32PlusMinusSpaceMaxCx + agGlyphs.i32PeriodCx + agGlyphs.i32Ecx) / 2; }		/**< "0 3.125 -42" */
+				case MX_DF_BFLOAT16 :	{ return ((stStyle.ui32FloatDigits + 2) * agGlyphs.i320_9DigitMaxCx + agGlyphs.i32MinusCx + agGlyphs.i32PlusMinusSpaceMaxCx + agGlyphs.i32PeriodCx + agGlyphs.i32Ecx) / 2; }		/**< "0 3.141 -42" */
+				case MX_DF_FLOAT16 :	{ return ((stStyle.ui32FloatDigits + 2) * agGlyphs.i320_9DigitMaxCx + agGlyphs.i32MinusCx + agGlyphs.i32PlusMinusSpaceMaxCx + agGlyphs.i32PeriodCx + agGlyphs.i32Ecx) / 2; }		/**< "0 3.1406 -42" */
+				case MX_DF_FLOAT32 :	{ return ((stStyle.ui32FloatDigits + 3) * agGlyphs.i320_9DigitMaxCx + agGlyphs.i32MinusCx + agGlyphs.i32PlusMinusSpaceMaxCx + agGlyphs.i32PeriodCx + agGlyphs.i32Ecx) / 4; }		/**< "0 3.1415925 -42" */
+				case MX_DF_FLOAT64 :	{ return ((stStyle.ui32FloatDigits + 4) * agGlyphs.i320_9DigitMaxCx + agGlyphs.i32MinusCx + agGlyphs.i32PlusMinusSpaceMaxCx + agGlyphs.i32PeriodCx + agGlyphs.i32Ecx) / 8; }		/**< "0 3.1415926535897931 -42" */
+
+				case MX_DF_PCM8 :		{ return ((stStyle.ui32FloatDigits + 1) * agGlyphs.i320_9DigitMaxCx + agGlyphs.i32MinusCx + agGlyphs.i32PeriodCx) / 1; }															/**< "0 -1 0.1647" */
+				case MX_DF_PCM16 :		{ return ((stStyle.ui32FloatDigits + 1) * agGlyphs.i320_9DigitMaxCx + agGlyphs.i32MinusCx + agGlyphs.i32PeriodCx) / 2; }															/**< "0 -1 0.1647" */
+				case MX_DF_PCM24 :		{ return ((stStyle.ui32FloatDigits + 1) * agGlyphs.i320_9DigitMaxCx + agGlyphs.i32MinusCx + agGlyphs.i32PeriodCx) / 3; }															/**< "0 -1 0.1647" */
+				case MX_DF_PCM32 :		{ return ((stStyle.ui32FloatDigits + 1) * agGlyphs.i320_9DigitMaxCx + agGlyphs.i32MinusCx + agGlyphs.i32PeriodCx) / 4; }															/**< "0 -1 0.1647" */
+				default :				{ return 2 * agGlyphs.i32DigitMaxCx; }
+			}
+		}
+
+		/**
 		 * Mixes two colors.  Alpha is taken from crRight.
 		 * 
 		 * \param crLeft The left color.
@@ -1576,6 +1844,138 @@ namespace mx {
 		}
 
 		/**
+		 * Gets a format’s stride (how many cells in a row it consumes).
+		 * 
+		 * \param _dfFmt The format whose sub-caret count is to be returned.
+		 * \return Returns the sub-caret count.
+		 **/
+		inline uint32_t								StrideForFormat( MX_DATA_FMT _dfFmt ) const {
+			switch ( _dfFmt ) {
+				case MX_DF_HEX : {}								MX_FALLTHROUGH
+				case MX_DF_DEC : {}								MX_FALLTHROUGH
+				case MX_DF_OCT : {}								MX_FALLTHROUGH
+				case MX_DF_BIN : { return 1; }
+				case MX_DF_CHAR : { return (CurStyle()->csCharSet == CCharSets::MX_CS_UNICODE) ? 2 : 1; }
+
+				case MX_DF_UINT8 : { return sizeof( uint8_t ); }
+				case MX_DF_INT8 : { return sizeof( int8_t ); }
+				case MX_DF_UINT16 : { return sizeof( uint16_t ); }
+				case MX_DF_INT16 : { return sizeof( int16_t ); }
+				case MX_DF_UINT32 : { return sizeof( uint32_t ); }
+				case MX_DF_INT32 : { return sizeof( int32_t ); }
+				case MX_DF_UINT64 : { return sizeof( uint64_t ); }
+				case MX_DF_INT64 : { return sizeof( int64_t ); }
+
+				case MX_DF_POINTER16 : { return sizeof( uint16_t ); }
+				case MX_DF_POINTER32 : { return sizeof( uint32_t ); }
+				case MX_DF_POINTER64 : { return sizeof( uint64_t ); }
+
+				case MX_DF_FLOAT11 : { return sizeof( uint16_t ); }
+				case MX_DF_FLOAT10 : { return sizeof( uint16_t ); }
+				case MX_DF_BFLOAT16 : { return sizeof( uint16_t ); }
+				case MX_DF_FLOAT16 : { return sizeof( uint16_t ); }
+				case MX_DF_FLOAT32 : { return sizeof( float ); }
+				case MX_DF_FLOAT64 : { return sizeof( double ); }
+
+				case MX_DF_PCM8 : { return sizeof( uint8_t ); }
+				case MX_DF_PCM16 : { return sizeof( uint16_t ); }
+				case MX_DF_PCM24 : { return sizeof( uint8_t ) * 3; }
+				case MX_DF_PCM32 : { return sizeof( uint32_t ); }
+				default : { return 1; }
+			}
+		}
+
+		/**
+		 * \brief Computes the number of source mini-map lines displayed for a given height and zoom.
+		 *
+		 * \param _i32Height The destination height in pixels.
+		 * \param _ui32Zoom The zoom (pixel size), clamped to at least 1.
+		 * \return Returns the number of source lines (at least 1).
+		 */
+		static inline uint64_t						MiniMapSpanLines( int32_t _i32Height, uint32_t _ui32Zoom ) {
+			const uint32_t ui32Zoom = _ui32Zoom ? _ui32Zoom : 1U;
+			if ( _i32Height <= 0 ) { return 1ULL; }
+			// CeilDiv(height, zoom).
+			return (static_cast<uint64_t>(_i32Height) + static_cast<uint64_t>(ui32Zoom) - 1ULL) / static_cast<uint64_t>(ui32Zoom);
+		}
+
+		/**
+		 * \brief Computes a rounded (A * B) / Div using 128-bit intermediate math.
+		 *
+		 * \param _ui64A The first value.
+		 * \param _ui64B The second value.
+		 * \param _ui64Div The divisor.
+		 * \return Returns round((A * B) / Div). Returns 0 if _ui64Div is 0 or on failure.
+		 */
+		static inline uint64_t						MiniMapMulDivU64Round( uint64_t _ui64A, uint64_t _ui64B, uint64_t _ui64Div ) {
+			if ( _ui64Div == 0 ) { return 0; }
+			try {
+				uint64_t ui64Rem;
+				return _umuldiv128_rounded( _ui64A, _ui64B, _ui64Div, &ui64Rem );
+			}
+			catch ( ... ) { return 0; }
+		}
+
+		/**
+		 * \brief Tests if a point is inside the mini-map rectangle.
+		 */
+		static inline bool							MiniMapPtInRect( int32_t _i32X, int32_t _i32Y, int32_t _i32L, int32_t _i32T, int32_t _i32R, int32_t _i32B ) {
+			return (_i32X >= _i32L && _i32X < _i32R && _i32Y >= _i32T && _i32Y < _i32B);
+		}
+
+		/**
+		 * \brief Computes the maximum top-of-view line index (the same clamp used by the main view).
+		 *
+		 * \param _ui64TotalBytes Total file size in bytes.
+		 * \param _ui32MainBpr Main view bytes-per-row.
+		 * \param _i32PageLines Number of visible lines.
+		 * \return Returns the maximum value for ui64FirstVisibleLine.
+		 */
+		static inline uint64_t						MiniMapMaxFirstVisibleLine( uint64_t _ui64TotalBytes, uint32_t _ui32MainBpr, int32_t _i32PageLines ) {
+			const uint64_t ui64PageBytesMain = static_cast<uint64_t>((_i32PageLines > 0) ? _i32PageLines : 1) * static_cast<uint64_t>(_ui32MainBpr ? _ui32MainBpr : 1U);
+			if ( _ui64TotalBytes <= ui64PageBytesMain ) { return 0ULL; }
+			return (_ui64TotalBytes - ui64PageBytesMain) / static_cast<uint64_t>(_ui32MainBpr ? _ui32MainBpr : 1U);
+		}
+
+		/**
+		 * Gets the number of sub-carets in a cell given its format.
+		 * 
+		 * \param _dfFmt The format whose sub-caret count is to be returned.
+		 * \return Returns the sub-caret count.
+		 **/
+		static inline uint32_t						SubCaretCountForFormat( MX_DATA_FMT _dfFmt ) {
+			switch ( _dfFmt ) {
+				case MX_DF_HEX : { return 2; }
+				case MX_DF_DEC : { return 3; }
+				case MX_DF_OCT : { return 3; }
+				case MX_DF_BIN : { return 8; }
+				case MX_DF_CHAR : { return 1; }
+				case MX_DF_UINT8 : {}				MX_FALLTHROUGH							/**< "  0 255  42" */
+				case MX_DF_INT8 : {}				MX_FALLTHROUGH							/**< "  0  -1  42" */
+				case MX_DF_UINT16 : {}				MX_FALLTHROUGH							/**< "    0 65535    42" */
+				case MX_DF_INT16 : {}				MX_FALLTHROUGH							/**< "    0    -1    42" */
+				case MX_DF_UINT32 : {}				MX_FALLTHROUGH							/**< "         0 4294967295         42" */
+				case MX_DF_INT32 : {}				MX_FALLTHROUGH							/**< "         0         -1         42" */
+				case MX_DF_UINT64 : {}				MX_FALLTHROUGH							/**< "                   0 18446744073709551615                   42" */
+				case MX_DF_INT64 : {}				MX_FALLTHROUGH							/**< "                   0                   -1                   42" */
+				case MX_DF_POINTER16 : {}			MX_FALLTHROUGH							/**< "FFFF" */
+				case MX_DF_POINTER32 : {}			MX_FALLTHROUGH							/**< "FFFFFFFF" */
+				case MX_DF_POINTER64 : {}			MX_FALLTHROUGH							/**< "FFFFFFFFFFFFFFFF" */
+				case MX_DF_FLOAT10 : {}				MX_FALLTHROUGH							/**< "0 3.125 -42" */
+				case MX_DF_FLOAT11 : {}				MX_FALLTHROUGH							/**< "0 3.125 -42" */
+				case MX_DF_BFLOAT16 : {}			MX_FALLTHROUGH							/**< "0 3.141 -42" */
+				case MX_DF_FLOAT16 : {}				MX_FALLTHROUGH							/**< "0 3.1406 -42" */
+				case MX_DF_FLOAT32 : {}				MX_FALLTHROUGH							/**< "0 3.1415925 -42" */
+				case MX_DF_FLOAT64 : {}				MX_FALLTHROUGH							/**< "0 3.1415926535897931 -42" */
+				case MX_DF_PCM8 : {}				MX_FALLTHROUGH							/**< "0 -1 0.1647" */
+				case MX_DF_PCM16 : {}				MX_FALLTHROUGH							/**< "0 -1 0.1647" */
+				case MX_DF_PCM24 : {}				MX_FALLTHROUGH							/**< "0 -1 0.1647" */
+				case MX_DF_PCM32 : {}				MX_FALLTHROUGH							/**< "0 -1 0.1647" */
+				default : { return 1; }
+			}
+		}
+
+		/**
 		 * Counts the number of digits needed to represent _ui64N in base _ui32Base.
 		 *
 		 * \param _ui64N The value whose digit count is requested.
@@ -1591,7 +1991,7 @@ namespace mx {
 			return ui32Val;
 		}
 
-
+		
 	private :
 		typedef lsw::CWidget						CParent;
 	};

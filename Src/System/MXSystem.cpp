@@ -938,15 +938,17 @@ namespace mx {
 #ifdef _DEBUG
 	LPVOID pfTemp;
 	HMODULE hDll = ::GetModuleHandleA( szKernel32 );
-#define MX_CHECK( NAME )																						\
-	pfTemp = ::GetProcAddress( hDll, #NAME );																	\
-	assert( pfTemp == m_pf ## NAME )
+#define MX_CHECK( NAME )																																																	\
+	pfTemp = ::GetProcAddress( hDll, #NAME );																																												\
+	if ( pfTemp != m_pf ## NAME ) {																																															\
+		::OutputDebugStringA( std::format( "kernel32.dll::" #NAME ": {:08X} != {:08X}.\r\n", reinterpret_cast<uintptr_t>(pfTemp), reinterpret_cast<uintptr_t>(m_pf ## NAME) ).c_str() ); assert( pfTemp == m_pf ## NAME );	\
+	}
 #else
 #define MX_CHECK( NAME )
 #endif // #ifdef _DEBUG
 
-#define MX_PROCADDR( NAME, ENCNAME, ENCLEN )			{ LPVOID & pvRef = reinterpret_cast<LPVOID &>(m_pf ## NAME);														\
-														pvRef = const_cast<LPVOID>(mx::CSystem::GetProcAddress( _T_LEN_6AE69F02_kernel32_dll, ENCNAME, ENCLEN, poObj ));	\
+#define MX_PROCADDR( NAME, ENCNAME, ENCLEN )			{ LPVOID & pvRef = reinterpret_cast<LPVOID &>(m_pf ## NAME);																										\
+														pvRef = const_cast<LPVOID>(mx::CSystem::GetProcAddress( _T_LEN_6AE69F02_kernel32_dll, ENCNAME, ENCLEN, poObj ));													\
 														MX_CHECK( NAME ); }
 
 		MX_PROCADDR( ReadProcessMemory, _T_F7C7AE42_ReadProcessMemory, _LEN_F7C7AE42 );
@@ -1024,16 +1026,18 @@ namespace mx {
 #ifdef _DEBUG
 	LPVOID pfTemp;
 	HMODULE hDll = ::GetModuleHandleA( szUser32 );
-#define MX_CHECK( NAME )																						\
-	pfTemp = ::GetProcAddress( hDll, #NAME );																	\
-	assert( pfTemp == m_pf ## NAME )
+#define MX_CHECK( NAME )																																																	\
+	pfTemp = ::GetProcAddress( hDll, #NAME );																																												\
+	if ( pfTemp != m_pf ## NAME ) {																																															\
+		::OutputDebugStringA( std::format( "User32.dll::" #NAME ": {:08X} != {:08X}.\r\n", reinterpret_cast<uintptr_t>(pfTemp), reinterpret_cast<uintptr_t>(m_pf ## NAME) ).c_str() ); assert( pfTemp == m_pf ## NAME );	\
+	}
 #else
 #define MX_CHECK( NAME )
 #endif // #ifdef _DEBUG
 
 
-#define MX_PROCADDR( NAME, ENCNAME, ENCLEN )			{ LPVOID & pvRef = reinterpret_cast<LPVOID &>(m_pf ## NAME);													\
-														pvRef = const_cast<LPVOID>(mx::CSystem::GetProcAddress( _T_LEN_02489AAB_user32_dll, ENCNAME, ENCLEN, poObj ));	\
+#define MX_PROCADDR( NAME, ENCNAME, ENCLEN )			{ LPVOID & pvRef = reinterpret_cast<LPVOID &>(m_pf ## NAME);																										\
+														pvRef = const_cast<LPVOID>(mx::CSystem::GetProcAddress( _T_LEN_02489AAB_user32_dll, ENCNAME, ENCLEN, poObj ));														\
 														MX_CHECK( NAME ); }
 
 		MX_PROCADDR( EnumThreadWindows, _T_AF5AA374_EnumThreadWindows, _LEN_AF5AA374 );
@@ -1070,16 +1074,18 @@ namespace mx {
 #ifdef _DEBUG
 	LPVOID pfTemp;
 	HMODULE hDll = ::GetModuleHandleA( szAdvapi32 );
-#define MX_CHECK( NAME )																						\
-	pfTemp = ::GetProcAddress( hDll, #NAME );																	\
-	assert( pfTemp == m_pf ## NAME )
+#define MX_CHECK( NAME )																																																	\
+	pfTemp = ::GetProcAddress( hDll, #NAME );																																												\
+	if ( pfTemp != m_pf ## NAME ) {																																															\
+		::OutputDebugStringA( std::format( "Advapi32.dll::" #NAME ": {:08X} != {:08X}.\r\n", reinterpret_cast<uintptr_t>(pfTemp), reinterpret_cast<uintptr_t>(m_pf ## NAME) ).c_str() ); assert( pfTemp == m_pf ## NAME );	\
+	}
 #else
 #define MX_CHECK( NAME )
 #endif // #ifdef _DEBUG
 
 
-#define MX_PROCADDR( NAME, ENCNAME, ENCLEN )			{ LPVOID & pvRef = reinterpret_cast<LPVOID &>(m_pf ## NAME);														\
-														pvRef = const_cast<LPVOID>(mx::CSystem::GetProcAddress( _T_LEN_F16ED7E0_advapi32_dll, ENCNAME, ENCLEN, poObj ));	\
+#define MX_PROCADDR( NAME, ENCNAME, ENCLEN )			{ LPVOID & pvRef = reinterpret_cast<LPVOID &>(m_pf ## NAME);																										\
+														pvRef = const_cast<LPVOID>(mx::CSystem::GetProcAddress( _T_LEN_F16ED7E0_advapi32_dll, ENCNAME, ENCLEN, poObj ));													\
 														MX_CHECK( NAME ); }
 
 		MX_PROCADDR( OpenProcessToken, _T_F9C60615_OpenProcessToken, _LEN_F9C60615 );
@@ -1109,16 +1115,18 @@ namespace mx {
 #ifdef _DEBUG
 	LPVOID pfTemp;
 	HMODULE hDll = ::GetModuleHandleA( szAtDll );
-#define MX_CHECK( NAME )																						\
-	pfTemp = ::GetProcAddress( hDll, #NAME );																	\
-	assert( pfTemp == m_pf ## NAME )
+#define MX_CHECK( NAME )																																																	\
+	pfTemp = ::GetProcAddress( hDll, #NAME );																																												\
+	if ( pfTemp != m_pf ## NAME ) {																																															\
+		::OutputDebugStringA( std::format( "ntdll.dll::" #NAME ": {:08X} != {:08X}.\r\n", reinterpret_cast<uintptr_t>(pfTemp), reinterpret_cast<uintptr_t>(m_pf ## NAME) ).c_str() ); assert( pfTemp == m_pf ## NAME );		\
+	}
 #else
 #define MX_CHECK( NAME )
 #endif // #ifdef _DEBUG
 
 
-#define MX_PROCADDR( NAME, ENCNAME, ENCLEN )			{ LPVOID & pvRef = reinterpret_cast<LPVOID &>(m_pf ## NAME);													\
-														pvRef = const_cast<LPVOID>(mx::CSystem::GetProcAddress( _T_LEN_84C05E40_ntdll_dll, ENCNAME, ENCLEN, poObj ));	\
+#define MX_PROCADDR( NAME, ENCNAME, ENCLEN )			{ LPVOID & pvRef = reinterpret_cast<LPVOID &>(m_pf ## NAME);																										\
+														pvRef = const_cast<LPVOID>(mx::CSystem::GetProcAddress( _T_LEN_84C05E40_ntdll_dll, ENCNAME, ENCLEN, poObj ));														\
 														MX_CHECK( NAME ); }
 
 		MX_PROCADDR( NtSuspendProcess, _T_1C2211DA_NtSuspendProcess, _LEN_1C2211DA );

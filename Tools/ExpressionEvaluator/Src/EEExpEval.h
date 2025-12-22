@@ -10,6 +10,8 @@
 #include <fenv.h>
 #include <iomanip>
 #include <numbers>
+#include <numeric>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -1884,6 +1886,72 @@ namespace ee {
 
 		// Pulls any preprocessing directives out of a single line.
 		static bool						PreprocessingDirectives( const std::string &_sInput, std::string &_sDirective, std::string &_sParms );
+
+		/**
+		 * Computes the least common multiple (LCM) of two integers.
+		 *
+		 * \param _tA First integer value.
+		 * \param _tB Second integer value.
+		 * \return Returns the LCM (always non-negative). If either input is 0, returns 0.
+		 */
+		template <typename _tInt>
+		static inline _tInt				Lcm( _tInt _tA, _tInt _tB ) {
+			static_assert( std::is_integral_v<_tInt>, "" );
+
+			if ( _tA == 0 || _tB == 0 ) { return 0; }
+
+			_tInt tGcd = std::gcd( _tA, _tB );
+
+			// Divide before multiply to reduce overflow risk.
+			// Note: This can still overflow for large values; see LcmChecked() below if you need detection.
+			_tInt tDiv = _tA / tGcd;
+			_tInt tLcm = tDiv * _tB;
+
+			// LCM is defined as non-negative.
+			if ( tLcm < 0 ) { tLcm = -tLcm; }
+
+			return tLcm;
+		}
+
+		/**
+		 * Computes the LCM of two integers, returning std::nullopt on overflow.
+		 *
+		 * \param _tA First integer value.
+		 * \param _tB Second integer value.
+		 * \return Returns the LCM if it fits in the type; otherwise std::nullopt. If either input is 0, returns 0.
+		 */
+		template <typename _tInt>
+		static inline std::optional<_tInt>
+										LcmChecked( _tInt _tA, _tInt _tB ) {
+			static_assert( std::is_integral_v<_tInt>, "" );
+
+			if ( _tA == 0 || _tB == 0 ) { return _tInt( 0 ); }
+
+			_tInt tGcd = std::gcd( _tA, _tB );
+			_tInt tDiv = _tA / tGcd;
+
+			// Overflow check for: tDiv * _tB
+			// Use unsigned magnitude checks to handle negatives safely.
+			using _tUnsigned = std::make_unsigned_t<_tInt>;
+			auto AbsU = []( _tInt _tX ) -> _tUnsigned {
+				// Convert to unsigned magnitude without UB on INT_MIN.
+				_tUnsigned u = static_cast<_tUnsigned>( _tX );
+				if ( _tX < 0 ) { u = _tUnsigned( 0 ) - u; }
+				return u;
+			};
+
+			_tUnsigned uA = AbsU( tDiv );
+			_tUnsigned uB = AbsU( _tB );
+
+			if ( uA != 0 && uB > _tUnsigned( std::numeric_limits<_tInt>::max() ) / uA ) {
+				return std::nullopt;
+			}
+
+			_tInt tLcm = tDiv * _tB;
+			if ( tLcm < 0 ) { tLcm = -tLcm; }
+
+			return tLcm;
+		}
 
 		/**
 		 * Internal helper to guard trivial window sizes.
@@ -5174,16 +5242,232 @@ inline unsigned int						CountLeadingZeros( uint64_t _ui64X ) {
 // 128-Bit Div/Mul
 // ===============================
 #if defined( _MSC_VER )
-    #ifdef _WIN64
+	#ifdef _WIN64
 		#include <immintrin.h>
 		#pragma intrinsic( _udiv128 )
 		#pragma intrinsic( _div128 )
 		#pragma intrinsic( _umul128 )
 		#pragma intrinsic( _mul128 )
-    #else
+
+		#pragma intrinsic( _addcarry_u64 )
+		#pragma intrinsic( _subborrow_u64 )
+
+		/**
+		 * \brief Adds two unsigned 128-bit values (hi:lo + hi:lo) and returns the low 64 bits.
+		 *
+		 * \param _ui64AHigh High 64 bits of the first addend.
+		 * \param _ui64ALow Low 64 bits of the first addend.
+		 * \param _ui64BHigh High 64 bits of the second addend.
+		 * \param _ui64BLow Low 64 bits of the second addend.
+		 * \param _pui64HighSum Receives the high 64 bits of the sum.
+		 * \return Returns the low 64 bits of the sum.
+		 **/
+		inline uint64_t												_uadd128( uint64_t _ui64AHigh, uint64_t _ui64ALow, uint64_t _ui64BHigh, uint64_t _ui64BLow, uint64_t * _pui64HighSum ) {
+			uint64_t ui64Lo = 0;
+			uint64_t ui64Hi = 0;
+
+			const unsigned char ucCarry = _addcarry_u64( 0, _ui64ALow, _ui64BLow, &ui64Lo );
+			_addcarry_u64( ucCarry, _ui64AHigh, _ui64BHigh, &ui64Hi );
+
+			if ( _pui64HighSum ) { (*_pui64HighSum) = ui64Hi; }
+			return ui64Lo;
+		}
+
+		/**
+		 * \brief Adds two signed 128-bit values (hi:lo + hi:lo) and returns the low 64 bits.
+		 *
+		 * \param _i64AHigh High 64 bits of the first addend.
+		 * \param _i64ALow Low 64 bits of the first addend.
+		 * \param _i64BHigh High 64 bits of the second addend.
+		 * \param _i64BLow Low 64 bits of the second addend.
+		 * \param _pi64HighSum Receives the high 64 bits of the sum.
+		 * \return Returns the low 64 bits of the sum.
+		 **/
+		inline int64_t												_add128( int64_t _i64AHigh, int64_t _i64ALow, int64_t _i64BHigh, int64_t _i64BLow, int64_t * _pi64HighSum ) {
+			uint64_t ui64Hi = 0;
+			const uint64_t ui64Lo = _uadd128(
+				static_cast<uint64_t>(_i64AHigh),
+				static_cast<uint64_t>(_i64ALow),
+				static_cast<uint64_t>(_i64BHigh),
+				static_cast<uint64_t>(_i64BLow),
+				&ui64Hi
+			);
+
+			if ( _pi64HighSum ) { (*_pi64HighSum) = static_cast<int64_t>(ui64Hi); }
+			return static_cast<int64_t>(ui64Lo);
+		}
+
+		/**
+		 * \brief Subtracts two unsigned 128-bit values (hi:lo - hi:lo) and returns the low 64 bits.
+		 *
+		 * \param _ui64AHigh High 64 bits of the minuend.
+		 * \param _ui64ALow Low 64 bits of the minuend.
+		 * \param _ui64BHigh High 64 bits of the subtrahend.
+		 * \param _ui64BLow Low 64 bits of the subtrahend.
+		 * \param _pui64HighDiff Receives the high 64 bits of the difference.
+		 * \return Returns the low 64 bits of the difference.
+		 **/
+		inline uint64_t												_usub128( uint64_t _ui64AHigh, uint64_t _ui64ALow, uint64_t _ui64BHigh, uint64_t _ui64BLow, uint64_t * _pui64HighDiff ) {
+			uint64_t ui64Lo = 0;
+			uint64_t ui64Hi = 0;
+
+			const unsigned char ucBorrow = _subborrow_u64( 0, _ui64ALow, _ui64BLow, &ui64Lo );
+			_subborrow_u64( ucBorrow, _ui64AHigh, _ui64BHigh, &ui64Hi );
+
+			if ( _pui64HighDiff ) { (*_pui64HighDiff) = ui64Hi; }
+			return ui64Lo;
+		}
+
+		/**
+		 * \brief Subtracts two signed 128-bit values (hi:lo - hi:lo) and returns the low 64 bits.
+		 *
+		 * \param _i64AHigh High 64 bits of the minuend.
+		 * \param _i64ALow Low 64 bits of the minuend.
+		 * \param _i64BHigh High 64 bits of the subtrahend.
+		 * \param _i64BLow Low 64 bits of the subtrahend.
+		 * \param _pi64HighDiff Receives the high 64 bits of the difference.
+		 * \return Returns the low 64 bits of the difference.
+		 **/
+		inline int64_t												_sub128( int64_t _i64AHigh, int64_t _i64ALow, int64_t _i64BHigh, int64_t _i64BLow, int64_t * _pi64HighDiff ) {
+			uint64_t ui64Hi = 0;
+			const uint64_t ui64Lo = _usub128(
+				static_cast<uint64_t>(_i64AHigh),
+				static_cast<uint64_t>(_i64ALow),
+				static_cast<uint64_t>(_i64BHigh),
+				static_cast<uint64_t>(_i64BLow),
+				&ui64Hi
+			);
+
+			if ( _pi64HighDiff ) { (*_pi64HighDiff) = static_cast<int64_t>(ui64Hi); }
+			return static_cast<int64_t>(ui64Lo);
+		}
+	#else
 		#include <bit>
 		#include <cassert>
 		#include <intrin.h>
+
+		#pragma intrinsic( _addcarry_u32 )
+		#pragma intrinsic( _subborrow_u32 )
+
+		/**
+		 * \brief Adds two unsigned 128-bit values (hi:lo + hi:lo) and returns the low 64 bits.
+		 *
+		 * \param _ui64AHigh High 64 bits of the first addend.
+		 * \param _ui64ALow Low 64 bits of the first addend.
+		 * \param _ui64BHigh High 64 bits of the second addend.
+		 * \param _ui64BLow Low 64 bits of the second addend.
+		 * \param _pui64HighSum Receives the high 64 bits of the sum.
+		 * \return Returns the low 64 bits of the sum.
+		 **/
+		inline uint64_t					_uadd128( uint64_t _ui64AHigh, uint64_t _ui64ALow, uint64_t _ui64BHigh, uint64_t _ui64BLow, uint64_t * _pui64HighSum ) {
+			uint32_t ui32ALo0 = static_cast<uint32_t>(_ui64ALow);
+			uint32_t ui32ALo1 = static_cast<uint32_t>(_ui64ALow >> 32);
+			uint32_t ui32AHi0 = static_cast<uint32_t>(_ui64AHigh);
+			uint32_t ui32AHi1 = static_cast<uint32_t>(_ui64AHigh >> 32);
+
+			uint32_t ui32BLo0 = static_cast<uint32_t>(_ui64BLow);
+			uint32_t ui32BLo1 = static_cast<uint32_t>(_ui64BLow >> 32);
+			uint32_t ui32BHi0 = static_cast<uint32_t>(_ui64BHigh);
+			uint32_t ui32BHi1 = static_cast<uint32_t>(_ui64BHigh >> 32);
+
+			uint32_t ui32Lo0 = 0, ui32Lo1 = 0, ui32Hi0 = 0, ui32Hi1 = 0;
+
+			unsigned char ucC = 0;
+			ucC = _addcarry_u32( ucC, ui32ALo0, ui32BLo0, &ui32Lo0 );
+			ucC = _addcarry_u32( ucC, ui32ALo1, ui32BLo1, &ui32Lo1 );
+			ucC = _addcarry_u32( ucC, ui32AHi0, ui32BHi0, &ui32Hi0 );
+			_addcarry_u32( ucC, ui32AHi1, ui32BHi1, &ui32Hi1 );
+
+			const uint64_t ui64Lo = (static_cast<uint64_t>(ui32Lo1) << 32) | ui32Lo0;
+			const uint64_t ui64Hi = (static_cast<uint64_t>(ui32Hi1) << 32) | ui32Hi0;
+
+			if ( _pui64HighSum ) { (*_pui64HighSum) = ui64Hi; }
+			return ui64Lo;
+		}
+
+		/**
+		 * \brief Adds two signed 128-bit values (hi:lo + hi:lo) and returns the low 64 bits.
+		 *
+		 * \param _i64AHigh High 64 bits of the first addend.
+		 * \param _i64ALow Low 64 bits of the first addend.
+		 * \param _i64BHigh High 64 bits of the second addend.
+		 * \param _i64BLow Low 64 bits of the second addend.
+		 * \param _pi64HighSum Receives the high 64 bits of the sum.
+		 * \return Returns the low 64 bits of the sum.
+		 **/
+		inline int64_t					_add128( int64_t _i64AHigh, int64_t _i64ALow, int64_t _i64BHigh, int64_t _i64BLow, int64_t * _pi64HighSum ) {
+			uint64_t ui64Hi = 0;
+			const uint64_t ui64Lo = _uadd128(
+				static_cast<uint64_t>(_i64AHigh),
+				static_cast<uint64_t>(_i64ALow),
+				static_cast<uint64_t>(_i64BHigh),
+				static_cast<uint64_t>(_i64BLow),
+				&ui64Hi
+			);
+
+			if ( _pi64HighSum ) { (*_pi64HighSum) = static_cast<int64_t>(ui64Hi); }
+			return static_cast<int64_t>(ui64Lo);
+		}
+
+		/**
+		 * \brief Subtracts two unsigned 128-bit values (hi:lo - hi:lo) and returns the low 64 bits.
+		 *
+		 * \param _ui64AHigh High 64 bits of the minuend.
+		 * \param _ui64ALow Low 64 bits of the minuend.
+		 * \param _ui64BHigh High 64 bits of the subtrahend.
+		 * \param _ui64BLow Low 64 bits of the subtrahend.
+		 * \param _pui64HighDiff Receives the high 64 bits of the difference.
+		 * \return Returns the low 64 bits of the difference.
+		 **/
+		inline uint64_t					_usub128( uint64_t _ui64AHigh, uint64_t _ui64ALow, uint64_t _ui64BHigh, uint64_t _ui64BLow, uint64_t * _pui64HighDiff ) {
+			uint32_t ui32ALo0 = static_cast<uint32_t>(_ui64ALow);
+			uint32_t ui32ALo1 = static_cast<uint32_t>(_ui64ALow >> 32);
+			uint32_t ui32AHi0 = static_cast<uint32_t>(_ui64AHigh);
+			uint32_t ui32AHi1 = static_cast<uint32_t>(_ui64AHigh >> 32);
+
+			uint32_t ui32BLo0 = static_cast<uint32_t>(_ui64BLow);
+			uint32_t ui32BLo1 = static_cast<uint32_t>(_ui64BLow >> 32);
+			uint32_t ui32BHi0 = static_cast<uint32_t>(_ui64BHigh);
+			uint32_t ui32BHi1 = static_cast<uint32_t>(_ui64BHigh >> 32);
+
+			uint32_t ui32Lo0 = 0, ui32Lo1 = 0, ui32Hi0 = 0, ui32Hi1 = 0;
+
+			unsigned char ucB = 0;
+			ucB = _subborrow_u32( ucB, ui32ALo0, ui32BLo0, &ui32Lo0 );
+			ucB = _subborrow_u32( ucB, ui32ALo1, ui32BLo1, &ui32Lo1 );
+			ucB = _subborrow_u32( ucB, ui32AHi0, ui32BHi0, &ui32Hi0 );
+			_subborrow_u32( ucB, ui32AHi1, ui32BHi1, &ui32Hi1 );
+
+			const uint64_t ui64Lo = (static_cast<uint64_t>(ui32Lo1) << 32) | ui32Lo0;
+			const uint64_t ui64Hi = (static_cast<uint64_t>(ui32Hi1) << 32) | ui32Hi0;
+
+			if ( _pui64HighDiff ) { (*_pui64HighDiff) = ui64Hi; }
+			return ui64Lo;
+		}
+
+		/**
+		 * \brief Subtracts two signed 128-bit values (hi:lo - hi:lo) and returns the low 64 bits.
+		 *
+		 * \param _i64AHigh High 64 bits of the minuend.
+		 * \param _i64ALow Low 64 bits of the minuend.
+		 * \param _i64BHigh High 64 bits of the subtrahend.
+		 * \param _i64BLow Low 64 bits of the subtrahend.
+		 * \param _pi64HighDiff Receives the high 64 bits of the difference.
+		 * \return Returns the low 64 bits of the difference.
+		 **/
+		inline int64_t					_sub128( int64_t _i64AHigh, int64_t _i64ALow, int64_t _i64BHigh, int64_t _i64BLow, int64_t * _pi64HighDiff ) {
+			uint64_t ui64Hi = 0;
+			const uint64_t ui64Lo = _usub128(
+				static_cast<uint64_t>(_i64AHigh),
+				static_cast<uint64_t>(_i64ALow),
+				static_cast<uint64_t>(_i64BHigh),
+				static_cast<uint64_t>(_i64BLow),
+				&ui64Hi
+			);
+
+			if ( _pi64HighDiff ) { (*_pi64HighDiff) = static_cast<int64_t>(ui64Hi); }
+			return static_cast<int64_t>(ui64Lo);
+		}
 
 		/**
 		 * \brief Performs unsigned 128-bit-by-64-bit division returning a 64-bit unsigned quotient and (optionally) a 64-bit unsigned remainder.
@@ -5201,7 +5485,7 @@ inline unsigned int						CountLeadingZeros( uint64_t _ui64X ) {
 		 * \return Returns the unsigned 64-bit quotient.
 		 * \throws std::overflow_error On division by zero or when the true quotient does not fit in a unsigned 64-bit integer.
 		 */
-		inline uint64_t                _udiv128( uint64_t _ui64High, uint64_t _ui64Low, uint64_t _ui64Divisor, uint64_t * _pui64Remainder ) {
+		inline uint64_t					_udiv128( uint64_t _ui64High, uint64_t _ui64Low, uint64_t _ui64Divisor, uint64_t * _pui64Remainder ) {
 			if ( _ui64Divisor == 0 ) [[unlikely]] { throw std::overflow_error( "Division by zero is not allowed." ); }
 			if ( _ui64High >= _ui64Divisor ) [[unlikely]] { throw std::overflow_error( "The division would overflow the 64-bit quotient." ); }
 			if ( _ui64High == 0 ) {
@@ -5371,7 +5655,7 @@ inline unsigned int						CountLeadingZeros( uint64_t _ui64X ) {
 		 * \param _pui64ProductHi Receives the high 64 bits of the product.
 		 * \return Returns the low 64 bits of the product.
 		 **/
-		inline uint64_t NN9_FASTCALL	_umul128( uint64_t _ui64Multiplier, uint64_t _ui64Multiplicand, uint64_t * _pui64ProductHi ) {
+		inline uint64_t					_umul128( uint64_t _ui64Multiplier, uint64_t _ui64Multiplicand, uint64_t * _pui64ProductHi ) {
 			assert( _pui64ProductHi );
 
 			// _ui64Multiplier   = ab = a * 2^32 + b
@@ -5404,7 +5688,7 @@ inline unsigned int						CountLeadingZeros( uint64_t _ui64X ) {
 		 * \param _pi64HighProduct Receives the high 64 bits of the product.
 		 * \return Returns the low 64 bits of the product.
 		 **/
-		inline int64_t NN9_FASTCALL		_mul128( int64_t _i64Multiplier, int64_t _i64Multiplicand, int64_t * _pi64HighProduct ) {
+		inline int64_t					_mul128( int64_t _i64Multiplier, int64_t _i64Multiplicand, int64_t * _pi64HighProduct ) {
 			assert( _pi64HighProduct );
 
 			// Do unsigned multiply on magnitudes, then apply sign to the 128-bit result.
@@ -5430,9 +5714,109 @@ inline unsigned int						CountLeadingZeros( uint64_t _ui64X ) {
 			(*_pi64HighProduct) = static_cast<int64_t>(ui64Hi);
 			return static_cast<int64_t>(ui64Lo);
 		}
-    #endif  // #ifdef _WIN64
+	#endif  // #ifdef _WIN64
 #elif defined( __x86_64__ ) || defined( _M_X64 )
 	#include <immintrin.h>
+
+	/**
+	 * \brief Adds two unsigned 128-bit values (hi:lo + hi:lo) and returns the low 64 bits.
+	 *
+	 * \param _ui64AHigh High 64 bits of the first addend.
+	 * \param _ui64ALow Low 64 bits of the first addend.
+	 * \param _ui64BHigh High 64 bits of the second addend.
+	 * \param _ui64BLow Low 64 bits of the second addend.
+	 * \param _pui64HighSum Receives the high 64 bits of the sum.
+	 * \return Returns the low 64 bits of the sum.
+	 **/
+	inline uint64_t						_uadd128( uint64_t _ui64AHigh, uint64_t _ui64ALow, uint64_t _ui64BHigh, uint64_t _ui64BLow, uint64_t * _pui64HighSum ) {
+		uint64_t ui64Lo = _ui64ALow;
+		uint64_t ui64Hi = _ui64AHigh;
+
+		asm volatile(
+			"addq %2, %0\n\t"
+			"adcq %3, %1"
+			: "+r"(ui64Lo), "+r"(ui64Hi)
+			: "r"(_ui64BLow), "r"(_ui64BHigh)
+			: "cc"
+		);
+
+		if ( _pui64HighSum ) { (*_pui64HighSum) = ui64Hi; }
+		return ui64Lo;
+	}
+
+	/**
+	 * \brief Adds two signed 128-bit values (hi:lo + hi:lo) and returns the low 64 bits.
+	 *
+	 * \param _i64AHigh High 64 bits of the first addend.
+	 * \param _i64ALow Low 64 bits of the first addend.
+	 * \param _i64BHigh High 64 bits of the second addend.
+	 * \param _i64BLow Low 64 bits of the second addend.
+	 * \param _pi64HighSum Receives the high 64 bits of the sum.
+	 * \return Returns the low 64 bits of the sum.
+	 **/
+	inline int64_t						_add128( int64_t _i64AHigh, int64_t _i64ALow, int64_t _i64BHigh, int64_t _i64BLow, int64_t * _pi64HighSum ) {
+		uint64_t ui64Hi = 0;
+		const uint64_t ui64Lo = _uadd128(
+			static_cast<uint64_t>(_i64AHigh),
+			static_cast<uint64_t>(_i64ALow),
+			static_cast<uint64_t>(_i64BHigh),
+			static_cast<uint64_t>(_i64BLow),
+			&ui64Hi
+		);
+
+		if ( _pi64HighSum ) { (*_pi64HighSum) = static_cast<int64_t>(ui64Hi); }
+		return static_cast<int64_t>(ui64Lo);
+	}
+
+	/**
+	 * \brief Subtracts two unsigned 128-bit values (hi:lo - hi:lo) and returns the low 64 bits.
+	 *
+	 * \param _ui64AHigh High 64 bits of the minuend.
+	 * \param _ui64ALow Low 64 bits of the minuend.
+	 * \param _ui64BHigh High 64 bits of the subtrahend.
+	 * \param _ui64BLow Low 64 bits of the subtrahend.
+	 * \param _pui64HighDiff Receives the high 64 bits of the difference.
+	 * \return Returns the low 64 bits of the difference.
+	 **/
+	inline uint64_t						_usub128( uint64_t _ui64AHigh, uint64_t _ui64ALow, uint64_t _ui64BHigh, uint64_t _ui64BLow, uint64_t * _pui64HighDiff ) {
+		uint64_t ui64Lo = _ui64ALow;
+		uint64_t ui64Hi = _ui64AHigh;
+
+		asm volatile(
+			"subq %2, %0\n\t"
+			"sbbq %3, %1"
+			: "+r"(ui64Lo), "+r"(ui64Hi)
+			: "r"(_ui64BLow), "r"(_ui64BHigh)
+			: "cc"
+		);
+
+		if ( _pui64HighDiff ) { (*_pui64HighDiff) = ui64Hi; }
+		return ui64Lo;
+	}
+
+	/**
+	 * \brief Subtracts two signed 128-bit values (hi:lo - hi:lo) and returns the low 64 bits.
+	 *
+	 * \param _i64AHigh High 64 bits of the minuend.
+	 * \param _i64ALow Low 64 bits of the minuend.
+	 * \param _i64BHigh High 64 bits of the subtrahend.
+	 * \param _i64BLow Low 64 bits of the subtrahend.
+	 * \param _pi64HighDiff Receives the high 64 bits of the difference.
+	 * \return Returns the low 64 bits of the difference.
+	 **/
+	inline int64_t						_sub128( int64_t _i64AHigh, int64_t _i64ALow, int64_t _i64BHigh, int64_t _i64BLow, int64_t * _pi64HighDiff ) {
+		uint64_t ui64Hi = 0;
+		const uint64_t ui64Lo = _usub128(
+			static_cast<uint64_t>(_i64AHigh),
+			static_cast<uint64_t>(_i64ALow),
+			static_cast<uint64_t>(_i64BHigh),
+			static_cast<uint64_t>(_i64BLow),
+			&ui64Hi
+		);
+
+		if ( _pi64HighDiff ) { (*_pi64HighDiff) = static_cast<int64_t>(ui64Hi); }
+		return static_cast<int64_t>(ui64Lo);
+	}
 
 	/**
 	 * \brief Performs unsigned 128-bit-by-64-bit division returning a 64-bit unsigned quotient and (optionally) a 64-bit unsigned remainder.
@@ -5550,7 +5934,108 @@ inline unsigned int						CountLeadingZeros( uint64_t _ui64X ) {
 	}
 
 #elif defined( __SIZEOF_INT128__ )
-	// Implementation for compilers that support __uint128_t (e.g., GCC, Clang)
+	/**
+	 * \brief Adds two unsigned 128-bit values (hi:lo + hi:lo) and returns the low 64 bits.
+	 *
+	 * \param _ui64AHigh High 64 bits of the first addend.
+	 * \param _ui64ALow Low 64 bits of the first addend.
+	 * \param _ui64BHigh High 64 bits of the second addend.
+	 * \param _ui64BLow Low 64 bits of the second addend.
+	 * \param _pui64HighSum Receives the high 64 bits of the sum.
+	 * \return Returns the low 64 bits of the sum.
+	 **/
+	inline uint64_t						_uadd128( uint64_t _ui64AHigh, uint64_t _ui64ALow, uint64_t _ui64BHigh, uint64_t _ui64BLow, uint64_t * _pui64HighSum ) {
+		const __uint128_t ui128A = (static_cast<__uint128_t>(_ui64AHigh) << 64) | static_cast<__uint128_t>(_ui64ALow);
+		const __uint128_t ui128B = (static_cast<__uint128_t>(_ui64BHigh) << 64) | static_cast<__uint128_t>(_ui64BLow);
+		const __uint128_t ui128S = ui128A + ui128B;
+
+		if ( _pui64HighSum ) { (*_pui64HighSum) = static_cast<uint64_t>(ui128S >> 64); }
+		return static_cast<uint64_t>(ui128S);
+	}
+
+	/**
+	 * \brief Adds two signed 128-bit values (hi:lo + hi:lo) and returns the low 64 bits.
+	 *
+	 * \param _i64AHigh High 64 bits of the first addend.
+	 * \param _i64ALow Low 64 bits of the first addend.
+	 * \param _i64BHigh High 64 bits of the second addend.
+	 * \param _i64BLow Low 64 bits of the second addend.
+	 * \param _pi64HighSum Receives the high 64 bits of the sum.
+	 * \return Returns the low 64 bits of the sum.
+	 **/
+	inline int64_t						_add128( int64_t _i64AHigh, int64_t _i64ALow, int64_t _i64BHigh, int64_t _i64BLow, int64_t * _pi64HighSum ) {
+		const __int128 i128A =
+			(static_cast<__int128>(_i64AHigh) << 64) |
+			static_cast<__int128>(static_cast<unsigned __int128>(static_cast<uint64_t>(_i64ALow)));
+		const __int128 i128B =
+			(static_cast<__int128>(_i64BHigh) << 64) |
+			static_cast<__int128>(static_cast<unsigned __int128>(static_cast<uint64_t>(_i64BLow)));
+		const __int128 i128S = i128A + i128B;
+
+		if ( _pi64HighSum ) { (*_pi64HighSum) = static_cast<int64_t>(i128S >> 64); }
+		return static_cast<int64_t>(i128S);
+	}
+
+	/**
+	 * \brief Subtracts two unsigned 128-bit values (hi:lo - hi:lo) and returns the low 64 bits.
+	 *
+	 * \param _ui64AHigh High 64 bits of the minuend.
+	 * \param _ui64ALow Low 64 bits of the minuend.
+	 * \param _ui64BHigh High 64 bits of the subtrahend.
+	 * \param _ui64BLow Low 64 bits of the subtrahend.
+	 * \param _pui64HighDiff Receives the high 64 bits of the difference.
+	 * \return Returns the low 64 bits of the difference.
+	 **/
+	inline uint64_t						_usub128( uint64_t _ui64AHigh, uint64_t _ui64ALow, uint64_t _ui64BHigh, uint64_t _ui64BLow, uint64_t * _pui64HighDiff ) {
+		const __uint128_t ui128A = (static_cast<__uint128_t>(_ui64AHigh) << 64) | static_cast<__uint128_t>(_ui64ALow);
+		const __uint128_t ui128B = (static_cast<__uint128_t>(_ui64BHigh) << 64) | static_cast<__uint128_t>(_ui64BLow);
+		const __uint128_t ui128D = ui128A - ui128B;
+
+		if ( _pui64HighDiff ) { (*_pui64HighDiff) = static_cast<uint64_t>(ui128D >> 64); }
+		return static_cast<uint64_t>(ui128D);
+	}
+
+	/**
+	 * \brief Subtracts two signed 128-bit values (hi:lo - hi:lo) and returns the low 64 bits.
+	 *
+	 * \param _i64AHigh High 64 bits of the minuend.
+	 * \param _i64ALow Low 64 bits of the minuend.
+	 * \param _i64BHigh High 64 bits of the subtrahend.
+	 * \param _i64BLow Low 64 bits of the subtrahend.
+	 * \param _pi64HighDiff Receives the high 64 bits of the difference.
+	 * \return Returns the low 64 bits of the difference.
+	 **/
+	inline int64_t						_sub128( int64_t _i64AHigh, int64_t _i64ALow, int64_t _i64BHigh, int64_t _i64BLow, int64_t * _pi64HighDiff ) {
+		const __int128 i128A =
+			(static_cast<__int128>(_i64AHigh) << 64) |
+			static_cast<__int128>(static_cast<unsigned __int128>(static_cast<uint64_t>(_i64ALow)));
+		const __int128 i128B =
+			(static_cast<__int128>(_i64BHigh) << 64) |
+			static_cast<__int128>(static_cast<unsigned __int128>(static_cast<uint64_t>(_i64BLow)));
+		const __int128 i128D = i128A - i128B;
+
+		if ( _pi64HighDiff ) { (*_pi64HighDiff) = static_cast<int64_t>(i128D >> 64); }
+		return static_cast<int64_t>(i128D);
+	}
+
+	/**
+	 * \brief Divides an unsigned 128-bit dividend by a 64-bit unsigned divisor.
+	 *
+	 * The dividend is provided as a high/low pair (high:low). The quotient is returned as a 64-bit value,
+	 * and the remainder is optionally written to *_pui64Remainder.
+	 *
+	 * This matches the typical _udiv128 contract: the quotient must fit in 64 bits, which requires
+	 * _ui64High < _ui64Divisor.
+	 *
+	 * \param _ui64High High 64 bits of the unsigned 128-bit dividend.
+	 * \param _ui64Low Low 64 bits of the unsigned 128-bit dividend.
+	 * \param _ui64Divisor The 64-bit unsigned divisor.
+	 * \param _pui64Remainder Optional pointer that receives the 64-bit unsigned remainder.
+	 * \return Returns the 64-bit unsigned quotient.
+	 *
+	 * \throws std::overflow_error Thrown if _ui64Divisor is 0.
+	 * \throws std::overflow_error Thrown if the quotient would overflow 64 bits (i.e. _ui64High >= _ui64Divisor).
+	 **/
 	inline uint64_t                     _udiv128( uint64_t _ui64High, uint64_t _ui64Low, uint64_t _ui64Divisor, uint64_t * _pui64Remainder ) {
 		if ( _ui64Divisor == 0 ) {
 			throw std::overflow_error( "_udiv128: Division by zero is not allowed." );
@@ -5574,7 +6059,24 @@ inline unsigned int						CountLeadingZeros( uint64_t _ui64X ) {
 		return static_cast<uint64_t>(ui128Dividend / _ui64Divisor);
 	}
 
-	// Implementation for compilers that support __int128 (e.g., GCC, Clang).
+	/**
+	 * \brief Divides a signed 128-bit dividend by a 64-bit signed divisor.
+	 *
+	 * The dividend is provided as a high/low pair (high:low), where _i64High is the sign-extended high 64 bits.
+	 * The quotient is returned as a 64-bit signed value, and the remainder is optionally written to *_pi64Remainder.
+	 *
+	 * Division follows C/C++ semantics: truncation toward zero, and the remainder has the same sign as the dividend.
+	 * This matches the typical _div128 contract: the quotient must fit in int64_t, otherwise overflow is reported.
+	 *
+	 * \param _i64High High 64 bits of the signed 128-bit dividend (sign-extended).
+	 * \param _i64Low Low 64 bits of the signed 128-bit dividend.
+	 * \param _i64Divisor The 64-bit signed divisor.
+	 * \param _pi64Remainder Optional pointer that receives the 64-bit signed remainder.
+	 * \return Returns the 64-bit signed quotient.
+	 *
+	 * \throws std::overflow_error Thrown if _i64Divisor is 0.
+	 * \throws std::overflow_error Thrown if the quotient would overflow int64_t.
+	 **/
 	inline int64_t						_div128( int64_t _i64High, int64_t _i64Low, int64_t _i64Divisor, int64_t * _pi64Remainder ) {
 		if ( _i64Divisor == 0 ) {
 			throw std::overflow_error( "_div128: Division by zero is not allowed." );
@@ -5627,7 +6129,7 @@ inline unsigned int						CountLeadingZeros( uint64_t _ui64X ) {
 	 * \param _pi64HighProduct Receives the high 64 bits of the product.
 	 * \return Returns the low 64 bits of the product.
 	 **/
-	inline int64_t NN9_FASTCALL			_mul128( int64_t _i64Multiplier, int64_t _i64Multiplicand, int64_t * _pi64HighProduct ) {
+	inline int64_t						_mul128( int64_t _i64Multiplier, int64_t _i64Multiplicand, int64_t * _pi64HighProduct ) {
 		assert( _pi64HighProduct );
 
 		const __int128 i128Prod = static_cast<__int128>(_i64Multiplier) * static_cast<__int128>(_i64Multiplicand);
@@ -5708,4 +6210,37 @@ static inline int64_t					_muldiv128( int64_t _i64A, int64_t _i64B, int64_t _i64
 	const int64_t i64Lo = _mul128( _i64A, _i64B, &i64Hi );
 
 	return _div128( i64Hi, i64Lo, _i64Divisor, _pi64Remainder );
+}
+
+/**
+ * \brief Computes round((A * B) / Div) using a 128-bit intermediate.
+ *
+ * This is (A * B + Div/2) / Div, using full 128-bit precision for the product.
+ * Throws on division by zero or if the quotient would overflow 64 bits (same policy as EE_muldiv128()).
+ *
+ * \param _ui64A The first value.
+ * \param _ui64B The second value.
+ * \param _ui64Divisor The divisor.
+ * \param _pui64Remainder Receives the remainder after rounding.
+ * \return Returns round((A * B) / Divisor).
+ **/
+static inline uint64_t					_umuldiv128_rounded( uint64_t _ui64A, uint64_t _ui64B, uint64_t _ui64Divisor, uint64_t * _pui64Remainder ) {
+	assert( _pui64Remainder );
+	assert( _ui64Divisor != 0 );
+
+	uint64_t ui64Hi = 0;
+	uint64_t ui64Lo = _umul128( _ui64A, _ui64B, &ui64Hi );
+
+	// Add Div/2 for rounding, propagating carry into the high word.
+	{
+		const uint64_t ui64Add = _ui64Divisor >> 1;
+		const uint64_t ui64Old = ui64Lo;
+		ui64Lo += ui64Add;
+		if ( ui64Lo < ui64Old ) { ++ui64Hi; }	// Lower-half overflow.
+	}
+
+	// Same contract as _udiv128(): quotient must fit in 64 bits.
+	assert( ui64Hi < _ui64Divisor );
+
+	return _udiv128( ui64Hi, ui64Lo, _ui64Divisor, _pui64Remainder );
 }
