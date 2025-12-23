@@ -452,6 +452,140 @@ namespace mx {
 	}
 
 	/**
+	 * Performs an Undo operation.
+	 * 
+	 * \param _wsStatus The string to print in the status bar.
+	 **/
+	bool CHexEditorControl::Undo( CSecureWString &_swsStatus ) {
+		if ( !m_pheiTarget ) {
+			_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+			return false;
+		}
+
+		if ( m_pheiTarget->Undo( _swsStatus ) ) {
+			if ( m_sSelStackIdx != size_t( -1 ) && m_sSelStackIdx < m_vSelectionStack.size() ) {
+				
+				m_sSel = m_vSelectionStack[m_sSelStackIdx].sUndoSelection;
+				m_sgSelGesture.i32CaretIdx = m_vSelectionStack[m_sSelStackIdx].i32UndoCaretIdx;
+				m_sgSelGesture.ui64AnchorAddr = m_vSelectionStack[m_sSelStackIdx].ui64UndoAnchorAddr;
+				m_sgSelGesture.ui64MouseAnchorAddr = m_vSelectionStack[m_sSelStackIdx].ui64UndoMouseAnchorAddr;
+				m_sgSelGesture.ui64CaretAddr = m_vSelectionStack[m_sSelStackIdx].ui64UndoCaretAddr;
+				
+				--m_sSelStackIdx;
+			}
+			::InvalidateRect( Wnd(), nullptr, FALSE );
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Performs an Redo operation.
+	 * 
+	 * \param _wsStatus The string to print in the status bar.
+	 **/
+	bool CHexEditorControl::Redo( CSecureWString &_swsStatus ) {
+		if ( !m_pheiTarget ) {
+			_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+			return false;
+		}
+
+		if ( m_pheiTarget->Redo( _swsStatus ) ) {
+			size_t sTmp = m_sSelStackIdx + 1;
+			if ( sTmp < m_vSelectionStack.size() ) {
+				m_sSel = m_vSelectionStack[sTmp].sRedoSelection;
+				m_sgSelGesture.i32CaretIdx = m_vSelectionStack[sTmp].i32RedoCaretIdx;
+				m_sgSelGesture.ui64AnchorAddr = m_vSelectionStack[sTmp].ui64RedoAnchorAddr;
+				m_sgSelGesture.ui64MouseAnchorAddr = m_vSelectionStack[sTmp].ui64RedoMouseAnchorAddr;
+				m_sgSelGesture.ui64CaretAddr = m_vSelectionStack[sTmp].ui64RedoCaretAddr;
+
+				m_sSelStackIdx = sTmp;
+			}
+
+			::InvalidateRect( Wnd(), nullptr, FALSE );
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Deletes the selected bytes.
+	 * 
+	 * \param _wsStatus The string to print in the status bar.
+	 **/
+	bool CHexEditorControl::DeleteSelectedOrCaret( CSecureWString &_swsStatus ) {
+		try {
+			if ( !m_pheiTarget ) {
+				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+				return false;
+			}
+			if ( m_pheiTarget->ReadOnly() ) {
+				_swsStatus = _DEC_WS_D4FFE2E0_File_is_Read_Only;
+				return false;
+			}
+
+			uint64_t ui64Total = 0, ui64TotaltDeleted = 0, ui64Deleted;
+			if ( !m_sSel.HasSelection() ) {
+				// Delete a single byte at the caret.
+				if ( m_sgSelGesture.ui64CaretAddr < Size() ) {
+					if ( m_pheiTarget->Delete( m_sgSelGesture.ui64CaretAddr, 1, ui64Deleted ) && AddSelectionUndo( m_sSel, m_sgSelGesture ) ) {
+						CSecureWString swsTmp;
+						_swsStatus = _DEC_WS_B8E08C71_Deleted__ + CUtilities::SizeString<CSecureWString>( ui64Deleted, swsTmp );
+						::InvalidateRect( Wnd(), nullptr, FALSE );
+						return true;
+					}
+					else {
+						_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+						return false;
+					}
+				}
+				return true;
+			}
+			
+		
+			uint64_t ui64Caret = m_sgSelGesture.ui64CaretAddr;
+			std::vector<MX_SEL_RANGE> vSelections;
+			
+			if ( m_sSel.GatherSelected_HighToLow( CurStyle()->uiBytesPerRow, vSelections ) ) {
+				CHexEditorInterface::MX_UNDO uUndo( m_pheiTarget );
+				if ( uUndo.Ready() ) {
+					for ( const auto & srThis : vSelections ) {
+						if ( m_pheiTarget->Delete( srThis.ui64Start, srThis.ui64Size, ui64Deleted ) ) {
+							if ( ui64Caret > srThis.ui64Start ) {
+								// If caret is above the start then it needs to be updated.
+								if ( ui64Caret >= srThis.ui64Start + srThis.ui64Size ) {
+									// Caret is beyond the end of the selection range.
+									ui64Caret -= srThis.ui64Size;
+								}
+								else {
+									// Caret is inside the selection range.
+									ui64Caret = srThis.ui64Start;
+								}
+							}
+							ui64TotaltDeleted += srThis.ui64Size;
+						}
+						ui64Total += ui64Deleted;
+					}
+				}
+				else {
+					_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+					return false;
+				}
+			}
+			
+
+			auto sOldSel = m_sSel;
+			auto sgOldGesture = m_sgSelGesture;
+			SetCaretAddr( ui64Caret );
+			AddSelectionUndo( sOldSel, sgOldGesture );
+			CSecureWString swsTmp;
+			_swsStatus = _DEC_WS_B8E08C71_Deleted__ + CUtilities::SizeString<CSecureWString>( ui64TotaltDeleted, swsTmp );
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
 	 * Goes to a given address.
 	 * 
 	 * \param _ui64Addr The address to which to go.
@@ -928,18 +1062,38 @@ namespace mx {
 				if ( MiniMapThumbMetrics( rClient, i32MiniLeft, i32MiniRight, i32MiniTop, i32MiniBottom,
 					i32ThumbTop, i32ThumbHeight, i32Track, ui64MaxFirstLine ) ) {
 
-					int32_t i32DesiredThumbTop = _pCursorPos.y - m_mmsMiniMap.i32ScrollGrabY;
+					// Thumb-top bounds.
+					const int32_t i32MinThumbTop = i32MiniTop;
+					const int32_t i32MaxThumbTop = i32MiniBottom - i32ThumbHeight;
 
-					if ( i32DesiredThumbTop < i32MiniTop ) { i32DesiredThumbTop = i32MiniTop; }
-					if ( i32DesiredThumbTop > (i32MiniTop + i32Track) ) { i32DesiredThumbTop = i32MiniTop + i32Track; }
+					int32_t i32GrabY = m_mmsMiniMap.i32ScrollGrabY;
+					if ( i32GrabY < 0 ) { i32GrabY = 0; }
+					if ( i32GrabY >= i32ThumbHeight ) { i32GrabY = i32ThumbHeight - 1; }
 
-					// Always update the dragged thumb position so it stays under the mouse,
-					// even when the scroll line does not change due to rounding/quantization.
-					const int32_t i32OldDragTop = m_mmsMiniMap.i32DragThumbTop;
-					m_mmsMiniMap.i32DragThumbTop = i32DesiredThumbTop;
+					const int32_t i32MouseY = _pCursorPos.y;
+
+					// Pass 1: clamp thumb top using the current grab.
+					int32_t i32NewThumbTop = i32MouseY - i32GrabY;
+					if ( i32NewThumbTop < i32MinThumbTop ) { i32NewThumbTop = i32MinThumbTop; }
+					if ( i32NewThumbTop > i32MaxThumbTop ) { i32NewThumbTop = i32MaxThumbTop; }
+
+					// Update grab so the mouse stays on the thumb after clamping.
+					int32_t i32NewGrabY = i32MouseY - i32NewThumbTop;
+					if ( i32NewGrabY < 0 ) { i32NewGrabY = 0; }
+					if ( i32NewGrabY >= i32ThumbHeight ) { i32NewGrabY = i32ThumbHeight - 1; }
+
+					// Pass 2: recompute thumb top with the adjusted grab (prevents thumb-height drift).
+					i32NewThumbTop = i32MouseY - i32NewGrabY;
+					if ( i32NewThumbTop < i32MinThumbTop ) { i32NewThumbTop = i32MinThumbTop; }
+					if ( i32NewThumbTop > i32MaxThumbTop ) { i32NewThumbTop = i32MaxThumbTop; }
+
+					m_mmsMiniMap.i32ScrollGrabY = i32NewGrabY;
+
+					// Authoritative thumb position while dragging (draw should use these).
+					m_mmsMiniMap.i32DragThumbTop = i32NewThumbTop;
 					m_mmsMiniMap.i32DragThumbHeight = i32ThumbHeight;
 
-					const uint64_t ui64ThumbTopPx = static_cast<uint64_t>( i32DesiredThumbTop - i32MiniTop );
+					const uint64_t ui64ThumbTopPx = static_cast<uint64_t>( i32NewThumbTop - i32MiniTop );
 
 					uint64_t ui64NewFirst = 0ULL;
 					if ( ui64MaxFirstLine != 0ULL && i32Track != 0 ) {
@@ -947,24 +1101,17 @@ namespace mx {
 						if ( ui64NewFirst > ui64MaxFirstLine ) { ui64NewFirst = ui64MaxFirstLine; }
 					}
 
-					bool bInvalidate = (i32OldDragTop != m_mmsMiniMap.i32DragThumbTop);
-
 					if ( ui64NewFirst != m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine ) {
 						m_sdScrollView[m_eaEditAs].ui64VPos = ui64NewFirst;
 						m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine = ui64NewFirst;
 
-						// Keep OS scrollbar behavior unchanged (last line can still be at top via scrollbar).
+						// Keep OS scrollbar max unchanged (your scrollbar still allows last line at top).
 						const uint64_t ui64Lines = TotalLines_FixedWidth();
-						const uint64_t ui64MaxV  = ui64Lines ? (ui64Lines - 1ULL) : 0ULL;
+						const uint64_t ui64MaxV = ui64Lines ? (ui64Lines - 1ULL) : 0ULL;
 						lsw::CBase::SetScrollInfo64( Wnd(), SB_VERT, SIF_POS, ui64MaxV, m_sdScrollView[m_eaEditAs].ui64VPos, 1, TRUE );
-
-						bInvalidate = true;
 					}
 
-					if ( bInvalidate ) {
-						::InvalidateRect( Wnd(), NULL, FALSE );
-					}
-
+					::InvalidateRect( Wnd(), NULL, FALSE );
 					return lsw::CWidget::LSW_H_HANDLED;
 				}
 
@@ -1100,6 +1247,14 @@ namespace mx {
 				}
 				else {
 					IncSubCaret();
+				}
+				break;
+			}
+
+
+			case VK_DELETE : {
+				if ( CanDelete() ) {
+					reinterpret_cast<CDeusHexMachinaWindow *>(m_pwHexParent)->DeleteSelectedOrCaret();
 				}
 				break;
 			}
@@ -3158,7 +3313,7 @@ namespace mx {
 		if ( ui64Lines == 0 ) { return false; }
 
 		const uint64_t ui64PageLines = (m_sdScrollView[m_eaEditAs].i32PageLines > 0) ?
-			static_cast<uint64_t>( m_sdScrollView[m_eaEditAs].i32PageLines ) : 1ULL;
+			static_cast<uint64_t>(m_sdScrollView[m_eaEditAs].i32PageLines) : 1ULL;
 
 		// Mini-map drag/overlay range: last line reaches the BOTTOM of the viewport.
 		_ui64MaxFirstLine = 0;
@@ -3167,10 +3322,10 @@ namespace mx {
 		}
 
 		// Thumb height proportional to visible lines. Clamp to [1..miniHeight].
-		uint64_t ui64ThumbH = MiniMapMulDivU64Round( ui64PageLines, static_cast<uint64_t>( i32MiniHeight ), ui64Lines );
+		uint64_t ui64ThumbH = MiniMapMulDivU64Round( ui64PageLines, static_cast<uint64_t>(i32MiniHeight), ui64Lines );
 		if ( ui64ThumbH < 1ULL ) { ui64ThumbH = 1ULL; }
-		if ( ui64ThumbH > static_cast<uint64_t>( i32MiniHeight ) ) { ui64ThumbH = static_cast<uint64_t>( i32MiniHeight ); }
-		_i32ThumbHeight = static_cast<int32_t>( ui64ThumbH );
+		if ( ui64ThumbH > static_cast<uint64_t>(i32MiniHeight) ) { ui64ThumbH = static_cast<uint64_t>(i32MiniHeight); }
+		_i32ThumbHeight = static_cast<int32_t>(ui64ThumbH);
 
 		_i32Track = i32MiniHeight - _i32ThumbHeight;
 		if ( _i32Track < 0 ) { _i32Track = 0; }
@@ -3181,9 +3336,9 @@ namespace mx {
 			_i32ThumbTop = _i32MiniTop;
 		}
 		else {
-			uint64_t ui64TopPx = MiniMapMulDivU64Round( ui64First, static_cast<uint64_t>( _i32Track ), _ui64MaxFirstLine );
-			if ( ui64TopPx > static_cast<uint64_t>( _i32Track ) ) { ui64TopPx = static_cast<uint64_t>( _i32Track ); }
-			_i32ThumbTop = _i32MiniTop + static_cast<int32_t>( ui64TopPx );
+			uint64_t ui64TopPx = MiniMapMulDivU64Round( ui64First, static_cast<uint64_t>(_i32Track), _ui64MaxFirstLine );
+			if ( ui64TopPx > static_cast<uint64_t>(_i32Track) ) { ui64TopPx = static_cast<uint64_t>(_i32Track); }
+			_i32ThumbTop = _i32MiniTop + static_cast<int32_t>(ui64TopPx);
 		}
 
 		return true;
@@ -3588,6 +3743,36 @@ namespace mx {
 	 * End a selection gesture (mouse up). Collapses zero-length selections created by clicks without drag.
 	 */
 	void CHexEditorControl::SelectionEndGesture() {
+	}
+
+	/**
+	 * Adds the current selection to the Undo/Redo stack.
+	 * 
+	 * \param _sOldSelection The old selection being set.  Automatically saves the current selection.
+	 * \param _sgOldGesture The previous caret and anchors.
+	 * \return Returns true if the current selection was added to the selection Undo/Redo stack.
+	 **/
+	bool CHexEditorControl::AddSelectionUndo( const MX_SELECTION &_sOldSelection, const MX_SELECT_GESTURE &_sgOldGesture ) {
+		try {
+			MX_SELECT_UNDO_REDO_ITEM suriItem;
+			suriItem.sRedoSelection = m_sSel;
+			suriItem.i32RedoCaretIdx = m_sgSelGesture.i32CaretIdx;
+			suriItem.ui64RedoAnchorAddr = m_sgSelGesture.ui64AnchorAddr;
+			suriItem.ui64RedoCaretAddr = m_sgSelGesture.ui64CaretAddr;
+			suriItem.ui64RedoMouseAnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr;
+
+			suriItem.sUndoSelection = _sOldSelection;
+			suriItem.i32UndoCaretIdx = _sgOldGesture.i32CaretIdx;
+			suriItem.ui64UndoAnchorAddr = _sgOldGesture.ui64AnchorAddr;
+			suriItem.ui64UndoCaretAddr = _sgOldGesture.ui64CaretAddr;
+			suriItem.ui64UndoMouseAnchorAddr = _sgOldGesture.ui64MouseAnchorAddr;
+			m_vSelectionStack.resize( m_sSelStackIdx + 2 );
+
+			m_vSelectionStack[m_sSelStackIdx+1] = suriItem;
+			++m_sSelStackIdx;
+			return true;
+		}
+		catch ( ... ) { return false; }
 	}
 
 	/**

@@ -38,13 +38,31 @@ namespace mx {
 		virtual bool						Overwrite( uint64_t _ui64Addr, const void * _pvSrc, size_t _sSize );
 
 		// Delets bytes at a given address.
-		virtual bool						Delete( uint64_t _ui64Addr, uint64_t _ui64Size );
+		virtual bool						Delete( uint64_t _ui64Addr, uint64_t _ui64Size, uint64_t &_ui64Deleted );
 
 		// Gets the size of the data source.
 		virtual uint64_t					Size() const;
 
 		// Gets the interface type.
 		virtual MX_HEX_EDITOR_TYPES			Type() const { return MX_HET_FILE; }
+
+		// Begins an Undo sequence.  Call before making multiple delete operations in a row.
+		virtual bool						BeginUndo();
+
+		// Ends an Undo sequence.  Call when done making modifications.
+		virtual bool						EndUndo();
+
+		// Determines if there are items to undo.
+		virtual bool						HasUndo() const;
+
+		// Determines if there are items to redo.
+		virtual bool						HasRedo() const;
+
+		// Performs an Undo operation.
+		virtual bool						Undo( CSecureWString &_swsStatus );
+
+		// Performs an Redo operation.
+		virtual bool						Redo( CSecureWString &_swsStatus );
 
 
 	protected :

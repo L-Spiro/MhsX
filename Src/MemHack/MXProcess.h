@@ -83,6 +83,15 @@ namespace mx {
 		};
 
 		/**
+		 * A saved protection range for restoration.
+		 */
+		struct MX_PROT_RANGE {
+			uint64_t					ui64Base;
+			SIZE_T						stSize;
+			DWORD						dwOldProtect;
+		};
+
+		/**
 		 * \brief Wrapper around MODULEENTRY32W with UTF-8 name/path and set-friendly operators.
 		 *
 		 * Blank line after the \brief.
@@ -120,6 +129,30 @@ namespace mx {
 			inline MX_ADDRESS_RANGE		Range() const {
 				return MX_ADDRESS_RANGE { Start(), Size() };
 			}
+		};
+
+		/**
+		 * RAII implementation for pausing and resuming the target process.
+		 */
+		struct MX_PAUSE_RESUME {
+			MX_PAUSE_RESUME( CProcess &_pProc ) :
+				lResult( _pProc.SuspendProcess() ),
+				pProc( _pProc ) {
+			}
+			~MX_PAUSE_RESUME() {
+				if ( STATUS_SUCCESS == lResult ) {
+					pProc.ResumeProcess();
+				}
+			}
+
+
+			// == Functions.
+			// Did we successfully pause the target process?
+			inline bool					Paused() const { return STATUS_SUCCESS == lResult; }
+
+			// == Members.
+			LONG						lResult = STATUS_ABANDONED;
+			CProcess &					pProc;
 		};
 
 
@@ -260,6 +293,18 @@ namespace mx {
 
 		// Changes the protection on a region of committed pages in the virtual address space of a specified process.
 		virtual bool					VirtualProtectEx( uint64_t _ui64Address, SIZE_T _dwSize, DWORD _flNewProtect, PDWORD _lpflOldProtect );
+
+		// Sets a given range in the target process to readable.
+		virtual bool					SetReadable( uint64_t _ui64Address, SIZE_T _dwSize, PDWORD _lpflOldProtect );
+
+		// Sets a given range in the target process to writeable.
+		bool							SetWriteable( uint64_t _ui64Address, SIZE_T _stSize, PDWORD _lpflOldProtect );
+
+		// Sets the given address range to writeable, returning the previous protections to restore them back to their old states afterward.
+		virtual bool					SetWriteableRanges( uint64_t _ui64Address, SIZE_T _stSize, std::vector<MX_PROT_RANGE> &_vOldProtects );
+
+		// Restores protections on multiple pages.
+		bool							RestoreProtectRanges( const std::vector<MX_PROT_RANGE> & _vOldProtects );
 
 		// Retrieves information about a range of pages within the virtual address space of a specified process.
 		virtual bool					VirtualQueryEx( uint64_t _ui64Address, PMEMORY_BASIC_INFORMATION64 _lpBuffer ) const;
@@ -584,7 +629,7 @@ namespace mx {
 		 * \param _dwProt The MEMORY_BASIC_INFORMATION::Protect value.
 		 * \return Returns true if the protection allows writing; false otherwise.
 		 */
-		static bool						ProtIsWritable( DWORD _dwProt ) {
+		static inline bool				ProtIsWritable( DWORD _dwProt ) {
 			// Mask out modifiers that don't affect write permission.
 			const DWORD dwCore = (_dwProt & ~(PAGE_GUARD | PAGE_NOCACHE | PAGE_WRITECOMBINE | PAGE_TARGETS_INVALID | PAGE_TARGETS_NO_UPDATE));
 
@@ -594,6 +639,28 @@ namespace mx {
 				case PAGE_EXECUTE_READWRITE : {}	MX_FALLTHROUGH
 				case PAGE_EXECUTE_WRITECOPY : { return true; }
 				default : { return false; }
+			}
+		}
+
+		/**
+		 * \brief Converts a page protection to a writable equivalent while preserving execute and cache modifiers.
+		 *
+		 * \param _dwProt The original protection.
+		 * \return Returns the writable protection, or 0 on failure/unsupported protections.
+		 */
+		static inline DWORD				ProtToWriteable( DWORD _dwProt ) {
+			const DWORD dwMods = (_dwProt & (PAGE_NOCACHE | PAGE_WRITECOMBINE));
+			const DWORD dwAccess = (_dwProt & 0xFF);
+
+			switch ( dwAccess ) {
+				case PAGE_READONLY :			{ return (PAGE_READWRITE | dwMods); }
+				case PAGE_READWRITE :			{ return (PAGE_READWRITE | dwMods); }
+				case PAGE_WRITECOPY :			{ return (PAGE_READWRITE | dwMods); }
+				case PAGE_EXECUTE :				{ return (PAGE_EXECUTE_READWRITE | dwMods); }
+				case PAGE_EXECUTE_READ :		{ return (PAGE_EXECUTE_READWRITE | dwMods); }
+				case PAGE_EXECUTE_READWRITE :	{ return (PAGE_EXECUTE_READWRITE | dwMods); }
+				case PAGE_EXECUTE_WRITECOPY :	{ return (PAGE_EXECUTE_READWRITE | dwMods); }
+				default :						{ return 0; }
 			}
 		}
 

@@ -286,6 +286,183 @@ namespace mx {
 		return true;
 	}
 
+	// Sets a given range in the target process to readable.
+	bool CProcess::SetReadable( uint64_t _ui64Address, SIZE_T _dwSize, PDWORD _lpflOldProtect ) {
+		LSW_ENT_CRIT( m_csCrit );
+		if MX_UNLIKELY( !ProcIsOpened() || !_ui64Address || !_dwSize ) { return false; }
+
+		const DWORD dwPageSize = CSystem::GetSystemInfo().dwPageSize;
+
+		// Align the request to page boundaries.
+		const uint64_t ui64Base = (_ui64Address / dwPageSize) * dwPageSize;
+
+		const uint64_t ui64EndUnaligned = _ui64Address + static_cast<uint64_t>(_dwSize);
+		if ( ui64EndUnaligned < _ui64Address ) { return false; }	// Overflow.
+
+		uint64_t ui64End = ui64EndUnaligned;
+		const uint64_t ui64Rem = (ui64End % dwPageSize);
+		if ( ui64Rem ) {
+			const uint64_t ui64Add = dwPageSize - ui64Rem;
+			if ( ui64End > (UINT64_MAX - ui64Add) ) { return false; }
+			ui64End += ui64Add;
+		}
+
+		// Query the first region and ensure the entire range stays within it (single old-protect value).
+		MEMORY_BASIC_INFORMATION64 mbiInfo{};
+		if ( !VirtualQueryEx( _ui64Address, &mbiInfo ) ) { return false; }
+		if ( mbiInfo.State != MEM_COMMIT ) { return false; }
+
+		const uint64_t ui64RegionBase = static_cast<uint64_t>(mbiInfo.BaseAddress);
+		const uint64_t ui64RegionEnd = ui64RegionBase + static_cast<uint64_t>(mbiInfo.RegionSize);
+		if ( ui64RegionEnd < ui64RegionBase ) { return false; }	// Overflow.
+		if ( ui64Base < ui64RegionBase || ui64End > ui64RegionEnd ) { return false; }
+
+		DWORD dwProt = mbiInfo.Protect;
+		if ( (dwProt & (PAGE_GUARD | PAGE_NOACCESS)) ) { return false; }
+
+		// Keep cache-related modifiers, but drop GUARD if present (it will break reads/writes).
+		const DWORD dwMods = (dwProt & (PAGE_NOCACHE | PAGE_WRITECOMBINE));
+		const DWORD dwAccess = (dwProt & 0xFF);
+
+		// If already writable, nothing to do (but still report old protect for symmetry if asked).
+		if ( (dwAccess == PAGE_READWRITE) || (dwAccess == PAGE_EXECUTE_READWRITE) ||
+			(dwAccess == PAGE_WRITECOPY) || (dwAccess == PAGE_EXECUTE_WRITECOPY) ) {
+			if ( _lpflOldProtect ) { (*_lpflOldProtect) = dwProt; }
+			return true;
+		}
+
+		// Choose a writable equivalent while preserving whether the page is executable.
+		DWORD dwNewAccess = 0;
+		switch ( dwAccess ) {
+			case PAGE_READONLY :			{ dwNewAccess = PAGE_READWRITE; break; }
+			case PAGE_EXECUTE :				{}				MX_FALLTHROUGH
+			case PAGE_EXECUTE_READ :		{ dwNewAccess = PAGE_EXECUTE_READWRITE; break; }
+			case PAGE_WRITECOPY :			{ dwNewAccess = PAGE_READWRITE; break; }
+			case PAGE_EXECUTE_WRITECOPY :	{ dwNewAccess = PAGE_EXECUTE_READWRITE; break; }
+			default :						{ return false; }
+		}
+
+		const DWORD dwNewProt = (dwNewAccess | dwMods);
+
+		return VirtualProtectEx(
+			ui64Base,
+			static_cast<SIZE_T>( ui64End - ui64Base ),
+			dwNewProt,
+			_lpflOldProtect
+		) != FALSE;
+	}
+
+	// Sets a given range in the target process to writeable.
+	bool CProcess::SetWriteable( uint64_t _ui64Address, SIZE_T _stSize, PDWORD _lpflOldProtect ) {
+		std::vector<MX_PROT_RANGE> vRanges;
+		if ( !SetWriteableRanges( _ui64Address, _stSize, vRanges ) ) { return false; }
+		if ( _lpflOldProtect ) {
+			(*_lpflOldProtect) = vRanges.size() ? vRanges[0].dwOldProtect : 0;
+		}
+		return true;
+	}
+
+	// Sets the given address range to writeable, returning the previous protections to restore them back to their old states afterward.
+	bool CProcess::SetWriteableRanges( uint64_t _ui64Address, SIZE_T _stSize, std::vector<MX_PROT_RANGE> &_vOldProtects ) {
+		LSW_ENT_CRIT( m_csCrit );
+
+		try {
+			_vOldProtects.clear();
+
+			if MX_UNLIKELY( !ProcIsOpened() || !_ui64Address || !_stSize ) { return false; }
+
+			const uint64_t ui64EndUnaligned = _ui64Address + static_cast<uint64_t>(_stSize);
+			if ( ui64EndUnaligned < _ui64Address ) { return false; }	// Overflow.
+
+			const DWORD dwPageSize = CSystem::GetSystemInfo().dwPageSize;
+			uint64_t ui64Cur = (_ui64Address / dwPageSize) * dwPageSize;
+			const uint64_t ui64End = ((ui64EndUnaligned + (dwPageSize - 1)) / dwPageSize) * dwPageSize;
+
+			// Preflight: walk regions and collect what we'd change.
+			while ( ui64Cur < ui64End ) {
+				MEMORY_BASIC_INFORMATION64 mbiInfo{};
+				if ( !VirtualQueryEx( ui64Cur, &mbiInfo ) ) { return false; }
+
+				const uint64_t ui64RegionBase = static_cast<uint64_t>(mbiInfo.BaseAddress);
+				const uint64_t ui64RegionEnd = ui64RegionBase + static_cast<uint64_t>(mbiInfo.RegionSize);
+				if ( ui64RegionEnd < ui64RegionBase ) { return false; }	// Overflow.
+
+				if ( mbiInfo.State != MEM_COMMIT ) { return false; }
+
+				const DWORD dwProt = mbiInfo.Protect;
+				if ( (dwProt & (PAGE_GUARD | PAGE_NOACCESS)) ) { return false; }
+
+				DWORD dwNewProt = ProtToWriteable( dwProt );
+				if ( !dwNewProt ) { return false; }
+
+				const uint64_t ui64ChunkBase = (ui64Cur > ui64RegionBase) ? ui64Cur : ui64RegionBase;
+				const uint64_t ui64ChunkEnd = (ui64End < ui64RegionEnd) ? ui64End : ui64RegionEnd;
+				if ( ui64ChunkEnd <= ui64ChunkBase ) { return false; }
+
+				// Only record chunks that actually need changing.
+				const DWORD dwAccess = (dwProt & 0xFF);
+				const bool bAlreadyWriteable =
+					(dwAccess == PAGE_READWRITE) || (dwAccess == PAGE_EXECUTE_READWRITE) ||
+					(dwAccess == PAGE_WRITECOPY) || (dwAccess == PAGE_EXECUTE_WRITECOPY);
+
+				if ( !bAlreadyWriteable ) {
+					MX_PROT_RANGE prThis{};
+					prThis.ui64Base = ui64ChunkBase;
+					prThis.stSize = static_cast<SIZE_T>(ui64ChunkEnd - ui64ChunkBase);
+					prThis.dwOldProtect = dwProt;	// Best-effort; Windows can return different old-protect per call.
+					_vOldProtects.push_back( prThis );
+				}
+
+				ui64Cur = ui64RegionEnd;
+			}
+
+			// Apply changes.
+			for ( size_t I = 0; I < _vOldProtects.size(); ++I ) {
+				const MX_PROT_RANGE & prThis = _vOldProtects[I];
+
+				MEMORY_BASIC_INFORMATION64 mbiInfo{};
+				if ( !VirtualQueryEx( prThis.ui64Base, &mbiInfo ) ) { return false; }
+
+				DWORD dwNewProt = ProtToWriteable( mbiInfo.Protect );
+				if ( !dwNewProt ) { return false; }
+
+				DWORD dwOldProt = 0;
+				if ( VirtualProtectEx( prThis.ui64Base, prThis.stSize, dwNewProt, &dwOldProt ) == FALSE ) {
+					// Roll back anything we already changed.
+					for ( size_t J = 0; J < I; ++J ) {
+						DWORD dwTmp = 0;
+						VirtualProtectEx( _vOldProtects[J].ui64Base, _vOldProtects[J].stSize, _vOldProtects[J].dwOldProtect, &dwTmp );
+					}
+					return false;
+				}
+
+				// Store the exact old protection returned by VirtualProtectEx for accurate restoration.
+				_vOldProtects[I].dwOldProtect = dwOldProt;
+			}
+
+			return true;
+		}
+		catch ( ... ) {
+			// No page attributes will have been changed at the point where excpetions can be generated.  No need to roll back.
+			return false;
+		}
+	}
+
+	// Restores protections on multiple pages.
+	bool CProcess::RestoreProtectRanges( const std::vector<MX_PROT_RANGE> & _vOldProtects ) {
+		LSW_ENT_CRIT( m_csCrit );
+		if MX_UNLIKELY( !ProcIsOpened() ) { return false; }
+
+		bool bOk = true;
+		for ( size_t I = 0; I < _vOldProtects.size(); ++I ) {
+			DWORD dwTmp = 0;
+			if ( VirtualProtectEx( _vOldProtects[I].ui64Base, _vOldProtects[I].stSize, _vOldProtects[I].dwOldProtect, &dwTmp ) == FALSE ) {
+				bOk = false;
+			}
+		}
+		return bOk;
+	}
+
 	// Retrieves information about a range of pages within the virtual address space of a specified process.
 	bool CProcess::VirtualQueryEx( uint64_t _ui64Address, PMEMORY_BASIC_INFORMATION64 _lpBuffer ) const {
 		LSW_ENT_CRIT( m_csCrit );

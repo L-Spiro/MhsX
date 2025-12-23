@@ -790,54 +790,6 @@ namespace mx {
 		return _sString.c_str();
 	}
 
-	// Creates a string that best represents the given size.
-	const CHAR * CUtilities::SizeString( uint64_t _uiSize, std::string &_sString ) {
-		CHAR szBuffer[_T_MAX_LEN];
-		struct {
-			uint64_t uiSize;
-			const CHAR * pcName;
-			uint32_t ui32StrLen;
-			const CHAR * pcFormat;
-		}
-		static const aTable[] = {
-			{ 1ULL << 60ULL, _T_4F3411E5_exbibyte, _LEN_4F3411E5, "%.18f " },
-			{ 1ULL << 50ULL, _T_7D66D3A4_pebibyte, _LEN_7D66D3A4, "%.15f " },
-			{ 1ULL << 40ULL, _T_F92CDD5E_tebibyte, _LEN_F92CDD5E, "%.12f " },
-			{ 1ULL << 30ULL, _T_CCB881E2_gibibyte, _LEN_CCB881E2, "%.9f " },
-			{ 1ULL << 20ULL, _T_9AD8F75E_mebibyte, _LEN_9AD8F75E, "%.6f " },
-			{ 1ULL << 10ULL, _T_9B1794AD_kibibyte, _LEN_9B1794AD, "%.3f " },
-		};
-		for ( size_t I = 0; I < sizeof( aTable ) / sizeof( aTable[0] ); ++I ) {
-			if ( _uiSize >= aTable[I].uiSize ) {
-				CHAR szNumber[64];
-				if ( _uiSize % aTable[I].uiSize == 0 ) {
-					std::sprintf( szNumber, "%I64u ", _uiSize / aTable[I].uiSize );
-				}
-				else {
-					std::sprintf( szNumber, aTable[I].pcFormat, static_cast<DOUBLE>(_uiSize) / static_cast<DOUBLE>(aTable[I].uiSize) );
-				}
-				_sString.append( szNumber );
-				CStringDecoder::Decode( aTable[I].pcName, aTable[I].ui32StrLen, szBuffer );
-				_sString.append( szBuffer );
-				if ( _uiSize != aTable[I].uiSize ) {
-					_sString.push_back( 's' );
-				}
-				::ZeroMemory( szBuffer, _T_MAX_LEN );
-				return _sString.c_str();
-			}
-		}
-		CHAR szNumber[64];
-		std::sprintf( szNumber, "%I64u ", _uiSize );
-		_sString.append( szNumber );
-		_DEC_9DC09A6E_byte( szBuffer );
-		_sString.append( szBuffer );
-		if ( _uiSize != 1 ) {
-			_sString.push_back( 's' );
-		}
-		::ZeroMemory( szBuffer, _T_MAX_LEN );
-		return _sString.c_str();
-	}
-
 	// Creates a date string.  _pcRet should be at least 64 characters long.
 	const CHAR * CUtilities::CreateDateString( uint64_t _uiTime, CHAR * _pcRet, size_t _sLen ) {
 		if ( _uiTime ) {

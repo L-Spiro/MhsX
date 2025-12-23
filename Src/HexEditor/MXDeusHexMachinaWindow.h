@@ -169,6 +169,15 @@ namespace mx {
 		// Close all tabs.
 		void										CloseAllTabs();
 
+		// Performs an Undo.
+		void										Undo();
+
+		// Performs a Redo.
+		void										Redo();
+
+		// Delete the selection.
+		void										DeleteSelectedOrCaret();
+
 		// Select all.
 		void										SelectAll();
 

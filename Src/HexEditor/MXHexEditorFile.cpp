@@ -41,13 +41,43 @@ namespace mx {
 	}
 
 	// Delets bytes at a given address.
-	bool CHexEditorFile::Delete( uint64_t _ui64Addr, uint64_t _ui64Size ) {
-		return false;
+	bool CHexEditorFile::Delete( uint64_t _ui64Addr, uint64_t _ui64Size, uint64_t &_ui64Deleted ) {
+		return m_lcwfwFile.Delete( _ui64Addr, _ui64Size, _ui64Deleted );
 	}
 
 	// Gets the size of the data source.
 	uint64_t CHexEditorFile::Size() const {
 		return m_lcwfwFile.Size();
+	}
+
+	// Begins an Undo sequence.  Call before making multiple delete operations in a row.
+	bool CHexEditorFile::BeginUndo() {
+		return m_lcwfwFile.BeginUndo();
+	}
+
+	// Ends an Undo sequence.  Call when done making modifications.
+	bool CHexEditorFile::EndUndo() {
+		return m_lcwfwFile.EndUndo();
+	}
+
+	// Determines if there are items to undo.
+	bool CHexEditorFile::HasUndo() const {
+		return m_lcwfwFile.HasUndo();
+	}
+
+	// Determines if there are items to redo.
+	bool CHexEditorFile::HasRedo() const {
+		return m_lcwfwFile.HasRedo();
+	}
+
+	// Performs an Undo operation.
+	bool CHexEditorFile::Undo( CSecureWString &_swsStatus ) {
+		return m_lcwfwFile.Undo( _swsStatus );
+	}
+
+	// Performs an Redo operation.
+	bool CHexEditorFile::Redo( CSecureWString &_swsStatus ) {
+		return m_lcwfwFile.Redo( _swsStatus );
 	}
 
 }	// namespace mx

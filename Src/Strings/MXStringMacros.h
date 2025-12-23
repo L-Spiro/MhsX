@@ -22375,3 +22375,48 @@
 #define _DEC_S_E7EE4F02_Po_inter_16 mx::CStringDecoder::DecodeToString( _T_E7EE4F02_Po_inter_16, _LEN_E7EE4F02 )
 #define _DEC_WS_E7EE4F02_Po_inter_16 mx::CStringDecoder::DecodeToWString( _T_E7EE4F02_Po_inter_16, _LEN_E7EE4F02 )
 
+// Deleted: 
+
+#define _T_B8E08C71_Deleted__ "\xCC\x33\x3C\x00\x06\x2E\xF2\x01\xF0"
+#define _LEN_B8E08C71 9
+#define _T_LEN_B8E08C71_Deleted__ _T_B8E08C71_Deleted__, _LEN_B8E08C71
+#define _DEC_B8E08C71_Deleted__( STR ) mx::CStringDecoder::Decode( _T_B8E08C71_Deleted__, _LEN_B8E08C71, STR )
+#define _DEC_S_B8E08C71_Deleted__ mx::CStringDecoder::DecodeToString( _T_B8E08C71_Deleted__, _LEN_B8E08C71 )
+#define _DEC_WS_B8E08C71_Deleted__ mx::CStringDecoder::DecodeToWString( _T_B8E08C71_Deleted__, _LEN_B8E08C71 )
+
+// File is Read-Only
+
+#define _T_D4FFE2E0_File_is_Read_Only "\xCE\x37\x3C\x00\xB2\x32\x01\xE7\x22\x2D\x2A\x32\xBF\xEA\x35\xF4\x47"
+#define _LEN_D4FFE2E0 17
+#define _T_LEN_D4FFE2E0_File_is_Read_Only _T_D4FFE2E0_File_is_Read_Only, _LEN_D4FFE2E0
+#define _DEC_D4FFE2E0_File_is_Read_Only( STR ) mx::CStringDecoder::Decode( _T_D4FFE2E0_File_is_Read_Only, _LEN_D4FFE2E0, STR )
+#define _DEC_S_D4FFE2E0_File_is_Read_Only mx::CStringDecoder::DecodeToString( _T_D4FFE2E0_File_is_Read_Only, _LEN_D4FFE2E0 )
+#define _DEC_WS_D4FFE2E0_File_is_Read_Only mx::CStringDecoder::DecodeToWString( _T_D4FFE2E0_File_is_Read_Only, _LEN_D4FFE2E0 )
+
+// Undo Operation: 
+
+#define _T_08D60FD3_Undo_Operation__ "\xDD\x3C\x34\x0A\xB2\x18\xFE\x2C\x42\x29\x3D\x37\x01\x09\x01\xA8"
+#define _LEN_08D60FD3 16
+#define _T_LEN_08D60FD3_Undo_Operation__ _T_08D60FD3_Undo_Operation__, _LEN_08D60FD3
+#define _DEC_08D60FD3_Undo_Operation__( STR ) mx::CStringDecoder::Decode( _T_08D60FD3_Undo_Operation__, _LEN_08D60FD3, STR )
+#define _DEC_S_08D60FD3_Undo_Operation__ mx::CStringDecoder::DecodeToString( _T_08D60FD3_Undo_Operation__, _LEN_08D60FD3 )
+#define _DEC_WS_08D60FD3_Undo_Operation__ mx::CStringDecoder::DecodeToWString( _T_08D60FD3_Undo_Operation__, _LEN_08D60FD3 )
+
+// Redo Operation: 
+
+#define _T_2BDB5158_Redo_Operation__ "\xDA\x33\x34\x0A\xB2\x18\xFE\x2C\x42\x29\x3D\x37\x01\x09\x01\xA8"
+#define _LEN_2BDB5158 16
+#define _T_LEN_2BDB5158_Redo_Operation__ _T_2BDB5158_Redo_Operation__, _LEN_2BDB5158
+#define _DEC_2BDB5158_Redo_Operation__( STR ) mx::CStringDecoder::Decode( _T_2BDB5158_Redo_Operation__, _LEN_2BDB5158, STR )
+#define _DEC_S_2BDB5158_Redo_Operation__ mx::CStringDecoder::DecodeToString( _T_2BDB5158_Redo_Operation__, _LEN_2BDB5158 )
+#define _DEC_WS_2BDB5158_Redo_Operation__ mx::CStringDecoder::DecodeToWString( _T_2BDB5158_Redo_Operation__, _LEN_2BDB5158 )
+
+// “Delete”
+
+#define _T_63A6700E____Delete___ "\x6A\x4E\x6C\xDF\xF7\x35\xF3\x3B\x35\xAA\x49\x6B"
+#define _LEN_63A6700E 12
+#define _T_LEN_63A6700E____Delete___ _T_63A6700E____Delete___, _LEN_63A6700E
+#define _DEC_63A6700E____Delete___( STR ) mx::CStringDecoder::Decode( _T_63A6700E____Delete___, _LEN_63A6700E, STR )
+#define _DEC_S_63A6700E____Delete___ mx::CStringDecoder::DecodeToString( _T_63A6700E____Delete___, _LEN_63A6700E )
+#define _DEC_WS_63A6700E____Delete___ mx::CStringDecoder::DecodeToWString( _T_63A6700E____Delete___, _LEN_63A6700E )
+

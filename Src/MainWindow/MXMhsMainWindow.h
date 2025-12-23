@@ -167,7 +167,7 @@ namespace mx {
 		void								ShowOptions( int32_t _i32Page );
 
 		// Deletes the selected Found Addresses.
-		void								DeleteSelected();
+		void								DeleteSelectedOrCaret();
 
 		// Deletes all Found Addresses.
 		void								DeleteAll();

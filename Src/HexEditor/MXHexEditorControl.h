@@ -210,6 +210,12 @@ namespace mx {
 			MX_HEX_EDITOR_COLORS *					phecBg							= nullptr;					/**< Background colors. */
 		};
 
+		/** Selection ranges. */
+		struct MX_SEL_RANGE {
+			uint64_t								ui64Start						= 0;						/**< The start of a selection range. */
+			uint64_t								ui64Size						= 0;						/**< The size of the selection range. */
+		};
+
 
 		// == Functions.
 		// Sets the view type.
@@ -695,6 +701,54 @@ namespace mx {
 		void										MarkSelectionEnd();
 
 		/**
+		 * Determines if deleting is possible.  To delete, the internal state must be valid, and there must either be a selection or the caret must not be at the end of the file, and the file must not be read-only.
+		 * 
+		 * \return Returns true if the internal state is valid, the file is not read-only, and there is a selection or the caret is not at the end of the file.
+		 **/
+		inline bool									CanDelete() const {
+			return m_pheiTarget && !m_pheiTarget->ReadOnly() && (m_sSel.HasSelection() || m_sgSelGesture.ui64CaretAddr < Size());
+		}
+
+		/**
+		 * Performs an Undo operation.
+		 * 
+		 * \param _wsStatus The string to print in the status bar.
+		 **/
+		bool										Undo( CSecureWString &_swsStatus );
+
+		/**
+		 * Performs an Redo operation.
+		 * 
+		 * \param _wsStatus The string to print in the status bar.
+		 **/
+		bool										Redo( CSecureWString &_swsStatus );
+
+		/**
+		 * Deletes the selected bytes.
+		 * 
+		 * \param _wsStatus The string to print in the status bar.
+		 **/
+		bool										DeleteSelectedOrCaret( CSecureWString &_swsStatus );
+
+		/**
+		 * Is Undo available?
+		 * 
+		 * \return Returns true if Undo is available.
+		 **/
+		inline bool									CanUndo() const {
+			return m_pheiTarget && m_pheiTarget->HasUndo();
+		}
+
+		/**
+		 * Is Redo available?
+		 * 
+		 * \return Returns true if Redo is available.
+		 **/
+		inline bool									CanRedo() const {
+			return m_pheiTarget && m_pheiTarget->HasRedo();
+		}
+
+		/**
 		 * Goes to a given address.
 		 * 
 		 * \param _ui64Addr The address to which to go.
@@ -994,7 +1048,7 @@ namespace mx {
 		/** A Normal selection: [startAddr, endAddr] inclusive, normalized. */
 		struct MX_SEL_NORMAL {
 			uint64_t								ui64Start			= 0;								/**< Inclusive start address. */
-			uint64_t								ui64End				= 0;								/**< Inclusive end address. */
+			uint64_t								ui64End				= 0;								/**< Exclusive end address. */
 
 
 			// == Functions.
@@ -1104,6 +1158,66 @@ namespace mx {
 				}
 				return sc.IsSelected( _ui64Address, _ui32BytesPerRow );
 			}
+
+			/**
+			 * Gathers the selected ranges.  Addresses will be sorted in descanding order (higher addresses first).
+			 * 
+			 * \param _vSelections Holds the returned selection ranges sorted from high-to-low.
+			 * \param _ui32BytesPerRow The Number of bytes in a row.
+			 * \return Returns true if allocating all of the selection ranges succeeded or there is no selection.  False always indicates a memory failure.
+			 **/
+			 inline bool							GatherSelected_HighToLow( uint32_t _ui32BytesPerRow, std::vector<MX_SEL_RANGE> &_vSelections ) {
+				_vSelections.clear();
+				if ( !HasSelection() ) { return true; }
+				try {
+					if ( smMode == LSN_SM_NORMAL ) {	
+						// Known not to be empty.
+						// There is only one selection range.
+						MX_SEL_RANGE srRange = { .ui64Start = sn.ui64Start, .ui64Size = sn.ui64End - sn.ui64Start };
+						_vSelections.push_back( srRange );
+						return true;
+					}
+
+					// Column Mode.
+					// Known not to be empty.
+					for ( size_t I = sc.ui64Lines + 1; I--; ) {
+						MX_SEL_RANGE srRange = { .ui64Start = sc.ui64AnchorAddr + I * _ui32BytesPerRow, .ui64Size = sc.ui32Cols };
+						_vSelections.push_back( srRange );
+					}
+					return true;
+				}
+				catch ( ... ) { return false; }
+			 }
+
+			 /**
+			 * Gathers the selected ranges.  Addresses will be sorted in ascanding order (lower addresses first).
+			 * 
+			 * \param _vSelections Holds the returned selection ranges sorted from high-to-low.
+			 * \param _ui32BytesPerRow The Number of bytes in a row.
+			 * \return Returns true if allocating all of the selection ranges succeeded or there is no selection.  False always indicates a memory failure.
+			 **/
+			 inline bool							GatherSelected_LowToHigh( uint32_t _ui32BytesPerRow, std::vector<MX_SEL_RANGE> &_vSelections ) {
+				_vSelections.clear();
+				if ( !HasSelection() ) { return true; }
+				try {
+					if ( smMode == LSN_SM_NORMAL ) {	
+						// Known not to be empty.
+						// There is only one selection range.
+						MX_SEL_RANGE srRange = { .ui64Start = sn.ui64Start, .ui64Size = sn.ui64End - sn.ui64Start };
+						_vSelections.push_back( srRange );
+						return true;
+					}
+
+					// Column Mode.
+					// Known not to be empty.
+					for ( size_t I = 0; I <= sc.ui64Lines; ++I ) {
+						MX_SEL_RANGE srRange = { .ui64Start = sc.ui64AnchorAddr + I * _ui32BytesPerRow, .ui64Size = sc.ui32Cols };
+						_vSelections.push_back( srRange );
+					}
+					return true;
+				}
+				catch ( ... ) { return false; }
+			 }
 		};
 
 		/**
@@ -1132,6 +1246,22 @@ namespace mx {
 			bool									bRightArea			= false;							/**< True if click hit the right (text) area. */
 		};
 
+		/** The selection Undo/Redo stack item. **/
+		struct MX_SELECT_UNDO_REDO_ITEM {
+			MX_SELECTION							sUndoSelection;											/**< The selection to restore during an Undo. */
+			MX_SELECTION							sRedoSelection;											/**< The selection to restore during a Redo. */
+
+			uint64_t								ui64UndoAnchorAddr	= 0;								/**< Selection "from" address. */
+			uint64_t								ui64UndoMouseAnchorAddr	= 0;							/**< Original anchor address when beginning a mouse drag. */
+			uint64_t								ui64UndoCaretAddr	= 0;								/**< Selection "to" address. */
+			int32_t									i32UndoCaretIdx		= -1;								/**< The index into the text where the caret is (IE if a value at an address is E7, this could be 0 to put the caret under the E, or 1 to put it under the 7). */
+
+			uint64_t								ui64RedoAnchorAddr	= 0;								/**< Selection "from" address. */
+			uint64_t								ui64RedoMouseAnchorAddr	= 0;							/**< Original anchor address when beginning a mouse drag. */
+			uint64_t								ui64RedoCaretAddr	= 0;								/**< Selection "to" address. */
+			int32_t									i32RedoCaretIdx		= -1;								/**< The index into the text where the caret is (IE if a value at an address is E7, this could be 0 to put the caret under the E, or 1 to put it under the 7). */
+		};
+
 
 		// == Members.
 		CWidget *									m_pwHexParent = nullptr;								/**< The main hex-editor window. */
@@ -1151,6 +1281,8 @@ namespace mx {
 		CHexEditorInterface *						m_pheiTarget = nullptr;									/**< The stream of data to handle. */
 		MX_SELECT_GESTURE							m_sgSelGesture {};										/**< Selection action. */
 		MX_SELECTION								m_sSel {};												/**< Actual selection. */
+		std::vector<MX_SELECT_UNDO_REDO_ITEM>		m_vSelectionStack;										/**< The Undo/Redo selection stack. */
+		size_t										m_sSelStackIdx = size_t( -1 );							/**< The selection-stack current index. */
 		CUtilities::MX_TIMER						m_tCaretBlink;											/**< The blinking of the caret. */
 		bool										m_bCaretOn = true;										/**< Caret on or off during active blink. */
 
@@ -1665,6 +1797,15 @@ namespace mx {
 		 * End a selection gesture (mouse up). Collapses zero-length selections created by clicks without drag.
 		 */
 		void										SelectionEndGesture();
+
+		/**
+		 * Adds the current selection to the Undo/Redo stack.
+		 * 
+		 * \param _sOldSelection The old selection being set.  Automatically saves the current selection.
+		 * \param _sgOldGesture The previous caret and anchors.
+		 * \return Returns true if the current selection was added to the selection Undo/Redo stack.
+		 **/
+		bool										AddSelectionUndo( const MX_SELECTION &_sOldSelection, const MX_SELECT_GESTURE &_sgOldGesture );
 
 		/**
 		 * \brief Initialize a Shift-extend gesture on an existing Normal selection.

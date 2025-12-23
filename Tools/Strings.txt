@@ -2481,3 +2481,9 @@
 "Po&inter 16"
 "Pointer& 32"
 "Point&er 64"
+
+"Deleted: "
+"File is Read-Only"
+"Undo Operation: "
+"Redo Operation: "
+"“Delete”"

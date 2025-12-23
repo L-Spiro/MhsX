@@ -57,7 +57,8 @@ namespace mx {
 	}
 
 	// Delets bytes at a given address.
-	bool CHexEditorCurProcess::Delete( uint64_t _ui64Addr, uint64_t _ui64Size ) {
+	bool CHexEditorCurProcess::Delete( uint64_t _ui64Addr, uint64_t _ui64Size, uint64_t &_ui64Deleted ) {
+		_ui64Deleted = 0;
 		return false;
 	}
 

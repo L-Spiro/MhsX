@@ -56,11 +56,49 @@ namespace mx {
 
 	// Overwrite bytes at a given address.
 	bool CHexEditorProcess::Overwrite( uint64_t _ui64Addr, const void * _pvSrc, size_t _sSize ) {
-		return false;
+		const auto siInfo = mx::CSystem::GetSystemInfo();
+		// Read in chunks of siInfo.dwPageSize.
+		
+		try {
+			const uint8_t * pui8Src = reinterpret_cast<const uint8_t *>(_pvSrc);
+
+
+			while ( _sSize ) {
+				uint64_t ui64Start = _ui64Addr / siInfo.dwPageSize * siInfo.dwPageSize;
+				uint64_t ui64End = (_ui64Addr / siInfo.dwPageSize + 1) * siInfo.dwPageSize;
+				_ui64Addr = std::max( _ui64Addr, ui64Start );
+				size_t sSize = size_t( ui64End - _ui64Addr );
+				sSize = std::min( sSize, _sSize );
+
+				if ( !m_pProcess.WriteProcessMemory( _ui64Addr, pui8Src, sSize, nullptr ) ) {
+					// m_pProcess re-opens the process with new permissions, but maybe try changing the writability
+					if ( m_pProcess.IsReadableByQuery( _ui64Addr ) /*|| m_pProcess.IsAddressReadable( _ui64Addr )*/ ) {
+						std::vector<CProcess::MX_PROT_RANGE> vRestoreMe;
+						
+						CProcess::MX_PAUSE_RESUME prPauseMe( m_pProcess );
+						if ( m_pProcess.SetWriteableRanges( _ui64Addr, sSize, vRestoreMe ) ) {
+							m_pProcess.WriteProcessMemory( _ui64Addr, pui8Src, sSize, nullptr );	// Failure doesn’t matter.
+							m_pProcess.RestoreProtectRanges( vRestoreMe );							// Restore old flags.
+						}
+					}
+					
+				}
+
+				_ui64Addr += sSize;
+				pui8Src += sSize;
+				_sSize -= sSize;
+			}
+			return true;
+		}
+		catch ( ... ) {
+			// Failed to allocate.
+			return false;
+		}
 	}
 
 	// Delets bytes at a given address.
-	bool CHexEditorProcess::Delete( uint64_t _ui64Addr, uint64_t _ui64Size ) {
+	bool CHexEditorProcess::Delete( uint64_t _ui64Addr, uint64_t _ui64Size, uint64_t &_ui64Deleted ) {
+		_ui64Deleted = 0;
 		return false;
 	}
 

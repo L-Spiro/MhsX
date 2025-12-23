@@ -71,7 +71,7 @@ namespace mx {
 		m_fmMainMap.Close();
 		m_vEditedMaps = std::vector<std::unique_ptr<CFileMap>>();
 		m_vLogicalMap = std::vector<MX_LOGICAL_SECTION>();
-		m_ui32OriginalCrc = 0;
+		//m_ui32OriginalCrc = 0;
 	}
 
 	// Read from the file.
@@ -96,13 +96,29 @@ namespace mx {
 
 				switch ( m_vLogicalMap[I].stType ) {
 					case MX_ST_ORIGINAL_FILE : {
-						if ( ui64MaxSize != static_cast<uint64_t>(m_fmMainMap.Read( pbDst, _ui64Addr, sSizeCopy )) ) { return false; }
+						if ( ui64MaxSize != static_cast<uint64_t>(m_fmMainMap.Read( pbDst, m_vLogicalMap[I].ui64Offset + (_ui64Addr - m_vLogicalMap[I].ui64Start), ui64MaxSize )) ) { return false; }
 						sSizeCopy -= ui64MaxSize;
 						if ( !sSizeCopy ) { return true; }
+						_ui64Addr += ui64MaxSize;
+						pbDst += ui64MaxSize;
 						break;
 					}
 					case MX_ST_SEGMENT : {
-						return false;
+						if ( m_vLogicalMap[I].u.saSegmentAddress.sFile >= m_vEditedMaps.size() ) { return false; }
+						if ( !m_vEditedMaps[m_vLogicalMap[I].u.saSegmentAddress.sFile].get() ) { return false; }
+						try {
+							auto pfmMap = m_vEditedMaps[m_vLogicalMap[I].u.saSegmentAddress.sFile].get();
+							UpdateActiveSegments( pfmMap->Id(), m_sTotalActiveSegments );
+
+							if ( ui64MaxSize != static_cast<uint64_t>(pfmMap->Read( pbDst, m_vLogicalMap[I].ui64Offset + (_ui64Addr - m_vLogicalMap[I].ui64Start), ui64MaxSize )) ) { return false; }
+							sSizeCopy -= ui64MaxSize;
+							if ( !sSizeCopy ) { return true; }
+							_ui64Addr += ui64MaxSize;
+							pbDst += ui64MaxSize;
+						}
+						catch ( ... ) { return false; }
+
+
 						break;
 					}
 					default: { return false; }
@@ -114,8 +130,98 @@ namespace mx {
 		return false;
 	}
 
+	// Delete from the file.
+	bool CLargeCoWFileWindow::Delete( uint64_t _ui64Addr, uint64_t _ui64Size, uint64_t &_ui64Deleted ) {
+		return DeleteRange( m_vLogicalMap, _ui64Addr, _ui64Size, _ui64Deleted );
+	}
+
+	// Performs an Undo operation.
+	bool CLargeCoWFileWindow::Undo( CSecureWString &_swsStatus ) {
+		if ( m_sUndoIdx == size_t( -1 ) ) { return true; }
+		if ( m_sUndoIdx >= m_vUndoStack.size() ) {
+			_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+			return false;
+		}
+
+		int32_t i32Scope = 0;
+		CHexEditorInterface::MX_UNDO_OP uoUndoType = CHexEditorInterface::MX_UO_INVALID;
+		do {
+			auto uoOp = SingleUndo();
+			if ( uoOp == CHexEditorInterface::MX_UO_INVALID ) {
+				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+				return false;
+			}
+			else if ( uoOp == CHexEditorInterface::MX_UO_GROUP_START ) {
+				--i32Scope;
+			}
+			else if ( uoOp == CHexEditorInterface::MX_UO_GROUP_END ) {
+				++i32Scope;
+			}
+			else {
+				uoUndoType = uoOp;
+			}
+		}
+		while ( i32Scope );
+
+		_swsStatus = _DEC_WS_08D60FD3_Undo_Operation__;
+		switch ( uoUndoType ) {
+			case CHexEditorInterface::MX_UO_DELETE : {
+				_swsStatus += _DEC_WS_63A6700E____Delete___;
+				break;
+			}
+			default : {
+				_swsStatus += _DEC_WS_DFA2AFF1_None;
+			}
+		}
+
+		return true;
+	}
+
+	// Performs an Redo operation.
+	bool CLargeCoWFileWindow::Redo( CSecureWString &_swsStatus ) {
+		size_t sNewIdx = m_sUndoIdx + 1;
+		if ( sNewIdx == size_t( m_vUndoStack.size() - 1 ) ) { return true; }
+		if ( sNewIdx >= m_vUndoStack.size() ) {
+			_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+			return false;
+		}
+
+		int32_t i32Scope = 0;
+		CHexEditorInterface::MX_UNDO_OP uoUndoType = CHexEditorInterface::MX_UO_INVALID;
+		do {
+			auto uoOp = SingleRedo();
+			if ( uoOp == CHexEditorInterface::MX_UO_INVALID ) {
+				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+				return false;
+			}
+			else if ( uoOp == CHexEditorInterface::MX_UO_GROUP_START ) {
+				++i32Scope;
+			}
+			else if ( uoOp == CHexEditorInterface::MX_UO_GROUP_END ) {
+				--i32Scope;
+			}
+			else {
+				uoUndoType = uoOp;
+			}
+		}
+		while ( i32Scope );
+
+		_swsStatus = _DEC_WS_2BDB5158_Redo_Operation__;
+		switch ( uoUndoType ) {
+			case CHexEditorInterface::MX_UO_DELETE : {
+				_swsStatus += _DEC_WS_63A6700E____Delete___;
+				break;
+			}
+			default : {
+				_swsStatus += _DEC_WS_DFA2AFF1_None;
+			}
+		}
+
+		return true;
+	}
+
 	// Updates the list of active segments.  Call within a try/catch block.
-	void CLargeCoWFileWindow::UpdateActiveSegments( uint64_t _ui64Id, size_t _sMax ) {
+	void CLargeCoWFileWindow::UpdateActiveSegments( uint64_t _ui64Id, size_t _sMax ) const {
 		// Erase any null pointers.
 		m_vEditedMaps.erase(
 			std::remove_if(
@@ -221,25 +327,15 @@ namespace mx {
 		m_ui64Size = ui64Tmp;
 	}
 
-	/**
-	 * Performs a logical DELETE on a vector of MX_LOGICAL_SECTION items.
-	 * \brief Removes the logical range [_ui64DelStart, _ui64DelStart + _ui64DelSize) and compacts everything after by shifting left.
-	 *
-	 * Sections that overlap the deleted range are trimmed or split as needed. Sections entirely after the
-	 * deleted range have their ui64Start reduced by _ui64DelSize. Adjacent compatible sections are coalesced.
-	 *
-	 * \param _vSections Vector of sections sorted by ui64Start (ties are not expected but tolerated).
-	 * \param _ui64DelStart Logical start of the delete range.
-	 * \param _ui64DelSize Logical size of the delete range. A value of 0 is a no-op.
-	 * \return Returns true if any modification was made to _vSections.
-	 **/
-	bool CLargeCoWFileWindow::DeleteRange( std::vector<MX_LOGICAL_SECTION> &_vSections, uint64_t _ui64DelStart, uint64_t _ui64DelSize ) {
-		if ( _ui64DelSize == 0u ) { return true; }
+	// Performs a logical DELETE on a vector of MX_LOGICAL_SECTION items.
+	bool CLargeCoWFileWindow::DeleteRange( std::vector<MX_LOGICAL_SECTION> &_vSections, uint64_t _ui64DelStart, uint64_t _ui64DelSize, uint64_t &_ui64Deleted ) {
+		_ui64Deleted = 0;
+		if ( _ui64DelSize == 0U ) { return true; }
 
 		// Compute delete end with overflow protection.
-		const uint64_t ui64DelEnd = (_ui64DelStart > (std::numeric_limits<uint64_t>::max)() - _ui64DelSize)
-			? (std::numeric_limits<uint64_t>::max)()
-			: (_ui64DelStart + _ui64DelSize);
+		const uint64_t ui64DelEnd = (_ui64DelStart > (std::numeric_limits<uint64_t>::max)() - _ui64DelSize) ?
+			(std::numeric_limits<uint64_t>::max)() :
+			(_ui64DelStart + _ui64DelSize);
 
 		std::vector<MX_LOGICAL_SECTION> vOut;
 		vOut.reserve( _vSections.size() );
@@ -248,9 +344,9 @@ namespace mx {
 
 		for ( const MX_LOGICAL_SECTION & lsIn : _vSections ) {
 			const uint64_t ui64SecStart = lsIn.ui64Start;
-			const uint64_t ui64SecEnd = (ui64SecStart > (std::numeric_limits<uint64_t>::max)() - lsIn.ui64Size)
-				? (std::numeric_limits<uint64_t>::max)()
-				: (ui64SecStart + lsIn.ui64Size);
+			const uint64_t ui64SecEnd = (ui64SecStart > (std::numeric_limits<uint64_t>::max)() - lsIn.ui64Size) ?
+				(std::numeric_limits<uint64_t>::max)() :
+				(ui64SecStart + lsIn.ui64Size);
 
 			if ( ui64SecEnd <= _ui64DelStart ) {
 				// Fully before the delete range.
@@ -302,45 +398,24 @@ namespace mx {
 			return false;
 		}
 
-		// Sort (defensive; input is expected sorted, but overlap handling might relax ordering when split).
-		std::sort( vOut.begin(), vOut.end() );
+		
 
-		// Coalesce adjacent compatible sections:
-		// Two sections are coalescible if they are consecutive logically and come from the same source
-		// with continuous backing offset progression.
-		/*std::vector<MX_LOGICAL_SECTION> vCoalesced;
-		vCoalesced.reserve( vOut.size() );
+		try {
+			// Sort (defensive; input is expected sorted, but overlap handling might relax ordering when split).
+			std::sort( vOut.begin(), vOut.end() );
 
-		for ( const MX_LOGICAL_SECTION & lsCur : vOut ) {
-			if ( vCoalesced.empty() ) {
-				vCoalesced.emplace_back( lsCur );
-				continue;
-			}
-
-			MX_LOGICAL_SECTION & lsBack = vCoalesced.back();
-			const bool bSameType = (lsBack.stType == lsCur.stType);
-			const bool bContiguousLogical = (lsBack.ui64Start + lsBack.ui64Size == lsCur.ui64Start);
-			const bool bContiguousBacking = (lsBack.ui64Offset + lsBack.ui64Size == lsCur.ui64Offset);
-
-			if ( bSameType && bContiguousLogical && bContiguousBacking ) {
-				lsBack.ui64Size += lsCur.ui64Size;
-			}
-			else {
-				vCoalesced.emplace_back( lsCur );
-			}
+			MX_UNDO_ITEM uUndoMe = { .uoOp = CHexEditorInterface::MX_UO_DELETE, .vDelete_Undo = _vSections, .vDelete_Redo = vOut };
+			if ( !PushUndo( uUndoMe ) ) { return false; }
 		}
-
-		_vSections.swap( vCoalesced );*/
+		catch ( ... ) { return false; }
 		_vSections.swap( vOut );
 		SimplifyLogicalView();
+		UpdateSize();
+		_ui64Deleted = _ui64DelSize;
 		return true;
 	}
 
-	/**
-	 * Creates the directories needed to make it not read-only.
-	 * 
-	 * \return Returns true if the file was successfully made read/write.
-	 **/
+	// Creates the directories needed to make it not read-only.
 	bool CLargeCoWFileWindow::CreateWriteDirectories() {
 		m_pEditDiractory = std::filesystem::temp_directory_path() / _DEC_S_9DAF7683_Dues_Hex_Machina.c_str();
 		::OutputDebugStringW( (m_pEditDiractory.generic_wstring() + L"\r\n").c_str() );
@@ -353,6 +428,43 @@ namespace mx {
 		CFile::EraseFilesInDirectory( m_pEditDiractory );
 		if ( !CFile::MakeDirectorySafely( m_pEditDiractory ) ) { return false; }
 		return true;
+	}
+
+	// Performs a single Undo operation.
+	CHexEditorInterface::MX_UNDO_OP CLargeCoWFileWindow::SingleUndo() {
+		if ( m_sUndoIdx == size_t( -1 ) ) { return CHexEditorInterface::MX_UO_INVALID; }
+		if ( m_sUndoIdx >= m_vUndoStack.size() ) { return CHexEditorInterface::MX_UO_INVALID; }
+
+		CHexEditorInterface::MX_UNDO_OP uoRet = m_vUndoStack[m_sUndoIdx].uoOp;
+		switch ( uoRet ) {
+			case CHexEditorInterface::MX_UO_DELETE : {
+				m_vLogicalMap = m_vUndoStack[m_sUndoIdx].vDelete_Undo;
+				UpdateSize();
+				break;
+			}
+		}
+		--m_sUndoIdx;
+
+		return uoRet;
+	}
+
+	// Performs a single Redo operation.
+	CHexEditorInterface::MX_UNDO_OP CLargeCoWFileWindow::SingleRedo() {
+		size_t sNewIdx = m_sUndoIdx + 1;
+		if ( sNewIdx == size_t( -1 ) ) { return CHexEditorInterface::MX_UO_INVALID; }
+		if ( sNewIdx >= m_vUndoStack.size() ) { return CHexEditorInterface::MX_UO_INVALID; }
+
+		CHexEditorInterface::MX_UNDO_OP uoRet = m_vUndoStack[sNewIdx].uoOp;
+		switch ( uoRet ) {
+			case CHexEditorInterface::MX_UO_DELETE : {
+				m_vLogicalMap = m_vUndoStack[sNewIdx].vDelete_Redo;
+				UpdateSize();
+				break;
+			}
+		}
+		++m_sUndoIdx;
+
+		return uoRet;
 	}
 
 }	// namespace mx

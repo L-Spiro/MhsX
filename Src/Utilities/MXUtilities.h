@@ -127,6 +127,28 @@ namespace mx {
 
 	class CFoundAddressBase;
 
+	template <typename T>
+	struct IsCharType : std::bool_constant<
+		std::is_same_v<T, char> ||
+		std::is_same_v<T, signed char> ||
+		std::is_same_v<T, unsigned char> ||
+		std::is_same_v<T, wchar_t> ||
+		std::is_same_v<T, char16_t> ||
+		std::is_same_v<T, char32_t>
+#if defined( __cpp_char8_t )
+		|| std::is_same_v<T, char8_t>
+#endif
+		> {};
+
+	template <typename T, typename = void>
+	struct IsVectorLike : std::false_type {};
+
+	template <typename T>
+	struct IsVectorLike<T, std::void_t<
+		typename T::size_type,
+		decltype( std::declval<const T &>().size() ),
+		decltype( std::declval<const T &>()[std::declval<typename T::size_type>()] ) >> : std::true_type {};
+
 	class CUtilities {
 	public :
 		// == Enumerations.
@@ -654,7 +676,80 @@ namespace mx {
 		static const CHAR *										ShowWindowToString( int _iVal, std::string &_sString, BOOL _bShort = -1 );
 
 		// Creates a string that best represents the given size.
-		static const CHAR *										SizeString( uint64_t _uiSize, std::string &_sString );
+		template <typename _tInType = std::wstring>
+		static _tInType &										SizeString( uint64_t _uiSize, _tInType &_tString ) {
+			char szBuffer[_T_MAX_LEN];
+			struct {
+				uint64_t uiSize;
+				const char * pcName;
+				uint32_t ui32StrLen;
+				const char * pcFormat;
+			}
+			static const aTable[] = {
+				{ 1ULL << 60ULL, _T_4F3411E5_exbibyte, _LEN_4F3411E5, "%.18f " },
+				{ 1ULL << 50ULL, _T_7D66D3A4_pebibyte, _LEN_7D66D3A4, "%.15f " },
+				{ 1ULL << 40ULL, _T_F92CDD5E_tebibyte, _LEN_F92CDD5E, "%.12f " },
+				{ 1ULL << 30ULL, _T_CCB881E2_gibibyte, _LEN_CCB881E2, "%.9f " },
+				{ 1ULL << 20ULL, _T_9AD8F75E_mebibyte, _LEN_9AD8F75E, "%.6f " },
+				{ 1ULL << 10ULL, _T_9B1794AD_kibibyte, _LEN_9B1794AD, "%.3f " },
+			};
+			for ( size_t I = 0; I < sizeof( aTable ) / sizeof( aTable[0] ); ++I ) {
+				if ( _uiSize >= aTable[I].uiSize ) {
+					char szNumber[64];
+					if ( _uiSize % aTable[I].uiSize == 0 ) {
+						std::sprintf( szNumber, "%I64u ", _uiSize / aTable[I].uiSize );
+					}
+					else {
+						std::sprintf( szNumber, aTable[I].pcFormat, static_cast<double>(_uiSize) / static_cast<double>(aTable[I].uiSize) );
+					}
+					_tString = CUtilities::Append( _tString, szNumber );
+					_tString = CUtilities::Append( _tString, CStringDecoder::DecodeToWString( aTable[I].pcName, aTable[I].ui32StrLen ) );
+					if ( _uiSize != aTable[I].uiSize ) {
+						_tString.push_back( typename _tInType::value_type( 's' ) );
+					}
+					::ZeroMemory( szBuffer, _T_MAX_LEN );
+					return _tString;
+				}
+			}
+			char szNumber[64];
+			std::sprintf( szNumber, "%I64u ", _uiSize );
+			_tString = CUtilities::Append( _tString, szNumber );
+			_DEC_9DC09A6E_byte( szBuffer );
+			_tString = CUtilities::Append( _tString, szBuffer );
+			if ( _uiSize != 1 ) {
+				_tString.push_back( typename _tInType::value_type( 's' ) );
+			}
+			::ZeroMemory( szBuffer, _T_MAX_LEN );
+			return _tString;
+		}
+
+		// Appends a string (NULL-terminated) character-by-character to another string (object).
+		template <typename _tInChar = wchar_t, typename _tOutFmt = std::u16string,
+			std::enable_if_t<mx::IsCharType<_tInChar>::value, int> = 0>
+		static _tOutFmt											Append( const _tOutFmt &_tDst, const _tInChar * _ptStr ) {
+			try {
+				_tOutFmt sTmp = _tDst;
+				while ( (*_ptStr) ) {
+					sTmp.push_back( (*_ptStr++) );
+				}
+				return sTmp;
+			}
+			catch ( ... ) { return _tOutFmt(); }
+		}
+
+		// Appends a string (object) character-by-character to another string (object).
+		template <typename _tInFmt, typename _tOutFmt,
+			std::enable_if_t<!std::is_pointer_v<_tInFmt> && mx::IsVectorLike<_tInFmt>::value, int> = 0>
+		static _tOutFmt											Append( const _tOutFmt &_tDst, const _tInFmt &_tStr ) {
+			try {
+				_tOutFmt sTmp = _tDst;
+				for ( typename _tInFmt::size_type I = 0; I < _tStr.size(); ++I ) {
+					sTmp.push_back( _tStr[I] );
+				}
+				return sTmp;
+			}
+			catch ( ... ) { return _tOutFmt(); }
+		}
 
 		// Creates a date string.
 		static const CHAR *										CreateDateString( uint64_t _uiTime, CHAR * _pcRet, size_t _sLen );

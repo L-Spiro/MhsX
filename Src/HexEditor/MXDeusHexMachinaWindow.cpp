@@ -243,6 +243,19 @@ namespace mx {
 				Close();
 				break;
 			}
+			
+			case Layout::MX_M_EDIT_UNDO : {
+				Undo();
+				break;
+			}
+			case Layout::MX_M_EDIT_REDO : {
+				Redo();
+				break;
+			}
+			case Layout::MX_M_EDIT_DELETE : {
+				DeleteSelectedOrCaret();
+				break;
+			}
 
 			case Layout::MX_M_SELECT_SELECT_ALL : {
 				SelectAll();
@@ -1469,6 +1482,30 @@ namespace mx {
 		}
 	}
 
+	// Performs an Undo.
+	void CDeusHexMachinaWindow::Undo() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		CSecureWString wsMsg;
+		bool bRet = phecControl->Undo( wsMsg );
+	}
+
+	// Performs a Redo.
+	void CDeusHexMachinaWindow::Redo() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		CSecureWString wsMsg;
+		bool bRet = phecControl->Redo( wsMsg );
+	}
+
+	// Delete the selection.
+	void CDeusHexMachinaWindow::DeleteSelectedOrCaret() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		CSecureWString wsMsg;
+		bool bRet = phecControl->DeleteSelectedOrCaret( wsMsg );
+	}
+
 	// Select all.
 	void CDeusHexMachinaWindow::SelectAll() {
 		auto phecControl = CurrentEditor();
@@ -1604,6 +1641,25 @@ namespace mx {
 					::EnableMenuItem(
 						_hMenu, uiId,
 						MF_BYCOMMAND | (phecControl ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+
+				case Layout::MX_M_EDIT_UNDO : {
+					EnableMenuItem(
+						_hMenu, uiId,
+						MF_BYCOMMAND | ((phecControl && phecControl->CanUndo()) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_EDIT_REDO : {
+					EnableMenuItem(
+						_hMenu, uiId,
+						MF_BYCOMMAND | ((phecControl && phecControl->CanRedo()) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_EDIT_DELETE : {
+					EnableMenuItem(
+						_hMenu, uiId,
+						MF_BYCOMMAND | ((phecControl && phecControl->HasSelection()) ? MF_ENABLED : MF_GRAYED) );
 					break;
 				}
 

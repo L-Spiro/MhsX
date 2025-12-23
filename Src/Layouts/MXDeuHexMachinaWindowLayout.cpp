@@ -215,7 +215,7 @@ namespace mx {
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miEditMenu[] = {
 		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
 		{ FALSE,		MX_M_EDIT_UNDO,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_EAA5E669__Undo, _LEN_EAA5E669 ),							false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'Z', MX_M_EDIT_UNDO } },
-		{ FALSE,		MX_M_EDIT_REDO,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_7B273131__Redo, _LEN_7B273131 ),							false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'Y', MX_M_EDIT_UNDO } },
+		{ FALSE,		MX_M_EDIT_REDO,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_7B273131__Redo, _LEN_7B273131 ),							false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'Y', MX_M_EDIT_REDO } },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_M_EDIT_CUT,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_6E69B475_Cu_t, _LEN_6E69B475 ),								false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'X', MX_M_EDIT_CUT } },
 		{ FALSE,		MX_M_EDIT_COPY,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_446FE619__Copy, _LEN_446FE619 ),							false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'C', MX_M_EDIT_COPY } },

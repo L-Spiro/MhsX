@@ -36,7 +36,7 @@ namespace mx {
 		virtual bool						Overwrite( uint64_t _ui64Addr, const void * _pvSrc, size_t _sSize );
 
 		// Delets bytes at a given address.
-		virtual bool						Delete( uint64_t _ui64Addr, uint64_t _ui64Size );
+		virtual bool						Delete( uint64_t _ui64Addr, uint64_t _ui64Size, uint64_t &_ui64Deleted );
 
 		// Gets the size of the data source.
 		virtual uint64_t					Size() const;
@@ -49,6 +49,24 @@ namespace mx {
 
 		// Does the given range of addresses contain anything real-time?
 		virtual bool						RangeContainsRealTime( uint64_t _ui64Start, uint64_t _ui64Total ) const override;
+
+		// Begins an Undo sequence.  Call before making multiple delete operations in a row.
+		virtual bool						BeginUndo() { return false; }
+
+		// Ends an Undo sequence.  Call when done making modifications.
+		virtual bool						EndUndo() { return false; }
+
+		// Determines if there are items to undo.
+		virtual bool						HasUndo() const { return false; }
+
+		// Determines if there are items to redo.
+		virtual bool						HasRedo() const { return false; }
+
+		// Performs an Undo operation.
+		virtual bool						Undo( CSecureWString &/*_swsStatus*/ ) { return false; }
+
+		// Performs an Redo operation.
+		virtual bool						Redo( CSecureWString &/*_swsStatus*/ ) { return false; }
 
 
 	protected :

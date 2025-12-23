@@ -386,7 +386,7 @@ namespace mx {
 				break;
 			}
 			case Layout::MX_MWMI_DELETE : {
-				DeleteSelected();
+				DeleteSelectedOrCaret();
 				break;
 			}
 			case Layout::MX_MWMI_DELETEALL : {
@@ -638,7 +638,7 @@ namespace mx {
 	}
 
 	// Deletes the selected Found Addresses.
-	void CMhsMainWindow::DeleteSelected() {
+	void CMhsMainWindow::DeleteSelectedOrCaret() {
 		auto ptlvView = MainTreeView();
 		if ( ptlvView ) {
 			auto famMan = m_pmhMemHack->FoundAddressManager();
