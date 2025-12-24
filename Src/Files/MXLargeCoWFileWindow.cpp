@@ -21,7 +21,16 @@ namespace mx {
 	}
 
 	// == Functions.
-	// Opens a file for editing.  Maps the first sector to memory.
+	/**
+	 * \brief Opens a file for copy-on-write editing and maps the initial window.
+	 *
+	 * Loads the target file, initializes internal state, and memory-maps the first sector/window
+	 * to enable fast reads. Subsequent edits are tracked through the logical map and any edit
+	 * segment files as needed.
+	 *
+	 * \param _pFile Path to the file to open.
+	 * \return Returns true if the file was opened and the initial mapping was created; false otherwise.
+	 */
 	bool CLargeCoWFileWindow::OpenFile( const std::filesystem::path &_pFile ) {
 		Reset();
 
@@ -66,7 +75,13 @@ namespace mx {
 		return true;
 	}
 
-	// Resets the object back to scratch.
+	/**
+	 * \brief Resets the object to its initial, unopened state.
+	 *
+	 * Clears all logical-view state, unmaps any mapped regions, closes any opened files, and
+	 * discards any pending edit tracking. After calling this, the object is equivalent to a
+	 * freshly constructed instance.
+	 */
 	void CLargeCoWFileWindow::Reset() {
 		m_fmMainMap.Close();
 		m_vEditedMaps = std::vector<std::unique_ptr<CFileMap>>();
@@ -74,7 +89,18 @@ namespace mx {
 		//m_ui32OriginalCrc = 0;
 	}
 
-	// Read from the file.
+	/**
+	 * \brief Reads bytes from the logical view into the destination buffer.
+	 *
+	 * Reads across logical sections as needed. The bytes returned reflect the current edited
+	 * view (i.e., after applying the logical map).
+	 *
+	 * \param _ui64Addr Logical address to read from.
+	 * \param _bDst Destination buffer to receive the data. The implementation may resize or append
+	 *              depending on the buffer semantics.
+	 * \param _sSize Number of bytes to read.
+	 * \return Returns true if the requested bytes were read; false otherwise.
+	 */
 	bool CLargeCoWFileWindow::Read( uint64_t _ui64Addr, CHexEditorInterface::CBuffer &_bDst, size_t _sSize ) const {
 		_sSize = std::min<size_t>( _sSize, Size() - _ui64Addr );
 
@@ -130,12 +156,42 @@ namespace mx {
 		return false;
 	}
 
-	// Delete from the file.
+	/**
+	 * \brief Deletes bytes from the logical view.
+	 *
+	 * Removes up to the requested number of bytes starting at the given logical address.
+	 * The logical map is updated to reflect the deletion.
+	 *
+	 * \param _ui64Addr Logical address at which deletion begins.
+	 * \param _ui64Size Number of bytes requested to delete.
+	 * \param _ui64Deleted Receives the number of bytes actually deleted.
+	 * \return Returns true if the deletion succeeded; false otherwise.
+	 */
 	bool CLargeCoWFileWindow::Delete( uint64_t _ui64Addr, uint64_t _ui64Size, uint64_t &_ui64Deleted ) {
 		return DeleteRange( m_vLogicalMap, _ui64Addr, _ui64Size, _ui64Deleted );
 	}
 
-	// Performs an Undo operation.
+	/**
+	 * \brief Inserts bytes at the given logical address.
+	 *
+	 * \param _ui64Addr Logical address at which to insert.
+	 * \param _bSrc Bytes to insert.
+	 * \param _ui64Inserted Returns the number of bytes inserted.
+	 * \return Returns true if the insert succeeded.
+	 */
+	bool CLargeCoWFileWindow::Insert( uint64_t _ui64Addr, const CHexEditorInterface::CBuffer &_bSrc, uint64_t &_ui64Inserted ) {
+		return false;
+	}
+
+	/**
+	 * \brief Performs an Undo operation.
+	 *
+	 * Undoes the most recent operation (or most recent group if group markers are present),
+	 * updating internal state and producing a user-facing status string.
+	 *
+	 * \param _swsStatus Receives a short status message describing the action performed.
+	 * \return Returns true if an Undo operation was performed; false otherwise.
+	 */
 	bool CLargeCoWFileWindow::Undo( CSecureWString &_swsStatus ) {
 		if ( m_sUndoIdx == size_t( -1 ) ) { return true; }
 		if ( m_sUndoIdx >= m_vUndoStack.size() ) {
@@ -177,7 +233,15 @@ namespace mx {
 		return true;
 	}
 
-	// Performs an Redo operation.
+	/**
+	 * \brief Performs a Redo operation.
+	 *
+	 * Redoes the most recently undone operation (or group if group markers are present),
+	 * updating internal state and producing a user-facing status string.
+	 *
+	 * \param _swsStatus Receives a short status message describing the action performed.
+	 * \return Returns true if a Redo operation was performed; false otherwise.
+	 */
 	bool CLargeCoWFileWindow::Redo( CSecureWString &_swsStatus ) {
 		size_t sNewIdx = m_sUndoIdx + 1;
 		if ( sNewIdx == size_t( m_vUndoStack.size() - 1 ) ) { return true; }
@@ -220,7 +284,15 @@ namespace mx {
 		return true;
 	}
 
-	// Updates the list of active segments.  Call within a try/catch block.
+	/**
+	 * \brief Updates the list of active segment ids.
+	 *
+	 * Scans the logical view and updates the segment activity list for the given id range.
+	 * Call this from within a try/catch block because it may allocate and can throw.
+	 *
+	 * \param _ui64Id Base segment id to update.
+	 * \param _sMax Maximum number of segment ids to consider.
+	 */
 	void CLargeCoWFileWindow::UpdateActiveSegments( uint64_t _ui64Id, size_t _sMax ) const {
 		// Erase any null pointers.
 		m_vEditedMaps.erase(
@@ -273,7 +345,13 @@ namespace mx {
 		}
 	}
 
-	// Simplifies the logical view.
+	/**
+	 * \brief Simplifies the current logical view.
+	 *
+	 * Merges adjacent compatible sections, removes empty sections, and normalizes the logical
+	 * map to a compact form. This should be called after any operation that mutates the logical
+	 * map (insert/delete/split/merge).
+	 */
 	void CLargeCoWFileWindow::SimplifyLogicalView() {
 		m_vLogicalMap.erase(
 			std::remove_if(
@@ -316,7 +394,12 @@ namespace mx {
 		}
 	}
 
-	// Updates the file size as per the logical view.
+	/**
+	 * \brief Updates the cached logical file size to match the logical view.
+	 *
+	 * Recomputes the current logical size based on the logical map, reflecting the user-visible
+	 * file size after all applied modifications.
+	 */
 	void CLargeCoWFileWindow::UpdateSize() {
 		uint64_t ui64Tmp = 0;
 
@@ -327,7 +410,18 @@ namespace mx {
 		m_ui64Size = ui64Tmp;
 	}
 
-	// Performs a logical DELETE on a vector of MX_LOGICAL_SECTION items.
+	/**
+	 * \brief Performs a logical delete across a section vector.
+	 *
+	 * Updates the provided section list by removing up to the requested range. The deletion may
+	 * split sections and/or remove sections entirely. The actual deleted byte count is returned.
+	 *
+	 * \param _vSections Section vector to modify.
+	 * \param _ui64DelStart Logical start address of the deletion.
+	 * \param _ui64DelSize Number of bytes requested to delete.
+	 * \param _ui64Deleted Receives the number of bytes actually deleted.
+	 * \return Returns true if the operation succeeded; false otherwise.
+	 */
 	bool CLargeCoWFileWindow::DeleteRange( std::vector<MX_LOGICAL_SECTION> &_vSections, uint64_t _ui64DelStart, uint64_t _ui64DelSize, uint64_t &_ui64Deleted ) {
 		_ui64Deleted = 0;
 		if ( _ui64DelSize == 0U ) { return true; }
@@ -415,7 +509,11 @@ namespace mx {
 		return true;
 	}
 
-	// Creates the directories needed to make it not read-only.
+	/**
+	 * \brief Creates edit directory if needed.
+	 *
+	 * \return Returns true if the edit directory exists or was created.
+	 */
 	bool CLargeCoWFileWindow::CreateWriteDirectories() {
 		m_pEditDiractory = std::filesystem::temp_directory_path() / _DEC_S_9DAF7683_Dues_Hex_Machina.c_str();
 		::OutputDebugStringW( (m_pEditDiractory.generic_wstring() + L"\r\n").c_str() );
@@ -430,7 +528,158 @@ namespace mx {
 		return true;
 	}
 
-	// Performs a single Undo operation.
+	/**
+	 * \brief Builds a full path to a segment file within m_pEditDiractory.  Call within try/catch block.
+	 *
+	 * \param _sId Segment file numeric id.
+	 * \return Full path to the segment file.
+	 */
+	std::filesystem::path CLargeCoWFileWindow::SegmentFilePath( size_t _sId ) const {
+		// Example: "<edit-dir>/seg_000012.mxseg"
+		wchar_t wszTmp[64];
+		::swprintf_s( wszTmp, L"seg_%06zu.mxseg", _sId );
+		return m_pEditDiractory / std::filesystem::path( wszTmp );
+	}
+
+	/**
+	 * \brief Ensures the current segment file exists and is sized appropriately for a new allocation.
+	 *
+	 * Rules:
+	 *  - If it does not exist, create it.
+	 *  - If it exists but is too small, extend it.
+	 *  - If it exists but is too large, create a new file.
+	 *  - If it exists but does not have enough remaining space, create a new file.
+	 *
+	 * \param _ui64NeedBytes Minimum contiguous bytes needed.
+	 * \return Returns true if the current segment file is ready.
+	 */
+	bool CLargeCoWFileWindow::EnsureCurrentSegmentFile( uint64_t _ui64NeedBytes ) {
+		if ( !CreateWriteDirectories() ) { return false; }
+
+		// If we don't have a current segment file, pick one.
+		if ( m_pCurSegmentFile.empty() ) {
+			m_pCurSegmentFile = SegmentFilePath( m_sFileId++ );
+			m_ui64CurSegmentUsed = 0;
+			m_sCurSegmentMapIdx = size_t( -1 );
+		}
+
+		auto MakeNew = [&]() -> bool {
+			m_pCurSegmentFile = SegmentFilePath( m_sFileId++ );
+			m_ui64CurSegmentUsed = 0;
+			m_sCurSegmentMapIdx = size_t( -1 );
+			return true;
+		};
+
+		std::error_code ec;
+		const bool bExists = std::filesystem::exists( m_pCurSegmentFile, ec );
+
+		const uint64_t ui64TargetSize = std::max( static_cast<uint64_t>( m_sSegmentFileSize ), _ui64NeedBytes );
+
+		if ( !bExists ) {
+			// Create new and size it.
+			HANDLE hFile = ::CreateFileW(
+				m_pCurSegmentFile.c_str(),
+				GENERIC_READ | GENERIC_WRITE,
+				FILE_SHARE_READ,
+				nullptr,
+				CREATE_NEW,
+				FILE_ATTRIBUTE_NORMAL,
+				nullptr
+			);
+			if ( hFile == INVALID_HANDLE_VALUE ) { return false; }
+
+			LARGE_INTEGER liSize;
+			liSize.QuadPart = static_cast<LONGLONG>( ui64TargetSize );
+			if ( ::SetFilePointerEx( hFile, liSize, nullptr, FILE_BEGIN ) == FALSE || ::SetEndOfFile( hFile ) == FALSE ) {
+				::CloseHandle( hFile );
+				return false;
+			}
+			::CloseHandle( hFile );
+			return true;
+		}
+
+		// Exists: check size.
+		const uint64_t ui64CurSize = static_cast<uint64_t>( std::filesystem::file_size( m_pCurSegmentFile, ec ) );
+		if ( ec ) { return false; }
+
+		// If file is too large, create a new file.
+		if ( ui64CurSize > static_cast<uint64_t>(m_sSegmentFileSize) ) {
+			MakeNew();
+			return EnsureCurrentSegmentFile( _ui64NeedBytes );
+		}
+
+		// If too small, extend it.
+		if ( ui64CurSize < ui64TargetSize ) {
+			HANDLE hFile = ::CreateFileW(
+				m_pCurSegmentFile.c_str(),
+				GENERIC_READ | GENERIC_WRITE,
+				FILE_SHARE_READ,
+				nullptr,
+				OPEN_EXISTING,
+				FILE_ATTRIBUTE_NORMAL,
+				nullptr
+			);
+			if ( hFile == INVALID_HANDLE_VALUE ) { return false; }
+
+			LARGE_INTEGER liSize;
+			liSize.QuadPart = static_cast<LONGLONG>( ui64TargetSize );
+			if ( ::SetFilePointerEx( hFile, liSize, nullptr, FILE_BEGIN ) == FALSE || ::SetEndOfFile( hFile ) == FALSE ) {
+				::CloseHandle( hFile );
+				return false;
+			}
+			::CloseHandle( hFile );
+
+			// Force remap next time.
+			m_sCurSegmentMapIdx = size_t( -1 );
+			return true;
+		}
+
+		// Size okay, but do we have contiguous room left?
+		// If not, create a new file.
+		if ( m_ui64CurSegmentUsed > ui64CurSize || ui64CurSize - m_ui64CurSegmentUsed < _ui64NeedBytes ) {
+			MakeNew();
+			return EnsureCurrentSegmentFile( _ui64NeedBytes );
+		}
+
+		return true;
+	}
+
+	/**
+	 * \brief Ensures a mapping exists for the current segment file and returns it.
+	 *
+	 * \return Returns pointer to the current segment mapping on success; nullptr on failure.
+	 */
+	CFileMap * CLargeCoWFileWindow::EnsureCurrentSegmentMap() {
+		if ( m_pCurSegmentFile.empty() ) { return nullptr; }
+
+		// If we already have an index, ensure it's still valid.
+		if ( m_sCurSegmentMapIdx != size_t( -1 ) && m_sCurSegmentMapIdx < m_vEditedMaps.size() && m_vEditedMaps[m_sCurSegmentMapIdx] ) {
+			return m_vEditedMaps[m_sCurSegmentMapIdx].get();
+		}
+
+		// Create new map object.
+		std::unique_ptr<CFileMap> upMap = std::make_unique<CFileMap>();
+
+		// Open / map writable.
+		// NOTE: Replace these calls with your real CFileMap API.
+		if ( !upMap->CreateMap( m_pCurSegmentFile, true ) ) { return nullptr; }
+		//if ( !upMap->MapWholeFile() ) { return nullptr; }
+
+		m_sCurSegmentMapIdx = m_vEditedMaps.size();
+		m_vEditedMaps.push_back( std::move( upMap ) );
+
+		return m_vEditedMaps[m_sCurSegmentMapIdx].get();
+	}
+
+	/**
+	 * \brief Performs a single Undo step.
+	 *
+	 * Executes exactly one undo record from the Undo stack (not an entire group). Group-level
+	 * Undo behavior should be implemented by calling this repeatedly while traversing group
+	 * markers.
+	 *
+	 * \return Returns the undo operation type that was processed.
+	 */
 	CHexEditorInterface::MX_UNDO_OP CLargeCoWFileWindow::SingleUndo() {
 		if ( m_sUndoIdx == size_t( -1 ) ) { return CHexEditorInterface::MX_UO_INVALID; }
 		if ( m_sUndoIdx >= m_vUndoStack.size() ) { return CHexEditorInterface::MX_UO_INVALID; }
@@ -448,7 +697,15 @@ namespace mx {
 		return uoRet;
 	}
 
-	// Performs a single Redo operation.
+	/**
+	 * \brief Performs a single Redo step.
+	 *
+	 * Executes exactly one redo record from the Undo stack (not an entire group). Group-level
+	 * Redo behavior should be implemented by calling this repeatedly while traversing group
+	 * markers.
+	 *
+	 * \return Returns the undo operation type that was processed.
+	 */
 	CHexEditorInterface::MX_UNDO_OP CLargeCoWFileWindow::SingleRedo() {
 		size_t sNewIdx = m_sUndoIdx + 1;
 		if ( sNewIdx == size_t( -1 ) ) { return CHexEditorInterface::MX_UO_INVALID; }

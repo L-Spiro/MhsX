@@ -464,7 +464,6 @@ namespace mx {
 
 		if ( m_pheiTarget->Undo( _swsStatus ) ) {
 			if ( m_sSelStackIdx != size_t( -1 ) && m_sSelStackIdx < m_vSelectionStack.size() ) {
-				
 				m_sSel = m_vSelectionStack[m_sSelStackIdx].sUndoSelection;
 				m_sgSelGesture.i32CaretIdx = m_vSelectionStack[m_sSelStackIdx].i32UndoCaretIdx;
 				m_sgSelGesture.ui64AnchorAddr = m_vSelectionStack[m_sSelStackIdx].ui64UndoAnchorAddr;
@@ -472,6 +471,7 @@ namespace mx {
 				m_sgSelGesture.ui64CaretAddr = m_vSelectionStack[m_sSelStackIdx].ui64UndoCaretAddr;
 				
 				--m_sSelStackIdx;
+				EnsureVisible( m_sgSelGesture.ui64CaretAddr, FALSE );
 			}
 			::InvalidateRect( Wnd(), nullptr, FALSE );
 			return true;
@@ -500,6 +500,7 @@ namespace mx {
 				m_sgSelGesture.ui64CaretAddr = m_vSelectionStack[sTmp].ui64RedoCaretAddr;
 
 				m_sSelStackIdx = sTmp;
+				EnsureVisible( m_sgSelGesture.ui64CaretAddr, FALSE );
 			}
 
 			::InvalidateRect( Wnd(), nullptr, FALSE );
