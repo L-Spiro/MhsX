@@ -32,50 +32,128 @@ namespace ee {
 
 
 		// == Operators.
-		// Cast to int8_t.
+		/**
+		 * \brief Casts this value to a signed 8-bit integer.
+		 *
+		 * \return Returns the value converted from the 16-bit float representation to \c int8_t.
+		 *
+		 * \note Conversion is performed by first converting to a float via Value() and then casting to \c int8_t.
+		 */
 		operator					int8_t() const {
 			return int8_t( Value() );
 		}
-		// Cast to int16_t.
+
+		/**
+		 * \brief Casts this value to a signed 16-bit integer.
+		 *
+		 * \return Returns the value converted from the 16-bit float representation to \c int16_t.
+		 *
+		 * \note Conversion is performed by first converting to a float via Value() and then casting to \c int16_t.
+		 */
 		operator					int16_t() const {
 			return int16_t( Value() );
 		}
-		// Cast to int32_t.
+
+		/**
+		 * \brief Casts this value to a signed 32-bit integer.
+		 *
+		 * \return Returns the value converted from the 16-bit float representation to \c int32_t.
+		 *
+		 * \note Conversion is performed by first converting to a float via Value() and then casting to \c int32_t.
+		 */
 		operator					int32_t() const {
 			return int32_t( Value() );
 		}
-		// Cast to int64_t.
+
+		/**
+		 * \brief Casts this value to a signed 64-bit integer.
+		 *
+		 * \return Returns the value converted from the 16-bit float representation to \c int64_t.
+		 *
+		 * \note Conversion is performed by first converting to a float via Value() and then casting to \c int64_t.
+		 */
 		operator					int64_t() const {
 			return int64_t( Value() );
 		}
-		// Cast to uint8_t.
+
+		/**
+		 * \brief Casts this value to an unsigned 8-bit integer.
+		 *
+		 * \return Returns the value converted from the 16-bit float representation to \c uint8_t.
+		 *
+		 * \note Conversion is performed by first converting to a float via Value() and then casting to \c uint8_t.
+		 */
 		operator					uint8_t() const {
 			return uint8_t( Value() );
 		}
-		// Cast to uint16_t.
+		
+		/**
+		 * \brief Casts this value to an unsigned 16-bit integer.
+		 *
+		 * \return Returns the value converted from the 16-bit float representation to \c uint16_t.
+		 *
+		 * \note Conversion is performed by first converting to a float via Value() and then casting to \c uint16_t.
+		 */
 		operator					uint16_t() const {
 			return uint16_t( Value() );
 		}
-		// Cast to uint32_t.
+		
+		/**
+		 * \brief Casts this value to an unsigned 32-bit integer.
+		 *
+		 * \return Returns the value converted from the 16-bit float representation to \c uint32_t.
+		 *
+		 * \note Conversion is performed by first converting to a float via Value() and then casting to \c uint32_t.
+		 */
 		operator					uint32_t() const {
 			return uint32_t( Value() );
 		}
-		// Cast to uint64_t.
+		
+		/**
+		 * \brief Casts this value to an unsigned 64-bit integer.
+		 *
+		 * \return Returns the value converted from the 16-bit float representation to \c uint64_t.
+		 *
+		 * \note Conversion is performed by first converting to a float via Value() and then casting to \c uint64_t.
+		 */
 		operator					uint64_t() const {
 			return uint64_t( Value() );
 		}
-		// Cast to float.
+		
+		/**
+		 * \brief Casts this value to a 32-bit floating-point number.
+		 *
+		 * \return Returns the value converted from the 16-bit float representation to \c float.
+		 *
+		 * \note Conversion uses Value(), which returns a float value.
+		 */
 		operator					float() const {
 			return float( Value() );
 		}
-		// Cast to double.
+		
+		/**
+		 * \brief Casts this value to a 64-bit floating-point number.
+		 *
+		 * \return Returns the value converted from the 16-bit float representation to \c double.
+		 *
+		 * \note Conversion uses Value(), which returns a float value and then casts it to \c double.
+		 */
 		operator					double() const {
 			return double( Value() );
 		}
 
 
 		// == Functions.
-		// Gets the value as a double.
+		/**
+		 * \brief Gets the value as a double.
+		 *
+		 * \return Returns the numeric value represented by the internal 16-bit float bit pattern as a \c double.
+		 *
+		 * \note This performs an IEEE-754 half-precision (1 sign bit, 5 exponent bits, 10 fraction bits) to single-precision conversion,
+		 * then returns the resulting \c float as a \c double.
+		 * \note NaN and infinity are preserved. Subnormals are normalized into the single-precision representation.
+		 * \note The sign is propagated for all cases, including signed zero.
+		 */
 		double						Value() const {
 			union {
 				float				fFloat;
@@ -113,17 +191,37 @@ namespace ee {
 			return fFloat.AsDouble();*/
 		}
 
-		// Gets the 16-bit int value.
+		/**
+		 * \brief Gets the raw 16-bit bit pattern.
+		 *
+		 * \return Returns the stored 16-bit value containing the IEEE-754 half-precision bit fields.
+		 */
 		uint16_t					RawValue() const { return m_uiVal; }
 
-		// Gets the max value.
+		/**
+		 * \brief Gets the maximum finite value representable by this 16-bit float format.
+		 *
+		 * \return Returns the maximum finite half-precision value, as a \c double.
+		 *
+		 * \note This returns a constant (65504.0), which is the IEEE-754 binary16 maximum finite value.
+		 */
 		static double				Max() {
 			/*static double dMax = ee::CFloatX::GetMaxForBits( 5, 11, true );
 			return dMax;*/
 			return 65504.0;
 		}
 
-		// Converts from a double to a 16-bit integer containing the bits for the 16-bit float.
+		/**
+		 * \brief Converts from a double to a 16-bit integer containing the bits for the 16-bit float.
+		 *
+		 * \param _dVal The input value to convert.
+		 * \return Returns a 16-bit value containing the IEEE-754 half-precision encoding of \p _dVal.
+		 *
+		 * \note The input is first converted to \c float, and the conversion is performed from that single-precision representation.
+		 * \note NaN and infinity are preserved. Values that overflow the half-precision range are converted to infinity.
+		 * \note Subnormal results are generated when the magnitude is too small to be represented as a normal half.
+		 * \note Rounding is performed using a tie-breaking rule based on the discarded bits (see the round-bit checks).
+		 */
 		static uint16_t				DoubleToUi16( double _dVal ) {
 			union {
 				float				fFloat;

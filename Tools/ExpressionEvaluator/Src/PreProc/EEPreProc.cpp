@@ -520,7 +520,7 @@ namespace ee {
 	/**
 	 * Gets the parameters for a function-style macro.  If no parameters are given, returns false.
 	 *
-	 * \param _psString The string from which to extract function-style macro parameters.
+	 * \param _sString The string from which to extract function-style macro parameters.
 	 * \param _stPos The position at which to begin the extraction.
 	 * \param _stNewPos The position after successful extraction.
 	 * \param _vRet The returned parameters, as strings.

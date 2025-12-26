@@ -11,7 +11,18 @@
 namespace ee {
 
 	// == Functions.
-	// Creates a +InF value.
+	/**
+	 * \brief Creates a +infinity value for the specified floating-point bit layout.
+	 *
+	 * Initializes this instance to represent positive infinity using the provided exponent/mantissa bit sizes
+	 * and encoding options (implicit mantissa bit and presence of a sign bit).
+	 *
+	 * \param _uiExpBits Number of exponent bits.
+	 * \param _uiManBits Number of mantissa bits (including the implicit bit if enabled).
+	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
+	 * \param _bHasSign True if the format contains a sign bit; false for unsigned formats.
+	 * \return Returns *this.
+	 */
 	CFloatX & CFloatX::CreateInfP( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
 		uiManBits = _uiManBits;
 		uiExpBits = _uiExpBits;
@@ -23,7 +34,18 @@ namespace ee {
 		return (*this);
 	}
 
-	// Creates a -InF value.
+	/**
+	 * \brief Creates a -infinity value for the specified floating-point bit layout.
+	 *
+	 * Initializes this instance to represent negative infinity using the provided exponent/mantissa bit sizes
+	 * and encoding options (implicit mantissa bit and presence of a sign bit).
+	 *
+	 * \param _uiExpBits Number of exponent bits.
+	 * \param _uiManBits Number of mantissa bits (including the implicit bit if enabled).
+	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
+	 * \param _bHasSign True if the format contains a sign bit; false for unsigned formats.
+	 * \return Returns *this.
+	 */
 	CFloatX & CFloatX::CreateInfN( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
 		uiManBits = _uiManBits;
 		uiExpBits = _uiExpBits;
@@ -35,7 +57,18 @@ namespace ee {
 		return (*this);
 	}
 
-	// Creates a NaN value.
+	/**
+	 * \brief Creates a NaN value for the specified floating-point bit layout.
+	 *
+	 * Initializes this instance to represent a quiet NaN using the provided exponent/mantissa bit sizes
+	 * and encoding options. The exact NaN payload/bit pattern is implementation-defined within this class.
+	 *
+	 * \param _uiExpBits Number of exponent bits.
+	 * \param _uiManBits Number of mantissa bits (including the implicit bit if enabled).
+	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
+	 * \param _bHasSign True if the format contains a sign bit; false for unsigned formats.
+	 * \return Returns *this.
+	 */
 	CFloatX & CFloatX::CreateNaN( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
 		uiManBits = _uiManBits;
 		uiExpBits = _uiExpBits;
@@ -47,7 +80,17 @@ namespace ee {
 		return (*this);
 	}
 
-	// Creates a max value.
+	/**
+	 * \brief Creates the maximum finite value for the specified floating-point bit layout.
+	 *
+	 * Initializes this instance to the largest representable non-infinite value for the provided format.
+	 *
+	 * \param _uiExpBits Number of exponent bits.
+	 * \param _uiManBits Number of mantissa bits (including the implicit bit if enabled).
+	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
+	 * \param _bHasSign True if the format contains a sign bit; false for unsigned formats.
+	 * \return Returns *this.
+	 */
 	CFloatX & CFloatX::CreateMax( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
 		uiManBits = _uiManBits;
 		uiExpBits = _uiExpBits;
@@ -60,7 +103,18 @@ namespace ee {
 		return (*this);
 	}
 
-	// Creates the smallest normalized value.
+	/**
+	 * \brief Creates the smallest positive normalized value for the specified floating-point bit layout.
+	 *
+	 * Initializes this instance to the minimum representable positive normalized value (i.e. the smallest
+	 * value with a non-zero exponent and a zero mantissa, using the format's rules).
+	 *
+	 * \param _uiExpBits Number of exponent bits.
+	 * \param _uiManBits Number of mantissa bits (including the implicit bit if enabled).
+	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
+	 * \param _bHasSign True if the format contains a sign bit; false for unsigned formats.
+	 * \return Returns *this.
+	 */
 	CFloatX & CFloatX::CreateMinNormalized( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
 		uiManBits = _uiManBits;
 		uiExpBits = _uiExpBits;
@@ -72,7 +126,18 @@ namespace ee {
 		return (*this);
 	}
 
-	// Creates the smallest non-0 value.
+	/**
+	 * \brief Creates the smallest positive non-zero value for the specified floating-point bit layout.
+	 *
+	 * Initializes this instance to the minimum representable positive value, including denormal/subnormal
+	 * values if the format supports them.
+	 *
+	 * \param _uiExpBits Number of exponent bits.
+	 * \param _uiManBits Number of mantissa bits (including the implicit bit if enabled).
+	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
+	 * \param _bHasSign True if the format contains a sign bit; false for unsigned formats.
+	 * \return Returns *this.
+	 */
 	CFloatX & CFloatX::CreateMin( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
 		uiManBits = _uiManBits;
 		uiExpBits = _uiExpBits;
@@ -85,7 +150,17 @@ namespace ee {
 		return (*this);
 	}
 
-	// Creates epsilon, the smallest value such that 1.0+X does not equal 1.
+	/**
+	 * \brief Creates epsilon for the specified floating-point bit layout.
+	 *
+	 * Epsilon is the smallest value X such that (1.0 + X) != 1.0 when represented in the specified format.
+	 *
+	 * \param _uiExpBits Number of exponent bits.
+	 * \param _uiManBits Number of mantissa bits (including the implicit bit if enabled).
+	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
+	 * \param _bHasSign True if the format contains a sign bit; false for unsigned formats.
+	 * \return Returns *this.
+	 */
 	CFloatX & CFloatX::CreateEpsilon( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
 		if ( _uiExpBits <= 1 ) {
 			return CreateFromDouble( 0.0, _uiExpBits, _uiManBits, _bImplicitMantissaBit, _bHasSign );
@@ -96,7 +171,19 @@ namespace ee {
 		return CreateFromDouble( AsDouble() - 1.0, _uiExpBits, _uiManBits, _bImplicitMantissaBit, _bHasSign );
 	}
 
-	// Creates the next-after value going up from the given number.
+	/**
+	 * \brief Creates the next representable value above the given number for the specified bit layout.
+	 *
+	 * Interprets the input as a real value, converts it to the specified format, and then advances to the
+	 * next representable value greater than that representation.
+	 *
+	 * \param _dVal Input value.
+	 * \param _uiExpBits Number of exponent bits.
+	 * \param _uiManBits Number of mantissa bits (including the implicit bit if enabled).
+	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
+	 * \param _bHasSign True if the format contains a sign bit; false for unsigned formats.
+	 * \return Returns *this.
+	 */
 	CFloatX & CFloatX::CreateNextAfterUp( double _dVal, uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
 		CreateFromDouble( _dVal, _uiExpBits, _uiManBits, _bImplicitMantissaBit, _bHasSign );
 		uint64_t uiVal = AsUint64SansSign();
@@ -122,7 +209,19 @@ namespace ee {
 		}
 	}
 
-	// Creates the next-after value going down from the given number.
+	/**
+	 * \brief Creates the next representable value below the given number for the specified bit layout.
+	 *
+	 * Interprets the input as a real value, converts it to the specified format, and then steps to the
+	 * next representable value less than that representation.
+	 *
+	 * \param _dVal Input value.
+	 * \param _uiExpBits Number of exponent bits.
+	 * \param _uiManBits Number of mantissa bits (including the implicit bit if enabled).
+	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
+	 * \param _bHasSign True if the format contains a sign bit; false for unsigned formats.
+	 * \return Returns *this.
+	 */
 	CFloatX & CFloatX::CreateNextAfterDown( double _dVal, uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
 		CreateFromDouble( _dVal, _uiExpBits, _uiManBits, _bImplicitMantissaBit, _bHasSign );
 		uint64_t uiVal = AsUint64SansSign();
@@ -154,27 +253,51 @@ namespace ee {
 		}
 	}
 
-	// Is this a NaN?
+	/**
+	 * \brief Determines whether this value is a NaN.
+	 *
+	 * \return Returns true if the stored bit pattern represents a NaN for this instance's configuration.
+	 */
 	bool CFloatX::IsNaN() const {
 		return (uiMantissa != 0) &&
 			(uiExponent == AllExpBitsSet( uiExpBits ));
 	}
 
-	// Is this +InF?
+	/**
+	 * \brief Determines whether this value is positive infinity.
+	 *
+	 * \return Returns true if the stored bit pattern represents +infinity for this instance's configuration.
+	 */
 	bool CFloatX::IsInfP() const {
 		return (bSign == 0) &&
 			(uiMantissa == 0) &&
 			(uiExponent == AllExpBitsSet( uiExpBits ));
 	}
 
-	// Is this -InF?
+	/**
+	 * \brief Determines whether this value is negative infinity.
+	 *
+	 * \return Returns true if the stored bit pattern represents -infinity for this instance's configuration.
+	 */
 	bool CFloatX::IsInfN() const {
 		return (bSign == 1) &&
 			(uiMantissa == 0) &&
 			(uiExponent == AllExpBitsSet( uiExpBits ));
 	}
 
-	// Create from a double.
+	/**
+	 * \brief Creates this value from a double using the specified floating-point bit layout.
+	 *
+	 * Converts the given double-precision value into the custom format described by the parameters and
+	 * stores the resulting sign/exponent/mantissa fields in this instance.
+	 *
+	 * \param _dVal Input value.
+	 * \param _uiExpBits Number of exponent bits.
+	 * \param _uiManBits Number of mantissa bits (including the implicit bit if enabled).
+	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
+	 * \param _bHasSign True if the format contains a sign bit; false for unsigned formats.
+	 * \return Returns *this.
+	 */
 	CFloatX & CFloatX::CreateFromDouble( double _dVal, uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
 		uiManBits = _uiManBits;
 		uiExpBits = _uiExpBits;
@@ -460,7 +583,19 @@ namespace ee {
 		return (*this);
 	}
 
-	// Create from bits in a uint64_t value.
+	/**
+	 * \brief Creates this value from a raw integer bit pattern using the specified floating-point bit layout.
+	 *
+	 * Interprets the low bits of the provided integer as sign/exponent/mantissa fields according to the
+	 * specified format and stores them in this instance.
+	 *
+	 * \param _uiVal Raw bit pattern.
+	 * \param _uiExpBits Number of exponent bits.
+	 * \param _uiManBits Number of mantissa bits (including the implicit bit if enabled).
+	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
+	 * \param _bHasSign True if the format contains a sign bit; false for unsigned formats.
+	 * \return Returns *this.
+	 */
 	CFloatX & CFloatX::CreateFromBits( uint64_t _uiVal, uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
 		uiManBits = _uiManBits;
 		uiExpBits = _uiExpBits;
@@ -475,7 +610,18 @@ namespace ee {
 		return (*this);
 	}
 
-	// Create from separate values.
+	/**
+	 * \brief Creates this value from explicit sign/exponent/mantissa parts using the specified bit layout.
+	 *
+	 * \param _uiSign Sign bit value (0 or 1). Ignored if \p _bHasSign is false.
+	 * \param _uiExp Exponent field value (unshifted).
+	 * \param _uiMan Mantissa field value (unshifted; does not include the implicit bit).
+	 * \param _uiExpBits Number of exponent bits.
+	 * \param _uiManBits Number of mantissa bits (including the implicit bit if enabled).
+	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
+	 * \param _bHasSign True if the format contains a sign bit; false for unsigned formats.
+	 * \return Returns *this.
+	 */
 	CFloatX & CFloatX::CreateFromParts( uint64_t _uiSign, uint64_t _uiExp, uint64_t _uiMan,
 		uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit, bool _bHasSign ) {
 		uiManBits = _uiManBits;
@@ -491,7 +637,14 @@ namespace ee {
 		return (*this);
 	}
 
-	// Cast to double.
+	/**
+	 * \brief Converts this value to a double.
+	 *
+	 * Decodes the stored fields using this instance's configuration and returns the nearest representable
+	 * double-precision value (including infinities and NaNs where applicable).
+	 *
+	 * \return Returns the decoded value as a double.
+	 */
 	double CFloatX::AsDouble() const {
 		/*if ( uiExpBits == EE_FLOATX_DBL_EXP_BITS && uiManBits == EE_FLOATX_DBL_MAN_BITS + 1 && bImplicitManBit && bHasSign ) {
 			union EE_DOUBLE_INT {
@@ -517,7 +670,11 @@ namespace ee {
 		return Sign() * std::pow( 2.0, uiExponent - ExpBias() ) * (1.0 + dSig);
 	}
 
-	// Put all the bits together into a uint64_t value.
+	/**
+	 * \brief Packs the stored fields into a raw integer bit pattern.
+	 *
+	 * \return Returns a uint64_t containing the packed representation for this instance's configuration.
+	 */
 	uint64_t CFloatX::AsUint64() const {
 		uint64_t uiVal = ((bHasSign && bSign) ? 1ULL : 0ULL);
 		uiVal <<= uiExpBits;
@@ -528,7 +685,11 @@ namespace ee {
 		return uiVal;
 	}
 
-	// Put all the bits together into a uint64_t value except for the sign value.
+	/**
+	 * \brief Packs the stored fields into a raw integer bit pattern excluding the sign bit.
+	 *
+	 * \return Returns the packed representation with the sign bit cleared/omitted.
+	 */
 	uint64_t CFloatX::AsUint64SansSign() const {
 		uint64_t uiVal = 0ULL;
 		uiVal |= uiExponent & ((1ULL << uiExpBits) - 1ULL);
@@ -538,7 +699,12 @@ namespace ee {
 		return uiVal;
 	}
 
-	// Sets the sign bit, if applicable.
+	/**
+	 * \brief Enables or disables the sign bit when the format supports a sign.
+	 *
+	 * \param _bEnabled True to set the sign bit; false to clear it.
+	 * \return Returns *this.
+	 */
 	CFloatX & CFloatX::SetSign( bool _bEnabled ) {
 		if ( bHasSign ) {
 			bSign = _bEnabled != false ? true : false;
@@ -546,7 +712,13 @@ namespace ee {
 		return (*this);
 	}
 
-	// Sets or unsets a bit in the exponent.
+	/**
+	 * \brief Sets or clears a bit in the exponent field.
+	 *
+	 * \param _bEnabled True to set the bit; false to clear it.
+	 * \param _uiBit Bit index within the exponent field (0 is least significant).
+	 * \return Returns *this.
+	 */
 	CFloatX & CFloatX::SetExpBit( bool _bEnabled, uint16_t _uiBit ) {
 		if ( _uiBit < uiExpBits ) {
 			if ( _bEnabled ) {
@@ -559,7 +731,13 @@ namespace ee {
 		return (*this);
 	}
 
-	// Sets or unsets a bit in the mantissa.
+	/**
+	 * \brief Sets or clears a bit in the mantissa field.
+	 *
+	 * \param _bEnabled True to set the bit; false to clear it.
+	 * \param _uiBit Bit index within the mantissa field (0 is least significant).
+	 * \return Returns *this.
+	 */
 	CFloatX & CFloatX::SetManBit( bool _bEnabled, uint16_t _uiBit ) {
 		if ( _uiBit < uiManBits ) {
 			if ( _bEnabled ) {
@@ -572,7 +750,14 @@ namespace ee {
 		return (*this);
 	}
 
-	// Gets the maximum possible value for a float type with the given bits.
+	/**
+	 * \brief Computes the maximum finite value representable by the given bit layout.
+	 *
+	 * \param _uiExpBits Number of exponent bits.
+	 * \param _uiManBits Number of mantissa bits (including the implicit bit if enabled).
+	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
+	 * \return Returns the maximum finite value as a double.
+	 */
 	double CFloatX::GetMaxForBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit ) {
 		uint64_t uiMaxExp = AllExpBitsSet( _uiExpBits ) - 1;
 		double dExpBias = ExpBias( _uiExpBits );
@@ -589,7 +774,14 @@ namespace ee {
 		return dMaxExp * dMan;
 	}
 
-	// Gets the smallest possible non-0 value for a float type with the given bits.
+	/**
+	 * \brief Computes the smallest positive non-zero value representable by the given bit layout.
+	 *
+	 * \param _uiExpBits Number of exponent bits.
+	 * \param _uiManBits Number of mantissa bits (including the implicit bit if enabled).
+	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
+	 * \return Returns the minimum positive non-zero value as a double.
+	 */
 	double CFloatX::GetMinForBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit ) {
 		double dExpBias = ExpBias( _uiExpBits ) - 1.0;	// Denormalized exponent.
 		double dMaxExp = std::pow( 2.0, -dExpBias );
@@ -601,14 +793,28 @@ namespace ee {
 		return dMaxExp * dMan;
 	}
 
-	// Gets the smallest normalized non-0 value for a float type with the given bits.
+	/**
+	 * \brief Computes the smallest positive normalized non-zero value representable by the given bit layout.
+	 *
+	 * \param _uiExpBits Number of exponent bits.
+	 * \param _uiManBits Number of mantissa bits (including the implicit bit if enabled).
+	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
+	 * \return Returns the minimum positive normalized value as a double.
+	 */
 	double CFloatX::GetNormalizedMinForBits( uint16_t _uiExpBits, uint16_t /*_uiManBits*/, bool /*_bImplicitMantissaBit*/ ) {
 		double dExpBias = ExpBias( _uiExpBits );		// Normalized exponent.
 		double dMaxExp = std::pow( 2.0, 1.0 - dExpBias );
 		return dMaxExp;
 	}
 
-	// Gets the maximum denormalized value for a float type with the given bits.
+	/**
+	 * \brief Computes the maximum denormal/subnormal value representable by the given bit layout.
+	 *
+	 * \param _uiExpBits Number of exponent bits.
+	 * \param _uiManBits Number of mantissa bits (including the implicit bit if enabled).
+	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
+	 * \return Returns the maximum denormalized value as a double.
+	 */
 	double CFloatX::GetDenormalizedMaxForBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit ) {
 		double dExpBias = ExpBias( _uiExpBits ) - 1.0;	// Denormalized exponent.
 		double dMaxExp = std::pow( 2.0, -dExpBias );

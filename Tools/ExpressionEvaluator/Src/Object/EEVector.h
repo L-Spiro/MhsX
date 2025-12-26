@@ -152,25 +152,74 @@ namespace ee {
 		virtual bool								DivideEquals( CExpEvalContainer::EE_RESULT &_rRet );
 
 		// == Base API functions.
-		// Gets the object as an ASCII string.
+		/**
+		 * \brief Gets the object as an ASCII string.
+		 *
+		 * Base implementation returns EE_NC_INVALID.  Derived types may override to provide an ASCII-only
+		 * representation of the object.
+		 *
+		 * \return Returns an EE_RESULT containing the ASCII string result, or EE_NC_INVALID if unsupported.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Ascii() const { return { EE_NC_INVALID }; }
 
-		// Gets the binary form of the object as a string (0b****).
+		/**
+		 * \brief Gets the binary form of the object as a string (0b****).
+		 *
+		 * Base implementation returns EE_NC_INVALID.  Derived types may override to format the object as a
+		 * binary literal string.
+		 *
+		 * \return Returns an EE_RESULT containing the binary string result, or EE_NC_INVALID if unsupported.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Bin() const { return { EE_NC_INVALID }; }
 
-		// Gets the boolean form of the object as a string (0b****).
+		/**
+		 * \brief Gets the boolean form of the object as a string (0b****).
+		 *
+		 * Base implementation returns EE_NC_INVALID.  Derived types may override to convert the object to a
+		 * boolean value and format it as a binary literal string (typically "0b0" or "0b1").
+		 *
+		 * \return Returns an EE_RESULT containing the boolean string result, or EE_NC_INVALID if unsupported.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Bool() const { return { EE_NC_INVALID }; }
 
-		// Returns the character that represents the specified Unicode. 
+		/**
+		 * \brief Returns the character that represents the specified Unicode.
+		 *
+		 * Base implementation returns EE_NC_INVALID.  Derived types may override to interpret the object as a
+		 * Unicode code point and return the corresponding character.
+		 *
+		 * \return Returns an EE_RESULT containing the character result, or EE_NC_INVALID if unsupported.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Chr() const { return { EE_NC_INVALID }; }
 
-		// Gets the string interpreted to its best fit and then converted to float. 
+		/**
+		 * \brief Gets the string interpreted to its best fit and then converted to float.
+		 *
+		 * Base implementation returns EE_NC_INVALID.  Derived types may override to interpret the object as a
+		 * number and return a floating-point result.
+		 *
+		 * \return Returns an EE_RESULT containing the floating-point value, or EE_NC_INVALID if unsupported.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Float() const { return { EE_NC_INVALID }; }
 
-		// Gets the hexadecimal form of the object as a string (0x****).
+		/**
+		 * \brief Gets the hexadecimal form of the object as a string (0x****).
+		 *
+		 * Base implementation returns EE_NC_INVALID.  Derived types may override to format the object as a
+		 * hexadecimal literal string.
+		 *
+		 * \return Returns an EE_RESULT containing the hexadecimal string result, or EE_NC_INVALID if unsupported.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Hex() const { return { EE_NC_INVALID }; }
 
-		// Gets the string interpreted to its best fit and then converted to int64_t. 
+		/**
+		 * \brief Gets the string interpreted to its best fit and then converted to int64_t.
+		 *
+		 * Base implementation returns EE_NC_INVALID.  Derived types may override to interpret the object as a
+		 * number and return a signed 64-bit integer result.
+		 *
+		 * \return Returns an EE_RESULT containing the integer value, or EE_NC_INVALID if unsupported.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Int() const { return { EE_NC_INVALID }; }
 
 		/**
@@ -254,13 +303,35 @@ namespace ee {
 			return true;
 		}
 
-		// Gets the octadecimal form of the object as a string (0o****).
+		/**
+		 * \brief Gets the octadecimal form of the object as a string (0o****).
+		 *
+		 * Base implementation returns EE_NC_INVALID.  Derived types may override to format the object as an
+		 * octal literal string.
+		 *
+		 * \return Returns an EE_RESULT containing the octal string result, or EE_NC_INVALID if unsupported.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Oct() const { return { EE_NC_INVALID }; }
 
-		// Returns the ordinal value of the object as a Unicode character (always EE_NC_UNSIGNED).
+		/**
+		 * \brief Returns the ordinal value of the object as a Unicode character (always EE_NC_UNSIGNED).
+		 *
+		 * Base implementation returns EE_NC_INVALID.  Derived types may override to interpret the object as a
+		 * character and return its ordinal (code point) value as an unsigned result.
+		 *
+		 * \return Returns an EE_RESULT containing the ordinal value, or EE_NC_INVALID if unsupported.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Ord() const { return { EE_NC_INVALID }; }
 
-		// Append an item to the end of the vector.
+		/**
+		 * \brief Append an item to the end of the vector.
+		 *
+		 * Appends the given value to this vector's backing store.  The value is stored as-is (EE_RESULT), and
+		 * the appended value is returned.
+		 *
+		 * \param _rRet The value to append.
+		 * \return Returns the appended value on success.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		PushBack( CExpEvalContainer::EE_RESULT &_rRet ) {
 			/*if ( _rRet.ncType == EE_NC_OBJECT && _rRet.u.poObj && (_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) &&
 				static_cast<ee::CVector *>(_rRet.u.poObj) == this ) { return { .ncType = EE_NC_INVALID }; }*/
@@ -268,27 +339,52 @@ namespace ee {
 			return _rRet;
 		}
 
-		// Gets the capacity.
+		/**
+		 * \brief Gets the capacity.
+		 *
+		 * \return Returns an EE_RESULT of type EE_NC_UNSIGNED containing the current capacity.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Capacity() const {
 			CExpEvalContainer::EE_RESULT rRet = { .ncType = EE_NC_UNSIGNED };
 			rRet.u.ui64Val = m_vBacking.capacity();
 			return rRet;
 		}
 
-		// Gets whether the vector is empty or not.
+		/**
+		 * \brief Gets whether the vector is empty or not.
+		 *
+		 * \return Returns an EE_RESULT of type EE_NC_UNSIGNED containing 1 if empty; 0 otherwise.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Empty() const {
 			CExpEvalContainer::EE_RESULT rRet = { .ncType = EE_NC_UNSIGNED };
 			rRet.u.ui64Val = m_vBacking.empty();
 			return rRet;
 		}
 
-		// Clears the array.
+		/**
+		 * \brief Clears the array.
+		 *
+		 * Removes all elements from the vector.
+		 *
+		 * \return Returns an EE_RESULT representing this object.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Clear() { m_vBacking.clear(); return CreateResult(); }
 
-		// Appends to the array.
+		/**
+		 * \brief Appends to the array.
+		 *
+		 * This is an alias of PushBack().
+		 *
+		 * \param _rRet The value to append.
+		 * \return Returns the appended value on success.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Append( CExpEvalContainer::EE_RESULT &_rRet ) { return PushBack( _rRet ); }
 
-		// Pops the back item and returns it.
+		/**
+		 * \brief Pops the back item and returns it.
+		 *
+		 * \return Returns the removed element, or EE_NC_INVALID if the vector is empty.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		PopBack() {
 			if ( !m_vBacking.size() ) { return { .ncType = EE_NC_INVALID }; }
 			auto aTmp = m_vBacking[m_vBacking.size()-1];
@@ -296,7 +392,16 @@ namespace ee {
 			return aTmp;
 		}
 
-		// Gets a value at an index in the array.
+		/**
+		 * \brief Gets a value at an index in the array.
+		 *
+		 * The provided index is converted using ArrayIndexToLinearIndex(), allowing support for negative or
+		 * extended indexing rules as defined by the evaluator.  If the translated index is invalid, an
+		 * EE_NC_INVALID result is returned.
+		 *
+		 * \param _sIdx The index of the element to read.
+		 * \return Returns the element at the given index, or EE_NC_INVALID on failure.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		At( size_t _sIdx ) {
 			_sIdx = ArrayIndexToLinearIndex( _sIdx, m_vBacking.size() );
 			CExpEvalContainer::EE_RESULT rRet = { .ncType = EE_NC_UNSIGNED };
@@ -304,7 +409,16 @@ namespace ee {
 			return m_vBacking.at( _sIdx );
 		}
 
-		// Assigns a value at a given index in the array.
+		/**
+		 * \brief Assigns a value at a given index in the array.
+		 *
+		 * Assigns _rRet into the vector using std::vector::assign().  Note that std::vector::assign( count, value )
+		 * replaces the entire contents of the vector with count copies of value.
+		 *
+		 * \param _sIdx The element count parameter passed to std::vector::assign().
+		 * \param _rRet The value assigned into the vector.
+		 * \return Returns an EE_RESULT representing this object.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Assign( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			/*if ( _rRet.ncType == EE_NC_OBJECT && _rRet.u.poObj && (_rRet.u.poObj->Type() & CObject::EE_BIT_VECTOR) &&
 				static_cast<ee::CVector *>(_rRet.u.poObj) == this ) { return { .ncType = EE_NC_INVALID }; }*/
@@ -312,7 +426,16 @@ namespace ee {
 			return CreateResult();
 		}
 
-		// Inserts a value at a given index in the array.
+		/**
+		 * \brief Inserts a value at a given index in the array.
+		 *
+		 * The provided index is converted using ArrayIndexToLinearIndex().  If the translated index is invalid,
+		 * EE_NC_INVALID is returned.  On success, the element is inserted and this object is returned.
+		 *
+		 * \param _sIdx The insertion index.
+		 * \param _rRet The value to insert.
+		 * \return Returns an EE_RESULT representing this object, or EE_NC_INVALID on failure.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Insert( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			_sIdx = ArrayIndexToLinearIndex( _sIdx, m_vBacking.size() );
 			CExpEvalContainer::EE_RESULT rRet = { .ncType = EE_NC_UNSIGNED };
@@ -322,7 +445,15 @@ namespace ee {
 			return CreateResult();
 		}
 
-		// Erases a value at an index in the array.
+		/**
+		 * \brief Erases a value at an index in the array.
+		 *
+		 * The provided index is converted using ArrayIndexToLinearIndex().  If the translated index is invalid,
+		 * EE_NC_INVALID is returned.  On success, the erased element is returned.
+		 *
+		 * \param _sIdx The index of the element to erase.
+		 * \return Returns the erased element, or EE_NC_INVALID on failure.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Erase( size_t _sIdx ) {
 			_sIdx = ArrayIndexToLinearIndex( _sIdx, m_vBacking.size() );
 			CExpEvalContainer::EE_RESULT rRet = { .ncType = EE_NC_UNSIGNED };
@@ -333,37 +464,69 @@ namespace ee {
 			return rRet;
 		}
 
-		// Gets the max size.
+		/**
+		 * \brief Gets the max size.
+		 *
+		 * \return Returns an EE_RESULT of type EE_NC_UNSIGNED containing the maximum size of the vector.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		MaxSize() const {
 			CExpEvalContainer::EE_RESULT rRet = { .ncType = EE_NC_UNSIGNED };
 			rRet.u.ui64Val = m_vBacking.max_size();
 			return rRet;
 		}
 
-		// Gets the size.
+		/**
+		 * \brief Gets the size.
+		 *
+		 * \return Returns the logical element count (Len()).
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Size() const {
 			return Len();
 		}
 
-		// Reserves memory for X number of elements.
+		/**
+		 * \brief Reserves memory for X number of elements.
+		 *
+		 * \param _sTotal The minimum capacity to reserve.
+		 * \return Returns an EE_RESULT representing this object.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Reserve( size_t _sTotal ) {
 			m_vBacking.reserve( _sTotal );
 			return CreateResult();
 		}
 
-		// Resize to X elements.
+		/**
+		 * \brief Resize to X elements.
+		 *
+		 * \param _sTotal The new size of the vector in elements.
+		 * \return Returns an EE_RESULT representing this object.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Resize( size_t _sTotal ) {
 			m_vBacking.resize( _sTotal );
 			return CreateResult();
 		}
 
-		// Shrinks to fit.
+		/**
+		 * \brief Shrinks to fit.
+		 *
+		 * Requests removal of unused capacity.
+		 *
+		 * \return Returns an EE_RESULT representing this object.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		ShrinkToFit() {
 			m_vBacking.shrink_to_fit();
 			return CreateResult();
 		}
 
-		// Swaps the vector with another.
+		/**
+		 * \brief Swaps the vector with another.
+		 *
+		 * Expects _rRet to be an object result whose object is a vector.  On success, this vector's backing store
+		 * is swapped with the other's and this object is returned.
+		 *
+		 * \param _rRet The other vector object to swap with.
+		 * \return Returns an EE_RESULT representing this object, or EE_NC_INVALID on type mismatch.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Swap( CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( _rRet.ncType != EE_NC_OBJECT ) { return { .ncType = EE_NC_INVALID }; }
 			if ( !_rRet.u.poObj ) { return { .ncType = EE_NC_INVALID }; }
@@ -372,40 +535,124 @@ namespace ee {
 			return CreateResult();
 		}
 
-		// Sums all elements.
+		/**
+		 * \brief Sums all elements.
+		 *
+		 * Computes and returns the sum of all elements in the vector using the evaluator's numeric rules.
+		 *
+		 * \return Returns the sum result, or EE_NC_INVALID on failure.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Sum();
 
-		// Element-wise addition.
+		/**
+		 * \brief Element-wise addition.
+		 *
+		 * Adds this vector to _pvOther element-by-element and writes the result to _pvReturn.
+		 *
+		 * \param _pvOther The other vector to add.
+		 * \param _pvReturn Receives the element-wise sum.
+		 * \return Returns an EE_RESULT representing _pvReturn, or EE_NC_INVALID on failure.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Add( const ee::CVector * _pvOther, ee::CVector * _pvReturn );
 
-		// Element-wise subtraction.
+		/**
+		 * \brief Element-wise subtraction.
+		 *
+		 * Subtracts _pvOther from this vector element-by-element and writes the result to _pvReturn.
+		 *
+		 * \param _pvOther The other vector to subtract.
+		 * \param _pvReturn Receives the element-wise difference.
+		 * \return Returns an EE_RESULT representing _pvReturn, or EE_NC_INVALID on failure.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Sub( const ee::CVector * _pvOther, ee::CVector * _pvReturn );
 
-		// Element-wise multiplication.
+		/**
+		 * \brief Element-wise multiplication.
+		 *
+		 * Multiplies this vector by _pvOther element-by-element and writes the result to _pvReturn.
+		 *
+		 * \param _pvOther The other vector to multiply.
+		 * \param _pvReturn Receives the element-wise product.
+		 * \return Returns an EE_RESULT representing _pvReturn, or EE_NC_INVALID on failure.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Mul( const ee::CVector * _pvOther, ee::CVector * _pvReturn );
 
-		// Scalar multiplication.
+		/**
+		 * \brief Scalar multiplication.
+		 *
+		 * Multiplies each element of this vector by the given scalar and writes the result to _pvReturn.
+		 *
+		 * \param _rScalar The scalar to apply.
+		 * \param _pvReturn Receives the scaled vector.
+		 * \return Returns an EE_RESULT representing _pvReturn, or EE_NC_INVALID on failure.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Mul( const CExpEvalContainer::EE_RESULT &_rScalar, ee::CVector * _pvReturn );
 
-		// Element-wise division.
+		/**
+		 * \brief Element-wise division.
+		 *
+		 * Divides this vector by _pvOther element-by-element and writes the result to _pvReturn.
+		 *
+		 * \param _pvOther The other vector to divide by.
+		 * \param _pvReturn Receives the element-wise quotient.
+		 * \return Returns an EE_RESULT representing _pvReturn, or EE_NC_INVALID on failure.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Div( const ee::CVector * _pvOther, ee::CVector * _pvReturn );
 
-		// Scalar division.
+		/**
+		 * \brief Scalar division.
+		 *
+		 * Divides each element of this vector by the given scalar and writes the result to _pvReturn.
+		 *
+		 * \param _rScalar The scalar divisor to apply.
+		 * \param _pvReturn Receives the scaled vector.
+		 * \return Returns an EE_RESULT representing _pvReturn, or EE_NC_INVALID on failure.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Div( const CExpEvalContainer::EE_RESULT &_rScalar, ee::CVector * _pvReturn );
 
-		// Dot product.
+		/**
+		 * \brief Dot product.
+		 *
+		 * Computes the dot product of this vector and _pvOther.
+		 *
+		 * \param _pvOther The other vector.
+		 * \return Returns the dot product result, or EE_NC_INVALID on failure.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Dot( const ee::CVector * _pvOther );
 
-		// Cross product.
+		/**
+		 * \brief Cross product.
+		 *
+		 * Computes the cross product of this vector and _pvOther and writes the resulting vector to _pvReturn.
+		 *
+		 * \param _pvOther The other vector.
+		 * \param _pvReturn Receives the cross-product vector.
+		 * \return Returns an EE_RESULT representing _pvReturn, or EE_NC_INVALID on failure.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Cross( const ee::CVector * _pvOther, ee::CVector * _pvReturn );
 
-		// Gets the magnitude of the vector.
+		/**
+		 * \brief Gets the magnitude of the vector.
+		 *
+		 * \return Returns the vector magnitude, or EE_NC_INVALID on failure.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Mag();
 
-		// Gets the squared magnitude of the vector.
+		/**
+		 * \brief Gets the squared magnitude of the vector.
+		 *
+		 * \return Returns the squared magnitude, or EE_NC_INVALID on failure.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		MagSq();
 
-		// Return a normalized copy of this vector.
+		/**
+		 * \brief Return a normalized copy of this vector.
+		 *
+		 * Computes a normalized version of this vector and writes it to _pvReturn.
+		 *
+		 * \param _pvReturn Receives the normalized vector.
+		 * \return Returns an EE_RESULT representing _pvReturn, or EE_NC_INVALID on failure.
+		 */
 		virtual CExpEvalContainer::EE_RESULT		Normalize( ee::CVector * _pvReturn );
 
 	protected :

@@ -406,7 +406,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Array\EEArrayBase.cpp" />
-    <ClCompile Include="Src\BigInt\EEBigInt.cpp" />
     <ClCompile Include="Src\EEExpEval.cpp" />
     <ClCompile Include="Src\EEExpEvalContainer.cpp" />
     <ClCompile Include="Src\EEFloatX.cpp" />
@@ -440,7 +439,6 @@
     <ClInclude Include="Src\Array\EEUInt32Array.h" />
     <ClInclude Include="Src\Array\EEUInt64Array.h" />
     <ClInclude Include="Src\Array\EEUInt8Array.h" />
-    <ClInclude Include="Src\BigInt\EEBigInt.h" />
     <ClInclude Include="Src\EEExpEval.h" />
     <ClInclude Include="Src\EEExpEvalContainer.h" />
     <ClInclude Include="Src\EEExpEvalLexer.h" />

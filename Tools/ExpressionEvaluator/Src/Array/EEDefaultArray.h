@@ -13,7 +13,14 @@ namespace ee {
 
 
 		// == Functions.
-		// Sets the size of the array.
+		/**
+		 * \brief Sets the number of elements in the array.
+		 *
+		 * \param _sNewSize The new size, in elements.
+		 * \return Returns true if the resize succeeded; false otherwise.
+		 *
+		 * \note This function catches std::bad_alloc and returns false on allocation failure.
+		 */
 		virtual bool								SetSize( size_t _sNewSize ) {
 			try {
 				m_vArray.resize( _sNewSize );
@@ -24,12 +31,29 @@ namespace ee {
 			return true;
 		}
 
-		// Gets the size of the array.
+		/**
+		 * \brief Gets the number of elements in the array.
+		 *
+		 * \return Returns the current size, in elements.
+		 */
 		virtual size_t								GetSize() const {
 			return m_vArray.size();
 		}
 
-		// Initializes the array with values interpolated between the start and end expressions.
+		/**
+		 * \brief Initializes the array with values interpolated between a start and end expression.
+		 *
+		 * \param _rStart The starting value/expression for interpolation.
+		 * \param _rEnd The ending value/expression for interpolation.
+		 * \return Returns true if initialization succeeded; false otherwise.
+		 *
+		 * \note If the array is empty, this function succeeds and performs no work.
+		 * \note If the array has exactly 1 element, that element is set to \p _rStart.
+		 * \note The interpolation mode is chosen by CExpEvalContainer::GetCastType() using \p _rStart and \p _rEnd:
+		 * - EE_NC_FLOATING: linear interpolation in double.
+		 * - EE_NC_SIGNED / EE_NC_UNSIGNED: interpolation in double followed by conversion back to integer storage.
+		 * \note This function depends on ConvertResultOrObject() for type coercion; conversion failure yields false.
+		 */
 		virtual bool								Initialize( const CExpEvalContainer::EE_RESULT &_rStart, const CExpEvalContainer::EE_RESULT &_rEnd ) {
 			if ( !m_vArray.size() ) { return true; }
 			if ( m_vArray.size() == 1 ) {
@@ -96,14 +120,31 @@ namespace ee {
 			return true;
 		}
 
-		// Reads a value.
+		/**
+		 * \brief Reads a value from the array.
+		 *
+		 * \param _sIdx The zero-based element index to read.
+		 * \param _rRet Receives the value stored at \p _sIdx.
+		 * \return Returns true if the read succeeded; false otherwise.
+		 *
+		 * \note Returns false if \p _sIdx is out of range.
+		 */
 		virtual bool								ReadValue( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			_rRet = m_vArray[_sIdx];
 			return true;
 		}
 
-		// Writes a value.  _rRet is updated with the actual return value, which will change if the input value is too large or of the wrong type etc.
+		/**
+		 * \brief Writes a value to the array.
+		 *
+		 * \param _sIdx The zero-based element index to write.
+		 * \param _rRet On input, supplies the value to write. On output, receives the stored value.
+		 * \return Returns true if the write succeeded; false otherwise.
+		 *
+		 * \note The output value in \p _rRet may differ from the input if the element type enforces conversion or clamping.
+		 * \note Returns false if \p _sIdx is out of range.
+		 */
 		virtual bool								WriteValue( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 
@@ -112,7 +153,16 @@ namespace ee {
 			return true;
 		}
 
-		// Operator +=.
+		/**
+		 * \brief Applies the \c += operator to an element.
+		 *
+		 * \param _sIdx The zero-based element index to modify.
+		 * \param _rRet On input, supplies the right-hand operand. On output, receives the resulting stored value.
+		 * \return Returns true if the operation succeeded; false otherwise.
+		 *
+		 * \note Both operands are coerced to a common numeric type via GetCastType() and ConvertResultOrObject().
+		 * \note Returns false if \p _sIdx is out of range or if type conversion fails.
+		 */
 		virtual bool								PlusEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
@@ -132,7 +182,16 @@ namespace ee {
 			return true;
 		}
 
-		// Operator -=.
+		/**
+		 * \brief Applies the \c -= operator to an element.
+		 *
+		 * \param _sIdx The zero-based element index to modify.
+		 * \param _rRet On input, supplies the right-hand operand. On output, receives the resulting stored value.
+		 * \return Returns true if the operation succeeded; false otherwise.
+		 *
+		 * \note Both operands are coerced to a common numeric type via GetCastType() and ConvertResultOrObject().
+		 * \note Returns false if \p _sIdx is out of range or if type conversion fails.
+		 */
 		virtual bool								MinusEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
@@ -151,7 +210,16 @@ namespace ee {
 			return true;
 		}
 
-		// Operator *=.
+		/**
+		 * \brief Applies the \c *= operator to an element.
+		 *
+		 * \param _sIdx The zero-based element index to modify.
+		 * \param _rRet On input, supplies the right-hand operand. On output, receives the resulting stored value.
+		 * \return Returns true if the operation succeeded; false otherwise.
+		 *
+		 * \note Both operands are coerced to a common numeric type via GetCastType() and ConvertResultOrObject().
+		 * \note Returns false if \p _sIdx is out of range or if type conversion fails.
+		 */
 		virtual bool								TimesEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
@@ -170,7 +238,17 @@ namespace ee {
 			return true;
 		}
 
-		// Operator /=.
+		/**
+		 * \brief Applies the \c /= operator to an element.
+		 *
+		 * \param _sIdx The zero-based element index to modify.
+		 * \param _rRet On input, supplies the right-hand operand. On output, receives the resulting stored value.
+		 * \return Returns true if the operation succeeded; false otherwise.
+		 *
+		 * \note Both operands are coerced to a common numeric type via GetCastType() and ConvertResultOrObject().
+		 * \note Division by zero handling is implementation-defined (integer division will follow C++ rules).
+		 * \note Returns false if \p _sIdx is out of range or if type conversion fails.
+		 */
 		virtual bool								DivideEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
@@ -189,7 +267,17 @@ namespace ee {
 			return true;
 		}
 
-		// Operator %=.
+		/**
+		 * \brief Applies the \c %= operator to an element.
+		 *
+		 * \param _sIdx The zero-based element index to modify.
+		 * \param _rRet On input, supplies the right-hand operand. On output, receives the resulting stored value.
+		 * \return Returns true if the operation succeeded; false otherwise.
+		 *
+		 * \note Both operands are coerced to a common numeric type via GetCastType() and ConvertResultOrObject().
+		 * \note For floating-point operands, std::fmod() is used.
+		 * \note Returns false if \p _sIdx is out of range or if type conversion fails.
+		 */
 		virtual bool								ModEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
@@ -208,7 +296,17 @@ namespace ee {
 			return true;
 		}
 
-		// Operator <<=.
+		/**
+		 * \brief Applies the \c <<= operator to an element.
+		 *
+		 * \param _sIdx The zero-based element index to modify.
+		 * \param _rRet On input, supplies the shift amount. On output, receives the resulting stored value.
+		 * \return Returns true if the operation succeeded; false otherwise.
+		 *
+		 * \note Both operands are coerced to a common numeric type via GetCastType() and ConvertResultOrObject().
+		 * \note For floating-point values, this is implemented as multiplication by pow(2, shift).
+		 * \note Returns false if \p _sIdx is out of range or if type conversion fails.
+		 */
 		virtual bool								ShiftLeftEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
@@ -227,7 +325,17 @@ namespace ee {
 			return true;
 		}
 
-		// Operator >>=.
+		/**
+		 * \brief Applies the \c >>= operator to an element.
+		 *
+		 * \param _sIdx The zero-based element index to modify.
+		 * \param _rRet On input, supplies the shift amount. On output, receives the resulting stored value.
+		 * \return Returns true if the operation succeeded; false otherwise.
+		 *
+		 * \note Both operands are coerced to a common numeric type via GetCastType() and ConvertResultOrObject().
+		 * \note For floating-point values, this is implemented as division by pow(2, shift).
+		 * \note Returns false if \p _sIdx is out of range or if type conversion fails.
+		 */
 		virtual bool								ShiftRightEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
@@ -246,7 +354,17 @@ namespace ee {
 			return true;
 		}
 
-		// Operator ^=.
+		/**
+		 * \brief Applies the \c ^= operator to an element.
+		 *
+		 * \param _sIdx The zero-based element index to modify.
+		 * \param _rRet On input, supplies the right-hand operand. On output, receives the resulting stored value.
+		 * \return Returns true if the operation succeeded; false otherwise.
+		 *
+		 * \note Only integer types are supported. Floating-point returns false.
+		 * \note Both operands are coerced to a common numeric type via GetCastType() and ConvertResultOrObject().
+		 * \note This is named CarrotEquals() to represent the caret (^) operator.
+		 */
 		virtual bool								CarrotEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
@@ -265,7 +383,16 @@ namespace ee {
 			return true;
 		}
 
-		// Operator |=.
+		/**
+		 * \brief Applies the \c |= operator to an element.
+		 *
+		 * \param _sIdx The zero-based element index to modify.
+		 * \param _rRet On input, supplies the right-hand operand. On output, receives the resulting stored value.
+		 * \return Returns true if the operation succeeded; false otherwise.
+		 *
+		 * \note Only integer types are supported. Floating-point returns false.
+		 * \note Both operands are coerced to a common numeric type via GetCastType() and ConvertResultOrObject().
+		 */
 		virtual bool								OrEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );
@@ -284,7 +411,16 @@ namespace ee {
 			return true;
 		}
 
-		// Operator &=.
+		/**
+		 * \brief Applies the \c &= operator to an element.
+		 *
+		 * \param _sIdx The zero-based element index to modify.
+		 * \param _rRet On input, supplies the right-hand operand. On output, receives the resulting stored value.
+		 * \return Returns true if the operation succeeded; false otherwise.
+		 *
+		 * \note Only integer types are supported. Floating-point returns false.
+		 * \note Both operands are coerced to a common numeric type via GetCastType() and ConvertResultOrObject().
+		 */
 		virtual bool								AndEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
 			if ( m_vArray.size() <= _sIdx ) { return false; }
 			ee::EE_NUM_CONSTANTS ncType = CExpEvalContainer::GetCastType( m_vArray[_sIdx].ncType, _rRet.ncType );

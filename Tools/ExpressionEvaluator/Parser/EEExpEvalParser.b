@@ -4,6 +4,11 @@
 #include "../EEExpEval.h"
 #include "../EEExpEvalContainer.h"
 #include "../EEExpEvalLexer.h"
+
+#if defined( _MSC_VER )
+	#include <corecrt_math_defines.h>
+#endif
+#include <cmath>
 #include <cstdio>
 #include <ctime>
 
@@ -563,21 +568,21 @@ assignment_exp
 	| custom_var assignment_op assignment_exp				{ m_peecContainer->CreateReAssignment( $1, $3, $2, $$ ); }
 	| EE_CONST identifier '=' assignment_exp				{ m_peecContainer->CreateAssignment( $2, $4, '=', true, $$ ); }
 	| identifier '=' EE_NEW backing_type '(' exp ')'
-															{ m_peecContainer->CreateRawArray( $1, size_t( $4 ), static_cast<size_t>(token::EE_TEMP), $6, size_t( ~0 ), size_t( ~0 ), $$ ); }
+															{ m_peecContainer->CreateRawArray( $1, uint32_t( $4 ), static_cast<uint32_t>(token::EE_TEMP), $6, size_t( ~0 ), size_t( ~0 ), $$ ); }
 	| identifier '=' EE_NEW backing_type '(' exp ',' backing_persistence ')'
-															{ m_peecContainer->CreateRawArray( $1, size_t( $4 ), $8, $6, size_t( ~0 ), size_t( ~0 ), $$ ); }
+															{ m_peecContainer->CreateRawArray( $1, uint32_t( $4 ), $8, $6, size_t( ~0 ), size_t( ~0 ), $$ ); }
 	| identifier '=' EE_NEW backing_type '(' exp ',' backing_persistence ',' exp ')'
 															{ m_peecContainer->CreateRawArray( $1, $4, $8, $6, $10.sNodeIndex, $10.sNodeIndex, $$ ); }
 	| identifier '=' EE_NEW backing_type '(' exp ',' backing_persistence ',' exp ',' exp ')'
 															{ m_peecContainer->CreateRawArray( $1, $4, $8, $6, $10.sNodeIndex, $12.sNodeIndex, $$ ); }
 	| identifier '=' EE_NEW '(' exp ')'
-															{ m_peecContainer->CreateRawArray( $1, static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), static_cast<size_t>(token::EE_TEMP), $5, size_t( ~0 ), size_t( ~0 ), $$ ); }
+															{ m_peecContainer->CreateRawArray( $1, static_cast<uint32_t>(CExpEvalParser::token::EE_DEFAULT), static_cast<uint32_t>(token::EE_TEMP), $5, size_t( ~0 ), size_t( ~0 ), $$ ); }
 	| identifier '=' EE_NEW '(' exp ',' backing_persistence ')'
-															{ m_peecContainer->CreateRawArray( $1, static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, size_t( ~0 ), size_t( ~0 ), $$ ); }
+															{ m_peecContainer->CreateRawArray( $1, static_cast<uint32_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, size_t( ~0 ), size_t( ~0 ), $$ ); }
 	| identifier '=' EE_NEW '(' exp ',' backing_persistence ',' exp ')'
-															{ m_peecContainer->CreateRawArray( $1, static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $9.sNodeIndex, $$ ); }
+															{ m_peecContainer->CreateRawArray( $1, static_cast<uint32_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $9.sNodeIndex, $$ ); }
 	| identifier '=' EE_NEW '(' exp ',' backing_persistence ',' exp ',' exp ')'
-															{ m_peecContainer->CreateRawArray( $1, static_cast<size_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $11.sNodeIndex, $$ ); }
+															{ m_peecContainer->CreateRawArray( $1, static_cast<uint32_t>(CExpEvalParser::token::EE_DEFAULT), $7, $5, $9.sNodeIndex, $11.sNodeIndex, $$ ); }
 	| custom_var '[' exp ']' assignment_op assignment_exp	{ m_peecContainer->CreateArrayReAssignmentObj( $1, $3, $6, $5, $$ ); }
 	| array_var '[' exp ']' assignment_op assignment_exp	{ m_peecContainer->CreateArrayReAssignment( $1, $3, $6, $5, $$ ); }
 	//| postfix_exp '[' assignment_exp ']' assignment_op assignment_exp

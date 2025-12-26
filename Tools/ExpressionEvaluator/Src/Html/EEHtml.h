@@ -12,7 +12,12 @@ namespace ee {
 	class CHtml {
 	public :
 		// == Enumerations.
-		// The recognized codes.
+		/**
+		 * \brief The recognized HTML entity codes.
+		 *
+		 * \note Values are Unicode code points associated with HTML named character references.
+		 * \note Some entities map to the same code point (for example, \c EE_lt and \c EE_LT).
+		 */
 		enum EE_HTML_CODES {
 			EE_Tab = 0x00009,
 			EE_NewLine = 0x0000A,
@@ -1467,45 +1472,89 @@ namespace ee {
 			EE_zopf = 0x1D56B,
 		};
 
-		// Invalid code.
+		/**
+		 * \brief Sentinel values for invalid HTML entity lookups.
+		 *
+		 * \note These values are used when a name does not map to a recognized entity or an index is out of range.
+		 */
 		enum EE_INVALID_CODE : uint32_t {
 			EE_IC_INVALID				= 0xFFFFFFFF
 		};
 
 
 		// == Functions.
-		// Gets the number of names.
+		/**
+		 * \brief Gets the total number of entity names in the table.
+		 *
+		 * \return Returns the number of entries available via GetName() / GetNameLength().
+		 */
 		static size_t					TotalNames();
 
-		// Gets a name by index.
+		/**
+		 * \brief Gets an entity name by index as a narrow string.
+		 *
+		 * \param _sRet   Receives the entity name.
+		 * \param _sIndex Index of the name to retrieve.
+		 * \return Returns \p _sRet.
+		 *
+		 * \note If \p _sIndex is out of range, the returned string may be set to an empty value (implementation-defined).
+		 */
 		static std::string &			GetName( std::string &_sRet, size_t _sIndex );
 
-		// Gets a name by index.
+		/**
+		 * \brief Gets an entity name by index as a wide string.
+		 *
+		 * \param _sRet   Receives the entity name.
+		 * \param _sIndex Index of the name to retrieve.
+		 * \return Returns \p _sRet.
+		 *
+		 * \note If \p _sIndex is out of range, the returned string may be set to an empty value (implementation-defined).
+		 */
 		static std::wstring &			GetName( std::wstring &_sRet, size_t _sIndex );
 
-		// Gets the Unicode number for a name by index.
-		/*static uint32_t					GetCharNum( size_t _sIndex ) { return _sIndex < TotalNames() ?
-			m_tNames[_sIndex].uiVal :
-			EE_IC_INVALID;
-		}*/
-
-		// Gets the length of the name by index.
+		/**
+		 * \brief Gets the length of an entity name by index.
+		 *
+		 * \param _sIndex Index of the name to query.
+		 * \return Returns the length of the name at \p _sIndex, or 0 if \p _sIndex is out of range.
+		 */
 		static size_t					GetNameLength( size_t _sIndex ) { return _sIndex < TotalNames() ?
 			m_tNames[_sIndex].uiLen :
 			0;
 		}
 
-		// Gets the HTML entity value given its name, case-sensitive.
+		/**
+		 * \brief Gets the HTML entity value given its name (case-sensitive).
+		 *
+		 * \param _pcName Pointer to the entity name (not including surrounding '&' and ';').
+		 * \param _sLen   Length of \p _pcName in bytes.
+		 * \return Returns the Unicode code point (or other stored value) associated with the name, or EE_IC_INVALID if not found.
+		 *
+		 * \note Lookup is case-sensitive (for example, "lt" and "LT" are treated as distinct names if both exist in the table).
+		 */
 		static uint64_t 				GetCode( const char * _pcName, size_t _sLen );
 
 #ifdef EE_GEN_HTML_TABLE
+		/**
+		 * \brief Generates the nickname table used to speed up entity lookups.
+		 *
+		 * \note This is a developer utility intended to emit or build the optimized lookup data.
+		 * \note Only available when \c EE_GEN_HTML_TABLE is defined.
+		 */
 		static void						MakeNickNameTable();
 #endif	// #ifdef EE_GEN_HTML_TABLE
 
 
 	protected :
 		// == Types.
-		// The final table.
+		/**
+		 * \brief A single entry in the name/value table.
+		 *
+		 * \note \c pcName points to the entity name.
+		 * \note \c uiLen is the name length, in bytes.
+		 * \note \c uiTotalVals indicates how many values are valid in \c uiVal.
+		 * \note \c uiVal contains 1 or 2 Unicode code points for entities that expand to multiple characters.
+		 */
 		struct EE_TABLE {
 			const char *				pcName;
 			uint32_t					uiLen;
@@ -1516,12 +1565,24 @@ namespace ee {
 
 
 		// == Members.
-		// The name <-> value pairing.
+		/**
+		 * \brief The entity name/value table.
+		 *
+		 * \note This table maps entity names to one or more Unicode code points.
+		 */
 		static EE_TABLE					m_tNames[];
 
 
 		// == Functions.
-		// Encrypts a string.
+		/**
+		 * \brief Encrypts a string into an internal encoded form.
+		 *
+		 * \param _pcString The input string buffer.
+		 * \param _sLen     The length of \p _pcString in bytes.
+		 * \param _sResult  Receives the encrypted/encoded result.
+		 *
+		 * \note This is used for building or querying the internal lookup structures.
+		 */
 		static void						Encrypt( const char * _pcString, size_t _sLen, std::string &_sResult );
 	};
 

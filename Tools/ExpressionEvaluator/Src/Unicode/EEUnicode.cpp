@@ -16,12 +16,22 @@ namespace ee {
 
 
 	// == Functions.
-	// Gets the number of names.
+	/**
+	 * \brief Gets the number of nickname entries available.
+	 *
+	 * \return Returns the total number of nickname entries in the internal table.
+	 */
 	size_t CUnicode::TotalNames() {
 		return std::size( m_nNames );
 	}
 
-	// Gets a name by index.
+	/**
+	 * \brief Gets a nickname by index as a UTF-8 string.
+	 *
+	 * \param _sRet Receives the nickname text.
+	 * \param _sIndex Index of the nickname to retrieve.
+	 * \return Returns \c _sRet.
+	 */
 	std::string & CUnicode::GetName( std::string &_sRet, size_t _sIndex ) {
 		if ( _sIndex < TotalNames() ) {
 			static const char * pcKey = EE_UNICODE_DECRYPT;
@@ -36,7 +46,13 @@ namespace ee {
 		return _sRet;
 	}
 
-	// Gets a name by index.
+	/**
+	 * \brief Gets a nickname by index as a wide string.
+	 *
+	 * \param _sRet Receives the nickname text.
+	 * \param _sIndex Index of the nickname to retrieve.
+	 * \return Returns \c _sRet.
+	 */
 	std::wstring & CUnicode::GetName( std::wstring &_sRet, size_t _sIndex ) {
 		if ( _sIndex < TotalNames() ) {
 			static const char * pcKey = EE_UNICODE_DECRYPT;
@@ -51,7 +67,15 @@ namespace ee {
 		return _sRet;
 	}
 
-	// Gets the Unicode numeric given its name, case-sensitive.
+	/**
+	 * \brief Looks up a Unicode code point by nickname (case-sensitive).
+	 *
+	 * \param _pcName Pointer to the nickname text to look up.
+	 * \param _sLen Length of \c _pcName in bytes. If 0, the implementation may
+	 * compute the length (e.g. via strlen()).
+	 * \return Returns the corresponding Unicode code point, or \c EE_INVALID if
+	 * the nickname is not found.
+	 */
 	uint32_t CUnicode::GetCode( const char * _pcName, size_t _sLen ) {
 		if ( !_pcName ) { return EE_INVALID; }
 		if ( !_sLen ) { _sLen = std::strlen( _pcName ); }
@@ -71,7 +95,12 @@ namespace ee {
 
 
 #ifdef EE_GEN_TABLE
-
+	/**
+	 * \brief Generates internal nickname lookup tables.
+	 *
+	 * This is intended for offline/tooling builds when regenerating the compiled
+	 * nickname table.
+	 */
 	void CUnicode::MakeNickNameTable() {
 		struct {
 			const char *				pcName;
@@ -6147,7 +6176,16 @@ namespace ee {
 
 #endif	// #if EE_GEN_TABLE
 
-	// Encrypts a string.
+	/**
+	 * \brief Encrypts a string into an internal, lookup-friendly form.
+	 *
+	 * Used to transform nickname text for faster comparisons (e.g. hashing or
+	 * normalization specific to the table generator/lookup).
+	 *
+	 * \param _pcString Pointer to the input string bytes.
+	 * \param _sLen Length of \c _pcString in bytes.
+	 * \param _sResult Receives the encrypted/transformed output.
+	 */
 	void CUnicode::Encrypt( const char * _pcString, size_t /*_sLen*/, std::string &_sResult ) {
 		const char * pcKey = EE_UNICODE_DECRYPT;
 		static const size_t sKeyLen = std::strlen( pcKey );

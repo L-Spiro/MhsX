@@ -1,4 +1,4 @@
-﻿#include "EEExpEvalContainer.h"
+#include "EEExpEvalContainer.h"
 #include "Api/EEBaseApi.h"
 #include "Array/EEDefaultArray.h"
 #include "Array/EEDoubleArray.h"
@@ -118,6 +118,7 @@ namespace ee {
 					rRes.u.ui64Val = static_cast<uint64_t>(_rRes.u.dVal);
 					break;
 				}
+				default : {}
 			}
 		}
 		else if ( (_rRes.ncType) == ee::EE_NC_SIGNED ) {
@@ -130,6 +131,7 @@ namespace ee {
 					rRes.u.dVal = static_cast<double>(_rRes.u.i64Val);
 					break;
 				}
+				default : {}
 			}
 		}
 		else if ( (_rRes.ncType) == ee::EE_NC_UNSIGNED ) {
@@ -142,6 +144,7 @@ namespace ee {
 					rRes.u.i64Val = static_cast<int64_t>(_rRes.u.ui64Val);
 					break;
 				}
+				default : {}
 			}
 		}
 		return rRes;
@@ -172,6 +175,7 @@ namespace ee {
 					rRes.ncType = ee::EE_NC_INVALID;
 					break;
 				}
+				default : {}
 			}
 		}
 		else if ( (_rRes.ncType) == ee::EE_NC_SIGNED ) {
@@ -188,6 +192,7 @@ namespace ee {
 					rRes.ncType = ee::EE_NC_INVALID;
 					break;
 				}
+				default : {}
 			}
 		}
 		else if ( (_rRes.ncType) == ee::EE_NC_UNSIGNED ) {
@@ -204,6 +209,7 @@ namespace ee {
 					rRes.ncType = ee::EE_NC_INVALID;
 					break;
 				}
+				default : {}
 			}
 		}
 		else if ( (_rRes.ncType) == ee::EE_NC_OBJECT ) {
@@ -224,13 +230,13 @@ namespace ee {
 		switch ( _rRes.ncType ) {
 			case ee::EE_NC_SIGNED : {
 				char szFormat[32];
-				std::snprintf( szFormat, std::size( szFormat ), "%I64d", _rRes.u.i64Val );
+				std::snprintf( szFormat, std::size( szFormat ), "%" PRIi64, _rRes.u.i64Val );
 				_sReturn = szFormat;
 				break;
 			}
 			case ee::EE_NC_UNSIGNED : {
 				char szFormat[32];
-				std::snprintf( szFormat, std::size( szFormat ), "%I64u", _rRes.u.ui64Val );
+				std::snprintf( szFormat, std::size( szFormat ), "%" PRIu64, _rRes.u.ui64Val );
 				_sReturn = szFormat;
 				break;
 			}
@@ -308,7 +314,16 @@ namespace ee {
 		return !!rRes.u.ui64Val;
 	}
 
-	// Default ToString() function.
+	/**
+	 * \brief Default \c ToString() implementation.
+	 *
+	 * Converts a result into a display string using the default formatting rules.
+	 *
+	 * \param _rResult The result to format.
+	 * \param _ui32Depth Current formatting depth (used to limit recursion).
+	 * \param _ui64Options Formatting options.
+	 * \return Returns a formatted string representation of \c _rResult.
+	 */
 	std::wstring CExpEvalContainer::DefaultToString( EE_RESULT &_rResult, uint32_t _ui32Depth, uint64_t /*_ui64Options*/ ) {
 		std::wstring wsString;
 		switch ( _rResult.ncType ) {
@@ -352,7 +367,12 @@ namespace ee {
 		return wsString;
 	}
 
-	// Returns the index of a string if it exists or static_cast<size_t>(-1) otherwise.
+	/**
+	 * \brief Returns the index of a string if it exists.
+	 *
+	 * \param _sText The string to search for.
+	 * \return Returns the index of \c _sText if found; otherwise returns \c static_cast<size_t>(-1).
+	 */
 	size_t CExpEvalContainer::HasString( const std::string &_sText ) const {
 		for ( size_t I = 0; I < m_vStrings.size(); ++I ) {
 			if ( m_vStrings[I] == _sText ) { return I; }
@@ -360,7 +380,12 @@ namespace ee {
 		return static_cast<size_t>(-1);
 	}
 
-	// Returns the index of a custom variable if it exists or static_cast<size_t>(-1) otherwise.
+	/**
+	 * \brief Returns the index of a custom variable if it exists.
+	 *
+	 * \param _sText The custom variable name to search for.
+	 * \return Returns the index of \c _sText if found; otherwise returns \c static_cast<size_t>(-1).
+	 */
 	size_t CExpEvalContainer::HasCustomVar( const std::string &_sText ) const {
 		if ( m_mCustomVariables.size() == 0 ) { return false; }	// Fastest check that is most-often the case.
 		size_t sIdx = HasString( _sText );
@@ -370,7 +395,12 @@ namespace ee {
 		return sIdx;
 	}
 
-	// Determines whether or not the given text is a custom variable.
+	/**
+	 * \brief Determines whether the given text is a custom variable name.
+	 *
+	 * \param _sText The text to test.
+	 * \return Returns true if \c _sText identifies a custom variable; otherwise false.
+	 */
 	bool CExpEvalContainer::IsCustomVar( const std::string &_sText ) const {
 		if ( m_mCustomVariables.size() == 0 ) { return false; }	// Fastest check that is most-often the case.
 		size_t sIdx = HasString( _sText );
@@ -378,7 +408,12 @@ namespace ee {
 		return m_mCustomVariables.find( sIdx ) != m_mCustomVariables.end();
 	}
 
-	// Returns the index of an array if it exists or static_cast<size_t>(-1) otherwise.
+	/**
+	 * \brief Returns the index of an array if it exists.
+	 *
+	 * \param _sText The array name to search for.
+	 * \return Returns the index of \c _sText if found; otherwise returns \c static_cast<size_t>(-1).
+	 */
 	size_t CExpEvalContainer::HasArray( const std::string &_sText ) const {
 		if ( m_mArrays.size() == 0 ) { return false; }	// Fastest check that is most-often the case.
 		size_t sIdx = HasString( _sText );
@@ -388,7 +423,12 @@ namespace ee {
 		return aFound->second;
 	}
 
-	// Determines whether or not a given text is an array.
+	/**
+	 * \brief Determines whether the given text refers to an array.
+	 *
+	 * \param _sText The text to test.
+	 * \return Returns true if \c _sText identifies an array; otherwise false.
+	 */
 	bool CExpEvalContainer::IsArray( const std::string &_sText ) const {
 		if ( m_mArrays.size() == 0 ) { return false; }	// Fastest check that is most-often the case.
 		size_t sIdx = HasString( _sText );
@@ -396,13 +436,31 @@ namespace ee {
 		return m_mArrays.find( sIdx ) != m_mArrays.end();
 	}
 
-	// Gets the string version of the given value.
+	/**
+	 * \brief Gets the string version of the given value.
+	 *
+	 * \param _rResult The result to stringify.
+	 * \param _ui32Depth Current formatting depth (used to limit recursion).
+	 * \param _ui64Options Formatting options.
+	 * \return Returns a string representation of \c _rResult.
+	 */
 	std::wstring CExpEvalContainer::ToString( EE_RESULT &_rResult, uint32_t _ui32Depth, uint64_t _ui64Options ) {
 		if ( !m_pfToString ) { return DefaultToString( _rResult, _ui32Depth, _ui64Options ); }
 		return m_pfToString( _rResult, _ui64Options );
 	}
 
-	// Prints a formatted string.
+	/**
+	 * \brief Prints a formatted string to a wide-character destination buffer using a \c va_list.
+	 *
+	 * All arguments described by \c _vaArgPtr must be of type \c const \c EE_RESULT.
+	 *
+	 * \param _pwcDst Destination buffer.
+	 * \param _sMaxLen Maximum number of wide characters writable to \c _pwcDst.
+	 * \param _pwcFormat Format string.
+	 * \param _iArgs Number of arguments in \c _vaArgPtr.
+	 * \param _vaArgPtr Variadic argument list. Each argument must be a \c const \c EE_RESULT.
+	 * \return Returns the number of characters written (or that would have been written), matching the underlying formatter's behavior.
+	 */
 	int __cdecl CExpEvalContainer::PrintF( wchar_t * _pwcDst, size_t _sMaxLen,
 		const wchar_t * _pwcFormat, int _iArgs, ... ) {
 		va_list vaArgs;
@@ -460,7 +518,15 @@ namespace ee {
 		return static_cast<int>(sDst);
 	}
 
-	// Prints a formatted string.  All ... parameters must be of type "const EE_RESULT".
+	/**
+	 * \brief Prints a formatted string to a wide-character destination buffer.
+	 *
+	 * \param _pwcDst Destination buffer.
+	 * \param _sMaxLen Maximum number of wide characters writable to \c _pwcDst.
+	 * \param _pwcFormat Format string.
+	 * \param _vParms Parameters used for formatting.
+	 * \return Returns the number of characters written (or that would have been written), matching the underlying formatter's behavior.
+	 */
 	int __cdecl CExpEvalContainer::PrintF( wchar_t * _pwcDst, size_t _sMaxLen,
 		const wchar_t * _pwcFormat, const std::vector<EE_RESULT> &_vParms ) {
 		size_t sDst = 0, sIdx = 0;
@@ -505,6 +571,15 @@ namespace ee {
 		return static_cast<int>(sDst);
 	}
 
+	/**
+	 * \brief Performs an operation on two results using the given operator.
+	 *
+	 * \param _rLeft The left operand.
+	 * \param _uiOp The operator (implementation-defined token/value).
+	 * \param _rRight The right operand.
+	 * \param _rResult Receives the operation result.
+	 * \return Returns an \c EE_ERROR_CODES value describing success or failure.
+	 */
 	CExpEvalContainer::EE_ERROR_CODES CExpEvalContainer::PerformOp( EE_RESULT _rLeft, uint32_t _uiOp, EE_RESULT _rRight, EE_RESULT &_rResult ) {
 		_rResult.ncType = GetCastType( _rLeft.ncType, _rRight.ncType );
 		if ( _rResult.ncType != EE_NC_OBJECT ) {
@@ -670,6 +745,7 @@ namespace ee {
 				//_rLeft.u.poObj->Ord
 				break;
 			}
+			default : {}
 		}
 
 #undef EE_INT_CHECK
@@ -679,7 +755,15 @@ namespace ee {
 		return EE_EC_SUCCESS;
 	}
 
-	// Performs an operation on 2 given results using the given operator.
+	/**
+	 * \brief Performs an operation on two results using the given operator (static form).
+	 *
+	 * \param _rLeft The left operand.
+	 * \param _uiOp The operator (implementation-defined token/value).
+	 * \param _rRight The right operand.
+	 * \param _rResult Receives the operation result.
+	 * \return Returns an \c EE_ERROR_CODES value describing success or failure.
+	 */
 	CExpEvalContainer::EE_ERROR_CODES CExpEvalContainer::PerformOp_S( EE_RESULT _rLeft, uint32_t _uiOp, EE_RESULT _rRight, EE_RESULT &_rResult ) {
 		_rResult.ncType = GetCastType( _rLeft.ncType, _rRight.ncType );
 		if ( _rResult.ncType != EE_NC_OBJECT ) {
@@ -807,6 +891,7 @@ namespace ee {
 				}
 				break;
 			}
+			default : {}
 		}
 
 #undef EE_INT_CHECK
@@ -816,7 +901,15 @@ namespace ee {
 		return EE_EC_SUCCESS;
 	}
 
-	// Applies a 1-parameter intrinsic to a result.
+	/**
+	 * \brief Applies a 1-parameter intrinsic to a result.
+	 *
+	 * \param _rExp The intrinsic input.
+	 * \param _uiIntrinsic The intrinsic identifier.
+	 * \param _rResult Receives the intrinsic result.
+	 * \param _ui32Depth Current evaluation depth (used to limit recursion).
+	 * \return Returns an \c EE_ERROR_CODES value describing success or failure.
+	 */
 	CExpEvalContainer::EE_ERROR_CODES CExpEvalContainer::PerformIntrinsic( EE_RESULT _rExp, uint32_t _uiIntrinsic, EE_RESULT &_rResult, uint32_t _ui32Depth ) {
 		if ( !_ui32Depth && _rExp.ncType == EE_NC_OBJECT && _rExp.u.poObj && (_rExp.u.poObj->Type() & CObject::EE_BIT_VECTOR) ) {
 			// Apply everything to each element in the vector.
@@ -831,21 +924,43 @@ namespace ee {
 		if ( _uiIntrinsic == CExpEvalParser::token::EE_BYTESWAPUSHORT ) {
 			_rExp = ConvertResultOrObject( _rExp, EE_NC_UNSIGNED );
 			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
-			_rResult.u.ui64Val = ::_byteswap_ushort( static_cast<uint16_t>(_rExp.u.ui64Val) );
+			_rResult.u.ui64Val =
+#if defined( _MSC_VER )
+				::_byteswap_ushort( static_cast<uint16_t>(_rExp.u.ui64Val) );
+#elif defined( __clang__ ) || defined( __GNUC__ )
+			static_cast<uint16_t>(::__builtin_bswap16( static_cast<uint16_t>(_rExp.u.ui64Val) ));
+#else
+#error "EE_BYTESWAPUSHORT not implemented."
+#endif	// #if defined( _MSC_VER )
 			_rResult.ncType = EE_NC_UNSIGNED;
 			return EE_EC_SUCCESS;
 		}
 		if ( _uiIntrinsic == CExpEvalParser::token::EE_BYTESWAPULONG ) {
 			_rExp = ConvertResultOrObject( _rExp, EE_NC_UNSIGNED );
 			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
-			_rResult.u.ui64Val = ::_byteswap_ulong( static_cast<uint32_t>(_rExp.u.ui64Val) );
+			_rResult.u.ui64Val =
+#if defined( _MSC_VER )
+				::_byteswap_ulong( static_cast<uint32_t>(_rExp.u.ui64Val) );
+#elif defined( __clang__ ) || defined( __GNUC__ )
+			static_cast<uint32_t>(::__builtin_bswap32( static_cast<uint32_t>(_rExp.u.ui64Val) ));
+#else
+#error "EE_BYTESWAPULONG not implemented."
+#endif	// #if defined( _MSC_VER )
+
 			_rResult.ncType = EE_NC_UNSIGNED;
 			return EE_EC_SUCCESS;
 		}
 		if ( _uiIntrinsic == CExpEvalParser::token::EE_BYTESWAPUINT64 ) {
 			_rExp = ConvertResultOrObject( _rExp, EE_NC_UNSIGNED );
 			if ( _rExp.ncType == EE_NC_INVALID ) { _rResult.ncType = EE_NC_INVALID; return EE_EC_INVALIDCAST; }
-			_rResult.u.ui64Val = ::_byteswap_uint64( _rExp.u.ui64Val );
+			_rResult.u.ui64Val =
+#if defined( _MSC_VER )
+				::_byteswap_uint64( _rExp.u.ui64Val );
+#elif defined( __clang__ ) || defined( __GNUC__ )
+			static_cast<uint64_t>(::__builtin_bswap64( _rExp.u.ui64Val ));
+#else
+#error "EE_BYTESWAPUINT64 not implemented."
+#endif	// #if defined( _MSC_VER )
 			_rResult.ncType = EE_NC_UNSIGNED;
 			return EE_EC_SUCCESS;
 		}
@@ -1204,7 +1319,16 @@ namespace ee {
 		return EE_EC_UNRECOGNIZEDINTRINSIC1;
 	}
 
-	// Applies a 2-parameter intrinsic to a result.
+	/**
+	 * \brief Applies a 2-parameter intrinsic to two results.
+	 *
+	 * \param _rExp0 The first intrinsic input.
+	 * \param _rExp1 The second intrinsic input.
+	 * \param _uiIntrinsic The intrinsic identifier.
+	 * \param _rResult Receives the intrinsic result.
+	 * \param _bIncludeNonConst Indicates whether non-constant operations are permitted for this call.
+	 * \return Returns an \c EE_ERROR_CODES value describing success or failure.
+	 */
 	CExpEvalContainer::EE_ERROR_CODES CExpEvalContainer::PerformIntrinsic( EE_RESULT _rExp0, EE_RESULT _rExp1, uint32_t _uiIntrinsic, EE_RESULT &_rResult, bool _bIncludeNonConst ) {				
 #define EE_OP( CASE, FUNC )																						\
 	case CExpEvalParser::token::CASE : {																		\
@@ -1284,7 +1408,19 @@ namespace ee {
 		//return EE_EC_UNRECOGNIZEDINTRINSIC2;
 	}
 
-	// Creates a float using the specific parameters.
+	/**
+	 * \brief Creates a floating-point value from explicit component parameters.
+	 *
+	 * \param _rTempSignBits Number of sign bits.
+	 * \param _rTempExpBits Number of exponent bits.
+	 * \param _rTempManBits Number of mantissa bits.
+	 * \param _rTempImplied Non-zero if the mantissa has an implied leading bit.
+	 * \param _rTempSignVal Sign value.
+	 * \param _rTempExpVal Exponent value.
+	 * \param _rTempManVal Mantissa value.
+	 * \param _rResult Receives the resulting floating-point value.
+	 * \return Returns an \c EE_ERROR_CODES value describing success or failure.
+	 */
 	CExpEvalContainer::EE_ERROR_CODES CExpEvalContainer::PerformFloatX( EE_RESULT _rTempSignBits, EE_RESULT _rTempExpBits,
 		EE_RESULT _rTempManBits, EE_RESULT _rTempImplied, EE_RESULT _rTempSignVal, EE_RESULT _rTempExpVal, EE_RESULT _rTempManVal,
 		EE_RESULT &_rResult ) {
@@ -1321,7 +1457,17 @@ namespace ee {
 		return EE_EC_SUCCESS;
 	}
 
-	// Creates a float using the specific parameters and a double input.
+	/**
+	 * \brief Creates a floating-point value from a double input using explicit format parameters.
+	 *
+	 * \param _rTempSignBits Number of sign bits.
+	 * \param _rTempExpBits Number of exponent bits.
+	 * \param _rTempManBits Number of mantissa bits.
+	 * \param _rTempImplied Non-zero if the mantissa has an implied leading bit.
+	 * \param _rTempDoubleVal Input value.
+	 * \param _rResult Receives the resulting floating-point value.
+	 * \return Returns an \c EE_ERROR_CODES value describing success or failure.
+	 */
 	CExpEvalContainer::EE_ERROR_CODES CExpEvalContainer::PerformFloatX( EE_RESULT _rTempSignBits, EE_RESULT _rTempExpBits,
 		EE_RESULT _rTempManBits, EE_RESULT _rTempImplied, EE_RESULT _rTempDoubleVal,
 		EE_RESULT &_rResult ) {
@@ -1347,7 +1493,12 @@ namespace ee {
 		return EE_EC_SUCCESS;
 	}
 
-	// Deallocates an object.
+	/**
+	 * \brief Deallocates an object previously allocated by this container.
+	 *
+	 * \param _poObj The object to deallocate.
+	 * \return Returns true if the object was found and deallocated; otherwise false.
+	 */
 	bool CExpEvalContainer::DeallocateObject( CObject * _poObj ) {
 		// Reverse search because it is most likely the immediate deletion of a temporary object.
 		for ( auto I = m_vObjects.size(); I--; ) {
@@ -1360,7 +1511,14 @@ namespace ee {
 		return false;
 	}
 
-	// String formatting.
+	/**
+	 * \brief Formats a string using a format buffer and a list of evaluated arguments.
+	 *
+	 * \param _pcFormat Pointer to the format string.
+	 * \param _stLen Length of \c _pcFormat in bytes (0 means null-terminated, if supported by the implementation).
+	 * \param _vArgs Arguments used for formatting.
+	 * \return Returns the formatted string.
+	 */
 	std::string CExpEvalContainer::FormatString( const char * _pcFormat, size_t _stLen, const std::vector<EE_RESULT> &_vArgs ) {
 		std::string sTmp;
 		size_t stCharLen = 0;
@@ -1457,24 +1615,52 @@ namespace ee {
 		return sTmp;
 	}
 
-	// Decodes a string.
+	/**
+	 * \brief Decodes and stores a string literal.
+	 *
+	 * The text is decoded (ex: escape sequences) and stored in the internal string table.
+	 *
+	 * \param _sText The source string text to decode and store.
+	 * \return Returns the index of the stored string in the internal string table.
+	 */
 	size_t CExpEvalContainer::CreateString( const std::string &_sText ) {
 		return AddString( _sText );
 	}
 
-	// Decodes an identifier.
+	/**
+	 * \brief Decodes and stores an identifier.
+	 *
+	 * The identifier text is decoded/stored in the internal string table and can be referenced by index.
+	 *
+	 * \param _pcText The identifier text.
+	 * \return Returns the index of the stored identifier string in the internal string table.
+	 */
 	size_t CExpEvalContainer::CreateIdentifier( const char * _pcText ) {
 		return AddString( _pcText );
 	}
 
-	// Creates a string expression.
+	/**
+	 * \brief Creates a string expression node.
+	 *
+	 * Populates \c _ndNode to represent a string constant referenced by \c _sStrIndex.
+	 *
+	 * \param _sStrIndex Index into the internal string table.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateStringBasicExp( size_t _sStrIndex, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_STRING;
 		_ndNode.u.sStringIndex = _sStrIndex;
 		AddNode( _ndNode );
 	}
 
-	// Creates a custom-variable expression.
+	/**
+	 * \brief Creates a custom-variable expression node.
+	 *
+	 * Populates \c _ndNode to represent a custom variable referenced by \c _sStrIndex.
+	 *
+	 * \param _sStrIndex Index into the internal string table for the variable name.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateCustomVar( size_t _sStrIndex, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_CUSTOM_VAR;
 		_ndNode.u.sStringIndex = _sStrIndex;
@@ -1490,7 +1676,16 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an array/access expression.
+	/**
+	 * \brief Creates an array-variable access expression node.
+	 *
+	 * Builds a node that represents an array access where the array name is referenced
+	 * by \c _sStrIndex and the index expression is provided in \c _ndExp.
+	 *
+	 * \param _sStrIndex Index into the internal string table for the array name.
+	 * \param _ndExp Index expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateArrayVar( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARRAY;
 		_ndNode.u.sStringIndex = _sStrIndex;
@@ -1498,7 +1693,16 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an array/access expression.
+	/**
+	 * \brief Creates a string array/slice access expression node with one index expression.
+	 *
+	 * Builds a node that represents string access where the string is referenced by \c _sStrIndex
+	 * and the index expression is provided in \c _ndExp.
+	 *
+	 * \param _sStrIndex Index into the internal string table for the string reference.
+	 * \param _ndExp Index expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateArrayString( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_STRINGARRAY;
 		_ndNode.u.sStringIndex = _sStrIndex;
@@ -1537,7 +1741,16 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an array/access expression.
+	/**
+	 * \brief Creates a string slice access expression node with two index expressions.
+	 *
+	 * Builds a node that represents string slicing with optional start/end indices.
+	 *
+	 * \param _sStrIndex Index into the internal string table for the string reference.
+	 * \param _ndExp0 Start/index-0 expression node data.
+	 * \param _ndExp1 End/index-1 expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateArrayString( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndExp0, const YYSTYPE::EE_NODE_DATA &_ndExp1, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_STRINGARRAY_EX;
 		_ndNode.u.sStringIndex = _sStrIndex;
@@ -1601,7 +1814,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an array/access expression.
+	/**
+	 * \brief Creates a string slice expression from a given index to the end.
+	 *
+	 * \param _sStrIndex Index into the internal string table for the string reference.
+	 * \param _ndExp0 Start expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateArrayToEndString( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndExp0, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_STRINGARRAY_EX;
 		_ndNode.u.sStringIndex = _sStrIndex;
@@ -1645,7 +1864,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an array/access expression.
+	/**
+	 * \brief Creates a string slice expression from the beginning to a given index.
+	 *
+	 * \param _sStrIndex Index into the internal string table for the string reference.
+	 * \param _ndExp0 End expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateArrayFromStartString( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndExp0, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_STRINGARRAY_EX;
 		_ndNode.u.sStringIndex = _sStrIndex;
@@ -1688,7 +1913,16 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an array/access expression.
+	/**
+	 * \brief Creates a generic array access expression node.
+	 *
+	 * Builds a node that represents array access on an evaluated object expression \c _ndObj
+	 * using index expression \c _ndExp.
+	 *
+	 * \param _ndObj The object expression node data.
+	 * \param _ndExp The index expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateArrayAccess( const YYSTYPE::EE_NODE_DATA &_ndObj, const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARRAY_ACCESS;
 		_ndNode.u.sNodeIndex = _ndObj.sNodeIndex;
@@ -1696,7 +1930,17 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an array/access expression.
+	/**
+	 * \brief Creates a generic extended array access expression node.
+	 *
+	 * Builds a node that represents extended array access/slicing on an evaluated object expression \c _ndObj
+	 * using two stored sub-expression indices.
+	 *
+	 * \param _ndObj The object expression node data.
+	 * \param _sExp0 Index into the sub-expression results array for the first index expression.
+	 * \param _sExp1 Index into the sub-expression results array for the second index expression.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateArrayAccessEx( const YYSTYPE::EE_NODE_DATA &_ndObj, size_t _sExp0, size_t _sExp1, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARRAY_ACCESS_EX;
 		_ndNode.u.sNodeIndex = _ndObj.sNodeIndex;
@@ -1705,7 +1949,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a postfix operator.
+	/**
+	 * \brief Creates a postfix operator expression node.
+	 *
+	 * \param _sStrIndex Index into the internal string table for the operator text (or token spelling).
+	 * \param _eType The postfix operator type/token.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreatePostfixOp( size_t _sStrIndex, int32_t _eType, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = _eType == CExpEvalParser::token::EE_PLUSPLUS ? EE_N_POSTFIX_PLUSPLUS : EE_N_POSTFIX_MINUSMINUS;
 		_ndNode.u.sStringIndex = _sStrIndex;
@@ -1716,7 +1966,13 @@ namespace ee {
  		AddNode( _ndNode );
 	}
 
-	// Creates a prefix operator.
+	/**
+	 * \brief Creates a prefix operator expression node.
+	 *
+	 * \param _sStrIndex Index into the internal string table for the operator text (or token spelling).
+	 * \param _eType The prefix operator type/token.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreatePrefixOp( size_t _sStrIndex, int32_t _eType, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = _eType == CExpEvalParser::token::EE_PLUSPLUS ? EE_N_PREFIX_PLUSPLUS : EE_N_PREFIX_MINUSMINUS;
 		_ndNode.u.sStringIndex = _sStrIndex;
@@ -1727,7 +1983,12 @@ namespace ee {
  		AddNode( _ndNode );
 	}
 
-	// Creates a hex constant (0x----).
+	/**
+	 * \brief Creates a hexadecimal constant from a \c 0x-prefixed string.
+	 *
+	 * \param _pcText Text containing the hexadecimal constant.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateHex1( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
 		_ndNode.u.ui64Val = ee::CExpEval::StoULL( _pcText, 16 );
@@ -1735,7 +1996,12 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a hex constant (----h).
+	/**
+	 * \brief Creates a hexadecimal constant from an \c h-suffixed string.
+	 *
+	 * \param _pcText Text containing the hexadecimal constant.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateHex2( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
 		_ndNode.u.ui64Val = ee::CExpEval::StoULL( _pcText, 16 );
@@ -1743,7 +2009,12 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a hex constant (----).
+	/**
+	 * \brief Creates a hexadecimal constant from an unsuffixed hexadecimal string.
+	 *
+	 * \param _pcText Text containing the hexadecimal constant.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateHex3( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
 		_ndNode.u.ui64Val = ee::CExpEval::StoULL( _pcText, 16 );
@@ -1751,7 +2022,12 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a binary constant (0b----).
+	/**
+	 * \brief Creates a binary constant from a \c 0b-prefixed string.
+	 *
+	 * \param _pcText Text containing the binary constant.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateBin( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
 		_ndNode.u.ui64Val = ee::CExpEval::StoULL( _pcText + 2, 2 );
@@ -1759,7 +2035,12 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a decimal constant.
+	/**
+	 * \brief Creates an unsigned decimal constant from text.
+	 *
+	 * \param _pcText Text containing the decimal constant.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateUInt( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
 		bool bOverflow;
@@ -1774,7 +2055,12 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a numeric constant.
+	/**
+	 * \brief Creates an unsigned 64-bit numeric constant.
+	 *
+	 * \param _uiVal The value to store.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateNumber( uint64_t _uiVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
 		_ndNode.u.ui64Val = _uiVal;
@@ -1782,7 +2068,12 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a numeric constant.
+	/**
+	 * \brief Creates a signed 64-bit numeric constant.
+	 *
+	 * \param _iVal The value to store.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateNumber( int64_t _iVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
 		_ndNode.u.i64Val = _iVal;
@@ -1790,32 +2081,87 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a numeric constant.
+	/**
+	 * \brief Creates an unsigned 32-bit numeric constant.
+	 *
+	 * \param _uiVal The value to store.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateNumber( uint32_t _uiVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		CreateNumber( static_cast<uint64_t>(_uiVal), _ndNode );
 	}
 
-	// Creates a numeric constant.
+	/**
+	 * \brief Creates a signed 32-bit numeric constant.
+	 *
+	 * \param _iVal The value to store.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateNumber( int32_t _iVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		CreateNumber( static_cast<int64_t>(_iVal), _ndNode );
 	}
 
-	// Creates a numeric constant.
+	/**
+	 * \brief Creates a 32-bit floating-point numeric constant.
+	 *
+	 * \param _fVal The value to store.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateNumber( float _fVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		CreateDouble( _fVal, _ndNode );
 	}
 
-	// Creates a numeric constant.
+	/**
+	 * \brief Creates a 64-bit floating-point numeric constant.
+	 *
+	 * \param _dVal The value to store.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateNumber( double _dVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		CreateDouble( _dVal, _ndNode );
 	}
 
-	// Creates a numeric constant.
+	/**
+	 * \brief Creates a numeric constant from a \c long value.
+	 *
+	 * \param _lVal The value to store.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateNumber( long _lVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		CreateNumber( static_cast<int64_t>(_lVal), _ndNode );
 	}
 
-	// Creates an oct constant.
+#ifdef __APPLE__
+	/**
+	 * \brief Creates a numeric constant from a \c long \c double value.
+	 *
+	 * \param _dVal The value to store.
+	 * \param _ndNode Receives the resulting node data.
+	 */
+	void CExpEvalContainer::CreateNumber( long double _dVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		CreateDouble( static_cast<double>(_dVal), _ndNode );
+	}
+
+	/**
+	 * \brief Creates a numeric constant from a \c ::clock_t value.
+	 *
+	 * \param _cVal The value to store.
+	 * \param _ndNode Receives the resulting node data.
+	 */
+	void CExpEvalContainer::CreateNumber( ::clock_t _cVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
+		_ndNode.nType = EE_N_NUMERICCONSTANT;
+		_ndNode.u.ui64Val = _cVal;
+		_ndNode.v.ncConstType = EE_NC_UNSIGNED;
+		AddNode( _ndNode );
+	}
+#endif	// #ifdef __APPLE__
+
+	/**
+	 * \brief Creates an octal constant from text.
+	 *
+	 * \param _pcText Text containing the octal constant.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateOct( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
 		auto aLen = std::strlen( _pcText );
@@ -1830,12 +2176,22 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Create a double constant.
+	/**
+	 * \brief Creates a double constant from text.
+	 *
+	 * \param _pcText Text containing the floating-point constant.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateDouble( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		CreateDouble( ee::CExpEval::AtoF( _pcText ), _ndNode );
 	}
 
-	// Create a double constant.
+	/**
+	 * \brief Creates a double constant.
+	 *
+	 * \param _dVal The value to store.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateDouble( double _dVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMERICCONSTANT;
 		_ndNode.u.dVal = _dVal;
@@ -1843,7 +2199,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Create a Unicode \N{} numeric constant.
+	/**
+	 * \brief Creates a Unicode \c \\N{} numeric constant node.
+	 *
+	 * Decodes a \c \\N{...} escape/name sequence from \c _pcText and produces a numeric constant
+	 * node representing the resolved Unicode code point (or an invalid node on failure).
+	 *
+	 * \param _pcText Source text containing the \c \\N{...} construct.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateUnicodeNumericConstant( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		const char * pcStart = nullptr;
 		size_t sLen = 0;
@@ -1864,7 +2228,14 @@ namespace ee {
 		CreateNumber( 0, _ndNode );
 	}
 
-	// Create a reinterpretation of bits to a float.
+	/**
+	 * \brief Creates an as-float node (reinterpret bits as \c float).
+	 *
+	 * Produces a node that reinterprets the input expression's bits as a 32-bit float.
+	 *
+	 * \param _ndExp Expression node to reinterpret.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateAsFloat( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ASFLOAT;
 		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
@@ -1882,7 +2253,16 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Create a reinterpretation of bits to a float of a common type.
+	/**
+	 * \brief Creates an as-float node (reinterpret bits as \c float) for a common source type.
+	 *
+	 * Produces a node that reinterprets the input expression's bits as a 32-bit float, with
+	 * \c _eType describing the source/common type classification used during parsing.
+	 *
+	 * \param _ndExp Expression node to reinterpret.
+	 * \param _eType The source/common type token used to guide node creation.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateAsFloat( const YYSTYPE::EE_NODE_DATA &_ndExp, int32_t _eType, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = static_cast<ee::EE_NODES>(_eType);
 		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
@@ -1923,13 +2303,21 @@ namespace ee {
 					}
 					break;
 				}
+				default : {}
 			}
 		}
 #endif	// #ifdef EE_OPTIMIZE_FOR_RUNTIME
 		AddNode( _ndNode );
 	}
 
-	// Create a reinterpretation of bits to a double.
+	/**
+	 * \brief Creates an as-double node (reinterpret bits as \c double).
+	 *
+	 * Produces a node that reinterprets the input expression's bits as a 64-bit float.
+	 *
+	 * \param _ndExp Expression node to reinterpret.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateAsDouble( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ASDOUBLE;
 		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
@@ -1947,7 +2335,21 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Create a reinterpretation of bits to a double with the given bit specifications.
+	/**
+	 * \brief Creates a FloatX node from explicit bit-field specifications.
+	 *
+	 * Produces a node that constructs a floating-point value from explicit sign/exponent/mantissa
+	 * bit sizes and provided component values.
+	 *
+	 * \param _ndSignBits Expression providing the number of sign bits.
+	 * \param _ndExpBits Expression providing the number of exponent bits.
+	 * \param _ndManBits Expression providing the number of mantissa bits.
+	 * \param _ndImplicitMan Expression indicating whether the mantissa has an implicit leading bit.
+	 * \param _ndSignValue Expression providing the sign value (0 or 1).
+	 * \param _ndExpValue Expression providing the exponent value.
+	 * \param _ndManValue Expression providing the mantissa value.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateAsFloatX( const YYSTYPE::EE_NODE_DATA &_ndSignBits,
 		const YYSTYPE::EE_NODE_DATA &_ndExpBits,
 		const YYSTYPE::EE_NODE_DATA &_ndManBits,
@@ -1985,7 +2387,19 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Create a reinterpretation of bits to a double with the given bit specifications.
+	/**
+	 * \brief Creates a FloatX node by converting from a double expression.
+	 *
+	 * Produces a node that converts the provided double expression into a floating-point type
+	 * described by the given bit-field specifications.
+	 *
+	 * \param _ndSignBits Expression providing the number of sign bits.
+	 * \param _ndExpBits Expression providing the number of exponent bits.
+	 * \param _ndManBits Expression providing the number of mantissa bits.
+	 * \param _ndImplicitMan Expression indicating whether the mantissa has an implicit leading bit.
+	 * \param _ndExp Expression providing the double value to convert.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateAsFloatX( const YYSTYPE::EE_NODE_DATA &_ndSignBits,
 		const YYSTYPE::EE_NODE_DATA &_ndExpBits,
 		const YYSTYPE::EE_NODE_DATA &_ndManBits,
@@ -2018,7 +2432,19 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Gets a property of a floating-point type with the given bit configuration.
+	/**
+	 * \brief Creates a node that queries a FloatX property from a bit configuration.
+	 *
+	 * Builds a node that returns a property (such as min/max/epsilon/etc. depending on \c _nProp)
+	 * of a floating-point format described by the provided bit-field specifications.
+	 *
+	 * \param _ndSignBits Expression providing the number of sign bits.
+	 * \param _ndExpBits Expression providing the number of exponent bits.
+	 * \param _ndManBits Expression providing the number of mantissa bits.
+	 * \param _ndImplicitMan Expression indicating whether the mantissa has an implicit leading bit.
+	 * \param _nProp The property to query.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateAsFloatXProp( const YYSTYPE::EE_NODE_DATA &_ndSignBits,
 		const YYSTYPE::EE_NODE_DATA &_ndExpBits,
 		const YYSTYPE::EE_NODE_DATA &_ndManBits,
@@ -2035,7 +2461,20 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Gets a property of a floating-point type with the given bit configuration.
+	/**
+	 * \brief Creates a node that queries a FloatX property for a configured format and input value.
+	 *
+	 * Builds a node that returns a property (selected by \c _nProp) of the configured floating-point
+	 * format, optionally using \c _ndExp as an input value for the property computation.
+	 *
+	 * \param _ndSignBits Expression providing the number of sign bits.
+	 * \param _ndExpBits Expression providing the number of exponent bits.
+	 * \param _ndManBits Expression providing the number of mantissa bits.
+	 * \param _ndImplicitMan Expression indicating whether the mantissa has an implicit leading bit.
+	 * \param _ndExp Expression providing the double value used by the queried property.
+	 * \param _nProp The property to query.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateAsFloatXProp( const YYSTYPE::EE_NODE_DATA &_ndSignBits,
 		const YYSTYPE::EE_NODE_DATA &_ndExpBits,
 		const YYSTYPE::EE_NODE_DATA &_ndManBits,
@@ -2054,7 +2493,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a cast node.
+	/**
+	 * \brief Creates a cast expression node.
+	 *
+	 * Produces a node that converts the value of \c _ndExp according to the cast type \c _ctCast.
+	 *
+	 * \param _ndExp Expression node to cast.
+	 * \param _ctCast The cast type to apply.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateCast( const YYSTYPE::EE_NODE_DATA &_ndExp, EE_CAST_TYPES _ctCast, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_CAST;
 		_ndNode.v.ctCast = _ctCast;
@@ -2062,7 +2509,16 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Create an address node.
+	/**
+	 * \brief Creates an address-of / address node.
+	 *
+	 * Produces a node that resolves an address from \c _ndExp, applying \c _ctCast to determine
+	 * the address interpretation/width.
+	 *
+	 * \param _ndExp Expression node from which to produce an address.
+	 * \param _ctCast The cast type describing the address interpretation.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateAddress( const YYSTYPE::EE_NODE_DATA &_ndExp, EE_CAST_TYPES _ctCast, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ADDRESS;
 		_ndNode.v.ctCast = _ctCast;
@@ -2071,7 +2527,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates member access.
+	/**
+	 * \brief Creates a member-access expression node.
+	 *
+	 * Builds a node that accesses member \c _sMember from the object expression \c _ndExp.
+	 *
+	 * \param _ndExp Object expression node data.
+	 * \param _sMember Index/name token for the member to access.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateMemberAccess( const YYSTYPE::EE_NODE_DATA &_ndExp, size_t _sMember, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_MEMBERACCESS;
 		_ndNode.v.sStringIndex = _sMember;
@@ -2079,14 +2543,25 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a user (??) node.
+	/**
+	 * \brief Creates a user (??) node.
+	 *
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateUser( YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_USER_VAR;
 		m_bHasUserVar = true;
 		AddNode( _ndNode );
 	}
 
-	// Creates a number parameter ($<decimal>) node.
+	/**
+	 * \brief Creates a numbered-parameter node (e.g. \c $<decimal>).
+	 *
+	 * Parses \c _pcText and produces a node that references the corresponding numbered parameter.
+	 *
+	 * \param _pcText Source text containing the numbered parameter.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateNumberedParm( const char * _pcText, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMBERED_PARM;
 		_ndNode.u.ui64Val = ee::CExpEval::StoULL( &_pcText[1] );
@@ -2094,7 +2569,12 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a dynamic numbered parameter node.
+	/**
+	 * \brief Creates a dynamic numbered-parameter node from a string-table index.
+	 *
+	 * \param _sStrIndex Index into the internal string table used to resolve the parameter reference.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateDynamicParm( size_t _sStrIndex, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_DYNAMIC_NUMBERED_PARM;
 		_ndNode.u.sStringIndex = _sStrIndex;
@@ -2121,7 +2601,12 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a dynamic numbered parameter node.
+	/**
+	 * \brief Creates a dynamic numbered-parameter node from an expression.
+	 *
+	 * \param _ndExp Expression node providing the parameter index.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateDynamicParmExp( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_DYNAMIC_NUMBERED_PARM_EXP;
 		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
@@ -2146,13 +2631,23 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a node that gets the total numbered parameters.
+	/**
+	 * \brief Creates a node that returns the total number of numbered parameters.
+	 *
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateParmTotal( YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_NUMBERED_PARM_TOTAL;
 		AddNode( _ndNode );
 	}
 
-	// Create a unary node.
+	/**
+	 * \brief Creates a unary operator node.
+	 *
+	 * \param _ndExp Operand expression node data.
+	 * \param _uiOp Unary operator token/character.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateUnary( const YYSTYPE::EE_NODE_DATA &_ndExp, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_UNARY;
 		_ndNode.v.ui32Op = _uiOp;
@@ -2171,7 +2666,14 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Create an operator node.
+	/**
+	 * \brief Creates a binary operator node.
+	 *
+	 * \param _ndLeft Left operand expression node data.
+	 * \param _ndRight Right operand expression node data.
+	 * \param _uiOp Operator token/character.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateOp( const YYSTYPE::EE_NODE_DATA &_ndLeft, const YYSTYPE::EE_NODE_DATA &_ndRight, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_OP;
 		_ndNode.v.ui32Op = _uiOp;
@@ -2201,7 +2703,14 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Create a conditional operator.
+	/**
+	 * \brief Creates a conditional (\c ?: ) operator node.
+	 *
+	 * \param _ndExp Condition expression node data.
+	 * \param _ndLeft True-expression node data.
+	 * \param _ndRight False-expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateConditional( const YYSTYPE::EE_NODE_DATA &_ndExp, const YYSTYPE::EE_NODE_DATA &_ndLeft, const YYSTYPE::EE_NODE_DATA &_ndRight, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_CONDITIONAL;
 		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
@@ -2223,13 +2732,25 @@ namespace ee {
 					_ndNode = rExp.u.dVal ? _ndLeft : _ndRight;
 					break;
 				}
+				default : {}
 			}
 		}
 #endif	// #ifdef EE_OPTIMIZE_FOR_RUNTIME
 		AddNode( _ndNode );
 	}
 
-	// Creates an assignment operator.
+	/**
+	 * \brief Creates an assignment expression node.
+	 *
+	 * Builds a node that assigns the evaluated right-hand side into a variable referenced by \c _sStrIndex,
+	 * using the operator \c _uiOp, optionally declaring the variable as \c const.
+	 *
+	 * \param _sStrIndex Index into the internal string table for the variable name.
+	 * \param _ndRight Right-hand side expression node data.
+	 * \param _uiOp Assignment operator token/character (e.g. \c '=' , \c '+=' , etc.).
+	 * \param _bIsConst Indicates whether the assignment declares a const variable.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateAssignment( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndRight, uint32_t _uiOp, bool _bIsConst, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ASSIGNMENT;
 		_ndNode.v.ui32Op = _uiOp;
@@ -2280,7 +2801,17 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an assignment operator (to change a variable that has already been created.
+	/**
+	 * \brief Creates a reassignment expression node.
+	 *
+	 * Builds a node that modifies an already-created variable referenced by \c _sStrIndex by applying
+	 * the operator \c _uiOp with the evaluated right-hand side.
+	 *
+	 * \param _sStrIndex Index into the internal string table for the variable name.
+	 * \param _ndRight Right-hand side expression node data.
+	 * \param _uiOp Assignment operator token/character (e.g. \c '=' , \c '+=' , etc.).
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateReAssignment( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndRight, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ASSIGNMENT;
 		_ndNode.v.ui32Op = _uiOp;
@@ -2293,7 +2824,20 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a raw data array.
+	/**
+	 * \brief Creates a raw data array node.
+	 *
+	 * Builds a node representing a raw array with a backing type and persistence setting, with size provided
+	 * by \c _ndSize. Optional initializer values are provided by the node index range.
+	 *
+	 * \param _sStrIndex Index into the internal string table for the array name (or backing identifier).
+	 * \param _ui32Backing Backing type identifier.
+	 * \param _ui32BackingPersistence Backing persistence identifier.
+	 * \param _ndSize Expression node data that evaluates to the array size.
+	 * \param _sStartValueNodeIdx Index of the first initializer-value node (inclusive).
+	 * \param _sEndValueNodeIdx Index of the last initializer-value node (inclusive).
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateRawArray( size_t _sStrIndex, uint32_t _ui32Backing, uint32_t _ui32BackingPersistence, const YYSTYPE::EE_NODE_DATA &_ndSize,
 		size_t _sStartValueNodeIdx, size_t _sEndValueNodeIdx, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_CREATE_ARRAY;
@@ -2314,7 +2858,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an assignment operator to assign a value in an array.
+	/**
+	 * \brief Creates an assignment node that writes to an array element by name/index.
+	 *
+	 * \param _sArrayIndex Index into the internal string table for the array identifier.
+	 * \param _ndArray Array/index expression node data describing the element.
+	 * \param _ndValue Value expression node data to assign.
+	 * \param _uiOp Assignment operator token/character.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateArrayReAssignment( size_t _sArrayIndex, const YYSTYPE::EE_NODE_DATA &_ndArray, const YYSTYPE::EE_NODE_DATA &_ndValue, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARRAY_ASSIGNMENT;
 		_ndNode.v.ui32Op = _uiOp;
@@ -2324,7 +2876,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an assignment operator to assign a value in an array.
+	/**
+	 * \brief Creates an assignment node that writes to an array element on an object.
+	 *
+	 * \param _sArrayIndex Index into the internal string table for the array identifier.
+	 * \param _ndIdx Index expression node data selecting the element.
+	 * \param _ndValue Value expression node data to assign.
+	 * \param _uiOp Assignment operator token/character.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateArrayReAssignmentObj( size_t _sArrayIndex, const YYSTYPE::EE_NODE_DATA &_ndIdx, const YYSTYPE::EE_NODE_DATA &_ndValue, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARRAY_ASSIGNMENT_OBJ;
 		_ndNode.v.ui32Op = _uiOp;
@@ -2335,7 +2895,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an assignment operator to assign a value in an array.
+	/**
+	 * \brief Creates an assignment node that writes to an array element via object/array expressions.
+	 *
+	 * \param _ndObj Object expression node data.
+	 * \param _ndArray Array/index expression node data describing the element.
+	 * \param _ndValue Value expression node data to assign.
+	 * \param _uiOp Assignment operator token/character.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateArrayReAssignment( const YYSTYPE::EE_NODE_DATA &_ndObj, const YYSTYPE::EE_NODE_DATA &_ndArray, const YYSTYPE::EE_NODE_DATA &_ndValue, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARRAY_ASSIGNMENT_OBJ;
 		_ndNode.v.ui32Op = _uiOp;
@@ -2345,7 +2913,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an assignment operator to write to an external address.
+	/**
+	 * \brief Creates an assignment node that writes to an external address.
+	 *
+	 * \param _ctCast Address cast/type used to interpret the destination.
+	 * \param _ndExp Expression node data that evaluates to the destination address.
+	 * \param _ndValue Value expression node data to assign.
+	 * \param _uiOp Assignment operator token/character.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateAddressAssignment( EE_CAST_TYPES _ctCast, const YYSTYPE::EE_NODE_DATA &_ndExp, const YYSTYPE::EE_NODE_DATA &_ndValue, uint32_t _uiOp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ADDRESS_ASSIGNMENT;
 		_ndNode.v.ctCast = _ctCast;
@@ -2355,7 +2931,12 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an array initializer.
+	/**
+	 * \brief Creates an array initializer node.
+	 *
+	 * \param _ndExp Expression node data providing the initializer expression.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateArrayInitializer( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARRAY_INITIALIZER;
 		_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
@@ -2363,7 +2944,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an array initializer list.
+	/**
+	 * \brief Creates an array initializer-list node.
+	 *
+	 * Builds a node that references a contiguous range of initializer entries.
+	 *
+	 * \param _stLeftIdx Index of the first initializer entry (inclusive).
+	 * \param _stRightIdx Index of the last initializer entry (inclusive).
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateArrayInitializerList( size_t _stLeftIdx, size_t _stRightIdx, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARRAY_INITIALIZER_LIST;
 		_ndNode.v.sNodeIndex = _stLeftIdx;
@@ -2371,7 +2960,12 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.
+	/**
+	 * \brief Creates a vector from an initializer expression.
+	 *
+	 * \param _ndExp Expression node data providing the vector initializer.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVector( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARRAY_CREATE_VECTOR;
 		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
@@ -2383,7 +2977,11 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.
+	/**
+	 * \brief Creates an empty vector node.
+	 *
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVector( YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARRAY_CREATE_VECTOR;
 		_ndNode.u.sNodeIndex = size_t( ~0 );
@@ -2395,7 +2993,12 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Create a 0-parm intrinsic.
+	/**
+	 * \brief Creates a 0-parameter intrinsic call node.
+	 *
+	 * \param _uiIntrinsic Intrinsic token/identifier.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateIntrinsic0( uint32_t _uiIntrinsic, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		switch ( _uiIntrinsic ) {
 			case CExpEvalParser::token::EE_CLOCK : {
@@ -2431,7 +3034,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Create a 1-parm intrinsic.
+	/**
+	 * \brief Creates a 1-parameter intrinsic call node.
+	 *
+	 * \param _uiIntrinsic Intrinsic token/identifier.
+	 * \param _ndExp Parameter expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateIntrinsic1( uint32_t _uiIntrinsic, const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 #ifdef EE_OPTIMIZE_FOR_RUNTIME
 		EE_RESULT rExp;
@@ -2659,21 +3268,42 @@ namespace ee {
 			}
 			case CExpEvalParser::token::EE_BYTESWAPUSHORT : {
 				_ndNode.nType = EE_N_INTRINSIC_1_UNSIGNED_UNSIGNED16;
-				_ndNode.uFuncPtr.pfIntrins1Unsigned_Unsigned16 = ::_byteswap_ushort;
+				_ndNode.uFuncPtr.pfIntrins1Unsigned_Unsigned16 =
+#if defined( _MSC_VER )
+				::_byteswap_ushort;
+#elif defined( __APPLE__ )
+				::_OSSwapInt16;
+#else
+#error "EE_BYTESWAPUSHORT not implemented."
+#endif	// #if defined( _MSC_VER )
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_BYTESWAPULONG : {
 				_ndNode.nType = EE_N_INTRINSIC_1_UNSIGNED_UNSIGNED32;
-				_ndNode.uFuncPtr.pfIntrins1Unsigned_Unsigned32 = ::_byteswap_ulong;
+				_ndNode.uFuncPtr.pfIntrins1Unsigned_Unsigned32 =
+#if defined( _MSC_VER )
+				::_byteswap_ulong;
+#elif defined( __APPLE__ )
+				::_OSSwapInt32;
+#else
+#error "EE_BYTESWAPULONG not implemented."
+#endif	// #if defined( _MSC_VER )
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
 			}
 			case CExpEvalParser::token::EE_BYTESWAPUINT64 : {
 				_ndNode.nType = EE_N_INTRINSIC_1_UNSIGNED_UNSIGNED64;
-				_ndNode.uFuncPtr.pfIntrins1Unsigned_Unsigned64 = ::_byteswap_uint64;
+				_ndNode.uFuncPtr.pfIntrins1Unsigned_Unsigned64 =
+#if defined( _MSC_VER )
+				::_byteswap_uint64;
+#elif defined( __APPLE__ )
+				::_OSSwapInt64;
+#else
+#error "EE_BYTESWAPUINT64 not implemented."
+#endif	// #if defined( _MSC_VER )
 				_ndNode.v.sNodeIndex = _ndExp.sNodeIndex;
 				AddNode( _ndNode );
 				return;
@@ -2706,7 +3336,14 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Create a 2-parm intrinsic.
+	/**
+	 * \brief Creates a 2-parameter intrinsic call node.
+	 *
+	 * \param _uiIntrinsic Intrinsic token/identifier.
+	 * \param _ndExp0 First parameter expression node data.
+	 * \param _ndExp1 Second parameter expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateIntrinsic2( uint32_t _uiIntrinsic, const YYSTYPE::EE_NODE_DATA &_ndExp0, const YYSTYPE::EE_NODE_DATA &_ndExp1, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 #ifdef EE_OPTIMIZE_FOR_RUNTIME
 		EE_RESULT rExp0, rExp1;
@@ -2812,7 +3449,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Create a 3-parm intrinsic.
+	/**
+	 * \brief Creates a 3-parameter intrinsic call node.
+	 *
+	 * \param _uiIntrinsic Intrinsic token/identifier.
+	 * \param _ndExp0 First parameter expression node data.
+	 * \param _ndExp1 Second parameter expression node data.
+	 * \param _ndExp2 Third parameter expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateIntrinsic3( uint32_t _uiIntrinsic, const YYSTYPE::EE_NODE_DATA &_ndExp0, const YYSTYPE::EE_NODE_DATA &_ndExp1, const YYSTYPE::EE_NODE_DATA &_ndExp2, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 #ifdef EE_OPTIMIZE_FOR_RUNTIME
 		EE_RESULT rExp0, rExp1, rExp2;
@@ -2887,7 +3532,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a compound statement.
+	/**
+	 * \brief Creates a compound statement node.
+	 *
+	 * Joins two statement nodes into a single compound statement node.
+	 *
+	 * \param _ndLeft Left statement node data.
+	 * \param _ndRight Right statement node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateCompoundStatement( const YYSTYPE::EE_NODE_DATA &_ndLeft, const YYSTYPE::EE_NODE_DATA &_ndRight, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_COMPOUND_STATEMENT;
 		_ndNode.v.sNodeIndex = _ndLeft.sNodeIndex;
@@ -2895,7 +3548,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a while loop.
+	/**
+	 * \brief Creates a while-loop node.
+	 *
+	 * \param _ndExp Condition expression node data.
+	 * \param _ndStatements Loop body statements node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateWhileLoop( const YYSTYPE::EE_NODE_DATA &_ndExp, const YYSTYPE::EE_NODE_DATA &_ndStatements, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_WHILE_LOOP;
 		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
@@ -2903,7 +3562,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a for loop.
+	/**
+	 * \brief Creates a for-loop node with initializer/condition/iteration expressions.
+	 *
+	 * \param _ndExp0 Initializer expression node data.
+	 * \param _ndExp1 Condition expression node data.
+	 * \param _ndExp2 Iteration expression node data.
+	 * \param _ndStatements Loop body statements node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateForLoop( const YYSTYPE::EE_NODE_DATA &_ndExp0, const YYSTYPE::EE_NODE_DATA &_ndExp1, const YYSTYPE::EE_NODE_DATA &_ndExp2, const YYSTYPE::EE_NODE_DATA &_ndStatements, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_FOR_LOOP;
 		_ndNode.u.sNodeIndex = _ndExp0.sNodeIndex;
@@ -2913,7 +3580,14 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a for loop.
+	/**
+	 * \brief Creates a for-loop node with initializer and condition expressions.
+	 *
+	 * \param _ndExp0 Initializer expression node data.
+	 * \param _ndExp1 Condition expression node data.
+	 * \param _ndStatements Loop body statements node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateForLoop( const YYSTYPE::EE_NODE_DATA &_ndExp0, const YYSTYPE::EE_NODE_DATA &_ndExp1, const YYSTYPE::EE_NODE_DATA &_ndStatements, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_FOR_LOOP;
 		_ndNode.u.sNodeIndex = _ndExp0.sNodeIndex;
@@ -2923,7 +3597,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a do-while loop.
+	/**
+	 * \brief Creates a do-while loop node.
+	 *
+	 * \param _ndExp Condition expression node data.
+	 * \param _ndStatements Loop body statements node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateDoWhileLoop( const YYSTYPE::EE_NODE_DATA &_ndExp, const YYSTYPE::EE_NODE_DATA &_ndStatements, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_DO_WHILE_LOOP;
 		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
@@ -2931,7 +3611,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a foreach declaration.
+	/**
+	 * \brief Creates a foreach declaration node.
+	 *
+	 * \param _sStrIndex Index into the internal string table for the loop variable name.
+	 * \param _sArrayIdx Index into the internal string table for the array identifier (or array reference).
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateForEachDecl( size_t _sStrIndex, size_t _sArrayIdx, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_FOREACHDECL0;
 		_ndNode.u.sNodeIndex = _sStrIndex;
@@ -2947,7 +3633,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a foreach declaration.
+	/**
+	 * \brief Creates a foreach declaration node for custom variables.
+	 *
+	 * \param _sStrIndex Index into the internal string table for the loop variable name.
+	 * \param _sArrayIdx Index into the internal string table for the array/custom-variable identifier.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateForEachCustomDecl( size_t _sStrIndex, size_t _sArrayIdx, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_FOREACHDECL1;
 		_ndNode.u.sNodeIndex = _sStrIndex;
@@ -2963,7 +3655,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a foreach declaration.
+	/**
+	 * \brief Creates a foreach declaration node for strings.
+	 *
+	 * \param _sStrIndex Index into the internal string table for the loop variable name.
+	 * \param _sArrayIdx Index into the internal string table for the string identifier.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateForEachStringDecl( size_t _sStrIndex, size_t _sArrayIdx, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_FOREACHDECL2;
 		_ndNode.u.sNodeIndex = _sStrIndex;
@@ -2979,7 +3677,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a foreach loop.
+	/**
+	 * \brief Creates a foreach loop node.
+	 *
+	 * \param _ndDecl Foreach declaration node data.
+	 * \param _ndStatements Loop body statements node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateForEachLoop( const YYSTYPE::EE_NODE_DATA &_ndDecl, const YYSTYPE::EE_NODE_DATA &_ndStatements, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_FOREACH;
 		_ndNode.u.sNodeIndex = _ndDecl.sNodeIndex;
@@ -2988,7 +3692,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a foreach loop that runs over objects.
+	/**
+	 * \brief Creates a foreach loop node that iterates over objects.
+	 *
+	 * \param _ndDecl Foreach declaration node data.
+	 * \param _ndStatements Loop body statements node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateForEachObjLoop( const YYSTYPE::EE_NODE_DATA &_ndDecl, const YYSTYPE::EE_NODE_DATA &_ndStatements, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_FOREACHOBJ;
 		_ndNode.u.sNodeIndex = _ndDecl.sNodeIndex;
@@ -2997,7 +3707,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a foreach loop that runs over strings.
+	/**
+	 * \brief Creates a foreach loop node that iterates over strings.
+	 *
+	 * \param _ndDecl Foreach declaration node data.
+	 * \param _ndStatements Loop body statements node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateForEachStrLoop( const YYSTYPE::EE_NODE_DATA &_ndDecl, const YYSTYPE::EE_NODE_DATA &_ndStatements, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_FOREACHSTR;
 		_ndNode.u.sNodeIndex = _ndDecl.sNodeIndex;
@@ -3006,7 +3722,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a selection.
+	/**
+	 * \brief Creates a selection statement node.
+	 *
+	 * \param _ndExp Condition expression node data.
+	 * \param _ndStatements Selection body statements node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateSelectionStatement( const YYSTYPE::EE_NODE_DATA &_ndExp, const YYSTYPE::EE_NODE_DATA &_ndStatements, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_IF;
 		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
@@ -3049,13 +3771,21 @@ namespace ee {
 					}
 					break;
 				}
+				default : {}
 			}
 		}
 #endif	// #ifdef EE_OPTIMIZE_FOR_RUNTIME
 		AddNode( _ndNode );
 	}
 
-	// Creates a selection.
+	/**
+	 * \brief Creates an if/else selection statement node.
+	 *
+	 * \param _ndExp Condition expression node data.
+	 * \param _ndStatements0 True-branch statements node data.
+	 * \param _ndStatements1 False-branch statements node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateSelectionStatement( const YYSTYPE::EE_NODE_DATA &_ndExp, const YYSTYPE::EE_NODE_DATA &_ndStatements0, const YYSTYPE::EE_NODE_DATA &_ndStatements1, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_IF;
 		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
@@ -3077,25 +3807,39 @@ namespace ee {
 					_ndNode = rExp.u.dVal ? _ndStatements0 : _ndStatements1;
 					break;
 				}
+				default : {}
 			}
 		}
 #endif	// #ifdef EE_OPTIMIZE_FOR_RUNTIME
 		AddNode( _ndNode );
 	}
 
-	// Creates a continue.
+	/**
+	 * \brief Creates a continue statement node.
+	 *
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateContinue( YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_CONTINUE;
 		AddNode( _ndNode );
 	}
 
-	// Creates a break.
+	/**
+	 * \brief Creates a break statement node.
+	 *
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateBreak( YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_BREAK;
 		AddNode( _ndNode );
 	}
 
-	// Creates an entry in an argument list.
+	/**
+	 * \brief Creates a single argument-list entry node.
+	 *
+	 * \param _ndExp Argument expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateArgListEntry( const YYSTYPE::EE_NODE_DATA &_ndExp, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARG_LIST_ENTRY;
 		_ndNode.u.sNodeIndex = _ndExp.sNodeIndex;
@@ -3103,7 +3847,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an entry in an argument list.
+	/**
+	 * \brief Creates an argument-list entry by joining two entries.
+	 *
+	 * \param _ndLeft Left list/entry node data.
+	 * \param _ndRight Right list/entry node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateArgListEntry( const YYSTYPE::EE_NODE_DATA &_ndLeft, const YYSTYPE::EE_NODE_DATA &_ndRight, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARG_LIST_ENTRY;
 		_ndNode.u.sNodeIndex = _ndLeft.sNodeIndex;
@@ -3111,14 +3861,26 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates an arg list.
+	/**
+	 * \brief Creates an argument-list node.
+	 *
+	 * \param _ndList Argument-list entry/list node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateArgList( const YYSTYPE::EE_NODE_DATA &_ndList, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_ARG_LIST;
 		_ndNode.u.sNodeIndex = _ndList.sNodeIndex;
 		AddNode( _ndNode );
 	}
 
-	// Starts an array.
+	/**
+	 * \brief Begins parsing/constructing an array literal.
+	 *
+	 * Initializes internal state used to accumulate array elements while the parser processes
+	 * an array construct. The resulting array node is produced later when the array is closed.
+	 *
+	 * \return Returns true if the array state was started successfully; false otherwise.
+	 */
 	bool CExpEvalContainer::StartArray( /*YYSTYPE::EE_NODE_DATA &_ndNode*/ ) {
 		size_t sIdx = m_vObjects.size();
 		ee::CObject * psObj = reinterpret_cast<ee::CVector *>(AllocateObject<ee::CVector>());
@@ -3136,7 +3898,12 @@ namespace ee {
 		return true;
 	}
 
-	// Ends an array.
+	/**
+	 * \brief Finishes parsing/constructing an array literal.
+	 *
+	 * Finalizes internal state associated with the most recently started array construct and
+	 * seals any pending element accumulation.
+	 */
 	void CExpEvalContainer::EndArray( /*YYSTYPE::EE_NODE_DATA &_ndNode*/ ) {
 		//size_t sIdx = m_vVectorStack[m_vVectorStack.size()-1];
 		m_vVectorStack.pop_back();
@@ -3145,7 +3912,18 @@ namespace ee {
 		AddNode( _ndNode );*/
 	}
 
-	// Creates a format string in the format of: "Some string {}.".format( Args0, Arg1 ).
+	/**
+	 * \brief Creates a format-string node using \c .format() semantics.
+	 *
+	 * Builds a node representing a call of the form:
+	 * \code
+	 * "Some string {}.".format( Arg0, Arg1 )
+	 * \endcode
+	 *
+	 * \param _sStrIndex Index into the internal string table for the format string literal.
+	 * \param _ndArgs Argument-list node data supplying the format parameters.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateFormat( size_t _sStrIndex, const YYSTYPE::EE_NODE_DATA &_ndArgs, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_FORMAT;
 		_ndNode.u.sStringIndex = _sStrIndex;
@@ -3153,7 +3931,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.add().
+	/**
+	 * \brief Creates a \c vector.add() node.
+	 *
+	 * Builds a node representing element-wise addition of \c _ndVector and \c _ndOperand.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndOperand Operand expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorAdd( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndOperand, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_ADD;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
@@ -3163,7 +3949,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.sub().
+	/**
+	 * \brief Creates a \c vector.sub() node.
+	 *
+	 * Builds a node representing element-wise subtraction of \c _ndOperand from \c _ndVector.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndOperand Operand expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorSub( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndOperand, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_SUB;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
@@ -3173,7 +3967,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.mul().
+	/**
+	 * \brief Creates a \c vector.mul() node.
+	 *
+	 * Builds a node representing element-wise multiplication of \c _ndVector and \c _ndOperand.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndOperand Operand expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorMul( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndOperand, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_MUL;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
@@ -3183,7 +3985,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.dot().
+	/**
+	 * \brief Creates a \c vector.dot() node.
+	 *
+	 * Builds a node representing the dot product of \c _ndVector and \c _ndOperand.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndOperand Operand expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorDot( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndOperand, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_DOT;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
@@ -3191,7 +4001,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.append().
+	/**
+	 * \brief Creates a \c vector.append() node.
+	 *
+	 * Builds a node representing an append operation on the vector expression.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndVal Value expression node data to append.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorAppend( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_APPEND;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
@@ -3199,7 +4017,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.append().
+	/**
+	 * \brief Creates a \c vector.append() node by variable id.
+	 *
+	 * Builds a node representing an append operation on a vector variable referenced by \c _sVarId.
+	 *
+	 * \param _sVarId Variable identifier for the destination vector.
+	 * \param _ndVal Value expression node data to append.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorAppend( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_APPEND_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3209,7 +4035,16 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.assign().
+	/**
+	 * \brief Creates a \c vector.assign() node.
+	 *
+	 * Builds a node representing assignment of \c _ndVal to the element at index \c _ndIdx in \c _ndVector.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndIdx Index expression node data.
+	 * \param _ndVal Value expression node data to assign.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorAssign( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndIdx, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_ASSIGN;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
@@ -3218,7 +4053,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.at().
+	/**
+	 * \brief Creates a \c vector.at() node.
+	 *
+	 * Builds a node representing retrieval of the element at index \c _ndIdx from \c _ndVector.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndIdx Index expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorAt( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndIdx, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_AT;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
@@ -3226,7 +4069,16 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.at().
+	/**
+	 * \brief Creates a \c vector.at() node by variable id.
+	 *
+	 * Builds a node representing retrieval of the element at index \c _ndIdx from the vector variable
+	 * referenced by \c _sVarId.
+	 *
+	 * \param _sVarId Variable identifier for the source vector.
+	 * \param _ndIdx Index expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorAt( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndIdx, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_AT_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3236,14 +4088,24 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.capacity().
+	/**
+	 * \brief Creates a \c vector.capacity() node.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorCapacity( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_CAPACITY;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.capacity().
+	/**
+	 * \brief Creates a \c vector.capacity() node by variable id.
+	 *
+	 * \param _sVarId Variable identifier for the vector.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorCapacity( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_CAPACITY_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3252,14 +4114,24 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.clear().
+	/**
+	 * \brief Creates a \c vector.clear() node.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorClear( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_CLEAR;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.clear().
+	/**
+	 * \brief Creates a \c vector.clear() node by variable id.
+	 *
+	 * \param _sVarId Variable identifier for the vector.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorClear( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_CLEAR_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3268,7 +4140,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.cross().
+	/**
+	 * \brief Creates a \c vector.cross() node.
+	 *
+	 * Builds a node representing the cross product of \c _ndVector and \c _ndOperand.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndOperand Operand vector expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorCross( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndOperand, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_CROSS;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
@@ -3278,14 +4158,24 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.empty().
+	/**
+	 * \brief Creates a \c vector.empty() node.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorEmpty( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_EMPTY;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.empty().
+	/**
+	 * \brief Creates a \c vector.empty() node by variable id.
+	 *
+	 * \param _sVarId Variable identifier for the vector.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorEmpty( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_EMPTY_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3294,7 +4184,15 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.erase().
+	/**
+	 * \brief Creates a \c vector.erase() node.
+	 *
+	 * Builds a node representing erasure of the element at index \c _ndIdx from \c _ndVector.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndIdx Index expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorErase( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndIdx, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_ERASE;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
@@ -3302,7 +4200,16 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.erase().
+	/**
+	 * \brief Creates a \c vector.erase() node by variable id.
+	 *
+	 * Builds a node representing erasure of the element at index \c _ndIdx from the vector variable
+	 * referenced by \c _sVarId.
+	 *
+	 * \param _sVarId Variable identifier for the vector.
+	 * \param _ndIdx Index expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorErase( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndIdx, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_ERASE_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3312,7 +4219,16 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.insert().
+	/**
+	 * \brief Creates a \c vector.insert() node.
+	 *
+	 * Builds a node representing insertion of \c _ndVal at index \c _ndIdx in \c _ndVector.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndIdx Index expression node data.
+	 * \param _ndVal Value expression node data to insert.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorInsert( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndIdx, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_INSERT;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
@@ -3321,14 +4237,24 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.max_size().
+	/**
+	 * \brief Creates a \c vector.max_size() node.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorMaxSize( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_MAX_SIZE;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.max_size().
+	/**
+	 * \brief Creates a \c vector.max_size() node by variable id.
+	 *
+	 * \param _sVarId Variable identifier for the vector.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorMaxSize( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_MAX_SIZE_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3337,14 +4263,24 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.mag().
+	/**
+	 * \brief Creates a \c vector.mag() node.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorMag( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_MAG;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.mag().
+	/**
+	 * \brief Creates a \c vector.mag() node by variable id.
+	 *
+	 * \param _sVarId Variable identifier for the vector.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorMag( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_MAG_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3353,14 +4289,24 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.mag_sq().
+	/**
+	 * \brief Creates a \c vector.mag_sq() node.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorMagSq( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_MAG_SQ;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.mag_sq().
+	/**
+	 * \brief Creates a \c vector.mag_sq() node by variable id.
+	 *
+	 * \param _sVarId Variable identifier for the vector.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorMagSq( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_MAG_SQ_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3369,7 +4315,12 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.normalize().
+	/**
+	 * \brief Creates a \c vector.normalize() node.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorNormalize( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_NORMALIZE;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
@@ -3378,7 +4329,12 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.normalize().
+	/**
+	 * \brief Creates a \c vector.normalize() node by variable id.
+	 *
+	 * \param _sVarId Variable identifier for the vector.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorNormalize( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_NORMALIZE_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3387,7 +4343,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.reserve().
+	/**
+	 * \brief Creates a \c vector.reserve() node.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndSize Size expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorReserve( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_RESERVE;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
@@ -3395,7 +4357,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.reserve().
+	/**
+	 * \brief Creates a \c vector.reserve() node by variable id.
+	 *
+	 * \param _sVarId Variable identifier for the vector.
+	 * \param _ndSize Size expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorReserve( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_RESERVE_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3405,7 +4373,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.resize().
+	/**
+	 * \brief Creates a \c vector.resize() node.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndSize Size expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorResize( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_RESIZE;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
@@ -3413,7 +4387,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.resize().
+	/**
+	 * \brief Creates a \c vector.resize() node by variable id.
+	 *
+	 * \param _sVarId Variable identifier for the vector.
+	 * \param _ndSize Size expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorResize( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndSize, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_RESIZE_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3423,14 +4403,24 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.pop_back().
+	/**
+	 * \brief Creates a \c vector.pop_back() node.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorPopBack( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_POP_BACK;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.pop_back().
+	/**
+	 * \brief Creates a \c vector.pop_back() node by variable id.
+	 *
+	 * \param _sVarId Variable identifier for the vector.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorPopBack( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_POP_BACK_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3439,7 +4429,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.push_back().
+	/**
+	 * \brief Creates a \c vector.push_back() node.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndVal Value expression node data to push.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorPushBack( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_APPEND;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
@@ -3447,7 +4443,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.push_back().
+	/**
+	 * \brief Creates a \c vector.push_back() node by variable id.
+	 *
+	 * \param _sVarId Variable identifier for the vector.
+	 * \param _ndVal Value expression node data to push.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorPushBack( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndVal, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_APPEND_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3457,14 +4459,24 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.shrink_to_fit().
+	/**
+	 * \brief Creates a \c vector.shrink_to_fit() node.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorShrinkToFit( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_SHRINK_TO_FIT;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.shrink_to_fit().
+	/**
+	 * \brief Creates a \c vector.shrink_to_fit() node by variable id.
+	 *
+	 * \param _sVarId Variable identifier for the vector.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorShrinkToFit( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_SHRINK_TO_FIT_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3473,14 +4485,24 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.size().
+	/**
+	 * \brief Creates a \c vector.size() node.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorSize( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_SIZE;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.size().
+	/**
+	 * \brief Creates a \c vector.size() node by variable id.
+	 *
+	 * \param _sVarId Variable identifier for the vector.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorSize( size_t _sVarId, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_SIZE_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3489,14 +4511,25 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.sum().
+	/**
+	 * \brief Creates a \c vector.sum() node.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorSum( const YYSTYPE::EE_NODE_DATA &_ndVector, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_SUM;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.swap().
+	/**
+	 * \brief Creates a \c vector.swap() node.
+	 *
+	 * \param _ndVector Vector expression node data.
+	 * \param _ndRight Right-hand operand expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorSwap( const YYSTYPE::EE_NODE_DATA &_ndVector, const YYSTYPE::EE_NODE_DATA &_ndRight, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_SWAP;
 		_ndNode.u.sNodeIndex = _ndVector.sNodeIndex;
@@ -3504,7 +4537,13 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a vector.swap().
+	/**
+	 * \brief Creates a \c vector.swap() node by variable id.
+	 *
+	 * \param _sVarId Variable identifier for the vector.
+	 * \param _ndRight Right-hand operand expression node data.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateVectorSwap( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndRight, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_VECTOR_SWAP_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3514,7 +4553,17 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a string tokenization.
+	/**
+	 * \brief Creates a string tokenization node.
+	 *
+	 * Builds a node representing tokenization of \c _ndString using \c _ndTokenizer, with behavior
+	 * controlled by \c _ndIncludeEmpty.
+	 *
+	 * \param _ndString String expression node data.
+	 * \param _ndTokenizer Tokenizer expression node data.
+	 * \param _ndIncludeEmpty Expression node data indicating whether empty tokens are included.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateStringTokenize( const YYSTYPE::EE_NODE_DATA &_ndString, const YYSTYPE::EE_NODE_DATA &_ndTokenizer, const YYSTYPE::EE_NODE_DATA &_ndIncludeEmpty, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_STRING_TOKENIZE;
 		_ndNode.u.sNodeIndex = _ndString.sNodeIndex;
@@ -3525,7 +4574,17 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Creates a string tokenization.
+	/**
+	 * \brief Creates a string tokenization node by variable id.
+	 *
+	 * Builds a node representing tokenization of the string variable referenced by \c _sVarId using
+	 * \c _ndTokenizer, with behavior controlled by \c _ndIncludeEmpty.
+	 *
+	 * \param _sVarId Variable identifier for the source string.
+	 * \param _ndTokenizer Tokenizer expression node data.
+	 * \param _ndIncludeEmpty Expression node data indicating whether empty tokens are included.
+	 * \param _ndNode Receives the resulting node data.
+	 */
 	void CExpEvalContainer::CreateStringTokenize( size_t _sVarId, const YYSTYPE::EE_NODE_DATA &_ndTokenizer, const YYSTYPE::EE_NODE_DATA &_ndIncludeEmpty, YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.nType = EE_N_STRING_TOKENIZE_IDENT;
 		_ndNode.u.sNodeIndex = _sVarId;
@@ -3536,12 +4595,26 @@ namespace ee {
 		AddNode( _ndNode );
 	}
 
-	// Sets the translation-unit node.
+	/**
+	 * \brief Sets the translation-unit node.
+	 *
+	 * Records \c _ndNode as the root/translation-unit node for the current parse.
+	 *
+	 * \param _ndNode Translation-unit node data.
+	 */
 	void CExpEvalContainer::SetTrans( YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		m_sTrans = _ndNode.sNodeIndex;
 	}
 
-	// Determines if a node is constant and, if so, returns the constant value associated with the node.
+	/**
+	 * \brief Determines whether an expression node is constant.
+	 *
+	 * If \c _ndExp is constant, returns true and writes the associated constant value to \c _rResult.
+	 *
+	 * \param _ndExp Expression node data to test.
+	 * \param _rResult Receives the constant value when the expression is constant.
+	 * \return Returns true if the expression is constant; false otherwise.
+	 */
 	bool CExpEvalContainer::IsConst( const YYSTYPE::EE_NODE_DATA &_ndExp, EE_RESULT &_rResult ) {
 		switch ( _ndExp.nType ) {
 			case EE_N_NUMERICCONSTANT : {
@@ -3558,44 +4631,77 @@ namespace ee {
 				}
 				break;
 			}
+			default : {}
 		}
 		return false;
 	}
 
-	// Are we breaking from a loop?
+	/**
+	 * \brief Determines whether the parser is currently breaking out of a loop.
+	 *
+	 * \return Returns true if the current loop scope has a pending break; false otherwise.
+	 */
 	bool CExpEvalContainer::Breaking() const {
 		if ( !m_vLoopStack.size() ) { return false; }
 		return m_vLoopStack[m_vLoopStack.size()-1].bBreak;
 	}
 
-	// Break.  Returns false if not in a loop.
+	/**
+	 * \brief Requests a break from the current loop.
+	 *
+	 * Sets the break flag on the current loop scope.
+	 *
+	 * \return Returns true if a loop scope exists and the break was recorded; false if not in a loop.
+	 */
 	bool CExpEvalContainer::Break() {
 		if ( !m_vLoopStack.size() ) { return false; }
 		m_vLoopStack[m_vLoopStack.size()-1].bBreak = true;
 		return true;
 	}
 
-	// Are we continuing in a loop?
+	/**
+	 * \brief Determines whether the parser is currently continuing a loop.
+	 *
+	 * \return Returns true if the current loop scope has a pending continue; false otherwise.
+	 */
 	bool CExpEvalContainer::Continuing() const {
 		if ( !m_vLoopStack.size() ) { return false; }
 		return m_vLoopStack[m_vLoopStack.size()-1].bContinue;
 	}
 
-	// Continue.  Returns false if not in a loop.
+	/**
+	 * \brief Requests a continue for the current loop.
+	 *
+	 * Sets the continue flag on the current loop scope.
+	 *
+	 * \return Returns true if a loop scope exists and the continue was recorded; false if not in a loop.
+	 */
 	bool CExpEvalContainer::Continue() {
 		if ( !m_vLoopStack.size() ) { return false; }
 		m_vLoopStack[m_vLoopStack.size()-1].bContinue = true;
 		return true;
 	}
 
-	// Adds a node to its internal node tree.
+	/**
+	 * \brief Adds a node to the internal node tree.
+	 *
+	 * Stores \c _ndNode into the evaluator's node list/tree, assigning any required indices and ownership
+	 * information for later evaluation.
+	 *
+	 * \param _ndNode Node data to add.
+	 */
 	void CExpEvalContainer::AddNode( YYSTYPE::EE_NODE_DATA &_ndNode ) {
 		_ndNode.sNodeIndex = m_vNodes.size();
 		// Since the function returns void, try/catch here makes no sense.
 		m_vNodes.push_back( _ndNode );
 	}
 
-	// Adds a string and returns its index into the stack.
+	/**
+	 * \brief Adds a string to the internal string table.
+	 *
+	 * \param _sText String to add.
+	 * \return Returns the index of the added string within the internal string table.
+	 */
 	size_t CExpEvalContainer::AddString( const std::string &_sText ) {
 		for ( size_t I = 0; I < m_vStrings.size(); ++I ) {
 			if ( m_vStrings[I] == _sText ) { return I; }
@@ -3604,7 +4710,17 @@ namespace ee {
 		return m_vStrings.size() - 1;
 	}
 
-	// Resolves a node.
+	/**
+	 * \brief Resolves (evaluates) a node using an explicit evaluation stack.
+	 *
+	 * Performs non-recursive evaluation of the expression rooted at \c _sNode, returning detailed error
+	 * information through \c _ecError.
+	 *
+	 * \param _sNode Node index to resolve.
+	 * \param _rRes Receives the resolved value.
+	 * \param _ecError Receives a specific error code when evaluation fails.
+	 * \return Returns true if evaluation succeeded; false otherwise.
+	 */
 	bool CExpEvalContainer::ResolveNode_ExplicitStack( size_t _sNode, EE_RESULT &_rFinalResult, EE_ERROR_CODES &_ecError ) {
 		if ( _sNode >= m_vNodes.size() ) { return false; }
 
@@ -4169,6 +5285,7 @@ namespace ee {
 								--aFind->second.rRes.u.dVal;
 								break;
 							}
+							default : {}
 						}
 						++aFind->second.ui64UpdateCounter;
 						EE_DONE;
@@ -4191,6 +5308,7 @@ namespace ee {
 								++aFind->second.rRes.u.dVal;
 								break;
 							}
+							default : {}
 						}
 						++aFind->second.ui64UpdateCounter;
 						EE_DONE;
@@ -4212,6 +5330,7 @@ namespace ee {
 								--aFind->second.rRes.u.dVal;
 								break;
 							}
+							default : {}
 						}
 						(*soProcessMe.prResult) = aFind->second.rRes;
 						++aFind->second.ui64UpdateCounter;
@@ -4234,6 +5353,7 @@ namespace ee {
 								++aFind->second.rRes.u.dVal;
 								break;
 							}
+							default : {}
 						}
 						(*soProcessMe.prResult) = aFind->second.rRes;
 						++aFind->second.ui64UpdateCounter;
@@ -4607,6 +5727,7 @@ namespace ee {
 						EE_PUSH( _ndExp.u.sNodeIndex );		// soProcessMe.sSubResults[0] = PARM0.
 						continue;
 					}
+					default : {}
 				}
 			}
 			else {
@@ -5793,6 +6914,7 @@ namespace ee {
 								if ( !m_vArrayData[_ndExp.w.sNodeIndex].m_pabBase->AndEquals( static_cast<size_t>(rTemp.u.ui64Val), (*soProcessMe.prResult) ) ) { EE_ERROR( EE_EC_PROCESSINGERROR ); }
 								break;
 							}
+							default : {}
 						}
 						break;
 					}
@@ -6254,7 +7376,6 @@ namespace ee {
 						}
 						else { (*soProcessMe.prResult).ncType = EE_NC_INVALID; EE_ERROR( EE_EC_INVALID_OBJECT ); }
 						break;
-						continue;
 					}
 					case EE_N_VECTOR_RESERVE_IDENT : {
 						auto aFind = m_mCustomVariables.find( _ndExp.u.sNodeIndex );
@@ -6979,6 +8100,7 @@ namespace ee {
 
 								EE_FULL( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
 								EE_FULL( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+								default : {}
 #undef EE_FULL
 							}
 						}
@@ -7049,6 +8171,7 @@ namespace ee {
 
 								EE_FULL( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
 								EE_FULL( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+								default : {}
 #undef EE_FULL
 							}
 						}
@@ -7112,6 +8235,7 @@ namespace ee {
 
 								EE_GEOMSPACE( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
 								EE_GEOMSPACE( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+								default : {}
 
 							}
 						}
@@ -7150,6 +8274,7 @@ namespace ee {
 								EE_LINSPACE( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
 								case CExpEvalParser::token::EE_DEFAULT : {}				EE_FALLTHROUGH
 								EE_LINSPACE( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+								default : {}
 
 							}
 						}
@@ -7190,6 +8315,7 @@ namespace ee {
 								EE_LINSPACE( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
 								case CExpEvalParser::token::EE_DEFAULT : {}				EE_FALLTHROUGH
 								EE_LINSPACE( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+								default : {}
 
 							}
 						}
@@ -7233,6 +8359,7 @@ namespace ee {
 								EE_LINSPACE( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
 								case CExpEvalParser::token::EE_DEFAULT : {}				EE_FALLTHROUGH
 								EE_LINSPACE( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+								default : {}
 
 							}
 						}
@@ -7299,6 +8426,7 @@ namespace ee {
 
 								EE_LOGSPACE( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
 								EE_LOGSPACE( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+								default : {}
 
 							}
 						}
@@ -7356,6 +8484,7 @@ namespace ee {
 
 								EE_ONES( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
 								EE_ONES( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+								default : {}
 
 							}
 						}
@@ -7421,6 +8550,7 @@ namespace ee {
 
 								EE_ONES( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
 								EE_ONES( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+								default : {}
 
 							}
 						}
@@ -7543,6 +8673,7 @@ namespace ee {
 
 								EE_ZEROS( CExpEvalParser::token::EE_FLOAT, float, dVal, EE_NC_FLOATING )
 								EE_ZEROS( CExpEvalParser::token::EE_DOUBLE, double, dVal, EE_NC_FLOATING )
+								default : {}
 
 							}
 						}
@@ -7550,6 +8681,7 @@ namespace ee {
 #undef EE_ZEROS
 						break;
 					}
+					default : {}
 				}
 
 
@@ -7572,7 +8704,12 @@ namespace ee {
 		return true;
 	}
 
-	// Takes an array type and creates an array for the given type.
+	/**
+	 * \brief Creates an array instance based on a type identifier.
+	 *
+	 * \param _ui32Type Type identifier describing the array element/backing type.
+	 * \return Returns a pointer to the created array instance, or nullptr on failure.
+	 */
 	CArrayBase * CExpEvalContainer::CreateArrayFromType( uint32_t _ui32Type ) {
 		switch ( _ui32Type ) {
 			case CExpEvalParser::token::EE_INT8 : {
@@ -7612,7 +8749,12 @@ namespace ee {
 		return nullptr;
 	}
 
-	// Creates a string reference given a string index.
+	/**
+	 * \brief Creates a string reference object from a string-table index.
+	 *
+	 * \param _stStrIdx Index into the internal string table.
+	 * \return Returns true if the string reference object was created successfully; false otherwise.
+	 */
 	bool CExpEvalContainer::CreateStringRef( size_t /*_stStrIdx*/ ) {
 		return false;
 		/*if ( m_vStringObjectsU8.size() <= _stStrIdx ) {
@@ -7628,17 +8770,46 @@ namespace ee {
 		return true;*/
 	}
 	
-	// Shifting for floats.
+	/**
+	 * \brief Left-shift operation for floating-point values.
+	 *
+	 * Interprets \c _dShift as a shift amount and applies a left shift-like operation to \c _dVal using
+	 * floating-point semantics as defined by the evaluator.
+	 *
+	 * \param _dVal Input value.
+	 * \param _dShift Shift amount.
+	 * \return Returns the shifted value.
+	 */
 	double CExpEvalContainer::LShift( double _dVal, double _dShift ) {
 		return _dVal * std::pow( 2.0, _dShift );
 	}
 
-	// Shifting for floats.
+	/**
+	 * \brief Right-shift operation for floating-point values.
+	 *
+	 * Interprets \c _dShift as a shift amount and applies a right shift-like operation to \c _dVal using
+	 * floating-point semantics as defined by the evaluator.
+	 *
+	 * \param _dVal Input value.
+	 * \param _dShift Shift amount.
+	 * \return Returns the shifted value.
+	 */
 	double CExpEvalContainer::RShift( double _dVal, double _dShift ) {
 		return _dVal / std::pow( 2.0, _dShift );
 	}
 
-	// Fills out a context structure for PrintF().
+	/**
+	 * \brief Parses a PrintF() formatter and fills the context structure.
+	 *
+	 * Consumes the next formatter specifier from \c _pwcFormat, updating \c _sPos and writing the parsed
+	 * information into \c _pcContext along with the inferred numeric type in \c _ncType.
+	 *
+	 * \param _pwcFormat Format string.
+	 * \param _sPos Current parsing position within \c _pwcFormat; updated on success.
+	 * \param _pcContext Receives parsed formatter context.
+	 * \param _ncType Receives the expected argument type category.
+	 * \return Returns true if a formatter was parsed successfully; false otherwise.
+	 */
 	bool CExpEvalContainer::FillContext( const wchar_t * _pwcFormat, size_t &_sPos, EE_PRINTF_CONTEXT &_pcContext, EE_NUM_CONSTANTS &_ncType ) {
 		size_t sDstIdx = 0;
 		_pcContext.wcFormat[sDstIdx++] = L'%';
@@ -7688,8 +8859,19 @@ namespace ee {
 #undef	EE_APPEND_CHAR
 	}
 
-	// Eats the {..} part out of a string.  Assumes that _pcFormat points to the next character after the opening {.
-	// Also assumes that from { to } is all standard ASCII, since no special characters are allowed inside valid formatters.
+	/**
+	 * \brief Consumes a \c {..} formatter from a UTF-8 format string.
+	 *
+	 * Parses and removes the formatter portion beginning immediately after an opening \c '{' and ending at the
+	 * matching \c '}'. The formatter is interpreted as ASCII-only.
+	 *
+	 * \param _pcFormat Pointer to the current format-string position; must point to the character immediately
+	 * after the opening \c '{'. Updated to point past the closing \c '}'.
+	 * \param _stLen Remaining length of the format string; updated as characters are consumed.
+	 * \param _stArgIdx Receives/updates the argument index selected by the formatter.
+	 * \param _vArgs Argument list used by the formatter (for indexed/typed selection as supported).
+	 * \return Returns the decoded/expanded formatter text to splice into the final formatted output.
+	 */
 	std::string CExpEvalContainer::EatStringFormatter( const char * &_pcFormat, size_t &_stLen, size_t &_stArgIdx, const std::vector<EE_RESULT> &/*_vArgs*/ ) {
 		std::string sRet;
 		sRet.push_back( '{' );

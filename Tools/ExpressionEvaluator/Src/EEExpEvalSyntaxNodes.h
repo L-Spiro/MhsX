@@ -19,6 +19,16 @@
 namespace ee {
 
 	// == Node types.
+	/**
+	 * \brief Expression-evaluator node kinds.
+	 *
+	 * These values identify the type of a node in the compiled syntax tree produced by the parser.
+	 * Node types cover literals, identifiers, operators, control flow, container operations (strings/vectors),
+	 * numeric helpers (casts, bit reinterpretation, custom float formats), DSP/window functions, integration
+	 * helpers, and array construction utilities.
+	 *
+	 * \note The meaning of node fields (u/v/w/x/y/z/a) depends on the selected node type.
+	 */
 	enum EE_NODES {
 		EE_N_NUMERICCONSTANT,
 		EE_N_STRING,
@@ -212,7 +222,12 @@ namespace ee {
 		EE_N_ZEROS_LIKE,
 	};
 
-	// Constant types.  Ordered by cast priority.
+	/**
+	 * \brief Numeric constant categories used by the evaluator.
+	 *
+	 * These tags identify the runtime representation stored in an \ref EE_RESULT and define the cast priority
+	 * used when combining numeric values. Invalid is reserved to signal failures or non-values.
+	 */
 	enum EE_NUM_CONSTANTS {
 		EE_NC_UNSIGNED													= 0x00,
 		EE_NC_SIGNED													= 0x01,
@@ -222,7 +237,12 @@ namespace ee {
 		//EE_NC_MASK														= 0xFF,
 	};
 
-	// Cast types.
+	/**
+	 * \brief Cast targets supported by the expression language.
+	 *
+	 * These values specify the concrete destination type for explicit casts and address reads/writes.
+	 * Floating-point targets include several compact/custom formats in addition to float and double.
+	 */
 	enum EE_CAST_TYPES {
 		EE_CT_INT8,
 		EE_CT_UINT8,
@@ -241,78 +261,208 @@ namespace ee {
 	};
 
 	// Function pointers.
-	typedef ::clock_t (__cdecl * Intrins0Clock)();
+	typedef ::clock_t (__cdecl * Intrins0Clock)();																/**< Function pointer type for no-argument intrinsics that return a clock tick count. */
+
+	/**
+	 * \brief Function pointer type for no-argument intrinsics implemented as a call requiring a divisor/operand.
+	 *
+	 * The specific meaning of the parameter depends on the intrinsic being invoked.
+	 *
+	 * \param Operand value supplied by the node.
+	 * \return Returns a 64-bit unsigned result.
+	 */
 	typedef uint64_t (* Intrins0Unsigned)( uint64_t );
+
+	/**
+	 * \brief Function pointer type for single-parameter floating intrinsics.
+	 *
+	 * \param Value Input value (double precision).
+	 * \return Returns a double-precision result.
+	 */
 	typedef double (__cdecl * Intrins1_Float_Float)( double );
+
+	/**
+	 * \brief Function pointer type for single-parameter 16-bit unsigned intrinsics.
+	 *
+	 * \param Value Input value.
+	 * \return Returns the transformed 16-bit value.
+	 */
 	typedef uint16_t (__cdecl * Intrins1_Unsigned16_Unsigned16)( uint16_t );
+
+#if defined( _MSC_VER )
+	/**
+	 * \brief Function pointer type for single-parameter 32-bit unsigned intrinsics on MSVC.
+	 *
+	 * MSVC uses unsigned long for some compiler/library intrinsics (e.g. ::_byteswap_ulong()).
+	 *
+	 * \param Value Input value.
+	 * \return Returns the transformed 32-bit value.
+	 */
 	typedef unsigned long (__cdecl * Intrins1_Unsigned32_Unsigned32)( unsigned long );							// Because of ::_byteswap_ulong().
+
+#elif defined( __APPLE__ )
+	/**
+	 * \brief Function pointer type for single-parameter 32-bit unsigned intrinsics on Apple platforms.
+	 *
+	 * \param Value Input value.
+	 * \return Returns the transformed 32-bit value.
+	 */
+	typedef uint32_t (__cdecl * Intrins1_Unsigned32_Unsigned32)( uint32_t );
+#endif	// #if defined( _MSC_VER )
+
+	/**
+	 * \brief Function pointer type for single-parameter 64-bit unsigned intrinsics.
+	 *
+	 * \param Value Input value.
+	 * \return Returns the transformed 64-bit value.
+	 */
 	typedef uint64_t (__cdecl * Intrins1_Unsigned64_Unsigned64)( uint64_t );
+
+	/**
+	 * \brief Function pointer type for intrinsics returning a boolean from a floating input.
+	 *
+	 * \param Value Input value (double precision).
+	 * \return Returns the boolean intrinsic result.
+	 */
 	typedef bool (__cdecl * Intrins1_Bool_Float)( double );
+
+	/**
+	 * \brief Function pointer type for intrinsics returning a signed integer from a floating input.
+	 *
+	 * \param Value Input value (double precision).
+	 * \return Returns the signed intrinsic result.
+	 */
 	typedef int (__cdecl * Intrins1_Signed_Float)( double );
+
+	/**
+	 * \brief Function pointer type for two-parameter floating intrinsics (double precision).
+	 *
+	 * \param A First input value.
+	 * \param B Second input value.
+	 * \return Returns a double-precision result.
+	 */
 	typedef double (__cdecl * Intrins2_Float_Float_Float)( double, double );
+
+	/**
+	 * \brief Function pointer type for two-parameter floating intrinsics (single precision).
+	 *
+	 * \param A First input value.
+	 * \param B Second input value.
+	 * \return Returns a single-precision result.
+	 */
 	typedef float (__cdecl * Intrins2_Float_Float32_Float32)( float, float );
+
+	/**
+	 * \brief Function pointer type for two-parameter floating intrinsics (extended precision).
+	 *
+	 * \param A First input value.
+	 * \param B Second input value.
+	 * \return Returns a long-double result.
+	 */
 	typedef long double (__cdecl * Intrins2_Float_Float80_Float80)( long double, long double );
+
+	/**
+	 * \brief Function pointer type for mixed-precision two-parameter floating intrinsics.
+	 *
+	 * \param A First input value (float).
+	 * \param B Second input value (long double).
+	 * \return Returns a float result.
+	 */
 	typedef float (__cdecl * Intrins2_Float_Float32_Float80)( float, long double );
+
+	/**
+	 * \brief Function pointer type for three-parameter floating intrinsics (double precision).
+	 *
+	 * \param A First input value.
+	 * \param B Second input value.
+	 * \param C Third input value.
+	 * \return Returns a double-precision result.
+	 */
 	typedef double (__cdecl * Intrins3_Float_Float_Float_Float)( double, double, double );
+
+	/**
+	 * \brief Function pointer type for three-parameter predicates (single precision).
+	 *
+	 * \param A First input value.
+	 * \param B Second input value.
+	 * \param C Third input value.
+	 * \return Returns the boolean predicate result.
+	 */
 	typedef bool (__cdecl * Intrins3_Bool_Float32_Float32_Float32)( float, float, float );
+
+	/**
+	 * \brief Function pointer type for three-parameter predicates (double precision).
+	 *
+	 * \param A First input value.
+	 * \param B Second input value.
+	 * \param C Third input value.
+	 * \return Returns the boolean predicate result.
+	 */
 	typedef bool (__cdecl * Intrins3_Bool_Float_Float_Float)( double, double, double );
 
+	/**
+	 * \brief Bison/Flex semantic value union used by the parser.
+	 *
+	 * Holds either a primitive semantic value (string index, operator, backing type) or a fully described node
+	 * payload via \ref EE_NODE_DATA. Parser actions populate these fields to build the node stack.
+	 */
 	union YYSTYPE {
-		size_t															sStringIndex;							// String index.
-		uint32_t														ui32Unary;								// Unary operator.
-		uint32_t														ui32Backing;							// Backing type (for creating arrays).
+		size_t															sStringIndex;							/**< String index. */
+		uint32_t														ui32Unary;								/**< Unary operator. */
+		uint32_t														ui32Backing;							/**< Backing type (for creating arrays). */
 		struct EE_NODE_DATA {
-			EE_NODES													nType;									// Type of the node.
-			size_t														sNodeIndex;								// Index of the node in the stack of nodes.
+			EE_NODES													nType;									/**< Type of the node. */
+			size_t														sNodeIndex;								/**< Index of the node in the stack of nodes. */
 			union {
-				uint64_t												ui64Val;								// 64-bit unsigned integer value.
-				int64_t													i64Val;									// 64-bit signed integer value.
-				double													dVal;									// Double value.
-				size_t													sStringIndex;							// Index of the string/identifier.
-				size_t													sNodeIndex;								// When the index of another node is needed.
-				uint32_t												ui32Intrinsic;							// Intrinsic.
+				uint64_t												ui64Val;								/**< 64-bit unsigned integer value. */
+				int64_t													i64Val;									/**< 64-bit signed integer value. */
+				double													dVal;									/**< Double value. */
+				size_t													sStringIndex;							/**< Index of the string/identifier. */
+				size_t													sNodeIndex;								/**< When the index of another node is needed. */
+				uint32_t												ui32Intrinsic;							/**< Intrinsic. */
 			}															u;
 			union {
-				EE_NUM_CONSTANTS										ncConstType;							// Type of numeric constant.
-				EE_CAST_TYPES											ctCast;									// Casting to a type.
-				size_t													sStringIndex;							// Index of the string.
-				size_t													sNodeIndex;								// Index of a node.
-				uint32_t												ui32Op;									// Operator.
-				bool													bIsConst;								// Is the user variable const?
+				EE_NUM_CONSTANTS										ncConstType;							/**< Type of numeric constant. */
+				EE_CAST_TYPES											ctCast;									/**< Casting to a type. */
+				size_t													sStringIndex;							/**< Index of the string. */
+				size_t													sNodeIndex;								/**< Index of a node. */
+				uint32_t												ui32Op;									/**< Operator. */
+				bool													bIsConst;								/**< Is the user variable const? */
 			}															v;
 			union {
-				size_t													sNodeIndex;								// Node index.
+				size_t													sNodeIndex;								/**< Node index. */
 			}															w;
 			union {
-				size_t													sNodeIndex;								// Node index.
+				size_t													sNodeIndex;								/**< Node index. */
 			}															x;
 			union {
-				size_t													sNodeIndex;								// Node index.
+				size_t													sNodeIndex;								/**< Node index. */
 			}															y;
 			union {
-				size_t													sNodeIndex;								// Node index.
+				size_t													sNodeIndex;								/**< Node index. */
 			}															z;
 			union {
-				size_t													sNodeIndex;								// Node index.
+				size_t													sNodeIndex;								/**< Node index. */
 			}															a;
 			union {
-				Intrins0Clock											pfClock;								// ::clock().
-				Intrins0Unsigned										pfIntrins0Unsigned;						// Any no-parameter instrinsic that returns a uint64_t.
-				Intrins1_Float_Float									pfIntrins1Float_Float;					// Any single-parameter function that takes a double and gives back a double.
-				Intrins1_Unsigned16_Unsigned16							pfIntrins1Unsigned_Unsigned16;			// Any single-paremeter function that takes a uint16_t and returns a uint16_t.
-				Intrins1_Unsigned32_Unsigned32							pfIntrins1Unsigned_Unsigned32;			// Any single-paremeter function that takes a uint32_t and returns a uint32_t.
-				Intrins1_Unsigned64_Unsigned64							pfIntrins1Unsigned_Unsigned64;			// Any single-paremeter function that takes a uint64_t and returns a uint64_t.
-				Intrins1_Bool_Float										pfIntrins1Bool_Float;					// Any single-paremeter function that takes a double and returns a bool.
-				Intrins1_Signed_Float									pfIntrins1Signed_Float;					// Any single-paremeter function that takes a double and returns an int.
-				Intrins2_Float_Float_Float								pfIntrins2Float_Float_Float;			// Any 2-parameter function that takes all doubles and returns a double.
-				Intrins2_Float_Float32_Float32							pfIntrins2Float32_Float32_Float32;		// Any 2-parameter function that takes all floats and returns a float.
-				Intrins2_Float_Float80_Float80							pfIntrins2Float80_Float80_Float80;		// Any 2-parameter function that takes all long doubles and returns a long double.
-				Intrins2_Float_Float32_Float80							pfIntrins2Float32_Float32_Float80;		// Any 2-parameter function that takes a float and long double and returns a float.
-				Intrins3_Float_Float_Float_Float						pfIntrins3Float_Float_Float_Float;		// Any 3-parameter function that takes 3 doubles and returns a double.
-				Intrins3_Bool_Float32_Float32_Float32					pfIntrins3Bool_Float32_Float32_Float32;	// Any 3-parameter function that takes 3 doubles and returns a bool.
-				Intrins3_Bool_Float_Float_Float							pfIntrins3Bool_Float_Float_Float;		// Any 3-parameter function that takes 3 doubles and returns a bool.
+				Intrins0Clock											pfClock;								/**< ::clock(). */
+				Intrins0Unsigned										pfIntrins0Unsigned;						/**< Any no-parameter instrinsic that returns a uint64_t. */
+				Intrins1_Float_Float									pfIntrins1Float_Float;					/**< Any single-parameter function that takes a double and gives back a double. */
+				Intrins1_Unsigned16_Unsigned16							pfIntrins1Unsigned_Unsigned16;			/**< Any single-paremeter function that takes a uint16_t and returns a uint16_t. */
+				Intrins1_Unsigned32_Unsigned32							pfIntrins1Unsigned_Unsigned32;			/**< Any single-paremeter function that takes a uint32_t and returns a uint32_t. */
+				Intrins1_Unsigned64_Unsigned64							pfIntrins1Unsigned_Unsigned64;			/**< Any single-paremeter function that takes a uint64_t and returns a uint64_t. */
+				Intrins1_Bool_Float										pfIntrins1Bool_Float;					/**< Any single-paremeter function that takes a double and returns a bool. */
+				Intrins1_Signed_Float									pfIntrins1Signed_Float;					/**< Any single-paremeter function that takes a double and returns an int. */
+				Intrins2_Float_Float_Float								pfIntrins2Float_Float_Float;			/**< Any 2-parameter function that takes all doubles and returns a double. */
+				Intrins2_Float_Float32_Float32							pfIntrins2Float32_Float32_Float32;		/**< Any 2-parameter function that takes all floats and returns a float. */
+				Intrins2_Float_Float80_Float80							pfIntrins2Float80_Float80_Float80;		/**< Any 2-parameter function that takes all long doubles and returns a long double. */
+				Intrins2_Float_Float32_Float80							pfIntrins2Float32_Float32_Float80;		/**< Any 2-parameter function that takes a float and long double and returns a float. */
+				Intrins3_Float_Float_Float_Float						pfIntrins3Float_Float_Float_Float;		/**< Any 3-parameter function that takes 3 doubles and returns a double. */
+				Intrins3_Bool_Float32_Float32_Float32					pfIntrins3Bool_Float32_Float32_Float32;	/**< Any 3-parameter function that takes 3 doubles and returns a bool. */
+				Intrins3_Bool_Float_Float_Float							pfIntrins3Bool_Float_Float_Float;		/**< Any 3-parameter function that takes 3 doubles and returns a bool. */
 			}															uFuncPtr;
 			
 		}																ndData;
 	};
+
 }	// namespace ee

@@ -50,6 +50,13 @@ namespace ee {
 			catch ( ... ) { return false; }
 		}
 
+		/**
+		 * Adds a child via iterator.
+		 * 
+		 * \param _tChild The child value to insert.
+		 * \param _iIt The iterator to add.
+		 * \return Returns an iterator to the added child.
+		 **/
 		std::vector<EE_PTR_TYPE>::iterator				InsertChild_It( const _tType &_tChild, std::vector<EE_PTR_TYPE>::iterator _iIt ) {
 			auto aIt = m_vChildren.insert( _iIt, std::make_unique<CTree<_tType>>( _tChild ) );
 			(*aIt)->m_ptParent = this;

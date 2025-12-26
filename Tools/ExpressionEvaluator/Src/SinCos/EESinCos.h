@@ -1,19 +1,36 @@
 #pragma once
 
+#include <cmath>
+
+#if defined( __cplusplus )
 extern "C" {
+#endif
 
-#if defined( _M_AMD64 )
+#if defined( _MSC_VER ) && defined( _M_AMD64 )
 
-// 64-bit implementation in MASM.
-// Enable MASM by right clicking your project in solution explorer then:
-// Build Dependencies -> Build Customizations -> MASM
-extern void SinCos( double _dRadians, double * _pdSin, double * _pdCos );
-// Add your assembly file as a source, but exclude it from 32 bit build.
+/**
+ * \brief Computes the sine and cosine of an angle in radians.
+ *
+ * MSVC x64 builds use a MASM implementation.
+ *
+ * \param _dRadians Angle in radians.
+ * \param _pdSin Receives sin(_dRadians). Must be non-null.
+ * \param _pdCos Receives cos(_dRadians). Must be non-null.
+ */
+extern void 		SinCos( double _dRadians, double * _pdSin, double * _pdCos );
 
-#else
+#elif defined( _MSC_VER ) && defined( _M_IX86 )
 
-// 32-bit implementation in inline assembly.
-inline void SinCos( double _dRadians, double * _pdSin, double * _pdCos ) {
+/**
+ * \brief Computes the sine and cosine of an angle in radians.
+ *
+ * MSVC x86 builds use inline x87 assembly (FSINCOS).
+ *
+ * \param _dRadians Angle in radians.
+ * \param _pdSin Receives sin(_dRadians). Must be non-null.
+ * \param _pdCos Receives cos(_dRadians). Must be non-null.
+ */
+inline void 		SinCos( double _dRadians, double * _pdSin, double * _pdCos ) {
 	double dSin, dCos;
 	__asm {
 		fld QWORD PTR[_dRadians]
@@ -26,19 +43,70 @@ inline void SinCos( double _dRadians, double * _pdSin, double * _pdCos ) {
 	(*_pdCos) = dCos;
 }
 
-inline void SinCosF( float _fAngle, float * _pfSin, float * _pfCos ) {
-    float fSinT, fCosT;
-    __asm {
-        fld DWORD PTR[_fAngle]		// Load the 32-bit float into the FPU stack.
-        fsincos						// Compute cosine and sine.
-        fstp DWORD PTR[fCosT]		// Store the cosine value.
-        fstp DWORD PTR[fSinT]		// Store the sine value.
-        fwait						// Wait for the FPU to finish.
-    }
-    (*_pfSin) = fSinT;
-    (*_pfCos) = fCosT;
+/**
+ * \brief Computes the sine and cosine of an angle in radians (single-precision).
+ *
+ * MSVC x86 builds use inline x87 assembly (FSINCOS).
+ *
+ * \param _fAngle Angle in radians.
+ * \param _pfSin Receives sin(_fAngle). Must be non-null.
+ * \param _pfCos Receives cos(_fAngle). Must be non-null.
+ */
+inline void 		SinCosF( float _fAngle, float * _pfSin, float * _pfCos ) {
+	float fSinT, fCosT;
+	__asm {
+		fld DWORD PTR[_fAngle]
+		fsincos
+		fstp DWORD PTR[fCosT]
+		fstp DWORD PTR[fSinT]
+		fwait
+	}
+	(*_pfSin) = fSinT;
+	(*_pfCos) = fCosT;
+}
+
+#else
+
+/**
+ * \brief Computes the sine and cosine of an angle in radians.
+ *
+ * On Clang/GCC (including Xcode), attempts to call the platform/libm combined
+ * implementation when available; otherwise falls back to std::sin/std::cos.
+ *
+ * \param _dRadians Angle in radians.
+ * \param _pdSin Receives sin(_dRadians). Must be non-null.
+ * \param _pdCos Receives cos(_dRadians). Must be non-null.
+ */
+inline void 		SinCos( double _dRadians, double * _pdSin, double * _pdCos ) {
+#if defined( __APPLE__ ) || defined( __GNUC__ ) || defined( __clang__ )
+	::__sincos( _dRadians, _pdSin, _pdCos );
+#else
+	(*_pdSin) = std::sin( _dRadians );
+	(*_pdCos) = std::cos( _dRadians );
+#endif
+}
+
+/**
+ * \brief Computes the sine and cosine of an angle in radians (single-precision).
+ *
+ * On Clang/GCC (including Xcode), attempts to call the platform/libm combined
+ * implementation when available; otherwise falls back to std::sinf/std::cosf.
+ *
+ * \param _fAngle Angle in radians.
+ * \param _pfSin Receives sin(_fAngle). Must be non-null.
+ * \param _pfCos Receives cos(_fAngle). Must be non-null.
+ */
+inline void 		SinCosF( float _fAngle, float * _pfSin, float * _pfCos ) {
+#if defined( __APPLE__ ) || defined( __GNUC__ ) || defined( __clang__ )
+	::__sincosf( _fAngle, _pfSin, _pfCos );
+#else
+	(*_pfSin) = std::sinf( _fAngle );
+	(*_pfCos) = std::cosf( _fAngle );
+#endif
 }
 
 #endif
 
+#if defined( __cplusplus )
 } // extern "C"
+#endif

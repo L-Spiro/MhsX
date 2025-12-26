@@ -1,0 +1,693 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		12CFC7572EFCBF5D00792565 /* EEExpEval.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12CFC6F72EFCBF5D00792565 /* EEExpEval.cpp */; };
+		12CFC7582EFCBF5D00792565 /* EETree.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC6F82EFCBF5D00792565 /* EETree.h */; };
+		12CFC7592EFCBF5D00792565 /* EEObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC6FA2EFCBF5D00792565 /* EEObject.h */; };
+		12CFC75A2EFCBF5D00792565 /* EEString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12CFC6FB2EFCBF5D00792565 /* EEString.cpp */; };
+		12CFC75B2EFCBF5D00792565 /* EEString.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC6FC2EFCBF5D00792565 /* EEString.h */; };
+		12CFC75C2EFCBF5D00792565 /* EEStringBaseApi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12CFC6FD2EFCBF5D00792565 /* EEStringBaseApi.cpp */; };
+		12CFC75D2EFCBF5D00792565 /* EEStringBaseApi.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC6FE2EFCBF5D00792565 /* EEStringBaseApi.h */; };
+		12CFC75E2EFCBF5D00792565 /* EEVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12CFC6FF2EFCBF5D00792565 /* EEVector.cpp */; };
+		12CFC75F2EFCBF5D00792565 /* EEVector.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7002EFCBF5D00792565 /* EEVector.h */; };
+		12CFC7602EFCBF5D00792565 /* EEPreProc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12CFC7022EFCBF5D00792565 /* EEPreProc.cpp */; };
+		12CFC7612EFCBF5D00792565 /* EEPreProc.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7032EFCBF5D00792565 /* EEPreProc.h */; };
+		12CFC7622EFCBF5D00792565 /* EEPreProcContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12CFC7042EFCBF5D00792565 /* EEPreProcContainer.cpp */; };
+		12CFC7632EFCBF5D00792565 /* EEPreProcContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7052EFCBF5D00792565 /* EEPreProcContainer.h */; };
+		12CFC7642EFCBF5D00792565 /* EEPreProcLexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12CFC7062EFCBF5D00792565 /* EEPreProcLexer.cpp */; };
+		12CFC7652EFCBF5D00792565 /* EEPreProcLexer.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7072EFCBF5D00792565 /* EEPreProcLexer.h */; };
+		12CFC7662EFCBF5D00792565 /* EEPreProcSyntaxNodes.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7082EFCBF5D00792565 /* EEPreProcSyntaxNodes.h */; };
+		12CFC7672EFCBF5D00792565 /* EEExpEvalContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12CFC70A2EFCBF5D00792565 /* EEExpEvalContainer.cpp */; };
+		12CFC7682EFCBF5D00792565 /* EEFloatX.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC70B2EFCBF5D00792565 /* EEFloatX.h */; };
+		12CFC7692EFCBF5D00792565 /* EEExpEvalSyntaxNodes.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC70C2EFCBF5D00792565 /* EEExpEvalSyntaxNodes.h */; };
+		12CFC76A2EFCBF5D00792565 /* EEExpEvalContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC70D2EFCBF5D00792565 /* EEExpEvalContainer.h */; };
+		12CFC76B2EFCBF5D00792565 /* EEFloat16.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC70E2EFCBF5D00792565 /* EEFloat16.h */; };
+		12CFC76C2EFCBF5D00792565 /* EEFloatX.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12CFC7102EFCBF5D00792565 /* EEFloatX.cpp */; };
+		12CFC76D2EFCBF5D00792565 /* EEArrayBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12CFC7112EFCBF5D00792565 /* EEArrayBase.cpp */; };
+		12CFC76E2EFCBF5D00792565 /* EEArrayBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7122EFCBF5D00792565 /* EEArrayBase.h */; };
+		12CFC76F2EFCBF5D00792565 /* EEDefaultArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7132EFCBF5D00792565 /* EEDefaultArray.h */; };
+		12CFC7702EFCBF5D00792565 /* EEDoubleArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7142EFCBF5D00792565 /* EEDoubleArray.h */; };
+		12CFC7712EFCBF5D00792565 /* EEFloatArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7152EFCBF5D00792565 /* EEFloatArray.h */; };
+		12CFC7722EFCBF5D00792565 /* EEInt8Array.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7162EFCBF5D00792565 /* EEInt8Array.h */; };
+		12CFC7732EFCBF5D00792565 /* EEInt16Array.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7172EFCBF5D00792565 /* EEInt16Array.h */; };
+		12CFC7742EFCBF5D00792565 /* EEInt32Array.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7182EFCBF5D00792565 /* EEInt32Array.h */; };
+		12CFC7752EFCBF5D00792565 /* EEInt64Array.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7192EFCBF5D00792565 /* EEInt64Array.h */; };
+		12CFC7762EFCBF5D00792565 /* EEPrimitiveArrayFloat.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC71A2EFCBF5D00792565 /* EEPrimitiveArrayFloat.h */; };
+		12CFC7772EFCBF5D00792565 /* EEPrimitiveArraySigned.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC71B2EFCBF5D00792565 /* EEPrimitiveArraySigned.h */; };
+		12CFC7782EFCBF5D00792565 /* EEPrimitiveArrayUnsigned.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC71C2EFCBF5D00792565 /* EEPrimitiveArrayUnsigned.h */; };
+		12CFC7792EFCBF5D00792565 /* EEUInt8Array.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC71D2EFCBF5D00792565 /* EEUInt8Array.h */; };
+		12CFC77A2EFCBF5D00792565 /* EEUInt16Array.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC71E2EFCBF5D00792565 /* EEUInt16Array.h */; };
+		12CFC77B2EFCBF5D00792565 /* EEUInt32Array.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC71F2EFCBF5D00792565 /* EEUInt32Array.h */; };
+		12CFC77C2EFCBF5D00792565 /* EEUInt64Array.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7202EFCBF5D00792565 /* EEUInt64Array.h */; };
+		12CFC77F2EFCBF5D00792565 /* EEExpEvalLexBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12CFC7252EFCBF5D00792565 /* EEExpEvalLexBase.cpp */; };
+		12CFC7802EFCBF5D00792565 /* EEExpEvalLexBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7262EFCBF5D00792565 /* EEExpEvalLexBase.h */; };
+		12CFC7812EFCBF5D00792565 /* EEExpEvalParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12CFC7272EFCBF5D00792565 /* EEExpEvalParser.cpp */; };
+		12CFC7822EFCBF5D00792565 /* EEExpEvalParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7282EFCBF5D00792565 /* EEExpEvalParser.h */; };
+		12CFC7832EFCBF5D00792565 /* EEExpEvalParserLocation.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7292EFCBF5D00792565 /* EEExpEvalParserLocation.h */; };
+		12CFC7842EFCBF5D00792565 /* EEExpEvalParserPosition.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC72A2EFCBF5D00792565 /* EEExpEvalParserPosition.h */; };
+		12CFC7852EFCBF5D00792565 /* EEExpEvalParserStack.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC72B2EFCBF5D00792565 /* EEExpEvalParserStack.h */; };
+		12CFC7862EFCBF5D00792565 /* EEPreProcLexBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12CFC72D2EFCBF5D00792565 /* EEPreProcLexBase.cpp */; };
+		12CFC7872EFCBF5D00792565 /* EEPreProcLexBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC72E2EFCBF5D00792565 /* EEPreProcLexBase.h */; };
+		12CFC7882EFCBF5D00792565 /* EEPreProcParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12CFC72F2EFCBF5D00792565 /* EEPreProcParser.cpp */; };
+		12CFC7892EFCBF5D00792565 /* EEPreProcParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7302EFCBF5D00792565 /* EEPreProcParser.h */; };
+		12CFC78A2EFCBF5D00792565 /* EEPreProcParserLocation.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7312EFCBF5D00792565 /* EEPreProcParserLocation.h */; };
+		12CFC78B2EFCBF5D00792565 /* EEPreProcParserPosition.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7322EFCBF5D00792565 /* EEPreProcParserPosition.h */; };
+		12CFC78C2EFCBF5D00792565 /* EEPreProcParserStack.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7332EFCBF5D00792565 /* EEPreProcParserStack.h */; };
+		12CFC78D2EFCBF5D00792565 /* EEExpEvalLexer.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7352EFCBF5D00792565 /* EEExpEvalLexer.h */; };
+		12CFC78F2EFCBF5D00792565 /* EESinCos.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7372EFCBF5D00792565 /* EESinCos.h */; };
+		12CFC7902EFCBF5D00792565 /* EEUnicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12CFC7392EFCBF5D00792565 /* EEUnicode.cpp */; };
+		12CFC7912EFCBF5D00792565 /* EEUnicode.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC73A2EFCBF5D00792565 /* EEUnicode.h */; };
+		12CFC7922EFCBF5D00792565 /* EEUnicodeTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC73B2EFCBF5D00792565 /* EEUnicodeTable.h */; };
+		12CFC7932EFCBF5D00792565 /* EEBaseApi.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC73D2EFCBF5D00792565 /* EEBaseApi.h */; };
+		12CFC7942EFCBF5D00792565 /* EEExpEval.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC73F2EFCBF5D00792565 /* EEExpEval.h */; };
+		12CFC7A52EFCBF5D00792565 /* EEHtml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12CFC7542EFCBF5D00792565 /* EEHtml.cpp */; };
+		12CFC7A62EFCBF5D00792565 /* EEHtml.h in Headers */ = {isa = PBXBuildFile; fileRef = 12CFC7552EFCBF5D00792565 /* EEHtml.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		12CFC6E72EFCBEFE00792565 /* ExpressionEvaluator.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ExpressionEvaluator.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		12CFC6F72EFCBF5D00792565 /* EEExpEval.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EEExpEval.cpp; path = Src/EEExpEval.cpp; sourceTree = "<group>"; };
+		12CFC6F82EFCBF5D00792565 /* EETree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EETree.h; sourceTree = "<group>"; };
+		12CFC6FA2EFCBF5D00792565 /* EEObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEObject.h; sourceTree = "<group>"; };
+		12CFC6FB2EFCBF5D00792565 /* EEString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EEString.cpp; sourceTree = "<group>"; };
+		12CFC6FC2EFCBF5D00792565 /* EEString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEString.h; sourceTree = "<group>"; };
+		12CFC6FD2EFCBF5D00792565 /* EEStringBaseApi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EEStringBaseApi.cpp; sourceTree = "<group>"; };
+		12CFC6FE2EFCBF5D00792565 /* EEStringBaseApi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEStringBaseApi.h; sourceTree = "<group>"; };
+		12CFC6FF2EFCBF5D00792565 /* EEVector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EEVector.cpp; sourceTree = "<group>"; };
+		12CFC7002EFCBF5D00792565 /* EEVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEVector.h; sourceTree = "<group>"; };
+		12CFC7022EFCBF5D00792565 /* EEPreProc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EEPreProc.cpp; sourceTree = "<group>"; };
+		12CFC7032EFCBF5D00792565 /* EEPreProc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEPreProc.h; sourceTree = "<group>"; };
+		12CFC7042EFCBF5D00792565 /* EEPreProcContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EEPreProcContainer.cpp; sourceTree = "<group>"; };
+		12CFC7052EFCBF5D00792565 /* EEPreProcContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEPreProcContainer.h; sourceTree = "<group>"; };
+		12CFC7062EFCBF5D00792565 /* EEPreProcLexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EEPreProcLexer.cpp; sourceTree = "<group>"; };
+		12CFC7072EFCBF5D00792565 /* EEPreProcLexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEPreProcLexer.h; sourceTree = "<group>"; };
+		12CFC7082EFCBF5D00792565 /* EEPreProcSyntaxNodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEPreProcSyntaxNodes.h; sourceTree = "<group>"; };
+		12CFC70A2EFCBF5D00792565 /* EEExpEvalContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EEExpEvalContainer.cpp; path = Src/EEExpEvalContainer.cpp; sourceTree = "<group>"; };
+		12CFC70B2EFCBF5D00792565 /* EEFloatX.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EEFloatX.h; path = Src/EEFloatX.h; sourceTree = "<group>"; };
+		12CFC70C2EFCBF5D00792565 /* EEExpEvalSyntaxNodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EEExpEvalSyntaxNodes.h; path = Src/EEExpEvalSyntaxNodes.h; sourceTree = "<group>"; };
+		12CFC70D2EFCBF5D00792565 /* EEExpEvalContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EEExpEvalContainer.h; path = Src/EEExpEvalContainer.h; sourceTree = "<group>"; };
+		12CFC70E2EFCBF5D00792565 /* EEFloat16.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEFloat16.h; sourceTree = "<group>"; };
+		12CFC7102EFCBF5D00792565 /* EEFloatX.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EEFloatX.cpp; path = Src/EEFloatX.cpp; sourceTree = "<group>"; };
+		12CFC7112EFCBF5D00792565 /* EEArrayBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EEArrayBase.cpp; sourceTree = "<group>"; };
+		12CFC7122EFCBF5D00792565 /* EEArrayBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEArrayBase.h; sourceTree = "<group>"; };
+		12CFC7132EFCBF5D00792565 /* EEDefaultArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEDefaultArray.h; sourceTree = "<group>"; };
+		12CFC7142EFCBF5D00792565 /* EEDoubleArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEDoubleArray.h; sourceTree = "<group>"; };
+		12CFC7152EFCBF5D00792565 /* EEFloatArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEFloatArray.h; sourceTree = "<group>"; };
+		12CFC7162EFCBF5D00792565 /* EEInt8Array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEInt8Array.h; sourceTree = "<group>"; };
+		12CFC7172EFCBF5D00792565 /* EEInt16Array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEInt16Array.h; sourceTree = "<group>"; };
+		12CFC7182EFCBF5D00792565 /* EEInt32Array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEInt32Array.h; sourceTree = "<group>"; };
+		12CFC7192EFCBF5D00792565 /* EEInt64Array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEInt64Array.h; sourceTree = "<group>"; };
+		12CFC71A2EFCBF5D00792565 /* EEPrimitiveArrayFloat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEPrimitiveArrayFloat.h; sourceTree = "<group>"; };
+		12CFC71B2EFCBF5D00792565 /* EEPrimitiveArraySigned.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEPrimitiveArraySigned.h; sourceTree = "<group>"; };
+		12CFC71C2EFCBF5D00792565 /* EEPrimitiveArrayUnsigned.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEPrimitiveArrayUnsigned.h; sourceTree = "<group>"; };
+		12CFC71D2EFCBF5D00792565 /* EEUInt8Array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEUInt8Array.h; sourceTree = "<group>"; };
+		12CFC71E2EFCBF5D00792565 /* EEUInt16Array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEUInt16Array.h; sourceTree = "<group>"; };
+		12CFC71F2EFCBF5D00792565 /* EEUInt32Array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEUInt32Array.h; sourceTree = "<group>"; };
+		12CFC7202EFCBF5D00792565 /* EEUInt64Array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEUInt64Array.h; sourceTree = "<group>"; };
+		12CFC7252EFCBF5D00792565 /* EEExpEvalLexBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EEExpEvalLexBase.cpp; sourceTree = "<group>"; };
+		12CFC7262EFCBF5D00792565 /* EEExpEvalLexBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEExpEvalLexBase.h; sourceTree = "<group>"; };
+		12CFC7272EFCBF5D00792565 /* EEExpEvalParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EEExpEvalParser.cpp; sourceTree = "<group>"; };
+		12CFC7282EFCBF5D00792565 /* EEExpEvalParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEExpEvalParser.h; sourceTree = "<group>"; };
+		12CFC7292EFCBF5D00792565 /* EEExpEvalParserLocation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEExpEvalParserLocation.h; sourceTree = "<group>"; };
+		12CFC72A2EFCBF5D00792565 /* EEExpEvalParserPosition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEExpEvalParserPosition.h; sourceTree = "<group>"; };
+		12CFC72B2EFCBF5D00792565 /* EEExpEvalParserStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEExpEvalParserStack.h; sourceTree = "<group>"; };
+		12CFC72D2EFCBF5D00792565 /* EEPreProcLexBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EEPreProcLexBase.cpp; sourceTree = "<group>"; };
+		12CFC72E2EFCBF5D00792565 /* EEPreProcLexBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEPreProcLexBase.h; sourceTree = "<group>"; };
+		12CFC72F2EFCBF5D00792565 /* EEPreProcParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EEPreProcParser.cpp; sourceTree = "<group>"; };
+		12CFC7302EFCBF5D00792565 /* EEPreProcParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEPreProcParser.h; sourceTree = "<group>"; };
+		12CFC7312EFCBF5D00792565 /* EEPreProcParserLocation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEPreProcParserLocation.h; sourceTree = "<group>"; };
+		12CFC7322EFCBF5D00792565 /* EEPreProcParserPosition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEPreProcParserPosition.h; sourceTree = "<group>"; };
+		12CFC7332EFCBF5D00792565 /* EEPreProcParserStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEPreProcParserStack.h; sourceTree = "<group>"; };
+		12CFC7352EFCBF5D00792565 /* EEExpEvalLexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EEExpEvalLexer.h; path = Src/EEExpEvalLexer.h; sourceTree = "<group>"; };
+		12CFC7372EFCBF5D00792565 /* EESinCos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EESinCos.h; sourceTree = "<group>"; };
+		12CFC7392EFCBF5D00792565 /* EEUnicode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EEUnicode.cpp; sourceTree = "<group>"; };
+		12CFC73A2EFCBF5D00792565 /* EEUnicode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEUnicode.h; sourceTree = "<group>"; };
+		12CFC73B2EFCBF5D00792565 /* EEUnicodeTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEUnicodeTable.h; sourceTree = "<group>"; };
+		12CFC73D2EFCBF5D00792565 /* EEBaseApi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEBaseApi.h; sourceTree = "<group>"; };
+		12CFC73F2EFCBF5D00792565 /* EEExpEval.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EEExpEval.h; path = Src/EEExpEval.h; sourceTree = "<group>"; };
+		12CFC7542EFCBF5D00792565 /* EEHtml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EEHtml.cpp; sourceTree = "<group>"; };
+		12CFC7552EFCBF5D00792565 /* EEHtml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EEHtml.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		12CFC6E42EFCBEFE00792565 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		12CFC6DD2EFCBEFE00792565 = {
+			isa = PBXGroup;
+			children = (
+				12CFC73E2EFCBF5D00792565 /* Api */,
+				12CFC7212EFCBF5D00792565 /* Array */,
+				12CFC6F72EFCBF5D00792565 /* EEExpEval.cpp */,
+				12CFC73F2EFCBF5D00792565 /* EEExpEval.h */,
+				12CFC70A2EFCBF5D00792565 /* EEExpEvalContainer.cpp */,
+				12CFC70D2EFCBF5D00792565 /* EEExpEvalContainer.h */,
+				12CFC7352EFCBF5D00792565 /* EEExpEvalLexer.h */,
+				12CFC70C2EFCBF5D00792565 /* EEExpEvalSyntaxNodes.h */,
+				12CFC7102EFCBF5D00792565 /* EEFloatX.cpp */,
+				12CFC70B2EFCBF5D00792565 /* EEFloatX.h */,
+				12CFC70F2EFCBF5D00792565 /* Float16 */,
+				12CFC72C2EFCBF5D00792565 /* Gen */,
+				12CFC7562EFCBF5D00792565 /* Html */,
+				12CFC7012EFCBF5D00792565 /* Object */,
+				12CFC7092EFCBF5D00792565 /* PreProc */,
+				12CFC7342EFCBF5D00792565 /* PreProcGen */,
+				12CFC7382EFCBF5D00792565 /* SinCos */,
+				12CFC6F92EFCBF5D00792565 /* Tree */,
+				12CFC73C2EFCBF5D00792565 /* Unicode */,
+				12CFC6E82EFCBEFE00792565 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		12CFC6E82EFCBEFE00792565 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				12CFC6E72EFCBEFE00792565 /* ExpressionEvaluator.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		12CFC6F92EFCBF5D00792565 /* Tree */ = {
+			isa = PBXGroup;
+			children = (
+				12CFC6F82EFCBF5D00792565 /* EETree.h */,
+			);
+			name = Tree;
+			path = Src/Tree;
+			sourceTree = "<group>";
+		};
+		12CFC7012EFCBF5D00792565 /* Object */ = {
+			isa = PBXGroup;
+			children = (
+				12CFC6FA2EFCBF5D00792565 /* EEObject.h */,
+				12CFC6FB2EFCBF5D00792565 /* EEString.cpp */,
+				12CFC6FC2EFCBF5D00792565 /* EEString.h */,
+				12CFC6FD2EFCBF5D00792565 /* EEStringBaseApi.cpp */,
+				12CFC6FE2EFCBF5D00792565 /* EEStringBaseApi.h */,
+				12CFC6FF2EFCBF5D00792565 /* EEVector.cpp */,
+				12CFC7002EFCBF5D00792565 /* EEVector.h */,
+			);
+			name = Object;
+			path = Src/Object;
+			sourceTree = "<group>";
+		};
+		12CFC7092EFCBF5D00792565 /* PreProc */ = {
+			isa = PBXGroup;
+			children = (
+				12CFC7022EFCBF5D00792565 /* EEPreProc.cpp */,
+				12CFC7032EFCBF5D00792565 /* EEPreProc.h */,
+				12CFC7042EFCBF5D00792565 /* EEPreProcContainer.cpp */,
+				12CFC7052EFCBF5D00792565 /* EEPreProcContainer.h */,
+				12CFC7062EFCBF5D00792565 /* EEPreProcLexer.cpp */,
+				12CFC7072EFCBF5D00792565 /* EEPreProcLexer.h */,
+				12CFC7082EFCBF5D00792565 /* EEPreProcSyntaxNodes.h */,
+			);
+			name = PreProc;
+			path = Src/PreProc;
+			sourceTree = "<group>";
+		};
+		12CFC70F2EFCBF5D00792565 /* Float16 */ = {
+			isa = PBXGroup;
+			children = (
+				12CFC70E2EFCBF5D00792565 /* EEFloat16.h */,
+			);
+			name = Float16;
+			path = Src/Float16;
+			sourceTree = "<group>";
+		};
+		12CFC7212EFCBF5D00792565 /* Array */ = {
+			isa = PBXGroup;
+			children = (
+				12CFC7112EFCBF5D00792565 /* EEArrayBase.cpp */,
+				12CFC7122EFCBF5D00792565 /* EEArrayBase.h */,
+				12CFC7132EFCBF5D00792565 /* EEDefaultArray.h */,
+				12CFC7142EFCBF5D00792565 /* EEDoubleArray.h */,
+				12CFC7152EFCBF5D00792565 /* EEFloatArray.h */,
+				12CFC7162EFCBF5D00792565 /* EEInt8Array.h */,
+				12CFC7172EFCBF5D00792565 /* EEInt16Array.h */,
+				12CFC7182EFCBF5D00792565 /* EEInt32Array.h */,
+				12CFC7192EFCBF5D00792565 /* EEInt64Array.h */,
+				12CFC71A2EFCBF5D00792565 /* EEPrimitiveArrayFloat.h */,
+				12CFC71B2EFCBF5D00792565 /* EEPrimitiveArraySigned.h */,
+				12CFC71C2EFCBF5D00792565 /* EEPrimitiveArrayUnsigned.h */,
+				12CFC71D2EFCBF5D00792565 /* EEUInt8Array.h */,
+				12CFC71E2EFCBF5D00792565 /* EEUInt16Array.h */,
+				12CFC71F2EFCBF5D00792565 /* EEUInt32Array.h */,
+				12CFC7202EFCBF5D00792565 /* EEUInt64Array.h */,
+			);
+			name = Array;
+			path = Src/Array;
+			sourceTree = "<group>";
+		};
+		12CFC72C2EFCBF5D00792565 /* Gen */ = {
+			isa = PBXGroup;
+			children = (
+				12CFC7252EFCBF5D00792565 /* EEExpEvalLexBase.cpp */,
+				12CFC7262EFCBF5D00792565 /* EEExpEvalLexBase.h */,
+				12CFC7272EFCBF5D00792565 /* EEExpEvalParser.cpp */,
+				12CFC7282EFCBF5D00792565 /* EEExpEvalParser.h */,
+				12CFC7292EFCBF5D00792565 /* EEExpEvalParserLocation.h */,
+				12CFC72A2EFCBF5D00792565 /* EEExpEvalParserPosition.h */,
+				12CFC72B2EFCBF5D00792565 /* EEExpEvalParserStack.h */,
+			);
+			name = Gen;
+			path = Src/Gen;
+			sourceTree = "<group>";
+		};
+		12CFC7342EFCBF5D00792565 /* PreProcGen */ = {
+			isa = PBXGroup;
+			children = (
+				12CFC72D2EFCBF5D00792565 /* EEPreProcLexBase.cpp */,
+				12CFC72E2EFCBF5D00792565 /* EEPreProcLexBase.h */,
+				12CFC72F2EFCBF5D00792565 /* EEPreProcParser.cpp */,
+				12CFC7302EFCBF5D00792565 /* EEPreProcParser.h */,
+				12CFC7312EFCBF5D00792565 /* EEPreProcParserLocation.h */,
+				12CFC7322EFCBF5D00792565 /* EEPreProcParserPosition.h */,
+				12CFC7332EFCBF5D00792565 /* EEPreProcParserStack.h */,
+			);
+			name = PreProcGen;
+			path = Src/PreProcGen;
+			sourceTree = "<group>";
+		};
+		12CFC7382EFCBF5D00792565 /* SinCos */ = {
+			isa = PBXGroup;
+			children = (
+				12CFC7372EFCBF5D00792565 /* EESinCos.h */,
+			);
+			name = SinCos;
+			path = Src/SinCos;
+			sourceTree = "<group>";
+		};
+		12CFC73C2EFCBF5D00792565 /* Unicode */ = {
+			isa = PBXGroup;
+			children = (
+				12CFC7392EFCBF5D00792565 /* EEUnicode.cpp */,
+				12CFC73A2EFCBF5D00792565 /* EEUnicode.h */,
+				12CFC73B2EFCBF5D00792565 /* EEUnicodeTable.h */,
+			);
+			name = Unicode;
+			path = Src/Unicode;
+			sourceTree = "<group>";
+		};
+		12CFC73E2EFCBF5D00792565 /* Api */ = {
+			isa = PBXGroup;
+			children = (
+				12CFC73D2EFCBF5D00792565 /* EEBaseApi.h */,
+			);
+			name = Api;
+			path = Src/Api;
+			sourceTree = "<group>";
+		};
+		12CFC7562EFCBF5D00792565 /* Html */ = {
+			isa = PBXGroup;
+			children = (
+				12CFC7542EFCBF5D00792565 /* EEHtml.cpp */,
+				12CFC7552EFCBF5D00792565 /* EEHtml.h */,
+			);
+			name = Html;
+			path = Src/Html;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		12CFC6E22EFCBEFE00792565 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				12CFC7942EFCBF5D00792565 /* EEExpEval.h in Headers */,
+				12CFC77C2EFCBF5D00792565 /* EEUInt64Array.h in Headers */,
+				12CFC7732EFCBF5D00792565 /* EEInt16Array.h in Headers */,
+				12CFC77A2EFCBF5D00792565 /* EEUInt16Array.h in Headers */,
+				12CFC76A2EFCBF5D00792565 /* EEExpEvalContainer.h in Headers */,
+				12CFC7842EFCBF5D00792565 /* EEExpEvalParserPosition.h in Headers */,
+				12CFC76B2EFCBF5D00792565 /* EEFloat16.h in Headers */,
+				12CFC7A62EFCBF5D00792565 /* EEHtml.h in Headers */,
+				12CFC7752EFCBF5D00792565 /* EEInt64Array.h in Headers */,
+				12CFC7712EFCBF5D00792565 /* EEFloatArray.h in Headers */,
+				12CFC75B2EFCBF5D00792565 /* EEString.h in Headers */,
+				12CFC7742EFCBF5D00792565 /* EEInt32Array.h in Headers */,
+				12CFC75F2EFCBF5D00792565 /* EEVector.h in Headers */,
+				12CFC7912EFCBF5D00792565 /* EEUnicode.h in Headers */,
+				12CFC7922EFCBF5D00792565 /* EEUnicodeTable.h in Headers */,
+				12CFC7682EFCBF5D00792565 /* EEFloatX.h in Headers */,
+				12CFC78A2EFCBF5D00792565 /* EEPreProcParserLocation.h in Headers */,
+				12CFC78C2EFCBF5D00792565 /* EEPreProcParserStack.h in Headers */,
+				12CFC7762EFCBF5D00792565 /* EEPrimitiveArrayFloat.h in Headers */,
+				12CFC75D2EFCBF5D00792565 /* EEStringBaseApi.h in Headers */,
+				12CFC7822EFCBF5D00792565 /* EEExpEvalParser.h in Headers */,
+				12CFC7792EFCBF5D00792565 /* EEUInt8Array.h in Headers */,
+				12CFC78B2EFCBF5D00792565 /* EEPreProcParserPosition.h in Headers */,
+				12CFC7662EFCBF5D00792565 /* EEPreProcSyntaxNodes.h in Headers */,
+				12CFC78D2EFCBF5D00792565 /* EEExpEvalLexer.h in Headers */,
+				12CFC7652EFCBF5D00792565 /* EEPreProcLexer.h in Headers */,
+				12CFC7692EFCBF5D00792565 /* EEExpEvalSyntaxNodes.h in Headers */,
+				12CFC7702EFCBF5D00792565 /* EEDoubleArray.h in Headers */,
+				12CFC7832EFCBF5D00792565 /* EEExpEvalParserLocation.h in Headers */,
+				12CFC7632EFCBF5D00792565 /* EEPreProcContainer.h in Headers */,
+				12CFC7582EFCBF5D00792565 /* EETree.h in Headers */,
+				12CFC7872EFCBF5D00792565 /* EEPreProcLexBase.h in Headers */,
+				12CFC7612EFCBF5D00792565 /* EEPreProc.h in Headers */,
+				12CFC7932EFCBF5D00792565 /* EEBaseApi.h in Headers */,
+				12CFC7592EFCBF5D00792565 /* EEObject.h in Headers */,
+				12CFC7852EFCBF5D00792565 /* EEExpEvalParserStack.h in Headers */,
+				12CFC77B2EFCBF5D00792565 /* EEUInt32Array.h in Headers */,
+				12CFC7892EFCBF5D00792565 /* EEPreProcParser.h in Headers */,
+				12CFC76E2EFCBF5D00792565 /* EEArrayBase.h in Headers */,
+				12CFC78F2EFCBF5D00792565 /* EESinCos.h in Headers */,
+				12CFC76F2EFCBF5D00792565 /* EEDefaultArray.h in Headers */,
+				12CFC7722EFCBF5D00792565 /* EEInt8Array.h in Headers */,
+				12CFC7802EFCBF5D00792565 /* EEExpEvalLexBase.h in Headers */,
+				12CFC7772EFCBF5D00792565 /* EEPrimitiveArraySigned.h in Headers */,
+				12CFC7782EFCBF5D00792565 /* EEPrimitiveArrayUnsigned.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		12CFC6E62EFCBEFE00792565 /* ExpressionEvaluator */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 12CFC6EE2EFCBEFE00792565 /* Build configuration list for PBXNativeTarget "ExpressionEvaluator" */;
+			buildPhases = (
+				12CFC6E22EFCBEFE00792565 /* Headers */,
+				12CFC6E32EFCBEFE00792565 /* Sources */,
+				12CFC6E42EFCBEFE00792565 /* Frameworks */,
+				12CFC6E52EFCBEFE00792565 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ExpressionEvaluator;
+			productName = ExpressionEvaluator;
+			productReference = 12CFC6E72EFCBEFE00792565 /* ExpressionEvaluator.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		12CFC6DE2EFCBEFE00792565 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1530;
+				TargetAttributes = {
+					12CFC6E62EFCBEFE00792565 = {
+						CreatedOnToolsVersion = 15.3;
+					};
+				};
+			};
+			buildConfigurationList = 12CFC6E12EFCBEFE00792565 /* Build configuration list for PBXProject "ExpressionEvaluator" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 12CFC6DD2EFCBEFE00792565;
+			productRefGroup = 12CFC6E82EFCBEFE00792565 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				12CFC6E62EFCBEFE00792565 /* ExpressionEvaluator */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		12CFC6E52EFCBEFE00792565 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		12CFC6E32EFCBEFE00792565 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				12CFC7602EFCBF5D00792565 /* EEPreProc.cpp in Sources */,
+				12CFC7672EFCBF5D00792565 /* EEExpEvalContainer.cpp in Sources */,
+				12CFC7622EFCBF5D00792565 /* EEPreProcContainer.cpp in Sources */,
+				12CFC77F2EFCBF5D00792565 /* EEExpEvalLexBase.cpp in Sources */,
+				12CFC75C2EFCBF5D00792565 /* EEStringBaseApi.cpp in Sources */,
+				12CFC76D2EFCBF5D00792565 /* EEArrayBase.cpp in Sources */,
+				12CFC7812EFCBF5D00792565 /* EEExpEvalParser.cpp in Sources */,
+				12CFC7902EFCBF5D00792565 /* EEUnicode.cpp in Sources */,
+				12CFC7862EFCBF5D00792565 /* EEPreProcLexBase.cpp in Sources */,
+				12CFC75A2EFCBF5D00792565 /* EEString.cpp in Sources */,
+				12CFC75E2EFCBF5D00792565 /* EEVector.cpp in Sources */,
+				12CFC76C2EFCBF5D00792565 /* EEFloatX.cpp in Sources */,
+				12CFC7572EFCBF5D00792565 /* EEExpEval.cpp in Sources */,
+				12CFC7A52EFCBF5D00792565 /* EEHtml.cpp in Sources */,
+				12CFC7642EFCBF5D00792565 /* EEPreProcLexer.cpp in Sources */,
+				12CFC7882EFCBF5D00792565 /* EEPreProcParser.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		12CFC6EC2EFCBEFE00792565 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		12CFC6ED2EFCBEFE00792565 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		12CFC6EF2EFCBEFE00792565 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = "L.-Spiro.ExpressionEvaluator";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		12CFC6F02EFCBEFE00792565 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = "L.-Spiro.ExpressionEvaluator";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		12CFC6E12EFCBEFE00792565 /* Build configuration list for PBXProject "ExpressionEvaluator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				12CFC6EC2EFCBEFE00792565 /* Debug */,
+				12CFC6ED2EFCBEFE00792565 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		12CFC6EE2EFCBEFE00792565 /* Build configuration list for PBXNativeTarget "ExpressionEvaluator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				12CFC6EF2EFCBEFE00792565 /* Debug */,
+				12CFC6F02EFCBEFE00792565 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 12CFC6DE2EFCBEFE00792565 /* Project object */;
+}

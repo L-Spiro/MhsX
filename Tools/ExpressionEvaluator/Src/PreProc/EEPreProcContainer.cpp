@@ -71,6 +71,7 @@ namespace ee {
 				_ndNode.nueNodeDataEx.ncConstantType = EE_PPNC_INVALID;
 				return false;
 			}
+			default : {}
 		}
 		_ndNode.nuNodeData.i64Const = ee::CExpEval::StoULL( _pcText );
 
@@ -110,6 +111,7 @@ namespace ee {
 				_ndNode.nueNodeDataEx.ncConstantType = EE_PPNC_INVALID;
 				return false;
 			}
+			default : {}
 		}
 		_ndNode.nuNodeData.i64Const = ee::CExpEval::StoULL( _pcText, 16 );
 
@@ -219,7 +221,7 @@ namespace ee {
 	/**
 	 * Creates a list of external declarations.
 	 *
-	 * \param param _ndLeft Left operand.
+	 * \param _ndLeft _ndLeft Left operand.
 	 * \param _ndRight Right operand.
 	 * \param _ndNode Node to create.
 	 * \return Returns true if the node was added.
@@ -237,7 +239,7 @@ namespace ee {
 	/**
 	 * Gets a node for read-only.
 	 *
-	 * \param _ui32Index Index of the node to get.
+	 * \param _stIndex Index of the node to get.
 	 * \return Returns a constant reference to the requested node.
 	 */
 	const EE_PREPROC_SYNTAX_NODES::EE_NODE_DATA & CPreProcContainer::GetNode( size_t _stIndex ) const {
@@ -301,7 +303,14 @@ namespace ee {
 		return ui32Ret;
 	}
 
-	// Returns the index of a string if it exists or static_cast<size_t>(-1) otherwise.
+	/**
+	 * \brief Returns the index of a string if it exists.
+	 *
+	 * Searches for the given string within the underlying string collection.
+	 *
+	 * \param _sText The string to search for.
+	 * \return Returns the index of the matching string if found; otherwise returns static_cast<size_t>(-1).
+	 */
 	size_t CPreProcContainer::HasString( const std::string &_sText ) const {
 		for ( size_t I = 0; I < m_vStringPool.size(); ++I ) {
 			if ( m_vStringPool[I] == _sText ) { return I; }

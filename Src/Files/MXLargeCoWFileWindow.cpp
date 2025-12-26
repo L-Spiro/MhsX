@@ -556,92 +556,95 @@ namespace mx {
 	bool CLargeCoWFileWindow::EnsureCurrentSegmentFile( uint64_t _ui64NeedBytes ) {
 		if ( !CreateWriteDirectories() ) { return false; }
 
-		// If we don't have a current segment file, pick one.
-		if ( m_pCurSegmentFile.empty() ) {
-			m_pCurSegmentFile = SegmentFilePath( m_sFileId++ );
-			m_ui64CurSegmentUsed = 0;
-			m_sCurSegmentMapIdx = size_t( -1 );
-		}
-
-		auto MakeNew = [&]() -> bool {
-			m_pCurSegmentFile = SegmentFilePath( m_sFileId++ );
-			m_ui64CurSegmentUsed = 0;
-			m_sCurSegmentMapIdx = size_t( -1 );
-			return true;
-		};
-
-		std::error_code ec;
-		const bool bExists = std::filesystem::exists( m_pCurSegmentFile, ec );
-
-		const uint64_t ui64TargetSize = std::max( static_cast<uint64_t>( m_sSegmentFileSize ), _ui64NeedBytes );
-
-		if ( !bExists ) {
-			// Create new and size it.
-			HANDLE hFile = ::CreateFileW(
-				m_pCurSegmentFile.c_str(),
-				GENERIC_READ | GENERIC_WRITE,
-				FILE_SHARE_READ,
-				nullptr,
-				CREATE_NEW,
-				FILE_ATTRIBUTE_NORMAL,
-				nullptr
-			);
-			if ( hFile == INVALID_HANDLE_VALUE ) { return false; }
-
-			LARGE_INTEGER liSize;
-			liSize.QuadPart = static_cast<LONGLONG>( ui64TargetSize );
-			if ( ::SetFilePointerEx( hFile, liSize, nullptr, FILE_BEGIN ) == FALSE || ::SetEndOfFile( hFile ) == FALSE ) {
-				::CloseHandle( hFile );
-				return false;
+		try {
+			// If we don't have a current segment file, pick one.
+			if ( m_pCurSegmentFile.empty() ) {
+				m_pCurSegmentFile = SegmentFilePath( m_sFileId++ );
+				m_ui64CurSegmentUsed = 0;
+				m_sCurSegmentMapIdx = size_t( -1 );
 			}
-			::CloseHandle( hFile );
-			return true;
-		}
 
-		// Exists: check size.
-		const uint64_t ui64CurSize = static_cast<uint64_t>( std::filesystem::file_size( m_pCurSegmentFile, ec ) );
-		if ( ec ) { return false; }
+			auto MakeNew = [&]() -> bool {
+				m_pCurSegmentFile = SegmentFilePath( m_sFileId++ );
+				m_ui64CurSegmentUsed = 0;
+				m_sCurSegmentMapIdx = size_t( -1 );
+				return true;
+			};
 
-		// If file is too large, create a new file.
-		if ( ui64CurSize > static_cast<uint64_t>(m_sSegmentFileSize) ) {
-			MakeNew();
-			return EnsureCurrentSegmentFile( _ui64NeedBytes );
-		}
+			std::error_code ec;
+			const bool bExists = std::filesystem::exists( m_pCurSegmentFile, ec );
 
-		// If too small, extend it.
-		if ( ui64CurSize < ui64TargetSize ) {
-			HANDLE hFile = ::CreateFileW(
-				m_pCurSegmentFile.c_str(),
-				GENERIC_READ | GENERIC_WRITE,
-				FILE_SHARE_READ,
-				nullptr,
-				OPEN_EXISTING,
-				FILE_ATTRIBUTE_NORMAL,
-				nullptr
-			);
-			if ( hFile == INVALID_HANDLE_VALUE ) { return false; }
+			const uint64_t ui64TargetSize = std::max( static_cast<uint64_t>( m_sSegmentFileSize ), _ui64NeedBytes );
 
-			LARGE_INTEGER liSize;
-			liSize.QuadPart = static_cast<LONGLONG>( ui64TargetSize );
-			if ( ::SetFilePointerEx( hFile, liSize, nullptr, FILE_BEGIN ) == FALSE || ::SetEndOfFile( hFile ) == FALSE ) {
+			if ( !bExists ) {
+				// Create new and size it.
+				HANDLE hFile = ::CreateFileW(
+					m_pCurSegmentFile.c_str(),
+					GENERIC_READ | GENERIC_WRITE,
+					FILE_SHARE_READ,
+					nullptr,
+					CREATE_NEW,
+					FILE_ATTRIBUTE_NORMAL,
+					nullptr
+				);
+				if ( hFile == INVALID_HANDLE_VALUE ) { return false; }
+
+				LARGE_INTEGER liSize;
+				liSize.QuadPart = static_cast<LONGLONG>( ui64TargetSize );
+				if ( ::SetFilePointerEx( hFile, liSize, nullptr, FILE_BEGIN ) == FALSE || ::SetEndOfFile( hFile ) == FALSE ) {
+					::CloseHandle( hFile );
+					return false;
+				}
 				::CloseHandle( hFile );
-				return false;
+				return true;
 			}
-			::CloseHandle( hFile );
 
-			// Force remap next time.
-			m_sCurSegmentMapIdx = size_t( -1 );
+			// Exists: check size.
+			const uint64_t ui64CurSize = static_cast<uint64_t>( std::filesystem::file_size( m_pCurSegmentFile, ec ) );
+			if ( ec ) { return false; }
+
+			// If file is too large, create a new file.
+			if ( ui64CurSize > static_cast<uint64_t>(m_sSegmentFileSize) ) {
+				MakeNew();
+				return EnsureCurrentSegmentFile( _ui64NeedBytes );
+			}
+
+			// If too small, extend it.
+			if ( ui64CurSize < ui64TargetSize ) {
+				HANDLE hFile = ::CreateFileW(
+					m_pCurSegmentFile.c_str(),
+					GENERIC_READ | GENERIC_WRITE,
+					FILE_SHARE_READ,
+					nullptr,
+					OPEN_EXISTING,
+					FILE_ATTRIBUTE_NORMAL,
+					nullptr
+				);
+				if ( hFile == INVALID_HANDLE_VALUE ) { return false; }
+
+				LARGE_INTEGER liSize;
+				liSize.QuadPart = static_cast<LONGLONG>( ui64TargetSize );
+				if ( ::SetFilePointerEx( hFile, liSize, nullptr, FILE_BEGIN ) == FALSE || ::SetEndOfFile( hFile ) == FALSE ) {
+					::CloseHandle( hFile );
+					return false;
+				}
+				::CloseHandle( hFile );
+
+				// Force remap next time.
+				m_sCurSegmentMapIdx = size_t( -1 );
+				return true;
+			}
+
+			// Size okay, but do we have contiguous room left?
+			// If not, create a new file.
+			if ( m_ui64CurSegmentUsed > ui64CurSize || ui64CurSize - m_ui64CurSegmentUsed < _ui64NeedBytes ) {
+				MakeNew();
+				return EnsureCurrentSegmentFile( _ui64NeedBytes );
+			}
+
 			return true;
 		}
-
-		// Size okay, but do we have contiguous room left?
-		// If not, create a new file.
-		if ( m_ui64CurSegmentUsed > ui64CurSize || ui64CurSize - m_ui64CurSegmentUsed < _ui64NeedBytes ) {
-			MakeNew();
-			return EnsureCurrentSegmentFile( _ui64NeedBytes );
-		}
-
-		return true;
+		catch ( ... ) { return false; }
 	}
 
 	/**
@@ -650,25 +653,25 @@ namespace mx {
 	 * \return Returns pointer to the current segment mapping on success; nullptr on failure.
 	 */
 	CFileMap * CLargeCoWFileWindow::EnsureCurrentSegmentMap() {
-		if ( m_pCurSegmentFile.empty() ) { return nullptr; }
+		try {
+			if ( m_pCurSegmentFile.empty() ) { return nullptr; }
 
-		// If we already have an index, ensure it's still valid.
-		if ( m_sCurSegmentMapIdx != size_t( -1 ) && m_sCurSegmentMapIdx < m_vEditedMaps.size() && m_vEditedMaps[m_sCurSegmentMapIdx] ) {
+			// If we already have an index, ensure it's still valid.
+			if ( m_sCurSegmentMapIdx != size_t( -1 ) && m_sCurSegmentMapIdx < m_vEditedMaps.size() && m_vEditedMaps[m_sCurSegmentMapIdx] ) {
+				return m_vEditedMaps[m_sCurSegmentMapIdx].get();
+			}
+
+			// Create new map object.
+			std::unique_ptr<CFileMap> upMap = std::make_unique<CFileMap>();
+			if ( !upMap->CreateMap( m_pCurSegmentFile, true ) ) { return nullptr; }
+			//if ( !upMap->MapWholeFile() ) { return nullptr; }
+
+			m_sCurSegmentMapIdx = m_vEditedMaps.size();
+			m_vEditedMaps.push_back( std::move( upMap ) );
+
 			return m_vEditedMaps[m_sCurSegmentMapIdx].get();
 		}
-
-		// Create new map object.
-		std::unique_ptr<CFileMap> upMap = std::make_unique<CFileMap>();
-
-		// Open / map writable.
-		// NOTE: Replace these calls with your real CFileMap API.
-		if ( !upMap->CreateMap( m_pCurSegmentFile, true ) ) { return nullptr; }
-		//if ( !upMap->MapWholeFile() ) { return nullptr; }
-
-		m_sCurSegmentMapIdx = m_vEditedMaps.size();
-		m_vEditedMaps.push_back( std::move( upMap ) );
-
-		return m_vEditedMaps[m_sCurSegmentMapIdx].get();
+		catch ( ... ) { return nullptr; }
 	}
 
 	/**

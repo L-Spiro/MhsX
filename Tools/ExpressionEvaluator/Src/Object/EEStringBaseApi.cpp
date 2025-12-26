@@ -7,7 +7,16 @@
 namespace ee {
 
 	// == Functions.
-	// Creates an EE_RESULT using a best-fit interpretation of the string as a number.
+	/**
+	 * \brief Creates an EE_RESULT using a best-fit interpretation of the string as a number.
+	 *
+	 * The input string is analyzed to determine the most appropriate numeric interpretation (for example,
+	 * integer vs. floating-point, and/or base detection).  If no reasonable numeric interpretation can be
+	 * made, the returned result is EE_NC_INVALID.
+	 *
+	 * \param _sIn The input string to interpret.
+	 * \return Returns an EE_RESULT containing the interpreted numeric value, or EE_NC_INVALID on failure.
+	 */
 	CExpEvalContainer::EE_RESULT CStringBaseApi::BestFitResult( const std::string &_sIn ) {
 		CExpEvalContainer::EE_RESULT rTmp;
 		uint8_t ui8Base;
@@ -50,7 +59,7 @@ namespace ee {
 				
 				break;
 			}
-			case EE_NC_FLOATING : {
+			case EE_SNC_FLOAT : {
 				rTmp.ncType = EE_NC_FLOATING;
 				bool bErrored = false;
 				size_t sEaten = 0;
@@ -68,7 +77,16 @@ namespace ee {
 		return rTmp;
 	}
 
-	// Gets the object as an ASCII string.
+	/**
+	 * \brief Gets the object as an ASCII string.
+	 *
+	 * Produces a string object containing the ASCII representation of the input.  Non-ASCII characters may
+	 * be replaced, removed, or otherwise normalized according to the evaluator's rules.
+	 *
+	 * \param _sIn The input string.
+	 * \param _peecCont Evaluator/container used to create any required objects/results.
+	 * \return Returns an EE_RESULT representing the ASCII string result, or EE_NC_INVALID on failure.
+	 */
 	CExpEvalContainer::EE_RESULT CStringBaseApi::Ascii( const std::string &_sIn, CExpEvalContainer * _peecCont ) {
 		CExpEvalContainer::EE_RESULT rRet = { EE_NC_INVALID };
 		CString * psObj = reinterpret_cast<CString *>(_peecCont->AllocateObject<CString>());
@@ -81,7 +99,16 @@ namespace ee {
 		return rRet;
 	}
 
-	// Gets the binary form of the object as a string (0b****).
+	/**
+	 * \brief Gets the binary form of the object as a string (0b****).
+	 *
+	 * The input is first interpreted as a number (best-fit), then formatted as a binary literal string with
+	 * a "0b" prefix.
+	 *
+	 * \param _sIn The input string.
+	 * \param _peecCont Evaluator/container used to create any required objects/results.
+	 * \return Returns an EE_RESULT representing the binary string result, or EE_NC_INVALID on failure.
+	 */
 	CExpEvalContainer::EE_RESULT CStringBaseApi::Bin( const std::string &_sIn, CExpEvalContainer * _peecCont ) {
 		CExpEvalContainer::EE_RESULT rRet = { EE_NC_INVALID };
 
@@ -109,7 +136,16 @@ namespace ee {
 		return rRet;
 	}
 
-	// Gets the boolean form of the object as a string (0b****).
+	/**
+	 * \brief Gets the boolean form of the object as a string (0b****).
+	 *
+	 * The input is interpreted (best-fit) and reduced to a boolean value, which is then formatted as a
+	 * binary literal string (typically "0b0" or "0b1").
+	 *
+	 * \param _sIn The input string.
+	 * \param _peecCont Evaluator/container used to create any required objects/results.
+	 * \return Returns an EE_RESULT representing the boolean string result, or EE_NC_INVALID on failure.
+	 */
 	CExpEvalContainer::EE_RESULT CStringBaseApi::Bool( const std::string &_sIn, CExpEvalContainer * _peecCont ) {
 		CExpEvalContainer::EE_RESULT rRet = { EE_NC_INVALID };
 
@@ -123,7 +159,16 @@ namespace ee {
 		return rRet;
 	}
 
-	// Returns the character that represents the specified Unicode. 
+	/**
+	 * \brief Returns the character that represents the specified Unicode.
+	 *
+	 * The input is interpreted as a Unicode code point value and converted into a string containing the
+	 * corresponding UTF-8 character.
+	 *
+	 * \param _sIn The input string.
+	 * \param _peecCont Evaluator/container used to create any required objects/results.
+	 * \return Returns an EE_RESULT representing the character string result, or EE_NC_INVALID on failure.
+	 */
 	CExpEvalContainer::EE_RESULT CStringBaseApi::Chr( const std::string &_sIn, CExpEvalContainer * _peecCont ) {
 		CExpEvalContainer::EE_RESULT rRet = { EE_NC_INVALID };
 
@@ -144,19 +189,45 @@ namespace ee {
 		return rRet;
 	}
 
-	// Gets the string interpreted to its best fit and then converted to float. 
+	/**
+	 * \brief Gets the string interpreted to its best fit and then converted to float.
+	 *
+	 * The input is parsed using a best-fit numeric interpretation and returned as a floating-point result.
+	 *
+	 * \param _sIn The input string.
+	 * \param _peecCont Evaluator/container used to create any required objects/results.
+	 * \return Returns an EE_RESULT containing the floating-point value, or EE_NC_INVALID on failure.
+	 */
 	CExpEvalContainer::EE_RESULT CStringBaseApi::Float( const std::string &_sIn, CExpEvalContainer * _peecCont ) {
 		CExpEvalContainer::EE_RESULT rTmp = BestFitResult( _sIn );
 		return _peecCont->ConvertResultOrObject( rTmp, EE_NC_FLOATING );
 	}
 
-	// Gets the string interpreted to its best fit and then converted to int64_t. 
+	/**
+	 * \brief Gets the string interpreted to its best fit and then converted to int64_t.
+	 *
+	 * The input is parsed using a best-fit numeric interpretation and returned as a signed 64-bit integer
+	 * result.
+	 *
+	 * \param _sIn The input string.
+	 * \param _peecCont Evaluator/container used to create any required objects/results.
+	 * \return Returns an EE_RESULT containing the integer value, or EE_NC_INVALID on failure.
+	 */
 	CExpEvalContainer::EE_RESULT CStringBaseApi::Int( const std::string &_sIn, CExpEvalContainer * _peecCont ) {
 		CExpEvalContainer::EE_RESULT rTmp = BestFitResult( _sIn );
 		return _peecCont->ConvertResultOrObject( rTmp, EE_NC_SIGNED );
 	}
 
-	// Gets the hexadecimal form of the object as a string (0x****).
+	/**
+	 * \brief Gets the hexadecimal form of the object as a string (0x****).
+	 *
+	 * The input is first interpreted as a number (best-fit), then formatted as a hexadecimal literal string
+	 * with a "0x" prefix.
+	 *
+	 * \param _sIn The input string.
+	 * \param _peecCont Evaluator/container used to create any required objects/results.
+	 * \return Returns an EE_RESULT representing the hexadecimal string result, or EE_NC_INVALID on failure.
+	 */
 	CExpEvalContainer::EE_RESULT CStringBaseApi::Hex( const std::string &_sIn, CExpEvalContainer * _peecCont ) {
 		CExpEvalContainer::EE_RESULT rRet = { EE_NC_INVALID };
 
@@ -184,7 +255,16 @@ namespace ee {
 		return rRet;
 	}
 
-	// Gets the octadecimal form of the object as a string (0o****).
+	/**
+	 * \brief Gets the octadecimal form of the object as a string (0o****).
+	 *
+	 * The input is first interpreted as a number (best-fit), then formatted as an octal literal string with
+	 * a "0o" prefix.
+	 *
+	 * \param _sIn The input string.
+	 * \param _peecCont Evaluator/container used to create any required objects/results.
+	 * \return Returns an EE_RESULT representing the octal string result, or EE_NC_INVALID on failure.
+	 */
 	CExpEvalContainer::EE_RESULT CStringBaseApi::Oct( const std::string &_sIn, CExpEvalContainer * _peecCont ) {
 		CExpEvalContainer::EE_RESULT rRet = { EE_NC_INVALID };
 
@@ -212,7 +292,15 @@ namespace ee {
 		return rRet;
 	}
 
-	// Returns the ordinal value of the object as a Unicode character (always EE_NC_UNSIGNED).
+	/**
+	 * \brief Returns the ordinal value of the object as a Unicode character (always EE_NC_UNSIGNED).
+	 *
+	 * The input is interpreted as a Unicode character/code point and returned as its unsigned ordinal value.
+	 *
+	 * \param _sIn The input string.
+	 * \param _peecCont Evaluator/container used to create any required objects/results.
+	 * \return Returns an EE_RESULT of type EE_NC_UNSIGNED containing the ordinal value, or EE_NC_INVALID on failure.
+	 */
 	CExpEvalContainer::EE_RESULT CStringBaseApi::Ord( const std::string &_sIn, CExpEvalContainer * /*_peecCont*/ ) {
 		CExpEvalContainer::EE_RESULT rTmp = { EE_NC_UNSIGNED };
 		if ( !_sIn.size() ) {
@@ -223,7 +311,18 @@ namespace ee {
 		return rTmp;
 	}
 
-	// Updates an optimization table for improving array-access speeds.
+	/**
+	 * \brief Updates an optimization table for improving array-access speeds.
+	 *
+	 * This function updates _vArray with cached byte offsets (or other indexing metadata) that accelerates
+	 * code-point-based indexing into the UTF-8 string.  The implementation may update only a portion of the
+	 * table beginning at _stIdx and reports status/details through _ui32Result.
+	 *
+	 * \param _sIn The input UTF-8 string.
+	 * \param _vArray The optimization table to update.
+	 * \param _stIdx The starting element/code-point index at which to begin updating.
+	 * \param _ui32Result Receives implementation-defined status/result information.
+	 */
 	void CStringBaseApi::UpdateArrayAccessOptimizer( const std::string &_sIn,
 		std::vector<size_t> &_vArray,
 		size_t _stIdx, uint32_t &_ui32Result ) {

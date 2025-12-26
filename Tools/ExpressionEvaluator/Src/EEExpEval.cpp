@@ -1581,22 +1581,68 @@ namespace ee {
 		return bFloat ? float( ::atof( _pcNumberBegins ) ) : ::atof( _pcNumberBegins );
 	}
 
-	// Gets the timer frequency.
+	/**
+	 * \brief Gets the frequency (units per second) for values returned by Time().
+	 *
+	 * Use this to convert a difference of two Time() samples into seconds:
+	 * \code
+	 * uint64_t ui64Start = Time();
+	 * // ... work ...
+	 * uint64_t ui64End = Time();
+	 * double dSeconds = double( ui64End - ui64Start ) / double( TimeFrequency() );
+	 * \endcode
+	 *
+	 * - Windows: Returns QueryPerformanceFrequency() (ticks per second).
+	 * - Apple: Converts mach timebase into an equivalent ticks-per-second value.
+	 * - Other POSIX: Returns 1,000,000,000 because Time() returns nanoseconds.
+	 *
+	 * \return Returns the number of Time() units per second. Guaranteed non-zero on supported
+	 * platforms.
+	 *
+	 * \note The returned value is intended only for converting Time() deltas. Do not assume it
+	 * matches any CPU frequency.
+	 */
 	uint64_t CExpEval::TimerFrequency() {
 		static uint64_t uiFreq = 0;
 		if ( !uiFreq ) {
-#ifdef _WIN32
+#if defined( _WIN32 )
 			::QueryPerformanceFrequency( reinterpret_cast<LARGE_INTEGER *>(&uiFreq) );
-#else
-			if ( !m_mtidInfoData.denom ) {
-				if ( KERN_SUCCESS != ::mach_timebase_info( &m_mtidInfoData ) ) {
-					return 0ULL;
-				}
+#elif defined( __APPLE__ )
+			::mach_timebase_info_data_t mtidInfoData{};
+			if ( KERN_SUCCESS != ::mach_timebase_info( &mtidInfoData ) ) {
+				return 0ULL;
 			}
-			uiFreq = (m_mtidInfoData.denom * 1000000000ULL);
-#endif	// #ifdef _WIN32
+
+			// mach_absolute_time() ticks -> nanoseconds: ticks * numer / denom.
+			// Therefore ticks per second = 1e9 * denom / numer.
+			__uint128_t ui128 = static_cast<__uint128_t>(1000000000ULL) * static_cast<__uint128_t>(mtidInfoData.denom);
+			ui128 /= static_cast<__uint128_t>(mtidInfoData.numer);
+			uiFreq = static_cast<uint64_t>(ui128);
+#else
+			// If ticks are nanoseconds (e.g. CLOCK_MONOTONIC packed as ns), frequency is 1e9.
+			uiFreq = 1000000000ULL;
+#endif	// #if defined( _WIN32 )
 		}
 		return uiFreq;
+	}
+
+	/**
+	 * \brief Converts timer ticks to microseconds using TimerFrequency().
+	 *
+	 * \param _ui64Ticks		The number of timer ticks to convert.
+	 * \return				The equivalent duration in microseconds. Returns 0 if TimerFrequency() is 0.
+	 *
+	 * \note This performs integer conversion (truncating toward zero). It uses an overflow-safe
+	 * multiply/divide path on supported compilers.
+	 */
+	uint64_t CExpEval::TicksToMicroseconds( uint64_t _ui64Ticks ) {
+		const uint64_t ui64Freq = TimerFrequency();
+		if ( !ui64Freq ) { return 0ULL; }
+
+		int64_t i64Rem;
+		return _muldiv128( _ui64Ticks, 1000000ULL, ui64Freq, &i64Rem );
+
+		//return (_ui64Ticks * 1000000ULL) / TimerFrequency();
 	}
 
 	// Pulls any preprocessing directives out of a single line.

@@ -31,13 +31,27 @@ namespace ee {
 
 
 		// == Functions.
-		// Sets the container.  This is used to access everything the lexer needs about the current state of the
-		//	compiled data.
+		/**
+		 * \brief Sets the parser container used by the lexer.
+		 *
+		 * The lexer queries the container for the current compilation/evaluation state, such as which identifiers
+		 * are custom variables or arrays, and uses that information to adjust emitted token types.
+		 *
+		 * \param _slpParserContainer Container that provides identifier classification and other parser state.
+		 */
 		void							SetContainer( const CExpEvalContainer &_slpParserContainer ) {
 			m_pslpContainer = &_slpParserContainer;
 		}
 
-		// The lexer.
+		/**
+		 * \brief Lexes the next token from the input stream.
+		 *
+		 * Delegates to the base lexer to obtain the next token, then optionally reclassifies identifiers based on
+		 * the current container state. If the token is an identifier and a container has been set, the identifier
+		 * may be converted to a custom-variable token or an array token.
+		 *
+		 * \return Returns the next token code.
+		 */
 		virtual int						yylex() {
 			int iRet = CExpEvalLexBase::yylex();
 			const char * pcText = YYText();
@@ -56,8 +70,7 @@ namespace ee {
 
 	protected :
 		// == Members.
-		// The container that handles collection of all of the script data.
-		const CExpEvalContainer *		m_pslpContainer;
+		const CExpEvalContainer *		m_pslpContainer;										/**< The container that handles collection of all of the script data. */
 
 	private :
 		typedef CExpEvalLexBase			Parent;
