@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "../MXMhsX.h"
 #include "../CodePages/MXCodePages.h"
@@ -146,7 +146,16 @@ namespace mx {
 			// Controls are unprintable.
 			if MX_UNLIKELY( (wType1 & C1_CNTRL) || !(wType1 & C1_DEFINED) ) { _wcChar = L'.'; return 0; }
 			// Combining marks on their own are unprintable (Mn/Mc).
-			if MX_UNLIKELY( wType3 & (C3_HIGHSURROGATE | C3_LOWSURROGATE | C3_NONSPACING | C3_DIACRITIC | C3_VOWELMARK) ) { _wcChar = L'.'; return 0; }
+
+			auto IsAllowedStandaloneDiacritic = []( wchar_t _wcChar ) -> bool {
+				switch ( _wcChar ) {
+					case 0x30FC : { return true; }	// KATAKANA-HIRAGANA PROLONGED SOUND MARK: ー
+					case 0xFF70 : { return true; }	// HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND MARK: ｰ
+					default : { return false; }
+				}
+			};
+			if MX_UNLIKELY( (wType3 & (/*C3_NONSPACING | */C3_VOWELMARK)) ) { _wcChar = L'.'; return 0; }
+			//if MX_UNLIKELY( (wType3 & (C3_DIACRITIC)) && !IsAllowedStandaloneDiacritic( _wcChar ) ) { _wcChar = L'.'; return 0; }
 
 			return 2;
 		}
@@ -167,9 +176,9 @@ namespace mx {
 			}
 			uint32_t ui32Utf16Chars;
 			uint32_t ui32Utf16Char = ee::CExpEval::Utf32ToUtf16( ui32Char, ui32Utf16Chars );
-			if ( ui32Utf16Chars == 2 ) { _wcChar = L'.'; return 1; }
+			if ( ui32Utf16Chars == 2 ) { _wcChar = L'.'; return uint32_t( sChars ); }
 
-			if ( !Utf16Display( reinterpret_cast<const uint8_t *>(&ui32Utf16Char), 2, _wcChar ) ) { return 1; }
+			if ( !Utf16Display( reinterpret_cast<const uint8_t *>(&ui32Utf16Char), 2, _wcChar ) ) { return uint32_t( sChars ); }
 
 			//if ( !std::isprint( _wcChar ) ) { _wcChar = L'.'; return 1; }
 

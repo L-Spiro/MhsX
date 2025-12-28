@@ -665,10 +665,13 @@ namespace mx {
 				// Delete a single byte just before the caret.
 				if ( m_sgSelGesture.ui64CaretAddr != 0 ) {
 					if ( m_pheiTarget->Delete( m_sgSelGesture.ui64CaretAddr - 1, 1, ui64Deleted ) ) {
-						AddSelectionUndo( m_sSel, m_sgSelGesture );	// Failure here is non-critical.
+						auto sOldSel = m_sSel;
+						auto sgOldGesture = m_sgSelGesture;
+						SetCaretAddr( m_sgSelGesture.ui64CaretAddr - 1 );
+						AddSelectionUndo( sOldSel, sgOldGesture );	// Failure here is non-critical.
 						CSecureWString swsTmp;
 						_swsStatus = _DEC_WS_B8E08C71_Deleted__ + CUtilities::SizeString<CSecureWString>( ui64Deleted, swsTmp );
-						SetCaretAddr( m_sgSelGesture.ui64CaretAddr - 1 );
+						
 						::InvalidateRect( Wnd(), nullptr, FALSE );
 						return true;
 					}

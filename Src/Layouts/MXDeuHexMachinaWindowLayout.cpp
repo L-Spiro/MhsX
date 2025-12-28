@@ -24,7 +24,7 @@ namespace mx {
 			TRUE,											// bEnabled
 			TRUE,											// bActive
 			155,											// iLeft
-			150,											// iTop
+			50,												// iTop
 			MX_W_W,											// dwWidth
 			MX_W_H,											// dwHeight
 			WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS | DS_3DLOOK | DS_SETFONT,				// dwStyle
