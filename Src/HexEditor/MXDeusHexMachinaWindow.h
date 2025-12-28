@@ -118,6 +118,15 @@ namespace mx {
 		 */
 		virtual LSW_HANDLED							KillFocus( HWND /*_hNewFocus*/ ) override;
 
+		/**
+		 * The WM_KEYDOWN handler.
+		 *
+		 * \param _uiKeyCode The virtual-key code of the nonsystem key.
+		 * \param _uiFlags The repeat count, scan code, extended-key flag, context code, previous key-state flag, and transition-state flag.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED							KeyDown( UINT _uiKeyCode, UINT _uiFlags );
+
 		// Translate a child's tooltip text.
 		virtual std::wstring						TranslateTooltip( const std::string &_sText ) { 
 			return CStringDecoder::DecodeToWString( _sText.c_str(), _sText.size() );
@@ -177,6 +186,9 @@ namespace mx {
 
 		// Delete the selection.
 		void										DeleteSelectedOrCaret();
+
+		// Deletes the character prior to the caret (backspace).
+		void										DeletePriorToCaret();
 
 		// Select all.
 		void										SelectAll();

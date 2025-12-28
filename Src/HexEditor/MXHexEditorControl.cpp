@@ -49,6 +49,7 @@ namespace mx {
 	 * \param _bRedraw If true the screen is redrawn immediately.
 	 **/
 	void CHexEditorControl::SetCaretAddr( uint64_t _ui64Addr, int32_t _i32SubCaret, bool _bUpdateSelection, bool _bRedraw ) {
+		auto psbStatus = reinterpret_cast<CDeusHexMachinaWindow *>(m_pwHexParent)->StatusBar();
 		auto ui64Size = Size();
 		m_sgSelGesture.ui64CaretAddr = std::min( _ui64Addr, ui64Size );
 		if ( m_sgSelGesture.ui64CaretAddr == ui64Size ) {
@@ -56,42 +57,86 @@ namespace mx {
 		}
 		m_sgSelGesture.i32CaretIdx = _bUpdateSelection ? 0 : _i32SubCaret;
 
-		if ( _bUpdateSelection ) {
-			m_sSel.bHas = true;
+		CSecureWString swsStatus;
+		try {
+			if ( _bUpdateSelection ) {
+				m_sSel.bHas = true;
 
-			if ( m_sgSelGesture.smCurrent == LSN_SM_NORMAL ) {
-				m_sSel.smMode = LSN_SM_NORMAL;
-				m_sSel.sn.ui64Start = std::min( m_sgSelGesture.ui64AnchorAddr, m_sgSelGesture.ui64CaretAddr );
-				m_sSel.sn.ui64End   = std::max( m_sgSelGesture.ui64AnchorAddr, m_sgSelGesture.ui64CaretAddr );
+				if ( m_sgSelGesture.smCurrent == MX_SM_NORMAL ) {
+					m_sSel.smMode = MX_SM_NORMAL;
+					m_sSel.sn.ui64Start = std::min( m_sgSelGesture.ui64AnchorAddr, m_sgSelGesture.ui64CaretAddr );
+					m_sSel.sn.ui64End   = std::max( m_sgSelGesture.ui64AnchorAddr, m_sgSelGesture.ui64CaretAddr );
+
+					swsStatus = _DEC_WS_2644E6E7_Selected__;
+					uint64_t ui64SelLen = m_sSel.sn.ui64End - m_sSel.sn.ui64Start;
+					swsStatus += std::to_wstring( ui64SelLen );
+					if ( ui64SelLen >= 0xA ) {
+						swsStatus.push_back( L' ' );
+						swsStatus.push_back( L'[' );
+						CUtilities::ToHex( ui64SelLen, swsStatus, 1 );
+						swsStatus.push_back( L']' );
+					}
+					if ( ui64SelLen == 1 ) {
+						swsStatus += _DEC_WS_BB679D6B__byte;
+					}
+					else {
+						swsStatus += _DEC_WS_C1D51046__bytes;
+					}
+					swsStatus += _DEC_WS_E9A13A63___Range__;
+					swsStatus += std::to_wstring( m_sSel.sn.ui64Start );
+					if ( m_sSel.sn.ui64Start >= 0xA ) {
+						swsStatus.push_back( L' ' );
+						swsStatus.push_back( L'[' );
+						CUtilities::ToHex( m_sSel.sn.ui64Start, swsStatus, 1 );
+						swsStatus.push_back( L']' );
+					}
+
+					swsStatus += _DEC_WS_0B85E70E__to_;
+					swsStatus += std::to_wstring( m_sSel.sn.ui64End - 1 );
+					if ( m_sSel.sn.ui64End - 1 >= 0xA ) {
+						swsStatus.push_back( L' ' );
+						swsStatus.push_back( L'[' );
+						CUtilities::ToHex( m_sSel.sn.ui64End - 1, swsStatus, 1 );
+						swsStatus.push_back( L']' );
+					}
+					swsStatus.push_back( L')' );
+				}
+				else {
+					const uint32_t ui32Bpr	= CurStyle()->uiBytesPerRow;
+					const uint64_t ui64A	= m_sgSelGesture.ui64AnchorAddr;
+					const uint64_t ui64B	= m_sgSelGesture.ui64CaretAddr - 1;
+
+					const uint64_t ui64RowA = ui64A / ui32Bpr;
+					const uint32_t ui32ColA = static_cast<uint32_t>(ui64A % ui32Bpr);
+					const uint64_t ui64RowB = ui64B / ui32Bpr;
+					const uint32_t ui32ColB = static_cast<uint32_t>(ui64B % ui32Bpr) + 1;
+
+					const uint64_t ui64TlRow = std::min( ui64RowA, ui64RowB );
+					const uint32_t ui32TlCol = std::min( ui32ColA, ui32ColB );
+					const uint64_t ui64BrRow = std::max( ui64RowA, ui64RowB );
+					const uint32_t ui32BrCol = std::max( ui32ColA, ui32ColB );
+
+					m_sSel.smMode = MX_SM_COLUMN;
+					m_sSel.sc.ui64AnchorAddr = ui64TlRow * ui32Bpr + ui32TlCol;
+					m_sSel.sc.ui32Cols       = (ui32BrCol - ui32TlCol);
+					m_sSel.sc.ui64Lines      = (ui64BrRow - ui64TlRow);
+
+					swsStatus = _DEC_WS_2644E6E7_Selected__;
+					swsStatus += std::to_wstring( m_sSel.sc.ui64Lines + 1 );
+					swsStatus += _DEC_WS_66452C3E___lines__;
+					swsStatus += std::to_wstring( m_sSel.sc.ui32Cols );
+					swsStatus += _DEC_WS_6DBF08C4__cols;
+				}
 			}
 			else {
-				const uint32_t ui32Bpr	= CurStyle()->uiBytesPerRow;
-				const uint64_t ui64A	= m_sgSelGesture.ui64AnchorAddr;
-				const uint64_t ui64B	= m_sgSelGesture.ui64CaretAddr - 1;
-
-				const uint64_t ui64RowA = ui64A / ui32Bpr;
-				const uint32_t ui32ColA = static_cast<uint32_t>(ui64A % ui32Bpr);
-				const uint64_t ui64RowB = ui64B / ui32Bpr;
-				const uint32_t ui32ColB = static_cast<uint32_t>(ui64B % ui32Bpr) + 1;
-
-				const uint64_t ui64TlRow = std::min( ui64RowA, ui64RowB );
-				const uint32_t ui32TlCol = std::min( ui32ColA, ui32ColB );
-				const uint64_t ui64BrRow = std::max( ui64RowA, ui64RowB );
-				const uint32_t ui32BrCol = std::max( ui32ColA, ui32ColB );
-
-				m_sSel.smMode = LSN_SM_COLUMN;
-				m_sSel.sc.ui64AnchorAddr = ui64TlRow * ui32Bpr + ui32TlCol;
-				m_sSel.sc.ui32Cols       = (ui32BrCol - ui32TlCol);
-				m_sSel.sc.ui64Lines      = (ui64BrRow - ui64TlRow);
-
+				ClearSelection();
+				m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = _ui64Addr;
+				m_sgSelGesture.smCurrent = CurStyle()->bSelectColumnMode ? MX_SM_COLUMN : MX_SM_NORMAL;
 			}
-		}
-		else {
-			ClearSelection();
-			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = _ui64Addr;
-			m_sgSelGesture.smCurrent = CurStyle()->bSelectColumnMode ? LSN_SM_COLUMN : LSN_SM_NORMAL;
-		}
 
+			if ( psbStatus ) { psbStatus->SetTextW( swsStatus.c_str() ); }
+		}
+		catch ( ... ) {}
 		StartCaretBlink();
 		EnsureVisible( m_sgSelGesture.ui64CaretAddr, _bRedraw );
 	}
@@ -105,7 +150,7 @@ namespace mx {
 		if ( IsProcess() ) { return false; }
 
 		m_sSel.bHas = Size() != 0;
-		m_sSel.smMode = m_sgSelGesture.smCurrent = LSN_SM_NORMAL;
+		m_sSel.smMode = m_sgSelGesture.smCurrent = MX_SM_NORMAL;
 		m_sSel.sn.ui64Start = 0;
 		m_sSel.sn.ui64End   = Size() - 1;
 		m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sn.ui64Start;
@@ -146,7 +191,7 @@ namespace mx {
 			bTmp.resize( 1 );
 
 			// ===== Column mode or no selection: caret-based behavior. =====
-			if ( !m_sSel.HasSelection() || m_sSel.smMode != LSN_SM_NORMAL ) {
+			if ( !m_sSel.HasSelection() || m_sSel.smMode != MX_SM_NORMAL ) {
 				const uint64_t ui64CaretAddr = GetCaretAddr();
 				if ( ui64CaretAddr >= ui64TotalBytes ) {
 					return;
@@ -187,7 +232,7 @@ namespace mx {
 				else { ui64SelEnd = ui64TotalBytes - 1; }
 
 				m_sSel.bHas = true;
-				m_sSel.smMode = m_sgSelGesture.smCurrent = LSN_SM_NORMAL;
+				m_sSel.smMode = m_sgSelGesture.smCurrent = MX_SM_NORMAL;
 				m_sSel.sn.ui64Start = ui64SelStart;
 				m_sSel.sn.ui64End   = ui64SelEnd;
 				m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sn.ui64Start;
@@ -305,7 +350,7 @@ namespace mx {
 			}
 
 			m_sSel.bHas = true;
-			m_sSel.smMode = m_sgSelGesture.smCurrent = LSN_SM_NORMAL;
+			m_sSel.smMode = m_sgSelGesture.smCurrent = MX_SM_NORMAL;
 			m_sSel.sn.ui64Start = ui64NewStart;
 			m_sSel.sn.ui64End   = ui64NewEnd;
 			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sn.ui64Start;
@@ -346,7 +391,7 @@ namespace mx {
 		uint64_t ui64EndRef   = 0;
 
 		if ( m_sSel.bHas ) {
-			if ( m_sSel.smMode == LSN_SM_NORMAL ) {
+			if ( m_sSel.smMode == MX_SM_NORMAL ) {
 				// Low/high of the Normal selection.
 				const uint64_t ui64SelStart = m_sSel.sn.ui64Start;
 				const uint64_t ui64SelEnd   = m_sSel.sn.ui64End;
@@ -399,7 +444,7 @@ namespace mx {
 
 		
 		m_sSel.bHas = true;
-		m_sSel.smMode = m_sgSelGesture.smCurrent = LSN_SM_NORMAL;
+		m_sSel.smMode = m_sgSelGesture.smCurrent = MX_SM_NORMAL;
 		m_sSel.sn.ui64Start = ui64LineStartAdr;
 		m_sSel.sn.ui64End   = ui64LineEndAdr;
 		m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sn.ui64Start;
@@ -431,8 +476,14 @@ namespace mx {
 
 	/**
 	 * Sets the caret to the beginning of the selection.
+	 * 
+	 * \param _wsStatus The string to print in the status bar.
 	 **/
-	void CHexEditorControl::MarkSelectionStart() {
+	void CHexEditorControl::MarkSelectionStart( CSecureWString &_swsStatus ) {
+		try {
+			_swsStatus = _DEC_WS_59D5AB36_Marked_start_of_selection_;
+		}
+		catch ( ... ) {}
 		if ( !m_sSel.HasSelection() ) { return; }
 
 		if ( m_sgSelGesture.ui64CaretAddr > m_sgSelGesture.ui64AnchorAddr ) {
@@ -442,8 +493,14 @@ namespace mx {
 
 	/**
 	 * Sets the caret to the end of the selection.
+	 * 
+	 * \param _wsStatus The string to print in the status bar.
 	 **/
-	void CHexEditorControl::MarkSelectionEnd() {
+	void CHexEditorControl::MarkSelectionEnd( CSecureWString &_swsStatus ) {
+		try {
+			_swsStatus = _DEC_WS_06516F57_Marked_end_of_selection_;
+		}
+		catch ( ... ) {}
 		if ( !m_sSel.HasSelection() ) { return; }
 
 		if ( m_sgSelGesture.ui64CaretAddr < m_sgSelGesture.ui64AnchorAddr ) {
@@ -582,6 +639,47 @@ namespace mx {
 			CSecureWString swsTmp;
 			_swsStatus = _DEC_WS_B8E08C71_Deleted__ + CUtilities::SizeString<CSecureWString>( ui64TotaltDeleted, swsTmp );
 			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * Deletes the character prior to the caret (backspace).
+	 * 
+	 * \param _wsStatus The string to print in the status bar.
+	 * \return Returns false if _swsStatus contains an error-state string.  True indicates that the process completed normally, regardless of whether anything was deleted or not.
+	 **/
+	bool CHexEditorControl::DeletePriorToCaret( CSecureWString &_swsStatus ) {
+		try {
+			if ( !m_pheiTarget ) {
+				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+				return false;
+			}
+			if ( m_pheiTarget->ReadOnly() ) {
+				_swsStatus = _DEC_WS_D4FFE2E0_File_is_Read_Only;
+				return false;
+			}
+
+			uint64_t ui64Total = 0, ui64TotaltDeleted = 0, ui64Deleted;
+			if ( !m_sSel.HasSelection() ) {
+				// Delete a single byte just before the caret.
+				if ( m_sgSelGesture.ui64CaretAddr != 0 ) {
+					if ( m_pheiTarget->Delete( m_sgSelGesture.ui64CaretAddr - 1, 1, ui64Deleted ) ) {
+						AddSelectionUndo( m_sSel, m_sgSelGesture );	// Failure here is non-critical.
+						CSecureWString swsTmp;
+						_swsStatus = _DEC_WS_B8E08C71_Deleted__ + CUtilities::SizeString<CSecureWString>( ui64Deleted, swsTmp );
+						SetCaretAddr( m_sgSelGesture.ui64CaretAddr - 1 );
+						::InvalidateRect( Wnd(), nullptr, FALSE );
+						return true;
+					}
+					else {
+						_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+						return false;
+					}
+				}
+				return true;
+			}
+			return DeleteSelectedOrCaret( _swsStatus );
 		}
 		catch ( ... ) { return false; }
 	}
@@ -1253,10 +1351,16 @@ namespace mx {
 			}
 
 
+			case VK_BACK : {
+				//if ( CanDelete() ) {
+					reinterpret_cast<CDeusHexMachinaWindow *>(m_pwHexParent)->DeletePriorToCaret();
+				//}
+				break;
+			}
 			case VK_DELETE : {
-				if ( CanDelete() ) {
+				//if ( CanDelete() ) {
 					reinterpret_cast<CDeusHexMachinaWindow *>(m_pwHexParent)->DeleteSelectedOrCaret();
-				}
+				//}
 				break;
 			}
 		}
@@ -3633,22 +3737,22 @@ namespace mx {
 
 		m_sgSelGesture.bRightArea = bRightArea;
 
-		if ( _bCtrlShift && m_sSel.bHas && m_sSel.smMode == LSN_SM_NORMAL && NormalSelectionIsSingleRow() ) {
+		if ( _bCtrlShift && m_sSel.bHas && m_sSel.smMode == MX_SM_NORMAL && NormalSelectionIsSingleRow() ) {
 			ConvertSingleRowNormalToColumn();
 			SelectionUpdateGesture( _ptClient, _bShift, _bCtrl, _bCtrlShift );
 			return;
 		}
 
-		if ( _bShift && m_sSel.bHas && m_sSel.smMode == LSN_SM_NORMAL ) {
+		if ( _bShift && m_sSel.bHas && m_sSel.smMode == MX_SM_NORMAL ) {
 			InitShiftExtendNormal( ui64Addr, _ptClient, _bShift, _bCtrl, _bCtrlShift );
 			return;
 		}
-		if ( _bShift && m_sSel.bHas && m_sSel.smMode == LSN_SM_COLUMN ) {
+		if ( _bShift && m_sSel.bHas && m_sSel.smMode == MX_SM_COLUMN ) {
 			InitShiftExtendColumn( ui64Addr, _ptClient, _bShift, _bCtrl, _bCtrlShift );
 			return;
 		}
 		if ( _bShift ) {
-			if ( m_sgSelGesture.smCurrent == LSN_SM_NORMAL ) {
+			if ( m_sgSelGesture.smCurrent == MX_SM_NORMAL ) {
 				if ( ui64Addr >= m_sgSelGesture.ui64MouseAnchorAddr ) {
 					m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr;
 					SetCaretAddr( ui64Addr + 1, 0, true, false );
@@ -3673,6 +3777,10 @@ namespace mx {
 			return;
 		}
 
+		auto psbStatus = reinterpret_cast<CDeusHexMachinaWindow *>(m_pwHexParent)->StatusBar();
+		if ( psbStatus ) {
+			psbStatus->SetTextW( L"" );
+		}
 		m_sgSelGesture.bSelecting = false;
 		m_sgSelGesture.bPendingThreshold = true;
 		m_sgSelGesture.ptDown = _ptClient;
@@ -3680,7 +3788,7 @@ namespace mx {
 		m_sgSelGesture.i32CaretIdx = i32Sub;
 		StartCaretBlink();
 
-		m_sgSelGesture.smCurrent = _bCtrl ? LSN_SM_COLUMN : (CurStyle()->bSelectColumnMode ? LSN_SM_COLUMN : LSN_SM_NORMAL);
+		m_sgSelGesture.smCurrent = _bCtrl ? MX_SM_COLUMN : (CurStyle()->bSelectColumnMode ? MX_SM_COLUMN : MX_SM_NORMAL);
 
 		m_sSel.bHas = false;
 	}
@@ -3718,7 +3826,7 @@ namespace mx {
 		if ( !m_sgSelGesture.bSelecting ) { return; }
 
 		auto ui32Stride = StrideForFormat( m_sgSelGesture.bRightArea ? CurStyle()->dfRightNumbersFmt : CurStyle()->dfLeftNumbersFmt );
-		if ( m_sgSelGesture.smCurrent == LSN_SM_NORMAL ) {
+		if ( m_sgSelGesture.smCurrent == MX_SM_NORMAL ) {
 			if ( ui64Addr >= m_sgSelGesture.ui64MouseAnchorAddr ) {
 				m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr;
 				SetCaretAddr( ui64Addr + ui32Stride, 0, true, false );
@@ -3798,7 +3906,7 @@ namespace mx {
 		bool _bCtrl,
 		bool _bCtrlShift ) {
 
-		if ( !m_sSel.bHas || m_sSel.smMode != LSN_SM_COLUMN ) { return; }
+		if ( !m_sSel.bHas || m_sSel.smMode != MX_SM_COLUMN ) { return; }
 
 		const uint32_t ui32Bpr = CurStyle()->uiBytesPerRow;
 		if ( ui32Bpr == 0 ) { return; }
@@ -3833,7 +3941,7 @@ namespace mx {
 		m_sgSelGesture.ptDown = _ptClient;
 		m_sgSelGesture.bPendingThreshold = false;		// Already selecting.
 		m_sgSelGesture.bSelecting = true;
-		m_sgSelGesture.smCurrent = LSN_SM_COLUMN;
+		m_sgSelGesture.smCurrent = MX_SM_COLUMN;
 
 		m_sgSelGesture.ui64AnchorAddr = ui64FixedAddr;
 		m_sgSelGesture.ui64CaretAddr  = _ui64ClickAddr;
@@ -3848,7 +3956,7 @@ namespace mx {
 	 * Precondition: NormalSelectionIsSingleRow() is true.
 	 */
 	void CHexEditorControl::ConvertSingleRowNormalToColumn() {
-		if ( !m_sSel.bHas || m_sSel.smMode != LSN_SM_NORMAL ) {
+		if ( !m_sSel.bHas || m_sSel.smMode != MX_SM_NORMAL ) {
 			return;
 		}
 
@@ -3864,19 +3972,19 @@ namespace mx {
 		const uint32_t ui32ColEnd  = static_cast<uint32_t>(ui64End   % ui32Bpr);
 		const uint32_t ui32Cols    = (ui32ColEnd - ui32ColBeg) + 1;
 
-		m_sSel.smMode = LSN_SM_COLUMN;
+		m_sSel.smMode = MX_SM_COLUMN;
 		m_sSel.sc.ui64AnchorAddr = ui64Row * ui32Bpr + ui32ColBeg;
 		m_sSel.sc.ui32Cols       = ui32Cols;
 		m_sSel.sc.ui64Lines      = 1;
 
-		m_sgSelGesture.smCurrent = LSN_SM_COLUMN;
+		m_sgSelGesture.smCurrent = MX_SM_COLUMN;
 	}
 
 	/**
 	 * \brief Returns true if the active Normal selection lies entirely on one logical row.
 	 */
 	bool CHexEditorControl::NormalSelectionIsSingleRow() const {
-		if ( !m_sSel.bHas || m_sSel.smMode != LSN_SM_NORMAL ) { return false; }
+		if ( !m_sSel.bHas || m_sSel.smMode != MX_SM_NORMAL ) { return false; }
 
 		const uint32_t ui32Bpr = CurStyle()->uiBytesPerRow;
 		if ( ui32Bpr == 0 ) { return false; }

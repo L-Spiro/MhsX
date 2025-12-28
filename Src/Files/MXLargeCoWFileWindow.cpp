@@ -244,7 +244,7 @@ namespace mx {
 	 */
 	bool CLargeCoWFileWindow::Redo( CSecureWString &_swsStatus ) {
 		size_t sNewIdx = m_sUndoIdx + 1;
-		if ( sNewIdx == size_t( m_vUndoStack.size() - 1 ) ) { return true; }
+		if ( sNewIdx == size_t( m_vUndoStack.size() ) ) { return true; }
 		if ( sNewIdx >= m_vUndoStack.size() ) {
 			_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
 			return false;

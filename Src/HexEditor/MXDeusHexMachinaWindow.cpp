@@ -1272,6 +1272,19 @@ namespace mx {
 		return LSW_H_CONTINUE;
 	}
 
+	/**
+	 * The WM_KEYDOWN handler.
+	 *
+	 * \param _uiKeyCode The virtual-key code of the nonsystem key.
+	 * \param _uiFlags The repeat count, scan code, extended-key flag, context code, previous key-state flag, and transition-state flag.
+	 * \return Returns an LSW_HANDLED code.
+	 */
+	CWidget::LSW_HANDLED CDeusHexMachinaWindow::KeyDown( UINT _uiKeyCode, UINT _uiFlags ) {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return LSW_H_CONTINUE; }
+		return phecControl->KeyDown( _uiKeyCode, _uiFlags );
+	}
+
 	// Gets the status bar.
 	CStatusBar * CDeusHexMachinaWindow::StatusBar() {
 		return static_cast<CStatusBar *>(FindChild( Layout::MX_W_STATUSBAR ));
@@ -1488,6 +1501,11 @@ namespace mx {
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
 		bool bRet = phecControl->Undo( wsMsg );
+
+		auto psbStatus = StatusBar();
+		if ( psbStatus && wsMsg.size() ) {
+			psbStatus->SetTextW( wsMsg.c_str() );
+		}
 	}
 
 	// Performs a Redo.
@@ -1496,6 +1514,11 @@ namespace mx {
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
 		bool bRet = phecControl->Redo( wsMsg );
+
+		auto psbStatus = StatusBar();
+		if ( psbStatus && wsMsg.size() ) {
+			psbStatus->SetTextW( wsMsg.c_str() );
+		}
 	}
 
 	// Delete the selection.
@@ -1504,6 +1527,24 @@ namespace mx {
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
 		bool bRet = phecControl->DeleteSelectedOrCaret( wsMsg );
+
+		auto psbStatus = StatusBar();
+		if ( psbStatus && wsMsg.size() ) {
+			psbStatus->SetTextW( wsMsg.c_str() );
+		}
+	}
+
+	// Deletes the character prior to the caret (backspace).
+	void CDeusHexMachinaWindow::DeletePriorToCaret() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		CSecureWString wsMsg;
+		bool bRet = phecControl->DeletePriorToCaret( wsMsg );
+
+		auto psbStatus = StatusBar();
+		if ( psbStatus && wsMsg.size() ) {
+			psbStatus->SetTextW( wsMsg.c_str() );
+		}
 	}
 
 	// Select all.
@@ -1538,14 +1579,26 @@ namespace mx {
 	void CDeusHexMachinaWindow::MarkSelectionStart() {
 		auto phecControl = CurrentEditor();
 		if ( !phecControl ) { return; }
-		phecControl->MarkSelectionStart();
+		CSecureWString wsMsg;
+		phecControl->MarkSelectionStart( wsMsg );
+
+		auto psbStatus = StatusBar();
+		if ( psbStatus && wsMsg.size() ) {
+			psbStatus->SetTextW( wsMsg.c_str() );
+		}
 	}
 
 	// Sets the caret to the end of the selection.
 	void CDeusHexMachinaWindow::MarkSelectionEnd() {
 		auto phecControl = CurrentEditor();
 		if ( !phecControl ) { return; }
-		phecControl->MarkSelectionEnd();
+		CSecureWString wsMsg;
+		phecControl->MarkSelectionEnd( wsMsg );
+
+		auto psbStatus = StatusBar();
+		if ( psbStatus && wsMsg.size() ) {
+			psbStatus->SetTextW( wsMsg.c_str() );
+		}
 	}
 
 	// Toggle column mode.

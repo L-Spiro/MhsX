@@ -24,9 +24,9 @@ namespace mx {
 
 		// == Enumerations.
 		/** Selection mode. */
-		enum LSN_SELECTION_MODE : uint32_t {
-			LSN_SM_NORMAL = 0,						/**< Normal mode. */
-			LSN_SM_COLUMN = 1						/**< Column mode. */
+		enum MX_SELECTION_MODE : uint32_t {
+			MX_SM_NORMAL = 0,						/**< Normal mode. */
+			MX_SM_COLUMN = 1						/**< Column mode. */
 		};
 
 		/** Shared fonts. */
@@ -566,22 +566,27 @@ namespace mx {
 		 * \param _bRedraw If true the screen is redrawn immediately.
 		 **/
 		inline void									IncSubCaret( bool _bRedraw = true ) {
-			bool bRight = m_sgSelGesture.bRightArea && CurStyle()->bShowRightArea;
-			auto dfFmt = bRight ? CurStyle()->dfRightNumbersFmt : CurStyle()->dfLeftNumbersFmt;
-			int32_t i32Max = SubCaretCountForFormat( dfFmt );
-			auto ui32Stride = StrideForFormat( dfFmt );
-			if ( ui32Stride > 1 ) {
-				AddCaret( ui32Stride - (m_sgSelGesture.ui64CaretAddr % ui32Stride), 0, false, _bRedraw );
-			}
-			else if ( std::clamp( m_sgSelGesture.i32CaretIdx, 0, i32Max ) == i32Max - 1 ) {
-				AddCaret( 1, 0, false, _bRedraw );
+			if ( HasSelection() ) {
+				SetCaretAddr( m_sSel.UpperRightAddress( CurStyle()->uiBytesPerRow ), 0, false, _bRedraw );
 			}
 			else {
-				if ( m_sgSelGesture.ui64CaretAddr < Size() ) {
-					++m_sgSelGesture.i32CaretIdx;
-					StartCaretBlink();
-					if ( _bRedraw ) {
-						::InvalidateRect( Wnd(), nullptr, FALSE );
+				bool bRight = m_sgSelGesture.bRightArea && CurStyle()->bShowRightArea;
+				auto dfFmt = bRight ? CurStyle()->dfRightNumbersFmt : CurStyle()->dfLeftNumbersFmt;
+				int32_t i32Max = SubCaretCountForFormat( dfFmt );
+				auto ui32Stride = StrideForFormat( dfFmt );
+				if ( ui32Stride > 1 ) {
+					AddCaret( ui32Stride - (m_sgSelGesture.ui64CaretAddr % ui32Stride), 0, false, _bRedraw );
+				}
+				else if ( std::clamp( m_sgSelGesture.i32CaretIdx, 0, i32Max ) == i32Max - 1 ) {
+					AddCaret( 1, 0, false, _bRedraw );
+				}
+				else {
+					if ( m_sgSelGesture.ui64CaretAddr < Size() ) {
+						++m_sgSelGesture.i32CaretIdx;
+						StartCaretBlink();
+						if ( _bRedraw ) {
+							::InvalidateRect( Wnd(), nullptr, FALSE );
+						}
 					}
 				}
 			}
@@ -593,26 +598,31 @@ namespace mx {
 		 * \param _bRedraw If true the screen is redrawn immediately.
 		 **/
 		inline void									DecSubCaret( bool _bRedraw = true ) {
-			bool bRight = m_sgSelGesture.bRightArea && CurStyle()->bShowRightArea;
-			auto dfFmt = bRight ? CurStyle()->dfRightNumbersFmt : CurStyle()->dfLeftNumbersFmt;
-			int32_t i32Max = SubCaretCountForFormat( dfFmt );
-			auto ui32Stride = StrideForFormat( dfFmt );
-			if ( ui32Stride > 1 ) {
-				SubCaret( (m_sgSelGesture.ui64CaretAddr % ui32Stride) + ui32Stride, 0, false, _bRedraw );
-			}
-			else if ( std::clamp( m_sgSelGesture.i32CaretIdx, 0, i32Max ) == 0 ) {
-				if ( m_sgSelGesture.ui64CaretAddr ) {
-					SubCaret( 1, i32Max - 1, false, _bRedraw );
-				}
-				else {
-					SubCaret( 1, 0, false, _bRedraw );
-				}
+			if ( HasSelection() ) {
+				SetCaretAddr( m_sSel.LowerLeftAddress(), 0, false, _bRedraw );
 			}
 			else {
-				--m_sgSelGesture.i32CaretIdx;
-				StartCaretBlink();
-				if ( _bRedraw ) {
-					::InvalidateRect( Wnd(), nullptr, FALSE );
+				bool bRight = m_sgSelGesture.bRightArea && CurStyle()->bShowRightArea;
+				auto dfFmt = bRight ? CurStyle()->dfRightNumbersFmt : CurStyle()->dfLeftNumbersFmt;
+				int32_t i32Max = SubCaretCountForFormat( dfFmt );
+				auto ui32Stride = StrideForFormat( dfFmt );
+				if ( ui32Stride > 1 || HasSelection() ) {
+					SubCaret( (m_sgSelGesture.ui64CaretAddr % ui32Stride) + ui32Stride, 0, false, _bRedraw );
+				}
+				else if ( std::clamp( m_sgSelGesture.i32CaretIdx, 0, i32Max ) == 0 ) {
+					if ( m_sgSelGesture.ui64CaretAddr ) {
+						SubCaret( 1, i32Max - 1, false, _bRedraw );
+					}
+					else {
+						SubCaret( 1, 0, false, _bRedraw );
+					}
+				}
+				else {
+					--m_sgSelGesture.i32CaretIdx;
+					StartCaretBlink();
+					if ( _bRedraw ) {
+						::InvalidateRect( Wnd(), nullptr, FALSE );
+					}
 				}
 			}
 		}
@@ -692,21 +702,25 @@ namespace mx {
 
 		/**
 		 * Sets the caret to the beginning of the selection.
+		 * 
+		 * \param _wsStatus The string to print in the status bar.
 		 **/
-		void										MarkSelectionStart();
+		void										MarkSelectionStart( CSecureWString &_swsStatus );
 
 		/**
 		 * Sets the caret to the end of the selection.
+		 * 
+		 * \param _wsStatus The string to print in the status bar.
 		 **/
-		void										MarkSelectionEnd();
+		void										MarkSelectionEnd( CSecureWString &_swsStatus );
 
 		/**
-		 * Determines if deleting is possible.  To delete, the internal state must be valid, and there must either be a selection or the caret must not be at the end of the file, and the file must not be read-only.
+		 * Determines if deleting is possible.  To delete, the internal state must be valid and the file must not be read-only.
 		 * 
-		 * \return Returns true if the internal state is valid, the file is not read-only, and there is a selection or the caret is not at the end of the file.
+		 * \return Returns true if the internal state is valid and the file is not read-only.
 		 **/
 		inline bool									CanDelete() const {
-			return m_pheiTarget && !m_pheiTarget->ReadOnly() && (m_sSel.HasSelection() || m_sgSelGesture.ui64CaretAddr < Size());
+			return m_pheiTarget && !m_pheiTarget->ReadOnly();
 		}
 
 		/**
@@ -720,6 +734,7 @@ namespace mx {
 		 * Performs an Redo operation.
 		 * 
 		 * \param _wsStatus The string to print in the status bar.
+		 * \return Returns
 		 **/
 		bool										Redo( CSecureWString &_swsStatus );
 
@@ -727,8 +742,17 @@ namespace mx {
 		 * Deletes the selected bytes.
 		 * 
 		 * \param _wsStatus The string to print in the status bar.
+		 * \return Returns false if _swsStatus contains an error-state string.  True indicates that the process completed normally, regardless of whether anything was deleted or not.
 		 **/
 		bool										DeleteSelectedOrCaret( CSecureWString &_swsStatus );
+
+		/**
+		 * Deletes the character prior to the caret (backspace).
+		 * 
+		 * \param _wsStatus The string to print in the status bar.
+		 * \return Returns false if _swsStatus contains an error-state string.  True indicates that the process completed normally, regardless of whether anything was deleted or not.
+		 **/
+		bool										DeletePriorToCaret( CSecureWString &_swsStatus );
 
 		/**
 		 * Is Undo available?
@@ -1110,7 +1134,7 @@ namespace mx {
 		 * Stores payload for the active mode and exposes helpers shared by both.
 		 */
 		struct MX_SELECTION {
-			LSN_SELECTION_MODE						smMode				= LSN_SM_NORMAL;					/**< Active selection mode. */
+			MX_SELECTION_MODE						smMode				= MX_SM_NORMAL;						/**< Active selection mode. */
 			bool									bHas				= false;							/**< True if there is an active selection. */
 			MX_SEL_NORMAL							sn;														/**< Normal selection payload. */
 			MX_SEL_COLUMN							sc;														/**< Column selection payload. */
@@ -1124,7 +1148,7 @@ namespace mx {
 			 **/
 			inline bool								HasSelection() const {
 				if ( !bHas ) { return false; }
-				if ( smMode == LSN_SM_NORMAL ) { return !sn.Empty(); }
+				if ( smMode == MX_SM_NORMAL ) { return !sn.Empty(); }
 				return !sc.Empty();
 			}
 
@@ -1136,7 +1160,7 @@ namespace mx {
 			 * \return Returns true if the selection occupies exactly one logical row.
 			 */
 			inline bool								IsSingleRow( uint32_t _ui32BytesPerRow ) const {
-				if ( smMode == LSN_SM_COLUMN ) {
+				if ( smMode == MX_SM_COLUMN ) {
 					return sc.ui64Lines == 1;
 				}
 				const uint64_t ui64StartLine = sn.ui64Start / _ui32BytesPerRow;
@@ -1153,7 +1177,7 @@ namespace mx {
 			 **/
 			inline bool								IsSelected( uint64_t _ui64Address, uint32_t _ui32BytesPerRow ) {
 				if ( !bHas ) { return false; }
-				if ( smMode == LSN_SM_NORMAL ) {
+				if ( smMode == MX_SM_NORMAL ) {
 					return sn.IsSelected( _ui64Address );
 				}
 				return sc.IsSelected( _ui64Address, _ui32BytesPerRow );
@@ -1166,11 +1190,11 @@ namespace mx {
 			 * \param _ui32BytesPerRow The Number of bytes in a row.
 			 * \return Returns true if allocating all of the selection ranges succeeded or there is no selection.  False always indicates a memory failure.
 			 **/
-			 inline bool							GatherSelected_HighToLow( uint32_t _ui32BytesPerRow, std::vector<MX_SEL_RANGE> &_vSelections ) {
+			inline bool								GatherSelected_HighToLow( uint32_t _ui32BytesPerRow, std::vector<MX_SEL_RANGE> &_vSelections ) {
 				_vSelections.clear();
 				if ( !HasSelection() ) { return true; }
 				try {
-					if ( smMode == LSN_SM_NORMAL ) {	
+					if ( smMode == MX_SM_NORMAL ) {	
 						// Known not to be empty.
 						// There is only one selection range.
 						MX_SEL_RANGE srRange = { .ui64Start = sn.ui64Start, .ui64Size = sn.ui64End - sn.ui64Start };
@@ -1189,18 +1213,18 @@ namespace mx {
 				catch ( ... ) { return false; }
 			 }
 
-			 /**
+			/**
 			 * Gathers the selected ranges.  Addresses will be sorted in ascanding order (lower addresses first).
 			 * 
 			 * \param _vSelections Holds the returned selection ranges sorted from high-to-low.
 			 * \param _ui32BytesPerRow The Number of bytes in a row.
 			 * \return Returns true if allocating all of the selection ranges succeeded or there is no selection.  False always indicates a memory failure.
 			 **/
-			 inline bool							GatherSelected_LowToHigh( uint32_t _ui32BytesPerRow, std::vector<MX_SEL_RANGE> &_vSelections ) {
+			inline bool								GatherSelected_LowToHigh( uint32_t _ui32BytesPerRow, std::vector<MX_SEL_RANGE> &_vSelections ) {
 				_vSelections.clear();
 				if ( !HasSelection() ) { return true; }
 				try {
-					if ( smMode == LSN_SM_NORMAL ) {	
+					if ( smMode == MX_SM_NORMAL ) {	
 						// Known not to be empty.
 						// There is only one selection range.
 						MX_SEL_RANGE srRange = { .ui64Start = sn.ui64Start, .ui64Size = sn.ui64End - sn.ui64Start };
@@ -1218,6 +1242,29 @@ namespace mx {
 				}
 				catch ( ... ) { return false; }
 			 }
+
+			/**
+			 * Gets the lower-left address of the selection.  Lower refers to the address, which means visually this is the upper-left address.
+			 * 
+			 * \return Returns the lower-left selection address or 0.
+			 **/
+			inline uint64_t							LowerLeftAddress() const {
+				if ( !HasSelection() ) { return 0; }
+				if ( smMode == MX_SM_NORMAL ) { return sn.ui64Start; }
+				return sc.ui64AnchorAddr;
+			}
+
+			/**
+			 * Gets the upper-right address of the selection.  Upper refers to the address, which means visually this is the lower-left address.
+			 * 
+			 * \param _ui32BytesPerRow The Number of bytes in a row.
+			 * \return Returns the upper-right selection address or 0.
+			 **/
+			inline uint64_t							UpperRightAddress( uint32_t _ui32BytesPerRow ) const {
+				if ( !HasSelection() ) { return 0; }
+				if ( smMode == MX_SM_NORMAL ) { return sn.ui64End; }
+				return sc.ui64AnchorAddr + (sc.ui64Lines * _ui32BytesPerRow) + sc.ui32Cols;
+			}
 		};
 
 		/**
@@ -1231,7 +1278,7 @@ namespace mx {
 		 * - Flags for “pending threshold” and “actively selecting”.
 		 */
 		struct MX_SELECT_GESTURE {
-			LSN_SELECTION_MODE						smCurrent			= LSN_SM_NORMAL;					/**< CurrentMode for this gesture. */
+			MX_SELECTION_MODE						smCurrent			= MX_SM_NORMAL;						/**< CurrentMode for this gesture. */
 
 			uint64_t								ui64AnchorAddr		= 0;								/**< Selection "from" address. */
 			uint64_t								ui64MouseAnchorAddr	= 0;								/**< Original anchor address when beginning a mouse drag. */
@@ -1843,7 +1890,7 @@ namespace mx {
 			m_sgSelGesture.ptDown = _ptClient;
 			m_sgSelGesture.bPendingThreshold = false;			// We are already selecting.
 			m_sgSelGesture.bSelecting = true;
-			m_sgSelGesture.smCurrent = LSN_SM_NORMAL;			// Shift-extend is always Normal here.
+			m_sgSelGesture.smCurrent = MX_SM_NORMAL;			// Shift-extend is always Normal here.
 
 			m_sgSelGesture.ui64AnchorAddr = ui64AnchorAddr;		// Fixed endpoint.
 			m_sgSelGesture.ui64CaretAddr  = _ui64ClickAddr;		// Moving endpoint at click.

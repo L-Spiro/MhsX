@@ -22420,3 +22420,75 @@
 #define _DEC_S_63A6700E____Delete___ mx::CStringDecoder::DecodeToString( _T_63A6700E____Delete___, _LEN_63A6700E )
 #define _DEC_WS_63A6700E____Delete___ mx::CStringDecoder::DecodeToWString( _T_63A6700E____Delete___, _LEN_63A6700E )
 
+// Marked start of Selection.
+
+#define _T_1688A8E6_Marked_start_of_Selection_ "\xD5\x2F\x42\x06\xF7\x2D\xAE\x3A\x44\x29\x3B\x42\xB2\x0A\x2D\xA8\x21\x35\x07\xF7\x2C\x02\x30\x3F\x36\xF7"
+#define _LEN_1688A8E6 26
+#define _T_LEN_1688A8E6_Marked_start_of_Selection_ _T_1688A8E6_Marked_start_of_Selection_, _LEN_1688A8E6
+#define _DEC_1688A8E6_Marked_start_of_Selection_( STR ) mx::CStringDecoder::Decode( _T_1688A8E6_Marked_start_of_Selection_, _LEN_1688A8E6, STR )
+#define _DEC_S_1688A8E6_Marked_start_of_Selection_ mx::CStringDecoder::DecodeToString( _T_1688A8E6_Marked_start_of_Selection_, _LEN_1688A8E6 )
+#define _DEC_WS_1688A8E6_Marked_start_of_Selection_ mx::CStringDecoder::DecodeToWString( _T_1688A8E6_Marked_start_of_Selection_, _LEN_1688A8E6 )
+
+// Marked start of selection.
+
+#define _T_59D5AB36_Marked_start_of_selection_ "\xD5\x2F\x42\x06\xF7\x2D\xAE\x3A\x44\x29\x3B\x42\xB2\x0A\x2D\xA8\x41\x35\x07\xF7\x2C\x02\x30\x3F\x36\xF7"
+#define _LEN_59D5AB36 26
+#define _T_LEN_59D5AB36_Marked_start_of_selection_ _T_59D5AB36_Marked_start_of_selection_, _LEN_59D5AB36
+#define _DEC_59D5AB36_Marked_start_of_selection_( STR ) mx::CStringDecoder::Decode( _T_59D5AB36_Marked_start_of_selection_, _LEN_59D5AB36, STR )
+#define _DEC_S_59D5AB36_Marked_start_of_selection_ mx::CStringDecoder::DecodeToString( _T_59D5AB36_Marked_start_of_selection_, _LEN_59D5AB36 )
+#define _DEC_WS_59D5AB36_Marked_start_of_selection_ mx::CStringDecoder::DecodeToWString( _T_59D5AB36_Marked_start_of_selection_, _LEN_59D5AB36 )
+
+// Marked end of selection.
+
+#define _T_06516F57_Marked_end_of_selection_ "\xD5\x2F\x42\x06\xF7\x2D\xAE\x2C\x3E\x2C\xE9\x3D\xF8\xBB\x3A\xED\x3A\x35\xFE\x06\x32\xFD\x35\xFE"
+#define _LEN_06516F57 24
+#define _T_LEN_06516F57_Marked_end_of_selection_ _T_06516F57_Marked_end_of_selection_, _LEN_06516F57
+#define _DEC_06516F57_Marked_end_of_selection_( STR ) mx::CStringDecoder::Decode( _T_06516F57_Marked_end_of_selection_, _LEN_06516F57, STR )
+#define _DEC_S_06516F57_Marked_end_of_selection_ mx::CStringDecoder::DecodeToString( _T_06516F57_Marked_end_of_selection_, _LEN_06516F57 )
+#define _DEC_WS_06516F57_Marked_end_of_selection_ mx::CStringDecoder::DecodeToWString( _T_06516F57_Marked_end_of_selection_, _LEN_06516F57 )
+
+// Selected: 
+
+#define _T_2644E6E7_Selected__ "\xDB\x33\x3C\x00\xF5\x3D\xF3\x2B\x0A\xE8"
+#define _LEN_2644E6E7 10
+#define _T_LEN_2644E6E7_Selected__ _T_2644E6E7_Selected__, _LEN_2644E6E7
+#define _DEC_2644E6E7_Selected__( STR ) mx::CStringDecoder::Decode( _T_2644E6E7_Selected__, _LEN_2644E6E7, STR )
+#define _DEC_S_2644E6E7_Selected__ mx::CStringDecoder::DecodeToString( _T_2644E6E7_Selected__, _LEN_2644E6E7 )
+#define _DEC_WS_2644E6E7_Selected__ mx::CStringDecoder::DecodeToWString( _T_2644E6E7_Selected__, _LEN_2644E6E7 )
+
+//  (Range: 
+
+#define _T_E9A13A63___Range__ "\xA8\xF6\x22\xFC\x00\x30\xF3\x01\xF0"
+#define _LEN_E9A13A63 9
+#define _T_LEN_E9A13A63___Range__ _T_E9A13A63___Range__, _LEN_E9A13A63
+#define _DEC_E9A13A63___Range__( STR ) mx::CStringDecoder::Decode( _T_E9A13A63___Range__, _LEN_E9A13A63, STR )
+#define _DEC_S_E9A13A63___Range__ mx::CStringDecoder::DecodeToString( _T_E9A13A63___Range__, _LEN_E9A13A63 )
+#define _DEC_WS_E9A13A63___Range__ mx::CStringDecoder::DecodeToWString( _T_E9A13A63___Range__, _LEN_E9A13A63 )
+
+//  to 
+
+#define _T_0B85E70E__to_ "\xA8\x42\x3F\xBB"
+#define _LEN_0B85E70E 4
+#define _T_LEN_0B85E70E__to_ _T_0B85E70E__to_, _LEN_0B85E70E
+#define _DEC_0B85E70E__to_( STR ) mx::CStringDecoder::Decode( _T_0B85E70E__to_, _LEN_0B85E70E, STR )
+#define _DEC_S_0B85E70E__to_ mx::CStringDecoder::DecodeToString( _T_0B85E70E__to_, _LEN_0B85E70E )
+#define _DEC_WS_0B85E70E__to_ mx::CStringDecoder::DecodeToWString( _T_0B85E70E__to_, _LEN_0B85E70E )
+
+//  cols
+
+#define _T_6DBF08C4__cols "\xA8\x31\x3F\x07\x05"
+#define _LEN_6DBF08C4 5
+#define _T_LEN_6DBF08C4__cols _T_6DBF08C4__cols, _LEN_6DBF08C4
+#define _DEC_6DBF08C4__cols( STR ) mx::CStringDecoder::Decode( _T_6DBF08C4__cols, _LEN_6DBF08C4, STR )
+#define _DEC_S_6DBF08C4__cols mx::CStringDecoder::DecodeToString( _T_6DBF08C4__cols, _LEN_6DBF08C4 )
+#define _DEC_WS_6DBF08C4__cols mx::CStringDecoder::DecodeToWString( _T_6DBF08C4__cols, _LEN_6DBF08C4 )
+
+// , lines, 
+
+#define _T_66452C3E___lines__ "\xB4\xEE\x3C\x04\x00\x2E\x01\xF3\xF0"
+#define _LEN_66452C3E 9
+#define _T_LEN_66452C3E___lines__ _T_66452C3E___lines__, _LEN_66452C3E
+#define _DEC_66452C3E___lines__( STR ) mx::CStringDecoder::Decode( _T_66452C3E___lines__, _LEN_66452C3E, STR )
+#define _DEC_S_66452C3E___lines__ mx::CStringDecoder::DecodeToString( _T_66452C3E___lines__, _LEN_66452C3E )
+#define _DEC_WS_66452C3E___lines__ mx::CStringDecoder::DecodeToWString( _T_66452C3E___lines__, _LEN_66452C3E )
+
