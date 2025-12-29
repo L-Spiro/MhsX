@@ -22,7 +22,7 @@ Allows you to fully define your search.  There is nothing you can’t code.
 
 ## Floating-Point Studio
 Easily decode/research any floating-point format, even custom ones.
-<br>![Floating-Point Studio](https://i.imgur.com/rlZ1QSm.png)
+<img width="849" height="637" alt="image" src="https://github.com/user-attachments/assets/5c0f1e85-6289-4bc7-afcd-b345954776ce" />
 
 ## Deus Hex Machina (Hex Editor)
 Currently under construction: A full-featured modern hex editor.
