@@ -31,6 +31,8 @@ Currently under construction: A full-featured modern hex editor.
 <img width="2560" height="1392" alt="image" src="https://github.com/user-attachments/assets/1ddb67f8-f23b-4443-9c2b-e8935bd5d43b" />
 <img width="1253" height="992" alt="image" src="https://github.com/user-attachments/assets/0433f458-0a45-489d-9280-612d400c5fd9" />
 <img width="2560" height="1392" alt="image" src="https://github.com/user-attachments/assets/11e3c99b-911c-482e-984c-267509449707" />
+<img width="1462" height="870" alt="image" src="https://github.com/user-attachments/assets/609c026d-a708-4885-a613-c56e33ccb932" />
+
 
 ## Expression Evaluator
 The Expression Evaluator is a handy ready-to-use simple way to evaluate snippets of code, mathematical expressions, etc.  Supports branching, loops, typed and typeless values, the full C++ \<cmath\> library, strings, and more.  It’s a full programming language that is easy to use; just start typing!
