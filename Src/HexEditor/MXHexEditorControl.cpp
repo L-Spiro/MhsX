@@ -602,32 +602,44 @@ namespace mx {
 			
 		
 			uint64_t ui64Caret = m_sgSelGesture.ui64CaretAddr;
-			std::vector<MX_SEL_RANGE> vSelections;
-			
-			if ( m_sSel.GatherSelected_HighToLow( CurStyle()->uiBytesPerRow, vSelections ) ) {
+			{
 				CHexEditorInterface::MX_UNDO uUndo( m_pheiTarget );
+				std::vector<MX_SEL_RANGE> vSelections;
 				if ( uUndo.Ready() ) {
-					for ( const auto & srThis : vSelections ) {
-						if ( m_pheiTarget->Delete( srThis.ui64Start, srThis.ui64Size, ui64Deleted ) ) {
-							if ( ui64Caret > srThis.ui64Start ) {
-								// If caret is above the start then it needs to be updated.
-								if ( ui64Caret >= srThis.ui64Start + srThis.ui64Size ) {
-									// Caret is beyond the end of the selection range.
-									ui64Caret -= srThis.ui64Size;
+					constexpr uint64_t ui64GroupSize = 1024ULL * 1024ULL;
+					uint64_t ui64Idx = 0;
+					do {
+						if ( m_sSel.GatherSelected_HighToLow( CurStyle()->uiBytesPerRow, vSelections, ui64GroupSize, ui64Idx++ ) ) {
+				
+							for ( const auto & srThis : vSelections ) {
+								if ( m_pheiTarget->Delete( srThis.ui64Start, srThis.ui64Size, ui64Deleted ) ) {
+									if ( ui64Caret > srThis.ui64Start ) {
+										// If caret is above the start then it needs to be updated.
+										if ( ui64Caret >= srThis.ui64Start + srThis.ui64Size ) {
+											// Caret is beyond the end of the selection range.
+											ui64Caret -= srThis.ui64Size;
+										}
+										else {
+											// Caret is inside the selection range.
+											ui64Caret = srThis.ui64Start;
+										}
+									}
+									ui64TotaltDeleted += srThis.ui64Size;
 								}
-								else {
-									// Caret is inside the selection range.
-									ui64Caret = srThis.ui64Start;
-								}
+								ui64Total += ui64Deleted;
 							}
-							ui64TotaltDeleted += srThis.ui64Size;
 						}
-						ui64Total += ui64Deleted;
-					}
-				}
-				else {
-					_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
-					return false;
+						else {
+							if ( ui64Caret != m_sgSelGesture.ui64CaretAddr ) {
+								auto sOldSel = m_sSel;
+								auto sgOldGesture = m_sgSelGesture;
+								SetCaretAddr( ui64Caret );
+								AddSelectionUndo( sOldSel, sgOldGesture );
+							}
+							_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+							return false;
+						}
+					} while ( vSelections.size() );
 				}
 			}
 			

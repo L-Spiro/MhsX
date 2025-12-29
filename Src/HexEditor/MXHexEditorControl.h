@@ -1114,7 +1114,7 @@ namespace mx {
 			 * Determines if a given address is in the selection.
 			 * 
 			 * \param _ui64Address The address to test for being selected.
-			 * \param _ui32BytesPerRow The Number of bytes in a row.
+			 * \param _ui32BytesPerRow The number of bytes in a row.
 			 * \return Returns true if there is a selection and if the given address is part of that selection.
 			 **/
 			inline bool								IsSelected( uint64_t _ui64Address, uint32_t _ui32BytesPerRow ) {
@@ -1172,7 +1172,7 @@ namespace mx {
 			 * Determines if a given address is in the selection.
 			 * 
 			 * \param _ui64Address The address to test for being selected.
-			 * \param _ui32BytesPerRow The Number of bytes in a row.
+			 * \param _ui32BytesPerRow The number of bytes in a row.
 			 * \return Returns true if there is a selection and if the given address is part of that selection.
 			 **/
 			inline bool								IsSelected( uint64_t _ui64Address, uint32_t _ui32BytesPerRow ) {
@@ -1186,8 +1186,8 @@ namespace mx {
 			/**
 			 * Gathers the selected ranges.  Addresses will be sorted in descanding order (higher addresses first).
 			 * 
+			 * \param _ui32BytesPerRow The number of bytes in a row.
 			 * \param _vSelections Holds the returned selection ranges sorted from high-to-low.
-			 * \param _ui32BytesPerRow The Number of bytes in a row.
 			 * \return Returns true if allocating all of the selection ranges succeeded or there is no selection.  False always indicates a memory failure.
 			 **/
 			inline bool								GatherSelected_HighToLow( uint32_t _ui32BytesPerRow, std::vector<MX_SEL_RANGE> &_vSelections ) {
@@ -1216,8 +1216,8 @@ namespace mx {
 			/**
 			 * Gathers the selected ranges.  Addresses will be sorted in ascanding order (lower addresses first).
 			 * 
-			 * \param _vSelections Holds the returned selection ranges sorted from high-to-low.
-			 * \param _ui32BytesPerRow The Number of bytes in a row.
+			 * \param _ui32BytesPerRow The number of bytes in a row.
+			 * \param _vSelections Holds the returned selection ranges sorted from low-to-high.
 			 * \return Returns true if allocating all of the selection ranges succeeded or there is no selection.  False always indicates a memory failure.
 			 **/
 			inline bool								GatherSelected_LowToHigh( uint32_t _ui32BytesPerRow, std::vector<MX_SEL_RANGE> &_vSelections ) {
@@ -1243,6 +1243,86 @@ namespace mx {
 				catch ( ... ) { return false; }
 			 }
 
+			 /**
+			 * Gathers a part of the selected ranges.  Addresses will be grouped into chunks of _ui64GroupSize, and you can request an index into those groupings to be returned via _ui64GroupIdx.
+			 *	This prevents long freezes or memory failures when millions of rows have been selected in column mode.
+			 *	Addresses will be sorted in descanding order (higher addresses first).
+			 * 
+			 * \param _ui32BytesPerRow The number of bytes in a row.
+			 * \param _vSelections Holds the returned selection ranges sorted from high-to-low.
+			 * \param _ui64GroupSize The size of each group to gather.
+			 * \param _ui64GroupIdx The index of the group to gather.
+			 * \return Returns true if allocating all of the selection ranges succeeded or there is no selection.  False always indicates a memory failure.
+			 **/
+			inline bool								GatherSelected_HighToLow( uint32_t _ui32BytesPerRow, std::vector<MX_SEL_RANGE> &_vSelections, uint64_t _ui64GroupSize, uint64_t _ui64GroupIdx ) {
+				_vSelections.clear();
+				if ( !HasSelection() ) { return true; }
+				try {
+					if ( smMode == MX_SM_NORMAL ) {	
+						// Known not to be empty.
+						// There is only one selection range.
+						MX_SEL_RANGE srRange = { .ui64Start = sn.ui64Start, .ui64Size = sn.ui64End - sn.ui64Start };
+						_vSelections.push_back( srRange );
+						return true;
+					}
+
+					// Column Mode.
+					// Known not to be empty.
+					if ( !_ui64GroupSize ) { return false; }
+					uint64_t ui64Total = sc.ui64Lines + 1;
+					uint64_t ui64TotalGroups = (ui64Total % _ui64GroupSize == 0) ? (ui64Total / _ui64GroupSize) : (ui64Total / _ui64GroupSize + 1);
+					if ( _ui64GroupIdx >= ui64TotalGroups ) { return true; }
+					uint64_t ui64NewTotal = std::min( _ui64GroupSize, ui64Total - _ui64GroupSize * _ui64GroupIdx );
+					uint64_t ui64Offset = ui64Total - _ui64GroupSize * _ui64GroupIdx - ui64NewTotal;
+					for ( size_t I = ui64NewTotal; I--; ) {
+						MX_SEL_RANGE srRange = { .ui64Start = sc.ui64AnchorAddr + (I + ui64Offset) * _ui32BytesPerRow, .ui64Size = sc.ui32Cols };
+						_vSelections.push_back( srRange );
+					}
+					return true;
+				}
+				catch ( ... ) { return false; }
+			 }
+
+			/**
+			 * Gathers a part of the selected ranges.  Addresses will be grouped into chunks of _ui64GroupSize, and you can request an index into those groupings to be returned via _ui64GroupIdx.
+			 *	This prevents long freezes or memory failures when millions of rows have been selected in column mode.
+			 *	Addresses will be sorted in ascanding order (lower addresses first).
+			 * 
+			 * \param _ui32BytesPerRow The number of bytes in a row.
+			 * \param _vSelections Holds the returned selection ranges sorted from low-to-high.
+			 * \param _ui32BytesPerRow The number of bytes in a row.
+			 * \param _ui32BytesPerRow The number of bytes in a row.
+			 * \return Returns true if allocating all of the selection ranges succeeded or there is no selection.  False always indicates a memory failure.
+			 **/
+			inline bool								GatherSelected_LowToHigh( uint32_t _ui32BytesPerRow, std::vector<MX_SEL_RANGE> &_vSelections, uint64_t _ui64GroupSize, uint64_t _ui64GroupIdx ) {
+				_vSelections.clear();
+				if ( !HasSelection() ) { return true; }
+				try {
+					if ( smMode == MX_SM_NORMAL ) {	
+						// Known not to be empty.
+						// There is only one selection range.
+						MX_SEL_RANGE srRange = { .ui64Start = sn.ui64Start, .ui64Size = sn.ui64End - sn.ui64Start };
+						_vSelections.push_back( srRange );
+						return true;
+					}
+
+					// Column Mode.
+					// Known not to be empty.
+					if ( !_ui64GroupSize ) { return false; }
+					uint64_t ui64Total = sc.ui64Lines + 1;
+					uint64_t ui64TotalGroups = (ui64Total % _ui64GroupSize == 0) ? (ui64Total / _ui64GroupSize) : (ui64Total / _ui64GroupSize + 1);
+					if ( _ui64GroupIdx >= ui64TotalGroups ) { return true; }
+					uint64_t ui64NewTotal = std::min( _ui64GroupSize, ui64Total - _ui64GroupSize * _ui64GroupIdx );
+					uint64_t ui64Offset = _ui64GroupSize * _ui64GroupIdx;
+					for ( size_t I = 0; I <= ui64NewTotal; ++I ) {
+						MX_SEL_RANGE srRange = { .ui64Start = sc.ui64AnchorAddr + (I + ui64Offset) * _ui32BytesPerRow, .ui64Size = sc.ui32Cols };
+						_vSelections.push_back( srRange );
+					}
+					return true;
+				}
+				catch ( ... ) { return false; }
+			 }
+
 			/**
 			 * Gets the lower-left address of the selection.  Lower refers to the address, which means visually this is the upper-left address.
 			 * 
@@ -1257,7 +1337,7 @@ namespace mx {
 			/**
 			 * Gets the upper-right address of the selection.  Upper refers to the address, which means visually this is the lower-left address.
 			 * 
-			 * \param _ui32BytesPerRow The Number of bytes in a row.
+			 * \param _ui32BytesPerRow The number of bytes in a row.
 			 * \return Returns the upper-right selection address or 0.
 			 **/
 			inline uint64_t							UpperRightAddress( uint32_t _ui32BytesPerRow ) const {

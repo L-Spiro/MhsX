@@ -233,8 +233,12 @@ namespace mx {
 		size_t													m_sSegmentFileSize = 24 * 1024 * 1024;			/**< Segment file size.  Defaults to 24 megabytes. */
 		size_t													m_sFileId = 0;									/**< The file names for segments. */
 		size_t													m_sTotalActiveSegments = 5;						/**< The total number of segments to keep active. */
+
 		std::vector<MX_UNDO_ITEM>								m_vUndoStack;									/**< The Undo stack. */
 		size_t													m_sUndoIdx = size_t( -1 );						/**< The Undo stack pointer. */
+		uint64_t												m_ui64UndoFileId = 0;							/**< The Undo file-backup total. */
+		uint64_t												m_ui64UndoStackBase = 0;						/**< The actual size of the Undo stack. */
+
 		//uint32_t												m_ui32OriginalCrc = 0;							/**< The CRC at the time of loading. */
 		std::filesystem::path                                   m_pCurSegmentFile;								/**< Current segment file path. */
 		uint64_t												m_ui64CurSegmentUsed = 0;						/**< Next free byte in current segment file. */
@@ -334,7 +338,6 @@ namespace mx {
 				++m_sUndoIdx;
 				m_vUndoStack.resize( m_sUndoIdx + 1 );
 				m_vUndoStack[m_sUndoIdx] = std::move( _uiItem );
-
 				return true;
 			}
 			catch ( ... ) { --m_sUndoIdx; return false; }
