@@ -2,6 +2,7 @@
 A memory searcher/debugger/research tool with a built-in easy-to-use script language, hex editor, hot keys, disassembler, RAM editor, string editor, floating-point tools, and much more, all in a clean and modern interface.
 <br>
 <br><br>![MHS X](https://i.imgur.com/V6ytGr4.png)
+<img width="1920" height="1040" alt="image" src="https://github.com/user-attachments/assets/52f30615-a240-46c5-bffb-8c6e4468e4a6" />
 
 ## Description
 The successor of the original MHS, a memory-searching tool similar to Cheat Engine.  The new version is written from scratch to be cleaner, faster, more feature-rich, 64-bit, retro-friendly, and harder to detect.  Sixteen-bit data-type searches are built-in along with full support for fully customized expression searches (you get to code the search conditions—no limitations).
