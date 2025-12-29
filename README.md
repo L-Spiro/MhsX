@@ -2,6 +2,7 @@
 A memory searcher/debugger/research tool with a built-in easy-to-use script language, hex editor, hot keys, disassembler, RAM editor, string editor, floating-point tools, and much more, all in a clean and modern interface.
 <br>
 <br><br>![MHS X](https://i.imgur.com/V6ytGr4.png)
+<img width="1920" height="1040" alt="image" src="https://github.com/user-attachments/assets/52f30615-a240-46c5-bffb-8c6e4468e4a6" />
 
 ## Description
 The successor of the original MHS, a memory-searching tool similar to Cheat Engine.  The new version is written from scratch to be cleaner, faster, more feature-rich, 64-bit, retro-friendly, and harder to detect.  Sixteen-bit data-type searches are built-in along with full support for fully customized expression searches (you get to code the search conditions—no limitations).
@@ -22,7 +23,7 @@ Allows you to fully define your search.  There is nothing you can’t code.
 
 ## Floating-Point Studio
 Easily decode/research any floating-point format, even custom ones.
-<br>![Floating-Point Studio](https://i.imgur.com/rlZ1QSm.png)
+<img width="849" height="637" alt="image" src="https://github.com/user-attachments/assets/5c0f1e85-6289-4bc7-afcd-b345954776ce" />
 
 ## Deus Hex Machina (Hex Editor)
 Currently under construction: A full-featured modern hex editor.
@@ -33,11 +34,11 @@ Currently under construction: A full-featured modern hex editor.
 <img width="2560" height="1392" alt="image" src="https://github.com/user-attachments/assets/11e3c99b-911c-482e-984c-267509449707" />
 <img width="1462" height="870" alt="image" src="https://github.com/user-attachments/assets/609c026d-a708-4885-a613-c56e33ccb932" />
 
-
 ## Expression Evaluator
 The Expression Evaluator is a handy ready-to-use simple way to evaluate snippets of code, mathematical expressions, etc.  Supports branching, loops, typed and typeless values, the full C++ \<cmath\> library, strings, and more.  It’s a full programming language that is easy to use; just start typing!
 <br>![Expression Evaluator](https://i.imgur.com/WLF2Xad.png)
 <br>![Expression Evaluator Strings](https://i.imgur.com/yj8thaF.png)
+<img width="656" height="262" alt="image" src="https://github.com/user-attachments/assets/64b40d42-e424-41e6-9bdf-da8f2e215878" />
 
 ## Subsearch
 An exhaustive list of options for subsearching.
