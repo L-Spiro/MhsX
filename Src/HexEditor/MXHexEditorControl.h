@@ -1258,7 +1258,9 @@ namespace mx {
 				_vSelections.clear();
 				if ( !HasSelection() ) { return true; }
 				try {
-					if ( smMode == MX_SM_NORMAL ) {	
+					if ( !_ui64GroupSize ) { return false; }
+					if ( smMode == MX_SM_NORMAL ) {
+						if ( _ui64GroupIdx != 0 ) { return true; }
 						// Known not to be empty.
 						// There is only one selection range.
 						MX_SEL_RANGE srRange = { .ui64Start = sn.ui64Start, .ui64Size = sn.ui64End - sn.ui64Start };
@@ -1268,7 +1270,7 @@ namespace mx {
 
 					// Column Mode.
 					// Known not to be empty.
-					if ( !_ui64GroupSize ) { return false; }
+					
 					uint64_t ui64Total = sc.ui64Lines + 1;
 					uint64_t ui64TotalGroups = (ui64Total % _ui64GroupSize == 0) ? (ui64Total / _ui64GroupSize) : (ui64Total / _ui64GroupSize + 1);
 					if ( _ui64GroupIdx >= ui64TotalGroups ) { return true; }
@@ -1298,7 +1300,9 @@ namespace mx {
 				_vSelections.clear();
 				if ( !HasSelection() ) { return true; }
 				try {
-					if ( smMode == MX_SM_NORMAL ) {	
+					if ( !_ui64GroupSize ) { return false; }
+					if ( smMode == MX_SM_NORMAL ) {
+						if ( _ui64GroupIdx != 0 ) { return true; }
 						// Known not to be empty.
 						// There is only one selection range.
 						MX_SEL_RANGE srRange = { .ui64Start = sn.ui64Start, .ui64Size = sn.ui64End - sn.ui64Start };
@@ -1308,7 +1312,6 @@ namespace mx {
 
 					// Column Mode.
 					// Known not to be empty.
-					if ( !_ui64GroupSize ) { return false; }
 					uint64_t ui64Total = sc.ui64Lines + 1;
 					uint64_t ui64TotalGroups = (ui64Total % _ui64GroupSize == 0) ? (ui64Total / _ui64GroupSize) : (ui64Total / _ui64GroupSize + 1);
 					if ( _ui64GroupIdx >= ui64TotalGroups ) { return true; }

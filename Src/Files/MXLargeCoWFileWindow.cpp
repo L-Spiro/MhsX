@@ -498,8 +498,20 @@ namespace mx {
 			// Sort (defensive; input is expected sorted, but overlap handling might relax ordering when split).
 			std::sort( vOut.begin(), vOut.end() );
 
-			MX_UNDO_ITEM uUndoMe = { .uoOp = CHexEditorInterface::MX_UO_DELETE, .vDelete_Undo = _vSections, .vDelete_Redo = vOut };
-			if ( !PushUndo( uUndoMe ) ) { return false; }
+			uint64_t ui64TotalInGroup = m_vItemsInGroup.size() ? m_vItemsInGroup[m_vItemsInGroup.size()-1] : 0;
+			bool bAddNew = true;
+			if ( ui64TotalInGroup && m_vUndoStack.size() > m_sUndoIdx && m_vUndoStack[m_sUndoIdx].uoOp == CHexEditorInterface::MX_UO_DELETE ) {
+				m_vUndoStack[m_sUndoIdx].vDelete_Redo = vOut;
+				bAddNew = false;
+			}
+			if ( bAddNew ) {
+				MX_UNDO_ITEM uUndoMe = { .uoOp = CHexEditorInterface::MX_UO_DELETE, .vDelete_Undo = _vSections, .vDelete_Redo = vOut };
+				if ( !PushUndo( uUndoMe ) ) { return false; }
+				if ( m_vItemsInGroup.size() ) {
+					m_vItemsInGroup[m_vItemsInGroup.size()-1]++;
+				}
+			}
+			
 		}
 		catch ( ... ) { return false; }
 		_vSections.swap( vOut );

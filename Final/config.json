@@ -68,6 +68,7 @@
     },
     "EditSettings" : {
         "EditDescrHistory" : [
+            "Address: 04DA11B8h",
             "Lives",
             "Weapon Multiplier",
             "Hearts",
@@ -135,6 +136,7 @@
             "Address: 001A02E0h \u005c\u005c\u005c\u2026"
         ],
         "EditCurValHistory" : [
+            "invalid type for defaulted assignment operator",
             "2",
             "1",
             "15",
@@ -233,8 +235,7 @@
             "4999",
             "4299",
             "3699",
-            "3099",
-            "2599"
+            "3099"
         ],
         "EditArrayLenHistory" : [
             "0",
@@ -254,6 +255,7 @@
             "0"
         ],
         "EditLockedLeftHistory" : [
+            "invalid type for defaulted assignment operator",
             "99",
             "2",
             "10",

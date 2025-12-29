@@ -114,7 +114,16 @@ namespace mx {
 		 */
 		bool													BeginUndo() {
 			MX_UNDO_ITEM uiItem = { .uoOp = CHexEditorInterface::MX_UO_GROUP_START };
-			return PushUndo( uiItem );
+
+			if ( PushUndo( uiItem ) ) {
+				try {
+					m_vItemsInGroup.push_back( 0ULL );
+				}
+				catch ( ... ) { return false; }
+				++m_i32UndoGroupCnt;
+				return true;
+			}
+			return false;
 		}
 
 		/**
@@ -128,7 +137,15 @@ namespace mx {
 		 */
 		bool													EndUndo() {
 			MX_UNDO_ITEM uiItem = { .uoOp = CHexEditorInterface::MX_UO_GROUP_END };
-			return PushUndo( uiItem );
+			if ( PushUndo( uiItem ) ) {
+				try {
+					m_vItemsInGroup.pop_back();
+				}
+				catch ( ... ) { return false; }
+				--m_i32UndoGroupCnt;
+				return true;
+			}
+			return false;
 		}
 
 		/**
@@ -233,11 +250,13 @@ namespace mx {
 		size_t													m_sSegmentFileSize = 24 * 1024 * 1024;			/**< Segment file size.  Defaults to 24 megabytes. */
 		size_t													m_sFileId = 0;									/**< The file names for segments. */
 		size_t													m_sTotalActiveSegments = 5;						/**< The total number of segments to keep active. */
+		int32_t													m_i32UndoGroupCnt = 0;							/**< How deep inside an Undo group count we are. */
 
 		std::vector<MX_UNDO_ITEM>								m_vUndoStack;									/**< The Undo stack. */
 		size_t													m_sUndoIdx = size_t( -1 );						/**< The Undo stack pointer. */
 		uint64_t												m_ui64UndoFileId = 0;							/**< The Undo file-backup total. */
 		uint64_t												m_ui64UndoStackBase = 0;						/**< The actual size of the Undo stack. */
+		std::vector<uint64_t>									m_vItemsInGroup;								/**< For each begin/end Undo group, this is the number of items in it. */
 
 		//uint32_t												m_ui32OriginalCrc = 0;							/**< The CRC at the time of loading. */
 		std::filesystem::path                                   m_pCurSegmentFile;								/**< Current segment file path. */
