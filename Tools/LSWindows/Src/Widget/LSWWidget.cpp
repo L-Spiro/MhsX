@@ -1822,6 +1822,15 @@ namespace lsw {
 				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( reinterpret_cast<LRESULT>(hBrush), reinterpret_cast<INT_PTR>(hBrush) ); }
 				break;
 			}
+			case WM_DRAWITEM : {
+				DRAWITEMSTRUCT * pdisItem = reinterpret_cast<DRAWITEMSTRUCT *>(_lParam);
+				if ( pdisItem ) {
+					LSW_HANDLED hHandled = pmwThis->DrawItem( WORD( _wParam ), (*pdisItem) );
+					// If an application processes this message, it should return TRUE.
+					if ( hHandled == LSW_H_HANDLED ) { LSW_RET( TRUE, TRUE ); }
+				}
+				break;
+			}
 
 			// =======================================
 			// Activation.

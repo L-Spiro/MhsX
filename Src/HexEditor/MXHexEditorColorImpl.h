@@ -1,3 +1,4 @@
+																								// Starry Sky
 MX_COLOR( Editor,								_DEC_WS_CB5DF48C_Editor,						MX_RGBA( 0xD5, 0xD5, 0xD5, 0xFF ), MX_RGBA( 0x23, 0x22, 0x20, 0xFF ) );
 MX_COLOR( Selected,								_DEC_WS_61DFDDD0_Selected,						MX_RGBA( 0xEA, 0xEA, 0xEA, 0x66 ), MX_RGBA( 0x21, 0x6B, 0xB0, 0xCC ) );				// 60%/80%.
 MX_COLOR( HighlightLine,						_DEC_WS_C49C6E6A_Highlight_Line,				MX_RGBA( 0x00, 0x00, 0x00, 0x00 ), MX_RGBA( 0x0E, 0x6C, 0xFF, 0x1A ) );				// 10%.

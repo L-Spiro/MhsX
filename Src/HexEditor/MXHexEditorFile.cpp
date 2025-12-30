@@ -31,8 +31,8 @@ namespace mx {
 	}
 
 	// Insert bytes at a given address.
-	bool CHexEditorFile::Insert( uint64_t _ui64Addr, const void * _pvSrc, size_t _sSize ) {
-		return false;
+	bool CHexEditorFile::Insert( uint64_t _ui64Addr, const CBuffer &_Src, uint64_t &_ui64Inserted ) {
+		return m_lcwfwFile.Insert( _ui64Addr, _Src, _ui64Inserted );
 	}
 
 	// Overwrite bytes at a given address.

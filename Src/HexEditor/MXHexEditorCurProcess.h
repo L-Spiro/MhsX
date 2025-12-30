@@ -30,7 +30,7 @@ namespace mx {
 		virtual bool						ReadOnly() const { return !m_pProcess.Writeable(); }
 
 		// Insert bytes at a given address.
-		virtual bool						Insert( uint64_t /*_ui64Addr*/, const void * /*_pvSrc*/, size_t /*_sSize*/ ) { return false; }
+		virtual bool						Insert( uint64_t /*_ui64Addr*/, const CBuffer &/*_Src*/, uint64_t &/*_ui64Inserted*/ ) { return false; }
 
 		// Overwrite bytes at a given address.
 		virtual bool						Overwrite( uint64_t _ui64Addr, const void * _pvSrc, size_t _sSize );

@@ -383,6 +383,16 @@ namespace lsw {
 				hPrev = ::SelectObject( _hDc, _hgdioObj );
 			}
 		}
+		LSW_SELECTOBJECT( HDC _hDc, HGDIOBJ _hgdioObj, bool _bDeleteNewObjAfter, bool _bConditional ) :
+			hDc( _bConditional ? _hDc : NULL ),
+			hCur( _bConditional ? _hgdioObj : NULL ),
+			hPrev( NULL ),
+			bDeleteAfter( _bConditional ? _bDeleteNewObjAfter : false ) {
+
+			if ( _hgdioObj && _bConditional ) {
+				hPrev = ::SelectObject( _hDc, _hgdioObj );
+			}
+		}
 		~LSW_SELECTOBJECT() {
 			if ( hPrev ) {
 				::SelectObject( hDc, hPrev );

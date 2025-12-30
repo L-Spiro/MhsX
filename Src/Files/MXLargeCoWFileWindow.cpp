@@ -83,10 +83,35 @@ namespace mx {
 	 * freshly constructed instance.
 	 */
 	void CLargeCoWFileWindow::Reset() {
-		m_fmMainMap.Close();
-		m_vEditedMaps = std::vector<std::unique_ptr<CFileMap>>();
-		m_vLogicalMap = std::vector<MX_LOGICAL_SECTION>();
-		//m_ui32OriginalCrc = 0;
+		try {
+			m_ui64Size = 0;
+			m_fmMainMap.Close();
+			m_pFilePath = std::filesystem::path();
+			m_vEditedMaps = std::vector<std::unique_ptr<CFileMap>>();
+			m_vActiveSegments = std::vector<uint64_t>();
+			m_vLogicalMap = std::vector<MX_LOGICAL_SECTION>();
+			m_sFileId = 0;
+			m_i32UndoGroupCnt = 0;
+
+			m_vUndoStack = std::vector<MX_UNDO_ITEM>();
+			m_sUndoIdx = size_t( -1 );
+			m_ui64UndoFileId = 0;
+			m_ui64UndoStackBase = 0;
+			m_vItemsInGroup = std::vector<uint64_t>();
+
+			m_pCurSegmentFile = std::filesystem::path();
+			m_ui64CurSegmentUsed = 0;
+			m_sCurSegmentMapIdx = size_t( -1 );
+			for ( auto I = m_vSegmentFiles.size(); I--; ) {
+				try {
+					std::error_code ecError;
+					std::filesystem::remove( m_vSegmentFiles[I], ecError );
+				}
+				catch ( ... ) {}
+			}
+			m_vSegmentFiles = std::vector<std::filesystem::path>();
+		}
+		catch ( ... ) {}
 	}
 
 	/**
@@ -180,7 +205,129 @@ namespace mx {
 	 * \return Returns true if the insert succeeded.
 	 */
 	bool CLargeCoWFileWindow::Insert( uint64_t _ui64Addr, const CHexEditorInterface::CBuffer &_bSrc, uint64_t &_ui64Inserted ) {
-		return false;
+		_ui64Inserted = 0;
+		try {
+			if ( ReadOnly() ) { return false; }
+			const uint64_t ui64InsSize = static_cast<uint64_t>(_bSrc.size());
+			if ( ui64InsSize == 0ULL ) { return true; }
+
+			// Clamp insert address to EOF.
+			if ( _ui64Addr > Size() ) { _ui64Addr = Size(); }
+
+			// Ensure we have a usable segment file (policy-driven).
+			if ( !EnsureCurrentSegmentFile( ui64InsSize ) ) { return false; }
+
+			// Ensure mapping is available.
+			CFileMap * pfmSeg = EnsureCurrentSegmentMap();
+			if ( !pfmSeg ) { return false; }
+
+			// Write to the segment file at current "used" offset.
+			uint64_t ui64SegOffset = m_ui64CurSegmentUsed;
+
+			auto ui64WriteSize = ui64InsSize;
+			while ( ui64WriteSize ) {
+				uint32_t ui32WriteSize = uint32_t( std::min<uint64_t>( ui64WriteSize, UINT_MAX ) );
+				pfmSeg->Write( _bSrc.data(), ui64SegOffset, ui32WriteSize );
+				ui64WriteSize -= ui32WriteSize;
+				ui64SegOffset += ui32WriteSize;
+			}
+
+			// Build the new logical section.
+			auto vOut = m_vLogicalMap;
+
+			MX_LOGICAL_SECTION lsNew{};
+			lsNew.stType = MX_ST_SEGMENT;
+			lsNew.ui64Start = _ui64Addr;
+			lsNew.ui64Size = ui64InsSize;
+			lsNew.ui64Offset = ui64SegOffset;
+			lsNew.u.saSegmentAddress.sFile = m_sCurSegmentMapIdx;
+
+			// Insert it into m_vLogicalMap at the correct position.
+			// We need to locate the first section whose start is >= insert addr.
+			size_t sInsertAt = 0;
+			for ( ; sInsertAt < m_vLogicalMap.size(); ++sInsertAt ) {
+				if ( m_vLogicalMap[sInsertAt].ui64Start >= _ui64Addr ) { break; }
+			}
+
+			// If inserting into the middle of a section, split that section.
+			if ( sInsertAt > 0 ) {
+				MX_LOGICAL_SECTION & lsPrev = m_vLogicalMap[sInsertAt-1];
+				const uint64_t ui64PrevEnd = lsPrev.ui64Start + lsPrev.ui64Size;
+				if ( _ui64Addr < ui64PrevEnd ) {
+					// Split lsPrev into left and right.
+					MX_LOGICAL_SECTION lsRight = lsPrev;
+
+					const uint64_t ui64LeftSize = _ui64Addr - lsPrev.ui64Start;
+					const uint64_t ui64RightSize = lsPrev.ui64Size - ui64LeftSize;
+
+					lsPrev.ui64Size = ui64LeftSize;
+
+					lsRight.ui64Start = _ui64Addr + ui64InsSize; // shifted by insertion
+					lsRight.ui64Size = ui64RightSize;
+					lsRight.ui64Offset = lsPrev.ui64Offset + ui64LeftSize;
+
+					// Insert new + right after left.
+					m_vLogicalMap.insert( m_vLogicalMap.begin() + sInsertAt, lsNew );
+					m_vLogicalMap.insert( m_vLogicalMap.begin() + sInsertAt + 1, lsRight );
+
+					// Shift everything after the right piece.
+					for ( size_t I = sInsertAt + 2; I < m_vLogicalMap.size(); ++I ) {
+						m_vLogicalMap[I].ui64Start += ui64InsSize;
+					}
+
+					m_ui64CurSegmentUsed += ui64InsSize;
+
+					SimplifyLogicalView();
+					UpdateSize();
+
+					uint64_t ui64TotalInGroup = m_vItemsInGroup.size() ? m_vItemsInGroup[m_vItemsInGroup.size()-1] : 0;
+					bool bAddNew = true;
+					if ( ui64TotalInGroup && m_vUndoStack.size() > m_sUndoIdx && m_vUndoStack[m_sUndoIdx].uoOp == CHexEditorInterface::MX_UO_INSERT ) {
+						m_vUndoStack[m_sUndoIdx].vDelete_Redo = vOut;
+						bAddNew = false;
+					}
+					if ( bAddNew ) {
+						MX_UNDO_ITEM uUndoMe = { .uoOp = CHexEditorInterface::MX_UO_INSERT, .vDelete_Undo = m_vLogicalMap, .vDelete_Redo = vOut };
+						if ( !PushUndo( uUndoMe ) ) { return false; }
+						if ( m_vItemsInGroup.size() ) {
+							m_vItemsInGroup[m_vItemsInGroup.size()-1]++;
+						}
+					}
+
+					_ui64Inserted = ui64InsSize;
+					return true;
+				}
+			}
+
+			// Not splitting: just insert and shift everything after it.
+			m_vLogicalMap.insert( m_vLogicalMap.begin() + sInsertAt, lsNew );
+			for ( size_t I = sInsertAt + 1; I < m_vLogicalMap.size(); ++I ) {
+				m_vLogicalMap[I].ui64Start += ui64InsSize;
+			}
+
+			m_ui64CurSegmentUsed += ui64InsSize;
+
+			SimplifyLogicalView();
+			UpdateSize();
+
+			uint64_t ui64TotalInGroup = m_vItemsInGroup.size() ? m_vItemsInGroup[m_vItemsInGroup.size()-1] : 0;
+			bool bAddNew = true;
+			if ( ui64TotalInGroup && m_vUndoStack.size() > m_sUndoIdx && m_vUndoStack[m_sUndoIdx].uoOp == CHexEditorInterface::MX_UO_INSERT ) {
+				m_vUndoStack[m_sUndoIdx].vDelete_Redo = vOut;
+				bAddNew = false;
+			}
+			if ( bAddNew ) {
+				MX_UNDO_ITEM uUndoMe = { .uoOp = CHexEditorInterface::MX_UO_INSERT, .vDelete_Undo = m_vLogicalMap, .vDelete_Redo = vOut };
+				if ( !PushUndo( uUndoMe ) ) { return false; }
+				if ( m_vItemsInGroup.size() ) {
+					m_vItemsInGroup[m_vItemsInGroup.size()-1]++;
+				}
+			}
+
+			_ui64Inserted = ui64InsSize;
+			return true;
+		}
+		catch ( ... ) { return false; }
 	}
 
 	/**
@@ -511,7 +658,6 @@ namespace mx {
 					m_vItemsInGroup[m_vItemsInGroup.size()-1]++;
 				}
 			}
-			
 		}
 		catch ( ... ) { return false; }
 		_vSections.swap( vOut );
@@ -574,12 +720,14 @@ namespace mx {
 				m_pCurSegmentFile = SegmentFilePath( m_sFileId++ );
 				m_ui64CurSegmentUsed = 0;
 				m_sCurSegmentMapIdx = size_t( -1 );
+				m_vSegmentFiles.push_back( m_pCurSegmentFile );
 			}
 
 			auto MakeNew = [&]() -> bool {
 				m_pCurSegmentFile = SegmentFilePath( m_sFileId++ );
 				m_ui64CurSegmentUsed = 0;
 				m_sCurSegmentMapIdx = size_t( -1 );
+				m_vSegmentFiles.push_back( m_pCurSegmentFile );
 				return true;
 			};
 

@@ -22492,3 +22492,12 @@
 #define _DEC_S_66452C3E___lines__ mx::CStringDecoder::DecodeToString( _T_66452C3E___lines__, _LEN_66452C3E )
 #define _DEC_WS_66452C3E___lines__ mx::CStringDecoder::DecodeToWString( _T_66452C3E___lines__, _LEN_66452C3E )
 
+// Moved selection to address 
+
+#define _T_3843E4C1_Moved_selection_to_address_ "\xD5\x3D\x46\x00\xF6\xE9\x01\x2C\x3C\x2D\x2C\x42\xFB\x0A\x35\xA8\x42\x3F\xBB\xF3\x2D\xF2\x39\x35\x3B\x3C\xEE"
+#define _LEN_3843E4C1 27
+#define _T_LEN_3843E4C1_Moved_selection_to_address_ _T_3843E4C1_Moved_selection_to_address_, _LEN_3843E4C1
+#define _DEC_3843E4C1_Moved_selection_to_address_( STR ) mx::CStringDecoder::Decode( _T_3843E4C1_Moved_selection_to_address_, _LEN_3843E4C1, STR )
+#define _DEC_S_3843E4C1_Moved_selection_to_address_ mx::CStringDecoder::DecodeToString( _T_3843E4C1_Moved_selection_to_address_, _LEN_3843E4C1 )
+#define _DEC_WS_3843E4C1_Moved_selection_to_address_ mx::CStringDecoder::DecodeToWString( _T_3843E4C1_Moved_selection_to_address_, _LEN_3843E4C1 )
+

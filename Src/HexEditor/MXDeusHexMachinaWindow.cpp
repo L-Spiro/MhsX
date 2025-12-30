@@ -285,6 +285,14 @@ namespace mx {
 				ToggleColumnSelection();
 				break;
 			}
+			case Layout::MX_M_SELECT_MOVE_SELECTION_BACK : {
+				MoveSelectionBack();
+				break;
+			}
+			case Layout::MX_M_SELECT_MOVE_SELECTION_FORWARD : {
+				MoveSelectionForward();
+				break;
+			}
 			
 
 			case Layout::MX_M_VIEW_FONT_ENLARGE_FONT : {
@@ -1500,12 +1508,8 @@ namespace mx {
 		auto phecControl = CurrentEditor();
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
-		bool bRet = phecControl->Undo( wsMsg );
-
-		auto psbStatus = StatusBar();
-		if ( psbStatus && wsMsg.size() ) {
-			psbStatus->SetTextW( wsMsg.c_str() );
-		}
+		bool bWarning = !phecControl->Undo( wsMsg );
+		SetStatusBarText( wsMsg.c_str(), bWarning );
 	}
 
 	// Performs a Redo.
@@ -1513,12 +1517,8 @@ namespace mx {
 		auto phecControl = CurrentEditor();
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
-		bool bRet = phecControl->Redo( wsMsg );
-
-		auto psbStatus = StatusBar();
-		if ( psbStatus && wsMsg.size() ) {
-			psbStatus->SetTextW( wsMsg.c_str() );
-		}
+		bool bWarning = !phecControl->Redo( wsMsg );
+		SetStatusBarText( wsMsg.c_str(), bWarning );
 	}
 
 	// Delete the selection.
@@ -1526,12 +1526,8 @@ namespace mx {
 		auto phecControl = CurrentEditor();
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
-		bool bRet = phecControl->DeleteSelectedOrCaret( wsMsg );
-
-		auto psbStatus = StatusBar();
-		if ( psbStatus && wsMsg.size() ) {
-			psbStatus->SetTextW( wsMsg.c_str() );
-		}
+		bool bWarning = !phecControl->DeleteSelectedOrCaret( wsMsg );
+		SetStatusBarText( wsMsg.c_str(), bWarning );
 	}
 
 	// Deletes the character prior to the caret (backspace).
@@ -1539,12 +1535,8 @@ namespace mx {
 		auto phecControl = CurrentEditor();
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
-		bool bRet = phecControl->DeletePriorToCaret( wsMsg );
-
-		auto psbStatus = StatusBar();
-		if ( psbStatus && wsMsg.size() ) {
-			psbStatus->SetTextW( wsMsg.c_str() );
-		}
+		bool bWarning = !phecControl->DeletePriorToCaret( wsMsg );
+		SetStatusBarText( wsMsg.c_str(), bWarning );
 	}
 
 	// Select all.
@@ -1580,12 +1572,8 @@ namespace mx {
 		auto phecControl = CurrentEditor();
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
-		phecControl->MarkSelectionStart( wsMsg );
-
-		auto psbStatus = StatusBar();
-		if ( psbStatus && wsMsg.size() ) {
-			psbStatus->SetTextW( wsMsg.c_str() );
-		}
+		bool bWarning = !phecControl->MarkSelectionStart( wsMsg );
+		SetStatusBarText( wsMsg.c_str(), bWarning );
 	}
 
 	// Sets the caret to the end of the selection.
@@ -1593,12 +1581,26 @@ namespace mx {
 		auto phecControl = CurrentEditor();
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
-		phecControl->MarkSelectionEnd( wsMsg );
+		bool bWarning = !phecControl->MarkSelectionEnd( wsMsg );
+		SetStatusBarText( wsMsg.c_str(), bWarning );
+	}
 
-		auto psbStatus = StatusBar();
-		if ( psbStatus && wsMsg.size() ) {
-			psbStatus->SetTextW( wsMsg.c_str() );
-		}
+	// Moves the selection back.
+	void CDeusHexMachinaWindow::MoveSelectionBack() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		CSecureWString wsMsg;
+		bool bWarning = !phecControl->MoveSelectionBack( wsMsg );
+		SetStatusBarText( wsMsg.c_str(), bWarning );
+	}
+
+	// Moves the selection forward.
+	void CDeusHexMachinaWindow::MoveSelectionForward() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		CSecureWString wsMsg;
+		bool bWarning = !phecControl->MoveSelectionForward( wsMsg );
+		SetStatusBarText( wsMsg.c_str(), bWarning );
 	}
 
 	// Toggle column mode.
@@ -1649,6 +1651,16 @@ namespace mx {
 		phecControl->SetFontSize( CHexEditorControl::DefaultPointSize() );
 
 		RecalcAllBut( phecControl );
+	}
+
+	// Sets a status-bar item’s text and "warning" status.
+	void CDeusHexMachinaWindow::SetStatusBarText( const wchar_t * _pwcText, bool _bWarning, size_t _sIdx ) {
+		auto psbStatus = StatusBar();
+		if ( psbStatus && (_pwcText && _pwcText[0] != L'\0') ) {
+			psbStatus->SetTextW( INT( _sIdx ), 0, _pwcText );
+			psbStatus->SetItemTextColors( MX_GetRgbValue( ::GetSysColor( COLOR_WINDOWTEXT ) ), MX_GetRgbValue( ::GetSysColor( COLOR_GRAYTEXT ) ), INT(_sIdx ) );
+			psbStatus->SetItemBkColor( MX_GetRgbValue( _bWarning ? ::GetSysColor( COLOR_3DSHADOW ) : ::GetSysColor( COLOR_3DFACE ) ), INT(_sIdx ) );
+		}
 	}
 
 	// Prepares to create the window.  Creates the atom if necessary.
@@ -1755,6 +1767,18 @@ namespace mx {
 				case Layout::MX_M_SELECT_COLUMN_MODE : {
 					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->SelectionIsColumn()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_SELECT_MOVE_SELECTION_BACK : {
+					::EnableMenuItem(
+						_hMenu, uiId,
+						MF_BYCOMMAND | ((phecControl && phecControl->HasSelection()) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_SELECT_MOVE_SELECTION_FORWARD : {
+					::EnableMenuItem(
+						_hMenu, uiId,
+						MF_BYCOMMAND | ((phecControl && phecControl->HasSelection()) ? MF_ENABLED : MF_GRAYED) );
 					break;
 				}
 

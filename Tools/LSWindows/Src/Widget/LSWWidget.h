@@ -1210,6 +1210,27 @@ namespace lsw {
 		virtual LSW_HANDLED					CtlColorDlg( HDC /*_hDc*/, CWidget * /*_pwControl*/, HBRUSH &/*_hBrush*/ ) { return LSW_H_CONTINUE; }
 
 		/**
+		 * \brief Handles WM_DRAWITEM for an owner-drawn control.
+		 *
+		 * \param _wControlId The control identifier (DRAWITEMSTRUCT::CtlID).
+		 * \param _disItem The DRAWITEMSTRUCT describing what to draw.
+		 * \return LSW_HANDLED::LSW_H_HANDLED if the message was handled and drawing was performed; otherwise
+		 * returns LSW_HANDLED::LSW_H_NOT_HANDLED to allow default/other handling.
+		 *
+		 * \note This is typically called from the parent window's WM_DRAWITEM handler.
+		 *
+		 * \note For SBT_OWNERDRAW status-bar parts, DRAWITEMSTRUCT::itemID is the zero-based part index.
+		 * The status-bar window handle is in DRAWITEMSTRUCT::hwndItem.
+		 */
+		virtual LSW_HANDLED					DrawItem( WORD _wControlId, const DRAWITEMSTRUCT &_disItem ) {
+			if ( !m_vChildren.size() ) { return LSW_H_CONTINUE; }
+			for ( auto I = m_vChildren.size(); I--; ) {
+				if ( LSW_H_HANDLED == m_vChildren[I]->DrawItem( _wControlId, _disItem ) ) { return LSW_H_HANDLED; }
+			}
+			return LSW_H_CONTINUE;
+		}
+
+		/**
 		 * Handles WM_SETCURSOR.
 		 * \brief Sets the cursor for the window or its child controls.
 		 *

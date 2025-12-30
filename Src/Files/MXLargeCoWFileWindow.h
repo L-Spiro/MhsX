@@ -258,8 +258,8 @@ namespace mx {
 		uint64_t												m_ui64UndoStackBase = 0;						/**< The actual size of the Undo stack. */
 		std::vector<uint64_t>									m_vItemsInGroup;								/**< For each begin/end Undo group, this is the number of items in it. */
 
-		//uint32_t												m_ui32OriginalCrc = 0;							/**< The CRC at the time of loading. */
 		std::filesystem::path                                   m_pCurSegmentFile;								/**< Current segment file path. */
+		std::vector<std::filesystem::path>						m_vSegmentFiles;								/**< A history of segment files to be cleaned up on shut-down. */
 		uint64_t												m_ui64CurSegmentUsed = 0;						/**< Next free byte in current segment file. */
 		size_t													m_sCurSegmentMapIdx = size_t( -1 );				/**< Index into m_vEditedMaps for current segment file. */
 

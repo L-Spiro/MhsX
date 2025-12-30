@@ -208,6 +208,12 @@ namespace mx {
 		// Sets the caret to the end of the selection.
 		void										MarkSelectionEnd();
 
+		// Moves the selection back.
+		void										MoveSelectionBack();
+
+		// Moves the selection forward.
+		void										MoveSelectionForward();
+
 		// Toggle column mode.
 		void										ToggleColumnSelection();
 
@@ -222,6 +228,9 @@ namespace mx {
 
 		// Sets the font size back to normal.
 		void										ResetFontSize();
+
+		// Sets a status-bar item’s text and "warning" status.
+		void										SetStatusBarText( const wchar_t * _pwcText, bool _bWarning = false, size_t _sIdx = 0 );
 
 		/**
 		 * Gets the widget type identifier.

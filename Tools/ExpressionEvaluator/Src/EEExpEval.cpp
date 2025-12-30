@@ -488,25 +488,28 @@ namespace ee {
 	 * \return				The resulting UTF-8 string.
 	 **/
 	std::string CExpEval::ToUtf8( const std::wstring &_wsString ) {
-		std::string sRet;
-		const wchar_t * pwcInput = _wsString.c_str();
-		size_t sSize = _wsString.size();
+		try {
+			std::string sRet;
+			const wchar_t * pwcInput = _wsString.c_str();
+			size_t sSize = _wsString.size();
 
-		for ( size_t I = 0; I < sSize; ) {
-			size_t sThisSize = 0;
-			uint32_t ui32Char = NextUtf16Char( &pwcInput[I], sSize - I, &sThisSize );
-			if ( ui32Char == EE_UTF_INVALID ) {
-				ui32Char = pwcInput[I];
+			for ( size_t I = 0; I < sSize; ) {
+				size_t sThisSize = 0;
+				uint32_t ui32Char = NextUtf16Char( &pwcInput[I], sSize - I, &sThisSize );
+				if ( ui32Char == EE_UTF_INVALID ) {
+					ui32Char = pwcInput[I];
+				}
+				I += sThisSize;
+				uint32_t ui32Len = 0;
+				uint32_t ui32BackToUtf8 = Utf32ToUtf8( ui32Char, ui32Len );
+				for ( uint32_t J = 0; J < ui32Len; ++J ) {
+					sRet.push_back( static_cast<uint8_t>(ui32BackToUtf8) );
+					ui32BackToUtf8 >>= 8;
+				}
 			}
-			I += sThisSize;
-			uint32_t ui32Len = 0;
-			uint32_t ui32BackToUtf8 = Utf32ToUtf8( ui32Char, ui32Len );
-			for ( uint32_t J = 0; J < ui32Len; ++J ) {
-				sRet.push_back( static_cast<uint8_t>(ui32BackToUtf8) );
-				ui32BackToUtf8 >>= 8;
-			}
+			return sRet;
 		}
-		return sRet;
+		catch ( ... ) { return std::string(); }
 	}
 
 	/**
@@ -516,25 +519,28 @@ namespace ee {
 	 * \return				The resulting UTF-8 string.
 	 **/
 	std::string CExpEval::ToUtf8( const std::u16string &_u16String ) {
-		std::string sRet;
-		const char16_t * pc16Input = _u16String.c_str();
-		size_t sSize = _u16String.size();
+		try {
+			std::string sRet;
+			const char16_t * pc16Input = _u16String.c_str();
+			size_t sSize = _u16String.size();
 
-		for ( size_t I = 0; I < sSize; ) {
-			size_t sThisSize = 0;
-			uint32_t ui32Char = NextUtf16Char( reinterpret_cast<const wchar_t *>(&pc16Input[I]), sSize - I, &sThisSize );
-			if ( ui32Char == EE_UTF_INVALID ) {
-				ui32Char = pc16Input[I];
+			for ( size_t I = 0; I < sSize; ) {
+				size_t sThisSize = 0;
+				uint32_t ui32Char = NextUtf16Char( reinterpret_cast<const wchar_t *>(&pc16Input[I]), sSize - I, &sThisSize );
+				if ( ui32Char == EE_UTF_INVALID ) {
+					ui32Char = pc16Input[I];
+				}
+				I += sThisSize;
+				uint32_t ui32Len = 0;
+				uint32_t ui32BackToUtf8 = Utf32ToUtf8( ui32Char, ui32Len );
+				for ( uint32_t J = 0; J < ui32Len; ++J ) {
+					sRet.push_back( static_cast<uint8_t>(ui32BackToUtf8) );
+					ui32BackToUtf8 >>= 8;
+				}
 			}
-			I += sThisSize;
-			uint32_t ui32Len = 0;
-			uint32_t ui32BackToUtf8 = Utf32ToUtf8( ui32Char, ui32Len );
-			for ( uint32_t J = 0; J < ui32Len; ++J ) {
-				sRet.push_back( static_cast<uint8_t>(ui32BackToUtf8) );
-				ui32BackToUtf8 >>= 8;
-			}
+			return sRet;
 		}
-		return sRet;
+		catch ( ... ) { return std::string(); }
 	}
 
 	/**
@@ -544,30 +550,33 @@ namespace ee {
 	 * \return				The resulting UTF-8 string.
 	 **/
 	std::string CExpEval::ToUtf8( const std::u32string &_u32String ) {
-		std::string sRet;
-		const char32_t * pc32Input = _u32String.c_str();
-		size_t sSize = _u32String.size();
+		try {
+			std::string sRet;
+			const char32_t * pc32Input = _u32String.c_str();
+			size_t sSize = _u32String.size();
 
-		for ( size_t I = 0; I < sSize; ) {
-			size_t sThisSize = 0;
-			uint32_t ui32Char = NextUtf32Char( reinterpret_cast<const uint32_t *>(&pc32Input[I]), sSize - I, &sThisSize );
-			//if ( ui32Char == EE_UTF_INVALID ) { ui32Char = pc32Input[I]; }
-			if ( ui32Char == EE_UTF_INVALID ) {
-				for ( size_t J = 0; J < sThisSize * sizeof( std::u32string::value_type ); ++J ) {
-					sRet.push_back( reinterpret_cast<const std::string::value_type *>(&_u32String.data()[I])[J] );
+			for ( size_t I = 0; I < sSize; ) {
+				size_t sThisSize = 0;
+				uint32_t ui32Char = NextUtf32Char( reinterpret_cast<const uint32_t *>(&pc32Input[I]), sSize - I, &sThisSize );
+				//if ( ui32Char == EE_UTF_INVALID ) { ui32Char = pc32Input[I]; }
+				if ( ui32Char == EE_UTF_INVALID ) {
+					for ( size_t J = 0; J < sThisSize * sizeof( std::u32string::value_type ); ++J ) {
+						sRet.push_back( reinterpret_cast<const std::string::value_type *>(&_u32String.data()[I])[J] );
+					}
+					I += sThisSize;
+					continue;
 				}
 				I += sThisSize;
-				continue;
+				uint32_t ui32Len = 0;
+				uint32_t ui32BackToUtf8 = Utf32ToUtf8( ui32Char, ui32Len );
+				for ( uint32_t J = 0; J < ui32Len; ++J ) {
+					sRet.push_back( static_cast<uint8_t>(ui32BackToUtf8) );
+					ui32BackToUtf8 >>= 8;
+				}
 			}
-			I += sThisSize;
-			uint32_t ui32Len = 0;
-			uint32_t ui32BackToUtf8 = Utf32ToUtf8( ui32Char, ui32Len );
-			for ( uint32_t J = 0; J < ui32Len; ++J ) {
-				sRet.push_back( static_cast<uint8_t>(ui32BackToUtf8) );
-				ui32BackToUtf8 >>= 8;
-			}
+			return sRet;
 		}
-		return sRet;
+		catch ( ... ) { return std::string(); }
 	}
 
 	/**
@@ -577,24 +586,27 @@ namespace ee {
 	 * \return				The resulting UTF-32 string.
 	 **/
 	std::u32string CExpEval::ToUtf32( const std::string &_sIn ) {
-		std::u32string u32Return;
-		const char * pcSrc = _sIn.c_str();
-		size_t sSize = _sIn.size();
+		try {
+			std::u32string u32Return;
+			const char * pcSrc = _sIn.c_str();
+			size_t sSize = _sIn.size();
 
-		for ( size_t I = 0; I < sSize; ) {
-			size_t sThisSize = 0;
-			uint32_t ui32This = NextUtf8Char( &pcSrc[I], _sIn.size() - I, &sThisSize );
-			if ( ui32This == EE_UTF_INVALID ) {
-				for ( size_t J = 0; J < sThisSize; ++J ) {
-					u32Return.push_back( static_cast<uint8_t>(pcSrc[I+J]) );
+			for ( size_t I = 0; I < sSize; ) {
+				size_t sThisSize = 0;
+				uint32_t ui32This = NextUtf8Char( &pcSrc[I], _sIn.size() - I, &sThisSize );
+				if ( ui32This == EE_UTF_INVALID ) {
+					for ( size_t J = 0; J < sThisSize; ++J ) {
+						u32Return.push_back( static_cast<uint8_t>(pcSrc[I+J]) );
+					}
+					I += sThisSize;
+					continue;
 				}
 				I += sThisSize;
-				continue;
+				u32Return.push_back( ui32This );
 			}
-			I += sThisSize;
-			u32Return.push_back( ui32This );
+			return u32Return;
 		}
-		return u32Return;
+		catch ( ... ) { return std::u32string(); }
 	}
 
 	/**

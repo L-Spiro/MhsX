@@ -1073,29 +1073,32 @@ namespace ee {
 		 **/
 		template <typename _tOutType = std::wstring>
 		static inline _tOutType			ToUtf16( const std::string &_sIn ) {
-			_tOutType otTmp;
-			const char * pcSrc = _sIn.c_str();
-			size_t sSize = _sIn.size();
+			try {
+				_tOutType otTmp;
+				const char * pcSrc = _sIn.c_str();
+				size_t sSize = _sIn.size();
 
-			for ( size_t I = 0; I < sSize; ) {
-				size_t sThisSize = 0;
-				uint32_t ui32This = NextUtf8Char( &pcSrc[I], _sIn.size() - I, &sThisSize );
-				if ( ui32This == EE_UTF_INVALID ) {
-					for ( size_t J = 0; J < sThisSize; ++J ) {
-						otTmp.push_back( static_cast<uint8_t>(pcSrc[I+J]) );
+				for ( size_t I = 0; I < sSize; ) {
+					size_t sThisSize = 0;
+					uint32_t ui32This = NextUtf8Char( &pcSrc[I], _sIn.size() - I, &sThisSize );
+					if ( ui32This == EE_UTF_INVALID ) {
+						for ( size_t J = 0; J < sThisSize; ++J ) {
+							otTmp.push_back( static_cast<uint8_t>(pcSrc[I+J]) );
+						}
+						I += sThisSize;
+						continue;
 					}
 					I += sThisSize;
-					continue;
+					uint32_t ui32Len;
+					uint32_t ui32Converted = Utf32ToUtf16( ui32This, ui32Len );
+					for ( uint32_t J = 0; J < ui32Len; ++J ) {
+						otTmp.push_back( static_cast<_tOutType::value_type>(ui32Converted & 0xFFFFU) );
+						ui32Converted >>= 16;
+					}
 				}
-				I += sThisSize;
-				uint32_t ui32Len;
-				uint32_t ui32Converted = Utf32ToUtf16( ui32This, ui32Len );
-				for ( uint32_t J = 0; J < ui32Len; ++J ) {
-					otTmp.push_back( static_cast<_tOutType::value_type>(ui32Converted & 0xFFFFU) );
-					ui32Converted >>= 16;
-				}
+				return otTmp;
 			}
-			return otTmp;
+			catch ( ... ) { return _tOutType(); }
 		}
 
 		/**
@@ -1107,28 +1110,31 @@ namespace ee {
 		 **/
 		template <typename _tOutType = std::wstring>
 		static inline _tOutType			ToUtf16( const std::u32string &_u32String ) {
-			_tOutType swsTemp;
-			size_t sSize = _u32String.size();
+			try {
+				_tOutType otTmp;
+				size_t sSize = _u32String.size();
 
-			for ( size_t I = 0; I < sSize; ) {
-				size_t sThisSize = 0;
-				uint32_t ui32This = NextUtf32Char( reinterpret_cast<const uint32_t *>(&_u32String.data()[I]), _u32String.size() - I, &sThisSize );
-				if ( ui32This == EE_UTF_INVALID ) {
-					for ( size_t J = 0; J < sThisSize * sizeof( std::u32string::value_type ); ++J ) {
-						swsTemp.push_back( reinterpret_cast<const _tOutType::value_type *>(&_u32String.data()[I])[J] );
+				for ( size_t I = 0; I < sSize; ) {
+					size_t sThisSize = 0;
+					uint32_t ui32This = NextUtf32Char( reinterpret_cast<const uint32_t *>(&_u32String.data()[I]), _u32String.size() - I, &sThisSize );
+					if ( ui32This == EE_UTF_INVALID ) {
+						for ( size_t J = 0; J < sThisSize * sizeof( std::u32string::value_type ); ++J ) {
+							otTmp.push_back( reinterpret_cast<const _tOutType::value_type *>(&_u32String.data()[I])[J] );
+						}
+						I += sThisSize;
+						continue;
 					}
 					I += sThisSize;
-					continue;
+					uint32_t ui32Len;
+					uint32_t ui32Converted = Utf32ToUtf16( ui32This, ui32Len );
+					for ( uint32_t J = 0; J < ui32Len; ++J ) {
+						otTmp.push_back( static_cast<_tOutType::value_type>(ui32Converted & 0xFFFFU) );
+						ui32Converted >>= 16;
+					}
 				}
-				I += sThisSize;
-				uint32_t ui32Len;
-				uint32_t ui32Converted = Utf32ToUtf16( ui32This, ui32Len );
-				for ( uint32_t J = 0; J < ui32Len; ++J ) {
-					swsTemp.push_back( static_cast<_tOutType::value_type>(ui32Converted & 0xFFFFU) );
-					ui32Converted >>= 16;
-				}
+				return otTmp;
 			}
-			return swsTemp;
+			catch ( ... ) { return _tOutType(); }
 		}
 
 		/**

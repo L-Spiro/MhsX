@@ -49,7 +49,6 @@ namespace mx {
 	 * \param _bRedraw If true the screen is redrawn immediately.
 	 **/
 	void CHexEditorControl::SetCaretAddr( uint64_t _ui64Addr, int32_t _i32SubCaret, bool _bUpdateSelection, bool _bRedraw ) {
-		auto psbStatus = reinterpret_cast<CDeusHexMachinaWindow *>(m_pwHexParent)->StatusBar();
 		auto ui64Size = Size();
 		m_sgSelGesture.ui64CaretAddr = std::min( _ui64Addr, ui64Size );
 		if ( m_sgSelGesture.ui64CaretAddr == ui64Size ) {
@@ -134,7 +133,7 @@ namespace mx {
 				m_sgSelGesture.smCurrent = CurStyle()->bSelectColumnMode ? MX_SM_COLUMN : MX_SM_NORMAL;
 			}
 
-			if ( psbStatus ) { psbStatus->SetTextW( swsStatus.c_str() ); }
+			reinterpret_cast<CDeusHexMachinaWindow *>(m_pwHexParent)->SetStatusBarText( swsStatus.c_str(), false );
 		}
 		catch ( ... ) {}
 		StartCaretBlink();
@@ -479,16 +478,17 @@ namespace mx {
 	 * 
 	 * \param _wsStatus The string to print in the status bar.
 	 **/
-	void CHexEditorControl::MarkSelectionStart( CSecureWString &_swsStatus ) {
+	bool CHexEditorControl::MarkSelectionStart( CSecureWString &_swsStatus ) {
 		try {
 			_swsStatus = _DEC_WS_59D5AB36_Marked_start_of_selection_;
 		}
 		catch ( ... ) {}
-		if ( !m_sSel.HasSelection() ) { return; }
+		if ( !m_sSel.HasSelection() ) { return true; }
 
 		if ( m_sgSelGesture.ui64CaretAddr > m_sgSelGesture.ui64AnchorAddr ) {
 			ReverseSelection();
 		}
+		return true;
 	}
 
 	/**
@@ -496,16 +496,110 @@ namespace mx {
 	 * 
 	 * \param _wsStatus The string to print in the status bar.
 	 **/
-	void CHexEditorControl::MarkSelectionEnd( CSecureWString &_swsStatus ) {
+	bool CHexEditorControl::MarkSelectionEnd( CSecureWString &_swsStatus ) {
 		try {
 			_swsStatus = _DEC_WS_06516F57_Marked_end_of_selection_;
 		}
 		catch ( ... ) {}
-		if ( !m_sSel.HasSelection() ) { return; }
+		if ( !m_sSel.HasSelection() ) { return true; }
 
 		if ( m_sgSelGesture.ui64CaretAddr < m_sgSelGesture.ui64AnchorAddr ) {
 			ReverseSelection();
 		}
+		return true;
+	}
+
+	/**
+	 * Moves the selection back.
+	 * 
+	 * \param _wsStatus The string to print in the status bar.
+	 **/
+	bool CHexEditorControl::MoveSelectionBack( CSecureWString &_swsStatus ) {
+		if ( !m_sSel.HasSelection() ) { return true; }
+		
+		uint64_t uiAddr;
+		if ( m_sSel.smMode == MX_SM_NORMAL ) {
+			uint64_t ui64Len = m_sSel.sn.ui64End - m_sSel.sn.ui64Start;
+			if ( ui64Len >= m_sSel.sn.ui64Start ) {
+				m_sSel.sn.ui64Start = 0;
+			}
+			else {
+				m_sSel.sn.ui64Start -= ui64Len;
+			}
+			m_sSel.sn.ui64End = m_sSel.sn.ui64Start + ui64Len;
+			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sn.ui64Start;
+			m_sgSelGesture.ui64CaretAddr = m_sSel.sn.ui64End;
+
+			uiAddr = m_sSel.sn.ui64Start;
+		}
+		else {
+			if ( (m_sSel.sc.ui64AnchorAddr <= m_sSel.sc.ui32Cols) ) {
+				m_sSel.sc.ui64AnchorAddr = 0;
+			}
+			else {
+				m_sSel.sc.ui64AnchorAddr -= m_sSel.sc.ui32Cols;
+			}
+
+			uint64_t ui64ThisSize = (m_sSel.sc.ui64Lines * CurStyle()->uiBytesPerRow) + m_sSel.sc.ui32Cols;
+			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sc.ui64AnchorAddr;
+			m_sgSelGesture.ui64CaretAddr = m_sgSelGesture.ui64AnchorAddr + ui64ThisSize;
+		}
+
+		::InvalidateRect( Wnd(), nullptr, FALSE );
+
+		try {
+			_swsStatus = _DEC_WS_3843E4C1_Moved_selection_to_address_;
+			_swsStatus += std::format( L"{0} [{0:X}]", uiAddr );
+		}
+		catch ( ... ) { return false; }
+		return true;
+	}
+
+	/**
+	 * Moves the selection forward.
+	 * 
+	 * \param _wsStatus The string to print in the status bar.
+	 **/
+	bool CHexEditorControl::MoveSelectionForward( CSecureWString &_swsStatus ) {
+		if ( !m_sSel.HasSelection() ) { return true; }
+		
+		uint64_t uiAddr;
+		auto ui64Size = Size();
+		if ( m_sSel.smMode == MX_SM_NORMAL ) {
+			uint64_t ui64Len = m_sSel.sn.ui64End - m_sSel.sn.ui64Start;
+			if ( ui64Len >= ui64Size - m_sSel.sn.ui64End ) {
+				m_sSel.sn.ui64End = ui64Size;
+			}
+			else {
+				m_sSel.sn.ui64End += ui64Len;
+			}
+			m_sSel.sn.ui64Start = m_sSel.sn.ui64End - ui64Len;
+			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sn.ui64Start;
+			m_sgSelGesture.ui64CaretAddr = m_sSel.sn.ui64End;
+
+			uiAddr = m_sSel.sn.ui64Start;
+		}
+		else {
+			uint64_t ui64ThisSize = (m_sSel.sc.ui64Lines * CurStyle()->uiBytesPerRow) + m_sSel.sc.ui32Cols;
+			if ( (m_sSel.sc.ui64AnchorAddr + m_sSel.sc.ui32Cols) >= ui64Size - ui64ThisSize ) {
+				m_sSel.sc.ui64AnchorAddr = ui64Size - ui64ThisSize;
+			}
+			else {
+				m_sSel.sc.ui64AnchorAddr += m_sSel.sc.ui32Cols;
+			}
+
+			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sc.ui64AnchorAddr;
+			m_sgSelGesture.ui64CaretAddr = m_sgSelGesture.ui64AnchorAddr + ui64ThisSize;
+		}
+
+		::InvalidateRect( Wnd(), nullptr, FALSE );
+
+		try {
+			_swsStatus = _DEC_WS_3843E4C1_Moved_selection_to_address_;
+			_swsStatus += std::format( L"{0} [{0:X}]", uiAddr );
+		}
+		catch ( ... ) { return false; }
+		return true;
 	}
 
 	/**

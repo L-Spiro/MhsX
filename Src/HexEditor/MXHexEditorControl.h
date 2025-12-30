@@ -705,14 +705,28 @@ namespace mx {
 		 * 
 		 * \param _wsStatus The string to print in the status bar.
 		 **/
-		void										MarkSelectionStart( CSecureWString &_swsStatus );
+		bool										MarkSelectionStart( CSecureWString &_swsStatus );
 
 		/**
 		 * Sets the caret to the end of the selection.
 		 * 
 		 * \param _wsStatus The string to print in the status bar.
 		 **/
-		void										MarkSelectionEnd( CSecureWString &_swsStatus );
+		bool										MarkSelectionEnd( CSecureWString &_swsStatus );
+
+		/**
+		 * Moves the selection back.
+		 * 
+		 * \param _wsStatus The string to print in the status bar.
+		 **/
+		bool										MoveSelectionBack( CSecureWString &_swsStatus );
+
+		/**
+		 * Moves the selection forward.
+		 * 
+		 * \param _wsStatus The string to print in the status bar.
+		 **/
+		bool										MoveSelectionForward( CSecureWString &_swsStatus );
 
 		/**
 		 * Determines if deleting is possible.  To delete, the internal state must be valid and the file must not be read-only.
@@ -1093,6 +1107,7 @@ namespace mx {
 			inline bool								IsSelected( uint64_t _ui64Address ) {
 				return _ui64Address >= ui64Start && _ui64Address < ui64End;
 			}
+
 		};
 
 		/**

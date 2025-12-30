@@ -22,6 +22,7 @@ namespace mx {
 			MX_UO_GROUP_START,
 			MX_UO_GROUP_END,
 			MX_UO_DELETE,
+			MX_UO_INSERT,
 		};
 
 
@@ -65,7 +66,7 @@ namespace mx {
 		virtual bool						ReadOnly() const { return false; }
 
 		// Insert bytes at a given address.
-		virtual bool						Insert( uint64_t _ui64Addr, const void * _pvSrc, size_t _sSize ) = 0;
+		virtual bool						Insert( uint64_t _ui64Addr, const CBuffer &_Src, uint64_t &_ui64Inserted ) = 0;
 
 		// Overwrite bytes at a given address.
 		virtual bool						Overwrite( uint64_t _ui64Addr, const void * _pvSrc, size_t _sSize ) = 0;
