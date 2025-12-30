@@ -791,8 +791,10 @@ namespace mx {
 		 * 
 		 * \param _ui64Addr The address to which to go.
 		 * \param _bShowAtTop If true, the scroll be aligned such that the address is on the top of the screen, otherwise it will be in the center of the screen.
+		 * \param _bOnlyIfNotVisible If true, the view is only moved if the value is not currently in the visible area.
+		 * \param _bRefresh If true, the view is updated.
 		 **/
-		void										GoTo( uint64_t _ui64Addr, bool _bShowAtTop = false );
+		void										GoTo( uint64_t _ui64Addr, bool _bShowAtTop = false, bool _bOnlyIfNotVisible = false, bool _bRefresh = true );
 
 		/**
 		 * Ensures a given address is visible.  If the address is already visible, no scrolling is done, otherwise it scrolls just enough to put the address on the top

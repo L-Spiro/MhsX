@@ -1,12 +1,23 @@
 #include "LSWStatusBar.h"
+
 #include <commctrl.h>
 #include <strsafe.h>
+#include <uxtheme.h>
+#include <vssym32.h>
+#pragma comment( lib, "UxTheme.lib" )
+
 
 
 namespace lsw {
 
+	// == Members.
+	WCHAR CStatusBar::m_szProp[2] = { 0 };							/** Window property. */
+
 	CStatusBar::CStatusBar( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
 		Parent( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ) {
+		if ( !m_szProp[0] ) {
+			m_szProp[0] = L'F' + ((reinterpret_cast<UINT_PTR>(_pwParent) >> 2) & 0x0F) + 16;
+		}
 	}
 
 	// == Functions.
@@ -215,39 +226,70 @@ namespace lsw {
 			::DeleteDC( hMemDc );
 			return FALSE;
 		}
+		
+		{
+			LSW_SELECTOBJECT soBmp( hMemDc, hBmp );
 
-		LSW_SELECTOBJECT soBmp( hMemDc, hBmp );
+			// Draw into local coordinates (0..W, 0..H).
+			RECT rLocal{ 0, 0, iW, iH };
 
-		// Draw into local coordinates (0..W, 0..H).
-		RECT rLocal{ 0, 0, iW, iH };
+			HFONT hFont = Font();
+			LSW_SELECTOBJECT soFont( hMemDc, hFont, false, NULL != hFont );
 
-		// Match font/state from the target DC (status bars often rely on this).
-		HGDIOBJ hFont = ::GetCurrentObject( _pDis->hDC, OBJ_FONT );
-		LSW_SELECTOBJECT soFont( hMemDc, hFont, false, NULL != hFont );
+			// Copy target DC settings that might matter.
+			//::SetBkMode( hMemDc, ::GetBkMode( _pDis->hDC ) );
+			LSW_SETBKMODE sbmBkMode( hMemDc, ::GetBkMode( _pDis->hDC ) );
+			LSW_SETTEXTCOLOR stcTextColor( hMemDc, ::GetTextColor( _pDis->hDC ) );
+			LSW_SETBKCOLOR sbcBkColor( hMemDc, ::GetBkColor( _pDis->hDC ) );
 
-		// Copy target DC settings that might matter.
-		//::SetBkMode( hMemDc, ::GetBkMode( _pDis->hDC ) );
-		LSW_SETBKMODE sbmBkMode( hMemDc, ::GetBkMode( _pDis->hDC ) );
-		LSW_SETTEXTCOLOR stcTextColor( hMemDc, ::GetTextColor( _pDis->hDC ) );
-		LSW_SETBKCOLOR sbcBkColor( hMemDc, ::GetBkColor( _pDis->hDC ) );
+			// Now do your normal draw into the backbuffer.
+			DefaultDrawStatusPart(
+				hMemDc,
+				rLocal,
+				m_vItems[uiIdx].uiType,
+				m_vItems[uiIdx].wsText.c_str(),
+				m_bEnabled != FALSE,
+				uiIdx
+			);
 
-		// Now do your normal draw into the backbuffer.
-		DefaultDrawStatusPart(
-			hMemDc,
-			rLocal,
-			m_vItems[uiIdx].uiType,
-			m_vItems[uiIdx].wsText.c_str(),
-			m_bEnabled != FALSE,
-			uiIdx
-		);
-
-		// One blit to the real DC.
-		::BitBlt( _pDis->hDC, rItem.left, rItem.top, iW, iH, hMemDc, 0, 0, SRCCOPY );
-
+			// One blit to the real DC.
+			::BitBlt( _pDis->hDC, rItem.left, rItem.top, iW, iH, hMemDc, 0, 0, SRCCOPY );
+		}
 		::DeleteObject( hBmp );
 		::DeleteDC( hMemDc );
 
 		return TRUE;
+	}
+
+	/**
+	 * Gets the font used by this control.
+	 * 
+	 * \return Returns the font used by this control.
+	 **/
+	HFONT CStatusBar::Font() const {
+		HFONT hFont = reinterpret_cast<HFONT>(::SendMessageW( Wnd(), WM_GETFONT, 0, 0 ));
+		if ( !hFont ) {
+			NONCLIENTMETRICSW ncm{};
+			ncm.cbSize = sizeof( ncm );
+			if ( ::SystemParametersInfoW( SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0 ) ) {
+				hFont = ::CreateFontIndirectW( &ncm.lfStatusFont );
+			}
+			if ( !hFont ) {
+				hFont = reinterpret_cast<HFONT>(::GetStockObject( DEFAULT_GUI_FONT ));
+			}
+		}
+		return hFont;
+	}
+
+	/**
+	 * Attaches an HWND to this widget after creation.
+	 * \brief Finalizes control initialization once the window handle exists.
+	 *
+	 * \param _hWnd The created window handle.
+	 */
+	void CStatusBar::InitControl( HWND /*_hWnd*/ ) {
+		m_wpOrigProc = CHelpers::SetWndProc( Wnd(), StatusOverride );
+		::SetPropW( Wnd(), m_szProp, reinterpret_cast<HANDLE>(this) );
 	}
 
 	/**
@@ -286,7 +328,6 @@ namespace lsw {
 		LSW_BEGINPAINT bpPaint( Wnd() );
 		if ( !bpPaint.hDc ) { return LSW_H_HANDLED; }
 
-		return LSW_H_HANDLED;
 
 		RECT rClient{};
 		::GetClientRect( Wnd(), &rClient );
@@ -388,7 +429,7 @@ namespace lsw {
 				const int iGripH = ::GetSystemMetrics( SM_CYHSCROLL );
 				rGrip.left = rGrip.right - iGripW;
 				rGrip.top = rGrip.bottom - iGripH;
-				::DrawFrameControl( hMemDc, &rGrip, DFC_SCROLL, DFCS_SCROLLSIZEGRIP );
+				DrawStatusGrip( Wnd(), hMemDc, rGrip );
 			}
 
 			// Blit only the invalid region (reduces work).
@@ -405,7 +446,6 @@ namespace lsw {
 				SRCCOPY
 			);
 		}
-
 		::DeleteObject( hBmp );
 		::DeleteDC( hMemDc );
 
@@ -449,19 +489,86 @@ namespace lsw {
 		// Background.
 		::FillRect( _hDc, &rItem, lsw::CBase::BrushCache().Brush( m_vItems[_sIdx].crBkColor ) );
 
-		
+		LSW_THEME_DATA hTheme( Wnd(), L"STATUS", ::IsThemeActive() && ::IsAppThemed() );
+
+		do {
+			if ( hTheme.Handle() ) {
+				// Draw themed pane background (includes the “bars” between items on modern Windows).
+				if ( FAILED( ::DrawThemeBackground( hTheme.Handle(), _hDc, SP_PANE, 0, &rItem, NULL ) ) ) { break; }
+
+				RECT rText = rItem;
+
+				// Use theme margins if available, otherwise small inset.
+				MARGINS m{};
+				if ( SUCCEEDED( ::GetThemeMargins( hTheme.Handle(), _hDc, SP_PANE, 0, TMT_CONTENTMARGINS, &rItem, &m ) ) ) {
+					rText.left += m.cxLeftWidth;
+					rText.right -= m.cxRightWidth;
+					rText.top += m.cyTopHeight;
+					rText.bottom -= m.cyBottomHeight;
+				}
+				else {
+					rText.left += 2;
+					rText.right -= 2;
+				}
+
+				lsw::LSW_SETBKMODE sbmBkMode( _hDc, TRANSPARENT );
+
+				COLORREF crText = _bEnabled ? m_vItems[_sIdx].crTextColor : m_vItems[_sIdx].crDisabledTextColor;
+				/*COLORREF crThemeText{};
+				if ( SUCCEEDED( ::GetThemeColor( hTheme.Handle(), SP_PANE, 0, TMT_TEXTCOLOR, &crThemeText ) ) ) {
+					if ( _bEnabled ) { crText = crThemeText; }
+				}*/
+				lsw::LSW_SETTEXTCOLOR stcTextColor( _hDc, crText );
+
+				UINT uiBase = DT_SINGLELINE | DT_VCENTER | DT_END_ELLIPSIS | DT_NOPREFIX;
+				if ( _uiType & SBT_RTLREADING ) { uiBase |= DT_RTLREADING; }
+
+				if ( (_uiType & SBT_NOTABPARSING) != 0 || !_pwcText ) {
+					::DrawThemeText( hTheme.Handle(), _hDc, SP_PANE, 0, _pwcText ? _pwcText : L"", -1, uiBase | DT_LEFT, 0, &rText );
+				}
+				else {
+					// Tab parsing: left\tcenter\tright.
+					try {
+						std::wstring wsTmp = _pwcText;
+						size_t s0 = wsTmp.find( L'\t' );
+						if ( s0 == std::wstring::npos ) {
+							::DrawThemeText( hTheme.Handle(), _hDc, SP_PANE, 0, wsTmp.c_str(), -1, uiBase | DT_LEFT, 0, &rText );
+						}
+						else {
+							std::wstring wsLeft = wsTmp.substr( 0, s0 );
+							size_t s1 = wsTmp.find( L'\t', s0 + 1 );
+							std::wstring wsMid;
+							std::wstring wsRight;
+							if ( s1 == std::wstring::npos ) {
+								wsRight = wsTmp.substr( s0 + 1 );
+							}
+							else {
+								wsMid = wsTmp.substr( s0 + 1, s1 - (s0 + 1) );
+								wsRight = wsTmp.substr( s1 + 1 );
+							}
+
+							if ( wsLeft.size() ) { ::DrawThemeText( hTheme.Handle(), _hDc, SP_PANE, 0, wsLeft.c_str(), -1, uiBase | DT_LEFT, 0, &rText ); }
+							if ( wsMid.size() ) { ::DrawThemeText( hTheme.Handle(), _hDc, SP_PANE, 0, wsMid.c_str(), -1, uiBase | DT_CENTER, 0, &rText ); }
+							if ( wsRight.size() ) { ::DrawThemeText( hTheme.Handle(), _hDc, SP_PANE, 0, wsRight.c_str(), -1, uiBase | DT_RIGHT, 0, &rText ); }
+						}
+					}
+					catch ( ... ) {}
+				}
+
+				return;
+			}
+		} while ( false );
 
 		// Border.
-		/*if ( (_uiType & SBT_NOBORDERS) == 0 ) {
+		if ( (_uiType & SBT_NOBORDERS) == 0 ) {
 			UINT uiEdge = (_uiType & SBT_POPOUT) ? EDGE_RAISED : EDGE_SUNKEN;
 			::DrawEdge( _hDc, &rItem, uiEdge, BF_RECT | BF_ADJUST );
-		}*/
+		}
 
 		// Text inset.
 		rItem.left += 2;
 		rItem.right -= 2;
 
-		
 		
 		lsw::LSW_SETBKMODE sbmBkMode( _hDc, TRANSPARENT );
 		lsw::LSW_SETTEXTCOLOR stcTextColor( _hDc, _bEnabled ? m_vItems[_sIdx].crTextColor : m_vItems[_sIdx].crDisabledTextColor );
@@ -506,6 +613,66 @@ namespace lsw {
 			}
 			catch ( ... ) {}
 		}
+	}
+
+	/**
+	 * The message handler for the Status Bar (implements custom drawing).
+	 * 
+	 * \param _hWnd Window receiving the message.
+	 * \param _uMsg Message identifier (WM_*).
+	 * \param _wParam WPARAM message data.
+	 * \param _lParam LPARAM message data.
+	 * \return Returns an LRESULT as defined by the message semantics.
+	 **/
+	LRESULT CALLBACK CStatusBar::StatusOverride( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam ) {
+		CStatusBar * ptlThis = reinterpret_cast<CStatusBar *>(::GetPropW( _hWnd, m_szProp ));
+		WNDPROC wpOrig = ptlThis->m_wpOrigProc;
+		switch ( _uMsg ) {
+			// =======================================
+			// Painting.
+			// =======================================
+			case WM_PAINT : {
+				ptlThis->Paint();
+				return 0;
+			}
+		}
+
+		return ::CallWindowProc( wpOrig, _hWnd, _uMsg, _wParam, _lParam );
+	}
+
+	/**
+	 * \brief Draws the standard status-bar size grip in the lower-right corner.
+	 *
+	 * This routine draws a size grip only when the status-bar has the SBARS_SIZEGRIP style.
+	 * If visual styles/themes are active, it draws the themed gripper (STATUS class, SP_GRIPPER).
+	 * Otherwise it falls back to the classic non-themed size grip using DrawFrameControl().
+	 *
+	 * \param _hWnd The status-bar window handle.
+	 * \param _hDc The device context to draw into.
+	 * \param _rClient The full client rectangle of the status bar in the coordinate space of \p _hDc.
+	 *
+	 * \note This should be called after the status-bar background and panes have been drawn so the
+	 * gripper is rendered on top.
+	 *
+	 * \note The grip rectangle size is derived from SM_CXVSCROLL and SM_CYHSCROLL to match the system’s
+	 * standard grip metrics.
+	 */
+	void CStatusBar::DrawStatusGrip( HWND _hWnd, HDC _hDc, const RECT &_rClient ) {
+		if ( !(::GetWindowLongPtrW( _hWnd, GWL_STYLE ) & SBARS_SIZEGRIP) ) { return; }
+
+		RECT rGrip = _rClient;
+		const int iGripW = ::GetSystemMetrics( SM_CXVSCROLL );
+		const int iGripH = ::GetSystemMetrics( SM_CYHSCROLL );
+		rGrip.left = rGrip.right - iGripW;
+		rGrip.top = rGrip.bottom - iGripH;
+
+		LSW_THEME_DATA hTheme( _hWnd, L"STATUS", ::IsThemeActive() && ::IsAppThemed() );
+		if ( hTheme.Handle() ) {
+			::DrawThemeBackground( hTheme.Handle(), _hDc, SP_GRIPPER, 0, &rGrip, NULL );
+			return;
+		}
+
+		::DrawFrameControl( _hDc, &rGrip, DFC_SCROLL, DFCS_SCROLLSIZEGRIP );
 	}
 
 }	// namespace lsw

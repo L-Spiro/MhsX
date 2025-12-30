@@ -545,7 +545,7 @@ namespace mx {
 			m_sgSelGesture.ui64CaretAddr = m_sgSelGesture.ui64AnchorAddr + ui64ThisSize;
 		}
 
-		::InvalidateRect( Wnd(), nullptr, FALSE );
+		GoTo( uiAddr, false, true );
 
 		try {
 			_swsStatus = _DEC_WS_3843E4C1_Moved_selection_to_address_;
@@ -592,7 +592,7 @@ namespace mx {
 			m_sgSelGesture.ui64CaretAddr = m_sgSelGesture.ui64AnchorAddr + ui64ThisSize;
 		}
 
-		::InvalidateRect( Wnd(), nullptr, FALSE );
+		GoTo( uiAddr, false, true );
 
 		try {
 			_swsStatus = _DEC_WS_3843E4C1_Moved_selection_to_address_;
@@ -798,8 +798,10 @@ namespace mx {
 	 * 
 	 * \param _ui64Addr The address to which to go.
 	 * \param _bShowAtTop If true, the scroll be aligned such that the address is on the top of the screen, otherwise it will be in the center of the screen.
+	 * \param _bOnlyIfNotVisible If true, the view is only moved if the value is not currently in the visible area.
+	 * \param _bRefresh If true, the view is updated.
 	 **/
-	void CHexEditorControl::GoTo( uint64_t _ui64Addr, bool _bShowAtTop ) {
+	void CHexEditorControl::GoTo( uint64_t _ui64Addr, bool _bShowAtTop, bool _bOnlyIfNotVisible, bool _bRefresh ) {
 		_ui64Addr = std::min( _ui64Addr, Size() );
 
 
@@ -810,11 +812,22 @@ namespace mx {
 		m_sdScrollView[m_eaEditAs].i32PageLines = (iLineAdv ? (iClientH / iLineAdv) : 0);
 		if ( m_sdScrollView[m_eaEditAs].i32PageLines < 1 ) { m_sdScrollView[m_eaEditAs].i32PageLines = 1; }
 
+		uint64_t ui64Pos = _ui64Addr / CurStyle()->uiBytesPerRow;
+		if ( _bOnlyIfNotVisible ) {
+			if ( ui64Pos >= m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine &&
+				ui64Pos < m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine + m_sdScrollView[m_eaEditAs].i32PageLines ) {
+				if ( _bRefresh ) {
+					::InvalidateRect( Wnd(), nullptr, FALSE );
+				}
+				return;
+			}
+		}
+
 
 		const uint64_t ui64Lines = TotalLines_FixedWidth();
 		const uint64_t ui64MaxV  = ui64Lines ? (ui64Lines - 1ULL) : 0ULL;
 
-		uint64_t ui64Pos = _ui64Addr / CurStyle()->uiBytesPerRow;
+		
 		if ( !_bShowAtTop ) {
 			if ( ui64Pos <= m_sdScrollView[m_eaEditAs].i32PageLines / 2 ) {
 				ui64Pos = 0;
@@ -829,7 +842,9 @@ namespace mx {
 		m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine = m_sdScrollView[m_eaEditAs].ui64VPos;
 
 		lsw::CBase::SetScrollInfo64( Wnd(), SB_VERT, SIF_POS, ui64MaxV, m_sdScrollView[m_eaEditAs].ui64VPos, 1, TRUE );
-		::InvalidateRect( Wnd(), nullptr, FALSE );
+		if ( _bRefresh ) {
+			::InvalidateRect( Wnd(), nullptr, FALSE );
+		}
 	}
 
 	/**

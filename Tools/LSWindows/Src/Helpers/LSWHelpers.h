@@ -641,6 +641,11 @@ namespace lsw {
 			wsClass( _pszClassList ) {
 			htTheme = ::OpenThemeData( _hWnd, _pszClassList );
 		}
+		LSW_THEME_DATA( HWND _hWnd, LPCWSTR _pszClassList, bool _bConditional ) :
+			hWnd( _bConditional ? _hWnd : NULL ),
+			wsClass( _pszClassList ) {
+			htTheme = _bConditional ? ::OpenThemeData( _hWnd, _pszClassList ) : NULL;
+		}
 		~LSW_THEME_DATA() {
 			if ( NULL != htTheme ) {
 				::CloseThemeData( htTheme );
@@ -655,7 +660,7 @@ namespace lsw {
 		 * \return Returns the theme handle.
 		 */
 		HTHEME								Handle() {
-			if ( !htTheme ) {
+			if ( !htTheme && hWnd ) {
 				htTheme = ::OpenThemeData( hWnd, wsClass.c_str() );
 			}
 			return htTheme;

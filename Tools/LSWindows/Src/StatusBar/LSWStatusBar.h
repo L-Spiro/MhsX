@@ -264,20 +264,35 @@ namespace lsw {
 		 */
 		virtual bool						IsStatusBar() const { return true; }
 
+		/**
+		 * Gets the font used by this control.
+		 * 
+		 * \return Returns the font used by this control.
+		 **/
+		virtual HFONT						Font() const;
+
 
 	protected :
 		// == Members.
-		/**
-		 * \brief The status-bar parts currently configured for the control.
-		 */
+		/** The status-bar parts currently configured for the control. */
 		std::vector<LSW_STATUS_PART>		m_vParts;
-
-		/**
-		 * \brief Per-part text and flags used for owner-draw.
-		 */
+		/** Per-part text and flags used for owner-draw. */
 		std::vector<LSW_STATUS_ITEM>		m_vItems;
+		/** Original message handler. */
+		WNDPROC								m_wpOrigProc = nullptr;
+		/** Window property. */
+		static WCHAR						m_szProp[2];
+
 
 		// == Functions.
+		/**
+		 * Attaches an HWND to this widget after creation.
+		 * \brief Finalizes control initialization once the window handle exists.
+		 *
+		 * \param _hWnd The created window handle.
+		 */
+		virtual void						InitControl( HWND _hWnd ) override;
+
 		/**
 		 * \brief Evaluates expressions to determine a new rectangle for the control.
 		 *
@@ -329,6 +344,37 @@ namespace lsw {
 		 * \param _sIdx The index of the item being drawn.
 		 */
 		void								DefaultDrawStatusPart( HDC _hDc, const RECT &_rRc, UINT _uiType, LPCWSTR _pwcText, BOOL _bEnabled, size_t _sIdx ) const;
+
+		/**
+		 * The message handler for the Status Bar (implements custom drawing).
+		 * 
+		 * \param _hWnd Window receiving the message.
+		 * \param _uMsg Message identifier (WM_*).
+		 * \param _wParam WPARAM message data.
+		 * \param _lParam LPARAM message data.
+		 * \return Returns an LRESULT as defined by the message semantics.
+		 **/
+		static LRESULT CALLBACK				StatusOverride( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam );
+
+		/**
+		 * \brief Draws the standard status-bar size grip in the lower-right corner.
+		 *
+		 * This routine draws a size grip only when the status-bar has the SBARS_SIZEGRIP style.
+		 * If visual styles/themes are active, it draws the themed gripper (STATUS class, SP_GRIPPER).
+		 * Otherwise it falls back to the classic non-themed size grip using DrawFrameControl().
+		 *
+		 * \param _hWnd The status-bar window handle.
+		 * \param _hDc The device context to draw into.
+		 * \param _rClient The full client rectangle of the status bar in the coordinate space of \p _hDc.
+		 *
+		 * \note This should be called after the status-bar background and panes have been drawn so the
+		 * gripper is rendered on top.
+		 *
+		 * \note The grip rectangle size is derived from SM_CXVSCROLL and SM_CYHSCROLL to match the system’s
+		 * standard grip metrics.
+		 */
+		static void							DrawStatusGrip( HWND _hWnd, HDC _hDc, const RECT &_rClient );
+
 
 	private :
 		/** The parent type. */

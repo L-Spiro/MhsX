@@ -1657,9 +1657,9 @@ namespace mx {
 	void CDeusHexMachinaWindow::SetStatusBarText( const wchar_t * _pwcText, bool _bWarning, size_t _sIdx ) {
 		auto psbStatus = StatusBar();
 		if ( psbStatus && (_pwcText && _pwcText[0] != L'\0') ) {
-			psbStatus->SetTextW( INT( _sIdx ), 0, _pwcText );
 			psbStatus->SetItemTextColors( MX_GetRgbValue( ::GetSysColor( COLOR_WINDOWTEXT ) ), MX_GetRgbValue( ::GetSysColor( COLOR_GRAYTEXT ) ), INT(_sIdx ) );
 			psbStatus->SetItemBkColor( MX_GetRgbValue( _bWarning ? ::GetSysColor( COLOR_3DSHADOW ) : ::GetSysColor( COLOR_3DFACE ) ), INT(_sIdx ) );
+			psbStatus->SetTextW( INT( _sIdx ), 0, _pwcText );
 		}
 	}
 
