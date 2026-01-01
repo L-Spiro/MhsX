@@ -56,7 +56,7 @@ namespace lsw {
 
 		// Force SBT_OWNERDRAW for every part.
 		for ( size_t I = 0; I < _sTotal; ++I ) {
-			::SendMessageW( Wnd(), SB_SETTEXTW, static_cast<WPARAM>( static_cast<INT>(I), (m_vItems[I].uiType | SBT_OWNERDRAW) ), static_cast<LPARAM>(I) );
+			::SendMessageW( Wnd(), SB_SETTEXTW, static_cast<WPARAM>(static_cast<INT>(I) | (m_vItems[I].uiType | SBT_OWNERDRAW)), static_cast<LPARAM>(I) );
 		}
 		return TRUE;
 	}
@@ -171,7 +171,11 @@ namespace lsw {
 		m_vItems[_iIdx].uiType = _uiType;
 		m_vItems[_iIdx].wsText = _lpString ? _lpString : L"";
 		if ( !Wnd() ) { return FALSE; }
-		return static_cast<BOOL>(::SendMessageW( Wnd(), SB_SETTEXTW, static_cast<WPARAM>( _iIdx, (_uiType | SBT_OWNERDRAW) ), static_cast<LPARAM>(_iIdx) ));
+		if ( static_cast<BOOL>(::SendMessageW( Wnd(), SB_SETTEXTW, static_cast<WPARAM>(_iIdx | (_uiType | SBT_OWNERDRAW)), static_cast<LPARAM>(_iIdx) )) ) {
+			AutoFitPartsToTextLocked( TRUE );
+			return TRUE;
+		}
+		return FALSE;
 	}
 
 	/**
@@ -267,7 +271,7 @@ namespace lsw {
 	 * \return Returns the font used by this control.
 	 **/
 	HFONT CStatusBar::Font() const {
-		HFONT hFont = reinterpret_cast<HFONT>(::SendMessageW( Wnd(), WM_GETFONT, 0, 0 ));
+		HFONT hFont = GetFont();
 		if ( !hFont ) {
 			NONCLIENTMETRICSW ncm{};
 			ncm.cbSize = sizeof( ncm );
@@ -279,6 +283,170 @@ namespace lsw {
 			}
 		}
 		return hFont;
+	}
+
+	/**
+	 * \brief Automatically sizes parts to their text and anchors a right-locked suffix to the right edge.
+	 *
+	 * All parts before the first bLockToRight part are laid out from left-to-right. All parts from the first
+	 * bLockToRight part to the end are laid out from right-to-left (anchored to the right edge).
+	 *
+	 * By default, the last non-locked part becomes a “filler” that expands to consume remaining space up to
+	 * the left edge of the right-locked suffix (or to the end if no suffix exists).
+	 *
+	 * \param _bFillLastNonLocked If TRUE, the last non-locked part is expanded to fill remaining space.
+	 * \return TRUE on success; FALSE otherwise.
+	 */
+	BOOL CStatusBar::AutoFitPartsToTextLocked( BOOL _bFillLastNonLocked ) {
+		if ( !Wnd() ) { return FALSE; }
+		try {
+			RECT rClient{};
+			::GetClientRect( Wnd(), &rClient );
+			int iClientW = rClient.right - rClient.left;
+			if ( iClientW <= 0 ) { return TRUE; }
+
+			// If the size grip is enabled, the native control visually occupies the bottom-right corner.
+			// Reserving its width prevents “filler” text from ending under the grip.
+			LONG_PTR lpStyle = ::GetWindowLongPtrW( Wnd(), GWL_STYLE );
+			int iGripReserve = 0;
+			if ( (lpStyle & SBARS_SIZEGRIP) != 0 ) {
+				iGripReserve = ::GetSystemMetrics( SM_CXVSCROLL );
+				if ( iGripReserve < 0 ) { iGripReserve = 0; }
+			}
+
+			const size_t sParts = m_vItems.size();
+			if ( sParts == 0 ) { return TRUE; }
+
+			// Determine the right-locked suffix start (must be a contiguous suffix for SB_SETPARTS ordering).
+			size_t sRightStart = sParts;
+			for ( size_t I = 0; I < sParts; ++I ) {
+				if ( I < m_vParts.size() && m_vParts[I].bLockToRight ) {
+					sRightStart = I;
+					break;
+				}
+			}
+
+			// Determine filler index: last non-locked part (just before the right-locked suffix).
+			INT iFill = -1;
+			if ( _bFillLastNonLocked && sRightStart > 0 ) {
+				iFill = static_cast<INT>(sRightStart - 1);
+			}
+
+			// Prepare a DC for measuring using the status bar’s font.
+			std::vector<int> vWidths;
+			vWidths.resize( sParts );
+			{
+				LSW_HDC hDc( Wnd() );
+				if ( !hDc.hDc ) { return FALSE; }
+			
+				{
+					HFONT hFont = GetFont();
+					LSW_SELECTOBJECT soFont( hDc.hDc, hFont, hFont != NULL );
+
+
+					const int iPad = StatusPanePaddingX();
+
+					for ( size_t I = 0; I < sParts; ++I ) {
+						const UINT uiType = m_vItems[I].uiType;
+						const LPCWSTR pwcText = m_vItems[I].wsText.c_str();
+
+						int iTextW = MeasureStatusTextW( hDc.hDc, pwcText, uiType );
+						int iW = iTextW + iPad;
+
+						// Keep empty/small items sane.
+						if ( iW < 24 ) { iW = 24; }
+
+						vWidths[I] = iW;
+					}
+				}
+			}
+
+			// Layout.
+			std::vector<INT> vRight;
+			vRight.resize( sParts );
+
+			// Right suffix placed from right-to-left.
+			int iRightEdge = iClientW;
+			int iRightTextEdge = iClientW - iGripReserve;
+			if ( iRightTextEdge < 0 ) { iRightTextEdge = 0; }
+
+			// Place the right-locked suffix (including the last part).
+			// Note: the rectangles still go to iClientW; the reserve is only used for the *filler* boundary.
+			for ( size_t I = sParts; I-- > sRightStart; ) {
+				int iW = vWidths[I];
+				int iLeft = iRightEdge - iW;
+				if ( iLeft < 0 ) { iLeft = 0; }
+
+				vRight[I] = iRightEdge;
+				iRightEdge = iLeft;
+			}
+
+			// Now iRightEdge is the left boundary of the right-locked suffix.
+			int iSuffixLeft = iRightEdge;
+
+			// Left side placed from left-to-right, skipping filler for now.
+			int iX = 0;
+			for ( size_t I = 0; I < sRightStart; ++I ) {
+				if ( static_cast<INT>(I) == iFill ) { continue; }
+
+				int iW = vWidths[I];
+				int iNext = iX + iW;
+
+				// Don’t overlap into the suffix.
+				if ( iNext > iSuffixLeft ) { iNext = iSuffixLeft; }
+				if ( iNext < iX ) { iNext = iX; }
+
+				vRight[I] = iNext;
+				iX = iNext;
+			}
+
+			// Filler expands to the left edge of suffix (or end if no suffix).
+			if ( iFill >= 0 ) {
+				int iFillRight = iSuffixLeft;
+
+				// If there is no right-locked suffix, keep text away from grip.
+				if ( sRightStart == sParts ) {
+					iFillRight = iRightTextEdge;
+				}
+
+				if ( iFillRight < iX ) { iFillRight = iX; }
+				vRight[static_cast<size_t>(iFill)] = iFillRight;
+			}
+
+			// Ensure the last part extends to the end (lets the control handle exact edge quirks).
+			// This also matches typical SB_SETPARTS usage.
+			vRight.back() = -1;
+
+			// Skip redundant SB_SETPARTS calls.
+			if ( m_vLastAutoFitRights.size() == vRight.size() ) {
+				bool bSame = true;
+				for ( size_t I = 0; I < vRight.size(); ++I ) {
+					if ( m_vLastAutoFitRights[I] != vRight[I] ) { bSame = false; break; }
+				}
+				if ( bSame ) { return TRUE; }
+			}
+
+			if ( !static_cast<BOOL>(::SendMessageW( Wnd(), SB_SETPARTS, static_cast<WPARAM>(vRight.size()), reinterpret_cast<LPARAM>(vRight.data()) )) ) {
+				return FALSE;
+			}
+
+			m_vLastAutoFitRights = vRight;
+
+			// Re-apply ownerdraw flags after SB_SETPARTS (some setups lose the type).
+			for ( size_t I = 0; I < m_vItems.size(); ++I ) {
+				::SendMessageW( Wnd(), SB_SETTEXTW, static_cast<WPARAM>(static_cast<INT>(I) | (m_vItems[I].uiType | SBT_OWNERDRAW)), static_cast<LPARAM>(I) );
+			}
+
+			// Optionally keep m_vParts’ iRightCoord in sync (useful if you still use it elsewhere).
+			if ( m_vParts.size() == vRight.size() ) {
+				for ( size_t I = 0; I < vRight.size(); ++I ) {
+					m_vParts[I].iRightCoord = vRight[I];
+				}
+			}
+
+			return TRUE;
+		}
+		catch ( ... ) { return FALSE; }
 	}
 
 	/**
@@ -313,9 +481,10 @@ namespace lsw {
 			::SendMessageW( Wnd(), SB_SETPARTS, static_cast<WPARAM>(vInts.size()), reinterpret_cast<LPARAM>(&vInts[0]) );
 			// SB_SETPARTS can clear/rebuild internal state. Re-apply owner-draw flags for all parts.
 			for ( size_t I = 0; I < m_vItems.size(); ++I ) {
-				::SendMessageW( Wnd(), SB_SETTEXTW, static_cast<WPARAM>( static_cast<INT>(I), (m_vItems[I].uiType | SBT_OWNERDRAW) ), static_cast<LPARAM>(I) );
+				::SendMessageW( Wnd(), SB_SETTEXTW, static_cast<WPARAM>(static_cast<INT>(I) | (m_vItems[I].uiType | SBT_OWNERDRAW)), static_cast<LPARAM>(I) );
 			}
 		}
+		AutoFitPartsToTextLocked( TRUE );
 	}
 
 	/**
@@ -673,6 +842,93 @@ namespace lsw {
 		}
 
 		::DrawFrameControl( _hDc, &rGrip, DFC_SCROLL, DFCS_SCROLLSIZEGRIP );
+	}
+
+	/**
+	 * \brief Measures the pixel width of a single UTF-16 text segment using DrawTextW() in DT_CALCRECT mode.
+	 *
+	 * This helper assumes the caller has already selected the desired font into \p _hDc.
+	 *
+	 * \param _hDc The device context used for measurement.
+	 * \param _pwc A NUL-terminated UTF-16 string to measure. If NULL or empty, returns 0.
+	 * \param _uiDrawFlags The DrawTextW() flags used for measurement. This function always ORs DT_CALCRECT
+	 * into the call, so \p _uiDrawFlags should include alignment and single-line flags as desired.
+	 * \return The width, in pixels, of the rendered text.
+	 */
+	int CStatusBar::MeasureTextSegmentW( HDC _hDc, const wchar_t * _pwc, UINT _uiDrawFlags ) {
+		if ( !_pwc || !_pwc[0] ) { return 0; }
+		LSW_RECT rRect { 0, 0, 0, 0 };
+		::DrawTextW( _hDc, _pwc, -1, &rRect, _uiDrawFlags | DT_CALCRECT );
+		return int( rRect.Width() );
+	}
+
+	/**
+	 * \brief Measures the pixel width of status-bar text as it would be rendered for a pane.
+	 *
+	 * If tab parsing is enabled (i.e. SBT_NOTABPARSING is not set) and the string contains one or two tab
+	 * characters, the status bar can display up to 3 segments (left, center, right). This helper measures
+	 * each segment independently and returns the maximum segment width, which is sufficient for sizing a
+	 * pane intended to contain that text without truncation for any of the three alignments.
+	 *
+	 * This helper assumes the caller has already selected the desired font into \p _hDc.
+	 *
+	 * \param _hDc The device context used for measurement.
+	 * \param _pwcText A NUL-terminated UTF-16 string to measure. If NULL or empty, returns 0.
+	 * \param _uiType The status-bar text type flags (SBT_*). Only SBT_NOTABPARSING and SBT_RTLREADING
+	 * are considered for measurement.
+	 * \return The width, in pixels, required for the widest segment of the text as rendered by a status bar.
+	 */
+	int CStatusBar::MeasureStatusTextW( HDC _hDc, LPCWSTR _pwcText, UINT _uiType ) {
+		if ( !_pwcText || !_pwcText[0] ) { return 0; }
+
+		UINT uiBase = DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX;
+		if ( _uiType & SBT_RTLREADING ) { uiBase |= DT_RTLREADING; }
+
+		// If tab parsing is enabled, measure the widest of left/mid/right segments.
+		if ( (_uiType & SBT_NOTABPARSING) == 0 ) {
+			const wchar_t * pTab0 = std::wcschr( _pwcText, L'\t' );
+			if ( pTab0 ) {
+				try {
+					std::wstring ws( _pwcText );
+					size_t s0 = ws.find( L'\t' );
+					size_t s1 = ws.find( L'\t', s0 + 1 );
+
+					std::wstring wsLeft = ws.substr( 0, s0 );
+					std::wstring wsMid;
+					std::wstring wsRight;
+
+					if ( s1 == std::wstring::npos ) {
+						wsRight = ws.substr( s0 + 1 );
+					}
+					else {
+						wsMid = ws.substr( s0 + 1, s1 - (s0 + 1) );
+						wsRight = ws.substr( s1 + 1 );
+					}
+
+					int iL = wsLeft.size() ? MeasureTextSegmentW( _hDc, wsLeft.c_str(), uiBase ) : 0;
+					int iM = wsMid.size() ? MeasureTextSegmentW( _hDc, wsMid.c_str(), uiBase ) : 0;
+					int iR = wsRight.size() ? MeasureTextSegmentW( _hDc, wsRight.c_str(), uiBase ) : 0;
+
+					int iMax = (iL > iM) ? ((iL > iR) ? iL : iR) : ((iM > iR) ? iM : iR);
+					return iMax;
+				}
+				catch ( ... ) {}
+			}
+		}
+
+		return MeasureTextSegmentW( _hDc, _pwcText, uiBase );
+	}
+
+	/**
+	 * \brief Returns the default horizontal padding used when converting measured text width into a pane width.
+	 *
+	 * The returned value represents extra horizontal space added to the measured text width to account for
+	 * typical status-bar insets, separators, and visual breathing room so text does not touch pane edges.
+	 *
+	 * \return The horizontal padding, in pixels, to add to the measured text width when computing pane width.
+	 */
+	int CStatusBar::StatusPanePaddingX() {
+		return 10;
 	}
 
 }	// namespace lsw

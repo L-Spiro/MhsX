@@ -61,6 +61,20 @@ namespace mx {
 			MX_M_CONTEXT_MENU						= 200,
 		};
 
+		// Status bar parts.
+		enum MX_STATUS_BAR {
+			MX_SB_MESSAGE,
+			MX_SB_POSITION_START,
+			MX_SB_VALUE_SEL,
+			MX_SB_FILE_SIZE,
+			MX_SB_VIEW_TYPE,
+			MX_SB_CHAR_SET,
+			MX_SB_ENDIAN,
+			MX_SB_INSERT_OVERWRITE,
+
+			MX_SB_TOTAL
+		};
+
 
 		// == Functions.
 		// Gets the base tab control.
@@ -232,6 +246,9 @@ namespace mx {
 		// Sets a status-bar item’s text and "warning" status.
 		void										SetStatusBarText( const wchar_t * _pwcText, bool _bWarning = false, size_t _sIdx = 0 );
 
+		// Update the status-bar Insert/Overwrite part.
+		void										UpdateStatusBar_InsertOverwrite();
+
 		/**
 		 * Gets the widget type identifier.
 		 * \brief Returns one of LSW_LT_* constants.
@@ -273,6 +290,8 @@ namespace mx {
 		CHexEditorControl::MX_FONT_SET				m_fsFixedRowFont;
 		// Variable-width view font.
 		CHexEditorControl::MX_FONT_SET				m_fsTextViewFont;
+		/** Overwrite Mode. */
+		bool										m_bOverwrite = true;
 		// Image list.
 		CImageList									m_iImages;
 		// Images.

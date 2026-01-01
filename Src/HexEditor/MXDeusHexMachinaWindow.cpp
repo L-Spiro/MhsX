@@ -162,18 +162,21 @@ namespace mx {
 		CStatusBar * psbStatus = StatusBar();
 		if ( psbStatus ) {
 			const CStatusBar::LSW_STATUS_PART spParts[] = {
-				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 523, TRUE },
-				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 192, TRUE },
-				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 168, TRUE },
-				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 132, TRUE },
-				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 96, TRUE },
-				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 48, TRUE },
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 523, TRUE },		// MX_SB_MESSAGE
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 192-48-48, TRUE },		// MX_SB_POSITION_START
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 192-48, TRUE },		// MX_SB_VALUE_SEL
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 192, TRUE },		// MX_SB_FILE_SIZE
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 168, TRUE },			// MX_SB_VIEW_TYPE
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 132, TRUE },			// MX_SB_CHAR_SET
 
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 96, TRUE },			// MX_SB_ENDIAN
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 48, TRUE },			// MX_SB_INSERT_OVERWRITE
 				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height(), TRUE },
 			};
 			psbStatus->SetParts( spParts, std::size( spParts ) );
 		}
-
+		UpdateStatusBar_InsertOverwrite();
+		psbStatus->AutoFitPartsToTextLocked( TRUE );
 
 		// ==== SPLITTER ==== //
 		CMultiSplitter * pwSplitter = MultiSplitter();
@@ -1660,6 +1663,14 @@ namespace mx {
 			psbStatus->SetItemTextColors( MX_GetRgbValue( ::GetSysColor( COLOR_WINDOWTEXT ) ), MX_GetRgbValue( ::GetSysColor( COLOR_GRAYTEXT ) ), INT(_sIdx ) );
 			psbStatus->SetItemBkColor( MX_GetRgbValue( _bWarning ? ::GetSysColor( COLOR_3DSHADOW ) : ::GetSysColor( COLOR_3DFACE ) ), INT(_sIdx ) );
 			psbStatus->SetTextW( INT( _sIdx ), 0, _pwcText );
+		}
+	}
+
+	// Update the status-bar Insert/Overwrite part.
+	void CDeusHexMachinaWindow::UpdateStatusBar_InsertOverwrite() {
+		auto psbStatus = StatusBar();
+		if ( psbStatus ) {
+			psbStatus->SetTextW( MX_SB_INSERT_OVERWRITE, 0, m_bOverwrite ? L"OVR" : L"INS" );
 		}
 	}
 

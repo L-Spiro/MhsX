@@ -646,7 +646,7 @@ namespace mx {
 		 * 
 		 * \return Return strue if both the file size is not 0 and there is an active selection.
 		 **/
-		inline bool									HasSelection() const { return Size() > 0 && m_sSel.bHas; }
+		inline bool									HasSelection() const { return Size() > 0 && m_sSel.HasSelection(); }
 
 		/**
 		 * Selects the whole file.  Not available when opening processes.

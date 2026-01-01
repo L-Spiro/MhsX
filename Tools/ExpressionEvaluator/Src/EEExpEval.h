@@ -106,7 +106,7 @@ namespace ee {
 				::fesetround( iPrevMode );
 			}
 
-			int													iPrevMode;					/**< The previous rounding mode. */
+			int							iPrevMode;					/**< The previous rounding mode. */
 			// FE_TONEAREST FE_DOWNWARD FE_UPWARD FE_TOWARDZERO
 		};
 
@@ -978,6 +978,41 @@ namespace ee {
 		 * \return				Returns up to 4 UTF-8 characters.
 		 **/
 		static uint32_t					Utf32ToUtf8( uint32_t _ui32Utf32, uint32_t &_ui32Len );
+
+		/**
+		 * \brief Tests whether a UTF-16 unit is a high surrogate.
+		 *
+		 * \tparam _tCharType THe input character type (typically wchar_t or char16_t).
+		 * \param _ctUnit UTF-16 unit.
+		 * \return Returns true if it is a high surrogate.
+		 */
+		template <typename _tCharType = wchar_t>
+		static inline bool				IsHighSurrogate( _tCharType _ctUnit ) { return (static_cast<uint32_t>(_ctUnit) >= 0xD800 && static_cast<uint32_t>(_ctUnit) <= 0xDBFF); }
+
+		/**
+		 * \brief Tests whether a UTF-16 unit is a low surrogate.
+		 *
+		 * \tparam _tCharType THe input character type (typically wchar_t or char16_t).
+		 * \param _ctUnit UTF-16 unit.
+		 * \return Returns true if it is a low surrogate.
+		 */
+		template <typename _tCharType = wchar_t>
+		static inline bool				IsLowSurrogate( _tCharType _ctUnit ) { return (static_cast<uint32_t>(_ctUnit) >= 0xDC00 && static_cast<uint32_t>(_ctUnit) <= 0xDFFF); }
+
+		/**
+		 * \brief Combines a UTF-16 surrogate pair into a Unicode code point.
+		 *
+		 * \tparam _tCharType THe input character type (typically wchar_t or char16_t).
+		 * \param _ctHi High surrogate.
+		 * \param _ctLo Low surrogate.
+		 * \return Returns the combined code point.
+		 */
+		template <typename _tCharType = wchar_t>
+		static inline char32_t			CombineSurrogates( _tCharType _ctHi, _tCharType _ctLo ) {
+			const uint32_t uiHi = static_cast<uint32_t>(_ctHi) - 0xD800U;
+			const uint32_t uiLo = static_cast<uint32_t>(_ctLo) - 0xDC00U;
+			return static_cast<char32_t>(0x10000U + ((uiHi << 10) | uiLo));
+		}
 
 		/**
 		 * Converts a wstring to a UTF-8 string.  Converts the full length of the string, so embedded 0 characters don't stop the conversion.

@@ -271,6 +271,21 @@ namespace lsw {
 		 **/
 		virtual HFONT						Font() const;
 
+		/**
+		 * \brief Automatically sizes parts to their text and anchors a right-locked suffix to the right edge.
+		 *
+		 * All parts before the first bLockToRight part are laid out from left-to-right. All parts from the first
+		 * bLockToRight part to the end are laid out from right-to-left (anchored to the right edge).
+		 *
+		 * By default, the last non-locked part becomes a “filler” that expands to consume remaining space up to
+		 * the left edge of the right-locked suffix (or to the end if no suffix exists).
+		 *
+		 * \param _bFillLastNonLocked If TRUE, the last non-locked part is expanded to fill remaining space.
+		 * \return TRUE on success; FALSE otherwise.
+		 */
+		BOOL								AutoFitPartsToTextLocked( BOOL _bFillLastNonLocked = TRUE );
+
+
 
 	protected :
 		// == Members.
@@ -282,6 +297,9 @@ namespace lsw {
 		WNDPROC								m_wpOrigProc = nullptr;
 		/** Window property. */
 		static WCHAR						m_szProp[2];
+		/** \brief Cached SB_SETPARTS right-edge array used to skip redundant updates. */
+		std::vector<INT>					m_vLastAutoFitRights;
+
 
 
 		// == Functions.
@@ -374,6 +392,48 @@ namespace lsw {
 		 * standard grip metrics.
 		 */
 		static void							DrawStatusGrip( HWND _hWnd, HDC _hDc, const RECT &_rClient );
+
+		/**
+		 * \brief Measures the pixel width of a single UTF-16 text segment using DrawTextW() in DT_CALCRECT mode.
+		 *
+		 * This helper assumes the caller has already selected the desired font into \p _hDc.
+		 *
+		 * \param _hDc The device context used for measurement.
+		 * \param _pwc A NUL-terminated UTF-16 string to measure. If NULL or empty, returns 0.
+		 * \param _uiDrawFlags The DrawTextW() flags used for measurement. This function always ORs DT_CALCRECT
+		 * into the call, so \p _uiDrawFlags should include alignment and single-line flags as desired.
+		 * \return The width, in pixels, of the rendered text.
+		 */
+		static int							MeasureTextSegmentW( HDC _hDc, const wchar_t * _pwc, UINT _uiDrawFlags );
+
+		/**
+		 * \brief Measures the pixel width of status-bar text as it would be rendered for a pane.
+		 *
+		 * If tab parsing is enabled (i.e. SBT_NOTABPARSING is not set) and the string contains one or two tab
+		 * characters, the status bar can display up to 3 segments (left, center, right). This helper measures
+		 * each segment independently and returns the maximum segment width, which is sufficient for sizing a
+		 * pane intended to contain that text without truncation for any of the three alignments.
+		 *
+		 * This helper assumes the caller has already selected the desired font into \p _hDc.
+		 *
+		 * \param _hDc The device context used for measurement.
+		 * \param _pwcText A NUL-terminated UTF-16 string to measure. If NULL or empty, returns 0.
+		 * \param _uiType The status-bar text type flags (SBT_*). Only SBT_NOTABPARSING and SBT_RTLREADING
+		 * are considered for measurement.
+		 * \return The width, in pixels, required for the widest segment of the text as rendered by a status bar.
+		 */
+		static int							MeasureStatusTextW( HDC _hDc, LPCWSTR _pwcText, UINT _uiType );
+
+		/**
+		 * \brief Returns the default horizontal padding used when converting measured text width into a pane width.
+		 *
+		 * The returned value represents extra horizontal space added to the measured text width to account for
+		 * typical status-bar insets, separators, and visual breathing room so text does not touch pane edges.
+		 *
+		 * \return The horizontal padding, in pixels, to add to the measured text width when computing pane width.
+		 */
+		static int							StatusPanePaddingX();
+
 
 
 	private :
