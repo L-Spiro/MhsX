@@ -299,6 +299,8 @@ namespace lsw {
 		static WCHAR						m_szProp[2];
 		/** \brief Cached SB_SETPARTS right-edge array used to skip redundant updates. */
 		std::vector<INT>					m_vLastAutoFitRights;
+		/** TRUE if SBT_OWNERDRAW has been asserted for all parts since the last SB_SETPARTS call. */
+		BOOL								m_bAllOwnerDrawApplied = FALSE;
 
 
 

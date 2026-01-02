@@ -53,6 +53,8 @@ namespace lsw {
 		}
 		if ( !vInts.size() ) { return TRUE; }
 		if ( !static_cast<BOOL>(::SendMessageW( Wnd(), SB_SETPARTS, static_cast<WPARAM>(vInts.size()), reinterpret_cast<LPARAM>(&vInts[0]) )) ) { return FALSE; }
+		m_bAllOwnerDrawApplied = FALSE;
+		m_vLastAutoFitRights.clear();
 
 		// Force SBT_OWNERDRAW for every part.
 		for ( size_t I = 0; I < _sTotal; ++I ) {
@@ -414,16 +416,28 @@ namespace lsw {
 			}
 
 			// Ensure the last part extends to the end (lets the control handle exact edge quirks).
-			// This also matches typical SB_SETPARTS usage.
 			vRight.back() = -1;
 
 			// Skip redundant SB_SETPARTS calls.
+			bool bSame = false;
 			if ( m_vLastAutoFitRights.size() == vRight.size() ) {
-				bool bSame = true;
+				bSame = true;
 				for ( size_t I = 0; I < vRight.size(); ++I ) {
 					if ( m_vLastAutoFitRights[I] != vRight[I] ) { bSame = false; break; }
 				}
-				if ( bSame ) { return TRUE; }
+			}
+
+			if ( bSame ) {
+				// Layout didn’t change, but parts may have lost owner-draw due to an SB_SETPARTS elsewhere.
+				if ( !m_bAllOwnerDrawApplied ) {
+					for ( size_t I = 0; I < m_vItems.size(); ++I ) {
+						::SendMessageW( Wnd(), SB_SETTEXTW,
+							static_cast<WPARAM>(static_cast<INT>(I) | (m_vItems[I].uiType | SBT_OWNERDRAW)),
+							static_cast<LPARAM>(I) );
+					}
+					m_bAllOwnerDrawApplied = TRUE;
+				}
+				return TRUE;
 			}
 
 			if ( !static_cast<BOOL>(::SendMessageW( Wnd(), SB_SETPARTS, static_cast<WPARAM>(vRight.size()), reinterpret_cast<LPARAM>(vRight.data()) )) ) {
@@ -443,6 +457,14 @@ namespace lsw {
 					m_vParts[I].iRightCoord = vRight[I];
 				}
 			}
+
+			// Re-assert ownerdraw after SB_SETPARTS.
+			for ( size_t I = 0; I < m_vItems.size(); ++I ) {
+				::SendMessageW( Wnd(), SB_SETTEXTW,
+					static_cast<WPARAM>(static_cast<INT>(I) | (m_vItems[I].uiType | SBT_OWNERDRAW)),
+					static_cast<LPARAM>(I) );
+			}
+			m_bAllOwnerDrawApplied = TRUE;
 
 			return TRUE;
 		}
@@ -483,6 +505,8 @@ namespace lsw {
 			for ( size_t I = 0; I < m_vItems.size(); ++I ) {
 				::SendMessageW( Wnd(), SB_SETTEXTW, static_cast<WPARAM>(static_cast<INT>(I) | (m_vItems[I].uiType | SBT_OWNERDRAW)), static_cast<LPARAM>(I) );
 			}
+			m_bAllOwnerDrawApplied = FALSE;
+			m_vLastAutoFitRights.clear();
 		}
 		AutoFitPartsToTextLocked( TRUE );
 	}

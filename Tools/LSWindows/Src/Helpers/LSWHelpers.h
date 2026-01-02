@@ -499,10 +499,91 @@ namespace lsw {
 		int									iPrev;
 	};
 
+	/** Message-only window. */
+	struct LSW_MESSAGE_WINDOW {
+		LSW_MESSAGE_WINDOW() {}
+		~LSW_MESSAGE_WINDOW() {
+			Destroy();
+		}
+
+
+		// == Functions.
+		/**
+		 * Creates the message-only window.
+		 * 
+		 * \return Returns the handle to the created window.
+		 **/
+		HWND								Create() {
+			Destroy();
+
+			hWnd = ::CreateWindowExW(
+				0, L"STATIC", nullptr, 0,
+				0, 0, 0, 0,
+				HWND_MESSAGE, nullptr,
+				::GetModuleHandleW( nullptr ), nullptr );
+			return hWnd;
+		}
+
+		/**
+		 * Destroys the message-only window.
+		 **/
+		void								Destroy() {
+			if ( hWnd ) {
+				::DestroyWindow( hWnd );
+				hWnd = NULL;
+			}
+		}
+
+	private :
+		// == Members.
+		HWND								hWnd = NULL;							/**< The handle to the the window. */
+	};
+
+	/** A wrapper around ::GlobalLock()/::GlobalUnlock() for Windows. */
+	struct LSW_GLOBALLOCK {
+		LSW_GLOBALLOCK( HGLOBAL _gLockMe ) :
+			gLockMe( _gLockMe ) {
+			if ( gLockMe ) {
+				lpvData = ::GlobalLock( gLockMe );
+			}
+		}
+		~LSW_GLOBALLOCK() {
+			Unlock();
+		}
+
+
+		// == Functions.
+		/**
+		 * Gets a pointer to the memory pointer returned by ::GlobalLock().
+		 * 
+		 * \return Returns the pointer to the memory pointer returned by ::GlobalLock().
+		 **/
+		inline LPVOID						Data() { return lpvData; }
+
+		/**
+		 * Unlocks the memory.
+		 **/
+		inline void							Unlock() {
+			if ( gLockMe && lpvData ) {
+				::GlobalUnlock( gLockMe );
+				gLockMe = NULL;
+				lpvData = NULL;
+			}
+		}
+
+	private :
+		// == Members.
+		HGLOBAL								gLockMe = NULL;							/**< The handle we manage. */
+		LPVOID								lpvData = NULL;							/**< The pointer to the data. */
+	};
+
+	/** A wrapper around cliboard access for Windows. */
 	struct LSW_CLIPBOARD {
-		LSW_CLIPBOARD( HWND _hWnd, bool _bEmpty ) :
-			bEmptied( FALSE ),
-			bOpen( ::OpenClipboard( _hWnd ) ) {
+		LSW_CLIPBOARD( HWND _hWnd = NULL, bool _bEmpty = true ) {
+			if ( NULL == _hWnd ) {
+				_hWnd = mwWindow.Create();
+			}
+			bOpen = ::OpenClipboard( _hWnd ) != FALSE;
 			if ( bOpen && _bEmpty ) {
 				bEmptied = ::EmptyClipboard();
 			}
@@ -516,32 +597,113 @@ namespace lsw {
 
 		// == Functions.
 		/**
+		 * Gets data of a given format.  Call within a try/catch block.  An exception indicates a memory-allocation failure when resizing _vData.
+		 * 
+		 * \param	_uiFormat The format of the data to attempt to retreive from the clipboard.
+		 * \param	_vData Holds the returned vector of data.
+		 * \return	Returns true if data of the given format was found in the clipboard.
+		 * \throws	std::bad_alloc on allocation error.
+		 **/
+		template <typename _tType = std::vector<uint8_t>>
+		bool								GetData( UINT _uiFormat, _tType &_vData ) {
+			static_assert( sizeof( _tType::value_type ) == 1, "Compile-time assertion failed: sizeof( _tType::value_type ) must equal 1." );
+			if ( !bOpen ) { return false; }
+			if ( !::IsClipboardFormatAvailable( _uiFormat ) ) { return false; }
+
+			HGLOBAL hMem = ::GetClipboardData( _uiFormat );
+			if ( hMem ) {
+				_vData.resize( ::GlobalSize( hMem ) );
+				LSW_GLOBALLOCK glLock( hMem );
+				if ( !glLock.Data() ) { return false; }
+				std::memcpy( _vData.data(), glLock.Data(), _vData.size() );
+				return true;
+			}
+			return false;
+		}
+
+		/**
+		 * Sets data in a given format.  Call within a try/catch block.  An exception indicates a memory-allocation failure when allocating the global memory buffer.
+		 * 
+		 * \param	_uiFormat Format of the data to set.
+		 * \param	_vData The actual data to set.
+		 * \return	Returns true if the clipboard is open and the write succeeds.
+		 * \throws	std::bad_alloc on allocation error.
+		 **/
+		template <typename _tType = std::vector<uint8_t>>
+		bool								SetData( UINT _uiFormat, const _tType &_vData ) {
+			if ( !bOpen ) { return false; }
+
+			HGLOBAL hglbBinCopy;
+			hglbBinCopy = ::GlobalAlloc( GMEM_MOVEABLE, _vData.size() );
+			if ( !hglbBinCopy ) { throw std::bad_alloc(); }
+			{
+				LSW_GLOBALLOCK glLock( hglbBinCopy );
+				if ( !glLock.Data() ) {
+					glLock.Unlock();
+					::GlobalFree( hglbBinCopy );
+					return false;
+				}
+				std::memcpy( glLock.Data(), _vData.data(), _vData.size() );
+			}
+			if ( NULL == ::SetClipboardData( _uiFormat, hglbBinCopy ) ) {
+				// It wasn't transferred.
+				::GlobalFree( hglbBinCopy );
+				return false;
+			}
+			return true;
+		}
+
+		/**
+		 * \brief Advertises a clipboard format for delayed rendering.
+		 *
+		 * Calls ::SetClipboardData( _uiFormat, NULL ) to register the format without providing data yet.
+		 * You must later supply the data when WM_RENDERFORMAT / WM_RENDERALLFORMATS is received.
+		 *
+		 * \param _uiFormat The clipboard format to register.
+		 * \return Returns true if the format was registered; false otherwise.
+		 *
+		 * \note The clipboard must be open and owned (typically after ::EmptyClipboard()).
+		 */
+		bool								SetDeferredData( UINT _uiFormat ) {
+			return NULL != ::SetClipboardData( _uiFormat, NULL );
+		}
+
+		/**
 		 * Sets the clipboard text in 8-bit characters.  Can be data rather than a NULL-terminated text string, but a NULL character is appended to the end.
 		 * 
 		 * \param _pcText The data/string to copy to the clipboard.
 		 * \param _stLen The number of bytes to which _pcText points.
 		 * \return Returns TRUE if the clipboard is opened and memory could be allocated and locked.
 		 **/
-		BOOL								SetText( const char * _pcText, size_t _stLen = -1 ) {
-			if ( !_pcText || !bOpen ) { return FALSE; }
+		bool								SetText( const char * _pcText, size_t _stLen = -1 ) {
+			if ( !_pcText || !bOpen ) {
+				::OutputDebugStringA( "Failed to open clipboard.\r\n" );
+				CBase::PrintError( L"Failed to open clipboard: " );
+				return false;
+			}
 			if ( static_cast<int32_t>(_stLen) < 0 ) {
 				_stLen = std::strlen( _pcText );
 			}
 			HGLOBAL hglbBinCopy;
 			hglbBinCopy = ::GlobalAlloc( GMEM_MOVEABLE, (_stLen + 1) * sizeof( _pcText[0] ) );
-			if ( !hglbBinCopy ) { return FALSE; }
-			LPVOID lpvAddress = ::GlobalLock( hglbBinCopy );
-			if ( !lpvAddress ) {
-				::GlobalFree( hglbBinCopy );
-				return FALSE;
+			if ( !hglbBinCopy ) { return false; }
+			{
+				LSW_GLOBALLOCK glLock( hglbBinCopy );
+				if ( !glLock.Data() ) {
+					::GlobalFree( hglbBinCopy );
+					return false;
+				}
+				std::memcpy( glLock.Data(), _pcText, _stLen * sizeof( _pcText[0] ) );
+				char * pcText = static_cast<char *>(glLock.Data());
+				pcText[_stLen] = L'\0';
 			}
-			std::memcpy( lpvAddress, _pcText, (_stLen + 1) * sizeof( _pcText[0] ) );
-			char * pcText = static_cast<char *>(lpvAddress);
-			pcText[_stLen] = L'\0';
-			::GlobalUnlock( hglbBinCopy );
 
-			::SetClipboardData( CF_TEXT, hglbBinCopy );
-			return TRUE;
+			if ( NULL == ::SetClipboardData( CF_TEXT, hglbBinCopy ) ) {
+				// It wasn't transferred.
+				::GlobalFree( hglbBinCopy );
+				return false;
+			}
+			return true;
 		}
 
 		/**
@@ -551,38 +713,45 @@ namespace lsw {
 		 * \param _stLen The number of wchar_t characters to which _pwcText points.
 		 * \return Returns TRUE if the clipboard is opened and memory could be allocated and locked.
 		 **/
-		BOOL								SetText( const wchar_t * _pwcText, size_t _stLen = -1 ) {
+		bool								SetText( const wchar_t * _pwcText, size_t _stLen = -1 ) {
 			if ( !_pwcText || !bOpen ) {
-				::OutputDebugStringA( "Failed to open.\r\n" );
-				CBase::PrintError( L"Failed to open: " );
-				return FALSE;
+				::OutputDebugStringA( "Failed to open clipboard.\r\n" );
+				CBase::PrintError( L"Failed to open clipboard: " );
+				return false;
 			}
 			if ( static_cast<int32_t>(_stLen) < 0 ) {
 				_stLen = std::wcslen( _pwcText );
 			}
 			HGLOBAL hglbBinCopy;
 			hglbBinCopy = ::GlobalAlloc( GMEM_MOVEABLE, (_stLen + 1) * sizeof( _pwcText[0] ) );
-			if ( !hglbBinCopy ) { return FALSE; }
-			LPVOID lpvAddress = ::GlobalLock( hglbBinCopy );
-			if ( !lpvAddress ) {
-				::GlobalFree( hglbBinCopy );
-				::OutputDebugStringA( "Failed to allocate.\r\n" );
-				return FALSE;
+			if ( !hglbBinCopy ) { return false; }
+			{
+				LSW_GLOBALLOCK glLock( hglbBinCopy );
+				if ( !glLock.Data() ) {
+					::GlobalFree( hglbBinCopy );
+					::OutputDebugStringA( "Failed to allocate.\r\n" );
+					return false;
+				}
+				std::memcpy( glLock.Data(), _pwcText, _stLen * sizeof( _pwcText[0] ) );
+				wchar_t * pwcText = static_cast<wchar_t *>(glLock.Data());
+				pwcText[_stLen] = L'\0';
+				::GlobalUnlock( hglbBinCopy );
 			}
-			std::memcpy( lpvAddress, _pwcText, (_stLen + 1) * sizeof( _pwcText[0] ) );
-			wchar_t * pwcText = static_cast<wchar_t *>(lpvAddress);
-			pwcText[_stLen] = L'\0';
-			::GlobalUnlock( hglbBinCopy );
 
-			::SetClipboardData( CF_UNICODETEXT, hglbBinCopy );
-			return TRUE;
+			::EmptyClipboard();
+			if ( NULL == ::SetClipboardData( CF_UNICODETEXT, hglbBinCopy ) ) {
+				// It wasn't transferred.
+				::GlobalFree( hglbBinCopy );
+				return false;
+			}
+			return true;
 		}
 
 
-		// == Members.
 	protected :
-		BOOL								bOpen;
-		BOOL								bEmptied;
+		LSW_MESSAGE_WINDOW					mwWindow;								/**< Message window if no winder was provided when opening the clipboard. */
+		bool								bOpen = false;							/**< Is the clipboard open? */
+		bool								bEmptied = false;						/**< Has the clipboard been emptied? */
 	};
 
 	struct LSW_KEY_FLAGS {
