@@ -62,6 +62,11 @@ namespace mx {
 		return false;
 	}
 
+	// Performs a Copy operation using the given selection, saved to the given clipboard index.
+	bool CHexEditorCurProcess::Copy( const MX_SELECTION &_sSelection, uint32_t _ui32BytesPerRow, size_t _sClipIdx, const MX_COPYAS &_csParms, CSecureWString &_swsMsg ) {
+		return false;
+	}
+
 	// Gets the size of the data source.
 	uint64_t CHexEditorCurProcess::Size() const {
 		return reinterpret_cast<uintptr_t>(mx::CSystem::GetSystemInfo().lpMaximumApplicationAddress);

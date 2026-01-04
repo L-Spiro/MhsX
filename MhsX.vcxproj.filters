@@ -989,6 +989,18 @@
     <ClInclude Include="Src\Layouts\MXUiIds.h">
       <Filter>Header Files\Layouts</Filter>
     </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXSelection.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXCopyAs.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXDataFmt.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXHexEditorControlHost.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="MhsX.exe.intermediate.manifest">

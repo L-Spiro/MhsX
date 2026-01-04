@@ -37,7 +37,32 @@ namespace mx {
 			GoTo( m_pheiTarget->DefaultAddress() );
 
 			RecalcAndInvalidate();
+			if ( m_pwHexParent ) {
+				m_pwHexParent->UpdateStatusBar_CharSet();
+			}
 		}
+	}
+
+	// Sets the character set.
+	void CHexEditorControl::SetCharacterSet( CCharSets::MX_CHAR_SETS _csSet ) {
+		if ( CurStyle()->csCharSet != _csSet ) {
+			CurStyle()->csCharSet = _csSet;
+
+			RecalcAndInvalidate();
+			if ( m_pwHexParent ) {
+				m_pwHexParent->UpdateStatusBar_CharSet();
+			}
+		}
+	}
+
+	/**
+	 * Gets the starting address of the selection, if there is one, otherwise returns the caret position.
+	 * 
+	 * \return Returns the starting address of the selection, if there is one.  Otherwise returns the caret position.
+	 **/
+	uint64_t CHexEditorControl::GetSelctStartOrCaret() const {
+		if ( !HasSelection() ) { return GetCaretAddr(); }
+		return m_sSel.smMode == MX_SM_NORMAL ? m_sSel.sn.ui64Start : m_sSel.sc.ui64AnchorAddr;
 	}
 
 	/**
@@ -132,8 +157,10 @@ namespace mx {
 				m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = _ui64Addr;
 				m_sgSelGesture.smCurrent = CurStyle()->bSelectColumnMode ? MX_SM_COLUMN : MX_SM_NORMAL;
 			}
-
-			reinterpret_cast<CDeusHexMachinaWindow *>(m_pwHexParent)->SetStatusBarText( swsStatus.c_str(), false );
+			
+			if ( m_pwHexParent ) {
+				m_pwHexParent->SetStatusBarText( swsStatus.c_str(), false );
+			}
 		}
 		catch ( ... ) {}
 		StartCaretBlink();
@@ -543,13 +570,16 @@ namespace mx {
 			uint64_t ui64ThisSize = (m_sSel.sc.ui64Lines * CurStyle()->uiBytesPerRow) + m_sSel.sc.ui32Cols;
 			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sc.ui64AnchorAddr;
 			m_sgSelGesture.ui64CaretAddr = m_sgSelGesture.ui64AnchorAddr + ui64ThisSize;
+
+			uiAddr = m_sSel.sc.ui64AnchorAddr;
 		}
 
 		GoTo( uiAddr, false, true );
 
 		try {
 			_swsStatus = _DEC_WS_3843E4C1_Moved_selection_to_address_;
-			_swsStatus += std::format( L"{0} [{0:X}]", uiAddr );
+			std::wstring wsTmp;
+			_swsStatus += std::format( L"{} [{}]", uiAddr, CUtilities::ToHex( uiAddr, wsTmp, 0 ) );
 		}
 		catch ( ... ) { return false; }
 		return true;
@@ -590,16 +620,153 @@ namespace mx {
 
 			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sc.ui64AnchorAddr;
 			m_sgSelGesture.ui64CaretAddr = m_sgSelGesture.ui64AnchorAddr + ui64ThisSize;
+
+			uiAddr = m_sgSelGesture.ui64CaretAddr;
 		}
 
 		GoTo( uiAddr, false, true );
 
 		try {
 			_swsStatus = _DEC_WS_3843E4C1_Moved_selection_to_address_;
-			_swsStatus += std::format( L"{0} [{0:X}]", uiAddr );
+			std::wstring wsTmp;
+			_swsStatus += std::format( L"{} [{}]", uiAddr, CUtilities::ToHex( uiAddr, wsTmp, 0 ) );
 		}
 		catch ( ... ) { return false; }
 		return true;
+	}
+
+	/**
+	 * Performs a Cut operation.
+	 * 
+	 * \param _wsStatus The string to print in the status bar.
+	 * \return Returns false if the message should be treated as a warning.
+	 **/
+	bool CHexEditorControl::Cut( CSecureWString &_swsStatus ) {
+		try {
+			if ( !m_pheiTarget ) {
+				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+				return false;
+			}
+			if ( m_pheiTarget->ReadOnly() ) {
+				_swsStatus = _DEC_WS_D4FFE2E0_File_is_Read_Only;
+				return false;
+			}
+			if ( !m_sSel.HasSelection() ) { return true; }
+			/*
+			std::vector<MX_SEL_RANGE> vSelections;
+			constexpr uint64_t ui64GroupSize = 1024ULL * 1024ULL;
+			uint64_t ui64Idx = 0;
+			std::vector<uint8_t> vClip;
+			{
+				CHexEditorInterface::CBuffer bTmp;
+				do {
+					if ( m_sSel.GatherSelected_LowToHigh( CurStyle()->uiBytesPerRow, vSelections, ui64GroupSize, ui64Idx++ ) ) {
+						for ( const auto & srThis : vSelections ) {
+							size_t sBufSize;
+							for ( uint64_t I = 0; I < srThis.ui64Size; I += sBufSize ) {
+								sBufSize = size_t( std::min<uint64_t>( srThis.ui64Size - I, MAXSIZE_T ) );
+								if ( !m_pheiTarget->Read( srThis.ui64Start, bTmp, sBufSize ) ) {
+								}
+								const uint8_t * pData = reinterpret_cast<const uint8_t *>(bTmp.data());
+								vClip.insert( vClip.end(), pData, pData + sBufSize );
+							}
+						}
+					}
+				} while ( vSelections.size() );
+			}
+
+			LSW_CLIPBOARD cbClip( Wnd(), true );
+			UINT uiId = ::RegisterClipboardFormatW( L"BinaryData" );
+			if ( !cbClip.SetData( uiId, vClip ) ) {
+				// FUCK!!!
+			}*/
+			MX_COPYAS caCopyData;
+			caCopyData.caCopyFmt = MX_CA_BINARY;
+			caCopyData.dfLeft = CurStyle()->dfLeftNumbersFmt;
+			caCopyData.dfRight = CurStyle()->dfRightNumbersFmt;
+			caCopyData.bBigEndian = IsBigEndian();
+			caCopyData.csCharSet = CurStyle()->csCharSet;
+			if ( !m_pheiTarget->Copy( m_sSel, CurStyle()->uiBytesPerRow, 0, caCopyData, _swsStatus ) ) { return false; }
+
+			auto ui64TotalSel = m_sSel.TotalSelected();
+			if ( !DeleteSelectedOrCaret( _swsStatus ) ) {
+				return false;
+			}
+
+			_swsStatus = _DEC_WS_C8AFBB17_Cut__;
+			std::wstring wsTmp;
+			_swsStatus += std::format( L"{} [{}]", ui64TotalSel, CUtilities::ToHex( ui64TotalSel, wsTmp, 0 ) );
+			if ( ui64TotalSel != 1 ) {
+				_swsStatus += _DEC_WS_C1D51046__bytes;
+			}
+			else {
+				_swsStatus += _DEC_WS_BB679D6B__byte;
+			}
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * Performs a Copy operation.
+	 * 
+	 * \param _caFormat The Copy format.
+	 * \param _wsStatus The string to print in the status bar.
+	 * \return Returns false if the message should be treated as a warning.
+	 **/
+	bool CHexEditorControl::CopyAs( MX_COPY_AS _caFormat, CSecureWString &_swsStatus ) {
+		try {
+			if ( !m_pheiTarget ) {
+				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+				return false;
+			}
+			if ( m_pheiTarget->ReadOnly() ) {
+				_swsStatus = _DEC_WS_D4FFE2E0_File_is_Read_Only;
+				return false;
+			}
+			if ( !m_sSel.HasSelection() ) { return true; }
+
+			MX_COPYAS caCopyData;
+			caCopyData.caCopyFmt = _caFormat;
+			caCopyData.dfLeft = CurStyle()->dfLeftNumbersFmt;
+			caCopyData.dfRight = CurStyle()->dfRightNumbersFmt;
+			caCopyData.bBigEndian = IsBigEndian();
+			caCopyData.csCharSet = CurStyle()->csCharSet;
+			if ( !m_pheiTarget->Copy( m_sSel, CurStyle()->uiBytesPerRow, 0, caCopyData, _swsStatus ) ) { return false; }
+
+			auto ui64TotalSel = m_sSel.TotalSelected();
+
+			_swsStatus = _DEC_WS_7D2FA4EA_Copied__;
+			std::wstring wsTmp;
+			_swsStatus += std::format( L"{} [{}]", ui64TotalSel, CUtilities::ToHex( ui64TotalSel, wsTmp, 0 ) );
+			if ( ui64TotalSel != 1 ) {
+				_swsStatus += _DEC_WS_C1D51046__bytes;
+			}
+			else {
+				_swsStatus += _DEC_WS_BB679D6B__byte;
+			}
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * Are we in OVR mode?
+	 * 
+	 * \return Returns true if in Overwrite mode.
+	 **/
+	bool CHexEditorControl::IsOverwriteMode() const {
+		if ( m_pwHexParent ) { return m_pwHexParent->IsOverwriteMode(); }
+		return true;
+	}
+
+	/**
+	 * Gets the character-set Status-Bar string.
+	 * 
+	 * \return Returns the Status Bar string for the given character set.
+	 **/
+	const CSecureString CHexEditorControl::CharSetStatusBarCode() const {
+		return mx::CStringDecoder::DecodeToString( CCharSets::m_csSets[CurStyle()->csCharSet].pcStatusBar, CCharSets::m_csSets[CurStyle()->csCharSet].sStatusLen );
 	}
 
 	/**
@@ -888,6 +1055,21 @@ namespace mx {
 		if ( _bRefresh ) {
 			::InvalidateRect( Wnd(), nullptr, FALSE );
 		}
+	}
+
+	/**
+	 * Reads from a given address in the hew control.
+	 * 
+	 * \param _ui64Addr The address from which to read.
+	 * \param _vReturn Holds the read values.
+	 * \param _sSize The number of bytes to read.
+	 * \return Returns true if all bytes were read.
+	 **/
+	bool CHexEditorControl::Read( uint64_t _ui64Addr, std::vector<uint8_t> &_vReturn, size_t _sSize ) {
+		if MX_UNLIKELY( !m_pheiTarget ) { return false; }
+		if MX_UNLIKELY( UINT64_MAX - _sSize < _ui64Addr ) { return false; }
+		if MX_UNLIKELY( !m_pheiTarget->Read( _ui64Addr, _vReturn, _sSize ) ) { return false; }
+		return _vReturn.size() == _sSize;
 	}
 
 	// WM_NCDESTROY.
@@ -1476,20 +1658,45 @@ namespace mx {
 
 
 			case VK_BACK : {
-				//if ( CanDelete() ) {
-					reinterpret_cast<CDeusHexMachinaWindow *>(m_pwHexParent)->DeletePriorToCaret();
-				//}
+				if ( m_pwHexParent ) {
+					m_pwHexParent->DeletePriorToCaret();
+				}
+				else {
+					CSecureWString wsMsg;
+					DeletePriorToCaret( wsMsg );
+				}
 				break;
 			}
 			case VK_DELETE : {
-				//if ( CanDelete() ) {
-					reinterpret_cast<CDeusHexMachinaWindow *>(m_pwHexParent)->DeleteSelectedOrCaret();
-				//}
+				if ( m_pwHexParent ) {
+					m_pwHexParent->DeleteSelectedOrCaret();
+				}
+				else {
+					CSecureWString wsMsg;
+					DeleteSelectedOrCaret( wsMsg );
+				}
+				break;
+			}
+			case VK_INSERT : {
+				if ( m_pwHexParent ) {
+					m_pwHexParent->ToggleOverwriteInsert();
+				}
 				break;
 			}
 		}
 
 
+		return lsw::CWidget::LSW_H_HANDLED;
+	}
+
+	/**
+	 * \brief Receives committed text input as a Unicode code point.
+	 *
+	 * \param _c32Cp The committed Unicode code point.
+	 * \param _uiRepeat The repeat count (normally 1).
+	 * \return Returns LSW_H_HANDLED if consumed.
+	 */
+	lsw::CWidget::LSW_HANDLED CHexEditorControl::OnTextInputCodePoint( char32_t _c32Cp, uint32_t _uiRepeat ) {
 		return lsw::CWidget::LSW_H_HANDLED;
 	}
 
@@ -1632,7 +1839,7 @@ namespace mx {
 	}
 
 	// Sets the target stream.
-	void CHexEditorControl::SetStream( CHexEditorInterface * _pediStream, CWidget * _pwMainCtrl ) {
+	void CHexEditorControl::SetStream( CHexEditorInterface * _pediStream, CHexEditorControlHost * _pwMainCtrl ) {
 		m_pwHexParent = _pwMainCtrl;
 		m_pheiTarget = _pediStream;
 
@@ -2810,7 +3017,7 @@ namespace mx {
 
 
 					auto pwAncestor = m_pwHexParent;
-					bool bFocus = (pwAncestor && pwAncestor->GetFocus()) || m_bHasFocus || (m_pwParent && m_pwParent->GetFocus()) ||
+					bool bFocus = (pwAncestor && pwAncestor->IsFocused()) || m_bHasFocus || (m_pwParent && m_pwParent->GetFocus()) ||
 						(m_pwParent && m_pwParent->Parent() && m_pwParent->Parent()->GetFocus());
 					
 					bool bRightCaret = m_sgSelGesture.bRightArea && stAll.bShowRightArea;
@@ -3900,11 +4107,14 @@ namespace mx {
 			m_sgSelGesture.bSelecting = true;
 			return;
 		}
-
-		auto psbStatus = reinterpret_cast<CDeusHexMachinaWindow *>(m_pwHexParent)->StatusBar();
-		if ( psbStatus ) {
-			psbStatus->SetTextW( L"" );
+		
+		if ( m_pwHexParent ) {
+			auto psbStatus = m_pwHexParent->StatusBar();
+			if ( psbStatus ) {
+				psbStatus->SetTextW( L"" );
+			}
 		}
+		
 		m_sgSelGesture.bSelecting = false;
 		m_sgSelGesture.bPendingThreshold = true;
 		m_sgSelGesture.ptDown = _ptClient;

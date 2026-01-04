@@ -129,56 +129,7 @@ namespace mx {
 	bool CLargeCoWFileWindow::Read( uint64_t _ui64Addr, CHexEditorInterface::CBuffer &_bDst, size_t _sSize ) const {
 		_sSize = std::min<size_t>( _sSize, Size() - _ui64Addr );
 
-		try {
-			if MX_UNLIKELY( _sSize == 0 ) {
-				_bDst.clear();
-				return true;
-			}
-			_bDst.resize( _sSize );
-		}
-		catch ( ... ) { return false; }
-
-		size_t sSizeCopy = _sSize;
-		uint8_t * pbDst = _bDst.data();
-		for ( size_t I = 0; I < m_vLogicalMap.size(); ++I ) {
-			uint64_t ui64LogicalEnd = m_vLogicalMap[I].ui64Start + m_vLogicalMap[I].ui64Size;
-			if ( _ui64Addr >= m_vLogicalMap[I].ui64Start && _ui64Addr < ui64LogicalEnd ) {
-				uint64_t ui64MaxSize = std::min<uint64_t>( ui64LogicalEnd - _ui64Addr, sSizeCopy );
-
-				switch ( m_vLogicalMap[I].stType ) {
-					case MX_ST_ORIGINAL_FILE : {
-						if ( ui64MaxSize != static_cast<uint64_t>(m_fmMainMap.Read( pbDst, m_vLogicalMap[I].ui64Offset + (_ui64Addr - m_vLogicalMap[I].ui64Start), ui64MaxSize )) ) { return false; }
-						sSizeCopy -= ui64MaxSize;
-						if ( !sSizeCopy ) { return true; }
-						_ui64Addr += ui64MaxSize;
-						pbDst += ui64MaxSize;
-						break;
-					}
-					case MX_ST_SEGMENT : {
-						if ( m_vLogicalMap[I].u.saSegmentAddress.sFile >= m_vEditedMaps.size() ) { return false; }
-						if ( !m_vEditedMaps[m_vLogicalMap[I].u.saSegmentAddress.sFile].get() ) { return false; }
-						try {
-							auto pfmMap = m_vEditedMaps[m_vLogicalMap[I].u.saSegmentAddress.sFile].get();
-							UpdateActiveSegments( pfmMap->Id(), m_sTotalActiveSegments );
-
-							if ( ui64MaxSize != static_cast<uint64_t>(pfmMap->Read( pbDst, m_vLogicalMap[I].ui64Offset + (_ui64Addr - m_vLogicalMap[I].ui64Start), ui64MaxSize )) ) { return false; }
-							sSizeCopy -= ui64MaxSize;
-							if ( !sSizeCopy ) { return true; }
-							_ui64Addr += ui64MaxSize;
-							pbDst += ui64MaxSize;
-						}
-						catch ( ... ) { return false; }
-
-
-						break;
-					}
-					default: { return false; }
-				}
-			}
-		}
-		// If there is anything left, something went wrong internally.
-		//assert( false );
-		return false;
+		return Read( _ui64Addr, _bDst, _sSize, m_vLogicalMap );
 	}
 
 	/**
@@ -328,6 +279,33 @@ namespace mx {
 			return true;
 		}
 		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * Performs a Copy operation using the given selection, saved to the given clipboard index (max index of TotalClipboards).
+	 * 
+	 * \param _sSelection The current selection.
+	 * \param _ui32BytesPerRow The number of bytes per row.
+	 * \param _sClipIdx The cliboard index (between 0 and TotalClipboards).
+	 * \param _swsMsg Upon return, holds the message to print in the Status Bar.
+	 * \return Returns true if the Copy operation was successful.
+	 **/
+	bool CLargeCoWFileWindow::Copy( const MX_SELECTION &_sSelection, uint32_t _ui32BytesPerRow, size_t _sClipIdx, const MX_COPYAS &_csParms, CSecureWString &_swsMsg ) {
+		if ( _sClipIdx >= TotalClipboards ) {
+			_swsMsg = _DEC_WS_1468A1DF_Internal_error_;	// Can only be my mistake.
+			return false;
+		}
+		try {
+			m_cbClipBoards[_sClipIdx].vLogicalMap = m_vLogicalMap;
+			m_cbClipBoards[_sClipIdx].sSelection = _sSelection;
+			m_cbClipBoards[_sClipIdx].ui32BytesPerRow = _ui32BytesPerRow;
+			m_cbClipBoards[_sClipIdx].caCopyAs = _csParms;
+			return true;
+		}
+		catch ( ... ) {
+			_swsMsg = _DEC_WS_F39F91A5_Out_of_memory_;
+			return false;
+		}
 	}
 
 	/**
@@ -548,13 +526,92 @@ namespace mx {
 	 * file size after all applied modifications.
 	 */
 	void CLargeCoWFileWindow::UpdateSize() {
+		m_ui64Size = CalcSize( m_vLogicalMap );
+	}
+
+	/**
+	 * \brief Updates the cached logical file size to match the logical view.
+	 *
+	 * Recomputes the current logical size based on the logical map, reflecting the user-visible
+	 * file size after all applied modifications.
+	 * 
+	 * \param _vLogicalMap Tnhe logical map on which to calculate the size.
+	 */
+	uint64_t CLargeCoWFileWindow::CalcSize( const std::vector<MX_LOGICAL_SECTION> &_vLogicalMap ) const {
 		uint64_t ui64Tmp = 0;
 
-		for ( size_t I = 0; I < m_vLogicalMap.size(); ++I ) {
-			ui64Tmp += m_vLogicalMap[I].ui64Size;
+		for ( size_t I = 0; I < _vLogicalMap.size(); ++I ) {
+			ui64Tmp += _vLogicalMap[I].ui64Size;
 		}
+		return ui64Tmp;
+	}
 
-		m_ui64Size = ui64Tmp;
+	/**
+	 * \brief Reads bytes from the given logical view into the destination buffer.
+	 *
+	 * Reads across logical sections as needed. The bytes returned reflect the current edited
+	 * view (i.e., after applying the logical map).
+	 *
+	 * \param _ui64Addr Logical address to read from.
+	 * \param _bDst Destination buffer to receive the data. The implementation may resize or append
+	 *              depending on the buffer semantics.
+	 * \param _sSize Number of bytes to read.
+	 * \param _vLogicalMap The logical map to use to read the data.
+	 * \return Returns true if the requested bytes were read; false otherwise.
+	 */
+	bool CLargeCoWFileWindow::Read( uint64_t _ui64Addr, CHexEditorInterface::CBuffer &_bDst, size_t _sSize, const std::vector<MX_LOGICAL_SECTION> &_vLogicalMap ) const {
+		//_sSize = std::min<size_t>( _sSize, CalcSize( _vLogicalMap ) - _ui64Addr );
+
+		try {
+			if MX_UNLIKELY( _sSize == 0 ) {
+				_bDst.clear();
+				return true;
+			}
+			_bDst.resize( _sSize );
+		}
+		catch ( ... ) { return false; }
+
+		size_t sSizeCopy = _sSize;
+		uint8_t * pbDst = _bDst.data();
+		for ( size_t I = 0; I < _vLogicalMap.size(); ++I ) {
+			uint64_t ui64LogicalEnd = _vLogicalMap[I].ui64Start + _vLogicalMap[I].ui64Size;
+			if ( _ui64Addr >= _vLogicalMap[I].ui64Start && _ui64Addr < ui64LogicalEnd ) {
+				uint64_t ui64MaxSize = std::min<uint64_t>( ui64LogicalEnd - _ui64Addr, sSizeCopy );
+
+				switch ( _vLogicalMap[I].stType ) {
+					case MX_ST_ORIGINAL_FILE : {
+						if ( ui64MaxSize != static_cast<uint64_t>(m_fmMainMap.Read( pbDst, _vLogicalMap[I].ui64Offset + (_ui64Addr - _vLogicalMap[I].ui64Start), ui64MaxSize )) ) { return false; }
+						sSizeCopy -= ui64MaxSize;
+						if ( !sSizeCopy ) { return true; }
+						_ui64Addr += ui64MaxSize;
+						pbDst += ui64MaxSize;
+						break;
+					}
+					case MX_ST_SEGMENT : {
+						if ( _vLogicalMap[I].u.saSegmentAddress.sFile >= m_vEditedMaps.size() ) { return false; }
+						if ( !m_vEditedMaps[_vLogicalMap[I].u.saSegmentAddress.sFile].get() ) { return false; }
+						try {
+							auto pfmMap = m_vEditedMaps[_vLogicalMap[I].u.saSegmentAddress.sFile].get();
+							UpdateActiveSegments( pfmMap->Id(), m_sTotalActiveSegments );
+
+							if ( ui64MaxSize != static_cast<uint64_t>(pfmMap->Read( pbDst, _vLogicalMap[I].ui64Offset + (_ui64Addr - _vLogicalMap[I].ui64Start), ui64MaxSize )) ) { return false; }
+							sSizeCopy -= ui64MaxSize;
+							if ( !sSizeCopy ) { return true; }
+							_ui64Addr += ui64MaxSize;
+							pbDst += ui64MaxSize;
+						}
+						catch ( ... ) { return false; }
+
+
+						break;
+					}
+					default: { return false; }
+				}
+			}
+		}
+		// If there is anything left, something went wrong internally.
+		//assert( false );
+		return false;
 	}
 
 	/**

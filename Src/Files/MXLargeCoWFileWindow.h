@@ -3,10 +3,12 @@
 #include <LSWWin.h>
 #include "../Files/MXFileMap.h"
 #include "../HexEditor/MXHexEditorInterface.h"
+#include "../HexEditor/MXSelection.h"
 
 #include <filesystem>
 #include <mutex>
 #include <vector>
+
 
 namespace mx {
 
@@ -14,6 +16,13 @@ namespace mx {
 	public :
 		CLargeCoWFileWindow();
 		~CLargeCoWFileWindow();
+
+
+		// == Constants.
+		/**
+		 * The number of clipboards available, including the Windows clipboard (index 0).
+		 **/
+		enum : size_t { TotalClipboards = 10 };
 
 
 		// == Functions.
@@ -101,6 +110,17 @@ namespace mx {
 		 * \return Returns true if the insert succeeded.
 		 */
 		bool													Insert( uint64_t _ui64Addr, const CHexEditorInterface::CBuffer &_bSrc, uint64_t &_ui64Inserted );
+
+		/**
+		 * Performs a Copy operation using the given selection, saved to the given clipboard index (max index of TotalClipboards).
+		 * 
+		 * \param _sSelection The current selection.
+		 * \param _ui32BytesPerRow The number of bytes per row.
+		 * \param _sClipIdx The cliboard index (between 0 and TotalClipboards).
+		 * \param _swsMsg Upon return, holds the message to print in the Status Bar.
+		 * \return Returns true if the Copy operation was successful.
+		 **/
+		bool													Copy( const MX_SELECTION &_sSelection, uint32_t _ui32BytesPerRow, size_t _sClipIdx, const MX_COPYAS &_csParms, CSecureWString &_swsMsg );
 
 		/**
 		 * \brief Begins an Undo grouping sequence.
@@ -238,6 +258,14 @@ namespace mx {
 			std::vector<MX_LOGICAL_SECTION>						vDelete_Redo;
 		};
 
+		// A clipboard.
+		struct MX_CLIPBOARD {
+			std::vector<MX_LOGICAL_SECTION>						vLogicalMap;									/**< The logical map at the time of the Copy operation. */
+			MX_SELECTION										sSelection;										/**< The selection at the time of the Copy operation. */
+			uint32_t											ui32BytesPerRow = 16;							/**< The bytes-per-row at the time of the Copy operation. */
+			MX_COPYAS											caCopyAs;										/**< The copy parameters. */
+		};
+
 
 		// == Members.
 		uint64_t												m_ui64Size = 0;									/**< File size, derived from the logical view. */
@@ -262,6 +290,8 @@ namespace mx {
 		std::vector<std::filesystem::path>						m_vSegmentFiles;								/**< A history of segment files to be cleaned up on shut-down. */
 		uint64_t												m_ui64CurSegmentUsed = 0;						/**< Next free byte in current segment file. */
 		size_t													m_sCurSegmentMapIdx = size_t( -1 );				/**< Index into m_vEditedMaps for current segment file. */
+
+		MX_CLIPBOARD											m_cbClipBoards[TotalClipboards];				/**< The clipboards. */
 
 
 		// == Functions.
@@ -292,6 +322,31 @@ namespace mx {
 		 * file size after all applied modifications.
 		 */
 		void													UpdateSize();
+
+		/**
+		 * \brief Updates the cached logical file size to match the logical view.
+		 *
+		 * Recomputes the current logical size based on the logical map, reflecting the user-visible
+		 * file size after all applied modifications.
+		 * 
+		 * \param _vLogicalMap Tnhe logical map on which to calculate the size.
+		 */
+		uint64_t												CalcSize( const std::vector<MX_LOGICAL_SECTION> &_vLogicalMap ) const;
+
+		/**
+		 * \brief Reads bytes from the given logical view into the destination buffer.
+		 *
+		 * Reads across logical sections as needed. The bytes returned reflect the current edited
+		 * view (i.e., after applying the logical map).
+		 *
+		 * \param _ui64Addr Logical address to read from.
+		 * \param _bDst Destination buffer to receive the data. The implementation may resize or append
+		 *              depending on the buffer semantics.
+		 * \param _sSize Number of bytes to read.
+		 * \param _vLogicalMap The logical map to use to read the data.
+		 * \return Returns true if the requested bytes were read; false otherwise.
+		 */
+		bool													Read( uint64_t _ui64Addr, CHexEditorInterface::CBuffer &_bDst, size_t _sSize, const std::vector<MX_LOGICAL_SECTION> &_vLogicalMap ) const;
 
 		/**
 		 * \brief Performs a logical delete across a section vector.

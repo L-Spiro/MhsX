@@ -52,6 +52,37 @@ namespace lsw {
 		};
 #pragma pack( pop )
 
+		/** RAII for SetRedraw(). */
+		struct LSW_SETREDRAW {
+			LSW_SETREDRAW( CWidget * _pwWnd, bool _bEnable = false, bool _bRedrawWhenEnabled = true, UINT _uiRedrawFlags = RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN ) :
+				pwWnd( _pwWnd ),
+				bEnable( _bEnable ),
+				bRedrawWhenEnabled( _bRedrawWhenEnabled ),
+				uiRedrawFlags( _uiRedrawFlags ) {
+				if ( pwWnd ) {
+					pwWnd->SetRedraw( bEnable );
+					if ( bEnable && bRedrawWhenEnabled ) {
+						::RedrawWindow( pwWnd->Wnd(), nullptr, NULL, uiRedrawFlags );
+					}
+				}
+			}
+			~LSW_SETREDRAW() {
+				if ( pwWnd ) {
+					pwWnd->SetRedraw( !bEnable );
+					if ( !bEnable && bRedrawWhenEnabled ) {
+						::RedrawWindow( pwWnd->Wnd(), nullptr, NULL, uiRedrawFlags );
+					}
+				}
+			}
+
+
+			// == Members.
+			CWidget *						pwWnd = nullptr;
+			UINT							uiRedrawFlags = RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN;
+			bool							bEnable = false;
+			bool							bRedrawWhenEnabled = true;
+		};
+
 
 		// == Functions.
 		/**
@@ -216,6 +247,13 @@ namespace lsw {
 		 * \return Returns non-zero if the window was previously visible; otherwise zero.
 		 */
 		BOOL								SetVisible( BOOL _bVis ) { return ::ShowWindow( Wnd(), _bVis ? SW_SHOW : SW_HIDE ); }
+
+		/**
+		 * Enables or diables redraw.
+		 * 
+		 * \param _bRedraw The redraw state to set.
+		 **/
+		void								SetRedraw( BOOL _bRedraw ) { ::SendMessageW( Wnd(), WM_SETREDRAW, _bRedraw ? TRUE : FALSE, 0 ); }
 
 		/**
 		 * Gets the current window style.
@@ -522,7 +560,18 @@ namespace lsw {
 		 * \param _pwTab Pointer to the tab control.
 		 * \param _iTab Zero-based tab index that toggled.
 		 */
-		virtual void						TabToggled( CWidget * /*_pwTab*/, int /*_iTab*/ ) {}
+		virtual void						TabToggled( CWidget * _pwTab, int _iTab ) { static_cast<void>(_pwTab); static_cast<void>(_iTab); }
+
+		/**
+		 * Notification for when a child tab changes its selection.
+		 * 
+		 * \param param _pwTab Pointer to the tab control.
+		 * \param _iTab Zero-based tab index that was selected.
+		 * \param _lpnHdr Contains information about the notification message.
+		 */
+		virtual void						TabSelChanged( CWidget * _pwTab, int _iTab, LPNMHDR _lpnHdr ) {
+			if ( m_pwParent ) { m_pwParent->TabSelChanged( _pwTab, _iTab, _lpnHdr ); }
+		}
 
 		/**
 		 * Sets the logical parent widget.

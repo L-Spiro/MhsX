@@ -192,46 +192,46 @@ namespace mx {
 
 	// Initialize the system.
 	VOID CSystem::InitSystem() {
-		// Is this WoW64?
-		{
-			CHAR szKernel32[_LEN_6AE69F02+1];
-			CHAR szIsWow64Process[_LEN_2E50340B+1];
-			LPFN_ISWOW64PROCESS pfIsWow64Process = reinterpret_cast<LPFN_ISWOW64PROCESS>(::GetProcAddress( ::GetModuleHandleA(
-				_DEC_6AE69F02_kernel32_dll( szKernel32 ) ),
-				_DEC_2E50340B_IsWow64Process( szIsWow64Process ) ));
-			if ( pfIsWow64Process ) {
-				pfIsWow64Process( ::GetCurrentProcess(), &m_bIsWow );
-			}
-			// Don't leave encrypted strings on the stack.
-			::ZeroMemory( szKernel32, sizeof( szKernel32 ) );
-			::ZeroMemory( szIsWow64Process, sizeof( szIsWow64Process ) );
-			pfIsWow64Process = nullptr;
-		}
-		
-		
-		// System information.
-		{
-			LPFN_GETSYSTEMINFO pfGetSystemInfo = nullptr;
-			CHAR szKernel32[_LEN_6AE69F02+1];
-			CHAR szGetSystemInfo[_T_MAX_LEN];
-			if ( IsWow64Process() ) {				
-				pfGetSystemInfo = reinterpret_cast<LPFN_GETSYSTEMINFO>(::GetProcAddress( ::GetModuleHandleA(
-					_DEC_6AE69F02_kernel32_dll( szKernel32 ) ),
-					_DEC_EB64C435_GetNativeSystemInfo( szGetSystemInfo ) ));
-			}
-			else {
-				pfGetSystemInfo = reinterpret_cast<LPFN_GETSYSTEMINFO>(::GetProcAddress( ::GetModuleHandleA(
-					_DEC_6AE69F02_kernel32_dll( szKernel32 ) ),
-					_DEC_763FADF6_GetSystemInfo( szGetSystemInfo ) ));
-			}
-			// Don't leave encrypted strings on the stack.
-			::ZeroMemory( szKernel32, sizeof( szKernel32 ) );
-			::ZeroMemory( szGetSystemInfo, sizeof( szGetSystemInfo ) );
-			if ( pfGetSystemInfo ) {
-				pfGetSystemInfo( &m_siSystemInfo );
-			}
-			pfGetSystemInfo = nullptr;
-		}
+		//// Is this WoW64?
+		//{
+		//	CHAR szKernel32[_LEN_6AE69F02+1];
+		//	CHAR szIsWow64Process[_LEN_2E50340B+1];
+		//	LPFN_ISWOW64PROCESS pfIsWow64Process = reinterpret_cast<LPFN_ISWOW64PROCESS>(::GetProcAddress( ::GetModuleHandleA(
+		//		_DEC_6AE69F02_kernel32_dll( szKernel32 ) ),
+		//		_DEC_2E50340B_IsWow64Process( szIsWow64Process ) ));
+		//	if ( pfIsWow64Process ) {
+		//		pfIsWow64Process( ::GetCurrentProcess(), &m_bIsWow );
+		//	}
+		//	// Don't leave encrypted strings on the stack.
+		//	::ZeroMemory( szKernel32, sizeof( szKernel32 ) );
+		//	::ZeroMemory( szIsWow64Process, sizeof( szIsWow64Process ) );
+		//	pfIsWow64Process = nullptr;
+		//}
+		//
+		//
+		//// System information.
+		//{
+		//	LPFN_GETSYSTEMINFO pfGetSystemInfo = nullptr;
+		//	CHAR szKernel32[_LEN_6AE69F02+1];
+		//	CHAR szGetSystemInfo[_T_MAX_LEN];
+		//	if ( IsWow64Process() ) {
+		//			pfGetSystemInfo = reinterpret_cast<LPFN_GETSYSTEMINFO>(::GetProcAddress( ::GetModuleHandleA(
+		//			_DEC_6AE69F02_kernel32_dll( szKernel32 ) ),
+		//			_DEC_EB64C435_GetNativeSystemInfo( szGetSystemInfo ) ));
+		//	}
+		//	else {
+		//		pfGetSystemInfo = reinterpret_cast<LPFN_GETSYSTEMINFO>(::GetProcAddress( ::GetModuleHandleA(
+		//			_DEC_6AE69F02_kernel32_dll( szKernel32 ) ),
+		//			_DEC_763FADF6_GetSystemInfo( szGetSystemInfo ) ));
+		//	}
+		//	// Don't leave encrypted strings on the stack.
+		//	::ZeroMemory( szKernel32, sizeof( szKernel32 ) );
+		//	::ZeroMemory( szGetSystemInfo, sizeof( szGetSystemInfo ) );
+		//	if ( pfGetSystemInfo ) {
+		//		pfGetSystemInfo( &m_siSystemInfo );
+		//	}
+		//	pfGetSystemInfo = nullptr;
+		//}
 
 
 		// Kernel32 imports.
@@ -529,7 +529,7 @@ namespace mx {
 		CFile fFile;
 		if ( !FindDll( _lpcModule, fFile ) ) { return nullptr; }
 		if ( !poObj.LoadImageFromMemory( fFile ) ) { return nullptr; }
-		return GetProcAddress( _lpcModule, _lpcProcName, poObj );
+		return CSystem::GetProcAddress( _lpcModule, _lpcProcName, poObj );
 	}
 
 	// Faster way to get the address of a function.
@@ -550,7 +550,7 @@ namespace mx {
 		CStringDecoder::Decode( _lpcModule, _sModuleLen, sModule );
 		CStringDecoder::Decode( _lpcProcName, _sProcLen, sProc );
 
-		LPCVOID pvRet = GetProcAddress( sModule.c_str(), sProc.c_str(), _poObj );
+		LPCVOID pvRet = CSystem::GetProcAddress( sModule.c_str(), sProc.c_str(), _poObj );
 
 		return pvRet;
 	}
@@ -1002,6 +1002,42 @@ namespace mx {
 		}
 		assert( pfTemp == m_pfEnumProcesses );
 #endif	// #ifdef _DEBUG
+
+		// Is this WoW64?
+		{
+			/*LPFN_ISWOW64PROCESS pfIsWow64Process = reinterpret_cast<LPFN_ISWOW64PROCESS>(::GetProcAddress( ::GetModuleHandleA(
+				_DEC_6AE69F02_kernel32_dll( szKernel32 ) ),
+				_DEC_2E50340B_IsWow64Process( szIsWow64Process ) ));*/
+			LPFN_ISWOW64PROCESS pfIsWow64Process = reinterpret_cast<LPFN_ISWOW64PROCESS>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_2E50340B_IsWow64Process, _LEN_2E50340B, poObj ));
+			if ( pfIsWow64Process ) {
+				pfIsWow64Process( ::GetCurrentProcess(), &m_bIsWow );
+			}
+			// Don't leave encrypted strings on the stack.
+			pfIsWow64Process = nullptr;
+		}
+		
+		
+		// System information.
+		{
+			LPFN_GETSYSTEMINFO pfGetSystemInfo = nullptr;
+			if ( IsWow64Process() ) {
+					/*pfGetSystemInfo = reinterpret_cast<LPFN_GETSYSTEMINFO>(::GetProcAddress( ::GetModuleHandleA(
+					_DEC_6AE69F02_kernel32_dll( szKernel32 ) ),
+					_DEC_EB64C435_GetNativeSystemInfo( szGetSystemInfo ) ));*/
+					pfGetSystemInfo = reinterpret_cast<LPFN_GETSYSTEMINFO>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_EB64C435_GetNativeSystemInfo, _LEN_EB64C435, poObj ));
+			}
+			else {
+				/*pfGetSystemInfo = reinterpret_cast<LPFN_GETSYSTEMINFO>(::GetProcAddress( ::GetModuleHandleA(
+					_DEC_6AE69F02_kernel32_dll( szKernel32 ) ),
+					_DEC_763FADF6_GetSystemInfo( szGetSystemInfo ) ));*/
+				pfGetSystemInfo = reinterpret_cast<LPFN_GETSYSTEMINFO>(GetProcAddress( _T_6AE69F02_kernel32_dll, _LEN_6AE69F02, _T_763FADF6_GetSystemInfo, _LEN_763FADF6, poObj ));
+			}
+			// Don't leave encrypted strings on the stack.
+			if ( pfGetSystemInfo ) {
+				pfGetSystemInfo( &m_siSystemInfo );
+			}
+			pfGetSystemInfo = nullptr;
+		}
 
 		::ZeroMemory( szKernel32, std::size( szKernel32 ) );
 #undef MX_CHECK

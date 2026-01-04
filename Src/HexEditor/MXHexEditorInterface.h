@@ -1,6 +1,10 @@
 #pragma once
 
 #include "../MXMhsX.h"
+#include "MXCharSets.h"
+#include "MXCopyAs.h"
+#include "MXDataFmt.h"
+#include "MXSelection.h"
 
 namespace mx {
 
@@ -73,6 +77,9 @@ namespace mx {
 
 		// Delets bytes at a given address.
 		virtual bool						Delete( uint64_t _ui64Addr, uint64_t _ui64Size, uint64_t &_ui64Deleted ) = 0;
+
+		// Performs a Copy operation using the given selection, saved to the given clipboard index.
+		virtual bool						Copy( const MX_SELECTION &_sSelection, uint32_t _ui32BytesPerRow, size_t _sClipIdx, const MX_COPYAS &_csParms, CSecureWString &_swsMsg ) = 0;
 
 		// Gets the size of the data source.
 		virtual uint64_t					Size() const = 0;

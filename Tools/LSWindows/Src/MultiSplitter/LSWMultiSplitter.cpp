@@ -45,11 +45,13 @@ namespace lsw {
 	// == Functions.
 	// Attach a widget.
 	bool CMultiSplitter::Attach( const LSW_DT_ATTACH &_maAttach ) {
+		LSW_SETREDRAW srRedraw( this );
 		return Attach( _maAttach, m_meRoot );
 	}
 
 	// Detaches a widget given its ID.
 	bool CMultiSplitter::Detach( WORD _wId ) {
+		LSW_SETREDRAW srRedraw( this );
 		return Detach( _wId, m_meRoot );
 	}
 

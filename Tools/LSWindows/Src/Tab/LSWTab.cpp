@@ -132,7 +132,7 @@ namespace lsw {
 			hDwp = ::DeferWindowPos(
 				hDwp,
 				hTarget,
-				HWND_TOP,						// ensure it is above siblings so WS_CLIPSIBLINGS wonÅft occlude it
+				HWND_TOP,						// Ensure it is above siblings so WS_CLIPSIBLINGS wonÅft occlude it
 				0, 0, 0, 0,
 				SWP_NOMOVE | SWP_NOSIZE | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW
 			);
@@ -158,7 +158,6 @@ namespace lsw {
 		::SendMessageW( Wnd(), WM_SETREDRAW, TRUE, 0 );
 		::SendMessageW( hParent, WM_SETREDRAW, TRUE, 0 );
 
-		// *** Critical: explicitly repaint the selected page now. ***
 		if ( hTarget ) {
 			::RedrawWindow(
 				hTarget,

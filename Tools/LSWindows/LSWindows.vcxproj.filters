@@ -219,6 +219,9 @@
     <Filter Include="Source Files\Fonts">
       <UniqueIdentifier>{54d16667-5f8a-443f-a181-01c7c1dd1a8c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Clipboard">
+      <UniqueIdentifier>{908e9c7d-84c5-420f-b32c-67167a406a95}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -370,6 +373,27 @@
     </ClInclude>
     <ClInclude Include="Src\Base\LSWAccelRouter.h">
       <Filter>Header Files\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Clipboard\LSWOleInitialize.h">
+      <Filter>Header Files\Clipboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Clipboard\LSWStgMedium.h">
+      <Filter>Header Files\Clipboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Clipboard\LSWOleStorage.h">
+      <Filter>Header Files\Clipboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Clipboard\LSWEnumFormatEtc.h">
+      <Filter>Header Files\Clipboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Clipboard\LSWDataObject.h">
+      <Filter>Header Files\Clipboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Clipboard\LSWOleClipboard.h">
+      <Filter>Header Files\Clipboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Clipboard\LSWOleClipboardObject.h">
+      <Filter>Header Files\Clipboard</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

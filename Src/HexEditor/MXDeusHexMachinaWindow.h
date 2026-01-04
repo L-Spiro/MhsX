@@ -5,6 +5,7 @@
 #include "../Layouts/MXLayoutManager.h"
 #include "../Strings/MXStringDecoder.h"
 #include "MXHexEditorControl.h"
+#include "MXHexEditorControlHost.h"
 #include "MXHexEditorInterface.h"
 
 #include <ImageList/LSWImageList.h>
@@ -24,7 +25,7 @@ namespace mx {
 	
 	class CWindowMemHack;
 
-	class CDeusHexMachinaWindow : public lsw::CMainWindow {
+	class CDeusHexMachinaWindow : public lsw::CMainWindow, CHexEditorControlHost {
 	public :
 		CDeusHexMachinaWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 		~CDeusHexMachinaWindow();
@@ -70,6 +71,7 @@ namespace mx {
 			MX_SB_VIEW_TYPE,
 			MX_SB_CHAR_SET,
 			MX_SB_ENDIAN,
+			MX_SB_CLIPBOARD,
 			MX_SB_INSERT_OVERWRITE,
 
 			MX_SB_TOTAL
@@ -123,6 +125,9 @@ namespace mx {
 		 */
 		virtual LSW_HANDLED							SetFocus( HWND /*_hPrevFocus*/ ) override;
 
+		// Determines if the control is focused or not.
+		virtual bool								IsFocused() { return GetFocus(); }
+
 		/**
 		 * Handles WM_KILLFOCUS.
 		 * \brief Notified when the window loses keyboard focus.
@@ -131,6 +136,15 @@ namespace mx {
 		 * \return Returns a LSW_HANDLED code.
 		 */
 		virtual LSW_HANDLED							KillFocus( HWND /*_hNewFocus*/ ) override;
+
+		/**
+		 * Notification for when a child tab changes its selection.
+		 * 
+		 * \param param _pwTab Pointer to the tab control.
+		 * \param _iTab Zero-based tab index that was selected.
+		 * \param _lpnHdr Contains information about the notification message.
+		 */
+		virtual void								TabSelChanged( CWidget * _pwTab, int _iTab, LPNMHDR _lpnHdr ) override;
 
 		/**
 		 * The WM_KEYDOWN handler.
@@ -198,11 +212,17 @@ namespace mx {
 		// Performs a Redo.
 		void										Redo();
 
+		// Performs a Cut.
+		void										Cut();
+
+		// Performs a Copy As.
+		void										Copy( MX_COPY_AS _caFormat = MX_CA_BINARY );
+
 		// Delete the selection.
-		void										DeleteSelectedOrCaret();
+		void										DeleteSelectedOrCaret() override;
 
 		// Deletes the character prior to the caret (backspace).
-		void										DeletePriorToCaret();
+		void										DeletePriorToCaret() override;
 
 		// Select all.
 		void										SelectAll();
@@ -244,10 +264,19 @@ namespace mx {
 		void										ResetFontSize();
 
 		// Sets a status-bar item’s text and "warning" status.
-		void										SetStatusBarText( const wchar_t * _pwcText, bool _bWarning = false, size_t _sIdx = 0 );
+		void										SetStatusBarText( const wchar_t * _pwcText, bool _bWarning = false, size_t _sIdx = 0 ) override;
+
+		// Toggles between Overwrite and Insert.
+		void										ToggleOverwriteInsert() override { CHexEditorControlHost::ToggleOverwriteInsert(); UpdateStatusBar_InsertOverwrite(); }
 
 		// Update the status-bar Insert/Overwrite part.
 		void										UpdateStatusBar_InsertOverwrite();
+
+		// Update the status-bar Little-Endian/Big-Endian part.
+		void										UpdateStatusBar_Endian();
+
+		// Update the status-bar Character-Set part.
+		void										UpdateStatusBar_CharSet() override;
 
 		/**
 		 * Gets the widget type identifier.

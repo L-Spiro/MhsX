@@ -4,7 +4,7 @@
         "FoundAddressRate" : 10,
         "MainRefreshRate" : 35,
         "LockedRefreshRate" : 1000,
-        "ExpressionRefreshRate" : 45,
+        "ExpressionRefreshRate" : 1,
         "DataAsCodeName" : true,
         "DataSizes" : true,
         "DataRanges" : true,

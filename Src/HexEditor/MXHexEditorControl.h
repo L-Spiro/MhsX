@@ -5,9 +5,13 @@
 #include "../Strings/MXStringDecoder.h"
 #include "../Utilities/MXUtilities.h"
 #include "MXCharSets.h"
+#include "MXCopyAs.h"
+#include "MXDataFmt.h"
 #include "MXHexEditorColors.h"
+#include "MXHexEditorControlHost.h"
 #include "MXHexEditorInterface.h"
 #include "MXMiniMap.h"
+#include "MXSelection.h"
 
 #include <LSWWin.h>
 #include <Helpers/LSWHelpers.h>
@@ -23,12 +27,6 @@ namespace mx {
 
 
 		// == Enumerations.
-		/** Selection mode. */
-		enum MX_SELECTION_MODE : uint32_t {
-			MX_SM_NORMAL = 0,						/**< Normal mode. */
-			MX_SM_COLUMN = 1						/**< Column mode. */
-		};
-
 		/** Shared fonts. */
 		enum MX_FONT_TYPE {
 			MX_FT_FIXED_ROW,
@@ -61,37 +59,6 @@ namespace mx {
 			MX_AF_LINE_NUMBER,						/**< Example: 820292197 (right-aligned, padded with spaces on the left) */
 			MX_AF_SHORT_HEX,						/**< Example: C392:A990w */
 			MX_AF_SHORT_DEC,						/**< Example: 2395961428w (right-aligned, padded with spaces on the left) */
-		};
-
-		/** Data display for the left and right columns. */
-		enum MX_DATA_FMT {
-			MX_DF_HEX,								/**< "00 FF 2A" */
-			MX_DF_DEC,								/**< "000 255 042" */
-			MX_DF_OCT,								/**< "000 377 052" */
-			MX_DF_BIN,								/**< "00000000" */
-			MX_DF_CHAR,								/**< Textual: printable byte or '.' */
-			MX_DF_UINT8,							/**< "  0 255  42" */
-			MX_DF_INT8,								/**< "  0  -1  42" */
-			MX_DF_UINT16,							/**< "    0 65535    42" */
-			MX_DF_INT16,							/**< "    0    -1    42" */
-			MX_DF_UINT32,							/**< "         0 4294967295         42" */
-			MX_DF_INT32,							/**< "         0         -1         42" */
-			MX_DF_UINT64,							/**< "                   0 18446744073709551615                   42" */
-			MX_DF_INT64,							/**< "                   0                   -1                   42" */
-			MX_DF_POINTER16,						/**< "FFFF" */
-			MX_DF_POINTER32,						/**< "FFFFFFFF" */
-			MX_DF_POINTER64,						/**< "FFFFFFFFFFFFFFFF" */
-			MX_DF_FLOAT10,							/**< "0 3.125 -42" */
-			MX_DF_FLOAT11,							/**< "0 3.125 -42" */
-			MX_DF_BFLOAT16,							/**< "0 3.141 -42" */
-			MX_DF_FLOAT16,							/**< "0 3.1406 -42" */
-			MX_DF_FLOAT32,							/**< "0 3.1415925 -42" */
-			MX_DF_FLOAT64,							/**< "0 3.1415926535897931 -42" */
-
-			MX_DF_PCM8,								/**< "0 -1 0.1647" */
-			MX_DF_PCM16,							/**< "0 -1 0.1647" */
-			MX_DF_PCM24,							/**< "0 -1 0.1647" */
-			MX_DF_PCM32,							/**< "0 -1 0.1647" */
 		};
 
 		/** Ruler formats. */
@@ -210,12 +177,6 @@ namespace mx {
 			MX_HEX_EDITOR_COLORS *					phecBg							= nullptr;					/**< Background colors. */
 		};
 
-		/** Selection ranges. */
-		struct MX_SEL_RANGE {
-			uint64_t								ui64Start						= 0;						/**< The start of a selection range. */
-			uint64_t								ui64Size						= 0;						/**< The size of the selection range. */
-		};
-
 
 		// == Functions.
 		// Sets the view type.
@@ -225,13 +186,7 @@ namespace mx {
 		inline MX_EDIT_AS							GetViewType() const { return m_eaEditAs; }
 
 		// Sets the character set.
-		void										SetCharacterSet( CCharSets::MX_CHAR_SETS _csSet ) {
-			if ( CurStyle()->csCharSet != _csSet ) {
-				CurStyle()->csCharSet = _csSet;
-
-				RecalcAndInvalidate();
-			}
-		};
+		void										SetCharacterSet( CCharSets::MX_CHAR_SETS _csSet );
 
 		// Gets the current character set.
 		inline CCharSets::MX_CHAR_SETS				GetCharacterSet() const { return CurStyle()->csCharSet; }
@@ -501,6 +456,13 @@ namespace mx {
 		}
 
 		/**
+		 * Gets the starting address of the selection, if there is one, otherwise returns the caret position.
+		 * 
+		 * \return Returns the starting address of the selection, if there is one.  Otherwise returns the caret position.
+		 **/
+		uint64_t									GetSelctStartOrCaret() const;
+
+		/**
 		 * Gets the caret address.
 		 * 
 		 * \return Returns the caret address.
@@ -704,6 +666,7 @@ namespace mx {
 		 * Sets the caret to the beginning of the selection.
 		 * 
 		 * \param _wsStatus The string to print in the status bar.
+		 * \return Returns false if the message should be treated as a warning.
 		 **/
 		bool										MarkSelectionStart( CSecureWString &_swsStatus );
 
@@ -711,6 +674,7 @@ namespace mx {
 		 * Sets the caret to the end of the selection.
 		 * 
 		 * \param _wsStatus The string to print in the status bar.
+		 * \return Returns false if the message should be treated as a warning.
 		 **/
 		bool										MarkSelectionEnd( CSecureWString &_swsStatus );
 
@@ -718,6 +682,7 @@ namespace mx {
 		 * Moves the selection back.
 		 * 
 		 * \param _wsStatus The string to print in the status bar.
+		 * \return Returns false if the message should be treated as a warning.
 		 **/
 		bool										MoveSelectionBack( CSecureWString &_swsStatus );
 
@@ -725,8 +690,47 @@ namespace mx {
 		 * Moves the selection forward.
 		 * 
 		 * \param _wsStatus The string to print in the status bar.
+		 * \return Returns false if the message should be treated as a warning.
 		 **/
 		bool										MoveSelectionForward( CSecureWString &_swsStatus );
+
+		/**
+		 * Performs a Cut operation.
+		 * 
+		 * \param _wsStatus The string to print in the status bar.
+		 * \return Returns false if the message should be treated as a warning.
+		 **/
+		bool										Cut( CSecureWString &_swsStatus );
+
+		/**
+		 * Performs a Copy operation.
+		 * 
+		 * \param _caFormat The Copy format.
+		 * \param _wsStatus The string to print in the status bar.
+		 * \return Returns false if the message should be treated as a warning.
+		 **/
+		bool										CopyAs( MX_COPY_AS _caFormat, CSecureWString &_swsStatus );
+
+		/**
+		 * Are we in OVR mode?
+		 * 
+		 * \return Returns true if in Overwrite mode.
+		 **/
+		bool										IsOverwriteMode() const;
+
+		/**
+		 * Are we in Big-Endian mode?
+		 * 
+		 * \return Returns true if we are in Big Endian mode (impacts how Unicode characters are displayed).
+		 **/
+		bool										IsBigEndian() const { return m_bBigEnd; }
+
+		/**
+		 * Gets the character-set Status-Bar string.
+		 * 
+		 * \return Returns the Status Bar string for the given character set.
+		 **/
+		const CSecureString							CharSetStatusBarCode() const;
 
 		/**
 		 * Determines if deleting is possible.  To delete, the internal state must be valid and the file must not be read-only.
@@ -804,6 +808,16 @@ namespace mx {
 		 * \param _bRefresh If true, the control is redrawn.
 		 **/
 		void										EnsureVisible( uint64_t _ui64Addr, bool _bRefresh = true );
+
+		/**
+		 * Reads from a given address in the hew control.
+		 * 
+		 * \param _ui64Addr The address from which to read.
+		 * \param _vReturn Holds the read values.
+		 * \param _sSize The number of bytes to read.
+		 * \return Returns true if all bytes were read.
+		 **/
+		bool										Read( uint64_t _ui64Addr, std::vector<uint8_t> &_vReturn, size_t _sSize );
 
 		// WM_NCDESTROY.
 		virtual LSW_HANDLED							NcDestroy();
@@ -992,6 +1006,15 @@ namespace mx {
 		 */
 		virtual LSW_HANDLED							KeyDown( UINT _uiKeyCode, UINT /*_uiFlags*/ );
 
+		/**
+		 * \brief Receives committed text input as a Unicode code point.
+		 *
+		 * \param _c32Cp The committed Unicode code point.
+		 * \param _uiRepeat The repeat count (normally 1).
+		 * \return Returns LSW_H_HANDLED if consumed.
+		 */
+		virtual LSW_HANDLED							OnTextInputCodePoint( char32_t _c32Cp, uint32_t _uiRepeat );
+
 		// WM_HSCROLL
 		virtual LSW_HANDLED							HScroll( USHORT /*_uScrollPos*/, USHORT _uScrollType, CWidget * /*_pwWidget*/ );
 
@@ -1010,7 +1033,7 @@ namespace mx {
 		}
 
 		// Sets the target stream.
-		void										SetStream( CHexEditorInterface * _pediStream, CWidget * _pwMainCtrl );
+		void										SetStream( CHexEditorInterface * _pediStream, CHexEditorControlHost * _pwMainCtrl );
 
 		// Gets the size of the handled data.
 		inline uint64_t								Size() const { return m_pheiTarget ? m_pheiTarget->Size() : 0; }
@@ -1085,288 +1108,6 @@ namespace mx {
 			int32_t									i32PageCols			= 0;								/**< How many text columns fit. */
 		};
 
-		/** A Normal selection: [startAddr, endAddr] inclusive, normalized. */
-		struct MX_SEL_NORMAL {
-			uint64_t								ui64Start			= 0;								/**< Inclusive start address. */
-			uint64_t								ui64End				= 0;								/**< Exclusive end address. */
-
-
-			// == Functions.
-			/** Normalize start/end so start <= end. */
-			inline void								Normalize() {
-				if ( ui64Start > ui64End ) { std::swap( ui64Start, ui64End ); }
-			}
-
-			/** True if a single-point selection. */
-			inline bool								Empty() const { return ui64Start == ui64End; }
-
-			/**
-			 * Determines if a given address is in the selection.
-			 * 
-			 * \param _ui64Address The address to test for being selected.
-			 * \return Returns true if there is a selection and if the given address is part of that selection.
-			 **/
-			inline bool								IsSelected( uint64_t _ui64Address ) {
-				return _ui64Address >= ui64Start && _ui64Address < ui64End;
-			}
-
-		};
-
-		/**
-		 * Column selection anchored to a top-left address.
-		 * Width is in columns (cells), height is in lines (rows). Both are >= 1 when valid.
-		 * This form survives any bytes-per-row changes; visualization is realized per current layout.
-		 */
-		struct MX_SEL_COLUMN {
-			uint64_t								ui64AnchorAddr		= 0;								/**< Absolute address of the top-left cell. */
-			uint32_t								ui32Cols			= 1;								/**< Width in byte columns. */
-			uint64_t								ui64Lines			= 1;								/**< Height in rows (lines). */
-
-
-			// == Functions.
-			/** Returns true if degenerate (treated as empty on end-gesture). */
-			inline bool								Empty() const { return ui32Cols == 0 /*|| ui64Lines == 0*/; }
-
-			/**
-			 * Determines if a given address is in the selection.
-			 * 
-			 * \param _ui64Address The address to test for being selected.
-			 * \param _ui32BytesPerRow The number of bytes in a row.
-			 * \return Returns true if there is a selection and if the given address is part of that selection.
-			 **/
-			inline bool								IsSelected( uint64_t _ui64Address, uint32_t _ui32BytesPerRow ) {
-				uint64_t ui64AnchorRow = ui64AnchorAddr / _ui32BytesPerRow;
-				uint64_t ui64AnchorCol = ui64AnchorAddr % _ui32BytesPerRow;
-
-				uint64_t ui64AddrRow = _ui64Address / _ui32BytesPerRow;
-				if ( ui64AddrRow < ui64AnchorRow || ui64AddrRow > ui64AnchorRow + ui64Lines ) { return false; }
-
-				uint64_t ui64AddrCol = _ui64Address % _ui32BytesPerRow;
-				return ui64AddrCol >= ui64AnchorCol && ui64AddrCol < ui64AnchorCol + ui32Cols;
-			}
-		};
-
-		/**
-		 * The active selection (either Normal or Column).
-		 * Stores payload for the active mode and exposes helpers shared by both.
-		 */
-		struct MX_SELECTION {
-			MX_SELECTION_MODE						smMode				= MX_SM_NORMAL;						/**< Active selection mode. */
-			bool									bHas				= false;							/**< True if there is an active selection. */
-			MX_SEL_NORMAL							sn;														/**< Normal selection payload. */
-			MX_SEL_COLUMN							sc;														/**< Column selection payload. */
-
-
-			// == Functions.
-			/**
-			 * Is there an actual selection?
-			 * 
-			 * \return Returns true if both bHas is true and the selection region has a non-0 area.
-			 **/
-			inline bool								HasSelection() const {
-				if ( !bHas ) { return false; }
-				if ( smMode == MX_SM_NORMAL ) { return !sn.Empty(); }
-				return !sc.Empty();
-			}
-
-			/**
-			 * True if selection is limited to a single logical row (for Normal) or single row (for Column).
-			 * Used for conversion logic.
-			 *
-			 * \param _ui32BytesPerRow Current bytes-per-row.
-			 * \return Returns true if the selection occupies exactly one logical row.
-			 */
-			inline bool								IsSingleRow( uint32_t _ui32BytesPerRow ) const {
-				if ( smMode == MX_SM_COLUMN ) {
-					return sc.ui64Lines == 1;
-				}
-				const uint64_t ui64StartLine = sn.ui64Start / _ui32BytesPerRow;
-				const uint64_t ui64EndLine   = sn.ui64End   / _ui32BytesPerRow;
-				return ui64StartLine == ui64EndLine;
-			}
-
-			/**
-			 * Determines if a given address is in the selection.
-			 * 
-			 * \param _ui64Address The address to test for being selected.
-			 * \param _ui32BytesPerRow The number of bytes in a row.
-			 * \return Returns true if there is a selection and if the given address is part of that selection.
-			 **/
-			inline bool								IsSelected( uint64_t _ui64Address, uint32_t _ui32BytesPerRow ) {
-				if ( !bHas ) { return false; }
-				if ( smMode == MX_SM_NORMAL ) {
-					return sn.IsSelected( _ui64Address );
-				}
-				return sc.IsSelected( _ui64Address, _ui32BytesPerRow );
-			}
-
-			/**
-			 * Gathers the selected ranges.  Addresses will be sorted in descanding order (higher addresses first).
-			 * 
-			 * \param _ui32BytesPerRow The number of bytes in a row.
-			 * \param _vSelections Holds the returned selection ranges sorted from high-to-low.
-			 * \return Returns true if allocating all of the selection ranges succeeded or there is no selection.  False always indicates a memory failure.
-			 **/
-			inline bool								GatherSelected_HighToLow( uint32_t _ui32BytesPerRow, std::vector<MX_SEL_RANGE> &_vSelections ) {
-				_vSelections.clear();
-				if ( !HasSelection() ) { return true; }
-				try {
-					if ( smMode == MX_SM_NORMAL ) {	
-						// Known not to be empty.
-						// There is only one selection range.
-						MX_SEL_RANGE srRange = { .ui64Start = sn.ui64Start, .ui64Size = sn.ui64End - sn.ui64Start };
-						_vSelections.push_back( srRange );
-						return true;
-					}
-
-					// Column Mode.
-					// Known not to be empty.
-					for ( size_t I = sc.ui64Lines + 1; I--; ) {
-						MX_SEL_RANGE srRange = { .ui64Start = sc.ui64AnchorAddr + I * _ui32BytesPerRow, .ui64Size = sc.ui32Cols };
-						_vSelections.push_back( srRange );
-					}
-					return true;
-				}
-				catch ( ... ) { return false; }
-			 }
-
-			/**
-			 * Gathers the selected ranges.  Addresses will be sorted in ascanding order (lower addresses first).
-			 * 
-			 * \param _ui32BytesPerRow The number of bytes in a row.
-			 * \param _vSelections Holds the returned selection ranges sorted from low-to-high.
-			 * \return Returns true if allocating all of the selection ranges succeeded or there is no selection.  False always indicates a memory failure.
-			 **/
-			inline bool								GatherSelected_LowToHigh( uint32_t _ui32BytesPerRow, std::vector<MX_SEL_RANGE> &_vSelections ) {
-				_vSelections.clear();
-				if ( !HasSelection() ) { return true; }
-				try {
-					if ( smMode == MX_SM_NORMAL ) {	
-						// Known not to be empty.
-						// There is only one selection range.
-						MX_SEL_RANGE srRange = { .ui64Start = sn.ui64Start, .ui64Size = sn.ui64End - sn.ui64Start };
-						_vSelections.push_back( srRange );
-						return true;
-					}
-
-					// Column Mode.
-					// Known not to be empty.
-					for ( size_t I = 0; I <= sc.ui64Lines; ++I ) {
-						MX_SEL_RANGE srRange = { .ui64Start = sc.ui64AnchorAddr + I * _ui32BytesPerRow, .ui64Size = sc.ui32Cols };
-						_vSelections.push_back( srRange );
-					}
-					return true;
-				}
-				catch ( ... ) { return false; }
-			 }
-
-			 /**
-			 * Gathers a part of the selected ranges.  Addresses will be grouped into chunks of _ui64GroupSize, and you can request an index into those groupings to be returned via _ui64GroupIdx.
-			 *	This prevents long freezes or memory failures when millions of rows have been selected in column mode.
-			 *	Addresses will be sorted in descanding order (higher addresses first).
-			 * 
-			 * \param _ui32BytesPerRow The number of bytes in a row.
-			 * \param _vSelections Holds the returned selection ranges sorted from high-to-low.
-			 * \param _ui64GroupSize The size of each group to gather.
-			 * \param _ui64GroupIdx The index of the group to gather.
-			 * \return Returns true if allocating all of the selection ranges succeeded or there is no selection.  False always indicates a memory failure.
-			 **/
-			inline bool								GatherSelected_HighToLow( uint32_t _ui32BytesPerRow, std::vector<MX_SEL_RANGE> &_vSelections, uint64_t _ui64GroupSize, uint64_t _ui64GroupIdx ) {
-				_vSelections.clear();
-				if ( !HasSelection() ) { return true; }
-				try {
-					if ( !_ui64GroupSize ) { return false; }
-					if ( smMode == MX_SM_NORMAL ) {
-						if ( _ui64GroupIdx != 0 ) { return true; }
-						// Known not to be empty.
-						// There is only one selection range.
-						MX_SEL_RANGE srRange = { .ui64Start = sn.ui64Start, .ui64Size = sn.ui64End - sn.ui64Start };
-						_vSelections.push_back( srRange );
-						return true;
-					}
-
-					// Column Mode.
-					// Known not to be empty.
-					
-					uint64_t ui64Total = sc.ui64Lines + 1;
-					uint64_t ui64TotalGroups = (ui64Total % _ui64GroupSize == 0) ? (ui64Total / _ui64GroupSize) : (ui64Total / _ui64GroupSize + 1);
-					if ( _ui64GroupIdx >= ui64TotalGroups ) { return true; }
-					uint64_t ui64NewTotal = std::min( _ui64GroupSize, ui64Total - _ui64GroupSize * _ui64GroupIdx );
-					uint64_t ui64Offset = ui64Total - _ui64GroupSize * _ui64GroupIdx - ui64NewTotal;
-					for ( size_t I = ui64NewTotal; I--; ) {
-						MX_SEL_RANGE srRange = { .ui64Start = sc.ui64AnchorAddr + (I + ui64Offset) * _ui32BytesPerRow, .ui64Size = sc.ui32Cols };
-						_vSelections.push_back( srRange );
-					}
-					return true;
-				}
-				catch ( ... ) { return false; }
-			 }
-
-			/**
-			 * Gathers a part of the selected ranges.  Addresses will be grouped into chunks of _ui64GroupSize, and you can request an index into those groupings to be returned via _ui64GroupIdx.
-			 *	This prevents long freezes or memory failures when millions of rows have been selected in column mode.
-			 *	Addresses will be sorted in ascanding order (lower addresses first).
-			 * 
-			 * \param _ui32BytesPerRow The number of bytes in a row.
-			 * \param _vSelections Holds the returned selection ranges sorted from low-to-high.
-			 * \param _ui32BytesPerRow The number of bytes in a row.
-			 * \param _ui32BytesPerRow The number of bytes in a row.
-			 * \return Returns true if allocating all of the selection ranges succeeded or there is no selection.  False always indicates a memory failure.
-			 **/
-			inline bool								GatherSelected_LowToHigh( uint32_t _ui32BytesPerRow, std::vector<MX_SEL_RANGE> &_vSelections, uint64_t _ui64GroupSize, uint64_t _ui64GroupIdx ) {
-				_vSelections.clear();
-				if ( !HasSelection() ) { return true; }
-				try {
-					if ( !_ui64GroupSize ) { return false; }
-					if ( smMode == MX_SM_NORMAL ) {
-						if ( _ui64GroupIdx != 0 ) { return true; }
-						// Known not to be empty.
-						// There is only one selection range.
-						MX_SEL_RANGE srRange = { .ui64Start = sn.ui64Start, .ui64Size = sn.ui64End - sn.ui64Start };
-						_vSelections.push_back( srRange );
-						return true;
-					}
-
-					// Column Mode.
-					// Known not to be empty.
-					uint64_t ui64Total = sc.ui64Lines + 1;
-					uint64_t ui64TotalGroups = (ui64Total % _ui64GroupSize == 0) ? (ui64Total / _ui64GroupSize) : (ui64Total / _ui64GroupSize + 1);
-					if ( _ui64GroupIdx >= ui64TotalGroups ) { return true; }
-					uint64_t ui64NewTotal = std::min( _ui64GroupSize, ui64Total - _ui64GroupSize * _ui64GroupIdx );
-					uint64_t ui64Offset = _ui64GroupSize * _ui64GroupIdx;
-					for ( size_t I = 0; I <= ui64NewTotal; ++I ) {
-						MX_SEL_RANGE srRange = { .ui64Start = sc.ui64AnchorAddr + (I + ui64Offset) * _ui32BytesPerRow, .ui64Size = sc.ui32Cols };
-						_vSelections.push_back( srRange );
-					}
-					return true;
-				}
-				catch ( ... ) { return false; }
-			 }
-
-			/**
-			 * Gets the lower-left address of the selection.  Lower refers to the address, which means visually this is the upper-left address.
-			 * 
-			 * \return Returns the lower-left selection address or 0.
-			 **/
-			inline uint64_t							LowerLeftAddress() const {
-				if ( !HasSelection() ) { return 0; }
-				if ( smMode == MX_SM_NORMAL ) { return sn.ui64Start; }
-				return sc.ui64AnchorAddr;
-			}
-
-			/**
-			 * Gets the upper-right address of the selection.  Upper refers to the address, which means visually this is the lower-left address.
-			 * 
-			 * \param _ui32BytesPerRow The number of bytes in a row.
-			 * \return Returns the upper-right selection address or 0.
-			 **/
-			inline uint64_t							UpperRightAddress( uint32_t _ui32BytesPerRow ) const {
-				if ( !HasSelection() ) { return 0; }
-				if ( smMode == MX_SM_NORMAL ) { return sn.ui64End; }
-				return sc.ui64AnchorAddr + (sc.ui64Lines * _ui32BytesPerRow) + sc.ui32Cols;
-			}
-		};
-
 		/**
 		 * \brief Drag/gesture state captured on mouse down.
 		 *
@@ -1411,7 +1152,7 @@ namespace mx {
 
 
 		// == Members.
-		CWidget *									m_pwHexParent = nullptr;								/**< The main hex-editor window. */
+		CHexEditorControlHost *						m_pwHexParent = nullptr;								/**< The main hex-editor window. */
 		MX_STYLE *									m_psOptions = nullptr;									/**< Pointer to the shared options. */
 		MX_FONT_SET *								m_pfsFonts[2] = {};										/**< Shared fonts. */
 		
@@ -1432,6 +1173,8 @@ namespace mx {
 		size_t										m_sSelStackIdx = size_t( -1 );							/**< The selection-stack current index. */
 		CUtilities::MX_TIMER						m_tCaretBlink;											/**< The blinking of the caret. */
 		bool										m_bCaretOn = true;										/**< Caret on or off during active blink. */
+
+		bool										m_bBigEnd = false;										/**< True for displaying Unicode as Big-Endian. */
 
 		// The main window class.
 		static ATOM									m_aAtom;

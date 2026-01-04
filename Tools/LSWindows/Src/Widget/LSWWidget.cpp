@@ -1897,10 +1897,14 @@ namespace lsw {
 						break;
 					}
 					case TCN_SELCHANGE : {
-						CWidget * pwSrc = LSW_WIN2CLASS( lpHdr->hwndFrom );
-						if ( pwSrc ) {
-							CTab * ptTab = static_cast<CTab *>(pwSrc);
-							ptTab->SetCurSel( ptTab->GetCurSel() );
+						if ( lpHdr ) {
+							CWidget * pwSrc = LSW_WIN2CLASS( lpHdr->hwndFrom );
+							if ( pwSrc ) {
+								CTab * ptTab = static_cast<CTab *>(pwSrc);
+								ptTab->SetCurSel( ptTab->GetCurSel() );
+								auto lpnmHdr = reinterpret_cast<LPNMHDR>(_lParam); 
+								pmwThis->TabSelChanged( pwSrc, ptTab->GetCurSel(), lpnmHdr );
+							}
 						}
 						break;
 					}

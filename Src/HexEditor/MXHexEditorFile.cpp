@@ -45,6 +45,11 @@ namespace mx {
 		return m_lcwfwFile.Delete( _ui64Addr, _ui64Size, _ui64Deleted );
 	}
 
+	// Performs a Copy operation using the given selection, saved to the given clipboard index.
+	bool CHexEditorFile::Copy( const MX_SELECTION &_sSelection, uint32_t _ui32BytesPerRow, size_t _sClipIdx, const MX_COPYAS &_csParms, CSecureWString &_swsMsg ) {
+		return m_lcwfwFile.Copy( _sSelection, _ui32BytesPerRow, _sClipIdx, _csParms, _swsMsg );
+	}
+
 	// Gets the size of the data source.
 	uint64_t CHexEditorFile::Size() const {
 		return m_lcwfwFile.Size();

@@ -173,6 +173,7 @@ namespace lsw {
 		m_vItems[_iIdx].uiType = _uiType;
 		m_vItems[_iIdx].wsText = _lpString ? _lpString : L"";
 		if ( !Wnd() ) { return FALSE; }
+		LSW_SETREDRAW srRedraw( this );
 		if ( static_cast<BOOL>(::SendMessageW( Wnd(), SB_SETTEXTW, static_cast<WPARAM>(_iIdx | (_uiType | SBT_OWNERDRAW)), static_cast<LPARAM>(_iIdx) )) ) {
 			AutoFitPartsToTextLocked( TRUE );
 			return TRUE;
@@ -201,7 +202,7 @@ namespace lsw {
 	 * \param _iIdx The index of the item whose background color is to be set.
 	 **/
 	void CStatusBar::SetItemBkColor( COLORREF _coColor, INT _iIdx ) {
-	if ( _iIdx < 0 ) { return; }
+		if ( _iIdx < 0 ) { return; }
 		if ( static_cast<size_t>(_iIdx) >= m_vItems.size() ) { return; }
 		m_vItems[_iIdx].crBkColor = _coColor;
 	}
@@ -952,7 +953,7 @@ namespace lsw {
 	 * \return The horizontal padding, in pixels, to add to the measured text width when computing pane width.
 	 */
 	int CStatusBar::StatusPanePaddingX() {
-		return 10;
+		return 4;
 	}
 
 }	// namespace lsw

@@ -76,17 +76,17 @@ namespace mx {
 		m_sOptions[CHexEditorControl::MX_EA_CODE].ftFont = CHexEditorControl::MX_FT_TEXT_VIEW;
 		m_sOptions[CHexEditorControl::MX_EA_TAGGED].ftFont = CHexEditorControl::MX_FT_TEXT_VIEW;
 
-		m_sOptions[CHexEditorControl::MX_EA_HEX].dfLeftNumbersFmt = CHexEditorControl::MX_DF_HEX;
-		m_sOptions[CHexEditorControl::MX_EA_HEX].dfRightNumbersFmt = CHexEditorControl::MX_DF_CHAR;
+		m_sOptions[CHexEditorControl::MX_EA_HEX].dfLeftNumbersFmt = MX_DF_HEX;
+		m_sOptions[CHexEditorControl::MX_EA_HEX].dfRightNumbersFmt = MX_DF_CHAR;
 
-		m_sOptions[CHexEditorControl::MX_EA_BINARY].dfLeftNumbersFmt = CHexEditorControl::MX_DF_BIN;
-		m_sOptions[CHexEditorControl::MX_EA_BINARY].dfRightNumbersFmt = CHexEditorControl::MX_DF_CHAR;
+		m_sOptions[CHexEditorControl::MX_EA_BINARY].dfLeftNumbersFmt = MX_DF_BIN;
+		m_sOptions[CHexEditorControl::MX_EA_BINARY].dfRightNumbersFmt = MX_DF_CHAR;
 
-		m_sOptions[CHexEditorControl::MX_EA_CUR_PROCESS].dfLeftNumbersFmt = CHexEditorControl::MX_DF_HEX;
-		m_sOptions[CHexEditorControl::MX_EA_CUR_PROCESS].dfRightNumbersFmt = CHexEditorControl::MX_DF_CHAR;
+		m_sOptions[CHexEditorControl::MX_EA_CUR_PROCESS].dfLeftNumbersFmt = MX_DF_HEX;
+		m_sOptions[CHexEditorControl::MX_EA_CUR_PROCESS].dfRightNumbersFmt = MX_DF_CHAR;
 
-		m_sOptions[CHexEditorControl::MX_EA_PROCESS].dfLeftNumbersFmt = CHexEditorControl::MX_DF_HEX;
-		m_sOptions[CHexEditorControl::MX_EA_PROCESS].dfRightNumbersFmt = CHexEditorControl::MX_DF_CHAR;
+		m_sOptions[CHexEditorControl::MX_EA_PROCESS].dfLeftNumbersFmt = MX_DF_HEX;
+		m_sOptions[CHexEditorControl::MX_EA_PROCESS].dfRightNumbersFmt = MX_DF_CHAR;
 	}
 	CDeusHexMachinaWindow::~CDeusHexMachinaWindow() {
 		for ( auto I = m_vTabs.size(); I--; ) {
@@ -157,26 +157,28 @@ namespace mx {
 		plvRebar->UpdateRects();
 
 
-
 		// ==== STATUS BAR ==== //
 		CStatusBar * psbStatus = StatusBar();
 		if ( psbStatus ) {
 			const CStatusBar::LSW_STATUS_PART spParts[] = {
-				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 523, TRUE },		// MX_SB_MESSAGE
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 523, TRUE },			// MX_SB_MESSAGE
 				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 192-48-48, TRUE },		// MX_SB_POSITION_START
-				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 192-48, TRUE },		// MX_SB_VALUE_SEL
-				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 192, TRUE },		// MX_SB_FILE_SIZE
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 192-48, TRUE },			// MX_SB_VALUE_SEL
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 192, TRUE },			// MX_SB_FILE_SIZE
 				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 168, TRUE },			// MX_SB_VIEW_TYPE
 				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 132, TRUE },			// MX_SB_CHAR_SET
 
-				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 96, TRUE },			// MX_SB_ENDIAN
-				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 48, TRUE },			// MX_SB_INSERT_OVERWRITE
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 96, TRUE },				// MX_SB_ENDIAN
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height() - 48, TRUE },				// MX_SB_CLIPBOARD
+				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height(), TRUE },					// MX_SB_INSERT_OVERWRITE
 				{ rRebarRect.Width() - psbStatus->ClientRect( this ).Height(), TRUE },
 			};
 			psbStatus->SetParts( spParts, std::size( spParts ) );
+
+			psbStatus->SetTextW( MX_SB_CLIPBOARD, 0, L"\U0001F4CB" );
 		}
 		UpdateStatusBar_InsertOverwrite();
-		psbStatus->AutoFitPartsToTextLocked( TRUE );
+
 
 		// ==== SPLITTER ==== //
 		CMultiSplitter * pwSplitter = MultiSplitter();
@@ -255,6 +257,168 @@ namespace mx {
 				Redo();
 				break;
 			}
+
+			case Layout::MX_M_EDIT_CUT : {
+				Cut();
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY : {
+				Copy();
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_HEX : {
+				Copy( MX_CA_HEX_TEXT );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_DECIMAL : {
+				Copy( MX_CA_DECIMAL_TEXT );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_BINARY : {
+				Copy( MX_CA_BINARY_TEXT );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_C : {
+				Copy( MX_CA_C_CODE );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_JAVA : {
+				Copy( MX_CA_JAVA_CODE );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_PYTHON : {
+				Copy( MX_CA_PYTHON_CODE );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_8_BIT_HEX : {
+				Copy( MX_CA_INTEL_8 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_16_BIT_HEX : {
+				Copy( MX_CA_INTEL_16 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_32_BIT_HEX : {
+				Copy( MX_CA_INTEL_32 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_MOTOROLA_S19 : {
+				Copy( MX_CA_MOTOROLA_S19 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_MOTOROLA_S28 : {
+				Copy( MX_CA_MOTOROLA_S28 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_MOTOROLA_S37 : {
+				Copy( MX_CA_MOTOROLA_S37 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_HEX_EDITOR_AREAS : {
+				Copy( MX_CA_HEX_EDITOR_AREAS );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_WEB_PAGE : {
+				Copy( MX_CA_WEB_PAGE );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_RICH_TEXT : {
+				Copy( MX_CA_RICH_TEXT );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_BASE64 : {
+				Copy( MX_CA_BASE64 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_UUENCODING : {
+				Copy( MX_CA_UUENCODING );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_UINT8 : {
+				Copy( MX_CA_UINT8 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_INT8 : {
+				Copy( MX_CA_INT8 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_UINT16 : {
+				Copy( MX_CA_UINT16 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_INT16 : {
+				Copy( MX_CA_INT16 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_UINT32 : {
+				Copy( MX_CA_UINT32 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_INT32 : {
+				Copy( MX_CA_INT32 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_UINT64 : {
+				Copy( MX_CA_UINT64 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_INT64 : {
+				Copy( MX_CA_INT64 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_P16 : {
+				Copy( MX_CA_P16 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_P32 : {
+				Copy( MX_CA_P32 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_P64 : {
+				Copy( MX_CA_P64 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_FLOAT10 : {
+				Copy( MX_CA_FLOAT10 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_FLOAT11 : {
+				Copy( MX_CA_FLOAT11 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_BFLOAT : {
+				Copy( MX_CA_BFLOAT );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_FLOAT16 : {
+				Copy( MX_CA_FLOAT16 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_FLOAT32 : {
+				Copy( MX_CA_FLOAT32 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_FLOAT64 : {
+				Copy( MX_CA_FLOAT64 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_PCM8 : {
+				Copy( MX_CA_PCM8 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_PCM16 : {
+				Copy( MX_CA_PCM16 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_PCM24 : {
+				Copy( MX_CA_PCM24 );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_PCM32 : {
+				Copy( MX_CA_PCM32 );
+				break;
+			}
+
 			case Layout::MX_M_EDIT_DELETE : {
 				DeleteSelectedOrCaret();
 				break;
@@ -770,35 +934,35 @@ namespace mx {
 
 			case Layout::MX_M_VIEW_LEFT_AREA_HEX : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_HEX );
+					phecControl->SetLeftAreaFormat( MX_DF_HEX );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_CHAR : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_CHAR );
+					phecControl->SetLeftAreaFormat( MX_DF_CHAR );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_OCTAL : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_OCT );
+					phecControl->SetLeftAreaFormat( MX_DF_OCT );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_BINARY : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_BIN );
+					phecControl->SetLeftAreaFormat( MX_DF_BIN );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_DECIMAL : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_DEC );
+					phecControl->SetLeftAreaFormat( MX_DF_DEC );
 					RecalcAllBut( phecControl );
 				}
 				break;
@@ -806,147 +970,147 @@ namespace mx {
 
 			case Layout::MX_M_VIEW_LEFT_AREA_UINT8 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_UINT8 );
+					phecControl->SetLeftAreaFormat( MX_DF_UINT8 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_INT8 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_INT8 );
+					phecControl->SetLeftAreaFormat( MX_DF_INT8 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_UINT16 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_UINT16 );
+					phecControl->SetLeftAreaFormat( MX_DF_UINT16 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_INT16 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_INT16 );
+					phecControl->SetLeftAreaFormat( MX_DF_INT16 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_UINT32 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_UINT32 );
+					phecControl->SetLeftAreaFormat( MX_DF_UINT32 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_INT32 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_INT32 );
+					phecControl->SetLeftAreaFormat( MX_DF_INT32 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_UINT64 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_UINT64 );
+					phecControl->SetLeftAreaFormat( MX_DF_UINT64 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_INT64 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_INT64 );
+					phecControl->SetLeftAreaFormat( MX_DF_INT64 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_POINTER16 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_POINTER16 );
+					phecControl->SetLeftAreaFormat( MX_DF_POINTER16 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_POINTER32 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_POINTER32 );
+					phecControl->SetLeftAreaFormat( MX_DF_POINTER32 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_POINTER64 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_POINTER64 );
+					phecControl->SetLeftAreaFormat( MX_DF_POINTER64 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_FLOAT10 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_FLOAT10 );
+					phecControl->SetLeftAreaFormat( MX_DF_FLOAT10 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_FLOAT11 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_FLOAT11 );
+					phecControl->SetLeftAreaFormat( MX_DF_FLOAT11 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_BFLOAT16 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_BFLOAT16 );
+					phecControl->SetLeftAreaFormat( MX_DF_BFLOAT16 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_FLOAT16 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_FLOAT16 );
+					phecControl->SetLeftAreaFormat( MX_DF_FLOAT16 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_FLOAT32 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_FLOAT32 );
+					phecControl->SetLeftAreaFormat( MX_DF_FLOAT32 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_FLOAT64 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_FLOAT64 );
+					phecControl->SetLeftAreaFormat( MX_DF_FLOAT64 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_PCM8 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_PCM8 );
+					phecControl->SetLeftAreaFormat( MX_DF_PCM8 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_PCM16 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_PCM16 );
+					phecControl->SetLeftAreaFormat( MX_DF_PCM16 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_PCM24 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_PCM24 );
+					phecControl->SetLeftAreaFormat( MX_DF_PCM24 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_LEFT_AREA_PCM32 : {
 				if ( phecControl ) {
-					phecControl->SetLeftAreaFormat( CHexEditorControl::MX_DF_PCM32 );
+					phecControl->SetLeftAreaFormat( MX_DF_PCM32 );
 					RecalcAllBut( phecControl );
 				}
 				break;
@@ -955,182 +1119,182 @@ namespace mx {
 
 			case Layout::MX_M_VIEW_RIGHT_AREA_HEX : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_HEX );
+					phecControl->SetRightAreaFormat( MX_DF_HEX );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_CHAR : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_CHAR );
+					phecControl->SetRightAreaFormat( MX_DF_CHAR );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_OCTAL : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_OCT );
+					phecControl->SetRightAreaFormat( MX_DF_OCT );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_BINARY : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_BIN );
+					phecControl->SetRightAreaFormat( MX_DF_BIN );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_DECIMAL : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_DEC );
+					phecControl->SetRightAreaFormat( MX_DF_DEC );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_UINT8 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_UINT8 );
+					phecControl->SetRightAreaFormat( MX_DF_UINT8 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_INT8 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_INT8 );
+					phecControl->SetRightAreaFormat( MX_DF_INT8 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_UINT16 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_UINT16 );
+					phecControl->SetRightAreaFormat( MX_DF_UINT16 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_INT16 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_INT16 );
+					phecControl->SetRightAreaFormat( MX_DF_INT16 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_UINT32 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_UINT32 );
+					phecControl->SetRightAreaFormat( MX_DF_UINT32 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_INT32 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_INT32 );
+					phecControl->SetRightAreaFormat( MX_DF_INT32 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_UINT64 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_UINT64 );
+					phecControl->SetRightAreaFormat( MX_DF_UINT64 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_INT64 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_INT64 );
+					phecControl->SetRightAreaFormat( MX_DF_INT64 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_POINTER16 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_POINTER16 );
+					phecControl->SetRightAreaFormat( MX_DF_POINTER16 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_POINTER32 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_POINTER32 );
+					phecControl->SetRightAreaFormat( MX_DF_POINTER32 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_POINTER64 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_POINTER64 );
+					phecControl->SetRightAreaFormat( MX_DF_POINTER64 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_FLOAT10 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_FLOAT10 );
+					phecControl->SetRightAreaFormat( MX_DF_FLOAT10 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_FLOAT11 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_FLOAT11 );
+					phecControl->SetRightAreaFormat( MX_DF_FLOAT11 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_BFLOAT16 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_BFLOAT16 );
+					phecControl->SetRightAreaFormat( MX_DF_BFLOAT16 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_FLOAT16 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_FLOAT16 );
+					phecControl->SetRightAreaFormat( MX_DF_FLOAT16 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_FLOAT32 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_FLOAT32 );
+					phecControl->SetRightAreaFormat( MX_DF_FLOAT32 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_FLOAT64 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_FLOAT64 );
+					phecControl->SetRightAreaFormat( MX_DF_FLOAT64 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_PCM8 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_PCM8 );
+					phecControl->SetRightAreaFormat( MX_DF_PCM8 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_PCM16 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_PCM16 );
+					phecControl->SetRightAreaFormat( MX_DF_PCM16 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_PCM24 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_PCM24 );
+					phecControl->SetRightAreaFormat( MX_DF_PCM24 );
 					RecalcAllBut( phecControl );
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_RIGHT_AREA_PCM32 : {
 				if ( phecControl ) {
-					phecControl->SetRightAreaFormat( CHexEditorControl::MX_DF_PCM32 );
+					phecControl->SetRightAreaFormat( MX_DF_PCM32 );
 					RecalcAllBut( phecControl );
 				}
 				break;
@@ -1281,6 +1445,20 @@ namespace mx {
 		if ( !phecControl ) { return LSW_H_CONTINUE; }
 		phecControl->CHexEditorControl::KillFocus( _hNewFocus );
 		return LSW_H_CONTINUE;
+	}
+
+	/**
+	 * Notification for when a child tab changes its selection.
+	 * 
+	 * \param param _pwTab Pointer to the tab control.
+	 * \param _iTab Zero-based tab index that was selected.
+	 * \param _lpnHdr Contains information about the notification message.
+	 */
+	void CDeusHexMachinaWindow::TabSelChanged( CWidget * _pwTab, int _iTab, LPNMHDR _lpnHdr ) {
+		static_cast<void>(_pwTab);
+		static_cast<void>(_iTab);
+		static_cast<void>(_lpnHdr);
+		UpdateStatusBar_Endian();
 	}
 
 	/**
@@ -1524,6 +1702,24 @@ namespace mx {
 		SetStatusBarText( wsMsg.c_str(), bWarning );
 	}
 
+	// Performs a Cut.
+	void CDeusHexMachinaWindow::Cut() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		CSecureWString wsMsg;
+		bool bWarning = !phecControl->Cut( wsMsg );
+		SetStatusBarText( wsMsg.c_str(), bWarning );
+	}
+
+	// Performs a Copy As.
+	void CDeusHexMachinaWindow::Copy( MX_COPY_AS _caFormat ) {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		CSecureWString wsMsg;
+		bool bWarning = !phecControl->CopyAs( _caFormat, wsMsg );
+		SetStatusBarText( wsMsg.c_str(), bWarning );
+	}
+
 	// Delete the selection.
 	void CDeusHexMachinaWindow::DeleteSelectedOrCaret() {
 		auto phecControl = CurrentEditor();
@@ -1674,6 +1870,28 @@ namespace mx {
 		}
 	}
 
+	// Update the status-bar Little-Endian/Big-Endian part.
+	void CDeusHexMachinaWindow::UpdateStatusBar_Endian() {
+		auto phecControl = CurrentEditor();
+		if ( phecControl ) {
+			auto psbStatus = StatusBar();
+			if ( psbStatus ) {
+				psbStatus->SetTextW( MX_SB_ENDIAN, 0, phecControl->IsBigEndian() ? L"BIG" : L"LIT" );
+			}
+		}
+	}
+
+	// Update the status-bar Character-Set part.
+	void CDeusHexMachinaWindow::UpdateStatusBar_CharSet() {
+		auto phecControl = CurrentEditor();
+		if ( phecControl ) {
+			auto psbStatus = StatusBar();
+			if ( psbStatus ) {
+				psbStatus->SetTextA( MX_SB_CHAR_SET, 0, phecControl->CharSetStatusBarCode().c_str() );
+			}
+		}
+	}
+
 	// Prepares to create the window.  Creates the atom if necessary.
 	void CDeusHexMachinaWindow::PrepareWindow() {
 		if ( !m_aAtom ) {
@@ -1707,12 +1925,12 @@ namespace mx {
 		for ( int I = ::GetMenuItemCount( _hMenu ); --I >= 0; ) {
 			UINT uiId = ::GetMenuItemID( _hMenu, I );
 			switch ( uiId ) {
-				case Layout::MX_M_FILE_SAVE : {}				MX_FALLTHROUGH
-				case Layout::MX_M_FILE_SAVE_AS : {}				MX_FALLTHROUGH
-				case Layout::MX_M_FILE_SAVE_A_COPY : {}			MX_FALLTHROUGH
-				case Layout::MX_M_FILE_SAVE_ALL : {}			MX_FALLTHROUGH
-				case Layout::MX_M_FILE_CLOSE : {}				MX_FALLTHROUGH
-				case Layout::MX_M_FILE_CLOSE_ALL : {}			MX_FALLTHROUGH
+				case Layout::MX_M_FILE_SAVE : {}									MX_FALLTHROUGH
+				case Layout::MX_M_FILE_SAVE_AS : {}									MX_FALLTHROUGH
+				case Layout::MX_M_FILE_SAVE_A_COPY : {}								MX_FALLTHROUGH
+				case Layout::MX_M_FILE_SAVE_ALL : {}								MX_FALLTHROUGH
+				case Layout::MX_M_FILE_CLOSE : {}									MX_FALLTHROUGH
+				case Layout::MX_M_FILE_CLOSE_ALL : {}								MX_FALLTHROUGH
 				case Layout::MX_M_FILE_REVERT_REFRESH : {
 					::EnableMenuItem(
 						_hMenu, uiId,
@@ -1732,6 +1950,47 @@ namespace mx {
 						MF_BYCOMMAND | ((phecControl && phecControl->CanRedo()) ? MF_ENABLED : MF_GRAYED) );
 					break;
 				}
+				case Layout::MX_M_EDIT_CUT : {}										MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY : {}									MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_ : {}								MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_HEX : {}								MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_DECIMAL : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_BINARY : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_C : {}								MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_JAVA : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_PYTHON : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_8_BIT_HEX : {}						MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_16_BIT_HEX : {}						MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_32_BIT_HEX : {}						MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_MOTOROLA_S19 : {}					MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_MOTOROLA_S28 : {}					MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_MOTOROLA_S37 : {}					MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_HEX_EDITOR_AREAS : {}				MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_WEB_PAGE : {}						MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_RICH_TEXT : {}						MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_BASE64 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_UUENCODING : {}						MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_UINT8 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_INT8 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_UINT16 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_INT16 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_UINT32 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_INT32 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_UINT64 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_INT64 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_P16 : {}								MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_P32 : {}								MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_P64 : {}								MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_FLOAT10 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_FLOAT11 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_BFLOAT : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_FLOAT16 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_FLOAT32 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_FLOAT64 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_PCM8 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_PCM16 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_PCM24 : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_PCM32 : {}							MX_FALLTHROUGH
 				case Layout::MX_M_EDIT_DELETE : {
 					EnableMenuItem(
 						_hMenu, uiId,
@@ -2153,263 +2412,263 @@ namespace mx {
 				}
 
 				case Layout::MX_M_VIEW_LEFT_AREA_HEX : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_HEX) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_HEX) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_CHAR : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_CHAR) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_CHAR) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_OCTAL : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_OCT) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_OCT) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_BINARY : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_BIN) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_BIN) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_DECIMAL : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_DEC) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_DEC) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_UINT8 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_UINT8) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_UINT8) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_INT8 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_INT8) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_INT8) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_UINT16 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_UINT16) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_UINT16) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_INT16 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_INT16) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_INT16) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_UINT32 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_UINT32) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_UINT32) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_INT32 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_INT32) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_INT32) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_UINT64 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_UINT64) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_UINT64) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_INT64 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_INT64) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_INT64) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_POINTER16 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_POINTER16) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_POINTER16) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_POINTER32 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_POINTER32) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_POINTER32) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_POINTER64 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_POINTER64) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_POINTER64) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_FLOAT10 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_FLOAT10) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_FLOAT10) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_FLOAT11 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_FLOAT11) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_FLOAT11) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_BFLOAT16 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_BFLOAT16) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_BFLOAT16) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_FLOAT16 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_FLOAT16) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_FLOAT16) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_FLOAT32 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_FLOAT32) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_FLOAT32) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_FLOAT64 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_FLOAT64) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_FLOAT64) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_PCM8 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_PCM8) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_PCM8) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_PCM16 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_PCM16) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_PCM16) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_PCM24 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_PCM24) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_PCM24) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_LEFT_AREA_PCM32 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == CHexEditorControl::MX_DF_PCM32) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetLeftAreaFormat() == MX_DF_PCM32) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 
 				case Layout::MX_M_VIEW_RIGHT_AREA_HEX : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_HEX && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_HEX && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_CHAR : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_CHAR && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_CHAR && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_OCTAL : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_OCT && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_OCT && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_BINARY : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_BIN && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_BIN && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_DECIMAL : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_DEC && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_DEC && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_UINT8 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_UINT8 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_UINT8 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_INT8 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_INT8 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_INT8 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_UINT16 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_UINT16 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_UINT16 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_INT16 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_INT16 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_INT16 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_UINT32 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_UINT32 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_UINT32 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_INT32 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_INT32 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_INT32 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_UINT64 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_UINT64 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_UINT64 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_INT64 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_INT64 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_INT64 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_POINTER16 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_POINTER16 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_POINTER16 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_POINTER32 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_POINTER32 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_POINTER32 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_POINTER64 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_POINTER64 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_POINTER64 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_FLOAT10 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_FLOAT10 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_FLOAT10 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_FLOAT11 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_FLOAT11 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_FLOAT11 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_BFLOAT16 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_BFLOAT16 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_BFLOAT16 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_FLOAT16 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_FLOAT16 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_FLOAT16 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_FLOAT32 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_FLOAT32 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_FLOAT32 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_FLOAT64 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_FLOAT64 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_FLOAT64 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_PCM8 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_PCM8 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_PCM8 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_PCM16 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_PCM16 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_PCM16 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_PCM24 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_PCM24 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_PCM24 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_RIGHT_AREA_PCM32 : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == CHexEditorControl::MX_DF_PCM32 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetRightAreaFormat() == MX_DF_PCM32 && !phecControl->RightAreaHidden()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
@@ -2569,6 +2828,8 @@ namespace mx {
 				LSW_RECT rInternalSize = ptTab->WindowRect().ScreenToClient( ptTab->Wnd() );
 				ptTab->AdjustRect( FALSE, &rInternalSize );
 				::MoveWindow( htTab.phecWidget->Wnd(), rInternalSize.left, rInternalSize.top, rInternalSize.Width(), rInternalSize.Height(), TRUE );
+				UpdateStatusBar_Endian();
+				UpdateStatusBar_CharSet();
 				return true;
 			}
 		}
