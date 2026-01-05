@@ -296,6 +296,30 @@ namespace mx {
 		return LSW_H_HANDLED;
 	}
 
+	/**
+	 * Called when the mouse enters a tab.
+	 * 
+	 * \param _iIdx The tab the mouse began to hover over.
+	 **/
+	void CPeWorksWindow::TabMouseEnterTab( INT _iIdx ) {
+		auto ptTab = GetTab();
+		if ( ptTab ) {
+			::RedrawWindow( ptTab->Wnd(), NULL, NULL, RDW_ALLCHILDREN | RDW_INVALIDATE | RDW_FRAME | RDW_NOERASE );
+		}
+	}
+
+	/**
+	 * Called when the mouse leaves a tab.
+	 * 
+	 * \param _iIdx INdex of the tab the mouse left.
+	 **/
+	void CPeWorksWindow::TabMouseLeftTab( INT _iIdx ) {
+		auto ptTab = GetTab();
+		if ( ptTab ) {
+			::RedrawWindow( ptTab->Wnd(), NULL, NULL, RDW_ALLCHILDREN | RDW_INVALIDATE | RDW_FRAME | RDW_NOERASE );
+		}
+	}
+
 	// Gets the status bar.
 	CStatusBar * CPeWorksWindow::StatusBar() {
 		return static_cast<CStatusBar *>(FindChild( CPeWorksLayout::MX_PEW_STATUSBAR ));

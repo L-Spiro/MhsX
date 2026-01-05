@@ -2720,11 +2720,11 @@ namespace ee {
 		 * information through \c _ecError.
 		 *
 		 * \param _sNode Node index to resolve.
-		 * \param _rRes Receives the resolved value.
+		 * \param _rFinalResult Receives the resolved value.
 		 * \param _ecError Receives a specific error code when evaluation fails.
 		 * \return Returns true if evaluation succeeded; false otherwise.
 		 */
-		bool								ResolveNode_ExplicitStack( size_t _sNode, EE_RESULT &_rRes, EE_ERROR_CODES &_ecError );
+		bool								ResolveNode_ExplicitStack( size_t _sNode, EE_RESULT &_rFinalResult, EE_ERROR_CODES &_ecError );
 
 		/**
 		 * \brief Creates an array instance based on a type identifier.

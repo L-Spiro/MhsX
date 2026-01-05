@@ -89,9 +89,9 @@ namespace mx {
 		m_sOptions[CHexEditorControl::MX_EA_PROCESS].dfRightNumbersFmt = MX_DF_CHAR;
 	}
 	CDeusHexMachinaWindow::~CDeusHexMachinaWindow() {
-		for ( auto I = m_vTabs.size(); I--; ) {
+		/*for ( auto I = m_vTabs.size(); I--; ) {
 			delete m_vTabs[I].pheiInterface;
-		}
+		}*/
 	}
 
 	// == Functions.
@@ -1522,7 +1522,7 @@ namespace mx {
 	void CDeusHexMachinaWindow::ChildTabClosed( CWidget * _pwChild, INT _iTab ) {
 		if ( _pwChild == Tab() ) {
 			if ( _iTab < m_vTabs.size() ) {
-				delete m_vTabs[_iTab].pheiInterface;
+				//delete m_vTabs[_iTab].pheiInterface;
 				m_vTabs.erase( m_vTabs.begin() + _iTab );
 			}
 		}
@@ -1585,13 +1585,21 @@ namespace mx {
 		try {
 			//auto wsTabname = _pPath.filename().generic_wstring();
 
-			CHexEditorInterface * pheiInterface = new( std::nothrow ) CHexEditorFile();
+			/*CHexEditorInterface * pheiInterface = new( std::nothrow ) CHexEditorFile();
 			if ( !pheiInterface || !static_cast<CHexEditorFile*>(pheiInterface)->SetFile( _pPath ) ) {
 				delete pheiInterface;
 				return;
+			}*/
+			std::shared_ptr<CHexEditorInterface> spInterface;
+			{
+				std::unique_ptr<CHexEditorFile> upIfc( new( std::nothrow ) CHexEditorFile() );
+				if ( !upIfc || !upIfc->SetFile( _pPath ) ) { return; }
+
+				// Transfer ownership into shared_ptr<base>.
+				spInterface = std::shared_ptr<CHexEditorInterface>( upIfc.release() );
 			}
 
-			AddTab( pheiInterface/*, wsTabname*/ );
+			AddTab( spInterface );
 		}
 		catch ( ... ) {}
 	}
@@ -1616,9 +1624,17 @@ namespace mx {
 			// SYNCHRONIZE: SignalObjectAndWait(), WaitForSingleObject(), WaitForSingleObjectEx(), WaitForMultipleObjects(), WaitForMultipleObjectsEx(), MsgWaitForMultipleObjects(), MsgWaitForMultipleObjectsEx(), etc.
 
 			try {
-				CHexEditorInterface * pheiInterface = new( std::nothrow ) CHexEditorProcess();
-				if ( !pheiInterface /*|| !static_cast<CHexEditorProcess*>(pheiInterface)->SetFile( _pPath )*/ ) {
-					return false;
+				//CHexEditorInterface * pheiInterface = new( std::nothrow ) CHexEditorProcess();
+				//if ( !pheiInterface /*|| !static_cast<CHexEditorProcess*>(pheiInterface)->SetFile( _pPath )*/ ) {
+				//	return false;
+				//}
+				std::shared_ptr<CHexEditorInterface> spInterface;
+				{
+					std::unique_ptr<CHexEditorInterface> upIfc( new( std::nothrow ) CHexEditorProcess() );
+					if ( !upIfc ) { return false; }
+
+					// Transfer ownership into shared_ptr<base>.
+					spInterface = std::shared_ptr<CHexEditorInterface>( upIfc.release() );
 				}
 
 				DWORD dwAttempts[] = {
@@ -1636,18 +1652,16 @@ namespace mx {
 						PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION,*/
 				};
 				for ( size_t I = 0; I < std::size( dwAttempts ); ++I ) {
-					if ( static_cast<CHexEditorProcess *>(pheiInterface)->SetProcess( dwId, CProcess::MX_OPM_FIXED, dwAttempts[I] ) ) {
+					if ( static_cast<CHexEditorProcess *>(spInterface.get())->SetProcess( dwId, CProcess::MX_OPM_FIXED, dwAttempts[I] ) ) {
 						break;
 					}
 				}
-				if ( !static_cast<CHexEditorProcess *>(pheiInterface)->Process().ProcIsOpened() ) {
-					delete pheiInterface;
+				if ( !static_cast<CHexEditorProcess *>(spInterface.get())->Process().ProcIsOpened() ) {
+					//delete pheiInterface;
 					return false;
 				}
-				//auto swsPath = static_cast<CHexEditorProcess *>(pheiInterface)->Process().QueryProcessImageName();
-				//auto wsTabname = std::filesystem::path( swsPath.c_str() ).filename().generic_wstring();
 
-				return AddTab( pheiInterface/*, wsTabname*/ );
+				return AddTab( spInterface );
 			}
 			catch ( ... ) {}
 		}
@@ -1665,18 +1679,24 @@ namespace mx {
 		if ( !m_pmhMemHack->Process().ProcIsOpened() ) { return 0; }
 
 		try {
-			CHexEditorInterface * pheiInterface = new( std::nothrow ) CHexEditorCurProcess( m_pmhMemHack->Process() );
+			/*CHexEditorInterface * pheiInterface = new( std::nothrow ) CHexEditorCurProcess( m_pmhMemHack->Process() );
 			if ( !pheiInterface ) {
 				return false;
+			}*/
+			std::shared_ptr<CHexEditorInterface> spInterface;
+			{
+				std::unique_ptr<CHexEditorInterface> upIfc( new( std::nothrow ) CHexEditorCurProcess( m_pmhMemHack->Process() ) );
+				if ( !upIfc ) { return false; }
+
+				// Transfer ownership into shared_ptr<base>.
+				spInterface = std::shared_ptr<CHexEditorInterface>( upIfc.release() );
 			}
-			if ( !static_cast<CHexEditorCurProcess *>(pheiInterface)->Process().ProcIsOpened() ) {
-				delete pheiInterface;
+			if ( !static_cast<CHexEditorCurProcess *>(spInterface.get())->Process().ProcIsOpened() ) {
+				//delete pheiInterface;
 				return false;
 			}
-			/*auto swsPath = static_cast<CHexEditorCurProcess *>(pheiInterface)->Process().QueryProcessImageName();
-			auto wsTabname = std::filesystem::path( swsPath.c_str() ).filename().generic_wstring();*/
 
-			return AddTab( pheiInterface/*, wsTabname*/ );
+			return AddTab( spInterface );
 		}
 		catch ( ... ) {}
 		return false;
@@ -1690,7 +1710,7 @@ namespace mx {
 		if ( sIdx >= m_vTabs.size() ) { return; }
 		//m_vTabs[sIdx].phecWidget->
 		ptTab->DeleteItem( int( sIdx ) );
-		delete m_vTabs[sIdx].pheiInterface;
+		//delete m_vTabs[sIdx].pheiInterface;
 		m_vTabs.erase( m_vTabs.begin() + sIdx );
 	}
 
@@ -1707,7 +1727,7 @@ namespace mx {
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
 		bool bWarning = !phecControl->Undo( wsMsg );
-		LSW_SETREDRAW rRedraw( StatusBar() );
+		LSW_SETREDRAW srRedraw( StatusBar() );
 		SetStatusBarText( wsMsg.c_str(), bWarning );
 		UpdateStatusBar_PosValue_StartSize();
 		UpdateStatusBar_Size();
@@ -1719,7 +1739,7 @@ namespace mx {
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
 		bool bWarning = !phecControl->Redo( wsMsg );
-		LSW_SETREDRAW rRedraw( StatusBar() );
+		LSW_SETREDRAW srRedraw( StatusBar() );
 		SetStatusBarText( wsMsg.c_str(), bWarning );
 		UpdateStatusBar_PosValue_StartSize();
 		UpdateStatusBar_Size();
@@ -1731,7 +1751,7 @@ namespace mx {
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
 		bool bWarning = !phecControl->Cut( wsMsg );
-		LSW_SETREDRAW rRedraw( StatusBar() );
+		LSW_SETREDRAW srRedraw( StatusBar() );
 		SetStatusBarText( wsMsg.c_str(), bWarning );
 		UpdateStatusBar_PosValue_StartSize();
 		UpdateStatusBar_Size();
@@ -1752,7 +1772,7 @@ namespace mx {
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
 		bool bWarning = !phecControl->DeleteSelectedOrCaret( wsMsg );
-		LSW_SETREDRAW rRedraw( StatusBar() );
+		LSW_SETREDRAW srRedraw( StatusBar() );
 		SetStatusBarText( wsMsg.c_str(), bWarning );
 		UpdateStatusBar_PosValue_StartSize();
 		UpdateStatusBar_Size();
@@ -1764,7 +1784,7 @@ namespace mx {
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
 		bool bWarning = !phecControl->DeletePriorToCaret( wsMsg );
-		LSW_SETREDRAW rRedraw( StatusBar() );
+		LSW_SETREDRAW srRedraw( StatusBar() );
 		SetStatusBarText( wsMsg.c_str(), bWarning );
 		UpdateStatusBar_PosValue_StartSize();
 		UpdateStatusBar_Size();
@@ -2904,9 +2924,9 @@ namespace mx {
 	}
 
 	// Adds a tab.
-	bool CDeusHexMachinaWindow::AddTab( CHexEditorInterface * _pheiInterface ) {
+	bool CDeusHexMachinaWindow::AddTab( const std::shared_ptr<CHexEditorInterface> &_spInterface ) {
 		MX_HEX_TAB htTab;
-		htTab.pheiInterface = _pheiInterface;
+		htTab.pheiInterface = _spInterface;
 		try {
 			auto ptTab = Tab();
 			if ( ptTab ) {
@@ -2959,7 +2979,7 @@ namespace mx {
 
 				m_vTabs.insert( m_vTabs.begin(), htTab );
 
-				auto swsName = _pheiInterface->TabString();
+				auto swsName = _spInterface->TabString();
 				TCITEMW tciItem = { 0 };
 				tciItem.mask = TCIF_TEXT;
 				tciItem.pszText = const_cast<LPWSTR>(swsName.c_str());
@@ -2968,11 +2988,11 @@ namespace mx {
 
 				if ( ptTab->InsertItem( 0, &tciItem, htTab.phecWidget ) == -1 ) {
 					delete htTab.phecWidget;
-					delete htTab.pheiInterface;
+					//delete htTab.pheiInterface;
 					return false;
 				}
 
-				htTab.phecWidget->SetStream( htTab.pheiInterface, this );
+				htTab.phecWidget->SetStream( htTab.pheiInterface.get(), this );
 
 				LSW_RECT rInternalSize = ptTab->WindowRect().ScreenToClient( ptTab->Wnd() );
 				ptTab->AdjustRect( FALSE, &rInternalSize );
@@ -2987,7 +3007,7 @@ namespace mx {
 		}
 		catch ( ... ) {
 			delete htTab.phecWidget;
-			delete htTab.pheiInterface;
+			//delete htTab.pheiInterface;
 		}
 		return false;
 	}

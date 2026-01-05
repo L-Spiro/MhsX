@@ -2,9 +2,11 @@
 
 #include "../LSWWin.h"
 #include "LSWEnumFormatEtc.h"
+#include "LSWOleStorage.h"
 
 #include <functional>
 #include <Ole2.h>
+#include <string>
 #include <wrl/client.h>
 
 namespace lsw {
@@ -27,7 +29,7 @@ namespace lsw {
 		 * \param _smOut Receives the returned data medium.
 		 * \return Returns S_OK on success or a COM error code on failure.
 		 */
-		using RenderFn = std::function<HRESULT( const FORMATETC & _feRequest, STGMEDIUM & _smOut )>;
+		using RenderFn = std::function<HRESULT( const FORMATETC &_feRequest, STGMEDIUM &_smOut )>;
 
 		/**
 		 * \brief Constructs an empty data object.
@@ -41,16 +43,16 @@ namespace lsw {
 		/**
 		 * \brief Queries for supported interfaces.
 		 *
-		 * \param _riid Interface id.
-		 * \param _ppv Receives the interface pointer.
+		 * \param _riId Interface id.
+		 * \param _ppvPointer Receives the interface pointer.
 		 * \return Returns S_OK on success or E_NOINTERFACE if unsupported.
 		 */
-		HRESULT STDMETHODCALLTYPE							QueryInterface( REFIID _riid, void ** _ppv ) override {
-			if ( !_ppv ) { return E_POINTER; }
-			(*_ppv) = NULL;
+		HRESULT STDMETHODCALLTYPE							QueryInterface( REFIID _riId, void ** _ppvPointer ) override {
+			if ( !_ppvPointer ) { return E_POINTER; }
+			(*_ppvPointer) = NULL;
 
-			if ( _riid == IID_IUnknown || _riid == IID_IDataObject ) {
-				(*_ppv) = static_cast<IDataObject *>(this);
+			if ( _riId == IID_IUnknown || _riId == IID_IDataObject ) {
+				(*_ppvPointer) = static_cast<IDataObject *>(this);
 				AddRef();
 				return S_OK;
 			}
@@ -63,7 +65,7 @@ namespace lsw {
 		 * \return Returns the new reference count.
 		 */
 		ULONG STDMETHODCALLTYPE								AddRef() override {
-			return static_cast<ULONG>( ::InterlockedIncrement( &m_lRefCount ) );
+			return static_cast<ULONG>(::InterlockedIncrement( &m_lRefCount ));
 		}
 
 		/**
@@ -77,7 +79,7 @@ namespace lsw {
 				delete this;
 				return 0;
 			}
-			return static_cast<ULONG>( lRef );
+			return static_cast<ULONG>(lRef);
 		}
 
 		/**
@@ -91,7 +93,7 @@ namespace lsw {
 			if ( !_pfe || !_psm ) { return E_POINTER; }
 			::ZeroMemory( _psm, sizeof( (*_psm) ) );
 
-			const SEntry * pEntry = FindBestMatch( (*_pfe) );
+			const LSW_ENTRY * pEntry = FindBestMatch( (*_pfe) );
 			if ( !pEntry ) { return DV_E_FORMATETC; }
 
 			return pEntry->fnRender( (*_pfe), (*_psm) );
@@ -166,7 +168,7 @@ namespace lsw {
 			std::vector<FORMATETC> vFe;
 			vFe.reserve( m_vEntries.size() );
 			for ( const auto & e : m_vEntries ) {
-				vFe.push_back( e.fe );
+				vFe.push_back( e.feFmt );
 			}
 
 			CEnumFormatEtc * pEnum = new (std::nothrow) CEnumFormatEtc( vFe );
@@ -225,8 +227,8 @@ namespace lsw {
 		 * \return Returns S_OK on success, E_OUTOFMEMORY on allocation failure.
 		 */
 		HRESULT												AddFormat( const FORMATETC & _fe, RenderFn _fnRender ) {
-			SEntry eEntry{};
-			eEntry.fe = _fe;
+			LSW_ENTRY eEntry{};
+			eEntry.feFmt = _fe;
 			eEntry.fnRender = std::move( _fnRender );
 
 			try {
@@ -256,13 +258,13 @@ namespace lsw {
 				std::memcpy( vBytes.data(), _pvData, _stSize );
 			}
 
-			FORMATETC fe{};
-			fe.cfFormat = static_cast<CLIPFORMAT>( _uiClipboardFormat );
-			fe.dwAspect = DVASPECT_CONTENT;
-			fe.lindex = -1;
-			fe.tymed = TYMED_HGLOBAL;
+			FORMATETC feFmt{};
+			feFmt.cfFormat = static_cast<CLIPFORMAT>(_uiClipboardFormat);
+			feFmt.dwAspect = DVASPECT_CONTENT;
+			feFmt.lindex = -1;
+			feFmt.tymed = TYMED_HGLOBAL;
 
-			return AddFormat( fe, [vBytes = std::move( vBytes )]( const FORMATETC & _feRequest, STGMEDIUM & _smOut ) -> HRESULT {
+			return AddFormat( feFmt, [vBytes = std::move( vBytes )]( const FORMATETC & _feRequest, STGMEDIUM & _smOut ) -> HRESULT {
 				if ( (_feRequest.tymed & TYMED_HGLOBAL) == 0 ) { return DV_E_TYMED; }
 
 				HGLOBAL hMem = COleStorage::CreateHGlobalCopy( vBytes.data(), vBytes.size() );
@@ -284,13 +286,13 @@ namespace lsw {
 		HRESULT												AddUnicodeTextCopy( const std::wstring & _wsText ) {
 			std::wstring wsText = _wsText;
 
-			FORMATETC fe{};
-			fe.cfFormat = CF_UNICODETEXT;
-			fe.dwAspect = DVASPECT_CONTENT;
-			fe.lindex = -1;
-			fe.tymed = TYMED_HGLOBAL;
+			FORMATETC feFmt{};
+			feFmt.cfFormat = CF_UNICODETEXT;
+			feFmt.dwAspect = DVASPECT_CONTENT;
+			feFmt.lindex = -1;
+			feFmt.tymed = TYMED_HGLOBAL;
 
-			return AddFormat( fe, [wsText = std::move( wsText )]( const FORMATETC & _feRequest, STGMEDIUM & _smOut ) -> HRESULT {
+			return AddFormat( feFmt, [wsText = std::move( wsText )]( const FORMATETC & _feRequest, STGMEDIUM & _smOut ) -> HRESULT {
 				if ( (_feRequest.tymed & TYMED_HGLOBAL) == 0 ) { return DV_E_TYMED; }
 
 				HGLOBAL hMem = COleStorage::CreateHGlobalUnicodeText( wsText );
@@ -313,13 +315,13 @@ namespace lsw {
 		 * \note The returned HGLOBAL must be GMEM_MOVEABLE. Ownership transfers to the receiver on success.
 		 */
 		HRESULT												AddDelayedBinaryHGlobal( UINT _uiClipboardFormat, std::function<HGLOBAL()> _fnCreate ) {
-			FORMATETC fe{};
-			fe.cfFormat = static_cast<CLIPFORMAT>( _uiClipboardFormat );
-			fe.dwAspect = DVASPECT_CONTENT;
-			fe.lindex = -1;
-			fe.tymed = TYMED_HGLOBAL;
+			FORMATETC feFmt{};
+			feFmt.cfFormat = static_cast<CLIPFORMAT>(_uiClipboardFormat);
+			feFmt.dwAspect = DVASPECT_CONTENT;
+			feFmt.lindex = -1;
+			feFmt.tymed = TYMED_HGLOBAL;
 
-			return AddFormat( fe, [_fnCreate = std::move( _fnCreate )]( const FORMATETC & _feRequest, STGMEDIUM & _smOut ) -> HRESULT {
+			return AddFormat( feFmt, [_fnCreate = std::move( _fnCreate )]( const FORMATETC & _feRequest, STGMEDIUM & _smOut ) -> HRESULT {
 				if ( (_feRequest.tymed & TYMED_HGLOBAL) == 0 ) { return DV_E_TYMED; }
 
 				HGLOBAL hMem = _fnCreate ? _fnCreate() : NULL;
@@ -342,18 +344,18 @@ namespace lsw {
 		 * \note The callback should return an AddRef'd IStream; this helper detaches it into STGMEDIUM.
 		 */
 		HRESULT												AddDelayedIStream( UINT _uiClipboardFormat, std::function<HRESULT( Microsoft::WRL::ComPtr<IStream> & )> _fnCreate ) {
-			FORMATETC fe{};
-			fe.cfFormat = static_cast<CLIPFORMAT>( _uiClipboardFormat );
-			fe.dwAspect = DVASPECT_CONTENT;
-			fe.lindex = -1;
-			fe.tymed = TYMED_ISTREAM;
+			FORMATETC feFmt{};
+			feFmt.cfFormat = static_cast<CLIPFORMAT>( uiClipboardFormat);
+			feFmt.dwAspect = DVASPECT_CONTENT;
+			feFmt.lindex = -1;
+			feFmt.tymed = TYMED_ISTREAM;
 
-			return AddFormat( fe, [_fnCreate = std::move( _fnCreate )]( const FORMATETC & _feRequest, STGMEDIUM & _smOut ) -> HRESULT {
+			return AddFormat( feFmt, [_fnCreate = std::move( _fnCreate )]( const FORMATETC & _feRequest, STGMEDIUM & _smOut ) -> HRESULT {
 				if ( (_feRequest.tymed & TYMED_ISTREAM) == 0 ) { return DV_E_TYMED; }
 
 				Microsoft::WRL::ComPtr<IStream> spStream;
-				HRESULT hr = _fnCreate ? _fnCreate( spStream ) : E_FAIL;
-				if ( FAILED( hr ) ) { return hr; }
+				HRESULT hrRes = _fnCreate ? _fnCreate( spStream ) : E_FAIL;
+				if ( FAILED( hrRes ) ) { return hrRes; }
 				if ( !spStream ) { return E_FAIL; }
 
 				_smOut.tymed = TYMED_ISTREAM;
@@ -364,8 +366,8 @@ namespace lsw {
 		}
 
 	private :
-		struct SEntry {
-			FORMATETC										fe{};
+		struct LSW_ENTRY {
+			FORMATETC										feFmt{};
 			RenderFn										fnRender;
 		};
 
@@ -377,9 +379,9 @@ namespace lsw {
 			return true;
 		}
 
-		const SEntry *										FindBestMatch( const FORMATETC & _feRequest ) const {
+		const LSW_ENTRY *									FindBestMatch( const FORMATETC & _feRequest ) const {
 			for ( const auto & e : m_vEntries ) {
-				if ( Compatible( e.fe, _feRequest ) ) { return &e; }
+				if ( Compatible( e.feFmt, _feRequest ) ) { return &e; }
 			}
 			return NULL;
 		}
@@ -389,7 +391,7 @@ namespace lsw {
 
 		// == Members.
 		LONG												m_lRefCount = 1;	/**< Reference count. */
-		std::vector<SEntry>									m_vEntries;			/**< Offered formats. */
+		std::vector<LSW_ENTRY>								m_vEntries;			/**< Offered formats. */
 	};
 
 }	// namespace lsw

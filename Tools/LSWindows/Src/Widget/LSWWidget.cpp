@@ -880,6 +880,7 @@ namespace lsw {
 	 * \brief Applies expression-driven layout to determine bounds.
 	 */
 	void CWidget::EvalNewSize() {
+		LSW_SETREDRAW srRedraw( this );
 		LSW_RECT rNewSize = WindowRect( this );
 		// Each axis has 3 possible expressions.
 		// X axis has left, width, and right.

@@ -45,22 +45,36 @@ namespace mx {
 		CTab *								GetTab() const;
 
 		// WM_INITDIALOG.
-		virtual LSW_HANDLED					InitDialog();
+		virtual LSW_HANDLED					InitDialog() override;
 
 		// WM_COMMAND from control.
-		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc );
+		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc ) override;
 
 		// WM_COMMAND from menu.
-		virtual LSW_HANDLED					MenuCommand( WORD _Id ) { return Command( 0, _Id, nullptr ); }
+		virtual LSW_HANDLED					MenuCommand( WORD _Id ) override { return Command( 0, _Id, nullptr ); }
 
 		// WM_CLOSE.
-		virtual LSW_HANDLED					Close();
+		virtual LSW_HANDLED					Close() override;
 
 		// WM_ERASEBKGND.
-		virtual LSW_HANDLED					EraseBkgnd( HDC _hDc );
+		virtual LSW_HANDLED					EraseBkgnd( HDC _hDc ) override;
+
+		/**
+		 * Called when the mouse enters a tab.
+		 * 
+		 * \param _iIdx The tab the mouse began to hover over.
+		 **/
+		virtual void						TabMouseEnterTab( INT _iIdx ) override;
+
+		/**
+		 * Called when the mouse leaves a tab.
+		 * 
+		 * \param _iIdx INdex of the tab the mouse left.
+		 **/
+		virtual void						TabMouseLeftTab( INT _iIdx ) override;
 
 		// Translate a child's tooltip text.
-		virtual std::wstring				TranslateTooltip( const std::string &_sText ) { 
+		virtual std::wstring				TranslateTooltip( const std::string &_sText ) override { 
 			return CStringDecoder::DecodeToWString( _sText.c_str(), _sText.size() );
 		}
 
@@ -71,7 +85,7 @@ namespace mx {
 		const CStatusBar *					StatusBar() const;
 
 		// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
-		virtual const LSW_RECT				VirtualClientRect( const CWidget * pwChild ) const;
+		virtual const LSW_RECT				VirtualClientRect( const CWidget * pwChild ) const override;
 
 		// Prepares to create the window.  Creates the atom if necessary.
 		static void							PreparePeWorks();

@@ -101,7 +101,7 @@ namespace mx {
 			0,										// dwWidth
 			0,										// dwHeight
 			WS_CHILD | TBSTYLE_FLAT | TBSTYLE_TOOLTIPS | WS_CLIPCHILDREN |
-				WS_CLIPSIBLINGS | CCS_NODIVIDER | CCS_NORESIZE | WS_VISIBLE | CCS_ADJUSTABLE,		// dwStyle
+				WS_CLIPSIBLINGS | CCS_NODIVIDER | CCS_NORESIZE | WS_VISIBLE | CCS_ADJUSTABLE,									// dwStyle
 			0,										// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
@@ -131,29 +131,6 @@ namespace mx {
 			nullptr, 0,								// pcWidthSizeExp
 			nullptr, 0,								// pcHeightSizeExp
 		},
-		/*{
-			LSW_LT_TREELIST,						// ltType
-			MX_PEW_TESTTREELIST,					// wId
-			nullptr,								// lpwcClass
-			TRUE,									// bEnabled
-			FALSE,									// bActive
-			0,										// iLeft
-			0,										// iTop
-			255,									// dwWidth
-			110,									// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP,								// dwStyle
-			0,																		// dwStyleEx
-			nullptr,								// pwcText
-			0,										// sTextLen
-			MX_PEW_MAINWINDOW,						// dwParentId
-
-			MX_PARENT_VCLEFT,						// pcLeftSizeExp
-			MX_PARENT_VCRIGHT,						// pcRightSizeExp
-			MX_PARENT_VCTOP,						// pcTopSizeExp
-			MX_PARENT_VCBOTTOM,						// pcBottomSizeExp
-			nullptr, 0,								// pcWidthSizeExp
-			nullptr, 0,								// pcHeightSizeExp
-		},*/
 	};
 
 #undef MX_PEW_W

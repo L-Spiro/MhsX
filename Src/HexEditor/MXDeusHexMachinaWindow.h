@@ -327,7 +327,8 @@ namespace mx {
 		/** Data for a tab. */
 		struct MX_HEX_TAB {
 			CHexEditorControl *						phecWidget = nullptr;
-			CHexEditorInterface *					pheiInterface = nullptr;
+			//CHexEditorInterface *					pheiInterface = nullptr;
+			std::shared_ptr<CHexEditorInterface>	pheiInterface;
 		};
 
 
@@ -352,6 +353,8 @@ namespace mx {
 		INT											m_iImageMap[MX_I_TOTAL];
 		// The hex-editor controls.
 		std::vector<MX_HEX_TAB>						m_vTabs;
+		// Clipboards.
+		//std::vector<std::shared_ptr<CHexEditorInterface>
 		// The tast text put into status-bat index 0.
 		CSecureWString								m_swsLastStatusText;
 		// Whether the last index-0 status-bar text was a warning or not.
@@ -379,7 +382,7 @@ namespace mx {
 		void										RecalcAllBut( const CHexEditorControl * _phecSkipMe );
 
 		// Adds a tab.
-		bool										AddTab( CHexEditorInterface * _pheiInterface );
+		bool										AddTab( const std::shared_ptr<CHexEditorInterface> &_spInterface );
 
 	private :
 		typedef CDeusHexMachinaLayout				Layout;
