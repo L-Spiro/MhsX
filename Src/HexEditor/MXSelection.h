@@ -79,19 +79,20 @@ namespace mx {
 		 * \return Returns true if there is a selection and if the given address is part of that selection.
 		 **/
 		inline bool								IsSelected( uint64_t _ui64Address, uint32_t _ui32BytesPerRow ) {
-			uint64_t ui64ThisSize = (ui64Lines * _ui32BytesPerRow) + ui32Cols;
-			if ( _ui64Address < ui64AnchorAddr || _ui64Address > ui64AnchorAddr + ui64ThisSize ) { return false; }
+			uint64_t ui64ThisSize = (ui64Lines * _ui32BytesPerRow) + std::min( _ui32BytesPerRow, ui32Cols );
+			if ( _ui64Address < ui64AnchorAddr || _ui64Address >= ui64AnchorAddr + ui64ThisSize ) { return false; }
 
 			uint64_t ui64AddrCol = (_ui64Address - ui64AnchorAddr) % _ui32BytesPerRow;
-			return ui64AddrCol < ui32Cols;
+			return ui64AddrCol < std::min( _ui32BytesPerRow, ui32Cols );
 		}
 
 		/**
 		 * Gets the number of selected bytes.
 		 * 
+		 * \param _ui32BytesPerRow Current bytes-per-row.
 		 * \return Returns the number of selected bytes.
 		 **/
-		inline uint64_t							TotalSelected() const { return (ui64Lines + 1) * ui32Cols; }
+		inline uint64_t							TotalSelected( uint32_t _ui32BytesPerRow ) const { return (ui64Lines + 1) * std::min( _ui32BytesPerRow, ui32Cols ); }
 	};
 
 	/**
@@ -120,11 +121,12 @@ namespace mx {
 		/**
 		 * Gets the number of selected bytes.
 		 * 
+		 * \param _ui32BytesPerRow Current bytes-per-row.
 		 * \return Returns the number of selected bytes.
 		 **/
-		inline uint64_t							TotalSelected() const {
+		inline uint64_t							TotalSelected( uint32_t _ui32BytesPerRow ) const {
 			return HasSelection() ?
-				((smMode == MX_SM_NORMAL) ? sn.TotalSelected() : sc.TotalSelected()) : 0;
+				((smMode == MX_SM_NORMAL) ? sn.TotalSelected() : sc.TotalSelected( _ui32BytesPerRow )) : 0;
 		}
 
 		/**
@@ -180,7 +182,7 @@ namespace mx {
 				// Column Mode.
 				// Known not to be empty.
 				for ( size_t I = sc.ui64Lines + 1; I--; ) {
-					MX_SEL_RANGE srRange = { .ui64Start = sc.ui64AnchorAddr + I * _ui32BytesPerRow, .ui64Size = sc.ui32Cols };
+					MX_SEL_RANGE srRange = { .ui64Start = sc.ui64AnchorAddr + I * _ui32BytesPerRow, .ui64Size = std::min( _ui32BytesPerRow, sc.ui32Cols ) };
 					_vSelections.push_back( srRange );
 				}
 				return true;
@@ -210,7 +212,7 @@ namespace mx {
 				// Column Mode.
 				// Known not to be empty.
 				for ( size_t I = 0; I <= sc.ui64Lines; ++I ) {
-					MX_SEL_RANGE srRange = { .ui64Start = sc.ui64AnchorAddr + I * _ui32BytesPerRow, .ui64Size = sc.ui32Cols };
+					MX_SEL_RANGE srRange = { .ui64Start = sc.ui64AnchorAddr + I * _ui32BytesPerRow, .ui64Size = std::min( _ui32BytesPerRow, sc.ui32Cols ) };
 					_vSelections.push_back( srRange );
 				}
 				return true;
@@ -252,7 +254,7 @@ namespace mx {
 				uint64_t ui64NewTotal = std::min( _ui64GroupSize, ui64Total - _ui64GroupSize * _ui64GroupIdx );
 				uint64_t ui64Offset = ui64Total - _ui64GroupSize * _ui64GroupIdx - ui64NewTotal;
 				for ( size_t I = ui64NewTotal; I--; ) {
-					MX_SEL_RANGE srRange = { .ui64Start = sc.ui64AnchorAddr + (I + ui64Offset) * _ui32BytesPerRow, .ui64Size = sc.ui32Cols };
+					MX_SEL_RANGE srRange = { .ui64Start = sc.ui64AnchorAddr + (I + ui64Offset) * _ui32BytesPerRow, .ui64Size = std::min( _ui32BytesPerRow, sc.ui32Cols ) };
 					_vSelections.push_back( srRange );
 				}
 				return true;
@@ -293,7 +295,7 @@ namespace mx {
 				uint64_t ui64NewTotal = std::min( _ui64GroupSize, ui64Total - _ui64GroupSize * _ui64GroupIdx );
 				uint64_t ui64Offset = _ui64GroupSize * _ui64GroupIdx;
 				for ( size_t I = 0; I <= ui64NewTotal; ++I ) {
-					MX_SEL_RANGE srRange = { .ui64Start = sc.ui64AnchorAddr + (I + ui64Offset) * _ui32BytesPerRow, .ui64Size = sc.ui32Cols };
+					MX_SEL_RANGE srRange = { .ui64Start = sc.ui64AnchorAddr + (I + ui64Offset) * _ui32BytesPerRow, .ui64Size = std::min( _ui32BytesPerRow, sc.ui32Cols ) };
 					_vSelections.push_back( srRange );
 				}
 				return true;
@@ -321,7 +323,7 @@ namespace mx {
 		inline uint64_t							UpperRightAddress( uint32_t _ui32BytesPerRow ) const {
 			if ( !HasSelection() ) { return 0; }
 			if ( smMode == MX_SM_NORMAL ) { return sn.ui64End; }
-			return sc.ui64AnchorAddr + (sc.ui64Lines * _ui32BytesPerRow) + sc.ui32Cols;
+			return sc.ui64AnchorAddr + (sc.ui64Lines * _ui32BytesPerRow) + std::min( _ui32BytesPerRow, sc.ui32Cols );
 		}
 	};
 

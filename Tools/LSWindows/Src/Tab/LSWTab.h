@@ -131,6 +131,40 @@ namespace lsw {
 		bool								IsChecked( int _iItem ) const;
 
 		/**
+		 * \brief Hit-tests the tab control at client coordinates and returns the hovered tab index.
+		 *
+		 * Calls TabCtrl_HitTest() (TCM_HITTEST) and optionally filters results to only count hits that are on the tab item
+		 * itself (TCHT_ONITEM). Returns -1 when the mouse is not over any tab item.
+		 *
+		 * \param _iX Client X coordinate.
+		 * \param _iY Client Y coordinate.
+		 * \return The 0-based tab index under the cursor, or -1 if none.
+		 */
+		int									HitTestTab( int _iX, int _iY ) const {
+			TCHITTESTINFO htiInfo{};
+			htiInfo.pt.x = _iX;
+			htiInfo.pt.y = _iY;
+
+			const int iTab = int(::SendMessageW( Wnd(), TCM_HITTEST, 0, reinterpret_cast<LPARAM>(reinterpret_cast<TC_HITTESTINFO *>(&htiInfo)) ));
+			if ( iTab < 0 ) { return -1; }
+
+			// Optional: ignore edge cases if you only want "on the tab item".
+			if ( (htiInfo.flags & TCHT_ONITEM) == 0 ) { return -1; }
+
+			return iTab;
+		}
+
+		/**
+		 * \brief Sets the current "hot" (mouse-over) tab index, updating state only when it changes.
+		 *
+		 * When the hot tab changes, this function updates internal state and triggers any necessary UI refresh.
+		 * Typical uses include invalidating the control for custom hover rendering and/or notifying the parent.
+		 *
+		 * \param _iNewHotTab The new 0-based hot tab index, or -1 for "no hot tab."
+		 */
+		void								SetHotTab( int _iNewHotTab );
+
+		/**
 		 * Handles WM_ERASEBKGND.
 		 * \brief Allows custom background erasing.
 		 *
@@ -155,9 +189,13 @@ namespace lsw {
 		/** Data for each tab. */
 		std::vector<LSW_TAB>				m_vTabs;
 		/** Original tab function. */
-		LONG_PTR							m_lpOriginProc;
+		LONG_PTR							m_lpOriginProc = 0;
+		/** THe hot tab. */
+		int									m_iHotTab = -1;
 		/** If true, close boxes appear in the tabs. */
-		bool								m_bShowClose;
+		bool								m_bShowClose = true;
+		/** If true we are tracking mouse events. */
+		bool								m_bTrackMouseLeave = false;
 
 
 		// == Functions.
@@ -184,6 +222,14 @@ namespace lsw {
 		 * \return Returns a LSW_HANDLED code.
 		 */
 		virtual LSW_HANDLED					Move( LONG _lX, LONG _lY );
+		
+		/**
+		 * \brief Begins tracking for WM_MOUSELEAVE so we can clear the hot tab when the mouse exits the tab control.
+		 *
+		 * Uses TrackMouseEvent() with TME_LEAVE. Call this when receiving WM_MOUSEMOVE, but only once per hover session.
+		 * WM_MOUSELEAVE will reset the tracking flag, allowing tracking to be re-armed on the next WM_MOUSEMOVE.
+		 */
+		void								BeginMouseLeaveTracking();
 
 		/**
 		 * Handles WM_ERASEBKGND.

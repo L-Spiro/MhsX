@@ -61,7 +61,7 @@ namespace lsw {
 				uiRedrawFlags( _uiRedrawFlags ) {
 				if ( pwWnd ) {
 					pwWnd->SetRedraw( bEnable );
-					if ( bEnable && bRedrawWhenEnabled ) {
+					if ( bEnable && bRedrawWhenEnabled && pwWnd->GetSetRedrawCount() == 0 ) {
 						::RedrawWindow( pwWnd->Wnd(), nullptr, NULL, uiRedrawFlags );
 					}
 				}
@@ -69,7 +69,7 @@ namespace lsw {
 			~LSW_SETREDRAW() {
 				if ( pwWnd ) {
 					pwWnd->SetRedraw( !bEnable );
-					if ( !bEnable && bRedrawWhenEnabled ) {
+					if ( !bEnable && bRedrawWhenEnabled && pwWnd->GetSetRedrawCount() == 0 ) {
 						::RedrawWindow( pwWnd->Wnd(), nullptr, NULL, uiRedrawFlags );
 					}
 				}
@@ -253,7 +253,25 @@ namespace lsw {
 		 * 
 		 * \param _bRedraw The redraw state to set.
 		 **/
-		void								SetRedraw( BOOL _bRedraw ) { ::SendMessageW( Wnd(), WM_SETREDRAW, _bRedraw ? TRUE : FALSE, 0 ); }
+		void								SetRedraw( BOOL _bRedraw ) {
+			if ( _bRedraw ) {
+				if ( !--m_iSetRedraw ) {
+					::SendMessageW( Wnd(), WM_SETREDRAW, TRUE, 0 );
+				}
+			}
+			else {
+				if ( !m_iSetRedraw++ ) {
+					::SendMessageW( Wnd(), WM_SETREDRAW, FALSE, 0 );
+				}
+			}
+		}
+
+		/**
+		 * Gets the WM_SETREDRAW count.
+		 * 
+		 * \return Returns the WM_SETREDRAW count.
+		 **/
+		INT									GetSetRedrawCount() const { return m_iSetRedraw; }
 
 		/**
 		 * Gets the current window style.
@@ -572,6 +590,20 @@ namespace lsw {
 		virtual void						TabSelChanged( CWidget * _pwTab, int _iTab, LPNMHDR _lpnHdr ) {
 			if ( m_pwParent ) { m_pwParent->TabSelChanged( _pwTab, _iTab, _lpnHdr ); }
 		}
+
+		/**
+		 * Called when the mouse enters a tab.
+		 * 
+		 * \param _iIdx The tab the mouse began to hover over.
+		 **/
+		virtual void						TabMouseEnterTab( INT _iIdx ) { if ( m_pwParent ) { m_pwParent->TabMouseEnterTab( _iIdx ); }; }
+
+		/**
+		 * Called when the mouse leaves a tab.
+		 * 
+		 * \param _iIdx INdex of the tab the mouse left.
+		 **/
+		virtual void						TabMouseLeftTab( INT _iIdx ) { if ( m_pwParent ) { m_pwParent->TabMouseLeftTab( _iIdx ); } }
 
 		/**
 		 * Sets the logical parent widget.
@@ -901,6 +933,8 @@ namespace lsw {
 		DWORD								m_dwTooltipStyle;
 		/** Tooltip extended styles. */
 		DWORD								m_dwTooltipStyleEx;
+		/** WM_SETREDRAW count. */
+		INT									m_iSetRedraw = 0;
 		/** Last hit returned by NcHitTest(). */
 		INT									m_iLastHit;
 		/** Enabled. */

@@ -14,6 +14,27 @@ namespace mx {
 		return m_pProcess.OpenProc( _dwId, _opmMode, _dwFlags );
 	}
 
+	// Gets the text displayed in the tab.
+	CSecureWString CHexEditorProcess::TabString() const {
+		CSecureWString swsTmp = _DEC_WS_E9985D3A_Process__;
+		std::filesystem::path pPath = m_pProcess.QueryProcessImageName( 0 );
+		if ( !pPath.has_filename() ) {
+			swsTmp += std::to_wstring( m_pProcess.ProcId() );
+		}
+		else {
+			swsTmp += pPath.filename();
+			swsTmp += L" (";
+			swsTmp += std::to_wstring( m_pProcess.ProcId() );
+			swsTmp += L")";
+		}
+		return swsTmp;
+	}
+
+	// Gets the text displayed in the status bar.
+	CSecureWString CHexEditorProcess::StatusString() const {
+		return TabString();
+	}
+
 	// Resets the object back to scratch.
 	void CHexEditorProcess::Reset() {
 		m_pProcess.Reset();

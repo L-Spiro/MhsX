@@ -10,6 +10,7 @@ namespace mx {
 		MX_TI_MAIN_WINDOW_UPDATE_LIST			= 0x3C20,
 		MX_TI_HEX_CARET							= 0x3C30,
 		MX_TI_HEX_REFRESH						= 0x3C40,
+		MX_TI_HEX_UPDATE_STATUS					= 0x3C50,
 	};
 
 }	// namespace mx

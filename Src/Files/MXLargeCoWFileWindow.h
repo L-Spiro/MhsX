@@ -48,6 +48,13 @@ namespace mx {
 		void													Reset();
 
 		/**
+		 * Gets the full file path.
+		 * 
+		 * \return Returns the path to the opened file.
+		 **/
+		const std::filesystem::path &							Path() const { return m_pFilePath; }
+
+		/**
 		 * \brief Sets the target size, in bytes, for segment files used to store edits.
 		 *
 		 * Segment files are temporary edit storage. Implementations may create, extend, or recreate

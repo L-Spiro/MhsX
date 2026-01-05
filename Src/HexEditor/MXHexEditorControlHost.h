@@ -37,10 +37,13 @@ namespace mx {
 		virtual const lsw::CStatusBar *				StatusBar() const { return nullptr; }
 
 		// Sets a status-bar item’s text and "warning" status.
-		virtual void								SetStatusBarText( const wchar_t * _pwcText, bool _bWarning = false, size_t _sIdx = 0 ) {}
+		virtual void								SetStatusBarText( const wchar_t * _pwcText, bool _bWarning = false, size_t _sIdx = 0, bool _bUpdateStore = true ) {}
 
 		// Update the status-bar Character-Set part.
 		virtual void								UpdateStatusBar_CharSet() {}
+
+		// Updates the status-bar selection ranges/current position/value.
+		virtual void								UpdateStatusBar_PosValue_StartSize() {}
 
 	protected :
 		// == Members.

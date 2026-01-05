@@ -482,66 +482,77 @@ namespace mx {
 			case Layout::MX_M_VIEW_EDIT_AS_TEXT : {
 				if ( phecControl ) {
 					phecControl->SetViewType( CHexEditorControl::MX_EA_TEXT );
+					UpdateStatusBar_ViewType();
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_EDIT_AS_HEX : {
 				if ( phecControl ) {
 					phecControl->SetViewType( CHexEditorControl::MX_EA_HEX );
+					UpdateStatusBar_ViewType();
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_EDIT_AS_BINARY : {
 				if ( phecControl ) {
 					phecControl->SetViewType( CHexEditorControl::MX_EA_BINARY );
+					UpdateStatusBar_ViewType();
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_EDIT_AS_SCRIPT : {
 				if ( phecControl ) {
 					phecControl->SetViewType( CHexEditorControl::MX_EA_SCRIPT );
+					UpdateStatusBar_ViewType();
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_EDIT_AS_TEMPLATE : {
 				if ( phecControl ) {
 					phecControl->SetViewType( CHexEditorControl::MX_EA_TEMPLATE );
+					UpdateStatusBar_ViewType();
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_EDIT_AS_EBCDIC : {
 				if ( phecControl ) {
 					phecControl->SetViewType( CHexEditorControl::MX_EA_EBCDIC );
+					UpdateStatusBar_ViewType();
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_EDIT_AS_UNICODE : {
 				if ( phecControl ) {
 					phecControl->SetViewType( CHexEditorControl::MX_EA_UTF16 );
+					UpdateStatusBar_ViewType();
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_EDIT_AS_UTF8 : {
 				if ( phecControl ) {
 					phecControl->SetViewType( CHexEditorControl::MX_EA_UTF8 );
+					UpdateStatusBar_ViewType();
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_EDIT_AS_PROCESS : {
 				if ( phecControl ) {
 					phecControl->SetViewType( CHexEditorControl::MX_EA_PROCESS );
+					UpdateStatusBar_ViewType();
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_EDIT_AS_CODE : {
 				if ( phecControl ) {
 					phecControl->SetViewType( CHexEditorControl::MX_EA_CODE );
+					UpdateStatusBar_ViewType();
 				}
 				break;
 			}
 			case Layout::MX_M_VIEW_EDIT_AS_TAGGED : {
 				if ( phecControl ) {
 					phecControl->SetViewType( CHexEditorControl::MX_EA_TAGGED );
+					UpdateStatusBar_ViewType();
 				}
 				break;
 			}
@@ -1458,7 +1469,13 @@ namespace mx {
 		static_cast<void>(_pwTab);
 		static_cast<void>(_iTab);
 		static_cast<void>(_lpnHdr);
+		LSW_SETREDRAW srRedraw( StatusBar() );
+		SetStatusBarText( L"", false, 0 );
 		UpdateStatusBar_Endian();
+		UpdateStatusBar_CharSet();
+		UpdateStatusBar_ViewType();
+		UpdateStatusBar_Size();
+		UpdateStatusBar_PosValue_StartSize();
 	}
 
 	/**
@@ -1566,7 +1583,7 @@ namespace mx {
 	// Performs an Open operation.
 	void CDeusHexMachinaWindow::Open( const std::filesystem::path &_pPath ) {
 		try {
-			auto wsTabname = _pPath.filename().generic_wstring();
+			//auto wsTabname = _pPath.filename().generic_wstring();
 
 			CHexEditorInterface * pheiInterface = new( std::nothrow ) CHexEditorFile();
 			if ( !pheiInterface || !static_cast<CHexEditorFile*>(pheiInterface)->SetFile( _pPath ) ) {
@@ -1574,7 +1591,7 @@ namespace mx {
 				return;
 			}
 
-			AddTab( pheiInterface, wsTabname );
+			AddTab( pheiInterface/*, wsTabname*/ );
 		}
 		catch ( ... ) {}
 	}
@@ -1627,10 +1644,10 @@ namespace mx {
 					delete pheiInterface;
 					return false;
 				}
-				auto swsPath = static_cast<CHexEditorProcess *>(pheiInterface)->Process().QueryProcessImageName();
-				auto wsTabname = std::filesystem::path( swsPath.c_str() ).filename().generic_wstring();
+				//auto swsPath = static_cast<CHexEditorProcess *>(pheiInterface)->Process().QueryProcessImageName();
+				//auto wsTabname = std::filesystem::path( swsPath.c_str() ).filename().generic_wstring();
 
-				return AddTab( pheiInterface, wsTabname );
+				return AddTab( pheiInterface/*, wsTabname*/ );
 			}
 			catch ( ... ) {}
 		}
@@ -1656,10 +1673,10 @@ namespace mx {
 				delete pheiInterface;
 				return false;
 			}
-			auto swsPath = static_cast<CHexEditorCurProcess *>(pheiInterface)->Process().QueryProcessImageName();
-			auto wsTabname = std::filesystem::path( swsPath.c_str() ).filename().generic_wstring();
+			/*auto swsPath = static_cast<CHexEditorCurProcess *>(pheiInterface)->Process().QueryProcessImageName();
+			auto wsTabname = std::filesystem::path( swsPath.c_str() ).filename().generic_wstring();*/
 
-			return AddTab( pheiInterface, wsTabname );
+			return AddTab( pheiInterface/*, wsTabname*/ );
 		}
 		catch ( ... ) {}
 		return false;
@@ -1690,7 +1707,10 @@ namespace mx {
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
 		bool bWarning = !phecControl->Undo( wsMsg );
+		LSW_SETREDRAW rRedraw( StatusBar() );
 		SetStatusBarText( wsMsg.c_str(), bWarning );
+		UpdateStatusBar_PosValue_StartSize();
+		UpdateStatusBar_Size();
 	}
 
 	// Performs a Redo.
@@ -1699,7 +1719,10 @@ namespace mx {
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
 		bool bWarning = !phecControl->Redo( wsMsg );
+		LSW_SETREDRAW rRedraw( StatusBar() );
 		SetStatusBarText( wsMsg.c_str(), bWarning );
+		UpdateStatusBar_PosValue_StartSize();
+		UpdateStatusBar_Size();
 	}
 
 	// Performs a Cut.
@@ -1708,7 +1731,10 @@ namespace mx {
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
 		bool bWarning = !phecControl->Cut( wsMsg );
+		LSW_SETREDRAW rRedraw( StatusBar() );
 		SetStatusBarText( wsMsg.c_str(), bWarning );
+		UpdateStatusBar_PosValue_StartSize();
+		UpdateStatusBar_Size();
 	}
 
 	// Performs a Copy As.
@@ -1726,7 +1752,10 @@ namespace mx {
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
 		bool bWarning = !phecControl->DeleteSelectedOrCaret( wsMsg );
+		LSW_SETREDRAW rRedraw( StatusBar() );
 		SetStatusBarText( wsMsg.c_str(), bWarning );
+		UpdateStatusBar_PosValue_StartSize();
+		UpdateStatusBar_Size();
 	}
 
 	// Deletes the character prior to the caret (backspace).
@@ -1735,7 +1764,10 @@ namespace mx {
 		if ( !phecControl ) { return; }
 		CSecureWString wsMsg;
 		bool bWarning = !phecControl->DeletePriorToCaret( wsMsg );
+		LSW_SETREDRAW rRedraw( StatusBar() );
 		SetStatusBarText( wsMsg.c_str(), bWarning );
+		UpdateStatusBar_PosValue_StartSize();
+		UpdateStatusBar_Size();
 	}
 
 	// Select all.
@@ -1853,12 +1885,19 @@ namespace mx {
 	}
 
 	// Sets a status-bar item’s text and "warning" status.
-	void CDeusHexMachinaWindow::SetStatusBarText( const wchar_t * _pwcText, bool _bWarning, size_t _sIdx ) {
+	void CDeusHexMachinaWindow::SetStatusBarText( const wchar_t * _pwcText, bool _bWarning, size_t _sIdx, bool _bUpdateStore ) {
 		auto psbStatus = StatusBar();
-		if ( psbStatus && (_pwcText && _pwcText[0] != L'\0') ) {
+		if ( psbStatus ) {
 			psbStatus->SetItemTextColors( MX_GetRgbValue( ::GetSysColor( COLOR_WINDOWTEXT ) ), MX_GetRgbValue( ::GetSysColor( COLOR_GRAYTEXT ) ), INT(_sIdx ) );
 			psbStatus->SetItemBkColor( MX_GetRgbValue( _bWarning ? ::GetSysColor( COLOR_3DSHADOW ) : ::GetSysColor( COLOR_3DFACE ) ), INT(_sIdx ) );
-			psbStatus->SetTextW( INT( _sIdx ), 0, _pwcText );
+			if ( _pwcText ) {
+				psbStatus->SetTextW( INT( _sIdx ), 0, _pwcText );
+			}
+		}
+		if ( _sIdx == 0 && _bUpdateStore ) {
+			if ( _pwcText ) { m_swsLastStatusText = _pwcText; }
+			else { m_swsLastStatusText.clear(); }
+			m_bLastStatusTextIsWarning = _bWarning;
 		}
 	}
 
@@ -1890,6 +1929,116 @@ namespace mx {
 				psbStatus->SetTextA( MX_SB_CHAR_SET, 0, phecControl->CharSetStatusBarCode().c_str() );
 			}
 		}
+	}
+
+	// Update the status-bar View Type part.
+	void CDeusHexMachinaWindow::UpdateStatusBar_ViewType() {
+		auto phecControl = CurrentEditor();
+		if ( phecControl ) {
+			auto psbStatus = StatusBar();
+			if ( psbStatus ) {
+				psbStatus->SetTextW( MX_SB_VIEW_TYPE, 0, phecControl->GetViewTypeAsString().c_str() );
+			}
+		}
+	}
+
+	// Update the status-bar Size part.
+	void CDeusHexMachinaWindow::UpdateStatusBar_Size() {
+		auto phecControl = CurrentEditor();
+		if ( phecControl ) {
+			auto psbStatus = StatusBar();
+			if ( psbStatus ) {
+				CSecureWString swsTmp = _DEC_WS_FBA37944_Size__;
+				
+				const std::locale lLoc( "" );
+				swsTmp += std::format( lLoc, L"{:L}\n", phecControl->Size() );
+				/*CSecureWString swsSize = std::to_wstring( phecControl->Size() );
+				int32_t iCommIdx = int32_t( swsSize.size() ) - 3;
+				while ( iCommIdx > 0 ) {
+					swsSize.insert( swsSize.begin() + iCommIdx, L',' );
+					iCommIdx -= 3;
+				}
+				swsTmp += swsSize;*/
+
+				psbStatus->SetTextW( MX_SB_FILE_SIZE, 0, swsTmp.c_str() );
+			}
+		}
+	}
+
+	// Updates the status-bar selection ranges/current position/value.
+	void CDeusHexMachinaWindow::UpdateStatusBar_PosValue_StartSize() {
+		try {
+			auto phecControl = CurrentEditor();
+			if ( phecControl ) {
+				auto psbStatus = StatusBar();
+				if ( psbStatus ) {
+					std::wstring wsTmp, wsTmp2;
+					uint64_t ui64Start = phecControl->GetSelctStartOrCaret();
+					if ( phecControl->HasSelection() ) {
+						wsTmp = _DEC_WS_37B96B54_Start__;
+					}
+					else {
+						wsTmp = _DEC_WS_D504F73B_Pos__;
+					}
+					wsTmp += std::format( L"{} [{}]", ui64Start, CUtilities::ToHex( ui64Start, wsTmp2, 0 ) );
+					psbStatus->SetTextW( MX_SB_POSITION_START, 0, wsTmp.c_str() );
+
+					if ( phecControl->HasSelection() ) {
+						wsTmp = _DEC_WS_EA6389C2_Sel__;
+						auto ui64Total = phecControl->GetTotalSelectedBytes();
+						wsTmp2.clear();
+						wsTmp += std::format( L"{} [{}]", ui64Total, CUtilities::ToHex( ui64Total, wsTmp2, 0 ) );
+						psbStatus->SetTextW( MX_SB_VALUE_SEL, 0, wsTmp.c_str() );
+					}
+					else {
+						if ( ui64Start >= phecControl->Size() ) {
+							psbStatus->SetTextW( MX_SB_VALUE_SEL, 0, L"" );
+						}
+						else {
+							wsTmp = _DEC_WS_ADE191E5_Val__;
+							std::vector<uint8_t> vReadMe;
+							if ( phecControl->Read( ui64Start, vReadMe, 1 ) ) {
+								wsTmp2.clear();
+								wsTmp += std::format( L"{} [{}]", vReadMe[0], CUtilities::ToHex( vReadMe[0], wsTmp2, 0 ) );
+								psbStatus->SetTextW( MX_SB_VALUE_SEL, 0, wsTmp.c_str() );
+							}
+							else {
+								wsTmp += _DEC_WS_968230B3_N_A;
+							}
+							psbStatus->SetTextW( MX_SB_VALUE_SEL, 0, wsTmp.c_str() );
+						}
+					}
+				}
+			}
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Called when the mouse enters a tab.
+	 * 
+	 * \param _iIdx The tab the mouse began to hover over.
+	 **/
+	void CDeusHexMachinaWindow::TabMouseEnterTab( INT _iIdx ) {
+		auto ptTab = Tab();
+		if ( !ptTab ) { return; }
+		size_t sIdx = size_t( _iIdx );
+		if ( sIdx >= m_vTabs.size() ) { return; }
+		try {
+			if ( m_vTabs[sIdx].phecWidget ) {
+				SetStatusBarText( m_vTabs[sIdx].phecWidget->StatusString().c_str(), false, 0, false );
+			}
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Called when the mouse leaves a tab.
+	 * 
+	 * \param _iIdx INdex of the tab the mouse left.
+	 **/
+	void CDeusHexMachinaWindow::TabMouseLeftTab( INT _iIdx ) {
+		SetStatusBarText( m_swsLastStatusText.c_str(), m_bLastStatusTextIsWarning, 0 );
 	}
 
 	// Prepares to create the window.  Creates the atom if necessary.
@@ -2755,7 +2904,7 @@ namespace mx {
 	}
 
 	// Adds a tab.
-	bool CDeusHexMachinaWindow::AddTab( CHexEditorInterface * _pheiInterface, const std::wstring &_wsName ) {
+	bool CDeusHexMachinaWindow::AddTab( CHexEditorInterface * _pheiInterface ) {
 		MX_HEX_TAB htTab;
 		htTab.pheiInterface = _pheiInterface;
 		try {
@@ -2810,10 +2959,10 @@ namespace mx {
 
 				m_vTabs.insert( m_vTabs.begin(), htTab );
 
-				
+				auto swsName = _pheiInterface->TabString();
 				TCITEMW tciItem = { 0 };
 				tciItem.mask = TCIF_TEXT;
-				tciItem.pszText = const_cast<LPWSTR>(_wsName.c_str());
+				tciItem.pszText = const_cast<LPWSTR>(swsName.c_str());
 
 				
 
@@ -2830,6 +2979,9 @@ namespace mx {
 				::MoveWindow( htTab.phecWidget->Wnd(), rInternalSize.left, rInternalSize.top, rInternalSize.Width(), rInternalSize.Height(), TRUE );
 				UpdateStatusBar_Endian();
 				UpdateStatusBar_CharSet();
+				UpdateStatusBar_ViewType();
+				UpdateStatusBar_Size();
+				UpdateStatusBar_PosValue_StartSize();
 				return true;
 			}
 		}

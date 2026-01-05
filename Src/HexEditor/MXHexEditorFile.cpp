@@ -20,6 +20,26 @@ namespace mx {
 		m_lcwfwFile.Reset();
 	}
 
+	// Gets the text displayed in the tab.
+	CSecureWString CHexEditorFile::TabString() const {
+		auto pPath = m_lcwfwFile.Path();
+		CSecureWString swsTmp;
+		if ( !pPath.has_filename() ) {
+			swsTmp = pPath.generic_wstring();
+		}
+		else {
+			swsTmp = pPath.filename().generic_wstring();
+		}
+
+		if ( ReadOnly() ) { swsTmp += L" \U0001F512"; }	// Lock.
+		return swsTmp;
+	}
+
+	// Gets the text displayed in the status bar.
+	CSecureWString CHexEditorFile::StatusString() const {
+		return m_lcwfwFile.Path().generic_wstring();
+	}
+
 	// Read from the given data stream.
 	bool CHexEditorFile::Read( uint64_t _ui64Addr, CBuffer &_bDst, size_t _sSize ) const {
 		return m_lcwfwFile.Read( _ui64Addr, _bDst, _sSize );

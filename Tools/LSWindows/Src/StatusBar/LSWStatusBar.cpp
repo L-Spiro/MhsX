@@ -303,6 +303,7 @@ namespace lsw {
 	BOOL CStatusBar::AutoFitPartsToTextLocked( BOOL _bFillLastNonLocked ) {
 		if ( !Wnd() ) { return FALSE; }
 		try {
+			LSW_SETREDRAW srRedraw( this );
 			RECT rClient{};
 			::GetClientRect( Wnd(), &rClient );
 			int iClientW = rClient.right - rClient.left;
@@ -489,6 +490,7 @@ namespace lsw {
 	 * Called during layout/resizing to compute and apply an updated size/position.
 	 */
 	void CStatusBar::EvalNewSize() {
+		LSW_SETREDRAW srRedraw( this );
 		::SendMessageW( Wnd(), WM_SIZE, 0L, 0L );
 		/*::GetWindowRect( Wnd(), &m_rRect );
 		::GetClientRect( Wnd(), &m_rClientRect );*/

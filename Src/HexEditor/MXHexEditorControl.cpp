@@ -43,6 +43,24 @@ namespace mx {
 		}
 	}
 
+	// Gets the view type as a string.
+	CSecureWString CHexEditorControl::GetViewTypeAsString() const {
+		switch ( m_eaEditAs ) {
+			case MX_EA_TEXT : { return _DEC_WS_9BB908F9_Text; }
+			case MX_EA_BINARY : { return _DEC_WS_C14CEC33_Binary; }
+			case MX_EA_SCRIPT : { return _DEC_WS_1B2D820C_Script; }
+			case MX_EA_TEMPLATE : { return _DEC_WS_6E167DD5_Template; }
+			case MX_EA_EBCDIC : { return _DEC_WS_FC3807FC_EBCDIC; }
+			case MX_EA_UTF16 : { return _DEC_WS_1C0C8DFC_Unicode; }
+			case MX_EA_UTF8 : { return _DEC_WS_0E813C50_UTF_8; }
+			case MX_EA_PROCESS : { return _DEC_WS_49A0210A_Process; }
+			case MX_EA_CUR_PROCESS : { return _DEC_WS_49A0210A_Process; }
+			case MX_EA_CODE : { return _DEC_WS_D7279FA6_Code; }
+			case MX_EA_TAGGED : { return _DEC_WS_3BB39D03_Tagged; }
+			default : { return _DEC_WS_C79C6386_Hex; }
+		}
+	}
+
 	// Sets the character set.
 	void CHexEditorControl::SetCharacterSet( CCharSets::MX_CHAR_SETS _csSet ) {
 		if ( CurStyle()->csCharSet != _csSet ) {
@@ -159,7 +177,15 @@ namespace mx {
 			}
 			
 			if ( m_pwHexParent ) {
+				LSW_SETREDRAW srRedraw( m_pwHexParent->StatusBar() );
 				m_pwHexParent->SetStatusBarText( swsStatus.c_str(), false );
+				if ( (m_ui8UpdateSelectCnt++ & 0x0F) == 0 ) {
+					m_pwHexParent->UpdateStatusBar_PosValue_StartSize();
+					m_tUpdateSelection.Stop();
+				}
+				else {
+					m_tUpdateSelection.Start( Wnd(), MX_TI_HEX_UPDATE_STATUS, 16, nullptr );
+				}
 			}
 		}
 		catch ( ... ) {}
@@ -431,7 +457,7 @@ namespace mx {
 				const uint32_t ui32AnchorCol  = static_cast<uint32_t>(ui64AnchorAddr % ui32Bpr);
 
 				const uint64_t ui64LastRow = ui64AnchorRow + m_sSel.sc.ui64Lines;
-				const uint32_t ui32LastCol = ui32AnchorCol + m_sSel.sc.ui32Cols;
+				const uint32_t ui32LastCol = ui32AnchorCol + std::min( m_sSel.sc.ui32Cols, ui32Bpr );
 
 				// Lower-left: last row, leftmost column.
 				const uint64_t ui64LowerLeftAddr = ui64LastRow * ui32Bpr + ui32AnchorCol;
@@ -484,20 +510,61 @@ namespace mx {
 	void CHexEditorControl::ReverseSelection() {
 		if ( !m_sSel.HasSelection() ) { return; }
 
-		// Normal selection mode.
-		auto ui64Tmp = m_sgSelGesture.ui64AnchorAddr;
+		if ( m_sSel.smMode == MX_SM_NORMAL ) {
+			// Normal selection mode.
+			auto ui64Tmp = m_sgSelGesture.ui64AnchorAddr;
 			
-		if ( m_sgSelGesture.ui64CaretAddr > m_sgSelGesture.ui64AnchorAddr ) {
-			// A..C  -> C..A
-			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64CaretAddr;
-			m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64AnchorAddr - 1;
+			if ( m_sgSelGesture.ui64CaretAddr > m_sgSelGesture.ui64AnchorAddr ) {
+				// A..C  -> C..A
+				m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64CaretAddr;
+				m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64AnchorAddr - 1;
+			}
+			else {
+				// C..A  -> A..C
+				m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64CaretAddr;
+				m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64AnchorAddr;
+			}
+			SetCaretAddr( ui64Tmp, 0, true );
 		}
 		else {
-			// C..A  -> A..C
-			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64CaretAddr;
-			m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64AnchorAddr;
+			auto uiBpr = CurStyle()->uiBytesPerRow;
+			auto ui64Tmp = m_sSel.sc.ui64AnchorAddr;
+			uint64_t ui64Right = ui64Tmp + std::min( uiBpr, m_sSel.sc.ui32Cols );
+			if ( ui64Right % CurStyle()->uiBytesPerRow <= ui64Tmp % CurStyle()->uiBytesPerRow ) {
+				uint64_t ui64ThisSize = (m_sSel.sc.ui64Lines * CurStyle()->uiBytesPerRow) + std::min( uiBpr, m_sSel.sc.ui32Cols );
+				if ( m_sgSelGesture.ui64CaretAddr > ui64Tmp ) {
+					m_sgSelGesture.ui64CaretAddr = ui64Tmp;
+					m_sgSelGesture.ui64AnchorAddr = ui64Tmp + ui64ThisSize;
+					m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64AnchorAddr - 1;
+				}
+				else {
+					m_sgSelGesture.ui64CaretAddr = ui64Tmp + ui64ThisSize;
+					m_sgSelGesture.ui64AnchorAddr = ui64Tmp;
+					m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64AnchorAddr;
+				}
+				
+				StartCaretBlink();
+				EnsureVisible( m_sgSelGesture.ui64CaretAddr, true );
+			}
+			else {
+				ui64Tmp = m_sgSelGesture.ui64AnchorAddr;
+			
+				if ( m_sgSelGesture.ui64CaretAddr > m_sgSelGesture.ui64AnchorAddr ) {
+					// A..C  -> C..A
+					m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64CaretAddr;
+					m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64AnchorAddr - 1;
+				}
+				else {
+					// C..A  -> A..C
+					m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64CaretAddr;
+					m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64AnchorAddr;
+				}
+				SetCaretAddr( ui64Tmp, 0, true );
+			}
 		}
-		SetCaretAddr( ui64Tmp, 0, true );
+		if ( m_pwHexParent ) {
+			m_pwHexParent->UpdateStatusBar_PosValue_StartSize();
+		}
 	}
 
 	/**
@@ -560,14 +627,15 @@ namespace mx {
 			uiAddr = m_sSel.sn.ui64Start;
 		}
 		else {
-			if ( (m_sSel.sc.ui64AnchorAddr <= m_sSel.sc.ui32Cols) ) {
+			auto uiBpr = CurStyle()->uiBytesPerRow;
+			if ( (m_sSel.sc.ui64AnchorAddr <= std::min( uiBpr, m_sSel.sc.ui32Cols )) ) {
 				m_sSel.sc.ui64AnchorAddr = 0;
 			}
 			else {
-				m_sSel.sc.ui64AnchorAddr -= m_sSel.sc.ui32Cols;
+				m_sSel.sc.ui64AnchorAddr -= std::min( uiBpr, m_sSel.sc.ui32Cols );
 			}
 
-			uint64_t ui64ThisSize = (m_sSel.sc.ui64Lines * CurStyle()->uiBytesPerRow) + m_sSel.sc.ui32Cols;
+			uint64_t ui64ThisSize = (m_sSel.sc.ui64Lines * CurStyle()->uiBytesPerRow) + std::min( uiBpr, m_sSel.sc.ui32Cols );
 			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sc.ui64AnchorAddr;
 			m_sgSelGesture.ui64CaretAddr = m_sgSelGesture.ui64AnchorAddr + ui64ThisSize;
 
@@ -580,6 +648,10 @@ namespace mx {
 			_swsStatus = _DEC_WS_3843E4C1_Moved_selection_to_address_;
 			std::wstring wsTmp;
 			_swsStatus += std::format( L"{} [{}]", uiAddr, CUtilities::ToHex( uiAddr, wsTmp, 0 ) );
+
+			if ( m_pwHexParent ) {
+				m_pwHexParent->UpdateStatusBar_PosValue_StartSize();
+			}
 		}
 		catch ( ... ) { return false; }
 		return true;
@@ -610,12 +682,13 @@ namespace mx {
 			uiAddr = m_sSel.sn.ui64Start;
 		}
 		else {
-			uint64_t ui64ThisSize = (m_sSel.sc.ui64Lines * CurStyle()->uiBytesPerRow) + m_sSel.sc.ui32Cols;
-			if ( (m_sSel.sc.ui64AnchorAddr + m_sSel.sc.ui32Cols) >= ui64Size - ui64ThisSize ) {
+			auto uiBpr = CurStyle()->uiBytesPerRow;
+			uint64_t ui64ThisSize = (m_sSel.sc.ui64Lines * uiBpr) + std::min( uiBpr, m_sSel.sc.ui32Cols );
+			if ( (m_sSel.sc.ui64AnchorAddr + std::min( uiBpr, m_sSel.sc.ui32Cols )) >= ui64Size - ui64ThisSize ) {
 				m_sSel.sc.ui64AnchorAddr = ui64Size - ui64ThisSize;
 			}
 			else {
-				m_sSel.sc.ui64AnchorAddr += m_sSel.sc.ui32Cols;
+				m_sSel.sc.ui64AnchorAddr += std::min( uiBpr, m_sSel.sc.ui32Cols );
 			}
 
 			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sc.ui64AnchorAddr;
@@ -630,6 +703,10 @@ namespace mx {
 			_swsStatus = _DEC_WS_3843E4C1_Moved_selection_to_address_;
 			std::wstring wsTmp;
 			_swsStatus += std::format( L"{} [{}]", uiAddr, CUtilities::ToHex( uiAddr, wsTmp, 0 ) );
+
+			if ( m_pwHexParent ) {
+				m_pwHexParent->UpdateStatusBar_PosValue_StartSize();
+			}
 		}
 		catch ( ... ) { return false; }
 		return true;
@@ -688,7 +765,7 @@ namespace mx {
 			caCopyData.csCharSet = CurStyle()->csCharSet;
 			if ( !m_pheiTarget->Copy( m_sSel, CurStyle()->uiBytesPerRow, 0, caCopyData, _swsStatus ) ) { return false; }
 
-			auto ui64TotalSel = m_sSel.TotalSelected();
+			auto ui64TotalSel = m_sSel.TotalSelected( CurStyle()->uiBytesPerRow );
 			if ( !DeleteSelectedOrCaret( _swsStatus ) ) {
 				return false;
 			}
@@ -734,7 +811,7 @@ namespace mx {
 			caCopyData.csCharSet = CurStyle()->csCharSet;
 			if ( !m_pheiTarget->Copy( m_sSel, CurStyle()->uiBytesPerRow, 0, caCopyData, _swsStatus ) ) { return false; }
 
-			auto ui64TotalSel = m_sSel.TotalSelected();
+			auto ui64TotalSel = m_sSel.TotalSelected( CurStyle()->uiBytesPerRow );
 
 			_swsStatus = _DEC_WS_7D2FA4EA_Copied__;
 			std::wstring wsTmp;
@@ -1308,6 +1385,12 @@ namespace mx {
 		if ( _uiptrId == m_tCaretBlink.uiptrActiveId ) {
 			m_bCaretOn = !m_bCaretOn;
 			::InvalidateRect( Wnd(), nullptr, FALSE );
+		}
+		else if ( _uiptrId == m_tUpdateSelection.uiptrActiveId ) {
+			m_tUpdateSelection.Stop();
+			if ( m_pwHexParent ) {
+				m_pwHexParent->UpdateStatusBar_PosValue_StartSize();
+			}
 		}
 		return lsw::CWidget::LSW_H_HANDLED;
 	}
@@ -4108,12 +4191,12 @@ namespace mx {
 			return;
 		}
 		
-		if ( m_pwHexParent ) {
+		/*if ( m_pwHexParent ) {
 			auto psbStatus = m_pwHexParent->StatusBar();
 			if ( psbStatus ) {
 				psbStatus->SetTextW( L"" );
 			}
-		}
+		}*/
 		
 		m_sgSelGesture.bSelecting = false;
 		m_sgSelGesture.bPendingThreshold = true;
@@ -4125,6 +4208,10 @@ namespace mx {
 		m_sgSelGesture.smCurrent = _bCtrl ? MX_SM_COLUMN : (CurStyle()->bSelectColumnMode ? MX_SM_COLUMN : MX_SM_NORMAL);
 
 		m_sSel.bHas = false;
+		if ( m_pwHexParent ) {
+			m_pwHexParent->SetStatusBarText( L"", false );
+			m_pwHexParent->UpdateStatusBar_PosValue_StartSize();
+		}
 	}
 
 	/**
@@ -4251,7 +4338,7 @@ namespace mx {
 		const uint32_t ui32AnchorCol  = static_cast<uint32_t>(ui64AnchorAddr % ui32Bpr);
 
 		const uint64_t ui64BrRow = ui64AnchorRow + m_sSel.sc.ui64Lines;
-		const uint32_t ui32BrCol = ui32AnchorCol + m_sSel.sc.ui32Cols;
+		const uint32_t ui32BrCol = ui32AnchorCol + std::min( ui32Bpr, m_sSel.sc.ui32Cols );
 		const uint64_t ui64BrAddr = ui64BrRow * ui32Bpr + ui32BrCol;		// Bottom-right.
 
 		// Click position in grid space.

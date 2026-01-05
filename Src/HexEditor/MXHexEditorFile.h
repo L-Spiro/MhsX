@@ -22,6 +22,12 @@ namespace mx {
 		// Resets the object back to scratch.
 		void								Reset();
 
+		// Gets the text displayed in the tab.
+		virtual CSecureWString				TabString() const;
+
+		// Gets the text displayed in the status bar.
+		virtual CSecureWString				StatusString() const;
+
 		// Read from the given data stream.
 		virtual bool						Read( uint64_t _ui64Addr, CBuffer &_bDst, size_t _sSize ) const;
 

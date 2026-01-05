@@ -20,6 +20,12 @@ namespace mx {
 		// Gets the process object directly.
 		const CProcess &					Process() const { return m_pProcess; }
 
+		// Gets the text displayed in the tab.
+		virtual CSecureWString				TabString() const;
+
+		// Gets the text displayed in the status bar.
+		virtual CSecureWString				StatusString() const;
+
 		// Resets the object back to scratch.
 		void								Reset();
 

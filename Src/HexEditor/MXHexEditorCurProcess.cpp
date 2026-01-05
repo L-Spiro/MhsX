@@ -16,6 +16,27 @@ namespace mx {
 		m_pProcess.Reset();
 	}
 
+	// Gets the text displayed in the tab.
+	CSecureWString CHexEditorCurProcess::TabString() const {
+		CSecureWString swsTmp = _DEC_WS_E9985D3A_Process__;
+		std::filesystem::path pPath = m_pProcess.QueryProcessImageName( 0 );
+		if ( !pPath.has_filename() ) {
+			swsTmp += std::to_wstring( m_pProcess.ProcId() );
+		}
+		else {
+			swsTmp += pPath.filename();
+			swsTmp += L" (";
+			swsTmp += std::to_wstring( m_pProcess.ProcId() );
+			swsTmp += L")";
+		}
+		return swsTmp;
+	}
+
+	// Gets the text displayed in the status bar.
+	CSecureWString CHexEditorCurProcess::StatusString() const {
+		return TabString();
+	}
+
 	// Read from the given data stream.
 	bool CHexEditorCurProcess::Read( uint64_t _ui64Addr, CBuffer &_bDst, size_t _sSize ) const {
 		const auto siInfo = mx::CSystem::GetSystemInfo();

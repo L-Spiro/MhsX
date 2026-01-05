@@ -179,11 +179,20 @@ namespace mx {
 
 
 		// == Functions.
+		// Gets the text displayed in the tab.
+		virtual CSecureWString						TabString() const { return m_pheiTarget ? m_pheiTarget->TabString() : CSecureWString(); }
+
+		// Gets the text displayed in the status bar.
+		virtual CSecureWString						StatusString() const { return m_pheiTarget ? m_pheiTarget->StatusString() : CSecureWString(); }
+
 		// Sets the view type.
 		void										SetViewType( MX_EDIT_AS _eaType );
 
 		// Gets the editing type of the control.
 		inline MX_EDIT_AS							GetViewType() const { return m_eaEditAs; }
+
+		// Gets the view type as a string.
+		CSecureWString								GetViewTypeAsString() const;
 
 		// Sets the character set.
 		void										SetCharacterSet( CCharSets::MX_CHAR_SETS _csSet );
@@ -247,6 +256,7 @@ namespace mx {
 				}
 
 				RecalcAndInvalidate();
+				if ( m_pwHexParent ) { m_pwHexParent->UpdateStatusBar_PosValue_StartSize(); }
 			}
 		}
 
@@ -285,6 +295,7 @@ namespace mx {
 					stAll.uiBytesPerRow = (stAll.uiBytesPerRow + (_ui32GroupSize - 1)) / _ui32GroupSize * _ui32GroupSize;
 				}
 				RecalcAndInvalidate();
+				if ( m_pwHexParent ) { m_pwHexParent->UpdateStatusBar_PosValue_StartSize(); }
 			}
 		}
 
@@ -609,6 +620,13 @@ namespace mx {
 		 * \return Return strue if both the file size is not 0 and there is an active selection.
 		 **/
 		inline bool									HasSelection() const { return Size() > 0 && m_sSel.HasSelection(); }
+
+		/**
+		 * Gets the size of the selection.
+		 * 
+		 * \return Returns the number of bytes selected.
+		 **/
+		inline uint64_t								GetTotalSelectedBytes() const { return m_sSel.TotalSelected( CurStyle()->uiBytesPerRow ); }
 
 		/**
 		 * Selects the whole file.  Not available when opening processes.
@@ -1171,6 +1189,8 @@ namespace mx {
 		MX_SELECTION								m_sSel {};												/**< Actual selection. */
 		std::vector<MX_SELECT_UNDO_REDO_ITEM>		m_vSelectionStack;										/**< The Undo/Redo selection stack. */
 		size_t										m_sSelStackIdx = size_t( -1 );							/**< The selection-stack current index. */
+		CUtilities::MX_TIMER						m_tUpdateSelection;										/**< Updates the status-bar selection text. */
+		uint8_t										m_ui8UpdateSelectCnt = 0;								/**< Every few mouse drags the selection data is forcibly updated. */
 		CUtilities::MX_TIMER						m_tCaretBlink;											/**< The blinking of the caret. */
 		bool										m_bCaretOn = true;										/**< Caret on or off during active blink. */
 

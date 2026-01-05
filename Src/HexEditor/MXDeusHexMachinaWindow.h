@@ -264,7 +264,7 @@ namespace mx {
 		void										ResetFontSize();
 
 		// Sets a status-bar item’s text and "warning" status.
-		void										SetStatusBarText( const wchar_t * _pwcText, bool _bWarning = false, size_t _sIdx = 0 ) override;
+		void										SetStatusBarText( const wchar_t * _pwcText, bool _bWarning = false, size_t _sIdx = 0, bool _bUpdateStore = true ) override;
 
 		// Toggles between Overwrite and Insert.
 		void										ToggleOverwriteInsert() override { CHexEditorControlHost::ToggleOverwriteInsert(); UpdateStatusBar_InsertOverwrite(); }
@@ -277,6 +277,29 @@ namespace mx {
 
 		// Update the status-bar Character-Set part.
 		void										UpdateStatusBar_CharSet() override;
+
+		// Update the status-bar View Type part.
+		void										UpdateStatusBar_ViewType();
+
+		// Update the status-bar Size part.
+		void										UpdateStatusBar_Size();
+
+		// Updates the status-bar selection ranges/current position/value.
+		void										UpdateStatusBar_PosValue_StartSize() override;
+
+		/**
+		 * Called when the mouse enters a tab.
+		 * 
+		 * \param _iIdx The tab the mouse began to hover over.
+		 **/
+		virtual void								TabMouseEnterTab( INT _iIdx ) override;
+
+		/**
+		 * Called when the mouse leaves a tab.
+		 * 
+		 * \param _iIdx INdex of the tab the mouse left.
+		 **/
+		virtual void								TabMouseLeftTab( INT _iIdx ) override;
 
 		/**
 		 * Gets the widget type identifier.
@@ -329,6 +352,10 @@ namespace mx {
 		INT											m_iImageMap[MX_I_TOTAL];
 		// The hex-editor controls.
 		std::vector<MX_HEX_TAB>						m_vTabs;
+		// The tast text put into status-bat index 0.
+		CSecureWString								m_swsLastStatusText;
+		// Whether the last index-0 status-bar text was a warning or not.
+		bool										m_bLastStatusTextIsWarning = false;
 
 		// The MHS object where we can access the current process and our options.
 		CWindowMemHack *							m_pmhMemHack = nullptr;
@@ -352,7 +379,7 @@ namespace mx {
 		void										RecalcAllBut( const CHexEditorControl * _phecSkipMe );
 
 		// Adds a tab.
-		bool										AddTab( CHexEditorInterface * _pheiInterface, const std::wstring &_wsName );
+		bool										AddTab( CHexEditorInterface * _pheiInterface );
 
 	private :
 		typedef CDeusHexMachinaLayout				Layout;

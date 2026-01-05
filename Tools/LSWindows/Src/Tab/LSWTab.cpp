@@ -9,9 +9,7 @@
 namespace lsw {
 
 	CTab::CTab( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
-		CWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ),
-		m_lpOriginProc( 0 ),
-		m_bShowClose( true ) {
+		CWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data ) {
 	}
 	CTab::~CTab() {
 		/*for ( auto I = m_vTabs.size(); I--; ) {
@@ -366,6 +364,30 @@ namespace lsw {
 		return false;
 	}
 
+	/**
+	 * \brief Sets the current "hot" (mouse-over) tab index, updating state only when it changes.
+	 *
+	 * When the hot tab changes, this function updates internal state and triggers any necessary UI refresh.
+	 * Typical uses include invalidating the control for custom hover rendering and/or notifying the parent.
+	 *
+	 * \param _iNewHotTab The new 0-based hot tab index, or -1 for "no hot tab."
+	 */
+	void CTab::SetHotTab( int _iNewHotTab ) {
+		if ( _iNewHotTab == m_iHotTab ) { return; }
+		if ( -1 != m_iHotTab ) {
+			TabMouseLeftTab( m_iHotTab );
+		}
+		if ( -1 != _iNewHotTab ) {
+			TabMouseEnterTab( _iNewHotTab );
+		}
+		m_iHotTab = _iNewHotTab;
+
+		
+
+		// If you custom-draw, you’ll likely want to repaint.
+		::InvalidateRect( Wnd(), nullptr, FALSE );
+	}
+
 	// == Functions.
 	/**
 	 * Handles WM_SIZE.
@@ -407,6 +429,23 @@ namespace lsw {
 		}*/
 
 		return LSW_H_CONTINUE;
+	}
+
+	/**
+	 * \brief Begins tracking for WM_MOUSELEAVE so we can clear the hot tab when the mouse exits the tab control.
+	 *
+	 * Uses TrackMouseEvent() with TME_LEAVE. Call this when receiving WM_MOUSEMOVE, but only once per hover session.
+	 * WM_MOUSELEAVE will reset the tracking flag, allowing tracking to be re-armed on the next WM_MOUSEMOVE.
+	 */
+	void CTab::BeginMouseLeaveTracking() {
+		if ( m_bTrackMouseLeave ) { return; }
+		m_bTrackMouseLeave = true;
+
+		TRACKMOUSEEVENT tmeTrackMe{};
+		tmeTrackMe.cbSize = sizeof( tmeTrackMe );
+		tmeTrackMe.dwFlags = TME_LEAVE;
+		tmeTrackMe.hwndTrack = m_hWnd;
+		::TrackMouseEvent( &tmeTrackMe );
 	}
 
 	/**
@@ -536,6 +575,19 @@ namespace lsw {
 				break;
 			}
 			case WM_ACTIVATE : {
+				break;
+			}
+			case WM_MOUSEMOVE : {
+				pmwThis->BeginMouseLeaveTracking();
+
+				const int iX = GET_X_LPARAM( _lParam );
+				const int iY = GET_Y_LPARAM( _lParam );
+				pmwThis->SetHotTab( pmwThis->HitTestTab( iX, iY ) );
+				break;
+			}
+			case WM_MOUSELEAVE : {
+				pmwThis->m_bTrackMouseLeave = false;
+				pmwThis->SetHotTab( -1 );
 				break;
 			}
 			/*case WM_MOUSEWHEEL : {
