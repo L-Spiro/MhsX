@@ -81,7 +81,8 @@ namespace ee {
 		 * \param _ui32Flags Formatting flags (EE_TOSTRING_FLAGS).
 		 * \return Returns true.
 		 */
-		virtual bool								ToString( std::string &_sString, uint32_t /*_ui32Depth*/, uint32_t _ui32Flags = EE_TF_NONE ) {
+		virtual bool								ToString( std::string &_sString, uint32_t _ui32Depth, uint32_t _ui32Flags = EE_TF_NONE ) {
+			static_cast<void>(_ui32Depth);
 			if ( _ui32Flags & CObject::EE_TF_C_STRING ) {
 				_sString.reserve( m_sObj.size() + 2 );
 				_sString = "\"";

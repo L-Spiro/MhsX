@@ -31,9 +31,6 @@ RS1_S								[rR]{CS1}
 
 #include "../EEExpEvalSyntaxNodes.h"
 #include "EEExpEvalParser.h"
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include "ComplexAddr.tab.h"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -241,6 +238,8 @@ RS1_S								[rR]{CS1}
 
 "true"								{ return yy::CExpEvalParser::token::EE_TRUE; }
 "false"								{ return yy::CExpEvalParser::token::EE_FALSE; }
+
+"static_cast"						{ return yy::CExpEvalParser::token::EE_STATIC_CAST; }
 
 "int8"								{ return yy::CExpEvalParser::token::EE_INT8; }
 "int16"								{ return yy::CExpEvalParser::token::EE_INT16; }

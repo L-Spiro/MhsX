@@ -8,6 +8,11 @@
 
 #if defined( _MSC_VER )
 #define EE_PURE_DECL								{ return { EE_NC_INVALID }; }
+
+#pragma warning( push )
+
+// warning C4100: '_i64Idx': unreferenced formal parameter
+#pragma warning( disable : 4100 )
 #else
 #define EE_PURE_DECL								;
 #endif	// #if defined( _MSC_VER )
@@ -149,7 +154,7 @@ namespace ee {
 		 * \param _ui32Flags Formatting flags (EE_TOSTRING_FLAGS).
 		 * \return Returns true if the conversion succeeded; false otherwise.
 		 */
-		virtual bool								ToString( std::string &_sString, uint32_t /*_ui32Depth*/, uint32_t _ui32Flags = EE_TF_NONE ) = 0;
+		virtual bool								ToString( std::string &_sString, uint32_t _ui32Depth, uint32_t _ui32Flags = EE_TF_NONE ) = 0;
 		
 		/**
 		 * \brief Creates a formatted string representation of the object.
@@ -161,7 +166,7 @@ namespace ee {
 		 * \param _ui32Flags Formatting flags (EE_TOSTRING_FLAGS).
 		 * \return Returns the formatted representation.
 		 */
-		virtual std::string							FormattedString( const std::string &/*_sFormat*/, uint32_t _ui32Flags = EE_TF_NONE ) = 0;
+		virtual std::string							FormattedString( const std::string &_sFormat, uint32_t _ui32Flags = EE_TF_NONE ) = 0;
 		
 		/**
 		 * \brief Converts this object into another evaluator value type.
@@ -172,7 +177,7 @@ namespace ee {
 		 * \param _ncType The destination numeric/value type.
 		 * \return Returns the converted value, or EE_NC_INVALID on failure.
 		 */
-		virtual CExpEvalContainer::EE_RESULT		ConvertTo( EE_NUM_CONSTANTS /*_ncType*/ ) = 0;
+		virtual CExpEvalContainer::EE_RESULT		ConvertTo( EE_NUM_CONSTANTS _ncType ) = 0;
 
 		/**
 		 * \brief Initializes this object from an evaluator result.
@@ -182,7 +187,7 @@ namespace ee {
 		 * \param _rObj Source evaluator result.
 		 * \return Returns true if initialization succeeded; false otherwise.
 		 */
-		virtual bool								InitializeFrom( const CExpEvalContainer::EE_RESULT &/*_rObj*/ ) = 0;
+		virtual bool								InitializeFrom( const CExpEvalContainer::EE_RESULT &_rObj ) = 0;
 #endif	// #if defined( _MSC_VER )
 
 		/**
@@ -216,7 +221,7 @@ namespace ee {
 		 * \param _i64Idx The index to access.
 		 * \return Returns the accessed element as an evaluator result, or EE_NC_INVALID on failure.
 		 */
-		virtual CExpEvalContainer::EE_RESULT		ArrayAccess( int64_t /*_i64Idx*/ ) = 0 EE_PURE_DECL
+		virtual CExpEvalContainer::EE_RESULT		ArrayAccess( int64_t _i64Idx ) = 0 EE_PURE_DECL
 
 		/**
 		 * \brief Performs extended array-style indexing on this object.
@@ -230,7 +235,7 @@ namespace ee {
 		 * \param _ui32Mask A mask of EE_ARRAY_EX_FLAGS describing which indices are valid.
 		 * \return Returns the accessed element/range as an evaluator result, or EE_NC_INVALID on failure.
 		 */
-		virtual CExpEvalContainer::EE_RESULT		ArrayAccessEx( int64_t /*_i64Idx0*/, int64_t /*_i64Idx1*/, uint32_t /*_ui32Mask*/ ) = 0 EE_PURE_DECL
+		virtual CExpEvalContainer::EE_RESULT		ArrayAccessEx( int64_t _i64Idx0, int64_t _i64Idx1, uint32_t _ui32Mask ) = 0 EE_PURE_DECL
 
 		/**
 		 * \brief Gets the logical length of the object when treated as an array.
@@ -248,7 +253,7 @@ namespace ee {
 		 * \param _rRet Right-hand operand and/or result carrier, depending on evaluator conventions.
 		 * \return Returns true if the operation is supported and the comparison was performed; false otherwise.
 		 */
-		virtual bool								Equals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
+		virtual bool								Equals( CExpEvalContainer::EE_RESULT &_rRet ) { static_cast<void>(_rRet); return false; }
 
 		/**
 		 * \brief Adds this object and another evaluator value.
@@ -256,7 +261,7 @@ namespace ee {
 		 * \param _rRet Right-hand operand and/or result carrier, depending on evaluator conventions.
 		 * \return Returns the result of the operation, or EE_NC_INVALID if unsupported.
 		 */
-		virtual CExpEvalContainer::EE_RESULT		Plus( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return { EE_NC_INVALID }; }
+		virtual CExpEvalContainer::EE_RESULT		Plus( CExpEvalContainer::EE_RESULT &_rRet ) { static_cast<void>(_rRet); return { EE_NC_INVALID }; }
 
 		/**
 		 * \brief Subtracts another evaluator value from this object.
@@ -264,7 +269,7 @@ namespace ee {
 		 * \param _rRet Right-hand operand and/or result carrier, depending on evaluator conventions.
 		 * \return Returns the result of the operation, or EE_NC_INVALID if unsupported.
 		 */
-		virtual CExpEvalContainer::EE_RESULT		Minus( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return { EE_NC_INVALID }; }
+		virtual CExpEvalContainer::EE_RESULT		Minus( CExpEvalContainer::EE_RESULT &_rRet ) { static_cast<void>(_rRet); return { EE_NC_INVALID }; }
 
 		/**
 		 * \brief Multiplies this object by another evaluator value.
@@ -272,7 +277,7 @@ namespace ee {
 		 * \param _rRet Right-hand operand and/or result carrier, depending on evaluator conventions.
 		 * \return Returns the result of the operation, or EE_NC_INVALID if unsupported.
 		 */
-		virtual CExpEvalContainer::EE_RESULT		Multiply( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return { EE_NC_INVALID }; }
+		virtual CExpEvalContainer::EE_RESULT		Multiply( CExpEvalContainer::EE_RESULT &_rRet ) { static_cast<void>(_rRet); return { EE_NC_INVALID }; }
 
 		/**
 		 * \brief Divides this object by another evaluator value.
@@ -280,7 +285,7 @@ namespace ee {
 		 * \param _rRet Right-hand operand and/or result carrier, depending on evaluator conventions.
 		 * \return Returns the result of the operation, or EE_NC_INVALID if unsupported.
 		 */
-		virtual CExpEvalContainer::EE_RESULT		Divide( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return { EE_NC_INVALID }; }
+		virtual CExpEvalContainer::EE_RESULT		Divide( CExpEvalContainer::EE_RESULT &_rRet ) { static_cast<void>(_rRet); return { EE_NC_INVALID }; }
 
 		/**
 		 * \brief Performs an in-place addition (operator+=).
@@ -288,7 +293,7 @@ namespace ee {
 		 * \param _rRet Right-hand operand and/or result carrier, depending on evaluator conventions.
 		 * \return Returns true if the operation succeeded; false otherwise.
 		 */
-		virtual bool								PlusEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
+		virtual bool								PlusEquals( CExpEvalContainer::EE_RESULT &_rRet ) { static_cast<void>(_rRet); return false; }
 
 		/**
 		 * \brief Performs an in-place subtraction (operator-=).
@@ -296,7 +301,7 @@ namespace ee {
 		 * \param _rRet Right-hand operand and/or result carrier, depending on evaluator conventions.
 		 * \return Returns true if the operation succeeded; false otherwise.
 		 */
-		virtual bool								MinusEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
+		virtual bool								MinusEquals( CExpEvalContainer::EE_RESULT &_rRet ) { static_cast<void>(_rRet); return false; }
 
 		/**
 		 * \brief Performs an in-place multiplication (operator*=).
@@ -304,7 +309,7 @@ namespace ee {
 		 * \param _rRet Right-hand operand and/or result carrier, depending on evaluator conventions.
 		 * \return Returns true if the operation succeeded; false otherwise.
 		 */
-		virtual bool								TimesEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
+		virtual bool								TimesEquals( CExpEvalContainer::EE_RESULT &_rRet ) { static_cast<void>(_rRet); return false; }
 
 		/**
 		 * \brief Performs an in-place division (operator/=).
@@ -312,7 +317,7 @@ namespace ee {
 		 * \param _rRet Right-hand operand and/or result carrier, depending on evaluator conventions.
 		 * \return Returns true if the operation succeeded; false otherwise.
 		 */
-		virtual bool								DivideEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
+		virtual bool								DivideEquals( CExpEvalContainer::EE_RESULT &_rRet ) { static_cast<void>(_rRet); return false; }
 
 		/**
 		 * \brief Performs an in-place modulo (operator%=).
@@ -320,7 +325,7 @@ namespace ee {
 		 * \param _rRet Right-hand operand and/or result carrier, depending on evaluator conventions.
 		 * \return Returns true if the operation succeeded; false otherwise.
 		 */
-		virtual bool								ModEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
+		virtual bool								ModEquals( CExpEvalContainer::EE_RESULT &_rRet ) { static_cast<void>(_rRet); return false; }
 
 		/**
 		 * \brief Performs an in-place left shift (operator<<=).
@@ -328,7 +333,7 @@ namespace ee {
 		 * \param _rRet Right-hand operand and/or result carrier, depending on evaluator conventions.
 		 * \return Returns true if the operation succeeded; false otherwise.
 		 */
-		virtual bool								ShiftLeftEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
+		virtual bool								ShiftLeftEquals( CExpEvalContainer::EE_RESULT &_rRet ) { static_cast<void>(_rRet); return false; }
 
 		/**
 		 * \brief Performs an in-place right shift (operator>>=).
@@ -336,7 +341,7 @@ namespace ee {
 		 * \param _rRet Right-hand operand and/or result carrier, depending on evaluator conventions.
 		 * \return Returns true if the operation succeeded; false otherwise.
 		 */
-		virtual bool								ShiftRightEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
+		virtual bool								ShiftRightEquals( CExpEvalContainer::EE_RESULT &_rRet ) { static_cast<void>(_rRet); return false; }
 
 		/**
 		 * \brief Performs an in-place XOR (operator^=).
@@ -346,7 +351,7 @@ namespace ee {
 		 * \param _rRet Right-hand operand and/or result carrier, depending on evaluator conventions.
 		 * \return Returns true if the operation succeeded; false otherwise.
 		 */
-		virtual bool								CarrotEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
+		virtual bool								CarrotEquals( CExpEvalContainer::EE_RESULT &_rRet ) { static_cast<void>(_rRet); return false; }
 
 		/**
 		 * \brief Performs an in-place bitwise OR (operator|=).
@@ -354,7 +359,7 @@ namespace ee {
 		 * \param _rRet Right-hand operand and/or result carrier, depending on evaluator conventions.
 		 * \return Returns true if the operation succeeded; false otherwise.
 		 */
-		virtual bool								OrEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
+		virtual bool								OrEquals( CExpEvalContainer::EE_RESULT &_rRet ) { static_cast<void>(_rRet); return false; }
 
 		/**
 		 * \brief Performs an in-place bitwise AND (operator&=).
@@ -362,7 +367,7 @@ namespace ee {
 		 * \param _rRet Right-hand operand and/or result carrier, depending on evaluator conventions.
 		 * \return Returns true if the operation succeeded; false otherwise.
 		 */
-		virtual bool								AndEquals( CExpEvalContainer::EE_RESULT &/*_rRet*/ ) { return false; }
+		virtual bool								AndEquals( CExpEvalContainer::EE_RESULT &_rRet ) { static_cast<void>(_rRet); return false; }
 
 
 	protected :
@@ -371,5 +376,9 @@ namespace ee {
 	};
 
 }	// namespace ee
+
+#if defined( _MSC_VER )
+#pragma warning( pop )
+#endif	// #if defined( _MSC_VER )
 
 #undef EE_PURE_DECL

@@ -801,7 +801,9 @@ namespace ee {
 	 * \param _bImplicitMantissaBit True if the format uses an implicit leading mantissa bit; false otherwise.
 	 * \return Returns the minimum positive normalized value as a double.
 	 */
-	double CFloatX::GetNormalizedMinForBits( uint16_t _uiExpBits, uint16_t /*_uiManBits*/, bool /*_bImplicitMantissaBit*/ ) {
+	double CFloatX::GetNormalizedMinForBits( uint16_t _uiExpBits, uint16_t _uiManBits, bool _bImplicitMantissaBit ) {
+		static_cast<void>(_uiManBits);
+		static_cast<void>(_bImplicitMantissaBit);
 		double dExpBias = ExpBias( _uiExpBits );		// Normalized exponent.
 		double dMaxExp = std::pow( 2.0, 1.0 - dExpBias );
 		return dMaxExp;

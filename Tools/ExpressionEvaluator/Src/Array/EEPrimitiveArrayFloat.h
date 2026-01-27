@@ -279,7 +279,9 @@ namespace ee {
 		 *
 		 * \note Bitwise operators are not supported for this floating-point array type.
 		 */
-		virtual bool								CarrotEquals( size_t /*_sIdx*/, CExpEvalContainer::EE_RESULT &/*_rRet*/ ) {
+		virtual bool								CarrotEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
+			static_cast<void>(_sIdx);
+			static_cast<void>(_rRet);
 			return false;
 		}
 
@@ -292,7 +294,9 @@ namespace ee {
 		 *
 		 * \note Bitwise operators are not supported for this floating-point array type.
 		 */
-		virtual bool								OrEquals( size_t /*_sIdx*/, CExpEvalContainer::EE_RESULT &/*_rRet*/ ) {
+		virtual bool								OrEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
+			static_cast<void>(_sIdx);
+			static_cast<void>(_rRet);
 			return false;
 		}
 
@@ -305,7 +309,9 @@ namespace ee {
 		 *
 		 * \note Bitwise operators are not supported for this floating-point array type.
 		 */
-		virtual bool								AndEquals( size_t /*_sIdx*/, CExpEvalContainer::EE_RESULT &/*_rRet*/ ) {
+		virtual bool								AndEquals( size_t _sIdx, CExpEvalContainer::EE_RESULT &_rRet ) {
+			static_cast<void>(_sIdx);
+			static_cast<void>(_rRet);
 			return false;
 		}
 

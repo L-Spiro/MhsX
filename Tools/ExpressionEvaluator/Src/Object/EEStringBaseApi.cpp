@@ -301,7 +301,8 @@ namespace ee {
 	 * \param _peecCont Evaluator/container used to create any required objects/results.
 	 * \return Returns an EE_RESULT of type EE_NC_UNSIGNED containing the ordinal value, or EE_NC_INVALID on failure.
 	 */
-	CExpEvalContainer::EE_RESULT CStringBaseApi::Ord( const std::string &_sIn, CExpEvalContainer * /*_peecCont*/ ) {
+	CExpEvalContainer::EE_RESULT CStringBaseApi::Ord( const std::string &_sIn, CExpEvalContainer * _peecCont ) {
+		static_cast<void>(_peecCont);
 		CExpEvalContainer::EE_RESULT rTmp = { EE_NC_UNSIGNED };
 		if ( !_sIn.size() ) {
 			rTmp.u.ui64Val = 0;

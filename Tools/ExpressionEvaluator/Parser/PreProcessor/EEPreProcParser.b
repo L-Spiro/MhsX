@@ -181,14 +181,14 @@ translation_unit
 
 
 int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CPreProcLexer * _ppplLexer ) {
-	static_cast<void *>(_pvNodeUnion);
+	static_cast<void>(_pvNodeUnion);
 	return _ppplLexer->NewLex();
 }
 
 
 void yy::parser::error( const yy::location &_lLoc, const std::string &_strM ) {
-	static_cast<const yy::location &>(_lLoc);
-	static_cast<const std::string &>(_strM);
+	static_cast<void>(_lLoc);
+	static_cast<void>(_strM);
 	/*std::string sError;
 	std::string sFile;
 	int iLine;

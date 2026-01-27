@@ -52,6 +52,7 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer
 %token EE_DO EE_ELSE EE_FOR EE_FOREACH EE_IF EE_IN EE_WHILE
 %token EE_BREAK EE_CONTINUE
 %token EE_NEW EE_COPY
+%token EE_STATIC_CAST
 %token EE_ANY EE_DEFAULT EE_DOUBLE EE_FLOAT EE_FLOAT10 EE_FLOAT11 EE_FLOAT14 EE_FLOAT16 EE_INT8 EE_INT16 EE_INT32 EE_INT64 EE_OBJECT EE_PERSISTENT EE_TEMP EE_UINT8 EE_UINT16 EE_UINT32 EE_UINT64
 
 %token EE_CONST
@@ -473,6 +474,7 @@ cast_exp
 	: unary_exp												{ $$ = $1; }
 	| '(' cast_type ')' cast_exp							{ m_peecContainer->CreateCast( $4, static_cast<ee::EE_CAST_TYPES>($2), $$ ); }
 	| cast_type '(' cast_exp ')'							{ m_peecContainer->CreateCast( $3, static_cast<ee::EE_CAST_TYPES>($1), $$ ); }
+	| EE_STATIC_CAST '<' cast_type '>' '(' cast_exp ')'		{ m_peecContainer->CreateCast( $6, static_cast<ee::EE_CAST_TYPES>($3), $$ ); }
 	;
 
 unary_operator
@@ -1068,10 +1070,13 @@ translation_unit
 
 %%
 
-int yylex( /*YYSTYPE*/void * /*_pvNodeUnion*/, ee::CExpEvalLexer * _peelLexer ) {
+int yylex( /*YYSTYPE*/void * _pvNodeUnion, ee::CExpEvalLexer * _peelLexer ) {
+	static_cast<void>(_pvNodeUnion);
+	
 	return _peelLexer->yylex();
 }
 
-void yy::parser::error( const yy::location &/*_lLoc*/, const std::string &/*_strM*/ ) {
-
+void yy::parser::error( const yy::location &_lLoc, const std::string &_strM ) {
+	static_cast<void>(_lLoc);
+	static_cast<void>(_strM);
 }
