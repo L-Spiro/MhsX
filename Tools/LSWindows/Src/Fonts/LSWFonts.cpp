@@ -455,7 +455,7 @@ namespace lsw {
 
 		HDC hDc = ::GetDC( NULL );
 		if ( hDc ) {
-			::EnumFontFamiliesExW( hDc, &lfQuery, EnumSizes_Proc, reinterpret_cast<LPARAM>( &sCtx ), 0 );
+			::EnumFontFamiliesExW( hDc, &lfQuery, EnumSizes_Proc, reinterpret_cast<LPARAM>(&sCtx), 0 );
 			::ReleaseDC( NULL, hDc );
 		}
 
@@ -624,12 +624,12 @@ namespace lsw {
 			int32_t i32Delta = std::abs( _i32TmWeight - g_wLookup[I].i32Weight );
 			if ( i32Delta < i32BestDelta ) {
 				i32BestDelta = i32Delta;
-				i32BestIdx = static_cast<int32_t>( I );
+				i32BestIdx = static_cast<int32_t>(I);
 			}
 			else if ( i32Delta == i32BestDelta ) {
 				// Prefer heavier bucket on ties.
 				if ( g_wLookup[I].i32Weight > g_wLookup[i32BestIdx].i32Weight ) {
-					i32BestIdx = static_cast<int32_t>( I );
+					i32BestIdx = static_cast<int32_t>(I);
 				}
 			}
 		}

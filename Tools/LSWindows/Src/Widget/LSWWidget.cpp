@@ -733,12 +733,12 @@ namespace lsw {
 			}
 
 			std::vector<wchar_t> vW;
-			vW.resize( static_cast<size_t>( lBytes / sizeof( wchar_t ) ) + 1 );
+			vW.resize( static_cast<size_t>(lBytes / sizeof( wchar_t )) + 1 );
 			const LONG lGot = ::ImmGetCompositionStringW( hImc, GCS_RESULTSTR, vW.data(), lBytes );
 			::ImmReleaseContext( Wnd(), hImc );
 
 			if ( lGot <= 0 ) { return LSW_H_CONTINUE; }
-			vW[static_cast<size_t>( lGot / sizeof( wchar_t ) )] = 0;
+			vW[static_cast<size_t>(lGot/sizeof(wchar_t))] = 0;
 
 			// Convert UTF-16 string to code points and emit.
 			std::vector<char32_t> vCp;
@@ -768,7 +768,7 @@ namespace lsw {
 					wcPending = 0;
 				}
 
-				const char32_t c32Cp = static_cast<char32_t>( wcUnit );
+				const char32_t c32Cp = static_cast<char32_t>(wcUnit);
 				if ( c32Cp < 0x20U && c32Cp != U'\t' && c32Cp != U'\r' && c32Cp != U'\n' ) { continue; }
 				vCp.push_back( c32Cp );
 			}
@@ -880,7 +880,7 @@ namespace lsw {
 	 * \brief Applies expression-driven layout to determine bounds.
 	 */
 	void CWidget::EvalNewSize() {
-		LSW_SETREDRAW srRedraw( this );
+		//LSW_SETREDRAW srRedraw( this );
 		LSW_RECT rNewSize = WindowRect( this );
 		// Each axis has 3 possible expressions.
 		// X axis has left, width, and right.

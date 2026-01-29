@@ -345,7 +345,7 @@ namespace lsw {
 		 */
 		HRESULT												AddDelayedIStream( UINT _uiClipboardFormat, std::function<HRESULT( Microsoft::WRL::ComPtr<IStream> & )> _fnCreate ) {
 			FORMATETC feFmt{};
-			feFmt.cfFormat = static_cast<CLIPFORMAT>( uiClipboardFormat);
+			feFmt.cfFormat = static_cast<CLIPFORMAT>(uiClipboardFormat);
 			feFmt.dwAspect = DVASPECT_CONTENT;
 			feFmt.lindex = -1;
 			feFmt.tymed = TYMED_ISTREAM;

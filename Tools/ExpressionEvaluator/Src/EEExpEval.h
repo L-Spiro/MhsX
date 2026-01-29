@@ -1414,13 +1414,13 @@ namespace ee {
 				_BitScanReverse64( &ulPos, _ui64Value );
 		#else
 				// 32-bit MSVC fallback.
-				if ( _BitScanReverse( &ulPos, static_cast<unsigned long>( _ui64Value >> 32ULL ) ) ) { return static_cast<uint32_t>( ulPos + 32UL ); }
-				_BitScanReverse( &ulPos, static_cast<unsigned long>( _ui64Value ) );
+				if ( _BitScanReverse( &ulPos, static_cast<unsigned long>(_ui64Value >> 32ULL) ) ) { return static_cast<uint32_t>(ulPos + 32UL); }
+				_BitScanReverse( &ulPos, static_cast<unsigned long>(_ui64Value) );
 		#endif
-			return static_cast<uint32_t>( ulPos );
+			return static_cast<uint32_t>(ulPos);
 #else
 			// Clang/GCC (including Xcode): msb index = 63 - clz(value).
-			return static_cast<uint32_t>( 63U - static_cast<uint32_t>( __builtin_clzll( _ui64Value ) ) );
+			return static_cast<uint32_t>(63U - static_cast<uint32_t>(__builtin_clzll( _ui64Value )));
 #endif
 		}
 
@@ -1691,15 +1691,15 @@ namespace ee {
 #if defined( _WIN32 )
 			LARGE_INTEGER liInt;
 			::QueryPerformanceCounter( &liInt );
-			return static_cast<uint64_t>( liInt.QuadPart );
+			return static_cast<uint64_t>(liInt.QuadPart);
 
 #elif defined( __APPLE__ )
-			return static_cast<uint64_t>( ::mach_absolute_time() );
+			return static_cast<uint64_t>(::mach_absolute_time());
 
 #else
 			timespec ts{};
 			::clock_gettime( CLOCK_MONOTONIC, &ts );
-			return static_cast<uint64_t>( ts.tv_sec ) * 1000000000ULL + static_cast<uint64_t>( ts.tv_nsec );
+			return static_cast<uint64_t>(ts.tv_sec) * 1000000000ULL + static_cast<uint64_t>(ts.tv_nsec);
 #endif
 		}
 
@@ -2235,7 +2235,7 @@ namespace ee {
 			using _tUnsigned = std::make_unsigned_t<_tInt>;
 			auto AbsU = []( _tInt _tX ) -> _tUnsigned {
 				// Convert to unsigned magnitude without UB on INT_MIN.
-				_tUnsigned u = static_cast<_tUnsigned>( _tX );
+				_tUnsigned u = static_cast<_tUnsigned>(_tX);
 				if ( _tX < 0 ) { u = _tUnsigned( 0 ) - u; }
 				return u;
 			};
@@ -3317,13 +3317,13 @@ namespace ee {
 				vFm.resize( static_cast<size_t>(_iNBar > 1 ? (_iNBar - 1) : 0) );
 
 				for ( int M = 1; M < _iNBar; ++M ) {
-					const double dM = static_cast<double>( M );
+					const double dM = static_cast<double>(M);
 
 					double dNum = 1.0;
 					double dDen = 1.0;
 
 					for ( int N = 1; N < _iNBar; ++N ) {
-						const double dN = static_cast<double>( N );
+						const double dN = static_cast<double>(N);
 
 						// Numerator product term.
 						const double dNumTerm =
@@ -3344,17 +3344,17 @@ namespace ee {
 				}
 
 				// Generate window samples.
-				const double dHalfN = 0.5 * static_cast<double>( _sN );
+				const double dHalfN = 0.5 * static_cast<double>(_sN);
 
 				for ( size_t I = 0; I < _sN; ++I ) {
-					const double dK = static_cast<double>( I );
+					const double dK = static_cast<double>(I);
 					// Xi in [-0.5, 0.5) as per common Taylor window implementations.
-					const double dXi = (dK - dHalfN + 0.5) / static_cast<double>( _sN );
+					const double dXi = (dK - dHalfN + 0.5) / static_cast<double>(_sN);
 
 					double dSum = 0.0;
 					for ( int M = 1; M < _iNBar; ++M ) {
-						dSum += vFm[static_cast<size_t>( M - 1 )] *
-							std::cos( dTwoPi * static_cast<double>( M ) * dXi );
+						dSum += vFm[static_cast<size_t>(M-1)] *
+							std::cos( dTwoPi * static_cast<double>(M) * dXi );
 					}
 
 					const double dVal = 1.0 + 2.0 * dSum;
@@ -4452,7 +4452,7 @@ namespace ee {
 			for ( size_t stL = 0; stL <= stK; ++stL ) {
 				const size_t stStep      = 1 << (stK - stL);   // Index step between samples.
 				const size_t stIntervals = 1 << stL;           // Number of intervals.
-				const _tType tH          = _tDx * static_cast<_tType>( stStep );
+				const _tType tH          = _tDx * static_cast<_tType>(stStep);
 
 				// Trapezoid T_l over this coarser grid.
 				_tType tSum = _vY[0] + _vY[stLastIndex];
@@ -4726,7 +4726,7 @@ namespace ee {
 
 			// NumPy uses dtype(start + step) - dtype(start) as the internal step,
 			// which reproduces the documented "instabilities" for integer dtypes.
-			const _tOut tStartCast = static_cast<_tOut>( ldStart );
+			const _tOut tStartCast = static_cast<_tOut>(ldStart);
 			vOut[0] = tStartCast;
 
 			if ( stCount > 1 ) {
@@ -5006,7 +5006,7 @@ namespace ee {
 			vOut.resize( _stNum );
 
 			if ( _stNum == 1 ) {
-				vOut[0] = static_cast<_tType>( _tStart );
+				vOut[0] = static_cast<_tType>(_tStart);
 				return vOut;
 			}
 

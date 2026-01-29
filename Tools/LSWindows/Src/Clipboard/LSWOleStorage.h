@@ -22,7 +22,7 @@ namespace lsw {
 		 * \return Returns the created HGLOBAL, or NULL on failure.
 		 */
 		static HGLOBAL									CreateHGlobalCopy( const void * _pvData, size_t _stSize ) {
-			HGLOBAL hMem = ::GlobalAlloc( GMEM_MOVEABLE, static_cast<SIZE_T>( _stSize ) );
+			HGLOBAL hMem = ::GlobalAlloc( GMEM_MOVEABLE, static_cast<SIZE_T>(_stSize) );
 			if ( !hMem ) { return NULL; }
 
 			void * pvDst = ::GlobalLock( hMem );
@@ -49,7 +49,7 @@ namespace lsw {
 			const size_t stLen = _wsText.size();
 			const size_t stBytes = (stLen + 1) * sizeof( wchar_t );
 
-			HGLOBAL hMem = ::GlobalAlloc( GMEM_MOVEABLE, static_cast<SIZE_T>( stBytes ) );
+			HGLOBAL hMem = ::GlobalAlloc( GMEM_MOVEABLE, static_cast<SIZE_T>(stBytes) );
 			if ( !hMem ) { return NULL; }
 
 			void * pvDst = ::GlobalLock( hMem );

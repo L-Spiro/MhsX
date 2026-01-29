@@ -52,7 +52,7 @@ namespace lsw {
 		 * \return Returns the new reference count.
 		 */
 		ULONG STDMETHODCALLTYPE								AddRef() override {
-			return static_cast<ULONG>( ::InterlockedIncrement( &m_lRefCount ) );
+			return static_cast<ULONG>(::InterlockedIncrement( &m_lRefCount ));
 		}
 
 		/**
@@ -66,7 +66,7 @@ namespace lsw {
 				delete this;
 				return 0;
 			}
-			return static_cast<ULONG>( lRef );
+			return static_cast<ULONG>(lRef);
 		}
 
 		/**
@@ -100,7 +100,7 @@ namespace lsw {
 		 */
 		HRESULT STDMETHODCALLTYPE							Skip( ULONG _celt ) override {
 			const size_t stRemain = (m_stIndex < m_vFormats.size()) ? (m_vFormats.size() - m_stIndex) : 0;
-			const size_t stSkip = (static_cast<size_t>( _celt ) < stRemain) ? static_cast<size_t>( _celt ) : stRemain;
+			const size_t stSkip = (static_cast<size_t>(_celt) < stRemain) ? static_cast<size_t>(_celt) : stRemain;
 			m_stIndex += stSkip;
 			return (stSkip == _celt) ? S_OK : S_FALSE;
 		}
