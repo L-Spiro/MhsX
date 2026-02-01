@@ -15,7 +15,7 @@ namespace lsw {
 
 
 	CTreeListView::CTreeListView( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget, HMENU _hMenu, uint64_t _ui64Data ) :
-		CListView( _wlLayout.ChangeClass( WC_LISTVIEWW ).AddStyleEx( LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER | WS_EX_COMPOSITED ).AddStyle( LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA ),
+		CListView( _wlLayout.ChangeClass( WC_LISTVIEWW ).AddStyleEx( LVS_EX_FULLROWSELECT ).AddStyle( LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA ),
 			_pwParent, _bCreateWidget, _hMenu, _ui64Data ),
 		/*m_hListView( NULL ),*/
 		m_wpListViewProc( nullptr ),
@@ -42,10 +42,14 @@ namespace lsw {
 	void CTreeListView::InitControl( HWND _hWnd ) {
 		CListView::InitControl( _hWnd );
 		//::SetWindowLongPtrW( Wnd(), GWL_STYLE, LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA );
-		::SetWindowLongPtrW( Wnd(), GWL_EXSTYLE, LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER );
+		::SetWindowLongPtrW( Wnd(), GWL_EXSTYLE, WS_EX_CLIENTEDGE /*LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER*/ );
+		const DWORD dwLvEx = LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER;
+		::SendMessageW( Wnd(), LVM_SETEXTENDEDLISTVIEWSTYLE, dwLvEx, dwLvEx );
 		::SendMessageW( Wnd(), LVM_SETVIEW, LV_VIEW_DETAILS, 0 );
 		m_wpListViewProc = CHelpers::SetWndProc( Wnd(), ListViewOverride );
 		::SetPropW( Wnd(), m_szProp, reinterpret_cast<HANDLE>(this) );
+
+		auto uiStylesEx = ::GetWindowLongPtrW( Wnd(), GWL_EXSTYLE );
 
 		// By default there is already a header.
 		InsertColumn( L"", 150, 0 );
@@ -1596,7 +1600,7 @@ namespace lsw {
 				break;
 			}
 			case WM_ERASEBKGND : {
-				return 1;
+				break;
 			}
 
 			// =======================================

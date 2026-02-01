@@ -391,7 +391,7 @@ namespace mx {
 			MX_MODIFIERS_LIST_W,					// dwWidth
 			(MX_DEF_BUTTON_HEIGHT_PXL * 4) + (MX_PADDING * 3),									// dwHeight
 			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT,		// dwStyle
-			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,						// dwStyleEx
+			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT /*| LVS_EX_DOUBLEBUFFER*/,						// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_STW_MAINWINDOW,						// dwParentId

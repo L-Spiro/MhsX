@@ -237,7 +237,7 @@ namespace mx {
 			0,										// dwWidth
 			0,										// dwHeight
 			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | LVS_REPORT | LVS_ALIGNLEFT | WS_TABSTOP,		// dwStyle
-			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER,											// dwStyleEx
+			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT /*| LVS_EX_DOUBLEBUFFER*/,											// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_EE_MAINWINDOW,						// dwParentId

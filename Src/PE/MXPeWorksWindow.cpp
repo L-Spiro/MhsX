@@ -96,8 +96,8 @@ namespace mx {
 			20,										// iTop
 			0,										// dwWidth
 			0,										// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_TABSTOP,								// dwStyle
-			0,																		// dwStyleEx
+			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT,			// dwStyle
+			WS_EX_CLIENTEDGE | LVS_EX_FULLROWSELECT,																						// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
 			static_cast<DWORD>(ptTab->Id()),		// dwParentId

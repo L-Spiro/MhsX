@@ -275,6 +275,17 @@ namespace lsw {
 		}
 
 
+		// == Operators.
+		LSW_HMODULE &						operator = ( LSW_HMODULE && _hOther ) {
+			if ( this != &_hOther ) {
+				Reset();
+				hHandle = _hOther.hHandle;
+				_hOther.hHandle = NULL;
+			}
+			return (*this);
+		}
+
+
 		// == Functions.
 		BOOL								LoadLibrary( LPCSTR _sPath ) {
 			Reset();
@@ -1004,6 +1015,7 @@ namespace lsw {
 		bool								LeaveBorderless( HWND _hWnd ) {
 			if ( !bInBorderless ) { return true; }
 			bInBorderless = false;
+			bIsSizing = true;
 			if ( hMenu != NULL ) {
 				::SetMenu( _hWnd, hMenu );
 				hMenu = NULL;
@@ -1011,10 +1023,11 @@ namespace lsw {
 			if ( !::SetWindowLongW( _hWnd, GWL_STYLE,
                   lWindowStyle | WS_OVERLAPPEDWINDOW ) ) {
 				bInBorderless = true;
+				bIsSizing = false;
 				return false;
 			}
-			if ( !::SetWindowPlacement( _hWnd, &wpPlacement ) ) { bInBorderless = true; return false; }
-			bIsSizing = true;
+			if ( !::SetWindowPlacement( _hWnd, &wpPlacement ) ) { bInBorderless = true; bIsSizing = false; return false; }
+			
 			if ( !::SetWindowPos( _hWnd, NULL,
 				wpPlacement.rcNormalPosition.left, wpPlacement.rcNormalPosition.top,
 				wpPlacement.rcNormalPosition.right - wpPlacement.rcNormalPosition.left,
@@ -1023,7 +1036,8 @@ namespace lsw {
 				SWP_NOOWNERZORDER | SWP_FRAMECHANGED ) ) {
 				bIsSizing = false;
 				bInBorderless = true;
-				return false; }
+				return false;
+			}
 			::ShowWindow( _hWnd, SW_NORMAL );
 			while ( ::ShowCursor( TRUE ) < 0 ) {}
 			bIsSizing = false;

@@ -1561,20 +1561,20 @@ namespace lsw {
 					ControlSetup( pmwThis, (*pvWidgets) );
 
 				// Window rect.
-#define MX_X	384
-#define MX_Y	153
-
-#if 1
-				// For window borders.
-#define MX_OFF_X	(7 - 4)
-#define MX_OFF_Y	(30 - 4)
-#else
-#define MX_OFF_X	0
-#define MX_OFF_Y	0
-#endif
-					POINT pConvOrg = PixelsToDialogUnits( _hWnd, 585 - MX_X - MX_OFF_X, 189 - MX_Y - MX_OFF_Y );
-					//POINT pConv = PixelsToDialogUnits( _hWnd, 559 - 548 - 7, 486 - 453 - 30 );
-					POINT pConvClient = PixelsToDialogUnits( _hWnd, 290, 47 );
+//#define MX_X	384
+//#define MX_Y	153
+//
+//#if 1
+//				// For window borders.
+//#define MX_OFF_X	(7 - 4)
+//#define MX_OFF_Y	(30 - 4)
+//#else
+//#define MX_OFF_X	0
+//#define MX_OFF_Y	0
+//#endif
+//					POINT pConvOrg = PixelsToDialogUnits( _hWnd, 585 - MX_X - MX_OFF_X, 189 - MX_Y - MX_OFF_Y );
+//					//POINT pConv = PixelsToDialogUnits( _hWnd, 559 - 548 - 7, 486 - 453 - 30 );
+//					POINT pConvClient = PixelsToDialogUnits( _hWnd, 290, 47 );
 				
 					pmwThis->InitDialog();
 					LSW_RET( TRUE, TRUE );	// Return TRUE to pass focus on to the control specified by _wParam.
@@ -1632,6 +1632,14 @@ namespace lsw {
 			// =======================================
 			// Sizing.
 			// =======================================
+			case WM_ENTERSIZEMOVE : {
+				pmwThis->m_bInLiveResize = true;
+				LSW_HANDLED hHandled = pmwThis->EnterSizeMove();
+				
+				// An application should return zero if it processes this message.
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+				break;
+			}
 			case WM_SIZING : {
 				LSW_HANDLED hHandled = pmwThis->Sizing( static_cast<INT>(_wParam), reinterpret_cast<LSW_RECT *>(_lParam) );
 
@@ -1668,6 +1676,14 @@ namespace lsw {
 					LSW_HANDLED hHandled = pmwThis->Move( pPoint.x, pPoint.y );
 					if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
 				}
+				break;
+			}
+			case WM_EXITSIZEMOVE : {
+				LSW_HANDLED hHandled = pmwThis->ExitSizeMove();
+				pmwThis->m_bInLiveResize = false;
+
+				// An application should return zero if it processes this message.
+				if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
 				break;
 			}
 			case WM_WINDOWPOSCHANGED : {

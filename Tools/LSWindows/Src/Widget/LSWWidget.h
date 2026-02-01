@@ -900,21 +900,21 @@ namespace lsw {
 	protected :
 		// == Members.
 		/** User data. */
-		uint64_t							m_ui64UserData;
+		uint64_t							m_ui64UserData = 0;
 		/** The window handle. */
-		HWND								m_hWnd;
+		HWND								m_hWnd = NULL;
 		/** The tooltip control. */
-		HWND								m_hTooltip;
+		HWND								m_hTooltip = NULL;
 		/** The address handler. */
 		ee::CExpEvalContainer::PfAddressHandler
-											m_pfahAddressHandler;
+											m_pfahAddressHandler = nullptr;
 		/** The data to be sent to the address handler. */
-		uintptr_t							m_uiptrAddressHandlerData;
+		uintptr_t							m_uiptrAddressHandlerData = 0;
 		/** The address write handler. */
 		ee::CExpEvalContainer::PfAddressHandler
-											m_pfahAddressWriteHandler;
+											m_pfahAddressWriteHandler = nullptr;
 		/** The data to be sent to the address write handler. */
-		uintptr_t							m_uiptrAddressWriteHandlerData;
+		uintptr_t							m_uiptrAddressWriteHandlerData = 0;
 		/** The tooltip text. */
 		std::string							m_sTooltipText;
 		/** Children. */
@@ -922,27 +922,27 @@ namespace lsw {
 		/** Dock windows as children of this window. */
 		std::vector<CDockable *>			m_vDockables;
 		/** Parent. */
-		CWidget *							m_pwParent;
+		CWidget *							m_pwParent = nullptr;
 		/** Original rectangle. */
 		LSW_RECT							m_rStartingRect;
 		/** This object's starting window rect in relationship with the parent's starting client rect. */
 		LSW_RECT							m_rStartingClientRect;
 		/** Extended styles. */
-		DWORD								m_dwExtendedStyles;
+		DWORD								m_dwExtendedStyles = 0;
 		/** Tooltip styles. */
-		DWORD								m_dwTooltipStyle;
+		DWORD								m_dwTooltipStyle = 0;
 		/** Tooltip extended styles. */
-		DWORD								m_dwTooltipStyleEx;
-		/** WM_SETREDRAW count. */
-		INT									m_iSetRedraw = 0;
+		DWORD								m_dwTooltipStyleEx = 0;
 		/** Last hit returned by NcHitTest(). */
-		INT									m_iLastHit;
+		INT									m_iLastHit = 0;
+		/** Redraw counter. */
+		INT									m_iSetRedraw = 0;
 		/** Enabled. */
-		BOOL								m_bEnabled;
+		BOOL								m_bEnabled = TRUE;
 		/** Default state.  Depends on the type of control. */
-		BOOL								m_bActive;
+		BOOL								m_bActive = FALSE;
 		/** Treat text as hex when possible? */
-		BOOL								m_bTreatAsHex;		
+		BOOL								m_bTreatAsHex = FALSE;		
 		/** Width expression. */
 		CExpression							m_eWidth;
 		/** Height expression. */
@@ -956,17 +956,19 @@ namespace lsw {
 		/** Bottom expression. */
 		CExpression							m_eBottom;
 		/** Show as active or not. */
-		BOOL								m_bShowAsActive;
+		BOOL								m_bShowAsActive = FALSE;
 		/** If in the destructor, the WM_NCDESTROY handler should not call delete. */
-		BOOL								m_bInDestructor;
+		BOOL								m_bInDestructor = FALSE;
 		/** Custom ID. */
-		WORD								m_wId;
+		WORD								m_wId = 0;
 		/** The X DPI. */
 		WORD								m_wDpiX = USER_DEFAULT_SCREEN_DPI;
 		/** The Y DPI. */
 		WORD								m_wDpiY = USER_DEFAULT_SCREEN_DPI;
 		/** Tracks whether the control has focus or not. */
-		bool								m_bHasFocus;
+		bool								m_bHasFocus = false;
+		/** Are we in a live resize? */
+		bool								m_bInLiveResize = false;
 		/** Discard control characters in Char(), UniChar(), and ImeChar(). */
 		bool								m_bDiscardControlChars = false;
 		/** Pending UTF-16 high surrogate (0 if none). */
@@ -1054,6 +1056,13 @@ namespace lsw {
 		virtual LSW_HANDLED					CancelMode() { return LSW_H_CONTINUE; }
 
 		/**
+		 * Handles WM_ENTERSIZEMOVE.
+		 * 
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					EnterSizeMove() { return LSW_H_CONTINUE; }
+
+		/**
 		 * Handles WM_SIZE.
 		 * \brief Responds to client-area size changes.
 		 *
@@ -1098,6 +1107,13 @@ namespace lsw {
 		 * \return Returns a LSW_HANDLED code.
 		 */
 		virtual LSW_HANDLED					Move( LONG /*_lX*/, LONG /*_lY*/ );
+
+		/**
+		 * Handles WM_EXITSIZEMOVE.
+		 * 
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					ExitSizeMove() { return LSW_H_CONTINUE; }
 
 		/**
 		 * Handles WM_WINDOWPOSCHANGED.
