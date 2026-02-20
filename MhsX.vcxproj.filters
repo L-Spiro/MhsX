@@ -619,6 +619,9 @@
     <ClCompile Include="Src\HexEditor\MXHexEditorCurProcess.cpp">
       <Filter>Source Files\HexEditor</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Layouts\MXNumberInputLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -1000,6 +1003,9 @@
     </ClInclude>
     <ClInclude Include="Src\HexEditor\MXHexEditorControlHost.h">
       <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXNumberInputLayout.h">
+      <Filter>Header Files\Layouts</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

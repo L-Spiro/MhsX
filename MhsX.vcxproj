@@ -308,6 +308,7 @@
     <ClCompile Include="Src\Layouts\MXNewExpressionSearchLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXNewPointerSearchLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXNewStringSearchLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXNumberInputLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXOpenProcessLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXOptionsLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXPeWorksLayout.cpp" />
@@ -465,6 +466,7 @@
     <ClInclude Include="Src\Layouts\MXNewExpressionSearchLayout.h" />
     <ClInclude Include="Src\Layouts\MXNewPointerSearchLayout.h" />
     <ClInclude Include="Src\Layouts\MXNewStringSearchLayout.h" />
+    <ClInclude Include="Src\Layouts\MXNumberInputLayout.h" />
     <ClInclude Include="Src\Layouts\MXOpenProcessLayout.h" />
     <ClInclude Include="Src\Layouts\MXOptionsLayout.h" />
     <ClInclude Include="Src\Layouts\MXPeWorksLayout.h" />

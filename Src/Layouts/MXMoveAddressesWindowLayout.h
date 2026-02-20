@@ -16,7 +16,7 @@ namespace mx {
 		// Control ID's.
 		enum MX_MOVE_ADDRESS_IDS : WORD {
 			MX_MAI_NONE,
-			MX_MAI_DIALOG					= 4500,
+			MX_MAI_DIALOG					= 4600,
 			MX_MAI_OK,
 			MX_MAI_CANCEL,
 
