@@ -1541,68 +1541,37 @@ namespace mx {
 
 			// Mini-map scroll drag bypasses selection logic.
 			if ( m_mmsMiniMap.bDraggingScroll && ::GetCapture() == Wnd() ) {
-				const lsw::LSW_RECT rClient = ClientRect();
+				int32_t i32Track = m_mmsMiniMap.i32DragTrack;
+				uint64_t ui64MaxFirstLine = m_mmsMiniMap.ui64DragMaxFirstLine;
+				int32_t i32MiniTop = m_mmsMiniMap.i32DragMiniTop;
+				int32_t i32ThumbHeight = m_mmsMiniMap.i32DragThumbHeight;
 
-				int32_t i32MiniLeft, i32MiniRight, i32MiniTop, i32MiniBottom;
-				int32_t i32ThumbTop, i32ThumbHeight, i32Track;
-				uint64_t ui64MaxFirstLine;
+				int32_t i32GrabY = m_mmsMiniMap.i32ScrollGrabY;
+				if ( i32GrabY < 0 ) { i32GrabY = 0; }
+				if ( i32GrabY >= i32ThumbHeight ) { i32GrabY = i32ThumbHeight - 1; }
 
-				if ( MiniMapThumbMetrics( rClient, i32MiniLeft, i32MiniRight, i32MiniTop, i32MiniBottom,
-					i32ThumbTop, i32ThumbHeight, i32Track, ui64MaxFirstLine ) ) {
+				int32_t i32TargetThumbTop = _pCursorPos.y - i32MiniTop - i32GrabY;
 
-					// Thumb-top bounds.
-					const int32_t i32MinThumbTop = i32MiniTop;
-					const int32_t i32MaxThumbTop = i32MiniBottom - i32ThumbHeight;
+				i32TargetThumbTop = std::max( 0, std::min( i32TargetThumbTop, i32Track ) );
 
-					int32_t i32GrabY = m_mmsMiniMap.i32ScrollGrabY;
-					if ( i32GrabY < 0 ) { i32GrabY = 0; }
-					if ( i32GrabY >= i32ThumbHeight ) { i32GrabY = i32ThumbHeight - 1; }
+				if ( i32Track > 0 && ui64MaxFirstLine > 0 ) {
+					uint64_t ui64NewFirst = MiniMapMulDivU64Round( static_cast<uint64_t>(i32TargetThumbTop), ui64MaxFirstLine, static_cast<uint64_t>(i32Track) );
 
-					const int32_t i32MouseY = _pCursorPos.y;
-
-					// Pass 1: clamp thumb top using the current grab.
-					int32_t i32NewThumbTop = i32MouseY - i32GrabY;
-					if ( i32NewThumbTop < i32MinThumbTop ) { i32NewThumbTop = i32MinThumbTop; }
-					if ( i32NewThumbTop > i32MaxThumbTop ) { i32NewThumbTop = i32MaxThumbTop; }
-
-					// Update grab so the mouse stays on the thumb after clamping.
-					int32_t i32NewGrabY = i32MouseY - i32NewThumbTop;
-					if ( i32NewGrabY < 0 ) { i32NewGrabY = 0; }
-					if ( i32NewGrabY >= i32ThumbHeight ) { i32NewGrabY = i32ThumbHeight - 1; }
-
-					// Pass 2: recompute thumb top with the adjusted grab (prevents thumb-height drift).
-					i32NewThumbTop = i32MouseY - i32NewGrabY;
-					if ( i32NewThumbTop < i32MinThumbTop ) { i32NewThumbTop = i32MinThumbTop; }
-					if ( i32NewThumbTop > i32MaxThumbTop ) { i32NewThumbTop = i32MaxThumbTop; }
-
-					m_mmsMiniMap.i32ScrollGrabY = i32NewGrabY;
-
-					// Authoritative thumb position while dragging (draw should use these).
-					m_mmsMiniMap.i32DragThumbTop = i32NewThumbTop;
-					m_mmsMiniMap.i32DragThumbHeight = i32ThumbHeight;
-
-					const uint64_t ui64ThumbTopPx = static_cast<uint64_t>( i32NewThumbTop - i32MiniTop );
-
-					uint64_t ui64NewFirst = 0ULL;
-					if ( ui64MaxFirstLine != 0ULL && i32Track != 0 ) {
-						ui64NewFirst = MiniMapMulDivU64Round( ui64ThumbTopPx, ui64MaxFirstLine, static_cast<uint64_t>( i32Track ) );
-						if ( ui64NewFirst > ui64MaxFirstLine ) { ui64NewFirst = ui64MaxFirstLine; }
+					if ( ui64NewFirst > ui64MaxFirstLine ) { 
+						ui64NewFirst = ui64MaxFirstLine;
 					}
 
-					if ( ui64NewFirst != m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine ) {
+					if ( m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine != ui64NewFirst ) {
 						m_sdScrollView[m_eaEditAs].ui64VPos = ui64NewFirst;
 						m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine = ui64NewFirst;
 
-						// Keep OS scrollbar max unchanged (your scrollbar still allows last line at top).
 						const uint64_t ui64Lines = TotalLines_FixedWidth();
 						const uint64_t ui64MaxV = ui64Lines ? (ui64Lines - 1ULL) : 0ULL;
 						lsw::CBase::SetScrollInfo64( Wnd(), SB_VERT, SIF_POS, ui64MaxV, m_sdScrollView[m_eaEditAs].ui64VPos, 1, TRUE );
+
+						::InvalidateRect( Wnd(), NULL, FALSE );
 					}
-
-					::InvalidateRect( Wnd(), NULL, FALSE );
-					return lsw::CWidget::LSW_H_HANDLED;
 				}
-
 				return lsw::CWidget::LSW_H_HANDLED;
 			}
 
