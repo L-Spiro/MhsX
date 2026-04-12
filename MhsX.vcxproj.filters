@@ -188,6 +188,12 @@
     <Filter Include="Source Files\CRC">
       <UniqueIdentifier>{0e5d6c1b-d721-4dbc-9e17-942568ca6a79}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\NumberInputWindow">
+      <UniqueIdentifier>{dde33122-79f6-47a8-ba2f-0475f61f7aa9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\NumberInputWindow">
+      <UniqueIdentifier>{30378f71-43c2-4393-a806-ae862df435cc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Strings\MXStringDecoder.cpp">
@@ -622,6 +628,9 @@
     <ClCompile Include="Src\Layouts\MXNumberInputLayout.cpp">
       <Filter>Source Files\Layouts</Filter>
     </ClCompile>
+    <ClCompile Include="Src\NumberInputWindow\MXNumberInputDialog.cpp">
+      <Filter>Source Files\NumberInputWindow</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -1006,6 +1015,9 @@
     </ClInclude>
     <ClInclude Include="Src\Layouts\MXNumberInputLayout.h">
       <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\NumberInputWindow\MXNumberInputDialog.h">
+      <Filter>Header Files\NumberInputWindow</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

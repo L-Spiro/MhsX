@@ -324,6 +324,7 @@
     <ClCompile Include="Src\MemHack\MXProcess.cpp" />
     <ClCompile Include="Src\MemHack\MXWindowMemHack.cpp" />
     <ClCompile Include="Src\MXMhsX.cpp" />
+    <ClCompile Include="Src\NumberInputWindow\MXNumberInputDialog.cpp" />
     <ClCompile Include="Src\OpenProcess\MXOpenProcessWindow.cpp" />
     <ClCompile Include="Src\Options\MXOptionsPage.cpp" />
     <ClCompile Include="Src\Options\MXOptionsPageGeneral.cpp" />
@@ -481,6 +482,7 @@
     <ClInclude Include="Src\MemHack\MXMemHack.h" />
     <ClInclude Include="Src\MemHack\MXProcess.h" />
     <ClInclude Include="Src\MemHack\MXWindowMemHack.h" />
+    <ClInclude Include="Src\NumberInputWindow\MXNumberInputDialog.h" />
     <ClInclude Include="Src\OpenProcess\MXOpenProcessWindow.h" />
     <ClInclude Include="Src\Options\MXOptions.h" />
     <ClInclude Include="Src\Options\MXOptionsPage.h" />
