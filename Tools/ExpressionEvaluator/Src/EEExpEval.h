@@ -5604,7 +5604,7 @@ inline unsigned int						CountLeadingZeros( uint64_t _ui64X ) {
 		 * \param _pui64HighSum Receives the high 64 bits of the sum.
 		 * \return Returns the low 64 bits of the sum.
 		 **/
-		inline uint64_t												_uadd128( uint64_t _ui64AHigh, uint64_t _ui64ALow, uint64_t _ui64BHigh, uint64_t _ui64BLow, uint64_t * _pui64HighSum ) {
+		inline uint64_t					_uadd128( uint64_t _ui64AHigh, uint64_t _ui64ALow, uint64_t _ui64BHigh, uint64_t _ui64BLow, uint64_t * _pui64HighSum ) {
 			uint64_t ui64Lo = 0;
 			uint64_t ui64Hi = 0;
 
@@ -5625,7 +5625,7 @@ inline unsigned int						CountLeadingZeros( uint64_t _ui64X ) {
 		 * \param _pi64HighSum Receives the high 64 bits of the sum.
 		 * \return Returns the low 64 bits of the sum.
 		 **/
-		inline int64_t												_add128( int64_t _i64AHigh, int64_t _i64ALow, int64_t _i64BHigh, int64_t _i64BLow, int64_t * _pi64HighSum ) {
+		inline int64_t					_add128( int64_t _i64AHigh, int64_t _i64ALow, int64_t _i64BHigh, int64_t _i64BLow, int64_t * _pi64HighSum ) {
 			uint64_t ui64Hi = 0;
 			const uint64_t ui64Lo = _uadd128(
 				static_cast<uint64_t>(_i64AHigh),
@@ -5649,7 +5649,7 @@ inline unsigned int						CountLeadingZeros( uint64_t _ui64X ) {
 		 * \param _pui64HighDiff Receives the high 64 bits of the difference.
 		 * \return Returns the low 64 bits of the difference.
 		 **/
-		inline uint64_t												_usub128( uint64_t _ui64AHigh, uint64_t _ui64ALow, uint64_t _ui64BHigh, uint64_t _ui64BLow, uint64_t * _pui64HighDiff ) {
+		inline uint64_t					_usub128( uint64_t _ui64AHigh, uint64_t _ui64ALow, uint64_t _ui64BHigh, uint64_t _ui64BLow, uint64_t * _pui64HighDiff ) {
 			uint64_t ui64Lo = 0;
 			uint64_t ui64Hi = 0;
 
@@ -5670,7 +5670,7 @@ inline unsigned int						CountLeadingZeros( uint64_t _ui64X ) {
 		 * \param _pi64HighDiff Receives the high 64 bits of the difference.
 		 * \return Returns the low 64 bits of the difference.
 		 **/
-		inline int64_t												_sub128( int64_t _i64AHigh, int64_t _i64ALow, int64_t _i64BHigh, int64_t _i64BLow, int64_t * _pi64HighDiff ) {
+		inline int64_t					_sub128( int64_t _i64AHigh, int64_t _i64ALow, int64_t _i64BHigh, int64_t _i64BLow, int64_t * _pi64HighDiff ) {
 			uint64_t ui64Hi = 0;
 			const uint64_t ui64Lo = _usub128(
 				static_cast<uint64_t>(_i64AHigh),
