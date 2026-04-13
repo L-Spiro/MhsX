@@ -1,8 +1,10 @@
 #include "MXDeusHexMachinaWindow.h"
 #include "../Layouts/MXLayoutManager.h"
+#include "../Layouts/MXNumberInputLayout.h"
 #include "../Layouts/MXOpenProcessLayout.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../MemHack/MXWindowMemHack.h"
+#include "../NumberInputWindow/MXNumberInputDialog.h"
 #include "../Utilities/MXUtilities.h"
 #include "MXHexEditorCurProcess.h"
 #include "MXHexEditorFile.h"
@@ -95,11 +97,6 @@ namespace mx {
 	}
 
 	// == Functions.
-	// Gets the base tab control.
-	CTab * CDeusHexMachinaWindow::GetTab() const {
-		return const_cast<CTab *>(static_cast<const CTab *>(FindChild( Layout::MX_W_TABS )));
-	}
-
 	// WM_INITDIALOG.
 	CWidget::LSW_HANDLED CDeusHexMachinaWindow::InitDialog() {
 		CToolBar * plvToolBar = static_cast<CToolBar *>(FindChild( Layout::MX_W_TOOLBAR0 ));
@@ -144,7 +141,7 @@ namespace mx {
 			LSW_REBARBANDINFO riRebarInfo;
 			riRebarInfo.SetColors( ::GetSysColor( COLOR_BTNTEXT ), ::GetSysColor( COLOR_BTNFACE ) );
 			riRebarInfo.SetStyle( RBBS_CHILDEDGE |
-			  RBBS_FIXEDBMP );
+				RBBS_FIXEDBMP );
 			riRebarInfo.SetChild( plvToolBar->Wnd() );
 			riRebarInfo.SetChildSize( plvToolBar->GetMinBoundingRect().Width(), plvToolBar->GetMinBoundingRect().Height() );
 			riRebarInfo.SetId( Layout::MX_W_TOOLBAR0 );
@@ -461,6 +458,10 @@ namespace mx {
 				break;
 			}
 			
+			case Layout::MX_M_FIND_GOTO : {
+				ShowGoTo();
+				break;
+			}
 
 			case Layout::MX_M_VIEW_FONT_ENLARGE_FONT : {
 				EnlargeFont();
@@ -1902,6 +1903,16 @@ namespace mx {
 		phecControl->SetFontSize( CHexEditorControl::DefaultPointSize() );
 
 		RecalcAllBut( phecControl );
+	}
+
+	// Shows the Go To dialog.
+	void CDeusHexMachinaWindow::ShowGoTo( uint64_t _ui64DefaultAddress ) {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+
+		CNumberInputLayout::MX_NUMBER_DIALOG_PARMS ndpParms;
+		if ( TRUE == CNumberInputLayout::CreateNumberInputDialog( this, ndpParms ) ) {
+		}
 	}
 
 	// Sets a status-bar item’s text and "warning" status.

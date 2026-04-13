@@ -79,9 +79,6 @@ namespace mx {
 
 
 		// == Functions.
-		// Gets the base tab control.
-		CTab *										GetTab() const;
-
 		// WM_INITDIALOG.
 		virtual LSW_HANDLED							InitDialog();
 
@@ -262,6 +259,9 @@ namespace mx {
 
 		// Sets the font size back to normal.
 		void										ResetFontSize();
+
+		// Shows the Go To dialog.
+		void										ShowGoTo( uint64_t _ui64DefaultAddress = UINT64_MAX );
 
 		// Sets a status-bar item’s text and "warning" status.
 		void										SetStatusBarText( const wchar_t * _pwcText, bool _bWarning = false, size_t _sIdx = 0, bool _bUpdateStore = true ) override;

@@ -42,7 +42,7 @@ namespace mx {
 		struct MX_NUMBER_DIALOG_PARMS {
 			CSecureWString						swsHeaderText;						/**< The text for the dialog. */
 			CSecureWString						swsLabelText;						/**< The text for the label. */
-			ee::CExpEvalContainer::EE_RESULT &	rResult;							/**< Holds the returned result.  It can never return an object type, but if the return type is a string it will be copied to psStringReturn. */
+			ee::CExpEvalContainer::EE_RESULT	rResult;							/**< Holds the returned result.  It can never return an object type, but if the return type is a string it will be copied to psStringReturn. */
 			std::string *						psStringReturn = nullptr;			/**< If rResult.ncType is EE_NC_OBJECT and this is not NULL, it will be filled with the string result of the entered expression. */
 
 			PfVerifyFunc						pfVerifyFunc = nullptr;				/**< The function to verify that the input is valid. Called when the user hits OK. */
