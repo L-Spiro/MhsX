@@ -319,7 +319,7 @@ namespace lsw {
 	 * \param _iSubItem The one-based index of the subitem. To set the item label, set _iSubItem to zero.
 	 * \return Returns the length of the item's string, including the terminating NULL.
 	 **/
-	INT CListView::GetItemTextLenW( INT _iItem, INT _iSubItem ) {
+	INT CListView::GetItemTextLenW( INT _iItem, INT _iSubItem ) const {
 		INT iSize = 128;
 		INT iRet = 0;
 		LVITEMW liItem = { 0 };
@@ -342,7 +342,7 @@ namespace lsw {
 	 * \param _iSubItem The one-based index of the subitem. To set the item label, set _iSubItem to zero.
 	 * \return Returns the length of the item's string, including the terminating NULL.
 	 **/
-	INT CListView::GetItemTextLenA( INT _iItem, INT _iSubItem ) {
+	INT CListView::GetItemTextLenA( INT _iItem, INT _iSubItem ) const {
 		INT iSize = 128;
 		INT iRet = 0;
 		LVITEMA liItem = { 0 };
@@ -365,7 +365,7 @@ namespace lsw {
 	 * \param _iSubItem The index of the subitem. To retrieve the item text, set _iSubItem to zero.
 	 * \param _sRet Holds the returned string.
 	 **/
-	VOID CListView::GetItemText( INT _iItem, INT _iSubItem, std::wstring &_sRet ) {
+	VOID CListView::GetItemText( INT _iItem, INT _iSubItem, std::wstring &_sRet ) const {
 		INT iLen = GetItemTextLenW( _iItem,  _iSubItem );
 		LVITEMW liItem = { 0 };
 		liItem.iSubItem = _iSubItem;
@@ -383,7 +383,7 @@ namespace lsw {
 	 * \param _iSubItem The index of the subitem. To retrieve the item text, set _iSubItem to zero.
 	 * \param _sRet Holds the returned string.
 	 **/
-	VOID CListView::GetItemText( INT _iItem, INT _iSubItem, std::string &_sRet ) {
+	VOID CListView::GetItemText( INT _iItem, INT _iSubItem, std::string &_sRet ) const {
 		INT iLen = GetItemTextLenA( _iItem,  _iSubItem );
 		LVITEMA liItem = { 0 };
 		liItem.iSubItem = _iSubItem;

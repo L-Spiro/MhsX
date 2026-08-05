@@ -16,7 +16,7 @@ namespace mx {
 	// The layout for the New Data-Type Search dialog.
 	LSW_WIDGET_LAYOUT CNumberInputLayout::m_wlNumberInputDialog[] = {
 		{
-			MX_NEW_DATA_TYPE_SEARCH,						// ltType
+			MX_NUMBER_INPUT,								// ltType
 			MX_NI_DIALOG,									// wId
 			nullptr,										// lpwcClass
 			TRUE,											// bEnabled

@@ -49,8 +49,6 @@ namespace lsw {
 		m_wpListViewProc = CHelpers::SetWndProc( Wnd(), ListViewOverride );
 		::SetPropW( Wnd(), m_szProp, reinterpret_cast<HANDLE>(this) );
 
-		auto uiStylesEx = ::GetWindowLongPtrW( Wnd(), GWL_EXSTYLE );
-
 		// By default there is already a header.
 		InsertColumn( L"", 150, 0 );
 	}
@@ -143,16 +141,35 @@ namespace lsw {
 	}
 
 	/**
-	 * Sets an itemÅfs color.
+	 * Sets an itemÅís color.
 	 * 
 	 * \param _tiItem The item whose color is to be updated.
 	 * \param _rgbColor The color to apply to the item (alpha respected).
-	 * \return Returns TRUE if the itemÅfs color was set.  FALSE indicates that the item was invalid.
+	 * \return Returns TRUE if the itemÅís color was set.  FALSE indicates that the item was invalid.
 	 **/
 	BOOL CTreeListView::SetItemColor( HTREEITEM _tiItem, RGBQUAD _rgbColor ) {
 		ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( _tiItem );
 		if ( !pntItem ) { return FALSE; }
 		pntItem->Value().rgbColor = _rgbColor;
+		return TRUE;
+	}
+
+	/**
+	 * Selects or deselects an item.
+	 * 
+	 * \param _tiItem The item to select or deselect.
+	 * \param _bSelect If true, the item is selected, otherwise it is deselected.
+	 * \return Returns TRUE if the itemís selection was updated.  FALSE indicates that the item was invalid.
+	 **/
+	BOOL CTreeListView::SetItemSelection( HTREEITEM _tiItem, bool _bSelect ) {
+		ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( _tiItem );
+		if ( !pntItem ) { return FALSE; }
+		if ( _bSelect ) {
+			pntItem->Value().uiState |= TVIS_SELECTED;
+		}
+		else {
+			pntItem->Value().uiState &= ~TVIS_SELECTED;
+		}
 		return TRUE;
 	}
 
@@ -183,6 +200,40 @@ namespace lsw {
 			++stCnt;
 		}
 		return stCnt;
+	}
+
+	/**
+	 * Gets the direct childern of the given item.
+	 * 
+	 * \param _vReturn Holds the returned array of children.
+	 * \param _htiThis The item whose children are to be gathered.
+	 * \return Returns the total number of children gathered.
+	 **/
+	size_t CTreeListView::GatherChildren( std::vector<HTREEITEM> &_vReturn, HTREEITEM _htiThis ) const {
+		const ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( _htiThis );
+		if ( !pntItem ) { return 0; }
+		_vReturn.clear();
+		try {
+			for ( size_t I = 0; I < pntItem->Size(); ++I ) {
+				_vReturn.push_back( PointerToTreeItem( pntItem->GetChild( I ) ) );
+			}
+		}
+		catch ( ... ) {
+			return 0;
+		}
+		return _vReturn.size();
+	}
+
+	/**
+	 * Gets the number of children under the given item.
+	 * 
+	 * \param _htiThis The item whose children are to be counted.
+	 * \return Returns the number of children under the given item.
+	 **/
+	size_t CTreeListView::CountChildren( HTREEITEM _htiThis ) const {
+		const ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( _htiThis );
+		if ( !pntItem ) { return 0; }
+		return pntItem->Size();
 	}
 
 	/**
@@ -287,6 +338,36 @@ namespace lsw {
 			ptNode = Next( ptNode );
 		}
 		UpdateListView();
+	}
+
+	/**
+	 * Expands or collapses the given item.
+	 * 
+	 * \param _htiItem The item to expand or collapse.
+	 * \param _bExpanded If TRUE, the item is expanded, otherwise it is collapsed.
+	 **/
+	void CTreeListView::SetItemExpand( HTREEITEM _htiItem, BOOL _bExpand ) {
+		auto ptNode = TreeItemToPointer( _htiItem );
+		if ( ptNode ) {
+			if ( _bExpand ) {
+				ptNode->Value().uiState |= TVIS_EXPANDED;
+			}
+			else {
+				ptNode->Value().uiState &= ~TVIS_EXPANDED;
+			}
+		}
+	}
+
+	/**
+	 * Determines whether the given item is expanded or not.
+	 * 
+	 * \param _htiItem The item to check for being expanded.
+	 * \return Returns TRUE if the item is expanded, FALSE otherwise.
+	 **/
+	BOOL CTreeListView::ItemIsExpanded( HTREEITEM _htiItem ) const {
+		auto ptNode = TreeItemToPointer( _htiItem );
+		if ( ptNode ) { return (ptNode->Value().uiState & TVIS_EXPANDED) ? TRUE : FALSE; }
+		return FALSE;
 	}
 
 	/**
@@ -609,6 +690,34 @@ namespace lsw {
 	}
 
 	/**
+	 * Gets the text for a given item and column.  Must be called with a try/catch block.
+	 * 
+	 * \param _htiItem The item whose text is to be retrieved.
+	 * \param _sColumn The column of the item.
+	 * \return Returns the text of the given cell.
+	 **/
+	std::wstring CTreeListView::GetItemText( HTREEITEM _htiItem, size_t _sColumn ) {
+		const ee::CTree<CTreeListView::LSW_TREE_ROW> * ptNode = TreeItemToPointer( _htiItem );
+		if ( !ptNode ) { return std::wstring(); }
+		if ( _sColumn >= ptNode->Value().vStrings.size() ) { return std::wstring(); }
+		return ptNode->Value().vStrings[_sColumn];
+	}
+
+	/**
+	 * Gets an itemís parent item.
+	 * 
+	 * \param _htiItem The item whose parent is to be gotten.
+	 * \return Returns NULL if _htiItem is invalid or is TVI_ROOT, otherwise returns the parent item for the given item. 
+	 **/
+	HTREEITEM CTreeListView::GetItemParent( HTREEITEM _htiItem ) {
+		ee::CTree<CTreeListView::LSW_TREE_ROW> * ptNode = TreeItemToPointer( _htiItem );
+		if ( !ptNode ) { return NULL; }
+		if ( ptNode == &m_tRoot ) { return NULL; }
+
+		return PointerToTreeItem( ptNode->Parent() );
+	}
+
+	/**
 	 * Sorts items.
 	 * 
 	 * \param _iSubItem The index of the sub-item.
@@ -816,18 +925,18 @@ namespace lsw {
 	 * Gets the text for a given item.  The row is counted by skipping over collapsed items, and can refer to different items depending on the collapsed/expanded state of the tree.
 	 * 
 	 * \param _sRow The index of the item.
-	 * \param _Column The column of the item.
+	 * \param _sColumn The column of the item.
 	 * \param _ptrRow A pointer to the _sRow'th item.
 	 * \return Returns the text of the given cell.
 	 **/
-	std::wstring CTreeListView::GetCellText( size_t _sRow, size_t _Column, ee::CTree<LSW_TREE_ROW> * _ptrRow ) {
+	std::wstring CTreeListView::GetCellText( size_t _sRow, size_t _sColumn, ee::CTree<LSW_TREE_ROW> * _ptrRow ) {
 		if ( !_ptrRow ) { return std::wstring(); }
-		if ( _sRow > INT_MAX || _Column > INT_MAX ) { return std::wstring(); }
+		if ( _sRow > INT_MAX || _sColumn > INT_MAX ) { return std::wstring(); }
 
 		std::wstring wsTmp;
-		auto pwsSrc = CWidget::Parent() ? CWidget::Parent()->TreeListView_ItemText( this, int( _sRow ), int( _Column ), _ptrRow->Value().lpParam, wsTmp ) : nullptr;
-		if ( !pwsSrc && size_t( _Column ) < _ptrRow->Value().vStrings.size() ) {
-			pwsSrc = &_ptrRow->Value().vStrings[_Column];
+		auto pwsSrc = CWidget::Parent() ? CWidget::Parent()->TreeListView_ItemText( this, int( _sRow ), int( _sColumn ), _ptrRow->Value().lpParam, wsTmp ) : nullptr;
+		if ( !pwsSrc && size_t( _sColumn ) < _ptrRow->Value().vStrings.size() ) {
+			pwsSrc = &_ptrRow->Value().vStrings[_sColumn];
 		}
 		if ( !pwsSrc ) { return std::wstring(); }
 		return (*pwsSrc);
@@ -958,7 +1067,10 @@ namespace lsw {
 		if ( !_ptObj->Size() ) { return; }
 
 		auto GetItemText = [this]( size_t _sRow, size_t _sColumn )->const std::wstring {
-            return GetCellText( _sRow, _sColumn );
+			try {
+				return GetCellText( _sRow, _sColumn );
+			}
+			catch ( ... ) { return std::wstring(); }
         };
 
 		auto vOrder = BuildOrderByColumnGeneric( _ptObj->Size(), GetItemText, _sColumn, _bAsc, _tpCmpPolicy );
@@ -1462,7 +1574,7 @@ namespace lsw {
 			}
 			else {
 				// It is unselected.
-				SetItemSelection( static_cast<INT>(vListSelection[I]), FALSE );
+				CListView::SetItemSelection( static_cast<INT>(vListSelection[I]), FALSE );
 			}
 		}
 
@@ -1476,7 +1588,7 @@ namespace lsw {
 			}
 			else {
 				// It is selected.
-				SetItemSelection( static_cast<INT>(vSelection[I]), TRUE );
+				CListView::SetItemSelection( static_cast<INT>(vSelection[I]), TRUE );
 			}
 		}
 	}

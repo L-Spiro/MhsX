@@ -12,6 +12,7 @@
 #include "../HexEditor/MXHexEditorControl.h"
 #include "../Layouts/MXLayoutMacros.h"
 #include "../MainWindow/MXMhsMainWindow.h"
+#include "../NumberInputWindow/MXNumberInputDialog.h"
 #include "../OpenProcess/MXOpenProcessWindow.h"
 #include "../Options/MXOptionsPageHotkeys.h"
 #include "../Options/MXOptionsPageGeneral.h"
@@ -123,6 +124,9 @@ namespace mx {
 			}
 			case MX_HEX_CONTROL : {
 				return new CHexEditorControl( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
+			case MX_NUMBER_INPUT : {
+				return new CNumberInputDialog( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );

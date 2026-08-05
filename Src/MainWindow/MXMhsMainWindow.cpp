@@ -121,19 +121,29 @@ namespace mx {
 	// WM_INITDIALOG.
 	CWidget::LSW_HANDLED CMhsMainWindow::InitDialog() {
 		static CHotkeyManBase::MX_HOTKEY_HANDLER hhHandlers[] = {
-		//	uiFuncParm0							pfFunc							hdName											uiId								sParms	hdParms																			hdFormattings
-			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowAddFoundAddress,		{ _T_LEN_2FD68502_Add_Entry },					MX_WH_SHOW_ADD_ENTRY,				0 },
-			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowEdit,				{ _T_LEN_F2BB02E1_Show_Found_Address_Edit },	MX_WH_SHOW_EDIT,					0 },
-			{ reinterpret_cast<uint64_t>(this),	Hotkey_OpenOptions,				{ _T_LEN_159BB63C_Show_Options },				MX_WH_SHOW_OPTIONS,					0 },
-			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowFoundAddresses,		{ _T_LEN_A5501E10_Show_Found_Addresses },		MX_WH_SHOW_FOUND_ADDRESSES,			0 },
-			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowExpressionEvaluator,	{ _T_LEN_0661F178_Show_Expression_Evaluator },	MX_WH_SHOW_EXPRESSION_EVALUATOR,	0 },
-			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowConverter,			{ _T_LEN_9118A28E_Show_Converter },				MX_WH_SHOW_CONVERTER,				0 },
-			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowPeWorks,				{ _T_LEN_759D0F03_Show_PE_Works },				MX_WH_SHOW_PE_WORKS,				0 },
-			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowStringTheory,		{ _T_LEN_B7A8A10D_Show_String_Theory },			MX_WH_SHOW_STRING_THEORY,			0 },
-			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowFloatingPointStudio,	{ _T_LEN_155439B4_Show_Floating_Point_Studio },	MX_WH_SHOW_FLOATING_POINT_STUDIO,	0 },
-			{ reinterpret_cast<uint64_t>(this),	Hotkey_LockSelected,			{ _T_LEN_14B8120F_Lock_Selected },				MX_WH_LOCK_SELECTED,				0 },
-			{ reinterpret_cast<uint64_t>(this),	Hotkey_UnLockSelected,			{ _T_LEN_85399C8F_Unlock_Selected },			MX_WH_UNLOCK_SELECTED,				0 },
-			{ reinterpret_cast<uint64_t>(this),	Hotkey_UnLockAll,				{ _T_LEN_EE088C0D_Unlock_All },					MX_WH_UNLOCK_ALL,					0 },
+		//	uiFuncParm0							pfFunc									hdName													uiId								sParms	hdParms																			hdFormattings
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowAddFoundAddress,				{ _T_LEN_2FD68502_Add_Entry },							MX_WH_SHOW_ADD_ENTRY,				0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowEdit,						{ _T_LEN_F2BB02E1_Show_Found_Address_Edit },			MX_WH_SHOW_EDIT,					0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_OpenOptions,						{ _T_LEN_159BB63C_Show_Options },						MX_WH_SHOW_OPTIONS,					0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowFoundAddresses,				{ _T_LEN_A5501E10_Show_Found_Addresses },				MX_WH_SHOW_FOUND_ADDRESSES,			0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowExpressionEvaluator,			{ _T_LEN_0661F178_Show_Expression_Evaluator },			MX_WH_SHOW_EXPRESSION_EVALUATOR,	0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowConverter,					{ _T_LEN_9118A28E_Show_Converter },						MX_WH_SHOW_CONVERTER,				0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowPeWorks,						{ _T_LEN_759D0F03_Show_PE_Works },						MX_WH_SHOW_PE_WORKS,				0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowStringTheory,				{ _T_LEN_B7A8A10D_Show_String_Theory },					MX_WH_SHOW_STRING_THEORY,			0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowFloatingPointStudio,			{ _T_LEN_155439B4_Show_Floating_Point_Studio },			MX_WH_SHOW_FLOATING_POINT_STUDIO,	0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_LockSelected,					{ _T_LEN_14B8120F_Lock_Selected },						MX_WH_LOCK_SELECTED,				0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_UnLockSelected,					{ _T_LEN_85399C8F_Unlock_Selected },					MX_WH_UNLOCK_SELECTED,				0 },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_UnLockAll,						{ _T_LEN_EE088C0D_Unlock_All },							MX_WH_UNLOCK_ALL,					0 },
+
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_IncAddress<sizeof(uint8_t)>,		{ _T_LEN_ABDEAA1C_Increase_1_byte_Address_By___ },		MX_WH_INC_1,						2,		{ { _T_LEN_C2F3561D_Address }, { _T_LEN_682D5FC8_Amount_to_Add } },				{ { _T_LEN_D763F3CD__I64X }, { _T_LEN_92BCAFB8__I64u } } },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_IncAddress<sizeof(uint16_t)>,	{ _T_LEN_0477E7D6_Increase_2_byte_Address_By___ },		MX_WH_INC_2,						2,		{ { _T_LEN_C2F3561D_Address }, { _T_LEN_682D5FC8_Amount_to_Add } },				{ { _T_LEN_D763F3CD__I64X }, { _T_LEN_92BCAFB8__I64u } } },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_IncAddress<sizeof(uint32_t)>,	{ _T_LEN_80547A03_Increase_4_byte_Address_By___ },		MX_WH_INC_4,						2,		{ { _T_LEN_C2F3561D_Address }, { _T_LEN_682D5FC8_Amount_to_Add } },				{ { _T_LEN_D763F3CD__I64X }, { _T_LEN_92BCAFB8__I64u } } },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_IncAddress<sizeof(uint64_t)>,	{ _T_LEN_536247E8_Increase_8_byte_Address_By___ },		MX_WH_INC_8,						2,		{ { _T_LEN_C2F3561D_Address }, { _T_LEN_682D5FC8_Amount_to_Add } },				{ { _T_LEN_D763F3CD__I64X }, { _T_LEN_92BCAFB8__I64u } } },
+
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_DecAddress<sizeof(uint8_t)>,		{ _T_LEN_3E1A3B84_Decrease_1_byte_Address_By___ },		MX_WH_DEC_1,						2,		{ { _T_LEN_C2F3561D_Address }, { _T_LEN_A53F3F90_Amount_to_Subtract } },		{ { _T_LEN_D763F3CD__I64X }, { _T_LEN_92BCAFB8__I64u } } },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_DecAddress<sizeof(uint16_t)>,	{ _T_LEN_91B3764E_Decrease_2_byte_Address_By___ },		MX_WH_DEC_2,						2,		{ { _T_LEN_C2F3561D_Address }, { _T_LEN_A53F3F90_Amount_to_Subtract } },		{ { _T_LEN_D763F3CD__I64X }, { _T_LEN_92BCAFB8__I64u } } },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_DecAddress<sizeof(uint32_t)>,	{ _T_LEN_1590EB9B_Decrease_4_byte_Address_By___ },		MX_WH_DEC_4,						2,		{ { _T_LEN_C2F3561D_Address }, { _T_LEN_A53F3F90_Amount_to_Subtract } },		{ { _T_LEN_D763F3CD__I64X }, { _T_LEN_92BCAFB8__I64u } } },
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_DecAddress<sizeof(uint64_t)>,	{ _T_LEN_C6A6D670_Decrease_8_byte_Address_By___ },		MX_WH_DEC_8,						2,		{ { _T_LEN_C2F3561D_Address }, { _T_LEN_A53F3F90_Amount_to_Subtract } },		{ { _T_LEN_D763F3CD__I64X }, { _T_LEN_92BCAFB8__I64u } } },
 		};
 		for ( size_t I = 0; I < std::size( hhHandlers ); ++I ) {
 			CHotkeyManBase::RegisterHotkeyHandler( hhHandlers[I] );
@@ -1840,6 +1850,96 @@ namespace mx {
 	void __stdcall CMhsMainWindow::Hotkey_UnLockAll( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
 		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
 		pmhThis->UnlockAll();
+	}
+
+	/**
+	 * Hotkey handler for increasing the value at a given address.
+	 *
+	 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+	 * \param _uiParm1 The address to increase.
+	 * \param _uiParm2 The amount by which to increase the given address.
+	 * \param _uiParm3 Unused.
+	 **/
+	template <unsigned _uSize>
+	void __stdcall CMhsMainWindow::Hotkey_IncAddress( uint64_t _uiParm0, uint64_t _uiParm1, uint64_t _uiParm2, uint64_t /*_uiParm3*/ ) {
+		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
+		if constexpr ( _uSize == sizeof( uint8_t ) ) {
+			uint8_t ui8Value;
+			size_t sBufferOffset;
+			if ( pmhThis->MemHack()->ReadProcessMemory_PreProcessed( _uiParm1, &ui8Value, _uSize, sBufferOffset ) ) {
+				ui8Value += uint8_t( _uiParm2 );
+				pmhThis->MemHack()->WriteProcessMemory_PreProcessed( _uiParm1, &ui8Value, _uSize );
+			}
+		}
+		else if constexpr ( _uSize == sizeof( uint16_t ) ) {
+			uint16_t ui16Value;
+			size_t sBufferOffset;
+			if ( pmhThis->MemHack()->ReadProcessMemory_PreProcessed( _uiParm1, &ui16Value, _uSize, sBufferOffset ) ) {
+				ui16Value += uint16_t( _uiParm2 );
+				pmhThis->MemHack()->WriteProcessMemory_PreProcessed( _uiParm1, &ui16Value, _uSize );
+			}
+		}
+		else if constexpr ( _uSize == sizeof( uint32_t ) ) {
+			uint32_t ui32Value;
+			size_t sBufferOffset;
+			if ( pmhThis->MemHack()->ReadProcessMemory_PreProcessed( _uiParm1, &ui32Value, _uSize, sBufferOffset ) ) {
+				ui32Value += uint32_t( _uiParm2 );
+				pmhThis->MemHack()->WriteProcessMemory_PreProcessed( _uiParm1, &ui32Value, _uSize );
+			}
+		}
+		else if constexpr ( _uSize == sizeof( uint64_t ) ) {
+			uint64_t ui64Value;
+			size_t sBufferOffset;
+			if ( pmhThis->MemHack()->ReadProcessMemory_PreProcessed( _uiParm1, &ui64Value, _uSize, sBufferOffset ) ) {
+				ui64Value += uint64_t( _uiParm2 );
+				pmhThis->MemHack()->WriteProcessMemory_PreProcessed( _uiParm1, &ui64Value, _uSize );
+			}
+		}
+	}
+
+	/**
+	 * Hotkey handler for decreasing the value at a given address.
+	 *
+	 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+	 * \param _uiParm1 The address to increase.
+	 * \param _uiParm2 The amount by which to decrease the given address.
+	 * \param _uiParm3 Unused.
+	 **/
+	template <unsigned _uSize>
+	void __stdcall CMhsMainWindow::Hotkey_DecAddress( uint64_t _uiParm0, uint64_t _uiParm1, uint64_t _uiParm2, uint64_t /*_uiParm3*/ ) {
+		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
+		if constexpr ( _uSize == sizeof( uint8_t ) ) {
+			uint8_t ui8Value;
+			size_t sBufferOffset;
+			if ( pmhThis->MemHack()->ReadProcessMemory_PreProcessed( _uiParm1, &ui8Value, _uSize, sBufferOffset ) ) {
+				ui8Value -= uint8_t( _uiParm2 );
+				pmhThis->MemHack()->WriteProcessMemory_PreProcessed( _uiParm1, &ui8Value, _uSize );
+			}
+		}
+		else if constexpr ( _uSize == sizeof( uint16_t ) ) {
+			uint16_t ui16Value;
+			size_t sBufferOffset;
+			if ( pmhThis->MemHack()->ReadProcessMemory_PreProcessed( _uiParm1, &ui16Value, _uSize, sBufferOffset ) ) {
+				ui16Value -= uint16_t( _uiParm2 );
+				pmhThis->MemHack()->WriteProcessMemory_PreProcessed( _uiParm1, &ui16Value, _uSize );
+			}
+		}
+		else if constexpr ( _uSize == sizeof( uint32_t ) ) {
+			uint32_t ui32Value;
+			size_t sBufferOffset;
+			if ( pmhThis->MemHack()->ReadProcessMemory_PreProcessed( _uiParm1, &ui32Value, _uSize, sBufferOffset ) ) {
+				ui32Value -= uint32_t( _uiParm2 );
+				pmhThis->MemHack()->WriteProcessMemory_PreProcessed( _uiParm1, &ui32Value, _uSize );
+			}
+		}
+		else if constexpr ( _uSize == sizeof( uint64_t ) ) {
+			uint64_t ui64Value;
+			size_t sBufferOffset;
+			if ( pmhThis->MemHack()->ReadProcessMemory_PreProcessed( _uiParm1, &ui64Value, _uSize, sBufferOffset ) ) {
+				ui64Value -= uint64_t( _uiParm2 );
+				pmhThis->MemHack()->WriteProcessMemory_PreProcessed( _uiParm1, &ui64Value, _uSize );
+			}
+		}
 	}
 
 }	// namespace mx

@@ -115,6 +115,13 @@ namespace lsw {
 		 */
 		static INT_PTR CALLBACK				DialogProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam );
 
+		/**
+		 * Attaches an HWND to this widget after creation.  Only call manually if manually creating a widget.
+		 * \brief Finalizes control initialization once the window handle exists.
+		 *
+		 * \param _hWnd The created window handle.
+		 */
+		virtual void						InitControl( HWND _hWnd );
 
 		/**
 		 * The Window handle.
@@ -476,6 +483,30 @@ namespace lsw {
 		 * \param _iLen The maximum number of TCHARs the user can enter, not including the terminating null character. If this parameter is zero, the text length is limited to 0x7FFFFFFE characters.
 		 **/
 		virtual void						LimitText( int _iLen = 0 ) { static_cast<void>(_iLen); }
+
+		/**
+		 * Applies the default GUI font to this control.
+		 **/
+		void								SetDefaultGuiFont() {
+			HFONT hFont = static_cast<HFONT>(::GetStockObject( DEFAULT_GUI_FONT ));
+			::SendMessageW( Wnd(), WM_SETFONT, reinterpret_cast<WPARAM>(hFont), MAKELPARAM( TRUE, 0 ) );
+		}
+
+		/**
+		 * Applies the system fixed-width GUI font to this control.
+		 **/
+		void								SetSystemFixedFont() {
+			HFONT hFont = static_cast<HFONT>(::GetStockObject( SYSTEM_FIXED_FONT ));
+			::SendMessageW( Wnd(), WM_SETFONT, reinterpret_cast<WPARAM>(hFont), MAKELPARAM( TRUE, 0 ) );
+		}
+
+		/**
+		 * Applies the ANSI fixed-width GUI font to this control.
+		 **/
+		void								SetAnsiFixedFont() {
+			HFONT hFont = static_cast<HFONT>(::GetStockObject( ANSI_FIXED_FONT ));
+			::SendMessageW( Wnd(), WM_SETFONT, reinterpret_cast<WPARAM>(hFont), MAKELPARAM( TRUE, 0 ) );
+		}
 
 		/**
 		 * Gives the keyboard focus to this window.
@@ -853,6 +884,18 @@ namespace lsw {
 
 		// Translate a child's tooltip text.
 		virtual std::wstring				TranslateTooltip( const std::string &_sText );
+
+		/**
+		 * Handles WM_DEVICECHANGE.
+		 * \brief Notified of device arrival/removal and related events.
+		 *
+		 * Return LSW_H_HANDLED to veto queries (equivalent to BROADCAST_QUERY_DENY).
+		 *
+		 * \param _wDbtEvent The DBT_* event code.
+		 * \param _lParam Event-specific data pointer (varies by event).
+		 * \return Returns a LSW_HANDLED code.
+		 **/
+		virtual LSW_HANDLED					DeviceChange( WORD /*_wDbtEvent*/, LPARAM /*_lParam*/ ) { return LSW_H_CONTINUE; }
 
 		// Sets a given font on all children of a window.
 		static BOOL CALLBACK				EnumChildWindows_SetFont( HWND _hWnd, LPARAM _lParam );
@@ -1846,18 +1889,6 @@ namespace lsw {
 		virtual LSW_HANDLED					TbnGetButtonInfo( LPNMTOOLBARW /*_lptbToolBar*/ ) { return LSW_H_CONTINUE; }
 
 		/**
-		 * Handles WM_DEVICECHANGE.
-		 * \brief Notified of device arrival/removal and related events.
-		 *
-		 * Return LSW_H_HANDLED to veto queries (equivalent to BROADCAST_QUERY_DENY).
-		 *
-		 * \param _wDbtEvent The DBT_* event code.
-		 * \param _lParam Event-specific data pointer (varies by event).
-		 * \return Returns a LSW_HANDLED code.
-		 **/
-		virtual LSW_HANDLED					DeviceChange( WORD /*_wDbtEvent*/, LPARAM /*_lParam*/ ) { return LSW_H_CONTINUE; }
-
-		/**
 		 * Handles WM_SYSCOMMAND.
 		 * \brief Processes system commands such as SC_CLOSE or SC_MAXIMIZE.
 		 *
@@ -2067,14 +2098,6 @@ namespace lsw {
 		 * \brief Applies expression-driven layout to determine bounds.
 		 */
 		virtual void						EvalNewSize();
-
-		/**
-		 * Attaches an HWND to this widget after creation.
-		 * \brief Finalizes control initialization once the window handle exists.
-		 *
-		 * \param _hWnd The created window handle.
-		 */
-		virtual void						InitControl( HWND _hWnd );
 
 		/**
 		 * Adds a dockable window to this widget's dockable list.

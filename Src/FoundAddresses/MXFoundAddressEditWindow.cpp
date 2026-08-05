@@ -16,6 +16,7 @@ namespace mx {
 	// == Functions.
 	// WM_INITDIALOG.
 	CWidget::LSW_HANDLED CFoundAddressEditWindow::InitDialog() {
+		LSW_SETREDRAW srRedraw( this );
 		try {
 			auto ptTab = reinterpret_cast<lsw::CTab *>(FindChild( CFoundAddressEditLayout::MX_FAEI_TAB ));
 			if ( ptTab ) {

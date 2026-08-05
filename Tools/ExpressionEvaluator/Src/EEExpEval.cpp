@@ -1423,7 +1423,7 @@ namespace ee {
 			if ( (*_pcText) == '0' ) {
 				++_pcText;
 				
-				if ( (*_pcText) == 'b' || (*_pcText) == 'B' ) {
+				if ( ((*_pcText) == 'b' || (*_pcText) == 'B') && _iBase < 12 ) {
 					//if ( _iBase <= 0 || _iBase == 2 ) {
 						++_pcText;
 						_iBase = 2;

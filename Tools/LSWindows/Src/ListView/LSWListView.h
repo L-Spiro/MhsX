@@ -260,7 +260,7 @@ namespace lsw {
 		 * \param _iSubItem The one-based index of the subitem. To set the item label, set _iSubItem to zero.
 		 * \return Returns the length of the item's string, including the terminating NULL.
 		 **/
-		INT									GetItemTextLenW( INT _iItem, INT _iSubItem );
+		INT									GetItemTextLenW( INT _iItem, INT _iSubItem ) const;
 
 		/**
 		 * Gets the length of an item's text in CHAR units.
@@ -269,7 +269,7 @@ namespace lsw {
 		 * \param _iSubItem The one-based index of the subitem. To set the item label, set _iSubItem to zero.
 		 * \return Returns the length of the item's string, including the terminating NULL.
 		 **/
-		INT									GetItemTextLenA( INT _iItem, INT _iSubItem );
+		INT									GetItemTextLenA( INT _iItem, INT _iSubItem ) const;
 
 		/**
 		 * Gets the text of an item.
@@ -278,7 +278,7 @@ namespace lsw {
 		 * \param _iSubItem The index of the subitem. To retrieve the item text, set _iSubItem to zero.
 		 * \param _sRet Holds the returned string.
 		 **/
-		VOID								GetItemText( INT _iItem, INT _iSubItem, std::wstring &_sRet );
+		VOID								GetItemText( INT _iItem, INT _iSubItem, std::wstring &_sRet ) const;
 
 		/**
 		 * Gets the text of an item.
@@ -287,7 +287,7 @@ namespace lsw {
 		 * \param _iSubItem The index of the subitem. To retrieve the item text, set _iSubItem to zero.
 		 * \param _sRet Holds the returned string.
 		 **/
-		VOID								GetItemText( INT _iItem, INT _iSubItem, std::string &_sRet );
+		VOID								GetItemText( INT _iItem, INT _iSubItem, std::string &_sRet ) const;
 
 		/**
 		 * Determines the width of a specified string using the specified list-view control's current font.

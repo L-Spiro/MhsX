@@ -78,13 +78,22 @@ namespace lsw {
 		LPARAM								GetItemLParam( HTREEITEM _tiItem ) const;
 
 		/**
-		 * Sets an itemÅfs color.
+		 * Sets an itemÅís color.
 		 * 
 		 * \param _tiItem The item whose color is to be updated.
 		 * \param _rgbColor The color to apply to the item (alpha respected).
-		 * \return Returns TRUE if the itemÅfs color was set.  FALSE indicates that the item was invalid.
+		 * \return Returns TRUE if the itemÅís color was set.  FALSE indicates that the item was invalid.
 		 **/
 		BOOL								SetItemColor( HTREEITEM _tiItem, RGBQUAD _rgbColor );
+
+		/**
+		 * Selects or deselects an item.
+		 * 
+		 * \param _tiItem The item to select or deselect.
+		 * \param _bSelect If true, the item is selected, otherwise it is deselected.
+		 * \return Returns TRUE if the itemís selection was updated.  FALSE indicates that the item was invalid.
+		 **/
+		BOOL								SetItemSelection( HTREEITEM _tiItem, bool _bSelect );
 
 		/**
 		 * Gets an item by index accounting for children being expanded or not.
@@ -120,10 +129,27 @@ namespace lsw {
 		/**
 		 * Gets the next item.
 		 *
-		 * \param _ptThis The items whose next item is to be obtained.
+		 * \param _htiThis The item whose next item is to be obtained.
 		 * \return Returns the next item.
 		 */
-		HTREEITEM							GetNext( HTREEITEM _ptThis ) const { return PointerToTreeItem( Next( const_cast<ee::CTree<LSW_TREE_ROW> *>(TreeItemToPointer( _ptThis )) ) ); }
+		HTREEITEM							GetNext( HTREEITEM _htiThis ) const { return PointerToTreeItem( Next( const_cast<ee::CTree<LSW_TREE_ROW> *>(TreeItemToPointer( _htiThis )) ) ); }
+
+		/**
+		 * Gets the direct childern of the given item.
+		 * 
+		 * \param _vReturn Holds the returned array of children.
+		 * \param _htiThis The item whose children are to be gathered.
+		 * \return Returns the total number of children gathered.
+		 **/
+		size_t								GatherChildren( std::vector<HTREEITEM> &_vReturn, HTREEITEM _htiThis ) const;
+
+		/**
+		 * Gets the number of children under the given item.
+		 * 
+		 * \param _htiThis The item whose children are to be counted.
+		 * \return Returns the number of children under the given item.
+		 **/
+		size_t								CountChildren( HTREEITEM _htiThis ) const;
 
 		/**
 		 * Deletes all items with the given LPARAM value.
@@ -177,6 +203,22 @@ namespace lsw {
 		 * Unselects all items.
 		 **/
 		virtual void						UnselectAll();
+
+		/**
+		 * Expands or collapses the given item.
+		 * 
+		 * \param _htiItem The item to expand or collapse.
+		 * \param _bExpanded If TRUE, the item is expanded, otherwise it is collapsed.
+		 **/
+		void								SetItemExpand( HTREEITEM _htiItem, BOOL _bExpand );
+
+		/**
+		 * Determines whether the given item is expanded or not.
+		 * 
+		 * \param _htiItem The item to check for being expanded.
+		 * \return Returns TRUE if the item is expanded, FALSE otherwise.
+		 **/
+		BOOL								ItemIsExpanded( HTREEITEM _htiItem ) const;
 
 		/**
 		 * Returns true if any of the selected items have children and are not in expanded view.
@@ -318,15 +360,32 @@ namespace lsw {
 		virtual BOOL						GetDispInfoNotify( NMLVDISPINFOW * _plvdiInfo );
 
 		/**
-		 * Gets the text for a given item.  The row is counted by skipping over collapsed items, and can refer to different items depending on the collapsed/expanded state of the tree.
+		 * Gets the text for a given item.  The row is counted by skipping over collapsed items, and can refer to different items depending on the collapsed/expanded state of the tree.  Must be called with a try/catch block.
 		 * 
 		 * \param _sRow The index of the item.
-		 * \param _Column The column of the item.
+		 * \param _sColumn The column of the item.
 		 * \return Returns the text of the given cell.
 		 **/
-		std::wstring						GetCellText( size_t _sRow, size_t _Column ) {
-			return GetCellText( _sRow, _Column, ItemByIndex_Cached( _sRow ) );
+		std::wstring						GetCellText( size_t _sRow, size_t _sColumn ) {
+			return GetCellText( _sRow, _sColumn, ItemByIndex_Cached( _sRow ) );
 		}
+
+		/**
+		 * Gets the text for a given item and column.  Must be called with a try/catch block.
+		 * 
+		 * \param _htiItem The item whose text is to be retrieved.
+		 * \param _sColumn The column of the item.
+		 * \return Returns the text of the given cell.
+		 **/
+		std::wstring						GetItemText( HTREEITEM _htiItem, size_t _sColumn );
+
+		/**
+		 * Gets an itemís parent item.
+		 * 
+		 * \param _htiItem The item whose parent is to be gotten.
+		 * \return Returns NULL if _htiItem is invalid or is TVI_ROOT, otherwise returns the parent item for the given item. 
+		 **/
+		HTREEITEM							GetItemParent( HTREEITEM _htiItem );
 
 		/**
 		 * Sorts items.
@@ -553,11 +612,11 @@ namespace lsw {
 		 * Gets the text for a given item.  The row is counted by skipping over collapsed items, and can refer to different items depending on the collapsed/expanded state of the tree.
 		 * 
 		 * \param _sRow The index of the item.
-		 * \param _Column The column of the item.
+		 * \param _sColumn The column of the item.
 		 * \param _ptrRow A pointer to the _sRow'th item.
 		 * \return Returns the text of the given cell.
 		 **/
-		std::wstring						GetCellText( size_t _sRow, size_t _Column, ee::CTree<LSW_TREE_ROW> * _ptrRow );
+		std::wstring						GetCellText( size_t _sRow, size_t _sColumn, ee::CTree<LSW_TREE_ROW> * _ptrRow );
 		
 		/**
 		 * Gets the indentation level for an item.

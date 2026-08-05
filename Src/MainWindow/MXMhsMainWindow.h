@@ -85,6 +85,14 @@ namespace mx {
 			MX_WH_UNLOCK_ALL,
 			MX_WH_SHOW_EDIT,
 			MX_WH_SHOW_ADD_ENTRY,
+			MX_WH_INC_1,
+			MX_WH_INC_2,
+			MX_WH_INC_4,
+			MX_WH_INC_8,
+			MX_WH_DEC_1,
+			MX_WH_DEC_2,
+			MX_WH_DEC_4,
+			MX_WH_DEC_8,
 		};
 
 		// Menu.
@@ -545,6 +553,28 @@ namespace mx {
 		 * \param _uiParm3 Unused.
 		 */
 		static void __stdcall				Hotkey_UnLockAll( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
+
+		/**
+		 * Hotkey handler for increasing the value at a given address.
+		 *
+		 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+		 * \param _uiParm1 The address to increase.
+		 * \param _uiParm2 The amount by which to increase the given address.
+		 * \param _uiParm3 Unused.
+		 **/
+		template <unsigned _uSize>
+		static void __stdcall				Hotkey_IncAddress( uint64_t _uiParm0, uint64_t _uiParm1, uint64_t _uiParm2, uint64_t /*_uiParm3*/ );
+
+		/**
+		 * Hotkey handler for decreasing the value at a given address.
+		 *
+		 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+		 * \param _uiParm1 The address to increase.
+		 * \param _uiParm2 The amount by which to decrease the given address.
+		 * \param _uiParm3 Unused.
+		 **/
+		template <unsigned _uSize>
+		static void __stdcall				Hotkey_DecAddress( uint64_t _uiParm0, uint64_t _uiParm1, uint64_t _uiParm2, uint64_t /*_uiParm3*/ );
 
 	private :
 		typedef CMainWindowLayout			Layout;

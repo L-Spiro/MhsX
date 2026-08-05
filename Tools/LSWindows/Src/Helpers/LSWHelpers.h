@@ -276,7 +276,7 @@ namespace lsw {
 
 
 		// == Operators.
-		LSW_HMODULE &						operator = ( LSW_HMODULE && _hOther ) {
+		LSW_HMODULE &						operator = ( LSW_HMODULE && _hOther ) noexcept {
 			if ( this != &_hOther ) {
 				Reset();
 				hHandle = _hOther.hHandle;
@@ -1063,7 +1063,7 @@ namespace lsw {
 	};
 
 	struct LSW_TIMER {
-		LSW_TIMER( HWND _hWnd, UINT_PTR _nIDEvent, UINT _uElapse, TIMERPROC _lpTimerFunc ) :
+		LSW_TIMER( HWND _hWnd, UINT_PTR _nIDEvent, UINT _uElapse, TIMERPROC _lpTimerFunc = NULL ) :
 			hWnd( _hWnd ),
 			uiptrEvent( _nIDEvent ),
 			uiTime( _uElapse ),
@@ -1087,7 +1087,7 @@ namespace lsw {
 		 * \param _lpTimerFunc A pointer to the function to be notified when the time-out value elapses. If _lpTimerFunc is NULL, the system posts a WM_TIMER message to the application queue. The hwnd member of the message's MSG structure contains the value of the hWnd parameter.
 		 * \return Returns the ID of the created timer.
 		 **/
-		UINT_PTR							Start( HWND _hWnd, UINT_PTR _nIDEvent, UINT _uElapse, TIMERPROC _lpTimerFunc ) {
+		UINT_PTR							Start( HWND _hWnd, UINT_PTR _nIDEvent, UINT _uElapse, TIMERPROC _lpTimerFunc = NULL ) {
 			Stop();
 			hWnd = _hWnd;
 			uiptrEvent = _nIDEvent;
@@ -1155,7 +1155,7 @@ namespace lsw {
 		/** Location of a found menu item. */
 		struct LSW_MENU_LOC {
 			HMENU							hMenu;					/**< The HMENU that directly owns the item. */
-			UINT							uPos;					/*< The zero-based position within hMenu. */
+			UINT							uPos;					/**< The zero-based position within hMenu. */
 		};
 
 		// == Functions.

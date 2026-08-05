@@ -27,6 +27,7 @@ namespace mx {
 
 	// WM_INITDIALOG.
 	CWidget::LSW_HANDLED CFoundAddressEditMainPage::InitDialog() {
+		LSW_SETREDRAW srRedraw( this );
 		// Selectable values.
 		auto pwTmp = FindChild( Layout::MX_FAEI_VALUE_TYPE_COMBO );
 		if ( pwTmp ) {

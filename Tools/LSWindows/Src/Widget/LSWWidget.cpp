@@ -186,6 +186,43 @@ namespace lsw {
 	}
 
 	/**
+	 * Attaches an HWND to this widget after creation.
+	 * \brief Finalizes control initialization once the window handle exists.
+	 *
+	 * \param _hWnd The created window handle.
+	 */
+	void CWidget::InitControl( HWND _hWnd ) {
+		m_hWnd = _hWnd;
+
+		if ( m_sTooltipText.size() && !m_hTooltip ) {
+			HWND hParent = Parent() ? Parent()->Wnd() : Wnd();
+			m_hTooltip = ::CreateWindowExW( m_dwTooltipStyleEx,
+				TOOLTIPS_CLASSW,
+				NULL,
+				m_dwTooltipStyle,
+				CW_USEDEFAULT, CW_USEDEFAULT,
+				CW_USEDEFAULT, CW_USEDEFAULT,
+				hParent,
+				0,
+				CBase::GetThisHandle(),
+				NULL );
+			if ( m_hTooltip ) {
+				::SendMessageW( m_hTooltip, TTM_SETMAXTIPWIDTH, 0, static_cast<LPARAM>(300) );
+
+				::SetWindowPos( m_hTooltip, HWND_TOPMOST, 0, 0, 0, 0,
+					SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE );
+
+				TOOLINFOW tiToolInfo = { sizeof( tiToolInfo ) };
+				tiToolInfo.hwnd = hParent;
+				tiToolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+				tiToolInfo.uId = reinterpret_cast<UINT_PTR>(Wnd());
+				tiToolInfo.lpszText = LPSTR_TEXTCALLBACKW;
+				::SendMessageW( m_hTooltip, TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&tiToolInfo) );
+			}
+		}
+	}
+
+	/**
 	 * The ancestor widget.
 	 * 
 	 * \return Returns a pointer to the most parent object or nullptr.
@@ -955,43 +992,6 @@ namespace lsw {
 		}
 		/*::GetWindowRect( Wnd(), &m_rRect );
 		::GetClientRect( Wnd(), &m_rClientRect );*/
-	}
-
-	/**
-	 * Attaches an HWND to this widget after creation.
-	 * \brief Finalizes control initialization once the window handle exists.
-	 *
-	 * \param _hWnd The created window handle.
-	 */
-	void CWidget::InitControl( HWND _hWnd ) {
-		m_hWnd = _hWnd;
-
-		if ( m_sTooltipText.size() && !m_hTooltip ) {
-			HWND hParent = Parent() ? Parent()->Wnd() : Wnd();
-			m_hTooltip = ::CreateWindowExW( m_dwTooltipStyleEx,
-				TOOLTIPS_CLASSW,
-				NULL,
-				m_dwTooltipStyle,
-				CW_USEDEFAULT, CW_USEDEFAULT,
-				CW_USEDEFAULT, CW_USEDEFAULT,
-				hParent,
-				0,
-				CBase::GetThisHandle(),
-				NULL );
-			if ( m_hTooltip ) {
-				::SendMessageW( m_hTooltip, TTM_SETMAXTIPWIDTH, 0, static_cast<LPARAM>(300) );
-
-				::SetWindowPos( m_hTooltip, HWND_TOPMOST, 0, 0, 0, 0,
-					SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE );
-
-				TOOLINFOW tiToolInfo = { sizeof( tiToolInfo ) };
-				tiToolInfo.hwnd = hParent;
-				tiToolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
-				tiToolInfo.uId = reinterpret_cast<UINT_PTR>(Wnd());
-				tiToolInfo.lpszText = LPSTR_TEXTCALLBACKW;
-				::SendMessageW( m_hTooltip, TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&tiToolInfo) );
-			}
-		}
 	}
 
 	/**

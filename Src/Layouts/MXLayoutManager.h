@@ -43,6 +43,7 @@ namespace mx {
 		MX_FLOATING_POINT_STUDIO,
 		MX_DEUS_HEX_MACHINA,
 		MX_HEX_CONTROL,
+		MX_NUMBER_INPUT,
 	};
 
 	class CLayoutManager : public lsw::CLayoutManager {

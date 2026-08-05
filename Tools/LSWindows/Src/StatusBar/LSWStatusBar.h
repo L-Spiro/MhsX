@@ -277,7 +277,7 @@ namespace lsw {
 		 * All parts before the first bLockToRight part are laid out from left-to-right. All parts from the first
 		 * bLockToRight part to the end are laid out from right-to-left (anchored to the right edge).
 		 *
-		 * By default, the last non-locked part becomes a “filler” that expands to consume remaining space up to
+		 * By default, the last non-locked part becomes a "filler" that expands to consume remaining space up to
 		 * the left edge of the right-locked suffix (or to the end if no suffix exists).
 		 *
 		 * \param _bFillLastNonLocked If TRUE, the last non-locked part is expanded to fill remaining space.
