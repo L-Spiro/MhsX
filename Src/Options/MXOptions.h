@@ -108,6 +108,8 @@ namespace mx {
 
 		struct MX_HEX_EDITOR {
 			CSecureWString				wsLastOpenFileDirectory;
+
+			std::vector<CSecureWString>	vGoToHistory;
 		}								heHexEditorOptions;
 	};
 

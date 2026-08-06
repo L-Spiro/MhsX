@@ -131,6 +131,24 @@ namespace mx {
 		return CParent::Command( _wCtrlCode, _wId, _pwSrc );
 	}
 
+	/**
+	 * Handles WM_COMMAND from a menu.
+	 * \brief Invoked for menu command selections.
+	 *
+	 * \param _wId The menu command identifier.
+	 * \return Returns a LSW_HANDLED code.
+	 */
+	CWidget::LSW_HANDLED CMoveAddressWindow::MenuCommand( WORD _wId ) {
+		switch ( _wId ) {
+			case IDCANCEL : {}													MX_FALLTHROUGH
+			case Layout::MX_MAI_CANCEL : {
+				return Close();
+			}
+		}
+		
+		return CParent::MenuCommand( _wId );
+	}
+
 	// WM_CLOSE.
 	CWidget::LSW_HANDLED CMoveAddressWindow::Close() {
 		::EndDialog( Wnd(), 0 );

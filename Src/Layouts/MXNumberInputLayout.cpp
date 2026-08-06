@@ -9,27 +9,96 @@
 
 namespace mx {
 
-#define MX_NUMBER_DLG_W										170
-#define MX_NUMBER_DLG_H										170
+#define MX_LABEL_L													(MX_LEFT_JUST)
+#define MX_LABEL_T													(MX_TOP_JUST)
+#define MX_LABEL_W													200
+#define MX_NUMBER_DLG_W												(MX_LABEL_W + MX_LEFT_JUST * 2)
+#define MX_NUMBER_DLG_H												(MX_LABEL_T + MX_DEF_STATIC_HEIGHT + MX_TOP_JUST + MX_DEF_COMBO_HEIGHT + MX_TOP_JUST + MX_DEF_BUTTON_HEIGHT + MX_TOP_JUST + 2)
 
 	// == Members.
 	// The layout for the New Data-Type Search dialog.
 	LSW_WIDGET_LAYOUT CNumberInputLayout::m_wlNumberInputDialog[] = {
 		{
-			MX_NUMBER_INPUT,								// ltType
-			MX_NI_DIALOG,									// wId
-			nullptr,										// lpwcClass
-			TRUE,											// bEnabled
-			FALSE,											// bActive
-			0,												// iLeft
-			0,												// iTop
-			MX_NUMBER_DLG_W,								// dwWidth
-			MX_NUMBER_DLG_H,								// dwHeight
+			MX_NUMBER_INPUT,										// ltType
+			MX_NI_DIALOG,											// wId
+			nullptr,												// lpwcClass
+			TRUE,													// bEnabled
+			FALSE,													// bActive
+			0,														// iLeft
+			0,														// iTop
+			MX_NUMBER_DLG_W,										// dwWidth
+			MX_NUMBER_DLG_H,										// dwHeight
 			WS_CAPTION | WS_POPUP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_SYSMENU | DS_3DLOOK | DS_FIXEDSYS | DS_MODALFRAME | DS_CENTER,					// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_WINDOWEDGE | WS_EX_CONTROLPARENT,												// dwStyleEx
-			nullptr,										// pwcText
-			0,												// sTextLen
-			MX_NI_NONE,										// dwParentId
+			nullptr,												// pwcText
+			0,														// sTextLen
+			MX_NI_NONE,												// dwParentId
+		},
+		{
+			LSW_LT_LABEL,											// ltType
+			MX_NI_LABEL,											// wId
+			WC_STATICW,												// lpwcClass
+			TRUE,													// bEnabled
+			FALSE,													// bActive
+			MX_LABEL_L,												// iLeft
+			MX_LABEL_T,												// iTop
+			MX_LABEL_W,												// dwWidth
+			MX_DEF_STATIC_HEIGHT,									// dwHeight
+			MX_STATICSTYLE,											// dwStyle
+			0,														// dwStyleEx
+			nullptr,												// pwcText
+			0,														// sTextLen
+			MX_NI_DIALOG,											// dwParentId
+		},
+		{
+			LSW_LT_COMBOBOX,										// ltType
+			MX_NI_COMBO,											// wId
+			WC_COMBOBOXW,											// lpwcClass
+			TRUE,													// bEnabled
+			FALSE,													// bActive
+			MX_LABEL_L,												// iLeft
+			(MX_LABEL_T + MX_DEF_STATIC_HEIGHT + MX_TOP_JUST),		// iTop
+			MX_LABEL_W,												// dwWidth
+			MX_DEF_COMBO_HEIGHT,									// dwHeight
+			MX_COMBOSTYLE,											// dwStyle
+			0,														// dwStyleEx
+			nullptr,												// pwcText
+			0,														// sTextLen
+			MX_NI_DIALOG,											// dwParentId
+		},
+
+		
+		{
+			LSW_LT_BUTTON,											// ltType
+			MX_NI_OK,												// wId
+			WC_BUTTONW,												// lpwcClass
+			TRUE,													// bEnabled
+			TRUE,													// bActive
+			MX_NUMBER_DLG_W - MX_DEF_BUTTON_WIDTH * 2 - 2 - 2,		// iLeft
+			MX_NUMBER_DLG_H - MX_DEF_BUTTON_HEIGHT - 2,				// iTop
+			MX_DEF_BUTTON_WIDTH,									// dwWidth
+			MX_DEF_BUTTON_HEIGHT,									// dwHeight
+			MX_DEFBUTTONSTYLE,										// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
+			MX_MAKE_WCHAR( _T_D736D92D_OK ),						// pwcText
+			_LEN_D736D92D,											// sTextLen
+			MX_NI_DIALOG,											// dwParentId
+		},
+		{
+			LSW_LT_BUTTON,											// ltType
+			MX_NI_CANCEL,											// wId
+			WC_BUTTONW,												// lpwcClass
+			TRUE,													// bEnabled
+			FALSE,													// bActive
+			MX_NUMBER_DLG_W - MX_DEF_BUTTON_WIDTH * 1 - 2,			// iLeft
+			MX_NUMBER_DLG_H - MX_DEF_BUTTON_HEIGHT - 2,				// iTop
+			MX_DEF_BUTTON_WIDTH,									// dwWidth
+			MX_DEF_BUTTON_HEIGHT,									// dwHeight
+			MX_BUTTONSTYLE,											// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
+			MX_MAKE_WCHAR( _T_51BAC044_Cancel ),					// pwcText
+			_LEN_51BAC044,											// sTextLen
+			MX_NI_DIALOG,											// dwParentId
 		},
 	};
 

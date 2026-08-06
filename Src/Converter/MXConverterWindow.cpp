@@ -266,8 +266,8 @@ namespace mx {
 	}
 
 	// WM_COMMAND from control.
-	CWidget::LSW_HANDLED CConverterWindow::Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc ) {
-		switch ( _Id ) {
+	CWidget::LSW_HANDLED CConverterWindow::Command( WORD _wCtrlCode, WORD _wId, CWidget * _pwSrc ) {
+		switch ( _wId ) {
 			case CConverterLayout::MX_CWI_INT8 : {}
 			case CConverterLayout::MX_CWI_UINT8 : {}
 			case CConverterLayout::MX_CWI_CHAR : {}
@@ -311,8 +311,8 @@ namespace mx {
 				switch ( _wCtrlCode ) {
 					case EN_CHANGE : {
 						for ( auto I = std::size( m_ciInfo ); I-- > 0; ) {
-							if ( m_ciInfo[I].wId == _Id ) {
-								UpdateAll( _pwSrc, _Id, m_ciInfo[I] );
+							if ( m_ciInfo[I].wId == _wId ) {
+								UpdateAll( _pwSrc, _wId, m_ciInfo[I] );
 								break;
 							}
 						}

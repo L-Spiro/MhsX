@@ -3,6 +3,7 @@
 #include "../MXMhsX.h"
 #include "../Layouts/MXDeuHexMachinaWindowLayout.h"
 #include "../Layouts/MXLayoutManager.h"
+#include "../Layouts/MXNumberInputLayout.h"
 #include "../Strings/MXStringDecoder.h"
 #include "MXHexEditorControl.h"
 #include "MXHexEditorControlHost.h"
@@ -317,6 +318,9 @@ namespace mx {
 			if ( sIdx >= m_vTabs.size() ) { return nullptr; }
 			return m_vTabs[sIdx].phecWidget;
 		}
+
+		// Called by the main window before the application closes.
+		bool										WillClose();
 		
 		// Prepares to create the window.  Creates the atom if necessary.
 		static void									PrepareWindow();
@@ -383,6 +387,9 @@ namespace mx {
 
 		// Adds a tab.
 		bool										AddTab( const std::shared_ptr<CHexEditorInterface> &_spInterface );
+
+		// Verification function for the Go To dialog.
+		static bool									GoTo_Verify( void * _pvThis, const mx::CNumberInputLayout::MX_NUMBER_DIALOG_PARMS &_ndpParms );
 
 	private :
 		typedef CDeusHexMachinaLayout				Layout;

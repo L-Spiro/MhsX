@@ -36,6 +36,15 @@ namespace mx {
 		// WM_COMMAND from control.
 		virtual LSW_HANDLED									Command( WORD _wCtrlCode, WORD _wId, CWidget * _pwSrc );
 
+		/**
+		 * Handles WM_COMMAND from a menu.
+		 * \brief Invoked for menu command selections.
+		 *
+		 * \param _wId The menu command identifier.
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED									MenuCommand( WORD _wId );
+
 		// WM_CLOSE.
 		virtual LSW_HANDLED									Close();
 

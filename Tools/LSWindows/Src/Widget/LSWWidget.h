@@ -25,20 +25,20 @@ namespace lsw {
 
 		// == Enumerations.
 		enum LSW_HANDLED {
-			LSW_H_HANDLED,					// The message was handled and the default procedure should not be called.
-			LSW_H_CONTINUE,					// Continue and let the default procedure handle it.
+			LSW_H_HANDLED,					/**< The message was handled and the default procedure should not be called. */
+			LSW_H_CONTINUE,					/**< Continue and let the default procedure handle it. */
 		};
 
 		enum LSW_NOTIFICATIONS {
 			// Tab control notifications.
-			LSW_TAB_NM_BASE					= (0U - 3048U),
-			LSW_TAB_NM_CLOSE				= (LSW_TAB_NM_BASE - 0),
-			LSW_TAB_NM_CHECK,
+			LSW_TAB_NM_BASE					= (0U - 3048U),				/**< Base for tab control notifications. */
+			LSW_TAB_NM_CLOSE				= (LSW_TAB_NM_BASE - 0),	/**< Tab closed notification. */
+			LSW_TAB_NM_CHECK,											/**< Tab checked notification. */
 		};
 
 		enum LSN_CUSTOM_COMMANDS {
 			// We have up to LSW_TOTAL_INTERNAL_CUSTOM_COMMANDS commands.
-			LSW_BN_COLOR_CHANGED			= WM_USER,
+			LSW_BN_COLOR_CHANGED			= WM_USER,					/**< Color changed notification. */
 		};
 
 
@@ -46,9 +46,9 @@ namespace lsw {
 #pragma pack( push, 1 )
 		// A structure used to send a WM_NOTIFY to the parent as a request for docking information.
 		struct LSW_NMTABCLOSE {
-			NMHDR							hdr;				// Required header.
-			INT								iTab;				// Tab being closed.
-			CWidget *						pwWidget;			// Source widget.
+			NMHDR							hdr;						/**< Required header. */
+			INT								iTab;						/**< Tab being closed. */
+			CWidget *						pwWidget;					/**< Source widget. */
 		};
 #pragma pack( pop )
 
@@ -77,9 +77,13 @@ namespace lsw {
 
 
 			// == Members.
+			/** Pointer to the widget. */
 			CWidget *						pwWnd = nullptr;
+			/** Flags to pass to RedrawWindow. */
 			UINT							uiRedrawFlags = RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN;
+			/** Enable redraw state. */
 			bool							bEnable = false;
+			/** Redraw immediately when enabled. */
 			bool							bRedrawWhenEnabled = true;
 		};
 
@@ -882,7 +886,12 @@ namespace lsw {
 		 **/
 		uint64_t							GetUserData() const { return m_ui64UserData; }
 
-		// Translate a child's tooltip text.
+		/**
+		 * \brief Translate a child's tooltip text.
+		 * 
+		 * \param _sText The string to translate.
+		 * \return Returns the translated string.
+		 */
 		virtual std::wstring				TranslateTooltip( const std::string &_sText );
 
 		/**
@@ -897,10 +906,23 @@ namespace lsw {
 		 **/
 		virtual LSW_HANDLED					DeviceChange( WORD /*_wDbtEvent*/, LPARAM /*_lParam*/ ) { return LSW_H_CONTINUE; }
 
-		// Sets a given font on all children of a window.
+		/**
+		 * \brief Sets a given font on all children of a window.
+		 * 
+		 * \param _hWnd Child window handle.
+		 * \param _lParam Font handle.
+		 * \return Returns TRUE to continue enumeration.
+		 */
 		static BOOL CALLBACK				EnumChildWindows_SetFont( HWND _hWnd, LPARAM _lParam );
 
-		// Converts a point from pixels to dialog units.
+		/**
+		 * \brief Converts a point from pixels to dialog units.
+		 * 
+		 * \param _hWnd Window handle.
+		 * \param _lX X coordinate in pixels.
+		 * \param _lY Y coordinate in pixels.
+		 * \return Returns a POINT with dialog units.
+		 */
 		static POINT						PixelsToDialogUnits( HWND _hWnd, LONG _lX, LONG _lY );
 
 		/**
@@ -930,10 +952,7 @@ namespace lsw {
 			HWND hChild = ::GetWindow( _hWnd, GW_CHILD );
 			while ( hChild ) {
 				if ( IsGroupBox( hChild ) ) { return true; }
-
-				HWND hThisChild = ::GetWindow( hChild, GW_CHILD );
-				if ( hThisChild ) { if ( HasGroupBoxChild( hThisChild ) ) { return true; } }
-
+				if ( HasGroupBoxChild( hChild ) ) { return true; }
 				hChild = ::GetWindow( hChild, GW_HWNDNEXT );
 			}
 			return false;
@@ -1227,19 +1246,19 @@ namespace lsw {
 		 * Handles WM_COMMAND from a menu.
 		 * \brief Invoked for menu command selections.
 		 *
-		 * \param _Id The menu command identifier.
+		 * \param _wId The menu command identifier.
 		 * \return Returns a LSW_HANDLED code.
 		 */
-		virtual LSW_HANDLED					MenuCommand( WORD /*_Id*/ ) { return LSW_H_CONTINUE; }
+		virtual LSW_HANDLED					MenuCommand( WORD /*_wId*/ ) { return LSW_H_CONTINUE; }
 
 		/**
 		 * Handles WM_COMMAND from an accelerator.
 		 * \brief Invoked for accelerator keystrokes.
 		 *
-		 * \param _Id The accelerator command identifier.
+		 * \param _wId The accelerator command identifier.
 		 * \return Returns a LSW_HANDLED code.
 		 */
-		virtual LSW_HANDLED					AcceleratorCommand( WORD /*_Id*/ ) { return LSW_H_CONTINUE; }
+		virtual LSW_HANDLED					AcceleratorCommand( WORD /*_wId*/ ) { return LSW_H_CONTINUE; }
 
 		/**
 		 * Handles WM_NOTIFY -> NM_DBLCLK for this item.
@@ -1689,11 +1708,13 @@ namespace lsw {
 		 * \return Returns LSW_H_HANDLED if consumed.
 		 */
 		virtual LSW_HANDLED					OnTextInputCodePoints( const char32_t * _pc32Cps, size_t _sCount ) {
+			LSW_HANDLED hRet = LSW_H_HANDLED;
 			for ( size_t I = 0; I < _sCount; ++I ) {
-				if ( OnTextInputCodePoint( _pc32Cps[I], 1 ) == LSW_H_HANDLED ) { continue; }
-				return LSW_H_CONTINUE;
+				if ( OnTextInputCodePoint( _pc32Cps[I], 1 ) == LSW_H_CONTINUE ) { 
+					hRet = LSW_H_CONTINUE; 
+				}
 			}
-			return _sCount ? LSW_H_HANDLED : LSW_H_CONTINUE;
+			return _sCount ? hRet : LSW_H_CONTINUE;
 		}
 
 		/**

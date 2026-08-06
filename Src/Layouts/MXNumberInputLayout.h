@@ -17,18 +17,9 @@ namespace mx {
 		// Control ID's.
 		enum MX_NUMBER_INPUT_IDS {
 			MX_NI_NONE,
-			MX_NI_DIALOG					= 4600,
-			MX_NI_SEARCH_GROUP,
-			MX_NI_DATA_TYPE_LABEL,
-			MX_NI_DATA_TYPE_COMBO,
-			MX_NI_EVALUATION_TYPE_LABEL,
-			MX_NI_EVALUATION_TYPE_COMBO,
-			MX_NI_LVAL_LABEL,
-			MX_NI_RVAL_LABEL,
-			MX_NI_LVAL_COMBO,
-			MX_NI_RVAL_COMBO,
-			MX_NI_EXP_LABEL,
-			MX_NI_EXP_COMBO,
+			MX_NI_DIALOG						= 4600,
+			MX_NI_LABEL,
+			MX_NI_COMBO,
 
 			MX_NI_CANCEL,
 			MX_NI_OK,
@@ -36,16 +27,24 @@ namespace mx {
 
 
 		// == Types.
-		typedef bool (*							PfVerifyFunc)( void *, const struct MX_NUMBER_DIALOG_PARMS & );
+		struct									MX_NUMBER_DIALOG_PARMS;
+		typedef bool (*							PfVerifyFunc)( void *, const MX_NUMBER_DIALOG_PARMS & );
 
 		/** Parameters to pass to the dialog. */
 		struct MX_NUMBER_DIALOG_PARMS {
 			CSecureWString						swsHeaderText;						/**< The text for the dialog. */
 			CSecureWString						swsLabelText;						/**< The text for the label. */
+			CSecureWString						swsDefaultText;						/**< The default text in the combo box. */
+			CSecureWString						swsExpression;						/**< Upon return, this holds the expression that was entered so that it can be added to the history. */
+			std::vector<CUtilities::MX_COMBO_ENTRY>
+												vComboItems;						/**< The combo-box entries */
 			ee::CExpEvalContainer::EE_RESULT	rResult;							/**< Holds the returned result.  It can never return an object type, but if the return type is a string it will be copied to psStringReturn. */
 			std::string *						psStringReturn = nullptr;			/**< If rResult.ncType is EE_NC_OBJECT and this is not NULL, it will be filled with the string result of the entered expression. */
+			CWidget *							pwThis = nullptr;					/**< Set by this object when calling pfVerifyFunc.  Do not set externally. */
 
 			PfVerifyFunc						pfVerifyFunc = nullptr;				/**< The function to verify that the input is valid. Called when the user hits OK. */
+			void *								pvVerifyParm = nullptr;				/**< The parameter to pass to the verification function. */
+			bool								bHexInput = false;					/**< Default to hex numeric interpretation? */
 		};
 
 

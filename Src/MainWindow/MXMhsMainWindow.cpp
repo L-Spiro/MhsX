@@ -444,8 +444,9 @@ namespace mx {
 				break;
 			}
 			case Layout::MX_MWMI_EXIT : {
-				Destroy();
-				NcDestroy();
+				if ( Destroy() == LSW_H_CONTINUE ) {
+					NcDestroy();
+				}
 				break;
 			}
 		}
@@ -460,6 +461,18 @@ namespace mx {
 	// WM_ERASEBKGND.
 	CWidget::LSW_HANDLED CMhsMainWindow::EraseBkgnd( HDC _hDc ) {
 		return LSW_H_HANDLED;
+	}
+
+	// WM_CLOSE.
+	CWidget::LSW_HANDLED CMhsMainWindow::Close() {
+		if ( m_pdhmwDeusHexMachinaWindow ) {
+			// Obnoxious.  Close any open Modal Dialogs and repost the message.
+			if ( m_pdhmwDeusHexMachinaWindow->WillClose() ) {
+				::PostMessageW( Wnd(), WM_CLOSE, 0, 0 );
+				return LSW_H_HANDLED;
+			}
+		}
+		return LSW_H_CONTINUE;
 	}
 
 	// WM_DESTROY.

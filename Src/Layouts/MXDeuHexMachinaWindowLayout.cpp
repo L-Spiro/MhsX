@@ -152,7 +152,7 @@ namespace mx {
 
 	// Menu bar items for the main window.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miMenuBar[] = {
-		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen															bSkip	aHotkey
 		{ FALSE,		MX_M_MENU_FILE,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_854A6B8B__File, _LEN_854A6B8B ) },
 		{ FALSE,		MX_M_MENU_EDIT,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_88E08381__Edit, _LEN_88E08381 ) },
 		{ FALSE,		MX_M_MENU_SELECT,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_CC9D9D8D__Select, _LEN_CC9D9D8D ) },
@@ -193,7 +193,7 @@ namespace mx {
 
 	// File -> New menu.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miFileNewMenu[] = {
-		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen															bSkip	aHotkey
 		{ FALSE,		MX_M_FILE_NEW_TEXT_FILE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_E8E120C8_New__Text_File, _LEN_E8E120C8 ),					false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'N', MX_M_FILE_NEW_TEXT_FILE } },
 		{ FALSE,		MX_M_FILE_NEW_HEX_FILE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_99EE2388_New__Hex_File, _LEN_99EE2388 ),					false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FSHIFT), 'N', MX_M_FILE_NEW_HEX_FILE } },
 		{ FALSE,		MX_M_FILE_NEW_UNICODE_FILE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_D9722ACF_New__Unicode_File, _LEN_D9722ACF ) },
@@ -206,14 +206,14 @@ namespace mx {
 
 	 // File -> Special menu.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miFileSpecialMenu[] = {
-		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen															bSkip	aHotkey
 		{ FALSE,		MX_M_FILE_RENAME_FILE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_C5BD4991__Rename_File___, _LEN_C5BD4991 ) },
 		{ FALSE,		MX_M_FILE_DELETE_FILE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_73ECC2A6__Delete_File, _LEN_73ECC2A6 ) },
 	};
 
 	// Edit menu.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miEditMenu[] = {
-		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen															bSkip	aHotkey
 		{ FALSE,		MX_M_EDIT_UNDO,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_EAA5E669__Undo, _LEN_EAA5E669 ),							false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'Z', MX_M_EDIT_UNDO } },
 		{ FALSE,		MX_M_EDIT_REDO,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_7B273131__Redo, _LEN_7B273131 ),							false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'Y', MX_M_EDIT_REDO } },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
@@ -237,7 +237,7 @@ namespace mx {
 
 	// Edit -> Copy As menu.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miEditCopyAsMenu[] = {
-		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen															bSkip	aHotkey
 		{ FALSE,		MX_M_EDIT_COPY_AS_HEX,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_2F29967F__Copy_as_Hex_Text, _LEN_2F29967F ),				false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FSHIFT), 'C', MX_M_EDIT_COPY_AS_HEX } },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_M_EDIT_COPY_AS_DECIMAL,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_1E422E7D_Copy_as__Decimal_Text, _LEN_1E422E7D ) },
@@ -285,7 +285,7 @@ namespace mx {
 
 	// Edit -> Insert/Overwrite.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miEditInsertOverwriteMenu[] = {
-		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen															bSkip	aHotkey
 		{ FALSE,		MX_M_EDIT_INSERT_FILE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_899D8058_Insert__File___, _LEN_899D8058 ),					false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'I', MX_M_EDIT_INSERT_FILE } },
 		{ FALSE,		MX_M_EDIT_INSERT_BYTES,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_09EEA57F_Insert__Bytes___, _LEN_09EEA57F ),					false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FSHIFT), 'I', MX_M_EDIT_INSERT_BYTES } },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
@@ -295,7 +295,7 @@ namespace mx {
 
 	// Select menu.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miSelectMenu[] = {
-		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen															bSkip	aHotkey
 		{ FALSE,		MX_M_SELECT_SELECT_ALL,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_0D2831F4_Select__All, _LEN_0D2831F4 ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'A', MX_M_SELECT_SELECT_ALL } },
 		{ FALSE,		MX_M_SELECT_WORD,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_8175DD3D_Select__Word, _LEN_8175DD3D ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), VK_OEM_PERIOD, MX_M_SELECT_WORD } },
 		{ FALSE,		MX_M_SELECT_LINE,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_93901CDA_Select__Line, _LEN_93901CDA ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'L', MX_M_SELECT_LINE } },
@@ -316,7 +316,7 @@ namespace mx {
 
 	// Find menu.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miFindMenu[] = {
-		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen															bSkip	aHotkey
 		{ FALSE,		MX_M_FIND_FIND,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_6E0D9949__Find___, _LEN_6E0D9949 ) },
 		{ FALSE,		MX_M_FIND_FIND_NEXT,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_F6024D9D_Find__Next, _LEN_F6024D9D ) },
 		{ FALSE,		MX_M_FIND_FIND_PREV,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_E0E59780_Find__Previous, _LEN_E0E59780 ) },
@@ -330,7 +330,7 @@ namespace mx {
 		{ FALSE,		MX_M_FIND_FIND_IN_FILES,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_F593DB67_Fin_d_in_Files___, _LEN_F593DB67 ) },
 		{ FALSE,		MX_M_FIND_REPLACE_IN_FILES,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_3CAB5A45_R_eplace_in_Files___, _LEN_3CAB5A45 ) },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_M_FIND_GOTO,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_E37279C2__Goto___, _LEN_E37279C2 ) },
+		{ FALSE,		MX_M_FIND_GOTO,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_E37279C2__Goto___, _LEN_E37279C2 ),							false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'G', MX_M_FIND_GOTO } },
 		{ FALSE,		MX_M_FIND_GOTO_AGAIN,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_9367A5D7_G_oto_Again, _LEN_9367A5D7 ) },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_M_FIND_ADD_BOOKMARK,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_CB091DF0__Add_Edit_Bookmark, _LEN_CB091DF0 ) },
@@ -681,16 +681,16 @@ namespace mx {
 
 	// View -> Endian menu.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miViewEndianMenu[] = {
-		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen															bSkip	aHotkey
 		{ FALSE,		MX_M_VIEW_ENDIAN_LE,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_89DF1A9E__Little_Endian__Intel_, _LEN_89DF1A9E ) },
 		{ FALSE,		MX_M_VIEW_ENDIAN_BE,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_2381E8C6__Big_Endian__Motorola_, _LEN_2381E8C6 ) },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
-		{ FALSE,		MX_M_VIEW_ENDIAN_TOGGLE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_8CE449C7__Toggle_Endian, _LEN_8CE449C7 ) },
+		{ FALSE,		MX_M_VIEW_ENDIAN_TOGGLE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_8CE449C7__Toggle_Endian, _LEN_8CE449C7 ),					false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'E', MX_M_VIEW_ENDIAN_TOGGLE } },
 	};
 
 	// Format menu.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miFormatMenu[] = {
-		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen															bSkip	aHotkey
 		{ FALSE,		MX_M_FORMAT_UPPERCASE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_5B53353D__Uppercase, _LEN_5B53353D ) },
 		{ FALSE,		MX_M_FORMAT_LOWERCASE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_3B0CDC1E__Lowercase, _LEN_3B0CDC1E ) },
 		{ FALSE,		MX_M_FORMAT_CAPITALIZE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_75171D41_C_apitalize, _LEN_75171D41 ) },

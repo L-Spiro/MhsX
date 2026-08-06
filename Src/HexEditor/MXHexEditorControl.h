@@ -220,7 +220,7 @@ namespace mx {
 		}
 
 		// Gets the address-gutter format.
-		inline MX_ADDRESS_FMT						GetAddressGutterFmr() const { return CurStyle()->daAddressStyle.afFormat; }
+		inline MX_ADDRESS_FMT						GetAddressGutterFmt() const { return CurStyle()->daAddressStyle.afFormat; }
 
 		// Sets the row width.
 		void										SetLineWidth( uint32_t _ui32Width ) {

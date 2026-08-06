@@ -1911,7 +1911,19 @@ namespace mx {
 		if ( !phecControl ) { return; }
 
 		CNumberInputLayout::MX_NUMBER_DIALOG_PARMS ndpParms;
+		ndpParms.swsHeaderText = _DEC_WS_3CAE39A1_Go_To___;
+		ndpParms.swsLabelText = _DEC_WS_3A737A93_Go_to_Address_;
+		ndpParms.bHexInput = phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_BYTES_HEX ||
+			phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_SHORT_HEX;
+		ndpParms.pfVerifyFunc = &CDeusHexMachinaWindow::GoTo_Verify;
+		ndpParms.pvVerifyParm = this;
 		if ( TRUE == CNumberInputLayout::CreateNumberInputDialog( this, ndpParms ) ) {
+			phecControl->SetCaretAddr( ndpParms.rResult.u.ui64Val );
+			if ( m_pmhMemHack ) {
+				auto oOptions = m_pmhMemHack->Options();
+				CUtilities::AddOrMove( oOptions.heHexEditorOptions.vGoToHistory, ndpParms.swsExpression );
+				m_pmhMemHack->SetOptions( oOptions );
+			}
 		}
 	}
 
@@ -2070,6 +2082,21 @@ namespace mx {
 	 **/
 	void CDeusHexMachinaWindow::TabMouseLeftTab( INT _iIdx ) {
 		SetStatusBarText( m_swsLastStatusText.c_str(), m_bLastStatusTextIsWarning, 0 );
+	}
+
+	// Called by the main window before the application closes.
+	bool CDeusHexMachinaWindow::WillClose() {
+		for ( auto I = m_vChildren.size(); I--; ) {
+			if ( m_vChildren[I] ) {
+				if ( m_vChildren[I]->Id() == CNumberInputLayout::MX_NI_DIALOG ) {
+					::EndDialog( m_vChildren[I]->Wnd(), 0 );
+					/*m_vChildren[I]->SetParent( nullptr );
+					RemoveChild( m_vChildren[I] );*/
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	// Prepares to create the window.  Creates the atom if necessary.
@@ -2458,32 +2485,32 @@ namespace mx {
 					break;
 				}
 				case Layout::MX_M_VIEW_ADDRESSES_DISPLAY_FORMATS_BYTE_HEX : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetAddressGutterFmr() == CHexEditorControl::MX_AF_BYTES_HEX) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_BYTES_HEX) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_ADDRESSES_DISPLAY_FORMATS_BYTE_DEC : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetAddressGutterFmr() == CHexEditorControl::MX_AF_BYTES_DEC) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_BYTES_DEC) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_ADDRESSES_DISPLAY_FORMATS_BYTE_OCT : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetAddressGutterFmr() == CHexEditorControl::MX_AF_BYTES_OCT) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_BYTES_OCT) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_ADDRESSES_DISPLAY_FORMATS_LINE_DEC : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetAddressGutterFmr() == CHexEditorControl::MX_AF_LINE_NUMBER) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_LINE_NUMBER) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_ADDRESSES_DISPLAY_FORMATS_SHORT_HEX : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetAddressGutterFmr() == CHexEditorControl::MX_AF_SHORT_HEX) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_SHORT_HEX) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_VIEW_ADDRESSES_DISPLAY_FORMATS_SHORT_DEC : {
-					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetAddressGutterFmr() == CHexEditorControl::MX_AF_SHORT_DEC) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_SHORT_DEC) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
@@ -3021,6 +3048,27 @@ namespace mx {
 			//delete htTab.pheiInterface;
 		}
 		return false;
+	}
+
+	// Verification function for the Go To dialog.
+	bool CDeusHexMachinaWindow::GoTo_Verify( void * _pvThis, const mx::CNumberInputLayout::MX_NUMBER_DIALOG_PARMS &_ndpParms ) {
+		auto pdhmwThis = static_cast<CDeusHexMachinaWindow *>(_pvThis);
+		auto rCastResult = ee::CExpEvalContainer::ConvertResult( _ndpParms.rResult, ee::EE_NC_UNSIGNED );
+		if ( rCastResult.ncType != ee::EE_NC_UNSIGNED ) {
+			auto swsTitle = _DEC_WS_9607671B_Invalid_Expression;
+			auto swsError = _DEC_WS_16D063D0_The_given_expression_must_evaluate_to_an_unsigned_integer_;
+			lsw::CBase::MessageBoxError( _ndpParms.pwThis->Wnd(), swsError.c_str(), swsTitle.c_str() );
+			return false;
+		}
+		auto phecControl = pdhmwThis->CurrentEditor();
+		if ( !phecControl ) { return true; }	// Internal error but unrecoverable here.
+		if ( rCastResult.u.ui64Val > phecControl->Size() ) {
+			auto swsTitle = _DEC_WS_9607671B_Invalid_Expression;
+			auto swsError = _DEC_WS_D08434A5_Address_out_of_range_;
+			lsw::CBase::MessageBoxError( _ndpParms.pwThis->Wnd(), swsError.c_str(), swsTitle.c_str() );
+			return false;
+		}
+		return true;
 	}
 
 }	// namespace mx

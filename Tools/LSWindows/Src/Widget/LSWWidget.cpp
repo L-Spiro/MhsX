@@ -257,10 +257,13 @@ namespace lsw {
 	std::string CWidget::GetTextA() const {
 		INT iLen = GetTextLengthA() + 1;
 		CHAR * pcBuffer = new( std::nothrow ) CHAR[iLen];
-		GetTextA( pcBuffer, iLen );
-		std::string sRet = pcBuffer;
-		delete [] pcBuffer;
-		return sRet;
+		if ( pcBuffer ) {
+			GetTextA( pcBuffer, iLen );
+			std::string sRet = pcBuffer;
+			delete [] pcBuffer;
+			return sRet;
+		}
+		return std::string();
 	}
 
 	/**
@@ -272,10 +275,13 @@ namespace lsw {
 	std::wstring CWidget::GetTextW() const {
 		INT iLen = GetTextLengthW() + 1;
 		WCHAR * pwcBuffer = new( std::nothrow ) WCHAR[iLen];
-		GetTextW( pwcBuffer, iLen );
-		std::wstring sRet = pwcBuffer;
-		delete [] pwcBuffer;
-		return sRet;
+		if ( pwcBuffer ) {
+			GetTextW( pwcBuffer, iLen );
+			std::wstring sRet = pwcBuffer;
+			delete [] pwcBuffer;
+			return sRet;
+		}
+		return std::wstring();
 	}
 
 	/**
@@ -564,18 +570,36 @@ namespace lsw {
 		return reinterpret_cast<HICON>(::SendMessageW( Wnd(), WM_SETICON, static_cast<WPARAM>(ICON_BIG), reinterpret_cast<LPARAM>(_hBig) ));
 	}
 
-	// Translate a child's tooltip text.
+	/**
+	 * \brief Translate a child's tooltip text.
+	 * 
+	 * \param _sText The string to translate.
+	 * \return Returns the translated string.
+	 */
 	std::wstring CWidget::TranslateTooltip( const std::string &_sText ) { 
 		return ee::CExpEval::ToUtf16( _sText );
 	}
 
-	// Sets a given font on all children of a window.
+	/**
+	 * \brief Sets a given font on all children of a window.
+	 * 
+	 * \param _hWnd Child window handle.
+	 * \param _lParam Font handle.
+	 * \return Returns TRUE to continue enumeration.
+	 */
 	BOOL CALLBACK CWidget::EnumChildWindows_SetFont( HWND _hWnd, LPARAM _lParam ) {
 		::SendMessageW( _hWnd, WM_SETFONT, static_cast<WPARAM>(_lParam), TRUE );
 		return TRUE;
 	}
 
-	// Converts a point from pixels to dialog units.
+	/**
+	 * \brief Converts a point from pixels to dialog units.
+	 * 
+	 * \param _hWnd Window handle.
+	 * \param _lX X coordinate in pixels.
+	 * \param _lY Y coordinate in pixels.
+	 * \return Returns a POINT with dialog units.
+	 */
 	POINT CWidget::PixelsToDialogUnits( HWND _hWnd, LONG _lX, LONG _lY ) {
 		POINT pRet = {};
 		for ( LONG I = 0; I < 5000; ++I ) {
@@ -1537,9 +1561,9 @@ namespace lsw {
 					}
 
 					// ControlSetup() called by the layout manager because WM_NCCREATE is inside a constructor.
-
+					// If an application processes this message, it should return TRUE to continue creation of the window. If the application returns FALSE, the CreateWindow or CreateWindowEx function will return a NULL handle.
 					LSW_HANDLED hHandled = pmwThis->NcCreate( (*pcsCreate) );
-					if ( hHandled == LSW_H_HANDLED ) { LSW_RET( 0, 0 ); }
+					if ( hHandled == LSW_H_HANDLED ) { LSW_RET( FALSE, FALSE ); }
 				}
 				break;
 			}
@@ -1712,7 +1736,6 @@ namespace lsw {
 				LSW_HANDLED hHandled = LSW_H_CONTINUE;
 				WORD wId = LOWORD( _wParam );
 
-
 				if ( _lParam ) {
 					// Sent by a control.
 					CWidget * pwSrc = LSW_WIN2CLASS( reinterpret_cast<HWND>(_lParam) );
@@ -1722,6 +1745,9 @@ namespace lsw {
 					switch ( HIWORD( _wParam ) ) {
 						case BN_CLICKED : {
 							hHandled = pmwThis->MenuCommand( wId );
+							/*if ( LSW_H_CONTINUE == hHandled ) {
+								hHandled = pmwThis->Command( HIWORD( _wParam ), wId, nullptr );
+							}*/
 							break;
 						}
 						case 1 : {

@@ -29,7 +29,7 @@ namespace mx {
 		virtual LSW_HANDLED					InitDialog();
 
 		// WM_COMMAND from control.
-		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc );
+		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _wId, CWidget * _pwSrc );
 
 		// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
 		virtual const LSW_RECT				VirtualClientRect( const CWidget * pwChild ) const;
