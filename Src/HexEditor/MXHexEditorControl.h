@@ -981,6 +981,18 @@ namespace mx {
 		// Gets the current font.
 		const inline MX_FONT_SET *					Font() const { return m_pfsFonts[m_psOptions[m_eaEditAs].ftFont]; }
 
+		/**
+		 * Sets the number of pixels between lines in the hex/binary/octal view.
+		 * 
+		 * \param _ui16Pixels The number of pixels between lines to set.
+		 **/
+		void										SetHexLineSpacing( uint16_t _ui16Pixels ) {
+			MX_STYLE & stAll = (*CurStyle());
+			stAll.i32LineSpacingPx = int32_t( _ui16Pixels );
+
+			RecalcAndInvalidate();
+		}
+
 		// Gets the current character set.
 		inline const CCharSets::MX_CHAR_SET &		CharSet() const { return CCharSets::m_csSets[CurStyle()->csCharSet]; }
 

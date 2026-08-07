@@ -110,6 +110,10 @@ namespace mx {
 			CSecureWString				wsLastOpenFileDirectory;
 
 			std::vector<CSecureWString>	vGoToHistory;
+			std::vector<CSecureWString>	vLineSpacingHistory;
+			std::vector<CSecureWString>	vLineWidthHistory;
+			std::vector<CSecureWString>	vGroupWidthHistory;
+			std::vector<CSecureWString>	vDivisionLinesHistory;
 		}								heHexEditorOptions;
 	};
 

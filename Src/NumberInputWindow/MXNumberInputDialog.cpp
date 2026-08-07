@@ -34,7 +34,9 @@ namespace mx {
 					CUtilities::FillComboBox( pwCombo, m_pndpParms->vComboItems.data(), m_pndpParms->vComboItems.size(),
 						m_pndpParms->vComboItems[0].lpParm, 0 );
 				}
-				pwCombo->SetTextW( m_pndpParms->swsDefaultText.c_str() );
+				if ( m_pndpParms->swsDefaultText.size() ) {
+					pwCombo->SetTextW( m_pndpParms->swsDefaultText.c_str() );
+				}
 			}
 		}
 		return lsw::CMainWindow::InitDialog();

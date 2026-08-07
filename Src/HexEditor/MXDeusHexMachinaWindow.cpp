@@ -463,22 +463,6 @@ namespace mx {
 				break;
 			}
 
-			case Layout::MX_M_VIEW_FONT_ENLARGE_FONT : {
-				EnlargeFont();
-				break;
-			}
-			case Layout::MX_M_VIEW_FONT_SHRINK_FONT : {
-				EnsmallFont();
-				break;
-			}
-			case Layout::MX_M_VIEW_FONT_RESET_FONT_SIZE : {
-				ResetFontSize();
-				break;
-			}
-			case Layout::MX_M_VIEW_FONT_RESET_FONT : {
-				ResetFont();
-				break;
-			}
 
 			case Layout::MX_M_VIEW_EDIT_AS_TEXT : {
 				if ( phecControl ) {
@@ -566,6 +550,27 @@ namespace mx {
 						phecControl->SetViewType( CHexEditorControl::MX_EA_TEXT );
 					}
 				}
+				break;
+			}
+
+			case Layout::MX_M_VIEW_FONT_LINE_SPACING : {
+				ShowSetLineSpacing();
+				break;
+			}
+			case Layout::MX_M_VIEW_FONT_ENLARGE_FONT : {
+				EnlargeFont();
+				break;
+			}
+			case Layout::MX_M_VIEW_FONT_SHRINK_FONT : {
+				EnsmallFont();
+				break;
+			}
+			case Layout::MX_M_VIEW_FONT_RESET_FONT_SIZE : {
+				ResetFontSize();
+				break;
+			}
+			case Layout::MX_M_VIEW_FONT_RESET_FONT : {
+				ResetFont();
 				break;
 			}
 
@@ -872,6 +877,7 @@ namespace mx {
 				break;
 			}
 			case Layout::MX_M_VIEW_LINE_WIDTH_CUSTOM : {
+				ShowSetCustomLineWidth();
 				break;
 			}
 
@@ -904,7 +910,7 @@ namespace mx {
 				break;
 			}
 			case Layout::MX_M_VIEW_GROUP_BY_CUSTOM : {
-				
+				ShowSetGroupWidth();
 				break;
 			}
 
@@ -941,6 +947,14 @@ namespace mx {
 					phecControl->SetDivionLines( 8 );
 					RecalcAllBut( phecControl );
 				}
+				break;
+			}
+			case Layout::MX_M_VIEW_DIVISION_LINES_CUSTOM : {
+				ShowSetDivisionLines();
+				break;
+			}
+			case Layout::MX_M_VIEW_DIVISION_LINES_SET_STARTING : {
+				
 				break;
 			}
 
@@ -1917,11 +1931,131 @@ namespace mx {
 			phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_SHORT_HEX;
 		ndpParms.pfVerifyFunc = &CDeusHexMachinaWindow::GoTo_Verify;
 		ndpParms.pvVerifyParm = this;
+
+		{
+			auto oOptions = m_pmhMemHack->Options();
+			for ( size_t I = 0; I < oOptions.heHexEditorOptions.vGoToHistory.size(); ++I ) {
+				ndpParms.vComboItems.push_back( CUtilities::MX_COMBO_ENTRY{ .pwcName = oOptions.heHexEditorOptions.vGoToHistory[I].c_str(), .lpParm = LPARAM( I ) } );
+			}
+		}
+
 		if ( TRUE == CNumberInputLayout::CreateNumberInputDialog( this, ndpParms ) ) {
 			phecControl->SetCaretAddr( ndpParms.rResult.u.ui64Val );
 			if ( m_pmhMemHack ) {
 				auto oOptions = m_pmhMemHack->Options();
 				CUtilities::AddOrMove( oOptions.heHexEditorOptions.vGoToHistory, ndpParms.swsExpression );
+				m_pmhMemHack->SetOptions( oOptions );
+			}
+		}
+	}
+
+	// Shows the Set Line SPacing dialog.
+	void CDeusHexMachinaWindow::ShowSetLineSpacing() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+
+		CNumberInputLayout::MX_NUMBER_DIALOG_PARMS ndpParms;
+		ndpParms.swsHeaderText = _DEC_WS_BC168EB1_Default_Hex_Line_Spacing;
+		ndpParms.swsLabelText = _DEC_WS_C8FB637C_Enter_the_extra_spacing_between_each_row_of_the_editor_in_pixels_;
+		ndpParms.bHexInput = false;
+		{
+			auto oOptions = m_pmhMemHack->Options();
+			for ( size_t I = 0; I < oOptions.heHexEditorOptions.vLineSpacingHistory.size(); ++I ) {
+				ndpParms.vComboItems.push_back( CUtilities::MX_COMBO_ENTRY{ .pwcName = oOptions.heHexEditorOptions.vLineSpacingHistory[I].c_str(), .lpParm = LPARAM( I ) } );
+			}
+		}
+		ndpParms.pfVerifyFunc = &CDeusHexMachinaWindow::ConstantRange_Verify<std::numeric_limits<uint16_t>::max()>;
+		ndpParms.pvVerifyParm = this;
+		if ( TRUE == CNumberInputLayout::CreateNumberInputDialog( this, ndpParms ) ) {
+			phecControl->SetHexLineSpacing( uint16_t( ndpParms.rResult.u.ui64Val ) );
+			RecalcAllBut( phecControl );
+			if ( m_pmhMemHack ) {
+				auto oOptions = m_pmhMemHack->Options();
+				CUtilities::AddOrMove( oOptions.heHexEditorOptions.vLineSpacingHistory, ndpParms.swsExpression );
+				m_pmhMemHack->SetOptions( oOptions );
+			}
+		}
+	}
+
+	// Shows the Set Custom Line Width dialog.
+	void CDeusHexMachinaWindow::ShowSetCustomLineWidth() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+
+		CNumberInputLayout::MX_NUMBER_DIALOG_PARMS ndpParms;
+		ndpParms.swsHeaderText = _DEC_WS_6C93F6AE_Custom_Width;
+		ndpParms.swsLabelText = _DEC_WS_9A033140_Enter_the_number_of_bytes_per_row_;
+		ndpParms.bHexInput = false;
+		{
+			auto oOptions = m_pmhMemHack->Options();
+			for ( size_t I = 0; I < oOptions.heHexEditorOptions.vLineWidthHistory.size(); ++I ) {
+				ndpParms.vComboItems.push_back( CUtilities::MX_COMBO_ENTRY{ .pwcName = oOptions.heHexEditorOptions.vLineWidthHistory[I].c_str(), .lpParm = LPARAM( I ) } );
+			}
+		}
+		ndpParms.pfVerifyFunc = &CDeusHexMachinaWindow::ConstantRange_Verify<std::numeric_limits<uint32_t>::max()>;
+		ndpParms.pvVerifyParm = this;
+		if ( TRUE == CNumberInputLayout::CreateNumberInputDialog( this, ndpParms ) ) {
+			phecControl->SetLineWidth( uint32_t( ndpParms.rResult.u.ui64Val ) );
+			RecalcAllBut( phecControl );
+			if ( m_pmhMemHack ) {
+				auto oOptions = m_pmhMemHack->Options();
+				CUtilities::AddOrMove( oOptions.heHexEditorOptions.vLineWidthHistory, ndpParms.swsExpression );
+				m_pmhMemHack->SetOptions( oOptions );
+			}
+		}
+	}
+
+	// Shows the Set Group Width dialog.
+	void CDeusHexMachinaWindow::ShowSetGroupWidth() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+
+		CNumberInputLayout::MX_NUMBER_DIALOG_PARMS ndpParms;
+		ndpParms.swsHeaderText = _DEC_WS_0FF4D032_Custom_Group_By;
+		ndpParms.swsLabelText = _DEC_WS_2375A567_Enter_the_number_of_bytes_by_which_to_group_;
+		ndpParms.bHexInput = false;
+		{
+			auto oOptions = m_pmhMemHack->Options();
+			for ( size_t I = 0; I < oOptions.heHexEditorOptions.vGroupWidthHistory.size(); ++I ) {
+				ndpParms.vComboItems.push_back( CUtilities::MX_COMBO_ENTRY{ .pwcName = oOptions.heHexEditorOptions.vGroupWidthHistory[I].c_str(), .lpParm = LPARAM( I ) } );
+			}
+		}
+		ndpParms.pfVerifyFunc = &CDeusHexMachinaWindow::ConstantRange_Verify<std::numeric_limits<uint32_t>::max()>;
+		ndpParms.pvVerifyParm = this;
+		if ( TRUE == CNumberInputLayout::CreateNumberInputDialog( this, ndpParms ) ) {
+			phecControl->SetGroupSize( uint32_t( ndpParms.rResult.u.ui64Val ) );
+			RecalcAllBut( phecControl );
+			if ( m_pmhMemHack ) {
+				auto oOptions = m_pmhMemHack->Options();
+				CUtilities::AddOrMove( oOptions.heHexEditorOptions.vGroupWidthHistory, ndpParms.swsExpression );
+				m_pmhMemHack->SetOptions( oOptions );
+			}
+		}
+	}
+
+	// Shows the Set Division Lines dialog.
+	void CDeusHexMachinaWindow::ShowSetDivisionLines() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+
+		CNumberInputLayout::MX_NUMBER_DIALOG_PARMS ndpParms;
+		ndpParms.swsHeaderText = _DEC_WS_7F6D8973_Custom_Division_Lines;
+		ndpParms.swsLabelText = _DEC_WS_2B021194_Enter_the_number_of_bytes_between_division_lines_;
+		ndpParms.bHexInput = false;
+		{
+			auto oOptions = m_pmhMemHack->Options();
+			for ( size_t I = 0; I < oOptions.heHexEditorOptions.vDivisionLinesHistory.size(); ++I ) {
+				ndpParms.vComboItems.push_back( CUtilities::MX_COMBO_ENTRY{ .pwcName = oOptions.heHexEditorOptions.vDivisionLinesHistory[I].c_str(), .lpParm = LPARAM( I ) } );
+			}
+		}
+		ndpParms.pfVerifyFunc = &CDeusHexMachinaWindow::ConstantRange_Verify<std::numeric_limits<uint64_t>::max()>;
+		ndpParms.pvVerifyParm = this;
+		if ( TRUE == CNumberInputLayout::CreateNumberInputDialog( this, ndpParms ) ) {
+			phecControl->SetDivionLines( uint64_t( ndpParms.rResult.u.ui64Val ) );
+			RecalcAllBut( phecControl );
+			if ( m_pmhMemHack ) {
+				auto oOptions = m_pmhMemHack->Options();
+				CUtilities::AddOrMove( oOptions.heHexEditorOptions.vDivisionLinesHistory, ndpParms.swsExpression );
 				m_pmhMemHack->SetOptions( oOptions );
 			}
 		}

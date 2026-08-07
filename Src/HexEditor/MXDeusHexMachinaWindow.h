@@ -264,6 +264,18 @@ namespace mx {
 		// Shows the Go To dialog.
 		void										ShowGoTo( uint64_t _ui64DefaultAddress = UINT64_MAX );
 
+		// Shows the Set Line SPacing dialog.
+		void										ShowSetLineSpacing();
+
+		// Shows the Set Custom Line Width dialog.
+		void										ShowSetCustomLineWidth();
+
+		// Shows the Set Group Width dialog.
+		void										ShowSetGroupWidth();
+
+		// Shows the Set Division Lines dialog.
+		void										ShowSetDivisionLines();
+
 		// Sets a status-bar item’s text and "warning" status.
 		void										SetStatusBarText( const wchar_t * _pwcText, bool _bWarning = false, size_t _sIdx = 0, bool _bUpdateStore = true ) override;
 
@@ -390,6 +402,30 @@ namespace mx {
 
 		// Verification function for the Go To dialog.
 		static bool									GoTo_Verify( void * _pvThis, const mx::CNumberInputLayout::MX_NUMBER_DIALOG_PARMS &_ndpParms );
+
+		// Verification of a value fitting into a constant range.
+		template <uint64_t _ui64Max = 0xFFFFFFFF>
+		static bool									ConstantRange_Verify( void * _pvThis, const mx::CNumberInputLayout::MX_NUMBER_DIALOG_PARMS &_ndpParms ) {
+			auto pdhmwThis = static_cast<CDeusHexMachinaWindow *>(_pvThis);
+			auto rCastResult = ee::CExpEvalContainer::ConvertResult( _ndpParms.rResult, ee::EE_NC_UNSIGNED );
+			if ( rCastResult.ncType != ee::EE_NC_UNSIGNED ) {
+				auto swsTitle = _DEC_WS_9607671B_Invalid_Expression;
+				auto swsError = _DEC_WS_16D063D0_The_given_expression_must_evaluate_to_an_unsigned_integer_;
+				lsw::CBase::MessageBoxError( _ndpParms.pwThis->Wnd(), swsError.c_str(), swsTitle.c_str() );
+				return false;
+			}
+			auto phecControl = pdhmwThis->CurrentEditor();
+			if ( !phecControl ) { return true; }	// Internal error but unrecoverable here.
+			if constexpr ( _ui64Max != UINT64_MAX ) {
+				if ( rCastResult.u.ui64Val > _ui64Max ) {
+					auto swsTitle = _DEC_WS_9607671B_Invalid_Expression;
+					auto swsError = _DEC_WS_D08434A5_Address_out_of_range_;
+					lsw::CBase::MessageBoxError( _ndpParms.pwThis->Wnd(), swsError.c_str(), swsTitle.c_str() );
+					return false;
+				}
+			}
+			return true;
+		}
 
 	private :
 		typedef CDeusHexMachinaLayout				Layout;
