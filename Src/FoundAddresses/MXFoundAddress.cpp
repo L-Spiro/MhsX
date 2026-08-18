@@ -16,7 +16,7 @@ namespace mx {
 
 	// == Functions.
 	// Sets the address, type, and original data.
-	bool CFoundAddress::InitWithAddressAndDataType( uint64_t _ui64Address, CUtilities::MX_DATA_TYPES _dtType, const uint8_t * _pui8Data ) {
+	bool CFoundAddress::InitWithAddressAndDataType( uint64_t _ui64Address, CUtilities::MX_DATA_TYPES _dtType, const uint8_t * _pui8Data, uint32_t _ui32ArrayLen ) {
 		m_eAddressExp.Reset();
 		m_sAddressTxt.clear();
 		m_sAddressTxt = std::string();
@@ -25,9 +25,10 @@ namespace mx {
 
 		m_vtValueType = CUtilities::MX_VT_DATA_TYPE;
 		m_dtDataType = _dtType;
+		m_ui32ArrayLen = _ui32ArrayLen;
 		try {
 			AdjustAddressToModule( _ui64Address );
-			m_vOriginalData.resize( CUtilities::DataTypeSize( _dtType ) );
+			m_vOriginalData.resize( CUtilities::DataTypeSize( _dtType ) * _ui32ArrayLen );
 			std::memcpy( m_vOriginalData.data(), _pui8Data, m_vOriginalData.size() );
 			m_vLockedData.clear();
 			m_vLockedData.push_back( m_vOriginalData );

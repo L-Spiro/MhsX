@@ -23158,3 +23158,12 @@
 #define _DEC_S_98277F10_The_given_expression_must_evaluate_to_a_floating_point_value_ mx::CStringDecoder::DecodeToString( _T_98277F10_The_given_expression_must_evaluate_to_a_floating_point_value_, _LEN_98277F10 )
 #define _DEC_WS_98277F10_The_given_expression_must_evaluate_to_a_floating_point_value_ mx::CStringDecoder::DecodeToWString( _T_98277F10_The_given_expression_must_evaluate_to_a_floating_point_value_, _LEN_98277F10 )
 
+// Show Deus Hex Machina
+
+#define _T_4AF2000B_Show_Deus_Hex_Machina "\xDB\x36\x3F\x12\xB2\x0D\xF3\x3C\x43\xE8\x11\x33\x0A\xBB\x14\xE9\x31\x38\x04\x00\x2A"
+#define _LEN_4AF2000B 21
+#define _T_LEN_4AF2000B_Show_Deus_Hex_Machina _T_4AF2000B_Show_Deus_Hex_Machina, _LEN_4AF2000B
+#define _DEC_4AF2000B_Show_Deus_Hex_Machina( STR ) mx::CStringDecoder::Decode( _T_4AF2000B_Show_Deus_Hex_Machina, _LEN_4AF2000B, STR )
+#define _DEC_S_4AF2000B_Show_Deus_Hex_Machina mx::CStringDecoder::DecodeToString( _T_4AF2000B_Show_Deus_Hex_Machina, _LEN_4AF2000B )
+#define _DEC_WS_4AF2000B_Show_Deus_Hex_Machina mx::CStringDecoder::DecodeToWString( _T_4AF2000B_Show_Deus_Hex_Machina, _LEN_4AF2000B )
+

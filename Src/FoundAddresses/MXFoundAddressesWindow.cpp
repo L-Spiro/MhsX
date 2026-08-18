@@ -455,61 +455,35 @@ namespace mx {
 													}
 													break;
 												}
-												/*case CUtilities::MX_SST_RAW : {
+												case CUtilities::MX_SST_RAW : {
 													CUtilities::MX_DATA_TYPES dtDataType = static_cast<CUtilities::MX_DATA_TYPES>(arRef.uiData >> 8);
 													switch ( dtDataType ) {
-														case CUtilities::MX_DT_INT8 : {
-															bRet = RawArraySearch<int8_t>( spParmsCopy, aclChunks, _hProgressUpdate );
-															break;
-														}
-														case CUtilities::MX_DT_UINT8 : {
-															bRet = RawArraySearch<uint8_t>( spParmsCopy, aclChunks, _hProgressUpdate );
-															break;
-														}
-														case CUtilities::MX_DT_INT16 : {
-															bRet = RawArraySearch<int16_t>( spParmsCopy, aclChunks, _hProgressUpdate );
-															break;
-														}
-														case CUtilities::MX_DT_UINT16 : {
-															bRet = RawArraySearch<uint16_t>( spParmsCopy, aclChunks, _hProgressUpdate );
-															break;
-														}
-														case CUtilities::MX_DT_INT32 : {
-															bRet = RawArraySearch<int32_t>( spParmsCopy, aclChunks, _hProgressUpdate );
-															break;
-														}
-														case CUtilities::MX_DT_UINT32 : {
-															bRet = RawArraySearch<uint32_t>( spParmsCopy, aclChunks, _hProgressUpdate );
-															break;
-														}
-														case CUtilities::MX_DT_INT64 : {
-															bRet = RawArraySearch<int64_t>( spParmsCopy, aclChunks, _hProgressUpdate );
-															break;
-														}
-														case CUtilities::MX_DT_UINT64 : {
-															bRet = RawArraySearch<uint64_t>( spParmsCopy, aclChunks, _hProgressUpdate );
-															break;
-														}
-														case CUtilities::MX_DT_FLOAT16 : {
-															bRet = RawArraySearch<uint16_t>( spParmsCopy, aclChunks, _hProgressUpdate );
-															break;
-														}
-														case CUtilities::MX_DT_FLOAT : {
-															bRet = RawArraySearch<float>( spParmsCopy, aclChunks, _hProgressUpdate );
-															break;
-														}
+														case CUtilities::MX_DT_INT8 : {}		MX_FALLTHROUGH
+														case CUtilities::MX_DT_UINT8 : {}		MX_FALLTHROUGH
+														case CUtilities::MX_DT_INT16 : {}		MX_FALLTHROUGH
+														case CUtilities::MX_DT_UINT16 : {}		MX_FALLTHROUGH
+														case CUtilities::MX_DT_INT32 : {}		MX_FALLTHROUGH
+														case CUtilities::MX_DT_UINT32 : {}		MX_FALLTHROUGH
+														case CUtilities::MX_DT_INT64 : {}		MX_FALLTHROUGH
+														case CUtilities::MX_DT_UINT64 : {}		MX_FALLTHROUGH
+														case CUtilities::MX_DT_FLOAT16 : {}		MX_FALLTHROUGH
+														case CUtilities::MX_DT_FLOAT : {}		MX_FALLTHROUGH
 														case CUtilities::MX_DT_DOUBLE : {
-															bRet = RawArraySearch<double>( spParmsCopy, aclChunks, _hProgressUpdate );
+															if ( !faAddress->InitWithAddressAndDataType( ui64Addr, dtDataType, vData.data(), size_t( arRef.uiSize ) / CUtilities::DataTypeSize( dtDataType ) ) ) {
+																return false;
+															}
 															break;
 														}
 														case CUtilities::MX_DT_VOID : {
-															bRet = RawArrayMultiType( spParmsCopy, aclChunks, _hProgressUpdate );
+															if ( !faAddress->InitWithAddressAndDataType( ui64Addr, CUtilities::MX_DT_UINT8, vData.data(), size_t( arRef.uiSize ) ) ) {
+																return false;
+															}
 															break;
 														}
 														default : { return false; }
 													}
 													break;
-												}*/
+												}
 												case CUtilities::MX_SST_REGEX : {
 													CUtilities::MX_REGEX_ENCODING reEncoding = static_cast<CUtilities::MX_REGEX_ENCODING>((arRef.uiData >> 8) & 0xFF);
 													if ( !faAddress->InitWithAddressandStringType( ui64Addr, CUtilities::RegexCodePageToCodePage( reEncoding ), vData.data() + sOffset, size_t( arRef.uiSize ) ) ) {

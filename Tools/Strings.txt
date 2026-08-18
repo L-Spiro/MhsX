@@ -1755,6 +1755,7 @@
 "Show PE Works"
 "Show String Theory"
 "Show Floating-Point Studio"
+"Show Deus Hex Machina"
 "Hold Ctrl while selecting to copy hotkey settings."
 "Hold Ctrl while selecting to copy program settings."
 "Input"

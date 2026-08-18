@@ -44,7 +44,7 @@ namespace mx {
 		virtual MX_FOUND_ADDRESS_TYPES						Type() const { return MX_FAT_FOUND_ADDRESS; }
 
 		// Sets the address, type, and original data.
-		bool												InitWithAddressAndDataType( uint64_t _ui64Address, CUtilities::MX_DATA_TYPES _dtType, const uint8_t * _pui8Data );
+		bool												InitWithAddressAndDataType( uint64_t _ui64Address, CUtilities::MX_DATA_TYPES _dtType, const uint8_t * _pui8Data, uint32_t _ui32ArrayLen = 1 );
 
 		// Sets the address, string type, and original data.
 		bool												InitWithAddressandStringType( uint64_t _ui64Address, UINT _uiCodePage, const uint8_t * _pui8Data, size_t _sLen );

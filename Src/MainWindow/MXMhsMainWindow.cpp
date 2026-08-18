@@ -131,6 +131,9 @@ namespace mx {
 			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowPeWorks,						{ _T_LEN_759D0F03_Show_PE_Works },						MX_WH_SHOW_PE_WORKS,				0 },
 			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowStringTheory,				{ _T_LEN_B7A8A10D_Show_String_Theory },					MX_WH_SHOW_STRING_THEORY,			0 },
 			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowFloatingPointStudio,			{ _T_LEN_155439B4_Show_Floating_Point_Studio },			MX_WH_SHOW_FLOATING_POINT_STUDIO,	0 },
+
+			{ reinterpret_cast<uint64_t>(this),	Hotkey_ShowDeusHexMachina,				{ _T_LEN_4AF2000B_Show_Deus_Hex_Machina },				MX_WH_SHOW_SHOWHEX_EDITOR,			0 },
+
 			{ reinterpret_cast<uint64_t>(this),	Hotkey_LockSelected,					{ _T_LEN_14B8120F_Lock_Selected },						MX_WH_LOCK_SELECTED,				0 },
 			{ reinterpret_cast<uint64_t>(this),	Hotkey_UnLockSelected,					{ _T_LEN_85399C8F_Unlock_Selected },					MX_WH_UNLOCK_SELECTED,				0 },
 			{ reinterpret_cast<uint64_t>(this),	Hotkey_UnLockAll,						{ _T_LEN_EE088C0D_Unlock_All },							MX_WH_UNLOCK_ALL,					0 },
@@ -1798,6 +1801,19 @@ namespace mx {
 	void __stdcall CMhsMainWindow::Hotkey_ShowFloatingPointStudio( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
 		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
 		pmhThis->ShowFloatingPointStudio( std::nan( "0" ) );
+	}
+
+	/**
+	 * Hotkey handler for showing the Deus Hex Machina window.
+	 *
+	 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+	 * \param _uiParm1 Unused.
+	 * \param _uiParm2 Unused.
+	 * \param _uiParm3 Unused.
+	 */
+	void __stdcall CMhsMainWindow::Hotkey_ShowDeusHexMachina( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ ) {
+		CMhsMainWindow * pmhThis = reinterpret_cast<CMhsMainWindow *>(_uiParm0);
+		pmhThis->ShowDeusHexMachina();
 	}
 
 	/**

@@ -80,6 +80,7 @@ namespace mx {
 			MX_WH_SHOW_PE_WORKS,
 			MX_WH_SHOW_STRING_THEORY,
 			MX_WH_SHOW_FLOATING_POINT_STUDIO,
+			MX_WH_SHOW_SHOWHEX_EDITOR,
 			MX_WH_LOCK_SELECTED,
 			MX_WH_UNLOCK_SELECTED,
 			MX_WH_UNLOCK_ALL,
@@ -506,6 +507,16 @@ namespace mx {
 		 * \param _uiParm3 Unused.
 		 */
 		static void __stdcall				Hotkey_ShowFloatingPointStudio( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
+
+		/**
+		 * Hotkey handler for showing the Deus Hex Machina window.
+		 *
+		 * \param _uiParm0 CMhsMainWindow * stored as a uint64_t.
+		 * \param _uiParm1 Unused.
+		 * \param _uiParm2 Unused.
+		 * \param _uiParm3 Unused.
+		 */
+		static void __stdcall				Hotkey_ShowDeusHexMachina( uint64_t _uiParm0, uint64_t /*_uiParm1*/, uint64_t /*_uiParm2*/, uint64_t /*_uiParm3*/ );
 
 		/**
 		 * Hotkey handler for showing the Add Entry dialog.
