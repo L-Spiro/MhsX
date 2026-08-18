@@ -516,6 +516,10 @@ namespace lsw {
 		size_t								m_stHotItem;
 		/** The width of the space character inside items of the ListView. */
 		LONG								m_lSpaceWidth;
+		/** Base width of the right-most column, used for proportional resizing. */
+		LONG								m_lLastColBaseWidth = -1;
+		/** Flag to prevent recursive sizing. */
+		bool								m_bAutoResizing = false;
 		/** If set, the listview is not updated when inserting/removing an item.  FinishUpdate() must be called to update the listview after the tree is modified. */
 		bool								m_bDontUpdate;
 		/** Set whether sorting is enabled. */
