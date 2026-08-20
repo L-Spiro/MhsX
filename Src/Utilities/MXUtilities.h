@@ -1232,8 +1232,14 @@ namespace mx {
 		// Upper-cases an ASCII string.
 		static std::string										ToUpper( const std::string &_sInput );
 
+		// Upper-cases an ASCII string.
+		static std::string										ToUpper( const std::string_view &_svInput );
+
 		// Lower-cases an ASCII string.
 		static std::string										ToLower( const std::string &_sInput );
+
+		// Lower-cases an ASCII string.
+		static std::string										ToLower( const std::string_view &_svInput );
 
 		// Upper-cases a string.
 		static CSecureWString									ToUpper( const CSecureWString &_swsInput );

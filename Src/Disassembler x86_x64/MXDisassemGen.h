@@ -39,15 +39,15 @@ namespace mx {
 		// == Types.
 		// The intermediate storage structure for the loaded instruction data.
 		struct MX_INSTRUCTION {
-			std::string							sMnem;															// The mnemonic.
+			std::string_view					sMnem;															// The mnemonic.
 			uint16_t							ui16Prefix							= 0;						// The prefix byte.
 			uint16_t							ui160FPrefix						= 0;						// The 0F prefix byte.
 			uint16_t							ui16PrimaryOp						= 0;						// The primary opcode.
 			uint16_t							ui16SecondaryOp						= 0;						// The secondary opcode.
 			uint64_t							ui64Group							= 0;						// The opcode groups.
 			MX_INSTR_EXT						ieInstExt							= MX_INSTR_EXT( 0 );		// Instruction extension.
-			std::string							sBrief;															// Brief description.
-			std::string							sDetailed;														// Detailed description.
+			std::string_view					sBrief;															// Brief description.
+			std::string_view					sDetailed;														// Detailed description.
 
 			bool								bLockable							= false;					// LOCK prefix allowed?
 			bool								bEscape								= false;					// 2-byte escape sequence?
@@ -59,6 +59,8 @@ namespace mx {
 		lsx::CXml								m_xXml;
 		// The instruction table.
 		std::vector<MX_INSTRUCTION>				m_vInstructions;
+		// The loaded XML data, which must be persistent as long as m_xXml is active.
+		std::vector<uint8_t>					m_vBytes;
 
 
 		// == Functions.
@@ -66,7 +68,7 @@ namespace mx {
 		void									AddEntryToTable( lsx::CTree<lsx::CXmlContainer::LSX_XML_ELEMENT> * _ptEntry, const MX_INSTRUCTION &_iInstr );
 
 #ifdef _DEBUG
-		static MX_OPCODE_GROUPS					GroupToEnum( const std::string &_sVal ) {
+		static MX_OPCODE_GROUPS					GroupToEnum( const std::string_view &_sVal ) {
 			if ( _sVal == "arith" ) { return MX_OG_ARITH; }
 			if ( _sVal == "binary" ) { return MX_OG_BINARY; }
 			if ( _sVal == "bit" ) { return MX_OG_BIT; }
@@ -109,7 +111,7 @@ namespace mx {
 			return MX_OPCODE_GROUPS( 0 );
 		}
 
-		static MX_INSTR_EXT						InstExtToEnum( const std::string &_sVal ) {
+		static MX_INSTR_EXT						InstExtToEnum( const std::string_view &_sVal ) {
 			if ( _sVal == "mmx" ) { return MX_IE_MMX; }
 			if ( _sVal == "smx" ) { return MX_IE_SMX; }
 			if ( _sVal == "sse1" ) { return MX_IE_SSE1; }
@@ -122,7 +124,7 @@ namespace mx {
 			return MX_IE_NONE;
 		}
 
-		static MX_ADDRESS_MODES					AddressModeToEnum( const std::string &_sVal ) {
+		static MX_ADDRESS_MODES					AddressModeToEnum( const std::string_view &_sVal ) {
 			if ( _sVal == "A" ) { return MX_AM_JMF; }
 			if ( _sVal == "BA" ) { return MX_AM_BAX; }
 			if ( _sVal == "BB" ) { return MX_AM_BBX; }

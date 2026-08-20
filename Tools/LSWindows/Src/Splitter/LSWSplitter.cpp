@@ -354,6 +354,9 @@ namespace lsw {
 
 		POINT pCurPos = { _pCursorPos.x, _pCursorPos.y };
 
+		lsw::CWidget::LSW_SETREDRAW srRedraw( this, false, true, RDW_INVALIDATE |
+			RDW_ERASE | RDW_UPDATENOW | RDW_ALLCHILDREN );
+
 		LSW_RECT rRect = ClientRect( this );
 		DrawBar( m_pLastPoint, rRect, FALSE );
 

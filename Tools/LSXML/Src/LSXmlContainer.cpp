@@ -19,37 +19,37 @@ namespace lsx {
 	/**
 	 * Adds a string and returns its index into the stack.
 	 *
-	 * \param _sText The string to add or whose existing index is to be found.
+	 * \param _svText The string to add or whose existing index is to be found.
 	 * \return Returns the index of the added string.
 	 */
-	size_t CXmlContainer::AddString( const std::string &_sText ) {
-		size_t stRet = FindString( _sText );
+	size_t CXmlContainer::AddString( std::string_view _svText ) {
+		size_t stRet = FindString( _svText );
 		if ( stRet == size_t( -1 ) ) {
-			m_vStrings.push_back( _sText );
+			m_vStrings.push_back( _svText );
 			return m_vStrings.size() - 1;
 		}
 		return stRet;
 	}
 
 	/**
-	 * A value is a string with quotes around it.  After the quotes are removed, this behaves as AddString().
+	 * A value is a string with quotes around it. After the quotes are removed, this behaves as AddString().
 	 *
-	 * \param _sText The string to add or whose existing index is to be found.
+	 * \param _svText The string to add or whose existing index is to be found.
 	 * \return Returns the index of the added string after stripping the enclosing quotes from it.
 	 */
-	size_t CXmlContainer::AddValue( const std::string &_sText ) {
-		return AddString( _sText.substr( 1, _sText.size() - 2 ) );
+	size_t CXmlContainer::AddValue( std::string_view _svText ) {
+		return AddString( _svText.substr( 1, _svText.size() - 2 ) );
 	}
 
 	/**
 	 * Returns the index of a string or -1 if it does not exist.
 	 *
-	 * \param _sText The string to find.
+	 * \param _svText The string to find.
 	 * \return Returns the index of the string if it exists or size_t( -1 ).
 	 */
-	size_t CXmlContainer::FindString( const std::string &_sText ) const {
+	size_t CXmlContainer::FindString( std::string_view _svText ) const {
 		for ( auto I = m_vStrings.size(); I--; ) {
-			if ( m_vStrings[I] == _sText ) { return I; }
+			if ( m_vStrings[I] == _svText ) { return I; }
 		}
 		return size_t( -1 );
 	}
@@ -57,27 +57,27 @@ namespace lsx {
 	/**
 	 * Creates an attribute start string.
 	 *
-	 * \param _sText The name of the attribute.
+	 * \param _svText The name of the attribute.
 	 * \return Returns the index of the string created.
 	 */
-	size_t CXmlContainer::AddAttributeStart( const std::string &_sText ) {
-		for ( auto I = _sText.size(); I--; ) {
+	size_t CXmlContainer::AddAttributeStart( std::string_view _svText ) {
+		for ( auto I = _svText.size(); I--; ) {
 			// Parser matches:
 			// {open}{ws}?{name}
 			// Easiest approach is to scan backward for {ws}:
 			// ws									[ \t\r\n]+
 			// or '<':
 			// open								{nl}?"<"
-			if ( (_sText[I] == ' ' ||
-				_sText[I] == '\t' ||
-				_sText[I] == '\r' ||
-				_sText[I] == '\n') ||
-				_sText[I] == '<' ) {
-				return AddString( _sText.substr( I + 1, std::string::npos ) );
+			if ( (_svText[I] == ' ' ||
+				_svText[I] == '\t' ||
+				_svText[I] == '\r' ||
+				_svText[I] == '\n') ||
+				_svText[I] == '<' ) {
+				return AddString( _svText.substr( I + 1, std::string_view::npos ) );
 			}
 		}
 
-		return AddString( _sText );
+		return AddString( _svText );
 	}
 
 	/**
@@ -316,7 +316,7 @@ namespace lsx {
 		_nNode.u.cContentObj.sLeft = size_t( -1 );
 		_nNode.u.cContentObj.sRight = size_t( -1 );
 
-		return size_t( -1 );;
+		return size_t( -1 );
 	}
 
 	/**
@@ -378,13 +378,9 @@ namespace lsx {
 			}
 			case LSX_N_MISC_SEQ : {
 				if ( nThisNode.u.msMiscSeqObj.sLeft != size_t( -1 ) ) {
-					//sPrintMe = std::format( "{0: >{1}}MISC SEQ LEFT:\r\n", "", _i32Depth * 5 );
-					//::OutputDebugStringA( sPrintMe.c_str() );
 					PrintNode( nThisNode.u.msMiscSeqObj.sLeft, _i32Depth + 0 );
 				}
 				if ( nThisNode.u.msMiscSeqObj.sRight != size_t( -1 ) ) {
-					//sPrintMe = std::format( "{0: >{1}}MISC SEQ RIGHT:\r\n", "", _i32Depth * 5 );
-					//::OutputDebugStringA( sPrintMe.c_str() );
 					PrintNode( nThisNode.u.msMiscSeqObj.sRight, _i32Depth + 0 );
 				}
 				break;
@@ -394,16 +390,12 @@ namespace lsx {
 				::OutputDebugStringA( sPrintMe.c_str() );
 				PrintNode( nThisNode.u.eElementObj.sAttribute, _i32Depth + 1 );
 				if ( nThisNode.u.eElementObj.sContent != size_t( -1 ) ) {
-					//sPrintMe = std::format( "{0: >{1}}ELEMENT CONTENT:\r\n", "", _i32Depth * 5 );
-					//::OutputDebugStringA( sPrintMe.c_str() );
 					PrintNode( nThisNode.u.eElementObj.sContent, _i32Depth + 1 );
 				}
 				break;
 			}
 			case LSX_N_CONTENT : {
 				if ( nThisNode.u.cContentObj.sLeft != size_t( -1 ) ) {
-					//sPrintMe = std::format( "{0: >{1}}CONTENT LEFT:\r\n", "", _i32Depth * 5 );
-					//::OutputDebugStringA( sPrintMe.c_str() );
 					PrintNode( nThisNode.u.cContentObj.sLeft, _i32Depth + 0 );
 				}
 				if ( nThisNode.u.cContentObj.sRight != size_t( -1 ) ) {
@@ -414,34 +406,24 @@ namespace lsx {
 			}
 			case LSX_N_CONTENT_ELEMENT : {
 				if ( nThisNode.u.cContentObj.sLeft != size_t( -1 ) ) {
-					//sPrintMe = std::format( "{0: >{1}}CONTENT ELEMENT LEFT:\r\n", "", _i32Depth * 5 );
-					//::OutputDebugStringA( sPrintMe.c_str() );
 					PrintNode( nThisNode.u.cContentObj.sLeft, _i32Depth + 0 );
 				}
 				if ( nThisNode.u.cContentObj.sRight != size_t( -1 ) ) {
-					//sPrintMe = std::format( "{0: >{1}}CONTENT ELEMENT RIGHT:\r\n", "", _i32Depth * 5 );
-					//::OutputDebugStringA( sPrintMe.c_str() );
 					PrintNode( nThisNode.u.cContentObj.sRight, _i32Depth + 0 );
 				}
 				break;
 			}
 			case LSX_N_CONTENT_MISC : {
 				if ( nThisNode.u.cContentObj.sLeft != size_t( -1 ) ) {
-					//sPrintMe = std::format( "{0: >{1}}CONTENT MISC LEFT:\r\n", "", _i32Depth * 5 );
-					//::OutputDebugStringA( sPrintMe.c_str() );
 					PrintNode( nThisNode.u.cContentObj.sLeft, _i32Depth + 0 );
 				}
 				if ( nThisNode.u.cContentObj.sRight != size_t( -1 ) ) {
-					//sPrintMe = std::format( "{0: >{1}}CONTENT MISC RIGHT:\r\n", "", _i32Depth * 5 );
-					//::OutputDebugStringA( sPrintMe.c_str() );
 					PrintNode( nThisNode.u.cContentObj.sRight, _i32Depth + 0 );
 				}
 				break;
 			}
 			case LSX_N_CONTENT_DATA : {
 				if ( nThisNode.u.cContentObj.sLeft != size_t( -1 ) ) {
-					//sPrintMe = std::format( "{0: >{1}}CONTENT DATA LEFT:\r\n", "", _i32Depth * 5 );
-					//::OutputDebugStringA( sPrintMe.c_str() );
 					PrintNode( nThisNode.u.cContentObj.sLeft, _i32Depth + 0 );
 				}
 				if ( nThisNode.u.cContentObj.sRight != size_t( -1 ) ) {
@@ -458,13 +440,9 @@ namespace lsx {
 			}
 			case LSX_N_ATTRIBUTE_LIST : {
 				if ( nThisNode.u.aAttributeListObj.sLeft != size_t( -1 ) ) {
-					//sPrintMe = std::format( "{0: >{1}}ATTR LIST LEFT:\r\n", "", _i32Depth * 5 );
-					//::OutputDebugStringA( sPrintMe.c_str() );
 					PrintNode( nThisNode.u.aAttributeListObj.sLeft, _i32Depth + 0 );
 				}
 				if ( nThisNode.u.aAttributeListObj.sRight != size_t( -1 ) ) {
-					//sPrintMe = std::format( "{0: >{1}}ATTR LIST RIGHT:\r\n", "", _i32Depth * 5 );
-					//::OutputDebugStringA( sPrintMe.c_str() );
 					PrintNode( nThisNode.u.aAttributeListObj.sRight, _i32Depth + 0 );
 				}
 				break;
@@ -517,7 +495,7 @@ namespace lsx {
 					continue;
 				}
 				if ( bFirstPass ) {
-					// Push in revese order (top gets processed sooner).
+					// Push in reverse order (top gets processed sooner).
 					switch ( m_vNodes[stNodeIdx].nType ) {
 						case LSX_N_DOCUMENT : {
 							LXM_PUSH( dDocumentObj.sMiscSeq );
@@ -580,9 +558,7 @@ namespace lsx {
 							break;
 						}
 						case LSX_N_ATTRIBUTE_DECL : {
-							/*CTree<LSX_XML_ELEMENT> * ptParent = CurStackPointer( vCurElement );
-							ptParent->Value().*/
-							// TODO: Haven’t encountered this case yet.
+							// TODO: Haven't encountered this case yet.
 							LXM_PUSH( aAttributeDeclObj.sList );
 							break;
 						}
@@ -666,13 +642,13 @@ namespace lsx {
 	 * Gets the first child element by name.
 	 *
 	 * \param _ptParent The node whose children are to be scanned for elements matching the given name.
-	 * \param _sName The name of the child element to find.
-	 * \return Returns a pointer to the child element of te given name or nullptr if there is none.
+	 * \param _svName The name of the child element to find.
+	 * \return Returns a pointer to the child element of the given name or nullptr if there is none.
 	 */
-	const CTree<CXmlContainer::LSX_XML_ELEMENT> * CXmlContainer::GetChildElement( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName ) const {
+	const CTree<CXmlContainer::LSX_XML_ELEMENT> * CXmlContainer::GetChildElement( const CTree<LSX_XML_ELEMENT> * _ptParent, std::string_view _svName ) const {
 		if ( _ptParent ) {
 			for ( size_t I = 0; I < _ptParent->Size(); ++I ) {
-				if ( GetString( _ptParent->GetChild( I )->Value().stNameString ) == _sName ) {
+				if ( GetString( _ptParent->GetChild( I )->Value().stNameString ) == _svName ) {
 					return _ptParent->GetChild( I );
 				}
 			}
@@ -684,13 +660,13 @@ namespace lsx {
 	 * Gets the first child element by name.
 	 *
 	 * \param _ptParent The node whose children are to be scanned for elements matching the given name.
-	 * \param _sName The name of the child element to find.
-	 * \return Returns a pointer to the child element of te given name or nullptr if there is none.
+	 * \param _svName The name of the child element to find.
+	 * \return Returns a pointer to the child element of the given name or nullptr if there is none.
 	 */
-	CTree<CXmlContainer::LSX_XML_ELEMENT> * CXmlContainer::GetChildElement( CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName ) {
+	CTree<CXmlContainer::LSX_XML_ELEMENT> * CXmlContainer::GetChildElement( CTree<LSX_XML_ELEMENT> * _ptParent, std::string_view _svName ) {
 		if ( _ptParent ) {
 			for ( size_t I = 0; I < _ptParent->Size(); ++I ) {
-				if ( GetString( _ptParent->GetChild( I )->Value().stNameString ) == _sName ) {
+				if ( GetString( _ptParent->GetChild( I )->Value().stNameString ) == _svName ) {
 					return _ptParent->GetChild( I );
 				}
 			}
@@ -702,14 +678,14 @@ namespace lsx {
 	 * Gathers the indices of children nodes (non-recursively) whose element names match the given name.
 	 *
 	 * \param _ptParent The node whose children are to be scanned for elements matching the given name.
-	 * \param _sName The name of the children elements to gather.
-	 * \return Returns an array of indices indicating the children of _ptParent whose element names match _sName.
+	 * \param _svName The name of the children elements to gather.
+	 * \return Returns an array of indices indicating the children of _ptParent whose element names match _svName.
 	 */
-	std::vector<size_t> CXmlContainer::GatherChildElementIndices( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName ) const {
+	std::vector<size_t> CXmlContainer::GatherChildElementIndices( const CTree<LSX_XML_ELEMENT> * _ptParent, std::string_view _svName ) const {
 		std::vector<size_t> vRet;
 		if ( !_ptParent ) { return vRet; }
 		for ( size_t I = 0; I < _ptParent->Size(); ++I ) {
-			if ( GetString( _ptParent->GetChild( I )->Value().stNameString ) == _sName ) {
+			if ( GetString( _ptParent->GetChild( I )->Value().stNameString ) == _svName ) {
 				vRet.push_back( I );
 			}
 		}
@@ -720,17 +696,17 @@ namespace lsx {
 	 * Gets the value of an attribute on a given element.
 	 *
 	 * \param _ptElement The element whose attributes are to be searched.
-	 * \param _sName The name of the attribute whose value is to be found.
-	 * \param _sRet Holds the returned value of the attribute.
+	 * \param _svName The name of the attribute whose value is to be found.
+	 * \param _svRet Holds the returned view of the attribute value.
 	 * \return Returns true if the given attribute was found on the given item.
 	 */
-	bool CXmlContainer::GetAttributeValue( const CTree<LSX_XML_ELEMENT> * _ptElement, const std::string &_sName, std::string &_sRet ) const {
-		_sRet.clear();
+	bool CXmlContainer::GetAttributeValue( const CTree<LSX_XML_ELEMENT> * _ptElement, std::string_view _svName, std::string_view &_svRet ) const {
+		_svRet = std::string_view();
 		if ( !_ptElement ) { return false; }
 		for ( auto I = _ptElement->Value().vAttributes.size(); I--; ) {
-			if ( GetString( _ptElement->Value().vAttributes[I].stNameString ) == _sName ) {
+			if ( GetString( _ptElement->Value().vAttributes[I].stNameString ) == _svName ) {
 				if ( _ptElement->Value().vAttributes[I].stValueString != size_t( -1 ) ) {
-					_sRet = GetString( _ptElement->Value().vAttributes[I].stValueString );
+					_svRet = GetString( _ptElement->Value().vAttributes[I].stValueString );
 				}
 				return true;
 			}
@@ -739,19 +715,19 @@ namespace lsx {
 	}
 
 	/**
-	 * Gets the data of an child element given its name.
+	 * Gets the data of a child element given its name.
 	 *
 	 * \param _ptParent The element whose child elements are to be searched.
-	 * \param _sName The name of the child element whose value is to be found.
-	 * \param _sRet Holds the returned data value of the element.
+	 * \param _svName The name of the child element whose value is to be found.
+	 * \param _svRet Holds the returned view of the element's data.
 	 * \return Returns true if the given child element was found on the given item.
 	 */
-	bool CXmlContainer::GetChildElementData( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName, std::string &_sRet ) const {
-		_sRet.clear();
+	bool CXmlContainer::GetChildElementData( const CTree<LSX_XML_ELEMENT> * _ptParent, std::string_view _svName, std::string_view &_svRet ) const {
+		_svRet = std::string_view();
 		if ( !_ptParent ) { return false; }
 		for ( size_t I = 0; I < _ptParent->Size(); ++I ) {
-			if ( GetString( _ptParent->GetChild( I )->Value().stNameString ) == _sName ) {
-				_sRet = _ptParent->GetChild( I )->Value().sData;
+			if ( GetString( _ptParent->GetChild( I )->Value().stNameString ) == _svName ) {
+				_svRet = _ptParent->GetChild( I )->Value().sData;
 				return true;
 			}
 		}
@@ -764,17 +740,13 @@ namespace lsx {
 	 * \param _mmDst The destination multi-map.
 	 * \return Returns true if there were no memory errors.
 	 */
-	bool CXmlContainer::GatherAttributes( std::multimap<std::string, std::string> &_mmDst ) {
+	bool CXmlContainer::GatherAttributes( std::multimap<std::string_view, std::string_view> &_mmDst ) {
 		try {
 			CTree<CXmlContainer::LSX_XML_ELEMENT> * ptItem = Next( nullptr );
 			while ( ptItem ) {
 				for ( size_t I = ptItem->Value().vAttributes.size(); I--; ) {
-					/*auto aThis = _mmDst.find( GetString( ptItem->Value().vAttributes[I].stNameString ) );
-					if ( aThis == _mmDst.end() ) {
-						aThis = _mmDst.insert( std::pair( GetString( ptItem->Value().vAttributes[I].stNameString ) );
-					}*/
 					if ( ptItem->Value().vAttributes[I].stValueString == size_t( -1 ) ) {
-						_mmDst.insert( std::pair( GetString( ptItem->Value().vAttributes[I].stNameString ), std::string() ) );
+						_mmDst.insert( std::pair( GetString( ptItem->Value().vAttributes[I].stNameString ), std::string_view() ) );
 					}
 					else {
 						_mmDst.insert( std::pair( GetString( ptItem->Value().vAttributes[I].stNameString ), GetString( ptItem->Value().vAttributes[I].stValueString ) ) );
@@ -794,20 +766,20 @@ namespace lsx {
 	 * \param _mDst The destination map.
 	 * \return Returns true if there were no memory errors.
 	 */
-	bool CXmlContainer::GatherAttributes( std::map<std::string, std::set<std::string>> &_mDst ) {
+	bool CXmlContainer::GatherAttributes( std::map<std::string_view, std::set<std::string_view>> &_mDst ) {
 		try {
 			CTree<CXmlContainer::LSX_XML_ELEMENT> * ptItem = Next( nullptr );
 			while ( ptItem ) {
 				for ( size_t I = ptItem->Value().vAttributes.size(); I--; ) {
 					auto aThis = _mDst.find( GetString( ptItem->Value().vAttributes[I].stNameString ) );
 					if ( aThis == _mDst.end() ) {
-						std::string sTmp = GetString( ptItem->Value().vAttributes[I].stNameString );
-						_mDst.insert( std::pair( sTmp, std::set<std::string>() ) );
+						std::string_view svTmp = GetString( ptItem->Value().vAttributes[I].stNameString );
+						_mDst.insert( std::pair( svTmp, std::set<std::string_view>() ) );
 						aThis = _mDst.find( GetString( ptItem->Value().vAttributes[I].stNameString ) );
 					}
 					if ( ptItem->Value().vAttributes[I].stValueString != size_t( -1 ) ) {
-						std::string sTmp = GetString( ptItem->Value().vAttributes[I].stValueString );
-						aThis->second.insert( sTmp );
+						std::string_view svTmp = GetString( ptItem->Value().vAttributes[I].stValueString );
+						aThis->second.insert( svTmp );
 					}
 				}
 
@@ -824,14 +796,14 @@ namespace lsx {
 	 * \param _mDst The destination map.
 	 * \return Returns true if there were no memory errors.
 	 */
-	bool CXmlContainer::GatherElements( std::map<std::string, std::set<std::string>> &_mDst ) {
+	bool CXmlContainer::GatherElements( std::map<std::string_view, std::set<std::string_view>> &_mDst ) {
 		try {
 			CTree<CXmlContainer::LSX_XML_ELEMENT> * ptItem = Next( nullptr );
 			while ( ptItem ) {
 				auto aThis = _mDst.find( GetString( ptItem->Value().stNameString ) );
 				if ( aThis == _mDst.end() ) {
-					std::string sTmp = GetString( ptItem->Value().stNameString );
-					_mDst.insert( std::pair( sTmp, std::set<std::string>() ) );
+					std::string_view svTmp = GetString( ptItem->Value().stNameString );
+					_mDst.insert( std::pair( svTmp, std::set<std::string_view>() ) );
 					aThis = _mDst.find( GetString( ptItem->Value().stNameString ) );
 				}
 				if ( ptItem->Value().sData.size() ) {
@@ -860,15 +832,15 @@ namespace lsx {
 	/**
 	 * Determines if a string is entirely whitespace.
 	 *
-	 * \param _sString The string to check.
+	 * \param _svString The string to check.
 	 * \return Returns true if the given string is entirely whitespace ([ \t\r\n]+).
 	 */
-	bool CXmlContainer::IsWhitespace( const std::string & _sString ) {
-		for ( auto I = _sString.size(); I--; ) {
-			if ( _sString[I] != ' ' &&
-				_sString[I] != '\t' &&
-				_sString[I] != '\r' &&
-				_sString[I] != '\n' ) { return false; }
+	bool CXmlContainer::IsWhitespace( std::string_view _svString ) {
+		for ( auto I = _svString.size(); I--; ) {
+			if ( _svString[I] != ' ' &&
+				_svString[I] != '\t' &&
+				_svString[I] != '\r' &&
+				_svString[I] != '\n' ) { return false; }
 		}
 		return true;
 	}

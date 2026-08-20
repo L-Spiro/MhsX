@@ -525,6 +525,8 @@ namespace lsw {
 	// WM_LBUTTONUP.
 	CWidget::LSW_HANDLED CMultiSplitter::LButtonUp( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
 		if ( m_pmlDragLayer ) {
+			lsw::CWidget::LSW_SETREDRAW srRedraw( this, false, true, RDW_INVALIDATE |
+				RDW_ERASE | RDW_UPDATENOW | RDW_ALLCHILDREN );
 			DrawBar( m_pLastPoint );
 			POINT pCurPos = { _pCursorPos.x, _pCursorPos.y };
 

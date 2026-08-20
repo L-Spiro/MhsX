@@ -43,6 +43,20 @@ namespace mx {
 		// WM_COMMAND from control.
 		virtual LSW_HANDLED					Command( WORD _wCtrlCode, WORD _Id, CWidget * _pwSrc );
 
+		/**
+		 * The WM_SIZE handler.
+		 *
+		 * \param _wParam The type of resizing requested.
+		 * \param _lWidth The new width of the client area.
+		 * \param _lHeight The new height of the client area.
+		 * \return Returns a LSW_HANDLED enumeration.
+		 */
+		virtual LSW_HANDLED					Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight ) {
+			lsw::CWidget::LSW_SETREDRAW srRedraw( this, false, true, RDW_INVALIDATE |
+				RDW_ERASE | RDW_UPDATENOW | RDW_ALLCHILDREN );
+			return lsw::CDockable::Size( _wParam, _lWidth, _lHeight );
+		}
+
 		// WM_COMMAND from menu.
 		virtual LSW_HANDLED					MenuCommand( WORD _Id );
 

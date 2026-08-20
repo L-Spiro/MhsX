@@ -29,34 +29,41 @@ namespace lsx {
 	 * \param _pcXml The NULL-terminated XML data.
 	 * \return Returns true if the XML data was successfully parsed.
 	 */
-	bool CXml::SetXml( const char * _pcXml ) {
+	bool CXml::SetXml( char * _pcXml ) {
 		Reset();
 		if ( !_pcXml ) { return false; }
 
 		std::istringstream isStream( _pcXml );
 
 		// Streams created.  Create the parsers.
-		std::unique_ptr<CXmlLexer> ppplLexer = std::make_unique<CXmlLexer>( &isStream, nullptr );
-		if ( !ppplLexer ) {
+		std::unique_ptr<CXmlLexer> pxlLexer = std::make_unique<CXmlLexer>( &isStream, nullptr );
+		if ( !pxlLexer ) {
+			return false;
+		}
+		struct yy_buffer_state * pbState = pxlLexer->ScanMemoryBuffer( const_cast<char *>(_pcXml), std::strlen( _pcXml ) + 2 );
+		if ( !pbState ) {
+			pxlLexer->yy_delete_buffer( pbState );
 			return false;
 		}
 
-		m_pxcContainer = new( std::nothrow ) CXmlContainer( ppplLexer.get() );
+		m_pxcContainer = new( std::nothrow ) CXmlContainer( pxlLexer.get() );
 
-		std::unique_ptr<CXmlParser> ppppParser = std::make_unique<CXmlParser>( ppplLexer.get(), m_pxcContainer );
+		std::unique_ptr<CXmlParser> ppppParser = std::make_unique<CXmlParser>( pxlLexer.get(), m_pxcContainer );
 		if ( !ppppParser ) {
+			pxlLexer->yy_delete_buffer( pbState );
 			Reset();
 			return false;
 		}
 
 
 		if ( ppppParser->parse() == 0 ) {
-			//m_pxcContainer->PrintNode( m_pxcContainer->Root(), 0 );
+			pxlLexer->yy_delete_buffer( pbState );
 			m_pxcContainer->BuildTree();
 			//m_pxcContainer->PrintTree();
 			// Parsed.
 			return true;
 		}
+		pxlLexer->yy_delete_buffer( pbState );
 		Reset();
 		return false;
 	}

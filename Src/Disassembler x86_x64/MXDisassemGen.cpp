@@ -10,11 +10,11 @@ namespace mx {
 
 	// Loads the XML file containing all of the instructions.
 	bool CDisassemGen::LoadXml( const wchar_t * _pwcFile ) {
-		std::vector<uint8_t> vBytes;
-		CFile::LoadToMemory( _pwcFile, vBytes );
-		vBytes.push_back( 0 );
+		CFile::LoadToMemory( _pwcFile, m_vBytes );
+		m_vBytes.push_back( 0 );
+		m_vBytes.push_back( 0 );
 
-		return m_xXml.SetXml( (const char *)(vBytes.data()) );
+		return m_xXml.SetXml( reinterpret_cast<char *>(m_vBytes.data()) );
 	}
 
 	// Prints the XML tree.
@@ -33,10 +33,10 @@ namespace mx {
 	void CDisassemGen::GenerateGroupMasks() {
 #ifdef _DEBUG
 		if ( GetContainer() ) {
-			std::map<std::string, std::set<std::string>> mMap;
+			std::map<std::string_view, std::set<std::string_view>> mMap;
 			GetContainer()->GatherElements( mMap );
 
-			std::set<std::string> sMerged;
+			std::set<std::string_view> sMerged;
 			auto aGrp = mMap["grp1"];
 			for ( auto I = aGrp.begin(); I != aGrp.end(); ++I ) {
 				sMerged.insert( (*I) );
@@ -74,7 +74,7 @@ namespace mx {
 	void CDisassemGen::GenerateInstExt() {
 #ifdef _DEBUG
 		if ( GetContainer() ) {
-			std::map<std::string, std::set<std::string>> mMap;
+			std::map<std::string_view, std::set<std::string_view>> mMap;
 			GetContainer()->GatherElements( mMap );
 			auto aGrp = mMap["instr_ext"];
 			std::string sResult;
@@ -100,7 +100,7 @@ namespace mx {
 	void CDisassemGen::GenerateOperandAddressFlags() {
 #ifdef _DEBUG
 		if ( GetContainer() ) {
-			std::map<std::string, std::set<std::string>> mAddr, mAttri;
+			std::map<std::string_view, std::set<std::string_view>> mAddr, mAttri;
 			GetContainer()->GatherElements( mAddr );
 			GetContainer()->GatherAttributes( mAttri );
 			struct MX_REPLACEMENTS {
@@ -141,7 +141,7 @@ namespace mx {
 				{ "Y",	"MDI" },				// Memory addressed by the ES:eDI or by RDI (only MOVS, CMPS, INS, STOS, and SCAS). In 64-bit mode, only 64-bit (RDI) and 32-bit (EDI) address sizes are supported. In non-64-bit modes, only 32-bit (EDI) and 16-bit (DI) address sizes are supported. The implicit ES segment register cannot be overriden by a segment prefix.
 				{ "Z",	"RCM" },				// The instruction has no ModR/M byte; the three least-significant bits of the opcode byte selects a general-purpose register.
 			};
-			auto lReplace = [&]( const std::string &_sReplaceMe ) {
+			auto lReplace = [&]( const std::string_view &_sReplaceMe ) {
 				for ( size_t J = std::size( rReplacements ); J--; ) {
 					if ( _sReplaceMe == rReplacements[J].pcSrc ) { return rReplacements[J].pcDst; }
 				}
@@ -156,14 +156,14 @@ namespace mx {
 			std::string sResult;
 			sResult += "MX_AM_NONE,\r\n";
 			for ( auto I = aGrp.begin(); I != aGrp.end(); ++I ) {
-				sResult += std::format( "MX_AM_{0},\r\n", CUtilities::ToUpper( lReplace( (*I) ) ) );
+				sResult += std::format( "MX_AM_{0},\r\n", CUtilities::ToUpper( std::string( lReplace( (*I) ) ) ) );
 			}
 			
 			::OutputDebugStringA( sResult.c_str() );
 
 			sResult = "static MX_ADDRESS_MODES					AddressModeToEnum( const std::string &_sVal ) {\r\n";
 			for ( auto I = aGrp.begin(); I != aGrp.end(); ++I ) {
-				sResult += std::format( "\tif ( _sVal == \"{1}\" ) {{ return MX_AM_{0}; }}\r\n", CUtilities::ToUpper( lReplace( (*I) ) ), (*I) );
+				sResult += std::format( "\tif ( _sVal == \"{1}\" ) {{ return MX_AM_{0}; }}\r\n", CUtilities::ToUpper( std::string( lReplace( (*I) ) ) ), (*I) );
 			}
 			sResult += "\treturn MX_AM_NONE;\r\n";
 			sResult += "}\r\n";
@@ -176,7 +176,7 @@ namespace mx {
 	void CDisassemGen::GenerateInstructionTable() {
 #ifdef _DEBUG
 		if ( GetContainer() ) {
-			std::map<std::string, std::set<std::string>> mAddr, mAttri;
+			std::map<std::string_view, std::set<std::string_view>> mAddr, mAttri;
 			GetContainer()->GatherElements( mAddr );
 			GetContainer()->GatherAttributes( mAttri );
 
@@ -187,10 +187,10 @@ namespace mx {
 				std::vector<size_t> vPrimary = GetContainer()->GatherChildElementIndices( ptThis, "pri_opcd" );
 				for ( size_t J = 0; J < vPrimary.size(); ++J ) {
 					lsx::CTree<lsx::CXmlContainer::LSX_XML_ELEMENT> * ptOp = ptThis->GetChild( vPrimary[J] );
-					std::string sValue;
+					std::string_view sValue;
 					MX_INSTRUCTION iInst;
 					if ( GetContainer()->GetAttributeValue( ptOp, "value", sValue ) ) {
-						iInst.ui16PrimaryOp = std::stoull( sValue.c_str(), nullptr, 16 );
+						iInst.ui16PrimaryOp = std::stoull( sValue.data(), nullptr, 16 );
 
 						std::vector<size_t> vEntry = GetContainer()->GatherChildElementIndices( ptOp, "entry" );
 						for ( size_t K = 0; K < vEntry.size(); ++K ) {
@@ -209,10 +209,10 @@ namespace mx {
 				std::vector<size_t> vPrimary = GetContainer()->GatherChildElementIndices( ptThis, "pri_opcd" );
 				for ( size_t J = 0; J < vPrimary.size(); ++J ) {
 					lsx::CTree<lsx::CXmlContainer::LSX_XML_ELEMENT> * ptOp = ptThis->GetChild( vPrimary[J] );
-					std::string sValue;
+					std::string_view sValue;
 					MX_INSTRUCTION iInst;
 					if ( GetContainer()->GetAttributeValue( ptOp, "value", sValue ) ) {
-						iInst.ui16PrimaryOp = std::stoull( sValue.c_str(), nullptr, 16 );
+						iInst.ui16PrimaryOp = std::stoull( sValue.data(), nullptr, 16 );
 						iInst.ui160FPrefix = 0x0F;
 						std::vector<size_t> vEntry = GetContainer()->GatherChildElementIndices( ptOp, "entry" );
 						for ( size_t K = 0; K < vEntry.size(); ++K ) {
@@ -232,7 +232,7 @@ namespace mx {
 #ifdef _DEBUG
 		MX_INSTRUCTION iInst = _iInstr;
 
-		std::string sValue;
+		std::string_view sValue;
 		{
 			lsx::CTree<lsx::CXmlContainer::LSX_XML_ELEMENT> * ptSyntax = GetContainer()->GetChildElement( _ptEntry, "syntax" );
 			if ( ptSyntax ) {
@@ -257,7 +257,7 @@ namespace mx {
 		}
 
 		if ( GetContainer()->GetChildElementData( _ptEntry, "pref", sValue ) ) {
-			iInst.ui16Prefix = std::stoull( sValue.c_str(), nullptr, 16 );
+			iInst.ui16Prefix = std::stoull( sValue.data(), nullptr, 16 );
 		}
 		if ( GetContainer()->GetChildElementData( _ptEntry, "grp1", sValue ) ) {
 			iInst.ui64Group |= uint64_t( GroupToEnum( sValue ) );

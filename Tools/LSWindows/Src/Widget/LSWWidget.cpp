@@ -1684,7 +1684,15 @@ namespace lsw {
 						LSW_RECT rTemp;
 						::GetWindowRect( _hWnd, &rTemp );
 						hHandled = pmwThis->Size( _wParam, rTemp.Width(), rTemp.Height() );
-						::RedrawWindow( _hWnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW );
+						bool bRedraw = true;
+						CWidget * pwParent = pmwThis;
+						while ( pwParent ) {
+							if ( 0 == pwParent->GetSetRedrawCount() ) { bRedraw = false; break; }
+							pwParent = pwParent->Parent();
+						}
+						if ( bRedraw ) {
+							::RedrawWindow( _hWnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW );
+						}
 					}
 				}
 				// If an application processes this message, it should return zero.

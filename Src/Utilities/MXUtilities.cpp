@@ -2934,11 +2934,29 @@ namespace mx {
 		return sRet;
 	}
 
+	// Upper-cases an ASCII string.
+	std::string CUtilities::ToUpper( const std::string_view &_svInput ) {
+		std::string sRet;
+		for ( size_t I = 0; I < _svInput.size(); ++I ) {
+			sRet.push_back( std::toupper( _svInput[I] ) );
+		}
+		return sRet;
+	}
+
 	// Lower-cases an ASCII string.
 	std::string CUtilities::ToLower( const std::string &_sInput ) {
 		std::string sRet;
 		for ( size_t I = 0; I < _sInput.size(); ++I ) {
 			sRet.push_back( std::tolower( _sInput[I] ) );
+		}
+		return sRet;
+	}
+
+	// Lower-cases an ASCII string.
+	std::string CUtilities::ToLower( const std::string_view &_svInput ) {
+		std::string sRet;
+		for ( size_t I = 0; I < _svInput.size(); ++I ) {
+			sRet.push_back( std::tolower( _svInput[I] ) );
 		}
 		return sRet;
 	}

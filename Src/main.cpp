@@ -22,9 +22,9 @@
 int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine, int _nCmdShow ) {
 #ifdef MX_XML_TEST
 	mx::CDisassemGen dgGen;
-	if ( dgGen.LoadXml( L"J:\\My Projects\\MHS X\\Research\\x86reference.xml" ) ) {
+	if ( dgGen.LoadXml( L"C:\\My Projects\\MhsX\\Research\\x86reference.xml" ) ) {
 		dgGen.PrintTree();
-		std::map<std::string, std::set<std::string>> mmMap;
+		std::map<std::string_view, std::set<std::string_view>> mmMap;
 		dgGen.GetContainer()->GatherElements( mmMap );
 		mmMap.clear();
 		dgGen.GetContainer()->GatherAttributes( mmMap );

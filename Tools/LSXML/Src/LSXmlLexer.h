@@ -25,6 +25,17 @@ namespace lsx {
 		}
 
 
+		// == Functions.
+		/**
+		 * Scans directly from a contiguous block of memory.
+		 * The buffer MUST end with two NUL ('\0') bytes.
+		 *
+		 * \param _pcBase The contiguous block of memory to scan.
+		 * \param _stSize The total size of the memory block, including the two NUL bytes.
+		 * \return Returns the new buffer state, or nullptr if the buffer is invalid.
+		 */
+		struct yy_buffer_state *						ScanMemoryBuffer( char * _pcBase, size_t _stSize );
+
 	protected :
 		// == Members.
 		// The container that handles collection of all of the script data.

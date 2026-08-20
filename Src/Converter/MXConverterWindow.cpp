@@ -219,6 +219,9 @@ namespace mx {
 
 	// WM_INITDIALOG.
 	CWidget::LSW_HANDLED CConverterWindow::InitDialog() {
+		lsw::CWidget::LSW_SETREDRAW srRedraw( this, false, true, RDW_INVALIDATE |
+			RDW_ERASE | RDW_UPDATENOW | RDW_ALLCHILDREN );
+
 		LONG lStyle = ::GetWindowLongW( Wnd(), GWL_STYLE ) & ~WS_CLIPCHILDREN;
 		::SetWindowLongW( Wnd(), GWL_STYLE, lStyle );
 

@@ -34,7 +34,7 @@ namespace lsx {
 		 * \param _pcXml The NULL-terminated XML data.
 		 * \return Returns true if the XML data was successfully parsed.
 		 */
-		bool										SetXml( const char * _pcXml );
+		bool										SetXml( char * _pcXml );
 
 		/**
 		 * Gets the container pointer.

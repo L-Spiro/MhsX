@@ -7,6 +7,8 @@
 
 #include <map>
 #include <set>
+#include <string_view>
+#include <vector>
 
 
 namespace lsx {
@@ -28,7 +30,7 @@ namespace lsx {
 		/** The public attibute structure. */
 		struct LSX_XML_ATTRIBUTE {
 			size_t										stNameString = size_t( -1 );			/**< Use GetString() to get the name of the attribute. */
-			size_t										stValueString = size_t( -1 );			/**< Use GetString() to get the name of the attribute value (unles sit is size_t( -1 )). */
+			size_t										stValueString = size_t( -1 );			/**< Use GetString() to get the name of the attribute value (unless it is size_t( -1 )). */
 		};
 
 		/** The public node structure. */
@@ -43,42 +45,42 @@ namespace lsx {
 		/**
 		 * Adds a string and returns its index into the stack.
 		 *
-		 * \param _sText The string to add or whose existing index is to be found.
+		 * \param _svText The string to add or whose existing index is to be found.
 		 * \return Returns the index of the added string.
 		 */
-		size_t											AddString( const std::string &_sText );
+		size_t											AddString( std::string_view _svText );
 
 		/**
-		 * A value is a string with quotes around it.  After the quotes are removed, this behaves as AddString().
+		 * A value is a string with quotes around it. After the quotes are removed, this behaves as AddString().
 		 *
-		 * \param _sText The string to add or whose existing index is to be found.
+		 * \param _svText The string to add or whose existing index is to be found.
 		 * \return Returns the index of the added string after stripping the enclosing quotes from it.
 		 */
-		size_t											AddValue( const std::string &_sText );
+		size_t											AddValue( std::string_view _svText );
 
 		/**
 		 * Returns the index of a string or -1 if it does not exist.
 		 *
-		 * \param _sText The string to find.
+		 * \param _svText The string to find.
 		 * \return Returns the index of the string if it exists or size_t( -1 ).
 		 */
-		size_t											FindString( const std::string &_sText ) const;
+		size_t											FindString( std::string_view _svText ) const;
 
 		/**
-		 * Gets a reference to a string by index.
+		 * Gets a view to a string by index.
 		 *
 		 * \param _stIdx String index.
-		 * \return Returns a constant reference to the string given its index.
+		 * \return Returns a constant string_view given its index.
 		 */
-		const std::string								GetString( size_t _stIdx ) const { return m_vStrings[_stIdx]; }
+		std::string_view								GetString( size_t _stIdx ) const { return m_vStrings[_stIdx]; }
 
 		/**
 		 * Creates an attribute start string.
 		 *
-		 * \param _sText The name of the attribute.
+		 * \param _svText The name of the attribute.
 		 * \return Returns the index of the string created.
 		 */
-		size_t											AddAttributeStart( const std::string &_sText );
+		size_t											AddAttributeStart( std::string_view _svText );
 
 		/**
 		 * Creates an attribute node.
@@ -274,56 +276,48 @@ namespace lsx {
 		 * Gets the first child element by name.
 		 *
 		 * \param _ptParent The node whose children are to be scanned for elements matching the given name.
-		 * \param _sName The name of the child element to find.
-		 * \return Returns a pointer to the child element of te given name or nullptr if there is none.
+		 * \param _svName The name of the child element to find.
+		 * \return Returns a pointer to the child element of the given name or nullptr if there is none.
 		 */
-		const CTree<LSX_XML_ELEMENT> *					GetChildElement( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName ) const;
+		const CTree<LSX_XML_ELEMENT> *					GetChildElement( const CTree<LSX_XML_ELEMENT> * _ptParent, std::string_view _svName ) const;
 
 		/**
 		 * Gets the first child element by name.
 		 *
 		 * \param _ptParent The node whose children are to be scanned for elements matching the given name.
-		 * \param _sName The name of the child element to find.
-		 * \return Returns a pointer to the child element of te given name or nullptr if there is none.
+		 * \param _svName The name of the child element to find.
+		 * \return Returns a pointer to the child element of the given name or nullptr if there is none.
 		 */
-		CTree<LSX_XML_ELEMENT> *						GetChildElement( CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName );
+		CTree<LSX_XML_ELEMENT> *						GetChildElement( CTree<LSX_XML_ELEMENT> * _ptParent, std::string_view _svName );
 
 		/**
 		 * Gathers the indices of children nodes (non-recursively) whose element names match the given name.
 		 *
 		 * \param _ptParent The node whose children are to be scanned for elements matching the given name.
-		 * \param _sName The name of the children elements to gather.
-		 * \return Returns an array of indices indicating the children of _ptParent whose element names match _sName.
+		 * \param _svName The name of the children elements to gather.
+		 * \return Returns an array of indices indicating the children of _ptParent whose element names match _svName.
 		 */
-		std::vector<size_t>								GatherChildElementIndices( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName ) const;
+		std::vector<size_t>								GatherChildElementIndices( const CTree<LSX_XML_ELEMENT> * _ptParent, std::string_view _svName ) const;
 
 		/**
 		 * Gets the value of an attribute on a given element.
 		 *
 		 * \param _ptElement The element whose attributes are to be searched.
-		 * \param _sName The name of the attribute whose value is to be found.
-		 * \param _sRet Holds the returned value of the attribute.
+		 * \param _svName The name of the attribute whose value is to be found.
+		 * \param _svRet Holds the returned view of the attribute value.
 		 * \return Returns true if the given attribute was found on the given item.
 		 */
-		bool											GetAttributeValue( const CTree<LSX_XML_ELEMENT> * _ptElement, const std::string &_sName, std::string &_sRet ) const;
+		bool											GetAttributeValue( const CTree<LSX_XML_ELEMENT> * _ptElement, std::string_view _svName, std::string_view &_svRet ) const;
 
 		/**
-		 * Gets the data of an child element given its name.
+		 * Gets the data of a child element given its name.
 		 *
 		 * \param _ptParent The element whose child elements are to be searched.
-		 * \param _sName The name of the child element whose value is to be found.
-		 * \param _sRet Holds the returned data value of the element.
+		 * \param _svName The name of the child element whose value is to be found.
+		 * \param _svRet Holds the returned view of the element's data.
 		 * \return Returns true if the given child element was found on the given item.
 		 */
-		bool											GetChildElementData( const CTree<LSX_XML_ELEMENT> * _ptParent, const std::string &_sName, std::string &_sRet ) const;
-
-		/**
-		 * Gets the data associated with a given element.
-		 *
-		 * \param _ptElement The element whose data is to be returned.
-		 * \param PARM Holds the return value of the element’s data if true is returned.
-		 * \return Returns true 
-		 */
+		bool											GetChildElementData( const CTree<LSX_XML_ELEMENT> * _ptParent, std::string_view _svName, std::string_view &_svRet ) const;
 
 		/**
 		 * Gathers every attribute and their values into a multi-map.
@@ -331,7 +325,7 @@ namespace lsx {
 		 * \param _mmDst The destination multi-map.
 		 * \return Returns true if there were no memory errors.
 		 */
-		bool											GatherAttributes( std::multimap<std::string, std::string> &_mmDst );
+		bool											GatherAttributes( std::multimap<std::string_view, std::string_view> &_mmDst );
 
 		/**
 		 * Gathers every attribute and their values into a map.
@@ -339,7 +333,7 @@ namespace lsx {
 		 * \param _mDst The destination map.
 		 * \return Returns true if there were no memory errors.
 		 */
-		bool											GatherAttributes( std::map<std::string, std::set<std::string>> &_mDst );
+		bool											GatherAttributes( std::map<std::string_view, std::set<std::string_view>> &_mDst );
 
 		/**
 		 * Gathers every element and their data values into a map.
@@ -347,7 +341,7 @@ namespace lsx {
 		 * \param _mDst The destination map.
 		 * \return Returns true if there were no memory errors.
 		 */
-		bool											GatherElements( std::map<std::string, std::set<std::string>> &_mDst );
+		bool											GatherElements( std::map<std::string_view, std::set<std::string_view>> &_mDst );
 
 
 	protected :
@@ -357,7 +351,7 @@ namespace lsx {
 		/** The stack of nodes. */
 		std::vector<YYSTYPE::LSX_NODE>					m_vNodes;
 		/** The stack of UTF-8 strings. */
-		std::vector<std::string>						m_vStrings;
+		std::vector<std::string_view>					m_vStrings;
 		/** The resulting tree. */
 		CTree<LSX_XML_ELEMENT>							m_tRoot;
 		/** The base node. */
@@ -396,10 +390,10 @@ namespace lsx {
 		/**
 		 * Determines if a string is entirely whitespace.
 		 *
-		 * \param _sString The string to check.
+		 * \param _svString The string to check.
 		 * \return Returns true if the given string is entirely whitespace ([ \t\r\n]+).
 		 */
-		bool											IsWhitespace( const std::string & _sString );
+		bool											IsWhitespace( std::string_view _svString );
 
 		/**
 		 * Prints the tree recursively.

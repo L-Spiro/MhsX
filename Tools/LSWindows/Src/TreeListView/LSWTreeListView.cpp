@@ -1086,7 +1086,13 @@ namespace lsw {
 	 * \return Returns a HANDLED code.
 	 */
 	CWidget::LSW_HANDLED CTreeListView::Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight ) {
+		bool bRedraw = (::GetWindowLongW( Wnd(), GWL_STYLE ) & WS_VISIBLE) != 0;
+		if ( bRedraw ) {
+			::SendMessageW( Wnd(), WM_SETREDRAW, FALSE, 0 );
+		}
+
 		CWidget::Size( _wParam, _lWidth, _lHeight );
+
 		INT iCols = GetColumnCount();
 		if ( iCols > 0 && !m_bAutoResizing ) {
 			m_bAutoResizing = true;
@@ -1101,7 +1107,6 @@ namespace lsw {
 			}
 
 			LONG lRemaining = _lWidth - lTotalExceptLast;
-			
 			LONG lTargetWidth = lRemaining > m_lLastColBaseWidth ? lRemaining : m_lLastColBaseWidth;
 
 			if ( ListView_GetColumnWidth( Wnd(), iCols - 1 ) != lTargetWidth ) {
@@ -1109,6 +1114,11 @@ namespace lsw {
 			}
 
 			m_bAutoResizing = false;
+		}
+
+		if ( bRedraw ) {
+			::SendMessageW( Wnd(), WM_SETREDRAW, TRUE, 0 );
+			::RedrawWindow( Wnd(), NULL, NULL, RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN );
 		}
 
 		return LSW_H_CONTINUE;
@@ -1563,10 +1573,34 @@ namespace lsw {
 	 * Updates the list view (clears the cache, sets the size, and updates selections/hot).
 	 */
 	void CTreeListView::UpdateListView() {
-		LSW_SETREDRAW srRedraw( this );
 		ClearCache();
 		size_t stTotal = CountExpanded();
-		const_cast<CTreeListView *>(this)->SetItemCount( static_cast<INT>(stTotal) );
+		INT iNewCount = static_cast<INT>( stTotal );
+		INT iCurrentCount = ListView_GetItemCount( Wnd() );
+
+		if ( iNewCount < iCurrentCount ) {
+			INT iTopIndex = ListView_GetTopIndex( Wnd() );
+			INT iPerPage = ListView_GetCountPerPage( Wnd() );
+			
+			INT iMaxTop = iNewCount - iPerPage;
+			if ( iMaxTop < 0 ) { iMaxTop = 0; }
+
+			// If the current view is stranded past the new boundary, force the view up.
+			if ( iTopIndex > iMaxTop ) {
+				if ( iMaxTop == 0 ) {
+					// If we are shrinking to less than a single page, slam the view to the top.
+					::SendMessageW( Wnd(), WM_VSCROLL, MAKEWPARAM( SB_TOP, 0 ), 0 );
+				}
+				else {
+					ListView_EnsureVisible( Wnd(), iMaxTop, FALSE );
+				}
+			}
+		}
+
+		// Now it is safe to apply the new item count. The view is within valid bounds.
+		const_cast<CTreeListView *>(this)->SetItemCount( iNewCount );
+
+		LSW_SETREDRAW srRedraw( this );
 
 		UnfocusCollapsed();
 		size_t stHighlighted = FindHighlighted();
@@ -1773,7 +1807,9 @@ namespace lsw {
 								}
 
 								if ( wpOrig ) {
-									LRESULT lRes = ::CallWindowProcW( wpOrig, _hWnd, _uMsg, _wParam, _lParam );
+									//LRESULT lRes = ::CallWindowProcW( wpOrig, _hWnd, _uMsg, _wParam, _lParam );
+									LRESULT lRes = CWidget::WindowProc( _hWnd, _uMsg, _wParam, _lParam );
+									lRes = ::CallWindowProcW( wpOrig, _hWnd, _uMsg, _wParam, _lParam );
 									
 									LSW_RECT rClient;
 									::GetClientRect( _hWnd, &rClient );
