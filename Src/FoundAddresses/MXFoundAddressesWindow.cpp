@@ -189,6 +189,10 @@ namespace mx {
 				CopySelectedText();
 				break;
 			}
+			case CFoundAddressLayout::MX_BC_SHOW_IN_HEX_EDITOR : {
+				ShowInHexEditor();
+				break;
+			}
 		}
 		return LSW_H_CONTINUE;
 	}
@@ -621,6 +625,29 @@ namespace mx {
 		}
 	}
 
+	// Shows the selected addresses in the Hex Editor.
+	void CFoundAddressesWindow::ShowInHexEditor() const {
+		const CFoundAddressesListView * plvAddressList = static_cast<const CFoundAddressesListView *>(ListView());
+		if ( plvAddressList ) {
+			std::vector<int> vSelections;
+			if ( plvAddressList->GetSelectedItems( vSelections ) ) {
+				for ( size_t I = 0; I < vSelections.size(); I++ ) {
+					if ( !m_pmmwMhsWindow->HexEditor() ) {
+						m_pmmwMhsWindow->ShowDeusHexMachina();
+					}
+					
+					if ( m_pmmwMhsWindow->HexEditor() ) {
+						CSecureWString swsString;
+						plvAddressList->GetAddressText( swsString, vSelections[I] );
+						CSecureString swTmp = ee::CExpEval::ToUtf8( swsString );
+						m_pmmwMhsWindow->HexEditor()->OpenCurProcess( ee::CExpEval::StoULL( swTmp.c_str(), 16 ) );
+					}
+					
+				}
+			}
+		}
+	}
+
 	// Gets the index of the current-value header or -1.
 	int CFoundAddressesWindow::CurValIndex() const {
 		if ( m_pmmwMhsWindow->MemHack()->Searcher().LastSearchType() != CUtilities::MX_ST_STRING_SEARCH &&
@@ -662,6 +689,8 @@ namespace mx {
 					{ FALSE,		CFoundAddressLayout::MX_BC_COPY_VALUE,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_43A1870B_Copy__Value, _LEN_43A1870B ),			FALSE },
 					{ FALSE,		CFoundAddressLayout::MX_BC_COPY_CUR_VALUE,				FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_C0FE03C5_Copy__Current_Value, _LEN_C0FE03C5 ),	CurValIndex() == -1 },
 					{ FALSE,		CFoundAddressLayout::MX_BC_COPY_ALL,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_9B7D368F_Copy_A_ll, _LEN_9B7D368F ),			FALSE },
+					{ TRUE,			0,														FALSE,		FALSE,		FALSE,				nullptr,  0,													sSelected == 0 },
+					{ FALSE,		CFoundAddressLayout::MX_BC_SHOW_IN_HEX_EDITOR,			FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_393BB253_Show_in__Hex_Editor, _LEN_393BB253 ),	sSelected == 0 },
 				};
 
 				const LSW_MENU_LAYOUT miMenus[] = {
@@ -672,13 +701,6 @@ namespace mx {
 						std::size( miMenuBar ),
 						miMenuBar
 					},
-					/*{
-						MX_MWMI_MENU_FILE,
-						MX_MWMI_MENU_BAR,
-						MX_MWMI_FILE,
-						std::size( m_miFileMenu ),
-						m_miFileMenu
-					},*/
 				};
 				mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
 				plmLayout->CreatePopupMenuEx( this, miMenus, std::size( miMenus ), _iX, _iY );

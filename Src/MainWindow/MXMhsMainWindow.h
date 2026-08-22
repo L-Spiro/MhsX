@@ -174,6 +174,9 @@ namespace mx {
 		// Gets the Found Addresses.
 		CFoundAddressesWindow *				FoundAddresses() { return m_pfaFoundAddresses; }
 
+		// Gets the Hex Editor.
+		CDeusHexMachinaWindow *				HexEditor() { return m_pdhmwDeusHexMachinaWindow; }
+
 		// Virtual client rectangle.  Can be used for things that need to be adjusted based on whether or not status bars, toolbars, etc. are present.
 		virtual const LSW_RECT				VirtualClientRect( const CWidget * pwChild ) const;
 
@@ -285,6 +288,9 @@ namespace mx {
 
 		// Copy the selected addresses to the clipboard.
 		void								CopySelectedAddresses();
+
+		// Show selected in the Hex Editor.
+		void								ShowSelectedInHexEditor();
 
 		// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
 		bool								OpenProcess();

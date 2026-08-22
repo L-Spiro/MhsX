@@ -96,6 +96,9 @@ namespace mx {
 		// Copies the selected rows' text.
 		void								CopySelectedText() const;
 
+		// Shows the selected addresses in the Hex Editor.
+		void								ShowInHexEditor() const;
+
 		// Gets the index of the current-value header or -1.
 		int									CurValIndex() const;
 

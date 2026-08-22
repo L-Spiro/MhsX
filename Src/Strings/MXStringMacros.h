@@ -23167,3 +23167,12 @@
 #define _DEC_S_4AF2000B_Show_Deus_Hex_Machina mx::CStringDecoder::DecodeToString( _T_4AF2000B_Show_Deus_Hex_Machina, _LEN_4AF2000B )
 #define _DEC_WS_4AF2000B_Show_Deus_Hex_Machina mx::CStringDecoder::DecodeToWString( _T_4AF2000B_Show_Deus_Hex_Machina, _LEN_4AF2000B )
 
+// Show in &Hex Editor
+
+#define _T_393BB253_Show_in__Hex_Editor "\xDB\x36\x3F\x12\xB2\x32\xFC\xE7\xF6\x10\x2E\x46\xB2\xE0\x2B\xF1\x42\x3F\x0D"
+#define _LEN_393BB253 19
+#define _T_LEN_393BB253_Show_in__Hex_Editor _T_393BB253_Show_in__Hex_Editor, _LEN_393BB253
+#define _DEC_393BB253_Show_in__Hex_Editor( STR ) mx::CStringDecoder::Decode( _T_393BB253_Show_in__Hex_Editor, _LEN_393BB253, STR )
+#define _DEC_S_393BB253_Show_in__Hex_Editor mx::CStringDecoder::DecodeToString( _T_393BB253_Show_in__Hex_Editor, _LEN_393BB253 )
+#define _DEC_WS_393BB253_Show_in__Hex_Editor mx::CStringDecoder::DecodeToWString( _T_393BB253_Show_in__Hex_Editor, _LEN_393BB253 )
+

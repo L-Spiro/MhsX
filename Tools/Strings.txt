@@ -2082,6 +2082,7 @@
 "Move Selected Addresses"
 "Set “Move Selected Addresses” -> “Where the Address &Was” Address"
 "Mo&ve Selected Addresses"
+"Show in &Hex Editor"
 "From -> To"
 "By"
 "Specific Amount"

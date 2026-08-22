@@ -96,6 +96,9 @@ namespace mx {
 		// Default starting address.
 		virtual uint64_t					DefaultAddress() const { return 0; }
 
+		// Sets the default starting address.
+		virtual void						SetDefaultAddress( uint64_t /*_ui64Addr*/ ) {}
+
 		// Does the given range of addresses contain anything real-time?
 		virtual bool						RangeContainsRealTime( uint64_t _ui64Start, uint64_t _ui64Total ) const { return false; }
 

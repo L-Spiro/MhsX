@@ -38,6 +38,8 @@ namespace mx {
 			MX_BC_COPY_VALUE,
 			MX_BC_COPY_CUR_VALUE,
 			MX_BC_COPY_ALL,
+
+			MX_BC_SHOW_IN_HEX_EDITOR,
 		};
 
 

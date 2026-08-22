@@ -95,7 +95,7 @@ namespace mx {
 
 	// Default starting address.
 	uint64_t CHexEditorCurProcess::DefaultAddress() const {
-		return Process().GetMainModuleBase_PEB();
+		return m_ui64StartAddress == UINT64_MAX ? Process().GetMainModuleBase_PEB() : m_ui64StartAddress;
 	}
 
 	// Does the given range of addresses contain anything real-time?

@@ -446,6 +446,10 @@ namespace mx {
 				CopySelectedAddresses();
 				break;
 			}
+			case Layout::MX_MWMI_SHOW_IN_HEX_EDITOR : {
+				ShowSelectedInHexEditor();
+				break;
+			}
 			case Layout::MX_MWMI_EXIT : {
 				if ( Destroy() == LSW_H_CONTINUE ) {
 					NcDestroy();
@@ -1026,6 +1030,35 @@ namespace mx {
 		}
 	}
 
+	// Show selected in the Hex Editor.
+	void CMhsMainWindow::ShowSelectedInHexEditor() {
+		try {
+			auto pwTree = MainTreeView();
+			if ( pwTree ) {
+				std::vector<LPARAM> vSelected;
+				if ( pwTree->GatherSelectedLParam( vSelected, true ) >= 1 ) {		// At least one thing is selected.
+					if ( !m_pdhmwDeusHexMachinaWindow ) {
+						ShowDeusHexMachina();
+					}
+					if ( m_pdhmwDeusHexMachinaWindow ) {
+						auto famMan = m_pmhMemHack->FoundAddressManager();			// Locks the Found Address Manager for modifications.
+						for ( size_t I = 0; I < vSelected.size(); ++I ) {
+							auto pfabThis = famMan->GetById( size_t( vSelected[I] ) );
+							if ( pfabThis && pfabThis->Type() == MX_FAT_FOUND_ADDRESS ) {
+								auto ui64Addr = reinterpret_cast<CFoundAddress *>(pfabThis)->FinalAddress();
+								if ( !m_pdhmwDeusHexMachinaWindow->OpenCurProcess( ui64Addr ) ) {
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		catch ( ... ) {
+			// TODO: Display Error.
+		}
+	}
+
 	// Handles opening a process via the Open Process dialog (returns true if a process was actually opened).
 	bool CMhsMainWindow::OpenProcess() {
 		MX_OPTIONS oOptions = m_pmhMemHack->Options();
@@ -1468,6 +1501,8 @@ namespace mx {
 						{ FALSE,		Layout::MX_MWMI_SET_MOVE_ADDRESS_SOURCE,		FALSE,		FALSE,		iCaret != -1,		MW_MENU_TXT( _T_EA7D6530_Set____Move_Selected_Addresses__________Where_the_Address__Was____Address, _LEN_EA7D6530 ),		FALSE },	// &W
 						{ FALSE,		Layout::MX_MWMI_COPY_ADDRESS,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_B1221868__Copy_Selected_Addresses, _LEN_B1221868 ),															FALSE },	// &C
 						{ FALSE,		Layout::MX_MWMI_MOVE_ADDRESS,					FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_40D39513_Mo_ve_Selected_Addresses, _LEN_40D39513 ),															FALSE },	// &V
+						{ TRUE,			0,												FALSE,		FALSE,		FALSE,				nullptr,  0,																												FALSE },
+						{ FALSE,		Layout::MX_MWMI_SHOW_IN_HEX_EDITOR,				FALSE,		FALSE,		sSelected != 0,		MW_MENU_TXT( _T_393BB253_Show_in__Hex_Editor, _LEN_393BB253 ),																FALSE },	// &H
 					};
 
 					const LSW_MENU_LAYOUT miMenus[] = {

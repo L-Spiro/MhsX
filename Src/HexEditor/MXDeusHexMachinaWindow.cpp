@@ -31,6 +31,7 @@ namespace mx {
 		} sImages[] = {
 			{ L"fn",			MX_I_NEW },
 			{ L"fo",			MX_I_OPENFILE },
+			{ L"cp",			MX_I_CURPROC },
 			{ L"fs",			MX_I_SAVE },
 			{ L"fsa",			MX_I_SAVEAS },
 			{ L"sa",			MX_I_SAVEALL },
@@ -114,6 +115,7 @@ namespace mx {
 			// iBitmap							idCommand									fsState				fsStyle			bReserved	dwData	iString
 			{ m_iImageMap[MX_I_NEW],			Layout::MX_M_FILE_NEW,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"New" ) },
 			{ m_iImageMap[MX_I_OPENFILE],		Layout::MX_M_FILE_OPENFILE,					TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Open" ) },
+			{ m_iImageMap[MX_I_CURPROC],		Layout::MX_M_FILE_OPENCURPROCESS,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Current Process" ) },
 			{ m_iImageMap[MX_I_SAVE],			Layout::MX_M_FILE_SAVE,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Save" ) },
 			{ m_iImageMap[MX_I_SAVEAS],			Layout::MX_M_FILE_SAVE_AS,					TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Save As" ) },
 			{ m_iImageMap[MX_I_SAVEALL],		Layout::MX_M_FILE_SAVE_ALL,					TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Save All" ) },
@@ -1705,6 +1707,7 @@ namespace mx {
 
 				// Transfer ownership into shared_ptr<base>.
 				spInterface = std::shared_ptr<CHexEditorInterface>( upIfc.release() );
+				spInterface->SetDefaultAddress( _ui64StartAddress );
 			}
 			if ( !static_cast<CHexEditorCurProcess *>(spInterface.get())->Process().ProcIsOpened() ) {
 				//delete pheiInterface;
