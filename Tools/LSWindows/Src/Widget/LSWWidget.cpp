@@ -1691,7 +1691,7 @@ namespace lsw {
 							pwParent = pwParent->Parent();
 						}
 						if ( bRedraw ) {
-							::RedrawWindow( _hWnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW );
+							::RedrawWindow( _hWnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN /*| RDW_UPDATENOW*/ );
 						}
 					}
 				}
@@ -1753,9 +1753,6 @@ namespace lsw {
 					switch ( HIWORD( _wParam ) ) {
 						case BN_CLICKED : {
 							hHandled = pmwThis->MenuCommand( wId );
-							/*if ( LSW_H_CONTINUE == hHandled ) {
-								hHandled = pmwThis->Command( HIWORD( _wParam ), wId, nullptr );
-							}*/
 							break;
 						}
 						case 1 : {

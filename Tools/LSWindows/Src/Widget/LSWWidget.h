@@ -1482,7 +1482,12 @@ namespace lsw {
 		 * \param _hDevice Handle to the raw input device.
 		 * \return Returns a LSW_HANDLED code.
 		 */
-		virtual LSW_HANDLED					InputDeviceChanged( INT /*_iNotifCode*/, HANDLE /*_hDevice*/ ) { return LSW_H_CONTINUE; }
+		virtual LSW_HANDLED					InputDeviceChanged( INT _iNotifCode, HANDLE _hDevice ) {
+			for ( size_t I = 0; I < m_vChildren.size(); ++I ) {
+				if ( LSW_H_HANDLED == m_vChildren[I]->InputDeviceChanged( _iNotifCode, _hDevice ) ) { return LSW_H_HANDLED; }
+			}
+			return LSW_H_CONTINUE;
+		}
 
 		/**
 		 * Handles WM_GETDLGCODE.
