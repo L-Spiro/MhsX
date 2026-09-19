@@ -587,6 +587,32 @@ namespace lsw {
 		::SendMessageW( Wnd(), LVM_DELETEALLITEMS, 0, 0 );
 	}
 
+	
+
+	/**
+	 * Snaps the column widths to the control width bi adjusting the given column's width.
+	 * 
+	 * \param _iCol The index of the column whose width is to be adjusted to make the columns fit perfectly into the control width.
+	 * \return Returns the new width of the given column if it exists or -1 if it does not.
+	 **/
+	INT CListView::FitColumndsToControlWidth( INT _iCol ) {
+		auto iColumns = GetTotalColumns();
+		if ( _iCol >= iColumns ) { return -1; }
+		INT iWidthExcludingCol = 0;
+		for ( auto I = iColumns; I--; ) {
+			if ( I != _iCol ) {
+				iWidthExcludingCol += GetColumnWidth( I );
+			}
+		}
+
+		LSW_RECT rClient;
+		::GetClientRect( Wnd(), &rClient );
+
+		INT iNewWidth = std::max<INT>( 0, rClient.Width() - iWidthExcludingCol );
+		SetColumnWidth( _iCol, iNewWidth );
+		return iNewWidth;
+	}
+
 	/**
 	 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_ITEMPREPAINT handler.
 	 *

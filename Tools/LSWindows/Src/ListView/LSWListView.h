@@ -453,6 +453,14 @@ namespace lsw {
 		virtual BOOL						DeleteAllNotify() { return TRUE; }
 
 		/**
+		 * Snaps the column widths to the control width bi adjusting the given column's width.
+		 * 
+		 * \param _iCol The index of the column whose width is to be adjusted to make the columns fit perfectly into the control width.
+		 * \return Returns the new width of the given column if it exists or -1 if it does not.
+		 **/
+		virtual INT							FitColumndsToControlWidth( INT _iCol );
+
+		/**
 		 * Requesting information (notification responder).
 		 *
 		 * \return Returns TRUE.

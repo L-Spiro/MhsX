@@ -78,11 +78,11 @@ namespace lsw {
 		LPARAM								GetItemLParam( HTREEITEM _tiItem ) const;
 
 		/**
-		 * Sets an itemÅís color.
+		 * Sets an item 's color.
 		 * 
 		 * \param _tiItem The item whose color is to be updated.
 		 * \param _rgbColor The color to apply to the item (alpha respected).
-		 * \return Returns TRUE if the itemÅís color was set.  FALSE indicates that the item was invalid.
+		 * \return Returns TRUE if the item 's color was set.  FALSE indicates that the item was invalid.
 		 **/
 		BOOL								SetItemColor( HTREEITEM _tiItem, RGBQUAD _rgbColor );
 
@@ -91,7 +91,7 @@ namespace lsw {
 		 * 
 		 * \param _tiItem The item to select or deselect.
 		 * \param _bSelect If true, the item is selected, otherwise it is deselected.
-		 * \return Returns TRUE if the itemís selection was updated.  FALSE indicates that the item was invalid.
+		 * \return Returns TRUE if the item's selection was updated.  FALSE indicates that the item was invalid.
 		 **/
 		BOOL								SetItemSelection( HTREEITEM _tiItem, bool _bSelect );
 
@@ -380,7 +380,7 @@ namespace lsw {
 		std::wstring						GetItemText( HTREEITEM _htiItem, size_t _sColumn );
 
 		/**
-		 * Gets an itemís parent item.
+		 * Gets an item's parent item.
 		 * 
 		 * \param _htiItem The item whose parent is to be gotten.
 		 * \return Returns NULL if _htiItem is invalid or is TVI_ROOT, otherwise returns the parent item for the given item. 
@@ -516,10 +516,6 @@ namespace lsw {
 		size_t								m_stHotItem;
 		/** The width of the space character inside items of the ListView. */
 		LONG								m_lSpaceWidth;
-		/** Base width of the right-most column, used for proportional resizing. */
-		LONG								m_lLastColBaseWidth = -1;
-		/** Flag to prevent recursive sizing. */
-		bool								m_bAutoResizing = false;
 		/** If set, the listview is not updated when inserting/removing an item.  FinishUpdate() must be called to update the listview after the tree is modified. */
 		bool								m_bDontUpdate;
 		/** Set whether sorting is enabled. */

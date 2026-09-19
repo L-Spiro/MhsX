@@ -41,8 +41,10 @@ namespace lsw {
 	 */
 	void CTreeListView::InitControl( HWND _hWnd ) {
 		CListView::InitControl( _hWnd );
-		//::SetWindowLongPtrW( Wnd(), GWL_STYLE, LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA );
-		::SetWindowLongPtrW( Wnd(), GWL_EXSTYLE, WS_EX_CLIENTEDGE /*LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER*/ );
+		LONG_PTR lpStyle = ::GetWindowLongPtrW( Wnd(), GWL_EXSTYLE );
+		::SetWindowLongPtrW( Wnd(), GWL_EXSTYLE, lpStyle | WS_EX_CLIENTEDGE );
+		::SetWindowPos( Wnd(), NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED );
+		
 		const DWORD dwLvEx = LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER;
 		::SendMessageW( Wnd(), LVM_SETEXTENDEDLISTVIEWSTYLE, dwLvEx, dwLvEx );
 		::SendMessageW( Wnd(), LVM_SETVIEW, LV_VIEW_DETAILS, 0 );
@@ -141,11 +143,11 @@ namespace lsw {
 	}
 
 	/**
-	 * Sets an itemÅís color.
+	 * Sets an item's color.
 	 * 
 	 * \param _tiItem The item whose color is to be updated.
 	 * \param _rgbColor The color to apply to the item (alpha respected).
-	 * \return Returns TRUE if the itemÅís color was set.  FALSE indicates that the item was invalid.
+	 * \return Returns TRUE if the item's color was set.  FALSE indicates that the item was invalid.
 	 **/
 	BOOL CTreeListView::SetItemColor( HTREEITEM _tiItem, RGBQUAD _rgbColor ) {
 		ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( _tiItem );
@@ -159,7 +161,7 @@ namespace lsw {
 	 * 
 	 * \param _tiItem The item to select or deselect.
 	 * \param _bSelect If true, the item is selected, otherwise it is deselected.
-	 * \return Returns TRUE if the itemís selection was updated.  FALSE indicates that the item was invalid.
+	 * \return Returns TRUE if the item's selection was updated.  FALSE indicates that the item was invalid.
 	 **/
 	BOOL CTreeListView::SetItemSelection( HTREEITEM _tiItem, bool _bSelect ) {
 		ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( _tiItem );
@@ -704,7 +706,7 @@ namespace lsw {
 	}
 
 	/**
-	 * Gets an itemís parent item.
+	 * Gets an item's parent item.
 	 * 
 	 * \param _htiItem The item whose parent is to be gotten.
 	 * \return Returns NULL if _htiItem is invalid or is TVI_ROOT, otherwise returns the parent item for the given item. 
@@ -1011,7 +1013,7 @@ namespace lsw {
 			if ( _ptThis->Size() ) { MoveUp( _ptThis->GetChild( 0 ), _sItems ); }
 
 			if ( std::find( _sItems.begin(), _sItems.end(), _ptThis->Value().lpParam ) != _sItems.end() ) {
-				// Can we move this one?  If the previous item was just moved or there is nothing before this one, it canÅft be moved.
+				// Can we move this one?  If the previous item was just moved or there is nothing before this one, it can't be moved.
 				if ( _ptThis->Prev() && i64ThisIdx - i64Idx > 1 ) {
 					ee::CTree<LSW_TREE_ROW>::MoveUp( _ptThis );
 				}
@@ -1042,7 +1044,7 @@ namespace lsw {
 			if ( _ptThis->Size() ) { MoveDown( _ptThis->GetChild( 0 ), _sItems ); }
 
 			if ( std::find( _sItems.begin(), _sItems.end(), _ptThis->Value().lpParam ) != _sItems.end() ) {
-				// Can we move this one?  If the previous item was just moved or there is nothing before this one, it canÅft be moved.
+				// Can we move this one?  If the previous item was just moved or there is nothing before this one, it can't be moved.
 				if ( _ptThis->Next() && i64ThisIdx - i64Idx > 1 ) {
 					ee::CTree<LSW_TREE_ROW>::MoveDown( _ptThis );
 				}
@@ -1086,40 +1088,9 @@ namespace lsw {
 	 * \return Returns a HANDLED code.
 	 */
 	CWidget::LSW_HANDLED CTreeListView::Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight ) {
-		bool bRedraw = (::GetWindowLongW( Wnd(), GWL_STYLE ) & WS_VISIBLE) != 0;
-		if ( bRedraw ) {
-			::SendMessageW( Wnd(), WM_SETREDRAW, FALSE, 0 );
-		}
-
 		CWidget::Size( _wParam, _lWidth, _lHeight );
-
-		INT iCols = GetColumnCount();
-		if ( iCols > 0 && !m_bAutoResizing ) {
-			m_bAutoResizing = true;
-
-			if ( m_lLastColBaseWidth == -1 ) {
-				m_lLastColBaseWidth = ListView_GetColumnWidth( Wnd(), iCols - 1 );
-			}
-
-			LONG lTotalExceptLast = 0;
-			for ( INT I = 0; I < iCols - 1; ++I ) {
-				lTotalExceptLast += ListView_GetColumnWidth( Wnd(), I );
-			}
-
-			LONG lRemaining = _lWidth - lTotalExceptLast;
-			LONG lTargetWidth = lRemaining > m_lLastColBaseWidth ? lRemaining : m_lLastColBaseWidth;
-
-			if ( ListView_GetColumnWidth( Wnd(), iCols - 1 ) != lTargetWidth ) {
-				ListView_SetColumnWidth( Wnd(), iCols - 1, lTargetWidth );
-			}
-
-			m_bAutoResizing = false;
-		}
-
-		if ( bRedraw ) {
-			::SendMessageW( Wnd(), WM_SETREDRAW, TRUE, 0 );
-			::RedrawWindow( Wnd(), NULL, NULL, RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN );
-		}
+		//::ShowScrollBar( Wnd(), SB_VERT, FALSE );
+		//ResizeControls( VirtualClientRect( nullptr ) );
 
 		return LSW_H_CONTINUE;
 	}
@@ -1390,7 +1361,7 @@ namespace lsw {
 	}
 
 	/**
-	 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_ITEMPREPAINT handler.
+	 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_PREPAINT handler.
 	 *
 	 * \param _lpcdParm The notifacation structure.
 	 * \return Returns an LSW_HANDLED code.
@@ -1772,7 +1743,7 @@ namespace lsw {
 			case WM_SIZE : {
 				if ( ptlThis ) {
 					LSW_RECT rTemp;
-					::GetClientRect( _hWnd, &rTemp );
+					::GetWindowRect( _hWnd, &rTemp );
 					/*LSW_HANDLED hHandled =*/ ptlThis->Size( _wParam, rTemp.Width(), rTemp.Height() );
 					//::RedrawWindow( _hWnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW );
 				}
@@ -1782,48 +1753,22 @@ namespace lsw {
 			// =======================================
 			// List-View Messages.
 			// =======================================
-			case LVM_INSERTCOLUMNA : {}
-			case LVM_INSERTCOLUMNW : {}
-			case LVM_DELETECOLUMN : {
-				if ( ptlThis ) {
-					ptlThis->m_lLastColBaseWidth = -1;
-				}
-				break;
-			}
-			case WM_NOTIFY : {
-				if ( ptlThis ) {
-					NMHDR * pNmHdr = reinterpret_cast<NMHDR *>( _lParam );
-					HWND hHeader = ListView_GetHeader( _hWnd );
-					
-					if ( pNmHdr->hwndFrom == hHeader ) {
-						if ( pNmHdr->code == HDN_ITEMCHANGEDW || pNmHdr->code == HDN_ITEMCHANGEDA ) {
-							NMHEADERW * pNmHeader = reinterpret_cast<NMHEADERW *>( _lParam );
-							
-
-							if ( !ptlThis->m_bAutoResizing && pNmHeader->pitem && (pNmHeader->pitem->mask & HDI_WIDTH) ) {
-								int iCols = ptlThis->GetColumnCount();
-								if ( iCols > 0 && pNmHeader->iItem == iCols - 1 ) {
-									ptlThis->m_lLastColBaseWidth = pNmHeader->pitem->cxy;
-								}
-
-								if ( wpOrig ) {
-									//LRESULT lRes = ::CallWindowProcW( wpOrig, _hWnd, _uMsg, _wParam, _lParam );
-									LRESULT lRes = CWidget::WindowProc( _hWnd, _uMsg, _wParam, _lParam );
-									lRes = ::CallWindowProcW( wpOrig, _hWnd, _uMsg, _wParam, _lParam );
-									
-									LSW_RECT rClient;
-									::GetClientRect( _hWnd, &rClient );
-									ptlThis->Size( 0, rClient.Width(), rClient.Height() );
-									
-									return lRes;
-								}
-							}
-						}
-					}
-				}
-				break;
-			}
 			case LVM_SETITEMSTATE : {
+				break;
+			}
+			case LVM_INSERTCOLUMNA : {}
+			case LVM_INSERTCOLUMNW : {
+				if ( wpOrig ) {
+					LRESULT lRes = ::CallWindowProcW( wpOrig, _hWnd, _uMsg, _wParam, _lParam );
+					if ( ptlThis ) {
+						// Natively, LVS_OWNERDATA list views defer horizontal scrollbar calculations 
+						// when columns are inserted dynamically to prevent screen flickering.
+						// Re-affirming the item count forces the OS to immediately validate the scroll state.
+						int iCount = ptlThis->GetItemCount();
+						::SendMessageW( _hWnd, LVM_SETITEMCOUNT, static_cast<WPARAM>(iCount), 0 );
+					}
+					return lRes;
+				}
 				break;
 			}
 		}
