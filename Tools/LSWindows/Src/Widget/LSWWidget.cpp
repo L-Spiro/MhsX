@@ -1817,7 +1817,9 @@ namespace lsw {
 						NMLVDISPINFOW * plvdiInfo = reinterpret_cast<NMLVDISPINFOW *>(_lParam);
 						HWND hFrom = plvdiInfo->hdr.hwndFrom;
 						CWidget * pmwTemp = LSW_WIN2CLASS( hFrom );
-						std::memset( plvdiInfo->item.pszText, 0, sizeof( plvdiInfo->item.pszText[0] ) * plvdiInfo->item.cchTextMax );
+						if ( plvdiInfo->item.pszText && plvdiInfo->item.cchTextMax > 0 ) {
+							std::memset( plvdiInfo->item.pszText, 0, sizeof( plvdiInfo->item.pszText[0] ) * plvdiInfo->item.cchTextMax );
+						}
 						if ( pmwTemp ) {
 							CListView * plvView = static_cast<CListView *>(pmwTemp);
 							plvView->GetDispInfoNotify( plvdiInfo );
