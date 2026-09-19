@@ -78,11 +78,11 @@ namespace lsw {
 		LPARAM								GetItemLParam( HTREEITEM _tiItem ) const;
 
 		/**
-		 * Sets an item 's color.
+		 * Sets an itemÅ's color.
 		 * 
 		 * \param _tiItem The item whose color is to be updated.
 		 * \param _rgbColor The color to apply to the item (alpha respected).
-		 * \return Returns TRUE if the item 's color was set.  FALSE indicates that the item was invalid.
+		 * \return Returns TRUE if the itemÅ's color was set.  FALSE indicates that the item was invalid.
 		 **/
 		BOOL								SetItemColor( HTREEITEM _tiItem, RGBQUAD _rgbColor );
 

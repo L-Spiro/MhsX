@@ -1687,7 +1687,7 @@ namespace lsw {
 						bool bRedraw = true;
 						CWidget * pwParent = pmwThis;
 						while ( pwParent ) {
-							if ( 0 == pwParent->GetSetRedrawCount() ) { bRedraw = false; break; }
+							if ( 0 != pwParent->GetSetRedrawCount() ) { bRedraw = false; break; }
 							pwParent = pwParent->Parent();
 						}
 						if ( bRedraw ) {

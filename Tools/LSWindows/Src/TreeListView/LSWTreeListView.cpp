@@ -143,11 +143,11 @@ namespace lsw {
 	}
 
 	/**
-	 * Sets an item's color.
+	 * Sets an itemÅ's color.
 	 * 
 	 * \param _tiItem The item whose color is to be updated.
 	 * \param _rgbColor The color to apply to the item (alpha respected).
-	 * \return Returns TRUE if the item's color was set.  FALSE indicates that the item was invalid.
+	 * \return Returns TRUE if the itemÅ's color was set.  FALSE indicates that the item was invalid.
 	 **/
 	BOOL CTreeListView::SetItemColor( HTREEITEM _tiItem, RGBQUAD _rgbColor ) {
 		ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( _tiItem );
@@ -1013,7 +1013,7 @@ namespace lsw {
 			if ( _ptThis->Size() ) { MoveUp( _ptThis->GetChild( 0 ), _sItems ); }
 
 			if ( std::find( _sItems.begin(), _sItems.end(), _ptThis->Value().lpParam ) != _sItems.end() ) {
-				// Can we move this one?  If the previous item was just moved or there is nothing before this one, it can't be moved.
+				// Can we move this one?  If the previous item was just moved or there is nothing before this one, it canÅft be moved.
 				if ( _ptThis->Prev() && i64ThisIdx - i64Idx > 1 ) {
 					ee::CTree<LSW_TREE_ROW>::MoveUp( _ptThis );
 				}
@@ -1044,7 +1044,7 @@ namespace lsw {
 			if ( _ptThis->Size() ) { MoveDown( _ptThis->GetChild( 0 ), _sItems ); }
 
 			if ( std::find( _sItems.begin(), _sItems.end(), _ptThis->Value().lpParam ) != _sItems.end() ) {
-				// Can we move this one?  If the previous item was just moved or there is nothing before this one, it can't be moved.
+				// Can we move this one?  If the previous item was just moved or there is nothing before this one, it canÅft be moved.
 				if ( _ptThis->Next() && i64ThisIdx - i64Idx > 1 ) {
 					ee::CTree<LSW_TREE_ROW>::MoveDown( _ptThis );
 				}
@@ -1361,7 +1361,7 @@ namespace lsw {
 	}
 
 	/**
-	 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_PREPAINT handler.
+	 * The WM_NOTIFY -> NM_CUSTOMDRAW -> CDDS_ITEMPREPAINT handler.
 	 *
 	 * \param _lpcdParm The notifacation structure.
 	 * \return Returns an LSW_HANDLED code.
@@ -1544,34 +1544,10 @@ namespace lsw {
 	 * Updates the list view (clears the cache, sets the size, and updates selections/hot).
 	 */
 	void CTreeListView::UpdateListView() {
+		LSW_SETREDRAW srRedraw( this );
 		ClearCache();
 		size_t stTotal = CountExpanded();
-		INT iNewCount = static_cast<INT>( stTotal );
-		INT iCurrentCount = ListView_GetItemCount( Wnd() );
-
-		if ( iNewCount < iCurrentCount ) {
-			INT iTopIndex = ListView_GetTopIndex( Wnd() );
-			INT iPerPage = ListView_GetCountPerPage( Wnd() );
-			
-			INT iMaxTop = iNewCount - iPerPage;
-			if ( iMaxTop < 0 ) { iMaxTop = 0; }
-
-			// If the current view is stranded past the new boundary, force the view up.
-			if ( iTopIndex > iMaxTop ) {
-				if ( iMaxTop == 0 ) {
-					// If we are shrinking to less than a single page, slam the view to the top.
-					::SendMessageW( Wnd(), WM_VSCROLL, MAKEWPARAM( SB_TOP, 0 ), 0 );
-				}
-				else {
-					ListView_EnsureVisible( Wnd(), iMaxTop, FALSE );
-				}
-			}
-		}
-
-		// Now it is safe to apply the new item count. The view is within valid bounds.
-		const_cast<CTreeListView *>(this)->SetItemCount( iNewCount );
-
-		LSW_SETREDRAW srRedraw( this );
+		const_cast<CTreeListView *>(this)->SetItemCount( static_cast<INT>(stTotal) );
 
 		UnfocusCollapsed();
 		size_t stHighlighted = FindHighlighted();
@@ -1740,35 +1716,11 @@ namespace lsw {
 			case WM_ERASEBKGND : {
 				break;
 			}
-			case WM_SIZE : {
-				if ( ptlThis ) {
-					LSW_RECT rTemp;
-					::GetWindowRect( _hWnd, &rTemp );
-					/*LSW_HANDLED hHandled =*/ ptlThis->Size( _wParam, rTemp.Width(), rTemp.Height() );
-					//::RedrawWindow( _hWnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW );
-				}
-				break;
-			}
 
 			// =======================================
 			// List-View Messages.
 			// =======================================
 			case LVM_SETITEMSTATE : {
-				break;
-			}
-			case LVM_INSERTCOLUMNA : {}
-			case LVM_INSERTCOLUMNW : {
-				if ( wpOrig ) {
-					LRESULT lRes = ::CallWindowProcW( wpOrig, _hWnd, _uMsg, _wParam, _lParam );
-					if ( ptlThis ) {
-						// Natively, LVS_OWNERDATA list views defer horizontal scrollbar calculations 
-						// when columns are inserted dynamically to prevent screen flickering.
-						// Re-affirming the item count forces the OS to immediately validate the scroll state.
-						int iCount = ptlThis->GetItemCount();
-						::SendMessageW( _hWnd, LVM_SETITEMCOUNT, static_cast<WPARAM>(iCount), 0 );
-					}
-					return lRes;
-				}
 				break;
 			}
 		}
