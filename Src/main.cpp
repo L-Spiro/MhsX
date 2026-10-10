@@ -1,9 +1,11 @@
 ﻿
 #include "MXMhsX.h"
-#include <EEExpEval.h>
 #include "Layouts/MXLayoutManager.h"
+#include "HexEditor/MXCopyPasteManager.h"
 #include "MemHack/MXWindowMemHack.h"
 #include "Utilities/MXUtilities.h"
+
+#include <EEExpEval.h>
 
 #ifdef _DEBUG
 //#define MX_XML_TEST
@@ -105,7 +107,7 @@ int wWinMain( HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPWSTR _lpCmdLine,
 		::TranslateMessage( &mMsg );
 		::DispatchMessageW( &mMsg );
 	}
-
+    mx::CCopyPasteManager::ShutDown();
 	lsw::CBase::ShutDown();
 	return static_cast<int>(mMsg.wParam);
 }

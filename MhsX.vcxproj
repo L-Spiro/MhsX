@@ -281,6 +281,7 @@
     <ClCompile Include="Src\FoundAddresses\MXFoundAddressManager.cpp" />
     <ClCompile Include="Src\FoundAddresses\MXMoveAddressesWindow.cpp" />
     <ClCompile Include="Src\HexEditor\MXCharSets.cpp" />
+    <ClCompile Include="Src\HexEditor\MXCopyPasteManager.cpp" />
     <ClCompile Include="Src\HexEditor\MXDeusHexMachinaWindow.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexEditorControl.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexEditorCurProcess.cpp" />
@@ -432,6 +433,7 @@
     <ClInclude Include="Src\FoundAddresses\MXMoveAddressesWindow.h" />
     <ClInclude Include="Src\HexEditor\MXCharSets.h" />
     <ClInclude Include="Src\HexEditor\MXCopyAs.h" />
+    <ClInclude Include="Src\HexEditor\MXCopyPasteManager.h" />
     <ClInclude Include="Src\HexEditor\MXDataFmt.h" />
     <ClInclude Include="Src\HexEditor\MXDeusHexMachinaWindow.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorColorImpl.h" />
