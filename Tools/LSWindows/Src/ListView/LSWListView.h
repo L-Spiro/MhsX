@@ -5,14 +5,46 @@
 
 namespace lsw {
 
+	/**
+	 * A list-view (SysListView32) control.
+	 * 
+	 * Wraps the Win32 list-view control with helpers for columns, items, selection, and sorting.
+	 *
+	 * In report view the right-most column snaps to the control's right edge: it stretches to fill the control whenever the columns are
+	 *	narrower than the control, but never gets narrower than its internal width, so a control narrower than that gets a horizontal scroll
+	 *	bar instead.  See SetRightColumnSnap().
+	 **/
 	class CListView : public CWidget {
 	public :
 		CListView( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
+		virtual ~CListView();
 
 
 		// == Functions.
-		// Set sort case sensitivity.
+		/**
+		 * Sets whether sorting is case-sensitive.
+		 *
+		 * \param _bVal TRUE to sort with case sensitivity, FALSE to sort without it.
+		 **/
 		VOID								SetSortCaseSensitivity( BOOL _bVal ) { m_bSortWithCase = (_bVal != FALSE); }
+
+		/**
+		 * Enables or disables snapping the right-most column to the control's right edge (enabled by default).
+		 *
+		 * While enabled, the right-most column's width is the larger of its internal width and the width the other columns leave free.  Its
+		 *	internal width is the width the application or the user last gave it (LVSCW_AUTOSIZE_USEHEADER sizes it to its header and items,
+		 *	as it does any other column).
+		 *
+		 * \param _bEnable TRUE to snap the right-most column to the right edge, FALSE to return it to its internal width and leave it alone.
+		 **/
+		VOID								SetRightColumnSnap( BOOL _bEnable );
+
+		/**
+		 * Determines whether the right-most column snaps to the control's right edge.
+		 *
+		 * \return Returns TRUE if the right-most column snaps to the control's right edge.
+		 **/
+		BOOL								RightColumnSnap() const { return m_bRightColumnSnap; }
 
 		/**
 		 * If the list-view control was created without the LVS_OWNERDATA style, this macro causes the control to allocate its internal data structures for
@@ -56,7 +88,7 @@ namespace lsw {
 		}
 		
 		/**
-		 * Gets the selection anchor (Ågselection markÅh) index.
+		 * Gets the selection anchor (¬Ågselection mark¬Åh) index.
 		 * 
 		 * The selection mark is the anchor used for Shift+click range selection and
 		 * can differ from the focused item. Returns -1 if not set.
@@ -372,7 +404,7 @@ namespace lsw {
 		 * Sets highlight on an item by index.
 		 *
 		 * \param _iItem The item to update.
-		 * \param _bSelected Whether the item is highlighted or not.
+		 * \param _bHighlighted Whether the item is highlighted or not.
 		 */
 		void								SetItemHighlight( INT _iItem, BOOL _bHighlighted );
 
@@ -463,6 +495,7 @@ namespace lsw {
 		/**
 		 * Requesting information (notification responder).
 		 *
+		 * \param _plvdiInfo A pointer to an NMLVDISPINFOW structure that specifies the item or subitem and the information requested, and receives that information.
 		 * \return Returns TRUE.
 		 **/
 		virtual BOOL						GetDispInfoNotify( NMLVDISPINFOW * /*_plvdiInfo*/ ) { return TRUE; }
@@ -500,25 +533,162 @@ namespace lsw {
 
 	protected :
 		// == Types.
+		/**
+		 * Sort data passed to CompareFunc() through its _lParamSort parameter.
+		 **/
 		struct LSW_LISTSORT {
-			CListView *						plvListView;
-			INT								iSubItem;
+			CListView *						plvListView;					/**< The list-view control whose items are being sorted. */
+			INT								iSubItem;						/**< The index of the sub-item to use for comparisons. */
 		};
 
 		// == Members.
 		SIZE_T								m_sColumns;						/**< The number of columns. */
 		BOOL								m_bSortWithCase;				/**< Sort with case-sensitivity or not. */
+		INT									m_iSnapCol;						/**< The index of the right-most column, which snaps to the right edge, or -1. */
+		INT									m_iSnapColWidth;				/**< The right-most column's internal width: its width when it is not stretched. */
+		INT									m_iSnapTrackCol;				/**< The column whose divider the user is dragging, or -1. */
+		INT									m_iSnapInternal;				/**< Non-zero while this class sets a width that must not become the internal width. */
+		INT									m_iSnapMsgDepth;				/**< How many of the control's messages are being processed (they nest). */
+		BOOL								m_bRightColumnSnap;				/**< Whether the right-most column snaps to the right edge. */
+		bool								m_bSnapPending;					/**< A snap has been requested but not performed. */
+		bool								m_bSnapPosted;					/**< SnapMessage() has been posted but not received. */
+		bool								m_bSnapSubclassed;				/**< The list-view control is subclassed. */
 
 
 		// == Functions.
-		// Setting the HWND after the control has been created.
+		/**
+		 * Setting the HWND after the control has been created.
+		 * 
+		 * \param _hWnd The handle to the control.
+		 **/
 		virtual void						InitControl( HWND _hWnd );
 
-		// Sort routine.
+		/**
+		 * Sort routine.  The comparison callback that SortItems() passes to the list-view control.
+		 * 
+		 * \param _lParam1 The first item to compare.
+		 * \param _lParam2 The second item to compare.
+		 * \param _lParamSort A pointer to the LSW_LISTSORT structure for the sort in progress.
+		 * \return Returns a negative value if the first item should precede the second, a positive value if the first item should follow the second, or zero if the two items are equivalent.
+		 **/
 		static int CALLBACK					CompareFunc( LPARAM _lParam1, LPARAM _lParam2, LPARAM _lParamSort );
+
+		/**
+		 * Subclasses the list-view control so that the right-most column can snap to its right edge.  Does nothing if it is already subclassed.
+		 **/
+		VOID								InstallSnapSubclass();
+
+		/**
+		 * Removes the subclass installed by InstallSnapSubclass().
+		 *
+		 * \param _hWnd The list-view control's window handle.
+		 **/
+		VOID								RemoveSnapSubclass( HWND _hWnd );
+
+		/**
+		 * Determines whether the right-most column is being snapped: snapping is enabled, the control is subclassed, and it is in report view.
+		 *
+		 * \return Returns TRUE if the right-most column is being snapped to the control's right edge.
+		 **/
+		BOOL								SnapActive() const;
+
+		/**
+		 * Requests a snap without performing it.  The snap happens when the posted SnapMessage() arrives, by which time the control has finished
+		 *	whatever it was doing.  Requests made in the meantime are merged into one.
+		 **/
+		VOID								RequestSnap();
+
+		/**
+		 * Snaps the right-most column immediately, repeating (a few times at most) while doing so adds or removes a scroll bar and so requests
+		 *	another snap.  Only call this while the control is not processing any of its own messages.
+		 **/
+		VOID								SnapNow();
+
+		/**
+		 * Snaps the right-most column once: its width becomes the larger of its internal width and the width the other columns leave free.
+		 **/
+		VOID								SnapOnce();
+
+		/**
+		 * Keeps track of which column is right-most.  When that changes, the previous right-most column goes back to its internal width and the
+		 *	new one is adopted with its current width as its internal width.
+		 **/
+		VOID								UpdateSnapColumn();
+
+		/**
+		 * Returns the right-most column to its internal width.
+		 **/
+		VOID								RestoreSnapColumn();
+
+		/**
+		 * Sets a column's width without that width becoming the column's internal width.
+		 *
+		 * \param _iCol The index of the column.
+		 * \param _iWidth The new width in pixels, or LVSCW_AUTOSIZE.
+		 **/
+		VOID								SetColumnWidthInternal( INT _iCol, INT _iWidth );
+
+		/**
+		 * Measures the width that LVSCW_AUTOSIZE_USEHEADER gives any column but the last one: wide enough for its header text and its items.
+		 *
+		 * \param _iCol The index of the column to measure.  As a side effect, the column is sized to fit its items.
+		 * \return Returns the width, in pixels.
+		 **/
+		INT									UseHeaderWidth( INT _iCol );
+
+		/**
+		 * Called by SnapSubclassProc() before the list-view control processes a message.
+		 *
+		 * \param _uMsg The message.
+		 * \param _wParam The message's WPARAM.
+		 * \param _lParam The message's LPARAM, which can be changed before the control receives it.
+		 **/
+		VOID								SnapBeforeMessage( UINT _uMsg, WPARAM _wParam, LPARAM &_lParam );
+
+		/**
+		 * Called by SnapSubclassProc() after the list-view control has processed a message.
+		 *
+		 * \param _uMsg The message.
+		 * \param _wParam The message's WPARAM.
+		 * \param _lParam The message's LPARAM.
+		 * \param _lrResult The control's result for the message.
+		 * \param _iDepth How many of the control's messages were already being processed when this one arrived.
+		 **/
+		VOID								SnapAfterMessage( UINT _uMsg, WPARAM _wParam, LPARAM _lParam, LRESULT _lrResult, INT _iDepth );
+
+		/**
+		 * Tracks the header notifications that affect the right-most column.
+		 *
+		 * \param _pnhHdr The notification.
+		 * \param _lrResult The control's result for the notification.
+		 **/
+		VOID								SnapHeaderNotify( const NMHDR * _pnhHdr, LRESULT _lrResult );
+
+		/**
+		 * Gets the private message that RequestSnap() posts to the list-view control.
+		 *
+		 * \return Returns the registered message.
+		 **/
+		static UINT							SnapMessage();
+
+		/**
+		 * The list-view control's subclass procedure.
+		 *
+		 * \param _hWnd The list-view control.
+		 * \param _uMsg The message.
+		 * \param _wParam The message's WPARAM.
+		 * \param _lParam The message's LPARAM.
+		 * \param _uiptrId The subclass ID.
+		 * \param _dwpRefData The CListView that installed the subclass.
+		 * \return Returns the message's result.
+		 **/
+		static LRESULT CALLBACK				SnapSubclassProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam, UINT_PTR _uiptrId, DWORD_PTR _dwpRefData );
 
 
 	private :
+		/**
+		 * The parent class.
+		 **/
 		typedef CWidget						Parent;
 	};
 

@@ -143,11 +143,11 @@ namespace lsw {
 	}
 
 	/**
-	 * Sets an itemÅ's color.
+	 * Sets an item's color.
 	 * 
 	 * \param _tiItem The item whose color is to be updated.
 	 * \param _rgbColor The color to apply to the item (alpha respected).
-	 * \return Returns TRUE if the itemÅ's color was set.  FALSE indicates that the item was invalid.
+	 * \return Returns TRUE if the item's color was set.  FALSE indicates that the item was invalid.
 	 **/
 	BOOL CTreeListView::SetItemColor( HTREEITEM _tiItem, RGBQUAD _rgbColor ) {
 		ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( _tiItem );
@@ -172,6 +172,31 @@ namespace lsw {
 		else {
 			pntItem->Value().uiState &= ~TVIS_SELECTED;
 		}
+		return TRUE;
+	}
+
+	/**
+	 * Restores the selection after a previous call to GatherSelectedLParam().  Selects items based on their LPARAM values in the given array.
+	 * 
+	 * \param _vSelections The array of LPARAM's by which to select items in the tree.
+	 * \return Returns TRUE if the window is valid.
+	 **/
+	BOOL CTreeListView::SetItemSelectionByLParam( std::vector<LPARAM> &_vSelections ) {
+		if ( !Wnd() ) { return FALSE; }
+		ee::CTree<LSW_TREE_ROW> * pntItem = TreeItemToPointer( TVI_ROOT );
+		try {
+			std::set<LPARAM> sItems( _vSelections.begin(), _vSelections.end() );
+			while ( pntItem ) {
+				if ( sItems.find( pntItem->Value().lpParam ) != sItems.end() ) {
+					pntItem->Value().uiState |= TVIS_SELECTED;
+				}
+				else {
+					pntItem->Value().uiState &= ~TVIS_SELECTED;
+				}
+				pntItem = Next( pntItem );
+			}
+		}
+		catch ( ... ) { return FALSE; }
 		return TRUE;
 	}
 
@@ -1679,14 +1704,12 @@ namespace lsw {
 					};
 					LSW_HANDLED hHandled = ptlThis->LButtonDblClk( static_cast<DWORD>(_wParam), pPos );
 
-					// Return value
 					//	An application should return zero if it processes this message.
 					if ( hHandled == LSW_H_HANDLED ) { return 0; }
 				}
 				break;
 			}
 			case WM_NCLBUTTONDBLCLK : {
-				//::MoveWindow( _hWnd, ee::CExpEval::Time() % 10, ee::CExpEval::Time() % 20, ee::CExpEval::Time() % 10 + 350, ee::CExpEval::Time() % 10 + 250, TRUE );
 				break;
 			}
 			case WM_LBUTTONDOWN : {

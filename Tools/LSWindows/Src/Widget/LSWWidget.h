@@ -703,8 +703,7 @@ namespace lsw {
 		 * \brief Sends a synthetic WM_SIZE to recompute layout and repaint.
 		 */
 		VOID								ForceSizeUpdate() {
-			LSW_RECT rRect;
-			// Send a fake WM_SIZE message to cause the window to recalculate and redraw its layout.
+            LSW_RECT rRect;
 			::GetClientRect( Wnd(), &rRect );
 			::SendMessageW( Wnd(), WM_SIZE, SIZE_RESTORED, MAKELPARAM( rRect.Width(), rRect.Height() ) );
 		}
@@ -1951,6 +1950,38 @@ namespace lsw {
 		 * \return Returns a LSW_HANDLED code.
 		 */
 		virtual LSW_HANDLED					Notify_ItemChanged( LPNMLISTVIEW /*_lplvParm*/ ) { return LSW_H_CONTINUE; }
+
+		/**
+		 * The WM_NOTIFY -> HDN_DIVIDERDBLCLICK handler.
+		 *
+		 * \param _pNmHdr The notification structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					Notify_HeaderDividerDblClk( NMHEADERW * /*_pNmHdr*/ ) { return LSW_H_CONTINUE; }
+
+		/**
+		 * The WM_NOTIFY -> HDN_ITEMCHANGED handler.
+		 *
+		 * \param _pNmHdr The notification structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					Notify_HeaderItemChanged( NMHEADERW * /*_pNmHdr*/ ) { return LSW_H_CONTINUE; }
+
+		/**
+		 * The WM_NOTIFY -> HDN_DIVIDERDBLCLICK handler.
+		 *
+		 * \param _pNmHdr The notification structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					Notify_HeaderDividerDblClk( NMHEADERA * /*_pNmHdr*/ ) { return LSW_H_CONTINUE; }
+
+		/**
+		 * The WM_NOTIFY -> HDN_ITEMCHANGED handler.
+		 *
+		 * \param _pNmHdr The notification structure.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED					Notify_HeaderItemChanged( NMHEADERA * /*_pNmHdr*/ ) { return LSW_H_CONTINUE; }
 
 		/**
 		 * Handles WM_NOTIFY -> LVN_ODSTATECHANGED.

@@ -8,7 +8,13 @@ namespace lsw {
 	}
 
 	// == Functions.
-	// Associates a new image with the static control.
+	/**
+	 * Associates a new image with the static control.
+	 * 
+	 * \param _iType The type of image being set.
+	 * \param _bImage The bitmap image to associate with the control.
+	 * \return Returns true if the image was successfully set.
+	 **/
 	bool CStatic::SetImage( INT _iType, CBitmap &_bImage ) {
 		if ( !Wnd() ) { return false; }
 		::SendMessageW( Wnd(), STM_SETIMAGE, static_cast<WPARAM>(_iType), reinterpret_cast<LPARAM>(_bImage.Handle()) );

@@ -1715,27 +1715,54 @@ namespace lsw {
 		 * \brief Recursively find a menu item by command ID anywhere under _hMenu.
 		 *
 		 * \param _hMenu The root to search (e.g., GetMenu( hWnd )).
-		 * \param _uId The command ID to find.
+		 * \param _uiId The command ID to find.
 		 * \param _mlOut Locates the owning HMENU and position on success.
 		 * \return Returns true if found.
 		 */
-		static bool							FindMenuItemById( HMENU _hMenu, UINT _uId, LSW_MENU_LOC &_mlOut ) {
+		static bool							FindMenuItemById( HMENU _hMenu, UINT _uiId, LSW_MENU_LOC &_mlOut ) {
 			const int iCount = ::GetMenuItemCount( _hMenu );
 			for ( int I = 0; I < iCount; ++I ) {
 				const UINT uId = ::GetMenuItemID( _hMenu, I );
-				if ( uId == _uId ) {
+				if ( uId == _uiId ) {
 					_mlOut.hMenu = _hMenu;
 					_mlOut.uPos = static_cast<UINT>(I);
 					return true;
 				}
 				// If this position is a popup, recurse.
-				if ( uId == static_cast<UINT>(-1) ) {
+				//if ( uId == static_cast<UINT>(-1) ) {
 					if ( HMENU hSub = ::GetSubMenu( _hMenu, I ) ) {
-						if ( FindMenuItemById( hSub, _uId, _mlOut ) ) { return true; }
+						if ( FindMenuItemById( hSub, _uiId, _mlOut ) ) { return true; }
 					}
-				}
+				//}
 			}
 			return false;
+		}
+
+		/**
+		 * Gets the parent of the given menu item by command.
+		 * 
+		 * \param _hMenu The root to search (e.g., GetMenu( hWnd )).
+		 * \param _uiId The command ID to find.
+		 * \param _uiPos Holds the returned item position.
+		 * \param _hParent The parent menu item.  Pass NULL when calling this function.
+		 * \param _uiParentPos The parent menu item position.
+		 * \return Returns the parent of the given menu or NULL.
+		 **/
+		static HMENU						FindMenuParentByCommand( HMENU _hMenu, UINT _uiId, UINT &_uiPos, HMENU _hParent = NULL, UINT _uiParentPos = UINT( -1 ) ) {
+			const int iCount = ::GetMenuItemCount( _hMenu );
+			for ( int I = 0; I < iCount; ++I ) {
+				const UINT uId = ::GetMenuItemID( _hMenu, I );
+				if ( uId == _uiId ) {
+					_uiPos = _uiParentPos;
+					return _hParent;
+				}
+
+				if ( HMENU hSub = ::GetSubMenu( _hMenu, I ) ) {
+					HMENU hRet =  FindMenuParentByCommand( hSub, _uiId, _uiPos, _hMenu, I );
+					if ( NULL != hRet ) { return hRet; }
+				}
+			}
+			return NULL;
 		}
 
 		/**

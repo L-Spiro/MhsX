@@ -2,6 +2,7 @@
 #include "LSXmlContainer.h"
 #include "LSXmlLexer.h"
 #include "Gen/LSXmlParser.h"	// Must come after container/lexer.
+#include <cstring>
 #include <sstream>
 
 
@@ -33,7 +34,7 @@ namespace lsx {
 		Reset();
 		if ( !_pcXml ) { return false; }
 
-		std::istringstream isStream( _pcXml );
+		std::istringstream isStream;
 
 		// Streams created.  Create the parsers.
 		std::unique_ptr<CXmlLexer> pxlLexer = std::make_unique<CXmlLexer>( &isStream, nullptr );
@@ -47,6 +48,11 @@ namespace lsx {
 		}
 
 		m_pxcContainer = new( std::nothrow ) CXmlContainer( pxlLexer.get() );
+		if ( !m_pxcContainer ) {
+			pxlLexer->yy_delete_buffer( pbState );
+			return false;
+		}
+		m_pxcContainer->Reserve( std::strlen( _pcXml ) );
 
 		std::unique_ptr<CXmlParser> ppppParser = std::make_unique<CXmlParser>( pxlLexer.get(), m_pxcContainer );
 		if ( !ppppParser ) {

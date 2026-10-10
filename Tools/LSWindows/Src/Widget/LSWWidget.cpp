@@ -1691,7 +1691,7 @@ namespace lsw {
 							pwParent = pwParent->Parent();
 						}
 						if ( bRedraw ) {
-							::RedrawWindow( _hWnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN /*| RDW_UPDATENOW*/ );
+							::RedrawWindow( _hWnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_FRAME | RDW_UPDATENOW );
 						}
 					}
 				}
@@ -1817,9 +1817,7 @@ namespace lsw {
 						NMLVDISPINFOW * plvdiInfo = reinterpret_cast<NMLVDISPINFOW *>(_lParam);
 						HWND hFrom = plvdiInfo->hdr.hwndFrom;
 						CWidget * pmwTemp = LSW_WIN2CLASS( hFrom );
-						if ( plvdiInfo->item.pszText && plvdiInfo->item.cchTextMax > 0 ) {
-							std::memset( plvdiInfo->item.pszText, 0, sizeof( plvdiInfo->item.pszText[0] ) * plvdiInfo->item.cchTextMax );
-						}
+						std::memset( plvdiInfo->item.pszText, 0, sizeof( plvdiInfo->item.pszText[0] ) * plvdiInfo->item.cchTextMax );
 						if ( pmwTemp ) {
 							CListView * plvView = static_cast<CListView *>(pmwTemp);
 							plvView->GetDispInfoNotify( plvdiInfo );
@@ -1841,6 +1839,42 @@ namespace lsw {
 							if ( pmwSrc->Notify_OdStateChange( lpscStateChange ) == LSW_HANDLED::LSW_H_HANDLED ) { LSW_RET( 1, TRUE ); }
 						}
 						LSW_RET( 1, TRUE );
+					}
+					case HDN_DIVIDERDBLCLICKA : {
+						NMHEADERA * pNmHdr = reinterpret_cast<NMHEADERA *>(_lParam);
+						if ( pmwThis ) {
+							if ( pmwThis->Notify_HeaderDividerDblClk( pNmHdr ) == LSW_HANDLED::LSW_H_HANDLED ) {
+								LSW_RET( TRUE, TRUE );
+							}
+						}
+						break;
+					}
+					case HDN_DIVIDERDBLCLICKW : {
+						NMHEADERW * pNmHdr = reinterpret_cast<NMHEADERW *>(_lParam);
+						if ( pmwThis ) {
+							if ( pmwThis->Notify_HeaderDividerDblClk( pNmHdr ) == LSW_HANDLED::LSW_H_HANDLED ) {
+								LSW_RET( TRUE, TRUE );
+							}
+						}
+						break;
+					}
+					case HDN_ITEMCHANGEDA : {
+						NMHEADERA * pNmHdr = reinterpret_cast<NMHEADERA *>(_lParam);
+						if ( pmwThis ) {
+							if ( pmwThis->Notify_HeaderItemChanged( pNmHdr ) == LSW_HANDLED::LSW_H_HANDLED ) {
+								LSW_RET( 0, 0 );
+							}
+						}
+						break;
+					}
+					case HDN_ITEMCHANGEDW : {
+						NMHEADERW * pNmHdr = reinterpret_cast<NMHEADERW *>(_lParam);
+						if ( pmwThis ) {
+							if ( pmwThis->Notify_HeaderItemChanged( pNmHdr ) == LSW_HANDLED::LSW_H_HANDLED ) {
+								LSW_RET( 0, 0 );
+							}
+						}
+						break;
 					}
 					case NM_CUSTOMDRAW : {
 						LPNMCUSTOMDRAW pcdCustomDraw = reinterpret_cast<LPNMCUSTOMDRAW>(_lParam);

@@ -17,18 +17,29 @@ namespace lsx {
 
 	// == Functions.
 	/**
+	 * Reserves room for the nodes and strings expected from XML text of a given length, to avoid repeatedly growing (and rehashing) them.
+	 *
+	 * \param _stLen The length of the XML text.
+	 */
+	void CXmlContainer::Reserve( size_t _stLen ) {
+		// Typical XML (such as the NES 2.0 database) yields about 1 node per 8 bytes and 1 unique string per 80 bytes.
+		m_vNodes.reserve( _stLen / 16 );
+		m_vStrings.reserve( _stLen / 64 );
+		m_umStringIndex.reserve( _stLen / 64 );
+	}
+
+	/**
 	 * Adds a string and returns its index into the stack.
 	 *
 	 * \param _svText The string to add or whose existing index is to be found.
 	 * \return Returns the index of the added string.
 	 */
 	size_t CXmlContainer::AddString( std::string_view _svText ) {
-		size_t stRet = FindString( _svText );
-		if ( stRet == size_t( -1 ) ) {
+		auto aInserted = m_umStringIndex.try_emplace( _svText, m_vStrings.size() );
+		if ( aInserted.second ) {
 			m_vStrings.push_back( _svText );
-			return m_vStrings.size() - 1;
 		}
-		return stRet;
+		return aInserted.first->second;
 	}
 
 	/**
@@ -48,10 +59,8 @@ namespace lsx {
 	 * \return Returns the index of the string if it exists or size_t( -1 ).
 	 */
 	size_t CXmlContainer::FindString( std::string_view _svText ) const {
-		for ( auto I = m_vStrings.size(); I--; ) {
-			if ( m_vStrings[I] == _svText ) { return I; }
-		}
-		return size_t( -1 );
+		auto aFound = m_umStringIndex.find( _svText );
+		return (aFound == m_umStringIndex.end()) ? size_t( -1 ) : aFound->second;
 	}
 
 	/**

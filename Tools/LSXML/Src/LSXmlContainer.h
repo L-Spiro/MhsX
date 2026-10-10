@@ -8,6 +8,7 @@
 #include <map>
 #include <set>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 
@@ -42,6 +43,13 @@ namespace lsx {
 
 		
 		// == Functions.
+		/**
+		 * Reserves room for the nodes and strings expected from XML text of a given length, to avoid repeatedly growing (and rehashing) them.
+		 *
+		 * \param _stLen The length of the XML text.
+		 */
+		void											Reserve( size_t _stLen );
+
 		/**
 		 * Adds a string and returns its index into the stack.
 		 *
@@ -352,6 +360,8 @@ namespace lsx {
 		std::vector<YYSTYPE::LSX_NODE>					m_vNodes;
 		/** The stack of UTF-8 strings. */
 		std::vector<std::string_view>					m_vStrings;
+		/** Index of each string in m_vStrings, so that AddString()/FindString() do not have to search the whole list. */
+		std::unordered_map<std::string_view, size_t>	m_umStringIndex;
 		/** The resulting tree. */
 		CTree<LSX_XML_ELEMENT>							m_tRoot;
 		/** The base node. */
