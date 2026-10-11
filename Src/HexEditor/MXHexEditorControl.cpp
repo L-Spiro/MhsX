@@ -823,7 +823,7 @@ namespace mx {
 	 * \return Returns the Copy parameters.
 	 **/
 	MX_COPYAS CHexEditorControl::CopyParms( MX_COPY_AS _caFormat ) const {
-		const MX_STYLE &stStyle = (*CurStyle());
+		const MX_STYLE & stStyle = (*CurStyle());
 		MX_COPYAS caCopyData;
 		caCopyData.caCopyFmt = _caFormat;
 		caCopyData.dfLeft = stStyle.dfLeftNumbersFmt;
