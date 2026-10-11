@@ -3,12 +3,22 @@
 #include "../MXMhsX.h"
 #include "MXCharSets.h"
 #include "MXCopyAs.h"
+#include "MXCopyFormatter.h"
 #include "MXDataFmt.h"
 #include "MXSelection.h"
 
+#include <memory>
+
 namespace mx {
 
-	class CHexEditorInterface {
+	/**
+	 * Class CHexEditorInterface
+	 * \brief The data source behind a hex-editor tab.
+	 *
+	 * Instances are always owned by std::shared_ptr (the tab and, after a Copy, CCopyPasteManager), so an interface can register
+	 *	itself with CCopyPasteManager during Copy() via weak_from_this().
+	 */
+	class CHexEditorInterface : public std::enable_shared_from_this<CHexEditorInterface> {
 	public :
 		virtual ~CHexEditorInterface() {}
 		// == Enumerations.
@@ -86,6 +96,27 @@ namespace mx {
 
 		// Performs a Copy operation using the given selection, saved to the given clipboard index.
 		virtual bool						Copy( const MX_SELECTION &_sSelection, uint32_t _ui32BytesPerRow, size_t _sClipIdx, const MX_COPYAS &_csParms, CSecureWString &_swsMsg ) = 0;
+
+		/**
+		 * \brief Renders the data held for a clipboard slot by a previous Copy() into one Windows clipboard format.
+		 *
+		 * Called by CCopyPasteManager for deferred rendering (WM_RENDERFORMAT/WM_RENDERALLFORMATS) and available for Paste.  Sources
+		 *	that place their data on the Windows clipboard immediately need not hold anything for slot 0.
+		 *
+		 * \param _sClipIdx The clipboard slot.
+		 * \param _uiFormat The clipboard format to produce (one of CCopyFormatter::Formats() for the copy type).
+		 * \param _csSink Receives the rendered bytes.
+		 * \param _swsMsg Receives an error message on failure.
+		 * \return Returns false if the slot holds nothing from this interface or rendering fails.
+		 */
+		virtual bool						RenderClipboard( size_t /*_sClipIdx*/, UINT /*_uiFormat*/, CCopySink &/*_csSink*/, CSecureWString &/*_swsMsg*/ ) const { return false; }
+
+		/**
+		 * \brief Discards the data held for a clipboard slot.  Called by CCopyPasteManager when the slot stops referring to this interface.
+		 *
+		 * \param _sClipIdx The clipboard slot.
+		 */
+		virtual void						ReleaseClipboard( size_t /*_sClipIdx*/ ) {}
 
 		// Gets the size of the data source.
 		virtual uint64_t					Size() const = 0;

@@ -3,6 +3,9 @@
 #include "MXCharSets.h"
 #include "MXDataFmt.h"
 
+#include <cstdint>
+#include <string>
+
 
 namespace mx {
 
@@ -80,11 +83,39 @@ namespace mx {
 	
 
 	// == Types.
+	/**
+	 * The address-gutter settings in effect at the time of a Copy operation.  Used by the formats that reproduce the view
+	 *	(MX_CA_HEX_EDITOR_AREAS, MX_CA_WEB_PAGE, and MX_CA_RICH_TEXT), which may be rendered long after the view has closed.
+	 */
+	struct MX_COPY_ADDR {
+		uint64_t				ui64Bias				= 0;								/**< The starting-address bias added to displayed addresses (Set Starting Address). */
+		uint32_t				ui32Format				= 0;								/**< A CHexEditorControl::MX_ADDRESS_FMT value. */
+		uint32_t				ui32MinDigits			= 4;								/**< The minimum number of address digits. */
+		bool					bLowercaseHex			= false;							/**< Use lowercase a..f for hex addresses. */
+		bool					bShowColonIn			= true;								/**< Insert ':' every 4 hex digits. */
+		bool					bShowColonAfter			= false;							/**< Append ':' after the address. */
+		bool					bShowTypeSpec			= false;							/**< Append 'h' (hex) or 'o' (octal). */
+		bool					bUseShortSuffixW		= true;								/**< Append 'w' for Short addressing. */
+	};
+
+	/**
+	 * The parameters of a Copy operation.  Everything needed to render the copied data is captured here, because rendering for
+	 *	the Windows clipboard may be deferred until a Paste occurs (possibly after the view that made the copy has closed).
+	 */
 	struct MX_COPYAS {
-		MX_COPY_AS				caCopyFmt		= MX_CA_BINARY;
-		MX_DATA_FMT				dfLeft			= MX_DF_HEX;
-		MX_DATA_FMT				dfRight			= MX_DF_CHAR;
-		bool					bBigEndian		= false;
-		CCharSets::MX_CHAR_SETS	csCharSet		= CCharSets::MX_CS_ASCII;
+		MX_COPY_AS				caCopyFmt				= MX_CA_BINARY;						/**< The format in which to copy. */
+		MX_DATA_FMT				dfLeft					= MX_DF_HEX;						/**< The left-area format. */
+		MX_DATA_FMT				dfRight					= MX_DF_CHAR;						/**< The right-area format. */
+		bool					bBigEndian				= false;							/**< Multi-byte values are big-endian. */
+		CCharSets::MX_CHAR_SETS	csCharSet				= CCharSets::MX_CS_ASCII;			/**< The character set used by MX_DF_CHAR areas. */
+
+		uint32_t				ui32FloatDigits			= 18;								/**< The number of digits to print for floating-point and PCM values. */
+		bool					bShowAddress			= true;								/**< MX_CA_HEX_EDITOR_AREAS (and derivatives) include the address gutter. */
+		bool					bShowLeft				= true;								/**< MX_CA_HEX_EDITOR_AREAS (and derivatives) include the left area. */
+		bool					bShowRight				= true;								/**< MX_CA_HEX_EDITOR_AREAS (and derivatives) include the right area. */
+		uint32_t				ui32GroupSize			= 1;								/**< The number of bytes per group within an area. */
+		uint32_t				ui32SpacesBetweenGroups	= 1;								/**< The number of spaces between groups within an area. */
+		MX_COPY_ADDR			caAddress;													/**< The address-gutter settings. */
+		std::wstring			wsName;														/**< The name embedded by formats that carry one (MX_CA_UUENCODING). */
 	};
 }	// namespace mx

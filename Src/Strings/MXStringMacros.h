@@ -23176,3 +23176,30 @@
 #define _DEC_S_393BB253_Show_in__Hex_Editor mx::CStringDecoder::DecodeToString( _T_393BB253_Show_in__Hex_Editor, _LEN_393BB253 )
 #define _DEC_WS_393BB253_Show_in__Hex_Editor mx::CStringDecoder::DecodeToWString( _T_393BB253_Show_in__Hex_Editor, _LEN_393BB253 )
 
+// Failed to open the clipboard.
+
+#define _T_C6498829_Failed_to_open_the_clipboard_ "\xCE\x2F\x39\x07\xF7\x2D\xAE\x3B\x3F\xE8\x38\x3E\xF7\x09\xE7\xFC\x36\x35\xBB\xF5\x35\xF7\x37\x32\x37\x2A\x40\xF6\xC9"
+#define _LEN_C6498829 29
+#define _T_LEN_C6498829_Failed_to_open_the_clipboard_ _T_C6498829_Failed_to_open_the_clipboard_, _LEN_C6498829
+#define _DEC_C6498829_Failed_to_open_the_clipboard_( STR ) mx::CStringDecoder::Decode( _T_C6498829_Failed_to_open_the_clipboard_, _LEN_C6498829, STR )
+#define _DEC_S_C6498829_Failed_to_open_the_clipboard_ mx::CStringDecoder::DecodeToString( _T_C6498829_Failed_to_open_the_clipboard_, _LEN_C6498829 )
+#define _DEC_WS_C6498829_Failed_to_open_the_clipboard_ mx::CStringDecoder::DecodeToWString( _T_C6498829_Failed_to_open_the_clipboard_, _LEN_C6498829 )
+
+// Failed to place the data on the clipboard.
+
+#define _T_F90B4E11_Failed_to_place_the_data_on_the_clipboard_ "\xCE\x2F\x39\x07\xF7\x2D\xAE\x3B\x3F\xE8\x39\x3A\xF3\xFE\x2C\xA8\x42\x38\x00\xB2\x2D\xEF\x3B\x31\xE8\x38\x3C\xB2\x0F\x2F\xED\xEE\x33\x07\xFB\x39\xF0\x36\x31\x3A\x2D\xFC"
+#define _LEN_F90B4E11 42
+#define _T_LEN_F90B4E11_Failed_to_place_the_data_on_the_clipboard_ _T_F90B4E11_Failed_to_place_the_data_on_the_clipboard_, _LEN_F90B4E11
+#define _DEC_F90B4E11_Failed_to_place_the_data_on_the_clipboard_( STR ) mx::CStringDecoder::Decode( _T_F90B4E11_Failed_to_place_the_data_on_the_clipboard_, _LEN_F90B4E11, STR )
+#define _DEC_S_F90B4E11_Failed_to_place_the_data_on_the_clipboard_ mx::CStringDecoder::DecodeToString( _T_F90B4E11_Failed_to_place_the_data_on_the_clipboard_, _LEN_F90B4E11 )
+#define _DEC_WS_F90B4E11_Failed_to_place_the_data_on_the_clipboard_ mx::CStringDecoder::DecodeToWString( _T_F90B4E11_Failed_to_place_the_data_on_the_clipboard_, _LEN_F90B4E11 )
+
+// Failed to read the selected data.
+
+#define _T_6C7C47A0_Failed_to_read_the_selected_data_ "\xCE\x2F\x39\x07\xF7\x2D\xAE\x3B\x3F\xE8\x3B\x33\xF3\xFF\xE7\xFC\x36\x35\xBB\x05\x2E\xFA\x2C\x33\x3C\x2E\x32\xB2\xFF\x28\xFC\x2F\xFE"
+#define _LEN_6C7C47A0 33
+#define _T_LEN_6C7C47A0_Failed_to_read_the_selected_data_ _T_6C7C47A0_Failed_to_read_the_selected_data_, _LEN_6C7C47A0
+#define _DEC_6C7C47A0_Failed_to_read_the_selected_data_( STR ) mx::CStringDecoder::Decode( _T_6C7C47A0_Failed_to_read_the_selected_data_, _LEN_6C7C47A0, STR )
+#define _DEC_S_6C7C47A0_Failed_to_read_the_selected_data_ mx::CStringDecoder::DecodeToString( _T_6C7C47A0_Failed_to_read_the_selected_data_, _LEN_6C7C47A0 )
+#define _DEC_WS_6C7C47A0_Failed_to_read_the_selected_data_ mx::CStringDecoder::DecodeToWString( _T_6C7C47A0_Failed_to_read_the_selected_data_, _LEN_6C7C47A0 )
+

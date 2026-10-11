@@ -757,12 +757,7 @@ namespace mx {
 			if ( !cbClip.SetData( uiId, vClip ) ) {
 				// FUCK!!!
 			}*/
-			MX_COPYAS caCopyData;
-			caCopyData.caCopyFmt = MX_CA_BINARY;
-			caCopyData.dfLeft = CurStyle()->dfLeftNumbersFmt;
-			caCopyData.dfRight = CurStyle()->dfRightNumbersFmt;
-			caCopyData.bBigEndian = IsBigEndian();
-			caCopyData.csCharSet = CurStyle()->csCharSet;
+			MX_COPYAS caCopyData = CopyParms( MX_CA_BINARY );
 			if ( !m_pheiTarget->Copy( m_sSel, CurStyle()->uiBytesPerRow, 0, caCopyData, _swsStatus ) ) { return false; }
 
 			auto ui64TotalSel = m_sSel.TotalSelected( CurStyle()->uiBytesPerRow );
@@ -797,18 +792,10 @@ namespace mx {
 				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
 				return false;
 			}
-			if ( m_pheiTarget->ReadOnly() ) {
-				_swsStatus = _DEC_WS_D4FFE2E0_File_is_Read_Only;
-				return false;
-			}
+			// Copying does not modify the source, so read-only sources can be copied.
 			if ( !m_sSel.HasSelection() ) { return true; }
 
-			MX_COPYAS caCopyData;
-			caCopyData.caCopyFmt = _caFormat;
-			caCopyData.dfLeft = CurStyle()->dfLeftNumbersFmt;
-			caCopyData.dfRight = CurStyle()->dfRightNumbersFmt;
-			caCopyData.bBigEndian = IsBigEndian();
-			caCopyData.csCharSet = CurStyle()->csCharSet;
+			MX_COPYAS caCopyData = CopyParms( _caFormat );
 			if ( !m_pheiTarget->Copy( m_sSel, CurStyle()->uiBytesPerRow, 0, caCopyData, _swsStatus ) ) { return false; }
 
 			auto ui64TotalSel = m_sSel.TotalSelected( CurStyle()->uiBytesPerRow );
@@ -825,6 +812,42 @@ namespace mx {
 			return true;
 		}
 		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * Gathers the parameters of a Copy operation from the current view: the format, the left/right areas, the character set, the
+	 *	endianness, and the layout and address-gutter settings needed to reproduce the view later (deferred rendering may happen
+	 *	after this control is gone).
+	 * 
+	 * \param _caFormat The Copy format.
+	 * \return Returns the Copy parameters.
+	 **/
+	MX_COPYAS CHexEditorControl::CopyParms( MX_COPY_AS _caFormat ) const {
+		const MX_STYLE &stStyle = (*CurStyle());
+		MX_COPYAS caCopyData;
+		caCopyData.caCopyFmt = _caFormat;
+		caCopyData.dfLeft = stStyle.dfLeftNumbersFmt;
+		caCopyData.dfRight = stStyle.dfRightNumbersFmt;
+		caCopyData.bBigEndian = IsBigEndian();
+		caCopyData.csCharSet = stStyle.csCharSet;
+
+		caCopyData.ui32FloatDigits = stStyle.ui32FloatDigits;
+		caCopyData.bShowAddress = stStyle.bShowAddressGutter;
+		caCopyData.bShowLeft = stStyle.bShowLeftNumbers;
+		caCopyData.bShowRight = stStyle.bShowRightArea;
+		caCopyData.ui32GroupSize = stStyle.uiGroupSize;
+		caCopyData.ui32SpacesBetweenGroups = stStyle.uiSpacesBetweenBytes;
+
+		const MX_ADDR_STYLE &asAddr = stStyle.daAddressStyle;
+		caCopyData.caAddress.ui64Bias = m_sdScrollView[m_eaEditAs].ui64StartAddress;
+		caCopyData.caAddress.ui32Format = static_cast<uint32_t>(asAddr.afFormat);
+		caCopyData.caAddress.ui32MinDigits = MinAddrDigits();
+		caCopyData.caAddress.bLowercaseHex = asAddr.bLowercaseHex;
+		caCopyData.caAddress.bShowColonIn = asAddr.bShowColonIn;
+		caCopyData.caAddress.bShowColonAfter = asAddr.bShowColonAfter;
+		caCopyData.caAddress.bShowTypeSpec = asAddr.bShowTypeSpec;
+		caCopyData.caAddress.bUseShortSuffixW = asAddr.bUseShortSuffixW;
+		return caCopyData;
 	}
 
 	/**

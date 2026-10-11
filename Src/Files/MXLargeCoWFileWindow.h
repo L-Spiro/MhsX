@@ -130,6 +130,35 @@ namespace mx {
 		bool													Copy( const MX_SELECTION &_sSelection, uint32_t _ui32BytesPerRow, size_t _sClipIdx, const MX_COPYAS &_csParms, CSecureWString &_swsMsg );
 
 		/**
+		 * \brief Renders the snapshot held by a clipboard slot into one Windows clipboard format.
+		 *
+		 * The bytes are read through the logical map saved by Copy(), so later edits do not affect the result.  Segment files are never
+		 *	overwritten, so the snapshot stays valid for as long as this object exists.
+		 *
+		 * \param _sClipIdx The clipboard index (less than TotalClipboards).
+		 * \param _uiFormat The clipboard format to produce.
+		 * \param _csSink Receives the rendered bytes.
+		 * \param _swsMsg Receives an error message on failure.
+		 * \return Returns false if the slot is empty or rendering fails.
+		 */
+		bool													RenderClipboard( size_t _sClipIdx, UINT _uiFormat, CCopySink &_csSink, CSecureWString &_swsMsg ) const;
+
+		/**
+		 * \brief Discards the snapshot held by a clipboard slot.
+		 *
+		 * \param _sClipIdx The clipboard index (less than TotalClipboards).
+		 */
+		void													ReleaseClipboard( size_t _sClipIdx );
+
+		/**
+		 * \brief Gets the number of bytes in the snapshot held by a clipboard slot.
+		 *
+		 * \param _sClipIdx The clipboard index (less than TotalClipboards).
+		 * \return Returns the number of copied bytes, or 0 if the slot is empty.
+		 */
+		uint64_t												ClipboardBytes( size_t _sClipIdx ) const;
+
+		/**
 		 * \brief Begins an Undo grouping sequence.
 		 *
 		 * Call this before performing multiple modifications that should be undone as a single
@@ -271,6 +300,7 @@ namespace mx {
 			MX_SELECTION										sSelection;										/**< The selection at the time of the Copy operation. */
 			uint32_t											ui32BytesPerRow = 16;							/**< The bytes-per-row at the time of the Copy operation. */
 			MX_COPYAS											caCopyAs;										/**< The copy parameters. */
+			uint64_t											ui64Size = 0;									/**< The logical size of the file at the time of the Copy operation. */
 		};
 
 
@@ -354,6 +384,14 @@ namespace mx {
 		 * \return Returns true if the requested bytes were read; false otherwise.
 		 */
 		bool													Read( uint64_t _ui64Addr, CHexEditorInterface::CBuffer &_bDst, size_t _sSize, const std::vector<MX_LOGICAL_SECTION> &_vLogicalMap ) const;
+
+		/**
+		 * \brief Describes the snapshot held by a clipboard slot for CCopyFormatter.
+		 *
+		 * \param _sClipIdx The clipboard index (less than TotalClipboards).
+		 * \return Returns the copy source, whose read function refers to this object and the slot's logical map.
+		 */
+		CCopyFormatter::MX_COPY_SOURCE							ClipboardSource( size_t _sClipIdx ) const;
 
 		/**
 		 * \brief Performs a logical delete across a section vector.

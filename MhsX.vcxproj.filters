@@ -634,6 +634,9 @@
     <ClCompile Include="Src\HexEditor\MXCopyPasteManager.cpp">
       <Filter>Source Files\HexEditor</Filter>
     </ClCompile>
+    <ClCompile Include="Src\HexEditor\MXCopyFormatter.cpp">
+      <Filter>Source Files\HexEditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Src\MXMhsX.h">
@@ -1023,6 +1026,9 @@
       <Filter>Header Files\NumberInputWindow</Filter>
     </ClInclude>
     <ClInclude Include="Src\HexEditor\MXCopyPasteManager.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXCopyFormatter.h">
       <Filter>Header Files\HexEditor</Filter>
     </ClInclude>
   </ItemGroup>

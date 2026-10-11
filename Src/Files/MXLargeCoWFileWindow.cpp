@@ -300,12 +300,64 @@ namespace mx {
 			m_cbClipBoards[_sClipIdx].sSelection = _sSelection;
 			m_cbClipBoards[_sClipIdx].ui32BytesPerRow = _ui32BytesPerRow;
 			m_cbClipBoards[_sClipIdx].caCopyAs = _csParms;
+			m_cbClipBoards[_sClipIdx].ui64Size = m_ui64Size;
 			return true;
+		}
+		catch ( ... ) {
+			ReleaseClipboard( _sClipIdx );
+			_swsMsg = _DEC_WS_F39F91A5_Out_of_memory_;
+			return false;
+		}
+	}
+
+	/**
+	 * \brief Renders the snapshot held by a clipboard slot into one Windows clipboard format.
+	 *
+	 * The bytes are read through the logical map saved by Copy(), so later edits do not affect the result.  Segment files are never
+	 *	overwritten, so the snapshot stays valid for as long as this object exists.
+	 *
+	 * \param _sClipIdx The clipboard index (less than TotalClipboards).
+	 * \param _uiFormat The clipboard format to produce.
+	 * \param _csSink Receives the rendered bytes.
+	 * \param _swsMsg Receives an error message on failure.
+	 * \return Returns false if the slot is empty or rendering fails.
+	 */
+	bool CLargeCoWFileWindow::RenderClipboard( size_t _sClipIdx, UINT _uiFormat, CCopySink &_csSink, CSecureWString &_swsMsg ) const {
+		if ( _sClipIdx >= TotalClipboards || !m_cbClipBoards[_sClipIdx].sSelection.HasSelection() ) {
+			_swsMsg = _DEC_WS_1468A1DF_Internal_error_;
+			return false;
+		}
+		try {
+			return CCopyFormatter::Render( ClipboardSource( _sClipIdx ), _uiFormat, _csSink, _swsMsg );
 		}
 		catch ( ... ) {
 			_swsMsg = _DEC_WS_F39F91A5_Out_of_memory_;
 			return false;
 		}
+	}
+
+	/**
+	 * \brief Discards the snapshot held by a clipboard slot.
+	 *
+	 * \param _sClipIdx The clipboard index (less than TotalClipboards).
+	 */
+	void CLargeCoWFileWindow::ReleaseClipboard( size_t _sClipIdx ) {
+		if ( _sClipIdx >= TotalClipboards ) { return; }
+		m_cbClipBoards[_sClipIdx] = MX_CLIPBOARD();
+	}
+
+	/**
+	 * \brief Gets the number of bytes in the snapshot held by a clipboard slot.
+	 *
+	 * \param _sClipIdx The clipboard index (less than TotalClipboards).
+	 * \return Returns the number of copied bytes, or 0 if the slot is empty.
+	 */
+	uint64_t CLargeCoWFileWindow::ClipboardBytes( size_t _sClipIdx ) const {
+		if ( _sClipIdx >= TotalClipboards ) { return 0; }
+		try {
+			return CCopyFormatter::TotalBytes( ClipboardSource( _sClipIdx ) );
+		}
+		catch ( ... ) { return 0; }
 	}
 
 	/**
@@ -612,6 +664,25 @@ namespace mx {
 		// If there is anything left, something went wrong internally.
 		//assert( false );
 		return false;
+	}
+
+	/**
+	 * \brief Describes the snapshot held by a clipboard slot for CCopyFormatter.
+	 *
+	 * \param _sClipIdx The clipboard index (less than TotalClipboards).
+	 * \return Returns the copy source, whose read function refers to this object and the slot's logical map.
+	 */
+	CCopyFormatter::MX_COPY_SOURCE CLargeCoWFileWindow::ClipboardSource( size_t _sClipIdx ) const {
+		const MX_CLIPBOARD &cbClip = m_cbClipBoards[_sClipIdx];
+		CCopyFormatter::MX_COPY_SOURCE csSource;
+		csSource.fRead = [this, &cbClip]( uint64_t _ui64Addr, std::vector<uint8_t> &_vDst, size_t _sSize ) {
+			return Read( _ui64Addr, _vDst, _sSize, cbClip.vLogicalMap );
+		};
+		csSource.sSelection = cbClip.sSelection;
+		csSource.ui32BytesPerRow = cbClip.ui32BytesPerRow;
+		csSource.caCopyAs = cbClip.caCopyAs;
+		csSource.ui64Size = cbClip.ui64Size;
+		return csSource;
 	}
 
 	/**

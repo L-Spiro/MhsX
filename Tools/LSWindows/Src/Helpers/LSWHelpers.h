@@ -608,6 +608,13 @@ namespace lsw {
 
 		// == Functions.
 		/**
+		 * Determines whether the clipboard was successfully opened.
+		 *
+		 * \return Returns true if ::OpenClipboard() succeeded.
+		 **/
+		inline bool							IsOpen() const { return bOpen; }
+
+		/**
 		 * Gets data of a given format.  Call within a try/catch block.  An exception indicates a memory-allocation failure when resizing _vData.
 		 * 
 		 * \param	_uiFormat The format of the data to attempt to retreive from the clipboard.

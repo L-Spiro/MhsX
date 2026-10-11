@@ -49,6 +49,24 @@ namespace mx {
 		// Performs a Copy operation using the given selection, saved to the given clipboard index.
 		virtual bool						Copy( const MX_SELECTION &_sSelection, uint32_t _ui32BytesPerRow, size_t _sClipIdx, const MX_COPYAS &_csParms, CSecureWString &_swsMsg );
 
+		/**
+		 * \brief Renders the snapshot held for a clipboard slot by a previous Copy() into one Windows clipboard format.
+		 *
+		 * \param _sClipIdx The clipboard slot.
+		 * \param _uiFormat The clipboard format to produce.
+		 * \param _csSink Receives the rendered bytes.
+		 * \param _swsMsg Receives an error message on failure.
+		 * \return Returns false if the slot holds nothing from this file or rendering fails.
+		 */
+		virtual bool						RenderClipboard( size_t _sClipIdx, UINT _uiFormat, CCopySink &_csSink, CSecureWString &_swsMsg ) const override;
+
+		/**
+		 * \brief Discards the snapshot held for a clipboard slot.
+		 *
+		 * \param _sClipIdx The clipboard slot.
+		 */
+		virtual void						ReleaseClipboard( size_t _sClipIdx ) override;
+
 		// Gets the size of the data source.
 		virtual uint64_t					Size() const;
 

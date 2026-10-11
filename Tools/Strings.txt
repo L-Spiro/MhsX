@@ -2572,3 +2572,6 @@
 "The given expression must evaluate to an unsigned integer."
 "The given expression must evaluate to a signed integer."
 "The given expression must evaluate to a floating-point value."
+"Failed to open the clipboard."
+"Failed to place the data on the clipboard."
+"Failed to read the selected data."

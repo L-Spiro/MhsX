@@ -730,6 +730,16 @@ namespace mx {
 		bool										CopyAs( MX_COPY_AS _caFormat, CSecureWString &_swsStatus );
 
 		/**
+		 * Gathers the parameters of a Copy operation from the current view: the format, the left/right areas, the character set, the
+		 *	endianness, and the layout and address-gutter settings needed to reproduce the view later (deferred rendering may happen
+		 *	after this control is gone).
+		 * 
+		 * \param _caFormat The Copy format.
+		 * \return Returns the Copy parameters.
+		 **/
+		MX_COPYAS									CopyParms( MX_COPY_AS _caFormat ) const;
+
+		/**
 		 * Are we in OVR mode?
 		 * 
 		 * \return Returns true if in Overwrite mode.

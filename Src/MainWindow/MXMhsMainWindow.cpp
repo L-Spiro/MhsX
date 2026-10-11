@@ -20,6 +20,7 @@
 #include "../Layouts/MXStandardSubsearchLayout.h"
 #include "../Layouts/MXStringTheoryLayout.h"
 #include "../Layouts/MXUiIds.h"
+#include "../HexEditor/MXCopyPasteManager.h"
 //#include "../Search/MXNewDataTypeSearchWindow.h"
 #include "../System/MXSystem.h"
 #include "../Utilities/MXUtilities.h"
@@ -493,6 +494,8 @@ namespace mx {
 
 	// WM_NCDESTROY.
 	CWidget::LSW_HANDLED CMhsMainWindow::NcDestroy() {
+		// Release the Hex Editor interfaces kept alive only for Copy/Paste so they are destroyed before shut-down.
+		CCopyPasteManager::ShutDown();
 		CPeWorksWindow::ShutDown();
 		::PostQuitMessage( 0 );
 		return LSW_H_CONTINUE;
