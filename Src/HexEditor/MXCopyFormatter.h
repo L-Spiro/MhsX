@@ -220,6 +220,12 @@ namespace mx {
 		/**
 		 * \brief Gets the clipboard formats offered for a given copy type, most-preferred first.
 		 *
+		 * Every copy type includes a text format so that it can be pasted into plain-text editors:
+		 *	- MX_CA_BINARY: "BinaryData", then the raw bytes as text (CF_UNICODETEXT if the character set is Unicode, otherwise CF_TEXT).
+		 *	- MX_CA_WEB_PAGE: "HTML Format", then CF_UNICODETEXT holding the same HTML.
+		 *	- MX_CA_RICH_TEXT: "Rich Text Format", then CF_UNICODETEXT holding the same RTF.
+		 *	- Everything else: CF_UNICODETEXT.
+		 *
 		 * \param _caCopyAs The copy parameters.
 		 * \param _vFormats Receives the clipboard-format IDs.
 		 * \return Returns false on a memory or registration failure.
@@ -229,8 +235,8 @@ namespace mx {
 		/**
 		 * \brief Renders a Copy operation into one clipboard format.
 		 *
-		 * CF_UNICODETEXT output is NUL-terminated.  For MX_CA_WEB_PAGE and MX_CA_RICH_TEXT, CF_UNICODETEXT is the plain-text fallback
-		 *	(the same text as MX_CA_HEX_EDITOR_AREAS).
+		 * CF_TEXT and CF_UNICODETEXT output is NUL-terminated.  For MX_CA_WEB_PAGE and MX_CA_RICH_TEXT, CF_UNICODETEXT holds the
+		 *	HTML or RTF markup itself.  For MX_CA_BINARY, CF_TEXT and CF_UNICODETEXT hold the raw bytes (readers stop at the first 0).
 		 *
 		 * \param _csSource The data and parameters of the Copy operation.
 		 * \param _uiFormat The clipboard format to produce.  Must be one returned by Formats() for _csSource.caCopyAs.
@@ -272,6 +278,8 @@ namespace mx {
 		class CByteStream;
 		/** Encodes text into a sink as UTF-16, escaped UTF-8 (HTML), or escaped ASCII (RTF). */
 		class CTextOut;
+		/** Converts UTF-8 written to it into UTF-16 in another sink (for the text form of HTML and RTF). */
+		class CUtf8ToUtf16Sink;
 
 
 		// == Functions.
@@ -283,6 +291,17 @@ namespace mx {
 		 * \return Returns false on a read or memory failure.
 		 */
 		static bool												RenderBinary( const MX_COPY_SOURCE &_csSource, CCopySink &_csSink );
+
+		/**
+		 * \brief Writes every selected byte, in order, followed by a NUL terminator, as the text form of a raw copy.
+		 *
+		 * \param _csSource The data and parameters of the Copy operation.
+		 * \param _csSink Receives the bytes.
+		 * \param _bWide If true, the bytes are UTF-16 (CF_UNICODETEXT) and the terminator is a whole 2-byte character; otherwise the
+		 *	terminator is 1 byte (CF_TEXT).
+		 * \return Returns false on a read or memory failure.
+		 */
+		static bool												RenderBinaryText( const MX_COPY_SOURCE &_csSource, CCopySink &_csSink, bool _bWide );
 
 		/**
 		 * \brief Writes the textual form of the Copy operation.

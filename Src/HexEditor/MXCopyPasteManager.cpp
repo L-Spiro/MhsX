@@ -132,9 +132,11 @@ namespace mx {
 				_swsMsg = _DEC_WS_F39F91A5_Out_of_memory_;
 				return false;
 			}
-			std::vector<CCopyVectorSink> vSinks( vFormats.size() );
+			// Rendered directly into global memory, which is handed to the clipboard without another copy.
+			std::vector<std::unique_ptr<CCopyGlobalSink>> vSinks;
 			for ( size_t I = 0; I < vFormats.size(); ++I ) {
-				if ( !CCopyFormatter::Render( _csSource, vFormats[I], vSinks[I], _swsMsg ) ) { return false; }
+				vSinks.push_back( std::make_unique<CCopyGlobalSink>() );
+				if ( !CCopyFormatter::Render( _csSource, vFormats[I], (*vSinks[I]), _swsMsg ) ) { return false; }
 			}
 
 			HWND hWnd = ClipboardWindow();
@@ -154,12 +156,10 @@ namespace mx {
 			m_vDeferredFormats.clear();
 			m_ui64DeferredBytes = 0;
 
+			// Every format is placed; the clipboard holds several at once.
 			bool bAny = false;
 			for ( size_t I = 0; I < vFormats.size(); ++I ) {
-				try {
-					if ( cbClip.SetData( vFormats[I], vSinks[I].Data() ) ) { bAny = true; }
-				}
-				catch ( ... ) {}
+				if ( cbClip.SetHandle( vFormats[I], (*vSinks[I]).Release() ) ) { bAny = true; }
 			}
 			if ( !bAny ) {
 				// The clipboard was emptied, so slot 0 no longer matches it.

@@ -404,6 +404,158 @@ namespace mx {
 	};
 
 
+	/**
+	 * Class CCopyFormatter::CUtf8ToUtf16Sink
+	 * \brief Converts UTF-8 written to it into UTF-16 in another sink (for the text form of HTML and RTF).
+	 *
+	 * Size() and Patch() work in UTF-8 byte offsets, so the HTML header offsets computed by RenderHtml() stay correct.  Patch() is only
+	 *	supported within the leading all-ASCII part of the output (where the HTML header lives), because there each UTF-8 byte is exactly
+	 *	one UTF-16 character.  The destination sink must be empty when conversion starts.
+	 */
+	class CCopyFormatter::CUtf8ToUtf16Sink : public CCopySink {
+	public :
+		CUtf8ToUtf16Sink( CCopySink &_csDst ) :
+			m_csDst( _csDst ) {
+		}
+
+
+		// == Functions.
+		/**
+		 * \brief Converts UTF-8 bytes and appends them to the destination as UTF-16.  Sequences may be split across calls.
+		 *
+		 * \param _pvData The UTF-8 bytes.
+		 * \param _sSize The number of bytes to which _pvData points.
+		 * \return Returns false if memory could not be allocated or the destination failed.
+		 */
+		virtual bool											Write( const void * _pvData, size_t _sSize ) override {
+			const uint8_t * pui8Src = static_cast<const uint8_t *>(_pvData);
+			try {
+				m_vOut.clear();
+				m_vOut.reserve( _sSize * 2 );
+				for ( size_t I = 0; I < _sSize; ++I ) {
+					const uint8_t ui8Byte = pui8Src[I];
+					if ( m_bAllAscii ) {
+						if ( ui8Byte < 0x80 ) { ++m_sAsciiPrefix; }
+						else { m_bAllAscii = false; }
+					}
+					if ( m_ui32Need ) {
+						if ( (ui8Byte & 0xC0) == 0x80 ) {
+							m_ui32Cp = (m_ui32Cp << 6) | (ui8Byte & 0x3F);
+							if ( --m_ui32Need == 0 ) { Emit( m_ui32Cp ); }
+							continue;
+						}
+						// A truncated sequence; this byte starts something new.
+						m_ui32Need = 0;
+						Emit( 0xFFFD );
+					}
+					if ( ui8Byte < 0x80 ) { Emit( ui8Byte ); }
+					else if ( (ui8Byte & 0xE0) == 0xC0 ) { m_ui32Cp = ui8Byte & 0x1F; m_ui32Need = 1; }
+					else if ( (ui8Byte & 0xF0) == 0xE0 ) { m_ui32Cp = ui8Byte & 0x0F; m_ui32Need = 2; }
+					else if ( (ui8Byte & 0xF8) == 0xF0 ) { m_ui32Cp = ui8Byte & 0x07; m_ui32Need = 3; }
+					else { Emit( 0xFFFD ); }
+				}
+			}
+			catch ( ... ) { return false; }
+			if ( m_vOut.size() && !m_csDst.Write( m_vOut.data(), m_vOut.size() ) ) { return false; }
+			m_sSize += _sSize;
+			return true;
+		}
+
+		/**
+		 * \brief Overwrites already-written bytes that lie within the leading all-ASCII part of the output.
+		 *
+		 * \param _sOffset The UTF-8 offset of the first byte to overwrite.
+		 * \param _pvData The replacement bytes, which must be ASCII.
+		 * \param _sSize The number of bytes to which _pvData points.
+		 * \return Returns false if the range is not entirely within the ASCII prefix, the data is not ASCII, or the destination failed.
+		 */
+		virtual bool											Patch( size_t _sOffset, const void * _pvData, size_t _sSize ) override {
+			if ( _sOffset > m_sAsciiPrefix || _sSize > m_sAsciiPrefix - _sOffset ) { return false; }
+			const uint8_t * pui8Src = static_cast<const uint8_t *>(_pvData);
+			try {
+				std::vector<uint8_t> vWide;
+				vWide.reserve( _sSize * 2 );
+				for ( size_t I = 0; I < _sSize; ++I ) {
+					if ( pui8Src[I] >= 0x80 ) { return false; }
+					vWide.push_back( pui8Src[I] );
+					vWide.push_back( 0 );
+				}
+				return m_csDst.Patch( _sOffset * 2, vWide.data(), vWide.size() );
+			}
+			catch ( ... ) { return false; }
+		}
+
+		/**
+		 * \brief Gets the number of UTF-8 bytes written so far.
+		 *
+		 * \return Returns the number of UTF-8 bytes written so far.
+		 */
+		virtual size_t											Size() const override { return m_sSize; }
+
+		/**
+		 * \brief Completes the conversion, replacing an unfinished trailing sequence with U+FFFD.
+		 *
+		 * \return Returns false if memory could not be allocated or the destination failed.
+		 */
+		bool													Finish() {
+			if ( !m_ui32Need ) { return true; }
+			m_ui32Need = 0;
+			try {
+				m_vOut.clear();
+				Emit( 0xFFFD );
+			}
+			catch ( ... ) { return false; }
+			return m_csDst.Write( m_vOut.data(), m_vOut.size() );
+		}
+
+
+	protected :
+		// == Members.
+		/** The UTF-16 destination. */
+		CCopySink &												m_csDst;
+		/** UTF-16LE bytes produced by the current Write(). */
+		std::vector<uint8_t>									m_vOut;
+		/** The number of UTF-8 bytes written. */
+		size_t													m_sSize = 0;
+		/** The number of leading UTF-8 bytes that are all ASCII. */
+		size_t													m_sAsciiPrefix = 0;
+		/** True until the first non-ASCII byte is written. */
+		bool													m_bAllAscii = true;
+		/** The code point being assembled. */
+		uint32_t												m_ui32Cp = 0;
+		/** The number of continuation bytes still expected. */
+		uint32_t												m_ui32Need = 0;
+
+
+		// == Functions.
+		/**
+		 * \brief Appends a code point to m_vOut as UTF-16LE.  Call within a try/catch block.
+		 *
+		 * \param _ui32Cp The code point.  Surrogates and values above U+10FFFF become U+FFFD.
+		 */
+		void													Emit( uint32_t _ui32Cp ) {
+			if ( (_ui32Cp >= 0xD800 && _ui32Cp <= 0xDFFF) || _ui32Cp > 0x10FFFF ) { _ui32Cp = 0xFFFD; }
+			if ( _ui32Cp >= 0x10000 ) {
+				_ui32Cp -= 0x10000;
+				PushUnit( 0xD800 + (_ui32Cp >> 10) );
+				PushUnit( 0xDC00 + (_ui32Cp & 0x3FF) );
+				return;
+			}
+			PushUnit( _ui32Cp );
+		}
+
+		/**
+		 * \brief Appends one UTF-16 code unit to m_vOut, little-endian.  Call within a try/catch block.
+		 *
+		 * \param _ui32Unit The code unit.
+		 */
+		void													PushUnit( uint32_t _ui32Unit ) {
+			m_vOut.push_back( static_cast<uint8_t>(_ui32Unit) );
+			m_vOut.push_back( static_cast<uint8_t>(_ui32Unit >> 8) );
+		}
+	};
+
+
 	// == CCopyVectorSink functions.
 	/**
 	 * \brief Appends bytes to the end of the sink.
@@ -560,6 +712,8 @@ namespace mx {
 				case MX_CA_BINARY : {
 					if ( !BinaryFormat() ) { return false; }
 					_vFormats.push_back( BinaryFormat() );
+					// The raw bytes as text, so that plain-text editors can paste them.  Windows synthesizes the other text formats.
+					_vFormats.push_back( _caCopyAs.csCharSet == CCharSets::MX_CS_UNICODE ? CF_UNICODETEXT : CF_TEXT );
 					break;
 				}
 				case MX_CA_WEB_PAGE : {
@@ -586,8 +740,8 @@ namespace mx {
 	/**
 	 * \brief Renders a Copy operation into one clipboard format.
 	 *
-	 * CF_UNICODETEXT output is NUL-terminated.  For MX_CA_WEB_PAGE and MX_CA_RICH_TEXT, CF_UNICODETEXT is the plain-text fallback
-	 *	(the same text as MX_CA_HEX_EDITOR_AREAS).
+	 * CF_TEXT and CF_UNICODETEXT output is NUL-terminated.  For MX_CA_WEB_PAGE and MX_CA_RICH_TEXT, CF_UNICODETEXT holds the
+	 *	HTML or RTF markup itself.  For MX_CA_BINARY, CF_TEXT and CF_UNICODETEXT hold the raw bytes (readers stop at the first 0).
 	 *
 	 * \param _csSource The data and parameters of the Copy operation.
 	 * \param _uiFormat The clipboard format to produce.  Must be one returned by Formats() for _csSource.caCopyAs.
@@ -607,6 +761,14 @@ namespace mx {
 			}
 			else if ( caFmt == MX_CA_RICH_TEXT && _uiFormat == RtfFormat() ) {
 				bRet = RenderRtf( _csSource, _csSink );
+			}
+			else if ( caFmt == MX_CA_BINARY && (_uiFormat == CF_TEXT || _uiFormat == CF_UNICODETEXT) ) {
+				bRet = RenderBinaryText( _csSource, _csSink, _uiFormat == CF_UNICODETEXT );
+			}
+			else if ( (caFmt == MX_CA_WEB_PAGE || caFmt == MX_CA_RICH_TEXT) && _uiFormat == CF_UNICODETEXT ) {
+				// Plain-text editors receive the markup itself.
+				CUtf8ToUtf16Sink uusSink( _csSink );
+				bRet = (caFmt == MX_CA_WEB_PAGE ? RenderHtml( _csSource, uusSink ) : RenderRtf( _csSource, uusSink )) && uusSink.Finish();
 			}
 			else if ( caFmt != MX_CA_BINARY && _uiFormat == CF_UNICODETEXT ) {
 				CTextOut toOut( _csSink, CTextOut::MX_M_UTF16 );
@@ -709,6 +871,23 @@ namespace mx {
 			if ( bsStream.Failed() ) { return false; }
 		}
 		return true;
+	}
+
+	/**
+	 * \brief Writes every selected byte, in order, followed by a NUL terminator, as the text form of a raw copy.
+	 *
+	 * \param _csSource The data and parameters of the Copy operation.
+	 * \param _csSink Receives the bytes.
+	 * \param _bWide If true, the bytes are UTF-16 (CF_UNICODETEXT) and the terminator is a whole 2-byte character; otherwise the
+	 *	terminator is 1 byte (CF_TEXT).
+	 * \return Returns false on a read or memory failure.
+	 */
+	bool CCopyFormatter::RenderBinaryText( const MX_COPY_SOURCE &_csSource, CCopySink &_csSink, bool _bWide ) {
+		if ( !RenderBinary( _csSource, _csSink ) ) { return false; }
+		static const uint8_t ui8Zeros[3] = {};
+		if ( !_bWide ) { return _csSink.Write( ui8Zeros, 1 ); }
+		// An odd byte count leaves half a character; complete it so the terminator is aligned.
+		return _csSink.Write( ui8Zeros, (_csSink.Size() & 1) ? 3 : 2 );
 	}
 
 	/**

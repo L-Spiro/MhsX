@@ -677,13 +677,39 @@ namespace lsw {
 		 * Calls ::SetClipboardData( _uiFormat, NULL ) to register the format without providing data yet.
 		 * You must later supply the data when WM_RENDERFORMAT / WM_RENDERALLFORMATS is received.
 		 *
+		 * ::SetClipboardData() returns the handle it was given, which is NULL here even on success, so success is
+		 *	determined by checking that the format is now on the clipboard.
+		 *
 		 * \param _uiFormat The clipboard format to register.
 		 * \return Returns true if the format was registered; false otherwise.
 		 *
-		 * \note The clipboard must be open and owned (typically after ::EmptyClipboard()).
+		 * \note The clipboard must be open and owned, and should have just been emptied (::EmptyClipboard()) so that a
+		 *	format left over from before cannot be mistaken for success.
 		 */
 		bool								SetDeferredData( UINT _uiFormat ) {
-			return NULL != ::SetClipboardData( _uiFormat, NULL );
+			if ( !bOpen ) { return false; }
+			::SetClipboardData( _uiFormat, NULL );
+			return ::IsClipboardFormatAvailable( _uiFormat ) != FALSE;
+		}
+
+		/**
+		 * \brief Places an already-filled moveable HGLOBAL on the clipboard, transferring ownership of it.
+		 *
+		 * Avoids the extra copy made by SetData() when the data was rendered directly into global memory.
+		 *
+		 * \param _uiFormat The clipboard format of the data.
+		 * \param _hGlobal The data, allocated with ::GlobalAlloc( GMEM_MOVEABLE, ... ).  On success the system owns it; on failure
+		 *	this function frees it, so the caller never frees it.
+		 * \return Returns true if the data was placed on the clipboard.
+		 */
+		bool								SetHandle( UINT _uiFormat, HGLOBAL _hGlobal ) {
+			if ( !_hGlobal ) { return false; }
+			if ( !bOpen || NULL == ::SetClipboardData( _uiFormat, _hGlobal ) ) {
+				// It wasn't transferred.
+				::GlobalFree( _hGlobal );
+				return false;
+			}
+			return true;
 		}
 
 		/**
