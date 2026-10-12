@@ -1416,6 +1416,19 @@ namespace mx {
 		void										MiniMapAddressRange( int32_t _i32ScreenHeight, uint64_t &_ui64StartAddr, uint64_t &_ui64EndAddr, uint32_t _ui32BytesPerRow );
 
 		/**
+		 * \brief Computes the first mini-map line shown when the main view starts at a given line.
+		 *
+		 * This is the single source of truth for where the mini-map content starts; MiniMapAddressRange() and the view-box drag both
+		 *	use it.
+		 *
+		 * \param _ui64TopLineMain The main view's first visible line.
+		 * \param _i32ScreenHeight The height of the mini-map.
+		 * \param _ui32BytesPerRow The number of bytes per mini-map row.
+		 * \return Returns the first mini-map line (0 if the whole file fits in the mini-map).
+		 */
+		uint64_t									MiniMapFirstLine( uint64_t _ui64TopLineMain, int32_t _i32ScreenHeight, uint32_t _ui32BytesPerRow ) const;
+
+		/**
 		 * \brief Determines if the cursor is on the mini-map drag line.
 		 *
 		 * \param _pCursorPos The cursor position in client coordinates.
@@ -1505,22 +1518,29 @@ namespace mx {
 		uint64_t									MiniMapLineToAddress( uint64_t _ui64MiniLine ) const;
 
 		/**
-		 * \brief Gets mini-map rectangle and thumb metrics for scroll dragging.
+		 * \brief Gets the drawn top of the "current view" box in the mini-map, as it would be if the main view started at a given line.
 		 *
-		 * \param _rClient The client rectangle.
-		 * \param _i32MiniLeft Holds the mini-map left.
-		 * \param _i32MiniRight Holds the mini-map right (exclusive).
-		 * \param _i32MiniTop Holds the mini-map top.
-		 * \param _i32MiniBottom Holds the mini-map bottom (exclusive).
-		 * \param _i32ThumbTop Holds the thumb top.
-		 * \param _i32ThumbHeight Holds the thumb height.
-		 * \param _i32Track Holds the track height (miniHeight - thumbHeight).
-		 * \param _ui64MaxFirstLine Holds the maximum ui64FirstVisibleLine.
-		 * \return Returns true if mini-map is visible and metrics are valid.
+		 * Uses the geometry of the last DrawMiniMap() and the same content placement (MiniMapFirstLine()), so the result matches what
+		 *	is on screen.  The box can start part-way through a mini-map row, so the result is fractional.
+		 *
+		 * \param _ui64TopLineMain The main view's first visible line.
+		 * \return Returns the box top in pixels, relative to the top of the mini-map.
 		 */
-		bool										MiniMapThumbMetrics( const lsw::LSW_RECT &_rClient,
-			int32_t &_i32MiniLeft, int32_t &_i32MiniRight, int32_t &_i32MiniTop, int32_t &_i32MiniBottom,
-			int32_t &_i32ThumbTop, int32_t &_i32ThumbHeight, int32_t &_i32Track, uint64_t &_ui64MaxFirstLine ) const;
+		double										MiniMapViewBoxTopPx( uint64_t _ui64TopLineMain ) const;
+
+		/**
+		 * \brief Gets how far the "current view" box moves in the mini-map per line the main view scrolls.
+		 *
+		 * The mini-map content scrolls while the box moves, so the box moves at
+		 *	zoom * (mainBytesPerRow / miniBytesPerRow) * (1 - (miniLines - miniSpan) / maxTopMiniLine) pixels per line.
+		 *
+		 * \param _dPxPerLine Holds the returned pixels per main-view line.
+		 * \param _ui64MaxFirstLine Holds the largest first line a drag can reach (totalLines - pageLines).
+		 * \param _bExact Holds whether the box can follow the mouse.  If false (the box is at least as tall as the mini-map),
+		 *	_dPxPerLine spreads the whole scroll range over the mini-map's height instead.
+		 * \return Returns false if the mini-map has not been drawn or there is nothing to scroll.
+		 */
+		bool										MiniMapViewBoxModel( double &_dPxPerLine, uint64_t &_ui64MaxFirstLine, bool &_bExact ) const;
 
 		// Gets the minimum address digits.
 		uint32_t									MinAddrDigits() const {

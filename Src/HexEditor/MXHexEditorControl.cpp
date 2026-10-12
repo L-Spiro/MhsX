@@ -1577,26 +1577,21 @@ namespace mx {
 				}
 
 				// Click inside current view: begin drag-scroll.
-				int32_t i32MiniLeft, i32MiniRight, i32MiniTop, i32MiniBottom;
-				int32_t i32ThumbTop, i32ThumbHeight, i32Track;
+				double dPxPerLine;
 				uint64_t ui64MaxFirstLine;
-
-				if ( MiniMapThumbMetrics( ClientRect(), i32MiniLeft, i32MiniRight, i32MiniTop, i32MiniBottom, i32ThumbTop, i32ThumbHeight, i32Track, ui64MaxFirstLine ) ) {
-					const int32_t i32X = _pCursorPos.x;
-					const int32_t i32Y = _pCursorPos.y;
+				bool bExact;
+				if ( MiniMapViewBoxModel( dPxPerLine, ui64MaxFirstLine, bExact ) ) {
+					const uint64_t ui64First = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine;
 					m_mmsMiniMap.bDraggingScroll = true;
-					m_mmsMiniMap.i32ScrollGrabY = i32Y - i32ThumbTop;
-
-					// Freeze geometry to avoid drift.
-					m_mmsMiniMap.i32DragMiniTop = i32MiniTop;
-					m_mmsMiniMap.i32DragTrack = i32Track;
-					m_mmsMiniMap.i32DragThumbHeight = i32ThumbHeight;
-					m_mmsMiniMap.i32DragThumbTop = i32ThumbTop;
+					m_mmsMiniMap.bDragExact = bExact;
+					m_mmsMiniMap.i32DragStartY = _pCursorPos.y;
+					m_mmsMiniMap.ui64DragStartFirstLine = ui64First;
 					m_mmsMiniMap.ui64DragMaxFirstLine = ui64MaxFirstLine;
+					m_mmsMiniMap.dDragPxPerLine = dPxPerLine;
+					m_mmsMiniMap.dDragGrabOffset = double( _pCursorPos.y - m_mmsMiniMap.i32DrawnTop ) - MiniMapViewBoxTopPx( ui64First );
 
 					::SetCapture( Wnd() );
 					return lsw::CWidget::LSW_H_HANDLED;
-
 				}
 			}
 		}
@@ -1660,24 +1655,41 @@ namespace mx {
 
 			// Mini-map scroll drag bypasses selection logic.
 			if ( m_mmsMiniMap.bDraggingScroll && ::GetCapture() == Wnd() ) {
-				int32_t i32Track = m_mmsMiniMap.i32DragTrack;
-				uint64_t ui64MaxFirstLine = m_mmsMiniMap.ui64DragMaxFirstLine;
-				int32_t i32MiniTop = m_mmsMiniMap.i32DragMiniTop;
-				int32_t i32ThumbHeight = m_mmsMiniMap.i32DragThumbHeight;
+				const uint64_t ui64MaxFirstLine = m_mmsMiniMap.ui64DragMaxFirstLine;
+				const uint64_t ui64StartFirst = std::min( m_mmsMiniMap.ui64DragStartFirstLine, ui64MaxFirstLine );
 
-				int32_t i32GrabY = m_mmsMiniMap.i32ScrollGrabY;
-				if ( i32GrabY < 0 ) { i32GrabY = 0; }
-				if ( i32GrabY >= i32ThumbHeight ) { i32GrabY = i32ThumbHeight - 1; }
+				if ( ui64MaxFirstLine > 0 && m_mmsMiniMap.dDragPxPerLine > 0.0 ) {
+					// Estimate from the box's linear rate of movement.
+					double dDelta = double( _pCursorPos.y - m_mmsMiniMap.i32DragStartY ) / m_mmsMiniMap.dDragPxPerLine;
+					dDelta = std::clamp( dDelta, -double( ui64StartFirst ), double( ui64MaxFirstLine - ui64StartFirst ) );
+					uint64_t ui64NewFirst;
+					if ( dDelta < 0.0 ) {
+						ui64NewFirst = ui64StartFirst - std::min( ui64StartFirst, static_cast<uint64_t>(std::llround( -dDelta )) );
+					}
+					else {
+						ui64NewFirst = ui64StartFirst + std::min( ui64MaxFirstLine - ui64StartFirst, static_cast<uint64_t>(std::llround( dDelta )) );
+					}
 
-				int32_t i32TargetThumbTop = _pCursorPos.y - i32MiniTop - i32GrabY;
-
-				i32TargetThumbTop = std::max( 0, std::min( i32TargetThumbTop, i32Track ) );
-
-				if ( i32Track > 0 && ui64MaxFirstLine > 0 ) {
-					uint64_t ui64NewFirst = MiniMapMulDivU64Round( static_cast<uint64_t>(i32TargetThumbTop), ui64MaxFirstLine, static_cast<uint64_t>(i32Track) );
-
-					if ( ui64NewFirst > ui64MaxFirstLine ) { 
-						ui64NewFirst = ui64MaxFirstLine;
+					if ( m_mmsMiniMap.bDragExact ) {
+						// The content only moves by whole mini-map rows, so refine against the box's drawn position: pick the nearby line
+						//	that puts the box top closest to where the grab point says it belongs.
+						const double dTarget = double( _pCursorPos.y - m_mmsMiniMap.i32DrawnTop ) - m_mmsMiniMap.dDragGrabOffset;
+						const uint64_t ui64MainBpr = CurStyle()->uiBytesPerRow ? CurStyle()->uiBytesPerRow : 1ULL;
+						const uint64_t ui64MiniBpr = m_mmsMiniMap.ui32DrawnBytesPerRow ? m_mmsMiniMap.ui32DrawnBytesPerRow : 1ULL;
+						const uint64_t ui64Window = 4ULL * ((ui64MiniBpr + ui64MainBpr - 1ULL) / ui64MainBpr) + 4ULL;
+						const uint64_t ui64Lo = ui64NewFirst - std::min( ui64NewFirst, ui64Window );
+						const uint64_t ui64Hi = ui64NewFirst + std::min( ui64MaxFirstLine - ui64NewFirst, ui64Window );
+						const uint64_t ui64Estimate = ui64NewFirst;
+						double dBestErr = -1.0;
+						for ( uint64_t I = ui64Lo; I <= ui64Hi; ++I ) {
+							const double dErr = std::abs( MiniMapViewBoxTopPx( I ) - dTarget );
+							const uint64_t ui64Dist = (I > ui64Estimate) ? (I - ui64Estimate) : (ui64Estimate - I);
+							const uint64_t ui64BestDist = (ui64NewFirst > ui64Estimate) ? (ui64NewFirst - ui64Estimate) : (ui64Estimate - ui64NewFirst);
+							if ( dBestErr < 0.0 || dErr < dBestErr || (dErr == dBestErr && ui64Dist < ui64BestDist) ) {
+								dBestErr = dErr;
+								ui64NewFirst = I;
+							}
+						}
 					}
 
 					if ( m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine != ui64NewFirst ) {
@@ -2345,6 +2357,10 @@ namespace mx {
 			ui32SrcW = std::max( ui32SrcW, mmMiniMap.ui32SnapLines );
 		}
 		MiniMapAddressRange( i32RectH, ui64AddrStart, ui64AddrEnd, ui32SrcW );
+		// The view-box drag must use exactly this geometry.
+		m_mmsMiniMap.ui32DrawnBytesPerRow = ui32SrcW;
+		m_mmsMiniMap.i32DrawnTop = _iYTop;
+		m_mmsMiniMap.i32DrawnHeight = i32RectH;
 
 		m_mmsMiniMap.ui64Address = ui64AddrStart;
 		m_mmsMiniMap.ui64End = ui64AddrEnd;
@@ -3644,44 +3660,7 @@ namespace mx {
 			return;
 		}
 
-		// Main editor visible range (in main lines).
-		const uint64_t ui64TopLineMain = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine;
-		const int32_t i32PageLines = (m_sdScrollView[m_eaEditAs].i32PageLines > 0) ?
-			m_sdScrollView[m_eaEditAs].i32PageLines : 1;
-
-		const uint32_t ui32MainBpr = CurStyle()->uiBytesPerRow ? CurStyle()->uiBytesPerRow : 1U;
-
-		const uint64_t ui64PageBytesMain = static_cast<uint64_t>(i32PageLines) * static_cast<uint64_t>(ui32MainBpr);
-		const uint64_t ui64TopAddrMain = ui64TopLineMain * static_cast<uint64_t>(ui32MainBpr);
-
-		// Maximum top-of-view address (clamped).
-		uint64_t ui64MaxTopAddrMain = 0;
-		if ( ui64TotalBytes > ui64PageBytesMain ) {
-			ui64MaxTopAddrMain = ui64TotalBytes - ui64PageBytesMain;
-		}
-
-		// Convert to mini-map line space.
-		uint64_t ui64TopLineMini = ui64TopAddrMain / static_cast<uint64_t>(_ui32BytesPerRow);
-		uint64_t ui64MaxTopLineMini = ui64MaxTopAddrMain / static_cast<uint64_t>(_ui32BytesPerRow);
-
-		// Map top line to a start line that moves continuously from 0..(total-span).
-		const uint64_t ui64MaxStart = ui64TotalMiniLines - ui64SpanMiniLines;
-
-		uint64_t ui64FirstLineMini = 0;
-		if ( ui64MaxTopLineMini ) {
-			try {
-				uint64_t ui64Rem;
-				ui64FirstLineMini = _umuldiv128_rounded( ui64TopLineMini, ui64MaxStart, ui64MaxTopLineMini, &ui64Rem );
-			}
-			catch ( ... ) {
-				ui64FirstLineMini = 0;
-			}
-		}
-
-		if ( ui64FirstLineMini > ui64MaxStart ) {
-			ui64FirstLineMini = ui64MaxStart;
-		}
-
+		const uint64_t ui64FirstLineMini = MiniMapFirstLine( m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine, _i32ScreenHeight, _ui32BytesPerRow );
 		const uint64_t ui64LastLineMini = ui64FirstLineMini + ui64SpanMiniLines;
 
 		_ui64StartAddr = ui64FirstLineMini * static_cast<uint64_t>(_ui32BytesPerRow);
@@ -3889,65 +3868,139 @@ namespace mx {
 	}
 
 	/**
-	 * \brief Gets mini-map rectangle and thumb metrics for scroll dragging.
+	 * \brief Computes the first mini-map line shown when the main view starts at a given line.
 	 *
-	 * \param _rClient The client rectangle.
-	 * \param _i32MiniLeft Holds the mini-map left.
-	 * \param _i32MiniRight Holds the mini-map right (exclusive).
-	 * \param _i32MiniTop Holds the mini-map top.
-	 * \param _i32MiniBottom Holds the mini-map bottom (exclusive).
-	 * \param _i32ThumbTop Holds the thumb top.
-	 * \param _i32ThumbHeight Holds the thumb height.
-	 * \param _i32Track Holds the track height (miniHeight - thumbHeight).
-	 * \param _ui64MaxFirstLine Holds the maximum ui64FirstVisibleLine.
-	 * \return Returns true if mini-map is visible and metrics are valid.
+	 * This is the single source of truth for where the mini-map content starts; MiniMapAddressRange() and the view-box drag both
+	 *	use it.
+	 *
+	 * \param _ui64TopLineMain The main view's first visible line.
+	 * \param _i32ScreenHeight The height of the mini-map.
+	 * \param _ui32BytesPerRow The number of bytes per mini-map row.
+	 * \return Returns the first mini-map line (0 if the whole file fits in the mini-map).
 	 */
-	bool CHexEditorControl::MiniMapThumbMetrics( const lsw::LSW_RECT &_rClient,
-		int32_t &_i32MiniLeft, int32_t &_i32MiniRight, int32_t &_i32MiniTop, int32_t &_i32MiniBottom,
-		int32_t &_i32ThumbTop, int32_t &_i32ThumbHeight, int32_t &_i32Track, uint64_t &_ui64MaxFirstLine ) const {
+	uint64_t CHexEditorControl::MiniMapFirstLine( uint64_t _ui64TopLineMain, int32_t _i32ScreenHeight, uint32_t _ui32BytesPerRow ) const {
+		const CMiniMap::MX_MINI_MAP &mmMiniMap = CurStyle()->mmMiniMap;
+		if ( _i32ScreenHeight <= 0 || !_ui32BytesPerRow ) { return 0; }
 
-		if ( !CurStyle()->bShowMiniMap ) { return false; }
+		const uint64_t ui64TotalBytes = Size();
+		if ( ui64TotalBytes == 0 ) { return 0; }
 
-		_i32MiniLeft = MiniMapLeft( _rClient );
-		_i32MiniRight = _i32MiniLeft + CurStyle()->i32MiniMapWidthPx;
-		_i32MiniTop = 0;
-		_i32MiniBottom = _rClient.Height();
+		const uint32_t ui32Zoom = mmMiniMap.ui32Zoom ? mmMiniMap.ui32Zoom : 1U;
 
-		const int32_t i32MiniHeight = _i32MiniBottom - _i32MiniTop;
-		if ( i32MiniHeight <= 0 ) { return false; }
+		// Total mini-map lines in the file based on mini-map bytes-per-row.
+		const uint64_t ui64TotalMiniLines = (ui64TotalBytes + _ui32BytesPerRow - 1ULL) / _ui32BytesPerRow;
 
-		const uint64_t ui64Lines = TotalLines_FixedWidth();
-		if ( ui64Lines == 0 ) { return false; }
+		// Number of mini-map lines visible on screen at this zoom.
+		const uint64_t ui64SpanMiniLines = MiniMapSpanLines( _i32ScreenHeight, ui32Zoom );
 
+		// If the whole file fits, it is shown from the start.
+		if ( ui64SpanMiniLines >= ui64TotalMiniLines ) { return 0; }
+
+		// Main editor visible range (in main lines).
+		const int32_t i32PageLines = (m_sdScrollView[m_eaEditAs].i32PageLines > 0) ?
+			m_sdScrollView[m_eaEditAs].i32PageLines : 1;
+
+		const uint32_t ui32MainBpr = CurStyle()->uiBytesPerRow ? CurStyle()->uiBytesPerRow : 1U;
+
+		const uint64_t ui64PageBytesMain = static_cast<uint64_t>(i32PageLines) * static_cast<uint64_t>(ui32MainBpr);
+		const uint64_t ui64TopAddrMain = _ui64TopLineMain * static_cast<uint64_t>(ui32MainBpr);
+
+		// Maximum top-of-view address (clamped).
+		uint64_t ui64MaxTopAddrMain = 0;
+		if ( ui64TotalBytes > ui64PageBytesMain ) {
+			ui64MaxTopAddrMain = ui64TotalBytes - ui64PageBytesMain;
+		}
+
+		// Convert to mini-map line space.
+		const uint64_t ui64TopLineMini = ui64TopAddrMain / static_cast<uint64_t>(_ui32BytesPerRow);
+		const uint64_t ui64MaxTopLineMini = ui64MaxTopAddrMain / static_cast<uint64_t>(_ui32BytesPerRow);
+
+		// Map top line to a start line that moves continuously from 0..(total-span).
+		const uint64_t ui64MaxStart = ui64TotalMiniLines - ui64SpanMiniLines;
+
+		uint64_t ui64FirstLineMini = 0;
+		if ( ui64MaxTopLineMini ) {
+			try {
+				uint64_t ui64Rem;
+				ui64FirstLineMini = _umuldiv128_rounded( ui64TopLineMini, ui64MaxStart, ui64MaxTopLineMini, &ui64Rem );
+			}
+			catch ( ... ) {
+				ui64FirstLineMini = 0;
+			}
+		}
+
+		return std::min( ui64FirstLineMini, ui64MaxStart );
+	}
+
+	/**
+	 * \brief Gets the drawn top of the "current view" box in the mini-map, as it would be if the main view started at a given line.
+	 *
+	 * Uses the geometry of the last DrawMiniMap() and the same content placement (MiniMapFirstLine()), so the result matches what
+	 *	is on screen.  The box can start part-way through a mini-map row, so the result is fractional.
+	 *
+	 * \param _ui64TopLineMain The main view's first visible line.
+	 * \return Returns the box top in pixels, relative to the top of the mini-map.
+	 */
+	double CHexEditorControl::MiniMapViewBoxTopPx( uint64_t _ui64TopLineMain ) const {
+		const uint32_t ui32MiniBpr = m_mmsMiniMap.ui32DrawnBytesPerRow;
+		if ( !ui32MiniBpr ) { return 0.0; }
+		const uint32_t ui32Zoom = CurStyle()->mmMiniMap.ui32Zoom ? CurStyle()->mmMiniMap.ui32Zoom : 1U;
+		const uint64_t ui64MainBpr = CurStyle()->uiBytesPerRow ? CurStyle()->uiBytesPerRow : 1ULL;
+
+		const uint64_t ui64FirstMini = MiniMapFirstLine( _ui64TopLineMain, m_mmsMiniMap.i32DrawnHeight, ui32MiniBpr );
+		// Bytes between the top of the mini-map and the top of the box (negative if the box starts above the mini-map).
+		const int64_t i64Bytes = static_cast<int64_t>(_ui64TopLineMain * ui64MainBpr) - static_cast<int64_t>(ui64FirstMini * ui32MiniBpr);
+		return double( ui32Zoom ) * double( i64Bytes ) / double( ui32MiniBpr );
+	}
+
+	/**
+	 * \brief Gets how far the "current view" box moves in the mini-map per line the main view scrolls.
+	 *
+	 * The mini-map content scrolls while the box moves, so the box moves at
+	 *	zoom * (mainBytesPerRow / miniBytesPerRow) * (1 - (miniLines - miniSpan) / maxTopMiniLine) pixels per line.
+	 *
+	 * \param _dPxPerLine Holds the returned pixels per main-view line.
+	 * \param _ui64MaxFirstLine Holds the largest first line a drag can reach (totalLines - pageLines).
+	 * \param _bExact Holds whether the box can follow the mouse.  If false (the box is at least as tall as the mini-map),
+	 *	_dPxPerLine spreads the whole scroll range over the mini-map's height instead.
+	 * \return Returns false if the mini-map has not been drawn or there is nothing to scroll.
+	 */
+	bool CHexEditorControl::MiniMapViewBoxModel( double &_dPxPerLine, uint64_t &_ui64MaxFirstLine, bool &_bExact ) const {
+		const uint32_t ui32MiniBpr = m_mmsMiniMap.ui32DrawnBytesPerRow;
+		const int32_t i32Height = m_mmsMiniMap.i32DrawnHeight;
+		if ( !CurStyle()->bShowMiniMap || !ui32MiniBpr || i32Height <= 0 ) { return false; }
+
+		const uint64_t ui64TotalBytes = Size();
+		if ( ui64TotalBytes == 0 ) { return false; }
+
+		const uint32_t ui32Zoom = CurStyle()->mmMiniMap.ui32Zoom ? CurStyle()->mmMiniMap.ui32Zoom : 1U;
+		const uint64_t ui64MainBpr = CurStyle()->uiBytesPerRow ? CurStyle()->uiBytesPerRow : 1ULL;
 		const uint64_t ui64PageLines = (m_sdScrollView[m_eaEditAs].i32PageLines > 0) ?
 			static_cast<uint64_t>(m_sdScrollView[m_eaEditAs].i32PageLines) : 1ULL;
 
-		// Mini-map drag/overlay range: last line reaches the BOTTOM of the viewport.
-		_ui64MaxFirstLine = 0;
-		if ( ui64Lines > ui64PageLines ) {
-			_ui64MaxFirstLine = ui64Lines - ui64PageLines;
+		const uint64_t ui64Lines = TotalLines_FixedWidth();
+		_ui64MaxFirstLine = (ui64Lines > ui64PageLines) ? (ui64Lines - ui64PageLines) : 0ULL;
+		if ( _ui64MaxFirstLine == 0 ) { return false; }
+
+		// The fraction of the box's movement that is cancelled by the content scrolling underneath it (see MiniMapFirstLine()).
+		double dScrollRatio = 0.0;
+		const uint64_t ui64TotalMiniLines = (ui64TotalBytes + ui32MiniBpr - 1ULL) / ui32MiniBpr;
+		const uint64_t ui64SpanMiniLines = MiniMapSpanLines( i32Height, ui32Zoom );
+		if ( ui64SpanMiniLines < ui64TotalMiniLines ) {
+			const uint64_t ui64PageBytes = ui64PageLines * ui64MainBpr;
+			const uint64_t ui64MaxTopAddr = (ui64TotalBytes > ui64PageBytes) ? (ui64TotalBytes - ui64PageBytes) : 0ULL;
+			const uint64_t ui64MaxTopMini = ui64MaxTopAddr / ui32MiniBpr;
+			if ( ui64MaxTopMini ) {
+				dScrollRatio = double( ui64TotalMiniLines - ui64SpanMiniLines ) / double( ui64MaxTopMini );
+			}
 		}
 
-		// Thumb height proportional to visible lines. Clamp to [1..miniHeight].
-		uint64_t ui64ThumbH = MiniMapMulDivU64Round( ui64PageLines, static_cast<uint64_t>(i32MiniHeight), ui64Lines );
-		if ( ui64ThumbH < 1ULL ) { ui64ThumbH = 1ULL; }
-		if ( ui64ThumbH > static_cast<uint64_t>(i32MiniHeight) ) { ui64ThumbH = static_cast<uint64_t>(i32MiniHeight); }
-		_i32ThumbHeight = static_cast<int32_t>(ui64ThumbH);
-
-		_i32Track = i32MiniHeight - _i32ThumbHeight;
-		if ( _i32Track < 0 ) { _i32Track = 0; }
-
-		const uint64_t ui64First = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine;
-
-		if ( _ui64MaxFirstLine == 0ULL || _i32Track == 0 ) {
-			_i32ThumbTop = _i32MiniTop;
+		_dPxPerLine = double( ui32Zoom ) * double( ui64MainBpr ) / double( ui32MiniBpr ) * (1.0 - dScrollRatio);
+		_bExact = _dPxPerLine > 1.0e-9;
+		if ( !_bExact ) {
+			// The box is at least as tall as the mini-map and cannot follow the mouse; map the mini-map's height to the scroll range.
+			_dPxPerLine = double( i32Height ) / double( _ui64MaxFirstLine );
 		}
-		else {
-			uint64_t ui64TopPx = MiniMapMulDivU64Round( ui64First, static_cast<uint64_t>(_i32Track), _ui64MaxFirstLine );
-			if ( ui64TopPx > static_cast<uint64_t>(_i32Track) ) { ui64TopPx = static_cast<uint64_t>(_i32Track); }
-			_i32ThumbTop = _i32MiniTop + static_cast<int32_t>(ui64TopPx);
-		}
-
 		return true;
 	}
 

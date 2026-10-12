@@ -62,14 +62,17 @@ namespace mx {
 			int32_t									i32DragStartX = 0;					/**< Mouse X at drag start. */
 			int32_t									i32DragStartWidth = 0;				/**< Mini-map width at drag start. */
 			
-			bool									bDraggingScroll = false;			/**< True while dragging the mini-map view thumb. */
-			int32_t									i32ScrollGrabY = 0;					/**< MouseY - thumbTop at drag start. */
+			bool									bDraggingScroll = false;			/**< True while dragging the "current view" box. */
+			bool									bDragExact = true;					/**< The box can follow the mouse (it is shorter than the mini-map). */
+			int32_t									i32DragStartY = 0;					/**< Mouse Y at the start of a view drag. */
+			uint64_t								ui64DragStartFirstLine = 0;			/**< The main view's first line at the start of a view drag. */
+			uint64_t								ui64DragMaxFirstLine = 0;			/**< The largest first line a view drag can reach (totalLines - pageLines). */
+			double									dDragGrabOffset = 0.0;				/**< Mouse Y minus the drawn top of the box at the start of a view drag. */
+			double									dDragPxPerLine = 0.0;				/**< Mini-map pixels the box moves per main-view line. */
 
-			int32_t									i32DragMiniTop = 0;					/**< Frozen mini-map top for drag. */
-			int32_t									i32DragTrack = 0;					/**< Frozen track height for drag. */
-			int32_t									i32DragThumbHeight = 0;				/**< Frozen thumb height for drag. */
-			int32_t									i32DragThumbTop = 0;				/**< Current thumb top while dragging. */
-			uint64_t								ui64DragMaxFirstLine = 0;			/**< Frozen max-first-line for drag (totalLines - pageLines). */
+			uint32_t								ui32DrawnBytesPerRow = 0;			/**< Bytes per mini-map row when last drawn. */
+			int32_t									i32DrawnTop = 0;					/**< Top of the mini-map when last drawn. */
+			int32_t									i32DrawnHeight = 0;					/**< Height of the mini-map when last drawn. */
 		};
 
 
