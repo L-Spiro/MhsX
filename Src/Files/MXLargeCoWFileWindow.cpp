@@ -157,128 +157,14 @@ namespace mx {
 	 */
 	bool CLargeCoWFileWindow::Insert( uint64_t _ui64Addr, const CHexEditorInterface::CBuffer &_bSrc, uint64_t &_ui64Inserted ) {
 		_ui64Inserted = 0;
-		try {
-			if ( ReadOnly() ) { return false; }
-			const uint64_t ui64InsSize = static_cast<uint64_t>(_bSrc.size());
-			if ( ui64InsSize == 0ULL ) { return true; }
-
-			// Clamp insert address to EOF.
-			if ( _ui64Addr > Size() ) { _ui64Addr = Size(); }
-
-			// Ensure we have a usable segment file (policy-driven).
-			if ( !EnsureCurrentSegmentFile( ui64InsSize ) ) { return false; }
-
-			// Ensure mapping is available.
-			CFileMap * pfmSeg = EnsureCurrentSegmentMap();
-			if ( !pfmSeg ) { return false; }
-
-			// Write to the segment file at current "used" offset.
-			uint64_t ui64SegOffset = m_ui64CurSegmentUsed;
-
-			auto ui64WriteSize = ui64InsSize;
-			while ( ui64WriteSize ) {
-				uint32_t ui32WriteSize = uint32_t( std::min<uint64_t>( ui64WriteSize, UINT_MAX ) );
-				pfmSeg->Write( _bSrc.data(), ui64SegOffset, ui32WriteSize );
-				ui64WriteSize -= ui32WriteSize;
-				ui64SegOffset += ui32WriteSize;
-			}
-
-			// Build the new logical section.
-			auto vOut = m_vLogicalMap;
-
-			MX_LOGICAL_SECTION lsNew{};
-			lsNew.stType = MX_ST_SEGMENT;
-			lsNew.ui64Start = _ui64Addr;
-			lsNew.ui64Size = ui64InsSize;
-			lsNew.ui64Offset = ui64SegOffset;
-			lsNew.u.saSegmentAddress.sFile = m_sCurSegmentMapIdx;
-
-			// Insert it into m_vLogicalMap at the correct position.
-			// We need to locate the first section whose start is >= insert addr.
-			size_t sInsertAt = 0;
-			for ( ; sInsertAt < m_vLogicalMap.size(); ++sInsertAt ) {
-				if ( m_vLogicalMap[sInsertAt].ui64Start >= _ui64Addr ) { break; }
-			}
-
-			// If inserting into the middle of a section, split that section.
-			if ( sInsertAt > 0 ) {
-				MX_LOGICAL_SECTION & lsPrev = m_vLogicalMap[sInsertAt-1];
-				const uint64_t ui64PrevEnd = lsPrev.ui64Start + lsPrev.ui64Size;
-				if ( _ui64Addr < ui64PrevEnd ) {
-					// Split lsPrev into left and right.
-					MX_LOGICAL_SECTION lsRight = lsPrev;
-
-					const uint64_t ui64LeftSize = _ui64Addr - lsPrev.ui64Start;
-					const uint64_t ui64RightSize = lsPrev.ui64Size - ui64LeftSize;
-
-					lsPrev.ui64Size = ui64LeftSize;
-
-					lsRight.ui64Start = _ui64Addr + ui64InsSize; // shifted by insertion
-					lsRight.ui64Size = ui64RightSize;
-					lsRight.ui64Offset = lsPrev.ui64Offset + ui64LeftSize;
-
-					// Insert new + right after left.
-					m_vLogicalMap.insert( m_vLogicalMap.begin() + sInsertAt, lsNew );
-					m_vLogicalMap.insert( m_vLogicalMap.begin() + sInsertAt + 1, lsRight );
-
-					// Shift everything after the right piece.
-					for ( size_t I = sInsertAt + 2; I < m_vLogicalMap.size(); ++I ) {
-						m_vLogicalMap[I].ui64Start += ui64InsSize;
-					}
-
-					m_ui64CurSegmentUsed += ui64InsSize;
-
-					SimplifyLogicalView();
-					UpdateSize();
-
-					uint64_t ui64TotalInGroup = m_vItemsInGroup.size() ? m_vItemsInGroup[m_vItemsInGroup.size()-1] : 0;
-					bool bAddNew = true;
-					if ( ui64TotalInGroup && m_vUndoStack.size() > m_sUndoIdx && m_vUndoStack[m_sUndoIdx].uoOp == CHexEditorInterface::MX_UO_INSERT ) {
-						m_vUndoStack[m_sUndoIdx].vDelete_Redo = vOut;
-						bAddNew = false;
-					}
-					if ( bAddNew ) {
-						MX_UNDO_ITEM uUndoMe = { .uoOp = CHexEditorInterface::MX_UO_INSERT, .vDelete_Undo = m_vLogicalMap, .vDelete_Redo = vOut };
-						if ( !PushUndo( uUndoMe ) ) { return false; }
-						if ( m_vItemsInGroup.size() ) {
-							m_vItemsInGroup[m_vItemsInGroup.size()-1]++;
-						}
-					}
-
-					_ui64Inserted = ui64InsSize;
-					return true;
-				}
-			}
-
-			// Not splitting: just insert and shift everything after it.
-			m_vLogicalMap.insert( m_vLogicalMap.begin() + sInsertAt, lsNew );
-			for ( size_t I = sInsertAt + 1; I < m_vLogicalMap.size(); ++I ) {
-				m_vLogicalMap[I].ui64Start += ui64InsSize;
-			}
-
-			m_ui64CurSegmentUsed += ui64InsSize;
-
-			SimplifyLogicalView();
-			UpdateSize();
-
-			uint64_t ui64TotalInGroup = m_vItemsInGroup.size() ? m_vItemsInGroup[m_vItemsInGroup.size()-1] : 0;
-			bool bAddNew = true;
-			if ( ui64TotalInGroup && m_vUndoStack.size() > m_sUndoIdx && m_vUndoStack[m_sUndoIdx].uoOp == CHexEditorInterface::MX_UO_INSERT ) {
-				m_vUndoStack[m_sUndoIdx].vDelete_Redo = vOut;
-				bAddNew = false;
-			}
-			if ( bAddNew ) {
-				MX_UNDO_ITEM uUndoMe = { .uoOp = CHexEditorInterface::MX_UO_INSERT, .vDelete_Undo = m_vLogicalMap, .vDelete_Redo = vOut };
-				if ( !PushUndo( uUndoMe ) ) { return false; }
-				if ( m_vItemsInGroup.size() ) {
-					m_vItemsInGroup[m_vItemsInGroup.size()-1]++;
-				}
-			}
-
-			_ui64Inserted = ui64InsSize;
-			return true;
+		if ( ReadOnly() ) { return false; }
+		if ( _bSrc.empty() ) { return true; }
+		if ( !BeginInsertData( _bSrc.size() ) ) { return false; }
+		if ( !AppendInsertData( _bSrc.data(), _bSrc.size() ) ) {
+			CancelInsertData();
+			return false;
 		}
-		catch ( ... ) { return false; }
+		return EndInsertData( _ui64Addr, _ui64Inserted );
 	}
 
 	/**
@@ -361,6 +247,184 @@ namespace mx {
 	}
 
 	/**
+	 * \brief Gets the Copy parameters of the snapshot held by a clipboard slot.
+	 *
+	 * \param _sClipIdx The clipboard index (less than TotalClipboards).
+	 * \param _caCopyAs Receives the Copy parameters.
+	 * \return Returns false if the slot is empty.
+	 */
+	bool CLargeCoWFileWindow::ClipboardCopyAs( size_t _sClipIdx, MX_COPYAS &_caCopyAs ) const {
+		if ( _sClipIdx >= TotalClipboards || !m_cbClipBoards[_sClipIdx].sSelection.HasSelection() ) { return false; }
+		try {
+			_caCopyAs = m_cbClipBoards[_sClipIdx].caCopyAs;
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * \brief Streams the raw selected bytes of the snapshot held by a clipboard slot, in order, to a callback.
+	 *
+	 * \param _sClipIdx The clipboard index (less than TotalClipboards).
+	 * \param _fChunk Receives each block of bytes; returning false stops the stream.
+	 * \return Returns false if the slot is empty, a read failed, or _fChunk returned false.
+	 */
+	bool CLargeCoWFileWindow::ReadClipboard( size_t _sClipIdx, const std::function<bool ( const uint8_t *, size_t )> &_fChunk ) const {
+		if ( _sClipIdx >= TotalClipboards || !m_cbClipBoards[_sClipIdx].sSelection.HasSelection() ) { return false; }
+		try {
+			const CCopyFormatter::MX_COPY_SOURCE csSource = ClipboardSource( _sClipIdx );
+			constexpr size_t sChunk = 8 * 1024 * 1024;
+			CHexEditorInterface::CBuffer bBuffer;
+			const uint64_t ui64Ranges = CCopyFormatter::TotalRanges( csSource );
+			for ( uint64_t I = 0; I < ui64Ranges; ++I ) {
+				const MX_SEL_RANGE srRange = CCopyFormatter::RangeAt( csSource, I );
+				for ( uint64_t ui64Done = 0; ui64Done < srRange.ui64Size; ) {
+					const size_t sThis = size_t( std::min<uint64_t>( srRange.ui64Size - ui64Done, sChunk ) );
+					if ( !csSource.fRead( srRange.ui64Start + ui64Done, bBuffer, sThis ) || bBuffer.size() < sThis ) { return false; }
+					if ( !_fChunk( bBuffer.data(), sThis ) ) { return false; }
+					ui64Done += sThis;
+				}
+			}
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * \brief Inserts the raw bytes of this object's own clipboard snapshot at the given address.
+	 *
+	 * The snapshot's sections of the original file and segment files are spliced into the logical map, so pasting any amount of
+	 *	data copied from this file is instantaneous and uses no additional storage.  A Column selection with very many lines is
+	 *	copied into a segment instead, to keep the logical map small.
+	 *
+	 * \param _ui64Addr The address at which to insert (clamped to the end of the file).
+	 * \param _sClipIdx The clipboard index (less than TotalClipboards).
+	 * \param _ui64Inserted Receives the number of bytes inserted.
+	 * \return Returns true if the insert succeeded.
+	 */
+	bool CLargeCoWFileWindow::InsertClipboard( uint64_t _ui64Addr, size_t _sClipIdx, uint64_t &_ui64Inserted ) {
+		_ui64Inserted = 0;
+		if ( ReadOnly() || _sClipIdx >= TotalClipboards || !m_cbClipBoards[_sClipIdx].sSelection.HasSelection() ) { return false; }
+		try {
+			const CCopyFormatter::MX_COPY_SOURCE csSource = ClipboardSource( _sClipIdx );
+			const uint64_t ui64Ranges = CCopyFormatter::TotalRanges( csSource );
+			const uint64_t ui64Total = CCopyFormatter::TotalBytes( csSource );
+			if ( !ui64Total ) { return true; }
+
+			constexpr uint64_t ui64MaxSplicedRanges = 4096;
+			if ( ui64Ranges <= ui64MaxSplicedRanges ) {
+				std::vector<MX_LOGICAL_SECTION> vSections;
+				uint64_t ui64Pos = 0;
+				for ( uint64_t I = 0; I < ui64Ranges; ++I ) {
+					const MX_SEL_RANGE srRange = CCopyFormatter::RangeAt( csSource, I );
+					if ( !ExtractSections( m_cbClipBoards[_sClipIdx].vLogicalMap, srRange.ui64Start, srRange.ui64Size, ui64Pos, vSections ) ) { return false; }
+					ui64Pos += srRange.ui64Size;
+				}
+				return InsertSections( _ui64Addr, vSections, ui64Total, _ui64Inserted );
+			}
+
+			// Many short lines: copy them into one contiguous segment.
+			if ( !BeginInsertData( ui64Total ) ) { return false; }
+			if ( !ReadClipboard( _sClipIdx, [this]( const uint8_t * _pui8Data, size_t _sSize ) { return AppendInsertData( _pui8Data, _sSize ); } ) ) {
+				CancelInsertData();
+				return false;
+			}
+			return EndInsertData( _ui64Addr, _ui64Inserted );
+		}
+		catch ( ... ) {
+			CancelInsertData();
+			return false;
+		}
+	}
+
+	/**
+	 * \brief Begins a streamed insertion of a known number of bytes.  Follow with AppendInsertData() and EndInsertData().
+	 *
+	 * The bytes are written straight into a segment file, so data of any size can be inserted without holding it in RAM.
+	 *
+	 * \param _ui64Total The exact number of bytes that will be appended.
+	 * \return Returns false if the file is read-only, an insertion is already pending, or segment storage could not be prepared.
+	 */
+	bool CLargeCoWFileWindow::BeginInsertData( uint64_t _ui64Total ) {
+		if ( ReadOnly() || m_bInsertPending ) { return false; }
+		if ( _ui64Total ) {
+			if ( !EnsureCurrentSegmentFile( _ui64Total ) ) { return false; }
+			if ( !EnsureCurrentSegmentMap() ) { return false; }
+		}
+		m_sInsertMapIdx = m_sCurSegmentMapIdx;
+		m_ui64InsertStart = m_ui64CurSegmentUsed;
+		m_ui64InsertTotal = _ui64Total;
+		m_ui64InsertWritten = 0;
+		m_bInsertPending = true;
+		return true;
+	}
+
+	/**
+	 * \brief Appends bytes to the pending streamed insertion.
+	 *
+	 * \param _pvData The bytes to append.
+	 * \param _sSize The number of bytes to which _pvData points.
+	 * \return Returns false if no insertion is pending, more than the announced total would be written, or the write failed.
+	 */
+	bool CLargeCoWFileWindow::AppendInsertData( const void * _pvData, size_t _sSize ) {
+		if ( !m_bInsertPending || _sSize > m_ui64InsertTotal - m_ui64InsertWritten ) { return false; }
+		if ( !_sSize ) { return true; }
+		if ( m_sInsertMapIdx >= m_vEditedMaps.size() || !m_vEditedMaps[m_sInsertMapIdx] ) { return false; }
+		CFileMap * pfmSeg = m_vEditedMaps[m_sInsertMapIdx].get();
+
+		const uint8_t * pui8Src = static_cast<const uint8_t *>(_pvData);
+		while ( _sSize ) {
+			const uint32_t ui32This = uint32_t( std::min<size_t>( _sSize, UINT32_MAX ) );
+			if ( pfmSeg->Write( pui8Src, m_ui64InsertStart + m_ui64InsertWritten, ui32This ) != ui32This ) { return false; }
+			pui8Src += ui32This;
+			_sSize -= ui32This;
+			m_ui64InsertWritten += ui32This;
+		}
+		return true;
+	}
+
+	/**
+	 * \brief Completes the pending streamed insertion, inserting the appended bytes at the given address.
+	 *
+	 * \param _ui64Addr The address at which to insert (clamped to the end of the file).
+	 * \param _ui64Inserted Receives the number of bytes inserted.
+	 * \return Returns false (and cancels the insertion) if fewer bytes than announced were appended or the insert failed.
+	 */
+	bool CLargeCoWFileWindow::EndInsertData( uint64_t _ui64Addr, uint64_t &_ui64Inserted ) {
+		_ui64Inserted = 0;
+		if ( !m_bInsertPending ) { return false; }
+		if ( m_ui64InsertWritten != m_ui64InsertTotal ) {
+			CancelInsertData();
+			return false;
+		}
+		m_bInsertPending = false;
+		if ( !m_ui64InsertTotal ) { return true; }
+
+		// The bytes now belong to the segment whether or not the insert below succeeds.
+		m_ui64CurSegmentUsed = m_ui64InsertStart + m_ui64InsertTotal;
+		try {
+			MX_LOGICAL_SECTION lsNew{};
+			lsNew.stType = MX_ST_SEGMENT;
+			lsNew.ui64Start = 0;
+			lsNew.ui64Size = m_ui64InsertTotal;
+			lsNew.ui64Offset = m_ui64InsertStart;
+			lsNew.u.saSegmentAddress.sFile = m_sInsertMapIdx;
+			std::vector<MX_LOGICAL_SECTION> vSections( 1, lsNew );
+			return InsertSections( _ui64Addr, vSections, m_ui64InsertTotal, _ui64Inserted );
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * \brief Abandons the pending streamed insertion, if any.  The file is not changed.
+	 */
+	void CLargeCoWFileWindow::CancelInsertData() {
+		// Nothing was committed to m_ui64CurSegmentUsed, so the written bytes are simply reused by the next insertion.
+		m_bInsertPending = false;
+		m_ui64InsertTotal = m_ui64InsertWritten = 0;
+	}
+
+	/**
 	 * \brief Performs an Undo operation.
 	 *
 	 * Undoes the most recent operation (or most recent group if group markers are present),
@@ -400,6 +464,10 @@ namespace mx {
 		switch ( uoUndoType ) {
 			case CHexEditorInterface::MX_UO_DELETE : {
 				_swsStatus += _DEC_WS_63A6700E____Delete___;
+				break;
+			}
+			case CHexEditorInterface::MX_UO_INSERT : {
+				_swsStatus += _DEC_WS_39F0A272____Insert___;
 				break;
 			}
 			default : {
@@ -451,6 +519,10 @@ namespace mx {
 		switch ( uoUndoType ) {
 			case CHexEditorInterface::MX_UO_DELETE : {
 				_swsStatus += _DEC_WS_63A6700E____Delete___;
+				break;
+			}
+			case CHexEditorInterface::MX_UO_INSERT : {
+				_swsStatus += _DEC_WS_39F0A272____Insert___;
 				break;
 			}
 			default : {
@@ -686,6 +758,118 @@ namespace mx {
 	}
 
 	/**
+	 * \brief Inserts sections into the logical map at the given address, shifting everything after it, and records the Undo item.
+	 *
+	 * \param _ui64Addr The address at which to insert (clamped to the end of the file).
+	 * \param _vSections The sections to insert, contiguous, with ui64Start relative to the first (0-based).
+	 * \param _ui64Total The total size of _vSections.
+	 * \param _ui64Inserted Receives the number of bytes inserted.
+	 * \return Returns true if the insert succeeded.
+	 */
+	bool CLargeCoWFileWindow::InsertSections( uint64_t _ui64Addr, const std::vector<MX_LOGICAL_SECTION> &_vSections, uint64_t _ui64Total, uint64_t &_ui64Inserted ) {
+		_ui64Inserted = 0;
+		if ( ReadOnly() ) { return false; }
+		if ( !_ui64Total ) { return true; }
+		if ( _ui64Addr > Size() ) { _ui64Addr = Size(); }
+		try {
+			std::vector<MX_LOGICAL_SECTION> vBefore = m_vLogicalMap;
+			std::vector<MX_LOGICAL_SECTION> vNew;
+			vNew.reserve( m_vLogicalMap.size() + _vSections.size() + 1 );
+
+			// Sections that end at or before the insertion point are unchanged.
+			size_t I = 0;
+			for ( ; I < m_vLogicalMap.size() && m_vLogicalMap[I].ui64Start + m_vLogicalMap[I].ui64Size <= _ui64Addr; ++I ) {
+				vNew.push_back( m_vLogicalMap[I] );
+			}
+			// A section that straddles the insertion point is split.
+			bool bHasRight = false;
+			MX_LOGICAL_SECTION lsRight{};
+			if ( I < m_vLogicalMap.size() && m_vLogicalMap[I].ui64Start < _ui64Addr ) {
+				MX_LOGICAL_SECTION lsLeft = m_vLogicalMap[I];
+				lsLeft.ui64Size = _ui64Addr - lsLeft.ui64Start;
+				vNew.push_back( lsLeft );
+
+				lsRight = m_vLogicalMap[I];
+				lsRight.ui64Start = _ui64Addr;
+				lsRight.ui64Offset += lsLeft.ui64Size;
+				lsRight.ui64Size -= lsLeft.ui64Size;
+				bHasRight = true;
+				++I;
+			}
+			// The new sections.
+			for ( const auto &lsThis : _vSections ) {
+				MX_LOGICAL_SECTION lsCopy = lsThis;
+				lsCopy.ui64Start += _ui64Addr;
+				vNew.push_back( lsCopy );
+			}
+			// Everything after the insertion point moves up.
+			if ( bHasRight ) {
+				lsRight.ui64Start += _ui64Total;
+				vNew.push_back( lsRight );
+			}
+			for ( ; I < m_vLogicalMap.size(); ++I ) {
+				MX_LOGICAL_SECTION lsCopy = m_vLogicalMap[I];
+				lsCopy.ui64Start += _ui64Total;
+				vNew.push_back( lsCopy );
+			}
+
+			m_vLogicalMap.swap( vNew );
+			SimplifyLogicalView();
+			UpdateSize();
+
+			// Consecutive inserts inside one Undo group become a single Undo item: keep the first "before" and update the "after".
+			uint64_t ui64TotalInGroup = m_vItemsInGroup.size() ? m_vItemsInGroup[m_vItemsInGroup.size()-1] : 0;
+			if ( ui64TotalInGroup && m_vUndoStack.size() > m_sUndoIdx && m_vUndoStack[m_sUndoIdx].uoOp == CHexEditorInterface::MX_UO_INSERT ) {
+				m_vUndoStack[m_sUndoIdx].vDelete_Redo = m_vLogicalMap;
+			}
+			else {
+				MX_UNDO_ITEM uUndoMe = { .uoOp = CHexEditorInterface::MX_UO_INSERT, .vDelete_Undo = std::move( vBefore ), .vDelete_Redo = m_vLogicalMap };
+				if ( !PushUndo( uUndoMe ) ) { return false; }
+				if ( m_vItemsInGroup.size() ) {
+					m_vItemsInGroup[m_vItemsInGroup.size()-1]++;
+				}
+			}
+			_ui64Inserted = _ui64Total;
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * \brief Appends the sections of a logical map that cover a range, clipped to the range.  Call within a try/catch block.
+	 *
+	 * \param _vMap The logical map to read.
+	 * \param _ui64Start The start of the range.
+	 * \param _ui64Size The size of the range.
+	 * \param _ui64DstStart The ui64Start to give the first appended section; later sections follow contiguously.
+	 * \param _vDst Receives the sections.
+	 * \return Returns false if the map does not cover the whole range.
+	 */
+	bool CLargeCoWFileWindow::ExtractSections( const std::vector<MX_LOGICAL_SECTION> &_vMap, uint64_t _ui64Start, uint64_t _ui64Size,
+		uint64_t _ui64DstStart, std::vector<MX_LOGICAL_SECTION> &_vDst ) {
+		if ( !_ui64Size ) { return true; }
+		const uint64_t ui64End = _ui64Start + _ui64Size;
+		// The first section that ends after _ui64Start.  Sections are sorted and contiguous.
+		auto aIt = std::upper_bound( _vMap.begin(), _vMap.end(), _ui64Start,
+			[]( uint64_t _ui64Val, const MX_LOGICAL_SECTION &_lsSec ) { return _ui64Val < _lsSec.ui64Start; } );
+		if ( aIt != _vMap.begin() ) { --aIt; }
+		uint64_t ui64Covered = 0;
+		for ( ; aIt != _vMap.end() && (*aIt).ui64Start < ui64End; ++aIt ) {
+			const uint64_t ui64SecEnd = (*aIt).ui64Start + (*aIt).ui64Size;
+			const uint64_t ui64From = std::max( _ui64Start, (*aIt).ui64Start );
+			const uint64_t ui64To = std::min( ui64End, ui64SecEnd );
+			if ( ui64From >= ui64To ) { continue; }
+			MX_LOGICAL_SECTION lsPiece = (*aIt);
+			lsPiece.ui64Offset += ui64From - (*aIt).ui64Start;
+			lsPiece.ui64Start = _ui64DstStart + (ui64From - _ui64Start);
+			lsPiece.ui64Size = ui64To - ui64From;
+			_vDst.push_back( lsPiece );
+			ui64Covered += lsPiece.ui64Size;
+		}
+		return ui64Covered == _ui64Size;
+	}
+
+	/**
 	 * \brief Performs a logical delete across a section vector.
 	 *
 	 * Updates the provided section list by removing up to the requested range. The deletion may
@@ -897,7 +1081,12 @@ namespace mx {
 				return EnsureCurrentSegmentFile( _ui64NeedBytes );
 			}
 
-			// If too small, extend it.
+			// If too small, extend it, but only while nothing has been written to or mapped from it (an open mapping would conflict with
+			//	reopening the file, and data already in it could leave too little contiguous room); otherwise start a new file.
+			if ( ui64CurSize < ui64TargetSize && (m_ui64CurSegmentUsed != 0 || m_sCurSegmentMapIdx != size_t( -1 )) ) {
+				MakeNew();
+				return EnsureCurrentSegmentFile( _ui64NeedBytes );
+			}
 			if ( ui64CurSize < ui64TargetSize ) {
 				HANDLE hFile = ::CreateFileW(
 					m_pCurSegmentFile.c_str(),
@@ -977,6 +1166,7 @@ namespace mx {
 
 		CHexEditorInterface::MX_UNDO_OP uoRet = m_vUndoStack[m_sUndoIdx].uoOp;
 		switch ( uoRet ) {
+			case CHexEditorInterface::MX_UO_INSERT : {}		MX_FALLTHROUGH
 			case CHexEditorInterface::MX_UO_DELETE : {
 				m_vLogicalMap = m_vUndoStack[m_sUndoIdx].vDelete_Undo;
 				UpdateSize();
@@ -1004,6 +1194,7 @@ namespace mx {
 
 		CHexEditorInterface::MX_UNDO_OP uoRet = m_vUndoStack[sNewIdx].uoOp;
 		switch ( uoRet ) {
+			case CHexEditorInterface::MX_UO_INSERT : {}		MX_FALLTHROUGH
 			case CHexEditorInterface::MX_UO_DELETE : {
 				m_vLogicalMap = m_vUndoStack[sNewIdx].vDelete_Redo;
 				UpdateSize();

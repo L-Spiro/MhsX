@@ -142,6 +142,46 @@ namespace mx {
 		m_ccClipBoards[_sClipIdx].Reset();
 	}
 
+	/**
+	 * \brief Gets the Copy parameters of the data held for a clipboard slot.
+	 *
+	 * \param _sClipIdx The clipboard slot.
+	 * \param _caCopyAs Receives the Copy parameters.
+	 * \return Returns false if nothing is held for the slot.
+	 */
+	bool CHexEditorCurProcess::ClipboardCopyAs( size_t _sClipIdx, MX_COPYAS &_caCopyAs ) const {
+		if ( _sClipIdx >= CCopyPasteManager::TotalClipboards || m_ccClipBoards[_sClipIdx].Empty() ) { return false; }
+		try {
+			_caCopyAs = m_ccClipBoards[_sClipIdx].CopyAs();
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * \brief Gets the number of raw bytes held for a clipboard slot.
+	 *
+	 * \param _sClipIdx The clipboard slot.
+	 * \return Returns the number of bytes, or 0 if nothing is held for the slot.
+	 */
+	uint64_t CHexEditorCurProcess::ClipboardBytes( size_t _sClipIdx ) const {
+		if ( _sClipIdx >= CCopyPasteManager::TotalClipboards ) { return 0; }
+		return m_ccClipBoards[_sClipIdx].Data().size();
+	}
+
+	/**
+	 * \brief Streams the raw bytes held for a clipboard slot, in order, to a callback.
+	 *
+	 * \param _sClipIdx The clipboard slot.
+	 * \param _fChunk Receives each block of bytes; returning false stops the stream.
+	 * \return Returns false if nothing is held for the slot, a read failed, or _fChunk returned false.
+	 */
+	bool CHexEditorCurProcess::ReadClipboard( size_t _sClipIdx, const std::function<bool ( const uint8_t *, size_t )> &_fChunk ) const {
+		if ( _sClipIdx >= CCopyPasteManager::TotalClipboards || m_ccClipBoards[_sClipIdx].Empty() ) { return false; }
+		const auto &vData = m_ccClipBoards[_sClipIdx].Data();
+		return _fChunk( vData.data(), vData.size() );
+	}
+
 	// Gets the size of the data source.
 	uint64_t CHexEditorCurProcess::Size() const {
 		return reinterpret_cast<uintptr_t>(mx::CSystem::GetSystemInfo().lpMaximumApplicationAddress);

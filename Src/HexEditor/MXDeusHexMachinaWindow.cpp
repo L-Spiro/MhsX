@@ -6,6 +6,7 @@
 #include "../MemHack/MXWindowMemHack.h"
 #include "../NumberInputWindow/MXNumberInputDialog.h"
 #include "../Utilities/MXUtilities.h"
+#include "MXCopyPasteManager.h"
 #include "MXHexEditorCurProcess.h"
 #include "MXHexEditorFile.h"
 #include "MXHexEditorProcess.h"
@@ -174,7 +175,7 @@ namespace mx {
 			};
 			psbStatus->SetParts( spParts, std::size( spParts ) );
 
-			psbStatus->SetTextW( MX_SB_CLIPBOARD, 0, L"\U0001F4CB" );
+			UpdateStatusBar_Clipboard();
 		}
 		UpdateStatusBar_InsertOverwrite();
 
@@ -263,6 +264,27 @@ namespace mx {
 			}
 			case Layout::MX_M_EDIT_COPY : {
 				Copy();
+				break;
+			}
+			case Layout::MX_M_EDIT_PASTE : {
+				Paste();
+				break;
+			}
+			case Layout::MX_M_EDIT_CLIPBOARD_0 : {}						MX_FALLTHROUGH
+			case Layout::MX_M_EDIT_CLIPBOARD_1 : {}						MX_FALLTHROUGH
+			case Layout::MX_M_EDIT_CLIPBOARD_2 : {}						MX_FALLTHROUGH
+			case Layout::MX_M_EDIT_CLIPBOARD_3 : {}						MX_FALLTHROUGH
+			case Layout::MX_M_EDIT_CLIPBOARD_4 : {}						MX_FALLTHROUGH
+			case Layout::MX_M_EDIT_CLIPBOARD_5 : {}						MX_FALLTHROUGH
+			case Layout::MX_M_EDIT_CLIPBOARD_6 : {}						MX_FALLTHROUGH
+			case Layout::MX_M_EDIT_CLIPBOARD_7 : {}						MX_FALLTHROUGH
+			case Layout::MX_M_EDIT_CLIPBOARD_8 : {}						MX_FALLTHROUGH
+			case Layout::MX_M_EDIT_CLIPBOARD_9 : {
+				SelectClipboard( size_t( _wId - Layout::MX_M_EDIT_CLIPBOARD_0 ) );
+				break;
+			}
+			case Layout::MX_M_EDIT_CLEAR_CLIPBOARDS : {
+				ClearClipboards();
 				break;
 			}
 			case Layout::MX_M_EDIT_COPY_AS_HEX : {
@@ -1784,6 +1806,50 @@ namespace mx {
 		SetStatusBarText( wsMsg.c_str(), bWarning );
 	}
 
+	/**
+	 * Performs a Paste from the active clipboard into the current editor.
+	 **/
+	void CDeusHexMachinaWindow::Paste() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		CSecureWString wsMsg;
+		bool bWarning = !phecControl->Paste( wsMsg );
+		LSW_SETREDRAW srRedraw( StatusBar() );
+		SetStatusBarText( wsMsg.c_str(), bWarning );
+		UpdateStatusBar_PosValue_StartSize();
+		UpdateStatusBar_Size();
+	}
+
+	/**
+	 * Makes a clipboard the active clipboard for Cut, Copy, and Paste.
+	 * 
+	 * \param _sIdx The clipboard index (0 is the Windows clipboard).
+	 **/
+	void CDeusHexMachinaWindow::SelectClipboard( size_t _sIdx ) {
+		if ( !CCopyPasteManager::SetActiveClipboard( _sIdx ) ) { return; }
+		UpdateStatusBar_Clipboard();
+		try {
+			CSecureWString swsMsg = _DEC_WS_BB6B1B5E_Active_clipboard__;
+			if ( _sIdx == CCopyPasteManager::WindowsClipboard ) {
+				swsMsg += _DEC_WS_C783AD2B_Windows_Clipboard;
+			}
+			else {
+				swsMsg += _DEC_WS_BFD22120_Clipboard_;
+				swsMsg += std::to_wstring( _sIdx );
+			}
+			SetStatusBarText( swsMsg.c_str(), false );
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Empties all clipboards (the Windows clipboard only if it holds this application's data).
+	 **/
+	void CDeusHexMachinaWindow::ClearClipboards() {
+		CCopyPasteManager::ClearAll();
+		SetStatusBarText( _DEC_WS_82513983_Cleared_all_clipboards_.c_str(), false );
+	}
+
 	// Delete the selection.
 	void CDeusHexMachinaWindow::DeleteSelectedOrCaret() {
 		auto phecControl = CurrentEditor();
@@ -2089,6 +2155,23 @@ namespace mx {
 		}
 	}
 
+	/**
+	 * Updates the status-bar Clipboard part to show the active clipboard.
+	 **/
+	void CDeusHexMachinaWindow::UpdateStatusBar_Clipboard() {
+		auto psbStatus = StatusBar();
+		if ( psbStatus ) {
+			const size_t sIdx = CCopyPasteManager::ActiveClipboard();
+			if ( sIdx == CCopyPasteManager::WindowsClipboard ) {
+				psbStatus->SetTextW( MX_SB_CLIPBOARD, 0, L"\U0001F4CB" );
+			}
+			else {
+				const wchar_t wcText[] = { L'\xD83D', L'\xDCCB', L' ', wchar_t( L'0' + sIdx ), L'\0' };
+				psbStatus->SetTextW( MX_SB_CLIPBOARD, 0, wcText );
+			}
+		}
+	}
+
 	// Update the status-bar Little-Endian/Big-Endian part.
 	void CDeusHexMachinaWindow::UpdateStatusBar_Endian() {
 		auto phecControl = CurrentEditor();
@@ -2292,6 +2375,27 @@ namespace mx {
 					EnableMenuItem(
 						_hMenu, uiId,
 						MF_BYCOMMAND | ((phecControl && phecControl->CanRedo()) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_EDIT_PASTE : {
+					EnableMenuItem(
+						_hMenu, uiId,
+						MF_BYCOMMAND | ((phecControl && phecControl->CanPaste()) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_EDIT_CLIPBOARD_0 : {}								MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_CLIPBOARD_1 : {}								MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_CLIPBOARD_2 : {}								MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_CLIPBOARD_3 : {}								MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_CLIPBOARD_4 : {}								MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_CLIPBOARD_5 : {}								MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_CLIPBOARD_6 : {}								MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_CLIPBOARD_7 : {}								MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_CLIPBOARD_8 : {}								MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_CLIPBOARD_9 : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE,
+						.fState = UINT( (size_t( uiId - Layout::MX_M_EDIT_CLIPBOARD_0 ) == CCopyPasteManager::ActiveClipboard()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
 				case Layout::MX_M_EDIT_CUT : {}										MX_FALLTHROUGH

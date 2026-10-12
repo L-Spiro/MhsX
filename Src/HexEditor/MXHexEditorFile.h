@@ -67,6 +67,54 @@ namespace mx {
 		 */
 		virtual void						ReleaseClipboard( size_t _sClipIdx ) override;
 
+		/**
+		 * \brief Gets the Copy parameters of the data held for a clipboard slot.
+		 *
+		 * \param _sClipIdx The clipboard slot.
+		 * \param _caCopyAs Receives the Copy parameters.
+		 * \return Returns false if nothing is held for the slot.
+		 */
+		virtual bool						ClipboardCopyAs( size_t _sClipIdx, MX_COPYAS &_caCopyAs ) const override;
+
+		/**
+		 * \brief Gets the number of raw bytes held for a clipboard slot.
+		 *
+		 * \param _sClipIdx The clipboard slot.
+		 * \return Returns the number of bytes, or 0 if nothing is held for the slot.
+		 */
+		virtual uint64_t					ClipboardBytes( size_t _sClipIdx ) const override;
+
+		/**
+		 * \brief Streams the raw bytes held for a clipboard slot, in order, to a callback.
+		 *
+		 * \param _sClipIdx The clipboard slot.
+		 * \param _fChunk Receives each block of bytes; returning false stops the stream.
+		 * \return Returns false if nothing is held for the slot, a read failed, or _fChunk returned false.
+		 */
+		virtual bool						ReadClipboard( size_t _sClipIdx, const std::function<bool ( const uint8_t *, size_t )> &_fChunk ) const override;
+
+		/**
+		 * \brief Determines whether Paste() is supported (and the source is writable).
+		 *
+		 * \return Returns true if the file is not read-only.
+		 */
+		virtual bool						CanPaste() const override { return !ReadOnly(); }
+
+		/**
+		 * \brief Pastes data at an address.
+		 *
+		 * Data copied from this file is spliced in without copying it; anything else is streamed into segment storage.  In Overwrite
+		 *	mode the pasted bytes replace the bytes at the address (extending the file if they run past the end).
+		 *
+		 * \param _ui64Addr The address at which to paste.
+		 * \param _pdData The data to paste (see CCopyPasteManager::GetPasteData()).
+		 * \param _bOverwrite If true, Overwrite mode; otherwise Insert mode.
+		 * \param _ui64Pasted Receives the number of bytes pasted.
+		 * \param _swsMsg Receives an error message on failure.
+		 * \return Returns true if the data was pasted.
+		 */
+		virtual bool						Paste( uint64_t _ui64Addr, const MX_PASTE_DATA &_pdData, bool _bOverwrite, uint64_t &_ui64Pasted, CSecureWString &_swsMsg ) override;
+
 		// Gets the size of the data source.
 		virtual uint64_t					Size() const;
 

@@ -41,6 +41,9 @@ namespace mx {
 	/** Set while this class empties the clipboard itself, so that its own WM_DESTROYCLIPBOARD does not clear slot 0. */
 	bool CCopyPasteManager::m_bEmptying = false;
 
+	/** The active slot. */
+	size_t CCopyPasteManager::m_sActive = CCopyPasteManager::WindowsClipboard;
+
 
 	// == Functions.
 	/**
@@ -132,12 +135,16 @@ namespace mx {
 				_swsMsg = _DEC_WS_F39F91A5_Out_of_memory_;
 				return false;
 			}
-			// Rendered directly into global memory, which is handed to the clipboard without another copy.
+			// Rendered directly into global memory, which is handed to the clipboard without another copy.  A format that fails to
+			//	render is left out rather than abandoning the whole Copy.
 			std::vector<std::unique_ptr<CCopyGlobalSink>> vSinks;
+			bool bRendered = false;
 			for ( size_t I = 0; I < vFormats.size(); ++I ) {
 				vSinks.push_back( std::make_unique<CCopyGlobalSink>() );
-				if ( !CCopyFormatter::Render( _csSource, vFormats[I], (*vSinks[I]), _swsMsg ) ) { return false; }
+				if ( CCopyFormatter::Render( _csSource, vFormats[I], (*vSinks[I]), _swsMsg ) ) { bRendered = true; }
+				else { vSinks[I].reset(); }
 			}
+			if ( !bRendered ) { return false; }
 
 			HWND hWnd = ClipboardWindow();
 			if ( !hWnd ) {
@@ -159,7 +166,7 @@ namespace mx {
 			// Every format is placed; the clipboard holds several at once.
 			bool bAny = false;
 			for ( size_t I = 0; I < vFormats.size(); ++I ) {
-				if ( cbClip.SetHandle( vFormats[I], (*vSinks[I]).Release() ) ) { bAny = true; }
+				if ( vSinks[I] && cbClip.SetHandle( vFormats[I], (*vSinks[I]).Release() ) ) { bAny = true; }
 			}
 			if ( !bAny ) {
 				// The clipboard was emptied, so slot 0 no longer matches it.
@@ -275,6 +282,114 @@ namespace mx {
 	}
 
 	/**
+	 * \brief Sets the active clipboard slot, used by Cut, Copy, and Paste.  UI thread only.
+	 *
+	 * \param _sIdx The slot to make active.
+	 * \return Returns false if _sIdx is out of range.
+	 */
+	bool CCopyPasteManager::SetActiveClipboard( size_t _sIdx ) {
+		if ( _sIdx >= TotalClipboards ) { return false; }
+		m_sActive = _sIdx;
+		return true;
+	}
+
+	/**
+	 * \brief Determines whether a Paste from the given slot would have anything to paste.  UI thread only.
+	 *
+	 * \param _sIdx The slot.
+	 * \return Returns true if the slot holds a Copy, or for slot 0, if the Windows clipboard holds binary data or text.
+	 */
+	bool CCopyPasteManager::HasPasteData( size_t _sIdx ) {
+		if ( _sIdx >= TotalClipboards ) { return false; }
+		if ( _sIdx != WindowsClipboard ) { return SlotIsSet( _sIdx ); }
+		if ( OwnsWindowsClipboard() ) { return true; }
+		return (CCopyFormatter::BinaryFormat() && ::IsClipboardFormatAvailable( CCopyFormatter::BinaryFormat() )) ||
+			::IsClipboardFormatAvailable( CF_UNICODETEXT ) || ::IsClipboardFormatAvailable( CF_TEXT );
+	}
+
+	/**
+	 * \brief Resolves what a Paste from the given slot inserts.  UI thread only.
+	 *
+	 * - A raw Copy (MX_CA_BINARY) held by an interface is pasted from that interface (_pdData.spSource), so any amount of data can
+	 *	be streamed, or spliced instantly when pasting into the file it was copied from.
+	 * - A Copy As text format pastes its text.
+	 * - For slot 0, data placed on the Windows clipboard by another application pastes its "BinaryData" if present, otherwise its
+	 *	text.
+	 * Text is converted to bytes in the given character set (UTF-16 for Unicode, otherwise the character set's code page).
+	 *
+	 * \param _sIdx The slot.
+	 * \param _csCharSet The character set of the view being pasted into.
+	 * \param _pdData Receives the data to paste.
+	 * \param _swsMsg Receives an error message on failure, including when there is nothing to paste.
+	 * \return Returns true if there is data to paste.
+	 */
+	bool CCopyPasteManager::GetPasteData( size_t _sIdx, CCharSets::MX_CHAR_SETS _csCharSet, MX_PASTE_DATA &_pdData, CSecureWString &_swsMsg ) {
+		try {
+			_pdData = MX_PASTE_DATA();
+			if ( _sIdx >= TotalClipboards ) {
+				_swsMsg = _DEC_WS_1468A1DF_Internal_error_;
+				return false;
+			}
+
+			std::shared_ptr<CHexEditorInterface> spSource = GetSlot( _sIdx );
+			// Slot 0 only describes the Windows clipboard while this application still owns it.
+			if ( _sIdx == WindowsClipboard && !OwnsWindowsClipboard() ) { spSource.reset(); }
+
+			MX_COPYAS caParms;
+			if ( spSource && spSource->ClipboardCopyAs( _sIdx, caParms ) ) {
+				if ( caParms.caCopyFmt == MX_CA_BINARY ) {
+					_pdData.spSource = spSource;
+					_pdData.sSourceSlot = _sIdx;
+					_pdData.ui64Size = spSource->ClipboardBytes( _sIdx );
+				}
+				else {
+					// A Copy As format pastes as the text it produced.
+					CCopyVectorSink cvsText;
+					if ( !spSource->RenderClipboard( _sIdx, CF_UNICODETEXT, cvsText, _swsMsg ) ) { return false; }
+					const wchar_t * pwcText = reinterpret_cast<const wchar_t *>(cvsText.Data().data());
+					const size_t sLen = ::wcsnlen( pwcText, cvsText.Data().size() / sizeof( wchar_t ) );
+					if ( !TextToBytes( pwcText, sLen, _csCharSet, _pdData.vBytes ) ) {
+						_swsMsg = _DEC_WS_F39F91A5_Out_of_memory_;
+						return false;
+					}
+					_pdData.ui64Size = _pdData.vBytes.size();
+				}
+			}
+			else if ( _sIdx == WindowsClipboard ) {
+				// Another application's data, or a process's Copy that was placed on the clipboard directly.
+				if ( !ReadWindowsClipboard( _csCharSet, _pdData.vBytes, _swsMsg ) ) { return false; }
+				_pdData.ui64Size = _pdData.vBytes.size();
+			}
+
+			if ( !_pdData.ui64Size ) {
+				_pdData = MX_PASTE_DATA();
+				_swsMsg = _DEC_WS_3D9DD0BF_The_clipboard_is_empty_;
+				return false;
+			}
+			return true;
+		}
+		catch ( ... ) {
+			_pdData = MX_PASTE_DATA();
+			_swsMsg = _DEC_WS_F39F91A5_Out_of_memory_;
+			return false;
+		}
+	}
+
+	/**
+	 * \brief Empties every slot.  The Windows clipboard is emptied only if it holds this application's data.  UI thread only.
+	 */
+	void CCopyPasteManager::ClearAll() {
+		for ( size_t I = 0; I < TotalClipboards; ++I ) {
+			if ( I != WindowsClipboard ) { ClearSlot( I ); }
+		}
+		if ( m_hWnd && ::GetClipboardOwner() == m_hWnd ) {
+			// Emptying sends this window WM_DESTROYCLIPBOARD, which releases slot 0 and the deferred formats.
+			lsw::LSW_CLIPBOARD cbClip( m_hWnd, true );
+		}
+		ClearSlot( WindowsClipboard );
+	}
+
+	/**
 	 * \brief Determines whether the Windows clipboard still holds the data of the Copy in slot 0.
 	 *
 	 * When true, a Paste from slot 0 can read straight from GetSlot( WindowsClipboard ) instead of the Windows clipboard.  UI thread only.
@@ -378,6 +493,92 @@ namespace mx {
 		// Outside of the lock.  If the same interface copied again, its new data for the slot is already in place.
 		if ( spOld && spOld != _spInterface ) { spOld->ReleaseClipboard( _sIdx ); }
 		return true;
+	}
+
+	/**
+	 * \brief Reads the Windows clipboard data of another application for pasting.  UI thread only.
+	 *
+	 * \param _csCharSet The character set into which text is converted.
+	 * \param _vBytes Receives the bytes.
+	 * \param _swsMsg Receives an error message on failure.
+	 * \return Returns true if there was binary data or text to read.
+	 */
+	bool CCopyPasteManager::ReadWindowsClipboard( CCharSets::MX_CHAR_SETS _csCharSet, std::vector<uint8_t> &_vBytes, CSecureWString &_swsMsg ) {
+		_vBytes.clear();
+		try {
+			lsw::LSW_CLIPBOARD cbClip( ClipboardWindow(), false );
+			if ( !cbClip.IsOpen() ) {
+				_swsMsg = _DEC_WS_C6498829_Failed_to_open_the_clipboard_;
+				return false;
+			}
+			// Raw bytes first.
+			if ( CCopyFormatter::BinaryFormat() && cbClip.GetData( CCopyFormatter::BinaryFormat(), _vBytes ) ) { return true; }
+
+			std::vector<uint8_t> vTmp;
+			if ( cbClip.GetData( CF_UNICODETEXT, vTmp ) ) {
+				const wchar_t * pwcText = reinterpret_cast<const wchar_t *>(vTmp.data());
+				const size_t sLen = ::wcsnlen( pwcText, vTmp.size() / sizeof( wchar_t ) );
+				if ( !TextToBytes( pwcText, sLen, _csCharSet, _vBytes ) ) {
+					_swsMsg = _DEC_WS_F39F91A5_Out_of_memory_;
+					return false;
+				}
+				return true;
+			}
+			if ( cbClip.GetData( CF_TEXT, vTmp ) ) {
+				const size_t sLen = ::strnlen( reinterpret_cast<const char *>(vTmp.data()), vTmp.size() );
+				_vBytes.assign( vTmp.begin(), vTmp.begin() + sLen );
+				return true;
+			}
+			_swsMsg = _DEC_WS_3D9DD0BF_The_clipboard_is_empty_;
+			return false;
+		}
+		catch ( ... ) {
+			_vBytes.clear();
+			_swsMsg = _DEC_WS_F39F91A5_Out_of_memory_;
+			return false;
+		}
+	}
+
+	/**
+	 * \brief Converts text to bytes in a character set: UTF-16 for Unicode, otherwise the character set's code page (falling back
+	 *	to the ANSI code page if that code page is not installed).
+	 *
+	 * \param _pwcText The text.
+	 * \param _sLen The number of characters to which _pwcText points.
+	 * \param _csCharSet The character set.
+	 * \param _vBytes Receives the bytes.
+	 * \return Returns false on a memory or conversion failure.
+	 */
+	bool CCopyPasteManager::TextToBytes( const wchar_t * _pwcText, size_t _sLen, CCharSets::MX_CHAR_SETS _csCharSet, std::vector<uint8_t> &_vBytes ) {
+		try {
+			_vBytes.clear();
+			if ( !_sLen ) { return true; }
+			UINT uiCodePage = static_cast<UINT>(CCharSets::m_csSets[_csCharSet].ui32Code);
+			if ( _csCharSet == CCharSets::MX_CS_UNICODE || uiCodePage == CCodePages::MX_utf_16 ) {
+				const uint8_t * pui8Text = reinterpret_cast<const uint8_t *>(_pwcText);
+				_vBytes.assign( pui8Text, pui8Text + _sLen * sizeof( wchar_t ) );
+				return true;
+			}
+			// Probe the code page; it might not be installed.
+			if ( !::WideCharToMultiByte( uiCodePage, 0, _pwcText, 1, nullptr, 0, nullptr, nullptr ) ) { uiCodePage = CP_ACP; }
+
+			// Convert in pieces that fit in an int, never splitting a surrogate pair.
+			constexpr size_t sPiece = 16 * 1024 * 1024;
+			for ( size_t sDone = 0; sDone < _sLen; ) {
+				size_t sThis = std::min( _sLen - sDone, sPiece );
+				if ( sDone + sThis < _sLen && _pwcText[sDone+sThis-1] >= 0xD800 && _pwcText[sDone+sThis-1] <= 0xDBFF ) { --sThis; }
+				const int iNeeded = ::WideCharToMultiByte( uiCodePage, 0, _pwcText + sDone, int( sThis ), nullptr, 0, nullptr, nullptr );
+				if ( iNeeded <= 0 ) { return false; }
+				const size_t sOld = _vBytes.size();
+				_vBytes.resize( sOld + size_t( iNeeded ) );
+				if ( ::WideCharToMultiByte( uiCodePage, 0, _pwcText + sDone, int( sThis ), reinterpret_cast<char *>(_vBytes.data() + sOld), iNeeded, nullptr, nullptr ) != iNeeded ) {
+					return false;
+				}
+				sDone += sThis;
+			}
+			return true;
+		}
+		catch ( ... ) { return false; }
 	}
 
 	/**

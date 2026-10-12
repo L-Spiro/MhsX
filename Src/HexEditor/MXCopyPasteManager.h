@@ -145,6 +145,52 @@ namespace mx {
 			size_t _sClipIdx, CCopyCapture &_ccCapture, CSecureWString &_swsMsg );
 
 		/**
+		 * \brief Gets the active clipboard slot, used by Cut, Copy, and Paste.  UI thread only.
+		 *
+		 * \return Returns the active slot (WindowsClipboard by default).
+		 */
+		static size_t											ActiveClipboard() { return m_sActive; }
+
+		/**
+		 * \brief Sets the active clipboard slot, used by Cut, Copy, and Paste.  UI thread only.
+		 *
+		 * \param _sIdx The slot to make active.
+		 * \return Returns false if _sIdx is out of range.
+		 */
+		static bool												SetActiveClipboard( size_t _sIdx );
+
+		/**
+		 * \brief Determines whether a Paste from the given slot would have anything to paste.  UI thread only.
+		 *
+		 * \param _sIdx The slot.
+		 * \return Returns true if the slot holds a Copy, or for slot 0, if the Windows clipboard holds binary data or text.
+		 */
+		static bool												HasPasteData( size_t _sIdx );
+
+		/**
+		 * \brief Resolves what a Paste from the given slot inserts.  UI thread only.
+		 *
+		 * - A raw Copy (MX_CA_BINARY) held by an interface is pasted from that interface (_pdData.spSource), so any amount of data can
+		 *	be streamed, or spliced instantly when pasting into the file it was copied from.
+		 * - A Copy As text format pastes its text.
+		 * - For slot 0, data placed on the Windows clipboard by another application pastes its "BinaryData" if present, otherwise its
+		 *	text.
+		 * Text is converted to bytes in the given character set (UTF-16 for Unicode, otherwise the character set's code page).
+		 *
+		 * \param _sIdx The slot.
+		 * \param _csCharSet The character set of the view being pasted into.
+		 * \param _pdData Receives the data to paste.
+		 * \param _swsMsg Receives an error message on failure, including when there is nothing to paste.
+		 * \return Returns true if there is data to paste.
+		 */
+		static bool												GetPasteData( size_t _sIdx, CCharSets::MX_CHAR_SETS _csCharSet, MX_PASTE_DATA &_pdData, CSecureWString &_swsMsg );
+
+		/**
+		 * \brief Empties every slot.  The Windows clipboard is emptied only if it holds this application's data.  UI thread only.
+		 */
+		static void												ClearAll();
+
+		/**
 		 * \brief Determines whether the Windows clipboard still holds the data of the Copy in slot 0.
 		 *
 		 * When true, a Paste from slot 0 can read straight from GetSlot( WindowsClipboard ) instead of the Windows clipboard.  UI thread only.
@@ -197,6 +243,8 @@ namespace mx {
 		static uint64_t											m_ui64DeferredBytes;
 		/** Set while this class empties the clipboard itself, so that its own WM_DESTROYCLIPBOARD does not clear slot 0. */
 		static bool												m_bEmptying;
+		/** The active slot. */
+		static size_t											m_sActive;
 
 
 		// == Functions.
@@ -209,6 +257,28 @@ namespace mx {
 		 * \return Returns false only if _bRespectShutDown is true and ShutDown() has been called.
 		 */
 		static bool												ReplaceSlot( size_t _sIdx, const std::shared_ptr<CHexEditorInterface> &_spInterface, bool _bRespectShutDown );
+
+		/**
+		 * \brief Reads the Windows clipboard data of another application for pasting.  UI thread only.
+		 *
+		 * \param _csCharSet The character set into which text is converted.
+		 * \param _vBytes Receives the bytes.
+		 * \param _swsMsg Receives an error message on failure.
+		 * \return Returns true if there was binary data or text to read.
+		 */
+		static bool												ReadWindowsClipboard( CCharSets::MX_CHAR_SETS _csCharSet, std::vector<uint8_t> &_vBytes, CSecureWString &_swsMsg );
+
+		/**
+		 * \brief Converts text to bytes in a character set: UTF-16 for Unicode, otherwise the character set's code page (falling back
+		 *	to the ANSI code page if that code page is not installed).
+		 *
+		 * \param _pwcText The text.
+		 * \param _sLen The number of characters to which _pwcText points.
+		 * \param _csCharSet The character set.
+		 * \param _vBytes Receives the bytes.
+		 * \return Returns false on a memory or conversion failure.
+		 */
+		static bool												TextToBytes( const wchar_t * _pwcText, size_t _sLen, CCharSets::MX_CHAR_SETS _csCharSet, std::vector<uint8_t> &_vBytes );
 
 		/**
 		 * \brief The window procedure of m_hWnd.  Handles WM_RENDERFORMAT, WM_RENDERALLFORMATS, and WM_DESTROYCLIPBOARD.

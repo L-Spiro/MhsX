@@ -6,6 +6,7 @@
 #include "../HexEditor/MXSelection.h"
 
 #include <filesystem>
+#include <functional>
 #include <mutex>
 #include <vector>
 
@@ -157,6 +158,71 @@ namespace mx {
 		 * \return Returns the number of copied bytes, or 0 if the slot is empty.
 		 */
 		uint64_t												ClipboardBytes( size_t _sClipIdx ) const;
+
+		/**
+		 * \brief Gets the Copy parameters of the snapshot held by a clipboard slot.
+		 *
+		 * \param _sClipIdx The clipboard index (less than TotalClipboards).
+		 * \param _caCopyAs Receives the Copy parameters.
+		 * \return Returns false if the slot is empty.
+		 */
+		bool													ClipboardCopyAs( size_t _sClipIdx, MX_COPYAS &_caCopyAs ) const;
+
+		/**
+		 * \brief Streams the raw selected bytes of the snapshot held by a clipboard slot, in order, to a callback.
+		 *
+		 * \param _sClipIdx The clipboard index (less than TotalClipboards).
+		 * \param _fChunk Receives each block of bytes; returning false stops the stream.
+		 * \return Returns false if the slot is empty, a read failed, or _fChunk returned false.
+		 */
+		bool													ReadClipboard( size_t _sClipIdx, const std::function<bool ( const uint8_t *, size_t )> &_fChunk ) const;
+
+		/**
+		 * \brief Inserts the raw bytes of this object's own clipboard snapshot at the given address.
+		 *
+		 * The snapshot's sections of the original file and segment files are spliced into the logical map, so pasting any amount of
+		 *	data copied from this file is instantaneous and uses no additional storage.  A Column selection with very many lines is
+		 *	copied into a segment instead, to keep the logical map small.
+		 *
+		 * \param _ui64Addr The address at which to insert (clamped to the end of the file).
+		 * \param _sClipIdx The clipboard index (less than TotalClipboards).
+		 * \param _ui64Inserted Receives the number of bytes inserted.
+		 * \return Returns true if the insert succeeded.
+		 */
+		bool													InsertClipboard( uint64_t _ui64Addr, size_t _sClipIdx, uint64_t &_ui64Inserted );
+
+		/**
+		 * \brief Begins a streamed insertion of a known number of bytes.  Follow with AppendInsertData() and EndInsertData().
+		 *
+		 * The bytes are written straight into a segment file, so data of any size can be inserted without holding it in RAM.
+		 *
+		 * \param _ui64Total The exact number of bytes that will be appended.
+		 * \return Returns false if the file is read-only, an insertion is already pending, or segment storage could not be prepared.
+		 */
+		bool													BeginInsertData( uint64_t _ui64Total );
+
+		/**
+		 * \brief Appends bytes to the pending streamed insertion.
+		 *
+		 * \param _pvData The bytes to append.
+		 * \param _sSize The number of bytes to which _pvData points.
+		 * \return Returns false if no insertion is pending, more than the announced total would be written, or the write failed.
+		 */
+		bool													AppendInsertData( const void * _pvData, size_t _sSize );
+
+		/**
+		 * \brief Completes the pending streamed insertion, inserting the appended bytes at the given address.
+		 *
+		 * \param _ui64Addr The address at which to insert (clamped to the end of the file).
+		 * \param _ui64Inserted Receives the number of bytes inserted.
+		 * \return Returns false (and cancels the insertion) if fewer bytes than announced were appended or the insert failed.
+		 */
+		bool													EndInsertData( uint64_t _ui64Addr, uint64_t &_ui64Inserted );
+
+		/**
+		 * \brief Abandons the pending streamed insertion, if any.  The file is not changed.
+		 */
+		void													CancelInsertData();
 
 		/**
 		 * \brief Begins an Undo grouping sequence.
@@ -330,6 +396,12 @@ namespace mx {
 
 		MX_CLIPBOARD											m_cbClipBoards[TotalClipboards];				/**< The clipboards. */
 
+		bool													m_bInsertPending = false;						/**< A streamed insertion (BeginInsertData()) is in progress. */
+		size_t													m_sInsertMapIdx = 0;							/**< Index into m_vEditedMaps of the pending insertion's segment. */
+		uint64_t												m_ui64InsertStart = 0;							/**< Offset in the segment of the pending insertion. */
+		uint64_t												m_ui64InsertTotal = 0;							/**< Bytes announced for the pending insertion. */
+		uint64_t												m_ui64InsertWritten = 0;						/**< Bytes appended so far to the pending insertion. */
+
 
 		// == Functions.
 		/**
@@ -392,6 +464,30 @@ namespace mx {
 		 * \return Returns the copy source, whose read function refers to this object and the slot's logical map.
 		 */
 		CCopyFormatter::MX_COPY_SOURCE							ClipboardSource( size_t _sClipIdx ) const;
+
+		/**
+		 * \brief Inserts sections into the logical map at the given address, shifting everything after it, and records the Undo item.
+		 *
+		 * \param _ui64Addr The address at which to insert (clamped to the end of the file).
+		 * \param _vSections The sections to insert, contiguous, with ui64Start relative to the first (0-based).
+		 * \param _ui64Total The total size of _vSections.
+		 * \param _ui64Inserted Receives the number of bytes inserted.
+		 * \return Returns true if the insert succeeded.
+		 */
+		bool													InsertSections( uint64_t _ui64Addr, const std::vector<MX_LOGICAL_SECTION> &_vSections, uint64_t _ui64Total, uint64_t &_ui64Inserted );
+
+		/**
+		 * \brief Appends the sections of a logical map that cover a range, clipped to the range.  Call within a try/catch block.
+		 *
+		 * \param _vMap The logical map to read.
+		 * \param _ui64Start The start of the range.
+		 * \param _ui64Size The size of the range.
+		 * \param _ui64DstStart The ui64Start to give the first appended section; later sections follow contiguously.
+		 * \param _vDst Receives the sections.
+		 * \return Returns false if the map does not cover the whole range.
+		 */
+		static bool												ExtractSections( const std::vector<MX_LOGICAL_SECTION> &_vMap, uint64_t _ui64Start, uint64_t _ui64Size,
+			uint64_t _ui64DstStart, std::vector<MX_LOGICAL_SECTION> &_vDst );
 
 		/**
 		 * \brief Performs a logical delete across a section vector.

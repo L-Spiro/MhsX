@@ -66,6 +66,32 @@ namespace mx {
 		 */
 		virtual void						ReleaseClipboard( size_t _sClipIdx ) override;
 
+		/**
+		 * \brief Gets the Copy parameters of the data held for a clipboard slot.
+		 *
+		 * \param _sClipIdx The clipboard slot.
+		 * \param _caCopyAs Receives the Copy parameters.
+		 * \return Returns false if nothing is held for the slot.
+		 */
+		virtual bool						ClipboardCopyAs( size_t _sClipIdx, MX_COPYAS &_caCopyAs ) const override;
+
+		/**
+		 * \brief Gets the number of raw bytes held for a clipboard slot.
+		 *
+		 * \param _sClipIdx The clipboard slot.
+		 * \return Returns the number of bytes, or 0 if nothing is held for the slot.
+		 */
+		virtual uint64_t					ClipboardBytes( size_t _sClipIdx ) const override;
+
+		/**
+		 * \brief Streams the raw bytes held for a clipboard slot, in order, to a callback.
+		 *
+		 * \param _sClipIdx The clipboard slot.
+		 * \param _fChunk Receives each block of bytes; returning false stops the stream.
+		 * \return Returns false if nothing is held for the slot, a read failed, or _fChunk returned false.
+		 */
+		virtual bool						ReadClipboard( size_t _sClipIdx, const std::function<bool ( const uint8_t *, size_t )> &_fChunk ) const override;
+
 		// Gets the size of the data source.
 		virtual uint64_t					Size() const;
 

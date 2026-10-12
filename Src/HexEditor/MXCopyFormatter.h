@@ -15,7 +15,7 @@ namespace mx {
 	 * Class CCopySink
 	 * \brief A destination for rendered clipboard data.
 	 *
-	 * The formatter writes sequentially with Write() and may go back to fix up a header with Patch().
+	 * The formatter writes strictly sequentially, so a sink can stream its output anywhere.
 	 */
 	class CCopySink {
 	public :
@@ -31,16 +31,6 @@ namespace mx {
 		 * \return Returns false if memory could not be allocated.
 		 */
 		virtual bool											Write( const void * _pvData, size_t _sSize ) = 0;
-
-		/**
-		 * \brief Overwrites bytes that have already been written.
-		 *
-		 * \param _sOffset The offset of the first byte to overwrite.
-		 * \param _pvData The replacement bytes.
-		 * \param _sSize The number of bytes to which _pvData points.  _sOffset + _sSize must not exceed Size().
-		 * \return Returns false if the range is invalid or the memory could not be accessed.
-		 */
-		virtual bool											Patch( size_t _sOffset, const void * _pvData, size_t _sSize ) = 0;
 
 		/**
 		 * \brief Gets the number of bytes written so far.
@@ -66,16 +56,6 @@ namespace mx {
 		 * \return Returns false if memory could not be allocated.
 		 */
 		virtual bool											Write( const void * _pvData, size_t _sSize ) override;
-
-		/**
-		 * \brief Overwrites bytes that have already been written.
-		 *
-		 * \param _sOffset The offset of the first byte to overwrite.
-		 * \param _pvData The replacement bytes.
-		 * \param _sSize The number of bytes to which _pvData points.  _sOffset + _sSize must not exceed Size().
-		 * \return Returns false if the range is invalid.
-		 */
-		virtual bool											Patch( size_t _sOffset, const void * _pvData, size_t _sSize ) override;
 
 		/**
 		 * \brief Gets the number of bytes written so far.
@@ -127,16 +107,6 @@ namespace mx {
 		 * \return Returns false if memory could not be allocated or locked.
 		 */
 		virtual bool											Write( const void * _pvData, size_t _sSize ) override;
-
-		/**
-		 * \brief Overwrites bytes that have already been written.
-		 *
-		 * \param _sOffset The offset of the first byte to overwrite.
-		 * \param _pvData The replacement bytes.
-		 * \param _sSize The number of bytes to which _pvData points.  _sOffset + _sSize must not exceed Size().
-		 * \return Returns false if the range is invalid or the memory could not be locked.
-		 */
-		virtual bool											Patch( size_t _sOffset, const void * _pvData, size_t _sSize ) override;
 
 		/**
 		 * \brief Gets the number of bytes written so far.
@@ -222,7 +192,7 @@ namespace mx {
 		 *
 		 * Every copy type includes a text format so that it can be pasted into plain-text editors:
 		 *	- MX_CA_BINARY: "BinaryData", then the raw bytes as text (CF_UNICODETEXT if the character set is Unicode, otherwise CF_TEXT).
-		 *	- MX_CA_WEB_PAGE: "HTML Format", then CF_UNICODETEXT holding the same HTML.
+		 *	- MX_CA_WEB_PAGE: "HTML Format", then CF_UNICODETEXT holding the HTML document (without the CF_HTML header).
 		 *	- MX_CA_RICH_TEXT: "Rich Text Format", then CF_UNICODETEXT holding the same RTF.
 		 *	- Everything else: CF_UNICODETEXT.
 		 *
@@ -235,8 +205,8 @@ namespace mx {
 		/**
 		 * \brief Renders a Copy operation into one clipboard format.
 		 *
-		 * CF_TEXT and CF_UNICODETEXT output is NUL-terminated.  For MX_CA_WEB_PAGE and MX_CA_RICH_TEXT, CF_UNICODETEXT holds the
-		 *	HTML or RTF markup itself.  For MX_CA_BINARY, CF_TEXT and CF_UNICODETEXT hold the raw bytes (readers stop at the first 0).
+		 * CF_TEXT and CF_UNICODETEXT output is NUL-terminated.  For MX_CA_WEB_PAGE, CF_UNICODETEXT holds the HTML document (without
+		 *	the CF_HTML header); for MX_CA_RICH_TEXT it holds the RTF markup.  For MX_CA_BINARY, CF_TEXT and CF_UNICODETEXT hold the raw bytes (readers stop at the first 0).
 		 *
 		 * \param _csSource The data and parameters of the Copy operation.
 		 * \param _uiFormat The clipboard format to produce.  Must be one returned by Formats() for _csSource.caCopyAs.
@@ -280,6 +250,8 @@ namespace mx {
 		class CTextOut;
 		/** Converts UTF-8 written to it into UTF-16 in another sink (for the text form of HTML and RTF). */
 		class CUtf8ToUtf16Sink;
+		/** Discards what is written to it, counting the bytes. */
+		class CCountSink;
 
 
 		// == Functions.
@@ -390,11 +362,25 @@ namespace mx {
 		/**
 		 * \brief Writes CF_HTML (UTF-8 with the Version/StartHTML/EndHTML/StartFragment/EndFragment header).
 		 *
+		 * The document is rendered into memory first so that the header offsets are known before anything is written; the source is
+		 *	read only once, so data that changes underneath (process memory) cannot make the offsets wrong.
+		 *
 		 * \param _csSource The data and parameters of the Copy operation.
 		 * \param _csSink Receives the bytes.
 		 * \return Returns false on a read or memory failure.
 		 */
 		static bool												RenderHtml( const MX_COPY_SOURCE &_csSource, CCopySink &_csSink );
+
+		/**
+		 * \brief Writes the HTML document "<html><body><pre>...</pre></body></html>" (UTF-8, escaped).
+		 *
+		 * \param _csSource The data and parameters of the Copy operation.
+		 * \param _toOut Receives the text.  Must be in HTML mode.
+		 * \param _sFragmentStart Receives the offset (relative to the first byte written here) of the start of the fragment ("<pre>").
+		 * \param _sFragmentEnd Receives the offset (relative to the first byte written here) just past the end of the fragment ("</pre>").
+		 * \return Returns false on a read or memory failure.
+		 */
+		static bool												RenderHtmlDocument( const MX_COPY_SOURCE &_csSource, CTextOut &_toOut, size_t &_sFragmentStart, size_t &_sFragmentEnd );
 
 		/**
 		 * \brief Writes Rich Text Format.
@@ -507,6 +493,20 @@ namespace mx {
 		 * \return Returns true if a Copy operation is held.
 		 */
 		inline bool												Empty() const { return !m_csSource.sSelection.HasSelection(); }
+
+		/**
+		 * \brief Gets the captured bytes: every selected byte, in order.
+		 *
+		 * \return Returns the captured bytes.
+		 */
+		inline const std::vector<uint8_t> &						Data() const { return m_vData; }
+
+		/**
+		 * \brief Gets the Copy parameters of the capture.
+		 *
+		 * \return Returns the Copy parameters.
+		 */
+		inline const MX_COPYAS &								CopyAs() const { return m_csSource.caCopyAs; }
 
 
 	protected :

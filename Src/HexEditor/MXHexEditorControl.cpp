@@ -3,6 +3,7 @@
 #include "../Layouts/MXUiIds.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../Utilities/MXUtilities.h"
+#include "MXCopyPasteManager.h"
 #include "MXHexEditorCurProcess.h"
 #include "MXHexEditorProcess.h"
 
@@ -758,7 +759,7 @@ namespace mx {
 				// FUCK!!!
 			}*/
 			MX_COPYAS caCopyData = CopyParms( MX_CA_BINARY );
-			if ( !m_pheiTarget->Copy( m_sSel, CurStyle()->uiBytesPerRow, 0, caCopyData, _swsStatus ) ) { return false; }
+			if ( !m_pheiTarget->Copy( m_sSel, CurStyle()->uiBytesPerRow, CCopyPasteManager::ActiveClipboard(), caCopyData, _swsStatus ) ) { return false; }
 
 			auto ui64TotalSel = m_sSel.TotalSelected( CurStyle()->uiBytesPerRow );
 			if ( !DeleteSelectedOrCaret( _swsStatus ) ) {
@@ -796,7 +797,7 @@ namespace mx {
 			if ( !m_sSel.HasSelection() ) { return true; }
 
 			MX_COPYAS caCopyData = CopyParms( _caFormat );
-			if ( !m_pheiTarget->Copy( m_sSel, CurStyle()->uiBytesPerRow, 0, caCopyData, _swsStatus ) ) { return false; }
+			if ( !m_pheiTarget->Copy( m_sSel, CurStyle()->uiBytesPerRow, CCopyPasteManager::ActiveClipboard(), caCopyData, _swsStatus ) ) { return false; }
 
 			auto ui64TotalSel = m_sSel.TotalSelected( CurStyle()->uiBytesPerRow );
 
@@ -823,7 +824,7 @@ namespace mx {
 	 * \return Returns the Copy parameters.
 	 **/
 	MX_COPYAS CHexEditorControl::CopyParms( MX_COPY_AS _caFormat ) const {
-		const MX_STYLE & stStyle = (*CurStyle());
+		const MX_STYLE &stStyle = (*CurStyle());
 		MX_COPYAS caCopyData;
 		caCopyData.caCopyFmt = _caFormat;
 		caCopyData.dfLeft = stStyle.dfLeftNumbersFmt;
@@ -848,6 +849,101 @@ namespace mx {
 		caCopyData.caAddress.bShowTypeSpec = asAddr.bShowTypeSpec;
 		caCopyData.caAddress.bUseShortSuffixW = asAddr.bUseShortSuffixW;
 		return caCopyData;
+	}
+
+	/**
+	 * Performs a Paste operation from the active clipboard.  Any selection is deleted first, then the clipboard data is inserted
+	 *	(Insert mode) or written over the following bytes (Overwrite mode) at the start of the selection or the caret.  The caret
+	 *	ends up after the pasted data.  The whole operation is one Undo step.
+	 * 
+	 * \param _swsStatus The string to print in the status bar.
+	 * \return Returns false if the message should be treated as a warning.
+	 **/
+	bool CHexEditorControl::Paste( CSecureWString &_swsStatus ) {
+		try {
+			if ( !m_pheiTarget ) {
+				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+				return false;
+			}
+			if ( m_pheiTarget->ReadOnly() ) {
+				_swsStatus = _DEC_WS_D4FFE2E0_File_is_Read_Only;
+				return false;
+			}
+			if ( !m_pheiTarget->CanPaste() ) {
+				_swsStatus = _DEC_WS_0388A331_Pasting_is_not_supported_for_this_data_source_;
+				return false;
+			}
+
+			// Resolve the data first so that nothing is changed when there is nothing to paste.
+			MX_PASTE_DATA pdData;
+			if ( !CCopyPasteManager::GetPasteData( CCopyPasteManager::ActiveClipboard(), CurStyle()->csCharSet, pdData, _swsStatus ) ) { return false; }
+
+			const bool bOverwrite = IsOverwriteMode() || m_pheiTarget->OverwriteOnly();
+			const MX_SELECTION sOldSel = m_sSel;
+			const MX_SELECT_GESTURE sgOldGesture = m_sgSelGesture;
+			// Deleting the selection (highest ranges first) leaves its lowest address where the data goes.
+			const uint64_t ui64Addr = m_sSel.HasSelection() ? m_sSel.LowerLeftAddress() : m_sgSelGesture.ui64CaretAddr;
+			uint64_t ui64Pasted = 0;
+			bool bOk = true;
+			{
+				CHexEditorInterface::MX_UNDO uUndo( m_pheiTarget );
+				if ( !uUndo.Ready() ) {
+					_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+					return false;
+				}
+				if ( m_sSel.HasSelection() ) {
+					std::vector<MX_SEL_RANGE> vSelections;
+					constexpr uint64_t ui64GroupSize = 1024ULL * 1024ULL;
+					uint64_t ui64Idx = 0;
+					do {
+						if ( !m_sSel.GatherSelected_HighToLow( CurStyle()->uiBytesPerRow, vSelections, ui64GroupSize, ui64Idx++ ) ) {
+							bOk = false;
+							break;
+						}
+						for ( const auto &srThis : vSelections ) {
+							uint64_t ui64Deleted = 0;
+							if ( !m_pheiTarget->Delete( srThis.ui64Start, srThis.ui64Size, ui64Deleted ) ) {
+								bOk = false;
+								break;
+							}
+						}
+					} while ( bOk && vSelections.size() );
+					if ( !bOk ) { _swsStatus = _DEC_WS_1468A1DF_Internal_error_; }
+				}
+				if ( bOk ) {
+					bOk = m_pheiTarget->Paste( ui64Addr, pdData, bOverwrite, ui64Pasted, _swsStatus );
+				}
+			}
+
+			// One selection-Undo item per Undo group, even if the paste failed part-way (the group is still on the stack).
+			SetCaretAddr( ui64Addr + ui64Pasted );
+			AddSelectionUndo( sOldSel, sgOldGesture );
+			EnsureVisible( m_sgSelGesture.ui64CaretAddr, FALSE );
+			::InvalidateRect( Wnd(), nullptr, FALSE );
+			if ( !bOk ) { return false; }
+
+			_swsStatus = _DEC_WS_C1C0C8E2_Pasted__;
+			std::wstring wsTmp;
+			_swsStatus += std::format( L"{} [{}]", ui64Pasted, CUtilities::ToHex( ui64Pasted, wsTmp, 0 ) );
+			if ( ui64Pasted != 1 ) {
+				_swsStatus += _DEC_WS_C1D51046__bytes;
+			}
+			else {
+				_swsStatus += _DEC_WS_BB679D6B__byte;
+			}
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * Determines whether a Paste operation can be performed now.
+	 * 
+	 * \return Returns true if the data source supports pasting, is writable, and the active clipboard has data.
+	 **/
+	bool CHexEditorControl::CanPaste() const {
+		return m_pheiTarget && !m_pheiTarget->ReadOnly() && m_pheiTarget->CanPaste() &&
+			CCopyPasteManager::HasPasteData( CCopyPasteManager::ActiveClipboard() );
 	}
 
 	/**

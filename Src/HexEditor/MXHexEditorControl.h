@@ -740,6 +740,23 @@ namespace mx {
 		MX_COPYAS									CopyParms( MX_COPY_AS _caFormat ) const;
 
 		/**
+		 * Performs a Paste operation from the active clipboard.  Any selection is deleted first, then the clipboard data is inserted
+		 *	(Insert mode) or written over the following bytes (Overwrite mode) at the start of the selection or the caret.  The caret
+		 *	ends up after the pasted data.  The whole operation is one Undo step.
+		 * 
+		 * \param _swsStatus The string to print in the status bar.
+		 * \return Returns false if the message should be treated as a warning.
+		 **/
+		bool										Paste( CSecureWString &_swsStatus );
+
+		/**
+		 * Determines whether a Paste operation can be performed now.
+		 * 
+		 * \return Returns true if the data source supports pasting, is writable, and the active clipboard has data.
+		 **/
+		bool										CanPaste() const;
+
+		/**
 		 * Are we in OVR mode?
 		 * 
 		 * \return Returns true if in Overwrite mode.

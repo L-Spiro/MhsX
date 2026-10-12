@@ -408,9 +408,7 @@ namespace mx {
 	 * Class CCopyFormatter::CUtf8ToUtf16Sink
 	 * \brief Converts UTF-8 written to it into UTF-16 in another sink (for the text form of HTML and RTF).
 	 *
-	 * Size() and Patch() work in UTF-8 byte offsets, so the HTML header offsets computed by RenderHtml() stay correct.  Patch() is only
-	 *	supported within the leading all-ASCII part of the output (where the HTML header lives), because there each UTF-8 byte is exactly
-	 *	one UTF-16 character.  The destination sink must be empty when conversion starts.
+	 * Size() reports UTF-8 bytes consumed.
 	 */
 	class CCopyFormatter::CUtf8ToUtf16Sink : public CCopySink {
 	public :
@@ -434,10 +432,6 @@ namespace mx {
 				m_vOut.reserve( _sSize * 2 );
 				for ( size_t I = 0; I < _sSize; ++I ) {
 					const uint8_t ui8Byte = pui8Src[I];
-					if ( m_bAllAscii ) {
-						if ( ui8Byte < 0x80 ) { ++m_sAsciiPrefix; }
-						else { m_bAllAscii = false; }
-					}
 					if ( m_ui32Need ) {
 						if ( (ui8Byte & 0xC0) == 0x80 ) {
 							m_ui32Cp = (m_ui32Cp << 6) | (ui8Byte & 0x3F);
@@ -459,30 +453,6 @@ namespace mx {
 			if ( m_vOut.size() && !m_csDst.Write( m_vOut.data(), m_vOut.size() ) ) { return false; }
 			m_sSize += _sSize;
 			return true;
-		}
-
-		/**
-		 * \brief Overwrites already-written bytes that lie within the leading all-ASCII part of the output.
-		 *
-		 * \param _sOffset The UTF-8 offset of the first byte to overwrite.
-		 * \param _pvData The replacement bytes, which must be ASCII.
-		 * \param _sSize The number of bytes to which _pvData points.
-		 * \return Returns false if the range is not entirely within the ASCII prefix, the data is not ASCII, or the destination failed.
-		 */
-		virtual bool											Patch( size_t _sOffset, const void * _pvData, size_t _sSize ) override {
-			if ( _sOffset > m_sAsciiPrefix || _sSize > m_sAsciiPrefix - _sOffset ) { return false; }
-			const uint8_t * pui8Src = static_cast<const uint8_t *>(_pvData);
-			try {
-				std::vector<uint8_t> vWide;
-				vWide.reserve( _sSize * 2 );
-				for ( size_t I = 0; I < _sSize; ++I ) {
-					if ( pui8Src[I] >= 0x80 ) { return false; }
-					vWide.push_back( pui8Src[I] );
-					vWide.push_back( 0 );
-				}
-				return m_csDst.Patch( _sOffset * 2, vWide.data(), vWide.size() );
-			}
-			catch ( ... ) { return false; }
 		}
 
 		/**
@@ -517,10 +487,6 @@ namespace mx {
 		std::vector<uint8_t>									m_vOut;
 		/** The number of UTF-8 bytes written. */
 		size_t													m_sSize = 0;
-		/** The number of leading UTF-8 bytes that are all ASCII. */
-		size_t													m_sAsciiPrefix = 0;
-		/** True until the first non-ASCII byte is written. */
-		bool													m_bAllAscii = true;
 		/** The code point being assembled. */
 		uint32_t												m_ui32Cp = 0;
 		/** The number of continuation bytes still expected. */
@@ -556,6 +522,39 @@ namespace mx {
 	};
 
 
+	/**
+	 * Class CCopyFormatter::CCountSink
+	 * \brief Discards what is written to it, counting the bytes.
+	 */
+	class CCopyFormatter::CCountSink : public CCopySink {
+	public :
+		// == Functions.
+		/**
+		 * \brief Counts bytes without storing them.
+		 *
+		 * \param _pvData Unused.
+		 * \param _sSize The number of bytes written.
+		 * \return Returns true.
+		 */
+		virtual bool											Write( const void * /*_pvData*/, size_t _sSize ) override {
+			m_sSize += _sSize;
+			return true;
+		}
+
+		/**
+		 * \brief Gets the number of bytes written so far.
+		 *
+		 * \return Returns the number of bytes written so far.
+		 */
+		virtual size_t											Size() const override { return m_sSize; }
+
+
+	protected :
+		// == Members.
+		/** The number of bytes written. */
+		size_t													m_sSize = 0;
+	};
+
 	// == CCopyVectorSink functions.
 	/**
 	 * \brief Appends bytes to the end of the sink.
@@ -573,19 +572,6 @@ namespace mx {
 		catch ( ... ) { return false; }
 	}
 
-	/**
-	 * \brief Overwrites bytes that have already been written.
-	 *
-	 * \param _sOffset The offset of the first byte to overwrite.
-	 * \param _pvData The replacement bytes.
-	 * \param _sSize The number of bytes to which _pvData points.  _sOffset + _sSize must not exceed Size().
-	 * \return Returns false if the range is invalid.
-	 */
-	bool CCopyVectorSink::Patch( size_t _sOffset, const void * _pvData, size_t _sSize ) {
-		if ( _sOffset > m_vData.size() || _sSize > m_vData.size() - _sOffset ) { return false; }
-		std::memcpy( m_vData.data() + _sOffset, _pvData, _sSize );
-		return true;
-	}
 
 
 	// == CCopyGlobalSink functions.
@@ -628,23 +614,6 @@ namespace mx {
 		return true;
 	}
 
-	/**
-	 * \brief Overwrites bytes that have already been written.
-	 *
-	 * \param _sOffset The offset of the first byte to overwrite.
-	 * \param _pvData The replacement bytes.
-	 * \param _sSize The number of bytes to which _pvData points.  _sOffset + _sSize must not exceed Size().
-	 * \return Returns false if the range is invalid or the memory could not be locked.
-	 */
-	bool CCopyGlobalSink::Patch( size_t _sOffset, const void * _pvData, size_t _sSize ) {
-		if ( _sOffset > m_sSize || _sSize > m_sSize - _sOffset ) { return false; }
-		if ( !_sSize ) { return true; }
-		uint8_t * pui8Dst = static_cast<uint8_t *>(::GlobalLock( m_hGlobal ));
-		if ( !pui8Dst ) { return false; }
-		std::memcpy( pui8Dst + _sOffset, _pvData, _sSize );
-		::GlobalUnlock( m_hGlobal );
-		return true;
-	}
 
 	/**
 	 * \brief Shrinks the HGLOBAL to the written size and transfers ownership of it to the caller.
@@ -740,8 +709,8 @@ namespace mx {
 	/**
 	 * \brief Renders a Copy operation into one clipboard format.
 	 *
-	 * CF_TEXT and CF_UNICODETEXT output is NUL-terminated.  For MX_CA_WEB_PAGE and MX_CA_RICH_TEXT, CF_UNICODETEXT holds the
-	 *	HTML or RTF markup itself.  For MX_CA_BINARY, CF_TEXT and CF_UNICODETEXT hold the raw bytes (readers stop at the first 0).
+	 * CF_TEXT and CF_UNICODETEXT output is NUL-terminated.  For MX_CA_WEB_PAGE, CF_UNICODETEXT holds the HTML document (without
+	 *	the CF_HTML header); for MX_CA_RICH_TEXT it holds the RTF markup.  For MX_CA_BINARY, CF_TEXT and CF_UNICODETEXT hold the raw bytes (readers stop at the first 0).
 	 *
 	 * \param _csSource The data and parameters of the Copy operation.
 	 * \param _uiFormat The clipboard format to produce.  Must be one returned by Formats() for _csSource.caCopyAs.
@@ -765,10 +734,18 @@ namespace mx {
 			else if ( caFmt == MX_CA_BINARY && (_uiFormat == CF_TEXT || _uiFormat == CF_UNICODETEXT) ) {
 				bRet = RenderBinaryText( _csSource, _csSink, _uiFormat == CF_UNICODETEXT );
 			}
-			else if ( (caFmt == MX_CA_WEB_PAGE || caFmt == MX_CA_RICH_TEXT) && _uiFormat == CF_UNICODETEXT ) {
-				// Plain-text editors receive the markup itself.
+			else if ( caFmt == MX_CA_WEB_PAGE && _uiFormat == CF_UNICODETEXT ) {
+				// Plain-text editors receive the HTML document itself.
 				CUtf8ToUtf16Sink uusSink( _csSink );
-				bRet = (caFmt == MX_CA_WEB_PAGE ? RenderHtml( _csSource, uusSink ) : RenderRtf( _csSource, uusSink )) && uusSink.Finish();
+				CTextOut toOut( uusSink, CTextOut::MX_M_HTML );
+				size_t sFragStart, sFragEnd;
+				const uint8_t ui8Nul = 0;
+				bRet = RenderHtmlDocument( _csSource, toOut, sFragStart, sFragEnd ) && toOut.Flush() && uusSink.Write( &ui8Nul, 1 ) && uusSink.Finish();
+			}
+			else if ( caFmt == MX_CA_RICH_TEXT && _uiFormat == CF_UNICODETEXT ) {
+				// Plain-text editors receive the RTF markup itself.
+				CUtf8ToUtf16Sink uusSink( _csSink );
+				bRet = RenderRtf( _csSource, uusSink ) && uusSink.Finish();
 			}
 			else if ( caFmt != MX_CA_BINARY && _uiFormat == CF_UNICODETEXT ) {
 				CTextOut toOut( _csSink, CTextOut::MX_M_UTF16 );
@@ -1491,44 +1468,58 @@ namespace mx {
 	/**
 	 * \brief Writes CF_HTML (UTF-8 with the Version/StartHTML/EndHTML/StartFragment/EndFragment header).
 	 *
+	 * The document is rendered into memory first so that the header offsets are known before anything is written; the source is
+	 *	read only once, so data that changes underneath (process memory) cannot make the offsets wrong.
+	 *
 	 * \param _csSource The data and parameters of the Copy operation.
 	 * \param _csSink Receives the bytes.
 	 * \return Returns false on a read or memory failure.
 	 */
 	bool CCopyFormatter::RenderHtml( const MX_COPY_SOURCE &_csSource, CCopySink &_csSink ) {
-		CTextOut toOut( _csSink, CTextOut::MX_M_HTML );
-		// The offsets are fixed-width so they can be patched once known.
-		static constexpr char szHeader[] = "Version:1.0\r\n"
-			"StartHTML:0000000000\r\n"
-			"EndHTML:0000000000\r\n"
-			"StartFragment:0000000000\r\n"
-			"EndFragment:0000000000\r\n";
-		const size_t sBase = toOut.Written();
-		if ( !toOut.Raw( szHeader ) ) { return false; }
-		const size_t sStartHtml = toOut.Written();
-		if ( !toOut.Raw( "<html>\r\n<body>\r\n" ) ) { return false; }
-		const size_t sStartFrag = toOut.Written();
-		if ( !toOut.Raw( "<pre>\r\n" ) ) { return false; }
-		if ( !RenderHexEditorAreas( _csSource, toOut, true ) ) { return false; }
-		if ( !toOut.Raw( "</pre>" ) ) { return false; }
-		const size_t sEndFrag = toOut.Written();
-		if ( !toOut.Raw( "\r\n</body>\r\n</html>\r\n" ) ) { return false; }
-		const size_t sEndHtml = toOut.Written();
-		if ( !toOut.Flush() ) { return false; }
+		CCopyVectorSink cvsDoc;
+		size_t sFragStart, sFragEnd;
+		{
+			CTextOut toDoc( cvsDoc, CTextOut::MX_M_HTML );
+			if ( !RenderHtmlDocument( _csSource, toDoc, sFragStart, sFragEnd ) || !toDoc.Flush() ) { return false; }
+		}
 
-		// Patch the offsets (relative to the start of the header).
-		auto PatchNumber = [&]( const char * _pcLabel, size_t _sValue ) -> bool {
-			const char * pcFound = std::strstr( szHeader, _pcLabel );
-			if ( !pcFound ) { return false; }
-			const size_t sOffset = size_t( pcFound - szHeader ) + std::strlen( _pcLabel );
-			const std::string sNum = std::format( "{:010}", _sValue - sBase );
-			return _csSink.Patch( sBase + sOffset, sNum.data(), sNum.size() );
+		// Every number has 10 digits, so the header length does not depend on the values.
+		auto MakeHeader = []( size_t _sStartHtml, size_t _sEndHtml, size_t _sStartFrag, size_t _sEndFrag ) {
+			return std::format( "Version:1.0\r\nStartHTML:{:010}\r\nEndHTML:{:010}\r\nStartFragment:{:010}\r\nEndFragment:{:010}\r\n",
+				_sStartHtml, _sEndHtml, _sStartFrag, _sEndFrag );
 		};
-		if ( !PatchNumber( "StartHTML:", sStartHtml ) || !PatchNumber( "EndHTML:", sEndHtml ) ||
-			!PatchNumber( "StartFragment:", sStartFrag ) || !PatchNumber( "EndFragment:", sEndFrag ) ) { return false; }
+		std::string sHeader;
+		try {
+			const size_t sHeaderLen = MakeHeader( 0, 0, 0, 0 ).size();
+			sHeader = MakeHeader( sHeaderLen, sHeaderLen + cvsDoc.Size(), sHeaderLen + sFragStart, sHeaderLen + sFragEnd );
+		}
+		catch ( ... ) { return false; }
+
 		// A terminating NUL (outside of EndHTML) for readers that treat the data as a C string.
 		const uint8_t ui8Nul = 0;
-		return _csSink.Write( &ui8Nul, 1 );
+		return _csSink.Write( sHeader.data(), sHeader.size() ) &&
+			_csSink.Write( cvsDoc.Data().data(), cvsDoc.Data().size() ) &&
+			_csSink.Write( &ui8Nul, 1 );
+	}
+
+	/**
+	 * \brief Writes the HTML document "<html><body><pre>...</pre></body></html>" (UTF-8, escaped).
+	 *
+	 * \param _csSource The data and parameters of the Copy operation.
+	 * \param _toOut Receives the text.  Must be in HTML mode.
+	 * \param _sFragmentStart Receives the offset (relative to the first byte written here) of the start of the fragment ("<pre>").
+	 * \param _sFragmentEnd Receives the offset (relative to the first byte written here) just past the end of the fragment ("</pre>").
+	 * \return Returns false on a read or memory failure.
+	 */
+	bool CCopyFormatter::RenderHtmlDocument( const MX_COPY_SOURCE &_csSource, CTextOut &_toOut, size_t &_sFragmentStart, size_t &_sFragmentEnd ) {
+		const size_t sBase = _toOut.Written();
+		if ( !_toOut.Raw( "<html>\r\n<body>\r\n" ) ) { return false; }
+		_sFragmentStart = _toOut.Written() - sBase;
+		if ( !_toOut.Raw( "<pre>\r\n" ) ) { return false; }
+		if ( !RenderHexEditorAreas( _csSource, _toOut, true ) ) { return false; }
+		if ( !_toOut.Raw( "</pre>" ) ) { return false; }
+		_sFragmentEnd = _toOut.Written() - sBase;
+		return _toOut.Raw( "\r\n</body>\r\n</html>\r\n" );
 	}
 
 	/**

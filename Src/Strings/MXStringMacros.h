@@ -23203,3 +23203,183 @@
 #define _DEC_S_6C7C47A0_Failed_to_read_the_selected_data_ mx::CStringDecoder::DecodeToString( _T_6C7C47A0_Failed_to_read_the_selected_data_, _LEN_6C7C47A0 )
 #define _DEC_WS_6C7C47A0_Failed_to_read_the_selected_data_ mx::CStringDecoder::DecodeToWString( _T_6C7C47A0_Failed_to_read_the_selected_data_, _LEN_6C7C47A0 )
 
+// “Insert”
+
+#define _T_39F0A272____Insert___ "\x6A\x4E\x6C\xE4\x00\x3C\xF3\x39\x44\xAA\x49\x6B"
+#define _LEN_39F0A272 12
+#define _T_LEN_39F0A272____Insert___ _T_39F0A272____Insert___, _LEN_39F0A272
+#define _DEC_39F0A272____Insert___( STR ) mx::CStringDecoder::Decode( _T_39F0A272____Insert___, _LEN_39F0A272, STR )
+#define _DEC_S_39F0A272____Insert___ mx::CStringDecoder::DecodeToString( _T_39F0A272____Insert___, _LEN_39F0A272 )
+#define _DEC_WS_39F0A272____Insert___ mx::CStringDecoder::DecodeToWString( _T_39F0A272____Insert___, _LEN_39F0A272 )
+
+// Pasted: 
+
+#define _T_C1C0C8E2_Pasted__ "\xD8\x2F\x43\x0F\xF7\x2D\xC8\xE7"
+#define _LEN_C1C0C8E2 8
+#define _T_LEN_C1C0C8E2_Pasted__ _T_C1C0C8E2_Pasted__, _LEN_C1C0C8E2
+#define _DEC_C1C0C8E2_Pasted__( STR ) mx::CStringDecoder::Decode( _T_C1C0C8E2_Pasted__, _LEN_C1C0C8E2, STR )
+#define _DEC_S_C1C0C8E2_Pasted__ mx::CStringDecoder::DecodeToString( _T_C1C0C8E2_Pasted__, _LEN_C1C0C8E2 )
+#define _DEC_WS_C1C0C8E2_Pasted__ mx::CStringDecoder::DecodeToWString( _T_C1C0C8E2_Pasted__, _LEN_C1C0C8E2 )
+
+// The clipboard is empty.
+
+#define _T_3D9DD0BF_The_clipboard_is_empty_ "\xDC\x36\x35\xBB\xF5\x35\xF7\x37\x32\x37\x2A\x40\xF6\xBB\x30\xFB\xEE\x35\x08\x02\x3D\x07\xF5"
+#define _LEN_3D9DD0BF 23
+#define _T_LEN_3D9DD0BF_The_clipboard_is_empty_ _T_3D9DD0BF_The_clipboard_is_empty_, _LEN_3D9DD0BF
+#define _DEC_3D9DD0BF_The_clipboard_is_empty_( STR ) mx::CStringDecoder::Decode( _T_3D9DD0BF_The_clipboard_is_empty_, _LEN_3D9DD0BF, STR )
+#define _DEC_S_3D9DD0BF_The_clipboard_is_empty_ mx::CStringDecoder::DecodeToString( _T_3D9DD0BF_The_clipboard_is_empty_, _LEN_3D9DD0BF )
+#define _DEC_WS_3D9DD0BF_The_clipboard_is_empty_ mx::CStringDecoder::DecodeToWString( _T_3D9DD0BF_The_clipboard_is_empty_, _LEN_3D9DD0BF )
+
+// Pasting is not supported for this data source.
+
+#define _T_0388A331_Pasting_is_not_supported_for_this_data_source_ "\xD8\x2F\x43\x0F\xFB\x37\xF5\xE7\x39\x3B\xE9\x3C\x01\x0F\xE7\xFB\x43\x40\x0B\x01\x3B\x02\x2C\x34\xE8\x2F\x3D\x04\xBB\x3B\xF0\x37\x43\xBB\xF6\x2A\x02\x28\xF0\x3B\x38\x43\x04\xFE\x2C\xB6"
+#define _LEN_0388A331 46
+#define _T_LEN_0388A331_Pasting_is_not_supported_for_this_data_source_ _T_0388A331_Pasting_is_not_supported_for_this_data_source_, _LEN_0388A331
+#define _DEC_0388A331_Pasting_is_not_supported_for_this_data_source_( STR ) mx::CStringDecoder::Decode( _T_0388A331_Pasting_is_not_supported_for_this_data_source_, _LEN_0388A331, STR )
+#define _DEC_S_0388A331_Pasting_is_not_supported_for_this_data_source_ mx::CStringDecoder::DecodeToString( _T_0388A331_Pasting_is_not_supported_for_this_data_source_, _LEN_0388A331 )
+#define _DEC_WS_0388A331_Pasting_is_not_supported_for_this_data_source_ mx::CStringDecoder::DecodeToWString( _T_0388A331_Pasting_is_not_supported_for_this_data_source_, _LEN_0388A331 )
+
+// Clip&board
+
+#define _T_401DF7AF_Clip_board "\xCB\x3A\x39\x0B\xB8\x2B\xFD\x28\x42\x2C"
+#define _LEN_401DF7AF 10
+#define _T_LEN_401DF7AF_Clip_board _T_401DF7AF_Clip_board, _LEN_401DF7AF
+#define _DEC_401DF7AF_Clip_board( STR ) mx::CStringDecoder::Decode( _T_401DF7AF_Clip_board, _LEN_401DF7AF, STR )
+#define _DEC_S_401DF7AF_Clip_board mx::CStringDecoder::DecodeToString( _T_401DF7AF_Clip_board, _LEN_401DF7AF )
+#define _DEC_WS_401DF7AF_Clip_board mx::CStringDecoder::DecodeToWString( _T_401DF7AF_Clip_board, _LEN_401DF7AF )
+
+// &Windows Clipboard
+
+#define _T_3A4D976E__Windows_Clipboard "\xAE\x25\x39\x09\xF6\x38\x05\x3A\xF0\x0B\x35\x37\x02\xFD\x36\xE9\x40\x34"
+#define _LEN_3A4D976E 18
+#define _T_LEN_3A4D976E__Windows_Clipboard _T_3A4D976E__Windows_Clipboard, _LEN_3A4D976E
+#define _DEC_3A4D976E__Windows_Clipboard( STR ) mx::CStringDecoder::Decode( _T_3A4D976E__Windows_Clipboard, _LEN_3A4D976E, STR )
+#define _DEC_S_3A4D976E__Windows_Clipboard mx::CStringDecoder::DecodeToString( _T_3A4D976E__Windows_Clipboard, _LEN_3A4D976E )
+#define _DEC_WS_3A4D976E__Windows_Clipboard mx::CStringDecoder::DecodeToWString( _T_3A4D976E__Windows_Clipboard, _LEN_3A4D976E )
+
+// Clipboard &1
+
+#define _T_0A341ACF_Clipboard__1 "\xCB\x3A\x39\x0B\xF4\x38\xEF\x39\x34\xE8\xEF\xFF"
+#define _LEN_0A341ACF 12
+#define _T_LEN_0A341ACF_Clipboard__1 _T_0A341ACF_Clipboard__1, _LEN_0A341ACF
+#define _DEC_0A341ACF_Clipboard__1( STR ) mx::CStringDecoder::Decode( _T_0A341ACF_Clipboard__1, _LEN_0A341ACF, STR )
+#define _DEC_S_0A341ACF_Clipboard__1 mx::CStringDecoder::DecodeToString( _T_0A341ACF_Clipboard__1, _LEN_0A341ACF )
+#define _DEC_WS_0A341ACF_Clipboard__1 mx::CStringDecoder::DecodeToWString( _T_0A341ACF_Clipboard__1, _LEN_0A341ACF )
+
+// Clipboard &2
+
+#define _T_933D4B75_Clipboard__2 "\xCB\x3A\x39\x0B\xF4\x38\xEF\x39\x34\xE8\xEF\x00"
+#define _LEN_933D4B75 12
+#define _T_LEN_933D4B75_Clipboard__2 _T_933D4B75_Clipboard__2, _LEN_933D4B75
+#define _DEC_933D4B75_Clipboard__2( STR ) mx::CStringDecoder::Decode( _T_933D4B75_Clipboard__2, _LEN_933D4B75, STR )
+#define _DEC_S_933D4B75_Clipboard__2 mx::CStringDecoder::DecodeToString( _T_933D4B75_Clipboard__2, _LEN_933D4B75 )
+#define _DEC_WS_933D4B75_Clipboard__2 mx::CStringDecoder::DecodeToWString( _T_933D4B75_Clipboard__2, _LEN_933D4B75 )
+
+// Clipboard &3
+
+#define _T_E43A7BE3_Clipboard__3 "\xCB\x3A\x39\x0B\xF4\x38\xEF\x39\x34\xE8\xEF\x01"
+#define _LEN_E43A7BE3 12
+#define _T_LEN_E43A7BE3_Clipboard__3 _T_E43A7BE3_Clipboard__3, _LEN_E43A7BE3
+#define _DEC_E43A7BE3_Clipboard__3( STR ) mx::CStringDecoder::Decode( _T_E43A7BE3_Clipboard__3, _LEN_E43A7BE3, STR )
+#define _DEC_S_E43A7BE3_Clipboard__3 mx::CStringDecoder::DecodeToString( _T_E43A7BE3_Clipboard__3, _LEN_E43A7BE3 )
+#define _DEC_WS_E43A7BE3_Clipboard__3 mx::CStringDecoder::DecodeToWString( _T_E43A7BE3_Clipboard__3, _LEN_E43A7BE3 )
+
+// Clipboard &4
+
+#define _T_7A5EEE40_Clipboard__4 "\xCB\x3A\x39\x0B\xF4\x38\xEF\x39\x34\xE8\xEF\x02"
+#define _LEN_7A5EEE40 12
+#define _T_LEN_7A5EEE40_Clipboard__4 _T_7A5EEE40_Clipboard__4, _LEN_7A5EEE40
+#define _DEC_7A5EEE40_Clipboard__4( STR ) mx::CStringDecoder::Decode( _T_7A5EEE40_Clipboard__4, _LEN_7A5EEE40, STR )
+#define _DEC_S_7A5EEE40_Clipboard__4 mx::CStringDecoder::DecodeToString( _T_7A5EEE40_Clipboard__4, _LEN_7A5EEE40 )
+#define _DEC_WS_7A5EEE40_Clipboard__4 mx::CStringDecoder::DecodeToWString( _T_7A5EEE40_Clipboard__4, _LEN_7A5EEE40 )
+
+// Clipboard &5
+
+#define _T_0D59DED6_Clipboard__5 "\xCB\x3A\x39\x0B\xF4\x38\xEF\x39\x34\xE8\xEF\x03"
+#define _LEN_0D59DED6 12
+#define _T_LEN_0D59DED6_Clipboard__5 _T_0D59DED6_Clipboard__5, _LEN_0D59DED6
+#define _DEC_0D59DED6_Clipboard__5( STR ) mx::CStringDecoder::Decode( _T_0D59DED6_Clipboard__5, _LEN_0D59DED6, STR )
+#define _DEC_S_0D59DED6_Clipboard__5 mx::CStringDecoder::DecodeToString( _T_0D59DED6_Clipboard__5, _LEN_0D59DED6 )
+#define _DEC_WS_0D59DED6_Clipboard__5 mx::CStringDecoder::DecodeToWString( _T_0D59DED6_Clipboard__5, _LEN_0D59DED6 )
+
+// Clipboard &6
+
+#define _T_94508F6C_Clipboard__6 "\xCB\x3A\x39\x0B\xF4\x38\xEF\x39\x34\xE8\xEF\x04"
+#define _LEN_94508F6C 12
+#define _T_LEN_94508F6C_Clipboard__6 _T_94508F6C_Clipboard__6, _LEN_94508F6C
+#define _DEC_94508F6C_Clipboard__6( STR ) mx::CStringDecoder::Decode( _T_94508F6C_Clipboard__6, _LEN_94508F6C, STR )
+#define _DEC_S_94508F6C_Clipboard__6 mx::CStringDecoder::DecodeToString( _T_94508F6C_Clipboard__6, _LEN_94508F6C )
+#define _DEC_WS_94508F6C_Clipboard__6 mx::CStringDecoder::DecodeToWString( _T_94508F6C_Clipboard__6, _LEN_94508F6C )
+
+// Clipboard &7
+
+#define _T_E357BFFA_Clipboard__7 "\xCB\x3A\x39\x0B\xF4\x38\xEF\x39\x34\xE8\xEF\x05"
+#define _LEN_E357BFFA 12
+#define _T_LEN_E357BFFA_Clipboard__7 _T_E357BFFA_Clipboard__7, _LEN_E357BFFA
+#define _DEC_E357BFFA_Clipboard__7( STR ) mx::CStringDecoder::Decode( _T_E357BFFA_Clipboard__7, _LEN_E357BFFA, STR )
+#define _DEC_S_E357BFFA_Clipboard__7 mx::CStringDecoder::DecodeToString( _T_E357BFFA_Clipboard__7, _LEN_E357BFFA )
+#define _DEC_WS_E357BFFA_Clipboard__7 mx::CStringDecoder::DecodeToWString( _T_E357BFFA_Clipboard__7, _LEN_E357BFFA )
+
+// Clipboard &8
+
+#define _T_73E8A26B_Clipboard__8 "\xCB\x3A\x39\x0B\xF4\x38\xEF\x39\x34\xE8\xEF\x06"
+#define _LEN_73E8A26B 12
+#define _T_LEN_73E8A26B_Clipboard__8 _T_73E8A26B_Clipboard__8, _LEN_73E8A26B
+#define _DEC_73E8A26B_Clipboard__8( STR ) mx::CStringDecoder::Decode( _T_73E8A26B_Clipboard__8, _LEN_73E8A26B, STR )
+#define _DEC_S_73E8A26B_Clipboard__8 mx::CStringDecoder::DecodeToString( _T_73E8A26B_Clipboard__8, _LEN_73E8A26B )
+#define _DEC_WS_73E8A26B_Clipboard__8 mx::CStringDecoder::DecodeToWString( _T_73E8A26B_Clipboard__8, _LEN_73E8A26B )
+
+// Clipboard &9
+
+#define _T_04EF92FD_Clipboard__9 "\xCB\x3A\x39\x0B\xF4\x38\xEF\x39\x34\xE8\xEF\x07"
+#define _LEN_04EF92FD 12
+#define _T_LEN_04EF92FD_Clipboard__9 _T_04EF92FD_Clipboard__9, _LEN_04EF92FD
+#define _DEC_04EF92FD_Clipboard__9( STR ) mx::CStringDecoder::Decode( _T_04EF92FD_Clipboard__9, _LEN_04EF92FD, STR )
+#define _DEC_S_04EF92FD_Clipboard__9 mx::CStringDecoder::DecodeToString( _T_04EF92FD_Clipboard__9, _LEN_04EF92FD )
+#define _DEC_WS_04EF92FD_Clipboard__9 mx::CStringDecoder::DecodeToWString( _T_04EF92FD_Clipboard__9, _LEN_04EF92FD )
+
+// &Clear All Clipboards
+
+#define _T_5B958D68__Clear_All_Clipboards "\xAE\x11\x3C\x00\xF3\x3B\xAE\x08\x3C\x34\xE9\x11\xFE\x04\x37\xEA\x3D\x31\x0D\xF6\x3C"
+#define _LEN_5B958D68 21
+#define _T_LEN_5B958D68__Clear_All_Clipboards _T_5B958D68__Clear_All_Clipboards, _LEN_5B958D68
+#define _DEC_5B958D68__Clear_All_Clipboards( STR ) mx::CStringDecoder::Decode( _T_5B958D68__Clear_All_Clipboards, _LEN_5B958D68, STR )
+#define _DEC_S_5B958D68__Clear_All_Clipboards mx::CStringDecoder::DecodeToString( _T_5B958D68__Clear_All_Clipboards, _LEN_5B958D68 )
+#define _DEC_WS_5B958D68__Clear_All_Clipboards mx::CStringDecoder::DecodeToWString( _T_5B958D68__Clear_All_Clipboards, _LEN_5B958D68 )
+
+// Cleared all clipboards.
+
+#define _T_82513983_Cleared_all_clipboards_ "\xCB\x3A\x35\xFC\x04\x2E\xF2\xE7\x31\x34\x35\xEE\xF5\x07\x30\xF8\x30\x3F\xFC\x04\x2D\x01\xF5"
+#define _LEN_82513983 23
+#define _T_LEN_82513983_Cleared_all_clipboards_ _T_82513983_Cleared_all_clipboards_, _LEN_82513983
+#define _DEC_82513983_Cleared_all_clipboards_( STR ) mx::CStringDecoder::Decode( _T_82513983_Cleared_all_clipboards_, _LEN_82513983, STR )
+#define _DEC_S_82513983_Cleared_all_clipboards_ mx::CStringDecoder::DecodeToString( _T_82513983_Cleared_all_clipboards_, _LEN_82513983 )
+#define _DEC_WS_82513983_Cleared_all_clipboards_ mx::CStringDecoder::DecodeToWString( _T_82513983_Cleared_all_clipboards_, _LEN_82513983 )
+
+// Active clipboard: 
+
+#define _T_BB6B1B5E_Active_clipboard__ "\xC9\x31\x44\x04\x08\x2E\xAE\x2A\x3C\x31\x39\x30\x01\xFC\x39\xEC\x08\xF0"
+#define _LEN_BB6B1B5E 18
+#define _T_LEN_BB6B1B5E_Active_clipboard__ _T_BB6B1B5E_Active_clipboard__, _LEN_BB6B1B5E
+#define _DEC_BB6B1B5E_Active_clipboard__( STR ) mx::CStringDecoder::Decode( _T_BB6B1B5E_Active_clipboard__, _LEN_BB6B1B5E, STR )
+#define _DEC_S_BB6B1B5E_Active_clipboard__ mx::CStringDecoder::DecodeToString( _T_BB6B1B5E_Active_clipboard__, _LEN_BB6B1B5E )
+#define _DEC_WS_BB6B1B5E_Active_clipboard__ mx::CStringDecoder::DecodeToWString( _T_BB6B1B5E_Active_clipboard__, _LEN_BB6B1B5E )
+
+// Windows Clipboard
+
+#define _T_C783AD2B_Windows_Clipboard "\xDF\x37\x3E\xFF\x01\x40\x01\xE7\x13\x34\x32\x3E\xF4\x0A\x28\xFA\x32"
+#define _LEN_C783AD2B 17
+#define _T_LEN_C783AD2B_Windows_Clipboard _T_C783AD2B_Windows_Clipboard, _LEN_C783AD2B
+#define _DEC_C783AD2B_Windows_Clipboard( STR ) mx::CStringDecoder::Decode( _T_C783AD2B_Windows_Clipboard, _LEN_C783AD2B, STR )
+#define _DEC_S_C783AD2B_Windows_Clipboard mx::CStringDecoder::DecodeToString( _T_C783AD2B_Windows_Clipboard, _LEN_C783AD2B )
+#define _DEC_WS_C783AD2B_Windows_Clipboard mx::CStringDecoder::DecodeToWString( _T_C783AD2B_Windows_Clipboard, _LEN_C783AD2B )
+
+// Clipboard 
+
+#define _T_BFD22120_Clipboard_ "\xCB\x3A\x39\x0B\xF4\x38\xEF\x39\x34\xE8"
+#define _LEN_BFD22120 10
+#define _T_LEN_BFD22120_Clipboard_ _T_BFD22120_Clipboard_, _LEN_BFD22120
+#define _DEC_BFD22120_Clipboard_( STR ) mx::CStringDecoder::Decode( _T_BFD22120_Clipboard_, _LEN_BFD22120, STR )
+#define _DEC_S_BFD22120_Clipboard_ mx::CStringDecoder::DecodeToString( _T_BFD22120_Clipboard_, _LEN_BFD22120 )
+#define _DEC_WS_BFD22120_Clipboard_ mx::CStringDecoder::DecodeToWString( _T_BFD22120_Clipboard_, _LEN_BFD22120 )
+

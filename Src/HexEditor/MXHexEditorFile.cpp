@@ -122,6 +122,104 @@ namespace mx {
 		m_lcwfwFile.ReleaseClipboard( _sClipIdx );
 	}
 
+	/**
+	 * \brief Gets the Copy parameters of the data held for a clipboard slot.
+	 *
+	 * \param _sClipIdx The clipboard slot.
+	 * \param _caCopyAs Receives the Copy parameters.
+	 * \return Returns false if nothing is held for the slot.
+	 */
+	bool CHexEditorFile::ClipboardCopyAs( size_t _sClipIdx, MX_COPYAS &_caCopyAs ) const {
+		return m_lcwfwFile.ClipboardCopyAs( _sClipIdx, _caCopyAs );
+	}
+
+	/**
+	 * \brief Gets the number of raw bytes held for a clipboard slot.
+	 *
+	 * \param _sClipIdx The clipboard slot.
+	 * \return Returns the number of bytes, or 0 if nothing is held for the slot.
+	 */
+	uint64_t CHexEditorFile::ClipboardBytes( size_t _sClipIdx ) const {
+		return m_lcwfwFile.ClipboardBytes( _sClipIdx );
+	}
+
+	/**
+	 * \brief Streams the raw bytes held for a clipboard slot, in order, to a callback.
+	 *
+	 * \param _sClipIdx The clipboard slot.
+	 * \param _fChunk Receives each block of bytes; returning false stops the stream.
+	 * \return Returns false if nothing is held for the slot, a read failed, or _fChunk returned false.
+	 */
+	bool CHexEditorFile::ReadClipboard( size_t _sClipIdx, const std::function<bool ( const uint8_t *, size_t )> &_fChunk ) const {
+		return m_lcwfwFile.ReadClipboard( _sClipIdx, _fChunk );
+	}
+
+	/**
+	 * \brief Pastes data at an address.
+	 *
+	 * Data copied from this file is spliced in without copying it; anything else is streamed into segment storage.  In Overwrite
+	 *	mode the pasted bytes replace the bytes at the address (extending the file if they run past the end).
+	 *
+	 * \param _ui64Addr The address at which to paste.
+	 * \param _pdData The data to paste (see CCopyPasteManager::GetPasteData()).
+	 * \param _bOverwrite If true, Overwrite mode; otherwise Insert mode.
+	 * \param _ui64Pasted Receives the number of bytes pasted.
+	 * \param _swsMsg Receives an error message on failure.
+	 * \return Returns true if the data was pasted.
+	 */
+	bool CHexEditorFile::Paste( uint64_t _ui64Addr, const MX_PASTE_DATA &_pdData, bool _bOverwrite, uint64_t &_ui64Pasted, CSecureWString &_swsMsg ) {
+		_ui64Pasted = 0;
+		if ( ReadOnly() ) {
+			_swsMsg = _DEC_WS_D4FFE2E0_File_is_Read_Only;
+			return false;
+		}
+		if ( !_pdData.ui64Size ) { return true; }
+		try {
+			if ( _ui64Addr > Size() ) { _ui64Addr = Size(); }
+
+			// Overwrite mode replaces as many existing bytes as are pasted.
+			if ( _bOverwrite ) {
+				const uint64_t ui64Replace = std::min( _pdData.ui64Size, Size() - _ui64Addr );
+				uint64_t ui64Deleted = 0;
+				if ( ui64Replace && !m_lcwfwFile.Delete( _ui64Addr, ui64Replace, ui64Deleted ) ) {
+					_swsMsg = _DEC_WS_1468A1DF_Internal_error_;
+					return false;
+				}
+			}
+
+			uint64_t ui64Inserted = 0;
+			bool bOk = false;
+			if ( _pdData.spSource.get() == static_cast<const CHexEditorInterface *>(this) ) {
+				// Copied from this file: splice the snapshot in.
+				bOk = m_lcwfwFile.InsertClipboard( _ui64Addr, _pdData.sSourceSlot, ui64Inserted );
+			}
+			else if ( _pdData.spSource ) {
+				// Copied from another source: stream it straight into segment storage.
+				bOk = m_lcwfwFile.BeginInsertData( _pdData.ui64Size );
+				if ( bOk ) {
+					bOk = _pdData.spSource->ReadClipboard( _pdData.sSourceSlot, [this]( const uint8_t * _pui8Data, size_t _sSize ) {
+						return m_lcwfwFile.AppendInsertData( _pui8Data, _sSize );
+					} );
+					if ( bOk ) { bOk = m_lcwfwFile.EndInsertData( _ui64Addr, ui64Inserted ); }
+					else { m_lcwfwFile.CancelInsertData(); }
+				}
+			}
+			else {
+				bOk = m_lcwfwFile.Insert( _ui64Addr, _pdData.vBytes, ui64Inserted );
+			}
+			if ( !bOk ) {
+				_swsMsg = _DEC_WS_F39F91A5_Out_of_memory_;
+				return false;
+			}
+			_ui64Pasted = ui64Inserted;
+			return true;
+		}
+		catch ( ... ) {
+			_swsMsg = _DEC_WS_F39F91A5_Out_of_memory_;
+			return false;
+		}
+	}
+
 	// Gets the size of the data source.
 	uint64_t CHexEditorFile::Size() const {
 		return m_lcwfwFile.Size();

@@ -136,8 +136,21 @@ namespace mx {
 			MX_M_EDIT_READ_ONLY,
 			MX_M_EDIT_KEEP_FILE_TIME,
 			MX_M_EDIT_PROPERTIES,
+			MX_M_EDIT_CLIPBOARD_,
+			MX_M_EDIT_CLIPBOARD_0,
+			MX_M_EDIT_CLIPBOARD_1,
+			MX_M_EDIT_CLIPBOARD_2,
+			MX_M_EDIT_CLIPBOARD_3,
+			MX_M_EDIT_CLIPBOARD_4,
+			MX_M_EDIT_CLIPBOARD_5,
+			MX_M_EDIT_CLIPBOARD_6,
+			MX_M_EDIT_CLIPBOARD_7,
+			MX_M_EDIT_CLIPBOARD_8,
+			MX_M_EDIT_CLIPBOARD_9,
+			MX_M_EDIT_CLEAR_CLIPBOARDS,
 			MX_M_COPY_AS,
 			MX_M_INSERT_OVERWRITE,
+			MX_M_CLIPBOARD,
 
 			MX_M_SELECT,
 			MX_M_SELECT_SELECT_ALL,
@@ -492,6 +505,9 @@ namespace mx {
 
 		// Edit -> Insert/Overwrite.
 		static LSW_MENU_ITEM					m_miEditInsertOverwriteMenu[];
+
+		// Edit -> Clipboard.
+		static LSW_MENU_ITEM					m_miEditClipboardMenu[];
 
 		// Select menu.
 		static LSW_MENU_ITEM					m_miSelectMenu[];

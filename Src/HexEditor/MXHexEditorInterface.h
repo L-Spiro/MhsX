@@ -7,9 +7,23 @@
 #include "MXDataFmt.h"
 #include "MXSelection.h"
 
+#include <functional>
 #include <memory>
+#include <vector>
 
 namespace mx {
+
+	class CHexEditorInterface;
+
+	/**
+	 * The data a Paste operation inserts, as resolved by CCopyPasteManager::GetPasteData().
+	 */
+	struct MX_PASTE_DATA {
+		std::shared_ptr<CHexEditorInterface>	spSource;								/**< When set, the raw bytes of spSource's copy in slot sSourceSlot are pasted. */
+		size_t									sSourceSlot			= 0;				/**< The clipboard slot of spSource that holds the copy. */
+		std::vector<uint8_t>					vBytes;									/**< When spSource is not set, these bytes are pasted. */
+		uint64_t								ui64Size			= 0;				/**< The total number of bytes to paste. */
+	};
 
 	/**
 	 * Class CHexEditorInterface
@@ -117,6 +131,57 @@ namespace mx {
 		 * \param _sClipIdx The clipboard slot.
 		 */
 		virtual void						ReleaseClipboard( size_t /*_sClipIdx*/ ) {}
+
+		/**
+		 * \brief Gets the Copy parameters of the data held for a clipboard slot.
+		 *
+		 * \param _sClipIdx The clipboard slot.
+		 * \param _caCopyAs Receives the Copy parameters.
+		 * \return Returns false if nothing is held for the slot.
+		 */
+		virtual bool						ClipboardCopyAs( size_t /*_sClipIdx*/, MX_COPYAS &/*_caCopyAs*/ ) const { return false; }
+
+		/**
+		 * \brief Gets the number of raw bytes held for a clipboard slot.
+		 *
+		 * \param _sClipIdx The clipboard slot.
+		 * \return Returns the number of bytes, or 0 if nothing is held for the slot.
+		 */
+		virtual uint64_t					ClipboardBytes( size_t /*_sClipIdx*/ ) const { return 0; }
+
+		/**
+		 * \brief Streams the raw bytes held for a clipboard slot, in order, to a callback.
+		 *
+		 * \param _sClipIdx The clipboard slot.
+		 * \param _fChunk Receives each block of bytes; returning false stops the stream.
+		 * \return Returns false if nothing is held for the slot, a read failed, or _fChunk returned false.
+		 */
+		virtual bool						ReadClipboard( size_t /*_sClipIdx*/, const std::function<bool ( const uint8_t *, size_t )> &/*_fChunk*/ ) const { return false; }
+
+		/**
+		 * \brief Determines whether Paste() is supported (and the source is writable).
+		 *
+		 * \return Returns true if Paste() can modify this data source.
+		 */
+		virtual bool						CanPaste() const { return false; }
+
+		/**
+		 * \brief Pastes data at an address.
+		 *
+		 * In Overwrite mode the pasted bytes replace the bytes at the address (extending the data if they run past the end); otherwise
+		 *	they are inserted.  The caller groups this with any deletion of the selection into one Undo operation.
+		 *
+		 * \param _ui64Addr The address at which to paste.
+		 * \param _pdData The data to paste (see CCopyPasteManager::GetPasteData()).
+		 * \param _bOverwrite If true, Overwrite mode; otherwise Insert mode.
+		 * \param _ui64Pasted Receives the number of bytes pasted.
+		 * \param _swsMsg Receives an error message on failure.
+		 * \return Returns true if the data was pasted.
+		 */
+		virtual bool						Paste( uint64_t /*_ui64Addr*/, const MX_PASTE_DATA &/*_pdData*/, bool /*_bOverwrite*/, uint64_t &_ui64Pasted, CSecureWString &/*_swsMsg*/ ) {
+			_ui64Pasted = 0;
+			return false;
+		}
 
 		// Gets the size of the data source.
 		virtual uint64_t					Size() const = 0;

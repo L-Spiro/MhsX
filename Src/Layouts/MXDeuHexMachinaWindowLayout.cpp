@@ -223,6 +223,7 @@ namespace mx {
 		{ FALSE,		MX_M_EDIT_PASTE,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_FB82E709__Paste, _LEN_FB82E709 ),							false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'V', MX_M_EDIT_PASTE } },
 		{ FALSE,		MX_M_EDIT_PASTE_SPECIAL,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_5C3FAC38_Paste_Spec_ial___, _LEN_5C3FAC38 ) },
 		{ FALSE,		MX_M_EDIT_DELETE,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_3DBE79B1_Delete, _LEN_3DBE79B1 ) },
+		{ FALSE,		MX_M_EDIT_CLIPBOARD_,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_401DF7AF_Clip_board, _LEN_401DF7AF ) },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_M_EDIT_INSERT_OVERWRITE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_CB4B4FA5_Insert_O_verwrite, _LEN_CB4B4FA5 ) },
 		{ FALSE,		MX_M_EDIT_INSERT_COLOR,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_B57D707F_Insert_Co_lor___, _LEN_B57D707F ) },
@@ -291,6 +292,23 @@ namespace mx {
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_M_EDIT_OVERWRITE_FILE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_9BAF9C05__Overwrite_File___, _LEN_9BAF9C05 ) },
 		{ FALSE,		MX_M_EDIT_OVERWRITE_BYTES,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_B6216D76_O_verwrite_Bytes___, _LEN_B6216D76 ) },
+	};
+
+	// Edit -> Clipboard.
+	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miEditClipboardMenu[] = {
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen															bSkip	aHotkey
+		{ FALSE,		MX_M_EDIT_CLIPBOARD_0,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_3A4D976E__Windows_Clipboard, _LEN_3A4D976E ),				false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), '0', MX_M_EDIT_CLIPBOARD_0 } },
+		{ FALSE,		MX_M_EDIT_CLIPBOARD_1,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_0A341ACF_Clipboard__1, _LEN_0A341ACF ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), '1', MX_M_EDIT_CLIPBOARD_1 } },
+		{ FALSE,		MX_M_EDIT_CLIPBOARD_2,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_933D4B75_Clipboard__2, _LEN_933D4B75 ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), '2', MX_M_EDIT_CLIPBOARD_2 } },
+		{ FALSE,		MX_M_EDIT_CLIPBOARD_3,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_E43A7BE3_Clipboard__3, _LEN_E43A7BE3 ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), '3', MX_M_EDIT_CLIPBOARD_3 } },
+		{ FALSE,		MX_M_EDIT_CLIPBOARD_4,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_7A5EEE40_Clipboard__4, _LEN_7A5EEE40 ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), '4', MX_M_EDIT_CLIPBOARD_4 } },
+		{ FALSE,		MX_M_EDIT_CLIPBOARD_5,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_0D59DED6_Clipboard__5, _LEN_0D59DED6 ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), '5', MX_M_EDIT_CLIPBOARD_5 } },
+		{ FALSE,		MX_M_EDIT_CLIPBOARD_6,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_94508F6C_Clipboard__6, _LEN_94508F6C ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), '6', MX_M_EDIT_CLIPBOARD_6 } },
+		{ FALSE,		MX_M_EDIT_CLIPBOARD_7,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_E357BFFA_Clipboard__7, _LEN_E357BFFA ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), '7', MX_M_EDIT_CLIPBOARD_7 } },
+		{ FALSE,		MX_M_EDIT_CLIPBOARD_8,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_73E8A26B_Clipboard__8, _LEN_73E8A26B ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), '8', MX_M_EDIT_CLIPBOARD_8 } },
+		{ FALSE,		MX_M_EDIT_CLIPBOARD_9,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_04EF92FD_Clipboard__9, _LEN_04EF92FD ),						false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), '9', MX_M_EDIT_CLIPBOARD_9 } },
+		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
+		{ FALSE,		MX_M_EDIT_CLEAR_CLIPBOARDS,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_5B958D68__Clear_All_Clipboards, _LEN_5B958D68 ) },
 	};
 
 	// Select menu.
@@ -768,6 +786,13 @@ namespace mx {
 			MX_M_EDIT_INSERT_OVERWRITE,
 			std::size( m_miEditInsertOverwriteMenu ),
 			m_miEditInsertOverwriteMenu
+		},
+		{
+			MX_M_CLIPBOARD,
+			MX_M_EDIT,
+			MX_M_EDIT_CLIPBOARD_,
+			std::size( m_miEditClipboardMenu ),
+			m_miEditClipboardMenu
 		},
 
 		{

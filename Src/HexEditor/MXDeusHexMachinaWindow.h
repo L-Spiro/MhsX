@@ -217,6 +217,23 @@ namespace mx {
 		// Performs a Copy As.
 		void										Copy( MX_COPY_AS _caFormat = MX_CA_BINARY );
 
+		/**
+		 * Performs a Paste from the active clipboard into the current editor.
+		 **/
+		void										Paste();
+
+		/**
+		 * Makes a clipboard the active clipboard for Cut, Copy, and Paste.
+		 * 
+		 * \param _sIdx The clipboard index (0 is the Windows clipboard).
+		 **/
+		void										SelectClipboard( size_t _sIdx );
+
+		/**
+		 * Empties all clipboards (the Windows clipboard only if it holds this application's data).
+		 **/
+		void										ClearClipboards();
+
 		// Delete the selection.
 		void										DeleteSelectedOrCaret() override;
 
@@ -285,6 +302,11 @@ namespace mx {
 
 		// Update the status-bar Insert/Overwrite part.
 		void										UpdateStatusBar_InsertOverwrite();
+
+		/**
+		 * Updates the status-bar Clipboard part to show the active clipboard.
+		 **/
+		void										UpdateStatusBar_Clipboard();
 
 		// Update the status-bar Little-Endian/Big-Endian part.
 		void										UpdateStatusBar_Endian();
@@ -370,8 +392,6 @@ namespace mx {
 		INT											m_iImageMap[MX_I_TOTAL];
 		// The hex-editor controls.
 		std::vector<MX_HEX_TAB>						m_vTabs;
-		// Clipboards.
-		//std::vector<std::shared_ptr<CHexEditorInterface>
 		// The tast text put into status-bat index 0.
 		CSecureWString								m_swsLastStatusText;
 		// Whether the last index-0 status-bar text was a warning or not.
