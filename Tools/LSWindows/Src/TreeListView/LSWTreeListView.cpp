@@ -1151,6 +1151,7 @@ namespace lsw {
 						if ( (ptNode->Value().uiState & TVIS_EXPANDED) && ptNode->Size() ) {
 							ptNode->Value().uiState &= ~TVIS_EXPANDED;
 							UpdateListView();
+							EnsureHighlightedVisible();
 							return LSW_H_HANDLED;
 						}
 						else {
@@ -1162,6 +1163,7 @@ namespace lsw {
 									UnfocusAll();
 									ptNode->Parent()->Value().uiState |= (TVIS_SELECTED | LSW_TREELIST_HIGHLIGHTED);
 									UpdateListView();
+									EnsureHighlightedVisible();
 									return LSW_H_HANDLED;
 								}
 							}
@@ -1177,6 +1179,7 @@ namespace lsw {
 									}
 									ptNode->Parent()->Value().uiState |= (TVIS_SELECTED | LSW_TREELIST_HIGHLIGHTED);
 									UpdateListView();
+									EnsureHighlightedVisible();
 									return LSW_H_HANDLED;
 								}
 							}
@@ -1193,6 +1196,7 @@ namespace lsw {
 						if ( !(ptNode->Value().uiState & TVIS_EXPANDED) && ptNode->Size() ) {
 							ptNode->Value().uiState |= TVIS_EXPANDED;
 							UpdateListView();
+							EnsureHighlightedVisible();
 							return LSW_H_HANDLED;
 						}
 					}
@@ -1566,13 +1570,13 @@ namespace lsw {
 	}
 
 	/**
-	 * Updates the list view (clears the cache, sets the size, and updates selections/hot).
+	 * Updates the list view (clears the cache, sets the size, and updates selections/hot).  It never scrolls the list view.
 	 */
 	void CTreeListView::UpdateListView() {
 		LSW_SETREDRAW srRedraw( this );
 		ClearCache();
 		size_t stTotal = CountExpanded();
-		const_cast<CTreeListView *>(this)->SetItemCount( static_cast<INT>(stTotal) );
+		SetItemCountEx( static_cast<INT>(stTotal), LVSICF_NOSCROLL );
 
 		UnfocusCollapsed();
 		size_t stHighlighted = FindHighlighted();
@@ -1617,6 +1621,17 @@ namespace lsw {
 				// It is selected.
 				CListView::SetItemSelection( static_cast<INT>(vSelection[I]), TRUE );
 			}
+		}
+	}
+
+	/**
+	 * Scrolls the list view as little as possible to bring the highlighted (focused) item into view.  Nothing scrolls if it is already in view
+	 *	or if there is no highlighted item.
+	 */
+	void CTreeListView::EnsureHighlightedVisible() {
+		size_t stHighlighted = FindHighlighted();
+		if ( stHighlighted != size_t( -1 ) && stHighlighted < size_t( INT_MAX ) ) {
+			::SendMessageW( Wnd(), LVM_ENSUREVISIBLE, static_cast<WPARAM>(stHighlighted), FALSE );
 		}
 	}
 

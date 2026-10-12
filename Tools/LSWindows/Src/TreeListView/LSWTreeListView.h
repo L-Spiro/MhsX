@@ -869,9 +869,15 @@ namespace lsw {
 		ee::CTree<LSW_TREE_ROW> *			GetHighlighted();
 
 		/**
-		 * Updates the list view (clears the cache, sets the size, and updates selections/hot).
+		 * Updates the list view (clears the cache, sets the size, and updates selections/hot).  It never scrolls the list view.
 		 */
 		void								UpdateListView();
+
+		/**
+		 * Scrolls the list view as little as possible to bring the highlighted (focused) item into view.  Nothing scrolls if it is already in view
+		 *	or if there is no highlighted item.
+		 */
+		void								EnsureHighlightedVisible();
 
 		/**
 		 * Removes focus from any hidden items.
