@@ -773,11 +773,12 @@ namespace lsw {
 	 **/
 	VOID CListView::SnapOnce() {
 		if ( !SnapActive() ) { return; }
-		// If a divider drag ended without an HDN_ENDTRACK, stop waiting for one.
-		if ( m_iSnapTrackCol != -1 && ::GetCapture() != ListView_GetHeader( Wnd() ) ) { m_iSnapTrackCol = -1; }
-		if ( m_iSnapTrackCol != -1 ) { return; }
 		UpdateSnapColumn();
 		if ( m_iSnapCol < 0 ) { return; }
+		// If a divider drag ended without an HDN_ENDTRACK, stop waiting for one.
+		if ( m_iSnapTrackCol != -1 && ::GetCapture() != ListView_GetHeader( Wnd() ) ) { m_iSnapTrackCol = -1; }
+		// While the user drags the right-most column's divider, the column goes where the mouse takes it.  HDN_ENDTRACK snaps it afterwards.
+		if ( m_iSnapTrackCol == m_iSnapCol ) { return; }
 
 		INT iOthers = 0;
 		for ( INT I = GetTotalColumns(); I--; ) {

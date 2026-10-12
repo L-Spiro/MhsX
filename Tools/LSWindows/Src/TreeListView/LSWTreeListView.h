@@ -528,6 +528,8 @@ namespace lsw {
 		bool								m_bDontUpdate;
 		/** Set whether sorting is enabled. */
 		bool								m_bSort = true;
+		/** Non-zero while UpdateListView() copies the tree's selection into the list view (it can nest). */
+		INT									m_iUpdatingListView = 0;
 		/** Window property. */
 		static WCHAR						m_szProp[2];
 		
@@ -878,6 +880,26 @@ namespace lsw {
 		 *	or if there is no highlighted item.
 		 */
 		void								EnsureHighlightedVisible();
+
+		/**
+		 * Determines whether an item that the list view is selecting replaces the previous selection rather than adding to it: neither Ctrl
+		 *	nor Shift is held, and the selection is not UpdateListView() copying the tree's own selection into the list view.
+		 *
+		 * \return Returns true if the selection being made replaces the previous selection.
+		 */
+		bool								SelectionReplaces() const;
+
+		/**
+		 * Unselects every item that is hidden inside a collapsed parent.  The list view cannot unselect these, because it does not contain them.
+		 */
+		void								UnselectHidden();
+
+		/**
+		 * Repaints the list view and its header after the header changes a column, so that the whole control is drawn from its new state.
+		 *
+		 * \param _uiCode The header notification code, already handled by the list view.
+		 */
+		void								HeaderChanged( UINT _uiCode );
 
 		/**
 		 * Removes focus from any hidden items.
