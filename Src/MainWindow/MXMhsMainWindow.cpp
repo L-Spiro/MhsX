@@ -606,7 +606,7 @@ namespace mx {
 				break;
 			}
 			case MX_CM_DETATCHED : {
-				m_pmhMemHack->Detach( FALSE );
+				if ( m_pmhMemHack ) { m_pmhMemHack->UpdateWindowTitle(); }
 				break;
 			}
 		}

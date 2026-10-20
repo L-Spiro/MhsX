@@ -68,6 +68,9 @@
     },
     "EditSettings" : {
         "EditDescrHistory" : [
+            "Address: 0x7FF6A57B3BF5",
+            "Address: 0x7FF6A57B3BF6",
+            "Address: 0x7FF624011EA6",
             "Lives",
             "Shield",
             "Missiles",
@@ -164,12 +167,13 @@
             "Address: 7FF6951C6120h",
             "Title Mode",
             "Address: 7FF6951C610Eh",
-            "Address: 7D4D1800h",
-            "Address: 001302E0h",
-            "Address: 001A02E0h \u005c\u005c\u005c\u2026"
+            "Address: 7D4D1800h"
         ],
         "EditCurValHistory" : [
+            "3",
             "2",
+            "48",
+            "16",
             "5",
             "1",
             "0",
@@ -184,7 +188,6 @@
             "0x63",
             "63h",
             "82",
-            "3",
             "30",
             "89",
             "50",
@@ -194,7 +197,6 @@
             "29",
             "21",
             "4",
-            "16",
             "127",
             "78",
             "9",
@@ -267,8 +269,7 @@
             "196",
             "195",
             "194",
-            "193",
-            "192"
+            "193"
         ],
         "EditArrayLenHistory" : [
             "1",
@@ -290,8 +291,10 @@
             "0"
         ],
         "EditLockedLeftHistory" : [
-            "3",
             "5",
+            "4",
+            "48",
+            "3",
             "1",
             "1 2 3",
             "0",
@@ -317,7 +320,6 @@
             "invalid type for defaulted assignment operator",
             "99",
             "7",
-            "4",
             "0xb",
             "6",
             "22",

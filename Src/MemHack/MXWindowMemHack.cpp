@@ -135,27 +135,31 @@ namespace mx {
 
 	// Detach from the current process.
 	void CWindowMemHack::Detach( BOOL _bCallProcessDetach ) {
+		// The process (if any) from which this detaches.  OpenProcess() calls this before every attach, attached or not.
+		DWORD dwDetachedId = m_pProcess.ProcId();
+		CMemHack::Detach( _bCallProcessDetach );
 		if ( m_pmmwWindow ) {
 			UpdateWindowTitle();
 
-			CStatusBar * psbStatus = m_pmmwWindow->StatusBar();
-			if ( psbStatus && psbStatus->IsStatusBar() ) {
-				try {
-					CSecureWString sTemp = _DEC_WS_6EA39706_Detached_from_;
-					CUtilities::ToHex( m_pProcess.ProcId(), sTemp, 4 );
-					sTemp.append( L" (" );
-					CUtilities::ToUnsigned( m_pProcess.ProcId(), sTemp );
-					sTemp.append( L")." );
-					/*sTemp.push_back( L' ' );
-					std::string sFlagsTemp;
-					CUtilities::OpenProcessFlagToString( m_pProcess.Flags(), sFlagsTemp, TRUE );
-					sTemp += CUtilities::StringToWString( sFlagsTemp );*/
-					psbStatus->SetTextW( 0, 0, sTemp.c_str() );
+			if ( dwDetachedId != DWINVALID && m_pProcess.ProcId() != dwDetachedId ) {
+				CStatusBar * psbStatus = m_pmmwWindow->StatusBar();
+				if ( psbStatus && psbStatus->IsStatusBar() ) {
+					try {
+						CSecureWString sTemp = _DEC_WS_6EA39706_Detached_from_;
+						CUtilities::ToHex( dwDetachedId, sTemp, 4 );
+						sTemp.append( L" (" );
+						CUtilities::ToUnsigned( dwDetachedId, sTemp );
+						sTemp.append( L")." );
+						/*sTemp.push_back( L' ' );
+						std::string sFlagsTemp;
+						CUtilities::OpenProcessFlagToString( m_pProcess.Flags(), sFlagsTemp, TRUE );
+						sTemp += CUtilities::StringToWString( sFlagsTemp );*/
+						psbStatus->SetTextW( 0, 0, sTemp.c_str() );
+					}
+					catch ( ...  ) {}
 				}
-				catch ( ...  ) {}
 			}
 		}
-		CMemHack::Detach( _bCallProcessDetach );
 	}
 
 	// Sets the options.
