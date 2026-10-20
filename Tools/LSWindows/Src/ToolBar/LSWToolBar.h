@@ -234,6 +234,18 @@ namespace lsw {
 		 **/
 		size_t								IndexOfButton( WORD _wId ) const;
 
+		/**
+		 * \brief Subclasses the edit control to handle background painting for its child static controls.
+		 * \param _hWnd Handle to the edit control window.
+		 * \param _uMsg The message being processed.
+		 * \param _wParam Additional message information.
+		 * \param _lParam Additional message information.
+		 * \param _uIdSubclass The subclass ID.
+		 * \param _dwRefData Reference data provided when subclassing.
+		 * \return LRESULT Returns the result of the message processing.
+		 */
+		static LRESULT CALLBACK				EditSubclassProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam, UINT_PTR _uIdSubclass, DWORD_PTR _dwRefData );
+
 
 	private :
 		/**

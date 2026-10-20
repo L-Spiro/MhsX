@@ -292,6 +292,7 @@ namespace lsw {
 			auto pwEdit = lsw::CBase::LayoutManager()->CreateWidget( wlLayout, this, true, NULL, 0 );
 
 			if ( pwEdit != nullptr ) {
+				::SetWindowSubclass( pwEdit->Wnd(), EditSubclassProc, 0, 0 );
 				::SendMessageW( pwEdit->Wnd(), WM_SETFONT, static_cast<WPARAM>(::SendMessageW( Wnd(), WM_GETFONT, 0, 0 )), MAKELPARAM( TRUE, 0 ) );
 
 				if ( _pwszCueText != NULL ) {
@@ -397,6 +398,33 @@ namespace lsw {
 			if ( m_vButtons[I].idCommand == _wId ) { return I; }
 		}
 		return static_cast<size_t>(-1);
+	}
+
+	/**
+	 * \brief Subclasses the edit control to handle background painting for its child static controls.
+	 * \param _hWnd Handle to the edit control window.
+	 * \param _uMsg The message being processed.
+	 * \param _wParam Additional message information.
+	 * \param _lParam Additional message information.
+	 * \param _uIdSubclass The subclass ID.
+	 * \param _dwRefData Reference data provided when subclassing.
+	 * \return LRESULT Returns the result of the message processing.
+	 */
+	LRESULT CALLBACK CToolBar::EditSubclassProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam, UINT_PTR _uIdSubclass, DWORD_PTR _dwRefData ) {
+		if ( _uMsg == WM_CTLCOLORSTATIC ) {
+			HDC hdcStatic = reinterpret_cast<HDC>(_wParam);
+        
+			// Ensure the background color matches the edit box background.
+			::SetBkColor( hdcStatic, ::GetSysColor( COLOR_WINDOW ) );
+        
+			// Return the standard white window brush.
+			return reinterpret_cast<LRESULT>(::GetSysColorBrush( COLOR_WINDOW ));
+		}
+		else if ( _uMsg == WM_NCDESTROY ) {
+			::RemoveWindowSubclass( _hWnd, EditSubclassProc, _uIdSubclass );
+		}
+    
+		return ::DefSubclassProc( _hWnd, _uMsg, _wParam, _lParam );
 	}
 
 }	// namespace lsw
