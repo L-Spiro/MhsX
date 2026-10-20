@@ -23383,3 +23383,48 @@
 #define _DEC_S_BFD22120_Clipboard_ mx::CStringDecoder::DecodeToString( _T_BFD22120_Clipboard_, _LEN_BFD22120 )
 #define _DEC_WS_BFD22120_Clipboard_ mx::CStringDecoder::DecodeToWString( _T_BFD22120_Clipboard_, _LEN_BFD22120 )
 
+// AutoReAttach
+
+#define _T_8534E73B_AutoReAttach "\xC9\x43\x44\x0A\xE4\x2E\xCF\x3B\x44\x29\x2C\x36"
+#define _LEN_8534E73B 12
+#define _T_LEN_8534E73B_AutoReAttach _T_8534E73B_AutoReAttach, _LEN_8534E73B
+#define _DEC_8534E73B_AutoReAttach( STR ) mx::CStringDecoder::Decode( _T_8534E73B_AutoReAttach, _LEN_8534E73B, STR )
+#define _DEC_S_8534E73B_AutoReAttach mx::CStringDecoder::DecodeToString( _T_8534E73B_AutoReAttach, _LEN_8534E73B )
+#define _DEC_WS_8534E73B_AutoReAttach mx::CStringDecoder::DecodeToWString( _T_8534E73B_AutoReAttach, _LEN_8534E73B )
+
+// Closed Process
+
+#define _T_5ED78C7D_Closed_Process "\xCB\x3A\x3F\x0E\xF7\x2D\xAE\x17\x42\x37\x2C\x33\x05\x0E"
+#define _LEN_5ED78C7D 14
+#define _T_LEN_5ED78C7D_Closed_Process _T_5ED78C7D_Closed_Process, _LEN_5ED78C7D
+#define _DEC_5ED78C7D_Closed_Process( STR ) mx::CStringDecoder::Decode( _T_5ED78C7D_Closed_Process, _LEN_5ED78C7D, STR )
+#define _DEC_S_5ED78C7D_Closed_Process mx::CStringDecoder::DecodeToString( _T_5ED78C7D_Closed_Process, _LEN_5ED78C7D )
+#define _DEC_WS_5ED78C7D_Closed_Process mx::CStringDecoder::DecodeToWString( _T_5ED78C7D_Closed_Process, _LEN_5ED78C7D )
+
+// Automatically Re-Attach When It Re-Opens
+
+#define _T_CE713423_Automatically_Re_Attach_When_It_Re_Opens "\xC9\x43\x44\x0A\xFF\x2A\x02\x30\x33\x29\x35\x3A\x0B\xBB\x19\xED\xFB\x11\x0F\x06\x2A\xF1\x2F\xF0\x1F\x31\x33\x00\xBB\x10\xFC\xEE\x22\x00\xBF\x18\xFE\x2C\x3E\x3B"
+#define _LEN_CE713423 40
+#define _T_LEN_CE713423_Automatically_Re_Attach_When_It_Re_Opens _T_CE713423_Automatically_Re_Attach_When_It_Re_Opens, _LEN_CE713423
+#define _DEC_CE713423_Automatically_Re_Attach_When_It_Re_Opens( STR ) mx::CStringDecoder::Decode( _T_CE713423_Automatically_Re_Attach_When_It_Re_Opens, _LEN_CE713423, STR )
+#define _DEC_S_CE713423_Automatically_Re_Attach_When_It_Re_Opens mx::CStringDecoder::DecodeToString( _T_CE713423_Automatically_Re_Attach_When_It_Re_Opens, _LEN_CE713423 )
+#define _DEC_WS_CE713423_Automatically_Re_Attach_When_It_Re_Opens mx::CStringDecoder::DecodeToWString( _T_CE713423_Automatically_Re_Attach_When_It_Re_Opens, _LEN_CE713423 )
+
+// Process closed: 
+
+#define _T_A3B5CAB4_Process_closed__ "\xD8\x40\x3F\xFE\xF7\x3C\x01\xE7\x33\x34\x38\x41\xF7\xFF\x01\xA8"
+#define _LEN_A3B5CAB4 16
+#define _T_LEN_A3B5CAB4_Process_closed__ _T_A3B5CAB4_Process_closed__, _LEN_A3B5CAB4
+#define _DEC_A3B5CAB4_Process_closed__( STR ) mx::CStringDecoder::Decode( _T_A3B5CAB4_Process_closed__, _LEN_A3B5CAB4, STR )
+#define _DEC_S_A3B5CAB4_Process_closed__ mx::CStringDecoder::DecodeToString( _T_A3B5CAB4_Process_closed__, _LEN_A3B5CAB4 )
+#define _DEC_WS_A3B5CAB4_Process_closed__ mx::CStringDecoder::DecodeToWString( _T_A3B5CAB4_Process_closed__, _LEN_A3B5CAB4 )
+
+//  Waiting for it to re-open.
+
+#define _T_3209C685__Waiting_for_it_to_re_open_ "\xA8\x25\x31\x04\x06\x32\xFC\x2E\xF0\x2E\x38\x40\xB2\x04\x3B\xA8\x42\x3F\xBB\x04\x2E\xBB\x36\x40\x2D\x37\xFC"
+#define _LEN_3209C685 27
+#define _T_LEN_3209C685__Waiting_for_it_to_re_open_ _T_3209C685__Waiting_for_it_to_re_open_, _LEN_3209C685
+#define _DEC_3209C685__Waiting_for_it_to_re_open_( STR ) mx::CStringDecoder::Decode( _T_3209C685__Waiting_for_it_to_re_open_, _LEN_3209C685, STR )
+#define _DEC_S_3209C685__Waiting_for_it_to_re_open_ mx::CStringDecoder::DecodeToString( _T_3209C685__Waiting_for_it_to_re_open_, _LEN_3209C685 )
+#define _DEC_WS_3209C685__Waiting_for_it_to_re_open_ mx::CStringDecoder::DecodeToWString( _T_3209C685__Waiting_for_it_to_re_open_, _LEN_3209C685 )
+

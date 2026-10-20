@@ -410,7 +410,7 @@ namespace lsw {
 	 * \param _dwRefData Reference data provided when subclassing.
 	 * \return LRESULT Returns the result of the message processing.
 	 */
-	LRESULT CALLBACK CToolBar::EditSubclassProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam, UINT_PTR _uIdSubclass, DWORD_PTR _dwRefData ) {
+	LRESULT CALLBACK CToolBar::EditSubclassProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam, UINT_PTR _uIdSubclass, DWORD_PTR /*_dwRefData*/ ) {
 		if ( _uMsg == WM_CTLCOLORSTATIC ) {
 			HDC hdcStatic = reinterpret_cast<HDC>(_wParam);
         

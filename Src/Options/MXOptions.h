@@ -39,6 +39,8 @@ namespace mx {
 
 		// Open-process settings.
 		DWORD							dwOpenProc						= (MX_OP_SHOW_ALL | MX_OP_TITLE_BAR_ALL) & ~MX_OP_TITLE_BAR_RANDOM;
+		/** If TRUE, when the current process closes, it is searched for (by path or by file name) and automatically re-attached when it re-opens. */
+		BOOL							bAutoReattach					= FALSE;
 
 		// Search settings.
 		BOOL							bMemImage						= TRUE;

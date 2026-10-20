@@ -337,6 +337,16 @@ namespace mx {
 		void							SetDetatchCallback( PfDetatchCallback _pfFunc, void * _pvParm1,  uintptr_t _uiptrParm2 );
 
 		/**
+		 * Sets the function called when the attached process closes (exits on its own).  It is called on the monitoring thread at the moment the
+		 *	process closes, with _pvParm1 and the ID of the process that closed as its parameters.  It must not wait on the thread that owns this
+		 *	object (post a message rather than send one).
+		 *
+		 * \param _pfFunc The function to call, or nullptr.
+		 * \param _pvParm1 The first parameter to pass to _pfFunc.
+		 */
+		void							SetClosedCallback( PfDetatchCallback _pfFunc, void * _pvParm1 );
+
+		/**
 		 * \brief Finds the module covering an address, if any. Returns nullptr if not found.
 		 */
 		inline MODULEENTRY32W			FindModuleForAddress( uint64_t _ui64Addr ) const {
@@ -671,6 +681,9 @@ namespace mx {
 		struct MX_OPEN_PROC {
 			volatile LONG				aAtom;							// The the atom is set on the main thread, unset on the monitoring thread. (ATOM defines to WORD on MINWIN defined, which is a bug).
 			HANDLE						hHandle = NULL;					// The handle returned by OpenProcess().
+			HANDLE						hStop = NULL;					// Event signaled to stop the monitoring thread.
+			DWORD						dwId = DWINVALID;				// The ID of the monitored process.
+			CProcess *					ppProcess = nullptr;			// The object that owns the monitoring thread.
 
 			MX_OPEN_PROC() :
 				aAtom( 1 ) {}
@@ -704,6 +717,13 @@ namespace mx {
 		void *							m_pvDetatchParm1;
 		// Detatch parameter 2.
 		uintptr_t						m_uiptrDetatchParm2;
+
+		/** The closed-process callback. */
+		PfDetatchCallback				m_pfClosedCallback = nullptr;
+		/** Closed-process parameter 1. */
+		void *							m_pvClosedParm1 = nullptr;
+		/** Manual-reset event signaled to stop the monitoring thread. */
+		LSW_HANDLE						m_hMonitorStop;
 
 		// Module address ranges for determining where static addresses are.
 		mutable std::map<MX_ADDRESS_RANGE, MODULEENTRY32W>
@@ -746,6 +766,11 @@ namespace mx {
 
 		// Open-process thread.
 		//void							CreateProcessThread( CProcess & _pProcess );
+
+		/**
+		 * Stops the monitoring thread and waits for it to exit.  Call before closing the handle the thread waits on.
+		 */
+		void							StopMonitor();
 
 		// Open-process thread.  Runs for as long as the target process is open.
 		static DWORD WINAPI				ThreadProc( LPVOID _lpParameter );

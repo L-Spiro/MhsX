@@ -38,6 +38,40 @@ namespace mx {
 		// Detach from the current process.
 		virtual void						Detach( BOOL _bCallProcessDetach );
 
+		/**
+		 * Called (on the main thread) when the attached process closes on its own.  Detaches from it and marks it as waiting to be re-attached
+		 *	(see CanSearchForReattach()).
+		 *
+		 * \param _dwId The ID of the process that closed.
+		 * \return Returns true if _dwId is the attached process and it was detached.  Returns false if the notification is stale.
+		 */
+		virtual bool						ProcessClosed( DWORD _dwId );
+
+		/**
+		 * Determines whether the closed process should be searched for now: it closed and nothing has been opened since, the automatic re-attach
+		 *	option is enabled, no process is open, and its path or file name is known.  The information needed for the search is kept whether
+		 *	or not the option is enabled, so enabling the option later starts the search.
+		 *
+		 * \return Returns true if FindReattachProcess() should be called periodically.
+		 */
+		bool								CanSearchForReattach() const;
+
+		/**
+		 * Searches the running processes for the closed process.  If the Open Process "Path" option is enabled and the closed process's full
+		 *	path is known, a process matches by full path (only processes with the same file name are opened to check their paths).  Otherwise
+		 *	a process matches by file name alone (no process is opened).
+		 *
+		 * \return Returns the ID of the first matching process or DWINVALID if there is none.
+		 */
+		DWORD								FindReattachProcess();
+
+		/**
+		 * Records that a process found by FindReattachProcess() could not be opened, so that the search skips it from then on.
+		 *
+		 * \param _dwId The ID of the process that could not be opened.
+		 */
+		void								ReattachFailed( DWORD _dwId );
+
 		// Gets the options.
 		const MX_OPTIONS &					Options() const;
 
@@ -157,9 +191,53 @@ namespace mx {
 		mutable CCriticalSection			m_csProgramCrit;
 		// The list of found addresses.
 		CFoundAddressManager				m_famFoundAddresses;
+		/** The full path of the last process opened, or empty if it is not known. */
+		CSecureWString						m_wsReattachPath;
+		/** The file name of the last process opened, or empty if it is not known. */
+		CSecureWString						m_wsReattachName;
+		/** The ID of the last process opened. */
+		DWORD								m_dwReattachId = DWINVALID;
+		/** Set when the last process opened closes; cleared when any process is opened. */
+		bool								m_bReattachPending = false;
+		/** Processes matching the closed process that could not be opened. */
+		std::set<DWORD>						m_sReattachSkip;
 
 
 		// == Functions.
+		/**
+		 * Gets the file name of a running process from a process snapshot (the process is not opened).
+		 *
+		 * \param _dwId The ID of the process.
+		 * \return Returns the process's file name or an empty string if it is not found.
+		 */
+		static CSecureWString				ProcessNameById( DWORD _dwId );
+
+		/**
+		 * Gets the full path of a process.
+		 *
+		 * \param _hProcess A handle to the process with PROCESS_QUERY_LIMITED_INFORMATION access.
+		 * \return Returns the full path of the process or an empty string on failure.
+		 */
+		static CSecureWString				ImagePath( HANDLE _hProcess );
+
+		/**
+		 * Compares two strings ordinally, ignoring case (as the file system compares file names).
+		 *
+		 * \param _pwcLeft The left string.
+		 * \param _wsRight The right string.
+		 * \return Returns true if the strings are equal, ignoring case.
+		 */
+		static bool							EqualNoCase( const wchar_t * _pwcLeft, const std::wstring &_wsRight );
+
+		/**
+		 * Compares two strings ordinally, ignoring case (as the file system compares file names).
+		 *
+		 * \param _wsLeft The left string.
+		 * \param _wsRight The right string.
+		 * \return Returns true if the strings are equal, ignoring case.
+		 */
+		static bool							EqualNoCase( const std::wstring &_wsLeft, const std::wstring &_wsRight );
+
 		// Saves to JSON format if _peJson is not nullptr, otherwise it saves to binary stored in _psBinary.
 		virtual bool						SaveGeneralSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary, const MX_OPTIONS &_oOptions ) const;
 

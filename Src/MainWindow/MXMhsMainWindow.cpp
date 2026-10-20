@@ -288,6 +288,11 @@ namespace mx {
 			uiTmp2 = uidDist( mGen );
 		}
 		m_tUpdateLocksTimer.Start( Wnd(), uiTmp2, 1000 / m_pmhMemHack->Options().dwLockedRefresh, NULL );
+		m_uiptrReattachTimerId = uidDist( mGen );
+		while ( m_uiptrReattachTimerId == uiTmp || m_uiptrReattachTimerId == uiTmp2 ) {
+			m_uiptrReattachTimerId = uidDist( mGen );
+		}
+		UpdateReattachTimer();
 		
 
 		UpdateOpenRecent();
@@ -607,6 +612,10 @@ namespace mx {
 			}
 			case MX_CM_DETATCHED : {
 				if ( m_pmhMemHack ) { m_pmhMemHack->UpdateWindowTitle(); }
+				break;
+			}
+			case MX_CM_PROCESS_CLOSED : {
+				if ( m_pmhMemHack ) { m_pmhMemHack->ProcessClosed( static_cast<DWORD>(_wParam) ); }
 				break;
 			}
 		}
@@ -1326,7 +1335,37 @@ namespace mx {
 		if ( _uiptrId == m_tUpdateLocksTimer.uiptrActiveId ) {
 			MemHack()->ApplyFoundAddressLocks();
 		}
+		if ( m_tReattachTimer.uiptrActiveId && _uiptrId == m_tReattachTimer.uiptrActiveId ) {
+			// Search for the closed process and re-attach to it if it has re-opened.
+			if ( m_pmhMemHack && m_pmhMemHack->CanSearchForReattach() ) {
+				DWORD dwId = m_pmhMemHack->FindReattachProcess();
+				if ( dwId != DWINVALID ) {
+					if ( m_pmhMemHack->OpenProcess( dwId ) ) {
+						UpdateOpenRecent();
+					}
+					else {
+						m_pmhMemHack->ReattachFailed( dwId );
+					}
+				}
+			}
+			UpdateReattachTimer();
+		}
 		return LSW_H_CONTINUE;
+	}
+
+	/**
+	 * Starts the timer that searches for the closed process (to re-attach to it) if CWindowMemHack::CanSearchForReattach() says to search,
+	 *	otherwise stops it.
+	 */
+	void CMhsMainWindow::UpdateReattachTimer() {
+		if ( m_pmhMemHack && m_pmhMemHack->CanSearchForReattach() ) {
+			if ( !m_tReattachTimer.uiptrActiveId ) {
+				m_tReattachTimer.Start( Wnd(), m_uiptrReattachTimerId, m_uiReattachInterval, NULL );
+			}
+		}
+		else {
+			m_tReattachTimer.Stop();
+		}
 	}
 
 	// WM_NOTIFY->NM_DBLCLK on the main list to edit the currently selected values.

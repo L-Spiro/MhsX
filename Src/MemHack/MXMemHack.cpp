@@ -80,7 +80,15 @@ namespace mx {
 
 	// Opened a process.
 	void CMemHack::OpenedProcess() {
-		CUtilities::AddOrMove( m_oOptions.vProcessHistory, m_pProcess.QueryProcessImageName(), CMhsMainWindow::MX_R_RECENT_PROCESSES_SIZE );
+		CSecureWString wsPath = m_pProcess.QueryProcessImageName();
+		CUtilities::AddOrMove( m_oOptions.vProcessHistory, wsPath, CMhsMainWindow::MX_R_RECENT_PROCESSES_SIZE );
+
+		// Remember how to find this process again if it closes.
+		m_dwReattachId = m_pProcess.ProcId();
+		m_wsReattachPath = wsPath;
+		m_wsReattachName = wsPath.size() ? CSecureWString( CUtilities::GetFileName( wsPath ) ) : ProcessNameById( m_dwReattachId );
+		m_bReattachPending = false;
+		m_sReattachSkip.clear();
 
 		FoundAddressManager()->ProcessOpened();
 	}
@@ -95,6 +103,144 @@ namespace mx {
 			m_pProcess.Detach();
 		}
 		//m_hProc.Reset();
+	}
+
+	/**
+	 * Called (on the main thread) when the attached process closes on its own.  Detaches from it and marks it as waiting to be re-attached
+	 *	(see CanSearchForReattach()).
+	 *
+	 * \param _dwId The ID of the process that closed.
+	 * \return Returns true if _dwId is the attached process and it was detached.  Returns false if the notification is stale.
+	 */
+	bool CMemHack::ProcessClosed( DWORD _dwId ) {
+		// The notification is posted, so another process may have been opened since.
+		if ( _dwId == DWINVALID || m_pProcess.ProcId() != _dwId || m_pProcess.ProcIsOpened() ) { return false; }
+		m_bReattachPending = (m_dwReattachId == _dwId);
+		m_sReattachSkip.clear();
+		Detach( TRUE );
+		return true;
+	}
+
+	/**
+	 * Determines whether the closed process should be searched for now: it closed and nothing has been opened since, the automatic re-attach
+	 *	option is enabled, no process is open, and its path or file name is known.  The information needed for the search is kept whether
+	 *	or not the option is enabled, so enabling the option later starts the search.
+	 *
+	 * \return Returns true if FindReattachProcess() should be called periodically.
+	 */
+	bool CMemHack::CanSearchForReattach() const {
+		return m_bReattachPending && m_oOptions.bAutoReattach && m_wsReattachName.size() && !m_pProcess.ProcIsOpened();
+	}
+
+	/**
+	 * Searches the running processes for the closed process.  If the Open Process "Path" option is enabled and the closed process's full
+	 *	path is known, a process matches by full path (only processes with the same file name are opened to check their paths).  Otherwise
+	 *	a process matches by file name alone (no process is opened).
+	 *
+	 * \return Returns the ID of the first matching process or DWINVALID if there is none.
+	 */
+	DWORD CMemHack::FindReattachProcess() {
+		if ( !CanSearchForReattach() ) { return DWINVALID; }
+		// Getting the paths of other processes means opening them, which the "Path" option allows.
+		const bool bByPath = (m_oOptions.dwOpenProc & MX_OP_SHOW_PATH) && m_wsReattachPath.size();
+
+		LSW_HANDLE hSnap = CSystem::CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 );
+		if ( !hSnap.Valid() ) { return DWINVALID; }
+		PROCESSENTRY32W peEntry = { sizeof( peEntry ) };
+		if ( !CSystem::Process32FirstW( hSnap.hHandle, &peEntry ) ) { return DWINVALID; }
+
+		std::set<DWORD> sRunning;
+		DWORD dwFound = DWINVALID;
+		do {
+			sRunning.insert( peEntry.th32ProcessID );
+			if ( dwFound != DWINVALID ) { continue; }
+			if ( m_sReattachSkip.find( peEntry.th32ProcessID ) != m_sReattachSkip.end() ) { continue; }
+			if ( !EqualNoCase( peEntry.szExeFile, m_wsReattachName ) ) { continue; }
+			if ( !bByPath ) {
+				dwFound = peEntry.th32ProcessID;
+				continue;
+			}
+			LSW_HANDLE hProc( CSystem::OpenProcess( PROCESS_QUERY_LIMITED_INFORMATION, FALSE, peEntry.th32ProcessID ) );
+			if ( hProc.Valid() && EqualNoCase( ImagePath( hProc.hHandle ), m_wsReattachPath ) ) {
+				dwFound = peEntry.th32ProcessID;
+			}
+		} while ( CSystem::Process32NextW( hSnap.hHandle, &peEntry ) );
+
+		// A skipped process that has exited no longer needs skipping (and its ID can be reused by a new instance).
+		for ( auto I = m_sReattachSkip.begin(); I != m_sReattachSkip.end(); ) {
+			if ( sRunning.find( (*I) ) == sRunning.end() ) { I = m_sReattachSkip.erase( I ); }
+			else { ++I; }
+		}
+		return dwFound;
+	}
+
+	/**
+	 * Records that a process found by FindReattachProcess() could not be opened, so that the search skips it from then on.
+	 *
+	 * \param _dwId The ID of the process that could not be opened.
+	 */
+	void CMemHack::ReattachFailed( DWORD _dwId ) {
+		m_sReattachSkip.insert( _dwId );
+	}
+
+	/**
+	 * Gets the file name of a running process from a process snapshot (the process is not opened).
+	 *
+	 * \param _dwId The ID of the process.
+	 * \return Returns the process's file name or an empty string if it is not found.
+	 */
+	CSecureWString CMemHack::ProcessNameById( DWORD _dwId ) {
+		if ( _dwId == DWINVALID ) { return CSecureWString(); }
+		LSW_HANDLE hSnap = CSystem::CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 );
+		if ( !hSnap.Valid() ) { return CSecureWString(); }
+		PROCESSENTRY32W peEntry = { sizeof( peEntry ) };
+		if ( !CSystem::Process32FirstW( hSnap.hHandle, &peEntry ) ) { return CSecureWString(); }
+		do {
+			if ( peEntry.th32ProcessID == _dwId ) { return CSecureWString( peEntry.szExeFile ); }
+		} while ( CSystem::Process32NextW( hSnap.hHandle, &peEntry ) );
+		return CSecureWString();
+	}
+
+	/**
+	 * Gets the full path of a process.
+	 *
+	 * \param _hProcess A handle to the process with PROCESS_QUERY_LIMITED_INFORMATION access.
+	 * \return Returns the full path of the process or an empty string on failure.
+	 */
+	CSecureWString CMemHack::ImagePath( HANDLE _hProcess ) {
+		CSecureWString wsPath;
+		for ( DWORD dwSize = MAX_PATH; dwSize <= 32 * 1024; dwSize *= 2 ) {
+			wsPath.resize( dwSize );
+			DWORD dwLen = dwSize;
+			if ( CSystem::QueryFullProcessImageNameW( _hProcess, 0, wsPath.data(), &dwLen ) ) {
+				wsPath.resize( dwLen );
+				return wsPath;
+			}
+			if ( ::GetLastError() != ERROR_INSUFFICIENT_BUFFER ) { break; }
+		}
+		return CSecureWString();
+	}
+
+	/**
+	 * Compares two strings ordinally, ignoring case (as the file system compares file names).
+	 *
+	 * \param _pwcLeft The left string.
+	 * \param _wsRight The right string.
+	 * \return Returns true if the strings are equal, ignoring case.
+	 */
+	bool CMemHack::EqualNoCase( const wchar_t * _pwcLeft, const std::wstring &_wsRight ) {
+		return ::CompareStringOrdinal( _pwcLeft, -1, _wsRight.c_str(), static_cast<int>(_wsRight.size()), TRUE ) == CSTR_EQUAL;
+	}
+
+	/**
+	 * Compares two strings ordinally, ignoring case (as the file system compares file names).
+	 *
+	 * \param _wsLeft The left string.
+	 * \param _wsRight The right string.
+	 * \return Returns true if the strings are equal, ignoring case.
+	 */
+	bool CMemHack::EqualNoCase( const std::wstring &_wsLeft, const std::wstring &_wsRight ) {
+		return ::CompareStringOrdinal( _wsLeft.c_str(), static_cast<int>(_wsLeft.size()), _wsRight.c_str(), static_cast<int>(_wsRight.size()), TRUE ) == CSTR_EQUAL;
 	}
 
 	// Gets the options.
@@ -211,7 +357,8 @@ namespace mx {
 	bool CMemHack::SaveSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary, const MX_OPTIONS &_oOptions ) const {
 		if ( _peJson == nullptr && nullptr == _psBinary ) { return false; }
 		try {
-			uint32_t ui32Version = 1;
+			// 2: Added MX_OPTIONS::bAutoReattach to the open-process settings.
+			uint32_t ui32Version = 2;
 			if ( _peJson ) {
 				MX_JSON_NUMBER( _DEC_S_70A1EA5F_Version, ui32Version, _peJson );
 
@@ -650,9 +797,11 @@ namespace mx {
 	bool CMemHack::SaveOpenProcSettings( lson::CJson::LSON_ELEMENT * _peJson, CStream * _psBinary, const MX_OPTIONS &_oOptions ) const {
 		if ( _peJson ) {
 			MX_JSON_NUMBER( _DEC_S_3C318291_OpenProcFlags, _oOptions.dwOpenProc, _peJson );
+			MX_JSON_BOOL( _DEC_S_8534E73B_AutoReAttach, _oOptions.bAutoReattach, _peJson );
 		}
 		else {
 			if ( !_psBinary->Write( _oOptions.dwOpenProc ) ) { return false; }
+			if ( !_psBinary->WriteUi8( _oOptions.bAutoReattach ? TRUE : FALSE ) ) { return false; }
 		}
 		return true;
 	}
@@ -663,9 +812,15 @@ namespace mx {
 		if ( _pjJson ) {
 			const lson::CJsonContainer::LSON_JSON_VALUE * pjvVal;
 			MX_JSON_GET_NUMBER( _DEC_S_3C318291_OpenProcFlags, _oOptions.dwOpenProc, DWORD, pjvVal, _pjJson );
+			MX_JSON_GET_BOOL( _DEC_S_8534E73B_AutoReAttach, _oOptions.bAutoReattach, pjvVal, _pjJson );
 		}
 		else {
 			if ( !_psBinary->Read( _oOptions.dwOpenProc ) ) { return false; }
+			if ( _ui32Version >= 2 ) {
+				uint8_t ui8Tmp;
+				if ( !_psBinary->ReadUi8( ui8Tmp ) ) { return false; }
+				_oOptions.bAutoReattach = ui8Tmp ? TRUE : FALSE;
+			}
 		}
 		return true;
 	}

@@ -69,6 +69,7 @@ namespace mx {
 			MX_CM_HOOKKEY,
 			MX_CM_DETATCHED,
 			MX_CM_UPDATE_HEX_SIBLINGS,
+			MX_CM_PROCESS_CLOSED,												/**< The attached process closed.  WPARAM is its ID. */
 		};
 
 		// Our hotkeys.  Ranging from 100-200.
@@ -330,6 +331,12 @@ namespace mx {
 		// WM_TIMER.
 		CWidget::LSW_HANDLED				Timer( UINT_PTR _uiptrId, TIMERPROC _tpProc );
 
+		/**
+		 * Starts the timer that searches for the closed process (to re-attach to it) if CWindowMemHack::CanSearchForReattach() says to search,
+		 *	otherwise stops it.
+		 */
+		void								UpdateReattachTimer();
+
 		// WM_NOTIFY->NM_DBLCLK on the main list to edit the currently selected values.
 		virtual LSW_HANDLED					DblClk( const LPNMITEMACTIVATE _phHdr );
 
@@ -404,6 +411,15 @@ namespace mx {
 
 		// Locks timer.
 		CUtilities::MX_TIMER				m_tUpdateLocksTimer;
+
+		/** The timer that searches for the closed process. */
+		CUtilities::MX_TIMER				m_tReattachTimer;
+
+		/** The ID for m_tReattachTimer. */
+		UINT_PTR							m_uiptrReattachTimerId = 0;
+
+		/** How often, in milliseconds, to search for the closed process. */
+		static constexpr UINT				m_uiReattachInterval = 250;
 
 		// Last context-menu hit-test;
 		int									m_iContextHitTest = -1;

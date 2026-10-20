@@ -26,6 +26,13 @@ namespace mx {
 		// Verifies the options, returning an error string in case of error.
 		virtual BOOL						Verify( std::wstring &_wsError, CWidget * &_pwWidget ) { return TRUE; }
 
+		/**
+		 * Copies the settings that are not applied as they are clicked to the MX_OPTIONS structure.
+		 *
+		 * \return Returns TRUE.
+		 */
+		virtual BOOL						Finalize();
+
 
 	protected :
 		// == Members.

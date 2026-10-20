@@ -1,5 +1,5 @@
 {
-    "Version" : 1,
+    "Version" : 2,
     "General" : {
         "FoundAddressRate" : 10,
         "MainRefreshRate" : 35,
@@ -13,7 +13,8 @@
         "ShortEnums" : true
     },
     "OpenProc" : {
-        "OpenProcFlags" : 255
+        "OpenProcFlags" : 255,
+        "AutoReAttach" : true
     },
     "SearchSettings" : {
         "MemImage" : true,

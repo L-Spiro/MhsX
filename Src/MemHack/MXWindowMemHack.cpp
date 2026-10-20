@@ -19,6 +19,7 @@ namespace mx {
 		AddUserProgramsToMenu();
 
 		m_pProcess.SetDetatchCallback( DetatchCallback, this, 0 );
+		m_pProcess.SetClosedCallback( ClosedCallback, this );
 	}
 	CWindowMemHack::~CWindowMemHack() {
 		m_pmmwWindow = nullptr;
@@ -30,6 +31,8 @@ namespace mx {
 		CMemHack::OpenedProcess();
 		if ( m_pmmwWindow ) {
 			UpdateWindowTitle();
+			// Stops any search for a closed process.
+			m_pmmwWindow->UpdateReattachTimer();
 
 			CStatusBar * psbStatus = m_pmmwWindow->StatusBar();
 			if ( psbStatus ) {
@@ -162,10 +165,42 @@ namespace mx {
 		}
 	}
 
+	/**
+	 * Called (on the main thread) when the attached process closes on its own.  Detaches from it, reports it in the status bar, and starts
+	 *	searching for it to re-open if the automatic re-attach option is enabled.
+	 *
+	 * \param _dwId The ID of the process that closed.
+	 * \return Returns true if _dwId is the attached process and it was detached.  Returns false if the notification is stale.
+	 */
+	bool CWindowMemHack::ProcessClosed( DWORD _dwId ) {
+		if ( !Parent::ProcessClosed( _dwId ) ) { return false; }
+		if ( m_pmmwWindow ) {
+			CStatusBar * psbStatus = m_pmmwWindow->StatusBar();
+			if ( psbStatus && psbStatus->IsStatusBar() ) {
+				try {
+					CSecureWString sTemp = _DEC_WS_A3B5CAB4_Process_closed__;
+					CUtilities::ToHex( _dwId, sTemp, 4 );
+					sTemp.append( L" (" );
+					CUtilities::ToUnsigned( _dwId, sTemp );
+					sTemp.append( L")." );
+					if ( CanSearchForReattach() ) {
+						sTemp += _DEC_WS_3209C685__Waiting_for_it_to_re_open_;
+					}
+					psbStatus->SetTextW( 0, 0, sTemp.c_str() );
+				}
+				catch ( ...  ) {}
+			}
+			m_pmmwWindow->UpdateReattachTimer();
+		}
+		return true;
+	}
+
 	// Sets the options.
 	void CWindowMemHack::SetOptions( const MX_OPTIONS &_oOptions ) {
 		Parent::SetOptions( _oOptions );
 		if ( m_pmmwWindow ) {
+			// Starts or stops the search for a closed process, as the automatic re-attach option now dictates.
+			m_pmmwWindow->UpdateReattachTimer();
 			if ( m_pmmwWindow->ExpressionEvaluator() ) {
 				m_pmmwWindow->ExpressionEvaluator()->SetUpdateSpeed( 1000 / max( Options().dwExpressionRefresh, static_cast<DWORD>(1) ) );
 			}
@@ -241,6 +276,20 @@ namespace mx {
 		CWindowMemHack * pwmhMemHack = static_cast<CWindowMemHack *>(_pvParm1);
 		if ( pwmhMemHack->m_pmmwWindow ) {
 			::PostMessageW( pwmhMemHack->m_pmmwWindow->Wnd(), CMhsMainWindow::MX_CUSTOM_MESSAGE::MX_CM_DETATCHED, 0, 0 );
+		}
+	}
+
+	/**
+	 * The process-closed callback.  Called on the process-monitoring thread the moment the attached process closes.
+	 *
+	 * \param _pvParm1 The CWindowMemHack object.
+	 * \param _uiptrId The ID of the process that closed.
+	 */
+	void CWindowMemHack::ClosedCallback( void * _pvParm1, uintptr_t _uiptrId ) {
+		CWindowMemHack * pwmhMemHack = static_cast<CWindowMemHack *>(_pvParm1);
+		if ( pwmhMemHack && pwmhMemHack->m_pmmwWindow ) {
+			// Posted: this is not the main thread, and the main thread may be waiting for this thread to exit.
+			::PostMessageW( pwmhMemHack->m_pmmwWindow->Wnd(), CMhsMainWindow::MX_CUSTOM_MESSAGE::MX_CM_PROCESS_CLOSED, static_cast<WPARAM>(_uiptrId), 0 );
 		}
 	}
 

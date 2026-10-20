@@ -2595,3 +2595,8 @@
 "Active clipboard: "
 "Windows Clipboard"
 "Clipboard "
+"AutoReAttach"
+"Closed Process"
+"Automatically Re-Attach When It Re-Opens"
+"Process closed: "
+" Waiting for it to re-open."

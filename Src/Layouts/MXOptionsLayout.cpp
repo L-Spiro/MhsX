@@ -1040,6 +1040,8 @@ namespace mx {
 #undef MX_SEARCH_EX_BYTESWAP_GROUP_HEIGHT
 #define MX_SHOW_HEIGHT								(MX_GROUP_TOP + (MX_DEF_CHECK_HEIGHT * 7) + MX_DEF_STATIC_HEIGHT * 2 + MX_GROUP_BOTTOM)
 #define MX_TITLE_BAR_HEIGHT							(MX_GROUP_TOP + (MX_DEF_CHECK_HEIGHT * 2) + MX_GROUP_BOTTOM)
+#define MX_CLOSED_PROC_TOP							(MX_SHOW_HEIGHT + MX_TITLE_BAR_HEIGHT)
+#define MX_CLOSED_PROC_HEIGHT						(MX_GROUP_TOP + MX_DEF_CHECK_HEIGHT + MX_GROUP_BOTTOM)
 #undef MX_CRIT_W
 #define MX_CRIT_W									33
 	// Open-process section.
@@ -1348,10 +1350,46 @@ namespace mx {
 			_LEN_DFA2AFF1,							// sTextLen
 			MX_OPTIONS_GENSEARCH,					// dwParentId
 		},
+
+		// ==== Closed Process ==== //
+		{
+			LSW_LT_GROUPBOX,						// ltType
+			MX_OI_OPEN_PROCESS_CLOSED_GROUP,		// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			0,										// iLeft
+			MX_CLOSED_PROC_TOP,						// iTop
+			MX_OD_W,								// dwWidth
+			MX_CLOSED_PROC_HEIGHT,					// dwHeight
+			MX_GROUPSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_5ED78C7D_Closed_Process ),				// pwcText
+			_LEN_5ED78C7D,							// sTextLen
+			MX_OI_OPEN_PROCESS,						// dwParentId
+		},
+		{
+			LSW_LT_CHECK,							// ltType
+			MX_OI_OPEN_PROCESS_AUTO_REATTACH,		// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_GROUP_LEFT,							// iLeft
+			MX_CLOSED_PROC_TOP + MX_GROUP_TOP,		// iTop
+			MX_OD_W - MX_GROUP_LEFT - MX_GROUP_RIGHT,	// dwWidth
+			MX_DEF_CHECK_HEIGHT,					// dwHeight
+			MX_CHECKSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_CE713423_Automatically_Re_Attach_When_It_Re_Opens ),	// pwcText
+			_LEN_CE713423,							// sTextLen
+			MX_OI_OPEN_PROCESS,						// dwParentId
+		},
 	};
 
 #undef MX_TP_L
 #undef MX_CRIT_W
+#undef MX_CLOSED_PROC_HEIGHT
+#undef MX_CLOSED_PROC_TOP
 #undef MX_TITLE_BAR_HEIGHT
 #undef MX_SHOW_HEIGHT
 

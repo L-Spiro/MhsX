@@ -45,8 +45,27 @@ namespace mx {
 		}
 
 		CheckAll();
+
+		pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_OPEN_PROCESS_AUTO_REATTACH ));
+		if ( pcbCheck ) {
+			pcbCheck->SetCheck( m_poOptions ? m_poOptions->bAutoReattach : FALSE );
+		}
 		
 		return LSW_H_CONTINUE;
+	}
+
+	/**
+	 * Copies the settings that are not applied as they are clicked to the MX_OPTIONS structure.
+	 *
+	 * \return Returns TRUE.
+	 */
+	BOOL COptionsPageOpenProc::Finalize() {
+		if ( !m_poOptions ) { return TRUE; }
+		CCheckButton * pcbCheck = static_cast<CCheckButton *>(FindChild( COptionsLayout::MX_OI_OPEN_PROCESS_AUTO_REATTACH ));
+		if ( pcbCheck ) {
+			m_poOptions->bAutoReattach = pcbCheck->IsChecked();
+		}
+		return TRUE;
 	}
 
 	// WM_COMMAND from control.

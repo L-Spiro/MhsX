@@ -10,6 +10,7 @@ namespace mx {
 		m_dwOpenProcFlags( 0 ),
 		m_pfDetatchCallback( nullptr ) {
 		//m_opOpenProcThreadMonitor.ppProcess = this;
+		m_hMonitorStop.hHandle = ::CreateEventW( NULL, TRUE, FALSE, NULL );
 	}
 	CProcess::~CProcess() {
 		Detach();
@@ -51,7 +52,7 @@ namespace mx {
 	// Detach from the current process, if there is one.
 	void CProcess::Detach() {
 		LSW_ENT_CRIT( m_csCrit );
-		m_tProcOpenThread.StopAndWait( 1, INFINITE );
+		StopMonitor();
 		//Reset();
 		m_hProcHandle.Reset();
 		m_dwId = DWINVALID;
@@ -551,8 +552,9 @@ namespace mx {
 
 	// Resets all assocations with the current process.
 	void CProcess::Reset() {
-		m_tProcOpenThread.StopAndWait( 1, INFINITE );
-		m_tProcOpenThread.ExitThread( 0 );
+		StopMonitor();
+		// Releases the thread's handle.  (CThread::ExitThread() would end the calling thread rather than the monitoring thread.)
+		m_tProcOpenThread.Reset();
 	}
 
 	// Pauses the target process.
@@ -570,6 +572,29 @@ namespace mx {
 		m_pfDetatchCallback = _pfFunc;
 		m_pvDetatchParm1 = _pvParm1;
 		m_uiptrDetatchParm2 = _uiptrParm2;
+	}
+
+	/**
+	 * Sets the function called when the attached process closes (exits on its own).  It is called on the monitoring thread at the moment the
+	 *	process closes, with _pvParm1 and the ID of the process that closed as its parameters.  It must not wait on the thread that owns this
+	 *	object (post a message rather than send one).
+	 *
+	 * \param _pfFunc The function to call, or nullptr.
+	 * \param _pvParm1 The first parameter to pass to _pfFunc.
+	 */
+	void CProcess::SetClosedCallback( PfDetatchCallback _pfFunc, void * _pvParm1 ) {
+		LSW_ENT_CRIT( m_csCrit );
+		m_pfClosedCallback = _pfFunc;
+		m_pvClosedParm1 = _pvParm1;
+	}
+
+	/**
+	 * Stops the monitoring thread and waits for it to exit.  Call before closing the handle the thread waits on.
+	 */
+	void CProcess::StopMonitor() {
+		if ( m_hMonitorStop.Valid() ) { ::SetEvent( m_hMonitorStop.hHandle ); }
+		m_tProcOpenThread.StopAndWait( 1, INFINITE );
+		if ( m_hMonitorStop.Valid() ) { ::ResetEvent( m_hMonitorStop.hHandle ); }
 	}
 
 	/**
@@ -737,14 +762,18 @@ namespace mx {
 		// If opening with the new flags fails, keep old handle.
 		HANDLE hTemp = CSystem::OpenProcess( _dwFlags | SYNCHRONIZE, FALSE, _dwId );
 		if ( LSW_HANDLE::Valid( hTemp ) ) {
+			// The monitoring thread waits on the old handle, so it must stop before that handle is closed.
+			StopMonitor();
+
 			m_hProcHandle.Reset();
 			m_hProcHandle.hHandle = hTemp;
 			m_dwId = _dwId;
 			m_dwOpenProcFlags = _dwFlags;
 
-			DWORD dwVal = m_tProcOpenThread.StopAndWait( 1, INFINITE );
-
 			m_opOpenProcThreadMonitor.hHandle = hTemp;
+			m_opOpenProcThreadMonitor.hStop = m_hMonitorStop.hHandle;
+			m_opOpenProcThreadMonitor.dwId = _dwId;
+			m_opOpenProcThreadMonitor.ppProcess = this;
 			::InterlockedExchange( &m_opOpenProcThreadMonitor.aAtom, 0 );
 			m_tProcOpenThread.CreateThread( ThreadProc, &m_opOpenProcThreadMonitor, &m_opOpenProcThreadMonitor.aAtom );
 			return true;
@@ -814,15 +843,30 @@ namespace mx {
 	DWORD WINAPI CProcess::ThreadProc( LPVOID _lpParameter ) {
 		MX_OPEN_PROC * popProc = reinterpret_cast<MX_OPEN_PROC *>(_lpParameter);
 		lsw::LSW_THREAD_PRIORITY tpThreadPri( THREAD_PRIORITY_LOWEST );
-		while ( ::WaitForSingleObject( popProc->hHandle, 0 ) == WAIT_TIMEOUT ) {
-			if ( popProc->aAtom == 1 ) {
-				return 0;
-			}
-			::Sleep( 1 );
+		if ( LSW_HANDLE::Valid( popProc->hStop ) ) {
+			// Sleeps until the process closes (its handle is signaled the moment it does) or until StopMonitor() is called.
+			HANDLE hWaitOn[2] = { popProc->hHandle, popProc->hStop };
+			DWORD dwWait = ::WaitForMultipleObjects( 2, hWaitOn, FALSE, INFINITE );
+			if ( dwWait != WAIT_OBJECT_0 ) { return 0; }
+			// A stop that was requested at the same moment wins.
+			if ( ::WaitForSingleObject( popProc->hStop, 0 ) == WAIT_OBJECT_0 ) { return 0; }
 		}
-		//popProc->ppProcess->Detach();
-		DWORD dwVal = ::WaitForSingleObject( popProc->hHandle, 0 );
+		else {
+			// No stop event could be created.  Poll, stopping when CThread::Stop() sets the atom.
+			while ( ::WaitForSingleObject( popProc->hHandle, 1 ) == WAIT_TIMEOUT ) {
+				if ( popProc->aAtom == 1 ) {
+					return 0;
+				}
+			}
+			if ( popProc->aAtom == 1 ) { return 0; }
+		}
+
+		// The process closed.
 		::InterlockedExchange( &popProc->aAtom, 1 );
+		CProcess * ppThis = popProc->ppProcess;
+		if ( ppThis && ppThis->m_pfClosedCallback ) {
+			ppThis->m_pfClosedCallback( ppThis->m_pvClosedParm1, static_cast<uintptr_t>(popProc->dwId) );
+		}
 		return 0;
 	}
 
