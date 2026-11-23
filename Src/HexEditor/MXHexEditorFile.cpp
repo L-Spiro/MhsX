@@ -60,7 +60,24 @@ namespace mx {
 
 	// Overwrite bytes at a given address.
 	bool CHexEditorFile::Overwrite( uint64_t _ui64Addr, const void * _pvSrc, size_t _sSize ) {
-		return false;
+		if ( ReadOnly() ) { return false; }
+		if ( !_sSize ) { return true; }
+		if ( !_pvSrc || _ui64Addr > Size() ) { return false; }
+		try {
+			const uint8_t * pui8Src = static_cast<const uint8_t *>(_pvSrc);
+			const CBuffer bSrc( pui8Src, pui8Src + _sSize );
+			// Replaced as one Undo item: the existing bytes are removed and the new ones put in their place.  Writing past the end
+			//	extends the file.
+			MX_UNDO uUndo( this );
+			const uint64_t ui64Replace = std::min<uint64_t>( _sSize, Size() - _ui64Addr );
+			if ( ui64Replace ) {
+				uint64_t ui64Deleted = 0;
+				if ( !m_lcwfwFile.Delete( _ui64Addr, ui64Replace, ui64Deleted ) || ui64Deleted != ui64Replace ) { return false; }
+			}
+			uint64_t ui64Inserted = 0;
+			return m_lcwfwFile.Insert( _ui64Addr, bSrc, ui64Inserted ) && ui64Inserted == _sSize;
+		}
+		catch ( ... ) { return false; }
 	}
 
 	// Delets bytes at a given address.

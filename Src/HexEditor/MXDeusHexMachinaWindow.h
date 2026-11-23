@@ -318,7 +318,7 @@ namespace mx {
 		void										UpdateStatusBar_ViewType();
 
 		// Update the status-bar Size part.
-		void										UpdateStatusBar_Size();
+		void										UpdateStatusBar_Size() override;
 
 		// Updates the status-bar selection ranges/current position/value.
 		void										UpdateStatusBar_PosValue_StartSize() override;
@@ -382,8 +382,6 @@ namespace mx {
 		CHexEditorControl::MX_FONT_SET				m_fsFixedRowFont;
 		// Variable-width view font.
 		CHexEditorControl::MX_FONT_SET				m_fsTextViewFont;
-		/** Overwrite Mode. */
-		bool										m_bOverwrite = true;
 		// Image list.
 		CImageList									m_iImages;
 		// Images.

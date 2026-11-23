@@ -45,10 +45,49 @@ namespace mx {
 		// Updates the status-bar selection ranges/current position/value.
 		virtual void								UpdateStatusBar_PosValue_StartSize() {}
 
+		/**
+		 * Updates the status-bar size part.
+		 **/
+		virtual void								UpdateStatusBar_Size() {}
+
+		/**
+		 * Determines whether typing into a file changes it as each character is typed (text, hex and binary).  Otherwise values are
+		 *	collected in the edit box and written when Enter is pressed.
+		 * 
+		 * \return Returns true if files are edited in real time.
+		 **/
+		inline bool									RealTimeFileEditing() const { return m_bRealTimeFileEditing; }
+
+		/**
+		 * Sets whether typing into a file changes it as each character is typed.
+		 * 
+		 * \param _bEnable If true, files are edited in real time.
+		 **/
+		inline void									SetRealTimeFileEditing( bool _bEnable ) { m_bRealTimeFileEditing = _bEnable; }
+
+		/**
+		 * Determines whether typing text into process memory writes each character as it is typed.  Otherwise the text is collected in
+		 *	the edit box and written when Enter is pressed.
+		 * 
+		 * \return Returns true if text is written to process memory in real time.
+		 **/
+		inline bool									RealTimeRamTextEditing() const { return m_bRealTimeRamTextEditing; }
+
+		/**
+		 * Sets whether typing text into process memory writes each character as it is typed.
+		 * 
+		 * \param _bEnable If true, text is written to process memory in real time.
+		 **/
+		inline void									SetRealTimeRamTextEditing( bool _bEnable ) { m_bRealTimeRamTextEditing = _bEnable; }
+
 	protected :
 		// == Members.
 		/** Overwrite Mode. */
 		bool										m_bOverwrite = true;
+		/** Files are edited in real time. */
+		bool										m_bRealTimeFileEditing = true;
+		/** Text is written to process memory in real time. */
+		bool										m_bRealTimeRamTextEditing = false;
 	};
 
 }	// namespace mx

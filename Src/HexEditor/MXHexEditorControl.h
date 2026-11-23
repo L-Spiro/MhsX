@@ -316,6 +316,7 @@ namespace mx {
 		// Sets the left area format.
 		void										SetLeftAreaFormat( MX_DATA_FMT _fdfFmt ) {
 			if ( CurStyle()->dfLeftNumbersFmt != _fdfFmt ) {
+				CancelEdit();
 				CurStyle()->dfLeftNumbersFmt = _fdfFmt;
 				SetLineWidth( CurStyle()->uiDesiredBytesPerRow );
 				RecalcAndInvalidate();
@@ -328,6 +329,7 @@ namespace mx {
 		// Sets the right area format.
 		void										SetRightAreaFormat( MX_DATA_FMT _fdfFmt ) {
 			if ( CurStyle()->dfRightNumbersFmt != _fdfFmt || RightAreaHidden() ) {
+				CancelEdit();
 				CurStyle()->dfRightNumbersFmt = _fdfFmt;
 				CurStyle()->bShowRightArea = true;
 				SetLineWidth( CurStyle()->uiDesiredBytesPerRow );
@@ -341,6 +343,7 @@ namespace mx {
 		// Hides the right area.
 		void										HideRightArea() {
 			if ( CurStyle()->bShowRightArea ) {
+				CancelEdit();
 				CurStyle()->bShowRightArea = false;
 				SetLineWidth( CurStyle()->uiDesiredBytesPerRow );
 				RecalcAndInvalidate();
@@ -787,6 +790,32 @@ namespace mx {
 		}
 
 		/**
+		 * Determines whether the edit box is open (values are being typed but have not been written yet).
+		 * 
+		 * \return Returns true if the edit box is open.
+		 **/
+		inline bool									IsEditing() const { return m_esEdit.bActive; }
+
+		/**
+		 * Closes the edit box without writing anything.  The caret returns to where the edit began.
+		 **/
+		void										CancelEdit();
+
+		/**
+		 * Writes what was typed into the edit box and closes it.
+		 * 
+		 * \param _swsStatus Receives an error message on failure.
+		 * \return Returns false if a typed value is invalid (the edit box stays open so that it can be corrected) or could not be written.
+		 **/
+		bool										CommitEdit( CSecureWString &_swsStatus );
+
+		/**
+		 * Ends the Undo group that collects real-time edits.  It normally ends 0.2 seconds after the last keystroke; call this before
+		 *	anything else changes the data or the Undo stack.
+		 **/
+		void										FlushRealTimeUndo();
+
+		/**
 		 * Performs an Undo operation.
 		 * 
 		 * \param _wsStatus The string to print in the status bar.
@@ -1064,6 +1093,34 @@ namespace mx {
 		virtual LSW_HANDLED							KeyDown( UINT _uiKeyCode, UINT /*_uiFlags*/ );
 
 		/**
+		 * The WM_SYSKEYDOWN handler.  Collects the digits of an Alt code (Alt held while typing on the numeric keypad).
+		 *
+		 * \param _uiKeyCode The virtual-key code.
+		 * \param _uiFlags The repeat count, scan code, extended-key flag, context code, previous key-state flag, and transition-state flag.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED							SysKeyDown( UINT _uiKeyCode, UINT _uiFlags );
+
+		/**
+		 * The WM_SYSKEYUP handler.  When Alt is released after an Alt code above 255, types the Unicode character with that code (Windows
+		 *	itself would produce the character for the code modulo 256).
+		 *
+		 * \param _uiKeyCode The virtual-key code.
+		 * \param _uiFlags The repeat count, scan code, extended-key flag, context code, previous key-state flag, and transition-state flag.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED							SysKeyUp( UINT _uiKeyCode, UINT _uiFlags );
+
+		/**
+		 * The WM_KEYUP handler.  Alt can be released as a WM_KEYUP rather than a WM_SYSKEYUP after typing an Alt code.
+		 *
+		 * \param _uiKeyCode The virtual-key code.
+		 * \param _uiFlags The repeat count, scan code, extended-key flag, context code, previous key-state flag, and transition-state flag.
+		 * \return Returns an LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED							KeyUp( UINT _uiKeyCode, UINT _uiFlags );
+
+		/**
 		 * \brief Receives committed text input as a Unicode code point.
 		 *
 		 * \param _c32Cp The committed Unicode code point.
@@ -1207,6 +1264,38 @@ namespace mx {
 			int32_t									i32RedoCaretIdx		= -1;								/**< The index into the text where the caret is (IE if a value at an address is E7, this could be 0 to put the caret under the E, or 1 to put it under the 7). */
 		};
 
+		/** How the edit box interprets what is typed into it, by data format. */
+		enum MX_EDIT_KIND {
+			MX_EK_DIGITS,																					/**< Hex, binary, octal, decimal: a fixed number of digits per byte, typed over. */
+			MX_EK_TEXT,																						/**< Characters, encoded with the view's character set. */
+			MX_EK_VALUES,																					/**< Multi-byte numbers: one typed string per value, separated by spaces, commas or tabs. */
+		};
+
+		/** The edit box. */
+		struct MX_EDIT_STATE {
+			bool									bActive				= false;							/**< The edit box is open. */
+			bool									bRightArea			= false;							/**< The edit box is in the right area. */
+			bool									bInsert				= false;							/**< Writing inserts the bytes rather than replacing existing ones. */
+			bool									bAutoCommit			= false;							/**< Writes itself as soon as the text no longer ends in an unfinished escape (real-time text editing). */
+			bool									bEscapeOpen			= false;							/**< MX_EK_TEXT: the text ends in an unfinished escape. */
+			MX_DATA_FMT								dfFmt				= MX_DF_HEX;						/**< The format being typed. */
+			MX_EDIT_KIND							ekKind				= MX_EK_DIGITS;						/**< How typing is interpreted. */
+			uint64_t								ui64Start			= 0;								/**< The address of the first edited cell. */
+
+			std::vector<uint8_t>					vDigits;												/**< MX_EK_DIGITS: every digit of every covered cell, most-significant first. */
+			std::vector<uint8_t>					vOrigDigits;											/**< MX_EK_DIGITS: the digits of every covered cell before editing. */
+			std::vector<uint8_t>					vTypedMask;												/**< MX_EK_DIGITS: per covered cell, a bit for each digit that was typed. */
+			size_t									sDigitPos			= 0;								/**< MX_EK_DIGITS: the next digit to type (cell * digits-per-cell + digit). */
+
+			std::u32string							u32Text;												/**< MX_EK_TEXT: the typed text, escapes unresolved. */
+			std::vector<uint8_t>					vPreview;												/**< MX_EK_TEXT: the bytes the text encodes to now. */
+
+			std::vector<std::wstring>				vTexts;													/**< MX_EK_VALUES: the text of each value; the last is the one being typed. */
+
+			MX_SELECTION							sOldSel;												/**< The selection before the edit began. */
+			MX_SELECT_GESTURE						sgOldGesture;											/**< The caret and anchors before the edit began. */
+		};
+
 
 		// == Members.
 		CHexEditorControlHost *						m_pwHexParent = nullptr;								/**< The main hex-editor window. */
@@ -1234,6 +1323,18 @@ namespace mx {
 		bool										m_bCaretOn = true;										/**< Caret on or off during active blink. */
 
 		bool										m_bBigEnd = false;										/**< True for displaying Unicode as Big-Endian. */
+
+		MX_EDIT_STATE								m_esEdit;												/**< The edit box. */
+		CHexEditorInterface::CBuffer				m_bEditBuffer;											/**< The displayed data with the edit box's bytes in place. */
+		bool										m_bRtUndoOpen = false;									/**< An Undo group collecting real-time edits is open. */
+		MX_SELECTION								m_sRtOldSel {};											/**< The selection before the real-time edits in the open Undo group. */
+		MX_SELECT_GESTURE							m_sgRtOldGesture {};									/**< The caret and anchors before the real-time edits in the open Undo group. */
+		CUtilities::MX_TIMER						m_tRtUndo;												/**< Ends the real-time Undo group shortly after typing stops. */
+		uint32_t									m_ui32AltCode = 0;										/**< The number typed so far on the numeric keypad with Alt held. */
+		uint32_t									m_ui32AltDigits = 0;									/**< The number of digits in m_ui32AltCode. */
+		bool										m_bAltLeadingZero = false;								/**< The Alt code began with 0 (ANSI code page rather than OEM). */
+		char32_t									m_c32AltEmitted = 0;									/**< A character this control typed for an Alt code above 255. */
+		wchar_t										m_wcAltSwallow = 0;										/**< The character Windows produces for that Alt code, which is discarded. */
 
 		// The main window class.
 		static ATOM									m_aAtom;
@@ -1371,9 +1472,10 @@ namespace mx {
 		 * \param _pui8Value The address of the data in the cell.
 		 * \param _sSize The address of the data in the cell.
 		 * \param _bRightArea The right area or the left area.
-		 * \return Returns the background color for the given cell.
+		 * \param _bEditFade If true, the text of a cell inside the edit box that has not been typed over is faded.
+		 * \return Returns the text color for the given cell.
 		 **/
-		COLORREF									CellFgColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize, bool _bRightArea );
+		COLORREF									CellFgColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize, bool _bRightArea, bool _bEditFade = true );
 
 		/**
 		 * Gets the color of a hex/octal/binary cell by address.
@@ -1385,6 +1487,302 @@ namespace mx {
 		 * \return Returns the background color for the given cell.
 		 **/
 		COLORREF									CellBgColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize, bool _bRightArea );
+
+		/**
+		 * Types one character, the way a WM_CHAR would.  Starts or continues an edit, or edits in real time.
+		 * 
+		 * \param _c32Cp The character.
+		 * \param _uiRepeat How many times to type it.
+		 **/
+		void										TypeCodePoint( char32_t _c32Cp, uint32_t _uiRepeat );
+
+		/**
+		 * Types one character when no edit box is open: decides between real-time editing and opening the edit box.
+		 * 
+		 * \param _c32Cp The character.
+		 **/
+		void										TypeFirst( char32_t _c32Cp );
+
+		/**
+		 * Determines whether typing in a given format changes the data as each character is typed.
+		 * 
+		 * \param _dfFmt The format being typed.
+		 * \return Returns true for real-time editing, false if the edit box collects the typing.
+		 **/
+		bool										RealTimeFor( MX_DATA_FMT _dfFmt ) const;
+
+		/**
+		 * Opens the edit box.
+		 * 
+		 * \param _dfFmt The format being typed.
+		 * \param _bRightArea True if the edit box is in the right area.
+		 * \param _ui64Addr The address of the first edited cell.
+		 * \param _bAutoCommit If true, the edit writes itself as soon as its text no longer ends in an unfinished escape.
+		 **/
+		void										BeginEdit( MX_DATA_FMT _dfFmt, bool _bRightArea, uint64_t _ui64Addr, bool _bAutoCommit );
+
+		/**
+		 * Types one character into the open edit box.  Characters that are not valid for the format are skipped.
+		 * 
+		 * \param _c32Cp The character.
+		 **/
+		void										EditType( char32_t _c32Cp );
+
+		/**
+		 * Removes the last thing typed into the edit box.  Closes the edit box if nothing typed remains.
+		 **/
+		void										EditBackspace();
+
+		/**
+		 * Writes an automatically committing edit (real-time text editing ending in an escape) as part of the real-time Undo group.
+		 **/
+		void										CommitAutoEdit();
+
+		/**
+		 * Makes sure the edit box holds the digits of a cell (MX_EK_DIGITS), reading its original value if needed.
+		 * 
+		 * \param _sCell The index of the cell relative to the start of the edit.
+		 **/
+		void										EnsureEditCell( size_t _sCell );
+
+		/**
+		 * Recomputes the bytes the edit box's text encodes to (MX_EK_TEXT).
+		 **/
+		void										UpdateEditPreview();
+
+		/**
+		 * Moves the caret to where the next character typed into the edit box goes and scrolls it into view.
+		 **/
+		void										UpdateEditCaret();
+
+		/**
+		 * Gets the address just past the edit box.  The edit box covers what was typed plus the cell where the next character goes.
+		 * 
+		 * \return Returns the end of the edit box (exclusive).
+		 **/
+		uint64_t									EditEnd() const;
+
+		/**
+		 * Determines whether a cell is inside the edit box.
+		 * 
+		 * \param _ui64Address The address of the cell.
+		 * \param _bRightArea The right area or the left area.
+		 * \return Returns true if the cell is inside the edit box.
+		 **/
+		bool										EditCovers( uint64_t _ui64Address, bool _bRightArea ) const;
+
+		/**
+		 * Determines whether anything was typed into a cell inside the edit box.
+		 * 
+		 * \param _ui64Address The address of the cell.
+		 * \return Returns true if the cell was typed into (wholly or partly).
+		 **/
+		bool										EditCellTyped( uint64_t _ui64Address ) const;
+
+		/**
+		 * Gets the bytes the edit box would write.
+		 * 
+		 * \param _vBytes Receives the bytes.
+		 * \param _swsStatus Receives an error message if a typed value is invalid.
+		 * \return Returns false if a typed value is invalid.
+		 **/
+		bool										EditBytes( std::vector<uint8_t> &_vBytes, CSecureWString &_swsStatus ) const;
+
+		/**
+		 * Gets the buffer to display: the data read for the screen, with the bytes the edit box would write in place (and, in Insert
+		 *	mode, the data after the edit box pushed along).
+		 * 
+		 * \param _ui64BufAddr The address of the first byte in m_bCurBuffer.
+		 * \param _sBufCap The number of bytes the screen shows.
+		 * \return Returns the buffer to display.
+		 **/
+		const CHexEditorInterface::CBuffer &		DisplayBuffer( uint64_t _ui64BufAddr, size_t _sBufCap );
+
+		/**
+		 * Draws the text of a cell inside the edit box when it differs from the normal drawing: typed values, digits typed over in part
+		 *	(typed digits normal, the rest faded), and empty cells past the end of the data.
+		 * 
+		 * \param _hDc The device context.
+		 * \param _ui64Address The address of the cell.
+		 * \param _dfFmt The format of the area.
+		 * \param _iX The left of the cell's text.
+		 * \param _iY The top of the cell's text.
+		 * \param _wsText The text that would normally be drawn.
+		 * \param _pui8Value The data at the cell.
+		 * \param _sSize The number of bytes at _pui8Value.
+		 * \return Returns true if the cell's text was drawn (or deliberately left blank).
+		 **/
+		bool										DrawEditCellText( HDC _hDc, uint64_t _ui64Address, MX_DATA_FMT _dfFmt, int32_t _iX, int32_t _iY, const std::wstring &_wsText, const uint8_t * _pui8Value, size_t _sSize );
+
+		/**
+		 * Draws the parts of the edit box's sunken border that fall in one row of an area, and fills any gaps between its cells.
+		 *	Called for each row during the main drawing pass, after the row's backgrounds and before its text, so each row draws only its
+		 *	own pixels: the row above the edit box draws its top border, the row below draws its bottom border.
+		 * 
+		 * \param _hDc The device context.
+		 * \param _dfFmt The format of the area.
+		 * \param _iXLeft The left of the area.
+		 * \param _iAreaW The width of the area.
+		 * \param _iYTop The top of the first row.
+		 * \param _ui32Row The row (relative to the first visible line).
+		 * \param _iLineAdv The height of a row.
+		 **/
+		void										DrawEditBoxRow( HDC _hDc, MX_DATA_FMT _dfFmt, int32_t _iXLeft, int32_t _iAreaW, int32_t _iYTop, uint32_t _ui32Row, int32_t _iLineAdv );
+
+		/**
+		 * Gets the color of the edit box from the color of the cell beneath it: a little whiter, or a little darker if the cell is white.
+		 * 
+		 * \param _crBase The cell's background color.
+		 * \return Returns the edit box's color.
+		 **/
+		static COLORREF								EditBoxColor( COLORREF _crBase );
+
+		/**
+		 * Fades a text color as if a translucent pane in the edit box's color lay over it.
+		 * 
+		 * \param _crText The text color.
+		 * \param _crBox The edit box's color.
+		 * \return Returns the faded text color.
+		 **/
+		static COLORREF								EditFadeColor( COLORREF _crText, COLORREF _crBox );
+
+		/**
+		 * Writes bytes to the data source: inserted or written over existing bytes.
+		 * 
+		 * \param _ui64Addr The address at which to write.
+		 * \param _vBytes The bytes to write.
+		 * \param _bInsert If true and the data source allows it, the bytes are inserted.
+		 * \param _swsStatus Receives an error message on failure.
+		 * \return Returns true if the bytes were written.
+		 **/
+		bool										WriteBytes( uint64_t _ui64Addr, const std::vector<uint8_t> &_vBytes, bool _bInsert, CSecureWString &_swsStatus );
+
+		/**
+		 * Opens the Undo group that collects real-time edits, if it is not open, and restarts the timer that ends it.
+		 * 
+		 * \param _sOldSel The selection before the edit.
+		 * \param _sgOldGesture The caret and anchors before the edit.
+		 **/
+		void										BeginRealTimeUndo( const MX_SELECTION &_sOldSel, const MX_SELECT_GESTURE &_sgOldGesture );
+
+		/**
+		 * Edits one digit in real time (hex and binary).
+		 * 
+		 * \param _ui64Addr The address of the byte.
+		 * \param _i32Idx The digit within the byte (0 is the most significant).
+		 * \param _dfFmt The format being typed.
+		 * \param _ui32Digit The digit's value.
+		 **/
+		void										RealTimeDigit( uint64_t _ui64Addr, int32_t _i32Idx, MX_DATA_FMT _dfFmt, uint32_t _ui32Digit );
+
+		/**
+		 * Edits one character in real time.
+		 * 
+		 * \param _ui64Addr The address of the character.
+		 * \param _c32Cp The character.
+		 **/
+		void										RealTimeText( uint64_t _ui64Addr, char32_t _c32Cp );
+
+		/**
+		 * Puts the caret after a real-time edit.
+		 * 
+		 * \param _ui64Addr The new caret address.
+		 * \param _i32Idx The new sub-caret.
+		 **/
+		void										SetEditedCaret( uint64_t _ui64Addr, int32_t _i32Idx );
+
+		/**
+		 * Reports a problem in the status bar.
+		 * 
+		 * \param _swsStatus The message.
+		 **/
+		void										EditWarning( const CSecureWString &_swsStatus );
+
+		/**
+		 * Encodes text with the view's character set.  Characters the character set lacks become their closest match (best fit).
+		 * 
+		 * \param _u32Text The text.
+		 * \param _vBytes Receives the encoded bytes (appended).
+		 **/
+		void										EncodeText( const std::u32string &_u32Text, std::vector<uint8_t> &_vBytes ) const;
+
+		/**
+		 * Resolves escape sequences in typed text.  Each is a backslash followed by one of: a backslash, ', ", ?, a, b, f, n, r, t, v,
+		 *	space, xHH, uHHHH (two in a row for a surrogate pair), UHHHHHHHH, up to three octal digits, or N{name}.  An invalid escape is
+		 *	kept as typed.
+		 * 
+		 * \param _u32Raw The typed text.
+		 * \param _u32Out Receives the resolved text.  An unfinished escape at the end is kept as typed.
+		 * \return Returns true if the text ends in an unfinished escape (more typing could change its meaning).
+		 **/
+		static bool									ResolveEditEscapes( const std::u32string &_u32Raw, std::u32string &_u32Out );
+
+		/**
+		 * Converts typed text to the bytes of a multi-byte value.
+		 * 
+		 * \param _dfFmt The format of the value.
+		 * \param _wsText The typed text.
+		 * \param _vBytes Receives the bytes (appended, little-endian).
+		 * \return Returns false if the text is not a valid value of the format.
+		 **/
+		static bool									ParseValue( MX_DATA_FMT _dfFmt, const std::wstring &_wsText, std::vector<uint8_t> &_vBytes );
+
+		/**
+		 * Determines whether a character can be part of a typed value of a multi-byte format.
+		 * 
+		 * \param _dfFmt The format of the value.
+		 * \param _c32Cp The character.
+		 * \param _wsSoFar What has been typed of the value so far.
+		 * \return Returns true if the character can be typed.
+		 **/
+		static bool									ValueCharValid( MX_DATA_FMT _dfFmt, char32_t _c32Cp, const std::wstring &_wsSoFar );
+
+		/**
+		 * Gets how the edit box treats a format.
+		 * 
+		 * \param _dfFmt The format.
+		 * \return Returns the edit kind.
+		 **/
+		static MX_EDIT_KIND							EditKindForFormat( MX_DATA_FMT _dfFmt ) {
+			switch ( _dfFmt ) {
+				case MX_DF_HEX : {}							MX_FALLTHROUGH
+				case MX_DF_BIN : {}							MX_FALLTHROUGH
+				case MX_DF_OCT : {}							MX_FALLTHROUGH
+				case MX_DF_DEC : { return MX_EK_DIGITS; }
+				case MX_DF_CHAR : { return MX_EK_TEXT; }
+				default : { return MX_EK_VALUES; }
+			}
+		}
+
+		/**
+		 * Gets the radix of a digit format.
+		 * 
+		 * \param _dfFmt The format.
+		 * \return Returns 16, 10, 8 or 2.
+		 **/
+		static uint32_t								RadixForFormat( MX_DATA_FMT _dfFmt ) {
+			switch ( _dfFmt ) {
+				case MX_DF_BIN : { return 2; }
+				case MX_DF_OCT : { return 8; }
+				case MX_DF_DEC : { return 10; }
+				default : { return 16; }
+			}
+		}
+
+		/**
+		 * Gets the value of a digit character.
+		 * 
+		 * \param _c32Cp The character.
+		 * \param _ui32Radix The radix.
+		 * \return Returns the digit's value, or -1 if the character is not a digit of the radix.
+		 **/
+		static int32_t								DigitValue( char32_t _c32Cp, uint32_t _ui32Radix ) {
+			int32_t i32Val = -1;
+			if ( _c32Cp >= U'0' && _c32Cp <= U'9' ) { i32Val = int32_t( _c32Cp - U'0' ); }
+			else if ( _c32Cp >= U'a' && _c32Cp <= U'f' ) { i32Val = int32_t( _c32Cp - U'a' ) + 10; }
+			else if ( _c32Cp >= U'A' && _c32Cp <= U'F' ) { i32Val = int32_t( _c32Cp - U'A' ) + 10; }
+			return (i32Val >= 0 && uint32_t( i32Val ) < _ui32Radix) ? i32Val : -1;
+		}
 
 		/**
 		 * Gets the color of a Mini-Map pixel.

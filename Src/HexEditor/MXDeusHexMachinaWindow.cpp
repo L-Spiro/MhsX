@@ -222,6 +222,8 @@ namespace mx {
 
 
 		auto phecControl = CurrentEditor();
+		// Anything done from the menu or an accelerator comes after the real-time edits typed so far, which become one Undo item.
+		if ( phecControl ) { phecControl->FlushRealTimeUndo(); }
 
 		switch ( _wId ) {
 			case Layout::MX_M_FILE_OPENFILE : {
@@ -285,6 +287,14 @@ namespace mx {
 			}
 			case Layout::MX_M_EDIT_CLEAR_CLIPBOARDS : {
 				ClearClipboards();
+				break;
+			}
+			case Layout::MX_M_EDIT_REAL_TIME_FILE_EDITING : {
+				SetRealTimeFileEditing( !RealTimeFileEditing() );
+				break;
+			}
+			case Layout::MX_M_EDIT_REAL_TIME_RAM_TEXT_EDITING : {
+				SetRealTimeRamTextEditing( !RealTimeRamTextEditing() );
 				break;
 			}
 			case Layout::MX_M_EDIT_COPY_AS_HEX : {
@@ -2395,6 +2405,18 @@ namespace mx {
 				case Layout::MX_M_EDIT_CLIPBOARD_9 : {
 					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE,
 						.fState = UINT( (size_t( uiId - Layout::MX_M_EDIT_CLIPBOARD_0 ) == CCopyPasteManager::ActiveClipboard()) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_EDIT_REAL_TIME_FILE_EDITING : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE,
+						.fState = UINT( RealTimeFileEditing() ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_EDIT_REAL_TIME_RAM_TEXT_EDITING : {
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE,
+						.fState = UINT( RealTimeRamTextEditing() ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}

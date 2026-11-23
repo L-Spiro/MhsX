@@ -2600,3 +2600,6 @@
 "Automatically Re-Attach When It Re-Opens"
 "Process closed: "
 " Waiting for it to re-open."
+"Real-Time Editing in &Files"
+"Real-Time Text Editing in R&AM"
+"Failed to write to the target."

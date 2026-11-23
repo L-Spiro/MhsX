@@ -11,6 +11,11 @@
 #include <Base/LSWWndClassEx.h>
 #include <Helpers/LSWHelpers.h>
 
+#include <algorithm>
+#include <cmath>
+#include <cwchar>
+#include <limits>
+
 
 namespace mx {
 
@@ -33,6 +38,7 @@ namespace mx {
 	// Sets the view type.
 	void CHexEditorControl::SetViewType( MX_EDIT_AS _eaType ) {
 		if ( m_eaEditAs != _eaType && _eaType >= MX_EA_TEXT && _eaType < MX_EA_TOTAL ) {
+			CancelEdit();
 			m_eaEditAs = _eaType;
 				
 			GoTo( m_pheiTarget->DefaultAddress() );
@@ -65,6 +71,7 @@ namespace mx {
 	// Sets the character set.
 	void CHexEditorControl::SetCharacterSet( CCharSets::MX_CHAR_SETS _csSet ) {
 		if ( CurStyle()->csCharSet != _csSet ) {
+			CancelEdit();
 			CurStyle()->csCharSet = _csSet;
 
 			RecalcAndInvalidate();
@@ -721,6 +728,8 @@ namespace mx {
 	 **/
 	bool CHexEditorControl::Cut( CSecureWString &_swsStatus ) {
 		try {
+			CancelEdit();
+			FlushRealTimeUndo();
 			if ( !m_pheiTarget ) {
 				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
 				return false;
@@ -861,6 +870,8 @@ namespace mx {
 	 **/
 	bool CHexEditorControl::Paste( CSecureWString &_swsStatus ) {
 		try {
+			CancelEdit();
+			FlushRealTimeUndo();
 			if ( !m_pheiTarget ) {
 				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
 				return false;
@@ -971,6 +982,12 @@ namespace mx {
 	 * \param _wsStatus The string to print in the status bar.
 	 **/
 	bool CHexEditorControl::Undo( CSecureWString &_swsStatus ) {
+		// Undoing while the edit box is open discards the edit.
+		if ( IsEditing() ) {
+			CancelEdit();
+			return true;
+		}
+		FlushRealTimeUndo();
 		if ( !m_pheiTarget ) {
 			_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
 			return false;
@@ -999,6 +1016,8 @@ namespace mx {
 	 * \param _wsStatus The string to print in the status bar.
 	 **/
 	bool CHexEditorControl::Redo( CSecureWString &_swsStatus ) {
+		CancelEdit();
+		FlushRealTimeUndo();
 		if ( !m_pheiTarget ) {
 			_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
 			return false;
@@ -1030,6 +1049,8 @@ namespace mx {
 	 **/
 	bool CHexEditorControl::DeleteSelectedOrCaret( CSecureWString &_swsStatus ) {
 		try {
+			CancelEdit();
+			FlushRealTimeUndo();
 			if ( !m_pheiTarget ) {
 				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
 				return false;
@@ -1120,6 +1141,8 @@ namespace mx {
 	 **/
 	bool CHexEditorControl::DeletePriorToCaret( CSecureWString &_swsStatus ) {
 		try {
+			CancelEdit();
+			FlushRealTimeUndo();
 			if ( !m_pheiTarget ) {
 				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
 				return false;
@@ -1511,12 +1534,19 @@ namespace mx {
 				m_pwHexParent->UpdateStatusBar_PosValue_StartSize();
 			}
 		}
+		else if ( _uiptrId == m_tRtUndo.uiptrActiveId ) {
+			// Typing stopped: the real-time edits so far become one Undo item.
+			FlushRealTimeUndo();
+		}
 		return lsw::CWidget::LSW_H_HANDLED;
 	}
 
 	// WM_LBUTTONDOWN.
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos ) {
 		this->CWidget::SetFocus();
+		// Clicking away from the edit box discards it (Enter writes it), and ends any real-time Undo item.
+		CancelEdit();
+		FlushRealTimeUndo();
 
 		// If clicking on the drag line, begin dragging mini-map width and avoid selection logic.
 		int32_t i32DragX = 0;
@@ -1761,6 +1791,51 @@ namespace mx {
 
 		const int32_t iPageLines = std::max( 1, m_sdScrollView[m_eaEditAs].i32PageLines - 1 );
 
+		// A new key means the character Windows produces for an Alt code above 255 has either arrived or will not.
+		m_wcAltSwallow = 0;
+		m_c32AltEmitted = 0;
+
+		if ( IsEditing() ) {
+			switch ( _uiKeyCode ) {
+				case VK_RETURN : {
+					CSecureWString swsStatus;
+					if ( !CommitEdit( swsStatus ) ) { EditWarning( swsStatus ); }
+					return lsw::CWidget::LSW_H_HANDLED;
+				}
+				case VK_ESCAPE : {
+					CancelEdit();
+					return lsw::CWidget::LSW_H_HANDLED;
+				}
+				case VK_BACK : {
+					EditBackspace();
+					return lsw::CWidget::LSW_H_HANDLED;
+				}
+				case VK_INSERT : { break; }		// Applies to the next edit.
+				default : {
+					// Moving the caret or deleting would leave the edit box behind, so only typing, Enter, Escape and Backspace work
+					//	until it is closed.
+					return lsw::CWidget::LSW_H_HANDLED;
+				}
+			}
+		}
+		else {
+			switch ( _uiKeyCode ) {
+				case VK_UP : {}							MX_FALLTHROUGH
+				case VK_DOWN : {}						MX_FALLTHROUGH
+				case VK_PRIOR : {}						MX_FALLTHROUGH
+				case VK_NEXT : {}						MX_FALLTHROUGH
+				case VK_HOME : {}						MX_FALLTHROUGH
+				case VK_END : {}						MX_FALLTHROUGH
+				case VK_LEFT : {}						MX_FALLTHROUGH
+				case VK_RIGHT : {
+					// Real-time edits after moving the caret are a separate Undo item.
+					FlushRealTimeUndo();
+					break;
+				}
+				default : {}
+			}
+		}
+
 		switch ( _uiKeyCode ) {
 			case VK_UP : {
 				if ( bCtrl ) {
@@ -1880,7 +1955,27 @@ namespace mx {
 	 * \return Returns LSW_H_HANDLED if consumed.
 	 */
 	lsw::CWidget::LSW_HANDLED CHexEditorControl::OnTextInputCodePoint( char32_t _c32Cp, uint32_t _uiRepeat ) {
+		if ( m_wcAltSwallow ) {
+			// The character Windows produced for an Alt code above 255 (which SysKeyUp() already typed correctly).
+			const wchar_t wcSwallow = m_wcAltSwallow;
+			m_wcAltSwallow = 0;
+			m_c32AltEmitted = 0;
+			if ( _c32Cp == char32_t( wcSwallow ) ) { return lsw::CWidget::LSW_H_HANDLED; }
+		}
+		TypeCodePoint( _c32Cp, _uiRepeat );
 		return lsw::CWidget::LSW_H_HANDLED;
+	}
+
+	/**
+	 * The WM_KEYUP handler.  Alt can be released as a WM_KEYUP rather than a WM_SYSKEYUP after typing an Alt code.
+	 *
+	 * \param _uiKeyCode The virtual-key code.
+	 * \param _uiFlags The repeat count, scan code, extended-key flag, context code, previous key-state flag, and transition-state flag.
+	 * \return Returns an LSW_HANDLED code.
+	 */
+	lsw::CWidget::LSW_HANDLED CHexEditorControl::KeyUp( UINT _uiKeyCode, UINT _uiFlags ) {
+		if ( _uiKeyCode == VK_MENU ) { return SysKeyUp( _uiKeyCode, _uiFlags ); }
+		return lsw::CWidget::LSW_H_CONTINUE;
 	}
 
 	// WM_HSCROLL
@@ -2023,6 +2118,9 @@ namespace mx {
 
 	// Sets the target stream.
 	void CHexEditorControl::SetStream( CHexEditorInterface * _pediStream, CHexEditorControlHost * _pwMainCtrl ) {
+		// Finish with the old stream first.
+		CancelEdit();
+		FlushRealTimeUndo();
 		m_pwHexParent = _pwMainCtrl;
 		m_pheiTarget = _pediStream;
 
@@ -2217,16 +2315,20 @@ namespace mx {
 		lsw::LSW_RECT rBlankArea = _rRect;
 		{
 			if MX_LIKELY( m_pheiTarget ) {
-				if MX_LIKELY( m_pheiTarget->Read( m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine * stAll.uiBytesPerRow, m_bCurBuffer, (m_sdScrollView[m_eaEditAs].i32PageLines + 1) * stAll.uiBytesPerRow ) ) {
+				const uint64_t ui64BufAddr = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine * stAll.uiBytesPerRow;
+				const size_t sBufCap = size_t( (m_sdScrollView[m_eaEditAs].i32PageLines + 1) * stAll.uiBytesPerRow );
+				if MX_LIKELY( m_pheiTarget->Read( ui64BufAddr, m_bCurBuffer, sBufCap ) ) {
+					// What the edit box would write is shown in both areas.
+					const CHexEditorInterface::CBuffer &bShown = DisplayBuffer( ui64BufAddr, sBufCap );
 					int32_t i32Top = GetRulerHeightPx();
-					DrawArea( _hDc, iX, i32Top, stAll.dfLeftNumbersFmt, m_sdScrollView[m_eaEditAs].i32PageLines + 1, m_bCurBuffer, false );
+					DrawArea( _hDc, iX, i32Top, stAll.dfLeftNumbersFmt, m_sdScrollView[m_eaEditAs].i32PageLines + 1, bShown, false );
 					auto ui32WidthL = ComputeAreaWidthPx( stAll.dfLeftNumbersFmt );
 					rBlankArea.top = i32Top;
 					rBlankArea.left = iX + ui32WidthL;
 
 					if ( stAll.bShowRightArea ) {
 						DrawArea( _hDc, iX + ui32WidthL + stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx,
-							i32Top, stAll.dfRightNumbersFmt, m_sdScrollView[m_eaEditAs].i32PageLines + 1, m_bCurBuffer, true );
+							i32Top, stAll.dfRightNumbersFmt, m_sdScrollView[m_eaEditAs].i32PageLines + 1, bShown, true );
 
 						rBlankArea.left += stAll.i32PadNumbersLeftPx + stAll.i32PadBetweenNumbersAndTextPx + stAll.i32PadNumbersRightPx + ComputeAreaWidthPx( stAll.dfRightNumbersFmt );
 
@@ -2743,7 +2845,14 @@ namespace mx {
 		uint64_t ui64Line = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine;
 		uint64_t ui64StartAddress = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine * ui32Bpr;
 
-		auto ui64MaxLines = TotalLines() - ui64Line + 1;
+		uint64_t ui64TotalLines = TotalLines();
+		if ( m_esEdit.bActive && ui32Bpr ) {
+			// The edit box can run past the end of the data (and inserted cells push the data along), so draw its rows too.
+			const uint64_t ui64EditEnd = EditEnd();
+			const uint64_t ui64Shown = m_esEdit.bInsert ? (Size() + (ui64EditEnd - m_esEdit.ui64Start)) : std::max( Size(), ui64EditEnd );
+			ui64TotalLines = std::max( ui64TotalLines, (ui64Shown + ui32Bpr - 1) / ui32Bpr );
+		}
+		auto ui64MaxLines = ui64TotalLines - ui64Line + 1;
 		_ui32LinesToDraw = uint32_t( std::min<uint64_t>( _ui32LinesToDraw, ui64MaxLines ) );
 
 		// The values to render.
@@ -2815,6 +2924,11 @@ namespace mx {
 					::FillRect( _hDc, &rRect,
 						lsw::CBase::BrushCache().Brush( MX_GetRgbValue( crColor ) ) );
 				}
+			}
+
+			// The parts of the edit box's border that fall in this row.  Drawn over this row's backgrounds and under its text.
+			if ( m_esEdit.bActive && m_esEdit.bRightArea == _bRightArea ) {
+				DrawEditBoxRow( _hDc, _dfFmt, _iXLeft, ComputeAreaWidthPx( _dfFmt ), _iYTop, I, iLineAdv );
 			}
 
 			//for ( int32_t J = 0; J < ui32Bpr; J += ui32Stride ) {
@@ -3183,13 +3297,18 @@ namespace mx {
 							break;
 						}
 					}
-					auto crThisColor = CellFgColor( ui64ThisAddr, pui8Data + J, sDataSize - J, _bRightArea );
-					if ( crThisColor != MX_GetRgbValue( ForeColors()->crEditor ) ) {
-						lsw::LSW_SETTEXTCOLOR stcTextColor2( _hDc, MX_GetRgbValue( crThisColor ) );
-						::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int>(wsTmp.size()) );
-					}
-					else {
-						::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int>(wsTmp.size()) );
+					// Cells in the edit box that are not drawn normally (typed values, partly typed digits, empty cells).
+					const bool bEditDrawn = EditCovers( ui64ThisAddr, _bRightArea ) &&
+						DrawEditCellText( _hDc, ui64ThisAddr, _dfFmt, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp, pui8Data + J, sDataSize - J );
+					if ( !bEditDrawn ) {
+						auto crThisColor = CellFgColor( ui64ThisAddr, pui8Data + J, sDataSize - J, _bRightArea );
+						if ( crThisColor != MX_GetRgbValue( ForeColors()->crEditor ) ) {
+							lsw::LSW_SETTEXTCOLOR stcTextColor2( _hDc, MX_GetRgbValue( crThisColor ) );
+							::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int>(wsTmp.size()) );
+						}
+						else {
+							::TextOutW( _hDc, iL, iY + stAll.i32LineSpacingPx / 2, wsTmp.c_str(), static_cast<int>(wsTmp.size()) );
+						}
 					}
 				}
 
@@ -3247,9 +3366,10 @@ namespace mx {
 	 * \param _pui8Value The address of the data in the cell.
 	 * \param _sSize The address of the data in the cell.
 	 * \param _bRightArea The right area or the left area.
-	 * \return Returns the background color for the given cell.
+	 * \param _bEditFade If true, the text of a cell inside the edit box that has not been typed over is faded.
+	 * \return Returns the text color for the given cell.
 	 **/
-	COLORREF CHexEditorControl::CellFgColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize, bool /*_bRightArea*/ ) {
+	COLORREF CHexEditorControl::CellFgColor( uint64_t _ui64Address, const uint8_t * _pui8Value, size_t _sSize, bool _bRightArea, bool _bEditFade ) {
 		if ( !_sSize ) {
 			return ForeColors()->crEditor;
 		}
@@ -3288,6 +3408,11 @@ namespace mx {
 			if ( _ui64Address < Size() && m_sSel.IsSelected( _ui64Address, CurStyle()->uiBytesPerRow ) && (MX_GetAValue( ForeColors()->crSelected ) || bDefaultBaseColor) ) {
 				crBaseColor = bDefaultBaseColor ? ForeColors()->crSelected : Mix( crBaseColor, ForeColors()->crSelected );
 			}
+		}
+
+		// Inside the edit box, what has not been typed over is faded, as if seen through a translucent pane in the edit box's color.
+		if ( _bEditFade && EditCovers( _ui64Address, _bRightArea ) && !EditCellTyped( _ui64Address ) ) {
+			crBaseColor = EditFadeColor( MX_GetRgbValue( crBaseColor ), MX_GetRgbValue( CellBgColor( _ui64Address, _pui8Value, _sSize, _bRightArea ) ) );
 		}
 
 		return crBaseColor;
@@ -3349,6 +3474,11 @@ namespace mx {
 			if ( _ui64Address < Size() && m_sSel.IsSelected( _ui64Address, CurStyle()->uiBytesPerRow ) && (MX_GetAValue( BackColors()->crSelected ) || bDefaultBaseColor) ) {
 				crBaseColor = bDefaultBaseColor ? BackColors()->crSelected : Mix( crBaseColor, BackColors()->crSelected );
 			}
+		}
+
+		// The edit box: a little whiter than what lies beneath it (or a little darker if that is white).
+		if ( EditCovers( _ui64Address, _bRightArea ) ) {
+			crBaseColor = EditBoxColor( crBaseColor );
 		}
 
 		return crBaseColor;
@@ -4699,6 +4829,1544 @@ namespace mx {
 		catch ( ... ) { return false; }
 
 		return false;
+	}
+
+	// == Editing.
+	/**
+	 * Closes the edit box without writing anything.  The caret returns to where the edit began.
+	 **/
+	void CHexEditorControl::CancelEdit() {
+		if ( !m_esEdit.bActive ) { return; }
+		m_sSel = m_esEdit.sOldSel;
+		m_sgSelGesture = m_esEdit.sgOldGesture;
+		m_esEdit = MX_EDIT_STATE();
+		m_bEditBuffer = CHexEditorInterface::CBuffer();
+		StartCaretBlink();
+		::InvalidateRect( Wnd(), nullptr, FALSE );
+	}
+
+	/**
+	 * Writes what was typed into the edit box and closes it.
+	 *
+	 * \param _swsStatus Receives an error message on failure.
+	 * \return Returns false if a typed value is invalid (the edit box stays open so that it can be corrected) or could not be written.
+	 **/
+	bool CHexEditorControl::CommitEdit( CSecureWString &_swsStatus ) {
+		if ( !m_esEdit.bActive ) { return true; }
+		if ( m_esEdit.bAutoCommit ) {
+			CommitAutoEdit();
+			return true;
+		}
+		if ( !m_pheiTarget ) {
+			CancelEdit();
+			_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+			return false;
+		}
+		try {
+			std::vector<uint8_t> vBytes;
+			// An invalid value leaves the edit box open so that it can be corrected.
+			if ( !EditBytes( vBytes, _swsStatus ) ) { return false; }
+			if ( vBytes.empty() ) {
+				CancelEdit();
+				return true;
+			}
+
+			// Where the caret goes afterward: where the next character would have been typed.
+			uint64_t ui64Caret = m_esEdit.ui64Start + vBytes.size();
+			int32_t i32CaretIdx = 0;
+			if ( m_esEdit.ekKind == MX_EK_DIGITS ) {
+				const size_t sDigits = SubCaretCountForFormat( m_esEdit.dfFmt );
+				ui64Caret = m_esEdit.ui64Start + m_esEdit.sDigitPos / sDigits;
+				i32CaretIdx = int32_t( m_esEdit.sDigitPos % sDigits );
+			}
+
+			// Close the edit box first so that the display shows the real data from here on.
+			const MX_SELECTION sOldSel = m_esEdit.sOldSel;
+			const MX_SELECT_GESTURE sgOldGesture = m_esEdit.sgOldGesture;
+			const uint64_t ui64Start = m_esEdit.ui64Start;
+			const bool bInsert = m_esEdit.bInsert;
+			const bool bRight = m_esEdit.bRightArea;
+			m_esEdit = MX_EDIT_STATE();
+			m_bEditBuffer = CHexEditorInterface::CBuffer();
+
+			FlushRealTimeUndo();
+			bool bOk;
+			{
+				CHexEditorInterface::MX_UNDO uUndo( m_pheiTarget );
+				bOk = WriteBytes( ui64Start, vBytes, bInsert, _swsStatus );
+			}
+
+			ClearSelection();
+			m_sgSelGesture.bRightArea = bRight;
+			m_sgSelGesture.ui64CaretAddr = std::min( ui64Caret, Size() );
+			m_sgSelGesture.i32CaretIdx = (m_sgSelGesture.ui64CaretAddr == ui64Caret) ? i32CaretIdx : 0;
+			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64CaretAddr;
+			// One selection-Undo item per data-Undo group.  Process memory has no Undo.
+			if ( !IsProcess() ) { AddSelectionUndo( sOldSel, sgOldGesture ); }
+
+			StartCaretBlink();
+			EnsureVisible( m_sgSelGesture.ui64CaretAddr, FALSE );
+			::InvalidateRect( Wnd(), nullptr, FALSE );
+			if ( m_pwHexParent ) { m_pwHexParent->UpdateStatusBar_PosValue_StartSize(); }
+			return bOk;
+		}
+		catch ( ... ) {
+			CancelEdit();
+			_swsStatus = _DEC_WS_F39F91A5_Out_of_memory_;
+			return false;
+		}
+	}
+
+	/**
+	 * Ends the Undo group that collects real-time edits.  It normally ends 0.2 seconds after the last keystroke; call this before
+	 *	anything else changes the data or the Undo stack.
+	 **/
+	void CHexEditorControl::FlushRealTimeUndo() {
+		m_tRtUndo.Stop();
+		if ( !m_bRtUndoOpen ) { return; }
+		m_bRtUndoOpen = false;
+		if ( m_pheiTarget ) {
+			m_pheiTarget->EndUndo();
+			// One selection-Undo item for the whole group, restoring the caret from before the first edit in it.
+			AddSelectionUndo( m_sRtOldSel, m_sgRtOldGesture );
+		}
+	}
+
+	/**
+	 * The WM_SYSKEYDOWN handler.  Collects the digits of an Alt code (Alt held while typing on the numeric keypad).
+	 *
+	 * \param _uiKeyCode The virtual-key code.
+	 * \param _uiFlags The repeat count, scan code, extended-key flag, context code, previous key-state flag, and transition-state flag.
+	 * \return Returns an LSW_HANDLED code.
+	 */
+	lsw::CWidget::LSW_HANDLED CHexEditorControl::SysKeyDown( UINT _uiKeyCode, UINT _uiFlags ) {
+		const bool bRepeat = (_uiFlags & (1U << 30)) != 0;
+		if ( _uiKeyCode == VK_MENU ) {
+			// A fresh press of Alt starts a new Alt code.
+			if ( !bRepeat ) {
+				m_ui32AltCode = 0;
+				m_ui32AltDigits = 0;
+				m_bAltLeadingZero = false;
+			}
+			return lsw::CWidget::LSW_H_CONTINUE;
+		}
+
+		// The numeric keypad's digits.  Without Num Lock they arrive as navigation keys, which the keypad sends as non-extended keys.
+		int32_t i32Digit = -1;
+		if ( _uiKeyCode >= VK_NUMPAD0 && _uiKeyCode <= VK_NUMPAD9 ) {
+			i32Digit = int32_t( _uiKeyCode - VK_NUMPAD0 );
+		}
+		else if ( (_uiFlags & (1U << 24)) == 0 ) {
+			switch ( _uiKeyCode ) {
+				case VK_INSERT : { i32Digit = 0; break; }
+				case VK_END : { i32Digit = 1; break; }
+				case VK_DOWN : { i32Digit = 2; break; }
+				case VK_NEXT : { i32Digit = 3; break; }
+				case VK_LEFT : { i32Digit = 4; break; }
+				case VK_CLEAR : { i32Digit = 5; break; }
+				case VK_RIGHT : { i32Digit = 6; break; }
+				case VK_HOME : { i32Digit = 7; break; }
+				case VK_UP : { i32Digit = 8; break; }
+				case VK_PRIOR : { i32Digit = 9; break; }
+			}
+		}
+		if ( i32Digit >= 0 && (::GetKeyState( VK_MENU ) & 0x8000) ) {
+			if ( !bRepeat ) {
+				if ( m_ui32AltDigits == 0 && i32Digit == 0 ) { m_bAltLeadingZero = true; }
+				if ( m_ui32AltCode <= 0x10FFFF ) { m_ui32AltCode = m_ui32AltCode * 10 + uint32_t( i32Digit ); }
+				++m_ui32AltDigits;
+			}
+		}
+		else {
+			m_ui32AltCode = 0;
+			m_ui32AltDigits = 0;
+			m_bAltLeadingZero = false;
+		}
+		return lsw::CWidget::LSW_H_CONTINUE;
+	}
+
+	/**
+	 * The WM_SYSKEYUP handler.  When Alt is released after an Alt code above 255, types the Unicode character with that code (Windows
+	 *	itself would produce the character for the code modulo 256).
+	 *
+	 * \param _uiKeyCode The virtual-key code.
+	 * \param _uiFlags The repeat count, scan code, extended-key flag, context code, previous key-state flag, and transition-state flag.
+	 * \return Returns an LSW_HANDLED code.
+	 */
+	lsw::CWidget::LSW_HANDLED CHexEditorControl::SysKeyUp( UINT _uiKeyCode, UINT /*_uiFlags*/ ) {
+		if ( _uiKeyCode == VK_MENU && m_ui32AltDigits ) {
+			const uint32_t ui32Code = m_ui32AltCode;
+			const bool bLeadingZero = m_bAltLeadingZero;
+			m_ui32AltCode = 0;
+			m_ui32AltDigits = 0;
+			m_bAltLeadingZero = false;
+			if ( ui32Code > 0xFF && ui32Code <= 0x10FFFF && !(ui32Code >= 0xD800 && ui32Code <= 0xDFFF) ) {
+				// Windows has already queued its own character for this Alt code (the code modulo 256 in the ANSI code page, or the OEM
+				//	code page without the leading 0).  Remember it so that OnTextInputCodePoint() discards it.
+				char cByte = char( ui32Code & 0xFF );
+				wchar_t wcWindows = 0;
+				if ( cByte == 0 || ::MultiByteToWideChar( bLeadingZero ? CP_ACP : CP_OEMCP, 0, &cByte, 1, &wcWindows, 1 ) != 1 ) {
+					wcWindows = 0;
+				}
+				TypeCodePoint( char32_t( ui32Code ), 1 );
+				m_wcAltSwallow = wcWindows;
+				m_c32AltEmitted = char32_t( ui32Code );
+			}
+		}
+		return lsw::CWidget::LSW_H_CONTINUE;
+	}
+
+	/**
+	 * Types one character, the way a WM_CHAR would.  Starts or continues an edit, or edits in real time.
+	 *
+	 * \param _c32Cp The character.
+	 * \param _uiRepeat How many times to type it.
+	 **/
+	void CHexEditorControl::TypeCodePoint( char32_t _c32Cp, uint32_t _uiRepeat ) {
+		if ( !m_pheiTarget ) { return; }
+		// Enter, Escape, Backspace and Ctrl+letter arrive here too; KeyDown() handles the keys that mean anything.  Tab separates values.
+		if ( (_c32Cp < 0x20 && _c32Cp != U'\t') || _c32Cp == 0x7F ) { return; }
+		if ( m_pheiTarget->ReadOnly() ) {
+			EditWarning( _DEC_WS_D4FFE2E0_File_is_Read_Only );
+			return;
+		}
+		for ( uint32_t I = 0; I < std::max( _uiRepeat, 1U ); ++I ) {
+			if ( m_esEdit.bActive ) { EditType( _c32Cp ); }
+			else { TypeFirst( _c32Cp ); }
+		}
+	}
+
+	/**
+	 * Types one character when no edit box is open: decides between real-time editing and opening the edit box.
+	 *
+	 * \param _c32Cp The character.
+	 **/
+	void CHexEditorControl::TypeFirst( char32_t _c32Cp ) {
+		const MX_STYLE &stAll = (*CurStyle());
+		const bool bRight = m_sgSelGesture.bRightArea && stAll.bShowRightArea;
+		const MX_DATA_FMT dfFmt = bRight ? stAll.dfRightNumbersFmt : stAll.dfLeftNumbersFmt;
+		const MX_EDIT_KIND ekKind = EditKindForFormat( dfFmt );
+
+		// Typing starts at the start of the selection, or at the caret, aligned to the format's values.
+		uint64_t ui64Addr = HasSelection() ? m_sSel.LowerLeftAddress() : m_sgSelGesture.ui64CaretAddr;
+		int32_t i32Idx = HasSelection() ? 0 : m_sgSelGesture.i32CaretIdx;
+		const uint32_t ui32Stride = StrideForFormat( dfFmt );
+		if ( ui32Stride > 1 ) { ui64Addr -= ui64Addr % ui32Stride; }
+		ui64Addr = std::min( ui64Addr, Size() );
+		// Process memory cannot grow.
+		if ( m_pheiTarget->OverwriteOnly() && ui64Addr >= Size() ) { return; }
+
+		const bool bRealTime = RealTimeFor( dfFmt );
+		switch ( ekKind ) {
+			case MX_EK_DIGITS : {
+				const int32_t i32Digit = DigitValue( _c32Cp, RadixForFormat( dfFmt ) );
+				if ( i32Digit < 0 ) { return; }		// Skipped.
+				if ( bRealTime ) {
+					RealTimeDigit( ui64Addr, i32Idx, dfFmt, uint32_t( i32Digit ) );
+					return;
+				}
+				BeginEdit( dfFmt, bRight, ui64Addr, false );
+				// Type over from the digit under the caret (an inserted byte starts at its first digit).
+				if ( !m_esEdit.bInsert ) {
+					m_esEdit.sDigitPos = size_t( std::clamp<int32_t>( i32Idx, 0, int32_t( SubCaretCountForFormat( dfFmt ) ) - 1 ) );
+				}
+				EditType( _c32Cp );
+				break;
+			}
+			case MX_EK_TEXT : {
+				// An escape needs more than one character, so even in real time it is collected in the edit box until it is complete.
+				if ( bRealTime && _c32Cp != U'\\' ) {
+					RealTimeText( ui64Addr, _c32Cp );
+					return;
+				}
+				BeginEdit( dfFmt, bRight, ui64Addr, bRealTime );
+				EditType( _c32Cp );
+				break;
+			}
+			case MX_EK_VALUES : {
+				if ( !ValueCharValid( dfFmt, _c32Cp, std::wstring() ) ) { return; }		// Skipped (separators too: nothing to separate yet).
+				BeginEdit( dfFmt, bRight, ui64Addr, false );
+				EditType( _c32Cp );
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Determines whether typing in a given format changes the data as each character is typed.
+	 *
+	 * \param _dfFmt The format being typed.
+	 * \return Returns true for real-time editing, false if the edit box collects the typing.
+	 **/
+	bool CHexEditorControl::RealTimeFor( MX_DATA_FMT _dfFmt ) const {
+		const bool bText = _dfFmt == MX_DF_CHAR;
+		if ( IsProcess() ) {
+			// RAM is only written once a value is complete, except text, which can optionally be written character-by-character.
+			return bText && (m_pwHexParent ? m_pwHexParent->RealTimeRamTextEditing() : false);
+		}
+		// Only formats where each character stands alone can change as each is typed; other values need the edit box.
+		const bool bDigits = _dfFmt == MX_DF_HEX || _dfFmt == MX_DF_BIN;
+		return (bText || bDigits) && (m_pwHexParent ? m_pwHexParent->RealTimeFileEditing() : true);
+	}
+
+	/**
+	 * Opens the edit box.
+	 *
+	 * \param _dfFmt The format being typed.
+	 * \param _bRightArea True if the edit box is in the right area.
+	 * \param _ui64Addr The address of the first edited cell.
+	 * \param _bAutoCommit If true, the edit writes itself as soon as its text no longer ends in an unfinished escape.
+	 **/
+	void CHexEditorControl::BeginEdit( MX_DATA_FMT _dfFmt, bool _bRightArea, uint64_t _ui64Addr, bool _bAutoCommit ) {
+		// An automatically committing edit belongs to the real-time Undo group; anything else starts after it.
+		if ( !_bAutoCommit ) { FlushRealTimeUndo(); }
+		try {
+			m_esEdit = MX_EDIT_STATE();
+			m_esEdit.bActive = true;
+			m_esEdit.bRightArea = _bRightArea;
+			m_esEdit.bAutoCommit = _bAutoCommit;
+			m_esEdit.dfFmt = _dfFmt;
+			m_esEdit.ekKind = EditKindForFormat( _dfFmt );
+			m_esEdit.ui64Start = _ui64Addr;
+			m_esEdit.bInsert = !IsOverwriteMode() && m_pheiTarget && !m_pheiTarget->OverwriteOnly();
+			m_esEdit.sOldSel = m_sSel;
+			m_esEdit.sgOldGesture = m_sgSelGesture;
+			ClearSelection();
+
+			switch ( m_esEdit.ekKind ) {
+				case MX_EK_DIGITS : {
+					EnsureEditCell( 0 );
+					break;
+				}
+				case MX_EK_VALUES : {
+					m_esEdit.vTexts.push_back( std::wstring() );
+					break;
+				}
+				default : {}
+			}
+		}
+		catch ( ... ) {
+			m_esEdit = MX_EDIT_STATE();
+		}
+	}
+
+	/**
+	 * Types one character into the open edit box.  Characters that are not valid for the format are skipped.
+	 *
+	 * \param _c32Cp The character.
+	 **/
+	void CHexEditorControl::EditType( char32_t _c32Cp ) {
+		if ( !m_esEdit.bActive ) { return; }
+		try {
+			switch ( m_esEdit.ekKind ) {
+				case MX_EK_DIGITS : {
+					const int32_t i32Digit = DigitValue( _c32Cp, RadixForFormat( m_esEdit.dfFmt ) );
+					if ( i32Digit < 0 ) { return; }
+					const size_t sDigits = SubCaretCountForFormat( m_esEdit.dfFmt );
+					const size_t sCell = m_esEdit.sDigitPos / sDigits;
+					EnsureEditCell( sCell );
+					m_esEdit.vDigits[m_esEdit.sDigitPos] = uint8_t( i32Digit );
+					m_esEdit.vTypedMask[sCell] |= uint8_t( 1U << (m_esEdit.sDigitPos % sDigits) );
+					++m_esEdit.sDigitPos;
+					// The edit box covers the cell where the next digit goes.
+					EnsureEditCell( m_esEdit.sDigitPos / sDigits );
+					break;
+				}
+				case MX_EK_TEXT : {
+					// Every character is typed, Tab included.
+					m_esEdit.u32Text.push_back( _c32Cp );
+					UpdateEditPreview();
+					if ( m_esEdit.bAutoCommit && !m_esEdit.bEscapeOpen ) {
+						CommitAutoEdit();
+						return;
+					}
+					break;
+				}
+				case MX_EK_VALUES : {
+					if ( _c32Cp == U' ' || _c32Cp == U',' || _c32Cp == U';' || _c32Cp == U'\t' ) {
+						// Move on to the next value (nothing to separate if the current value is empty).
+						if ( !m_esEdit.vTexts.back().empty() ) { m_esEdit.vTexts.push_back( std::wstring() ); }
+					}
+					else if ( ValueCharValid( m_esEdit.dfFmt, _c32Cp, m_esEdit.vTexts.back() ) ) {
+						m_esEdit.vTexts.back().push_back( wchar_t( _c32Cp ) );
+					}
+					else { return; }
+					break;
+				}
+			}
+			UpdateEditCaret();
+			::InvalidateRect( Wnd(), nullptr, FALSE );
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Removes the last thing typed into the edit box.  Closes the edit box if nothing typed remains.
+	 **/
+	void CHexEditorControl::EditBackspace() {
+		if ( !m_esEdit.bActive ) { return; }
+		try {
+			switch ( m_esEdit.ekKind ) {
+				case MX_EK_DIGITS : {
+					if ( m_esEdit.sDigitPos == 0 ) {
+						CancelEdit();
+						return;
+					}
+					const size_t sDigits = SubCaretCountForFormat( m_esEdit.dfFmt );
+					--m_esEdit.sDigitPos;
+					const size_t sCell = m_esEdit.sDigitPos / sDigits;
+					// Put back the digit that was there before.
+					m_esEdit.vDigits[m_esEdit.sDigitPos] = m_esEdit.vOrigDigits[m_esEdit.sDigitPos];
+					m_esEdit.vTypedMask[sCell] &= uint8_t( ~(1U << (m_esEdit.sDigitPos % sDigits)) );
+					// The edit box shrinks back to the cell now under the caret.
+					m_esEdit.vDigits.resize( (sCell + 1) * sDigits );
+					m_esEdit.vOrigDigits.resize( (sCell + 1) * sDigits );
+					m_esEdit.vTypedMask.resize( sCell + 1 );
+					bool bAnyTyped = false;
+					for ( auto ui8Mask : m_esEdit.vTypedMask ) { bAnyTyped = bAnyTyped || ui8Mask != 0; }
+					if ( !bAnyTyped ) {
+						CancelEdit();
+						return;
+					}
+					break;
+				}
+				case MX_EK_TEXT : {
+					if ( !m_esEdit.u32Text.empty() ) { m_esEdit.u32Text.pop_back(); }
+					if ( m_esEdit.u32Text.empty() ) {
+						CancelEdit();
+						return;
+					}
+					UpdateEditPreview();
+					break;
+				}
+				case MX_EK_VALUES : {
+					if ( m_esEdit.vTexts.back().empty() ) {
+						// Back to the end of the previous value.
+						if ( m_esEdit.vTexts.size() > 1 ) { m_esEdit.vTexts.pop_back(); }
+					}
+					else {
+						m_esEdit.vTexts.back().pop_back();
+					}
+					if ( m_esEdit.vTexts.size() == 1 && m_esEdit.vTexts.back().empty() ) {
+						CancelEdit();
+						return;
+					}
+					break;
+				}
+			}
+			UpdateEditCaret();
+			::InvalidateRect( Wnd(), nullptr, FALSE );
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Writes an automatically committing edit (real-time text editing ending in an escape) as part of the real-time Undo group.
+	 **/
+	void CHexEditorControl::CommitAutoEdit() {
+		if ( !m_esEdit.bActive ) { return; }
+		try {
+			const std::vector<uint8_t> vBytes = m_esEdit.vPreview;
+			const MX_SELECTION sOldSel = m_esEdit.sOldSel;
+			const MX_SELECT_GESTURE sgOldGesture = m_esEdit.sgOldGesture;
+			const uint64_t ui64Start = m_esEdit.ui64Start;
+			const bool bInsert = m_esEdit.bInsert;
+			const bool bRight = m_esEdit.bRightArea;
+			m_esEdit = MX_EDIT_STATE();
+			m_bEditBuffer = CHexEditorInterface::CBuffer();
+			if ( vBytes.empty() ) {
+				m_sSel = sOldSel;
+				m_sgSelGesture = sgOldGesture;
+				::InvalidateRect( Wnd(), nullptr, FALSE );
+				return;
+			}
+
+			BeginRealTimeUndo( sOldSel, sgOldGesture );
+			CSecureWString swsStatus;
+			if ( !WriteBytes( ui64Start, vBytes, bInsert, swsStatus ) ) {
+				EditWarning( swsStatus );
+			}
+			m_sgSelGesture.bRightArea = bRight;
+			SetEditedCaret( ui64Start + vBytes.size(), 0 );
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Makes sure the edit box holds the digits of a cell (MX_EK_DIGITS), reading its original value if needed.
+	 *
+	 * \param _sCell The index of the cell relative to the start of the edit.
+	 **/
+	void CHexEditorControl::EnsureEditCell( size_t _sCell ) {
+		const size_t sDigits = SubCaretCountForFormat( m_esEdit.dfFmt );
+		const uint32_t ui32Radix = RadixForFormat( m_esEdit.dfFmt );
+		while ( m_esEdit.vTypedMask.size() <= _sCell ) {
+			const uint64_t ui64Addr = m_esEdit.ui64Start + m_esEdit.vTypedMask.size();
+			// Inserted bytes, and bytes past the end, start at 0.
+			uint32_t ui32Val = 0;
+			if ( !m_esEdit.bInsert && ui64Addr < Size() && m_pheiTarget ) {
+				CHexEditorInterface::CBuffer bTmp;
+				if ( m_pheiTarget->Read( ui64Addr, bTmp, 1 ) && bTmp.size() ) { ui32Val = bTmp[0]; }
+			}
+			uint8_t ui8Digits[8] = {};
+			for ( size_t I = sDigits; I--; ) {
+				ui8Digits[I] = uint8_t( ui32Val % ui32Radix );
+				ui32Val /= ui32Radix;
+			}
+			for ( size_t I = 0; I < sDigits; ++I ) {
+				m_esEdit.vDigits.push_back( ui8Digits[I] );
+				m_esEdit.vOrigDigits.push_back( ui8Digits[I] );
+			}
+			m_esEdit.vTypedMask.push_back( 0 );
+		}
+	}
+
+	/**
+	 * Recomputes the bytes the edit box's text encodes to (MX_EK_TEXT).
+	 **/
+	void CHexEditorControl::UpdateEditPreview() {
+		std::u32string u32Resolved;
+		m_esEdit.bEscapeOpen = ResolveEditEscapes( m_esEdit.u32Text, u32Resolved );
+		m_esEdit.vPreview.clear();
+		EncodeText( u32Resolved, m_esEdit.vPreview );
+	}
+
+	/**
+	 * Moves the caret to where the next character typed into the edit box goes and scrolls it into view.
+	 **/
+	void CHexEditorControl::UpdateEditCaret() {
+		if ( !m_esEdit.bActive ) { return; }
+		uint64_t ui64Caret = m_esEdit.ui64Start;
+		int32_t i32Idx = 0;
+		switch ( m_esEdit.ekKind ) {
+			case MX_EK_DIGITS : {
+				const size_t sDigits = SubCaretCountForFormat( m_esEdit.dfFmt );
+				ui64Caret += m_esEdit.sDigitPos / sDigits;
+				i32Idx = int32_t( m_esEdit.sDigitPos % sDigits );
+				break;
+			}
+			case MX_EK_TEXT : {
+				ui64Caret += m_esEdit.vPreview.size();
+				break;
+			}
+			case MX_EK_VALUES : {
+				ui64Caret += uint64_t( m_esEdit.vTexts.size() - 1 ) * StrideForFormat( m_esEdit.dfFmt );
+				break;
+			}
+		}
+		m_sgSelGesture.bRightArea = m_esEdit.bRightArea;
+		m_sgSelGesture.ui64CaretAddr = ui64Caret;
+		m_sgSelGesture.i32CaretIdx = i32Idx;
+		m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = ui64Caret;
+		StartCaretBlink();
+		EnsureVisible( ui64Caret, FALSE );
+	}
+
+	/**
+	 * Gets the address just past the edit box.  The edit box covers what was typed plus the cell where the next character goes.
+	 *
+	 * \return Returns the end of the edit box (exclusive).
+	 **/
+	uint64_t CHexEditorControl::EditEnd() const {
+		if ( !m_esEdit.bActive ) { return 0; }
+		switch ( m_esEdit.ekKind ) {
+			case MX_EK_DIGITS : { return m_esEdit.ui64Start + m_esEdit.vTypedMask.size(); }
+			case MX_EK_TEXT : { return m_esEdit.ui64Start + m_esEdit.vPreview.size() + StrideForFormat( m_esEdit.dfFmt ); }
+			case MX_EK_VALUES : { return m_esEdit.ui64Start + uint64_t( m_esEdit.vTexts.size() ) * StrideForFormat( m_esEdit.dfFmt ); }
+			default : { return m_esEdit.ui64Start; }
+		}
+	}
+
+	/**
+	 * Determines whether a cell is inside the edit box.
+	 *
+	 * \param _ui64Address The address of the cell.
+	 * \param _bRightArea The right area or the left area.
+	 * \return Returns true if the cell is inside the edit box.
+	 **/
+	bool CHexEditorControl::EditCovers( uint64_t _ui64Address, bool _bRightArea ) const {
+		return m_esEdit.bActive && m_esEdit.bRightArea == _bRightArea &&
+			_ui64Address >= m_esEdit.ui64Start && _ui64Address < EditEnd();
+	}
+
+	/**
+	 * Determines whether anything was typed into a cell inside the edit box.
+	 *
+	 * \param _ui64Address The address of the cell.
+	 * \return Returns true if the cell was typed into (wholly or partly).
+	 **/
+	bool CHexEditorControl::EditCellTyped( uint64_t _ui64Address ) const {
+		if ( !m_esEdit.bActive || _ui64Address < m_esEdit.ui64Start ) { return false; }
+		const uint64_t ui64Off = _ui64Address - m_esEdit.ui64Start;
+		switch ( m_esEdit.ekKind ) {
+			case MX_EK_DIGITS : { return ui64Off < m_esEdit.vTypedMask.size() && m_esEdit.vTypedMask[size_t( ui64Off )] != 0; }
+			case MX_EK_TEXT : { return ui64Off < m_esEdit.vPreview.size(); }
+			case MX_EK_VALUES : {
+				const uint64_t ui64Idx = ui64Off / StrideForFormat( m_esEdit.dfFmt );
+				return ui64Idx < m_esEdit.vTexts.size() && !m_esEdit.vTexts[size_t( ui64Idx )].empty();
+			}
+			default : { return false; }
+		}
+	}
+
+	/**
+	 * Gets the bytes the edit box would write.
+	 *
+	 * \param _vBytes Receives the bytes.
+	 * \param _swsStatus Receives an error message if a typed value is invalid.
+	 * \return Returns false if a typed value is invalid.
+	 **/
+	bool CHexEditorControl::EditBytes( std::vector<uint8_t> &_vBytes, CSecureWString &_swsStatus ) const {
+		_vBytes.clear();
+		if ( !m_esEdit.bActive ) { return true; }
+		switch ( m_esEdit.ekKind ) {
+			case MX_EK_DIGITS : {
+				const size_t sDigits = SubCaretCountForFormat( m_esEdit.dfFmt );
+				const uint32_t ui32Radix = RadixForFormat( m_esEdit.dfFmt );
+				// Every cell up to the last one typed into (the cell after it only shows where the next digit goes).
+				size_t sCells = m_esEdit.vTypedMask.size();
+				while ( sCells && m_esEdit.vTypedMask[sCells-1] == 0 ) { --sCells; }
+				for ( size_t I = 0; I < sCells; ++I ) {
+					uint32_t ui32Val = 0;
+					for ( size_t J = 0; J < sDigits; ++J ) {
+						ui32Val = ui32Val * ui32Radix + m_esEdit.vDigits[I*sDigits+J];
+					}
+					if ( ui32Val > 0xFF ) {
+						// Octal and decimal digits can describe values that do not fit in a byte.
+						_swsStatus = _DEC_WS_CEE34699_Invalid_input__;
+						for ( size_t J = 0; J < sDigits; ++J ) {
+							_swsStatus.push_back( wchar_t( L'0' + m_esEdit.vDigits[I*sDigits+J] ) );
+						}
+						return false;
+					}
+					_vBytes.push_back( uint8_t( ui32Val ) );
+				}
+				return true;
+			}
+			case MX_EK_TEXT : {
+				_vBytes = m_esEdit.vPreview;
+				return true;
+			}
+			case MX_EK_VALUES : {
+				for ( const auto &wsThis : m_esEdit.vTexts ) {
+					if ( wsThis.empty() ) { continue; }
+					if ( !ParseValue( m_esEdit.dfFmt, wsThis, _vBytes ) ) {
+						_swsStatus = _DEC_WS_CEE34699_Invalid_input__;
+						_swsStatus += wsThis;
+						return false;
+					}
+				}
+				return true;
+			}
+			default : { return true; }
+		}
+	}
+
+	/**
+	 * Gets the buffer to display: the data read for the screen, with the bytes the edit box would write in place (and, in Insert
+	 *	mode, the data after the edit box pushed along).
+	 * 
+	 * \param _ui64BufAddr The address of the first byte in m_bCurBuffer.
+	 * \param _sBufCap The number of bytes the screen shows.
+	 * \return Returns the buffer to display.
+	 **/
+	const CHexEditorInterface::CBuffer & CHexEditorControl::DisplayBuffer( uint64_t _ui64BufAddr, size_t _sBufCap ) {
+		if ( !m_esEdit.bActive ) { return m_bCurBuffer; }
+		try {
+			const uint64_t ui64BufEnd = _ui64BufAddr + _sBufCap;
+			const uint64_t ui64EditEnd = EditEnd();
+			const uint64_t ui64EditLen = ui64EditEnd - m_esEdit.ui64Start;
+			if ( m_esEdit.bInsert ) {
+				// The edit box's cells are new, so the data from its start onward comes after them.
+				m_bEditBuffer.clear();
+				const uint64_t ui64End = std::min( ui64BufEnd, Size() + ui64EditLen );
+				if ( ui64End > _ui64BufAddr ) {
+					m_bEditBuffer.resize( size_t( ui64End - _ui64BufAddr ), 0 );
+					const uint64_t ui64Before = std::min( ui64End, m_esEdit.ui64Start );
+					for ( uint64_t A = _ui64BufAddr; A < ui64Before; ++A ) {
+						const size_t sIdx = size_t( A - _ui64BufAddr );
+						if ( sIdx < m_bCurBuffer.size() ) { m_bEditBuffer[sIdx] = m_bCurBuffer[sIdx]; }
+					}
+					const uint64_t ui64After = std::max( _ui64BufAddr, ui64EditEnd );
+					if ( ui64End > ui64After && m_pheiTarget ) {
+						CHexEditorInterface::CBuffer bTmp;
+						if ( m_pheiTarget->Read( ui64After - ui64EditLen, bTmp, size_t( ui64End - ui64After ) ) ) {
+							const size_t sCopy = std::min( bTmp.size(), size_t( ui64End - ui64After ) );
+							for ( size_t I = 0; I < sCopy; ++I ) {
+								m_bEditBuffer[size_t( ui64After - _ui64BufAddr )+I] = bTmp[I];
+							}
+						}
+					}
+				}
+			}
+			else {
+				m_bEditBuffer = m_bCurBuffer;
+				// Make room for the edit box where it runs past the end of the data (so that its cells are drawn).
+				const uint64_t ui64Need = std::min( ui64EditEnd, ui64BufEnd );
+				if ( ui64Need > _ui64BufAddr && ui64Need - _ui64BufAddr > m_bEditBuffer.size() ) {
+					m_bEditBuffer.resize( size_t( ui64Need - _ui64BufAddr ), 0 );
+				}
+			}
+
+			// The bytes the edit box would write.
+			auto Put = [&]( uint64_t _ui64Addr, uint8_t _ui8Val ) {
+				if ( _ui64Addr >= _ui64BufAddr && _ui64Addr - _ui64BufAddr < m_bEditBuffer.size() ) {
+					m_bEditBuffer[size_t( _ui64Addr - _ui64BufAddr )] = _ui8Val;
+				}
+			};
+			const uint64_t ui64From = std::max( m_esEdit.ui64Start, _ui64BufAddr );
+			switch ( m_esEdit.ekKind ) {
+				case MX_EK_DIGITS : {
+					const size_t sDigits = SubCaretCountForFormat( m_esEdit.dfFmt );
+					const uint32_t ui32Radix = RadixForFormat( m_esEdit.dfFmt );
+					const uint64_t ui64To = std::min( m_esEdit.ui64Start + m_esEdit.vTypedMask.size(), ui64BufEnd );
+					for ( uint64_t A = ui64From; A < ui64To; ++A ) {
+						const size_t sCell = size_t( A - m_esEdit.ui64Start );
+						uint32_t ui32Val = 0;
+						for ( size_t J = 0; J < sDigits; ++J ) {
+							ui32Val = ui32Val * ui32Radix + m_esEdit.vDigits[sCell*sDigits+J];
+						}
+						Put( A, uint8_t( std::min<uint32_t>( ui32Val, 0xFF ) ) );
+					}
+					break;
+				}
+				case MX_EK_TEXT : {
+					const uint64_t ui64To = std::min( m_esEdit.ui64Start + m_esEdit.vPreview.size(), ui64BufEnd );
+					for ( uint64_t A = ui64From; A < ui64To; ++A ) {
+						Put( A, m_esEdit.vPreview[size_t( A - m_esEdit.ui64Start )] );
+					}
+					break;
+				}
+				case MX_EK_VALUES : {
+					// Each value typed so far that is valid (the area being typed in shows the typed text instead).
+					const uint32_t ui32Stride = StrideForFormat( m_esEdit.dfFmt );
+					std::vector<uint8_t> vValue;
+					for ( size_t I = 0; I < m_esEdit.vTexts.size(); ++I ) {
+						const uint64_t ui64Addr = m_esEdit.ui64Start + uint64_t( I ) * ui32Stride;
+						if ( ui64Addr >= ui64BufEnd ) { break; }
+						if ( ui64Addr + ui32Stride <= _ui64BufAddr || m_esEdit.vTexts[I].empty() ) { continue; }
+						vValue.clear();
+						if ( !ParseValue( m_esEdit.dfFmt, m_esEdit.vTexts[I], vValue ) ) { continue; }
+						for ( size_t J = 0; J < vValue.size(); ++J ) { Put( ui64Addr + J, vValue[J] ); }
+					}
+					break;
+				}
+				default : {}
+			}
+			return m_bEditBuffer;
+		}
+		catch ( ... ) { return m_bCurBuffer; }
+	}
+
+	/**
+	 * Draws the text of a cell inside the edit box when it differs from the normal drawing: typed values, digits typed over in part
+	 *	(typed digits normal, the rest faded), and empty cells past the end of the data.
+	 *
+	 * \param _hDc The device context.
+	 * \param _ui64Address The address of the cell.
+	 * \param _dfFmt The format of the area.
+	 * \param _iX The left of the cell's text.
+	 * \param _iY The top of the cell's text.
+	 * \param _wsText The text that would normally be drawn.
+	 * \param _pui8Value The data at the cell.
+	 * \param _sSize The number of bytes at _pui8Value.
+	 * \return Returns true if the cell's text was drawn (or deliberately left blank).
+	 **/
+	bool CHexEditorControl::DrawEditCellText( HDC _hDc, uint64_t _ui64Address, MX_DATA_FMT _dfFmt, int32_t _iX, int32_t _iY, const std::wstring &/*_wsText*/, const uint8_t * _pui8Value, size_t _sSize ) {
+		const bool bTyped = EditCellTyped( _ui64Address );
+		// New cells (inserted, or past the end of the data) show only what was typed.
+		if ( !bTyped && (m_esEdit.bInsert || _ui64Address >= Size()) ) { return true; }
+		switch ( m_esEdit.ekKind ) {
+			case MX_EK_DIGITS : {
+				if ( !bTyped ) { return false; }	// Wholly faded: drawn normally with the color CellFgColor() gives.
+				const size_t sDigits = SubCaretCountForFormat( m_esEdit.dfFmt );
+				const size_t sCell = size_t( _ui64Address - m_esEdit.ui64Start );
+				const uint8_t ui8Mask = m_esEdit.vTypedMask[sCell];
+				const COLORREF crNormal = MX_GetRgbValue( CellFgColor( _ui64Address, _pui8Value, _sSize, m_esEdit.bRightArea, false ) );
+				const COLORREF crFaded = EditFadeColor( crNormal, MX_GetRgbValue( CellBgColor( _ui64Address, _pui8Value, _sSize, m_esEdit.bRightArea ) ) );
+				wchar_t wcDigits[8];
+				for ( size_t J = 0; J < sDigits; ++J ) {
+					const uint8_t ui8Digit = m_esEdit.vDigits[sCell*sDigits+J];
+					wcDigits[J] = wchar_t( ui8Digit < 10 ? (L'0' + ui8Digit) : (L'A' + (ui8Digit - 10)) );
+				}
+				// Each digit goes where it would be if the digits were drawn together, the way cells are normally drawn.
+				for ( size_t J = 0; J < sDigits; ++J ) {
+					SIZE sPrefix = { 0, 0 };
+					if ( J ) { ::GetTextExtentPoint32W( _hDc, wcDigits, int( J ), &sPrefix ); }
+					lsw::LSW_SETTEXTCOLOR stcColor( _hDc, ((ui8Mask >> J) & 1) ? crNormal : crFaded );
+					::TextOutW( _hDc, _iX + sPrefix.cx, _iY, &wcDigits[J], 1 );
+				}
+				return true;
+			}
+			case MX_EK_VALUES : {
+				if ( !bTyped ) { return false; }
+				const std::wstring &wsTyped = m_esEdit.vTexts[size_t( (_ui64Address - m_esEdit.ui64Start) / StrideForFormat( m_esEdit.dfFmt ) )];
+				lsw::LSW_SETTEXTCOLOR stcColor( _hDc, MX_GetRgbValue( CellFgColor( _ui64Address, _pui8Value, _sSize, m_esEdit.bRightArea ) ) );
+				::TextOutW( _hDc, _iX, _iY, wsTyped.c_str(), static_cast<int>(wsTyped.size()) );
+				return true;
+			}
+			default : { return false; }		// Text: the preview bytes are already in the displayed buffer.
+		}
+	}
+
+	/**
+	 * Draws the parts of the edit box's sunken border that fall in one row of an area, and fills any gaps between its cells.
+	 *	Called for each row during the main drawing pass, after the row's backgrounds and before its text, so each row draws only its
+	 *	own pixels: the row above the edit box draws its top border, the row below draws its bottom border.
+	 *
+	 * \param _hDc The device context.
+	 * \param _dfFmt The format of the area.
+	 * \param _iXLeft The left of the area.
+	 * \param _iAreaW The width of the area.
+	 * \param _iYTop The top of the first row.
+	 * \param _ui32Row The row (relative to the first visible line).
+	 * \param _iLineAdv The height of a row.
+	 **/
+	void CHexEditorControl::DrawEditBoxRow( HDC _hDc, MX_DATA_FMT _dfFmt, int32_t _iXLeft, int32_t _iAreaW, int32_t _iYTop, uint32_t _ui32Row, int32_t _iLineAdv ) {
+		if ( !m_esEdit.bActive || _iLineAdv <= 0 ) { return; }
+		const uint32_t ui32Bpr = CurStyle()->uiBytesPerRow ? CurStyle()->uiBytesPerRow : 16;
+		const uint64_t ui64End = EditEnd();
+		if ( ui64End <= m_esEdit.ui64Start ) { return; }
+		const uint64_t ui64FirstRow = m_esEdit.ui64Start / ui32Bpr;
+		const uint64_t ui64LastRow = (ui64End - 1) / ui32Bpr;
+		const uint64_t ui64TopLine = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine;
+		const uint64_t ui64Line = ui64TopLine + _ui32Row;
+		// Only the rows of the edit box and the rows just above and below it have anything to draw.
+		if ( ui64Line + 1 < ui64FirstRow || ui64Line > ui64LastRow + 1 ) { return; }
+
+		const int32_t i32BandT = _iYTop + int32_t( _ui32Row ) * _iLineAdv;
+		const int32_t i32BandB = i32BandT + _iLineAdv;
+		const int32_t i32AreaL = _iXLeft;
+		const int32_t i32AreaR = _iXLeft + _iAreaW;
+
+		// The edit box's extent on its rows next to this one.
+		/** The edit box's rectangle on one row. */
+		struct MX_BOX_ROW {
+			int32_t									i32L;												/**< The left (inclusive). */
+			int32_t									i32R;												/**< The right (exclusive). */
+			int32_t									i32T;												/**< The top (inclusive). */
+			int32_t									i32B;												/**< The bottom (exclusive). */
+		};
+		MX_BOX_ROW brRows[3];
+		size_t sRows = 0;
+		for ( uint64_t K = (ui64Line ? ui64Line - 1 : 0); K <= ui64Line + 1; ++K ) {
+			if ( K < ui64FirstRow || K > ui64LastRow ) { continue; }
+			const uint32_t ui32C0 = (K == ui64FirstRow) ? uint32_t( m_esEdit.ui64Start % ui32Bpr ) : 0;
+			const uint32_t ui32C1 = (K == ui64LastRow) ? uint32_t( (ui64End - 1) % ui32Bpr ) : (ui32Bpr - 1);
+			int32_t i32L0, i32W0, i32L1, i32W1;
+			GetBackgrondRectForIndex( _dfFmt, ui32C0, _iXLeft, i32L0, i32W0 );
+			GetBackgrondRectForIndex( _dfFmt, ui32C1, _iXLeft, i32L1, i32W1 );
+
+			MX_BOX_ROW &brRow = brRows[sRows++];
+			// Nothing outside the area belongs to it, so a border there is moved inside the edit box.
+			brRow.i32L = std::max( i32L0, i32AreaL + 2 );
+			brRow.i32R = std::min( i32L1 + i32W1, i32AreaR - 2 );
+			brRow.i32T = _iYTop + int32_t( int64_t( K ) - int64_t( ui64TopLine ) ) * _iLineAdv;
+			brRow.i32B = brRow.i32T + _iLineAdv;
+			// Nothing is drawn above the first visible row, so its top border is moved inside it.
+			if ( K == ui64FirstRow && K == ui64TopLine ) { brRow.i32T += 2; }
+
+			// Wide spacing between groups leaves gaps between cells; fill those inside the edit box.
+			if ( K == ui64Line ) {
+				for ( uint32_t C = ui32C0; C < ui32C1; ++C ) {
+					int32_t i32La, i32Wa, i32Lb, i32Wb;
+					GetBackgrondRectForIndex( _dfFmt, C, _iXLeft, i32La, i32Wa );
+					GetBackgrondRectForIndex( _dfFmt, C + 1, _iXLeft, i32Lb, i32Wb );
+					if ( i32La + i32Wa < i32Lb ) {
+						lsw::LSW_RECT rGap;
+						rGap.left = i32La + i32Wa;
+						rGap.right = i32Lb;
+						rGap.top = i32BandT;
+						rGap.bottom = i32BandB;
+						const COLORREF crGap = CellBgColor( K * ui32Bpr + C, nullptr, 0, m_esEdit.bRightArea );
+						::FillRect( _hDc, &rGap, lsw::CBase::BrushCache().Brush( MX_GetRgbValue( crGap ) ) );
+					}
+				}
+			}
+		}
+		if ( !sRows ) { return; }
+
+		// A sunken border: dark above and to the left, light below and to the right, two pixels deep.
+		const COLORREF crBox = MX_GetRgbValue( CellBgColor( m_esEdit.ui64Start, nullptr, 0, m_esEdit.bRightArea ) );
+		auto Blend = [crBox]( COLORREF _crTo, uint32_t _ui32Amount ) -> COLORREF {
+			return RGB( (GetRValue( crBox ) * (255 - _ui32Amount) + GetRValue( _crTo ) * _ui32Amount) / 255,
+				(GetGValue( crBox ) * (255 - _ui32Amount) + GetGValue( _crTo ) * _ui32Amount) / 255,
+				(GetBValue( crBox ) * (255 - _ui32Amount) + GetBValue( _crTo ) * _ui32Amount) / 255 );
+		};
+		const COLORREF crOuterDark = Blend( RGB( 0, 0, 0 ), 90 );
+		const COLORREF crInnerDark = Blend( RGB( 0, 0, 0 ), 150 );
+		const COLORREF crOuterLight = Blend( RGB( 0xFF, 0xFF, 0xFF ), 230 );
+		const COLORREF crInnerLight = Blend( RGB( 0xFF, 0xFF, 0xFF ), 120 );
+
+		int32_t i32Pts[3*6+2];
+		for ( int32_t Y = i32BandT; Y < i32BandB; ++Y ) {
+			// Where the border can begin or end along this line of pixels.
+			size_t sPts = 0;
+			i32Pts[sPts++] = i32AreaL;
+			i32Pts[sPts++] = i32AreaR;
+			for ( size_t R = 0; R < sRows; ++R ) {
+				i32Pts[sPts++] = brRows[R].i32L - 2;
+				i32Pts[sPts++] = brRows[R].i32L - 1;
+				i32Pts[sPts++] = brRows[R].i32L;
+				i32Pts[sPts++] = brRows[R].i32R;
+				i32Pts[sPts++] = brRows[R].i32R + 1;
+				i32Pts[sPts++] = brRows[R].i32R + 2;
+			}
+			std::sort( i32Pts, i32Pts + sPts );
+			sPts = size_t( std::unique( i32Pts, i32Pts + sPts ) - i32Pts );
+
+			int32_t i32RunL = 0, i32RunR = 0;
+			COLORREF crRun = 0;
+			bool bRun = false;
+			auto Flush = [&]() {
+				if ( bRun && i32RunL < i32RunR ) {
+					lsw::LSW_RECT rLine;
+					rLine.left = i32RunL;
+					rLine.right = i32RunR;
+					rLine.top = Y;
+					rLine.bottom = Y + 1;
+					::FillRect( _hDc, &rLine, lsw::CBase::BrushCache().Brush( crRun ) );
+				}
+				bRun = false;
+			};
+			for ( size_t P = 0; P + 1 < sPts; ++P ) {
+				const int32_t X = i32Pts[P];
+				const int32_t XEnd = i32Pts[P+1];
+				if ( X < i32AreaL || XEnd > i32AreaR ) { Flush(); continue; }
+
+				// The closest box row (Chebyshev distance) decides what this stretch of pixels is.  On a tie, a straight edge wins over
+				//	a corner, so that the border runs on unbroken where two box rows meet.
+				int32_t i32Best = 3, i32BestMin = 3;
+				bool bDark = false;
+				for ( size_t R = 0; R < sRows; ++R ) {
+					const MX_BOX_ROW &brRow = brRows[R];
+					const int32_t i32Dx = (X < brRow.i32L) ? (brRow.i32L - X) : ((X >= brRow.i32R) ? (X - brRow.i32R + 1) : 0);
+					const int32_t i32Dy = (Y < brRow.i32T) ? (brRow.i32T - Y) : ((Y >= brRow.i32B) ? (Y - brRow.i32B + 1) : 0);
+					const int32_t i32D = std::max( i32Dx, i32Dy );
+					const int32_t i32Min = std::min( i32Dx, i32Dy );
+					if ( i32D < i32Best || (i32D == i32Best && i32Min < i32BestMin) ) {
+						i32Best = i32D;
+						i32BestMin = i32Min;
+						if ( i32Dy > i32Dx ) { bDark = Y < brRow.i32T; }
+						else if ( i32Dx > i32Dy ) { bDark = X < brRow.i32L; }
+						else { bDark = (Y < brRow.i32T) && (X < brRow.i32L); }
+					}
+				}
+				if ( i32Best == 0 || i32Best > 2 ) { Flush(); continue; }
+				const COLORREF crThis = bDark ? (i32Best == 1 ? crInnerDark : crOuterDark) : (i32Best == 1 ? crInnerLight : crOuterLight);
+				if ( bRun && crThis == crRun && i32RunR == X ) {
+					i32RunR = XEnd;
+				}
+				else {
+					Flush();
+					bRun = true;
+					crRun = crThis;
+					i32RunL = X;
+					i32RunR = XEnd;
+				}
+			}
+			Flush();
+		}
+	}
+
+	/**
+	 * Gets the color of the edit box from the color of the cell beneath it: a little whiter, or a little darker if the cell is white.
+	 *
+	 * \param _crBase The cell's background color.
+	 * \return Returns the edit box's color.
+	 **/
+	COLORREF CHexEditorControl::EditBoxColor( COLORREF _crBase ) {
+		const uint32_t ui32R = GetRValue( _crBase ), ui32G = GetGValue( _crBase ), ui32B = GetBValue( _crBase );
+		const uint32_t ui32Luma = (ui32R * 299 + ui32G * 587 + ui32B * 114) / 1000;
+		COLORREF crRet;
+		if ( ui32Luma >= 0xF0 ) {
+			// White (or nearly): a little darker.
+			constexpr uint32_t ui32Keep = 235;
+			crRet = RGB( ui32R * ui32Keep / 255, ui32G * ui32Keep / 255, ui32B * ui32Keep / 255 );
+		}
+		else {
+			// A little whiter.
+			constexpr uint32_t ui32White = 95;
+			crRet = RGB( ui32R + (255 - ui32R) * ui32White / 255, ui32G + (255 - ui32G) * ui32White / 255, ui32B + (255 - ui32B) * ui32White / 255 );
+		}
+		return crRet | (_crBase & 0xFF000000);
+	}
+
+	/**
+	 * Fades a text color as if a translucent pane in the edit box's color lay over it.
+	 *
+	 * \param _crText The text color.
+	 * \param _crBox The edit box's color.
+	 * \return Returns the faded text color.
+	 **/
+	COLORREF CHexEditorControl::EditFadeColor( COLORREF _crText, COLORREF _crBox ) {
+		auto Blend = []( uint32_t _ui32Text, uint32_t _ui32Box ) -> uint32_t {
+			constexpr uint32_t ui32Pane = 140;		// How opaque the pane is (of 255).
+			return (_ui32Text * (255 - ui32Pane) + _ui32Box * ui32Pane) / 255;
+		};
+		return RGB( Blend( GetRValue( _crText ), GetRValue( _crBox ) ),
+			Blend( GetGValue( _crText ), GetGValue( _crBox ) ),
+			Blend( GetBValue( _crText ), GetBValue( _crBox ) ) ) | (_crText & 0xFF000000);
+	}
+
+	/**
+	 * Writes bytes to the data source: inserted or written over existing bytes.
+	 *
+	 * \param _ui64Addr The address at which to write.
+	 * \param _vBytes The bytes to write.
+	 * \param _bInsert If true and the data source allows it, the bytes are inserted.
+	 * \param _swsStatus Receives an error message on failure.
+	 * \return Returns true if the bytes were written.
+	 **/
+	bool CHexEditorControl::WriteBytes( uint64_t _ui64Addr, const std::vector<uint8_t> &_vBytes, bool _bInsert, CSecureWString &_swsStatus ) {
+		if ( !m_pheiTarget ) {
+			_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+			return false;
+		}
+		if ( m_pheiTarget->ReadOnly() ) {
+			_swsStatus = _DEC_WS_D4FFE2E0_File_is_Read_Only;
+			return false;
+		}
+		if ( _vBytes.empty() ) { return true; }
+		const uint64_t ui64OldSize = Size();
+		bool bOk;
+		if ( _bInsert && !m_pheiTarget->OverwriteOnly() ) {
+			uint64_t ui64Inserted = 0;
+			bOk = m_pheiTarget->Insert( _ui64Addr, _vBytes, ui64Inserted ) && ui64Inserted == _vBytes.size();
+		}
+		else {
+			bOk = m_pheiTarget->Overwrite( _ui64Addr, _vBytes.data(), _vBytes.size() );
+		}
+		if ( !bOk ) { _swsStatus = _DEC_WS_58763A46_Failed_to_write_to_the_target_; }
+		if ( Size() != ui64OldSize ) {
+			UpdateScrollbars();
+			if ( m_pwHexParent ) { m_pwHexParent->UpdateStatusBar_Size(); }
+		}
+		::InvalidateRect( Wnd(), nullptr, FALSE );
+		return bOk;
+	}
+
+	/**
+	 * Opens the Undo group that collects real-time edits, if it is not open, and restarts the timer that ends it.
+	 *
+	 * \param _sOldSel The selection before the edit.
+	 * \param _sgOldGesture The caret and anchors before the edit.
+	 **/
+	void CHexEditorControl::BeginRealTimeUndo( const MX_SELECTION &_sOldSel, const MX_SELECT_GESTURE &_sgOldGesture ) {
+		if ( !m_pheiTarget ) { return; }
+		if ( !m_bRtUndoOpen ) {
+			// Process memory has no Undo, so BeginUndo() fails and nothing is collected.
+			if ( !m_pheiTarget->BeginUndo() ) { return; }
+			m_bRtUndoOpen = true;
+			m_sRtOldSel = _sOldSel;
+			m_sgRtOldGesture = _sgOldGesture;
+		}
+		// The Undo item is completed 0.2 seconds after typing stops.
+		m_tRtUndo.Start( Wnd(), MX_TI_HEX_EDIT_UNDO, 200, nullptr );
+	}
+
+	/**
+	 * Edits one digit in real time (hex and binary).
+	 *
+	 * \param _ui64Addr The address of the byte.
+	 * \param _i32Idx The digit within the byte (0 is the most significant).
+	 * \param _dfFmt The format being typed.
+	 * \param _ui32Digit The digit's value.
+	 **/
+	void CHexEditorControl::RealTimeDigit( uint64_t _ui64Addr, int32_t _i32Idx, MX_DATA_FMT _dfFmt, uint32_t _ui32Digit ) {
+		try {
+			const uint32_t ui32Digits = SubCaretCountForFormat( _dfFmt );
+			const uint32_t ui32Radix = RadixForFormat( _dfFmt );
+			const uint32_t ui32Idx = uint32_t( std::clamp<int32_t>( _i32Idx, 0, int32_t( ui32Digits ) - 1 ) );
+			// A new byte is inserted when typing its first digit in Insert mode, or past the end of the data.
+			const bool bInsert = _ui64Addr >= Size() || (!IsOverwriteMode() && !m_pheiTarget->OverwriteOnly() && ui32Idx == 0);
+			uint32_t ui32Val = 0;
+			if ( !bInsert ) {
+				CHexEditorInterface::CBuffer bTmp;
+				if ( !m_pheiTarget->Read( _ui64Addr, bTmp, 1 ) || bTmp.empty() ) { return; }
+				ui32Val = bTmp[0];
+			}
+			// Replace the digit (radix 16 and 2 always fit in a byte).
+			uint32_t ui32Weight = 1;
+			for ( uint32_t I = ui32Idx + 1; I < ui32Digits; ++I ) { ui32Weight *= ui32Radix; }
+			ui32Val = ui32Val - ((ui32Val / ui32Weight) % ui32Radix) * ui32Weight + _ui32Digit * ui32Weight;
+
+			const MX_SELECTION sOldSel = m_sSel;
+			const MX_SELECT_GESTURE sgOldGesture = m_sgSelGesture;
+			BeginRealTimeUndo( sOldSel, sgOldGesture );
+			ClearSelection();
+			CSecureWString swsStatus;
+			if ( !WriteBytes( _ui64Addr, std::vector<uint8_t>( 1, uint8_t( ui32Val ) ), bInsert, swsStatus ) ) {
+				EditWarning( swsStatus );
+				return;
+			}
+			if ( ui32Idx + 1 < ui32Digits ) { SetEditedCaret( _ui64Addr, int32_t( ui32Idx + 1 ) ); }
+			else { SetEditedCaret( _ui64Addr + 1, 0 ); }
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Edits one character in real time.
+	 *
+	 * \param _ui64Addr The address of the character.
+	 * \param _c32Cp The character.
+	 **/
+	void CHexEditorControl::RealTimeText( uint64_t _ui64Addr, char32_t _c32Cp ) {
+		try {
+			std::vector<uint8_t> vBytes;
+			EncodeText( std::u32string( 1, _c32Cp ), vBytes );
+			if ( vBytes.empty() ) { return; }
+			const bool bInsert = _ui64Addr >= Size() || (!IsOverwriteMode() && !m_pheiTarget->OverwriteOnly());
+
+			const MX_SELECTION sOldSel = m_sSel;
+			const MX_SELECT_GESTURE sgOldGesture = m_sgSelGesture;
+			BeginRealTimeUndo( sOldSel, sgOldGesture );
+			ClearSelection();
+			CSecureWString swsStatus;
+			if ( !WriteBytes( _ui64Addr, vBytes, bInsert, swsStatus ) ) {
+				EditWarning( swsStatus );
+				return;
+			}
+			SetEditedCaret( _ui64Addr + vBytes.size(), 0 );
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Puts the caret after a real-time edit.
+	 *
+	 * \param _ui64Addr The new caret address.
+	 * \param _i32Idx The new sub-caret.
+	 **/
+	void CHexEditorControl::SetEditedCaret( uint64_t _ui64Addr, int32_t _i32Idx ) {
+		ClearSelection();
+		m_sgSelGesture.ui64CaretAddr = std::min( _ui64Addr, Size() );
+		m_sgSelGesture.i32CaretIdx = (m_sgSelGesture.ui64CaretAddr == _ui64Addr) ? _i32Idx : 0;
+		m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64CaretAddr;
+		StartCaretBlink();
+		EnsureVisible( m_sgSelGesture.ui64CaretAddr, FALSE );
+		::InvalidateRect( Wnd(), nullptr, FALSE );
+		if ( m_pwHexParent ) { m_pwHexParent->UpdateStatusBar_PosValue_StartSize(); }
+	}
+
+	/**
+	 * Reports a problem in the status bar.
+	 *
+	 * \param _swsStatus The message.
+	 **/
+	void CHexEditorControl::EditWarning( const CSecureWString &_swsStatus ) {
+		if ( m_pwHexParent && _swsStatus.size() ) {
+			m_pwHexParent->SetStatusBarText( _swsStatus.c_str(), true );
+		}
+	}
+
+	/**
+	 * Encodes text with the view's character set.  Characters the character set lacks become their closest match (best fit).
+	 *
+	 * \param _u32Text The text.
+	 * \param _vBytes Receives the encoded bytes (appended).
+	 **/
+	void CHexEditorControl::EncodeText( const std::u32string &_u32Text, std::vector<uint8_t> &_vBytes ) const {
+		const CCharSets::MX_CHAR_SETS csSet = CurStyle()->csCharSet;
+		auto Valid = []( char32_t _c32Cp ) -> char32_t {
+			return (_c32Cp > 0x10FFFF || (_c32Cp >= 0xD800 && _c32Cp <= 0xDFFF)) ? char32_t( 0xFFFD ) : _c32Cp;
+		};
+		switch ( csSet ) {
+			case CCharSets::MX_CS_UNICODE : {
+				for ( char32_t c32Cp : _u32Text ) {
+					c32Cp = Valid( c32Cp );
+					uint16_t ui16Units[2];
+					size_t sUnits = 1;
+					if ( c32Cp >= 0x10000 ) {
+						c32Cp -= 0x10000;
+						ui16Units[0] = uint16_t( 0xD800 + (c32Cp >> 10) );
+						ui16Units[1] = uint16_t( 0xDC00 + (c32Cp & 0x3FF) );
+						sUnits = 2;
+					}
+					else { ui16Units[0] = uint16_t( c32Cp ); }
+					for ( size_t I = 0; I < sUnits; ++I ) {
+						if ( m_bBigEnd ) {
+							_vBytes.push_back( uint8_t( ui16Units[I] >> 8 ) );
+							_vBytes.push_back( uint8_t( ui16Units[I] ) );
+						}
+						else {
+							_vBytes.push_back( uint8_t( ui16Units[I] ) );
+							_vBytes.push_back( uint8_t( ui16Units[I] >> 8 ) );
+						}
+					}
+				}
+				break;
+			}
+			case CCharSets::MX_CS_UTF8 : {
+				for ( char32_t c32Cp : _u32Text ) {
+					c32Cp = Valid( c32Cp );
+					if ( c32Cp < 0x80 ) {
+						_vBytes.push_back( uint8_t( c32Cp ) );
+					}
+					else if ( c32Cp < 0x800 ) {
+						_vBytes.push_back( uint8_t( 0xC0 | (c32Cp >> 6) ) );
+						_vBytes.push_back( uint8_t( 0x80 | (c32Cp & 0x3F) ) );
+					}
+					else if ( c32Cp < 0x10000 ) {
+						_vBytes.push_back( uint8_t( 0xE0 | (c32Cp >> 12) ) );
+						_vBytes.push_back( uint8_t( 0x80 | ((c32Cp >> 6) & 0x3F) ) );
+						_vBytes.push_back( uint8_t( 0x80 | (c32Cp & 0x3F) ) );
+					}
+					else {
+						_vBytes.push_back( uint8_t( 0xF0 | (c32Cp >> 18) ) );
+						_vBytes.push_back( uint8_t( 0x80 | ((c32Cp >> 12) & 0x3F) ) );
+						_vBytes.push_back( uint8_t( 0x80 | ((c32Cp >> 6) & 0x3F) ) );
+						_vBytes.push_back( uint8_t( 0x80 | (c32Cp & 0x3F) ) );
+					}
+				}
+				break;
+			}
+			default : {
+				// The ASCII view shows only 7-bit characters, so it gets the 7-bit code page (where best fit turns, for example, (R) into R).
+				const UINT uiCodePage = (csSet == CCharSets::MX_CS_ASCII) ? CCodePages::MX_us_ascii : UINT( CharSet().ui32Code );
+				for ( char32_t c32Cp : _u32Text ) {
+					c32Cp = Valid( c32Cp );
+					wchar_t wcUnits[2];
+					int iUnits = 1;
+					if ( c32Cp >= 0x10000 ) {
+						const char32_t c32Tmp = c32Cp - 0x10000;
+						wcUnits[0] = wchar_t( 0xD800 + (c32Tmp >> 10) );
+						wcUnits[1] = wchar_t( 0xDC00 + (c32Tmp & 0x3FF) );
+						iUnits = 2;
+					}
+					else { wcUnits[0] = wchar_t( c32Cp ); }
+					// No WC_NO_BEST_FIT_CHARS: characters the code page lacks become their best fit, or the code page's default character.
+					char cBytes[16];
+					int iLen = ::WideCharToMultiByte( uiCodePage, 0, wcUnits, iUnits, cBytes, int( sizeof( cBytes ) ), nullptr, nullptr );
+					if ( iLen > 0 ) {
+						for ( int I = 0; I < iLen; ++I ) { _vBytes.push_back( uint8_t( cBytes[I] ) ); }
+					}
+					else {
+						// The code page is not available.
+						_vBytes.push_back( uint8_t( c32Cp < 0x80 ? c32Cp : U'?' ) );
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Resolves escape sequences in typed text.  Each is a backslash followed by one of: a backslash, ', ", ?, a, b, f, n, r, t, v,
+	 *	space, xHH, uHHHH (two in a row for a surrogate pair), UHHHHHHHH, up to three octal digits, or N{name}.  An invalid escape is
+	 *	kept as typed.
+	 *
+	 * \param _u32Raw The typed text.
+	 * \param _u32Out Receives the resolved text.  An unfinished escape at the end is kept as typed.
+	 * \return Returns true if the text ends in an unfinished escape (more typing could change its meaning).
+	 **/
+	bool CHexEditorControl::ResolveEditEscapes( const std::u32string &_u32Raw, std::u32string &_u32Out ) {
+		const size_t sLen = _u32Raw.size();
+		auto Hex = []( char32_t _c32Cp ) -> int32_t { return DigitValue( _c32Cp, 16 ); };
+		// Counts up to _sMax hex digits at _sPos.
+		auto CountHex = [&]( size_t _sPos, size_t _sMax, uint32_t &_ui32Val ) -> size_t {
+			size_t sCnt = 0;
+			_ui32Val = 0;
+			while ( sCnt < _sMax && _sPos + sCnt < sLen && Hex( _u32Raw[_sPos+sCnt] ) >= 0 ) {
+				_ui32Val = (_ui32Val << 4) | uint32_t( Hex( _u32Raw[_sPos+sCnt] ) );
+				++sCnt;
+			}
+			return sCnt;
+		};
+		auto Valid = []( uint32_t _ui32Cp ) -> char32_t {
+			return (_ui32Cp > 0x10FFFF || (_ui32Cp >= 0xD800 && _ui32Cp <= 0xDFFF)) ? char32_t( 0xFFFD ) : char32_t( _ui32Cp );
+		};
+		// The rest of the text is an unfinished escape: keep it as typed.
+		auto Open = [&]( size_t _sFrom ) -> bool {
+			_u32Out.append( _u32Raw, _sFrom, std::u32string::npos );
+			return true;
+		};
+
+		for ( size_t I = 0; I < sLen; ) {
+			const char32_t c32This = _u32Raw[I];
+			if ( c32This != U'\\' ) {
+				_u32Out.push_back( c32This );
+				++I;
+				continue;
+			}
+			if ( I + 1 >= sLen ) { return Open( I ); }
+			const char32_t c32Next = _u32Raw[I+1];
+			switch ( c32Next ) {
+				case U'\\' : { _u32Out.push_back( U'\\' ); I += 2; continue; }
+				case U'\'' : { _u32Out.push_back( U'\'' ); I += 2; continue; }
+				case U'"' : { _u32Out.push_back( U'"' ); I += 2; continue; }
+				case U'?' : { _u32Out.push_back( U'?' ); I += 2; continue; }
+				case U' ' : { _u32Out.push_back( U' ' ); I += 2; continue; }
+				case U'a' : { _u32Out.push_back( U'\a' ); I += 2; continue; }
+				case U'b' : { _u32Out.push_back( U'\b' ); I += 2; continue; }
+				case U'f' : { _u32Out.push_back( U'\f' ); I += 2; continue; }
+				case U'n' : { _u32Out.push_back( U'\n' ); I += 2; continue; }
+				case U'r' : { _u32Out.push_back( U'\r' ); I += 2; continue; }
+				case U't' : { _u32Out.push_back( U'\t' ); I += 2; continue; }
+				case U'v' : { _u32Out.push_back( U'\v' ); I += 2; continue; }
+				case U'x' : {
+					uint32_t ui32Val;
+					const size_t sCnt = CountHex( I + 2, 2, ui32Val );
+					// \x takes one or two hex digits; with one at the end a second may still come.
+					if ( I + 2 + sCnt >= sLen && sCnt < 2 ) { return Open( I ); }
+					if ( !sCnt ) { break; }		// Invalid.
+					_u32Out.push_back( char32_t( ui32Val ) );
+					I += 2 + sCnt;
+					continue;
+				}
+				case U'u' : {
+					uint32_t ui32Val;
+					const size_t sCnt = CountHex( I + 2, 4, ui32Val );
+					if ( sCnt < 4 ) {
+						if ( I + 2 + sCnt >= sLen ) { return Open( I ); }
+						break;		// Invalid.
+					}
+					size_t sNext = I + 6;
+					if ( ui32Val >= 0xD800 && ui32Val <= 0xDBFF ) {
+						// A high surrogate wants a low surrogate in another \u right after it.
+						const char32_t c32Pat[2] = { U'\\', U'u' };
+						size_t sMatch = 0;
+						while ( sMatch < 2 && sNext + sMatch < sLen && _u32Raw[sNext+sMatch] == c32Pat[sMatch] ) { ++sMatch; }
+						if ( sNext + sMatch >= sLen && sMatch < 2 ) { return Open( I ); }
+						if ( sMatch == 2 ) {
+							uint32_t ui32Low;
+							const size_t sLowCnt = CountHex( sNext + 2, 4, ui32Low );
+							if ( sLowCnt < 4 && sNext + 2 + sLowCnt >= sLen ) { return Open( I ); }
+							if ( sLowCnt == 4 && ui32Low >= 0xDC00 && ui32Low <= 0xDFFF ) {
+								_u32Out.push_back( char32_t( 0x10000 + ((ui32Val - 0xD800) << 10) + (ui32Low - 0xDC00) ) );
+								I = sNext + 6;
+								continue;
+							}
+						}
+					}
+					_u32Out.push_back( Valid( ui32Val ) );
+					I = sNext;
+					continue;
+				}
+				case U'U' : {
+					uint32_t ui32Val;
+					const size_t sCnt = CountHex( I + 2, 8, ui32Val );
+					if ( sCnt < 8 ) {
+						if ( I + 2 + sCnt >= sLen ) { return Open( I ); }
+						break;		// Invalid.
+					}
+					_u32Out.push_back( Valid( ui32Val ) );
+					I += 10;
+					continue;
+				}
+				case U'N' : {
+					if ( I + 2 >= sLen ) { return Open( I ); }
+					if ( _u32Raw[I+2] != U'{' ) { break; }		// Invalid.
+					const size_t sClose = _u32Raw.find( U'}', I + 3 );
+					if ( sClose == std::u32string::npos ) { return Open( I ); }
+					// Let the expression evaluator look the name up.
+					std::string sEsc = "\\N{";
+					bool bAscii = true;
+					for ( size_t J = I + 3; J < sClose; ++J ) {
+						if ( _u32Raw[J] >= 0x80 ) { bAscii = false; break; }
+						sEsc.push_back( char( _u32Raw[J] ) );
+					}
+					sEsc.push_back( '}' );
+					if ( bAscii ) {
+						size_t sCharLen = 0;
+						bool bFound = false;
+						const uint64_t ui64Val = ee::CExpEval::ResolveEscape( sEsc.c_str(), sEsc.size(), sCharLen, false, &bFound );
+						if ( bFound && sCharLen == sEsc.size() ) {
+							_u32Out.push_back( Valid( uint32_t( ui64Val ) ) );
+							I = sClose + 1;
+							continue;
+						}
+					}
+					break;		// Invalid.
+				}
+				default : {
+					if ( c32Next >= U'0' && c32Next <= U'7' ) {
+						// Up to three octal digits; with fewer at the end, more may still come.
+						size_t sCnt = 0;
+						uint32_t ui32Val = 0;
+						while ( sCnt < 3 && I + 1 + sCnt < sLen && _u32Raw[I+1+sCnt] >= U'0' && _u32Raw[I+1+sCnt] <= U'7' ) {
+							ui32Val = (ui32Val << 3) | uint32_t( _u32Raw[I+1+sCnt] - U'0' );
+							++sCnt;
+						}
+						if ( sCnt < 3 && I + 1 + sCnt >= sLen ) { return Open( I ); }
+						_u32Out.push_back( char32_t( ui32Val ) );
+						I += 1 + sCnt;
+						continue;
+					}
+				}
+			}
+			// An invalid escape: the backslash is kept as typed.
+			_u32Out.push_back( U'\\' );
+			++I;
+		}
+		return false;
+	}
+
+	/**
+	 * Converts typed text to the bytes of a multi-byte value.
+	 *
+	 * \param _dfFmt The format of the value.
+	 * \param _wsText The typed text.
+	 * \param _vBytes Receives the bytes (appended, little-endian).
+	 * \return Returns false if the text is not a valid value of the format.
+	 **/
+	bool CHexEditorControl::ParseValue( MX_DATA_FMT _dfFmt, const std::wstring &_wsText, std::vector<uint8_t> &_vBytes ) {
+		auto Append = [&]( const void * _pvData, size_t _sSize ) {
+			const uint8_t * pui8Data = static_cast<const uint8_t *>(_pvData);
+			_vBytes.insert( _vBytes.end(), pui8Data, pui8Data + _sSize );
+		};
+		// Unsigned decimal or hexadecimal digits, with overflow checking.
+		auto ParseUnsigned = [&]( size_t _sFrom, uint32_t _ui32Radix, uint64_t &_ui64Val ) -> bool {
+			if ( _sFrom >= _wsText.size() ) { return false; }
+			_ui64Val = 0;
+			for ( size_t I = _sFrom; I < _wsText.size(); ++I ) {
+				const int32_t i32Digit = DigitValue( char32_t( _wsText[I] ), _ui32Radix );
+				if ( i32Digit < 0 ) { return false; }
+				if ( _ui64Val > (UINT64_MAX - uint64_t( i32Digit )) / _ui32Radix ) { return false; }
+				_ui64Val = _ui64Val * _ui32Radix + uint64_t( i32Digit );
+			}
+			return true;
+		};
+		auto ParseSigned = [&]( int64_t _i64Min, int64_t _i64Max, int64_t &_i64Val ) -> bool {
+			const bool bNeg = !_wsText.empty() && _wsText[0] == L'-';
+			const size_t sFrom = (!_wsText.empty() && (_wsText[0] == L'-' || _wsText[0] == L'+')) ? 1 : 0;
+			uint64_t ui64Mag;
+			if ( !ParseUnsigned( sFrom, 10, ui64Mag ) ) { return false; }
+			if ( bNeg ) {
+				if ( ui64Mag > uint64_t( -(_i64Min + 1) ) + 1 ) { return false; }
+				_i64Val = (ui64Mag == 0) ? 0 : -int64_t( ui64Mag - 1 ) - 1;
+			}
+			else {
+				if ( ui64Mag > uint64_t( _i64Max ) ) { return false; }
+				_i64Val = int64_t( ui64Mag );
+			}
+			return true;
+		};
+		auto ParseDouble = [&]( double &_dVal ) -> bool {
+			if ( _wsText.empty() ) { return false; }
+			wchar_t * pwcEnd = nullptr;
+			_dVal = std::wcstod( _wsText.c_str(), &pwcEnd );
+			return pwcEnd == _wsText.c_str() + _wsText.size();
+		};
+		auto Pcm = [&]( double _dScale, double _dBias, int64_t _i64Min, int64_t _i64Max, size_t _sBytes ) -> bool {
+			double dVal;
+			if ( !ParseDouble( dVal ) || !(dVal >= -1.0 && dVal <= 1.0) ) { return false; }
+			const int64_t i64Val = std::clamp<int64_t>( int64_t( std::llround( dVal * _dScale + _dBias ) ), _i64Min, _i64Max );
+			Append( &i64Val, _sBytes );
+			return true;
+		};
+
+		switch ( _dfFmt ) {
+#define MX_UNSIGNED( CASE, TYPE )																	\
+			case CASE : {																			\
+				uint64_t ui64Val;																	\
+				if ( !ParseUnsigned( 0, 10, ui64Val ) || ui64Val > std::numeric_limits<TYPE>::max() ) { return false; }	\
+				const TYPE tVal = TYPE( ui64Val );													\
+				Append( &tVal, sizeof( tVal ) );													\
+				return true;																		\
+			}
+#define MX_SIGNED( CASE, TYPE )																		\
+			case CASE : {																			\
+				int64_t i64Val;																		\
+				if ( !ParseSigned( std::numeric_limits<TYPE>::min(), std::numeric_limits<TYPE>::max(), i64Val ) ) { return false; }	\
+				const TYPE tVal = TYPE( i64Val );													\
+				Append( &tVal, sizeof( tVal ) );													\
+				return true;																		\
+			}
+#define MX_POINTER( CASE, TYPE )																	\
+			case CASE : {																			\
+				uint64_t ui64Val;																	\
+				if ( !ParseUnsigned( 0, 16, ui64Val ) || ui64Val > std::numeric_limits<TYPE>::max() ) { return false; }	\
+				const TYPE tVal = TYPE( ui64Val );													\
+				Append( &tVal, sizeof( tVal ) );													\
+				return true;																		\
+			}
+			MX_UNSIGNED( MX_DF_UINT8, uint8_t )
+			MX_UNSIGNED( MX_DF_UINT16, uint16_t )
+			MX_UNSIGNED( MX_DF_UINT32, uint32_t )
+			MX_UNSIGNED( MX_DF_UINT64, uint64_t )
+			MX_SIGNED( MX_DF_INT8, int8_t )
+			MX_SIGNED( MX_DF_INT16, int16_t )
+			MX_SIGNED( MX_DF_INT32, int32_t )
+			MX_SIGNED( MX_DF_INT64, int64_t )
+			MX_POINTER( MX_DF_POINTER16, uint16_t )
+			MX_POINTER( MX_DF_POINTER32, uint32_t )
+			MX_POINTER( MX_DF_POINTER64, uint64_t )
+#undef MX_POINTER
+#undef MX_SIGNED
+#undef MX_UNSIGNED
+			case MX_DF_FLOAT32 : {
+				double dVal;
+				if ( !ParseDouble( dVal ) ) { return false; }
+				const float fVal = float( dVal );
+				Append( &fVal, sizeof( fVal ) );
+				return true;
+			}
+			case MX_DF_FLOAT64 : {
+				double dVal;
+				if ( !ParseDouble( dVal ) ) { return false; }
+				Append( &dVal, sizeof( dVal ) );
+				return true;
+			}
+			case MX_DF_FLOAT16 : {
+				double dVal;
+				if ( !ParseDouble( dVal ) ) { return false; }
+				const uint16_t ui16Val = ee::CFloat16( dVal ).RawValue();
+				Append( &ui16Val, sizeof( ui16Val ) );
+				return true;
+			}
+			// The same layouts DrawArea() displays.
+			case MX_DF_FLOAT10 : {}				MX_FALLTHROUGH
+			case MX_DF_FLOAT11 : {}				MX_FALLTHROUGH
+			case MX_DF_BFLOAT16 : {
+				double dVal;
+				if ( !ParseDouble( dVal ) ) { return false; }
+				ee::CFloatX fFloat;
+				switch ( _dfFmt ) {
+					case MX_DF_FLOAT10 : { fFloat.CreateFromDouble( dVal, 5, 6, true, false ); break; }
+					case MX_DF_FLOAT11 : { fFloat.CreateFromDouble( dVal, 5, 7, true, false ); break; }
+					default : { fFloat.CreateFromDouble( dVal, 8, 8, true, true ); break; }
+				}
+				const uint16_t ui16Val = uint16_t( fFloat.AsUint64() );
+				Append( &ui16Val, sizeof( ui16Val ) );
+				return true;
+			}
+			// The inverses of DrawArea()'s PCM conversions.
+			case MX_DF_PCM8 : { return Pcm( 127.0, 128.0, 0, 255, 1 ); }
+			case MX_DF_PCM16 : { return Pcm( 32767.0, 0.0, INT16_MIN, INT16_MAX, 2 ); }
+			case MX_DF_PCM24 : { return Pcm( 8388607.0, 0.0, -8388608, 8388607, 3 ); }
+			case MX_DF_PCM32 : { return Pcm( 2147483647.0, 0.0, INT32_MIN, INT32_MAX, 4 ); }
+			default : { return false; }
+		}
+	}
+
+	/**
+	 * Determines whether a character can be part of a typed value of a multi-byte format.
+	 *
+	 * \param _dfFmt The format of the value.
+	 * \param _c32Cp The character.
+	 * \param _wsSoFar What has been typed of the value so far.
+	 * \return Returns true if the character can be typed.
+	 **/
+	bool CHexEditorControl::ValueCharValid( MX_DATA_FMT _dfFmt, char32_t _c32Cp, const std::wstring &_wsSoFar ) {
+		const bool bDigit = _c32Cp >= U'0' && _c32Cp <= U'9';
+		switch ( _dfFmt ) {
+			case MX_DF_UINT8 : {}				MX_FALLTHROUGH
+			case MX_DF_UINT16 : {}				MX_FALLTHROUGH
+			case MX_DF_UINT32 : {}				MX_FALLTHROUGH
+			case MX_DF_UINT64 : { return bDigit; }
+			case MX_DF_INT8 : {}				MX_FALLTHROUGH
+			case MX_DF_INT16 : {}				MX_FALLTHROUGH
+			case MX_DF_INT32 : {}				MX_FALLTHROUGH
+			case MX_DF_INT64 : { return bDigit || ((_c32Cp == U'-' || _c32Cp == U'+') && _wsSoFar.empty()); }
+			case MX_DF_POINTER16 : {}			MX_FALLTHROUGH
+			case MX_DF_POINTER32 : {}			MX_FALLTHROUGH
+			case MX_DF_POINTER64 : { return DigitValue( _c32Cp, 16 ) >= 0; }
+			default : {
+				// Floating-point and PCM values.
+				return bDigit || _c32Cp == U'.' || _c32Cp == U'-' || _c32Cp == U'+' || _c32Cp == U'e' || _c32Cp == U'E';
+			}
+		}
 	}
 
 }	// namespace mx

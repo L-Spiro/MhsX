@@ -23428,3 +23428,30 @@
 #define _DEC_S_3209C685__Waiting_for_it_to_re_open_ mx::CStringDecoder::DecodeToString( _T_3209C685__Waiting_for_it_to_re_open_, _LEN_3209C685 )
 #define _DEC_WS_3209C685__Waiting_for_it_to_re_open_ mx::CStringDecoder::DecodeToWString( _T_3209C685__Waiting_for_it_to_re_open_, _LEN_3209C685 )
 
+// Real-Time Editing in &Files
+
+#define _T_495A2EF7_Real_Time_Editing_in__Files "\xDA\x33\x31\x07\xBF\x1D\xF7\x34\x35\xE8\x0E\x32\xFB\x0F\x30\xF6\x35\xF0\x04\x00\xE9\xB4\x0D\x39\x34\x2E\x41"
+#define _LEN_495A2EF7 27
+#define _T_LEN_495A2EF7_Real_Time_Editing_in__Files _T_495A2EF7_Real_Time_Editing_in__Files, _LEN_495A2EF7
+#define _DEC_495A2EF7_Real_Time_Editing_in__Files( STR ) mx::CStringDecoder::Decode( _T_495A2EF7_Real_Time_Editing_in__Files, _LEN_495A2EF7, STR )
+#define _DEC_S_495A2EF7_Real_Time_Editing_in__Files mx::CStringDecoder::DecodeToString( _T_495A2EF7_Real_Time_Editing_in__Files, _LEN_495A2EF7 )
+#define _DEC_WS_495A2EF7_Real_Time_Editing_in__Files mx::CStringDecoder::DecodeToWString( _T_495A2EF7_Real_Time_Editing_in__Files, _LEN_495A2EF7 )
+
+// Real-Time Text Editing in R&AM
+
+#define _T_43849E7E_Real_Time_Text_Editing_in_R_AM "\xDA\x33\x31\x07\xBF\x1D\xF7\x34\x35\xE8\x1D\x33\x0A\x0F\xE7\xCD\x32\x39\x0F\xFB\x37\xF5\xE7\x39\x36\xE9\x20\xB8\xDC\x14"
+#define _LEN_43849E7E 30
+#define _T_LEN_43849E7E_Real_Time_Text_Editing_in_R_AM _T_43849E7E_Real_Time_Text_Editing_in_R_AM, _LEN_43849E7E
+#define _DEC_43849E7E_Real_Time_Text_Editing_in_R_AM( STR ) mx::CStringDecoder::Decode( _T_43849E7E_Real_Time_Text_Editing_in_R_AM, _LEN_43849E7E, STR )
+#define _DEC_S_43849E7E_Real_Time_Text_Editing_in_R_AM mx::CStringDecoder::DecodeToString( _T_43849E7E_Real_Time_Text_Editing_in_R_AM, _LEN_43849E7E )
+#define _DEC_WS_43849E7E_Real_Time_Text_Editing_in_R_AM mx::CStringDecoder::DecodeToWString( _T_43849E7E_Real_Time_Text_Editing_in_R_AM, _LEN_43849E7E )
+
+// Failed to write to the target.
+
+#define _T_58763A46_Failed_to_write_to_the_target_ "\xCE\x2F\x39\x07\xF7\x2D\xAE\x3B\x3F\xE8\x40\x40\xFB\x0F\x2C\xA8\x42\x3F\xBB\x06\x31\xF3\xE7\x44\x29\x3B\x35\xF7\x0F\xF5"
+#define _LEN_58763A46 30
+#define _T_LEN_58763A46_Failed_to_write_to_the_target_ _T_58763A46_Failed_to_write_to_the_target_, _LEN_58763A46
+#define _DEC_58763A46_Failed_to_write_to_the_target_( STR ) mx::CStringDecoder::Decode( _T_58763A46_Failed_to_write_to_the_target_, _LEN_58763A46, STR )
+#define _DEC_S_58763A46_Failed_to_write_to_the_target_ mx::CStringDecoder::DecodeToString( _T_58763A46_Failed_to_write_to_the_target_, _LEN_58763A46 )
+#define _DEC_WS_58763A46_Failed_to_write_to_the_target_ mx::CStringDecoder::DecodeToWString( _T_58763A46_Failed_to_write_to_the_target_, _LEN_58763A46 )
+
