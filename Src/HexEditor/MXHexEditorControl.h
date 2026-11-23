@@ -1271,6 +1271,18 @@ namespace mx {
 			MX_EK_VALUES,																					/**< Multi-byte numbers: one typed string per value, separated by spaces, commas or tabs. */
 		};
 
+		/** Cursor movements within the edit box. */
+		enum MX_EDIT_NAV {
+			MX_EN_LEFT,																						/**< Left arrow. */
+			MX_EN_RIGHT,																					/**< Right arrow. */
+			MX_EN_UP,																						/**< Up arrow: one row up. */
+			MX_EN_DOWN,																						/**< Down arrow: one row down. */
+			MX_EN_HOME,																						/**< Home: the start of the value (or of the edit box for digits). */
+			MX_EN_END,																						/**< End: the end of the value (or of the edit box for digits). */
+			MX_EN_NEXT_ITEM,																				/**< Tab or Space: the next cell or value. */
+			MX_EN_PREV_ITEM,																				/**< Shift+Tab: the previous cell or value. */
+		};
+
 		/** The edit box. */
 		struct MX_EDIT_STATE {
 			bool									bActive				= false;							/**< The edit box is open. */
@@ -1290,7 +1302,9 @@ namespace mx {
 			std::u32string							u32Text;												/**< MX_EK_TEXT: the typed text, escapes unresolved. */
 			std::vector<uint8_t>					vPreview;												/**< MX_EK_TEXT: the bytes the text encodes to now. */
 
-			std::vector<std::wstring>				vTexts;													/**< MX_EK_VALUES: the text of each value; the last is the one being typed. */
+			std::vector<std::wstring>				vTexts;													/**< MX_EK_VALUES: the text of each value (empty if skipped over). */
+			size_t									sItem				= 0;								/**< MX_EK_VALUES: the value under the cursor. */
+			size_t									sCursor				= 0;								/**< MX_EK_VALUES: the cursor within the value under it.  MX_EK_TEXT: the cursor within u32Text. */
 
 			MX_SELECTION							sOldSel;												/**< The selection before the edit began. */
 			MX_SELECT_GESTURE						sgOldGesture;											/**< The caret and anchors before the edit began. */
@@ -1529,9 +1543,63 @@ namespace mx {
 		void										EditType( char32_t _c32Cp );
 
 		/**
-		 * Removes the last thing typed into the edit box.  Closes the edit box if nothing typed remains.
+		 * Removes what is typed before the cursor in the edit box (a digit goes back to what it was).  At the start of a value, moves to
+		 *	the end of the previous one.  Closes the edit box if nothing typed remains.
 		 **/
 		void										EditBackspace();
+
+		/**
+		 * Removes what is typed under the cursor in the edit box (a digit goes back to what it was).  Closes the edit box if nothing typed
+		 *	remains.
+		 **/
+		void										EditDelete();
+
+		/**
+		 * Finishes a change made by EditBackspace() or EditDelete(): closes the edit box if nothing typed remains, otherwise trims it and
+		 *	redraws it.
+		 **/
+		void										EditChanged();
+
+		/**
+		 * Determines whether anything typed remains in the edit box.
+		 *
+		 * \return Returns true if at least one digit, character or value is typed.
+		 **/
+		bool										EditHasTyping() const;
+
+		/**
+		 * Moves the cursor in the edit box.  Digits: by digit, by cell (Tab, Space, Shift+Tab) or by row; values: by character within a
+		 *	value, by value (Tab, Space, Shift+Tab) or by row; text: by character.  Moving past either end of the edit box extends it,
+		 *	except before its start in Insert mode and past the end of process memory.
+		 *
+		 * \param _enNav The movement.
+		 **/
+		void										EditNavigate( MX_EDIT_NAV _enNav );
+
+		/**
+		 * Grows the edit box backward by whole cells (digits) or values.  Not possible in Insert mode (the edit box is new data inserted
+		 *	at its start) or before address 0.
+		 *
+		 * \param _sCount The number of cells or values to add before the start.
+		 * \return Returns true if the edit box grew.
+		 **/
+		bool										EditPrepend( size_t _sCount );
+
+		/**
+		 * Determines whether the edit box can cover a cell (digits) or value.  Process memory cannot grow, so nothing past its end can be
+		 *	covered.
+		 *
+		 * \param _sIdx The index of the cell or value relative to the start of the edit box.
+		 * \return Returns true if the cell or value can be part of the edit box.
+		 **/
+		bool										EditCanCover( size_t _sIdx ) const;
+
+		/**
+		 * Removes untyped cells (digits) or empty values from the ends of the edit box.
+		 *
+		 * \param _bKeepCursor If true, the cell or value under the cursor is kept.  If false and nothing is typed, everything is removed.
+		 **/
+		void										TrimEdit( bool _bKeepCursor );
 
 		/**
 		 * Writes an automatically committing edit (real-time text editing ending in an escape) as part of the real-time Undo group.
@@ -1551,7 +1619,7 @@ namespace mx {
 		void										UpdateEditPreview();
 
 		/**
-		 * Moves the caret to where the next character typed into the edit box goes and scrolls it into view.
+		 * Moves the caret to the edit box's cursor (where the next character typed goes) and scrolls it into view.
 		 **/
 		void										UpdateEditCaret();
 
@@ -1599,8 +1667,8 @@ namespace mx {
 		const CHexEditorInterface::CBuffer &		DisplayBuffer( uint64_t _ui64BufAddr, size_t _sBufCap );
 
 		/**
-		 * Draws the text of a cell inside the edit box when it differs from the normal drawing: typed values, digits typed over in part
-		 *	(typed digits normal, the rest faded), and empty cells past the end of the data.
+		 * Draws the text of a cell inside the edit box when it differs from the normal drawing: typed values (with the text cursor in the
+		 *	value under it), digits typed over in part (typed digits normal, the rest faded), and empty new cells.
 		 * 
 		 * \param _hDc The device context.
 		 * \param _ui64Address The address of the cell.
@@ -1732,10 +1800,10 @@ namespace mx {
 		 * 
 		 * \param _dfFmt The format of the value.
 		 * \param _c32Cp The character.
-		 * \param _wsSoFar What has been typed of the value so far.
+		 * \param _bSignAllowed True if a sign can be typed here (at the start of a value that has none).
 		 * \return Returns true if the character can be typed.
 		 **/
-		static bool									ValueCharValid( MX_DATA_FMT _dfFmt, char32_t _c32Cp, const std::wstring &_wsSoFar );
+		static bool									ValueCharValid( MX_DATA_FMT _dfFmt, char32_t _c32Cp, bool _bSignAllowed );
 
 		/**
 		 * Gets how the edit box treats a format.

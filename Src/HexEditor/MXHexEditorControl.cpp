@@ -1810,10 +1810,20 @@ namespace mx {
 					EditBackspace();
 					return lsw::CWidget::LSW_H_HANDLED;
 				}
+				case VK_DELETE : {
+					EditDelete();
+					return lsw::CWidget::LSW_H_HANDLED;
+				}
+				// The arrow keys, Home and End move within the edit box (Tab, Space and Shift+Tab arrive as characters).
+				case VK_LEFT : { EditNavigate( MX_EN_LEFT ); return lsw::CWidget::LSW_H_HANDLED; }
+				case VK_RIGHT : { EditNavigate( MX_EN_RIGHT ); return lsw::CWidget::LSW_H_HANDLED; }
+				case VK_UP : { EditNavigate( MX_EN_UP ); return lsw::CWidget::LSW_H_HANDLED; }
+				case VK_DOWN : { EditNavigate( MX_EN_DOWN ); return lsw::CWidget::LSW_H_HANDLED; }
+				case VK_HOME : { EditNavigate( MX_EN_HOME ); return lsw::CWidget::LSW_H_HANDLED; }
+				case VK_END : { EditNavigate( MX_EN_END ); return lsw::CWidget::LSW_H_HANDLED; }
 				case VK_INSERT : { break; }		// Applies to the next edit.
 				default : {
-					// Moving the caret or deleting would leave the edit box behind, so only typing, Enter, Escape and Backspace work
-					//	until it is closed.
+					// Anything else (Page Up/Down, etc.) would leave the edit box behind.
 					return lsw::CWidget::LSW_H_HANDLED;
 				}
 			}
@@ -4863,21 +4873,27 @@ namespace mx {
 			return false;
 		}
 		try {
+			// Where the caret goes afterward: where it is in the edit box, or after the last value if it is at the end of it.
+			uint64_t ui64Caret = m_sgSelGesture.ui64CaretAddr;
+			int32_t i32CaretIdx = m_sgSelGesture.i32CaretIdx;
+			if ( m_esEdit.ekKind == MX_EK_VALUES && m_esEdit.sItem + 1 == m_esEdit.vTexts.size() &&
+				m_esEdit.vTexts[m_esEdit.sItem].size() && m_esEdit.sCursor == m_esEdit.vTexts[m_esEdit.sItem].size() ) {
+				ui64Caret = m_esEdit.ui64Start + uint64_t( m_esEdit.sItem + 1 ) * StrideForFormat( m_esEdit.dfFmt );
+				i32CaretIdx = 0;
+			}
+
+			// Only what lies between the first and last things typed is written.
+			const MX_EDIT_STATE esSaved = m_esEdit;
+			TrimEdit( false );
 			std::vector<uint8_t> vBytes;
-			// An invalid value leaves the edit box open so that it can be corrected.
-			if ( !EditBytes( vBytes, _swsStatus ) ) { return false; }
+			if ( !EditBytes( vBytes, _swsStatus ) ) {
+				// An invalid value leaves the edit box open so that it can be corrected.
+				m_esEdit = esSaved;
+				return false;
+			}
 			if ( vBytes.empty() ) {
 				CancelEdit();
 				return true;
-			}
-
-			// Where the caret goes afterward: where the next character would have been typed.
-			uint64_t ui64Caret = m_esEdit.ui64Start + vBytes.size();
-			int32_t i32CaretIdx = 0;
-			if ( m_esEdit.ekKind == MX_EK_DIGITS ) {
-				const size_t sDigits = SubCaretCountForFormat( m_esEdit.dfFmt );
-				ui64Caret = m_esEdit.ui64Start + m_esEdit.sDigitPos / sDigits;
-				i32CaretIdx = int32_t( m_esEdit.sDigitPos % sDigits );
 			}
 
 			// Close the edit box first so that the display shows the real data from here on.
@@ -5084,7 +5100,7 @@ namespace mx {
 				break;
 			}
 			case MX_EK_VALUES : {
-				if ( !ValueCharValid( dfFmt, _c32Cp, std::wstring() ) ) { return; }		// Skipped (separators too: nothing to separate yet).
+				if ( !ValueCharValid( dfFmt, _c32Cp, true ) ) { return; }		// Skipped (separators too: nothing to separate yet).
 				BeginEdit( dfFmt, bRight, ui64Addr, false );
 				EditType( _c32Cp );
 				break;
@@ -5158,23 +5174,36 @@ namespace mx {
 	void CHexEditorControl::EditType( char32_t _c32Cp ) {
 		if ( !m_esEdit.bActive ) { return; }
 		try {
+			// Outside of text, Tab, Space, comma and semicolon move between cells or values (Shift+Tab moves back).
+			if ( m_esEdit.ekKind != MX_EK_TEXT &&
+				(_c32Cp == U'\t' || _c32Cp == U' ' || (m_esEdit.ekKind == MX_EK_VALUES && (_c32Cp == U',' || _c32Cp == U';'))) ) {
+				const bool bBack = _c32Cp == U'\t' && (::GetKeyState( VK_SHIFT ) & 0x8000) != 0;
+				EditNavigate( bBack ? MX_EN_PREV_ITEM : MX_EN_NEXT_ITEM );
+				return;
+			}
 			switch ( m_esEdit.ekKind ) {
 				case MX_EK_DIGITS : {
 					const int32_t i32Digit = DigitValue( _c32Cp, RadixForFormat( m_esEdit.dfFmt ) );
 					if ( i32Digit < 0 ) { return; }
 					const size_t sDigits = SubCaretCountForFormat( m_esEdit.dfFmt );
 					const size_t sCell = m_esEdit.sDigitPos / sDigits;
+					if ( !EditCanCover( sCell ) ) { return; }
 					EnsureEditCell( sCell );
 					m_esEdit.vDigits[m_esEdit.sDigitPos] = uint8_t( i32Digit );
 					m_esEdit.vTypedMask[sCell] |= uint8_t( 1U << (m_esEdit.sDigitPos % sDigits) );
-					++m_esEdit.sDigitPos;
-					// The edit box covers the cell where the next digit goes.
-					EnsureEditCell( m_esEdit.sDigitPos / sDigits );
+					// The edit box covers the cell where the next digit goes (unless that is past the end of process memory).
+					const size_t sNextCell = (m_esEdit.sDigitPos + 1) / sDigits;
+					if ( EditCanCover( sNextCell ) ) {
+						++m_esEdit.sDigitPos;
+						EnsureEditCell( sNextCell );
+					}
 					break;
 				}
 				case MX_EK_TEXT : {
-					// Every character is typed, Tab included.
-					m_esEdit.u32Text.push_back( _c32Cp );
+					// Every character is typed, Tab and Space included.
+					m_esEdit.sCursor = std::min( m_esEdit.sCursor, m_esEdit.u32Text.size() );
+					m_esEdit.u32Text.insert( m_esEdit.u32Text.begin() + m_esEdit.sCursor, _c32Cp );
+					++m_esEdit.sCursor;
 					UpdateEditPreview();
 					if ( m_esEdit.bAutoCommit && !m_esEdit.bEscapeOpen ) {
 						CommitAutoEdit();
@@ -5183,14 +5212,13 @@ namespace mx {
 					break;
 				}
 				case MX_EK_VALUES : {
-					if ( _c32Cp == U' ' || _c32Cp == U',' || _c32Cp == U';' || _c32Cp == U'\t' ) {
-						// Move on to the next value (nothing to separate if the current value is empty).
-						if ( !m_esEdit.vTexts.back().empty() ) { m_esEdit.vTexts.push_back( std::wstring() ); }
-					}
-					else if ( ValueCharValid( m_esEdit.dfFmt, _c32Cp, m_esEdit.vTexts.back() ) ) {
-						m_esEdit.vTexts.back().push_back( wchar_t( _c32Cp ) );
-					}
-					else { return; }
+					std::wstring &wsItem = m_esEdit.vTexts[m_esEdit.sItem];
+					m_esEdit.sCursor = std::min( m_esEdit.sCursor, wsItem.size() );
+					// A sign can only go at the start, and only once.
+					const bool bSignAllowed = m_esEdit.sCursor == 0 && (wsItem.empty() || (wsItem[0] != L'-' && wsItem[0] != L'+'));
+					if ( !ValueCharValid( m_esEdit.dfFmt, _c32Cp, bSignAllowed ) ) { return; }
+					wsItem.insert( wsItem.begin() + m_esEdit.sCursor, wchar_t( _c32Cp ) );
+					++m_esEdit.sCursor;
 					break;
 				}
 			}
@@ -5201,63 +5229,380 @@ namespace mx {
 	}
 
 	/**
-	 * Removes the last thing typed into the edit box.  Closes the edit box if nothing typed remains.
+	 * Removes what is typed before the cursor in the edit box (a digit goes back to what it was).  At the start of a value, moves to
+	 *	the end of the previous one.  Closes the edit box if nothing typed remains.
 	 **/
 	void CHexEditorControl::EditBackspace() {
 		if ( !m_esEdit.bActive ) { return; }
 		try {
 			switch ( m_esEdit.ekKind ) {
 				case MX_EK_DIGITS : {
-					if ( m_esEdit.sDigitPos == 0 ) {
-						CancelEdit();
-						return;
-					}
-					const size_t sDigits = SubCaretCountForFormat( m_esEdit.dfFmt );
-					--m_esEdit.sDigitPos;
-					const size_t sCell = m_esEdit.sDigitPos / sDigits;
-					// Put back the digit that was there before.
-					m_esEdit.vDigits[m_esEdit.sDigitPos] = m_esEdit.vOrigDigits[m_esEdit.sDigitPos];
-					m_esEdit.vTypedMask[sCell] &= uint8_t( ~(1U << (m_esEdit.sDigitPos % sDigits)) );
-					// The edit box shrinks back to the cell now under the caret.
-					m_esEdit.vDigits.resize( (sCell + 1) * sDigits );
-					m_esEdit.vOrigDigits.resize( (sCell + 1) * sDigits );
-					m_esEdit.vTypedMask.resize( sCell + 1 );
-					bool bAnyTyped = false;
-					for ( auto ui8Mask : m_esEdit.vTypedMask ) { bAnyTyped = bAnyTyped || ui8Mask != 0; }
-					if ( !bAnyTyped ) {
-						CancelEdit();
-						return;
+					if ( m_esEdit.sDigitPos ) {
+						// Back one digit, putting back the digit that was there before.
+						const size_t sDigits = SubCaretCountForFormat( m_esEdit.dfFmt );
+						--m_esEdit.sDigitPos;
+						const size_t sCell = m_esEdit.sDigitPos / sDigits;
+						m_esEdit.vDigits[m_esEdit.sDigitPos] = m_esEdit.vOrigDigits[m_esEdit.sDigitPos];
+						m_esEdit.vTypedMask[sCell] &= uint8_t( ~(1U << (m_esEdit.sDigitPos % sDigits)) );
 					}
 					break;
 				}
 				case MX_EK_TEXT : {
-					if ( !m_esEdit.u32Text.empty() ) { m_esEdit.u32Text.pop_back(); }
-					if ( m_esEdit.u32Text.empty() ) {
-						CancelEdit();
-						return;
+					m_esEdit.sCursor = std::min( m_esEdit.sCursor, m_esEdit.u32Text.size() );
+					if ( m_esEdit.sCursor ) {
+						m_esEdit.u32Text.erase( m_esEdit.u32Text.begin() + (m_esEdit.sCursor - 1) );
+						--m_esEdit.sCursor;
 					}
-					UpdateEditPreview();
 					break;
 				}
 				case MX_EK_VALUES : {
-					if ( m_esEdit.vTexts.back().empty() ) {
+					std::wstring &wsItem = m_esEdit.vTexts[m_esEdit.sItem];
+					m_esEdit.sCursor = std::min( m_esEdit.sCursor, wsItem.size() );
+					if ( m_esEdit.sCursor ) {
+						wsItem.erase( wsItem.begin() + (m_esEdit.sCursor - 1) );
+						--m_esEdit.sCursor;
+					}
+					else if ( m_esEdit.sItem ) {
 						// Back to the end of the previous value.
-						if ( m_esEdit.vTexts.size() > 1 ) { m_esEdit.vTexts.pop_back(); }
-					}
-					else {
-						m_esEdit.vTexts.back().pop_back();
-					}
-					if ( m_esEdit.vTexts.size() == 1 && m_esEdit.vTexts.back().empty() ) {
-						CancelEdit();
-						return;
+						--m_esEdit.sItem;
+						m_esEdit.sCursor = m_esEdit.vTexts[m_esEdit.sItem].size();
 					}
 					break;
 				}
 			}
+			EditChanged();
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Removes what is typed under the cursor in the edit box (a digit goes back to what it was).  Closes the edit box if nothing typed
+	 *	remains.
+	 **/
+	void CHexEditorControl::EditDelete() {
+		if ( !m_esEdit.bActive ) { return; }
+		try {
+			switch ( m_esEdit.ekKind ) {
+				case MX_EK_DIGITS : {
+					const size_t sDigits = SubCaretCountForFormat( m_esEdit.dfFmt );
+					const size_t sCell = m_esEdit.sDigitPos / sDigits;
+					if ( sCell < m_esEdit.vTypedMask.size() ) {
+						m_esEdit.vDigits[m_esEdit.sDigitPos] = m_esEdit.vOrigDigits[m_esEdit.sDigitPos];
+						m_esEdit.vTypedMask[sCell] &= uint8_t( ~(1U << (m_esEdit.sDigitPos % sDigits)) );
+					}
+					break;
+				}
+				case MX_EK_TEXT : {
+					if ( m_esEdit.sCursor < m_esEdit.u32Text.size() ) {
+						m_esEdit.u32Text.erase( m_esEdit.u32Text.begin() + m_esEdit.sCursor );
+					}
+					break;
+				}
+				case MX_EK_VALUES : {
+					std::wstring &wsItem = m_esEdit.vTexts[m_esEdit.sItem];
+					if ( m_esEdit.sCursor < wsItem.size() ) {
+						wsItem.erase( wsItem.begin() + m_esEdit.sCursor );
+					}
+					break;
+				}
+			}
+			EditChanged();
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Finishes a change made by EditBackspace() or EditDelete(): closes the edit box if nothing typed remains, otherwise trims it and
+	 *	redraws it.
+	 **/
+	void CHexEditorControl::EditChanged() {
+		if ( !EditHasTyping() ) {
+			CancelEdit();
+			return;
+		}
+		if ( m_esEdit.ekKind == MX_EK_TEXT ) { UpdateEditPreview(); }
+		TrimEdit( true );
+		UpdateEditCaret();
+		::InvalidateRect( Wnd(), nullptr, FALSE );
+	}
+
+	/**
+	 * Determines whether anything typed remains in the edit box.
+	 *
+	 * \return Returns true if at least one digit, character or value is typed.
+	 **/
+	bool CHexEditorControl::EditHasTyping() const {
+		switch ( m_esEdit.ekKind ) {
+			case MX_EK_DIGITS : {
+				for ( auto ui8Mask : m_esEdit.vTypedMask ) {
+					if ( ui8Mask ) { return true; }
+				}
+				return false;
+			}
+			case MX_EK_TEXT : { return !m_esEdit.u32Text.empty(); }
+			case MX_EK_VALUES : {
+				for ( const auto &wsThis : m_esEdit.vTexts ) {
+					if ( !wsThis.empty() ) { return true; }
+				}
+				return false;
+			}
+			default : { return false; }
+		}
+	}
+
+	/**
+	 * Moves the cursor in the edit box.  Digits: by digit, by cell (Tab, Space, Shift+Tab) or by row; values: by character within a
+	 *	value, by value (Tab, Space, Shift+Tab) or by row; text: by character.  Moving past either end of the edit box extends it,
+	 *	except before its start in Insert mode and past the end of process memory.
+	 *
+	 * \param _enNav The movement.
+	 **/
+	void CHexEditorControl::EditNavigate( MX_EDIT_NAV _enNav ) {
+		if ( !m_esEdit.bActive ) { return; }
+		try {
+			const uint32_t ui32Bpr = CurStyle()->uiBytesPerRow ? CurStyle()->uiBytesPerRow : 16;
+			switch ( m_esEdit.ekKind ) {
+				case MX_EK_DIGITS : {
+					const int64_t i64Digits = int64_t( SubCaretCountForFormat( m_esEdit.dfFmt ) );
+					const int64_t i64Cells = int64_t( m_esEdit.vTypedMask.size() );
+					const int64_t i64Cur = int64_t( m_esEdit.sDigitPos );
+					// Floor division (the position can go negative, before the edit box).
+					auto CellOf = [i64Digits]( int64_t _i64Pos ) -> int64_t { return (_i64Pos >= 0) ? (_i64Pos / i64Digits) : -((-_i64Pos + i64Digits - 1) / i64Digits); };
+					int64_t i64Pos = i64Cur;
+					switch ( _enNav ) {
+						case MX_EN_LEFT : { --i64Pos; break; }
+						case MX_EN_RIGHT : { ++i64Pos; break; }
+						case MX_EN_UP : { i64Pos -= int64_t( ui32Bpr ) * i64Digits; break; }
+						case MX_EN_DOWN : { i64Pos += int64_t( ui32Bpr ) * i64Digits; break; }
+						case MX_EN_HOME : { i64Pos = 0; break; }
+						case MX_EN_END : { i64Pos = i64Cells * i64Digits - 1; break; }
+						case MX_EN_NEXT_ITEM : { i64Pos = (CellOf( i64Cur ) + 1) * i64Digits; break; }
+						case MX_EN_PREV_ITEM : { i64Pos = (CellOf( i64Cur ) - 1) * i64Digits; break; }
+						default : { return; }
+					}
+					if ( i64Pos < 0 ) {
+						// Before the start: the edit box grows backward.
+						const int64_t i64Add = -CellOf( i64Pos );
+						if ( !EditPrepend( size_t( i64Add ) ) ) { return; }
+						i64Pos += i64Add * i64Digits;
+					}
+					const size_t sCell = size_t( i64Pos / i64Digits );
+					if ( !EditCanCover( sCell ) ) { return; }
+					EnsureEditCell( sCell );
+					m_esEdit.sDigitPos = size_t( i64Pos );
+					break;
+				}
+				case MX_EK_TEXT : {
+					m_esEdit.sCursor = std::min( m_esEdit.sCursor, m_esEdit.u32Text.size() );
+					switch ( _enNav ) {
+						case MX_EN_LEFT : {
+							if ( m_esEdit.sCursor ) { --m_esEdit.sCursor; }
+							break;
+						}
+						case MX_EN_RIGHT : {
+							if ( m_esEdit.sCursor < m_esEdit.u32Text.size() ) { ++m_esEdit.sCursor; }
+							break;
+						}
+						case MX_EN_HOME : { m_esEdit.sCursor = 0; break; }
+						case MX_EN_END : { m_esEdit.sCursor = m_esEdit.u32Text.size(); break; }
+						default : { return; }
+					}
+					break;
+				}
+				case MX_EK_VALUES : {
+					const size_t sLen = m_esEdit.vTexts[m_esEdit.sItem].size();
+					m_esEdit.sCursor = std::min( m_esEdit.sCursor, sLen );
+					const int64_t i64RowItems = std::max<int64_t>( 1, int64_t( ui32Bpr / StrideForFormat( m_esEdit.dfFmt ) ) );
+					int64_t i64Item = int64_t( m_esEdit.sItem );
+					// Where the cursor goes in the new value: 0 = its start, 1 = its end, 2 = the same column.
+					int32_t i32Place = 0;
+					// False if the cursor only moves within the current value.
+					bool bNewItem = true;
+					switch ( _enNav ) {
+						case MX_EN_LEFT : {
+							if ( m_esEdit.sCursor ) {
+								--m_esEdit.sCursor;
+								bNewItem = false;
+							}
+							else {
+								--i64Item;
+								i32Place = 1;
+							}
+							break;
+						}
+						case MX_EN_RIGHT : {
+							if ( m_esEdit.sCursor < sLen ) {
+								++m_esEdit.sCursor;
+								bNewItem = false;
+							}
+							else { ++i64Item; }
+							break;
+						}
+						case MX_EN_UP : { i64Item -= i64RowItems; i32Place = 2; break; }
+						case MX_EN_DOWN : { i64Item += i64RowItems; i32Place = 2; break; }
+						case MX_EN_HOME : { m_esEdit.sCursor = 0; bNewItem = false; break; }
+						case MX_EN_END : { m_esEdit.sCursor = sLen; bNewItem = false; break; }
+						case MX_EN_NEXT_ITEM : { ++i64Item; i32Place = 1; break; }
+						case MX_EN_PREV_ITEM : { --i64Item; i32Place = 1; break; }
+						default : { return; }
+					}
+					if ( bNewItem ) {
+						if ( i64Item < 0 ) {
+							// Before the start: the edit box grows backward.
+							if ( !EditPrepend( size_t( -i64Item ) ) ) { return; }
+							i64Item = 0;
+						}
+						if ( !EditCanCover( size_t( i64Item ) ) ) { return; }
+						while ( m_esEdit.vTexts.size() <= size_t( i64Item ) ) { m_esEdit.vTexts.push_back( std::wstring() ); }
+						const size_t sOldCursor = m_esEdit.sCursor;
+						m_esEdit.sItem = size_t( i64Item );
+						const size_t sNewLen = m_esEdit.vTexts[m_esEdit.sItem].size();
+						m_esEdit.sCursor = (i32Place == 0) ? 0 : ((i32Place == 1) ? sNewLen : std::min( sOldCursor, sNewLen ));
+					}
+					break;
+				}
+			}
+			TrimEdit( true );
 			UpdateEditCaret();
 			::InvalidateRect( Wnd(), nullptr, FALSE );
 		}
 		catch ( ... ) {}
+	}
+
+	/**
+	 * Grows the edit box backward by whole cells (digits) or values.  Not possible in Insert mode (the edit box is new data inserted
+	 *	at its start) or before address 0.
+	 *
+	 * \param _sCount The number of cells or values to add before the start.
+	 * \return Returns true if the edit box grew.
+	 **/
+	bool CHexEditorControl::EditPrepend( size_t _sCount ) {
+		if ( !_sCount ) { return true; }
+		if ( m_esEdit.bInsert || m_esEdit.ekKind == MX_EK_TEXT ) { return false; }
+		const uint64_t ui64Stride = (m_esEdit.ekKind == MX_EK_DIGITS) ? 1 : StrideForFormat( m_esEdit.dfFmt );
+		if ( m_esEdit.ui64Start < uint64_t( _sCount ) * ui64Stride ) { return false; }
+		if ( m_esEdit.ekKind == MX_EK_DIGITS ) {
+			const size_t sDigits = SubCaretCountForFormat( m_esEdit.dfFmt );
+			const uint32_t ui32Radix = RadixForFormat( m_esEdit.dfFmt );
+			for ( size_t I = 0; I < _sCount; ++I ) {
+				--m_esEdit.ui64Start;
+				uint32_t ui32Val = 0;
+				if ( m_esEdit.ui64Start < Size() && m_pheiTarget ) {
+					CHexEditorInterface::CBuffer bTmp;
+					if ( m_pheiTarget->Read( m_esEdit.ui64Start, bTmp, 1 ) && bTmp.size() ) { ui32Val = bTmp[0]; }
+				}
+				uint8_t ui8Digits[8] = {};
+				for ( size_t J = sDigits; J--; ) {
+					ui8Digits[J] = uint8_t( ui32Val % ui32Radix );
+					ui32Val /= ui32Radix;
+				}
+				m_esEdit.vDigits.insert( m_esEdit.vDigits.begin(), ui8Digits, ui8Digits + sDigits );
+				m_esEdit.vOrigDigits.insert( m_esEdit.vOrigDigits.begin(), ui8Digits, ui8Digits + sDigits );
+				m_esEdit.vTypedMask.insert( m_esEdit.vTypedMask.begin(), uint8_t( 0 ) );
+				m_esEdit.sDigitPos += sDigits;
+			}
+		}
+		else {
+			m_esEdit.vTexts.insert( m_esEdit.vTexts.begin(), _sCount, std::wstring() );
+			m_esEdit.ui64Start -= uint64_t( _sCount ) * ui64Stride;
+			m_esEdit.sItem += _sCount;
+		}
+		return true;
+	}
+
+	/**
+	 * Determines whether the edit box can cover a cell (digits) or value.  Process memory cannot grow, so nothing past its end can be
+	 *	covered.
+	 *
+	 * \param _sIdx The index of the cell or value relative to the start of the edit box.
+	 * \return Returns true if the cell or value can be part of the edit box.
+	 **/
+	bool CHexEditorControl::EditCanCover( size_t _sIdx ) const {
+		if ( !m_pheiTarget || !m_pheiTarget->OverwriteOnly() ) { return true; }
+		const uint64_t ui64Stride = (m_esEdit.ekKind == MX_EK_DIGITS) ? 1 : StrideForFormat( m_esEdit.dfFmt );
+		return m_esEdit.ui64Start + (uint64_t( _sIdx ) + 1) * ui64Stride <= Size();
+	}
+
+	/**
+	 * Removes untyped cells (digits) or empty values from the ends of the edit box.
+	 *
+	 * \param _bKeepCursor If true, the cell or value under the cursor is kept.  If false and nothing is typed, everything is removed.
+	 **/
+	void CHexEditorControl::TrimEdit( bool _bKeepCursor ) {
+		switch ( m_esEdit.ekKind ) {
+			case MX_EK_DIGITS : {
+				const size_t sDigits = SubCaretCountForFormat( m_esEdit.dfFmt );
+				const size_t sCells = m_esEdit.vTypedMask.size();
+				size_t sFirst = sCells, sLast = 0;
+				for ( size_t I = 0; I < sCells; ++I ) {
+					if ( m_esEdit.vTypedMask[I] ) {
+						sFirst = std::min( sFirst, I );
+						sLast = I;
+					}
+				}
+				if ( _bKeepCursor ) {
+					const size_t sCur = std::min( m_esEdit.sDigitPos / sDigits, sCells ? sCells - 1 : 0 );
+					sFirst = std::min( sFirst, sCur );
+					sLast = std::max( sLast, sCur );
+				}
+				if ( sFirst >= sCells ) {
+					m_esEdit.vTypedMask.clear();
+					m_esEdit.vDigits.clear();
+					m_esEdit.vOrigDigits.clear();
+					m_esEdit.sDigitPos = 0;
+					break;
+				}
+				m_esEdit.vTypedMask.resize( sLast + 1 );
+				m_esEdit.vDigits.resize( (sLast + 1) * sDigits );
+				m_esEdit.vOrigDigits.resize( (sLast + 1) * sDigits );
+				if ( sFirst ) {
+					m_esEdit.vTypedMask.erase( m_esEdit.vTypedMask.begin(), m_esEdit.vTypedMask.begin() + sFirst );
+					m_esEdit.vDigits.erase( m_esEdit.vDigits.begin(), m_esEdit.vDigits.begin() + sFirst * sDigits );
+					m_esEdit.vOrigDigits.erase( m_esEdit.vOrigDigits.begin(), m_esEdit.vOrigDigits.begin() + sFirst * sDigits );
+					m_esEdit.ui64Start += sFirst;
+					m_esEdit.sDigitPos = (m_esEdit.sDigitPos >= sFirst * sDigits) ? (m_esEdit.sDigitPos - sFirst * sDigits) : 0;
+				}
+				m_esEdit.sDigitPos = std::min( m_esEdit.sDigitPos, m_esEdit.vTypedMask.size() * sDigits - 1 );
+				break;
+			}
+			case MX_EK_VALUES : {
+				const size_t sItems = m_esEdit.vTexts.size();
+				size_t sFirst = sItems, sLast = 0;
+				for ( size_t I = 0; I < sItems; ++I ) {
+					if ( !m_esEdit.vTexts[I].empty() ) {
+						sFirst = std::min( sFirst, I );
+						sLast = I;
+					}
+				}
+				if ( _bKeepCursor ) {
+					const size_t sCur = std::min( m_esEdit.sItem, sItems ? sItems - 1 : 0 );
+					sFirst = std::min( sFirst, sCur );
+					sLast = std::max( sLast, sCur );
+				}
+				if ( sFirst >= sItems ) {
+					m_esEdit.vTexts.clear();
+					m_esEdit.sItem = 0;
+					m_esEdit.sCursor = 0;
+					break;
+				}
+				m_esEdit.vTexts.resize( sLast + 1 );
+				if ( sFirst ) {
+					m_esEdit.vTexts.erase( m_esEdit.vTexts.begin(), m_esEdit.vTexts.begin() + sFirst );
+					m_esEdit.ui64Start += uint64_t( sFirst ) * StrideForFormat( m_esEdit.dfFmt );
+					if ( m_esEdit.sItem >= sFirst ) { m_esEdit.sItem -= sFirst; }
+					else {
+						m_esEdit.sItem = 0;
+						m_esEdit.sCursor = 0;
+					}
+				}
+				if ( m_esEdit.sItem >= m_esEdit.vTexts.size() ) {
+					m_esEdit.sItem = m_esEdit.vTexts.size() - 1;
+					m_esEdit.sCursor = m_esEdit.vTexts[m_esEdit.sItem].size();
+				}
+				break;
+			}
+			default : {}
+		}
 	}
 
 	/**
@@ -5332,7 +5677,7 @@ namespace mx {
 	}
 
 	/**
-	 * Moves the caret to where the next character typed into the edit box goes and scrolls it into view.
+	 * Moves the caret to the edit box's cursor (where the next character typed goes) and scrolls it into view.
 	 **/
 	void CHexEditorControl::UpdateEditCaret() {
 		if ( !m_esEdit.bActive ) { return; }
@@ -5346,11 +5691,20 @@ namespace mx {
 				break;
 			}
 			case MX_EK_TEXT : {
-				ui64Caret += m_esEdit.vPreview.size();
+				// Under the first byte of the character at the cursor.
+				size_t sBytes = m_esEdit.vPreview.size();
+				if ( m_esEdit.sCursor < m_esEdit.u32Text.size() ) {
+					std::u32string u32Resolved;
+					std::vector<uint8_t> vPrefix;
+					ResolveEditEscapes( m_esEdit.u32Text.substr( 0, m_esEdit.sCursor ), u32Resolved );
+					EncodeText( u32Resolved, vPrefix );
+					sBytes = std::min( sBytes, vPrefix.size() );
+				}
+				ui64Caret += sBytes;
 				break;
 			}
 			case MX_EK_VALUES : {
-				ui64Caret += uint64_t( m_esEdit.vTexts.size() - 1 ) * StrideForFormat( m_esEdit.dfFmt );
+				ui64Caret += uint64_t( m_esEdit.sItem ) * StrideForFormat( m_esEdit.dfFmt );
 				break;
 			}
 		}
@@ -5448,8 +5802,22 @@ namespace mx {
 				return true;
 			}
 			case MX_EK_VALUES : {
-				for ( const auto &wsThis : m_esEdit.vTexts ) {
-					if ( wsThis.empty() ) { continue; }
+				const uint32_t ui32Stride = StrideForFormat( m_esEdit.dfFmt );
+				for ( size_t I = 0; I < m_esEdit.vTexts.size(); ++I ) {
+					const std::wstring &wsThis = m_esEdit.vTexts[I];
+					if ( wsThis.empty() ) {
+						// A value skipped over stays as it is (an inserted one is 0).
+						const size_t sOff = _vBytes.size();
+						_vBytes.resize( sOff + ui32Stride, 0 );
+						const uint64_t ui64Addr = m_esEdit.ui64Start + uint64_t( I ) * ui32Stride;
+						if ( !m_esEdit.bInsert && ui64Addr < Size() && m_pheiTarget ) {
+							CHexEditorInterface::CBuffer bTmp;
+							if ( m_pheiTarget->Read( ui64Addr, bTmp, ui32Stride ) ) {
+								for ( size_t J = 0; J < std::min<size_t>( bTmp.size(), ui32Stride ); ++J ) { _vBytes[sOff+J] = bTmp[J]; }
+							}
+						}
+						continue;
+					}
 					if ( !ParseValue( m_esEdit.dfFmt, wsThis, _vBytes ) ) {
 						_swsStatus = _DEC_WS_CEE34699_Invalid_input__;
 						_swsStatus += wsThis;
@@ -5559,8 +5927,8 @@ namespace mx {
 	}
 
 	/**
-	 * Draws the text of a cell inside the edit box when it differs from the normal drawing: typed values, digits typed over in part
-	 *	(typed digits normal, the rest faded), and empty cells past the end of the data.
+	 * Draws the text of a cell inside the edit box when it differs from the normal drawing: typed values (with the text cursor in the
+	 *	value under it), digits typed over in part (typed digits normal, the rest faded), and empty new cells.
 	 *
 	 * \param _hDc The device context.
 	 * \param _ui64Address The address of the cell.
@@ -5572,13 +5940,13 @@ namespace mx {
 	 * \param _sSize The number of bytes at _pui8Value.
 	 * \return Returns true if the cell's text was drawn (or deliberately left blank).
 	 **/
-	bool CHexEditorControl::DrawEditCellText( HDC _hDc, uint64_t _ui64Address, MX_DATA_FMT _dfFmt, int32_t _iX, int32_t _iY, const std::wstring &/*_wsText*/, const uint8_t * _pui8Value, size_t _sSize ) {
+	bool CHexEditorControl::DrawEditCellText( HDC _hDc, uint64_t _ui64Address, MX_DATA_FMT _dfFmt, int32_t _iX, int32_t _iY, const std::wstring &_wsText, const uint8_t * _pui8Value, size_t _sSize ) {
 		const bool bTyped = EditCellTyped( _ui64Address );
 		// New cells (inserted, or past the end of the data) show only what was typed.
-		if ( !bTyped && (m_esEdit.bInsert || _ui64Address >= Size()) ) { return true; }
+		const bool bNew = m_esEdit.bInsert || _ui64Address >= Size();
 		switch ( m_esEdit.ekKind ) {
 			case MX_EK_DIGITS : {
-				if ( !bTyped ) { return false; }	// Wholly faded: drawn normally with the color CellFgColor() gives.
+				if ( !bTyped ) { return bNew; }		// Otherwise wholly faded: drawn normally with the color CellFgColor() gives.
 				const size_t sDigits = SubCaretCountForFormat( m_esEdit.dfFmt );
 				const size_t sCell = size_t( _ui64Address - m_esEdit.ui64Start );
 				const uint8_t ui8Mask = m_esEdit.vTypedMask[sCell];
@@ -5599,13 +5967,33 @@ namespace mx {
 				return true;
 			}
 			case MX_EK_VALUES : {
-				if ( !bTyped ) { return false; }
-				const std::wstring &wsTyped = m_esEdit.vTexts[size_t( (_ui64Address - m_esEdit.ui64Start) / StrideForFormat( m_esEdit.dfFmt ) )];
-				lsw::LSW_SETTEXTCOLOR stcColor( _hDc, MX_GetRgbValue( CellFgColor( _ui64Address, _pui8Value, _sSize, m_esEdit.bRightArea ) ) );
-				::TextOutW( _hDc, _iX, _iY, wsTyped.c_str(), static_cast<int>(wsTyped.size()) );
+				const size_t sIdx = size_t( (_ui64Address - m_esEdit.ui64Start) / StrideForFormat( m_esEdit.dfFmt ) );
+				const bool bCurrent = sIdx == m_esEdit.sItem;
+				if ( !bTyped && !bCurrent ) { return bNew; }
+				// The typed text, or (for the value under the cursor before anything is typed into it) what is there now, faded.
+				const std::wstring &wsShown = bTyped ? m_esEdit.vTexts[sIdx] : _wsText;
+				if ( bTyped || !bNew ) {
+					lsw::LSW_SETTEXTCOLOR stcColor( _hDc, MX_GetRgbValue( CellFgColor( _ui64Address, _pui8Value, _sSize, m_esEdit.bRightArea ) ) );
+					::TextOutW( _hDc, _iX, _iY, wsShown.c_str(), static_cast<int>(wsShown.size()) );
+				}
+				if ( bCurrent && m_bCaretOn ) {
+					// The text cursor.
+					SIZE sPrefix = { 0, 0 };
+					if ( bTyped && m_esEdit.sCursor ) {
+						::GetTextExtentPoint32W( _hDc, wsShown.c_str(), int( std::min( m_esEdit.sCursor, wsShown.size() ) ), &sPrefix );
+					}
+					TEXTMETRICW tmMetrics = {};
+					::GetTextMetricsW( _hDc, &tmMetrics );
+					lsw::LSW_RECT rBar;
+					rBar.left = _iX + sPrefix.cx;
+					rBar.right = rBar.left + 2;
+					rBar.top = _iY;
+					rBar.bottom = _iY + (tmMetrics.tmHeight ? tmMetrics.tmHeight : 1);
+					::FillRect( _hDc, &rBar, lsw::CBase::BrushCache().Brush( MX_GetRgbValue( ForeColors()->crCaret ) ) );
+				}
 				return true;
 			}
-			default : { return false; }		// Text: the preview bytes are already in the displayed buffer.
+			default : { return !bTyped && bNew; }		// Text: the preview bytes are already in the displayed buffer.
 		}
 	}
 
@@ -6345,10 +6733,10 @@ namespace mx {
 	 *
 	 * \param _dfFmt The format of the value.
 	 * \param _c32Cp The character.
-	 * \param _wsSoFar What has been typed of the value so far.
+	 * \param _bSignAllowed True if a sign can be typed here (at the start of a value that has none).
 	 * \return Returns true if the character can be typed.
 	 **/
-	bool CHexEditorControl::ValueCharValid( MX_DATA_FMT _dfFmt, char32_t _c32Cp, const std::wstring &_wsSoFar ) {
+	bool CHexEditorControl::ValueCharValid( MX_DATA_FMT _dfFmt, char32_t _c32Cp, bool _bSignAllowed ) {
 		const bool bDigit = _c32Cp >= U'0' && _c32Cp <= U'9';
 		switch ( _dfFmt ) {
 			case MX_DF_UINT8 : {}				MX_FALLTHROUGH
@@ -6358,7 +6746,7 @@ namespace mx {
 			case MX_DF_INT8 : {}				MX_FALLTHROUGH
 			case MX_DF_INT16 : {}				MX_FALLTHROUGH
 			case MX_DF_INT32 : {}				MX_FALLTHROUGH
-			case MX_DF_INT64 : { return bDigit || ((_c32Cp == U'-' || _c32Cp == U'+') && _wsSoFar.empty()); }
+			case MX_DF_INT64 : { return bDigit || ((_c32Cp == U'-' || _c32Cp == U'+') && _bSignAllowed); }
 			case MX_DF_POINTER16 : {}			MX_FALLTHROUGH
 			case MX_DF_POINTER32 : {}			MX_FALLTHROUGH
 			case MX_DF_POINTER64 : { return DigitValue( _c32Cp, 16 ) >= 0; }
