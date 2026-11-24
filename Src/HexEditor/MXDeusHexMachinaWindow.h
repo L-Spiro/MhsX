@@ -109,6 +109,16 @@ namespace mx {
 		// WM_COMMAND from menu.
 		virtual LSW_HANDLED							MenuCommand( WORD _wId );
 
+		/**
+		 * Handles WM_CONTEXTMENU.  Right-clicking the hex editor shows its context menu.
+		 *
+		 * \param _pwControl The control that was right-clicked.
+		 * \param _iX The horizontal position of the cursor in screen coordinates, or -1 if the menu was opened with the keyboard.
+		 * \param _iY The vertical position of the cursor in screen coordinates, or -1 if the menu was opened with the keyboard.
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED							ContextMenu( CWidget * _pwControl, INT _iX, INT _iY );
+
 		// WM_CLOSE.
 		virtual LSW_HANDLED							Close();
 

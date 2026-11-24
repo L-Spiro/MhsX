@@ -252,6 +252,8 @@ namespace mx {
 		class CUtf8ToUtf16Sink;
 		/** Discards what is written to it, counting the bytes. */
 		class CCountSink;
+		/** Writes text as a programming language's string literal. */
+		class CStringOut;
 
 
 		// == Functions.
@@ -301,6 +303,29 @@ namespace mx {
 		 * \return Returns false on a read or memory failure.
 		 */
 		static bool												RenderCode( const MX_COPY_SOURCE &_csSource, CTextOut &_toOut );
+
+		/**
+		 * \brief Writes the selected bytes, read as text in the view's character set, as a C, C#, Java, JavaScript, or Python string
+		 *	literal.  See CStringOut for how each language's literal is formed.
+		 *
+		 * \param _csSource The data and parameters of the Copy operation.
+		 * \param _toOut Receives the text.
+		 * \return Returns false on a read or memory failure.
+		 */
+		static bool												RenderString( const MX_COPY_SOURCE &_csSource, CTextOut &_toOut );
+
+		/**
+		 * \brief Decodes one character of text.
+		 *
+		 * \param _csSet The character set.
+		 * \param _bBigEndian For MX_CS_UNICODE, the text is UTF-16BE rather than UTF-16LE.
+		 * \param _pui8Data The bytes to decode.
+		 * \param _sSize The number of bytes at _pui8Data (at least 1).  Characters longer than this are treated as invalid.
+		 * \param _ui32Char Receives the Unicode code point, or a CStringOut::MX_F_RAW_BYTE byte that is not valid text, or a
+		 *	CStringOut::MX_F_LONE_UNIT unpaired UTF-16 surrogate.
+		 * \return Returns the number of bytes used (at least 1).
+		 */
+		static size_t											DecodeChar( CCharSets::MX_CHAR_SETS _csSet, bool _bBigEndian, const uint8_t * _pui8Data, size_t _sSize, uint32_t &_ui32Char );
 
 		/**
 		 * \brief Writes Intel HEX records (8-, 16-, or 32-bit).

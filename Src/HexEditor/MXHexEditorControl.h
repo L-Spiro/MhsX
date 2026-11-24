@@ -18,6 +18,8 @@
 #include <Layout/LSWWidgetLayout.h>
 #include <Widget/LSWWidget.h>
 
+#include <map>
+
 
 namespace mx {
 
@@ -816,6 +818,23 @@ namespace mx {
 		void										FlushRealTimeUndo();
 
 		/**
+		 * Clears the highlighting of every changed value.
+		 **/
+		void										ClearAllChanges();
+
+		/**
+		 * Clears the highlighting of the changed values in the selection, or of the byte at the caret if nothing is selected.
+		 **/
+		void										ClearSelectedChanges();
+
+		/**
+		 * Determines whether any values are highlighted as changed.
+		 *
+		 * \return Returns true if at least one byte is highlighted as changed.
+		 **/
+		inline bool									HasChanges() const { return !m_mChanges.empty(); }
+
+		/**
 		 * Performs an Undo operation.
 		 * 
 		 * \param _wsStatus The string to print in the status bar.
@@ -1077,6 +1096,16 @@ namespace mx {
 		// WM_LBUTTONDOWN.
 		virtual LSW_HANDLED							LButtonDown( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos );
 
+		/**
+		 * Handles WM_RBUTTONDOWN.  Right-clicking a byte outside the selection moves the caret to it, so that the context menu applies to
+		 *	it.
+		 *
+		 * \param _iHitTest The virtual keys that are down.
+		 * \param _pCursorPos The cursor position in client coordinates.
+		 * \return Returns a LSW_HANDLED code.
+		 */
+		virtual LSW_HANDLED							RButtonDown( INT _iHitTest, const POINTS &_pCursorPos );
+
 		/** \brief Handles WM_MOUSEMOVE. */
 		virtual LSW_HANDLED							MouseMove( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos );
 
@@ -1310,6 +1339,21 @@ namespace mx {
 			MX_SELECT_GESTURE						sgOldGesture;											/**< The caret and anchors before the edit began. */
 		};
 
+		/** A run of bytes that changed at the same time. */
+		struct MX_CHANGE_RUN {
+			uint64_t								ui64End				= 0;								/**< The end of the run (exclusive). */
+			uint32_t								ui32Time			= 0;								/**< When the bytes changed: milliseconds after m_ui64ChangeEpoch. */
+		};
+
+		/** How often to look for changed values while nothing is changing (milliseconds). */
+		static constexpr uint32_t					MX_WATCH_SLOW_MS	= 100;
+		/** How often to look for changed values right after a change (milliseconds). */
+		static constexpr uint32_t					MX_WATCH_FAST_MS	= 20;
+		/** How much longer the wait becomes after each look that finds nothing new (milliseconds). */
+		static constexpr uint32_t					MX_WATCH_SLOWDOWN_MS = 4;
+		/** How long a changed value takes to fade from the Modified color to its normal color (milliseconds).  0 = it does not fade. */
+		static constexpr uint32_t					MX_CHANGE_FADE_MS	= 0;
+
 
 		// == Members.
 		CHexEditorControlHost *						m_pwHexParent = nullptr;								/**< The main hex-editor window. */
@@ -1349,6 +1393,15 @@ namespace mx {
 		bool										m_bAltLeadingZero = false;								/**< The Alt code began with 0 (ANSI code page rather than OEM). */
 		char32_t									m_c32AltEmitted = 0;									/**< A character this control typed for an Alt code above 255. */
 		wchar_t										m_wcAltSwallow = 0;										/**< The character Windows produces for that Alt code, which is discarded. */
+
+		std::map<uint64_t, MX_CHANGE_RUN>			m_mChanges;												/**< Changed bytes: runs that do not overlap, by start address. */
+		uint64_t									m_ui64ChangeEpoch = 0;									/**< The tick count (milliseconds) to which change times are relative. */
+		CHexEditorInterface::CBuffer				m_bWatchPrev;											/**< The bytes in view the last time changes were looked for. */
+		uint64_t									m_ui64WatchAddr = 0;									/**< The address of the first byte in m_bWatchPrev. */
+		uint64_t									m_ui64WatchSize = 0;									/**< The size of the data when m_bWatchPrev was read. */
+		bool										m_bWatchValid = false;									/**< m_bWatchPrev can be compared against. */
+		uint32_t									m_ui32WatchPeriod = MX_WATCH_SLOW_MS;					/**< The current wait between looks for changed values (milliseconds). */
+		CUtilities::MX_TIMER						m_tWatch;												/**< Looks for changed values in view. */
 
 		// The main window class.
 		static ATOM									m_aAtom;
@@ -1713,6 +1766,78 @@ namespace mx {
 		 * \return Returns the faded text color.
 		 **/
 		static COLORREF								EditFadeColor( COLORREF _crText, COLORREF _crBox );
+
+		/**
+		 * (Re)starts the timer that looks for changed values in view, at the current rate.
+		 **/
+		void										StartWatch();
+
+		/**
+		 * Compares the bytes in view with those seen the last time and highlights the ones that changed.  Looks more often right after a
+		 *	change (MX_WATCH_FAST_MS), then less and less often while nothing more changes, back down to MX_WATCH_SLOW_MS.
+		 **/
+		void										WatchForChanges();
+
+		/**
+		 * Gets the time to record for a change made now.
+		 *
+		 * \return Returns the number of milliseconds since m_ui64ChangeEpoch.
+		 **/
+		uint32_t									ChangeTimeNow();
+
+		/**
+		 * Highlights bytes as changed now.
+		 *
+		 * \param _ui64Addr The address of the first byte.
+		 * \param _ui64Size The number of bytes.
+		 **/
+		void										MarkChanged( uint64_t _ui64Addr, uint64_t _ui64Size );
+
+		/**
+		 * Records a run of bytes as changed at a given time, replacing what was recorded for them.
+		 *
+		 * \param _ui64Start The address of the first byte.
+		 * \param _ui64End The address after the last byte.
+		 * \param _ui32Time When they changed (see ChangeTimeNow()).
+		 **/
+		void										SetChanged( uint64_t _ui64Start, uint64_t _ui64End, uint32_t _ui32Time );
+
+		/**
+		 * Removes the change highlighting of a range of bytes.
+		 *
+		 * \param _ui64Start The address of the first byte.
+		 * \param _ui64End The address after the last byte.
+		 **/
+		void										ClearChanges( uint64_t _ui64Start, uint64_t _ui64End );
+
+		/**
+		 * Moves the change highlighting along after bytes are inserted or deleted, so that it stays with the bytes it belongs to.
+		 *
+		 * \param _ui64Addr Where the bytes were inserted or deleted.
+		 * \param _ui64Size The number of bytes.
+		 * \param _bInserted True if the bytes were inserted (and are highlighted as changed), false if they were deleted.
+		 **/
+		void										ShiftChanges( uint64_t _ui64Addr, uint64_t _ui64Size, bool _bInserted );
+
+		/**
+		 * Determines whether any of a range of bytes is highlighted as changed.
+		 *
+		 * \param _ui64Addr The address of the first byte.
+		 * \param _ui64Size The number of bytes (a value's size).
+		 * \param _ui32Time Receives when the most recent change among them happened (see ChangeTimeNow()).
+		 * \return Returns true if at least one of the bytes is highlighted as changed.
+		 **/
+		bool										ChangedIn( uint64_t _ui64Addr, uint64_t _ui64Size, uint32_t &_ui32Time ) const;
+
+		/**
+		 * Gets the text color of a changed value: the Modified color, fading to the normal color over MX_CHANGE_FADE_MS if that is
+		 *	not 0.
+		 *
+		 * \param _crNormal The value's normal text color.
+		 * \param _ui32Time When the value changed (see ChangeTimeNow()).
+		 * \return Returns the text color.
+		 **/
+		COLORREF									ChangedColor( COLORREF _crNormal, uint32_t _ui32Time ) const;
 
 		/**
 		 * Writes bytes to the data source: inserted or written over existing bytes.

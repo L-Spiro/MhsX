@@ -917,12 +917,16 @@ namespace mx {
 								bOk = false;
 								break;
 							}
+							ShiftChanges( srThis.ui64Start, ui64Deleted, false );
 						}
 					} while ( bOk && vSelections.size() );
 					if ( !bOk ) { _swsStatus = _DEC_WS_1468A1DF_Internal_error_; }
 				}
 				if ( bOk ) {
 					bOk = m_pheiTarget->Paste( ui64Addr, pdData, bOverwrite, ui64Pasted, _swsStatus );
+					// The pasted bytes are highlighted as changed.
+					if ( bOverwrite ) { MarkChanged( ui64Addr, ui64Pasted ); }
+					else { ShiftChanges( ui64Addr, ui64Pasted, true ); }
 				}
 			}
 
@@ -1065,6 +1069,7 @@ namespace mx {
 				// Delete a single byte at the caret.
 				if ( m_sgSelGesture.ui64CaretAddr < Size() ) {
 					if ( m_pheiTarget->Delete( m_sgSelGesture.ui64CaretAddr, 1, ui64Deleted ) && AddSelectionUndo( m_sSel, m_sgSelGesture ) ) {
+						ShiftChanges( m_sgSelGesture.ui64CaretAddr, ui64Deleted, false );
 						CSecureWString swsTmp;
 						_swsStatus = _DEC_WS_B8E08C71_Deleted__ + CUtilities::SizeString<CSecureWString>( ui64Deleted, swsTmp );
 						::InvalidateRect( Wnd(), nullptr, FALSE );
@@ -1091,6 +1096,7 @@ namespace mx {
 				
 							for ( const auto & srThis : vSelections ) {
 								if ( m_pheiTarget->Delete( srThis.ui64Start, srThis.ui64Size, ui64Deleted ) ) {
+									ShiftChanges( srThis.ui64Start, ui64Deleted, false );
 									if ( ui64Caret > srThis.ui64Start ) {
 										// If caret is above the start then it needs to be updated.
 										if ( ui64Caret >= srThis.ui64Start + srThis.ui64Size ) {
@@ -1157,6 +1163,7 @@ namespace mx {
 				// Delete a single byte just before the caret.
 				if ( m_sgSelGesture.ui64CaretAddr != 0 ) {
 					if ( m_pheiTarget->Delete( m_sgSelGesture.ui64CaretAddr - 1, 1, ui64Deleted ) ) {
+						ShiftChanges( m_sgSelGesture.ui64CaretAddr - 1, ui64Deleted, false );
 						auto sOldSel = m_sSel;
 						auto sgOldGesture = m_sgSelGesture;
 						SetCaretAddr( m_sgSelGesture.ui64CaretAddr - 1 );
@@ -1537,6 +1544,9 @@ namespace mx {
 		else if ( _uiptrId == m_tRtUndo.uiptrActiveId ) {
 			// Typing stopped: the real-time edits so far become one Undo item.
 			FlushRealTimeUndo();
+		}
+		else if ( _uiptrId == m_tWatch.uiptrActiveId ) {
+			WatchForChanges();
 		}
 		return lsw::CWidget::LSW_H_HANDLED;
 	}
@@ -2133,6 +2143,12 @@ namespace mx {
 		FlushRealTimeUndo();
 		m_pwHexParent = _pwMainCtrl;
 		m_pheiTarget = _pediStream;
+
+		// Changes are tracked per data source.
+		m_mChanges.clear();
+		m_bWatchValid = false;
+		m_ui32WatchPeriod = MX_WATCH_SLOW_MS;
+		StartWatch();
 
 		uint64_t ui64Addr = m_pheiTarget->DefaultAddress();
 		GoTo( ui64Addr );
@@ -3412,6 +3428,15 @@ namespace mx {
 			crBaseColor = ForeColors()->crHighlightingHex;
 			bDefaultBaseColor = false;
 		}*/
+
+		// Values that changed (any of their bytes).
+		if ( !m_mChanges.empty() && _ui64Address < Size() ) {
+			uint32_t ui32Time;
+			if ( ChangedIn( _ui64Address, StrideForFormat( _bRightArea ? stAll.dfRightNumbersFmt : stAll.dfLeftNumbersFmt ), ui32Time ) ) {
+				crBaseColor = ChangedColor( crBaseColor, ui32Time );
+				bDefaultBaseColor = false;
+			}
+		}
 
 
 		if ( !m_sSel.HasSelection() ) {
@@ -6226,6 +6251,8 @@ namespace mx {
 			bOk = m_pheiTarget->Overwrite( _ui64Addr, _vBytes.data(), _vBytes.size() );
 		}
 		if ( !bOk ) { _swsStatus = _DEC_WS_58763A46_Failed_to_write_to_the_target_; }
+		else if ( _bInsert && !m_pheiTarget->OverwriteOnly() ) { ShiftChanges( _ui64Addr, _vBytes.size(), true ); }
+		else { MarkChanged( _ui64Addr, _vBytes.size() ); }
 		if ( Size() != ui64OldSize ) {
 			UpdateScrollbars();
 			if ( m_pwHexParent ) { m_pwHexParent->UpdateStatusBar_Size(); }
@@ -6755,6 +6782,347 @@ namespace mx {
 				return bDigit || _c32Cp == U'.' || _c32Cp == U'-' || _c32Cp == U'+' || _c32Cp == U'e' || _c32Cp == U'E';
 			}
 		}
+	}
+
+	// == Changed values.
+	/**
+	 * Clears the highlighting of every changed value.
+	 **/
+	void CHexEditorControl::ClearAllChanges() {
+		m_mChanges.clear();
+		::InvalidateRect( Wnd(), nullptr, FALSE );
+	}
+
+	/**
+	 * Clears the highlighting of the changed values in the selection, or of the byte at the caret if nothing is selected.
+	 **/
+	void CHexEditorControl::ClearSelectedChanges() {
+		try {
+			if ( m_sSel.HasSelection() ) {
+				std::vector<MX_SEL_RANGE> vSelections;
+				constexpr uint64_t ui64GroupSize = 1024ULL * 1024ULL;
+				uint64_t ui64Idx = 0;
+				do {
+					if ( !m_sSel.GatherSelected_LowToHigh( CurStyle()->uiBytesPerRow, vSelections, ui64GroupSize, ui64Idx++ ) ) { break; }
+					for ( const auto &srThis : vSelections ) {
+						ClearChanges( srThis.ui64Start, srThis.ui64Start + srThis.ui64Size );
+					}
+				} while ( vSelections.size() );
+			}
+			else {
+				// The whole value under the caret.
+				const MX_STYLE &stAll = (*CurStyle());
+				const bool bRight = m_sgSelGesture.bRightArea && stAll.bShowRightArea;
+				const uint32_t ui32Stride = StrideForFormat( bRight ? stAll.dfRightNumbersFmt : stAll.dfLeftNumbersFmt );
+				const uint64_t ui64Start = m_sgSelGesture.ui64CaretAddr - m_sgSelGesture.ui64CaretAddr % ui32Stride;
+				ClearChanges( ui64Start, ui64Start + ui32Stride );
+			}
+		}
+		catch ( ... ) {}
+		::InvalidateRect( Wnd(), nullptr, FALSE );
+	}
+
+	/**
+	 * Handles WM_RBUTTONDOWN.  Right-clicking a byte outside the selection moves the caret to it, so that the context menu applies to
+	 *	it.
+	 *
+	 * \param _iHitTest The virtual keys that are down.
+	 * \param _pCursorPos The cursor position in client coordinates.
+	 * \return Returns a LSW_HANDLED code.
+	 */
+	lsw::CWidget::LSW_HANDLED CHexEditorControl::RButtonDown( INT /*_iHitTest*/, const POINTS &_pCursorPos ) {
+		this->CWidget::SetFocus();
+		// The edit box stays as it is (its own keys and the context menu's commands decide what happens to it).
+		if ( IsEditing() ) { return lsw::CWidget::LSW_H_CONTINUE; }
+		POINT ptPoint { _pCursorPos.x, _pCursorPos.y };
+		uint64_t ui64Addr = 0;
+		int32_t i32Sub = 0;
+		bool bRight = false;
+		if ( ptPoint.y >= GetRulerHeightPx() && PointToAddress( ptPoint, ui64Addr, i32Sub, bRight ) ) {
+			if ( !(m_sSel.HasSelection() && m_sSel.IsSelected( ui64Addr, CurStyle()->uiBytesPerRow )) ) {
+				FlushRealTimeUndo();
+				ClearSelection();
+				m_sgSelGesture.bRightArea = bRight;
+				SetCaretAddr( ui64Addr, i32Sub, false, false );
+				m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64CaretAddr;
+				StartCaretBlink();
+				::InvalidateRect( Wnd(), nullptr, FALSE );
+				if ( m_pwHexParent ) { m_pwHexParent->UpdateStatusBar_PosValue_StartSize(); }
+			}
+		}
+		// Windows sends WM_CONTEXTMENU when the button is released.
+		return lsw::CWidget::LSW_H_CONTINUE;
+	}
+
+	/**
+	 * (Re)starts the timer that looks for changed values in view, at the current rate.
+	 **/
+	void CHexEditorControl::StartWatch() {
+		if ( Wnd() ) {
+			m_tWatch.Start( Wnd(), MX_TI_HEX_WATCH_CHANGES, m_ui32WatchPeriod, nullptr );
+		}
+	}
+
+	/**
+	 * Compares the bytes in view with those seen the last time and highlights the ones that changed.  Looks more often right after a
+	 *	change (MX_WATCH_FAST_MS), then less and less often while nothing more changes, back down to MX_WATCH_SLOW_MS.
+	 **/
+	void CHexEditorControl::WatchForChanges() {
+		// A hidden view keeps what it saw last, so changes made meanwhile show when it is shown again.
+		if ( !m_pheiTarget || !Wnd() || !::IsWindowVisible( Wnd() ) ) { return; }
+		try {
+			const uint32_t ui32Bpr = CurStyle()->uiBytesPerRow ? CurStyle()->uiBytesPerRow : 16;
+			const uint64_t ui64Addr = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine * ui32Bpr;
+			const size_t sCap = size_t( std::max( m_sdScrollView[m_eaEditAs].i32PageLines + 1, 1 ) ) * ui32Bpr;
+			const uint64_t ui64Size = Size();
+			CHexEditorInterface::CBuffer bNow;
+			if ( ui64Addr >= ui64Size || !m_pheiTarget->Read( ui64Addr, bNow, size_t( std::min<uint64_t>( sCap, ui64Size - ui64Addr ) ) ) ) {
+				m_bWatchValid = false;
+				return;
+			}
+
+			bool bChanged = false;
+			// Insertions and deletions move the data, so after one the bytes can only be compared from the next look onward.
+			if ( m_bWatchValid && m_ui64WatchSize == ui64Size ) {
+				const uint64_t ui64From = std::max( ui64Addr, m_ui64WatchAddr );
+				const uint64_t ui64To = std::min( ui64Addr + bNow.size(), m_ui64WatchAddr + m_bWatchPrev.size() );
+				const uint32_t ui32Now = ChangeTimeNow();
+				uint64_t ui64RunStart = 0;
+				bool bInRun = false;
+				for ( uint64_t A = ui64From; A < ui64To; ++A ) {
+					const bool bDiff = bNow[size_t( A - ui64Addr )] != m_bWatchPrev[size_t( A - m_ui64WatchAddr )];
+					if ( bDiff && !bInRun ) {
+						ui64RunStart = A;
+						bInRun = true;
+					}
+					else if ( !bDiff && bInRun ) {
+						SetChanged( ui64RunStart, A, ui32Now );
+						bInRun = false;
+						bChanged = true;
+					}
+				}
+				if ( bInRun ) {
+					SetChanged( ui64RunStart, ui64To, ui32Now );
+					bChanged = true;
+				}
+			}
+			m_bWatchPrev.swap( bNow );
+			m_ui64WatchAddr = ui64Addr;
+			m_ui64WatchSize = ui64Size;
+			m_bWatchValid = true;
+
+			bool bRedraw = bChanged;
+			if ( !bRedraw && MX_CHANGE_FADE_MS && !m_mChanges.empty() ) {
+				// Values still fading in view need to be drawn again.
+				const uint64_t ui64Now = ::GetTickCount64() - m_ui64ChangeEpoch;
+				auto aIt = m_mChanges.upper_bound( ui64Addr );
+				if ( aIt != m_mChanges.begin() ) { --aIt; }
+				for ( ; aIt != m_mChanges.end() && aIt->first < ui64Addr + m_bWatchPrev.size() && !bRedraw; ++aIt ) {
+					bRedraw = aIt->second.ui64End > ui64Addr && ui64Now - aIt->second.ui32Time < MX_CHANGE_FADE_MS;
+				}
+			}
+			if ( bRedraw ) { ::InvalidateRect( Wnd(), nullptr, FALSE ); }
+
+			// Faster right after a change, then gradually slower while nothing more changes.
+			const uint32_t ui32Period = bChanged ? MX_WATCH_FAST_MS : std::min( m_ui32WatchPeriod + MX_WATCH_SLOWDOWN_MS, MX_WATCH_SLOW_MS );
+			if ( ui32Period != m_ui32WatchPeriod ) {
+				m_ui32WatchPeriod = ui32Period;
+				StartWatch();
+			}
+		}
+		catch ( ... ) { m_bWatchValid = false; }
+	}
+
+	/**
+	 * Gets the time to record for a change made now.
+	 *
+	 * \return Returns the number of milliseconds since m_ui64ChangeEpoch.
+	 **/
+	uint32_t CHexEditorControl::ChangeTimeNow() {
+		const uint64_t ui64Now = ::GetTickCount64();
+		if ( !m_ui64ChangeEpoch ) { m_ui64ChangeEpoch = ui64Now; }
+		return uint32_t( std::min<uint64_t>( ui64Now - m_ui64ChangeEpoch, UINT32_MAX ) );
+	}
+
+	/**
+	 * Highlights bytes as changed now.
+	 *
+	 * \param _ui64Addr The address of the first byte.
+	 * \param _ui64Size The number of bytes.
+	 **/
+	void CHexEditorControl::MarkChanged( uint64_t _ui64Addr, uint64_t _ui64Size ) {
+		SetChanged( _ui64Addr, _ui64Addr + _ui64Size, ChangeTimeNow() );
+	}
+
+	/**
+	 * Records a run of bytes as changed at a given time, replacing what was recorded for them.
+	 *
+	 * \param _ui64Start The address of the first byte.
+	 * \param _ui64End The address after the last byte.
+	 * \param _ui32Time When they changed (see ChangeTimeNow()).
+	 **/
+	void CHexEditorControl::SetChanged( uint64_t _ui64Start, uint64_t _ui64End, uint32_t _ui32Time ) {
+		if ( _ui64Start >= _ui64End ) { return; }
+		try {
+			ClearChanges( _ui64Start, _ui64End );
+			uint64_t ui64End = _ui64End;
+			// Join the neighbors that changed at the same time.
+			auto aNext = m_mChanges.lower_bound( _ui64Start );
+			if ( aNext != m_mChanges.end() && aNext->first == _ui64End && aNext->second.ui32Time == _ui32Time ) {
+				ui64End = aNext->second.ui64End;
+				aNext = m_mChanges.erase( aNext );
+			}
+			if ( aNext != m_mChanges.begin() ) {
+				auto aPrev = std::prev( aNext );
+				if ( aPrev->second.ui64End == _ui64Start && aPrev->second.ui32Time == _ui32Time ) {
+					aPrev->second.ui64End = ui64End;
+					return;
+				}
+			}
+			MX_CHANGE_RUN crRun;
+			crRun.ui64End = ui64End;
+			crRun.ui32Time = _ui32Time;
+			m_mChanges.emplace_hint( aNext, _ui64Start, crRun );
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Removes the change highlighting of a range of bytes.
+	 *
+	 * \param _ui64Start The address of the first byte.
+	 * \param _ui64End The address after the last byte.
+	 **/
+	void CHexEditorControl::ClearChanges( uint64_t _ui64Start, uint64_t _ui64End ) {
+		if ( _ui64Start >= _ui64End || m_mChanges.empty() ) { return; }
+		try {
+			auto aIt = m_mChanges.lower_bound( _ui64Start );
+			if ( aIt != m_mChanges.begin() ) {
+				// A run that starts before the range is cut short (and split if it runs past the range).
+				auto aPrev = std::prev( aIt );
+				if ( aPrev->second.ui64End > _ui64Start ) {
+					const MX_CHANGE_RUN crOld = aPrev->second;
+					aPrev->second.ui64End = _ui64Start;
+					if ( crOld.ui64End > _ui64End ) {
+						m_mChanges.emplace_hint( aIt, _ui64End, crOld );
+						return;
+					}
+				}
+			}
+			while ( aIt != m_mChanges.end() && aIt->first < _ui64End ) {
+				if ( aIt->second.ui64End > _ui64End ) {
+					// The last run keeps its part after the range.
+					const MX_CHANGE_RUN crTail = aIt->second;
+					aIt = m_mChanges.erase( aIt );
+					m_mChanges.emplace_hint( aIt, _ui64End, crTail );
+					break;
+				}
+				aIt = m_mChanges.erase( aIt );
+			}
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Moves the change highlighting along after bytes are inserted or deleted, so that it stays with the bytes it belongs to.
+	 *
+	 * \param _ui64Addr Where the bytes were inserted or deleted.
+	 * \param _ui64Size The number of bytes.
+	 * \param _bInserted True if the bytes were inserted (and are highlighted as changed), false if they were deleted.
+	 **/
+	void CHexEditorControl::ShiftChanges( uint64_t _ui64Addr, uint64_t _ui64Size, bool _bInserted ) {
+		// The data moved, so the next look for changes starts over.
+		m_bWatchValid = false;
+		if ( !_ui64Size ) { return; }
+		try {
+			if ( _bInserted ) {
+				// A run that straddles the insertion point is split around it.
+				auto aIt = m_mChanges.lower_bound( _ui64Addr );
+				if ( aIt != m_mChanges.begin() ) {
+					auto aPrev = std::prev( aIt );
+					if ( aPrev->second.ui64End > _ui64Addr ) {
+						const MX_CHANGE_RUN crTail = aPrev->second;
+						aPrev->second.ui64End = _ui64Addr;
+						m_mChanges.emplace_hint( aIt, _ui64Addr, crTail );
+					}
+				}
+			}
+			else {
+				ClearChanges( _ui64Addr, _ui64Addr + _ui64Size );
+			}
+
+			// Everything after the point moves (in order, so each can be put back at the end).
+			std::vector<std::pair<uint64_t, MX_CHANGE_RUN>> vMoved;
+			for ( auto aIt = m_mChanges.lower_bound( _bInserted ? _ui64Addr : (_ui64Addr + _ui64Size) ); aIt != m_mChanges.end(); ) {
+				MX_CHANGE_RUN crRun = aIt->second;
+				uint64_t ui64Start = aIt->first;
+				if ( _bInserted ) {
+					ui64Start += _ui64Size;
+					crRun.ui64End += _ui64Size;
+				}
+				else {
+					ui64Start -= _ui64Size;
+					crRun.ui64End -= _ui64Size;
+				}
+				vMoved.emplace_back( ui64Start, crRun );
+				aIt = m_mChanges.erase( aIt );
+			}
+			for ( const auto &pThis : vMoved ) { m_mChanges.emplace_hint( m_mChanges.end(), pThis.first, pThis.second ); }
+
+			if ( _bInserted ) { MarkChanged( _ui64Addr, _ui64Size ); }
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Determines whether any of a range of bytes is highlighted as changed.
+	 *
+	 * \param _ui64Addr The address of the first byte.
+	 * \param _ui64Size The number of bytes (a value's size).
+	 * \param _ui32Time Receives when the most recent change among them happened (see ChangeTimeNow()).
+	 * \return Returns true if at least one of the bytes is highlighted as changed.
+	 **/
+	bool CHexEditorControl::ChangedIn( uint64_t _ui64Addr, uint64_t _ui64Size, uint32_t &_ui32Time ) const {
+		if ( m_mChanges.empty() ) { return false; }
+		const uint64_t ui64End = _ui64Addr + std::max<uint64_t>( _ui64Size, 1 );
+		bool bFound = false;
+		_ui32Time = 0;
+		auto aIt = m_mChanges.upper_bound( _ui64Addr );
+		if ( aIt != m_mChanges.begin() ) {
+			auto aPrev = std::prev( aIt );
+			if ( aPrev->second.ui64End > _ui64Addr ) {
+				bFound = true;
+				_ui32Time = aPrev->second.ui32Time;
+			}
+		}
+		for ( ; aIt != m_mChanges.end() && aIt->first < ui64End; ++aIt ) {
+			if ( !bFound || aIt->second.ui32Time > _ui32Time ) { _ui32Time = aIt->second.ui32Time; }
+			bFound = true;
+		}
+		return bFound;
+	}
+
+	/**
+	 * Gets the text color of a changed value: the Modified color, fading to the normal color over MX_CHANGE_FADE_MS if that is
+	 *	not 0.
+	 *
+	 * \param _crNormal The value's normal text color.
+	 * \param _ui32Time When the value changed (see ChangeTimeNow()).
+	 * \return Returns the text color.
+	 **/
+	COLORREF CHexEditorControl::ChangedColor( COLORREF _crNormal, uint32_t _ui32Time ) const {
+		const COLORREF crChanged = ForeColors()->crModified;
+		if ( !MX_CHANGE_FADE_MS ) { return crChanged; }
+		const uint64_t ui64Age = (::GetTickCount64() - m_ui64ChangeEpoch) - _ui32Time;
+		if ( ui64Age >= MX_CHANGE_FADE_MS ) { return _crNormal; }
+		// 0 = still wholly the Modified color, 255 = back to normal.
+		const uint32_t ui32Amount = uint32_t( ui64Age * 255 / std::max<uint64_t>( MX_CHANGE_FADE_MS, 1 ) );
+		auto Blend = [ui32Amount]( uint32_t _ui32From, uint32_t _ui32To ) -> uint32_t {
+			return (_ui32From * (255 - ui32Amount) + _ui32To * ui32Amount) / 255;
+		};
+		return RGB( Blend( GetRValue( crChanged ), GetRValue( _crNormal ) ),
+			Blend( GetGValue( crChanged ), GetGValue( _crNormal ) ),
+			Blend( GetBValue( crChanged ), GetBValue( _crNormal ) ) ) | (crChanged & 0xFF000000);
 	}
 
 }	// namespace mx

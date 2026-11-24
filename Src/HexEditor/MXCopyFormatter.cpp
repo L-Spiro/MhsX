@@ -6,6 +6,7 @@
 #include <Float16/EEFloat16.h>
 
 #include <algorithm>
+#include <cctype>
 #include <cstring>
 #include <format>
 
@@ -555,6 +556,293 @@ namespace mx {
 		size_t													m_sSize = 0;
 	};
 
+	/**
+	 * Class CCopyFormatter::CStringOut
+	 * \brief Writes text as a string literal of a programming language: printable ASCII as-is, everything else as escape sequences, and
+	 *	long text split over lines (after each line feed and before a line grows past MX_LINE_WIDTH characters).
+	 *
+	 * The languages differ in the escapes they offer and in how adjacent literals combine:
+	 *	- C: \\a \\b \\f \\n \\r \\t \\v \\0, \\xHH for other control characters and undecodable bytes, \\uXXXX and \\UXXXXXXXX for other characters
+	 *		(but U+0080..U+009F, which C does not allow as universal character names, as their UTF-8 bytes).  \\x and \\0 take as many
+	 *		digits as follow them, so the literal is closed and reopened ("\\xFF""AB") when a digit would follow.  A '?' after a '?' is
+	 *		escaped so that it cannot form a trigraph.  Lines are joined by putting the literals next to each other.  UTF-16 text is
+	 *		written as a u"" literal so that its code units are kept.
+	 *	- C#: \\a \\b \\f \\n \\r \\t \\v \\0, \\uXXXX for other control characters, \\UXXXXXXXX above U+FFFF (\\x is avoided: it takes 1 to 4
+	 *		digits).  Lines are joined with +.
+	 *	- Java: \\b \\t \\n \\f \\r, \\uXXXX for everything else (surrogate pairs above U+FFFF; \\u000A and \\u000D would end the line, so
+	 *		they are always \\n and \\r).  Lines are joined with +.
+	 *	- JavaScript: \\b \\f \\n \\r \\t \\v, \\xHH for other control characters, \\uXXXX, and \\u{XXXXX} above U+FFFF.  Lines are joined
+	 *		with +.
+	 *	- Python: \\a \\b \\f \\n \\r \\t \\v, \\xHH for other control characters, \\uXXXX, and \\UXXXXXXXX above U+FFFF.  Lines are joined by
+	 *		putting the literals next to each other, with a \\ at the end of each line.
+	 * Bytes that are not valid text in the character set are kept as \\xHH in C; the other languages' strings hold characters, not bytes,
+	 *	so they become U+FFFD.  Unpaired UTF-16 surrogates are kept as \\uXXXX (\\xHHHH in C).
+	 */
+	class CCopyFormatter::CStringOut {
+	public :
+		CStringOut( CTextOut &_toOut, MX_COPY_AS _caFmt, bool _bWide ) :
+			m_toOut( _toOut ),
+			m_caFmt( _caFmt ),
+			m_bWide( _bWide ) {
+		}
+
+
+		// == Enumerations.
+		/** Flags on the values passed to Char(). */
+		enum MX_FLAGS : uint32_t {
+			MX_F_RAW_BYTE										= 0x80000000,											/**< The low 8 bits are a byte that is not valid text. */
+			MX_F_LONE_UNIT										= 0x40000000,											/**< The low 16 bits are an unpaired UTF-16 surrogate. */
+		};
+
+
+		// == Functions.
+		/**
+		 * \brief Writes one character.
+		 *
+		 * \param _ui32Char A Unicode code point, or a byte or code unit with an MX_FLAGS flag.
+		 * \return Returns false if an error has occurred.
+		 */
+		bool													Char( uint32_t _ui32Char ) {
+			char szTok[24];
+			size_t sLen = 0;
+			// The kind of digit that would extend this token's escape if it came next.
+			MX_EXTEND eExtends = MX_E_NONE;
+			bool bQuestion = false;
+			const bool bC = m_caFmt == MX_CA_C_STRING;
+
+			auto Hex = [&]( uint32_t _ui32Val, size_t _sDigits ) {
+				for ( size_t I = _sDigits; I--; ) { szTok[sLen++] = MX_HEX_DIGITS[(_ui32Val>>(I*4))&0xF]; }
+			};
+			auto Esc = [&]( char _cEsc ) {
+				szTok[sLen++] = '\\';
+				szTok[sLen++] = _cEsc;
+			};
+			auto EscU = [&]( uint32_t _ui32Val ) {
+				Esc( 'u' );
+				Hex( _ui32Val, 4 );
+			};
+			auto EscX = [&]( uint32_t _ui32Val, size_t _sDigits ) {
+				Esc( 'x' );
+				Hex( _ui32Val, _sDigits );
+				if ( bC ) { eExtends = MX_E_HEX; }
+			};
+
+			if ( _ui32Char & MX_F_RAW_BYTE ) {
+				if ( bC ) { EscX( _ui32Char & 0xFF, 2 ); }
+				else { EscU( 0xFFFD ); }
+			}
+			else if ( _ui32Char & MX_F_LONE_UNIT ) {
+				if ( bC ) { EscX( _ui32Char & 0xFFFF, 4 ); }
+				else { EscU( _ui32Char & 0xFFFF ); }
+			}
+			else {
+				const uint32_t ui32Cp = _ui32Char;
+				switch ( ui32Cp ) {
+					case '\\' : { Esc( '\\' ); break; }
+					case '"' : { Esc( '"' ); break; }
+					case '\n' : { Esc( 'n' ); break; }
+					case '\r' : { Esc( 'r' ); break; }
+					case '\t' : { Esc( 't' ); break; }
+					case '\b' : { Esc( 'b' ); break; }
+					case '\f' : { Esc( 'f' ); break; }
+					case '\a' : {
+						if ( m_caFmt == MX_CA_JAVA_STRING || m_caFmt == MX_CA_JS_STRING ) { EscControl( ui32Cp, szTok, sLen, eExtends ); }
+						else { Esc( 'a' ); }
+						break;
+					}
+					case '\v' : {
+						if ( m_caFmt == MX_CA_JAVA_STRING ) { EscControl( ui32Cp, szTok, sLen, eExtends ); }
+						else { Esc( 'v' ); }
+						break;
+					}
+					case '\0' : {
+						if ( bC ) {
+							// \0 followed by a digit would be read as one octal escape.
+							Esc( '0' );
+							eExtends = MX_E_DIGIT;
+						}
+						else if ( m_caFmt == MX_CA_CS_STRING ) { Esc( '0' ); }
+						else { EscControl( ui32Cp, szTok, sLen, eExtends ); }		// JavaScript's \0 cannot be followed by a digit.
+						break;
+					}
+					case '?' : {
+						// "??" followed by certain characters is a trigraph in C.
+						if ( bC && m_bLastQuestion ) { Esc( '?' ); }
+						else { szTok[sLen++] = '?'; }
+						bQuestion = true;
+						break;
+					}
+					default : {
+						if ( ui32Cp < 0x20 || ui32Cp == 0x7F ) {
+							EscControl( ui32Cp, szTok, sLen, eExtends );
+						}
+						else if ( ui32Cp < 0x80 ) {
+							szTok[sLen++] = char( ui32Cp );
+						}
+						else if ( bC && ui32Cp < 0xA0 ) {
+							// Not allowed as a universal character name in C.
+							if ( m_bWide ) { EscX( ui32Cp, 4 ); }
+							else {
+								EscX( 0xC0 | (ui32Cp >> 6), 2 );
+								EscX( 0x80 | (ui32Cp & 0x3F), 2 );
+							}
+						}
+						else if ( ui32Cp <= 0xFFFF ) {
+							EscU( ui32Cp );
+						}
+						else {
+							switch ( m_caFmt ) {
+								case MX_CA_JAVA_STRING : {
+									// A surrogate pair.
+									EscU( 0xD800 + ((ui32Cp - 0x10000) >> 10) );
+									EscU( 0xDC00 + ((ui32Cp - 0x10000) & 0x3FF) );
+									break;
+								}
+								case MX_CA_JS_STRING : {
+									Esc( 'u' );
+									szTok[sLen++] = '{';
+									Hex( ui32Cp, ui32Cp > 0xFFFFF ? 6 : 5 );
+									szTok[sLen++] = '}';
+									break;
+								}
+								default : {
+									Esc( 'U' );
+									Hex( ui32Cp, 8 );
+								}
+							}
+						}
+					}
+				}
+			}
+			szTok[sLen] = '\0';
+
+			// Start a new line if the last one ended in a line feed or this would make it too long.
+			if ( m_bBreak || (m_sLineLen && m_sLineLen + sLen > MX_LINE_WIDTH) ) {
+				if ( !NextLine() ) { return false; }
+			}
+			else if ( !m_bOpen ) {
+				if ( !Open() ) { return false; }
+			}
+			// A digit after an escape that would take it in: close this literal and start another.
+			if ( m_eExtends != MX_E_NONE && sLen && szTok[0] != '\\' &&
+				((m_eExtends == MX_E_HEX && std::isxdigit( uint8_t( szTok[0] ) )) || (m_eExtends == MX_E_DIGIT && std::isdigit( uint8_t( szTok[0] ) ))) ) {
+				if ( !m_toOut.Put( L'"' ) || !Prefix() ) { return false; }
+			}
+			m_eExtends = eExtends;
+			m_bLastQuestion = bQuestion;
+			m_bBreak = !(_ui32Char & (MX_F_RAW_BYTE | MX_F_LONE_UNIT)) && _ui32Char == '\n';
+			m_sLineLen += sLen;
+			return m_toOut.Put( szTok );
+		}
+
+		/**
+		 * \brief Ends the literal (writing an empty one if nothing was written).
+		 *
+		 * \return Returns false if an error has occurred.
+		 */
+		bool													Finish() {
+			if ( !m_bOpen && !Open() ) { return false; }
+			return m_toOut.Put( L'"' );
+		}
+
+
+	protected :
+		// == Enumerations.
+		/** Digits that would be taken into the escape just written. */
+		enum MX_EXTEND {
+			MX_E_NONE,																					/**< None. */
+			MX_E_HEX,																					/**< Hexadecimal digits (after C's \\x). */
+			MX_E_DIGIT,																					/**< Decimal digits (after \\0). */
+		};
+
+
+		// == Members.
+		/** The text output. */
+		CTextOut &												m_toOut;
+		/** The language. */
+		MX_COPY_AS												m_caFmt;
+		/** The text is UTF-16 (C writes a u"" literal). */
+		bool													m_bWide;
+		/** A literal has been opened. */
+		bool													m_bOpen = false;
+		/** The last character was a line feed, so the next starts a new line. */
+		bool													m_bBreak = false;
+		/** The last character was a '?'. */
+		bool													m_bLastQuestion = false;
+		/** What would extend the last escape. */
+		MX_EXTEND												m_eExtends = MX_E_NONE;
+		/** The number of characters in the current line's literal. */
+		size_t													m_sLineLen = 0;
+
+		/** The number of characters after which a line is split. */
+		static constexpr size_t									MX_LINE_WIDTH = 76;
+
+
+		// == Functions.
+		/**
+		 * \brief Escapes a control character the way the language prefers when it has no named escape for it.
+		 *
+		 * \param _ui32Cp The control character.
+		 * \param _pcTok The token being built.
+		 * \param _sLen The length of the token, updated.
+		 * \param _eExtends Updated with what would extend the escape.
+		 */
+		void													EscControl( uint32_t _ui32Cp, char * _pcTok, size_t &_sLen, MX_EXTEND &_eExtends ) const {
+			_pcTok[_sLen++] = '\\';
+			const bool bHex = m_caFmt == MX_CA_C_STRING || m_caFmt == MX_CA_JS_STRING || m_caFmt == MX_CA_PYTHON_STRING;
+			_pcTok[_sLen++] = bHex ? 'x' : 'u';
+			const size_t sDigits = (bHex && !(m_caFmt == MX_CA_C_STRING && m_bWide)) ? 2 : 4;
+			for ( size_t I = sDigits; I--; ) { _pcTok[_sLen++] = MX_HEX_DIGITS[(_ui32Cp>>(I*4))&0xF]; }
+			if ( m_caFmt == MX_CA_C_STRING ) { _eExtends = MX_E_HEX; }
+		}
+
+		/**
+		 * \brief Writes the literal's prefix and opening quote.
+		 *
+		 * \return Returns false if an error has occurred.
+		 */
+		bool													Prefix() {
+			if ( m_caFmt == MX_CA_C_STRING && m_bWide && !m_toOut.Put( L'u' ) ) { return false; }
+			return m_toOut.Put( L'"' );
+		}
+
+		/**
+		 * \brief Opens the first literal.
+		 *
+		 * \return Returns false if an error has occurred.
+		 */
+		bool													Open() {
+			m_bOpen = true;
+			m_sLineLen = 0;
+			return Prefix();
+		}
+
+		/**
+		 * \brief Closes the current line's literal and opens one on the next line.
+		 *
+		 * \return Returns false if an error has occurred.
+		 */
+		bool													NextLine() {
+			if ( !m_toOut.Put( L'"' ) ) { return false; }
+			switch ( m_caFmt ) {
+				case MX_CA_C_STRING : { break; }
+				case MX_CA_PYTHON_STRING : {
+					if ( !m_toOut.Put( " \\" ) ) { return false; }
+					break;
+				}
+				default : {
+					if ( !m_toOut.Put( " +" ) ) { return false; }
+				}
+			}
+			if ( !m_toOut.NewLine() ) { return false; }
+			m_bBreak = false;
+			m_bLastQuestion = false;
+			m_eExtends = MX_E_NONE;
+			m_sLineLen = 0;
+			return Prefix();
+		}
+	};
+
 	// == CCopyVectorSink functions.
 	/**
 	 * \brief Appends bytes to the end of the sink.
@@ -882,6 +1170,11 @@ namespace mx {
 			case MX_CA_C_CODE : {}							MX_FALLTHROUGH
 			case MX_CA_JAVA_CODE : {}						MX_FALLTHROUGH
 			case MX_CA_PYTHON_CODE : { return RenderCode( _csSource, _toOut ); }
+			case MX_CA_C_STRING : {}						MX_FALLTHROUGH
+			case MX_CA_CS_STRING : {}						MX_FALLTHROUGH
+			case MX_CA_JAVA_STRING : {}						MX_FALLTHROUGH
+			case MX_CA_JS_STRING : {}						MX_FALLTHROUGH
+			case MX_CA_PYTHON_STRING : { return RenderString( _csSource, _toOut ); }
 			case MX_CA_INTEL_8 : {}							MX_FALLTHROUGH
 			case MX_CA_INTEL_16 : {}						MX_FALLTHROUGH
 			case MX_CA_INTEL_32 : { return RenderIntelHex( _csSource, _toOut ); }
@@ -1030,6 +1323,145 @@ namespace mx {
 			return _toOut.NewLine() && _toOut.Put( "])" );
 		}
 		return _toOut.NewLine() && _toOut.Put( "};" );
+	}
+
+	/**
+	 * \brief Writes the selected bytes, read as text in the view's character set, as a C, C#, Java, JavaScript, or Python string
+	 *	literal.  See CStringOut for how each language's literal is formed.
+	 *
+	 * \param _csSource The data and parameters of the Copy operation.
+	 * \param _toOut Receives the text.
+	 * \return Returns false on a read or memory failure.
+	 */
+	bool CCopyFormatter::RenderString( const MX_COPY_SOURCE &_csSource, CTextOut &_toOut ) {
+		const CCharSets::MX_CHAR_SETS csSet = _csSource.caCopyAs.csCharSet;
+		CStringOut soOut( _toOut, _csSource.caCopyAs.caCopyFmt, csSet == CCharSets::MX_CS_UNICODE );
+
+		// Characters can span blocks from the data source, so bytes wait here until a whole character (up to 4 bytes) is available.
+		uint8_t ui8Pending[8];
+		size_t sPending = 0;
+		auto Drain = [&]( bool _bAll ) -> bool {
+			size_t sPos = 0;
+			while ( sPos < sPending && (_bAll || sPending - sPos >= 4) ) {
+				uint32_t ui32Char;
+				sPos += DecodeChar( csSet, _csSource.caCopyAs.bBigEndian, ui8Pending + sPos, sPending - sPos, ui32Char );
+				if ( !soOut.Char( ui32Char ) ) { return false; }
+			}
+			std::memmove( ui8Pending, ui8Pending + sPos, sPending - sPos );
+			sPending -= sPos;
+			return true;
+		};
+
+		const uint64_t ui64Ranges = TotalRanges( _csSource );
+		for ( uint64_t I = 0; I < ui64Ranges; ++I ) {
+			const MX_SEL_RANGE srRange = RangeAt( _csSource, I );
+			if ( !srRange.ui64Size ) { continue; }
+			CByteStream bsStream( _csSource, srRange.ui64Start, srRange.ui64Size );
+			const uint8_t * pui8Data = nullptr;
+			while ( size_t sGot = bsStream.NextBlock( pui8Data ) ) {
+				for ( size_t J = 0; J < sGot; ++J ) {
+					ui8Pending[sPending++] = pui8Data[J];
+					if ( sPending >= 4 && !Drain( false ) ) { return false; }
+				}
+			}
+			if ( bsStream.Failed() ) { return false; }
+			// Each range (each line of a Column selection) is decoded on its own.
+			if ( !Drain( true ) ) { return false; }
+		}
+		return soOut.Finish() && _toOut.Ok();
+	}
+
+	/**
+	 * \brief Decodes one character of text.
+	 *
+	 * \param _csSet The character set.
+	 * \param _bBigEndian For MX_CS_UNICODE, the text is UTF-16BE rather than UTF-16LE.
+	 * \param _pui8Data The bytes to decode.
+	 * \param _sSize The number of bytes at _pui8Data (at least 1).  Characters longer than this are treated as invalid.
+	 * \param _ui32Char Receives the Unicode code point, or a CStringOut::MX_F_RAW_BYTE byte that is not valid text, or a
+	 *	CStringOut::MX_F_LONE_UNIT unpaired UTF-16 surrogate.
+	 * \return Returns the number of bytes used (at least 1).
+	 */
+	size_t CCopyFormatter::DecodeChar( CCharSets::MX_CHAR_SETS _csSet, bool _bBigEndian, const uint8_t * _pui8Data, size_t _sSize, uint32_t &_ui32Char ) {
+		const uint32_t ui32Raw = CStringOut::MX_F_RAW_BYTE | _pui8Data[0];
+		switch ( _csSet ) {
+			case CCharSets::MX_CS_ASCII : {
+				_ui32Char = (_pui8Data[0] < 0x80) ? _pui8Data[0] : ui32Raw;
+				return 1;
+			}
+			case CCharSets::MX_CS_UNICODE : {
+				if ( _sSize < 2 ) {
+					_ui32Char = ui32Raw;
+					return 1;
+				}
+				auto Unit = [&]( size_t _sIdx ) -> uint32_t {
+					return _bBigEndian ? ((uint32_t( _pui8Data[_sIdx] ) << 8) | _pui8Data[_sIdx+1]) : ((uint32_t( _pui8Data[_sIdx+1] ) << 8) | _pui8Data[_sIdx]);
+				};
+				const uint32_t ui32Hi = Unit( 0 );
+				if ( ui32Hi >= 0xD800 && ui32Hi <= 0xDBFF && _sSize >= 4 ) {
+					const uint32_t ui32Lo = Unit( 2 );
+					if ( ui32Lo >= 0xDC00 && ui32Lo <= 0xDFFF ) {
+						_ui32Char = 0x10000 + ((ui32Hi - 0xD800) << 10) + (ui32Lo - 0xDC00);
+						return 4;
+					}
+				}
+				_ui32Char = (ui32Hi >= 0xD800 && ui32Hi <= 0xDFFF) ? (CStringOut::MX_F_LONE_UNIT | ui32Hi) : ui32Hi;
+				return 2;
+			}
+			case CCharSets::MX_CS_UTF8 : {
+				const uint8_t ui8Lead = _pui8Data[0];
+				size_t sLen;
+				uint32_t ui32Cp, ui32Min;
+				if ( ui8Lead < 0x80 ) {
+					_ui32Char = ui8Lead;
+					return 1;
+				}
+				else if ( (ui8Lead & 0xE0) == 0xC0 ) { sLen = 2; ui32Cp = ui8Lead & 0x1F; ui32Min = 0x80; }
+				else if ( (ui8Lead & 0xF0) == 0xE0 ) { sLen = 3; ui32Cp = ui8Lead & 0x0F; ui32Min = 0x800; }
+				else if ( (ui8Lead & 0xF8) == 0xF0 ) { sLen = 4; ui32Cp = ui8Lead & 0x07; ui32Min = 0x10000; }
+				else {
+					_ui32Char = ui32Raw;
+					return 1;
+				}
+				if ( _sSize < sLen ) {
+					_ui32Char = ui32Raw;
+					return 1;
+				}
+				for ( size_t I = 1; I < sLen; ++I ) {
+					if ( (_pui8Data[I] & 0xC0) != 0x80 ) {
+						_ui32Char = ui32Raw;
+						return 1;
+					}
+					ui32Cp = (ui32Cp << 6) | (_pui8Data[I] & 0x3F);
+				}
+				// Overlong forms, surrogates, and values past U+10FFFF are not valid.
+				if ( ui32Cp < ui32Min || ui32Cp > 0x10FFFF || (ui32Cp >= 0xD800 && ui32Cp <= 0xDFFF) ) {
+					_ui32Char = ui32Raw;
+					return 1;
+				}
+				_ui32Char = ui32Cp;
+				return sLen;
+			}
+			default : {
+				// A Windows code page: the shortest run of bytes that converts to a character.
+				const CCharSets::MX_CHAR_SET &csThis = CCharSets::m_csSets[_csSet];
+				const size_t sMax = csThis.bSinglePage ? 1 : std::min<size_t>( _sSize, 4 );
+				for ( size_t sLen = 1; sLen <= sMax; ++sLen ) {
+					wchar_t wcOut[4];
+					const int iLen = ::MultiByteToWideChar( csThis.ui32Code, MB_ERR_INVALID_CHARS, reinterpret_cast<const char *>(_pui8Data), int( sLen ), wcOut, int( std::size( wcOut ) ) );
+					if ( iLen == 1 && !(wcOut[0] >= 0xD800 && wcOut[0] <= 0xDFFF) ) {
+						_ui32Char = wcOut[0];
+						return sLen;
+					}
+					if ( iLen == 2 && wcOut[0] >= 0xD800 && wcOut[0] <= 0xDBFF && wcOut[1] >= 0xDC00 && wcOut[1] <= 0xDFFF ) {
+						_ui32Char = 0x10000 + ((uint32_t( wcOut[0] ) - 0xD800) << 10) + (uint32_t( wcOut[1] ) - 0xDC00);
+						return sLen;
+					}
+				}
+				_ui32Char = ui32Raw;
+				return 1;
+			}
+		}
 	}
 
 	/**

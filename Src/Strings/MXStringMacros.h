@@ -23455,3 +23455,84 @@
 #define _DEC_S_58763A46_Failed_to_write_to_the_target_ mx::CStringDecoder::DecodeToString( _T_58763A46_Failed_to_write_to_the_target_, _LEN_58763A46 )
 #define _DEC_WS_58763A46_Failed_to_write_to_the_target_ mx::CStringDecoder::DecodeToWString( _T_58763A46_Failed_to_write_to_the_target_, _LEN_58763A46 )
 
+// &Insert Mode
+
+#define _T_83EE6C49__Insert_Mode "\xAE\x17\x3E\x0E\xF7\x3B\x02\xE7\x1D\x37\x2D\x33"
+#define _LEN_83EE6C49 12
+#define _T_LEN_83EE6C49__Insert_Mode _T_83EE6C49__Insert_Mode, _LEN_83EE6C49
+#define _DEC_83EE6C49__Insert_Mode( STR ) mx::CStringDecoder::Decode( _T_83EE6C49__Insert_Mode, _LEN_83EE6C49, STR )
+#define _DEC_S_83EE6C49__Insert_Mode mx::CStringDecoder::DecodeToString( _T_83EE6C49__Insert_Mode, _LEN_83EE6C49 )
+#define _DEC_WS_83EE6C49__Insert_Mode mx::CStringDecoder::DecodeToWString( _T_83EE6C49__Insert_Mode, _LEN_83EE6C49 )
+
+// Overwrite Mo&de
+
+#define _T_6052936D_Overwrite_Mo_de "\xD7\x44\x35\x0D\x09\x3B\xF7\x3B\x35\xE8\x16\x3D\xB8\xFF\x2C"
+#define _LEN_6052936D 15
+#define _T_LEN_6052936D_Overwrite_Mo_de _T_6052936D_Overwrite_Mo_de, _LEN_6052936D
+#define _DEC_6052936D_Overwrite_Mo_de( STR ) mx::CStringDecoder::Decode( _T_6052936D_Overwrite_Mo_de, _LEN_6052936D, STR )
+#define _DEC_S_6052936D_Overwrite_Mo_de mx::CStringDecoder::DecodeToString( _T_6052936D_Overwrite_Mo_de, _LEN_6052936D )
+#define _DEC_WS_6052936D_Overwrite_Mo_de mx::CStringDecoder::DecodeToWString( _T_6052936D_Overwrite_Mo_de, _LEN_6052936D )
+
+// Clear All C&hange Highlights
+
+#define _T_A91F09F9_Clear_All_C_hange_Highlights "\xCB\x3A\x35\xFC\x04\xE9\xCF\x33\x3C\xE8\x0C\xF4\xFA\xFC\x35\xEF\x33\xF0\xE3\xFB\x30\xF6\x33\x39\x2F\x31\x42\x05"
+#define _LEN_A91F09F9 28
+#define _T_LEN_A91F09F9_Clear_All_C_hange_Highlights _T_A91F09F9_Clear_All_C_hange_Highlights, _LEN_A91F09F9
+#define _DEC_A91F09F9_Clear_All_C_hange_Highlights( STR ) mx::CStringDecoder::Decode( _T_A91F09F9_Clear_All_C_hange_Highlights, _LEN_A91F09F9, STR )
+#define _DEC_S_A91F09F9_Clear_All_C_hange_Highlights mx::CStringDecoder::DecodeToString( _T_A91F09F9_Clear_All_C_hange_Highlights, _LEN_A91F09F9 )
+#define _DEC_WS_A91F09F9_Clear_All_C_hange_Highlights mx::CStringDecoder::DecodeToWString( _T_A91F09F9_Clear_All_C_hange_Highlights, _LEN_A91F09F9 )
+
+// C&lear Change Highlight
+
+#define _T_058EDF70_C_lear_Change_Highlight "\xCB\xF4\x3C\x00\xF3\x3B\xAE\x0A\x38\x29\x37\x35\xF7\xBB\x0F\xF1\x35\x38\x07\xFB\x30\xF6\x3B"
+#define _LEN_058EDF70 23
+#define _T_LEN_058EDF70_C_lear_Change_Highlight _T_058EDF70_C_lear_Change_Highlight, _LEN_058EDF70
+#define _DEC_058EDF70_C_lear_Change_Highlight( STR ) mx::CStringDecoder::Decode( _T_058EDF70_C_lear_Change_Highlight, _LEN_058EDF70, STR )
+#define _DEC_S_058EDF70_C_lear_Change_Highlight mx::CStringDecoder::DecodeToString( _T_058EDF70_C_lear_Change_Highlight, _LEN_058EDF70 )
+#define _DEC_WS_058EDF70_C_lear_Change_Highlight mx::CStringDecoder::DecodeToWString( _T_058EDF70_C_lear_Change_Highlight, _LEN_058EDF70 )
+
+// Copy as C &String
+
+#define _T_803DA867_Copy_as_C__String "\xCB\x3D\x40\x14\xB2\x2A\x01\xE7\x13\xE8\xEF\x21\x06\x0D\x30\xF6\x35"
+#define _LEN_803DA867 17
+#define _T_LEN_803DA867_Copy_as_C__String _T_803DA867_Copy_as_C__String, _LEN_803DA867
+#define _DEC_803DA867_Copy_as_C__String( STR ) mx::CStringDecoder::Decode( _T_803DA867_Copy_as_C__String, _LEN_803DA867, STR )
+#define _DEC_S_803DA867_Copy_as_C__String mx::CStringDecoder::DecodeToString( _T_803DA867_Copy_as_C__String, _LEN_803DA867 )
+#define _DEC_WS_803DA867_Copy_as_C__String mx::CStringDecoder::DecodeToWString( _T_803DA867_Copy_as_C__String, _LEN_803DA867 )
+
+// Copy as C&# String
+
+#define _T_F284D201_Copy_as_C___String "\xCB\x3D\x40\x14\xB2\x2A\x01\xE7\x13\xEE\xEC\xEE\xE5\x0F\x39\xF1\x3C\x37"
+#define _LEN_F284D201 18
+#define _T_LEN_F284D201_Copy_as_C___String _T_F284D201_Copy_as_C___String, _LEN_F284D201
+#define _DEC_F284D201_Copy_as_C___String( STR ) mx::CStringDecoder::Decode( _T_F284D201_Copy_as_C___String, _LEN_F284D201, STR )
+#define _DEC_S_F284D201_Copy_as_C___String mx::CStringDecoder::DecodeToString( _T_F284D201_Copy_as_C___String, _LEN_F284D201 )
+#define _DEC_WS_F284D201_Copy_as_C___String mx::CStringDecoder::DecodeToWString( _T_F284D201_Copy_as_C___String, _LEN_F284D201 )
+
+// Copy as Ja&va String
+
+#define _T_C9AFCC7C_Copy_as_Ja_va_String "\xCB\x3D\x40\x14\xB2\x2A\x01\xE7\x1A\x29\xEF\x44\xF3\xBB\x1A\xFC\x40\x39\x09\xF9"
+#define _LEN_C9AFCC7C 20
+#define _T_LEN_C9AFCC7C_Copy_as_Ja_va_String _T_C9AFCC7C_Copy_as_Ja_va_String, _LEN_C9AFCC7C
+#define _DEC_C9AFCC7C_Copy_as_Ja_va_String( STR ) mx::CStringDecoder::Decode( _T_C9AFCC7C_Copy_as_Ja_va_String, _LEN_C9AFCC7C, STR )
+#define _DEC_S_C9AFCC7C_Copy_as_Ja_va_String mx::CStringDecoder::DecodeToString( _T_C9AFCC7C_Copy_as_Ja_va_String, _LEN_C9AFCC7C )
+#define _DEC_WS_C9AFCC7C_Copy_as_Ja_va_String mx::CStringDecoder::DecodeToWString( _T_C9AFCC7C_Copy_as_Ja_va_String, _LEN_C9AFCC7C )
+
+// Copy as Java&Script String
+
+#define _T_3977DA4F_Copy_as_Java_Script_String "\xCB\x3D\x40\x14\xB2\x2A\x01\xE7\x1A\x29\x3F\x2F\xB8\xEE\x2A\xFA\x37\x40\x0F\xB2\x1C\x02\x39\x39\x36\x30"
+#define _LEN_3977DA4F 26
+#define _T_LEN_3977DA4F_Copy_as_Java_Script_String _T_3977DA4F_Copy_as_Java_Script_String, _LEN_3977DA4F
+#define _DEC_3977DA4F_Copy_as_Java_Script_String( STR ) mx::CStringDecoder::Decode( _T_3977DA4F_Copy_as_Java_Script_String, _LEN_3977DA4F, STR )
+#define _DEC_S_3977DA4F_Copy_as_Java_Script_String mx::CStringDecoder::DecodeToString( _T_3977DA4F_Copy_as_Java_Script_String, _LEN_3977DA4F )
+#define _DEC_WS_3977DA4F_Copy_as_Java_Script_String mx::CStringDecoder::DecodeToWString( _T_3977DA4F_Copy_as_Java_Script_String, _LEN_3977DA4F )
+
+// Copy as Pyt&hon String
+
+#define _T_FAEB778D_Copy_as_Pyt_hon_String "\xCB\x3D\x40\x14\xB2\x2A\x01\xE7\x20\x41\x3D\xF4\xFA\x0A\x35\xA8\x21\x44\x0D\xFB\x37\xF5"
+#define _LEN_FAEB778D 22
+#define _T_LEN_FAEB778D_Copy_as_Pyt_hon_String _T_FAEB778D_Copy_as_Pyt_hon_String, _LEN_FAEB778D
+#define _DEC_FAEB778D_Copy_as_Pyt_hon_String( STR ) mx::CStringDecoder::Decode( _T_FAEB778D_Copy_as_Pyt_hon_String, _LEN_FAEB778D, STR )
+#define _DEC_S_FAEB778D_Copy_as_Pyt_hon_String mx::CStringDecoder::DecodeToString( _T_FAEB778D_Copy_as_Pyt_hon_String, _LEN_FAEB778D )
+#define _DEC_WS_FAEB778D_Copy_as_Pyt_hon_String mx::CStringDecoder::DecodeToWString( _T_FAEB778D_Copy_as_Pyt_hon_String, _LEN_FAEB778D )
+

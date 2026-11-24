@@ -79,6 +79,17 @@ namespace mx {
 		MX_CA_PCM24,
 		MX_CA_PCM32,
 
+		// Text (in the view's character set) as a string literal.  Added last so that the values above are unchanged.
+		MX_CA_C_STRING,											// "LSN_E_E\n"
+																// "NUM( LSN"
+		MX_CA_CS_STRING,										// "LSN_E_E\n" +
+																// "NUM( LSN"
+		MX_CA_JAVA_STRING,										// "LSN_E_E\n" +
+																// "NUM( LSN"
+		MX_CA_JS_STRING,										// "LSN_E_E\n" +
+																// "NUM( LSN"
+		MX_CA_PYTHON_STRING,									// "LSN_E_E\n" \ (a line continuation)
+																// "NUM( LSN"
 	};
 	
 

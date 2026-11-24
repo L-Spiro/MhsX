@@ -228,6 +228,7 @@ namespace mx {
 		{ FALSE,		MX_M_EDIT_INSERT_OVERWRITE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_CB4B4FA5_Insert_O_verwrite, _LEN_CB4B4FA5 ) },
 		{ FALSE,		MX_M_EDIT_REAL_TIME_FILE_EDITING,				TRUE,		TRUE,		TRUE,		MW_MENU_TXT( _T_495A2EF7_Real_Time_Editing_in__Files, _LEN_495A2EF7 ) },
 		{ FALSE,		MX_M_EDIT_REAL_TIME_RAM_TEXT_EDITING,			TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_43849E7E_Real_Time_Text_Editing_in_R_AM, _LEN_43849E7E ) },
+		{ FALSE,		MX_M_EDIT_CLEAR_ALL_CHANGES,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_A91F09F9_Clear_All_C_hange_Highlights, _LEN_A91F09F9 ) },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_M_EDIT_INSERT_COLOR,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_B57D707F_Insert_Co_lor___, _LEN_B57D707F ) },
 		{ FALSE,		MX_M_EDIT_INSERT_DATE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_BB3A17D9_I_nsert_Data_Time, _LEN_BB3A17D9 ),				false,	{ static_cast<BYTE>(FVIRTKEY | FSHIFT), VK_F5, MX_M_EDIT_INSERT_DATE } },
@@ -249,6 +250,11 @@ namespace mx {
 		{ FALSE,		MX_M_EDIT_COPY_AS_C,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_CA6D9CC2_Copy_as_C_C_ode, _LEN_CA6D9CC2 ) },
 		{ FALSE,		MX_M_EDIT_COPY_AS_JAVA,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_887AD3E5_Copy_as__Java_Code, _LEN_887AD3E5 ) },
 		{ FALSE,		MX_M_EDIT_COPY_AS_PYTHON,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_EB7A8579_Copy_as__Python_Code, _LEN_EB7A8579 ) },
+		{ FALSE,		MX_M_EDIT_COPY_AS_C_STRING,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_803DA867_Copy_as_C__String, _LEN_803DA867 ) },
+		{ FALSE,		MX_M_EDIT_COPY_AS_CS_STRING,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_F284D201_Copy_as_C___String, _LEN_F284D201 ) },
+		{ FALSE,		MX_M_EDIT_COPY_AS_JAVA_STRING,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_C9AFCC7C_Copy_as_Ja_va_String, _LEN_C9AFCC7C ) },
+		{ FALSE,		MX_M_EDIT_COPY_AS_JS_STRING,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_3977DA4F_Copy_as_Java_Script_String, _LEN_3977DA4F ) },
+		{ FALSE,		MX_M_EDIT_COPY_AS_PYTHON_STRING,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_FAEB778D_Copy_as_Pyt_hon_String, _LEN_FAEB778D ) },
 		{ FALSE,		MX_M_EDIT_COPY_AS_8_BIT_HEX,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_2CCFF31F_Copy_as_Intel__8_Bit_Hex_Code, _LEN_2CCFF31F ) },
 		{ FALSE,		MX_M_EDIT_COPY_AS_16_BIT_HEX,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_EA9F97C5_Copy_as_Intel__16_Bit_Hex_Code, _LEN_EA9F97C5 ) },
 		{ FALSE,		MX_M_EDIT_COPY_AS_32_BIT_HEX,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_5BB5A94F_Copy_as_Intel__32_Bit_Hex_Code, _LEN_5BB5A94F ) },
@@ -290,6 +296,9 @@ namespace mx {
 	// Edit -> Insert/Overwrite.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miEditInsertOverwriteMenu[] = {
 		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen															bSkip	aHotkey
+		{ FALSE,		MX_M_EDIT_INSERT_MODE,							TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_83EE6C49__Insert_Mode, _LEN_83EE6C49 ) },
+		{ FALSE,		MX_M_EDIT_OVERWRITE_MODE,						TRUE,		TRUE,		TRUE,		MW_MENU_TXT( _T_6052936D_Overwrite_Mo_de, _LEN_6052936D ) },
+		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_M_EDIT_INSERT_FILE,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_899D8058_Insert__File___, _LEN_899D8058 ),					false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'I', MX_M_EDIT_INSERT_FILE } },
 		{ FALSE,		MX_M_EDIT_INSERT_BYTES,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_09EEA57F_Insert__Bytes___, _LEN_09EEA57F ),					false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FSHIFT), 'I', MX_M_EDIT_INSERT_BYTES } },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },

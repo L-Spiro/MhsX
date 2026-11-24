@@ -1,4 +1,5 @@
 #include "MXDeusHexMachinaWindow.h"
+#include "../Layouts/MXLayoutMacros.h"
 #include "../Layouts/MXLayoutManager.h"
 #include "../Layouts/MXNumberInputLayout.h"
 #include "../Layouts/MXOpenProcessLayout.h"
@@ -297,6 +298,23 @@ namespace mx {
 				SetRealTimeRamTextEditing( !RealTimeRamTextEditing() );
 				break;
 			}
+			case Layout::MX_M_EDIT_INSERT_MODE : {
+				// Process memory cannot grow, so it is always in Overwrite mode.
+				if ( IsOverwriteMode() && !(phecControl && phecControl->IsProcess()) ) { ToggleOverwriteInsert(); }
+				break;
+			}
+			case Layout::MX_M_EDIT_OVERWRITE_MODE : {
+				if ( !IsOverwriteMode() ) { ToggleOverwriteInsert(); }
+				break;
+			}
+			case Layout::MX_M_EDIT_CLEAR_ALL_CHANGES : {
+				if ( phecControl ) { phecControl->ClearAllChanges(); }
+				break;
+			}
+			case Layout::MX_M_EDIT_CLEAR_CHANGES : {
+				if ( phecControl ) { phecControl->ClearSelectedChanges(); }
+				break;
+			}
 			case Layout::MX_M_EDIT_COPY_AS_HEX : {
 				Copy( MX_CA_HEX_TEXT );
 				break;
@@ -319,6 +337,26 @@ namespace mx {
 			}
 			case Layout::MX_M_EDIT_COPY_AS_PYTHON : {
 				Copy( MX_CA_PYTHON_CODE );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_C_STRING : {
+				Copy( MX_CA_C_STRING );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_CS_STRING : {
+				Copy( MX_CA_CS_STRING );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_JAVA_STRING : {
+				Copy( MX_CA_JAVA_STRING );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_JS_STRING : {
+				Copy( MX_CA_JS_STRING );
+				break;
+			}
+			case Layout::MX_M_EDIT_COPY_AS_PYTHON_STRING : {
+				Copy( MX_CA_PYTHON_STRING );
 				break;
 			}
 			case Layout::MX_M_EDIT_COPY_AS_8_BIT_HEX : {
@@ -1468,6 +1506,47 @@ namespace mx {
 		return Command( 0, _wId, NULL );
 	}
 
+	/**
+	 * Handles WM_CONTEXTMENU.  Right-clicking the hex editor shows its context menu.
+	 *
+	 * \param _pwControl The control that was right-clicked.
+	 * \param _iX The horizontal position of the cursor in screen coordinates, or -1 if the menu was opened with the keyboard.
+	 * \param _iY The vertical position of the cursor in screen coordinates, or -1 if the menu was opened with the keyboard.
+	 * \return Returns a LSW_HANDLED code.
+	 */
+	CWidget::LSW_HANDLED CDeusHexMachinaWindow::ContextMenu( CWidget * _pwControl, INT _iX, INT _iY ) {
+		auto phecControl = CurrentEditor();
+		if ( phecControl && _pwControl == phecControl ) {
+			// The items are enabled and checked by InitMenuPopup(), and their commands go to Command(), as for the Edit menu.
+			LSW_MENU_ITEM miMenuBar[] = {
+				//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen																bSkip
+				{ FALSE,		Layout::MX_M_EDIT_CUT,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_6E69B475_Cu_t, _LEN_6E69B475 ),									FALSE },
+				{ FALSE,		Layout::MX_M_EDIT_COPY,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_446FE619__Copy, _LEN_446FE619 ),								FALSE },
+				{ FALSE,		Layout::MX_M_EDIT_PASTE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_FB82E709__Paste, _LEN_FB82E709 ),								FALSE },
+				{ FALSE,		Layout::MX_M_EDIT_DELETE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_3DBE79B1_Delete, _LEN_3DBE79B1 ),								FALSE },
+				{ TRUE,			0,												FALSE,		FALSE,		FALSE,		nullptr,  0,																	FALSE },
+				{ FALSE,		Layout::MX_M_SELECT_SELECT_ALL,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_0D2831F4_Select__All, _LEN_0D2831F4 ),							FALSE },
+				{ TRUE,			0,												FALSE,		FALSE,		FALSE,		nullptr,  0,																	FALSE },
+				{ FALSE,		Layout::MX_M_EDIT_CLEAR_CHANGES,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_058EDF70_C_lear_Change_Highlight, _LEN_058EDF70 ),				FALSE },
+				{ FALSE,		Layout::MX_M_EDIT_CLEAR_ALL_CHANGES,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_A91F09F9_Clear_All_C_hange_Highlights, _LEN_A91F09F9 ),			FALSE },
+			};
+
+			const LSW_MENU_LAYOUT miMenus[] = {
+				{
+					MX_M_CONTEXT_MENU,
+					0,
+					0,
+					std::size( miMenuBar ),
+					miMenuBar
+				},
+			};
+			mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
+			plmLayout->CreatePopupMenuEx( this, miMenus, std::size( miMenus ), _iX, _iY );
+			return LSW_H_HANDLED;
+		}
+		return lsw::CMainWindow::ContextMenu( _pwControl, _iX, _iY );
+	}
+
 	// WM_CLOSE.
 	CWidget::LSW_HANDLED CDeusHexMachinaWindow::Close() {
 		::DestroyWindow( Wnd() );
@@ -2420,6 +2499,28 @@ namespace mx {
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
 					break;
 				}
+				case Layout::MX_M_EDIT_INSERT_MODE : {
+					// Process memory cannot grow, so it is always in Overwrite mode.
+					const bool bProcess = phecControl && phecControl->IsProcess();
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE,
+						.fState = UINT( ((!IsOverwriteMode() && !bProcess) ? MFS_CHECKED : MFS_UNCHECKED) | (bProcess ? MFS_GRAYED : MFS_ENABLED) ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_EDIT_OVERWRITE_MODE : {
+					const bool bProcess = phecControl && phecControl->IsProcess();
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE,
+						.fState = UINT( (IsOverwriteMode() || bProcess) ? MFS_CHECKED : MFS_UNCHECKED ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_EDIT_CLEAR_ALL_CHANGES : {}						MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_CLEAR_CHANGES : {
+					::EnableMenuItem(
+						_hMenu, uiId,
+						MF_BYCOMMAND | ((phecControl && phecControl->HasChanges()) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
 				case Layout::MX_M_EDIT_CUT : {}										MX_FALLTHROUGH
 				case Layout::MX_M_EDIT_COPY : {}									MX_FALLTHROUGH
 				case Layout::MX_M_EDIT_COPY_AS_ : {}								MX_FALLTHROUGH
@@ -2429,6 +2530,11 @@ namespace mx {
 				case Layout::MX_M_EDIT_COPY_AS_C : {}								MX_FALLTHROUGH
 				case Layout::MX_M_EDIT_COPY_AS_JAVA : {}							MX_FALLTHROUGH
 				case Layout::MX_M_EDIT_COPY_AS_PYTHON : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_C_STRING : {}						MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_CS_STRING : {}						MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_JAVA_STRING : {}						MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_JS_STRING : {}						MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_COPY_AS_PYTHON_STRING : {}					MX_FALLTHROUGH
 				case Layout::MX_M_EDIT_COPY_AS_8_BIT_HEX : {}						MX_FALLTHROUGH
 				case Layout::MX_M_EDIT_COPY_AS_16_BIT_HEX : {}						MX_FALLTHROUGH
 				case Layout::MX_M_EDIT_COPY_AS_32_BIT_HEX : {}						MX_FALLTHROUGH
