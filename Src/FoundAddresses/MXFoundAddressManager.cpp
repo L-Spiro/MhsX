@@ -211,8 +211,9 @@ namespace mx {
 			if ( _bAsJson ) {
 				lson::CJson jSon;
 				vBuffer.push_back( 0 );
+				vBuffer.push_back( 0 );
 
-				if ( !jSon.SetJson( reinterpret_cast<const char *>(vBuffer.data()) ) ) { return false; }
+				if ( !jSon.SetJson( reinterpret_cast<char *>(vBuffer.data()) ) ) { return false; }
 
 				if ( !jSon.GetContainer() ) { return false; }
 				size_t stRoot = jSon.GetContainer()->GetRoot();

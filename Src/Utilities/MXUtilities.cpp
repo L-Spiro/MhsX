@@ -3430,28 +3430,32 @@ namespace mx {
 	// \unnnn universal character name (arbitrary Unicode value); may result in several characters	code point U+nnnn
 	// \Unnnnnnnn universal character name (arbitrary Unicode value); may result in several characters	code point U+nnnnnnnn
 	// \N{name} Character named NAME in the Unicode database
-	void CUtilities::ResolveAllEscapes( const std::string &_sInput, std::string &_sOutput, bool _bIsUtf8 ) {
-		size_t sLen = 1;
-		for ( size_t I = 0; I < _sInput.size() && sLen; I += sLen ) {
-			uint64_t uiNext = _bIsUtf8 ? ee::CExpEval::NextUtf8Char( &_sInput[I], _sInput.size() - I, &sLen ) : (sLen = 1, static_cast<uint8_t>(_sInput[I]));
-			if ( sLen == 1 ) {
-				// It was just a regular character.  Could be an escape.
-				uiNext = ee::CExpEval::ResolveEscape( &_sInput[I], _sInput.size() - I, sLen, false );
+	void CUtilities::ResolveAllEscapes( const std::string_view &_sInput, std::string &_sOutput, bool _bIsUtf8 ) {
+		try {
+			_sOutput.reserve( _sInput.size() );
+			size_t sLen = 1;
+			for ( size_t I = 0; I < _sInput.size() && sLen; I += sLen ) {
+				uint64_t uiNext = _bIsUtf8 ? ee::CExpEval::NextUtf8Char( &_sInput[I], _sInput.size() - I, &sLen ) : (sLen = 1, static_cast<uint8_t>(_sInput[I]));
+				if ( sLen == 1 ) {
+					// It was just a regular character.  Could be an escape.
+					uiNext = ee::CExpEval::ResolveEscape( &_sInput[I], _sInput.size() - I, sLen, false );
+				}
+				do {
+					uint32_t ui32Len;
+					uint32_t ui32BackToUtf8 = _bIsUtf8 ? ee::CExpEval::Utf32ToUtf8( static_cast<uint32_t>(uiNext), ui32Len ) : (ui32Len = ee::CExpEval::CountSetBytes( uiNext ), uiNext);
+					if ( ui32BackToUtf8 == MX_UTF_INVALID ) {
+						ui32Len = 1;
+						ui32BackToUtf8 = uiNext;
+					}
+					for ( uint32_t J = 0; J < ui32Len; ++J ) {
+						_sOutput.push_back( static_cast<uint8_t>(ui32BackToUtf8) );
+						ui32BackToUtf8 >>= 8;
+					}
+					uiNext >>= 32ULL;
+				} while ( uiNext );
 			}
-			do {
-				uint32_t ui32Len;
-				uint32_t ui32BackToUtf8 = _bIsUtf8 ? ee::CExpEval::Utf32ToUtf8( static_cast<uint32_t>(uiNext), ui32Len ) : (ui32Len = ee::CExpEval::CountSetBytes( uiNext ), uiNext);
-				if ( ui32BackToUtf8 == MX_UTF_INVALID ) {
-					ui32Len = 1;
-					ui32BackToUtf8 = uiNext;
-				}
-				for ( uint32_t J = 0; J < ui32Len; ++J ) {
-					_sOutput.push_back( static_cast<uint8_t>(ui32BackToUtf8) );
-					ui32BackToUtf8 >>= 8;
-				}
-				uiNext >>= 32ULL;
-			} while ( uiNext );
 		}
+		catch ( ... ) { _sOutput = std::string(); }
 	}
 
 	// Resolves a single escape character, or returns the first input character if not an escape character.

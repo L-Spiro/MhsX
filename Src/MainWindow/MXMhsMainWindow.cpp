@@ -1298,8 +1298,9 @@ namespace mx {
 		if ( _bAsJson ) {
 			lson::CJson jSon;
 			vBuffer.push_back( 0 );
+			vBuffer.push_back( 0 );
 
-			if ( !jSon.SetJson( reinterpret_cast<const char *>(vBuffer.data()) ) ) { return false; }
+			if ( !jSon.SetJson( reinterpret_cast<char *>(vBuffer.data()) ) ) { return false; }
 			if ( !m_pmhMemHack->LoadSettings( &jSon, nullptr, oOptions ) ) { return false; }
 			if ( !m_pmhMemHack->HotkeyManager().LoadSettings( &jSon, nullptr ) ) { return false; }
 		}
