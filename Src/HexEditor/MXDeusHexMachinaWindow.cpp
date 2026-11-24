@@ -321,7 +321,8 @@ namespace mx {
 			}
 			case Layout::MX_M_FILE_EXIT : {
 				Close();
-				break;
+				// The window may be gone.
+				return LSW_H_CONTINUE;
 			}
 			
 			case Layout::MX_M_EDIT_UNDO : {
@@ -1551,7 +1552,45 @@ namespace mx {
 				break;
 			}
 		}
+		// Any command can change what the toolbar buttons can do (Undo/Redo, clipboards, tabs, etc.)
+		UpdateToolBar();
 		return LSW_H_CONTINUE;
+	}
+
+	/**
+	 * Handles TBN_GETINFOTIPW: supplies the tooltips of the toolbar buttons.  The text is decrypted only when it is needed.
+	 *
+	 * \param _pgitTip The notification data.  iItem is the command ID of the button.
+	 * \return Returns LSW_H_HANDLED if text was supplied.
+	 */
+	CWidget::LSW_HANDLED CDeusHexMachinaWindow::TbnGetInfoTip( LPNMTBGETINFOTIPW _pgitTip ) {
+		if ( !_pgitTip || !_pgitTip->pszText || _pgitTip->cchTextMax <= 0 ) { return LSW_H_CONTINUE; }
+		try {
+			CSecureWString swsTip;
+			switch ( _pgitTip->iItem ) {
+				case Layout::MX_M_FILE_NEW : { swsTip = _DEC_WS_53AE02A5_New; break; }
+				case Layout::MX_M_FILE_OPENFILE : { swsTip = _DEC_WS_6C2A2DB6_Open_File; break; }
+				case Layout::MX_M_FILE_OPENCURPROCESS : { swsTip = _DEC_WS_D1788D14_Open_Current_Process; break; }
+				case Layout::MX_M_FILE_SAVE : { swsTip = _DEC_WS_F55495E0_Save; break; }
+				case Layout::MX_M_FILE_SAVE_AS : { swsTip = _DEC_WS_2EB0FAD7_Save_As; break; }
+				case Layout::MX_M_FILE_SAVE_ALL : { swsTip = _DEC_WS_43C53BED_Save_All; break; }
+				case Layout::MX_M_FILE_CLOSE : { swsTip = _DEC_WS_D2C0AEC0_Close; break; }
+				case Layout::MX_M_EDIT_CUT : { swsTip = _DEC_WS_88BDD21D_Cut; break; }
+				case Layout::MX_M_EDIT_COPY : { swsTip = _DEC_WS_ED8814BC_Copy; break; }
+				case Layout::MX_M_EDIT_PASTE : { swsTip = _DEC_WS_5D97579C_Paste; break; }
+				case Layout::MX_M_EDIT_UNDO : { swsTip = _DEC_WS_434214CC_Undo; break; }
+				case Layout::MX_M_EDIT_REDO : { swsTip = _DEC_WS_D2C0C394_Redo; break; }
+				case Layout::MX_M_FIND_FIND : { swsTip = _DEC_WS_699CCB3A_Find; break; }
+				case Layout::MX_M_FIND_GOTO : { swsTip = _DEC_WS_74233668_Go_To; break; }
+				case Layout::MX_M_TOOLS_EXPRESSION_EVALUATOR : { swsTip = _DEC_WS_54B37832_Expression_Evaluator; break; }
+				case Layout::MX_M_TOOLS_COMPARE_FILES : { swsTip = _DEC_WS_4265EB07_Compare_Files; break; }
+				case Layout::MX_M_TOOLS_HISTOGRAM : { swsTip = _DEC_WS_BEFDEA03_Histogram_Entropy; break; }
+				default : { return LSW_H_CONTINUE; }
+			}
+			::wcsncpy_s( _pgitTip->pszText, static_cast<size_t>(_pgitTip->cchTextMax), swsTip.c_str(), _TRUNCATE );
+			return LSW_H_HANDLED;
+		}
+		catch ( ... ) { return LSW_H_CONTINUE; }
 	}
 
 	/**
@@ -1746,17 +1785,18 @@ namespace mx {
 			CHexEditorControl::MX_EDIT_AS			eaEditAs;
 			bool									bSetCharSet;
 			CCharSets::MX_CHAR_SETS					csCharSet;
-			const wchar_t *							pwcExt;
+			const char *							pcExt;					// Encrypted.
+			size_t									sExtLen;
 		};
 		static const MX_NEW_TYPE ntTypes[] = {
-			{ MX_NF_TEXT,		CHexEditorControl::MX_EA_TEXT,		false,	CCharSets::MX_CS_ASCII,		L".txt" },
-			{ MX_NF_HEX,		CHexEditorControl::MX_EA_HEX,		false,	CCharSets::MX_CS_ASCII,		L".bin" },
-			{ MX_NF_UNICODE,	CHexEditorControl::MX_EA_UTF16,		true,	CCharSets::MX_CS_UNICODE,	L".txt" },
-			{ MX_NF_UTF8,		CHexEditorControl::MX_EA_UTF8,		true,	CCharSets::MX_CS_UTF8,		L".txt" },
-			{ MX_NF_C,			CHexEditorControl::MX_EA_CODE,		false,	CCharSets::MX_CS_ASCII,		L".cpp" },
-			{ MX_NF_HTML,		CHexEditorControl::MX_EA_TAGGED,	false,	CCharSets::MX_CS_ASCII,		L".html" },
-			{ MX_NF_PHP,		CHexEditorControl::MX_EA_CODE,		false,	CCharSets::MX_CS_ASCII,		L".php" },
-			{ MX_NF_XML,		CHexEditorControl::MX_EA_TAGGED,	false,	CCharSets::MX_CS_ASCII,		L".xml" },
+			{ MX_NF_TEXT,		CHexEditorControl::MX_EA_TEXT,		false,	CCharSets::MX_CS_ASCII,		_T_LEN_82DF8146__txt },
+			{ MX_NF_HEX,		CHexEditorControl::MX_EA_HEX,		false,	CCharSets::MX_CS_ASCII,		_T_LEN_34CF84EE__bin },
+			{ MX_NF_UNICODE,	CHexEditorControl::MX_EA_UTF16,		true,	CCharSets::MX_CS_UNICODE,	_T_LEN_82DF8146__txt },
+			{ MX_NF_UTF8,		CHexEditorControl::MX_EA_UTF8,		true,	CCharSets::MX_CS_UTF8,		_T_LEN_82DF8146__txt },
+			{ MX_NF_C,			CHexEditorControl::MX_EA_CODE,		false,	CCharSets::MX_CS_ASCII,		_T_LEN_54027AA2__cpp },
+			{ MX_NF_HTML,		CHexEditorControl::MX_EA_TAGGED,	false,	CCharSets::MX_CS_ASCII,		_T_LEN_81EE4181__html },
+			{ MX_NF_PHP,		CHexEditorControl::MX_EA_CODE,		false,	CCharSets::MX_CS_ASCII,		_T_LEN_C879FFD2__php },
+			{ MX_NF_XML,		CHexEditorControl::MX_EA_TAGGED,	false,	CCharSets::MX_CS_ASCII,		_T_LEN_AF1C0660__xml },
 		};
 		const MX_NEW_TYPE * pntType = nullptr;
 		for ( const auto &ntThis : ntTypes ) {
@@ -1768,7 +1808,7 @@ namespace mx {
 			// "Untitled1.txt", "Untitled2.bin", etc.
 			std::wstring wsName = _DEC_WS_503970B4_Untitled;
 			wsName += std::to_wstring( ++m_ui32Untitled );
-			wsName += pntType->pwcExt;
+			wsName += mx::CStringDecoder::DecodeToWString( pntType->pcExt, pntType->sExtLen );
 
 			// A UTF-16 file starts with its byte-order mark, so that it is recognized as UTF-16 when opened again.
 			CHexEditorInterface::CBuffer bInitial;
@@ -1947,15 +1987,16 @@ namespace mx {
 			else {
 				// A process: its name, without anything a file name cannot hold.
 				wsName = pheiSource->TabString();
-				wsExt = L".bin";
+				wsExt = _DEC_WS_34CF84EE__bin;
+				const CSecureWString swsBad = _DEC_WS_8A350921____________;
 				for ( auto &wcThis : wsName ) {
-					if ( wcThis < L' ' || std::wcschr( L"<>:\"/\\|?*", wcThis ) ) { wcThis = L'_'; }
+					if ( wcThis < L' ' || swsBad.find( wcThis ) != std::wstring::npos ) { wcThis = L'_'; }
 				}
 				while ( wsName.size() && (wsName.back() == L' ' || wsName.back() == L'.') ) { wsName.pop_back(); }
-				if ( wsName.empty() ) { wsName = L"Memory"; }
+				if ( wsName.empty() ) { wsName = _DEC_WS_EDC13103_Memory; }
 			}
 			wchar_t wszRange[64];
-			::swprintf_s( wszRange, L"_%.8llX_%.8llX", static_cast<unsigned long long>(phecControl->SelectionStart()), static_cast<unsigned long long>(ui64Total) );
+			::swprintf_s( wszRange, _DEC_WS_BE34A111____8llX___8llX.c_str(), static_cast<unsigned long long>(phecControl->SelectionStart()), static_cast<unsigned long long>(ui64Total) );
 			wsName += wszRange;
 			wsName += wsExt;
 
@@ -2003,7 +2044,7 @@ namespace mx {
 			if ( m_vTabs[sIdx].phecWidget ) { m_vTabs[sIdx].phecWidget->FlushRealTimeUndo(); }
 			const std::filesystem::path pPath = phefFile->Path();
 			if ( phefFile->IsModified() ) {
-				const std::wstring wsMsg = _DEC_WS_B2D793C8_Discard_all_unsaved_changes_and_reload_the_file_from_disk_ + L"\r\n\r\n" + pPath.generic_wstring();
+				const std::wstring wsMsg = _DEC_WS_B2D793C8_Discard_all_unsaved_changes_and_reload_the_file_from_disk_ + _DEC_WS_2BB8AB61__r_n_r_n + pPath.generic_wstring();
 				if ( ::MessageBoxW( Wnd(), wsMsg.c_str(), _DEC_WS_A303F04B_Revert_Refresh.c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 ) != IDYES ) { return; }
 			}
 			if ( ReopenTab( sIdx, pPath ) ) {
@@ -2050,7 +2091,7 @@ namespace mx {
 		if ( !phefFile || phefFile->IsUntitled() ) { return; }
 		try {
 			const std::filesystem::path pPath = phefFile->Path();
-			const std::wstring wsMsg = _DEC_WS_146D99BE_Close_the_file_and_permanently_delete_it_from_disk___This_cannot_be_undone_ + L"\r\n\r\n" + pPath.generic_wstring();
+			const std::wstring wsMsg = _DEC_WS_146D99BE_Close_the_file_and_permanently_delete_it_from_disk___This_cannot_be_undone_ + _DEC_WS_2BB8AB61__r_n_r_n + pPath.generic_wstring();
 			if ( ::MessageBoxW( Wnd(), wsMsg.c_str(), _DEC_WS_94B2CB3D_Delete_File.c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 ) != IDYES ) { return; }
 
 			// Nothing may keep the file open: clipboards that refer to it are rendered or released, then the tab is closed.
@@ -2095,7 +2136,7 @@ namespace mx {
 				ptTab->SetCurSel( int( _sIdx ) );
 				TabSelChanged( ptTab, int( _sIdx ), nullptr );
 			}
-			const std::wstring wsMsg = _DEC_WS_B42F7DCB_Save_the_changes_to_this_file_ + L"\r\n\r\n" + std::wstring( phefFile->StatusString() );
+			const std::wstring wsMsg = _DEC_WS_B42F7DCB_Save_the_changes_to_this_file_ + _DEC_WS_2BB8AB61__r_n_r_n + std::wstring( phefFile->StatusString() );
 			switch ( ::MessageBoxW( Wnd(), wsMsg.c_str(), _DEC_WS_3213087F_Unsaved_Changes.c_str(), MB_YESNOCANCEL | MB_ICONWARNING ) ) {
 				case IDYES : { return SaveTab( _sIdx, false ); }
 				case IDNO : { return true; }
@@ -2235,10 +2276,23 @@ namespace mx {
 		CToolBar * ptbToolBar = static_cast<CToolBar *>(FindChild( Layout::MX_W_TOOLBAR0 ));
 		if ( !ptbToolBar ) { return; }
 		const bool bFile = CurrentFile() != nullptr;
+		const bool bTab = CurrentTab() != SIZE_MAX;
+		auto phecControl = bTab ? CurrentEditor() : nullptr;
+		const bool bSel = phecControl && phecControl->HasSelection();
+		// The toolbar only redraws buttons whose state changes, so this is cheap enough to call on every caret move.
 		ptbToolBar->EnableButton( Layout::MX_M_FILE_SAVE, CanSave() );
 		ptbToolBar->EnableButton( Layout::MX_M_FILE_SAVE_AS, bFile );
 		ptbToolBar->EnableButton( Layout::MX_M_FILE_SAVE_ALL, CanSaveAll() );
-		ptbToolBar->EnableButton( Layout::MX_M_FILE_CLOSE, CurrentTab() != SIZE_MAX );
+		ptbToolBar->EnableButton( Layout::MX_M_FILE_CLOSE, bTab );
+		// Cut removes bytes, so it also needs a writable data source.
+		ptbToolBar->EnableButton( Layout::MX_M_EDIT_CUT, bSel && phecControl->CanDelete() );
+		ptbToolBar->EnableButton( Layout::MX_M_EDIT_COPY, bSel );
+		ptbToolBar->EnableButton( Layout::MX_M_EDIT_PASTE, phecControl && phecControl->CanPaste() );
+		ptbToolBar->EnableButton( Layout::MX_M_EDIT_UNDO, phecControl && phecControl->CanUndo() );
+		ptbToolBar->EnableButton( Layout::MX_M_EDIT_REDO, phecControl && phecControl->CanRedo() );
+		ptbToolBar->EnableButton( Layout::MX_M_FIND_FIND, phecControl != nullptr );
+		ptbToolBar->EnableButton( Layout::MX_M_FIND_GOTO, phecControl != nullptr );
+		ptbToolBar->EnableButton( Layout::MX_M_TOOLS_HISTOGRAM, phecControl != nullptr );
 	}
 
 	/**
@@ -2382,7 +2436,7 @@ namespace mx {
 	void CDeusHexMachinaWindow::FileError( const CSecureWString &_swsMsg, const std::filesystem::path &_pPath, DWORD _dwError ) {
 		try {
 			std::wstring wsText;
-			lsw::CBase::AppendError( (std::wstring( _swsMsg ) + L"\r\n\r\n" + _pPath.generic_wstring()).c_str(), wsText, _dwError );
+			lsw::CBase::AppendError( (std::wstring( _swsMsg ) + _DEC_WS_2BB8AB61__r_n_r_n + _pPath.generic_wstring()).c_str(), wsText, _dwError );
 			lsw::CBase::MessageBoxError( Wnd(), wsText.c_str() );
 			SetStatusBarText( _swsMsg.c_str(), true );
 		}
@@ -2966,7 +3020,7 @@ namespace mx {
 			// A data source that cannot change size (a process, a read-only file) is always in Overwrite mode.
 			const size_t sIdx = CurrentTab();
 			const bool bOverwriteOnly = sIdx != SIZE_MAX && m_vTabs[sIdx].pheiInterface && m_vTabs[sIdx].pheiInterface->OverwriteOnly();
-			psbStatus->SetTextW( MX_SB_INSERT_OVERWRITE, 0, (m_bOverwrite || bOverwriteOnly) ? L"OVR" : L"INS" );
+			psbStatus->SetTextW( MX_SB_INSERT_OVERWRITE, 0, ((m_bOverwrite || bOverwriteOnly) ? _DEC_WS_ED03D9E5_OVR : _DEC_WS_1C920D98_INS).c_str() );
 		}
 	}
 
@@ -2974,6 +3028,8 @@ namespace mx {
 	 * Updates the status-bar Clipboard part to show the active clipboard.
 	 **/
 	void CDeusHexMachinaWindow::UpdateStatusBar_Clipboard() {
+		// Paste depends on the active clipboard.
+		UpdateToolBar();
 		auto psbStatus = StatusBar();
 		if ( psbStatus ) {
 			const size_t sIdx = CCopyPasteManager::ActiveClipboard();
@@ -3022,6 +3078,8 @@ namespace mx {
 
 	// Update the status-bar Size part.
 	void CDeusHexMachinaWindow::UpdateStatusBar_Size() {
+		// The size changes with edits, which also change Undo/Redo.
+		UpdateToolBar();
 		auto phecControl = CurrentEditor();
 		if ( phecControl ) {
 			auto psbStatus = StatusBar();
@@ -3045,6 +3103,8 @@ namespace mx {
 
 	// Updates the status-bar selection ranges/current position/value.
 	void CDeusHexMachinaWindow::UpdateStatusBar_PosValue_StartSize() {
+		// Called when the caret, the selection, or the data under the caret changes, which is what Cut/Copy/Undo/Redo depend on.
+		UpdateToolBar();
 		try {
 			auto phecControl = CurrentEditor();
 			if ( phecControl ) {
@@ -3268,7 +3328,13 @@ namespace mx {
 						MF_BYCOMMAND | ((phecControl && phecControl->HasChanges()) ? MF_ENABLED : MF_GRAYED) );
 					break;
 				}
-				case Layout::MX_M_EDIT_CUT : {}										MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_CUT : {
+					// Cut removes bytes, so it also needs a writable data source (as on the toolbar).
+					EnableMenuItem(
+						_hMenu, uiId,
+						MF_BYCOMMAND | ((phecControl && phecControl->HasSelection() && phecControl->CanDelete()) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
 				case Layout::MX_M_EDIT_COPY : {}									MX_FALLTHROUGH
 				case Layout::MX_M_EDIT_COPY_AS_ : {}								MX_FALLTHROUGH
 				case Layout::MX_M_EDIT_COPY_AS_HEX : {}								MX_FALLTHROUGH

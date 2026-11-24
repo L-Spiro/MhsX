@@ -56,6 +56,16 @@ namespace mx {
 		virtual bool					CreatePopupMenuEx( CWidget * _pwParent, const LSW_MENU_LAYOUT * _pmlLayout, size_t _sTotal,
 			INT _iX, INT _iY );
 
+		/**
+		 * Creates a pop-up menu to be shown to the user given menu layouts whose text is encrypted (as in all of the layouts here).
+		 *	The text is decrypted only while the menu is being built (the menu keeps its own copy).
+		 *
+		 * \param _pmlLayouts The menu layouts.  The first is the menu; the rest are its submenus.
+		 * \param _sTotal The number of layouts at _pmlLayouts.
+		 * \return Returns the menu, which the caller destroys with ::DestroyMenu(), or NULL on failure.
+		 **/
+		virtual HMENU					CreateDisplayPopupMenu( const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotal );
+
 		// Creates a copy of the given array of LSW_WIDGET_LAYOUT objects with LSW_WIDGET_LAYOUT::pwcText and the expressions.
 		static void						UnencryptLayouts( const LSW_WIDGET_LAYOUT * _pwlLayouts, size_t _sTotal,
 			std::vector<LSW_WIDGET_LAYOUT> &_vArray,

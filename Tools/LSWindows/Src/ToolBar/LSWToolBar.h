@@ -6,6 +6,8 @@
 #include "../Layout/LSWMenuLayout.h"
 #include "../Widget/LSWWidget.h"
 
+#include <map>
+#include <string>
 #include <vector>
 
 namespace lsw {
@@ -181,6 +183,25 @@ namespace lsw {
 		BOOL								ShowDropDownMenu( WORD _wId );
 
 		/**
+		 * Sets the text of a button's tooltip (the toolbar must have the TBSTYLE_TOOLTIPS style).  Tooltips can instead be supplied
+		 *	when they are needed by overriding TbnGetInfoTip() in the window that receives the toolbar's notifications, which avoids
+		 *	keeping the text in memory.
+		 *
+		 * \param _wId Command ID of the button.
+		 * \param _pwcText The text, or nullptr to remove the button's tooltip.
+		 * \return Returns TRUE if successful, or FALSE otherwise.
+		 **/
+		BOOL								SetButtonToolTip( WORD _wId, LPCWSTR _pwcText );
+
+		/**
+		 * TBN_GETINFOTIPW.  Supplies a button's tooltip text if one was given with SetButtonToolTip().
+		 *
+		 * \param _pgitTip The notification data.  iItem is the command ID of the button.
+		 * \return Returns LSW_H_HANDLED if text was supplied.
+		 **/
+		virtual LSW_HANDLED					TbnGetInfoTip( LPNMTBGETINFOTIPW _pgitTip );
+
+		/**
 		 * TBN_DROPDOWN.  Shows the button's drop-down menu, if it has one (see SetDropDownMenu()).
 		 *
 		 * \param _lptbToolBar A pointer to an NMTOOLBARW structure.
@@ -265,6 +286,11 @@ namespace lsw {
 		 * The buttons' drop-down menus.
 		 **/
 		std::vector<LSW_DROP_DOWN>			m_vDropDowns;
+
+		/**
+		 * The buttons' tooltips given by SetButtonToolTip(), by command ID.
+		 **/
+		std::map<WORD, std::wstring>		m_mToolTips;
 
 		/**
 		 * Copy of the buttons for TBN_GETBUTTONINFO.

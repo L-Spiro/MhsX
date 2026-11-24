@@ -271,6 +271,17 @@ namespace lsw {
 		// Cancels the drag.
 		void								CancelDrag( BOOL _bBecauseOfCancelMode );
 
+		/**
+		 * Tells every dock target that a drag has started, so that their attachment points are previewed as they will be once this
+		 *	widget has been detached from where it is docked now.
+		 **/
+		void								BeginDragPreviews();
+
+		/**
+		 * Tells every dock target that the drag has ended, so that they use their actual layouts again.
+		 **/
+		void								EndDragPreviews();
+
 		// Redraws the docking state.
 		virtual void						RedrawDockingState( CDockTarget::LSW_DT_ATTACH &_daAttach, CDockTarget * _pdtTarget );
 

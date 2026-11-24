@@ -1979,6 +1979,16 @@ namespace lsw {
 		virtual LSW_HANDLED					TbnDropDown( LPNMTOOLBARW /*_lptbToolBar*/ ) { return LSW_H_CONTINUE; }
 
 		/**
+		 * Handles TBN_GETINFOTIPW, sent when a toolbar (with the TBSTYLE_TOOLTIPS style) needs the tooltip text of a button.  The
+		 *	toolbar is asked first (see CToolBar::SetButtonToolTip()), then the window that received the notification.
+		 *
+		 * \param _pgitTip The notification data.  iItem is the command ID of the button; copy at most cchTextMax characters
+		 *	(including the terminating NULL) to pszText.
+		 * \return Returns LSW_H_HANDLED if text was supplied.
+		 */
+		virtual LSW_HANDLED					TbnGetInfoTip( LPNMTBGETINFOTIPW /*_pgitTip*/ ) { return LSW_H_CONTINUE; }
+
+		/**
 		 * Handles WM_SYSCOMMAND.
 		 * \brief Processes system commands such as SC_CLOSE or SC_MAXIMIZE.
 		 *

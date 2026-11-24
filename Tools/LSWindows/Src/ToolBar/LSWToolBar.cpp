@@ -304,7 +304,7 @@ namespace lsw {
 			if ( ddThis.wId != _wId ) { continue; }
 			if ( !ddThis.pwOwner || !ddThis.pwOwner->Wnd() ) { return FALSE; }
 
-			HMENU hMenu = CBase::LayoutManager()->CreatePopupMenu( ddThis.pmlLayouts, ddThis.sTotal );
+			HMENU hMenu = CBase::LayoutManager()->CreateDisplayPopupMenu( ddThis.pmlLayouts, ddThis.sTotal );
 			if ( !hMenu ) { return FALSE; }
 
 			// Below the button, or above it if there is no room below; never covering it.
@@ -327,6 +327,41 @@ namespace lsw {
 			return TRUE;
 		}
 		return FALSE;
+	}
+
+	/**
+	 * Sets the text of a button's tooltip (the toolbar must have the TBSTYLE_TOOLTIPS style).  Tooltips can instead be supplied
+	 *	when they are needed by overriding TbnGetInfoTip() in the window that receives the toolbar's notifications, which avoids
+	 *	keeping the text in memory.
+	 *
+	 * \param _wId Command ID of the button.
+	 * \param _pwcText The text, or nullptr to remove the button's tooltip.
+	 * \return Returns TRUE if successful, or FALSE otherwise.
+	 **/
+	BOOL CToolBar::SetButtonToolTip( WORD _wId, LPCWSTR _pwcText ) {
+		try {
+			if ( !_pwcText ) {
+				m_mToolTips.erase( _wId );
+				return TRUE;
+			}
+			m_mToolTips[_wId] = _pwcText;
+			return TRUE;
+		}
+		catch ( ... ) { return FALSE; }
+	}
+
+	/**
+	 * TBN_GETINFOTIPW.  Supplies a button's tooltip text if one was given with SetButtonToolTip().
+	 *
+	 * \param _pgitTip The notification data.  iItem is the command ID of the button.
+	 * \return Returns LSW_H_HANDLED if text was supplied.
+	 **/
+	CWidget::LSW_HANDLED CToolBar::TbnGetInfoTip( LPNMTBGETINFOTIPW _pgitTip ) {
+		if ( !_pgitTip || !_pgitTip->pszText || _pgitTip->cchTextMax <= 0 ) { return LSW_H_CONTINUE; }
+		auto aFound = m_mToolTips.find( static_cast<WORD>(_pgitTip->iItem) );
+		if ( aFound == m_mToolTips.end() ) { return LSW_H_CONTINUE; }
+		::wcsncpy_s( _pgitTip->pszText, static_cast<size_t>(_pgitTip->cchTextMax), aFound->second.c_str(), _TRUNCATE );
+		return LSW_H_HANDLED;
 	}
 
 	/**

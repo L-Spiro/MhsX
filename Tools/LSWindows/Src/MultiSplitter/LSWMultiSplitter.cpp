@@ -22,6 +22,8 @@ namespace lsw {
 		m_meRoot.dwId = ++m_dwIds;
 		m_meRoot.iDist = 500;
 		m_meRoot.bContainsWidget = FALSE;
+		m_meRoot.bLockToFar = FALSE;
+		m_meDragRootCopy = m_meRoot;
 	}
 	CMultiSplitter::~CMultiSplitter() {
 		for ( size_t I = m_vLayers.size(); I--; ) {
@@ -84,19 +86,21 @@ namespace lsw {
 		POINT pClientPoint = _pPoint;
 		::ScreenToClient( Wnd(), &pClientPoint );
 
+		// During a drag, the layout as it will be once the dragged widget has been detached.
+		const LSW_MS_RECT & mrRoot = AttachRoot();
 
 		// If there is nothing attached.
-		if ( !m_meRoot.u.pmlLayer && !m_meRoot.bContainsWidget ) {
+		if ( !mrRoot.u.pmlLayer && !mrRoot.bContainsWidget ) {
 			// User can drag anywhere.  The whole rectangle is returned.
 			_maAttach.atAttachTo = LSW_AT_LEFT;			// Ignored when you attach the first widget.
-			_maAttach.dwId = RootId();
-			_rDrawRect = ClientRect( this );
+			_maAttach.dwId = mrRoot.dwId;
+			_rDrawRect = mrRoot.rRect;
 			_rDrawRect = _rDrawRect.MapToDeskTop( Wnd() );
 			return 0;
 		}
 
 		// If only one widget is attached.
-		if ( m_meRoot.u.pqWidget && m_meRoot.bContainsWidget ) {
+		if ( mrRoot.u.pqWidget && mrRoot.bContainsWidget ) {
 			LONG lWinDist = LONG_MAX;
 			// Check each side of the widget.
 			static const LSW_ATTACH_TYPE atAttaches[] = {
@@ -105,7 +109,7 @@ namespace lsw {
 				LSW_AT_TOP,
 				LSW_AT_BOTTOM,
 			};
-			LSW_RECT rRect = ClientRect( this );
+			LSW_RECT rRect = mrRoot.rRect;
 			for ( size_t I = 0; I < LSW_ELEMENTS( atAttaches ); ++I ) {
 				LSW_DT_ATTACH maAttach;
 				INT iDist = 500;
@@ -117,7 +121,7 @@ namespace lsw {
 				}
 				LSW_RECT rAttachrectTemp;
 				LONG lDist = GetAttachPoint( pClientPoint, maAttach, rAttachrectTemp,
-					rRect, rRect, iDist, RootId(), atAttaches[I], _iSizeSuggestion );
+					rRect, rRect, iDist, mrRoot.dwId, atAttaches[I], _iSizeSuggestion );
 				if ( lDist < lWinDist ) {
 					lWinDist = lDist;
 					_maAttach = maAttach;
@@ -129,15 +133,44 @@ namespace lsw {
 		}
 
 		// If more than 1 widget is attached.
-		if ( m_meRoot.u.pmlLayer && !m_meRoot.bContainsWidget ) {
+		if ( mrRoot.u.pmlLayer && !mrRoot.bContainsWidget ) {
 			LONG lRet = GetAttachPoint( pClientPoint, _maAttach, _rDrawRect,
-				(*m_meRoot.u.pmlLayer), _iSizeSuggestion );
+				(*mrRoot.u.pmlLayer), _iSizeSuggestion );
 			_rDrawRect = _rDrawRect.MapToDeskTop( Wnd() );
 			return lRet;
 		}
 
 		// Can never get hit.
 		return LONG_MAX;
+	}
+
+	/**
+	 * Called when a dockable starts being dragged.  A copy of the layout is made with the dragged widget detached from it (if it
+	 *	is attached here), exactly as Detach() would leave it, and GetAttachPoint() works on that copy until EndDragPreview() is
+	 *	called.  The previews then show where the widget will go once it has been taken out of its current place.
+	 *
+	 * \param _pwDragging The widget being dragged.
+	 **/
+	void CMultiSplitter::BeginDragPreview( const CWidget * _pwDragging ) {
+		EndDragPreview();
+		// If the copy cannot be made, the actual layout is used (as before).
+		m_bDragPreview = CopyLayerTreeForDrag( _pwDragging );
+		if ( !m_bDragPreview ) { EndDragPreview(); }
+	}
+
+	/**
+	 * Frees the copy of the layout made by BeginDragPreview().  GetAttachPoint() goes back to using the actual layout.
+	 **/
+	void CMultiSplitter::EndDragPreview() {
+		m_bDragPreview = false;
+		for ( size_t I = m_vDragLayersCopy.size(); I--; ) {
+			LSW_MS_LAYER * pmlTemp = m_vDragLayersCopy[I];
+			m_vDragLayersCopy[I] = nullptr;
+			delete pmlTemp;
+		}
+		m_vDragLayersCopy.clear();
+		m_meDragRootCopy.u.pmlLayer = nullptr;
+		m_meDragRootCopy.bContainsWidget = FALSE;
 	}
 
 	/**
@@ -822,13 +855,27 @@ namespace lsw {
 
 	// Detaches a widget from the given root given its ID.
 	bool CMultiSplitter::Detach( WORD _wId, LSW_MS_RECT &_mrRoot ) {
+		if ( !DetachFromTree( _wId, _mrRoot, m_vLayers ) ) { return false; }
+		CalcRects();
+		ForceSizeUpdate();
+		return true;
+	}
+
+	/**
+	 * Detaches a widget from a layout tree given its ID.  Used both for the actual layout and for the copy used for drag
+	 *	previews, so that the copy always ends up exactly as the actual layout will.  Rectangles are not recalculated.
+	 *
+	 * \param _wId The ID of the widget to detach.
+	 * \param _mrRoot The root of the tree.
+	 * \param _vLayers All of the layers in the tree.  Layers removed from the tree are deleted and removed from this list.
+	 * \return Returns true if the widget was found and detached.
+	 **/
+	bool CMultiSplitter::DetachFromTree( WORD _wId, LSW_MS_RECT &_mrRoot, std::vector<LSW_MS_LAYER *> &_vLayers ) {
 		if ( _mrRoot.bContainsWidget && _mrRoot.u.pqWidget ) {
 			if ( _mrRoot.u.pqWidget->Id() == _wId ) {
 				// It is just the root node and nothing else.
 				_mrRoot.bContainsWidget = FALSE;
 				_mrRoot.u.pqWidget = nullptr;
-				CalcRects();
-				ForceSizeUpdate();
 				return true;
 			}
 		}
@@ -844,16 +891,16 @@ namespace lsw {
 					LSW_MS_LAYER * pEmpty = mdDetachInfo.pmlLayer;
 
 					// If this was the root layer, sever the root link.
-					if ( m_meRoot.u.pmlLayer == pEmpty ) {
-						m_meRoot.u.pmlLayer = nullptr;
+					if ( !_mrRoot.bContainsWidget && _mrRoot.u.pmlLayer == pEmpty ) {
+						_mrRoot.u.pmlLayer = nullptr;
 					}
 
-					for ( size_t I = m_vLayers.size(); I--; ) {
-						if ( m_vLayers[I] == pEmpty ) {
-							LSW_MS_LAYER * pmlTemp = m_vLayers[I];
-							m_vLayers[I] = nullptr;
+					for ( size_t I = _vLayers.size(); I--; ) {
+						if ( _vLayers[I] == pEmpty ) {
+							LSW_MS_LAYER * pmlTemp = _vLayers[I];
+							_vLayers[I] = nullptr;
 							delete pmlTemp;
-							m_vLayers.erase( m_vLayers.begin() + I );
+							_vLayers.erase( _vLayers.begin() + I );
 						}
 					}
 					
@@ -864,12 +911,12 @@ namespace lsw {
 				else if ( /*mdDetachInfo.pmlParentLayer && */mdDetachInfo.pmlLayer->vRects.size() == 1 && !mdDetachInfo.pmlLayer->vRects[0].bContainsWidget ) {
 					LSW_MS_LAYER * pmlPrev = mdDetachInfo.pmlLayer->vRects[0].u.pmlLayer;
 					(*mdDetachInfo.pmlLayer) = (*mdDetachInfo.pmlLayer->vRects[0].u.pmlLayer);
-					for ( size_t I = m_vLayers.size(); I--; ) {
-						if ( m_vLayers[I] == pmlPrev ) {
-							LSW_MS_LAYER * pmlTemp = m_vLayers[I];
-							m_vLayers[I] = nullptr;
+					for ( size_t I = _vLayers.size(); I--; ) {
+						if ( _vLayers[I] == pmlPrev ) {
+							LSW_MS_LAYER * pmlTemp = _vLayers[I];
+							_vLayers[I] = nullptr;
 							delete pmlTemp;
-							m_vLayers.erase( m_vLayers.begin() + I );
+							_vLayers.erase( _vLayers.begin() + I );
 						}
 					}
 					// This layer is a sub-layer and contains only a reference to another layer.  This layer is not needed.
@@ -877,8 +924,6 @@ namespace lsw {
 
 				}
 
-				CalcRects();
-				ForceSizeUpdate();
 				return true;
 			}
 		}
@@ -886,9 +931,60 @@ namespace lsw {
 		return false;
 	}
 
-	// Copies the layer tree with a specific layer removed so that it can be dragged elsewhere.
-	bool CMultiSplitter::CopyLayerTreeForDrag() {
+	/**
+	 * Makes a deep copy of a layer and all of the layers under it.
+	 *
+	 * \param _mlSrc The layer to copy.
+	 * \param _vLayers Receives every layer created (they belong to the caller even if the copy fails).
+	 * \return Returns the copy of _mlSrc, or nullptr on failure.
+	 **/
+	CMultiSplitter::LSW_MS_LAYER * CMultiSplitter::CloneLayer( const LSW_MS_LAYER &_mlSrc, std::vector<LSW_MS_LAYER *> &_vLayers ) {
+		try {
+			LSW_MS_LAYER * pmlNew = new( std::nothrow ) LSW_MS_LAYER( _mlSrc );
+			if ( !pmlNew ) { return nullptr; }
+			try {
+				_vLayers.push_back( pmlNew );
+			}
+			catch ( ... ) {
+				delete pmlNew;
+				return nullptr;
+			}
+			// The rectangles were copied but still point to the source's layers.
+			for ( size_t I = 0; I < pmlNew->vRects.size(); ++I ) {
+				if ( !pmlNew->vRects[I].bContainsWidget && pmlNew->vRects[I].u.pmlLayer ) {
+					pmlNew->vRects[I].u.pmlLayer = CloneLayer( (*pmlNew->vRects[I].u.pmlLayer), _vLayers );
+					if ( !pmlNew->vRects[I].u.pmlLayer ) { return nullptr; }
+				}
+			}
+			return pmlNew;
+		}
+		catch ( ... ) { return nullptr; }
+	}
 
+	/**
+	 * Copies the layer tree with a widget removed so that it can be dragged elsewhere (into m_meDragRootCopy and
+	 *	m_vDragLayersCopy), and calculates the rectangles of the copy.
+	 *
+	 * \param _pwDragging The widget being dragged.  If it is not attached here, the copy is the same as the actual layout.
+	 * \return Returns true if the copy was made.
+	 **/
+	bool CMultiSplitter::CopyLayerTreeForDrag( const CWidget * _pwDragging ) {
+		m_meDragRootCopy = m_meRoot;
+		if ( !m_meRoot.bContainsWidget && m_meRoot.u.pmlLayer ) {
+			m_meDragRootCopy.u.pmlLayer = CloneLayer( (*m_meRoot.u.pmlLayer), m_vDragLayersCopy );
+			if ( !m_meDragRootCopy.u.pmlLayer ) { return false; }
+		}
+
+		// Detach it exactly as Detach() will (layers emptied by it are removed, single-layer layers are collapsed, etc.)
+		//	so that the IDs of the rectangles in the copy match the IDs they will have in the actual layout.
+		if ( _pwDragging ) {
+			DetachFromTree( _pwDragging->Id(), m_meDragRootCopy, m_vDragLayersCopy );
+		}
+
+		::GetClientRect( Wnd(), &m_meDragRootCopy.rRect );
+		if ( !m_meDragRootCopy.bContainsWidget && m_meDragRootCopy.u.pmlLayer ) {
+			CalcRects( (*m_meDragRootCopy.u.pmlLayer), m_meDragRootCopy.rRect );
+		}
 		return true;
 	}
 

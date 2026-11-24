@@ -999,7 +999,7 @@ namespace mx {
 		m_pEditDiractory = std::filesystem::temp_directory_path() / _DEC_S_9DAF7683_Dues_Hex_Machina.c_str();
 		::OutputDebugStringW( (m_pEditDiractory.generic_wstring() + L"\r\n").c_str() );
 		if ( m_pFilePath.has_filename() ) { m_pEditDiractory /= m_pFilePath.filename(); }
-		else { m_pEditDiractory /= m_wsNewName.size() ? std::filesystem::path( m_wsNewName ) : std::filesystem::path( L"New" ); }
+		else { m_pEditDiractory /= m_wsNewName.size() ? std::filesystem::path( m_wsNewName ) : std::filesystem::path( static_cast<const std::wstring &>(_DEC_WS_53AE02A5_New) ); }
 		//m_pEditDiractory += std::to_string( m_ui32OriginalCrc );
 		while ( std::filesystem::exists( m_pEditDiractory, ecError ) ) {
 			m_pEditDiractory += L'-';
@@ -1314,7 +1314,7 @@ namespace mx {
 				if ( !WriteThenReplace( _pDst, fWrite, _dwError ) ) { return false; }
 			}
 			else {
-				std::filesystem::path pTemp = TempPathBeside( _pDst, L"save" );
+				std::filesystem::path pTemp = TempPathBeside( _pDst, _DEC_WS_55663ADE_save.c_str() );
 				{
 					HANDLE hFile = ::CreateFileW( pTemp.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW, FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_TEMPORARY, nullptr );
 					if ( hFile == INVALID_HANDLE_VALUE ) {
@@ -1345,7 +1345,7 @@ namespace mx {
 				if ( CreateWriteDirectories() ) {
 					for ( uint32_t I = 0; I < 1000 && !bMoved; ++I ) {
 						wchar_t wszName[64];
-						::swprintf_s( wszName, L"original_%03u.mxorig", unsigned( m_vAsideFiles.size() * 1000 + I ) );
+						::swprintf_s( wszName, _DEC_WS_412F19BD_original__03u_mxorig.c_str(), unsigned( m_vAsideFiles.size() * 1000 + I ) );
 						pAside = m_pEditDiractory / wszName;
 						if ( std::filesystem::exists( pAside, ecError ) ) { continue; }
 						bMoved = ::MoveFileExW( _pDst.c_str(), pAside.c_str(), 0 ) != FALSE;
@@ -1353,7 +1353,7 @@ namespace mx {
 					}
 				}
 				if ( !bMoved ) {
-					pAside = TempPathBeside( _pDst, L"orig" );
+					pAside = TempPathBeside( _pDst, _DEC_WS_729DA062_orig.c_str() );
 					bMoved = ::MoveFileExW( _pDst.c_str(), pAside.c_str(), 0 ) != FALSE;
 					if ( bMoved ) { ::SetFileAttributesW( pAside.c_str(), FILE_ATTRIBUTE_HIDDEN ); }
 				}
@@ -1438,7 +1438,7 @@ namespace mx {
 	bool CLargeCoWFileWindow::WriteThenReplace( const std::filesystem::path &_pDst, const std::function<bool ( HANDLE, DWORD & )> &_fWrite, DWORD &_dwError ) {
 		_dwError = ERROR_SUCCESS;
 		try {
-			const std::filesystem::path pTemp = TempPathBeside( _pDst, L"save" );
+			const std::filesystem::path pTemp = TempPathBeside( _pDst, _DEC_WS_55663ADE_save.c_str() );
 			HANDLE hFile = ::CreateFileW( pTemp.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW, FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_TEMPORARY, nullptr );
 			if ( hFile == INVALID_HANDLE_VALUE ) {
 				_dwError = ::GetLastError();
@@ -1518,13 +1518,13 @@ namespace mx {
 	 */
 	std::filesystem::path CLargeCoWFileWindow::TempPathBeside( const std::filesystem::path &_pFile, const wchar_t * _pwcTag ) {
 		std::error_code ecError;
-		const std::filesystem::path pDir = _pFile.has_parent_path() ? _pFile.parent_path() : std::filesystem::path( L"." );
+		const std::filesystem::path pDir = _pFile.has_parent_path() ? _pFile.parent_path() : std::filesystem::path( static_cast<const std::wstring &>(_DEC_WS_0ED4E242__) );
 		const std::wstring wsName = _pFile.filename().wstring();
 		uint64_t ui64Unique = ::GetTickCount64();
 		for ( uint32_t I = 0; ; ++I ) {
 			wchar_t wszSuffix[64];
-			::swprintf_s( wszSuffix, L".%ls-%llX.mhsxtmp", _pwcTag, static_cast<unsigned long long>(ui64Unique + I) );
-			std::filesystem::path pTry = pDir / (L".~" + wsName + wszSuffix);
+			::swprintf_s( wszSuffix, _DEC_WS_57F9056F___ls__llX_mhsxtmp.c_str(), _pwcTag, static_cast<unsigned long long>(ui64Unique + I) );
+			std::filesystem::path pTry = pDir / (_DEC_WS_FD6347E8___ + wsName + wszSuffix);
 			if ( !std::filesystem::exists( pTry, ecError ) || I >= 10000 ) { return pTry; }
 		}
 	}

@@ -52,6 +52,20 @@ namespace lsw {
 		virtual LONG						GetAttachPoint( const POINT &/*_pPoint*/, LSW_DT_ATTACH &/*_maAttach*/, INT /*_iSizeSuggestion*/,
 			LSW_RECT &/*_rDrawRect*/ ) { return LONG_MAX; }
 
+		/**
+		 * Called when a dockable starts being dragged.  Until EndDragPreview() is called, GetAttachPoint() should report the
+		 *	attachment points as they will be once the dragged widget has been detached from this target (if it is attached to it),
+		 *	since that is what happens before it is attached somewhere else.
+		 *
+		 * \param _pwDragging The widget being dragged.
+		 **/
+		virtual void						BeginDragPreview( const CWidget * /*_pwDragging*/ ) {}
+
+		/**
+		 * Called when a drag started with BeginDragPreview() ends.  GetAttachPoint() goes back to using the actual layout.
+		 **/
+		virtual void						EndDragPreview() {}
+
 	};
 
 }	// namespace lsw

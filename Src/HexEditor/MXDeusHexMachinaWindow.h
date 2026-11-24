@@ -546,6 +546,14 @@ namespace mx {
 		 * \return Returns an LSW_HANDLED code.
 		 */
 		virtual LSW_HANDLED							InitMenuPopup( HMENU _hMenu, WORD /*_wPos*/, BOOL _bIsWindowMenu );
+
+		/**
+		 * Handles TBN_GETINFOTIPW: supplies the tooltips of the toolbar buttons.  The text is decrypted only when it is needed.
+		 *
+		 * \param _pgitTip The notification data.  iItem is the command ID of the button.
+		 * \return Returns LSW_H_HANDLED if text was supplied.
+		 */
+		virtual LSW_HANDLED							TbnGetInfoTip( LPNMTBGETINFOTIPW _pgitTip ) override;
 		
 		// Recalc all but the given control.
 		void										RecalcAllBut( const CHexEditorControl * _phecSkipMe );
@@ -571,7 +579,7 @@ namespace mx {
 		void										UpdateTabText( size_t _sIdx );
 
 		/**
-		 * Enables and disables the toolbar buttons for the current tab.
+		 * Enables and disables the toolbar buttons for the current tab (Save, Cut/Copy with a selection, Undo/Redo, etc.)
 		 **/
 		void										UpdateToolBar();
 

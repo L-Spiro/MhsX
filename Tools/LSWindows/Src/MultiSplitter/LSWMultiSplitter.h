@@ -46,6 +46,20 @@ namespace lsw {
 		virtual LONG						GetAttachPoint( const POINT &_pPoint, LSW_DT_ATTACH &_maAttach, INT _iSizeSuggestion,
 			LSW_RECT &_rDrawRect );
 
+		/**
+		 * Called when a dockable starts being dragged.  A copy of the layout is made with the dragged widget detached from it (if it
+		 *	is attached here), exactly as Detach() would leave it, and GetAttachPoint() works on that copy until EndDragPreview() is
+		 *	called.  The previews then show where the widget will go once it has been taken out of its current place.
+		 *
+		 * \param _pwDragging The widget being dragged.
+		 **/
+		virtual void						BeginDragPreview( const CWidget * _pwDragging );
+
+		/**
+		 * Frees the copy of the layout made by BeginDragPreview().  GetAttachPoint() goes back to using the actual layout.
+		 **/
+		virtual void						EndDragPreview();
+
 		// Determines the type of control this is.
 		virtual uint32_t					WidgetType() const { return LSW_LT_MULTISPLITTER; }
 
@@ -136,6 +150,8 @@ namespace lsw {
 		LSW_MS_RECT							m_meRoot;
 		// The copy of the root minus the widget that is being dragged.
 		LSW_MS_RECT							m_meDragRootCopy;
+		/** If true, m_meDragRootCopy and m_vDragLayersCopy hold the layout to use for drag previews (see BeginDragPreview()). */
+		bool								m_bDragPreview = false;
 		// Width of the drag bars.
 		INT									m_iBarWidth;
 		// Dragged layer.
@@ -286,8 +302,41 @@ namespace lsw {
 		// Detaches a widget from the given root given its ID.
 		bool								Detach( WORD _wId, LSW_MS_RECT &_mrRoot );
 
-		// Copies the layer tree with a specific layer removed so that it can be dragged elsewhere.
-		bool								CopyLayerTreeForDrag();
+		/**
+		 * Detaches a widget from a layout tree given its ID.  Used both for the actual layout and for the copy used for drag
+		 *	previews, so that the copy always ends up exactly as the actual layout will.  Rectangles are not recalculated.
+		 *
+		 * \param _wId The ID of the widget to detach.
+		 * \param _mrRoot The root of the tree.
+		 * \param _vLayers All of the layers in the tree.  Layers removed from the tree are deleted and removed from this list.
+		 * \return Returns true if the widget was found and detached.
+		 **/
+		bool								DetachFromTree( WORD _wId, LSW_MS_RECT &_mrRoot, std::vector<LSW_MS_LAYER *> &_vLayers );
+
+		/**
+		 * Makes a deep copy of a layer and all of the layers under it.
+		 *
+		 * \param _mlSrc The layer to copy.
+		 * \param _vLayers Receives every layer created (they belong to the caller even if the copy fails).
+		 * \return Returns the copy of _mlSrc, or nullptr on failure.
+		 **/
+		static LSW_MS_LAYER *				CloneLayer( const LSW_MS_LAYER &_mlSrc, std::vector<LSW_MS_LAYER *> &_vLayers );
+
+		/**
+		 * Gets the root to use for finding attachment points: the drag-preview copy during a drag, otherwise the actual root.
+		 *
+		 * \return Returns the root of the layout used for attachment points.
+		 **/
+		const LSW_MS_RECT &					AttachRoot() const { return m_bDragPreview ? m_meDragRootCopy : m_meRoot; }
+
+		/**
+		 * Copies the layer tree with a widget removed so that it can be dragged elsewhere (into m_meDragRootCopy and
+		 *	m_vDragLayersCopy), and calculates the rectangles of the copy.
+		 *
+		 * \param _pwDragging The widget being dragged.  If it is not attached here, the copy is the same as the actual layout.
+		 * \return Returns true if the copy was made.
+		 **/
+		bool								CopyLayerTreeForDrag( const CWidget * _pwDragging );
 	};
 
 }	// namespace lsw

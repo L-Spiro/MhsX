@@ -1966,6 +1966,14 @@ namespace lsw {
 						if ( pmwThis->TbnDropDown( reinterpret_cast<LPNMTOOLBARW>(_lParam) ) == LSW_HANDLED::LSW_H_HANDLED ) { LSW_RET( TBDDRET_DEFAULT, TBDDRET_DEFAULT ); }
 						LSW_RET( TBDDRET_NODEFAULT, TBDDRET_NODEFAULT );
 					}
+					case TBN_GETINFOTIPW : {
+						LPNMTBGETINFOTIPW pgitTip = reinterpret_cast<LPNMTBGETINFOTIPW>(_lParam);
+						CWidget * pmwTemp = LSW_WIN2CLASS( lpHdr->hwndFrom );
+						if ( !pmwTemp || pmwTemp->TbnGetInfoTip( pgitTip ) != LSW_HANDLED::LSW_H_HANDLED ) {
+							pmwThis->TbnGetInfoTip( pgitTip );
+						}
+						LSW_RET( 0, 0 );
+					}
 					case LSW_TAB_NM_CLOSE : {
 						LSW_NMTABCLOSE * ptcClose = reinterpret_cast<LSW_NMTABCLOSE *>(_lParam);
 						if ( ptcClose->iTab != -1 && ptcClose->pwWidget && ptcClose->pwWidget->Parent() &&

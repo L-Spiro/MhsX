@@ -52,6 +52,17 @@ namespace lsw {
 		// Creates a pop-upmenu given menu layouts.
 		HMENU							CreatePopupMenu( const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotal );
 
+		/**
+		 * Creates a pop-up menu to be shown to the user given menu layouts.  Unlike CreatePopupMenu(), this goes through the same
+		 *	translation of the menu text as CreatePopupMenuEx(), so a layout manager that stores menu text in another form (for
+		 *	example, encrypted) overrides it to convert the text first.  The default simply calls CreatePopupMenu().
+		 *
+		 * \param _pmlLayouts The menu layouts.  The first is the menu; the rest are its submenus.
+		 * \param _sTotal The number of layouts at _pmlLayouts.
+		 * \return Returns the menu, which the caller destroys with ::DestroyMenu(), or NULL on failure.
+		 **/
+		virtual HMENU					CreateDisplayPopupMenu( const LSW_MENU_LAYOUT * _pmlLayouts, SIZE_T _sTotal ) { return CreatePopupMenu( _pmlLayouts, _sTotal ); }
+
 		// Creates a pop-up menu.
 		virtual BOOL					CreatePopupMenuEx( CWidget * _pwParent, const LSW_MENU_LAYOUT * _pmlLayout, size_t _sTotal,
 			INT _iX, INT _iY, UINT _uiFlags = TPM_LEFTALIGN | TPM_RIGHTBUTTON );
