@@ -58,7 +58,7 @@ namespace lson {
 		 * \param _pcJson The NULL-terminated JSON data.
 		 * \return Returns true if the JSON data was successfully parsed.
 		 */
-		bool											SetJson( const char * _pcJson );
+		bool											SetJson( char * _pcJson );
 
 		/**
 		 * Gets the container pointer.

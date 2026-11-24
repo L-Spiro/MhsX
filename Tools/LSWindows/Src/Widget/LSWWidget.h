@@ -5,6 +5,8 @@
 #include "../Helpers/LSWHelpers.h"
 #include "../Layout/LSWWidgetLayout.h"
 
+#include <Object/EEVector.h>
+
 #include <vector>
 
 
@@ -438,6 +440,60 @@ namespace lsw {
 		 * \return Returns non-zero on success; otherwise zero.
 		 */
 		virtual BOOL						SetTextW( LPCWSTR _lpwString ) { return ::SetWindowTextW( Wnd(), _lpwString ); }
+
+		/**
+		 * Evaluates the control text as an expression.
+		 * \brief Parses the text and computes a value using the expression evaluator.
+		 *
+		 * The evaluator may consult the address handler to resolve symbols or memory references.
+		 *
+		 * \param _eResult Receives the evaluated result and type.
+		 * \param _ui32Flags Evaluation flags controlling parsing behavior.
+		 * \param _pbExpIsValid Optional pointer to receive TRUE if expression was valid.
+		 * \param _vObj Holds the primitive vector holding each element in the returned array.
+		 * \return Returns TRUE on success; otherwise FALSE.
+		 */
+		template <typename _tVecType, ee::EE_NUM_CONSTANTS _ncType>
+		BOOL								GetTextAsVectorExpression( ee::CExpEvalContainer::EE_RESULT &_eResult, std::vector<_tVecType> &_vObj, BOOL * _pbExpIsValid = nullptr ) const {
+			if ( _pbExpIsValid ) { (*_pbExpIsValid) = FALSE; }
+			CExpression eExp;
+			eExp.SetTreatsAsHex( TreatAsHex() != FALSE );
+
+		
+			try {
+				std::string sText = GetTextUTF8();
+				if ( sText.size() == 0 ) { return FALSE; }
+				if ( !eExp.SetExpression( sText.c_str() ) ) { return FALSE; }
+				if ( !eExp.GetContainer() ) { return FALSE; }
+				eExp.GetContainer()->SetAddressHandler( m_pfahAddressHandler, m_uiptrAddressHandlerData );
+				eExp.GetContainer()->SetAddressWriteHandler( m_pfahAddressWriteHandler, m_uiptrAddressWriteHandlerData );
+				if ( _pbExpIsValid ) { (*_pbExpIsValid) = TRUE; }
+		
+				if ( !eExp.GetContainer()->Resolve( _eResult ) ) { return FALSE; }
+				if ( (_eResult.ncType) == ee::EE_NC_OBJECT ) {
+					ee::CObject * poObj = _eResult.u.poObj;
+					_eResult.u.poObj = nullptr;
+					if ( poObj && (poObj->Type() & ee::CObject::EE_BIT_VECTOR) ) {
+						return reinterpret_cast<ee::CVector *>(poObj)->ToPrimitiveArray<_tVecType, _ncType>( _vObj );
+					}
+					return FALSE;
+				}
+				_eResult = ee::CExpEvalContainer::ConvertResult( _eResult, _ncType );
+				if ( _eResult.ncType != _ncType ) { return FALSE; }
+				if constexpr ( _ncType == ee::EE_NC_FLOATING ) {
+					_vObj.push_back( _tVecType( _eResult.u.dVal ) );
+				}
+				else if constexpr ( _ncType == ee::EE_NC_SIGNED ) {
+					_vObj.push_back( _tVecType( _eResult.u.i64Val ) );
+				}
+				else if constexpr ( _ncType == ee::EE_NC_UNSIGNED ) {
+					_vObj.push_back( _tVecType( _eResult.u.ui64Val ) );
+				}
+				else { return FALSE; }
+			}
+			catch ( ... ) {}
+			return TRUE;
+		}
 
 		/**
 		 * Evaluates the control text as an expression.

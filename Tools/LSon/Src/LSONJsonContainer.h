@@ -3,6 +3,8 @@
 #include "LSONJsonSyntaxNodes.h"
 #include "Gen/LSONJsonParser.h"
 
+#include <string_view>
+#include <unordered_map>
 #include <vector>
 
 
@@ -14,7 +16,9 @@ namespace lson {
 	 * Class CJsonContainer
 	 * \brief Processes the results of the parsing and stores the result.
 	 *
-	 * Description: Processes the results of the parsing and stores the result.
+	 * Description: Processes the results of the parsing and stores the result.  The values are built directly by the parser's actions as
+	 *	it reduces (children before their parents), so there is no intermediate syntax tree.  Strings are not copied:  they point into the
+	 *	buffer that was parsed, which must outlive the container.
 	 */
 	class CJsonContainer {
 	public :
@@ -40,7 +44,7 @@ namespace lson {
 			size_t										stName;									/**< Name of the member. */
 			size_t										stValue;								/**< Index of the member value. */
 #ifdef _DEBUG
-			std::string									sName;
+			std::string_view							svName;									/**< The name of the member (for debugging). */
 #endif	// #ifdef _DEBUG
 		};
 
@@ -59,290 +63,222 @@ namespace lson {
 			std::vector<size_t>							vArray;									/**< The array, if vtType is LSON_VT_ARRAY. */
 			LSON_OBJECT									oObject;								/**< The object, if vtType is LSON_VT_OBJECT. */
 #ifdef _DEBUG
-			std::string									sString;
+			std::string_view							svString;								/**< The string, if vtType is LSON_VT_STRING (for debugging). */
 #endif	// #ifdef _DEBUG
 		};
 
-		
 
-		
+
+
 		// == Functions.
+		/**
+		 * Reserves room for the results of parsing a JSON file of a given size.
+		 *
+		 * \param _sBytes The size of the JSON text, in bytes.
+		 */
+		void											Reserve( size_t _sBytes );
+
 		/**
 		 * Adds a string and returns its index into the stack.
 		 *
-		 * \param _sText The string to add or whose existing index is to be found.
+		 * \param _svText The string to add or whose existing index is to be found.
 		 * \return Returns the index of the added string.
 		 */
-		size_t											AddString( const std::string &_sText );
+		size_t											AddString( std::string_view _svText );
 
 		/**
 		 * Removes quotes from the front and end before adding the string.
 		 *
-		 * \param _sText The string to add or whose existing index is to be found.
+		 * \param _svText The string to add or whose existing index is to be found.
 		 * \return Returns the index of the added string after stripping the enclosing quotes from it.
 		 */
-		size_t											AddQuoteString( const std::string &_sText );
+		size_t											AddQuoteString( std::string_view _svText );
 
 		/**
 		 * Returns the index of a string or -1 if it does not exist.
 		 *
-		 * \param _sText The string to find.
+		 * \param _svText The string to find.
 		 * \return Returns the index of the string if it exists or size_t( -1 ).
 		 */
-		size_t											FindString( const std::string &_sText ) const;
+		size_t											FindString( std::string_view _svText ) const;
 
 		/**
-		 * Gets a reference to a string by index.
+		 * Gets a string by index.
 		 *
-		 * \param _stIdx String index.
-		 * \return Returns a constant reference to the string given its index.
+		 * \param _stIdx The index of the string to get.
+		 * \return Returns the string at the given index.
 		 */
-		const std::string								GetString( size_t _stIdx ) const { return m_vStrings[_stIdx]; }
+		std::string_view								GetString( size_t _stIdx ) const { return m_vStrings[_stIdx]; }
 
 		/**
-		 * Creates an object value node.
+		 * Creates a string value.
 		 *
-		 * \param _nNode The resulting node.
-		 * \param _nValue The value.
-		 * \return Returns the index of the value node created.
+		 * \param _stString The index of the string.
+		 * \return Returns the index of the value created.
 		 */
-		size_t											AddObjectValue( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nValue );
+		size_t											AddStringValue( size_t _stString );
 
 		/**
-		 * Creates a string value node.
+		 * Creates a decimal value.
 		 *
-		 * \param _nNode The resulting node.
-		 * \param _stValue The string.
-		 * \return Returns the index of the value node created.
-		 */
-		size_t											AddStringValue( YYSTYPE::LSON_NODE &_nNode, size_t _stValue );
-
-		/**
-		 * Creates a decimal value node.
-		 *
-		 * \param _nNode The resulting node.
 		 * \param _dValue The value.
-		 * \return Returns the index of the value node created.
+		 * \return Returns the index of the value created.
 		 */
-		size_t											AddDecimalValue( YYSTYPE::LSON_NODE &_nNode, double _dValue );
+		size_t											AddDecimalValue( double _dValue );
 
 		/**
-		 * Creates an array value node.
+		 * Creates a TRUE value.
 		 *
-		 * \param _nNode The resulting node.
-		 * \param _nValue The value.
-		 * \return Returns the index of the value node created.
+		 * \return Returns the index of the value created.
 		 */
-		size_t											AddArrayValue( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nValue );
+		size_t											AddTrueValue();
 
 		/**
-		 * Creates a TRUE value node.
+		 * Creates a FALSE value.
 		 *
-		 * \param _nNode The resulting node.
-		 * \return Returns the index of the value node created.
+		 * \return Returns the index of the value created.
 		 */
-		size_t											AddTrueValue( YYSTYPE::LSON_NODE &_nNode );
+		size_t											AddFalseValue();
 
 		/**
-		 * Creates a FALSE value node.
+		 * Creates a NULL value.
 		 *
-		 * \param _nNode The resulting node.
-		 * \return Returns the index of the value node created.
+		 * \return Returns the index of the value created.
 		 */
-		size_t											AddFalseValue( YYSTYPE::LSON_NODE &_nNode );
+		size_t											AddNullValue();
 
 		/**
-		 * Creates a NULL value node.
+		 * Creates an object value with no members.
 		 *
-		 * \param _nNode The resulting node.
-		 * \return Returns the index of the value node created.
+		 * \return Returns the index of the value created.
 		 */
-		size_t											AddNullValue( YYSTYPE::LSON_NODE &_nNode );
+		size_t											AddObject();
 
 		/**
-		 * Creates a member node.
+		 * Starts the member list of an object with its first member.  Member lists nest (an object inside a member's value is finished
+		 *	before the next member of its parent is added), so they are kept on a stack.
 		 *
-		 * \param _nNode The resulting node.
-		 * \param _stName The name of the member.
-		 * \param _nValue The value.
-		 * \return Returns the index of the value node created.
+		 * \param _mMember The first member.
 		 */
-		size_t											AddMember( YYSTYPE::LSON_NODE &_nNode, size_t _stName, const YYSTYPE::LSON_NODE &_nValue );
+		void											BeginMembers( const YYSTYPE::LSON_MEMBER &_mMember );
 
 		/**
-		 * Creates a member-list node.
+		 * Adds a member to the current member list.
 		 *
-		 * \param _nNode The resulting node.
-		 * \param _nLeft The left node.
-		 * \param _nRight The right node.
-		 * \return Returns the index of the value node created.
+		 * \param _mMember The member to add.
 		 */
-		size_t											AddMemberList( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight );
+		void											AddMember( const YYSTYPE::LSON_MEMBER &_mMember );
 
 		/**
-		 * Creates an empty member-list node.
+		 * Creates an object value from the current member list and ends the list.
 		 *
-		 * \param _nNode The resulting node.
-		 * \param _nLeft The left node.
-		 * \return Returns the index of the value node created.
+		 * \return Returns the index of the value created.
 		 */
-		size_t											AddMemberList( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft );
+		size_t											EndObject();
 
 		/**
-		 * Creates an object node.
+		 * Creates an array value with no values.
 		 *
-		 * \param _nNode The resulting node.
-		 * \param _nMembers The members node.
-		 * \return Returns the index of the value node created.
+		 * \return Returns the index of the value created.
 		 */
-		size_t											AddObject( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nMembers );
+		size_t											AddArray();
 
 		/**
-		 * Creates an object node with no members.
+		 * Starts the value list of an array with its first value.  Value lists nest, so they are kept on a stack.
 		 *
-		 * \param _nNode The resulting node.
-		 * \return Returns the index of the value node created.
+		 * \param _stValue The index of the first value.
 		 */
-		size_t											AddObject( YYSTYPE::LSON_NODE &_nNode );
+		void											BeginValues( size_t _stValue );
 
 		/**
-		 * Creates a value-list node.
+		 * Adds a value to the current value list.
 		 *
-		 * \param _nNode The resulting node.
-		 * \param _nLeft The left node.
-		 * \param _nRight The right node.
-		 * \return Returns the index of the value node created.
+		 * \param _stValue The index of the value to add.
 		 */
-		size_t											AddValueList( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft, const YYSTYPE::LSON_NODE &_nRight );
+		void											AddArrayValue( size_t _stValue );
 
 		/**
-		 * Creates an empty value-list node.
+		 * Creates an array value from the current value list and ends the list.
 		 *
-		 * \param _nNode The resulting node.
-		 * \param _nLeft The left node.
-		 * \return Returns the index of the value node created.
+		 * \return Returns the index of the value created.
 		 */
-		size_t											AddValueList( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nLeft );
+		size_t											EndArray();
 
 		/**
-		 * Creates an array node.
+		 * Sets the root value.
 		 *
-		 * \param _nNode The resulting node.
-		 * \param _nValues The values node.
-		 * \return Returns the index of the value node created.
+		 * \param _stValue The index of the root value.
 		 */
-		size_t											AddArray( YYSTYPE::LSON_NODE &_nNode, const YYSTYPE::LSON_NODE &_nValues );
+		void											SetRoot( size_t _stValue ) { m_stRoot = _stValue; }
 
 		/**
-		 * Creates an empty array node.
+		 * Finishes the results of the parsing.  The values are built during parsing, so this only verifies that there is a root.
 		 *
-		 * \param _nNode The resulting node.
-		 * \return Returns the index of the value node created.
-		 */
-		size_t											AddArray( YYSTYPE::LSON_NODE &_nNode );
-
-		/**
-		 * Creates the JSON node.
-		 *
-		 * \param _nNode The resulting node.
-		 */
-		void											AddJson( YYSTYPE::LSON_NODE &_nNode );
-
-		/**
-		 * Builds the tree that can be used to access data in the JSON.
+		 * \return Returns true if the JSON has a root value.
 		 */
 		bool											BuildTree();
 
 		/**
-		 * Gets the root value index.
+		 * Gets the index of the root value.
 		 *
-		 * \return Returns the root value's index.
+		 * \return Returns the index of the root value (see GetValue()).
 		 */
-		inline constexpr size_t							GetRoot() const { return 0; }
+		inline size_t									GetRoot() const { return m_stRoot; }
 
 		/**
 		 * Gets a value by index.
 		 *
-		 * \param _stIdx Index of te value to get.
-		 * \return Returns a constant reference to a value loaded from the JSON file by index.
+		 * \param _stIdx The index of the value to get.
+		 * \return Returns the value at the given index.
 		 */
 		inline const LSON_JSON_VALUE &					GetValue( size_t _stIdx ) const { return m_vValues[_stIdx]; }
 
 		/**
-		 * Finds a member by name and returns a pointer to the given value or nullptr.  _jvValue must be an object.
+		 * Finds a member by name and returns a pointer to the given value or nullptr. _jvValue must be an object.
 		 *
 		 * \param _jvValue The object owning the member to find.
-		 * \param _sName The name of the member to locate.
+		 * \param _svName The name of the member to locate.
 		 * \return Returns a pointer to the member value with the given name or nullptr if it can't be found.
 		 */
-		const LSON_JSON_VALUE *							GetMemberByName( const LSON_JSON_VALUE &_jvValue, const std::string &_sName );
+		const LSON_JSON_VALUE *							GetMemberByName( const LSON_JSON_VALUE &_jvValue, std::string_view _svName ) const;
+
+		/**
+		 * Converts the text of a number to a double without regard to the locale (where std::from_chars() supports floating-point values).
+		 *
+		 * \param _pcText The text of the number.
+		 * \param _sLen The length of the text.
+		 * \return Returns the converted number, or 0.0 if the text is not a number.
+		 */
+		static double									ParseDecimal( const char * _pcText, size_t _sLen );
 
 
 	protected :
 		// == Members.
-		/** The lexer object. */
-		CJsonLexer *									m_pxlLexer;
-		/** The stack of nodes. */
-		std::vector<YYSTYPE::LSON_NODE>					m_vNodes;
-		/** The stack of UTF-8 strings. */
-		std::vector<std::string>						m_vStrings;
-		/** Tree values, referenced by index. */
-		std::vector<LSON_JSON_VALUE>					m_vValues;
-		/** The resulting tree. */
-		//CTree<size_t>									m_tRoot;
-		/** The base node. */
-		size_t											m_stRoot;
+		CJsonLexer *									m_pxlLexer;								/**< The lexer. */
+		std::vector<std::string_view>					m_vStrings;								/**< The strings (unique), pointing into the parsed text. */
+		std::unordered_map<std::string_view, size_t>	m_mStringIndex;							/**< Maps strings to their indices in m_vStrings. */
+		std::vector<LSON_JSON_VALUE>					m_vValues;								/**< The values. */
+		std::vector<std::vector<LSON_JSON_MEMBER>>		m_vMemberLists;							/**< The member lists being built (a stack, reused between objects). */
+		std::vector<std::vector<size_t>>				m_vValueLists;							/**< The value lists being built (a stack, reused between arrays). */
+		size_t											m_stMemberListDepth;					/**< The number of member lists being built. */
+		size_t											m_stValueListDepth;						/**< The number of value lists being built. */
+		size_t											m_stRoot;								/**< The index of the root value. */
 
 
 		// == Functions.
 		/**
-		 * Adds a node and returns its index into the array of nodes.
+		 * Adds a value of a given type and returns its index.
 		 *
-		 * \param _nNode The node to add.
-		 * \return Returns the index of the added node inside m_vNodes.
+		 * \param _vtType The type of the value.
+		 * \return Returns the index of the added value inside m_vValues.
 		 */
-		size_t											AddNode( YYSTYPE::LSON_NODE &_nNode );
-
-		/**
-		 * Adds a value to be indexed by the tree.
-		 *
-		 * \param _jvValue The value structure to added to the internal database of values.
-		 * \return Returns the index of the stored value.
-		 */
-		inline size_t									AddValue( LSON_JSON_VALUE &_jvValue ) {
+		inline size_t									AddValue( LSON_VALUE_TYPE _vtType ) {
 			size_t stIdx = m_vValues.size();
-			m_vValues.push_back( std::move( _jvValue ) );
+			LSON_JSON_VALUE & jvValue = m_vValues.emplace_back();
+			jvValue.vtType = _vtType;
+			jvValue.u.dDecimal = 0.0;
 			return stIdx;
 		}
-
-		/**
-		 * Converts a pointer to a tree pointer (nullptr = &m_tRoot, everything else is pass-through).
-		 *
-		 * \param _ptPtr The pointer to sanitize.
-		 * \return Returns the input pointer or &m_tRoot if the input is nullptr.
-		 */
-		/*CTree<LSON_JSON_ELEMENT> *						GetTreePointer( CTree<LSON_JSON_ELEMENT> * _ptPtr ) {
-			return _ptPtr ? _ptPtr : &m_tRoot;
-		}*/
-
-		/**
-		 * Gets the current tree pointer from a stack of tree pointers.
-		 *
-		 * \param _vStack The input stack of pointers.
-		 * \return Returns &m_tRoot if the stack is empty, otherwise the top of the stack is returned.
-		 */
-		LSON_JSON_VALUE *								CurStackPointer( const std::vector<size_t> &_vStack ) {
-			return (m_vValues.size() == 0 || _vStack.size() == 0) ? nullptr : &m_vValues[_vStack[_vStack.size()-1]];
-		}
-
-		/**
-		 * Prints the tree recursively.
-		 * 
-		 * \param _ptNode The node to print.
-		 * \param _i32Depth The node depth.
-		 */
-		//void											PrintTree( const CTree<LSON_JSON_ELEMENT> * _ptNode, int32_t _i32Depth );
-		
 	};
 
 }	// namespace lson

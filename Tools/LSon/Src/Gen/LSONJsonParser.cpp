@@ -44,15 +44,15 @@
 #include "../LSONJsonContainer.h"
 #include "../LSONJsonLexer.h"
 #include <string>
+#include <string_view>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // MACROS
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 #define YYINCLUDED_STDLIB_H
 
-//extern char yytext[];
 // Announce to Flex the prototype we want for lexing function.
-extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, lson::CJsonLexer * _pxlLexer );
+extern int yylex( void * _pvNodeUnion, lson::CJsonLexer * _pxlLexer );
 
 #include "../LSONJsonSyntaxNodes.h"
 
@@ -420,97 +420,97 @@ namespace yy {
       {
 	  case 3:
 
-    { m_pjcContainer->AddJson( (yyval.nNode) ); }
+    { m_pjcContainer->SetRoot( (yysemantic_stack_[(1) - (1)].stValue) ); }
     break;
 
   case 4:
 
-    { m_pjcContainer->AddObjectValue( (yyval.nNode), (yysemantic_stack_[(1) - (1)].nNode) ); }
+    { (yyval.stValue) = (yysemantic_stack_[(1) - (1)].stValue); }
     break;
 
   case 5:
 
-    { m_pjcContainer->AddStringValue( (yyval.nNode), (yysemantic_stack_[(1) - (1)].sStringIndex) ); }
+    { (yyval.stValue) = m_pjcContainer->AddStringValue( (yysemantic_stack_[(1) - (1)].sStringIndex) ); }
     break;
 
   case 6:
 
-    { m_pjcContainer->AddDecimalValue( (yyval.nNode), (yysemantic_stack_[(1) - (1)].dDecimal) ); }
+    { (yyval.stValue) = m_pjcContainer->AddDecimalValue( (yysemantic_stack_[(1) - (1)].dDecimal) ); }
     break;
 
   case 7:
 
-    { m_pjcContainer->AddArrayValue( (yyval.nNode), (yysemantic_stack_[(1) - (1)].nNode) ); }
+    { (yyval.stValue) = (yysemantic_stack_[(1) - (1)].stValue); }
     break;
 
   case 8:
 
-    { m_pjcContainer->AddTrueValue( (yyval.nNode) ); }
+    { (yyval.stValue) = m_pjcContainer->AddTrueValue(); }
     break;
 
   case 9:
 
-    { m_pjcContainer->AddFalseValue( (yyval.nNode) ); }
+    { (yyval.stValue) = m_pjcContainer->AddFalseValue(); }
     break;
 
   case 10:
 
-    { m_pjcContainer->AddNullValue( (yyval.nNode) ); }
+    { (yyval.stValue) = m_pjcContainer->AddNullValue(); }
     break;
 
   case 11:
 
-    { m_pjcContainer->AddObject( (yyval.nNode) ); }
+    { (yyval.stValue) = m_pjcContainer->AddObject(); }
     break;
 
   case 12:
 
-    { m_pjcContainer->AddObject( (yyval.nNode), (yysemantic_stack_[(3) - (2)].nNode) ); }
+    { (yyval.stValue) = m_pjcContainer->EndObject(); }
     break;
 
   case 13:
 
-    { m_pjcContainer->AddMemberList( (yyval.nNode), (yysemantic_stack_[(1) - (1)].nNode) ); }
+    { m_pjcContainer->BeginMembers( (yysemantic_stack_[(1) - (1)].mMember) ); }
     break;
 
   case 14:
 
-    { m_pjcContainer->AddMemberList( (yyval.nNode), (yysemantic_stack_[(3) - (1)].nNode), (yysemantic_stack_[(3) - (3)].nNode) ); }
+    { m_pjcContainer->AddMember( (yysemantic_stack_[(3) - (3)].mMember) ); }
     break;
 
   case 15:
 
-    { m_pjcContainer->AddMember( (yyval.nNode), (yysemantic_stack_[(3) - (1)].sStringIndex), (yysemantic_stack_[(3) - (3)].nNode) ); }
+    { (yyval.mMember).stName = (yysemantic_stack_[(3) - (1)].sStringIndex); (yyval.mMember).stValue = (yysemantic_stack_[(3) - (3)].stValue); }
     break;
 
   case 16:
 
-    { m_pjcContainer->AddArray( (yyval.nNode) ); }
+    { (yyval.stValue) = m_pjcContainer->AddArray(); }
     break;
 
   case 17:
 
-    { m_pjcContainer->AddArray( (yyval.nNode), (yysemantic_stack_[(3) - (2)].nNode) ); }
+    { (yyval.stValue) = m_pjcContainer->EndArray(); }
     break;
 
   case 18:
 
-    { m_pjcContainer->AddValueList( (yyval.nNode), (yysemantic_stack_[(1) - (1)].nNode) ); }
+    { m_pjcContainer->BeginValues( (yysemantic_stack_[(1) - (1)].stValue) ); }
     break;
 
   case 19:
 
-    { m_pjcContainer->AddValueList( (yyval.nNode), (yysemantic_stack_[(3) - (1)].nNode), (yysemantic_stack_[(3) - (3)].nNode) ); }
+    { m_pjcContainer->AddArrayValue( (yysemantic_stack_[(3) - (3)].stValue) ); }
     break;
 
   case 20:
 
-    { (yyval.sStringIndex) = m_pjcContainer->AddQuoteString( m_pjlLexer->YYText() ); }
+    { (yyval.sStringIndex) = m_pjcContainer->AddQuoteString( std::string_view( m_pjlLexer->YYText(), m_pjlLexer->YYLeng() ) ); }
     break;
 
   case 21:
 
-    { (yyval.dDecimal) = ::atof( m_pjlLexer->YYText() ); }
+    { (yyval.dDecimal) = CJsonContainer::ParseDecimal( m_pjlLexer->YYText(), m_pjlLexer->YYLeng() ); }
     break;
 
 
@@ -854,9 +854,9 @@ namespace yy {
   const unsigned char
   CJsonParser::yyrline_[] =
   {
-         0,    49,    49,    51,    55,    56,    57,    58,    59,    60,
-      61,    65,    66,    70,    71,    75,    79,    80,    84,    85,
-      89,    92
+         0,    46,    46,    48,    52,    53,    54,    55,    56,    57,
+      58,    62,    63,    67,    68,    72,    76,    77,    81,    82,
+      86,    89
   };
 
   // Print the state stack on the debug stream.
@@ -957,3 +957,4 @@ int yylex( /*YYSTYPE*/void * /*_pvNodeUnion*/, lson::CJsonLexer * _pxlLexer ) {
 void yy::CJsonParser::error( const yy::location &/*_lLoc*/, const std::string &/*_strM*/ ) {
 
 }
+

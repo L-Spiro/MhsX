@@ -413,17 +413,12 @@ namespace lsw {
 	LRESULT CALLBACK CToolBar::EditSubclassProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam, UINT_PTR _uIdSubclass, DWORD_PTR /*_dwRefData*/ ) {
 		if ( _uMsg == WM_CTLCOLORSTATIC ) {
 			HDC hdcStatic = reinterpret_cast<HDC>(_wParam);
-        
-			// Ensure the background color matches the edit box background.
 			::SetBkColor( hdcStatic, ::GetSysColor( COLOR_WINDOW ) );
-        
-			// Return the standard white window brush.
 			return reinterpret_cast<LRESULT>(::GetSysColorBrush( COLOR_WINDOW ));
 		}
 		else if ( _uMsg == WM_NCDESTROY ) {
 			::RemoveWindowSubclass( _hWnd, EditSubclassProc, _uIdSubclass );
 		}
-    
 		return ::DefSubclassProc( _hWnd, _uMsg, _wParam, _lParam );
 	}
 

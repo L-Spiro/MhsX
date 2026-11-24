@@ -240,6 +240,7 @@ namespace ee {
 
 
 		_sResult = ee::CExpEval::Reconstitute( vLines, '\n', &bErrored );
+		_sResult.push_back( '\n' );
 		if ( bErrored ) {
 			// Reconstitute() can only fail due to memory issues.
 			return EE_E_OUT_OF_MEMORY;

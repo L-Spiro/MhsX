@@ -47,3 +47,6 @@ The lexer needs the token definitions, but because of the erroneous generation f
 So EEExpEvalSyntaxNodes.h was created so that the parser could include that to get the correct union along with LSG_NODE, and when the lexer includes EEExpEvalParser.h, YYSTYPE will be defined and the lexer will not get a bad LSG_SHADER_SYNTAX_NODES.  Then EEExpEvalParser.b includes this file instead of having the union defined from within EEExpEvalParser.b.
 The user section of EEExpEvalParser.b is being copied as-is to the generated .cpp file instead of to the .h file.  This seems to be an error.  The file structure could be made much more organized if this were to be fixed as it was in previous versions of Bison.
 
+// == LSON
+LSONJsonParserFastStack.h is not generated.  LSONJsonSyntaxBuild.bat copies it over the stack that Bison generates (stack.hh), which keeps its items in a std::deque, as ../Src/Gen/LSONJsonParserStack.h.  It keeps them in a std::vector instead (the parser pushes and pops its stacks for every token).
+The parser's actions build the final values (CJsonContainer::LSON_JSON_VALUE) as they reduce, so there is no intermediate syntax tree.  The lexer does not track line numbers (no %option yylineno), which saves scanning every token a second time.

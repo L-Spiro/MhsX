@@ -7,15 +7,15 @@
 #include "../LSONJsonContainer.h"
 #include "../LSONJsonLexer.h"
 #include <string>
+#include <string_view>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // MACROS
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 #define YYINCLUDED_STDLIB_H
 
-//extern char yytext[];
 // Announce to Flex the prototype we want for lexing function.
-extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, lson::CJsonLexer * _pxlLexer );
+extern int yylex( void * _pvNodeUnion, lson::CJsonLexer * _pxlLexer );
 
 #include "../LSONJsonSyntaxNodes.h"
 
@@ -34,13 +34,10 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, lson::CJsonLexer * _pxlLexer )
 
 %type <sStringIndex>										string
 %type <dDecimal>											decimal
-%type <nNode>												json
-%type <nNode>												value
-%type <nNode>												object
-%type <nNode>												members
-%type <nNode>												member
-%type <nNode>												array
-%type <nNode>												values
+%type <stValue>												value
+%type <stValue>												object
+%type <stValue>												array
+%type <mMember>												member
 
 %start json
 
@@ -48,48 +45,48 @@ extern int yylex( /*YYSTYPE*/void * _pvNodeUnion, lson::CJsonLexer * _pxlLexer )
 
 json
 	:
-    | value													{ m_pjcContainer->AddJson( $$ ); }
-    ;
+	| value													{ m_pjcContainer->SetRoot( $1 ); }
+	;
 
 value
-	: object												{ m_pjcContainer->AddObjectValue( $$, $1 ); }
-	| string												{ m_pjcContainer->AddStringValue( $$, $1 ); }
-	| decimal												{ m_pjcContainer->AddDecimalValue( $$, $1 ); }
-	| array													{ m_pjcContainer->AddArrayValue( $$, $1 ); }
-	| LSON_VTRUE											{ m_pjcContainer->AddTrueValue( $$ ); }
-	| LSON_VFALSE											{ m_pjcContainer->AddFalseValue( $$ ); }
-	| LSON_VNULL											{ m_pjcContainer->AddNullValue( $$ ); }
+	: object												{ $$ = $1; }
+	| string												{ $$ = m_pjcContainer->AddStringValue( $1 ); }
+	| decimal												{ $$ = m_pjcContainer->AddDecimalValue( $1 ); }
+	| array													{ $$ = $1; }
+	| LSON_VTRUE											{ $$ = m_pjcContainer->AddTrueValue(); }
+	| LSON_VFALSE											{ $$ = m_pjcContainer->AddFalseValue(); }
+	| LSON_VNULL											{ $$ = m_pjcContainer->AddNullValue(); }
 	;
 
 object
-	: LSON_LCURLY LSON_RCURLY								{ m_pjcContainer->AddObject( $$ ); }
-	| LSON_LCURLY members LSON_RCURLY						{ m_pjcContainer->AddObject( $$, $2 ); }
+	: LSON_LCURLY LSON_RCURLY								{ $$ = m_pjcContainer->AddObject(); }
+	| LSON_LCURLY members LSON_RCURLY						{ $$ = m_pjcContainer->EndObject(); }
 	;
 
 members
-	: member												{ m_pjcContainer->AddMemberList( $$, $1 ); }
-	| members LSON_COMMA member								{ m_pjcContainer->AddMemberList( $$, $1, $3 ); }
+	: member												{ m_pjcContainer->BeginMembers( $1 ); }
+	| members LSON_COMMA member								{ m_pjcContainer->AddMember( $3 ); }
 	;
 
 member
-	: string LSON_COLON value								{ m_pjcContainer->AddMember( $$, $1, $3 ); }
-    ;
+	: string LSON_COLON value								{ $$.stName = $1; $$.stValue = $3; }
+	;
 
 array
-	: LSON_LBRAC LSON_RBRAC									{ m_pjcContainer->AddArray( $$ ); }
-	| LSON_LBRAC values LSON_RBRAC							{ m_pjcContainer->AddArray( $$, $2 ); }
+	: LSON_LBRAC LSON_RBRAC									{ $$ = m_pjcContainer->AddArray(); }
+	| LSON_LBRAC values LSON_RBRAC							{ $$ = m_pjcContainer->EndArray(); }
 	;
 
 values
-	: value													{ m_pjcContainer->AddValueList( $$, $1 ); }
-	| values LSON_COMMA value								{ m_pjcContainer->AddValueList( $$, $1, $3 ); }
+	: value													{ m_pjcContainer->BeginValues( $1 ); }
+	| values LSON_COMMA value								{ m_pjcContainer->AddArrayValue( $3 ); }
 	;
 	
 string
-	: LSON_STRING											{ $$ = m_pjcContainer->AddQuoteString( m_pjlLexer->YYText() ); }
+	: LSON_STRING											{ $$ = m_pjcContainer->AddQuoteString( std::string_view( m_pjlLexer->YYText(), m_pjlLexer->YYLeng() ) ); }
 	
 decimal
-	: LSON_DECIMAL											{ $$ = ::atof( m_pjlLexer->YYText() ); }
+	: LSON_DECIMAL											{ $$ = CJsonContainer::ParseDecimal( m_pjlLexer->YYText(), m_pjlLexer->YYLeng() ); }
 
 %%
 

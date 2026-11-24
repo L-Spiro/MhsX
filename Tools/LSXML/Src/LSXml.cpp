@@ -34,6 +34,7 @@ namespace lsx {
 		Reset();
 		if ( !_pcXml ) { return false; }
 
+		// The lexer scans _pcXml in place (ScanMemoryBuffer()) and never reads from this stream, so it does not need a copy of the text.
 		std::istringstream isStream;
 
 		// Streams created.  Create the parsers.

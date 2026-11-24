@@ -30,11 +30,12 @@ namespace lson {
 	 * \param _pcJson The NULL-terminated JSON data.
 	 * \return Returns true if the JSON data was successfully parsed.
 	 */
-	bool CJson::SetJson( const char * _pcJson ) {
+	bool CJson::SetJson( char * _pcJson ) {
 		Reset();
 		if ( !_pcJson ) { return false; }
 
-		std::istringstream isStream( _pcJson );
+		// The lexer scans the text in place (see ScanMemoryBuffer()), so its stream is never read; an empty one avoids copying the text.
+		std::istringstream isStream;
 
 		// Streams created.  Create the parsers.
 		std::unique_ptr<CJsonLexer> pjlLexer = std::make_unique<CJsonLexer>( &isStream, nullptr );
@@ -42,22 +43,36 @@ namespace lson {
 			return false;
 		}
 
-		m_pjcContainer = new( std::nothrow ) CJsonContainer( pjlLexer.get() );
+		const size_t sLen = std::strlen( _pcJson );
+		struct yy_buffer_state * pbState = pjlLexer->ScanMemoryBuffer( const_cast<char *>(_pcJson), sLen + 2 );
+		if ( !pbState ) {
+			pjlLexer->yy_delete_buffer( pbState );
+			return false;
+		}
 
-		std::unique_ptr<CJsonParser> pjppParser = std::make_unique<CJsonParser>( pjlLexer.get(), m_pjcContainer );
-		if ( !pjppParser ) {
+		m_pjcContainer = new( std::nothrow ) CJsonContainer( pjlLexer.get() );
+		if ( !m_pjcContainer ) {
+			pjlLexer->yy_delete_buffer( pbState );
+			return false;
+		}
+		m_pjcContainer->Reserve( sLen );
+
+		std::unique_ptr<CJsonParser> ppppParser = std::make_unique<CJsonParser>( pjlLexer.get(), m_pjcContainer );
+		if ( !ppppParser ) {
+			pjlLexer->yy_delete_buffer( pbState );
 			Reset();
 			return false;
 		}
 
 
-		if ( pjppParser->parse() == 0 ) {
-			//m_pjcContainer->PrintNode( m_pjcContainer->Root(), 0 );
+		if ( ppppParser->parse() == 0 ) {
+			pjlLexer->yy_delete_buffer( pbState );
+			// The values were built during parsing; this releases what was needed only to build them.  As before, empty JSON is accepted.
 			m_pjcContainer->BuildTree();
-			//m_pjcContainer->PrintTree();
 			// Parsed.
 			return true;
 		}
+		pjlLexer->yy_delete_buffer( pbState );
 		Reset();
 		return false;
 	}
