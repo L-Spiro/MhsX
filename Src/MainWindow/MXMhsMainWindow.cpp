@@ -484,6 +484,8 @@ namespace mx {
 				::PostMessageW( Wnd(), WM_CLOSE, 0, 0 );
 				return LSW_H_HANDLED;
 			}
+			// Modified files in the Hex Editor are offered to be saved first; cancelling keeps the application open.
+			if ( !m_pdhmwDeusHexMachinaWindow->QueryCloseAll() ) { return LSW_H_HANDLED; }
 		}
 		return LSW_H_CONTINUE;
 	}

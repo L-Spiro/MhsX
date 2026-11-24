@@ -19,6 +19,72 @@ namespace mx {
 		// Sets the target file.
 		bool								SetFile( const std::filesystem::path &_pPath );
 
+		/**
+		 * Starts a new, untitled file that exists only in memory and edit storage until it is saved.
+		 *
+		 * \param _wsName The name shown for the file until it is saved (for example, "Untitled1.txt").
+		 * \param _bInitial The initial contents (for example, a byte-order mark).  They are not part of the Undo history.
+		 * \return Returns true if the file was created.
+		 **/
+		bool								CreateNew( const std::wstring &_wsName, const CBuffer &_bInitial );
+
+		/**
+		 * Determines whether this is a new file that has never been saved.
+		 *
+		 * \return Returns true if the file has no path yet.
+		 **/
+		inline bool							IsUntitled() const { return m_lcwfwFile.IsUntitled(); }
+
+		/**
+		 * Determines whether the data differs from what was last opened or saved.
+		 *
+		 * \return Returns true if there are unsaved changes.
+		 **/
+		inline bool							IsModified() const { return m_lcwfwFile.IsModified(); }
+
+		/**
+		 * Gets the path of the file.
+		 *
+		 * \return Returns the path, which is empty for an untitled file.
+		 **/
+		inline const std::filesystem::path &	Path() const { return m_lcwfwFile.Path(); }
+
+		/**
+		 * Gets the name of the file: its file name, or the name given to CreateNew() if it is untitled.
+		 *
+		 * \return Returns the name.
+		 **/
+		CSecureWString						DisplayName() const;
+
+		/**
+		 * Saves the file, which takes the given path (see CLargeCoWFileWindow::SaveTo()).
+		 *
+		 * \param _pPath The file to write.
+		 * \param _dwError Receives the Windows error code on failure.
+		 * \return Returns true if the file was saved.
+		 **/
+		bool								SaveTo( const std::filesystem::path &_pPath, DWORD &_dwError ) { return m_lcwfwFile.SaveTo( _pPath, _dwError ); }
+
+		/**
+		 * Renames the file on disk.
+		 *
+		 * \param _pPath The new path.  It must not exist.
+		 * \param _dwError Receives the Windows error code on failure.
+		 * \return Returns true if the file was renamed.
+		 **/
+		bool								Rename( const std::filesystem::path &_pPath, DWORD &_dwError ) { return m_lcwfwFile.Rename( _pPath, _dwError ); }
+
+		/**
+		 * Writes a range of the file to an open file at its current position.
+		 *
+		 * \param _hFile The file, opened for writing.
+		 * \param _ui64Start The address of the first byte to write.
+		 * \param _ui64Size The number of bytes to write.
+		 * \param _dwError Receives the Windows error code on failure.
+		 * \return Returns true if every byte was written.
+		 **/
+		bool								WriteRange( HANDLE _hFile, uint64_t _ui64Start, uint64_t _ui64Size, DWORD &_dwError ) const { return m_lcwfwFile.WriteRange( _hFile, _ui64Start, _ui64Size, _dwError ); }
+
 		// Resets the object back to scratch.
 		void								Reset();
 
@@ -144,6 +210,8 @@ namespace mx {
 		// == Members.
 		// The copy-on-write file.
 		CLargeCoWFileWindow					m_lcwfwFile;
+		/** The name of an untitled file. */
+		std::wstring						m_wsNewName;
 	};
 
 }	// namespace mx

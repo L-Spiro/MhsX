@@ -191,6 +191,15 @@ namespace mx {
 		static void												ClearAll();
 
 		/**
+		 * \brief Releases every slot that holds the given data source, so that it can be destroyed (for example, before its file is
+		 *	reloaded or deleted).  If it holds the Copy on the Windows clipboard, that is rendered first (up to MaxRenderOnExit bytes) so
+		 *	that it stays on the clipboard.  UI thread only.
+		 *
+		 * \param _pheiInterface The data source.
+		 */
+		static void												ReleaseInterface( const CHexEditorInterface * _pheiInterface );
+
+		/**
 		 * \brief Determines whether the Windows clipboard still holds the data of the Copy in slot 0.
 		 *
 		 * When true, a Paste from slot 0 can read straight from GetSlot( WindowsClipboard ) instead of the Windows clipboard.  UI thread only.

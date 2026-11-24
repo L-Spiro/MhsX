@@ -19,10 +19,13 @@
 #include <TreeListView/LSWTreeListView.h>
 
 #include <filesystem>
+#include <functional>
 
 using namespace lsw;
 
 namespace mx {
+
+	class CHexEditorFile;
 	
 	class CWindowMemHack;
 
@@ -181,6 +184,15 @@ namespace mx {
 		// Informs tha a child tab closed one of it headers.
 		virtual void								ChildTabClosed( CWidget * _pwChild, INT _iTab );
 
+		/**
+		 * Asked before a tab is closed with its close box.  Offers to save a modified file.
+		 *
+		 * \param _pwChild The tab control.
+		 * \param _iTab The tab being closed.
+		 * \return Returns false to keep the tab open.
+		 */
+		virtual bool								ChildTabClosing( CWidget * _pwChild, INT _iTab ) override;
+
 		// Gets the multi-splitter.
 		CMultiSplitter *							MultiSplitter() {
 			return static_cast<CMultiSplitter *>(FindChild( Layout::MX_W_MAIN_SPLITTER ));
@@ -191,11 +203,82 @@ namespace mx {
 			return static_cast<CTab *>(FindChild( Layout::MX_W_TABS ));
 		}
 
-		// Performs a Save As operation.
+		/** The kinds of file File > New creates. */
+		enum MX_NEW_FILE {
+			MX_NF_TEXT,																		/**< A text file. */
+			MX_NF_HEX,																		/**< A binary file, edited as hex. */
+			MX_NF_UNICODE,																	/**< A UTF-16 (little-endian) text file, starting with a byte-order mark. */
+			MX_NF_UTF8,																		/**< A UTF-8 text file. */
+			MX_NF_C,																		/**< A C/C++ source file. */
+			MX_NF_HTML,																		/**< An HTML file. */
+			MX_NF_PHP,																		/**< A PHP file. */
+			MX_NF_XML,																		/**< An XML file. */
+		};
+
+		/**
+		 * Creates a new, untitled file in a new tab.
+		 *
+		 * \param _nfType The kind of file.
+		 * \return Returns true if the file was created.
+		 **/
+		bool										NewFile( MX_NEW_FILE _nfType );
+
+		/**
+		 * Performs a Save As operation on the current file.
+		 **/
 		void										SaveAs();
 
-		// Performs a Save operation.
+		/**
+		 * Performs a Save operation on the current file (Save As if it has never been saved).
+		 **/
 		void										Save();
+
+		/**
+		 * Saves a file.  An untitled file, or Save As, asks for a path.  A read-only file can only be saved under another name, after
+		 *	which the tab edits the new file.
+		 *
+		 * \param _sIdx The tab.
+		 * \param _bAs If true, asks for a new path (Save As).
+		 * \return Returns true if the file was saved; false if it failed or was cancelled.
+		 **/
+		bool										SaveTab( size_t _sIdx, bool _bAs );
+
+		/**
+		 * Writes a copy of the current file without changing which file is being edited.
+		 **/
+		void										SaveACopy();
+
+		/**
+		 * Writes the selected bytes (a file's or a process's) to a new file.
+		 **/
+		void										SaveSelection();
+
+		/**
+		 * Saves every modified file (read-only files are skipped).
+		 **/
+		void										SaveAll();
+
+		/**
+		 * Discards the current file's unsaved changes and reloads it from disk.
+		 **/
+		void										RevertRefresh();
+
+		/**
+		 * Renames the current file on disk.
+		 **/
+		void										RenameFile();
+
+		/**
+		 * Closes the current file and permanently deletes it from disk.
+		 **/
+		void										DeleteCurrentFile();
+
+		/**
+		 * Offers to save every modified file, as before closing them all.
+		 *
+		 * \return Returns false if the user cancelled (or a save failed), in which case nothing should be closed.
+		 **/
+		bool										QueryCloseAll();
 
 		// Performs an Open operation.
 		void										Open();
@@ -211,6 +294,21 @@ namespace mx {
 
 		// Closes the active tab.
 		void										CloseTab();
+
+		/**
+		 * Offers to save a tab's file if it is modified, as before closing it.
+		 *
+		 * \param _sIdx The tab.
+		 * \return Returns false if the user cancelled (or the save failed), in which case the tab should stay open.
+		 **/
+		bool										QueryCloseTab( size_t _sIdx );
+
+		/**
+		 * Closes a tab without asking anything.
+		 *
+		 * \param _sIdx The tab.
+		 **/
+		void										RemoveTab( size_t _sIdx );
 
 		// Close all tabs.
 		void										CloseAllTabs();
@@ -366,6 +464,28 @@ namespace mx {
 
 		// Called by the main window before the application closes.
 		bool										WillClose();
+
+		/**
+		 * Gets the file being edited in a tab.
+		 *
+		 * \param _sIdx The tab.
+		 * \return Returns the file, or nullptr if the tab does not exist or does not edit a file (a process).
+		 **/
+		CHexEditorFile *							FileAt( size_t _sIdx );
+
+		/**
+		 * Gets the file being edited in the current tab.
+		 *
+		 * \return Returns the file, or nullptr if there is no tab or it does not edit a file (a process).
+		 **/
+		CHexEditorFile *							CurrentFile();
+
+		/**
+		 * Gets the index of the current tab.
+		 *
+		 * \return Returns the index, or SIZE_MAX if there is no tab.
+		 **/
+		size_t										CurrentTab();
 		
 		// Prepares to create the window.  Creates the atom if necessary.
 		static void									PrepareWindow();
@@ -407,6 +527,10 @@ namespace mx {
 
 		// The MHS object where we can access the current process and our options.
 		CWindowMemHack *							m_pmhMemHack = nullptr;
+		/** The kind of file the toolbar's New button creates: the last one chosen. */
+		MX_NEW_FILE									m_nfLastNew = MX_NF_HEX;
+		/** The number of untitled files created (for naming them). */
+		uint32_t									m_ui32Untitled = 0;
 
 		// The main window class.
 		static ATOM									m_aAtom;
@@ -428,6 +552,84 @@ namespace mx {
 
 		// Adds a tab.
 		bool										AddTab( const std::shared_ptr<CHexEditorInterface> &_spInterface );
+
+		/**
+		 * Makes a tab edit a file freshly opened from disk in place of what it edits now (Revert/Refresh, or after saving a read-only
+		 *	file under a new name).  The tab is closed if the file cannot be opened.
+		 *
+		 * \param _sIdx The tab.
+		 * \param _pPath The file to open.
+		 * \return Returns true if the file was opened.
+		 **/
+		bool										ReopenTab( size_t _sIdx, const std::filesystem::path &_pPath );
+
+		/**
+		 * Updates a tab's text from its data source.
+		 *
+		 * \param _sIdx The tab.
+		 **/
+		void										UpdateTabText( size_t _sIdx );
+
+		/**
+		 * Enables and disables the toolbar buttons for the current tab.
+		 **/
+		void										UpdateToolBar();
+
+		/**
+		 * Determines whether the current file can be saved under its own name (it is a file, not read-only).
+		 *
+		 * \return Returns true if Save is available.
+		 **/
+		bool										CanSave();
+
+		/**
+		 * Determines whether any open file can be saved (Save All).
+		 *
+		 * \return Returns true if at least one file is not read-only.
+		 **/
+		bool										CanSaveAll();
+
+		/**
+		 * Asks for the path of a file to write.
+		 *
+		 * \param _pwcTitle The title of the dialog.
+		 * \param _pSuggested The path (or just the name) to suggest.
+		 * \param _bOverwritePrompt If true, asks before an existing file is chosen.
+		 * \param _pChosen Receives the chosen path.
+		 * \return Returns true if a path was chosen.
+		 **/
+		bool										AskSavePath( LPCWSTR _pwcTitle, const std::filesystem::path &_pSuggested, bool _bOverwritePrompt, std::filesystem::path &_pChosen );
+
+		/**
+		 * Determines whether a path is a file open in any tab (which must not be overwritten except by saving that tab).
+		 *
+		 * \param _pPath The path.
+		 * \param _sSkip A tab to ignore, or SIZE_MAX.
+		 * \return Returns true if another tab edits the file.
+		 **/
+		bool										IsOpenInTab( const std::filesystem::path &_pPath, size_t _sSkip );
+
+		/**
+		 * Writes bytes read from a data source to a file (through a temporary file that then replaces it).
+		 *
+		 * \param _pheiSource The data source.
+		 * \param _fGather Gets the ranges to write, a group at a time (filling an empty vector after the last group), in order.  Returns
+		 *	false on a memory failure.
+		 * \param _pDst The file to write.
+		 * \param _dwError Receives the Windows error code on failure.
+		 * \return Returns true if the file was written.
+		 **/
+		static bool									WriteRangesTo( CHexEditorInterface * _pheiSource, const std::function<bool ( std::vector<MX_SEL_RANGE> &, uint64_t )> &_fGather,
+			const std::filesystem::path &_pDst, DWORD &_dwError );
+
+		/**
+		 * Shows an error about a file.
+		 *
+		 * \param _swsMsg What failed.
+		 * \param _pPath The file.
+		 * \param _dwError The Windows error code.
+		 **/
+		void										FileError( const CSecureWString &_swsMsg, const std::filesystem::path &_pPath, DWORD _dwError );
 
 		// Verification function for the Go To dialog.
 		static bool									GoTo_Verify( void * _pvThis, const mx::CNumberInputLayout::MX_NUMBER_DIALOG_PARMS &_ndpParms );

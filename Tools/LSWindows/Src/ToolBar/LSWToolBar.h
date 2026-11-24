@@ -3,6 +3,7 @@
 #include "../LSWWin.h"
 #include "../ImageList/LSWImageList.h"
 #include "../Images/LSWBitmap.h"
+#include "../Layout/LSWMenuLayout.h"
 #include "../Widget/LSWWidget.h"
 
 #include <vector>
@@ -157,6 +158,37 @@ namespace lsw {
 		BOOL								AddButtons( const TBBUTTON * _pbButtons, size_t _sTotal );
 
 		/**
+		 * Gives a button a drop-down menu.  The button should have the BTNS_DROPDOWN style (a separate arrow beside the button; clicking
+		 *	the button itself sends its command as usual) or BTNS_WHOLEDROPDOWN (the whole button shows the menu).  When the arrow is
+		 *	clicked the menu is shown below the button.  The owner receives WM_INITMENUPOPUP (to enable and check the items) and the
+		 *	WM_COMMAND of the chosen item, just as for its menu bar.
+		 *
+		 * \param _wId Command ID of the button.
+		 * \param _pmlLayouts The menu layouts (see CLayoutManager::CreatePopupMenu()).  The first is the menu shown; the rest are its
+		 *	submenus.  They must remain valid for as long as the toolbar exists.
+		 * \param _sTotal The number of layouts at _pmlLayouts.
+		 * \param _pwOwner The window that owns the menu.
+		 * \return Returns TRUE if successful, or FALSE otherwise.
+		 **/
+		BOOL								SetDropDownMenu( WORD _wId, const LSW_MENU_LAYOUT * _pmlLayouts, size_t _sTotal, CWidget * _pwOwner );
+
+		/**
+		 * Shows the drop-down menu below a button, if one was given with SetDropDownMenu().
+		 *
+		 * \param _wId Command ID of the button.
+		 * \return Returns TRUE if a menu was shown.
+		 **/
+		BOOL								ShowDropDownMenu( WORD _wId );
+
+		/**
+		 * TBN_DROPDOWN.  Shows the button's drop-down menu, if it has one (see SetDropDownMenu()).
+		 *
+		 * \param _lptbToolBar A pointer to an NMTOOLBARW structure.
+		 * \return Returns LSW_H_HANDLED if a menu was shown.
+		 **/
+		virtual LSW_HANDLED					TbnDropDown( LPNMTOOLBARW _lptbToolBar );
+
+		/**
 		 * Creates an edit box with an embedded icon inside it and placeholder hint text.
 		 * 
 		 * \param _iCommandId The command ID of the separator placeholder.
@@ -216,7 +248,24 @@ namespace lsw {
 
 
 	protected :
+		// == Types.
+		/**
+		 * A drop-down menu given to a button.
+		 **/
+		struct LSW_DROP_DOWN {
+			WORD							wId;													/**< Command ID of the button. */
+			const LSW_MENU_LAYOUT *			pmlLayouts;												/**< The menu layouts. */
+			size_t							sTotal;													/**< The number of layouts at pmlLayouts. */
+			CWidget *						pwOwner;												/**< The window that owns the menu. */
+		};
+
+
 		// == Members.
+		/**
+		 * The buttons' drop-down menus.
+		 **/
+		std::vector<LSW_DROP_DOWN>			m_vDropDowns;
+
 		/**
 		 * Copy of the buttons for TBN_GETBUTTONINFO.
 		 * TODO: Button text should be copied into a std::wstring or else pointers here can

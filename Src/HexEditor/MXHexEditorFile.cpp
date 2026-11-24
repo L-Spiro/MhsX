@@ -18,6 +18,38 @@ namespace mx {
 		return m_lcwfwFile.OpenFile( _pPath );
 	}
 
+	/**
+	 * Starts a new, untitled file that exists only in memory and edit storage until it is saved.
+	 *
+	 * \param _wsName The name shown for the file until it is saved (for example, "Untitled1.txt").
+	 * \param _bInitial The initial contents (for example, a byte-order mark).  They are not part of the Undo history.
+	 * \return Returns true if the file was created.
+	 **/
+	bool CHexEditorFile::CreateNew( const std::wstring &_wsName, const CBuffer &_bInitial ) {
+		try {
+			m_wsNewName = _wsName;
+		}
+		catch ( ... ) { return false; }
+		return m_lcwfwFile.CreateNew( _wsName, _bInitial.data(), _bInitial.size() );
+	}
+
+	/**
+	 * Gets the name of the file: its file name, or the name given to CreateNew() if it is untitled.
+	 *
+	 * \return Returns the name.
+	 **/
+	CSecureWString CHexEditorFile::DisplayName() const {
+		CSecureWString swsTmp;
+		try {
+			const auto &pPath = m_lcwfwFile.Path();
+			if ( pPath.empty() ) { swsTmp = m_wsNewName; }
+			else if ( !pPath.has_filename() ) { swsTmp = pPath.generic_wstring(); }
+			else { swsTmp = pPath.filename().generic_wstring(); }
+		}
+		catch ( ... ) {}
+		return swsTmp;
+	}
+
 	// Resets the object back to scratch.
 	void CHexEditorFile::Reset() {
 		m_lcwfwFile.Reset();
@@ -25,14 +57,7 @@ namespace mx {
 
 	// Gets the text displayed in the tab.
 	CSecureWString CHexEditorFile::TabString() const {
-		auto pPath = m_lcwfwFile.Path();
-		CSecureWString swsTmp;
-		if ( !pPath.has_filename() ) {
-			swsTmp = pPath.generic_wstring();
-		}
-		else {
-			swsTmp = pPath.filename().generic_wstring();
-		}
+		CSecureWString swsTmp = DisplayName();
 
 		if ( ReadOnly() ) { swsTmp += L" \U0001F512"; }	// Lock.
 		return swsTmp;
@@ -40,6 +65,7 @@ namespace mx {
 
 	// Gets the text displayed in the status bar.
 	CSecureWString CHexEditorFile::StatusString() const {
+		if ( m_lcwfwFile.Path().empty() ) { return DisplayName(); }
 		return m_lcwfwFile.Path().generic_wstring();
 	}
 
@@ -95,7 +121,7 @@ namespace mx {
 		try {
 			MX_COPYAS caParms = _csParms;
 			if ( caParms.wsName.empty() ) {
-				caParms.wsName = m_lcwfwFile.Path().filename().wstring();
+				caParms.wsName = DisplayName();
 			}
 			// A file can only change through this object, and the logical map is copy-on-write, so a snapshot of the map is a complete
 			//	copy of the data no matter how large the selection is.  Rendering is deferred until something is pasted.

@@ -1970,6 +1970,15 @@ namespace lsw {
 		virtual LSW_HANDLED					TbnGetButtonInfo( LPNMTOOLBARW /*_lptbToolBar*/ ) { return LSW_H_CONTINUE; }
 
 		/**
+		 * Handles TBN_DROPDOWN, sent when the arrow of a drop-down toolbar button (BTNS_DROPDOWN or BTNS_WHOLEDROPDOWN) is clicked.
+		 *	The toolbar is asked first (see CToolBar::SetDropDownMenu()), then the window that received the notification.
+		 *
+		 * \param _lptbToolBar The notification data.  iItem is the command ID of the button.
+		 * \return Returns LSW_H_HANDLED if the drop-down was shown.
+		 */
+		virtual LSW_HANDLED					TbnDropDown( LPNMTOOLBARW /*_lptbToolBar*/ ) { return LSW_H_CONTINUE; }
+
+		/**
 		 * Handles WM_SYSCOMMAND.
 		 * \brief Processes system commands such as SC_CLOSE or SC_MAXIMIZE.
 		 *
@@ -2204,6 +2213,21 @@ namespace lsw {
 			if ( Parent() ) {
 				Parent()->ChildTabClosed( _pwChild, _iTab );
 			}
+		}
+
+		/**
+		 * Asked when the close box of one of a child tab control's headers is clicked, before the tab is closed.  Bubbles to the parent
+		 *	by default.
+		 *
+		 * \param _pwChild The child tab control.
+		 * \param _iTab The index of the tab being closed.
+		 * \return Returns false to keep the tab open.
+		 */
+		virtual bool						ChildTabClosing( CWidget * _pwChild, INT _iTab ) {
+			if ( Parent() ) {
+				return Parent()->ChildTabClosing( _pwChild, _iTab );
+			}
+			return true;
 		}
 
 		/**

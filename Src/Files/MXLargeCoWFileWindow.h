@@ -40,6 +40,91 @@ namespace mx {
 		bool													OpenFile( const std::filesystem::path &_pFile );
 
 		/**
+		 * \brief Starts a new, untitled file that exists only in edit storage until it is saved (see SaveTo()).
+		 *
+		 * \param _wsName The name of the file (used to name its edit storage).
+		 * \param _pvInitial The initial contents (for example, a byte-order mark), or nullptr.  They are not part of the Undo history.
+		 * \param _sSize The number of bytes at _pvInitial.
+		 * \return Returns true if the file was created.
+		 */
+		bool													CreateNew( const std::wstring &_wsName, const void * _pvInitial, size_t _sSize );
+
+		/**
+		 * \brief Determines whether this is a new file that has never been saved (see CreateNew()).
+		 *
+		 * \return Returns true if the file has no path yet.
+		 */
+		inline bool												IsUntitled() const { return m_bUntitled; }
+
+		/**
+		 * \brief Determines whether the data differs from what was last opened or saved.
+		 *
+		 * \return Returns true if there are unsaved changes.
+		 */
+		inline bool												IsModified() const { return m_sUndoIdx != m_sSavedUndoIdx; }
+
+		/**
+		 * \brief Records the current state as saved (IsModified() returns false until the next change).
+		 */
+		inline void												MarkSaved() { m_sSavedUndoIdx = m_sUndoIdx; }
+
+		/**
+		 * \brief Writes a range of the logical view to an open file at its current position.
+		 *
+		 * \param _hFile The file, opened for writing.
+		 * \param _ui64Start The logical address of the first byte to write.
+		 * \param _ui64Size The number of bytes to write.
+		 * \param _dwError Receives the Windows error code on failure.
+		 * \return Returns true if every byte was written.
+		 */
+		bool													WriteRange( HANDLE _hFile, uint64_t _ui64Start, uint64_t _ui64Size, DWORD &_dwError ) const;
+
+		/**
+		 * \brief Saves the whole logical view to a file, which becomes this file's path.
+		 *
+		 * The data is written to a temporary file beside the destination, which then takes the destination's place, so a failure never
+		 *	leaves a partly written file behind.  If the destination is the file being edited (which is still read from), that file is
+		 *	moved aside (into the edit directory if possible, otherwise beside itself, hidden) and kept until Reset(), so the Undo history
+		 *	and clipboards that refer to it stay valid.
+		 *
+		 * \param _pDst The file to write.
+		 * \param _dwError Receives the Windows error code on failure.
+		 * \return Returns true if the file was saved.
+		 */
+		bool													SaveTo( const std::filesystem::path &_pDst, DWORD &_dwError );
+
+		/**
+		 * \brief Renames (or moves within its volume) the file on disk.
+		 *
+		 * \param _pDst The new path.  It must not exist.
+		 * \param _dwError Receives the Windows error code on failure.
+		 * \return Returns true if the file was renamed.
+		 */
+		bool													Rename( const std::filesystem::path &_pDst, DWORD &_dwError );
+
+		/**
+		 * \brief Writes a file through a temporary file beside it, which then replaces it (or becomes it, if it does not exist).
+		 *
+		 * \param _pDst The file to write.
+		 * \param _fWrite Writes the contents to the temporary file (opened for writing); on failure it sets the error code and returns
+		 *	false.
+		 * \param _dwError Receives the Windows error code on failure.
+		 * \return Returns true if the file was written.
+		 */
+		static bool												WriteThenReplace( const std::filesystem::path &_pDst, const std::function<bool ( HANDLE, DWORD & )> &_fWrite, DWORD &_dwError );
+
+		/**
+		 * \brief Writes bytes to an open file at its current position.
+		 *
+		 * \param _hFile The file, opened for writing.
+		 * \param _pvData The bytes to write.
+		 * \param _sSize The number of bytes to write.
+		 * \param _dwError Receives the Windows error code on failure.
+		 * \return Returns true if every byte was written.
+		 */
+		static bool												WriteAll( HANDLE _hFile, const void * _pvData, size_t _sSize, DWORD &_dwError );
+
+		/**
 		 * \brief Resets the object to its initial, unopened state.
 		 *
 		 * Clears all logical-view state, unmaps any mapped regions, closes any opened files, and
@@ -80,7 +165,7 @@ namespace mx {
 		 *
 		 * \return Returns true if edits are not permitted; false otherwise.
 		 */
-		inline bool												ReadOnly() const { return m_fmMainMap.ReadOnly(); }
+		inline bool												ReadOnly() const { return !m_bUntitled && m_fmMainMap.ReadOnly(); }
 
 		/**
 		 * \brief Reads bytes from the logical view into the destination buffer.
@@ -372,6 +457,13 @@ namespace mx {
 
 		// == Members.
 		uint64_t												m_ui64Size = 0;									/**< File size, derived from the logical view. */
+		std::filesystem::path									m_pMapPath;										/**< Where the file in m_fmMainMap is now (moved aside after saving over it). */
+		std::vector<std::filesystem::path>						m_vAsideFiles;									/**< Originals moved aside by SaveTo(), deleted by Reset(). */
+		std::wstring											m_wsNewName;									/**< The name given to CreateNew(), for naming the edit directory. */
+		bool													m_bUntitled = false;							/**< A new file that has never been saved. */
+		size_t													m_sSavedUndoIdx = size_t( -1 );					/**< The Undo index when last opened or saved, or MX_SAVED_LOST. */
+		/** m_sSavedUndoIdx when the saved state is no longer in the Undo history (it was undone and then replaced by a new change). */
+		static constexpr size_t									MX_SAVED_LOST = size_t( -2 );
 		CFileMap												m_fmMainMap;									/**< The map for the main file being edited. */
 		std::filesystem::path									m_pFilePath;									/**< The path to the file. */
 		mutable std::vector<std::unique_ptr<CFileMap>>			m_vEditedMaps;									/**< Mappings of edited copies. */
@@ -511,6 +603,15 @@ namespace mx {
 		bool													CreateWriteDirectories();
 
 		/**
+		 * \brief Makes the path of a hidden temporary file beside a file (in the same directory, so it can be renamed over it).
+		 *
+		 * \param _pFile The file.
+		 * \param _pwcTag Identifies the use of the temporary file.
+		 * \return Returns a path that does not exist.
+		 */
+		static std::filesystem::path							TempPathBeside( const std::filesystem::path &_pFile, const wchar_t * _pwcTag );
+
+		/**
 		 * \brief Builds a full path to a segment file within m_pEditDiractory.  Call within try/catch block.
 		 *
 		 * \param _sId Segment file numeric id.
@@ -550,6 +651,8 @@ namespace mx {
 		 */
 		inline bool												PushUndo( MX_UNDO_ITEM &_uiItem ) {
 			try {
+				// Anything after the current index is about to be replaced; if the saved state is among it, it can never be reached again.
+				if ( m_sSavedUndoIdx != MX_SAVED_LOST && m_sSavedUndoIdx + 1 > m_sUndoIdx + 1 ) { m_sSavedUndoIdx = MX_SAVED_LOST; }
 				++m_sUndoIdx;
 				m_vUndoStack.resize( m_sUndoIdx + 1 );
 				m_vUndoStack[m_sUndoIdx] = std::move( _uiItem );

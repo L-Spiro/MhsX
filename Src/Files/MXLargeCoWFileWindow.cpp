@@ -14,9 +14,9 @@ namespace mx {
 	CLargeCoWFileWindow::CLargeCoWFileWindow() {
 	}
 	CLargeCoWFileWindow::~CLargeCoWFileWindow() {
+		Reset();
 		CFile::EraseFilesInDirectory( m_pEditDiractory );
 		CFile::DeleteDirectorySafely( m_pEditDiractory );
-		Reset();
 		m_pEditDiractory = std::filesystem::path();
 	}
 
@@ -44,6 +44,7 @@ namespace mx {
 			uint64_t ui64Size = m_fmMainMap.Size();
 			CCrc::Init();
 			m_pFilePath = _pFile;
+			m_pMapPath = _pFile;
 			//m_ui32OriginalCrc = UINT32_MAX;
 			//
 			//std::vector<uint8_t> vBuffer;
@@ -87,6 +88,14 @@ namespace mx {
 			m_ui64Size = 0;
 			m_fmMainMap.Close();
 			m_pFilePath = std::filesystem::path();
+			m_pMapPath = std::filesystem::path();
+			for ( auto I = m_vAsideFiles.size(); I--; ) {
+				::SetFileAttributesW( m_vAsideFiles[I].c_str(), FILE_ATTRIBUTE_NORMAL );
+				::DeleteFileW( m_vAsideFiles[I].c_str() );
+			}
+			m_vAsideFiles = std::vector<std::filesystem::path>();
+			m_bUntitled = false;
+			m_sSavedUndoIdx = size_t( -1 );
 			m_vEditedMaps = std::vector<std::unique_ptr<CFileMap>>();
 			m_vActiveSegments = std::vector<uint64_t>();
 			m_vLogicalMap = std::vector<MX_LOGICAL_SECTION>();
@@ -985,11 +994,13 @@ namespace mx {
 	 * \return Returns true if the edit directory exists or was created.
 	 */
 	bool CLargeCoWFileWindow::CreateWriteDirectories() {
+		std::error_code ecError;
+		if ( !m_pEditDiractory.empty() && std::filesystem::is_directory( m_pEditDiractory, ecError ) ) { return true; }
 		m_pEditDiractory = std::filesystem::temp_directory_path() / _DEC_S_9DAF7683_Dues_Hex_Machina.c_str();
 		::OutputDebugStringW( (m_pEditDiractory.generic_wstring() + L"\r\n").c_str() );
-		m_pEditDiractory /= m_pFilePath.filename();
+		if ( m_pFilePath.has_filename() ) { m_pEditDiractory /= m_pFilePath.filename(); }
+		else { m_pEditDiractory /= m_wsNewName.size() ? std::filesystem::path( m_wsNewName ) : std::filesystem::path( L"New" ); }
 		//m_pEditDiractory += std::to_string( m_ui32OriginalCrc );
-		std::error_code ecError;
 		while ( std::filesystem::exists( m_pEditDiractory, ecError ) ) {
 			m_pEditDiractory += L'-';
 		}
@@ -1204,6 +1215,318 @@ namespace mx {
 		++m_sUndoIdx;
 
 		return uoRet;
+	}
+
+	/**
+	 * \brief Starts a new, untitled file that exists only in edit storage until it is saved (see SaveTo()).
+	 *
+	 * \param _wsName The name of the file (used to name its edit storage).
+	 * \param _pvInitial The initial contents (for example, a byte-order mark), or nullptr.  They are not part of the Undo history.
+	 * \param _sSize The number of bytes at _pvInitial.
+	 * \return Returns true if the file was created.
+	 */
+	bool CLargeCoWFileWindow::CreateNew( const std::wstring &_wsName, const void * _pvInitial, size_t _sSize ) {
+		Reset();
+		try {
+			m_bUntitled = true;
+			m_wsNewName = _wsName;
+			if ( !CreateWriteDirectories() ) {
+				Reset();
+				return false;
+			}
+			UpdateSize();
+			if ( _pvInitial && _sSize ) {
+				const uint8_t * pui8Initial = static_cast<const uint8_t *>(_pvInitial);
+				CHexEditorInterface::CBuffer bInitial( pui8Initial, pui8Initial + _sSize );
+				uint64_t ui64Inserted = 0;
+				if ( !Insert( 0, bInitial, ui64Inserted ) || ui64Inserted != _sSize ) {
+					Reset();
+					return false;
+				}
+				m_vUndoStack = std::vector<MX_UNDO_ITEM>();
+				m_sUndoIdx = size_t( -1 );
+				m_vItemsInGroup = std::vector<uint64_t>();
+				m_i32UndoGroupCnt = 0;
+			}
+			MarkSaved();
+			return true;
+		}
+		catch ( ... ) {
+			Reset();
+			return false;
+		}
+	}
+
+	/**
+	 * \brief Writes a range of the logical view to an open file at its current position.
+	 *
+	 * \param _hFile The file, opened for writing.
+	 * \param _ui64Start The logical address of the first byte to write.
+	 * \param _ui64Size The number of bytes to write.
+	 * \param _dwError Receives the Windows error code on failure.
+	 * \return Returns true if every byte was written.
+	 */
+	bool CLargeCoWFileWindow::WriteRange( HANDLE _hFile, uint64_t _ui64Start, uint64_t _ui64Size, DWORD &_dwError ) const {
+		if ( _ui64Start > Size() || Size() - _ui64Start < _ui64Size ) {
+			_dwError = ERROR_INVALID_PARAMETER;
+			return false;
+		}
+		try {
+			constexpr uint64_t ui64Chunk = 8ULL * 1024ULL * 1024ULL;
+			CHexEditorInterface::CBuffer bBuffer;
+			for ( uint64_t I = 0; I < _ui64Size; ) {
+				const size_t sThis = size_t( std::min( _ui64Size - I, ui64Chunk ) );
+				if ( !Read( _ui64Start + I, bBuffer, sThis ) || bBuffer.size() != sThis ) {
+					_dwError = ERROR_READ_FAULT;
+					return false;
+				}
+				if ( !WriteAll( _hFile, bBuffer.data(), bBuffer.size(), _dwError ) ) { return false; }
+				I += sThis;
+			}
+			return true;
+		}
+		catch ( ... ) {
+			_dwError = ERROR_NOT_ENOUGH_MEMORY;
+			return false;
+		}
+	}
+
+	/**
+	 * \brief Saves the whole logical view to a file, which becomes this file's path.
+	 *
+	 * The data is written to a temporary file beside the destination, which then takes the destination's place, so a failure never
+	 *	leaves a partly written file behind.  If the destination is the file being edited (which is still read from), that file is
+	 *	moved aside (into the edit directory if possible, otherwise beside itself, hidden) and kept until Reset(), so the Undo history
+	 *	and clipboards that refer to it stay valid.
+	 *
+	 * \param _pDst The file to write.
+	 * \param _dwError Receives the Windows error code on failure.
+	 * \return Returns true if the file was saved.
+	 */
+	bool CLargeCoWFileWindow::SaveTo( const std::filesystem::path &_pDst, DWORD &_dwError ) {
+		_dwError = ERROR_SUCCESS;
+		try {
+			std::error_code ecError;
+			const bool bOverMap = !m_pMapPath.empty() && std::filesystem::equivalent( m_pMapPath, _pDst, ecError ) && !ecError;
+			auto fWrite = [&]( HANDLE _hFile, DWORD &_dwErr ) -> bool { return WriteRange( _hFile, 0, Size(), _dwErr ); };
+
+			if ( !bOverMap ) {
+				if ( !WriteThenReplace( _pDst, fWrite, _dwError ) ) { return false; }
+			}
+			else {
+				std::filesystem::path pTemp = TempPathBeside( _pDst, L"save" );
+				{
+					HANDLE hFile = ::CreateFileW( pTemp.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW, FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_TEMPORARY, nullptr );
+					if ( hFile == INVALID_HANDLE_VALUE ) {
+						_dwError = ::GetLastError();
+						return false;
+					}
+					const bool bWritten = fWrite( hFile, _dwError ) && (::FlushFileBuffers( hFile ) || ((_dwError = ::GetLastError()), false));
+					::CloseHandle( hFile );
+					if ( !bWritten ) {
+						::DeleteFileW( pTemp.c_str() );
+						return false;
+					}
+				}
+
+				const DWORD dwAttributes = ::GetFileAttributesW( _pDst.c_str() );
+				FILETIME ftCreated = {};
+				bool bHaveTime = false;
+				{
+					WIN32_FILE_ATTRIBUTE_DATA fadData;
+					if ( ::GetFileAttributesExW( _pDst.c_str(), GetFileExInfoStandard, &fadData ) ) {
+						ftCreated = fadData.ftCreationTime;
+						bHaveTime = true;
+					}
+				}
+
+				std::filesystem::path pAside;
+				bool bMoved = false;
+				if ( CreateWriteDirectories() ) {
+					for ( uint32_t I = 0; I < 1000 && !bMoved; ++I ) {
+						wchar_t wszName[64];
+						::swprintf_s( wszName, L"original_%03u.mxorig", unsigned( m_vAsideFiles.size() * 1000 + I ) );
+						pAside = m_pEditDiractory / wszName;
+						if ( std::filesystem::exists( pAside, ecError ) ) { continue; }
+						bMoved = ::MoveFileExW( _pDst.c_str(), pAside.c_str(), 0 ) != FALSE;
+						if ( !bMoved ) { break; }
+					}
+				}
+				if ( !bMoved ) {
+					pAside = TempPathBeside( _pDst, L"orig" );
+					bMoved = ::MoveFileExW( _pDst.c_str(), pAside.c_str(), 0 ) != FALSE;
+					if ( bMoved ) { ::SetFileAttributesW( pAside.c_str(), FILE_ATTRIBUTE_HIDDEN ); }
+				}
+				if ( !bMoved ) {
+					_dwError = ::GetLastError();
+					::DeleteFileW( pTemp.c_str() );
+					return false;
+				}
+				if ( !::MoveFileExW( pTemp.c_str(), _pDst.c_str(), MOVEFILE_WRITE_THROUGH ) ) {
+					_dwError = ::GetLastError();
+					// Put the original back.
+					::MoveFileExW( pAside.c_str(), _pDst.c_str(), 0 );
+					if ( dwAttributes != INVALID_FILE_ATTRIBUTES ) { ::SetFileAttributesW( _pDst.c_str(), dwAttributes ); }
+					::DeleteFileW( pTemp.c_str() );
+					return false;
+				}
+				m_pMapPath = pAside;
+				m_vAsideFiles.push_back( pAside );
+
+				if ( dwAttributes != INVALID_FILE_ATTRIBUTES ) {
+					::SetFileAttributesW( _pDst.c_str(), (dwAttributes & ~FILE_ATTRIBUTE_TEMPORARY) ? (dwAttributes & ~FILE_ATTRIBUTE_TEMPORARY) : FILE_ATTRIBUTE_NORMAL );
+				}
+				if ( bHaveTime ) {
+					HANDLE hFile = ::CreateFileW( _pDst.c_str(), FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, 0, nullptr );
+					if ( hFile != INVALID_HANDLE_VALUE ) {
+						::SetFileTime( hFile, &ftCreated, nullptr, nullptr );
+						::CloseHandle( hFile );
+					}
+				}
+			}
+
+			m_pFilePath = _pDst;
+			m_bUntitled = false;
+			MarkSaved();
+			return true;
+		}
+		catch ( ... ) {
+			_dwError = ERROR_NOT_ENOUGH_MEMORY;
+			return false;
+		}
+	}
+
+	/**
+	 * \brief Renames (or moves within its volume) the file on disk.
+	 *
+	 * \param _pDst The new path.  It must not exist.
+	 * \param _dwError Receives the Windows error code on failure.
+	 * \return Returns true if the file was renamed.
+	 */
+	bool CLargeCoWFileWindow::Rename( const std::filesystem::path &_pDst, DWORD &_dwError ) {
+		if ( m_pFilePath.empty() ) {
+			_dwError = ERROR_FILE_NOT_FOUND;
+			return false;
+		}
+		try {
+			std::error_code ecError;
+			const bool bMapHere = !m_pMapPath.empty() && std::filesystem::equivalent( m_pMapPath, m_pFilePath, ecError ) && !ecError;
+			if ( !::MoveFileExW( m_pFilePath.c_str(), _pDst.c_str(), 0 ) ) {
+				_dwError = ::GetLastError();
+				return false;
+			}
+			// The open file moved with its name.
+			if ( bMapHere ) { m_pMapPath = _pDst; }
+			m_pFilePath = _pDst;
+			return true;
+		}
+		catch ( ... ) {
+			_dwError = ERROR_NOT_ENOUGH_MEMORY;
+			return false;
+		}
+	}
+
+	/**
+	 * \brief Writes a file through a temporary file beside it, which then replaces it (or becomes it, if it does not exist).
+	 *
+	 * \param _pDst The file to write.
+	 * \param _fWrite Writes the contents to the temporary file (opened for writing); on failure it sets the error code and returns
+	 *	false.
+	 * \param _dwError Receives the Windows error code on failure.
+	 * \return Returns true if the file was written.
+	 */
+	bool CLargeCoWFileWindow::WriteThenReplace( const std::filesystem::path &_pDst, const std::function<bool ( HANDLE, DWORD & )> &_fWrite, DWORD &_dwError ) {
+		_dwError = ERROR_SUCCESS;
+		try {
+			const std::filesystem::path pTemp = TempPathBeside( _pDst, L"save" );
+			HANDLE hFile = ::CreateFileW( pTemp.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW, FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_TEMPORARY, nullptr );
+			if ( hFile == INVALID_HANDLE_VALUE ) {
+				_dwError = ::GetLastError();
+				return false;
+			}
+			const bool bWritten = _fWrite( hFile, _dwError ) && (::FlushFileBuffers( hFile ) || ((_dwError = ::GetLastError()), false));
+			::CloseHandle( hFile );
+			if ( !bWritten ) {
+				::DeleteFileW( pTemp.c_str() );
+				return false;
+			}
+
+			std::error_code ecError;
+			if ( std::filesystem::exists( _pDst, ecError ) ) {
+				// ReplaceFileW() keeps the replaced file's attributes, security, and creation time.
+				if ( !::ReplaceFileW( _pDst.c_str(), pTemp.c_str(), nullptr, REPLACEFILE_IGNORE_MERGE_ERRORS | REPLACEFILE_IGNORE_ACL_ERRORS, nullptr, nullptr ) ) {
+					const DWORD dwAttributes = ::GetFileAttributesW( _pDst.c_str() );
+					if ( !::MoveFileExW( pTemp.c_str(), _pDst.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH ) ) {
+						_dwError = ::GetLastError();
+						::DeleteFileW( pTemp.c_str() );
+						return false;
+					}
+					::SetFileAttributesW( _pDst.c_str(), (dwAttributes != INVALID_FILE_ATTRIBUTES && (dwAttributes & ~FILE_ATTRIBUTE_TEMPORARY)) ?
+						(dwAttributes & ~FILE_ATTRIBUTE_TEMPORARY) : FILE_ATTRIBUTE_NORMAL );
+				}
+			}
+			else {
+				if ( !::MoveFileExW( pTemp.c_str(), _pDst.c_str(), MOVEFILE_WRITE_THROUGH ) ) {
+					_dwError = ::GetLastError();
+					::DeleteFileW( pTemp.c_str() );
+					return false;
+				}
+				::SetFileAttributesW( _pDst.c_str(), FILE_ATTRIBUTE_NORMAL );
+			}
+			return true;
+		}
+		catch ( ... ) {
+			_dwError = ERROR_NOT_ENOUGH_MEMORY;
+			return false;
+		}
+	}
+
+	/**
+	 * \brief Writes bytes to an open file at its current position.
+	 *
+	 * \param _hFile The file, opened for writing.
+	 * \param _pvData The bytes to write.
+	 * \param _sSize The number of bytes to write.
+	 * \param _dwError Receives the Windows error code on failure.
+	 * \return Returns true if every byte was written.
+	 */
+	bool CLargeCoWFileWindow::WriteAll( HANDLE _hFile, const void * _pvData, size_t _sSize, DWORD &_dwError ) {
+		const uint8_t * pui8Data = static_cast<const uint8_t *>(_pvData);
+		while ( _sSize ) {
+			const DWORD dwThis = DWORD( std::min<size_t>( _sSize, 0x40000000 ) );
+			DWORD dwWritten = 0;
+			if ( !::WriteFile( _hFile, pui8Data, dwThis, &dwWritten, nullptr ) ) {
+				_dwError = ::GetLastError();
+				return false;
+			}
+			if ( !dwWritten ) {
+				_dwError = ERROR_WRITE_FAULT;
+				return false;
+			}
+			pui8Data += dwWritten;
+			_sSize -= dwWritten;
+		}
+		return true;
+	}
+
+	/**
+	 * \brief Makes the path of a hidden temporary file beside a file (in the same directory, so it can be renamed over it).
+	 *
+	 * \param _pFile The file.
+	 * \param _pwcTag Identifies the use of the temporary file.
+	 * \return Returns a path that does not exist.
+	 */
+	std::filesystem::path CLargeCoWFileWindow::TempPathBeside( const std::filesystem::path &_pFile, const wchar_t * _pwcTag ) {
+		std::error_code ecError;
+		const std::filesystem::path pDir = _pFile.has_parent_path() ? _pFile.parent_path() : std::filesystem::path( L"." );
+		const std::wstring wsName = _pFile.filename().wstring();
+		uint64_t ui64Unique = ::GetTickCount64();
+		for ( uint32_t I = 0; ; ++I ) {
+			wchar_t wszSuffix[64];
+			::swprintf_s( wszSuffix, L".%ls-%llX.mhsxtmp", _pwcTag, static_cast<unsigned long long>(ui64Unique + I) );
+			std::filesystem::path pTry = pDir / (L".~" + wsName + wszSuffix);
+			if ( !std::filesystem::exists( pTry, ecError ) || I >= 10000 ) { return pTry; }
+		}
 	}
 
 }	// namespace mx

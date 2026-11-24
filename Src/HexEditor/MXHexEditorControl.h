@@ -627,6 +627,26 @@ namespace mx {
 		inline bool									HasSelection() const { return Size() > 0 && m_sSel.HasSelection(); }
 
 		/**
+		 * Gets the selected ranges, lowest address first, a group at a time (a Column selection has one range per row; see
+		 *	MX_SELECTION::GatherSelected_LowToHigh()).  Ranges can run past the end of the data.
+		 *
+		 * \param _vRanges Receives the ranges of the group (empty after the last group).
+		 * \param _ui64GroupSize The number of ranges per group.
+		 * \param _ui64GroupIdx The group.
+		 * \return Returns false on a memory failure.
+		 **/
+		inline bool									GatherSelection( std::vector<MX_SEL_RANGE> &_vRanges, uint64_t _ui64GroupSize, uint64_t _ui64GroupIdx ) {
+			return m_sSel.GatherSelected_LowToHigh( CurStyle()->uiBytesPerRow, _vRanges, _ui64GroupSize, _ui64GroupIdx );
+		}
+
+		/**
+		 * Gets the address of the start of the selection (the lowest selected address), or the caret if nothing is selected.
+		 *
+		 * \return Returns the address.
+		 **/
+		inline uint64_t								SelectionStart() const { return HasSelection() ? m_sSel.LowerLeftAddress() : m_sgSelGesture.ui64CaretAddr; }
+
+		/**
 		 * Gets the size of the selection.
 		 * 
 		 * \return Returns the number of bytes selected.

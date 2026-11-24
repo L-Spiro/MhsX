@@ -490,6 +490,13 @@ namespace mx {
 		// Creates the PE Works window.
 		static CWidget *						CreateDeusHexMachinaWindow( CWidget * _pwParent, CWindowMemHack * _pmhMemHack );
 
+		/**
+		 * Gets the layout of the menu shown by the arrow beside the toolbar's New button (the kinds of files that can be created).
+		 *
+		 * \return Returns a pointer to 1 menu layout.
+		 **/
+		static const LSW_MENU_LAYOUT *			FileNewDropDown() { return &m_mlFileNewDropDown; }
+
 
 	protected :
 		// == Members.
@@ -600,6 +607,9 @@ namespace mx {
 
 		// Menus.
 		static LSW_MENU_LAYOUT					m_miMenus[];
+
+		/** The menu shown by the arrow beside the toolbar's New button. */
+		static LSW_MENU_LAYOUT					m_mlFileNewDropDown;
 	};
 
 }	// namespace mx

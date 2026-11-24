@@ -264,6 +264,26 @@ namespace lsw {
 	}
 
 	/**
+	 * Sets item text.
+	 *
+	 * \param _iItem The index of the tab.
+	 * \param _pwcText The new text.
+	 * \return Returns true if successful.
+	 **/
+	bool CTab::SetItemTextW( int _iItem, LPCWSTR _pwcText ) {
+		if ( !Wnd() || !_pwcText || _iItem < 0 || _iItem >= static_cast<int>(m_vTabs.size()) ) { return false; }
+		TCITEMW iItem = { TCIF_TEXT };
+		iItem.pszText = const_cast<LPWSTR>(_pwcText);
+		if ( !::SendMessageW( Wnd(), TCM_SETITEMW, static_cast<WPARAM>(_iItem), reinterpret_cast<LPARAM>(&iItem) ) ) { return false; }
+		m_vTabs[_iItem].sTextLen = std::wcslen( _pwcText );
+		// Every tab is as wide as the widest text.
+		int iLen = GetLongestTextWidth();
+		SetItemSize( iLen + (m_bShowClose ? LSW_CLOSE_SPACING : 0), 0 );
+		::InvalidateRect( Wnd(), nullptr, TRUE );
+		return true;
+	}
+
+	/**
 	 * Attaches an HWND to this widget after creation.
 	 * \brief Finalizes control initialization once the window handle exists.
 	 *

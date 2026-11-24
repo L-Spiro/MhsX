@@ -635,6 +635,29 @@ namespace mx {
 	}
 
 	/**
+	 * \brief Releases every slot that holds the given data source, so that it can be destroyed (for example, before its file is
+	 *	reloaded or deleted).  If it holds the Copy on the Windows clipboard, that is rendered first (up to MaxRenderOnExit bytes) so
+	 *	that it stays on the clipboard.  UI thread only.
+	 *
+	 * \param _pheiInterface The data source.
+	 */
+	void CCopyPasteManager::ReleaseInterface( const CHexEditorInterface * _pheiInterface ) {
+		if ( !_pheiInterface ) { return; }
+		for ( size_t I = 0; I < TotalClipboards; ++I ) {
+			{
+				std::shared_ptr<CHexEditorInterface> spThis = GetSlot( I );
+				if ( spThis.get() != _pheiInterface ) { continue; }
+			}
+			if ( I == WindowsClipboard && m_hWnd && OwnsWindowsClipboard() ) {
+				RenderAllFormats( m_hWnd );
+				m_vDeferredFormats.clear();
+				m_ui64DeferredBytes = 0;
+			}
+			ClearSlot( I );
+		}
+	}
+
+	/**
 	 * \brief Renders every deferred format before the clipboard owner is destroyed (WM_RENDERALLFORMATS).
 	 *
 	 * \param _hWnd The clipboard owner.

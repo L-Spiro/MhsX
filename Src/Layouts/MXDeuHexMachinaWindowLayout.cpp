@@ -746,6 +746,15 @@ namespace mx {
 		{ FALSE,		MX_M_FORMAT_TRIM_TRAILING_WHITESPACE,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_D5AB7255_T_rim_Trailing_Whitespace, _LEN_D5AB7255 ) },
 	};
 
+	// The menu shown by the arrow beside the toolbar's New button.
+	LSW_MENU_LAYOUT CDeusHexMachinaLayout::m_mlFileNewDropDown = {
+		MX_M_NEW,
+		0,
+		0,
+		std::size( m_miFileNewMenu ),
+		m_miFileNewMenu
+	};
+
 	// Menus.
 	LSW_MENU_LAYOUT CDeusHexMachinaLayout::m_miMenus[] = {
 		{

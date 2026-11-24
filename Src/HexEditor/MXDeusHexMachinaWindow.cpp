@@ -115,7 +115,7 @@ namespace mx {
 #define MX_TOOL_STR( TXT )						0
 		const TBBUTTON bButtons[] = {
 			// iBitmap							idCommand									fsState				fsStyle			bReserved	dwData	iString
-			{ m_iImageMap[MX_I_NEW],			Layout::MX_M_FILE_NEW,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"New" ) },
+			{ m_iImageMap[MX_I_NEW],			Layout::MX_M_FILE_NEW,						TBSTATE_ENABLED,	BTNS_AUTOSIZE | BTNS_DROPDOWN,	{ 0 },		0,		MX_TOOL_STR( L"New" ) },
 			{ m_iImageMap[MX_I_OPENFILE],		Layout::MX_M_FILE_OPENFILE,					TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Open" ) },
 			{ m_iImageMap[MX_I_CURPROC],		Layout::MX_M_FILE_OPENCURPROCESS,			TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Current Process" ) },
 			{ m_iImageMap[MX_I_SAVE],			Layout::MX_M_FILE_SAVE,						TBSTATE_ENABLED,	BTNS_AUTOSIZE,	{ 0 },		0,		MX_TOOL_STR( L"Save" ) },
@@ -139,6 +139,8 @@ namespace mx {
 #undef MX_TOOL_STR
 
 		plvToolBar->AddButtons( bButtons, std::size( bButtons ) );
+		// The arrow beside New lists the kinds of files that can be created.
+		plvToolBar->SetDropDownMenu( Layout::MX_M_FILE_NEW, Layout::FileNewDropDown(), 1, this );
 
 		plvRebar->SetImageList( m_iImages );
 		{
@@ -179,6 +181,7 @@ namespace mx {
 			UpdateStatusBar_Clipboard();
 		}
 		UpdateStatusBar_InsertOverwrite();
+		UpdateToolBar();
 
 
 		// ==== SPLITTER ==== //
@@ -237,6 +240,75 @@ namespace mx {
 			}
 			case Layout::MX_M_FILE_OPENCURPROCESS : {
 				OpenCurProcess();
+				break;
+			}
+			case Layout::MX_M_FILE_NEW : {
+				NewFile( m_nfLastNew );
+				break;
+			}
+			case Layout::MX_M_FILE_NEW_TEXT_FILE : {
+				NewFile( MX_NF_TEXT );
+				break;
+			}
+			case Layout::MX_M_FILE_NEW_HEX_FILE : {
+				NewFile( MX_NF_HEX );
+				break;
+			}
+			case Layout::MX_M_FILE_NEW_UNICODE_FILE : {
+				NewFile( MX_NF_UNICODE );
+				break;
+			}
+			case Layout::MX_M_FILE_NEW_UTF8_FILE : {
+				NewFile( MX_NF_UTF8 );
+				break;
+			}
+			case Layout::MX_M_FILE_NEW_C_FILE : {
+				NewFile( MX_NF_C );
+				break;
+			}
+			case Layout::MX_M_FILE_NEW_HTML_FILE : {
+				NewFile( MX_NF_HTML );
+				break;
+			}
+			case Layout::MX_M_FILE_NEW_PHP_FILE : {
+				NewFile( MX_NF_PHP );
+				break;
+			}
+			case Layout::MX_M_FILE_NEW_XML_FILE : {
+				NewFile( MX_NF_XML );
+				break;
+			}
+			// Accelerators bypass the greyed-out menu items, so each of these checks again whether it can run.
+			case Layout::MX_M_FILE_SAVE : {
+				Save();
+				break;
+			}
+			case Layout::MX_M_FILE_SAVE_AS : {
+				SaveAs();
+				break;
+			}
+			case Layout::MX_M_FILE_SAVE_A_COPY : {
+				SaveACopy();
+				break;
+			}
+			case Layout::MX_M_FILE_SAVE_SELECTION : {
+				SaveSelection();
+				break;
+			}
+			case Layout::MX_M_FILE_SAVE_ALL : {
+				SaveAll();
+				break;
+			}
+			case Layout::MX_M_FILE_REVERT_REFRESH : {
+				RevertRefresh();
+				break;
+			}
+			case Layout::MX_M_FILE_RENAME_FILE : {
+				RenameFile();
+				break;
+			}
+			case Layout::MX_M_FILE_DELETE_FILE : {
+				DeleteCurrentFile();
 				break;
 			}
 			case Layout::MX_M_FILE_CLOSE : {
@@ -1549,6 +1621,8 @@ namespace mx {
 
 	// WM_CLOSE.
 	CWidget::LSW_HANDLED CDeusHexMachinaWindow::Close() {
+		// Modified files are offered to be saved first; cancelling keeps the window open.
+		if ( !QueryCloseAll() ) { return LSW_H_HANDLED; }
 		::DestroyWindow( Wnd() );
 		return LSW_H_HANDLED;
 	}
@@ -1604,6 +1678,8 @@ namespace mx {
 		UpdateStatusBar_ViewType();
 		UpdateStatusBar_Size();
 		UpdateStatusBar_PosValue_StartSize();
+		UpdateStatusBar_InsertOverwrite();
+		UpdateToolBar();
 	}
 
 	/**
@@ -1653,15 +1729,664 @@ namespace mx {
 				//delete m_vTabs[_iTab].pheiInterface;
 				m_vTabs.erase( m_vTabs.begin() + _iTab );
 			}
+			auto ptTab = Tab();
+			if ( ptTab ) { TabSelChanged( ptTab, ptTab->GetCurSel(), nullptr ); }
 		}
 	}
 
-	// Performs a Save As operation.
-	void CDeusHexMachinaWindow::SaveAs() {
+	/**
+	 * Creates a new, untitled file in a new tab.
+	 *
+	 * \param _nfType The kind of file.
+	 * \return Returns true if the file was created.
+	 **/
+	bool CDeusHexMachinaWindow::NewFile( MX_NEW_FILE _nfType ) {
+		struct MX_NEW_TYPE {
+			MX_NEW_FILE								nfType;
+			CHexEditorControl::MX_EDIT_AS			eaEditAs;
+			bool									bSetCharSet;
+			CCharSets::MX_CHAR_SETS					csCharSet;
+			const wchar_t *							pwcExt;
+		};
+		static const MX_NEW_TYPE ntTypes[] = {
+			{ MX_NF_TEXT,		CHexEditorControl::MX_EA_TEXT,		false,	CCharSets::MX_CS_ASCII,		L".txt" },
+			{ MX_NF_HEX,		CHexEditorControl::MX_EA_HEX,		false,	CCharSets::MX_CS_ASCII,		L".bin" },
+			{ MX_NF_UNICODE,	CHexEditorControl::MX_EA_UTF16,		true,	CCharSets::MX_CS_UNICODE,	L".txt" },
+			{ MX_NF_UTF8,		CHexEditorControl::MX_EA_UTF8,		true,	CCharSets::MX_CS_UTF8,		L".txt" },
+			{ MX_NF_C,			CHexEditorControl::MX_EA_CODE,		false,	CCharSets::MX_CS_ASCII,		L".cpp" },
+			{ MX_NF_HTML,		CHexEditorControl::MX_EA_TAGGED,	false,	CCharSets::MX_CS_ASCII,		L".html" },
+			{ MX_NF_PHP,		CHexEditorControl::MX_EA_CODE,		false,	CCharSets::MX_CS_ASCII,		L".php" },
+			{ MX_NF_XML,		CHexEditorControl::MX_EA_TAGGED,	false,	CCharSets::MX_CS_ASCII,		L".xml" },
+		};
+		const MX_NEW_TYPE * pntType = nullptr;
+		for ( const auto &ntThis : ntTypes ) {
+			if ( ntThis.nfType == _nfType ) { pntType = &ntThis; }
+		}
+		if ( !pntType ) { return false; }
+
+		try {
+			// "Untitled1.txt", "Untitled2.bin", etc.
+			std::wstring wsName = _DEC_WS_503970B4_Untitled;
+			wsName += std::to_wstring( ++m_ui32Untitled );
+			wsName += pntType->pwcExt;
+
+			// A UTF-16 file starts with its byte-order mark, so that it is recognized as UTF-16 when opened again.
+			CHexEditorInterface::CBuffer bInitial;
+			if ( _nfType == MX_NF_UNICODE ) { bInitial = { 0xFF, 0xFE }; }
+
+			std::shared_ptr<CHexEditorInterface> spInterface;
+			{
+				std::unique_ptr<CHexEditorFile> upIfc( new( std::nothrow ) CHexEditorFile() );
+				if ( !upIfc || !upIfc->CreateNew( wsName, bInitial ) ) {
+					SetStatusBarText( _DEC_WS_A77664BF_Failed_to_save_the_file_.c_str(), true );
+					return false;
+				}
+				spInterface = std::shared_ptr<CHexEditorInterface>( upIfc.release() );
+			}
+			if ( !AddTab( spInterface ) ) { return false; }
+
+			// AddTab() selects the new tab.
+			auto phecControl = CurrentEditor();
+			if ( phecControl ) {
+				phecControl->SetViewType( pntType->eaEditAs );
+				if ( pntType->bSetCharSet ) { phecControl->SetCharacterSet( pntType->csCharSet ); }
+				UpdateStatusBar_ViewType();
+				UpdateStatusBar_CharSet();
+			}
+			m_nfLastNew = _nfType;
+			return true;
+		}
+		catch ( ... ) { return false; }
 	}
 
-	// Performs a Save operation.
+	/**
+	 * Performs a Save As operation on the current file.
+	 **/
+	void CDeusHexMachinaWindow::SaveAs() {
+		if ( CurrentFile() ) { SaveTab( CurrentTab(), true ); }
+	}
+
+	/**
+	 * Performs a Save operation on the current file (Save As if it has never been saved).
+	 **/
 	void CDeusHexMachinaWindow::Save() {
+		if ( CanSave() ) { SaveTab( CurrentTab(), false ); }
+	}
+
+	/**
+	 * Saves a file.  An untitled file, or Save As, asks for a path.  A read-only file can only be saved under another name, after
+	 *	which the tab edits the new file.
+	 *
+	 * \param _sIdx The tab.
+	 * \param _bAs If true, asks for a new path (Save As).
+	 * \return Returns true if the file was saved; false if it failed or was cancelled.
+	 **/
+	bool CDeusHexMachinaWindow::SaveTab( size_t _sIdx, bool _bAs ) {
+		CHexEditorFile * phefFile = FileAt( _sIdx );
+		if ( !phefFile ) { return false; }
+		try {
+			// Real-time edits still being collected become their Undo item first, so that the saved state is a whole one.
+			if ( m_vTabs[_sIdx].phecWidget ) { m_vTabs[_sIdx].phecWidget->FlushRealTimeUndo(); }
+
+			const bool bReadOnly = phefFile->ReadOnly();
+			std::filesystem::path pDst = phefFile->Path();
+			if ( _bAs || phefFile->IsUntitled() ) {
+				const std::filesystem::path pSuggest = phefFile->IsUntitled() ? std::filesystem::path( static_cast<const std::wstring &>(phefFile->DisplayName()) ) : phefFile->Path();
+				if ( !AskSavePath( _DEC_WS_2EB0FAD7_Save_As.c_str(), pSuggest, true, pDst ) ) { return false; }
+			}
+
+			std::error_code ecError;
+			const bool bSelf = !phefFile->IsUntitled() && std::filesystem::equivalent( pDst, phefFile->Path(), ecError ) && !ecError;
+			if ( bReadOnly && (bSelf || !(_bAs || phefFile->IsUntitled())) ) {
+				FileError( _DEC_WS_A77664BF_Failed_to_save_the_file_, pDst, ERROR_FILE_READ_ONLY );
+				return false;
+			}
+			if ( IsOpenInTab( pDst, _sIdx ) ) {
+				lsw::CBase::MessageBoxError( Wnd(), _DEC_WS_88F67A0C_That_file_is_open_in_the_Hex_Editor___Close_it_first_.c_str() );
+				return false;
+			}
+
+			DWORD dwError = ERROR_SUCCESS;
+			if ( bReadOnly ) {
+				// The read-only file cannot be edited, so after writing the copy the tab edits the copy.
+				auto fWrite = [phefFile]( HANDLE _hFile, DWORD &_dwErr ) -> bool { return phefFile->WriteRange( _hFile, 0, phefFile->Size(), _dwErr ); };
+				if ( !CLargeCoWFileWindow::WriteThenReplace( pDst, fWrite, dwError ) ) {
+					FileError( _DEC_WS_A77664BF_Failed_to_save_the_file_, pDst, dwError );
+					return false;
+				}
+				if ( !ReopenTab( _sIdx, pDst ) ) { return false; }
+			}
+			else {
+				if ( !phefFile->SaveTo( pDst, dwError ) ) {
+					FileError( _DEC_WS_A77664BF_Failed_to_save_the_file_, pDst, dwError );
+					return false;
+				}
+				UpdateTabText( _sIdx );
+			}
+
+			if ( m_pmhMemHack && pDst.has_parent_path() ) {
+				auto oOptions = m_pmhMemHack->Options();
+				oOptions.heHexEditorOptions.wsLastOpenFileDirectory = pDst.parent_path().generic_wstring();
+				m_pmhMemHack->SetOptions( oOptions );
+			}
+			SetStatusBarText( (_DEC_WS_678A7FB8_Saved__ + pDst.generic_wstring()).c_str(), false );
+			UpdateToolBar();
+			return true;
+		}
+		catch ( ... ) {
+			SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true );
+			return false;
+		}
+	}
+
+	/**
+	 * Writes a copy of the current file without changing which file is being edited.
+	 **/
+	void CDeusHexMachinaWindow::SaveACopy() {
+		const size_t sIdx = CurrentTab();
+		CHexEditorFile * phefFile = FileAt( sIdx );
+		if ( !phefFile ) { return; }
+		try {
+			std::filesystem::path pDst;
+			const std::filesystem::path pSuggest = phefFile->IsUntitled() ? std::filesystem::path( static_cast<const std::wstring &>(phefFile->DisplayName()) ) : phefFile->Path();
+			if ( !AskSavePath( _DEC_WS_AE5470C0_Save_a_Copy.c_str(), pSuggest, true, pDst ) ) { return; }
+			// A copy over the file itself is just a save.
+			std::error_code ecError;
+			if ( !phefFile->IsUntitled() && std::filesystem::equivalent( pDst, phefFile->Path(), ecError ) && !ecError ) {
+				SaveTab( sIdx, false );
+				return;
+			}
+			if ( IsOpenInTab( pDst, SIZE_MAX ) ) {
+				lsw::CBase::MessageBoxError( Wnd(), _DEC_WS_88F67A0C_That_file_is_open_in_the_Hex_Editor___Close_it_first_.c_str() );
+				return;
+			}
+			DWORD dwError = ERROR_SUCCESS;
+			auto fWrite = [phefFile]( HANDLE _hFile, DWORD &_dwErr ) -> bool { return phefFile->WriteRange( _hFile, 0, phefFile->Size(), _dwErr ); };
+			if ( !CLargeCoWFileWindow::WriteThenReplace( pDst, fWrite, dwError ) ) {
+				FileError( _DEC_WS_A77664BF_Failed_to_save_the_file_, pDst, dwError );
+				return;
+			}
+			SetStatusBarText( (_DEC_WS_678A7FB8_Saved__ + pDst.generic_wstring()).c_str(), false );
+		}
+		catch ( ... ) { SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true ); }
+	}
+
+	/**
+	 * Writes the selected bytes (a file's or a process's) to a new file.
+	 **/
+	void CDeusHexMachinaWindow::SaveSelection() {
+		const size_t sIdx = CurrentTab();
+		auto phecControl = CurrentEditor();
+		if ( !phecControl || sIdx >= m_vTabs.size() || !phecControl->HasSelection() ) { return; }
+		CHexEditorInterface * pheiSource = m_vTabs[sIdx].pheiInterface.get();
+		if ( !pheiSource ) { return; }
+		try {
+			phecControl->FlushRealTimeUndo();
+			// The selection's address and size are added to the name: "name_00001000_00000200.ext".
+			constexpr uint64_t ui64Group = 64ULL * 1024ULL;
+			uint64_t ui64Total = 0;
+			{
+				std::vector<MX_SEL_RANGE> vRanges;
+				for ( uint64_t I = 0; ; ++I ) {
+					if ( !phecControl->GatherSelection( vRanges, ui64Group, I ) ) { throw std::bad_alloc(); }
+					if ( vRanges.empty() ) { break; }
+					for ( const auto &srThis : vRanges ) {
+						if ( srThis.ui64Start < pheiSource->Size() ) { ui64Total += std::min( srThis.ui64Size, pheiSource->Size() - srThis.ui64Start ); }
+					}
+				}
+			}
+			std::wstring wsName;
+			std::wstring wsExt;
+			std::filesystem::path pDir;
+			if ( CHexEditorFile * phefFile = FileAt( sIdx ) ) {
+				const std::filesystem::path pName( static_cast<const std::wstring &>(phefFile->DisplayName()) );
+				wsName = pName.stem().wstring();
+				wsExt = pName.extension().wstring();
+				if ( phefFile->Path().has_parent_path() ) { pDir = phefFile->Path().parent_path(); }
+			}
+			else {
+				// A process: its name, without anything a file name cannot hold.
+				wsName = pheiSource->TabString();
+				wsExt = L".bin";
+				for ( auto &wcThis : wsName ) {
+					if ( wcThis < L' ' || std::wcschr( L"<>:\"/\\|?*", wcThis ) ) { wcThis = L'_'; }
+				}
+				while ( wsName.size() && (wsName.back() == L' ' || wsName.back() == L'.') ) { wsName.pop_back(); }
+				if ( wsName.empty() ) { wsName = L"Memory"; }
+			}
+			wchar_t wszRange[64];
+			::swprintf_s( wszRange, L"_%.8llX_%.8llX", static_cast<unsigned long long>(phecControl->SelectionStart()), static_cast<unsigned long long>(ui64Total) );
+			wsName += wszRange;
+			wsName += wsExt;
+
+			std::filesystem::path pDst;
+			if ( !AskSavePath( _DEC_WS_0E40133E_Save_Selection.c_str(), pDir.empty() ? std::filesystem::path( wsName ) : pDir / wsName, true, pDst ) ) { return; }
+			if ( IsOpenInTab( pDst, SIZE_MAX ) ) {
+				lsw::CBase::MessageBoxError( Wnd(), _DEC_WS_88F67A0C_That_file_is_open_in_the_Hex_Editor___Close_it_first_.c_str() );
+				return;
+			}
+			DWORD dwError = ERROR_SUCCESS;
+			auto fGather = [phecControl, ui64Group]( std::vector<MX_SEL_RANGE> &_vRanges, uint64_t _ui64Idx ) -> bool {
+				return phecControl->GatherSelection( _vRanges, ui64Group, _ui64Idx );
+			};
+			if ( !WriteRangesTo( pheiSource, fGather, pDst, dwError ) ) {
+				FileError( _DEC_WS_A77664BF_Failed_to_save_the_file_, pDst, dwError );
+				return;
+			}
+			SetStatusBarText( (_DEC_WS_678A7FB8_Saved__ + pDst.generic_wstring()).c_str(), false );
+		}
+		catch ( ... ) { SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true ); }
+	}
+
+	/**
+	 * Saves every modified file (read-only files are skipped).
+	 **/
+	void CDeusHexMachinaWindow::SaveAll() {
+		for ( size_t I = 0; I < m_vTabs.size(); ++I ) {
+			CHexEditorFile * phefFile = FileAt( I );
+			if ( !phefFile || phefFile->ReadOnly() ) { continue; }
+			if ( m_vTabs[I].phecWidget ) { m_vTabs[I].phecWidget->FlushRealTimeUndo(); }
+			if ( !phefFile->IsModified() ) { continue; }
+			// An untitled file asks for its name; cancelling it skips only that file.
+			SaveTab( I, false );
+		}
+	}
+
+	/**
+	 * Discards the current file's unsaved changes and reloads it from disk.
+	 **/
+	void CDeusHexMachinaWindow::RevertRefresh() {
+		const size_t sIdx = CurrentTab();
+		CHexEditorFile * phefFile = FileAt( sIdx );
+		if ( !phefFile || phefFile->IsUntitled() ) { return; }
+		try {
+			if ( m_vTabs[sIdx].phecWidget ) { m_vTabs[sIdx].phecWidget->FlushRealTimeUndo(); }
+			const std::filesystem::path pPath = phefFile->Path();
+			if ( phefFile->IsModified() ) {
+				const std::wstring wsMsg = _DEC_WS_B2D793C8_Discard_all_unsaved_changes_and_reload_the_file_from_disk_ + L"\r\n\r\n" + pPath.generic_wstring();
+				if ( ::MessageBoxW( Wnd(), wsMsg.c_str(), _DEC_WS_A303F04B_Revert_Refresh.c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 ) != IDYES ) { return; }
+			}
+			if ( ReopenTab( sIdx, pPath ) ) {
+				SetStatusBarText( (_DEC_WS_EC777104_Reverted__ + pPath.generic_wstring()).c_str(), false );
+			}
+		}
+		catch ( ... ) { SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true ); }
+	}
+
+	/**
+	 * Renames the current file on disk.
+	 **/
+	void CDeusHexMachinaWindow::RenameFile() {
+		const size_t sIdx = CurrentTab();
+		CHexEditorFile * phefFile = FileAt( sIdx );
+		if ( !phefFile || phefFile->IsUntitled() ) { return; }
+		try {
+			const std::filesystem::path pOld = phefFile->Path();
+			std::filesystem::path pDst;
+			if ( !AskSavePath( _DEC_WS_8A0B3AD4_Rename_File.c_str(), pOld, false, pDst ) ) { return; }
+			std::error_code ecError;
+			// Only a change of case may use the name of an existing file (the file itself).
+			if ( std::filesystem::exists( pDst, ecError ) && !(std::filesystem::equivalent( pDst, pOld, ecError ) && !ecError) ) {
+				lsw::CBase::MessageBoxError( Wnd(), _DEC_WS_4E7D86AC_A_file_with_that_name_already_exists_.c_str(), _DEC_WS_8A0B3AD4_Rename_File.c_str() );
+				return;
+			}
+			DWORD dwError = ERROR_SUCCESS;
+			if ( !phefFile->Rename( pDst, dwError ) ) {
+				FileError( _DEC_WS_7A9C5609_Failed_to_rename_the_file_, pOld, dwError );
+				return;
+			}
+			UpdateTabText( sIdx );
+			SetStatusBarText( (_DEC_WS_77F568A5_Renamed_to__ + pDst.generic_wstring()).c_str(), false );
+		}
+		catch ( ... ) { SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true ); }
+	}
+
+	/**
+	 * Closes the current file and permanently deletes it from disk.
+	 **/
+	void CDeusHexMachinaWindow::DeleteCurrentFile() {
+		const size_t sIdx = CurrentTab();
+		CHexEditorFile * phefFile = FileAt( sIdx );
+		if ( !phefFile || phefFile->IsUntitled() ) { return; }
+		try {
+			const std::filesystem::path pPath = phefFile->Path();
+			const std::wstring wsMsg = _DEC_WS_146D99BE_Close_the_file_and_permanently_delete_it_from_disk___This_cannot_be_undone_ + L"\r\n\r\n" + pPath.generic_wstring();
+			if ( ::MessageBoxW( Wnd(), wsMsg.c_str(), _DEC_WS_94B2CB3D_Delete_File.c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 ) != IDYES ) { return; }
+
+			// Nothing may keep the file open: clipboards that refer to it are rendered or released, then the tab is closed.
+			CCopyPasteManager::ReleaseInterface( m_vTabs[sIdx].pheiInterface.get() );
+			RemoveTab( sIdx );
+			if ( !::DeleteFileW( pPath.c_str() ) ) {
+				FileError( _DEC_WS_7F4C7825_Failed_to_delete_the_file_, pPath, ::GetLastError() );
+				return;
+			}
+			SetStatusBarText( (_DEC_WS_B8E08C71_Deleted__ + pPath.generic_wstring()).c_str(), false );
+		}
+		catch ( ... ) { SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true ); }
+	}
+
+	/**
+	 * Offers to save every modified file, as before closing them all.
+	 *
+	 * \return Returns false if the user cancelled (or a save failed), in which case nothing should be closed.
+	 **/
+	bool CDeusHexMachinaWindow::QueryCloseAll() {
+		for ( size_t I = 0; I < m_vTabs.size(); ++I ) {
+			if ( !QueryCloseTab( I ) ) { return false; }
+		}
+		return true;
+	}
+
+	/**
+	 * Offers to save a tab's file if it is modified, as before closing it.
+	 *
+	 * \param _sIdx The tab.
+	 * \return Returns false if the user cancelled (or the save failed), in which case the tab should stay open.
+	 **/
+	bool CDeusHexMachinaWindow::QueryCloseTab( size_t _sIdx ) {
+		CHexEditorFile * phefFile = FileAt( _sIdx );
+		if ( !phefFile ) { return true; }
+		if ( m_vTabs[_sIdx].phecWidget ) { m_vTabs[_sIdx].phecWidget->FlushRealTimeUndo(); }
+		if ( !phefFile->IsModified() ) { return true; }
+		try {
+			// Show the file being asked about.
+			auto ptTab = Tab();
+			if ( ptTab && size_t( ptTab->GetCurSel() ) != _sIdx ) {
+				ptTab->SetCurSel( int( _sIdx ) );
+				TabSelChanged( ptTab, int( _sIdx ), nullptr );
+			}
+			const std::wstring wsMsg = _DEC_WS_B42F7DCB_Save_the_changes_to_this_file_ + L"\r\n\r\n" + std::wstring( phefFile->StatusString() );
+			switch ( ::MessageBoxW( Wnd(), wsMsg.c_str(), _DEC_WS_3213087F_Unsaved_Changes.c_str(), MB_YESNOCANCEL | MB_ICONWARNING ) ) {
+				case IDYES : { return SaveTab( _sIdx, false ); }
+				case IDNO : { return true; }
+				default : { return false; }
+			}
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * Closes a tab without asking anything.
+	 *
+	 * \param _sIdx The tab.
+	 **/
+	void CDeusHexMachinaWindow::RemoveTab( size_t _sIdx ) {
+		auto ptTab = Tab();
+		if ( !ptTab || _sIdx >= m_vTabs.size() ) { return; }
+		ptTab->DeleteItem( int( _sIdx ) );
+		m_vTabs.erase( m_vTabs.begin() + _sIdx );
+		TabSelChanged( ptTab, ptTab->GetCurSel(), nullptr );
+	}
+
+	/**
+	 * Asked before a tab is closed with its close box.  Offers to save a modified file.
+	 *
+	 * \param _pwChild The tab control.
+	 * \param _iTab The tab being closed.
+	 * \return Returns false to keep the tab open.
+	 */
+	bool CDeusHexMachinaWindow::ChildTabClosing( CWidget * _pwChild, INT _iTab ) {
+		if ( _pwChild == Tab() && _iTab >= 0 ) { return QueryCloseTab( size_t( _iTab ) ); }
+		return true;
+	}
+
+	/**
+	 * Gets the file being edited in a tab.
+	 *
+	 * \param _sIdx The tab.
+	 * \return Returns the file, or nullptr if the tab does not exist or does not edit a file (a process).
+	 **/
+	CHexEditorFile * CDeusHexMachinaWindow::FileAt( size_t _sIdx ) {
+		if ( _sIdx >= m_vTabs.size() || !m_vTabs[_sIdx].pheiInterface ) { return nullptr; }
+		if ( m_vTabs[_sIdx].pheiInterface->Type() != CHexEditorInterface::MX_HET_FILE ) { return nullptr; }
+		return static_cast<CHexEditorFile *>(m_vTabs[_sIdx].pheiInterface.get());
+	}
+
+	/**
+	 * Gets the file being edited in the current tab.
+	 *
+	 * \return Returns the file, or nullptr if there is no tab or it does not edit a file (a process).
+	 **/
+	CHexEditorFile * CDeusHexMachinaWindow::CurrentFile() {
+		return FileAt( CurrentTab() );
+	}
+
+	/**
+	 * Gets the index of the current tab.
+	 *
+	 * \return Returns the index, or SIZE_MAX if there is no tab.
+	 **/
+	size_t CDeusHexMachinaWindow::CurrentTab() {
+		auto ptTab = Tab();
+		if ( !ptTab ) { return SIZE_MAX; }
+		const int iSel = ptTab->GetCurSel();
+		if ( iSel < 0 || size_t( iSel ) >= m_vTabs.size() ) { return SIZE_MAX; }
+		return size_t( iSel );
+	}
+
+	/**
+	 * Makes a tab edit a file freshly opened from disk in place of what it edits now (Revert/Refresh, or after saving a read-only
+	 *	file under a new name).  The tab is closed if the file cannot be opened.
+	 *
+	 * \param _sIdx The tab.
+	 * \param _pPath The file to open.
+	 * \return Returns true if the file was opened.
+	 **/
+	bool CDeusHexMachinaWindow::ReopenTab( size_t _sIdx, const std::filesystem::path &_pPath ) {
+		if ( _sIdx >= m_vTabs.size() ) { return false; }
+		MX_HEX_TAB &htTab = m_vTabs[_sIdx];
+		try {
+			// The old file must be closed first, or the new one could only be opened read-only.  Clipboards that refer to it are
+			//	rendered or released, and it is emptied (the control still refers to it until it is given the new one).
+			CCopyPasteManager::ReleaseInterface( htTab.pheiInterface.get() );
+			if ( htTab.pheiInterface && htTab.pheiInterface->Type() == CHexEditorInterface::MX_HET_FILE ) {
+				static_cast<CHexEditorFile *>(htTab.pheiInterface.get())->Reset();
+			}
+
+			std::shared_ptr<CHexEditorInterface> spInterface;
+			{
+				std::unique_ptr<CHexEditorFile> upIfc( new( std::nothrow ) CHexEditorFile() );
+				if ( !upIfc || !upIfc->SetFile( _pPath ) ) {
+					FileError( _DEC_WS_A5900C55_Failed_to_reload_the_file_, _pPath, ::GetLastError() );
+					RemoveTab( _sIdx );
+					return false;
+				}
+				spInterface = std::shared_ptr<CHexEditorInterface>( upIfc.release() );
+			}
+			// The view keeps its place as far as the new data allows.
+			const uint64_t ui64Caret = htTab.phecWidget ? htTab.phecWidget->SelectionStart() : 0;
+			std::shared_ptr<CHexEditorInterface> spOld = std::move( htTab.pheiInterface );
+			htTab.pheiInterface = spInterface;
+			if ( htTab.phecWidget ) {
+				htTab.phecWidget->SetStream( spInterface.get(), this );
+				htTab.phecWidget->SetCaretAddr( std::min( ui64Caret, spInterface->Size() ), 0, false, true );
+			}
+			spOld.reset();
+
+			UpdateTabText( _sIdx );
+			if ( _sIdx == CurrentTab() ) { TabSelChanged( Tab(), int( _sIdx ), nullptr ); }
+			return true;
+		}
+		catch ( ... ) {
+			SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true );
+			return false;
+		}
+	}
+
+	/**
+	 * Updates a tab's text from its data source.
+	 *
+	 * \param _sIdx The tab.
+	 **/
+	void CDeusHexMachinaWindow::UpdateTabText( size_t _sIdx ) {
+		auto ptTab = Tab();
+		if ( !ptTab || _sIdx >= m_vTabs.size() || !m_vTabs[_sIdx].pheiInterface ) { return; }
+		try {
+			const CSecureWString swsName = m_vTabs[_sIdx].pheiInterface->TabString();
+			ptTab->SetItemTextW( int( _sIdx ), swsName.c_str() );
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Enables and disables the toolbar buttons for the current tab.
+	 **/
+	void CDeusHexMachinaWindow::UpdateToolBar() {
+		CToolBar * ptbToolBar = static_cast<CToolBar *>(FindChild( Layout::MX_W_TOOLBAR0 ));
+		if ( !ptbToolBar ) { return; }
+		const bool bFile = CurrentFile() != nullptr;
+		ptbToolBar->EnableButton( Layout::MX_M_FILE_SAVE, CanSave() );
+		ptbToolBar->EnableButton( Layout::MX_M_FILE_SAVE_AS, bFile );
+		ptbToolBar->EnableButton( Layout::MX_M_FILE_SAVE_ALL, CanSaveAll() );
+		ptbToolBar->EnableButton( Layout::MX_M_FILE_CLOSE, CurrentTab() != SIZE_MAX );
+	}
+
+	/**
+	 * Determines whether the current file can be saved under its own name (it is a file, not read-only).
+	 *
+	 * \return Returns true if Save is available.
+	 **/
+	bool CDeusHexMachinaWindow::CanSave() {
+		CHexEditorFile * phefFile = CurrentFile();
+		return phefFile && !phefFile->ReadOnly();
+	}
+
+	/**
+	 * Determines whether any open file can be saved (Save All).
+	 *
+	 * \return Returns true if at least one file is not read-only.
+	 **/
+	bool CDeusHexMachinaWindow::CanSaveAll() {
+		for ( size_t I = 0; I < m_vTabs.size(); ++I ) {
+			CHexEditorFile * phefFile = FileAt( I );
+			if ( phefFile && !phefFile->ReadOnly() ) { return true; }
+		}
+		return false;
+	}
+
+	/**
+	 * Asks for the path of a file to write.
+	 *
+	 * \param _pwcTitle The title of the dialog.
+	 * \param _pSuggested The path (or just the name) to suggest.
+	 * \param _bOverwritePrompt If true, asks before an existing file is chosen.
+	 * \param _pChosen Receives the chosen path.
+	 * \return Returns true if a path was chosen.
+	 **/
+	bool CDeusHexMachinaWindow::AskSavePath( LPCWSTR _pwcTitle, const std::filesystem::path &_pSuggested, bool _bOverwritePrompt, std::filesystem::path &_pChosen ) {
+		try {
+			OPENFILENAMEW ofnSaveFile = { sizeof( ofnSaveFile ) };
+			CSecureWString szFileName;
+			szFileName.resize( 0xFFFF + 2 );
+			const std::wstring wsName = _pSuggested.filename().wstring();
+			std::memcpy( szFileName.data(), wsName.c_str(), std::min( wsName.size(), szFileName.size() - 2 ) * sizeof( wchar_t ) );
+
+			std::wstring wsDir;
+			if ( _pSuggested.has_parent_path() ) { wsDir = _pSuggested.parent_path().wstring(); }
+			else if ( m_pmhMemHack ) { wsDir = m_pmhMemHack->Options().heHexEditorOptions.wsLastOpenFileDirectory; }
+
+			CSecureWString wsFilter = _DEC_WS_6331FDE9_All_Files_______0____0;
+			ofnSaveFile.hwndOwner = Wnd();
+			ofnSaveFile.lpstrFilter = wsFilter.c_str();
+			ofnSaveFile.lpstrFile = szFileName.data();
+			ofnSaveFile.nMaxFile = DWORD( szFileName.size() );
+			ofnSaveFile.lpstrTitle = _pwcTitle;
+			ofnSaveFile.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN | OFN_HIDEREADONLY | (_bOverwritePrompt ? OFN_OVERWRITEPROMPT : 0);
+			ofnSaveFile.lpstrInitialDir = wsDir.size() ? wsDir.c_str() : nullptr;
+
+			if ( !::GetSaveFileNameW( &ofnSaveFile ) ) { return false; }
+			_pChosen = std::filesystem::path( ofnSaveFile.lpstrFile );
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * Determines whether a path is a file open in any tab (which must not be overwritten except by saving that tab).
+	 *
+	 * \param _pPath The path.
+	 * \param _sSkip A tab to ignore, or SIZE_MAX.
+	 * \return Returns true if another tab edits the file.
+	 **/
+	bool CDeusHexMachinaWindow::IsOpenInTab( const std::filesystem::path &_pPath, size_t _sSkip ) {
+		std::error_code ecError;
+		if ( !std::filesystem::exists( _pPath, ecError ) ) { return false; }
+		for ( size_t I = 0; I < m_vTabs.size(); ++I ) {
+			if ( I == _sSkip ) { continue; }
+			CHexEditorFile * phefFile = FileAt( I );
+			if ( !phefFile || phefFile->IsUntitled() ) { continue; }
+			if ( std::filesystem::equivalent( _pPath, phefFile->Path(), ecError ) && !ecError ) { return true; }
+		}
+		return false;
+	}
+
+	/**
+	 * Writes bytes read from a data source to a file (through a temporary file that then replaces it).
+	 *
+	 * \param _pheiSource The data source.
+	 * \param _fGather Gets the ranges to write, a group at a time (filling an empty vector after the last group), in order.  Returns
+	 *	false on a memory failure.
+	 * \param _pDst The file to write.
+	 * \param _dwError Receives the Windows error code on failure.
+	 * \return Returns true if the file was written.
+	 **/
+	bool CDeusHexMachinaWindow::WriteRangesTo( CHexEditorInterface * _pheiSource, const std::function<bool ( std::vector<MX_SEL_RANGE> &, uint64_t )> &_fGather,
+		const std::filesystem::path &_pDst, DWORD &_dwError ) {
+		if ( !_pheiSource ) {
+			_dwError = ERROR_INVALID_PARAMETER;
+			return false;
+		}
+		auto fWrite = [&]( HANDLE _hFile, DWORD &_dwErr ) -> bool {
+			try {
+				constexpr uint64_t ui64Chunk = 8ULL * 1024ULL * 1024ULL;
+				const uint64_t ui64Size = _pheiSource->Size();
+				std::vector<MX_SEL_RANGE> vRanges;
+				CHexEditorInterface::CBuffer bBuffer;
+				for ( uint64_t G = 0; ; ++G ) {
+					if ( !_fGather( vRanges, G ) ) {
+						_dwErr = ERROR_NOT_ENOUGH_MEMORY;
+						return false;
+					}
+					if ( vRanges.empty() ) { return true; }
+					for ( const auto &srThis : vRanges ) {
+						// Column selections can run past the end of the data.
+						if ( srThis.ui64Start >= ui64Size ) { continue; }
+						const uint64_t ui64End = srThis.ui64Start + std::min( srThis.ui64Size, ui64Size - srThis.ui64Start );
+						for ( uint64_t A = srThis.ui64Start; A < ui64End; ) {
+							const size_t sThis = size_t( std::min( ui64End - A, ui64Chunk ) );
+							if ( !_pheiSource->Read( A, bBuffer, sThis ) || bBuffer.size() < sThis ) {
+								_dwErr = ERROR_READ_FAULT;
+								return false;
+							}
+							if ( !CLargeCoWFileWindow::WriteAll( _hFile, bBuffer.data(), sThis, _dwErr ) ) { return false; }
+							A += sThis;
+						}
+					}
+				}
+			}
+			catch ( ... ) {
+				_dwErr = ERROR_NOT_ENOUGH_MEMORY;
+				return false;
+			}
+		};
+		return CLargeCoWFileWindow::WriteThenReplace( _pDst, fWrite, _dwError );
+	}
+
+	/**
+	 * Shows an error about a file.
+	 *
+	 * \param _swsMsg What failed.
+	 * \param _pPath The file.
+	 * \param _dwError The Windows error code.
+	 **/
+	void CDeusHexMachinaWindow::FileError( const CSecureWString &_swsMsg, const std::filesystem::path &_pPath, DWORD _dwError ) {
+		try {
+			std::wstring wsText;
+			lsw::CBase::AppendError( (std::wstring( _swsMsg ) + L"\r\n\r\n" + _pPath.generic_wstring()).c_str(), wsText, _dwError );
+			lsw::CBase::MessageBoxError( Wnd(), wsText.c_str() );
+			SetStatusBarText( _swsMsg.c_str(), true );
+		}
+		catch ( ... ) {}
 	}
 
 	// Performs an Open operation.
@@ -1833,20 +2558,18 @@ namespace mx {
 
 	// Closes the active tab.
 	void CDeusHexMachinaWindow::CloseTab() {
-		auto ptTab = Tab();
-		if ( !ptTab ) { return; }
-		size_t sIdx = size_t( ptTab->GetCurSel() );
-		if ( sIdx >= m_vTabs.size() ) { return; }
-		//m_vTabs[sIdx].phecWidget->
-		ptTab->DeleteItem( int( sIdx ) );
-		//delete m_vTabs[sIdx].pheiInterface;
-		m_vTabs.erase( m_vTabs.begin() + sIdx );
+		const size_t sIdx = CurrentTab();
+		if ( sIdx == SIZE_MAX ) { return; }
+		// Modified files are offered to be saved first; cancelling keeps the tab open.
+		if ( !QueryCloseTab( sIdx ) ) { return; }
+		RemoveTab( sIdx );
 	}
 
 	// Close all tabs.
 	void CDeusHexMachinaWindow::CloseAllTabs() {
+		if ( !QueryCloseAll() ) { return; }
 		while ( m_vTabs.size() ) {
-			CloseTab();
+			RemoveTab( m_vTabs.size() - 1 );
 		}
 	}
 
@@ -2240,7 +2963,10 @@ namespace mx {
 	void CDeusHexMachinaWindow::UpdateStatusBar_InsertOverwrite() {
 		auto psbStatus = StatusBar();
 		if ( psbStatus ) {
-			psbStatus->SetTextW( MX_SB_INSERT_OVERWRITE, 0, m_bOverwrite ? L"OVR" : L"INS" );
+			// A data source that cannot change size (a process, a read-only file) is always in Overwrite mode.
+			const size_t sIdx = CurrentTab();
+			const bool bOverwriteOnly = sIdx != SIZE_MAX && m_vTabs[sIdx].pheiInterface && m_vTabs[sIdx].pheiInterface->OverwriteOnly();
+			psbStatus->SetTextW( MX_SB_INSERT_OVERWRITE, 0, (m_bOverwrite || bOverwriteOnly) ? L"OVR" : L"INS" );
 		}
 	}
 
@@ -2441,16 +3167,37 @@ namespace mx {
 		for ( int I = ::GetMenuItemCount( _hMenu ); --I >= 0; ) {
 			UINT uiId = ::GetMenuItemID( _hMenu, I );
 			switch ( uiId ) {
-				case Layout::MX_M_FILE_SAVE : {}									MX_FALLTHROUGH
+				case Layout::MX_M_FILE_SAVE : {
+					// Not for processes or read-only files.
+					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | (CanSave() ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
 				case Layout::MX_M_FILE_SAVE_AS : {}									MX_FALLTHROUGH
-				case Layout::MX_M_FILE_SAVE_A_COPY : {}								MX_FALLTHROUGH
-				case Layout::MX_M_FILE_SAVE_ALL : {}								MX_FALLTHROUGH
+				case Layout::MX_M_FILE_SAVE_A_COPY : {
+					// Files only.  A read-only file can be saved under another name.
+					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | (CurrentFile() ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_FILE_SAVE_SELECTION : {
+					// Files and processes.
+					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | ((bTabIsOpen && phecControl->HasSelection()) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_FILE_SAVE_ALL : {
+					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | (CanSaveAll() ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
 				case Layout::MX_M_FILE_CLOSE : {}									MX_FALLTHROUGH
-				case Layout::MX_M_FILE_CLOSE_ALL : {}								MX_FALLTHROUGH
-				case Layout::MX_M_FILE_REVERT_REFRESH : {
-					::EnableMenuItem(
-						_hMenu, uiId,
-						MF_BYCOMMAND | (phecControl ? MF_ENABLED : MF_GRAYED) );
+				case Layout::MX_M_FILE_CLOSE_ALL : {
+					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | (bTabIsOpen ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_FILE_REVERT_REFRESH : {}							MX_FALLTHROUGH
+				case Layout::MX_M_FILE_RENAME_FILE : {}								MX_FALLTHROUGH
+				case Layout::MX_M_FILE_DELETE_FILE : {
+					// Files that exist on disk (not processes, not new files that were never saved).
+					const CHexEditorFile * phefFile = CurrentFile();
+					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | ((phefFile && !phefFile->IsUntitled()) ? MF_ENABLED : MF_GRAYED) );
 					break;
 				}
 
@@ -3409,6 +4156,8 @@ namespace mx {
 				UpdateStatusBar_ViewType();
 				UpdateStatusBar_Size();
 				UpdateStatusBar_PosValue_StartSize();
+				UpdateStatusBar_InsertOverwrite();
+				UpdateToolBar();
 				return true;
 			}
 		}

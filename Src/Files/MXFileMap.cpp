@@ -70,7 +70,7 @@ namespace mx {
 		const DWORD dwDesiredAccess = bCreate ? (GENERIC_READ | GENERIC_WRITE)
 			: (_bOpenForWrite ? (GENERIC_READ | GENERIC_WRITE) : GENERIC_READ);
 		const DWORD dwCreationDisposition = bCreate ? CREATE_ALWAYS : OPEN_EXISTING;
-		const DWORD dwShare = (_bOpenForWrite || bCreate) ? FILE_SHARE_READ : (FILE_SHARE_READ | FILE_SHARE_WRITE);
+		const DWORD dwShare = ((_bOpenForWrite || bCreate) ? FILE_SHARE_READ : (FILE_SHARE_READ | FILE_SHARE_WRITE)) | FILE_SHARE_DELETE;
 
 		m_hFile = ::CreateFileW(
 			_pFile.c_str(),

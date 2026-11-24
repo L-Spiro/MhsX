@@ -64,6 +64,15 @@ namespace lsw {
 		std::wstring						GetItemTextW( int _iItem ) const;
 
 		/**
+		 * Sets item text.
+		 *
+		 * \param _iItem The index of the tab.
+		 * \param _pwcText The new text.
+		 * \return Returns true if successful.
+		 **/
+		bool								SetItemTextW( int _iItem, LPCWSTR _pwcText );
+
+		/**
 		 * Attaches an HWND to this widget after creation.
 		 * \brief Finalizes control initialization once the window handle exists.
 		 *
