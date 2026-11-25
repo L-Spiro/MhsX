@@ -1,8 +1,10 @@
 #include "MXDeusHexMachinaWindow.h"
 #include "../Layouts/MXLayoutMacros.h"
 #include "../Layouts/MXLayoutManager.h"
+#include "../Layouts/MXFontDialogLayout.h"
 #include "../Layouts/MXNumberInputLayout.h"
 #include "../Layouts/MXOpenProcessLayout.h"
+#include "../Layouts/MXSelectRangeLayout.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../MemHack/MXWindowMemHack.h"
 #include "../NumberInputWindow/MXNumberInputDialog.h"
@@ -386,6 +388,30 @@ namespace mx {
 			}
 			case Layout::MX_M_EDIT_CLEAR_CHANGES : {
 				if ( phecControl ) { phecControl->ClearSelectedChanges(); }
+				break;
+			}
+			case Layout::MX_M_EDIT_CLEAR_CLICKED_CHANGE : {
+				if ( phecControl ) { phecControl->ClearClickedChange(); }
+				break;
+			}
+			case Layout::MX_M_EDIT_READ_ONLY : {
+				ToggleReadOnly();
+				break;
+			}
+			case Layout::MX_M_EDIT_KEEP_FILE_TIME : {
+				ToggleKeepFileTime();
+				break;
+			}
+			case Layout::MX_M_EDIT_PROPERTIES : {
+				ShowProperties();
+				break;
+			}
+			case Layout::MX_M_SELECT_SELECT_RANGE : {
+				ShowSelectRange();
+				break;
+			}
+			case Layout::MX_M_VIEW_FONT_CHANGE_FONT : {
+				ShowChangeFont();
 				break;
 			}
 			case Layout::MX_M_EDIT_COPY_AS_HEX : {
@@ -1628,18 +1654,42 @@ namespace mx {
 	CWidget::LSW_HANDLED CDeusHexMachinaWindow::ContextMenu( CWidget * _pwControl, INT _iX, INT _iY ) {
 		auto phecControl = CurrentEditor();
 		if ( phecControl && _pwControl == phecControl ) {
-			// The items are enabled and checked by InitMenuPopup(), and their commands go to Command(), as for the Edit menu.
+			// A menu opened with the keyboard applies to the caret rather than to the last address right-clicked.
+			if ( _iX == -1 && _iY == -1 ) { phecControl->ForgetContextAddress(); }
+
+			// The items are enabled and checked by InitMenuPopup(), and their commands go to Command(), as for the Edit menu.  The
+			//	shortcuts are only shown (they belong to the main menu).
 			LSW_MENU_ITEM miMenuBar[] = {
-				//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen																bSkip
-				{ FALSE,		Layout::MX_M_EDIT_CUT,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_6E69B475_Cu_t, _LEN_6E69B475 ),									FALSE },
-				{ FALSE,		Layout::MX_M_EDIT_COPY,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_446FE619__Copy, _LEN_446FE619 ),								FALSE },
-				{ FALSE,		Layout::MX_M_EDIT_PASTE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_FB82E709__Paste, _LEN_FB82E709 ),								FALSE },
+				//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen																bSkip	aHotkey
+				{ FALSE,		Layout::MX_M_EDIT_CUT,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_6E69B475_Cu_t, _LEN_6E69B475 ),									FALSE,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'X', Layout::MX_M_EDIT_CUT } },
+				{ FALSE,		Layout::MX_M_EDIT_COPY,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_446FE619__Copy, _LEN_446FE619 ),								FALSE,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'C', Layout::MX_M_EDIT_COPY } },
+				{ FALSE,		Layout::MX_M_EDIT_PASTE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_FB82E709__Paste, _LEN_FB82E709 ),								FALSE,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'V', Layout::MX_M_EDIT_PASTE } },
 				{ FALSE,		Layout::MX_M_EDIT_DELETE,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_3DBE79B1_Delete, _LEN_3DBE79B1 ),								FALSE },
 				{ TRUE,			0,												FALSE,		FALSE,		FALSE,		nullptr,  0,																	FALSE },
-				{ FALSE,		Layout::MX_M_SELECT_SELECT_ALL,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_0D2831F4_Select__All, _LEN_0D2831F4 ),							FALSE },
+				{ FALSE,		Layout::MX_M_SELECT_SELECT_ALL,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_0D2831F4_Select__All, _LEN_0D2831F4 ),							FALSE,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'A', Layout::MX_M_SELECT_SELECT_ALL } },
+				{ FALSE,		MX_M_CONTEXT_SELECT_ITEM,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_CC9D9D8D__Select, _LEN_CC9D9D8D ),								FALSE },
 				{ TRUE,			0,												FALSE,		FALSE,		FALSE,		nullptr,  0,																	FALSE },
-				{ FALSE,		Layout::MX_M_EDIT_CLEAR_CHANGES,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_058EDF70_C_lear_Change_Highlight, _LEN_058EDF70 ),				FALSE },
+				{ FALSE,		Layout::MX_M_EDIT_CLEAR_CLICKED_CHANGE,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_F9891940_Clear_Change_Highlight_at_Clic_ked_Address, _LEN_F9891940 ),	FALSE },
+				{ FALSE,		Layout::MX_M_EDIT_CLEAR_CHANGES,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_84FED5C2_Clear__Selected_Change_Highlights, _LEN_84FED5C2 ),	FALSE },
 				{ FALSE,		Layout::MX_M_EDIT_CLEAR_ALL_CHANGES,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_A91F09F9_Clear_All_C_hange_Highlights, _LEN_A91F09F9 ),			FALSE },
+				{ TRUE,			0,												FALSE,		FALSE,		FALSE,		nullptr,  0,																	FALSE },
+				{ FALSE,		Layout::MX_M_EDIT_READ_ONLY,					TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_03A5AEDB_Read__Only, _LEN_03A5AEDB ),							FALSE },
+				{ FALSE,		Layout::MX_M_EDIT_KEEP_FILE_TIME,				TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_381FB8E7__Keep_File_Time, _LEN_381FB8E7 ),						FALSE },
+				{ TRUE,			0,												FALSE,		FALSE,		FALSE,		nullptr,  0,																	FALSE },
+				{ FALSE,		Layout::MX_M_EDIT_PROPERTIES,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_CB94BF68_Prop_erties, _LEN_CB94BF68 ),							FALSE,	{ static_cast<BYTE>(FVIRTKEY | FALT), VK_RETURN, Layout::MX_M_EDIT_PROPERTIES } },
+			};
+			LSW_MENU_ITEM miSelect[] = {
+				//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen																bSkip	aHotkey
+				{ FALSE,		Layout::MX_M_SELECT_SELECT_RANGE,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_2ED4F2F2__Select_Range___, _LEN_2ED4F2F2 ),						FALSE,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FALT), 'A', Layout::MX_M_SELECT_SELECT_RANGE } },
+				{ TRUE,			0,												FALSE,		FALSE,		FALSE,		nullptr,  0,																	FALSE },
+				{ FALSE,		Layout::MX_M_SELECT_MARK_SELECTION_START,		FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_3AD86671__Mark_Selection_Start, _LEN_3AD86671 ),				FALSE,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FALT), VK_OEM_COMMA, Layout::MX_M_SELECT_MARK_SELECTION_START } },
+				{ FALSE,		Layout::MX_M_SELECT_MARK_SELECTION_END,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_235B2698_Mark_Selection__End, _LEN_235B2698 ),					FALSE,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL | FALT), VK_OEM_PERIOD, Layout::MX_M_SELECT_MARK_SELECTION_END } },
+				{ TRUE,			0,												FALSE,		FALSE,		FALSE,		nullptr,  0,																	FALSE },
+				{ FALSE,		Layout::MX_M_SELECT_EXPAND_SELECTION,			FALSE,		FALSE,		FALSE,		MW_MENU_TXT( _T_48180F4F_E_xpand_Selection, _LEN_48180F4F ),					FALSE,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'J', Layout::MX_M_SELECT_EXPAND_SELECTION } },
+				{ TRUE,			0,												FALSE,		FALSE,		FALSE,		nullptr,  0,																	FALSE },
+				{ FALSE,		Layout::MX_M_SELECT_REVSERSE_SELECTION,			FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_D0352186__Reverse_Selection, _LEN_D0352186 ),					FALSE,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), VK_OEM_7, Layout::MX_M_SELECT_REVSERSE_SELECTION } },
+				{ TRUE,			0,												FALSE,		FALSE,		FALSE,		nullptr,  0,																	FALSE },
+				{ FALSE,		Layout::MX_M_FILE_SAVE_SELECTION,				FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_B78BF6D5_Save_Selec_tion___, _LEN_B78BF6D5 ),					FALSE },
 			};
 
 			const LSW_MENU_LAYOUT miMenus[] = {
@@ -1649,6 +1699,13 @@ namespace mx {
 					0,
 					std::size( miMenuBar ),
 					miMenuBar
+				},
+				{
+					MX_M_CONTEXT_SELECT,
+					MX_M_CONTEXT_MENU,
+					MX_M_CONTEXT_SELECT_ITEM,
+					std::size( miSelect ),
+					miSelect
 				},
 			};
 			mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
@@ -1897,9 +1954,21 @@ namespace mx {
 				if ( !ReopenTab( _sIdx, pDst ) ) { return false; }
 			}
 			else {
+				// Keep File Time: the file's times from before the save are put back afterwards.
+				WIN32_FILE_ATTRIBUTE_DATA fadOld {};
+				const bool bKeepTime = bSelf && phefFile->KeepFileTime() &&
+					::GetFileAttributesExW( pDst.c_str(), GetFileExInfoStandard, &fadOld );
 				if ( !phefFile->SaveTo( pDst, dwError ) ) {
 					FileError( _DEC_WS_A77664BF_Failed_to_save_the_file_, pDst, dwError );
 					return false;
+				}
+				if ( bKeepTime ) {
+					HANDLE hFile = ::CreateFileW( pDst.c_str(), FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+						nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
+					if ( hFile != INVALID_HANDLE_VALUE ) {
+						::SetFileTime( hFile, &fadOld.ftCreationTime, nullptr, &fadOld.ftLastWriteTime );
+						::CloseHandle( hFile );
+					}
 				}
 				UpdateTabText( _sIdx );
 			}
@@ -2047,7 +2116,16 @@ namespace mx {
 				const std::wstring wsMsg = _DEC_WS_B2D793C8_Discard_all_unsaved_changes_and_reload_the_file_from_disk_ + _DEC_WS_2BB8AB61__r_n_r_n + pPath.generic_wstring();
 				if ( ::MessageBoxW( Wnd(), wsMsg.c_str(), _DEC_WS_A303F04B_Revert_Refresh.c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 ) != IDYES ) { return; }
 			}
+			// The tab's settings stay as they were.
+			const bool bReadOnlyMode = phefFile->ReadOnlyMode();
+			const bool bKeepFileTime = phefFile->KeepFileTime();
 			if ( ReopenTab( sIdx, pPath ) ) {
+				if ( CHexEditorFile * phefNew = FileAt( sIdx ) ) {
+					phefNew->SetReadOnlyMode( bReadOnlyMode );
+					phefNew->SetKeepFileTime( bKeepFileTime );
+					UpdateTabText( sIdx );
+					UpdateStatusBar_InsertOverwrite();
+				}
 				SetStatusBarText( (_DEC_WS_EC777104_Reverted__ + pPath.generic_wstring()).c_str(), false );
 			}
 		}
@@ -2854,6 +2932,158 @@ namespace mx {
 		RecalcAllBut( phecControl );
 	}
 
+	/**
+	 * Shows the Select Range dialog and selects the range entered.
+	 **/
+	void CDeusHexMachinaWindow::ShowSelectRange() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		phecControl->FlushRealTimeUndo();
+
+		CSelectRangeLayout::MX_SELECT_RANGE_PARMS srpParms;
+		srpParms.ui64DataSize = phecControl->Size();
+		srpParms.bHex = phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_BYTES_HEX ||
+			phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_SHORT_HEX;
+		srpParms.bEnd = m_bSelectRangeEnd;
+		// The current selection (or the caret) is the default.
+		bool bHaveSel = false;
+		if ( phecControl->HasSelection() ) {
+			// The whole span of the selection (a column selection is selected again as a normal one).
+			try {
+				std::vector<MX_SEL_RANGE> vRanges;
+				uint64_t ui64Start = UINT64_MAX, ui64End = 0;
+				for ( uint64_t I = 0; phecControl->GatherSelection( vRanges, 1024ULL * 1024ULL, I ) && vRanges.size(); ++I ) {
+					for ( const auto &srThis : vRanges ) {
+						ui64Start = std::min( ui64Start, srThis.ui64Start );
+						ui64End = std::max( ui64End, srThis.ui64Start + srThis.ui64Size );
+					}
+				}
+				if ( ui64Start < ui64End ) {
+					srpParms.ui64Start = ui64Start;
+					srpParms.ui64Size = ui64End - ui64Start;
+					bHaveSel = true;
+				}
+			}
+			catch ( ... ) {}
+		}
+		if ( !bHaveSel ) {
+			srpParms.ui64Start = phecControl->GetCaretAddr();
+			srpParms.ui64Size = 0;
+		}
+
+		if ( TRUE == CSelectRangeLayout::CreateSelectRangeDialog( this, srpParms ) ) {
+			m_bSelectRangeEnd = srpParms.bEnd;
+			phecControl->SelectRange( srpParms.ui64Start, srpParms.ui64Size );
+			UpdateStatusBar_PosValue_StartSize();
+		}
+	}
+
+	/**
+	 * Shows the Change Font dialog and applies the font chosen to the Hex Editor (all tabs share it).
+	 **/
+	void CDeusHexMachinaWindow::ShowChangeFont() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		CHexEditorControl::MX_FONT_SET * pfsSet = phecControl->Font();
+		if ( !pfsSet ) { return; }
+
+		CFontDialogLayout::MX_FONT_DIALOG_PARMS fdpParms;
+		fdpParms.lfFont = pfsSet->lfFontParms;
+		fdpParms.i32PointSize = pfsSet->i32PointSize;
+		fdpParms.ui32Dpi = m_wDpiY ? m_wDpiY : USER_DEFAULT_SCREEN_DPI;
+		if ( TRUE != CFontDialogLayout::CreateFontDialog( this, fdpParms ) ) { return; }
+
+		if ( !pfsSet->fFont.CreateFontIndirectW( &fdpParms.lfFont ) ) {
+			lsw::CBase::MessageBoxError( Wnd(), _DEC_WS_1468A1DF_Internal_error_.c_str(), _DEC_WS_EE6F169E_Change_Font.c_str() );
+			return;
+		}
+		pfsSet->lfFontParms = fdpParms.lfFont;
+		pfsSet->i32PointSize = fdpParms.i32PointSize;
+		CHexEditorControl::ComputeFontMetrics( (*pfsSet), WORD( fdpParms.ui32Dpi ), Wnd() );
+		phecControl->RecalcAndInvalidate();
+		RecalcAllBut( phecControl );
+	}
+
+	/**
+	 * Gets the path of the file whose properties are shown for a tab: the file, or the executable of the process.
+	 *
+	 * \param _sIdx The tab.
+	 * \param _pPath Receives the path.
+	 * \return Returns true if the tab has such a file.
+	 **/
+	bool CDeusHexMachinaWindow::PropertiesPath( size_t _sIdx, std::filesystem::path &_pPath ) {
+		if ( _sIdx >= m_vTabs.size() || !m_vTabs[_sIdx].pheiInterface ) { return false; }
+		try {
+			switch ( m_vTabs[_sIdx].pheiInterface->Type() ) {
+				case CHexEditorInterface::MX_HET_FILE : {
+					const CHexEditorFile * phefFile = static_cast<const CHexEditorFile *>(m_vTabs[_sIdx].pheiInterface.get());
+					if ( phefFile->IsUntitled() ) { return false; }
+					_pPath = phefFile->Path();
+					break;
+				}
+				case CHexEditorInterface::MX_HET_PROCESS : {
+					_pPath = static_cast<const CHexEditorProcess *>(m_vTabs[_sIdx].pheiInterface.get())->Process().QueryProcessImageName( 0 );
+					break;
+				}
+				case CHexEditorInterface::MX_HET_CUR_PROCESS : {
+					_pPath = static_cast<const CHexEditorCurProcess *>(m_vTabs[_sIdx].pheiInterface.get())->Process().QueryProcessImageName( 0 );
+					break;
+				}
+				default : { return false; }
+			}
+			return !_pPath.empty();
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * Shows the Windows Properties dialog of the current file (or of the executable of the current process).
+	 **/
+	void CDeusHexMachinaWindow::ShowProperties() {
+		try {
+			std::filesystem::path pPath;
+			if ( !PropertiesPath( CurrentTab(), pPath ) ) { return; }
+			const CSecureWString swsVerb = _DEC_WS_87C331C7_properties;
+			SHELLEXECUTEINFOW seiInfo = { sizeof( seiInfo ) };
+			seiInfo.fMask = SEE_MASK_INVOKEIDLIST;
+			seiInfo.hwnd = Wnd();
+			seiInfo.lpVerb = swsVerb.c_str();
+			seiInfo.lpFile = pPath.c_str();
+			seiInfo.nShow = SW_SHOWNORMAL;
+			if ( !::ShellExecuteExW( &seiInfo ) ) {
+				FileError( _DEC_WS_2128232B_Failed_to_show_the_properties_of_the_file_, pPath, ::GetLastError() );
+			}
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Turns Read Only mode on or off for the current tab (not available if the data source itself cannot be written).
+	 **/
+	void CDeusHexMachinaWindow::ToggleReadOnly() {
+		const size_t sIdx = CurrentTab();
+		if ( sIdx == SIZE_MAX || !m_vTabs[sIdx].pheiInterface || m_vTabs[sIdx].pheiInterface->SourceReadOnly() ) { return; }
+		// Anything being typed is finished (or abandoned) first.
+		if ( m_vTabs[sIdx].phecWidget ) {
+			m_vTabs[sIdx].phecWidget->CancelEdit();
+			m_vTabs[sIdx].phecWidget->FlushRealTimeUndo();
+		}
+		m_vTabs[sIdx].pheiInterface->SetReadOnlyMode( !m_vTabs[sIdx].pheiInterface->ReadOnlyMode() );
+		UpdateTabText( sIdx );
+		UpdateStatusBar_InsertOverwrite();
+		UpdateToolBar();
+		if ( m_vTabs[sIdx].phecWidget ) { ::InvalidateRect( m_vTabs[sIdx].phecWidget->Wnd(), nullptr, FALSE ); }
+	}
+
+	/**
+	 * Turns Keep File Time on or off for the current file.
+	 **/
+	void CDeusHexMachinaWindow::ToggleKeepFileTime() {
+		CHexEditorFile * phefFile = CurrentFile();
+		if ( !phefFile || phefFile->IsUntitled() ) { return; }
+		phefFile->SetKeepFileTime( !phefFile->KeepFileTime() );
+	}
+
 	// Shows the Go To dialog.
 	void CDeusHexMachinaWindow::ShowGoTo( uint64_t _ui64DefaultAddress ) {
 		auto phecControl = CurrentEditor();
@@ -3426,6 +3656,46 @@ namespace mx {
 				case Layout::MX_M_SELECT_COLUMN_MODE : {
 					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->SelectionIsColumn()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_SELECT_SELECT_RANGE : {
+					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | (bTabIsOpen ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_SELECT_EXPAND_SELECTION : {
+					// Not available yet.
+					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | MF_GRAYED );
+					break;
+				}
+				case Layout::MX_M_EDIT_CLEAR_CLICKED_CHANGE : {
+					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | ((phecControl && phecControl->HasChanges()) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_EDIT_READ_ONLY : {
+					// Checked when edits are refused; only Read Only mode can be turned off (not a read-only file or process).
+					const size_t sIdx = CurrentTab();
+					const CHexEditorInterface * pheiThis = (sIdx != SIZE_MAX) ? m_vTabs[sIdx].pheiInterface.get() : nullptr;
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE,
+						.fState = UINT( ((pheiThis && pheiThis->ReadOnly()) ? MFS_CHECKED : MFS_UNCHECKED) |
+							((pheiThis && !pheiThis->SourceReadOnly()) ? MFS_ENABLED : MFS_GRAYED) ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_EDIT_KEEP_FILE_TIME : {
+					const CHexEditorFile * phefFile = CurrentFile();
+					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE,
+						.fState = UINT( ((phefFile && phefFile->KeepFileTime()) ? MFS_CHECKED : MFS_UNCHECKED) |
+							((phefFile && !phefFile->IsUntitled()) ? MFS_ENABLED : MFS_GRAYED) ) };
+					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_EDIT_PROPERTIES : {
+					std::filesystem::path pPath;
+					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | (PropertiesPath( CurrentTab(), pPath ) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_VIEW_FONT_CHANGE_FONT : {
+					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | (bTabIsOpen ? MF_ENABLED : MF_GRAYED) );
 					break;
 				}
 				case Layout::MX_M_SELECT_MOVE_SELECTION_BACK : {

@@ -96,8 +96,30 @@ namespace mx {
 		// Does the given data stream allow insertion and deletion?  Processes return true.
 		virtual bool						OverwriteOnly() const = 0;
 
-		// Is the given data stream read-only?
-		virtual bool						ReadOnly() const { return false; }
+		// Is the given data stream read-only?  True if the data source cannot be written or Read Only mode is on.
+		virtual bool						ReadOnly() const { return m_bReadOnlyMode || SourceReadOnly(); }
+
+		/**
+		 * Determines whether the data source itself cannot be written (a file opened read-only, a process opened without write
+		 *	access), regardless of Read Only mode.
+		 *
+		 * \return Returns true if the data source cannot be written.
+		 **/
+		virtual bool						SourceReadOnly() const { return false; }
+
+		/**
+		 * Turns Read Only mode on or off.  In Read Only mode, edits are refused even if the data source can be written.
+		 *
+		 * \param _bReadOnly If true, Read Only mode is turned on.
+		 **/
+		void								SetReadOnlyMode( bool _bReadOnly ) { m_bReadOnlyMode = _bReadOnly; }
+
+		/**
+		 * Determines whether Read Only mode is on.
+		 *
+		 * \return Returns true if Read Only mode is on.
+		 **/
+		bool								ReadOnlyMode() const { return m_bReadOnlyMode; }
 
 		// Insert bytes at a given address.
 		virtual bool						Insert( uint64_t _ui64Addr, const CBuffer &_Src, uint64_t &_ui64Inserted ) = 0;
@@ -215,6 +237,12 @@ namespace mx {
 
 		// Performs an Redo operation.
 		virtual bool						Redo( CSecureWString &/*_swsStatus*/ ) { return false; }
+
+
+	protected :
+		// == Members.
+		/** If true, edits are refused even if the data source can be written (Edit -> Read Only). */
+		bool								m_bReadOnlyMode = false;
 	};
 
 }	// namespace mx

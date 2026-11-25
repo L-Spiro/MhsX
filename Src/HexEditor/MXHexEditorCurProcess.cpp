@@ -78,6 +78,67 @@ namespace mx {
 
 	// Overwrite bytes at a given address.
 	bool CHexEditorCurProcess::Overwrite( uint64_t _ui64Addr, const void * _pvSrc, size_t _sSize ) {
+		CheckUndoProcess();
+		// The bytes being replaced are kept for Undo (unreadable bytes read as 0xFF, and writing them back does nothing).
+		CBuffer bOld;
+		const bool bHaveOld = Read( _ui64Addr, bOld, _sSize );
+		if ( !CHexEditorProcess::WriteToProcess( m_pProcess, _ui64Addr, _pvSrc, _sSize ) ) { return false; }
+		if ( bHaveOld ) { m_puUndo.AddOverwrite( _ui64Addr, std::move( bOld ), _pvSrc, _sSize ); }
+		return true;
+	}
+
+	/**
+	 * Determines if there are items to undo.
+	 *
+	 * \return Returns true if Undo() would undo something.
+	 **/
+	bool CHexEditorCurProcess::HasUndo() const {
+		return m_dwUndoProcId == m_pProcess.ProcId() && m_puUndo.HasUndo();
+	}
+
+	/**
+	 * Determines if there are items to redo.
+	 *
+	 * \return Returns true if Redo() would redo something.
+	 **/
+	bool CHexEditorCurProcess::HasRedo() const {
+		return m_dwUndoProcId == m_pProcess.ProcId() && m_puUndo.HasRedo();
+	}
+
+	/**
+	 * Performs an Undo operation.
+	 *
+	 * \param _swsStatus Receives the text for the status bar.
+	 * \return Returns true if the operation succeeded (or there was nothing to undo).
+	 **/
+	bool CHexEditorCurProcess::Undo( CSecureWString &_swsStatus ) {
+		if ( !CheckUndoProcess() ) { return true; }
+		return m_puUndo.Undo( [this]( uint64_t _ui64Addr, const void * _pvSrc, size_t _sSize ) { return CHexEditorProcess::WriteToProcess( m_pProcess, _ui64Addr, _pvSrc, _sSize ); }, _swsStatus );
+	}
+
+	/**
+	 * Performs a Redo operation.
+	 *
+	 * \param _swsStatus Receives the text for the status bar.
+	 * \return Returns true if the operation succeeded (or there was nothing to redo).
+	 **/
+	bool CHexEditorCurProcess::Redo( CSecureWString &_swsStatus ) {
+		if ( !CheckUndoProcess() ) { return true; }
+		return m_puUndo.Redo( [this]( uint64_t _ui64Addr, const void * _pvSrc, size_t _sSize ) { return CHexEditorProcess::WriteToProcess( m_pProcess, _ui64Addr, _pvSrc, _sSize ); }, _swsStatus );
+	}
+
+	/**
+	 * Discards the Undo/Redo stack if the current process is no longer the one it was made for.
+	 *
+	 * \return Returns true if the stack belongs to the current process.
+	 **/
+	bool CHexEditorCurProcess::CheckUndoProcess() {
+		const DWORD dwId = m_pProcess.ProcId();
+		if ( dwId == m_dwUndoProcId ) { return true; }
+		// Never while a group is open (the hex control is in the middle of an edit).
+		if ( m_puUndo.GroupOpen() ) { return true; }
+		m_puUndo.Reset();
+		m_dwUndoProcId = dwId;
 		return false;
 	}
 

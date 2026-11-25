@@ -65,6 +65,8 @@ namespace mx {
 		// Menus.
 		enum MX_MENUS {
 			MX_M_CONTEXT_MENU						= 200,
+			MX_M_CONTEXT_SELECT,																	/**< The context menu's Select submenu. */
+			MX_M_CONTEXT_SELECT_ITEM,																/**< The context menu's item that opens the Select submenu. */
 		};
 
 		// Status bar parts.
@@ -390,6 +392,40 @@ namespace mx {
 		// Shows the Go To dialog.
 		void										ShowGoTo( uint64_t _ui64DefaultAddress = UINT64_MAX );
 
+		/**
+		 * Shows the Select Range dialog and selects the range entered.
+		 **/
+		void										ShowSelectRange();
+
+		/**
+		 * Shows the Change Font dialog and applies the font chosen to the Hex Editor (all tabs share it).
+		 **/
+		void										ShowChangeFont();
+
+		/**
+		 * Shows the Windows Properties dialog of the current file (or of the executable of the current process).
+		 **/
+		void										ShowProperties();
+
+		/**
+		 * Turns Read Only mode on or off for the current tab (not available if the data source itself cannot be written).
+		 **/
+		void										ToggleReadOnly();
+
+		/**
+		 * Turns Keep File Time on or off for the current file.
+		 **/
+		void										ToggleKeepFileTime();
+
+		/**
+		 * Gets the path of the file whose properties are shown for a tab: the file, or the executable of the process.
+		 *
+		 * \param _sIdx The tab.
+		 * \param _pPath Receives the path.
+		 * \return Returns true if the tab has such a file.
+		 **/
+		bool										PropertiesPath( size_t _sIdx, std::filesystem::path &_pPath );
+
 		// Shows the Set Line SPacing dialog.
 		void										ShowSetLineSpacing();
 
@@ -529,6 +565,8 @@ namespace mx {
 		CWindowMemHack *							m_pmhMemHack = nullptr;
 		/** The kind of file the toolbar's New button creates: the last one chosen. */
 		MX_NEW_FILE									m_nfLastNew = MX_NF_HEX;
+		/** If true, the Select Range dialog last took an end address rather than a size (it starts that way next time). */
+		bool										m_bSelectRangeEnd = false;
 		/** The number of untitled files created (for naming them). */
 		uint32_t									m_ui32Untitled = 0;
 

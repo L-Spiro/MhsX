@@ -848,6 +848,27 @@ namespace mx {
 		void										ClearSelectedChanges();
 
 		/**
+		 * Clears the highlighting of the changed value at the address that was right-clicked to open the context menu (the whole
+		 *	value in the area that was clicked), or at the caret if the menu was not opened by a click on an address.
+		 **/
+		void										ClearClickedChange();
+
+		/**
+		 * Forgets the address that was right-clicked, so that ClearClickedChange() uses the caret (for a context menu opened with
+		 *	the keyboard).
+		 **/
+		inline void									ForgetContextAddress() { m_bContextAddr = false; }
+
+		/**
+		 * Selects a range of bytes, with the caret after the last one.
+		 *
+		 * \param _ui64Start The first byte to select.
+		 * \param _ui64Size The number of bytes to select.  If 0, the selection is removed and the caret is put at _ui64Start.
+		 * \return Returns false if the range starts beyond the end of the data.  A range that runs past the end is cut short.
+		 **/
+		bool										SelectRange( uint64_t _ui64Start, uint64_t _ui64Size );
+
+		/**
 		 * Determines whether any values are highlighted as changed.
 		 *
 		 * \return Returns true if at least one byte is highlighted as changed.
@@ -1415,6 +1436,9 @@ namespace mx {
 		wchar_t										m_wcAltSwallow = 0;										/**< The character Windows produces for that Alt code, which is discarded. */
 
 		std::map<uint64_t, MX_CHANGE_RUN>			m_mChanges;												/**< Changed bytes: runs that do not overlap, by start address. */
+		uint64_t									m_ui64ContextAddr = 0;									/**< The address last right-clicked (for the context menu). */
+		bool										m_bContextAddr = false;									/**< m_ui64ContextAddr is valid. */
+		bool										m_bContextRight = false;								/**< m_ui64ContextAddr was clicked in the right (text) area. */
 		uint64_t									m_ui64ChangeEpoch = 0;									/**< The tick count (milliseconds) to which change times are relative. */
 		CHexEditorInterface::CBuffer				m_bWatchPrev;											/**< The bytes in view the last time changes were looked for. */
 		uint64_t									m_ui64WatchAddr = 0;									/**< The address of the first byte in m_bWatchPrev. */

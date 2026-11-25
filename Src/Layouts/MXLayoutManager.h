@@ -44,6 +44,8 @@ namespace mx {
 		MX_DEUS_HEX_MACHINA,
 		MX_HEX_CONTROL,
 		MX_NUMBER_INPUT,
+		MX_SELECT_RANGE,
+		MX_FONT_DIALOG,
 	};
 
 	class CLayoutManager : public lsw::CLayoutManager {

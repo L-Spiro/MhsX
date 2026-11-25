@@ -100,8 +100,22 @@ namespace mx {
 		// Does the given data stream allow insertion and deletion?  Processes return true.
 		virtual bool						OverwriteOnly() const;
 
-		// Is the given data stream read-only?
-		virtual bool						ReadOnly() const { return m_lcwfwFile.ReadOnly(); }
+		// Is the file itself read-only (regardless of Read Only mode)?
+		virtual bool						SourceReadOnly() const { return m_lcwfwFile.ReadOnly(); }
+
+		/**
+		 * Determines whether saving the file over itself keeps its modification time (Edit -> Keep File Time).
+		 *
+		 * \return Returns true if the file's times are restored after it is saved.
+		 **/
+		inline bool							KeepFileTime() const { return m_bKeepFileTime; }
+
+		/**
+		 * Sets whether saving the file over itself keeps its modification time (Edit -> Keep File Time).
+		 *
+		 * \param _bKeep If true, the file's times are restored after it is saved.
+		 **/
+		inline void							SetKeepFileTime( bool _bKeep ) { m_bKeepFileTime = _bKeep; }
 
 		// Insert bytes at a given address.
 		virtual bool						Insert( uint64_t _ui64Addr, const CBuffer &_Src, uint64_t &_ui64Inserted );
@@ -212,6 +226,8 @@ namespace mx {
 		CLargeCoWFileWindow					m_lcwfwFile;
 		/** The name of an untitled file. */
 		std::wstring						m_wsNewName;
+		/** If true, saving the file over itself keeps its creation and modification times. */
+		bool								m_bKeepFileTime = false;
 	};
 
 }	// namespace mx

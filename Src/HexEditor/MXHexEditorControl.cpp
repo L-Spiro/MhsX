@@ -4942,8 +4942,8 @@ namespace mx {
 			m_sgSelGesture.ui64CaretAddr = std::min( ui64Caret, Size() );
 			m_sgSelGesture.i32CaretIdx = (m_sgSelGesture.ui64CaretAddr == ui64Caret) ? i32CaretIdx : 0;
 			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64CaretAddr;
-			// One selection-Undo item per data-Undo group.  Process memory has no Undo.
-			if ( !IsProcess() ) { AddSelectionUndo( sOldSel, sgOldGesture ); }
+			// One selection-Undo item per data-Undo group.
+			AddSelectionUndo( sOldSel, sgOldGesture );
 
 			StartCaretBlink();
 			EnsureVisible( m_sgSelGesture.ui64CaretAddr, FALSE );
@@ -6270,7 +6270,7 @@ namespace mx {
 	void CHexEditorControl::BeginRealTimeUndo( const MX_SELECTION &_sOldSel, const MX_SELECT_GESTURE &_sgOldGesture ) {
 		if ( !m_pheiTarget ) { return; }
 		if ( !m_bRtUndoOpen ) {
-			// Process memory has no Undo, so BeginUndo() fails and nothing is collected.
+			// If the data source has no Undo, BeginUndo() fails and nothing is collected.
 			if ( !m_pheiTarget->BeginUndo() ) { return; }
 			m_bRtUndoOpen = true;
 			m_sRtOldSel = _sOldSel;
@@ -6823,6 +6823,47 @@ namespace mx {
 	}
 
 	/**
+	 * Clears the highlighting of the changed value at the address that was right-clicked to open the context menu (the whole
+	 *	value in the area that was clicked), or at the caret if the menu was not opened by a click on an address.
+	 **/
+	void CHexEditorControl::ClearClickedChange() {
+		const MX_STYLE &stAll = (*CurStyle());
+		const uint64_t ui64Addr = m_bContextAddr ? m_ui64ContextAddr : m_sgSelGesture.ui64CaretAddr;
+		const bool bRight = (m_bContextAddr ? m_bContextRight : m_sgSelGesture.bRightArea) && stAll.bShowRightArea;
+		const uint32_t ui32Stride = std::max<uint32_t>( StrideForFormat( bRight ? stAll.dfRightNumbersFmt : stAll.dfLeftNumbersFmt ), 1 );
+		const uint64_t ui64Start = ui64Addr - ui64Addr % ui32Stride;
+		ClearChanges( ui64Start, ui64Start + ui32Stride );
+		::InvalidateRect( Wnd(), nullptr, FALSE );
+	}
+
+	/**
+	 * Selects a range of bytes, with the caret after the last one.
+	 *
+	 * \param _ui64Start The first byte to select.
+	 * \param _ui64Size The number of bytes to select.  If 0, the selection is removed and the caret is put at _ui64Start.
+	 * \return Returns false if the range starts beyond the end of the data.  A range that runs past the end is cut short.
+	 **/
+	bool CHexEditorControl::SelectRange( uint64_t _ui64Start, uint64_t _ui64Size ) {
+		const uint64_t ui64Size = Size();
+		if ( _ui64Start > ui64Size ) { return false; }
+		FlushRealTimeUndo();
+		_ui64Size = std::min( _ui64Size, ui64Size - _ui64Start );
+		if ( !_ui64Size ) {
+			ClearSelection();
+			SetCaretAddr( _ui64Start );
+			m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sgSelGesture.ui64CaretAddr;
+			return true;
+		}
+		m_sSel.bHas = true;
+		m_sSel.smMode = m_sgSelGesture.smCurrent = MX_SM_NORMAL;
+		m_sSel.sn.ui64Start = _ui64Start;
+		m_sSel.sn.ui64End = _ui64Start + _ui64Size - 1;
+		m_sgSelGesture.ui64AnchorAddr = m_sgSelGesture.ui64MouseAnchorAddr = m_sSel.sn.ui64Start;
+		SetCaretAddr( _ui64Start + _ui64Size, 0, true );
+		return true;
+	}
+
+	/**
 	 * Handles WM_RBUTTONDOWN.  Right-clicking a byte outside the selection moves the caret to it, so that the context menu applies to
 	 *	it.
 	 *
@@ -6838,7 +6879,12 @@ namespace mx {
 		uint64_t ui64Addr = 0;
 		int32_t i32Sub = 0;
 		bool bRight = false;
+		m_bContextAddr = false;
 		if ( ptPoint.y >= GetRulerHeightPx() && PointToAddress( ptPoint, ui64Addr, i32Sub, bRight ) ) {
+			// Remembered for the context menu's Clear Change Highlight at Clicked Address, even inside the selection.
+			m_ui64ContextAddr = ui64Addr;
+			m_bContextRight = bRight;
+			m_bContextAddr = true;
 			if ( !(m_sSel.HasSelection() && m_sSel.IsSelected( ui64Addr, CurStyle()->uiBytesPerRow )) ) {
 				FlushRealTimeUndo();
 				ClearSelection();

@@ -9,7 +9,9 @@
 #include "../FoundAddresses/MXFoundAddressesWindow.h"
 #include "../FoundAddresses/MXMoveAddressesWindow.h"
 #include "../HexEditor/MXDeusHexMachinaWindow.h"
+#include "../HexEditor/MXFontDialog.h"
 #include "../HexEditor/MXHexEditorControl.h"
+#include "../HexEditor/MXSelectRangeDialog.h"
 #include "../Layouts/MXLayoutMacros.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../NumberInputWindow/MXNumberInputDialog.h"
@@ -127,6 +129,12 @@ namespace mx {
 			}
 			case MX_NUMBER_INPUT : {
 				return new CNumberInputDialog( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
+			case MX_SELECT_RANGE : {
+				return new CSelectRangeDialog( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
+			case MX_FONT_DIALOG : {
+				return new CFontDialog( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
