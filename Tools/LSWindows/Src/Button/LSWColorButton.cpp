@@ -122,9 +122,11 @@ namespace lsw {
 				::RemoveWindowSubclass( _hWnd, ColorButtonSubclassProc, _uId );
 				//::SetWindowSubclass( _hWnd, CWidget::WindowProc, _uId, _dwRef );
 				////delete pmwThis;
-				//return ::DefSubclassProc( _hWnd, _uiMsg, _wParam, _lParam );
-				
-				return CWidget::WindowProc( _hWnd, _uiMsg, _wParam, _lParam );
+				if ( pmwThis && pmwThis->m_hWnd == _hWnd ) {
+					CBase::GetAccelHandler().Unregister( _hWnd );
+					pmwThis->m_hWnd = NULL;
+				}
+				return ::DefSubclassProc( _hWnd, _uiMsg, _wParam, _lParam );
 			}
 			case WM_SETTEXT : {
 				/*LRESULT lrResult = */::DefSubclassProc( _hWnd, _uiMsg, _wParam, _lParam );
