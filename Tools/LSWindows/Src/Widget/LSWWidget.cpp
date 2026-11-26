@@ -1741,6 +1741,7 @@ namespace lsw {
 			// Commands.
 			// =======================================
 			case WM_COMMAND : {
+				if ( !pmwThis ) { break; }
 				LSW_HANDLED hHandled = LSW_H_CONTINUE;
 				WORD wId = LOWORD( _wParam );
 

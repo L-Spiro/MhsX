@@ -44,6 +44,11 @@ namespace mx {
 #define MX_FD_BUTTON_T												(MX_FD_ADV_T + MX_FD_ADV_H + 7)
 #define MX_FD_H														(MX_FD_BUTTON_T + MX_DEF_BUTTON_HEIGHT + MX_FD_L)
 
+#define MX_FP_W														200
+#define MX_FP_BAR_T													(MX_FD_L + MX_DEF_STATIC_HEIGHT + 4)
+#define MX_FP_BUTTON_T												(MX_FP_BAR_T + MX_DEF_PROGRESS_BAR_HEIGHT + 7)
+#define MX_FP_H														(MX_FP_BUTTON_T + MX_DEF_BUTTON_HEIGHT + MX_FD_L)
+
 	// == Members.
 	// The layout of the Find dialog.
 	LSW_WIDGET_LAYOUT CFindLayout::m_wlFindDialog[] = {
@@ -689,7 +694,97 @@ namespace mx {
 		},
 	};
 
+	// The layout of the dialog shown while a long search runs.
+	LSW_WIDGET_LAYOUT CFindLayout::m_wlFindProgress[] = {
+		{
+			MX_FIND_PROGRESS,						// ltType
+			MX_FI_PROGRESS_DIALOG,					// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			0,										// iLeft
+			0,										// iTop
+			MX_FP_W,								// dwWidth
+			MX_FP_H,								// dwHeight
+			WS_CAPTION | WS_POPUP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_SYSMENU | DS_3DLOOK | DS_FIXEDSYS | DS_MODALFRAME | DS_CENTER,	// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_WINDOWEDGE | WS_EX_DLGMODALFRAME,							// dwStyleEx
+			MX_MAKE_WCHAR( _T_699CCB3A_Find ),		// pwcText
+			_LEN_699CCB3A,							// sTextLen
+			MX_FI_NONE,								// dwParentId
+		},
+		{
+			LSW_LT_LABEL,							// ltType
+			MX_FI_PROGRESS_LABEL,					// wId
+			WC_STATICW,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_FD_L,								// iLeft
+			MX_FD_L,								// iTop
+			MX_FP_W - MX_FD_L * 2,					// dwWidth
+			MX_DEF_STATIC_HEIGHT,					// dwHeight
+			MX_STATICSTYLE,							// dwStyle
+			0,										// dwStyleEx
+			MX_MAKE_WCHAR( _T_16A69772_Searching___ ),	// pwcText
+			_LEN_16A69772,							// sTextLen
+			MX_FI_PROGRESS_DIALOG,					// dwParentId
+		},
+		{
+			LSW_LT_PROGRESSBAR,						// ltType
+			MX_FI_PROGRESS_BAR,						// wId
+			nullptr,								// lpwcClass
+			TRUE,									// bEnabled
+			FALSE,									// bActive
+			MX_FD_L,								// iLeft
+			MX_FP_BAR_T,							// iTop
+			MX_FP_W - MX_FD_L * 2,					// dwWidth
+			MX_DEF_PROGRESS_BAR_HEIGHT,				// dwHeight
+			WS_CHILDWINDOW | WS_VISIBLE | PBS_SMOOTH,	// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY | WS_EX_CLIENTEDGE,	// dwStyleEx
+			nullptr,								// pwcText
+			0,										// sTextLen
+			MX_FI_PROGRESS_DIALOG,					// dwParentId
+		},
+		{
+			LSW_LT_BUTTON,							// ltType
+			MX_FI_PROGRESS_CANCEL,					// wId
+			WC_BUTTONW,								// lpwcClass
+			TRUE,									// bEnabled
+			TRUE,									// bActive
+			(MX_FP_W - MX_DEF_BUTTON_WIDTH) / 2,	// iLeft
+			MX_FP_BUTTON_T,							// iTop
+			MX_DEF_BUTTON_WIDTH,					// dwWidth
+			MX_DEF_BUTTON_HEIGHT,					// dwHeight
+			MX_DEFBUTTONSTYLE,						// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,	// dwStyleEx
+			MX_MAKE_WCHAR( _T_51BAC044_Cancel ),	// pwcText
+			_LEN_51BAC044,							// sTextLen
+			MX_FI_PROGRESS_DIALOG,					// dwParentId
+		},
+	};
+
 	// == Functions.
+	/**
+	 * Creates the modeless dialog shown while a long search runs (it has a progress bar and a Cancel button).  The caller
+	 *	destroys its window and deletes the returned object when the search ends.
+	 *
+	 * \param _pwParent The owner window.
+	 * \param _fppParms The parameters, which must remain valid while the dialog exists.
+	 * \return Returns the dialog, or nullptr on failure.
+	 **/
+	CWidget * CFindLayout::CreateFindProgress( CWidget * _pwParent, MX_FIND_PROGRESS_PARMS &_fppParms ) {
+		std::vector<CSecureString> sStrings;
+		std::vector<CSecureWString> sStringsW;
+		std::vector<LSW_WIDGET_LAYOUT> vLayouts;
+		CLayoutManager::UnencryptLayouts( m_wlFindProgress, std::size( m_wlFindProgress ),
+			vLayouts,
+			sStringsW,
+			sStrings );
+
+		CWidget * pwWidget = lsw::CBase::LayoutManager()->CreateDialogX( &vLayouts[0], std::size( m_wlFindProgress ), _pwParent, reinterpret_cast<uint64_t>(&_fppParms) );
+		CLayoutManager::CleanEncryptedStrings( sStringsW, sStrings );
+		return pwWidget;
+	}
+
 	/**
 	 * Shows the Find dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
 	 *

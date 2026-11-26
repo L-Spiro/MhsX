@@ -634,6 +634,9 @@
     <ClCompile Include="Src\HexEditor\MXFindDialog.cpp">
       <Filter>Source Files\HexEditor</Filter>
     </ClCompile>
+    <ClCompile Include="Src\HexEditor\MXFindProgressDialog.cpp">
+      <Filter>Source Files\HexEditor</Filter>
+    </ClCompile>
     <ClCompile Include="Src\HexEditor\MXHexFind.cpp">
       <Filter>Source Files\HexEditor</Filter>
     </ClCompile>
@@ -1032,6 +1035,9 @@
       <Filter>Header Files\HexEditor</Filter>
     </ClInclude>
     <ClInclude Include="Src\HexEditor\MXFindDialog.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXFindProgressDialog.h">
       <Filter>Header Files\HexEditor</Filter>
     </ClInclude>
     <ClInclude Include="Src\HexEditor\MXFindResults.h">

@@ -12,6 +12,7 @@
 #include "../Utilities/MXUtilities.h"
 #include "MXCopyFormatter.h"
 #include "MXCopyPasteManager.h"
+#include "MXFindProgressDialog.h"
 #include "MXHexEditorCurProcess.h"
 #include "MXHexEditorFile.h"
 #include "MXHexEditorProcess.h"
@@ -3186,21 +3187,99 @@ namespace mx {
 			CHexFind::CReader rReader = [pheiSource]( uint64_t _ui64Addr, size_t _sSize, std::vector<uint8_t> &_vDst ) {
 				return pheiSource->Read( _ui64Addr, _vDst, _sSize );
 			};
-			// Escape stops a long search.
-			CHexFind::CProgress pProgress = []( double /*_dProgress*/ ) { return !(::GetAsyncKeyState( VK_ESCAPE ) & 0x8000); };
-			HCURSOR hOldCursor = ::SetCursor( ::LoadCursorW( NULL, IDC_WAIT ) );
-			struct MX_RESTORE_CURSOR {
-				~MX_RESTORE_CURSOR() { ::SetCursor( hCursor ); }
-				HCURSOR								hCursor;
-			} rcRestore = { hOldCursor };
+			struct MX_FIND_WAIT {
+				~MX_FIND_WAIT() {
+					// The windows are enabled before the dialog goes, so that one of them is activated.
+					for ( auto hWnd : vDisabled ) { ::EnableWindow( hWnd, TRUE ); }
+					delete pwDialog;
+					// The window that was active (the Find dialog, perhaps) is active again.
+					if ( bPumping && hActive && ::IsWindow( hActive ) ) { ::SetActiveWindow( hActive ); }
+					::SetCursor( hOldCursor );
+				}
+
+				/**
+				 * Called as the search progresses.
+				 *
+				 * \param _dProgress How far the search has gone (0 to 1).
+				 * \return Returns false to stop the search.
+				 **/
+				bool												Progress( double _dProgress ) {
+					if ( ::GetAsyncKeyState( VK_ESCAPE ) & 0x8000 ) { bCancel = true; }
+					if ( bCancel ) { return false; }
+					const ULONGLONG ullNow = ::GetTickCount64();
+					const ULONGLONG ullElapsed = ullNow - ullStart;
+					if ( ullElapsed < 1000 ) { return true; }
+					if ( !bPumping ) {
+						bPumping = true;
+						hActive = ::GetActiveWindow();
+						const HWND hWnds[] = { ::GetAncestor( hOwner, GA_ROOTOWNER ), ::GetAncestor( hOwner, GA_ROOT ), ::GetActiveWindow() };
+						for ( HWND hThis : hWnds ) {
+							if ( hThis && ::IsWindowEnabled( hThis ) && std::find( vDisabled.begin(), vDisabled.end(), hThis ) == vDisabled.end() ) {
+								::EnableWindow( hThis, FALSE );
+								vDisabled.push_back( hThis );
+							}
+						}
+					}
+					if ( !pwDialog && ullElapsed >= 10000 ) {
+						fppParms.pbCancel = &bCancel;
+						pwDialog = CFindLayout::CreateFindProgress( pwOwner, fppParms );
+					}
+					// Messages are handled every 50 milliseconds.
+					if ( ullNow - ullLastPump < 50 ) { return true; }
+					ullLastPump = ullNow;
+					if ( pwDialog ) { static_cast<CFindProgressDialog *>(pwDialog)->SetProgress( _dProgress ); }
+					MSG mMsg;
+					while ( ::PeekMessageW( &mMsg, NULL, 0, 0, PM_REMOVE ) ) {
+						if ( mMsg.message == WM_QUIT ) {
+							// Put back for the main loop.
+							::PostQuitMessage( int( mMsg.wParam ) );
+							bCancel = true;
+							break;
+						}
+						if ( pwDialog && pwDialog->Wnd() && ::IsDialogMessageW( pwDialog->Wnd(), &mMsg ) ) { continue; }
+						::TranslateMessage( &mMsg );
+						::DispatchMessageW( &mMsg );
+					}
+					return !bCancel;
+				}
+
+
+				// == Members.
+				CWidget *											pwOwner = nullptr;							/**< The Hex Editor window. */
+				HWND												hOwner = NULL;								/**< Its window. */
+				HWND												hActive = NULL;								/**< The window that was active when messages began to be handled. */
+				ULONGLONG											ullStart = 0;								/**< When the search started. */
+				ULONGLONG											ullLastPump = 0;							/**< When messages were last handled. */
+				HCURSOR												hOldCursor = NULL;							/**< The cursor before the search. */
+				bool												bCancel = false;							/**< The search is to stop. */
+				bool												bPumping = false;							/**< Messages are being handled. */
+				std::vector<HWND>									vDisabled;									/**< The windows disabled during the search. */
+				CFindLayout::MX_FIND_PROGRESS_PARMS					fppParms;									/**< The parameters of the dialog. */
+				CWidget *											pwDialog = nullptr;							/**< The dialog that can stop the search. */
+			} fwWait;
+			fwWait.pwOwner = this;
+			fwWait.hOwner = Wnd();
+			fwWait.ullStart = fwWait.ullLastPump = ::GetTickCount64();
+			fwWait.hOldCursor = ::SetCursor( ::LoadCursorW( NULL, IDC_WAIT ) );
+			CHexFind::CProgress pProgress = [&fwWait]( double _dProgress ) { return fwWait.Progress( _dProgress ); };
+
+			// While messages were handled, the tab may have been closed (a process that ended); the control is found again.
+			auto fControl = [&]() -> CHexEditorControl * {
+				for ( const auto & htTab : m_vTabs ) {
+					if ( htTab.pheiInterface == spSource ) { return htTab.phecWidget; }
+				}
+				return nullptr;
+			};
 
 			if ( _faAction == CFindLayout::MX_FA_ALL ) {
 				CFindResults::MX_FIND_SET fsSet;
 				bool bTooMany = false;
-				if ( !hfFind.FindAll( rReader, ui64Start, ui64End, fpParms.bLimit ? fpParms.ui64Limit : 0, fsSet.vMatches, bTooMany, pProgress ) && !bTooMany ) {
+				if ( (!hfFind.FindAll( rReader, ui64Start, ui64End, fpParms.bLimit ? fpParms.ui64Limit : 0, fsSet.vMatches, bTooMany, pProgress ) && !bTooMany) ||
+					fwWait.bCancel ) {
 					_swsStatus = _DEC_WS_CE5EEB4C_The_search_was_stopped_;
 					return false;
 				}
+				phecControl = fControl();
 				const size_t sFound = fsSet.vMatches.size();
 				const CHexFind::MX_FIND_MATCH fmFirst = sFound ? fsSet.vMatches[0] : CHexFind::MX_FIND_MATCH();
 				fsSet.swsQuery = fpParms.swsQuery;
@@ -3224,7 +3303,7 @@ namespace mx {
 				else { _swsStatus = std::to_wstring( sFound ) + _DEC_WS_4C8957DE__occurrences_found_; }
 				SetStatusBarText( _swsStatus.c_str(), sFound == 0 );
 				// The first one is selected.
-				if ( sFound ) { phecControl->SelectRange( fmFirst.ui64Addr, fmFirst.ui64Size ); }
+				if ( sFound && phecControl ) { phecControl->SelectRange( fmFirst.ui64Addr, fmFirst.ui64Size ); }
 				return true;
 			}
 
@@ -3239,10 +3318,17 @@ namespace mx {
 
 			CHexFind::MX_FIND_MATCH fmMatch;
 			bool bWrapped = false;
-			if ( !hfFind.FindNext( rReader, ui64Start, ui64End, ui64From, bUp, fpParms.bWrap, fmMatch, pProgress, bWrapped ) ) {
+			const bool bFound = hfFind.FindNext( rReader, ui64Start, ui64End, ui64From, bUp, fpParms.bWrap, fmMatch, pProgress, bWrapped );
+			if ( fwWait.bCancel ) {
+				_swsStatus = _DEC_WS_CE5EEB4C_The_search_was_stopped_;
+				return false;
+			}
+			if ( !bFound ) {
 				_swsStatus = _DEC_WS_01A4AED5_Not_found_;
 				return false;
 			}
+			phecControl = fControl();
+			if ( !phecControl ) { return false; }
 			phecControl->SelectRange( fmMatch.ui64Addr, fmMatch.ui64Size );
 			const uint64_t ui64Shown = fmMatch.ui64Addr + phecControl->StartingAddress();
 			std::wstring wsHex;

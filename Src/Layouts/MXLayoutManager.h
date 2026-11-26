@@ -48,6 +48,7 @@ namespace mx {
 		MX_FONT_DIALOG,
 		MX_EXPORT_HEX,
 		MX_FIND_DIALOG,
+		MX_FIND_PROGRESS,
 	};
 
 	class CLayoutManager : public lsw::CLayoutManager {

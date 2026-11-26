@@ -288,6 +288,7 @@
     <ClCompile Include="Src\HexEditor\MXHexEditorCurProcess.cpp" />
     <ClCompile Include="Src\HexEditor\MXExportHexDialog.cpp" />
     <ClCompile Include="Src\HexEditor\MXFindDialog.cpp" />
+    <ClCompile Include="Src\HexEditor\MXFindProgressDialog.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexFind.cpp" />
     <ClCompile Include="Src\HexEditor\MXFontDialog.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexImport.cpp" />
@@ -455,6 +456,7 @@
     <ClInclude Include="Src\HexEditor\MXHexEditorCurProcess.h" />
     <ClInclude Include="Src\HexEditor\MXExportHexDialog.h" />
     <ClInclude Include="Src\HexEditor\MXFindDialog.h" />
+    <ClInclude Include="Src\HexEditor\MXFindProgressDialog.h" />
     <ClInclude Include="Src\HexEditor\MXFindResults.h" />
     <ClInclude Include="Src\HexEditor\MXHexFind.h" />
     <ClInclude Include="Src\HexEditor\MXFontDialog.h" />

@@ -62,6 +62,11 @@ namespace mx {
 			MX_FI_FIND_PREV,
 			MX_FI_FIND_ALL,
 			MX_FI_CLOSE,
+
+			MX_FI_PROGRESS_DIALOG				= 6450,
+			MX_FI_PROGRESS_LABEL,
+			MX_FI_PROGRESS_BAR,
+			MX_FI_PROGRESS_CANCEL,
 		};
 
 		/** What the dialog asks the Hex Editor to do. */
@@ -88,7 +93,23 @@ namespace mx {
 		};
 
 
+		/** Parameters passed to the dialog shown while a long search runs. */
+		struct MX_FIND_PROGRESS_PARMS {
+			bool *								pbCancel = nullptr;				/**< Set to true when Cancel is pressed. */
+		};
+
+
 		// == Functions.
+		/**
+		 * Creates the modeless dialog shown while a long search runs (it has a progress bar and a Cancel button).  The caller
+		 *	destroys its window and deletes the returned object when the search ends.
+		 *
+		 * \param _pwParent The owner window.
+		 * \param _fppParms The parameters, which must remain valid while the dialog exists.
+		 * \return Returns the dialog, or nullptr on failure.
+		 **/
+		static CWidget *						CreateFindProgress( CWidget * _pwParent, MX_FIND_PROGRESS_PARMS &_fppParms );
+
 		/**
 		 * Shows the Find dialog.  Makes an in-memory copy of the LSW_WIDGET_LAYOUT's so it can decode strings etc.
 		 *
@@ -103,6 +124,8 @@ namespace mx {
 		// == Members.
 		/** The layout of the Find dialog. */
 		static LSW_WIDGET_LAYOUT				m_wlFindDialog[];
+		/** The layout of the dialog shown while a long search runs. */
+		static LSW_WIDGET_LAYOUT				m_wlFindProgress[];
 	};
 
 }	// namespace mx
