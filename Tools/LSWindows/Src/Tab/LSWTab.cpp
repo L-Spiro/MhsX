@@ -744,8 +744,11 @@ namespace lsw {
 			const std::wstring wsText = GetItemTextW( I );
 			::SetTextColor( _hDc, crText );
 			if ( rText.right > rText.left ) {
+				// Text starts at the reading edge of every tab: the left, or the right for right-to-left text.
+				const DWORD dwExStyle = static_cast<DWORD>(::GetWindowLongPtrW( Wnd(), GWL_EXSTYLE ));
+				const UINT uiAlign = (dwExStyle & (WS_EX_RTLREADING | WS_EX_RIGHT)) ? (DT_RIGHT | ((dwExStyle & WS_EX_RTLREADING) ? DT_RTLREADING : 0)) : DT_LEFT;
 				::DrawTextW( _hDc, wsText.c_str(), static_cast<int>(wsText.size()), &rText,
-					DT_SINGLELINE | DT_VCENTER | DT_END_ELLIPSIS | DT_NOPREFIX | (iBox ? DT_LEFT : DT_CENTER) );
+					DT_SINGLELINE | DT_VCENTER | DT_END_ELLIPSIS | DT_NOPREFIX | uiAlign );
 			}
 
 			// The close box or check box.

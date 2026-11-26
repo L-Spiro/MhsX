@@ -235,6 +235,9 @@
     <ClCompile Include="Src\Layouts\MXSelectRangeLayout.cpp">
       <Filter>Source Files\Layouts</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Layouts\MXMiniMapOptionsLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
     <ClCompile Include="Src\Layouts\MXExportHexLayout.cpp">
       <Filter>Source Files\Layouts</Filter>
     </ClCompile>
@@ -628,6 +631,9 @@
     <ClCompile Include="Src\HexEditor\MXSelectRangeDialog.cpp">
       <Filter>Source Files\HexEditor</Filter>
     </ClCompile>
+    <ClCompile Include="Src\HexEditor\MXMiniMapOptionsDialog.cpp">
+      <Filter>Source Files\HexEditor</Filter>
+    </ClCompile>
     <ClCompile Include="Src\HexEditor\MXExportHexDialog.cpp">
       <Filter>Source Files\HexEditor</Filter>
     </ClCompile>
@@ -714,6 +720,9 @@
       <Filter>Header Files\Layouts</Filter>
     </ClInclude>
     <ClInclude Include="Src\Layouts\MXSelectRangeLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXMiniMapOptionsLayout.h">
       <Filter>Header Files\Layouts</Filter>
     </ClInclude>
     <ClInclude Include="Src\Layouts\MXExportHexLayout.h">
@@ -1029,6 +1038,9 @@
       <Filter>Header Files\HexEditor</Filter>
     </ClInclude>
     <ClInclude Include="Src\HexEditor\MXSelectRangeDialog.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXMiniMapOptionsDialog.h">
       <Filter>Header Files\HexEditor</Filter>
     </ClInclude>
     <ClInclude Include="Src\HexEditor\MXExportHexDialog.h">

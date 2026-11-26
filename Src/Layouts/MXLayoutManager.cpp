@@ -12,6 +12,7 @@
 #include "../HexEditor/MXExportHexDialog.h"
 #include "../HexEditor/MXFindDialog.h"
 #include "../HexEditor/MXFindProgressDialog.h"
+#include "../HexEditor/MXMiniMapOptionsDialog.h"
 #include "../HexEditor/MXFontDialog.h"
 #include "../HexEditor/MXHexEditorControl.h"
 #include "../HexEditor/MXSelectRangeDialog.h"
@@ -147,6 +148,9 @@ namespace mx {
 			}
 			case MX_FIND_PROGRESS : {
 				return new CFindProgressDialog( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
+			case MX_MINI_MAP_OPTIONS : {
+				return new CMiniMapOptionsDialog( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );

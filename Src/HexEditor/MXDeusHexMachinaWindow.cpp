@@ -6,6 +6,7 @@
 #include "../Layouts/MXFontDialogLayout.h"
 #include "../Layouts/MXNumberInputLayout.h"
 #include "../Layouts/MXOpenProcessLayout.h"
+#include "../Layouts/MXMiniMapOptionsLayout.h"
 #include "../Layouts/MXSelectRangeLayout.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../MemHack/MXWindowMemHack.h"
@@ -660,6 +661,14 @@ namespace mx {
 			}
 			case Layout::MX_M_TOOLS_EXPRESSION_EVALUATOR : {
 				ShowExpEval();
+				break;
+			}
+			case Layout::MX_M_TOOLS_WINDOWS_CALCULATOR : {
+				::ShellExecuteW( Wnd(), nullptr, _DEC_WS_9A9A2865_Calc_exe.c_str(), nullptr, nullptr, SW_SHOWNORMAL );
+				break;
+			}
+			case Layout::MX_M_TOOLS_WINDOWS_NOTEPAD : {
+				::ShellExecuteW( Wnd(), nullptr, _DEC_WS_6DAC8A48_Notepad_exe.c_str(), nullptr, nullptr, SW_SHOWNORMAL );
 				break;
 			}
 			case Layout::MX_M_FIND_FIND_NEXT : {
@@ -1614,6 +1623,10 @@ namespace mx {
 				}
 				break;
 			}
+			case Layout::MX_M_VIEW_MINI_MAP_OPTIONS : {
+				ShowMiniMapOptions();
+				break;
+			}
 		}
 		// Any command can change what the toolbar buttons can do (Undo/Redo, clipboards, tabs, etc.)
 		UpdateToolBar();
@@ -1704,6 +1717,14 @@ namespace mx {
 	bool CDeusHexMachinaWindow::ShowHexContextMenu( lsw::CWidget * _pwControl, INT _iX, INT _iY ) {
 		auto phecControl = CurrentEditor();
 		if ( phecControl && _pwControl == phecControl ) {
+			// Right-clicking the Mini Map shows its options.
+			if ( !(_iX == -1 && _iY == -1) ) {
+				POINT ptClient = { _iX, _iY };
+				if ( ::ScreenToClient( phecControl->Wnd(), &ptClient ) && phecControl->PointIsOverMiniMap( ptClient ) ) {
+					ShowMiniMapOptions();
+					return true;
+				}
+			}
 			// A menu opened with the keyboard applies to the caret rather than to the last address right-clicked.
 			if ( _iX == -1 && _iY == -1 ) { phecControl->ForgetContextAddress(); }
 
@@ -3029,6 +3050,26 @@ namespace mx {
 		phecControl->SetFontSize( CHexEditorControl::DefaultPointSize() );
 
 		RecalcAllBut( phecControl );
+	}
+
+	/**
+	 * Shows the Mini Map Options dialog for the current hex editor.
+	 **/
+	void CDeusHexMachinaWindow::ShowMiniMapOptions() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		phecControl->FlushRealTimeUndo();
+
+		CMiniMapOptionsLayout::MX_MINI_MAP_OPTIONS_PARMS mmopParms;
+		mmopParms.mmOptions = phecControl->GetMiniMapOptions();
+		mmopParms.phecControl = phecControl;
+		if ( TRUE == CMiniMapOptionsLayout::CreateMiniMapOptionsDialog( this, mmopParms ) ) {
+			phecControl->SetMiniMapOptions( mmopParms.mmOptions );
+			if ( mmopParms.bHide ) {
+				phecControl->SetShowMiniMap( false );
+			}
+		}
+		::SetFocus( phecControl->Wnd() );
 	}
 
 	/**
@@ -5193,6 +5234,10 @@ namespace mx {
 				case Layout::MX_M_VIEW_MINI_MAP_SHOW : {
 					MENUITEMINFOW miiInfo = { .cbSize = sizeof( MENUITEMINFOW ), .fMask = MIIM_STATE, .fState = UINT( (phecControl && phecControl->GetShowMiniMap()) ? MFS_CHECKED : MFS_UNCHECKED ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_VIEW_MINI_MAP_OPTIONS : {
+					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | (phecControl ? MF_ENABLED : MF_GRAYED) );
 					break;
 				}
 			}

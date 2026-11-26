@@ -468,6 +468,12 @@ namespace lsw {
 		 * Moves the tab control of each group to its rectangle (the widgets in a group size themselves from ClientRect()).
 		 **/
 		void								SizeGroups();
+
+		/**
+		 * Makes sure that only the selected widget of each group is visible, that it is above the group's tab control, and that both
+		 *	are redrawn.
+		 **/
+		void								ShowGroupSelections();
 	};
 
 }	// namespace lsw

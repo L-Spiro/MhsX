@@ -412,6 +412,11 @@ namespace mx {
 		void										ShowSelectRange();
 
 		/**
+		 * Shows the Mini Map Options dialog for the current hex editor.
+		 **/
+		void										ShowMiniMapOptions();
+
+		/**
 		 * Shows the Set Starting Address dialog and sets the address shown for the first byte of the current tab.
 		 **/
 		void										ShowSetStartingAddress();

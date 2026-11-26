@@ -558,7 +558,10 @@ namespace lsw {
 	CWidget::LSW_HANDLED CMultiSplitter::Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight ) {
 		CalcRects();
 		SizeGroups();
-		return CWidget::Size( _wParam, _lWidth, _lHeight );
+		LSW_HANDLED hRet = CWidget::Size( _wParam, _lWidth, _lHeight );
+		// Children size themselves without redrawing; the groups make sure only their selected widgets show, and redraw them.
+		ShowGroupSelections();
+		return hRet;
 	}
 
 	// WM_LBUTTONDOWN.
@@ -1304,6 +1307,30 @@ namespace lsw {
 			if ( pmrFound ) { return pmrFound; }
 		}
 		return nullptr;
+	}
+
+	/**
+	 * Makes sure that only the selected widget of each group is visible, that it is above the group's tab control, and that both
+	 *	are redrawn.
+	 **/
+	void CMultiSplitter::ShowGroupSelections() {
+		for ( size_t I = 0; I < m_vGroups.size(); ++I ) {
+			const LSW_MS_GROUP & mgGroup = m_vGroups[I];
+			if ( !mgGroup.ptTab || !mgGroup.ptTab->Wnd() ) { continue; }
+			const int iSel = mgGroup.ptTab->GetCurSel();
+			for ( size_t J = 0; J < mgGroup.vMembers.size(); ++J ) {
+				CWidget * pwMember = mgGroup.vMembers[J];
+				if ( !pwMember || !pwMember->Wnd() ) { continue; }
+				if ( int( J ) == iSel ) {
+					::SetWindowPos( pwMember->Wnd(), HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW );
+					::RedrawWindow( pwMember->Wnd(), nullptr, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_FRAME | RDW_ALLCHILDREN );
+				}
+				else if ( ::GetWindowLongPtrW( pwMember->Wnd(), GWL_STYLE ) & WS_VISIBLE ) {
+					::ShowWindow( pwMember->Wnd(), SW_HIDE );
+				}
+			}
+			::RedrawWindow( mgGroup.ptTab->Wnd(), nullptr, NULL, RDW_INVALIDATE | RDW_FRAME );
+		}
 	}
 
 	/**

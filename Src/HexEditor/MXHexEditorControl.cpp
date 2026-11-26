@@ -1372,7 +1372,27 @@ namespace mx {
 		HBITMAP hBmp = ::CreateCompatibleBitmap( bpPaint.hDc, int32_t( rRect.Width() ), int32_t( rRect.Height() ) );
 		{
 			lsw::LSW_SELECTOBJECT soBmp( hDcMem, hBmp );
-			PaintHex( hDcMem, rRect );
+			const int32_t i32Off = MainViewOffsetX();
+			if ( i32Off ) {
+				// The Mini-Map is on the left: the main view is drawn shifted to its right, then the Mini-Map is drawn.
+				lsw::LSW_RECT rGap = rRect;
+				rGap.left = MiniMapBarX( rRect );
+				rGap.right = std::min<LONG>( rRect.right, rRect.left + i32Off );
+				if ( rGap.right > rGap.left ) {
+					::FillRect( hDcMem, &rGap, lsw::CBase::BrushCache().Brush( MX_GetRgbValue( BackColors()->crEditor ) ) );
+				}
+
+				POINT ptOrg;
+				::SetViewportOrgEx( hDcMem, i32Off, 0, &ptOrg );
+				lsw::LSW_RECT rMain = rRect;
+				rMain.right = std::max<LONG>( rMain.left, rMain.right - i32Off );
+				PaintHex( hDcMem, rMain, false );
+				::SetViewportOrgEx( hDcMem, ptOrg.x, ptOrg.y, nullptr );
+				DrawMiniMap( hDcMem, MiniMapBarX( rRect ), 0, rRect );
+			}
+			else {
+				PaintHex( hDcMem, rRect );
+			}
 
 
 			::BitBlt( bpPaint.hDc, 0, 0, int32_t( rRect.Width() ), int32_t( rRect.Height() ), hDcMem, 0, 0, SRCCOPY );
@@ -2167,6 +2187,8 @@ namespace mx {
 	 * \return Returns true if there is a cell representing an address under the given point.  The address will always be valid (in the range of the opened file, memory space, etc.) if the function returns true.
 	 **/
 	bool CHexEditorControl::PointToAddress( const POINT &_pPoint, uint64_t &_ui64Addr, int32_t &_i32SubCaret, bool &_bRightArea ) {
+		// The main view is shifted right when the Mini-Map is on the left.
+		const POINT ptPoint = { _pPoint.x - MainViewOffsetX(), _pPoint.y };
 		uint64_t ui64Max = Size();
 		if MX_UNLIKELY( ui64Max == 0 ) { return false; }
 		if MX_LIKELY( m_pheiTarget ) {
@@ -2174,10 +2196,10 @@ namespace mx {
 			const int32_t iGutterW = ComputeAddressGutterWidthPx();
 
 			int32_t i32Top = GetRulerHeightPx();
-			//if MX_UNLIKELY( _pPoint.y < i32Top ) { return false; }
-			if MX_UNLIKELY( _pPoint.x < iGutterW ) { return false; }
+			//if MX_UNLIKELY( ptPoint.y < i32Top ) { return false; }
+			if MX_UNLIKELY( ptPoint.x < iGutterW ) { return false; }
 
-			POINT pThis = { _pPoint.x - iGutterW, _pPoint.y - i32Top };
+			POINT pThis = { ptPoint.x - iGutterW, ptPoint.y - i32Top };
 
 
 			// Line height.
@@ -2333,7 +2355,7 @@ namespace mx {
 	};
 
 	// Draws the hex-editor view.
-	bool CHexEditorControl::PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect ) {
+	bool CHexEditorControl::PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect, bool _bDrawMiniMap ) {
 		const MX_STYLE & stAll = (*CurStyle());
 		const int32_t iGutterW = ComputeAddressGutterWidthPx();
 		lsw::LSW_RECT rTmp = _rRect;
@@ -2427,9 +2449,9 @@ namespace mx {
 			DrawAddressGutter( _hDc, stAll.i32LeftAddrPadding, iY, m_sdScrollView[m_eaEditAs].i32PageLines + 1 );
 		}
 
-		if ( stAll.bShowMiniMap ) {
+		if ( stAll.bShowMiniMap && _bDrawMiniMap ) {
 			DrawMiniMap( _hDc,
-				MiniMapLeft( _rRect ),
+				MiniMapBarX( _rRect ),
 				0, _rRect );
 		}
 		return true;
@@ -2463,7 +2485,7 @@ namespace mx {
 			else {
 				rBg.left = 0;
 				rBg.right = _iXLeft - 1;
-				i32VisualWidth = int32_t( rBg.left );
+				i32VisualWidth = int32_t( rBg.Width() );
 			}
 			if ( rBg.Width() >= 0 ) {
 				::FillRect( _hDc, &rBg,
@@ -2536,11 +2558,19 @@ namespace mx {
 			bmi.dwMasks[1] = 0x0000FF00;								// Green.
 			bmi.dwMasks[2] = 0x00FF0000;								// Blue.
 
+			// On the left, the bitmap starts at the left edge and is kept out of the drag bar and the main view.
+			const int32_t i32ClipRight = _iXLeft - 1;
+			const bool bClip = !mmMiniMap.bRightSize;
 			if ( mmMiniMap.bRightSize ) {
 				++_iXLeft;
 			}
 			else {
-				_iXLeft = _iXLeft - 1 - (sSrcW * mmMiniMap.ui32Zoom);
+				_iXLeft = 0;
+			}
+			int iSavedDc = 0;
+			if ( bClip ) {
+				iSavedDc = ::SaveDC( _hDc );
+				::IntersectClipRect( _hDc, 0, _rRect.top, std::max( i32ClipRight, 0 ), _rRect.bottom );
 			}
 
 			::StretchDIBits(
@@ -2558,6 +2588,7 @@ namespace mx {
 				DIB_RGB_COLORS,
 				SRCCOPY
 			);
+			if ( iSavedDc ) { ::RestoreDC( _hDc, iSavedDc ); }
 
 		}
 		catch ( ... ) {}

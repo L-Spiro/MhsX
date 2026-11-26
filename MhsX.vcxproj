@@ -294,6 +294,7 @@
     <ClCompile Include="Src\HexEditor\MXHexImport.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexEditorFile.cpp" />
     <ClCompile Include="Src\HexEditor\MXSelectRangeDialog.cpp" />
+    <ClCompile Include="Src\HexEditor\MXMiniMapOptionsDialog.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexEditorProcess.cpp" />
     <ClCompile Include="Src\HexEditor\MXMiniMap.cpp" />
     <ClCompile Include="Src\Hotkeys\MXHotkeyManager.cpp" />
@@ -323,6 +324,7 @@
     <ClCompile Include="Src\Layouts\MXNumberInputLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXOpenProcessLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXSelectRangeLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXMiniMapOptionsLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXOptionsLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXPeWorksLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXSearchProgressLayout.cpp" />
@@ -463,6 +465,7 @@
     <ClInclude Include="Src\HexEditor\MXHexImport.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorFile.h" />
     <ClInclude Include="Src\HexEditor\MXSelectRangeDialog.h" />
+    <ClInclude Include="Src\HexEditor\MXMiniMapOptionsDialog.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorInterface.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorProcess.h" />
     <ClInclude Include="Src\HexEditor\MXMiniMap.h" />
@@ -496,6 +499,7 @@
     <ClInclude Include="Src\Layouts\MXNumberInputLayout.h" />
     <ClInclude Include="Src\Layouts\MXOpenProcessLayout.h" />
     <ClInclude Include="Src\Layouts\MXSelectRangeLayout.h" />
+    <ClInclude Include="Src\Layouts\MXMiniMapOptionsLayout.h" />
     <ClInclude Include="Src\Layouts\MXOptionsLayout.h" />
     <ClInclude Include="Src\Layouts\MXPeWorksLayout.h" />
     <ClInclude Include="Src\Layouts\MXSearchProgressLayout.h" />

@@ -478,6 +478,8 @@ namespace mx {
 			MX_M_TOOLS_DISASSEMBLER,
 			MX_M_TOOLS_BASE_CONVERTER,
 			MX_M_TOOLS_OPTIONS,
+			MX_M_TOOLS_WINDOWS_CALCULATOR,
+			MX_M_TOOLS_WINDOWS_NOTEPAD,
 
 
 
@@ -605,6 +607,9 @@ namespace mx {
 
 		// Format menu.
 		static LSW_MENU_ITEM					m_miFormatMenu[];
+
+		/** Tools menu. */
+		static LSW_MENU_ITEM					m_miToolsMenu[];
 
 		// Menus.
 		static LSW_MENU_LAYOUT					m_miMenus[];

@@ -459,6 +459,42 @@ namespace mx {
 		inline bool									GetShowMiniMap() const { return CurStyle()->bShowMiniMap; }
 
 		/**
+		 * Gets the Mini Map options of the current view.
+		 *
+		 * \return Returns a constant reference to the Mini Map options of the current view.
+		 **/
+		inline const CMiniMap::MX_MINI_MAP &		GetMiniMapOptions() const { return CurStyle()->mmMiniMap; }
+
+		/**
+		 * Sets the Mini Map options of the current view.  Values are clamped to their valid ranges.
+		 *
+		 * \param _mmOptions The new options.
+		 **/
+		void										SetMiniMapOptions( const CMiniMap::MX_MINI_MAP &_mmOptions ) {
+			CMiniMap::MX_MINI_MAP & mmMiniMap = CurStyle()->mmMiniMap;
+			mmMiniMap = _mmOptions;
+			mmMiniMap.i32Brightness = std::clamp<int32_t>( mmMiniMap.i32Brightness, -100, 100 );
+			mmMiniMap.ui32Contrast = std::min<uint32_t>( mmMiniMap.ui32Contrast, 100 );
+			mmMiniMap.ui32Zoom = std::clamp<uint32_t>( mmMiniMap.ui32Zoom, 1, 10 );
+			mmMiniMap.ui32BytesPerRow = std::max<uint32_t>( mmMiniMap.ui32BytesPerRow, 1 );
+			mmMiniMap.ui32SnapLines = std::max<uint32_t>( mmMiniMap.ui32SnapLines, 1 );
+			UpdateScrollbars();
+			::InvalidateRect( Wnd(), NULL, FALSE );
+		}
+
+		/**
+		 * Determines whether a point (in client coordinates) is over the Mini Map.
+		 *
+		 * \param _pPoint The point to test, in client coordinates.
+		 * \return Returns true if the Mini Map is shown and the point is over it.
+		 **/
+		bool										PointIsOverMiniMap( const POINT &_pPoint ) const {
+			lsw::LSW_RECT rMini;
+			if ( !MiniMapRect( rMini ) ) { return false; }
+			return _pPoint.x >= rMini.left && _pPoint.x < rMini.right && _pPoint.y >= rMini.top && _pPoint.y < rMini.bottom;
+		}
+
+		/**
 		 * Determines if a process is being viewed.
 		 * 
 		 * \return Returns true if the current view is to a process.
@@ -1505,7 +1541,7 @@ namespace mx {
 		void										UpdateSiblings() const;
 
 		// Draws the hex-editor view.
-		bool										PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect );
+		bool										PaintHex( HDC _hDc, const lsw::LSW_RECT &_rRect, bool _bDrawMiniMap = true );
 
 		/**
 		 * \brief Draws the mini-map.
@@ -2317,7 +2353,33 @@ namespace mx {
 			const MX_STYLE & stAll = (*CurStyle());
 			return stAll.mmMiniMap.bRightSize ?
 				_rRect.Width() - (stAll.i32MiniMapWidthPx) :
+				0;
+		}
+
+		/**
+		 * Gets the X of the Mini-Map drag bar (the edge of the Mini-Map that faces the main view).
+		 * 
+		 * \param _rRect The client rectangle.
+		 * \return Returns the X of the Mini-Map drag bar.
+		 **/
+		int32_t										MiniMapBarX( const lsw::LSW_RECT &_rRect ) const {
+			const MX_STYLE & stAll = (*CurStyle());
+			return stAll.mmMiniMap.bRightSize ?
+				MiniMapLeft( _rRect ) :
 				(stAll.i32MiniMapWidthPx);
+		}
+
+		/**
+		 * Gets the horizontal offset of the main view (address gutter, ruler, and data areas).  When the Mini-Map is shown on the left,
+		 *	the main view starts to its right.
+		 * 
+		 * \return Returns the number of pixels by which the main view is shifted to the right.
+		 **/
+		int32_t										MainViewOffsetX() const {
+			const MX_STYLE & stAll = (*CurStyle());
+			return (stAll.bShowMiniMap && !stAll.mmMiniMap.bRightSize) ?
+				(stAll.i32MiniMapWidthPx + stAll.i32PadBeforeMiniMapPx) :
+				0;
 		}
 
 		/**

@@ -270,10 +270,17 @@ namespace lsw {
 			if ( _bRedraw ) {
 				if ( !--m_iSetRedraw ) {
 					::SendMessageW( Wnd(), WM_SETREDRAW, TRUE, 0 );
+					// WM_SETREDRAW TRUE sets WS_VISIBLE, which would show a window that was hidden (a dockable behind others in a
+					//	group, for example) without it being properly shown.
+					if ( m_bHiddenBeforeSetRedraw ) {
+						const LONG_PTR lpStyle = ::GetWindowLongPtrW( Wnd(), GWL_STYLE );
+						if ( lpStyle & WS_VISIBLE ) { ::SetWindowLongPtrW( Wnd(), GWL_STYLE, lpStyle & ~LONG_PTR( WS_VISIBLE ) ); }
+					}
 				}
 			}
 			else {
 				if ( !m_iSetRedraw++ ) {
+					m_bHiddenBeforeSetRedraw = Wnd() && !(::GetWindowLongPtrW( Wnd(), GWL_STYLE ) & WS_VISIBLE);
 					::SendMessageW( Wnd(), WM_SETREDRAW, FALSE, 0 );
 				}
 			}
@@ -1054,6 +1061,8 @@ namespace lsw {
 		INT									m_iLastHit = 0;
 		/** Redraw counter. */
 		INT									m_iSetRedraw = 0;
+		/** The window was hidden when SetRedraw() turned redrawing off (it is kept hidden when redrawing is turned back on). */
+		bool								m_bHiddenBeforeSetRedraw = false;
 		/** Enabled. */
 		BOOL								m_bEnabled = TRUE;
 		/** Default state.  Depends on the type of control. */

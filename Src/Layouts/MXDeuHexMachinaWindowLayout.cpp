@@ -755,6 +755,15 @@ namespace mx {
 		m_miFileNewMenu
 	};
 
+	// Tools menu.
+	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miToolsMenu[] = {
+		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen															bSkip	aHotkey
+		{ FALSE,		MX_M_TOOLS_EXPRESSION_EVALUATOR,				TRUE,		FALSE,		TRUE,		MW_MENU_TXT( _T_7B97062A__Expression_Evaluator, _LEN_7B97062A ),				false,	{ static_cast<BYTE>(FVIRTKEY), VK_F8, MX_M_TOOLS_EXPRESSION_EVALUATOR } },
+		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
+		{ FALSE,		MX_M_TOOLS_WINDOWS_CALCULATOR,					FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_E1053BE4_Windows_C_alculator___, _LEN_E1053BE4 ) },
+		{ FALSE,		MX_M_TOOLS_WINDOWS_NOTEPAD,						FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_A16E1680_Windows__Notepad___, _LEN_A16E1680 ) },
+	};
+
 	// Menus.
 	LSW_MENU_LAYOUT CDeusHexMachinaLayout::m_miMenus[] = {
 		{
@@ -1003,6 +1012,13 @@ namespace mx {
 			MX_M_MENU_FORMAT,
 			std::size( m_miFormatMenu ),
 			m_miFormatMenu
+		},
+		{
+			MX_M_TOOLS,
+			MX_M_MENU_BAR,
+			MX_M_MENU_TOOLS,
+			std::size( m_miToolsMenu ),
+			m_miToolsMenu
 		},
 	};
 

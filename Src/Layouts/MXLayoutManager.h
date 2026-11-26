@@ -49,6 +49,7 @@ namespace mx {
 		MX_EXPORT_HEX,
 		MX_FIND_DIALOG,
 		MX_FIND_PROGRESS,
+		MX_MINI_MAP_OPTIONS,
 	};
 
 	class CLayoutManager : public lsw::CLayoutManager {
