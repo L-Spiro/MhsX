@@ -2,6 +2,7 @@
 #include "../Layouts/MXLayoutMacros.h"
 #include "../Layouts/MXLayoutManager.h"
 #include "../Layouts/MXExportHexLayout.h"
+#include "../Layouts/MXExpressionEvaluatorLayout.h"
 #include "../Layouts/MXFontDialogLayout.h"
 #include "../Layouts/MXNumberInputLayout.h"
 #include "../Layouts/MXOpenProcessLayout.h"
@@ -655,6 +656,10 @@ namespace mx {
 			}
 			case Layout::MX_M_FIND_FIND : {
 				ShowFind();
+				break;
+			}
+			case Layout::MX_M_TOOLS_EXPRESSION_EVALUATOR : {
+				ShowExpEval();
 				break;
 			}
 			case Layout::MX_M_FIND_FIND_NEXT : {
@@ -3343,6 +3348,137 @@ namespace mx {
 	}
 
 	/**
+	 * Shows the Hex Editor's Expression Evaluator (Tools -> Expression Evaluator), creating it if needed.  If it is docked
+	 *	behind other dockables, its tab is selected.
+	 **/
+	void CDeusHexMachinaWindow::ShowExpEval() {
+		CMultiSplitter * pmsSplitter = MultiSplitter();
+		if ( !pmsSplitter ) { return; }
+		if ( !m_peeExpEval ) {
+			m_peeExpEval = static_cast<CExpEvalWindow *>(CExpressionEvaluatorLayout::CreateExpEvalWindow( pmsSplitter ));
+			if ( !m_peeExpEval ) { return; }
+			if ( m_pmhMemHack ) {
+				m_peeExpEval->SetUpdateSpeed( 1000 / std::max( m_pmhMemHack->Options().dwExpressionRefresh, static_cast<DWORD>(1) ) );
+			}
+			m_peeExpEval->AddDockTarget( pmsSplitter );
+			// [address] reads from the file or process in the current tab.
+			m_peeExpEval->SetAddressHandler( ExpAddressHandler, reinterpret_cast<uintptr_t>(this) );
+		}
+		else {
+			pmsSplitter->SelectDocked( m_peeExpEval );
+			m_peeExpEval->SetVisible( TRUE );
+		}
+	}
+
+	/**
+	 * Informs that a child was removed from a child control (or from this one).  Forgets the Expression Evaluator when it is
+	 *	closed.
+	 *
+	 * \param _pwChild The child that was removed.
+	 **/
+	void CDeusHexMachinaWindow::ChildWasRemoved( const CWidget * _pwChild ) {
+		if ( m_peeExpEval && static_cast<const CWidget *>(m_peeExpEval) == _pwChild ) { m_peeExpEval = nullptr; }
+		lsw::CMainWindow::ChildWasRemoved( _pwChild );
+	}
+
+	/**
+	 * Reads values for the Expression Evaluator's [address] expressions from the current tab.  Addresses are those shown (they
+	 *	include the starting address), and values are read in the byte order of the view.
+	 *
+	 * \param _ui64Address The address.
+	 * \param _ctType The type to read.
+	 * \param _uiptrData The CDeusHexMachinaWindow.
+	 * \param _peecContainer The expression container.
+	 * \param _rResult Receives the value.
+	 * \return Returns true if the value was read.
+	 **/
+	bool __stdcall CDeusHexMachinaWindow::ExpAddressHandler( uint64_t _ui64Address, ee::EE_CAST_TYPES _ctType, uintptr_t _uiptrData,
+		ee::CExpEvalContainer * /*_peecContainer*/, ee::CExpEvalContainer::EE_RESULT &_rResult ) {
+		_rResult.ncType = ee::EE_NC_INVALID;
+		CDeusHexMachinaWindow * pdhmwThis = reinterpret_cast<CDeusHexMachinaWindow *>(_uiptrData);
+		if ( !pdhmwThis ) { return false; }
+		CHexEditorControl * phecControl = pdhmwThis->CurrentEditor();
+		const size_t sTab = pdhmwThis->CurrentTab();
+		if ( !phecControl || sTab >= pdhmwThis->m_vTabs.size() || !pdhmwThis->m_vTabs[sTab].pheiInterface ) { return false; }
+
+		size_t sSize;
+		switch ( _ctType ) {
+			case ee::EE_CT_INT8 : {}								MX_FALLTHROUGH
+			case ee::EE_CT_UINT8 : { sSize = 1; break; }
+			case ee::EE_CT_INT16 : {}								MX_FALLTHROUGH
+			case ee::EE_CT_UINT16 : {}								MX_FALLTHROUGH
+			case ee::EE_CT_FLOAT16 : { sSize = 2; break; }
+			case ee::EE_CT_INT32 : {}								MX_FALLTHROUGH
+			case ee::EE_CT_UINT32 : {}								MX_FALLTHROUGH
+			case ee::EE_CT_FLOAT : { sSize = 4; break; }
+			case ee::EE_CT_INT64 : {}								MX_FALLTHROUGH
+			case ee::EE_CT_UINT64 : {}								MX_FALLTHROUGH
+			case ee::EE_CT_DOUBLE : { sSize = 8; break; }
+			default : { return false; }
+		}
+		const uint64_t ui64Bias = phecControl->StartingAddress();
+		if ( _ui64Address < ui64Bias ) { return false; }
+		try {
+			std::vector<uint8_t> vBytes;
+			if ( !pdhmwThis->m_vTabs[sTab].pheiInterface->Read( _ui64Address - ui64Bias, vBytes, sSize ) || vBytes.size() < sSize ) { return false; }
+			if ( phecControl->IsBigEndian() ) { std::reverse( vBytes.begin(), vBytes.begin() + sSize ); }
+			uint64_t ui64Raw = 0;
+			std::memcpy( &ui64Raw, vBytes.data(), sSize );
+			switch ( _ctType ) {
+				case ee::EE_CT_INT8 : {
+					_rResult.ncType = ee::EE_NC_SIGNED;
+					_rResult.u.i64Val = int8_t( ui64Raw );
+					return true;
+				}
+				case ee::EE_CT_INT16 : {
+					_rResult.ncType = ee::EE_NC_SIGNED;
+					_rResult.u.i64Val = int16_t( ui64Raw );
+					return true;
+				}
+				case ee::EE_CT_INT32 : {
+					_rResult.ncType = ee::EE_NC_SIGNED;
+					_rResult.u.i64Val = int32_t( ui64Raw );
+					return true;
+				}
+				case ee::EE_CT_INT64 : {
+					_rResult.ncType = ee::EE_NC_SIGNED;
+					_rResult.u.i64Val = int64_t( ui64Raw );
+					return true;
+				}
+				case ee::EE_CT_UINT8 : {}							MX_FALLTHROUGH
+				case ee::EE_CT_UINT16 : {}							MX_FALLTHROUGH
+				case ee::EE_CT_UINT32 : {}							MX_FALLTHROUGH
+				case ee::EE_CT_UINT64 : {
+					_rResult.ncType = ee::EE_NC_UNSIGNED;
+					_rResult.u.ui64Val = ui64Raw;
+					return true;
+				}
+				case ee::EE_CT_FLOAT16 : {
+					_rResult.ncType = ee::EE_NC_FLOATING;
+					_rResult.u.dVal = ee::CFloat16( uint16_t( ui64Raw ) ).Value();
+					return true;
+				}
+				case ee::EE_CT_FLOAT : {
+					float fVal;
+					std::memcpy( &fVal, &ui64Raw, sizeof( fVal ) );
+					_rResult.ncType = ee::EE_NC_FLOATING;
+					_rResult.u.dVal = fVal;
+					return true;
+				}
+				case ee::EE_CT_DOUBLE : {
+					_rResult.ncType = ee::EE_NC_FLOATING;
+					std::memcpy( &_rResult.u.dVal, &ui64Raw, sizeof( _rResult.u.dVal ) );
+					return true;
+				}
+				default : {}
+			}
+		}
+		catch ( ... ) {}
+		_rResult.ncType = ee::EE_NC_INVALID;
+		return false;
+	}
+
+	/**
 	 * Shows the Set Starting Address dialog and sets the address shown for the first byte of the current tab.
 	 **/
 	void CDeusHexMachinaWindow::ShowSetStartingAddress() {
@@ -4334,6 +4470,10 @@ namespace mx {
 						.fState = UINT( ((pheiThis && pheiThis->ReadOnly()) ? MFS_CHECKED : MFS_UNCHECKED) |
 							((pheiThis && !pheiThis->SourceReadOnly()) ? MFS_ENABLED : MFS_GRAYED) ) };
 					::SetMenuItemInfoW( _hMenu, uiId, FALSE, &miiInfo );
+					break;
+				}
+				case Layout::MX_M_TOOLS_EXPRESSION_EVALUATOR : {
+					::CheckMenuItem( _hMenu, uiId, MF_BYCOMMAND | (m_peeExpEval ? MF_CHECKED : MF_UNCHECKED) );
 					break;
 				}
 				case Layout::MX_M_EDIT_KEEP_FILE_TIME : {

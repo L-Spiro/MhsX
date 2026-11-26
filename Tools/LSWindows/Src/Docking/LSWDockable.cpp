@@ -115,6 +115,7 @@ namespace lsw {
 			case CDockTarget::LSW_AT_RIGHT : { return LSW_DS_DOCKED_RIGHT; }
 			case CDockTarget::LSW_AT_TOP : { return LSW_DS_DOCKED_TOP; }
 			case CDockTarget::LSW_AT_BOTTOM : { return LSW_DS_DOCKED_BOTTOM; }
+			case CDockTarget::LSW_AT_TAB : { return LSW_DS_DOCKED_TAB; }
 		}
 		return LSW_DS_FLOATING;
 	}

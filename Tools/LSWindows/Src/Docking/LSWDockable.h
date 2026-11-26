@@ -36,6 +36,7 @@ namespace lsw {
 			LSW_DS_DOCKED_RIGHT				= 0x02,
 			LSW_DS_DOCKED_TOP				= 0x04,
 			LSW_DS_DOCKED_BOTTOM			= 0x08,
+			LSW_DS_DOCKED_TAB				= 0x10,		/**< Docked over other dockables, with tabs to choose between them. */
 			LSW_DS_ALL_DOCKS				= LSW_DS_DOCKED_LEFT | LSW_DS_DOCKED_RIGHT | LSW_DS_DOCKED_TOP | LSW_DS_DOCKED_BOTTOM,
 
 		};

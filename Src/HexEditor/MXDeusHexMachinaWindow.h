@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../MXMhsX.h"
+#include "../ExpEval/MXExpEvalWindow.h"
 #include "../Layouts/MXDeuHexMachinaWindowLayout.h"
 #include "../Layouts/MXExportHexLayout.h"
 #include "../Layouts/MXFindLayout.h"
@@ -447,6 +448,34 @@ namespace mx {
 		inline const CFindResults &					FindResults() const { return m_frFindResults; }
 
 		/**
+		 * Shows the Hex Editor's Expression Evaluator (Tools -> Expression Evaluator), creating it if needed.  If it is docked
+		 *	behind other dockables, its tab is selected.
+		 **/
+		void										ShowExpEval();
+
+		/**
+		 * Informs that a child was removed from a child control (or from this one).  Forgets the Expression Evaluator when it is
+		 *	closed.
+		 *
+		 * \param _pwChild The child that was removed.
+		 **/
+		virtual void								ChildWasRemoved( const CWidget * _pwChild );
+
+		/**
+		 * Reads values for the Expression Evaluator's [address] expressions from the current tab.  Addresses are those shown (they
+		 *	include the starting address), and values are read in the byte order of the view.
+		 *
+		 * \param _ui64Address The address.
+		 * \param _ctType The type to read.
+		 * \param _uiptrData The CDeusHexMachinaWindow.
+		 * \param _peecContainer The expression container.
+		 * \param _rResult Receives the value.
+		 * \return Returns true if the value was read.
+		 **/
+		static bool __stdcall						ExpAddressHandler( uint64_t _ui64Address, ee::EE_CAST_TYPES _ctType, uintptr_t _uiptrData,
+			ee::CExpEvalContainer * _peecContainer, ee::CExpEvalContainer::EE_RESULT &_rResult );
+
+		/**
 		 * Shows the Export Hex dialog and writes the current file, process, or selection to a text file in the format chosen.
 		 **/
 		void										ExportHex();
@@ -640,6 +669,8 @@ namespace mx {
 		const CHexEditorInterface *					m_pheiFindLock = nullptr;
 		/** Where Incremental Search searches from (the caret when the Find dialog was opened). */
 		uint64_t									m_ui64FindAnchor = 0;
+		/** The Hex Editor's Expression Evaluator (nullptr until it is shown, and after it is closed). */
+		CExpEvalWindow *							m_peeExpEval = nullptr;
 		/** The number of untitled files created (for naming them). */
 		uint32_t									m_ui32Untitled = 0;
 

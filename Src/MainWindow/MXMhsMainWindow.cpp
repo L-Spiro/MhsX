@@ -635,6 +635,8 @@ namespace mx {
 			m_pfaFoundAddresses->AddFoundAddresses();
 		}
 		else {
+			// Docked behind other dockables, its tab is selected.
+			if ( MultiSplitter() ) { MultiSplitter()->SelectDocked( m_pfaFoundAddresses ); }
 			m_pfaFoundAddresses->SetVisible( TRUE );
 		}
 		UpdateWindowChecks();
@@ -651,6 +653,8 @@ namespace mx {
 			m_peeExpEval->SetAddressWriteHandler( CMemHack::ExpAddressWriteHandler, reinterpret_cast<uintptr_t>(m_pmhMemHack) );
 		}
 		else {
+			// Docked behind other dockables, its tab is selected.
+			if ( MultiSplitter() ) { MultiSplitter()->SelectDocked( m_peeExpEval ); }
 			m_peeExpEval->SetVisible( TRUE );
 		}
 		UpdateWindowChecks();
@@ -664,6 +668,8 @@ namespace mx {
 			m_cwConverter->SetAddressHandler( CMemHack::ExpAddressHandler, reinterpret_cast<uintptr_t>(m_pmhMemHack) );
 		}
 		else {
+			// Docked behind other dockables, its tab is selected.
+			if ( MultiSplitter() ) { MultiSplitter()->SelectDocked( m_cwConverter ); }
 			m_cwConverter->SetVisible( TRUE );
 		}
 		UpdateWindowChecks();

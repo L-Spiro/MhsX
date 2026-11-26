@@ -20,6 +20,7 @@ namespace lsw {
 			LSW_AT_RIGHT,
 			LSW_AT_TOP,
 			LSW_AT_BOTTOM,
+			LSW_AT_TAB,																	/**< Layered over what is already there, with tabs to choose between them. */
 		};
 
 

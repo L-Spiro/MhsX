@@ -7,6 +7,12 @@
 
 namespace lsw {
 
+	class CTab;
+
+	/**
+	 * A window split into resizable areas, into which dockables can be docked.  Dockables can also be docked over each other
+	 *	(LSW_AT_TAB), forming a group that shows one of them at a time, with tabs to choose between them.
+	 **/
 	class CMultiSplitter : public CWidget, public CDockTarget {
 	public :
 		CMultiSplitter( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
@@ -29,6 +35,24 @@ namespace lsw {
 
 		// Root ID.
 		DWORD								RootId() const { return m_meRoot.dwId; }
+
+		/**
+		 * Brings a docked widget to the front: if it is in a group of tabbed dockables, its tab is selected.
+		 *
+		 * \param _pwWidget The widget.
+		 * \return Returns true if the widget is docked here.
+		 **/
+		bool								SelectDocked( const CWidget * _pwWidget );
+
+		/**
+		 * Notified when the selected tab of a tab control changes.  Changes in the tabs of groups of docked widgets are handled here
+		 *	and not passed on.
+		 *
+		 * \param _pwTab The tab control.
+		 * \param _iTab The selected tab.
+		 * \param _lpnHdr The notification header.
+		 **/
+		virtual void						TabSelChanged( CWidget * _pwTab, int _iTab, LPNMHDR _lpnHdr );
 
 		// Client rectangle.
 		virtual LSW_RECT					ClientRect( const CWidget * pwChild ) const;
@@ -132,6 +156,13 @@ namespace lsw {
 			LSW_MS_RECT *					pmrRect;
 		};
 
+		/** A group of widgets docked over each other, with a tab control to choose which one is shown. */
+		struct LSW_MS_GROUP {
+			CTab *							ptTab = nullptr;		/**< The tab control, which is what occupies the group's rectangle. */
+			std::vector<CWidget *>			vMembers;				/**< The widgets in the group, in the order of their tabs.  They are
+																		 children of the splitter, shown over the tab control's page area. */
+		};
+
 		// Detach data.
 		struct LSW_MS_DETACH {
 			LSW_MS_LAYER *					pmlLayer;				// Layer containing the widget to remove.
@@ -168,8 +199,14 @@ namespace lsw {
 		bool								m_bSetCursorToggle;
 		// Show the default cursor?
 		bool								m_bShowCursor = false;
+		/** The groups of tabbed widgets. */
+		std::vector<LSW_MS_GROUP>			m_vGroups;
+		/** Set while the splitter is being destroyed (groups are then left as they are). */
+		bool								m_bDestroying = false;
 		// IDs.
 		static DWORD						m_dwIds;
+		/** The control ID given to the next group's tab control. */
+		static WORD							m_wNextGroupId;
 
 
 
@@ -337,6 +374,100 @@ namespace lsw {
 		 * \return Returns true if the copy was made.
 		 **/
 		bool								CopyLayerTreeForDrag( const CWidget * _pwDragging );
+
+		/**
+		 * Determines whether widgets can be docked over a widget as tabs (it is a dockable or a group of them).
+		 *
+		 * \param _pwWidget The widget in a rectangle.
+		 * \return Returns true if a dockable can be tabbed over it.
+		 **/
+		bool								CanTabOnto( const CWidget * _pwWidget ) const;
+
+		/**
+		 * Gets the attachment point for docking over the widget in a rectangle as a tab.
+		 *
+		 * \param _pPoint The point (client coordinates).
+		 * \param _maAttach Receives the attachment.
+		 * \param _rAttachRect Receives the rectangle to draw (client coordinates).
+		 * \param _mrRect The rectangle.
+		 * \return Returns the squared distance from the point to the center of the rectangle, or LONG_MAX if nothing can be tabbed
+		 *	there.
+		 **/
+		LONG								GetTabAttachPoint( const POINT &_pPoint, LSW_DT_ATTACH &_maAttach, LSW_RECT &_rAttachRect,
+			const LSW_MS_RECT &_mrRect ) const;
+
+		/**
+		 * Docks a widget over the widget in a rectangle, making a group if there is not one there yet.
+		 *
+		 * \param _maAttach The attachment (LSW_AT_TAB).
+		 * \param _mrRect The rectangle.
+		 * \return Returns true if the widget was docked.
+		 **/
+		bool								AttachAsTab( const LSW_DT_ATTACH &_maAttach, LSW_MS_RECT &_mrRect );
+
+		/**
+		 * Finds the group whose tab control is a widget.
+		 *
+		 * \param _pwTab The widget.
+		 * \return Returns the index of the group, or SIZE_MAX.
+		 **/
+		size_t								FindGroup( const CWidget * _pwTab ) const;
+
+		/**
+		 * Finds the group that contains a widget.
+		 *
+		 * \param _wId The ID of the widget.
+		 * \param _sMember Receives the index of the widget in the group.
+		 * \return Returns the index of the group, or SIZE_MAX.
+		 **/
+		size_t								FindGroupOfMember( WORD _wId, size_t &_sMember ) const;
+
+		/**
+		 * Creates an empty group (with its tab control).
+		 *
+		 * \return Returns the index of the new group, or SIZE_MAX on failure.
+		 **/
+		size_t								CreateGroup();
+
+		/**
+		 * Adds a widget to a group and shows it.
+		 *
+		 * \param _sGroup The index of the group.
+		 * \param _pwWidget The widget.
+		 * \return Returns true if it was added.
+		 **/
+		bool								AddToGroup( size_t _sGroup, CWidget * _pwWidget );
+
+		/**
+		 * Removes a widget from the group it is in.  A group left with one widget is replaced by that widget.
+		 *
+		 * \param _wId The ID of the widget.
+		 * \return Returns true if the widget was in a group.
+		 **/
+		bool								RemoveFromGroup( WORD _wId );
+
+		/**
+		 * Finds the rectangle that holds a widget.
+		 *
+		 * \param _pwWidget The widget.
+		 * \param _mrRoot The root of the tree to search.
+		 * \return Returns the rectangle, or nullptr.
+		 **/
+		static LSW_MS_RECT *				FindCellByWidget( const CWidget * _pwWidget, LSW_MS_RECT &_mrRoot );
+
+		/**
+		 * Finds the rectangle that holds a widget in a layer.
+		 *
+		 * \param _pwWidget The widget.
+		 * \param _mlLayer The layer to search.
+		 * \return Returns the rectangle, or nullptr.
+		 **/
+		static LSW_MS_RECT *				FindCellByWidget( const CWidget * _pwWidget, LSW_MS_LAYER &_mlLayer );
+
+		/**
+		 * Moves the tab control of each group to its rectangle (the widgets in a group size themselves from ClientRect()).
+		 **/
+		void								SizeGroups();
 	};
 
 }	// namespace lsw
