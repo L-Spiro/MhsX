@@ -3430,11 +3430,20 @@ namespace mx {
 		}*/
 
 		// Values that changed (any of their bytes).
-		if ( !m_mChanges.empty() && _ui64Address < Size() ) {
-			uint32_t ui32Time;
-			if ( ChangedIn( _ui64Address, StrideForFormat( _bRightArea ? stAll.dfRightNumbersFmt : stAll.dfLeftNumbersFmt ), ui32Time ) ) {
-				crBaseColor = ChangedColor( crBaseColor, ui32Time );
-				bDefaultBaseColor = false;
+		if ( _ui64Address < Size() ) {
+			const uint32_t ui32Stride = StrideForFormat( _bRightArea ? stAll.dfRightNumbersFmt : stAll.dfLeftNumbersFmt );
+			if ( m_pheiTarget && m_pheiTarget->TracksChangedBytes() ) {
+				if ( m_pheiTarget->BytesChanged( _ui64Address, std::max<uint32_t>( ui32Stride, 1 ) ) ) {
+					crBaseColor = ForeColors()->crModified;
+					bDefaultBaseColor = false;
+				}
+			}
+			else if ( !m_mChanges.empty() ) {
+				uint32_t ui32Time;
+				if ( ChangedIn( _ui64Address, ui32Stride, ui32Time ) ) {
+					crBaseColor = ChangedColor( crBaseColor, ui32Time );
+					bDefaultBaseColor = false;
+				}
 			}
 		}
 
@@ -6943,6 +6952,8 @@ namespace mx {
 	void CHexEditorControl::WatchForChanges() {
 		// A hidden view keeps what it saw last, so changes made meanwhile show when it is shown again.
 		if ( !m_pheiTarget || !Wnd() || !::IsWindowVisible( Wnd() ) ) { return; }
+		// Data sources that know their own changes (files) are shown from those instead.
+		if ( m_pheiTarget->TracksChangedBytes() ) { return; }
 		try {
 			const uint32_t ui32Bpr = CurStyle()->uiBytesPerRow ? CurStyle()->uiBytesPerRow : 16;
 			const uint64_t ui64Addr = m_sdScrollView[m_eaEditAs].ui64FirstVisibleLine * ui32Bpr;

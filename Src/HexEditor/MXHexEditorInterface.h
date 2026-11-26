@@ -108,6 +108,24 @@ namespace mx {
 		virtual bool						SourceReadOnly() const { return false; }
 
 		/**
+		 * Determines whether the data source itself knows which of its bytes differ from the original data (files do).  If so, the
+		 *	hex editor shows exactly those bytes as changed (see BytesChanged()), so a change that is undone stops being shown as
+		 *	changed.  Otherwise the hex editor highlights the bytes it sees change.
+		 *
+		 * \return Returns true if BytesChanged() can be used.
+		 **/
+		virtual bool						TracksChangedBytes() const { return false; }
+
+		/**
+		 * Determines whether any byte in a range differs from the original data (see TracksChangedBytes()).
+		 *
+		 * \param _ui64Addr The address of the first byte.
+		 * \param _ui64Size The number of bytes.
+		 * \return Returns true if at least one of the bytes is changed.
+		 **/
+		virtual bool						BytesChanged( uint64_t /*_ui64Addr*/, uint64_t /*_ui64Size*/ ) const { return false; }
+
+		/**
 		 * Turns Read Only mode on or off.  In Read Only mode, edits are refused even if the data source can be written.
 		 *
 		 * \param _bReadOnly If true, Read Only mode is turned on.

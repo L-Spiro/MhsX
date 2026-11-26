@@ -24769,3 +24769,39 @@
 #define _DEC_S_ACF8DC2F_He_x mx::CStringDecoder::DecodeToString( _T_ACF8DC2F_He_x, _LEN_ACF8DC2F )
 #define _DEC_WS_ACF8DC2F_He_x mx::CStringDecoder::DecodeToWString( _T_ACF8DC2F_He_x, _LEN_ACF8DC2F )
 
+// …
+
+#define _T_5111434A____ "\x6A\x4E\x76"
+#define _LEN_5111434A 3
+#define _T_LEN_5111434A____ _T_5111434A____, _LEN_5111434A
+#define _DEC_5111434A____( STR ) mx::CStringDecoder::Decode( _T_5111434A____, _LEN_5111434A, STR )
+#define _DEC_S_5111434A____ mx::CStringDecoder::DecodeToString( _T_5111434A____, _LEN_5111434A )
+#define _DEC_WS_5111434A____ mx::CStringDecoder::DecodeToWString( _T_5111434A____, _LEN_5111434A )
+
+// Opened read-only: the file is in use by another program.
+
+#define _T_17C5E241_Opened_read_only__the_file_is_in_use_by_another_program_ "\xD7\x3E\x35\x09\xF7\x2D\xAE\x39\x35\x29\x2D\xFB\x01\x09\x33\x01\x08\xF0\x0F\xFA\x2E\xAE\x2D\x39\x34\x2E\xEE\xFB\x0E\xE7\xF1\x3C\xF0\x10\x05\x2E\xAE\x29\x49\xE8\x2A\x3C\x01\x0F\x2F\xED\x40\xF0\x0B\x04\x38\xF5\x39\x31\x35\xF7"
+#define _LEN_17C5E241 56
+#define _T_LEN_17C5E241_Opened_read_only__the_file_is_in_use_by_another_program_ _T_17C5E241_Opened_read_only__the_file_is_in_use_by_another_program_, _LEN_17C5E241
+#define _DEC_17C5E241_Opened_read_only__the_file_is_in_use_by_another_program_( STR ) mx::CStringDecoder::Decode( _T_17C5E241_Opened_read_only__the_file_is_in_use_by_another_program_, _LEN_17C5E241, STR )
+#define _DEC_S_17C5E241_Opened_read_only__the_file_is_in_use_by_another_program_ mx::CStringDecoder::DecodeToString( _T_17C5E241_Opened_read_only__the_file_is_in_use_by_another_program_, _LEN_17C5E241 )
+#define _DEC_WS_17C5E241_Opened_read_only__the_file_is_in_use_by_another_program_ mx::CStringDecoder::DecodeToWString( _T_17C5E241_Opened_read_only__the_file_is_in_use_by_another_program_, _LEN_17C5E241 )
+
+// Opened read-only: write access to the file was denied.
+
+#define _T_A963AFA9_Opened_read_only__write_access_to_the_file_was_denied_ "\xD7\x3E\x35\x09\xF7\x2D\xAE\x39\x35\x29\x2D\xFB\x01\x09\x33\x01\x08\xF0\x12\x04\x32\x02\x2C\xF0\x29\x2C\x31\xF7\x0E\x3A\xA8\x42\x3F\xBB\x06\x31\xF3\xE7\x36\x31\x35\x33\xB2\x12\x28\xFB\xEE\x34\x00\x00\x32\xF3\x2B\xFE"
+#define _LEN_A963AFA9 54
+#define _T_LEN_A963AFA9_Opened_read_only__write_access_to_the_file_was_denied_ _T_A963AFA9_Opened_read_only__write_access_to_the_file_was_denied_, _LEN_A963AFA9
+#define _DEC_A963AFA9_Opened_read_only__write_access_to_the_file_was_denied_( STR ) mx::CStringDecoder::Decode( _T_A963AFA9_Opened_read_only__write_access_to_the_file_was_denied_, _LEN_A963AFA9, STR )
+#define _DEC_S_A963AFA9_Opened_read_only__write_access_to_the_file_was_denied_ mx::CStringDecoder::DecodeToString( _T_A963AFA9_Opened_read_only__write_access_to_the_file_was_denied_, _LEN_A963AFA9 )
+#define _DEC_WS_A963AFA9_Opened_read_only__write_access_to_the_file_was_denied_ mx::CStringDecoder::DecodeToWString( _T_A963AFA9_Opened_read_only__write_access_to_the_file_was_denied_, _LEN_A963AFA9 )
+
+// Opened read-only: the file could not be opened for writing.
+
+#define _T_C800688C_Opened_read_only__the_file_could_not_be_opened_for_writing_ "\xD7\x3E\x35\x09\xF7\x2D\xAE\x39\x35\x29\x2D\xFB\x01\x09\x33\x01\x08\xF0\x0F\xFA\x2E\xAE\x2D\x39\x34\x2E\xEE\xF5\x0A\x3C\xF4\x32\xF0\x09\x01\x3D\xAE\x29\x35\xE8\x38\x3E\xF7\x09\x2C\xEC\xEE\x36\x0A\x04\xE9\x05\x39\x39\x3C\x32\x3C\xF9\xC9"
+#define _LEN_C800688C 59
+#define _T_LEN_C800688C_Opened_read_only__the_file_could_not_be_opened_for_writing_ _T_C800688C_Opened_read_only__the_file_could_not_be_opened_for_writing_, _LEN_C800688C
+#define _DEC_C800688C_Opened_read_only__the_file_could_not_be_opened_for_writing_( STR ) mx::CStringDecoder::Decode( _T_C800688C_Opened_read_only__the_file_could_not_be_opened_for_writing_, _LEN_C800688C, STR )
+#define _DEC_S_C800688C_Opened_read_only__the_file_could_not_be_opened_for_writing_ mx::CStringDecoder::DecodeToString( _T_C800688C_Opened_read_only__the_file_could_not_be_opened_for_writing_, _LEN_C800688C )
+#define _DEC_WS_C800688C_Opened_read_only__the_file_could_not_be_opened_for_writing_ mx::CStringDecoder::DecodeToWString( _T_C800688C_Opened_read_only__the_file_could_not_be_opened_for_writing_, _LEN_C800688C )
+

@@ -99,8 +99,8 @@ namespace mx {
 			MX_DEF_EDIT_HEIGHT + 2,					// dwHeight
 			MX_BUTTONSTYLE,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,	// dwStyleEx
-			MX_MAKE_WCHAR( _T_1A43B61B____ ),		// pwcText
-			_LEN_1A43B61B,							// sTextLen
+			MX_MAKE_WCHAR( _T_5111434A____ ),		// pwcText
+			_LEN_5111434A,							// sTextLen
 			MX_EHI_DIALOG,							// dwParentId
 		},
 		{

@@ -898,11 +898,12 @@ namespace mx {
 		inline uint32_t								BytesPerRow() const { return CurStyle()->uiBytesPerRow ? CurStyle()->uiBytesPerRow : 16; }
 
 		/**
-		 * Determines whether any values are highlighted as changed.
+		 * Determines whether any values are highlighted as changed in a way that can be cleared.  The changes in a file are shown from
+		 *	the file itself (they stop being shown when undone) and cannot be cleared.
 		 *
 		 * \return Returns true if at least one byte is highlighted as changed.
 		 **/
-		inline bool									HasChanges() const { return !m_mChanges.empty(); }
+		inline bool									HasChanges() const { return !m_mChanges.empty() && !(m_pheiTarget && m_pheiTarget->TracksChangedBytes()); }
 
 		/**
 		 * Performs an Undo operation.

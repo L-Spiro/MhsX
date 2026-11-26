@@ -69,6 +69,24 @@ namespace mx {
 		inline void												MarkSaved() { m_sSavedUndoIdx = m_sUndoIdx; }
 
 		/**
+		 * \brief Gets the reason the file could not be opened for writing (when OpenFile() had to open it read-only).
+		 *
+		 * \return Returns the Windows error code of the failed attempt to open the file for writing, or ERROR_SUCCESS if it was opened
+		 *	for writing (or was not opened by OpenFile()).
+		 */
+		inline DWORD											WriteOpenError() const { return m_dwWriteOpenError; }
+
+		/**
+		 * \brief Determines whether any byte in a range refers to data other than the original file: it was typed, pasted, or inserted
+		 *	(and the change has not since been undone).  For a new file, the data it was created with counts as the original.
+		 *
+		 * \param _ui64Addr The logical address of the first byte.
+		 * \param _ui64Size The number of bytes.
+		 * \return Returns true if at least one of the bytes is changed.
+		 */
+		bool													BytesChanged( uint64_t _ui64Addr, uint64_t _ui64Size ) const;
+
+		/**
 		 * \brief Writes a range of the logical view to an open file at its current position.
 		 *
 		 * \param _hFile The file, opened for writing.
@@ -489,6 +507,8 @@ namespace mx {
 		MX_CLIPBOARD											m_cbClipBoards[TotalClipboards];				/**< The clipboards. */
 
 		bool													m_bInsertPending = false;						/**< A streamed insertion (BeginInsertData()) is in progress. */
+		std::vector<MX_LOGICAL_SECTION>							m_vBaseSections;								/**< For a new file, the segment sections that hold the data it was created with (they count as the original data). */
+		DWORD													m_dwWriteOpenError = ERROR_SUCCESS;				/**< Why OpenFile() could not open the file for writing, or ERROR_SUCCESS. */
 		size_t													m_sInsertMapIdx = 0;							/**< Index into m_vEditedMaps of the pending insertion's segment. */
 		uint64_t												m_ui64InsertStart = 0;							/**< Offset in the segment of the pending insertion. */
 		uint64_t												m_ui64InsertTotal = 0;							/**< Bytes announced for the pending insertion. */

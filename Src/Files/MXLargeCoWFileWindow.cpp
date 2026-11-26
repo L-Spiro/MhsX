@@ -35,10 +35,12 @@ namespace mx {
 		Reset();
 
 		if ( !m_fmMainMap.CreateMap( _pFile, TRUE ) ) {
+			const DWORD dwWriteError = ::GetLastError();
 			if ( !m_fmMainMap.CreateMap( _pFile, FALSE ) ) {
 				Reset();
 				return false;
 			}
+			m_dwWriteOpenError = (dwWriteError == ERROR_SUCCESS) ? ERROR_ACCESS_DENIED : dwWriteError;
 		}
 		try {
 			uint64_t ui64Size = m_fmMainMap.Size();
@@ -96,6 +98,8 @@ namespace mx {
 			m_vAsideFiles = std::vector<std::filesystem::path>();
 			m_bUntitled = false;
 			m_sSavedUndoIdx = size_t( -1 );
+			m_vBaseSections = std::vector<MX_LOGICAL_SECTION>();
+			m_dwWriteOpenError = ERROR_SUCCESS;
 			m_vEditedMaps = std::vector<std::unique_ptr<CFileMap>>();
 			m_vActiveSegments = std::vector<uint64_t>();
 			m_vLogicalMap = std::vector<MX_LOGICAL_SECTION>();
@@ -1247,6 +1251,7 @@ namespace mx {
 				m_sUndoIdx = size_t( -1 );
 				m_vItemsInGroup = std::vector<uint64_t>();
 				m_i32UndoGroupCnt = 0;
+				m_vBaseSections = m_vLogicalMap;
 			}
 			MarkSaved();
 			return true;
@@ -1255,6 +1260,46 @@ namespace mx {
 			Reset();
 			return false;
 		}
+	}
+
+	/**
+	 * \brief Determines whether any byte in a range refers to data other than the original file: it was typed, pasted, or inserted
+	 *	(and the change has not since been undone).  For a new file, the data it was created with counts as the original.
+	 *
+	 * \param _ui64Addr The logical address of the first byte.
+	 * \param _ui64Size The number of bytes.
+	 * \return Returns true if at least one of the bytes is changed.
+	 */
+	bool CLargeCoWFileWindow::BytesChanged( uint64_t _ui64Addr, uint64_t _ui64Size ) const {
+		if ( !_ui64Size || _ui64Addr >= Size() ) { return false; }
+		const uint64_t ui64End = _ui64Addr + std::min( _ui64Size, Size() - _ui64Addr );
+		// The last section that starts at or before _ui64Addr.  Sections are sorted and contiguous.
+		auto aIt = std::upper_bound( m_vLogicalMap.begin(), m_vLogicalMap.end(), _ui64Addr,
+			[]( uint64_t _ui64Val, const MX_LOGICAL_SECTION &_lsSec ) { return _ui64Val < _lsSec.ui64Start; } );
+		if ( aIt != m_vLogicalMap.begin() ) { --aIt; }
+		for ( ; aIt != m_vLogicalMap.end() && (*aIt).ui64Start < ui64End; ++aIt ) {
+			const uint64_t ui64From = std::max( _ui64Addr, (*aIt).ui64Start );
+			const uint64_t ui64To = std::min( ui64End, (*aIt).ui64Start + (*aIt).ui64Size );
+			if ( ui64From >= ui64To || (*aIt).stType == MX_ST_ORIGINAL_FILE ) { continue; }
+
+			// Segment data is changed unless it is part of the data a new file was created with.  Segment files are only ever appended
+			//	to, so that data is never replaced.
+			uint64_t ui64Off = (*aIt).ui64Offset + (ui64From - (*aIt).ui64Start);
+			const uint64_t ui64OffEnd = ui64Off + (ui64To - ui64From);
+			while ( ui64Off < ui64OffEnd ) {
+				bool bFound = false;
+				for ( const auto &lsBase : m_vBaseSections ) {
+					if ( lsBase.stType != MX_ST_SEGMENT || lsBase.u.saSegmentAddress.sFile != (*aIt).u.saSegmentAddress.sFile ) { continue; }
+					if ( ui64Off >= lsBase.ui64Offset && ui64Off < lsBase.ui64Offset + lsBase.ui64Size ) {
+						ui64Off = std::min( ui64OffEnd, lsBase.ui64Offset + lsBase.ui64Size );
+						bFound = true;
+						break;
+					}
+				}
+				if ( !bFound ) { return true; }
+			}
+		}
+		return false;
 	}
 
 	/**

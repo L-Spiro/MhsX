@@ -2749,3 +2749,7 @@
 "end"
 "Export Hex"
 "He&x"
+"…"
+"Opened read-only: the file is in use by another program."
+"Opened read-only: write access to the file was denied."
+"Opened read-only: the file could not be opened for writing."

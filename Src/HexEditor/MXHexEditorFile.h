@@ -43,6 +43,30 @@ namespace mx {
 		inline bool							IsModified() const { return m_lcwfwFile.IsModified(); }
 
 		/**
+		 * Gets the reason the file could not be opened for writing (when it had to be opened read-only).
+		 *
+		 * \return Returns the Windows error code, or ERROR_SUCCESS if the file was opened for writing.
+		 **/
+		inline DWORD						WriteOpenError() const { return m_lcwfwFile.WriteOpenError(); }
+
+		/**
+		 * Files know which of their bytes refer to data other than the original file.
+		 *
+		 * \return Returns true.
+		 **/
+		virtual bool						TracksChangedBytes() const override { return true; }
+
+		/**
+		 * Determines whether any byte in a range refers to data other than the original file (it was typed, pasted, or inserted, and
+		 *	the change has not since been undone).
+		 *
+		 * \param _ui64Addr The address of the first byte.
+		 * \param _ui64Size The number of bytes.
+		 * \return Returns true if at least one of the bytes is changed.
+		 **/
+		virtual bool						BytesChanged( uint64_t _ui64Addr, uint64_t _ui64Size ) const override { return m_lcwfwFile.BytesChanged( _ui64Addr, _ui64Size ); }
+
+		/**
 		 * Gets the path of the file.
 		 *
 		 * \return Returns the path, which is empty for an untitled file.

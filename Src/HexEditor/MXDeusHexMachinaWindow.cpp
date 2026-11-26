@@ -102,6 +102,10 @@ namespace mx {
 		/*for ( auto I = m_vTabs.size(); I--; ) {
 			delete m_vTabs[I].pheiInterface;
 		}*/
+		// Clipboards must not keep the files open after the window is gone.
+		for ( auto I = m_vTabs.size(); I--; ) {
+			CCopyPasteManager::ReleaseInterface( m_vTabs[I].pheiInterface.get() );
+		}
 	}
 
 	// == Functions.
@@ -1850,6 +1854,8 @@ namespace mx {
 		if ( _pwChild == Tab() ) {
 			if ( _iTab < m_vTabs.size() ) {
 				//delete m_vTabs[_iTab].pheiInterface;
+				// Clipboards that refer to the data are rendered or released, so that the file is really closed.
+				CCopyPasteManager::ReleaseInterface( m_vTabs[_iTab].pheiInterface.get() );
 				m_vTabs.erase( m_vTabs.begin() + _iTab );
 			}
 			auto ptTab = Tab();
@@ -2259,6 +2265,7 @@ namespace mx {
 	void CDeusHexMachinaWindow::RemoveTab( size_t _sIdx ) {
 		auto ptTab = Tab();
 		if ( !ptTab || _sIdx >= m_vTabs.size() ) { return; }
+		CCopyPasteManager::ReleaseInterface( m_vTabs[_sIdx].pheiInterface.get() );
 		ptTab->DeleteItem( int( _sIdx ) );
 		m_vTabs.erase( m_vTabs.begin() + _sIdx );
 		TabSelChanged( ptTab, ptTab->GetCurSel(), nullptr );
@@ -2602,16 +2609,51 @@ namespace mx {
 				delete pheiInterface;
 				return;
 			}*/
+			{
+				std::error_code ecError;
+				for ( size_t I = 0; I < m_vTabs.size(); ++I ) {
+					CHexEditorFile * phefFile = FileAt( I );
+					if ( !phefFile || phefFile->IsUntitled() ) { continue; }
+					if ( std::filesystem::equivalent( _pPath, phefFile->Path(), ecError ) && !ecError ) {
+						auto ptTab = Tab();
+						if ( ptTab ) {
+							ptTab->SetCurSel( int( I ) );
+							TabSelChanged( ptTab, int( I ), nullptr );
+						}
+						return;
+					}
+				}
+			}
+
 			std::shared_ptr<CHexEditorInterface> spInterface;
+			DWORD dwWriteError = ERROR_SUCCESS;
 			{
 				std::unique_ptr<CHexEditorFile> upIfc( new( std::nothrow ) CHexEditorFile() );
 				if ( !upIfc || !upIfc->SetFile( _pPath ) ) { return; }
+				dwWriteError = upIfc->WriteOpenError();
 
 				// Transfer ownership into shared_ptr<base>.
 				spInterface = std::shared_ptr<CHexEditorInterface>( upIfc.release() );
 			}
 
-			AddTab( spInterface );
+			if ( AddTab( spInterface ) && dwWriteError != ERROR_SUCCESS ) {
+				// Say why the file is read-only.
+				switch ( dwWriteError ) {
+					case ERROR_SHARING_VIOLATION : {}					MX_FALLTHROUGH
+					case ERROR_LOCK_VIOLATION : {
+						SetStatusBarText( _DEC_WS_17C5E241_Opened_read_only__the_file_is_in_use_by_another_program_.c_str(), true );
+						break;
+					}
+					case ERROR_ACCESS_DENIED : {}						MX_FALLTHROUGH
+					case ERROR_WRITE_PROTECT : {
+						SetStatusBarText( _DEC_WS_A963AFA9_Opened_read_only__write_access_to_the_file_was_denied_.c_str(), true );
+						break;
+					}
+					default : {
+						SetStatusBarText( _DEC_WS_C800688C_Opened_read_only__the_file_could_not_be_opened_for_writing_.c_str(), true );
+					}
+				}
+			}
 		}
 		catch ( ... ) {}
 	}
