@@ -80,7 +80,7 @@ namespace mx {
 				uint64_t ui64Start = 0, ui64Value = 0;
 				if ( !GetValue( CSelectRangeLayout::MX_SRI_START_EDIT, ui64Start, true ) ) { break; }
 				if ( !GetValue( CSelectRangeLayout::MX_SRI_VALUE_EDIT, ui64Value, true ) ) { break; }
-				if ( ui64Start > m_psrpParms->ui64DataSize ) {
+				if ( ui64Start < m_psrpParms->ui64Bias || ui64Start - m_psrpParms->ui64Bias > m_psrpParms->ui64DataSize ) {
 					lsw::CBase::MessageBoxError( Wnd(), _DEC_WS_D08434A5_Address_out_of_range_.c_str(), _DEC_WS_191780FA_Select_Range.c_str() );
 					auto pwStart = FindChild( CSelectRangeLayout::MX_SRI_START_EDIT );
 					if ( pwStart ) { pwStart->SetFocus(); }

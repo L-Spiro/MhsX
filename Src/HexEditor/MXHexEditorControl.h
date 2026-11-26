@@ -869,6 +869,35 @@ namespace mx {
 		bool										SelectRange( uint64_t _ui64Start, uint64_t _ui64Size );
 
 		/**
+		 * Gets the custom starting address: the address shown for the first byte (View -> Addresses -> Set Starting Address).
+		 *	Addresses shown to the user (the address column, the status bar, Go To, Select Range, Hex Editor Areas) have it added.
+		 *
+		 * \return Returns the starting address (0 if none was set).
+		 **/
+		inline uint64_t								StartingAddress() const { return m_sdScrollView[m_eaEditAs].ui64StartAddress; }
+
+		/**
+		 * Sets the custom starting address for every view of the data.
+		 *
+		 * \param _ui64Addr The address to show for the first byte.
+		 **/
+		void										SetStartingAddress( uint64_t _ui64Addr );
+
+		/**
+		 * Gets the selection.
+		 *
+		 * \return Returns the current selection.
+		 **/
+		inline const MX_SELECTION &					Selection() const { return m_sSel; }
+
+		/**
+		 * Gets the number of bytes in each row of the current view.
+		 *
+		 * \return Returns the bytes per row.
+		 **/
+		inline uint32_t								BytesPerRow() const { return CurStyle()->uiBytesPerRow ? CurStyle()->uiBytesPerRow : 16; }
+
+		/**
 		 * Determines whether any values are highlighted as changed.
 		 *
 		 * \return Returns true if at least one byte is highlighted as changed.
@@ -1146,6 +1175,17 @@ namespace mx {
 		 * \return Returns a LSW_HANDLED code.
 		 */
 		virtual LSW_HANDLED							RButtonDown( INT _iHitTest, const POINTS &_pCursorPos );
+
+		/**
+		 * Handles WM_CONTEXTMENU.  The hex editor window shows the context menu directly (the message is not left to travel up
+		 *	through the tab control and the splitter, where it was being lost).
+		 *
+		 * \param _pwControl The control that was right-clicked.
+		 * \param _iX The horizontal position of the cursor in screen coordinates, or -1 if the menu was opened with the keyboard.
+		 * \param _iY The vertical position of the cursor in screen coordinates, or -1 if the menu was opened with the keyboard.
+		 * \return Returns LSW_H_HANDLED if the menu was shown.
+		 */
+		virtual LSW_HANDLED							ContextMenu( CWidget * _pwControl, INT _iX, INT _iY );
 
 		/** \brief Handles WM_MOUSEMOVE. */
 		virtual LSW_HANDLED							MouseMove( DWORD /*_dwVirtKeys*/, const POINTS &_pCursorPos );

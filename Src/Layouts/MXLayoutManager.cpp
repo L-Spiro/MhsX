@@ -9,6 +9,7 @@
 #include "../FoundAddresses/MXFoundAddressesWindow.h"
 #include "../FoundAddresses/MXMoveAddressesWindow.h"
 #include "../HexEditor/MXDeusHexMachinaWindow.h"
+#include "../HexEditor/MXExportHexDialog.h"
 #include "../HexEditor/MXFontDialog.h"
 #include "../HexEditor/MXHexEditorControl.h"
 #include "../HexEditor/MXSelectRangeDialog.h"
@@ -136,6 +137,9 @@ namespace mx {
 			case MX_FONT_DIALOG : {
 				return new CFontDialog( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
+			case MX_EXPORT_HEX : {
+				return new CExportHexDialog( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 	}
@@ -151,8 +155,11 @@ namespace mx {
 			vMenuItems,
 			vMenuStrings );
 
-		HMENU hMenu = CreatePopupMenu( &vMenus[0], vMenus.size() );
-		if ( !hMenu ) { return false; }
+		HMENU hMenu = vMenus.size() ? CreatePopupMenu( &vMenus[0], vMenus.size() ) : NULL;
+		if ( !hMenu ) {
+			CLayoutManager::CleanEncryptedMenu( vMenuItems, vMenuStrings );
+			return false;
+		}
 
 		if ( _iX == -1 && _iY == -1 ) {
 			POINT pPos;
@@ -163,6 +170,8 @@ namespace mx {
 		::TrackPopupMenu( hMenu,
 			TPM_LEFTALIGN | TPM_RIGHTBUTTON,
 			_iX, _iY, 0, _pwParent ? _pwParent->Wnd() : reinterpret_cast<HWND>(NULL), NULL );
+		// The menu (and its submenus) was leaked.
+		::DestroyMenu( hMenu );
 
 		CLayoutManager::CleanEncryptedMenu( vMenuItems, vMenuStrings );
 

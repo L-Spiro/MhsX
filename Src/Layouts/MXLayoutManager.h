@@ -46,6 +46,7 @@ namespace mx {
 		MX_NUMBER_INPUT,
 		MX_SELECT_RANGE,
 		MX_FONT_DIALOG,
+		MX_EXPORT_HEX,
 	};
 
 	class CLayoutManager : public lsw::CLayoutManager {

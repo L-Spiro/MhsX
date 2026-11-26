@@ -3,6 +3,7 @@
 #include "../MXMhsX.h"
 
 #include <StatusBar/LSWStatusBar.h>
+#include <Widget/LSWWidget.h>
 
 
 namespace mx {
@@ -29,6 +30,17 @@ namespace mx {
 
 		// Determines if the control is focused or not.
 		virtual bool								IsFocused() { return false; }
+
+		/**
+		 * Shows the hex editor's context menu.  Called by the hex control itself when it gets WM_CONTEXTMENU, rather than relying on
+		 *	the message being passed up through the windows that contain it.
+		 *
+		 * \param _pwControl The hex control.
+		 * \param _iX The horizontal position of the cursor in screen coordinates, or -1 if the menu was opened with the keyboard.
+		 * \param _iY The vertical position of the cursor in screen coordinates, or -1 if the menu was opened with the keyboard.
+		 * \return Returns true if a menu was shown.
+		 **/
+		virtual bool								ShowHexContextMenu( lsw::CWidget * /*_pwControl*/, INT /*_iX*/, INT /*_iY*/ ) { return false; }
 
 		// Gets the status bar.
 		virtual lsw::CStatusBar *					StatusBar() { return nullptr; }

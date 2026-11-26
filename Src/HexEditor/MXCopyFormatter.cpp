@@ -148,6 +148,7 @@ namespace mx {
 			MX_M_UTF16,											/**< UTF-16LE text with CRLF new lines. */
 			MX_M_HTML,											/**< UTF-8 with &, <, and > escaped, and CRLF new lines. */
 			MX_M_RTF,											/**< ASCII with \, {, and } escaped, \uN? for other characters, and \par new lines. */
+			MX_M_UTF8,											/**< UTF-8 text with CRLF new lines (files). */
 		};
 
 
@@ -172,6 +173,10 @@ namespace mx {
 						const uint16_t ui16Char = static_cast<uint16_t>(_wcChar);
 						m_vBuffer.push_back( static_cast<uint8_t>(ui16Char) );
 						m_vBuffer.push_back( static_cast<uint8_t>(ui16Char >> 8) );
+						break;
+					}
+					case MX_M_UTF8 : {
+						AppendUtf8( static_cast<uint32_t>(static_cast<uint16_t>(_wcChar)) );
 						break;
 					}
 					case MX_M_HTML : {
@@ -321,7 +326,7 @@ namespace mx {
 		MX_MODE													m_mMode;
 		/** Encoded bytes not yet passed to m_csSink. */
 		std::vector<uint8_t>									m_vBuffer;
-		/** A high surrogate waiting for its low surrogate (MX_M_HTML only). */
+		/** A high surrogate waiting for its low surrogate (MX_M_HTML and MX_M_UTF8 only). */
 		uint16_t												m_ui16HighSurrogate = 0;
 		/** Cleared on the first error. */
 		bool													m_bOk = true;
@@ -1055,6 +1060,51 @@ namespace mx {
 	}
 
 	/**
+	 * \brief Renders a Copy operation as the contents of a file (Export Hex).
+	 *
+	 * Text formats are written as UTF-8 without a byte-order mark and end with a new line; MX_CA_WEB_PAGE is written as an
+	 *	HTML document, MX_CA_RICH_TEXT as RTF, and MX_CA_BINARY as the raw bytes.  Nothing is NUL-terminated.
+	 *
+	 * \param _csSource The data and parameters of the Copy operation.
+	 * \param _csSink Receives the bytes of the file.
+	 * \param _swsMsg Receives an error message on failure.
+	 * \return Returns true if the file contents were rendered.
+	 */
+	bool CCopyFormatter::RenderFile( const MX_COPY_SOURCE &_csSource, CCopySink &_csSink, CSecureWString &_swsMsg ) {
+		try {
+			bool bRet = false;
+			switch ( _csSource.caCopyAs.caCopyFmt ) {
+				case MX_CA_BINARY : {
+					bRet = RenderBinary( _csSource, _csSink );
+					break;
+				}
+				case MX_CA_WEB_PAGE : {
+					CTextOut toOut( _csSink, CTextOut::MX_M_HTML );
+					size_t sFragStart, sFragEnd;
+					bRet = RenderHtmlDocument( _csSource, toOut, sFragStart, sFragEnd ) && toOut.Flush();
+					break;
+				}
+				case MX_CA_RICH_TEXT : {
+					bRet = RenderRtf( _csSource, _csSink, false );
+					break;
+				}
+				default : {
+					CTextOut toOut( _csSink, CTextOut::MX_M_UTF8 );
+					bRet = RenderText( _csSource, toOut ) && toOut.NewLine() && toOut.Flush();
+				}
+			}
+			if ( !bRet ) {
+				_swsMsg = _DEC_WS_9F15717B_Failed_to_export_the_file_;
+			}
+			return bRet;
+		}
+		catch ( ... ) {
+			_swsMsg = _DEC_WS_F39F91A5_Out_of_memory_;
+			return false;
+		}
+	}
+
+	/**
 	 * \brief Gets the number of selected bytes, clamped to the source size.
 	 *
 	 * \param _csSource The data and parameters of the Copy operation.
@@ -1203,6 +1253,9 @@ namespace mx {
 		const uint64_t ui64Ranges = TotalRanges( _csSource );
 		bool bFirstLine = true;
 		wchar_t wcCell[9];
+		// Hex Text can leave out the spaces and/or the line breaks (Export Hex's Include Spaces/Include Linefeeds).
+		const bool bSpaces = caFmt != MX_CA_HEX_TEXT || _csSource.caCopyAs.bByteTextSpaces;
+		const bool bLines = caFmt != MX_CA_HEX_TEXT || _csSource.caCopyAs.bByteTextLineFeeds;
 		for ( uint64_t I = 0; I < ui64Ranges; ++I ) {
 			const MX_SEL_RANGE srRange = RangeAt( _csSource, I );
 			if ( !srRange.ui64Size ) { continue; }
@@ -1213,10 +1266,15 @@ namespace mx {
 				for ( size_t J = 0; J < sGot; ++J ) {
 					// Each row (and each Column-selection line) starts a new line of text.
 					if ( ui64Col == 0 ) {
-						if ( !bFirstLine && !_toOut.NewLine() ) { return false; }
+						if ( !bFirstLine ) {
+							if ( bLines ) {
+								if ( !_toOut.NewLine() ) { return false; }
+							}
+							else if ( bSpaces && !_toOut.Put( L' ' ) ) { return false; }
+						}
 						bFirstLine = false;
 					}
-					else if ( !_toOut.Put( L' ' ) ) { return false; }
+					else if ( bSpaces && !_toOut.Put( L' ' ) ) { return false; }
 
 					uint8_t ui8Val = pui8Data[J];
 					switch ( caFmt ) {
@@ -1476,6 +1534,8 @@ namespace mx {
 		const uint32_t ui32Bpr = _csSource.ui32BytesPerRow ? _csSource.ui32BytesPerRow : 16;
 		const size_t sMaxRecord = std::min<size_t>( ui32Bpr, 255 );
 		const uint64_t ui64Bias = _csSource.caCopyAs.caAddress.ui64Bias;
+		// Word addresses are byte addresses divided by 2.
+		const uint32_t ui32AddrShift = _csSource.caCopyAs.bWordAddresses ? 1 : 0;
 
 		// Writes one record: ":LLAAAATT<data>CC".
 		auto WriteRecord = [&]( uint8_t _ui8Type, uint16_t _ui16Addr, const uint8_t * _pui8Data, size_t _sSize ) -> bool {
@@ -1515,11 +1575,12 @@ namespace mx {
 			CByteStream bsStream( _csSource, srRange.ui64Start, srRange.ui64Size );
 			uint64_t ui64Addr = srRange.ui64Start + ui64Bias;
 			while ( bsStream.Remaining() ) {
-				// Records never cross a 64-kilobyte boundary.
-				const size_t sThis = size_t( std::min<uint64_t>( std::min<uint64_t>( sMaxRecord, bsStream.Remaining() ), 0x10000 - (ui64Addr & 0xFFFF) ) );
+				// Records never cross a 64-kilobyte (or 64-kiloword) boundary.
+				const uint64_t ui64RecAddr = ui64Addr >> ui32AddrShift;
+				const size_t sThis = size_t( std::min<uint64_t>( std::min<uint64_t>( sMaxRecord, bsStream.Remaining() ), (0x10000 - (ui64RecAddr & 0xFFFF)) << ui32AddrShift ) );
 				if ( !bsStream.Read( vRecord.data(), sThis ) ) { return false; }
 
-				const uint64_t ui64Upper = ui64Addr >> 16;
+				const uint64_t ui64Upper = ui64RecAddr >> 16;
 				if ( caFmt != MX_CA_INTEL_8 && ui64Upper != ui64CurUpper ) {
 					uint8_t ui8Ext[2];
 					if ( caFmt == MX_CA_INTEL_16 ) {
@@ -1537,7 +1598,7 @@ namespace mx {
 					}
 					ui64CurUpper = ui64Upper;
 				}
-				if ( !WriteRecord( 0x00, static_cast<uint16_t>(ui64Addr), vRecord.data(), sThis ) ) { return false; }
+				if ( !WriteRecord( 0x00, static_cast<uint16_t>(ui64RecAddr), vRecord.data(), sThis ) ) { return false; }
 				ui64Addr += sThis;
 			}
 			if ( bsStream.Failed() ) { return false; }
@@ -1606,7 +1667,9 @@ namespace mx {
 			while ( bsStream.Remaining() ) {
 				const size_t sThis = size_t( std::min<uint64_t>( sMaxRecord, bsStream.Remaining() ) );
 				if ( !bsStream.Read( vRecord.data(), sThis ) ) { return false; }
-				if ( !WriteRecord( cDataType, sAddrBytes, ui64Addr, vRecord.data(), sThis ) || !_toOut.NewLine() ) { return false; }
+				// Word addresses are byte addresses divided by 2.
+				const uint64_t ui64RecAddr = _csSource.caCopyAs.bWordAddresses ? (ui64Addr >> 1) : ui64Addr;
+				if ( !WriteRecord( cDataType, sAddrBytes, ui64RecAddr, vRecord.data(), sThis ) || !_toOut.NewLine() ) { return false; }
 				ui64Addr += sThis;
 			}
 			if ( bsStream.Failed() ) { return false; }
@@ -1961,12 +2024,13 @@ namespace mx {
 	 * \param _csSink Receives the bytes.
 	 * \return Returns false on a read or memory failure.
 	 */
-	bool CCopyFormatter::RenderRtf( const MX_COPY_SOURCE &_csSource, CCopySink &_csSink ) {
+	bool CCopyFormatter::RenderRtf( const MX_COPY_SOURCE &_csSource, CCopySink &_csSink, bool _bNulTerminate ) {
 		CTextOut toOut( _csSink, CTextOut::MX_M_RTF );
 		if ( !toOut.Raw( "{\\rtf1\\ansi\\ansicpg1252\\deff0\\deflang1033{\\fonttbl{\\f0\\fmodern\\fprq1\\fcharset0 Courier New;}}\r\n"
 			"\\viewkind4\\uc1\\pard\\f0\\fs20 " ) ) { return false; }
 		if ( !RenderHexEditorAreas( _csSource, toOut, true ) ) { return false; }
 		if ( !toOut.Raw( "}" ) || !toOut.Flush() ) { return false; }
+		if ( !_bNulTerminate ) { return true; }
 		const uint8_t ui8Nul = 0;
 		return _csSink.Write( &ui8Nul, 1 );
 	}

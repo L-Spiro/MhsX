@@ -128,5 +128,8 @@ namespace mx {
 		uint32_t				ui32SpacesBetweenGroups	= 1;								/**< The number of spaces between groups within an area. */
 		MX_COPY_ADDR			caAddress;													/**< The address-gutter settings. */
 		std::wstring			wsName;														/**< The name embedded by formats that carry one (MX_CA_UUENCODING). */
+		bool					bByteTextSpaces			= true;								/**< MX_CA_HEX_TEXT puts a space between bytes (Export Hex's Include Spaces). */
+		bool					bByteTextLineFeeds		= true;								/**< MX_CA_HEX_TEXT starts a new line after each row (Export Hex's Include Linefeeds). */
+		bool					bWordAddresses			= false;							/**< Intel HEX and Motorola records give addresses in words (byte addresses / 2). */
 	};
 }	// namespace mx

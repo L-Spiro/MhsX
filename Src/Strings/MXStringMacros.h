@@ -1,6 +1,6 @@
 ﻿#pragma once
 #define MX_STRING_ENCRYPT_KEY "x20en7r90872ne9"
-#define _T_MAX_LEN 296
+#define _T_MAX_LEN 450
 // kernel32.dll
 
 #define _T_6AE69F02_kernel32_dll "\xF3\x33\x42\x09\xF7\x35\xC1\xF9\xFE\x2C\x35\x3A"
@@ -24210,4 +24210,562 @@
 #define _DEC_2128232B_Failed_to_show_the_properties_of_the_file_( STR ) mx::CStringDecoder::Decode( _T_2128232B_Failed_to_show_the_properties_of_the_file_, _LEN_2128232B, STR )
 #define _DEC_S_2128232B_Failed_to_show_the_properties_of_the_file_ mx::CStringDecoder::DecodeToString( _T_2128232B_Failed_to_show_the_properties_of_the_file_, _LEN_2128232B )
 #define _DEC_WS_2128232B_Failed_to_show_the_properties_of_the_file_ mx::CStringDecoder::DecodeToWString( _T_2128232B_Failed_to_show_the_properties_of_the_file_, _LEN_2128232B )
+
+// Set Starting Address
+
+#define _T_37FCFE22_Set_Starting_Address "\xDB\x33\x44\xBB\xE5\x3D\xEF\x39\x44\x31\x37\x35\xB2\xDC\x2B\xEC\x40\x35\x0E\x05"
+#define _LEN_37FCFE22 20
+#define _T_LEN_37FCFE22_Set_Starting_Address _T_37FCFE22_Set_Starting_Address, _LEN_37FCFE22
+#define _DEC_37FCFE22_Set_Starting_Address( STR ) mx::CStringDecoder::Decode( _T_37FCFE22_Set_Starting_Address, _LEN_37FCFE22, STR )
+#define _DEC_S_37FCFE22_Set_Starting_Address mx::CStringDecoder::DecodeToString( _T_37FCFE22_Set_Starting_Address, _LEN_37FCFE22 )
+#define _DEC_WS_37FCFE22_Set_Starting_Address mx::CStringDecoder::DecodeToWString( _T_37FCFE22_Set_Starting_Address, _LEN_37FCFE22 )
+
+// Starting &Address:
+
+#define _T_598BFEA5_Starting__Address_ "\xDB\x42\x31\x0D\x06\x32\xFC\x2E\xF0\xEE\x0A\x32\xF6\x0D\x2C\xFB\x41\x0A"
+#define _LEN_598BFEA5 18
+#define _T_LEN_598BFEA5_Starting__Address_ _T_598BFEA5_Starting__Address_, _LEN_598BFEA5
+#define _DEC_598BFEA5_Starting__Address_( STR ) mx::CStringDecoder::Decode( _T_598BFEA5_Starting__Address_, _LEN_598BFEA5, STR )
+#define _DEC_S_598BFEA5_Starting__Address_ mx::CStringDecoder::DecodeToString( _T_598BFEA5_Starting__Address_, _LEN_598BFEA5 )
+#define _DEC_WS_598BFEA5_Starting__Address_ mx::CStringDecoder::DecodeToWString( _T_598BFEA5_Starting__Address_, _LEN_598BFEA5 )
+
+// OFFSET 
+
+#define _T_6BCDC989_OFFSET_ "\xD7\x14\x16\xEE\xD7\x1D\xAE"
+#define _LEN_6BCDC989 7
+#define _T_LEN_6BCDC989_OFFSET_ _T_6BCDC989_OFFSET_, _LEN_6BCDC989
+#define _DEC_6BCDC989_OFFSET_( STR ) mx::CStringDecoder::Decode( _T_6BCDC989_OFFSET_, _LEN_6BCDC989, STR )
+#define _DEC_S_6BCDC989_OFFSET_ mx::CStringDecoder::DecodeToString( _T_6BCDC989_OFFSET_, _LEN_6BCDC989 )
+#define _DEC_WS_6BCDC989_OFFSET_ mx::CStringDecoder::DecodeToWString( _T_6BCDC989_OFFSET_, _LEN_6BCDC989 )
+
+// Export Hex - 
+
+#define _T_55F71713_Export_Hex___ "\xCD\x46\x40\x0A\x04\x3D\xAE\x0F\x35\x40\xE9\xFB\xB2"
+#define _LEN_55F71713 13
+#define _T_LEN_55F71713_Export_Hex___ _T_55F71713_Export_Hex___, _LEN_55F71713
+#define _DEC_55F71713_Export_Hex___( STR ) mx::CStringDecoder::Decode( _T_55F71713_Export_Hex___, _LEN_55F71713, STR )
+#define _DEC_S_55F71713_Export_Hex___ mx::CStringDecoder::DecodeToString( _T_55F71713_Export_Hex___, _LEN_55F71713 )
+#define _DEC_WS_55F71713_Export_Hex___ mx::CStringDecoder::DecodeToWString( _T_55F71713_Export_Hex___, _LEN_55F71713 )
+
+// Export &File:
+
+#define _T_B58F54C4_Export__File_ "\xCD\x46\x40\x0A\x04\x3D\xAE\xED\x16\x31\x35\x33\xCC"
+#define _LEN_B58F54C4 13
+#define _T_LEN_B58F54C4_Export__File_ _T_B58F54C4_Export__File_, _LEN_B58F54C4
+#define _DEC_B58F54C4_Export__File_( STR ) mx::CStringDecoder::Decode( _T_B58F54C4_Export__File_, _LEN_B58F54C4, STR )
+#define _DEC_S_B58F54C4_Export__File_ mx::CStringDecoder::DecodeToString( _T_B58F54C4_Export__File_, _LEN_B58F54C4 )
+#define _DEC_WS_B58F54C4_Export__File_ mx::CStringDecoder::DecodeToWString( _T_B58F54C4_Export__File_, _LEN_B58F54C4 )
+
+// Export &Type:
+
+#define _T_EA8A9DAD_Export__Type_ "\xCD\x46\x40\x0A\x04\x3D\xAE\xED\x24\x41\x39\x33\xCC"
+#define _LEN_EA8A9DAD 13
+#define _T_LEN_EA8A9DAD_Export__Type_ _T_EA8A9DAD_Export__Type_, _LEN_EA8A9DAD
+#define _DEC_EA8A9DAD_Export__Type_( STR ) mx::CStringDecoder::Decode( _T_EA8A9DAD_Export__Type_, _LEN_EA8A9DAD, STR )
+#define _DEC_S_EA8A9DAD_Export__Type_ mx::CStringDecoder::DecodeToString( _T_EA8A9DAD_Export__Type_, _LEN_EA8A9DAD )
+#define _DEC_WS_EA8A9DAD_Export__Type_ mx::CStringDecoder::DecodeToWString( _T_EA8A9DAD_Export__Type_, _LEN_EA8A9DAD )
+
+// &Bytes Per Row:
+
+#define _T_F664FE8F__Bytes_Per_Row_ "\xAE\x10\x49\x0F\xF7\x3C\xAE\x17\x35\x3A\xE9\x20\x01\x12\x01"
+#define _LEN_F664FE8F 15
+#define _T_LEN_F664FE8F__Bytes_Per_Row_ _T_F664FE8F__Bytes_Per_Row_, _LEN_F664FE8F
+#define _DEC_F664FE8F__Bytes_Per_Row_( STR ) mx::CStringDecoder::Decode( _T_F664FE8F__Bytes_Per_Row_, _LEN_F664FE8F, STR )
+#define _DEC_S_F664FE8F__Bytes_Per_Row_ mx::CStringDecoder::DecodeToString( _T_F664FE8F__Bytes_Per_Row_, _LEN_F664FE8F )
+#define _DEC_WS_F664FE8F__Bytes_Per_Row_ mx::CStringDecoder::DecodeToWString( _T_F664FE8F__Bytes_Per_Row_, _LEN_F664FE8F )
+
+// &Entire File
+
+#define _T_69E5268D__Entire_File "\xAE\x13\x3E\x0F\xFB\x3B\xF3\xE7\x16\x31\x35\x33"
+#define _LEN_69E5268D 12
+#define _T_LEN_69E5268D__Entire_File _T_69E5268D__Entire_File, _LEN_69E5268D
+#define _DEC_69E5268D__Entire_File( STR ) mx::CStringDecoder::Decode( _T_69E5268D__Entire_File, _LEN_69E5268D, STR )
+#define _DEC_S_69E5268D__Entire_File mx::CStringDecoder::DecodeToString( _T_69E5268D__Entire_File, _LEN_69E5268D )
+#define _DEC_WS_69E5268D__Entire_File mx::CStringDecoder::DecodeToWString( _T_69E5268D__Entire_File, _LEN_69E5268D )
+
+// Se&lection
+
+#define _T_B9CDB3B1_Se_lection "\xDB\x33\xF6\x07\xF7\x2C\x02\x30\x3F\x36"
+#define _LEN_B9CDB3B1 10
+#define _T_LEN_B9CDB3B1_Se_lection _T_B9CDB3B1_Se_lection, _LEN_B9CDB3B1
+#define _DEC_B9CDB3B1_Se_lection( STR ) mx::CStringDecoder::Decode( _T_B9CDB3B1_Se_lection, _LEN_B9CDB3B1, STR )
+#define _DEC_S_B9CDB3B1_Se_lection mx::CStringDecoder::DecodeToString( _T_B9CDB3B1_Se_lection, _LEN_B9CDB3B1 )
+#define _DEC_WS_B9CDB3B1_Se_lection mx::CStringDecoder::DecodeToWString( _T_B9CDB3B1_Se_lection, _LEN_B9CDB3B1 )
+
+// Start Address
+
+#define _T_F438C207_Start_Address "\xDB\x42\x31\x0D\x06\xE9\xCF\x2B\x34\x3A\x2E\x41\x05"
+#define _LEN_F438C207 13
+#define _T_LEN_F438C207_Start_Address _T_F438C207_Start_Address, _LEN_F438C207
+#define _DEC_F438C207_Start_Address( STR ) mx::CStringDecoder::Decode( _T_F438C207_Start_Address, _LEN_F438C207, STR )
+#define _DEC_S_F438C207_Start_Address mx::CStringDecoder::DecodeToString( _T_F438C207_Start_Address, _LEN_F438C207 )
+#define _DEC_WS_F438C207_Start_Address mx::CStringDecoder::DecodeToWString( _T_F438C207_Start_Address, _LEN_F438C207 )
+
+// Always &Zero
+
+#define _T_D84A2C26_Always__Zero "\xC9\x3A\x47\xFC\x0B\x3C\xAE\xED\x2A\x2D\x3B\x3D"
+#define _LEN_D84A2C26 12
+#define _T_LEN_D84A2C26_Always__Zero _T_D84A2C26_Always__Zero, _LEN_D84A2C26
+#define _DEC_D84A2C26_Always__Zero( STR ) mx::CStringDecoder::Decode( _T_D84A2C26_Always__Zero, _LEN_D84A2C26, STR )
+#define _DEC_S_D84A2C26_Always__Zero mx::CStringDecoder::DecodeToString( _T_D84A2C26_Always__Zero, _LEN_D84A2C26 )
+#define _DEC_WS_D84A2C26_Always__Zero mx::CStringDecoder::DecodeToWString( _T_D84A2C26_Always__Zero, _LEN_D84A2C26 )
+
+// Start of &Range
+
+#define _T_BE34354D_Start_of__Range "\xDB\x42\x31\x0D\x06\xE9\xFD\x2D\xF0\xEE\x1B\x2F\x00\x02\x2C"
+#define _LEN_BE34354D 15
+#define _T_LEN_BE34354D_Start_of__Range _T_BE34354D_Start_of__Range, _LEN_BE34354D
+#define _DEC_BE34354D_Start_of__Range( STR ) mx::CStringDecoder::Decode( _T_BE34354D_Start_of__Range, _LEN_BE34354D, STR )
+#define _DEC_S_BE34354D_Start_of__Range mx::CStringDecoder::DecodeToString( _T_BE34354D_Start_of__Range, _LEN_BE34354D )
+#define _DEC_WS_BE34354D_Start_of__Range mx::CStringDecoder::DecodeToWString( _T_BE34354D_Start_of__Range, _LEN_BE34354D )
+
+// C&ustom:
+
+#define _T_3A496722_C_ustom_ "\xCB\xF4\x45\x0E\x06\x38\xFB\x01"
+#define _LEN_3A496722 8
+#define _T_LEN_3A496722_C_ustom_ _T_3A496722_C_ustom_, _LEN_3A496722
+#define _DEC_3A496722_C_ustom_( STR ) mx::CStringDecoder::Decode( _T_3A496722_C_ustom_, _LEN_3A496722, STR )
+#define _DEC_S_3A496722_C_ustom_ mx::CStringDecoder::DecodeToString( _T_3A496722_C_ustom_, _LEN_3A496722 )
+#define _DEC_WS_3A496722_C_ustom_ mx::CStringDecoder::DecodeToWString( _T_3A496722_C_ustom_, _LEN_3A496722 )
+
+// Address Units
+
+#define _T_56DED88C_Address_Units "\xC9\x32\x34\x0D\xF7\x3C\x01\xE7\x25\x36\x32\x42\x05"
+#define _LEN_56DED88C 13
+#define _T_LEN_56DED88C_Address_Units _T_56DED88C_Address_Units, _LEN_56DED88C
+#define _DEC_56DED88C_Address_Units( STR ) mx::CStringDecoder::Decode( _T_56DED88C_Address_Units, _LEN_56DED88C, STR )
+#define _DEC_S_56DED88C_Address_Units mx::CStringDecoder::DecodeToString( _T_56DED88C_Address_Units, _LEN_56DED88C )
+#define _DEC_WS_56DED88C_Address_Units mx::CStringDecoder::DecodeToWString( _T_56DED88C_Address_Units, _LEN_56DED88C )
+
+// B&ytes
+
+#define _T_299A409E_B_ytes "\xCA\xF4\x49\x0F\xF7\x3C"
+#define _LEN_299A409E 6
+#define _T_LEN_299A409E_B_ytes _T_299A409E_B_ytes, _LEN_299A409E
+#define _DEC_299A409E_B_ytes( STR ) mx::CStringDecoder::Decode( _T_299A409E_B_ytes, _LEN_299A409E, STR )
+#define _DEC_S_299A409E_B_ytes mx::CStringDecoder::DecodeToString( _T_299A409E_B_ytes, _LEN_299A409E )
+#define _DEC_WS_299A409E_B_ytes mx::CStringDecoder::DecodeToWString( _T_299A409E_B_ytes, _LEN_299A409E )
+
+// &Words
+
+#define _T_16A9811D__Words "\xAE\x25\x3F\x0D\xF6\x3C"
+#define _LEN_16A9811D 6
+#define _T_LEN_16A9811D__Words _T_16A9811D__Words, _LEN_16A9811D
+#define _DEC_16A9811D__Words( STR ) mx::CStringDecoder::Decode( _T_16A9811D__Words, _LEN_16A9811D, STR )
+#define _DEC_S_16A9811D__Words mx::CStringDecoder::DecodeToString( _T_16A9811D__Words, _LEN_16A9811D )
+#define _DEC_WS_16A9811D__Words mx::CStringDecoder::DecodeToWString( _T_16A9811D__Words, _LEN_16A9811D )
+
+// Include &Spaces
+
+#define _T_CDAE1208_Include__Spaces "\xD1\x3C\x33\x07\x07\x2D\xF3\xE7\xF6\x1B\x39\x2F\xF5\x00\x3A"
+#define _LEN_CDAE1208 15
+#define _T_LEN_CDAE1208_Include__Spaces _T_CDAE1208_Include__Spaces, _LEN_CDAE1208
+#define _DEC_CDAE1208_Include__Spaces( STR ) mx::CStringDecoder::Decode( _T_CDAE1208_Include__Spaces, _LEN_CDAE1208, STR )
+#define _DEC_S_CDAE1208_Include__Spaces mx::CStringDecoder::DecodeToString( _T_CDAE1208_Include__Spaces, _LEN_CDAE1208 )
+#define _DEC_WS_CDAE1208_Include__Spaces mx::CStringDecoder::DecodeToWString( _T_CDAE1208_Include__Spaces, _LEN_CDAE1208 )
+
+// Include Line&feeds
+
+#define _T_B3AAC106_Include_Line_feeds "\xD1\x3C\x33\x07\x07\x2D\xF3\xE7\x1C\x31\x37\x33\xB8\x01\x2C\xED\x32\x43"
+#define _LEN_B3AAC106 18
+#define _T_LEN_B3AAC106_Include_Line_feeds _T_B3AAC106_Include_Line_feeds, _LEN_B3AAC106
+#define _DEC_B3AAC106_Include_Line_feeds( STR ) mx::CStringDecoder::Decode( _T_B3AAC106_Include_Line_feeds, _LEN_B3AAC106, STR )
+#define _DEC_S_B3AAC106_Include_Line_feeds mx::CStringDecoder::DecodeToString( _T_B3AAC106_Include_Line_feeds, _LEN_B3AAC106 )
+#define _DEC_WS_B3AAC106_Include_Line_feeds mx::CStringDecoder::DecodeToWString( _T_B3AAC106_Include_Line_feeds, _LEN_B3AAC106 )
+
+// &Export
+
+#define _T_C5E361D9__Export "\xAE\x13\x48\x0B\x01\x3B\x02"
+#define _LEN_C5E361D9 7
+#define _T_LEN_C5E361D9__Export _T_C5E361D9__Export, _LEN_C5E361D9
+#define _DEC_C5E361D9__Export( STR ) mx::CStringDecoder::Decode( _T_C5E361D9__Export, _LEN_C5E361D9, STR )
+#define _DEC_S_C5E361D9__Export mx::CStringDecoder::DecodeToString( _T_C5E361D9__Export, _LEN_C5E361D9 )
+#define _DEC_WS_C5E361D9__Export mx::CStringDecoder::DecodeToWString( _T_C5E361D9__Export, _LEN_C5E361D9 )
+
+// ...
+
+#define _T_1A43B61B____ "\xB6\xFC\xFE"
+#define _LEN_1A43B61B 3
+#define _T_LEN_1A43B61B____ _T_1A43B61B____, _LEN_1A43B61B
+#define _DEC_1A43B61B____( STR ) mx::CStringDecoder::Decode( _T_1A43B61B____, _LEN_1A43B61B, STR )
+#define _DEC_S_1A43B61B____ mx::CStringDecoder::DecodeToString( _T_1A43B61B____, _LEN_1A43B61B )
+#define _DEC_WS_1A43B61B____ mx::CStringDecoder::DecodeToWString( _T_1A43B61B____, _LEN_1A43B61B )
+
+// Hex Text (*.txt)
+
+#define _T_96B4BB97_Hex_Text____txt_ "\xD0\x33\x48\xBB\xE6\x2E\x06\x3B\xF0\xF0\xF3\xFC\x06\x13\x3B\xB1"
+#define _LEN_96B4BB97 16
+#define _T_LEN_96B4BB97_Hex_Text____txt_ _T_96B4BB97_Hex_Text____txt_, _LEN_96B4BB97
+#define _DEC_96B4BB97_Hex_Text____txt_( STR ) mx::CStringDecoder::Decode( _T_96B4BB97_Hex_Text____txt_, _LEN_96B4BB97, STR )
+#define _DEC_S_96B4BB97_Hex_Text____txt_ mx::CStringDecoder::DecodeToString( _T_96B4BB97_Hex_Text____txt_, _LEN_96B4BB97 )
+#define _DEC_WS_96B4BB97_Hex_Text____txt_ mx::CStringDecoder::DecodeToWString( _T_96B4BB97_Hex_Text____txt_, _LEN_96B4BB97 )
+
+// Decimal Text (*.txt)
+
+#define _T_DCD38118_Decimal_Text____txt_ "\xCC\x33\x33\x04\xFF\x2A\xFA\xE7\x24\x2D\x41\x42\xB2\xC3\xF1\xB6\x42\x48\x0F\xBB"
+#define _LEN_DCD38118 20
+#define _T_LEN_DCD38118_Decimal_Text____txt_ _T_DCD38118_Decimal_Text____txt_, _LEN_DCD38118
+#define _DEC_DCD38118_Decimal_Text____txt_( STR ) mx::CStringDecoder::Decode( _T_DCD38118_Decimal_Text____txt_, _LEN_DCD38118, STR )
+#define _DEC_S_DCD38118_Decimal_Text____txt_ mx::CStringDecoder::DecodeToString( _T_DCD38118_Decimal_Text____txt_, _LEN_DCD38118 )
+#define _DEC_WS_DCD38118_Decimal_Text____txt_ mx::CStringDecoder::DecodeToWString( _T_DCD38118_Decimal_Text____txt_, _LEN_DCD38118 )
+
+// Binary Text (*.txt)
+
+#define _T_3C9AA8D1_Binary_Text____txt_ "\xCA\x37\x3E\xFC\x04\x42\xAE\x1B\x35\x40\x3D\xEE\xBA\xC5\xF5\xFC\x46\x44\xC4"
+#define _LEN_3C9AA8D1 19
+#define _T_LEN_3C9AA8D1_Binary_Text____txt_ _T_3C9AA8D1_Binary_Text____txt_, _LEN_3C9AA8D1
+#define _DEC_3C9AA8D1_Binary_Text____txt_( STR ) mx::CStringDecoder::Decode( _T_3C9AA8D1_Binary_Text____txt_, _LEN_3C9AA8D1, STR )
+#define _DEC_S_3C9AA8D1_Binary_Text____txt_ mx::CStringDecoder::DecodeToString( _T_3C9AA8D1_Binary_Text____txt_, _LEN_3C9AA8D1 )
+#define _DEC_WS_3C9AA8D1_Binary_Text____txt_ mx::CStringDecoder::DecodeToWString( _T_3C9AA8D1_Binary_Text____txt_, _LEN_3C9AA8D1 )
+
+// C Code (*.cpp;*.c)
+
+#define _T_26DDF563_C_Code____cpp___c_ "\xCB\xEE\x13\x0A\xF6\x2E\xAE\xEF\xFA\xF6\x2C\x3E\x02\xD6\xF1\xB6\x31\xF9"
+#define _LEN_26DDF563 18
+#define _T_LEN_26DDF563_C_Code____cpp___c_ _T_26DDF563_C_Code____cpp___c_, _LEN_26DDF563
+#define _DEC_26DDF563_C_Code____cpp___c_( STR ) mx::CStringDecoder::Decode( _T_26DDF563_C_Code____cpp___c_, _LEN_26DDF563, STR )
+#define _DEC_S_26DDF563_C_Code____cpp___c_ mx::CStringDecoder::DecodeToString( _T_26DDF563_C_Code____cpp___c_, _LEN_26DDF563 )
+#define _DEC_WS_26DDF563_C_Code____cpp___c_ mx::CStringDecoder::DecodeToWString( _T_26DDF563_C_Code____cpp___c_, _LEN_26DDF563 )
+
+// Java Code (*.java)
+
+#define _T_CC7D2E65_Java_Code____java_ "\xD2\x2F\x46\xFC\xB2\x0C\xFD\x2B\x35\xE8\xF1\xF8\xC0\x05\x28\xFE\x2F\xF9"
+#define _LEN_CC7D2E65 18
+#define _T_LEN_CC7D2E65_Java_Code____java_ _T_CC7D2E65_Java_Code____java_, _LEN_CC7D2E65
+#define _DEC_CC7D2E65_Java_Code____java_( STR ) mx::CStringDecoder::Decode( _T_CC7D2E65_Java_Code____java_, _LEN_CC7D2E65, STR )
+#define _DEC_S_CC7D2E65_Java_Code____java_ mx::CStringDecoder::DecodeToString( _T_CC7D2E65_Java_Code____java_, _LEN_CC7D2E65 )
+#define _DEC_WS_CC7D2E65_Java_Code____java_ mx::CStringDecoder::DecodeToWString( _T_CC7D2E65_Java_Code____java_, _LEN_CC7D2E65 )
+
+// Python Code (*.py)
+
+#define _T_B718D420_Python_Code____py_ "\xD8\x47\x44\x03\x01\x37\xAE\x0A\x3F\x2C\x2E\xEE\xBA\xC5\xF5\xF8\x47\xF9"
+#define _LEN_B718D420 18
+#define _T_LEN_B718D420_Python_Code____py_ _T_B718D420_Python_Code____py_, _LEN_B718D420
+#define _DEC_B718D420_Python_Code____py_( STR ) mx::CStringDecoder::Decode( _T_B718D420_Python_Code____py_, _LEN_B718D420, STR )
+#define _DEC_S_B718D420_Python_Code____py_ mx::CStringDecoder::DecodeToString( _T_B718D420_Python_Code____py_, _LEN_B718D420 )
+#define _DEC_WS_B718D420_Python_Code____py_ mx::CStringDecoder::DecodeToWString( _T_B718D420_Python_Code____py_, _LEN_B718D420 )
+
+// Intel 8-Bit Hex Code (*.hex)
+
+#define _T_BBB91553_Intel_8_Bit_Hex_Code____hex_ "\xD1\x3C\x44\x00\xFE\xE9\xC6\xF4\x12\x31\x3D\xEE\xDA\x00\x3F\xA8\x11\x3F\xFF\xF7\xE9\xB6\xF1\xFE\x30\x2E\x46\xBB"
+#define _LEN_BBB91553 28
+#define _T_LEN_BBB91553_Intel_8_Bit_Hex_Code____hex_ _T_BBB91553_Intel_8_Bit_Hex_Code____hex_, _LEN_BBB91553
+#define _DEC_BBB91553_Intel_8_Bit_Hex_Code____hex_( STR ) mx::CStringDecoder::Decode( _T_BBB91553_Intel_8_Bit_Hex_Code____hex_, _LEN_BBB91553, STR )
+#define _DEC_S_BBB91553_Intel_8_Bit_Hex_Code____hex_ mx::CStringDecoder::DecodeToString( _T_BBB91553_Intel_8_Bit_Hex_Code____hex_, _LEN_BBB91553 )
+#define _DEC_WS_BBB91553_Intel_8_Bit_Hex_Code____hex_ mx::CStringDecoder::DecodeToWString( _T_BBB91553_Intel_8_Bit_Hex_Code____hex_, _LEN_BBB91553 )
+
+// Intel 16-Bit Hex Code (*.hex)
+
+#define _T_F0042879_Intel_16_Bit_Hex_Code____hex_ "\xD1\x3C\x44\x00\xFE\xE9\xBF\xFD\xFD\x0A\x32\x42\xB2\xE3\x2C\x00\xEE\x13\x0A\xF6\x2E\xAE\xEF\xFA\xF6\x31\x33\x0A\xC4"
+#define _LEN_F0042879 29
+#define _T_LEN_F0042879_Intel_16_Bit_Hex_Code____hex_ _T_F0042879_Intel_16_Bit_Hex_Code____hex_, _LEN_F0042879
+#define _DEC_F0042879_Intel_16_Bit_Hex_Code____hex_( STR ) mx::CStringDecoder::Decode( _T_F0042879_Intel_16_Bit_Hex_Code____hex_, _LEN_F0042879, STR )
+#define _DEC_S_F0042879_Intel_16_Bit_Hex_Code____hex_ mx::CStringDecoder::DecodeToString( _T_F0042879_Intel_16_Bit_Hex_Code____hex_, _LEN_F0042879 )
+#define _DEC_WS_F0042879_Intel_16_Bit_Hex_Code____hex_ mx::CStringDecoder::DecodeToWString( _T_F0042879_Intel_16_Bit_Hex_Code____hex_, _LEN_F0042879 )
+
+// Intel 32-Bit Hex Code (*.hex)
+
+#define _T_41336890_Intel_32_Bit_Hex_Code____hex_ "\xD1\x3C\x44\x00\xFE\xE9\xC1\xF9\xFD\x0A\x32\x42\xB2\xE3\x2C\x00\xEE\x13\x0A\xF6\x2E\xAE\xEF\xFA\xF6\x31\x33\x0A\xC4"
+#define _LEN_41336890 29
+#define _T_LEN_41336890_Intel_32_Bit_Hex_Code____hex_ _T_41336890_Intel_32_Bit_Hex_Code____hex_, _LEN_41336890
+#define _DEC_41336890_Intel_32_Bit_Hex_Code____hex_( STR ) mx::CStringDecoder::Decode( _T_41336890_Intel_32_Bit_Hex_Code____hex_, _LEN_41336890, STR )
+#define _DEC_S_41336890_Intel_32_Bit_Hex_Code____hex_ mx::CStringDecoder::DecodeToString( _T_41336890_Intel_32_Bit_Hex_Code____hex_, _LEN_41336890 )
+#define _DEC_WS_41336890_Intel_32_Bit_Hex_Code____hex_ mx::CStringDecoder::DecodeToWString( _T_41336890_Intel_32_Bit_Hex_Code____hex_, _LEN_41336890 )
+
+// Motorola S19 Records (*.s19)
+
+#define _T_16D2FB28_Motorola_S19_Records____s19_ "\xD5\x3D\x44\x0A\x04\x38\xFA\x28\xF0\x1B\xFA\x07\xB2\xED\x2C\xEB\x3D\x42\xFF\x05\xE9\xB6\xF1\xFE\x3B\xFA\x07\xBB"
+#define _LEN_16D2FB28 28
+#define _T_LEN_16D2FB28_Motorola_S19_Records____s19_ _T_16D2FB28_Motorola_S19_Records____s19_, _LEN_16D2FB28
+#define _DEC_16D2FB28_Motorola_S19_Records____s19_( STR ) mx::CStringDecoder::Decode( _T_16D2FB28_Motorola_S19_Records____s19_, _LEN_16D2FB28, STR )
+#define _DEC_S_16D2FB28_Motorola_S19_Records____s19_ mx::CStringDecoder::DecodeToString( _T_16D2FB28_Motorola_S19_Records____s19_, _LEN_16D2FB28 )
+#define _DEC_WS_16D2FB28_Motorola_S19_Records____s19_ mx::CStringDecoder::DecodeToWString( _T_16D2FB28_Motorola_S19_Records____s19_, _LEN_16D2FB28 )
+
+// Motorola S28 Records (*.s28)
+
+#define _T_60AF6211_Motorola_S28_Records____s28_ "\xD5\x3D\x44\x0A\x04\x38\xFA\x28\xF0\x1B\xFB\x06\xB2\xED\x2C\xEB\x3D\x42\xFF\x05\xE9\xB6\xF1\xFE\x3B\xFB\x06\xBB"
+#define _LEN_60AF6211 28
+#define _T_LEN_60AF6211_Motorola_S28_Records____s28_ _T_60AF6211_Motorola_S28_Records____s28_, _LEN_60AF6211
+#define _DEC_60AF6211_Motorola_S28_Records____s28_( STR ) mx::CStringDecoder::Decode( _T_60AF6211_Motorola_S28_Records____s28_, _LEN_60AF6211, STR )
+#define _DEC_S_60AF6211_Motorola_S28_Records____s28_ mx::CStringDecoder::DecodeToString( _T_60AF6211_Motorola_S28_Records____s28_, _LEN_60AF6211 )
+#define _DEC_WS_60AF6211_Motorola_S28_Records____s28_ mx::CStringDecoder::DecodeToWString( _T_60AF6211_Motorola_S28_Records____s28_, _LEN_60AF6211 )
+
+// Motorola S37 Records (*.s37)
+
+#define _T_CF2591DD_Motorola_S37_Records____s37_ "\xD5\x3D\x44\x0A\x04\x38\xFA\x28\xF0\x1B\xFC\x05\xB2\xED\x2C\xEB\x3D\x42\xFF\x05\xE9\xB6\xF1\xFE\x3B\xFC\x05\xBB"
+#define _LEN_CF2591DD 28
+#define _T_LEN_CF2591DD_Motorola_S37_Records____s37_ _T_CF2591DD_Motorola_S37_Records____s37_, _LEN_CF2591DD
+#define _DEC_CF2591DD_Motorola_S37_Records____s37_( STR ) mx::CStringDecoder::Decode( _T_CF2591DD_Motorola_S37_Records____s37_, _LEN_CF2591DD, STR )
+#define _DEC_S_CF2591DD_Motorola_S37_Records____s37_ mx::CStringDecoder::DecodeToString( _T_CF2591DD_Motorola_S37_Records____s37_, _LEN_CF2591DD )
+#define _DEC_WS_CF2591DD_Motorola_S37_Records____s37_ mx::CStringDecoder::DecodeToWString( _T_CF2591DD_Motorola_S37_Records____s37_, _LEN_CF2591DD )
+
+// Hex Editor Areas (*.txt)
+
+#define _T_5A14F893_Hex_Editor_Areas____txt_ "\xD0\x33\x48\xBB\xD7\x2D\xF7\x3B\x3F\x3A\xE9\x0F\x04\x00\x28\xFB\xEE\xF8\xC5\xC0\x3D\x06\x3B\xF9"
+#define _LEN_5A14F893 24
+#define _T_LEN_5A14F893_Hex_Editor_Areas____txt_ _T_5A14F893_Hex_Editor_Areas____txt_, _LEN_5A14F893
+#define _DEC_5A14F893_Hex_Editor_Areas____txt_( STR ) mx::CStringDecoder::Decode( _T_5A14F893_Hex_Editor_Areas____txt_, _LEN_5A14F893, STR )
+#define _DEC_S_5A14F893_Hex_Editor_Areas____txt_ mx::CStringDecoder::DecodeToString( _T_5A14F893_Hex_Editor_Areas____txt_, _LEN_5A14F893 )
+#define _DEC_WS_5A14F893_Hex_Editor_Areas____txt_ mx::CStringDecoder::DecodeToWString( _T_5A14F893_Hex_Editor_Areas____txt_, _LEN_5A14F893 )
+
+// Web Page (HTML) (*.html;*.htm)
+
+#define _T_0AD665DA_Web_Page__HTML_____html___htm_ "\xDF\x33\x32\xBB\xE2\x2A\xF5\x2C\xF0\xF0\x11\x22\xDF\xE7\xF0\xA8\xF6\xFA\xC9\xFA\x3D\xFB\x33\x0B\xF2\xF7\x36\x06\x08\xF0"
+#define _LEN_0AD665DA 30
+#define _T_LEN_0AD665DA_Web_Page__HTML_____html___htm_ _T_0AD665DA_Web_Page__HTML_____html___htm_, _LEN_0AD665DA
+#define _DEC_0AD665DA_Web_Page__HTML_____html___htm_( STR ) mx::CStringDecoder::Decode( _T_0AD665DA_Web_Page__HTML_____html___htm_, _LEN_0AD665DA, STR )
+#define _DEC_S_0AD665DA_Web_Page__HTML_____html___htm_ mx::CStringDecoder::DecodeToString( _T_0AD665DA_Web_Page__HTML_____html___htm_, _LEN_0AD665DA )
+#define _DEC_WS_0AD665DA_Web_Page__HTML_____html___htm_ mx::CStringDecoder::DecodeToWString( _T_0AD665DA_Web_Page__HTML_____html___htm_, _LEN_0AD665DA )
+
+// Rich Text Format (RTF) (*.rtf)
+
+#define _T_E9B3EE28_Rich_Text_Format__RTF_____rtf_ "\xDA\x37\x33\x03\xB2\x1D\xF3\x3F\x44\xE8\x0F\x3D\x04\x08\x28\xFC\xEE\xF8\xED\xE6\x0F\xB7\xE7\xF8\xF2\xF7\x40\x06\x01\xF0"
+#define _LEN_E9B3EE28 30
+#define _T_LEN_E9B3EE28_Rich_Text_Format__RTF_____rtf_ _T_E9B3EE28_Rich_Text_Format__RTF_____rtf_, _LEN_E9B3EE28
+#define _DEC_E9B3EE28_Rich_Text_Format__RTF_____rtf_( STR ) mx::CStringDecoder::Decode( _T_E9B3EE28_Rich_Text_Format__RTF_____rtf_, _LEN_E9B3EE28, STR )
+#define _DEC_S_E9B3EE28_Rich_Text_Format__RTF_____rtf_ mx::CStringDecoder::DecodeToString( _T_E9B3EE28_Rich_Text_Format__RTF_____rtf_, _LEN_E9B3EE28 )
+#define _DEC_WS_E9B3EE28_Rich_Text_Format__RTF_____rtf_ mx::CStringDecoder::DecodeToWString( _T_E9B3EE28_Rich_Text_Format__RTF_____rtf_, _LEN_E9B3EE28 )
+
+// Base64 (*.b64)
+
+#define _T_53DD2C36_Base64____b64_ "\xCA\x2F\x43\x00\xC8\xFD\xAE\xEF\xFA\xF6\x2B\x04\xC6\xC4"
+#define _LEN_53DD2C36 14
+#define _T_LEN_53DD2C36_Base64____b64_ _T_53DD2C36_Base64____b64_, _LEN_53DD2C36
+#define _DEC_53DD2C36_Base64____b64_( STR ) mx::CStringDecoder::Decode( _T_53DD2C36_Base64____b64_, _LEN_53DD2C36, STR )
+#define _DEC_S_53DD2C36_Base64____b64_ mx::CStringDecoder::DecodeToString( _T_53DD2C36_Base64____b64_, _LEN_53DD2C36 )
+#define _DEC_WS_53DD2C36_Base64____b64_ mx::CStringDecoder::DecodeToWString( _T_53DD2C36_Base64____b64_, _LEN_53DD2C36 )
+
+// Uuencoding (*.uue;*.uu)
+
+#define _T_16858C8B_Uuencoding____uue___uu_ "\xDD\x43\x35\x09\xF5\x38\xF2\x30\x3E\x2F\xE9\xF6\xBC\xC9\x3C\xFD\x33\x0B\xC5\xC0\x3E\x03\xF0"
+#define _LEN_16858C8B 23
+#define _T_LEN_16858C8B_Uuencoding____uue___uu_ _T_16858C8B_Uuencoding____uue___uu_, _LEN_16858C8B
+#define _DEC_16858C8B_Uuencoding____uue___uu_( STR ) mx::CStringDecoder::Decode( _T_16858C8B_Uuencoding____uue___uu_, _LEN_16858C8B, STR )
+#define _DEC_S_16858C8B_Uuencoding____uue___uu_ mx::CStringDecoder::DecodeToString( _T_16858C8B_Uuencoding____uue___uu_, _LEN_16858C8B )
+#define _DEC_WS_16858C8B_Uuencoding____uue___uu_ mx::CStringDecoder::DecodeToWString( _T_16858C8B_Uuencoding____uue___uu_, _LEN_16858C8B )
+
+// .java
+
+#define _T_E68D5FB6__java "\xB6\x38\x31\x11\xF3"
+#define _LEN_E68D5FB6 5
+#define _T_LEN_E68D5FB6__java _T_E68D5FB6__java, _LEN_E68D5FB6
+#define _DEC_E68D5FB6__java( STR ) mx::CStringDecoder::Decode( _T_E68D5FB6__java, _LEN_E68D5FB6, STR )
+#define _DEC_S_E68D5FB6__java mx::CStringDecoder::DecodeToString( _T_E68D5FB6__java, _LEN_E68D5FB6 )
+#define _DEC_WS_E68D5FB6__java mx::CStringDecoder::DecodeToWString( _T_E68D5FB6__java, _LEN_E68D5FB6 )
+
+// .py
+
+#define _T_CB740296__py "\xB6\x3E\x49"
+#define _LEN_CB740296 3
+#define _T_LEN_CB740296__py _T_CB740296__py, _LEN_CB740296
+#define _DEC_CB740296__py( STR ) mx::CStringDecoder::Decode( _T_CB740296__py, _LEN_CB740296, STR )
+#define _DEC_S_CB740296__py mx::CStringDecoder::DecodeToString( _T_CB740296__py, _LEN_CB740296 )
+#define _DEC_WS_CB740296__py mx::CStringDecoder::DecodeToWString( _T_CB740296__py, _LEN_CB740296 )
+
+// .hex
+
+#define _T_6139FB65__hex "\xB6\x36\x35\x13"
+#define _LEN_6139FB65 4
+#define _T_LEN_6139FB65__hex _T_6139FB65__hex, _LEN_6139FB65
+#define _DEC_6139FB65__hex( STR ) mx::CStringDecoder::Decode( _T_6139FB65__hex, _LEN_6139FB65, STR )
+#define _DEC_S_6139FB65__hex mx::CStringDecoder::DecodeToString( _T_6139FB65__hex, _LEN_6139FB65 )
+#define _DEC_WS_6139FB65__hex mx::CStringDecoder::DecodeToWString( _T_6139FB65__hex, _LEN_6139FB65 )
+
+// .s19
+
+#define _T_AE465EA2__s19 "\xB6\x41\x01\xD4"
+#define _LEN_AE465EA2 4
+#define _T_LEN_AE465EA2__s19 _T_AE465EA2__s19, _LEN_AE465EA2
+#define _DEC_AE465EA2__s19( STR ) mx::CStringDecoder::Decode( _T_AE465EA2__s19, _LEN_AE465EA2, STR )
+#define _DEC_S_AE465EA2__s19 mx::CStringDecoder::DecodeToString( _T_AE465EA2__s19, _LEN_AE465EA2 )
+#define _DEC_WS_AE465EA2__s19 mx::CStringDecoder::DecodeToWString( _T_AE465EA2__s19, _LEN_AE465EA2 )
+
+// .s28
+
+#define _T_F26C3DF7__s28 "\xB6\x41\x02\xD3"
+#define _LEN_F26C3DF7 4
+#define _T_LEN_F26C3DF7__s28 _T_F26C3DF7__s28, _LEN_F26C3DF7
+#define _DEC_F26C3DF7__s28( STR ) mx::CStringDecoder::Decode( _T_F26C3DF7__s28, _LEN_F26C3DF7, STR )
+#define _DEC_S_F26C3DF7__s28 mx::CStringDecoder::DecodeToString( _T_F26C3DF7__s28, _LEN_F26C3DF7 )
+#define _DEC_WS_F26C3DF7__s28 mx::CStringDecoder::DecodeToWString( _T_F26C3DF7__s28, _LEN_F26C3DF7 )
+
+// .s37
+
+#define _T_7BC81127__s37 "\xB6\x41\x03\xD2"
+#define _LEN_7BC81127 4
+#define _T_LEN_7BC81127__s37 _T_7BC81127__s37, _LEN_7BC81127
+#define _DEC_7BC81127__s37( STR ) mx::CStringDecoder::Decode( _T_7BC81127__s37, _LEN_7BC81127, STR )
+#define _DEC_S_7BC81127__s37 mx::CStringDecoder::DecodeToString( _T_7BC81127__s37, _LEN_7BC81127 )
+#define _DEC_WS_7BC81127__s37 mx::CStringDecoder::DecodeToWString( _T_7BC81127__s37, _LEN_7BC81127 )
+
+// .rtf
+
+#define _T_D95EC3B0__rtf "\xB6\x40\x44\x01"
+#define _LEN_D95EC3B0 4
+#define _T_LEN_D95EC3B0__rtf _T_D95EC3B0__rtf, _LEN_D95EC3B0
+#define _DEC_D95EC3B0__rtf( STR ) mx::CStringDecoder::Decode( _T_D95EC3B0__rtf, _LEN_D95EC3B0, STR )
+#define _DEC_S_D95EC3B0__rtf mx::CStringDecoder::DecodeToString( _T_D95EC3B0__rtf, _LEN_D95EC3B0 )
+#define _DEC_WS_D95EC3B0__rtf mx::CStringDecoder::DecodeToWString( _T_D95EC3B0__rtf, _LEN_D95EC3B0 )
+
+// .b64
+
+#define _T_82527D9F__b64 "\xB6\x30\x06\xCF"
+#define _LEN_82527D9F 4
+#define _T_LEN_82527D9F__b64 _T_82527D9F__b64, _LEN_82527D9F
+#define _DEC_82527D9F__b64( STR ) mx::CStringDecoder::Decode( _T_82527D9F__b64, _LEN_82527D9F, STR )
+#define _DEC_S_82527D9F__b64 mx::CStringDecoder::DecodeToString( _T_82527D9F__b64, _LEN_82527D9F )
+#define _DEC_WS_82527D9F__b64 mx::CStringDecoder::DecodeToWString( _T_82527D9F__b64, _LEN_82527D9F )
+
+// .uue
+
+#define _T_5C03B5CE__uue "\xB6\x43\x45\x00"
+#define _LEN_5C03B5CE 4
+#define _T_LEN_5C03B5CE__uue _T_5C03B5CE__uue, _LEN_5C03B5CE
+#define _DEC_5C03B5CE__uue( STR ) mx::CStringDecoder::Decode( _T_5C03B5CE__uue, _LEN_5C03B5CE, STR )
+#define _DEC_S_5C03B5CE__uue mx::CStringDecoder::DecodeToString( _T_5C03B5CE__uue, _LEN_5C03B5CE )
+#define _DEC_WS_5C03B5CE__uue mx::CStringDecoder::DecodeToWString( _T_5C03B5CE__uue, _LEN_5C03B5CE )
+
+// Choose the file to export to.
+
+#define _T_948E74E5_Choose_the_file_to_export_to_ "\xCB\x36\x3F\x0A\x05\x2E\xAE\x3B\x38\x2D\xE9\x34\xFB\x07\x2C\xA8\x42\x3F\xBB\xF7\x41\xFE\x36\x42\x3C\xE9\x42\x01\xC9"
+#define _LEN_948E74E5 29
+#define _T_LEN_948E74E5_Choose_the_file_to_export_to_ _T_948E74E5_Choose_the_file_to_export_to_, _LEN_948E74E5
+#define _DEC_948E74E5_Choose_the_file_to_export_to_( STR ) mx::CStringDecoder::Decode( _T_948E74E5_Choose_the_file_to_export_to_, _LEN_948E74E5, STR )
+#define _DEC_S_948E74E5_Choose_the_file_to_export_to_ mx::CStringDecoder::DecodeToString( _T_948E74E5_Choose_the_file_to_export_to_, _LEN_948E74E5 )
+#define _DEC_WS_948E74E5_Choose_the_file_to_export_to_ mx::CStringDecoder::DecodeToWString( _T_948E74E5_Choose_the_file_to_export_to_, _LEN_948E74E5 )
+
+// The bytes per row must be from 1 to 65535.
+
+#define _T_F076F729_The_bytes_per_row_must_be_from_1_to_65535_ "\xDC\x36\x35\xBB\xF4\x42\x02\x2C\x43\xE8\x39\x33\x04\xBB\x39\xF7\x45\xF0\x08\x07\x3C\x02\xE7\x32\x2D\xE9\x34\x04\x0A\x34\xA8\xFF\xF0\x0F\x01\xE9\xC4\xFC\x05\xFB\xFE\xFC"
+#define _LEN_F076F729 42
+#define _T_LEN_F076F729_The_bytes_per_row_must_be_from_1_to_65535_ _T_F076F729_The_bytes_per_row_must_be_from_1_to_65535_, _LEN_F076F729
+#define _DEC_F076F729_The_bytes_per_row_must_be_from_1_to_65535_( STR ) mx::CStringDecoder::Decode( _T_F076F729_The_bytes_per_row_must_be_from_1_to_65535_, _LEN_F076F729, STR )
+#define _DEC_S_F076F729_The_bytes_per_row_must_be_from_1_to_65535_ mx::CStringDecoder::DecodeToString( _T_F076F729_The_bytes_per_row_must_be_from_1_to_65535_, _LEN_F076F729 )
+#define _DEC_WS_F076F729_The_bytes_per_row_must_be_from_1_to_65535_ mx::CStringDecoder::DecodeToWString( _T_F076F729_The_bytes_per_row_must_be_from_1_to_65535_, _LEN_F076F729 )
+
+// Failed to export the file.
+
+#define _T_9F15717B_Failed_to_export_the_file_ "\xCE\x2F\x39\x07\xF7\x2D\xAE\x3B\x3F\xE8\x2E\x46\x02\x0A\x39\xFC\xEE\x44\x03\xF7\xE9\xF4\x30\x3C\x2D\xF7"
+#define _LEN_9F15717B 26
+#define _T_LEN_9F15717B_Failed_to_export_the_file_ _T_9F15717B_Failed_to_export_the_file_, _LEN_9F15717B
+#define _DEC_9F15717B_Failed_to_export_the_file_( STR ) mx::CStringDecoder::Decode( _T_9F15717B_Failed_to_export_the_file_, _LEN_9F15717B, STR )
+#define _DEC_S_9F15717B_Failed_to_export_the_file_ mx::CStringDecoder::DecodeToString( _T_9F15717B_Failed_to_export_the_file_, _LEN_9F15717B )
+#define _DEC_WS_9F15717B_Failed_to_export_the_file_ mx::CStringDecoder::DecodeToWString( _T_9F15717B_Failed_to_export_the_file_, _LEN_9F15717B )
+
+// Exported: 
+
+#define _T_1695187A_Exported__ "\xCD\x46\x40\x0A\x04\x3D\xF3\x2B\x0A\xE8"
+#define _LEN_1695187A 10
+#define _T_LEN_1695187A_Exported__ _T_1695187A_Exported__, _LEN_1695187A
+#define _DEC_1695187A_Exported__( STR ) mx::CStringDecoder::Decode( _T_1695187A_Exported__, _LEN_1695187A, STR )
+#define _DEC_S_1695187A_Exported__ mx::CStringDecoder::DecodeToString( _T_1695187A_Exported__, _LEN_1695187A )
+#define _DEC_WS_1695187A_Exported__ mx::CStringDecoder::DecodeToWString( _T_1695187A_Exported__, _LEN_1695187A )
+
+// Import Hex
+
+#define _T_2FF0701C_Import_Hex "\xD1\x3B\x40\x0A\x04\x3D\xAE\x0F\x35\x40"
+#define _LEN_2FF0701C 10
+#define _T_LEN_2FF0701C_Import_Hex _T_2FF0701C_Import_Hex, _LEN_2FF0701C
+#define _DEC_2FF0701C_Import_Hex( STR ) mx::CStringDecoder::Decode( _T_2FF0701C_Import_Hex, _LEN_2FF0701C, STR )
+#define _DEC_S_2FF0701C_Import_Hex mx::CStringDecoder::DecodeToString( _T_2FF0701C_Import_Hex, _LEN_2FF0701C )
+#define _DEC_WS_2FF0701C_Import_Hex mx::CStringDecoder::DecodeToWString( _T_2FF0701C_Import_Hex, _LEN_2FF0701C )
+
+// All Supported Types\0*.txt;*.c;*.cpp;*.h;*.java;*.py;*.hex;*.ihx;*.s19;*.s28;*.s37;*.srec;*.mot;*.b64;*.uue;*.uu\0Hex Text (*.txt)\0*.txt\0Decimal Text (*.txt)\0*.txt\0Binary Text (*.txt)\0*.txt\0Source Code (*.c;*.cpp;*.h;*.java;*.py)\0*.c;*.cpp;*.h;*.java;*.py\0Intel Hex (*.hex;*.ihx)\0*.hex;*.ihx\0Motorola S-Records (*.s19;*.s28;*.s37;*.srec;*.mot)\0*.s19;*.s28;*.s37;*.srec;*.mot\0Base64 (*.b64)\0*.b64\0Uuencoding (*.uue;*.uu)\0*.uue;*.uu\0All Files (*.*)\0*.*\0\0
+
+#define _T_F4F6D09A_All_Supported_Types_0__txt___c___cpp___h___java___py___hex___ihx___s19___s28___s37___srec___mot___b64___uue___uu_0Hex_Text____txt__0__txt_0Decimal_Text____txt__0__txt_0Binary_Text____txt__0__txt_0Source_Code____c___cpp___h___java___py__0__c___cpp___h___java___py_0Intel_Hex____hex___ihx__0__hex___ihx_0Motorola_S_Records____s19___s28___s37___srec___mot__0__s19___s28___s37___srec___mot_0Base64____b64__0__b64_0Uuencoding____uue___uu__0__uue___uu_0All_Files_______0____0_0 "\xC9\x3A\x3C\xBB\xE5\x3E\xFE\x37\x3F\x3A\x3D\x33\xF6\xBB\x1B\x01\x3E\x35\x0E\x92\xF3\xBC\x3B\x48\x3C\x04\xF8\xC0\xFE\x02\xB2\xFC\x33\x0B\x02\x04\xB8\xF5\x38\x03\xF3\xFC\xFC\xFC\x3D\xE9\x09\xFA\xC9\x02\x42\xC9\xF1\xFE\x30\x2E\x46\xCD\xC5\xF5\xF1\x36\x48\xD6\xBC\xF7\x01\xF8\x09\x03\xF3\xFC\x05\xCD\xFF\xC3\xF8\xFE\x0E\xC5\x00\xC9\xF1\xFE\x3B\x3B\x33\xF5\xD6\xF1\xB6\x3B\x3F\x0F\xCD\xF3\xBC\x29\x06\xFC\x04\xF8\xC0\x10\x3C\xED\x09\xFA\xC9\x07\x3E\x8E\x0F\x35\x40\xE9\x22\xF7\x13\x3B\xA8\xF6\xFA\xC9\x06\x41\x02\xF0\xD0\xF2\xF7\x42\x0A\x0F\xC7\xCC\x33\x33\x04\xFF\x2A\xFA\xE7\x24\x2D\x41\x42\xB2\xC3\xF1\xB6\x42\x48\x0F\xBB\xC9\xB8\xF5\x44\x40\x3D\xCE\xD4\x04\x35\xE9\x40\x49\xBB\xE6\x2E\x06\x3B\xF0\xF0\xF3\xFC\x06\x13\x3B\xB1\xCE\xFA\xC9\x06\x41\x02\xC7\x23\x37\x3E\x40\xF5\x00\xE7\xCB\x3D\x34\x00\xB2\xF1\xB8\xF5\x33\x03\xF3\xFC\xF5\x0B\x37\xC3\xF8\xFE\x03\xCD\xF3\xBC\x31\x31\x3E\x2A\x09\xBC\xC9\x37\x01\xF7\xD0\xC5\xC0\x2C\xC9\xF1\xFE\x2B\x39\x3E\xCD\xC5\xF5\xF0\x09\xFA\xC9\xFC\x2A\x04\x28\x0B\xF2\xF7\x3E\x0B\x9B\x10\xF6\x42\x35\x07\xB2\x11\xF3\x3F\xF0\xF0\xF3\xFC\xFA\x00\x3F\xC3\xF8\xFE\x04\xFA\x41\xB7\xC7\xFA\xF6\x31\x33\x0A\xD6\xF1\xB6\x37\x38\x13\x92\x16\xFD\x3B\x3F\x3A\x38\x3A\xF3\xBB\x1A\xB5\x20\x35\xFE\x01\x3B\xF2\x3A\xF0\xF0\xF3\xFC\x05\xCC\x00\xC3\xF8\xFE\x0E\xC4\x01\xC9\xF1\xFE\x3B\xFC\x05\xCD\xC5\xF5\xFB\x40\x35\xFE\xCD\xF3\xBC\x34\x3F\x3C\xF2\xCE\xBC\xC9\x3A\xB9\x07\x0B\xC5\xC0\x3C\xC0\xFF\x0B\xF2\xF7\x41\xC5\xD2\x02\xB2\xFC\x43\x0D\xF7\x2C\xC9\xF1\xFE\x35\x38\x42\x92\xDD\x28\xFB\x33\x06\xCF\xB2\xF1\xB8\xF5\x32\xFE\xFD\xF7\x92\xC5\xF5\xEA\x04\x04\x9B\xE7\x3E\xF3\x35\x33\x37\x2D\x37\x00\x02\xE7\xB0\xF8\xFE\x10\x07\x2E\xC9\xF1\xFE\x3D\x3E\xF7\x92\xC5\xF5\xFD\x43\x35\xD6\xBC\xF7\x03\x3C\xD0\x09\x35\x3A\xB2\xE1\x30\xF4\x33\x43\xBB\xBA\xF3\xBC\xF1\xF9\xC8\xF3\xFC\xBC\x9B\xC7"
+#define _LEN_F4F6D09A 450
+#define _T_LEN_F4F6D09A_All_Supported_Types_0__txt___c___cpp___h___java___py___hex___ihx___s19___s28___s37___srec___mot___b64___uue___uu_0Hex_Text____txt__0__txt_0Decimal_Text____txt__0__txt_0Binary_Text____txt__0__txt_0Source_Code____c___cpp___h___java___py__0__c___cpp___h___java___py_0Intel_Hex____hex___ihx__0__hex___ihx_0Motorola_S_Records____s19___s28___s37___srec___mot__0__s19___s28___s37___srec___mot_0Base64____b64__0__b64_0Uuencoding____uue___uu__0__uue___uu_0All_Files_______0____0_0 _T_F4F6D09A_All_Supported_Types_0__txt___c___cpp___h___java___py___hex___ihx___s19___s28___s37___srec___mot___b64___uue___uu_0Hex_Text____txt__0__txt_0Decimal_Text____txt__0__txt_0Binary_Text____txt__0__txt_0Source_Code____c___cpp___h___java___py__0__c___cpp___h___java___py_0Intel_Hex____hex___ihx__0__hex___ihx_0Motorola_S_Records____s19___s28___s37___srec___mot__0__s19___s28___s37___srec___mot_0Base64____b64__0__b64_0Uuencoding____uue___uu__0__uue___uu_0All_Files_______0____0_0, _LEN_F4F6D09A
+#define _DEC_F4F6D09A_All_Supported_Types_0__txt___c___cpp___h___java___py___hex___ihx___s19___s28___s37___srec___mot___b64___uue___uu_0Hex_Text____txt__0__txt_0Decimal_Text____txt__0__txt_0Binary_Text____txt__0__txt_0Source_Code____c___cpp___h___java___py__0__c___cpp___h___java___py_0Intel_Hex____hex___ihx__0__hex___ihx_0Motorola_S_Records____s19___s28___s37___srec___mot__0__s19___s28___s37___srec___mot_0Base64____b64__0__b64_0Uuencoding____uue___uu__0__uue___uu_0All_Files_______0____0_0( STR ) mx::CStringDecoder::Decode( _T_F4F6D09A_All_Supported_Types_0__txt___c___cpp___h___java___py___hex___ihx___s19___s28___s37___srec___mot___b64___uue___uu_0Hex_Text____txt__0__txt_0Decimal_Text____txt__0__txt_0Binary_Text____txt__0__txt_0Source_Code____c___cpp___h___java___py__0__c___cpp___h___java___py_0Intel_Hex____hex___ihx__0__hex___ihx_0Motorola_S_Records____s19___s28___s37___srec___mot__0__s19___s28___s37___srec___mot_0Base64____b64__0__b64_0Uuencoding____uue___uu__0__uue___uu_0All_Files_______0____0_0, _LEN_F4F6D09A, STR )
+#define _DEC_S_F4F6D09A_All_Supported_Types_0__txt___c___cpp___h___java___py___hex___ihx___s19___s28___s37___srec___mot___b64___uue___uu_0Hex_Text____txt__0__txt_0Decimal_Text____txt__0__txt_0Binary_Text____txt__0__txt_0Source_Code____c___cpp___h___java___py__0__c___cpp___h___java___py_0Intel_Hex____hex___ihx__0__hex___ihx_0Motorola_S_Records____s19___s28___s37___srec___mot__0__s19___s28___s37___srec___mot_0Base64____b64__0__b64_0Uuencoding____uue___uu__0__uue___uu_0All_Files_______0____0_0 mx::CStringDecoder::DecodeToString( _T_F4F6D09A_All_Supported_Types_0__txt___c___cpp___h___java___py___hex___ihx___s19___s28___s37___srec___mot___b64___uue___uu_0Hex_Text____txt__0__txt_0Decimal_Text____txt__0__txt_0Binary_Text____txt__0__txt_0Source_Code____c___cpp___h___java___py__0__c___cpp___h___java___py_0Intel_Hex____hex___ihx__0__hex___ihx_0Motorola_S_Records____s19___s28___s37___srec___mot__0__s19___s28___s37___srec___mot_0Base64____b64__0__b64_0Uuencoding____uue___uu__0__uue___uu_0All_Files_______0____0_0, _LEN_F4F6D09A )
+#define _DEC_WS_F4F6D09A_All_Supported_Types_0__txt___c___cpp___h___java___py___hex___ihx___s19___s28___s37___srec___mot___b64___uue___uu_0Hex_Text____txt__0__txt_0Decimal_Text____txt__0__txt_0Binary_Text____txt__0__txt_0Source_Code____c___cpp___h___java___py__0__c___cpp___h___java___py_0Intel_Hex____hex___ihx__0__hex___ihx_0Motorola_S_Records____s19___s28___s37___srec___mot__0__s19___s28___s37___srec___mot_0Base64____b64__0__b64_0Uuencoding____uue___uu__0__uue___uu_0All_Files_______0____0_0 mx::CStringDecoder::DecodeToWString( _T_F4F6D09A_All_Supported_Types_0__txt___c___cpp___h___java___py___hex___ihx___s19___s28___s37___srec___mot___b64___uue___uu_0Hex_Text____txt__0__txt_0Decimal_Text____txt__0__txt_0Binary_Text____txt__0__txt_0Source_Code____c___cpp___h___java___py__0__c___cpp___h___java___py_0Intel_Hex____hex___ihx__0__hex___ihx_0Motorola_S_Records____s19___s28___s37___srec___mot__0__s19___s28___s37___srec___mot_0Base64____b64__0__b64_0Uuencoding____uue___uu__0__uue___uu_0All_Files_______0____0_0, _LEN_F4F6D09A )
+
+// Failed to read the file.
+
+#define _T_43CE34EC_Failed_to_read_the_file_ "\xCE\x2F\x39\x07\xF7\x2D\xAE\x3B\x3F\xE8\x3B\x33\xF3\xFF\xE7\xFC\x36\x35\xBB\xF8\x32\xFA\x2C\xFE"
+#define _LEN_43CE34EC 24
+#define _T_LEN_43CE34EC_Failed_to_read_the_file_ _T_43CE34EC_Failed_to_read_the_file_, _LEN_43CE34EC
+#define _DEC_43CE34EC_Failed_to_read_the_file_( STR ) mx::CStringDecoder::Decode( _T_43CE34EC_Failed_to_read_the_file_, _LEN_43CE34EC, STR )
+#define _DEC_S_43CE34EC_Failed_to_read_the_file_ mx::CStringDecoder::DecodeToString( _T_43CE34EC_Failed_to_read_the_file_, _LEN_43CE34EC )
+#define _DEC_WS_43CE34EC_Failed_to_read_the_file_ mx::CStringDecoder::DecodeToWString( _T_43CE34EC_Failed_to_read_the_file_, _LEN_43CE34EC )
+
+// The file contains nothing that can be imported.
+
+#define _T_7F0157C2_The_file_contains_nothing_that_can_be_imported_ "\xDC\x36\x35\xBB\xF8\x32\xFA\x2C\xF0\x2B\x38\x3C\x06\xFC\x30\xF6\x41\xF0\x09\x01\x3D\xF6\x30\x3E\x2F\xE9\x42\xFA\xFC\x3B\xA8\x31\x31\x09\xB2\x2B\xF3\xE7\x39\x35\x39\x3D\x04\x0F\x2C\xEC\xFC"
+#define _LEN_7F0157C2 47
+#define _T_LEN_7F0157C2_The_file_contains_nothing_that_can_be_imported_ _T_7F0157C2_The_file_contains_nothing_that_can_be_imported_, _LEN_7F0157C2
+#define _DEC_7F0157C2_The_file_contains_nothing_that_can_be_imported_( STR ) mx::CStringDecoder::Decode( _T_7F0157C2_The_file_contains_nothing_that_can_be_imported_, _LEN_7F0157C2, STR )
+#define _DEC_S_7F0157C2_The_file_contains_nothing_that_can_be_imported_ mx::CStringDecoder::DecodeToString( _T_7F0157C2_The_file_contains_nothing_that_can_be_imported_, _LEN_7F0157C2 )
+#define _DEC_WS_7F0157C2_The_file_contains_nothing_that_can_be_imported_ mx::CStringDecoder::DecodeToWString( _T_7F0157C2_The_file_contains_nothing_that_can_be_imported_, _LEN_7F0157C2 )
+
+// The file is not valid.  The first problem is on line 
+
+#define _T_2EF0FF63_The_file_is_not_valid___The_first_problem_is_on_line_ "\xDC\x36\x35\xBB\xF8\x32\xFA\x2C\xF0\x31\x3C\xEE\x00\x0A\x3B\xA8\x44\x31\x07\xFB\x2D\xBC\xE7\xF0\x1C\x31\x33\xB2\x01\x30\xFA\x41\x44\xBB\x02\x3B\xFD\x29\x3C\x2D\x36\xEE\xFB\x0E\xE7\xF7\x3C\xF0\x07\xFB\x37\xF3\xE7"
+#define _LEN_2EF0FF63 53
+#define _T_LEN_2EF0FF63_The_file_is_not_valid___The_first_problem_is_on_line_ _T_2EF0FF63_The_file_is_not_valid___The_first_problem_is_on_line_, _LEN_2EF0FF63
+#define _DEC_2EF0FF63_The_file_is_not_valid___The_first_problem_is_on_line_( STR ) mx::CStringDecoder::Decode( _T_2EF0FF63_The_file_is_not_valid___The_first_problem_is_on_line_, _LEN_2EF0FF63, STR )
+#define _DEC_S_2EF0FF63_The_file_is_not_valid___The_first_problem_is_on_line_ mx::CStringDecoder::DecodeToString( _T_2EF0FF63_The_file_is_not_valid___The_first_problem_is_on_line_, _LEN_2EF0FF63 )
+#define _DEC_WS_2EF0FF63_The_file_is_not_valid___The_first_problem_is_on_line_ mx::CStringDecoder::DecodeToWString( _T_2EF0FF63_The_file_is_not_valid___The_first_problem_is_on_line_, _LEN_2EF0FF63 )
+
+// The checksum is wrong on line 
+
+#define _T_A27C6232_The_checksum_is_wrong_on_line_ "\xDC\x36\x35\xBB\xF5\x31\xF3\x2A\x3B\x3B\x3E\x3B\xB2\x04\x3A\xA8\x45\x42\x0A\x00\x30\xAE\x36\x3E\xE8\x35\x37\x00\x00\xE7"
+#define _LEN_A27C6232 30
+#define _T_LEN_A27C6232_The_checksum_is_wrong_on_line_ _T_A27C6232_The_checksum_is_wrong_on_line_, _LEN_A27C6232
+#define _DEC_A27C6232_The_checksum_is_wrong_on_line_( STR ) mx::CStringDecoder::Decode( _T_A27C6232_The_checksum_is_wrong_on_line_, _LEN_A27C6232, STR )
+#define _DEC_S_A27C6232_The_checksum_is_wrong_on_line_ mx::CStringDecoder::DecodeToString( _T_A27C6232_The_checksum_is_wrong_on_line_, _LEN_A27C6232 )
+#define _DEC_WS_A27C6232_The_checksum_is_wrong_on_line_ mx::CStringDecoder::DecodeToWString( _T_A27C6232_The_checksum_is_wrong_on_line_, _LEN_A27C6232 )
+
+// The imported data would be larger than 1 GB.
+
+#define _T_76ED7F76_The_imported_data_would_be_larger_than_1_GB_ "\xDC\x36\x35\xBB\xFB\x36\xFE\x36\x42\x3C\x2E\x32\xB2\xFF\x28\xFC\x2F\xF0\x12\x01\x3E\xFA\x2B\xF0\x2A\x2E\xEE\xFE\xFC\x39\xEF\x33\x42\xBB\x06\x31\xEF\x35\xF0\xF9\xE9\x15\xD4\xC9"
+#define _LEN_76ED7F76 44
+#define _T_LEN_76ED7F76_The_imported_data_would_be_larger_than_1_GB_ _T_76ED7F76_The_imported_data_would_be_larger_than_1_GB_, _LEN_76ED7F76
+#define _DEC_76ED7F76_The_imported_data_would_be_larger_than_1_GB_( STR ) mx::CStringDecoder::Decode( _T_76ED7F76_The_imported_data_would_be_larger_than_1_GB_, _LEN_76ED7F76, STR )
+#define _DEC_S_76ED7F76_The_imported_data_would_be_larger_than_1_GB_ mx::CStringDecoder::DecodeToString( _T_76ED7F76_The_imported_data_would_be_larger_than_1_GB_, _LEN_76ED7F76 )
+#define _DEC_WS_76ED7F76_The_imported_data_would_be_larger_than_1_GB_ mx::CStringDecoder::DecodeToWString( _T_76ED7F76_The_imported_data_would_be_larger_than_1_GB_, _LEN_76ED7F76 )
+
+// Imported: 
+
+#define _T_EAFEFFCA_Imported__ "\xD1\x3B\x40\x0A\x04\x3D\xF3\x2B\x0A\xE8"
+#define _LEN_EAFEFFCA 10
+#define _T_LEN_EAFEFFCA_Imported__ _T_EAFEFFCA_Imported__, _LEN_EAFEFFCA
+#define _DEC_EAFEFFCA_Imported__( STR ) mx::CStringDecoder::Decode( _T_EAFEFFCA_Imported__, _LEN_EAFEFFCA, STR )
+#define _DEC_S_EAFEFFCA_Imported__ mx::CStringDecoder::DecodeToString( _T_EAFEFFCA_Imported__, _LEN_EAFEFFCA )
+#define _DEC_WS_EAFEFFCA_Imported__ mx::CStringDecoder::DecodeToWString( _T_EAFEFFCA_Imported__, _LEN_EAFEFFCA )
+
+// begin 
+
+#define _T_84CBAE3B_begin_ "\xEA\x33\x37\x04\x00\xE9"
+#define _LEN_84CBAE3B 6
+#define _T_LEN_84CBAE3B_begin_ _T_84CBAE3B_begin_, _LEN_84CBAE3B
+#define _DEC_84CBAE3B_begin_( STR ) mx::CStringDecoder::Decode( _T_84CBAE3B_begin_, _LEN_84CBAE3B, STR )
+#define _DEC_S_84CBAE3B_begin_ mx::CStringDecoder::DecodeToString( _T_84CBAE3B_begin_, _LEN_84CBAE3B )
+#define _DEC_WS_84CBAE3B_begin_ mx::CStringDecoder::DecodeToWString( _T_84CBAE3B_begin_, _LEN_84CBAE3B )
+
+// end
+
+#define _T_00FC33B1_end "\xED\x3C\x34"
+#define _LEN_00FC33B1 3
+#define _T_LEN_00FC33B1_end _T_00FC33B1_end, _LEN_00FC33B1
+#define _DEC_00FC33B1_end( STR ) mx::CStringDecoder::Decode( _T_00FC33B1_end, _LEN_00FC33B1, STR )
+#define _DEC_S_00FC33B1_end mx::CStringDecoder::DecodeToString( _T_00FC33B1_end, _LEN_00FC33B1 )
+#define _DEC_WS_00FC33B1_end mx::CStringDecoder::DecodeToWString( _T_00FC33B1_end, _LEN_00FC33B1 )
+
+// Export Hex
+
+#define _T_D39B97AC_Export_Hex "\xCD\x46\x40\x0A\x04\x3D\xAE\x0F\x35\x40"
+#define _LEN_D39B97AC 10
+#define _T_LEN_D39B97AC_Export_Hex _T_D39B97AC_Export_Hex, _LEN_D39B97AC
+#define _DEC_D39B97AC_Export_Hex( STR ) mx::CStringDecoder::Decode( _T_D39B97AC_Export_Hex, _LEN_D39B97AC, STR )
+#define _DEC_S_D39B97AC_Export_Hex mx::CStringDecoder::DecodeToString( _T_D39B97AC_Export_Hex, _LEN_D39B97AC )
+#define _DEC_WS_D39B97AC_Export_Hex mx::CStringDecoder::DecodeToWString( _T_D39B97AC_Export_Hex, _LEN_D39B97AC )
+
+// He&x
+
+#define _T_ACF8DC2F_He_x "\xD0\x33\xF6\x13"
+#define _LEN_ACF8DC2F 4
+#define _T_LEN_ACF8DC2F_He_x _T_ACF8DC2F_He_x, _LEN_ACF8DC2F
+#define _DEC_ACF8DC2F_He_x( STR ) mx::CStringDecoder::Decode( _T_ACF8DC2F_He_x, _LEN_ACF8DC2F, STR )
+#define _DEC_S_ACF8DC2F_He_x mx::CStringDecoder::DecodeToString( _T_ACF8DC2F_He_x, _LEN_ACF8DC2F )
+#define _DEC_WS_ACF8DC2F_He_x mx::CStringDecoder::DecodeToWString( _T_ACF8DC2F_He_x, _LEN_ACF8DC2F )
 

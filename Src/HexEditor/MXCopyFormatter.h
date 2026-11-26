@@ -225,6 +225,19 @@ namespace mx {
 		static uint64_t											TotalBytes( const MX_COPY_SOURCE &_csSource );
 
 		/**
+		 * \brief Renders a Copy operation as the contents of a file (Export Hex).
+		 *
+		 * Text formats are written as UTF-8 without a byte-order mark and end with a new line; MX_CA_WEB_PAGE is written as an
+		 *	HTML document, MX_CA_RICH_TEXT as RTF, and MX_CA_BINARY as the raw bytes.  Nothing is NUL-terminated.
+		 *
+		 * \param _csSource The data and parameters of the Copy operation.
+		 * \param _csSink Receives the bytes of the file.
+		 * \param _swsMsg Receives an error message on failure.
+		 * \return Returns true if the file contents were rendered.
+		 */
+		static bool												RenderFile( const MX_COPY_SOURCE &_csSource, CCopySink &_csSink, CSecureWString &_swsMsg );
+
+		/**
 		 * \brief Gets the number of ranges in a selection.
 		 *
 		 * \param _csSource The data and parameters of the Copy operation.
@@ -412,9 +425,10 @@ namespace mx {
 		 *
 		 * \param _csSource The data and parameters of the Copy operation.
 		 * \param _csSink Receives the bytes.
+		 * \param _bNulTerminate If true, a NUL byte is written after the RTF (for the clipboard).
 		 * \return Returns false on a read or memory failure.
 		 */
-		static bool												RenderRtf( const MX_COPY_SOURCE &_csSource, CCopySink &_csSink );
+		static bool												RenderRtf( const MX_COPY_SOURCE &_csSource, CCopySink &_csSink, bool _bNulTerminate = true );
 
 		/**
 		 * \brief Gets the primitive data format that corresponds to an MX_CA_UINT8-through-MX_CA_PCM32 copy type.

@@ -13,7 +13,11 @@ namespace mx {
 #define MX_LABEL_T													(MX_TOP_JUST)
 #define MX_LABEL_W													200
 #define MX_NUMBER_DLG_W												(MX_LABEL_W + MX_LEFT_JUST * 2)
-#define MX_NUMBER_DLG_H												(MX_LABEL_T + MX_DEF_STATIC_HEIGHT + MX_TOP_JUST + MX_DEF_COMBO_HEIGHT + MX_TOP_JUST + MX_DEF_BUTTON_HEIGHT + MX_TOP_JUST + 2)
+// The row of Decimal/Hex radio buttons (removed by the dialog when they are not wanted).
+#define MX_NI_RADIO_ROW_H											(MX_DEF_RADIO_HEIGHT + MX_TOP_JUST)
+#define MX_NI_RADIO_T												(MX_LABEL_T + MX_DEF_STATIC_HEIGHT + MX_TOP_JUST + MX_DEF_COMBO_HEIGHT + MX_TOP_JUST)
+#define MX_NI_RADIO_W												45
+#define MX_NUMBER_DLG_H												(MX_LABEL_T + MX_DEF_STATIC_HEIGHT + MX_TOP_JUST + MX_DEF_COMBO_HEIGHT + MX_TOP_JUST + MX_NI_RADIO_ROW_H + MX_DEF_BUTTON_HEIGHT + MX_TOP_JUST + 2)
 
 	// == Members.
 	// The layout for the New Data-Type Search dialog.
@@ -66,6 +70,38 @@ namespace mx {
 			0,														// sTextLen
 			MX_NI_DIALOG,											// dwParentId
 		},
+		{
+			LSW_LT_RADIO,											// ltType
+			MX_NI_DECIMAL,											// wId
+			WC_BUTTONW,												// lpwcClass
+			TRUE,													// bEnabled
+			FALSE,													// bActive
+			MX_NUMBER_DLG_W / 2 - MX_NI_RADIO_W,					// iLeft
+			MX_NI_RADIO_T,											// iTop
+			MX_NI_RADIO_W,											// dwWidth
+			MX_DEF_RADIO_HEIGHT,									// dwHeight
+			MX_RADIOSTYLE | WS_GROUP,								// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
+			MX_MAKE_WCHAR( _T_5217E1C9__Decimal ),					// pwcText
+			_LEN_5217E1C9,											// sTextLen
+			MX_NI_DIALOG,											// dwParentId
+		},
+		{
+			LSW_LT_RADIO,											// ltType
+			MX_NI_HEX,												// wId
+			WC_BUTTONW,												// lpwcClass
+			TRUE,													// bEnabled
+			FALSE,													// bActive
+			MX_NUMBER_DLG_W / 2 + 4,								// iLeft
+			MX_NI_RADIO_T,											// iTop
+			MX_NI_RADIO_W,											// dwWidth
+			MX_DEF_RADIO_HEIGHT,									// dwHeight
+			MX_RADIOSTYLE,											// dwStyle
+			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
+			MX_MAKE_WCHAR( _T_ACF8DC2F_He_x ),						// pwcText
+			_LEN_ACF8DC2F,											// sTextLen
+			MX_NI_DIALOG,											// dwParentId
+		},
 
 		
 		{
@@ -78,7 +114,7 @@ namespace mx {
 			MX_NUMBER_DLG_H - MX_DEF_BUTTON_HEIGHT - 2,				// iTop
 			MX_DEF_BUTTON_WIDTH,									// dwWidth
 			MX_DEF_BUTTON_HEIGHT,									// dwHeight
-			MX_DEFBUTTONSTYLE,										// dwStyle
+			MX_DEFBUTTONSTYLE | WS_GROUP,							// dwStyle
 			WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | WS_EX_NOPARENTNOTIFY,						// dwStyleEx
 			MX_MAKE_WCHAR( _T_D736D92D_OK ),						// pwcText
 			_LEN_D736D92D,											// sTextLen

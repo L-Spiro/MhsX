@@ -1,4 +1,5 @@
 #include "MXNumberInputDialog.h"
+#include "../Layouts/MXLayoutMacros.h"
 
 #include <Object/EEObject.h>
 
@@ -37,6 +38,36 @@ namespace mx {
 				if ( m_pndpParms->swsDefaultText.size() ) {
 					pwCombo->SetTextW( m_pndpParms->swsDefaultText.c_str() );
 				}
+			}
+		}
+
+		auto pwDec = FindChild( CNumberInputLayout::MX_NI_DECIMAL );
+		auto pwHex = FindChild( CNumberInputLayout::MX_NI_HEX );
+		if ( m_pndpParms && m_pndpParms->bShowHexDec ) {
+			if ( pwDec ) { pwDec->SetCheck( !m_pndpParms->bHexInput ); }
+			if ( pwHex ) { pwHex->SetCheck( m_pndpParms->bHexInput ); }
+		}
+		else {
+			LSW_RECT rRow { 0, 0, 1, MX_DEF_RADIO_HEIGHT + MX_TOP_JUST };
+			::MapDialogRect( Wnd(), &rRow );
+			const LONG lDelta = rRow.bottom;
+			for ( auto pwThis : { pwDec, pwHex } ) {
+				if ( pwThis ) {
+					::ShowWindow( pwThis->Wnd(), SW_HIDE );
+					::EnableWindow( pwThis->Wnd(), FALSE );
+				}
+			}
+			for ( WORD wId : { WORD( CNumberInputLayout::MX_NI_OK ), WORD( CNumberInputLayout::MX_NI_CANCEL ) } ) {
+				auto pwButton = FindChild( wId );
+				if ( !pwButton ) { continue; }
+				LSW_RECT rButton;
+				::GetWindowRect( pwButton->Wnd(), &rButton );
+				::MapWindowPoints( NULL, Wnd(), reinterpret_cast<POINT *>(&rButton), 2 );
+				::SetWindowPos( pwButton->Wnd(), NULL, rButton.left, rButton.top - lDelta, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE );
+			}
+			LSW_RECT rWindow;
+			if ( ::GetWindowRect( Wnd(), &rWindow ) ) {
+				::SetWindowPos( Wnd(), NULL, 0, 0, rWindow.Width(), rWindow.Height() - lDelta, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE );
 			}
 		}
 		return lsw::CMainWindow::InitDialog();
@@ -81,6 +112,10 @@ namespace mx {
 						lsw::CBase::MessageBoxError( Wnd(), swsError.c_str(), swsTitle.c_str() );
 						::EndDialog( Wnd(), -1 );
 						break;
+					}
+					if ( m_pndpParms->bShowHexDec ) {
+						auto pwHex = FindChild( CNumberInputLayout::MX_NI_HEX );
+						m_pndpParms->bHexInput = pwHex && pwHex->IsChecked();
 					}
 					pwCombo->SetTreatAsHex( m_pndpParms->bHexInput );
 					if ( !pwCombo->GetTextAsExpression( m_pndpParms->rResult, ee::CObject::EE_TF_NONE, &bValid, m_pndpParms->psStringReturn ) ) {

@@ -1,6 +1,7 @@
 #include "MXDeusHexMachinaWindow.h"
 #include "../Layouts/MXLayoutMacros.h"
 #include "../Layouts/MXLayoutManager.h"
+#include "../Layouts/MXExportHexLayout.h"
 #include "../Layouts/MXFontDialogLayout.h"
 #include "../Layouts/MXNumberInputLayout.h"
 #include "../Layouts/MXOpenProcessLayout.h"
@@ -9,10 +10,12 @@
 #include "../MemHack/MXWindowMemHack.h"
 #include "../NumberInputWindow/MXNumberInputDialog.h"
 #include "../Utilities/MXUtilities.h"
+#include "MXCopyFormatter.h"
 #include "MXCopyPasteManager.h"
 #include "MXHexEditorCurProcess.h"
 #include "MXHexEditorFile.h"
 #include "MXHexEditorProcess.h"
+#include "MXHexImport.h"
 
 #include <Base/LSWWndClassEx.h>
 #include <Rebar/LSWRebar.h>
@@ -412,6 +415,18 @@ namespace mx {
 			}
 			case Layout::MX_M_VIEW_FONT_CHANGE_FONT : {
 				ShowChangeFont();
+				break;
+			}
+			case Layout::MX_M_VIEW_ADDRESSES_SET_STARTING_ADDRESS : {
+				ShowSetStartingAddress();
+				break;
+			}
+			case Layout::MX_M_FILE_EXPORT_HEX : {
+				ExportHex();
+				break;
+			}
+			case Layout::MX_M_FILE_IMPORT_HEX : {
+				ImportHex();
 				break;
 			}
 			case Layout::MX_M_EDIT_COPY_AS_HEX : {
@@ -1652,6 +1667,19 @@ namespace mx {
 	 * \return Returns a LSW_HANDLED code.
 	 */
 	CWidget::LSW_HANDLED CDeusHexMachinaWindow::ContextMenu( CWidget * _pwControl, INT _iX, INT _iY ) {
+		if ( ShowHexContextMenu( _pwControl, _iX, _iY ) ) { return LSW_H_HANDLED; }
+		return lsw::CMainWindow::ContextMenu( _pwControl, _iX, _iY );
+	}
+
+	/**
+	 * Shows the hex editor's context menu.  Called by the hex control itself when it gets WM_CONTEXTMENU.
+	 *
+	 * \param _pwControl The hex control.
+	 * \param _iX The horizontal position of the cursor in screen coordinates, or -1 if the menu was opened with the keyboard.
+	 * \param _iY The vertical position of the cursor in screen coordinates, or -1 if the menu was opened with the keyboard.
+	 * \return Returns true if a menu was shown.
+	 **/
+	bool CDeusHexMachinaWindow::ShowHexContextMenu( lsw::CWidget * _pwControl, INT _iX, INT _iY ) {
 		auto phecControl = CurrentEditor();
 		if ( phecControl && _pwControl == phecControl ) {
 			// A menu opened with the keyboard applies to the caret rather than to the last address right-clicked.
@@ -1709,10 +1737,9 @@ namespace mx {
 				},
 			};
 			mx::CLayoutManager * plmLayout = static_cast<mx::CLayoutManager *>(lsw::CBase::LayoutManager());
-			plmLayout->CreatePopupMenuEx( this, miMenus, std::size( miMenus ), _iX, _iY );
-			return LSW_H_HANDLED;
+			return plmLayout->CreatePopupMenuEx( this, miMenus, std::size( miMenus ), _iX, _iY );
 		}
-		return lsw::CMainWindow::ContextMenu( _pwControl, _iX, _iY );
+		return false;
 	}
 
 	// WM_CLOSE.
@@ -2942,6 +2969,7 @@ namespace mx {
 
 		CSelectRangeLayout::MX_SELECT_RANGE_PARMS srpParms;
 		srpParms.ui64DataSize = phecControl->Size();
+		srpParms.ui64Bias = phecControl->StartingAddress();
 		srpParms.bHex = phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_BYTES_HEX ||
 			phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_SHORT_HEX;
 		srpParms.bEnd = m_bSelectRangeEnd;
@@ -2970,12 +2998,299 @@ namespace mx {
 			srpParms.ui64Start = phecControl->GetCaretAddr();
 			srpParms.ui64Size = 0;
 		}
+		// Shown (and entered) with the custom starting address added.
+		srpParms.ui64Start += srpParms.ui64Bias;
 
 		if ( TRUE == CSelectRangeLayout::CreateSelectRangeDialog( this, srpParms ) ) {
 			m_bSelectRangeEnd = srpParms.bEnd;
-			phecControl->SelectRange( srpParms.ui64Start, srpParms.ui64Size );
+			phecControl->SelectRange( srpParms.ui64Start - srpParms.ui64Bias, srpParms.ui64Size );
 			UpdateStatusBar_PosValue_StartSize();
 		}
+	}
+
+	/**
+	 * Shows the Set Starting Address dialog and sets the address shown for the first byte of the current tab.
+	 **/
+	void CDeusHexMachinaWindow::ShowSetStartingAddress() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		try {
+			CNumberInputLayout::MX_NUMBER_DIALOG_PARMS ndpParms;
+			ndpParms.swsHeaderText = _DEC_WS_37FCFE22_Set_Starting_Address;
+			ndpParms.swsLabelText = _DEC_WS_598BFEA5_Starting__Address_;
+			ndpParms.bShowHexDec = true;
+			ndpParms.bHexInput = phecControl->GetAddressGutterFmt() != CHexEditorControl::MX_AF_BYTES_DEC &&
+				phecControl->GetAddressGutterFmt() != CHexEditorControl::MX_AF_SHORT_DEC &&
+				phecControl->GetAddressGutterFmt() != CHexEditorControl::MX_AF_LINE_NUMBER;
+			ndpParms.pfVerifyFunc = &CDeusHexMachinaWindow::StartingAddress_Verify;
+			ndpParms.pvVerifyParm = this;
+			// The current starting address, written the way it will be read.
+			const uint64_t ui64Current = phecControl->StartingAddress();
+			if ( ndpParms.bHexInput ) {
+				const char * pcHex = CUtilities::ToHex( ui64Current, 1, false );
+				for ( const char * pcThis = pcHex; pcThis && (*pcThis); ++pcThis ) { ndpParms.swsDefaultText.push_back( wchar_t( (*pcThis) ) ); }
+			}
+			else {
+				ndpParms.swsDefaultText = std::to_wstring( ui64Current );
+			}
+
+			if ( TRUE == CNumberInputLayout::CreateNumberInputDialog( this, ndpParms ) ) {
+				const auto rCast = ee::CExpEvalContainer::ConvertResult( ndpParms.rResult, ee::EE_NC_UNSIGNED );
+				phecControl->SetStartingAddress( rCast.u.ui64Val );
+				UpdateStatusBar_PosValue_StartSize();
+			}
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Shows the Export Hex dialog and writes the current file, process, or selection to a text file in the format chosen.
+	 **/
+	void CDeusHexMachinaWindow::ExportHex() {
+		const size_t sIdx = CurrentTab();
+		auto phecControl = CurrentEditor();
+		if ( sIdx == SIZE_MAX || !phecControl || !m_vTabs[sIdx].pheiInterface ) { return; }
+		CHexEditorInterface * pheiSource = m_vTabs[sIdx].pheiInterface.get();
+		try {
+			phecControl->FlushRealTimeUndo();
+
+			// The settings last used, with this tab's name, file, and selection.
+			CExportHexLayout::MX_EXPORT_HEX_PARMS ehpParms = m_ehpLastExport;
+			size_t sTypes = 0;
+			const CExportHexLayout::MX_EXPORT_TYPE * petTypes = CExportHexLayout::Types( sTypes );
+			if ( ehpParms.ui32Type >= sTypes ) { ehpParms.ui32Type = 0; }
+			ehpParms.bHasSelection = phecControl->HasSelection();
+			ehpParms.bSelection = ehpParms.bHasSelection;
+			ehpParms.bHexInput = phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_BYTES_HEX ||
+				phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_SHORT_HEX;
+
+			std::filesystem::path pDefault;
+			if ( CHexEditorFile * phefFile = FileAt( sIdx ) ) {
+				ehpParms.wsSourceName = phefFile->IsUntitled() ? std::wstring( phefFile->DisplayName() ) : phefFile->Path().wstring();
+				pDefault = phefFile->IsUntitled() ? std::filesystem::path( static_cast<const std::wstring &>(phefFile->DisplayName()) ) : phefFile->Path();
+			}
+			else {
+				// A process: its name, without anything a file name cannot hold.
+				std::wstring wsName = pheiSource->TabString();
+				ehpParms.wsSourceName = wsName;
+				const CSecureWString swsBad = _DEC_WS_8A350921____________;
+				for ( auto &wcThis : wsName ) {
+					if ( wcThis < L' ' || swsBad.find( wcThis ) != std::wstring::npos ) { wcThis = L'_'; }
+				}
+				if ( wsName.empty() ) { wsName = _DEC_WS_EDC13103_Memory; }
+				pDefault = std::filesystem::path( wsName );
+			}
+			if ( !pDefault.has_parent_path() && m_pmhMemHack ) {
+				const std::wstring wsLastDir = m_pmhMemHack->Options().heHexEditorOptions.wsLastOpenFileDirectory;
+				if ( wsLastDir.size() ) { pDefault = std::filesystem::path( wsLastDir ) / pDefault; }
+			}
+			pDefault.replace_extension( std::filesystem::path( static_cast<const std::wstring &>(mx::CStringDecoder::DecodeToWString( petTypes[ehpParms.ui32Type].pcExt, petTypes[ehpParms.ui32Type].sExtLen )) ) );
+			ehpParms.wsPath = pDefault.wstring();
+
+			if ( TRUE != CExportHexLayout::CreateExportHexDialog( this, ehpParms ) ) { return; }
+			m_ehpLastExport = ehpParms;
+			m_ehpLastExport.wsPath.clear();
+
+			const std::filesystem::path pDst( ehpParms.wsPath );
+			if ( IsOpenInTab( pDst, SIZE_MAX ) ) {
+				lsw::CBase::MessageBoxError( Wnd(), _DEC_WS_88F67A0C_That_file_is_open_in_the_Hex_Editor___Close_it_first_.c_str() );
+				return;
+			}
+
+			// What to export.
+			const MX_COPY_AS caFmt = petTypes[ehpParms.ui32Type].caFormat;
+			CCopyFormatter::MX_COPY_SOURCE csSource;
+			csSource.fRead = [pheiSource]( uint64_t _ui64Addr, std::vector<uint8_t> &_vDst, size_t _sSize ) {
+				return pheiSource->Read( _ui64Addr, _vDst, _sSize );
+			};
+			csSource.ui64Size = pheiSource->Size();
+			csSource.ui32BytesPerRow = ehpParms.ui32BytesPerRow;
+			if ( ehpParms.bSelection && phecControl->HasSelection() ) {
+				csSource.sSelection = phecControl->Selection();
+				// A column selection's lines are rows of the view.
+				if ( csSource.sSelection.smMode != MX_SM_NORMAL ) { csSource.ui32BytesPerRow = phecControl->BytesPerRow(); }
+			}
+			else {
+				if ( !csSource.ui64Size ) { return; }
+				csSource.sSelection.bHas = true;
+				csSource.sSelection.smMode = MX_SM_NORMAL;
+				csSource.sSelection.sn.ui64Start = 0;
+				csSource.sSelection.sn.ui64End = csSource.ui64Size - 1;
+			}
+			csSource.caCopyAs = phecControl->CopyParms( caFmt );
+			csSource.caCopyAs.wsName = std::filesystem::path( ehpParms.wsSourceName ).filename().wstring();
+			csSource.caCopyAs.bByteTextSpaces = ehpParms.bSpaces;
+			csSource.caCopyAs.bByteTextLineFeeds = ehpParms.bLineFeeds;
+			if ( CExportHexLayout::IsRecordFormat( caFmt ) ) {
+				csSource.caCopyAs.bWordAddresses = ehpParms.bWords;
+				// The first exported byte is at 0, at its own (displayed) address, or at the custom address.  Addresses wrap like
+				//	the records' own address arithmetic.
+				const uint64_t ui64First = CCopyFormatter::TotalRanges( csSource ) ? CCopyFormatter::RangeAt( csSource, 0 ).ui64Start : 0;
+				switch ( ehpParms.smStart ) {
+					case CExportHexLayout::MX_SM_ZERO : { csSource.caCopyAs.caAddress.ui64Bias = 0 - ui64First; break; }
+					case CExportHexLayout::MX_SM_CUSTOM : { csSource.caCopyAs.caAddress.ui64Bias = ehpParms.ui64CustomStart - ui64First; break; }
+					default : { csSource.caCopyAs.caAddress.ui64Bias = phecControl->StartingAddress(); }
+				}
+			}
+
+			// Written to a temporary file that then replaces the destination.
+			class CHandleSink : public CCopySink {
+			public :
+				CHandleSink( HANDLE _hFile, DWORD &_dwError ) : m_hFile( _hFile ), m_dwError( _dwError ) {}
+				virtual bool											Write( const void * _pvData, size_t _sSize ) override {
+					if ( !CLargeCoWFileWindow::WriteAll( m_hFile, _pvData, _sSize, m_dwError ) ) { return false; }
+					m_sSize += _sSize;
+					return true;
+				}
+				virtual size_t											Size() const override { return m_sSize; }
+			protected :
+				HANDLE													m_hFile;
+				DWORD &													m_dwError;
+				size_t													m_sSize = 0;
+			};
+			CSecureWString swsMsg;
+			DWORD dwError = ERROR_SUCCESS;
+			auto fWrite = [&]( HANDLE _hFile, DWORD &_dwErr ) -> bool {
+				CHandleSink hsSink( _hFile, _dwErr );
+				if ( !CCopyFormatter::RenderFile( csSource, hsSink, swsMsg ) ) {
+					if ( _dwErr == ERROR_SUCCESS ) { _dwErr = ERROR_READ_FAULT; }
+					return false;
+				}
+				return true;
+			};
+			HCURSOR hOld = ::SetCursor( ::LoadCursorW( NULL, IDC_WAIT ) );
+			const bool bWritten = CLargeCoWFileWindow::WriteThenReplace( pDst, fWrite, dwError );
+			::SetCursor( hOld );
+			if ( !bWritten ) {
+				FileError( _DEC_WS_9F15717B_Failed_to_export_the_file_, pDst, dwError );
+				return;
+			}
+			if ( m_pmhMemHack && pDst.has_parent_path() ) {
+				auto oOptions = m_pmhMemHack->Options();
+				oOptions.heHexEditorOptions.wsLastOpenFileDirectory = pDst.parent_path().generic_wstring();
+				m_pmhMemHack->SetOptions( oOptions );
+			}
+			SetStatusBarText( (_DEC_WS_1695187A_Exported__ + pDst.generic_wstring()).c_str(), false );
+		}
+		catch ( ... ) { SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true ); }
+	}
+
+	/**
+	 * Asks for a file of hex text (or Intel HEX, Motorola, Base64, etc.), converts it to bytes, and opens the bytes as a new file.
+	 **/
+	void CDeusHexMachinaWindow::ImportHex() {
+		try {
+			// The file.
+			OPENFILENAMEW ofnOpenFile = { sizeof( ofnOpenFile ) };
+			CSecureWString szFileName;
+			szFileName.resize( 0xFFFF + 2 );
+			CSecureWString wsFilter = _DEC_WS_F4F6D09A_All_Supported_Types_0__txt___c___cpp___h___java___py___hex___ihx___s19___s28___s37___srec___mot___b64___uue___uu_0Hex_Text____txt__0__txt_0Decimal_Text____txt__0__txt_0Binary_Text____txt__0__txt_0Source_Code____c___cpp___h___java___py__0__c___cpp___h___java___py_0Intel_Hex____hex___ihx__0__hex___ihx_0Motorola_S_Records____s19___s28___s37___srec___mot__0__s19___s28___s37___srec___mot_0Base64____b64__0__b64_0Uuencoding____uue___uu__0__uue___uu_0All_Files_______0____0_0;
+			CSecureWString swsTitle = _DEC_WS_2FF0701C_Import_Hex;
+			std::wstring wsDir;
+			if ( m_pmhMemHack ) { wsDir = m_pmhMemHack->Options().heHexEditorOptions.wsLastOpenFileDirectory; }
+			ofnOpenFile.hwndOwner = Wnd();
+			ofnOpenFile.lpstrFilter = wsFilter.c_str();
+			ofnOpenFile.nFilterIndex = m_dwLastImportFilter;
+			ofnOpenFile.lpstrFile = szFileName.data();
+			ofnOpenFile.nMaxFile = DWORD( szFileName.size() );
+			ofnOpenFile.lpstrTitle = swsTitle.c_str();
+			ofnOpenFile.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY;
+			ofnOpenFile.lpstrInitialDir = wsDir.size() ? wsDir.c_str() : nullptr;
+			if ( !::GetOpenFileNameW( &ofnOpenFile ) ) { return; }
+			m_dwLastImportFilter = ofnOpenFile.nFilterIndex;
+			const std::filesystem::path pPath( ofnOpenFile.lpstrFile );
+
+			// The filter chosen decides the kind of text (the first and last filters decide from the contents).
+			static const CHexImport::MX_IMPORT_TYPE itTypes[] = {
+				CHexImport::MX_IT_AUTO,
+				CHexImport::MX_IT_AUTO,
+				CHexImport::MX_IT_HEX_TEXT,
+				CHexImport::MX_IT_DECIMAL_TEXT,
+				CHexImport::MX_IT_BINARY_TEXT,
+				CHexImport::MX_IT_SOURCE_CODE,
+				CHexImport::MX_IT_INTEL_HEX,
+				CHexImport::MX_IT_MOTOROLA,
+				CHexImport::MX_IT_BASE64,
+				CHexImport::MX_IT_UUENCODING,
+			};
+			const CHexImport::MX_IMPORT_TYPE itType = ofnOpenFile.nFilterIndex < std::size( itTypes ) ? itTypes[ofnOpenFile.nFilterIndex] : CHexImport::MX_IT_AUTO;
+
+			// Read it all (text files of more than 1 gigabyte are not imported).
+			std::vector<uint8_t> vText;
+			{
+				HANDLE hFile = ::CreateFileW( pPath.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
+				if ( hFile == INVALID_HANDLE_VALUE ) {
+					FileError( _DEC_WS_43CE34EC_Failed_to_read_the_file_, pPath, ::GetLastError() );
+					return;
+				}
+				LARGE_INTEGER liSize {};
+				bool bOk = ::GetFileSizeEx( hFile, &liSize ) != FALSE;
+				DWORD dwError = bOk ? ERROR_SUCCESS : ::GetLastError();
+				if ( bOk && uint64_t( liSize.QuadPart ) > 1024ULL * 1024ULL * 1024ULL ) {
+					bOk = false;
+					dwError = ERROR_FILE_TOO_LARGE;
+				}
+				if ( bOk ) {
+					vText.resize( size_t( liSize.QuadPart ) );
+					size_t sDone = 0;
+					while ( bOk && sDone < vText.size() ) {
+						DWORD dwRead = 0;
+						const DWORD dwThis = DWORD( std::min<size_t>( vText.size() - sDone, 16 * 1024 * 1024 ) );
+						if ( !::ReadFile( hFile, vText.data() + sDone, dwThis, &dwRead, nullptr ) || !dwRead ) {
+							bOk = false;
+							dwError = ::GetLastError();
+						}
+						sDone += dwRead;
+					}
+				}
+				::CloseHandle( hFile );
+				if ( !bOk ) {
+					FileError( _DEC_WS_43CE34EC_Failed_to_read_the_file_, pPath, dwError );
+					return;
+				}
+			}
+
+			CHexImport::MX_IMPORT_OPTIONS ioOptions;
+			CHexImport::MX_IMPORT_RESULT irResult;
+			CSecureWString swsError;
+			HCURSOR hOld = ::SetCursor( ::LoadCursorW( NULL, IDC_WAIT ) );
+			const bool bImported = CHexImport::Import( vText.data(), vText.size(), itType, ioOptions, irResult, swsError );
+			::SetCursor( hOld );
+			vText = std::vector<uint8_t>();
+			if ( !bImported ) {
+				lsw::CBase::MessageBoxError( Wnd(), (swsError + _DEC_WS_2BB8AB61__r_n_r_n + pPath.generic_wstring()).c_str(), swsTitle.c_str() );
+				return;
+			}
+
+			// A new file named after the one imported.
+			std::wstring wsName = pPath.stem().wstring();
+			wsName += _DEC_WS_34CF84EE__bin;
+			std::shared_ptr<CHexEditorInterface> spInterface;
+			{
+				std::unique_ptr<CHexEditorFile> upIfc( new( std::nothrow ) CHexEditorFile() );
+				if ( !upIfc || !upIfc->CreateNew( wsName, irResult.vData ) ) {
+					SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true );
+					return;
+				}
+				spInterface = std::shared_ptr<CHexEditorInterface>( upIfc.release() );
+			}
+			if ( !AddTab( spInterface ) ) { return; }
+			// Intel HEX and Motorola files whose leading blank area was skipped start at their first data byte.
+			auto phecControl = CurrentEditor();
+			if ( phecControl ) {
+				phecControl->SetViewType( CHexEditorControl::MX_EA_HEX );
+				if ( irResult.ui64StartAddress ) { phecControl->SetStartingAddress( irResult.ui64StartAddress ); }
+				UpdateStatusBar_ViewType();
+				UpdateStatusBar_PosValue_StartSize();
+			}
+			if ( m_pmhMemHack && pPath.has_parent_path() ) {
+				auto oOptions = m_pmhMemHack->Options();
+				oOptions.heHexEditorOptions.wsLastOpenFileDirectory = pPath.parent_path().generic_wstring();
+				m_pmhMemHack->SetOptions( oOptions );
+			}
+			SetStatusBarText( (_DEC_WS_EAFEFFCA_Imported__ + pPath.generic_wstring()).c_str(), false );
+		}
+		catch ( ... ) { SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true ); }
 	}
 
 	/**
@@ -3105,7 +3420,9 @@ namespace mx {
 		}
 
 		if ( TRUE == CNumberInputLayout::CreateNumberInputDialog( this, ndpParms ) ) {
-			phecControl->SetCaretAddr( ndpParms.rResult.u.ui64Val );
+			// Addresses are entered as shown (with the custom starting address added).
+			const auto rCast = ee::CExpEvalContainer::ConvertResult( ndpParms.rResult, ee::EE_NC_UNSIGNED );
+			phecControl->SetCaretAddr( rCast.u.ui64Val - phecControl->StartingAddress() );
 			if ( m_pmhMemHack ) {
 				auto oOptions = m_pmhMemHack->Options();
 				CUtilities::AddOrMove( oOptions.heHexEditorOptions.vGoToHistory, ndpParms.swsExpression );
@@ -3342,13 +3659,17 @@ namespace mx {
 				if ( psbStatus ) {
 					std::wstring wsTmp, wsTmp2;
 					uint64_t ui64Start = phecControl->GetSelctStartOrCaret();
+					// A custom starting address is added to the position shown, and OFFSET says so.
+					const uint64_t ui64Bias = phecControl->StartingAddress();
+					if ( ui64Bias ) { wsTmp = _DEC_WS_6BCDC989_OFFSET_; }
 					if ( phecControl->HasSelection() ) {
-						wsTmp = _DEC_WS_37B96B54_Start__;
+						wsTmp += _DEC_WS_37B96B54_Start__;
 					}
 					else {
-						wsTmp = _DEC_WS_D504F73B_Pos__;
+						wsTmp += _DEC_WS_D504F73B_Pos__;
 					}
-					wsTmp += std::format( L"{} [{}]", ui64Start, CUtilities::ToHex( ui64Start, wsTmp2, 0 ) );
+					const uint64_t ui64Shown = ui64Start + ui64Bias;
+					wsTmp += std::format( L"{} [{}]", ui64Shown, CUtilities::ToHex( ui64Shown, wsTmp2, 0 ) );
 					psbStatus->SetTextW( MX_SB_POSITION_START, 0, wsTmp.c_str() );
 
 					if ( phecControl->HasSelection() ) {
@@ -3694,7 +4015,9 @@ namespace mx {
 					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | (PropertiesPath( CurrentTab(), pPath ) ? MF_ENABLED : MF_GRAYED) );
 					break;
 				}
-				case Layout::MX_M_VIEW_FONT_CHANGE_FONT : {
+				case Layout::MX_M_VIEW_FONT_CHANGE_FONT : {}						MX_FALLTHROUGH
+				case Layout::MX_M_VIEW_ADDRESSES_SET_STARTING_ADDRESS : {}			MX_FALLTHROUGH
+				case Layout::MX_M_FILE_EXPORT_HEX : {
 					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | (bTabIsOpen ? MF_ENABLED : MF_GRAYED) );
 					break;
 				}
@@ -4505,6 +4828,24 @@ namespace mx {
 	}
 
 	// Verification function for the Go To dialog.
+	/**
+	 * Checks the address entered in the Set Starting Address dialog.
+	 *
+	 * \param _pvThis The CDeusHexMachinaWindow.
+	 * \param _ndpParms The dialog's parameters, holding the result.
+	 * \return Returns true if the result is an unsigned integer.
+	 **/
+	bool CDeusHexMachinaWindow::StartingAddress_Verify( void * /*_pvThis*/, const mx::CNumberInputLayout::MX_NUMBER_DIALOG_PARMS &_ndpParms ) {
+		auto rCastResult = ee::CExpEvalContainer::ConvertResult( _ndpParms.rResult, ee::EE_NC_UNSIGNED );
+		if ( rCastResult.ncType != ee::EE_NC_UNSIGNED ) {
+			auto swsTitle = _DEC_WS_9607671B_Invalid_Expression;
+			auto swsError = _DEC_WS_16D063D0_The_given_expression_must_evaluate_to_an_unsigned_integer_;
+			lsw::CBase::MessageBoxError( _ndpParms.pwThis->Wnd(), swsError.c_str(), swsTitle.c_str() );
+			return false;
+		}
+		return true;
+	}
+
 	bool CDeusHexMachinaWindow::GoTo_Verify( void * _pvThis, const mx::CNumberInputLayout::MX_NUMBER_DIALOG_PARMS &_ndpParms ) {
 		auto pdhmwThis = static_cast<CDeusHexMachinaWindow *>(_pvThis);
 		auto rCastResult = ee::CExpEvalContainer::ConvertResult( _ndpParms.rResult, ee::EE_NC_UNSIGNED );
@@ -4516,7 +4857,9 @@ namespace mx {
 		}
 		auto phecControl = pdhmwThis->CurrentEditor();
 		if ( !phecControl ) { return true; }	// Internal error but unrecoverable here.
-		if ( rCastResult.u.ui64Val > phecControl->Size() ) {
+		// Addresses are entered as shown (with the custom starting address added).
+		const uint64_t ui64Bias = phecControl->StartingAddress();
+		if ( rCastResult.u.ui64Val < ui64Bias || rCastResult.u.ui64Val - ui64Bias > phecControl->Size() ) {
 			auto swsTitle = _DEC_WS_9607671B_Invalid_Expression;
 			auto swsError = _DEC_WS_D08434A5_Address_out_of_range_;
 			lsw::CBase::MessageBoxError( _ndpParms.pwThis->Wnd(), swsError.c_str(), swsTitle.c_str() );

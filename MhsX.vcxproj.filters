@@ -235,6 +235,9 @@
     <ClCompile Include="Src\Layouts\MXSelectRangeLayout.cpp">
       <Filter>Source Files\Layouts</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Layouts\MXExportHexLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
     <ClCompile Include="Src\Layouts\MXOpenProcessLayout.cpp">
       <Filter>Source Files\Layouts</Filter>
     </ClCompile>
@@ -622,6 +625,12 @@
     <ClCompile Include="Src\HexEditor\MXSelectRangeDialog.cpp">
       <Filter>Source Files\HexEditor</Filter>
     </ClCompile>
+    <ClCompile Include="Src\HexEditor\MXExportHexDialog.cpp">
+      <Filter>Source Files\HexEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HexEditor\MXHexImport.cpp">
+      <Filter>Source Files\HexEditor</Filter>
+    </ClCompile>
     <ClCompile Include="Src\HexEditor\MXHexEditorFile.cpp">
       <Filter>Source Files\HexEditor</Filter>
     </ClCompile>
@@ -693,6 +702,9 @@
       <Filter>Header Files\Layouts</Filter>
     </ClInclude>
     <ClInclude Include="Src\Layouts\MXSelectRangeLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXExportHexLayout.h">
       <Filter>Header Files\Layouts</Filter>
     </ClInclude>
     <ClInclude Include="Src\Layouts\MXOpenProcessLayout.h">
@@ -1002,6 +1014,12 @@
       <Filter>Header Files\HexEditor</Filter>
     </ClInclude>
     <ClInclude Include="Src\HexEditor\MXSelectRangeDialog.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXExportHexDialog.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXHexImport.h">
       <Filter>Header Files\HexEditor</Filter>
     </ClInclude>
     <ClInclude Include="Src\HexEditor\MXHexEditorFile.h">

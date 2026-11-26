@@ -20,6 +20,8 @@ namespace mx {
 			MX_NI_DIALOG						= 4600,
 			MX_NI_LABEL,
 			MX_NI_COMBO,
+			MX_NI_DECIMAL,
+			MX_NI_HEX,
 
 			MX_NI_CANCEL,
 			MX_NI_OK,
@@ -44,7 +46,8 @@ namespace mx {
 
 			PfVerifyFunc						pfVerifyFunc = nullptr;				/**< The function to verify that the input is valid. Called when the user hits OK. */
 			void *								pvVerifyParm = nullptr;				/**< The parameter to pass to the verification function. */
-			bool								bHexInput = false;					/**< Default to hex numeric interpretation? */
+			bool								bHexInput = false;					/**< Default to hex numeric interpretation?  With bShowHexDec, receives the choice made. */
+			bool								bShowHexDec = false;				/**< If true, Decimal and Hex radio buttons let the user choose how numbers are read. */
 		};
 
 

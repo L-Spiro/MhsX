@@ -2,6 +2,7 @@
 
 #include "../MXMhsX.h"
 #include "../Layouts/MXDeuHexMachinaWindowLayout.h"
+#include "../Layouts/MXExportHexLayout.h"
 #include "../Layouts/MXLayoutManager.h"
 #include "../Layouts/MXNumberInputLayout.h"
 #include "../Strings/MXStringDecoder.h"
@@ -123,6 +124,16 @@ namespace mx {
 		 * \return Returns a LSW_HANDLED code.
 		 */
 		virtual LSW_HANDLED							ContextMenu( CWidget * _pwControl, INT _iX, INT _iY );
+
+		/**
+		 * Shows the hex editor's context menu.  Called by the hex control itself when it gets WM_CONTEXTMENU.
+		 *
+		 * \param _pwControl The hex control.
+		 * \param _iX The horizontal position of the cursor in screen coordinates, or -1 if the menu was opened with the keyboard.
+		 * \param _iY The vertical position of the cursor in screen coordinates, or -1 if the menu was opened with the keyboard.
+		 * \return Returns true if a menu was shown.
+		 **/
+		virtual bool								ShowHexContextMenu( lsw::CWidget * _pwControl, INT _iX, INT _iY );
 
 		// WM_CLOSE.
 		virtual LSW_HANDLED							Close();
@@ -398,6 +409,21 @@ namespace mx {
 		void										ShowSelectRange();
 
 		/**
+		 * Shows the Set Starting Address dialog and sets the address shown for the first byte of the current tab.
+		 **/
+		void										ShowSetStartingAddress();
+
+		/**
+		 * Shows the Export Hex dialog and writes the current file, process, or selection to a text file in the format chosen.
+		 **/
+		void										ExportHex();
+
+		/**
+		 * Asks for a file of hex text (or Intel HEX, Motorola, Base64, etc.), converts it to bytes, and opens the bytes as a new file.
+		 **/
+		void										ImportHex();
+
+		/**
 		 * Shows the Change Font dialog and applies the font chosen to the Hex Editor (all tabs share it).
 		 **/
 		void										ShowChangeFont();
@@ -567,6 +593,10 @@ namespace mx {
 		MX_NEW_FILE									m_nfLastNew = MX_NF_HEX;
 		/** If true, the Select Range dialog last took an end address rather than a size (it starts that way next time). */
 		bool										m_bSelectRangeEnd = false;
+		/** The Export Hex settings last used (the path is not kept). */
+		CExportHexLayout::MX_EXPORT_HEX_PARMS		m_ehpLastExport;
+		/** The filter last chosen in Import Hex. */
+		DWORD										m_dwLastImportFilter = 1;
 		/** The number of untitled files created (for naming them). */
 		uint32_t									m_ui32Untitled = 0;
 
@@ -679,6 +709,15 @@ namespace mx {
 
 		// Verification function for the Go To dialog.
 		static bool									GoTo_Verify( void * _pvThis, const mx::CNumberInputLayout::MX_NUMBER_DIALOG_PARMS &_ndpParms );
+
+		/**
+		 * Checks the address entered in the Set Starting Address dialog.
+		 *
+		 * \param _pvThis The CDeusHexMachinaWindow.
+		 * \param _ndpParms The dialog's parameters, holding the result.
+		 * \return Returns true if the result is an unsigned integer.
+		 **/
+		static bool									StartingAddress_Verify( void * _pvThis, const mx::CNumberInputLayout::MX_NUMBER_DIALOG_PARMS &_ndpParms );
 
 		// Verification of a value fitting into a constant range.
 		template <uint64_t _ui64Max = 0xFFFFFFFF>

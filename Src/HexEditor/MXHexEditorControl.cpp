@@ -6864,6 +6864,19 @@ namespace mx {
 	}
 
 	/**
+	 * Sets the custom starting address for every view of the data.
+	 *
+	 * \param _ui64Addr The address to show for the first byte.
+	 **/
+	void CHexEditorControl::SetStartingAddress( uint64_t _ui64Addr ) {
+		for ( auto &sdView : m_sdScrollView ) {
+			sdView.ui64StartAddress = _ui64Addr;
+		}
+		// The address column may need a different width.
+		RecalcAndInvalidate();
+	}
+
+	/**
 	 * Handles WM_RBUTTONDOWN.  Right-clicking a byte outside the selection moves the caret to it, so that the context menu applies to
 	 *	it.
 	 *
@@ -6897,6 +6910,20 @@ namespace mx {
 			}
 		}
 		// Windows sends WM_CONTEXTMENU when the button is released.
+		return lsw::CWidget::LSW_H_CONTINUE;
+	}
+
+	/**
+	 * Handles WM_CONTEXTMENU.  The hex editor window shows the context menu directly (the message is not left to travel up
+	 *	through the tab control and the splitter, where it was being lost).
+	 *
+	 * \param _pwControl The control that was right-clicked.
+	 * \param _iX The horizontal position of the cursor in screen coordinates, or -1 if the menu was opened with the keyboard.
+	 * \param _iY The vertical position of the cursor in screen coordinates, or -1 if the menu was opened with the keyboard.
+	 * \return Returns LSW_H_HANDLED if the menu was shown.
+	 */
+	lsw::CWidget::LSW_HANDLED CHexEditorControl::ContextMenu( CWidget * /*_pwControl*/, INT _iX, INT _iY ) {
+		if ( m_pwHexParent && m_pwHexParent->ShowHexContextMenu( this, _iX, _iY ) ) { return lsw::CWidget::LSW_H_HANDLED; }
 		return lsw::CWidget::LSW_H_CONTINUE;
 	}
 

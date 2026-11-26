@@ -36,6 +36,7 @@ namespace mx {
 			uint64_t							ui64Start = 0;						/**< In: the default start address.  Out: the start address entered. */
 			uint64_t							ui64Size = 0;						/**< In: the default size.  Out: the number of bytes to select. */
 			uint64_t							ui64DataSize = 0;					/**< The size of the data (the start address may not be greater than this). */
+			uint64_t							ui64Bias = 0;						/**< The custom starting address: addresses are entered as shown, with it added. */
 			bool								bHex = true;						/**< If true, numbers are shown and entered in hexadecimal by default. */
 			bool								bEnd = false;						/**< In/out: true if the second value is the (inclusive) end address rather than the size. */
 		};
