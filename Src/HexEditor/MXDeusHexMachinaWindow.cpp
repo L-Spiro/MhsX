@@ -652,6 +652,18 @@ namespace mx {
 				ShowGoTo();
 				break;
 			}
+			case Layout::MX_M_FIND_FIND : {
+				ShowFind();
+				break;
+			}
+			case Layout::MX_M_FIND_FIND_NEXT : {
+				FindAgain( false );
+				break;
+			}
+			case Layout::MX_M_FIND_FIND_PREV : {
+				FindAgain( true );
+				break;
+			}
 
 
 			case Layout::MX_M_VIEW_EDIT_AS_TEXT : {
@@ -1856,6 +1868,12 @@ namespace mx {
 				//delete m_vTabs[_iTab].pheiInterface;
 				// Clipboards that refer to the data are rendered or released, so that the file is really closed.
 				CCopyPasteManager::ReleaseInterface( m_vTabs[_iTab].pheiInterface.get() );
+				// Find results and a locked Find range of the closed data are dropped.
+				m_frFindResults.RemoveSource( m_vTabs[_iTab].pheiInterface.get() );
+				if ( m_pheiFindLock == m_vTabs[_iTab].pheiInterface.get() ) {
+					m_pheiFindLock = nullptr;
+					m_fpFindParms.bLockToSelection = false;
+				}
 				m_vTabs.erase( m_vTabs.begin() + _iTab );
 			}
 			auto ptTab = Tab();
@@ -2266,6 +2284,12 @@ namespace mx {
 		auto ptTab = Tab();
 		if ( !ptTab || _sIdx >= m_vTabs.size() ) { return; }
 		CCopyPasteManager::ReleaseInterface( m_vTabs[_sIdx].pheiInterface.get() );
+		// Find results and a locked Find range of the closed data are dropped.
+		m_frFindResults.RemoveSource( m_vTabs[_sIdx].pheiInterface.get() );
+		if ( m_pheiFindLock == m_vTabs[_sIdx].pheiInterface.get() ) {
+			m_pheiFindLock = nullptr;
+			m_fpFindParms.bLockToSelection = false;
+		}
 		ptTab->DeleteItem( int( _sIdx ) );
 		m_vTabs.erase( m_vTabs.begin() + _sIdx );
 		TabSelChanged( ptTab, ptTab->GetCurSel(), nullptr );
@@ -3047,6 +3071,187 @@ namespace mx {
 			m_bSelectRangeEnd = srpParms.bEnd;
 			phecControl->SelectRange( srpParms.ui64Start - srpParms.ui64Bias, srpParms.ui64Size );
 			UpdateStatusBar_PosValue_StartSize();
+		}
+	}
+
+	/**
+	 * Shows the Find dialog, which searches the current tab while it is open.
+	 **/
+	void CDeusHexMachinaWindow::ShowFind() {
+		auto phecControl = CurrentEditor();
+		const size_t sTab = CurrentTab();
+		if ( !phecControl || sTab >= m_vTabs.size() || !m_vTabs[sTab].pheiInterface ) { return; }
+		try {
+			phecControl->FlushRealTimeUndo();
+			const CHexEditorInterface * pheiSource = m_vTabs[sTab].pheiInterface.get();
+			// A locked range belongs to the data it was made in.
+			if ( m_pheiFindLock != pheiSource ) {
+				m_pheiFindLock = nullptr;
+				m_fpFindParms.bLockToSelection = false;
+			}
+			m_ui64FindAnchor = phecControl->GetSelctStartOrCaret();
+
+			CFindLayout::MX_FIND_DIALOG_PARMS fdpParms;
+			fdpParms.pfpParms = &m_fpFindParms;
+			fdpParms.pvHistory = &m_vFindHistory;
+			fdpParms.bHasSelection = phecControl->HasSelection() && !phecControl->SelectionIsColumn();
+			fdpParms.ui64SelStart = phecControl->GetSelctStartOrCaret();
+			fdpParms.ui64SelSize = fdpParms.bHasSelection ? phecControl->GetTotalSelectedBytes() : 0;
+			fdpParms.fAction = [this, pheiSource]( CFindLayout::MX_FIND_ACTION _faAction, CSecureWString &_swsStatus ) {
+				m_pheiFindLock = m_fpFindParms.bLockToSelection ? pheiSource : nullptr;
+				const bool bFound = DoFind( m_fpFindParms, _faAction, _swsStatus );
+				UpdateStatusBar_PosValue_StartSize();
+				return bFound;
+			};
+			CFindLayout::CreateFindDialog( this, fdpParms );
+			m_pheiFindLock = m_fpFindParms.bLockToSelection ? pheiSource : nullptr;
+		}
+		catch ( ... ) {
+			SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true );
+		}
+	}
+
+	/**
+	 * Finds the next or previous match of the last search (Find -> Find Next/Find Previous).  With Quick Find Next/Previous,
+	 *	the selected bytes are searched for instead.
+	 *
+	 * \param _bUp Searches backward.
+	 **/
+	void CDeusHexMachinaWindow::FindAgain( bool _bUp ) {
+		auto phecControl = CurrentEditor();
+		const size_t sTab = CurrentTab();
+		if ( !phecControl || sTab >= m_vTabs.size() || !m_vTabs[sTab].pheiInterface ) { return; }
+		try {
+			CHexFind::MX_FIND_PARMS fpParms = m_fpFindParms;
+			const uint64_t ui64SelSize = phecControl->HasSelection() ? phecControl->GetTotalSelectedBytes() : 0;
+			if ( fpParms.bQuickFind && ui64SelSize && ui64SelSize <= 1024 && !phecControl->SelectionIsColumn() ) {
+				// The selected bytes are searched for (the Find dialog keeps its text).
+				std::vector<uint8_t> vBytes;
+				if ( m_vTabs[sTab].pheiInterface->Read( phecControl->GetSelctStartOrCaret(), vBytes, size_t( ui64SelSize ) ) && vBytes.size() ) {
+					std::string sHex;
+					CUtilities::BytesToHex( vBytes.data(), vBytes.size(), sHex );
+					fpParms.swsQuery.clear();
+					for ( char cThis : sHex ) { fpParms.swsQuery.push_back( wchar_t( cThis ) ); }
+					fpParms.ftType = CHexFind::MX_FT_HEX;
+					fpParms.bRegex = fpParms.bWildcards = fpParms.bTypeSpecifiers = fpParms.bLockToSelection = false;
+				}
+			}
+			else if ( fpParms.swsQuery.empty() ) {
+				ShowFind();
+				return;
+			}
+			if ( fpParms.bLockToSelection && m_pheiFindLock != m_vTabs[sTab].pheiInterface.get() ) { fpParms.bLockToSelection = false; }
+
+			CSecureWString swsStatus;
+			const bool bFound = DoFind( fpParms, _bUp ? CFindLayout::MX_FA_PREV : CFindLayout::MX_FA_NEXT, swsStatus );
+			UpdateStatusBar_PosValue_StartSize();
+			SetStatusBarText( swsStatus.c_str(), !bFound );
+		}
+		catch ( ... ) {
+			SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true );
+		}
+	}
+
+	/**
+	 * Searches the current tab.  Find Next/Previous selects the match; Find All stores the matches in the Find results.
+	 *
+	 * \param _fpParms The search.
+	 * \param _faAction What to do.
+	 * \param _swsStatus Receives a description of the result.
+	 * \return Returns true if something was found.
+	 **/
+	bool CDeusHexMachinaWindow::DoFind( const CHexFind::MX_FIND_PARMS &_fpParms, CFindLayout::MX_FIND_ACTION _faAction, CSecureWString &_swsStatus ) {
+		auto phecControl = CurrentEditor();
+		const size_t sTab = CurrentTab();
+		if ( !phecControl || sTab >= m_vTabs.size() || !m_vTabs[sTab].pheiInterface ) { return false; }
+		try {
+			std::shared_ptr<CHexEditorInterface> spSource = m_vTabs[sTab].pheiInterface;
+			phecControl->FlushRealTimeUndo();
+
+			// The view decides the character set of Text and the byte order of numbers and Unicode.
+			CHexFind::MX_FIND_PARMS fpParms = _fpParms;
+			fpParms.csCharSet = phecControl->GetCharacterSet();
+			fpParms.bBigEndian = phecControl->IsBigEndian();
+			CHexFind hfFind;
+			if ( !hfFind.Compile( fpParms, _swsStatus ) ) { return false; }
+
+			const uint64_t ui64Size = spSource->Size();
+			uint64_t ui64Start = 0, ui64End = ui64Size;
+			if ( fpParms.bLockToSelection && m_pheiFindLock == spSource.get() ) {
+				ui64Start = std::min( fpParms.ui64LockStart, ui64Size );
+				ui64End = std::min( ui64Size - ui64Start, fpParms.ui64LockSize ) + ui64Start;
+			}
+			CHexEditorInterface * pheiSource = spSource.get();
+			CHexFind::CReader rReader = [pheiSource]( uint64_t _ui64Addr, size_t _sSize, std::vector<uint8_t> &_vDst ) {
+				return pheiSource->Read( _ui64Addr, _vDst, _sSize );
+			};
+			// Escape stops a long search.
+			CHexFind::CProgress pProgress = []( double /*_dProgress*/ ) { return !(::GetAsyncKeyState( VK_ESCAPE ) & 0x8000); };
+			HCURSOR hOldCursor = ::SetCursor( ::LoadCursorW( NULL, IDC_WAIT ) );
+			struct MX_RESTORE_CURSOR {
+				~MX_RESTORE_CURSOR() { ::SetCursor( hCursor ); }
+				HCURSOR								hCursor;
+			} rcRestore = { hOldCursor };
+
+			if ( _faAction == CFindLayout::MX_FA_ALL ) {
+				CFindResults::MX_FIND_SET fsSet;
+				bool bTooMany = false;
+				if ( !hfFind.FindAll( rReader, ui64Start, ui64End, fpParms.bLimit ? fpParms.ui64Limit : 0, fsSet.vMatches, bTooMany, pProgress ) && !bTooMany ) {
+					_swsStatus = _DEC_WS_CE5EEB4C_The_search_was_stopped_;
+					return false;
+				}
+				const size_t sFound = fsSet.vMatches.size();
+				const CHexFind::MX_FIND_MATCH fmFirst = sFound ? fsSet.vMatches[0] : CHexFind::MX_FIND_MATCH();
+				fsSet.swsQuery = fpParms.swsQuery;
+				fsSet.ftType = hfFind.Type();
+				fsSet.wpSource = spSource;
+				fsSet.swsSourceName = spSource->TabString();
+				fsSet.ui64RangeStart = ui64Start;
+				fsSet.ui64RangeEnd = ui64End;
+				fsSet.bCustomColor = fpParms.bCustomColor;
+				fsSet.bCustomFore = fpParms.bCustomFore;
+				fsSet.crFore = fpParms.crFore;
+				fsSet.crBack = fpParms.crBack;
+				fsSet.bTooMany = bTooMany;
+				m_frFindResults.Add( std::move( fsSet ), fpParms.bMultipleRanges );
+
+				if ( bTooMany ) {
+					_swsStatus = _DEC_WS_BBA58F10_Stopped_after_the_limit_of_ + std::to_wstring( sFound ) + _DEC_WS_FBEC4128__occurrences_;
+				}
+				else if ( !sFound ) { _swsStatus = _DEC_WS_01A4AED5_Not_found_; }
+				else if ( sFound == 1 ) { _swsStatus = _DEC_WS_3507F809_1_occurrence_found_; }
+				else { _swsStatus = std::to_wstring( sFound ) + _DEC_WS_4C8957DE__occurrences_found_; }
+				SetStatusBarText( _swsStatus.c_str(), sFound == 0 );
+				// The first one is selected.
+				if ( sFound ) { phecControl->SelectRange( fmFirst.ui64Addr, fmFirst.ui64Size ); }
+				return sFound != 0;
+			}
+
+			const bool bUp = _faAction == CFindLayout::MX_FA_PREV || (_faAction == CFindLayout::MX_FA_INCREMENTAL && fpParms.bUp);
+			uint64_t ui64From;
+			if ( _faAction == CFindLayout::MX_FA_INCREMENTAL ) { ui64From = m_ui64FindAnchor; }
+			else if ( phecControl->HasSelection() ) {
+				// Searching forward starts after the start of the selection (the last match), so the next one is found.
+				ui64From = phecControl->GetSelctStartOrCaret() + (bUp ? 0 : 1);
+			}
+			else { ui64From = phecControl->GetCaretAddr(); }
+
+			CHexFind::MX_FIND_MATCH fmMatch;
+			bool bWrapped = false;
+			if ( !hfFind.FindNext( rReader, ui64Start, ui64End, ui64From, bUp, fpParms.bWrap, fmMatch, pProgress, bWrapped ) ) {
+				_swsStatus = _DEC_WS_01A4AED5_Not_found_;
+				return false;
+			}
+			phecControl->SelectRange( fmMatch.ui64Addr, fmMatch.ui64Size );
+			const uint64_t ui64Shown = fmMatch.ui64Addr + phecControl->StartingAddress();
+			std::wstring wsHex;
+			_swsStatus = bWrapped ? _DEC_WS_20207F04_Found_at__wrapped__ : _DEC_WS_3B4C0E0C_Found_at_;
+			_swsStatus += std::format( L"{} [{}]", ui64Shown, CUtilities::ToHex( ui64Shown, wsHex, 0 ) );
+			return true;
+		}
+		catch ( ... ) {
+			_swsStatus = _DEC_WS_F39F91A5_Out_of_memory_;
+			return false;
 		}
 	}
 

@@ -347,9 +347,9 @@ namespace mx {
 	// Find menu.
 	LSW_MENU_ITEM CDeusHexMachinaLayout::m_miFindMenu[] = {
 		//bIsSeperator	dwId											bCheckable	bChecked	bEnabled	lpwcText, stTextLen															bSkip	aHotkey
-		{ FALSE,		MX_M_FIND_FIND,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_6E0D9949__Find___, _LEN_6E0D9949 ) },
-		{ FALSE,		MX_M_FIND_FIND_NEXT,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_F6024D9D_Find__Next, _LEN_F6024D9D ) },
-		{ FALSE,		MX_M_FIND_FIND_PREV,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_E0E59780_Find__Previous, _LEN_E0E59780 ) },
+		{ FALSE,		MX_M_FIND_FIND,									FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_6E0D9949__Find___, _LEN_6E0D9949 ),							false,	{ static_cast<BYTE>(FVIRTKEY | FCONTROL), 'F', MX_M_FIND_FIND } },
+		{ FALSE,		MX_M_FIND_FIND_NEXT,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_F6024D9D_Find__Next, _LEN_F6024D9D ),							false,	{ static_cast<BYTE>(FVIRTKEY), VK_F3, MX_M_FIND_FIND_NEXT } },
+		{ FALSE,		MX_M_FIND_FIND_PREV,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_E0E59780_Find__Previous, _LEN_E0E59780 ),						false,	{ static_cast<BYTE>(FVIRTKEY | FSHIFT), VK_F3, MX_M_FIND_FIND_PREV } },
 		{ TRUE,			0,												FALSE,		FALSE,		TRUE,		nullptr },
 		{ FALSE,		MX_M_FIND_REPLACE,								FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_0477761F__Replace, _LEN_0477761F ) },
 		{ FALSE,		MX_M_FIND_REPLACE_NEXT,							FALSE,		FALSE,		TRUE,		MW_MENU_TXT( _T_6ADBABDA_Rep_lace_Next, _LEN_6ADBABDA ) },

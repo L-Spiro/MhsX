@@ -244,7 +244,6 @@ namespace lsw {
 					::GetWindowRect( Wnd(), &m_rDragPlacementRect );
 					m_rDragStartRect = m_rDragPlacementRect;
 
-					// Attachment points are previewed as they will be once this has been detached from where it is docked now.
 					BeginDragPreviews();
 
 					// TODO: Check this logic.
@@ -639,10 +638,8 @@ namespace lsw {
 				::GetCursorPos( &m_pMousePos );
 
 				CDockTarget * pdtTarget;
-				// Decided with the same (previewed) layouts as were shown during the drag.
 				CDockTarget::LSW_DT_ATTACH adAttach = CheckDockingPos( m_rDragPlacementRect, pdtTarget );
 				LSW_DOCK_STATE dsDockSide = AttachToDockState( adAttach );
-				// From here on, actual layouts are changed.  Once this has been detached, the actual layout matches the preview.
 				EndDragPreviews();
 
 

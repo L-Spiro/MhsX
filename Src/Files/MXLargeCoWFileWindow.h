@@ -616,6 +616,17 @@ namespace mx {
 		bool													DeleteRange( std::vector<MX_LOGICAL_SECTION> &_vSections, uint64_t _ui64DelStart, uint64_t _ui64DelSize, uint64_t &_ui64Deleted );
 
 		/**
+		 * \brief After the file was saved under a new name (Save As), stops holding the file it was opened from, which would otherwise
+		 *	stay locked (it could only be opened again read-only) until the tab is closed.  If nothing can refer to the old data any
+		 *	more (no Undo history and no clipboards), the new file simply becomes the original data; otherwise the original is first
+		 *	copied into edit storage so that Undo and the clipboards keep working.  On failure the original stays open as before.
+		 *
+		 * \param _pNew The file that was just written (its contents are those of the logical view).
+		 * \return Returns true if the file it was opened from is no longer held open.
+		 */
+		bool													ReleaseOriginal( const std::filesystem::path &_pNew );
+
+		/**
 		 * \brief Creates edit directory if needed.
 		 *
 		 * \return Returns true if the edit directory exists or was created.

@@ -10,6 +10,7 @@
 #include "../FoundAddresses/MXMoveAddressesWindow.h"
 #include "../HexEditor/MXDeusHexMachinaWindow.h"
 #include "../HexEditor/MXExportHexDialog.h"
+#include "../HexEditor/MXFindDialog.h"
 #include "../HexEditor/MXFontDialog.h"
 #include "../HexEditor/MXHexEditorControl.h"
 #include "../HexEditor/MXSelectRangeDialog.h"
@@ -139,6 +140,9 @@ namespace mx {
 			}
 			case MX_EXPORT_HEX : {
 				return new CExportHexDialog( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
+			case MX_FIND_DIALOG : {
+				return new CFindDialog( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );

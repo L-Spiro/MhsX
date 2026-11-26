@@ -5,10 +5,22 @@
 
 namespace lsw {
 
+	/**
+	 * A tab control.  The tab strip is laid out and drawn here (the native control keeps track of the tabs, the selection, and the
+	 *	keyboard), so that tabs can have their own widths or fill the control, and so that hovering does not cause flicker.
+	 **/
 	class CTab : public CWidget {
 	public :
 		CTab( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 		~CTab();
+
+
+		// == Enumerations.
+		/** How wide the tabs are. */
+		enum LSW_TAB_WIDTH_MODE {
+			LSW_TWM_TEXT,																	/**< Each tab is as wide as its own text (the default).  If they do not all fit, they share the width equally. */
+			LSW_TWM_FILL,																	/**< The tabs fill the width of the control, sharing it equally (some may be 1 pixel wider so that they fit exactly). */
+		};
 
 
 		// == Functions.
@@ -48,7 +60,12 @@ namespace lsw {
 		// Gets the rectangle of a given tab.
 		LSW_RECT							GetItemRect( INT _iTab ) const;
 
-		// Gets the width of the text in a given tab.
+		/**
+		 * Gets the width a tab needs for its text (the text plus the padding on both sides, not counting a close box or check box).
+		 *
+		 * \param _iTab The index of the tab.
+		 * \return Returns the width in pixels.
+		 **/
 		int									GetTabTextWidth( INT _iTab ) const;
 
 		// Gets the width of the longest text in any tab.
@@ -99,7 +116,21 @@ namespace lsw {
 		 *
 		 * \param _bShowClose If true, close boxes are shown in the tabs.
 		 */
-		void								SetShowCloseBoxes( bool _bShowClose ) { m_bShowClose = _bShowClose; }
+		void								SetShowCloseBoxes( bool _bShowClose ) { m_bShowClose = _bShowClose; UpdateLayout(); }
+
+		/**
+		 * Sets how wide the tabs are.
+		 *
+		 * \param _twmMode LSW_TWM_TEXT for tabs as wide as their text, or LSW_TWM_FILL for tabs that fill the control.
+		 **/
+		void								SetWidthMode( LSW_TAB_WIDTH_MODE _twmMode ) { m_twmWidthMode = _twmMode; UpdateLayout(); }
+
+		/**
+		 * Gets how wide the tabs are.
+		 *
+		 * \return Returns LSW_TWM_TEXT or LSW_TWM_FILL.
+		 **/
+		LSW_TAB_WIDTH_MODE					WidthMode() const { return m_twmWidthMode; }
 
 		/**
 		 * Sets a tab to be checkable.
@@ -187,10 +218,11 @@ namespace lsw {
 		// == Types.
 		// A tab.
 		struct LSW_TAB {
-			CWidget *						pwWidget;
-			size_t							sTextLen = 0;
-			bool							bCheckable = false;
-			bool							bChecked = false;
+			CWidget *						pwWidget;										/**< The page shown by the tab. */
+			size_t							sTextLen = 0;									/**< The length of the tab's text. */
+			bool							bCheckable = false;								/**< The tab has a check box. */
+			bool							bChecked = false;								/**< The check box is checked. */
+			RECT							rRect = {};										/**< Where the tab is (client coordinates, not including the extra size of a selected tab). */
 		};
 
 		
@@ -205,6 +237,14 @@ namespace lsw {
 		bool								m_bShowClose = true;
 		/** If true we are tracking mouse events. */
 		bool								m_bTrackMouseLeave = false;
+		/** If true we are tracking the mouse leaving the non-client parts (the close boxes and check boxes). */
+		bool								m_bTrackNcLeave = false;
+		/** How wide the tabs are. */
+		LSW_TAB_WIDTH_MODE					m_twmWidthMode = LSW_TWM_TEXT;
+		/** The top of the row of tabs. */
+		int									m_iRowTop = 0;
+		/** The bottom of the row of tabs (where the page area begins). */
+		int									m_iRowBottom = 0;
 
 
 		// == Functions.
@@ -251,6 +291,82 @@ namespace lsw {
 
 		// Determines the close rectangle.
 		static LSW_RECT						GetCloseRect( const LSW_RECT &_rTabRect, bool _bHasFocus );
+
+		/**
+		 * Works out where every tab goes (from the width mode, the text, and the size of the control) and redraws the tabs.
+		 **/
+		void								UpdateLayout();
+
+		/**
+		 * Gets the font used for the tab text.
+		 *
+		 * \return Returns the control's font, or the default GUI font.
+		 **/
+		HFONT								TabFont() const;
+
+		/**
+		 * Gets the extra width a tab needs for its close box or check box.
+		 *
+		 * \param _iTab The index of the tab.
+		 * \return Returns the extra width in pixels, or 0 if the tab has neither.
+		 **/
+		int									BoxWidth( INT _iTab ) const;
+
+		/**
+		 * Gets the rectangle in which the native control keeps a tab (not where it is shown).
+		 *
+		 * \param _iTab The index of the tab.
+		 * \return Returns the native rectangle.
+		 **/
+		RECT								NativeItemRect( INT _iTab ) const;
+
+		/**
+		 * Gets the tab at a point.
+		 *
+		 * \param _pPoint The point in client coordinates.
+		 * \return Returns the index of the tab, or -1.
+		 **/
+		INT									TabFromPoint( const POINT &_pPoint ) const;
+
+		/**
+		 * Converts the mouse position of a mouse message to the matching place in the native control's own layout, so that it
+		 *	selects the tab that is shown under the mouse.
+		 *
+		 * \param _lParam The client coordinates from the mouse message.
+		 * \return Returns the coordinates to give the native control.
+		 **/
+		LPARAM								ToNativePoint( LPARAM _lParam ) const;
+
+		/**
+		 * Gets the rectangle a tab is drawn in (a selected tab is larger).
+		 *
+		 * \param _iTab The index of the tab.
+		 * \param _bSelected Whether the tab is selected.
+		 * \return Returns the rectangle in client coordinates.
+		 **/
+		RECT								DrawRect( INT _iTab, bool _bSelected ) const;
+
+		/**
+		 * Redraws one tab (without erasing, so there is no flicker).
+		 *
+		 * \param _iTab The index of the tab, or -1 to do nothing.
+		 **/
+		void								InvalidateTab( INT _iTab );
+
+		/**
+		 * Draws the row of tabs.
+		 *
+		 * \param _hDc The device context.
+		 * \param _rClient The client rectangle.
+		 **/
+		void								PaintTabs( HDC _hDc, const RECT &_rClient );
+
+		/**
+		 * Keeps painting off the child windows and the pages that cover the control.
+		 *
+		 * \param _hDc The device context to clip.
+		 **/
+		void								ExcludeCovered( HDC _hDc ) const;
 
 		// The custom tab message handler.
 		static LRESULT CALLBACK				CustomTabProc( HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam );

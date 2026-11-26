@@ -2,9 +2,14 @@
 #include "../Base/LSWBase.h"
 #include "../Helpers/LSWHelpers.h"
 #include <codecvt>
+#include <uxtheme.h>
+#include <vssym32.h>
 #include <windowsx.h>
+#pragma comment( lib, "UxTheme.lib" )
 
-#define LSW_CLOSE_SPACING	21
+#define LSW_TAB_MARGIN		2								// Space to the left and right of the row of tabs (room for the larger selected tab).
+#define LSW_TAB_PADDING		6								// Space to the left and right of the text in a tab.
+#define LSW_TAB_BOX_GAP		4								// Space on both sides of a close box or check box.
 
 namespace lsw {
 
@@ -51,9 +56,7 @@ namespace lsw {
 				tNewTab.sTextLen = std::wcslen( _piItem->pszText );
 			}
 			m_vTabs.insert( m_vTabs.begin() + iRet, tNewTab );
-			
-			int iLen = GetLongestTextWidth();
-			SetItemSize( iLen + LSW_CLOSE_SPACING, 0 );
+			UpdateLayout();
 			SetCurSel( iRet );
 		}
 
@@ -70,8 +73,7 @@ namespace lsw {
 				tNewTab.sTextLen = std::strlen( _piItem->pszText );
 			}
 			m_vTabs.insert( m_vTabs.begin() + iRet, tNewTab );
-			int iLen = GetLongestTextWidth();
-			SetItemSize( iLen + (m_bShowClose ? LSW_CLOSE_SPACING : 0), 0 );
+			UpdateLayout();
 			SetCurSel( iRet );
 		}
 
@@ -89,8 +91,8 @@ namespace lsw {
 				delete pwDeleteMe;
 			}
 			m_vTabs.erase( m_vTabs.begin() + _iItem );
-			int iLen = GetLongestTextWidth();
-			SetItemSize( iLen + (m_bShowClose ? LSW_CLOSE_SPACING : 0), 0 );
+			if ( m_iHotTab >= int( m_vTabs.size() ) ) { m_iHotTab = -1; }
+			UpdateLayout();
 
 			int iCount = GetItemCount();
 			if ( iCount && iCur == _iItem ) {
@@ -194,9 +196,25 @@ namespace lsw {
 		return rTemp;
 	}
 
-	// Gets the width of the text in a given tab.
+	/**
+	 * Gets the width a tab needs for its text (the text plus the padding on both sides, not counting a close box or check box).
+	 *
+	 * \param _iTab The index of the tab.
+	 * \return Returns the width in pixels.
+	 **/
 	int CTab::GetTabTextWidth( INT _iTab ) const {
-		if ( !Wnd() ) { return 0; }
+		if ( !Wnd() || _iTab < 0 || _iTab >= static_cast<INT>(m_vTabs.size()) ) { return 0; }
+		std::wstring wsText = GetItemTextW( _iTab );
+		SIZE sSize = {};
+		{
+			LSW_HDC hDc( Wnd() );
+			if ( !hDc.hDc ) { return LSW_TAB_PADDING * 2; }
+			LSW_SELECTOBJECT soFont( hDc.hDc, TabFont() );
+			if ( wsText.size() ) { ::GetTextExtentPoint32W( hDc.hDc, wsText.c_str(), static_cast<int>(wsText.size()), &sSize ); }
+		}
+		return sSize.cx + LSW_TAB_PADDING * 2;
+
+#if 0
 		// Neither method is great.  Trying ::DrawTextW() returns bad values and ::SetWindowLongPtrW() changes the window style back and forth, potentially causing flicker?
 		//	It is only used when inserting and removing items so flicker, if it exists, can't be noticed, but it is still a hack.
 		// Any better way?
@@ -223,6 +241,7 @@ namespace lsw {
 		::ReleaseDC( Wnd(), hDc );
 
 		return rRet.Width();*/
+#endif	// #if 0
 	}
 
 	// Gets the width of the longest text in any tab.
@@ -276,10 +295,7 @@ namespace lsw {
 		iItem.pszText = const_cast<LPWSTR>(_pwcText);
 		if ( !::SendMessageW( Wnd(), TCM_SETITEMW, static_cast<WPARAM>(_iItem), reinterpret_cast<LPARAM>(&iItem) ) ) { return false; }
 		m_vTabs[_iItem].sTextLen = std::wcslen( _pwcText );
-		// Every tab is as wide as the widest text.
-		int iLen = GetLongestTextWidth();
-		SetItemSize( iLen + (m_bShowClose ? LSW_CLOSE_SPACING : 0), 0 );
-		::InvalidateRect( Wnd(), nullptr, TRUE );
+		UpdateLayout();
 		return true;
 	}
 
@@ -294,8 +310,12 @@ namespace lsw {
 		m_lpOriginProc = ::GetWindowLongPtrW( Wnd(), GWLP_WNDPROC );
 		::SetWindowLongPtrW( _hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(CustomTabProc) );
 
+		// The native control keeps narrow fixed-width tabs (so it never shows scroll arrows); where the tabs are shown is decided by
+		//	UpdateLayout().
 		DWORD dwStyle = static_cast<DWORD>(::GetWindowLongPtrW( Wnd(), GWL_STYLE ));
-		::SetWindowLongPtrW( Wnd(), GWL_STYLE, dwStyle | TCS_FIXEDWIDTH | TCS_FORCELABELLEFT | TCS_SINGLELINE );
+		::SetWindowLongPtrW( Wnd(), GWL_STYLE, (dwStyle | TCS_FIXEDWIDTH | TCS_FORCELABELLEFT | TCS_SINGLELINE) & ~TCS_MULTILINE );
+		::SendMessageW( Wnd(), TCM_SETMINTABWIDTH, 0, 1 );
+		UpdateLayout();
 	}
 
 	/**
@@ -312,6 +332,8 @@ namespace lsw {
 		else {
 			if ( _iItem < int( m_vTabs.size() ) ) { m_vTabs[_iItem].bCheckable = true; }
 		}
+		// Check boxes take room.
+		UpdateLayout();
 	}
 
 	/**
@@ -355,8 +377,10 @@ namespace lsw {
 				m_vTabs[_iItem].bChecked = !m_vTabs[_iItem].bChecked;
 			}
 		}
-		::InvalidateRect( Wnd(), NULL, FALSE );
-		Paint();
+		if ( _iItem < 0 ) {
+			for ( auto I = m_vTabs.size(); I--; ) { InvalidateTab( static_cast<INT>(I) ); }
+		}
+		else { InvalidateTab( _iItem ); }
 	}
 
 	/**
@@ -400,12 +424,12 @@ namespace lsw {
 		if ( -1 != _iNewHotTab ) {
 			TabMouseEnterTab( _iNewHotTab );
 		}
+		const int iOld = m_iHotTab;
 		m_iHotTab = _iNewHotTab;
 
-		
-
-		// If you custom-draw, you’ll likely want to repaint.
-		::InvalidateRect( Wnd(), nullptr, FALSE );
+		// Only the two tabs are redrawn (into a buffer, without erasing), so nothing flickers.
+		InvalidateTab( iOld );
+		InvalidateTab( _iNewHotTab );
 	}
 
 	// == Functions.
@@ -423,6 +447,7 @@ namespace lsw {
 	 */
 	CWidget::LSW_HANDLED CTab::Size( WPARAM _wParam, LONG _lWidth, LONG _lHeight ) {
 		CWidget::Size( _wParam, _lWidth, _lHeight );
+		UpdateLayout();
 		//::ShowScrollBar( Wnd(), SB_VERT, FALSE );
 		//ResizeControls( VirtualClientRect( nullptr ) );
 
@@ -478,17 +503,288 @@ namespace lsw {
 	//CWidget::LSW_HANDLED CTab::EraseBkgnd( HDC /*_hDc*/ ) { return LSW_H_HANDLED; }
 
 	// Determines the close rectangle.
-	LSW_RECT CTab::GetCloseRect( const LSW_RECT &_rTabRect, bool _bHasFocus ) {
+	LSW_RECT CTab::GetCloseRect( const LSW_RECT &_rTabRect, bool /*_bHasFocus*/ ) {
+		// The same for selected and unselected tabs (_rTabRect is never the larger rectangle of a selected tab).
 		LSW_RECT rReturn;
 		INT iHeight = _rTabRect.Height();
 		INT iXW = ::GetSystemMetrics( SM_CXSMSIZE ) - 1;
-		INT iXH = ::GetSystemMetrics( SM_CYSMSIZE ) - 1;
-		rReturn.left = _rTabRect.right - iXW - (_bHasFocus ? 2 : ::GetSystemMetrics( SM_CXFRAME ));
+		INT iXH = std::min<INT>( ::GetSystemMetrics( SM_CYSMSIZE ) - 1, iHeight );
+		rReturn.left = _rTabRect.right - iXW - LSW_TAB_BOX_GAP;
 		rReturn.right = rReturn.left + iXW;
 
 		rReturn.top = _rTabRect.top + ((iHeight - iXH) >> 1) + 1;
 		rReturn.bottom = rReturn.top + iXH;
 		return rReturn;
+	}
+
+	/**
+	 * Works out where every tab goes (from the width mode, the text, and the size of the control) and redraws the tabs.
+	 **/
+	void CTab::UpdateLayout() {
+		if ( !Wnd() ) { return; }
+		RECT rClient = {};
+		::GetClientRect( Wnd(), &rClient );
+		const INT iCount = static_cast<INT>(m_vTabs.size());
+		const INT iAvail = std::max<INT>( 0, (rClient.right - rClient.left) - LSW_TAB_MARGIN * 2 );
+		if ( !iCount ) {
+			::InvalidateRect( Wnd(), nullptr, FALSE );
+			return;
+		}
+
+		// The native tabs are kept narrow enough that they never need scroll arrows and leave empty space at the end (used when a
+		//	click is not on a tab; see ToNativePoint()).
+		SetItemSize( std::max<INT>( 1, iAvail / (iCount + 1) ), 0 );
+		RECT rNative = NativeItemRect( 0 );
+		m_iRowTop = rNative.top;
+		m_iRowBottom = rNative.bottom;
+
+		std::vector<INT> vWidths( static_cast<size_t>(iCount) );
+		bool bFill = m_twmWidthMode == LSW_TWM_FILL;
+		if ( !bFill ) {
+			int64_t i64Total = 0;
+			for ( INT I = 0; I < iCount; ++I ) {
+				const INT iBox = BoxWidth( I );
+				vWidths[I] = GetTabTextWidth( I ) + (iBox ? iBox - LSW_TAB_PADDING : 0);
+				i64Total += vWidths[I];
+			}
+			// If they do not fit, they share the space.
+			bFill = i64Total > iAvail;
+		}
+		if ( bFill ) {
+			const INT iEach = iAvail / iCount;
+			const INT iExtra = iAvail % iCount;
+			for ( INT I = 0; I < iCount; ++I ) {
+				vWidths[I] = iEach + ((I < iExtra) ? 1 : 0);
+			}
+		}
+
+		INT iX = LSW_TAB_MARGIN;
+		for ( INT I = 0; I < iCount; ++I ) {
+			m_vTabs[I].rRect.left = iX;
+			m_vTabs[I].rRect.right = iX + vWidths[I];
+			m_vTabs[I].rRect.top = m_iRowTop;
+			m_vTabs[I].rRect.bottom = m_iRowBottom;
+			iX += vWidths[I];
+		}
+
+		// Only the row of tabs changes.
+		RECT rStrip = { 0, 0, rClient.right, m_iRowBottom + 1 };
+		::InvalidateRect( Wnd(), &rStrip, FALSE );
+	}
+
+	/**
+	 * Gets the font used for the tab text.
+	 *
+	 * \return Returns the control's font, or the default GUI font.
+	 **/
+	HFONT CTab::TabFont() const {
+		HFONT hFont = Wnd() ? reinterpret_cast<HFONT>(::SendMessageW( Wnd(), WM_GETFONT, 0, 0 )) : NULL;
+		return hFont ? hFont : reinterpret_cast<HFONT>(::GetStockObject( DEFAULT_GUI_FONT ));
+	}
+
+	/**
+	 * Gets the extra width a tab needs for its close box or check box.
+	 *
+	 * \param _iTab The index of the tab.
+	 * \return Returns the extra width in pixels, or 0 if the tab has neither.
+	 **/
+	int CTab::BoxWidth( INT _iTab ) const {
+		if ( _iTab < 0 || _iTab >= static_cast<INT>(m_vTabs.size()) ) { return 0; }
+		if ( !m_bShowClose && !m_vTabs[_iTab].bCheckable ) { return 0; }
+		return (::GetSystemMetrics( SM_CXSMSIZE ) - 1) + LSW_TAB_BOX_GAP * 2;
+	}
+
+	/**
+	 * Gets the rectangle in which the native control keeps a tab (not where it is shown).
+	 *
+	 * \param _iTab The index of the tab.
+	 * \return Returns the native rectangle.
+	 **/
+	RECT CTab::NativeItemRect( INT _iTab ) const {
+		RECT rRect = {};
+		if ( Wnd() && m_lpOriginProc ) {
+			::CallWindowProcW( OriginalProc(), Wnd(), TCM_GETITEMRECT, static_cast<WPARAM>(_iTab), reinterpret_cast<LPARAM>(&rRect) );
+		}
+		return rRect;
+	}
+
+	/**
+	 * Gets the tab at a point.
+	 *
+	 * \param _pPoint The point in client coordinates.
+	 * \return Returns the index of the tab, or -1.
+	 **/
+	INT CTab::TabFromPoint( const POINT &_pPoint ) const {
+		// The selected tab is drawn larger, so it is tested first.
+		const INT iSel = GetCurSel();
+		if ( iSel >= 0 && iSel < static_cast<INT>(m_vTabs.size()) ) {
+			const RECT rSel = DrawRect( iSel, true );
+			if ( ::PtInRect( &rSel, _pPoint ) ) { return iSel; }
+		}
+		for ( size_t I = 0; I < m_vTabs.size(); ++I ) {
+			if ( ::PtInRect( &m_vTabs[I].rRect, _pPoint ) ) { return static_cast<INT>(I); }
+		}
+		return -1;
+	}
+
+	/**
+	 * Converts the mouse position of a mouse message to the matching place in the native control's own layout, so that it
+	 *	selects the tab that is shown under the mouse.
+	 *
+	 * \param _lParam The client coordinates from the mouse message.
+	 * \return Returns the coordinates to give the native control.
+	 **/
+	LPARAM CTab::ToNativePoint( LPARAM _lParam ) const {
+		if ( m_vTabs.empty() ) { return _lParam; }
+		const POINT pPoint = { GET_X_LPARAM( _lParam ), GET_Y_LPARAM( _lParam ) };
+		// Only the row of tabs is laid out differently.
+		if ( pPoint.y < m_iRowTop - 2 || pPoint.y >= m_iRowBottom ) { return _lParam; }
+		const INT iTab = TabFromPoint( pPoint );
+		RECT rNative;
+		INT iX;
+		if ( iTab >= 0 ) {
+			rNative = NativeItemRect( iTab );
+			iX = (rNative.left + rNative.right) / 2;
+		}
+		else {
+			// Past the native tabs, where there is no tab.
+			rNative = NativeItemRect( static_cast<INT>(m_vTabs.size()) - 1 );
+			iX = rNative.right + 1;
+		}
+		const INT iY = std::max<INT>( rNative.top, std::min<INT>( pPoint.y, rNative.bottom - 1 ) );
+		return MAKELPARAM( static_cast<SHORT>(iX), static_cast<SHORT>(iY) );
+	}
+
+	/**
+	 * Gets the rectangle a tab is drawn in (a selected tab is larger).
+	 *
+	 * \param _iTab The index of the tab.
+	 * \param _bSelected Whether the tab is selected.
+	 * \return Returns the rectangle in client coordinates.
+	 **/
+	RECT CTab::DrawRect( INT _iTab, bool _bSelected ) const {
+		RECT rRect = m_vTabs[_iTab].rRect;
+		if ( _bSelected ) {
+			rRect.left -= 2;
+			rRect.right += 2;
+			rRect.top = std::max<LONG>( 0, rRect.top - 2 );
+			rRect.bottom += 1;
+		}
+		return rRect;
+	}
+
+	/**
+	 * Redraws one tab (without erasing, so there is no flicker).
+	 *
+	 * \param _iTab The index of the tab, or -1 to do nothing.
+	 **/
+	void CTab::InvalidateTab( INT _iTab ) {
+		if ( !Wnd() || _iTab < 0 || _iTab >= static_cast<INT>(m_vTabs.size()) ) { return; }
+		RECT rRect = DrawRect( _iTab, true );
+		::InvalidateRect( Wnd(), &rRect, FALSE );
+	}
+
+	/**
+	 * Draws the row of tabs.
+	 *
+	 * \param _hDc The device context.
+	 * \param _rClient The client rectangle.
+	 **/
+	void CTab::PaintTabs( HDC _hDc, const RECT &_rClient ) {
+		const INT iCount = static_cast<INT>(m_vTabs.size());
+		if ( !iCount ) { return; }
+		LSW_THEME_DATA tdTheme( Wnd(), L"TAB", ::IsThemeActive() && ::IsAppThemed() );
+		HTHEME htTheme = tdTheme.Handle();
+
+		// What the native control drew in the row is replaced.
+		RECT rStrip = { _rClient.left, _rClient.top, _rClient.right, m_iRowBottom };
+		if ( htTheme ) { ::DrawThemeParentBackground( Wnd(), _hDc, &rStrip ); }
+		else { ::FillRect( _hDc, &rStrip, ::GetSysColorBrush( COLOR_BTNFACE ) ); }
+
+		const INT iSel = GetCurSel();
+		const bool bEnabled = ::IsWindowEnabled( Wnd() ) != FALSE;
+		const bool bFocus = ::GetFocus() == Wnd() &&
+			!(::SendMessageW( Wnd(), WM_QUERYUISTATE, 0, 0 ) & UISF_HIDEFOCUS);
+		LSW_SELECTOBJECT soFont( _hDc, TabFont() );
+		const int iOldMode = ::SetBkMode( _hDc, TRANSPARENT );
+		const COLORREF crOldText = ::GetTextColor( _hDc );
+
+		// Unselected tabs first; the selected one is drawn last, over its neighbors.
+		for ( INT J = 0; J <= iCount; ++J ) {
+			const INT I = (J == iCount) ? iSel : J;
+			if ( I < 0 || I >= iCount ) { continue; }
+			const bool bSel = I == iSel;
+			if ( J != iCount && bSel ) { continue; }
+
+			RECT rTab = DrawRect( I, bSel );
+			const int iState = !bEnabled ? TIS_DISABLED : (bSel ? TIS_SELECTED : ((I == m_iHotTab) ? TIS_HOT : TIS_NORMAL));
+			const int iPart = bSel ? ((I == 0) ? TABP_TOPTABITEMLEFTEDGE : TABP_TOPTABITEM) :
+				((I == 0) ? TABP_TABITEMLEFTEDGE : TABP_TABITEM);
+			COLORREF crText = ::GetSysColor( bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT );
+			if ( htTheme ) {
+				::DrawThemeBackground( htTheme, _hDc, iPart, iState, &rTab, nullptr );
+				COLORREF crTheme;
+				if ( SUCCEEDED( ::GetThemeColor( htTheme, iPart, iState, TMT_TEXTCOLOR, &crTheme ) ) ) { crText = crTheme; }
+			}
+			else {
+				::FillRect( _hDc, &rTab, ::GetSysColorBrush( COLOR_BTNFACE ) );
+				RECT rEdge = rTab;
+				::DrawEdge( _hDc, &rEdge, EDGE_RAISED, BF_LEFT | BF_TOP | BF_RIGHT | BF_SOFT );
+			}
+
+			// The text (left-aligned if there is a box to its right).
+			const LSW_RECT rItem = m_vTabs[I].rRect;
+			const INT iBox = BoxWidth( I );
+			RECT rText = rItem;
+			rText.left += LSW_TAB_PADDING;
+			rText.right -= iBox ? iBox : LSW_TAB_PADDING;
+			if ( bSel ) { ::OffsetRect( &rText, 0, -1 ); }
+			const std::wstring wsText = GetItemTextW( I );
+			::SetTextColor( _hDc, crText );
+			if ( rText.right > rText.left ) {
+				::DrawTextW( _hDc, wsText.c_str(), static_cast<int>(wsText.size()), &rText,
+					DT_SINGLELINE | DT_VCENTER | DT_END_ELLIPSIS | DT_NOPREFIX | (iBox ? DT_LEFT : DT_CENTER) );
+			}
+
+			// The close box or check box.
+			if ( iBox ) {
+				RECT rBox = GetCloseRect( rItem, bSel );
+				if ( m_bShowClose ) { ::DrawFrameControl( _hDc, &rBox, DFC_CAPTION, DFCS_CAPTIONCLOSE | DFCS_FLAT | (bEnabled ? 0 : DFCS_INACTIVE) ); }
+				else { ::DrawFrameControl( _hDc, &rBox, DFC_BUTTON, DFCS_BUTTONCHECK | (m_vTabs[I].bChecked ? DFCS_CHECKED : 0) | (bEnabled ? 0 : DFCS_INACTIVE) ); }
+			}
+
+			if ( bSel && bFocus ) {
+				RECT rFocus = rItem;
+				::InflateRect( &rFocus, -2, -2 );
+				::OffsetRect( &rFocus, 0, -1 );
+				::DrawFocusRect( _hDc, &rFocus );
+			}
+		}
+
+		::SetTextColor( _hDc, crOldText );
+		::SetBkMode( _hDc, iOldMode );
+	}
+
+	/**
+	 * Keeps painting off the child windows and the pages that cover the control.
+	 *
+	 * \param _hDc The device context to clip.
+	 **/
+	void CTab::ExcludeCovered( HDC _hDc ) const {
+		auto fExclude = [&]( HWND _hCover ) {
+			if ( !_hCover || _hCover == Wnd() || !::IsWindowVisible( _hCover ) ) { return; }
+			RECT rCover;
+			if ( !::GetWindowRect( _hCover, &rCover ) ) { return; }
+			::MapWindowPoints( HWND_DESKTOP, Wnd(), reinterpret_cast<POINT *>(&rCover), 2 );
+			::ExcludeClipRect( _hDc, rCover.left, rCover.top, rCover.right, rCover.bottom );
+		};
+		for ( HWND hChild = ::GetWindow( Wnd(), GW_CHILD ); hChild; hChild = ::GetWindow( hChild, GW_HWNDNEXT ) ) {
+			fExclude( hChild );
+		}
+		// Pages may be siblings placed over the control.
+		for ( size_t I = 0; I < m_vTabs.size(); ++I ) {
+			if ( m_vTabs[I].pwWidget && ::GetParent( m_vTabs[I].pwWidget->Wnd() ) != Wnd() ) { fExclude( m_vTabs[I].pwWidget->Wnd() ); }
+		}
 	}
 
 	// The custom tab message handler.
@@ -522,6 +818,12 @@ namespace lsw {
 					}
 					return lrHit;
 				}
+				break;
+			}
+			case WM_NCLBUTTONDOWN : {}
+			case WM_NCLBUTTONDBLCLK : {
+				// The close box and check box act on button-up.  The default handling of HTCLOSE tracks a caption button and redraws.
+				if ( _wParam == HTCLOSE || _wParam == HTOBJECT ) { return 0; }
 				break;
 			}
 			case WM_NCLBUTTONUP : {
@@ -561,34 +863,73 @@ namespace lsw {
 				break;
 			}
 			case WM_PAINT : {
-				if ( pmwThis->m_bShowClose || pmwThis->AnyAreCheckable() ) {
-					/*LONG_PTR hObj = */::GetWindowLongPtrW( _hWnd, 0 );
-					LSW_BEGINPAINT bpPaint( _hWnd );
+				// Everything is drawn into a buffer and copied to the screen once, without drawing over the pages, so nothing flickers.
+				LSW_BEGINPAINT bpPaint( _hWnd );
+				if ( !bpPaint.hDc ) { return 0; }
+				RECT rClient = {};
+				::GetClientRect( _hWnd, &rClient );
+				const int iW = rClient.right - rClient.left, iH = rClient.bottom - rClient.top;
+				if ( iW <= 0 || iH <= 0 ) { return 0; }
 
-					{
-						//LSW_SELECTOBJECT soPrev( bpPaint.hDc, reinterpret_cast<HGDIOBJ>(hObjSet) );
-
-						INT iTotal = pmwThis->GetItemCount();
-						INT iSel = pmwThis->GetCurSel();
-
-						::CallWindowProcW( pOld, _hWnd, _uMsg, reinterpret_cast<WPARAM>(bpPaint.hDc), 0L );
-
-						for ( INT I = 0; I < iTotal; I++ ) {
-							LSW_RECT rItem, rClose;
-							rItem = pmwThis->GetItemRect( I );
-							rClose = GetCloseRect( rItem, I == iSel );
-							if ( !pmwThis->m_bShowClose && pmwThis->m_vTabs[I].bCheckable ) {
-								::DrawFrameControl( bpPaint.hDc, &rClose, DFC_BUTTON, DFCS_BUTTONCHECK | (pmwThis->m_vTabs[I].bChecked) ? DFCS_CHECKED : 0 );
-							}
-							else if ( pmwThis->m_bShowClose ) { ::DrawFrameControl( bpPaint.hDc, &rClose, DFC_CAPTION, DFCS_CAPTIONCLOSE | DFCS_FLAT ); }
-							
-						}
-					}
-
-					// ::EndPaint() called by the destructor of bpPaint.
+				HDC hMem = ::CreateCompatibleDC( bpPaint.hDc );
+				HBITMAP hBmp = hMem ? ::CreateCompatibleBitmap( bpPaint.hDc, iW, iH ) : NULL;
+				if ( !hBmp ) {
+					// No buffer: draw directly.
+					if ( hMem ) { ::DeleteDC( hMem ); }
+					::CallWindowProcW( pOld, _hWnd, _uMsg, reinterpret_cast<WPARAM>(bpPaint.hDc), 0L );
+					pmwThis->PaintTabs( bpPaint.hDc, rClient );
 					return 0;
 				}
+				{
+					LSW_SELECTOBJECT soBmp( hMem, hBmp );
+					// The page area and border come from the native control; the row of tabs is drawn over it.
+					::CallWindowProcW( pOld, _hWnd, _uMsg, reinterpret_cast<WPARAM>(hMem), 0L );
+					pmwThis->PaintTabs( hMem, rClient );
+					pmwThis->ExcludeCovered( bpPaint.hDc );
+					::BitBlt( bpPaint.hDc, 0, 0, iW, iH, hMem, 0, 0, SRCCOPY );
+				}
+				::DeleteObject( hBmp );
+				::DeleteDC( hMem );
+				// ::EndPaint() called by the destructor of bpPaint.
+				return 0;
+			}
+			case WM_ERASEBKGND : {
+				// WM_PAINT draws everything.  Other windows' DCs (a child asking for its parent's background) are left to the control.
+				if ( ::WindowFromDC( reinterpret_cast<HDC>(_wParam) ) == _hWnd ) { return 1; }
 				break;
+			}
+			case WM_SIZE : {}
+			case WM_SETFONT : {
+				LRESULT lrRet = ::CallWindowProcW( reinterpret_cast<WNDPROC>(pOld), _hWnd, _uMsg, _wParam, _lParam );
+				pmwThis->UpdateLayout();
+				return lrRet;
+			}
+			case TCM_HITTEST : {
+				// Tabs are where this class puts them.
+				LPTCHITTESTINFO phtiInfo = reinterpret_cast<LPTCHITTESTINFO>(_lParam);
+				if ( !phtiInfo ) { return -1; }
+				const INT iTab = pmwThis->TabFromPoint( phtiInfo->pt );
+				phtiInfo->flags = (iTab >= 0) ? TCHT_ONITEM : TCHT_NOWHERE;
+				return iTab;
+			}
+			case TCM_GETITEMRECT : {
+				const INT iTab = static_cast<INT>(_wParam);
+				if ( _lParam && iTab >= 0 && iTab < static_cast<INT>(pmwThis->m_vTabs.size()) ) {
+					(*reinterpret_cast<RECT *>(_lParam)) = pmwThis->m_vTabs[iTab].rRect;
+					return TRUE;
+				}
+				break;
+			}
+			case WM_LBUTTONDOWN : {}
+			case WM_LBUTTONUP : {}
+			case WM_LBUTTONDBLCLK : {}
+			case WM_RBUTTONDOWN : {}
+			case WM_RBUTTONUP : {}
+			case WM_RBUTTONDBLCLK : {}
+			case WM_MBUTTONDOWN : {}
+			case WM_MBUTTONUP : {
+				// The native control finds the tab under the mouse in its own layout.
+				return ::CallWindowProcW( reinterpret_cast<WNDPROC>(pOld), _hWnd, _uMsg, _wParam, pmwThis->ToNativePoint( _lParam ) );
 			}
 			case WM_MOUSEACTIVATE : {
 				if ( LOWORD( _lParam ) == HTCLOSE && HIWORD( _lParam ) == WM_LBUTTONDOWN ) { return MA_ACTIVATEANDEAT; }
@@ -603,10 +944,32 @@ namespace lsw {
 				const int iX = GET_X_LPARAM( _lParam );
 				const int iY = GET_Y_LPARAM( _lParam );
 				pmwThis->SetHotTab( pmwThis->HitTestTab( iX, iY ) );
-				break;
+				return ::CallWindowProcW( reinterpret_cast<WNDPROC>(pOld), _hWnd, _uMsg, _wParam, pmwThis->ToNativePoint( _lParam ) );
 			}
 			case WM_MOUSELEAVE : {
 				pmwThis->m_bTrackMouseLeave = false;
+				// Moving onto a close box or check box (non-client) also "leaves", but the tab stays hot (see WM_NCMOUSEMOVE).
+				pmwThis->SetHotTab( -1 );
+				break;
+			}
+			case WM_NCMOUSEMOVE : {
+				// Over a close box or check box.
+				if ( !pmwThis->m_bTrackNcLeave ) {
+					pmwThis->m_bTrackNcLeave = true;
+					TRACKMOUSEEVENT tmeTrackMe{};
+					tmeTrackMe.cbSize = sizeof( tmeTrackMe );
+					tmeTrackMe.dwFlags = TME_LEAVE | TME_NONCLIENT;
+					tmeTrackMe.hwndTrack = _hWnd;
+					::TrackMouseEvent( &tmeTrackMe );
+				}
+				POINT pPos = { GET_X_LPARAM( _lParam ), GET_Y_LPARAM( _lParam ) };
+				::ScreenToClient( _hWnd, &pPos );
+				pmwThis->SetHotTab( pmwThis->TabFromPoint( pPos ) );
+				break;
+			}
+			case WM_NCMOUSELEAVE : {
+				pmwThis->m_bTrackNcLeave = false;
+				// If the mouse went back over the tab, WM_MOUSEMOVE makes it hot again before anything is redrawn.
 				pmwThis->SetHotTab( -1 );
 				break;
 			}

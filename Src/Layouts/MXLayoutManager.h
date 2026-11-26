@@ -47,6 +47,7 @@ namespace mx {
 		MX_SELECT_RANGE,
 		MX_FONT_DIALOG,
 		MX_EXPORT_HEX,
+		MX_FIND_DIALOG,
 	};
 
 	class CLayoutManager : public lsw::CLayoutManager {

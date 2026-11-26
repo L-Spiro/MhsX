@@ -3,9 +3,11 @@
 #include "../MXMhsX.h"
 #include "../Layouts/MXDeuHexMachinaWindowLayout.h"
 #include "../Layouts/MXExportHexLayout.h"
+#include "../Layouts/MXFindLayout.h"
 #include "../Layouts/MXLayoutManager.h"
 #include "../Layouts/MXNumberInputLayout.h"
 #include "../Strings/MXStringDecoder.h"
+#include "MXFindResults.h"
 #include "MXHexEditorControl.h"
 #include "MXHexEditorControlHost.h"
 #include "MXHexEditorInterface.h"
@@ -414,6 +416,36 @@ namespace mx {
 		void										ShowSetStartingAddress();
 
 		/**
+		 * Shows the Find dialog, which searches the current tab while it is open.
+		 **/
+		void										ShowFind();
+
+		/**
+		 * Finds the next or previous match of the last search (Find -> Find Next/Find Previous).  With Quick Find Next/Previous,
+		 *	the selected bytes are searched for instead.
+		 *
+		 * \param _bUp Searches backward.
+		 **/
+		void										FindAgain( bool _bUp );
+
+		/**
+		 * Searches the current tab.  Find Next/Previous selects the match; Find All stores the matches in the Find results.
+		 *
+		 * \param _fpParms The search.
+		 * \param _faAction What to do.
+		 * \param _swsStatus Receives a description of the result.
+		 * \return Returns true if something was found.
+		 **/
+		bool										DoFind( const CHexFind::MX_FIND_PARMS &_fpParms, CFindLayout::MX_FIND_ACTION _faAction, CSecureWString &_swsStatus );
+
+		/**
+		 * Gets the results of the Find All searches.
+		 *
+		 * \return Returns the results.
+		 **/
+		inline const CFindResults &					FindResults() const { return m_frFindResults; }
+
+		/**
 		 * Shows the Export Hex dialog and writes the current file, process, or selection to a text file in the format chosen.
 		 **/
 		void										ExportHex();
@@ -597,6 +629,16 @@ namespace mx {
 		CExportHexLayout::MX_EXPORT_HEX_PARMS		m_ehpLastExport;
 		/** The filter last chosen in Import Hex. */
 		DWORD										m_dwLastImportFilter = 1;
+		/** The Find settings last used. */
+		CHexFind::MX_FIND_PARMS						m_fpFindParms;
+		/** What was searched for (most recent first). */
+		std::vector<CSecureWString>					m_vFindHistory;
+		/** The results of Find All. */
+		CFindResults								m_frFindResults;
+		/** The data source the Find dialog's locked range belongs to. */
+		const CHexEditorInterface *					m_pheiFindLock = nullptr;
+		/** Where Incremental Search searches from (the caret when the Find dialog was opened). */
+		uint64_t									m_ui64FindAnchor = 0;
 		/** The number of untitled files created (for naming them). */
 		uint32_t									m_ui32Untitled = 0;
 

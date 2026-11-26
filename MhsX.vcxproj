@@ -287,6 +287,8 @@
     <ClCompile Include="Src\HexEditor\MXHexEditorControl.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexEditorCurProcess.cpp" />
     <ClCompile Include="Src\HexEditor\MXExportHexDialog.cpp" />
+    <ClCompile Include="Src\HexEditor\MXFindDialog.cpp" />
+    <ClCompile Include="Src\HexEditor\MXHexFind.cpp" />
     <ClCompile Include="Src\HexEditor\MXFontDialog.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexImport.cpp" />
     <ClCompile Include="Src\HexEditor\MXHexEditorFile.cpp" />
@@ -315,6 +317,7 @@
     <ClCompile Include="Src\Layouts\MXNewPointerSearchLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXNewStringSearchLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXExportHexLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXFindLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXFontDialogLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXNumberInputLayout.cpp" />
     <ClCompile Include="Src\Layouts\MXOpenProcessLayout.cpp" />
@@ -451,6 +454,9 @@
     <ClInclude Include="Src\HexEditor\MXHexEditorControlHost.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorCurProcess.h" />
     <ClInclude Include="Src\HexEditor\MXExportHexDialog.h" />
+    <ClInclude Include="Src\HexEditor\MXFindDialog.h" />
+    <ClInclude Include="Src\HexEditor\MXFindResults.h" />
+    <ClInclude Include="Src\HexEditor\MXHexFind.h" />
     <ClInclude Include="Src\HexEditor\MXFontDialog.h" />
     <ClInclude Include="Src\HexEditor\MXHexImport.h" />
     <ClInclude Include="Src\HexEditor\MXHexEditorFile.h" />
@@ -483,6 +489,7 @@
     <ClInclude Include="Src\Layouts\MXNewPointerSearchLayout.h" />
     <ClInclude Include="Src\Layouts\MXNewStringSearchLayout.h" />
     <ClInclude Include="Src\Layouts\MXExportHexLayout.h" />
+    <ClInclude Include="Src\Layouts\MXFindLayout.h" />
     <ClInclude Include="Src\Layouts\MXFontDialogLayout.h" />
     <ClInclude Include="Src\Layouts\MXNumberInputLayout.h" />
     <ClInclude Include="Src\Layouts\MXOpenProcessLayout.h" />

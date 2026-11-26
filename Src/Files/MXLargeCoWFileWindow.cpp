@@ -993,6 +993,91 @@ namespace mx {
 	}
 
 	/**
+	 * \brief After the file was saved under a new name (Save As), stops holding the file it was opened from, which would otherwise
+	 *	stay locked (it could only be opened again read-only) until the tab is closed.  If nothing can refer to the old data any
+	 *	more (no Undo history and no clipboards), the new file simply becomes the original data; otherwise the original is first
+	 *	copied into edit storage so that Undo and the clipboards keep working.  On failure the original stays open as before.
+	 *
+	 * \param _pNew The file that was just written (its contents are those of the logical view).
+	 * \return Returns true if the file it was opened from is no longer held open.
+	 */
+	bool CLargeCoWFileWindow::ReleaseOriginal( const std::filesystem::path &_pNew ) {
+		if ( m_pMapPath.empty() ) { return true; }
+		try {
+			const std::filesystem::path pOld = m_pMapPath;
+			bool bReferenced = !m_vUndoStack.empty();
+			for ( size_t I = 0; I < TotalClipboards && !bReferenced; ++I ) {
+				bReferenced = !m_cbClipBoards[I].vLogicalMap.empty();
+			}
+
+			if ( !bReferenced ) {
+				// Nothing refers to the old data, so the new file (whose contents are the logical view) becomes the original data.
+				m_fmMainMap.Close();
+				if ( m_fmMainMap.CreateMap( _pNew, TRUE ) && m_fmMainMap.Size() == Size() ) {
+					m_pMapPath = _pNew;
+					m_vLogicalMap.clear();
+					if ( Size() ) {
+						MX_LOGICAL_SECTION lsSection{};
+						lsSection.stType = MX_ST_ORIGINAL_FILE;
+						lsSection.ui64Start = 0;
+						lsSection.ui64Size = Size();
+						lsSection.ui64Offset = 0;
+						m_vLogicalMap.push_back( lsSection );
+					}
+					m_vBaseSections.clear();
+					m_dwWriteOpenError = ERROR_SUCCESS;
+					return true;
+				}
+				// Put the old file back.
+				m_fmMainMap.Close();
+				if ( !m_fmMainMap.CreateMap( pOld, TRUE ) ) { m_fmMainMap.CreateMap( pOld, FALSE ); }
+				return false;
+			}
+
+			// Undo or a clipboard can still refer to the old data, so a private copy of it takes its place.
+			if ( !CreateWriteDirectories() ) { return false; }
+			std::error_code ecError;
+			std::filesystem::path pCopy;
+			for ( uint32_t I = 0; I < 1000; ++I ) {
+				wchar_t wszName[64];
+				::swprintf_s( wszName, _DEC_WS_412F19BD_original__03u_mxorig.c_str(), unsigned( m_vAsideFiles.size() * 1000 + I ) );
+				pCopy = m_pEditDiractory / wszName;
+				if ( !std::filesystem::exists( pCopy, ecError ) ) { break; }
+				pCopy.clear();
+			}
+			if ( pCopy.empty() ) { return false; }
+			{
+				// Copied through the open map (the file is open for writing here, so it cannot be opened again to copy it).
+				HANDLE hFile = ::CreateFileW( pCopy.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr );
+				if ( hFile == INVALID_HANDLE_VALUE ) { return false; }
+				m_vAsideFiles.push_back( pCopy );
+				const uint64_t ui64Total = m_fmMainMap.Size();
+				std::vector<uint8_t> vBuffer( size_t( std::min<uint64_t>( ui64Total, 4ULL * 1024 * 1024 ) ) );
+				bool bOk = true;
+				for ( uint64_t ui64Off = 0; ui64Off < ui64Total && bOk; ) {
+					const DWORD dwThis = DWORD( std::min<uint64_t>( vBuffer.size(), ui64Total - ui64Off ) );
+					DWORD dwWritten = 0;
+					bOk = uint64_t( m_fmMainMap.Read( vBuffer.data(), ui64Off, dwThis ) ) == dwThis &&
+						::WriteFile( hFile, vBuffer.data(), dwThis, &dwWritten, nullptr ) && dwWritten == dwThis;
+					ui64Off += dwThis;
+				}
+				::CloseHandle( hFile );
+				if ( !bOk ) { return false; }
+			}
+			m_fmMainMap.Close();
+			if ( m_fmMainMap.CreateMap( pCopy, TRUE ) ) {
+				m_pMapPath = pCopy;
+				m_dwWriteOpenError = ERROR_SUCCESS;
+				return true;
+			}
+			m_fmMainMap.Close();
+			if ( !m_fmMainMap.CreateMap( pOld, TRUE ) ) { m_fmMainMap.CreateMap( pOld, FALSE ); }
+			return false;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
 	 * \brief Creates edit directory if needed.
 	 *
 	 * \return Returns true if the edit directory exists or was created.
@@ -1357,6 +1442,12 @@ namespace mx {
 
 			if ( !bOverMap ) {
 				if ( !WriteThenReplace( _pDst, fWrite, _dwError ) ) { return false; }
+				// Save As: the file this was opened from must not stay locked now that the new file is being edited.
+				if ( !m_bUntitled && !m_pMapPath.empty() && !m_pFilePath.empty() &&
+					std::filesystem::equivalent( m_pMapPath, m_pFilePath, ecError ) && !ecError &&
+					!(std::filesystem::equivalent( _pDst, m_pFilePath, ecError ) && !ecError) ) {
+					ReleaseOriginal( _pDst );
+				}
 			}
 			else {
 				std::filesystem::path pTemp = TempPathBeside( _pDst, _DEC_WS_55663ADE_save.c_str() );
