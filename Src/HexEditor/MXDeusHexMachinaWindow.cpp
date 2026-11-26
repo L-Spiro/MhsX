@@ -108,6 +108,9 @@ namespace mx {
 		// Clipboards must not keep the files open after the window is gone.
 		for ( auto I = m_vTabs.size(); I--; ) {
 			CCopyPasteManager::ReleaseInterface( m_vTabs[I].pheiInterface.get() );
+			if ( m_vTabs[I].phecWidget ) {
+				m_vTabs[I].phecWidget->ReleaseStream();
+			}
 		}
 	}
 

@@ -906,16 +906,21 @@ namespace lsw {
 
 	// Detaches a widget from the given root given its ID.
 	bool CMultiSplitter::Detach( WORD _wId, LSW_MS_RECT &_mrRoot ) {
+		const bool bResize = !m_bDestroying && !(Parent() && Parent()->InDestructor());
 		// A widget in a group leaves the group; the layout of the rectangles does not change.
 		if ( &_mrRoot == &m_meRoot && RemoveFromGroup( _wId ) ) {
-			CalcRects();
-			SizeGroups();
-			ForceSizeUpdate();
+			if ( bResize ) {
+				CalcRects();
+				SizeGroups();
+				ForceSizeUpdate();
+			}
 			return true;
 		}
 		if ( !DetachFromTree( _wId, _mrRoot, m_vLayers ) ) { return false; }
-		CalcRects();
-		ForceSizeUpdate();
+		if ( bResize ) {
+			CalcRects();
+			ForceSizeUpdate();
+		}
 		return true;
 	}
 

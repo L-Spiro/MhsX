@@ -1296,6 +1296,18 @@ namespace mx {
 		// Sets the target stream.
 		void										SetStream( CHexEditorInterface * _pediStream, CHexEditorControlHost * _pwMainCtrl );
 
+		/**
+		 * Stops using the target stream without touching it (for when the stream is about to be deleted, such as while the window
+		 *	that owns it is being destroyed).  The control shows no data afterwards.
+		 **/
+		void										ReleaseStream() {
+			m_tWatch.Stop();
+			m_pheiTarget = nullptr;
+			m_pwHexParent = nullptr;
+			m_mChanges.clear();
+			m_bWatchValid = false;
+		}
+
 		// Gets the size of the handled data.
 		inline uint64_t								Size() const { return m_pheiTarget ? m_pheiTarget->Size() : 0; }
 

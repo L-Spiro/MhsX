@@ -137,6 +137,14 @@ namespace lsw {
 		HWND								Wnd() const { return m_hWnd; }
 
 		/**
+		 * Determines whether the widget is being destroyed by its destructor (its window and child windows are being destroyed, and
+		 *	the members of any derived class are already gone).
+		 * 
+		 * \return Returns TRUE if the widget's destructor is running.
+		 **/
+		BOOL								InDestructor() const { return m_bInDestructor; }
+
+		/**
 		 * The parent widget.
 		 * 
 		 * \return Returns a pointer to the parent or nullptr.
