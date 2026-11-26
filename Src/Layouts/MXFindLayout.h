@@ -81,7 +81,8 @@ namespace mx {
 			bool								bHasSelection = false;			/**< Whether there is a selection (for Lock to Selection). */
 			uint64_t							ui64SelStart = 0;				/**< The start of the selection. */
 			uint64_t							ui64SelSize = 0;				/**< The size of the selection. */
-			/** Does a search with the settings in (*pfpParms); returns true if it succeeded and fills the status text. */
+			/** Does a search with the settings in (*pfpParms) and fills the status text.  Returns true if a match was selected (Find
+			 *	Next/Previous) or if the search was done (Find All, even if nothing was found). */
 			std::function<bool ( MX_FIND_ACTION, CSecureWString & )>
 												fAction;
 		};

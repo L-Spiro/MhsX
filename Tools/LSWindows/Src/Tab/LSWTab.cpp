@@ -685,21 +685,23 @@ namespace lsw {
 	}
 
 	/**
-	 * Draws the row of tabs.
+	 * Draws the whole control: the background, the page area and its border, and the row of tabs.
 	 *
 	 * \param _hDc The device context.
 	 * \param _rClient The client rectangle.
 	 **/
 	void CTab::PaintTabs( HDC _hDc, const RECT &_rClient ) {
 		const INT iCount = static_cast<INT>(m_vTabs.size());
-		if ( !iCount ) { return; }
 		LSW_THEME_DATA tdTheme( Wnd(), L"TAB", ::IsThemeActive() && ::IsAppThemed() );
 		HTHEME htTheme = tdTheme.Handle();
 
-		// What the native control drew in the row is replaced.
-		RECT rStrip = { _rClient.left, _rClient.top, _rClient.right, m_iRowBottom };
-		if ( htTheme ) { ::DrawThemeParentBackground( Wnd(), _hDc, &rStrip ); }
-		else { ::FillRect( _hDc, &rStrip, ::GetSysColorBrush( COLOR_BTNFACE ) ); }
+		::FillRect( _hDc, &_rClient, ::GetSysColorBrush( COLOR_BTNFACE ) );
+		RECT rPane = { _rClient.left, iCount ? m_iRowBottom : _rClient.top, _rClient.right, _rClient.bottom };
+		if ( rPane.bottom > rPane.top ) {
+			if ( htTheme ) { ::DrawThemeBackground( htTheme, _hDc, TABP_PANE, 0, &rPane, nullptr ); }
+			else { ::DrawEdge( _hDc, &rPane, EDGE_RAISED, BF_RECT ); }
+		}
+		if ( !iCount ) { return; }
 
 		const INT iSel = GetCurSel();
 		const bool bEnabled = ::IsWindowEnabled( Wnd() ) != FALSE;
@@ -876,14 +878,12 @@ namespace lsw {
 				if ( !hBmp ) {
 					// No buffer: draw directly.
 					if ( hMem ) { ::DeleteDC( hMem ); }
-					::CallWindowProcW( pOld, _hWnd, _uMsg, reinterpret_cast<WPARAM>(bpPaint.hDc), 0L );
+					pmwThis->ExcludeCovered( bpPaint.hDc );
 					pmwThis->PaintTabs( bpPaint.hDc, rClient );
 					return 0;
 				}
 				{
 					LSW_SELECTOBJECT soBmp( hMem, hBmp );
-					// The page area and border come from the native control; the row of tabs is drawn over it.
-					::CallWindowProcW( pOld, _hWnd, _uMsg, reinterpret_cast<WPARAM>(hMem), 0L );
 					pmwThis->PaintTabs( hMem, rClient );
 					pmwThis->ExcludeCovered( bpPaint.hDc );
 					::BitBlt( bpPaint.hDc, 0, 0, iW, iH, hMem, 0, 0, SRCCOPY );

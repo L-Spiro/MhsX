@@ -11,17 +11,18 @@ namespace mx {
 
 #define MX_FD_L														7
 #define MX_FD_W														300
+#define MX_FD_MID													(MX_FD_W / 2)
 #define MX_FD_LABEL_W												24
 #define MX_FD_CTRL_L												(MX_FD_L + MX_FD_LABEL_W + 2)
-#define MX_FD_TYPE_W												105
-#define MX_FD_TOL_L													(MX_FD_CTRL_L + MX_FD_TYPE_W + 10)
+#define MX_FD_TYPE_W												(MX_FD_MID - 4 - MX_FD_CTRL_L)
+#define MX_FD_TOL_L													MX_FD_MID
 #define MX_FD_TOL_LABEL_W											56
 #define MX_FD_ROW0_T												7
 #define MX_FD_ROW1_T												(MX_FD_ROW0_T + 17)
 #define MX_FD_ROW2_T												(MX_FD_ROW1_T + 17)
 #define MX_FD_IN_L													(MX_FD_L + MX_GROUP_LEFT)
-#define MX_FD_COL0_W												150
-#define MX_FD_COL1_L												(MX_FD_IN_L + MX_FD_COL0_W + 10)
+#define MX_FD_COL0_W												(MX_FD_MID - 4 - MX_FD_IN_L)
+#define MX_FD_COL1_L												MX_FD_MID
 #define MX_FD_COL1_W												(MX_FD_W - MX_FD_L - MX_GROUP_RIGHT - MX_FD_COL1_L)
 #define MX_FD_ROW_H													12
 #define MX_FD_OPT_T													(MX_FD_ROW2_T + 13)
@@ -30,16 +31,16 @@ namespace mx {
 #define MX_FD_ADV_T													(MX_FD_OPT_T + MX_FD_OPT_H + 5)
 #define MX_FD_ADV_ROW( ROW )										(MX_FD_ADV_T + MX_GROUP_TOP + 1 + (((ROW) <= 3) ? ((ROW) * MX_FD_ROW_H) : (3 * MX_FD_ROW_H + ((ROW) - 3) * 16)))
 #define MX_FD_ADV_H													(MX_FD_ADV_ROW( 5 ) + 2 + MX_DEF_EDIT_HEIGHT + MX_GROUP_BOTTOM + 2 - MX_FD_ADV_T)
-#define MX_FD_CUSTOM_W												74
-#define MX_FD_FORE_W												30
-#define MX_FD_COLOR_W												40
-#define MX_FD_BACK_L												(MX_FD_IN_L + MX_FD_CUSTOM_W + MX_FD_FORE_W + MX_FD_COLOR_W + 10)
+#define MX_FD_CUSTOM_W												70
+#define MX_FD_COLOR_W												34
+#define MX_FD_FORE_W												(MX_FD_MID - 4 - MX_FD_COLOR_W - MX_FD_IN_L - MX_FD_CUSTOM_W)
+#define MX_FD_BACK_L												MX_FD_MID
 #define MX_FD_BACK_W												26
-#define MX_FD_NUM_LABEL_W											118
+#define MX_FD_NUM_LABEL_W											(MX_FD_MID - MX_FD_IN_L)
 #define MX_FD_NUM_W													60
 #define MX_FD_BUTTON_W												52
 #define MX_FD_BUTTON_GAP											4
-#define MX_FD_BUTTON_L( IDX )										(MX_FD_W - MX_FD_L - (5 - (IDX)) * MX_FD_BUTTON_W - (4 - (IDX)) * MX_FD_BUTTON_GAP)
+#define MX_FD_BUTTON_L( IDX )										((MX_FD_W - (5 * MX_FD_BUTTON_W + 4 * MX_FD_BUTTON_GAP)) / 2 + (IDX) * (MX_FD_BUTTON_W + MX_FD_BUTTON_GAP))
 #define MX_FD_BUTTON_T												(MX_FD_ADV_T + MX_FD_ADV_H + 7)
 #define MX_FD_H														(MX_FD_BUTTON_T + MX_DEF_BUTTON_HEIGHT + MX_FD_L)
 

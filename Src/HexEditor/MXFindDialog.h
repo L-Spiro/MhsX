@@ -129,6 +129,14 @@ namespace mx {
 		void														Enable( WORD _wId, bool _bEnable );
 
 		/**
+		 * Gets the text in the Find box (what is typed, which CComboBox::GetTextW() does not return when a history item is
+		 *	selected).
+		 *
+		 * \return Returns the text.
+		 **/
+		std::wstring												FindText();
+
+		/**
 		 * Reads a whole number from an edit control.
 		 *
 		 * \param _wId The ID of the control.

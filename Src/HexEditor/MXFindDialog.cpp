@@ -197,9 +197,10 @@ namespace mx {
 			SetStatus( CSecureWString() );
 			return;
 		}
-		const bool bFound = m_pfdpParms->fAction( _faAction, swsStatus );
+		// For Find All, true means the search was done (even if nothing was found).
+		const bool bDone = m_pfdpParms->fAction( _faAction, swsStatus );
 		SetStatus( swsStatus );
-		if ( bFound && _faAction == CFindLayout::MX_FA_ALL && m_pfdpParms->pfpParms->bHideAfterSearch ) {
+		if ( bDone && _faAction == CFindLayout::MX_FA_ALL && m_pfdpParms->pfpParms->bHideAfterSearch ) {
 			::EndDialog( Wnd(), TRUE );
 		}
 	}
@@ -214,8 +215,7 @@ namespace mx {
 		if ( !m_pfdpParms || !m_pfdpParms->pfpParms ) { return false; }
 		CHexFind::MX_FIND_PARMS & fpParms = (*m_pfdpParms->pfpParms);
 		try {
-			auto pwFind = FindChild( CFindLayout::MX_FI_FIND_COMBO );
-			if ( pwFind ) { fpParms.swsQuery = pwFind->GetTextW(); }
+			fpParms.swsQuery = FindText();
 			fpParms.ftType = SelectedType();
 			fpParms.bFindAll = Checked( CFindLayout::MX_FI_FIND_ALL_OCCURRENCES );
 			fpParms.bMatchCase = Checked( CFindLayout::MX_FI_MATCH_CASE );
@@ -295,7 +295,7 @@ namespace mx {
 			// The list shows the new order; the text being edited stays as it is.
 			auto pcbFind = static_cast<lsw::CComboBox *>(FindChild( CFindLayout::MX_FI_FIND_COMBO ));
 			if ( pcbFind ) {
-				const std::wstring wsText = pcbFind->GetTextW();
+				const std::wstring wsText = FindText();
 				m_bFilling = true;
 				pcbFind->ResetContent();
 				for ( const auto & swsThis : vHistory ) { pcbFind->AddString( swsThis.c_str() ); }
@@ -389,6 +389,23 @@ namespace mx {
 	void CFindDialog::Enable( WORD _wId, bool _bEnable ) {
 		auto pwThis = FindChild( _wId );
 		if ( pwThis ) { ::EnableWindow( pwThis->Wnd(), _bEnable ? TRUE : FALSE ); }
+	}
+
+	/**
+	 * Gets the text in the Find box (what is typed, which CComboBox::GetTextW() does not return when a history item is
+	 *	selected).
+	 *
+	 * \return Returns the text.
+	 **/
+	std::wstring CFindDialog::FindText() {
+		auto pwFind = FindChild( CFindLayout::MX_FI_FIND_COMBO );
+		if ( !pwFind || !pwFind->Wnd() ) { return std::wstring(); }
+		const int iLen = ::GetWindowTextLengthW( pwFind->Wnd() );
+		if ( iLen <= 0 ) { return std::wstring(); }
+		std::wstring wsText( size_t( iLen ) + 1, L'\0' );
+		const int iGot = ::GetWindowTextW( pwFind->Wnd(), wsText.data(), iLen + 1 );
+		wsText.resize( size_t( std::clamp( iGot, 0, iLen ) ) );
+		return wsText;
 	}
 
 	/**

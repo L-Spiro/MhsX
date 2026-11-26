@@ -3158,7 +3158,8 @@ namespace mx {
 	 * \param _fpParms The search.
 	 * \param _faAction What to do.
 	 * \param _swsStatus Receives a description of the result.
-	 * \return Returns true if something was found.
+	 * \return Returns true if a match was selected (Find Next/Previous) or if the search was done (Find All, even if nothing
+	 *	was found).
 	 **/
 	bool CDeusHexMachinaWindow::DoFind( const CHexFind::MX_FIND_PARMS &_fpParms, CFindLayout::MX_FIND_ACTION _faAction, CSecureWString &_swsStatus ) {
 		auto phecControl = CurrentEditor();
@@ -3224,7 +3225,7 @@ namespace mx {
 				SetStatusBarText( _swsStatus.c_str(), sFound == 0 );
 				// The first one is selected.
 				if ( sFound ) { phecControl->SelectRange( fmFirst.ui64Addr, fmFirst.ui64Size ); }
-				return sFound != 0;
+				return true;
 			}
 
 			const bool bUp = _faAction == CFindLayout::MX_FA_PREV || (_faAction == CFindLayout::MX_FA_INCREMENTAL && fpParms.bUp);

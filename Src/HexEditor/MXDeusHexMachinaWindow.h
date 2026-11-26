@@ -434,7 +434,8 @@ namespace mx {
 		 * \param _fpParms The search.
 		 * \param _faAction What to do.
 		 * \param _swsStatus Receives a description of the result.
-		 * \return Returns true if something was found.
+		 * \return Returns true if a match was selected (Find Next/Previous) or if the search was done (Find All, even if nothing
+		 *	was found).
 		 **/
 		bool										DoFind( const CHexFind::MX_FIND_PARMS &_fpParms, CFindLayout::MX_FIND_ACTION _faAction, CSecureWString &_swsStatus );
 

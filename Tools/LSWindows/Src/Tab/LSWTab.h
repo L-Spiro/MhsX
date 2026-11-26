@@ -354,7 +354,7 @@ namespace lsw {
 		void								InvalidateTab( INT _iTab );
 
 		/**
-		 * Draws the row of tabs.
+		 * Draws the whole control: the background, the page area and its border, and the row of tabs.
 		 *
 		 * \param _hDc The device context.
 		 * \param _rClient The client rectangle.
