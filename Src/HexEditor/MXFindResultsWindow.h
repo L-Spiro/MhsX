@@ -373,6 +373,13 @@ namespace mx {
 		void																PaintMap( HDC _hDc, const RECT &_rClient );
 
 		/**
+		 * Gets the font of the map.
+		 *
+		 * \return Returns the font of the map (or the default GUI font).
+		 **/
+		HFONT																MapFont();
+
+		/**
 		 * Goes to the match nearest the address at a point on the map.
 		 *
 		 * \param _iY The vertical position in the map's client area.

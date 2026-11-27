@@ -406,6 +406,8 @@ namespace mx {
 
 		// The Deus Hex Machina window.
 		CDeusHexMachinaWindow *				m_pdhmwDeusHexMachinaWindow = nullptr;
+		/** Were the positions of the windows stored (when MHS X began to close, while every window still existed)? */
+		bool								m_bUiCaptured = false;
 
 		// The Converter window.
 		CConverterWindow *					m_cwConverter;

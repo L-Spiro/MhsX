@@ -43,23 +43,6 @@ namespace mx {
 				plvList->SetColumnWidth( iCol, std::max<INT>( rClient.right - rClient.left - ::GetSystemMetrics( SM_CXVSCROLL ), 50 ) );
 			}
 
-			auto pcbHex = static_cast<CComboBox *>(FindChild( CInspectorLayout::MX_ICI_HEX_COMBO ));
-			if ( pcbHex ) {
-				const struct {
-					const char *											pcText;
-					size_t													sLen;
-					CInspector::MX_HEX_STYLE								hsStyle;
-				} aStyles[] = {
-					{ _T_LEN_6E1C2989_FFh, CInspector::MX_HS_SUFFIX_H },
-					{ _T_LEN_B2111273_0xFF, CInspector::MX_HS_PREFIX_0X },
-					{ _T_LEN_78451ED9_FF, CInspector::MX_HS_NONE },
-				};
-				for ( const auto & sThis : aStyles ) {
-					const INT iIdx = pcbHex->AddString( mx::CStringDecoder::DecodeToWString( sThis.pcText, sThis.sLen ).c_str() );
-					if ( iIdx >= 0 ) { pcbHex->SetItemData( iIdx, static_cast<LPARAM>(sThis.hsStyle) ); }
-				}
-			}
-
 			auto pcbDate = static_cast<CComboBox *>(FindChild( CInspectorLayout::MX_ICI_DATE_COMBO ));
 			if ( pcbDate ) {
 				const struct {
@@ -147,11 +130,6 @@ namespace mx {
 			case CInspectorLayout::MX_ICI_OK : {
 				ReadChecks();
 				try {
-					auto pcbHex = static_cast<CComboBox *>(FindChild( CInspectorLayout::MX_ICI_HEX_COMBO ));
-					if ( pcbHex && pcbHex->GetCurSel() >= 0 ) {
-						m_sSettings.hsHexStyle = static_cast<CInspector::MX_HEX_STYLE>(pcbHex->GetCurSelItemData());
-					}
-
 					// The formats must work (an empty format uses the user's format from Windows).
 					SYSTEMTIME stTest = {};
 					stTest.wYear = 2001;
@@ -254,8 +232,6 @@ namespace mx {
 	 * Fills in the formats from m_sSettings.
 	 **/
 	void CInspectorCustomizeDialog::FillFormats() {
-		auto pcbHex = static_cast<CComboBox *>(FindChild( CInspectorLayout::MX_ICI_HEX_COMBO ));
-		if ( pcbHex ) { pcbHex->SetCurSelByItemData( static_cast<LPARAM>(m_sSettings.hsHexStyle) ); }
 		auto pwDate = FindChild( CInspectorLayout::MX_ICI_DATE_COMBO );
 		if ( pwDate ) { ::SetWindowTextW( pwDate->Wnd(), m_sSettings.wsDateFormat.c_str() ); }
 		auto pwTime = FindChild( CInspectorLayout::MX_ICI_TIME_COMBO );

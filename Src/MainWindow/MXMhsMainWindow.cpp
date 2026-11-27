@@ -494,13 +494,14 @@ namespace mx {
 			// Modified files in the Hex Editor are offered to be saved first; cancelling keeps the application open.
 			if ( !m_pdhmwDeusHexMachinaWindow->QueryCloseAll() ) { return LSW_H_HANDLED; }
 		}
+		CaptureUiState();
 		return LSW_H_CONTINUE;
 	}
 
 	// WM_DESTROY.
 	CWidget::LSW_HANDLED CMhsMainWindow::Destroy() {
 		if ( m_pmhMemHack ) {
-			CaptureUiState();
+			if ( !m_bUiCaptured ) { CaptureUiState(); }
 			//m_pmhMemHack->SaveSettings( CSecureWString(), true );
 			SaveSettings( CSecureWString(), true );
 		}
@@ -530,6 +531,7 @@ namespace mx {
 		if ( !m_pmhMemHack ) { return; }
 		CUiState::CaptureWindow( this, MultiSplitter(), KnownDockables(), m_pmhMemHack->UiState().wMain );
 		if ( m_pdhmwDeusHexMachinaWindow ) { m_pdhmwDeusHexMachinaWindow->CaptureUiState(); }
+		m_bUiCaptured = true;
 	}
 
 	// WM_NCDESTROY.

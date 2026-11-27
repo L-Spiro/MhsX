@@ -7,6 +7,7 @@
 #include "../Strings/MXStringMacros.h"
 
 #include <Base/LSWBase.h>
+#include <Helpers/LSWHelpers.h>
 #include <EEExpEval.h>
 
 #include <CommCtrl.h>
@@ -189,7 +190,7 @@ namespace mx {
 				bGoTo = true;
 				try {
 					std::wstring wsText = _DEC_WS_6B4613A5__Go_to_Address_;
-					CInspector::FormatUnsigned( ui64Value, CInspector::MX_NF_HEX, sSettings.hsHexStyle, wsText );
+					CInspector::FormatUnsigned( ui64Value, CInspector::MX_NF_HEX, CInspector::HexStyle(), wsText );
 					::InsertMenuW( hMenu, 0, MF_BYPOSITION | MF_STRING, MX_IC_GO_TO_ADDRESS, wsText.c_str() );
 					::InsertMenuW( hMenu, 1, MF_BYPOSITION | MF_SEPARATOR, 0, nullptr );
 				}
@@ -626,26 +627,8 @@ namespace mx {
 	 * \return Returns true if the text was put on the clipboard.
 	 **/
 	bool CInspectorWindow::SetClipboardText( const std::wstring &_wsText ) {
-		if ( !::OpenClipboard( Wnd() ) ) { return false; }
-		bool bRet = false;
-		if ( ::EmptyClipboard() ) {
-			const size_t sBytes = (_wsText.size() + 1) * sizeof( wchar_t );
-			HGLOBAL hMem = ::GlobalAlloc( GMEM_MOVEABLE, sBytes );
-			if ( hMem ) {
-				void * pvDst = ::GlobalLock( hMem );
-				if ( pvDst ) {
-					std::memcpy( pvDst, _wsText.c_str(), sBytes );
-					::GlobalUnlock( hMem );
-					if ( ::SetClipboardData( CF_UNICODETEXT, hMem ) ) {
-						bRet = true;
-						hMem = NULL;
-					}
-				}
-				if ( hMem ) { ::GlobalFree( hMem ); }
-			}
-		}
-		::CloseClipboard();
-		return bRet;
+		lsw::LSW_CLIPBOARD cbClipboard( Wnd(), true );
+		return cbClipboard.IsOpen() && cbClipboard.SetText( _wsText.c_str(), _wsText.size() );
 	}
 
 	/**

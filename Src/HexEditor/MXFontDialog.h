@@ -4,6 +4,7 @@
 #include "../Strings/MXStringDecoder.h"
 
 #include <Fonts/LSWFonts.h>
+#include <Helpers/LSWHelpers.h>
 #include <ListBox/LSWListBox.h>
 #include <LSWWin.h>
 #include <MainWindow/LSWMainWindow.h>
@@ -78,7 +79,7 @@ namespace mx {
 		/** The writing system whose fonts are listed. */
 		lsw::CFonts::LSW_WS_ID										m_wiWritingSystem = lsw::CFonts::LSW_WS_ANY;
 		/** The font of the sample. */
-		HFONT														m_hSampleFont = NULL;
+		lsw::LSW_FONT												m_fSampleFont;
 		/** The size of the window when it was created (the minimum size is based on it). */
 		SIZE														m_sStartSize {};
 		/** True while the controls are being changed by the dialog itself (their notifications are ignored). */

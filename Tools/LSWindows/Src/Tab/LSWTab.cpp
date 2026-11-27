@@ -708,8 +708,7 @@ namespace lsw {
 		const bool bFocus = ::GetFocus() == Wnd() &&
 			!(::SendMessageW( Wnd(), WM_QUERYUISTATE, 0, 0 ) & UISF_HIDEFOCUS);
 		LSW_SELECTOBJECT soFont( _hDc, TabFont() );
-		const int iOldMode = ::SetBkMode( _hDc, TRANSPARENT );
-		const COLORREF crOldText = ::GetTextColor( _hDc );
+		LSW_SETBKMODE sbmMode( _hDc, TRANSPARENT );
 
 		// Unselected tabs first; the selected one is drawn last, over its neighbors.
 		for ( INT J = 0; J <= iCount; ++J ) {
@@ -742,7 +741,7 @@ namespace lsw {
 			rText.right -= iBox ? iBox : LSW_TAB_PADDING;
 			if ( bSel ) { ::OffsetRect( &rText, 0, -1 ); }
 			const std::wstring wsText = GetItemTextW( I );
-			::SetTextColor( _hDc, crText );
+			LSW_SETTEXTCOLOR stcText( _hDc, crText );
 			if ( rText.right > rText.left ) {
 				// Text starts at the reading edge of every tab: the left, or the right for right-to-left text.
 				const DWORD dwExStyle = static_cast<DWORD>(::GetWindowLongPtrW( Wnd(), GWL_EXSTYLE ));
@@ -765,9 +764,6 @@ namespace lsw {
 				::DrawFocusRect( _hDc, &rFocus );
 			}
 		}
-
-		::SetTextColor( _hDc, crOldText );
-		::SetBkMode( _hDc, iOldMode );
 	}
 
 	/**

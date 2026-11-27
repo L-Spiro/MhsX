@@ -2,8 +2,10 @@
 #include "../Strings/MXStringMacros.h"
 #include "../Utilities/MXUtilities.h"
 
+#include <Helpers/LSWHelpers.h>
 #include <ListBox/LSWListBox.h>
 
+#include <algorithm>
 #include <cstring>
 
 
@@ -28,11 +30,13 @@ namespace mx {
 		if ( plbList ) {
 			std::vector<UINT> vFormats;
 			try {
-				if ( ::OpenClipboard( Wnd() ) ) {
-					for ( UINT uiFmt = ::EnumClipboardFormats( 0 ); uiFmt; uiFmt = ::EnumClipboardFormats( uiFmt ) ) {
-						if ( !IsHandleFormat( uiFmt ) ) { vFormats.push_back( uiFmt ); }
+				{
+					lsw::LSW_CLIPBOARD cbClipboard( Wnd(), false );
+					if ( cbClipboard.IsOpen() ) {
+						for ( UINT uiFmt = ::EnumClipboardFormats( 0 ); uiFmt; uiFmt = ::EnumClipboardFormats( uiFmt ) ) {
+							if ( !IsHandleFormat( uiFmt ) ) { vFormats.push_back( uiFmt ); }
+						}
 					}
-					::CloseClipboard();
 				}
 				for ( auto uiFmt : vFormats ) {
 					INT iIdx = plbList->AddString( FormatName( uiFmt ).c_str() );
@@ -175,38 +179,34 @@ namespace mx {
 	bool CPasteSpecialDialog::ReadFormat( HWND _hWnd, UINT _uiFormat, std::vector<uint8_t> &_vBytes ) {
 		_vBytes.clear();
 		if ( IsHandleFormat( _uiFormat ) ) { return false; }
-		if ( !::OpenClipboard( _hWnd ) ) { return false; }
-		bool bRet = false;
 		try {
-			HANDLE hData = ::GetClipboardData( _uiFormat );
-			if ( hData ) {
-				const SIZE_T stSize = ::GlobalSize( hData );
-				const void * pvData = stSize ? ::GlobalLock( hData ) : nullptr;
-				if ( pvData ) {
-					size_t sLen = size_t( stSize );
-					// Text is cut at its terminator (the memory block can be larger than the text).
-					if ( _uiFormat == CF_TEXT || _uiFormat == CF_OEMTEXT || _uiFormat == CF_DSPTEXT ) {
-						const void * pvEnd = std::memchr( pvData, 0, sLen );
-						if ( pvEnd ) { sLen = size_t( static_cast<const uint8_t *>(pvEnd) - static_cast<const uint8_t *>(pvData) ); }
-					}
-					else if ( _uiFormat == CF_UNICODETEXT ) {
-						const wchar_t * pwcText = static_cast<const wchar_t *>(pvData);
-						size_t sChars = sLen / sizeof( wchar_t ), I = 0;
-						while ( I < sChars && pwcText[I] ) { ++I; }
-						sLen = I * sizeof( wchar_t );
-					}
-					_vBytes.assign( static_cast<const uint8_t *>(pvData), static_cast<const uint8_t *>(pvData) + sLen );
-					::GlobalUnlock( hData );
-					bRet = true;
-				}
+			lsw::LSW_CLIPBOARD cbClipboard( _hWnd, false );
+			if ( !cbClipboard.IsOpen() || !cbClipboard.GetData( _uiFormat, _vBytes ) ) {
+				_vBytes.clear();
+				return false;
 			}
+			// Text is cut at its terminator (the memory block can be larger than the text).
+			if ( _uiFormat == CF_TEXT || _uiFormat == CF_OEMTEXT || _uiFormat == CF_DSPTEXT ) {
+				auto aEnd = std::find( _vBytes.begin(), _vBytes.end(), uint8_t( 0 ) );
+				_vBytes.erase( aEnd, _vBytes.end() );
+			}
+			else if ( _uiFormat == CF_UNICODETEXT ) {
+				size_t I = 0;
+				const size_t sChars = _vBytes.size() / sizeof( wchar_t );
+				while ( I < sChars ) {
+					wchar_t wcThis;
+					std::memcpy( &wcThis, _vBytes.data() + I * sizeof( wchar_t ), sizeof( wchar_t ) );
+					if ( !wcThis ) { break; }
+					++I;
+				}
+				_vBytes.resize( I * sizeof( wchar_t ) );
+			}
+			return true;
 		}
 		catch ( ... ) {
 			_vBytes.clear();
-			bRet = false;
+			return false;
 		}
-		::CloseClipboard();
-		return bRet;
 	}
 
 	/**

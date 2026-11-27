@@ -80,24 +80,38 @@ namespace mx {
 	 * \return Returns the name of the type.
 	 **/
 	CSecureWString CInspector::TypeName( MX_INSPECTOR_TYPE _itType ) {
+		// Numeric types are named as everywhere else in MHS X ("Int" or "int32_t", by the global option).
+		const bool bCodeNames = (CUtilities::Options.dwDataTypeOptions & CUtilities::MX_DTO_CODENAMES) != 0;
+		CUtilities::MX_DATA_TYPES dtType = CUtilities::MX_DT_VOID;
+		switch ( _itType ) {
+			case MX_IT_INT8 : { dtType = CUtilities::MX_DT_INT8; break; }
+			case MX_IT_UINT8 : { dtType = CUtilities::MX_DT_UINT8; break; }
+			case MX_IT_INT16 : { dtType = CUtilities::MX_DT_INT16; break; }
+			case MX_IT_UINT16 : { dtType = CUtilities::MX_DT_UINT16; break; }
+			case MX_IT_INT32 : { dtType = CUtilities::MX_DT_INT32; break; }
+			case MX_IT_UINT32 : { dtType = CUtilities::MX_DT_UINT32; break; }
+			case MX_IT_INT64 : { dtType = CUtilities::MX_DT_INT64; break; }
+			case MX_IT_UINT64 : { dtType = CUtilities::MX_DT_UINT64; break; }
+			case MX_IT_FLOAT : { dtType = CUtilities::MX_DT_FLOAT; break; }
+			case MX_IT_DOUBLE : { dtType = CUtilities::MX_DT_DOUBLE; break; }
+			case MX_IT_FLOAT16 : { dtType = CUtilities::MX_DT_FLOAT16; break; }
+			default : {}
+		}
+		if ( dtType != CUtilities::MX_DT_VOID ) {
+			try {
+				std::wstring wsName;
+				CUtilities::PrintDataType( wsName, dtType, bCodeNames ? DWORD( CUtilities::MX_DTO_CODENAMES ) : DWORD( 0 ) );
+				return CSecureWString( wsName );
+			}
+			catch ( ... ) { return CSecureWString(); }
+		}
 		switch ( _itType ) {
 			case MX_IT_BINARY : { return _DEC_WS_C14CEC33_Binary; }
-			case MX_IT_INT8 : { return _DEC_WS_CDD690D1_Signed_Byte; }
-			case MX_IT_UINT8 : { return _DEC_WS_FA7FD31C_Unsigned_Byte; }
-			case MX_IT_INT16 : { return _DEC_WS_D4A628B5_Signed_Short; }
-			case MX_IT_UINT16 : { return _DEC_WS_31443FFB_Unsigned_Short; }
-			case MX_IT_INT32 : { return _DEC_WS_072A59C1_Signed_Int; }
-			case MX_IT_UINT32 : { return _DEC_WS_7652642A_Unsigned_Int; }
-			case MX_IT_INT64 : { return _DEC_WS_29277F4A_Signed_Int64; }
-			case MX_IT_UINT64 : { return _DEC_WS_CCC56804_Unsigned_Int64; }
-			case MX_IT_FLOAT : { return _DEC_WS_08647191_Float; }
-			case MX_IT_DOUBLE : { return _DEC_WS_DD4BF7D9_Double; }
-			case MX_IT_FLOAT16 : { return _DEC_WS_8337F554_Half_Float; }
-			case MX_IT_BFLOAT16 : { return _DEC_WS_9490B7C6_BFloat16; }
-			case MX_IT_VECTOR4 : { return _DEC_WS_06A07CB1_Vector4__Float_; }
-			case MX_IT_STRING : { return _DEC_WS_9912B79F_String; }
-			case MX_IT_STRING_UTF16 : { return _DEC_WS_A4CEA253_Unicode_String; }
-			case MX_IT_STRING_UTF8 : { return _DEC_WS_463530AE_UTF_8_String; }
+			case MX_IT_BFLOAT16 : { return bCodeNames ? _DEC_WS_A25BEC0C_bfloat16 : _DEC_WS_9490B7C6_BFloat16; }
+			case MX_IT_VECTOR4 : { return bCodeNames ? _DEC_WS_48049B92_float_4_ : _DEC_WS_06A07CB1_Vector4__Float_; }
+			case MX_IT_STRING : { return bCodeNames ? _DEC_WS_0E9A6555_char__ : _DEC_WS_9912B79F_String; }
+			case MX_IT_STRING_UTF16 : { return bCodeNames ? _DEC_WS_34137A1E_char16_t__ : _DEC_WS_A4CEA253_Unicode_String; }
+			case MX_IT_STRING_UTF8 : { return bCodeNames ? _DEC_WS_F6907CB3_char8_t__ : _DEC_WS_463530AE_UTF_8_String; }
 			case MX_IT_DOSDATE : { return _DEC_WS_11DA8664_DOSDATE; }
 			case MX_IT_DOSTIME : { return _DEC_WS_D4D0295B_DOSTIME; }
 			case MX_IT_FILETIME : { return _DEC_WS_CB8F936A_FILETIME; }
@@ -107,6 +121,15 @@ namespace mx {
 			case MX_IT_GUID : { return _DEC_WS_1DFA2206_GUID; }
 			default : { return CSecureWString(); }
 		}
+	}
+
+	/**
+	 * Gets how hexadecimal numbers are written, from the global option (0xFF or FFh).
+	 *
+	 * \return Returns MX_HS_PREFIX_0X or MX_HS_SUFFIX_H.
+	 **/
+	CInspector::MX_HEX_STYLE CInspector::HexStyle() {
+		return CUtilities::Options.bUse0xForHex ? MX_HS_PREFIX_0X : MX_HS_SUFFIX_H;
 	}
 
 	/**
@@ -195,7 +218,7 @@ namespace mx {
 					}
 					else {
 						// Other formats show the bits of the value (two's complement for negative values).
-						FormatUnsigned( ui64Raw, _sSettings.nfFormat, _sSettings.hsHexStyle, _wsText,
+						FormatUnsigned( ui64Raw, _sSettings.nfFormat, HexStyle(), _wsText,
 							_sSettings.nfFormat == MX_NF_HEX ? static_cast<uint32_t>(sSize * 2) :
 							_sSettings.nfFormat == MX_NF_BINARY ? static_cast<uint32_t>(sSize * 8) : 1 );
 					}

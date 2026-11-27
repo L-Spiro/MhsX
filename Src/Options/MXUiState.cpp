@@ -288,7 +288,6 @@ namespace mx {
 			MX_JSON_BOOL( _DEC_S_CEFCB299_Shown, _sSettings.vRows[I].bShown, peRow );
 		}
 		MX_JSON_NUMBER( _DEC_S_D91677E9_Format, _sSettings.nfFormat, _peParent );
-		MX_JSON_NUMBER( _DEC_S_95FB8AAC_HexStyle, _sSettings.hsHexStyle, _peParent );
 		MX_AddString( _peParent, _DEC_S_A6837029_DateFormat, _sSettings.wsDateFormat );
 		MX_AddString( _peParent, _DEC_S_590179D9_TimeFormat, _sSettings.wsTimeFormat );
 		MX_JSON_BOOL( _DEC_S_70B4D80A_AllowDocking, _sSettings.bAllowDocking, _peParent );
@@ -403,9 +402,6 @@ namespace mx {
 		double dVal = 0.0;
 		if ( GetNumber( _pjvInspector, _pjcContainer, _DEC_S_D91677E9_Format, dVal ) && dVal >= 0.0 && dVal <= static_cast<double>(CInspector::MX_NF_BINARY) ) {
 			_sSettings.nfFormat = static_cast<CInspector::MX_NUMBER_FORMAT>(static_cast<uint32_t>(dVal));
-		}
-		if ( GetNumber( _pjvInspector, _pjcContainer, _DEC_S_95FB8AAC_HexStyle, dVal ) && dVal >= 0.0 && dVal <= static_cast<double>(CInspector::MX_HS_NONE) ) {
-			_sSettings.hsHexStyle = static_cast<CInspector::MX_HEX_STYLE>(static_cast<uint32_t>(dVal));
 		}
 		const lson::CJsonContainer::LSON_JSON_VALUE * pjvText = _pjcContainer->GetMemberByName( (*_pjvInspector), _DEC_S_A6837029_DateFormat );
 		if ( pjvText ) { GetString( (*pjvText), _pjcContainer, _sSettings.wsDateFormat ); }

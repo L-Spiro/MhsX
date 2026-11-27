@@ -7,6 +7,7 @@
 #include "../Strings/MXStringMacros.h"
 
 #include <Base/LSWBase.h>
+#include <Helpers/LSWHelpers.h>
 
 #include <algorithm>
 #include <CommCtrl.h>
@@ -254,16 +255,14 @@ namespace mx {
 
 			CWidget * pwMap = Map();
 			if ( pwMap ) {
-				HDC hDc = ::GetDC( pwMap->Wnd() );
-				if ( hDc ) {
-					HFONT hFont = reinterpret_cast<HFONT>(::SendMessageW( pwMap->Wnd(), WM_GETFONT, 0, 0 ));
-					if ( !hFont ) { hFont = static_cast<HFONT>(::GetStockObject( DEFAULT_GUI_FONT )); }
-					HGDIOBJ hOld = ::SelectObject( hDc, hFont );
-					const std::wstring wsCount = CountText();
+				lsw::LSW_HDC hdDc( pwMap->Wnd() );
+				if ( hdDc.hDc ) {
 					SIZE sSize = {};
-					::GetTextExtentPoint32W( hDc, wsCount.c_str(), int( wsCount.size() ), &sSize );
-					::SelectObject( hDc, hOld );
-					::ReleaseDC( pwMap->Wnd(), hDc );
+					{
+						lsw::LSW_SELECTOBJECT soFont( hdDc.hDc, MapFont() );
+						const std::wstring wsCount = CountText();
+						::GetTextExtentPoint32W( hdDc.hDc, wsCount.c_str(), int( wsCount.size() ), &sSize );
+					}
 					const int iWidth = std::max<int>( 24, sSize.cx + 8 );
 					if ( iWidth != m_iMapWidth ) {
 						m_iMapWidth = iWidth;
@@ -374,15 +373,8 @@ namespace mx {
 		static const wchar_t wcDigits[] = { L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9', L'A', L'B', L'C', L'D', L'E', L'F' };
 		if ( _iColumn == 0 ) {
 			const uint64_t ui64Addr = fmMatch.ui64Addr + ((spSource && m_pfrhHost) ? m_pfrhHost->FindResultsStartingAddress( spSource.get() ) : 0);
-			wchar_t wcBuffer[24];
-			size_t sLen = 0;
-			uint64_t ui64Tmp = ui64Addr;
-			do {
-				wcBuffer[sLen++] = wcDigits[ui64Tmp&0xF];
-				ui64Tmp >>= 4;
-			} while ( ui64Tmp && sLen < std::size( wcBuffer ) );
-			while ( sLen ) { _wsText.push_back( wcBuffer[--sLen] ); }
-			_wsText.push_back( L'h' );
+			// 0x2D or 2Dh, by the global option.
+			CUtilities::ToHex( ui64Addr, _wsText, 1, true );
 			return true;
 		}
 		if ( _iColumn == 1 ) {
@@ -493,21 +485,10 @@ namespace mx {
 				}
 			}
 			if ( !sRows ) { return; }
-			bool bOk = false;
-			if ( ::OpenClipboard( Wnd() ) ) {
-				::EmptyClipboard();
-				const size_t sBytes = (wsText.size() + 1) * sizeof( wchar_t );
-				HGLOBAL hMem = ::GlobalAlloc( GMEM_MOVEABLE, sBytes );
-				if ( hMem ) {
-					void * pvDst = ::GlobalLock( hMem );
-					if ( pvDst ) {
-						std::memcpy( pvDst, wsText.c_str(), sBytes );
-						::GlobalUnlock( hMem );
-						bOk = ::SetClipboardData( CF_UNICODETEXT, hMem ) != NULL;
-					}
-					if ( !bOk ) { ::GlobalFree( hMem ); }
-				}
-				::CloseClipboard();
+			bool bOk;
+			{
+				lsw::LSW_CLIPBOARD cbClipboard( Wnd(), true );
+				bOk = cbClipboard.IsOpen() && cbClipboard.SetText( wsText.c_str(), wsText.size() );
 			}
 			if ( !bOk ) {
 				m_pfrhHost->FindResultsStatus( _DEC_WS_6D7AE665_The_results_could_not_be_copied_, true );
@@ -640,17 +621,13 @@ namespace mx {
 		::FillRect( _hDc, &_rClient, ::GetSysColorBrush( COLOR_3DFACE ) );
 		RECT rBar = MapBarRect( _rClient );
 		if ( rBar.bottom - rBar.top > 2 && rBar.right - rBar.left > 2 ) {
-			HBRUSH hBar = ::CreateSolidBrush( MX_FIND_RESULTS_BAR_COLOR );
-			if ( hBar ) {
-				::FillRect( _hDc, &rBar, hBar );
-				::DeleteObject( hBar );
-			}
+			::FillRect( _hDc, &rBar, lsw::CBase::BrushCache().Brush( MX_FIND_RESULTS_BAR_COLOR ) );
 			::FrameRect( _hDc, &rBar, ::GetSysColorBrush( COLOR_3DSHADOW ) );
 			RECT rInner = rBar;
 			::InflateRect( &rInner, -1, -1 );
 			const int iHeight = rInner.bottom - rInner.top;
 			if ( m_bMapDirty || m_vMapRows.size() != size_t( iHeight ) ) { BuildMap( iHeight ); }
-			HBRUSH hMatch = ::CreateSolidBrush( MX_FIND_RESULTS_MATCH_COLOR );
+			HBRUSH hMatch = lsw::CBase::BrushCache().Brush( MX_FIND_RESULTS_MATCH_COLOR );
 			if ( hMatch ) {
 				for ( size_t I = 0; I < m_vMapRows.size(); ) {
 					if ( !m_vMapRows[I] ) { ++I; continue; }
@@ -660,7 +637,6 @@ namespace mx {
 					::FillRect( _hDc, &rRun, hMatch );
 					I = J;
 				}
-				::DeleteObject( hMatch );
 			}
 			if ( m_bMapCurrent && m_ui64MapSize && iHeight > 0 ) {
 				const LONG lY = LONG( std::min<double>( double( m_ui64MapCurrent ) * double( iHeight ) / double( m_ui64MapSize ), double( iHeight - 1 ) ) );
@@ -671,15 +647,21 @@ namespace mx {
 		RECT rText = _rClient;
 		rText.top = rBar.bottom;
 		const std::wstring wsCount = CountText();
-		HFONT hFont = reinterpret_cast<HFONT>(::SendMessageW( ::WindowFromDC( _hDc ), WM_GETFONT, 0, 0 ));
-		CWidget * pwMap = Map();
-		if ( !hFont && pwMap ) { hFont = reinterpret_cast<HFONT>(::SendMessageW( pwMap->Wnd(), WM_GETFONT, 0, 0 )); }
-		if ( !hFont ) { hFont = static_cast<HFONT>(::GetStockObject( DEFAULT_GUI_FONT )); }
-		HGDIOBJ hOld = ::SelectObject( _hDc, hFont );
-		::SetBkMode( _hDc, TRANSPARENT );
-		::SetTextColor( _hDc, ::GetSysColor( COLOR_BTNTEXT ) );
+		lsw::LSW_SELECTOBJECT soFont( _hDc, MapFont() );
+		lsw::LSW_SETBKMODE sbmMode( _hDc, TRANSPARENT );
+		lsw::LSW_SETTEXTCOLOR stcColor( _hDc, ::GetSysColor( COLOR_BTNTEXT ) );
 		::DrawTextW( _hDc, wsCount.c_str(), int( wsCount.size() ), &rText, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX );
-		::SelectObject( _hDc, hOld );
+	}
+
+	/**
+	 * Gets the font of the map.
+	 *
+	 * \return Returns the font of the map (or the default GUI font).
+	 **/
+	HFONT CFindResultsWindow::MapFont() {
+		CWidget * pwMap = Map();
+		HFONT hFont = pwMap ? reinterpret_cast<HFONT>(::SendMessageW( pwMap->Wnd(), WM_GETFONT, 0, 0 )) : NULL;
+		return hFont ? hFont : static_cast<HFONT>(::GetStockObject( DEFAULT_GUI_FONT ));
 	}
 
 	/**
@@ -806,29 +788,23 @@ namespace mx {
 		switch ( _uMsg ) {
 			case WM_ERASEBKGND : { return 1; }
 			case WM_PAINT : {
-				PAINTSTRUCT psPaint;
-				HDC hDc = ::BeginPaint( _hWnd, &psPaint );
-				if ( hDc ) {
+				lsw::LSW_BEGINPAINT bpPaint( _hWnd );
+				if ( bpPaint.hDc ) {
 					RECT rClient;
 					::GetClientRect( _hWnd, &rClient );
-					HDC hMem = ::CreateCompatibleDC( hDc );
-					HBITMAP hBmp = hMem ? ::CreateCompatibleBitmap( hDc, std::max<LONG>( 1, rClient.right ), std::max<LONG>( 1, rClient.bottom ) ) : NULL;
+					HDC hMem = ::CreateCompatibleDC( bpPaint.hDc );
+					HBITMAP hBmp = hMem ? ::CreateCompatibleBitmap( bpPaint.hDc, std::max<LONG>( 1, rClient.right ), std::max<LONG>( 1, rClient.bottom ) ) : NULL;
 					if ( hMem && hBmp ) {
-						HGDIOBJ hOldBmp = ::SelectObject( hMem, hBmp );
-						HFONT hFont = reinterpret_cast<HFONT>(::SendMessageW( _hWnd, WM_GETFONT, 0, 0 ));
-						HGDIOBJ hOldFont = hFont ? ::SelectObject( hMem, hFont ) : NULL;
+						lsw::LSW_SELECTOBJECT soBmp( hMem, hBmp );
 						pfrwThis->PaintMap( hMem, rClient );
-						::BitBlt( hDc, 0, 0, rClient.right, rClient.bottom, hMem, 0, 0, SRCCOPY );
-						if ( hOldFont ) { ::SelectObject( hMem, hOldFont ); }
-						::SelectObject( hMem, hOldBmp );
+						::BitBlt( bpPaint.hDc, 0, 0, rClient.right, rClient.bottom, hMem, 0, 0, SRCCOPY );
 					}
 					else {
-						pfrwThis->PaintMap( hDc, rClient );
+						pfrwThis->PaintMap( bpPaint.hDc, rClient );
 					}
 					if ( hBmp ) { ::DeleteObject( hBmp ); }
 					if ( hMem ) { ::DeleteDC( hMem ); }
 				}
-				::EndPaint( _hWnd, &psPaint );
 				return 0;
 			}
 			case WM_LBUTTONDOWN : {

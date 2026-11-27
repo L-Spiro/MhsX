@@ -155,6 +155,11 @@ namespace mx {
 		virtual LSW_HANDLED							Destroy();
 
 		/**
+		 * Makes every hex control stop using its file and forgets the controls (when they are about to be destroyed).
+		 **/
+		void										ReleaseEditors();
+
+		/**
 		 * Stores the position and arrangement of the window, its dockables, and the Inspector settings in the settings.
 		 **/
 		void										CaptureUiState();
@@ -857,6 +862,8 @@ namespace mx {
 		CEditBytesLayout::MX_EDIT_BYTES_PARMS		m_ebpEditBytes;
 		/** Was m_ebpEditBytes entered (rather than the defaults)? */
 		bool										m_bEditBytesUsed = false;
+		/** Were the positions of the windows stored (when the window began to close, while its floating dockables still existed)? */
+		bool										m_bUiCaptured = false;
 		/** The clipboard format last pasted with Paste Special. */
 		UINT										m_uiPasteSpecialFormat = 0;
 		/** The color last inserted with Insert Color. */

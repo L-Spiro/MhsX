@@ -75,7 +75,6 @@ namespace mx {
 		struct MX_SETTINGS {
 			std::vector<MX_ROW_SETTING>										vRows;					/**< The rows, in the order shown.  Every type appears once. */
 			MX_NUMBER_FORMAT												nfFormat = MX_NF_DECIMAL;	/**< How integers are shown. */
-			MX_HEX_STYLE													hsHexStyle = MX_HS_SUFFIX_H;	/**< How hexadecimal numbers are written. */
 			std::wstring													wsDateFormat;			/**< The date format (Windows date picture).  Empty = the user's short date. */
 			std::wstring													wsTimeFormat;			/**< The time format (Windows time picture).  Empty = the user's time format. */
 			bool															bAllowDocking = true;	/**< Can the Inspector be docked? */
@@ -112,6 +111,13 @@ namespace mx {
 		 * \return Returns the name of the type.
 		 **/
 		static CSecureWString												TypeName( MX_INSPECTOR_TYPE _itType );
+
+		/**
+		 * Gets how hexadecimal numbers are written, from the global option (0xFF or FFh).
+		 *
+		 * \return Returns MX_HS_PREFIX_0X or MX_HS_SUFFIX_H.
+		 **/
+		static MX_HEX_STYLE													HexStyle();
 
 		/**
 		 * Gets the size of a type in bytes.

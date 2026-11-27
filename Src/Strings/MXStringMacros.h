@@ -26902,3 +26902,39 @@
 #define _DEC_S_5258A666_The_file_is_too_large_to_insert__the_limit_is_1_GB__ mx::CStringDecoder::DecodeToString( _T_5258A666_The_file_is_too_large_to_insert__the_limit_is_1_GB__, _LEN_5258A666 )
 #define _DEC_WS_5258A666_The_file_is_too_large_to_insert__the_limit_is_1_GB__ mx::CStringDecoder::DecodeToWString( _T_5258A666_The_file_is_too_large_to_insert__the_limit_is_1_GB__, _LEN_5258A666 )
 
+// char16_t[]
+
+#define _T_34137A1E_char16_t__ "\xEB\x36\x31\x0D\xC3\xFF\xED\x3B\x2B\x25"
+#define _LEN_34137A1E 10
+#define _T_LEN_34137A1E_char16_t__ _T_34137A1E_char16_t__, _LEN_34137A1E
+#define _DEC_34137A1E_char16_t__( STR ) mx::CStringDecoder::Decode( _T_34137A1E_char16_t__, _LEN_34137A1E, STR )
+#define _DEC_S_34137A1E_char16_t__ mx::CStringDecoder::DecodeToString( _T_34137A1E_char16_t__, _LEN_34137A1E )
+#define _DEC_WS_34137A1E_char16_t__ mx::CStringDecoder::DecodeToWString( _T_34137A1E_char16_t__, _LEN_34137A1E )
+
+// char8_t[]
+
+#define _T_F6907CB3_char8_t__ "\xEB\x36\x31\x0D\xCA\x28\x02\x22\x2D"
+#define _LEN_F6907CB3 9
+#define _T_LEN_F6907CB3_char8_t__ _T_F6907CB3_char8_t__, _LEN_F6907CB3
+#define _DEC_F6907CB3_char8_t__( STR ) mx::CStringDecoder::Decode( _T_F6907CB3_char8_t__, _LEN_F6907CB3, STR )
+#define _DEC_S_F6907CB3_char8_t__ mx::CStringDecoder::DecodeToString( _T_F6907CB3_char8_t__, _LEN_F6907CB3 )
+#define _DEC_WS_F6907CB3_char8_t__ mx::CStringDecoder::DecodeToWString( _T_F6907CB3_char8_t__, _LEN_F6907CB3 )
+
+// char[]
+
+#define _T_0E9A6555_char__ "\xEB\x36\x31\x0D\xED\x26"
+#define _LEN_0E9A6555 6
+#define _T_LEN_0E9A6555_char__ _T_0E9A6555_char__, _LEN_0E9A6555
+#define _DEC_0E9A6555_char__( STR ) mx::CStringDecoder::Decode( _T_0E9A6555_char__, _LEN_0E9A6555, STR )
+#define _DEC_S_0E9A6555_char__ mx::CStringDecoder::DecodeToString( _T_0E9A6555_char__, _LEN_0E9A6555 )
+#define _DEC_WS_0E9A6555_char__ mx::CStringDecoder::DecodeToWString( _T_0E9A6555_char__, _LEN_0E9A6555 )
+
+// float[4]
+
+#define _T_48049B92_float_4_ "\xEE\x3A\x3F\xFC\x06\x24\xC2\x24"
+#define _LEN_48049B92 8
+#define _T_LEN_48049B92_float_4_ _T_48049B92_float_4_, _LEN_48049B92
+#define _DEC_48049B92_float_4_( STR ) mx::CStringDecoder::Decode( _T_48049B92_float_4_, _LEN_48049B92, STR )
+#define _DEC_S_48049B92_float_4_ mx::CStringDecoder::DecodeToString( _T_48049B92_float_4_, _LEN_48049B92 )
+#define _DEC_WS_48049B92_float_4_ mx::CStringDecoder::DecodeToWString( _T_48049B92_float_4_, _LEN_48049B92 )
+

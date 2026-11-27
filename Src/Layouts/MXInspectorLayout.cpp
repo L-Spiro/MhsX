@@ -20,9 +20,7 @@ namespace mx {
 #define MX_ICU_LIST_H												150
 #define MX_ICU_LABEL_W												60
 #define MX_ICU_CTRL_L												(MX_ICU_L + MX_ICU_LABEL_W + 2)
-#define MX_ICU_HEX_W												60
-#define MX_ICU_ROW1_T												(MX_ICU_LIST_T + MX_ICU_LIST_H + 8)
-#define MX_ICU_ROW2_T												(MX_ICU_ROW1_T + MX_DEF_COMBO_HEIGHT + 4)
+#define MX_ICU_ROW2_T												(MX_ICU_LIST_T + MX_ICU_LIST_H + 8)
 #define MX_ICU_ROW3_T												(MX_ICU_ROW2_T + MX_DEF_COMBO_HEIGHT + 4)
 #define MX_ICU_BUTTON_T												(MX_ICU_ROW3_T + MX_DEF_COMBO_HEIGHT + 10)
 #define MX_ICU_H													(MX_ICU_BUTTON_T + MX_DEF_BUTTON_HEIGHT + MX_ICU_L)
@@ -178,38 +176,6 @@ namespace mx {
 		},
 		{
 			LSW_LT_LABEL,							// ltType
-			MX_ICI_HEX_LABEL,						// wId
-			WC_STATICW,								// lpwcClass
-			TRUE,									// bEnabled
-			FALSE,									// bActive
-			MX_ICU_L,								// iLeft
-			MX_ICU_ROW1_T + 2,						// iTop
-			MX_ICU_LABEL_W,							// dwWidth
-			MX_DEF_STATIC_HEIGHT,					// dwHeight
-			MX_STATICSTYLE,							// dwStyle
-			0,										// dwStyleEx
-			MX_MAKE_WCHAR( _T_D9565335__Hex_numbers_ ),	// pwcText
-			_LEN_D9565335,					// sTextLen
-			MX_ICI_DIALOG,							// dwParentId
-		},
-		{
-			LSW_LT_COMBOBOX,						// ltType
-			MX_ICI_HEX_COMBO,						// wId
-			WC_COMBOBOXW,							// lpwcClass
-			TRUE,									// bEnabled
-			FALSE,									// bActive
-			MX_ICU_CTRL_L,							// iLeft
-			MX_ICU_ROW1_T,							// iTop
-			MX_ICU_HEX_W,							// dwWidth
-			MX_DEF_COMBO_HEIGHT,					// dwHeight
-			MX_COMBOSTYLE_LIST,						// dwStyle
-			MX_COMBOSTYLEEX_LIST,					// dwStyleEx
-			nullptr,								// pwcText
-			0,										// sTextLen
-			MX_ICI_DIALOG,							// dwParentId
-		},
-		{
-			LSW_LT_LABEL,							// ltType
 			MX_ICI_DATE_LABEL,						// wId
 			WC_STATICW,								// lpwcClass
 			TRUE,									// bEnabled
@@ -354,8 +320,6 @@ namespace mx {
 #undef MX_ICU_BUTTON_T
 #undef MX_ICU_ROW3_T
 #undef MX_ICU_ROW2_T
-#undef MX_ICU_ROW1_T
-#undef MX_ICU_HEX_W
 #undef MX_ICU_CTRL_L
 #undef MX_ICU_LABEL_W
 #undef MX_ICU_LIST_H

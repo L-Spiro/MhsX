@@ -15,10 +15,6 @@ namespace mx {
 		m_pfdpParms( reinterpret_cast<CFontDialogLayout::MX_FONT_DIALOG_PARMS *>(_ui64Data) ) {
 	}
 	CFontDialog::~CFontDialog() {
-		if ( m_hSampleFont ) {
-			::DeleteObject( m_hSampleFont );
-			m_hSampleFont = NULL;
-		}
 	}
 
 	// == Functions.
@@ -500,15 +496,19 @@ namespace mx {
 		int32_t i32Size = 0;
 		// An invalid size shows the sample at the last size that was valid.
 		if ( !BuildFont( lfFont, i32Size ) ) {
-			if ( !m_hSampleFont ) { return; }
+			if ( !m_fSampleFont.Valid() ) { return; }
 			LOGFONTW lfOld {};
-			if ( ::GetObjectW( m_hSampleFont, sizeof( lfOld ), &lfOld ) ) { lfFont.lfHeight = lfOld.lfHeight; }
+			if ( ::GetObjectW( m_fSampleFont.hFont, sizeof( lfOld ), &lfOld ) ) { lfFont.lfHeight = lfOld.lfHeight; }
 		}
-		HFONT hNew = ::CreateFontIndirectW( &lfFont );
-		if ( !hNew ) { return; }
-		::SendMessageW( pwSample->Wnd(), WM_SETFONT, reinterpret_cast<WPARAM>(hNew), TRUE );
-		if ( m_hSampleFont ) { ::DeleteObject( m_hSampleFont ); }
-		m_hSampleFont = hNew;
+		lsw::LSW_FONT fNew;
+		if ( !fNew.CreateFontIndirectW( &lfFont ) ) { return; }
+		::SendMessageW( pwSample->Wnd(), WM_SETFONT, reinterpret_cast<WPARAM>(fNew.hFont), TRUE );
+		// The sample uses the new font now, so the old one can go; the new one is kept (and deleted) by m_fSampleFont.
+		m_fSampleFont.Reset();
+		m_fSampleFont.hFont = fNew.hFont;
+		m_fSampleFont.bDeleteIt = true;
+		fNew.hFont = NULL;
+		fNew.bDeleteIt = false;
 		pwSample->SetTextW( lsw::CFonts::WritingSystem( m_wiWritingSystem ).pwszSample );
 	}
 

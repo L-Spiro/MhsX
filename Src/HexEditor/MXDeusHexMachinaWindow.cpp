@@ -112,13 +112,9 @@ namespace mx {
 	}
 	CDeusHexMachinaWindow::~CDeusHexMachinaWindow() {
 		// The hex controls stop using their files first (the controls are deleted along with their windows below, and the files are
-		//	deleted along with m_vTabs).
-		for ( auto I = m_vTabs.size(); I--; ) {
-			if ( m_vTabs[I].phecWidget ) {
-				m_vTabs[I].phecWidget->ReleaseStream();
-				m_vTabs[I].phecWidget = nullptr;
-			}
-		}
+		//	deleted along with m_vTabs).  If the window was destroyed first (closed), Destroy() already did this and the controls are
+		//	gone.
+		ReleaseEditors();
 		// Destroy the windows (hex controls, dockables, etc.) while everything they use (styles, fonts, colors, this object) is still
 		//	alive.  CWidget's destructor would otherwise destroy them after the members of this class are gone.
 		m_peeExpEval = nullptr;
@@ -1926,6 +1922,7 @@ namespace mx {
 	CWidget::LSW_HANDLED CDeusHexMachinaWindow::Close() {
 		// Modified files are offered to be saved first; cancelling keeps the window open.
 		if ( !QueryCloseAll() ) { return LSW_H_HANDLED; }
+		CaptureUiState();
 		::DestroyWindow( Wnd() );
 		return LSW_H_HANDLED;
 	}
@@ -3563,8 +3560,21 @@ namespace mx {
 	 * \return Returns a LSW_HANDLED code.
 	 **/
 	CWidget::LSW_HANDLED CDeusHexMachinaWindow::Destroy() {
-		if ( !InDestructor() ) { CaptureUiState(); }
+		if ( !InDestructor() && !m_bUiCaptured ) { CaptureUiState(); }
+		ReleaseEditors();
 		return CMainWindow::Destroy();
+	}
+
+	/**
+	 * Makes every hex control stop using its file and forgets the controls (when they are about to be destroyed).
+	 **/
+	void CDeusHexMachinaWindow::ReleaseEditors() {
+		for ( auto I = m_vTabs.size(); I--; ) {
+			if ( m_vTabs[I].phecWidget ) {
+				m_vTabs[I].phecWidget->ReleaseStream();
+				m_vTabs[I].phecWidget = nullptr;
+			}
+		}
 	}
 
 	/**
@@ -3577,6 +3587,7 @@ namespace mx {
 			CUiState::CaptureWindow( this, MultiSplitter(), KnownDockables(), usState.wHexEditor );
 			usState.sInspector = m_isInspectorSettings;
 			usState.bHaveInspector = true;
+			m_bUiCaptured = true;
 		}
 		catch ( ... ) {}
 	}
@@ -4144,6 +4155,9 @@ namespace mx {
 		if ( m_peeExpEval && static_cast<const CWidget *>(m_peeExpEval) == _pwChild ) { m_peeExpEval = nullptr; }
 		if ( m_piInspector && static_cast<const CWidget *>(m_piInspector) == _pwChild ) { m_piInspector = nullptr; }
 		if ( m_pfrwFindResults && static_cast<const CWidget *>(m_pfrwFindResults) == _pwChild ) { m_pfrwFindResults = nullptr; }
+		for ( auto & htTab : m_vTabs ) {
+			if ( htTab.phecWidget && static_cast<const CWidget *>(htTab.phecWidget) == _pwChild ) { htTab.phecWidget = nullptr; }
+		}
 		lsw::CMainWindow::ChildWasRemoved( _pwChild );
 	}
 

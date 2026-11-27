@@ -4,6 +4,7 @@
 #include "MXHexEditorControl.h"
 
 #include <Float16/EEFloat16.h>
+#include <Helpers/LSWHelpers.h>
 
 #include <algorithm>
 #include <cctype>
@@ -899,10 +900,12 @@ namespace mx {
 			m_hGlobal = hNew;
 			m_sCapacity = sNewCap;
 		}
-		uint8_t * pui8Dst = static_cast<uint8_t *>(::GlobalLock( m_hGlobal ));
-		if ( !pui8Dst ) { return false; }
-		std::memcpy( pui8Dst + m_sSize, _pvData, _sSize );
-		::GlobalUnlock( m_hGlobal );
+		{
+			lsw::LSW_GLOBALLOCK glLock( m_hGlobal );
+			uint8_t * pui8Dst = static_cast<uint8_t *>(glLock.Data());
+			if ( !pui8Dst ) { return false; }
+			std::memcpy( pui8Dst + m_sSize, _pvData, _sSize );
+		}
 		m_sSize = sNeeded;
 		return true;
 	}

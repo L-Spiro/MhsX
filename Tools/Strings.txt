@@ -2986,3 +2986,7 @@
 "The file could not be read."
 "The file is empty."
 "The file is too large to insert (the limit is 1 GB)."
+"char16_t[]"
+"char8_t[]"
+"char[]"
+"float[4]"
