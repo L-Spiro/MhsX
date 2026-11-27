@@ -464,9 +464,7 @@ namespace mx {
 				break;
 			}
 			case Layout::MX_MWMI_EXIT : {
-				if ( Destroy() == LSW_H_CONTINUE ) {
-					NcDestroy();
-				}
+				::PostMessageW( Wnd(), WM_CLOSE, 0, 0 );
 				break;
 			}
 		}

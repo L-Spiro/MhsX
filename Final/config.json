@@ -618,8 +618,174 @@
                 }
             ]
         },
+        "HexEditor" : {
+            "Left" : 147,
+            "Top" : -1,
+            "Right" : 1623,
+            "Bottom" : 998,
+            "Maximized" : true,
+            "Layout" : {
+                "Layer" : true,
+                "Dist" : 500,
+                "Far" : false,
+                "Split" : 1,
+                "Children" : [
+                    {
+                        "Layer" : true,
+                        "Dist" : 1463,
+                        "Far" : false,
+                        "Split" : 0,
+                        "Children" : [
+                            {
+                                "Layer" : false,
+                                "Dist" : 1463,
+                                "Far" : false,
+                                "Widgets" : [
+                                    3955
+                                ],
+                                "Selected" : 0
+                            }
+                        ]
+                    },
+                    {
+                        "Layer" : false,
+                        "Dist" : 0,
+                        "Far" : false,
+                        "Widgets" : [
+                            3000,
+                            3100
+                        ],
+                        "Selected" : 1
+                    }
+                ]
+            },
+            "Dockables" : [
+                {
+                    "Id" : 3100,
+                    "Open" : true,
+                    "Floating" : false
+                },
+                {
+                    "Id" : 3000,
+                    "Open" : true,
+                    "Floating" : false
+                },
+                {
+                    "Id" : 6900,
+                    "Open" : false,
+                    "Floating" : false
+                }
+            ]
+        },
         "RecentFiles" : [
-
-        ]
+            "C:\u005cNES Restores\u005cCastlevania II Simon's Quest\u005cRAW\u005cThe Silence of The Daylight N34169630.wav",
+            "C:\u005cNES Restores\u005cCastlevania II Simon's Quest\u005cTracks.txt",
+            "C:\u005cNES Restores\u005cCastlevania II Simon's Quest\u005cThe Silence of the Daylight (NES, Famicom).wav",
+            "C:\u005cNES Restores\u005cCastlevania II Simon's Quest\u005cRAW\u005cThe Silence of The Daylight N34169630.wav.txt"
+        ],
+        "Inspector" : {
+            "Rows" : [
+                {
+                    "Type" : 0,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 1,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 2,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 3,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 4,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 5,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 6,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 7,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 8,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 9,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 10,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 11,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 23,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 12,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 13,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 14,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 15,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 16,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 17,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 18,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 19,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 20,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 21,
+                    "Shown" : true
+                },
+                {
+                    "Type" : 22,
+                    "Shown" : true
+                }
+            ],
+            "Format" : 0,
+            "DateFormat" : "MM/dd/yyyy",
+            "TimeFormat" : "HH:mm:ss",
+            "AllowDocking" : true
+        }
     }
 }

@@ -28,6 +28,14 @@ namespace mx {
 			MX_MAKE_WCHAR( _T_75B7F809_Find_Results ),		// pwcText
 			_LEN_75B7F809,					// sTextLen
 			0,										// dwParentId
+
+			// The dock target places the window through these (its part of the dock target is the parent's virtual client area).
+			MX_PARENT_VCLEFT,						// pcLeftSizeExp
+			MX_PARENT_VCRIGHT,						// pcRightSizeExp
+			MX_PARENT_VCTOP,						// pcTopSizeExp
+			MX_PARENT_VCBOTTOM,						// pcBottomSizeExp
+			nullptr, 0,								// pcWidthSizeExp
+			nullptr, 0,								// pcHeightSizeExp
 		},
 		{
 			LSW_LT_LABEL,							// ltType

@@ -120,8 +120,8 @@ namespace mx {
 			MX_ICU_LIST_T,							// iTop
 			MX_ICU_LIST_W,							// dwWidth
 			MX_ICU_LIST_H,							// dwHeight
-			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | WS_BORDER | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOCOLUMNHEADER,	// dwStyle
-			0,										// dwStyleEx
+			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOCOLUMNHEADER,	// dwStyle
+			WS_EX_CLIENTEDGE,						// dwStyleEx
 			nullptr,								// pwcText
 			0,										// sTextLen
 			MX_ICI_DIALOG,							// dwParentId

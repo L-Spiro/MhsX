@@ -37,6 +37,7 @@ namespace mx {
 			if ( plvList ) {
 				const DWORD dwExStyle = LVS_EX_CHECKBOXES | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER;
 				::SendMessageW( plvList->Wnd(), LVM_SETEXTENDEDLISTVIEWSTYLE, dwExStyle, dwExStyle );
+				plvList->SetRightColumnSnap( FALSE );
 				const INT iCol = plvList->AddColumn( _DEC_WS_2CECF817_Type.c_str() );
 				RECT rClient = {};
 				::GetClientRect( plvList->Wnd(), &rClient );
@@ -201,7 +202,6 @@ namespace mx {
 		auto plvList = static_cast<CListView *>(FindChild( CInspectorLayout::MX_ICI_TYPES_LIST ));
 		if ( !plvList ) { return; }
 		try {
-			plvList->SetRedraw( false );
 			plvList->DeleteAll();
 			for ( size_t I = 0; I < m_sSettings.vRows.size(); ++I ) {
 				const INT iIdx = plvList->InsertItem( CInspector::TypeName( m_sSettings.vRows[I].itType ).c_str(), static_cast<LPARAM>(m_sSettings.vRows[I].itType) );
@@ -213,7 +213,7 @@ namespace mx {
 			}
 		}
 		catch ( ... ) {}
-		plvList->SetRedraw( true );
+		::InvalidateRect( plvList->Wnd(), nullptr, TRUE );
 	}
 
 	/**
