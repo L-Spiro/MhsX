@@ -12,6 +12,8 @@
 #include "../HexEditor/MXExportHexDialog.h"
 #include "../HexEditor/MXFindDialog.h"
 #include "../HexEditor/MXFindProgressDialog.h"
+#include "../HexEditor/MXInspectorCustomizeDialog.h"
+#include "../HexEditor/MXInspectorWindow.h"
 #include "../HexEditor/MXMiniMapOptionsDialog.h"
 #include "../HexEditor/MXFontDialog.h"
 #include "../HexEditor/MXHexEditorControl.h"
@@ -151,6 +153,12 @@ namespace mx {
 			}
 			case MX_MINI_MAP_OPTIONS : {
 				return new CMiniMapOptionsDialog( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
+			case MX_INSPECTOR : {
+				return new CInspectorWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
+			case MX_INSPECTOR_CUSTOMIZE : {
+				return new CInspectorCustomizeDialog( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );

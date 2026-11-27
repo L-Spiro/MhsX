@@ -905,6 +905,21 @@ namespace mx {
 		bool										SelectRange( uint64_t _ui64Start, uint64_t _ui64Size );
 
 		/**
+		 * Replaces a value with new bytes as one Undo step (used by the Inspector).  The selection and caret do not change.
+		 *
+		 * \param _ui64Addr The address of the value.
+		 * \param _ui64OldSize The number of bytes the value uses now.
+		 * \param _vBytes The new bytes.
+		 * \param _bResize If true, the value can change size (strings): in Insert mode the old bytes are deleted and the new ones
+		 *	inserted; in Overwrite mode a shorter value is followed by 0's up to the end of the old one.  If false, the new bytes are
+		 *	written over the old ones.
+		 * \param _swsStatus Receives an error message on failure.
+		 * \return Returns true if the bytes were written.
+		 **/
+		bool										ReplaceBytes( uint64_t _ui64Addr, uint64_t _ui64OldSize, const std::vector<uint8_t> &_vBytes, bool _bResize,
+			CSecureWString &_swsStatus );
+
+		/**
 		 * Gets the custom starting address: the address shown for the first byte (View -> Addresses -> Set Starting Address).
 		 *	Addresses shown to the user (the address column, the status bar, Go To, Select Range, Hex Editor Areas) have it added.
 		 *
@@ -1477,8 +1492,9 @@ namespace mx {
 
 		/** How often to look for changed values while nothing is changing (milliseconds). */
 		static constexpr uint32_t					MX_WATCH_SLOW_MS	= 100;
-		/** How often to look for changed values right after a change (milliseconds). */
-		static constexpr uint32_t					MX_WATCH_FAST_MS	= 20;
+		/** How often to look for changed values right after a change (milliseconds).  About 65 times per second, faster than most games
+		 *	update (60 frames per second). */
+		static constexpr uint32_t					MX_WATCH_FAST_MS	= 15;
 		/** How much longer the wait becomes after each look that finds nothing new (milliseconds). */
 		static constexpr uint32_t					MX_WATCH_SLOWDOWN_MS = 4;
 		/** How long a changed value takes to fade from the Modified color to its normal color (milliseconds).  0 = it does not fade. */

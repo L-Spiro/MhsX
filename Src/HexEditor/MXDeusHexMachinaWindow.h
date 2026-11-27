@@ -12,6 +12,8 @@
 #include "MXHexEditorControl.h"
 #include "MXHexEditorControlHost.h"
 #include "MXHexEditorInterface.h"
+#include "MXInspector.h"
+#include "MXInspectorWindow.h"
 
 #include <ImageList/LSWImageList.h>
 #include <Images/LSWBitmap.h>
@@ -33,7 +35,7 @@ namespace mx {
 	
 	class CWindowMemHack;
 
-	class CDeusHexMachinaWindow : public lsw::CMainWindow, CHexEditorControlHost {
+	class CDeusHexMachinaWindow : public lsw::CMainWindow, CHexEditorControlHost, CInspectorHost {
 	public :
 		CDeusHexMachinaWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 		~CDeusHexMachinaWindow();
@@ -459,6 +461,56 @@ namespace mx {
 		void										ShowExpEval();
 
 		/**
+		 * Shows the Inspector (Tools -> Inspector), creating it if needed.  A new Inspector is docked on the right (if docking is
+		 *	allowed).  If it is docked behind other dockables, its tab is selected.
+		 **/
+		void										ShowInspector();
+
+		/**
+		 * Gets the data at the inspected address of the current view (the start of the selection, or the caret).
+		 *
+		 * \param _isSource Receives the data.
+		 * \param _sMaxBytes The most bytes to read.
+		 * \return Returns false if there is no data to inspect.
+		 **/
+		virtual bool								InspectorSource( MX_INSPECTOR_SOURCE &_isSource, size_t _sMaxBytes ) override;
+
+		/**
+		 * Writes a value typed into the Inspector into the current view, as one Undo step.
+		 *
+		 * \param _ui64Address The address of the value, relative to the data.
+		 * \param _ui64OldSize The number of bytes the value currently uses.
+		 * \param _vBytes The new bytes.
+		 * \param _bString If true, the value is a string (its size can change in Insert mode).
+		 * \param _swsStatus Receives a message for the status bar.
+		 * \return Returns true if the value was written.
+		 **/
+		virtual bool								InspectorWrite( uint64_t _ui64Address, uint64_t _ui64OldSize, const std::vector<uint8_t> &_vBytes,
+			bool _bString, CSecureWString &_swsStatus ) override;
+
+		/**
+		 * Moves the caret of the current view to an address (Go to Address in the Inspector).
+		 *
+		 * \param _ui64Address The address, relative to the data.
+		 **/
+		virtual void								InspectorGoTo( uint64_t _ui64Address ) override;
+
+		/**
+		 * Shows a message from the Inspector in the status bar.
+		 *
+		 * \param _swsText The message.
+		 * \param _bWarning If true, the message is a warning.
+		 **/
+		virtual void								InspectorStatus( const CSecureWString &_swsText, bool _bWarning ) override;
+
+		/**
+		 * Gets the Inspector settings.
+		 *
+		 * \return Returns the Inspector settings.
+		 **/
+		virtual CInspector::MX_SETTINGS &			InspectorSettings() override { return m_isInspectorSettings; }
+
+		/**
 		 * Informs that a child was removed from a child control (or from this one).  Forgets the Expression Evaluator when it is
 		 *	closed.
 		 *
@@ -676,6 +728,10 @@ namespace mx {
 		uint64_t									m_ui64FindAnchor = 0;
 		/** The Hex Editor's Expression Evaluator (nullptr until it is shown, and after it is closed). */
 		CExpEvalWindow *							m_peeExpEval = nullptr;
+		/** The Inspector (nullptr until it is shown, and after it is closed). */
+		CInspectorWindow *							m_piInspector = nullptr;
+		/** The Inspector settings (kept while the Inspector is closed). */
+		CInspector::MX_SETTINGS						m_isInspectorSettings;
 		/** The number of untitled files created (for naming them). */
 		uint32_t									m_ui32Untitled = 0;
 

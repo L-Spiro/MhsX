@@ -238,6 +238,9 @@
     <ClCompile Include="Src\Layouts\MXMiniMapOptionsLayout.cpp">
       <Filter>Source Files\Layouts</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Layouts\MXInspectorLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
     <ClCompile Include="Src\Layouts\MXExportHexLayout.cpp">
       <Filter>Source Files\Layouts</Filter>
     </ClCompile>
@@ -634,6 +637,15 @@
     <ClCompile Include="Src\HexEditor\MXMiniMapOptionsDialog.cpp">
       <Filter>Source Files\HexEditor</Filter>
     </ClCompile>
+    <ClCompile Include="Src\HexEditor\MXInspector.cpp">
+      <Filter>Source Files\HexEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HexEditor\MXInspectorCustomizeDialog.cpp">
+      <Filter>Source Files\HexEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HexEditor\MXInspectorWindow.cpp">
+      <Filter>Source Files\HexEditor</Filter>
+    </ClCompile>
     <ClCompile Include="Src\HexEditor\MXExportHexDialog.cpp">
       <Filter>Source Files\HexEditor</Filter>
     </ClCompile>
@@ -723,6 +735,9 @@
       <Filter>Header Files\Layouts</Filter>
     </ClInclude>
     <ClInclude Include="Src\Layouts\MXMiniMapOptionsLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXInspectorLayout.h">
       <Filter>Header Files\Layouts</Filter>
     </ClInclude>
     <ClInclude Include="Src\Layouts\MXExportHexLayout.h">
@@ -1041,6 +1056,15 @@
       <Filter>Header Files\HexEditor</Filter>
     </ClInclude>
     <ClInclude Include="Src\HexEditor\MXMiniMapOptionsDialog.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXInspector.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXInspectorCustomizeDialog.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXInspectorWindow.h">
       <Filter>Header Files\HexEditor</Filter>
     </ClInclude>
     <ClInclude Include="Src\HexEditor\MXExportHexDialog.h">

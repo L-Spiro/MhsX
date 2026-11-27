@@ -6,6 +6,7 @@
 #include "../Layouts/MXFontDialogLayout.h"
 #include "../Layouts/MXNumberInputLayout.h"
 #include "../Layouts/MXOpenProcessLayout.h"
+#include "../Layouts/MXInspectorLayout.h"
 #include "../Layouts/MXMiniMapOptionsLayout.h"
 #include "../Layouts/MXSelectRangeLayout.h"
 #include "../MainWindow/MXMhsMainWindow.h"
@@ -100,17 +101,30 @@ namespace mx {
 
 		m_sOptions[CHexEditorControl::MX_EA_PROCESS].dfLeftNumbersFmt = MX_DF_HEX;
 		m_sOptions[CHexEditorControl::MX_EA_PROCESS].dfRightNumbersFmt = MX_DF_CHAR;
+
+		try {
+			CInspector::DefaultSettings( m_isInspectorSettings );
+		}
+		catch ( ... ) {}
 	}
 	CDeusHexMachinaWindow::~CDeusHexMachinaWindow() {
-		/*for ( auto I = m_vTabs.size(); I--; ) {
-			delete m_vTabs[I].pheiInterface;
-		}*/
+		// The hex controls stop using their files first (the controls are deleted along with their windows below, and the files are
+		//	deleted along with m_vTabs).
+		for ( auto I = m_vTabs.size(); I--; ) {
+			if ( m_vTabs[I].phecWidget ) {
+				m_vTabs[I].phecWidget->ReleaseStream();
+				m_vTabs[I].phecWidget = nullptr;
+			}
+		}
+		// Destroy the windows (hex controls, dockables, etc.) while everything they use (styles, fonts, colors, this object) is still
+		//	alive.  CWidget's destructor would otherwise destroy them after the members of this class are gone.
+		m_peeExpEval = nullptr;
+		m_piInspector = nullptr;
+		DestroyWindowNow();
+
 		// Clipboards must not keep the files open after the window is gone.
 		for ( auto I = m_vTabs.size(); I--; ) {
 			CCopyPasteManager::ReleaseInterface( m_vTabs[I].pheiInterface.get() );
-			if ( m_vTabs[I].phecWidget ) {
-				m_vTabs[I].phecWidget->ReleaseStream();
-			}
 		}
 	}
 
@@ -209,6 +223,9 @@ namespace mx {
 		pwSplitter->ShowCursor( true );
 
 		ForceSizeUpdate();
+
+		// The Inspector is docked on the right from the start.
+		ShowInspector();
 		return LSW_H_CONTINUE;
 	}
 
@@ -241,6 +258,46 @@ namespace mx {
 
 
 		auto phecControl = CurrentEditor();
+
+		if ( _wCtrlCode == 1 ) {
+			// Clipboard and Undo shortcuts typed into an edit box (the Inspector's value editor, the Expression Evaluator, etc.) are for
+			//	the edit box, not for the data in the hex editor.
+			HWND hFocus = ::GetFocus();
+			if ( hFocus && (!phecControl || hFocus != phecControl->Wnd()) && ::IsChild( Wnd(), hFocus ) &&
+				(::SendMessageW( hFocus, WM_GETDLGCODE, 0, 0 ) & DLGC_HASSETSEL) ) {
+				switch ( _wId ) {
+					case Layout::MX_M_EDIT_CUT : {
+						::SendMessageW( hFocus, WM_CUT, 0, 0 );
+						return LSW_H_HANDLED;
+					}
+					case Layout::MX_M_EDIT_COPY : {
+						::SendMessageW( hFocus, WM_COPY, 0, 0 );
+						return LSW_H_HANDLED;
+					}
+					case Layout::MX_M_EDIT_PASTE : {
+						::SendMessageW( hFocus, WM_PASTE, 0, 0 );
+						return LSW_H_HANDLED;
+					}
+					case Layout::MX_M_EDIT_UNDO : {
+						::SendMessageW( hFocus, EM_UNDO, 0, 0 );
+						return LSW_H_HANDLED;
+					}
+					case Layout::MX_M_EDIT_REDO : {
+						return LSW_H_HANDLED;
+					}
+					case Layout::MX_M_SELECT_SELECT_ALL : {
+						::SendMessageW( hFocus, EM_SETSEL, 0, -1 );
+						return LSW_H_HANDLED;
+					}
+				}
+			}
+			// Ctrl+C in the Inspector copies its selected row.
+			if ( _wId == Layout::MX_M_EDIT_COPY && m_piInspector && m_piInspector->HasFocus() ) {
+				m_piInspector->CopyRow();
+				return LSW_H_HANDLED;
+			}
+		}
+
 		// Anything done from the menu or an accelerator comes after the real-time edits typed so far, which become one Undo item.
 		if ( phecControl ) { phecControl->FlushRealTimeUndo(); }
 
@@ -664,6 +721,10 @@ namespace mx {
 			}
 			case Layout::MX_M_TOOLS_EXPRESSION_EVALUATOR : {
 				ShowExpEval();
+				break;
+			}
+			case Layout::MX_M_TOOLS_INSPECTOR : {
+				ShowInspector();
 				break;
 			}
 			case Layout::MX_M_TOOLS_WINDOWS_CALCULATOR : {
@@ -3415,6 +3476,106 @@ namespace mx {
 	}
 
 	/**
+	 * Shows the Inspector (Tools -> Inspector), creating it if needed.  A new Inspector is docked on the right (if docking is
+	 *	allowed).  If it is docked behind other dockables, its tab is selected.
+	 **/
+	void CDeusHexMachinaWindow::ShowInspector() {
+		CMultiSplitter * pmsSplitter = MultiSplitter();
+		if ( !pmsSplitter ) { return; }
+		if ( !m_piInspector ) {
+			m_piInspector = static_cast<CInspectorWindow *>(CInspectorLayout::CreateInspectorWindow( pmsSplitter ));
+			if ( !m_piInspector ) { return; }
+			m_piInspector->AddDockTarget( pmsSplitter );
+			m_piInspector->SetHost( this );
+			if ( m_isInspectorSettings.bAllowDocking ) {
+				m_piInspector->DockTo( pmsSplitter, CDockTarget::LSW_AT_RIGHT, pmsSplitter->RootId() );
+			}
+			m_piInspector->Refresh();
+		}
+		else {
+			pmsSplitter->SelectDocked( m_piInspector );
+			m_piInspector->SetVisible( TRUE );
+			m_piInspector->Refresh();
+		}
+	}
+
+	/**
+	 * Gets the data at the inspected address of the current view (the start of the selection, or the caret).
+	 *
+	 * \param _isSource Receives the data.
+	 * \param _sMaxBytes The most bytes to read.
+	 * \return Returns false if there is no data to inspect.
+	 **/
+	bool CDeusHexMachinaWindow::InspectorSource( MX_INSPECTOR_SOURCE &_isSource, size_t _sMaxBytes ) {
+		_isSource = MX_INSPECTOR_SOURCE();
+		CHexEditorControl * phecControl = CurrentEditor();
+		const size_t sTab = CurrentTab();
+		if ( !phecControl || sTab >= m_vTabs.size() || !m_vTabs[sTab].pheiInterface ) { return false; }
+		CHexEditorInterface * pheiData = m_vTabs[sTab].pheiInterface.get();
+		try {
+			_isSource.ui64Address = phecControl->GetSelctStartOrCaret();
+			_isSource.ui64StartAddress = phecControl->StartingAddress();
+			_isSource.ui64Size = pheiData->Size();
+			_isSource.bBigEndian = phecControl->IsBigEndian();
+			_isSource.bReadOnly = pheiData->ReadOnly();
+			if ( _isSource.ui64Address > _isSource.ui64Size ) { return false; }
+			const uint64_t ui64Avail = _isSource.ui64Size - _isSource.ui64Address;
+			const size_t sRead = static_cast<size_t>(std::min<uint64_t>( ui64Avail, _sMaxBytes ));
+			if ( sRead ) {
+				if ( !pheiData->Read( _isSource.ui64Address, _isSource.vBytes, sRead ) ) { _isSource.vBytes.clear(); }
+				if ( _isSource.vBytes.size() > sRead ) { _isSource.vBytes.resize( sRead ); }
+			}
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * Writes a value typed into the Inspector into the current view, as one Undo step.
+	 *
+	 * \param _ui64Address The address of the value, relative to the data.
+	 * \param _ui64OldSize The number of bytes the value currently uses.
+	 * \param _vBytes The new bytes.
+	 * \param _bString If true, the value is a string (its size can change in Insert mode).
+	 * \param _swsStatus Receives a message for the status bar.
+	 * \return Returns true if the value was written.
+	 **/
+	bool CDeusHexMachinaWindow::InspectorWrite( uint64_t _ui64Address, uint64_t _ui64OldSize, const std::vector<uint8_t> &_vBytes,
+		bool _bString, CSecureWString &_swsStatus ) {
+		CHexEditorControl * phecControl = CurrentEditor();
+		if ( !phecControl ) {
+			_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+			return false;
+		}
+		const bool bRet = phecControl->ReplaceBytes( _ui64Address, _ui64OldSize, _vBytes, _bString, _swsStatus );
+		UpdateStatusBar_PosValue_StartSize();
+		return bRet;
+	}
+
+	/**
+	 * Moves the caret of the current view to an address (Go to Address in the Inspector).
+	 *
+	 * \param _ui64Address The address, relative to the data.
+	 **/
+	void CDeusHexMachinaWindow::InspectorGoTo( uint64_t _ui64Address ) {
+		CHexEditorControl * phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		phecControl->FlushRealTimeUndo();
+		phecControl->SetCaretAddr( std::min( _ui64Address, phecControl->Size() ) );
+		::SetFocus( phecControl->Wnd() );
+	}
+
+	/**
+	 * Shows a message from the Inspector in the status bar.
+	 *
+	 * \param _swsText The message.
+	 * \param _bWarning If true, the message is a warning.
+	 **/
+	void CDeusHexMachinaWindow::InspectorStatus( const CSecureWString &_swsText, bool _bWarning ) {
+		SetStatusBarText( _swsText.c_str(), _bWarning );
+	}
+
+	/**
 	 * Informs that a child was removed from a child control (or from this one).  Forgets the Expression Evaluator when it is
 	 *	closed.
 	 *
@@ -3422,6 +3583,7 @@ namespace mx {
 	 **/
 	void CDeusHexMachinaWindow::ChildWasRemoved( const CWidget * _pwChild ) {
 		if ( m_peeExpEval && static_cast<const CWidget *>(m_peeExpEval) == _pwChild ) { m_peeExpEval = nullptr; }
+		if ( m_piInspector && static_cast<const CWidget *>(m_piInspector) == _pwChild ) { m_piInspector = nullptr; }
 		lsw::CMainWindow::ChildWasRemoved( _pwChild );
 	}
 
@@ -4166,6 +4328,8 @@ namespace mx {
 	void CDeusHexMachinaWindow::UpdateStatusBar_PosValue_StartSize() {
 		// Called when the caret, the selection, or the data under the caret changes, which is what Cut/Copy/Undo/Redo depend on.
 		UpdateToolBar();
+		// The Inspector shows the values at the caret.
+		if ( m_piInspector ) { m_piInspector->Refresh(); }
 		try {
 			auto phecControl = CurrentEditor();
 			if ( phecControl ) {
@@ -4518,6 +4682,10 @@ namespace mx {
 				}
 				case Layout::MX_M_TOOLS_EXPRESSION_EVALUATOR : {
 					::CheckMenuItem( _hMenu, uiId, MF_BYCOMMAND | (m_peeExpEval ? MF_CHECKED : MF_UNCHECKED) );
+					break;
+				}
+				case Layout::MX_M_TOOLS_INSPECTOR : {
+					::CheckMenuItem( _hMenu, uiId, MF_BYCOMMAND | (m_piInspector ? MF_CHECKED : MF_UNCHECKED) );
 					break;
 				}
 				case Layout::MX_M_EDIT_KEEP_FILE_TIME : {

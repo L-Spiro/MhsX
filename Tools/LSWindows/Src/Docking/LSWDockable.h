@@ -81,6 +81,30 @@ namespace lsw {
 		// Determines if the given target is already in the list of dock targets.
 		bool								HasDockTarget( CDockTarget * _pdtTarget );
 
+		/**
+		 * Docks into a dock target without dragging (for example, to place a dockable when it is first shown).
+		 *
+		 * \param _pdtTarget The dock target.
+		 * \param _atAttachTo Where to dock relative to the rectangle given by _dwId.
+		 * \param _dwId The rectangle of the dock target next to which (or onto which, for tabs) to dock.
+		 * \return Returns true if the dockable is now docked.
+		 **/
+		bool								DockTo( CDockTarget * _pdtTarget, CDockTarget::LSW_ATTACH_TYPE _atAttachTo, DWORD _dwId );
+
+		/**
+		 * Sets whether the dockable can be docked by dragging it.  When it cannot, dragging it only moves it (as when Ctrl is held).
+		 *
+		 * \param _bAllow If true, the dockable can be docked.
+		 **/
+		void								SetAllowDocking( bool _bAllow ) { m_bAllowDocking = _bAllow; }
+
+		/**
+		 * Determines whether the dockable can be docked by dragging it.
+		 *
+		 * \return Returns true if the dockable can be docked.
+		 **/
+		bool								AllowDocking() const { return m_bAllowDocking; }
+
 		// The system color of the right side of the caption when docked.
 		INT									GetRightCaptionColorActive() const {
 #ifndef COLOR_GRADIENTACTIVECAPTION
@@ -168,6 +192,9 @@ namespace lsw {
 
 		// Use a gradient for the caption color when docked?
 		BOOL								m_bUseGradient;
+
+		/** Can the dockable be docked by dragging it? */
+		bool								m_bAllowDocking = true;
 
 		// To keep track of window movement.  Only one window can move via the mouse at a time.
 		// The dragging rectangle.

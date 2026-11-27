@@ -50,6 +50,8 @@ namespace mx {
 		MX_FIND_DIALOG,
 		MX_FIND_PROGRESS,
 		MX_MINI_MAP_OPTIONS,
+		MX_INSPECTOR,
+		MX_INSPECTOR_CUSTOMIZE,
 	};
 
 	class CLayoutManager : public lsw::CLayoutManager {

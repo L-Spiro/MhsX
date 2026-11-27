@@ -2206,6 +2206,13 @@ namespace lsw {
 
 		// == Functions.
 		/**
+		 * Destroys the window and its child windows now, while the whole object (including the members of any derived class) is still
+		 *	alive.  A derived class whose child windows use its members calls this first thing in its destructor; otherwise CWidget's
+		 *	destructor destroys the windows after those members are gone.  The object is not deleted when its window is destroyed.
+		 **/
+		void								DestroyWindowNow();
+
+		/**
 		 * Removes a child widget from this widget.
 		 * \brief Detaches the child from the internal child list.
 		 *

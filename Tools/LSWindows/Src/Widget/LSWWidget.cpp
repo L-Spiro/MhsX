@@ -146,6 +146,28 @@ namespace lsw {
 	
 	// == Functions.
 	/**
+	 * Destroys the window and its child windows now, while the whole object (including the members of any derived class) is still
+	 *	alive.  A derived class whose child windows use its members calls this first thing in its destructor; otherwise CWidget's
+	 *	destructor destroys the windows after those members are gone.  The object is not deleted when its window is destroyed.
+	 **/
+	void CWidget::DestroyWindowNow() {
+		if ( m_hWnd == NULL ) { return; }
+		// WM_NCDESTROY must not delete this object, and docking targets must not resize what is left while it is torn down.
+		const BOOL bInDestructor = m_bInDestructor;
+		m_bInDestructor = TRUE;
+		HWND hWnd = m_hWnd;
+		CBase::GetAccelHandler().Unregister( hWnd );
+		::DestroyWindow( hWnd );
+		m_hWnd = NULL;
+		if ( m_hTooltip ) {
+			HWND hTool = m_hTooltip;
+			m_hTooltip = NULL;
+			::DestroyWindow( hTool );
+		}
+		m_bInDestructor = bInDestructor;
+	}
+
+	/**
 	 * Default top-level window procedure.
 	 * \brief Routes messages to the appropriate handler and provides default processing.
 	 *

@@ -76,6 +76,29 @@ namespace lsw {
 		}
 	}
 
+	/**
+	 * Docks into a dock target without dragging (for example, to place a dockable when it is first shown).
+	 *
+	 * \param _pdtTarget The dock target.
+	 * \param _atAttachTo Where to dock relative to the rectangle given by _dwId.
+	 * \param _dwId The rectangle of the dock target next to which (or onto which, for tabs) to dock.
+	 * \return Returns true if the dockable is now docked.
+	 **/
+	bool CDockable::DockTo( CDockTarget * _pdtTarget, CDockTarget::LSW_ATTACH_TYPE _atAttachTo, DWORD _dwId ) {
+		if ( !_pdtTarget || m_pwDraggingDockWnd == this ) { return false; }
+		if ( m_pdtDockedControl ) {
+			m_pdtDockedControl->Detach( Id() );
+			m_pdtDockedControl = nullptr;
+		}
+		CDockTarget::LSW_DT_ATTACH daAttach;
+		daAttach.pwWidget = this;
+		daAttach.dwId = _dwId;
+		daAttach.atAttachTo = _atAttachTo;
+		m_dwState = AttachToDockState( daAttach );
+		RedrawDockingState( daAttach, _pdtTarget );
+		return !Floating() && m_pdtDockedControl != nullptr;
+	}
+
 	// Determines if the given target is already in the list of dock targets.
 	bool CDockable::HasDockTarget( CDockTarget * _pdtTarget ) {
 		return std::find( m_vDockingTargets.begin(), m_vDockingTargets.end(), _pdtTarget ) != m_vDockingTargets.end();
@@ -544,7 +567,7 @@ namespace lsw {
 		// ===========================================================
 		BOOL bControlKeyDown = (::GetKeyState( VK_CONTROL ) & 0x8000) ? TRUE : FALSE;
 		m_ddrtDragRectType = LSW_DDRT_SOLID;
-		if ( !bControlKeyDown ) {
+		if ( !bControlKeyDown && m_bAllowDocking ) {
 			LONG lDistWin = LONG_MAX;
 			for ( size_t I = 0; I < m_vDockingTargets.size(); ++I ) {
 				CDockTarget::LSW_DT_ATTACH daTemp;

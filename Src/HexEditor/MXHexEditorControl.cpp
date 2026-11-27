@@ -6263,6 +6263,92 @@ namespace mx {
 	}
 
 	/**
+	 * Replaces a value with new bytes as one Undo step (used by the Inspector).  The selection and caret do not change.
+	 *
+	 * \param _ui64Addr The address of the value.
+	 * \param _ui64OldSize The number of bytes the value uses now.
+	 * \param _vBytes The new bytes.
+	 * \param _bResize If true, the value can change size (strings): in Insert mode the old bytes are deleted and the new ones
+	 *	inserted; in Overwrite mode a shorter value is followed by 0's up to the end of the old one.  If false, the new bytes are
+	 *	written over the old ones.
+	 * \param _swsStatus Receives an error message on failure.
+	 * \return Returns true if the bytes were written.
+	 **/
+	bool CHexEditorControl::ReplaceBytes( uint64_t _ui64Addr, uint64_t _ui64OldSize, const std::vector<uint8_t> &_vBytes, bool _bResize,
+		CSecureWString &_swsStatus ) {
+		try {
+			CancelEdit();
+			FlushRealTimeUndo();
+			if ( !m_pheiTarget ) {
+				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+				return false;
+			}
+			if ( m_pheiTarget->ReadOnly() ) {
+				_swsStatus = _DEC_WS_D4FFE2E0_File_is_Read_Only;
+				return false;
+			}
+			const uint64_t ui64Size = Size();
+			if ( _ui64Addr > ui64Size ) {
+				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+				return false;
+			}
+			_ui64OldSize = std::min( _ui64OldSize, ui64Size - _ui64Addr );
+			const bool bInsert = _bResize && !IsOverwriteMode() && !m_pheiTarget->OverwriteOnly();
+			const uint64_t ui64Room = ui64Size - _ui64Addr;
+			// Fixed-size values must fit in the data.
+			if ( !_bResize && _vBytes.size() > ui64Room ) {
+				_swsStatus = _DEC_WS_58763A46_Failed_to_write_to_the_target_;
+				return false;
+			}
+
+			const MX_SELECTION sOldSel = m_sSel;
+			const MX_SELECT_GESTURE sgOldGesture = m_sgSelGesture;
+			bool bOk = true;
+			{
+				CHexEditorInterface::MX_UNDO uUndo( m_pheiTarget );
+				if ( bInsert ) {
+					if ( _ui64OldSize ) {
+						uint64_t ui64Deleted = 0;
+						bOk = m_pheiTarget->Delete( _ui64Addr, _ui64OldSize, ui64Deleted ) && ui64Deleted == _ui64OldSize;
+						if ( ui64Deleted ) { ShiftChanges( _ui64Addr, ui64Deleted, false ); }
+						if ( !bOk ) { _swsStatus = _DEC_WS_58763A46_Failed_to_write_to_the_target_; }
+					}
+					if ( bOk ) { bOk = WriteBytes( _ui64Addr, _vBytes, true, _swsStatus ); }
+				}
+				else {
+					std::vector<uint8_t> vBytes = _vBytes;
+					// A shorter string is followed by 0's up to the end of the old one (the size of the data does not change).
+					if ( _bResize && vBytes.size() < _ui64OldSize ) { vBytes.resize( size_t( _ui64OldSize ), 0 ); }
+					if ( vBytes.size() > ui64Room ) {
+						// What goes past the end is added if the data can grow, otherwise it is cut off.
+						std::vector<uint8_t> vTail( vBytes.begin() + size_t( ui64Room ), vBytes.end() );
+						vBytes.resize( size_t( ui64Room ) );
+						if ( vBytes.size() ) { bOk = WriteBytes( _ui64Addr, vBytes, false, _swsStatus ); }
+						if ( bOk && !m_pheiTarget->OverwriteOnly() ) { bOk = WriteBytes( ui64Size, vTail, true, _swsStatus ); }
+					}
+					else {
+						bOk = WriteBytes( _ui64Addr, vBytes, false, _swsStatus );
+					}
+				}
+			}
+
+			// One selection-Undo item per data-Undo group.
+			AddSelectionUndo( sOldSel, sgOldGesture );
+			if ( Size() != ui64Size ) {
+				UpdateScrollbars();
+				if ( m_pwHexParent ) { m_pwHexParent->UpdateStatusBar_Size(); }
+			}
+			::InvalidateRect( Wnd(), nullptr, FALSE );
+			if ( m_pwHexParent ) { m_pwHexParent->UpdateStatusBar_PosValue_StartSize(); }
+			return bOk;
+		}
+		catch ( ... ) {
+			_swsStatus = _DEC_WS_F39F91A5_Out_of_memory_;
+			return false;
+		}
+	}
+
+	/**
 	 * Writes bytes to the data source: inserted or written over existing bytes.
 	 *
 	 * \param _ui64Addr The address at which to write.
