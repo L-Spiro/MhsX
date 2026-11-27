@@ -18,6 +18,9 @@
 #include "../HexEditor/MXFontDialog.h"
 #include "../HexEditor/MXHexEditorControl.h"
 #include "../HexEditor/MXSelectRangeDialog.h"
+#include "../HexEditor/MXEditBytesDialog.h"
+#include "../HexEditor/MXPasteSpecialDialog.h"
+#include "../HexEditor/MXFindResultsWindow.h"
 #include "../Layouts/MXLayoutMacros.h"
 #include "../MainWindow/MXMhsMainWindow.h"
 #include "../NumberInputWindow/MXNumberInputDialog.h"
@@ -159,6 +162,18 @@ namespace mx {
 			}
 			case MX_INSPECTOR_CUSTOMIZE : {
 				return new CInspectorCustomizeDialog( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
+			case MX_EDIT_BYTES : {
+				return new CEditBytesDialog( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
+			case MX_PASTE_SPECIAL : {
+				return new CPasteSpecialDialog( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
+			case MX_FIND_RESULTS : {
+				return new CFindResultsWindow( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
+			}
+			case MX_FIND_RESULTS_LIST : {
+				return new CFindResultsListView( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );
 			}
 		}
 		return lsw::CLayoutManager::CreateWidget( _wlLayout, _pwParent, _bCreateWidget, _hMenu, _ui64Data );

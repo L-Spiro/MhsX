@@ -606,6 +606,20 @@ namespace mx {
 	}
 
 	/**
+	 * Selects the bytes of a row's value in the hex editor.
+	 *
+	 * \param _iRow The row.
+	 **/
+	void CInspectorWindow::SelectInHexEditor( int _iRow ) {
+		if ( !m_pihHost || _iRow < 0 || size_t( _iRow ) >= m_vRows.size() || !m_bSourceValid ) { return; }
+		const MX_ROW & rRow = m_vRows[_iRow];
+		size_t sBytes = CInspector::TypeSize( rRow.itType );
+		if ( !sBytes ) { sBytes = rRow.sBytes; }
+		if ( !sBytes || m_isSource.vBytes.size() < sBytes ) { return; }
+		m_pihHost->InspectorSelect( m_isSource.ui64Address, sBytes );
+	}
+
+	/**
 	 * Puts text on the clipboard.
 	 *
 	 * \param _wsText The text.
@@ -741,7 +755,6 @@ namespace mx {
 		CInspectorWindow * piwThis = reinterpret_cast<CInspectorWindow *>(_dwRefData);
 		switch ( _uMsg ) {
 			case WM_LBUTTONDOWN : {
-				// A click on the value of the row that was already selected edits it.
 				const int iSelBefore = piwThis->SelectedRow();
 				const bool bWasEditing = piwThis->m_hEdit != NULL;
 				LVHITTESTINFO htiHit = {};
@@ -751,6 +764,9 @@ namespace mx {
 				if ( !bWasEditing && iHit >= 0 && iHit == iSelBefore && htiHit.iSubItem == 1 && !(_wParam & (MK_SHIFT | MK_CONTROL)) &&
 					::GetCapture() != _hWnd ) {
 					piwThis->BeginEdit( iHit );
+				}
+				else if ( iHit >= 0 && iHit != iSelBefore && !(_wParam & (MK_SHIFT | MK_CONTROL)) ) {
+					piwThis->SelectInHexEditor( iHit );
 				}
 				return lrRet;
 			}

@@ -209,6 +209,13 @@ namespace mx {
 		void																BeginEdit( int _iRow );
 
 		/**
+		 * Selects the bytes of a row's value in the hex editor.
+		 *
+		 * \param _iRow The row.
+		 **/
+		void																SelectInHexEditor( int _iRow );
+
+		/**
 		 * Ends editing in place.
 		 *
 		 * \param _bCommit If true, the value typed is written.

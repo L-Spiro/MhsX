@@ -634,6 +634,27 @@
     <ClCompile Include="Src\HexEditor\MXSelectRangeDialog.cpp">
       <Filter>Source Files\HexEditor</Filter>
     </ClCompile>
+    <ClCompile Include="Src\HexEditor\MXEditBytesDialog.cpp">
+      <Filter>Source Files\HexEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HexEditor\MXPasteSpecialDialog.cpp">
+      <Filter>Source Files\HexEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HexEditor\MXFindResultsWindow.cpp">
+      <Filter>Source Files\HexEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXEditBytesLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXPasteSpecialLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Layouts\MXFindResultsLayout.cpp">
+      <Filter>Source Files\Layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Options\MXUiState.cpp">
+      <Filter>Source Files\Options</Filter>
+    </ClCompile>
     <ClCompile Include="Src\HexEditor\MXMiniMapOptionsDialog.cpp">
       <Filter>Source Files\HexEditor</Filter>
     </ClCompile>
@@ -1054,6 +1075,27 @@
     </ClInclude>
     <ClInclude Include="Src\HexEditor\MXSelectRangeDialog.h">
       <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXEditBytesDialog.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXPasteSpecialDialog.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexEditor\MXFindResultsWindow.h">
+      <Filter>Header Files\HexEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXEditBytesLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXPasteSpecialLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Layouts\MXFindResultsLayout.h">
+      <Filter>Header Files\Layouts</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Options\MXUiState.h">
+      <Filter>Header Files\Options</Filter>
     </ClInclude>
     <ClInclude Include="Src\HexEditor\MXMiniMapOptionsDialog.h">
       <Filter>Header Files\HexEditor</Filter>

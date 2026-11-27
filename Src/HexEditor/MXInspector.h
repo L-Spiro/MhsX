@@ -43,6 +43,7 @@ namespace mx {
 			MX_IT_TIME_T,																		/**< 32-bit signed count of seconds since 1970 (UTC). */
 			MX_IT_TIME64_T,																		/**< 64-bit signed count of seconds since 1970 (UTC). */
 			MX_IT_GUID,																			/**< 16-byte GUID. */
+			MX_IT_BFLOAT16,																		/**< 16-bit brain float (the top 16 bits of a 32-bit float). */
 
 			MX_IT_TOTAL
 		};
@@ -195,6 +196,15 @@ namespace mx {
 		static constexpr size_t												MX_MAX_STRING_CHARS = 256;
 
 
+		/**
+		 * Converts a 32-bit float to a 16-bit brain float (rounded to nearest, ties to even).
+		 *
+		 * \param _fValue The value to convert.
+		 * \return Returns the bits of the brain float.
+		 **/
+		static uint16_t														FloatToBFloat16( float _fValue );
+
+
 	protected :
 		// == Members.
 		/** Milliseconds from January 1, 1601 to December 30, 1899 (the start of OLE dates). */
@@ -339,6 +349,15 @@ namespace mx {
 		 * \param _ui64Address The address, relative to the data.
 		 **/
 		virtual void														InspectorGoTo( uint64_t _ui64Address ) = 0;
+
+		/**
+		 * Selects bytes in the current view (the bytes of a value clicked in the Inspector).  The start of the selection (the
+		 *	inspected address) does not change.
+		 *
+		 * \param _ui64Address The address of the first byte, relative to the data.
+		 * \param _ui64Size The number of bytes.
+		 **/
+		virtual void														InspectorSelect( uint64_t _ui64Address, uint64_t _ui64Size ) = 0;
 
 		/**
 		 * Shows a message in the status bar.

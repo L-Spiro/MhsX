@@ -3,6 +3,8 @@
 #include "../Layouts/MXLayoutManager.h"
 #include "../Layouts/MXExportHexLayout.h"
 #include "../Layouts/MXExpressionEvaluatorLayout.h"
+#include "../Layouts/MXFindResultsLayout.h"
+#include "../Layouts/MXPasteSpecialLayout.h"
 #include "../Layouts/MXFontDialogLayout.h"
 #include "../Layouts/MXNumberInputLayout.h"
 #include "../Layouts/MXOpenProcessLayout.h"
@@ -15,6 +17,7 @@
 #include "../Utilities/MXUtilities.h"
 #include "MXCopyFormatter.h"
 #include "MXCopyPasteManager.h"
+#include "../Files/MXFile.h"
 #include "MXFindProgressDialog.h"
 #include "MXHexEditorCurProcess.h"
 #include "MXHexEditorFile.h"
@@ -120,6 +123,7 @@ namespace mx {
 		//	alive.  CWidget's destructor would otherwise destroy them after the members of this class are gone.
 		m_peeExpEval = nullptr;
 		m_piInspector = nullptr;
+		m_pfrwFindResults = nullptr;
 		DestroyWindowNow();
 
 		// Clipboards must not keep the files open after the window is gone.
@@ -224,8 +228,23 @@ namespace mx {
 
 		ForceSizeUpdate();
 
-		// The Inspector is docked on the right from the start.
-		ShowInspector();
+		if ( m_pmhMemHack && m_pmhMemHack->UiState().bHaveInspector ) {
+			try {
+				m_isInspectorSettings = m_pmhMemHack->UiState().sInspector;
+				CInspector::FixSettings( m_isInspectorSettings );
+			}
+			catch ( ... ) {}
+		}
+		const CUiState::MX_WINDOW * pwSaved = m_pmhMemHack ? &m_pmhMemHack->UiState().wHexEditor : nullptr;
+		if ( !pwSaved || pwSaved->IsOpen( CInspectorLayout::MX_II_MAINWINDOW, true ) ) { ShowInspector(); }
+		if ( pwSaved && pwSaved->IsOpen( CExpressionEvaluatorLayout::MX_EE_MAINWINDOW, false ) ) { ShowExpEval(); }
+		if ( pwSaved && pwSaved->IsOpen( CFindResultsLayout::MX_FRI_MAINWINDOW, false ) ) { ShowFindResults(); }
+		if ( pwSaved && pwSaved->bValid ) {
+			std::vector<CWidget *> vFixed;
+			if ( Tab() ) { vFixed.push_back( Tab() ); }
+			CUiState::RestoreLayout( MultiSplitter(), (*pwSaved), vFixed, KnownDockables() );
+			CUiState::RestorePlacement( this, (*pwSaved) );
+		}
 		return LSW_H_CONTINUE;
 	}
 
@@ -240,11 +259,21 @@ namespace mx {
 	 */
 	CWidget::LSW_HANDLED CDeusHexMachinaWindow::Command( WORD _wCtrlCode, WORD _wId, CWidget * _pwSrc ) {
 		if ( _wId >= Layout::MX_M_SHOW_RECENT_BASE ) {
+			// File -> Open Recent.
 			_wId -= Layout::MX_M_SHOW_RECENT_BASE;
-			if ( _wId < m_pmhMemHack->Options().vProcessHistory.size() ) {
-				if ( m_pmhMemHack->Options().vProcessHistory[_wId].size() ) {
-					Open( std::filesystem::path( static_cast<const std::wstring &>(m_pmhMemHack->Options().vProcessHistory[_wId]) ) );
+			if ( m_pmhMemHack && _wId < m_pmhMemHack->UiState().vRecentFiles.size() ) {
+				try {
+					const std::wstring wsPath = m_pmhMemHack->UiState().vRecentFiles[_wId].c_str();
+					std::error_code ecError;
+					if ( wsPath.size() && std::filesystem::is_regular_file( std::filesystem::path( wsPath ), ecError ) ) {
+						Open( std::filesystem::path( wsPath ) );
+					}
+					else {
+						m_pmhMemHack->UiState().RemoveRecentFile( wsPath );
+						SetStatusBarText( (_DEC_WS_4F29F544_The_file_could_not_be_found__ + wsPath).c_str(), true );
+					}
 				}
+				catch ( ... ) {}
 			}
 			return LSW_H_CONTINUE;
 		}
@@ -294,6 +323,10 @@ namespace mx {
 			// Ctrl+C in the Inspector copies its selected row.
 			if ( _wId == Layout::MX_M_EDIT_COPY && m_piInspector && m_piInspector->HasFocus() ) {
 				m_piInspector->CopyRow();
+				return LSW_H_HANDLED;
+			}
+			if ( _wId == Layout::MX_M_EDIT_COPY && m_pfrwFindResults && m_pfrwFindResults->HasFocus() ) {
+				m_pfrwFindResults->CopySelected();
 				return LSW_H_HANDLED;
 			}
 		}
@@ -725,6 +758,46 @@ namespace mx {
 			}
 			case Layout::MX_M_TOOLS_INSPECTOR : {
 				ShowInspector();
+				break;
+			}
+			case Layout::MX_M_FILE_CLEAR_RECENT : {
+				if ( m_pmhMemHack ) { m_pmhMemHack->UiState().vRecentFiles.clear(); }
+				break;
+			}
+			case Layout::MX_M_TOOLS_FIND_RESULTS : {
+				ShowFindResults();
+				break;
+			}
+			case Layout::MX_M_EDIT_PASTE_SPECIAL : {
+				PasteSpecial();
+				break;
+			}
+			case Layout::MX_M_EDIT_INSERT_FILE : {
+				InsertOverwriteFile( true );
+				break;
+			}
+			case Layout::MX_M_EDIT_OVERWRITE_FILE : {
+				InsertOverwriteFile( false );
+				break;
+			}
+			case Layout::MX_M_EDIT_INSERT_BYTES : {
+				EditBytes( CEditBytesLayout::MX_EBM_INSERT );
+				break;
+			}
+			case Layout::MX_M_EDIT_OVERWRITE_BYTES : {
+				EditBytes( CEditBytesLayout::MX_EBM_OVERWRITE );
+				break;
+			}
+			case Layout::MX_M_EDIT_SET_FILE_SIZE : {
+				EditBytes( CEditBytesLayout::MX_EBM_SET_SIZE );
+				break;
+			}
+			case Layout::MX_M_EDIT_INSERT_COLOR : {
+				InsertColor();
+				break;
+			}
+			case Layout::MX_M_EDIT_INSERT_DATE : {
+				InsertDateTime();
 				break;
 			}
 			case Layout::MX_M_TOOLS_WINDOWS_CALCULATOR : {
@@ -2120,6 +2193,7 @@ namespace mx {
 				oOptions.heHexEditorOptions.wsLastOpenFileDirectory = pDst.parent_path().generic_wstring();
 				m_pmhMemHack->SetOptions( oOptions );
 			}
+			if ( m_pmhMemHack ) { m_pmhMemHack->UiState().AddRecentFile( pDst.wstring() ); }
 			SetStatusBarText( (_DEC_WS_678A7FB8_Saved__ + pDst.generic_wstring()).c_str(), false );
 			UpdateToolBar();
 			return true;
@@ -2751,7 +2825,13 @@ namespace mx {
 				spInterface = std::shared_ptr<CHexEditorInterface>( upIfc.release() );
 			}
 
-			if ( AddTab( spInterface ) && dwWriteError != ERROR_SUCCESS ) {
+			const bool bAdded = AddTab( spInterface );
+			if ( bAdded && m_pmhMemHack ) {
+				std::error_code ecAbs;
+				const std::filesystem::path pAbs = std::filesystem::absolute( _pPath, ecAbs );
+				m_pmhMemHack->UiState().AddRecentFile( (ecAbs ? _pPath : pAbs).wstring() );
+			}
+			if ( bAdded && dwWriteError != ERROR_SUCCESS ) {
 				// Say why the file is read-only.
 				switch ( dwWriteError ) {
 					case ERROR_SHARING_VIOLATION : {}					MX_FALLTHROUGH
@@ -3404,6 +3484,7 @@ namespace mx {
 				fsSet.crBack = fpParms.crBack;
 				fsSet.bTooMany = bTooMany;
 				m_frFindResults.Add( std::move( fsSet ), fpParms.bMultipleRanges );
+				ShowFindResults();
 
 				if ( bTooMany ) {
 					_swsStatus = _DEC_WS_BBA58F10_Stopped_after_the_limit_of_ + std::to_wstring( sFound ) + _DEC_WS_FBEC4128__occurrences_;
@@ -3473,6 +3554,99 @@ namespace mx {
 			pmsSplitter->SelectDocked( m_peeExpEval );
 			m_peeExpEval->SetVisible( TRUE );
 		}
+	}
+
+	/**
+	 * Handles WM_DESTROY.  The positions and arrangement of the window are stored in the settings (when the window is closed
+	 *	by itself; when MHS X closes, the main window stores them first).
+	 *
+	 * \return Returns a LSW_HANDLED code.
+	 **/
+	CWidget::LSW_HANDLED CDeusHexMachinaWindow::Destroy() {
+		if ( !InDestructor() ) { CaptureUiState(); }
+		return CMainWindow::Destroy();
+	}
+
+	/**
+	 * Stores the position and arrangement of the window, its dockables, and the Inspector settings in the settings.
+	 **/
+	void CDeusHexMachinaWindow::CaptureUiState() {
+		if ( !m_pmhMemHack ) { return; }
+		try {
+			CUiState & usState = m_pmhMemHack->UiState();
+			CUiState::CaptureWindow( this, MultiSplitter(), KnownDockables(), usState.wHexEditor );
+			usState.sInspector = m_isInspectorSettings;
+			usState.bHaveInspector = true;
+		}
+		catch ( ... ) {}
+	}
+
+	/**
+	 * Gets the dockables the window can have, with the ones that are open.
+	 *
+	 * \return Returns the control IDs of the dockables and the dockables (nullptr for the ones that are closed).
+	 **/
+	std::vector<CUiState::MX_KNOWN_DOCKABLE> CDeusHexMachinaWindow::KnownDockables() {
+		std::vector<CUiState::MX_KNOWN_DOCKABLE> vRet;
+		try {
+			vRet.push_back( CUiState::MX_KNOWN_DOCKABLE( WORD( CInspectorLayout::MX_II_MAINWINDOW ), m_piInspector ) );
+			vRet.push_back( CUiState::MX_KNOWN_DOCKABLE( WORD( CExpressionEvaluatorLayout::MX_EE_MAINWINDOW ), m_peeExpEval ) );
+			vRet.push_back( CUiState::MX_KNOWN_DOCKABLE( WORD( CFindResultsLayout::MX_FRI_MAINWINDOW ), m_pfrwFindResults ) );
+		}
+		catch ( ... ) {}
+		return vRet;
+	}
+
+	/**
+	 * Rebuilds File -> Open Recent from the recent files, if a menu is the File menu.
+	 *
+	 * \param _hMenu The menu being opened.
+	 **/
+	void CDeusHexMachinaWindow::UpdateRecentMenu( HMENU _hMenu ) {
+		int iPos = -1;
+		for ( int I = ::GetMenuItemCount( _hMenu ); --I >= 0; ) {
+			if ( ::GetMenuItemID( _hMenu, I ) == Layout::MX_M_FILE_OPENRECENT || (m_hRecentMenu && ::GetSubMenu( _hMenu, I ) == m_hRecentMenu) ) {
+				iPos = I;
+				break;
+			}
+		}
+		if ( iPos < 0 ) { return; }
+		try {
+			wchar_t wszText[256] = {};
+			::GetMenuStringW( _hMenu, UINT( iPos ), wszText, int( std::size( wszText ) ), MF_BYPOSITION );
+			::DeleteMenu( _hMenu, UINT( iPos ), MF_BYPOSITION );
+			m_hRecentMenu = NULL;
+
+			const std::vector<CSecureWString> vList = m_pmhMemHack ? m_pmhMemHack->UiState().vRecentFiles : std::vector<CSecureWString>();
+			HMENU hNew = vList.size() ? ::CreatePopupMenu() : NULL;
+			if ( !hNew ) {
+				::InsertMenuW( _hMenu, UINT( iPos ), MF_BYPOSITION | MF_STRING | MF_GRAYED, Layout::MX_M_FILE_OPENRECENT, wszText );
+				return;
+			}
+			for ( size_t I = 0; I < vList.size(); ++I ) {
+				std::wstring wsItem;
+				if ( I < 10 ) {
+					wsItem.push_back( L'&' );
+					wsItem.push_back( wchar_t( L'0' + ((I + 1) % 10) ) );
+					wsItem.push_back( L' ' );
+				}
+				// Ampersands in the path are not shortcuts.
+				for ( wchar_t wcThis : std::wstring( vList[I].c_str() ) ) {
+					if ( wcThis == L'&' ) { wsItem.push_back( L'&' ); }
+					wsItem.push_back( wcThis );
+				}
+				::AppendMenuW( hNew, MF_STRING, UINT_PTR( Layout::MX_M_SHOW_RECENT_BASE + I ), wsItem.c_str() );
+			}
+			::AppendMenuW( hNew, MF_SEPARATOR, 0, nullptr );
+			::AppendMenuW( hNew, MF_STRING, UINT_PTR( Layout::MX_M_FILE_CLEAR_RECENT ), _DEC_WS_D1DF8A04__Clear_Recent_Files.c_str() );
+			if ( !::InsertMenuW( _hMenu, UINT( iPos ), MF_BYPOSITION | MF_POPUP | MF_STRING, reinterpret_cast<UINT_PTR>(hNew), wszText ) ) {
+				::DestroyMenu( hNew );
+				::InsertMenuW( _hMenu, UINT( iPos ), MF_BYPOSITION | MF_STRING | MF_GRAYED, Layout::MX_M_FILE_OPENRECENT, wszText );
+				return;
+			}
+			m_hRecentMenu = hNew;
+		}
+		catch ( ... ) {}
 	}
 
 	/**
@@ -3566,6 +3740,21 @@ namespace mx {
 	}
 
 	/**
+	 * Selects the bytes of a value clicked in the Inspector.  The start of the selection (the inspected address) does not change.
+	 *
+	 * \param _ui64Address The address of the first byte, relative to the data.
+	 * \param _ui64Size The number of bytes.
+	 **/
+	void CDeusHexMachinaWindow::InspectorSelect( uint64_t _ui64Address, uint64_t _ui64Size ) {
+		CHexEditorControl * phecControl = CurrentEditor();
+		if ( !phecControl || !_ui64Size ) { return; }
+		const uint64_t ui64Size = phecControl->Size();
+		if ( _ui64Address >= ui64Size ) { return; }
+		phecControl->FlushRealTimeUndo();
+		phecControl->SelectRange( _ui64Address, std::min( _ui64Size, ui64Size - _ui64Address ) );
+	}
+
+	/**
 	 * Shows a message from the Inspector in the status bar.
 	 *
 	 * \param _swsText The message.
@@ -3573,6 +3762,376 @@ namespace mx {
 	 **/
 	void CDeusHexMachinaWindow::InspectorStatus( const CSecureWString &_swsText, bool _bWarning ) {
 		SetStatusBarText( _swsText.c_str(), _bWarning );
+	}
+
+	/**
+	 * Shows the Find Results window (Tools -> Find Results, and after Find All), creating it if needed.  A new one is docked
+	 *	along the bottom.  If it is docked behind other dockables, its tab is selected.
+	 **/
+	void CDeusHexMachinaWindow::ShowFindResults() {
+		CMultiSplitter * pmsSplitter = MultiSplitter();
+		if ( !pmsSplitter ) { return; }
+		if ( !m_pfrwFindResults ) {
+			m_pfrwFindResults = static_cast<CFindResultsWindow *>(CFindResultsLayout::CreateFindResultsWindow( pmsSplitter ));
+			if ( !m_pfrwFindResults ) { return; }
+			m_pfrwFindResults->AddDockTarget( pmsSplitter );
+			m_pfrwFindResults->SetHost( this );
+			m_pfrwFindResults->DockTo( pmsSplitter, CDockTarget::LSW_AT_BOTTOM, pmsSplitter->RootId() );
+		}
+		else {
+			pmsSplitter->SelectDocked( m_pfrwFindResults );
+			m_pfrwFindResults->SetVisible( TRUE );
+		}
+		m_pfrwFindResults->Refresh( false );
+	}
+
+	/**
+	 * Removes every result.
+	 **/
+	void CDeusHexMachinaWindow::FindResultsClear() {
+		m_frFindResults.Clear();
+	}
+
+	/**
+	 * Shows a result: the tab of its data is made current and the result is selected.
+	 *
+	 * \param _pheiSource The data that was searched.
+	 * \param _ui64Addr The address of the result.
+	 * \param _ui64Size The size of the result.
+	 **/
+	void CDeusHexMachinaWindow::FindResultsSelect( const CHexEditorInterface * _pheiSource, uint64_t _ui64Addr, uint64_t _ui64Size ) {
+		for ( size_t I = 0; I < m_vTabs.size(); ++I ) {
+			if ( m_vTabs[I].pheiInterface.get() != _pheiSource || !m_vTabs[I].phecWidget ) { continue; }
+			auto ptTab = Tab();
+			if ( ptTab && size_t( ptTab->GetCurSel() ) != I ) {
+				ptTab->SetCurSel( int( I ) );
+				TabSelChanged( ptTab, int( I ), nullptr );
+			}
+			CHexEditorControl * phecControl = m_vTabs[I].phecWidget;
+			if ( _ui64Addr > phecControl->Size() ) {
+				SetStatusBarText( _DEC_WS_D08434A5_Address_out_of_range_.c_str(), true );
+				return;
+			}
+			phecControl->SelectRange( _ui64Addr, _ui64Size );
+			phecControl->EnsureVisible( _ui64Addr );
+			UpdateStatusBar_PosValue_StartSize();
+			return;
+		}
+		SetStatusBarText( _DEC_WS_BA008C99_The_data_of_this_result_is_no_longer_open_.c_str(), true );
+	}
+
+	/**
+	 * Gets the starting address of the view of some data (the number added to the addresses shown).
+	 *
+	 * \param _pheiSource The data.
+	 * \return Returns the starting address, or 0.
+	 **/
+	uint64_t CDeusHexMachinaWindow::FindResultsStartingAddress( const CHexEditorInterface * _pheiSource ) {
+		for ( const auto & htTab : m_vTabs ) {
+			if ( htTab.pheiInterface.get() == _pheiSource && htTab.phecWidget ) { return htTab.phecWidget->StartingAddress(); }
+		}
+		return 0;
+	}
+
+	/**
+	 * Gets the data of the current tab.
+	 *
+	 * \return Returns the data of the current tab, or nullptr.
+	 **/
+	const CHexEditorInterface * CDeusHexMachinaWindow::FindResultsCurrentSource() {
+		const size_t sTab = CurrentTab();
+		return (sTab < m_vTabs.size()) ? m_vTabs[sTab].pheiInterface.get() : nullptr;
+	}
+
+	/**
+	 * Shows a message from the Find Results window in the status bar.
+	 *
+	 * \param _swsText The message.
+	 * \param _bWarning If true, the message is a warning.
+	 **/
+	void CDeusHexMachinaWindow::FindResultsStatus( const CSecureWString &_swsText, bool _bWarning ) {
+		SetStatusBarText( _swsText.c_str(), _bWarning );
+	}
+
+	/**
+	 * Shows the Insert Bytes, Overwrite Bytes, or Set File Size dialog and carries out what was entered.
+	 *
+	 * \param _ebmMode Which dialog.
+	 **/
+	void CDeusHexMachinaWindow::EditBytes( CEditBytesLayout::MX_EDIT_BYTES_MODE _ebmMode ) {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		phecControl->FlushRealTimeUndo();
+		if ( !phecControl->CanWrite() ) {
+			SetStatusBarText( _DEC_WS_D4FFE2E0_File_is_Read_Only.c_str(), true );
+			return;
+		}
+		if ( _ebmMode != CEditBytesLayout::MX_EBM_OVERWRITE && !phecControl->CanResize() ) {
+			SetStatusBarText( _DEC_WS_AB5905FA_The_size_of_this_data_cannot_change_.c_str(), true );
+			return;
+		}
+		try {
+			CEditBytesLayout::MX_EDIT_BYTES_PARMS ebpParms = m_ebpEditBytes;
+			ebpParms.ebmMode = _ebmMode;
+			ebpParms.ui64DataSize = phecControl->Size();
+			ebpParms.ui64Bias = phecControl->StartingAddress();
+			ebpParms.bCanGrow = phecControl->CanResize();
+			if ( !m_bEditBytesUsed ) {
+				ebpParms.bHex = phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_BYTES_HEX ||
+					phecControl->GetAddressGutterFmt() == CHexEditorControl::MX_AF_SHORT_HEX;
+				ebpParms.ui64Size = 1;
+			}
+			ebpParms.ui64Start = phecControl->GetSelctStartOrCaret();
+			if ( _ebmMode == CEditBytesLayout::MX_EBM_OVERWRITE && phecControl->HasSelection() ) {
+				std::vector<MX_SEL_RANGE> vRanges;
+				uint64_t ui64Start = UINT64_MAX, ui64End = 0;
+				for ( uint64_t I = 0; phecControl->GatherSelection( vRanges, 1024ULL * 1024ULL, I ) && vRanges.size(); ++I ) {
+					for ( const auto &srThis : vRanges ) {
+						ui64Start = std::min( ui64Start, srThis.ui64Start );
+						ui64End = std::max( ui64End, srThis.ui64Start + srThis.ui64Size );
+					}
+				}
+				if ( ui64Start < ui64End ) {
+					ebpParms.ui64Start = ui64Start;
+					ebpParms.ui64Size = ui64End - ui64Start;
+				}
+			}
+			if ( !CEditBytesLayout::CreateEditBytesDialog( this, ebpParms ) ) { return; }
+
+			m_ebpEditBytes.bHex = ebpParms.bHex;
+			m_ebpEditBytes.ui8Value = ebpParms.ui8Value;
+			if ( _ebmMode != CEditBytesLayout::MX_EBM_SET_SIZE ) {
+				m_ebpEditBytes.bEnd = ebpParms.bEnd;
+				m_ebpEditBytes.ui64Size = ebpParms.ui64Size;
+			}
+			else if ( !m_bEditBytesUsed ) {
+				m_ebpEditBytes.ui64Size = 1;
+			}
+			m_bEditBytesUsed = true;
+
+			phecControl = CurrentEditor();
+			if ( !phecControl ) { return; }
+			HCURSOR hOld = ::SetCursor( ::LoadCursorW( NULL, IDC_WAIT ) );
+			CSecureWString swsMsg;
+			bool bOk;
+			if ( _ebmMode == CEditBytesLayout::MX_EBM_SET_SIZE ) {
+				bOk = phecControl->SetDataSize( ebpParms.ui64Size, ebpParms.ui8Value, swsMsg );
+			}
+			else {
+				bOk = phecControl->FillBytes( ebpParms.ui64Start, ebpParms.ui64Size, ebpParms.ui8Value, _ebmMode == CEditBytesLayout::MX_EBM_INSERT, swsMsg );
+			}
+			::SetCursor( hOld );
+			LSW_SETREDRAW srRedraw( StatusBar() );
+			SetStatusBarText( swsMsg.c_str(), !bOk );
+			UpdateStatusBar_PosValue_StartSize();
+			UpdateStatusBar_Size();
+		}
+		catch ( ... ) {
+			SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true );
+		}
+	}
+
+	/**
+	 * Inserts a file at the caret (Insert File) or writes it over the bytes at the caret (Overwrite File).
+	 *
+	 * \param _bInsert If true, the file is inserted.
+	 **/
+	void CDeusHexMachinaWindow::InsertOverwriteFile( bool _bInsert ) {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl || !m_pmhMemHack ) { return; }
+		phecControl->FlushRealTimeUndo();
+		if ( !phecControl->CanWrite() ) {
+			SetStatusBarText( _DEC_WS_D4FFE2E0_File_is_Read_Only.c_str(), true );
+			return;
+		}
+		if ( _bInsert && !phecControl->CanResize() ) {
+			SetStatusBarText( _DEC_WS_AB5905FA_The_size_of_this_data_cannot_change_.c_str(), true );
+			return;
+		}
+		try {
+			OPENFILENAMEW ofnOpenFile = { sizeof( ofnOpenFile ) };
+			CSecureWString szFileName;
+			szFileName.resize( 0xFFFF + 2 );
+			CSecureWString wsFilter = _DEC_WS_6331FDE9_All_Files_______0____0;
+			CSecureWString wsTitle = _bInsert ? _DEC_WS_7FE51469_Insert_File : _DEC_WS_436AA476_Overwrite_File;
+			const std::wstring wsDir = m_pmhMemHack->Options().heHexEditorOptions.wsLastOpenFileDirectory;
+			ofnOpenFile.hwndOwner = Wnd();
+			ofnOpenFile.lpstrFilter = wsFilter.c_str();
+			ofnOpenFile.lpstrFile = szFileName.data();
+			ofnOpenFile.nMaxFile = DWORD( szFileName.size() );
+			ofnOpenFile.lpstrTitle = wsTitle.c_str();
+			ofnOpenFile.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+			ofnOpenFile.lpstrInitialDir = wsDir.c_str();
+			if ( !::GetOpenFileNameW( &ofnOpenFile ) ) { return; }
+			{
+				auto oOptions = m_pmhMemHack->Options();
+				oOptions.heHexEditorOptions.wsLastOpenFileDirectory = std::filesystem::path( ofnOpenFile.lpstrFile ).remove_filename().generic_wstring();
+				m_pmhMemHack->SetOptions( oOptions );
+			}
+
+			std::vector<uint8_t> vBytes;
+			{
+				CFile fFile;
+				if ( !fFile.OpenFile( ofnOpenFile.lpstrFile, TRUE ) ) {
+					SetStatusBarText( _DEC_WS_8A93A0B1_The_file_could_not_be_opened_.c_str(), true );
+					return;
+				}
+				const UINT64 ui64Size = fFile.Size();
+				constexpr UINT64 ui64Max = 1024ULL * 1024ULL * 1024ULL;
+				if ( ui64Size > ui64Max ) {
+					SetStatusBarText( _DEC_WS_5258A666_The_file_is_too_large_to_insert__the_limit_is_1_GB__.c_str(), true );
+					return;
+				}
+				if ( !ui64Size ) {
+					SetStatusBarText( _DEC_WS_269F54C3_The_file_is_empty_.c_str(), true );
+					return;
+				}
+				vBytes.resize( size_t( ui64Size ) );
+				size_t sDone = 0;
+				while ( sDone < vBytes.size() ) {
+					const DWORD dwThis = DWORD( std::min<size_t>( vBytes.size() - sDone, 64ULL * 1024ULL * 1024ULL ) );
+					DWORD dwRead = 0;
+					fFile.Read( vBytes.data() + sDone, dwThis, &dwRead );
+					if ( dwRead != dwThis ) {
+						SetStatusBarText( _DEC_WS_56C7200E_The_file_could_not_be_read_.c_str(), true );
+						return;
+					}
+					sDone += dwRead;
+				}
+			}
+
+			phecControl = CurrentEditor();
+			if ( !phecControl ) { return; }
+			HCURSOR hOld = ::SetCursor( ::LoadCursorW( NULL, IDC_WAIT ) );
+			CSecureWString swsMsg;
+			const bool bOk = phecControl->WriteData( phecControl->GetSelctStartOrCaret(), vBytes, _bInsert, swsMsg );
+			::SetCursor( hOld );
+			LSW_SETREDRAW srRedraw( StatusBar() );
+			SetStatusBarText( swsMsg.c_str(), !bOk );
+			UpdateStatusBar_PosValue_StartSize();
+			UpdateStatusBar_Size();
+		}
+		catch ( ... ) {
+			SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true );
+		}
+	}
+
+	/**
+	 * Shows the Paste Special dialog and pastes the clipboard format chosen.
+	 **/
+	void CDeusHexMachinaWindow::PasteSpecial() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		phecControl->FlushRealTimeUndo();
+		if ( !phecControl->CanWrite() ) {
+			SetStatusBarText( _DEC_WS_D4FFE2E0_File_is_Read_Only.c_str(), true );
+			return;
+		}
+		try {
+			CPasteSpecialLayout::MX_PASTE_SPECIAL_PARMS pspParms;
+			pspParms.uiFormat = m_uiPasteSpecialFormat;
+			if ( !CPasteSpecialLayout::CreatePasteSpecialDialog( this, pspParms ) ) { return; }
+			m_uiPasteSpecialFormat = pspParms.uiFormat;
+			phecControl = CurrentEditor();
+			if ( !phecControl ) { return; }
+			CSecureWString swsMsg;
+			const bool bOk = phecControl->PasteBytes( std::move( pspParms.vBytes ), swsMsg );
+			LSW_SETREDRAW srRedraw( StatusBar() );
+			SetStatusBarText( swsMsg.c_str(), !bOk );
+			UpdateStatusBar_PosValue_StartSize();
+			UpdateStatusBar_Size();
+		}
+		catch ( ... ) {
+			SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true );
+		}
+	}
+
+	/**
+	 * Asks for a color and pastes it as text ("#RRGGBB") at the caret (Insert Color).
+	 **/
+	void CDeusHexMachinaWindow::InsertColor() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		phecControl->FlushRealTimeUndo();
+		if ( !phecControl->CanWrite() ) {
+			SetStatusBarText( _DEC_WS_D4FFE2E0_File_is_Read_Only.c_str(), true );
+			return;
+		}
+		try {
+			CHOOSECOLORW ccColor = { sizeof( ccColor ) };
+			ccColor.hwndOwner = Wnd();
+			ccColor.rgbResult = m_crInsertColor;
+			ccColor.lpCustColors = m_crCustomColors;
+			ccColor.Flags = CC_FULLOPEN | CC_RGBINIT | CC_ANYCOLOR;
+			if ( !::ChooseColorW( &ccColor ) ) { return; }
+			m_crInsertColor = ccColor.rgbResult;
+
+			static const wchar_t wcDigits[] = { L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9', L'A', L'B', L'C', L'D', L'E', L'F' };
+			const BYTE bRgb[] = { GetRValue( m_crInsertColor ), GetGValue( m_crInsertColor ), GetBValue( m_crInsertColor ) };
+			std::wstring wsText( 1, L'#' );
+			for ( auto bThis : bRgb ) {
+				wsText.push_back( wcDigits[bThis>>4] );
+				wsText.push_back( wcDigits[bThis&0xF] );
+			}
+			phecControl = CurrentEditor();
+			if ( !phecControl ) { return; }
+			std::vector<uint8_t> vBytes;
+			if ( !CCopyPasteManager::TextToBytes( wsText.c_str(), wsText.size(), phecControl->GetCharacterSet(), vBytes ) ) {
+				SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true );
+				return;
+			}
+			CSecureWString swsMsg;
+			const bool bOk = phecControl->PasteBytes( std::move( vBytes ), swsMsg );
+			LSW_SETREDRAW srRedraw( StatusBar() );
+			SetStatusBarText( swsMsg.c_str(), !bOk );
+			UpdateStatusBar_PosValue_StartSize();
+			UpdateStatusBar_Size();
+		}
+		catch ( ... ) {
+			SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true );
+		}
+	}
+
+	/**
+	 * Pastes the current date and time as text at the caret (Insert Date/Time).
+	 **/
+	void CDeusHexMachinaWindow::InsertDateTime() {
+		auto phecControl = CurrentEditor();
+		if ( !phecControl ) { return; }
+		phecControl->FlushRealTimeUndo();
+		if ( !phecControl->CanWrite() ) {
+			SetStatusBarText( _DEC_WS_D4FFE2E0_File_is_Read_Only.c_str(), true );
+			return;
+		}
+		try {
+			// The short date and the time, as the user's locale writes them.
+			SYSTEMTIME stNow;
+			::GetLocalTime( &stNow );
+			wchar_t wcDate[128] = {}, wcTime[128] = {};
+			const int iDate = ::GetDateFormatEx( LOCALE_NAME_USER_DEFAULT, DATE_SHORTDATE, &stNow, nullptr, wcDate, int( std::size( wcDate ) ), nullptr );
+			const int iTime = ::GetTimeFormatEx( LOCALE_NAME_USER_DEFAULT, 0, &stNow, nullptr, wcTime, int( std::size( wcTime ) ) );
+			std::wstring wsText;
+			if ( iDate > 1 ) { wsText.append( wcDate, size_t( iDate - 1 ) ); }
+			if ( iTime > 1 ) {
+				if ( wsText.size() ) { wsText.push_back( L' ' ); }
+				wsText.append( wcTime, size_t( iTime - 1 ) );
+			}
+			if ( wsText.empty() ) { return; }
+			std::vector<uint8_t> vBytes;
+			if ( !CCopyPasteManager::TextToBytes( wsText.c_str(), wsText.size(), phecControl->GetCharacterSet(), vBytes ) ) {
+				SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true );
+				return;
+			}
+			CSecureWString swsMsg;
+			const bool bOk = phecControl->PasteBytes( std::move( vBytes ), swsMsg );
+			LSW_SETREDRAW srRedraw( StatusBar() );
+			SetStatusBarText( swsMsg.c_str(), !bOk );
+			UpdateStatusBar_PosValue_StartSize();
+			UpdateStatusBar_Size();
+		}
+		catch ( ... ) {
+			SetStatusBarText( _DEC_WS_F39F91A5_Out_of_memory_.c_str(), true );
+		}
 	}
 
 	/**
@@ -3584,6 +4143,7 @@ namespace mx {
 	void CDeusHexMachinaWindow::ChildWasRemoved( const CWidget * _pwChild ) {
 		if ( m_peeExpEval && static_cast<const CWidget *>(m_peeExpEval) == _pwChild ) { m_peeExpEval = nullptr; }
 		if ( m_piInspector && static_cast<const CWidget *>(m_piInspector) == _pwChild ) { m_piInspector = nullptr; }
+		if ( m_pfrwFindResults && static_cast<const CWidget *>(m_pfrwFindResults) == _pwChild ) { m_pfrwFindResults = nullptr; }
 		lsw::CMainWindow::ChildWasRemoved( _pwChild );
 	}
 
@@ -4453,6 +5013,7 @@ namespace mx {
 		auto phecControl = CurrentEditor();
 		bool bTabIsOpen = sIdx < m_vTabs.size() && ptTab->GetItemCount() && phecControl;
 
+		UpdateRecentMenu( _hMenu );
 		for ( int I = ::GetMenuItemCount( _hMenu ); --I >= 0; ) {
 			UINT uiId = ::GetMenuItemID( _hMenu, I );
 			switch ( uiId ) {
@@ -4686,6 +5247,28 @@ namespace mx {
 				}
 				case Layout::MX_M_TOOLS_INSPECTOR : {
 					::CheckMenuItem( _hMenu, uiId, MF_BYCOMMAND | (m_piInspector ? MF_CHECKED : MF_UNCHECKED) );
+					break;
+				}
+				case Layout::MX_M_TOOLS_FIND_RESULTS : {
+					::CheckMenuItem( _hMenu, uiId, MF_BYCOMMAND | (m_pfrwFindResults ? MF_CHECKED : MF_UNCHECKED) );
+					break;
+				}
+				case Layout::MX_M_EDIT_PASTE_SPECIAL : {
+					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | ((phecControl && phecControl->CanWrite() && ::CountClipboardFormats() > 0) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_EDIT_INSERT_FILE : {}								MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_INSERT_BYTES : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_SET_FILE_SIZE : {
+					// The size of the data changes (not for processes).
+					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | ((phecControl && phecControl->CanResize()) ? MF_ENABLED : MF_GRAYED) );
+					break;
+				}
+				case Layout::MX_M_EDIT_OVERWRITE_FILE : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_OVERWRITE_BYTES : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_INSERT_COLOR : {}							MX_FALLTHROUGH
+				case Layout::MX_M_EDIT_INSERT_DATE : {
+					::EnableMenuItem( _hMenu, uiId, MF_BYCOMMAND | ((phecControl && phecControl->CanWrite()) ? MF_ENABLED : MF_GRAYED) );
 					break;
 				}
 				case Layout::MX_M_EDIT_KEEP_FILE_TIME : {

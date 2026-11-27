@@ -811,6 +811,65 @@ namespace mx {
 		bool										Paste( CSecureWString &_swsStatus );
 
 		/**
+		 * Pastes the given bytes exactly as Paste() pastes the clipboard data (Paste Special, Insert Date/Time, Insert Color).
+		 * 
+		 * \param _vBytes The bytes to paste.
+		 * \param _swsStatus The string to print in the status bar.
+		 * \return Returns false if the message should be treated as a warning.
+		 **/
+		bool										PasteBytes( std::vector<uint8_t> &&_vBytes, CSecureWString &_swsStatus );
+
+		/**
+		 * Inserts bytes or writes them over the bytes at an address, as one Undo step, and selects them (Insert File, Overwrite
+		 *	File).  Bytes written past the end are added if the data can grow and dropped otherwise.
+		 * 
+		 * \param _ui64Addr The address.
+		 * \param _vBytes The bytes.
+		 * \param _bInsert If true, the bytes are inserted; otherwise they are written over the bytes there.
+		 * \param _swsStatus The string to print in the status bar.
+		 * \return Returns false if the message should be treated as a warning.
+		 **/
+		bool										WriteData( uint64_t _ui64Addr, const std::vector<uint8_t> &_vBytes, bool _bInsert, CSecureWString &_swsStatus );
+
+		/**
+		 * Inserts a run of one byte value or writes it over a range, as one Undo step, and selects the range (Insert Bytes,
+		 *	Overwrite Bytes).
+		 * 
+		 * \param _ui64Addr The address.
+		 * \param _ui64Size The number of bytes.
+		 * \param _ui8Value The byte value.
+		 * \param _bInsert If true, the bytes are inserted; otherwise they are written over the bytes there (and added past the end
+		 *	if the data can grow).
+		 * \param _swsStatus The string to print in the status bar.
+		 * \return Returns false if the message should be treated as a warning.
+		 **/
+		bool										FillBytes( uint64_t _ui64Addr, uint64_t _ui64Size, uint8_t _ui8Value, bool _bInsert, CSecureWString &_swsStatus );
+
+		/**
+		 * Changes the size of the data as one Undo step: bytes are removed from the end or added to it (Set File Size).
+		 * 
+		 * \param _ui64Size The new size.
+		 * \param _ui8Fill The value of the bytes added.
+		 * \param _swsStatus The string to print in the status bar.
+		 * \return Returns false if the message should be treated as a warning.
+		 **/
+		bool										SetDataSize( uint64_t _ui64Size, uint8_t _ui8Fill, CSecureWString &_swsStatus );
+
+		/**
+		 * Determines whether the data can be changed.
+		 * 
+		 * \return Returns true if there is data and it is not read-only.
+		 **/
+		inline bool									CanWrite() const { return m_pheiTarget && !m_pheiTarget->ReadOnly(); }
+
+		/**
+		 * Determines whether bytes can be inserted and removed (files can; processes cannot).
+		 * 
+		 * \return Returns true if the data can be changed and can change size.
+		 **/
+		inline bool									CanResize() const { return CanWrite() && !m_pheiTarget->OverwriteOnly(); }
+
+		/**
 		 * Determines whether a Paste operation can be performed now.
 		 * 
 		 * \return Returns true if the data source supports pasting, is writable, and the active clipboard has data.
@@ -903,6 +962,25 @@ namespace mx {
 		 * \return Returns false if the range starts beyond the end of the data.  A range that runs past the end is cut short.
 		 **/
 		bool										SelectRange( uint64_t _ui64Start, uint64_t _ui64Size );
+
+		/**
+		 * Pastes data as Paste() does: the selection is deleted, then the data is inserted or written at the start of the selection or
+		 *	the caret.
+		 * 
+		 * \param _pdData The data.
+		 * \param _swsStatus The string to print in the status bar.
+		 * \return Returns false if the message should be treated as a warning.
+		 **/
+		bool										PasteData( const MX_PASTE_DATA &_pdData, CSecureWString &_swsStatus );
+
+		/**
+		 * Makes the status message for a number of bytes changed ("Inserted 16 [10h] bytes").
+		 * 
+		 * \param _swsVerb The first word ("Inserted", "Wrote").
+		 * \param _ui64Bytes The number of bytes.
+		 * \param _swsStatus Receives the message.
+		 **/
+		static void									BytesMessage( const CSecureWString &_swsVerb, uint64_t _ui64Bytes, CSecureWString &_swsStatus );
 
 		/**
 		 * Replaces a value with new bytes as one Undo step (used by the Inspector).  The selection and caret do not change.

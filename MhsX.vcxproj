@@ -295,6 +295,13 @@
     <ClCompile Include="Src\HexEditor\MXHexEditorFile.cpp" />
     <ClCompile Include="Src\HexEditor\MXSelectRangeDialog.cpp" />
     <ClCompile Include="Src\HexEditor\MXMiniMapOptionsDialog.cpp" />
+    <ClCompile Include="Src\Options\MXUiState.cpp" />
+    <ClCompile Include="Src\Layouts\MXFindResultsLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXPasteSpecialLayout.cpp" />
+    <ClCompile Include="Src\Layouts\MXEditBytesLayout.cpp" />
+    <ClCompile Include="Src\HexEditor\MXFindResultsWindow.cpp" />
+    <ClCompile Include="Src\HexEditor\MXPasteSpecialDialog.cpp" />
+    <ClCompile Include="Src\HexEditor\MXEditBytesDialog.cpp" />
     <ClCompile Include="Src\HexEditor\MXInspector.cpp" />
     <ClCompile Include="Src\HexEditor\MXInspectorCustomizeDialog.cpp" />
     <ClCompile Include="Src\HexEditor\MXInspectorWindow.cpp" />
@@ -470,6 +477,13 @@
     <ClInclude Include="Src\HexEditor\MXHexEditorFile.h" />
     <ClInclude Include="Src\HexEditor\MXSelectRangeDialog.h" />
     <ClInclude Include="Src\HexEditor\MXMiniMapOptionsDialog.h" />
+    <ClInclude Include="Src\Options\MXUiState.h" />
+    <ClInclude Include="Src\Layouts\MXFindResultsLayout.h" />
+    <ClInclude Include="Src\Layouts\MXPasteSpecialLayout.h" />
+    <ClInclude Include="Src\Layouts\MXEditBytesLayout.h" />
+    <ClInclude Include="Src\HexEditor\MXFindResultsWindow.h" />
+    <ClInclude Include="Src\HexEditor\MXPasteSpecialDialog.h" />
+    <ClInclude Include="Src\HexEditor\MXEditBytesDialog.h" />
     <ClInclude Include="Src\HexEditor\MXInspector.h" />
     <ClInclude Include="Src\HexEditor\MXInspectorCustomizeDialog.h" />
     <ClInclude Include="Src\HexEditor\MXInspectorWindow.h" />

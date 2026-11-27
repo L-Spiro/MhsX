@@ -232,6 +232,18 @@ namespace mx {
 		 */
 		static bool												IsShutDown();
 
+		/**
+		 * \brief Converts text to bytes in a character set: UTF-16 for Unicode, otherwise the character set's code page (falling back
+		 *	to the ANSI code page if that code page is not installed).
+		 *
+		 * \param _pwcText The text.
+		 * \param _sLen The number of characters to which _pwcText points.
+		 * \param _csCharSet The character set.
+		 * \param _vBytes Receives the bytes.
+		 * \return Returns false on a memory or conversion failure.
+		 */
+		static bool												TextToBytes( const wchar_t * _pwcText, size_t _sLen, CCharSets::MX_CHAR_SETS _csCharSet, std::vector<uint8_t> &_vBytes );
+
 
 	protected :
 		// == Members.
@@ -276,18 +288,6 @@ namespace mx {
 		 * \return Returns true if there was binary data or text to read.
 		 */
 		static bool												ReadWindowsClipboard( CCharSets::MX_CHAR_SETS _csCharSet, std::vector<uint8_t> &_vBytes, CSecureWString &_swsMsg );
-
-		/**
-		 * \brief Converts text to bytes in a character set: UTF-16 for Unicode, otherwise the character set's code page (falling back
-		 *	to the ANSI code page if that code page is not installed).
-		 *
-		 * \param _pwcText The text.
-		 * \param _sLen The number of characters to which _pwcText points.
-		 * \param _csCharSet The character set.
-		 * \param _vBytes Receives the bytes.
-		 * \return Returns false on a memory or conversion failure.
-		 */
-		static bool												TextToBytes( const wchar_t * _pwcText, size_t _sLen, CCharSets::MX_CHAR_SETS _csCharSet, std::vector<uint8_t> &_vBytes );
 
 		/**
 		 * \brief The window procedure of m_hWnd.  Handles WM_RENDERFORMAT, WM_RENDERALLFORMATS, and WM_DESTROYCLIPBOARD.

@@ -92,6 +92,29 @@ namespace lsw {
 		bool								DockTo( CDockTarget * _pdtTarget, CDockTarget::LSW_ATTACH_TYPE _atAttachTo, DWORD _dwId );
 
 		/**
+		 * Marks the dockable as docked in a dock target that has placed it itself (used when a dock target restores a saved
+		 *	layout).  A floating dockable becomes a child window again.
+		 *
+		 * \param _pdtTarget The dock target.
+		 * \param _bTab If true, the dockable is docked over others, with tabs to choose between them.
+		 **/
+		void								SetDockedInto( CDockTarget * _pdtTarget, bool _bTab );
+
+		/**
+		 * Undocks the dockable (if it is docked) and optionally moves it.
+		 *
+		 * \param _prWindow If not nullptr, the window rectangle (in screen coordinates) to give the floating dockable.
+		 **/
+		void								Float( const LSW_RECT * _prWindow = nullptr );
+
+		/**
+		 * Gets the dock target the dockable is docked in.
+		 *
+		 * \return Returns the dock target, or nullptr if the dockable is floating.
+		 **/
+		CDockTarget *						DockedInto() const { return Floating() ? nullptr : m_pdtDockedControl; }
+
+		/**
 		 * Sets whether the dockable can be docked by dragging it.  When it cannot, dragging it only moves it (as when Ctrl is held).
 		 *
 		 * \param _bAllow If true, the dockable can be docked.

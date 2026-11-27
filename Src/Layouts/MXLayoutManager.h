@@ -52,6 +52,10 @@ namespace mx {
 		MX_MINI_MAP_OPTIONS,
 		MX_INSPECTOR,
 		MX_INSPECTOR_CUSTOMIZE,
+		MX_EDIT_BYTES,
+		MX_PASTE_SPECIAL,
+		MX_FIND_RESULTS,
+		MX_FIND_RESULTS_LIST,
 	};
 
 	class CLayoutManager : public lsw::CLayoutManager {

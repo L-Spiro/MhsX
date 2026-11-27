@@ -4,6 +4,7 @@
 #include "../FoundAddresses/MXFoundAddressManager.h"
 #include "../Hotkeys/MXHotkeyManager.h"
 #include "../Options/MXOptions.h"
+#include "../Options/MXUiState.h"
 #include "../Programs/MXPrograms.h"
 #include "../RegEx/MXOnigurumaSystem.h"
 #include "../Search/MXSearcher.h"
@@ -77,6 +78,13 @@ namespace mx {
 
 		// Gets the Floating-Point Studio options for read and write.
 		MX_FLOAT_STUDIO_OPTIONS &			FloatStudioOptions();
+
+		/**
+		 * Gets the positions and arrangements of the windows (saved with the settings).
+		 *
+		 * \return Returns the state of the windows for read and write.
+		 **/
+		CUiState &							UiState() { return m_usUiState; }
 
 		// Sets the options.
 		virtual void						SetOptions( const MX_OPTIONS &_oOptions );
@@ -179,6 +187,8 @@ namespace mx {
 		mutable MX_OPTIONS					m_oOptions;
 		// Floating-Point Studio options.
 		MX_FLOAT_STUDIO_OPTIONS				m_fsoOptions;
+		/** The positions and arrangements of the windows. */
+		CUiState							m_usUiState;
 		// Searcher.
 		CSearcher							m_sSearcher;
 		// Regex system.

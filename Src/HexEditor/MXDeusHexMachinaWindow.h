@@ -13,7 +13,10 @@
 #include "MXHexEditorControlHost.h"
 #include "MXHexEditorInterface.h"
 #include "MXInspector.h"
+#include "MXFindResultsWindow.h"
 #include "MXInspectorWindow.h"
+#include "../Layouts/MXEditBytesLayout.h"
+#include "../Options/MXUiState.h"
 
 #include <ImageList/LSWImageList.h>
 #include <Images/LSWBitmap.h>
@@ -35,7 +38,7 @@ namespace mx {
 	
 	class CWindowMemHack;
 
-	class CDeusHexMachinaWindow : public lsw::CMainWindow, CHexEditorControlHost, CInspectorHost {
+	class CDeusHexMachinaWindow : public lsw::CMainWindow, CHexEditorControlHost, CInspectorHost, CFindResultsHost {
 	public :
 		CDeusHexMachinaWindow( const LSW_WIDGET_LAYOUT &_wlLayout, CWidget * _pwParent, bool _bCreateWidget = true, HMENU _hMenu = NULL, uint64_t _ui64Data = 0 );
 		~CDeusHexMachinaWindow();
@@ -142,6 +145,33 @@ namespace mx {
 
 		// WM_CLOSE.
 		virtual LSW_HANDLED							Close();
+
+		/**
+		 * Handles WM_DESTROY.  The positions and arrangement of the window are stored in the settings (when the window is closed
+		 *	by itself; when MHS X closes, the main window stores them first).
+		 *
+		 * \return Returns a LSW_HANDLED code.
+		 **/
+		virtual LSW_HANDLED							Destroy();
+
+		/**
+		 * Stores the position and arrangement of the window, its dockables, and the Inspector settings in the settings.
+		 **/
+		void										CaptureUiState();
+
+		/**
+		 * Gets the dockables the window can have, with the ones that are open.
+		 *
+		 * \return Returns the control IDs of the dockables and the dockables (nullptr for the ones that are closed).
+		 **/
+		std::vector<CUiState::MX_KNOWN_DOCKABLE>	KnownDockables();
+
+		/**
+		 * Rebuilds File -> Open Recent from the recent files, if a menu is the File menu.
+		 *
+		 * \param _hMenu The menu being opened.
+		 **/
+		void										UpdateRecentMenu( HMENU _hMenu );
 
 		// WM_ERASEBKGND.
 		virtual LSW_HANDLED							EraseBkgnd( HDC _hDc );
@@ -467,6 +497,85 @@ namespace mx {
 		void										ShowInspector();
 
 		/**
+		 * Shows the Find Results window (Tools -> Find Results, and after Find All), creating it if needed.  A new one is docked
+		 *	along the bottom.  If it is docked behind other dockables, its tab is selected.
+		 **/
+		void										ShowFindResults();
+
+		/**
+		 * Shows the Insert Bytes, Overwrite Bytes, or Set File Size dialog and carries out what was entered.
+		 *
+		 * \param _ebmMode Which dialog.
+		 **/
+		void										EditBytes( CEditBytesLayout::MX_EDIT_BYTES_MODE _ebmMode );
+
+		/**
+		 * Inserts a file at the caret (Insert File) or writes it over the bytes at the caret (Overwrite File).
+		 *
+		 * \param _bInsert If true, the file is inserted.
+		 **/
+		void										InsertOverwriteFile( bool _bInsert );
+
+		/**
+		 * Shows the Paste Special dialog and pastes the clipboard format chosen.
+		 **/
+		void										PasteSpecial();
+
+		/**
+		 * Asks for a color and pastes it as text ("#RRGGBB") at the caret (Insert Color).
+		 **/
+		void										InsertColor();
+
+		/**
+		 * Pastes the current date and time as text at the caret (Insert Date/Time).
+		 **/
+		void										InsertDateTime();
+
+		/**
+		 * Gets the results of the Find All searches.
+		 *
+		 * \return Returns the results.
+		 **/
+		virtual const CFindResults &				FindResultsList() const override { return m_frFindResults; }
+
+		/**
+		 * Removes every result.
+		 **/
+		virtual void								FindResultsClear() override;
+
+		/**
+		 * Shows a result: the tab of its data is made current and the result is selected.
+		 *
+		 * \param _pheiSource The data that was searched.
+		 * \param _ui64Addr The address of the result.
+		 * \param _ui64Size The size of the result.
+		 **/
+		virtual void								FindResultsSelect( const CHexEditorInterface * _pheiSource, uint64_t _ui64Addr, uint64_t _ui64Size ) override;
+
+		/**
+		 * Gets the starting address of the view of some data (the number added to the addresses shown).
+		 *
+		 * \param _pheiSource The data.
+		 * \return Returns the starting address, or 0.
+		 **/
+		virtual uint64_t							FindResultsStartingAddress( const CHexEditorInterface * _pheiSource ) override;
+
+		/**
+		 * Gets the data of the current tab.
+		 *
+		 * \return Returns the data of the current tab, or nullptr.
+		 **/
+		virtual const CHexEditorInterface *			FindResultsCurrentSource() override;
+
+		/**
+		 * Shows a message from the Find Results window in the status bar.
+		 *
+		 * \param _swsText The message.
+		 * \param _bWarning If true, the message is a warning.
+		 **/
+		virtual void								FindResultsStatus( const CSecureWString &_swsText, bool _bWarning ) override;
+
+		/**
 		 * Gets the data at the inspected address of the current view (the start of the selection, or the caret).
 		 *
 		 * \param _isSource Receives the data.
@@ -494,6 +603,14 @@ namespace mx {
 		 * \param _ui64Address The address, relative to the data.
 		 **/
 		virtual void								InspectorGoTo( uint64_t _ui64Address ) override;
+
+		/**
+		 * Selects the bytes of a value clicked in the Inspector.  The start of the selection (the inspected address) does not change.
+		 *
+		 * \param _ui64Address The address of the first byte, relative to the data.
+		 * \param _ui64Size The number of bytes.
+		 **/
+		virtual void								InspectorSelect( uint64_t _ui64Address, uint64_t _ui64Size ) override;
 
 		/**
 		 * Shows a message from the Inspector in the status bar.
@@ -710,6 +827,8 @@ namespace mx {
 		CWindowMemHack *							m_pmhMemHack = nullptr;
 		/** The kind of file the toolbar's New button creates: the last one chosen. */
 		MX_NEW_FILE									m_nfLastNew = MX_NF_HEX;
+		/** The File -> Open Recent submenu (owned by the File menu), or NULL. */
+		HMENU										m_hRecentMenu = NULL;
 		/** If true, the Select Range dialog last took an end address rather than a size (it starts that way next time). */
 		bool										m_bSelectRangeEnd = false;
 		/** The Export Hex settings last used (the path is not kept). */
@@ -732,6 +851,18 @@ namespace mx {
 		CInspectorWindow *							m_piInspector = nullptr;
 		/** The Inspector settings (kept while the Inspector is closed). */
 		CInspector::MX_SETTINGS						m_isInspectorSettings;
+		/** The Find Results window (nullptr until it is shown, and after it is closed). */
+		CFindResultsWindow *						m_pfrwFindResults = nullptr;
+		/** The values last entered into Insert Bytes, Overwrite Bytes, and Set File Size. */
+		CEditBytesLayout::MX_EDIT_BYTES_PARMS		m_ebpEditBytes;
+		/** Was m_ebpEditBytes entered (rather than the defaults)? */
+		bool										m_bEditBytesUsed = false;
+		/** The clipboard format last pasted with Paste Special. */
+		UINT										m_uiPasteSpecialFormat = 0;
+		/** The color last inserted with Insert Color. */
+		COLORREF									m_crInsertColor = RGB( 0xFF, 0xFF, 0xFF );
+		/** The custom colors of Insert Color. */
+		COLORREF									m_crCustomColors[16] = {};
 		/** The number of untitled files created (for naming them). */
 		uint32_t									m_ui32Untitled = 0;
 

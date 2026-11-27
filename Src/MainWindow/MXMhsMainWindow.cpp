@@ -269,9 +269,16 @@ namespace mx {
 
 		LoadSettings( CSecureWString(), true );
 
-		ShowFoundAddress();
-		ShowExpEval();
-		ShowConverter();
+		{
+			const CUiState::MX_WINDOW & wSaved = m_pmhMemHack->UiState().wMain;
+			if ( wSaved.IsOpen( CFoundAddressLayout::MX_FAW_MAINWINDOW, true ) ) { ShowFoundAddress(); }
+			if ( wSaved.IsOpen( CExpressionEvaluatorLayout::MX_EE_MAINWINDOW, true ) ) { ShowExpEval(); }
+			if ( wSaved.IsOpen( CConverterLayout::MX_CWI_MAIN_WINDOW, true ) ) { ShowConverter(); }
+			std::vector<CWidget *> vFixed;
+			if ( MainTreeView() ) { vFixed.push_back( MainTreeView() ); }
+			CUiState::RestoreLayout( MultiSplitter(), wSaved, vFixed, KnownDockables() );
+			CUiState::RestorePlacement( this, wSaved );
+		}
 
 		reinterpret_cast<CHotkeyPollingMethod *>(m_pmhMemHack->HotkeyManager().GetPollingHotkeyManager())->SetWindow( Wnd() );
 		reinterpret_cast<CHotkeyWhKeyboardMethod *>(m_pmhMemHack->HotkeyManager().GetWhKeyboardHotkeyManager())->SetWindow( Wnd() );
@@ -493,10 +500,36 @@ namespace mx {
 	// WM_DESTROY.
 	CWidget::LSW_HANDLED CMhsMainWindow::Destroy() {
 		if ( m_pmhMemHack ) {
+			CaptureUiState();
 			//m_pmhMemHack->SaveSettings( CSecureWString(), true );
 			SaveSettings( CSecureWString(), true );
 		}
 		return LSW_H_CONTINUE;
+	}
+
+	/**
+	 * Gets the dockables the main window can have, with the ones that are open.
+	 *
+	 * \return Returns the control IDs of the dockables and the dockables (nullptr for the ones that are closed).
+	 **/
+	std::vector<CUiState::MX_KNOWN_DOCKABLE> CMhsMainWindow::KnownDockables() {
+		std::vector<CUiState::MX_KNOWN_DOCKABLE> vRet;
+		try {
+			vRet.push_back( CUiState::MX_KNOWN_DOCKABLE( WORD( CFoundAddressLayout::MX_FAW_MAINWINDOW ), m_pfaFoundAddresses ) );
+			vRet.push_back( CUiState::MX_KNOWN_DOCKABLE( WORD( CExpressionEvaluatorLayout::MX_EE_MAINWINDOW ), m_peeExpEval ) );
+			vRet.push_back( CUiState::MX_KNOWN_DOCKABLE( WORD( CConverterLayout::MX_CWI_MAIN_WINDOW ), m_cwConverter ) );
+		}
+		catch ( ... ) {}
+		return vRet;
+	}
+
+	/**
+	 * Stores the positions and arrangements of the main window and the Hex Editor (if it is open) in the settings.
+	 **/
+	void CMhsMainWindow::CaptureUiState() {
+		if ( !m_pmhMemHack ) { return; }
+		CUiState::CaptureWindow( this, MultiSplitter(), KnownDockables(), m_pmhMemHack->UiState().wMain );
+		if ( m_pdhmwDeusHexMachinaWindow ) { m_pdhmwDeusHexMachinaWindow->CaptureUiState(); }
 	}
 
 	// WM_NCDESTROY.
@@ -1271,6 +1304,7 @@ namespace mx {
 			lson::CJson::CreateObjectElement( "", eRoot );
 			if ( !m_pmhMemHack->SaveSettings( &eRoot, nullptr, m_pmhMemHack->Options() ) ) { return false; }
 			if ( !m_pmhMemHack->HotkeyManager().SaveSettings( &eRoot, nullptr ) ) { return false; }
+			m_pmhMemHack->UiState().Save( &eRoot );
 			if ( !lson::CJson::WriteElement( eRoot, vBuffer, 0 ) ) { return false; }
 			/*vBuffer.push_back( 0 );
 			::OutputDebugStringA( reinterpret_cast<LPCSTR>(vBuffer.data()) );*/
@@ -1309,6 +1343,7 @@ namespace mx {
 			vBuffer.push_back( 0 );
 
 			if ( !jSon.SetJson( reinterpret_cast<char *>(vBuffer.data()) ) ) { return false; }
+			m_pmhMemHack->UiState().Load( &jSon );
 			if ( !m_pmhMemHack->LoadSettings( &jSon, nullptr, oOptions ) ) { return false; }
 			if ( !m_pmhMemHack->HotkeyManager().LoadSettings( &jSon, nullptr ) ) { return false; }
 		}

@@ -26,9 +26,44 @@ namespace lsw {
 			LSW_ST_VER,
 		};
 
+		// == Types.
+		/**
+		 * A saved arrangement of the splitter: what is docked where, the sizes of the areas, and the tabs of groups.  Widgets are
+		 *	identified by their IDs (see GetLayout() and SetLayout()).
+		 **/
+		struct LSW_MS_LAYOUT_NODE {
+			bool							bLayer = false;			/**< If true, the node is split into vChildren; otherwise it holds widgets. */
+			LSW_SPLIT_TYPE					stSplitType = LSW_ST_VER;	/**< How a layer is split. */
+			INT								iDist = 200;			/**< The size of the node in the direction in which its parent is split. */
+			bool							bLockToFar = false;		/**< The node keeps its size at the far (right or bottom) end. */
+			std::vector<WORD>				vWidgets;				/**< The IDs of the widgets in the node (more than one: tabs, in tab order). */
+			size_t							sSelected = 0;			/**< The selected tab. */
+			std::vector<LSW_MS_LAYOUT_NODE>	vChildren;				/**< The parts of a layer, from left to right or top to bottom. */
+		};
+
+
 		// == Functions.
 		// Attach a widget.
 		virtual bool						Attach( const LSW_DT_ATTACH &_maAttach );
+
+		/**
+		 * Gets the arrangement of the splitter (to be saved).
+		 *
+		 * \param _lnRoot Receives the arrangement.
+		 **/
+		void								GetLayout( LSW_MS_LAYOUT_NODE &_lnRoot ) const;
+
+		/**
+		 * Rearranges the splitter to a saved arrangement.  Widgets are found by their IDs in _vWidgets; areas whose widgets are not
+		 *	found are left out.  Dockables placed in the arrangement are docked (floating ones are docked), and dockables that were
+		 *	docked here but are not in the arrangement are made to float.  Nothing changes if a widget that is not a dockable (such as
+		 *	the main view) is docked here but is not in the arrangement.
+		 *
+		 * \param _lnRoot The arrangement.
+		 * \param _vWidgets The widgets that can be placed.
+		 * \return Returns true if the splitter was rearranged.
+		 **/
+		bool								SetLayout( const LSW_MS_LAYOUT_NODE &_lnRoot, const std::vector<CWidget *> &_vWidgets );
 
 		// Detaches a widget given its ID.
 		virtual bool						Detach( WORD _wId );
@@ -282,6 +317,34 @@ namespace lsw {
 
 		// Size all attachments.
 		void								SizeAttachments() const;
+
+		/**
+		 * Saves a rectangle of the layout and everything under it.
+		 *
+		 * \param _mrRect The rectangle.
+		 * \param _lnNode Receives the saved rectangle.
+		 **/
+		void								SaveLayoutNode( const LSW_MS_RECT &_mrRect, LSW_MS_LAYOUT_NODE &_lnNode ) const;
+
+		/**
+		 * Builds a rectangle of the layout from a saved one.
+		 *
+		 * \param _lnNode The saved rectangle.
+		 * \param _vWidgets The widgets that can be placed.
+		 * \param _vPlaced Receives the widgets placed.
+		 * \param _mrRect Receives the rectangle (its ID is not changed).
+		 * \return Returns false if nothing in the saved rectangle could be placed.
+		 **/
+		bool								BuildLayoutNode( const LSW_MS_LAYOUT_NODE &_lnNode, const std::vector<CWidget *> &_vWidgets,
+			std::vector<CWidget *> &_vPlaced, LSW_MS_RECT &_mrRect );
+
+		/**
+		 * Gathers the widgets in a rectangle of the layout and everything under it (the widgets in groups, not their tab controls).
+		 *
+		 * \param _mrRect The rectangle.
+		 * \param _vWidgets Receives the widgets.
+		 **/
+		void								GatherWidgets( const LSW_MS_RECT &_mrRect, std::vector<CWidget *> &_vWidgets ) const;
 
 		// Given a layer, index, side, and size (as a suggestion), generate a center point and a possible docking rectangle for the given side.
 		void								GenerateCenterPointAndAttachmentRect( const LSW_MS_LAYER &_mlLayer, size_t _sIndex, LSW_ATTACH_TYPE _atAttachType, INT _iSizeSuggestion,

@@ -548,5 +548,78 @@
 
             ]
         }
+    },
+    "Ui" : {
+        "Version" : 1,
+        "Main" : {
+            "Left" : 82,
+            "Top" : 29,
+            "Right" : 1278,
+            "Bottom" : 938,
+            "Maximized" : false,
+            "Layout" : {
+                "Layer" : true,
+                "Dist" : 500,
+                "Far" : false,
+                "Split" : 1,
+                "Children" : [
+                    {
+                        "Layer" : false,
+                        "Dist" : 349,
+                        "Far" : false,
+                        "Widgets" : [
+                            2000
+                        ],
+                        "Selected" : 0
+                    },
+                    {
+                        "Layer" : true,
+                        "Dist" : 451,
+                        "Far" : false,
+                        "Split" : 0,
+                        "Children" : [
+                            {
+                                "Layer" : false,
+                                "Dist" : 360,
+                                "Far" : false,
+                                "Widgets" : [
+                                    3000
+                                ],
+                                "Selected" : 0
+                            },
+                            {
+                                "Layer" : false,
+                                "Dist" : 460,
+                                "Far" : false,
+                                "Widgets" : [
+                                    2
+                                ],
+                                "Selected" : 0
+                            }
+                        ]
+                    }
+                ]
+            },
+            "Dockables" : [
+                {
+                    "Id" : 2000,
+                    "Open" : true,
+                    "Floating" : false
+                },
+                {
+                    "Id" : 3000,
+                    "Open" : true,
+                    "Floating" : false
+                },
+                {
+                    "Id" : 2400,
+                    "Open" : false,
+                    "Floating" : false
+                }
+            ]
+        },
+        "RecentFiles" : [
+
+        ]
     }
 }

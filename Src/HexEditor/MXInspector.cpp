@@ -21,16 +21,24 @@ namespace mx {
 	 **/
 	void CInspector::DefaultSettings( MX_SETTINGS &_sSettings ) {
 		_sSettings = MX_SETTINGS();
-		for ( uint32_t I = 0; I < MX_IT_TOTAL; ++I ) {
-			_sSettings.vRows.push_back( MX_ROW_SETTING{ .itType = static_cast<MX_INSPECTOR_TYPE>(I), .bShown = true } );
+		// The IDs never change (they are saved), so types added later are put where they belong here.
+		static const MX_INSPECTOR_TYPE itOrder[] = {
+			MX_IT_BINARY, MX_IT_INT8, MX_IT_UINT8, MX_IT_INT16, MX_IT_UINT16, MX_IT_INT32, MX_IT_UINT32, MX_IT_INT64, MX_IT_UINT64,
+			MX_IT_FLOAT, MX_IT_DOUBLE, MX_IT_FLOAT16, MX_IT_BFLOAT16, MX_IT_VECTOR4, MX_IT_STRING, MX_IT_STRING_UTF16, MX_IT_STRING_UTF8,
+			MX_IT_DOSDATE, MX_IT_DOSTIME, MX_IT_FILETIME, MX_IT_OLETIME, MX_IT_TIME_T, MX_IT_TIME64_T, MX_IT_GUID,
+		};
+		static_assert( std::size( itOrder ) == MX_IT_TOTAL, "Every type must be in the default order." );
+		for ( auto itThis : itOrder ) {
+			_sSettings.vRows.push_back( MX_ROW_SETTING{ .itType = itThis, .bShown = true } );
 		}
 		_sSettings.wsDateFormat = _DEC_WS_B27B5A4D_MM_dd_yyyy;
 		_sSettings.wsTimeFormat = _DEC_WS_0153EF33_HH_mm_ss;
 	}
 
 	/**
-	 * Makes sure that every type appears exactly once in a set of settings (types that are missing are added at the end, hidden,
-	 *	and invalid or repeated types are removed).
+	 * Makes sure that every type appears exactly once in a set of settings (types that are missing, such as types added after the
+	 *	settings were saved, are added shown, after the type that comes before them in the default order; invalid or repeated types
+	 *	are removed).
 	 *
 	 * \param _sSettings The settings to fix.
 	 **/
@@ -43,8 +51,24 @@ namespace mx {
 			bSeen[rsRow.itType] = true;
 			vRows.push_back( rsRow );
 		}
-		for ( uint32_t I = 0; I < MX_IT_TOTAL; ++I ) {
-			if ( !bSeen[I] ) { vRows.push_back( MX_ROW_SETTING{ .itType = static_cast<MX_INSPECTOR_TYPE>(I), .bShown = false } ); }
+		MX_SETTINGS sDefault;
+		DefaultSettings( sDefault );
+		for ( size_t I = 0; I < sDefault.vRows.size(); ++I ) {
+			const MX_INSPECTOR_TYPE itMissing = sDefault.vRows[I].itType;
+			if ( bSeen[itMissing] ) { continue; }
+			bSeen[itMissing] = true;
+			// After the type before it in the default order, or first.
+			size_t sInsert = 0;
+			if ( I ) {
+				const MX_INSPECTOR_TYPE itBefore = sDefault.vRows[I-1].itType;
+				for ( size_t J = 0; J < vRows.size(); ++J ) {
+					if ( vRows[J].itType == itBefore ) {
+						sInsert = J + 1;
+						break;
+					}
+				}
+			}
+			vRows.insert( vRows.begin() + sInsert, MX_ROW_SETTING{ .itType = itMissing, .bShown = true } );
 		}
 		_sSettings.vRows = std::move( vRows );
 	}
@@ -69,6 +93,7 @@ namespace mx {
 			case MX_IT_FLOAT : { return _DEC_WS_08647191_Float; }
 			case MX_IT_DOUBLE : { return _DEC_WS_DD4BF7D9_Double; }
 			case MX_IT_FLOAT16 : { return _DEC_WS_8337F554_Half_Float; }
+			case MX_IT_BFLOAT16 : { return _DEC_WS_9490B7C6_BFloat16; }
 			case MX_IT_VECTOR4 : { return _DEC_WS_06A07CB1_Vector4__Float_; }
 			case MX_IT_STRING : { return _DEC_WS_9912B79F_String; }
 			case MX_IT_STRING_UTF16 : { return _DEC_WS_A4CEA253_Unicode_String; }
@@ -98,6 +123,7 @@ namespace mx {
 			case MX_IT_INT16 : {}								MX_FALLTHROUGH
 			case MX_IT_UINT16 : {}								MX_FALLTHROUGH
 			case MX_IT_FLOAT16 : {}								MX_FALLTHROUGH
+			case MX_IT_BFLOAT16 : {}							MX_FALLTHROUGH
 			case MX_IT_DOSDATE : {}								MX_FALLTHROUGH
 			case MX_IT_DOSTIME : { return 2; }
 			case MX_IT_INT32 : {}								MX_FALLTHROUGH
@@ -192,6 +218,14 @@ namespace mx {
 				case MX_IT_FLOAT16 : {
 					const uint16_t ui16Raw = static_cast<uint16_t>(ReadUnsigned( pui8Data, 2, bBe ));
 					CUtilities::ToDouble( ee::CFloat16( ui16Raw ).Value(), _wsText, -7 );
+					return true;
+				}
+				case MX_IT_BFLOAT16 : {
+					// The top 16 bits of a 32-bit float.
+					const uint32_t ui32Raw = static_cast<uint32_t>(ReadUnsigned( pui8Data, 2, bBe )) << 16;
+					float fVal;
+					std::memcpy( &fVal, &ui32Raw, sizeof( fVal ) );
+					CUtilities::ToDouble( fVal, _wsText, -4 );
 					return true;
 				}
 				case MX_IT_VECTOR4 : {
@@ -513,6 +547,7 @@ namespace mx {
 				case MX_IT_FLOAT : {}							MX_FALLTHROUGH
 				case MX_IT_DOUBLE : {}							MX_FALLTHROUGH
 				case MX_IT_FLOAT16 : {}							MX_FALLTHROUGH
+				case MX_IT_BFLOAT16 : {}						MX_FALLTHROUGH
 				case MX_IT_VECTOR4 : {
 					// A Vector4 is 4 numbers separated by commas or semicolons (or by spaces if there are no commas or semicolons).
 					std::vector<std::wstring> vParts;
@@ -553,6 +588,10 @@ namespace mx {
 							}
 							case MX_IT_FLOAT16 : {
 								WriteUnsigned( ee::CFloat16( dVal ).RawValue(), 2, _bBigEndian, _vBytes );
+								break;
+							}
+							case MX_IT_BFLOAT16 : {
+								WriteUnsigned( FloatToBFloat16( static_cast<float>(dVal) ), 2, _bBigEndian, _vBytes );
 								break;
 							}
 							default : {
@@ -736,6 +775,21 @@ namespace mx {
 				CUtilities::ToUnsigned( _ui64Value, _wsText );
 			}
 		}
+	}
+
+	/**
+	 * Converts a 32-bit float to a 16-bit brain float (rounded to nearest, ties to even).
+	 *
+	 * \param _fValue The value to convert.
+	 * \return Returns the bits of the brain float.
+	 **/
+	uint16_t CInspector::FloatToBFloat16( float _fValue ) {
+		uint32_t ui32Bits;
+		std::memcpy( &ui32Bits, &_fValue, sizeof( ui32Bits ) );
+		// NaN stays NaN (rounding could turn it into infinity).
+		if ( (ui32Bits & 0x7F800000) == 0x7F800000 && (ui32Bits & 0x007FFFFF) ) { return static_cast<uint16_t>((ui32Bits >> 16) | 0x0040); }
+		ui32Bits += 0x7FFF + ((ui32Bits >> 16) & 1);
+		return static_cast<uint16_t>(ui32Bits >> 16);
 	}
 
 	/**

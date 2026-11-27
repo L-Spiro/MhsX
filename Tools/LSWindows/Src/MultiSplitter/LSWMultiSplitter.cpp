@@ -1339,6 +1339,260 @@ namespace lsw {
 	}
 
 	/**
+	 * Gets the arrangement of the splitter (to be saved).
+	 *
+	 * \param _lnRoot Receives the arrangement.
+	 **/
+	void CMultiSplitter::GetLayout( LSW_MS_LAYOUT_NODE &_lnRoot ) const {
+		_lnRoot = LSW_MS_LAYOUT_NODE();
+		try {
+			SaveLayoutNode( m_meRoot, _lnRoot );
+		}
+		catch ( ... ) { _lnRoot = LSW_MS_LAYOUT_NODE(); }
+	}
+
+	/**
+	 * Rearranges the splitter to a saved arrangement.  Widgets are found by their IDs in _vWidgets; areas whose widgets are not
+	 *	found are left out.  Dockables placed in the arrangement are docked (floating ones are docked), and dockables that were
+	 *	docked here but are not in the arrangement are made to float.  Nothing changes if a widget that is not a dockable (such as
+	 *	the main view) is docked here but is not in the arrangement.
+	 *
+	 * \param _lnRoot The arrangement.
+	 * \param _vWidgets The widgets that can be placed.
+	 * \return Returns true if the splitter was rearranged.
+	 **/
+	bool CMultiSplitter::SetLayout( const LSW_MS_LAYOUT_NODE &_lnRoot, const std::vector<CWidget *> &_vWidgets ) {
+		if ( m_bDragPreview || m_bDestroying ) { return false; }
+		try {
+			// Only widgets docked here (or floating dockables that can dock here) can be placed.
+			std::vector<CWidget *> vCurrent;
+			GatherWidgets( m_meRoot, vCurrent );
+			std::vector<CWidget *> vUsable;
+			for ( CWidget * pwThis : _vWidgets ) {
+				if ( !pwThis || !pwThis->Wnd() ) { continue; }
+				const bool bHere = std::find( vCurrent.begin(), vCurrent.end(), pwThis ) != vCurrent.end();
+				if ( bHere ) {
+					vUsable.push_back( pwThis );
+					continue;
+				}
+				if ( pwThis->IsDockable() ) {
+					CDockable * pdThis = static_cast<CDockable *>(pwThis);
+					// Not if it is docked somewhere else.
+					if ( !pdThis->DockedInto() && pwThis->Parent() == this ) { vUsable.push_back( pwThis ); }
+				}
+			}
+
+			// Every widget that is not a dockable must have a place in the arrangement.
+			std::vector<WORD> vIds;
+			std::vector<const LSW_MS_LAYOUT_NODE *> vStack = { &_lnRoot };
+			while ( vStack.size() ) {
+				const LSW_MS_LAYOUT_NODE * plnThis = vStack.back();
+				vStack.pop_back();
+				vIds.insert( vIds.end(), plnThis->vWidgets.begin(), plnThis->vWidgets.end() );
+				for ( const auto & lnChild : plnThis->vChildren ) { vStack.push_back( &lnChild ); }
+			}
+			for ( CWidget * pwThis : vCurrent ) {
+				if ( !pwThis->IsDockable() && std::find( vIds.begin(), vIds.end(), WORD( pwThis->Id() ) ) == vIds.end() ) { return false; }
+			}
+
+			std::vector<CTab *> vTabs;
+			for ( auto & mgGroup : m_vGroups ) {
+				if ( mgGroup.ptTab ) { vTabs.push_back( mgGroup.ptTab ); }
+			}
+			m_vGroups.clear();
+			for ( size_t I = m_vLayers.size(); I--; ) {
+				LSW_MS_LAYER * pmlTemp = m_vLayers[I];
+				m_vLayers[I] = nullptr;
+				delete pmlTemp;
+			}
+			m_vLayers.clear();
+			m_meRoot.bContainsWidget = FALSE;
+			m_meRoot.u.pmlLayer = nullptr;
+			for ( CTab * ptTab : vTabs ) { delete ptTab; }
+
+			// Build the new one.
+			std::vector<CWidget *> vPlaced;
+			const DWORD dwRootId = m_meRoot.dwId;
+			if ( !BuildLayoutNode( _lnRoot, vUsable, vPlaced, m_meRoot ) ) {
+				m_meRoot.bContainsWidget = FALSE;
+				m_meRoot.u.pmlLayer = nullptr;
+			}
+			m_meRoot.dwId = dwRootId;
+
+			// Widgets that were docked here but have no place: dockables float; anything else (which cannot happen; see above) goes on the right.
+			for ( CWidget * pwThis : vCurrent ) {
+				if ( std::find( vPlaced.begin(), vPlaced.end(), pwThis ) != vPlaced.end() ) { continue; }
+				if ( pwThis->IsDockable() ) {
+					static_cast<CDockable *>(pwThis)->Float();
+				}
+				else {
+					LSW_DT_ATTACH daAttach;
+					daAttach.pwWidget = pwThis;
+					daAttach.dwId = RootId();
+					daAttach.atAttachTo = LSW_AT_RIGHT;
+					Attach( daAttach );
+				}
+			}
+
+			for ( CWidget * pwThis : vPlaced ) {
+				size_t sMember;
+				if ( pwThis->Wnd() && FindGroupOfMember( WORD( pwThis->Id() ), sMember ) == SIZE_MAX ) { ::ShowWindow( pwThis->Wnd(), SW_SHOWNA ); }
+			}
+			CalcRects();
+			SizeGroups();
+			ForceSizeUpdate();
+			ShowGroupSelections();
+			::RedrawWindow( Wnd(), nullptr, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_FRAME | RDW_ALLCHILDREN );
+			return true;
+		}
+		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * Saves a rectangle of the layout and everything under it.
+	 *
+	 * \param _mrRect The rectangle.
+	 * \param _lnNode Receives the saved rectangle.
+	 **/
+	void CMultiSplitter::SaveLayoutNode( const LSW_MS_RECT &_mrRect, LSW_MS_LAYOUT_NODE &_lnNode ) const {
+		_lnNode.iDist = _mrRect.iDist;
+		_lnNode.bLockToFar = _mrRect.bLockToFar != FALSE;
+		if ( _mrRect.bContainsWidget ) {
+			_lnNode.bLayer = false;
+			if ( !_mrRect.u.pqWidget ) { return; }
+			const size_t sGroup = FindGroup( _mrRect.u.pqWidget );
+			if ( sGroup != SIZE_MAX ) {
+				for ( const CWidget * pwMember : m_vGroups[sGroup].vMembers ) {
+					if ( pwMember ) { _lnNode.vWidgets.push_back( WORD( pwMember->Id() ) ); }
+				}
+				const int iSel = m_vGroups[sGroup].ptTab ? m_vGroups[sGroup].ptTab->GetCurSel() : 0;
+				_lnNode.sSelected = size_t( std::max( iSel, 0 ) );
+			}
+			else {
+				_lnNode.vWidgets.push_back( WORD( _mrRect.u.pqWidget->Id() ) );
+			}
+			return;
+		}
+		_lnNode.bLayer = true;
+		if ( !_mrRect.u.pmlLayer ) { return; }
+		_lnNode.stSplitType = _mrRect.u.pmlLayer->stSplitType;
+		for ( const auto & mrChild : _mrRect.u.pmlLayer->vRects ) {
+			_lnNode.vChildren.push_back( LSW_MS_LAYOUT_NODE() );
+			SaveLayoutNode( mrChild, _lnNode.vChildren.back() );
+		}
+	}
+
+	/**
+	 * Builds a rectangle of the layout from a saved one.
+	 *
+	 * \param _lnNode The saved rectangle.
+	 * \param _vWidgets The widgets that can be placed.
+	 * \param _vPlaced Receives the widgets placed.
+	 * \param _mrRect Receives the rectangle (its ID is not changed).
+	 * \return Returns false if nothing in the saved rectangle could be placed.
+	 **/
+	bool CMultiSplitter::BuildLayoutNode( const LSW_MS_LAYOUT_NODE &_lnNode, const std::vector<CWidget *> &_vWidgets,
+		std::vector<CWidget *> &_vPlaced, LSW_MS_RECT &_mrRect ) {
+		_mrRect.iDist = std::max( _lnNode.iDist, 0 );
+		_mrRect.bLockToFar = _lnNode.bLockToFar ? TRUE : FALSE;
+		_mrRect.rRect = LSW_RECT();
+		if ( !_lnNode.bLayer ) {
+			std::vector<CWidget *> vHere;
+			size_t sSelected = 0;
+			for ( size_t I = 0; I < _lnNode.vWidgets.size(); ++I ) {
+				for ( CWidget * pwThis : _vWidgets ) {
+					if ( WORD( pwThis->Id() ) != _lnNode.vWidgets[I] ) { continue; }
+					if ( std::find( _vPlaced.begin(), _vPlaced.end(), pwThis ) != _vPlaced.end() ) { break; }
+					if ( I == _lnNode.sSelected ) { sSelected = vHere.size(); }
+					vHere.push_back( pwThis );
+					break;
+				}
+			}
+			if ( vHere.empty() ) { return false; }
+			// Only dockables can share an area.
+			if ( vHere.size() > 1 ) {
+				vHere.erase( std::remove_if( vHere.begin() + 1, vHere.end(), []( CWidget * _pwThis ) { return !_pwThis->IsDockable(); } ), vHere.end() );
+				if ( !vHere[0]->IsDockable() ) { vHere.resize( 1 ); }
+				if ( sSelected >= vHere.size() ) { sSelected = 0; }
+			}
+			for ( CWidget * pwThis : vHere ) {
+				if ( pwThis->IsDockable() ) { static_cast<CDockable *>(pwThis)->SetDockedInto( this, vHere.size() > 1 ); }
+			}
+			_mrRect.bContainsWidget = TRUE;
+			if ( vHere.size() == 1 ) {
+				_mrRect.u.pqWidget = vHere[0];
+				_vPlaced.push_back( vHere[0] );
+				return true;
+			}
+			const size_t sGroup = CreateGroup();
+			if ( sGroup == SIZE_MAX ) {
+				// Without a group, only the first one is placed.
+				_mrRect.u.pqWidget = vHere[0];
+				_vPlaced.push_back( vHere[0] );
+				return true;
+			}
+			for ( CWidget * pwThis : vHere ) {
+				if ( AddToGroup( sGroup, pwThis ) ) { _vPlaced.push_back( pwThis ); }
+			}
+			_mrRect.u.pqWidget = m_vGroups[sGroup].ptTab;
+			m_vGroups[sGroup].ptTab->SetCurSel( int( sSelected ) );
+			return true;
+		}
+
+		// A layer.
+		LSW_MS_LAYER * pmlLayer = new( std::nothrow ) LSW_MS_LAYER();
+		if ( !pmlLayer ) { return false; }
+		pmlLayer->stSplitType = _lnNode.stSplitType;
+		try {
+			m_vLayers.push_back( pmlLayer );
+		}
+		catch ( ... ) {
+			delete pmlLayer;
+			return false;
+		}
+		for ( const auto & lnChild : _lnNode.vChildren ) {
+			LSW_MS_RECT mrChild = {};
+			mrChild.dwId = ++m_dwIds;
+			if ( BuildLayoutNode( lnChild, _vWidgets, _vPlaced, mrChild ) ) {
+				pmlLayer->vRects.push_back( mrChild );
+			}
+		}
+		if ( pmlLayer->vRects.empty() ) {
+			m_vLayers.erase( std::find( m_vLayers.begin(), m_vLayers.end(), pmlLayer ) );
+			delete pmlLayer;
+			return false;
+		}
+		// The last area in a layer takes what is left.
+		_mrRect.bContainsWidget = FALSE;
+		_mrRect.u.pmlLayer = pmlLayer;
+		return true;
+	}
+
+	/**
+	 * Gathers the widgets in a rectangle of the layout and everything under it (the widgets in groups, not their tab controls).
+	 *
+	 * \param _mrRect The rectangle.
+	 * \param _vWidgets Receives the widgets.
+	 **/
+	void CMultiSplitter::GatherWidgets( const LSW_MS_RECT &_mrRect, std::vector<CWidget *> &_vWidgets ) const {
+		if ( _mrRect.bContainsWidget ) {
+			if ( !_mrRect.u.pqWidget ) { return; }
+			const size_t sGroup = FindGroup( _mrRect.u.pqWidget );
+			if ( sGroup != SIZE_MAX ) {
+				for ( CWidget * pwMember : m_vGroups[sGroup].vMembers ) {
+					if ( pwMember ) { _vWidgets.push_back( pwMember ); }
+				}
+			}
+			else {
+				_vWidgets.push_back( _mrRect.u.pqWidget );
+			}
+			return;
+		}
+		if ( !_mrRect.u.pmlLayer ) { return; }
+		for ( const auto & mrChild : _mrRect.u.pmlLayer->vRects ) { GatherWidgets( mrChild, _vWidgets ); }
+	}
+
+	/**
 	 * Moves the tab control of each group to its rectangle (the widgets in a group size themselves from ClientRect()).
 	 **/
 	void CMultiSplitter::SizeGroups() {

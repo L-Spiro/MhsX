@@ -193,6 +193,19 @@ namespace mx {
 		// Shows the Converter dockable.
 		void								ShowConverter();
 
+		/**
+		 * Gets the dockables the main window can have, with the ones that are open.
+		 *
+		 * \return Returns the control IDs of the dockables and the dockables (nullptr for the ones that are closed).
+		 **/
+		std::vector<CUiState::MX_KNOWN_DOCKABLE>
+											KnownDockables();
+
+		/**
+		 * Stores the positions and arrangements of the main window and the Hex Editor (if it is open) in the settings.
+		 **/
+		void								CaptureUiState();
+
 		// Shows the options dialog with a page to be selected by default.
 		void								ShowOptions( int32_t _i32Page );
 

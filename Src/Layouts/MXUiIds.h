@@ -14,6 +14,7 @@ namespace mx {
 		MX_TI_HEX_EDIT_UNDO						= 0x3C60,
 		MX_TI_HEX_WATCH_CHANGES					= 0x3C70,
 		MX_TI_INSPECTOR_REFRESH					= 0x3C80,
+		MX_TI_FIND_RESULTS_REFRESH				= 0x3C90,
 	};
 
 }	// namespace mx

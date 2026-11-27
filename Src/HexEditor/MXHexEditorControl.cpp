@@ -888,7 +888,59 @@ namespace mx {
 			// Resolve the data first so that nothing is changed when there is nothing to paste.
 			MX_PASTE_DATA pdData;
 			if ( !CCopyPasteManager::GetPasteData( CCopyPasteManager::ActiveClipboard(), CurStyle()->csCharSet, pdData, _swsStatus ) ) { return false; }
+			return PasteData( pdData, _swsStatus );
+		}
+		catch ( ... ) { return false; }
+	}
 
+	/**
+	 * Pastes the given bytes exactly as Paste() pastes the clipboard data (Paste Special, Insert Date/Time, Insert Color).
+	 * 
+	 * \param _vBytes The bytes to paste.
+	 * \param _swsStatus The string to print in the status bar.
+	 * \return Returns false if the message should be treated as a warning.
+	 **/
+	bool CHexEditorControl::PasteBytes( std::vector<uint8_t> &&_vBytes, CSecureWString &_swsStatus ) {
+		try {
+			CancelEdit();
+			FlushRealTimeUndo();
+			if ( !m_pheiTarget ) {
+				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+				return false;
+			}
+			if ( m_pheiTarget->ReadOnly() ) {
+				_swsStatus = _DEC_WS_D4FFE2E0_File_is_Read_Only;
+				return false;
+			}
+			if ( _vBytes.empty() ) {
+				_swsStatus = _DEC_WS_3AF29F46_There_is_nothing_to_paste_;
+				return false;
+			}
+			if ( !m_pheiTarget->CanPaste() ) {
+				return WriteData( SelectionStart(), _vBytes, !IsOverwriteMode() && !m_pheiTarget->OverwriteOnly(), _swsStatus );
+			}
+			MX_PASTE_DATA pdData;
+			pdData.ui64Size = _vBytes.size();
+			pdData.vBytes = std::move( _vBytes );
+			return PasteData( pdData, _swsStatus );
+		}
+		catch ( ... ) {
+			_swsStatus = _DEC_WS_F39F91A5_Out_of_memory_;
+			return false;
+		}
+	}
+
+	/**
+	 * Pastes data as Paste() does: the selection is deleted, then the data is inserted or written at the start of the selection or
+	 *	the caret.
+	 * 
+	 * \param _pdData The data.
+	 * \param _swsStatus The string to print in the status bar.
+	 * \return Returns false if the message should be treated as a warning.
+	 **/
+	bool CHexEditorControl::PasteData( const MX_PASTE_DATA &_pdData, CSecureWString &_swsStatus ) {
+		try {
+			const MX_PASTE_DATA & pdData = _pdData;
 			const bool bOverwrite = IsOverwriteMode() || m_pheiTarget->OverwriteOnly();
 			const MX_SELECTION sOldSel = m_sSel;
 			const MX_SELECT_GESTURE sgOldGesture = m_sgSelGesture;
@@ -949,6 +1001,257 @@ namespace mx {
 			return true;
 		}
 		catch ( ... ) { return false; }
+	}
+
+	/**
+	 * Inserts bytes or writes them over the bytes at an address, as one Undo step, and selects them (Insert File, Overwrite
+	 *	File).  Bytes written past the end are added if the data can grow and dropped otherwise.
+	 * 
+	 * \param _ui64Addr The address.
+	 * \param _vBytes The bytes.
+	 * \param _bInsert If true, the bytes are inserted; otherwise they are written over the bytes there.
+	 * \param _swsStatus The string to print in the status bar.
+	 * \return Returns false if the message should be treated as a warning.
+	 **/
+	bool CHexEditorControl::WriteData( uint64_t _ui64Addr, const std::vector<uint8_t> &_vBytes, bool _bInsert, CSecureWString &_swsStatus ) {
+		try {
+			CancelEdit();
+			FlushRealTimeUndo();
+			if ( !m_pheiTarget ) {
+				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+				return false;
+			}
+			if ( m_pheiTarget->ReadOnly() ) {
+				_swsStatus = _DEC_WS_D4FFE2E0_File_is_Read_Only;
+				return false;
+			}
+			if ( _bInsert && m_pheiTarget->OverwriteOnly() ) {
+				_swsStatus = _DEC_WS_126322C5_Bytes_cannot_be_inserted_here_because_the_size_of_the_data_cannot_change_;
+				return false;
+			}
+			const uint64_t ui64Size = Size();
+			if ( _ui64Addr > ui64Size ) {
+				_swsStatus = _DEC_WS_29B71E40_The_address_is_outside_of_the_data_;
+				return false;
+			}
+			if ( _vBytes.empty() ) {
+				_swsStatus = _DEC_WS_3F13F557_There_is_nothing_to_write_;
+				return false;
+			}
+
+			const MX_SELECTION sOldSel = m_sSel;
+			const MX_SELECT_GESTURE sgOldGesture = m_sgSelGesture;
+			uint64_t ui64Written = 0;
+			bool bOk = true;
+			{
+				CHexEditorInterface::MX_UNDO uUndo( m_pheiTarget );
+				if ( _bInsert ) {
+					bOk = WriteBytes( _ui64Addr, _vBytes, true, _swsStatus );
+					if ( bOk ) { ui64Written = _vBytes.size(); }
+				}
+				else {
+					const uint64_t ui64Room = ui64Size - _ui64Addr;
+					if ( _vBytes.size() <= ui64Room ) {
+						bOk = WriteBytes( _ui64Addr, _vBytes, false, _swsStatus );
+						if ( bOk ) { ui64Written = _vBytes.size(); }
+					}
+					else {
+						std::vector<uint8_t> vHead( _vBytes.begin(), _vBytes.begin() + size_t( ui64Room ) );
+						if ( vHead.size() ) { bOk = WriteBytes( _ui64Addr, vHead, false, _swsStatus ); }
+						if ( bOk ) { ui64Written = vHead.size(); }
+						if ( bOk && !m_pheiTarget->OverwriteOnly() ) {
+							std::vector<uint8_t> vTail( _vBytes.begin() + size_t( ui64Room ), _vBytes.end() );
+							bOk = WriteBytes( ui64Size, vTail, true, _swsStatus );
+							if ( bOk ) { ui64Written += vTail.size(); }
+						}
+					}
+				}
+			}
+			SelectRange( _ui64Addr, ui64Written );
+			AddSelectionUndo( sOldSel, sgOldGesture );
+			EnsureVisible( m_sgSelGesture.ui64CaretAddr, FALSE );
+			::InvalidateRect( Wnd(), nullptr, FALSE );
+			if ( m_pwHexParent ) { m_pwHexParent->UpdateStatusBar_PosValue_StartSize(); }
+			if ( !bOk ) { return false; }
+			BytesMessage( _bInsert ? _DEC_WS_C74C44E0_Inserted_ : _DEC_WS_3002B2B0_Wrote_, ui64Written, _swsStatus );
+			return true;
+		}
+		catch ( ... ) {
+			_swsStatus = _DEC_WS_F39F91A5_Out_of_memory_;
+			return false;
+		}
+	}
+
+	/**
+	 * Inserts a run of one byte value or writes it over a range, as one Undo step, and selects the range (Insert Bytes,
+	 *	Overwrite Bytes).
+	 * 
+	 * \param _ui64Addr The address.
+	 * \param _ui64Size The number of bytes.
+	 * \param _ui8Value The byte value.
+	 * \param _bInsert If true, the bytes are inserted; otherwise they are written over the bytes there (and added past the end
+	 *	if the data can grow).
+	 * \param _swsStatus The string to print in the status bar.
+	 * \return Returns false if the message should be treated as a warning.
+	 **/
+	bool CHexEditorControl::FillBytes( uint64_t _ui64Addr, uint64_t _ui64Size, uint8_t _ui8Value, bool _bInsert, CSecureWString &_swsStatus ) {
+		try {
+			CancelEdit();
+			FlushRealTimeUndo();
+			if ( !m_pheiTarget ) {
+				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+				return false;
+			}
+			if ( m_pheiTarget->ReadOnly() ) {
+				_swsStatus = _DEC_WS_D4FFE2E0_File_is_Read_Only;
+				return false;
+			}
+			if ( _bInsert && m_pheiTarget->OverwriteOnly() ) {
+				_swsStatus = _DEC_WS_126322C5_Bytes_cannot_be_inserted_here_because_the_size_of_the_data_cannot_change_;
+				return false;
+			}
+			const uint64_t ui64Size = Size();
+			if ( _ui64Addr > ui64Size || (!_bInsert && m_pheiTarget->OverwriteOnly() && _ui64Size > ui64Size - _ui64Addr) ) {
+				_swsStatus = _DEC_WS_545A9BB0_The_range_is_outside_of_the_data_;
+				return false;
+			}
+			if ( !_ui64Size ) {
+				_swsStatus = _DEC_WS_3F13F557_There_is_nothing_to_write_;
+				return false;
+			}
+
+			const MX_SELECTION sOldSel = m_sSel;
+			const MX_SELECT_GESTURE sgOldGesture = m_sgSelGesture;
+			uint64_t ui64Done = 0;
+			bool bOk = true;
+			{
+				CHexEditorInterface::MX_UNDO uUndo( m_pheiTarget );
+				// Written in pieces so that huge runs do not need huge buffers.
+				constexpr uint64_t ui64Chunk = 16ULL * 1024ULL * 1024ULL;
+				std::vector<uint8_t> vChunk( size_t( std::min( _ui64Size, ui64Chunk ) ), _ui8Value );
+				while ( bOk && ui64Done < _ui64Size ) {
+					const uint64_t ui64This = std::min( _ui64Size - ui64Done, ui64Chunk );
+					if ( vChunk.size() != ui64This ) { vChunk.resize( size_t( ui64This ) ); }
+					const uint64_t ui64At = _ui64Addr + ui64Done;
+					// Overwriting past the end adds bytes.
+					const bool bInsertThis = _bInsert || ui64At >= Size();
+					if ( !bInsertThis && ui64This > Size() - ui64At ) {
+						std::vector<uint8_t> vHead( size_t( Size() - ui64At ), _ui8Value );
+						std::vector<uint8_t> vTail( size_t( ui64This - vHead.size() ), _ui8Value );
+						bOk = WriteBytes( ui64At, vHead, false, _swsStatus ) && WriteBytes( ui64At + vHead.size(), vTail, true, _swsStatus );
+					}
+					else {
+						bOk = WriteBytes( ui64At, vChunk, bInsertThis, _swsStatus );
+					}
+					if ( bOk ) { ui64Done += ui64This; }
+				}
+			}
+			SelectRange( _ui64Addr, ui64Done );
+			AddSelectionUndo( sOldSel, sgOldGesture );
+			EnsureVisible( m_sgSelGesture.ui64CaretAddr, FALSE );
+			::InvalidateRect( Wnd(), nullptr, FALSE );
+			if ( m_pwHexParent ) { m_pwHexParent->UpdateStatusBar_PosValue_StartSize(); }
+			if ( !bOk ) { return false; }
+			BytesMessage( _bInsert ? _DEC_WS_C74C44E0_Inserted_ : _DEC_WS_3002B2B0_Wrote_, ui64Done, _swsStatus );
+			return true;
+		}
+		catch ( ... ) {
+			_swsStatus = _DEC_WS_F39F91A5_Out_of_memory_;
+			return false;
+		}
+	}
+
+	/**
+	 * Changes the size of the data as one Undo step: bytes are removed from the end or added to it (Set File Size).
+	 * 
+	 * \param _ui64Size The new size.
+	 * \param _ui8Fill The value of the bytes added.
+	 * \param _swsStatus The string to print in the status bar.
+	 * \return Returns false if the message should be treated as a warning.
+	 **/
+	bool CHexEditorControl::SetDataSize( uint64_t _ui64Size, uint8_t _ui8Fill, CSecureWString &_swsStatus ) {
+		try {
+			CancelEdit();
+			FlushRealTimeUndo();
+			if ( !m_pheiTarget ) {
+				_swsStatus = _DEC_WS_1468A1DF_Internal_error_;
+				return false;
+			}
+			if ( m_pheiTarget->ReadOnly() ) {
+				_swsStatus = _DEC_WS_D4FFE2E0_File_is_Read_Only;
+				return false;
+			}
+			if ( m_pheiTarget->OverwriteOnly() ) {
+				_swsStatus = _DEC_WS_AB5905FA_The_size_of_this_data_cannot_change_;
+				return false;
+			}
+			const uint64_t ui64Old = Size();
+			if ( _ui64Size == ui64Old ) {
+				_swsStatus = _DEC_WS_5F85A7DF_The_size_is_already_that_;
+				return true;
+			}
+			if ( _ui64Size > ui64Old ) {
+				if ( !FillBytes( ui64Old, _ui64Size - ui64Old, _ui8Fill, true, _swsStatus ) ) { return false; }
+			}
+			else {
+				const MX_SELECTION sOldSel = m_sSel;
+				const MX_SELECT_GESTURE sgOldGesture = m_sgSelGesture;
+				bool bOk;
+				uint64_t ui64Deleted = 0;
+				{
+					CHexEditorInterface::MX_UNDO uUndo( m_pheiTarget );
+					bOk = m_pheiTarget->Delete( _ui64Size, ui64Old - _ui64Size, ui64Deleted );
+					if ( ui64Deleted ) { ShiftChanges( _ui64Size, ui64Deleted, false ); }
+				}
+				if ( m_sSel.HasSelection() ) { ClearSelection(); }
+				if ( m_sgSelGesture.ui64CaretAddr > _ui64Size ) { SetCaretAddr( _ui64Size ); }
+				AddSelectionUndo( sOldSel, sgOldGesture );
+				UpdateScrollbars();
+				if ( m_pwHexParent ) {
+					m_pwHexParent->UpdateStatusBar_Size();
+					m_pwHexParent->UpdateStatusBar_PosValue_StartSize();
+				}
+				::InvalidateRect( Wnd(), nullptr, FALSE );
+				if ( !bOk ) {
+					_swsStatus = _DEC_WS_58763A46_Failed_to_write_to_the_target_;
+					return false;
+				}
+			}
+			std::wstring wsTmp;
+			_swsStatus = _DEC_WS_21FB3EBF_The_size_is_now_;
+			_swsStatus += std::to_wstring( _ui64Size );
+			_swsStatus += L' ';
+			_swsStatus += L'[';
+			_swsStatus += CUtilities::ToHex( _ui64Size, wsTmp, 0 );
+			_swsStatus += L']';
+			_swsStatus += (_ui64Size != 1) ? _DEC_WS_C1D51046__bytes : _DEC_WS_BB679D6B__byte;
+			return true;
+		}
+		catch ( ... ) {
+			_swsStatus = _DEC_WS_F39F91A5_Out_of_memory_;
+			return false;
+		}
+	}
+
+	/**
+	 * Makes the status message for a number of bytes changed ("Inserted 16 [10h] bytes").
+	 * 
+	 * \param _swsVerb The first word ("Inserted", "Wrote").
+	 * \param _ui64Bytes The number of bytes.
+	 * \param _swsStatus Receives the message.
+	 **/
+	void CHexEditorControl::BytesMessage( const CSecureWString &_swsVerb, uint64_t _ui64Bytes, CSecureWString &_swsStatus ) {
+		try {
+			std::wstring wsTmp;
+			_swsStatus = _swsVerb;
+			_swsStatus += std::to_wstring( _ui64Bytes );
+			_swsStatus += L' ';
+			_swsStatus += L'[';
+			_swsStatus += CUtilities::ToHex( _ui64Bytes, wsTmp, 0 );
+			_swsStatus += L']';
+			_swsStatus += (_ui64Bytes != 1) ? _DEC_WS_C1D51046__bytes : _DEC_WS_BB679D6B__byte;
+		}
+		catch ( ... ) {}
 	}
 
 	/**
