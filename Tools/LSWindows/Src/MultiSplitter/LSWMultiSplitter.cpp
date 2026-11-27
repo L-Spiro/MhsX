@@ -30,7 +30,6 @@ namespace lsw {
 		m_meDragRootCopy = m_meRoot;
 	}
 	CMultiSplitter::~CMultiSplitter() {
-		// The tab controls of the groups are children and are deleted with the other children.
 		m_bDestroying = true;
 		m_vGroups.clear();
 		for ( size_t I = m_vLayers.size(); I--; ) {
@@ -147,7 +146,6 @@ namespace lsw {
 					_rDrawRect = rAttachrectTemp;
 				}
 			}
-			// Over the widget, as a tab.
 			{
 				LSW_DT_ATTACH maAttach;
 				LSW_RECT rAttachrectTemp;
@@ -342,7 +340,6 @@ namespace lsw {
 
 	// Remove a child.
 	void CMultiSplitter::RemoveChild( const CWidget * _pwChild ) {
-		// A group's tab control being destroyed: the group is forgotten (its rectangle is removed by Detach() below).
 		const size_t sGroup = FindGroup( _pwChild );
 		if ( sGroup != SIZE_MAX ) { m_vGroups.erase( m_vGroups.begin() + sGroup ); }
 		/*for ( size_t I = m_vLayers.size(); I--; ) {
@@ -559,7 +556,6 @@ namespace lsw {
 		CalcRects();
 		SizeGroups();
 		LSW_HANDLED hRet = CWidget::Size( _wParam, _lWidth, _lHeight );
-		// Children size themselves without redrawing; the groups make sure only their selected widgets show, and redraw them.
 		ShowGroupSelections();
 		return hRet;
 	}
@@ -616,7 +612,6 @@ namespace lsw {
 			}
 			CalcRects();
 			SizeAttachments();
-			// The widgets in groups size themselves from ClientRect().
 			if ( m_vGroups.size() ) { ForceSizeUpdate(); }
 
 			m_pmlDragLayer = nullptr;
@@ -747,7 +742,6 @@ namespace lsw {
 					_rAttachRect = rAttachRectTemp;
 				}
 			}
-			// Over the widget, as a tab.
 			{
 				LSW_DT_ATTACH maAttach;
 				LSW_RECT rAttachRectTemp;
@@ -907,7 +901,6 @@ namespace lsw {
 	// Detaches a widget from the given root given its ID.
 	bool CMultiSplitter::Detach( WORD _wId, LSW_MS_RECT &_mrRoot ) {
 		const bool bResize = !m_bDestroying && !(Parent() && Parent()->InDestructor());
-		// A widget in a group leaves the group; the layout of the rectangles does not change.
 		if ( &_mrRoot == &m_meRoot && RemoveFromGroup( _wId ) ) {
 			if ( bResize ) {
 				CalcRects();
@@ -1127,14 +1120,12 @@ namespace lsw {
 		if ( !_maAttach.pwWidget || !_mrRect.bContainsWidget || !_mrRect.u.pqWidget ) { return false; }
 		size_t sGroup = FindGroup( _mrRect.u.pqWidget );
 		if ( sGroup == SIZE_MAX ) {
-			// The first time: the dockable already here and the new one become a group, which takes its place.
 			if ( !_mrRect.u.pqWidget->IsDockable() ) { return false; }
 			sGroup = CreateGroup();
 			if ( sGroup == SIZE_MAX ) { return false; }
 			CWidget * pwFirst = _mrRect.u.pqWidget;
 			_mrRect.u.pqWidget = m_vGroups[sGroup].ptTab;
 			if ( !AddToGroup( sGroup, pwFirst ) ) {
-				// Put it back.
 				_mrRect.u.pqWidget = pwFirst;
 				CTab * ptTab = m_vGroups[sGroup].ptTab;
 				m_vGroups.erase( m_vGroups.begin() + sGroup );
@@ -1204,7 +1195,6 @@ namespace lsw {
 			ptTab->InitControl( ptTab->Wnd() );
 			::SendMessageW( ptTab->Wnd(), WM_SETFONT, reinterpret_cast<WPARAM>(CBase::MessageBoxFont()), FALSE );
 			ptTab->SetShowCloseBoxes( false );
-			// Below the widgets it holds.
 			::SetWindowPos( ptTab->Wnd(), HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE );
 
 			LSW_MS_GROUP mgGroup;
@@ -1239,7 +1229,6 @@ namespace lsw {
 		TCITEMW tciItem = {};
 		tciItem.mask = TCIF_TEXT;
 		tciItem.pszText = const_cast<LPWSTR>(wsText.c_str());
-		// Inserting it selects it, which shows it and hides the others.
 		if ( mgGroup.ptTab->InsertItem( mgGroup.ptTab->GetItemCount(), &tciItem, _pwWidget ) == -1 ) {
 			mgGroup.vMembers.pop_back();
 			return false;
@@ -1260,12 +1249,9 @@ namespace lsw {
 		LSW_MS_GROUP & mgGroup = m_vGroups[sGroup];
 		mgGroup.vMembers.erase( mgGroup.vMembers.begin() + sMember );
 		if ( m_bDestroying ) { return true; }
-		// The widget stays alive (it is being moved or destroyed by its owner).
 		mgGroup.ptTab->DeleteItem( int( sMember ), false );
 
 		if ( mgGroup.vMembers.size() <= 1 ) {
-			// The group is no longer needed: the widget left takes its place (in the same rectangle, with the same ID, so that the
-			//	layout matches what was previewed during a drag).
 			CTab * ptTab = mgGroup.ptTab;
 			CWidget * pwLeft = mgGroup.vMembers.empty() ? nullptr : mgGroup.vMembers[0];
 			LSW_MS_RECT * pmrCell = FindCellByWidget( ptTab, m_meRoot );
@@ -1279,7 +1265,6 @@ namespace lsw {
 				}
 			}
 			if ( pwLeft && pwLeft->Wnd() ) { ::ShowWindow( pwLeft->Wnd(), SW_SHOWNA ); }
-			// Removing the tab control from the children also detaches it from the layout if it is still in it.
 			delete ptTab;
 		}
 		return true;
@@ -1364,7 +1349,6 @@ namespace lsw {
 	bool CMultiSplitter::SetLayout( const LSW_MS_LAYOUT_NODE &_lnRoot, const std::vector<CWidget *> &_vWidgets ) {
 		if ( m_bDragPreview || m_bDestroying ) { return false; }
 		try {
-			// Only widgets docked here (or floating dockables that can dock here) can be placed.
 			std::vector<CWidget *> vCurrent;
 			GatherWidgets( m_meRoot, vCurrent );
 			std::vector<CWidget *> vUsable;
@@ -1377,12 +1361,10 @@ namespace lsw {
 				}
 				if ( pwThis->IsDockable() ) {
 					CDockable * pdThis = static_cast<CDockable *>(pwThis);
-					// Not if it is docked somewhere else.
 					if ( !pdThis->DockedInto() && pwThis->Parent() == this ) { vUsable.push_back( pwThis ); }
 				}
 			}
 
-			// Every widget that is not a dockable must have a place in the arrangement.
 			std::vector<WORD> vIds;
 			std::vector<const LSW_MS_LAYOUT_NODE *> vStack = { &_lnRoot };
 			while ( vStack.size() ) {
@@ -1410,7 +1392,6 @@ namespace lsw {
 			m_meRoot.u.pmlLayer = nullptr;
 			for ( CTab * ptTab : vTabs ) { delete ptTab; }
 
-			// Build the new one.
 			std::vector<CWidget *> vPlaced;
 			const DWORD dwRootId = m_meRoot.dwId;
 			if ( !BuildLayoutNode( _lnRoot, vUsable, vPlaced, m_meRoot ) ) {
@@ -1419,7 +1400,6 @@ namespace lsw {
 			}
 			m_meRoot.dwId = dwRootId;
 
-			// Widgets that were docked here but have no place: dockables float; anything else (which cannot happen; see above) goes on the right.
 			for ( CWidget * pwThis : vCurrent ) {
 				if ( std::find( vPlaced.begin(), vPlaced.end(), pwThis ) != vPlaced.end() ) { continue; }
 				if ( pwThis->IsDockable() ) {
@@ -1509,7 +1489,6 @@ namespace lsw {
 				}
 			}
 			if ( vHere.empty() ) { return false; }
-			// Only dockables can share an area.
 			if ( vHere.size() > 1 ) {
 				vHere.erase( std::remove_if( vHere.begin() + 1, vHere.end(), []( CWidget * _pwThis ) { return !_pwThis->IsDockable(); } ), vHere.end() );
 				if ( !vHere[0]->IsDockable() ) { vHere.resize( 1 ); }
@@ -1526,7 +1505,6 @@ namespace lsw {
 			}
 			const size_t sGroup = CreateGroup();
 			if ( sGroup == SIZE_MAX ) {
-				// Without a group, only the first one is placed.
 				_mrRect.u.pqWidget = vHere[0];
 				_vPlaced.push_back( vHere[0] );
 				return true;

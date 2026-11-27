@@ -628,34 +628,51 @@
                 "Layer" : true,
                 "Dist" : 500,
                 "Far" : false,
-                "Split" : 1,
+                "Split" : 0,
                 "Children" : [
                     {
                         "Layer" : true,
-                        "Dist" : 1463,
+                        "Dist" : 500,
                         "Far" : false,
-                        "Split" : 0,
+                        "Split" : 1,
                         "Children" : [
                             {
-                                "Layer" : false,
+                                "Layer" : true,
                                 "Dist" : 1463,
                                 "Far" : false,
+                                "Split" : 0,
+                                "Children" : [
+                                    {
+                                        "Layer" : false,
+                                        "Dist" : 1463,
+                                        "Far" : false,
+                                        "Widgets" : [
+                                            3955
+                                        ],
+                                        "Selected" : 0
+                                    }
+                                ]
+                            },
+                            {
+                                "Layer" : false,
+                                "Dist" : 0,
+                                "Far" : false,
                                 "Widgets" : [
-                                    3955
+                                    3000,
+                                    3100
                                 ],
-                                "Selected" : 0
+                                "Selected" : 1
                             }
                         ]
                     },
                     {
                         "Layer" : false,
-                        "Dist" : 0,
-                        "Far" : false,
+                        "Dist" : 180,
+                        "Far" : true,
                         "Widgets" : [
-                            3000,
-                            3100
+                            6900
                         ],
-                        "Selected" : 1
+                        "Selected" : 0
                     }
                 ]
             },
@@ -672,15 +689,15 @@
                 },
                 {
                     "Id" : 6900,
-                    "Open" : false,
+                    "Open" : true,
                     "Floating" : false
                 }
             ]
         },
         "RecentFiles" : [
-            "C:\u005cNES Restores\u005cCastlevania II Simon's Quest\u005cRAW\u005cThe Silence of The Daylight N34169630.wav",
-            "C:\u005cNES Restores\u005cCastlevania II Simon's Quest\u005cTracks.txt",
             "C:\u005cNES Restores\u005cCastlevania II Simon's Quest\u005cThe Silence of the Daylight (NES, Famicom).wav",
+            "C:\u005cNES Restores\u005cCastlevania II Simon's Quest\u005cTracks.txt",
+            "C:\u005cNES Restores\u005cCastlevania II Simon's Quest\u005cRAW\u005cThe Silence of The Daylight N34169630.wav",
             "C:\u005cNES Restores\u005cCastlevania II Simon's Quest\u005cRAW\u005cThe Silence of The Daylight N34169630.wav.txt"
         ],
         "Inspector" : {

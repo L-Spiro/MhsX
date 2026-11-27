@@ -109,7 +109,6 @@ namespace lsw {
 	void CDockable::SetDockedInto( CDockTarget * _pdtTarget, bool _bTab ) {
 		if ( !_pdtTarget ) { return; }
 		const DWORD dwStyle = m_dwDockStyle;
-		// The floating position is kept for when it floats again.
 		m_dwDockStyle |= LSW_DS_DONTSAVEPOS;
 		if ( Floating() ) {
 			SetVisible( FALSE );

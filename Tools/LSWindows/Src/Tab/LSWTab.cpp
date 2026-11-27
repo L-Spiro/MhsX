@@ -743,7 +743,6 @@ namespace lsw {
 			const std::wstring wsText = GetItemTextW( I );
 			LSW_SETTEXTCOLOR stcText( _hDc, crText );
 			if ( rText.right > rText.left ) {
-				// Text starts at the reading edge of every tab: the left, or the right for right-to-left text.
 				const DWORD dwExStyle = static_cast<DWORD>(::GetWindowLongPtrW( Wnd(), GWL_EXSTYLE ));
 				const UINT uiAlign = (dwExStyle & (WS_EX_RTLREADING | WS_EX_RIGHT)) ? (DT_RIGHT | ((dwExStyle & WS_EX_RTLREADING) ? DT_RTLREADING : 0)) : DT_LEFT;
 				::DrawTextW( _hDc, wsText.c_str(), static_cast<int>(wsText.size()), &rText,
@@ -794,32 +793,16 @@ namespace lsw {
 		WNDPROC pOld = pmwThis->OriginalProc();
 		switch ( _uMsg ) {
 			case WM_NCHITTEST : {
-				if ( pmwThis->m_bShowClose || pmwThis->AnyAreCheckable() ) {
-					POINTS pPos = MAKEPOINTS( _lParam );
-					LRESULT lrHit = ::CallWindowProcW( reinterpret_cast<WNDPROC>(pOld), _hWnd, _uMsg, _wParam, _lParam );
-					TCHITTESTINFO tTest;
-					tTest.pt.x = pPos.x;
-					tTest.pt.y = pPos.y;
-					::ScreenToClient( _hWnd, &tTest.pt );
-					INT iHit = pmwThis->HitTest( &tTest );
-					if ( iHit == -1 ) {
-						return lrHit;
-					}
-					LSW_RECT rItem = pmwThis->GetItemRect( iHit );
-					LSW_RECT rClose;
-					rClose = GetCloseRect( rItem, iHit == pmwThis->GetCurSel() );
-			
-					if ( rClose.PtInRect( tTest.pt ) ) {
-						if ( pmwThis->m_bShowClose ) {
-							lrHit = HTCLOSE;
-						}
-						else if ( pmwThis->m_vTabs[iHit].bCheckable ) {
-							lrHit = HTOBJECT;
-						}
-					}
-					return lrHit;
+				LRESULT lrHit = ::CallWindowProcW( reinterpret_cast<WNDPROC>(pOld), _hWnd, _uMsg, _wParam, _lParam );
+				POINT pClient = { GET_X_LPARAM( _lParam ), GET_Y_LPARAM( _lParam ) };
+				::ScreenToClient( _hWnd, &pClient );
+				const INT iHit = pmwThis->TabFromPoint( pClient );
+				if ( iHit == -1 ) { return lrHit; }
+				if ( pmwThis->m_bShowClose || pmwThis->m_vTabs[iHit].bCheckable ) {
+					LSW_RECT rClose = GetCloseRect( pmwThis->m_vTabs[iHit].rRect, iHit == pmwThis->GetCurSel() );
+					if ( rClose.PtInRect( pClient ) ) { return pmwThis->m_bShowClose ? HTCLOSE : HTOBJECT; }
 				}
-				break;
+				return HTCLIENT;
 			}
 			case WM_NCLBUTTONDOWN : {}
 			case WM_NCLBUTTONDBLCLK : {
